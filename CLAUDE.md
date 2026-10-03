@@ -37,6 +37,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - onglet dans la barre du bas ; le profil s'ouvre depuis l'avatar ;
   - « partenaires » = boutiques qui ont un accord avec PKM, pas une mention officielle Pokémon ;
   - probabilité d'arrivage estimée à partir de trois sources : annonce du magasin partenaire, signalements des collectionneurs (modérés, sans fil social), historique des arrivages.
+- **Catalogue réel (2026-10-03, « go » du porteur) :**
+  - la démo web (https://pokemon-appli.pages.dev) charge toutes les cartes françaises de TCGdex et leurs prix ;
+  - GitHub Actions les met à jour chaque jour (`.github/workflows/tcgdex.yml`) ;
+  - licence et usage commercial à vérifier avant toute sortie publique.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

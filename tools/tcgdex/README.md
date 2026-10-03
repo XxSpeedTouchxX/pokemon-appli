@@ -24,9 +24,25 @@ python tools/tcgdex/sync_tcgdex.py --skip-images --workers 4 --out data/tcgdex
 - **Images :** l'app les affiche depuis `assets.tcgdex.net`. Le JSON de chaque carte contient déjà l'adresse de base de son image. Une synchronisation complète des images représente environ 20 000 fichiers, soit plusieurs Go : à réserver à un besoin hors ligne.
 - **Charge sur l'API :** l'API est gratuite et communautaire ; `--workers 4` la ménage.
 - **Dépôt git :** `data/` n'est pas versionné (voir `.gitignore`).
-- **Archive des prix :** une exécution quotidienne de l'étape 2 constituerait l'archive maison des prix (principe 6 du CLAUDE.md). Le mode d'exécution est à décider : tâche planifiée GitHub Actions ou Cloudflare.
 - **Licence et usage commercial :** ils restent à vérifier (points V1 à V6 de `docs/05-sources-donnees-prix.md`).
+
+## Mise à jour automatique (GitHub Actions)
+
+Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveurs de GitHub :
+
+1. **Téléchargement :** `sync_tcgdex.py --skip-images` récupère toutes les cartes françaises et leurs prix. Une seconde passe reprend les échecs éventuels.
+2. **Catalogue compact :** `build_index.py` produit `web/data/cards.json`. Ce fichier est chargé par la démo web.
+   - Il garde, pour chaque carte : l'identifiant, le nom, l'extension, le numéro, la rareté, l'image et quatre prix (tendance, plus bas et moyenne 30 jours de Cardmarket ; TCGplayer converti en euros).
+   - Il contient une carte par ligne.
+3. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site.
+
+L'historique git de `cards.json` sert d'**archive quotidienne des prix** (principe 6 du CLAUDE.md).
+
+Le workflow se lance :
+- chaque jour vers 06:47, heure de Paris ;
+- à chaque modification de ces scripts ou du workflow ;
+- à la main, depuis l'onglet *Actions* du dépôt.
 
 ## Accès réseau
 
-Le script appelle `api.tcgdex.net` et `assets.tcgdex.net`. Dans l'environnement Claude Code actuel, ces deux domaines sont bloqués. Ouvre-les dans les réglages réseau de l'environnement (*Network access*, en mode *Custom*) pour que Claude puisse lancer le script.
+Le script appelle `api.tcgdex.net` et `assets.tcgdex.net`. Ces domaines sont bloqués dans l'environnement Claude Code actuel : c'est pourquoi la synchronisation passe par GitHub Actions. Pour lancer le script ailleurs, il suffit de Python 3.9 ou plus.

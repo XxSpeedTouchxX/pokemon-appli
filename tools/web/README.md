@@ -1,13 +1,32 @@
 # Démo web de PKM-App
 
-Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5/`) : mêmes écrans, même logique, **données, prix et magasins fictifs**. Il n'y a ni compte, ni serveur, ni vraies données de prix.
+Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5/`) : mêmes écrans, même logique.
 
-- **Page claude.ai (privée) :** https://claude.ai/artifact/9sDF5mc4brvvYaZWLd64qe
-- **Hébergement prévu :** Cloudflare Pages, accès limité par e-mail.
+- **Réel :** le **catalogue complet des cartes françaises** et leurs prix Cardmarket et TCGplayer, via TCGdex, mis à jour chaque jour.
+- **Fictif :** la collection de démo, les ventes, les prix eBay et les magasins.
+
+Il n'y a ni compte ni serveur : la collection n'est pas enregistrée et repart de zéro à chaque ouverture.
+
+- **Adresse :** https://pokemon-appli.pages.dev (Cloudflare Pages, accès limité par e-mail).
+- **Page claude.ai (privée) :** https://claude.ai/artifact/9sDF5mc4brvvYaZWLd64qe. Elle n'a pas le catalogue complet.
+
+## Catalogue complet
+
+- **Mise à jour :** le workflow `.github/workflows/tcgdex.yml` tourne chaque jour vers 06:47, heure de Paris. Il peut aussi être lancé à la main depuis l'onglet *Actions* de GitHub.
+  - Il télécharge le catalogue avec `tools/tcgdex/sync_tcgdex.py`.
+  - Il construit `web/data/cards.json` avec `tools/tcgdex/build_index.py`.
+  - Il publie le résultat sur la branche, et Cloudflare redéploie le site.
+- **Dans l'app :** `tools/web/catalog.js` charge `cards.json` au démarrage.
+  - **Marché :** la recherche porte sur toutes les cartes (nom, extension, numéro, rareté), sans tenir compte des accents ni des majuscules.
+  - **Fiche carte :** image du CDN TCGdex, prix datés, cote PKM et ajout à la collection.
+  - **Scan :** « Ce n'est pas le bon article ? » ouvre cette recherche.
+- **Cote PKM d'une vraie carte :** moyenne de la tendance Cardmarket et du prix TCGplayer converti en euros, au taux de la BCE du jour. Le prix eBay n'est pas encore branché.
+- **Pas de courbe inventée :** la courbe sur 30 jours viendra de l'archive (l'historique git de `cards.json`).
 
 ## Avant tout partage public
 
-Les visuels de `web/img/` sont des **découpes provisoires** de captures d'écran. Il faut les remplacer par les images TCGdex (CLAUDE.md §4) avant d'ouvrir l'adresse à d'autres personnes que l'équipe.
+- **Visuels de la maquette :** ceux de `web/img/` sont des **découpes provisoires** de captures d'écran. Il faut les remplacer par les images TCGdex (CLAUDE.md §4).
+- **Licence et usage commercial de TCGdex :** à vérifier (points V1 à V6 de `docs/05-sources-donnees-prix.md`).
 
 ## Mettre en ligne sur Cloudflare Pages
 
@@ -19,7 +38,7 @@ Les visuels de `web/img/` sont des **découpes provisoires** de captures d'écra
 
    | Réglage | Valeur |
    |---|---|
-   | Nom du projet | `pkm-app` (adresse `https://pkm-app.pages.dev`) |
+   | Nom du projet | `pokemon-appli` (adresse `https://pokemon-appli.pages.dev`) |
    | Branche de production | `claude/pokemon-app-mockup-1mxt7p`, tant qu'elle n'est pas fusionnée dans `main` |
    | Préréglage du framework | Aucun |
    | Commande de build | vide |
@@ -28,7 +47,7 @@ Les visuels de `web/img/` sont des **découpes provisoires** de captures d'écra
 4. Clique sur **Enregistrer et déployer**. Ensuite, chaque push sur la branche met le site à jour.
 5. Limite l'accès (recommandé) :
    - ouvre **Zero Trust**, puis **Access**, puis **Applications** ;
-   - ajoute une application **Self-hosted** sur `pkm-app.pages.dev` ;
+   - ajoute une application **Self-hosted** sur `pokemon-appli.pages.dev` et `*.pokemon-appli.pages.dev` ;
    - crée une règle **Emails** avec la liste des personnes autorisées ;
    - choisis la connexion par code reçu par e-mail (*One-time PIN*).
 
@@ -64,10 +83,11 @@ Le script `tools/web/build.mjs` :
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Page de l'app |
-| `app.js` | Logique de la maquette, gabarit compilé et démarrage |
+| `app.js` | Logique de la maquette, catalogue complet (`tools/web/catalog.js`), gabarit compilé et démarrage |
+| `data/cards.json` | Catalogue complet, généré chaque jour par GitHub Actions (ne pas modifier à la main) |
 | `vendor/vue.runtime.global.prod.js` | Vue 3.5.43, licence MIT |
 | `img/` | Visuels provisoires |
 | `icons/` | Icônes de l'app |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
-| `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut |
+| `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |
 | `_headers` | En-têtes Cloudflare : non-indexation, cache |
