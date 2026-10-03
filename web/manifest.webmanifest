@@ -1,0 +1,16 @@
+{
+  "name": "PKM-App (démo)",
+  "short_name": "PKM",
+  "description": "Démo de PKM-App : valeur de ta collection Pokémon TCG, scan, profils et boutiques autour de toi. Données fictives.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B1120",
+  "theme_color": "#0B1120",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

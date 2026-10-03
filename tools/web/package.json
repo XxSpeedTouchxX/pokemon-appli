@@ -1,0 +1,13 @@
+{
+  "name": "pkm-app-web-demo-build",
+  "private": true,
+  "description": "Génère la démo web de PKM-App (dossier web/) à partir de la maquette du canevas Design.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@vue/compiler-dom": "3.5.43",
+    "vue": "3.5.43"
+  }
+}
