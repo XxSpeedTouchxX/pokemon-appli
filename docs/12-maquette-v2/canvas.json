@@ -1,0 +1,208 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Avance-Associes.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Associés",
+      "w": 390,
+      "x": 1880,
+      "y": 1520
+    },
+    "Avance-Frais.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Frais par plateforme",
+      "w": 390,
+      "x": 1410,
+      "y": 1520
+    },
+    "Avance-Import-export.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Importer / exporter",
+      "w": 390,
+      "x": 2350,
+      "y": 1520
+    },
+    "Avance-Lots.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Lots",
+      "w": 390,
+      "x": 940,
+      "y": 1520
+    },
+    "Avance-Marge.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Marge — avec associés",
+      "w": 390,
+      "x": 0,
+      "y": 1520
+    },
+    "Avance-Reglages.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Réglages — mode avancé activé",
+      "w": 390,
+      "x": 470,
+      "y": 1520
+    },
+    "Avance-Saisie-achat.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Saisie rapide — achat (avancé)",
+      "w": 390,
+      "x": 2820,
+      "y": 1520
+    },
+    "Ecran-Detail-vente.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Détail d’une vente",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
+    "Ecran-Fiche-produit.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Fiche produit",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Ecran-Reglages.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Réglages",
+      "w": 390,
+      "x": 2820,
+      "y": 0
+    },
+    "Ecran-Saisie-vente.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Saisie rapide — vente",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "Ecran-Stock.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Stock",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Ecran-Ventes.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Ventes",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Prototype cliquable — départ : Marge",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-03T18:36:29.532Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "n-lots": {
+      "fill": "purple",
+      "maxH": 240,
+      "text": "Lot : bascule « Valeur de marché / Parts égales » pour voir l’effet sur les marges. En parts égales, la vente eBay de l’ETB devient une perte : la règle de répartition est un choix métier à valider.",
+      "w": 390,
+      "x": 940,
+      "y": 2424
+    },
+    "n-marge": {
+      "fill": "orange",
+      "maxH": 240,
+      "text": "Marge nette = prix de vente − commission − port à ta charge − coût d’achat. Coût d’achat = PRU (coût moyen pondéré) au jour de la vente, puis figé. Les frais de la vente sont figés aussi.",
+      "w": 390,
+      "x": 1880,
+      "y": 904
+    },
+    "n-prix": {
+      "fill": "teal",
+      "maxH": 240,
+      "text": "Transparence des prix : chaque valeur affiche sa source et sa date. « demandé » = annonce Cardmarket ; « vendu » = tes propres ventes. La courbe vient de l’archive maison (un relevé par jour).",
+      "w": 390,
+      "x": 940,
+      "y": 904
+    },
+    "n-proto": {
+      "fill": "blue",
+      "maxH": 240,
+      "text": "Prototype cliquable : bouton Play sur ce cadre. Le bouton + saisit une vente ou un achat : stock, marge et récap se recalculent. Le mode avancé s’active dans Réglages. Données fictives, séries inventées : les visuels produits sont génériques (dégradé de la série + pictogramme du type), aucune image Pokémon.",
+      "w": 390,
+      "x": 0,
+      "y": 904
+    },
+    "t-avance": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Mode avancé (activable dans Réglages) — lots, associés, frais, import/export",
+      "w": 240,
+      "x": 0,
+      "y": 1220
+    },
+    "t-simple": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Mode simple (par défaut) — Marge, Stock, Ventes + saisie rapide",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Ecran-Stock.dc.html",
+    "Ecran-Fiche-produit.dc.html",
+    "Ecran-Ventes.dc.html",
+    "Ecran-Detail-vente.dc.html",
+    "Ecran-Saisie-vente.dc.html",
+    "Ecran-Reglages.dc.html",
+    "Avance-Marge.dc.html",
+    "Avance-Reglages.dc.html",
+    "Avance-Lots.dc.html",
+    "Avance-Frais.dc.html",
+    "Avance-Associes.dc.html",
+    "Avance-Import-export.dc.html",
+    "Avance-Saisie-achat.dc.html"
+  ],
+  "pages": [],
+  "title": "Maquette PKM-App v2"
+}

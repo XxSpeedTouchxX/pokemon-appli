@@ -1,0 +1,1430 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>PKM-App · prototype</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #0B1120; color: #F3F6FC; font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; font-size: 15px; line-height: 1.4">
+
+<sc-if value="{{ ui.headerHome }}" hint-placeholder-val="{{ true }}">
+<header style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 16px 16px 10px">
+<span style="justify-self: start; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; font-size: 13px; font-weight: 600; color: #C9D3EA"><span style="flex: none; width: 18px; height: 12px; border-radius: 2px; background: linear-gradient(90deg, #0055A4 0 33.3%, #FFFFFF 33.3% 66.6%, #EF4135 66.6%)"></span>Marché FR</span>
+<span style="display: flex; align-items: center; gap: 8px">
+<span style="width: 30px; height: 30px; border-radius: 10px; background: #3D63FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(61, 99, 255, 0.35)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg></span>
+<span style="font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.03em">PKM</span>
+</span>
+<span style="justify-self: end; width: 38px; height: 38px; border-radius: 19px; background: #1B2742; border: 2px solid #2A3A5C; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600">T</span>
+</header>
+</sc-if>
+
+<sc-if value="{{ ui.headerBig }}" hint-placeholder-val="{{ false }}">
+<header style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 16px 8px">
+<h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em">{{ ui.title }}</h1>
+<span style="flex: none; display: flex; align-items: center; gap: 7px; height: 36px; padding: 0 12px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; font-size: 13px; font-weight: 600; color: #C9D3EA"><span style="flex: none; width: 18px; height: 12px; border-radius: 2px; background: linear-gradient(90deg, #0055A4 0 33.3%, #FFFFFF 33.3% 66.6%, #EF4135 66.6%)"></span>FR</span>
+</header>
+</sc-if>
+
+<sc-if value="{{ ui.headerDetail }}" hint-placeholder-val="{{ false }}">
+<header style="flex: none; display: flex; align-items: center; gap: 12px; padding: 14px 16px 8px">
+<button type="button" onClick="{{ goBack }}" aria-label="Retour" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #1E2B45; border-radius: 22px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 20px; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ui.title }}</h1>
+<sc-if value="{{ ui.hasSubtitle }}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 13px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ui.subtitle }}</span>
+</sc-if>
+</div>
+</header>
+</sc-if>
+
+<sc-if value="{{ ui.hasSubRow }}" hint-placeholder-val="{{ true }}">
+<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 24px; padding: 0 16px 8px; font-size: 12.5px; color: #7D8BA8">
+<span>{{ ui.syncText }}</span>
+<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">
+<span style="flex: none; padding: 3px 10px; border-radius: 999px; background: rgba(168, 182, 255, 0.14); color: #B9C5FF; font-size: 12px; font-weight: 700">Mode avancé</span>
+</sc-if>
+</div>
+</sc-if>
+
+<main style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 4px 16px 112px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+
+<sc-if value="{{ ui.isHome }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="Période" style="flex: none; display: flex; gap: 8px">
+<sc-for list="{{ periods }}" as="pr" hint-placeholder-count="3">
+<button type="button" onClick="{{ pr.pick }}" aria-pressed="{{ pr.on }}" style="height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid {{ pr.bc }}; background: {{ pr.bg }}; color: {{ pr.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ pr.label }}</button>
+</sc-for>
+</div>
+
+<section aria-label="Marge nette" style="flex: none; padding: 18px 18px 16px; border-radius: 24px; border: 1px solid #24345C; background: radial-gradient(120% 85% at 100% 0%, rgba(98, 122, 255, 0.24), rgba(98, 122, 255, 0) 62%), #121C33; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px">
+<div style="display: flex; align-items: center; gap: 2px; font-size: 14px; font-weight: 600; color: #C9D3EA">Marge nette
+<button type="button" onClick="{{ toggleMask }}" aria-label="{{ ui.maskLabel }}" aria-pressed="{{ ui.masked }}" style="width: 44px; height: 44px; margin: -10px -6px -10px 0; padding: 0; border: 0; background: transparent; color: #9AA8C3; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="2.8"></circle><path d="{{ ui.eyeSlash }}"></path></svg>
+</button>
+</div>
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 1px; font-size: 12.5px; color: #9AA8C3; text-align: right">
+<span>{{ home.count }} · {{ home.periodShort }}</span>
+<span>Encaissé <span style="color: #F3F6FC; font-weight: 600">{{ home.ca }}</span></span>
+</div>
+</div>
+<div style="font-family: 'Sora', sans-serif; font-size: 42px; line-height: 1.05; font-weight: 700; letter-spacing: -0.035em">{{ home.marginBig }}</div>
+<svg width="320" height="58" viewBox="0 0 320 58" role="img" aria-label="{{ home.chartLabel }}" style="display: block; overflow: visible">
+<path d="{{ home.chart.area }}" style="fill: {{ home.chart.color }}; fill-opacity: 0.12; stroke: none"></path>
+<path d="{{ home.chart.line }}" style="fill: none; stroke: {{ home.chart.color }}; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round"></path>
+<circle cx="{{ home.chart.dotX }}" cy="{{ home.chart.dotY }}" r="4.5" style="fill: {{ home.chart.color }}; stroke: #121C33; stroke-width: 2"></circle>
+</svg>
+<div aria-hidden="true" style="display: flex; gap: 2px; height: 8px; margin-top: 4px">
+<div style="flex: {{ home.barCost }} 1 0px; min-width: 3px; background: #34415F; border-radius: 4px 0 0 4px"></div>
+<div style="flex: {{ home.barFees }} 1 0px; min-width: 3px; background: #D5763A"></div>
+<div style="flex: {{ home.barMargin }} 1 0px; min-width: 3px; background: #6C84F2; border-radius: 0 4px 4px 0"></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9AA8C3"><span style="flex: none; width: 8px; height: 8px; border-radius: 2px; background: #34415F; box-shadow: inset 0 0 0 1px #56648A"></span>Coût d’achat</span><span style="font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums">{{ home.cost }}</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9AA8C3"><span style="flex: none; width: 8px; height: 8px; border-radius: 2px; background: #D5763A"></span>Frais et port</span><span style="font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums">{{ home.fees }}</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9AA8C3"><span style="flex: none; width: 8px; height: 8px; border-radius: 2px; background: #6C84F2"></span>Marge nette</span><span style="font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums">{{ home.margin }}</span></div>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #9AA8C3">{{ home.insight }}</p>
+</section>
+
+<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button type="button" onClick="{{ tabSales }}" style="min-height: 112px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; padding: 14px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="font-size: 13px; color: #9AA8C3">À compléter</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: {{ home.todo.color }}">{{ home.todo.n }}</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ home.todo.sub }}</span>
+</button>
+<button type="button" onClick="{{ home.best.open }}" style="min-height: 112px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; padding: 14px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="font-size: 13px; color: #9AA8C3">Meilleure vente</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; color: {{ home.best.color }}">{{ home.best.value }}</span>
+<span style="font-size: 12.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ home.best.sub }}</span>
+</button>
+</div>
+
+<section aria-label="Valeur du stock" style="flex: none; padding: 16px; border-radius: 24px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #C9D3EA"><span style="flex: none; width: 18px; height: 12px; border-radius: 2px; background: linear-gradient(90deg, #0055A4 0 33.3%, #FFFFFF 33.3% 66.6%, #EF4135 66.6%)"></span>Valeur du stock</span>
+<span style="display: flex; flex-direction: column; align-items: flex-end; gap: 1px; font-size: 12.5px; text-align: right">
+<span style="font-weight: 700; color: {{ home.mktColor }}">Marché {{ home.mkt24 }} (24 h)</span>
+<span style="color: #9AA8C3">Latent {{ home.latent }}</span>
+</span>
+</div>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #9AA8C3"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg>{{ home.stockUnits }}</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em">{{ home.stockValueBig }}</span>
+<svg width="324" height="44" viewBox="0 0 324 44" role="img" aria-label="{{ home.stockChartLabel }}" style="display: block; overflow: visible">
+<path d="{{ home.stockChart.area }}" style="fill: {{ home.stockChart.color }}; fill-opacity: 0.12; stroke: none"></path>
+<path d="{{ home.stockChart.line }}" style="fill: none; stroke: {{ home.stockChart.color }}; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round"></path>
+<circle cx="{{ home.stockChart.dotX }}" cy="{{ home.stockChart.dotY }}" r="4.5" style="fill: {{ home.stockChart.color }}; stroke: #111A2C; stroke-width: 2"></circle>
+</svg>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #7D8BA8"><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: #3DDC84"></span>{{ home.stamp }}</span>
+</section>
+
+<div style="flex: none; display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0 4px; font-size: 13px; color: #9AA8C3">
+<sc-for list="{{ home.stats }}" as="st" hint-placeholder-count="3">
+<span><span style="font-weight: 700; color: #F3F6FC">{{ st.n }}</span> {{ st.label }}</span>
+</sc-for>
+</div>
+
+<section aria-label="Aperçu de mon stock" style="flex: none; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Aperçu de mon stock</h2>
+<button type="button" onClick="{{ tabStock }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir tout</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{ home.apercu }}" as="ap" hint-placeholder-count="3">
+<button type="button" onClick="{{ ap.open }}" aria-label="{{ ap.label }}" style="position: relative; height: 150px; padding: 0; border: 0; border-radius: 18px; background: {{ ap.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true" style="margin-top: -22px; fill: none; stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round"><path d="{{ ap.glyph }}"></path></svg>
+<span style="position: absolute; top: 8px; left: 8px; padding: 1px 5px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 6px; background: rgba(11, 17, 32, 0.25); font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ ap.code }}</span>
+<span style="position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; align-items: center; gap: 5px; padding: 5px 7px; border-radius: 10px; background: rgba(8, 13, 26, 0.84); color: #FFFFFF; font-size: 12px; font-weight: 700">
+<span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ ap.flag }}"></span>
+<span style="flex: 1; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ap.value }}</span>
+<span style="flex: none; width: 8px; height: 8px; border-radius: 4px; background: {{ ap.dot }}"></span>
+</span>
+</button>
+</sc-for>
+</div>
+</section>
+
+<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Partage entre associés" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Partage entre associés</h2>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ team.ruleLabel }}</span>
+</div>
+<sc-for list="{{ team.members }}" as="m" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="flex: none; width: 38px; height: 38px; border-radius: 19px; background: {{ m.avatarBg }}; color: #0B1120; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px">{{ m.initial }}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-weight: 600">{{ m.name }}</span><span style="font-size: 12.5px; color: #9AA8C3">{{ m.shareLabel }}</span></span>
+<span style="flex: none; font-weight: 700; font-variant-numeric: tabular-nums; color: {{ m.color }}">{{ m.amount }}</span>
+</div>
+</sc-for>
+<button type="button" onClick="{{ goTeam }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir le détail</button>
+</section>
+</sc-if>
+
+<section aria-label="Dernières opérations" style="flex: none; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Dernières opérations</h2>
+<button type="button" onClick="{{ tabSales }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir tout</button>
+</div>
+<div style="border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-for list="{{ home.recent }}" as="op" hint-placeholder-count="4">
+<button type="button" onClick="{{ op.open }}" style="display: flex; align-items: center; gap: 12px; min-height: 66px; padding: 10px 14px; border: 0; border-top: {{ op.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: none; width: 42px; height: 42px; border-radius: 12px; background: {{ op.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ op.code }}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ op.title }}</span><span style="font-size: 12.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ op.meta }}</span></span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end"><span style="font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{ op.amountColor }}">{{ op.amount }}</span><span style="font-size: 12px; color: #7D8BA8">{{ op.amountLabel }}</span></span>
+</button>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ ui.isStock }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 16px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #9AA8C3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+<input type="search" aria-label="Rechercher un produit" placeholder="Rechercher « Display »" value="{{ stockV.q }}" onChange="{{ stockV.onQ }}" style="flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; outline-offset: 4px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 1.8; stroke-linecap: round"><path d="M5 5v14 M9 5v14 M13 5v14 M16.5 5.5l3.5 13"></path></svg>
+</div>
+<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; display: flex; gap: 22px; border-bottom: 1px solid #1E2B45">
+<span aria-current="page" style="height: 44px; display: flex; align-items: center; border-bottom: 2px solid #F3F6FC; margin-bottom: -1px; font-size: 15px; font-weight: 600">Articles</span>
+<button type="button" onClick="{{ goLots }}" style="height: 44px; padding: 0; border: 0; background: transparent; color: #9AA8C3; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">{{ stockV.lotsTab }}</button>
+</div>
+</sc-if>
+<div role="group" aria-label="Type de produit" style="flex: none; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px">
+<sc-for list="{{ stockV.types }}" as="ty" hint-placeholder-count="6">
+<button type="button" onClick="{{ ty.pick }}" aria-pressed="{{ ty.on }}" style="flex: none; height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid {{ ty.bc }}; background: {{ ty.bg }}; color: {{ ty.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ ty.label }}</button>
+</sc-for>
+</div>
+<section aria-label="Résumé du stock" style="flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 14px 4px; border-radius: 20px; border: 1px solid #1E2B45; background: #111A2C">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="font-size: 12px; color: #9AA8C3">Valeur</span><span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; white-space: nowrap">{{ stockV.value }}</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2px; border-left: 1px solid #1E2B45; border-right: 1px solid #1E2B45"><span style="font-size: 12px; color: #9AA8C3">Coût d’achat</span><span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; white-space: nowrap">{{ stockV.cost }}</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="font-size: 12px; color: #9AA8C3">Latent</span><span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; white-space: nowrap; color: {{ stockV.latentColor }}">{{ stockV.latent }}</span></div>
+</section>
+<span style="flex: none; font-size: 12.5px; color: #7D8BA8">{{ stockV.countText }}</span>
+<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{ stockV.list }}" as="it" hint-placeholder-count="6">
+<button type="button" onClick="{{ it.open }}" style="display: flex; flex-direction: column; gap: 9px; padding: 9px 9px 12px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="position: relative; display: flex; align-items: center; justify-content: center; height: 118px; border-radius: 14px; background: {{ it.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14)">
+<svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round"><path d="{{ it.glyph }}"></path></svg>
+<span style="position: absolute; top: 8px; left: 8px; padding: 1px 5px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 6px; background: rgba(11, 17, 32, 0.25); font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ it.code }}</span>
+<span style="position: absolute; top: 8px; right: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(8, 13, 26, 0.6); font-size: 12px; font-weight: 700; color: #FFFFFF">{{ it.qty }}</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 1px; padding: 0 3px; min-width: 0">
+<span style="font-size: 14px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ it.name }}</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ it.serie }}</span>
+</span>
+<span style="display: flex; align-items: center; gap: 6px; padding: 0 3px">
+<span style="flex: none; width: 16px; height: 11px; border-radius: 2px; background: {{ it.flag }}"></span>
+<span style="font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums">{{ it.value }}</span>
+</span>
+<span style="display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 3px; font-size: 12px">
+<span style="color: #9AA8C3; white-space: nowrap">PRU {{ it.pru }}</span>
+<span style="font-weight: 700; color: {{ it.latentColor }}; white-space: nowrap">{{ it.latent }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{ stockV.empty }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; padding: 24px 0; text-align: center; font-size: 14px; color: #9AA8C3">Aucun produit ne correspond à ta recherche.</p>
+</sc-if>
+<span style="flex: none; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #7D8BA8"><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: #3DDC84"></span>{{ stockV.stamp }}</span>
+</sc-if>
+
+<sc-if value="{{ ui.isProduct }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Visuel du produit" style="flex: none; position: relative; height: 196px; border-radius: 26px; background: {{ prod.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16); display: flex; align-items: center; justify-content: center">
+<svg width="96" height="96" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round"><path d="{{ prod.glyph }}"></path></svg>
+<span style="position: absolute; top: 14px; left: 14px; padding: 2px 7px; border: 1.5px solid rgba(255, 255, 255, 0.92); border-radius: 7px; background: rgba(11, 17, 32, 0.25); font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ prod.code }}</span>
+<span style="position: absolute; top: 14px; right: 14px; padding: 4px 10px; border-radius: 999px; background: rgba(8, 13, 26, 0.6); font-size: 13px; font-weight: 700; color: #FFFFFF">{{ prod.qtyBadge }}</span>
+<span style="position: absolute; left: 14px; bottom: 14px; display: flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 999px; background: rgba(8, 13, 26, 0.6); font-size: 12.5px; font-weight: 600; color: #FFFFFF"><span style="flex: none; width: 16px; height: 11px; border-radius: 2px; background: {{ prod.flag }}"></span>{{ prod.badge }}</span>
+</section>
+
+<section aria-label="Valeur estimée" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 13px; color: #9AA8C3">Valeur de ton stock</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em">{{ prod.value }}</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12.5px; text-align: right">
+<span style="font-weight: 700; color: {{ prod.latentColor }}">{{ prod.latentLine }}</span>
+<span style="color: #9AA8C3">{{ prod.unitLine }}</span>
+</div>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-top: 10px; border-top: 1px solid #1E2B45">
+<span style="font-size: 13px; color: #9AA8C3">Tendance archivée · 30 jours</span>
+<span style="font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums">{{ prod.readout }}</span>
+</div>
+<svg width="324" height="72" viewBox="0 0 324 72" role="img" aria-label="{{ prod.chartLabel }}" onMouseLeave="{{ chartLeave }}" style="display: block; overflow: visible">
+<path d="{{ prod.area }}" style="fill: {{ prod.chartColor }}; fill-opacity: 0.12; stroke: none"></path>
+<path d="{{ prod.line }}" style="fill: none; stroke: {{ prod.chartColor }}; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round"></path>
+<sc-if value="{{ prod.hasHi }}" hint-placeholder-val="{{ false }}">
+<line x1="{{ prod.dotX }}" x2="{{ prod.dotX }}" y1="0" y2="72" style="stroke: #3A4A75; stroke-width: 1"></line>
+</sc-if>
+<circle cx="{{ prod.dotX }}" cy="{{ prod.dotY }}" r="4.5" style="fill: {{ prod.chartColor }}; stroke: #111A2C; stroke-width: 2"></circle>
+<sc-for list="{{ prod.hits }}" as="h" hint-placeholder-count="30">
+<rect x="{{ h.x }}" y="0" width="{{ h.w }}" height="72" onMouseEnter="{{ h.enter }}" onClick="{{ h.enter }}" style="fill: transparent; cursor: crosshair"></rect>
+</sc-for>
+</svg>
+<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: #7D8BA8"><span>{{ prod.firstDate }}</span><span>{{ prod.rangeText }}</span><span>{{ prod.lastDate }}</span></div>
+</section>
+
+<section aria-label="Prix du marché" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0 0 4px; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Prix du marché</h2>
+<sc-for list="{{ prod.market }}" as="mk" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 8px; min-height: 42px; border-top: {{ mk.border }}">
+<span style="flex: 1; font-size: 14.5px; font-weight: {{ mk.weight }}">{{ mk.label }}</span>
+<span style="font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 3px 9px; background: {{ mk.tagBg }}; color: {{ mk.tagFg }}">{{ mk.tag }}</span>
+<span style="min-width: 86px; text-align: right; font-size: 14.5px; font-variant-numeric: tabular-nums; font-weight: {{ mk.weight }}">{{ mk.value }}</span>
+</div>
+</sc-for>
+<span style="display: flex; align-items: center; gap: 6px; padding-top: 4px; font-size: 12px; color: #7D8BA8"><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: #3DDC84"></span>{{ prod.source }}</span>
+</section>
+
+<section aria-label="Tes ventes de ce produit" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+<h2 style="flex: 1; margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Tes ventes</h2>
+<span style="font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 3px 9px; background: rgba(61, 220, 132, 0.14); color: #3DDC84">vendu</span>
+</div>
+<sc-if value="{{ prod.hasSales }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ prod.sales }}" as="ps" hint-placeholder-count="2">
+<button type="button" onClick="{{ ps.open }}" style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0; border: 0; border-top: {{ ps.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1; font-size: 14px; color: #C9D3EA">{{ ps.meta }}</span>
+<span style="font-size: 14px; font-variant-numeric: tabular-nums">{{ ps.price }}</span>
+<span style="min-width: 82px; text-align: right; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{ ps.marginColor }}">{{ ps.margin }}</span>
+</button>
+</sc-for>
+</sc-if>
+<sc-if value="{{ prod.noSales }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 14px; color: #9AA8C3">Aucune vente de ce produit pour l’instant.</p>
+</sc-if>
+</section>
+
+<section aria-label="Tes achats de ce produit" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0 0 4px; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Tes achats</h2>
+<sc-for list="{{ prod.buys }}" as="pb" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 48px; border-top: {{ pb.border }}">
+<span style="flex: 1; min-width: 0; font-size: 14px; color: #C9D3EA">{{ pb.meta }}</span>
+<sc-if value="{{ pb.isLot }}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 3px 9px; background: rgba(168, 182, 255, 0.14); color: #B9C5FF">lot</span>
+</sc-if>
+<span style="font-size: 14px; font-variant-numeric: tabular-nums">{{ pb.amount }}</span>
+</div>
+</sc-for>
+</section>
+
+<button type="button" onClick="{{ sellThis }}" disabled="{{ prod.cantSell }}" style="flex: none; height: 54px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; opacity: {{ prod.sellOpacity }}">+ Enregistrer une vente</button>
+</sc-if>
+
+<sc-if value="{{ ui.isSales }}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="Période" style="flex: none; display: flex; gap: 8px">
+<sc-for list="{{ periods }}" as="pr" hint-placeholder-count="3">
+<button type="button" onClick="{{ pr.pick }}" aria-pressed="{{ pr.on }}" style="height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid {{ pr.bc }}; background: {{ pr.bg }}; color: {{ pr.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ pr.label }}</button>
+</sc-for>
+</div>
+<section aria-label="Résumé des ventes" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.18), rgba(98, 122, 255, 0) 60%), #121C33; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 13px; color: #C9D3EA">Marge nette · {{ salesV.periodLabel }}</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 30px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em; color: {{ salesV.marginColor }}">{{ salesV.margin }}</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12.5px; color: #9AA8C3; text-align: right">
+<span>{{ salesV.count }}</span>
+<span>encaissé <span style="color: #F3F6FC; font-weight: 600">{{ salesV.ca }}</span></span>
+</div>
+</div>
+<div aria-hidden="true" style="display: flex; gap: 2px; height: 8px">
+<div style="flex: {{ home.barCost }} 1 0px; min-width: 3px; background: #34415F; border-radius: 4px 0 0 4px"></div>
+<div style="flex: {{ home.barFees }} 1 0px; min-width: 3px; background: #D5763A"></div>
+<div style="flex: {{ home.barMargin }} 1 0px; min-width: 3px; background: #6C84F2; border-radius: 0 4px 4px 0"></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: #9AA8C3">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #34415F; box-shadow: inset 0 0 0 1px #56648A"></span>Coût d’achat {{ home.cost }}</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #D5763A"></span>Frais et port {{ home.fees }}</span>
+</div>
+</section>
+<sc-if value="{{ salesV.has }}" hint-placeholder-val="{{ true }}">
+<div style="flex: none; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-for list="{{ salesV.list }}" as="sl" hint-placeholder-count="6">
+<button type="button" onClick="{{ sl.open }}" style="display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 12px 14px; border: 0; border-top: {{ sl.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: none; width: 46px; height: 46px; border-radius: 13px; background: {{ sl.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ sl.code }}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<span style="font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ sl.name }}</span>
+<span style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12.5px; color: #9AA8C3">{{ sl.date }}<span style="padding: 1px 8px; border-radius: 999px; border: 1px solid #2A3A5C; color: #C9D3EA; font-size: 11.5px; font-weight: 600">{{ sl.platform }}</span>
+<sc-if value="{{ sl.missing }}" hint-placeholder-val="{{ false }}">
+<span style="padding: 1px 8px; border-radius: 999px; background: rgba(245, 177, 76, 0.16); color: #F5B14C; font-size: 11.5px; font-weight: 700">Port à renseigner</span>
+</sc-if>
+</span>
+</span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 1px">
+<span style="font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{ sl.marginColor }}">{{ sl.margin }}</span>
+<span style="font-size: 12px; color: #7D8BA8">{{ sl.price }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ salesV.none }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; padding: 24px 0; text-align: center; font-size: 14px; color: #9AA8C3">Aucune vente sur cette période.</p>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ ui.isSale }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Résultat de la vente" style="flex: none; padding: 16px; border-radius: 24px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.2), rgba(98, 122, 255, 0) 60%), #121C33; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="flex: none; width: 52px; height: 52px; border-radius: 15px; background: {{ sale.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round"><path d="{{ sale.glyph }}"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-weight: 600">{{ sale.name }}</span><span style="font-size: 12.5px; color: #9AA8C3">{{ sale.meta }}</span></span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 13px; color: #C9D3EA">Marge nette</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 42px; line-height: 1.05; font-weight: 700; letter-spacing: -0.035em; color: {{ sale.marginColor }}">{{ sale.margin }}</span>
+<span style="font-size: 13px; color: #9AA8C3">{{ sale.rateText }}</span>
+</div>
+<sc-if value="{{ sale.missing }}" hint-placeholder-val="{{ false }}">
+<div style="font-size: 13px; line-height: 1.45; color: #F7C77E; background: rgba(245, 177, 76, 0.12); border: 1px solid rgba(245, 177, 76, 0.3); border-radius: 14px; padding: 10px 12px">{{ sale.missingText }}</div>
+</sc-if>
+</section>
+
+<section aria-label="Décomposition de la marge" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Décomposition</h2>
+<div style="display: flex; flex-direction: column; gap: 11px; font-size: 14px">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span>Prix de vente</span><span style="font-variant-numeric: tabular-nums; font-weight: 600">{{ sale.price }}</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px"><span style="display: flex; flex-direction: column"><span>Commission {{ sale.platform }}</span><span style="font-size: 12px; color: #7D8BA8">{{ sale.feeRule }}</span></span><span style="font-variant-numeric: tabular-nums; color: #C9D3EA">{{ sale.commission }}</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px"><span style="display: flex; flex-direction: column"><span>Port et emballage à ta charge</span><span style="font-size: 12px; color: #7D8BA8">{{ sale.portRule }}</span></span><span style="font-variant-numeric: tabular-nums; color: #C9D3EA">{{ sale.port }}</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px"><span style="display: flex; flex-direction: column"><span>Coût d’achat</span><span style="font-size: 12px; color: #7D8BA8">{{ sale.costRule }}</span></span><span style="font-variant-numeric: tabular-nums; color: #C9D3EA">{{ sale.cost }}</span></div>
+<div style="height: 1px; background: #1E2B45"></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; font-weight: 700"><span>Marge nette</span><span style="font-variant-numeric: tabular-nums; color: {{ sale.marginColor }}">{{ sale.margin }}</span></div>
+</div>
+<div aria-hidden="true" style="display: flex; gap: 2px; height: 8px; margin-top: 2px">
+<div style="flex: {{ sale.barCost }} 1 0px; min-width: 3px; background: #34415F; border-radius: 4px 0 0 4px"></div>
+<div style="flex: {{ sale.barFees }} 1 0px; min-width: 3px; background: #D5763A; border-radius: {{ sale.feesRadius }}"></div>
+<div style="display: {{ sale.marginDisplay }}; flex: {{ sale.barMargin }} 1 0px; min-width: 3px; background: #6C84F2; border-radius: 0 4px 4px 0"></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: #9AA8C3">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #34415F; box-shadow: inset 0 0 0 1px #56648A"></span>Coût d’achat</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #D5763A"></span>Frais et port</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 2px; background: #6C84F2"></span>Marge nette</span>
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #9AA8C3">{{ sale.insight }}</p>
+</section>
+
+<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 54px; padding: 0 16px; border-radius: 18px; border: 1px solid #1E2B45; background: #111A2C; font-size: 14px"><span style="color: #9AA8C3">Vendu par</span><span style="font-weight: 700">{{ sale.by }}</span></div>
+</sc-if>
+
+<button type="button" onClick="{{ editSale }}" style="flex: none; height: 52px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Modifier la vente</button>
+</sc-if>
+
+<sc-if value="{{ ui.isSettings }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Mode avancé" style="flex: none; padding: 20px 18px 18px; border-radius: 26px; border: 1px solid #2A3A5C; background: radial-gradient(110% 80% at 50% 0%, rgba(98, 122, 255, 0.26), rgba(98, 122, 255, 0) 65%), #121C33; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+<span style="display: flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #E8ECFF; color: #0B1120; font-size: 12px; font-weight: 800; letter-spacing: 0.06em">
+<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #3D63FF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l9 5-9 5-9-5z M3 13l9 5 9-5"></path></svg>MODE AVANCÉ</span>
+<div aria-hidden="true" style="position: relative; width: 190px; height: 104px">
+<sc-for list="{{ settingsV.fan }}" as="fn" hint-placeholder-count="3">
+<span style="position: absolute; top: {{ fn.top }}; left: {{ fn.left }}; width: 74px; height: 92px; border-radius: 14px; background: {{ fn.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 10px 22px rgba(0, 0, 0, 0.35); transform: rotate({{ fn.rot }}); display: flex; align-items: center; justify-content: center"><svg width="36" height="36" viewBox="0 0 24 24" style="fill: none; stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round"><path d="{{ fn.glyph }}"></path></svg></span>
+</sc-for>
+</div>
+<span style="font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 600; letter-spacing: -0.01em">{{ settingsV.promoTitle }}</span>
+<span style="font-size: 13.5px; line-height: 1.5; color: #9AA8C3">Lots, associés, frais par plateforme, import et export. Tu peux revenir au mode simple à tout moment : rien n’est perdu.</span>
+<button type="button" onClick="{{ toggleAdv }}" aria-pressed="{{ ui.adv }}" style="height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: {{ settingsV.ctaBg }}; color: {{ settingsV.ctaFg }}; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">{{ settingsV.cta }}</button>
+</section>
+
+<section aria-label="Prix et sources" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Prix et sources</h2>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; color: #9AA8C3">Valoriser le stock au</span>
+<div role="group" aria-label="Indicateur de valorisation" style="display: flex; gap: 8px">
+<sc-for list="{{ valuations }}" as="va" hint-placeholder-count="3">
+<button type="button" onClick="{{ va.pick }}" aria-pressed="{{ va.on }}" style="flex: 1; height: 44px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ va.bc }}; background: {{ va.bg }}; color: {{ va.fg }}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer">{{ va.label }}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 0"><span style="flex: none; width: 8px; height: 8px; border-radius: 4px; background: #3DDC84"></span><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Cardmarket — guide des prix</span><span style="font-size: 12.5px; color: #9AA8C3">Fichier public quotidien · 03/10/2026 à 07:00</span></span></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid #1E2B45"><span style="flex: none; width: 8px; height: 8px; border-radius: 4px; background: #3DDC84"></span><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Archive maison</span><span style="font-size: 12.5px; color: #9AA8C3">Un relevé par jour depuis le 04/09/2026</span></span></div>
+</div>
+</section>
+
+<section aria-label="Frais par plateforme" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0 0 4px; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Frais par plateforme</h2>
+<sc-for list="{{ feesList }}" as="fl" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 46px; border-top: {{ fl.border }}"><span style="padding: 3px 10px; border-radius: 999px; border: 1px solid #2A3A5C; font-size: 13px; font-weight: 600">{{ fl.label }}</span><span style="font-size: 13px; color: #9AA8C3; text-align: right">{{ fl.rule }}</span></div>
+</sc-for>
+<sc-if value="{{ ui.simple }}" hint-placeholder-val="{{ true }}">
+<p style="margin: 4px 0 0; font-size: 12.5px; line-height: 1.45; color: #7D8BA8">Valeurs d’exemple, appliquées automatiquement à chaque vente. Modifiables en mode avancé.</p>
+</sc-if>
+<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ goFees }}" style="height: 44px; margin-top: 6px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Modifier les frais</button>
+</sc-if>
+</section>
+
+<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Outils avancés" style="flex: none; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<h2 style="margin: 0; padding: 16px 16px 6px; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Outils avancés</h2>
+<button type="button" onClick="{{ goLots }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: none; width: 40px; height: 40px; border-radius: 12px; background: rgba(168, 182, 255, 0.14); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #B9C5FF; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l9 5-9 5-9-5z M3 13l9 5 9-5"></path></svg></span>
+<span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Lots</span><span style="font-size: 12.5px; color: #9AA8C3">{{ settingsV.lotsText }}</span></span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+<button type="button" onClick="{{ goTeam }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: none; width: 40px; height: 40px; border-radius: 12px; background: rgba(168, 182, 255, 0.14); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #B9C5FF; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"></path><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"></path><path d="M18 14.3c2.1 0.6 3.5 2.6 3.5 5.7"></path></svg></span>
+<span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Associés</span><span style="font-size: 12.5px; color: #9AA8C3">{{ settingsV.teamText }}</span></span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+<button type="button" onClick="{{ goIO }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: none; width: 40px; height: 40px; border-radius: 12px; background: rgba(168, 182, 255, 0.14); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #B9C5FF; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M7 4v13"></path><path d="M3.5 13.5L7 17l3.5-3.5"></path><path d="M17 20V7"></path><path d="M13.5 10.5L17 7l3.5 3.5"></path></svg></span>
+<span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Importer / exporter</span><span style="font-size: 12.5px; color: #9AA8C3">CSV, sans limite</span></span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</section>
+</sc-if>
+<p style="margin: 0; text-align: center; font-size: 12px; color: #7D8BA8">PKM-App · maquette v2 · données fictives</p>
+</sc-if>
+
+<sc-if value="{{ ui.isLots }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #9AA8C3">Un lot, c’est plusieurs produits payés en un seul prix. Ce prix est réparti entre les articles pour calculer leur coût d’achat.</p>
+<section aria-label="Lot" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px"><h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">{{ lots.title }}</h2><span style="font-size: 12.5px; color: #9AA8C3">{{ lots.meta }}</span></div>
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px"><span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700">{{ lots.total }}</span><span style="font-size: 12.5px; color: #9AA8C3">{{ lots.count }}</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; color: #9AA8C3">Répartir le prix du lot</span>
+<div role="group" aria-label="Méthode de répartition" style="display: flex; gap: 8px">
+<sc-for list="{{ lots.methods }}" as="lm" hint-placeholder-count="2">
+<button type="button" onClick="{{ lm.pick }}" aria-pressed="{{ lm.on }}" style="flex: 1; height: 44px; padding: 0 10px; border-radius: 999px; border: 1px solid {{ lm.bc }}; background: {{ lm.bg }}; color: {{ lm.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ lm.label }}</button>
+</sc-for>
+</div>
+<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ lots.methodHelp }}</span>
+</div>
+<sc-for list="{{ lots.lines }}" as="ll" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 12px; min-height: 68px; border-top: 1px solid #1E2B45">
+<span style="flex: none; width: 46px; height: 46px; border-radius: 13px; background: {{ ll.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round"><path d="{{ ll.glyph }}"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ll.name }}</span><span style="font-size: 12.5px; color: #9AA8C3">{{ ll.meta }}</span></span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end"><span style="font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums">{{ ll.unitCost }}</span><span style="font-size: 12px; color: #7D8BA8">{{ ll.total }}</span></span>
+</div>
+</sc-for>
+</section>
+<section aria-label="Effet sur tes marges" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0 0 4px; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Effet sur tes marges</h2>
+<sc-for list="{{ lots.impacts }}" as="im" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 12px; min-height: 54px; border-top: {{ im.border }}">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">{{ im.label }}</span><span style="font-size: 12.5px; color: #9AA8C3">{{ im.sub }}</span></span>
+<span style="font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{ im.color }}">{{ im.value }}</span>
+</div>
+</sc-for>
+</section>
+</sc-if>
+
+<sc-if value="{{ ui.isFees }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #9AA8C3">Appliqués automatiquement aux nouvelles ventes. Une vente déjà enregistrée garde ses frais : tu peux les corriger vente par vente.</p>
+<sc-for list="{{ feesEdit }}" as="fe" hint-placeholder-count="4">
+<section aria-label="{{ fe.label }}" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600">{{ fe.label }}</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<label style="display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; color: #9AA8C3">Commission (%)<input type="text" inputmode="decimal" value="{{ fe.rate }}" onChange="{{ fe.onRate }}" style="height: 46px; width: 100%; box-sizing: border-box; padding: 0 12px; border: 1px solid #2A3A5C; border-radius: 14px; background: #0B1120; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 15px"></label>
+<label style="display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; color: #9AA8C3">Fixe par vente (€)<input type="text" inputmode="decimal" value="{{ fe.fixed }}" onChange="{{ fe.onFixed }}" style="height: 46px; width: 100%; box-sizing: border-box; padding: 0 12px; border: 1px solid #2A3A5C; border-radius: 14px; background: #0B1120; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 15px"></label>
+<label style="display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 600; color: #9AA8C3">Port à ta charge (€)<input type="text" inputmode="decimal" value="{{ fe.port }}" onChange="{{ fe.onPort }}" style="height: 46px; width: 100%; box-sizing: border-box; padding: 0 12px; border: 1px solid #2A3A5C; border-radius: 14px; background: #0B1120; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 15px"></label>
+</div>
+<p style="margin: 0; font-size: 12.5px; color: #9AA8C3">{{ fe.example }}</p>
+</section>
+</sc-for>
+<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #F5B14C">Valeurs d’exemple, à vérifier selon ton statut (particulier ou professionnel) et les conditions de chaque plateforme.</p>
+</sc-if>
+
+<sc-if value="{{ ui.isTeam }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Équipe" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Équipe</h2>
+<sc-for list="{{ team.members }}" as="m" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="flex: none; width: 42px; height: 42px; border-radius: 21px; background: {{ m.avatarBg }}; color: #0B1120; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700">{{ m.initial }}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-weight: 600">{{ m.name }}</span><span style="font-size: 12.5px; color: #9AA8C3">{{ m.role }}</span></span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end"><span style="font-size: 12px; color: #7D8BA8">Apports</span><span style="font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums">{{ m.apport }}</span></span>
+</div>
+</sc-for>
+</section>
+<section aria-label="Partage de la marge nette" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Partage de la marge nette</h2>
+<div role="group" aria-label="Règle de partage" style="display: flex; gap: 8px">
+<sc-for list="{{ team.rules }}" as="ru" hint-placeholder-count="3">
+<button type="button" onClick="{{ ru.pick }}" aria-pressed="{{ ru.on }}" style="flex: 1; height: 44px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ ru.bc }}; background: {{ ru.bg }}; color: {{ ru.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ ru.label }}</button>
+</sc-for>
+</div>
+<sc-for list="{{ team.members }}" as="m" hint-placeholder-count="2">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 42px"><span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{ m.name }}</span><span style="font-size: 12.5px; color: #9AA8C3">{{ m.shareLabel }}</span></span><span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: {{ m.color }}">{{ m.amount }}</span></div>
+</sc-for>
+<p style="margin: 0; padding-top: 10px; border-top: 1px solid #1E2B45; font-size: 13px; color: #9AA8C3">{{ team.total }}</p>
+</section>
+<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #9AA8C3">Chaque achat et chaque vente indique l’associé qui l’a fait. Les apports sont les achats payés par chacun.</p>
+</sc-if>
+
+<sc-if value="{{ ui.isIO }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Importer" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Importer</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #9AA8C3">Un fichier CSV : ton tableur actuel, ou l’export d’une autre app de suivi.</p>
+<button type="button" onClick="{{ demoImport }}" style="height: 52px; border: 1.5px dashed #3A4A75; border-radius: 16px; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 600; cursor: pointer">Choisir un fichier CSV</button>
+<span style="font-size: 13px; font-weight: 600; color: #9AA8C3">Colonnes reconnues automatiquement</span>
+<sc-for list="{{ io.mapping }}" as="mp" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 40px; border-top: 1px solid #1E2B45; font-size: 13.5px"><span style="flex: 1; color: #9AA8C3">{{ mp.from }}</span><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg><span style="flex: 1; font-weight: 600">{{ mp.to }}</span></div>
+</sc-for>
+</section>
+<section aria-label="Exporter" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Exporter</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #9AA8C3">Tout ton historique, sans limite : achats, ventes, stock et frais.</p>
+<button type="button" onClick="{{ demoExport }}" style="height: 52px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Exporter en CSV</button>
+<span style="font-size: 12px; color: #7D8BA8">{{ io.exportInfo }}</span>
+</section>
+</sc-if>
+
+</main>
+
+<nav aria-label="Navigation principale" style="position: absolute; left: 14px; right: 14px; bottom: 14px; z-index: 10; height: 68px; box-sizing: border-box; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; padding: 0 6px; border-radius: 26px; border: 1px solid #1E2B45; background: rgba(8, 13, 26, 0.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5)">
+<button type="button" onClick="{{ tabHome }}" aria-label="Marge" aria-current="{{ tab.homeCur }}" style="height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: {{ tab.homeFg }}; cursor: pointer">
+<svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z"></path></svg>
+<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.homeDot }}"></span>
+</button>
+<button type="button" onClick="{{ tabStock }}" aria-label="Stock" aria-current="{{ tab.stockCur }}" style="height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: {{ tab.stockFg }}; cursor: pointer">
+<svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg>
+<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.stockDot }}"></span>
+</button>
+<button type="button" onClick="{{ openSheet }}" aria-label="Saisir un achat ou une vente" style="justify-self: center; width: 50px; height: 50px; padding: 0; border: 0; border-radius: 17px; background: #3D63FF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(61, 99, 255, 0.45)">
+<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+</button>
+<button type="button" onClick="{{ tabSales }}" aria-label="Ventes" aria-current="{{ tab.salesCur }}" style="height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: {{ tab.salesFg }}; cursor: pointer">
+<svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg>
+<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.salesDot }}"></span>
+</button>
+<button type="button" onClick="{{ tabSettings }}" aria-label="Réglages" aria-current="{{ tab.setCur }}" style="height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: {{ tab.setFg }}; cursor: pointer">
+<svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M4 7h9"></path><path d="M17 7h3"></path><circle cx="15" cy="7" r="2"></circle><path d="M4 17h3"></path><path d="M11 17h9"></path><circle cx="9" cy="17" r="2"></circle></svg>
+<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.setDot }}"></span>
+</button>
+</nav>
+
+<sc-if value="{{ ui.sheetOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
+<button type="button" aria-label="Fermer la saisie" onClick="{{ closeSheet }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
+<section aria-label="Saisie rapide" style="flex: none; max-height: 796px; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 26px; display: flex; flex-direction: column; gap: 14px">
+<div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
+<div style="flex: none; display: flex; align-items: center; gap: 8px">
+<div role="group" aria-label="Type de saisie" style="flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; background: #0B1120; border: 1px solid #1E2B45">
+<button type="button" onClick="{{ sh.toBuy }}" aria-pressed="{{ sh.isBuy }}" style="height: 44px; padding: 0 6px; border: 0; border-radius: 999px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; background: {{ sh.buyBg }}; color: {{ sh.buyFg }}">Achat</button>
+<button type="button" onClick="{{ sh.toSell }}" aria-pressed="{{ sh.isSell }}" style="height: 44px; padding: 0 6px; border: 0; border-radius: 999px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; background: {{ sh.sellBg }}; color: {{ sh.sellFg }}">Vente</button>
+</div>
+<button type="button" onClick="{{ closeSheet }}" aria-label="Fermer" style="flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
+</button>
+</div>
+<h2 style="flex: none; margin: 0; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em">{{ sh.title }}</h2>
+
+<fieldset style="flex: none; margin: 0; padding: 0; border: 0; min-width: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #9AA8C3">Produit</legend>
+<div style="display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 4px">
+<sc-for list="{{ sh.products }}" as="po" hint-placeholder-count="4">
+<button type="button" onClick="{{ po.pick }}" aria-pressed="{{ po.sel }}" aria-label="{{ po.label }}" style="flex: none; width: 104px; display: flex; flex-direction: column; gap: 6px; padding: 6px 6px 8px; border-radius: 18px; border: 1px solid {{ po.bc }}; box-shadow: {{ po.ring }}; background: {{ po.bg }}; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="position: relative; height: 70px; border-radius: 12px; background: {{ po.art }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); display: flex; align-items: center; justify-content: center">
+<svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round"><path d="{{ po.glyph }}"></path></svg>
+<span style="position: absolute; top: 5px; left: 5px; padding: 0 4px; border: 1.2px solid rgba(255, 255, 255, 0.9); border-radius: 5px; font-family: 'Sora', sans-serif; font-size: 9px; font-weight: 700; color: #FFFFFF">{{ po.code }}</span>
+</span>
+<span style="padding: 0 2px; font-size: 12.5px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ po.name }}</span>
+<span style="padding: 0 2px; font-size: 11.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ po.right }}</span>
+</button>
+</sc-for>
+</div>
+</fieldset>
+
+<div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #9AA8C3">{{ sh.priceLabel }}<input type="text" inputmode="decimal" placeholder="0,00" value="{{ sh.price }}" onChange="{{ sh.onPrice }}" style="height: 52px; width: 100%; box-sizing: border-box; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 16px; background: #0B1120; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 600"></label>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; font-weight: 600; color: #9AA8C3">Quantité</span>
+<div style="display: flex; align-items: center; height: 52px; box-sizing: border-box; border: 1px solid #2A3A5C; border-radius: 16px; background: #0B1120">
+<button type="button" onClick="{{ sh.dec }}" aria-label="Diminuer la quantité" style="width: 44px; height: 50px; padding: 0; border: 0; background: transparent; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round"><path d="M5 12h14"></path></svg></button>
+<span aria-live="polite" style="min-width: 26px; text-align: center; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">{{ sh.qty }}</span>
+<button type="button" onClick="{{ sh.inc }}" aria-label="Augmenter la quantité" style="width: 44px; height: 50px; padding: 0; border: 0; background: transparent; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></button>
+</div>
+</div>
+</div>
+<sc-if value="{{ sh.hasPriceHint }}" hint-placeholder-val="{{ false }}">
+<span style="flex: none; margin-top: -8px; font-size: 12.5px; color: #7D8BA8">{{ sh.priceHint }}</span>
+</sc-if>
+
+<sc-if value="{{ sh.isSell }}" hint-placeholder-val="{{ true }}">
+<fieldset style="flex: none; margin: 0; padding: 0; border: 0; min-width: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #9AA8C3">Plateforme</legend>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{ sh.platforms }}" as="pl" hint-placeholder-count="4">
+<button type="button" onClick="{{ pl.pick }}" aria-pressed="{{ pl.sel }}" style="height: 46px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ pl.bc }}; box-shadow: {{ pl.ring }}; background: {{ pl.bg }}; color: {{ pl.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ pl.label }}</button>
+</sc-for>
+</div>
+</fieldset>
+<label style="flex: none; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #9AA8C3">Port et emballage à ta charge (€)<input type="text" inputmode="decimal" value="{{ sh.port }}" onChange="{{ sh.onPort }}" style="height: 48px; width: 100%; box-sizing: border-box; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 16px; background: #0B1120; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 16px"><span style="font-weight: 400; font-size: 12.5px; color: #7D8BA8">{{ sh.portHint }}</span></label>
+<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">
+<label style="flex: none; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #9AA8C3">Commission (€)<input type="text" inputmode="decimal" value="{{ sh.commission }}" onChange="{{ sh.onCommission }}" style="height: 48px; width: 100%; box-sizing: border-box; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 16px; background: #0B1120; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 16px"><span style="font-weight: 400; font-size: 12.5px; color: #7D8BA8">{{ sh.commissionHint }}</span></label>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">
+<fieldset style="flex: none; margin: 0; padding: 0; border: 0; min-width: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #9AA8C3">{{ sh.byLabel }}</legend>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{ sh.people }}" as="pp" hint-placeholder-count="2">
+<button type="button" onClick="{{ pp.pick }}" aria-pressed="{{ pp.sel }}" style="height: 46px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ pp.bc }}; box-shadow: {{ pp.ring }}; background: {{ pp.bg }}; color: {{ pp.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ pp.label }}</button>
+</sc-for>
+</div>
+</fieldset>
+</sc-if>
+
+<section aria-label="{{ sh.previewTitle }}" style="flex: none; padding: 14px 16px; border-radius: 20px; border: 1px solid #24345C; background: radial-gradient(120% 100% at 100% 0%, rgba(98, 122, 255, 0.2), rgba(98, 122, 255, 0) 60%), #121C33; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+<span style="font-size: 13px; font-weight: 600; color: #C9D3EA">{{ sh.previewTitle }}</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.03em; color: {{ sh.bigColor }}">{{ sh.big }}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #9AA8C3">
+<sc-for list="{{ sh.lines }}" as="ln" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span>{{ ln.label }}</span><span style="color: #C9D3EA; font-variant-numeric: tabular-nums">{{ ln.value }}</span></div>
+</sc-for>
+</div>
+<sc-if value="{{ sh.hasError }}" hint-placeholder-val="{{ false }}">
+<div style="font-size: 13px; font-weight: 700; color: #F5B14C">{{ sh.error }}</div>
+</sc-if>
+</section>
+<button type="button" onClick="{{ sh.save }}" disabled="{{ sh.disabled }}" style="flex: none; height: 54px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; opacity: {{ sh.saveOpacity }}">{{ sh.saveLabel }}</button>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{ ui.hasToast }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position: absolute; z-index: 30; left: 16px; right: 16px; bottom: 98px; display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 18px; border: 1px solid #24345C; background: #16223A; color: #F3F6FC; font-size: 14px; font-weight: 600; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45)">
+<span style="flex: none; width: 26px; height: 26px; border-radius: 13px; background: rgba(61, 220, 132, 0.16); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #3DDC84; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+<span>{{ ui.toast }}</span>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":"enum","options":["home","stock","product","sales","sale","settings","lots","fees","team","io"],"default":"home","section":"Maquette"},"adv":{"editor":"boolean","default":false,"section":"Maquette"},"productId":{"editor":null,"default":"p1"},"saleId":{"editor":null,"default":"v1"},"sheet":{"editor":null,"default":null},"formProduct":{"editor":null,"default":null},"formPrice":{"editor":null,"default":null},"formPlatform":{"editor":null,"default":null},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  // Maquette PKM-App v2 (thème sombre) — données fictives : séries inventées, visuels génériques, aucune image Pokémon.
+  today() { return '2026-10-03'; }
+
+  catalog() {
+    return [
+      { id: 'p1', code: 'DSP', kind: 'Display 36 boosters', serie: 'Série Aurore', lang: 'FR', trend: 289, low: 262, avg7: 281, avg30: 274, seed: 11 },
+      { id: 'p2', code: 'ETB', kind: 'ETB', serie: 'Série Aurore', lang: 'FR', trend: 84, low: 76, avg7: 82, avg30: 79, seed: 23 },
+      { id: 'p3', code: 'UPC', kind: 'UPC', serie: 'Série Zénith', lang: 'FR', trend: 218, low: 199, avg7: 214, avg30: 205, seed: 37 },
+      { id: 'p4', code: 'CFT', kind: 'Coffret collection', serie: 'Série Braise', lang: 'FR', trend: 46, low: 41, avg7: 45, avg30: 44, seed: 41 },
+      { id: 'p5', code: 'DSP', kind: 'Display 30 boosters', serie: 'Série Récif', lang: 'JP', trend: 96, low: 88, avg7: 94, avg30: 91, seed: 53 },
+      { id: 'p6', code: 'BDL', kind: 'Bundle 6 boosters', serie: 'Série Orage', lang: 'FR', trend: 39, low: 35, avg7: 38, avg30: 37, seed: 67 }
+    ];
+  }
+
+  // Visuels génériques : un dégradé par série et un pictogramme par type de produit.
+  seriesArt(serie) {
+    const m = { 'Série Aurore': ['#FF9A8B', '#D6456F'], 'Série Zénith': ['#FFD66B', '#E3892B'], 'Série Braise': ['#FF8C5A', '#C2362B'], 'Série Récif': ['#5EE0CF', '#2C82B5'], 'Série Orage': ['#A797FF', '#5B40C9'] };
+    const c = m[serie] || ['#8FA3FF', '#4A5BD8'];
+    return 'linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 46%), linear-gradient(145deg, ' + c[0] + ', ' + c[1] + ')';
+  }
+  glyph(code) {
+    return {
+      DSP: 'M3.5 10.5h17v9.5h-17z M6 10.5V5.5h3.2v5 M10.4 10.5V4h3.2v6.5 M14.8 10.5V5.5H18v5',
+      ETB: 'M6 5.5h12v15H6z M6 9h12 M10 7.2h4',
+      UPC: 'M3 7h18v12H3z M3 10h18 M10 14.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0',
+      CFT: 'M4 6h16v13H4z M7.5 9h9v7h-9z',
+      BDL: 'M4.5 6.5h4.5v12H4.5z M9.75 5h4.5v14h-4.5z M15 6.5h4.5v12H15z M3.5 12.5h17'
+    }[code] || 'M4 6h16v13H4z';
+  }
+  flag(lang) {
+    return lang === 'JP' ? 'radial-gradient(circle, #BC002D 0 30%, #FFFFFF 33%)' : 'linear-gradient(90deg, #0055A4 0 33.3%, #FFFFFF 33.3% 66.6%, #EF4135 66.6%)';
+  }
+
+  platformKeys() { return ['vinted', 'cardmarket', 'ebay', 'direct']; }
+
+  // Valeurs d'exemple, à vérifier : elles dépendent du statut du vendeur et de chaque plateforme.
+  platformsSeed() {
+    return {
+      vinted: { label: 'Vinted', rate: 0, fixed: 0, port: 1.5 },
+      cardmarket: { label: 'Cardmarket', rate: 5, fixed: 0, port: 2 },
+      ebay: { label: 'eBay', rate: 11, fixed: 0.35, port: 2 },
+      direct: { label: 'Main propre', rate: 0, fixed: 0, port: 0 }
+    };
+  }
+
+  purchasesSeed() {
+    return [
+      { id: 'a1', date: '2026-08-25', lines: [{ pid: 'p4', qty: 4 }], total: 119.96, where: 'Prix public', by: 'toi' },
+      { id: 'a2', date: '2026-09-05', lines: [{ pid: 'p2', qty: 3 }], total: 179.7, where: 'Prix public', by: 'toi' },
+      { id: 'a3', date: '2026-09-12', lines: [{ pid: 'p1', qty: 3 }], total: 524.7, where: 'Prix public', by: 'toi' },
+      { id: 'a4', date: '2026-09-14', lines: [{ pid: 'p3', qty: 2, ref: 210 }, { pid: 'p2', qty: 2, ref: 90 }], total: 480, where: 'Leboncoin', by: 'sam' },
+      { id: 'a5', date: '2026-09-20', lines: [{ pid: 'p1', qty: 1 }], total: 189.3, where: 'Vinted', by: 'sam' },
+      { id: 'a6', date: '2026-09-28', lines: [{ pid: 'p5', qty: 2 }], total: 149, where: 'Import', by: 'sam' },
+      { id: 'a7', date: '2026-10-01', lines: [{ pid: 'p6', qty: 5 }], total: 164.95, where: 'Prix public', by: 'toi' },
+      { id: 'a8', date: '2026-10-02', lines: [{ pid: 'p3', qty: 1 }], total: 139.9, where: 'Prix public', by: 'toi' }
+    ];
+  }
+
+  // price = prix total de la vente ; commission figée à l'enregistrement ; port null = à renseigner.
+  salesSeed() {
+    return [
+      { id: 'v1', date: '2026-09-16', pid: 'p2', qty: 1, price: 82, platform: 'ebay', commission: 9.37, port: 2, by: 'toi' },
+      { id: 'v2', date: '2026-09-21', pid: 'p1', qty: 1, price: 268, platform: 'cardmarket', commission: 13.4, port: 2, by: 'toi' },
+      { id: 'v3', date: '2026-09-26', pid: 'p4', qty: 2, price: 88, platform: 'vinted', commission: 0, port: 1.5, by: 'toi' },
+      { id: 'v4', date: '2026-09-28', pid: 'p1', qty: 1, price: 275, platform: 'vinted', commission: 0, port: 1.5, by: 'sam' },
+      { id: 'v5', date: '2026-09-30', pid: 'p3', qty: 1, price: 210, platform: 'cardmarket', commission: 10.5, port: 2, by: 'sam' },
+      { id: 'v6', date: '2026-10-02', pid: 'p2', qty: 1, price: 85, platform: 'vinted', commission: 0, port: null, by: 'toi' }
+    ];
+  }
+
+  formSeed(p) {
+    p = p || {};
+    return {
+      pid: p.formProduct || 'p1',
+      price: p.formPrice !== undefined && p.formPrice !== null ? String(p.formPrice) : '',
+      qty: 1,
+      platform: p.formPlatform || 'vinted',
+      port: null,
+      commission: null,
+      by: 'toi',
+      editId: null
+    };
+  }
+
+  // État courant = valeurs par défaut (issues des props de l'artboard) + état modifié.
+  st() {
+    const p = this.props || {};
+    const d = {
+      screen: p.start || 'home',
+      stack: [],
+      productId: p.productId || 'p1',
+      saleId: p.saleId || 'v1',
+      period: '30',
+      adv: p.adv === true || p.adv === 'true',
+      sheet: p.sheet === 'buy' || p.sheet === 'sell' ? p.sheet : null,
+      f: this.formSeed(p),
+      purchases: this.purchasesSeed(),
+      sales: this.salesSeed(),
+      platforms: this.platformsSeed(),
+      lotMethod: 'value',
+      valuation: 'trend',
+      split: 50,
+      toast: null,
+      hi: null,
+      seq: 100,
+      q: '',
+      ftype: 'all',
+      masked: false
+    };
+    return Object.assign(d, this.state || {});
+  }
+
+  // ——— outils ———
+  num(x) {
+    if (x === null || x === undefined) return NaN;
+    if (typeof x === 'number') return x;
+    const t = String(x).replace(/[\s  ]/g, '').replace(',', '.');
+    return t === '' ? NaN : Number(t);
+  }
+  r2(n) { return Math.round(n * 100) / 100 + 0; }
+  eur(n) { return this.r2(n).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' }); }
+  signed(n) { const r = this.r2(n); return (r < 0 ? '−' : '+') + this.eur(Math.abs(r)); }
+  minus(n) { return '−' + this.eur(Math.abs(n)); }
+  pct(n) { return (Math.round(n * 10) / 10 + 0).toLocaleString('fr-FR') + ' %'; }
+  signedPct(n) { const r = Math.round(n); return (r < 0 ? '−' : '+') + Math.abs(r) + ' %'; }
+  d2(d) { return d.slice(8, 10) + '/' + d.slice(5, 7); }
+  d3(d) { return d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4); }
+  fmtIn(v) { return typeof v === 'number' ? String(v).replace('.', ',') : (v === null || v === undefined ? '' : String(v)); }
+  daysAgo(d) { return Math.round((Date.parse(this.today()) - Date.parse(d)) / 86400000); }
+  inPeriod(d, period) { return period === 'all' || this.daysAgo(d) < Number(period); }
+  histDate(i, n) { return new Date(Date.UTC(2026, 9, 3 - (n - 1 - i))).toISOString().slice(0, 10); }
+  feeRule(pf) {
+    const rate = this.num(pf.rate) || 0, fixed = this.num(pf.fixed) || 0, parts = [];
+    if (rate > 0) parts.push((Math.round(rate * 100) / 100).toLocaleString('fr-FR') + ' %');
+    if (fixed > 0) parts.push(this.eur(fixed));
+    return parts.length ? parts.join(' + ') : 'sans commission';
+  }
+  // Puce de filtre (pilule) et choix sélectionnable (anneau pastel).
+  chip(on) {
+    return { bg: on ? '#26345A' : 'transparent', bc: on ? '#3A4A75' : '#2A3A5C', fg: on ? '#FFFFFF' : '#C9D3EA' };
+  }
+  choice(on) {
+    return { bc: on ? '#A8B6FF' : '#24345C', ring: on ? 'inset 0 0 0 1px #A8B6FF' : 'none', bg: on ? '#1A2645' : '#111A2C', fg: '#F3F6FC' };
+  }
+  // Courbe : tracé, aire et point final, à l'échelle du cadre W × H.
+  spark(pts, W, H, padTop, padBottom) {
+    const n = pts.length;
+    const mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts), span = (mx - mn) || 1;
+    const step = n > 1 ? (W - 8) / (n - 1) : 0;
+    const xs = pts.map((_, i) => 4 + i * step);
+    const ys = pts.map(v => padTop + (mx - v) / span * (H - padTop - padBottom));
+    const line = xs.map((x, i) => (i ? 'L' : 'M') + x.toFixed(1) + ' ' + ys[i].toFixed(1)).join(' ');
+    return {
+      line: line, area: line + ' L' + xs[n - 1].toFixed(1) + ' ' + H + ' L' + xs[0].toFixed(1) + ' ' + H + ' Z',
+      xs: xs, ys: ys, step: step, mn: mn, mx: mx, dotX: xs[n - 1].toFixed(1), dotY: ys[n - 1].toFixed(1),
+      color: pts[n - 1] < pts[0] ? '#FF6B6B' : '#3DDC84'
+    };
+  }
+
+  // Historique quotidien de la tendance (déterministe), se terminant au prix du jour.
+  history(p) {
+    let x = p.seed;
+    const rnd = () => { x = (x * 9301 + 49297) % 233280; return x / 233280; };
+    const n = 30, pts = [];
+    let v = p.avg30 * 0.97;
+    for (let i = 0; i < n; i++) {
+      const target = p.avg30 + (p.trend - p.avg30) * (i / (n - 1));
+      v = v + (target - v) * 0.35 + (rnd() - 0.5) * p.trend * 0.03;
+      pts.push(i === n - 1 ? p.trend : Math.round(v * 100) / 100);
+    }
+    return pts;
+  }
+
+  // Répartition du prix d'un lot entre ses lignes.
+  allocate(a, method) {
+    const total = this.num(a.total) || 0;
+    if (a.lines.length === 1) return [total];
+    const units = a.lines.reduce((n, l) => n + l.qty, 0);
+    const val = a.lines.reduce((n, l) => n + l.qty * (l.ref || 0), 0);
+    if (method === 'equal' || !(val > 0)) return a.lines.map(l => total * l.qty / units);
+    return a.lines.map(l => total * l.qty * l.ref / val);
+  }
+
+  // Rejoue achats et ventes dans l'ordre : stock au coût moyen pondéré (PRU),
+  // coût d'achat figé au jour de chaque vente, marge nette par vente.
+  compute(s) {
+    const byId = {}, stock = {};
+    this.catalog().forEach(p => { byId[p.id] = p; stock[p.id] = { qty: 0, cost: 0 }; });
+    const ev = [];
+    s.purchases.forEach(a => ev.push({ t: 0, date: a.date, seq: a.seq || 0, a: a }));
+    s.sales.forEach(v => ev.push({ t: 1, date: v.date, seq: v.seq || 0, v: v }));
+    ev.sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : 0) || (x.seq - y.seq) || (x.t - y.t));
+    const sales = {}, buys = {};
+    ev.forEach(e => {
+      if (e.t === 0) {
+        const alloc = this.allocate(e.a, s.lotMethod);
+        e.a.lines.forEach((l, k) => { stock[l.pid].qty += l.qty; stock[l.pid].cost += alloc[k]; });
+        buys[e.a.id] = alloc;
+      } else {
+        const v = e.v, st = stock[v.pid], pf = s.platforms[v.platform] || { port: 0 };
+        const pru = st.qty > 0 ? st.cost / st.qty : 0;
+        const cost = pru * v.qty;
+        st.qty = Math.max(0, st.qty - v.qty);
+        st.cost = st.qty === 0 ? 0 : st.cost - cost;
+        const missing = v.port === null || v.port === undefined || v.port === '';
+        const port = missing ? (this.num(pf.port) || 0) : (this.num(v.port) || 0);
+        const commission = this.num(v.commission) || 0;
+        const price = this.num(v.price) || 0;
+        sales[v.id] = { pru: pru, cost: cost, port: port, missing: missing, commission: commission, price: price, margin: price - commission - port - cost, gross: price - cost };
+      }
+    });
+    return { byId: byId, stock: stock, sales: sales, buys: buys };
+  }
+
+  // Vente en cours de saisie (nouvelle ou modifiée), frais calculés selon la plateforme.
+  draftSale(s) {
+    const f = s.f, pf = s.platforms[f.platform] || s.platforms.vinted;
+    const price = this.num(f.price);
+    const old = f.editId ? s.sales.find(x => x.id === f.editId) : null;
+    const auto = price > 0 ? price * (this.num(pf.rate) || 0) / 100 + (this.num(pf.fixed) || 0) : 0;
+    const typedCom = f.commission !== null && f.commission !== '' && !isNaN(this.num(f.commission));
+    const typedPort = f.port !== null && f.port !== '' && !isNaN(this.num(f.port));
+    return {
+      id: old ? old.id : 'draft', date: old ? old.date : this.today(), seq: old ? (old.seq || 0) : s.seq,
+      pid: f.pid, qty: f.qty, price: price > 0 ? price : 0, platform: f.platform,
+      commission: this.r2(typedCom ? this.num(f.commission) : auto),
+      port: typedPort ? this.num(f.port) : (this.num(pf.port) || 0),
+      by: f.by, auto: auto
+    };
+  }
+
+  // ——— actions ———
+  setF(patch) { const s = this.st(); this.setState({ f: Object.assign({}, s.f, patch) }); }
+  push(screen, extra) {
+    const s = this.st();
+    this.setState(Object.assign({ screen: screen, stack: (s.stack || []).concat([s.screen]), hi: null }, extra || {}));
+  }
+  parentOf(sc) { return { product: 'stock', sale: 'sales', lots: 'settings', fees: 'settings', team: 'settings', io: 'settings' }[sc] || 'home'; }
+  pop() {
+    const s = this.st(), stack = (s.stack || []).slice(), prev = stack.pop();
+    this.setState({ screen: prev || this.parentOf(s.screen), stack: stack, hi: null });
+  }
+  tab(screen) { this.setState({ screen: screen, stack: [], hi: null }); }
+  section(s) {
+    const tabs = ['home', 'stock', 'sales', 'settings'];
+    if (tabs.indexOf(s.screen) >= 0) return s.screen;
+    const st = s.stack || [];
+    for (let i = st.length - 1; i >= 0; i--) if (tabs.indexOf(st[i]) >= 0) return st[i];
+    return this.parentOf(s.screen);
+  }
+  openSheet(kind, pid) {
+    const s = this.st(), c = this.compute(s);
+    let p = pid || s.productId;
+    if (kind === 'sell' && !(c.stock[p] && c.stock[p].qty > 0)) {
+      const first = this.catalog().find(x => c.stock[x.id].qty > 0);
+      p = first ? first.id : p;
+    }
+    this.setState({ sheet: kind, f: Object.assign(this.formSeed({}), { pid: p }) });
+  }
+  switchSheet(kind) {
+    const s = this.st();
+    if (s.sheet === kind) return;
+    this.openSheet(kind, s.f.pid);
+  }
+  editSale() {
+    const s = this.st(), v = s.sales.find(x => x.id === s.saleId);
+    if (!v) return;
+    this.setState({ sheet: 'sell', f: {
+      pid: v.pid, price: this.fmtIn(v.price), qty: v.qty, platform: v.platform,
+      port: v.port === null || v.port === undefined ? null : this.fmtIn(v.port),
+      commission: this.fmtIn(this.r2(v.commission)), by: v.by || 'toi', editId: v.id
+    } });
+  }
+  saveSell() {
+    const s = this.st(), f = s.f, d = this.draftSale(s);
+    const others = s.sales.filter(x => x.id !== d.id);
+    const avail = this.compute(Object.assign({}, s, { sales: others })).stock[f.pid].qty;
+    if (!(d.price > 0) || f.qty < 1 || f.qty > avail) return;
+    const id = f.editId || ('n' + s.seq);
+    const rec = { id: id, date: d.date, seq: d.seq, pid: d.pid, qty: d.qty, price: d.price, platform: d.platform, commission: d.commission, port: d.port, by: d.by };
+    const sales = others.concat([rec]);
+    const m = this.compute(Object.assign({}, s, { sales: sales })).sales[id].margin;
+    this.setState({ sales: sales, sheet: null, seq: f.editId ? s.seq : s.seq + 1, f: this.formSeed({}), productId: d.pid,
+      toast: (f.editId ? 'Vente modifiée' : 'Vente enregistrée') + ' · marge nette ' + this.signed(m) });
+    this.flash();
+  }
+  saveBuy() {
+    const s = this.st(), f = s.f, price = this.num(f.price);
+    if (!(price > 0) || f.qty < 1) return;
+    const id = 'n' + s.seq;
+    const rec = { id: id, date: this.today(), seq: s.seq, lines: [{ pid: f.pid, qty: f.qty }], total: this.r2(price), where: 'Saisie', by: f.by };
+    const purchases = s.purchases.concat([rec]);
+    const st = this.compute(Object.assign({}, s, { purchases: purchases })).stock[f.pid];
+    this.setState({ purchases: purchases, sheet: null, seq: s.seq + 1, f: this.formSeed({}), productId: f.pid,
+      toast: 'Achat enregistré · nouveau PRU ' + this.eur(st.cost / st.qty) });
+    this.flash();
+  }
+  say(msg) { this.setState({ toast: msg }); this.flash(); }
+  flash() {
+    if (this._tt) clearTimeout(this._tt);
+    this._tt = setTimeout(() => { this._tt = null; this.setState({ toast: null }); }, 2800);
+  }
+  setPlat(k, field, value) {
+    const s = this.st(), pl = Object.assign({}, s.platforms);
+    pl[k] = Object.assign({}, pl[k]);
+    pl[k][field] = value;
+    this.setState({ platforms: pl });
+  }
+  toggleAdv() {
+    const s = this.st(), advOnly = ['lots', 'fees', 'team', 'io'];
+    const patch = { adv: !s.adv };
+    if (s.adv && advOnly.indexOf(s.screen) >= 0) { patch.screen = 'settings'; patch.stack = []; }
+    this.setState(patch);
+  }
+  componentWillUnmount() { if (this._tt) clearTimeout(this._tt); }
+
+  // ——— vues ———
+  renderVals() {
+    const s = this.st();
+    const c = this.compute(s);
+    const cat = this.catalog();
+    const P = c.byId;
+    const UP = '#3DDC84', DOWN = '#FF6B6B';
+    const col = n => (this.r2(n) < 0 ? DOWN : UP);
+    const val = p => p[s.valuation] || p.trend;
+    const valLabel = { trend: 'tendance', avg30: 'moyenne 30 j', low: 'plus bas' }[s.valuation] || 'tendance';
+    const plat = k => (s.platforms[k] ? s.platforms[k].label : k);
+    const who = { toi: 'Toi', sam: 'Sam' };
+    const line = i => (i === 0 ? 'none' : '1px solid #1E2B45');
+    const periodLabels = { '7': '7 derniers jours', '30': '30 derniers jours', all: 'depuis le début' };
+    const periodShort = { '7': '7 j', '30': '30 j', all: 'tout' };
+    const pk = this.platformKeys();
+    const mask = txt => (s.masked ? '•••• €' : txt);
+    const look = p => ({ art: this.seriesArt(p.serie), glyph: this.glyph(p.code), flag: this.flag(p.lang) });
+
+    const advOnly = ['lots', 'fees', 'team', 'io'];
+    const screen = !s.adv && advOnly.indexOf(s.screen) >= 0 ? 'settings' : s.screen;
+
+    // Période
+    const periods = [['7', '7 jours'], ['30', '30 jours'], ['all', 'Tout']].map(([k, label]) => Object.assign(
+      { label: label, on: s.period === k, pick: () => this.setState({ period: k }) }, this.chip(s.period === k)));
+
+    // Ventes de la période
+    const salesSorted = s.sales.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.seq || 0) - (a.seq || 0)));
+    const inP = salesSorted.filter(v => this.inPeriod(v.date, s.period));
+    let ca = 0, cost = 0, com = 0, port = 0, margin = 0;
+    inP.forEach(v => { const r = c.sales[v.id]; ca += r.price; cost += r.cost; com += r.commission; port += r.port; margin += r.margin; });
+    const fees = com + port, gross = ca - cost;
+    const nVentes = inP.length + (inP.length > 1 ? ' ventes' : ' vente');
+    const missingAll = s.sales.filter(v => c.sales[v.id].missing);
+
+    // Courbe de marge cumulée sur la période
+    const oldest = s.sales.reduce((m, v) => Math.max(m, this.daysAgo(v.date)), 0);
+    const N = s.period === 'all' ? Math.max(2, oldest + 1) : Number(s.period);
+    const daily = [];
+    for (let i = 0; i < N; i++) daily.push(0);
+    inP.forEach(v => { const k = N - 1 - this.daysAgo(v.date); if (k >= 0 && k < N) daily[k] += c.sales[v.id].margin; });
+    let acc = 0;
+    const cum = daily.map(dv => (acc += dv));
+    const mChart = this.spark(cum, 320, 58, 6, 4);
+
+    // Stock
+    const histOf = {};
+    cat.forEach(p => { histOf[p.id] = this.history(p); });
+    let units = 0, sVal = 0, sCost = 0;
+    const inStock = cat.filter(p => c.stock[p.id].qty > 0);
+    inStock.forEach(p => { const st = c.stock[p.id]; units += st.qty; sVal += val(p) * st.qty; sCost += st.cost; });
+    const V = [];
+    for (let i = 0; i < 30; i++) { let t = 0; inStock.forEach(p => { t += c.stock[p.id].qty * histOf[p.id][i]; }); V.push(t); }
+    const sChart = this.spark(V, 324, 44, 4, 4);
+    const mkt24 = V.length > 1 ? V[V.length - 1] - V[V.length - 2] : 0;
+    const stamp = 'Cardmarket · ' + valLabel + ' · 03/10/2026 07:00';
+    const lotsAll = s.purchases.filter(a => a.lines.length > 1);
+    const lotsText = lotsAll.length + (lotsAll.length > 1 ? ' lots' : ' lot') + ' · répartition du coût';
+
+    const typeDefs = [['all', 'Tous'], ['DSP', 'Display'], ['ETB', 'ETB'], ['UPC', 'UPC'], ['CFT', 'Coffret'], ['BDL', 'Bundle']];
+    const q = String(s.q || '').trim().toLowerCase();
+    const shown = inStock.filter(p => (s.ftype === 'all' || p.code === s.ftype) && (!q || (p.kind + ' ' + p.serie + ' ' + p.code).toLowerCase().indexOf(q) >= 0));
+    const stockList = shown.map(p => {
+      const st = c.stock[p.id], v = val(p) * st.qty, lat = v - st.cost;
+      return Object.assign(look(p), {
+        code: p.code, name: p.kind, serie: p.serie + ' · ' + p.lang, qty: '×' + st.qty,
+        value: this.eur(v), pru: this.eur(st.cost / st.qty), latent: this.signed(lat), latentColor: col(lat),
+        open: () => this.push('product', { productId: p.id })
+      });
+    });
+
+    // Dernières opérations
+    const ops = [];
+    s.sales.forEach(v => ops.push({ date: v.date, seq: v.seq || 0, t: 1, v: v }));
+    s.purchases.forEach(a => ops.push({ date: a.date, seq: a.seq || 0, t: 0, a: a }));
+    ops.sort((x, y) => (x.date < y.date ? 1 : x.date > y.date ? -1 : 0) || (y.seq - x.seq) || (y.t - x.t));
+    const recent = ops.slice(0, 4).map((o, i) => {
+      if (o.t === 1) {
+        const v = o.v, r = c.sales[v.id], p = P[v.pid];
+        return { code: p.code, art: this.seriesArt(p.serie), title: p.kind + ' · ' + p.serie, meta: 'Vente · ' + plat(v.platform) + ' · ' + this.d2(v.date),
+          amount: this.signed(r.margin), amountColor: col(r.margin), amountLabel: r.missing ? 'marge estimée' : 'marge nette', border: line(i),
+          open: () => this.push('sale', { saleId: v.id }) };
+      }
+      const a = o.a, l0 = a.lines[0], p = P[l0.pid], n = a.lines.reduce((k, l) => k + l.qty, 0), isLot = a.lines.length > 1;
+      return { code: isLot ? 'LOT' : p.code, art: isLot ? 'linear-gradient(145deg, #4B5A86, #2A3556)' : this.seriesArt(p.serie),
+        title: isLot ? 'Lot de ' + n + ' articles' : p.kind + ' · ' + p.serie,
+        meta: 'Achat · ' + a.where + ' · ' + this.d2(a.date), amount: this.eur(a.total), amountColor: '#F3F6FC',
+        amountLabel: isLot ? 'payé (lot)' : (l0.qty > 1 ? 'payé · ×' + l0.qty : 'payé'), border: line(i),
+        open: () => this.push('product', { productId: l0.pid }) };
+    });
+
+    // Associés
+    const shares = { toi: s.split, sam: 100 - s.split };
+    const toiPart = this.r2(margin * s.split / 100), samPart = this.r2(margin) - toiPart;
+    const parts = { toi: toiPart, sam: samPart };
+    const apports = { toi: 0, sam: 0 };
+    s.purchases.forEach(a => { apports[a.by || 'toi'] += this.num(a.total) || 0; });
+    const team = {
+      ruleLabel: 'Règle ' + s.split + ' / ' + (100 - s.split),
+      members: ['toi', 'sam'].map(k => ({
+        initial: k === 'toi' ? 'T' : 'S', name: who[k], role: k === 'toi' ? 'Compte principal' : 'Associé·e',
+        avatarBg: k === 'toi' ? '#B9C5FF' : '#FFC9A8', shareLabel: shares[k] + ' % de la marge nette',
+        amount: this.signed(parts[k]), color: col(parts[k]), apport: this.eur(apports[k])
+      })),
+      rules: [50, 60, 70].map(n => Object.assign({ label: n + ' / ' + (100 - n), on: s.split === n, pick: () => this.setState({ split: n }) }, this.chip(s.split === n))),
+      total: 'Marge nette sur ' + periodLabels[s.period] + ' : ' + this.signed(margin)
+    };
+
+    // Meilleure vente de la période
+    let best = null;
+    inP.forEach(v => { if (!best || c.sales[v.id].margin > c.sales[best.id].margin) best = v; });
+
+    const home = {
+      periodLabel: periodLabels[s.period], periodShort: periodShort[s.period],
+      count: nVentes, ca: this.eur(ca),
+      margin: this.signed(margin), marginBig: mask(this.signed(margin)),
+      cost: this.minus(cost), fees: this.minus(fees),
+      barCost: Math.max(cost, 0).toFixed(2), barFees: Math.max(fees, 0).toFixed(2), barMargin: Math.max(margin, 0).toFixed(2),
+      chart: mChart,
+      chartLabel: 'Marge nette cumulée sur ' + periodLabels[s.period] + ' : ' + this.signed(margin),
+      insight: gross > 0 ? 'Les frais et le port ont absorbé ' + this.pct(fees / gross * 100) + ' de ta marge brute (' + this.eur(gross) + ').' : 'Pas encore de marge brute sur cette période.',
+      todo: {
+        n: String(missingAll.length), color: missingAll.length ? '#F5B14C' : '#3DDC84',
+        sub: missingAll.length ? (missingAll.length > 1 ? 'ventes sans port renseigné' : 'vente sans port renseigné') : 'tout est à jour'
+      },
+      best: best ? {
+        value: this.signed(c.sales[best.id].margin), color: col(c.sales[best.id].margin),
+        sub: P[best.pid].kind + ' · ' + plat(best.platform), open: () => this.push('sale', { saleId: best.id })
+      } : { value: '—', color: '#9AA8C3', sub: 'aucune vente sur la période', open: () => this.tab('sales') },
+      stockUnits: units + (units > 1 ? ' articles' : ' article') + ' · ' + inStock.length + (inStock.length > 1 ? ' produits' : ' produit'),
+      stockValueBig: mask(this.eur(sVal)), latent: this.signed(sVal - sCost),
+      mkt24: this.signed(mkt24), mktColor: col(mkt24),
+      stockChart: sChart,
+      stockChartLabel: 'Valeur du stock actuel aux prix des 30 derniers jours',
+      stamp: stamp,
+      stats: [
+        { n: String(inP.length), label: inP.length > 1 ? 'ventes (' + periodShort[s.period] + ')' : 'vente (' + periodShort[s.period] + ')' },
+        { n: String(s.purchases.length), label: 'achats' },
+        { n: String(lotsAll.length), label: lotsAll.length > 1 ? 'lots' : 'lot' }
+      ],
+      apercu: inStock.slice().sort((a, b) => val(b) * c.stock[b.id].qty - val(a) * c.stock[a.id].qty).slice(0, 3).map(p => {
+        const st = c.stock[p.id], v = val(p) * st.qty;
+        return Object.assign(look(p), { code: p.code, value: this.eur(v), dot: col(v - st.cost), label: p.kind + ' · ' + p.serie + ' · ' + this.eur(v), open: () => this.push('product', { productId: p.id }) });
+      }),
+      recent: recent
+    };
+
+    const stockV = {
+      q: s.q, onQ: e => this.setState({ q: e.target.value }),
+      types: typeDefs.map(([k, label]) => Object.assign({ label: label, on: s.ftype === k, pick: () => this.setState({ ftype: k }) }, this.chip(s.ftype === k))),
+      value: this.eur(sVal), cost: this.eur(sCost), latent: this.signed(sVal - sCost), latentColor: col(sVal - sCost),
+      countText: shown.length + (shown.length > 1 ? ' produits' : ' produit') + ' · ' + shown.reduce((n, p) => n + c.stock[p.id].qty, 0) + ' articles',
+      list: stockList, empty: shown.length === 0, stamp: stamp, lotsTab: 'Lots (' + lotsAll.length + ')'
+    };
+
+    // Fiche produit
+    const pp = P[s.productId] || cat[0];
+    const pst = c.stock[pp.id];
+    const pval = val(pp) * pst.qty;
+    const hist = histOf[pp.id];
+    const n = hist.length;
+    const pc = this.spark(hist, 324, 72, 8, 8);
+    const hi = s.hi !== null && s.hi !== undefined && s.hi >= 0 && s.hi < n ? s.hi : null;
+    const di = hi === null ? n - 1 : hi;
+    const mkDefs = [['trend', 'Tendance', 'calculé'], ['low', 'Plus bas', 'demandé'], ['avg7', 'Moyenne 7 jours', 'calculé'], ['avg30', 'Moyenne 30 jours', 'calculé']];
+    const prod = Object.assign(look(pp), {
+      code: pp.code, qtyBadge: pst.qty > 0 ? '×' + pst.qty + ' en stock' : 'Épuisé', badge: pp.lang + ' · ' + pp.serie + ' · scellé',
+      value: this.eur(pval), unitLine: this.eur(val(pp)) + ' / u · ' + valLabel,
+      latentLine: pst.qty > 0 ? this.signed(pval - pst.cost) + ' (' + this.signedPct((pval - pst.cost) / pst.cost * 100) + ')' : 'Plus d’article en stock',
+      latentColor: col(pval - pst.cost),
+      line: pc.line, area: pc.area, chartColor: pc.color,
+      dotX: pc.xs[di].toFixed(1), dotY: pc.ys[di].toFixed(1), hasHi: hi !== null,
+      readout: (hi === null ? 'Aujourd’hui' : this.d2(this.histDate(hi, n))) + ' · ' + this.eur(hist[di]),
+      hits: hist.map((_, i) => ({ x: Math.max(0, pc.xs[i] - pc.step / 2).toFixed(1), w: pc.step.toFixed(1), enter: () => this.setState({ hi: i }) })),
+      firstDate: this.d2(this.histDate(0, n)), lastDate: this.d2(this.histDate(n - 1, n)),
+      rangeText: 'min ' + this.eur(pc.mn) + ' · max ' + this.eur(pc.mx),
+      chartLabel: 'Tendance Cardmarket archivée sur 30 jours : de ' + this.eur(hist[0]) + ' à ' + this.eur(hist[n - 1]),
+      market: mkDefs.map(([k, label, tag], i) => ({
+        label: label, tag: tag, value: this.eur(pp[k]), border: line(i),
+        tagBg: tag === 'demandé' ? 'rgba(245, 177, 76, 0.16)' : 'rgba(168, 182, 255, 0.14)', tagFg: tag === 'demandé' ? '#F5B14C' : '#B9C5FF',
+        weight: k === s.valuation ? '700' : '500'
+      })),
+      source: 'Cardmarket, guide des prix du 03/10/2026 07:00',
+      sales: salesSorted.filter(v => v.pid === pp.id).map((v, i) => {
+        const r = c.sales[v.id];
+        return { meta: this.d2(v.date) + ' · ' + plat(v.platform) + (v.qty > 1 ? ' · ×' + v.qty : ''), price: this.eur(r.price),
+          margin: this.signed(r.margin), marginColor: col(r.margin), border: line(i), open: () => this.push('sale', { saleId: v.id }) };
+      }),
+      buys: s.purchases.filter(a => a.lines.some(l => l.pid === pp.id))
+        .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.seq || 0) - (a.seq || 0)))
+        .map((a, i) => {
+          const k = a.lines.findIndex(l => l.pid === pp.id), l = a.lines[k], alloc = c.buys[a.id] ? c.buys[a.id][k] : 0;
+          return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + who[a.by || 'toi'] : ''), amount: l.qty + ' × ' + this.eur(alloc / l.qty), isLot: a.lines.length > 1, border: line(i) };
+        }),
+      cantSell: pst.qty <= 0, sellOpacity: pst.qty > 0 ? '1' : '0.45'
+    });
+    prod.hasSales = prod.sales.length > 0;
+    prod.noSales = prod.sales.length === 0;
+
+    // Ventes
+    const salesV = {
+      periodLabel: periodLabels[s.period], count: nVentes, ca: this.eur(ca), margin: this.signed(margin), marginColor: col(margin),
+      has: inP.length > 0, none: inP.length === 0,
+      list: inP.map((v, i) => {
+        const r = c.sales[v.id], p = P[v.pid];
+        return { code: p.code, art: this.seriesArt(p.serie), name: p.kind + ' · ' + p.serie, date: this.d2(v.date) + (v.qty > 1 ? ' · ×' + v.qty : ''), platform: plat(v.platform),
+          missing: r.missing, margin: this.signed(r.margin), marginColor: col(r.margin), price: 'vendu ' + this.eur(r.price), border: line(i),
+          open: () => this.push('sale', { saleId: v.id }) };
+      })
+    };
+
+    // Détail d'une vente
+    const sv = s.sales.find(v => v.id === s.saleId) || salesSorted[0];
+    const sr = c.sales[sv.id], sp = P[sv.pid];
+    const sfees = sr.commission + sr.port;
+    const sale = {
+      art: this.seriesArt(sp.serie), glyph: this.glyph(sp.code), name: sp.kind + ' · ' + sp.serie + ' · ' + sp.lang,
+      meta: plat(sv.platform) + ' · ' + (sv.qty > 1 ? sv.qty + ' articles' : '1 article') + ' · ' + this.d3(sv.date),
+      margin: this.signed(sr.margin), marginColor: col(sr.margin),
+      rateText: sr.price > 0 ? 'soit ' + this.pct(sr.margin / sr.price * 100) + ' du prix de vente' : '',
+      missing: sr.missing,
+      missingText: 'Port non renseigné : marge estimée avec le port par défaut ' + plat(sv.platform) + ' (' + this.eur(sr.port) + '). « Modifier la vente » pour le corriger.',
+      price: this.eur(sr.price), platform: plat(sv.platform),
+      feeRule: sr.commission > 0 && sr.price > 0 ? 'soit ' + this.pct(sr.commission / sr.price * 100) + ' du prix' : 'aucune commission',
+      portRule: sr.missing ? 'estimé (par défaut)' : 'saisi',
+      commission: this.minus(sr.commission), port: this.minus(sr.port), cost: this.minus(sr.cost),
+      costRule: 'PRU ' + this.eur(sr.pru) + (sv.qty > 1 ? ' × ' + sv.qty : '') + ' au ' + this.d2(sv.date) + ', figé',
+      barCost: Math.max(sr.cost, 0).toFixed(2), barFees: Math.max(sfees, 0).toFixed(2), barMargin: Math.max(sr.margin, 0).toFixed(2),
+      marginDisplay: sr.margin > 0 ? 'block' : 'none', feesRadius: sr.margin > 0 ? '0' : '0 4px 4px 0',
+      insight: sr.gross > 0 ? 'Les frais et le port ont absorbé ' + this.pct(sfees / sr.gross * 100) + ' de ta marge brute (' + this.eur(sr.gross) + ').' : 'Cette vente ne couvre pas son coût d’achat.',
+      by: who[sv.by || 'toi']
+    };
+
+    // Réglages
+    const valuations = [['trend', 'Tendance'], ['avg30', 'Moy. 30 j'], ['low', 'Plus bas']].map(([k, label]) => Object.assign(
+      { label: label, on: s.valuation === k, pick: () => this.setState({ valuation: k }) }, this.chip(s.valuation === k)));
+    const feesList = pk.map((k, i) => { const pf = s.platforms[k]; return { label: pf.label, rule: this.feeRule(pf) + ' · port ' + this.eur(this.num(pf.port) || 0), border: line(i) }; });
+    const fanIds = ['p3', 'p1', 'p5'], fanPos = [['6px', '14px', '-12deg'], ['58px', '2px', '0deg'], ['110px', '14px', '12deg']];
+    const settingsV = {
+      lotsText: lotsText, teamText: '2 membres · ' + team.ruleLabel.toLowerCase(),
+      promoTitle: s.adv ? 'Mode avancé activé' : 'Va plus loin quand tu veux',
+      cta: s.adv ? 'Revenir au mode simple' : 'Activer le mode avancé',
+      ctaBg: s.adv ? 'transparent' : '#A8B6FF', ctaFg: s.adv ? '#F3F6FC' : '#0B1120',
+      fan: fanIds.map((id, i) => ({ art: this.seriesArt(P[id].serie), glyph: this.glyph(P[id].code), left: fanPos[i][0], top: fanPos[i][1], rot: fanPos[i][2] }))
+    };
+
+    // Lots
+    const lot = lotsAll[0];
+    let lots = { title: 'Aucun lot', meta: '', total: '', count: '', methods: [], methodHelp: '', lines: [], impacts: [] };
+    if (lot) {
+      const alloc = c.buys[lot.id], nArt = lot.lines.reduce((k, l) => k + l.qty, 0), pids = lot.lines.map(l => l.pid);
+      const impacts = salesSorted.filter(v => pids.indexOf(v.pid) >= 0 && v.date >= lot.date).slice(0, 3).map((v, i) => {
+        const r = c.sales[v.id], p = P[v.pid];
+        return { label: 'Vente ' + p.kind + ' · ' + this.d2(v.date), sub: plat(v.platform) + ' · ' + this.eur(r.price), value: this.signed(r.margin), color: col(r.margin), border: line(i) };
+      });
+      let lat = 0;
+      pids.forEach(pid => { const st = c.stock[pid]; lat += val(P[pid]) * st.qty - st.cost; });
+      impacts.push({ label: 'Stock restant de ces produits', sub: 'plus-value latente', value: this.signed(lat), color: col(lat), border: line(impacts.length) });
+      lots = {
+        title: 'Lot du ' + this.d3(lot.date), meta: lot.where + ' · acheté par ' + who[lot.by || 'toi'],
+        total: this.eur(lot.total), count: nArt + ' articles',
+        methods: [['value', 'Valeur de marché'], ['equal', 'Parts égales']].map(([k, label]) => Object.assign(
+          { label: label, on: s.lotMethod === k, pick: () => this.setState({ lotMethod: k }) }, this.chip(s.lotMethod === k))),
+        methodHelp: s.lotMethod === 'equal' ? 'Même coût pour chaque article, quelle que soit sa valeur.' : 'Au prorata de la moyenne 30 jours Cardmarket au ' + this.d2(lot.date) + ', tirée de l’archive maison.',
+        lines: lot.lines.map((l, k) => { const p = P[l.pid]; return { art: this.seriesArt(p.serie), glyph: this.glyph(p.code), name: p.kind + ' · ' + p.serie, meta: '×' + l.qty + ' · réf. ' + this.eur(l.ref || 0) + ' / u', unitCost: this.eur(alloc[k] / l.qty) + ' / u', total: this.eur(alloc[k]) }; }),
+        impacts: impacts
+      };
+    }
+
+    // Frais (édition)
+    const feesEdit = pk.map(k => {
+      const pf = s.platforms[k], exFee = 100 * (this.num(pf.rate) || 0) / 100 + (this.num(pf.fixed) || 0);
+      return {
+        label: pf.label, rate: this.fmtIn(pf.rate), fixed: this.fmtIn(pf.fixed), port: this.fmtIn(pf.port),
+        onRate: e => this.setPlat(k, 'rate', e.target.value), onFixed: e => this.setPlat(k, 'fixed', e.target.value), onPort: e => this.setPlat(k, 'port', e.target.value),
+        example: 'Exemple : vente à 100,00 € → commission ' + this.eur(exFee) + ', port ' + this.eur(this.num(pf.port) || 0) + '.'
+      };
+    });
+
+    // Import / export
+    const io = {
+      mapping: [['date', 'Date'], ['produit', 'Produit'], ['prix', 'Prix payé ou vendu'], ['qte', 'Quantité'], ['plateforme', 'Plateforme']].map(([from, to]) => ({ from: from, to: to })),
+      exportInfo: (s.purchases.length + s.sales.length) + ' opérations · ' + cat.length + ' produits · CSV UTF-8, séparateur ;'
+    };
+
+    // Saisie rapide
+    const f = s.f, isSell = s.sheet !== 'buy', isBuy = s.sheet === 'buy';
+    const segOn = on => ({ bg: on ? '#A8B6FF' : 'transparent', fg: on ? '#0B1120' : '#C9D3EA' });
+    const segBuy = segOn(isBuy), segSell = segOn(isSell);
+    const sh = {
+      isSell: isSell, isBuy: isBuy,
+      buyBg: segBuy.bg, buyFg: segBuy.fg, sellBg: segSell.bg, sellFg: segSell.fg,
+      toBuy: () => this.switchSheet('buy'), toSell: () => this.switchSheet('sell'),
+      qty: String(f.qty), dec: () => this.setF({ qty: Math.max(1, f.qty - 1) }), inc: () => this.setF({ qty: Math.min(99, f.qty + 1) }),
+      price: f.price, onPrice: e => this.setF({ price: e.target.value }),
+      hasPriceHint: f.qty > 1, priceHint: 'Prix total pour ' + f.qty + ' articles',
+      byLabel: isSell ? 'Vendu par' : 'Acheté par',
+      people: ['toi', 'sam'].map(k => Object.assign({ label: who[k], sel: f.by === k, pick: () => this.setF({ by: k }) }, this.choice(f.by === k)))
+    };
+    const pickTile = (p, right, sel, pick) => Object.assign(look(p), this.choice(sel), {
+      code: p.code, name: p.kind, right: right, sel: sel, pick: pick, label: p.kind + ' · ' + p.serie + ' · ' + right
+    });
+    if (isSell) {
+      const d = this.draftSale(s);
+      const others = s.sales.filter(x => x.id !== d.id);
+      const cB = this.compute(Object.assign({}, s, { sales: others }));
+      const avail = cB.stock[f.pid] ? cB.stock[f.pid].qty : 0;
+      const r = this.compute(Object.assign({}, s, { sales: others.concat([d]) })).sales[d.id];
+      const pf = s.platforms[f.platform] || s.platforms.vinted;
+      const error = !(d.price > 0) ? 'Indique le prix de vente.' : (avail <= 0 ? 'Plus de stock pour ce produit.' : (f.qty > avail ? 'Stock insuffisant : ' + avail + ' disponible' + (avail > 1 ? 's' : '') + '.' : ''));
+      Object.assign(sh, {
+        title: f.editId ? 'Modifier la vente' : 'Nouvelle vente',
+        priceLabel: 'Prix de vente (€)',
+        products: cat.filter(p => cB.stock[p.id].qty > 0 || p.id === f.pid).map(p =>
+          pickTile(p, cB.stock[p.id].qty + ' en stock', p.id === f.pid, () => this.setF({ pid: p.id, qty: 1 }))),
+        platforms: pk.map(k => Object.assign({ label: s.platforms[k].label, sel: f.platform === k, pick: () => this.setF({ platform: k, port: null, commission: null }) }, this.choice(f.platform === k))),
+        port: f.port === null ? this.fmtIn(this.num(pf.port) || 0) : f.port,
+        onPort: e => this.setF({ port: e.target.value }),
+        portHint: 'Par défaut pour ' + pf.label + ' : ' + this.eur(this.num(pf.port) || 0),
+        commission: f.commission === null ? this.fmtIn(this.r2(d.auto)) : f.commission,
+        onCommission: e => this.setF({ commission: e.target.value }),
+        commissionHint: 'Règle ' + pf.label + ' : ' + this.feeRule(pf),
+        previewTitle: 'Marge nette estimée',
+        big: d.price > 0 ? this.signed(r.margin) : '—', bigColor: d.price > 0 ? col(r.margin) : '#9AA8C3',
+        lines: [
+          { label: 'Commission ' + pf.label, value: this.minus(r.commission) },
+          { label: 'Port et emballage', value: this.minus(r.port) },
+          { label: 'Coût d’achat (PRU ' + this.eur(r.pru) + (f.qty > 1 ? ' × ' + f.qty : '') + ')', value: this.minus(r.cost) }
+        ],
+        error: error, hasError: error !== '', disabled: error !== '', saveOpacity: error ? '0.45' : '1',
+        saveLabel: f.editId ? 'Enregistrer les modifications' : 'Enregistrer la vente',
+        save: () => this.saveSell()
+      });
+    } else {
+      const pB = P[f.pid] || cat[0], st0 = c.stock[pB.id], price = this.num(f.price), ok = price > 0;
+      const unit = ok ? price / f.qty : 0;
+      const pruA = ok ? (st0.cost + price) / (st0.qty + f.qty) : 0;
+      const error = ok ? '' : 'Indique le prix payé.';
+      Object.assign(sh, {
+        title: 'Nouvel achat',
+        priceLabel: 'Prix payé (€)',
+        products: cat.map(p => pickTile(p, c.stock[p.id].qty + ' en stock', p.id === f.pid, () => this.setF({ pid: p.id }))),
+        platforms: [], port: '', onPort: null, portHint: '', commission: '', onCommission: null, commissionHint: '',
+        previewTitle: 'Plus-value latente à l’achat',
+        big: ok ? this.signed((val(pB) - unit) * f.qty) : '—', bigColor: ok ? col(val(pB) - unit) : '#9AA8C3',
+        lines: [
+          { label: 'Prix unitaire', value: ok ? this.eur(unit) : '—' },
+          { label: valLabel.charAt(0).toUpperCase() + valLabel.slice(1) + ' Cardmarket', value: this.eur(val(pB)) },
+          { label: 'PRU du produit', value: (st0.qty > 0 ? this.eur(st0.cost / st0.qty) : 'nouveau') + ' → ' + (ok ? this.eur(pruA) : '…') }
+        ],
+        error: error, hasError: error !== '', disabled: error !== '', saveOpacity: error ? '0.45' : '1',
+        saveLabel: 'Enregistrer l’achat',
+        save: () => this.saveBuy()
+      });
+    }
+
+    // Interface
+    const sec = this.section(Object.assign({}, s, { screen: screen }));
+    const titles = { home: 'Marge', stock: 'Stock', sales: 'Ventes', settings: 'Réglages', lots: 'Lots', fees: 'Frais par plateforme', team: 'Associés', io: 'Importer / exporter' };
+    let title = titles[screen] || '', subtitle = '';
+    if (screen === 'product') { title = pp.kind; subtitle = pp.serie + ' · ' + pp.lang + ' · scellé'; }
+    if (screen === 'sale') { title = 'Vente du ' + this.d2(sv.date); subtitle = sp.kind + ' · ' + sp.serie; }
+    const detail = ['product', 'sale', 'lots', 'fees', 'team', 'io'].indexOf(screen) >= 0;
+    const syncScreens = ['home', 'stock', 'sales', 'product'];
+    const syncText = syncScreens.indexOf(screen) >= 0 ? 'Dernière sync : 3 oct. à 07:00 · Cardmarket' : '';
+    const tabInfo = k => ({ fg: sec === k ? '#FFFFFF' : '#7D8BA8', dot: sec === k ? '#A8B6FF' : 'transparent', cur: sec === k ? 'page' : 'false' });
+    const th = tabInfo('home'), ts = tabInfo('stock'), tv = tabInfo('sales'), tr = tabInfo('settings');
+
+    return {
+      ui: {
+        title: title, subtitle: subtitle, hasSubtitle: subtitle !== '',
+        headerHome: screen === 'home', headerBig: ['stock', 'sales', 'settings'].indexOf(screen) >= 0, headerDetail: detail,
+        hasSubRow: syncText !== '' || s.adv, syncText: syncText,
+        adv: s.adv, simple: !s.adv,
+        masked: s.masked, maskLabel: s.masked ? 'Afficher les montants' : 'Masquer les montants', eyeSlash: s.masked ? 'M4 4l16 16' : '',
+        isHome: screen === 'home', isStock: screen === 'stock', isProduct: screen === 'product', isSales: screen === 'sales',
+        isSale: screen === 'sale', isSettings: screen === 'settings', isLots: screen === 'lots', isFees: screen === 'fees',
+        isTeam: screen === 'team', isIO: screen === 'io',
+        sheetOpen: !!s.sheet, hasToast: !!s.toast, toast: s.toast || ''
+      },
+      tab: {
+        homeFg: th.fg, homeDot: th.dot, homeCur: th.cur, stockFg: ts.fg, stockDot: ts.dot, stockCur: ts.cur,
+        salesFg: tv.fg, salesDot: tv.dot, salesCur: tv.cur, setFg: tr.fg, setDot: tr.dot, setCur: tr.cur
+      },
+      periods: periods, home: home, team: team, stockV: stockV, prod: prod, salesV: salesV, sale: sale,
+      valuations: valuations, feesList: feesList, settingsV: settingsV, lots: lots, feesEdit: feesEdit, io: io, sh: sh,
+      goBack: () => this.pop(),
+      tabHome: () => this.tab('home'), tabStock: () => this.tab('stock'), tabSales: () => this.tab('sales'), tabSettings: () => this.tab('settings'),
+      openSheet: () => this.openSheet('sell'),
+      closeSheet: () => this.setState({ sheet: null, f: this.formSeed({}) }),
+      toggleAdv: () => this.toggleAdv(),
+      toggleMask: () => this.setState({ masked: !s.masked }),
+      goTeam: () => this.push('team'), goLots: () => this.push('lots'), goFees: () => this.push('fees'), goIO: () => this.push('io'),
+      sellThis: () => this.openSheet('sell', pp.id),
+      editSale: () => this.editSale(),
+      chartLeave: () => this.setState({ hi: null }),
+      demoImport: () => this.say('Démo : l’import n’est pas branché dans la maquette'),
+      demoExport: () => this.say('Démo : export CSV de ' + (s.purchases.length + s.sales.length) + ' opérations')
+    };
+  }
+}
+</script>
+</body>
+</html>
