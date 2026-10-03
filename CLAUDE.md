@@ -5,8 +5,8 @@
 > En cas de contradiction entre ce fichier et `docs/`, signale-la, ne tranche pas seul.
 
 ## 1. Le projet en 5 lignes
-- **Vision :** une app qui aide les collectionneurs et revendeurs français de Pokémon TCG à suivre la **valeur** et la **marge** de leurs produits, **de l'achat à la revente**.
-- **Cible prioritaire (hypothèse à tester) :** revendeurs / investisseurs français en **produits scellés** (display, ETB, UPC, coffrets). Collectionneurs = cible secondaire.
+- **Vision :** une app qui aide les collectionneurs et passionnés français de Pokémon TCG à connaître la **valeur** de leurs cartes et produits scellés, au prix du marché comparé entre plusieurs sources et mis à jour automatiquement. Le suivi de la **marge** à la revente reste un complément. Ce n'est **pas une plateforme de vente**.
+- **Cible prioritaire (hypothèse à tester) :** **collectionneurs et passionnés** français (cartes, cartes gradées, scellé). Revendeurs / investisseurs en scellé = cible secondaire. *(Décision du porteur du 2026-10-03, qui remplace la cible « revendeurs de scellé ».)*
 - **Ambition :** side-business. Projet d'**exploration** (on cherche encore quoi construire exactement).
 - **Contraintes :** 2-4 h/jour, budget 500 à 5 000 €, équipe à plusieurs (rôles à confirmer), aucun calendrier externe.
 - **Concurrent de référence :** PokéItem (pokeitem.fr). Voir `docs/04-cartographie-concurrents.md` et `docs/10-analyse-pokeitem-brouillon.md`.
@@ -17,16 +17,34 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 → Tant que l'utilisateur n'a pas dit explicitement « go » : **propose, planifie, spécifie. Ne code pas.**
 → Quand le « go » est donné, le premier incrément doit être **le plus petit livrable qui sert le test ou la transition**, pas l'app complète.
 
+> **Contradiction signalée (2026-10-03), à trancher par le porteur.**
+> - Le Comparatif des options v2 (`docs/07-comparatif-options.md`) acte un changement de cap : un **produit proche de PokéItem d'abord**, à optimiser ensuite.
+> - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
+> - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
+
 ## 3. État d'avancement (au 2026-10-03)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
-- Phase 3 (test) : protocole rédigé, **non validé, non gelé**.
+- Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
+- **Changement de cap (2026-10-03, Comparatif des options v2) :** produit proche de PokéItem d'abord, optimisation ensuite.
+- **Positionnement (2026-10-03) :**
+  - valorisation des cartes et du scellé au prix du marché ;
+  - cible : collectionneurs et passionnés ;
+  - profils Novice, Régulier et Passionné automatiques, selon le nombre de cartes ultra rares ou la valeur de la collection.
+
+  Maquette : `docs/12-maquette-v4/`.
+- **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
 ## 4. Décisions et orientations déjà prises
-- Scénario recommandé : **test = service à l'acte + tableur** (E5+T1) ; **si Gate M3 franchie : abonnement + web app/PWA** (E1+T2). App mobile native, marketplace, gratuit+pub : écartés pour l'instant.
+- **Scénario recommandé** (Comparatif des options v2, proposition à valider) :
+  - **freemium + app mobile multiplateforme** (E1+T3) ;
+  - repli **web app/PWA** (T2) si la compétence mobile manque ;
+  - écartés à ce stade : marketplace (E4), service à l'acte (E5), app native à deux bases de code (T4).
+
+  L'ancien scénario « test concierge d'abord » (E5+T1, Comparatif v1) est abandonné par le porteur.
 - Données : **scénario A** proposé = TCGdex (catalogue FR + prix) + fichiers publics Cardmarket (scellé) + archivage quotidien maison. Accès, licence et usage commercial **à vérifier** (V1 à V6 dans `docs/05-sources-donnees-prix.md`).
-- **Pas de scraping** (eBay, Vinted, Leboncoin, Cardmarket) sans avis juridique préalable.
+- **Pas de scraping** (eBay, Vinted, Leboncoin, Cardmarket) sans avis juridique préalable. Sujet à revoir plus tard (décision du 2026-10-03).
 - **Visuels et noms Pokémon : AUTORISÉS par le porteur du projet (Nico, décision du 2026-10-03).** L'app peut afficher les noms, illustrations de cartes et visuels de produits scellés, comme le font tous les concurrents (PokéItem, TCG Crew, Pokéindex…). C'est une décision du porteur, qui en assume le risque ; ne bloque pas le travail dessus et ne redemande pas l'autorisation.
   - **Sourcing des images :** utilise en priorité les URLs ou CDN fournis par les sources de données retenues (ex. TCGdex, voir `docs/05-sources-donnees-prix.md`) ; à défaut, stockage local des images nécessaires au prototype. Pas de téléchargement massif depuis les pages des marketplaces.
   - **Obligatoire :** mention de non-affiliation visible dans l'app et sur le site (« application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company »). Pas de logo officiel Pokémon comme identité visuelle de l'app.
@@ -34,11 +52,18 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - Hypothèse principale, seuils et prix testé (9,90 €/mois) : `docs/06-hypotheses-opportunites.md` et `docs/08-protocole-test.md` (propositions à valider).
 
 ## 5. Principes produit (le cahier des charges de fond)
-1. **Novice ET aguerri :** un mode simple par défaut (3 écrans : stock, ventes, marge), des fonctions avancées activables (divulgation progressive). Une seule app, pas deux.
-2. **Marge nette réelle** d'abord : prix d'achat − frais de plateforme − port, par vente et par lot.
+1. **Novice ET passionné :**
+   - un mode simple par défaut : valeur de la collection, collection, scan ;
+   - des fonctions avancées activables (divulgation progressive) ;
+   - un profil (Novice, Régulier, Passionné) qui s'adapte **automatiquement** à la collection : nombre de cartes ultra rares ou valeur.
+
+   Une seule app, pas deux.
+2. **Valeur réelle d'abord :**
+   - la cote de chaque carte et de chaque produit au prix du marché : médiane des prix « marché » de plusieurs sources, mise à jour automatiquement ;
+   - la **marge nette réelle** (prix d'achat − frais de plateforme − port, par vente et par lot) reste disponible pour ceux qui revendent.
 3. **Transparence des prix :** chaque chiffre affiche sa source, sa date, et distingue prix demandé / prix vendu.
 4. **Pas de dispersion :** on ne copie PAS le réseau social, la marketplace, les quêtes/saisons, le multi-TCG ni le Pokédex de PokéItem.
-5. **Saisie rapide** (2-3 champs pour enregistrer un achat ou une vente), import CSV (tableur, PokéItem, PokéCardex), export complet.
+5. **Saisie rapide :** scan d'une carte ou d'un produit, sinon 2-3 champs pour enregistrer un ajout ou une vente ; import CSV (tableur, PokéItem, PokéCardex) ; export complet.
 6. **Données maison :** archiver chaque jour les prix utilisés ; ne jamais dépendre d'une seule source.
 7. La longueur de la liste de fonctions n'est pas un avantage durable (voir `docs/04-cartographie-concurrents.md` §6) : toute proposition doit dire **ce qui rend l'avantage durable** et **comment il sera mesuré par le test**.
 
