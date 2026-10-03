@@ -1312,7 +1312,7 @@ class Component extends DCLogic {
     const hits = [];
     for (const x of TCG.rows) {
       if (words.every(w => x.hay.indexOf(w) >= 0)) {
-        const v = x.r[F.cm] || x.r[F.tcp] || 0;
+        const a = x.r[F.cm], b = x.r[F.tcp], v = a && b ? (a + b) / 2 : a || b || 0; // = cote PKM affichée
         hits.push({ x: x, rank: x.name === fq ? 0 : x.name.indexOf(fq) === 0 ? 1 : 2, v: v });
       }
     }
