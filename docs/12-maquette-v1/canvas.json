@@ -1,0 +1,52 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "Prototype cliquable — départ : Marge", "is_interactive": true, "radius": 32 },
+    "Ecran-Stock.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "Stock", "is_interactive": true, "radius": 32 },
+    "Ecran-Fiche-produit.dc.html": { "x": 940, "y": 0, "w": 390, "h": 844, "title": "Fiche produit", "is_interactive": true, "radius": 32 },
+    "Ecran-Ventes.dc.html": { "x": 1410, "y": 0, "w": 390, "h": 844, "title": "Ventes", "is_interactive": true, "radius": 32 },
+    "Ecran-Detail-vente.dc.html": { "x": 1880, "y": 0, "w": 390, "h": 844, "title": "Détail d’une vente", "is_interactive": true, "radius": 32 },
+    "Ecran-Saisie-vente.dc.html": { "x": 2350, "y": 0, "w": 390, "h": 844, "title": "Saisie rapide — vente", "is_interactive": true, "radius": 32 },
+    "Ecran-Reglages.dc.html": { "x": 2820, "y": 0, "w": 390, "h": 844, "title": "Réglages", "is_interactive": true, "radius": 32 },
+    "Avance-Marge.dc.html": { "x": 0, "y": 1520, "w": 390, "h": 844, "title": "Marge — avec associés", "is_interactive": true, "radius": 32 },
+    "Avance-Reglages.dc.html": { "x": 470, "y": 1520, "w": 390, "h": 844, "title": "Réglages — mode avancé activé", "is_interactive": true, "radius": 32 },
+    "Avance-Lots.dc.html": { "x": 940, "y": 1520, "w": 390, "h": 844, "title": "Lots", "is_interactive": true, "radius": 32 },
+    "Avance-Frais.dc.html": { "x": 1410, "y": 1520, "w": 390, "h": 844, "title": "Frais par plateforme", "is_interactive": true, "radius": 32 },
+    "Avance-Associes.dc.html": { "x": 1880, "y": 1520, "w": 390, "h": 844, "title": "Associés", "is_interactive": true, "radius": 32 },
+    "Avance-Import-export.dc.html": { "x": 2350, "y": 1520, "w": 390, "h": 844, "title": "Importer / exporter", "is_interactive": true, "radius": 32 },
+    "Avance-Saisie-achat.dc.html": { "x": 2820, "y": 1520, "w": 390, "h": 844, "title": "Saisie rapide — achat (avancé)", "is_interactive": true, "radius": 32 }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-03T18:36:29.532Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": { "view": "canvas" },
+  "notes": {
+    "t-simple": { "x": 0, "y": -300, "text": "Mode simple (par défaut) — Marge, Stock, Ventes + saisie rapide", "kind": "title1", "maxW": 3210 },
+    "t-avance": { "x": 0, "y": 1220, "text": "Mode avancé (activable dans Réglages) — lots, associés, frais, import/export", "kind": "title1", "maxW": 3210 },
+    "n-proto": { "x": 0, "y": 904, "w": 390, "maxH": 240, "fill": "blue", "text": "Prototype cliquable : bouton Play sur ce cadre. Le bouton + saisit une vente ou un achat : stock, marge et récap se recalculent. Le mode avancé s’active dans Réglages. Données fictives, séries inventées, aucune image." },
+    "n-prix": { "x": 940, "y": 904, "w": 390, "maxH": 240, "fill": "teal", "text": "Transparence des prix : chaque valeur affiche sa source et sa date. « demandé » = annonce Cardmarket ; « vendu » = tes propres ventes. La courbe vient de l’archive maison (un relevé par jour)." },
+    "n-marge": { "x": 1880, "y": 904, "w": 390, "maxH": 240, "fill": "orange", "text": "Marge nette = prix de vente − commission − port à ta charge − coût d’achat. Coût d’achat = PRU (coût moyen pondéré) au jour de la vente, puis figé. Les frais de la vente sont figés aussi." },
+    "n-lots": { "x": 940, "y": 2424, "w": 390, "maxH": 240, "fill": "purple", "text": "Lot : bascule « Valeur de marché / Parts égales » pour voir l’effet sur les marges. En parts égales, la vente eBay de l’ETB devient une perte : la règle de répartition est un choix métier à valider." }
+  },
+  "order": [
+    "Main.dc.html",
+    "Ecran-Stock.dc.html",
+    "Ecran-Fiche-produit.dc.html",
+    "Ecran-Ventes.dc.html",
+    "Ecran-Detail-vente.dc.html",
+    "Ecran-Saisie-vente.dc.html",
+    "Ecran-Reglages.dc.html",
+    "Avance-Marge.dc.html",
+    "Avance-Reglages.dc.html",
+    "Avance-Lots.dc.html",
+    "Avance-Frais.dc.html",
+    "Avance-Associes.dc.html",
+    "Avance-Import-export.dc.html",
+    "Avance-Saisie-achat.dc.html"
+  ],
+  "pages": [],
+  "title": "Maquette PKM-App v1"
+}
