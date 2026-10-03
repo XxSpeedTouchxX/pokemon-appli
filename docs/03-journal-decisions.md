@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-10-03 — Onglet Territoire : boutiques partenaires PKM et arrivages probables
+
+- **Contexte :** le porteur demande un onglet listant les magasins, avec la probabilité d'arrivage des produits (ETB, objets de valeur). La maquette v5 le montre.
+- **Décision :**
+  - **Partenaires :** boutiques qui ont un accord avec PKM. Ce n'est pas une mention officielle Pokémon.
+  - **Probabilité d'arrivage :** estimée à partir de l'annonce du magasin partenaire, des signalements des collectionneurs (modérés, sans fil social) et de l'historique des arrivages.
+  - **Navigation :** Territoire prend la place de Profil dans la barre du bas ; le profil s'ouvre depuis l'avatar.
+- **Écarté :**
+  - le scraping des sites d'enseignes (CLAUDE.md §4) ;
+  - un fil social de signalements (principe 4).
+- **Impact :** CLAUDE.md (§3) ; maquette v5 (`docs/12-maquette-v5/`).
+
 ## 2026-10-03 — Changement de cap : une app de valorisation pour collectionneurs, proche de PokéItem d'abord
 
 - **Contexte :**

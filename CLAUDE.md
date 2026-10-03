@@ -32,7 +32,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - cible : collectionneurs et passionnés ;
   - profils Novice, Régulier et Passionné automatiques, selon le nombre de cartes ultra rares ou la valeur de la collection.
 
-  Maquette : `docs/12-maquette-v4/`.
+  Maquette : `docs/12-maquette-v5/`.
+- **Territoire (validé le 2026-10-03) :**
+  - onglet dans la barre du bas ; le profil s'ouvre depuis l'avatar ;
+  - « partenaires » = boutiques qui ont un accord avec PKM, pas une mention officielle Pokémon ;
+  - probabilité d'arrivage estimée à partir de trois sources : annonce du magasin partenaire, signalements des collectionneurs (modérés, sans fil social), historique des arrivages.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
