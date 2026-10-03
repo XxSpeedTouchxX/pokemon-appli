@@ -1,0 +1,56 @@
+# Catalogue TCGdex : télécharge toutes les cartes françaises et leurs prix, construit web/data/cards.json
+# (catalogue compact chargé par la démo web) et le publie sur la branche. Cloudflare Pages redéploie ensuite.
+# Chaque mise à jour est un commit : l'historique git de cards.json sert d'archive quotidienne des prix.
+name: Catalogue TCGdex
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "47 4 * * *" # chaque jour vers 06:47 (heure de Paris en été)
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/tcgdex.yml
+      - tools/tcgdex/sync_tcgdex.py
+      - tools/tcgdex/build_index.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tcgdex-catalog
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+
+      - name: Télécharger le catalogue TCGdex (sans les images)
+        run: python3 tools/tcgdex/sync_tcgdex.py --skip-images --workers 6 --out data/tcgdex
+
+      - name: Relancer pour les éventuels échecs (reprise)
+        run: |
+          if [ "$(python3 -c 'import json;print(len(json.load(open("data/tcgdex/failures.json"))))')" != "0" ]; then
+            python3 tools/tcgdex/sync_tcgdex.py --skip-images --workers 2 --out data/tcgdex
+          fi
+
+      - name: Construire le catalogue compact
+        run: python3 tools/tcgdex/build_index.py --src data/tcgdex --out web/data/cards.json
+
+      - name: Publier sur la branche
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data/cards.json
+          if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
+          git commit -m "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))"
+          for i in 1 2 3 4; do
+            git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
