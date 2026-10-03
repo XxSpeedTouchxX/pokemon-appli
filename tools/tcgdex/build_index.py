@@ -5,15 +5,22 @@ compact que la démo web charge en une fois : web/data/cards.json.
 
 Aucune dépendance externe (Python 3.9+).
 
-    python tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en --out web/data/cards.json
+    python tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en \
+        --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --out web/data/cards.json
     python tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en --list-en-only
 
 Sources :
     --src  copie française complète (sync_tcgdex.py --lang fr)
     --en   copie anglaise, facultative (sync_tcgdex.py --lang en). Elle sert à :
-           - compléter les visuels absents en français par le scan anglais de la même carte ;
-           - ajouter les extensions jamais sorties en français (cartes en anglais) ;
+           - ajouter les extensions sans version française dans TCGdex (cartes en anglais) ;
+           - compléter les visuels absents en français ;
            - --list-en-only liste ces extensions, pour en télécharger le détail.
+    --alt  autres versions (langue=dossier), facultatives : visuels de repli, après l'anglais.
+           Même dessin officiel, texte dans une autre langue.
+
+Repli d'un visuel absent : même carte dans l'autre langue (même identifiant, ou même extension et même
+numéro), sinon dans l'extension parente (« swsh9tg » TG01 → « swsh9 » TG01, « swsh12.5gg » GG01 →
+« swsh12.5 » GG01, « swsh4.5sv » SV001 → « swsh4.5 » SV001).
 
 Contenu de cards.json :
     sets      { set_id: [nom, série, date de sortie, logo, nombre officiel de cartes, langue des cartes] }
@@ -25,7 +32,7 @@ Contenu de cards.json :
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
               Le chemin commence par la langue du visuel (fr/… ou en/…).
     usdEur    taux appliqué aux prix TCGplayer (BCE du jour, sinon taux de secours)
-    stats     contrôle : cartes, visuels français, visuels anglais de repli, cartes sans visuel
+    stats     contrôle : cartes, visuels dans la langue de la carte, visuels de repli par langue, sans visuel
     rarities  nombre de cartes par rareté (contrôle)
 """
 import argparse
@@ -128,6 +135,40 @@ def read_sets(root):
     return out
 
 
+def norm_local(n):
+    """Numéro comparable d'une langue à l'autre : SV001 = SV1, TG01 = TG1, 001 = 1."""
+    return re.sub(r"(^|\D)0+(?=\d)", r"\1", str(n)).upper()
+
+
+def parent_set(sid):
+    """Extension parente d'une sous-extension (galerie de dresseurs, galerie, coffre) : swsh9tg → swsh9."""
+    m = re.match(r"^(.+?)(tg|gg|sv)$", sid)
+    return m.group(1) if m else None
+
+
+class Fallback:
+    """Visuels et logos d'une autre langue, cherchés par identifiant puis par (extension, numéro)."""
+
+    def __init__(self, lang, sets):
+        self.lang, self.sets, self.by_id, self.by_local = lang, sets, {}, {}
+        for sid, s in sets.items():
+            for b in s.get("cards") or []:
+                if b.get("image"):
+                    self.by_id[b["id"]] = b["image"]
+                    self.by_local[(sid, norm_local(b.get("localId", "")))] = b["image"]
+
+    def image(self, cid, sid, local):
+        key = norm_local(local)
+        return (self.by_id.get(cid) or self.by_local.get((sid, key))
+                or (parent_set(sid) and self.by_local.get((parent_set(sid), key))))
+
+    def logo(self, sid):
+        for k in (sid, parent_set(sid)):
+            if k and (self.sets.get(k) or {}).get("logo"):
+                return self.sets[k]["logo"]
+        return None
+
+
 def natural(n):
     """Clé de tri des numéros : 2 < 10 < 100, puis les numéros à lettres (TG01, SV001…)."""
     return tuple((0, int(t)) if t.isdigit() else (1, t) for t in re.findall(r"\d+|\D+", str(n)))
@@ -137,6 +178,7 @@ def main():
     p = argparse.ArgumentParser(description="Construit web/data/cards.json à partir de la copie TCGdex.")
     p.add_argument("--src", default="data/tcgdex", help="copie française")
     p.add_argument("--en", default=None, help="copie anglaise (facultative)")
+    p.add_argument("--alt", action="append", default=[], metavar="LANGUE=DOSSIER", help="autre version, pour les visuels de repli")
     p.add_argument("--out", default="web/data/cards.json")
     p.add_argument("--list-en-only", action="store_true", help="affiche les extensions absentes du catalogue français, puis s'arrête")
     p.add_argument("--min-cards", type=int, default=1000, help="échec si moins de cartes (protège contre un index vide)")
@@ -153,14 +195,23 @@ def main():
     t0 = time.time()
     rate, rate_day, rate_src = usd_eur()
     fr_series = {s["id"]: s.get("name") for s in (load(src / "series.json") or []) if s.get("id")}
-    en_img = {b["id"]: b.get("image") for s in en_sets.values() for b in (s.get("cards") or []) if b.get("image")}
+    # Visuels de repli : l'anglais d'abord, puis les autres versions dans l'ordre donné.
+    fallbacks = [Fallback("en", en_sets)] if en_sets else []
+    for spec in args.alt:
+        lang, _, folder = spec.partition("=")
+        alt = read_sets(Path(folder))
+        if alt:
+            fallbacks.append(Fallback(lang, alt))
+    own = Fallback("fr", fr_sets)
 
     sets, cards, rarities = {}, [], {}
-    stats = {"cards": 0, "cardsEn": 0, "imgFr": 0, "imgEn": 0, "imgNone": 0, "noDetail": 0}
+    stats = {"cards": 0, "cardsEn": 0, "imgOwn": 0, "imgAlt": {}, "imgNone": 0, "noDetail": 0}
 
     def add_set(sid, s, lang, root):
         serie = s.get("serie") or {}
-        logo = s.get("logo") or (en_sets.get(sid) or {}).get("logo")
+        logo = s.get("logo") or (own.logo(sid) if lang == "fr" else None)
+        for fb in fallbacks:
+            logo = logo or fb.logo(sid)
         official = (s.get("cardCount") or {}).get("official") or ""
         sets[sid] = [s.get("name") or sid, fr_series.get(serie.get("id")) or serie.get("name") or "",
                      s.get("releaseDate") or "", short_img(logo), official, lang]
@@ -170,21 +221,26 @@ def main():
             if c is None:
                 stats["noDetail"] += 1
                 c = b
+            local = c.get("localId") or b.get("localId") or ""
             img = c.get("image") or b.get("image")
             if img:
-                stats["imgFr" if lang == "fr" else "imgEn"] += 1
-            elif lang == "fr" and en_img.get(cid):
-                img = en_img[cid]
-                stats["imgEn"] += 1
+                stats["imgOwn"] += 1
             else:
-                stats["imgNone"] += 1
+                for fb in fallbacks:
+                    if fb.lang != lang:
+                        img = fb.image(cid, sid, local)
+                        if img:
+                            stats["imgAlt"][fb.lang] = stats["imgAlt"].get(fb.lang, 0) + 1
+                            break
+                if not img:
+                    stats["imgNone"] += 1
             rarity = c.get("rarity") or ""
             if lang == "en":
                 rarity = RARITY_FR.get(rarity.lower(), rarity)
                 stats["cardsEn"] += 1
             rarities[rarity] = rarities.get(rarity, 0) + 1
             cm, low, avg30, tcp, upd = prices(c, rate)
-            cards.append([cid, c.get("name") or b.get("name") or "", sid, str(c.get("localId") or b.get("localId") or ""),
+            cards.append([cid, c.get("name") or b.get("name") or "", sid, str(local),
                           rarity, short_img(img), cm, low, avg30, tcp, upd])
 
     for sid, s in fr_sets.items():
@@ -203,7 +259,7 @@ def main():
     doc = {
         "v": 2,
         "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "source": "TCGdex (api.tcgdex.net) : catalogue français, complété par le catalogue anglais",
+        "source": "TCGdex (api.tcgdex.net) : catalogue français, complété par les autres versions",
         "img": ASSETS,
         "usdEur": rate, "usdEurDate": rate_day, "usdEurSource": rate_src,
         "sets": sets,
@@ -223,9 +279,15 @@ def main():
 
     priced = sum(1 for c in cards if c[6] is not None or c[9] is not None)
     print(f"{len(cards)} cartes dans {len(sets)} extensions, dont {stats['cardsEn']} cartes en anglais "
-          f"({len(en_only)} extensions jamais sorties en français) ; {priced} avec un prix.")
-    print(f"Visuels : {stats['imgFr']} en français, {stats['imgEn']} en anglais, {stats['imgNone']} sans visuel. "
-          f"{stats['noDetail']} cartes sans détail.")
+          f"({len(en_only)} extensions sans version française dans TCGdex) ; {priced} avec un prix.")
+    print(f"Visuels : {stats['imgOwn']} dans la langue de la carte, repli {json.dumps(stats['imgAlt'])}, "
+          f"{stats['imgNone']} sans visuel. {stats['noDetail']} cartes sans détail.")
+    missing = {}
+    for c in cards:
+        if not c[5]:
+            missing[c[2]] = missing.get(c[2], 0) + 1
+    if missing:
+        print("Sans visuel :", ", ".join(f"{k} ({v})" for k, v in sorted(missing.items(), key=lambda kv: -kv[1])[:25]))
     if en_only:
         print("Extensions en anglais :", ", ".join(f"{sid} ({en_sets[sid].get('name')})" for sid in en_only))
     print(f"Taux USD→EUR : {rate} ({rate_src}{' du ' + rate_day if rate_day else ''}).")
