@@ -25,7 +25,10 @@ Il n'y a ni compte ni serveur : la collection n'est pas enregistrée et repart d
 
 ## Avant tout partage public
 
-- **Visuels de la maquette :** ceux de `web/img/` sont des **découpes provisoires** de captures d'écran. Il faut les remplacer par les images TCGdex (CLAUDE.md §4).
+- **Visuels de la maquette :** les cartes de démo et les logos Méga-Évolution, Chaos Ascendant et Nuit Noire viennent désormais du CDN TCGdex. Restent des **découpes provisoires** de captures d'écran dans `web/img/` :
+  - la carte gradée ;
+  - l'avatar ;
+  - les logos Règne Delta et 30e Anniversaire, absents de TCGdex.
 - **Licence et usage commercial de TCGdex :** à vérifier (points V1 à V6 de `docs/05-sources-donnees-prix.md`).
 
 ## Mettre en ligne sur Cloudflare Pages
@@ -86,7 +89,7 @@ Le script `tools/web/build.mjs` :
 | `app.js` | Logique de la maquette, catalogue complet (`tools/web/catalog.js`), gabarit compilé et démarrage |
 | `data/cards.json` | Catalogue complet, généré chaque jour par GitHub Actions (ne pas modifier à la main) |
 | `vendor/vue.runtime.global.prod.js` | Vue 3.5.43, licence MIT |
-| `img/` | Visuels provisoires |
+| `img/` | Visuels provisoires (ceux qui ne sont pas sur TCGdex) |
 | `icons/` | Icônes de l'app |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |

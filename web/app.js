@@ -1258,7 +1258,7 @@ class Component extends DCLogic {
 }
 
   // Images servies avec la page.
-  const IMG = {"k1":"img/card-pikachu-ex.webp","k2":"img/card-mega-meganium-ex.webp","k3":"img/card-favianos-ex.webp","k4":"img/card-jirachi-ex.webp","k5":"img/card-pikachu-zekrom-gx.webp","k6":"img/card-mewtwo-slab.webp","avatar":"img/avatar-jirachi.webp","megaEvo":"img/logo-mega-evolution.webp","delta":"img/logo-regne-delta.webp","anniv":"img/logo-30-anniversaire.webp","nuit":"img/logo-nuit-noire.webp","chaos":"img/logo-chaos-ascendant.webp"};
+  const IMG = {"k1":"https://assets.tcgdex.net/fr/sv/sv08/238/high.webp","k2":"https://assets.tcgdex.net/fr/me/me02.5/272/high.webp","k3":"https://assets.tcgdex.net/fr/me/me02.5/288/high.webp","k4":"https://assets.tcgdex.net/fr/me/30th/155/high.webp","k5":"https://assets.tcgdex.net/fr/sm/sm9/162/high.webp","k6":"img/card-mewtwo-slab.webp","avatar":"img/avatar-jirachi.webp","megaEvo":"https://assets.tcgdex.net/fr/me/me01/logo.webp","delta":"img/logo-regne-delta.webp","anniv":"img/logo-30-anniversaire.webp","nuit":"https://assets.tcgdex.net/fr/me/me05/logo.webp","chaos":"https://assets.tcgdex.net/fr/me/me04/logo.webp"};
   Component.prototype.img = function () { return IMG; };
   // ——— Catalogue complet TCGdex ———
   // web/data/cards.json est reconstruit chaque jour par GitHub Actions (.github/workflows/tcgdex.yml).
@@ -1266,7 +1266,8 @@ class Component extends DCLogic {
   // et une carte ouverte ou ajoutée rejoint le catalogue de l'app (état « extra »).
   // Images : CDN TCGdex (assets.tcgdex.net), jamais stockées chez nous.
   const TCG = { status: 'loading', doc: null, F: null, rows: [], byId: {}, items: {} };
-  const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  // Sans accents ni casse ; « Pikachu-ex » se trouve aussi avec « pikachu ex ».
+  const fold = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-‐–]/g, ' ').toLowerCase();
   // Raretés TCGdex comptées comme « ultra rares » pour le profil automatique (ultra rare et au-dessus).
   const UR_RARITY = /^(ultra rare|chromatique ultra rare|illustration spéciale rare|magnifique rare|hyper rare|méga hyper rare|couronne)$/i;
   const NO_IMG = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 63 88"><rect width="63" height="88" rx="4" fill="#1A2645"/><text x="31.5" y="52" font-size="26" text-anchor="middle" fill="#7D8BA8" font-family="sans-serif">?</text></svg>');
