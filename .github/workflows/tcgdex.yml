@@ -1,4 +1,5 @@
-# Catalogue TCGdex : télécharge toutes les cartes françaises et leurs prix, construit web/data/cards.json
+# Catalogue TCGdex : télécharge toutes les cartes françaises et leurs prix (complétées par le catalogue
+# anglais : visuels manquants, extensions jamais sorties en français), construit web/data/cards.json
 # (catalogue compact chargé par la démo web) et le publie sur la branche. Cloudflare Pages redéploie ensuite.
 # Chaque mise à jour est un commit : l'historique git de cards.json sert d'archive quotidienne des prix.
 name: Catalogue TCGdex
@@ -39,8 +40,21 @@ jobs:
             python3 tools/tcgdex/sync_tcgdex.py --skip-images --workers 2 --out data/tcgdex
           fi
 
+      # Catalogue anglais, sans le détail des cartes (une requête par extension) : il complète les
+      # visuels absents en français et liste les extensions jamais sorties en français.
+      - name: Catalogue anglais (visuels de repli)
+        continue-on-error: true
+        run: python3 tools/tcgdex/sync_tcgdex.py --lang en --skip-images --skip-details --workers 6 --out data/tcgdex-en
+
+      - name: Extensions jamais sorties en français (détail et prix)
+        continue-on-error: true
+        run: |
+          for id in $(python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en --list-en-only); do
+            python3 tools/tcgdex/sync_tcgdex.py --lang en --skip-images --only-set "$id" --workers 6 --out data/tcgdex-en
+          done
+
       - name: Construire le catalogue compact
-        run: python3 tools/tcgdex/build_index.py --src data/tcgdex --out web/data/cards.json
+        run: python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en --out web/data/cards.json
 
       - name: Publier sur la branche
         run: |
