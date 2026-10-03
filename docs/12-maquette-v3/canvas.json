@@ -1,0 +1,326 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "A-Associes.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Associés (avancé)",
+      "w": 390,
+      "x": 2350,
+      "y": 3040
+    },
+    "A-Detail-vente.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Détail d’une vente — port à renseigner",
+      "w": 390,
+      "x": 470,
+      "y": 3040
+    },
+    "A-Frais.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Frais par plateforme (avancé)",
+      "w": 390,
+      "x": 1880,
+      "y": 3040
+    },
+    "A-Import-export.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Importer / exporter (avancé)",
+      "w": 390,
+      "x": 2820,
+      "y": 3040
+    },
+    "A-Lots.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Lots (avancé)",
+      "w": 390,
+      "x": 1410,
+      "y": 3040
+    },
+    "A-Saisie-vente.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "J’ai vendu — saisie rapide",
+      "w": 390,
+      "x": 940,
+      "y": 3040
+    },
+    "A-Ventes.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Ventes et marge",
+      "w": 390,
+      "x": 0,
+      "y": 3040
+    },
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Prototype cliquable — départ : Accueil",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "P-Accueil-novice.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Accueil — profil Novice",
+      "w": 390,
+      "x": 1880,
+      "y": 1520
+    },
+    "P-Onboarding-1.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Accueil 1/3 — bienvenue",
+      "w": 390,
+      "x": 0,
+      "y": 1520
+    },
+    "P-Onboarding-2.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Accueil 2/3 — profil anticipé",
+      "w": 390,
+      "x": 470,
+      "y": 1520
+    },
+    "P-Onboarding-3.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Accueil 3/3 — résultat",
+      "w": 390,
+      "x": 940,
+      "y": 1520
+    },
+    "P-Paliers.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Paliers et succès",
+      "w": 390,
+      "x": 2350,
+      "y": 1520
+    },
+    "P-Profil.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Profil — type de collectionneur",
+      "w": 390,
+      "x": 1410,
+      "y": 1520
+    },
+    "P-Reglages.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Réglages",
+      "w": 390,
+      "x": 2820,
+      "y": 1520
+    },
+    "V-Collection.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Collection",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "V-Fiche-carte.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Fiche carte — Pikachu ex",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "V-Fiche-scelle.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Fiche scellé — UPC 30e Anniversaire",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "V-Marche.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Marché",
+      "w": 390,
+      "x": 2820,
+      "y": 0
+    },
+    "V-Scan-resultat.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Scan — carte reconnue",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "V-Scan.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 32,
+      "title": "Scan (bouton central)",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-03T18:36:29.532Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "n-adapt": {
+      "fill": "teal",
+      "maxH": 240,
+      "text": "Le profil adapte l’app sans la couper : Novice = accueil « premiers pas » et prix expliqués ; Régulier = mouvements sur 7 jours et alertes ; Passionné = toutes les sources et mode avancé proposé. L’utilisateur peut choisir son profil lui-même.",
+      "w": 390,
+      "x": 1410,
+      "y": 2424
+    },
+    "n-cote": {
+      "fill": "teal",
+      "maxH": 240,
+      "text": "Cote PKM = médiane des prix « marché » disponibles : tendance Cardmarket (calculé), ventes réussies eBay sur 30 jours (vendu), TCGplayer converti (calculé). Le prix demandé (plus bas Cardmarket) est affiché mais jamais compté. Chaque prix montre sa source et sa date.",
+      "w": 390,
+      "x": 940,
+      "y": 904
+    },
+    "n-lots": {
+      "fill": "purple",
+      "maxH": 240,
+      "text": "Lot : bascule « Valeur de marché / Parts égales » pour voir l’effet sur les marges. La règle de répartition est un choix métier à valider.",
+      "w": 390,
+      "x": 1410,
+      "y": 3944
+    },
+    "n-marche": {
+      "fill": "purple",
+      "maxH": 240,
+      "text": "Marché : comparatif limité aux sources autorisées (fichiers Cardmarket, API eBay, TCGdex pour TCGplayer). Vinted et Leboncoin : pas d’API publique, pas de scraping (CLAUDE.md §4). Aucune vente dans l’app.",
+      "w": 390,
+      "x": 2820,
+      "y": 904
+    },
+    "n-marge": {
+      "fill": "orange",
+      "maxH": 240,
+      "text": "Revente et marge : conservé de la v2, devenu secondaire. L’app ne vend rien : l’utilisateur note ses ventes faites ailleurs. Marge nette = prix de vente − commission − port − coût d’achat (PRU figé au jour de la vente).",
+      "w": 390,
+      "x": 0,
+      "y": 3944
+    },
+    "n-paliers": {
+      "fill": "orange",
+      "maxH": 240,
+      "text": "Paliers selon la valeur de la collection (cote PKM) : Commune 0 €, Peu commune 500 €, Rare 1 500 €, Ultra rare 3 000 €, Hyper rare 7 500 €. S’y ajoutent une série hebdomadaire et des succès. Pas de quêtes ni de saisons (principe 4).",
+      "w": 390,
+      "x": 2350,
+      "y": 2424
+    },
+    "n-profil": {
+      "fill": "blue",
+      "maxH": 240,
+      "text": "Profil anticipé à l’inscription : 4 questions notées de 0 à 2 (Novice 0-2, Régulier 3-5, Passionné 6-8). Ensuite, recalcul chaque lundi sur 5 signaux notés de 0 à 2 : taille, valeur, activité sur 30 jours, régularité, expertise (Novice 0-3, Régulier 4-6, Passionné 7-10). Seuils à valider.",
+      "w": 390,
+      "x": 0,
+      "y": 2424
+    },
+    "n-proto": {
+      "fill": "blue",
+      "maxH": 240,
+      "text": "Prototype cliquable : bouton Play sur ce cadre. Le bouton central ouvre le scan (appareil photo simulé) : « Démo : changer d’article » fait défiler les cartes, le déclencheur ouvre la fiche reconnue, « Ajouter » met à jour la valeur, le palier et le profil. Prix fictifs. Visuels provisoires (captures), à remplacer par les images TCGdex.",
+      "w": 390,
+      "x": 0,
+      "y": 904
+    },
+    "n-scan": {
+      "fill": "orange",
+      "maxH": 240,
+      "text": "Scan : reconnaissance par l’image (cartes) ou par le code-barres (scellé). À valider techniquement : précision sur les cartes FR, les gradées et les reverse. Prix payé facultatif : sans prix, l’article compte dans la valeur mais pas dans la plus-value.",
+      "w": 390,
+      "x": 1880,
+      "y": 904
+    },
+    "t-marge": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Revente et marge (secondaire) — ventes faites ailleurs, lots, frais, associés, export",
+      "w": 240,
+      "x": 0,
+      "y": 2740
+    },
+    "t-profils": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Profils et progression — accueil en 3 étapes, profil anticipé, paliers",
+      "w": 240,
+      "x": 0,
+      "y": 1220
+    },
+    "t-valo": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Valorisation — scan au centre, cote multi-sources, collection, marché",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "V-Collection.dc.html",
+    "V-Fiche-carte.dc.html",
+    "V-Fiche-scelle.dc.html",
+    "V-Scan.dc.html",
+    "V-Scan-resultat.dc.html",
+    "V-Marche.dc.html",
+    "P-Onboarding-1.dc.html",
+    "P-Onboarding-2.dc.html",
+    "P-Onboarding-3.dc.html",
+    "P-Profil.dc.html",
+    "P-Accueil-novice.dc.html",
+    "P-Paliers.dc.html",
+    "P-Reglages.dc.html",
+    "A-Ventes.dc.html",
+    "A-Detail-vente.dc.html",
+    "A-Saisie-vente.dc.html",
+    "A-Lots.dc.html",
+    "A-Frais.dc.html",
+    "A-Associes.dc.html",
+    "A-Import-export.dc.html"
+  ],
+  "pages": [],
+  "title": "Maquette PKM-App v3"
+}
