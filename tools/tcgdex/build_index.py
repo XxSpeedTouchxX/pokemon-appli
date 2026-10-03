@@ -30,6 +30,7 @@ import xml.etree.ElementTree as ET
 ASSETS = "https://assets.tcgdex.net/"
 ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 FALLBACK_USD_EUR = 0.86  # taux de secours si la BCE ne répond pas
+SKIP_SERIES = {"tcgp"}  # Pokémon TCG Pocket : cartes numériques, hors collection physique
 TCP_VARIANTS = ["normal", "holofoil", "reverse-holofoil", "1st-edition-holofoil", "1st-edition", "unlimited-holofoil", "unlimited"]
 
 
@@ -91,10 +92,13 @@ def main():
     src, out = Path(args.src), Path(args.out)
 
     rate, rate_day, rate_src = usd_eur()
-    sets, cards, rarities, missing = {}, [], {}, 0
+    sets, cards, rarities, missing, skipped = {}, [], {}, 0, 0
     for sf in sorted((src / "sets").glob("*.json")):
         s = json.loads(sf.read_text("utf-8"))
         sid = s["id"]
+        if (s.get("serie") or {}).get("id") in SKIP_SERIES:
+            skipped += 1
+            continue
         sets[sid] = [s.get("name") or sid, (s.get("serie") or {}).get("name") or "", s.get("releaseDate") or "", short_img(s.get("logo"))]
         briefs = {b["id"]: b for b in (s.get("cards") or [])}
         for cid, b in briefs.items():
@@ -139,7 +143,7 @@ def main():
     tmp.replace(out)
 
     priced = sum(1 for c in cards if c[6] is not None or c[9] is not None)
-    print(f"{len(cards)} cartes, {len(sets)} extensions, {priced} avec un prix, {missing} sans détail.")
+    print(f"{len(cards)} cartes, {len(sets)} extensions ({skipped} extensions TCG Pocket ignorées), {priced} avec un prix, {missing} sans détail.")
     print(f"Taux USD→EUR : {rate} ({rate_src}{' du ' + rate_day if rate_day else ''}).")
     print(f"Écrit : {out} ({out.stat().st_size / 1e6:.1f} Mo)")
     print("Raretés :", json.dumps(doc["rarities"], ensure_ascii=False))

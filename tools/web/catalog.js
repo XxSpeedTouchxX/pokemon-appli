@@ -5,8 +5,8 @@
   // Images : CDN TCGdex (assets.tcgdex.net), jamais stockées chez nous.
   const TCG = { status: 'loading', doc: null, F: null, rows: [], byId: {}, items: {} };
   const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  // Raretés comptées comme « ultra rares » pour le profil automatique.
-  const UR_RARITY = /ultra|hyper|sp[ée]cial|secr|magnifique|couronne|chromatique/i;
+  // Raretés TCGdex comptées comme « ultra rares » pour le profil automatique (ultra rare et au-dessus).
+  const UR_RARITY = /^(ultra rare|chromatique ultra rare|illustration spéciale rare|magnifique rare|hyper rare|méga hyper rare|couronne)$/i;
   const NO_IMG = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 63 88"><rect width="63" height="88" rx="4" fill="#1A2645"/><text x="31.5" y="52" font-size="26" text-anchor="middle" fill="#7D8BA8" font-family="sans-serif">?</text></svg>');
   const LIMIT = 40;
 
