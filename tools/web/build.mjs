@@ -29,6 +29,16 @@ patch('style="flex: none; position: relative; width: 358px; height: 210px;',
 patch('<svg width="358" height="210" viewBox="0 0 358 210"', '<svg width="100%" height="100%" viewBox="0 0 358 210"');
 patch('<svg width="324" height="56" viewBox="0 0 324 56"', '<svg width="100%" height="56" viewBox="0 0 324 56" preserveAspectRatio="none"');
 patch('<svg width="324" height="76" viewBox="0 0 324 76"', '<svg width="100%" height="76" viewBox="0 0 324 76" preserveAspectRatio="none"');
+// Catalogue complet (tools/web/catalog.js) : courbe seulement si un historique existe, ajout possible
+// d'une carte sans prix, recherche du Marché sur toutes les cartes.
+patch('<sc-if value="{{ it.hasCote }}" hint-placeholder-val="{{ true }}">\n<div style="display: flex; justify-content: space-between; align-items: baseline;',
+  '<sc-if value="{{ it.hasChart }}" hint-placeholder-val="{{ true }}">\n<div style="display: flex; justify-content: space-between; align-items: baseline;');
+patch('<sc-if value="{{ it.hasCote }}" hint-placeholder-val="{{ true }}">\n<div style="flex: none; display: grid;',
+  '<sc-if value="{{ it.canAdd }}" hint-placeholder-val="{{ true }}">\n<div style="flex: none; display: grid;');
+patch('<sc-if value="{{ it.noCote }}" hint-placeholder-val="{{ false }}">\n<button type="button" onClick="{{ notify }}"',
+  '<sc-if value="{{ it.upcoming }}" hint-placeholder-val="{{ false }}">\n<button type="button" onClick="{{ notify }}"');
+patch('placeholder="Rechercher « Display »"', 'placeholder="Rechercher « Dracaufeu », « Display »"');
+patch('<img src="{{ mi.img }}" alt=""', '<img src="{{ mi.img }}" alt="" loading="lazy"');
 
 // Gabarit du canevas → gabarit Vue. Les trous {{ a.b }} visent les valeurs de renderVals (préfixe V.)
 // ou un alias de boucle ; sc-if / sc-for deviennent v-if / v-for.
@@ -81,6 +91,8 @@ function toVue(t) {
 const vueTpl = toVue(tpl);
 const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, hoistStatic: true, whitespace: 'condense' });
 
+const catalogJs = readFileSync(fileURLToPath(new URL('./catalog.js', import.meta.url)), 'utf8');
+
 const img = Object.fromEntries([
   ['k1', 'card-pikachu-ex'], ['k2', 'card-mega-meganium-ex'], ['k3', 'card-favianos-ex'], ['k4', 'card-jirachi-ex'],
   ['k5', 'card-pikachu-zekrom-gx'], ['k6', 'card-mewtwo-slab'], ['avatar', 'avatar-jirachi'], ['megaEvo', 'logo-mega-evolution'],
@@ -88,7 +100,7 @@ const img = Object.fromEntries([
 ].map(([k, f]) => [k, 'img/' + f + '.webp']));
 
 const app = `/* PKM-App · démo web. Fichier généré par tools/web/build.mjs à partir de
-   docs/12-maquette-v5/Main.dc.html : ne pas le modifier à la main. Données et prix fictifs. */
+   docs/12-maquette-v5/Main.dc.html : ne pas le modifier à la main. Catalogue réel (web/data/cards.json), collection de démo fictive. */
 (function () {
   'use strict';
   // Socle minimal attendu par la logique de la maquette : état local et nouveau rendu à chaque changement.
@@ -100,7 +112,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -133,6 +145,10 @@ ${code}
     },
     render: render
   }).mount('#app');
+  // Catalogue complet : chargé après le premier affichage.
+  fetch('data/cards.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); })
+    .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); });
   // Hors ligne et installation (hébergement uniquement ; refusé dans les pages claude.ai).
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -161,7 +177,7 @@ const VUE_LOCAL = 'vendor/vue.runtime.global.prod.js';
 const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global.prod.js';
 const body = vue => `<div id="shell">
 <div id="app"></div>
-<p class="pkm-caption">Démo PKM-App · données, prix et magasins fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
+<p class="pkm-caption">Démo PKM-App · catalogue et prix réels via TCGdex ; collection, ventes et magasins fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="${vue}"></script>
 <script src="app.js"></script>`;
