@@ -734,3 +734,21 @@
 </section>
 </div>
 </sc-if>
+
+<!-- fragment: buy-copy -->
+<sc-if value="{{ sh.showCopy }}" hint-placeholder-val="{{ true }}">
+<div style="flex: none; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 600; color: #9AA8C3">Langue</span>
+<div role="group" aria-label="Langue de l’exemplaire" style="display: flex; gap: 8px">
+<sc-for list="{{ sh.copyLangs }}" as="cl" hint-placeholder-count="3">
+<button type="button" onClick="{{ cl.pick }}" aria-pressed="{{ cl.on }}" style="flex: 1; height: 44px; border-radius: 999px; border: 1px solid {{ cl.bc }}; background: {{ cl.bg }}; color: {{ cl.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ cl.label }}</button>
+</sc-for>
+</div>
+<span style="font-size: 13px; font-weight: 600; color: #9AA8C3">État</span>
+<div role="group" aria-label="État de l’exemplaire" style="display: flex; gap: 8px">
+<sc-for list="{{ sh.copyConds }}" as="cc" hint-placeholder-count="3">
+<button type="button" onClick="{{ cc.pick }}" aria-pressed="{{ cc.on }}" style="flex: 1; height: 44px; padding: 0 6px; border-radius: 999px; border: 1px solid {{ cc.bc }}; background: {{ cc.bg }}; color: {{ cc.fg }}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer">{{ cc.label }}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>

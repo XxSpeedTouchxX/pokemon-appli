@@ -82,7 +82,7 @@ test('variables : toutes celles des règles existent, valeurs classiques au form
 });
 
 test('modules de l’app : chaque variable utilisée existe', () => {
-  for (const f of ['catalog.js', 'sealed.js', 'radar.js', 'territory.js', 'home.js', 'scan.js']) {
+  for (const f of ['catalog.js', 'sealed.js', 'radar.js', 'territory.js', 'home.js', 'scan.js', 'copies.js']) {
     const unknown = usedTokens(readFileSync(new URL('./' + f, import.meta.url), 'utf8')).filter(n => !(n in TOKENS));
     assert.deepEqual(unknown, [], f);
   }

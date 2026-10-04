@@ -107,6 +107,15 @@ const afterSection = (label, html) => { const j = sectionAt(label)[1]; tpl = tpl
   const [i, j] = sectionAt('Scanner'), open = tpl.indexOf('>', i) + 1, close = j - '</section>'.length;
   tpl = tpl.slice(0, open) + '\n' + FRAG.scan.trimEnd() + '\n' + tpl.slice(close);
 }
+// Exemplaires (tools/web/copies.js) : langue et état de chaque ajout, choisis dans « Ajout » comme au scan, rappelés
+// dans l'historique d'achat de la fiche, la liste « Ma collection » et la grille de la Collection.
+patch('</fieldset>\n\n<div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end">',
+  '</fieldset>\n' + FRAG['buy-copy'] + '\n<div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end">');
+patch('font-size: 17px; font-weight: 600">Historique d’achat</h2>', 'font-size: 17px; font-weight: 600">Historique d’achat</h2>\n<p style="margin: 0 0 4px; font-size: 13px; line-height: 1.45; color: #C9D3EA">{{ it.copyText }}</p>');
+patchJs("name: p.name, sub: p.sub, qty: '×' + st.qty, value: this.eur(x.val(p) * st.qty), unit: this.eur(x.val(p)) + ' / u',",
+  "name: p.name, sub: this.copySub(p, x.s), qty: '×' + st.qty, value: this.eur(x.val(p) * st.qty), unit: this.eur(x.val(p)) + ' / u',");
+patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x.who[a.by || 'toi'] : ''), amount:",
+  "return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x.who[a.by || 'toi'] : '') + this.copyMeta(p, l), amount:");
 // Marché : entrée « Toutes les cartes » ; écrans « Toutes les cartes » et « Extension ».
 patch('<div role="group" aria-label="Filtre du marché"', FRAG['market-browse'] + '<div role="group" aria-label="Filtre du marché"');
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG.screens + '\n<sc-if value="{{ ui.isProfile }}"');
@@ -385,7 +394,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto (tools/sprites/kanto.json).
 const kanto = JSON.parse(readFileSync(ROOT + 'tools/sprites/kanto.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
 if (kanto.length !== 151) throw new Error('Compagnons : ' + kanto.length + ' au lieu de 151');
@@ -404,7 +413,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -424,7 +433,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${kantoJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${kantoJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);

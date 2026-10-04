@@ -54,7 +54,7 @@
       rows: items.slice(0, n).map((p, i) => {
         const ch = HomeCore.change7(p, x.ch7[p.id], SEALED.doc && SEALED.doc.days, TODAY), known = typeof ch === 'number';
         return Object.assign(this.look(p), {
-          name: p.name, sub: p.sub, qty: '×' + c.stock[p.id].qty, value: x.mask(this.eur(worth(p))), border: x.line(i),
+          name: p.name, sub: this.copySub(p, s), qty: '×' + c.stock[p.id].qty, value: x.mask(this.eur(worth(p))), border: x.line(i),
           change: known ? this.chg(ch) + ' · 7 j' : '—', changeColor: known ? x.col(ch) : 'var(--pkm-t3)',
           open: () => this.push('item', { itemId: p.id })
         });
