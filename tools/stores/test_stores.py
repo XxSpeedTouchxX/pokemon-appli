@@ -1,6 +1,11 @@
 """Tests de sync_stores.py. Lancer : python3 -m unittest discover -s tools/stores"""
+import http.client
+import io
+import json
 import unittest
+from unittest import mock
 
+import sync_stores
 from sync_stores import FIELDS, MAX_BYTES, Departments, build, classify, contact, render
 
 DEPTS = Departments()
@@ -112,3 +117,21 @@ class Contact(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Overpass(unittest.TestCase):
+    def test_next_server_after_disconnect(self):
+        # Le premier serveur coupe la connexion sans répondre : le suivant est essayé.
+        answer = io.BytesIO(json.dumps({"elements": [{"type": "node", "id": 1}]}).encode())
+        calls = []
+
+        def fake_urlopen(req, timeout):
+            calls.append(req.full_url)
+            if len(calls) == 1:
+                raise http.client.RemoteDisconnected("Remote end closed connection without response")
+            return mock.MagicMock(__enter__=lambda s: answer, __exit__=lambda *a: False)
+
+        with mock.patch.object(sync_stores, "urlopen", fake_urlopen), mock.patch.object(sync_stores.time, "sleep"):
+            doc = sync_stores.overpass()
+        self.assertEqual(len(doc["elements"]), 1)
+        self.assertEqual(calls, sync_stores.ENDPOINTS[:2])

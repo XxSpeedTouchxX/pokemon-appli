@@ -18,6 +18,7 @@ Données © les contributeurs d'OpenStreetMap, sous licence ODbL : la mention es
 Usage : python3 tools/stores/sync_stores.py [--input overpass.json]
 """
 import argparse
+import http.client
 import json
 import math
 import re
@@ -25,7 +26,6 @@ import sys
 import time
 import unicodedata
 from pathlib import Path
-from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -81,8 +81,8 @@ def overpass():
                     raise ValueError(doc["remark"])
                 print(f"{url} : {len(doc.get('elements', []))} éléments")
                 return doc
-            except (HTTPError, URLError, TimeoutError, ValueError) as e:
-                print(f"{url} : {e}")
+            except (OSError, http.client.HTTPException, ValueError) as e:  # dont HTTPError, URLError, coupure de connexion
+                print(f"{url} : {type(e).__name__} {e}")
                 time.sleep(30 * (attempt + 1))
     sys.exit("Overpass injoignable : stores.json n'est pas modifié.")
 
