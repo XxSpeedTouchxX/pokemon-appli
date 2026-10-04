@@ -9,7 +9,9 @@ Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5
   - les **produits scellés** sortis en France depuis l'automne 2025 : visuels de la galerie officielle Pokémon France, cote Cardmarket du jour ;
   - les **sorties** : dates, prix de lancement constatés et liens directs vers Amazon, eBay, Fnac, Cultura et Micromania ;
   - **Territoire**, le **Radar** et le radar de l'accueil : les boutiques réelles de France métropolitaine (OpenStreetMap), avec leur commune, autour de toi ou sur une carte de France ;
-  - la **tendance** de la collection : moyennes Cardmarket sur 30, 7 et 1 jours pour les cartes, cote archivée chaque jour pour le scellé.
+  - la **tendance** de la collection : moyennes Cardmarket sur 30, 7 et 1 jours pour les cartes, cote archivée chaque jour pour le scellé ;
+  - le **scan** à l'appareil photo : lecture du numéro et du nom de la carte sur le téléphone, 3 propositions à confirmer ;
+  - la **langue et l'état** de chaque exemplaire ajouté.
 - **Fictif :** la collection de démo de départ, les ventes, les prix eBay et les magasins partenaires (encadré « Démo » de Territoire).
 
 Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil** (navigateur), à chaque changement.
@@ -45,6 +47,44 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 6. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
 
 Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage de démo, mouvements, plus belles pièces, derniers ajouts. Le build remplace l'accueil de la maquette par le fragment `home` de `catalog.dc.html`.
+
+## Scan à l'appareil photo
+
+- **Parcours :**
+  - le bouton Scan (barre du bas, « Scanner » de l'accueil, `#scan`) ouvre la caméra arrière, avec un cadre au format carte ;
+  - la lecture est continue, une à deux images par seconde. Le déclencheur lance une **lecture fine** (deux contrastes pour le numéro) ;
+  - **« C'est laquelle ? »** propose 3 cartes : visuel, extension et numéro, cote, « à toi ×N ». « Aucune de ces cartes » ouvre le Marché sur ce qui a été lu ;
+  - la fiche résultat de la maquette s'ouvre avec la vraie carte. La langue est préremplie « EN » si la carte porte « EN » ou si son extension n'existe qu'en anglais ;
+  - après l'ajout, retour direct à la caméra pour la carte suivante. La carte ajoutée n'est pas reproposée pendant 8 secondes.
+- **Lecture (OCR) :**
+  - Tesseract.js 7 et son modèle français « best_int » (licence Apache 2.0), servis par le site depuis `web/vendor/tesseract/7.0.0/` (cache long) ;
+  - chargés à la première ouverture du scan (environ 4,7 Mo, une seule fois) ; cœur WebAssembly avec SIMD si le téléphone le gère, sinon cœur simple ;
+  - deux bandes de la carte : le **bas** (numéro « 123/191 », code d'extension et langue des cartes récentes), signal principal ; le **haut** (nom), qui confirme. Chaque bande est agrandie, contrastée et inversée si le texte est clair sur fond sombre.
+- **Rapprochement** avec `cards.json` :
+  - numéro et total imprimé, sous-séries (TG, GG, SV, RC, H), promos (SWSH, SM, XY, BW, HGSS, DP, SVP, MEP) ;
+  - confusions courantes corrigées : O/0, I/1, S/5, B/8, mots collés (« SSPFR123/191 »), barre lue « 1 » ou perdue ;
+  - nom comparé sans accents, avec « ex », « V », « VMAX », « GX »… ;
+  - les indices s'additionnent d'une image à l'autre : les propositions s'affichent dès qu'une carte domine.
+- **Sans caméra** (refus, absence, caméra occupée, moteur indisponible) : un panneau propose « Prendre une photo », « Importer une photo », « Rechercher une carte » et, selon le cas, « Réessayer ». Une photo est lue au centre (format carte), puis en entier.
+- **Onglet Scellé :** recherche parmi les vrais produits scellés, qui ouvre la même fiche. Nos données n'ont pas de code-barres.
+- **Confidentialité :** la lecture se fait sur l'appareil ; aucune image n'est envoyée ni gardée. La caméra s'arrête dès qu'on quitte l'écran ou l'app ; le moteur de lecture est libéré deux minutes après.
+- **Diagnostic :** `?debug=scan` affiche les bandes lues, le texte reconnu, les temps et les cartes trouvées. Il sert à régler la lecture sur un vrai téléphone.
+- **Limites :**
+  - lecture réglée sur des cartes de test dessinées et dégradées comme une vidéo : le bac à sable n'accède pas aux scans officiels. La vraie mesure se fait sur téléphone ;
+  - le numéro est petit : il faut une carte proche, nette et sans reflet. Sinon : lecture fine, ou « Prendre une photo » (pleine résolution) ;
+  - non reconnues : cartes japonaises, cartes horizontales (BREAK, LEGEND, V-UNION), souvent les cartes dorées. Le scan ne distingue pas les versions reverse ni les premières éditions ;
+  - les cartes anglaises d'extensions sorties en France sont reconnues par le numéro ; leur nom anglais n'est pas dans le catalogue.
+- **Code :**
+  - `tools/web/scan-core.js` : calculs purs (lecture du numéro et du nom, index du catalogue, classement, règle d'arrêt, géométrie, préparation des bandes). Tests : `node --test tools/web/test_scan.mjs` ;
+  - `tools/web/scan-ocr.js` : Tesseract.js, découpe et lecture des bandes ;
+  - `tools/web/scan.js` : écran, caméra, lecture continue, propositions, photo, onglet Scellé ; fragment `scan` de `tools/web/catalog.dc.html`. Le build remplace le viseur simulé de la maquette.
+
+## Langue et état des exemplaires
+
+- `tools/web/copies.js` : chaque ligne d'achat garde sa langue (`lang` : FR, JP, EN) et son état (`cond` : NM, EX, PL pour Near Mint, Excellent, Joué ; SO, AB pour Scellé d'origine, Boîte abîmée).
+- Choisis dans la fiche du scan et dans « Ajout » ; enregistrés sur l'appareil avec le reste. Les ajouts plus anciens comptent comme FR et Near Mint (ou Scellé d'origine).
+- Affichés dans la liste « Ma collection » et la grille de la Collection (« EN · Excellent », ou « EN, FR · 2 états ») et dans la fiche : résumé des ajouts, langue et état de chaque ligne de l'historique, drapeau de la langue la plus présente.
+- **Limites :** la cote ne dépend pas encore de l'état ; à la vente, on ne choisit pas encore l'exemplaire qui part.
 
 ## Design : jaune et verre (thème v6)
 
@@ -227,6 +267,7 @@ Le site n'est pas indexé par les moteurs de recherche : balise `robots` et en-t
 
 - **Avec un ancrage :** `#territoire`, `#radar` (carte de France des boutiques), `#sorties`, `#scan`, `#collection`, `#marche`, `#extensions` (toutes les cartes), `#scelle` (produits scellés), `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
 - **Avec des paramètres (hébergement uniquement) :** par exemple `?start=store&storeId=s3`, ou `?start=set&setId=sv08` pour une extension.
+- **Diagnostic du scan :** `?debug=scan#scan` (voir « Scan à l'appareil photo »).
 
 ## Régénérer après une évolution de la maquette
 
@@ -242,22 +283,23 @@ Le script `tools/web/build.mjs` :
 - convertit le gabarit du canevas Design en gabarit Vue, compilé à l'avance (pas d'évaluation de code dans le navigateur) ;
 - adapte la page aux vraies tailles d'écran ;
 - ajoute les écrans et blocs de `tools/web/catalog.dc.html` (même syntaxe que le canevas) ;
-- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `showcase.js` (articles mis en avant), `releases.js` (Sorties), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar), `territory.js` (Territoire et fiche boutique), `home-core.js` et `home.js` (accueil), plus les noms des 151 compagnons (`tools/sprites/kanto.json`) ;
+- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `showcase.js` (articles mis en avant), `releases.js` (Sorties), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar), `territory.js` (Territoire et fiche boutique), `home-core.js` et `home.js` (accueil), `scan-core.js`, `scan-ocr.js` et `scan.js` (scan), `copies.js` (langue et état des exemplaires), plus les noms des 151 compagnons (`tools/sprites/kanto.json`) ;
 - applique le thème (`tools/web/theme.mjs`) ;
-- copie Vue 3.5.43 dans `web/vendor/`, MapLibre GL 6.12 dans `web/vendor/maplibre/` et les images dans `web/img/`.
+- copie Vue 3.5.43 dans `web/vendor/`, MapLibre GL 6.12 dans `web/vendor/maplibre/`, Tesseract.js 7 et son modèle français dans `web/vendor/tesseract/7.0.0/`, et les images dans `web/img/`.
 
 ## Contenu du dossier `web/`
 
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Page de l'app |
-| `app.js` | Logique de la maquette et des modules `tools/web/*.js` (catalogue, scellé, Sorties, Territoire, Radar, accueil, enregistrement sur l'appareil), gabarit compilé et démarrage |
+| `app.js` | Logique de la maquette et des modules `tools/web/*.js` (catalogue, scellé, Sorties, Territoire, Radar, accueil, scan, exemplaires, enregistrement sur l'appareil), gabarit compilé et démarrage |
 | `data/cards.json` | Catalogue complet, généré chaque jour par GitHub Actions (ne pas modifier à la main) |
 | `data/sealed.json` | Produits scellés, leurs prix du jour et la cote archivée sur 31 jours (GitHub Actions) |
 | `data/stores.json` | Boutiques réelles, OpenStreetMap, avec leur commune (GitHub Actions, chaque semaine) |
 | `data/geo/` | Contours des régions et des départements (IGN, Licence Ouverte) |
 | `vendor/vue.runtime.global.prod.js` | Vue 3.5.43, licence MIT |
 | `vendor/maplibre/` | MapLibre GL 6.12, licence BSD (Radar, chargé à l'ouverture de l'écran) |
+| `vendor/tesseract/7.0.0/` | Tesseract.js 7, ses cœurs WebAssembly (avec et sans SIMD) et le modèle français, licence Apache 2.0 (scan, chargé à l'ouverture de l'écran) |
 | `img/` | Visuels provisoires (ceux qui ne sont pas sur TCGdex) |
 | `img/products/` | Visuels officiels des produits scellés (galerie Pokémon France) |
 | `img/brand/` | Logo Dropicards (SVG : clair, petit, sombre, icône), voir `tools/brand/` |

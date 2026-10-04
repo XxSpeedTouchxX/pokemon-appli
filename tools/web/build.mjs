@@ -127,8 +127,8 @@ afterSection('Visuel', FRAG['item-note']);
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
 // Accueil : choix du compagnon (tools/web/home.js), au premier plan comme le zoom.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['buddy-picker'] + '\n<sc-if value="{{ ui.hasToast }}"');
-// Réglages, « À propos » : crédit des sprites des compagnons.
-patch('sont des marques de leurs propriétaires respectifs.</p>', 'sont des marques de leurs propriétaires respectifs. Compagnons de l’accueil : sprites de Pokémon Noir et Blanc (© The Pokémon Company), via PokeAPI.</p>');
+// Réglages, « À propos » : crédit des sprites des compagnons et du moteur de lecture du scan.
+patch('sont des marques de leurs propriétaires respectifs.</p>', 'sont des marques de leurs propriétaires respectifs. Compagnons de l’accueil : sprites de Pokémon Noir et Blanc (© The Pokémon Company), via PokeAPI. Scan : lecture sur l’appareil avec Tesseract.js et son modèle français (licence Apache 2.0) ; aucune image n’est envoyée.</p>');
 // Radar : écran plein écran (carte de France des boutiques réelles), ouvert depuis un bandeau de Territoire.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.radar + '\n<sc-if value="{{ ui.hasToast }}"');
 // Territoire : vraies boutiques autour de toi (tools/web/territory.js), puis le Radar ; les magasins partenaires

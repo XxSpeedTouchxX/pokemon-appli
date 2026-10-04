@@ -62,7 +62,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - accueil : recherche, valeur dans la police du logo avec courbe sur 4 points réels et compagnon animé (151 Pokémon de Kanto), radar des boutiques avec balayage et repères cliquables (nom, ville exacte), sorties, liste complète de la collection, marge ;
   - données : commune officielle des boutiques, moyennes Cardmarket 7 j et 1 j des cartes, archive quotidienne de la cote du scellé ;
   - Radar : points des boutiques enfin affichés et touchables pendant le balayage ;
-  - suite prévue (plan séparé) : scan réel à l'appareil photo.
+  - scan réel à l'appareil photo : livré ensuite (ci-dessous).
+- **Scan réel et exemplaires (2026-10-04, nuit) :**
+  - scan à l'appareil photo : lecture sur le téléphone (Tesseract.js, aucune image envoyée) du numéro et du nom, 3 propositions à confirmer, carte suivante ; photo, import ou recherche sans caméra ; onglet Scellé en recherche ;
+  - langue et état de chaque ajout enregistrés et affichés (liste, Collection, fiche) ;
+  - lecture réglée sur des cartes de test dessinées : la vraie mesure se fait sur téléphone (`?debug=scan`).
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

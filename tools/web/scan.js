@@ -9,7 +9,7 @@
   // ?debug=scan affiche les bandes lues, le texte reconnu et les temps (réglages sur téléphone).
   const SCAN = {
     gen: 0, on: false, stream: null, video: null, starting: false, idx: null, frames: [], timer: 0, since: 0,
-    miss: 0, inv: false, cool: new Map(), hasTorch: false, fine: false, back: null, ev: {}, stopWorker: 0,
+    miss: 0, inv: false, cool: new Map(), coolMsg: '', hasTorch: false, fine: false, back: null, ev: {}, stopWorker: 0,
     thumb: null, cvLoop: null, cvShot: null, debug: false, inst: null
   };
   try { SCAN.debug = /[?&]debug=scan(&|$)/.test(location.search); } catch (e) { /* adresse sans paramètres */ }
@@ -108,6 +108,7 @@
     return { canvas: c, rect: { sx: 0, sy: 0, sw: c.width, sh: c.height } };
   };
   // Image à ne pas lire : carte en mouvement, ou grand reflet sur le bas de la carte (là où est le numéro).
+  // Le cadre ne bouge jamais à l'écran (hauteur du message d'état réservée) : un écart vient donc de la caméra.
   SCAN.gate = function (shot) {
     const c = shot.canvas, w = 120, h = 24, t = SCAN.thumb || (SCAN.thumb = document.createElement('canvas'));
     t.width = w; t.height = h;
@@ -147,8 +148,11 @@
   // Une lecture → indices, puis propositions si une carte domine (ou tout de suite pour une lecture fine).
   SCAN.consider = function (inst, read, fine) {
     const m = ScanCore.match(SCAN.idx, read), now = Date.now();
-    const cands = m.cands.filter(c => !(SCAN.cool.get(c.id) > now));
     if (!fine) { SCAN.inv = read.inverted; SCAN.miss = m.ev.num ? 0 : SCAN.miss + 1; }
+    // La carte vue en tête vient d'être ajoutée (ou écartée) : rien à proposer tant qu'elle reste devant la caméra,
+    // pendant quelques secondes (ses voisines du même numéro ne prennent pas sa place).
+    if (!fine && m.cands.length && SCAN.cool.get(m.cands[0].id) > now) { SCAN.frames = []; SCAN.say(inst, SCAN.coolMsg); return false; }
+    const cands = fine ? m.cands : m.cands.filter(c => !(SCAN.cool.get(c.id) > now));
     ['num', 'name', 'lang'].forEach(k => { if (m.ev[k]) SCAN.ev[k] = m.ev[k]; });
     if (SCAN.debug) SCAN.showDebug(read, m);
     SCAN.frames.push(cands);
@@ -336,6 +340,7 @@
       retry: () => {
         const t = Date.now() + 8000;
         (s.scanCands || []).forEach(id => SCAN.cool.set(id, t));
+        SCAN.coolMsg = 'Replace la carte dans le cadre, bien à plat, sans reflet';
         SCAN.frames = []; SCAN.ev = {}; SCAN.since = Date.now();
         this.setState({ scanPhase: SCAN_PANELS[SCAN.back] ? SCAN.back : 'live', scanCands: [], scanEv: null, scanMsg: '' });
       },
@@ -386,6 +391,7 @@
     baseSaveScan.call(this);
     if (!pid) return;
     SCAN.cool.set(pid, Date.now() + 8000);
+    SCAN.coolMsg = 'Carte ajoutée : place la suivante dans le cadre';
     SCAN.frames = []; SCAN.ev = {}; SCAN.since = Date.now();
     this.setState({ scanPid: null, scanCands: [], scanEv: null, scanMsg: '', scanAdded: (s.scanAdded || 0) + 1,
       scanPhase: s.scanMode === 'sealed' ? s.scanPhase : SCAN_PANELS[SCAN.back] ? SCAN.back : 'live' });
