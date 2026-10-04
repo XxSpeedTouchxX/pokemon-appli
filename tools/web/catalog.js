@@ -109,7 +109,9 @@
       img: v ? v.img : '', imgHi: v ? v.hi : '', srcset: v ? v.srcset : '',
       fallback: 'drawn:' + id, fallbackHi: 'drawn:' + id,
       logo: '', grade: null, release: null,
-      cm: r[F.cm], low: r[F.low], ebay: null, tcp: r[F.tcp], avg30: r[F.avg30], upd: r[F.upd], seed: seed
+      cm: r[F.cm], low: r[F.low], ebay: null, tcp: r[F.tcp], avg30: r[F.avg30], upd: r[F.upd], seed: seed,
+      // Moyennes Cardmarket 7 jours et 1 jour (absentes des fichiers plus anciens) : tendance sur l'accueil.
+      avg7: typeof r[F.avg7] === 'number' ? r[F.avg7] : null, avg1: typeof r[F.avg1] === 'number' ? r[F.avg1] : null
     };
     if (!v) { p.img = p.imgHi = drawnCard(p); p.fallback = p.fallbackHi = ''; }
     return p;

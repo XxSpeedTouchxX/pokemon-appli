@@ -1,8 +1,8 @@
   // ——— Accueil (octobre 2026) ———
   // De haut en bas : recherche dans tout le catalogue, valeur de la collection, Sorties du moment, liste complète de
   // la collection (récents ou valeur), marge réalisée ; « Premiers pas » et « Suggestion » selon le profil.
-  // Les calculs de l'accueil ne tournent que sur l'accueil. Ce module partage la portée des autres : ses noms
-  // commencent par HOME_ ou home.
+  // Les calculs de l'accueil ne tournent que sur l'accueil ; les calculs purs sont dans home-core.js (HomeCore).
+  // Ce module partage la portée des autres : ses noms commencent par HOME_ ou home.
   const HOME_PAGE = 20, HOME_HITS = 8;
   const HOME_SORTS = [['recent', 'Récents'], ['value', 'Valeur']];
   const homeBaseSt = proto.st;
@@ -12,15 +12,6 @@
     if (d.hsort !== 'value') d.hsort = 'recent';
     if (!(d.hmore >= 1)) d.hmore = 1;
     return d;
-  };
-  // Ajout le plus récent de chaque article : date du dernier achat, puis ordre de saisie.
-  const homeAdded = purchases => {
-    const last = {};
-    (purchases || []).forEach(a => {
-      const k = (a.date || '') + '#' + String(a.seq || 0).padStart(8, '0');
-      (a.lines || []).forEach(l => { if (!last[l.pid] || last[l.pid] < k) last[l.pid] = k; });
-    });
-    return last;
   };
 
   // Recherche : les résultats du Marché (scellé, articles suivis, puis cartes du catalogue), 8 au plus.
@@ -48,16 +39,15 @@
 
   // Ma collection : tous les articles, les plus récents d'abord (ou par valeur), 20 par page.
   proto.homeList = function (x) {
-    const s = x.s, c = x.c, added = homeAdded(s.purchases), worth = p => x.val(p) * c.stock[p.id].qty;
-    const items = x.owned.slice().sort(s.hsort === 'value' ? (a, b) => worth(b) - worth(a)
-      : (a, b) => (added[b.id] || '').localeCompare(added[a.id] || '') || worth(b) - worth(a));
+    const s = x.s, c = x.c, worth = p => x.val(p) * c.stock[p.id].qty;
+    const items = HomeCore.order(x.owned, s.hsort, HomeCore.added(s.purchases), worth);
     const n = Math.min(items.length, s.hmore * HOME_PAGE), units = items.reduce((t, p) => t + c.stock[p.id].qty, 0);
     return {
       hasItems: items.length > 0, isEmpty: items.length === 0,
       count: items.length + (items.length > 1 ? ' références · ' : ' référence · ') + units + (units > 1 ? ' articles' : ' article'),
       sorts: HOME_SORTS.map(([k, label]) => Object.assign({ label: label, on: s.hsort === k, pick: () => this.setState({ hsort: k, hmore: 1 }) }, this.chip(s.hsort === k))),
       rows: items.slice(0, n).map((p, i) => {
-        const ch = x.ch7[p.id], known = typeof ch === 'number';
+        const ch = HomeCore.change7(p, x.ch7[p.id], SEALED.doc && SEALED.doc.days, TODAY), known = typeof ch === 'number';
         return Object.assign(this.look(p), {
           name: p.name, sub: p.sub, qty: '×' + c.stock[p.id].qty, value: x.mask(this.eur(worth(p))), border: x.line(i),
           change: known ? this.chg(ch) + ' · 7 j' : '—', changeColor: known ? x.col(ch) : 'var(--pkm-t3)',
@@ -72,11 +62,33 @@
     };
   };
 
+  // Tendance de la collection : 4 points (il y a 30 jours, 7 jours, hier, aujourd'hui), calculés par HomeCore.points :
+  // moyennes Cardmarket pour les cartes, cote archivée chaque jour pour le scellé, courbe simulée pour la démo.
+  const HOME_LABELS = ['il y a 30 jours', 'il y a 7 jours', 'hier', 'aujourd’hui'];
+  proto.homeTrend = function (x, valueBig) {
+    const c = x.c, V = [0, 0, 0, 0], days = SEALED.doc && SEALED.doc.days;
+    x.owned.forEach(p => {
+      const q = c.stock[p.id].qty;
+      HomeCore.points(p, x.val(p), x.hist[p.id], this.cote(p), days, TODAY).forEach((v, i) => { V[i] += q * v; });
+    });
+    const d7 = V[3] - V[1], pct = V[1] > 0 ? d7 / V[1] * 100 : 0;
+    return Object.assign(HomeCore.chart(V, 324, 64, 8, 54), {
+      color: x.col(d7),
+      delta: 'Sur 7 jours : ' + x.mask(this.signed(d7)) + (V[1] > 0 ? ' (' + this.chg(pct) + ')' : ''),
+      source: 'Source : moyennes Cardmarket (cartes), cote archivée chaque jour (scellé)',
+      // Police du logo : l'espace fine des milliers (U+202F) n'y a pas de largeur ; espace normale, sans retour à la ligne.
+      value: String(valueBig).replace(/[\u202f\u00a0]/g, ' '),
+      aria: 'Tendance de ta collection : ' + V.map((v, i) => HOME_LABELS[i] + ' ' + x.mask(this.eur(v))).join(', '),
+      fit: Math.max(4, String(valueBig).length * 0.6).toFixed(2)
+    });
+  };
+
   const homeBaseView = proto.vHome;
   proto.vHome = function (x) {
     const r = homeBaseView.call(this, x);
     if (x.s.screen !== 'home') return r;
     r.hs = this.homeSearch(x);
     r.hl = this.homeList(x);
+    r.hv = this.homeTrend(x, r.valueBig);
     return r;
   };

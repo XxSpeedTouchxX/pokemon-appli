@@ -22,7 +22,7 @@ export const TOKENS = {
   'scan-ring': '#0B1120', 'scan-fg': '#FFFFFF', iris: '#6C84F2', regular: '#A8B6FF',
   // Statuts
   green: '#3DDC84', up: '#3DDC84', down: '#FF6B6B', red: '#FF8A8A', orange: '#F5B14C', amber: '#FFB547', teal: '#5EE0CF',
-  gold: '#FFD66B', sand: '#F7C77E', 'sand-2': '#F3D9AE', gray: '#9AA8C3', off: '#56648A', peach: '#FFC9A8',
+  logo: '#FFD60A', gold: '#FFD66B', sand: '#F7C77E', 'sand-2': '#F3D9AE', gray: '#9AA8C3', off: '#56648A', peach: '#FFC9A8',
   // Barres de la marge (coût, frais, marge)
   'bar-cost': '#34415F', 'bar-edge': '#56648A', 'bar-fees': '#D5763A', 'bar-margin': '#6C84F2',
   // Puces et choix (couleurs produites par la logique)
@@ -313,7 +313,7 @@ export function cssVars(tokens = TOKENS) {
 export const V6_LIGHT = {
   app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFD60A 45%, #FFB703 100%)',
   t1: '#0B1120', t2: '#1F2433', t3: '#33363F', t4: '#41434A', t5: '#41434A', link: '#0A2A88', ink: '#0B1120',
-  accent: '#0B1120', 'on-accent': '#FFD84D', 'accent-rgb': '11, 17, 32', 'glow-rgb': '255, 255, 255', brand: '#0B1120',
+  logo: '#0B1120', accent: '#0B1120', 'on-accent': '#FFD84D', 'accent-rgb': '11, 17, 32', 'glow-rgb': '255, 255, 255', brand: '#0B1120',
   line: 'rgba(11, 17, 32, 0.16)', 'line-2': 'rgba(11, 17, 32, 0.22)', 'line-3': 'rgba(11, 17, 32, 0.2)', 'line-4': 'rgba(11, 17, 32, 0.32)',
   track: 'rgba(11, 17, 32, 0.16)',
   'chip-bg': 'rgba(255, 255, 255, 0.45)', 'chip-bc': 'rgba(11, 17, 32, 0.18)', 'chip-fg': '#1F2433',
@@ -327,7 +327,7 @@ export const V6_DARK = {
   card: 'rgba(10, 17, 48, 0.9)', 'card-hi': 'rgba(12, 22, 66, 0.94)', 'card-2': 'rgba(8, 14, 40, 0.92)', 'card-teal': 'rgba(4, 32, 44, 0.9)',
   field: 'rgba(0, 4, 18, 0.55)', toast: 'rgba(10, 17, 48, 0.86)',
   t1: '#F5F7FC', t2: '#D7DDEA', t3: '#BCC5D9', t4: '#A3AEC6', t5: '#8F9AB4', link: '#FFD84D',
-  accent: '#FFD60A', 'on-accent': '#0B1120', 'accent-rgb': '255, 214, 10', 'glow-rgb': '12, 22, 66', brand: '#0B1120',
+  logo: '#FFD60A', accent: '#FFD60A', 'on-accent': '#0B1120', 'accent-rgb': '255, 214, 10', 'glow-rgb': '12, 22, 66', brand: '#0B1120',
   line: 'rgba(255, 255, 255, 0.14)', 'line-2': 'rgba(255, 255, 255, 0.2)', 'line-3': 'rgba(255, 210, 60, 0.4)', 'line-4': 'rgba(255, 255, 255, 0.3)',
   track: 'rgba(255, 255, 255, 0.14)',
   'chip-bg': 'rgba(255, 255, 255, 0.06)', 'chip-bc': 'rgba(255, 255, 255, 0.2)', 'chip-fg': '#D7DDEA',
