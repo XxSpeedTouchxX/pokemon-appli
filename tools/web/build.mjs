@@ -426,7 +426,7 @@ ${code}
   const props = Object.assign({}, HASH[location.hash.slice(1)] || {});
   try {
     const q = new URLSearchParams(location.search);
-    ['start', 'demo', 'onb', 'itemId', 'storeId', 'saleId', 'setId', 'tprod', 'tprob', 'adv'].forEach(k => { if (q.get(k)) props[k] = q.get(k); });
+    ['start', 'demo', 'onb', 'itemId', 'storeId', 'shopId', 'saleId', 'setId', 'tprod', 'tprob', 'adv'].forEach(k => { if (q.get(k)) props[k] = q.get(k); });
   } catch (e) { /* adresse sans paramètres */ }
   const inst = new Component(props);
   // Collection enregistrée sur l'appareil, sauf pour les liens de démonstration.
