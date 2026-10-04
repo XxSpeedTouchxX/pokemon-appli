@@ -212,18 +212,22 @@
     map.addLayer({ id: 'stores-halo', type: 'circle', source: 'stores', paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 6, 12, 14], 'circle-color': col,
       'circle-opacity': ['case', pick, 0.45, on, 0.18, 0] } });
-    const size = (a, b) => ['interpolate', ['linear'], ['zoom'], 6, a, 10, a * 1.7, 14, b];
+    // Taille selon le zoom : MapLibre n'accepte le zoom qu'en tête d'expression (sinon la couche est refusée et les
+    // points n'apparaissent pas) ; l'état (choisie, révélée, niveau) se décide à chaque palier de zoom.
+    const radius = k => ['case', pick, 9, ['!', on], k(2.4, 6), ['match', ['get', 'lvl'], 2, k(4.6, 9), 1, k(3.8, 8), k(2.6, 6.5)]];
     map.addLayer({ id: 'stores-dot', type: 'circle', source: 'stores', paint: {
-      'circle-radius': ['case', pick, 9, ['!', on], size(2.4, 6), ['match', ['get', 'lvl'], 2, size(4.6, 9), 1, size(3.8, 8), size(2.6, 6.5)]],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, radius(a => a), 10, radius(a => a * 1.7), 14, radius((a, b) => b)],
       'circle-color': ['case', on, col, '#5A6B8C'], 'circle-opacity': ['case', on, ['match', ['get', 'lvl'], 0, 0.75, 1], 0.5],
       'circle-stroke-color': ['case', pick, '#FFFFFF', '#0B1120'], 'circle-stroke-width': ['case', pick, 2.5, 1.2] } });
   }
   function onClick(inst, e) {
     const s = inst.st(), map = RADAR.map;
-    if (!map || s.rscan === 'scanning') return;
+    if (!map) return;
     const box = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
     const st = map.queryRenderedFeatures(box, { layers: ['stores-dot'] })[0];
-    if (st) { inst.radarStore(st.properties.id); return; }
+    // Pendant le balayage, une boutique déjà apparue s'ouvre tout de suite (le balayage se termine).
+    if (st && (s.rscan !== 'scanning' || (map.getFeatureState({ source: 'stores', id: st.properties.id }) || {}).on)) { inst.radarStore(st.properties.id); return; }
+    if (s.rscan === 'scanning') return;
     if (s.rlevel === 'region' || s.rlevel === 'dept') {
       const d = map.queryRenderedFeatures(e.point, { layers: ['depts-fill'] })[0];
       if (d && d.properties.code !== s.rdept) { inst.radarGo('dept', d.properties.code); return; }
@@ -337,11 +341,13 @@
     const plan = RadarCore.sweepPlan(rows.map(r => r.st), center, TURN);
     const finish = () => {
       if (gen !== RADAR.sweepGen) return;
+      RADAR.sweepGen++; // arrête le faisceau s'il tourne encore
       setStates('stores', rows.map(r => r.st.id), 'on', true);
       el.style.opacity = '0';
       setTimeout(() => { if (RADAR.sweep && RADAR.sweep.el === el) removeSweep(); }, 500);
       inst.setState({ rscan: 'done' });
     };
+    RADAR.finish = finish;
     inst.setState({ rscan: 'scanning', rstore: '', rwhy: false });
     if (reducedMotion() || !plan.length) { count.textContent = fmt(plan.length) + ' boutiques'; finish(); return; }
     const t0 = performance.now();
@@ -388,7 +394,11 @@
       () => this.setState({ rmsg: 'Position refusée ou introuvable : choisis une région sur la carte ou dans la liste.' }),
       { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 });
   };
-  radarProto.radarStore = function (id) { if (this.st().rscan !== 'scanning') this.setState({ rstore: id, rwhy: false }); };
+  // Fiche d'une boutique ; pendant le balayage, il se termine d'abord (toutes les boutiques apparaissent).
+  radarProto.radarStore = function (id) {
+    if (this.st().rscan === 'scanning' && RADAR.finish) RADAR.finish();
+    this.setState({ rstore: id, rwhy: false });
+  };
   radarProto.radarAlert = function (id) {
     const s = this.st(), key = 'osm:' + id, on = !s.alerts[key], st = RADAR.byId[id];
     this.setState({ alerts: Object.assign({}, s.alerts, { [key]: on }), toast: on ? 'Alerte enregistrée pour ' + (st ? st.name : 'cette boutique') : 'Alerte retirée' });
