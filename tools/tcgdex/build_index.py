@@ -213,7 +213,8 @@ def main():
         for fb in fallbacks:
             logo = logo or fb.logo(sid)
         official = (s.get("cardCount") or {}).get("official") or ""
-        sets[sid] = [s.get("name") or sid, fr_series.get(serie.get("id")) or serie.get("name") or "",
+        name = re.sub(r"(?<=[a-zà-ÿ])(?=\d)", " ", s.get("name") or sid)  # « Classique30ᵉ » → « Classique 30ᵉ »
+        sets[sid] = [name, fr_series.get(serie.get("id")) or serie.get("name") or "",
                      s.get("releaseDate") or "", short_img(logo), official, lang]
         for b in s.get("cards") or []:
             cid = b["id"]

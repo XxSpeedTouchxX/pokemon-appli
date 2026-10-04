@@ -6,6 +6,26 @@
 
 ---
 
+## 2026-10-04 — Toutes les cartes en visuel officiel, collection enregistrée sur l'appareil
+
+- **Contexte :** le porteur demande de passer à l'étape suivante (enregistrer la collection) et de mettre « toutes les cartes possibles » dans l'app, avec leur design officiel, en qualité la plus haute possible.
+- **Décision :**
+  - **Catalogue élargi :** les extensions sans version française dans TCGdex entrent au catalogue. Leurs cartes sont en anglais et l'app l'indique.
+  - **Visuels :** un visuel absent en français est remplacé par le scan d'une autre version, dans cet ordre : anglais, allemand, italien, espagnol. C'est le même dessin officiel, et l'app l'indique.
+  - **Qualité :** la fiche et le zoom affichent la meilleure qualité publiée par TCGdex (PNG 600 × 825). Les grilles s'adaptent à la finesse de l'écran.
+  - **Parcours :** « Toutes les cartes » (extensions par série, puis grille de l'extension), accessible depuis le Marché. La carte s'affiche entière.
+  - **Collection :**
+    - enregistrée dans le navigateur de l'appareil, rien n'est envoyé en ligne ;
+    - « Vider ma collection » et « Remettre la démo » dans les Réglages.
+- **Écarté :**
+  - le stockage des images chez nous : plusieurs Go, au-delà de la limite de 20 000 fichiers de Cloudflare Pages ; le CDN TCGdex suffit (CLAUDE.md §4) ;
+  - les cartes japonaises : numérotation et noms différents ;
+  - un compte en ligne pour synchroniser la collection entre appareils : à décider plus tard.
+- **Impact :**
+  - CLAUDE.md (§3) ;
+  - `tools/tcgdex/build_index.py`, `.github/workflows/tcgdex.yml` ;
+  - `tools/web/catalog.js`, `tools/web/catalog.dc.html`, `tools/web/persist.js`.
+
 ## 2026-10-03 — Catalogue réel dans la démo : toutes les cartes françaises via TCGdex, mises à jour chaque jour
 
 - **Contexte :** le porteur veut que toutes les cartes soient dans l'app. Il donne son « go » explicite (option A), ce qui vaut feu vert de la Règle d'or pour cet incrément.

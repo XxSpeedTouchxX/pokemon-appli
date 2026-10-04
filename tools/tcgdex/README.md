@@ -31,10 +31,17 @@ python tools/tcgdex/sync_tcgdex.py --skip-images --workers 4 --out data/tcgdex
 Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveurs de GitHub :
 
 1. **Téléchargement :** `sync_tcgdex.py --skip-images` récupère toutes les cartes françaises et leurs prix. Une seconde passe reprend les échecs éventuels.
-2. **Catalogue compact :** `build_index.py` produit `web/data/cards.json`. Ce fichier est chargé par la démo web.
-   - Il garde, pour chaque carte : l'identifiant, le nom, l'extension, le numéro, la rareté, l'image et quatre prix (tendance, plus bas et moyenne 30 jours de Cardmarket ; TCGplayer converti en euros).
-   - Il contient une carte par ligne.
-3. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site.
+2. **Autres versions :** le même script récupère les extensions en anglais, allemand, italien et espagnol, sans le détail des cartes (une requête par extension). Elles servent à deux choses :
+   - **visuels de repli :** une carte sans scan français prend celui d'une autre version (même dessin officiel), dans cet ordre : anglais, allemand, italien, espagnol. La carte est cherchée par identifiant, ou par numéro dans la même extension ou dans l'extension parente (Galerie de Dresseurs, Galerie Galaroise, Coffre Étincelant). Les logos manquants suivent la même règle ;
+   - **extensions sans version française dans TCGdex :** `build_index.py --list-en-only` les liste, puis leur détail et leurs prix sont téléchargés en anglais. Leurs cartes entrent au catalogue, en anglais.
+3. **Catalogue compact :** `build_index.py` produit `web/data/cards.json`. Ce fichier est chargé par la démo web.
+   - **Pour chaque carte :** l'identifiant, le nom, l'extension, le numéro, la rareté, l'image (le chemin commence par la langue du visuel) et quatre prix (tendance, plus bas et moyenne 30 jours de Cardmarket ; TCGplayer converti en euros).
+   - **Pour chaque extension :** le nom, la série, la date, le logo, le nombre officiel de cartes et la langue des cartes.
+   - Le fichier contient une carte par ligne.
+   - Le journal du workflow donne le bilan : cartes, visuels par langue, cartes encore sans visuel par extension.
+4. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site.
+
+TCG Pocket (cartes numériques) est exclu.
 
 L'historique git de `cards.json` sert d'**archive quotidienne des prix** (principe 6 du CLAUDE.md).
 
