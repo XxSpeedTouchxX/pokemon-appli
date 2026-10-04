@@ -1,3 +1,4 @@
 tools/web/node_modules/
 tools/web/artifact.html
 /data/
+__pycache__/

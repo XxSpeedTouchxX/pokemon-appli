@@ -93,6 +93,18 @@ wrapSection('Derniers ajouts', 'home.hasAdds');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, visuels et prix via TCGdex · démo de collection, ventes et magasins fictifs');
+// Produits scellés : chaque vignette a une variante « vraie photo » (tools/web/sealed.js), sur carte blanche.
+const PHOTO_INLINE = o => `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #FFFFFF"><img src="{{ ${o}.photo }}" alt="" loading="lazy" style="max-width: 90%; max-height: 90%; object-fit: contain"></span>`;
+const PHOTO_TILE = o => `<span style="position: absolute; left: 8%; top: 7%; width: 84%; height: 86%; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35)"><img src="{{ ${o}.photo }}" alt="" loading="lazy" style="max-width: 92%; max-height: 92%; object-fit: contain"></span>`;
+const PHOTO_ITEM = '<button type="button" onClick="{{ it.zoom }}" aria-label="{{ it.zoomLabel }}" style="position: absolute; left: 50%; top: 16px; width: 270px; height: 266px; margin-left: -135px; padding: 0; border: 0; border-radius: 18px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); cursor: zoom-in"><img src="{{ it.photo }}" alt="{{ it.name }}" style="max-width: 94%; max-height: 94%; object-fit: contain"></button>';
+const PHOTO_SCAN = '<div style="position: absolute; left: 22px; top: 40px; width: 200px; height: 220px; border-radius: 14px; background: #FFFFFF; transform: rotate(-2deg); box-shadow: 0 26px 44px rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; overflow: hidden"><img src="{{ scan.photo }}" alt="{{ scan.name }}" style="max-width: 92%; max-height: 92%; object-fit: contain"></div>';
+let sealedBlocks = 0; const sealedSeen = [];
+tpl = tpl.replace(/<sc-if value="\{\{ ([\w.]+)\.isSealed \}\}"([^>]*)>([\s\S]*?)<\/sc-if>/g, (m, o, attrs, body) => {
+  sealedBlocks++; sealedSeen.push(o);
+  const photo = o === 'it' ? PHOTO_ITEM : o === 'scan' ? PHOTO_SCAN : /position: absolute/.test(body) ? PHOTO_TILE(o) : PHOTO_INLINE(o);
+  return `<sc-if value="{{ ${o}.sealedArt }}"${attrs}>${body}</sc-if><sc-if value="{{ ${o}.hasPhoto }}" hint-placeholder-val="{{ false }}">${photo}</sc-if>`;
+});
+if (sealedBlocks !== 15) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 15 (' + sealedSeen.join(', ') + ')');
 // Visuel de secours de chaque image de carte (data-fallback), utilisé si l'image ne charge plus.
 tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fallback="{{ ' + o + (o === 'it' ? '.fallbackHi' : '.fallback') + ' }}"');
 
@@ -149,6 +161,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 
 const catalogJs = readFileSync(fileURLToPath(new URL('./catalog.js', import.meta.url)), 'utf8');
 const persistJs = readFileSync(fileURLToPath(new URL('./persist.js', import.meta.url)), 'utf8');
+const sealedJs = readFileSync(fileURLToPath(new URL('./sealed.js', import.meta.url)), 'utf8');
 
 const img = Object.fromEntries([
   ['k1', 'card-pikachu-ex'], ['k2', 'card-mega-meganium-ex'], ['k3', 'card-favianos-ex'], ['k4', 'card-jirachi-ex'],
@@ -179,7 +192,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${persistJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${persistJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
