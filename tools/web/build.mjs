@@ -3,6 +3,7 @@
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
+import { TOKENS, themeTemplate, themeScript, cssVars, usedTokens } from './theme.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const SRC = ROOT + 'docs/12-maquette-v5/Main.dc.html';
@@ -128,6 +129,13 @@ let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
 if (brokenMarks !== 36) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 36');
 
+// Thème (tools/web/theme.mjs) : couleurs du gabarit et de la logique en variables CSS, surfaces sombres repérées.
+const themed = themeTemplate(tpl), themedJs = themeScript(logic);
+const themeErrors = themed.missing.concat(themed.wrong, themedJs.missing, themedJs.wrong);
+if (themeErrors.length) throw new Error('Thème : ' + themeErrors.length + ' couleur(s) sans règle ou règle(s) mal appliquée(s) :\n' + [...new Set(themeErrors)].join('\n'));
+tpl = themed.tpl;
+logic = themedJs.js;
+
 // Gabarit du canevas → gabarit Vue. Les trous {{ a.b }} visent les valeurs de renderVals (préfixe V.)
 // ou un alias de boucle ; sc-if / sc-for deviennent v-if / v-for.
 function toVue(t) {
@@ -196,6 +204,9 @@ Object.assign(img, Object.fromEntries([
   ['k1', 'sv/sv08/238/high'], ['k2', 'me/me02.5/272/high'], ['k3', 'me/me02.5/288/high'], ['k4', 'me/30th/155/high'],
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
+
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + radarJs).filter(n => !(n in TOKENS));
+if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* PKM-App · démo web. Fichier généré par tools/web/build.mjs à partir de
    docs/12-maquette-v5/Main.dc.html : ne pas le modifier à la main. Catalogue réel (web/data/cards.json), collection de démo fictive. */
@@ -326,6 +337,7 @@ body { margin: 0; background: var(--ground); color: var(--ink); font-family: 'Pl
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 input, button { -webkit-tap-highlight-color: transparent; }
 @keyframes pkmSpin { to { transform: rotate(360deg); } }
+${cssVars()}
 ${keyframes}`;
 const fonts = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">';
 // Vue : copie locale pour l'hébergement (hors ligne possible), CDN autorisé pour la page claude.ai.
@@ -384,4 +396,5 @@ mkdirSync(OUT + 'vendor/maplibre', { recursive: true });
   copyFileSync(fileURLToPath(new URL('./node_modules/maplibre-gl/' + f, import.meta.url)), OUT + 'vendor/maplibre/' + f.replace('dist/', '')));
 const imgs = readdirSync(IMG_SRC).filter(f => f.endsWith('.webp'));
 imgs.forEach(f => copyFileSync(IMG_SRC + f, OUT + 'img/' + f));
-console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli.');
+console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli, thème : '
+  + themed.replaced + ' couleurs du gabarit et ' + themedJs.replaced + ' de la logique en variables, ' + themed.surfaces + ' surfaces sombres.');

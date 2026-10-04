@@ -409,7 +409,7 @@
 
   const EMPTY_RADAR = { title: '', subtitle: '' };
   radarProto.vRadar = function (s) {
-    const chip = (on, label, pick) => Object.assign({ label: label, on: on, pick: pick }, this.chip(on), { bg2: on ? '#26345A' : 'rgba(8, 13, 26, 0.82)' });
+    const chip = (on, label, pick) => Object.assign({ label: label, on: on, pick: pick }, this.chip(on), { bg2: on ? 'var(--pkm-chip-on-bg)' : 'rgba(var(--pkm-ink-rgb), 0.82)' });
     const ready = RADAR.status === 'ready', listMode = !!s.rlist || s.rmap === 'off', scanning = s.rscan === 'scanning';
     const reg = RADAR.region[s.rregion], dep = RADAR.dept[s.rdept];
     const crumbs = [{ label: 'France', go: () => this.radarGo('france'), current: s.rlevel === 'france' }];
@@ -419,7 +419,7 @@
     const r = {
       close: () => this.pop(), loading: RADAR.status === 'loading' || RADAR.status === 'idle', error: RADAR.status === 'error',
       retry: () => { RADAR.status = 'idle'; RADAR.load().then(() => this.setState({ rdata: Date.now() })); },
-      crumbs: crumbs.map((c, i) => ({ label: c.label, go: c.go, sep: i > 0, current: c.current ? 'location' : false, color: c.current ? '#FFFFFF' : '#B9C5FF', weight: c.current ? '700' : '600' })),
+      crumbs: crumbs.map((c, i) => ({ label: c.label, go: c.go, sep: i > 0, current: c.current ? 'location' : false, color: c.current ? 'var(--pkm-white)' : 'var(--pkm-link)', weight: c.current ? '700' : '600' })),
       canMap: s.rmap !== 'off', listMode: listMode, listLabel: listMode ? 'Carte' : 'Liste',
       toggleList: () => this.setState({ rlist: !s.rlist, rscan: s.rscan === 'scanning' ? '' : s.rscan }),
       prods: [['all', 'Tout'], ['ETB', 'ETB'], ['DSP', 'Display'], ['UPC', 'UPC'], ['value', 'Objets de valeur']].map(([k, label]) => chip(s.tprod === k, label, () => this.setState({ tprod: k }))),
@@ -433,7 +433,7 @@
     };
     if (!ready) {
       r.title = r.error ? 'Boutiques indisponibles' : 'Chargement des boutiques…';
-      return Object.assign(r, { notStore: true, noScan: true, scanBg: '#26345A', scanFg: '#7D8BA8', scanLabel: 'Balayer', hasHint: false });
+      return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-chip-on-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Balayer', hasHint: false });
     }
     const rows = RADAR.rows(s), n = s.rlevel === 'france' ? RADAR.stores.length : rows.length;
     const where = s.rlevel === 'france' ? 'France métropolitaine' : s.rlevel === 'region' ? (reg ? reg.nom : '') : s.rlevel === 'dept' ? (dep ? dep.nom + ' (' + dep.code + ')' : '') : 'Autour de toi · ' + s.rkm + ' km';
@@ -447,7 +447,7 @@
       r.sectorsTitle = s.rlevel === 'france' ? 'Régions' : 'Départements';
       r.sectors = feats.map(f => f.properties).sort((a, b) => a.nom.localeCompare(b.nom, 'fr')).map((p, i) => {
         const k = (s.rlevel === 'france' ? RADAR.nRegion[p.code] : RADAR.nDept[p.code]) || 0;
-        return { name: (s.rlevel === 'region' ? p.code + ' · ' : '') + p.nom, count: fmt(k), border: i ? '1px solid #1E2B45' : 'none',
+        return { name: (s.rlevel === 'region' ? p.code + ' · ' : '') + p.nom, count: fmt(k), border: i ? '1px solid var(--pkm-line)' : 'none',
           label: p.nom + ' : ' + fmt(k) + ' boutiques', open: () => this.radarGo(s.rlevel === 'france' ? 'region' : 'dept', p.code) };
       });
       r.hasSectors = r.sectors.length > 0 && !(s.rscan === 'done' && s.rlevel === 'region');
@@ -461,7 +461,7 @@
         return {
           name: x.st.name, kind: k.label + (x.st.brand && x.st.brand !== x.st.name ? ' · ' + x.st.brand : ''),
           place: [x.st.city, (RADAR.dept[x.st.dept] || {}).nom].filter(Boolean).join(' · ') + (x.dist !== null ? ' · ' + this.km(Math.round(x.dist * 10) / 10) : ''),
-          pct: x.pct + ' %', color: lv.color, tint: lv.tint, level: lv.label, border: i ? '1px solid #1E2B45' : 'none',
+          pct: x.pct + ' %', color: lv.color, tint: lv.tint, level: lv.label, border: i ? '1px solid var(--pkm-line)' : 'none',
           label: x.st.name + ', indice ' + x.pct + ' %, ' + lv.label.toLowerCase(), open: () => this.radarStore(x.st.id)
         };
       });
@@ -471,8 +471,8 @@
     }
     if (s.rlevel === 'france') r.scanLabel = 'Choisis une région';
     r.noScan = !r.canScan;
-    r.scanBg = r.canScan ? '#A8B6FF' : '#26345A';
-    r.scanFg = r.canScan ? '#0B1120' : '#7D8BA8';
+    r.scanBg = r.canScan ? 'var(--pkm-accent)' : 'var(--pkm-chip-on-bg)';
+    r.scanFg = r.canScan ? 'var(--pkm-on-accent)' : 'var(--pkm-t4)';
     r.hasHint = !!r.hint && !r.hasResults;
     const sel = s.rstore ? rows.find(x => x.st.id === s.rstore) : null;
     if (sel) {
@@ -484,12 +484,12 @@
         place: [x.st.city, (RADAR.dept[x.st.dept] || {}).nom + ' (' + x.st.dept + ')'].filter(Boolean).join(' · ') + (x.dist !== null ? ' · à ' + this.km(Math.round(x.dist * 10) / 10) : ''),
         pct: x.pct + ' %', level: lv.label, color: lv.color, tint: lv.tint,
         why: !!s.rwhy, whyLabel: s.rwhy ? 'Masquer le détail' : 'Pourquoi ' + x.pct + ' % ?', toggleWhy: () => this.setState({ rwhy: !s.rwhy }),
-        reasons: x.c.reasons.map(rs => ({ sign: rs.sign, text: rs.text, color: rs.pts > 0 ? '#3DDC84' : '#FF8A8A' })),
+        reasons: x.c.reasons.map(rs => ({ sign: rs.sign, text: rs.text, color: rs.pts > 0 ? 'var(--pkm-green)' : 'var(--pkm-red)' })),
         total: 'Total ' + x.c.raw + ' points' + (x.c.clamped ? ', ramené entre 5 et 90 %' : '') + ' · arrondi à 5 % près.',
         route: 'https://www.google.com/maps/dir/?api=1&destination=' + x.st.lat + ',' + x.st.lon,
         osm: 'https://www.openstreetmap.org/' + osm,
         alertOn: on, alertLabel: on ? 'Alerte activée' : 'Activer une alerte', toggleAlert: () => this.radarAlert(x.st.id),
-        alertBg: on ? '#A8B6FF' : 'transparent', alertFg: on ? '#0B1120' : '#F3F6FC',
+        alertBg: on ? 'var(--pkm-accent)' : 'transparent', alertFg: on ? 'var(--pkm-on-accent)' : 'var(--pkm-t1)',
         back: () => this.setState({ rstore: '', rwhy: false })
       };
     }

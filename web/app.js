@@ -119,9 +119,9 @@ class Component extends DCLogic {
   profRules() { return { ur: [3, 10], val: [1000, 5000] }; }
   cats() {
     return {
-      novice: { name: 'Novice', color: '#5EE0CF', tint: 'rgba(94, 224, 207, 0.12)', edge: 'rgba(94, 224, 207, 0.34)', icon: 'M12 20.5v-8 M12 12.5C12 9 9.4 6.5 5.5 6.5c0 3.6 2.6 6 6.5 6z M12 14.5c0-3 2.3-5.2 5.6-5.2 0 3.1-2.3 5.2-5.6 5.2z', desc: 'Tu démarres : moins de 3 cartes ultra rares et moins de 1 000 € de collection. Chaque prix est expliqué.' },
-      regular: { name: 'Régulier', color: '#A8B6FF', tint: 'rgba(168, 182, 255, 0.12)', edge: 'rgba(168, 182, 255, 0.34)', icon: 'M13 3L5 13.5h6L10 21l8-10.5h-6z', desc: 'Collection installée : au moins 3 cartes ultra rares ou 1 000 € de valeur.' },
-      passion: { name: 'Passionné', color: '#FFB547', tint: 'rgba(255, 181, 71, 0.12)', edge: 'rgba(255, 181, 71, 0.34)', icon: 'M4 17.5L3 8l5 4 4-6.5 4 6.5 5-4-1 9.5z M5 20.5h14', desc: 'Grosse collection : au moins 10 cartes ultra rares ou 5 000 € de valeur. Tous les détails.' }
+      novice: { name: 'Novice', color: 'var(--pkm-teal)', tint: 'rgba(var(--pkm-teal-rgb), 0.12)', edge: 'rgba(var(--pkm-teal-rgb), 0.34)', icon: 'M12 20.5v-8 M12 12.5C12 9 9.4 6.5 5.5 6.5c0 3.6 2.6 6 6.5 6z M12 14.5c0-3 2.3-5.2 5.6-5.2 0 3.1-2.3 5.2-5.6 5.2z', desc: 'Tu démarres : moins de 3 cartes ultra rares et moins de 1 000 € de collection. Chaque prix est expliqué.' },
+      regular: { name: 'Régulier', color: 'var(--pkm-accent)', tint: 'rgba(var(--pkm-accent-rgb), 0.12)', edge: 'rgba(var(--pkm-accent-rgb), 0.34)', icon: 'M13 3L5 13.5h6L10 21l8-10.5h-6z', desc: 'Collection installée : au moins 3 cartes ultra rares ou 1 000 € de valeur.' },
+      passion: { name: 'Passionné', color: 'var(--pkm-amber)', tint: 'rgba(var(--pkm-amber-rgb), 0.12)', edge: 'rgba(var(--pkm-amber-rgb), 0.34)', icon: 'M4 17.5L3 8l5 4 4-6.5 4 6.5 5-4-1 9.5z M5 20.5h14', desc: 'Grosse collection : au moins 10 cartes ultra rares ou 5 000 € de valeur. Tous les détails.' }
     };
   }
   adapts(cat) {
@@ -239,9 +239,9 @@ class Component extends DCLogic {
   }
   // Probabilité d'arrivage : forte dès 70 %, moyenne dès 40 %.
   probLevel(n) {
-    return n >= 70 ? { label: 'Forte', color: '#3DDC84', tint: 'rgba(61, 220, 132, 0.16)' }
-      : n >= 40 ? { label: 'Moyenne', color: '#F5B14C', tint: 'rgba(245, 177, 76, 0.16)' }
-      : { label: 'Faible', color: '#9AA8C3', tint: 'rgba(154, 168, 195, 0.14)' };
+    return n >= 70 ? { label: 'Forte', color: 'var(--pkm-green)', tint: 'rgba(var(--pkm-green-rgb), 0.16)' }
+      : n >= 40 ? { label: 'Moyenne', color: 'var(--pkm-orange)', tint: 'rgba(var(--pkm-orange-rgb), 0.16)' }
+      : { label: 'Faible', color: 'var(--pkm-gray)', tint: 'rgba(var(--pkm-gray-rgb), 0.14)' };
   }
   srcLabel(code) {
     if (code === 'annonce') return 'Annonce du magasin';
@@ -308,10 +308,10 @@ class Component extends DCLogic {
   }
   // Puce de filtre (pilule) et choix sélectionnable (anneau pastel).
   chip(on) {
-    return { bg: on ? '#26345A' : 'transparent', bc: on ? '#3A4A75' : '#2A3A5C', fg: on ? '#FFFFFF' : '#C9D3EA' };
+    return { bg: on ? 'var(--pkm-chip-on-bg)' : 'var(--pkm-chip-bg)', bc: on ? 'var(--pkm-chip-on-bc)' : 'var(--pkm-chip-bc)', fg: on ? 'var(--pkm-chip-on-fg)' : 'var(--pkm-chip-fg)' };
   }
   choice(on) {
-    return { bc: on ? '#A8B6FF' : '#24345C', ring: on ? 'inset 0 0 0 1px #A8B6FF' : 'none', bg: on ? '#1A2645' : '#111A2C', fg: '#F3F6FC' };
+    return { bc: on ? 'var(--pkm-choice-on-bc)' : 'var(--pkm-choice-bc)', ring: on ? 'inset 0 0 0 1px var(--pkm-choice-on-bc)' : 'none', bg: on ? 'var(--pkm-choice-on-bg)' : 'var(--pkm-choice-bg)', fg: 'var(--pkm-t1)' };
   }
   // Courbe : tracé, aire et point final, à l'échelle du cadre W × H.
   spark(pts, W, H, padTop, padBottom) {
@@ -324,7 +324,7 @@ class Component extends DCLogic {
     return {
       line: line, area: line + ' L' + xs[n - 1].toFixed(1) + ' ' + H + ' L' + xs[0].toFixed(1) + ' ' + H + ' Z',
       xs: xs, ys: ys, step: step, mn: mn, mx: mx, dotX: xs[n - 1].toFixed(1), dotY: ys[n - 1].toFixed(1),
-      color: pts[n - 1] < pts[0] ? '#FF6B6B' : '#3DDC84'
+      color: pts[n - 1] < pts[0] ? 'var(--pkm-down)' : 'var(--pkm-up)'
     };
   }
 
@@ -632,7 +632,7 @@ class Component extends DCLogic {
         meta: a.where + ' · ' + this.d2(a.date),
         amount: this.eur(a.lines.reduce((t, l) => t + x.val(x.P[l.pid]) * l.qty, 0)),
         amountLabel: noCost ? 'prix d’achat à compléter' : 'payé ' + this.eur(a.total),
-        labelColor: noCost ? '#F5B14C' : '#7D8BA8',
+        labelColor: noCost ? 'var(--pkm-orange)' : 'var(--pkm-t4)',
         border: x.line(i), open: () => this.push('item', { itemId: l0.pid })
       });
     });
@@ -648,7 +648,7 @@ class Component extends DCLogic {
       ['Scanne ta première carte', s.scanned > 0],
       ['Regarde d’où vient sa cote (fiche de l’article)', false],
       ['Reviens chaque semaine voir la valeur évoluer', x.prof.streak >= 2]
-    ].map((r, i) => ({ n: String(i + 1), label: r[0], done: r[1], color: r[1] ? '#3DDC84' : '#5EE0CF' }));
+    ].map((r, i) => ({ n: String(i + 1), label: r[0], done: r[1], color: r[1] ? 'var(--pkm-green)' : 'var(--pkm-teal)' }));
     return {
       valueBig: x.mask(this.eur(x.total)), mkt24: this.signed(mkt24), mktColor: x.col(mkt24),
       units: (x.nCards + x.nSealed) + ' articles · ' + x.nCards + (x.nCards > 1 ? ' cartes · ' : ' carte · ') + x.nSealed + (x.nSealed > 1 ? ' scellés' : ' scellé'),
@@ -688,7 +688,7 @@ class Component extends DCLogic {
         const st = c.stock[p.id], ch = x.ch7[p.id];
         return Object.assign(this.look(p), {
           name: p.name, sub: p.sub, qty: '×' + st.qty, value: this.eur(x.val(p) * st.qty), unit: this.eur(x.val(p)) + ' / u',
-          change: ch === null ? '—' : this.chg(ch), changeColor: ch === null ? '#9AA8C3' : x.col(ch),
+          change: ch === null ? '—' : this.chg(ch), changeColor: ch === null ? 'var(--pkm-t3)' : x.col(ch),
           open: () => this.push('item', { itemId: p.id })
         });
       }),
@@ -704,10 +704,10 @@ class Component extends DCLogic {
       name: p.name, sub: p.sub, owned: owned,
       ownedBadge: owned ? '×' + st.qty + ' dans ta collection' : 'Pas dans ta collection',
       hasCote: k !== null, noCote: k === null, cote: k !== null ? this.eur(k) : '—',
-      change: ch === null ? 'Pas encore de variation' : this.chg(ch) + ' sur 7 jours', changeColor: ch === null ? '#9AA8C3' : x.col(ch),
+      change: ch === null ? 'Pas encore de variation' : this.chg(ch) + ' sur 7 jours', changeColor: ch === null ? 'var(--pkm-t3)' : x.col(ch),
       release: p.release ? 'Sortie prévue le ' + this.d3(p.release) + '. Pas de cote avant les premières ventes : seul le prix demandé en précommande est connu.' : '',
       hold: owned ? x.mask(this.eur(u * st.qty)) : '', holdLatent: owned && known > 0 ? x.mask(this.signed(lat)) + ' (' + this.signedPct(lat / st.cost * 100) + ')' : (owned ? 'Plus-value : prix d’achat à compléter' : ''),
-      holdColor: owned && known > 0 ? x.col(lat) : '#F5B14C',
+      holdColor: owned && known > 0 ? x.col(lat) : 'var(--pkm-orange)',
       pru: known > 0 ? 'Coût moyen ' + this.eur(st.cost / known) + ' / u' : (owned ? 'Coût d’achat inconnu' : ''),
       cantSell: !owned, sellOpacity: owned ? '1' : '0.45'
     });
@@ -725,19 +725,19 @@ class Component extends DCLogic {
         chartLabel: 'Cote PKM archivée sur 30 jours : de ' + this.eur(h[0]) + ' à ' + this.eur(h[n - 1])
       });
     } else {
-      Object.assign(it, { line: '', area: '', chartColor: '#9AA8C3', dotX: '0', dotY: '0', hasHi: false, readout: '', hits: [], firstDate: '', lastDate: '', rangeText: '', chartLabel: '' });
+      Object.assign(it, { line: '', area: '', chartColor: 'var(--pkm-t3)', dotX: '0', dotY: '0', hasHi: false, readout: '', hits: [], firstDate: '', lastDate: '', rangeText: '', chartLabel: '' });
     }
     const defs = [
-      ['cm', 'Cardmarket', 'Tendance · fichier public du 03/10', 'calculé', '#6C84F2'],
-      ['low', 'Cardmarket', p.release ? 'Précommandes · annonces du 03/10' : 'Plus bas · annonces du 03/10', 'demandé', '#6C84F2'],
-      ['ebay', 'eBay', 'Ventes réussies · 30 derniers jours', 'vendu', '#F5B14C'],
-      ['tcp', 'TCGplayer', 'Marché US, converti en € · via TCGdex', 'calculé', '#5EE0CF']
+      ['cm', 'Cardmarket', 'Tendance · fichier public du 03/10', 'calculé', 'var(--pkm-iris)'],
+      ['low', 'Cardmarket', p.release ? 'Précommandes · annonces du 03/10' : 'Plus bas · annonces du 03/10', 'demandé', 'var(--pkm-iris)'],
+      ['ebay', 'eBay', 'Ventes réussies · 30 derniers jours', 'vendu', 'var(--pkm-orange)'],
+      ['tcp', 'TCGplayer', 'Marché US, converti en € · via TCGdex', 'calculé', 'var(--pkm-teal)']
     ].filter(r => typeof p[r[0]] === 'number');
     it.sources = defs.map((r, i) => ({
       label: r[1], sub: r[2], tag: r[3], dot: r[4], value: this.eur(p[r[0]]), border: x.line(i),
-      tagBg: r[3] === 'demandé' ? 'rgba(245, 177, 76, 0.16)' : r[3] === 'vendu' ? 'rgba(61, 220, 132, 0.14)' : 'rgba(168, 182, 255, 0.14)',
-      tagFg: r[3] === 'demandé' ? '#F5B14C' : r[3] === 'vendu' ? '#3DDC84' : '#B9C5FF',
-      fg: r[0] === 'low' ? '#9AA8C3' : '#F3F6FC', weight: r[0] === 'low' ? '500' : '700'
+      tagBg: r[3] === 'demandé' ? 'rgba(var(--pkm-orange-rgb), 0.16)' : r[3] === 'vendu' ? 'rgba(var(--pkm-green-rgb), 0.14)' : 'rgba(var(--pkm-accent-rgb), 0.14)',
+      tagFg: r[3] === 'demandé' ? 'var(--pkm-orange)' : r[3] === 'vendu' ? 'var(--pkm-green)' : 'var(--pkm-link)',
+      fg: r[0] === 'low' ? 'var(--pkm-t3)' : 'var(--pkm-t1)', weight: r[0] === 'low' ? '500' : '700'
     }));
     const nM = defs.filter(r => r[0] !== 'low').length;
     it.coteRule = nM === 0 ? 'Pas encore de prix « marché » : la cote apparaîtra après les premières ventes.'
@@ -760,14 +760,14 @@ class Component extends DCLogic {
     const s = x.s, c = x.c, pid = this.scanTarget(s), p = x.P[pid], k = this.cote(p), sealed = s.scanMode === 'sealed';
     return Object.assign(this.look(p), {
       modeCard: !sealed, modeSealed: sealed,
-      cardBg: sealed ? 'transparent' : '#A8B6FF', cardFg: sealed ? '#C9D3EA' : '#0B1120',
-      sealedBg: sealed ? '#A8B6FF' : 'transparent', sealedFg: sealed ? '#0B1120' : '#C9D3EA',
+      cardBg: sealed ? 'transparent' : 'var(--pkm-accent)', cardFg: sealed ? 'var(--pkm-t2)' : 'var(--pkm-on-accent)',
+      sealedBg: sealed ? 'var(--pkm-accent)' : 'transparent', sealedFg: sealed ? 'var(--pkm-on-accent)' : 'var(--pkm-t2)',
       toCard: () => this.setState({ scanMode: 'card', scanIdx: 0, scanSheet: false }),
       toSealed: () => this.setState({ scanMode: 'sealed', scanIdx: 0, scanSheet: false }),
       name: p.name, status: (sealed ? 'Produit détecté · ' : 'Carte détectée · ') + p.name,
       conf: (sealed ? 'Code-barres lu' : 'Reconnue à ' + (93 + p.seed % 7) + ' %') + ' · cote ' + (k !== null ? this.eur(k) : '—'),
       hint: sealed ? 'Vise le code-barres ou la face avant de la boîte' : 'Place la carte dans le cadre, bien à plat',
-      torchOn: !!s.torch, torchFg: s.torch ? '#0B1120' : '#FFFFFF', torchBg: s.torch ? '#FFD66B' : 'rgba(8, 13, 26, 0.6)',
+      torchOn: !!s.torch, torchFg: s.torch ? 'var(--pkm-ink)' : 'var(--pkm-white)', torchBg: s.torch ? 'var(--pkm-gold)' : 'rgba(var(--pkm-ink-rgb), 0.6)',
       torchLabel: s.torch ? 'Éteindre la lampe' : 'Allumer la lampe', torch: () => this.setState({ torch: !s.torch }),
       glow: s.torch ? 'radial-gradient(60% 45% at 50% 40%, rgba(255, 244, 214, 0.22), rgba(255, 244, 214, 0) 70%)' : 'none',
       next: () => this.setState({ scanIdx: s.scanIdx + 1, scanSheet: false }),
@@ -796,7 +796,7 @@ class Component extends DCLogic {
       conf: sealed ? 'Code-barres lu : correspondance exacte' : 'Reconnue à ' + (93 + p.seed % 7) + ' % : vérifie le nom et la série',
       cote: k !== null ? this.eur(k) : '—', srcs: srcs,
       ownedText: st.qty > 0 ? 'Déjà ×' + st.qty + ' dans ta collection' : 'Nouveau dans ta collection',
-      ownedBg: st.qty > 0 ? 'rgba(168, 182, 255, 0.14)' : 'rgba(61, 220, 132, 0.14)', ownedFg: st.qty > 0 ? '#B9C5FF' : '#3DDC84',
+      ownedBg: st.qty > 0 ? 'rgba(var(--pkm-accent-rgb), 0.14)' : 'rgba(var(--pkm-green-rgb), 0.14)', ownedFg: st.qty > 0 ? 'var(--pkm-link)' : 'var(--pkm-green)',
       langs: ['FR', 'JP', 'EN'].map(l => Object.assign({ label: l, on: sf.lang === l, pick: () => this.setSF({ lang: l }) }, this.chip(sf.lang === l))),
       conds: conds.map((l, i) => Object.assign({ label: l, on: sf.cond === i, pick: () => this.setSF({ cond: i }) }, this.chip(sf.cond === i))),
       qty: String(sf.qty), dec: () => this.setSF({ qty: Math.max(1, sf.qty - 1) }), inc: () => this.setSF({ qty: Math.min(99, sf.qty + 1) }),
@@ -833,7 +833,7 @@ class Component extends DCLogic {
         return Object.assign(this.look(p), {
           name: p.name, sub: p.sub, border: x.line(i), owned: own,
           cote: k !== null ? this.eur(k) : '~' + this.eur(p.low), coteLabel: k !== null ? 'cote PKM' : 'demandé',
-          right: p.release ? 'Sortie le ' + this.d2(p.release) : this.chg(v) + ' · 7 j', rightColor: p.release ? '#F5B14C' : x.col(v),
+          right: p.release ? 'Sortie le ' + this.d2(p.release) : this.chg(v) + ' · 7 j', rightColor: p.release ? 'var(--pkm-orange)' : x.col(v),
           open: () => this.push('item', { itemId: p.id })
         });
       }),
@@ -857,7 +857,7 @@ class Component extends DCLogic {
       tierLine: 'Palier ' + x.tier.cur.name + (x.tier.next ? ' · ' + Math.floor(x.tier.pct) + ' % vers ' + x.tier.next.name : ''),
       catName: cur.name, catColor: cur.color, catIcon: cur.icon, catDesc: cur.desc, catTint: cur.tint,
       catSource: declaredUsed ? 'Anticipé à l’inscription · s’ajuste tout seul dès 10 articles' : 'S’adapte tout seul à chaque ajout, scan ou vente',
-      steps: keys.map((k, i) => ({ name: C[k].name, bg: i === lv ? C[k].tint : 'transparent', bc: i === lv ? C[k].color : '#2A3A5C', fg: i === lv ? C[k].color : '#7D8BA8', weight: i === lv ? '800' : '600' })),
+      steps: keys.map((k, i) => ({ name: C[k].name, bg: i === lv ? C[k].tint : 'transparent', bc: i === lv ? C[k].color : 'var(--pkm-line-2)', fg: i === lv ? C[k].color : 'var(--pkm-t4)', weight: i === lv ? '800' : '600' })),
       anticip: next ? nx.name + ' dès ' + R.ur[lv] + ' cartes ultra rares (encore ' + needUr + ') ou dès ' + this.eur0(R.val[lv]) + ' de collection (encore ' + this.eur(needVal) + ').'
         : 'Tu as le profil le plus complet. Il reste à jour tout seul.',
       nextColor: nx.color, nextTint: nx.tint, nextEdge: nx.edge,
@@ -877,11 +877,11 @@ class Component extends DCLogic {
     const ladder = T.map((r, i) => ({
       name: r.name, color: r.color, sym: r.sym, min: i === 0 ? 'Dès le premier article' : 'À partir de ' + this.eur0(r.min),
       state: i < t.i ? 'Atteint' : i === t.i ? (t.next ? 'En cours · ' + Math.floor(t.pct) + ' %' : 'Atteint') : 'À venir',
-      stateColor: i < t.i ? '#3DDC84' : i === t.i ? r.color : '#7D8BA8',
-      bg: i === t.i ? 'rgba(168, 182, 255, 0.08)' : 'transparent', op: i > t.i ? '0.6' : '1'
+      stateColor: i < t.i ? 'var(--pkm-green)' : i === t.i ? r.color : 'var(--pkm-t4)',
+      bg: i === t.i ? 'rgba(var(--pkm-accent-rgb), 0.08)' : 'transparent', op: i > t.i ? '0.6' : '1'
     })).reverse().map((r, i) => Object.assign(r, { border: x.line(i) }));
     const weeks = [];
-    for (let k = 7; k >= 0; k--) weeks.push({ bg: w[k] ? '#A8B6FF' : '#24345C', h: w[k] ? '34px' : '14px' });
+    for (let k = 7; k >= 0; k--) weeks.push({ bg: w[k] ? 'var(--pkm-accent)' : 'var(--pkm-track)', h: w[k] ? '34px' : '14px' });
     const graded = x.cat.find(p => p.grade && x.c.stock[p.id].qty > 0);
     const lot = s.purchases.find(a => a.lines.length > 1);
     const ach = [
@@ -891,7 +891,7 @@ class Component extends DCLogic {
       ['Premier lot réparti', !!lot, lot ? 'Lot ' + lot.where + ' du ' + this.d2(lot.date) : 'Enregistre un lot', lot ? 1 : 0],
       ['10 cartes ultra rares', x.prof.ur >= 10, Math.min(x.prof.ur, 10) + ' / 10', Math.min(1, x.prof.ur / 10)],
       ['Collection à 5 000 €', x.total >= 5000, this.eur0(Math.min(x.total, 5000)) + ' / 5 000 €', Math.min(1, x.total / 5000)]
-    ].map(a => ({ label: a[0], done: a[1], todo: !a[1], sub: a[2], barW: (a[3] * 100).toFixed(0) + '%', color: a[1] ? '#3DDC84' : '#A8B6FF', bg: a[1] ? 'rgba(61, 220, 132, 0.14)' : 'rgba(168, 182, 255, 0.10)' }));
+    ].map(a => ({ label: a[0], done: a[1], todo: !a[1], sub: a[2], barW: (a[3] * 100).toFixed(0) + '%', color: a[1] ? 'var(--pkm-green)' : 'var(--pkm-accent)', bg: a[1] ? 'rgba(var(--pkm-green-rgb), 0.14)' : 'rgba(var(--pkm-accent-rgb), 0.10)' }));
     return Object.assign(this.tierView(x), {
       value: x.mask(this.eur(x.total)), ladder: ladder, weeks: weeks,
       streak: x.prof.streak + (x.prof.streak > 1 ? ' semaines' : ' semaine'),
@@ -907,7 +907,7 @@ class Component extends DCLogic {
     return {
       promoTitle: s.adv ? 'Mode avancé activé' : 'Va plus loin quand tu veux',
       cta: s.adv ? 'Revenir au mode simple' : 'Activer le mode avancé',
-      ctaBg: s.adv ? 'transparent' : '#A8B6FF', ctaFg: s.adv ? '#F3F6FC' : '#0B1120',
+      ctaBg: s.adv ? 'transparent' : 'var(--pkm-accent)', ctaFg: s.adv ? 'var(--pkm-t1)' : 'var(--pkm-on-accent)',
       fan: fan.map(r => ({ img: I[r[0]], left: r[1], top: r[2], rot: r[3] })),
       valuations: [['pkm', 'Cote PKM'], ['cm', 'Tendance CM'], ['low', 'Plus bas CM']].map(([k, label]) => Object.assign(
         { label: label, on: s.valuation === k, pick: () => this.setState({ valuation: k }) }, this.chip(s.valuation === k))),
@@ -917,11 +917,11 @@ class Component extends DCLogic {
         low: 'Annonce la moins chère sur Cardmarket : un prix demandé, souvent plus bas que le prix vendu.'
       }[s.valuation],
       sources: [
-        ['Cardmarket', 'Fichier public quotidien · 03/10/2026 à 07:00', '#3DDC84', 'connecté'],
-        ['TCGdex', 'Catalogue FR, images et prix TCGplayer', '#3DDC84', 'connecté'],
-        ['eBay', 'API officielle, ventes réussies · accès à confirmer', '#F5B14C', 'à vérifier'],
-        ['Archive maison', 'Un relevé par jour depuis le 04/09/2026', '#3DDC84', 'actif'],
-        ['Vinted, Leboncoin', 'Pas d’API publique, pas de scraping', '#56648A', 'non connectés']
+        ['Cardmarket', 'Fichier public quotidien · 03/10/2026 à 07:00', 'var(--pkm-green)', 'connecté'],
+        ['TCGdex', 'Catalogue FR, images et prix TCGplayer', 'var(--pkm-green)', 'connecté'],
+        ['eBay', 'API officielle, ventes réussies · accès à confirmer', 'var(--pkm-orange)', 'à vérifier'],
+        ['Archive maison', 'Un relevé par jour depuis le 04/09/2026', 'var(--pkm-green)', 'actif'],
+        ['Vinted, Leboncoin', 'Pas d’API publique, pas de scraping', 'var(--pkm-off)', 'non connectés']
       ].map((r, i) => ({ label: r[0], sub: r[1], dot: r[2], state: r[3], border: x.line(i) })),
       feesList: pk.map((k, i) => { const pf = s.platforms[k]; return { label: pf.label, rule: this.feeRule(pf) + ' · port ' + this.eur(this.num(pf.port) || 0), border: x.line(i) }; }),
       lotsText: lotsAll.length + (lotsAll.length > 1 ? ' lots' : ' lot') + ' · répartition du coût',
@@ -937,9 +937,9 @@ class Component extends DCLogic {
       questions: this.questions().map(q => ({ q: q.q, opts: q.opts.map((o, v) => Object.assign(
         { label: o, on: s.answers[q.k] === v, pick: () => this.setAnswer(q.k, v) }, this.choice(s.answers[q.k] === v))) })),
       predName: cur.name, predColor: cur.color, predIcon: cur.icon, predDesc: cur.desc, predTint: cur.tint, predEdge: cur.edge,
-      predSteps: ['novice', 'regular', 'passion'].map((k, i) => ({ name: C[k].name, bg: i === pr.lvl ? C[k].tint : 'transparent', bc: i === pr.lvl ? C[k].color : '#2A3A5C', fg: i === pr.lvl ? C[k].color : '#7D8BA8' })),
+      predSteps: ['novice', 'regular', 'passion'].map((k, i) => ({ name: C[k].name, bg: i === pr.lvl ? C[k].tint : 'transparent', bc: i === pr.lvl ? C[k].color : 'var(--pkm-line-2)', fg: i === pr.lvl ? C[k].color : 'var(--pkm-t4)' })),
       adapts: this.adapts(pr.cat).map(t => ({ text: t, color: cur.color })),
-      dots: [1, 2, 3].map(n => ({ w: n === s.onb ? '22px' : '8px', bg: n <= s.onb ? '#A8B6FF' : '#2A3A5C' })),
+      dots: [1, 2, 3].map(n => ({ w: n === s.onb ? '22px' : '8px', bg: n <= s.onb ? 'var(--pkm-accent)' : 'var(--pkm-line-2)' })),
       next1: () => this.setState({ onb: 2 }), next2: () => this.setState({ onb: 3 }),
       back: () => this.setState({ onb: Math.max(1, s.onb - 1) }),
       skip: () => this.setState({ onb: 0 }),
@@ -1020,7 +1020,7 @@ class Component extends DCLogic {
     const team = {
       members: ['toi', 'sam'].map(k => ({
         initial: k === 'toi' ? 'T' : 'S', name: who[k], role: k === 'toi' ? 'Compte principal' : 'Associé·e',
-        avatarBg: k === 'toi' ? '#B9C5FF' : '#FFC9A8', shareLabel: (k === 'toi' ? s.split : 100 - s.split) + ' % de la marge nette',
+        avatarBg: k === 'toi' ? 'var(--pkm-link)' : 'var(--pkm-peach)', shareLabel: (k === 'toi' ? s.split : 100 - s.split) + ' % de la marge nette',
         amount: this.signed(parts[k]), color: col(parts[k]), apport: this.eur(apports[k])
       })),
       rules: [50, 60, 70].map(n => Object.assign({ label: n + ' / ' + (100 - n), on: s.split === n, pick: () => this.setState({ split: n }) }, this.chip(s.split === n))),
@@ -1045,7 +1045,7 @@ class Component extends DCLogic {
   // Saisie : ajout manuel à la collection, ou vente faite ailleurs.
   vSheet(x) {
     const s = x.s, c = x.c, P = x.P, f = s.f, isSell = s.sheet === 'sell', isBuy = !isSell, col = x.col;
-    const segOn = on => ({ bg: on ? '#A8B6FF' : 'transparent', fg: on ? '#0B1120' : '#C9D3EA' });
+    const segOn = on => ({ bg: on ? 'var(--pkm-accent)' : 'transparent', fg: on ? 'var(--pkm-on-accent)' : 'var(--pkm-t2)' });
     const sb = segOn(isBuy), ss = segOn(isSell);
     const sh = {
       isSell: isSell, isBuy: isBuy, buyBg: sb.bg, buyFg: sb.fg, sellBg: ss.bg, sellFg: ss.fg,
@@ -1073,7 +1073,7 @@ class Component extends DCLogic {
         commission: f.commission === null ? this.fmtIn(this.r2(d.auto)) : f.commission, onCommission: e => this.setF({ commission: e.target.value }),
         commissionHint: 'Règle ' + pf.label + ' : ' + this.feeRule(pf),
         previewTitle: 'Marge nette estimée',
-        big: d.price > 0 ? this.signed(r.margin) : '—', bigColor: d.price > 0 ? col(r.margin) : '#9AA8C3',
+        big: d.price > 0 ? this.signed(r.margin) : '—', bigColor: d.price > 0 ? col(r.margin) : 'var(--pkm-t3)',
         lines: [
           { label: 'Commission ' + pf.label, value: this.minus(r.commission) },
           { label: 'Port et emballage', value: this.minus(r.port) },
@@ -1090,7 +1090,7 @@ class Component extends DCLogic {
         products: x.cat.filter(p => !p.release).map(p => tile(p, (c.stock[p.id].qty > 0 ? '×' + c.stock[p.id].qty + ' · ' : '') + this.eur(x.val(p)), p.id === pB.id, () => this.setF({ pid: p.id }))),
         platforms: [], port: '', onPort: null, portHint: '', commission: '', onCommission: null, commissionHint: '',
         previewTitle: 'Valeur ajoutée',
-        big: this.signed(add), bigColor: '#F3F6FC',
+        big: this.signed(add), bigColor: 'var(--pkm-t1)',
         lines: [
           { label: 'Cote PKM unitaire', value: this.eur(u) },
           { label: 'Plus-value à l’ajout', value: ok ? this.signed(add - price) : 'prix non renseigné' },
@@ -1171,7 +1171,7 @@ class Component extends DCLogic {
       }),
       history: st.history.map((hh, i) => ({ date: this.d2(hh.date), text: hh.text, border: x.line(i) })),
       alertOn: on, alertLabel: on ? 'Alerte activée' : 'Me prévenir des arrivages',
-      alertBg: on ? 'transparent' : '#A8B6FF', alertFg: on ? '#3DDC84' : '#0B1120', alertBc: on ? 'rgba(61, 220, 132, 0.5)' : '#A8B6FF',
+      alertBg: on ? 'transparent' : 'var(--pkm-accent)', alertFg: on ? 'var(--pkm-green)' : 'var(--pkm-on-accent)', alertBc: on ? 'rgba(var(--pkm-green-rgb), 0.5)' : 'var(--pkm-accent)',
       toggleAlert: () => this.toggleAlert(st.id),
       route: () => this.say('Démo : l’itinéraire s’ouvrirait dans ton application de cartes')
     };
@@ -1179,7 +1179,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.st(), c = this.compute(s), cat = this.catalog(), P = c.byId;
-    const col = n => (this.r2(n) < 0 ? '#FF6B6B' : '#3DDC84');
+    const col = n => (this.r2(n) < 0 ? 'var(--pkm-down)' : 'var(--pkm-up)');
     const val = p => this.unitVal(p, s.valuation);
     const hist = {}, ch7 = {};
     cat.forEach(p => { hist[p.id] = this.history(p); ch7[p.id] = this.change7(hist[p.id]); });
@@ -1196,7 +1196,7 @@ class Component extends DCLogic {
     const x = {
       s: s, c: c, cat: cat, P: P, col: col, val: val, hist: hist, ch7: ch7, owned: owned, total: total, cost: cost, knownVal: knownVal,
       unk: unk, nCards: nCards, nSealed: nSealed, tier: tier, prof: prof, C: C, catKey: catKey,
-      mask: t => (s.masked ? '•••• €' : t), line: i => (i === 0 ? 'none' : '1px solid #1E2B45'),
+      mask: t => (s.masked ? '•••• €' : t), line: i => (i === 0 ? 'none' : '1px solid var(--pkm-line)'),
       plat: k => (s.platforms[k] ? s.platforms[k].label : k), who: { toi: 'Toi', sam: 'Sam' }
     };
     const advOnly = ['lots', 'fees', 'team', 'io'];
@@ -1213,7 +1213,7 @@ class Component extends DCLogic {
     const detail = ['item', 'store', 'profile', 'tiers', 'settings', 'sales', 'sale', 'lots', 'fees', 'team', 'io'].indexOf(screen) >= 0;
     const syncText = ['home', 'collection', 'market', 'item'].indexOf(screen) >= 0 ? 'Cotes mises à jour automatiquement · 3 oct. à 07:00'
       : (['territory', 'store'].indexOf(screen) >= 0 ? 'Estimations mises à jour en continu · 3 oct. à 07:00' : '');
-    const tabInfo = k => ({ fg: sec === k ? '#FFFFFF' : '#7D8BA8', dot: sec === k ? '#A8B6FF' : 'transparent', cur: sec === k ? 'page' : 'false' });
+    const tabInfo = k => ({ fg: sec === k ? 'var(--pkm-nav-on)' : 'var(--pkm-nav-off)', dot: sec === k ? 'var(--pkm-nav-dot)' : 'transparent', cur: sec === k ? 'page' : 'false' });
     const th = tabInfo('home'), tc = tabInfo('collection'), tm = tabInfo('market'), tt = tabInfo('territory');
     const isScan = screen === 'scan';
     return {
@@ -1470,7 +1470,7 @@ class Component extends DCLogic {
       return Object.assign(this.look(p), {
         name: p.name, sub: p.sub, border: x.line(start + i), owned: !!(st && st.qty > 0),
         cote: k !== null ? this.eur(k) : '—', coteLabel: k !== null ? 'cote PKM' : 'sans prix',
-        right: k !== null ? 'cote PKM' : 'sans prix', rightColor: '#9AA8C3',
+        right: k !== null ? 'cote PKM' : 'sans prix', rightColor: 'var(--pkm-t3)',
         open: () => this.openTcg(p.id)
       });
     }));
@@ -1503,7 +1503,7 @@ class Component extends DCLogic {
         const k = own[e.id] || 0, cards = e.n + (e.n > 1 ? ' cartes' : ' carte'), logo = logoUrl(e.logo), hasLogo = !!logo && !BROKEN.has(logo);
         return {
           name: e.name, sub: (e.date ? this.d3(e.date) + ' · ' : '') + cards, logo: logo, hasLogo: hasLogo, noLogo: !hasLogo,
-          code: e.id.toUpperCase(), owned: k > 0, ownedText: k + ' à toi', border: i === 0 ? 'none' : '1px solid #1E2B45',
+          code: e.id.toUpperCase(), owned: k > 0, ownedText: k + ' à toi', border: i === 0 ? 'none' : '1px solid var(--pkm-line)',
           label: e.name + ', ' + cards + (k ? ', ' + k + ' à toi' : ''), open: () => this.push('set', { setId: e.id, setFilter: 'all' })
         };
       })
@@ -1552,7 +1552,7 @@ class Component extends DCLogic {
         const k = this.cote(p), q = qty(p);
         return {
           img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: p.numShort, owned: q > 0, qty: '×' + q,
-          cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), coteColor: k === null ? '#7D8BA8' : '#F3F6FC',
+          cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), coteColor: k === null ? 'var(--pkm-t4)' : 'var(--pkm-t1)',
           label: p.name + ', ' + p.numLabel + (k !== null ? ', cote ' + this.eur(k) : ', sans prix') + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
         };
@@ -1823,7 +1823,7 @@ class Component extends DCLogic {
       return Object.assign(this.look(p), {
         name: p.name, sub: p.sub, border: x.line(i), owned: !!(st && st.qty > 0),
         cote: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : '—'), coteLabel: k !== null ? 'cote PKM' : (typeof p.low === 'number' ? 'demandé' : 'sans prix'),
-        right: p.release ? 'Sortie le ' + this.d2(p.release) : (k !== null ? 'cote PKM' : 'prix à venir'), rightColor: p.release ? '#F5B14C' : '#9AA8C3',
+        right: p.release ? 'Sortie le ' + this.d2(p.release) : (k !== null ? 'cote PKM' : 'prix à venir'), rightColor: p.release ? 'var(--pkm-orange)' : 'var(--pkm-t3)',
         open: () => this.openTcg(p.id)
       });
     };
@@ -1839,7 +1839,7 @@ class Component extends DCLogic {
         sub: all.length + ' produits · visuels officiels · cote Cardmarket',
         fan: photos.map((p, i) => {
           const l = this.look(p);
-          return { photo: l.hasPhoto ? l.photo : l.logo, bg: l.hasPhoto ? '#FFFFFF' : l.bg, top: ['10px', '4px', '10px'][i], left: ['0px', '16px', '32px'][i], rot: ['-9deg', '0deg', '9deg'][i] };
+          return { photo: l.hasPhoto ? l.photo : l.logo, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg, top: ['10px', '4px', '10px'][i], left: ['0px', '16px', '32px'][i], rot: ['-9deg', '0deg', '9deg'][i] };
         })
       };
     }
@@ -1895,7 +1895,7 @@ class Component extends DCLogic {
         return Object.assign(l, {
           name: p.name, sub: (TYPE_LABEL[p.code] || 'Produit') + ' · ' + when, noPhoto: !l.hasPhoto, soon: !!p.release, owned: q > 0, qty: '×' + q,
           price: k !== null ? (k >= 100 ? this.eur0(k) : this.eur(k)) : (typeof p.low === 'number' ? '~' + this.eur0(p.low) : 'prix à venir'),
-          priceColor: k !== null ? '#F3F6FC' : '#9AA8C3',
+          priceColor: k !== null ? 'var(--pkm-t1)' : 'var(--pkm-t3)',
           label: p.name + ', ' + when + (k !== null ? ', cote ' + this.eur(k) : '') + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
         });
@@ -2524,7 +2524,7 @@ class Component extends DCLogic {
 
   const EMPTY_RADAR = { title: '', subtitle: '' };
   radarProto.vRadar = function (s) {
-    const chip = (on, label, pick) => Object.assign({ label: label, on: on, pick: pick }, this.chip(on), { bg2: on ? '#26345A' : 'rgba(8, 13, 26, 0.82)' });
+    const chip = (on, label, pick) => Object.assign({ label: label, on: on, pick: pick }, this.chip(on), { bg2: on ? 'var(--pkm-chip-on-bg)' : 'rgba(var(--pkm-ink-rgb), 0.82)' });
     const ready = RADAR.status === 'ready', listMode = !!s.rlist || s.rmap === 'off', scanning = s.rscan === 'scanning';
     const reg = RADAR.region[s.rregion], dep = RADAR.dept[s.rdept];
     const crumbs = [{ label: 'France', go: () => this.radarGo('france'), current: s.rlevel === 'france' }];
@@ -2534,7 +2534,7 @@ class Component extends DCLogic {
     const r = {
       close: () => this.pop(), loading: RADAR.status === 'loading' || RADAR.status === 'idle', error: RADAR.status === 'error',
       retry: () => { RADAR.status = 'idle'; RADAR.load().then(() => this.setState({ rdata: Date.now() })); },
-      crumbs: crumbs.map((c, i) => ({ label: c.label, go: c.go, sep: i > 0, current: c.current ? 'location' : false, color: c.current ? '#FFFFFF' : '#B9C5FF', weight: c.current ? '700' : '600' })),
+      crumbs: crumbs.map((c, i) => ({ label: c.label, go: c.go, sep: i > 0, current: c.current ? 'location' : false, color: c.current ? 'var(--pkm-white)' : 'var(--pkm-link)', weight: c.current ? '700' : '600' })),
       canMap: s.rmap !== 'off', listMode: listMode, listLabel: listMode ? 'Carte' : 'Liste',
       toggleList: () => this.setState({ rlist: !s.rlist, rscan: s.rscan === 'scanning' ? '' : s.rscan }),
       prods: [['all', 'Tout'], ['ETB', 'ETB'], ['DSP', 'Display'], ['UPC', 'UPC'], ['value', 'Objets de valeur']].map(([k, label]) => chip(s.tprod === k, label, () => this.setState({ tprod: k }))),
@@ -2548,7 +2548,7 @@ class Component extends DCLogic {
     };
     if (!ready) {
       r.title = r.error ? 'Boutiques indisponibles' : 'Chargement des boutiques…';
-      return Object.assign(r, { notStore: true, noScan: true, scanBg: '#26345A', scanFg: '#7D8BA8', scanLabel: 'Balayer', hasHint: false });
+      return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-chip-on-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Balayer', hasHint: false });
     }
     const rows = RADAR.rows(s), n = s.rlevel === 'france' ? RADAR.stores.length : rows.length;
     const where = s.rlevel === 'france' ? 'France métropolitaine' : s.rlevel === 'region' ? (reg ? reg.nom : '') : s.rlevel === 'dept' ? (dep ? dep.nom + ' (' + dep.code + ')' : '') : 'Autour de toi · ' + s.rkm + ' km';
@@ -2562,7 +2562,7 @@ class Component extends DCLogic {
       r.sectorsTitle = s.rlevel === 'france' ? 'Régions' : 'Départements';
       r.sectors = feats.map(f => f.properties).sort((a, b) => a.nom.localeCompare(b.nom, 'fr')).map((p, i) => {
         const k = (s.rlevel === 'france' ? RADAR.nRegion[p.code] : RADAR.nDept[p.code]) || 0;
-        return { name: (s.rlevel === 'region' ? p.code + ' · ' : '') + p.nom, count: fmt(k), border: i ? '1px solid #1E2B45' : 'none',
+        return { name: (s.rlevel === 'region' ? p.code + ' · ' : '') + p.nom, count: fmt(k), border: i ? '1px solid var(--pkm-line)' : 'none',
           label: p.nom + ' : ' + fmt(k) + ' boutiques', open: () => this.radarGo(s.rlevel === 'france' ? 'region' : 'dept', p.code) };
       });
       r.hasSectors = r.sectors.length > 0 && !(s.rscan === 'done' && s.rlevel === 'region');
@@ -2576,7 +2576,7 @@ class Component extends DCLogic {
         return {
           name: x.st.name, kind: k.label + (x.st.brand && x.st.brand !== x.st.name ? ' · ' + x.st.brand : ''),
           place: [x.st.city, (RADAR.dept[x.st.dept] || {}).nom].filter(Boolean).join(' · ') + (x.dist !== null ? ' · ' + this.km(Math.round(x.dist * 10) / 10) : ''),
-          pct: x.pct + ' %', color: lv.color, tint: lv.tint, level: lv.label, border: i ? '1px solid #1E2B45' : 'none',
+          pct: x.pct + ' %', color: lv.color, tint: lv.tint, level: lv.label, border: i ? '1px solid var(--pkm-line)' : 'none',
           label: x.st.name + ', indice ' + x.pct + ' %, ' + lv.label.toLowerCase(), open: () => this.radarStore(x.st.id)
         };
       });
@@ -2586,8 +2586,8 @@ class Component extends DCLogic {
     }
     if (s.rlevel === 'france') r.scanLabel = 'Choisis une région';
     r.noScan = !r.canScan;
-    r.scanBg = r.canScan ? '#A8B6FF' : '#26345A';
-    r.scanFg = r.canScan ? '#0B1120' : '#7D8BA8';
+    r.scanBg = r.canScan ? 'var(--pkm-accent)' : 'var(--pkm-chip-on-bg)';
+    r.scanFg = r.canScan ? 'var(--pkm-on-accent)' : 'var(--pkm-t4)';
     r.hasHint = !!r.hint && !r.hasResults;
     const sel = s.rstore ? rows.find(x => x.st.id === s.rstore) : null;
     if (sel) {
@@ -2599,12 +2599,12 @@ class Component extends DCLogic {
         place: [x.st.city, (RADAR.dept[x.st.dept] || {}).nom + ' (' + x.st.dept + ')'].filter(Boolean).join(' · ') + (x.dist !== null ? ' · à ' + this.km(Math.round(x.dist * 10) / 10) : ''),
         pct: x.pct + ' %', level: lv.label, color: lv.color, tint: lv.tint,
         why: !!s.rwhy, whyLabel: s.rwhy ? 'Masquer le détail' : 'Pourquoi ' + x.pct + ' % ?', toggleWhy: () => this.setState({ rwhy: !s.rwhy }),
-        reasons: x.c.reasons.map(rs => ({ sign: rs.sign, text: rs.text, color: rs.pts > 0 ? '#3DDC84' : '#FF8A8A' })),
+        reasons: x.c.reasons.map(rs => ({ sign: rs.sign, text: rs.text, color: rs.pts > 0 ? 'var(--pkm-green)' : 'var(--pkm-red)' })),
         total: 'Total ' + x.c.raw + ' points' + (x.c.clamped ? ', ramené entre 5 et 90 %' : '') + ' · arrondi à 5 % près.',
         route: 'https://www.google.com/maps/dir/?api=1&destination=' + x.st.lat + ',' + x.st.lon,
         osm: 'https://www.openstreetmap.org/' + osm,
         alertOn: on, alertLabel: on ? 'Alerte activée' : 'Activer une alerte', toggleAlert: () => this.radarAlert(x.st.id),
-        alertBg: on ? '#A8B6FF' : 'transparent', alertFg: on ? '#0B1120' : '#F3F6FC',
+        alertBg: on ? 'var(--pkm-accent)' : 'transparent', alertFg: on ? 'var(--pkm-on-accent)' : 'var(--pkm-t1)',
         back: () => this.setState({ rstore: '', rwhy: false })
       };
     }
@@ -2649,20 +2649,20 @@ const { createElementVNode: _createElementVNode, createTextVNode: _createTextVNo
 
 const _hoisted_1 = {
   class: "pkm-root",
-  style: {"width":"100%","height":"100%","box-sizing":"border-box","position":"relative","overflow":"hidden","display":"flex","flex-direction":"column","background":"#0B1120","color":"#F3F6FC","font-family":"'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif","font-size":"15px","line-height":"1.4"}
+  style: {"width":"100%","height":"100%","box-sizing":"border-box","position":"relative","overflow":"hidden","display":"flex","flex-direction":"column","background":"var(--pkm-app)","color":"var(--pkm-t1)","font-family":"'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif","font-size":"15px","line-height":"1.4"}
 }
 const _hoisted_2 = {
   key: 0,
   style: {"flex":"none","display":"grid","grid-template-columns":"minmax(0, 1fr) auto minmax(0, 1fr)","align-items":"center","gap":"8px","padding":"14px 16px 8px"}
 }
 const _hoisted_3 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
-const _hoisted_4 = { style: {"width":"30px","height":"30px","border-radius":"10px","background":"#3D63FF","display":"flex","align-items":"center","justify-content":"center","box-shadow":"0 6px 16px rgba(61, 99, 255, 0.35)"} }
+const _hoisted_4 = { style: {"width":"30px","height":"30px","border-radius":"10px","background":"var(--pkm-brand)","display":"flex","align-items":"center","justify-content":"center","box-shadow":"0 6px 16px rgba(var(--pkm-blue-rgb), 0.35)"} }
 const _hoisted_5 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#FFFFFF","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-white)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_6 = ["onClick", "aria-label"]
 const _hoisted_7 = ["src"]
@@ -2689,23 +2689,24 @@ const _hoisted_15 = { style: {"flex":"1","min-width":"0","display":"flex","flex-
 const _hoisted_16 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"20px","line-height":"1.2","font-weight":"600","letter-spacing":"-0.02em","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_17 = {
   key: 0,
-  style: {"font-size":"13px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"}
+  style: {"font-size":"13px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"}
 }
 const _hoisted_18 = {
   key: 3,
-  style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","gap":"8px","min-height":"22px","padding":"0 16px 8px","font-size":"12.5px","color":"#7D8BA8"}
+  style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","gap":"8px","min-height":"22px","padding":"0 16px 8px","font-size":"12.5px","color":"var(--pkm-t4)"}
 }
 const _hoisted_19 = {
   key: 0,
-  style: {"flex":"none","padding":"3px 10px","border-radius":"999px","background":"rgba(168, 182, 255, 0.14)","color":"#B9C5FF","font-size":"12px","font-weight":"700"}
+  style: {"flex":"none","padding":"3px 10px","border-radius":"999px","background":"rgba(var(--pkm-accent-rgb), 0.14)","color":"var(--pkm-link)","font-size":"12px","font-weight":"700"}
 }
 const _hoisted_20 = { style: {"flex":"1","min-height":"0","overflow-y":"auto","scrollbar-width":"none","padding":"4px 16px 118px","box-sizing":"border-box","display":"flex","flex-direction":"column","gap":"14px"} }
 const _hoisted_21 = {
+  class: "pkm-dark",
   "aria-label": "Valeur de ma collection",
-  style: {"flex":"none","padding":"16px 18px 14px","border-radius":"24px","border":"1px solid #24345C","background":"radial-gradient(120% 85% at 100% 0%, rgba(98, 122, 255, 0.26), rgba(98, 122, 255, 0) 62%), #121C33","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px 18px 14px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 85% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.26), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"6px"}
 }
 const _hoisted_22 = { style: {"display":"flex","justify-content":"space-between","align-items":"center","gap":"10px"} }
-const _hoisted_23 = { style: {"display":"flex","align-items":"center","gap":"2px","font-size":"14px","font-weight":"600","color":"#C9D3EA"} }
+const _hoisted_23 = { style: {"display":"flex","align-items":"center","gap":"2px","font-size":"14px","font-weight":"600","color":"var(--pkm-t2)"} }
 const _hoisted_24 = ["onClick", "aria-label", "aria-pressed"]
 const _hoisted_25 = {
   width: "20",
@@ -2716,22 +2717,23 @@ const _hoisted_25 = {
 }
 const _hoisted_26 = ["d"]
 const _hoisted_27 = { style: {"font-family":"'Sora', sans-serif","font-size":"40px","line-height":"1.05","font-weight":"700","letter-spacing":"-0.035em"} }
-const _hoisted_28 = { style: {"font-size":"13px","color":"#9AA8C3"} }
+const _hoisted_28 = { style: {"font-size":"13px","color":"var(--pkm-t3)"} }
 const _hoisted_29 = ["aria-label"]
 const _hoisted_30 = ["d"]
 const _hoisted_31 = ["d"]
 const _hoisted_32 = ["cx", "cy"]
-const _hoisted_33 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-end","gap":"12px","margin-top":"6px","padding-top":"10px","border-top":"1px solid rgba(255, 255, 255, 0.08)"} }
+const _hoisted_33 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-end","gap":"12px","margin-top":"6px","padding-top":"10px","border-top":"1px solid rgba(var(--pkm-hl-rgb), 0.08)"} }
 const _hoisted_34 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"1px"} }
-const _hoisted_35 = { style: {"flex":"1","min-width":"0","font-size":"11.5px","line-height":"1.35","color":"#7D8BA8","text-align":"right"} }
+const _hoisted_35 = { style: {"flex":"1","min-width":"0","font-size":"11.5px","line-height":"1.35","color":"var(--pkm-t4)","text-align":"right"} }
 const _hoisted_36 = {
   key: 0,
-  style: {"font-size":"12px","color":"#F5B14C"}
+  style: {"font-size":"12px","color":"var(--pkm-orange)"}
 }
 const _hoisted_37 = {
   key: 0,
+  class: "pkm-dark",
   "aria-label": "Collection vide",
-  style: {"flex":"none","padding":"18px 16px 16px","border-radius":"22px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 0% 0%, rgba(98, 122, 255, 0.2), rgba(98, 122, 255, 0) 60%), #121C33","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"18px 16px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_38 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
 const _hoisted_39 = ["onClick"]
@@ -2750,26 +2752,26 @@ const _hoisted_45 = { style: {"display":"flex","justify-content":"space-between"
 const _hoisted_46 = { style: {"font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"700"} }
 const _hoisted_47 = {
   "aria-hidden": "true",
-  style: {"display":"block","height":"8px","border-radius":"4px","background":"#24345C","overflow":"hidden"}
+  style: {"display":"block","height":"8px","border-radius":"4px","background":"var(--pkm-track)","overflow":"hidden"}
 }
-const _hoisted_48 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_48 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_49 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_50 = ["onClick", "aria-label"]
 const _hoisted_51 = ["src", "data-fallback"]
 const _hoisted_52 = ["src"]
 const _hoisted_53 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_54 = ["src"]
 const _hoisted_55 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"1px"} }
-const _hoisted_56 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","font-weight":"700","color":"#5EE0CF"} }
+const _hoisted_56 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","font-weight":"700","color":"var(--pkm-teal)"} }
 const _hoisted_57 = {
   width: "14",
   height: "14",
@@ -2778,13 +2780,14 @@ const _hoisted_57 = {
   style: {"flex":"none","fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_58 = { style: {"font-size":"14.5px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_59 = { style: {"font-size":"12.5px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_60 = { style: {"font-size":"12px","color":"#C9D3EA","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_59 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_60 = { style: {"font-size":"12px","color":"var(--pkm-t2)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_61 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"2px"} }
 const _hoisted_62 = {
   key: 1,
+  class: "pkm-dark",
   "aria-label": "Premiers pas",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid rgba(94, 224, 207, 0.34)","background":"radial-gradient(120% 90% at 0% 0%, rgba(94, 224, 207, 0.16), rgba(94, 224, 207, 0) 60%), #111A2C","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid rgba(var(--pkm-teal-rgb), 0.34)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-teal-rgb), 0.16), rgba(var(--pkm-teal-rgb), 0) 60%), var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
 }
 const _hoisted_63 = { style: {"flex":"1","font-size":"14px"} }
 const _hoisted_64 = {
@@ -2794,13 +2797,13 @@ const _hoisted_64 = {
   viewBox: "0 0 24 24",
   role: "img",
   "aria-label": "Fait",
-  style: {"flex":"none","fill":"none","stroke":"#3DDC84","stroke-width":"2.6","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-green)","stroke-width":"2.6","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_65 = ["onClick"]
 const _hoisted_66 = {
   key: 2,
   "aria-label": "Suggestion",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"14px 16px","border-radius":"20px","border":"1px solid rgba(255, 181, 71, 0.34)","background":"rgba(255, 181, 71, 0.08)"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"14px 16px","border-radius":"20px","border":"1px solid rgba(var(--pkm-amber-rgb), 0.34)","background":"rgba(var(--pkm-amber-rgb), 0.08)"}
 }
 const _hoisted_67 = ["onClick"]
 const _hoisted_68 = {
@@ -2809,25 +2812,25 @@ const _hoisted_68 = {
   style: {"flex":"none","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px"}
 }
 const _hoisted_69 = ["onClick"]
-const _hoisted_70 = { style: {"font-size":"12px","color":"#9AA8C3"} }
+const _hoisted_70 = { style: {"font-size":"12px","color":"var(--pkm-t3)"} }
 const _hoisted_71 = { style: {"display":"flex","align-items":"center","gap":"10px","min-width":"0"} }
 const _hoisted_72 = ["src", "data-fallback"]
 const _hoisted_73 = ["src"]
 const _hoisted_74 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_75 = ["src"]
 const _hoisted_76 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
 const _hoisted_77 = { style: {"font-size":"13.5px","font-weight":"700","line-height":"1.25","display":"-webkit-box","-webkit-line-clamp":"2","-webkit-box-orient":"vertical","overflow":"hidden"} }
 const _hoisted_78 = ["onClick"]
-const _hoisted_79 = { style: {"font-size":"12px","color":"#9AA8C3"} }
+const _hoisted_79 = { style: {"font-size":"12px","color":"var(--pkm-t3)"} }
 const _hoisted_80 = { style: {"display":"flex","align-items":"center","gap":"10px","min-width":"0"} }
 const _hoisted_81 = ["src", "data-fallback"]
 const _hoisted_82 = ["src"]
 const _hoisted_83 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_84 = ["src"]
 const _hoisted_85 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
@@ -2850,42 +2853,47 @@ const _hoisted_96 = {
   height: "34",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"position":"absolute","left":"42px","top":"80px","fill":"none","stroke":"rgba(255, 255, 255, 0.85)","stroke-width":"1.3","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"position":"absolute","left":"42px","top":"80px","fill":"none","stroke":"rgba(var(--pkm-hl-rgb), 0.85)","stroke-width":"1.3","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_97 = ["d"]
-const _hoisted_98 = { style: {"position":"absolute","top":"7px","left":"7px","padding":"0 4px","border":"1.2px solid rgba(255, 255, 255, 0.9)","border-radius":"5px","font-family":"'Sora', sans-serif","font-size":"9px","font-weight":"700","color":"#FFFFFF"} }
+const _hoisted_98 = { style: {"position":"absolute","top":"7px","left":"7px","padding":"0 4px","border":"1.2px solid rgba(var(--pkm-hl-rgb), 0.9)","border-radius":"5px","font-family":"'Sora', sans-serif","font-size":"9px","font-weight":"700","color":"var(--pkm-white)"} }
 const _hoisted_99 = {
   key: 3,
-  style: {"position":"absolute","left":"8%","top":"7%","width":"84%","height":"86%","border-radius":"12px","background":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","overflow":"hidden","box-shadow":"0 8px 18px rgba(0, 0, 0, 0.35)"}
+  style: {"position":"absolute","left":"8%","top":"7%","width":"84%","height":"86%","border-radius":"12px","background":"var(--pkm-photo-mat)","display":"flex","align-items":"center","justify-content":"center","overflow":"hidden","box-shadow":"0 8px 18px rgba(var(--pkm-shadow-rgb), 0.35)"}
 }
 const _hoisted_100 = ["src"]
 const _hoisted_101 = {
   key: 4,
-  style: {"position":"absolute","left":"7px","top":"7px","display":"flex","align-items":"center","gap":"3px","padding":"2px 7px","border-radius":"999px","background":"rgba(8, 13, 26, 0.8)","border":"1px solid rgba(255, 214, 107, 0.6)","color":"#FFD66B","font-size":"10.5px","font-weight":"800","letter-spacing":"0.04em"}
+  class: "pkm-dark",
+  style: {"position":"absolute","left":"7px","top":"7px","display":"flex","align-items":"center","gap":"3px","padding":"2px 7px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.8)","border":"1px solid rgba(var(--pkm-gold-rgb), 0.6)","color":"var(--pkm-gold)","font-size":"10.5px","font-weight":"800","letter-spacing":"0.04em"}
 }
 const _hoisted_102 = {
   key: 5,
-  style: {"position":"absolute","top":"7px","right":"7px","padding":"1px 7px","border-radius":"999px","background":"rgba(8, 13, 26, 0.72)","font-size":"11.5px","font-weight":"700","color":"#FFFFFF"}
+  class: "pkm-dark",
+  style: {"position":"absolute","top":"7px","right":"7px","padding":"1px 7px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.72)","font-size":"11.5px","font-weight":"700","color":"var(--pkm-white)"}
 }
-const _hoisted_103 = { style: {"position":"absolute","left":"6px","right":"6px","bottom":"6px","display":"flex","align-items":"center","gap":"5px","padding":"5px 7px","border-radius":"10px","background":"rgba(8, 13, 26, 0.86)","color":"#FFFFFF","font-size":"12px","font-weight":"700"} }
+const _hoisted_103 = {
+  class: "pkm-dark",
+  style: {"position":"absolute","left":"6px","right":"6px","bottom":"6px","display":"flex","align-items":"center","gap":"5px","padding":"5px 7px","border-radius":"10px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-white)","font-size":"12px","font-weight":"700"}
+}
 const _hoisted_104 = { style: {"flex":"1","min-width":"0","text-align":"left","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_105 = ["onClick"]
-const _hoisted_106 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(108, 132, 242, 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_106 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(var(--pkm-iris-rgb), 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_107 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#B9C5FF","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_108 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"1px"} }
-const _hoisted_109 = { style: {"font-size":"12px","color":"#7D8BA8"} }
+const _hoisted_109 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_110 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_111 = {
   key: 6,
@@ -2894,27 +2902,33 @@ const _hoisted_111 = {
 }
 const _hoisted_112 = { style: {"display":"flex","align-items":"center","justify-content":"space-between","gap":"8px"} }
 const _hoisted_113 = ["onClick"]
-const _hoisted_114 = { style: {"border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"} }
+const _hoisted_114 = {
+  class: "pkm-dark",
+  style: {"border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+}
 const _hoisted_115 = ["onClick"]
 const _hoisted_116 = ["src", "data-fallback"]
 const _hoisted_117 = ["src"]
 const _hoisted_118 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_119 = ["src"]
 const _hoisted_120 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_121 = { style: {"font-weight":"600","font-size":"14.5px","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_122 = { style: {"font-size":"12.5px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_122 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_123 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end"} }
 const _hoisted_124 = { style: {"font-size":"14.5px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
-const _hoisted_125 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid #1E2B45","background":"#111A2C"} }
+const _hoisted_125 = {
+  class: "pkm-dark",
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+}
 const _hoisted_126 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#9AA8C3","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t3)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_127 = ["value", "onInput"]
 const _hoisted_128 = ["onClick"]
@@ -2932,15 +2946,16 @@ const _hoisted_130 = {
 }
 const _hoisted_131 = ["onClick", "aria-pressed"]
 const _hoisted_132 = {
+  class: "pkm-dark",
   "aria-label": "Résumé de la collection",
-  style: {"flex":"none","display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","padding":"14px 4px","border-radius":"20px","border":"1px solid #1E2B45","background":"#111A2C"}
+  style: {"flex":"none","display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","padding":"14px 4px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
 }
 const _hoisted_133 = { style: {"display":"flex","flex-direction":"column","align-items":"center","gap":"2px"} }
 const _hoisted_134 = { style: {"font-family":"'Sora', sans-serif","font-size":"15.5px","font-weight":"700","white-space":"nowrap"} }
-const _hoisted_135 = { style: {"display":"flex","flex-direction":"column","align-items":"center","gap":"2px","border-left":"1px solid #1E2B45","border-right":"1px solid #1E2B45"} }
+const _hoisted_135 = { style: {"display":"flex","flex-direction":"column","align-items":"center","gap":"2px","border-left":"1px solid var(--pkm-line)","border-right":"1px solid var(--pkm-line)"} }
 const _hoisted_136 = { style: {"font-family":"'Sora', sans-serif","font-size":"15.5px","font-weight":"700","white-space":"nowrap"} }
 const _hoisted_137 = { style: {"display":"flex","flex-direction":"column","align-items":"center","gap":"2px"} }
-const _hoisted_138 = { style: {"flex":"none","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_138 = { style: {"flex":"none","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_139 = { style: {"flex":"none","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px"} }
 const _hoisted_140 = ["onClick"]
 const _hoisted_141 = ["src", "data-fallback", "srcset"]
@@ -2952,44 +2967,52 @@ const _hoisted_145 = {
   height: "44",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"position":"absolute","left":"50%","top":"110px","margin-left":"-22px","fill":"none","stroke":"rgba(255, 255, 255, 0.85)","stroke-width":"1.25","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"position":"absolute","left":"50%","top":"110px","margin-left":"-22px","fill":"none","stroke":"rgba(var(--pkm-hl-rgb), 0.85)","stroke-width":"1.25","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_146 = ["d"]
-const _hoisted_147 = { style: {"position":"absolute","top":"8px","left":"8px","padding":"1px 5px","border":"1.5px solid rgba(255, 255, 255, 0.9)","border-radius":"6px","background":"rgba(11, 17, 32, 0.25)","font-family":"'Sora', sans-serif","font-size":"10px","font-weight":"700","letter-spacing":"0.04em","color":"#FFFFFF"} }
+const _hoisted_147 = {
+  class: "pkm-dark",
+  style: {"position":"absolute","top":"8px","left":"8px","padding":"1px 5px","border":"1.5px solid rgba(var(--pkm-hl-rgb), 0.9)","border-radius":"6px","background":"rgba(var(--pkm-app-rgb), 0.25)","font-family":"'Sora', sans-serif","font-size":"10px","font-weight":"700","letter-spacing":"0.04em","color":"var(--pkm-white)"}
+}
 const _hoisted_148 = {
   key: 3,
-  style: {"position":"absolute","left":"8%","top":"7%","width":"84%","height":"86%","border-radius":"12px","background":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","overflow":"hidden","box-shadow":"0 8px 18px rgba(0, 0, 0, 0.35)"}
+  style: {"position":"absolute","left":"8%","top":"7%","width":"84%","height":"86%","border-radius":"12px","background":"var(--pkm-photo-mat)","display":"flex","align-items":"center","justify-content":"center","overflow":"hidden","box-shadow":"0 8px 18px rgba(var(--pkm-shadow-rgb), 0.35)"}
 }
 const _hoisted_149 = ["src"]
-const _hoisted_150 = { style: {"position":"absolute","top":"8px","right":"8px","padding":"2px 8px","border-radius":"999px","background":"rgba(8, 13, 26, 0.7)","font-size":"12px","font-weight":"700","color":"#FFFFFF"} }
+const _hoisted_150 = {
+  class: "pkm-dark",
+  style: {"position":"absolute","top":"8px","right":"8px","padding":"2px 8px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.7)","font-size":"12px","font-weight":"700","color":"var(--pkm-white)"}
+}
 const _hoisted_151 = {
   key: 4,
-  style: {"position":"absolute","left":"8px","bottom":"8px","display":"flex","align-items":"center","gap":"3px","padding":"2px 7px","border-radius":"999px","background":"rgba(8, 13, 26, 0.8)","border":"1px solid rgba(255, 214, 107, 0.6)","color":"#FFD66B","font-size":"10.5px","font-weight":"800","letter-spacing":"0.04em"}
+  class: "pkm-dark",
+  style: {"position":"absolute","left":"8px","bottom":"8px","display":"flex","align-items":"center","gap":"3px","padding":"2px 7px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.8)","border":"1px solid rgba(var(--pkm-gold-rgb), 0.6)","color":"var(--pkm-gold)","font-size":"10.5px","font-weight":"800","letter-spacing":"0.04em"}
 }
 const _hoisted_152 = { style: {"display":"flex","flex-direction":"column","gap":"1px","padding":"0 3px","min-width":"0"} }
 const _hoisted_153 = { style: {"font-size":"14px","font-weight":"700","line-height":"1.25","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_154 = { style: {"font-size":"12px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_154 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_155 = { style: {"display":"flex","align-items":"center","gap":"6px","padding":"0 3px"} }
 const _hoisted_156 = { style: {"font-family":"'Sora', sans-serif","font-size":"15px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
 const _hoisted_157 = { style: {"display":"flex","align-items":"center","justify-content":"space-between","gap":"6px","padding":"0 3px","font-size":"12px"} }
-const _hoisted_158 = { style: {"color":"#9AA8C3","white-space":"nowrap"} }
+const _hoisted_158 = { style: {"color":"var(--pkm-t3)","white-space":"nowrap"} }
 const _hoisted_159 = {
   key: 0,
-  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"#9AA8C3"}
+  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"var(--pkm-t3)"}
 }
-const _hoisted_160 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"#7D8BA8"} }
+const _hoisted_160 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_161 = ["src", "data-fallback"]
 const _hoisted_162 = ["onClick", "aria-label"]
 const _hoisted_163 = ["src", "data-fallback", "alt"]
 const _hoisted_164 = {
+  class: "pkm-dark",
   "aria-hidden": "true",
-  style: {"position":"absolute","left":"12px","bottom":"12px","width":"32px","height":"32px","border-radius":"16px","background":"rgba(8, 13, 26, 0.72)","display":"flex","align-items":"center","justify-content":"center"}
+  style: {"position":"absolute","left":"12px","bottom":"12px","width":"32px","height":"32px","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.72)","display":"flex","align-items":"center","justify-content":"center"}
 }
 const _hoisted_165 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
-  style: {"fill":"none","stroke":"#FFFFFF","stroke-width":"2.2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-white)","stroke-width":"2.2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_166 = { style: {"position":"absolute","left":"50%","top":"22px","width":"220px","margin-left":"-110px","height":"30px","border-radius":"8px 8px 0 0","background":"#E9ECF2","color":"#1B2236","display":"flex","align-items":"center","justify-content":"space-between","padding":"0 12px","box-sizing":"border-box","font-family":"'Sora', sans-serif","font-size":"12px","font-weight":"700"} }
 const _hoisted_167 = ["src", "data-fallback", "alt"]
@@ -2999,20 +3022,27 @@ const _hoisted_169 = {
   height: "72",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"position":"absolute","left":"50%","top":"176px","margin-left":"-36px","fill":"none","stroke":"rgba(255, 255, 255, 0.85)","stroke-width":"1.1","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"position":"absolute","left":"50%","top":"176px","margin-left":"-36px","fill":"none","stroke":"rgba(var(--pkm-hl-rgb), 0.85)","stroke-width":"1.1","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_170 = ["d"]
-const _hoisted_171 = { style: {"position":"absolute","top":"14px","left":"14px","padding":"2px 7px","border":"1.5px solid rgba(255, 255, 255, 0.92)","border-radius":"7px","background":"rgba(11, 17, 32, 0.25)","font-family":"'Sora', sans-serif","font-size":"12px","font-weight":"700","letter-spacing":"0.04em","color":"#FFFFFF"} }
+const _hoisted_171 = {
+  class: "pkm-dark",
+  style: {"position":"absolute","top":"14px","left":"14px","padding":"2px 7px","border":"1.5px solid rgba(var(--pkm-hl-rgb), 0.92)","border-radius":"7px","background":"rgba(var(--pkm-app-rgb), 0.25)","font-family":"'Sora', sans-serif","font-size":"12px","font-weight":"700","letter-spacing":"0.04em","color":"var(--pkm-white)"}
+}
 const _hoisted_172 = ["onClick", "aria-label"]
 const _hoisted_173 = ["src", "alt"]
-const _hoisted_174 = { style: {"position":"absolute","right":"12px","bottom":"12px","display":"flex","align-items":"center","gap":"7px","padding":"5px 11px","border-radius":"999px","background":"rgba(8, 13, 26, 0.72)","font-size":"12.5px","font-weight":"700","color":"#FFFFFF"} }
+const _hoisted_174 = {
+  class: "pkm-dark",
+  style: {"position":"absolute","right":"12px","bottom":"12px","display":"flex","align-items":"center","gap":"7px","padding":"5px 11px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.72)","font-size":"12.5px","font-weight":"700","color":"var(--pkm-white)"}
+}
 const _hoisted_175 = {
   key: 0,
-  style: {"margin":"-4px 4px 0","font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"}
+  style: {"margin":"-4px 4px 0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"}
 }
 const _hoisted_176 = {
+  class: "pkm-dark",
   "aria-label": "Cote PKM",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.18), rgba(98, 122, 255, 0) 60%), #121C33","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"10px"}
 }
 const _hoisted_177 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-start","gap":"10px"} }
 const _hoisted_178 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
@@ -3022,8 +3052,8 @@ const _hoisted_180 = {
   style: {"display":"flex","flex-direction":"column","align-items":"flex-end","gap":"2px","font-size":"12.5px","text-align":"right"}
 }
 const _hoisted_181 = { style: {"font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"700"} }
-const _hoisted_182 = { style: {"color":"#9AA8C3"} }
-const _hoisted_183 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px","padding-top":"10px","border-top":"1px solid rgba(255, 255, 255, 0.08)"} }
+const _hoisted_182 = { style: {"color":"var(--pkm-t3)"} }
+const _hoisted_183 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px","padding-top":"10px","border-top":"1px solid rgba(var(--pkm-hl-rgb), 0.08)"} }
 const _hoisted_184 = { style: {"font-size":"12.5px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
 const _hoisted_185 = ["aria-label", "onMouseleave"]
 const _hoisted_186 = ["d"]
@@ -3031,28 +3061,30 @@ const _hoisted_187 = ["d"]
 const _hoisted_188 = ["x1", "x2"]
 const _hoisted_189 = ["cx", "cy"]
 const _hoisted_190 = ["x", "width", "onMouseenter", "onClick"]
-const _hoisted_191 = { style: {"display":"flex","justify-content":"space-between","gap":"8px","font-size":"11.5px","color":"#7D8BA8"} }
+const _hoisted_191 = { style: {"display":"flex","justify-content":"space-between","gap":"8px","font-size":"11.5px","color":"var(--pkm-t4)"} }
 const _hoisted_192 = {
   key: 1,
-  style: {"margin":"0","font-size":"13.5px","line-height":"1.5","color":"#F7C77E"}
+  style: {"margin":"0","font-size":"13.5px","line-height":"1.5","color":"var(--pkm-sand)"}
 }
 const _hoisted_193 = {
+  class: "pkm-dark",
   "aria-label": "Comparatif des prix",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px"}
 }
 const _hoisted_194 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_195 = { style: {"font-size":"14.5px","font-weight":"600"} }
-const _hoisted_196 = { style: {"font-size":"12px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_197 = { style: {"margin":"4px 0 0","padding-top":"10px","border-top":"1px solid #1E2B45","font-size":"12.5px","line-height":"1.5","color":"#C9D3EA"} }
+const _hoisted_196 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_197 = { style: {"margin":"4px 0 0","padding-top":"10px","border-top":"1px solid var(--pkm-line)","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t2)"} }
 const _hoisted_198 = {
   key: 1,
+  class: "pkm-dark",
   "aria-label": "Historique d’achat",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px"}
 }
-const _hoisted_199 = { style: {"flex":"1","min-width":"0","font-size":"14px","color":"#C9D3EA"} }
+const _hoisted_199 = { style: {"flex":"1","min-width":"0","font-size":"14px","color":"var(--pkm-t2)"} }
 const _hoisted_200 = {
   key: 0,
-  style: {"font-size":"11.5px","font-weight":"700","border-radius":"999px","padding":"3px 9px","background":"rgba(168, 182, 255, 0.14)","color":"#B9C5FF"}
+  style: {"font-size":"11.5px","font-weight":"700","border-radius":"999px","padding":"3px 9px","background":"rgba(var(--pkm-accent-rgb), 0.14)","color":"var(--pkm-link)"}
 }
 const _hoisted_201 = { style: {"font-size":"14px","font-variant-numeric":"tabular-nums"} }
 const _hoisted_202 = ["onClick"]
@@ -3070,13 +3102,16 @@ const _hoisted_204 = {
 const _hoisted_205 = ["onClick"]
 const _hoisted_206 = ["onClick", "disabled"]
 const _hoisted_207 = ["onClick"]
-const _hoisted_208 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid #1E2B45","background":"#111A2C"} }
+const _hoisted_208 = {
+  class: "pkm-dark",
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+}
 const _hoisted_209 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#9AA8C3","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t3)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_210 = ["value", "onInput"]
 const _hoisted_211 = ["onClick"]
@@ -3086,13 +3121,13 @@ const _hoisted_212 = {
 }
 const _hoisted_213 = ["src", "data-fallback"]
 const _hoisted_214 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_215 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_215 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_216 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_217 = ["onClick"]
 const _hoisted_218 = {
@@ -3101,13 +3136,13 @@ const _hoisted_218 = {
 }
 const _hoisted_219 = ["src"]
 const _hoisted_220 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_221 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_221 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_222 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_223 = {
   role: "group",
@@ -3115,83 +3150,93 @@ const _hoisted_223 = {
   style: {"flex":"none","display":"flex","gap":"8px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -16px","padding":"0 16px"}
 }
 const _hoisted_224 = ["onClick", "aria-pressed"]
-const _hoisted_225 = { style: {"flex":"none","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_225 = { style: {"flex":"none","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_226 = {
   key: 2,
-  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"#9AA8C3"}
+  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"var(--pkm-t3)"}
 }
-const _hoisted_227 = { style: {"flex":"none","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"} }
+const _hoisted_227 = {
+  class: "pkm-dark",
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+}
 const _hoisted_228 = ["onClick"]
 const _hoisted_229 = ["src", "data-fallback"]
 const _hoisted_230 = ["src"]
 const _hoisted_231 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_232 = ["src"]
 const _hoisted_233 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
 const _hoisted_234 = { style: {"font-weight":"600","font-size":"14.5px","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_235 = { style: {"display":"flex","align-items":"center","gap":"6px","min-width":"0","font-size":"12px","color":"#9AA8C3"} }
+const _hoisted_235 = { style: {"display":"flex","align-items":"center","gap":"6px","min-width":"0","font-size":"12px","color":"var(--pkm-t3)"} }
 const _hoisted_236 = { style: {"white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_237 = {
   key: 0,
-  style: {"flex":"none","padding":"1px 7px","border-radius":"999px","background":"rgba(168, 182, 255, 0.14)","color":"#B9C5FF","font-size":"11px","font-weight":"700"}
+  style: {"flex":"none","padding":"1px 7px","border-radius":"999px","background":"rgba(var(--pkm-accent-rgb), 0.14)","color":"var(--pkm-link)","font-size":"11px","font-weight":"700"}
 }
 const _hoisted_238 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"1px"} }
 const _hoisted_239 = { style: {"font-size":"15px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
-const _hoisted_240 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid #1E2B45","background":"#111A2C"} }
+const _hoisted_240 = {
+  class: "pkm-dark",
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+}
 const _hoisted_241 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#9AA8C3","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t3)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_242 = ["value", "onInput"]
-const _hoisted_243 = { style: {"flex":"none","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_243 = { style: {"flex":"none","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_244 = {
   key: 0,
-  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"#9AA8C3"}
+  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"var(--pkm-t3)"}
 }
 const _hoisted_245 = ["aria-label"]
 const _hoisted_246 = { style: {"margin":"4px 2px 0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600","letter-spacing":"-0.01em"} }
 const _hoisted_247 = {
   key: 0,
-  style: {"margin":"0 2px","font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"}
+  style: {"margin":"0 2px","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"}
 }
-const _hoisted_248 = { style: {"border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"} }
+const _hoisted_248 = {
+  class: "pkm-dark",
+  style: {"border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+}
 const _hoisted_249 = ["onClick", "aria-label"]
 const _hoisted_250 = { style: {"flex":"none","width":"78px","height":"42px","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_251 = ["src"]
 const _hoisted_252 = {
   key: 1,
-  style: {"padding":"3px 7px","border":"1.5px solid #2A3A5C","border-radius":"7px","font-family":"'Sora', sans-serif","font-size":"11px","font-weight":"700","letter-spacing":"0.04em","color":"#9AA8C3"}
+  style: {"padding":"3px 7px","border":"1.5px solid var(--pkm-line-2)","border-radius":"7px","font-family":"'Sora', sans-serif","font-size":"11px","font-weight":"700","letter-spacing":"0.04em","color":"var(--pkm-t3)"}
 }
 const _hoisted_253 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
 const _hoisted_254 = { style: {"font-weight":"600","font-size":"14.5px","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_255 = { style: {"font-size":"12px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_255 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_256 = {
   key: 0,
-  style: {"flex":"none","padding":"1px 8px","border-radius":"999px","background":"rgba(168, 182, 255, 0.14)","color":"#B9C5FF","font-size":"11.5px","font-weight":"700"}
+  style: {"flex":"none","padding":"1px 8px","border-radius":"999px","background":"rgba(var(--pkm-accent-rgb), 0.14)","color":"var(--pkm-link)","font-size":"11.5px","font-weight":"700"}
 }
 const _hoisted_257 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_258 = {
+  class: "pkm-dark",
   "aria-label": "Extension",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","padding":"14px 16px","border-radius":"22px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.18), rgba(98, 122, 255, 0) 60%), #121C33"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","padding":"14px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)"}
 }
 const _hoisted_259 = ["src"]
 const _hoisted_260 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
 const _hoisted_261 = { style: {"font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"600"} }
-const _hoisted_262 = { style: {"font-size":"12.5px","color":"#C9D3EA"} }
+const _hoisted_262 = { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }
 const _hoisted_263 = {
   key: 0,
-  style: {"margin":"0 2px","font-size":"12.5px","line-height":"1.45","color":"#F7C77E"}
+  style: {"margin":"0 2px","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-sand)"}
 }
 const _hoisted_264 = {
   role: "group",
@@ -3199,45 +3244,50 @@ const _hoisted_264 = {
   style: {"flex":"none","display":"flex","gap":"8px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -16px","padding":"0 16px"}
 }
 const _hoisted_265 = ["onClick", "aria-pressed"]
-const _hoisted_266 = { style: {"flex":"none","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_266 = { style: {"flex":"none","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_267 = {
   key: 1,
-  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"#9AA8C3"}
+  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"var(--pkm-t3)"}
 }
 const _hoisted_268 = { style: {"flex":"none","display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"16px 10px"} }
 const _hoisted_269 = ["onClick", "aria-label"]
-const _hoisted_270 = { style: {"position":"relative","display":"block","width":"100%","aspect-ratio":"600 / 825","border-radius":"5% / 3.6%","overflow":"hidden","background":"#16213A","box-shadow":"0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08)"} }
+const _hoisted_270 = {
+  class: "pkm-dark",
+  style: {"position":"relative","display":"block","width":"100%","aspect-ratio":"600 / 825","border-radius":"5% / 3.6%","overflow":"hidden","background":"var(--pkm-img-bg)","box-shadow":"0 6px 14px rgba(var(--pkm-shadow-rgb), 0.35), inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.08)"}
+}
 const _hoisted_271 = ["src", "data-fallback", "srcset"]
 const _hoisted_272 = {
   key: 0,
-  style: {"position":"absolute","top":"5px","right":"5px","padding":"1px 7px","border-radius":"999px","background":"rgba(8, 13, 26, 0.82)","border":"1px solid rgba(168, 182, 255, 0.5)","color":"#FFFFFF","font-size":"11.5px","font-weight":"700"}
+  class: "pkm-dark",
+  style: {"position":"absolute","top":"5px","right":"5px","padding":"1px 7px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.82)","border":"1px solid rgba(var(--pkm-accent-rgb), 0.5)","color":"var(--pkm-white)","font-size":"11.5px","font-weight":"700"}
 }
 const _hoisted_273 = { style: {"display":"flex","flex-direction":"column","gap":"1px","min-width":"0","padding":"0 2px"} }
 const _hoisted_274 = { style: {"font-size":"12.5px","font-weight":"700","line-height":"1.25","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_275 = { style: {"display":"flex","justify-content":"space-between","gap":"4px","font-size":"11.5px","color":"#9AA8C3"} }
+const _hoisted_275 = { style: {"display":"flex","justify-content":"space-between","gap":"4px","font-size":"11.5px","color":"var(--pkm-t3)"} }
 const _hoisted_276 = { style: {"min-width":"0","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_277 = {
+  class: "pkm-dark",
   "aria-label": "Catalogue scellé",
-  style: {"flex":"none","display":"flex","flex-direction":"column","gap":"4px","padding":"14px 16px","border-radius":"22px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 100% 0%, rgba(245, 177, 76, 0.16), rgba(245, 177, 76, 0) 60%), #121C33"}
+  style: {"flex":"none","display":"flex","flex-direction":"column","gap":"4px","padding":"14px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-orange-rgb), 0.16), rgba(var(--pkm-orange-rgb), 0) 60%), var(--pkm-card-hi)"}
 }
 const _hoisted_278 = { style: {"font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"600"} }
-const _hoisted_279 = { style: {"font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"} }
+const _hoisted_279 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
 const _hoisted_280 = {
   role: "group",
   "aria-label": "Type de produit",
   style: {"flex":"none","display":"flex","gap":"8px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -16px","padding":"0 16px"}
 }
 const _hoisted_281 = ["onClick", "aria-pressed"]
-const _hoisted_282 = { style: {"flex":"none","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_282 = { style: {"flex":"none","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_283 = {
   key: 0,
-  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"#9AA8C3"}
+  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"var(--pkm-t3)"}
 }
 const _hoisted_284 = { style: {"flex":"none","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"16px 12px"} }
 const _hoisted_285 = ["onClick", "aria-label"]
 const _hoisted_286 = {
   key: 0,
-  style: {"position":"absolute","inset":"0","background":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center"}
+  style: {"position":"absolute","inset":"0","background":"var(--pkm-photo-mat)","display":"flex","align-items":"center","justify-content":"center"}
 }
 const _hoisted_287 = ["src"]
 const _hoisted_288 = {
@@ -3245,21 +3295,23 @@ const _hoisted_288 = {
   style: {"position":"absolute","inset":"0","display":"flex","flex-direction":"column","align-items":"center","justify-content":"center","gap":"10px","padding":"12px","box-sizing":"border-box"}
 }
 const _hoisted_289 = ["src"]
-const _hoisted_290 = { style: {"padding":"3px 9px","border-radius":"8px","border":"1.5px solid rgba(255, 255, 255, 0.4)","font-family":"'Sora', sans-serif","font-size":"12px","font-weight":"700","letter-spacing":"0.05em","color":"#FFFFFF"} }
+const _hoisted_290 = { style: {"padding":"3px 9px","border-radius":"8px","border":"1.5px solid rgba(var(--pkm-hl-rgb), 0.4)","font-family":"'Sora', sans-serif","font-size":"12px","font-weight":"700","letter-spacing":"0.05em","color":"var(--pkm-white)"} }
 const _hoisted_291 = {
   key: 2,
-  style: {"position":"absolute","left":"7px","top":"7px","padding":"2px 8px","border-radius":"999px","background":"#F5B14C","color":"#0B1120","font-size":"11px","font-weight":"800"}
+  style: {"position":"absolute","left":"7px","top":"7px","padding":"2px 8px","border-radius":"999px","background":"var(--pkm-orange)","color":"var(--pkm-ink)","font-size":"11px","font-weight":"800"}
 }
 const _hoisted_292 = {
   key: 3,
-  style: {"position":"absolute","top":"7px","right":"7px","padding":"1px 8px","border-radius":"999px","background":"rgba(8, 13, 26, 0.85)","border":"1px solid rgba(168, 182, 255, 0.5)","color":"#FFFFFF","font-size":"11.5px","font-weight":"700"}
+  class: "pkm-dark",
+  style: {"position":"absolute","top":"7px","right":"7px","padding":"1px 8px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.85)","border":"1px solid rgba(var(--pkm-accent-rgb), 0.5)","color":"var(--pkm-white)","font-size":"11.5px","font-weight":"700"}
 }
 const _hoisted_293 = { style: {"display":"flex","flex-direction":"column","gap":"2px","min-width":"0","padding":"0 2px"} }
 const _hoisted_294 = { style: {"font-size":"13px","font-weight":"700","line-height":"1.3","display":"-webkit-box","-webkit-line-clamp":"2","-webkit-box-orient":"vertical","overflow":"hidden"} }
-const _hoisted_295 = { style: {"font-size":"11.5px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_295 = { style: {"font-size":"11.5px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_296 = {
+  class: "pkm-dark",
   "aria-label": "Identité",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","padding":"16px","border-radius":"24px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 0% 0%, rgba(98, 122, 255, 0.22), rgba(98, 122, 255, 0) 60%), #121C33"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.22), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)"}
 }
 const _hoisted_297 = { style: {"position":"relative","flex":"none","width":"76px","height":"76px"} }
 const _hoisted_298 = ["src"]
@@ -3272,10 +3324,11 @@ const _hoisted_299 = {
 }
 const _hoisted_300 = ["d"]
 const _hoisted_301 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
-const _hoisted_302 = { style: {"font-size":"13px","color":"#9AA8C3"} }
+const _hoisted_302 = { style: {"font-size":"13px","color":"var(--pkm-t3)"} }
 const _hoisted_303 = {
+  class: "pkm-dark",
   "aria-label": "Type de collectionneur",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_304 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
 const _hoisted_305 = ["d"]
@@ -3285,8 +3338,8 @@ const _hoisted_307 = {
   "aria-label": "Les trois profils",
   style: {"display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"6px"}
 }
-const _hoisted_308 = { style: {"margin":"0","font-size":"13.5px","line-height":"1.5","color":"#C9D3EA"} }
-const _hoisted_309 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"#7D8BA8"} }
+const _hoisted_308 = { style: {"margin":"0","font-size":"13.5px","line-height":"1.5","color":"var(--pkm-t2)"} }
+const _hoisted_309 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_310 = {
   width: "14",
   height: "14",
@@ -3297,11 +3350,12 @@ const _hoisted_310 = {
 const _hoisted_311 = { style: {"font-size":"13.5px","line-height":"1.45"} }
 const _hoisted_312 = {
   key: 0,
-  style: {"font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"}
+  style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"}
 }
 const _hoisted_313 = {
+  class: "pkm-dark",
   "aria-label": "Ce qui fixe ton profil",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"4px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px"}
 }
 const _hoisted_314 = { style: {"display":"flex","align-items":"center","justify-content":"space-between","gap":"10px"} }
 const _hoisted_315 = { style: {"display":"flex","flex-direction":"column"} }
@@ -3309,21 +3363,23 @@ const _hoisted_316 = { style: {"font-size":"14px","font-weight":"600"} }
 const _hoisted_317 = { style: {"font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"700"} }
 const _hoisted_318 = {
   "aria-hidden": "true",
-  style: {"position":"relative","height":"8px","border-radius":"4px","background":"#24345C"}
+  style: {"position":"relative","height":"8px","border-radius":"4px","background":"var(--pkm-track)"}
 }
 const _hoisted_319 = {
   "aria-hidden": "true",
-  style: {"position":"relative","height":"14px","font-size":"11px","color":"#7D8BA8"}
+  style: {"position":"relative","height":"14px","font-size":"11px","color":"var(--pkm-t4)"}
 }
 const _hoisted_320 = { style: {"position":"absolute","left":"0"} }
 const _hoisted_321 = { style: {"position":"absolute","right":"0"} }
 const _hoisted_322 = {
+  class: "pkm-dark",
   "aria-label": "Ce que ça change pour toi",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
 }
 const _hoisted_323 = {
+  class: "pkm-dark",
   "aria-label": "Raccourcis du profil",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
 }
 const _hoisted_324 = ["onClick"]
 const _hoisted_325 = {
@@ -3335,13 +3391,13 @@ const _hoisted_325 = {
 }
 const _hoisted_326 = ["d"]
 const _hoisted_327 = { style: {"flex":"1","display":"flex","flex-direction":"column"} }
-const _hoisted_328 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_328 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_329 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_330 = ["onClick"]
 const _hoisted_331 = {
@@ -3349,14 +3405,14 @@ const _hoisted_331 = {
   height: "24",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#B9C5FF","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_332 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_333 = ["onClick"]
 const _hoisted_334 = {
@@ -3364,14 +3420,14 @@ const _hoisted_334 = {
   height: "24",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#B9C5FF","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_335 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_336 = ["onClick"]
 const _hoisted_337 = {
@@ -3379,14 +3435,14 @@ const _hoisted_337 = {
   height: "24",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#B9C5FF","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_338 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_339 = {
   width: "96",
@@ -3396,15 +3452,16 @@ const _hoisted_339 = {
   style: {"overflow":"visible"}
 }
 const _hoisted_340 = ["d"]
-const _hoisted_341 = { style: {"font-size":"14px","color":"#C9D3EA"} }
+const _hoisted_341 = { style: {"font-size":"14px","color":"var(--pkm-t2)"} }
 const _hoisted_342 = {
   "aria-hidden": "true",
-  style: {"align-self":"stretch","height":"10px","margin-top":"6px","border-radius":"5px","background":"#24345C","overflow":"hidden"}
+  style: {"align-self":"stretch","height":"10px","margin-top":"6px","border-radius":"5px","background":"var(--pkm-track)","overflow":"hidden"}
 }
 const _hoisted_343 = { style: {"font-size":"13px","font-weight":"600"} }
 const _hoisted_344 = {
+  class: "pkm-dark",
   "aria-label": "Les paliers",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
 }
 const _hoisted_345 = {
   width: "34",
@@ -3416,24 +3473,25 @@ const _hoisted_345 = {
 const _hoisted_346 = ["d"]
 const _hoisted_347 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_348 = { style: {"font-weight":"700"} }
-const _hoisted_349 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_349 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_350 = {
+  class: "pkm-dark",
   "aria-label": "Série en cours",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
 }
 const _hoisted_351 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px"} }
-const _hoisted_352 = { style: {"font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"700","color":"#A8B6FF"} }
+const _hoisted_352 = { style: {"font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"700","color":"var(--pkm-accent)"} }
 const _hoisted_353 = {
   "aria-hidden": "true",
   style: {"display":"flex","align-items":"flex-end","gap":"6px","height":"34px"}
 }
-const _hoisted_354 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_354 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_355 = {
   "aria-label": "Succès",
   style: {"flex":"none","display":"flex","flex-direction":"column","gap":"10px"}
 }
 const _hoisted_356 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px"} }
-const _hoisted_357 = { style: {"font-size":"13px","color":"#9AA8C3"} }
+const _hoisted_357 = { style: {"font-size":"13px","color":"var(--pkm-t3)"} }
 const _hoisted_358 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px"} }
 const _hoisted_359 = {
   key: 0,
@@ -3441,7 +3499,7 @@ const _hoisted_359 = {
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#3DDC84","stroke-width":"2.6","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-green)","stroke-width":"2.6","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_360 = {
   key: 1,
@@ -3449,17 +3507,18 @@ const _hoisted_360 = {
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#A8B6FF","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-accent)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_361 = { style: {"font-size":"14px","font-weight":"700","line-height":"1.25"} }
-const _hoisted_362 = { style: {"font-size":"12px","color":"#9AA8C3"} }
+const _hoisted_362 = { style: {"font-size":"12px","color":"var(--pkm-t3)"} }
 const _hoisted_363 = {
   "aria-hidden": "true",
-  style: {"height":"5px","border-radius":"3px","background":"#24345C","overflow":"hidden"}
+  style: {"height":"5px","border-radius":"3px","background":"var(--pkm-track)","overflow":"hidden"}
 }
 const _hoisted_364 = {
+  class: "pkm-dark",
   "aria-label": "Valorisation",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_365 = {
   role: "group",
@@ -3467,26 +3526,28 @@ const _hoisted_365 = {
   style: {"display":"flex","gap":"8px"}
 }
 const _hoisted_366 = ["onClick", "aria-pressed"]
-const _hoisted_367 = { style: {"font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"} }
+const _hoisted_367 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
 const _hoisted_368 = {
+  class: "pkm-dark",
   "aria-label": "Sources de prix",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"4px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px"}
 }
 const _hoisted_369 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_370 = { style: {"font-weight":"600"} }
-const _hoisted_371 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
-const _hoisted_372 = { style: {"flex":"none","font-size":"12px","font-weight":"600","color":"#9AA8C3"} }
+const _hoisted_371 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_372 = { style: {"flex":"none","font-size":"12px","font-weight":"600","color":"var(--pkm-t3)"} }
 const _hoisted_373 = {
+  class: "pkm-dark",
   "aria-label": "Mode avancé",
-  style: {"flex":"none","padding":"20px 18px 18px","border-radius":"26px","border":"1px solid #2A3A5C","background":"radial-gradient(110% 80% at 50% 0%, rgba(98, 122, 255, 0.26), rgba(98, 122, 255, 0) 65%), #121C33","display":"flex","flex-direction":"column","align-items":"center","gap":"12px","text-align":"center"}
+  style: {"flex":"none","padding":"20px 18px 18px","border-radius":"26px","border":"1px solid var(--pkm-line-2)","background":"radial-gradient(110% 80% at 50% 0%, rgba(var(--pkm-glow-rgb), 0.26), rgba(var(--pkm-glow-rgb), 0) 65%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","align-items":"center","gap":"12px","text-align":"center"}
 }
-const _hoisted_374 = { style: {"display":"flex","align-items":"center","gap":"6px","padding":"4px 12px","border-radius":"999px","background":"#E8ECFF","color":"#0B1120","font-size":"12px","font-weight":"800","letter-spacing":"0.06em"} }
+const _hoisted_374 = { style: {"display":"flex","align-items":"center","gap":"6px","padding":"4px 12px","border-radius":"999px","background":"var(--pkm-pearl)","color":"var(--pkm-ink)","font-size":"12px","font-weight":"800","letter-spacing":"0.06em"} }
 const _hoisted_375 = {
   width: "14",
   height: "14",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#3D63FF","stroke-width":"2.4","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-brand)","stroke-width":"2.4","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_376 = {
   "aria-hidden": "true",
@@ -3496,79 +3557,83 @@ const _hoisted_377 = ["src", "data-fallback"]
 const _hoisted_378 = { style: {"font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.01em"} }
 const _hoisted_379 = ["onClick", "aria-pressed"]
 const _hoisted_380 = {
+  class: "pkm-dark",
   "aria-label": "Frais par plateforme",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px"}
 }
-const _hoisted_381 = { style: {"padding":"3px 10px","border-radius":"999px","border":"1px solid #2A3A5C","font-size":"13px","font-weight":"600"} }
-const _hoisted_382 = { style: {"font-size":"13px","color":"#9AA8C3","text-align":"right"} }
+const _hoisted_381 = { style: {"padding":"3px 10px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","font-size":"13px","font-weight":"600"} }
+const _hoisted_382 = { style: {"font-size":"13px","color":"var(--pkm-t3)","text-align":"right"} }
 const _hoisted_383 = ["onClick"]
 const _hoisted_384 = {
+  class: "pkm-dark",
   "aria-label": "Outils avancés",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
 }
 const _hoisted_385 = ["onClick"]
-const _hoisted_386 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(168, 182, 255, 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_386 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(var(--pkm-accent-rgb), 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_387 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#B9C5FF","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_388 = { style: {"flex":"1","display":"flex","flex-direction":"column"} }
-const _hoisted_389 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_389 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_390 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_391 = ["onClick"]
-const _hoisted_392 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(168, 182, 255, 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_392 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(var(--pkm-accent-rgb), 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_393 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#B9C5FF","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_394 = { style: {"flex":"1","display":"flex","flex-direction":"column"} }
-const _hoisted_395 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_395 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_396 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_397 = ["onClick"]
-const _hoisted_398 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(168, 182, 255, 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_398 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(var(--pkm-accent-rgb), 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_399 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#B9C5FF","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_400 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_401 = {
+  class: "pkm-dark",
   "aria-label": "Ma collection sur cet appareil",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
 }
-const _hoisted_402 = { style: {"margin":"0","font-size":"13px","line-height":"1.5","color":"#9AA8C3"} }
+const _hoisted_402 = { style: {"margin":"0","font-size":"13px","line-height":"1.5","color":"var(--pkm-t3)"} }
 const _hoisted_403 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
 const _hoisted_404 = ["onClick"]
 const _hoisted_405 = ["onClick"]
 const _hoisted_406 = {
+  class: "pkm-dark",
   "aria-label": "À propos",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#0F1828","display":"flex","flex-direction":"column","gap":"8px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"8px"}
 }
 const _hoisted_407 = ["onClick"]
 const _hoisted_408 = {
@@ -3578,123 +3643,128 @@ const _hoisted_408 = {
 }
 const _hoisted_409 = ["onClick", "aria-pressed"]
 const _hoisted_410 = {
+  class: "pkm-dark",
   "aria-label": "Résumé des ventes",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.18), rgba(98, 122, 255, 0) 60%), #121C33","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"10px"}
 }
 const _hoisted_411 = { style: {"display":"flex","align-items":"flex-end","justify-content":"space-between","gap":"12px"} }
 const _hoisted_412 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_413 = { style: {"font-size":"13px","color":"#C9D3EA"} }
-const _hoisted_414 = { style: {"display":"flex","flex-direction":"column","align-items":"flex-end","gap":"2px","font-size":"12.5px","color":"#9AA8C3","text-align":"right"} }
-const _hoisted_415 = { style: {"color":"#F3F6FC","font-weight":"600"} }
+const _hoisted_413 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
+const _hoisted_414 = { style: {"display":"flex","flex-direction":"column","align-items":"flex-end","gap":"2px","font-size":"12.5px","color":"var(--pkm-t3)","text-align":"right"} }
+const _hoisted_415 = { style: {"color":"var(--pkm-t1)","font-weight":"600"} }
 const _hoisted_416 = {
   "aria-hidden": "true",
   style: {"display":"flex","gap":"2px","height":"8px"}
 }
-const _hoisted_417 = { style: {"display":"flex","flex-wrap":"wrap","gap":"4px 14px","font-size":"12px","color":"#9AA8C3"} }
+const _hoisted_417 = { style: {"display":"flex","flex-wrap":"wrap","gap":"4px 14px","font-size":"12px","color":"var(--pkm-t3)"} }
 const _hoisted_418 = { style: {"display":"flex","align-items":"center","gap":"6px"} }
 const _hoisted_419 = { style: {"display":"flex","align-items":"center","gap":"6px"} }
 const _hoisted_420 = {
   key: 0,
-  style: {"flex":"none","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"}
+  class: "pkm-dark",
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
 }
 const _hoisted_421 = ["onClick"]
 const _hoisted_422 = ["src", "data-fallback"]
 const _hoisted_423 = ["src"]
 const _hoisted_424 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_425 = ["src"]
 const _hoisted_426 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
 const _hoisted_427 = { style: {"font-weight":"600","font-size":"14.5px","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_428 = { style: {"display":"flex","align-items":"center","gap":"6px","flex-wrap":"wrap","font-size":"12.5px","color":"#9AA8C3"} }
-const _hoisted_429 = { style: {"padding":"1px 8px","border-radius":"999px","border":"1px solid #2A3A5C","color":"#C9D3EA","font-size":"11.5px","font-weight":"600"} }
+const _hoisted_428 = { style: {"display":"flex","align-items":"center","gap":"6px","flex-wrap":"wrap","font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_429 = { style: {"padding":"1px 8px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","color":"var(--pkm-t2)","font-size":"11.5px","font-weight":"600"} }
 const _hoisted_430 = {
   key: 0,
-  style: {"padding":"1px 8px","border-radius":"999px","background":"rgba(245, 177, 76, 0.16)","color":"#F5B14C","font-size":"11.5px","font-weight":"700"}
+  style: {"padding":"1px 8px","border-radius":"999px","background":"rgba(var(--pkm-orange-rgb), 0.16)","color":"var(--pkm-orange)","font-size":"11.5px","font-weight":"700"}
 }
 const _hoisted_431 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"1px"} }
-const _hoisted_432 = { style: {"font-size":"12px","color":"#7D8BA8"} }
+const _hoisted_432 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_433 = {
   key: 1,
-  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"#9AA8C3"}
+  style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"var(--pkm-t3)"}
 }
 const _hoisted_434 = ["onClick"]
 const _hoisted_435 = {
+  class: "pkm-dark",
   "aria-label": "Résultat de la vente",
-  style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.2), rgba(98, 122, 255, 0) 60%), #121C33","display":"flex","flex-direction":"column","gap":"14px"}
+  style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"14px"}
 }
 const _hoisted_436 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
 const _hoisted_437 = ["src", "data-fallback"]
 const _hoisted_438 = ["src"]
 const _hoisted_439 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_440 = ["src"]
 const _hoisted_441 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_442 = { style: {"font-weight":"600"} }
-const _hoisted_443 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_443 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_444 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_445 = { style: {"font-size":"13px","color":"#9AA8C3"} }
+const _hoisted_445 = { style: {"font-size":"13px","color":"var(--pkm-t3)"} }
 const _hoisted_446 = {
   key: 0,
-  style: {"font-size":"13px","line-height":"1.45","color":"#F7C77E","background":"rgba(245, 177, 76, 0.12)","border":"1px solid rgba(245, 177, 76, 0.3)","border-radius":"14px","padding":"10px 12px"}
+  style: {"font-size":"13px","line-height":"1.45","color":"var(--pkm-sand)","background":"rgba(var(--pkm-orange-rgb), 0.12)","border":"1px solid rgba(var(--pkm-orange-rgb), 0.3)","border-radius":"14px","padding":"10px 12px"}
 }
 const _hoisted_447 = {
+  class: "pkm-dark",
   "aria-label": "Décomposition de la marge",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_448 = { style: {"display":"flex","flex-direction":"column","gap":"11px","font-size":"14px"} }
 const _hoisted_449 = { style: {"display":"flex","justify-content":"space-between","gap":"12px"} }
 const _hoisted_450 = { style: {"font-variant-numeric":"tabular-nums","font-weight":"600"} }
 const _hoisted_451 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-start","gap":"12px"} }
 const _hoisted_452 = { style: {"display":"flex","flex-direction":"column"} }
-const _hoisted_453 = { style: {"font-size":"12px","color":"#7D8BA8"} }
-const _hoisted_454 = { style: {"font-variant-numeric":"tabular-nums","color":"#C9D3EA"} }
+const _hoisted_453 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
+const _hoisted_454 = { style: {"font-variant-numeric":"tabular-nums","color":"var(--pkm-t2)"} }
 const _hoisted_455 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-start","gap":"12px"} }
 const _hoisted_456 = { style: {"display":"flex","flex-direction":"column"} }
-const _hoisted_457 = { style: {"font-size":"12px","color":"#7D8BA8"} }
-const _hoisted_458 = { style: {"font-variant-numeric":"tabular-nums","color":"#C9D3EA"} }
+const _hoisted_457 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
+const _hoisted_458 = { style: {"font-variant-numeric":"tabular-nums","color":"var(--pkm-t2)"} }
 const _hoisted_459 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-start","gap":"12px"} }
 const _hoisted_460 = { style: {"display":"flex","flex-direction":"column"} }
-const _hoisted_461 = { style: {"font-size":"12px","color":"#7D8BA8"} }
-const _hoisted_462 = { style: {"font-variant-numeric":"tabular-nums","color":"#C9D3EA"} }
+const _hoisted_461 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
+const _hoisted_462 = { style: {"font-variant-numeric":"tabular-nums","color":"var(--pkm-t2)"} }
 const _hoisted_463 = { style: {"display":"flex","justify-content":"space-between","gap":"12px","font-weight":"700"} }
 const _hoisted_464 = {
   "aria-hidden": "true",
   style: {"display":"flex","gap":"2px","height":"8px","margin-top":"2px"}
 }
-const _hoisted_465 = { style: {"margin":"0","font-size":"13px","line-height":"1.45","color":"#9AA8C3"} }
+const _hoisted_465 = { style: {"margin":"0","font-size":"13px","line-height":"1.45","color":"var(--pkm-t3)"} }
 const _hoisted_466 = {
   key: 0,
-  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","min-height":"54px","padding":"0 16px","border-radius":"18px","border":"1px solid #1E2B45","background":"#111A2C","font-size":"14px"}
+  class: "pkm-dark",
+  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","min-height":"54px","padding":"0 16px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","font-size":"14px"}
 }
 const _hoisted_467 = { style: {"font-weight":"700"} }
 const _hoisted_468 = ["onClick"]
 const _hoisted_469 = ["onClick"]
 const _hoisted_470 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"1px"} }
-const _hoisted_471 = { style: {"font-size":"12px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_471 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_472 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_473 = ["onClick"]
-const _hoisted_474 = { style: {"flex":"none","width":"66px","height":"46px","border-radius":"11px","background":"linear-gradient(160deg, #23765C, #0A251C)","box-shadow":"inset 0 0 0 1px rgba(255, 255, 255, 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_474 = { style: {"flex":"none","width":"66px","height":"46px","border-radius":"11px","background":"linear-gradient(160deg, #23765C, #0A251C)","box-shadow":"inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_475 = ["src"]
 const _hoisted_476 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"1px"} }
-const _hoisted_477 = { style: {"font-size":"12px","font-weight":"700","color":"#5EE0CF"} }
+const _hoisted_477 = { style: {"font-size":"12px","font-weight":"700","color":"var(--pkm-teal)"} }
 const _hoisted_478 = { style: {"font-size":"14px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_479 = { style: {"font-size":"12px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_479 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_480 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_481 = {
   role: "group",
@@ -3703,8 +3773,9 @@ const _hoisted_481 = {
 }
 const _hoisted_482 = ["onClick", "aria-pressed"]
 const _hoisted_483 = {
+  class: "pkm-dark",
   "aria-label": "Carte des magasins",
-  style: {"flex":"none","position":"relative","width":"100%","max-width":"100%","aspect-ratio":"358 / 210","border-radius":"22px","overflow":"hidden","border":"1px solid #1E2B45","background":"#0E1729"}
+  style: {"flex":"none","position":"relative","width":"100%","max-width":"100%","aspect-ratio":"358 / 210","border-radius":"22px","overflow":"hidden","border":"1px solid var(--pkm-line)","background":"#0E1729"}
 }
 const _hoisted_484 = ["aria-label"]
 const _hoisted_485 = ["rx", "ry"]
@@ -3722,20 +3793,23 @@ const _hoisted_490 = {
   style: {"display":"flex","align-items":"center","gap":"8px"}
 }
 const _hoisted_491 = ["onClick", "aria-pressed"]
-const _hoisted_492 = { style: {"flex":"none","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_492 = { style: {"flex":"none","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_493 = {
   key: 0,
-  style: {"margin":"0","padding":"20px 0","text-align":"center","font-size":"14px","color":"#9AA8C3"}
+  style: {"margin":"0","padding":"20px 0","text-align":"center","font-size":"14px","color":"var(--pkm-t3)"}
 }
-const _hoisted_494 = { style: {"flex":"none","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"} }
+const _hoisted_494 = {
+  class: "pkm-dark",
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+}
 const _hoisted_495 = ["onClick"]
-const _hoisted_496 = { style: {"flex":"none","width":"42px","height":"42px","border-radius":"13px","background":"rgba(168, 182, 255, 0.12)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_496 = { style: {"flex":"none","width":"42px","height":"42px","border-radius":"13px","background":"rgba(var(--pkm-accent-rgb), 0.12)","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_497 = {
   width: "22",
   height: "22",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#B9C5FF","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_498 = ["d"]
 const _hoisted_499 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
@@ -3743,78 +3817,82 @@ const _hoisted_500 = { style: {"display":"flex","align-items":"center","gap":"6p
 const _hoisted_501 = { style: {"font-size":"14.5px","font-weight":"700"} }
 const _hoisted_502 = {
   key: 0,
-  style: {"padding":"1px 7px","border-radius":"999px","background":"rgba(168, 182, 255, 0.16)","color":"#B9C5FF","font-size":"10.5px","font-weight":"800"}
+  style: {"padding":"1px 7px","border-radius":"999px","background":"rgba(var(--pkm-accent-rgb), 0.16)","color":"var(--pkm-link)","font-size":"10.5px","font-weight":"800"}
 }
-const _hoisted_503 = { style: {"font-size":"12px","color":"#9AA8C3"} }
-const _hoisted_504 = { style: {"font-size":"12.5px","color":"#C9D3EA"} }
+const _hoisted_503 = { style: {"font-size":"12px","color":"var(--pkm-t3)"} }
+const _hoisted_504 = { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }
 const _hoisted_505 = { style: {"display":"flex","flex-wrap":"wrap","gap":"5px","margin-top":"2px"} }
-const _hoisted_506 = { style: {"font-size":"11.5px","color":"#7D8BA8"} }
+const _hoisted_506 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)"} }
 const _hoisted_507 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
 const _hoisted_508 = {
+  class: "pkm-dark",
   "aria-label": "Magasin",
-  style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.2), rgba(98, 122, 255, 0) 60%), #121C33","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_509 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
-const _hoisted_510 = { style: {"flex":"none","width":"52px","height":"52px","border-radius":"16px","background":"rgba(168, 182, 255, 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_510 = { style: {"flex":"none","width":"52px","height":"52px","border-radius":"16px","background":"rgba(var(--pkm-accent-rgb), 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_511 = {
   width: "28",
   height: "28",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#B9C5FF","stroke-width":"1.7","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-link)","stroke-width":"1.7","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_512 = ["d"]
 const _hoisted_513 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_514 = { style: {"font-size":"13px","font-weight":"600","color":"#C9D3EA"} }
-const _hoisted_515 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_514 = { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t2)"} }
+const _hoisted_515 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_516 = {
   key: 0,
-  style: {"align-self":"flex-start","margin-top":"2px","padding":"1px 8px","border-radius":"999px","background":"rgba(168, 182, 255, 0.16)","color":"#B9C5FF","font-size":"11px","font-weight":"800"}
+  style: {"align-self":"flex-start","margin-top":"2px","padding":"1px 8px","border-radius":"999px","background":"rgba(var(--pkm-accent-rgb), 0.16)","color":"var(--pkm-link)","font-size":"11px","font-weight":"800"}
 }
 const _hoisted_517 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
-const _hoisted_518 = { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"} }
+const _hoisted_518 = { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
 const _hoisted_519 = {
+  class: "pkm-dark",
   "aria-label": "Prochains arrivages",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"4px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px"}
 }
 const _hoisted_520 = ["onClick", "aria-label"]
 const _hoisted_521 = ["src", "data-fallback"]
 const _hoisted_522 = ["src"]
 const _hoisted_523 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_524 = ["src"]
 const _hoisted_525 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"4px"} }
 const _hoisted_526 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px"} }
 const _hoisted_527 = { style: {"font-size":"14.5px","font-weight":"700"} }
-const _hoisted_528 = { style: {"font-size":"12.5px","color":"#C9D3EA"} }
+const _hoisted_528 = { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }
 const _hoisted_529 = {
   "aria-hidden": "true",
-  style: {"display":"block","height":"6px","border-radius":"3px","background":"#24345C","overflow":"hidden"}
+  style: {"display":"block","height":"6px","border-radius":"3px","background":"var(--pkm-track)","overflow":"hidden"}
 }
 const _hoisted_530 = { style: {"display":"flex","flex-wrap":"wrap","align-items":"center","gap":"5px"} }
-const _hoisted_531 = { style: {"font-size":"11.5px","color":"#7D8BA8"} }
+const _hoisted_531 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)"} }
 const _hoisted_532 = {
+  class: "pkm-dark",
   "aria-label": "Historique des arrivages",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"4px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px"}
 }
-const _hoisted_533 = { style: {"flex":"none","width":"44px","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"#9AA8C3"} }
+const _hoisted_533 = { style: {"flex":"none","width":"44px","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-t3)"} }
 const _hoisted_534 = { style: {"flex":"1","font-size":"13.5px","line-height":"1.4"} }
 const _hoisted_535 = { style: {"flex":"none","display":"grid","grid-template-columns":"minmax(0, 1.4fr) minmax(0, 1fr)","gap":"10px"} }
 const _hoisted_536 = ["onClick", "aria-pressed"]
 const _hoisted_537 = ["onClick"]
 const _hoisted_538 = {
+  class: "pkm-dark",
   "aria-label": "Lot",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_539 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-start","gap":"12px"} }
 const _hoisted_540 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
 const _hoisted_541 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }
-const _hoisted_542 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_542 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_543 = { style: {"display":"flex","flex-direction":"column","align-items":"flex-end","gap":"2px"} }
 const _hoisted_544 = { style: {"font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"700"} }
-const _hoisted_545 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_545 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_546 = { style: {"display":"flex","flex-direction":"column","gap":"8px"} }
 const _hoisted_547 = {
   role: "group",
@@ -3822,49 +3900,52 @@ const _hoisted_547 = {
   style: {"display":"flex","gap":"8px"}
 }
 const _hoisted_548 = ["onClick", "aria-pressed"]
-const _hoisted_549 = { style: {"font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"} }
+const _hoisted_549 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
 const _hoisted_550 = ["src", "data-fallback"]
 const _hoisted_551 = ["src"]
 const _hoisted_552 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_553 = ["src"]
 const _hoisted_554 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_555 = { style: {"font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_556 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_556 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_557 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end"} }
 const _hoisted_558 = { style: {"font-size":"14.5px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
-const _hoisted_559 = { style: {"font-size":"12px","color":"#7D8BA8"} }
+const _hoisted_559 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_560 = {
+  class: "pkm-dark",
   "aria-label": "Effet sur tes marges",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px"}
 }
 const _hoisted_561 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_562 = { style: {"font-size":"14px","font-weight":"600"} }
-const _hoisted_563 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_563 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_564 = ["aria-label"]
 const _hoisted_565 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"600"} }
 const _hoisted_566 = { style: {"display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"8px"} }
-const _hoisted_567 = { style: {"display":"flex","flex-direction":"column","gap":"5px","font-size":"12px","font-weight":"600","color":"#9AA8C3"} }
+const _hoisted_567 = { style: {"display":"flex","flex-direction":"column","gap":"5px","font-size":"12px","font-weight":"600","color":"var(--pkm-t3)"} }
 const _hoisted_568 = ["value", "onInput"]
-const _hoisted_569 = { style: {"display":"flex","flex-direction":"column","gap":"5px","font-size":"12px","font-weight":"600","color":"#9AA8C3"} }
+const _hoisted_569 = { style: {"display":"flex","flex-direction":"column","gap":"5px","font-size":"12px","font-weight":"600","color":"var(--pkm-t3)"} }
 const _hoisted_570 = ["value", "onInput"]
-const _hoisted_571 = { style: {"display":"flex","flex-direction":"column","gap":"5px","font-size":"12px","font-weight":"600","color":"#9AA8C3"} }
+const _hoisted_571 = { style: {"display":"flex","flex-direction":"column","gap":"5px","font-size":"12px","font-weight":"600","color":"var(--pkm-t3)"} }
 const _hoisted_572 = ["value", "onInput"]
-const _hoisted_573 = { style: {"margin":"0","font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_573 = { style: {"margin":"0","font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_574 = {
+  class: "pkm-dark",
   "aria-label": "Équipe",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"14px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"14px"}
 }
 const _hoisted_575 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_576 = { style: {"font-weight":"600"} }
-const _hoisted_577 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_577 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_578 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end"} }
 const _hoisted_579 = { style: {"font-size":"14.5px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
 const _hoisted_580 = {
+  class: "pkm-dark",
   "aria-label": "Partage de la marge nette",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_581 = {
   role: "group",
@@ -3874,31 +3955,34 @@ const _hoisted_581 = {
 const _hoisted_582 = ["onClick", "aria-pressed"]
 const _hoisted_583 = { style: {"display":"flex","flex-direction":"column"} }
 const _hoisted_584 = { style: {"font-weight":"600"} }
-const _hoisted_585 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
-const _hoisted_586 = { style: {"margin":"0","padding-top":"10px","border-top":"1px solid #1E2B45","font-size":"13px","color":"#9AA8C3"} }
+const _hoisted_585 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_586 = { style: {"margin":"0","padding-top":"10px","border-top":"1px solid var(--pkm-line)","font-size":"13px","color":"var(--pkm-t3)"} }
 const _hoisted_587 = {
+  class: "pkm-dark",
   "aria-label": "Importer",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_588 = ["onClick"]
-const _hoisted_589 = { style: {"flex":"1","color":"#9AA8C3"} }
+const _hoisted_589 = { style: {"flex":"1","color":"var(--pkm-t3)"} }
 const _hoisted_590 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_591 = { style: {"flex":"1","font-weight":"600"} }
 const _hoisted_592 = {
+  class: "pkm-dark",
   "aria-label": "Exporter",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
 }
 const _hoisted_593 = ["onClick"]
-const _hoisted_594 = { style: {"font-size":"12px","color":"#7D8BA8"} }
+const _hoisted_594 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_595 = {
+  class: "pkm-dark",
   "aria-label": "Navigation principale",
-  style: {"position":"absolute","left":"14px","right":"14px","bottom":"14px","z-index":"10","height":"68px","box-sizing":"border-box","display":"grid","grid-template-columns":"repeat(5, minmax(0, 1fr))","align-items":"center","padding":"0 6px","border-radius":"26px","border":"1px solid #1E2B45","background":"rgba(8, 13, 26, 0.92)","backdrop-filter":"blur(14px)","-webkit-backdrop-filter":"blur(14px)","box-shadow":"0 14px 34px rgba(0, 0, 0, 0.5)"}
+  style: {"position":"absolute","left":"14px","right":"14px","bottom":"14px","z-index":"10","height":"68px","box-sizing":"border-box","display":"grid","grid-template-columns":"repeat(5, minmax(0, 1fr))","align-items":"center","padding":"0 6px","border-radius":"26px","border":"1px solid var(--pkm-line)","background":"rgba(var(--pkm-ink-rgb), 0.92)","backdrop-filter":"blur(14px)","-webkit-backdrop-filter":"blur(14px)","box-shadow":"0 14px 34px rgba(var(--pkm-shadow-rgb), 0.5)"}
 }
 const _hoisted_596 = ["onClick", "aria-current"]
 const _hoisted_597 = {
@@ -3942,6 +4026,7 @@ const _hoisted_605 = {
 }
 const _hoisted_606 = {
   key: 4,
+  class: "pkm-dark",
   "aria-label": "Scanner",
   style: {"position":"absolute","inset":"0","z-index":"15","display":"flex","flex-direction":"column","overflow":"hidden","background":"radial-gradient(90% 60% at 50% 40%, #2B3550 0%, #131A2A 55%, #07090F 100%)"}
 }
@@ -3955,9 +4040,10 @@ const _hoisted_609 = {
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_610 = {
+  class: "pkm-dark",
   role: "group",
   "aria-label": "Que scannes-tu ?",
-  style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"3px","border-radius":"999px","background":"rgba(8, 13, 26, 0.6)","border":"1px solid rgba(255, 255, 255, 0.14)"}
+  style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"3px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.6)","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)"}
 }
 const _hoisted_611 = ["onClick", "aria-pressed"]
 const _hoisted_612 = ["onClick", "aria-pressed"]
@@ -3970,12 +4056,12 @@ const _hoisted_614 = {
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_615 = { style: {"position":"relative","flex":"1","min-height":"0","display":"flex","flex-direction":"column","align-items":"center","justify-content":"center","gap":"14px"} }
-const _hoisted_616 = { style: {"font-size":"13px","color":"#C9D3EA"} }
+const _hoisted_616 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
 const _hoisted_617 = { style: {"position":"relative","width":"244px","height":"300px"} }
 const _hoisted_618 = ["src", "data-fallback", "alt"]
 const _hoisted_619 = {
   key: 1,
-  style: {"position":"absolute","left":"24px","top":"16px","width":"196px","transform":"rotate(-2deg)","box-shadow":"0 26px 44px rgba(0, 0, 0, 0.6)","border-radius":"8px","overflow":"hidden"}
+  style: {"position":"absolute","left":"24px","top":"16px","width":"196px","transform":"rotate(-2deg)","box-shadow":"0 26px 44px rgba(var(--pkm-shadow-rgb), 0.6)","border-radius":"8px","overflow":"hidden"}
 }
 const _hoisted_620 = { style: {"display":"flex","align-items":"center","justify-content":"space-between","height":"28px","padding":"0 10px","background":"#E9ECF2","color":"#1B2236","font-family":"'Sora', sans-serif","font-size":"11px","font-weight":"700"} }
 const _hoisted_621 = ["src", "data-fallback", "alt"]
@@ -3985,23 +4071,24 @@ const _hoisted_623 = {
   height: "56",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"position":"absolute","left":"72px","top":"122px","fill":"none","stroke":"rgba(255, 255, 255, 0.85)","stroke-width":"1.2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"position":"absolute","left":"72px","top":"122px","fill":"none","stroke":"rgba(var(--pkm-hl-rgb), 0.85)","stroke-width":"1.2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_624 = ["d"]
 const _hoisted_625 = {
   key: 3,
-  style: {"position":"absolute","left":"22px","top":"40px","width":"200px","height":"220px","border-radius":"14px","background":"#FFFFFF","transform":"rotate(-2deg)","box-shadow":"0 26px 44px rgba(0, 0, 0, 0.6)","display":"flex","align-items":"center","justify-content":"center","overflow":"hidden"}
+  style: {"position":"absolute","left":"22px","top":"40px","width":"200px","height":"220px","border-radius":"14px","background":"var(--pkm-photo-mat)","transform":"rotate(-2deg)","box-shadow":"0 26px 44px rgba(var(--pkm-shadow-rgb), 0.6)","display":"flex","align-items":"center","justify-content":"center","overflow":"hidden"}
 }
 const _hoisted_626 = ["src", "alt"]
 const _hoisted_627 = {
+  class: "pkm-dark",
   role: "status",
-  style: {"display":"flex","align-items":"center","gap":"8px","max-width":"340px","padding":"9px 14px","border-radius":"999px","background":"rgba(8, 13, 26, 0.78)","border":"1px solid rgba(61, 220, 132, 0.45)","font-size":"13.5px","font-weight":"600"}
+  style: {"display":"flex","align-items":"center","gap":"8px","max-width":"340px","padding":"9px 14px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.78)","border":"1px solid rgba(var(--pkm-green-rgb), 0.45)","font-size":"13.5px","font-weight":"600"}
 }
 const _hoisted_628 = { style: {"white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_629 = { style: {"margin-top":"-6px","font-size":"12.5px","color":"#C9D3EA"} }
+const _hoisted_629 = { style: {"margin-top":"-6px","font-size":"12.5px","color":"var(--pkm-t2)"} }
 const _hoisted_630 = ["onClick"]
 const _hoisted_631 = { style: {"position":"relative","display":"flex","flex-direction":"column","align-items":"center","gap":"12px","padding":"0 24px 30px"} }
-const _hoisted_632 = { style: {"font-size":"12px","color":"#9AA8C3"} }
+const _hoisted_632 = { style: {"font-size":"12px","color":"var(--pkm-t3)"} }
 const _hoisted_633 = { style: {"align-self":"stretch","display":"grid","grid-template-columns":"1fr auto 1fr","align-items":"center"} }
 const _hoisted_634 = ["onClick"]
 const _hoisted_635 = {
@@ -4022,25 +4109,26 @@ const _hoisted_638 = {
 }
 const _hoisted_639 = {
   key: 5,
-  style: {"position":"absolute","inset":"0","z-index":"25","display":"flex","flex-direction":"column","background":"rgba(3, 6, 14, 0.55)"}
+  style: {"position":"absolute","inset":"0","z-index":"25","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.55)"}
 }
 const _hoisted_640 = ["onClick"]
 const _hoisted_641 = {
+  class: "pkm-dark",
   "aria-label": "Résultat du scan",
-  style: {"flex":"none","max-height":"770px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"#0F1828","border-top":"1px solid #24345C","border-radius":"28px 28px 0 0","padding":"8px 16px 24px","display":"flex","flex-direction":"column","gap":"14px"}
+  style: {"flex":"none","max-height":"770px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 24px","display":"flex","flex-direction":"column","gap":"14px"}
 }
 const _hoisted_642 = { style: {"flex":"none","display":"flex","gap":"14px","align-items":"flex-start"} }
 const _hoisted_643 = ["src", "data-fallback"]
 const _hoisted_644 = ["src"]
 const _hoisted_645 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_646 = ["src"]
 const _hoisted_647 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","align-items":"flex-start","gap":"4px"} }
 const _hoisted_648 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"21px","line-height":"1.2","font-weight":"700","letter-spacing":"-0.02em"} }
-const _hoisted_649 = { style: {"font-size":"13px","color":"#9AA8C3"} }
-const _hoisted_650 = { style: {"font-size":"12px","color":"#7D8BA8"} }
+const _hoisted_649 = { style: {"font-size":"13px","color":"var(--pkm-t3)"} }
+const _hoisted_650 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_651 = ["onClick"]
 const _hoisted_652 = {
   width: "20",
@@ -4050,13 +4138,14 @@ const _hoisted_652 = {
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_653 = {
+  class: "pkm-dark",
   "aria-label": "Cote",
-  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","padding":"14px 16px","border-radius":"20px","border":"1px solid #24345C","background":"radial-gradient(120% 100% at 100% 0%, rgba(98, 122, 255, 0.2), rgba(98, 122, 255, 0) 60%), #121C33"}
+  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)"}
 }
 const _hoisted_654 = { style: {"display":"flex","flex-direction":"column","gap":"1px"} }
 const _hoisted_655 = { style: {"font-family":"'Sora', sans-serif","font-size":"30px","line-height":"1.1","font-weight":"700","letter-spacing":"-0.03em"} }
 const _hoisted_656 = { style: {"display":"flex","flex-direction":"column","gap":"3px","min-width":"150px"} }
-const _hoisted_657 = { style: {"color":"#9AA8C3"} }
+const _hoisted_657 = { style: {"color":"var(--pkm-t3)"} }
 const _hoisted_658 = { style: {"font-weight":"700","font-variant-numeric":"tabular-nums"} }
 const _hoisted_659 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"8px"} }
 const _hoisted_660 = {
@@ -4072,10 +4161,13 @@ const _hoisted_662 = {
 }
 const _hoisted_663 = ["onClick", "aria-pressed"]
 const _hoisted_664 = { style: {"flex":"none","display":"grid","grid-template-columns":"minmax(0, 1fr) auto","gap":"10px","align-items":"end"} }
-const _hoisted_665 = { style: {"display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"#9AA8C3"} }
+const _hoisted_665 = { style: {"display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
 const _hoisted_666 = ["value", "onInput"]
 const _hoisted_667 = { style: {"display":"flex","flex-direction":"column","gap":"6px"} }
-const _hoisted_668 = { style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid #2A3A5C","border-radius":"16px","background":"#0B1120"} }
+const _hoisted_668 = {
+  class: "pkm-dark",
+  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)"}
+}
 const _hoisted_669 = ["onClick"]
 const _hoisted_670 = {
   width: "18",
@@ -4096,10 +4188,11 @@ const _hoisted_673 = {
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
 }
-const _hoisted_674 = { style: {"flex":"none","margin-top":"-6px","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_674 = { style: {"flex":"none","margin-top":"-6px","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_675 = {
+  class: "pkm-dark",
   "aria-label": "Effet sur ta collection",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border-radius":"18px","border":"1px solid #1E2B45","background":"#111A2C"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
 }
 const _hoisted_676 = {
   width: "40",
@@ -4123,18 +4216,20 @@ const _hoisted_682 = ["onClick"]
 const _hoisted_683 = ["onClick"]
 const _hoisted_684 = {
   key: 6,
-  style: {"position":"absolute","inset":"0","z-index":"20","display":"flex","flex-direction":"column","background":"rgba(3, 6, 14, 0.62)"}
+  style: {"position":"absolute","inset":"0","z-index":"20","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.62)"}
 }
 const _hoisted_685 = ["onClick"]
 const _hoisted_686 = {
+  class: "pkm-dark",
   "aria-label": "Saisie",
-  style: {"flex":"none","max-height":"796px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"#0F1828","border-top":"1px solid #24345C","border-radius":"28px 28px 0 0","padding":"8px 16px 26px","display":"flex","flex-direction":"column","gap":"14px"}
+  style: {"flex":"none","max-height":"796px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 26px","display":"flex","flex-direction":"column","gap":"14px"}
 }
 const _hoisted_687 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"8px"} }
 const _hoisted_688 = {
+  class: "pkm-dark",
   role: "group",
   "aria-label": "Type de saisie",
-  style: {"flex":"1","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"4px","border-radius":"999px","background":"#0B1120","border":"1px solid #1E2B45"}
+  style: {"flex":"1","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"4px","border-radius":"999px","background":"var(--pkm-field)","border":"1px solid var(--pkm-line)"}
 }
 const _hoisted_689 = ["onClick", "aria-pressed"]
 const _hoisted_690 = ["onClick", "aria-pressed"]
@@ -4154,16 +4249,19 @@ const _hoisted_697 = ["src", "data-fallback"]
 const _hoisted_698 = ["src"]
 const _hoisted_699 = {
   key: 2,
-  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"#FFFFFF"}
+  style: {"display":"flex","align-items":"center","justify-content":"center","width":"100%","height":"100%","background":"var(--pkm-photo-mat)"}
 }
 const _hoisted_700 = ["src"]
 const _hoisted_701 = { style: {"padding":"0 2px","font-size":"12.5px","font-weight":"700","line-height":"1.25","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_702 = { style: {"padding":"0 2px","font-size":"11.5px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_702 = { style: {"padding":"0 2px","font-size":"11.5px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_703 = { style: {"flex":"none","display":"grid","grid-template-columns":"minmax(0, 1fr) auto","gap":"10px","align-items":"end"} }
-const _hoisted_704 = { style: {"display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"#9AA8C3"} }
+const _hoisted_704 = { style: {"display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
 const _hoisted_705 = ["value", "onInput"]
 const _hoisted_706 = { style: {"display":"flex","flex-direction":"column","gap":"6px"} }
-const _hoisted_707 = { style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid #2A3A5C","border-radius":"16px","background":"#0B1120"} }
+const _hoisted_707 = {
+  class: "pkm-dark",
+  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)"}
+}
 const _hoisted_708 = ["onClick"]
 const _hoisted_709 = {
   width: "18",
@@ -4186,41 +4284,41 @@ const _hoisted_712 = {
 }
 const _hoisted_713 = {
   key: 0,
-  style: {"flex":"none","margin-top":"-8px","font-size":"12.5px","color":"#7D8BA8"}
+  style: {"flex":"none","margin-top":"-8px","font-size":"12.5px","color":"var(--pkm-t4)"}
 }
 const _hoisted_714 = { style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"} }
 const _hoisted_715 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"8px"} }
 const _hoisted_716 = ["onClick", "aria-pressed"]
-const _hoisted_717 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"#9AA8C3"} }
+const _hoisted_717 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
 const _hoisted_718 = ["value", "onInput"]
-const _hoisted_719 = { style: {"font-weight":"400","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_719 = { style: {"font-weight":"400","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_720 = {
   key: 0,
-  style: {"flex":"none","display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"#9AA8C3"}
+  style: {"flex":"none","display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"}
 }
 const _hoisted_721 = ["value", "onInput"]
-const _hoisted_722 = { style: {"font-weight":"400","font-size":"12.5px","color":"#7D8BA8"} }
+const _hoisted_722 = { style: {"font-weight":"400","font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_723 = {
   key: 2,
   style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"}
 }
-const _hoisted_724 = { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"#9AA8C3"} }
+const _hoisted_724 = { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
 const _hoisted_725 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"8px"} }
 const _hoisted_726 = ["onClick", "aria-pressed"]
 const _hoisted_727 = ["aria-label"]
 const _hoisted_728 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px"} }
-const _hoisted_729 = { style: {"font-size":"13px","font-weight":"600","color":"#C9D3EA"} }
-const _hoisted_730 = { style: {"display":"flex","flex-direction":"column","gap":"4px","font-size":"13px","color":"#9AA8C3"} }
-const _hoisted_731 = { style: {"color":"#C9D3EA","font-variant-numeric":"tabular-nums","text-align":"right"} }
+const _hoisted_729 = { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t2)"} }
+const _hoisted_730 = { style: {"display":"flex","flex-direction":"column","gap":"4px","font-size":"13px","color":"var(--pkm-t3)"} }
+const _hoisted_731 = { style: {"color":"var(--pkm-t2)","font-variant-numeric":"tabular-nums","text-align":"right"} }
 const _hoisted_732 = {
   key: 0,
-  style: {"font-size":"13px","font-weight":"700","color":"#F5B14C"}
+  style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-orange)"}
 }
 const _hoisted_733 = ["onClick", "disabled"]
 const _hoisted_734 = {
   key: 7,
   "aria-label": "Bienvenue sur PKM",
-  style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","flex-direction":"column","overflow-y":"auto","scrollbar-width":"none","background":"radial-gradient(110% 55% at 50% 0%, rgba(98, 122, 255, 0.3), rgba(98, 122, 255, 0) 62%), #0B1120"}
+  style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","flex-direction":"column","overflow-y":"auto","scrollbar-width":"none","background":"radial-gradient(110% 55% at 50% 0%, rgba(var(--pkm-glow-rgb), 0.3), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-app)"}
 }
 const _hoisted_735 = { style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","min-height":"44px","padding":"14px 16px 0"} }
 const _hoisted_736 = {
@@ -4237,14 +4335,17 @@ const _hoisted_739 = {
   style: {"position":"relative","align-self":"center","width":"262px","height":"232px"}
 }
 const _hoisted_740 = ["src", "data-fallback"]
-const _hoisted_741 = { style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid #1E2B45","background":"#111A2C"} }
+const _hoisted_741 = {
+  class: "pkm-dark",
+  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+}
 const _hoisted_742 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
 const _hoisted_743 = {
   width: "22",
   height: "22",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#A8B6FF","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_744 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
 const _hoisted_745 = {
@@ -4252,7 +4353,7 @@ const _hoisted_745 = {
   height: "22",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#A8B6FF","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_746 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
 const _hoisted_747 = {
@@ -4260,7 +4361,7 @@ const _hoisted_747 = {
   height: "22",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#A8B6FF","stroke-width":"1.9","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linejoin":"round"}
 }
 const _hoisted_748 = ["onClick"]
 const _hoisted_749 = {
@@ -4271,7 +4372,10 @@ const _hoisted_750 = { style: {"padding":"0","margin-bottom":"8px","font-size":"
 const _hoisted_751 = { style: {"display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"6px"} }
 const _hoisted_752 = ["onClick", "aria-pressed"]
 const _hoisted_753 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
-const _hoisted_754 = { style: {"flex":"none","width":"42px","height":"42px","border-radius":"14px","background":"rgba(8, 13, 26, 0.5)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_754 = {
+  class: "pkm-dark",
+  style: {"flex":"none","width":"42px","height":"42px","border-radius":"14px","background":"rgba(var(--pkm-ink-rgb), 0.5)","display":"flex","align-items":"center","justify-content":"center"}
+}
 const _hoisted_755 = ["d"]
 const _hoisted_756 = { style: {"flex":"1","display":"flex","flex-direction":"column"} }
 const _hoisted_757 = {
@@ -4295,10 +4399,11 @@ const _hoisted_762 = {
 }
 const _hoisted_763 = ["d"]
 const _hoisted_764 = { style: {"display":"flex","flex-direction":"column","align-items":"center","gap":"2px","text-align":"center"} }
-const _hoisted_765 = { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"#C9D3EA","text-align":"center"} }
+const _hoisted_765 = { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"var(--pkm-t2)","text-align":"center"} }
 const _hoisted_766 = {
+  class: "pkm-dark",
   "aria-label": "Ce qu’on a préparé pour toi",
-  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid #1E2B45","background":"#111A2C"}
+  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
 }
 const _hoisted_767 = ["onClick"]
 const _hoisted_768 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px","margin-top":"-4px"} }
@@ -4317,14 +4422,18 @@ const _hoisted_774 = { style: {"flex":"1 1 auto","min-height":"0","width":"100%"
 const _hoisted_775 = ["src", "data-fallback", "alt", "onClick"]
 const _hoisted_776 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"center","gap":"2px","text-align":"center"} }
 const _hoisted_777 = { style: {"font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"600"} }
-const _hoisted_778 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
-const _hoisted_779 = { style: {"font-size":"11.5px","color":"#7D8BA8"} }
+const _hoisted_778 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_779 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)"} }
 const _hoisted_780 = {
   key: 9,
+  class: "pkm-dark",
   "aria-label": "Radar des boutiques",
   style: {"position":"absolute","inset":"0","z-index":"15","overflow":"hidden","background":"#05080F"}
 }
-const _hoisted_781 = { style: {"position":"absolute","left":"0","right":"0","top":"0","z-index":"3","display":"flex","flex-direction":"column","gap":"8px","padding":"14px 14px 10px","background":"linear-gradient(180deg, rgba(5, 8, 15, 0.85), rgba(5, 8, 15, 0))"} }
+const _hoisted_781 = {
+  class: "pkm-dark",
+  style: {"position":"absolute","left":"0","right":"0","top":"0","z-index":"3","display":"flex","flex-direction":"column","gap":"8px","padding":"14px 14px 10px","background":"linear-gradient(180deg, rgba(var(--pkm-deep-rgb), 0.85), rgba(var(--pkm-deep-rgb), 0))"}
+}
 const _hoisted_782 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
 const _hoisted_783 = ["onClick"]
 const _hoisted_784 = {
@@ -4335,13 +4444,14 @@ const _hoisted_784 = {
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_785 = {
+  class: "pkm-dark",
   "aria-label": "Secteur",
-  style: {"flex":"1","min-width":"0","display":"flex","align-items":"center","gap":"0","height":"44px","padding":"0 6px","box-sizing":"border-box","border-radius":"22px","border":"1px solid rgba(255, 255, 255, 0.12)","background":"rgba(8, 13, 26, 0.86)","overflow-x":"auto","scrollbar-width":"none"}
+  style: {"flex":"1","min-width":"0","display":"flex","align-items":"center","gap":"0","height":"44px","padding":"0 6px","box-sizing":"border-box","border-radius":"22px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.12)","background":"rgba(var(--pkm-ink-rgb), 0.86)","overflow-x":"auto","scrollbar-width":"none"}
 }
 const _hoisted_786 = {
   key: 0,
   "aria-hidden": "true",
-  style: {"flex":"none","color":"#5A6B8C","font-size":"14px"}
+  style: {"flex":"none","color":"var(--pkm-t5)","font-size":"14px"}
 }
 const _hoisted_787 = ["onClick", "aria-current"]
 const _hoisted_788 = ["onClick", "aria-pressed"]
@@ -4353,8 +4463,9 @@ const _hoisted_789 = {
 const _hoisted_790 = ["onClick", "aria-pressed"]
 const _hoisted_791 = {
   key: 0,
+  class: "pkm-dark",
   "aria-hidden": "true",
-  style: {"align-self":"flex-start","display":"flex","align-items":"center","gap":"10px","padding":"4px 10px","border-radius":"999px","background":"rgba(8, 13, 26, 0.82)","font-size":"11px","font-weight":"600","color":"#C9D3EA"}
+  style: {"align-self":"flex-start","display":"flex","align-items":"center","gap":"10px","padding":"4px 10px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.82)","font-size":"11px","font-weight":"600","color":"var(--pkm-t2)"}
 }
 const _hoisted_792 = {
   id: "pkm-radar-sheet",
@@ -4372,27 +4483,28 @@ const _hoisted_795 = ["aria-label"]
 const _hoisted_796 = { style: {"display":"flex","align-items":"flex-start","gap":"12px"} }
 const _hoisted_797 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
 const _hoisted_798 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.02em"} }
-const _hoisted_799 = { style: {"font-size":"13px","color":"#C9D3EA"} }
-const _hoisted_800 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_799 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
+const _hoisted_800 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_801 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"4px"} }
 const _hoisted_802 = ["onClick", "aria-expanded"]
 const _hoisted_803 = {
   key: 0,
-  style: {"display":"flex","flex-direction":"column","gap":"6px","padding":"12px 14px","border-radius":"16px","border":"1px solid #1E2B45","background":"#0F1828"}
+  class: "pkm-dark",
+  style: {"display":"flex","flex-direction":"column","gap":"6px","padding":"12px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)"}
 }
-const _hoisted_804 = { style: {"color":"#C9D3EA"} }
-const _hoisted_805 = { style: {"font-size":"12px","color":"#7D8BA8"} }
+const _hoisted_804 = { style: {"color":"var(--pkm-t2)"} }
+const _hoisted_805 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_806 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
 const _hoisted_807 = ["href"]
 const _hoisted_808 = ["onClick", "aria-pressed"]
 const _hoisted_809 = ["href"]
 const _hoisted_810 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
 const _hoisted_811 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.02em"} }
-const _hoisted_812 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
+const _hoisted_812 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_813 = {
   key: 0,
   role: "status",
-  style: {"margin":"0","padding":"10px 12px","border-radius":"14px","background":"rgba(245, 177, 76, 0.12)","color":"#F7C77E","font-size":"13px","line-height":"1.45"}
+  style: {"margin":"0","padding":"10px 12px","border-radius":"14px","background":"rgba(var(--pkm-orange-rgb), 0.12)","color":"var(--pkm-sand)","font-size":"13px","line-height":"1.45"}
 }
 const _hoisted_814 = ["onClick"]
 const _hoisted_815 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
@@ -4414,47 +4526,56 @@ const _hoisted_819 = {
 const _hoisted_820 = ["onClick", "aria-pressed"]
 const _hoisted_821 = {
   key: 3,
-  style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"}
+  style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"}
 }
 const _hoisted_822 = {
   key: 4,
-  style: {"margin":"0","padding":"8px 0","font-size":"13.5px","color":"#9AA8C3"}
+  style: {"margin":"0","padding":"8px 0","font-size":"13.5px","color":"var(--pkm-t3)"}
 }
-const _hoisted_823 = { style: {"font-size":"12.5px","color":"#7D8BA8"} }
-const _hoisted_824 = { style: {"border-radius":"20px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"} }
+const _hoisted_823 = { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }
+const _hoisted_824 = {
+  class: "pkm-dark",
+  style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+}
 const _hoisted_825 = ["onClick", "aria-label"]
 const _hoisted_826 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
 const _hoisted_827 = { style: {"font-size":"14px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_828 = { style: {"font-size":"12px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_829 = { style: {"font-size":"11.5px","color":"#7D8BA8","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_828 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_829 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_830 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
-const _hoisted_831 = { style: {"font-size":"12.5px","font-weight":"700","color":"#C9D3EA"} }
-const _hoisted_832 = { style: {"border-radius":"20px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"} }
+const _hoisted_831 = { style: {"font-size":"12.5px","font-weight":"700","color":"var(--pkm-t2)"} }
+const _hoisted_832 = {
+  class: "pkm-dark",
+  style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+}
 const _hoisted_833 = ["onClick", "aria-label"]
 const _hoisted_834 = { style: {"flex":"1","min-width":"0","font-size":"14px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_835 = { style: {"flex":"none","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"#5EE0CF"} }
+const _hoisted_835 = { style: {"flex":"none","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-teal)"} }
 const _hoisted_836 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_837 = { style: {"margin":"0","font-size":"11px","line-height":"1.45","color":"#5A6B8C"} }
-const _hoisted_838 = { style: {"flex":"none","width":"26px","height":"26px","border-radius":"13px","background":"rgba(61, 220, 132, 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_837 = { style: {"margin":"0","font-size":"11px","line-height":"1.45","color":"var(--pkm-t5)"} }
+const _hoisted_838 = { style: {"flex":"none","width":"26px","height":"26px","border-radius":"13px","background":"rgba(var(--pkm-green-rgb), 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
 const _hoisted_839 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"#3DDC84","stroke-width":"2.6","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"var(--pkm-green)","stroke-width":"2.6","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 
 return function render(_ctx, _cache) {
   return (_openBlock(), _createElementBlock("div", _hoisted_1, [
     (_ctx.V.ui.headerHome)
       ? (_openBlock(), _createElementBlock("header", _hoisted_2, [
-          _cache[2] || (_cache[2] = _createElementVNode("span", { style: {"justify-self":"start","display":"flex","align-items":"center","gap":"8px","height":"36px","padding":"0 12px","border-radius":"999px","background":"#111A2C","border":"1px solid #1E2B45","font-size":"13px","font-weight":"600","color":"#C9D3EA"} }, [
+          _cache[2] || (_cache[2] = _createElementVNode("span", {
+            class: "pkm-dark",
+            style: {"justify-self":"start","display":"flex","align-items":"center","gap":"8px","height":"36px","padding":"0 12px","border-radius":"999px","background":"var(--pkm-card)","border":"1px solid var(--pkm-line)","font-size":"13px","font-weight":"600","color":"var(--pkm-t2)"}
+          }, [
             _createElementVNode("span", { style: {"flex":"none","width":"18px","height":"12px","border-radius":"2px","background":"linear-gradient(90deg, #0055A4 0 33.3%, #FFFFFF 33.3% 66.6%, #EF4135 66.6%)"} }),
             _createTextVNode("Marché FR")
           ], -1 /* CACHED */)),
@@ -4500,10 +4621,11 @@ return function render(_ctx, _cache) {
     (_ctx.V.ui.headerDetail)
       ? (_openBlock(), _createElementBlock("header", _hoisted_12, [
           _createElementVNode("button", {
+            class: "pkm-dark",
             type: "button",
             onClick: _ctx.V.goBack,
             "aria-label": "Retour",
-            style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid #1E2B45","border-radius":"22px","background":"#111A2C","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+            style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"22px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
           }, [
             (_openBlock(), _createElementBlock("svg", _hoisted_14, [...(_cache[3] || (_cache[3] = [
               _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
@@ -4537,7 +4659,7 @@ return function render(_ctx, _cache) {
                     onClick: _ctx.V.toggleMask,
                     "aria-label": _ctx.A(_ctx.V.ui.maskLabel),
                     "aria-pressed": _ctx.A(_ctx.V.ui.masked),
-                    style: {"width":"44px","height":"44px","margin":"-10px -6px -10px 0","padding":"0","border":"0","background":"transparent","color":"#9AA8C3","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                    style: {"width":"44px","height":"44px","margin":"-10px -6px -10px 0","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t3)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_25, [
                       _cache[4] || (_cache[4] = _createElementVNode("path", { d: "M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" }, null, -1 /* CACHED */)),
@@ -4579,12 +4701,12 @@ return function render(_ctx, _cache) {
                   cx: _ctx.V.home.chart.dotX,
                   cy: _ctx.V.home.chart.dotY,
                   r: "4.5",
-                  style: _normalizeStyle(`fill: ${_ctx.V.home.chart.color}; stroke: #121C33; stroke-width: 2`)
+                  style: _normalizeStyle(`fill: ${_ctx.V.home.chart.color}; stroke: var(--pkm-card-hi); stroke-width: 2`)
                 }, null, 12 /* STYLE, PROPS */, _hoisted_32)
               ], 8 /* PROPS */, _hoisted_29)),
               _createElementVNode("div", _hoisted_33, [
                 _createElementVNode("span", _hoisted_34, [
-                  _cache[7] || (_cache[7] = _createElementVNode("span", { style: {"font-size":"12px","color":"#9AA8C3"} }, "Plus-value latente", -1 /* CACHED */)),
+                  _cache[7] || (_cache[7] = _createElementVNode("span", { style: {"font-size":"12px","color":"var(--pkm-t3)"} }, "Plus-value latente", -1 /* CACHED */)),
                   _createElementVNode("span", {
                     style: _normalizeStyle(`font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: ${_ctx.V.home.latentColor}`)
                   }, _toDisplayString(_ctx.V.home.latent), 5 /* TEXT, STYLE */)
@@ -4598,26 +4720,27 @@ return function render(_ctx, _cache) {
             (_ctx.V.home.isEmpty)
               ? (_openBlock(), _createElementBlock("section", _hoisted_37, [
                   _cache[8] || (_cache[8] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.01em"} }, "Ta collection est vide", -1 /* CACHED */)),
-                  _cache[9] || (_cache[9] = _createElementVNode("p", { style: {"margin":"0","font-size":"13.5px","line-height":"1.5","color":"#9AA8C3"} }, "Retrouve tes cartes parmi toutes les extensions, ou scanne-les. Ta collection est enregistrée sur cet appareil.", -1 /* CACHED */)),
+                  _cache[9] || (_cache[9] = _createElementVNode("p", { style: {"margin":"0","font-size":"13.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Retrouve tes cartes parmi toutes les extensions, ou scanne-les. Ta collection est enregistrée sur cet appareil.", -1 /* CACHED */)),
                   _createElementVNode("div", _hoisted_38, [
                     _createElementVNode("button", {
                       type: "button",
                       onClick: _ctx.V.home.browse,
-                      style: {"height":"48px","border":"0","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font":"inherit","font-size":"14.5px","font-weight":"700","cursor":"pointer"}
+                      style: {"height":"48px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"14.5px","font-weight":"700","cursor":"pointer"}
                     }, "Toutes les cartes", 8 /* PROPS */, _hoisted_39),
                     _createElementVNode("button", {
                       type: "button",
                       onClick: _ctx.V.openScan,
-                      style: {"height":"48px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"14.5px","font-weight":"700","cursor":"pointer"}
+                      style: {"height":"48px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14.5px","font-weight":"700","cursor":"pointer"}
                     }, "Scanner", 8 /* PROPS */, _hoisted_40)
                   ])
                 ]))
               : _createCommentVNode("v-if", true),
             _createElementVNode("button", {
+              class: "pkm-dark",
               type: "button",
               onClick: _ctx.V.goTiers,
               "aria-label": _ctx.A(_ctx.V.home.tier.aria),
-              style: _normalizeStyle(`flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 16px; border: 1px solid #1E2B45; border-radius: 22px; background: radial-gradient(90% 120% at 0% 50%, ${_ctx.V.home.tier.glow}, rgba(0, 0, 0, 0) 60%), #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer`)
+              style: _normalizeStyle(`flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 16px; border: 1px solid var(--pkm-line); border-radius: 22px; background: radial-gradient(90% 120% at 0% 50%, ${_ctx.V.home.tier.glow}, rgba(var(--pkm-shadow-rgb), 0) 60%), var(--pkm-card); color: inherit; font: inherit; text-align: left; cursor: pointer`)
             }, [
               (_openBlock(), _createElementBlock("svg", _hoisted_42, [
                 _createElementVNode("path", {
@@ -4648,13 +4771,14 @@ return function render(_ctx, _cache) {
               ]))]))
             ], 12 /* STYLE, PROPS */, _hoisted_41),
             _createElementVNode("button", {
+              class: "pkm-dark",
               type: "button",
               onClick: _ctx.V.home.near.open,
               "aria-label": _ctx.A(_ctx.V.home.near.aria),
-              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid #1E2B45","border-radius":"20px","background":"#111A2C","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
             }, [
               _createElementVNode("span", {
-                style: _normalizeStyle(`position: relative; flex: none; width: 40px; height: 52px; border-radius: 8px; overflow: hidden; background: ${_ctx.V.home.near.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                style: _normalizeStyle(`position: relative; flex: none; width: 40px; height: 52px; border-radius: 8px; overflow: hidden; background: ${_ctx.V.home.near.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
               }, [
                 (_ctx.V.home.near.isCard)
                   ? (_openBlock(), _createElementBlock("img", {
@@ -4733,32 +4857,33 @@ return function render(_ctx, _cache) {
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.openScan,
-                    style: {"height":"48px","margin-top":"2px","border":"0","border-radius":"999px","background":"#5EE0CF","color":"#0B1120","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+                    style: {"height":"48px","margin-top":"2px","border":"0","border-radius":"999px","background":"var(--pkm-teal)","color":"var(--pkm-ink)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
                   }, "Scanner ma première carte", 8 /* PROPS */, _hoisted_65),
-                  _cache[15] || (_cache[15] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"#9AA8C3"} }, "La cote PKM, c’est le prix du milieu entre plusieurs sites. Elle évite de surestimer ta collection à cause d’une annonce trop chère.", -1 /* CACHED */))
+                  _cache[15] || (_cache[15] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "La cote PKM, c’est le prix du milieu entre plusieurs sites. Elle évite de surestimer ta collection à cause d’une annonce trop chère.", -1 /* CACHED */))
                 ]))
               : _createCommentVNode("v-if", true),
             (_ctx.V.home.passion)
               ? (_openBlock(), _createElementBlock("section", _hoisted_66, [
-                  _cache[16] || (_cache[16] = _createElementVNode("span", { style: {"flex":"1","font-size":"13.5px","line-height":"1.45","color":"#F3D9AE"} }, "Profil Passionné : le mode avancé ajoute les lots, les associés et l’export complet.", -1 /* CACHED */)),
+                  _cache[16] || (_cache[16] = _createElementVNode("span", { style: {"flex":"1","font-size":"13.5px","line-height":"1.45","color":"var(--pkm-sand-2)"} }, "Profil Passionné : le mode avancé ajoute les lots, les associés et l’export complet.", -1 /* CACHED */)),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.toggleAdv,
-                    style: {"flex":"none","height":"44px","padding":"0 16px","border":"0","border-radius":"999px","background":"#FFB547","color":"#0B1120","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
+                    style: {"flex":"none","height":"44px","padding":"0 16px","border":"0","border-radius":"999px","background":"var(--pkm-amber)","color":"var(--pkm-ink)","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
                   }, "Activer", 8 /* PROPS */, _hoisted_67)
                 ]))
               : _createCommentVNode("v-if", true),
             (_ctx.V.home.showMovers)
               ? (_openBlock(), _createElementBlock("section", _hoisted_68, [
                   _createElementVNode("button", {
+                    class: "pkm-dark",
                     type: "button",
                     onClick: _ctx.V.home.up.open,
-                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border":"1px solid #1E2B45","border-radius":"20px","background":"#111A2C","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                   }, [
                     _createElementVNode("span", _hoisted_70, _toDisplayString(_ctx.V.home.up.label), 1 /* TEXT */),
                     _createElementVNode("span", _hoisted_71, [
                       _createElementVNode("span", {
-                        style: _normalizeStyle(`position: relative; flex: none; width: 42px; height: 56px; border-radius: 8px; overflow: hidden; background: ${_ctx.V.home.up.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                        style: _normalizeStyle(`position: relative; flex: none; width: 42px; height: 56px; border-radius: 8px; overflow: hidden; background: ${_ctx.V.home.up.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
                       }, [
                         (_ctx.V.home.up.isCard)
                           ? (_openBlock(), _createElementBlock("img", {
@@ -4799,14 +4924,15 @@ return function render(_ctx, _cache) {
                     ])
                   ], 8 /* PROPS */, _hoisted_69),
                   _createElementVNode("button", {
+                    class: "pkm-dark",
                     type: "button",
                     onClick: _ctx.V.home.down.open,
-                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border":"1px solid #1E2B45","border-radius":"20px","background":"#111A2C","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                   }, [
                     _createElementVNode("span", _hoisted_79, _toDisplayString(_ctx.V.home.down.label), 1 /* TEXT */),
                     _createElementVNode("span", _hoisted_80, [
                       _createElementVNode("span", {
-                        style: _normalizeStyle(`position: relative; flex: none; width: 42px; height: 56px; border-radius: 8px; overflow: hidden; background: ${_ctx.V.home.down.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                        style: _normalizeStyle(`position: relative; flex: none; width: 42px; height: 56px; border-radius: 8px; overflow: hidden; background: ${_ctx.V.home.down.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
                       }, [
                         (_ctx.V.home.down.isCard)
                           ? (_openBlock(), _createElementBlock("img", {
@@ -4855,7 +4981,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       type: "button",
                       onClick: _ctx.V.tabCollection,
-                      style: {"height":"44px","padding":"0 2px","border":"0","background":"transparent","color":"#B9C5FF","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+                      style: {"height":"44px","padding":"0 2px","border":"0","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
                     }, "Voir tout", 8 /* PROPS */, _hoisted_89)
                   ]),
                   _createElementVNode("div", _hoisted_90, [
@@ -4865,7 +4991,7 @@ return function render(_ctx, _cache) {
                         type: "button",
                         onClick: bp.open,
                         "aria-label": _ctx.A(bp.label),
-                        style: _normalizeStyle(`position: relative; flex: none; width: 118px; height: 164px; padding: 0; border: 0; border-radius: 16px; overflow: hidden; background: ${bp.bg}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); cursor: pointer`)
+                        style: _normalizeStyle(`position: relative; flex: none; width: 118px; height: 164px; padding: 0; border: 0; border-radius: 16px; overflow: hidden; background: ${bp.bg}; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12); cursor: pointer`)
                       }, [
                         (bp.plainCard)
                           ? (_openBlock(), _createElementBlock("img", {
@@ -4934,9 +5060,10 @@ return function render(_ctx, _cache) {
             (_ctx.V.home.hasMargin)
               ? (_openBlock(), _createElementBlock("button", {
                   key: 5,
+                  class: "pkm-dark",
                   type: "button",
                   onClick: _ctx.V.goSales,
-                  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"14px 14px 14px 16px","border":"1px solid #1E2B45","border-radius":"20px","background":"#111A2C","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"14px 14px 14px 16px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", _hoisted_106, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_107, [...(_cache[18] || (_cache[18] = [
@@ -4946,7 +5073,7 @@ return function render(_ctx, _cache) {
                     ]))]))
                   ]),
                   _createElementVNode("span", _hoisted_108, [
-                    _cache[19] || (_cache[19] = _createElementVNode("span", { style: {"font-size":"13px","color":"#9AA8C3"} }, "Marge réalisée sur tes ventes", -1 /* CACHED */)),
+                    _cache[19] || (_cache[19] = _createElementVNode("span", { style: {"font-size":"13px","color":"var(--pkm-t3)"} }, "Marge réalisée sur tes ventes", -1 /* CACHED */)),
                     _createElementVNode("span", {
                       style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: ${_ctx.V.home.marginColor}`)
                     }, _toDisplayString(_ctx.V.home.margin), 5 /* TEXT, STYLE */),
@@ -4964,7 +5091,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       type: "button",
                       onClick: _ctx.V.openScan,
-                      style: {"height":"44px","padding":"0 2px","border":"0","background":"transparent","color":"#B9C5FF","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+                      style: {"height":"44px","padding":"0 2px","border":"0","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
                     }, "Scanner", 8 /* PROPS */, _hoisted_113)
                   ]),
                   _createElementVNode("div", _hoisted_114, [
@@ -4976,7 +5103,7 @@ return function render(_ctx, _cache) {
                         style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 70px; padding: 9px 14px; border: 0; border-top: ${ad.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                       }, [
                         _createElementVNode("span", {
-                          style: _normalizeStyle(`position: relative; flex: none; width: 38px; height: 50px; border-radius: 7px; overflow: hidden; background: ${ad.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                          style: _normalizeStyle(`position: relative; flex: none; width: 38px; height: 50px; border-radius: 7px; overflow: hidden; background: ${ad.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
                         }, [
                           (ad.isCard)
                             ? (_openBlock(), _createElementBlock("img", {
@@ -5023,7 +5150,7 @@ return function render(_ctx, _cache) {
                   ])
                 ]))
               : _createCommentVNode("v-if", true),
-            _cache[22] || (_cache[22] = _createElementVNode("p", { style: {"margin":"2px 0 0","font-size":"11.5px","line-height":"1.5","color":"#7D8BA8","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company. Maquette : prix fictifs.", -1 /* CACHED */))
+            _cache[22] || (_cache[22] = _createElementVNode("p", { style: {"margin":"2px 0 0","font-size":"11.5px","line-height":"1.5","color":"var(--pkm-t4)","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company. Maquette : prix fictifs.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isCollection)
@@ -5044,13 +5171,13 @@ return function render(_ctx, _cache) {
                 placeholder: "Rechercher « Pikachu »",
                 value: _ctx.V.coll.q,
                 onInput: _ctx.V.coll.onQ,
-                style: {"flex":"1","min-width":"0","height":"44px","padding":"0","border":"0","outline-offset":"4px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"15px"}
+                style: {"flex":"1","min-width":"0","height":"44px","padding":"0","border":"0","outline-offset":"4px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px"}
               }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_127),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.openScan,
                 "aria-label": "Scanner un article",
-                style: {"flex":"none","width":"44px","height":"44px","margin-right":"-10px","padding":"0","border":"0","background":"transparent","color":"#B9C5FF","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                style: {"flex":"none","width":"44px","height":"44px","margin-right":"-10px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-link)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_129, [...(_cache[24] || (_cache[24] = [
                   _createElementVNode("path", { d: "M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8 M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8 M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16 M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16 M7 12h10" }, null, -1 /* CACHED */)
@@ -5070,15 +5197,15 @@ return function render(_ctx, _cache) {
             ]),
             _createElementVNode("section", _hoisted_132, [
               _createElementVNode("div", _hoisted_133, [
-                _cache[25] || (_cache[25] = _createElementVNode("span", { style: {"font-size":"12px","color":"#9AA8C3"} }, "Valeur", -1 /* CACHED */)),
+                _cache[25] || (_cache[25] = _createElementVNode("span", { style: {"font-size":"12px","color":"var(--pkm-t3)"} }, "Valeur", -1 /* CACHED */)),
                 _createElementVNode("span", _hoisted_134, _toDisplayString(_ctx.V.coll.value), 1 /* TEXT */)
               ]),
               _createElementVNode("div", _hoisted_135, [
-                _cache[26] || (_cache[26] = _createElementVNode("span", { style: {"font-size":"12px","color":"#9AA8C3"} }, "Coût d’achat", -1 /* CACHED */)),
+                _cache[26] || (_cache[26] = _createElementVNode("span", { style: {"font-size":"12px","color":"var(--pkm-t3)"} }, "Coût d’achat", -1 /* CACHED */)),
                 _createElementVNode("span", _hoisted_136, _toDisplayString(_ctx.V.coll.cost), 1 /* TEXT */)
               ]),
               _createElementVNode("div", _hoisted_137, [
-                _cache[27] || (_cache[27] = _createElementVNode("span", { style: {"font-size":"12px","color":"#9AA8C3"} }, "Plus-value", -1 /* CACHED */)),
+                _cache[27] || (_cache[27] = _createElementVNode("span", { style: {"font-size":"12px","color":"var(--pkm-t3)"} }, "Plus-value", -1 /* CACHED */)),
                 _createElementVNode("span", {
                   style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 15.5px; font-weight: 700; white-space: nowrap; color: ${_ctx.V.coll.latentColor}`)
                 }, _toDisplayString(_ctx.V.coll.latent), 5 /* TEXT, STYLE */)
@@ -5089,12 +5216,13 @@ return function render(_ctx, _cache) {
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.coll.list || []), (ci, ci_i) => {
                 return (_openBlock(), _createElementBlock("button", {
                   key: ci_i,
+                  class: "pkm-dark",
                   type: "button",
                   onClick: ci.open,
-                  style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"8px 8px 12px","border":"1px solid #1E2B45","border-radius":"20px","background":"#111A2C","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                  style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"8px 8px 12px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", {
-                    style: _normalizeStyle(`position: relative; display: block; height: 176px; border-radius: 14px; overflow: hidden; background: ${ci.bg}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1)`)
+                    style: _normalizeStyle(`position: relative; display: block; height: 176px; border-radius: 14px; overflow: hidden; background: ${ci.bg}; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.1)`)
                   }, [
                     (ci.plainCard)
                       ? (_openBlock(), _createElementBlock("img", {
@@ -5105,7 +5233,7 @@ return function render(_ctx, _cache) {
                           sizes: "114px",
                           alt: "",
                           loading: "lazy",
-                          style: {"position":"absolute","left":"50%","top":"10px","width":"114px","height":"157px","margin-left":"-57px","border-radius":"5% / 3.6%","object-fit":"cover","box-shadow":"0 8px 18px rgba(0, 0, 0, 0.45)"}
+                          style: {"position":"absolute","left":"50%","top":"10px","width":"114px","height":"157px","margin-left":"-57px","border-radius":"5% / 3.6%","object-fit":"cover","box-shadow":"0 8px 18px rgba(var(--pkm-shadow-rgb), 0.45)"}
                         }, null, 8 /* PROPS */, _hoisted_141))
                       : _createCommentVNode("v-if", true),
                     (ci.graded)
@@ -5174,7 +5302,7 @@ return function render(_ctx, _cache) {
               ? (_openBlock(), _createElementBlock("p", _hoisted_159, _toDisplayString(_ctx.V.coll.emptyText), 1 /* TEXT */))
               : _createCommentVNode("v-if", true),
             _createElementVNode("span", _hoisted_160, [
-              _cache[28] || (_cache[28] = _createElementVNode("span", { style: {"flex":"none","width":"7px","height":"7px","border-radius":"4px","background":"#3DDC84"} }, null, -1 /* CACHED */)),
+              _cache[28] || (_cache[28] = _createElementVNode("span", { style: {"flex":"none","width":"7px","height":"7px","border-radius":"4px","background":"var(--pkm-green)"} }, null, -1 /* CACHED */)),
               _createTextVNode(_toDisplayString(_ctx.V.coll.stamp), 1 /* TEXT */)
             ])
           ], 64 /* STABLE_FRAGMENT */))
@@ -5183,7 +5311,7 @@ return function render(_ctx, _cache) {
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
             _createElementVNode("section", {
               "aria-label": "Visuel",
-              style: _normalizeStyle(`flex: none; position: relative; height: 330px; border-radius: 26px; overflow: hidden; background: ${_ctx.V.it.bg}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+              style: _normalizeStyle(`flex: none; position: relative; height: 330px; border-radius: 26px; overflow: hidden; background: ${_ctx.V.it.bg}; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
             }, [
               (_ctx.V.it.isCard)
                 ? (_openBlock(), _createElementBlock("img", {
@@ -5198,10 +5326,11 @@ return function render(_ctx, _cache) {
               (_ctx.V.it.plainCard)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                     _createElementVNode("button", {
+                      class: "pkm-dark",
                       type: "button",
                       onClick: _ctx.V.it.zoom,
                       "aria-label": _ctx.A(_ctx.V.it.zoomLabel),
-                      style: {"position":"absolute","left":"50%","top":"14px","width":"196px","height":"270px","margin-left":"-98px","padding":"0","border":"0","border-radius":"4.8% / 3.4%","overflow":"hidden","background":"#16213A","box-shadow":"0 18px 40px rgba(0, 0, 0, 0.55)","cursor":"zoom-in"}
+                      style: {"position":"absolute","left":"50%","top":"14px","width":"196px","height":"270px","margin-left":"-98px","padding":"0","border":"0","border-radius":"4.8% / 3.4%","overflow":"hidden","background":"var(--pkm-img-bg)","box-shadow":"0 18px 40px rgba(var(--pkm-shadow-rgb), 0.55)","cursor":"zoom-in"}
                     }, [
                       _createElementVNode("img", {
                         src: _ctx.V.it.img,
@@ -5232,7 +5361,7 @@ return function render(_ctx, _cache) {
                       src: _ctx.V.it.img,
                       "data-fallback": _ctx.V.it.fallbackHi,
                       alt: _ctx.V.it.name,
-                      style: {"position":"absolute","left":"50%","top":"52px","width":"220px","height":"220px","margin-left":"-110px","border-radius":"0 0 8px 8px","object-fit":"cover","object-position":"top","box-shadow":"0 18px 40px rgba(0, 0, 0, 0.55)"}
+                      style: {"position":"absolute","left":"50%","top":"52px","width":"220px","height":"220px","margin-left":"-110px","border-radius":"0 0 8px 8px","object-fit":"cover","object-position":"top","box-shadow":"0 18px 40px rgba(var(--pkm-shadow-rgb), 0.55)"}
                     }, null, 8 /* PROPS */, _hoisted_167)
                   ], 64 /* STABLE_FRAGMENT */))
                 : _createCommentVNode("v-if", true),
@@ -5258,7 +5387,7 @@ return function render(_ctx, _cache) {
                     type: "button",
                     onClick: _ctx.V.it.zoom,
                     "aria-label": _ctx.A(_ctx.V.it.zoomLabel),
-                    style: {"position":"absolute","left":"50%","top":"16px","width":"270px","height":"266px","margin-left":"-135px","padding":"0","border":"0","border-radius":"18px","background":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","overflow":"hidden","box-shadow":"0 18px 40px rgba(0, 0, 0, 0.45)","cursor":"zoom-in"}
+                    style: {"position":"absolute","left":"50%","top":"16px","width":"270px","height":"266px","margin-left":"-135px","padding":"0","border":"0","border-radius":"18px","background":"var(--pkm-photo-mat)","display":"flex","align-items":"center","justify-content":"center","overflow":"hidden","box-shadow":"0 18px 40px rgba(var(--pkm-shadow-rgb), 0.45)","cursor":"zoom-in"}
                   }, [
                     _createElementVNode("img", {
                       src: _ctx.V.it.photo,
@@ -5281,7 +5410,7 @@ return function render(_ctx, _cache) {
             _createElementVNode("section", _hoisted_176, [
               _createElementVNode("div", _hoisted_177, [
                 _createElementVNode("div", _hoisted_178, [
-                  _cache[30] || (_cache[30] = _createElementVNode("span", { style: {"font-size":"13px","color":"#C9D3EA"} }, "Cote PKM · à l’unité", -1 /* CACHED */)),
+                  _cache[30] || (_cache[30] = _createElementVNode("span", { style: {"font-size":"13px","color":"var(--pkm-t2)"} }, "Cote PKM · à l’unité", -1 /* CACHED */)),
                   _createElementVNode("span", _hoisted_179, _toDisplayString(_ctx.V.it.cote), 1 /* TEXT */),
                   _createElementVNode("span", {
                     style: _normalizeStyle(`font-size: 13px; font-weight: 700; color: ${_ctx.V.it.changeColor}`)
@@ -5289,7 +5418,7 @@ return function render(_ctx, _cache) {
                 ]),
                 (_ctx.V.it.owned)
                   ? (_openBlock(), _createElementBlock("div", _hoisted_180, [
-                      _cache[31] || (_cache[31] = _createElementVNode("span", { style: {"color":"#9AA8C3"} }, "Tes exemplaires", -1 /* CACHED */)),
+                      _cache[31] || (_cache[31] = _createElementVNode("span", { style: {"color":"var(--pkm-t3)"} }, "Tes exemplaires", -1 /* CACHED */)),
                       _createElementVNode("span", _hoisted_181, _toDisplayString(_ctx.V.it.hold), 1 /* TEXT */),
                       _createElementVNode("span", {
                         style: _normalizeStyle(`font-weight: 700; color: ${_ctx.V.it.holdColor}`)
@@ -5301,7 +5430,7 @@ return function render(_ctx, _cache) {
               (_ctx.V.it.hasChart)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                     _createElementVNode("div", _hoisted_183, [
-                      _cache[32] || (_cache[32] = _createElementVNode("span", { style: {"font-size":"13px","color":"#9AA8C3"} }, "Cote archivée · 30 jours", -1 /* CACHED */)),
+                      _cache[32] || (_cache[32] = _createElementVNode("span", { style: {"font-size":"13px","color":"var(--pkm-t3)"} }, "Cote archivée · 30 jours", -1 /* CACHED */)),
                       _createElementVNode("span", _hoisted_184, _toDisplayString(_ctx.V.it.readout), 1 /* TEXT */)
                     ]),
                     (_openBlock(), _createElementBlock("svg", {
@@ -5329,14 +5458,14 @@ return function render(_ctx, _cache) {
                             x2: _ctx.V.it.dotX,
                             y1: "0",
                             y2: "76",
-                            style: {"stroke":"#3A4A75","stroke-width":"1"}
+                            style: {"stroke":"var(--pkm-line-4)","stroke-width":"1"}
                           }, null, 8 /* PROPS */, _hoisted_188))
                         : _createCommentVNode("v-if", true),
                       _createElementVNode("circle", {
                         cx: _ctx.V.it.dotX,
                         cy: _ctx.V.it.dotY,
                         r: "4.5",
-                        style: _normalizeStyle(`fill: ${_ctx.V.it.chartColor}; stroke: #121C33; stroke-width: 2`)
+                        style: _normalizeStyle(`fill: ${_ctx.V.it.chartColor}; stroke: var(--pkm-card-hi); stroke-width: 2`)
                       }, null, 12 /* STYLE, PROPS */, _hoisted_189),
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.it.hits || []), (h, h_i) => {
                         return (_openBlock(), _createElementBlock("rect", {
@@ -5385,7 +5514,7 @@ return function render(_ctx, _cache) {
                 ], 4 /* STYLE */))
               }), 128 /* KEYED_FRAGMENT */)),
               _createElementVNode("p", _hoisted_197, _toDisplayString(_ctx.V.it.coteRule), 1 /* TEXT */),
-              _cache[34] || (_cache[34] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","line-height":"1.45","color":"#7D8BA8"} }, "Vinted et Leboncoin ne sont pas comparés : pas d’API publique, et pas de scraping.", -1 /* CACHED */))
+              _cache[34] || (_cache[34] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","line-height":"1.45","color":"var(--pkm-t4)"} }, "Vinted et Leboncoin ne sont pas comparés : pas d’API publique, et pas de scraping.", -1 /* CACHED */))
             ]),
             (_ctx.V.it.hasCopies)
               ? (_openBlock(), _createElementBlock("section", _hoisted_198, [
@@ -5407,7 +5536,7 @@ return function render(_ctx, _cache) {
                         key: 0,
                         type: "button",
                         onClick: _ctx.V.goSales,
-                        style: {"display":"flex","align-items":"center","justify-content":"space-between","gap":"8px","min-height":"48px","padding":"0","border":"0","border-top":"1px solid #1E2B45","background":"transparent","color":"#B9C5FF","font":"inherit","font-size":"13.5px","font-weight":"600","text-align":"left","cursor":"pointer"}
+                        style: {"display":"flex","align-items":"center","justify-content":"space-between","gap":"8px","min-height":"48px","padding":"0","border":"0","border-top":"1px solid var(--pkm-line)","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"13.5px","font-weight":"600","text-align":"left","cursor":"pointer"}
                       }, [
                         _createElementVNode("span", null, _toDisplayString(_ctx.V.it.soldText), 1 /* TEXT */),
                         (_openBlock(), _createElementBlock("svg", _hoisted_203, [...(_cache[35] || (_cache[35] = [
@@ -5422,13 +5551,13 @@ return function render(_ctx, _cache) {
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.addThis,
-                    style: {"height":"54px","border":"0","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+                    style: {"height":"54px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
                   }, "+ Ajouter un exemplaire", 8 /* PROPS */, _hoisted_205),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.sellThis,
                     disabled: _ctx.V.it.cantSell,
-                    style: _normalizeStyle(`height: 54px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; opacity: ${_ctx.V.it.sellOpacity}`)
+                    style: _normalizeStyle(`height: 54px; border: 1px solid var(--pkm-line-2); border-radius: 999px; background: transparent; color: var(--pkm-t1); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; opacity: ${_ctx.V.it.sellOpacity}`)
                   }, "J’ai vendu", 12 /* STYLE, PROPS */, _hoisted_206)
                 ]))
               : _createCommentVNode("v-if", true),
@@ -5437,7 +5566,7 @@ return function render(_ctx, _cache) {
                   key: 3,
                   type: "button",
                   onClick: _ctx.V.notify,
-                  style: {"flex":"none","height":"54px","border":"0","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+                  style: {"flex":"none","height":"54px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
                 }, "Me prévenir à la sortie", 8 /* PROPS */, _hoisted_207))
               : _createCommentVNode("v-if", true)
           ], 64 /* STABLE_FRAGMENT */))
@@ -5460,15 +5589,16 @@ return function render(_ctx, _cache) {
                 placeholder: "Rechercher « Dracaufeu », « Display »",
                 value: _ctx.V.mk.q,
                 onInput: _ctx.V.mk.onQ,
-                style: {"flex":"1","min-width":"0","height":"44px","padding":"0","border":"0","outline-offset":"4px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"15px"}
+                style: {"flex":"1","min-width":"0","height":"44px","padding":"0","border":"0","outline-offset":"4px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px"}
               }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_210)
             ]),
             (_ctx.V.mk.browse.show)
               ? (_openBlock(), _createElementBlock("button", {
                   key: 0,
+                  class: "pkm-dark",
                   type: "button",
                   onClick: _ctx.V.mk.browse.open,
-                  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","min-height":"76px","padding":"10px 14px 10px 12px","border":"1px solid #24345C","border-radius":"22px","background":"radial-gradient(120% 90% at 0% 0%, rgba(98, 122, 255, 0.24), rgba(98, 122, 255, 0) 62%), #121C33","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","min-height":"76px","padding":"10px 14px 10px 12px","border":"1px solid var(--pkm-line-3)","border-radius":"22px","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.24), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-card-hi)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", _hoisted_212, [
                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.mk.browse.fan || []), (bf, bf_i) => {
@@ -5477,7 +5607,7 @@ return function render(_ctx, _cache) {
                         src: bf.img,
                         "data-fallback": bf.fallback,
                         alt: "",
-                        style: _normalizeStyle(`position: absolute; top: ${bf.top}; left: ${bf.left}; width: 36px; height: 50px; border-radius: 3px; object-fit: cover; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transform: rotate(${bf.rot})`)
+                        style: _normalizeStyle(`position: absolute; top: ${bf.top}; left: ${bf.left}; width: 36px; height: 50px; border-radius: 3px; object-fit: cover; box-shadow: 0 4px 10px rgba(var(--pkm-shadow-rgb), 0.5); transform: rotate(${bf.rot})`)
                       }, null, 12 /* STYLE, PROPS */, _hoisted_213))
                     }), 128 /* KEYED_FRAGMENT */))
                   ]),
@@ -5493,15 +5623,16 @@ return function render(_ctx, _cache) {
             (_ctx.V.mk.sealedBrowse.show)
               ? (_openBlock(), _createElementBlock("button", {
                   key: 1,
+                  class: "pkm-dark",
                   type: "button",
                   onClick: _ctx.V.mk.sealedBrowse.open,
-                  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","min-height":"76px","padding":"10px 14px 10px 12px","border":"1px solid #24345C","border-radius":"22px","background":"radial-gradient(120% 90% at 0% 0%, rgba(245, 177, 76, 0.18), rgba(245, 177, 76, 0) 62%), #121C33","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","min-height":"76px","padding":"10px 14px 10px 12px","border":"1px solid var(--pkm-line-3)","border-radius":"22px","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-orange-rgb), 0.18), rgba(var(--pkm-orange-rgb), 0) 62%), var(--pkm-card-hi)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", _hoisted_218, [
                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.mk.sealedBrowse.fan || []), (sf, sf_i) => {
                       return (_openBlock(), _createElementBlock("span", {
                         key: sf_i,
-                        style: _normalizeStyle(`position: absolute; top: ${sf.top}; left: ${sf.left}; width: 38px; height: 40px; border-radius: 8px; background: ${sf.bg}; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transform: rotate(${sf.rot})`)
+                        style: _normalizeStyle(`position: absolute; top: ${sf.top}; left: ${sf.left}; width: 38px; height: 40px; border-radius: 8px; background: ${sf.bg}; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 10px rgba(var(--pkm-shadow-rgb), 0.5); transform: rotate(${sf.rot})`)
                       }, [
                         _createElementVNode("img", {
                           src: sf.photo,
@@ -5545,7 +5676,7 @@ return function render(_ctx, _cache) {
                   style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 10px 14px; border: 0; border-top: ${mi.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                 }, [
                   _createElementVNode("span", {
-                    style: _normalizeStyle(`position: relative; flex: none; width: 42px; height: 56px; border-radius: 8px; overflow: hidden; background: ${mi.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                    style: _normalizeStyle(`position: relative; flex: none; width: 42px; height: 56px; border-radius: 8px; overflow: hidden; background: ${mi.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
                   }, [
                     (mi.isCard)
                       ? (_openBlock(), _createElementBlock("img", {
@@ -5597,11 +5728,12 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             _cache[42] || (_cache[42] = _createElementVNode("section", {
+              class: "pkm-dark",
               "aria-label": "D’où viennent les prix",
-              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid #1E2B45","background":"#0F1828","display":"flex","flex-direction":"column","gap":"6px"}
+              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"6px"}
             }, [
               _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"15px","font-weight":"600"} }, "D’où viennent les prix ?"),
-              _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"#9AA8C3"} }, "Cardmarket (fichier public quotidien), eBay (API officielle, ventes réussies) et TCGplayer via TCGdex. La cote PKM est la médiane de ces prix « marché ». Vinted et Leboncoin ne sont pas connectés : pas d’API publique, pas de scraping. PKM ne vend rien : c’est un outil de suivi de valeur.")
+              _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Cardmarket (fichier public quotidien), eBay (API officielle, ventes réussies) et TCGplayer via TCGdex. La cote PKM est la médiane de ces prix « marché ». Vinted et Leboncoin ne sont pas connectés : pas d’API publique, pas de scraping. PKM ne vend rien : c’est un outil de suivi de valeur.")
             ], -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
@@ -5623,7 +5755,7 @@ return function render(_ctx, _cache) {
                 placeholder: "Rechercher une extension",
                 value: _ctx.V.exts.q,
                 onInput: _ctx.V.exts.onQ,
-                style: {"flex":"1","min-width":"0","height":"44px","padding":"0","border":"0","outline-offset":"4px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"15px"}
+                style: {"flex":"1","min-width":"0","height":"44px","padding":"0","border":"0","outline-offset":"4px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px"}
               }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_242)
             ]),
             _createElementVNode("span", _hoisted_243, _toDisplayString(_ctx.V.exts.count), 1 /* TEXT */),
@@ -5785,7 +5917,7 @@ return function render(_ctx, _cache) {
                   style: {"display":"flex","flex-direction":"column","gap":"6px","min-width":"0","padding":"0","border":"0","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", {
-                    style: _normalizeStyle(`position: relative; display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: 18px; overflow: hidden; background: ${sp.bg}; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08)`)
+                    style: _normalizeStyle(`position: relative; display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: 18px; overflow: hidden; background: ${sp.bg}; box-shadow: 0 6px 14px rgba(var(--pkm-shadow-rgb), 0.35), inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.08)`)
                   }, [
                     (sp.hasPhoto)
                       ? (_openBlock(), _createElementBlock("span", _hoisted_286, [
@@ -5806,7 +5938,7 @@ return function render(_ctx, _cache) {
                             "data-broken": "1",
                             alt: "",
                             loading: "lazy",
-                            style: {"max-width":"82%","max-height":"42%","object-fit":"contain","filter":"drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5))"}
+                            style: {"max-width":"82%","max-height":"42%","object-fit":"contain","filter":"drop-shadow(0 4px 10px rgba(var(--pkm-shadow-rgb), 0.5))"}
                           }, null, 8 /* PROPS */, _hoisted_289),
                           _createElementVNode("span", _hoisted_290, _toDisplayString(sp.code), 1 /* TEXT */)
                         ]))
@@ -5842,7 +5974,7 @@ return function render(_ctx, _cache) {
                 (_openBlock(), _createElementBlock("svg", _hoisted_299, [
                   _createElementVNode("path", {
                     d: "M12 2l8.66 5v10L12 22l-8.66-5V7z",
-                    style: _normalizeStyle(`fill: #121C33; stroke: ${_ctx.V.pf.tierColor}; stroke-width: 1.6; stroke-linejoin: round`)
+                    style: _normalizeStyle(`fill: var(--pkm-card-hi); stroke: ${_ctx.V.pf.tierColor}; stroke-width: 1.6; stroke-linejoin: round`)
                   }, null, 4 /* STYLE */),
                   _createElementVNode("path", {
                     d: _ctx.V.pf.tierSym,
@@ -5876,7 +6008,7 @@ return function render(_ctx, _cache) {
                   ], 4 /* STYLE */))
                 ], 4 /* STYLE */),
                 _createElementVNode("span", _hoisted_306, [
-                  _cache[46] || (_cache[46] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"#9AA8C3"} }, "Type de collectionneur", -1 /* CACHED */)),
+                  _cache[46] || (_cache[46] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Type de collectionneur", -1 /* CACHED */)),
                   _createElementVNode("span", {
                     style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: ${_ctx.V.pf.catColor}`)
                   }, _toDisplayString(_ctx.V.pf.catName), 5 /* TEXT, STYLE */)
@@ -5919,7 +6051,7 @@ return function render(_ctx, _cache) {
             ]),
             _createElementVNode("section", _hoisted_313, [
               _cache[49] || (_cache[49] = _createElementVNode("h2", { style: {"margin":"0 0 4px","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Ce qui fixe ton profil", -1 /* CACHED */)),
-              _cache[50] || (_cache[50] = _createElementVNode("p", { style: {"margin":"0 0 6px","font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"} }, "Le plus haut des deux niveaux compte. Pas de calcul à date fixe : le profil suit ta collection.", -1 /* CACHED */)),
+              _cache[50] || (_cache[50] = _createElementVNode("p", { style: {"margin":"0 0 6px","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }, "Le plus haut des deux niveaux compte. Pas de calcul à date fixe : le profil suit ta collection.", -1 /* CACHED */)),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.pf.criteria || []), (cr, cr_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: cr_i,
@@ -5939,7 +6071,7 @@ return function render(_ctx, _cache) {
                       style: _normalizeStyle(`width: ${cr.barW}; height: 100%; border-radius: 4px; background: ${cr.barColor}`)
                     }, null, 4 /* STYLE */),
                     _createElementVNode("span", {
-                      style: _normalizeStyle(`position: absolute; top: -3px; left: ${cr.tick}; width: 2px; height: 14px; margin-left: -1px; background: #C9D3EA`)
+                      style: _normalizeStyle(`position: absolute; top: -3px; left: ${cr.tick}; width: 2px; height: 14px; margin-left: -1px; background: var(--pkm-t2)`)
                     }, null, 4 /* STYLE */)
                   ]),
                   _createElementVNode("div", _hoisted_319, [
@@ -5999,7 +6131,7 @@ return function render(_ctx, _cache) {
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.goSales,
-                style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid #1E2B45","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid var(--pkm-line)","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_331, [...(_cache[55] || (_cache[55] = [
                   _createElementVNode("path", { d: "M6 3h12v18l-3-2-3 2-3-2-3 2z" }, null, -1 /* CACHED */),
@@ -6008,7 +6140,7 @@ return function render(_ctx, _cache) {
                 ]))])),
                 _cache[57] || (_cache[57] = _createElementVNode("span", { style: {"flex":"1","display":"flex","flex-direction":"column"} }, [
                   _createElementVNode("span", { style: {"font-weight":"600"} }, "Ventes et marge"),
-                  _createElementVNode("span", { style: {"font-size":"12.5px","color":"#9AA8C3"} }, "Tes ventes faites ailleurs, frais déduits")
+                  _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Tes ventes faites ailleurs, frais déduits")
                 ], -1 /* CACHED */)),
                 (_openBlock(), _createElementBlock("svg", _hoisted_332, [...(_cache[56] || (_cache[56] = [
                   _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
@@ -6017,14 +6149,14 @@ return function render(_ctx, _cache) {
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.goSettings,
-                style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid #1E2B45","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid var(--pkm-line)","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_334, [...(_cache[58] || (_cache[58] = [
                   _createStaticVNode("<path d=\"M4 7h9\"></path><path d=\"M17 7h3\"></path><circle cx=\"15\" cy=\"7\" r=\"2\"></circle><path d=\"M4 17h3\"></path><path d=\"M11 17h9\"></path><circle cx=\"9\" cy=\"17\" r=\"2\"></circle>", 6)
                 ]))])),
                 _cache[60] || (_cache[60] = _createElementVNode("span", { style: {"flex":"1","display":"flex","flex-direction":"column"} }, [
                   _createElementVNode("span", { style: {"font-weight":"600"} }, "Réglages"),
-                  _createElementVNode("span", { style: {"font-size":"12.5px","color":"#9AA8C3"} }, "Cote, sources, mode avancé")
+                  _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Cote, sources, mode avancé")
                 ], -1 /* CACHED */)),
                 (_openBlock(), _createElementBlock("svg", _hoisted_335, [...(_cache[59] || (_cache[59] = [
                   _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
@@ -6033,7 +6165,7 @@ return function render(_ctx, _cache) {
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.replayOnb,
-                style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid #1E2B45","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid var(--pkm-line)","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_337, [...(_cache[61] || (_cache[61] = [
                   _createElementVNode("path", { d: "M4.5 12a7.5 7.5 0 1 0 2.2-5.3" }, null, -1 /* CACHED */),
@@ -6041,21 +6173,22 @@ return function render(_ctx, _cache) {
                 ]))])),
                 _cache[63] || (_cache[63] = _createElementVNode("span", { style: {"flex":"1","display":"flex","flex-direction":"column"} }, [
                   _createElementVNode("span", { style: {"font-weight":"600"} }, "Revoir l’accueil"),
-                  _createElementVNode("span", { style: {"font-size":"12.5px","color":"#9AA8C3"} }, "Les 2 questions qui anticipent ton profil")
+                  _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Les 2 questions qui anticipent ton profil")
                 ], -1 /* CACHED */)),
                 (_openBlock(), _createElementBlock("svg", _hoisted_338, [...(_cache[62] || (_cache[62] = [
                   _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
                 ]))]))
               ], 8 /* PROPS */, _hoisted_336)
             ]),
-            _cache[64] || (_cache[64] = _createElementVNode("p", { style: {"margin":"0","font-size":"11.5px","line-height":"1.5","color":"#7D8BA8","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.", -1 /* CACHED */))
+            _cache[64] || (_cache[64] = _createElementVNode("p", { style: {"margin":"0","font-size":"11.5px","line-height":"1.5","color":"var(--pkm-t4)","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isTiers)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 8 }, [
             _createElementVNode("section", {
+              class: "pkm-dark",
               "aria-label": "Ton palier",
-              style: _normalizeStyle(`flex: none; padding: 20px 16px 16px; border-radius: 26px; border: 1px solid #2A3A5C; background: radial-gradient(100% 75% at 50% 0%, ${_ctx.V.tr.glow}, rgba(0, 0, 0, 0) 66%), #121C33; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center`)
+              style: _normalizeStyle(`flex: none; padding: 20px 16px 16px; border-radius: 26px; border: 1px solid var(--pkm-line-2); background: radial-gradient(100% 75% at 50% 0%, ${_ctx.V.tr.glow}, rgba(var(--pkm-shadow-rgb), 0) 66%), var(--pkm-card-hi); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center`)
             }, [
               (_openBlock(), _createElementBlock("svg", _hoisted_339, [
                 _createElementVNode("path", {
@@ -6067,7 +6200,7 @@ return function render(_ctx, _cache) {
                   style: _normalizeStyle(`fill: ${_ctx.V.tr.color}; stroke: none`)
                 }, null, 12 /* STYLE, PROPS */, _hoisted_340)
               ])),
-              _cache[65] || (_cache[65] = _createElementVNode("span", { style: {"font-size":"13px","color":"#9AA8C3"} }, "Ton palier", -1 /* CACHED */)),
+              _cache[65] || (_cache[65] = _createElementVNode("span", { style: {"font-size":"13px","color":"var(--pkm-t3)"} }, "Ton palier", -1 /* CACHED */)),
               _createElementVNode("span", {
                 style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -0.02em; color: ${_ctx.V.tr.color}`)
               }, _toDisplayString(_ctx.V.tr.name), 5 /* TEXT, STYLE */),
@@ -6118,7 +6251,7 @@ return function render(_ctx, _cache) {
                   }, null, 4 /* STYLE */))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
-              _cache[67] || (_cache[67] = _createElementVNode("div", { style: {"display":"flex","justify-content":"space-between","font-size":"11.5px","color":"#7D8BA8"} }, [
+              _cache[67] || (_cache[67] = _createElementVNode("div", { style: {"display":"flex","justify-content":"space-between","font-size":"11.5px","color":"var(--pkm-t4)"} }, [
                 _createElementVNode("span", null, "il y a 7 semaines"),
                 _createElementVNode("span", null, "cette semaine")
               ], -1 /* CACHED */)),
@@ -6133,7 +6266,8 @@ return function render(_ctx, _cache) {
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.tr.ach || []), (ac, ac_i) => {
                   return (_openBlock(), _createElementBlock("div", {
                     key: ac_i,
-                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border-radius":"18px","border":"1px solid #1E2B45","background":"#111A2C"}
+                    class: "pkm-dark",
+                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
                   }, [
                     _createElementVNode("span", {
                       style: _normalizeStyle(`width: 34px; height: 34px; border-radius: 11px; background: ${ac.bg}; display: flex; align-items: center; justify-content: center`)
@@ -6165,7 +6299,7 @@ return function render(_ctx, _cache) {
                 }), 128 /* KEYED_FRAGMENT */))
               ])
             ]),
-            _cache[71] || (_cache[71] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"#7D8BA8","text-align":"center"} }, "Pas de quêtes ni de saisons : les paliers suivent seulement la valeur de ta collection, au prix du marché.", -1 /* CACHED */))
+            _cache[71] || (_cache[71] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t4)","text-align":"center"} }, "Pas de quêtes ni de saisons : les paliers suivent seulement la valeur de ta collection, au prix du marché.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isSettings)
@@ -6217,17 +6351,17 @@ return function render(_ctx, _cache) {
                     src: fn.img,
                     "data-fallback": fn.fallback,
                     alt: "",
-                    style: _normalizeStyle(`position: absolute; top: ${fn.top}; left: ${fn.left}; width: 74px; height: 86px; border-radius: 8px 8px 0 0; object-fit: cover; object-position: top; box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35); transform: rotate(${fn.rot}); -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent)`)
+                    style: _normalizeStyle(`position: absolute; top: ${fn.top}; left: ${fn.left}; width: 74px; height: 86px; border-radius: 8px 8px 0 0; object-fit: cover; object-position: top; box-shadow: 0 10px 22px rgba(var(--pkm-shadow-rgb), 0.35); transform: rotate(${fn.rot}); -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent)`)
                   }, null, 12 /* STYLE, PROPS */, _hoisted_377))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
               _createElementVNode("span", _hoisted_378, _toDisplayString(_ctx.V.set.promoTitle), 1 /* TEXT */),
-              _cache[76] || (_cache[76] = _createElementVNode("span", { style: {"font-size":"13.5px","line-height":"1.5","color":"#9AA8C3"} }, "Lots, associés, frais par plateforme, import et export. Tu peux revenir au mode simple à tout moment : rien n’est perdu.", -1 /* CACHED */)),
+              _cache[76] || (_cache[76] = _createElementVNode("span", { style: {"font-size":"13.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Lots, associés, frais par plateforme, import et export. Tu peux revenir au mode simple à tout moment : rien n’est perdu.", -1 /* CACHED */)),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.toggleAdv,
                 "aria-pressed": _ctx.A(_ctx.V.ui.adv),
-                style: _normalizeStyle(`height: 48px; padding: 0 22px; border: 1px solid #2A3A5C; border-radius: 999px; background: ${_ctx.V.set.ctaBg}; color: ${_ctx.V.set.ctaFg}; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer`)
+                style: _normalizeStyle(`height: 48px; padding: 0 22px; border: 1px solid var(--pkm-line-2); border-radius: 999px; background: ${_ctx.V.set.ctaBg}; color: ${_ctx.V.set.ctaFg}; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer`)
               }, _toDisplayString(_ctx.V.set.cta), 13 /* TEXT, STYLE, PROPS */, _hoisted_379)
             ]),
             (_ctx.V.ui.adv)
@@ -6246,7 +6380,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       type: "button",
                       onClick: _ctx.V.goFees,
-                      style: {"height":"44px","margin-top":"6px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+                      style: {"height":"44px","margin-top":"6px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
                     }, "Modifier les frais", 8 /* PROPS */, _hoisted_383)
                   ]),
                   _createElementVNode("section", _hoisted_384, [
@@ -6272,7 +6406,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       type: "button",
                       onClick: _ctx.V.goTeam,
-                      style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid #1E2B45","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                      style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid var(--pkm-line)","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                     }, [
                       _createElementVNode("span", _hoisted_392, [
                         (_openBlock(), _createElementBlock("svg", _hoisted_393, [...(_cache[81] || (_cache[81] = [
@@ -6297,7 +6431,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       type: "button",
                       onClick: _ctx.V.goIO,
-                      style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid #1E2B45","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                      style: {"display":"flex","align-items":"center","gap":"12px","min-height":"60px","padding":"8px 16px","border":"0","border-top":"1px solid var(--pkm-line)","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
                     }, [
                       _createElementVNode("span", _hoisted_398, [
                         (_openBlock(), _createElementBlock("svg", _hoisted_399, [...(_cache[84] || (_cache[84] = [
@@ -6309,7 +6443,7 @@ return function render(_ctx, _cache) {
                       ]),
                       _cache[86] || (_cache[86] = _createElementVNode("span", { style: {"flex":"1","display":"flex","flex-direction":"column"} }, [
                         _createElementVNode("span", { style: {"font-weight":"600"} }, "Importer / exporter"),
-                        _createElementVNode("span", { style: {"font-size":"12.5px","color":"#9AA8C3"} }, "CSV, sans limite")
+                        _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "CSV, sans limite")
                       ], -1 /* CACHED */)),
                       (_openBlock(), _createElementBlock("svg", _hoisted_400, [...(_cache[85] || (_cache[85] = [
                         _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
@@ -6325,23 +6459,23 @@ return function render(_ctx, _cache) {
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.set.dev.clear,
-                  style: {"height":"44px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#FF8A8A","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+                  style: {"height":"44px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-red)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
                 }, "Vider ma collection", 8 /* PROPS */, _hoisted_404),
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.set.dev.demo,
-                  style: {"height":"44px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+                  style: {"height":"44px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
                 }, "Remettre la démo", 8 /* PROPS */, _hoisted_405)
               ])
             ]),
             _createElementVNode("section", _hoisted_406, [
               _cache[89] || (_cache[89] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"15px","font-weight":"600"} }, "À propos", -1 /* CACHED */)),
-              _cache[90] || (_cache[90] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"#9AA8C3"} }, "PKM-App est une application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company. Pokémon et les noms associés sont des marques de leurs propriétaires respectifs.", -1 /* CACHED */)),
-              _cache[91] || (_cache[91] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","color":"#7D8BA8"} }, "Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques du Radar réelles (OpenStreetMap) · collection, ventes et magasins de Territoire fictifs", -1 /* CACHED */)),
+              _cache[90] || (_cache[90] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "PKM-App est une application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company. Pokémon et les noms associés sont des marques de leurs propriétaires respectifs.", -1 /* CACHED */)),
+              _cache[91] || (_cache[91] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","color":"var(--pkm-t4)"} }, "Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques du Radar réelles (OpenStreetMap) · collection, ventes et magasins de Territoire fictifs", -1 /* CACHED */)),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.replayOnb,
-                style: {"height":"44px","margin-top":"4px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+                style: {"height":"44px","margin-top":"4px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
               }, "Revoir l’accueil", 8 /* PROPS */, _hoisted_407)
             ])
           ], 64 /* STABLE_FRAGMENT */))
@@ -6377,26 +6511,26 @@ return function render(_ctx, _cache) {
               ]),
               _createElementVNode("div", _hoisted_416, [
                 _createElementVNode("div", {
-                  style: _normalizeStyle(`flex: ${_ctx.V.salesV.barCost} 1 0px; min-width: 3px; background: #34415F; border-radius: 4px 0 0 4px`)
+                  style: _normalizeStyle(`flex: ${_ctx.V.salesV.barCost} 1 0px; min-width: 3px; background: var(--pkm-bar-cost); border-radius: 4px 0 0 4px`)
                 }, null, 4 /* STYLE */),
                 _createElementVNode("div", {
-                  style: _normalizeStyle(`flex: ${_ctx.V.salesV.barFees} 1 0px; min-width: 3px; background: #D5763A`)
+                  style: _normalizeStyle(`flex: ${_ctx.V.salesV.barFees} 1 0px; min-width: 3px; background: var(--pkm-bar-fees)`)
                 }, null, 4 /* STYLE */),
                 _createElementVNode("div", {
-                  style: _normalizeStyle(`flex: ${_ctx.V.salesV.barMargin} 1 0px; min-width: 3px; background: #6C84F2; border-radius: 0 4px 4px 0`)
+                  style: _normalizeStyle(`flex: ${_ctx.V.salesV.barMargin} 1 0px; min-width: 3px; background: var(--pkm-bar-margin); border-radius: 0 4px 4px 0`)
                 }, null, 4 /* STYLE */)
               ]),
               _createElementVNode("div", _hoisted_417, [
                 _createElementVNode("span", _hoisted_418, [
-                  _cache[93] || (_cache[93] = _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"2px","background":"#34415F","box-shadow":"inset 0 0 0 1px #56648A"} }, null, -1 /* CACHED */)),
+                  _cache[93] || (_cache[93] = _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"2px","background":"var(--pkm-bar-cost)","box-shadow":"inset 0 0 0 1px var(--pkm-bar-edge)"} }, null, -1 /* CACHED */)),
                   _createTextVNode("Coût d’achat " + _toDisplayString(_ctx.V.salesV.cost), 1 /* TEXT */)
                 ]),
                 _createElementVNode("span", _hoisted_419, [
-                  _cache[94] || (_cache[94] = _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"2px","background":"#D5763A"} }, null, -1 /* CACHED */)),
+                  _cache[94] || (_cache[94] = _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"2px","background":"var(--pkm-bar-fees)"} }, null, -1 /* CACHED */)),
                   _createTextVNode("Frais et port " + _toDisplayString(_ctx.V.salesV.fees), 1 /* TEXT */)
                 ]),
                 _cache[95] || (_cache[95] = _createElementVNode("span", { style: {"display":"flex","align-items":"center","gap":"6px"} }, [
-                  _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"2px","background":"#6C84F2"} }),
+                  _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"2px","background":"var(--pkm-bar-margin)"} }),
                   _createTextVNode("Marge nette")
                 ], -1 /* CACHED */))
               ])
@@ -6411,7 +6545,7 @@ return function render(_ctx, _cache) {
                       style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 12px 14px; border: 0; border-top: ${sl.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                     }, [
                       _createElementVNode("span", {
-                        style: _normalizeStyle(`position: relative; flex: none; width: 40px; height: 52px; border-radius: 8px; overflow: hidden; background: ${sl.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                        style: _normalizeStyle(`position: relative; flex: none; width: 40px; height: 52px; border-radius: 8px; overflow: hidden; background: ${sl.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
                       }, [
                         (sl.isCard)
                           ? (_openBlock(), _createElementBlock("img", {
@@ -6469,9 +6603,9 @@ return function render(_ctx, _cache) {
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.newSale,
-              style: {"flex":"none","height":"52px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+              style: {"flex":"none","height":"52px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
             }, "Enregistrer une vente faite ailleurs", 8 /* PROPS */, _hoisted_434),
-            _cache[96] || (_cache[96] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"#7D8BA8"} }, "PKM ne vend rien pour toi. Tu notes ici tes ventes faites sur Vinted, Cardmarket, eBay ou en main propre pour connaître ta marge nette réelle.", -1 /* CACHED */))
+            _cache[96] || (_cache[96] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t4)"} }, "PKM ne vend rien pour toi. Tu notes ici tes ventes faites sur Vinted, Cardmarket, eBay ou en main propre pour connaître ta marge nette réelle.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isSale)
@@ -6479,7 +6613,7 @@ return function render(_ctx, _cache) {
             _createElementVNode("section", _hoisted_435, [
               _createElementVNode("div", _hoisted_436, [
                 _createElementVNode("span", {
-                  style: _normalizeStyle(`position: relative; flex: none; width: 46px; height: 60px; border-radius: 9px; overflow: hidden; background: ${_ctx.V.sale.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                  style: _normalizeStyle(`position: relative; flex: none; width: 46px; height: 60px; border-radius: 9px; overflow: hidden; background: ${_ctx.V.sale.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
                 }, [
                   (_ctx.V.sale.isCard)
                     ? (_openBlock(), _createElementBlock("img", {
@@ -6517,7 +6651,7 @@ return function render(_ctx, _cache) {
                 ])
               ]),
               _createElementVNode("div", _hoisted_444, [
-                _cache[97] || (_cache[97] = _createElementVNode("span", { style: {"font-size":"13px","color":"#C9D3EA"} }, "Marge nette", -1 /* CACHED */)),
+                _cache[97] || (_cache[97] = _createElementVNode("span", { style: {"font-size":"13px","color":"var(--pkm-t2)"} }, "Marge nette", -1 /* CACHED */)),
                 _createElementVNode("span", {
                   style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 42px; line-height: 1.05; font-weight: 700; letter-spacing: -0.035em; color: ${_ctx.V.sale.marginColor}`)
                 }, _toDisplayString(_ctx.V.sale.margin), 5 /* TEXT, STYLE */),
@@ -6555,7 +6689,7 @@ return function render(_ctx, _cache) {
                   ]),
                   _createElementVNode("span", _hoisted_462, _toDisplayString(_ctx.V.sale.cost), 1 /* TEXT */)
                 ]),
-                _cache[102] || (_cache[102] = _createElementVNode("div", { style: {"height":"1px","background":"#1E2B45"} }, null, -1 /* CACHED */)),
+                _cache[102] || (_cache[102] = _createElementVNode("div", { style: {"height":"1px","background":"var(--pkm-line)"} }, null, -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_463, [
                   _cache[101] || (_cache[101] = _createElementVNode("span", null, "Marge nette", -1 /* CACHED */)),
                   _createElementVNode("span", {
@@ -6565,51 +6699,52 @@ return function render(_ctx, _cache) {
               ]),
               _createElementVNode("div", _hoisted_464, [
                 _createElementVNode("div", {
-                  style: _normalizeStyle(`flex: ${_ctx.V.sale.barCost} 1 0px; min-width: 3px; background: #34415F; border-radius: 4px 0 0 4px`)
+                  style: _normalizeStyle(`flex: ${_ctx.V.sale.barCost} 1 0px; min-width: 3px; background: var(--pkm-bar-cost); border-radius: 4px 0 0 4px`)
                 }, null, 4 /* STYLE */),
                 _createElementVNode("div", {
-                  style: _normalizeStyle(`flex: ${_ctx.V.sale.barFees} 1 0px; min-width: 3px; background: #D5763A; border-radius: ${_ctx.V.sale.feesRadius}`)
+                  style: _normalizeStyle(`flex: ${_ctx.V.sale.barFees} 1 0px; min-width: 3px; background: var(--pkm-bar-fees); border-radius: ${_ctx.V.sale.feesRadius}`)
                 }, null, 4 /* STYLE */),
                 _createElementVNode("div", {
-                  style: _normalizeStyle(`display: ${_ctx.V.sale.marginDisplay}; flex: ${_ctx.V.sale.barMargin} 1 0px; min-width: 3px; background: #6C84F2; border-radius: 0 4px 4px 0`)
+                  style: _normalizeStyle(`display: ${_ctx.V.sale.marginDisplay}; flex: ${_ctx.V.sale.barMargin} 1 0px; min-width: 3px; background: var(--pkm-bar-margin); border-radius: 0 4px 4px 0`)
                 }, null, 4 /* STYLE */)
               ]),
-              _cache[104] || (_cache[104] = _createStaticVNode("<div style=\"display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#9AA8C3;\"><span style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:8px;height:8px;border-radius:2px;background:#34415F;box-shadow:inset 0 0 0 1px #56648A;\"></span>Coût d’achat</span><span style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:8px;height:8px;border-radius:2px;background:#D5763A;\"></span>Frais et port</span><span style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:8px;height:8px;border-radius:2px;background:#6C84F2;\"></span>Marge nette</span></div>", 1)),
+              _cache[104] || (_cache[104] = _createStaticVNode("<div style=\"display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--pkm-t3);\"><span style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:8px;height:8px;border-radius:2px;background:var(--pkm-bar-cost);box-shadow:inset 0 0 0 1px var(--pkm-bar-edge);\"></span>Coût d’achat</span><span style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:8px;height:8px;border-radius:2px;background:var(--pkm-bar-fees);\"></span>Frais et port</span><span style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:8px;height:8px;border-radius:2px;background:var(--pkm-bar-margin);\"></span>Marge nette</span></div>", 1)),
               _createElementVNode("p", _hoisted_465, _toDisplayString(_ctx.V.sale.insight), 1 /* TEXT */)
             ]),
             (_ctx.V.ui.adv)
               ? (_openBlock(), _createElementBlock("div", _hoisted_466, [
-                  _cache[105] || (_cache[105] = _createElementVNode("span", { style: {"color":"#9AA8C3"} }, "Vendu par", -1 /* CACHED */)),
+                  _cache[105] || (_cache[105] = _createElementVNode("span", { style: {"color":"var(--pkm-t3)"} }, "Vendu par", -1 /* CACHED */)),
                   _createElementVNode("span", _hoisted_467, _toDisplayString(_ctx.V.sale.by), 1 /* TEXT */)
                 ]))
               : _createCommentVNode("v-if", true),
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.editSale,
-              style: {"flex":"none","height":"52px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
+              style: {"flex":"none","height":"52px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
             }, "Modifier la vente", 8 /* PROPS */, _hoisted_468)
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isTerritory)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 12 }, [
             _createElementVNode("button", {
+              class: "pkm-dark",
               type: "button",
               onClick: _ctx.V.ter.radar,
-              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid #1F5A55","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(94, 224, 207, 0.26), rgba(94, 224, 207, 0) 62%), #0F1D2B","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line-teal)","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(var(--pkm-teal-rgb), 0.26), rgba(var(--pkm-teal-rgb), 0) 62%), var(--pkm-card-teal)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
             }, [
               _cache[109] || (_cache[109] = _createElementVNode("span", {
                 "aria-hidden": "true",
-                style: {"position":"relative","flex":"none","width":"46px","height":"46px","border-radius":"23px","background":"radial-gradient(circle, rgba(94, 224, 207, 0.22), rgba(94, 224, 207, 0.04) 70%)","box-shadow":"inset 0 0 0 1px rgba(94, 224, 207, 0.45)","overflow":"hidden"}
+                style: {"position":"relative","flex":"none","width":"46px","height":"46px","border-radius":"23px","background":"radial-gradient(circle, rgba(var(--pkm-teal-rgb), 0.22), rgba(var(--pkm-teal-rgb), 0.04) 70%)","box-shadow":"inset 0 0 0 1px rgba(var(--pkm-teal-rgb), 0.45)","overflow":"hidden"}
               }, [
-                _createElementVNode("span", { style: {"position":"absolute","inset":"9px","border-radius":"50%","box-shadow":"inset 0 0 0 1px rgba(94, 224, 207, 0.4)"} }),
+                _createElementVNode("span", { style: {"position":"absolute","inset":"9px","border-radius":"50%","box-shadow":"inset 0 0 0 1px rgba(var(--pkm-teal-rgb), 0.4)"} }),
                 _createElementVNode("span", {
                   class: "pkm-anim",
-                  style: {"position":"absolute","inset":"0","border-radius":"50%","background":"conic-gradient(from 0deg, rgba(94, 224, 207, 0) 0deg, rgba(94, 224, 207, 0) 270deg, rgba(94, 224, 207, 0.55) 360deg)","animation":"pkmSpin 3s linear infinite"}
+                  style: {"position":"absolute","inset":"0","border-radius":"50%","background":"conic-gradient(from 0deg, rgba(var(--pkm-teal-rgb), 0) 0deg, rgba(var(--pkm-teal-rgb), 0) 270deg, rgba(var(--pkm-teal-rgb), 0.55) 360deg)","animation":"pkmSpin 3s linear infinite"}
                 }),
-                _createElementVNode("span", { style: {"position":"absolute","left":"20px","top":"20px","width":"6px","height":"6px","border-radius":"3px","background":"#5EE0CF"} })
+                _createElementVNode("span", { style: {"position":"absolute","left":"20px","top":"20px","width":"6px","height":"6px","border-radius":"3px","background":"var(--pkm-teal)"} })
               ], -1 /* CACHED */)),
               _createElementVNode("span", _hoisted_470, [
-                _cache[106] || (_cache[106] = _createElementVNode("span", { style: {"font-size":"12px","font-weight":"700","color":"#5EE0CF"} }, "Nouveau · carte de France", -1 /* CACHED */)),
+                _cache[106] || (_cache[106] = _createElementVNode("span", { style: {"font-size":"12px","font-weight":"700","color":"var(--pkm-teal)"} }, "Nouveau · carte de France", -1 /* CACHED */)),
                 _cache[107] || (_cache[107] = _createElementVNode("span", { style: {"font-size":"15px","font-weight":"700"} }, "Radar des boutiques", -1 /* CACHED */)),
                 _createElementVNode("span", _hoisted_471, _toDisplayString(_ctx.V.ter.radarSub), 1 /* TEXT */)
               ]),
@@ -6618,9 +6753,10 @@ return function render(_ctx, _cache) {
               ]))]))
             ], 8 /* PROPS */, _hoisted_469),
             _createElementVNode("button", {
+              class: "pkm-dark",
               type: "button",
               onClick: _ctx.V.ter.release.open,
-              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid #24345C","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(35, 118, 92, 0.34), rgba(35, 118, 92, 0) 62%), #121C33","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line-3)","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(35, 118, 92, 0.34), rgba(35, 118, 92, 0) 62%), var(--pkm-card-hi)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
             }, [
               _createElementVNode("span", _hoisted_474, [
                 _createElementVNode("img", {
@@ -6690,15 +6826,15 @@ return function render(_ctx, _cache) {
                   style: _normalizeStyle(`position: absolute; left: ${pn.left}; top: ${pn.top}; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; font: inherit; cursor: pointer`)
                 }, [
                   _createElementVNode("span", {
-                    style: _normalizeStyle(`flex: none; white-space: nowrap; min-width: 42px; height: 22px; box-sizing: border-box; padding: 0 6px; border-radius: 11px; border: 2px solid #0B1120; background: ${pn.fill}; color: #0B1120; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45)`)
+                    style: _normalizeStyle(`flex: none; white-space: nowrap; min-width: 42px; height: 22px; box-sizing: border-box; padding: 0 6px; border-radius: 11px; border: 2px solid var(--pkm-ink); background: ${pn.fill}; color: var(--pkm-ink); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(var(--pkm-shadow-rgb), 0.45)`)
                   }, _toDisplayString(pn.text), 5 /* TEXT, STYLE */)
                 ], 12 /* STYLE, PROPS */, _hoisted_486))
               }), 128 /* KEYED_FRAGMENT */)),
-              _cache[114] || (_cache[114] = _createStaticVNode("<span aria-hidden=\"true\" style=\"position:absolute;left:10px;bottom:9px;display:flex;align-items:center;gap:10px;padding:4px 9px;border-radius:999px;background:rgba(8, 13, 26, 0.8);font-size:11px;font-weight:600;color:#C9D3EA;\"><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:#3DDC84;\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:#F5B14C;\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:#9AA8C3;\"></span>Faible</span></span><span aria-hidden=\"true\" style=\"position:absolute;right:10px;top:9px;display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:rgba(8, 13, 26, 0.8);font-size:11px;font-weight:600;color:#C9D3EA;\"><span style=\"width:8px;height:8px;border-radius:4px;background:#3D63FF;box-shadow:0 0 0 2px #FFFFFF;\"></span>Toi · échelle non linéaire</span>", 2))
+              _cache[114] || (_cache[114] = _createStaticVNode("<span class=\"pkm-dark\" aria-hidden=\"true\" style=\"position:absolute;left:10px;bottom:9px;display:flex;align-items:center;gap:10px;padding:4px 9px;border-radius:999px;background:rgba(var(--pkm-ink-rgb), 0.8);font-size:11px;font-weight:600;color:var(--pkm-t2);\"><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-green);\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-orange);\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-gray);\"></span>Faible</span></span><span class=\"pkm-dark\" aria-hidden=\"true\" style=\"position:absolute;right:10px;top:9px;display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:rgba(var(--pkm-ink-rgb), 0.8);font-size:11px;font-weight:600;color:var(--pkm-t2);\"><span style=\"width:8px;height:8px;border-radius:4px;background:#3D63FF;box-shadow:0 0 0 2px #FFFFFF;\"></span>Toi · échelle non linéaire</span>", 2))
             ]),
             _createElementVNode("div", _hoisted_487, [
               _createElementVNode("div", _hoisted_488, [
-                _cache[115] || (_cache[115] = _createElementVNode("span", { style: {"flex":"none","width":"74px","font-size":"12.5px","font-weight":"600","color":"#9AA8C3"} }, "Probabilité", -1 /* CACHED */)),
+                _cache[115] || (_cache[115] = _createElementVNode("span", { style: {"flex":"none","width":"74px","font-size":"12.5px","font-weight":"600","color":"var(--pkm-t3)"} }, "Probabilité", -1 /* CACHED */)),
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ter.probs || []), (tq, tq_i) => {
                   return (_openBlock(), _createElementBlock("button", {
                     key: tq_i,
@@ -6710,7 +6846,7 @@ return function render(_ctx, _cache) {
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
               _createElementVNode("div", _hoisted_490, [
-                _cache[116] || (_cache[116] = _createElementVNode("span", { style: {"flex":"none","width":"74px","font-size":"12.5px","font-weight":"600","color":"#9AA8C3"} }, "Rayon", -1 /* CACHED */)),
+                _cache[116] || (_cache[116] = _createElementVNode("span", { style: {"flex":"none","width":"74px","font-size":"12.5px","font-weight":"600","color":"var(--pkm-t3)"} }, "Rayon", -1 /* CACHED */)),
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ter.radii || []), (tr2, tr2_i) => {
                   return (_openBlock(), _createElementBlock("button", {
                     key: tr2_i,
@@ -6754,7 +6890,7 @@ return function render(_ctx, _cache) {
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((so2.chips || []), (ch, ch_i) => {
                         return (_openBlock(), _createElementBlock("span", {
                           key: ch_i,
-                          style: {"display":"flex","align-items":"center","gap":"5px","padding":"2px 8px","border-radius":"999px","border":"1px solid #2A3A5C","font-size":"11.5px","font-weight":"600","color":"#C9D3EA"}
+                          style: {"display":"flex","align-items":"center","gap":"5px","padding":"2px 8px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","font-size":"11.5px","font-weight":"600","color":"var(--pkm-t2)"}
                         }, [
                           _createElementVNode("span", {
                             style: _normalizeStyle(`flex: none; width: 7px; height: 7px; border-radius: 4px; background: ${ch.color}`)
@@ -6777,11 +6913,12 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             _cache[117] || (_cache[117] = _createElementVNode("section", {
+              class: "pkm-dark",
               "aria-label": "Comment on estime la probabilité",
-              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid #1E2B45","background":"#0F1828","display":"flex","flex-direction":"column","gap":"6px"}
+              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"6px"}
             }, [
               _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"15px","font-weight":"600"} }, "Comment on estime la probabilité ?"),
-              _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"#9AA8C3"} }, "Trois sources : l’annonce du magasin (boutiques partenaires PKM), les signalements des collectionneurs et l’historique des arrivages (jour de la semaine, délai après une sortie). C’est une estimation, pas une garantie de stock. Aucune donnée n’est récupérée sur les sites des enseignes.")
+              _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Trois sources : l’annonce du magasin (boutiques partenaires PKM), les signalements des collectionneurs et l’historique des arrivages (jour de la semaine, délai après une sortie). C’est une estimation, pas une garantie de stock. Aucune donnée n’est récupérée sur les sites des enseignes.")
             ], -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
@@ -6825,7 +6962,7 @@ return function render(_ctx, _cache) {
                     type: "button",
                     onClick: ar.openItem,
                     "aria-label": _ctx.A(ar.aria),
-                    style: _normalizeStyle(`position: relative; flex: none; width: 44px; height: 58px; padding: 0; border: 0; border-radius: 8px; overflow: hidden; background: ${ar.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); cursor: pointer`)
+                    style: _normalizeStyle(`position: relative; flex: none; width: 44px; height: 58px; padding: 0; border: 0; border-radius: 8px; overflow: hidden; background: ${ar.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12); cursor: pointer`)
                   }, [
                     (ar.isCard)
                       ? (_openBlock(), _createElementBlock("img", {
@@ -6877,7 +7014,7 @@ return function render(_ctx, _cache) {
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((ar.srcs || []), (sr2, sr2_i) => {
                         return (_openBlock(), _createElementBlock("span", {
                           key: sr2_i,
-                          style: {"padding":"1px 8px","border-radius":"999px","border":"1px solid #2A3A5C","color":"#C9D3EA","font-size":"11px","font-weight":"600"}
+                          style: {"padding":"1px 8px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","color":"var(--pkm-t2)","font-size":"11px","font-weight":"600"}
                         }, _toDisplayString(sr2.label), 1 /* TEXT */))
                       }), 128 /* KEYED_FRAGMENT */)),
                       _createElementVNode("span", _hoisted_531, _toDisplayString(ar.cote), 1 /* TEXT */)
@@ -6908,15 +7045,15 @@ return function render(_ctx, _cache) {
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.store.route,
-                style: {"height":"54px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+                style: {"height":"54px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
               }, "Itinéraire", 8 /* PROPS */, _hoisted_537)
             ]),
-            _cache[120] || (_cache[120] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","line-height":"1.5","color":"#7D8BA8"} }, "Probabilité estimée, pas une garantie de stock. Magasins et arrivages de démonstration : noms et données fictifs.", -1 /* CACHED */))
+            _cache[120] || (_cache[120] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","line-height":"1.5","color":"var(--pkm-t4)"} }, "Probabilité estimée, pas une garantie de stock. Magasins et arrivages de démonstration : noms et données fictifs.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isLots)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 14 }, [
-            _cache[123] || (_cache[123] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"#9AA8C3"} }, "Un lot, c’est plusieurs articles payés en un seul prix. Ce prix est réparti entre les articles pour calculer leur coût d’achat et ta plus-value.", -1 /* CACHED */)),
+            _cache[123] || (_cache[123] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Un lot, c’est plusieurs articles payés en un seul prix. Ce prix est réparti entre les articles pour calculer leur coût d’achat et ta plus-value.", -1 /* CACHED */)),
             _createElementVNode("section", _hoisted_538, [
               _createElementVNode("div", _hoisted_539, [
                 _createElementVNode("div", _hoisted_540, [
@@ -6929,7 +7066,7 @@ return function render(_ctx, _cache) {
                 ])
               ]),
               _createElementVNode("div", _hoisted_546, [
-                _cache[121] || (_cache[121] = _createElementVNode("span", { style: {"font-size":"13px","color":"#9AA8C3"} }, "Répartir le prix du lot", -1 /* CACHED */)),
+                _cache[121] || (_cache[121] = _createElementVNode("span", { style: {"font-size":"13px","color":"var(--pkm-t3)"} }, "Répartir le prix du lot", -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_547, [
                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.lots.methods || []), (lm, lm_i) => {
                     return (_openBlock(), _createElementBlock("button", {
@@ -6946,10 +7083,10 @@ return function render(_ctx, _cache) {
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.lots.lines || []), (ll, ll_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: ll_i,
-                  style: {"display":"flex","align-items":"center","gap":"12px","min-height":"70px","border-top":"1px solid #1E2B45"}
+                  style: {"display":"flex","align-items":"center","gap":"12px","min-height":"70px","border-top":"1px solid var(--pkm-line)"}
                 }, [
                   _createElementVNode("span", {
-                    style: _normalizeStyle(`position: relative; flex: none; width: 40px; height: 52px; border-radius: 8px; overflow: hidden; background: ${ll.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                    style: _normalizeStyle(`position: relative; flex: none; width: 40px; height: 52px; border-radius: 8px; overflow: hidden; background: ${ll.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
                   }, [
                     (ll.isCard)
                       ? (_openBlock(), _createElementBlock("img", {
@@ -7013,12 +7150,13 @@ return function render(_ctx, _cache) {
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isFees)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 15 }, [
-            _cache[127] || (_cache[127] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"#9AA8C3"} }, "Appliqués automatiquement aux ventes que tu notes. Une vente déjà enregistrée garde ses frais : tu peux les corriger vente par vente.", -1 /* CACHED */)),
+            _cache[127] || (_cache[127] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Appliqués automatiquement aux ventes que tu notes. Une vente déjà enregistrée garde ses frais : tu peux les corriger vente par vente.", -1 /* CACHED */)),
             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.feesEdit || []), (fe, fe_i) => {
               return (_openBlock(), _createElementBlock("section", {
                 key: fe_i,
+                class: "pkm-dark",
                 "aria-label": _ctx.A(fe.label),
-                style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"10px"}
+                style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
               }, [
                 _createElementVNode("h2", _hoisted_565, _toDisplayString(fe.label), 1 /* TEXT */),
                 _createElementVNode("div", _hoisted_566, [
@@ -7026,40 +7164,43 @@ return function render(_ctx, _cache) {
                     _cache[124] || (_cache[124] = _createTextVNode("Commission (%)", -1 /* CACHED */)),
                     _createElementVNode("input", {
                       id: "pkm-champ-4",
+                      class: "pkm-dark",
                       type: "text",
                       inputmode: "decimal",
                       value: fe.rate,
                       onInput: fe.onRate,
-                      style: {"height":"46px","width":"100%","box-sizing":"border-box","padding":"0 12px","border":"1px solid #2A3A5C","border-radius":"14px","background":"#0B1120","color":"#F3F6FC","font-family":"'Sora', sans-serif","font-size":"15px"}
+                      style: {"height":"46px","width":"100%","box-sizing":"border-box","padding":"0 12px","border":"1px solid var(--pkm-line-2)","border-radius":"14px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"15px"}
                     }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_568)
                   ]),
                   _createElementVNode("label", _hoisted_569, [
                     _cache[125] || (_cache[125] = _createTextVNode("Fixe par vente (€)", -1 /* CACHED */)),
                     _createElementVNode("input", {
                       id: "pkm-champ-5",
+                      class: "pkm-dark",
                       type: "text",
                       inputmode: "decimal",
                       value: fe.fixed,
                       onInput: fe.onFixed,
-                      style: {"height":"46px","width":"100%","box-sizing":"border-box","padding":"0 12px","border":"1px solid #2A3A5C","border-radius":"14px","background":"#0B1120","color":"#F3F6FC","font-family":"'Sora', sans-serif","font-size":"15px"}
+                      style: {"height":"46px","width":"100%","box-sizing":"border-box","padding":"0 12px","border":"1px solid var(--pkm-line-2)","border-radius":"14px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"15px"}
                     }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_570)
                   ]),
                   _createElementVNode("label", _hoisted_571, [
                     _cache[126] || (_cache[126] = _createTextVNode("Port à ta charge (€)", -1 /* CACHED */)),
                     _createElementVNode("input", {
                       id: "pkm-champ-6",
+                      class: "pkm-dark",
                       type: "text",
                       inputmode: "decimal",
                       value: fe.port,
                       onInput: fe.onPort,
-                      style: {"height":"46px","width":"100%","box-sizing":"border-box","padding":"0 12px","border":"1px solid #2A3A5C","border-radius":"14px","background":"#0B1120","color":"#F3F6FC","font-family":"'Sora', sans-serif","font-size":"15px"}
+                      style: {"height":"46px","width":"100%","box-sizing":"border-box","padding":"0 12px","border":"1px solid var(--pkm-line-2)","border-radius":"14px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"15px"}
                     }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_572)
                   ])
                 ]),
                 _createElementVNode("p", _hoisted_573, _toDisplayString(fe.example), 1 /* TEXT */)
               ], 8 /* PROPS */, _hoisted_564))
             }), 128 /* KEYED_FRAGMENT */)),
-            _cache[128] || (_cache[128] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"#F5B14C"} }, "Valeurs d’exemple, à vérifier selon ton statut (particulier ou professionnel) et les conditions de chaque plateforme.", -1 /* CACHED */))
+            _cache[128] || (_cache[128] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-orange)"} }, "Valeurs d’exemple, à vérifier selon ton statut (particulier ou professionnel) et les conditions de chaque plateforme.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isTeam)
@@ -7072,14 +7213,14 @@ return function render(_ctx, _cache) {
                   style: {"display":"flex","align-items":"center","gap":"12px"}
                 }, [
                   _createElementVNode("span", {
-                    style: _normalizeStyle(`flex: none; width: 42px; height: 42px; border-radius: 21px; background: ${m.avatarBg}; color: #0B1120; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700`)
+                    style: _normalizeStyle(`flex: none; width: 42px; height: 42px; border-radius: 21px; background: ${m.avatarBg}; color: var(--pkm-ink); display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700`)
                   }, _toDisplayString(m.initial), 5 /* TEXT, STYLE */),
                   _createElementVNode("span", _hoisted_575, [
                     _createElementVNode("span", _hoisted_576, _toDisplayString(m.name), 1 /* TEXT */),
                     _createElementVNode("span", _hoisted_577, _toDisplayString(m.role), 1 /* TEXT */)
                   ]),
                   _createElementVNode("span", _hoisted_578, [
-                    _cache[129] || (_cache[129] = _createElementVNode("span", { style: {"font-size":"12px","color":"#7D8BA8"} }, "Apports", -1 /* CACHED */)),
+                    _cache[129] || (_cache[129] = _createElementVNode("span", { style: {"font-size":"12px","color":"var(--pkm-t4)"} }, "Apports", -1 /* CACHED */)),
                     _createElementVNode("span", _hoisted_579, _toDisplayString(m.apport), 1 /* TEXT */)
                   ])
                 ]))
@@ -7114,24 +7255,25 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */)),
               _createElementVNode("p", _hoisted_586, _toDisplayString(_ctx.V.team.total), 1 /* TEXT */)
             ]),
-            _cache[132] || (_cache[132] = _createElementVNode("p", { style: {"margin":"0","font-size":"13px","line-height":"1.5","color":"#9AA8C3"} }, "Chaque ajout et chaque vente indique l’associé qui l’a fait. Les apports sont les achats payés par chacun.", -1 /* CACHED */))
+            _cache[132] || (_cache[132] = _createElementVNode("p", { style: {"margin":"0","font-size":"13px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Chaque ajout et chaque vente indique l’associé qui l’a fait. Les apports sont les achats payés par chacun.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isIO)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 17 }, [
             _createElementVNode("section", _hoisted_587, [
               _cache[134] || (_cache[134] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Importer", -1 /* CACHED */)),
-              _cache[135] || (_cache[135] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"#9AA8C3"} }, "Un fichier CSV : ton tableur actuel, ou l’export d’une autre app de collection.", -1 /* CACHED */)),
+              _cache[135] || (_cache[135] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Un fichier CSV : ton tableur actuel, ou l’export d’une autre app de collection.", -1 /* CACHED */)),
               _createElementVNode("button", {
+                class: "pkm-dark",
                 type: "button",
                 onClick: _ctx.V.demoImport,
-                style: {"height":"52px","border":"1.5px dashed #3A4A75","border-radius":"16px","background":"#0B1120","color":"#F3F6FC","font":"inherit","font-size":"14.5px","font-weight":"600","cursor":"pointer"}
+                style: {"height":"52px","border":"1.5px dashed var(--pkm-line-4)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font":"inherit","font-size":"14.5px","font-weight":"600","cursor":"pointer"}
               }, "Choisir un fichier CSV", 8 /* PROPS */, _hoisted_588),
-              _cache[136] || (_cache[136] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"#9AA8C3"} }, "Colonnes reconnues automatiquement", -1 /* CACHED */)),
+              _cache[136] || (_cache[136] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Colonnes reconnues automatiquement", -1 /* CACHED */)),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.io.mapping || []), (mp, mp_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: mp_i,
-                  style: {"display":"flex","align-items":"center","gap":"10px","min-height":"40px","border-top":"1px solid #1E2B45","font-size":"13.5px"}
+                  style: {"display":"flex","align-items":"center","gap":"10px","min-height":"40px","border-top":"1px solid var(--pkm-line)","font-size":"13.5px"}
                 }, [
                   _createElementVNode("span", _hoisted_589, _toDisplayString(mp.from), 1 /* TEXT */),
                   (_openBlock(), _createElementBlock("svg", _hoisted_590, [...(_cache[133] || (_cache[133] = [
@@ -7144,11 +7286,11 @@ return function render(_ctx, _cache) {
             ]),
             _createElementVNode("section", _hoisted_592, [
               _cache[137] || (_cache[137] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Exporter", -1 /* CACHED */)),
-              _cache[138] || (_cache[138] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"#9AA8C3"} }, "Toute ta collection et ton historique, sans limite : ajouts, ventes, cotes et frais.", -1 /* CACHED */)),
+              _cache[138] || (_cache[138] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Toute ta collection et ton historique, sans limite : ajouts, ventes, cotes et frais.", -1 /* CACHED */)),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.demoExport,
-                style: {"height":"52px","border":"0","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+                style: {"height":"52px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
               }, "Exporter en CSV", 8 /* PROPS */, _hoisted_593),
               _createElementVNode("span", _hoisted_594, _toDisplayString(_ctx.V.io.exportInfo), 1 /* TEXT */)
             ])
@@ -7190,7 +7332,7 @@ return function render(_ctx, _cache) {
         onClick: _ctx.V.openScan,
         "aria-label": "Scanner une carte ou un produit",
         class: "pkm-anim",
-        style: {"justify-self":"center","width":"62px","height":"62px","margin-top":"-30px","padding":"0","border":"4px solid #0B1120","border-radius":"31px","background":"linear-gradient(160deg, #5B7BFF, #3D63FF 60%, #2F4FE0)","color":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer","animation":"pkmPulse 2.6s ease-in-out infinite"}
+        style: {"justify-self":"center","width":"62px","height":"62px","margin-top":"-30px","padding":"0","border":"4px solid var(--pkm-scan-ring)","border-radius":"31px","background":"linear-gradient(160deg, var(--pkm-scan-1), var(--pkm-scan-3) 60%, var(--pkm-scan-2))","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer","animation":"pkmPulse 2.6s ease-in-out infinite"}
       }, [
         (_openBlock(), _createElementBlock("svg", _hoisted_601, [...(_cache[141] || (_cache[141] = [
           _createElementVNode("path", { d: "M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.6-2.2h5.4L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
@@ -7241,7 +7383,7 @@ return function render(_ctx, _cache) {
       ? (_openBlock(), _createElementBlock("section", _hoisted_606, [
           _cache[152] || (_cache[152] = _createElementVNode("div", {
             "aria-hidden": "true",
-            style: {"position":"absolute","inset":"0","background":"repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.025) 0 2px, rgba(255, 255, 255, 0) 2px 9px)"}
+            style: {"position":"absolute","inset":"0","background":"repeating-linear-gradient(115deg, rgba(var(--pkm-hl-rgb), 0.025) 0 2px, rgba(var(--pkm-hl-rgb), 0) 2px 9px)"}
           }, null, -1 /* CACHED */)),
           _createElementVNode("div", {
             "aria-hidden": "true",
@@ -7249,10 +7391,11 @@ return function render(_ctx, _cache) {
           }, null, 4 /* STYLE */),
           _createElementVNode("div", _hoisted_607, [
             _createElementVNode("button", {
+              class: "pkm-dark",
               type: "button",
               onClick: _ctx.V.scan.close,
               "aria-label": "Fermer le scan",
-              style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(255, 255, 255, 0.14)","border-radius":"22px","background":"rgba(8, 13, 26, 0.6)","color":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+              style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
             }, [
               (_openBlock(), _createElementBlock("svg", _hoisted_609, [...(_cache[144] || (_cache[144] = [
                 _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
@@ -7278,7 +7421,7 @@ return function render(_ctx, _cache) {
               onClick: _ctx.V.scan.torch,
               "aria-label": _ctx.A(_ctx.V.scan.torchLabel),
               "aria-pressed": _ctx.A(_ctx.V.scan.torchOn),
-              style: _normalizeStyle(`flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 22px; background: ${_ctx.V.scan.torchBg}; color: ${_ctx.V.scan.torchFg}; display: flex; align-items: center; justify-content: center; cursor: pointer`)
+              style: _normalizeStyle(`flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.14); border-radius: 22px; background: ${_ctx.V.scan.torchBg}; color: ${_ctx.V.scan.torchFg}; display: flex; align-items: center; justify-content: center; cursor: pointer`)
             }, [
               (_openBlock(), _createElementBlock("svg", _hoisted_614, [...(_cache[145] || (_cache[145] = [
                 _createElementVNode("path", { d: "M13 3L5 13.5h6L10 21l8-10.5h-6z" }, null, -1 /* CACHED */)
@@ -7294,7 +7437,7 @@ return function render(_ctx, _cache) {
                     src: _ctx.V.scan.img,
                     "data-fallback": _ctx.V.scan.fallback,
                     alt: _ctx.V.scan.name,
-                    style: {"position":"absolute","left":"22px","top":"18px","width":"200px","height":"232px","border-radius":"10px 10px 0 0","object-fit":"cover","object-position":"top","transform":"rotate(-3deg)","box-shadow":"0 26px 44px rgba(0, 0, 0, 0.6)","-webkit-mask-image":"linear-gradient(180deg, #000 86%, transparent)","mask-image":"linear-gradient(180deg, #000 86%, transparent)"}
+                    style: {"position":"absolute","left":"22px","top":"18px","width":"200px","height":"232px","border-radius":"10px 10px 0 0","object-fit":"cover","object-position":"top","transform":"rotate(-3deg)","box-shadow":"0 26px 44px rgba(var(--pkm-shadow-rgb), 0.6)","-webkit-mask-image":"linear-gradient(180deg, #000 86%, transparent)","mask-image":"linear-gradient(180deg, #000 86%, transparent)"}
                   }, null, 8 /* PROPS */, _hoisted_618))
                 : _createCommentVNode("v-if", true),
               (_ctx.V.scan.graded)
@@ -7314,7 +7457,7 @@ return function render(_ctx, _cache) {
               (_ctx.V.scan.sealedArt)
                 ? (_openBlock(), _createElementBlock("div", {
                     key: 2,
-                    style: _normalizeStyle(`position: absolute; left: 22px; top: 40px; width: 200px; height: 220px; border-radius: 14px; background: ${_ctx.V.scan.bg}; transform: rotate(-2deg); box-shadow: 0 26px 44px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.16)`)
+                    style: _normalizeStyle(`position: absolute; left: 22px; top: 40px; width: 200px; height: 220px; border-radius: 14px; background: ${_ctx.V.scan.bg}; transform: rotate(-2deg); box-shadow: 0 26px 44px rgba(var(--pkm-shadow-rgb), 0.6), inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.16)`)
                   }, [
                     _createElementVNode("img", {
                       src: _ctx.V.scan.logo,
@@ -7329,7 +7472,7 @@ return function render(_ctx, _cache) {
                     ])),
                     _cache[146] || (_cache[146] = _createElementVNode("span", {
                       "aria-hidden": "true",
-                      style: {"position":"absolute","left":"50px","bottom":"14px","width":"100px","height":"26px","border-radius":"3px","background":"repeating-linear-gradient(90deg, #FFFFFF 0 2px, rgba(255, 255, 255, 0) 2px 4px, #FFFFFF 4px 5px, rgba(255, 255, 255, 0) 5px 8px)","opacity":"0.85"}
+                      style: {"position":"absolute","left":"50px","bottom":"14px","width":"100px","height":"26px","border-radius":"3px","background":"repeating-linear-gradient(90deg, #FFFFFF 0 2px, rgba(var(--pkm-hl-rgb), 0) 2px 4px, #FFFFFF 4px 5px, rgba(var(--pkm-hl-rgb), 0) 5px 8px)","opacity":"0.85"}
                     }, null, -1 /* CACHED */))
                   ], 4 /* STYLE */))
                 : _createCommentVNode("v-if", true),
@@ -7343,27 +7486,28 @@ return function render(_ctx, _cache) {
                     }, null, 8 /* PROPS */, _hoisted_626)
                   ]))
                 : _createCommentVNode("v-if", true),
-              _cache[147] || (_cache[147] = _createStaticVNode("<span aria-hidden=\"true\" style=\"position:absolute;left:0;top:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid #A8B6FF;border-top:4px solid #A8B6FF;border-radius:14px 0 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;top:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid #A8B6FF;border-top:4px solid #A8B6FF;border-radius:0 14px 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;left:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid #A8B6FF;border-bottom:4px solid #A8B6FF;border-radius:0 0 0 14px;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid #A8B6FF;border-bottom:4px solid #A8B6FF;border-radius:0 0 14px 0;\"></span><span aria-hidden=\"true\" class=\"pkm-anim\" style=\"position:absolute;left:14px;right:14px;top:30px;height:2px;border-radius:1px;background:linear-gradient(90deg, rgba(168, 182, 255, 0), #A8B6FF, rgba(168, 182, 255, 0));box-shadow:0 0 14px #A8B6FF;animation:pkmScan 2.2s ease-in-out infinite alternate;\"></span>", 5))
+              _cache[147] || (_cache[147] = _createStaticVNode("<span aria-hidden=\"true\" style=\"position:absolute;left:0;top:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid var(--pkm-accent);border-top:4px solid var(--pkm-accent);border-radius:14px 0 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;top:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid var(--pkm-accent);border-top:4px solid var(--pkm-accent);border-radius:0 14px 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;left:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid var(--pkm-accent);border-bottom:4px solid var(--pkm-accent);border-radius:0 0 0 14px;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid var(--pkm-accent);border-bottom:4px solid var(--pkm-accent);border-radius:0 0 14px 0;\"></span><span aria-hidden=\"true\" class=\"pkm-anim\" style=\"position:absolute;left:14px;right:14px;top:30px;height:2px;border-radius:1px;background:linear-gradient(90deg, rgba(var(--pkm-accent-rgb), 0), var(--pkm-accent), rgba(var(--pkm-accent-rgb), 0));box-shadow:0 0 14px var(--pkm-accent);animation:pkmScan 2.2s ease-in-out infinite alternate;\"></span>", 5))
             ]),
             _createElementVNode("span", _hoisted_627, [
-              _cache[148] || (_cache[148] = _createElementVNode("span", { style: {"flex":"none","width":"8px","height":"8px","border-radius":"4px","background":"#3DDC84","box-shadow":"0 0 8px #3DDC84"} }, null, -1 /* CACHED */)),
+              _cache[148] || (_cache[148] = _createElementVNode("span", { style: {"flex":"none","width":"8px","height":"8px","border-radius":"4px","background":"var(--pkm-green)","box-shadow":"0 0 8px var(--pkm-green)"} }, null, -1 /* CACHED */)),
               _createElementVNode("span", _hoisted_628, _toDisplayString(_ctx.V.scan.status), 1 /* TEXT */)
             ]),
             _createElementVNode("span", _hoisted_629, _toDisplayString(_ctx.V.scan.conf), 1 /* TEXT */),
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.scan.next,
-              style: {"height":"44px","margin-top":"-8px","padding":"0 14px","border":"0","background":"transparent","color":"#B9C5FF","font":"inherit","font-size":"13.5px","font-weight":"600","text-decoration":"underline","text-underline-offset":"3px","cursor":"pointer"}
+              style: {"height":"44px","margin-top":"-8px","padding":"0 14px","border":"0","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"13.5px","font-weight":"600","text-decoration":"underline","text-underline-offset":"3px","cursor":"pointer"}
             }, "Démo : changer d’article devant l’objectif", 8 /* PROPS */, _hoisted_630)
           ]),
           _createElementVNode("div", _hoisted_631, [
             _createElementVNode("span", _hoisted_632, _toDisplayString(_ctx.V.scan.count), 1 /* TEXT */),
             _createElementVNode("div", _hoisted_633, [
               _createElementVNode("button", {
+                class: "pkm-dark",
                 type: "button",
                 onClick: _ctx.V.scan.importPhoto,
                 "aria-label": "Importer une photo",
-                style: {"justify-self":"start","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(255, 255, 255, 0.16)","border-radius":"16px","background":"rgba(8, 13, 26, 0.6)","color":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                style: {"justify-self":"start","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.16)","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_635, [...(_cache[149] || (_cache[149] = [
                   _createElementVNode("path", { d: "M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
@@ -7379,15 +7523,16 @@ return function render(_ctx, _cache) {
                 type: "button",
                 onClick: _ctx.V.scan.shutter,
                 "aria-label": "Analyser l’article détecté",
-                style: {"width":"80px","height":"80px","padding":"6px","box-sizing":"border-box","border":"4px solid #FFFFFF","border-radius":"40px","background":"rgba(255, 255, 255, 0.12)","cursor":"pointer"}
+                style: {"width":"80px","height":"80px","padding":"6px","box-sizing":"border-box","border":"4px solid var(--pkm-white)","border-radius":"40px","background":"rgba(var(--pkm-hl-rgb), 0.12)","cursor":"pointer"}
               }, [...(_cache[150] || (_cache[150] = [
-                _createElementVNode("span", { style: {"display":"block","width":"100%","height":"100%","border-radius":"50%","background":"#FFFFFF"} }, null, -1 /* CACHED */)
+                _createElementVNode("span", { style: {"display":"block","width":"100%","height":"100%","border-radius":"50%","background":"var(--pkm-photo-mat)"} }, null, -1 /* CACHED */)
               ]))], 8 /* PROPS */, _hoisted_636),
               _createElementVNode("button", {
+                class: "pkm-dark",
                 type: "button",
                 onClick: _ctx.V.scan.manual,
                 "aria-label": "Ajouter sans scanner",
-                style: {"justify-self":"end","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(255, 255, 255, 0.16)","border-radius":"16px","background":"rgba(8, 13, 26, 0.6)","color":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                style: {"justify-self":"end","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.16)","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_638, [...(_cache[151] || (_cache[151] = [
                   _createElementVNode("path", { d: "M4 20h4L19 9l-4-4L4 16z" }, null, -1 /* CACHED */),
@@ -7409,11 +7554,11 @@ return function render(_ctx, _cache) {
           _createElementVNode("section", _hoisted_641, [
             _cache[162] || (_cache[162] = _createElementVNode("div", {
               "aria-hidden": "true",
-              style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"#2A3A5C"}
+              style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
             _createElementVNode("div", _hoisted_642, [
               _createElementVNode("span", {
-                style: _normalizeStyle(`position: relative; flex: none; width: 84px; height: 112px; border-radius: 10px; overflow: hidden; background: ${_ctx.V.sr.bg}; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                style: _normalizeStyle(`position: relative; flex: none; width: 84px; height: 112px; border-radius: 10px; overflow: hidden; background: ${_ctx.V.sr.bg}; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 22px rgba(var(--pkm-shadow-rgb), 0.45), inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
               }, [
                 (_ctx.V.sr.isCard)
                   ? (_openBlock(), _createElementBlock("img", {
@@ -7454,10 +7599,11 @@ return function render(_ctx, _cache) {
                 _createElementVNode("span", _hoisted_650, _toDisplayString(_ctx.V.sr.conf), 1 /* TEXT */)
               ]),
               _createElementVNode("button", {
+                class: "pkm-dark",
                 type: "button",
                 onClick: _ctx.V.sr.close,
                 "aria-label": "Fermer",
-                style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid #1E2B45","border-radius":"22px","background":"#111A2C","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"22px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_652, [...(_cache[153] || (_cache[153] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
@@ -7467,7 +7613,7 @@ return function render(_ctx, _cache) {
             ]),
             _createElementVNode("section", _hoisted_653, [
               _createElementVNode("span", _hoisted_654, [
-                _cache[154] || (_cache[154] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"#C9D3EA"} }, "Cote PKM", -1 /* CACHED */)),
+                _cache[154] || (_cache[154] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Cote PKM", -1 /* CACHED */)),
                 _createElementVNode("span", _hoisted_655, _toDisplayString(_ctx.V.sr.cote), 1 /* TEXT */)
               ]),
               _createElementVNode("span", _hoisted_656, [
@@ -7483,7 +7629,7 @@ return function render(_ctx, _cache) {
               ])
             ]),
             _createElementVNode("div", _hoisted_659, [
-              _cache[155] || (_cache[155] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"#9AA8C3"} }, "Langue", -1 /* CACHED */)),
+              _cache[155] || (_cache[155] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Langue", -1 /* CACHED */)),
               _createElementVNode("div", _hoisted_660, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sr.langs || []), (lg, lg_i) => {
                   return (_openBlock(), _createElementBlock("button", {
@@ -7495,7 +7641,7 @@ return function render(_ctx, _cache) {
                   }, _toDisplayString(lg.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_661))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
-              _cache[156] || (_cache[156] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"#9AA8C3"} }, "État", -1 /* CACHED */)),
+              _cache[156] || (_cache[156] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "État", -1 /* CACHED */)),
               _createElementVNode("div", _hoisted_662, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sr.conds || []), (cd, cd_i) => {
                   return (_openBlock(), _createElementBlock("button", {
@@ -7513,22 +7659,23 @@ return function render(_ctx, _cache) {
                 _cache[157] || (_cache[157] = _createTextVNode("Prix payé (€) · facultatif", -1 /* CACHED */)),
                 _createElementVNode("input", {
                   id: "pkm-champ-7",
+                  class: "pkm-dark",
                   type: "text",
                   inputmode: "decimal",
                   placeholder: "0,00",
                   value: _ctx.V.sr.price,
                   onInput: _ctx.V.sr.onPrice,
-                  style: {"height":"52px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid #2A3A5C","border-radius":"16px","background":"#0B1120","color":"#F3F6FC","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600"}
+                  style: {"height":"52px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600"}
                 }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_666)
               ]),
               _createElementVNode("div", _hoisted_667, [
-                _cache[160] || (_cache[160] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"#9AA8C3"} }, "Quantité", -1 /* CACHED */)),
+                _cache[160] || (_cache[160] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_668, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.sr.dec,
                     "aria-label": "Diminuer la quantité",
-                    style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                    style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_670, [...(_cache[158] || (_cache[158] = [
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
@@ -7539,7 +7686,7 @@ return function render(_ctx, _cache) {
                     type: "button",
                     onClick: _ctx.V.sr.inc,
                     "aria-label": "Augmenter la quantité",
-                    style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                    style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_673, [...(_cache[159] || (_cache[159] = [
                       _createElementVNode("path", { d: "M12 5v14" }, null, -1 /* CACHED */),
@@ -7562,7 +7709,7 @@ return function render(_ctx, _cache) {
                 }, null, 12 /* STYLE, PROPS */, _hoisted_677)
               ])),
               _createElementVNode("span", _hoisted_678, [
-                _cache[161] || (_cache[161] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"#9AA8C3"} }, "Ta collection", -1 /* CACHED */)),
+                _cache[161] || (_cache[161] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Ta collection", -1 /* CACHED */)),
                 _createElementVNode("span", _hoisted_679, _toDisplayString(_ctx.V.sr.valueLine), 1 /* TEXT */),
                 _createElementVNode("span", {
                   style: _normalizeStyle(`font-size: 12.5px; font-weight: 700; color: ${_ctx.V.sr.tierColor}`)
@@ -7582,12 +7729,12 @@ return function render(_ctx, _cache) {
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.sr.save,
-              style: {"flex":"none","height":"54px","border":"0","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
+              style: {"flex":"none","height":"54px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
             }, _toDisplayString(_ctx.V.sr.saveLabel), 9 /* TEXT, PROPS */, _hoisted_682),
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.sr.wrong,
-              style: {"flex":"none","height":"44px","margin-top":"-6px","border":"0","background":"transparent","color":"#B9C5FF","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+              style: {"flex":"none","height":"44px","margin-top":"-6px","border":"0","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
             }, "Ce n’est pas le bon article ?", 8 /* PROPS */, _hoisted_683)
           ])
         ]))
@@ -7603,7 +7750,7 @@ return function render(_ctx, _cache) {
           _createElementVNode("section", _hoisted_686, [
             _cache[171] || (_cache[171] = _createElementVNode("div", {
               "aria-hidden": "true",
-              style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"#2A3A5C"}
+              style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
             _createElementVNode("div", _hoisted_687, [
               _createElementVNode("div", _hoisted_688, [
@@ -7621,10 +7768,11 @@ return function render(_ctx, _cache) {
                 }, "Vente", 12 /* STYLE, PROPS */, _hoisted_690)
               ]),
               _createElementVNode("button", {
+                class: "pkm-dark",
                 type: "button",
                 onClick: _ctx.V.closeSheet,
                 "aria-label": "Fermer",
-                style: {"flex":"none","width":"46px","height":"46px","padding":"0","border":"1px solid #1E2B45","border-radius":"23px","background":"#111A2C","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                style: {"flex":"none","width":"46px","height":"46px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"23px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_692, [...(_cache[163] || (_cache[163] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
@@ -7634,7 +7782,7 @@ return function render(_ctx, _cache) {
             ]),
             _createElementVNode("h2", _hoisted_693, _toDisplayString(_ctx.V.sh.title), 1 /* TEXT */),
             _createElementVNode("fieldset", _hoisted_694, [
-              _cache[164] || (_cache[164] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"#9AA8C3"} }, "Article", -1 /* CACHED */)),
+              _cache[164] || (_cache[164] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Article", -1 /* CACHED */)),
               _createElementVNode("div", _hoisted_695, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sh.products || []), (po, po_i) => {
                   return (_openBlock(), _createElementBlock("button", {
@@ -7646,7 +7794,7 @@ return function render(_ctx, _cache) {
                     style: _normalizeStyle(`flex: none; width: 104px; display: flex; flex-direction: column; gap: 6px; padding: 6px 6px 8px; border-radius: 18px; border: 1px solid ${po.bc}; box-shadow: ${po.ring}; background: ${po.bg}; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                   }, [
                     _createElementVNode("span", {
-                      style: _normalizeStyle(`position: relative; display: flex; align-items: center; justify-content: center; height: 78px; border-radius: 12px; overflow: hidden; background: ${po.art}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)`)
+                      style: _normalizeStyle(`position: relative; display: flex; align-items: center; justify-content: center; height: 78px; border-radius: 12px; overflow: hidden; background: ${po.art}; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
                     }, [
                       (po.isCard)
                         ? (_openBlock(), _createElementBlock("img", {
@@ -7689,22 +7837,23 @@ return function render(_ctx, _cache) {
                 _createTextVNode(_toDisplayString(_ctx.V.sh.priceLabel), 1 /* TEXT */),
                 _createElementVNode("input", {
                   id: "pkm-champ-8",
+                  class: "pkm-dark",
                   type: "text",
                   inputmode: "decimal",
                   placeholder: "0,00",
                   value: _ctx.V.sh.price,
                   onInput: _ctx.V.sh.onPrice,
-                  style: {"height":"52px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid #2A3A5C","border-radius":"16px","background":"#0B1120","color":"#F3F6FC","font-family":"'Sora', sans-serif","font-size":"20px","font-weight":"600"}
+                  style: {"height":"52px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"20px","font-weight":"600"}
                 }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_705)
               ]),
               _createElementVNode("div", _hoisted_706, [
-                _cache[167] || (_cache[167] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"#9AA8C3"} }, "Quantité", -1 /* CACHED */)),
+                _cache[167] || (_cache[167] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_707, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.sh.dec,
                     "aria-label": "Diminuer la quantité",
-                    style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                    style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_709, [...(_cache[165] || (_cache[165] = [
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
@@ -7715,7 +7864,7 @@ return function render(_ctx, _cache) {
                     type: "button",
                     onClick: _ctx.V.sh.inc,
                     "aria-label": "Augmenter la quantité",
-                    style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                    style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_712, [...(_cache[166] || (_cache[166] = [
                       _createElementVNode("path", { d: "M12 5v14" }, null, -1 /* CACHED */),
@@ -7731,7 +7880,7 @@ return function render(_ctx, _cache) {
             (_ctx.V.sh.isSell)
               ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                   _createElementVNode("fieldset", _hoisted_714, [
-                    _cache[168] || (_cache[168] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"#9AA8C3"} }, "Vendu sur", -1 /* CACHED */)),
+                    _cache[168] || (_cache[168] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Vendu sur", -1 /* CACHED */)),
                     _createElementVNode("div", _hoisted_715, [
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sh.platforms || []), (pl, pl_i) => {
                         return (_openBlock(), _createElementBlock("button", {
@@ -7748,11 +7897,12 @@ return function render(_ctx, _cache) {
                     _cache[169] || (_cache[169] = _createTextVNode("Port et emballage à ta charge (€)", -1 /* CACHED */)),
                     _createElementVNode("input", {
                       id: "pkm-champ-9",
+                      class: "pkm-dark",
                       type: "text",
                       inputmode: "decimal",
                       value: _ctx.V.sh.port,
                       onInput: _ctx.V.sh.onPort,
-                      style: {"height":"48px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid #2A3A5C","border-radius":"16px","background":"#0B1120","color":"#F3F6FC","font-family":"'Sora', sans-serif","font-size":"16px"}
+                      style: {"height":"48px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"16px"}
                     }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_718),
                     _createElementVNode("span", _hoisted_719, _toDisplayString(_ctx.V.sh.portHint), 1 /* TEXT */)
                   ]),
@@ -7761,11 +7911,12 @@ return function render(_ctx, _cache) {
                         _cache[170] || (_cache[170] = _createTextVNode("Commission (€)", -1 /* CACHED */)),
                         _createElementVNode("input", {
                           id: "pkm-champ-10",
+                          class: "pkm-dark",
                           type: "text",
                           inputmode: "decimal",
                           value: _ctx.V.sh.commission,
                           onInput: _ctx.V.sh.onCommission,
-                          style: {"height":"48px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid #2A3A5C","border-radius":"16px","background":"#0B1120","color":"#F3F6FC","font-family":"'Sora', sans-serif","font-size":"16px"}
+                          style: {"height":"48px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"16px"}
                         }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_721),
                         _createElementVNode("span", _hoisted_722, _toDisplayString(_ctx.V.sh.commissionHint), 1 /* TEXT */)
                       ]))
@@ -7789,8 +7940,9 @@ return function render(_ctx, _cache) {
                 ]))
               : _createCommentVNode("v-if", true),
             _createElementVNode("section", {
+              class: "pkm-dark",
               "aria-label": _ctx.A(_ctx.V.sh.previewTitle),
-              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid #24345C","background":"radial-gradient(120% 100% at 100% 0%, rgba(98, 122, 255, 0.2), rgba(98, 122, 255, 0) 60%), #121C33","display":"flex","flex-direction":"column","gap":"8px"}
+              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"8px"}
             }, [
               _createElementVNode("div", _hoisted_728, [
                 _createElementVNode("span", _hoisted_729, _toDisplayString(_ctx.V.sh.previewTitle), 1 /* TEXT */),
@@ -7817,7 +7969,7 @@ return function render(_ctx, _cache) {
               type: "button",
               onClick: _ctx.V.sh.save,
               disabled: _ctx.V.sh.disabled,
-              style: _normalizeStyle(`flex: none; height: 54px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; opacity: ${_ctx.V.sh.saveOpacity}`)
+              style: _normalizeStyle(`flex: none; height: 54px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; opacity: ${_ctx.V.sh.saveOpacity}`)
             }, _toDisplayString(_ctx.V.sh.saveLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_733)
           ])
         ]))
@@ -7836,7 +7988,7 @@ return function render(_ctx, _cache) {
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.ob.skip,
-              style: {"height":"44px","padding":"0 6px","border":"0","background":"transparent","color":"#9AA8C3","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+              style: {"height":"44px","padding":"0 6px","border":"0","background":"transparent","color":"var(--pkm-t3)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
             }, "Passer", 8 /* PROPS */, _hoisted_737)
           ]),
           (_ctx.V.ob.is1)
@@ -7848,16 +8000,19 @@ return function render(_ctx, _cache) {
                       src: fc.img,
                       "data-fallback": fc.fallback,
                       alt: "",
-                      style: _normalizeStyle(`position: absolute; left: ${fc.left}; top: ${fc.top}; width: 104px; height: 121px; border-radius: 9px 9px 0 0; object-fit: cover; object-position: top; transform: rotate(${fc.rot}); box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5); -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent)`)
+                      style: _normalizeStyle(`position: absolute; left: ${fc.left}; top: ${fc.top}; width: 104px; height: 121px; border-radius: 9px 9px 0 0; object-fit: cover; object-position: top; transform: rotate(${fc.rot}); box-shadow: 0 16px 30px rgba(var(--pkm-shadow-rgb), 0.5); -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent)`)
                     }, null, 12 /* STYLE, PROPS */, _hoisted_740))
                   }), 128 /* KEYED_FRAGMENT */)),
-                  _cache[172] || (_cache[172] = _createElementVNode("span", { style: {"position":"absolute","left":"50%","bottom":"8px","margin-left":"-88px","width":"176px","display":"flex","align-items":"center","justify-content":"center","gap":"8px","padding":"9px 0","border-radius":"999px","background":"rgba(8, 13, 26, 0.88)","border":"1px solid #24345C","font-size":"13px","font-weight":"700"} }, [
-                    _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"4px","background":"#3DDC84"} }),
+                  _cache[172] || (_cache[172] = _createElementVNode("span", {
+                    class: "pkm-dark",
+                    style: {"position":"absolute","left":"50%","bottom":"8px","margin-left":"-88px","width":"176px","display":"flex","align-items":"center","justify-content":"center","gap":"8px","padding":"9px 0","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.88)","border":"1px solid var(--pkm-line-3)","font-size":"13px","font-weight":"700"}
+                  }, [
+                    _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"4px","background":"var(--pkm-green)"} }),
                     _createTextVNode("Cote PKM 99,00 €")
                   ], -1 /* CACHED */))
                 ]),
                 _cache[179] || (_cache[179] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"28px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em","text-align":"center"} }, "La vraie valeur de ta collection Pokémon", -1 /* CACHED */)),
-                _cache[180] || (_cache[180] = _createElementVNode("p", { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"#C9D3EA","text-align":"center"} }, "Scanne tes cartes et ton scellé. PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.", -1 /* CACHED */)),
+                _cache[180] || (_cache[180] = _createElementVNode("p", { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"var(--pkm-t2)","text-align":"center"} }, "Scanne tes cartes et ton scellé. PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.", -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_741, [
                   _createElementVNode("div", _hoisted_742, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_743, [...(_cache[173] || (_cache[173] = [
@@ -7888,15 +8043,15 @@ return function render(_ctx, _cache) {
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.ob.next1,
-                  style: {"height":"54px","margin-top":"4px","border":"0","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
+                  style: {"height":"54px","margin-top":"4px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
                 }, "Commencer", 8 /* PROPS */, _hoisted_748),
-                _cache[181] || (_cache[181] = _createElementVNode("p", { style: {"margin":"0","font-size":"11.5px","line-height":"1.5","color":"#7D8BA8","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.", -1 /* CACHED */))
+                _cache[181] || (_cache[181] = _createElementVNode("p", { style: {"margin":"0","font-size":"11.5px","line-height":"1.5","color":"var(--pkm-t4)","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.", -1 /* CACHED */))
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.V.ob.is2)
             ? (_openBlock(), _createElementBlock("div", _hoisted_749, [
                 _cache[184] || (_cache[184] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"26px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em"} }, "Faisons connaissance", -1 /* CACHED */)),
-                _cache[185] || (_cache[185] = _createElementVNode("p", { style: {"margin":"-6px 0 0","font-size":"14px","line-height":"1.5","color":"#9AA8C3"} }, "2 questions pour anticiper ton profil. Ensuite, il s’adapte tout seul à ta collection.", -1 /* CACHED */)),
+                _cache[185] || (_cache[185] = _createElementVNode("p", { style: {"margin":"-6px 0 0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "2 questions pour anticiper ton profil. Ensuite, il s’adapte tout seul à ta collection.", -1 /* CACHED */)),
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.questions || []), (qq, qq_i) => {
                   return (_openBlock(), _createElementBlock("fieldset", {
                     key: qq_i,
@@ -7936,7 +8091,7 @@ return function render(_ctx, _cache) {
                       ], 4 /* STYLE */))
                     ]),
                     _createElementVNode("span", _hoisted_756, [
-                      _cache[182] || (_cache[182] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"#C9D3EA"} }, "Profil anticipé", -1 /* CACHED */)),
+                      _cache[182] || (_cache[182] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Profil anticipé", -1 /* CACHED */)),
                       _createElementVNode("span", {
                         style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; color: ${_ctx.V.ob.predColor}`)
                       }, _toDisplayString(_ctx.V.ob.predName), 5 /* TEXT, STYLE */)
@@ -7957,7 +8112,7 @@ return function render(_ctx, _cache) {
                     type: "button",
                     onClick: _ctx.V.ob.back,
                     "aria-label": "Étape précédente",
-                    style: {"width":"54px","height":"54px","padding":"0","border":"1px solid #2A3A5C","border-radius":"27px","background":"transparent","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                    style: {"width":"54px","height":"54px","padding":"0","border":"1px solid var(--pkm-line-2)","border-radius":"27px","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_760, [...(_cache[183] || (_cache[183] = [
                       _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
@@ -7966,7 +8121,7 @@ return function render(_ctx, _cache) {
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.ob.next2,
-                    style: {"height":"54px","border":"0","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
+                    style: {"height":"54px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
                   }, "Voir mon profil", 8 /* PROPS */, _hoisted_761)
                 ])
               ]))
@@ -7989,14 +8144,14 @@ return function render(_ctx, _cache) {
                   ], 4 /* STYLE */))
                 ], 4 /* STYLE */),
                 _createElementVNode("div", _hoisted_764, [
-                  _cache[186] || (_cache[186] = _createElementVNode("span", { style: {"font-size":"14px","color":"#9AA8C3"} }, "Tu es plutôt", -1 /* CACHED */)),
+                  _cache[186] || (_cache[186] = _createElementVNode("span", { style: {"font-size":"14px","color":"var(--pkm-t3)"} }, "Tu es plutôt", -1 /* CACHED */)),
                   _createElementVNode("h1", {
                     style: _normalizeStyle(`margin: 0; font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em; color: ${_ctx.V.ob.predColor}`)
                   }, _toDisplayString(_ctx.V.ob.predName), 5 /* TEXT, STYLE */)
                 ]),
                 _createElementVNode("p", _hoisted_765, _toDisplayString(_ctx.V.ob.predDesc), 1 /* TEXT */),
                 _createElementVNode("section", _hoisted_766, [
-                  _cache[188] || (_cache[188] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"700","color":"#9AA8C3"} }, "Ce qu’on a préparé pour toi", -1 /* CACHED */)),
+                  _cache[188] || (_cache[188] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-t3)"} }, "Ce qu’on a préparé pour toi", -1 /* CACHED */)),
                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.adapts || []), (oa, oa_i) => {
                     return (_openBlock(), _createElementBlock("div", {
                       key: oa_i,
@@ -8015,22 +8170,22 @@ return function render(_ctx, _cache) {
                     ]))
                   }), 128 /* KEYED_FRAGMENT */))
                 ]),
-                _cache[189] || (_cache[189] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"#9AA8C3","text-align":"center"} }, "Ensuite, ton profil s’adapte tout seul : il suit le nombre de tes cartes ultra rares et la valeur de ta collection.", -1 /* CACHED */)),
+                _cache[189] || (_cache[189] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)","text-align":"center"} }, "Ensuite, ton profil s’adapte tout seul : il suit le nombre de tes cartes ultra rares et la valeur de ta collection.", -1 /* CACHED */)),
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.ob.toScan,
-                  style: {"height":"54px","border":"0","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
+                  style: {"height":"54px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
                 }, "Scanner ma première carte", 8 /* PROPS */, _hoisted_767),
                 _createElementVNode("div", _hoisted_768, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.ob.back,
-                    style: {"height":"46px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+                    style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
                   }, "Modifier", 8 /* PROPS */, _hoisted_769),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.ob.toHome,
-                    style: {"height":"46px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
+                    style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
                   }, "Aller à l’accueil", 8 /* PROPS */, _hoisted_770)
                 ])
               ]))
@@ -8040,17 +8195,19 @@ return function render(_ctx, _cache) {
     (_ctx.V.ui.zoomOpen)
       ? (_openBlock(), _createElementBlock("div", {
           key: 8,
+          class: "pkm-dark",
           id: "pkm-zoom",
           role: "dialog",
           "aria-modal": "true",
           "aria-label": _ctx.A(_ctx.V.zoom.label),
-          style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","flex-direction":"column","align-items":"center","gap":"14px","padding":"70px 18px 28px","box-sizing":"border-box","background":"rgba(5, 8, 15, 0.95)"}
+          style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","flex-direction":"column","align-items":"center","gap":"14px","padding":"70px 18px 28px","box-sizing":"border-box","background":"rgba(var(--pkm-deep-rgb), 0.95)"}
         }, [
           _createElementVNode("button", {
+            class: "pkm-dark",
             type: "button",
             onClick: _ctx.V.zoom.close,
             "aria-label": "Fermer",
-            style: {"position":"absolute","top":"14px","right":"14px","width":"44px","height":"44px","padding":"0","border":"1px solid #2A3A5C","border-radius":"22px","background":"#111A2C","color":"#F3F6FC","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+            style: {"position":"absolute","top":"14px","right":"14px","width":"44px","height":"44px","padding":"0","border":"1px solid var(--pkm-line-2)","border-radius":"22px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
           }, [
             (_openBlock(), _createElementBlock("svg", _hoisted_773, [...(_cache[190] || (_cache[190] = [
               _createElementVNode("path", { d: "M6 6l12 12 M18 6L6 18" }, null, -1 /* CACHED */)
@@ -8058,11 +8215,12 @@ return function render(_ctx, _cache) {
           ], 8 /* PROPS */, _hoisted_772),
           _createElementVNode("div", _hoisted_774, [
             _createElementVNode("img", {
+              class: "pkm-dark",
               src: _ctx.V.zoom.img,
               "data-fallback": _ctx.V.zoom.fallback,
               alt: _ctx.V.zoom.name,
               onClick: _ctx.V.zoom.close,
-              style: {"display":"block","max-width":"100%","max-height":"100%","width":"auto","height":"auto","border-radius":"4.8% / 3.4%","background":"#16213A","box-shadow":"0 24px 60px rgba(0, 0, 0, 0.65)","cursor":"zoom-out"}
+              style: {"display":"block","max-width":"100%","max-height":"100%","width":"auto","height":"auto","border-radius":"4.8% / 3.4%","background":"var(--pkm-img-bg)","box-shadow":"0 24px 60px rgba(var(--pkm-shadow-rgb), 0.65)","cursor":"zoom-out"}
             }, null, 8 /* PROPS */, _hoisted_775)
           ]),
           _createElementVNode("span", _hoisted_776, [
@@ -8075,6 +8233,7 @@ return function render(_ctx, _cache) {
     (_ctx.V.ui.isRadar)
       ? (_openBlock(), _createElementBlock("section", _hoisted_780, [
           _cache[199] || (_cache[199] = _createElementVNode("div", {
+            class: "pkm-dark",
             id: "pkm-radar-map",
             "aria-hidden": "true",
             style: {"position":"absolute","inset":"0","background":"radial-gradient(120% 80% at 50% 30%, #0E1A33, #05080F 70%)"}
@@ -8082,10 +8241,11 @@ return function render(_ctx, _cache) {
           _createElementVNode("div", _hoisted_781, [
             _createElementVNode("div", _hoisted_782, [
               _createElementVNode("button", {
+                class: "pkm-dark",
                 type: "button",
                 onClick: _ctx.V.rd.close,
                 "aria-label": "Fermer le radar",
-                style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(255, 255, 255, 0.14)","border-radius":"22px","background":"rgba(8, 13, 26, 0.86)","color":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
                 (_openBlock(), _createElementBlock("svg", _hoisted_784, [...(_cache[191] || (_cache[191] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
@@ -8110,10 +8270,11 @@ return function render(_ctx, _cache) {
               (_ctx.V.rd.canMap)
                 ? (_openBlock(), _createElementBlock("button", {
                     key: 0,
+                    class: "pkm-dark",
                     type: "button",
                     onClick: _ctx.V.rd.toggleList,
                     "aria-pressed": _ctx.A(_ctx.V.rd.listMode),
-                    style: {"flex":"none","height":"44px","padding":"0 14px","border":"1px solid rgba(255, 255, 255, 0.14)","border-radius":"22px","background":"rgba(8, 13, 26, 0.86)","color":"#F3F6FC","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
+                    style: {"flex":"none","height":"44px","padding":"0 14px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
                   }, _toDisplayString(_ctx.V.rd.listLabel), 9 /* TEXT, PROPS */, _hoisted_788))
                 : _createCommentVNode("v-if", true)
             ]),
@@ -8130,12 +8291,13 @@ return function render(_ctx, _cache) {
             ]),
             (_ctx.V.rd.showLegend)
               ? (_openBlock(), _createElementBlock("span", _hoisted_791, [...(_cache[192] || (_cache[192] = [
-                  _createStaticVNode("<span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:#3DDC84;\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:#F5B14C;\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:#9AA8C3;\"></span>Faible</span>", 3)
+                  _createStaticVNode("<span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-green);\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-orange);\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-gray);\"></span>Faible</span>", 3)
                 ]))]))
               : _createCommentVNode("v-if", true)
           ]),
           _createElementVNode("div", {
-            style: _normalizeStyle(`position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: ${_ctx.V.rd.sheetMax}; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; border-top: 1px solid #24345C; background: rgba(11, 17, 32, 0.97); box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.5)`)
+            class: "pkm-dark",
+            style: _normalizeStyle(`position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: ${_ctx.V.rd.sheetMax}; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; border-top: 1px solid var(--pkm-line-3); background: rgba(var(--pkm-app-rgb), 0.97); box-shadow: 0 -18px 40px rgba(var(--pkm-shadow-rgb), 0.5)`)
           }, [
             _createElementVNode("div", _hoisted_792, [
               (_ctx.V.rd.hasStore)
@@ -8143,7 +8305,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       type: "button",
                       onClick: _ctx.V.rd.st.back,
-                      style: {"align-self":"flex-start","height":"36px","padding":"0 12px 0 6px","border":"0","border-radius":"18px","background":"transparent","color":"#B9C5FF","font":"inherit","font-size":"13.5px","font-weight":"600","display":"flex","align-items":"center","gap":"2px","cursor":"pointer"}
+                      style: {"align-self":"flex-start","height":"36px","padding":"0 12px 0 6px","border":"0","border-radius":"18px","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"13.5px","font-weight":"600","display":"flex","align-items":"center","gap":"2px","cursor":"pointer"}
                     }, [
                       (_openBlock(), _createElementBlock("svg", _hoisted_794, [...(_cache[193] || (_cache[193] = [
                         _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
@@ -8169,12 +8331,12 @@ return function render(_ctx, _cache) {
                           }, _toDisplayString(_ctx.V.rd.st.level), 5 /* TEXT, STYLE */)
                         ])
                       ]),
-                      _cache[195] || (_cache[195] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"} }, "Indice de chance estimé : pas un stock réel. Boutique repérée sur OpenStreetMap, ni partenaire PKM ni arrivage annoncé.", -1 /* CACHED */)),
+                      _cache[195] || (_cache[195] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }, "Indice de chance estimé : pas un stock réel. Boutique repérée sur OpenStreetMap, ni partenaire PKM ni arrivage annoncé.", -1 /* CACHED */)),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.st.toggleWhy,
                         "aria-expanded": _ctx.A(_ctx.V.rd.st.why),
-                        style: {"align-self":"flex-start","height":"40px","padding":"0 14px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
+                        style: {"align-self":"flex-start","height":"40px","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
                       }, _toDisplayString(_ctx.V.rd.st.whyLabel), 9 /* TEXT, PROPS */, _hoisted_802),
                       (_ctx.V.rd.st.why)
                         ? (_openBlock(), _createElementBlock("div", _hoisted_803, [
@@ -8197,20 +8359,20 @@ return function render(_ctx, _cache) {
                           href: _ctx.V.rd.st.route,
                           target: "_blank",
                           rel: "noopener",
-                          style: {"height":"46px","border-radius":"999px","background":"#A8B6FF","color":"#0B1120","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
+                          style: {"height":"46px","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
                         }, "Itinéraire", 8 /* PROPS */, _hoisted_807),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: _ctx.V.rd.st.toggleAlert,
                           "aria-pressed": _ctx.A(_ctx.V.rd.st.alertOn),
-                          style: _normalizeStyle(`height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: ${_ctx.V.rd.st.alertBg}; color: ${_ctx.V.rd.st.alertFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
+                          style: _normalizeStyle(`height: 46px; border: 1px solid var(--pkm-line-2); border-radius: 999px; background: ${_ctx.V.rd.st.alertBg}; color: ${_ctx.V.rd.st.alertFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
                         }, _toDisplayString(_ctx.V.rd.st.alertLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_808)
                       ]),
                       _createElementVNode("a", {
                         href: _ctx.V.rd.st.osm,
                         target: "_blank",
                         rel: "noopener",
-                        style: {"align-self":"flex-start","font-size":"12.5px","color":"#B9C5FF"}
+                        style: {"align-self":"flex-start","font-size":"12.5px","color":"var(--pkm-link)"}
                       }, "Voir la fiche OpenStreetMap", 8 /* PROPS */, _hoisted_809)
                     ], 8 /* PROPS */, _hoisted_795)
                   ], 64 /* STABLE_FRAGMENT */))
@@ -8229,7 +8391,7 @@ return function render(_ctx, _cache) {
                           key: 1,
                           type: "button",
                           onClick: _ctx.V.rd.retry,
-                          style: {"height":"46px","border":"1px solid #2A3A5C","border-radius":"999px","background":"transparent","color":"#F3F6FC","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
+                          style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
                         }, "Réessayer", 8 /* PROPS */, _hoisted_814))
                       : _createCommentVNode("v-if", true),
                     _createElementVNode("div", _hoisted_815, [
@@ -8243,7 +8405,7 @@ return function render(_ctx, _cache) {
                         type: "button",
                         onClick: _ctx.V.rd.around,
                         "aria-pressed": _ctx.A(_ctx.V.rd.aroundOn),
-                        style: {"height":"48px","border":"1px solid #1F5A55","border-radius":"999px","background":"rgba(94, 224, 207, 0.1)","color":"#5EE0CF","font":"inherit","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","gap":"6px","cursor":"pointer"}
+                        style: {"height":"48px","border":"1px solid var(--pkm-line-teal)","border-radius":"999px","background":"rgba(var(--pkm-teal-rgb), 0.1)","color":"var(--pkm-teal)","font":"inherit","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","gap":"6px","cursor":"pointer"}
                       }, [
                         (_openBlock(), _createElementBlock("svg", _hoisted_818, [...(_cache[196] || (_cache[196] = [
                           _createElementVNode("circle", {
@@ -8342,8 +8504,9 @@ return function render(_ctx, _cache) {
     (_ctx.V.ui.hasToast)
       ? (_openBlock(), _createElementBlock("div", {
           key: 10,
+          class: "pkm-dark",
           role: "status",
-          style: _normalizeStyle(`position: absolute; z-index: 50; left: 16px; right: 16px; bottom: ${_ctx.V.ui.toastBottom}; display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 18px; border: 1px solid #24345C; background: #16223A; color: #F3F6FC; font-size: 14px; font-weight: 600; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45)`)
+          style: _normalizeStyle(`position: absolute; z-index: 50; left: 16px; right: 16px; bottom: ${_ctx.V.ui.toastBottom}; display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 18px; border: 1px solid var(--pkm-line-3); background: var(--pkm-toast); color: var(--pkm-t1); font-size: 14px; font-weight: 600; box-shadow: 0 14px 30px rgba(var(--pkm-shadow-rgb), 0.45)`)
         }, [
           _createElementVNode("span", _hoisted_838, [
             (_openBlock(), _createElementBlock("svg", _hoisted_839, [...(_cache[200] || (_cache[200] = [

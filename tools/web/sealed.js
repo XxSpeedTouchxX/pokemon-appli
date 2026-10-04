@@ -175,7 +175,7 @@
       return Object.assign(this.look(p), {
         name: p.name, sub: p.sub, border: x.line(i), owned: !!(st && st.qty > 0),
         cote: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : '—'), coteLabel: k !== null ? 'cote PKM' : (typeof p.low === 'number' ? 'demandé' : 'sans prix'),
-        right: p.release ? 'Sortie le ' + this.d2(p.release) : (k !== null ? 'cote PKM' : 'prix à venir'), rightColor: p.release ? '#F5B14C' : '#9AA8C3',
+        right: p.release ? 'Sortie le ' + this.d2(p.release) : (k !== null ? 'cote PKM' : 'prix à venir'), rightColor: p.release ? 'var(--pkm-orange)' : 'var(--pkm-t3)',
         open: () => this.openTcg(p.id)
       });
     };
@@ -191,7 +191,7 @@
         sub: all.length + ' produits · visuels officiels · cote Cardmarket',
         fan: photos.map((p, i) => {
           const l = this.look(p);
-          return { photo: l.hasPhoto ? l.photo : l.logo, bg: l.hasPhoto ? '#FFFFFF' : l.bg, top: ['10px', '4px', '10px'][i], left: ['0px', '16px', '32px'][i], rot: ['-9deg', '0deg', '9deg'][i] };
+          return { photo: l.hasPhoto ? l.photo : l.logo, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg, top: ['10px', '4px', '10px'][i], left: ['0px', '16px', '32px'][i], rot: ['-9deg', '0deg', '9deg'][i] };
         })
       };
     }
@@ -247,7 +247,7 @@
         return Object.assign(l, {
           name: p.name, sub: (TYPE_LABEL[p.code] || 'Produit') + ' · ' + when, noPhoto: !l.hasPhoto, soon: !!p.release, owned: q > 0, qty: '×' + q,
           price: k !== null ? (k >= 100 ? this.eur0(k) : this.eur(k)) : (typeof p.low === 'number' ? '~' + this.eur0(p.low) : 'prix à venir'),
-          priceColor: k !== null ? '#F3F6FC' : '#9AA8C3',
+          priceColor: k !== null ? 'var(--pkm-t1)' : 'var(--pkm-t3)',
           label: p.name + ', ' + when + (k !== null ? ', cote ' + this.eur(k) : '') + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
         });

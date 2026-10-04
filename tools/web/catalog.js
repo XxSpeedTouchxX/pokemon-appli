@@ -204,7 +204,7 @@
       return Object.assign(this.look(p), {
         name: p.name, sub: p.sub, border: x.line(start + i), owned: !!(st && st.qty > 0),
         cote: k !== null ? this.eur(k) : '—', coteLabel: k !== null ? 'cote PKM' : 'sans prix',
-        right: k !== null ? 'cote PKM' : 'sans prix', rightColor: '#9AA8C3',
+        right: k !== null ? 'cote PKM' : 'sans prix', rightColor: 'var(--pkm-t3)',
         open: () => this.openTcg(p.id)
       });
     }));
@@ -237,7 +237,7 @@
         const k = own[e.id] || 0, cards = e.n + (e.n > 1 ? ' cartes' : ' carte'), logo = logoUrl(e.logo), hasLogo = !!logo && !BROKEN.has(logo);
         return {
           name: e.name, sub: (e.date ? this.d3(e.date) + ' · ' : '') + cards, logo: logo, hasLogo: hasLogo, noLogo: !hasLogo,
-          code: e.id.toUpperCase(), owned: k > 0, ownedText: k + ' à toi', border: i === 0 ? 'none' : '1px solid #1E2B45',
+          code: e.id.toUpperCase(), owned: k > 0, ownedText: k + ' à toi', border: i === 0 ? 'none' : '1px solid var(--pkm-line)',
           label: e.name + ', ' + cards + (k ? ', ' + k + ' à toi' : ''), open: () => this.push('set', { setId: e.id, setFilter: 'all' })
         };
       })
@@ -286,7 +286,7 @@
         const k = this.cote(p), q = qty(p);
         return {
           img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: p.numShort, owned: q > 0, qty: '×' + q,
-          cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), coteColor: k === null ? '#7D8BA8' : '#F3F6FC',
+          cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), coteColor: k === null ? 'var(--pkm-t4)' : 'var(--pkm-t1)',
           label: p.name + ', ' + p.numLabel + (k !== null ? ', cote ' + this.eur(k) : ', sans prix') + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
         };
