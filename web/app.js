@@ -7943,7 +7943,7 @@ return function render(_ctx, _cache) {
                 ], 8 /* PROPS */, _hoisted_572))
               : _createCommentVNode("v-if", true),
             _createElementVNode("section", _hoisted_580, [
-              _cache[127] || (_cache[127] = _createElementVNode("div", { style: {"display":"flex","flex-direction":"column","gap":"2px"} }, [
+              _cache[126] || (_cache[126] = _createElementVNode("div", { style: {"display":"flex","flex-direction":"column","gap":"2px"} }, [
                 _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.01em"} }, "Boutiques autour de toi"),
                 _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }, "Vraies boutiques, d’après OpenStreetMap")
               ], -1 /* CACHED */)),
@@ -8015,10 +8015,6 @@ return function render(_ctx, _cache) {
                     ]),
                     _createElementVNode("div", _hoisted_596, [
                       (_openBlock(), _createElementBlock("svg", _hoisted_597, [
-                        _cache[124] || (_cache[124] = _createElementVNode("path", {
-                          d: "M0 -112 L0 -104",
-                          style: {"fill":"none","stroke":"var(--pkm-t4)","stroke-width":"1.5","stroke-linecap":"round"}
-                        }, null, -1 /* CACHED */)),
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.tx.rings || []), (rg, rg_i) => {
                           return (_openBlock(), _createElementBlock(_Fragment, { key: rg_i }, [
                             _createElementVNode("circle", {
@@ -8035,11 +8031,11 @@ return function render(_ctx, _cache) {
                           ], 64 /* STABLE_FRAGMENT */))
                         }), 128 /* KEYED_FRAGMENT */))
                       ])),
-                      _cache[125] || (_cache[125] = _createElementVNode("span", {
+                      _cache[124] || (_cache[124] = _createElementVNode("span", {
                         "aria-hidden": "true",
                         style: {"position":"absolute","left":"50%","top":"4px","transform":"translateX(-50%)","font-size":"10px","font-weight":"800","color":"var(--pkm-t3)"}
                       }, "N", -1 /* CACHED */)),
-                      _cache[126] || (_cache[126] = _createElementVNode("span", {
+                      _cache[125] || (_cache[125] = _createElementVNode("span", {
                         "aria-hidden": "true",
                         style: {"position":"absolute","left":"50%","top":"50%","width":"14px","height":"14px","margin":"-7px 0 0 -7px","border-radius":"7px","background":"var(--pkm-accent)","box-shadow":"0 0 0 3px rgba(var(--pkm-accent-rgb), 0.35)"}
                       }, null, -1 /* CACHED */)),
@@ -8115,7 +8111,7 @@ return function render(_ctx, _cache) {
                   ], 64 /* STABLE_FRAGMENT */))
                 : _createCommentVNode("v-if", true)
             ]),
-            _cache[141] || (_cache[141] = _createElementVNode("section", {
+            _cache[140] || (_cache[140] = _createElementVNode("section", {
               class: "pkm-dark",
               "aria-label": "Comment on estime la chance",
               style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
@@ -8129,7 +8125,7 @@ return function render(_ctx, _cache) {
               "aria-expanded": _ctx.A(_ctx.V.tx.demoOpen),
               style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","min-height":"52px","padding":"8px 14px","border":"1px dashed var(--pkm-line-4)","border-radius":"18px","background":"transparent","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
             }, [
-              _cache[128] || (_cache[128] = _createElementVNode("span", { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"1px"} }, [
+              _cache[127] || (_cache[127] = _createElementVNode("span", { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"1px"} }, [
                 _createElementVNode("span", { style: {"font-size":"14px","font-weight":"700"} }, "Démo · boutiques partenaires fictives"),
                 _createElementVNode("span", { style: {"font-size":"12px","color":"var(--pkm-t3)"} }, "Ce que verrait un collectionneur avec des boutiques partenaires de PKM")
               ], -1 /* CACHED */)),
@@ -8141,7 +8137,7 @@ return function render(_ctx, _cache) {
               onClick: _ctx.V.ter.radar,
               style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line-teal)","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(var(--pkm-teal-rgb), 0.14), rgba(var(--pkm-teal-rgb), 0) 62%), var(--pkm-card-teal)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
             }, [
-              _cache[132] || (_cache[132] = _createElementVNode("span", {
+              _cache[131] || (_cache[131] = _createElementVNode("span", {
                 "aria-hidden": "true",
                 style: {"position":"relative","flex":"none","width":"46px","height":"46px","border-radius":"23px","background":"radial-gradient(circle, rgba(var(--pkm-teal-rgb), 0.22), rgba(var(--pkm-teal-rgb), 0.04) 70%)","box-shadow":"inset 0 0 0 1px rgba(var(--pkm-teal-rgb), 0.45)","overflow":"hidden"}
               }, [
@@ -8153,11 +8149,11 @@ return function render(_ctx, _cache) {
                 _createElementVNode("span", { style: {"position":"absolute","left":"20px","top":"20px","width":"6px","height":"6px","border-radius":"3px","background":"var(--pkm-teal)"} })
               ], -1 /* CACHED */)),
               _createElementVNode("span", _hoisted_617, [
-                _cache[129] || (_cache[129] = _createElementVNode("span", { style: {"font-size":"12px","font-weight":"700","color":"var(--pkm-teal)"} }, "Nouveau · carte de France", -1 /* CACHED */)),
-                _cache[130] || (_cache[130] = _createElementVNode("span", { style: {"font-size":"15px","font-weight":"700"} }, "Radar des boutiques", -1 /* CACHED */)),
+                _cache[128] || (_cache[128] = _createElementVNode("span", { style: {"font-size":"12px","font-weight":"700","color":"var(--pkm-teal)"} }, "Nouveau · carte de France", -1 /* CACHED */)),
+                _cache[129] || (_cache[129] = _createElementVNode("span", { style: {"font-size":"15px","font-weight":"700"} }, "Radar des boutiques", -1 /* CACHED */)),
                 _createElementVNode("span", _hoisted_618, _toDisplayString(_ctx.V.ter.radarSub), 1 /* TEXT */)
               ]),
-              (_openBlock(), _createElementBlock("svg", _hoisted_619, [...(_cache[131] || (_cache[131] = [
+              (_openBlock(), _createElementBlock("svg", _hoisted_619, [...(_cache[130] || (_cache[130] = [
                 _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
               ]))]))
             ], 8 /* PROPS */, _hoisted_616),
@@ -8182,7 +8178,7 @@ return function render(_ctx, _cache) {
                       _createElementVNode("span", _hoisted_625, _toDisplayString(_ctx.V.ter.release.text), 1 /* TEXT */),
                       _createElementVNode("span", _hoisted_626, _toDisplayString(_ctx.V.ter.release.date) + " · " + _toDisplayString(_ctx.V.ter.release.note), 1 /* TEXT */)
                     ]),
-                    (_openBlock(), _createElementBlock("svg", _hoisted_627, [...(_cache[133] || (_cache[133] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_627, [...(_cache[132] || (_cache[132] = [
                       _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
                     ]))]))
                   ], 8 /* PROPS */, _hoisted_620),
@@ -8206,7 +8202,7 @@ return function render(_ctx, _cache) {
                       "aria-label": _ctx.A(_ctx.V.ter.mapLabel),
                       style: {"position":"absolute","left":"0","top":"0","display":"block"}
                     }, [
-                      _cache[134] || (_cache[134] = _createStaticVNode("<path d=\"M0 168 C 60 154, 112 184, 176 172 S 286 146, 358 164 L358 210 L0 210 Z\" style=\"fill:#11294A;stroke:none;\"></path><path d=\"M262 18 h66 a12 12 0 0 1 12 12 v34 a12 12 0 0 1 -12 12 h-66 a12 12 0 0 1 -12 -12 v-34 a12 12 0 0 1 12 -12 z\" style=\"fill:#11291F;stroke:none;\"></path><path d=\"M22 22 h54 a10 10 0 0 1 10 10 v22 a10 10 0 0 1 -10 10 h-54 a10 10 0 0 1 -10 -10 v-22 a10 10 0 0 1 10 -10 z\" style=\"fill:#11291F;stroke:none;\"></path><path d=\"M-10 74 L368 100\" style=\"fill:none;stroke:#1B2944;stroke-width:8;stroke-linecap:round;\"></path><path d=\"M-10 132 L368 124\" style=\"fill:none;stroke:#1B2944;stroke-width:6;stroke-linecap:round;\"></path><path d=\"M110 -10 L148 220\" style=\"fill:none;stroke:#1B2944;stroke-width:8;stroke-linecap:round;\"></path><path d=\"M238 -10 C 226 60, 262 120, 244 220\" style=\"fill:none;stroke:#1B2944;stroke-width:6;stroke-linecap:round;\"></path><path d=\"M30 200 L190 20\" style=\"fill:none;stroke:#172339;stroke-width:4;stroke-linecap:round;\"></path>", 8)),
+                      _cache[133] || (_cache[133] = _createStaticVNode("<path d=\"M0 168 C 60 154, 112 184, 176 172 S 286 146, 358 164 L358 210 L0 210 Z\" style=\"fill:#11294A;stroke:none;\"></path><path d=\"M262 18 h66 a12 12 0 0 1 12 12 v34 a12 12 0 0 1 -12 12 h-66 a12 12 0 0 1 -12 -12 v-34 a12 12 0 0 1 12 -12 z\" style=\"fill:#11291F;stroke:none;\"></path><path d=\"M22 22 h54 a10 10 0 0 1 10 10 v22 a10 10 0 0 1 -10 10 h-54 a10 10 0 0 1 -10 -10 v-22 a10 10 0 0 1 10 -10 z\" style=\"fill:#11291F;stroke:none;\"></path><path d=\"M-10 74 L368 100\" style=\"fill:none;stroke:#1B2944;stroke-width:8;stroke-linecap:round;\"></path><path d=\"M-10 132 L368 124\" style=\"fill:none;stroke:#1B2944;stroke-width:6;stroke-linecap:round;\"></path><path d=\"M110 -10 L148 220\" style=\"fill:none;stroke:#1B2944;stroke-width:8;stroke-linecap:round;\"></path><path d=\"M238 -10 C 226 60, 262 120, 244 220\" style=\"fill:none;stroke:#1B2944;stroke-width:6;stroke-linecap:round;\"></path><path d=\"M30 200 L190 20\" style=\"fill:none;stroke:#172339;stroke-width:4;stroke-linecap:round;\"></path>", 8)),
                       _createElementVNode("ellipse", {
                         cx: "179",
                         cy: "105",
@@ -8214,14 +8210,14 @@ return function render(_ctx, _cache) {
                         ry: _ctx.V.ter.ringRy,
                         style: {"fill":"rgba(168, 182, 255, 0.06)","stroke":"rgba(168, 182, 255, 0.5)","stroke-width":"1.2","stroke-dasharray":"4 4"}
                       }, null, 8 /* PROPS */, _hoisted_632),
-                      _cache[135] || (_cache[135] = _createElementVNode("circle", {
+                      _cache[134] || (_cache[134] = _createElementVNode("circle", {
                         cx: "179",
                         cy: "105",
                         r: "7",
                         class: "pkm-anim",
                         style: {"fill":"rgba(61, 99, 255, 0.45)","transform-box":"fill-box","transform-origin":"center","animation":"pkmPing 2.4s ease-out infinite"}
                       }, null, -1 /* CACHED */)),
-                      _cache[136] || (_cache[136] = _createElementVNode("circle", {
+                      _cache[135] || (_cache[135] = _createElementVNode("circle", {
                         cx: "179",
                         cy: "105",
                         r: "6.5",
@@ -8241,11 +8237,11 @@ return function render(_ctx, _cache) {
                         }, _toDisplayString(pn.text), 5 /* TEXT, STYLE */)
                       ], 12 /* STYLE, PROPS */, _hoisted_633))
                     }), 128 /* KEYED_FRAGMENT */)),
-                    _cache[137] || (_cache[137] = _createStaticVNode("<span class=\"pkm-dark\" aria-hidden=\"true\" style=\"position:absolute;left:10px;bottom:9px;display:flex;align-items:center;gap:10px;padding:4px 9px;border-radius:999px;background:rgba(var(--pkm-ink-rgb), 0.8);font-size:11px;font-weight:600;color:var(--pkm-t2);\"><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-green);\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-orange);\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-gray);\"></span>Faible</span></span><span class=\"pkm-dark\" aria-hidden=\"true\" style=\"position:absolute;right:10px;top:9px;display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:rgba(var(--pkm-ink-rgb), 0.8);font-size:11px;font-weight:600;color:var(--pkm-t2);\"><span style=\"width:8px;height:8px;border-radius:4px;background:#3D63FF;box-shadow:0 0 0 2px #FFFFFF;\"></span>Toi · échelle non linéaire</span>", 2))
+                    _cache[136] || (_cache[136] = _createStaticVNode("<span class=\"pkm-dark\" aria-hidden=\"true\" style=\"position:absolute;left:10px;bottom:9px;display:flex;align-items:center;gap:10px;padding:4px 9px;border-radius:999px;background:rgba(var(--pkm-ink-rgb), 0.8);font-size:11px;font-weight:600;color:var(--pkm-t2);\"><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-green);\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-orange);\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-gray);\"></span>Faible</span></span><span class=\"pkm-dark\" aria-hidden=\"true\" style=\"position:absolute;right:10px;top:9px;display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:rgba(var(--pkm-ink-rgb), 0.8);font-size:11px;font-weight:600;color:var(--pkm-t2);\"><span style=\"width:8px;height:8px;border-radius:4px;background:#3D63FF;box-shadow:0 0 0 2px #FFFFFF;\"></span>Toi · échelle non linéaire</span>", 2))
                   ]),
                   _createElementVNode("div", _hoisted_634, [
                     _createElementVNode("div", _hoisted_635, [
-                      _cache[138] || (_cache[138] = _createElementVNode("span", { style: {"flex":"none","width":"74px","font-size":"12.5px","font-weight":"600","color":"var(--pkm-t3)"} }, "Probabilité", -1 /* CACHED */)),
+                      _cache[137] || (_cache[137] = _createElementVNode("span", { style: {"flex":"none","width":"74px","font-size":"12.5px","font-weight":"600","color":"var(--pkm-t3)"} }, "Probabilité", -1 /* CACHED */)),
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ter.probs || []), (tq, tq_i) => {
                         return (_openBlock(), _createElementBlock("button", {
                           key: tq_i,
@@ -8257,7 +8253,7 @@ return function render(_ctx, _cache) {
                       }), 128 /* KEYED_FRAGMENT */))
                     ]),
                     _createElementVNode("div", _hoisted_637, [
-                      _cache[139] || (_cache[139] = _createElementVNode("span", { style: {"flex":"none","width":"74px","font-size":"12.5px","font-weight":"600","color":"var(--pkm-t3)"} }, "Rayon", -1 /* CACHED */)),
+                      _cache[138] || (_cache[138] = _createElementVNode("span", { style: {"flex":"none","width":"74px","font-size":"12.5px","font-weight":"600","color":"var(--pkm-t3)"} }, "Rayon", -1 /* CACHED */)),
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ter.radii || []), (tr2, tr2_i) => {
                         return (_openBlock(), _createElementBlock("button", {
                           key: tr2_i,
@@ -8323,7 +8319,7 @@ return function render(_ctx, _cache) {
                       ], 12 /* STYLE, PROPS */, _hoisted_642))
                     }), 128 /* KEYED_FRAGMENT */))
                   ]),
-                  _cache[140] || (_cache[140] = _createElementVNode("section", {
+                  _cache[139] || (_cache[139] = _createElementVNode("section", {
                     class: "pkm-dark",
                     "aria-label": "Comment on estime la probabilité",
                     style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
@@ -8365,7 +8361,7 @@ return function render(_ctx, _cache) {
               _createElementVNode("p", _hoisted_665, _toDisplayString(_ctx.V.store.partnerNote), 1 /* TEXT */)
             ]),
             _createElementVNode("section", _hoisted_666, [
-              _cache[142] || (_cache[142] = _createElementVNode("h2", { style: {"margin":"0 0 4px","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Prochains arrivages", -1 /* CACHED */)),
+              _cache[141] || (_cache[141] = _createElementVNode("h2", { style: {"margin":"0 0 4px","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Prochains arrivages", -1 /* CACHED */)),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.store.arrivals || []), (ar, ar_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: ar_i,
@@ -8436,7 +8432,7 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             _createElementVNode("section", _hoisted_678, [
-              _cache[143] || (_cache[143] = _createElementVNode("h2", { style: {"margin":"0 0 4px","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Historique des arrivages", -1 /* CACHED */)),
+              _cache[142] || (_cache[142] = _createElementVNode("h2", { style: {"margin":"0 0 4px","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Historique des arrivages", -1 /* CACHED */)),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.store.history || []), (hs, hs_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: hs_i,
@@ -8460,12 +8456,12 @@ return function render(_ctx, _cache) {
                 style: {"height":"54px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
               }, "Itinéraire", 8 /* PROPS */, _hoisted_683)
             ]),
-            _cache[144] || (_cache[144] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","line-height":"1.5","color":"var(--pkm-t4)"} }, "Probabilité estimée, pas une garantie de stock. Magasins et arrivages de démonstration : noms et données fictifs.", -1 /* CACHED */))
+            _cache[143] || (_cache[143] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","line-height":"1.5","color":"var(--pkm-t4)"} }, "Probabilité estimée, pas une garantie de stock. Magasins et arrivages de démonstration : noms et données fictifs.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isLots)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 16 }, [
-            _cache[147] || (_cache[147] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Un lot, c’est plusieurs articles payés en un seul prix. Ce prix est réparti entre les articles pour calculer leur coût d’achat et ta plus-value.", -1 /* CACHED */)),
+            _cache[146] || (_cache[146] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Un lot, c’est plusieurs articles payés en un seul prix. Ce prix est réparti entre les articles pour calculer leur coût d’achat et ta plus-value.", -1 /* CACHED */)),
             _createElementVNode("section", _hoisted_684, [
               _createElementVNode("div", _hoisted_685, [
                 _createElementVNode("div", _hoisted_686, [
@@ -8478,7 +8474,7 @@ return function render(_ctx, _cache) {
                 ])
               ]),
               _createElementVNode("div", _hoisted_692, [
-                _cache[145] || (_cache[145] = _createElementVNode("span", { style: {"font-size":"13px","color":"var(--pkm-t3)"} }, "Répartir le prix du lot", -1 /* CACHED */)),
+                _cache[144] || (_cache[144] = _createElementVNode("span", { style: {"font-size":"13px","color":"var(--pkm-t3)"} }, "Répartir le prix du lot", -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_693, [
                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.lots.methods || []), (lm, lm_i) => {
                     return (_openBlock(), _createElementBlock("button", {
@@ -8541,7 +8537,7 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             _createElementVNode("section", _hoisted_705, [
-              _cache[146] || (_cache[146] = _createElementVNode("h2", { style: {"margin":"0 0 4px","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Effet sur tes marges", -1 /* CACHED */)),
+              _cache[145] || (_cache[145] = _createElementVNode("h2", { style: {"margin":"0 0 4px","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Effet sur tes marges", -1 /* CACHED */)),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.lots.impacts || []), (im, im_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: im_i,
@@ -8561,7 +8557,7 @@ return function render(_ctx, _cache) {
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isFees)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 17 }, [
-            _cache[151] || (_cache[151] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Appliqués automatiquement aux ventes que tu notes. Une vente déjà enregistrée garde ses frais : tu peux les corriger vente par vente.", -1 /* CACHED */)),
+            _cache[150] || (_cache[150] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Appliqués automatiquement aux ventes que tu notes. Une vente déjà enregistrée garde ses frais : tu peux les corriger vente par vente.", -1 /* CACHED */)),
             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.feesEdit || []), (fe, fe_i) => {
               return (_openBlock(), _createElementBlock("section", {
                 key: fe_i,
@@ -8572,7 +8568,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("h2", _hoisted_710, _toDisplayString(fe.label), 1 /* TEXT */),
                 _createElementVNode("div", _hoisted_711, [
                   _createElementVNode("label", _hoisted_712, [
-                    _cache[148] || (_cache[148] = _createTextVNode("Commission (%)", -1 /* CACHED */)),
+                    _cache[147] || (_cache[147] = _createTextVNode("Commission (%)", -1 /* CACHED */)),
                     _createElementVNode("input", {
                       id: "pkm-champ-4",
                       class: "pkm-dark",
@@ -8584,7 +8580,7 @@ return function render(_ctx, _cache) {
                     }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_713)
                   ]),
                   _createElementVNode("label", _hoisted_714, [
-                    _cache[149] || (_cache[149] = _createTextVNode("Fixe par vente (€)", -1 /* CACHED */)),
+                    _cache[148] || (_cache[148] = _createTextVNode("Fixe par vente (€)", -1 /* CACHED */)),
                     _createElementVNode("input", {
                       id: "pkm-champ-5",
                       class: "pkm-dark",
@@ -8596,7 +8592,7 @@ return function render(_ctx, _cache) {
                     }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_715)
                   ]),
                   _createElementVNode("label", _hoisted_716, [
-                    _cache[150] || (_cache[150] = _createTextVNode("Port à ta charge (€)", -1 /* CACHED */)),
+                    _cache[149] || (_cache[149] = _createTextVNode("Port à ta charge (€)", -1 /* CACHED */)),
                     _createElementVNode("input", {
                       id: "pkm-champ-6",
                       class: "pkm-dark",
@@ -8611,13 +8607,13 @@ return function render(_ctx, _cache) {
                 _createElementVNode("p", _hoisted_718, _toDisplayString(fe.example), 1 /* TEXT */)
               ], 8 /* PROPS */, _hoisted_709))
             }), 128 /* KEYED_FRAGMENT */)),
-            _cache[152] || (_cache[152] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-orange)"} }, "Valeurs d’exemple, à vérifier selon ton statut (particulier ou professionnel) et les conditions de chaque plateforme.", -1 /* CACHED */))
+            _cache[151] || (_cache[151] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-orange)"} }, "Valeurs d’exemple, à vérifier selon ton statut (particulier ou professionnel) et les conditions de chaque plateforme.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isTeam)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 18 }, [
             _createElementVNode("section", _hoisted_719, [
-              _cache[154] || (_cache[154] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Équipe", -1 /* CACHED */)),
+              _cache[153] || (_cache[153] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Équipe", -1 /* CACHED */)),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.team.members || []), (m, m_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: m_i,
@@ -8631,14 +8627,14 @@ return function render(_ctx, _cache) {
                     _createElementVNode("span", _hoisted_722, _toDisplayString(m.role), 1 /* TEXT */)
                   ]),
                   _createElementVNode("span", _hoisted_723, [
-                    _cache[153] || (_cache[153] = _createElementVNode("span", { style: {"font-size":"12px","color":"var(--pkm-t4)"} }, "Apports", -1 /* CACHED */)),
+                    _cache[152] || (_cache[152] = _createElementVNode("span", { style: {"font-size":"12px","color":"var(--pkm-t4)"} }, "Apports", -1 /* CACHED */)),
                     _createElementVNode("span", _hoisted_724, _toDisplayString(m.apport), 1 /* TEXT */)
                   ])
                 ]))
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             _createElementVNode("section", _hoisted_725, [
-              _cache[155] || (_cache[155] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Partage de la marge nette", -1 /* CACHED */)),
+              _cache[154] || (_cache[154] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Partage de la marge nette", -1 /* CACHED */)),
               _createElementVNode("div", _hoisted_726, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.team.rules || []), (ru, ru_i) => {
                   return (_openBlock(), _createElementBlock("button", {
@@ -8666,28 +8662,28 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */)),
               _createElementVNode("p", _hoisted_731, _toDisplayString(_ctx.V.team.total), 1 /* TEXT */)
             ]),
-            _cache[156] || (_cache[156] = _createElementVNode("p", { style: {"margin":"0","font-size":"13px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Chaque ajout et chaque vente indique l’associé qui l’a fait. Les apports sont les achats payés par chacun.", -1 /* CACHED */))
+            _cache[155] || (_cache[155] = _createElementVNode("p", { style: {"margin":"0","font-size":"13px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Chaque ajout et chaque vente indique l’associé qui l’a fait. Les apports sont les achats payés par chacun.", -1 /* CACHED */))
           ], 64 /* STABLE_FRAGMENT */))
         : _createCommentVNode("v-if", true),
       (_ctx.V.ui.isIO)
         ? (_openBlock(), _createElementBlock(_Fragment, { key: 19 }, [
             _createElementVNode("section", _hoisted_732, [
-              _cache[158] || (_cache[158] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Importer", -1 /* CACHED */)),
-              _cache[159] || (_cache[159] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Un fichier CSV : ton tableur actuel, ou l’export d’une autre app de collection.", -1 /* CACHED */)),
+              _cache[157] || (_cache[157] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Importer", -1 /* CACHED */)),
+              _cache[158] || (_cache[158] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Un fichier CSV : ton tableur actuel, ou l’export d’une autre app de collection.", -1 /* CACHED */)),
               _createElementVNode("button", {
                 class: "pkm-dark",
                 type: "button",
                 onClick: _ctx.V.demoImport,
                 style: {"height":"52px","border":"1.5px dashed var(--pkm-line-4)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font":"inherit","font-size":"14.5px","font-weight":"600","cursor":"pointer"}
               }, "Choisir un fichier CSV", 8 /* PROPS */, _hoisted_733),
-              _cache[160] || (_cache[160] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Colonnes reconnues automatiquement", -1 /* CACHED */)),
+              _cache[159] || (_cache[159] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Colonnes reconnues automatiquement", -1 /* CACHED */)),
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.io.mapping || []), (mp, mp_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: mp_i,
                   style: {"display":"flex","align-items":"center","gap":"10px","min-height":"40px","border-top":"1px solid var(--pkm-line)","font-size":"13.5px"}
                 }, [
                   _createElementVNode("span", _hoisted_734, _toDisplayString(mp.from), 1 /* TEXT */),
-                  (_openBlock(), _createElementBlock("svg", _hoisted_735, [...(_cache[157] || (_cache[157] = [
+                  (_openBlock(), _createElementBlock("svg", _hoisted_735, [...(_cache[156] || (_cache[156] = [
                     _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */),
                     _createElementVNode("path", { d: "M13 6l6 6-6 6" }, null, -1 /* CACHED */)
                   ]))])),
@@ -8696,8 +8692,8 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             _createElementVNode("section", _hoisted_737, [
-              _cache[161] || (_cache[161] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Exporter", -1 /* CACHED */)),
-              _cache[162] || (_cache[162] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Toute ta collection et ton historique, sans limite : ajouts, ventes, cotes et frais.", -1 /* CACHED */)),
+              _cache[160] || (_cache[160] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"600"} }, "Exporter", -1 /* CACHED */)),
+              _cache[161] || (_cache[161] = _createElementVNode("p", { style: {"margin":"0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Toute ta collection et ton historique, sans limite : ajouts, ventes, cotes et frais.", -1 /* CACHED */)),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.demoExport,
@@ -8716,7 +8712,7 @@ return function render(_ctx, _cache) {
         "aria-current": _ctx.A(_ctx.V.tab.homeCur),
         style: _normalizeStyle(`height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: ${_ctx.V.tab.homeFg}; cursor: pointer`)
       }, [
-        (_openBlock(), _createElementBlock("svg", _hoisted_742, [...(_cache[163] || (_cache[163] = [
+        (_openBlock(), _createElementBlock("svg", _hoisted_742, [...(_cache[162] || (_cache[162] = [
           _createElementVNode("path", { d: "M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z" }, null, -1 /* CACHED */)
         ]))])),
         _createElementVNode("span", {
@@ -8730,7 +8726,7 @@ return function render(_ctx, _cache) {
         "aria-current": _ctx.A(_ctx.V.tab.collCur),
         style: _normalizeStyle(`height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: ${_ctx.V.tab.collFg}; cursor: pointer`)
       }, [
-        (_openBlock(), _createElementBlock("svg", _hoisted_744, [...(_cache[164] || (_cache[164] = [
+        (_openBlock(), _createElementBlock("svg", _hoisted_744, [...(_cache[163] || (_cache[163] = [
           _createElementVNode("path", { d: "M8.5 4.5h9a1.5 1.5 0 0 1 1.5 1.5v12.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 7 18.5V6a1.5 1.5 0 0 1 1.5-1.5z" }, null, -1 /* CACHED */),
           _createElementVNode("path", { d: "M4.5 7.5v10.5a2 2 0 0 0 2 2" }, null, -1 /* CACHED */)
         ]))])),
@@ -8745,7 +8741,7 @@ return function render(_ctx, _cache) {
         class: "pkm-anim",
         style: {"justify-self":"center","width":"62px","height":"62px","margin-top":"-30px","padding":"0","border":"4px solid var(--pkm-scan-ring)","border-radius":"31px","background":"linear-gradient(160deg, var(--pkm-scan-1), var(--pkm-scan-3) 60%, var(--pkm-scan-2))","color":"var(--pkm-scan-fg)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer","animation":"pkmPulse 2.6s ease-in-out infinite"}
       }, [
-        (_openBlock(), _createElementBlock("svg", _hoisted_746, [...(_cache[165] || (_cache[165] = [
+        (_openBlock(), _createElementBlock("svg", _hoisted_746, [...(_cache[164] || (_cache[164] = [
           _createElementVNode("path", { d: "M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.6-2.2h5.4L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
           _createElementVNode("circle", {
             cx: "12",
@@ -8761,7 +8757,7 @@ return function render(_ctx, _cache) {
         "aria-current": _ctx.A(_ctx.V.tab.mktCur),
         style: _normalizeStyle(`height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: ${_ctx.V.tab.mktFg}; cursor: pointer`)
       }, [
-        (_openBlock(), _createElementBlock("svg", _hoisted_748, [...(_cache[166] || (_cache[166] = [
+        (_openBlock(), _createElementBlock("svg", _hoisted_748, [...(_cache[165] || (_cache[165] = [
           _createElementVNode("path", { d: "M4 19.5h16" }, null, -1 /* CACHED */),
           _createElementVNode("path", { d: "M5 15.5l4.5-4.5 3.5 3 6-6.5" }, null, -1 /* CACHED */),
           _createElementVNode("path", { d: "M15 7.5h4v4" }, null, -1 /* CACHED */)
@@ -8777,7 +8773,7 @@ return function render(_ctx, _cache) {
         "aria-current": _ctx.A(_ctx.V.tab.terCur),
         style: _normalizeStyle(`height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: ${_ctx.V.tab.terFg}; cursor: pointer`)
       }, [
-        (_openBlock(), _createElementBlock("svg", _hoisted_750, [...(_cache[167] || (_cache[167] = [
+        (_openBlock(), _createElementBlock("svg", _hoisted_750, [...(_cache[166] || (_cache[166] = [
           _createElementVNode("path", { d: "M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" }, null, -1 /* CACHED */),
           _createElementVNode("circle", {
             cx: "12",
@@ -8792,7 +8788,7 @@ return function render(_ctx, _cache) {
     ]),
     (_ctx.V.ui.isScan)
       ? (_openBlock(), _createElementBlock("section", _hoisted_751, [
-          _cache[176] || (_cache[176] = _createElementVNode("div", {
+          _cache[175] || (_cache[175] = _createElementVNode("div", {
             "aria-hidden": "true",
             style: {"position":"absolute","inset":"0","background":"repeating-linear-gradient(115deg, rgba(var(--pkm-hl-rgb), 0.025) 0 2px, rgba(var(--pkm-hl-rgb), 0) 2px 9px)"}
           }, null, -1 /* CACHED */)),
@@ -8808,7 +8804,7 @@ return function render(_ctx, _cache) {
               "aria-label": "Fermer le scan",
               style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
             }, [
-              (_openBlock(), _createElementBlock("svg", _hoisted_754, [...(_cache[168] || (_cache[168] = [
+              (_openBlock(), _createElementBlock("svg", _hoisted_754, [...(_cache[167] || (_cache[167] = [
                 _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                 _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
               ]))]))
@@ -8834,7 +8830,7 @@ return function render(_ctx, _cache) {
               "aria-pressed": _ctx.A(_ctx.V.scan.torchOn),
               style: _normalizeStyle(`flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.14); border-radius: 22px; background: ${_ctx.V.scan.torchBg}; color: ${_ctx.V.scan.torchFg}; display: flex; align-items: center; justify-content: center; cursor: pointer`)
             }, [
-              (_openBlock(), _createElementBlock("svg", _hoisted_759, [...(_cache[169] || (_cache[169] = [
+              (_openBlock(), _createElementBlock("svg", _hoisted_759, [...(_cache[168] || (_cache[168] = [
                 _createElementVNode("path", { d: "M13 3L5 13.5h6L10 21l8-10.5h-6z" }, null, -1 /* CACHED */)
               ]))]))
             ], 12 /* STYLE, PROPS */, _hoisted_758)
@@ -8881,7 +8877,7 @@ return function render(_ctx, _cache) {
                         d: _ctx.V.scan.glyph
                       }, null, 8 /* PROPS */, _hoisted_769)
                     ])),
-                    _cache[170] || (_cache[170] = _createElementVNode("span", {
+                    _cache[169] || (_cache[169] = _createElementVNode("span", {
                       "aria-hidden": "true",
                       style: {"position":"absolute","left":"50px","bottom":"14px","width":"100px","height":"26px","border-radius":"3px","background":"repeating-linear-gradient(90deg, #FFFFFF 0 2px, rgba(var(--pkm-hl-rgb), 0) 2px 4px, #FFFFFF 4px 5px, rgba(var(--pkm-hl-rgb), 0) 5px 8px)","opacity":"0.85"}
                     }, null, -1 /* CACHED */))
@@ -8897,10 +8893,10 @@ return function render(_ctx, _cache) {
                     }, null, 8 /* PROPS */, _hoisted_771)
                   ]))
                 : _createCommentVNode("v-if", true),
-              _cache[171] || (_cache[171] = _createStaticVNode("<span aria-hidden=\"true\" style=\"position:absolute;left:0;top:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid var(--pkm-accent);border-top:4px solid var(--pkm-accent);border-radius:14px 0 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;top:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid var(--pkm-accent);border-top:4px solid var(--pkm-accent);border-radius:0 14px 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;left:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid var(--pkm-accent);border-bottom:4px solid var(--pkm-accent);border-radius:0 0 0 14px;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid var(--pkm-accent);border-bottom:4px solid var(--pkm-accent);border-radius:0 0 14px 0;\"></span><span aria-hidden=\"true\" class=\"pkm-anim\" style=\"position:absolute;left:14px;right:14px;top:30px;height:2px;border-radius:1px;background:linear-gradient(90deg, rgba(var(--pkm-accent-rgb), 0), var(--pkm-accent), rgba(var(--pkm-accent-rgb), 0));box-shadow:0 0 14px var(--pkm-accent);animation:pkmScan 2.2s ease-in-out infinite alternate;\"></span>", 5))
+              _cache[170] || (_cache[170] = _createStaticVNode("<span aria-hidden=\"true\" style=\"position:absolute;left:0;top:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid var(--pkm-accent);border-top:4px solid var(--pkm-accent);border-radius:14px 0 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;top:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid var(--pkm-accent);border-top:4px solid var(--pkm-accent);border-radius:0 14px 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;left:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid var(--pkm-accent);border-bottom:4px solid var(--pkm-accent);border-radius:0 0 0 14px;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid var(--pkm-accent);border-bottom:4px solid var(--pkm-accent);border-radius:0 0 14px 0;\"></span><span aria-hidden=\"true\" class=\"pkm-anim\" style=\"position:absolute;left:14px;right:14px;top:30px;height:2px;border-radius:1px;background:linear-gradient(90deg, rgba(var(--pkm-accent-rgb), 0), var(--pkm-accent), rgba(var(--pkm-accent-rgb), 0));box-shadow:0 0 14px var(--pkm-accent);animation:pkmScan 2.2s ease-in-out infinite alternate;\"></span>", 5))
             ]),
             _createElementVNode("span", _hoisted_772, [
-              _cache[172] || (_cache[172] = _createElementVNode("span", { style: {"flex":"none","width":"8px","height":"8px","border-radius":"4px","background":"var(--pkm-green)","box-shadow":"0 0 8px var(--pkm-green)"} }, null, -1 /* CACHED */)),
+              _cache[171] || (_cache[171] = _createElementVNode("span", { style: {"flex":"none","width":"8px","height":"8px","border-radius":"4px","background":"var(--pkm-green)","box-shadow":"0 0 8px var(--pkm-green)"} }, null, -1 /* CACHED */)),
               _createElementVNode("span", _hoisted_773, _toDisplayString(_ctx.V.scan.status), 1 /* TEXT */)
             ]),
             _createElementVNode("span", _hoisted_774, _toDisplayString(_ctx.V.scan.conf), 1 /* TEXT */),
@@ -8920,7 +8916,7 @@ return function render(_ctx, _cache) {
                 "aria-label": "Importer une photo",
                 style: {"justify-self":"start","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.16)","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_780, [...(_cache[173] || (_cache[173] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_780, [...(_cache[172] || (_cache[172] = [
                   _createElementVNode("path", { d: "M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M4 15.5l4.5-4.5 4 4 2.5-2.5 5 5" }, null, -1 /* CACHED */),
                   _createElementVNode("circle", {
@@ -8935,7 +8931,7 @@ return function render(_ctx, _cache) {
                 onClick: _ctx.V.scan.shutter,
                 "aria-label": "Analyser l’article détecté",
                 style: {"width":"80px","height":"80px","padding":"6px","box-sizing":"border-box","border":"4px solid var(--pkm-white)","border-radius":"40px","background":"rgba(var(--pkm-hl-rgb), 0.12)","cursor":"pointer"}
-              }, [...(_cache[174] || (_cache[174] = [
+              }, [...(_cache[173] || (_cache[173] = [
                 _createElementVNode("span", { style: {"display":"block","width":"100%","height":"100%","border-radius":"50%","background":"var(--pkm-photo-mat)"} }, null, -1 /* CACHED */)
               ]))], 8 /* PROPS */, _hoisted_781),
               _createElementVNode("button", {
@@ -8945,7 +8941,7 @@ return function render(_ctx, _cache) {
                 "aria-label": "Ajouter sans scanner",
                 style: {"justify-self":"end","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.16)","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_783, [...(_cache[175] || (_cache[175] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_783, [...(_cache[174] || (_cache[174] = [
                   _createElementVNode("path", { d: "M4 20h4L19 9l-4-4L4 16z" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M13.5 6.5l4 4" }, null, -1 /* CACHED */)
                 ]))]))
@@ -8963,7 +8959,7 @@ return function render(_ctx, _cache) {
             style: {"flex":"1 1 auto","min-height":"44px","padding":"0","border":"0","background":"transparent","cursor":"pointer"}
           }, null, 8 /* PROPS */, _hoisted_785),
           _createElementVNode("section", _hoisted_786, [
-            _cache[186] || (_cache[186] = _createElementVNode("div", {
+            _cache[185] || (_cache[185] = _createElementVNode("div", {
               "aria-hidden": "true",
               style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
@@ -9015,7 +9011,7 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer",
                 style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"22px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_796, [...(_cache[177] || (_cache[177] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_796, [...(_cache[176] || (_cache[176] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
@@ -9023,7 +9019,7 @@ return function render(_ctx, _cache) {
             ]),
             _createElementVNode("section", _hoisted_797, [
               _createElementVNode("span", _hoisted_798, [
-                _cache[178] || (_cache[178] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Cote PKM", -1 /* CACHED */)),
+                _cache[177] || (_cache[177] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Cote PKM", -1 /* CACHED */)),
                 _createElementVNode("span", _hoisted_799, _toDisplayString(_ctx.V.sr.cote), 1 /* TEXT */)
               ]),
               _createElementVNode("span", _hoisted_800, [
@@ -9039,7 +9035,7 @@ return function render(_ctx, _cache) {
               ])
             ]),
             _createElementVNode("div", _hoisted_803, [
-              _cache[179] || (_cache[179] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Langue", -1 /* CACHED */)),
+              _cache[178] || (_cache[178] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Langue", -1 /* CACHED */)),
               _createElementVNode("div", _hoisted_804, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sr.langs || []), (lg, lg_i) => {
                   return (_openBlock(), _createElementBlock("button", {
@@ -9051,7 +9047,7 @@ return function render(_ctx, _cache) {
                   }, _toDisplayString(lg.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_805))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
-              _cache[180] || (_cache[180] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "État", -1 /* CACHED */)),
+              _cache[179] || (_cache[179] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "État", -1 /* CACHED */)),
               _createElementVNode("div", _hoisted_806, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sr.conds || []), (cd, cd_i) => {
                   return (_openBlock(), _createElementBlock("button", {
@@ -9066,7 +9062,7 @@ return function render(_ctx, _cache) {
             ]),
             _createElementVNode("div", _hoisted_808, [
               _createElementVNode("label", _hoisted_809, [
-                _cache[181] || (_cache[181] = _createTextVNode("Prix payé (€) · facultatif", -1 /* CACHED */)),
+                _cache[180] || (_cache[180] = _createTextVNode("Prix payé (€) · facultatif", -1 /* CACHED */)),
                 _createElementVNode("input", {
                   id: "pkm-champ-7",
                   class: "pkm-dark",
@@ -9079,7 +9075,7 @@ return function render(_ctx, _cache) {
                 }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_810)
               ]),
               _createElementVNode("div", _hoisted_811, [
-                _cache[184] || (_cache[184] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
+                _cache[183] || (_cache[183] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_812, [
                   _createElementVNode("button", {
                     type: "button",
@@ -9087,7 +9083,7 @@ return function render(_ctx, _cache) {
                     "aria-label": "Diminuer la quantité",
                     style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_814, [...(_cache[182] || (_cache[182] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_814, [...(_cache[181] || (_cache[181] = [
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
                     ]))]))
                   ], 8 /* PROPS */, _hoisted_813),
@@ -9098,7 +9094,7 @@ return function render(_ctx, _cache) {
                     "aria-label": "Augmenter la quantité",
                     style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_817, [...(_cache[183] || (_cache[183] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_817, [...(_cache[182] || (_cache[182] = [
                       _createElementVNode("path", { d: "M12 5v14" }, null, -1 /* CACHED */),
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
                     ]))]))
@@ -9119,7 +9115,7 @@ return function render(_ctx, _cache) {
                 }, null, 12 /* STYLE, PROPS */, _hoisted_821)
               ])),
               _createElementVNode("span", _hoisted_822, [
-                _cache[185] || (_cache[185] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Ta collection", -1 /* CACHED */)),
+                _cache[184] || (_cache[184] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Ta collection", -1 /* CACHED */)),
                 _createElementVNode("span", _hoisted_823, _toDisplayString(_ctx.V.sr.valueLine), 1 /* TEXT */),
                 _createElementVNode("span", {
                   style: _normalizeStyle(`font-size: 12.5px; font-weight: 700; color: ${_ctx.V.sr.tierColor}`)
@@ -9158,7 +9154,7 @@ return function render(_ctx, _cache) {
             style: {"flex":"1 1 auto","min-height":"44px","padding":"0","border":"0","background":"transparent","cursor":"pointer"}
           }, null, 8 /* PROPS */, _hoisted_829),
           _createElementVNode("section", _hoisted_830, [
-            _cache[195] || (_cache[195] = _createElementVNode("div", {
+            _cache[194] || (_cache[194] = _createElementVNode("div", {
               "aria-hidden": "true",
               style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
@@ -9184,7 +9180,7 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer",
                 style: {"flex":"none","width":"46px","height":"46px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"23px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_836, [...(_cache[187] || (_cache[187] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_836, [...(_cache[186] || (_cache[186] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
@@ -9192,7 +9188,7 @@ return function render(_ctx, _cache) {
             ]),
             _createElementVNode("h2", _hoisted_837, _toDisplayString(_ctx.V.sh.title), 1 /* TEXT */),
             _createElementVNode("fieldset", _hoisted_838, [
-              _cache[188] || (_cache[188] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Article", -1 /* CACHED */)),
+              _cache[187] || (_cache[187] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Article", -1 /* CACHED */)),
               _createElementVNode("div", _hoisted_839, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sh.products || []), (po, po_i) => {
                   return (_openBlock(), _createElementBlock("button", {
@@ -9256,7 +9252,7 @@ return function render(_ctx, _cache) {
                 }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_848)
               ]),
               _createElementVNode("div", _hoisted_849, [
-                _cache[191] || (_cache[191] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
+                _cache[190] || (_cache[190] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_850, [
                   _createElementVNode("button", {
                     type: "button",
@@ -9264,7 +9260,7 @@ return function render(_ctx, _cache) {
                     "aria-label": "Diminuer la quantité",
                     style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_852, [...(_cache[189] || (_cache[189] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_852, [...(_cache[188] || (_cache[188] = [
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
                     ]))]))
                   ], 8 /* PROPS */, _hoisted_851),
@@ -9275,7 +9271,7 @@ return function render(_ctx, _cache) {
                     "aria-label": "Augmenter la quantité",
                     style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_855, [...(_cache[190] || (_cache[190] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_855, [...(_cache[189] || (_cache[189] = [
                       _createElementVNode("path", { d: "M12 5v14" }, null, -1 /* CACHED */),
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
                     ]))]))
@@ -9289,7 +9285,7 @@ return function render(_ctx, _cache) {
             (_ctx.V.sh.isSell)
               ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                   _createElementVNode("fieldset", _hoisted_857, [
-                    _cache[192] || (_cache[192] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Vendu sur", -1 /* CACHED */)),
+                    _cache[191] || (_cache[191] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Vendu sur", -1 /* CACHED */)),
                     _createElementVNode("div", _hoisted_858, [
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sh.platforms || []), (pl, pl_i) => {
                         return (_openBlock(), _createElementBlock("button", {
@@ -9303,7 +9299,7 @@ return function render(_ctx, _cache) {
                     ])
                   ]),
                   _createElementVNode("label", _hoisted_860, [
-                    _cache[193] || (_cache[193] = _createTextVNode("Port et emballage à ta charge (€)", -1 /* CACHED */)),
+                    _cache[192] || (_cache[192] = _createTextVNode("Port et emballage à ta charge (€)", -1 /* CACHED */)),
                     _createElementVNode("input", {
                       id: "pkm-champ-9",
                       class: "pkm-dark",
@@ -9317,7 +9313,7 @@ return function render(_ctx, _cache) {
                   ]),
                   (_ctx.V.ui.adv)
                     ? (_openBlock(), _createElementBlock("label", _hoisted_863, [
-                        _cache[194] || (_cache[194] = _createTextVNode("Commission (€)", -1 /* CACHED */)),
+                        _cache[193] || (_cache[193] = _createTextVNode("Commission (€)", -1 /* CACHED */)),
                         _createElementVNode("input", {
                           id: "pkm-champ-10",
                           class: "pkm-dark",
@@ -9412,7 +9408,7 @@ return function render(_ctx, _cache) {
                       style: _normalizeStyle(`position: absolute; left: ${fc.left}; top: ${fc.top}; width: 104px; height: 121px; border-radius: 9px 9px 0 0; object-fit: cover; object-position: top; transform: rotate(${fc.rot}); box-shadow: 0 16px 30px rgba(var(--pkm-shadow-rgb), 0.5); -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent)`)
                     }, null, 12 /* STYLE, PROPS */, _hoisted_883))
                   }), 128 /* KEYED_FRAGMENT */)),
-                  _cache[196] || (_cache[196] = _createElementVNode("span", {
+                  _cache[195] || (_cache[195] = _createElementVNode("span", {
                     class: "pkm-dark",
                     style: {"position":"absolute","left":"50%","bottom":"8px","margin-left":"-88px","width":"176px","display":"flex","align-items":"center","justify-content":"center","gap":"8px","padding":"9px 0","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.88)","border":"1px solid var(--pkm-line-3)","font-size":"13px","font-weight":"700","color":"var(--pkm-t1)"}
                   }, [
@@ -9420,11 +9416,11 @@ return function render(_ctx, _cache) {
                     _createTextVNode("Cote PKM 99,00 €")
                   ], -1 /* CACHED */))
                 ]),
-                _cache[203] || (_cache[203] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"28px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em","text-align":"center"} }, "La vraie valeur de ta collection Pokémon", -1 /* CACHED */)),
-                _cache[204] || (_cache[204] = _createElementVNode("p", { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"var(--pkm-t2)","text-align":"center"} }, "Scanne tes cartes et ton scellé. PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.", -1 /* CACHED */)),
+                _cache[202] || (_cache[202] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"28px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em","text-align":"center"} }, "La vraie valeur de ta collection Pokémon", -1 /* CACHED */)),
+                _cache[203] || (_cache[203] = _createElementVNode("p", { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"var(--pkm-t2)","text-align":"center"} }, "Scanne tes cartes et ton scellé. PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.", -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_884, [
                   _createElementVNode("div", _hoisted_885, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_886, [...(_cache[197] || (_cache[197] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_886, [...(_cache[196] || (_cache[196] = [
                       _createElementVNode("path", { d: "M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.6-2.2h5.4L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
                       _createElementVNode("circle", {
                         cx: "12",
@@ -9432,21 +9428,21 @@ return function render(_ctx, _cache) {
                         r: "3.4"
                       }, null, -1 /* CACHED */)
                     ]))])),
-                    _cache[198] || (_cache[198] = _createTextVNode("Scan en 2 secondes, cartes et scellé", -1 /* CACHED */))
+                    _cache[197] || (_cache[197] = _createTextVNode("Scan en 2 secondes, cartes et scellé", -1 /* CACHED */))
                   ]),
                   _createElementVNode("div", _hoisted_887, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_888, [...(_cache[199] || (_cache[199] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_888, [...(_cache[198] || (_cache[198] = [
                       _createElementVNode("path", { d: "M4 19.5h16" }, null, -1 /* CACHED */),
                       _createElementVNode("path", { d: "M5 15.5l4.5-4.5 3.5 3 6-6.5" }, null, -1 /* CACHED */),
                       _createElementVNode("path", { d: "M15 7.5h4v4" }, null, -1 /* CACHED */)
                     ]))])),
-                    _cache[200] || (_cache[200] = _createTextVNode("Prix comparés entre plusieurs sites", -1 /* CACHED */))
+                    _cache[199] || (_cache[199] = _createTextVNode("Prix comparés entre plusieurs sites", -1 /* CACHED */))
                   ]),
                   _createElementVNode("div", _hoisted_889, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_890, [...(_cache[201] || (_cache[201] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_890, [...(_cache[200] || (_cache[200] = [
                       _createElementVNode("path", { d: "M12 2l8.66 5v10L12 22l-8.66-5V7z" }, null, -1 /* CACHED */)
                     ]))])),
-                    _cache[202] || (_cache[202] = _createTextVNode("Des paliers selon la valeur de ta collection", -1 /* CACHED */))
+                    _cache[201] || (_cache[201] = _createTextVNode("Des paliers selon la valeur de ta collection", -1 /* CACHED */))
                   ])
                 ]),
                 _createElementVNode("button", {
@@ -9454,13 +9450,13 @@ return function render(_ctx, _cache) {
                   onClick: _ctx.V.ob.next1,
                   style: {"height":"54px","margin-top":"4px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
                 }, "Commencer", 8 /* PROPS */, _hoisted_891),
-                _cache[205] || (_cache[205] = _createElementVNode("p", { style: {"margin":"0","font-size":"11.5px","line-height":"1.5","color":"var(--pkm-t4)","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.", -1 /* CACHED */))
+                _cache[204] || (_cache[204] = _createElementVNode("p", { style: {"margin":"0","font-size":"11.5px","line-height":"1.5","color":"var(--pkm-t4)","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.", -1 /* CACHED */))
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.V.ob.is2)
             ? (_openBlock(), _createElementBlock("div", _hoisted_892, [
-                _cache[208] || (_cache[208] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"26px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em"} }, "Faisons connaissance", -1 /* CACHED */)),
-                _cache[209] || (_cache[209] = _createElementVNode("p", { style: {"margin":"-6px 0 0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "2 questions pour anticiper ton profil. Ensuite, il s’adapte tout seul à ta collection.", -1 /* CACHED */)),
+                _cache[207] || (_cache[207] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"26px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em"} }, "Faisons connaissance", -1 /* CACHED */)),
+                _cache[208] || (_cache[208] = _createElementVNode("p", { style: {"margin":"-6px 0 0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "2 questions pour anticiper ton profil. Ensuite, il s’adapte tout seul à ta collection.", -1 /* CACHED */)),
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.questions || []), (qq, qq_i) => {
                   return (_openBlock(), _createElementBlock("fieldset", {
                     key: qq_i,
@@ -9500,7 +9496,7 @@ return function render(_ctx, _cache) {
                       ], 4 /* STYLE */))
                     ]),
                     _createElementVNode("span", _hoisted_899, [
-                      _cache[206] || (_cache[206] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Profil anticipé", -1 /* CACHED */)),
+                      _cache[205] || (_cache[205] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Profil anticipé", -1 /* CACHED */)),
                       _createElementVNode("span", {
                         style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; color: ${_ctx.V.ob.predColor}`)
                       }, _toDisplayString(_ctx.V.ob.predName), 5 /* TEXT, STYLE */)
@@ -9523,7 +9519,7 @@ return function render(_ctx, _cache) {
                     "aria-label": "Étape précédente",
                     style: {"width":"54px","height":"54px","padding":"0","border":"1px solid var(--pkm-line-2)","border-radius":"27px","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_903, [...(_cache[207] || (_cache[207] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_903, [...(_cache[206] || (_cache[206] = [
                       _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
                     ]))]))
                   ], 8 /* PROPS */, _hoisted_902),
@@ -9553,14 +9549,14 @@ return function render(_ctx, _cache) {
                   ], 4 /* STYLE */))
                 ], 4 /* STYLE */),
                 _createElementVNode("div", _hoisted_907, [
-                  _cache[210] || (_cache[210] = _createElementVNode("span", { style: {"font-size":"14px","color":"var(--pkm-t3)"} }, "Tu es plutôt", -1 /* CACHED */)),
+                  _cache[209] || (_cache[209] = _createElementVNode("span", { style: {"font-size":"14px","color":"var(--pkm-t3)"} }, "Tu es plutôt", -1 /* CACHED */)),
                   _createElementVNode("h1", {
                     style: _normalizeStyle(`margin: 0; font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em; color: ${_ctx.V.ob.predColor}`)
                   }, _toDisplayString(_ctx.V.ob.predName), 5 /* TEXT, STYLE */)
                 ]),
                 _createElementVNode("p", _hoisted_908, _toDisplayString(_ctx.V.ob.predDesc), 1 /* TEXT */),
                 _createElementVNode("section", _hoisted_909, [
-                  _cache[212] || (_cache[212] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-t3)"} }, "Ce qu’on a préparé pour toi", -1 /* CACHED */)),
+                  _cache[211] || (_cache[211] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-t3)"} }, "Ce qu’on a préparé pour toi", -1 /* CACHED */)),
                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.adapts || []), (oa, oa_i) => {
                     return (_openBlock(), _createElementBlock("div", {
                       key: oa_i,
@@ -9572,14 +9568,14 @@ return function render(_ctx, _cache) {
                         viewBox: "0 0 24 24",
                         "aria-hidden": "true",
                         style: _normalizeStyle(`flex: none; margin-top: 1px; fill: none; stroke: ${oa.color}; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round`)
-                      }, [...(_cache[211] || (_cache[211] = [
+                      }, [...(_cache[210] || (_cache[210] = [
                         _createElementVNode("path", { d: "M5 12.5l4.5 4.5L19 7.5" }, null, -1 /* CACHED */)
                       ]))], 4 /* STYLE */)),
                       _createElementVNode("span", null, _toDisplayString(oa.text), 1 /* TEXT */)
                     ]))
                   }), 128 /* KEYED_FRAGMENT */))
                 ]),
-                _cache[213] || (_cache[213] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)","text-align":"center"} }, "Ensuite, ton profil s’adapte tout seul : il suit le nombre de tes cartes ultra rares et la valeur de ta collection.", -1 /* CACHED */)),
+                _cache[212] || (_cache[212] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)","text-align":"center"} }, "Ensuite, ton profil s’adapte tout seul : il suit le nombre de tes cartes ultra rares et la valeur de ta collection.", -1 /* CACHED */)),
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.ob.toScan,
@@ -9618,7 +9614,7 @@ return function render(_ctx, _cache) {
             "aria-label": "Fermer",
             style: {"position":"absolute","top":"14px","right":"14px","width":"44px","height":"44px","padding":"0","border":"1px solid var(--pkm-line-2)","border-radius":"22px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
           }, [
-            (_openBlock(), _createElementBlock("svg", _hoisted_916, [...(_cache[214] || (_cache[214] = [
+            (_openBlock(), _createElementBlock("svg", _hoisted_916, [...(_cache[213] || (_cache[213] = [
               _createElementVNode("path", { d: "M6 6l12 12 M18 6L6 18" }, null, -1 /* CACHED */)
             ]))]))
           ], 8 /* PROPS */, _hoisted_915),
@@ -9641,7 +9637,7 @@ return function render(_ctx, _cache) {
       : _createCommentVNode("v-if", true),
     (_ctx.V.ui.isRadar)
       ? (_openBlock(), _createElementBlock("section", _hoisted_923, [
-          _cache[222] || (_cache[222] = _createElementVNode("div", {
+          _cache[221] || (_cache[221] = _createElementVNode("div", {
             class: "pkm-dark",
             id: "pkm-radar-map",
             "aria-hidden": "true",
@@ -9656,7 +9652,7 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer le radar",
                 style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_927, [...(_cache[215] || (_cache[215] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_927, [...(_cache[214] || (_cache[214] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
@@ -9699,7 +9695,7 @@ return function render(_ctx, _cache) {
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             (_ctx.V.rd.showLegend)
-              ? (_openBlock(), _createElementBlock("span", _hoisted_934, [...(_cache[216] || (_cache[216] = [
+              ? (_openBlock(), _createElementBlock("span", _hoisted_934, [...(_cache[215] || (_cache[215] = [
                   _createStaticVNode("<span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-green);\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-orange);\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-gray);\"></span>Faible</span>", 3)
                 ]))]))
               : _createCommentVNode("v-if", true)
@@ -9716,10 +9712,10 @@ return function render(_ctx, _cache) {
                       onClick: _ctx.V.rd.st.back,
                       style: {"align-self":"flex-start","height":"36px","padding":"0 12px 0 6px","border":"0","border-radius":"18px","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"13.5px","font-weight":"600","display":"flex","align-items":"center","gap":"2px","cursor":"pointer"}
                     }, [
-                      (_openBlock(), _createElementBlock("svg", _hoisted_937, [...(_cache[217] || (_cache[217] = [
+                      (_openBlock(), _createElementBlock("svg", _hoisted_937, [...(_cache[216] || (_cache[216] = [
                         _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
                       ]))])),
-                      _cache[218] || (_cache[218] = _createTextVNode("Résultats", -1 /* CACHED */))
+                      _cache[217] || (_cache[217] = _createTextVNode("Résultats", -1 /* CACHED */))
                     ], 8 /* PROPS */, _hoisted_936),
                     _createElementVNode("section", {
                       "aria-label": _ctx.A(_ctx.V.rd.st.name),
@@ -9853,7 +9849,7 @@ return function render(_ctx, _cache) {
                         "aria-pressed": _ctx.A(_ctx.V.rd.aroundOn),
                         style: {"height":"48px","border":"1px solid var(--pkm-line-teal)","border-radius":"999px","background":"rgba(var(--pkm-teal-rgb), 0.1)","color":"var(--pkm-teal)","font":"inherit","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","gap":"6px","cursor":"pointer"}
                       }, [
-                        (_openBlock(), _createElementBlock("svg", _hoisted_969, [...(_cache[219] || (_cache[219] = [
+                        (_openBlock(), _createElementBlock("svg", _hoisted_969, [...(_cache[218] || (_cache[218] = [
                           _createElementVNode("circle", {
                             cx: "12",
                             cy: "12",
@@ -9866,7 +9862,7 @@ return function render(_ctx, _cache) {
                             r: "7"
                           }, null, -1 /* CACHED */)
                         ]))])),
-                        _cache[220] || (_cache[220] = _createTextVNode("Autour de moi", -1 /* CACHED */))
+                        _cache[219] || (_cache[219] = _createTextVNode("Autour de moi", -1 /* CACHED */))
                       ], 8 /* PROPS */, _hoisted_968)
                     ]),
                     (_ctx.V.rd.hasRadii)
@@ -9932,7 +9928,7 @@ return function render(_ctx, _cache) {
                               }, [
                                 _createElementVNode("span", _hoisted_985, _toDisplayString(rg.name), 1 /* TEXT */),
                                 _createElementVNode("span", _hoisted_986, _toDisplayString(rg.count), 1 /* TEXT */),
-                                (_openBlock(), _createElementBlock("svg", _hoisted_987, [...(_cache[221] || (_cache[221] = [
+                                (_openBlock(), _createElementBlock("svg", _hoisted_987, [...(_cache[220] || (_cache[220] = [
                                   _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
                                 ]))]))
                               ], 12 /* STYLE, PROPS */, _hoisted_984))
@@ -9955,7 +9951,7 @@ return function render(_ctx, _cache) {
           style: _normalizeStyle(`position: absolute; z-index: 50; left: 16px; right: 16px; bottom: ${_ctx.V.ui.toastBottom}; display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 18px; border: 1px solid var(--pkm-line-3); background: var(--pkm-toast); color: var(--pkm-t1); font-size: 14px; font-weight: 600; box-shadow: 0 14px 30px rgba(var(--pkm-shadow-rgb), 0.45)`)
         }, [
           _createElementVNode("span", _hoisted_989, [
-            (_openBlock(), _createElementBlock("svg", _hoisted_990, [...(_cache[223] || (_cache[223] = [
+            (_openBlock(), _createElementBlock("svg", _hoisted_990, [...(_cache[222] || (_cache[222] = [
               _createElementVNode("path", { d: "M5 12.5l4.5 4.5L19 7.5" }, null, -1 /* CACHED */)
             ]))]))
           ]),
