@@ -5,12 +5,17 @@
   // Ce module partage la portée des autres : ses noms commencent par HOME_ ou home.
   const HOME_PAGE = 20, HOME_HITS = 8;
   const HOME_SORTS = [['recent', 'Récents'], ['value', 'Valeur']];
+  const HOME_BUDDY = 25; // Pikachu
+  const HOME_NAMES = {};
+  HOME_KANTO.forEach(([n, nom]) => { HOME_NAMES[n] = nom; });
   const homeBaseSt = proto.st;
   proto.st = function () {
     const d = homeBaseSt.call(this);
     if (typeof d.hq !== 'string') d.hq = '';
     if (d.hsort !== 'value') d.hsort = 'recent';
     if (!(d.hmore >= 1)) d.hmore = 1;
+    if (!HOME_KANTO.some(([n]) => n === d.buddy)) d.buddy = HOME_BUDDY;
+    if (typeof d.hbq !== 'string') d.hbq = '';
     return d;
   };
 
@@ -90,5 +95,37 @@
     r.hs = this.homeSearch(x);
     r.hl = this.homeList(x);
     r.hv = this.homeTrend(x, r.valueBig);
+    return r;
+  };
+
+  // ——— Compagnon : un des 151 Pokémon de Kanto, animé à côté de la valeur ; choix enregistré sur l'appareil ———
+  // Sprites de Pokémon Noir et Blanc (tools/sprites/fetch_sprites.py) : animé (GIF), image fixe si l'utilisateur
+  // limite les animations, et dans le panneau de choix (plus léger).
+  const homeStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+  const homeSprite = (n, still) => 'img/pokemon/' + n + (still ? '.png' : '.gif');
+  const HOME_CREDIT = 'Sprites de Pokémon Noir et Blanc © The Pokémon Company, via PokeAPI. Dropicards est une application indépendante, non affiliée.';
+  proto.homeBuddy = function (s) {
+    const n = s.buddy, name = HOME_NAMES[n], still = homeStill();
+    const r = {
+      // Image fixe : cadre de 96 px presque vide, agrandie pour avoir la taille du sprite animé.
+      src: homeSprite(n, still), scale: still ? 'scale(1.5)' : 'none', name: name, aria: 'Compagnon : ' + name + '. Changer de compagnon',
+      open: () => this.setState({ buddyPick: true, hbq: '' }), close: () => this.setState({ buddyPick: false }),
+      picking: !!s.buddyPick, q: s.hbq, onQ: e => this.setState({ hbq: e.target.value }), list: [], count: '', credit: HOME_CREDIT
+    };
+    if (!r.picking) return r;
+    const q = fold(String(s.hbq || '').trim());
+    const list = HOME_KANTO.filter(([k, nom]) => !q || fold(nom).indexOf(q) >= 0 || String(k) === q.replace(/^0+/, ''));
+    r.count = list.length ? list.length + (list.length > 1 ? ' Pokémon' : ' Pokémon') + ' · n° 1 à 151 (Kanto)' : 'Aucun Pokémon ne correspond.';
+    r.list = list.map(([k, nom]) => Object.assign({
+      name: nom, src: homeSprite(k, true), on: k === n, aria: nom + ', n° ' + k + (k === n ? ' (ton compagnon)' : ''),
+      pick: () => { this.setState({ buddy: k, buddyPick: false, toast: nom + ' t’accompagne' }); this.flash(); }
+    }, this.chip(k === n)));
+    return r;
+  };
+  const HOME_NO_BUDDY = { picking: false, list: [] };
+  const homeBaseRender = proto.renderVals;
+  proto.renderVals = function () {
+    const r = homeBaseRender.call(this), s = this.st();
+    r.hb = r.ui.isHome || s.buddyPick ? this.homeBuddy(s) : HOME_NO_BUDDY;
     return r;
   };

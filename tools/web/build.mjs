@@ -112,6 +112,10 @@ patch('<section aria-label="Visuel" style="flex: none; position: relative; heigh
 patch('left: -40px; top: -40px; width: 438px; height: 372px;', 'left: -40px; top: -40px; width: 438px; height: 410px;');
 afterSection('Visuel', FRAG['item-note']);
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
+// Accueil : choix du compagnon (tools/web/home.js), au premier plan comme le zoom.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['buddy-picker'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Réglages, « À propos » : crédit des sprites des compagnons.
+patch('sont des marques de leurs propriétaires respectifs.</p>', 'sont des marques de leurs propriétaires respectifs. Compagnons de l’accueil : sprites de Pokémon Noir et Blanc (© The Pokémon Company), via PokeAPI.</p>');
 // Radar : écran plein écran (carte de France des boutiques réelles), ouvert depuis un bandeau de Territoire.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.radar + '\n<sc-if value="{{ ui.hasToast }}"');
 // Territoire : vraies boutiques autour de toi (tools/web/territory.js), puis le Radar ; les magasins partenaires
@@ -379,6 +383,10 @@ const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.met
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
 const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js');
+// Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto (tools/sprites/kanto.json).
+const kanto = JSON.parse(readFileSync(ROOT + 'tools/sprites/kanto.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
+if (kanto.length !== 151) throw new Error('Compagnons : ' + kanto.length + ' au lieu de 151');
+const kantoJs = '  const HOME_KANTO = ' + JSON.stringify(kanto) + ';\n';
 if (rebranded !== REBRANDED) throw new Error('Libellés « PKM » renommés : ' + rebranded + ' au lieu de ' + REBRANDED);
 
 const img = Object.fromEntries([
@@ -413,7 +421,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${homeJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${kantoJs}${homeJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -527,6 +535,10 @@ input, button { -webkit-tap-highlight-color: transparent; }
 /* Recherche de l'accueil : sa propre croix (44 px), pas celle du navigateur. */
 input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button { display: none; }
 @keyframes pkmSpin { to { transform: rotate(360deg); } }
+/* Compagnon de l'accueil : léger flottement, arrêté si l'utilisateur limite les animations. */
+@keyframes pkmFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.pkm-buddy { animation: pkmFloat 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .pkm-buddy { animation: none; } }
 ${cssVars()}
 ${v6Css()}
 ${keyframes}`;
