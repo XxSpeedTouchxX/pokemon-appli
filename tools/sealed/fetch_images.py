@@ -4,9 +4,8 @@ fetch_images.py : télécharge une seule fois le visuel officiel de chaque produ
 (galerie Pokémon France) et l'enregistre en WebP dans web/img/products/<id>.webp. Lancé par le workflow
 « Catalogue scellé » quand la liste des produits change.
 
-Ordre de préférence :
-  1. la photo détourée du produit (dossier « inline » de la fiche : 01-fr.png, sinon 01.png) ;
-  2. la vignette de la galerie (format 16:9).
+Visuel retenu : la vignette de la galerie (16:9), qui montre toujours la boîte. Les images « inline » des
+fiches montrent souvent le contenu (cartes promo, dés…) plutôt que le produit : elles ne sont pas utilisées.
 Les visuels déjà présents ne sont pas retéléchargés. Une requête toutes les deux secondes.
 """
 import io
@@ -28,10 +27,8 @@ PAUSE = 2
 
 
 def candidates(tile):
-    """Photo détourée d'abord (même dossier que la vignette), puis la vignette elle-même."""
-    folder = tile.rsplit("/", 1)[0]
-    fr = tile.endswith("-fr.png")
-    return [folder + "/inline/01-fr.png"] * fr + [folder + "/inline/01.png", tile]
+    """La vignette de la galerie (la boîte du produit)."""
+    return [tile]
 
 
 def download(url):
@@ -75,8 +72,7 @@ def main():
             if not data:
                 continue
             w, h = to_webp(data, path)
-            kind = "photo détourée" if "/inline/" in url else "vignette"
-            print(f"  {p['id']} : {kind} {w} × {h}, {path.stat().st_size // 1024} Ko")
+            print(f"  {p['id']} : vignette {w} × {h}, {path.stat().st_size // 1024} Ko")
             done += 1
             break
         else:
