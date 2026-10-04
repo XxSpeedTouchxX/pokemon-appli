@@ -17,6 +17,10 @@ Données de l'écran Radar :
 - **Rattachement :** chaque boutique est rattachée à son département, d'après les contours, sinon d'après son code postal, sinon d'après le département le plus proche (moins de 3 km).
 - **Doublons :** un même nom à moins de 100 m (le point et le bâtiment d'un même magasin) n'est gardé qu'une fois.
 - **Prudence :** si la nouvelle liste compte moins de 80 % des boutiques de la précédente, elle est refusée (réponse Overpass incomplète).
+- **Requêtes :** la France est découpée en 6 tuiles. Une seule requête pour tout le pays est refusée quand les serveurs sont chargés (« 504 Gateway Timeout »).
+  - Pour chaque tuile, trois serveurs Overpass sont essayés tour à tour, deux fois, en commençant par le dernier qui a répondu.
+  - Une réponse interrompue côté serveur est refusée, et la tuile redemandée.
+  - Si une tuile reste sans réponse, ou au bout de 50 min (le job est coupé à 60 min), le script s'arrête avec un message : la liste n'est pas modifiée.
 - **Sortie :** `web/data/stores.json` (1 Mo au plus, sinon la liste n'est pas remplacée), une boutique par ligne :
   - identifiant OpenStreetMap ;
   - nom, type, latitude, longitude ;

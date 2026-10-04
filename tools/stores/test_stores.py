@@ -115,23 +115,72 @@ class Contact(unittest.TestCase):
         self.assertLess(len(render([row] * 4500).encode("utf-8")), MAX_BYTES)
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class Overpass(unittest.TestCase):
+    def test_tiles_cover_france(self):
+        boxes = [[float(v) for v in b.split(",")] for b in sync_stores.TILES]
+        self.assertEqual(len(boxes), 6)
+        self.assertEqual((min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)),
+                         (41.3, -5.3, 51.2, 9.7))
+        self.assertIn("(area.fr)(" + sync_stores.TILES[2] + ")", sync_stores.query(sync_stores.TILES[2]))
+
     def test_next_server_after_disconnect(self):
-        # Le premier serveur coupe la connexion sans répondre : le suivant est essayé.
-        answer = io.BytesIO(json.dumps({"elements": [{"type": "node", "id": 1}]}).encode())
+        # Le premier serveur coupe la connexion sans répondre : le suivant est essayé, puis gardé pour les tuiles
+        # suivantes. Un élément présent dans toutes les tuiles n'est gardé qu'une fois.
         calls = []
 
         def fake_urlopen(req, timeout):
             calls.append(req.full_url)
             if len(calls) == 1:
                 raise http.client.RemoteDisconnected("Remote end closed connection without response")
+            answer = io.BytesIO(json.dumps({"elements": [{"type": "way", "id": 1}, {"type": "node", "id": len(calls)}]}).encode())
             return mock.MagicMock(__enter__=lambda s: answer, __exit__=lambda *a: False)
 
         with mock.patch.object(sync_stores, "urlopen", fake_urlopen), mock.patch.object(sync_stores.time, "sleep"):
             doc = sync_stores.overpass()
-        self.assertEqual(len(doc["elements"]), 1)
-        self.assertEqual(calls, sync_stores.ENDPOINTS[:2])
+        tiles = len(sync_stores.TILES)
+        self.assertEqual(len(doc["elements"]), 1 + tiles)
+        self.assertEqual(calls, sync_stores.ENDPOINTS[:2] + [sync_stores.ENDPOINTS[1]] * (tiles - 1))
+
+    def test_partial_answer_retried(self):
+        # Requête interrompue côté serveur (« remark ») : réponse incomplète, le serveur suivant est essayé.
+        calls = []
+
+        def fake_urlopen(req, timeout):
+            calls.append(req.full_url)
+            body = {"elements": [{"type": "node", "id": 1}]}
+            if len(calls) == 1:
+                body["remark"] = "runtime error: Query timed out"
+            answer = io.BytesIO(json.dumps(body).encode())
+            return mock.MagicMock(__enter__=lambda s: answer, __exit__=lambda *a: False)
+
+        with mock.patch.object(sync_stores, "urlopen", fake_urlopen), mock.patch.object(sync_stores.time, "sleep"):
+            sync_stores.overpass()
+        self.assertEqual(calls[:2], sync_stores.ENDPOINTS[:2])
+
+    def test_deadline(self):
+        # Serveurs muets : on abandonne avant l'échéance (le job GitHub est coupé à 60 min), avec un message.
+        clock = [0.0]
+        timeouts = []
+
+        def fake_urlopen(req, timeout):
+            timeouts.append(timeout)
+            clock[0] += timeout
+            raise TimeoutError("The read operation timed out")
+
+        def fake_sleep(s):
+            clock[0] += s
+
+        with mock.patch.object(sync_stores, "urlopen", fake_urlopen), \
+                mock.patch.object(sync_stores.time, "sleep", fake_sleep), \
+                mock.patch.object(sync_stores.time, "monotonic", lambda: clock[0]):
+            with self.assertRaises(SystemExit) as e:
+                sync_stores.overpass(deadline=1000)
+        self.assertIn("tuile 1/6 sans réponse", str(e.exception.code))
+        self.assertLessEqual(clock[0], 1000)
+        self.assertEqual(timeouts, [360, 360, 220])
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -35,10 +35,15 @@ DEPTS = ROOT / "web" / "data" / "geo" / "departements.json"
 UA = "PKM-App/1.0 (+https://github.com/XxSpeedTouchxX/pokemon-appli)"
 ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter",
              "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]
-BBOX = "41.3,-5.3,51.2,9.7"  # France métropolitaine et Corse
+# France métropolitaine et Corse (41.3,-5.3,51.2,9.7) en 6 tuiles : des requêtes courtes passent mieux quand les
+# serveurs Overpass sont chargés (une requête pour toute la France y finit en « 504 Gateway Timeout »).
+LATS, LONS = (41.3, 44.6, 47.9, 51.2), (-5.3, 2.2, 9.7)
+TILES = [f"{s},{w},{n},{e}" for s, n in zip(LATS, LATS[1:]) for w, e in zip(LONS, LONS[1:])]
+TILE_TIMEOUT = 300  # secondes, côté serveur, par tuile
 FIELDS = ["id", "nom", "type", "lat", "lon", "dept", "ville", "enseigne", "cartes", "site", "tel", "horaires", "adresse"]
 CONTACT = slice(9, 13)  # site, tel, horaires, adresse
 MAX_BYTES = 1_000_000
+DEADLINE = 50 * 60  # le job GitHub Actions est coupé à 60 min : on abandonne avant, avec un message clair
 
 # brand:wikidata → (type de boutique, nom de l'enseigne)
 BRANDS = {
@@ -57,34 +62,54 @@ EXCLUDED = r"warhammer|games workshop|\blego\b|playmobil|disney store|build.a.be
 TCG_HINT = r"pok[ée]mon|\btcg\b|trading card|cartes? [àa] collectionner|jeux? de cartes|magic the gathering|\bmtg\b|yu.?gi.?oh|lorcana"
 
 
-def query():
+def query(bbox):
     sel = "|".join(SHOPS)
     brands = "|".join(BRANDS)
-    return f"""[out:json][timeout:600];
+    return f"""[out:json][timeout:{TILE_TIMEOUT}];
 area["ISO3166-1"="FR"][admin_level=2]->.fr;
 (
-  nwr["shop"~"^({sel})$"](area.fr)({BBOX});
-  nwr["shop"]["brand:wikidata"~"^({brands})$"](area.fr)({BBOX});
+  nwr["shop"~"^({sel})$"](area.fr)({bbox});
+  nwr["shop"]["brand:wikidata"~"^({brands})$"](area.fr)({bbox});
 );
 out center tags qt;"""
 
 
-def overpass():
-    data = urlencode({"data": query()}).encode()
+def fetch(q, end, first=0):
+    """(réponse, n° du serveur) : chaque serveur tour à tour, en commençant par `first`, deux tours, avant `end`."""
+    data = urlencode({"data": q}).encode()
     for attempt in range(2):
-        for url in ENDPOINTS:
+        for i in [(first + k) % len(ENDPOINTS) for k in range(len(ENDPOINTS))]:
+            left = end - time.monotonic()
+            if left < 60:
+                return None, first
             try:
-                req = Request(url, data=data, headers={"User-Agent": UA, "Accept": "application/json"})
-                with urlopen(req, timeout=900) as resp:
+                req = Request(ENDPOINTS[i], data=data, headers={"User-Agent": UA, "Accept": "application/json"})
+                with urlopen(req, timeout=min(TILE_TIMEOUT + 60, left)) as resp:
                     doc = json.loads(resp.read().decode("utf-8"))
-                if doc.get("remark"):
+                if doc.get("remark"):  # requête interrompue côté serveur : réponse incomplète
                     raise ValueError(doc["remark"])
-                print(f"{url} : {len(doc.get('elements', []))} éléments")
-                return doc
+                return doc, i
             except (OSError, http.client.HTTPException, ValueError) as e:  # dont HTTPError, URLError, coupure de connexion
-                print(f"{url} : {type(e).__name__} {e}")
-                time.sleep(30 * (attempt + 1))
-    sys.exit("Overpass injoignable : stores.json n'est pas modifié.")
+                print(f"{ENDPOINTS[i]} : {type(e).__name__} {e}", flush=True)
+                time.sleep(max(0, min(30 * (attempt + 1), end - time.monotonic())))
+    return None, first
+
+
+def overpass(deadline=DEADLINE):
+    """Toutes les tuiles, sans doublon (un bâtiment à cheval sur deux tuiles revient deux fois)."""
+    end = time.monotonic() + deadline
+    found, good = {}, 0
+    for n, bbox in enumerate(TILES, 1):
+        if n > 1:
+            time.sleep(10)  # politesse envers les serveurs publics
+        doc, good = fetch(query(bbox), end, good)
+        if doc is None:
+            sys.exit(f"Overpass : tuile {n}/{len(TILES)} sans réponse (serveurs saturés, ou {deadline // 60} min écoulées) : "
+                     "stores.json n'est pas modifié.")
+        elements = doc.get("elements", [])
+        found.update(((e.get("type"), e.get("id")), e) for e in elements)
+        print(f"Tuile {n}/{len(TILES)} : {len(elements)} éléments ({ENDPOINTS[good]})", flush=True)
+    return {"elements": list(found.values())}
 
 
 def fold(t):
