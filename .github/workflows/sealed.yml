@@ -1,0 +1,29 @@
+# Catalogue scellé : produits officiels Pokémon France (galerie des produits) et prix Cardmarket.
+# Étape 1 (en cours) : reconnaissance des sources, sans rien écrire.
+name: Catalogue scellé
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/sealed.yml
+      - tools/sealed/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sealed-catalog
+  cancel-in-progress: false
+
+jobs:
+  recon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - name: Reconnaissance des sources
+        run: python3 tools/sealed/recon.py
