@@ -7652,7 +7652,7 @@ return function render(_ctx, _cache) {
             _createElementVNode("section", _hoisted_513, [
               _cache[103] || (_cache[103] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"15px","font-weight":"600"} }, "À propos", -1 /* CACHED */)),
               _cache[104] || (_cache[104] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "PKM-App est une application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company. Pokémon et les noms associés sont des marques de leurs propriétaires respectifs.", -1 /* CACHED */)),
-              _cache[105] || (_cache[105] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","color":"var(--pkm-t4)"} }, "Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques du Radar réelles (OpenStreetMap) · collection, ventes et magasins de Territoire fictifs", -1 /* CACHED */)),
+              _cache[105] || (_cache[105] = _createElementVNode("p", { style: {"margin":"0","font-size":"12px","color":"var(--pkm-t4)"} }, "Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs", -1 /* CACHED */)),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.replayOnb,

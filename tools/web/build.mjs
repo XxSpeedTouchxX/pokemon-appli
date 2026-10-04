@@ -112,7 +112,7 @@ wrapSection('Mes plus belles pièces', 'home.hasBest');
 wrapSection('Derniers ajouts', 'home.hasAdds');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
-patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques du Radar réelles (OpenStreetMap) · collection, ventes et magasins de Territoire fictifs');
+patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs');
 // Articles mis en avant (tools/web/showcase.js).
 // - Accueil, « Mes plus belles pièces » : tuile double (220 px) pour le scellé, photo 16:9 en haut.
 patch('style="position: relative; flex: none; width: 118px; height: 164px;', 'style="position: relative; flex: none; width: {{ bp.tileW }}; height: 164px;');
@@ -525,7 +525,7 @@ const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global
 const THEME_SWITCH = '<script>try { if (/[?&]theme=classic(&|$)/.test(location.search)) { document.documentElement.classList.add(\'pkm-classic\'); var m = document.querySelector(\'meta[name="theme-color"]\'); if (m) m.content = \'#0B1120\'; } } catch (e) {}</script>';
 const body = vue => `<div id="shell">
 <div id="app"></div>
-<p class="pkm-caption">Démo PKM-App · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques du Radar réelles (OpenStreetMap) ; collection, ventes et magasins de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
+<p class="pkm-caption">Démo PKM-App · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="${vue}"></script>
 <script src="app.js"></script>`;

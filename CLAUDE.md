@@ -51,6 +51,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - écran plein écran ouvert depuis Territoire : carte de France des boutiques réelles (OpenStreetMap, chaque semaine) ;
   - zoom par secteur, balayage radar, « Autour de moi », indice de chance expliqué ;
   - jamais de badge « partenaire » ni d'arrivage annoncé sur une vraie boutique.
+- **Refonte v6 (2026-10-04, soir) :**
+  - design jaune et verre (cartes bleu nuit translucides, contours, accent jaune), contraste vérifié ; l'ancien thème reste accessible avec `?theme=classic` ;
+  - ETB, UPC, coffrets et cartes mis en avant partout (carrousels, grandes cartes 16:9, tuiles doubles) ;
+  - page **Sorties** (`#sorties`) : dates et prix de lancement sourcés, liens directs Amazon (invitations), eBay, Fnac, Cultura, Micromania, sans affiliation : liens sortants, pas une marketplace ;
+  - **Territoire réel** : vraies boutiques autour de la position (OpenStreetMap), fiche avec itinéraire, site, téléphone, horaires ; partenaires fictifs dans un encadré « Démo ».
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

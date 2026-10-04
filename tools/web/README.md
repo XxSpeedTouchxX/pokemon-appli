@@ -7,13 +7,35 @@ Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5
   - leurs **visuels officiels**, en qualité maximale ;
   - leurs prix Cardmarket et TCGplayer, via TCGdex, mis à jour chaque jour ;
   - les **produits scellés** sortis en France depuis l'automne 2025 : visuels de la galerie officielle Pokémon France, cote Cardmarket du jour ;
-  - le **Radar** : les boutiques réelles de France métropolitaine (OpenStreetMap) sur une vraie carte.
-- **Fictif :** la collection de démo de départ, les ventes, les prix eBay et les magasins de l'onglet Territoire.
+  - les **sorties** : dates, prix de lancement constatés et liens directs vers Amazon, eBay, Fnac, Cultura et Micromania ;
+  - **Territoire** et le **Radar** : les boutiques réelles de France métropolitaine (OpenStreetMap), autour de toi ou sur une carte de France.
+- **Fictif :** la collection de démo de départ, les ventes, les prix eBay et les magasins partenaires (encadré « Démo » de Territoire).
 
 Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil** (navigateur), à chaque changement.
 
 - **Adresse :** https://pokemon-appli.pages.dev (Cloudflare Pages, accès limité par e-mail).
 - **Page claude.ai (privée) :** https://claude.ai/artifact/9sDF5mc4brvvYaZWLd64qe. Elle n'a pas le catalogue complet.
+
+## Design : jaune et verre (thème v6)
+
+- **Look :** fond jaune en dégradé ; cartes, fiches, champs et barre du bas en verre bleu nuit translucide, avec un contour clair ; contour jaune pour les cartes mises en avant ; bouton Scan jaune.
+- **Boutons et puces selon le fond :** jaunes sur le verre, bleu nuit sur le jaune ; secondaires translucides.
+- **Flou réel** seulement sur ce qui passe au-dessus d'un contenu qui défile : barre du bas, fiches, toast, zoom, panneau du Radar (2 éléments au plus par écran). Fond opaque si le navigateur ne gère pas le flou.
+- **Lisibilité :** chaque texte a un contraste d'au moins 4,5:1 (3:1 pour les grands titres), vérifié écran par écran.
+- **Ancien thème :** `?theme=classic` (comparaison, retour arrière).
+- **Mise en œuvre :** la maquette v5 reste intacte. `tools/web/theme.mjs` remplace, au build, chaque couleur écrite en dur (gabarit et logique) par une variable CSS selon son rôle : fond de carte, ligne, textes 1 à 5, accent, statuts… Le thème classique leur donne les couleurs d'origine (l'app reste identique au pixel près), le thème v6 ses propres valeurs.
+  - Une surface sombre reçoit la classe `pkm-dark` : ses textes prennent les couleurs du ton sombre, ceux posés sur le jaune celles du ton clair.
+  - Le build échoue si une couleur n'a pas de règle, si une règle à contexte ne s'applique plus le nombre de fois prévu ou si une variable n'existe pas. Tests : `node --test tools/web/test_theme.mjs`.
+
+## Articles mis en avant
+
+`tools/web/showcase.js` :
+- **Accueil :** carrousel « Sorties du moment » ; tuiles doubles pour le scellé dans « Mes plus belles pièces » ; l'arrivage près de toi est marqué Démo.
+- **Collection :** le scellé prend toute la largeur de la grille, en 16:9.
+- **Marché :** carrousel « Scellé à la une » ; vignettes du scellé élargies ; cartes plus grandes, cadre doré pour les ultra rares.
+- **Produits scellés :** une colonne de grandes cartes 16:9.
+- **Fiche d'un produit :** photo 16:9 sur toute la largeur.
+- **Vignettes :** la photo remplit son cadre. Si elle ne charge pas : logo de l'extension sur son fond, sinon une plaque dessinée (nom de l'extension ou du produit).
 
 ## Catalogue complet
 
@@ -44,12 +66,43 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
   - **Marché :**
     - la recherche trouve aussi le scellé ;
     - « Sorties » liste les prochains produits (Règne Delta…) ;
-    - l'entrée **« Produits scellés »** ouvre une grille de photos, filtrable par type (ETB, display, UPC, lots de boosters, boîtes, coffrets, decks).
+    - l'entrée **« Produits scellés »** ouvre la liste en grandes cartes, filtrable par type (ETB, display, UPC, lots de boosters, boîtes, coffrets, decks).
   - **Toutes les cartes :** le scellé apparaît en tête.
   - **Fiche produit :** photo officielle agrandissable, cote du jour datée, prix demandé, ajout à la collection (enregistré sur l'appareil).
   - **Produits de la démo** (ETB 30e Anniversaire, Display Nuit Noire…) : ils prennent la photo officielle et le prix Cardmarket du produit réel.
 - **Sans visuel officiel** (displays, booster, Règne Delta) : l'app affiche le logo de l'extension sur son fond.
 - **Pas de courbe inventée** pour les produits réels : la courbe viendra de l'archive quotidienne.
+- **À venir ou sorti :** d'après la date réelle du jour (`?today=AAAA-MM-JJ` pour les tests). Avant la sortie, pas de cote : le prix des précommandes Cardmarket est affiché. La collection de démo garde sa date fixe (3 octobre 2026).
+
+## Sorties
+
+- **Ouverture :** `#sorties`, « Toutes les sorties » (Accueil), la carte « Sorties » du Marché ou le bandeau de Territoire.
+- **Contenu :** `tools/web/releases.js`.
+  - « À venir », avec compte à rebours, puis les sorties des 45 derniers jours ;
+  - pour chaque produit : grand visuel, date et sa source, prix de lancement constaté et sa source (aucun prix conseillé officiel en euros), précommandes ou cote Cardmarket, fiche PKM, alerte enregistrée sur l'appareil.
+- **Liens directs**, dans un nouvel onglet, **sans affiliation ni pistage** :
+
+  | Enseigne | Adresse |
+  |---|---|
+  | Amazon (ASIN connu) | `https://www.amazon.fr/dp/ASIN` : la fiche, où l'on demande une invitation |
+  | Amazon (sinon) | `https://www.amazon.fr/s?k=…` |
+  | eBay | `https://www.ebay.fr/sch/i.html?_nkw=…` |
+  | Fnac | `https://www.fnac.com/SearchResult/ResultList.aspx?Search=…` |
+  | Cultura | `https://www.cultura.com/search/results?search_query=…` |
+  | Micromania | `https://www.micromania.fr/on/demandware.store/Sites-Micromania-Site/fr_FR/Search-Show?q=…` |
+
+- **Invitations Amazon :** la demande se fait sur la fiche Amazon ; PKM ne fait aucune demande automatique (Amazon l'interdit) et ne touche aucune commission.
+- **Données :** champs `amazon`, `msrp`, `msrpSource`, `q`, `dateSource` de `tools/sealed/products.json` (voir `tools/sealed/README.md`).
+- **Ce n'est pas une marketplace :** PKM ne vend rien et ne compare pas les prix des enseignes ; il renvoie vers elles.
+
+## Territoire : boutiques autour de toi
+
+- **Position :** bouton « Me localiser », ou retrouvée seule si l'autorisation est déjà donnée. Arrondie à 100 m environ, gardée en mémoire : jamais enregistrée ni envoyée.
+- **Liste :** vraies boutiques (OpenStreetMap) dans un rayon de 3, 5, 10 ou 20 km, triées par distance ou par chance ; ouverture lue dans les horaires ; « élargir » si rien n'est trouvé.
+- **Carte :** nord en haut, anneaux de distance, pastilles à la vraie direction, sans recouvrement ; « Carte de France » ouvre le Radar.
+- **Fiche d'une boutique** (`tools/web/territory.js`, la même que dans le Radar) : chance et « Pourquoi ? », horaires, adresse, Itinéraire (Google Maps), Site (sinon celui de l'enseigne), Appeler, alerte, fiche OpenStreetMap, « Signaler une erreur » (note OpenStreetMap).
+- **Jamais** de badge partenaire ni d'arrivage annoncé sur une vraie boutique. Les magasins partenaires de la maquette sont dans l'encadré replié « Démo · boutiques partenaires fictives ».
+- **Horaires :** `RadarCore.parseHours` lit les formats courants (« Mo-Sa 10:00-19:00; Su off », plages multiples, 24/7) ; sinon le texte brut est affiché.
 
 ## Radar : carte de France des boutiques réelles
 
@@ -69,10 +122,7 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
   - on choisit le secteur sur la carte ou dans la liste.
 - **Balayer :** un faisceau radar révèle les boutiques une à une. Les résultats sont ensuite triés par indice de chance, puis par distance.
 - **Autour de moi :** position du téléphone, rayon de 3, 5 ou 10 km.
-- **Fiche boutique :**
-  - indice de chance avec son détail (« Pourquoi ? ») ;
-  - itinéraire (Google Maps) et fiche OpenStreetMap ;
-  - alerte enregistrée sur l'appareil.
+- **Fiche boutique :** la même que dans Territoire (voir plus haut).
 
   Une vraie boutique n'est jamais présentée comme partenaire PKM, ni comme ayant annoncé un arrivage.
 - **Liste :** le bouton « Liste » remplace la carte par une liste complète. C'est aussi le mode automatique sans WebGL.
@@ -80,7 +130,7 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 - **Mentions :** © OpenStreetMap, OpenMapTiles, OpenFreeMap, IGN.
 - **Code :**
   - `tools/web/radar.js` : écran et carte ;
-  - `tools/web/radar-core.js` : indice de chance, ordre du balayage, distances. Tests : `node --test tools/web/test_radar.mjs`.
+  - `tools/web/radar-core.js` : indice de chance, ordre du balayage, distances, horaires. Tests : `node --test tools/web/test_radar.mjs`.
   - `?today=AAAA-MM-JJ` fixe la date du calendrier des sorties, pour les tests.
 
 ## Collection enregistrée sur l'appareil
@@ -143,7 +193,7 @@ Le site n'est pas indexé par les moteurs de recherche : balise `robots` et en-t
 
 ## Ouvrir un écran précis
 
-- **Avec un ancrage :** `#territoire`, `#radar` (carte de France des boutiques), `#scan`, `#collection`, `#marche`, `#extensions` (toutes les cartes), `#scelle` (produits scellés), `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
+- **Avec un ancrage :** `#territoire`, `#radar` (carte de France des boutiques), `#sorties`, `#scan`, `#collection`, `#marche`, `#extensions` (toutes les cartes), `#scelle` (produits scellés), `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
 - **Avec des paramètres (hébergement uniquement) :** par exemple `?start=store&storeId=s3`, ou `?start=set&setId=sv08` pour une extension.
 
 ## Régénérer après une évolution de la maquette
@@ -160,7 +210,8 @@ Le script `tools/web/build.mjs` :
 - convertit le gabarit du canevas Design en gabarit Vue, compilé à l'avance (pas d'évaluation de code dans le navigateur) ;
 - adapte la page aux vraies tailles d'écran ;
 - ajoute les écrans et blocs de `tools/web/catalog.dc.html` (même syntaxe que le canevas) ;
-- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar) ;
+- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `showcase.js` (articles mis en avant), `releases.js` (Sorties), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar), `territory.js` (Territoire et fiche boutique) ;
+- applique le thème (`tools/web/theme.mjs`) ;
 - copie Vue 3.5.43 dans `web/vendor/`, MapLibre GL 6.12 dans `web/vendor/maplibre/` et les images dans `web/img/`.
 
 ## Contenu du dossier `web/`
@@ -168,7 +219,7 @@ Le script `tools/web/build.mjs` :
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Page de l'app |
-| `app.js` | Logique de la maquette, catalogue complet, produits scellés, enregistrement sur l'appareil, Radar (`tools/web/*.js`), gabarit compilé et démarrage |
+| `app.js` | Logique de la maquette et des modules `tools/web/*.js` (catalogue, scellé, Sorties, Territoire, Radar, enregistrement sur l'appareil), gabarit compilé et démarrage |
 | `data/cards.json` | Catalogue complet, généré chaque jour par GitHub Actions (ne pas modifier à la main) |
 | `data/sealed.json` | Produits scellés et leurs prix du jour (GitHub Actions) |
 | `data/stores.json` | Boutiques réelles, OpenStreetMap (GitHub Actions, chaque semaine) |
