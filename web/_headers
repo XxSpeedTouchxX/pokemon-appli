@@ -8,3 +8,5 @@
   Cache-Control: no-cache
 /data/*
   Cache-Control: no-cache
+/vendor/tesseract/*
+  Cache-Control: public, max-age=31536000, immutable
