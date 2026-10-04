@@ -1,7 +1,8 @@
 # Catalogue scellé, à la demande : liste les produits de la galerie officielle Pokémon France et leurs
 # correspondances Cardmarket possibles (tools/sealed/candidates.json, rapport de travail), puis télécharge
 # les visuels des produits retenus (tools/sealed/products.json) dans web/img/products/.
-# Les prix du scellé sont mis à jour chaque jour par le workflow « Catalogue TCGdex ».
+# Il construit aussi web/data/sealed.json ; les prix du scellé sont ensuite mis à jour chaque jour par le
+# workflow « Catalogue TCGdex ».
 name: Catalogue scellé
 
 on:
@@ -12,6 +13,7 @@ on:
       - .github/workflows/sealed.yml
       - tools/sealed/discover.py
       - tools/sealed/fetch_images.py
+      - tools/sealed/build_sealed.py
       - tools/sealed/products.json
 
 permissions:
@@ -43,12 +45,18 @@ jobs:
             python3 tools/sealed/fetch_images.py
           fi
 
+      - name: Prix du scellé (guide public Cardmarket)
+        run: |
+          python3 -m unittest discover -s tools/sealed -p "test_*.py"
+          python3 tools/sealed/build_sealed.py
+
       - name: Publier sur la branche
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -f tools/sealed/candidates.json ]; then git add tools/sealed/candidates.json; fi
           if [ -d web/img/products ]; then git add web/img/products; fi
+          git add web/data/sealed.json
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
           git commit -m "Met à jour le catalogue scellé ($(date -u +%Y-%m-%d))"
           for i in 1 2 3 4; do

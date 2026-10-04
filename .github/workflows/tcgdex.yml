@@ -1,6 +1,7 @@
 # Catalogue TCGdex : télécharge toutes les cartes françaises et leurs prix, complétées par les autres
 # versions (extensions sans version française, visuels manquants), construit web/data/cards.json
-# (catalogue compact chargé par la démo web) et le publie sur la branche. Cloudflare Pages redéploie ensuite.
+# (catalogue compact chargé par la démo web), met à jour les prix du scellé (web/data/sealed.json) et publie
+# le tout sur la branche. Cloudflare Pages redéploie ensuite.
 # Chaque mise à jour est un commit : l'historique git de cards.json sert d'archive quotidienne des prix.
 name: Catalogue TCGdex
 
@@ -76,12 +77,17 @@ jobs:
           --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --ptcg data/ptcg
           --out web/data/cards.json
 
+      - name: Prix du scellé (guide public Cardmarket)
+        continue-on-error: true
+        run: python3 tools/sealed/build_sealed.py
+
       - name: Publier sur la branche
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add web/data/cards.json
           if [ -f tools/tcgdex/ptcg_images.json ]; then git add tools/tcgdex/ptcg_images.json; fi
+          if [ -f web/data/sealed.json ]; then git add web/data/sealed.json; fi
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
           git commit -m "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))"
           for i in 1 2 3 4; do
