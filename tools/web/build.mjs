@@ -244,12 +244,13 @@ patch(FRAG['market-browse'], `<sc-if value="{{ mk.releasesEntry.show }}" hint-pl
 </sc-if>
 ` + FRAG['market-browse']);
 // - Fiche d'une vraie boutique : même gabarit dans le Radar et dans Territoire (écran « shop »).
-const SHOP_BODY = o => `<section aria-label="{{ ${o}.name }}" style="flex: none; display: flex; flex-direction: column; gap: 12px">
+// named : nom et type en tête (fiche du Radar) ; l'écran boutique les a déjà dans son en-tête.
+const SHOP_BODY = (o, named = true) => `<section aria-label="{{ ${o}.name }}" style="flex: none; display: flex; flex-direction: column; gap: 12px">
 <div style="display: flex; align-items: flex-start; gap: 12px">
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
-<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 600; letter-spacing: -0.02em">{{ ${o}.name }}</h2>
+${named ? `<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 600; letter-spacing: -0.02em">{{ ${o}.name }}</h2>
 <span style="font-size: 13px; color: #C9D3EA">{{ ${o}.kind }}</span>
-<span style="font-size: 12.5px; color: #9AA8C3">{{ ${o}.place }}</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ ${o}.place }}</span>` : `<span style="font-size: 14px; font-weight: 600; color: #C9D3EA">{{ ${o}.place }}</span>`}
 </span>
 <span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; white-space: nowrap; color: {{ ${o}.color }}">{{ ${o}.pct }}</span><span style="padding: 2px 9px; border-radius: 999px; background: {{ ${o}.tint }}; color: {{ ${o}.color }}; font-size: 11.5px; font-weight: 800">{{ ${o}.level }}</span></span>
 </div>
@@ -278,7 +279,7 @@ const SHOP_BODY = o => `<section aria-label="{{ ${o}.name }}" style="flex: none;
 patch('<!-- fiche boutique : rd.st -->', SHOP_BODY('rd.st'));
 patch('<sc-if value="{{ ui.isProfile }}"', `<sc-if value="{{ ui.isShop }}" hint-placeholder-val="{{ false }}">
 <sc-if value="{{ bq.found }}" hint-placeholder-val="{{ true }}">
-${SHOP_BODY('bq')}
+${SHOP_BODY('bq', false)}
 </sc-if>
 </sc-if>
 <sc-if value="{{ ui.isProfile }}"`);
