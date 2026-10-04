@@ -8,7 +8,7 @@ Produits scellés réels de l'app : ETB, UPC, displays, lots de boosters, coffre
 |---|---|---|---|
 | 1. Découverte | À la demande | `discover.py` | `candidates.json`, un rapport de travail |
 | 2. Liste figée | À la main | — | `products.json` |
-| 3. Visuels | Quand la liste change | `fetch_images.py` | `web/img/products/<id>.webp` |
+| 3. Visuels | Chaque jour (seulement les manquants) | `fetch_images.py` | `web/img/products/<id>.webp` |
 | 4. Prix | Chaque jour | `build_sealed.py` | `web/data/sealed.json` |
 
 ### 1. Découverte (`discover.py`, workflow « Catalogue scellé »)
@@ -59,7 +59,7 @@ Les displays, le booster 30ᵉ Anniversaire et Règne Delta (6 novembre 2026) ne
 - **Plusieurs versions d'un produit :** l'app prend la médiane.
 - **Avant la sortie :** pas de cote ; le prix des précommandes est affiché comme prix demandé.
 - **Guide des prix injoignable :** les prix de la veille sont gardés.
-- **Lancement :** par « Catalogue scellé » après les visuels, puis chaque jour par « Catalogue TCGdex ». L'historique git de `sealed.json` sert d'archive quotidienne des prix.
+- **Lancement :** chaque jour vers 06:17 (heure de Paris), par le workflow « Catalogue scellé », après les visuels. C'est le seul workflow qui écrit `sealed.json`, ce qui évite les conflits de publication. L'historique git de `sealed.json` sert d'archive quotidienne des prix.
 
 ## Tests
 

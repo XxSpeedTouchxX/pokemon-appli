@@ -1,12 +1,14 @@
-# Catalogue scellé, à la demande : liste les produits de la galerie officielle Pokémon France et leurs
-# correspondances Cardmarket possibles (tools/sealed/candidates.json, rapport de travail), puis télécharge
-# les visuels des produits retenus (tools/sealed/products.json) dans web/img/products/.
-# Il construit aussi web/data/sealed.json ; les prix du scellé sont ensuite mis à jour chaque jour par le
-# workflow « Catalogue TCGdex ».
+# Catalogue scellé, chaque jour : télécharge les visuels manquants des produits retenus
+# (tools/sealed/products.json) dans web/img/products/, puis construit web/data/sealed.json avec les prix du
+# jour (guide public Cardmarket). C'est le seul workflow qui écrit ces fichiers.
+# À la demande (ou si discover.py change), il liste aussi les produits de la galerie officielle Pokémon France
+# et leurs correspondances Cardmarket possibles (tools/sealed/candidates.json, rapport de travail).
 name: Catalogue scellé
 
 on:
   workflow_dispatch: {}
+  schedule:
+    - cron: "17 4 * * *" # chaque jour vers 06:17 (heure de Paris en été), après la mise à jour du guide Cardmarket
   push:
     branches: [claude/pokemon-app-mockup-1mxt7p]
     paths:

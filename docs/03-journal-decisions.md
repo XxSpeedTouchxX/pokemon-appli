@@ -43,7 +43,7 @@
 - **Impact :**
   - CLAUDE.md (§3) ;
   - `tools/tcgdex/ptcg.py` et `build_index.py` ; `tools/sealed/` ; `tools/stores/` et `tools/geo/` ;
-  - workflows `tcgdex.yml`, `sealed.yml` et `stores.yml` ;
+  - workflows `tcgdex.yml`, `sealed.yml` (chaque jour : visuels manquants et prix du scellé) et `stores.yml` (chaque semaine) ;
   - `tools/web/sealed.js`, `radar-core.js`, `radar.js`, `catalog.dc.html` et `build.mjs`.
 
 ## 2026-10-04 — Toutes les cartes en visuel officiel, collection enregistrée sur l'appareil

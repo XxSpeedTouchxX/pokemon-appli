@@ -48,8 +48,7 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
    - **Pour chaque extension :** le nom, la série, la date, le logo, le nombre officiel de cartes et la langue des cartes.
    - Le fichier contient une carte par ligne.
    - Le journal du workflow donne le bilan : cartes, visuels par langue, cartes encore sans visuel par extension.
-5. **Prix du scellé :** `tools/sealed/build_sealed.py` met à jour `web/data/sealed.json` (voir `tools/sealed/README.md`).
-6. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site.
+5. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site.
 
 TCG Pocket (cartes numériques) est exclu.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 build_sealed.py : catalogue scellé de l'app avec les prix du jour → web/data/sealed.json.
-Lancé chaque jour par le workflow « Catalogue TCGdex », juste après cards.json ; chaque mise à jour est
+Lancé chaque jour par le workflow « Catalogue scellé » (seul à écrire ce fichier) ; chaque mise à jour est
 un commit, l'historique git sert d'archive quotidienne des prix (comme pour les cartes).
 
 Entrées :
