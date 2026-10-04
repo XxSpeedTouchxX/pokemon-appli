@@ -1,6 +1,6 @@
-# Démo web de PKM-App
+# Démo web de Dropicards (nom de code PKM-App)
 
-Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5/`) : mêmes écrans, même logique.
+Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5/`) : mêmes écrans, même logique, avec l'identité Dropicards et un nouvel accueil.
 
 - **Réel :**
   - le **catalogue complet** : toutes les cartes françaises, plus les extensions sans version française dans TCGdex (cartes en anglais) ;
@@ -8,13 +8,43 @@ Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5
   - leurs prix Cardmarket et TCGplayer, via TCGdex, mis à jour chaque jour ;
   - les **produits scellés** sortis en France depuis l'automne 2025 : visuels de la galerie officielle Pokémon France, cote Cardmarket du jour ;
   - les **sorties** : dates, prix de lancement constatés et liens directs vers Amazon, eBay, Fnac, Cultura et Micromania ;
-  - **Territoire** et le **Radar** : les boutiques réelles de France métropolitaine (OpenStreetMap), autour de toi ou sur une carte de France.
+  - **Territoire**, le **Radar** et le radar de l'accueil : les boutiques réelles de France métropolitaine (OpenStreetMap), avec leur commune, autour de toi ou sur une carte de France ;
+  - la **tendance** de la collection : moyennes Cardmarket sur 30, 7 et 1 jours pour les cartes, cote archivée chaque jour pour le scellé.
 - **Fictif :** la collection de démo de départ, les ventes, les prix eBay et les magasins partenaires (encadré « Démo » de Territoire).
 
 Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil** (navigateur), à chaque changement.
 
 - **Adresse :** https://pokemon-appli.pages.dev (Cloudflare Pages, accès limité par e-mail).
 - **Page claude.ai (privée) :** https://claude.ai/artifact/9sDF5mc4brvvYaZWLd64qe. Elle n'a pas le catalogue complet.
+
+## Identité Dropicards
+
+- **Logo :** celui de la planche du porteur, redessiné en SVG (`tools/brand/`, voir son README) ; dans l'en-tête, la pastille « Marché FR » devient « FR ».
+- **Nom :** « Dropicards » dans le titre, le manifeste (icône « maskable » à part) et la légende.
+- **Libellés :** « PKM » devient « Dropicards » au build (cote Dropicards, Bienvenue sur Dropicards…), avec un compte vérifié. Les noms techniques gardent `pkm` (classes, variables CSS, clé d'enregistrement de la collection).
+- **Jaune :** celui de la planche (`#FFD60A`), repris par le thème v6.
+
+## Accueil
+
+De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`, testés par `node --test tools/web/test_home.mjs`) :
+1. **Recherche** dans tout le catalogue : 8 résultats sous le champ (scellé, articles suivis, puis cartes), « Voir les N résultats » ouvre le Marché sur la même recherche.
+2. **Valeur de ma collection :**
+   - montant dans la police du logo (Luckiest Guy), en jaune ;
+   - variation sur 7 jours ;
+   - **courbe sur 4 points réels** (il y a 30 jours, 7 jours, hier, aujourd'hui). Cartes : moyennes Cardmarket ramenées à la valeur du jour ; scellé : cote archivée chaque jour (`sealed.json`) ; démo : sa courbe simulée. Une valeur inconnue reste plate, jamais inventée ;
+   - plus-value latente, source et date ;
+   - **compagnon animé** : un des 151 Pokémon de Kanto, Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » (recherche par nom ou numéro). Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites : `tools/sprites/`.
+3. **Boutiques autour de toi :**
+   - radar en SVG (anneaux 1, 3, 5 km) ;
+   - « Scanner les boutiques » lance le faisceau : chaque vraie boutique apparaît à sa direction réelle, avec son nom et sa ville, et devient cliquable à ce moment-là ;
+   - un appui ouvre sa fiche ;
+   - sans position : « Me localiser » ;
+   - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
+4. **Sorties du moment** (carrousel).
+5. **Ma collection :** tous les articles, les plus récents d'abord ou par valeur, 20 par page ; variation sur 7 jours ; collection vide : « Rechercher une carte » et « Scanner ».
+6. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
+
+Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage de démo, mouvements, plus belles pièces, derniers ajouts. Le build remplace l'accueil de la maquette par le fragment `home` de `catalog.dc.html`.
 
 ## Design : jaune et verre (thème v6)
 
@@ -30,7 +60,7 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 ## Articles mis en avant
 
 `tools/web/showcase.js` :
-- **Accueil :** carrousel « Sorties du moment » ; tuiles doubles pour le scellé dans « Mes plus belles pièces » ; l'arrivage près de toi est marqué Démo.
+- **Accueil :** carrousel « Sorties du moment ».
 - **Collection :** le scellé prend toute la largeur de la grille, en 16:9.
 - **Marché :** carrousel « Scellé à la une » ; vignettes du scellé élargies ; cartes plus grandes, cadre doré pour les ultra rares.
 - **Produits scellés :** une colonne de grandes cartes 16:9.
@@ -121,16 +151,18 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
   - une pastille par secteur donne son nombre de boutiques ;
   - on choisit le secteur sur la carte ou dans la liste.
 - **Balayer :** un faisceau radar révèle les boutiques une à une. Les résultats sont ensuite triés par indice de chance, puis par distance.
+  - Pendant le balayage, un appui sur une boutique déjà apparue ouvre sa fiche ; le balayage se termine.
+  - Les points des boutiques : la taille dépend du zoom, en tête d'expression (MapLibre refuse sinon la couche entière, corrigé le 2026-10-04).
 - **Autour de moi :** position du téléphone, rayon de 3, 5 ou 10 km.
 - **Fiche boutique :** la même que dans Territoire (voir plus haut).
 
-  Une vraie boutique n'est jamais présentée comme partenaire PKM, ni comme ayant annoncé un arrivage.
+  Une vraie boutique n'est jamais présentée comme partenaire Dropicards, ni comme ayant annoncé un arrivage. La fiche et la liste donnent la ville exacte (commune officielle, arrondissement à Paris, Lyon et Marseille).
 - **Liste :** le bouton « Liste » remplace la carte par une liste complète. C'est aussi le mode automatique sans WebGL.
 - **Accessibilité :** mouvements réduits respectés (pas d'animation) ; toutes les fonctions sont accessibles depuis la liste.
 - **Mentions :** © OpenStreetMap, OpenMapTiles, OpenFreeMap, IGN.
 - **Code :**
   - `tools/web/radar.js` : écran et carte ;
-  - `tools/web/radar-core.js` : indice de chance, ordre du balayage, distances, horaires. Tests : `node --test tools/web/test_radar.mjs`.
+  - `tools/web/radar-core.js` : indice de chance, ordre du balayage, distances, horaires, placement des repères des mini-cartes (Territoire, accueil). Tests : `node --test tools/web/test_radar.mjs`.
   - `?today=AAAA-MM-JJ` fixe la date du calendrier des sorties, pour les tests.
 
 ## Collection enregistrée sur l'appareil
@@ -210,7 +242,7 @@ Le script `tools/web/build.mjs` :
 - convertit le gabarit du canevas Design en gabarit Vue, compilé à l'avance (pas d'évaluation de code dans le navigateur) ;
 - adapte la page aux vraies tailles d'écran ;
 - ajoute les écrans et blocs de `tools/web/catalog.dc.html` (même syntaxe que le canevas) ;
-- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `showcase.js` (articles mis en avant), `releases.js` (Sorties), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar), `territory.js` (Territoire et fiche boutique) ;
+- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `showcase.js` (articles mis en avant), `releases.js` (Sorties), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar), `territory.js` (Territoire et fiche boutique), `home-core.js` et `home.js` (accueil), plus les noms des 151 compagnons (`tools/sprites/kanto.json`) ;
 - applique le thème (`tools/web/theme.mjs`) ;
 - copie Vue 3.5.43 dans `web/vendor/`, MapLibre GL 6.12 dans `web/vendor/maplibre/` et les images dans `web/img/`.
 
@@ -219,16 +251,18 @@ Le script `tools/web/build.mjs` :
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Page de l'app |
-| `app.js` | Logique de la maquette et des modules `tools/web/*.js` (catalogue, scellé, Sorties, Territoire, Radar, enregistrement sur l'appareil), gabarit compilé et démarrage |
+| `app.js` | Logique de la maquette et des modules `tools/web/*.js` (catalogue, scellé, Sorties, Territoire, Radar, accueil, enregistrement sur l'appareil), gabarit compilé et démarrage |
 | `data/cards.json` | Catalogue complet, généré chaque jour par GitHub Actions (ne pas modifier à la main) |
-| `data/sealed.json` | Produits scellés et leurs prix du jour (GitHub Actions) |
-| `data/stores.json` | Boutiques réelles, OpenStreetMap (GitHub Actions, chaque semaine) |
+| `data/sealed.json` | Produits scellés, leurs prix du jour et la cote archivée sur 31 jours (GitHub Actions) |
+| `data/stores.json` | Boutiques réelles, OpenStreetMap, avec leur commune (GitHub Actions, chaque semaine) |
 | `data/geo/` | Contours des régions et des départements (IGN, Licence Ouverte) |
 | `vendor/vue.runtime.global.prod.js` | Vue 3.5.43, licence MIT |
 | `vendor/maplibre/` | MapLibre GL 6.12, licence BSD (Radar, chargé à l'ouverture de l'écran) |
 | `img/` | Visuels provisoires (ceux qui ne sont pas sur TCGdex) |
 | `img/products/` | Visuels officiels des produits scellés (galerie Pokémon France) |
-| `icons/` | Icônes de l'app |
+| `img/brand/` | Logo Dropicards (SVG : clair, petit, sombre, icône), voir `tools/brand/` |
+| `img/pokemon/` | Compagnons de l'accueil : sprites animés et fixes des 151 Pokémon de Kanto, voir `tools/sprites/` |
+| `icons/` | Icônes de l'app Dropicards (dont une « maskable ») |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |
 | `_headers` | En-têtes Cloudflare : non-indexation, cache |

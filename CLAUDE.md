@@ -5,6 +5,7 @@
 > En cas de contradiction entre ce fichier et `docs/`, signale-la, ne tranche pas seul.
 
 ## 1. Le projet en 5 lignes
+- **Nom :** **Dropicards** pour la démo (identité choisie par le porteur le 2026-10-04 : logo, icône, nom) ; « PKM-App » reste le nom de code des documents. Disponibilité du nom (marque, domaine) à vérifier avant toute sortie publique.
 - **Vision :** une app qui aide les collectionneurs et passionnés français de Pokémon TCG à connaître la **valeur** de leurs cartes et produits scellés, au prix du marché comparé entre plusieurs sources et mis à jour automatiquement. Le suivi de la **marge** à la revente reste un complément. Ce n'est **pas une plateforme de vente**.
 - **Cible prioritaire (hypothèse à tester) :** **collectionneurs et passionnés** français (cartes, cartes gradées, scellé). Revendeurs / investisseurs en scellé = cible secondaire. *(Décision du porteur du 2026-10-03, qui remplace la cible « revendeurs de scellé ».)*
 - **Ambition :** side-business. Projet d'**exploration** (on cherche encore quoi construire exactement).
@@ -56,6 +57,12 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - ETB, UPC, coffrets et cartes mis en avant partout (carrousels, grandes cartes 16:9, tuiles doubles) ;
   - page **Sorties** (`#sorties`) : dates et prix de lancement sourcés, liens directs Amazon (invitations), eBay, Fnac, Cultura, Micromania, sans affiliation : liens sortants, pas une marketplace ;
   - **Territoire réel** : vraies boutiques autour de la position (OpenStreetMap), fiche avec itinéraire, site, téléphone, horaires ; partenaires fictifs dans un encadré « Démo ».
+- **Identité Dropicards et nouvel accueil (2026-10-04, nuit) :**
+  - logo Dropicards redessiné en SVG (`tools/brand/`), icônes, nom, libellés ; jaune de la planche ;
+  - accueil : recherche, valeur dans la police du logo avec courbe sur 4 points réels et compagnon animé (151 Pokémon de Kanto), radar des boutiques avec balayage et repères cliquables (nom, ville exacte), sorties, liste complète de la collection, marge ;
+  - données : commune officielle des boutiques, moyennes Cardmarket 7 j et 1 j des cartes, archive quotidienne de la cote du scellé ;
+  - Radar : points des boutiques enfin affichés et touchables pendant le balayage ;
+  - suite prévue (plan séparé) : scan réel à l'appareil photo.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
