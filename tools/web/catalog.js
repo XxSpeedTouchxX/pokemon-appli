@@ -17,6 +17,8 @@
   const UR_RARITY = /^(ultra rare|chromatique ultra rare|illustration spéciale rare|magnifique rare|hyper rare|méga hyper rare|couronne|rare secrète)$/i;
   const FLAG_EN = 'linear-gradient(90deg, transparent 42%, #C8102E 42% 58%, transparent 58%), linear-gradient(180deg, #012169 38%, #C8102E 38% 62%, #012169 62%)';
   const LIMIT = 40;
+  // Adresses d'images qui n'ont pas chargé (photos et logos) : l'app affiche alors le visuel suivant.
+  const BROKEN = new Set();
   // Langue d'un visuel de repli (même dessin officiel, texte dans une autre langue).
   const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole' };
   const PTCG = 'https://images.pokemontcg.io/', ASSETS = 'https://assets.tcgdex.net/';
@@ -232,9 +234,9 @@
     res.groups = groups.map(g => ({
       name: g.name, hasNote: g.en, note: g.en ? 'Cartes en anglais : ces extensions n’ont pas de version française dans le catalogue TCGdex.' : '',
       sets: g.sets.map((e, i) => {
-        const k = own[e.id] || 0, cards = e.n + (e.n > 1 ? ' cartes' : ' carte');
+        const k = own[e.id] || 0, cards = e.n + (e.n > 1 ? ' cartes' : ' carte'), logo = logoUrl(e.logo), hasLogo = !!logo && !BROKEN.has(logo);
         return {
-          name: e.name, sub: (e.date ? this.d3(e.date) + ' · ' : '') + cards, logo: logoUrl(e.logo), hasLogo: !!e.logo, noLogo: !e.logo,
+          name: e.name, sub: (e.date ? this.d3(e.date) + ' · ' : '') + cards, logo: logo, hasLogo: hasLogo, noLogo: !hasLogo,
           code: e.id.toUpperCase(), owned: k > 0, ownedText: k + ' à toi', border: i === 0 ? 'none' : '1px solid #1E2B45',
           label: e.name + ', ' + cards + (k ? ', ' + k + ' à toi' : ''), open: () => this.push('set', { setId: e.id, setFilter: 'all' })
         };
@@ -273,7 +275,7 @@
     const defs = [['all', 'Toutes · ' + all.length], ['top', 'Les plus chères'], ['ur', 'Ultra rares · ' + nUr], ['own', 'À toi · ' + mine.length]];
     return {
       title: e.name, subtitle: [e.serie, e.date ? this.d3(e.date) : '', e.lang === 'EN' ? 'EN' : ''].filter(Boolean).join(' · '),
-      hasLogo: !!e.logo, logo: logoUrl(e.logo),
+      hasLogo: !!e.logo && !BROKEN.has(logoUrl(e.logo)), logo: logoUrl(e.logo),
       countText: all.length + (all.length > 1 ? ' cartes' : ' carte') + (e.official && Number(e.official) !== all.length ? ' · ' + e.official + ' officielles' : ''),
       valueText: priced.length ? 'Série complète ≈ ' + this.eur0(full) + ' (cote PKM de ' + priced.length + ' cartes)' : 'Pas encore de prix pour cette extension',
       hasNote: notes.length > 0, note: notes.join(' '),

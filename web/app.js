@@ -774,7 +774,7 @@ class Component extends DCLogic {
       shutter: () => this.setState({ scanSheet: true, sf: this.scanFormSeed() }),
       close: () => this.pop(),
       manual: () => this.openSheet('buy', pid),
-      photo: () => this.say('Démo : import d’une photo de la galerie'),
+      importPhoto: () => this.say('Démo : import d’une photo de la galerie'),
       count: s.scanned > 0 ? s.scanned + (s.scanned > 1 ? ' articles ajoutés depuis l’ouverture' : ' article ajouté depuis l’ouverture') : 'Scan en continu : enchaîne les cartes'
     });
   }
@@ -1283,6 +1283,8 @@ class Component extends DCLogic {
   const UR_RARITY = /^(ultra rare|chromatique ultra rare|illustration spéciale rare|magnifique rare|hyper rare|méga hyper rare|couronne|rare secrète)$/i;
   const FLAG_EN = 'linear-gradient(90deg, transparent 42%, #C8102E 42% 58%, transparent 58%), linear-gradient(180deg, #012169 38%, #C8102E 38% 62%, #012169 62%)';
   const LIMIT = 40;
+  // Adresses d'images qui n'ont pas chargé (photos et logos) : l'app affiche alors le visuel suivant.
+  const BROKEN = new Set();
   // Langue d'un visuel de repli (même dessin officiel, texte dans une autre langue).
   const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole' };
   const PTCG = 'https://images.pokemontcg.io/', ASSETS = 'https://assets.tcgdex.net/';
@@ -1498,9 +1500,9 @@ class Component extends DCLogic {
     res.groups = groups.map(g => ({
       name: g.name, hasNote: g.en, note: g.en ? 'Cartes en anglais : ces extensions n’ont pas de version française dans le catalogue TCGdex.' : '',
       sets: g.sets.map((e, i) => {
-        const k = own[e.id] || 0, cards = e.n + (e.n > 1 ? ' cartes' : ' carte');
+        const k = own[e.id] || 0, cards = e.n + (e.n > 1 ? ' cartes' : ' carte'), logo = logoUrl(e.logo), hasLogo = !!logo && !BROKEN.has(logo);
         return {
-          name: e.name, sub: (e.date ? this.d3(e.date) + ' · ' : '') + cards, logo: logoUrl(e.logo), hasLogo: !!e.logo, noLogo: !e.logo,
+          name: e.name, sub: (e.date ? this.d3(e.date) + ' · ' : '') + cards, logo: logo, hasLogo: hasLogo, noLogo: !hasLogo,
           code: e.id.toUpperCase(), owned: k > 0, ownedText: k + ' à toi', border: i === 0 ? 'none' : '1px solid #1E2B45',
           label: e.name + ', ' + cards + (k ? ', ' + k + ' à toi' : ''), open: () => this.push('set', { setId: e.id, setFilter: 'all' })
         };
@@ -1539,7 +1541,7 @@ class Component extends DCLogic {
     const defs = [['all', 'Toutes · ' + all.length], ['top', 'Les plus chères'], ['ur', 'Ultra rares · ' + nUr], ['own', 'À toi · ' + mine.length]];
     return {
       title: e.name, subtitle: [e.serie, e.date ? this.d3(e.date) : '', e.lang === 'EN' ? 'EN' : ''].filter(Boolean).join(' · '),
-      hasLogo: !!e.logo, logo: logoUrl(e.logo),
+      hasLogo: !!e.logo && !BROKEN.has(logoUrl(e.logo)), logo: logoUrl(e.logo),
       countText: all.length + (all.length > 1 ? ' cartes' : ' carte') + (e.official && Number(e.official) !== all.length ? ' · ' + e.official + ' officielles' : ''),
       valueText: priced.length ? 'Série complète ≈ ' + this.eur0(full) + ' (cote PKM de ' + priced.length + ' cartes)' : 'Pas encore de prix pour cette extension',
       hasNote: notes.length > 0, note: notes.join(' '),
@@ -1718,7 +1720,27 @@ class Component extends DCLogic {
     const words = fold(q).split(/\s+/).filter(Boolean);
     return words.length ? SEALED.rows.filter(x => words.every(w => x.hay.indexOf(w) >= 0)).map(x => SEALED.item(SP + x.r[SEALED.F.id])) : [];
   };
-  const photoOf = p => (p.photo ? p.photo : '');
+  // Plaque dessinée, dernier repli sans photo ni logo : nom de l'extension (sinon du produit) en blanc, sur fond
+  // transparent. Elle prend la place du logo, sur le fond de l'extension, avec le symbole et le code du produit.
+  const PLAQUES = {};
+  function plaque(p) {
+    const text = p.setName || p.name || 'Produit scellé';
+    if (PLAQUES[text]) return PLAQUES[text];
+    const lines = [];
+    String(text).split(/\s+/).filter(Boolean).forEach(w => {
+      const cur = lines[lines.length - 1];
+      if (cur !== undefined && (cur + ' ' + w).length <= 16) lines[lines.length - 1] = cur + ' ' + w; else lines.push(w);
+    });
+    if (lines.length > 3) { lines.length = 3; lines[2] += '…'; }
+    const longest = Math.max.apply(null, lines.map(l => l.length));
+    const size = Math.min([38, 30, 24][lines.length - 1], 224 / (longest * 0.62)), dy = size * 1.15, y0 = 60 - (lines.length - 1) * dy / 2 + size * 0.36;
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120" viewBox="0 0 240 120" font-family="Helvetica, Arial, sans-serif">'
+      + lines.map((l, i) => '<text x="120" y="' + (y0 + i * dy).toFixed(1) + '" text-anchor="middle" font-size="' + size.toFixed(1)
+        + '" font-weight="800" fill="#FFFFFF" stroke="#000000" stroke-opacity="0.3" stroke-width="3" paint-order="stroke">' + esc(l) + '</text>').join('')
+      + '</svg>';
+    return (PLAQUES[text] = 'data:image/svg+xml,' + encodeURIComponent(svg));
+  }
+  SEALED.plaque = plaque;
 
   // Démo : vraie photo et vrai prix des produits de la maquette présents au catalogue.
   const baseSealedCatalog = proto.catalog;
@@ -1740,10 +1762,14 @@ class Component extends DCLogic {
   // Pas d'historique inventé pour les produits réels : la courbe viendra de l'archive quotidienne.
   const baseSealedHistory = proto.history;
   proto.history = function (p) { return p.real ? null : baseSealedHistory.call(this, p); };
+  // Visuel d'un produit : sa photo ; sinon (ou si elle ne charge pas) le logo de l'extension sur son fond ; sinon
+  // la plaque dessinée.
   const baseSealedLook = proto.look;
   proto.look = function (p) {
-    const l = baseSealedLook.call(this, p), photo = p.type === 'sealed' ? photoOf(p) : '';
-    return Object.assign(l, { photo: photo, hasPhoto: !!photo, sealedArt: l.isSealed && !photo });
+    const l = baseSealedLook.call(this, p);
+    if (p.type !== 'sealed') return Object.assign(l, { photo: '', hasPhoto: false, sealedArt: false });
+    const photo = p.photo && !BROKEN.has(p.photo) ? p.photo : '';
+    return Object.assign(l, { photo: photo, hasPhoto: !!photo, sealedArt: !photo, logo: l.logo && !BROKEN.has(l.logo) ? l.logo : plaque(p) });
   };
   const baseSealedParent = proto.parentOf;
   proto.parentOf = function (sc) { return sc === 'sealed' ? 'market' : baseSealedParent.call(this, sc); };
@@ -1806,11 +1832,15 @@ class Component extends DCLogic {
     const mapped = new Set(x.cat.filter(p => p.realId).map(p => p.realId));
     const inCat = new Set(x.cat.filter(p => p.real).map(p => p.id));
     if (!q) {
+      // Éventail : trois produits avec photo ; une photo qui ne charge pas laisse place au logo, sur le fond de l'extension.
       const all = SEALED.list(), photos = all.filter(p => p.photo).slice(0, 3);
       r.sealedBrowse = {
         show: true, open: () => this.openSealedList(),
         sub: all.length + ' produits · visuels officiels · cote Cardmarket',
-        fan: photos.map((p, i) => ({ photo: p.photo, top: ['10px', '4px', '10px'][i], left: ['0px', '16px', '32px'][i], rot: ['-9deg', '0deg', '9deg'][i] }))
+        fan: photos.map((p, i) => {
+          const l = this.look(p);
+          return { photo: l.hasPhoto ? l.photo : l.logo, bg: l.hasPhoto ? '#FFFFFF' : l.bg, top: ['10px', '4px', '10px'][i], left: ['0px', '16px', '32px'][i], rot: ['-9deg', '0deg', '9deg'][i] };
+        })
       };
     }
     if (s.mfilter === 'soon') {
@@ -1834,7 +1864,7 @@ class Component extends DCLogic {
   proto.vSets = function (s) {
     const res = baseSealedSets.call(this, s);
     if (SEALED.status !== 'ready' || (s.eq && s.eq.trim())) return res;
-    const all = SEALED.list(), first = all.find(p => p.photo);
+    const all = SEALED.list(), top = all.find(p => p.photo), first = top && !BROKEN.has(top.photo) ? top : null;
     res.groups = [{
       name: 'Produits scellés', hasNote: false, note: '',
       sets: [{
@@ -1861,8 +1891,9 @@ class Component extends DCLogic {
       empty: shown.length === 0,
       items: shown.map(p => {
         const k = this.cote(p), q = qty(p), when = p.release ? 'Sortie le ' + this.d2(p.release) : (p.released ? this.d3(p.released) : (p.releaseText || String(p.year)));
-        return Object.assign(this.look(p), {
-          name: p.name, sub: (TYPE_LABEL[p.code] || 'Produit') + ' · ' + when, noPhoto: !p.photo, soon: !!p.release, owned: q > 0, qty: '×' + q,
+        const l = this.look(p);
+        return Object.assign(l, {
+          name: p.name, sub: (TYPE_LABEL[p.code] || 'Produit') + ' · ' + when, noPhoto: !l.hasPhoto, soon: !!p.release, owned: q > 0, qty: '×' + q,
           price: k !== null ? (k >= 100 ? this.eur0(k) : this.eur(k)) : (typeof p.low === 'number' ? '~' + this.eur0(p.low) : 'prix à venir'),
           priceColor: k !== null ? '#F3F6FC' : '#9AA8C3',
           label: p.name + ', ' + when + (k !== null ? ', cote ' + this.eur(k) : '') + (q ? ', ' + q + ' dans ta collection' : ''),
@@ -2607,6 +2638,7 @@ class Component extends DCLogic {
     const r = vTerritory.call(this, x);
     r.pins.forEach(p => {
       const cx = parseFloat(p.left) + 22, cy = parseFloat(p.top) + 22;
+      p.text = p.text.replace(' %', ' %');
       p.left = 'calc(' + (cx / 358 * 100).toFixed(2) + '% - 22px)';
       p.top = 'calc(' + (cy / 210 * 100).toFixed(2) + '% - 22px)';
     });
@@ -4637,6 +4669,7 @@ return function render(_ctx, _cache) {
                   ? (_openBlock(), _createElementBlock("img", {
                       key: 1,
                       src: _ctx.V.home.near.logo,
+                      "data-broken": "1",
                       alt: "",
                       style: {"max-width":"34px","max-height":"24px","object-fit":"contain"}
                     }, null, 8 /* PROPS */, _hoisted_52))
@@ -4645,6 +4678,7 @@ return function render(_ctx, _cache) {
                   ? (_openBlock(), _createElementBlock("span", _hoisted_53, [
                       _createElementVNode("img", {
                         src: _ctx.V.home.near.photo,
+                        "data-broken": "1",
                         alt: "",
                         loading: "lazy",
                         style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -4739,6 +4773,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 1,
                               src: _ctx.V.home.up.logo,
+                              "data-broken": "1",
                               alt: "",
                               style: {"max-width":"36px","max-height":"26px","object-fit":"contain"}
                             }, null, 8 /* PROPS */, _hoisted_73))
@@ -4747,6 +4782,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("span", _hoisted_74, [
                               _createElementVNode("img", {
                                 src: _ctx.V.home.up.photo,
+                                "data-broken": "1",
                                 alt: "",
                                 loading: "lazy",
                                 style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -4785,6 +4821,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 1,
                               src: _ctx.V.home.down.logo,
+                              "data-broken": "1",
                               alt: "",
                               style: {"max-width":"36px","max-height":"26px","object-fit":"contain"}
                             }, null, 8 /* PROPS */, _hoisted_82))
@@ -4793,6 +4830,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("span", _hoisted_83, [
                               _createElementVNode("img", {
                                 src: _ctx.V.home.down.photo,
+                                "data-broken": "1",
                                 alt: "",
                                 loading: "lazy",
                                 style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -4853,6 +4891,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
                               _createElementVNode("img", {
                                 src: bp.logo,
+                                "data-broken": "1",
                                 alt: "",
                                 style: {"position":"absolute","left":"12px","right":"12px","top":"26px","width":"94px","height":"48px","object-fit":"contain"}
                               }, null, 8 /* PROPS */, _hoisted_95),
@@ -4868,6 +4907,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("span", _hoisted_99, [
                               _createElementVNode("img", {
                                 src: bp.photo,
+                                "data-broken": "1",
                                 alt: "",
                                 loading: "lazy",
                                 style: {"max-width":"92%","max-height":"92%","object-fit":"contain"}
@@ -4951,6 +4991,7 @@ return function render(_ctx, _cache) {
                             ? (_openBlock(), _createElementBlock("img", {
                                 key: 1,
                                 src: ad.logo,
+                                "data-broken": "1",
                                 alt: "",
                                 style: {"max-width":"32px","max-height":"24px","object-fit":"contain"}
                               }, null, 8 /* PROPS */, _hoisted_117))
@@ -4959,6 +5000,7 @@ return function render(_ctx, _cache) {
                             ? (_openBlock(), _createElementBlock("span", _hoisted_118, [
                                 _createElementVNode("img", {
                                   src: ad.photo,
+                                  "data-broken": "1",
                                   alt: "",
                                   loading: "lazy",
                                   style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -5081,6 +5123,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
                           _createElementVNode("img", {
                             src: ci.logo,
+                            "data-broken": "1",
                             alt: "",
                             style: {"position":"absolute","left":"14px","top":"34px","width":"calc(100% - 28px)","height":"64px","object-fit":"contain"}
                           }, null, 8 /* PROPS */, _hoisted_144),
@@ -5096,6 +5139,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("span", _hoisted_148, [
                           _createElementVNode("img", {
                             src: ci.photo,
+                            "data-broken": "1",
                             alt: "",
                             loading: "lazy",
                             style: {"max-width":"92%","max-height":"92%","object-fit":"contain"}
@@ -5196,6 +5240,7 @@ return function render(_ctx, _cache) {
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 3 }, [
                     _createElementVNode("img", {
                       src: _ctx.V.it.logo,
+                      "data-broken": "1",
                       alt: _ctx.V.it.name,
                       style: {"position":"absolute","left":"40px","top":"56px","width":"calc(100% - 80px)","height":"104px","object-fit":"contain"}
                     }, null, 8 /* PROPS */, _hoisted_168),
@@ -5217,6 +5262,7 @@ return function render(_ctx, _cache) {
                   }, [
                     _createElementVNode("img", {
                       src: _ctx.V.it.photo,
+                      "data-broken": "1",
                       alt: _ctx.V.it.name,
                       style: {"max-width":"94%","max-height":"94%","object-fit":"contain"}
                     }, null, 8 /* PROPS */, _hoisted_173)
@@ -5455,10 +5501,11 @@ return function render(_ctx, _cache) {
                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.mk.sealedBrowse.fan || []), (sf, sf_i) => {
                       return (_openBlock(), _createElementBlock("span", {
                         key: sf_i,
-                        style: _normalizeStyle(`position: absolute; top: ${sf.top}; left: ${sf.left}; width: 38px; height: 40px; border-radius: 8px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transform: rotate(${sf.rot})`)
+                        style: _normalizeStyle(`position: absolute; top: ${sf.top}; left: ${sf.left}; width: 38px; height: 40px; border-radius: 8px; background: ${sf.bg}; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transform: rotate(${sf.rot})`)
                       }, [
                         _createElementVNode("img", {
                           src: sf.photo,
+                          "data-broken": "1",
                           alt: "",
                           style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
                         }, null, 8 /* PROPS */, _hoisted_219)
@@ -5514,6 +5561,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("img", {
                           key: 1,
                           src: mi.logo,
+                          "data-broken": "1",
                           alt: "",
                           style: {"max-width":"36px","max-height":"26px","object-fit":"contain"}
                         }, null, 8 /* PROPS */, _hoisted_230))
@@ -5522,6 +5570,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("span", _hoisted_231, [
                           _createElementVNode("img", {
                             src: mi.photo,
+                            "data-broken": "1",
                             alt: "",
                             loading: "lazy",
                             style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -5605,6 +5654,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 0,
                               src: ex.logo,
+                              "data-broken": "1",
                               alt: "",
                               loading: "lazy",
                               style: {"max-width":"78px","max-height":"42px","object-fit":"contain"}
@@ -5638,6 +5688,7 @@ return function render(_ctx, _cache) {
                 ? (_openBlock(), _createElementBlock("img", {
                     key: 0,
                     src: _ctx.V.cset.logo,
+                    "data-broken": "1",
                     alt: "",
                     style: {"flex":"none","width":"104px","height":"56px","object-fit":"contain"}
                   }, null, 8 /* PROPS */, _hoisted_259))
@@ -5740,6 +5791,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("span", _hoisted_286, [
                           _createElementVNode("img", {
                             src: sp.photo,
+                            "data-broken": "1",
                             alt: "",
                             loading: "lazy",
                             decoding: "async",
@@ -5751,6 +5803,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("span", _hoisted_288, [
                           _createElementVNode("img", {
                             src: sp.logo,
+                            "data-broken": "1",
                             alt: "",
                             loading: "lazy",
                             style: {"max-width":"82%","max-height":"42%","object-fit":"contain","filter":"drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5))"}
@@ -6373,6 +6426,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 1,
                               src: sl.logo,
+                              "data-broken": "1",
                               alt: "",
                               style: {"max-width":"34px","max-height":"24px","object-fit":"contain"}
                             }, null, 8 /* PROPS */, _hoisted_423))
@@ -6381,6 +6435,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("span", _hoisted_424, [
                               _createElementVNode("img", {
                                 src: sl.photo,
+                                "data-broken": "1",
                                 alt: "",
                                 loading: "lazy",
                                 style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -6439,6 +6494,7 @@ return function render(_ctx, _cache) {
                     ? (_openBlock(), _createElementBlock("img", {
                         key: 1,
                         src: _ctx.V.sale.logo,
+                        "data-broken": "1",
                         alt: "",
                         style: {"max-width":"40px","max-height":"28px","object-fit":"contain"}
                       }, null, 8 /* PROPS */, _hoisted_438))
@@ -6447,6 +6503,7 @@ return function render(_ctx, _cache) {
                     ? (_openBlock(), _createElementBlock("span", _hoisted_439, [
                         _createElementVNode("img", {
                           src: _ctx.V.sale.photo,
+                          "data-broken": "1",
                           alt: "",
                           loading: "lazy",
                           style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -6568,6 +6625,7 @@ return function render(_ctx, _cache) {
               _createElementVNode("span", _hoisted_474, [
                 _createElementVNode("img", {
                   src: _ctx.V.ter.release.logo,
+                  "data-broken": "1",
                   alt: "",
                   style: {"max-width":"58px","max-height":"36px","object-fit":"contain"}
                 }, null, 8 /* PROPS */, _hoisted_475)
@@ -6629,10 +6687,10 @@ return function render(_ctx, _cache) {
                   type: "button",
                   onClick: pn.open,
                   "aria-label": _ctx.A(pn.label),
-                  style: _normalizeStyle(`position: absolute; left: ${pn.left}; top: ${pn.top}; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer`)
+                  style: _normalizeStyle(`position: absolute; left: ${pn.left}; top: ${pn.top}; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; font: inherit; cursor: pointer`)
                 }, [
                   _createElementVNode("span", {
-                    style: _normalizeStyle(`min-width: 42px; height: 22px; box-sizing: border-box; padding: 0 6px; border-radius: 11px; border: 2px solid #0B1120; background: ${pn.fill}; color: #0B1120; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45)`)
+                    style: _normalizeStyle(`flex: none; white-space: nowrap; min-width: 42px; height: 22px; box-sizing: border-box; padding: 0 6px; border-radius: 11px; border: 2px solid #0B1120; background: ${pn.fill}; color: #0B1120; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45)`)
                   }, _toDisplayString(pn.text), 5 /* TEXT, STYLE */)
                 ], 12 /* STYLE, PROPS */, _hoisted_486))
               }), 128 /* KEYED_FRAGMENT */)),
@@ -6782,6 +6840,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("img", {
                           key: 1,
                           src: ar.logo,
+                          "data-broken": "1",
                           alt: "",
                           style: {"max-width":"38px","max-height":"26px","object-fit":"contain"}
                         }, null, 8 /* PROPS */, _hoisted_522))
@@ -6790,6 +6849,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("span", _hoisted_523, [
                           _createElementVNode("img", {
                             src: ar.photo,
+                            "data-broken": "1",
                             alt: "",
                             loading: "lazy",
                             style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -6904,6 +6964,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("img", {
                           key: 1,
                           src: ll.logo,
+                          "data-broken": "1",
                           alt: "",
                           style: {"max-width":"34px","max-height":"24px","object-fit":"contain"}
                         }, null, 8 /* PROPS */, _hoisted_551))
@@ -6912,6 +6973,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("span", _hoisted_552, [
                           _createElementVNode("img", {
                             src: ll.photo,
+                            "data-broken": "1",
                             alt: "",
                             loading: "lazy",
                             style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -7256,6 +7318,7 @@ return function render(_ctx, _cache) {
                   }, [
                     _createElementVNode("img", {
                       src: _ctx.V.scan.logo,
+                      "data-broken": "1",
                       alt: _ctx.V.scan.name,
                       style: {"position":"absolute","left":"20px","top":"34px","width":"160px","height":"72px","object-fit":"contain"}
                     }, null, 8 /* PROPS */, _hoisted_622),
@@ -7274,6 +7337,7 @@ return function render(_ctx, _cache) {
                 ? (_openBlock(), _createElementBlock("div", _hoisted_625, [
                     _createElementVNode("img", {
                       src: _ctx.V.scan.photo,
+                      "data-broken": "1",
                       alt: _ctx.V.scan.name,
                       style: {"max-width":"92%","max-height":"92%","object-fit":"contain"}
                     }, null, 8 /* PROPS */, _hoisted_626)
@@ -7297,7 +7361,7 @@ return function render(_ctx, _cache) {
             _createElementVNode("div", _hoisted_633, [
               _createElementVNode("button", {
                 type: "button",
-                onClick: _ctx.V.scan.photo,
+                onClick: _ctx.V.scan.importPhoto,
                 "aria-label": "Importer une photo",
                 style: {"justify-self":"start","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(255, 255, 255, 0.16)","border-radius":"16px","background":"rgba(8, 13, 26, 0.6)","color":"#FFFFFF","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
@@ -7364,6 +7428,7 @@ return function render(_ctx, _cache) {
                   ? (_openBlock(), _createElementBlock("img", {
                       key: 1,
                       src: _ctx.V.sr.logo,
+                      "data-broken": "1",
                       alt: "",
                       style: {"max-width":"72px","max-height":"44px","object-fit":"contain"}
                     }, null, 8 /* PROPS */, _hoisted_644))
@@ -7372,6 +7437,7 @@ return function render(_ctx, _cache) {
                   ? (_openBlock(), _createElementBlock("span", _hoisted_645, [
                       _createElementVNode("img", {
                         src: _ctx.V.sr.photo,
+                        "data-broken": "1",
                         alt: "",
                         loading: "lazy",
                         style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -7595,6 +7661,7 @@ return function render(_ctx, _cache) {
                         ? (_openBlock(), _createElementBlock("img", {
                             key: 1,
                             src: po.logo,
+                            "data-broken": "1",
                             alt: "",
                             style: {"position":"relative","width":"80px","height":"40px","object-fit":"contain"}
                           }, null, 8 /* PROPS */, _hoisted_698))
@@ -7603,6 +7670,7 @@ return function render(_ctx, _cache) {
                         ? (_openBlock(), _createElementBlock("span", _hoisted_699, [
                             _createElementVNode("img", {
                               src: po.photo,
+                              "data-broken": "1",
                               alt: "",
                               loading: "lazy",
                               style: {"max-width":"90%","max-height":"90%","object-fit":"contain"}
@@ -8336,10 +8404,18 @@ return function render(_ctx, _cache) {
     render: render
   }).mount('#app');
   inst.__changed = () => inst.scheduleSave();
-  // Image qui ne charge plus (ex. arrêt de pokemontcg.io) : on passe au visuel de secours, une fois par visuel.
+  // Image qui ne charge plus. Photo ou logo du scellé : adresse notée, l'app affiche le visuel suivant.
+  // Carte (ex. arrêt de pokemontcg.io) : visuel de secours, une fois par visuel.
+  let brokenTimer = null;
   document.addEventListener('error', e => {
     const t = e.target;
-    if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
+    if (!t || t.tagName !== 'IMG' || !t.dataset) return;
+    if (t.dataset.broken) {
+      const bad = t.getAttribute('src');
+      if (bad && !BROKEN.has(bad)) { BROKEN.add(bad); clearTimeout(brokenTimer); brokenTimer = setTimeout(() => inst.__rerender(), 60); }
+      return;
+    }
+    if (!t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
     t.dataset.fellBack = t.dataset.fallback;
     const src = t.dataset.fallback.indexOf('drawn:') === 0 ? TCG.drawnFor(t.dataset.fallback.slice(6)) : t.dataset.fallback;
     if (!src) return;

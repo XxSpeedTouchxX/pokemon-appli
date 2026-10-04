@@ -24,7 +24,7 @@
 <button type="button" onClick="{{ mk.sealedBrowse.open }}" style="flex: none; display: flex; align-items: center; gap: 14px; min-height: 76px; padding: 10px 14px 10px 12px; border: 1px solid #24345C; border-radius: 22px; background: radial-gradient(120% 90% at 0% 0%, rgba(245, 177, 76, 0.18), rgba(245, 177, 76, 0) 62%), #121C33; color: inherit; font: inherit; text-align: left; cursor: pointer">
 <span aria-hidden="true" style="position: relative; flex: none; width: 70px; height: 58px">
 <sc-for list="{{ mk.sealedBrowse.fan }}" as="sf" hint-placeholder-count="3">
-<span style="position: absolute; top: {{ sf.top }}; left: {{ sf.left }}; width: 38px; height: 40px; border-radius: 8px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transform: rotate({{ sf.rot }})"><img src="{{ sf.photo }}" alt="" style="max-width: 90%; max-height: 90%; object-fit: contain"></span>
+<span style="position: absolute; top: {{ sf.top }}; left: {{ sf.left }}; width: 38px; height: 40px; border-radius: 8px; background: {{ sf.bg }}; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transform: rotate({{ sf.rot }})"><img src="{{ sf.photo }}" alt="" style="max-width: 90%; max-height: 90%; object-fit: contain"></span>
 </sc-for>
 </span>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">

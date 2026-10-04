@@ -13,7 +13,7 @@ const src = readFileSync(SRC, 'utf8');
 const dc = src.split('<x-dc>')[1].split('</x-dc>')[0];
 const helmet = dc.match(/<helmet>([\s\S]*?)<\/helmet>/)[1];
 const keyframes = helmet.match(/<style>([\s\S]*?)<\/style>/)[1].replace('body{margin:0}', '');
-const logic = src.match(/<script type="text\/x-dc" data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1];
+let logic = src.match(/<script type="text\/x-dc" data-dc-script[^>]*>([\s\S]*?)<\/script>/)[1];
 let tpl = dc.replace(/<helmet>[\s\S]*?<\/helmet>/, '').trim();
 
 // Ajustements pour un vrai écran : taille du téléphone, carte et courbes à la largeur disponible.
@@ -39,6 +39,18 @@ patch('<sc-if value="{{ it.noCote }}" hint-placeholder-val="{{ false }}">\n<butt
   '<sc-if value="{{ it.upcoming }}" hint-placeholder-val="{{ false }}">\n<button type="button" onClick="{{ notify }}"');
 patch('placeholder="Rechercher « Display »"', 'placeholder="Rechercher « Dracaufeu », « Display »"');
 patch('<img src="{{ mi.img }}" alt=""', '<img src="{{ mi.img }}" alt="" loading="lazy"');
+// Retouches de la logique de la maquette (même contrôle du nombre d'occurrences).
+const patchJs = (from, to, count = 1) => {
+  const n = logic.split(from).length - 1;
+  if (n !== count) throw new Error(`Retouche de logique introuvable (${n}/${count}) : ${from.slice(0, 60)}`);
+  logic = logic.split(from).join(to);
+};
+// Scan : le bouton « Importer une photo » écrasait la photo du produit (image cassée dans le viseur).
+patch('onClick="{{ scan.photo }}"', 'onClick="{{ scan.importPhoto }}"');
+patchJs("photo: () => this.say('Démo : import d’une photo de la galerie'),", "importPhoto: () => this.say('Démo : import d’une photo de la galerie'),");
+// Territoire : pastilles « 50 % » sur une seule ligne, dans la police de l'app.
+patch('width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer">\n<span style="min-width: 42px; height: 22px;',
+  'width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; font: inherit; cursor: pointer">\n<span style="flex: none; white-space: nowrap; min-width: 42px; height: 22px;');
 
 // Écrans et blocs ajoutés (tools/web/catalog.dc.html) : toutes les cartes par extension, produits scellés,
 // carte entière en qualité maximale avec zoom, collection enregistrée sur l'appareil.
@@ -110,6 +122,11 @@ tpl = tpl.replace(/<sc-if value="\{\{ ([\w.]+)\.isSealed \}\}"([^>]*)>([\s\S]*?)
 if (sealedBlocks !== 15) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 15 (' + sealedSeen.join(', ') + ')');
 // Visuel de secours de chaque image de carte (data-fallback), utilisé si l'image ne charge plus.
 tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fallback="{{ ' + o + (o === 'it' ? '.fallbackHi' : '.fallback') + ' }}"');
+// Photos et logos du scellé (data-broken) : si l'image ne charge pas, l'app passe au visuel suivant
+// (photo → logo de l'extension sur son fond → plaque dessinée).
+let brokenMarks = 0;
+tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
+if (brokenMarks !== 36) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 36');
 
 // Gabarit du canevas → gabarit Vue. Les trous {{ a.b }} visent les valeurs de renderVals (préfixe V.)
 // ou un alias de boucle ; sc-if / sc-for deviennent v-if / v-for.
@@ -203,6 +220,7 @@ ${catalogJs}${sealedJs}${persistJs}${radarCoreJs}${radarJs}  // Carte du territo
     const r = vTerritory.call(this, x);
     r.pins.forEach(p => {
       const cx = parseFloat(p.left) + 22, cy = parseFloat(p.top) + 22;
+      p.text = p.text.replace(' %', '\u00a0%');
       p.left = 'calc(' + (cx / 358 * 100).toFixed(2) + '% - 22px)';
       p.top = 'calc(' + (cy / 210 * 100).toFixed(2) + '% - 22px)';
     });
@@ -259,10 +277,18 @@ ${code}
     render: render
   }).mount('#app');
   inst.__changed = () => inst.scheduleSave();
-  // Image qui ne charge plus (ex. arrêt de pokemontcg.io) : on passe au visuel de secours, une fois par visuel.
+  // Image qui ne charge plus. Photo ou logo du scellé : adresse notée, l'app affiche le visuel suivant.
+  // Carte (ex. arrêt de pokemontcg.io) : visuel de secours, une fois par visuel.
+  let brokenTimer = null;
   document.addEventListener('error', e => {
     const t = e.target;
-    if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
+    if (!t || t.tagName !== 'IMG' || !t.dataset) return;
+    if (t.dataset.broken) {
+      const bad = t.getAttribute('src');
+      if (bad && !BROKEN.has(bad)) { BROKEN.add(bad); clearTimeout(brokenTimer); brokenTimer = setTimeout(() => inst.__rerender(), 60); }
+      return;
+    }
+    if (!t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
     t.dataset.fellBack = t.dataset.fallback;
     const src = t.dataset.fallback.indexOf('drawn:') === 0 ? TCG.drawnFor(t.dataset.fallback.slice(6)) : t.dataset.fallback;
     if (!src) return;
@@ -301,7 +327,7 @@ body { margin: 0; background: var(--ground); color: var(--ink); font-family: 'Pl
 input, button { -webkit-tap-highlight-color: transparent; }
 @keyframes pkmSpin { to { transform: rotate(360deg); } }
 ${keyframes}`;
-const fonts = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">';
+const fonts = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">';
 // Vue : copie locale pour l'hébergement (hors ligne possible), CDN autorisé pour la page claude.ai.
 const VUE_LOCAL = 'vendor/vue.runtime.global.prod.js';
 const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global.prod.js';
@@ -358,4 +384,4 @@ mkdirSync(OUT + 'vendor/maplibre', { recursive: true });
   copyFileSync(fileURLToPath(new URL('./node_modules/maplibre-gl/' + f, import.meta.url)), OUT + 'vendor/maplibre/' + f.replace('dist/', '')));
 const imgs = readdirSync(IMG_SRC).filter(f => f.endsWith('.webp'));
 imgs.forEach(f => copyFileSync(IMG_SRC + f, OUT + 'img/' + f));
-console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères), ' + imgs.length + ' images.');
+console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli.');

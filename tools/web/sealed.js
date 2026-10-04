@@ -72,7 +72,27 @@
     const words = fold(q).split(/\s+/).filter(Boolean);
     return words.length ? SEALED.rows.filter(x => words.every(w => x.hay.indexOf(w) >= 0)).map(x => SEALED.item(SP + x.r[SEALED.F.id])) : [];
   };
-  const photoOf = p => (p.photo ? p.photo : '');
+  // Plaque dessinée, dernier repli sans photo ni logo : nom de l'extension (sinon du produit) en blanc, sur fond
+  // transparent. Elle prend la place du logo, sur le fond de l'extension, avec le symbole et le code du produit.
+  const PLAQUES = {};
+  function plaque(p) {
+    const text = p.setName || p.name || 'Produit scellé';
+    if (PLAQUES[text]) return PLAQUES[text];
+    const lines = [];
+    String(text).split(/\s+/).filter(Boolean).forEach(w => {
+      const cur = lines[lines.length - 1];
+      if (cur !== undefined && (cur + ' ' + w).length <= 16) lines[lines.length - 1] = cur + ' ' + w; else lines.push(w);
+    });
+    if (lines.length > 3) { lines.length = 3; lines[2] += '…'; }
+    const longest = Math.max.apply(null, lines.map(l => l.length));
+    const size = Math.min([38, 30, 24][lines.length - 1], 224 / (longest * 0.62)), dy = size * 1.15, y0 = 60 - (lines.length - 1) * dy / 2 + size * 0.36;
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120" viewBox="0 0 240 120" font-family="Helvetica, Arial, sans-serif">'
+      + lines.map((l, i) => '<text x="120" y="' + (y0 + i * dy).toFixed(1) + '" text-anchor="middle" font-size="' + size.toFixed(1)
+        + '" font-weight="800" fill="#FFFFFF" stroke="#000000" stroke-opacity="0.3" stroke-width="3" paint-order="stroke">' + esc(l) + '</text>').join('')
+      + '</svg>';
+    return (PLAQUES[text] = 'data:image/svg+xml,' + encodeURIComponent(svg));
+  }
+  SEALED.plaque = plaque;
 
   // Démo : vraie photo et vrai prix des produits de la maquette présents au catalogue.
   const baseSealedCatalog = proto.catalog;
@@ -94,10 +114,14 @@
   // Pas d'historique inventé pour les produits réels : la courbe viendra de l'archive quotidienne.
   const baseSealedHistory = proto.history;
   proto.history = function (p) { return p.real ? null : baseSealedHistory.call(this, p); };
+  // Visuel d'un produit : sa photo ; sinon (ou si elle ne charge pas) le logo de l'extension sur son fond ; sinon
+  // la plaque dessinée.
   const baseSealedLook = proto.look;
   proto.look = function (p) {
-    const l = baseSealedLook.call(this, p), photo = p.type === 'sealed' ? photoOf(p) : '';
-    return Object.assign(l, { photo: photo, hasPhoto: !!photo, sealedArt: l.isSealed && !photo });
+    const l = baseSealedLook.call(this, p);
+    if (p.type !== 'sealed') return Object.assign(l, { photo: '', hasPhoto: false, sealedArt: false });
+    const photo = p.photo && !BROKEN.has(p.photo) ? p.photo : '';
+    return Object.assign(l, { photo: photo, hasPhoto: !!photo, sealedArt: !photo, logo: l.logo && !BROKEN.has(l.logo) ? l.logo : plaque(p) });
   };
   const baseSealedParent = proto.parentOf;
   proto.parentOf = function (sc) { return sc === 'sealed' ? 'market' : baseSealedParent.call(this, sc); };
@@ -160,11 +184,15 @@
     const mapped = new Set(x.cat.filter(p => p.realId).map(p => p.realId));
     const inCat = new Set(x.cat.filter(p => p.real).map(p => p.id));
     if (!q) {
+      // Éventail : trois produits avec photo ; une photo qui ne charge pas laisse place au logo, sur le fond de l'extension.
       const all = SEALED.list(), photos = all.filter(p => p.photo).slice(0, 3);
       r.sealedBrowse = {
         show: true, open: () => this.openSealedList(),
         sub: all.length + ' produits · visuels officiels · cote Cardmarket',
-        fan: photos.map((p, i) => ({ photo: p.photo, top: ['10px', '4px', '10px'][i], left: ['0px', '16px', '32px'][i], rot: ['-9deg', '0deg', '9deg'][i] }))
+        fan: photos.map((p, i) => {
+          const l = this.look(p);
+          return { photo: l.hasPhoto ? l.photo : l.logo, bg: l.hasPhoto ? '#FFFFFF' : l.bg, top: ['10px', '4px', '10px'][i], left: ['0px', '16px', '32px'][i], rot: ['-9deg', '0deg', '9deg'][i] };
+        })
       };
     }
     if (s.mfilter === 'soon') {
@@ -188,7 +216,7 @@
   proto.vSets = function (s) {
     const res = baseSealedSets.call(this, s);
     if (SEALED.status !== 'ready' || (s.eq && s.eq.trim())) return res;
-    const all = SEALED.list(), first = all.find(p => p.photo);
+    const all = SEALED.list(), top = all.find(p => p.photo), first = top && !BROKEN.has(top.photo) ? top : null;
     res.groups = [{
       name: 'Produits scellés', hasNote: false, note: '',
       sets: [{
@@ -215,8 +243,9 @@
       empty: shown.length === 0,
       items: shown.map(p => {
         const k = this.cote(p), q = qty(p), when = p.release ? 'Sortie le ' + this.d2(p.release) : (p.released ? this.d3(p.released) : (p.releaseText || String(p.year)));
-        return Object.assign(this.look(p), {
-          name: p.name, sub: (TYPE_LABEL[p.code] || 'Produit') + ' · ' + when, noPhoto: !p.photo, soon: !!p.release, owned: q > 0, qty: '×' + q,
+        const l = this.look(p);
+        return Object.assign(l, {
+          name: p.name, sub: (TYPE_LABEL[p.code] || 'Produit') + ' · ' + when, noPhoto: !l.hasPhoto, soon: !!p.release, owned: q > 0, qty: '×' + q,
           price: k !== null ? (k >= 100 ? this.eur0(k) : this.eur(k)) : (typeof p.low === 'number' ? '~' + this.eur0(p.low) : 'prix à venir'),
           priceColor: k !== null ? '#F3F6FC' : '#9AA8C3',
           label: p.name + ', ' + when + (k !== null ? ', cote ' + this.eur(k) : '') + (q ? ', ' + q + ' dans ta collection' : ''),
