@@ -233,7 +233,7 @@
     if (SEALED.status !== 'ready') return Object.assign({}, EMPTY_SEALED, { count: SEALED.status === 'error' ? 'Catalogue scellé indisponible pour le moment.' : 'Chargement du catalogue scellé…' });
     const c = this.compute(s), all = SEALED.list(), f = TYPE_FILTERS.some(d => d[0] === s.sfilter) ? s.sfilter : 'all';
     const shown = f === 'all' ? all : all.filter(p => p.code === f);
-    const qty = p => (c.stock[p.id] ? c.stock[p.id].qty : 0), withPhoto = all.filter(p => p.photo).length;
+    const withPhoto = all.filter(p => p.photo).length;
     const defs = TYPE_FILTERS.filter(d => d[0] === 'all' || all.some(p => p.code === d[0]));
     return {
       countText: all.length + ' produits · ' + withPhoto + ' visuels officiels',
@@ -241,17 +241,7 @@
       filters: defs.map(([k, label]) => Object.assign({ label: label, on: f === k, pick: () => this.setState({ sfilter: k }) }, this.chip(f === k))),
       count: shown.length + (shown.length > 1 ? ' produits' : ' produit') + ' · du plus récent au plus ancien',
       empty: shown.length === 0,
-      items: shown.map(p => {
-        const k = this.cote(p), q = qty(p), when = p.release ? 'Sortie le ' + this.d2(p.release) : (p.released ? this.d3(p.released) : (p.releaseText || String(p.year)));
-        const l = this.look(p);
-        return Object.assign(l, {
-          name: p.name, sub: (TYPE_LABEL[p.code] || 'Produit') + ' · ' + when, noPhoto: !l.hasPhoto, soon: !!p.release, owned: q > 0, qty: '×' + q,
-          price: k !== null ? (k >= 100 ? this.eur0(k) : this.eur(k)) : (typeof p.low === 'number' ? '~' + this.eur0(p.low) : 'prix à venir'),
-          priceColor: k !== null ? 'var(--pkm-t1)' : 'var(--pkm-t3)',
-          label: p.name + ', ' + when + (k !== null ? ', cote ' + this.eur(k) : '') + (q ? ', ' + q + ' dans ta collection' : ''),
-          open: () => this.openTcg(p.id)
-        });
-      })
+      items: shown.map(p => this.featureCard(p, c.stock))
     };
   };
 

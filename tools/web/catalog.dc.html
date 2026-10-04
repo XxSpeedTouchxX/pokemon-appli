@@ -125,34 +125,7 @@
 <sc-if value="{{ sl.empty }}" hint-placeholder-val="{{ false }}">
 <p style="margin: 0; padding: 24px 0; text-align: center; font-size: 14px; color: #9AA8C3">Aucun produit de ce type.</p>
 </sc-if>
-<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px">
-<sc-for list="{{ sl.items }}" as="sp" hint-placeholder-count="6">
-<button type="button" onClick="{{ sp.open }}" aria-label="{{ sp.label }}" style="display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
-<span style="position: relative; display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: 18px; overflow: hidden; background: {{ sp.bg }}; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08)">
-<sc-if value="{{ sp.hasPhoto }}" hint-placeholder-val="{{ true }}">
-<span style="position: absolute; inset: 0; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><img src="{{ sp.photo }}" alt="" loading="lazy" decoding="async" style="max-width: 88%; max-height: 88%; object-fit: contain"></span>
-</sc-if>
-<sc-if value="{{ sp.noPhoto }}" hint-placeholder-val="{{ false }}">
-<span style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; box-sizing: border-box">
-<img src="{{ sp.logo }}" alt="" loading="lazy" style="max-width: 82%; max-height: 42%; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5))">
-<span style="padding: 3px 9px; border-radius: 8px; border: 1.5px solid rgba(255, 255, 255, 0.4); font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: #FFFFFF">{{ sp.code }}</span>
-</span>
-</sc-if>
-<sc-if value="{{ sp.soon }}" hint-placeholder-val="{{ false }}">
-<span style="position: absolute; left: 7px; top: 7px; padding: 2px 8px; border-radius: 999px; background: #F5B14C; color: #0B1120; font-size: 11px; font-weight: 800">À venir</span>
-</sc-if>
-<sc-if value="{{ sp.owned }}" hint-placeholder-val="{{ false }}">
-<span style="position: absolute; top: 7px; right: 7px; padding: 1px 8px; border-radius: 999px; background: rgba(8, 13, 26, 0.85); border: 1px solid rgba(168, 182, 255, 0.5); color: #FFFFFF; font-size: 11.5px; font-weight: 700">{{ sp.qty }}</span>
-</sc-if>
-</span>
-<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 0 2px">
-<span style="font-size: 13px; font-weight: 700; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{ sp.name }}</span>
-<span style="font-size: 11.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ sp.sub }}</span>
-<span style="font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{ sp.priceColor }}">{{ sp.price }}</span>
-</span>
-</button>
-</sc-for>
-</div>
+<!-- liste : produits scellés -->
 </sc-if>
 
 <!-- fragment: item-card -->

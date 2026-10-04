@@ -89,7 +89,7 @@ patch('<div role="group" aria-label="Filtre du marché"', FRAG['market-browse'] 
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG.screens + '\n<sc-if value="{{ ui.isProfile }}"');
 // Fiche : la carte entière (et non plus le haut de la carte), agrandissable ; mention du visuel anglais.
 patchRe(/<sc-if value="\{\{ it\.plainCard \}\}"[^>]*>\n<img src="\{\{ it\.img \}\}"[^\n]*\n<\/sc-if>/, FRAG['item-card'].trim());
-patch('<section aria-label="Visuel" style="flex: none; position: relative; height: 292px;', '<section aria-label="Visuel" style="flex: none; position: relative; height: 330px;');
+patch('<section aria-label="Visuel" style="flex: none; position: relative; height: 292px;', '<section aria-label="Visuel" style="flex: none; position: relative; height: {{ it.visH }}; aspect-ratio: {{ it.visAr }};');
 patch('left: -40px; top: -40px; width: 438px; height: 372px;', 'left: -40px; top: -40px; width: 438px; height: 410px;');
 afterSection('Visuel', FRAG['item-note']);
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
@@ -109,15 +109,72 @@ wrapSection('Derniers ajouts', 'home.hasAdds');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques du Radar réelles (OpenStreetMap) · collection, ventes et magasins de Territoire fictifs');
-// Produits scellés : chaque vignette a une variante « vraie photo » (tools/web/sealed.js), sur carte blanche.
-const PHOTO_INLINE = o => `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #FFFFFF"><img src="{{ ${o}.photo }}" alt="" loading="lazy" style="max-width: 90%; max-height: 90%; object-fit: contain"></span>`;
-const PHOTO_TILE = o => `<span style="position: absolute; left: 8%; top: 7%; width: 84%; height: 86%; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35)"><img src="{{ ${o}.photo }}" alt="" loading="lazy" style="max-width: 92%; max-height: 92%; object-fit: contain"></span>`;
-const PHOTO_ITEM = '<button type="button" onClick="{{ it.zoom }}" aria-label="{{ it.zoomLabel }}" style="position: absolute; left: 50%; top: 16px; width: 270px; height: 266px; margin-left: -135px; padding: 0; border: 0; border-radius: 18px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); cursor: zoom-in"><img src="{{ it.photo }}" alt="{{ it.name }}" style="max-width: 94%; max-height: 94%; object-fit: contain"></button>';
-const PHOTO_SCAN = '<div style="position: absolute; left: 22px; top: 40px; width: 200px; height: 220px; border-radius: 14px; background: #FFFFFF; transform: rotate(-2deg); box-shadow: 0 26px 44px rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; overflow: hidden"><img src="{{ scan.photo }}" alt="{{ scan.name }}" style="max-width: 92%; max-height: 92%; object-fit: contain"></div>';
+// Articles mis en avant (tools/web/showcase.js).
+// - Accueil, « Mes plus belles pièces » : tuile double (220 px) pour le scellé, photo 16:9 en haut.
+patch('style="position: relative; flex: none; width: 118px; height: 164px;', 'style="position: relative; flex: none; width: {{ bp.tileW }}; height: 164px;');
+patch('<img src="{{ bp.logo }}" alt="" style="position: absolute; left: 12px; right: 12px; top: 26px; width: 94px; height: 48px; object-fit: contain">',
+  '<img src="{{ bp.logo }}" alt="" style="position: absolute; left: 12px; right: 12px; top: 26px; width: calc(100% - 24px); height: 48px; object-fit: contain">');
+patch('style="position: absolute; left: 42px; top: 80px; fill: none;', 'style="position: absolute; left: 50%; margin-left: -17px; top: 80px; fill: none;');
+// - Vignettes des listes (ventes, lots, arrivages, Marché, scan…) : plus larges pour le scellé (largeur × wk),
+//   cadre doré des cartes ultra rares (ring).
+let slots = 0;
+tpl = tpl.replace(/(<(?:span|button)\b[^>]*?style="position: relative; flex: none; )width: (\d+)px; height: (\d+)px;([^"]*?background: \{\{ ([\w.]+)\.bg \}\};)/g, (m, head, w, h, rest, o) => {
+  slots++;
+  return head + 'width: calc({{ ' + o + '.wk }} * ' + w + 'px); height: calc({{ ' + o + '.hk }} * ' + h + 'px); outline: {{ ' + o + '.ring }}; outline-offset: -1.5px;' + rest;
+});
+if (slots !== 10) throw new Error('Vignettes de liste : ' + slots + ' au lieu de 10');
+patch('aria-label="{{ po.label }}" style="flex: none; width: 104px;', 'aria-label="{{ po.label }}" style="flex: none; width: calc({{ po.wk }} * 104px);');
+// - Collection : le scellé sur toute la largeur de la grille, visuel 16:9 ; grille sans trous.
+patch('<button type="button" onClick="{{ ci.open }}" style="display: flex;', '<button type="button" onClick="{{ ci.open }}" style="grid-column: {{ ci.col }}; display: flex;');
+patch('<span style="position: relative; display: block; height: 176px; border-radius: 14px; overflow: hidden; background: {{ ci.bg }};',
+  '<span style="position: relative; display: block; height: {{ ci.h }}; aspect-ratio: {{ ci.ar }}; border-radius: 14px; overflow: hidden; background: {{ ci.bg }};');
+patch('<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">\n<sc-for list="{{ coll.list }}"',
+  '<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: dense; gap: 10px">\n<sc-for list="{{ coll.list }}"');
+// - Accueil : l'arrivage près de toi vient des magasins de démonstration.
+patch('</svg>Arrivage près de toi</span>', '</svg><span style="white-space: nowrap">Arrivage près de toi</span><span style="flex: none; padding: 0 5px; border-radius: 999px; border: 1px solid rgba(94, 224, 207, 0.34); font-size: 10px; font-weight: 700">Démo</span></span>');
+// - Carrousels de produits scellés en grand (16:9) : « Sorties du moment » (Accueil), « Scellé à la une » (Marché).
+const FEATURE_CARD = (v, box) => `<button type="button" onClick="{{ ${v}.open }}" aria-label="{{ ${v}.label }}" style="${box} display: flex; flex-direction: column; padding: 0; border: 1px solid #24345C; border-radius: 20px; overflow: hidden; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; background: {{ ${v}.bg }}">
+<sc-if value="{{ ${v}.hasPhoto }}" hint-placeholder-val="{{ true }}"><img src="{{ ${v}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover"></sc-if>
+<sc-if value="{{ ${v}.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ ${v}.logo }}" alt="" loading="lazy" style="position: absolute; left: 20%; top: 18%; width: 60%; height: 44%; object-fit: contain"><span style="position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 1px 6px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 6px; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ ${v}.code }}</span></sc-if>
+<sc-if value="{{ ${v}.hasTag }}" hint-placeholder-val="{{ true }}"><span style="position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 999px; background: {{ ${v}.tagBg }}; color: #0B1120; font-size: 11px; font-weight: 800">{{ ${v}.tag }}</span></sc-if>
+<sc-if value="{{ ${v}.owned }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 8px; right: 8px; padding: 1px 8px; border-radius: 999px; background: rgba(8, 13, 26, 0.85); color: #FFFFFF; font-size: 11.5px; font-weight: 700">{{ ${v}.qty }}</span></sc-if>
+</span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding: 10px 12px 12px; min-width: 0">
+<span style="font-size: 14px; font-weight: 700; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ${v}.name }}</span>
+<span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ${v}.sub }}</span>
+<span style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 4px"><span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: {{ ${v}.priceColor }}">{{ ${v}.price }}</span><span style="font-size: 11.5px; color: #7D8BA8">{{ ${v}.priceLabel }}</span></span>
+</span>
+</button>`;
+const CAROUSEL = (root, label) => `<sc-if value="{{ ${root}.show }}" hint-placeholder-val="{{ true }}">
+<section aria-label="${label}" style="flex: none; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">${label}</h2>
+<button type="button" onClick="{{ ${root}.all }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ ${root}.allLabel }}</button>
+</div>
+<div style="display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px 4px; scroll-snap-type: x mandatory; scroll-padding-left: 16px">
+<sc-for list="{{ ${root}.items }}" as="fx" hint-placeholder-count="3">
+${FEATURE_CARD('fx', 'flex: none; width: 240px; scroll-snap-align: start;')}
+</sc-for>
+</div>
+</section>
+</sc-if>
+`;
+afterSection('Valeur de ma collection', CAROUSEL('home.rel', 'Sorties du moment'));
+patch(FRAG['market-browse'], CAROUSEL('mk.feat', 'Scellé à la une') + FRAG['market-browse']);
+// - Produits scellés : une colonne de grandes cartes.
+patch('<!-- liste : produits scellés -->', '<div style="flex: none; display: flex; flex-direction: column; gap: 14px">\n<sc-for list="{{ sl.items }}" as="sp" hint-placeholder-count="4">\n'
+  + FEATURE_CARD('sp', 'width: 100%;') + '\n</sc-for>\n</div>');
+// Produits scellés : chaque vignette a une variante « vraie photo » (tools/web/sealed.js), qui remplit son cadre.
+const PHOTO_INLINE = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover">`;
+const PHOTO_FILL = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover">`;
+const PHOTO_BEST = '<img src="{{ bp.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 124px; object-fit: cover">';
+const PHOTO_ITEM = '<button type="button" onClick="{{ it.zoom }}" aria-label="{{ it.zoomLabel }}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in"><img src="{{ it.photo }}" alt="{{ it.name }}" style="display: block; width: 100%; height: 100%; object-fit: cover"></button>';
+const PHOTO_SCAN = '<div style="position: absolute; left: 12px; top: 88px; width: 220px; height: 124px; border-radius: 14px; overflow: hidden; transform: rotate(-2deg); box-shadow: 0 26px 44px rgba(0, 0, 0, 0.6)"><img src="{{ scan.photo }}" alt="{{ scan.name }}" style="display: block; width: 100%; height: 100%; object-fit: cover"></div>';
 let sealedBlocks = 0; const sealedSeen = [];
 tpl = tpl.replace(/<sc-if value="\{\{ ([\w.]+)\.isSealed \}\}"([^>]*)>([\s\S]*?)<\/sc-if>/g, (m, o, attrs, body) => {
   sealedBlocks++; sealedSeen.push(o);
-  const photo = o === 'it' ? PHOTO_ITEM : o === 'scan' ? PHOTO_SCAN : /position: absolute/.test(body) ? PHOTO_TILE(o) : PHOTO_INLINE(o);
+  const photo = o === 'it' ? PHOTO_ITEM : o === 'scan' ? PHOTO_SCAN : o === 'bp' ? PHOTO_BEST : o === 'ci' ? PHOTO_FILL(o) : PHOTO_INLINE(o);
   return `<sc-if value="{{ ${o}.sealedArt }}"${attrs}>${body}</sc-if><sc-if value="{{ ${o}.hasPhoto }}" hint-placeholder-val="{{ false }}">${photo}</sc-if>`;
 });
 if (sealedBlocks !== 15) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 15 (' + sealedSeen.join(', ') + ')');
@@ -127,7 +184,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 36) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 36');
+if (brokenMarks !== 40) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 40');
 
 // Thème (tools/web/theme.mjs) : couleurs du gabarit et de la logique en variables CSS, surfaces sombres repérées.
 const themed = themeTemplate(tpl), themedJs = themeScript(logic);
@@ -190,6 +247,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const catalogJs = readFileSync(fileURLToPath(new URL('./catalog.js', import.meta.url)), 'utf8');
 const persistJs = readFileSync(fileURLToPath(new URL('./persist.js', import.meta.url)), 'utf8');
 const sealedJs = readFileSync(fileURLToPath(new URL('./sealed.js', import.meta.url)), 'utf8');
+const showcaseJs = readFileSync(fileURLToPath(new URL('./showcase.js', import.meta.url)), 'utf8');
 const radarCoreJs = readFileSync(fileURLToPath(new URL('./radar-core.js', import.meta.url)), 'utf8');
 const radarJs = readFileSync(fileURLToPath(new URL('./radar.js', import.meta.url)), 'utf8');
 
@@ -205,7 +263,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + radarJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + radarJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* PKM-App · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -225,7 +283,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${persistJs}${radarCoreJs}${radarJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${persistJs}${radarCoreJs}${radarJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
