@@ -774,7 +774,7 @@ class Component extends DCLogic {
       shutter: () => this.setState({ scanSheet: true, sf: this.scanFormSeed() }),
       close: () => this.pop(),
       manual: () => this.openSheet('buy', pid),
-      importPhoto: () => this.say('Démo : import d’une photo de la galerie'),
+      photo: () => this.say('Démo : import d’une photo de la galerie'),
       count: s.scanned > 0 ? s.scanned + (s.scanned > 1 ? ' articles ajoutés depuis l’ouverture' : ' article ajouté depuis l’ouverture') : 'Scan en continu : enchaîne les cartes'
     });
   }
@@ -3791,6 +3791,404 @@ class Component extends DCLogic {
     }
     return { start: start, read: read, band: band, stop: stop, simd: () => (st.simd === null ? (st.simd = simd()) : st.simd) };
   })();
+  // ——— Scan réel : caméra, lecture continue, propositions, ajout (calculs : scan-core.js ; lecture : scan-ocr.js) ———
+  // L'écran Scan de la maquette était simulé (article tiré d'une liste de démo, confiance inventée). Ici :
+  // - caméra arrière (getUserMedia) ; la vidéo est montée hors de Vue dans #pkm-scan-cam, comme la carte du Radar ;
+  // - lecture continue : la zone du cadre est copiée, lue (ScanOcr), rapprochée du catalogue (ScanCore) ; les indices
+  //   s'additionnent d'une lecture à l'autre (ScanCore.decide), puis « C'est laquelle ? » propose 3 cartes ;
+  // - déclencheur : lecture fine ; « Prendre une photo » et « Importer une photo » : même lecture sur une photo ;
+  // - la caméra s'arrête dès qu'on quitte l'écran ou l'app ; aucune image n'est envoyée ni gardée ;
+  // - onglet Scellé : recherche parmi les vrais produits (sealed.json n'a pas de code-barres).
+  // ?debug=scan affiche les bandes lues, le texte reconnu et les temps (réglages sur téléphone).
+  const SCAN = {
+    gen: 0, on: false, stream: null, video: null, starting: false, idx: null, frames: [], timer: 0, since: 0,
+    miss: 0, inv: false, cool: new Map(), hasTorch: false, fine: false, back: null, ev: {}, stopWorker: 0,
+    thumb: null, cvLoop: null, cvShot: null, debug: false, inst: null
+  };
+  try { SCAN.debug = /[?&]debug=scan(&|$)/.test(location.search); } catch (e) { /* adresse sans paramètres */ }
+  const SCAN_PANELS = {
+    denied: ['Caméra refusée', 'Autorise la caméra pour ce site dans les réglages du navigateur, puis réessaie. Tu peux aussi prendre une photo de la carte.', true],
+    nocam: ['Pas de caméra disponible', 'Ce navigateur ne donne pas accès à la caméra (ordinateur, ou navigateur intégré d’une app). Prends une photo de la carte ou importe-la.', false],
+    busy: ['Caméra occupée', 'Une autre app utilise la caméra. Ferme-la, puis réessaie.', true],
+    error: ['La lecture n’a pas pu démarrer', 'La première fois, l’app télécharge son moteur de lecture (4,7 Mo). Vérifie ta connexion, puis réessaie.', true]
+  };
+
+  // Arrêt de la caméra : pistes coupées (le voyant s'éteint), vidéo retirée, lecture arrêtée.
+  SCAN.stopCam = function () {
+    SCAN.gen++;
+    clearTimeout(SCAN.timer); SCAN.timer = 0;
+    if (SCAN.stream) SCAN.stream.getTracks().forEach(t => { try { t.stop(); } catch (e) { /* déjà arrêtée */ } });
+    SCAN.stream = null; SCAN.starting = false; SCAN.hasTorch = false;
+    if (SCAN.video) { try { SCAN.video.srcObject = null; } catch (e) { /* rien */ } SCAN.video.remove(); SCAN.video = null; }
+  };
+  // La vidéo dans le conteneur affiché (Vue ne touche pas à son contenu).
+  SCAN.attach = function () {
+    const cam = document.getElementById('pkm-scan-cam');
+    if (cam && SCAN.video && SCAN.video.parentNode !== cam) cam.insertBefore(SCAN.video, cam.firstChild);
+  };
+  // Caméra arrière, puis moteur de lecture et index du catalogue.
+  SCAN.startCam = function (inst) {
+    const gen = ++SCAN.gen, md = navigator.mediaDevices;
+    if (!md || !md.getUserMedia) { inst.setState({ scanPhase: 'nocam' }); return; }
+    SCAN.starting = true;
+    md.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } } }).then(stream => {
+      if (gen !== SCAN.gen) { stream.getTracks().forEach(t => t.stop()); return; }
+      SCAN.stream = stream; SCAN.starting = false; SCAN.back = null;
+      if (inst.st().scanTorch) inst.setState({ scanTorch: false });
+      const v = document.createElement('video');
+      v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.setAttribute('autoplay', '');
+      v.muted = true; v.playsInline = true;
+      v.style.cssText = 'position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover';
+      v.srcObject = stream;
+      SCAN.video = v;
+      SCAN.attach();
+      const play = v.play();
+      if (play && play.catch) play.catch(() => {});
+      const track = stream.getVideoTracks()[0];
+      try {
+        const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+        SCAN.hasTorch = !!caps.torch;
+        if (caps.focusMode && caps.focusMode.indexOf('continuous') >= 0) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+      } catch (e) { SCAN.hasTorch = false; }
+      if (track) track.addEventListener('ended', () => { if (gen === SCAN.gen) { SCAN.stopCam(); SCAN.sync(inst); } });
+      SCAN.ready(inst, gen);
+    }).catch(e => {
+      if (gen !== SCAN.gen) return;
+      SCAN.starting = false;
+      const n = e && e.name;
+      inst.setState({ scanPhase: /NotAllowed|Security|PermissionDenied/.test(n) ? 'denied' : /NotReadable|TrackStart|Abort/.test(n) ? 'busy' : 'nocam' });
+    });
+  };
+  // Index du catalogue complet, construit une fois (le catalogue se charge au démarrage de l'app).
+  SCAN.catalog = function () {
+    if (SCAN.idx) return Promise.resolve(SCAN.idx);
+    return new Promise((ok, ko) => {
+      const t0 = Date.now(), wait = () => {
+        if (TCG.status === 'ready' && TCG.doc) { SCAN.idx = ScanCore.index(TCG.doc); ok(SCAN.idx); } else if (TCG.status === 'error' || Date.now() - t0 > 30000) ko(new Error('Catalogue indisponible'));
+        else setTimeout(wait, 250);
+      };
+      wait();
+    });
+  };
+  // Moteur de lecture prêt (progression affichée la première fois), puis lecture continue.
+  SCAN.ready = function (inst, gen) {
+    let last = -5;
+    // Au retour dans l'app, la caméra se rallume sans toucher aux propositions affichées.
+    if (inst.st().scanPhase === 'idle') inst.setState({ scanPhase: 'loading', scanProg: 0 });
+    ScanOcr.start((status, p) => {
+      const k = /core/.test(status) ? 0.6 * p : /language|traineddata/.test(status) ? 0.6 + 0.3 * p : /initializ/.test(status) ? 0.9 + 0.1 * p : null;
+      if (k === null || gen !== SCAN.gen) return;
+      const pct = Math.round(k * 100);
+      if (pct >= last + 5) { last = pct; inst.setState({ scanProg: pct }); }
+    }).then(() => SCAN.catalog()).then(() => {
+      if (gen !== SCAN.gen) return;
+      SCAN.frames = []; SCAN.since = Date.now(); SCAN.miss = 0;
+      if (inst.st().scanPhase === 'loading') inst.setState({ scanPhase: 'live', scanMsg: '' });
+      SCAN.loop(inst, gen);
+    }).catch(() => { if (gen === SCAN.gen) { SCAN.stopCam(); inst.setState({ scanPhase: 'error' }); } });
+  };
+
+  // Copie de la zone du cadre (en pixels de la vidéo) dans un canevas : la lecture travaille sur cette copie.
+  SCAN.grab = function (which) {
+    const v = SCAN.video, cam = document.getElementById('pkm-scan-cam'), fr = document.getElementById('pkm-scan-frame');
+    if (!v || !cam || !fr || v.readyState < 2 || !v.videoWidth || !v.videoHeight) return null;
+    const a = cam.getBoundingClientRect(), b = fr.getBoundingClientRect();
+    const m = ScanCore.coverMap({ w: a.width, h: a.height }, { w: v.videoWidth, h: v.videoHeight }, { x: b.left - a.left, y: b.top - a.top, w: b.width, h: b.height });
+    if (m.sw < 40 || m.sh < 40) return null;
+    const c = SCAN[which] || (SCAN[which] = document.createElement('canvas'));
+    c.width = Math.round(m.sw); c.height = Math.round(m.sh);
+    c.getContext('2d', { willReadFrequently: true }).drawImage(v, m.sx, m.sy, m.sw, m.sh, 0, 0, c.width, c.height);
+    return { canvas: c, rect: { sx: 0, sy: 0, sw: c.width, sh: c.height } };
+  };
+  // Image à ne pas lire : carte en mouvement, ou grand reflet sur le bas de la carte (là où est le numéro).
+  SCAN.gate = function (shot) {
+    const c = shot.canvas, w = 120, h = 24, t = SCAN.thumb || (SCAN.thumb = document.createElement('canvas'));
+    t.width = w; t.height = h;
+    const g = t.getContext('2d', { willReadFrequently: true });
+    g.drawImage(c, 0, c.height * 0.86, c.width, c.height * 0.14, 0, 0, w, h);
+    const d = g.getImageData(0, 0, w, h).data, cur = new Uint8Array(w * h);
+    let bright = 0, diff = 0;
+    for (let i = 0, j = 0; i < w * h; i++, j += 4) { const y = (299 * d[j] + 587 * d[j + 1] + 114 * d[j + 2]) / 1000 | 0; cur[i] = y; if (y >= 250) bright++; }
+    const prev = SCAN.prevThumb;
+    if (prev) { for (let i = 0; i < cur.length; i++) diff += Math.abs(cur[i] - prev[i]); diff /= cur.length; }
+    SCAN.prevThumb = cur;
+    if (prev && diff > 32) return 'Tiens le téléphone immobile';
+    if (bright / cur.length > 0.25) return 'Reflet sur la carte : incline-la un peu';
+    return null;
+  };
+  // Lecture continue : une lecture à la fois, environ une à deux par seconde ; en pause sous les propositions et la fiche.
+  SCAN.loop = function (inst, gen) {
+    clearTimeout(SCAN.timer);
+    const step = () => {
+      if (gen !== SCAN.gen) return;
+      const s = inst.st();
+      if (s.screen !== 'scan' || s.scanPhase !== 'live' || s.scanSheet || s.sheet || document.hidden || SCAN.fine) { SCAN.timer = setTimeout(step, 400); return; }
+      const t0 = Date.now(), shot = SCAN.grab('cvLoop');
+      if (!shot) { SCAN.timer = setTimeout(step, 300); return; }
+      const hint = SCAN.gate(shot);
+      if (hint) { SCAN.say(inst, hint); SCAN.timer = setTimeout(step, 350); return; }
+      // Polarité : celle choisie par l'image, puis l'inverse une fois sur deux tant que rien n'est lu.
+      const invert = SCAN.miss % 2 === 1 ? !SCAN.inv : undefined;
+      ScanOcr.read(shot.canvas, shot.rect, { invert: invert, debug: SCAN.debug }).then(read => {
+        if (gen !== SCAN.gen) return;
+        if (inst.st().scanPhase === 'live') SCAN.consider(inst, read, false);
+        SCAN.timer = setTimeout(step, Math.max(150, 650 - (Date.now() - t0)));
+      }).catch(() => { if (gen === SCAN.gen) SCAN.timer = setTimeout(step, 1000); });
+    };
+    step();
+  };
+  // Une lecture → indices, puis propositions si une carte domine (ou tout de suite pour une lecture fine).
+  SCAN.consider = function (inst, read, fine) {
+    const m = ScanCore.match(SCAN.idx, read), now = Date.now();
+    const cands = m.cands.filter(c => !(SCAN.cool.get(c.id) > now));
+    if (!fine) { SCAN.inv = read.inverted; SCAN.miss = m.ev.num ? 0 : SCAN.miss + 1; }
+    ['num', 'name', 'lang'].forEach(k => { if (m.ev[k]) SCAN.ev[k] = m.ev[k]; });
+    if (SCAN.debug) SCAN.showDebug(read, m);
+    SCAN.frames.push(cands);
+    if (SCAN.frames.length > 12) SCAN.frames.shift();
+    const d = fine ? { state: cands.length ? 'ask' : 'wait', ids: cands.map(c => c.id) } : ScanCore.decide(SCAN.frames);
+    if (d.state !== 'wait' && d.ids.length) {
+      const ids = d.ids.concat(cands.map(c => c.id).filter(id => d.ids.indexOf(id) < 0)).slice(0, 3);
+      SCAN.frames = [];
+      try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) { /* pas de vibreur */ }
+      inst.setState({ scanPhase: 'pick', scanCands: ids, scanEv: Object.assign({}, SCAN.ev), scanMsg: '' });
+      return true;
+    }
+    const parts = [m.ev.num ? 'n° ' + m.ev.num : '', m.ev.name || ''].filter(Boolean);
+    SCAN.say(inst, parts.length ? 'Lu : ' + parts.join(' · ') : now - SCAN.since > 12000 ? 'Toujours rien : rapproche la carte, ou appuie sur le déclencheur' : 'Lecture en cours…');
+    return false;
+  };
+  SCAN.say = function (inst, msg) { if (inst.st().scanMsg !== msg) inst.setState({ scanMsg: msg }); };
+  // Déclencheur : lecture fine de l'image en cours (deux polarités pour le numéro), propositions même si la carte
+  // ne domine pas encore.
+  SCAN.shutter = function (inst) {
+    if (SCAN.fine || inst.st().scanPhase !== 'live' || !SCAN.idx) return;
+    const shot = SCAN.grab('cvShot');
+    if (!shot) return;
+    SCAN.fine = true;
+    SCAN.say(inst, 'Lecture fine…');
+    ScanOcr.read(shot.canvas, shot.rect, { fine: true, debug: SCAN.debug }).then(read => {
+      SCAN.fine = false;
+      if (inst.st().scanPhase === 'live' && !SCAN.consider(inst, read, true)) SCAN.say(inst, 'Rien de lisible : rapproche la carte, évite les reflets, ou prends une photo');
+    }).catch(() => { SCAN.fine = false; });
+  };
+  // Photo prise ou importée : pas de cadre ; on lit la carte au centre (format 63 × 88), puis toute la photo.
+  SCAN.photo = function (inst, file) {
+    const s = inst.st();
+    if (!file || s.scanPhase === 'photo') return;
+    SCAN.back = ['denied', 'nocam', 'busy', 'error'].indexOf(s.scanPhase) >= 0 ? s.scanPhase : 'live';
+    inst.setState({ scanPhase: 'photo', scanMsg: 'Lecture de la photo…', scanCands: [], scanPid: null });
+    const url = URL.createObjectURL(file), img = new Image();
+    const fail = msg => { URL.revokeObjectURL(url); inst.setState({ scanPhase: SCAN.back, scanMsg: msg }); };
+    img.onerror = () => fail('Photo illisible : essaie une photo en JPEG');
+    img.onload = () => {
+      const W = img.naturalWidth, H = img.naturalHeight, k = Math.min(W * 0.92 / 0.716, H * 0.92);
+      const center = { sx: (W - k * 0.716) / 2, sy: (H - k) / 2, sw: k * 0.716, sh: k };
+      Promise.all([ScanOcr.start(), SCAN.catalog()])
+        .then(() => ScanOcr.read(img, center, { fine: true, debug: SCAN.debug }))
+        .then(a => ScanOcr.read(img, { sx: 0, sy: 0, sw: W, sh: H }, { fine: true }).then(b => ({ num: a.num + '\n' + b.num, name: a.name + '\n' + b.name, inverted: a.inverted, ms: a.ms, bands: a.bands })))
+        .then(read => {
+          URL.revokeObjectURL(url);
+          SCAN.ev = {};
+          if (inst.st().scanPhase !== 'photo') return;
+          inst.setState({ scanPhase: SCAN.back });
+          if (!SCAN.consider(inst, read, true)) inst.setState({ scanMsg: 'Rien de lisible sur la photo : cadre la carte en entier, sans reflet' });
+        })
+        .catch(() => fail('La lecture n’a pas pu démarrer : vérifie ta connexion'));
+    };
+    img.src = url;
+  };
+  SCAN.setTorch = function (inst, on) {
+    const t = SCAN.stream && SCAN.stream.getVideoTracks()[0];
+    if (!t || !SCAN.hasTorch) return;
+    t.applyConstraints({ advanced: [{ torch: on }] }).then(() => inst.setState({ scanTorch: on })).catch(() => {});
+  };
+  // Mode diagnostic (?debug=scan) : bandes lues, texte reconnu, temps, cartes proposées.
+  SCAN.showDebug = function (read, m) {
+    const cam = document.getElementById('pkm-scan-cam');
+    if (!cam) return;
+    let box = document.getElementById('pkm-scan-debug');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'pkm-scan-debug';
+      box.style.cssText = 'position: absolute; left: 6px; right: 6px; top: 70px; z-index: 2; max-height: 45%; overflow: auto; padding: 6px; border-radius: 8px; background: rgba(0, 0, 0, 0.72); color: #FFFFFF; font: 11px/1.35 monospace; white-space: pre-wrap';
+      cam.appendChild(box);
+    }
+    box.textContent = 'numéro : ' + JSON.stringify(read.num.trim()) + '\nnom : ' + JSON.stringify(read.name.trim()) + '\ntemps : ' + read.ms.num + ' + ' + read.ms.name + ' ms · inversé : ' + read.inverted
+      + '\n→ ' + (m.cands.slice(0, 3).map(c => c.id + ' ' + c.score).join(' | ') || 'rien');
+    (read.bands || []).forEach(c => { c.style.cssText = 'display: block; max-width: 100%; margin-top: 4px; background: #FFFFFF'; box.appendChild(c); });
+  };
+
+  // Après chaque affichage : caméra allumée sur l'écran Scan (onglet Carte, app visible), éteinte ailleurs.
+  SCAN.sync = function (inst) {
+    SCAN.inst = inst;
+    const s = inst.st();
+    if (s.screen !== 'scan') {
+      if (SCAN.on) {
+        SCAN.on = false;
+        SCAN.stopCam();
+        SCAN.frames = []; SCAN.ev = {};
+        // Moteur de lecture libéré deux minutes après la sortie de l'écran.
+        clearTimeout(SCAN.stopWorker);
+        SCAN.stopWorker = setTimeout(() => { if (!SCAN.on) ScanOcr.stop(); }, 120000);
+        if (s.scanPhase !== 'idle' || s.scanPid) inst.setState({ scanPhase: 'idle', scanCands: [], scanPid: null, scanEv: null, scanMsg: '' });
+      }
+      return;
+    }
+    if (!SCAN.on) { SCAN.on = true; clearTimeout(SCAN.stopWorker); }
+    // Pas de caméra pour l'onglet Scellé, ni sur un panneau (refus, absence…), ni pendant la lecture d'une photo
+    // importée depuis un panneau et ses propositions.
+    const fromPanel = !!SCAN_PANELS[SCAN.back] && (s.scanPhase === 'photo' || s.scanPhase === 'pick');
+    const want = s.scanMode !== 'sealed' && !document.hidden && !SCAN_PANELS[s.scanPhase] && !fromPanel;
+    if (want && !SCAN.stream && !SCAN.starting) SCAN.startCam(inst);
+    else if (!want && (SCAN.stream || SCAN.starting)) SCAN.stopCam();
+    SCAN.attach();
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (!SCAN.inst || !SCAN.on) return;
+    if (document.hidden) SCAN.stopCam(); else SCAN.sync(SCAN.inst);
+  });
+  window.addEventListener('pagehide', () => SCAN.stopCam());
+
+  const scanProto = Component.prototype;
+  const baseScanSt = scanProto.st;
+  scanProto.st = function () {
+    const d = baseScanSt.call(this);
+    if (d.scanPhase === undefined) d.scanPhase = 'idle';
+    if (d.scanCands === undefined) d.scanCands = [];
+    if (d.scanQ === undefined) d.scanQ = '';
+    return d;
+  };
+  // Carte choisie (dans le catalogue de l'app grâce à « extra ») ; sinon l'article de démo de la maquette, pour que
+  // la fiche résultat, calculée sur tous les écrans, vise toujours un article connu.
+  const baseScanTarget = scanProto.scanTarget;
+  scanProto.scanTarget = function (s) {
+    const id = s.scanPid;
+    return id && (s.extra || []).indexOf(id) >= 0 && TCG.item(id) ? id : baseScanTarget.call(this, s);
+  };
+  // Choix d'une proposition (ou d'un produit scellé) : fiche résultat, langue préremplie (« EN » lu sur la carte,
+  // ou extension sans version française).
+  scanProto.scanPick = function (id) {
+    const s = this.st(), p = TCG.item(id);
+    if (!p) return;
+    const extra = (s.extra || []).indexOf(id) >= 0 ? s.extra : (s.extra || []).concat([id]), ev = s.scanEv || {};
+    const lang = ev.lang === 'EN' || p.lang === 'EN' ? 'EN' : 'FR';
+    this.setState({ extra: extra, scanPid: id, scanSheet: true, sheet: null, sf: Object.assign(this.scanFormSeed(), { lang: lang }) });
+  };
+  const baseOpenScan = scanProto.openScan;
+  scanProto.openScan = function () {
+    const was = this.st().screen === 'scan';
+    baseOpenScan.call(this);
+    if (!was) this.setState({ scanPhase: 'idle', scanCands: [], scanPid: null, scanEv: null, scanMsg: '', scanMode: 'card', scanAdded: 0 });
+  };
+  // Recherche du Marché, préremplie avec ce qui a été lu.
+  scanProto.scanSearch = function (q) {
+    this.setState({ mq: q || '', mfilter: 'trend', scanSheet: false });
+    this.tab('market');
+  };
+
+  const SCAN_OFF = { modeCard: false, modeSealed: false, picking: false, cands: [], sealedRows: [] };
+  scanProto.vScan = function (x) {
+    const s = x.s;
+    if (s.screen !== 'scan') return SCAN_OFF;
+    const sealed = s.scanMode === 'sealed', ph = s.scanPhase, panel = SCAN_PANELS[ph], live = ph === 'live';
+    const on = 'var(--pkm-accent)', onFg = 'var(--pkm-on-accent)', off = 'transparent', offFg = 'var(--pkm-t2)';
+    const clickInput = id => () => { const el = document.getElementById(id); if (el) { el.value = ''; el.click(); } };
+    const status = ph === 'idle' ? 'Ouverture de la caméra…'
+      : ph === 'loading' ? 'Préparation de la lecture… ' + (s.scanProg || 0) + ' % (une seule fois)'
+        : ph === 'photo' ? 'Lecture de la photo…'
+          : panel ? s.scanMsg || ''
+            : s.scanMsg || 'Lecture en cours…';
+    const n = s.scanAdded || 0, ev = s.scanEv || {};
+    const r = {
+      close: () => this.pop(),
+      modeCard: !sealed, modeSealed: sealed,
+      cardBg: sealed ? off : on, cardFg: sealed ? offFg : onFg, sealedBg: sealed ? on : off, sealedFg: sealed ? onFg : offFg,
+      toCard: () => this.setState({ scanMode: 'card', scanPhase: SCAN_PANELS[ph] ? ph : 'idle', scanCands: [], scanPid: null, scanSheet: false }),
+      toSealed: () => this.setState({ scanMode: 'sealed', scanCands: [], scanPid: null, scanSheet: false }),
+      hasTorch: !sealed && SCAN.hasTorch && !panel, noTorch: sealed || !SCAN.hasTorch || !!panel,
+      torchOn: !!s.scanTorch, torchLabel: s.scanTorch ? 'Éteindre la lampe' : 'Allumer la lampe',
+      torchBg: s.scanTorch ? 'var(--pkm-accent)' : 'rgba(var(--pkm-ink-rgb), 0.66)', torchFg: s.scanTorch ? 'var(--pkm-on-accent)' : 'var(--pkm-white)',
+      torch: () => SCAN.setTorch(this, !s.scanTorch),
+      showFrame: !panel, hasPanel: !!panel, panelTitle: panel ? panel[0] : '', panelText: panel ? panel[1] : '', panelRetry: !!(panel && panel[2]),
+      retryCam: () => this.setState({ scanPhase: 'idle', scanMsg: '' }),
+      hint: 'Place la carte dans le cadre, bien à plat',
+      reading: live || ph === 'photo',
+      status: status, hasStatus: !panel || !!s.scanMsg, dot: panel ? 'var(--pkm-orange)' : live ? 'var(--pkm-green)' : 'var(--pkm-t3)',
+      count: n > 0 ? n + (n > 1 ? ' articles ajoutés depuis l’ouverture' : ' article ajouté depuis l’ouverture') : 'Lecture sur ton téléphone : aucune image n’est envoyée',
+      shutter: () => SCAN.shutter(this), shutterLabel: 'Lecture fine de la carte', shutterOff: !live, shutterOp: live ? '1' : '0.45',
+      takePhoto: clickInput('pkm-scan-photo'), importPhoto: clickInput('pkm-scan-file'),
+      onFile: e => SCAN.photo(this, e && e.target && e.target.files && e.target.files[0]),
+      search: () => this.scanSearch(ev.name || ''),
+      // Propositions.
+      picking: ph === 'pick' && !s.scanSheet && (s.scanCands || []).length > 0, cands: [],
+      evText: [ev.num ? 'n° ' + ev.num : '', ev.name ? '« ' + ev.name + ' »' : ''].filter(Boolean).length
+        ? 'Lu sur la carte : ' + [ev.num ? 'n° ' + ev.num : '', ev.name ? '« ' + ev.name + ' »' : ''].filter(Boolean).join(' · ')
+        : 'Touche la bonne carte pour l’ajouter.',
+      none: () => this.scanSearch(ev.name || ''),
+      retry: () => {
+        const t = Date.now() + 8000;
+        (s.scanCands || []).forEach(id => SCAN.cool.set(id, t));
+        SCAN.frames = []; SCAN.ev = {}; SCAN.since = Date.now();
+        this.setState({ scanPhase: SCAN_PANELS[SCAN.back] ? SCAN.back : 'live', scanCands: [], scanEv: null, scanMsg: '' });
+      },
+      // Onglet Scellé.
+      sealedIntro: 'Les produits scellés n’ont pas encore de code-barres dans nos données : cherche le tien, il s’ajoute en deux appuis.',
+      sq: s.scanQ, onSq: e => this.setState({ scanQ: e.target.value }), sealedRows: [], sealedCount: ''
+    };
+    if (r.picking) {
+      r.cands = s.scanCands.map(id => TCG.item(id)).filter(Boolean).map((p, i) => {
+        const k = this.cote(p), q = x.c.stock[p.id] ? x.c.stock[p.id].qty : 0;
+        return {
+          name: p.name, sub: [p.setName, p.numLabel].filter(Boolean).join(' · ') + (p.lang === 'EN' ? ' · EN' : ''),
+          cote: k !== null && k !== undefined ? 'Cote ' + this.eur(k) : 'Pas encore de cote',
+          img: p.img, fallback: p.fallback, best: i === 0, hasOwned: q > 0, owned: 'à toi ×' + q,
+          bc: i === 0 ? 'var(--pkm-accent)' : 'var(--pkm-line-2)', bg: i === 0 ? 'rgba(var(--pkm-accent-rgb), 0.1)' : 'transparent',
+          aria: p.name + ', ' + [p.setName, p.numLabel].filter(Boolean).join(', ') + (i === 0 ? ', le plus probable' : ''),
+          pick: () => this.scanPick(p.id)
+        };
+      });
+    }
+    if (sealed) {
+      const q = String(s.scanQ || '').trim(), list = SEALED.status !== 'ready' ? [] : q.length >= 2 ? SEALED.search(q) : SEALED.list();
+      r.sealedCount = SEALED.status !== 'ready' ? 'Chargement des produits…' : q.length >= 2 ? list.length + (list.length > 1 ? ' produits' : ' produit') + ' pour « ' + q + ' »'
+        : list.length + ' produits sortis en France · du plus récent au plus ancien';
+      // Visuel : la photo officielle, sinon le logo de l'extension, sinon la plaque dessinée (look, data-broken).
+      r.sealedRows = list.slice(0, 40).map(p => {
+        const k = this.cote(p), l = this.look(p);
+        return { name: p.name, sub: p.sub, pic: l.hasPhoto ? l.photo : l.logo, fit: l.hasPhoto ? 'cover' : 'contain',
+          cote: k !== null && k !== undefined ? this.eur(k) : '—', pick: () => this.scanPick(p.id) };
+      });
+    }
+    return r;
+  };
+  // Fiche résultat : ce qui a été lu, et « Ce n'est pas le bon article ? » revient aux propositions.
+  const baseScanSheet = scanProto.vScanResult;
+  scanProto.vScanResult = function (x) {
+    const r = baseScanSheet.call(this, x), s = x.s;
+    if (!s.scanPid || this.scanTarget(s) !== s.scanPid) return r;
+    const p = TCG.item(s.scanPid), ev = s.scanEv || {}, parts = [ev.num ? 'n° ' + ev.num : '', ev.name ? '« ' + ev.name + ' »' : ''].filter(Boolean);
+    r.conf = p && p.type === 'sealed' ? 'Choisi dans la liste des produits scellés' : parts.length ? 'Lu sur la carte : ' + parts.join(' · ') + ' · vérifie le nom et le numéro' : 'Choisie dans les propositions';
+    r.wrong = () => this.setState({ scanSheet: false, scanPid: null, scanPhase: (s.scanCands || []).length ? 'pick' : s.scanPhase });
+    return r;
+  };
+  // Après l'ajout : retour à la caméra pour la carte suivante ; la même carte n'est pas reproposée tout de suite.
+  const baseSaveScan = scanProto.saveScan;
+  scanProto.saveScan = function () {
+    const s = this.st(), pid = s.scanPid && this.scanTarget(s) === s.scanPid ? s.scanPid : null;
+    baseSaveScan.call(this);
+    if (!pid) return;
+    SCAN.cool.set(pid, Date.now() + 8000);
+    SCAN.frames = []; SCAN.ev = {}; SCAN.since = Date.now();
+    this.setState({ scanPid: null, scanCands: [], scanEv: null, scanMsg: '', scanAdded: (s.scanAdded || 0) + 1,
+      scanPhase: s.scanMode === 'sealed' ? s.scanPhase : SCAN_PANELS[SCAN.back] ? SCAN.back : 'live' });
+  };
+  const baseScanRender = scanProto.renderVals;
+  scanProto.renderVals = function () {
+    const r = baseScanRender.call(this);
+    setTimeout(() => SCAN.sync(this), 0);
+    return r;
+  };
   // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
@@ -5449,65 +5847,68 @@ const _hoisted_748 = {
   "aria-label": "Scanner",
   style: {"position":"absolute","inset":"0","z-index":"15","display":"flex","flex-direction":"column","overflow":"hidden","background":"radial-gradient(90% 60% at 50% 40%, #2B3550 0%, #131A2A 55%, #07090F 100%)","color":"var(--pkm-t1)"}
 }
-const _hoisted_749 = { style: {"position":"relative","display":"flex","align-items":"center","justify-content":"space-between","gap":"10px","padding":"16px 16px 0"} }
-const _hoisted_750 = ["onClick"]
-const _hoisted_751 = {
+const _hoisted_749 = ["onInput"]
+const _hoisted_750 = ["onInput"]
+const _hoisted_751 = { style: {"position":"relative","z-index":"2","display":"flex","align-items":"center","justify-content":"space-between","gap":"10px","padding":"16px 16px 0"} }
+const _hoisted_752 = ["onClick"]
+const _hoisted_753 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_752 = {
-  class: "pkm-dark",
+const _hoisted_754 = {
   role: "group",
   "aria-label": "Que scannes-tu ?",
-  style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"3px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.6)","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","color":"var(--pkm-t1)"}
+  style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"3px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.66)","border":"1px solid rgba(var(--pkm-hl-rgb), 0.16)"}
 }
-const _hoisted_753 = ["onClick", "aria-pressed"]
-const _hoisted_754 = ["onClick", "aria-pressed"]
-const _hoisted_755 = ["onClick", "aria-label", "aria-pressed"]
-const _hoisted_756 = {
+const _hoisted_755 = ["onClick", "aria-pressed"]
+const _hoisted_756 = ["onClick", "aria-pressed"]
+const _hoisted_757 = ["onClick", "aria-label", "aria-pressed"]
+const _hoisted_758 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_757 = { style: {"position":"relative","flex":"1","min-height":"0","display":"flex","flex-direction":"column","align-items":"center","justify-content":"center","gap":"14px"} }
-const _hoisted_758 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
-const _hoisted_759 = { style: {"position":"relative","width":"244px","height":"300px"} }
-const _hoisted_760 = ["src", "data-fallback", "alt"]
-const _hoisted_761 = {
+const _hoisted_759 = {
   key: 1,
-  style: {"position":"absolute","left":"24px","top":"16px","width":"196px","transform":"rotate(-2deg)","box-shadow":"0 26px 44px rgba(var(--pkm-shadow-rgb), 0.6)","border-radius":"8px","overflow":"hidden"}
-}
-const _hoisted_762 = { style: {"display":"flex","align-items":"center","justify-content":"space-between","height":"28px","padding":"0 10px","background":"#E9ECF2","color":"#1B2236","font-family":"'Sora', sans-serif","font-size":"11px","font-weight":"700"} }
-const _hoisted_763 = ["src", "data-fallback", "alt"]
-const _hoisted_764 = ["src", "alt"]
-const _hoisted_765 = {
-  width: "56",
-  height: "56",
-  viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"position":"absolute","left":"72px","top":"122px","fill":"none","stroke":"rgba(var(--pkm-hl-rgb), 0.85)","stroke-width":"1.2","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"flex":"none","width":"44px","height":"44px"}
 }
-const _hoisted_766 = ["d"]
-const _hoisted_767 = {
-  key: 3,
-  style: {"position":"absolute","left":"12px","top":"88px","width":"220px","height":"124px","border-radius":"14px","overflow":"hidden","transform":"rotate(-2deg)","box-shadow":"0 26px 44px rgba(var(--pkm-shadow-rgb), 0.6)"}
+const _hoisted_760 = { style: {"position":"relative","flex":"1","min-height":"0","display":"flex","flex-direction":"column","align-items":"center","justify-content":"center","gap":"12px","padding":"0 16px"} }
+const _hoisted_761 = { style: {"position":"relative","z-index":"2","max-width":"100%","padding":"6px 12px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.7)","color":"var(--pkm-t1)","font-size":"13px","font-weight":"600","text-align":"center"} }
+const _hoisted_762 = {
+  id: "pkm-scan-frame",
+  style: {"position":"relative","flex":"none","height":"min(52dvh, 460px, calc(82vw / 0.716))","aspect-ratio":"63 / 88","border-radius":"18px","box-shadow":"0 0 0 200vmax rgba(var(--pkm-scrim-rgb), 0.5)"}
 }
-const _hoisted_768 = ["src", "alt"]
-const _hoisted_769 = {
-  class: "pkm-dark",
+const _hoisted_763 = {
+  key: 0,
+  "aria-hidden": "true",
+  class: "pkm-anim",
+  style: {"position":"absolute","left":"8%","right":"8%","top":"4%","height":"2px","border-radius":"1px","background":"linear-gradient(90deg, rgba(var(--pkm-accent-rgb), 0), var(--pkm-accent), rgba(var(--pkm-accent-rgb), 0))","box-shadow":"0 0 14px var(--pkm-accent)","animation":"pkmScanLine 2.2s ease-in-out infinite alternate"}
+}
+const _hoisted_764 = ["aria-label"]
+const _hoisted_765 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","color":"var(--pkm-t1)"} }
+const _hoisted_766 = { style: {"margin":"0","font-size":"14px","line-height":"1.45","color":"var(--pkm-t2)"} }
+const _hoisted_767 = ["onClick"]
+const _hoisted_768 = ["onClick"]
+const _hoisted_769 = ["onClick"]
+const _hoisted_770 = ["onClick"]
+const _hoisted_771 = {
+  key: 2,
   role: "status",
-  style: {"display":"flex","align-items":"center","gap":"8px","max-width":"340px","padding":"9px 14px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.78)","border":"1px solid rgba(var(--pkm-green-rgb), 0.45)","font-size":"13.5px","font-weight":"600","color":"var(--pkm-t1)"}
+  "aria-live": "polite",
+  style: {"display":"flex","align-items":"center","gap":"8px","max-width":"100%","box-sizing":"border-box","padding":"9px 14px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.8)","border":"1px solid rgba(var(--pkm-hl-rgb), 0.18)","color":"var(--pkm-t1)","font-size":"13.5px","font-weight":"600"}
 }
-const _hoisted_770 = { style: {"white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_771 = { style: {"margin-top":"-6px","font-size":"12.5px","color":"var(--pkm-t2)"} }
-const _hoisted_772 = ["onClick"]
-const _hoisted_773 = { style: {"position":"relative","display":"flex","flex-direction":"column","align-items":"center","gap":"12px","padding":"0 24px 30px"} }
-const _hoisted_774 = { style: {"font-size":"12px","color":"var(--pkm-t3)"} }
+const _hoisted_772 = { style: {"min-width":"0"} }
+const _hoisted_773 = {
+  key: 0,
+  style: {"position":"relative","display":"flex","flex-direction":"column","align-items":"center","gap":"12px","padding":"0 24px 28px"}
+}
+const _hoisted_774 = { style: {"max-width":"100%","padding":"4px 10px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-t2)","font-size":"12px","text-align":"center"} }
 const _hoisted_775 = { style: {"align-self":"stretch","display":"grid","grid-template-columns":"1fr auto 1fr","align-items":"center"} }
 const _hoisted_776 = ["onClick"]
 const _hoisted_777 = {
@@ -5517,518 +5918,574 @@ const _hoisted_777 = {
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_778 = ["onClick"]
+const _hoisted_778 = ["onClick", "aria-label", "aria-disabled"]
 const _hoisted_779 = ["onClick"]
 const _hoisted_780 = {
   width: "22",
   height: "22",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"1.8","stroke-linecap":"round","stroke-linejoin":"round"}
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_781 = {
-  key: 5,
-  style: {"position":"absolute","inset":"0","z-index":"25","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.55)"}
-}
-const _hoisted_782 = ["onClick"]
-const _hoisted_783 = {
-  class: "pkm-dark",
-  "aria-label": "Résultat du scan",
-  style: {"flex":"none","max-height":"770px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 24px","display":"flex","flex-direction":"column","gap":"14px","color":"var(--pkm-t1)"}
-}
-const _hoisted_784 = { style: {"flex":"none","display":"flex","gap":"14px","align-items":"flex-start"} }
-const _hoisted_785 = ["src", "data-fallback"]
-const _hoisted_786 = ["src"]
-const _hoisted_787 = ["src"]
-const _hoisted_788 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","align-items":"flex-start","gap":"4px"} }
-const _hoisted_789 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"21px","line-height":"1.2","font-weight":"700","letter-spacing":"-0.02em"} }
-const _hoisted_790 = { style: {"font-size":"13px","color":"var(--pkm-t3)"} }
-const _hoisted_791 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
-const _hoisted_792 = ["onClick"]
-const _hoisted_793 = {
-  width: "20",
-  height: "20",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
-}
-const _hoisted_794 = {
-  class: "pkm-dark",
-  "aria-label": "Cote",
-  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","color":"var(--pkm-t1)"}
-}
-const _hoisted_795 = { style: {"display":"flex","flex-direction":"column","gap":"1px"} }
-const _hoisted_796 = { style: {"font-family":"'Sora', sans-serif","font-size":"30px","line-height":"1.1","font-weight":"700","letter-spacing":"-0.03em"} }
-const _hoisted_797 = { style: {"display":"flex","flex-direction":"column","gap":"3px","min-width":"150px"} }
-const _hoisted_798 = { style: {"color":"var(--pkm-t3)"} }
-const _hoisted_799 = { style: {"font-weight":"700","font-variant-numeric":"tabular-nums"} }
-const _hoisted_800 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"8px"} }
-const _hoisted_801 = {
-  role: "group",
-  "aria-label": "Langue",
-  style: {"display":"flex","gap":"8px"}
-}
-const _hoisted_802 = ["onClick", "aria-pressed"]
-const _hoisted_803 = {
-  role: "group",
-  "aria-label": "État",
-  style: {"display":"flex","gap":"8px"}
-}
-const _hoisted_804 = ["onClick", "aria-pressed"]
-const _hoisted_805 = { style: {"flex":"none","display":"grid","grid-template-columns":"minmax(0, 1fr) auto","gap":"10px","align-items":"end"} }
-const _hoisted_806 = { style: {"display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
-const _hoisted_807 = ["value", "onInput"]
-const _hoisted_808 = { style: {"display":"flex","flex-direction":"column","gap":"6px"} }
-const _hoisted_809 = {
-  class: "pkm-dark",
-  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)"}
-}
-const _hoisted_810 = ["onClick"]
-const _hoisted_811 = {
-  width: "18",
-  height: "18",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
-}
-const _hoisted_812 = {
-  "aria-live": "polite",
-  style: {"min-width":"26px","text-align":"center","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"}
-}
-const _hoisted_813 = ["onClick"]
-const _hoisted_814 = {
-  width: "18",
-  height: "18",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
-}
-const _hoisted_815 = { style: {"flex":"none","margin-top":"-6px","font-size":"12.5px","color":"var(--pkm-t4)"} }
-const _hoisted_816 = {
-  class: "pkm-dark",
-  "aria-label": "Effet sur ta collection",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
-}
-const _hoisted_817 = {
-  width: "40",
-  height: "40",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"flex":"none","overflow":"visible"}
-}
-const _hoisted_818 = ["d"]
-const _hoisted_819 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_820 = { style: {"font-size":"14px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
-const _hoisted_821 = {
-  width: "15",
-  height: "15",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
-}
-const _hoisted_822 = ["d"]
-const _hoisted_823 = ["onClick"]
-const _hoisted_824 = ["onClick"]
-const _hoisted_825 = {
-  key: 6,
-  style: {"position":"absolute","inset":"0","z-index":"20","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.62)"}
-}
-const _hoisted_826 = ["onClick"]
-const _hoisted_827 = {
-  class: "pkm-dark",
-  "aria-label": "Saisie",
-  style: {"flex":"none","max-height":"796px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 26px","display":"flex","flex-direction":"column","gap":"14px","color":"var(--pkm-t1)"}
-}
-const _hoisted_828 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"8px"} }
-const _hoisted_829 = {
-  class: "pkm-dark",
-  role: "group",
-  "aria-label": "Type de saisie",
-  style: {"flex":"1","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"4px","border-radius":"999px","background":"var(--pkm-field)","border":"1px solid var(--pkm-line)","color":"var(--pkm-t1)"}
-}
-const _hoisted_830 = ["onClick", "aria-pressed"]
-const _hoisted_831 = ["onClick", "aria-pressed"]
-const _hoisted_832 = ["onClick"]
-const _hoisted_833 = {
-  width: "20",
-  height: "20",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
-}
-const _hoisted_834 = { style: {"flex":"none","margin":"0","font-family":"'Sora', sans-serif","font-size":"22px","font-weight":"700","letter-spacing":"-0.02em"} }
-const _hoisted_835 = { style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"} }
-const _hoisted_836 = { style: {"display":"flex","gap":"10px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -16px","padding":"2px 16px 4px"} }
-const _hoisted_837 = ["onClick", "aria-pressed", "aria-label"]
-const _hoisted_838 = ["src", "data-fallback"]
-const _hoisted_839 = ["src"]
-const _hoisted_840 = ["src"]
-const _hoisted_841 = { style: {"padding":"0 2px","font-size":"12.5px","font-weight":"700","line-height":"1.25","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_842 = { style: {"padding":"0 2px","font-size":"11.5px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_843 = { style: {"flex":"none","display":"grid","grid-template-columns":"minmax(0, 1fr) auto","gap":"10px","align-items":"end"} }
-const _hoisted_844 = { style: {"display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
-const _hoisted_845 = ["value", "onInput"]
-const _hoisted_846 = { style: {"display":"flex","flex-direction":"column","gap":"6px"} }
-const _hoisted_847 = {
-  class: "pkm-dark",
-  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)"}
-}
-const _hoisted_848 = ["onClick"]
-const _hoisted_849 = {
-  width: "18",
-  height: "18",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
-}
-const _hoisted_850 = {
-  "aria-live": "polite",
-  style: {"min-width":"26px","text-align":"center","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"}
-}
-const _hoisted_851 = ["onClick"]
-const _hoisted_852 = {
-  width: "18",
-  height: "18",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
-}
-const _hoisted_853 = {
-  key: 0,
-  style: {"flex":"none","margin-top":"-8px","font-size":"12.5px","color":"var(--pkm-t4)"}
-}
-const _hoisted_854 = { style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"} }
-const _hoisted_855 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"8px"} }
-const _hoisted_856 = ["onClick", "aria-pressed"]
-const _hoisted_857 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
-const _hoisted_858 = ["value", "onInput"]
-const _hoisted_859 = { style: {"font-weight":"400","font-size":"12.5px","color":"var(--pkm-t4)"} }
-const _hoisted_860 = {
-  key: 0,
-  style: {"flex":"none","display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"}
-}
-const _hoisted_861 = ["value", "onInput"]
-const _hoisted_862 = { style: {"font-weight":"400","font-size":"12.5px","color":"var(--pkm-t4)"} }
-const _hoisted_863 = {
-  key: 2,
-  style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"}
-}
-const _hoisted_864 = { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
-const _hoisted_865 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"8px"} }
-const _hoisted_866 = ["onClick", "aria-pressed"]
-const _hoisted_867 = ["aria-label"]
-const _hoisted_868 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px"} }
-const _hoisted_869 = { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t2)"} }
-const _hoisted_870 = { style: {"display":"flex","flex-direction":"column","gap":"4px","font-size":"13px","color":"var(--pkm-t3)"} }
-const _hoisted_871 = { style: {"color":"var(--pkm-t2)","font-variant-numeric":"tabular-nums","text-align":"right"} }
-const _hoisted_872 = {
-  key: 0,
-  style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-orange)"}
-}
-const _hoisted_873 = ["onClick", "disabled"]
-const _hoisted_874 = {
-  key: 7,
-  "aria-label": "Bienvenue sur Dropicards",
-  style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","flex-direction":"column","overflow-y":"auto","scrollbar-width":"none","background":"radial-gradient(110% 55% at 50% 0%, rgba(var(--pkm-glow-rgb), 0.3), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-app)"}
-}
-const _hoisted_875 = { style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","min-height":"44px","padding":"14px 16px 0"} }
-const _hoisted_876 = {
-  "aria-hidden": "true",
-  style: {"display":"flex","gap":"6px"}
-}
-const _hoisted_877 = ["onClick"]
-const _hoisted_878 = {
-  key: 0,
-  style: {"flex":"1","display":"flex","flex-direction":"column","gap":"16px","padding":"8px 20px 24px"}
-}
-const _hoisted_879 = {
-  "aria-hidden": "true",
-  style: {"position":"relative","align-self":"center","width":"262px","height":"232px"}
-}
-const _hoisted_880 = ["src", "data-fallback"]
-const _hoisted_881 = {
-  class: "pkm-dark",
-  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
-}
-const _hoisted_882 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
-const _hoisted_883 = {
-  width: "22",
-  height: "22",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
-}
-const _hoisted_884 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
-const _hoisted_885 = {
-  width: "22",
-  height: "22",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
-}
-const _hoisted_886 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
-const _hoisted_887 = {
-  width: "22",
-  height: "22",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linejoin":"round"}
-}
-const _hoisted_888 = ["onClick"]
-const _hoisted_889 = {
   key: 1,
-  style: {"flex":"1","display":"flex","flex-direction":"column","gap":"14px","padding":"8px 16px 24px"}
+  style: {"position":"relative","flex":"1","min-height":"0","display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px 20px"}
 }
-const _hoisted_890 = { style: {"padding":"0","margin-bottom":"8px","font-size":"14px","font-weight":"700"} }
-const _hoisted_891 = { style: {"display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"6px"} }
-const _hoisted_892 = ["onClick", "aria-pressed"]
-const _hoisted_893 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
-const _hoisted_894 = {
-  class: "pkm-dark",
-  style: {"flex":"none","width":"42px","height":"42px","border-radius":"14px","background":"rgba(var(--pkm-ink-rgb), 0.5)","display":"flex","align-items":"center","justify-content":"center","color":"var(--pkm-t1)"}
-}
-const _hoisted_895 = ["d"]
-const _hoisted_896 = { style: {"flex":"1","display":"flex","flex-direction":"column"} }
-const _hoisted_897 = {
-  role: "list",
-  "aria-label": "Les trois profils",
-  style: {"display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"6px"}
-}
-const _hoisted_898 = { style: {"display":"grid","grid-template-columns":"auto minmax(0, 1fr)","gap":"10px"} }
-const _hoisted_899 = ["onClick"]
-const _hoisted_900 = {
-  width: "22",
-  height: "22",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
-}
-const _hoisted_901 = ["onClick"]
-const _hoisted_902 = {
-  key: 2,
-  style: {"flex":"1","display":"flex","flex-direction":"column","align-items":"stretch","gap":"14px","padding":"8px 20px 24px"}
-}
-const _hoisted_903 = ["d"]
-const _hoisted_904 = { style: {"display":"flex","flex-direction":"column","align-items":"center","gap":"2px","text-align":"center"} }
-const _hoisted_905 = { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"var(--pkm-t2)","text-align":"center"} }
-const _hoisted_906 = {
-  class: "pkm-dark",
-  "aria-label": "Ce qu’on a préparé pour toi",
-  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
-}
-const _hoisted_907 = ["onClick"]
-const _hoisted_908 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px","margin-top":"-4px"} }
-const _hoisted_909 = ["onClick"]
-const _hoisted_910 = ["onClick"]
-const _hoisted_911 = ["aria-label"]
-const _hoisted_912 = ["onClick"]
-const _hoisted_913 = {
-  width: "20",
-  height: "20",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
-}
-const _hoisted_914 = { style: {"flex":"1 1 auto","min-height":"0","width":"100%","display":"flex","align-items":"center","justify-content":"center"} }
-const _hoisted_915 = ["src", "data-fallback", "alt", "onClick"]
-const _hoisted_916 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"center","gap":"2px","text-align":"center"} }
-const _hoisted_917 = { style: {"font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"600"} }
-const _hoisted_918 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
-const _hoisted_919 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)"} }
-const _hoisted_920 = {
-  key: 9,
-  style: {"position":"absolute","inset":"0","z-index":"30","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.62)"}
-}
-const _hoisted_921 = ["onClick"]
-const _hoisted_922 = {
-  class: "pkm-dark",
-  "aria-label": "Choisis ton compagnon",
-  role: "dialog",
-  "aria-modal": "true",
-  style: {"flex":"none","height":"78%","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 18px","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
-}
-const _hoisted_923 = { style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","gap":"8px"} }
-const _hoisted_924 = ["onClick"]
-const _hoisted_925 = {
-  width: "20",
-  height: "20",
-  viewBox: "0 0 24 24",
-  "aria-hidden": "true",
-  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
-}
-const _hoisted_926 = {
-  class: "pkm-dark",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"48px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
-}
-const _hoisted_927 = {
+const _hoisted_782 = { style: {"flex":"none","margin":"0","padding":"10px 12px","border-radius":"14px","background":"rgba(var(--pkm-ink-rgb), 0.66)","color":"var(--pkm-t2)","font-size":"13px","line-height":"1.45"} }
+const _hoisted_783 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"48px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","background":"var(--pkm-card-2)"} }
+const _hoisted_784 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"flex":"none","fill":"none","stroke":"var(--pkm-t3)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_928 = ["value", "onInput"]
-const _hoisted_929 = { style: {"flex":"none","font-size":"12.5px","color":"var(--pkm-t4)"} }
-const _hoisted_930 = {
-  role: "group",
-  "aria-label": "Pokémon de Kanto",
-  style: {"flex":"1 1 auto","min-height":"0","overflow-y":"auto","scrollbar-width":"none","display":"grid","grid-template-columns":"repeat(auto-fill, minmax(76px, 1fr))","align-content":"start","gap":"8px"}
+const _hoisted_785 = ["value", "onInput"]
+const _hoisted_786 = { style: {"flex":"none","padding":"0 4px","color":"var(--pkm-t1)","font-size":"12.5px","font-weight":"600"} }
+const _hoisted_787 = {
+  role: "list",
+  "aria-label": "Produits scellés",
+  style: {"flex":"1 1 auto","min-height":"0","overflow-y":"auto","scrollbar-width":"none","display":"flex","flex-direction":"column","gap":"8px"}
 }
-const _hoisted_931 = ["onClick", "aria-pressed", "aria-label"]
-const _hoisted_932 = ["src"]
-const _hoisted_933 = { style: {"max-width":"100%","font-size":"11.5px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_934 = { style: {"flex":"none","margin":"0","font-size":"11px","line-height":"1.4","color":"var(--pkm-t4)"} }
-const _hoisted_935 = {
-  key: 10,
+const _hoisted_788 = ["onClick"]
+const _hoisted_789 = { style: {"flex":"none","width":"96px","height":"54px","border-radius":"10px","overflow":"hidden","background":"var(--pkm-img-bg)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_790 = ["src"]
+const _hoisted_791 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
+const _hoisted_792 = { style: {"font-size":"14.5px","font-weight":"700","line-height":"1.25"} }
+const _hoisted_793 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_794 = { style: {"flex":"none","font-size":"14px","font-weight":"700"} }
+const _hoisted_795 = {
+  key: 2,
+  style: {"position":"absolute","inset":"0","z-index":"4","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.5)"}
+}
+const _hoisted_796 = ["onClick"]
+const _hoisted_797 = {
+  "aria-label": "C’est laquelle ?",
+  role: "dialog",
+  "aria-modal": "true",
+  style: {"flex":"none","max-height":"80%","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 22px","display":"flex","flex-direction":"column","gap":"10px"}
+}
+const _hoisted_798 = { style: {"margin":"0","font-size":"13px","line-height":"1.4","color":"var(--pkm-t3)"} }
+const _hoisted_799 = ["onClick", "aria-label"]
+const _hoisted_800 = ["src", "data-fallback"]
+const _hoisted_801 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","align-items":"flex-start","gap":"3px"} }
+const _hoisted_802 = {
+  key: 0,
+  style: {"padding":"2px 8px","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font-size":"11px","font-weight":"800"}
+}
+const _hoisted_803 = { style: {"font-size":"15px","font-weight":"700","line-height":"1.25"} }
+const _hoisted_804 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_805 = { style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-t2)"} }
+const _hoisted_806 = {
+  key: 0,
+  style: {"flex":"none","align-self":"flex-start","padding":"3px 8px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","color":"var(--pkm-t1)","font-size":"11.5px","font-weight":"700"}
+}
+const _hoisted_807 = { style: {"flex":"none","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px","margin-top":"4px"} }
+const _hoisted_808 = ["onClick"]
+const _hoisted_809 = ["onClick"]
+const _hoisted_810 = {
+  key: 5,
+  style: {"position":"absolute","inset":"0","z-index":"25","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.55)"}
+}
+const _hoisted_811 = ["onClick"]
+const _hoisted_812 = {
   class: "pkm-dark",
-  "aria-label": "Radar des boutiques",
-  style: {"position":"absolute","inset":"0","z-index":"15","overflow":"hidden","background":"#05080F","color":"var(--pkm-t1)"}
+  "aria-label": "Résultat du scan",
+  style: {"flex":"none","max-height":"770px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 24px","display":"flex","flex-direction":"column","gap":"14px","color":"var(--pkm-t1)"}
 }
-const _hoisted_936 = {
-  class: "pkm-dark",
-  style: {"position":"absolute","left":"0","right":"0","top":"0","z-index":"3","display":"flex","flex-direction":"column","gap":"8px","padding":"14px 14px 10px","background":"linear-gradient(180deg, rgba(var(--pkm-deep-rgb), 0.85), rgba(var(--pkm-deep-rgb), 0))","color":"var(--pkm-t1)"}
-}
-const _hoisted_937 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
-const _hoisted_938 = ["onClick"]
-const _hoisted_939 = {
+const _hoisted_813 = { style: {"flex":"none","display":"flex","gap":"14px","align-items":"flex-start"} }
+const _hoisted_814 = ["src", "data-fallback"]
+const _hoisted_815 = ["src"]
+const _hoisted_816 = ["src"]
+const _hoisted_817 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","align-items":"flex-start","gap":"4px"} }
+const _hoisted_818 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"21px","line-height":"1.2","font-weight":"700","letter-spacing":"-0.02em"} }
+const _hoisted_819 = { style: {"font-size":"13px","color":"var(--pkm-t3)"} }
+const _hoisted_820 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
+const _hoisted_821 = ["onClick"]
+const _hoisted_822 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_940 = {
+const _hoisted_823 = {
+  class: "pkm-dark",
+  "aria-label": "Cote",
+  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","color":"var(--pkm-t1)"}
+}
+const _hoisted_824 = { style: {"display":"flex","flex-direction":"column","gap":"1px"} }
+const _hoisted_825 = { style: {"font-family":"'Sora', sans-serif","font-size":"30px","line-height":"1.1","font-weight":"700","letter-spacing":"-0.03em"} }
+const _hoisted_826 = { style: {"display":"flex","flex-direction":"column","gap":"3px","min-width":"150px"} }
+const _hoisted_827 = { style: {"color":"var(--pkm-t3)"} }
+const _hoisted_828 = { style: {"font-weight":"700","font-variant-numeric":"tabular-nums"} }
+const _hoisted_829 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"8px"} }
+const _hoisted_830 = {
+  role: "group",
+  "aria-label": "Langue",
+  style: {"display":"flex","gap":"8px"}
+}
+const _hoisted_831 = ["onClick", "aria-pressed"]
+const _hoisted_832 = {
+  role: "group",
+  "aria-label": "État",
+  style: {"display":"flex","gap":"8px"}
+}
+const _hoisted_833 = ["onClick", "aria-pressed"]
+const _hoisted_834 = { style: {"flex":"none","display":"grid","grid-template-columns":"minmax(0, 1fr) auto","gap":"10px","align-items":"end"} }
+const _hoisted_835 = { style: {"display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
+const _hoisted_836 = ["value", "onInput"]
+const _hoisted_837 = { style: {"display":"flex","flex-direction":"column","gap":"6px"} }
+const _hoisted_838 = {
+  class: "pkm-dark",
+  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)"}
+}
+const _hoisted_839 = ["onClick"]
+const _hoisted_840 = {
+  width: "18",
+  height: "18",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
+}
+const _hoisted_841 = {
+  "aria-live": "polite",
+  style: {"min-width":"26px","text-align":"center","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"}
+}
+const _hoisted_842 = ["onClick"]
+const _hoisted_843 = {
+  width: "18",
+  height: "18",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
+}
+const _hoisted_844 = { style: {"flex":"none","margin-top":"-6px","font-size":"12.5px","color":"var(--pkm-t4)"} }
+const _hoisted_845 = {
+  class: "pkm-dark",
+  "aria-label": "Effet sur ta collection",
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
+}
+const _hoisted_846 = {
+  width: "40",
+  height: "40",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"flex":"none","overflow":"visible"}
+}
+const _hoisted_847 = ["d"]
+const _hoisted_848 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
+const _hoisted_849 = { style: {"font-size":"14px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
+const _hoisted_850 = {
+  width: "15",
+  height: "15",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"flex":"none","fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_851 = ["d"]
+const _hoisted_852 = ["onClick"]
+const _hoisted_853 = ["onClick"]
+const _hoisted_854 = {
+  key: 6,
+  style: {"position":"absolute","inset":"0","z-index":"20","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.62)"}
+}
+const _hoisted_855 = ["onClick"]
+const _hoisted_856 = {
+  class: "pkm-dark",
+  "aria-label": "Saisie",
+  style: {"flex":"none","max-height":"796px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 26px","display":"flex","flex-direction":"column","gap":"14px","color":"var(--pkm-t1)"}
+}
+const _hoisted_857 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"8px"} }
+const _hoisted_858 = {
+  class: "pkm-dark",
+  role: "group",
+  "aria-label": "Type de saisie",
+  style: {"flex":"1","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"4px","border-radius":"999px","background":"var(--pkm-field)","border":"1px solid var(--pkm-line)","color":"var(--pkm-t1)"}
+}
+const _hoisted_859 = ["onClick", "aria-pressed"]
+const _hoisted_860 = ["onClick", "aria-pressed"]
+const _hoisted_861 = ["onClick"]
+const _hoisted_862 = {
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_863 = { style: {"flex":"none","margin":"0","font-family":"'Sora', sans-serif","font-size":"22px","font-weight":"700","letter-spacing":"-0.02em"} }
+const _hoisted_864 = { style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"} }
+const _hoisted_865 = { style: {"display":"flex","gap":"10px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -16px","padding":"2px 16px 4px"} }
+const _hoisted_866 = ["onClick", "aria-pressed", "aria-label"]
+const _hoisted_867 = ["src", "data-fallback"]
+const _hoisted_868 = ["src"]
+const _hoisted_869 = ["src"]
+const _hoisted_870 = { style: {"padding":"0 2px","font-size":"12.5px","font-weight":"700","line-height":"1.25","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_871 = { style: {"padding":"0 2px","font-size":"11.5px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_872 = { style: {"flex":"none","display":"grid","grid-template-columns":"minmax(0, 1fr) auto","gap":"10px","align-items":"end"} }
+const _hoisted_873 = { style: {"display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
+const _hoisted_874 = ["value", "onInput"]
+const _hoisted_875 = { style: {"display":"flex","flex-direction":"column","gap":"6px"} }
+const _hoisted_876 = {
+  class: "pkm-dark",
+  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)"}
+}
+const _hoisted_877 = ["onClick"]
+const _hoisted_878 = {
+  width: "18",
+  height: "18",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
+}
+const _hoisted_879 = {
+  "aria-live": "polite",
+  style: {"min-width":"26px","text-align":"center","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"}
+}
+const _hoisted_880 = ["onClick"]
+const _hoisted_881 = {
+  width: "18",
+  height: "18",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
+}
+const _hoisted_882 = {
+  key: 0,
+  style: {"flex":"none","margin-top":"-8px","font-size":"12.5px","color":"var(--pkm-t4)"}
+}
+const _hoisted_883 = { style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"} }
+const _hoisted_884 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"8px"} }
+const _hoisted_885 = ["onClick", "aria-pressed"]
+const _hoisted_886 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
+const _hoisted_887 = ["value", "onInput"]
+const _hoisted_888 = { style: {"font-weight":"400","font-size":"12.5px","color":"var(--pkm-t4)"} }
+const _hoisted_889 = {
+  key: 0,
+  style: {"flex":"none","display":"flex","flex-direction":"column","gap":"6px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"}
+}
+const _hoisted_890 = ["value", "onInput"]
+const _hoisted_891 = { style: {"font-weight":"400","font-size":"12.5px","color":"var(--pkm-t4)"} }
+const _hoisted_892 = {
+  key: 2,
+  style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"}
+}
+const _hoisted_893 = { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }
+const _hoisted_894 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"8px"} }
+const _hoisted_895 = ["onClick", "aria-pressed"]
+const _hoisted_896 = ["aria-label"]
+const _hoisted_897 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px"} }
+const _hoisted_898 = { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t2)"} }
+const _hoisted_899 = { style: {"display":"flex","flex-direction":"column","gap":"4px","font-size":"13px","color":"var(--pkm-t3)"} }
+const _hoisted_900 = { style: {"color":"var(--pkm-t2)","font-variant-numeric":"tabular-nums","text-align":"right"} }
+const _hoisted_901 = {
+  key: 0,
+  style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-orange)"}
+}
+const _hoisted_902 = ["onClick", "disabled"]
+const _hoisted_903 = {
+  key: 7,
+  "aria-label": "Bienvenue sur Dropicards",
+  style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","flex-direction":"column","overflow-y":"auto","scrollbar-width":"none","background":"radial-gradient(110% 55% at 50% 0%, rgba(var(--pkm-glow-rgb), 0.3), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-app)"}
+}
+const _hoisted_904 = { style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","min-height":"44px","padding":"14px 16px 0"} }
+const _hoisted_905 = {
+  "aria-hidden": "true",
+  style: {"display":"flex","gap":"6px"}
+}
+const _hoisted_906 = ["onClick"]
+const _hoisted_907 = {
+  key: 0,
+  style: {"flex":"1","display":"flex","flex-direction":"column","gap":"16px","padding":"8px 20px 24px"}
+}
+const _hoisted_908 = {
+  "aria-hidden": "true",
+  style: {"position":"relative","align-self":"center","width":"262px","height":"232px"}
+}
+const _hoisted_909 = ["src", "data-fallback"]
+const _hoisted_910 = {
+  class: "pkm-dark",
+  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
+}
+const _hoisted_911 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
+const _hoisted_912 = {
+  width: "22",
+  height: "22",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_913 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
+const _hoisted_914 = {
+  width: "22",
+  height: "22",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_915 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
+const _hoisted_916 = {
+  width: "22",
+  height: "22",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-accent)","stroke-width":"1.9","stroke-linejoin":"round"}
+}
+const _hoisted_917 = ["onClick"]
+const _hoisted_918 = {
+  key: 1,
+  style: {"flex":"1","display":"flex","flex-direction":"column","gap":"14px","padding":"8px 16px 24px"}
+}
+const _hoisted_919 = { style: {"padding":"0","margin-bottom":"8px","font-size":"14px","font-weight":"700"} }
+const _hoisted_920 = { style: {"display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"6px"} }
+const _hoisted_921 = ["onClick", "aria-pressed"]
+const _hoisted_922 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
+const _hoisted_923 = {
+  class: "pkm-dark",
+  style: {"flex":"none","width":"42px","height":"42px","border-radius":"14px","background":"rgba(var(--pkm-ink-rgb), 0.5)","display":"flex","align-items":"center","justify-content":"center","color":"var(--pkm-t1)"}
+}
+const _hoisted_924 = ["d"]
+const _hoisted_925 = { style: {"flex":"1","display":"flex","flex-direction":"column"} }
+const _hoisted_926 = {
+  role: "list",
+  "aria-label": "Les trois profils",
+  style: {"display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"6px"}
+}
+const _hoisted_927 = { style: {"display":"grid","grid-template-columns":"auto minmax(0, 1fr)","gap":"10px"} }
+const _hoisted_928 = ["onClick"]
+const _hoisted_929 = {
+  width: "22",
+  height: "22",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_930 = ["onClick"]
+const _hoisted_931 = {
+  key: 2,
+  style: {"flex":"1","display":"flex","flex-direction":"column","align-items":"stretch","gap":"14px","padding":"8px 20px 24px"}
+}
+const _hoisted_932 = ["d"]
+const _hoisted_933 = { style: {"display":"flex","flex-direction":"column","align-items":"center","gap":"2px","text-align":"center"} }
+const _hoisted_934 = { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"var(--pkm-t2)","text-align":"center"} }
+const _hoisted_935 = {
+  class: "pkm-dark",
+  "aria-label": "Ce qu’on a préparé pour toi",
+  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
+}
+const _hoisted_936 = ["onClick"]
+const _hoisted_937 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px","margin-top":"-4px"} }
+const _hoisted_938 = ["onClick"]
+const _hoisted_939 = ["onClick"]
+const _hoisted_940 = ["aria-label"]
+const _hoisted_941 = ["onClick"]
+const _hoisted_942 = {
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
+}
+const _hoisted_943 = { style: {"flex":"1 1 auto","min-height":"0","width":"100%","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_944 = ["src", "data-fallback", "alt", "onClick"]
+const _hoisted_945 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"center","gap":"2px","text-align":"center"} }
+const _hoisted_946 = { style: {"font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"600"} }
+const _hoisted_947 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_948 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)"} }
+const _hoisted_949 = {
+  key: 9,
+  style: {"position":"absolute","inset":"0","z-index":"30","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.62)"}
+}
+const _hoisted_950 = ["onClick"]
+const _hoisted_951 = {
+  class: "pkm-dark",
+  "aria-label": "Choisis ton compagnon",
+  role: "dialog",
+  "aria-modal": "true",
+  style: {"flex":"none","height":"78%","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 18px","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
+}
+const _hoisted_952 = { style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","gap":"8px"} }
+const _hoisted_953 = ["onClick"]
+const _hoisted_954 = {
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_955 = {
+  class: "pkm-dark",
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"48px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
+}
+const _hoisted_956 = {
+  width: "18",
+  height: "18",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"flex":"none","fill":"none","stroke":"var(--pkm-t3)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_957 = ["value", "onInput"]
+const _hoisted_958 = { style: {"flex":"none","font-size":"12.5px","color":"var(--pkm-t4)"} }
+const _hoisted_959 = {
+  role: "group",
+  "aria-label": "Pokémon de Kanto",
+  style: {"flex":"1 1 auto","min-height":"0","overflow-y":"auto","scrollbar-width":"none","display":"grid","grid-template-columns":"repeat(auto-fill, minmax(76px, 1fr))","align-content":"start","gap":"8px"}
+}
+const _hoisted_960 = ["onClick", "aria-pressed", "aria-label"]
+const _hoisted_961 = ["src"]
+const _hoisted_962 = { style: {"max-width":"100%","font-size":"11.5px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_963 = { style: {"flex":"none","margin":"0","font-size":"11px","line-height":"1.4","color":"var(--pkm-t4)"} }
+const _hoisted_964 = {
+  key: 10,
+  class: "pkm-dark",
+  "aria-label": "Radar des boutiques",
+  style: {"position":"absolute","inset":"0","z-index":"15","overflow":"hidden","background":"#05080F","color":"var(--pkm-t1)"}
+}
+const _hoisted_965 = {
+  class: "pkm-dark",
+  style: {"position":"absolute","left":"0","right":"0","top":"0","z-index":"3","display":"flex","flex-direction":"column","gap":"8px","padding":"14px 14px 10px","background":"linear-gradient(180deg, rgba(var(--pkm-deep-rgb), 0.85), rgba(var(--pkm-deep-rgb), 0))","color":"var(--pkm-t1)"}
+}
+const _hoisted_966 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
+const _hoisted_967 = ["onClick"]
+const _hoisted_968 = {
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_969 = {
   class: "pkm-dark",
   "aria-label": "Secteur",
   style: {"flex":"1","min-width":"0","display":"flex","align-items":"center","gap":"0","height":"44px","padding":"0 6px","box-sizing":"border-box","border-radius":"22px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.12)","background":"rgba(var(--pkm-ink-rgb), 0.86)","overflow-x":"auto","scrollbar-width":"none","color":"var(--pkm-t1)"}
 }
-const _hoisted_941 = {
+const _hoisted_970 = {
   key: 0,
   "aria-hidden": "true",
   style: {"flex":"none","color":"var(--pkm-t5)","font-size":"14px"}
 }
-const _hoisted_942 = ["onClick", "aria-current"]
-const _hoisted_943 = ["onClick", "aria-pressed"]
-const _hoisted_944 = {
+const _hoisted_971 = ["onClick", "aria-current"]
+const _hoisted_972 = ["onClick", "aria-pressed"]
+const _hoisted_973 = {
   role: "group",
   "aria-label": "Produit recherché",
   style: {"display":"flex","gap":"6px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -14px","padding":"0 14px"}
 }
-const _hoisted_945 = ["onClick", "aria-pressed"]
-const _hoisted_946 = {
+const _hoisted_974 = ["onClick", "aria-pressed"]
+const _hoisted_975 = {
   key: 0,
   class: "pkm-dark",
   "aria-hidden": "true",
   style: {"align-self":"flex-start","display":"flex","align-items":"center","gap":"10px","padding":"4px 10px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.82)","font-size":"11px","font-weight":"600","color":"var(--pkm-t2)"}
 }
-const _hoisted_947 = {
+const _hoisted_976 = {
   id: "pkm-radar-sheet",
   style: {"flex":"1","min-height":"0","overflow-y":"auto","scrollbar-width":"none","padding":"16px 16px 18px","display":"flex","flex-direction":"column","gap":"12px"}
 }
-const _hoisted_948 = ["onClick"]
-const _hoisted_949 = {
+const _hoisted_977 = ["onClick"]
+const _hoisted_978 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_950 = ["aria-label"]
-const _hoisted_951 = { style: {"display":"flex","align-items":"flex-start","gap":"12px"} }
-const _hoisted_952 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
-const _hoisted_953 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.02em"} }
-const _hoisted_954 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
-const _hoisted_955 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
-const _hoisted_956 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"4px"} }
-const _hoisted_957 = { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
-const _hoisted_958 = ["onClick", "aria-expanded"]
-const _hoisted_959 = {
+const _hoisted_979 = ["aria-label"]
+const _hoisted_980 = { style: {"display":"flex","align-items":"flex-start","gap":"12px"} }
+const _hoisted_981 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
+const _hoisted_982 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.02em"} }
+const _hoisted_983 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
+const _hoisted_984 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_985 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"4px"} }
+const _hoisted_986 = { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
+const _hoisted_987 = ["onClick", "aria-expanded"]
+const _hoisted_988 = {
   key: 0,
   class: "pkm-dark",
   style: {"display":"flex","flex-direction":"column","gap":"6px","padding":"12px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","color":"var(--pkm-t1)"}
 }
-const _hoisted_960 = { style: {"color":"var(--pkm-t2)"} }
-const _hoisted_961 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
-const _hoisted_962 = {
+const _hoisted_989 = { style: {"color":"var(--pkm-t2)"} }
+const _hoisted_990 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
+const _hoisted_991 = {
   key: 1,
   style: {"display":"flex","flex-direction":"column","gap":"2px","padding":"11px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)"}
 }
-const _hoisted_963 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t2)"} }
-const _hoisted_964 = {
+const _hoisted_992 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t2)"} }
+const _hoisted_993 = {
   key: 2,
   style: {"margin":"0","font-size":"13px","line-height":"1.45","color":"var(--pkm-t2)"}
 }
-const _hoisted_965 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
-const _hoisted_966 = ["href"]
-const _hoisted_967 = ["onClick", "aria-pressed"]
-const _hoisted_968 = ["href", "aria-label"]
-const _hoisted_969 = ["href", "aria-label"]
-const _hoisted_970 = { style: {"display":"flex","flex-wrap":"wrap","gap":"4px 18px"} }
-const _hoisted_971 = ["href"]
-const _hoisted_972 = ["href"]
-const _hoisted_973 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_974 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.02em"} }
-const _hoisted_975 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
-const _hoisted_976 = {
+const _hoisted_994 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
+const _hoisted_995 = ["href"]
+const _hoisted_996 = ["onClick", "aria-pressed"]
+const _hoisted_997 = ["href", "aria-label"]
+const _hoisted_998 = ["href", "aria-label"]
+const _hoisted_999 = { style: {"display":"flex","flex-wrap":"wrap","gap":"4px 18px"} }
+const _hoisted_1000 = ["href"]
+const _hoisted_1001 = ["href"]
+const _hoisted_1002 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
+const _hoisted_1003 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.02em"} }
+const _hoisted_1004 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_1005 = {
   key: 0,
   role: "status",
   style: {"margin":"0","padding":"10px 12px","border-radius":"14px","background":"rgba(var(--pkm-orange-rgb), 0.12)","color":"var(--pkm-sand)","font-size":"13px","line-height":"1.45"}
 }
-const _hoisted_977 = ["onClick"]
-const _hoisted_978 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
-const _hoisted_979 = ["onClick", "disabled"]
-const _hoisted_980 = ["onClick", "aria-pressed"]
-const _hoisted_981 = {
+const _hoisted_1006 = ["onClick"]
+const _hoisted_1007 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
+const _hoisted_1008 = ["onClick", "disabled"]
+const _hoisted_1009 = ["onClick", "aria-pressed"]
+const _hoisted_1010 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_982 = {
+const _hoisted_1011 = {
   key: 2,
   role: "group",
   "aria-label": "Rayon autour de toi",
   style: {"display":"flex","gap":"8px"}
 }
-const _hoisted_983 = ["onClick", "aria-pressed"]
-const _hoisted_984 = {
+const _hoisted_1012 = ["onClick", "aria-pressed"]
+const _hoisted_1013 = {
   key: 3,
   style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"}
 }
-const _hoisted_985 = {
+const _hoisted_1014 = {
   key: 4,
   style: {"margin":"0","padding":"8px 0","font-size":"13.5px","color":"var(--pkm-t3)"}
 }
-const _hoisted_986 = { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }
-const _hoisted_987 = {
+const _hoisted_1015 = { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }
+const _hoisted_1016 = {
   class: "pkm-dark",
   style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
-const _hoisted_988 = ["onClick", "aria-label"]
-const _hoisted_989 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_990 = { style: {"font-size":"14px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_991 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_992 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_993 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
-const _hoisted_994 = { style: {"font-size":"12.5px","font-weight":"700","color":"var(--pkm-t2)"} }
-const _hoisted_995 = {
+const _hoisted_1017 = ["onClick", "aria-label"]
+const _hoisted_1018 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
+const _hoisted_1019 = { style: {"font-size":"14px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1020 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1021 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1022 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
+const _hoisted_1023 = { style: {"font-size":"12.5px","font-weight":"700","color":"var(--pkm-t2)"} }
+const _hoisted_1024 = {
   class: "pkm-dark",
   style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
-const _hoisted_996 = ["onClick", "aria-label"]
-const _hoisted_997 = { style: {"flex":"1","min-width":"0","font-size":"14px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_998 = { style: {"flex":"none","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-teal)"} }
-const _hoisted_999 = {
+const _hoisted_1025 = ["onClick", "aria-label"]
+const _hoisted_1026 = { style: {"flex":"1","min-width":"0","font-size":"14px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1027 = { style: {"flex":"none","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-teal)"} }
+const _hoisted_1028 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1000 = { style: {"margin":"0","font-size":"11px","line-height":"1.45","color":"var(--pkm-t5)"} }
-const _hoisted_1001 = { style: {"flex":"none","width":"26px","height":"26px","border-radius":"13px","background":"rgba(var(--pkm-green-rgb), 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
-const _hoisted_1002 = {
+const _hoisted_1029 = { style: {"margin":"0","font-size":"11px","line-height":"1.45","color":"var(--pkm-t5)"} }
+const _hoisted_1030 = { style: {"flex":"none","width":"26px","height":"26px","border-radius":"13px","background":"rgba(var(--pkm-green-rgb), 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_1031 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
@@ -9570,182 +10027,323 @@ return function render(_ctx, _cache) {
     ]),
     (_ctx.V.ui.isScan)
       ? (_openBlock(), _createElementBlock("section", _hoisted_748, [
-          _cache[179] || (_cache[179] = _createElementVNode("div", {
+          _cache[183] || (_cache[183] = _createElementVNode("div", {
+            id: "pkm-scan-cam",
             "aria-hidden": "true",
-            style: {"position":"absolute","inset":"0","background":"repeating-linear-gradient(115deg, rgba(var(--pkm-hl-rgb), 0.025) 0 2px, rgba(var(--pkm-hl-rgb), 0) 2px 9px)"}
+            style: {"position":"absolute","inset":"0","overflow":"hidden"}
           }, null, -1 /* CACHED */)),
-          _createElementVNode("div", {
+          _createElementVNode("input", {
+            type: "file",
+            id: "pkm-scan-photo",
+            accept: "image/*",
+            capture: "environment",
+            tabindex: "-1",
             "aria-hidden": "true",
-            style: _normalizeStyle(`position: absolute; inset: 0; background: ${_ctx.V.scan.glow}`)
-          }, null, 4 /* STYLE */),
-          _createElementVNode("div", _hoisted_749, [
+            onInput: _ctx.V.scan.onFile,
+            style: {"position":"absolute","left":"0","top":"0","width":"1px","height":"1px","opacity":"0","pointer-events":"none"}
+          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_749),
+          _createElementVNode("input", {
+            type: "file",
+            id: "pkm-scan-file",
+            accept: "image/*",
+            tabindex: "-1",
+            "aria-hidden": "true",
+            onInput: _ctx.V.scan.onFile,
+            style: {"position":"absolute","left":"0","top":"0","width":"1px","height":"1px","opacity":"0","pointer-events":"none"}
+          }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_750),
+          _createElementVNode("div", _hoisted_751, [
             _createElementVNode("button", {
-              class: "pkm-dark",
               type: "button",
               onClick: _ctx.V.scan.close,
               "aria-label": "Fermer le scan",
-              style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+              style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.16)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.66)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
             }, [
-              (_openBlock(), _createElementBlock("svg", _hoisted_751, [...(_cache[171] || (_cache[171] = [
+              (_openBlock(), _createElementBlock("svg", _hoisted_753, [...(_cache[171] || (_cache[171] = [
                 _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                 _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
               ]))]))
-            ], 8 /* PROPS */, _hoisted_750),
-            _createElementVNode("div", _hoisted_752, [
+            ], 8 /* PROPS */, _hoisted_752),
+            _createElementVNode("div", _hoisted_754, [
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.scan.toCard,
                 "aria-pressed": _ctx.A(_ctx.V.scan.modeCard),
                 style: _normalizeStyle(`height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: ${_ctx.V.scan.cardBg}; color: ${_ctx.V.scan.cardFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
-              }, "Carte", 12 /* STYLE, PROPS */, _hoisted_753),
+              }, "Carte", 12 /* STYLE, PROPS */, _hoisted_755),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.scan.toSealed,
                 "aria-pressed": _ctx.A(_ctx.V.scan.modeSealed),
                 style: _normalizeStyle(`height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: ${_ctx.V.scan.sealedBg}; color: ${_ctx.V.scan.sealedFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
-              }, "Scellé", 12 /* STYLE, PROPS */, _hoisted_754)
+              }, "Scellé", 12 /* STYLE, PROPS */, _hoisted_756)
             ]),
-            _createElementVNode("button", {
-              type: "button",
-              onClick: _ctx.V.scan.torch,
-              "aria-label": _ctx.A(_ctx.V.scan.torchLabel),
-              "aria-pressed": _ctx.A(_ctx.V.scan.torchOn),
-              style: _normalizeStyle(`flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.14); border-radius: 22px; background: ${_ctx.V.scan.torchBg}; color: ${_ctx.V.scan.torchFg}; display: flex; align-items: center; justify-content: center; cursor: pointer`)
-            }, [
-              (_openBlock(), _createElementBlock("svg", _hoisted_756, [...(_cache[172] || (_cache[172] = [
-                _createElementVNode("path", { d: "M13 3L5 13.5h6L10 21l8-10.5h-6z" }, null, -1 /* CACHED */)
-              ]))]))
-            ], 12 /* STYLE, PROPS */, _hoisted_755)
+            (_ctx.V.scan.hasTorch)
+              ? (_openBlock(), _createElementBlock("button", {
+                  key: 0,
+                  type: "button",
+                  onClick: _ctx.V.scan.torch,
+                  "aria-label": _ctx.A(_ctx.V.scan.torchLabel),
+                  "aria-pressed": _ctx.A(_ctx.V.scan.torchOn),
+                  style: _normalizeStyle(`flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.16); border-radius: 22px; background: ${_ctx.V.scan.torchBg}; color: ${_ctx.V.scan.torchFg}; display: flex; align-items: center; justify-content: center; cursor: pointer`)
+                }, [
+                  (_openBlock(), _createElementBlock("svg", _hoisted_758, [...(_cache[172] || (_cache[172] = [
+                    _createElementVNode("path", { d: "M13 3L5 13.5h6L10 21l8-10.5h-6z" }, null, -1 /* CACHED */)
+                  ]))]))
+                ], 12 /* STYLE, PROPS */, _hoisted_757))
+              : _createCommentVNode("v-if", true),
+            (_ctx.V.scan.noTorch)
+              ? (_openBlock(), _createElementBlock("span", _hoisted_759))
+              : _createCommentVNode("v-if", true)
           ]),
-          _createElementVNode("div", _hoisted_757, [
-            _createElementVNode("span", _hoisted_758, _toDisplayString(_ctx.V.scan.hint), 1 /* TEXT */),
-            _createElementVNode("div", _hoisted_759, [
-              (_ctx.V.scan.plainCard)
-                ? (_openBlock(), _createElementBlock("img", {
-                    key: 0,
-                    src: _ctx.V.scan.img,
-                    "data-fallback": _ctx.V.scan.fallback,
-                    alt: _ctx.V.scan.name,
-                    style: {"position":"absolute","left":"22px","top":"18px","width":"200px","height":"232px","border-radius":"10px 10px 0 0","object-fit":"cover","object-position":"top","transform":"rotate(-3deg)","box-shadow":"0 26px 44px rgba(var(--pkm-shadow-rgb), 0.6)","-webkit-mask-image":"linear-gradient(180deg, #000 86%, transparent)","mask-image":"linear-gradient(180deg, #000 86%, transparent)"}
-                  }, null, 8 /* PROPS */, _hoisted_760))
-                : _createCommentVNode("v-if", true),
-              (_ctx.V.scan.graded)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_761, [
-                    _createElementVNode("span", _hoisted_762, [
-                      _createElementVNode("span", null, _toDisplayString(_ctx.V.scan.name), 1 /* TEXT */),
-                      _createElementVNode("span", null, _toDisplayString(_ctx.V.scan.grade), 1 /* TEXT */)
-                    ]),
-                    _createElementVNode("img", {
-                      src: _ctx.V.scan.img,
-                      "data-fallback": _ctx.V.scan.fallback,
-                      alt: _ctx.V.scan.name,
-                      style: {"display":"block","width":"196px","height":"220px","object-fit":"cover","object-position":"top"}
-                    }, null, 8 /* PROPS */, _hoisted_763)
-                  ]))
-                : _createCommentVNode("v-if", true),
-              (_ctx.V.scan.sealedArt)
-                ? (_openBlock(), _createElementBlock("div", {
-                    key: 2,
-                    style: _normalizeStyle(`position: absolute; left: 22px; top: 40px; width: 200px; height: 220px; border-radius: 14px; background: ${_ctx.V.scan.bg}; transform: rotate(-2deg); box-shadow: 0 26px 44px rgba(var(--pkm-shadow-rgb), 0.6), inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.16)`)
-                  }, [
-                    _createElementVNode("img", {
-                      src: _ctx.V.scan.logo,
-                      "data-broken": "1",
-                      alt: _ctx.V.scan.name,
-                      style: {"position":"absolute","left":"20px","top":"34px","width":"160px","height":"72px","object-fit":"contain"}
-                    }, null, 8 /* PROPS */, _hoisted_764),
-                    (_openBlock(), _createElementBlock("svg", _hoisted_765, [
-                      _createElementVNode("path", {
-                        d: _ctx.V.scan.glyph
-                      }, null, 8 /* PROPS */, _hoisted_766)
-                    ])),
-                    _cache[173] || (_cache[173] = _createElementVNode("span", {
-                      "aria-hidden": "true",
-                      style: {"position":"absolute","left":"50px","bottom":"14px","width":"100px","height":"26px","border-radius":"3px","background":"repeating-linear-gradient(90deg, #FFFFFF 0 2px, rgba(var(--pkm-hl-rgb), 0) 2px 4px, #FFFFFF 4px 5px, rgba(var(--pkm-hl-rgb), 0) 5px 8px)","opacity":"0.85"}
-                    }, null, -1 /* CACHED */))
-                  ], 4 /* STYLE */))
-                : _createCommentVNode("v-if", true),
-              (_ctx.V.scan.hasPhoto)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_767, [
-                    _createElementVNode("img", {
-                      src: _ctx.V.scan.photo,
-                      "data-broken": "1",
-                      alt: _ctx.V.scan.name,
-                      style: {"display":"block","width":"100%","height":"100%","object-fit":"cover"}
-                    }, null, 8 /* PROPS */, _hoisted_768)
-                  ]))
-                : _createCommentVNode("v-if", true),
-              _cache[174] || (_cache[174] = _createStaticVNode("<span aria-hidden=\"true\" style=\"position:absolute;left:0;top:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid var(--pkm-accent);border-top:4px solid var(--pkm-accent);border-radius:14px 0 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;top:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid var(--pkm-accent);border-top:4px solid var(--pkm-accent);border-radius:0 14px 0 0;\"></span><span aria-hidden=\"true\" style=\"position:absolute;left:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-left:4px solid var(--pkm-accent);border-bottom:4px solid var(--pkm-accent);border-radius:0 0 0 14px;\"></span><span aria-hidden=\"true\" style=\"position:absolute;right:0;bottom:0;width:38px;height:38px;box-sizing:border-box;border-right:4px solid var(--pkm-accent);border-bottom:4px solid var(--pkm-accent);border-radius:0 0 14px 0;\"></span><span aria-hidden=\"true\" class=\"pkm-anim\" style=\"position:absolute;left:14px;right:14px;top:30px;height:2px;border-radius:1px;background:linear-gradient(90deg, rgba(var(--pkm-accent-rgb), 0), var(--pkm-accent), rgba(var(--pkm-accent-rgb), 0));box-shadow:0 0 14px var(--pkm-accent);animation:pkmScan 2.2s ease-in-out infinite alternate;\"></span>", 5))
-            ]),
-            _createElementVNode("span", _hoisted_769, [
-              _cache[175] || (_cache[175] = _createElementVNode("span", { style: {"flex":"none","width":"8px","height":"8px","border-radius":"4px","background":"var(--pkm-green)","box-shadow":"0 0 8px var(--pkm-green)"} }, null, -1 /* CACHED */)),
-              _createElementVNode("span", _hoisted_770, _toDisplayString(_ctx.V.scan.status), 1 /* TEXT */)
-            ]),
-            _createElementVNode("span", _hoisted_771, _toDisplayString(_ctx.V.scan.conf), 1 /* TEXT */),
-            _createElementVNode("button", {
-              type: "button",
-              onClick: _ctx.V.scan.next,
-              style: {"height":"44px","margin-top":"-8px","padding":"0 14px","border":"0","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"13.5px","font-weight":"600","text-decoration":"underline","text-underline-offset":"3px","cursor":"pointer"}
-            }, "Démo : changer d’article devant l’objectif", 8 /* PROPS */, _hoisted_772)
-          ]),
-          _createElementVNode("div", _hoisted_773, [
-            _createElementVNode("span", _hoisted_774, _toDisplayString(_ctx.V.scan.count), 1 /* TEXT */),
-            _createElementVNode("div", _hoisted_775, [
-              _createElementVNode("button", {
-                class: "pkm-dark",
-                type: "button",
-                onClick: _ctx.V.scan.importPhoto,
-                "aria-label": "Importer une photo",
-                style: {"justify-self":"start","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.16)","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
-              }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_777, [...(_cache[176] || (_cache[176] = [
-                  _createElementVNode("path", { d: "M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
-                  _createElementVNode("path", { d: "M4 15.5l4.5-4.5 4 4 2.5-2.5 5 5" }, null, -1 /* CACHED */),
-                  _createElementVNode("circle", {
-                    cx: "15.5",
-                    cy: "9",
-                    r: "1.5"
-                  }, null, -1 /* CACHED */)
-                ]))]))
-              ], 8 /* PROPS */, _hoisted_776),
-              _createElementVNode("button", {
-                type: "button",
-                onClick: _ctx.V.scan.shutter,
-                "aria-label": "Analyser l’article détecté",
-                style: {"width":"80px","height":"80px","padding":"6px","box-sizing":"border-box","border":"4px solid var(--pkm-white)","border-radius":"40px","background":"rgba(var(--pkm-hl-rgb), 0.12)","cursor":"pointer"}
-              }, [...(_cache[177] || (_cache[177] = [
-                _createElementVNode("span", { style: {"display":"block","width":"100%","height":"100%","border-radius":"50%","background":"var(--pkm-photo-mat)"} }, null, -1 /* CACHED */)
-              ]))], 8 /* PROPS */, _hoisted_778),
-              _createElementVNode("button", {
-                class: "pkm-dark",
-                type: "button",
-                onClick: _ctx.V.scan.manual,
-                "aria-label": "Ajouter sans scanner",
-                style: {"justify-self":"end","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.16)","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.6)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
-              }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_780, [...(_cache[178] || (_cache[178] = [
-                  _createElementVNode("path", { d: "M4 20h4L19 9l-4-4L4 16z" }, null, -1 /* CACHED */),
-                  _createElementVNode("path", { d: "M13.5 6.5l4 4" }, null, -1 /* CACHED */)
-                ]))]))
-              ], 8 /* PROPS */, _hoisted_779)
-            ])
-          ])
+          (_ctx.V.scan.modeCard)
+            ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
+                _createElementVNode("div", _hoisted_760, [
+                  (_ctx.V.scan.showFrame)
+                    ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
+                        _createElementVNode("span", _hoisted_761, _toDisplayString(_ctx.V.scan.hint), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_762, [
+                          _cache[173] || (_cache[173] = _createElementVNode("span", {
+                            "aria-hidden": "true",
+                            style: {"position":"absolute","left":"-3px","top":"-3px","width":"38px","height":"38px","box-sizing":"border-box","border-left":"4px solid var(--pkm-accent)","border-top":"4px solid var(--pkm-accent)","border-radius":"18px 0 0 0"}
+                          }, null, -1 /* CACHED */)),
+                          _cache[174] || (_cache[174] = _createElementVNode("span", {
+                            "aria-hidden": "true",
+                            style: {"position":"absolute","right":"-3px","top":"-3px","width":"38px","height":"38px","box-sizing":"border-box","border-right":"4px solid var(--pkm-accent)","border-top":"4px solid var(--pkm-accent)","border-radius":"0 18px 0 0"}
+                          }, null, -1 /* CACHED */)),
+                          _cache[175] || (_cache[175] = _createElementVNode("span", {
+                            "aria-hidden": "true",
+                            style: {"position":"absolute","left":"-3px","bottom":"-3px","width":"38px","height":"38px","box-sizing":"border-box","border-left":"4px solid var(--pkm-accent)","border-bottom":"4px solid var(--pkm-accent)","border-radius":"0 0 0 18px"}
+                          }, null, -1 /* CACHED */)),
+                          _cache[176] || (_cache[176] = _createElementVNode("span", {
+                            "aria-hidden": "true",
+                            style: {"position":"absolute","right":"-3px","bottom":"-3px","width":"38px","height":"38px","box-sizing":"border-box","border-right":"4px solid var(--pkm-accent)","border-bottom":"4px solid var(--pkm-accent)","border-radius":"0 0 18px 0"}
+                          }, null, -1 /* CACHED */)),
+                          (_ctx.V.scan.reading)
+                            ? (_openBlock(), _createElementBlock("span", _hoisted_763))
+                            : _createCommentVNode("v-if", true)
+                        ])
+                      ], 64 /* STABLE_FRAGMENT */))
+                    : _createCommentVNode("v-if", true),
+                  (_ctx.V.scan.hasPanel)
+                    ? (_openBlock(), _createElementBlock("section", {
+                        key: 1,
+                        "aria-label": _ctx.A(_ctx.V.scan.panelTitle),
+                        style: {"width":"100%","max-width":"360px","box-sizing":"border-box","padding":"18px 16px","border-radius":"22px","background":"var(--pkm-card-2)","border":"1px solid var(--pkm-line-2)","display":"flex","flex-direction":"column","gap":"12px"}
+                      }, [
+                        _createElementVNode("h2", _hoisted_765, _toDisplayString(_ctx.V.scan.panelTitle), 1 /* TEXT */),
+                        _createElementVNode("p", _hoisted_766, _toDisplayString(_ctx.V.scan.panelText), 1 /* TEXT */),
+                        (_ctx.V.scan.panelRetry)
+                          ? (_openBlock(), _createElementBlock("button", {
+                              key: 0,
+                              type: "button",
+                              onClick: _ctx.V.scan.retryCam,
+                              style: {"height":"48px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+                            }, "Réessayer", 8 /* PROPS */, _hoisted_767))
+                          : _createCommentVNode("v-if", true),
+                        _createElementVNode("button", {
+                          type: "button",
+                          onClick: _ctx.V.scan.takePhoto,
+                          style: {"height":"48px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+                        }, "Prendre une photo", 8 /* PROPS */, _hoisted_768),
+                        _createElementVNode("button", {
+                          type: "button",
+                          onClick: _ctx.V.scan.importPhoto,
+                          style: {"height":"48px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px","font-weight":"700","cursor":"pointer"}
+                        }, "Importer une photo", 8 /* PROPS */, _hoisted_769),
+                        _createElementVNode("button", {
+                          type: "button",
+                          onClick: _ctx.V.scan.search,
+                          style: {"height":"48px","border":"0","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"15px","font-weight":"700","text-decoration":"underline","text-underline-offset":"3px","cursor":"pointer"}
+                        }, "Rechercher une carte", 8 /* PROPS */, _hoisted_770)
+                      ], 8 /* PROPS */, _hoisted_764))
+                    : _createCommentVNode("v-if", true),
+                  (_ctx.V.scan.hasStatus)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_771, [
+                        _createElementVNode("span", {
+                          "aria-hidden": "true",
+                          style: _normalizeStyle(`flex: none; width: 8px; height: 8px; border-radius: 4px; background: ${_ctx.V.scan.dot}`)
+                        }, null, 4 /* STYLE */),
+                        _createElementVNode("span", _hoisted_772, _toDisplayString(_ctx.V.scan.status), 1 /* TEXT */)
+                      ]))
+                    : _createCommentVNode("v-if", true)
+                ]),
+                (_ctx.V.scan.showFrame)
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_773, [
+                      _createElementVNode("span", _hoisted_774, _toDisplayString(_ctx.V.scan.count), 1 /* TEXT */),
+                      _createElementVNode("div", _hoisted_775, [
+                        _createElementVNode("button", {
+                          type: "button",
+                          onClick: _ctx.V.scan.importPhoto,
+                          "aria-label": "Importer une photo",
+                          style: {"justify-self":"start","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.18)","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.66)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                        }, [
+                          (_openBlock(), _createElementBlock("svg", _hoisted_777, [...(_cache[177] || (_cache[177] = [
+                            _createElementVNode("path", { d: "M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
+                            _createElementVNode("path", { d: "M4 15.5l4.5-4.5 4 4 2.5-2.5 5 5" }, null, -1 /* CACHED */),
+                            _createElementVNode("circle", {
+                              cx: "15.5",
+                              cy: "9",
+                              r: "1.5"
+                            }, null, -1 /* CACHED */)
+                          ]))]))
+                        ], 8 /* PROPS */, _hoisted_776),
+                        _createElementVNode("button", {
+                          type: "button",
+                          onClick: _ctx.V.scan.shutter,
+                          "aria-label": _ctx.A(_ctx.V.scan.shutterLabel),
+                          "aria-disabled": _ctx.A(_ctx.V.scan.shutterOff),
+                          style: _normalizeStyle(`width: 80px; height: 80px; padding: 6px; box-sizing: border-box; border: 4px solid var(--pkm-white); border-radius: 40px; background: rgba(var(--pkm-hl-rgb), 0.12); opacity: ${_ctx.V.scan.shutterOp}; cursor: pointer`)
+                        }, [...(_cache[178] || (_cache[178] = [
+                          _createElementVNode("span", { style: {"display":"block","width":"100%","height":"100%","border-radius":"50%","background":"var(--pkm-white)"} }, null, -1 /* CACHED */)
+                        ]))], 12 /* STYLE, PROPS */, _hoisted_778),
+                        _createElementVNode("button", {
+                          type: "button",
+                          onClick: _ctx.V.scan.search,
+                          "aria-label": "Rechercher une carte",
+                          style: {"justify-self":"end","width":"52px","height":"52px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.18)","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.66)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
+                        }, [
+                          (_openBlock(), _createElementBlock("svg", _hoisted_780, [...(_cache[179] || (_cache[179] = [
+                            _createElementVNode("circle", {
+                              cx: "11",
+                              cy: "11",
+                              r: "6.5"
+                            }, null, -1 /* CACHED */),
+                            _createElementVNode("path", { d: "M16 16l4.5 4.5" }, null, -1 /* CACHED */)
+                          ]))]))
+                        ], 8 /* PROPS */, _hoisted_779)
+                      ])
+                    ]))
+                  : _createCommentVNode("v-if", true)
+              ], 64 /* STABLE_FRAGMENT */))
+            : _createCommentVNode("v-if", true),
+          (_ctx.V.scan.modeSealed)
+            ? (_openBlock(), _createElementBlock("div", _hoisted_781, [
+                _createElementVNode("p", _hoisted_782, _toDisplayString(_ctx.V.scan.sealedIntro), 1 /* TEXT */),
+                _createElementVNode("div", _hoisted_783, [
+                  (_openBlock(), _createElementBlock("svg", _hoisted_784, [...(_cache[180] || (_cache[180] = [
+                    _createElementVNode("circle", {
+                      cx: "11",
+                      cy: "11",
+                      r: "6.5"
+                    }, null, -1 /* CACHED */),
+                    _createElementVNode("path", { d: "M16 16l4.5 4.5" }, null, -1 /* CACHED */)
+                  ]))])),
+                  _createElementVNode("input", {
+                    id: "pkm-champ-8",
+                    type: "search",
+                    "aria-label": "Chercher un produit scellé",
+                    placeholder: "ETB, Display, Flammes…",
+                    value: _ctx.V.scan.sq,
+                    onInput: _ctx.V.scan.onSq,
+                    style: {"flex":"1","min-width":"0","height":"44px","padding":"0","border":"0","outline-offset":"4px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px"}
+                  }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_785)
+                ]),
+                _createElementVNode("span", _hoisted_786, _toDisplayString(_ctx.V.scan.sealedCount), 1 /* TEXT */),
+                _createElementVNode("div", _hoisted_787, [
+                  (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.scan.sealedRows || []), (sp, sp_i) => {
+                    return (_openBlock(), _createElementBlock("button", {
+                      key: sp_i,
+                      type: "button",
+                      role: "listitem",
+                      onClick: sp.pick,
+                      style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"8px","border-radius":"16px","border":"1px solid var(--pkm-line-2)","background":"var(--pkm-card-2)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
+                    }, [
+                      _createElementVNode("span", _hoisted_789, [
+                        _createElementVNode("img", {
+                          src: sp.pic,
+                          "data-broken": "1",
+                          alt: "",
+                          loading: "lazy",
+                          width: "96",
+                          height: "54",
+                          style: _normalizeStyle(`display: block; width: 100%; height: 100%; object-fit: ${sp.fit}`)
+                        }, null, 12 /* STYLE, PROPS */, _hoisted_790)
+                      ]),
+                      _createElementVNode("span", _hoisted_791, [
+                        _createElementVNode("span", _hoisted_792, _toDisplayString(sp.name), 1 /* TEXT */),
+                        _createElementVNode("span", _hoisted_793, _toDisplayString(sp.sub), 1 /* TEXT */)
+                      ]),
+                      _createElementVNode("span", _hoisted_794, _toDisplayString(sp.cote), 1 /* TEXT */)
+                    ], 8 /* PROPS */, _hoisted_788))
+                  }), 128 /* KEYED_FRAGMENT */))
+                ])
+              ]))
+            : _createCommentVNode("v-if", true),
+          (_ctx.V.scan.picking)
+            ? (_openBlock(), _createElementBlock("div", _hoisted_795, [
+                _createElementVNode("button", {
+                  type: "button",
+                  "aria-label": "Revenir à la caméra",
+                  onClick: _ctx.V.scan.retry,
+                  style: {"flex":"1 1 auto","min-height":"44px","padding":"0","border":"0","background":"transparent","cursor":"pointer"}
+                }, null, 8 /* PROPS */, _hoisted_796),
+                _createElementVNode("section", _hoisted_797, [
+                  _cache[181] || (_cache[181] = _createElementVNode("div", {
+                    "aria-hidden": "true",
+                    style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
+                  }, null, -1 /* CACHED */)),
+                  _cache[182] || (_cache[182] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","color":"var(--pkm-t1)"} }, "C’est laquelle ?", -1 /* CACHED */)),
+                  _createElementVNode("p", _hoisted_798, _toDisplayString(_ctx.V.scan.evText), 1 /* TEXT */),
+                  (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.scan.cands || []), (sk, sk_i) => {
+                    return (_openBlock(), _createElementBlock("button", {
+                      key: sk_i,
+                      type: "button",
+                      onClick: sk.pick,
+                      "aria-label": _ctx.A(sk.aria),
+                      style: _normalizeStyle(`flex: none; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 18px; border: 1px solid ${sk.bc}; background: ${sk.bg}; color: var(--pkm-t1); font: inherit; text-align: left; cursor: pointer`)
+                    }, [
+                      _createElementVNode("img", {
+                        src: sk.img,
+                        "data-fallback": sk.fallback,
+                        alt: "",
+                        width: "60",
+                        height: "84",
+                        style: {"flex":"none","display":"block","width":"60px","height":"84px","border-radius":"6px","object-fit":"cover","background":"var(--pkm-img-bg)"}
+                      }, null, 8 /* PROPS */, _hoisted_800),
+                      _createElementVNode("span", _hoisted_801, [
+                        (sk.best)
+                          ? (_openBlock(), _createElementBlock("span", _hoisted_802, "Le plus probable"))
+                          : _createCommentVNode("v-if", true),
+                        _createElementVNode("span", _hoisted_803, _toDisplayString(sk.name), 1 /* TEXT */),
+                        _createElementVNode("span", _hoisted_804, _toDisplayString(sk.sub), 1 /* TEXT */),
+                        _createElementVNode("span", _hoisted_805, _toDisplayString(sk.cote), 1 /* TEXT */)
+                      ]),
+                      (sk.hasOwned)
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_806, _toDisplayString(sk.owned), 1 /* TEXT */))
+                        : _createCommentVNode("v-if", true)
+                    ], 12 /* STYLE, PROPS */, _hoisted_799))
+                  }), 128 /* KEYED_FRAGMENT */)),
+                  _createElementVNode("div", _hoisted_807, [
+                    _createElementVNode("button", {
+                      type: "button",
+                      onClick: _ctx.V.scan.none,
+                      style: {"height":"48px","padding":"0 10px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
+                    }, "Aucune de ces cartes", 8 /* PROPS */, _hoisted_808),
+                    _createElementVNode("button", {
+                      type: "button",
+                      onClick: _ctx.V.scan.retry,
+                      style: {"height":"48px","padding":"0 10px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
+                    }, "Réessayer", 8 /* PROPS */, _hoisted_809)
+                  ])
+                ])
+              ]))
+            : _createCommentVNode("v-if", true)
         ]))
       : _createCommentVNode("v-if", true),
     (_ctx.V.ui.scanSheetOpen)
-      ? (_openBlock(), _createElementBlock("div", _hoisted_781, [
+      ? (_openBlock(), _createElementBlock("div", _hoisted_810, [
           _createElementVNode("button", {
             type: "button",
             "aria-label": "Revenir au scan",
             onClick: _ctx.V.sr.close,
             style: {"flex":"1 1 auto","min-height":"44px","padding":"0","border":"0","background":"transparent","cursor":"pointer"}
-          }, null, 8 /* PROPS */, _hoisted_782),
-          _createElementVNode("section", _hoisted_783, [
-            _cache[189] || (_cache[189] = _createElementVNode("div", {
+          }, null, 8 /* PROPS */, _hoisted_811),
+          _createElementVNode("section", _hoisted_812, [
+            _cache[193] || (_cache[193] = _createElementVNode("div", {
               "aria-hidden": "true",
               style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
-            _createElementVNode("div", _hoisted_784, [
+            _createElementVNode("div", _hoisted_813, [
               _createElementVNode("span", {
                 style: _normalizeStyle(`position: relative; flex: none; width: calc(${_ctx.V.sr.wk} * 84px); height: calc(${_ctx.V.sr.hk} * 112px); outline: ${_ctx.V.sr.ring}; outline-offset: -1.5px; border-radius: 10px; overflow: hidden; background: ${_ctx.V.sr.bg}; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 22px rgba(var(--pkm-shadow-rgb), 0.45), inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
               }, [
@@ -9756,7 +10354,7 @@ return function render(_ctx, _cache) {
                       "data-fallback": _ctx.V.sr.fallback,
                       alt: "",
                       style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
-                    }, null, 8 /* PROPS */, _hoisted_785))
+                    }, null, 8 /* PROPS */, _hoisted_814))
                   : _createCommentVNode("v-if", true),
                 (_ctx.V.sr.sealedArt)
                   ? (_openBlock(), _createElementBlock("img", {
@@ -9765,7 +10363,7 @@ return function render(_ctx, _cache) {
                       "data-broken": "1",
                       alt: "",
                       style: {"max-width":"72px","max-height":"44px","object-fit":"contain"}
-                    }, null, 8 /* PROPS */, _hoisted_786))
+                    }, null, 8 /* PROPS */, _hoisted_815))
                   : _createCommentVNode("v-if", true),
                 (_ctx.V.sr.hasPhoto)
                   ? (_openBlock(), _createElementBlock("img", {
@@ -9775,16 +10373,16 @@ return function render(_ctx, _cache) {
                       alt: "",
                       loading: "lazy",
                       style: {"width":"100%","height":"100%","object-fit":"cover"}
-                    }, null, 8 /* PROPS */, _hoisted_787))
+                    }, null, 8 /* PROPS */, _hoisted_816))
                   : _createCommentVNode("v-if", true)
               ], 4 /* STYLE */),
-              _createElementVNode("div", _hoisted_788, [
+              _createElementVNode("div", _hoisted_817, [
                 _createElementVNode("span", {
                   style: _normalizeStyle(`padding: 2px 9px; border-radius: 999px; background: ${_ctx.V.sr.ownedBg}; color: ${_ctx.V.sr.ownedFg}; font-size: 11.5px; font-weight: 700`)
                 }, _toDisplayString(_ctx.V.sr.ownedText), 5 /* TEXT, STYLE */),
-                _createElementVNode("h2", _hoisted_789, _toDisplayString(_ctx.V.sr.name), 1 /* TEXT */),
-                _createElementVNode("span", _hoisted_790, _toDisplayString(_ctx.V.sr.sub), 1 /* TEXT */),
-                _createElementVNode("span", _hoisted_791, _toDisplayString(_ctx.V.sr.conf), 1 /* TEXT */)
+                _createElementVNode("h2", _hoisted_818, _toDisplayString(_ctx.V.sr.name), 1 /* TEXT */),
+                _createElementVNode("span", _hoisted_819, _toDisplayString(_ctx.V.sr.sub), 1 /* TEXT */),
+                _createElementVNode("span", _hoisted_820, _toDisplayString(_ctx.V.sr.conf), 1 /* TEXT */)
               ]),
               _createElementVNode("button", {
                 class: "pkm-dark",
@@ -9793,32 +10391,32 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer",
                 style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"22px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_793, [...(_cache[180] || (_cache[180] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_822, [...(_cache[184] || (_cache[184] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
-              ], 8 /* PROPS */, _hoisted_792)
+              ], 8 /* PROPS */, _hoisted_821)
             ]),
-            _createElementVNode("section", _hoisted_794, [
-              _createElementVNode("span", _hoisted_795, [
-                _cache[181] || (_cache[181] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Cote Dropicards", -1 /* CACHED */)),
-                _createElementVNode("span", _hoisted_796, _toDisplayString(_ctx.V.sr.cote), 1 /* TEXT */)
+            _createElementVNode("section", _hoisted_823, [
+              _createElementVNode("span", _hoisted_824, [
+                _cache[185] || (_cache[185] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Cote Dropicards", -1 /* CACHED */)),
+                _createElementVNode("span", _hoisted_825, _toDisplayString(_ctx.V.sr.cote), 1 /* TEXT */)
               ]),
-              _createElementVNode("span", _hoisted_797, [
+              _createElementVNode("span", _hoisted_826, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sr.srcs || []), (rs, rs_i) => {
                   return (_openBlock(), _createElementBlock("span", {
                     key: rs_i,
                     style: {"display":"flex","justify-content":"space-between","gap":"10px","font-size":"12px"}
                   }, [
-                    _createElementVNode("span", _hoisted_798, _toDisplayString(rs.label) + " · " + _toDisplayString(rs.sub), 1 /* TEXT */),
-                    _createElementVNode("span", _hoisted_799, _toDisplayString(rs.value), 1 /* TEXT */)
+                    _createElementVNode("span", _hoisted_827, _toDisplayString(rs.label) + " · " + _toDisplayString(rs.sub), 1 /* TEXT */),
+                    _createElementVNode("span", _hoisted_828, _toDisplayString(rs.value), 1 /* TEXT */)
                   ]))
                 }), 128 /* KEYED_FRAGMENT */))
               ])
             ]),
-            _createElementVNode("div", _hoisted_800, [
-              _cache[182] || (_cache[182] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Langue", -1 /* CACHED */)),
-              _createElementVNode("div", _hoisted_801, [
+            _createElementVNode("div", _hoisted_829, [
+              _cache[186] || (_cache[186] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Langue", -1 /* CACHED */)),
+              _createElementVNode("div", _hoisted_830, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sr.langs || []), (lg, lg_i) => {
                   return (_openBlock(), _createElementBlock("button", {
                     key: lg_i,
@@ -9826,11 +10424,11 @@ return function render(_ctx, _cache) {
                     onClick: lg.pick,
                     "aria-pressed": _ctx.A(lg.on),
                     style: _normalizeStyle(`flex: 1; height: 44px; border-radius: 999px; border: 1px solid ${lg.bc}; background: ${lg.bg}; color: ${lg.fg}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer`)
-                  }, _toDisplayString(lg.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_802))
+                  }, _toDisplayString(lg.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_831))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
-              _cache[183] || (_cache[183] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "État", -1 /* CACHED */)),
-              _createElementVNode("div", _hoisted_803, [
+              _cache[187] || (_cache[187] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "État", -1 /* CACHED */)),
+              _createElementVNode("div", _hoisted_832, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sr.conds || []), (cd, cd_i) => {
                   return (_openBlock(), _createElementBlock("button", {
                     key: cd_i,
@@ -9838,15 +10436,15 @@ return function render(_ctx, _cache) {
                     onClick: cd.pick,
                     "aria-pressed": _ctx.A(cd.on),
                     style: _normalizeStyle(`flex: 1; height: 44px; padding: 0 6px; border-radius: 999px; border: 1px solid ${cd.bc}; background: ${cd.bg}; color: ${cd.fg}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer`)
-                  }, _toDisplayString(cd.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_804))
+                  }, _toDisplayString(cd.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_833))
                 }), 128 /* KEYED_FRAGMENT */))
               ])
             ]),
-            _createElementVNode("div", _hoisted_805, [
-              _createElementVNode("label", _hoisted_806, [
-                _cache[184] || (_cache[184] = _createTextVNode("Prix payé (€) · facultatif", -1 /* CACHED */)),
+            _createElementVNode("div", _hoisted_834, [
+              _createElementVNode("label", _hoisted_835, [
+                _cache[188] || (_cache[188] = _createTextVNode("Prix payé (€) · facultatif", -1 /* CACHED */)),
                 _createElementVNode("input", {
-                  id: "pkm-champ-8",
+                  id: "pkm-champ-9",
                   class: "pkm-dark",
                   type: "text",
                   inputmode: "decimal",
@@ -9854,39 +10452,39 @@ return function render(_ctx, _cache) {
                   value: _ctx.V.sr.price,
                   onInput: _ctx.V.sr.onPrice,
                   style: {"height":"52px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600"}
-                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_807)
+                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_836)
               ]),
-              _createElementVNode("div", _hoisted_808, [
-                _cache[187] || (_cache[187] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_809, [
+              _createElementVNode("div", _hoisted_837, [
+                _cache[191] || (_cache[191] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
+                _createElementVNode("div", _hoisted_838, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.sr.dec,
                     "aria-label": "Diminuer la quantité",
                     style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_811, [...(_cache[185] || (_cache[185] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_840, [...(_cache[189] || (_cache[189] = [
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
                     ]))]))
-                  ], 8 /* PROPS */, _hoisted_810),
-                  _createElementVNode("span", _hoisted_812, _toDisplayString(_ctx.V.sr.qty), 1 /* TEXT */),
+                  ], 8 /* PROPS */, _hoisted_839),
+                  _createElementVNode("span", _hoisted_841, _toDisplayString(_ctx.V.sr.qty), 1 /* TEXT */),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.sr.inc,
                     "aria-label": "Augmenter la quantité",
                     style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_814, [...(_cache[186] || (_cache[186] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_843, [...(_cache[190] || (_cache[190] = [
                       _createElementVNode("path", { d: "M12 5v14" }, null, -1 /* CACHED */),
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
                     ]))]))
-                  ], 8 /* PROPS */, _hoisted_813)
+                  ], 8 /* PROPS */, _hoisted_842)
                 ])
               ])
             ]),
-            _createElementVNode("span", _hoisted_815, _toDisplayString(_ctx.V.sr.priceHint), 1 /* TEXT */),
-            _createElementVNode("section", _hoisted_816, [
-              (_openBlock(), _createElementBlock("svg", _hoisted_817, [
+            _createElementVNode("span", _hoisted_844, _toDisplayString(_ctx.V.sr.priceHint), 1 /* TEXT */),
+            _createElementVNode("section", _hoisted_845, [
+              (_openBlock(), _createElementBlock("svg", _hoisted_846, [
                 _createElementVNode("path", {
                   d: "M12 2l8.66 5v10L12 22l-8.66-5V7z",
                   style: _normalizeStyle(`fill: ${_ctx.V.sr.tierColor}; fill-opacity: 0.16; stroke: ${_ctx.V.sr.tierColor}; stroke-width: 1.3; stroke-linejoin: round`)
@@ -9894,21 +10492,21 @@ return function render(_ctx, _cache) {
                 _createElementVNode("path", {
                   d: _ctx.V.sr.tierSym,
                   style: _normalizeStyle(`fill: ${_ctx.V.sr.tierColor}; stroke: none`)
-                }, null, 12 /* STYLE, PROPS */, _hoisted_818)
+                }, null, 12 /* STYLE, PROPS */, _hoisted_847)
               ])),
-              _createElementVNode("span", _hoisted_819, [
-                _cache[188] || (_cache[188] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Ta collection", -1 /* CACHED */)),
-                _createElementVNode("span", _hoisted_820, _toDisplayString(_ctx.V.sr.valueLine), 1 /* TEXT */),
+              _createElementVNode("span", _hoisted_848, [
+                _cache[192] || (_cache[192] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }, "Ta collection", -1 /* CACHED */)),
+                _createElementVNode("span", _hoisted_849, _toDisplayString(_ctx.V.sr.valueLine), 1 /* TEXT */),
                 _createElementVNode("span", {
                   style: _normalizeStyle(`font-size: 12.5px; font-weight: 700; color: ${_ctx.V.sr.tierColor}`)
                 }, _toDisplayString(_ctx.V.sr.tierLine), 5 /* TEXT, STYLE */),
                 _createElementVNode("span", {
                   style: _normalizeStyle(`display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: ${_ctx.V.sr.profColor}`)
                 }, [
-                  (_openBlock(), _createElementBlock("svg", _hoisted_821, [
+                  (_openBlock(), _createElementBlock("svg", _hoisted_850, [
                     _createElementVNode("path", {
                       d: _ctx.V.sr.profIcon
-                    }, null, 8 /* PROPS */, _hoisted_822)
+                    }, null, 8 /* PROPS */, _hoisted_851)
                   ])),
                   _createTextVNode(_toDisplayString(_ctx.V.sr.profLine), 1 /* TEXT */)
                 ], 4 /* STYLE */)
@@ -9918,42 +10516,42 @@ return function render(_ctx, _cache) {
               type: "button",
               onClick: _ctx.V.sr.save,
               style: {"flex":"none","height":"54px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
-            }, _toDisplayString(_ctx.V.sr.saveLabel), 9 /* TEXT, PROPS */, _hoisted_823),
+            }, _toDisplayString(_ctx.V.sr.saveLabel), 9 /* TEXT, PROPS */, _hoisted_852),
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.sr.wrong,
               style: {"flex":"none","height":"44px","margin-top":"-6px","border":"0","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
-            }, "Ce n’est pas le bon article ?", 8 /* PROPS */, _hoisted_824)
+            }, "Ce n’est pas le bon article ?", 8 /* PROPS */, _hoisted_853)
           ])
         ]))
       : _createCommentVNode("v-if", true),
     (_ctx.V.ui.sheetOpen)
-      ? (_openBlock(), _createElementBlock("div", _hoisted_825, [
+      ? (_openBlock(), _createElementBlock("div", _hoisted_854, [
           _createElementVNode("button", {
             type: "button",
             "aria-label": "Fermer la saisie",
             onClick: _ctx.V.closeSheet,
             style: {"flex":"1 1 auto","min-height":"44px","padding":"0","border":"0","background":"transparent","cursor":"pointer"}
-          }, null, 8 /* PROPS */, _hoisted_826),
-          _createElementVNode("section", _hoisted_827, [
-            _cache[198] || (_cache[198] = _createElementVNode("div", {
+          }, null, 8 /* PROPS */, _hoisted_855),
+          _createElementVNode("section", _hoisted_856, [
+            _cache[202] || (_cache[202] = _createElementVNode("div", {
               "aria-hidden": "true",
               style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
-            _createElementVNode("div", _hoisted_828, [
-              _createElementVNode("div", _hoisted_829, [
+            _createElementVNode("div", _hoisted_857, [
+              _createElementVNode("div", _hoisted_858, [
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.sh.toBuy,
                   "aria-pressed": _ctx.A(_ctx.V.sh.isBuy),
                   style: _normalizeStyle(`height: 44px; padding: 0 6px; border: 0; border-radius: 999px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; background: ${_ctx.V.sh.buyBg}; color: ${_ctx.V.sh.buyFg}`)
-                }, "Ajout", 12 /* STYLE, PROPS */, _hoisted_830),
+                }, "Ajout", 12 /* STYLE, PROPS */, _hoisted_859),
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.sh.toSell,
                   "aria-pressed": _ctx.A(_ctx.V.sh.isSell),
                   style: _normalizeStyle(`height: 44px; padding: 0 6px; border: 0; border-radius: 999px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; background: ${_ctx.V.sh.sellBg}; color: ${_ctx.V.sh.sellFg}`)
-                }, "Vente", 12 /* STYLE, PROPS */, _hoisted_831)
+                }, "Vente", 12 /* STYLE, PROPS */, _hoisted_860)
               ]),
               _createElementVNode("button", {
                 class: "pkm-dark",
@@ -9962,16 +10560,16 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer",
                 style: {"flex":"none","width":"46px","height":"46px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"23px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_833, [...(_cache[190] || (_cache[190] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_862, [...(_cache[194] || (_cache[194] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
-              ], 8 /* PROPS */, _hoisted_832)
+              ], 8 /* PROPS */, _hoisted_861)
             ]),
-            _createElementVNode("h2", _hoisted_834, _toDisplayString(_ctx.V.sh.title), 1 /* TEXT */),
-            _createElementVNode("fieldset", _hoisted_835, [
-              _cache[191] || (_cache[191] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Article", -1 /* CACHED */)),
-              _createElementVNode("div", _hoisted_836, [
+            _createElementVNode("h2", _hoisted_863, _toDisplayString(_ctx.V.sh.title), 1 /* TEXT */),
+            _createElementVNode("fieldset", _hoisted_864, [
+              _cache[195] || (_cache[195] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Article", -1 /* CACHED */)),
+              _createElementVNode("div", _hoisted_865, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sh.products || []), (po, po_i) => {
                   return (_openBlock(), _createElementBlock("button", {
                     key: po_i,
@@ -9991,7 +10589,7 @@ return function render(_ctx, _cache) {
                             "data-fallback": po.fallback,
                             alt: "",
                             style: {"position":"relative","width":"58px","height":"68px","margin-top":"10px","border-radius":"4px 4px 0 0","object-fit":"cover","object-position":"top"}
-                          }, null, 8 /* PROPS */, _hoisted_838))
+                          }, null, 8 /* PROPS */, _hoisted_867))
                         : _createCommentVNode("v-if", true),
                       (po.sealedArt)
                         ? (_openBlock(), _createElementBlock("img", {
@@ -10000,7 +10598,7 @@ return function render(_ctx, _cache) {
                             "data-broken": "1",
                             alt: "",
                             style: {"position":"relative","width":"80px","height":"40px","object-fit":"contain"}
-                          }, null, 8 /* PROPS */, _hoisted_839))
+                          }, null, 8 /* PROPS */, _hoisted_868))
                         : _createCommentVNode("v-if", true),
                       (po.hasPhoto)
                         ? (_openBlock(), _createElementBlock("img", {
@@ -10010,20 +10608,20 @@ return function render(_ctx, _cache) {
                             alt: "",
                             loading: "lazy",
                             style: {"width":"100%","height":"100%","object-fit":"cover"}
-                          }, null, 8 /* PROPS */, _hoisted_840))
+                          }, null, 8 /* PROPS */, _hoisted_869))
                         : _createCommentVNode("v-if", true)
                     ], 4 /* STYLE */),
-                    _createElementVNode("span", _hoisted_841, _toDisplayString(po.name), 1 /* TEXT */),
-                    _createElementVNode("span", _hoisted_842, _toDisplayString(po.right), 1 /* TEXT */)
-                  ], 12 /* STYLE, PROPS */, _hoisted_837))
+                    _createElementVNode("span", _hoisted_870, _toDisplayString(po.name), 1 /* TEXT */),
+                    _createElementVNode("span", _hoisted_871, _toDisplayString(po.right), 1 /* TEXT */)
+                  ], 12 /* STYLE, PROPS */, _hoisted_866))
                 }), 128 /* KEYED_FRAGMENT */))
               ])
             ]),
-            _createElementVNode("div", _hoisted_843, [
-              _createElementVNode("label", _hoisted_844, [
+            _createElementVNode("div", _hoisted_872, [
+              _createElementVNode("label", _hoisted_873, [
                 _createTextVNode(_toDisplayString(_ctx.V.sh.priceLabel), 1 /* TEXT */),
                 _createElementVNode("input", {
-                  id: "pkm-champ-9",
+                  id: "pkm-champ-10",
                   class: "pkm-dark",
                   type: "text",
                   inputmode: "decimal",
@@ -10031,44 +10629,44 @@ return function render(_ctx, _cache) {
                   value: _ctx.V.sh.price,
                   onInput: _ctx.V.sh.onPrice,
                   style: {"height":"52px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"20px","font-weight":"600"}
-                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_845)
+                }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_874)
               ]),
-              _createElementVNode("div", _hoisted_846, [
-                _cache[194] || (_cache[194] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_847, [
+              _createElementVNode("div", _hoisted_875, [
+                _cache[198] || (_cache[198] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Quantité", -1 /* CACHED */)),
+                _createElementVNode("div", _hoisted_876, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.sh.dec,
                     "aria-label": "Diminuer la quantité",
                     style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_849, [...(_cache[192] || (_cache[192] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_878, [...(_cache[196] || (_cache[196] = [
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
                     ]))]))
-                  ], 8 /* PROPS */, _hoisted_848),
-                  _createElementVNode("span", _hoisted_850, _toDisplayString(_ctx.V.sh.qty), 1 /* TEXT */),
+                  ], 8 /* PROPS */, _hoisted_877),
+                  _createElementVNode("span", _hoisted_879, _toDisplayString(_ctx.V.sh.qty), 1 /* TEXT */),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.sh.inc,
                     "aria-label": "Augmenter la quantité",
                     style: {"width":"44px","height":"50px","padding":"0","border":"0","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_852, [...(_cache[193] || (_cache[193] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_881, [...(_cache[197] || (_cache[197] = [
                       _createElementVNode("path", { d: "M12 5v14" }, null, -1 /* CACHED */),
                       _createElementVNode("path", { d: "M5 12h14" }, null, -1 /* CACHED */)
                     ]))]))
-                  ], 8 /* PROPS */, _hoisted_851)
+                  ], 8 /* PROPS */, _hoisted_880)
                 ])
               ])
             ]),
             (_ctx.V.sh.hasPriceHint)
-              ? (_openBlock(), _createElementBlock("span", _hoisted_853, _toDisplayString(_ctx.V.sh.priceHint), 1 /* TEXT */))
+              ? (_openBlock(), _createElementBlock("span", _hoisted_882, _toDisplayString(_ctx.V.sh.priceHint), 1 /* TEXT */))
               : _createCommentVNode("v-if", true),
             (_ctx.V.sh.isSell)
               ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                  _createElementVNode("fieldset", _hoisted_854, [
-                    _cache[195] || (_cache[195] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Vendu sur", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_855, [
+                  _createElementVNode("fieldset", _hoisted_883, [
+                    _cache[199] || (_cache[199] = _createElementVNode("legend", { style: {"padding":"0","margin-bottom":"8px","font-size":"13px","font-weight":"600","color":"var(--pkm-t3)"} }, "Vendu sur", -1 /* CACHED */)),
+                    _createElementVNode("div", _hoisted_884, [
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sh.platforms || []), (pl, pl_i) => {
                         return (_openBlock(), _createElementBlock("button", {
                           key: pl_i,
@@ -10076,44 +10674,44 @@ return function render(_ctx, _cache) {
                           onClick: pl.pick,
                           "aria-pressed": _ctx.A(pl.sel),
                           style: _normalizeStyle(`height: 46px; padding: 0 8px; border-radius: 999px; border: 1px solid ${pl.bc}; box-shadow: ${pl.ring}; background: ${pl.bg}; color: ${pl.fg}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer`)
-                        }, _toDisplayString(pl.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_856))
+                        }, _toDisplayString(pl.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_885))
                       }), 128 /* KEYED_FRAGMENT */))
                     ])
                   ]),
-                  _createElementVNode("label", _hoisted_857, [
-                    _cache[196] || (_cache[196] = _createTextVNode("Port et emballage à ta charge (€)", -1 /* CACHED */)),
+                  _createElementVNode("label", _hoisted_886, [
+                    _cache[200] || (_cache[200] = _createTextVNode("Port et emballage à ta charge (€)", -1 /* CACHED */)),
                     _createElementVNode("input", {
-                      id: "pkm-champ-10",
+                      id: "pkm-champ-11",
                       class: "pkm-dark",
                       type: "text",
                       inputmode: "decimal",
                       value: _ctx.V.sh.port,
                       onInput: _ctx.V.sh.onPort,
                       style: {"height":"48px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"16px"}
-                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_858),
-                    _createElementVNode("span", _hoisted_859, _toDisplayString(_ctx.V.sh.portHint), 1 /* TEXT */)
+                    }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_887),
+                    _createElementVNode("span", _hoisted_888, _toDisplayString(_ctx.V.sh.portHint), 1 /* TEXT */)
                   ]),
                   (_ctx.V.ui.adv)
-                    ? (_openBlock(), _createElementBlock("label", _hoisted_860, [
-                        _cache[197] || (_cache[197] = _createTextVNode("Commission (€)", -1 /* CACHED */)),
+                    ? (_openBlock(), _createElementBlock("label", _hoisted_889, [
+                        _cache[201] || (_cache[201] = _createTextVNode("Commission (€)", -1 /* CACHED */)),
                         _createElementVNode("input", {
-                          id: "pkm-champ-11",
+                          id: "pkm-champ-12",
                           class: "pkm-dark",
                           type: "text",
                           inputmode: "decimal",
                           value: _ctx.V.sh.commission,
                           onInput: _ctx.V.sh.onCommission,
                           style: {"height":"48px","width":"100%","box-sizing":"border-box","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)","font-family":"'Sora', sans-serif","font-size":"16px"}
-                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_861),
-                        _createElementVNode("span", _hoisted_862, _toDisplayString(_ctx.V.sh.commissionHint), 1 /* TEXT */)
+                        }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_890),
+                        _createElementVNode("span", _hoisted_891, _toDisplayString(_ctx.V.sh.commissionHint), 1 /* TEXT */)
                       ]))
                     : _createCommentVNode("v-if", true)
                 ], 64 /* STABLE_FRAGMENT */))
               : _createCommentVNode("v-if", true),
             (_ctx.V.ui.adv)
-              ? (_openBlock(), _createElementBlock("fieldset", _hoisted_863, [
-                  _createElementVNode("legend", _hoisted_864, _toDisplayString(_ctx.V.sh.byLabel), 1 /* TEXT */),
-                  _createElementVNode("div", _hoisted_865, [
+              ? (_openBlock(), _createElementBlock("fieldset", _hoisted_892, [
+                  _createElementVNode("legend", _hoisted_893, _toDisplayString(_ctx.V.sh.byLabel), 1 /* TEXT */),
+                  _createElementVNode("div", _hoisted_894, [
                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sh.people || []), (pp, pp_i) => {
                       return (_openBlock(), _createElementBlock("button", {
                         key: pp_i,
@@ -10121,7 +10719,7 @@ return function render(_ctx, _cache) {
                         onClick: pp.pick,
                         "aria-pressed": _ctx.A(pp.sel),
                         style: _normalizeStyle(`height: 46px; padding: 0 8px; border-radius: 999px; border: 1px solid ${pp.bc}; box-shadow: ${pp.ring}; background: ${pp.bg}; color: ${pp.fg}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer`)
-                      }, _toDisplayString(pp.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_866))
+                      }, _toDisplayString(pp.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_895))
                     }), 128 /* KEYED_FRAGMENT */))
                   ])
                 ]))
@@ -10131,40 +10729,40 @@ return function render(_ctx, _cache) {
               "aria-label": _ctx.A(_ctx.V.sh.previewTitle),
               style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"8px","color":"var(--pkm-t1)"}
             }, [
-              _createElementVNode("div", _hoisted_868, [
-                _createElementVNode("span", _hoisted_869, _toDisplayString(_ctx.V.sh.previewTitle), 1 /* TEXT */),
+              _createElementVNode("div", _hoisted_897, [
+                _createElementVNode("span", _hoisted_898, _toDisplayString(_ctx.V.sh.previewTitle), 1 /* TEXT */),
                 _createElementVNode("span", {
                   style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.03em; color: ${_ctx.V.sh.bigColor}`)
                 }, _toDisplayString(_ctx.V.sh.big), 5 /* TEXT, STYLE */)
               ]),
-              _createElementVNode("div", _hoisted_870, [
+              _createElementVNode("div", _hoisted_899, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.sh.lines || []), (ln, ln_i) => {
                   return (_openBlock(), _createElementBlock("div", {
                     key: ln_i,
                     style: {"display":"flex","justify-content":"space-between","gap":"12px"}
                   }, [
                     _createElementVNode("span", null, _toDisplayString(ln.label), 1 /* TEXT */),
-                    _createElementVNode("span", _hoisted_871, _toDisplayString(ln.value), 1 /* TEXT */)
+                    _createElementVNode("span", _hoisted_900, _toDisplayString(ln.value), 1 /* TEXT */)
                   ]))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
               (_ctx.V.sh.hasError)
-                ? (_openBlock(), _createElementBlock("div", _hoisted_872, _toDisplayString(_ctx.V.sh.error), 1 /* TEXT */))
+                ? (_openBlock(), _createElementBlock("div", _hoisted_901, _toDisplayString(_ctx.V.sh.error), 1 /* TEXT */))
                 : _createCommentVNode("v-if", true)
-            ], 8 /* PROPS */, _hoisted_867),
+            ], 8 /* PROPS */, _hoisted_896),
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.sh.save,
               disabled: _ctx.V.sh.disabled,
               style: _normalizeStyle(`flex: none; height: 54px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; opacity: ${_ctx.V.sh.saveOpacity}`)
-            }, _toDisplayString(_ctx.V.sh.saveLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_873)
+            }, _toDisplayString(_ctx.V.sh.saveLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_902)
           ])
         ]))
       : _createCommentVNode("v-if", true),
     (_ctx.V.ui.onbOpen)
-      ? (_openBlock(), _createElementBlock("section", _hoisted_874, [
-          _createElementVNode("div", _hoisted_875, [
-            _createElementVNode("span", _hoisted_876, [
+      ? (_openBlock(), _createElementBlock("section", _hoisted_903, [
+          _createElementVNode("div", _hoisted_904, [
+            _createElementVNode("span", _hoisted_905, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.dots || []), (dt, dt_i) => {
                 return (_openBlock(), _createElementBlock("span", {
                   key: dt_i,
@@ -10176,11 +10774,11 @@ return function render(_ctx, _cache) {
               type: "button",
               onClick: _ctx.V.ob.skip,
               style: {"height":"44px","padding":"0 6px","border":"0","background":"transparent","color":"var(--pkm-t3)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
-            }, "Passer", 8 /* PROPS */, _hoisted_877)
+            }, "Passer", 8 /* PROPS */, _hoisted_906)
           ]),
           (_ctx.V.ob.is1)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_878, [
-                _createElementVNode("div", _hoisted_879, [
+            ? (_openBlock(), _createElementBlock("div", _hoisted_907, [
+                _createElementVNode("div", _hoisted_908, [
                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.fan || []), (fc, fc_i) => {
                     return (_openBlock(), _createElementBlock("img", {
                       key: fc_i,
@@ -10188,9 +10786,9 @@ return function render(_ctx, _cache) {
                       "data-fallback": fc.fallback,
                       alt: "",
                       style: _normalizeStyle(`position: absolute; left: ${fc.left}; top: ${fc.top}; width: 104px; height: 121px; border-radius: 9px 9px 0 0; object-fit: cover; object-position: top; transform: rotate(${fc.rot}); box-shadow: 0 16px 30px rgba(var(--pkm-shadow-rgb), 0.5); -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent)`)
-                    }, null, 12 /* STYLE, PROPS */, _hoisted_880))
+                    }, null, 12 /* STYLE, PROPS */, _hoisted_909))
                   }), 128 /* KEYED_FRAGMENT */)),
-                  _cache[199] || (_cache[199] = _createElementVNode("span", {
+                  _cache[203] || (_cache[203] = _createElementVNode("span", {
                     class: "pkm-dark",
                     style: {"position":"absolute","left":"50%","bottom":"8px","margin-left":"-88px","width":"176px","display":"flex","align-items":"center","justify-content":"center","gap":"8px","padding":"9px 0","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.88)","border":"1px solid var(--pkm-line-3)","font-size":"13px","font-weight":"700","color":"var(--pkm-t1)"}
                   }, [
@@ -10198,11 +10796,11 @@ return function render(_ctx, _cache) {
                     _createTextVNode("Cote Dropicards 99,00 €")
                   ], -1 /* CACHED */))
                 ]),
-                _cache[206] || (_cache[206] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"28px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em","text-align":"center"} }, "La vraie valeur de ta collection Pokémon", -1 /* CACHED */)),
-                _cache[207] || (_cache[207] = _createElementVNode("p", { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"var(--pkm-t2)","text-align":"center"} }, "Scanne tes cartes et ton scellé. Dropicards compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.", -1 /* CACHED */)),
-                _createElementVNode("div", _hoisted_881, [
-                  _createElementVNode("div", _hoisted_882, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_883, [...(_cache[200] || (_cache[200] = [
+                _cache[210] || (_cache[210] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"28px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em","text-align":"center"} }, "La vraie valeur de ta collection Pokémon", -1 /* CACHED */)),
+                _cache[211] || (_cache[211] = _createElementVNode("p", { style: {"margin":"0","font-size":"15px","line-height":"1.5","color":"var(--pkm-t2)","text-align":"center"} }, "Scanne tes cartes et ton scellé. Dropicards compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.", -1 /* CACHED */)),
+                _createElementVNode("div", _hoisted_910, [
+                  _createElementVNode("div", _hoisted_911, [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_912, [...(_cache[204] || (_cache[204] = [
                       _createElementVNode("path", { d: "M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.6-2.2h5.4L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
                       _createElementVNode("circle", {
                         cx: "12",
@@ -10210,42 +10808,42 @@ return function render(_ctx, _cache) {
                         r: "3.4"
                       }, null, -1 /* CACHED */)
                     ]))])),
-                    _cache[201] || (_cache[201] = _createTextVNode("Scan en 2 secondes, cartes et scellé", -1 /* CACHED */))
+                    _cache[205] || (_cache[205] = _createTextVNode("Scan en 2 secondes, cartes et scellé", -1 /* CACHED */))
                   ]),
-                  _createElementVNode("div", _hoisted_884, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_885, [...(_cache[202] || (_cache[202] = [
+                  _createElementVNode("div", _hoisted_913, [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_914, [...(_cache[206] || (_cache[206] = [
                       _createElementVNode("path", { d: "M4 19.5h16" }, null, -1 /* CACHED */),
                       _createElementVNode("path", { d: "M5 15.5l4.5-4.5 3.5 3 6-6.5" }, null, -1 /* CACHED */),
                       _createElementVNode("path", { d: "M15 7.5h4v4" }, null, -1 /* CACHED */)
                     ]))])),
-                    _cache[203] || (_cache[203] = _createTextVNode("Prix comparés entre plusieurs sites", -1 /* CACHED */))
+                    _cache[207] || (_cache[207] = _createTextVNode("Prix comparés entre plusieurs sites", -1 /* CACHED */))
                   ]),
-                  _createElementVNode("div", _hoisted_886, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_887, [...(_cache[204] || (_cache[204] = [
+                  _createElementVNode("div", _hoisted_915, [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_916, [...(_cache[208] || (_cache[208] = [
                       _createElementVNode("path", { d: "M12 2l8.66 5v10L12 22l-8.66-5V7z" }, null, -1 /* CACHED */)
                     ]))])),
-                    _cache[205] || (_cache[205] = _createTextVNode("Des paliers selon la valeur de ta collection", -1 /* CACHED */))
+                    _cache[209] || (_cache[209] = _createTextVNode("Des paliers selon la valeur de ta collection", -1 /* CACHED */))
                   ])
                 ]),
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.ob.next1,
                   style: {"height":"54px","margin-top":"4px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
-                }, "Commencer", 8 /* PROPS */, _hoisted_888),
-                _cache[208] || (_cache[208] = _createElementVNode("p", { style: {"margin":"0","font-size":"11.5px","line-height":"1.5","color":"var(--pkm-t4)","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.", -1 /* CACHED */))
+                }, "Commencer", 8 /* PROPS */, _hoisted_917),
+                _cache[212] || (_cache[212] = _createElementVNode("p", { style: {"margin":"0","font-size":"11.5px","line-height":"1.5","color":"var(--pkm-t4)","text-align":"center"} }, "Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.", -1 /* CACHED */))
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.V.ob.is2)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_889, [
-                _cache[211] || (_cache[211] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"26px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em"} }, "Faisons connaissance", -1 /* CACHED */)),
-                _cache[212] || (_cache[212] = _createElementVNode("p", { style: {"margin":"-6px 0 0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "2 questions pour anticiper ton profil. Ensuite, il s’adapte tout seul à ta collection.", -1 /* CACHED */)),
+            ? (_openBlock(), _createElementBlock("div", _hoisted_918, [
+                _cache[215] || (_cache[215] = _createElementVNode("h1", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"26px","line-height":"1.15","font-weight":"700","letter-spacing":"-0.03em"} }, "Faisons connaissance", -1 /* CACHED */)),
+                _cache[216] || (_cache[216] = _createElementVNode("p", { style: {"margin":"-6px 0 0","font-size":"14px","line-height":"1.5","color":"var(--pkm-t3)"} }, "2 questions pour anticiper ton profil. Ensuite, il s’adapte tout seul à ta collection.", -1 /* CACHED */)),
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.questions || []), (qq, qq_i) => {
                   return (_openBlock(), _createElementBlock("fieldset", {
                     key: qq_i,
                     style: {"margin":"0","padding":"0","border":"0","min-width":"0"}
                   }, [
-                    _createElementVNode("legend", _hoisted_890, _toDisplayString(qq.q), 1 /* TEXT */),
-                    _createElementVNode("div", _hoisted_891, [
+                    _createElementVNode("legend", _hoisted_919, _toDisplayString(qq.q), 1 /* TEXT */),
+                    _createElementVNode("div", _hoisted_920, [
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((qq.opts || []), (oo, oo_i) => {
                         return (_openBlock(), _createElementBlock("button", {
                           key: oo_i,
@@ -10253,7 +10851,7 @@ return function render(_ctx, _cache) {
                           onClick: oo.pick,
                           "aria-pressed": _ctx.A(oo.on),
                           style: _normalizeStyle(`min-height: 48px; padding: 6px 6px; border-radius: 14px; border: 1px solid ${oo.bc}; box-shadow: ${oo.ring}; background: ${oo.bg}; color: ${oo.fg}; font: inherit; font-size: 12.5px; font-weight: 600; line-height: 1.25; cursor: pointer`)
-                        }, _toDisplayString(oo.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_892))
+                        }, _toDisplayString(oo.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_921))
                       }), 128 /* KEYED_FRAGMENT */))
                     ])
                   ]))
@@ -10263,8 +10861,8 @@ return function render(_ctx, _cache) {
                   "aria-live": "polite",
                   style: _normalizeStyle(`display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 20px; border: 1px solid ${_ctx.V.ob.predEdge}; background: ${_ctx.V.ob.predTint}`)
                 }, [
-                  _createElementVNode("div", _hoisted_893, [
-                    _createElementVNode("span", _hoisted_894, [
+                  _createElementVNode("div", _hoisted_922, [
+                    _createElementVNode("span", _hoisted_923, [
                       (_openBlock(), _createElementBlock("svg", {
                         width: "24",
                         height: "24",
@@ -10274,17 +10872,17 @@ return function render(_ctx, _cache) {
                       }, [
                         _createElementVNode("path", {
                           d: _ctx.V.ob.predIcon
-                        }, null, 8 /* PROPS */, _hoisted_895)
+                        }, null, 8 /* PROPS */, _hoisted_924)
                       ], 4 /* STYLE */))
                     ]),
-                    _createElementVNode("span", _hoisted_896, [
-                      _cache[209] || (_cache[209] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Profil anticipé", -1 /* CACHED */)),
+                    _createElementVNode("span", _hoisted_925, [
+                      _cache[213] || (_cache[213] = _createElementVNode("span", { style: {"font-size":"12.5px","color":"var(--pkm-t2)"} }, "Profil anticipé", -1 /* CACHED */)),
                       _createElementVNode("span", {
                         style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; color: ${_ctx.V.ob.predColor}`)
                       }, _toDisplayString(_ctx.V.ob.predName), 5 /* TEXT, STYLE */)
                     ])
                   ]),
-                  _createElementVNode("div", _hoisted_897, [
+                  _createElementVNode("div", _hoisted_926, [
                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.predSteps || []), (pq, pq_i) => {
                       return (_openBlock(), _createElementBlock("span", {
                         key: pq_i,
@@ -10294,27 +10892,27 @@ return function render(_ctx, _cache) {
                     }), 128 /* KEYED_FRAGMENT */))
                   ])
                 ], 4 /* STYLE */),
-                _createElementVNode("div", _hoisted_898, [
+                _createElementVNode("div", _hoisted_927, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.ob.back,
                     "aria-label": "Étape précédente",
                     style: {"width":"54px","height":"54px","padding":"0","border":"1px solid var(--pkm-line-2)","border-radius":"27px","background":"transparent","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
                   }, [
-                    (_openBlock(), _createElementBlock("svg", _hoisted_900, [...(_cache[210] || (_cache[210] = [
+                    (_openBlock(), _createElementBlock("svg", _hoisted_929, [...(_cache[214] || (_cache[214] = [
                       _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
                     ]))]))
-                  ], 8 /* PROPS */, _hoisted_899),
+                  ], 8 /* PROPS */, _hoisted_928),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.ob.next2,
                     style: {"height":"54px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
-                  }, "Voir mon profil", 8 /* PROPS */, _hoisted_901)
+                  }, "Voir mon profil", 8 /* PROPS */, _hoisted_930)
                 ])
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.V.ob.is3)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_902, [
+            ? (_openBlock(), _createElementBlock("div", _hoisted_931, [
                 _createElementVNode("span", {
                   style: _normalizeStyle(`align-self: center; width: 104px; height: 104px; margin-top: 10px; border-radius: 52px; background: ${_ctx.V.ob.predTint}; border: 2px solid ${_ctx.V.ob.predEdge}; display: flex; align-items: center; justify-content: center`)
                 }, [
@@ -10327,18 +10925,18 @@ return function render(_ctx, _cache) {
                   }, [
                     _createElementVNode("path", {
                       d: _ctx.V.ob.predIcon
-                    }, null, 8 /* PROPS */, _hoisted_903)
+                    }, null, 8 /* PROPS */, _hoisted_932)
                   ], 4 /* STYLE */))
                 ], 4 /* STYLE */),
-                _createElementVNode("div", _hoisted_904, [
-                  _cache[213] || (_cache[213] = _createElementVNode("span", { style: {"font-size":"14px","color":"var(--pkm-t3)"} }, "Tu es plutôt", -1 /* CACHED */)),
+                _createElementVNode("div", _hoisted_933, [
+                  _cache[217] || (_cache[217] = _createElementVNode("span", { style: {"font-size":"14px","color":"var(--pkm-t3)"} }, "Tu es plutôt", -1 /* CACHED */)),
                   _createElementVNode("h1", {
                     style: _normalizeStyle(`margin: 0; font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em; color: ${_ctx.V.ob.predColor}`)
                   }, _toDisplayString(_ctx.V.ob.predName), 5 /* TEXT, STYLE */)
                 ]),
-                _createElementVNode("p", _hoisted_905, _toDisplayString(_ctx.V.ob.predDesc), 1 /* TEXT */),
-                _createElementVNode("section", _hoisted_906, [
-                  _cache[215] || (_cache[215] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-t3)"} }, "Ce qu’on a préparé pour toi", -1 /* CACHED */)),
+                _createElementVNode("p", _hoisted_934, _toDisplayString(_ctx.V.ob.predDesc), 1 /* TEXT */),
+                _createElementVNode("section", _hoisted_935, [
+                  _cache[219] || (_cache[219] = _createElementVNode("span", { style: {"font-size":"13px","font-weight":"700","color":"var(--pkm-t3)"} }, "Ce qu’on a préparé pour toi", -1 /* CACHED */)),
                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.ob.adapts || []), (oa, oa_i) => {
                     return (_openBlock(), _createElementBlock("div", {
                       key: oa_i,
@@ -10350,30 +10948,30 @@ return function render(_ctx, _cache) {
                         viewBox: "0 0 24 24",
                         "aria-hidden": "true",
                         style: _normalizeStyle(`flex: none; margin-top: 1px; fill: none; stroke: ${oa.color}; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round`)
-                      }, [...(_cache[214] || (_cache[214] = [
+                      }, [...(_cache[218] || (_cache[218] = [
                         _createElementVNode("path", { d: "M5 12.5l4.5 4.5L19 7.5" }, null, -1 /* CACHED */)
                       ]))], 4 /* STYLE */)),
                       _createElementVNode("span", null, _toDisplayString(oa.text), 1 /* TEXT */)
                     ]))
                   }), 128 /* KEYED_FRAGMENT */))
                 ]),
-                _cache[216] || (_cache[216] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)","text-align":"center"} }, "Ensuite, ton profil s’adapte tout seul : il suit le nombre de tes cartes ultra rares et la valeur de ta collection.", -1 /* CACHED */)),
+                _cache[220] || (_cache[220] = _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)","text-align":"center"} }, "Ensuite, ton profil s’adapte tout seul : il suit le nombre de tes cartes ultra rares et la valeur de ta collection.", -1 /* CACHED */)),
                 _createElementVNode("button", {
                   type: "button",
                   onClick: _ctx.V.ob.toScan,
                   style: {"height":"54px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"16px","font-weight":"700","cursor":"pointer"}
-                }, "Scanner ma première carte", 8 /* PROPS */, _hoisted_907),
-                _createElementVNode("div", _hoisted_908, [
+                }, "Scanner ma première carte", 8 /* PROPS */, _hoisted_936),
+                _createElementVNode("div", _hoisted_937, [
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.ob.back,
                     style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
-                  }, "Modifier", 8 /* PROPS */, _hoisted_909),
+                  }, "Modifier", 8 /* PROPS */, _hoisted_938),
                   _createElementVNode("button", {
                     type: "button",
                     onClick: _ctx.V.ob.toHome,
                     style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"600","cursor":"pointer"}
-                  }, "Aller à l’accueil", 8 /* PROPS */, _hoisted_910)
+                  }, "Aller à l’accueil", 8 /* PROPS */, _hoisted_939)
                 ])
               ]))
             : _createCommentVNode("v-if", true)
@@ -10396,11 +10994,11 @@ return function render(_ctx, _cache) {
             "aria-label": "Fermer",
             style: {"position":"absolute","top":"14px","right":"14px","width":"44px","height":"44px","padding":"0","border":"1px solid var(--pkm-line-2)","border-radius":"22px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
           }, [
-            (_openBlock(), _createElementBlock("svg", _hoisted_913, [...(_cache[217] || (_cache[217] = [
+            (_openBlock(), _createElementBlock("svg", _hoisted_942, [...(_cache[221] || (_cache[221] = [
               _createElementVNode("path", { d: "M6 6l12 12 M18 6L6 18" }, null, -1 /* CACHED */)
             ]))]))
-          ], 8 /* PROPS */, _hoisted_912),
-          _createElementVNode("div", _hoisted_914, [
+          ], 8 /* PROPS */, _hoisted_941),
+          _createElementVNode("div", _hoisted_943, [
             _createElementVNode("img", {
               class: "pkm-dark",
               src: _ctx.V.zoom.img,
@@ -10408,30 +11006,30 @@ return function render(_ctx, _cache) {
               alt: _ctx.V.zoom.name,
               onClick: _ctx.V.zoom.close,
               style: {"display":"block","max-width":"100%","max-height":"100%","width":"auto","height":"auto","border-radius":"4.8% / 3.4%","background":"var(--pkm-img-bg)","box-shadow":"0 24px 60px rgba(var(--pkm-shadow-rgb), 0.65)","cursor":"zoom-out","color":"var(--pkm-t1)"}
-            }, null, 8 /* PROPS */, _hoisted_915)
+            }, null, 8 /* PROPS */, _hoisted_944)
           ]),
-          _createElementVNode("span", _hoisted_916, [
-            _createElementVNode("span", _hoisted_917, _toDisplayString(_ctx.V.zoom.name), 1 /* TEXT */),
-            _createElementVNode("span", _hoisted_918, _toDisplayString(_ctx.V.zoom.sub), 1 /* TEXT */),
-            _createElementVNode("span", _hoisted_919, _toDisplayString(_ctx.V.zoom.credit), 1 /* TEXT */)
+          _createElementVNode("span", _hoisted_945, [
+            _createElementVNode("span", _hoisted_946, _toDisplayString(_ctx.V.zoom.name), 1 /* TEXT */),
+            _createElementVNode("span", _hoisted_947, _toDisplayString(_ctx.V.zoom.sub), 1 /* TEXT */),
+            _createElementVNode("span", _hoisted_948, _toDisplayString(_ctx.V.zoom.credit), 1 /* TEXT */)
           ])
-        ], 8 /* PROPS */, _hoisted_911))
+        ], 8 /* PROPS */, _hoisted_940))
       : _createCommentVNode("v-if", true),
     (_ctx.V.hb.picking)
-      ? (_openBlock(), _createElementBlock("div", _hoisted_920, [
+      ? (_openBlock(), _createElementBlock("div", _hoisted_949, [
           _createElementVNode("button", {
             type: "button",
             "aria-label": "Fermer le choix du compagnon",
             onClick: _ctx.V.hb.close,
             style: {"flex":"1 1 auto","min-height":"44px","padding":"0","border":"0","background":"transparent","cursor":"pointer"}
-          }, null, 8 /* PROPS */, _hoisted_921),
-          _createElementVNode("section", _hoisted_922, [
-            _cache[221] || (_cache[221] = _createElementVNode("div", {
+          }, null, 8 /* PROPS */, _hoisted_950),
+          _createElementVNode("section", _hoisted_951, [
+            _cache[225] || (_cache[225] = _createElementVNode("div", {
               "aria-hidden": "true",
               style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
-            _createElementVNode("div", _hoisted_923, [
-              _cache[219] || (_cache[219] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"} }, "Choisis ton compagnon", -1 /* CACHED */)),
+            _createElementVNode("div", _hoisted_952, [
+              _cache[223] || (_cache[223] = _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"} }, "Choisis ton compagnon", -1 /* CACHED */)),
               _createElementVNode("button", {
                 class: "pkm-dark",
                 type: "button",
@@ -10439,14 +11037,14 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer",
                 style: {"flex":"none","width":"46px","height":"46px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"23px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_925, [...(_cache[218] || (_cache[218] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_954, [...(_cache[222] || (_cache[222] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
-              ], 8 /* PROPS */, _hoisted_924)
+              ], 8 /* PROPS */, _hoisted_953)
             ]),
-            _createElementVNode("div", _hoisted_926, [
-              (_openBlock(), _createElementBlock("svg", _hoisted_927, [...(_cache[220] || (_cache[220] = [
+            _createElementVNode("div", _hoisted_955, [
+              (_openBlock(), _createElementBlock("svg", _hoisted_956, [...(_cache[224] || (_cache[224] = [
                 _createElementVNode("circle", {
                   cx: "11",
                   cy: "11",
@@ -10455,17 +11053,17 @@ return function render(_ctx, _cache) {
                 _createElementVNode("path", { d: "M16 16l4.5 4.5" }, null, -1 /* CACHED */)
               ]))])),
               _createElementVNode("input", {
-                id: "pkm-champ-12",
+                id: "pkm-champ-13",
                 type: "search",
                 "aria-label": "Chercher un Pokémon",
                 placeholder: "Pikachu, 133…",
                 value: _ctx.V.hb.q,
                 onInput: _ctx.V.hb.onQ,
                 style: {"flex":"1","min-width":"0","height":"44px","padding":"0","border":"0","outline-offset":"4px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"15px"}
-              }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_928)
+              }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_957)
             ]),
-            _createElementVNode("span", _hoisted_929, _toDisplayString(_ctx.V.hb.count), 1 /* TEXT */),
-            _createElementVNode("div", _hoisted_930, [
+            _createElementVNode("span", _hoisted_958, _toDisplayString(_ctx.V.hb.count), 1 /* TEXT */),
+            _createElementVNode("div", _hoisted_959, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.hb.list || []), (hbp, hbp_i) => {
                 return (_openBlock(), _createElementBlock("button", {
                   key: hbp_i,
@@ -10482,25 +11080,25 @@ return function render(_ctx, _cache) {
                     width: "72",
                     height: "72",
                     style: {"display":"block","width":"72px","height":"72px","object-fit":"none","object-position":"50% 62%","image-rendering":"pixelated"}
-                  }, null, 8 /* PROPS */, _hoisted_932),
-                  _createElementVNode("span", _hoisted_933, _toDisplayString(hbp.name), 1 /* TEXT */)
-                ], 12 /* STYLE, PROPS */, _hoisted_931))
+                  }, null, 8 /* PROPS */, _hoisted_961),
+                  _createElementVNode("span", _hoisted_962, _toDisplayString(hbp.name), 1 /* TEXT */)
+                ], 12 /* STYLE, PROPS */, _hoisted_960))
               }), 128 /* KEYED_FRAGMENT */))
             ]),
-            _createElementVNode("p", _hoisted_934, _toDisplayString(_ctx.V.hb.credit), 1 /* TEXT */)
+            _createElementVNode("p", _hoisted_963, _toDisplayString(_ctx.V.hb.credit), 1 /* TEXT */)
           ])
         ]))
       : _createCommentVNode("v-if", true),
     (_ctx.V.ui.isRadar)
-      ? (_openBlock(), _createElementBlock("section", _hoisted_935, [
-          _cache[229] || (_cache[229] = _createElementVNode("div", {
+      ? (_openBlock(), _createElementBlock("section", _hoisted_964, [
+          _cache[233] || (_cache[233] = _createElementVNode("div", {
             class: "pkm-dark",
             id: "pkm-radar-map",
             "aria-hidden": "true",
             style: {"position":"absolute","inset":"0","background":"radial-gradient(120% 80% at 50% 30%, #0E1A33, #05080F 70%)","color":"var(--pkm-t1)"}
           }, null, -1 /* CACHED */)),
-          _createElementVNode("div", _hoisted_936, [
-            _createElementVNode("div", _hoisted_937, [
+          _createElementVNode("div", _hoisted_965, [
+            _createElementVNode("div", _hoisted_966, [
               _createElementVNode("button", {
                 class: "pkm-dark",
                 type: "button",
@@ -10508,23 +11106,23 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer le radar",
                 style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_939, [...(_cache[222] || (_cache[222] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_968, [...(_cache[226] || (_cache[226] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
-              ], 8 /* PROPS */, _hoisted_938),
-              _createElementVNode("nav", _hoisted_940, [
+              ], 8 /* PROPS */, _hoisted_967),
+              _createElementVNode("nav", _hoisted_969, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.crumbs || []), (rc, rc_i) => {
                   return (_openBlock(), _createElementBlock(_Fragment, { key: rc_i }, [
                     (rc.sep)
-                      ? (_openBlock(), _createElementBlock("span", _hoisted_941, "›"))
+                      ? (_openBlock(), _createElementBlock("span", _hoisted_970, "›"))
                       : _createCommentVNode("v-if", true),
                     _createElementVNode("button", {
                       type: "button",
                       onClick: rc.go,
                       "aria-current": _ctx.A(rc.current),
                       style: _normalizeStyle(`flex: none; height: 36px; padding: 0 8px; border: 0; border-radius: 18px; background: transparent; color: ${rc.color}; font: inherit; font-size: 13.5px; font-weight: ${rc.weight}; white-space: nowrap; cursor: pointer`)
-                    }, _toDisplayString(rc.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_942)
+                    }, _toDisplayString(rc.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_971)
                   ], 64 /* STABLE_FRAGMENT */))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
@@ -10536,10 +11134,10 @@ return function render(_ctx, _cache) {
                     onClick: _ctx.V.rd.toggleList,
                     "aria-pressed": _ctx.A(_ctx.V.rd.listMode),
                     style: {"flex":"none","height":"44px","padding":"0 14px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-                  }, _toDisplayString(_ctx.V.rd.listLabel), 9 /* TEXT, PROPS */, _hoisted_943))
+                  }, _toDisplayString(_ctx.V.rd.listLabel), 9 /* TEXT, PROPS */, _hoisted_972))
                 : _createCommentVNode("v-if", true)
             ]),
-            _createElementVNode("div", _hoisted_944, [
+            _createElementVNode("div", _hoisted_973, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.prods || []), (rp, rp_i) => {
                 return (_openBlock(), _createElementBlock("button", {
                   key: rp_i,
@@ -10547,11 +11145,11 @@ return function render(_ctx, _cache) {
                   onClick: rp.pick,
                   "aria-pressed": _ctx.A(rp.on),
                   style: _normalizeStyle(`flex: none; height: 36px; padding: 0 13px; border-radius: 999px; border: 1px solid ${rp.bc}; background: ${rp.bg2}; color: ${rp.fg}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer`)
-                }, _toDisplayString(rp.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_945))
+                }, _toDisplayString(rp.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_974))
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             (_ctx.V.rd.showLegend)
-              ? (_openBlock(), _createElementBlock("span", _hoisted_946, [...(_cache[223] || (_cache[223] = [
+              ? (_openBlock(), _createElementBlock("span", _hoisted_975, [...(_cache[227] || (_cache[227] = [
                   _createStaticVNode("<span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-green);\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-orange);\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-gray);\"></span>Faible</span>", 3)
                 ]))]))
               : _createCommentVNode("v-if", true)
@@ -10560,7 +11158,7 @@ return function render(_ctx, _cache) {
             class: "pkm-dark",
             style: _normalizeStyle(`position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: ${_ctx.V.rd.sheetMax}; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; border-top: 1px solid var(--pkm-line-3); background: rgba(var(--pkm-app-rgb), 0.97); box-shadow: 0 -18px 40px rgba(var(--pkm-shadow-rgb), 0.5); color: var(--pkm-t1)`)
           }, [
-            _createElementVNode("div", _hoisted_947, [
+            _createElementVNode("div", _hoisted_976, [
               (_ctx.V.rd.hasStore)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                     _createElementVNode("button", {
@@ -10568,22 +11166,22 @@ return function render(_ctx, _cache) {
                       onClick: _ctx.V.rd.st.back,
                       style: {"align-self":"flex-start","height":"36px","padding":"0 12px 0 6px","border":"0","border-radius":"18px","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"13.5px","font-weight":"600","display":"flex","align-items":"center","gap":"2px","cursor":"pointer"}
                     }, [
-                      (_openBlock(), _createElementBlock("svg", _hoisted_949, [...(_cache[224] || (_cache[224] = [
+                      (_openBlock(), _createElementBlock("svg", _hoisted_978, [...(_cache[228] || (_cache[228] = [
                         _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
                       ]))])),
-                      _cache[225] || (_cache[225] = _createTextVNode("Résultats", -1 /* CACHED */))
-                    ], 8 /* PROPS */, _hoisted_948),
+                      _cache[229] || (_cache[229] = _createTextVNode("Résultats", -1 /* CACHED */))
+                    ], 8 /* PROPS */, _hoisted_977),
                     _createElementVNode("section", {
                       "aria-label": _ctx.A(_ctx.V.rd.st.name),
                       style: {"flex":"none","display":"flex","flex-direction":"column","gap":"12px"}
                     }, [
-                      _createElementVNode("div", _hoisted_951, [
-                        _createElementVNode("span", _hoisted_952, [
-                          _createElementVNode("h2", _hoisted_953, _toDisplayString(_ctx.V.rd.st.name), 1 /* TEXT */),
-                          _createElementVNode("span", _hoisted_954, _toDisplayString(_ctx.V.rd.st.kind), 1 /* TEXT */),
-                          _createElementVNode("span", _hoisted_955, _toDisplayString(_ctx.V.rd.st.place), 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_980, [
+                        _createElementVNode("span", _hoisted_981, [
+                          _createElementVNode("h2", _hoisted_982, _toDisplayString(_ctx.V.rd.st.name), 1 /* TEXT */),
+                          _createElementVNode("span", _hoisted_983, _toDisplayString(_ctx.V.rd.st.kind), 1 /* TEXT */),
+                          _createElementVNode("span", _hoisted_984, _toDisplayString(_ctx.V.rd.st.place), 1 /* TEXT */)
                         ]),
-                        _createElementVNode("span", _hoisted_956, [
+                        _createElementVNode("span", _hoisted_985, [
                           _createElementVNode("span", {
                             style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; white-space: nowrap; color: ${_ctx.V.rd.st.color}`)
                           }, _toDisplayString(_ctx.V.rd.st.pct), 5 /* TEXT, STYLE */),
@@ -10592,15 +11190,15 @@ return function render(_ctx, _cache) {
                           }, _toDisplayString(_ctx.V.rd.st.level), 5 /* TEXT, STYLE */)
                         ])
                       ]),
-                      _createElementVNode("p", _hoisted_957, _toDisplayString(_ctx.V.rd.st.note), 1 /* TEXT */),
+                      _createElementVNode("p", _hoisted_986, _toDisplayString(_ctx.V.rd.st.note), 1 /* TEXT */),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.st.toggleWhy,
                         "aria-expanded": _ctx.A(_ctx.V.rd.st.why),
                         style: {"align-self":"flex-start","height":"40px","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-                      }, _toDisplayString(_ctx.V.rd.st.whyLabel), 9 /* TEXT, PROPS */, _hoisted_958),
+                      }, _toDisplayString(_ctx.V.rd.st.whyLabel), 9 /* TEXT, PROPS */, _hoisted_987),
                       (_ctx.V.rd.st.why)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_959, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_988, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.st.reasons || []), (rr, rr_i) => {
                               return (_openBlock(), _createElementBlock("span", {
                                 key: rr_i,
@@ -10609,36 +11207,36 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("span", {
                                   style: _normalizeStyle(`flex: none; width: 34px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; color: ${rr.color}`)
                                 }, _toDisplayString(rr.sign), 5 /* TEXT, STYLE */),
-                                _createElementVNode("span", _hoisted_960, _toDisplayString(rr.text), 1 /* TEXT */)
+                                _createElementVNode("span", _hoisted_989, _toDisplayString(rr.text), 1 /* TEXT */)
                               ]))
                             }), 128 /* KEYED_FRAGMENT */)),
-                            _createElementVNode("span", _hoisted_961, _toDisplayString(_ctx.V.rd.st.total), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_990, _toDisplayString(_ctx.V.rd.st.total), 1 /* TEXT */)
                           ]))
                         : _createCommentVNode("v-if", true),
                       (_ctx.V.rd.st.hasHours)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_962, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_991, [
                             _createElementVNode("span", {
                               style: _normalizeStyle(`font-size: 13.5px; font-weight: 700; color: ${_ctx.V.rd.st.hoursColor}`)
                             }, _toDisplayString(_ctx.V.rd.st.hoursState), 5 /* TEXT, STYLE */),
-                            _createElementVNode("span", _hoisted_963, _toDisplayString(_ctx.V.rd.st.hoursText), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_992, _toDisplayString(_ctx.V.rd.st.hoursText), 1 /* TEXT */)
                           ]))
                         : _createCommentVNode("v-if", true),
                       (_ctx.V.rd.st.hasAddress)
-                        ? (_openBlock(), _createElementBlock("p", _hoisted_964, _toDisplayString(_ctx.V.rd.st.address), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("p", _hoisted_993, _toDisplayString(_ctx.V.rd.st.address), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
-                      _createElementVNode("div", _hoisted_965, [
+                      _createElementVNode("div", _hoisted_994, [
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.route,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"height":"46px","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                        }, "Itinéraire", 8 /* PROPS */, _hoisted_966),
+                        }, "Itinéraire", 8 /* PROPS */, _hoisted_995),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: _ctx.V.rd.st.toggleAlert,
                           "aria-pressed": _ctx.A(_ctx.V.rd.st.alertOn),
                           style: _normalizeStyle(`height: 46px; border: 1px solid var(--pkm-line-2); border-radius: 999px; background: ${_ctx.V.rd.st.alertBg}; color: ${_ctx.V.rd.st.alertFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
-                        }, _toDisplayString(_ctx.V.rd.st.alertLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_967),
+                        }, _toDisplayString(_ctx.V.rd.st.alertLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_996),
                         (_ctx.V.rd.st.hasSite)
                           ? (_openBlock(), _createElementBlock("a", {
                               key: 0,
@@ -10647,7 +11245,7 @@ return function render(_ctx, _cache) {
                               rel: "noopener noreferrer",
                               "aria-label": _ctx.A(_ctx.V.rd.st.siteAria),
                               style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","box-sizing":"border-box","color":"var(--pkm-t1)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                            }, _toDisplayString(_ctx.V.rd.st.siteLabel), 9 /* TEXT, PROPS */, _hoisted_968))
+                            }, _toDisplayString(_ctx.V.rd.st.siteLabel), 9 /* TEXT, PROPS */, _hoisted_997))
                           : _createCommentVNode("v-if", true),
                         (_ctx.V.rd.st.hasTel)
                           ? (_openBlock(), _createElementBlock("a", {
@@ -10655,34 +11253,34 @@ return function render(_ctx, _cache) {
                               href: _ctx.V.rd.st.tel,
                               "aria-label": _ctx.A(_ctx.V.rd.st.telAria),
                               style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","box-sizing":"border-box","color":"var(--pkm-t1)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                            }, _toDisplayString(_ctx.V.rd.st.telLabel), 9 /* TEXT, PROPS */, _hoisted_969))
+                            }, _toDisplayString(_ctx.V.rd.st.telLabel), 9 /* TEXT, PROPS */, _hoisted_998))
                           : _createCommentVNode("v-if", true)
                       ]),
-                      _createElementVNode("div", _hoisted_970, [
+                      _createElementVNode("div", _hoisted_999, [
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.osm,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"font-size":"12.5px","line-height":"2","color":"var(--pkm-link)"}
-                        }, "Voir la fiche OpenStreetMap", 8 /* PROPS */, _hoisted_971),
+                        }, "Voir la fiche OpenStreetMap", 8 /* PROPS */, _hoisted_1000),
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.report,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"font-size":"12.5px","line-height":"2","color":"var(--pkm-link)"}
-                        }, "Signaler une erreur", 8 /* PROPS */, _hoisted_972)
+                        }, "Signaler une erreur", 8 /* PROPS */, _hoisted_1001)
                       ])
-                    ], 8 /* PROPS */, _hoisted_950)
+                    ], 8 /* PROPS */, _hoisted_979)
                   ], 64 /* STABLE_FRAGMENT */))
                 : _createCommentVNode("v-if", true),
               (_ctx.V.rd.notStore)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                    _createElementVNode("div", _hoisted_973, [
-                      _createElementVNode("h2", _hoisted_974, _toDisplayString(_ctx.V.rd.title), 1 /* TEXT */),
-                      _createElementVNode("span", _hoisted_975, _toDisplayString(_ctx.V.rd.subtitle), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_1002, [
+                      _createElementVNode("h2", _hoisted_1003, _toDisplayString(_ctx.V.rd.title), 1 /* TEXT */),
+                      _createElementVNode("span", _hoisted_1004, _toDisplayString(_ctx.V.rd.subtitle), 1 /* TEXT */)
                     ]),
                     (_ctx.V.rd.hasMsg)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_976, _toDisplayString(_ctx.V.rd.msg), 1 /* TEXT */))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1005, _toDisplayString(_ctx.V.rd.msg), 1 /* TEXT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.error)
                       ? (_openBlock(), _createElementBlock("button", {
@@ -10690,22 +11288,22 @@ return function render(_ctx, _cache) {
                           type: "button",
                           onClick: _ctx.V.rd.retry,
                           style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
-                        }, "Réessayer", 8 /* PROPS */, _hoisted_977))
+                        }, "Réessayer", 8 /* PROPS */, _hoisted_1006))
                       : _createCommentVNode("v-if", true),
-                    _createElementVNode("div", _hoisted_978, [
+                    _createElementVNode("div", _hoisted_1007, [
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.scan,
                         disabled: _ctx.V.rd.noScan,
                         style: _normalizeStyle(`height: 48px; border: 0; border-radius: 999px; background: ${_ctx.V.rd.scanBg}; color: ${_ctx.V.rd.scanFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
-                      }, _toDisplayString(_ctx.V.rd.scanLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_979),
+                      }, _toDisplayString(_ctx.V.rd.scanLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1008),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.around,
                         "aria-pressed": _ctx.A(_ctx.V.rd.aroundOn),
                         style: {"height":"48px","border":"1px solid var(--pkm-line-teal)","border-radius":"999px","background":"rgba(var(--pkm-teal-rgb), 0.1)","color":"var(--pkm-teal)","font":"inherit","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","gap":"6px","cursor":"pointer"}
                       }, [
-                        (_openBlock(), _createElementBlock("svg", _hoisted_981, [...(_cache[226] || (_cache[226] = [
+                        (_openBlock(), _createElementBlock("svg", _hoisted_1010, [...(_cache[230] || (_cache[230] = [
                           _createElementVNode("circle", {
                             cx: "12",
                             cy: "12",
@@ -10718,11 +11316,11 @@ return function render(_ctx, _cache) {
                             r: "7"
                           }, null, -1 /* CACHED */)
                         ]))])),
-                        _cache[227] || (_cache[227] = _createTextVNode("Autour de moi", -1 /* CACHED */))
-                      ], 8 /* PROPS */, _hoisted_980)
+                        _cache[231] || (_cache[231] = _createTextVNode("Autour de moi", -1 /* CACHED */))
+                      ], 8 /* PROPS */, _hoisted_1009)
                     ]),
                     (_ctx.V.rd.hasRadii)
-                      ? (_openBlock(), _createElementBlock("div", _hoisted_982, [
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_1011, [
                           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.radii || []), (rk, rk_i) => {
                             return (_openBlock(), _createElementBlock("button", {
                               key: rk_i,
@@ -10730,20 +11328,20 @@ return function render(_ctx, _cache) {
                               onClick: rk.pick,
                               "aria-pressed": _ctx.A(rk.on),
                               style: _normalizeStyle(`flex: 1; height: 40px; border-radius: 999px; border: 1px solid ${rk.bc}; background: ${rk.bg}; color: ${rk.fg}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer`)
-                            }, _toDisplayString(rk.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_983))
+                            }, _toDisplayString(rk.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1012))
                           }), 128 /* KEYED_FRAGMENT */))
                         ]))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasHint)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_984, _toDisplayString(_ctx.V.rd.hint), 1 /* TEXT */))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1013, _toDisplayString(_ctx.V.rd.hint), 1 /* TEXT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.empty)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_985, "Aucune boutique repérée ici : élargis le rayon ou choisis un autre secteur."))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1014, "Aucune boutique repérée ici : élargis le rayon ou choisis un autre secteur."))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasResults)
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
-                          _createElementVNode("span", _hoisted_986, _toDisplayString(_ctx.V.rd.resultsTitle), 1 /* TEXT */),
-                          _createElementVNode("div", _hoisted_987, [
+                          _createElementVNode("span", _hoisted_1015, _toDisplayString(_ctx.V.rd.resultsTitle), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_1016, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.results || []), (rs, rs_i) => {
                               return (_openBlock(), _createElementBlock("button", {
                                 key: rs_i,
@@ -10752,12 +11350,12 @@ return function render(_ctx, _cache) {
                                 "aria-label": _ctx.A(rs.label),
                                 style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; border: 0; border-top: ${rs.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                               }, [
-                                _createElementVNode("span", _hoisted_989, [
-                                  _createElementVNode("span", _hoisted_990, _toDisplayString(rs.name), 1 /* TEXT */),
-                                  _createElementVNode("span", _hoisted_991, _toDisplayString(rs.kind), 1 /* TEXT */),
-                                  _createElementVNode("span", _hoisted_992, _toDisplayString(rs.place), 1 /* TEXT */)
+                                _createElementVNode("span", _hoisted_1018, [
+                                  _createElementVNode("span", _hoisted_1019, _toDisplayString(rs.name), 1 /* TEXT */),
+                                  _createElementVNode("span", _hoisted_1020, _toDisplayString(rs.kind), 1 /* TEXT */),
+                                  _createElementVNode("span", _hoisted_1021, _toDisplayString(rs.place), 1 /* TEXT */)
                                 ]),
-                                _createElementVNode("span", _hoisted_993, [
+                                _createElementVNode("span", _hoisted_1022, [
                                   _createElementVNode("span", {
                                     style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: ${rs.color}`)
                                   }, _toDisplayString(rs.pct), 5 /* TEXT, STYLE */),
@@ -10765,15 +11363,15 @@ return function render(_ctx, _cache) {
                                     style: _normalizeStyle(`padding: 1px 8px; border-radius: 999px; background: ${rs.tint}; color: ${rs.color}; font-size: 11px; font-weight: 800`)
                                   }, _toDisplayString(rs.level), 5 /* TEXT, STYLE */)
                                 ])
-                              ], 12 /* STYLE, PROPS */, _hoisted_988))
+                              ], 12 /* STYLE, PROPS */, _hoisted_1017))
                             }), 128 /* KEYED_FRAGMENT */))
                           ])
                         ], 64 /* STABLE_FRAGMENT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasSectors)
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 6 }, [
-                          _createElementVNode("span", _hoisted_994, _toDisplayString(_ctx.V.rd.sectorsTitle), 1 /* TEXT */),
-                          _createElementVNode("div", _hoisted_995, [
+                          _createElementVNode("span", _hoisted_1023, _toDisplayString(_ctx.V.rd.sectorsTitle), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_1024, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.sectors || []), (rg, rg_i) => {
                               return (_openBlock(), _createElementBlock("button", {
                                 key: rg_i,
@@ -10782,19 +11380,19 @@ return function render(_ctx, _cache) {
                                 "aria-label": _ctx.A(rg.label),
                                 style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 14px; border: 0; border-top: ${rg.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                               }, [
-                                _createElementVNode("span", _hoisted_997, _toDisplayString(rg.name), 1 /* TEXT */),
-                                _createElementVNode("span", _hoisted_998, _toDisplayString(rg.count), 1 /* TEXT */),
-                                (_openBlock(), _createElementBlock("svg", _hoisted_999, [...(_cache[228] || (_cache[228] = [
+                                _createElementVNode("span", _hoisted_1026, _toDisplayString(rg.name), 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_1027, _toDisplayString(rg.count), 1 /* TEXT */),
+                                (_openBlock(), _createElementBlock("svg", _hoisted_1028, [...(_cache[232] || (_cache[232] = [
                                   _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
                                 ]))]))
-                              ], 12 /* STYLE, PROPS */, _hoisted_996))
+                              ], 12 /* STYLE, PROPS */, _hoisted_1025))
                             }), 128 /* KEYED_FRAGMENT */))
                           ])
                         ], 64 /* STABLE_FRAGMENT */))
                       : _createCommentVNode("v-if", true)
                   ], 64 /* STABLE_FRAGMENT */))
                 : _createCommentVNode("v-if", true),
-              _createElementVNode("p", _hoisted_1000, _toDisplayString(_ctx.V.rd.attribution) + " · Indice estimé selon le type de boutique, le produit recherché et le calendrier des sorties.", 1 /* TEXT */)
+              _createElementVNode("p", _hoisted_1029, _toDisplayString(_ctx.V.rd.attribution) + " · Indice estimé selon le type de boutique, le produit recherché et le calendrier des sorties.", 1 /* TEXT */)
             ])
           ], 4 /* STYLE */)
         ]))
@@ -10806,8 +11404,8 @@ return function render(_ctx, _cache) {
           role: "status",
           style: _normalizeStyle(`position: absolute; z-index: 50; left: 16px; right: 16px; bottom: ${_ctx.V.ui.toastBottom}; display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 18px; border: 1px solid var(--pkm-line-3); background: var(--pkm-toast); color: var(--pkm-t1); font-size: 14px; font-weight: 600; box-shadow: 0 14px 30px rgba(var(--pkm-shadow-rgb), 0.45)`)
         }, [
-          _createElementVNode("span", _hoisted_1001, [
-            (_openBlock(), _createElementBlock("svg", _hoisted_1002, [...(_cache[230] || (_cache[230] = [
+          _createElementVNode("span", _hoisted_1030, [
+            (_openBlock(), _createElementBlock("svg", _hoisted_1031, [...(_cache[234] || (_cache[234] = [
               _createElementVNode("path", { d: "M5 12.5l4.5 4.5L19 7.5" }, null, -1 /* CACHED */)
             ]))]))
           ]),

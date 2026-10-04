@@ -53,9 +53,6 @@ const patchJs = (from, to, count = 1) => {
   if (n !== count) throw new Error(`Retouche de logique introuvable (${n}/${count}) : ${from.slice(0, 60)}`);
   logic = logic.split(from).join(to);
 };
-// Scan : le bouton « Importer une photo » écrasait la photo du produit (image cassée dans le viseur).
-patch('onClick="{{ scan.photo }}"', 'onClick="{{ scan.importPhoto }}"');
-patchJs("photo: () => this.say('Démo : import d’une photo de la galerie'),", "importPhoto: () => this.say('Démo : import d’une photo de la galerie'),");
 // Territoire : pastilles « 50 % » sur une seule ligne, dans la police de l'app.
 patch('width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer">\n<span style="min-width: 42px; height: 22px;',
   'width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; font: inherit; cursor: pointer">\n<span style="flex: none; white-space: nowrap; min-width: 42px; height: 22px;');
@@ -103,6 +100,13 @@ const wrapSection = (label, cond) => {
   tpl = tpl.slice(0, i) + '<sc-if value="{{ ' + cond + ' }}" hint-placeholder-val="{{ true }}">\n' + tpl.slice(i, j) + '\n</sc-if>' + tpl.slice(j);
 };
 const afterSection = (label, html) => { const j = sectionAt(label)[1]; tpl = tpl.slice(0, j) + '\n' + html + tpl.slice(j); };
+// Scan réel (tools/web/scan.js) : caméra, lecture de la carte, propositions, recherche du scellé. Le viseur simulé de
+// la maquette (article de démo, fausse confiance, faux code-barres) est remplacé ; l'ouverture de la section (fond de
+// l'écran) et la fiche « Résultat du scan » sont gardées.
+{
+  const [i, j] = sectionAt('Scanner'), open = tpl.indexOf('>', i) + 1, close = j - '</section>'.length;
+  tpl = tpl.slice(0, open) + '\n' + FRAG.scan.trimEnd() + '\n' + tpl.slice(close);
+}
 // Marché : entrée « Toutes les cartes » ; écrans « Toutes les cartes » et « Extension ».
 patch('<div role="group" aria-label="Filtre du marché"', FRAG['market-browse'] + '<div role="group" aria-label="Filtre du marché"');
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG.screens + '\n<sc-if value="{{ ui.isProfile }}"');
@@ -297,21 +301,20 @@ ${SHOP_BODY('bq', false)}
 const PHOTO_INLINE = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover">`;
 const PHOTO_FILL = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover">`;
 const PHOTO_ITEM = '<button type="button" onClick="{{ it.zoom }}" aria-label="{{ it.zoomLabel }}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in"><img src="{{ it.photo }}" alt="{{ it.name }}" style="display: block; width: 100%; height: 100%; object-fit: cover"></button>';
-const PHOTO_SCAN = '<div style="position: absolute; left: 12px; top: 88px; width: 220px; height: 124px; border-radius: 14px; overflow: hidden; transform: rotate(-2deg); box-shadow: 0 26px 44px rgba(0, 0, 0, 0.6)"><img src="{{ scan.photo }}" alt="{{ scan.name }}" style="display: block; width: 100%; height: 100%; object-fit: cover"></div>';
 let sealedBlocks = 0; const sealedSeen = [];
 tpl = tpl.replace(/<sc-if value="\{\{ ([\w.]+)\.isSealed \}\}"([^>]*)>([\s\S]*?)<\/sc-if>/g, (m, o, attrs, body) => {
   sealedBlocks++; sealedSeen.push(o);
-  const photo = o === 'it' ? PHOTO_ITEM : o === 'scan' ? PHOTO_SCAN : o === 'ci' ? PHOTO_FILL(o) : PHOTO_INLINE(o);
+  const photo = o === 'it' ? PHOTO_ITEM : o === 'ci' ? PHOTO_FILL(o) : PHOTO_INLINE(o);
   return `<sc-if value="{{ ${o}.sealedArt }}"${attrs}>${body}</sc-if><sc-if value="{{ ${o}.hasPhoto }}" hint-placeholder-val="{{ false }}">${photo}</sc-if>`;
 });
-if (sealedBlocks !== 12) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 12 (' + sealedSeen.join(', ') + ')'); // dont 2 sur l'accueil
+if (sealedBlocks !== 11) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 11 (' + sealedSeen.join(', ') + ')'); // dont 2 sur l'accueil ; plus celle du viseur simulé
 // Visuel de secours de chaque image de carte (data-fallback), utilisé si l'image ne charge plus.
 tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fallback="{{ ' + o + (o === 'it' ? '.fallbackHi' : '.fallback') + ' }}"');
 // Photos et logos du scellé (data-broken) : si l'image ne charge pas, l'app passe au visuel suivant
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 40) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 40'); // dont 4 sur l'accueil (2 vignettes)
+if (brokenMarks !== 38) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 38'); // dont 4 sur l'accueil (2 vignettes) ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -382,7 +385,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto (tools/sprites/kanto.json).
 const kanto = JSON.parse(readFileSync(ROOT + 'tools/sprites/kanto.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
 if (kanto.length !== 151) throw new Error('Compagnons : ' + kanto.length + ' au lieu de 151');
@@ -401,7 +404,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -421,7 +424,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${kantoJs}${homeJs}${scanCoreJs}${scanOcrJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${kantoJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -541,6 +544,8 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 @keyframes pkmReveal { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
 .pkm-buddy { animation: pkmFloat 2.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pkm-buddy { animation: none; } }
+/* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
+@keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${cssVars()}
 ${v6Css()}
 ${keyframes}`;

@@ -48,8 +48,8 @@ export const TOKENS = {
 const MAP_SVG = /aria-label="Carte des magasins"|M0 168 C|M262 18 h66|M22 22 h54|M-10 74|M-10 132|M110 -10|M238 -10|M30 200|cx="179"|pkmPing|left: 10px; bottom: 9px|right: 10px; top: 9px/;
 export const RULES = [
   // Gardées telles quelles.
-  ['mask', '#000', 'keep', { n: 6 }],
-  ['bg', '#E9ECF2', 'keep', { n: 3 }], ['fg', '#1B2236', 'keep', { n: 3 }], // étiquette des cartes gradées
+  ['mask', '#000', 'keep', { n: 4 }],
+  ['bg', '#E9ECF2', 'keep', { n: 2 }], ['fg', '#1B2236', 'keep', { n: 2 }], // étiquette des cartes gradées
   ['bg', '#0055A4', 'keep', { n: 1 }], ['bg', '#EF4135', 'keep', { n: 1 }], ['bg', '#FFFFFF', 'keep', { ctx: /#0055A4 0 33\.3%/, n: 1 }], // drapeau
   ['bg', '#23765C', 'keep', { n: 1 }], ['bg', '#0A251C', 'keep', { n: 1 }], ['bg', 'rgb(35, 118, 92)', 'keep', { n: 2 }], // fond d'extension (Règne Delta)
   ['bg', '#0E1729', 'keep', { surface: true, n: 1 }], // carte de démonstration de Territoire
@@ -58,7 +58,6 @@ export const RULES = [
   ['fill', '#3D63FF', 'keep', { ctx: MAP_SVG, n: 1 }], ['stroke', '#FFFFFF', 'keep', { ctx: /<circle cx="179"/, n: 1 }],
   ['bg', '#3D63FF', 'keep', { ctx: /box-shadow: 0 0 0 2px #FFFFFF/, n: 1 }], ['shadow', '#FFFFFF', 'keep', { n: 1 }],
   ['bg', '#2B3550', 'keep', { surface: true, n: 1 }], ['bg', '#131A2A', 'keep', { n: 1 }], ['bg', '#07090F', 'keep', { n: 1 }], // écran Scan
-  ['bg', '#FFFFFF', 'keep', { ctx: /repeating-linear-gradient\(90deg, #FFFFFF/, n: 2 }], // code-barres du viseur
   ['bg', '#05080F', 'keep', { surface: true, n: 2 }], ['bg', '#0E1A33', 'keep', { n: 1 }], // Radar
   // Fonds
   ['bg', '#0B1120', 'var(--pkm-app)', { ctx: /class="pkm-root"|aria-label="Bienvenue sur Dropicards"/, n: 2 }],
