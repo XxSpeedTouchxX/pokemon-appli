@@ -1,7 +1,8 @@
   // ——— Collection enregistrée sur l'appareil ———
   // Achats, ventes et réglages sont enregistrés dans le navigateur (localStorage) à chaque changement,
   // puis relus à l'ouverture. Rien n'est envoyé en ligne. Les cartes du catalogue citées par la
-  // collection sont enregistrées avec elle, pour s'afficher avant le chargement du catalogue complet.
+  // collection sont enregistrées avec elle (ligne brute du catalogue), pour s'afficher avant le
+  // chargement du catalogue complet.
   // Les liens de démonstration (#novice, ?demo=…) montrent la démo sans toucher à la collection.
   const SAVE_KEY = 'pkm-collection-v1';
   const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts'];
@@ -35,7 +36,8 @@
   proto.saveNow = function () {
     if (!DEVICE.enabled) return;
     const s = this.st(), ids = usedIds(s), cards = {};
-    (s.extra || []).forEach(id => { if (ids.has(id)) { const p = TCG.item(id); if (p) cards[id] = p; } });
+    // Cartes du catalogue citées : leur ligne brute seulement (pas les images dessinées), pour rester léger.
+    (s.extra || []).forEach(id => { if (ids.has(id)) { const raw = TCG.raw(id); if (raw) cards[id] = raw; } });
     const out = { v: 1, savedAt: new Date().toISOString(), cards: cards };
     SAVED_KEYS.forEach(k => { out[k] = s[k]; });
     DEVICE.ok = storage.write(out);

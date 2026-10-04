@@ -1,0 +1,161 @@
+{
+ "cel25c": [
+  {
+   "id": "cel25c-2_A",
+   "number": "2",
+   "name": "Blastoise",
+   "images": {
+    "small": "https://images.pokemontcg.io/cel25c/2_A.png",
+    "large": "https://images.pokemontcg.io/cel25c/2_A_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    9
+   ],
+   "artist": "Ken Sugimori"
+  },
+  {
+   "id": "cel25c-4_A",
+   "number": "4",
+   "name": "Charizard",
+   "images": {
+    "small": "https://images.pokemontcg.io/cel25c/4_A.png",
+    "large": "https://images.pokemontcg.io/cel25c/4_A_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    6
+   ],
+   "artist": "Mitsuhiro Arita"
+  },
+  {
+   "id": "cel25c-15_A1",
+   "number": "15",
+   "name": "Venusaur",
+   "images": {
+    "small": "https://images.pokemontcg.io/cel25c/15_A.png",
+    "large": "https://images.pokemontcg.io/cel25c/15_A_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    3
+   ],
+   "artist": "Mitsuhiro Arita"
+  },
+  {
+   "id": "cel25c-15_A2",
+   "number": "15",
+   "name": "Here Comes Team Rocket!",
+   "images": {
+    "small": "https://images.pokemontcg.io/cel25c/15_B.png",
+    "large": "https://images.pokemontcg.io/cel25c/15_B_hires.png"
+   },
+   "artist": "Ken Sugimori"
+  },
+  {
+   "id": "cel25c-15_A3",
+   "number": "15",
+   "name": "Rocket's Zapdos",
+   "images": {
+    "small": "https://images.pokemontcg.io/cel25c/15_C.png",
+    "large": "https://images.pokemontcg.io/cel25c/15_C_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    145
+   ],
+   "artist": "Shin-ichi Yoshida"
+  },
+  {
+   "id": "cel25c-15_A4",
+   "number": "15",
+   "name": "Claydol",
+   "images": {
+    "small": "https://images.pokemontcg.io/cel25c/15_D.png",
+    "large": "https://images.pokemontcg.io/cel25c/15_D_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    344
+   ],
+   "artist": "Midori Harada"
+  }
+ ],
+ "tk2a": [
+  {
+   "id": "tk2a-1",
+   "number": "1",
+   "name": "Beldum",
+   "images": {
+    "small": "https://images.pokemontcg.io/tk2a/1.png",
+    "large": "https://images.pokemontcg.io/tk2a/1_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    374
+   ],
+   "artist": "Kouki Saitou"
+  },
+  {
+   "id": "tk2a-2",
+   "number": "2",
+   "name": "Electrike",
+   "images": {
+    "small": "https://images.pokemontcg.io/tk2a/2.png",
+    "large": "https://images.pokemontcg.io/tk2a/2_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    309
+   ],
+   "artist": "Hiroki Fuchino"
+  },
+  {
+   "id": "tk2a-3",
+   "number": "3",
+   "name": "Grumpig",
+   "images": {
+    "small": "https://images.pokemontcg.io/tk2a/3.png",
+    "large": "https://images.pokemontcg.io/tk2a/3_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    326
+   ],
+   "artist": "Atsuko Nishida"
+  }
+ ],
+ "ex10": [
+  {
+   "id": "ex10-A",
+   "number": "A",
+   "name": "Unown",
+   "images": {
+    "small": "https://images.pokemontcg.io/ex10/A.png",
+    "large": "https://images.pokemontcg.io/ex10/A_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    201
+   ],
+   "artist": "Shin-ichi Yoshikawa"
+  },
+  {
+   "id": "ex10-!",
+   "number": "!",
+   "name": "Unown",
+   "images": {
+    "small": "https://images.pokemontcg.io/ex10/!.png",
+    "large": "https://images.pokemontcg.io/ex10/!_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    201
+   ],
+   "artist": "Kyoko Koizumi"
+  },
+  {
+   "id": "ex10-?",
+   "number": "?",
+   "name": "Unown",
+   "images": {
+    "small": "https://images.pokemontcg.io/ex10/question.png",
+    "large": "https://images.pokemontcg.io/ex10/question_hires.png"
+   },
+   "nationalPokedexNumbers": [
+    201
+   ],
+   "artist": "Kyoko Koizumi"
+  }
+ ]
+}

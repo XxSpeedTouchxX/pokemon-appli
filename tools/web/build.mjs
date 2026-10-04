@@ -259,8 +259,10 @@ ${code}
     const t = e.target;
     if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
     t.dataset.fellBack = t.dataset.fallback;
+    const src = t.dataset.fallback.indexOf('drawn:') === 0 ? TCG.drawnFor(t.dataset.fallback.slice(6)) : t.dataset.fallback;
+    if (!src) return;
     t.removeAttribute('srcset');
-    t.src = t.dataset.fallback;
+    t.src = src;
   }, true);
   // Échap ferme le zoom de la carte.
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && inst.st().zoom) inst.setState({ zoom: null }); });

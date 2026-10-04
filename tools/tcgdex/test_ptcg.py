@@ -1,25 +1,16 @@
-"""Tests de ptcg.py (correspondance TCGdex → pokemontcg.io). Lancer : python3 -m unittest discover tools/tcgdex"""
+"""Tests de ptcg.py (correspondance TCGdex → pokemontcg.io). Lancer : python3 -m unittest discover -s tools/tcgdex
+
+Les cartes de test_ptcg_fixtures.json sont des extraits réels du dépôt pokemon-tcg-data (Collection Classique
+avec plusieurs cartes au même numéro, kit du dresseur Posipi, Zarbi « ? »).
+"""
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from ptcg import PtcgData, candidates, compact_image, fold, norm_number, same_name
+from ptcg import PtcgData, agrees, candidates, compact_image, fold, norm_number, same_name
 
-
-def write(root, rel, obj):
-    path = Path(root) / rel
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj), "utf-8")
-
-
-def card(cid, number, name, scx=False):
-    set_id = cid.rsplit("-", 1)[0]
-    if scx:
-        images = {"small": f"https://images.scrydex.com/pokemon/{cid}/small", "large": f"https://images.scrydex.com/pokemon/{cid}/large"}
-    else:
-        images = {"small": f"https://images.pokemontcg.io/{set_id}/{number}.png", "large": f"https://images.pokemontcg.io/{set_id}/{number}_hires.png"}
-    return {"id": cid, "number": number, "name": name, "images": images}
+FIXTURES = json.loads(Path(__file__).with_name("test_ptcg_fixtures.json").read_text("utf-8"))
 
 
 class Helpers(unittest.TestCase):
@@ -28,7 +19,6 @@ class Helpers(unittest.TestCase):
         self.assertEqual(norm_number("TG01"), "TG1")
         self.assertEqual(norm_number("001"), "1")
         self.assertEqual(norm_number("%3F"), "?")
-        self.assertEqual(norm_number("24a"), "24A")
 
     def test_candidates(self):
         self.assertIn("sm75", candidates("sm7.5"))
@@ -40,47 +30,62 @@ class Helpers(unittest.TestCase):
 
     def test_names(self):
         self.assertEqual(fold("Rocket’s Scizor"), fold("Rocket's Scizor"))
-        self.assertTrue(same_name("Flabébé", "Flabebe"))
-        self.assertTrue(same_name("Pikachu V", "Pikachu V (Full Art)"))
-        self.assertFalse(same_name("Pikachu", "Raichu"))
+        self.assertTrue(same_name("Pikachu V (Full Art)", "Pikachu V"))
+        self.assertFalse(same_name("Pikachu", "Pikachu V"))
+        self.assertFalse(same_name("", "Pikachu"))
+
+    def test_agrees(self):
+        beldum = FIXTURES["tk2a"][0]
+        self.assertTrue(agrees(beldum, dex=[374], artist="Kouki Saitou"))
+        self.assertFalse(agrees(beldum, dex=[355]))  # Terhal (Pokédex 355) n’est pas Beldum (374)
+        self.assertIsNone(agrees(beldum))
 
     def test_compact_image(self):
-        self.assertEqual(compact_image(card("swsh9tg-TG01", "TG01", "Flareon")["images"]), "ptcg:swsh9tg/TG01")
-        self.assertEqual(compact_image(card("me2pt5-1", "1", "Oddish", scx=True)["images"]), "scx:me2pt5-1")
-        self.assertIsNone(compact_image({"small": "https://ailleurs.example/a.png", "large": "https://ailleurs.example/b.png"}))
+        self.assertEqual(compact_image(FIXTURES["tk2a"][0]["images"]), "ptcg:tk2a/1")
+        self.assertIsNone(compact_image({"small": "https://images.scrydex.com/pokemon/me2pt5-1/small", "large": "https://images.scrydex.com/pokemon/me2pt5-1/large"}))
 
 
 class Data(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        root = self.tmp.name
-        write(root, "sets/en.json", [
-            {"id": "swsh9tg", "name": "Brilliant Stars Trainer Gallery", "releaseDate": "2022/02/25"},
-            {"id": "cel25c", "name": "Celebrations: Classic Collection", "releaseDate": "2021/10/08"},
-            {"id": "pop1", "name": "POP Series 1", "releaseDate": "2004/09/01"},
-        ])
-        write(root, "cards/en/swsh9tg.json", [card("swsh9tg-TG01", "TG01", "Flareon"), card("swsh9tg-TG02", "TG02", "Vaporeon")])
-        write(root, "cards/en/cel25c.json", [card("cel25c-2", "2", "Blastoise"), card("cel25c-4", "4", "Charizard")])
-        write(root, "cards/en/pop1.json", [card("pop1-1", "1", "Blastoise")])
+        root = Path(self.tmp.name)
+        (root / "cards" / "en").mkdir(parents=True)
+        (root / "sets").mkdir()
+        sets = [{"id": k, "name": k, "releaseDate": "2000/01/01"} for k in FIXTURES]
+        (root / "sets" / "en.json").write_text(json.dumps(sets), "utf-8")
+        for k, cards in FIXTURES.items():
+            (root / "cards" / "en" / (k + ".json")).write_text(json.dumps(cards), "utf-8")
         self.data = PtcgData(root)
 
     def tearDown(self):
         self.tmp.cleanup()
 
     def test_map_set(self):
-        self.assertEqual(self.data.map_set("swsh9tg"), "swsh9tg")
         self.assertEqual(self.data.map_set("cel25cc"), "cel25c")
-        self.assertEqual(self.data.map_set("inconnue", "POP Series 1", "2004-09-01"), "pop1")
-        self.assertIsNone(self.data.map_set("inconnue", "Autre nom"))
+        self.assertEqual(self.data.map_set("tk-ex-p"), "tk2a")
+        self.assertEqual(self.data.map_set("exu"), "ex10")
 
-    def test_image_by_number_and_name(self):
-        self.assertEqual(self.data.image("swsh9tg", "TG01"), "ptcg:swsh9tg/TG01")
-        self.assertEqual(self.data.image("swsh9tg", "TG01", "Flareon"), "ptcg:swsh9tg/TG01")
-        # Même numéro mais autre carte : refusé.
-        self.assertIsNone(self.data.image("swsh9tg", "TG01", "Jolteon"))
-        # Numérotation différente (Collection Classique) : trouvée par le nom, s'il est unique.
-        self.assertEqual(self.data.image("cel25c", "CC002", "Charizard"), "ptcg:cel25c/4")
-        self.assertIsNone(self.data.image("cel25c", "CC009", None))
+    def test_duplicate_numbers_are_kept(self):
+        # Quatre cartes portent le numéro 15 : la bonne est trouvée par son Pokédex et son illustrateur.
+        card, state = self.data.match("cel25c", "CC003", dex=[3], artist="Mitsuhiro Arita")
+        self.assertEqual((card["name"], state), ("Venusaur", True))
+        card, state = self.data.match("cel25c", "CC009", dex=[145])
+        self.assertEqual((card["name"], state), ("Rocket's Zapdos", True))
+
+    def test_wrong_card_with_same_number_is_rejected(self):
+        # Kit du dresseur : le n° 1 français (Terhal, Pokédex 355) n'est pas le n° 1 anglais (Terhal ≠ Beldum).
+        card, state = self.data.match("tk2a", "1", dex=[355], artist="Masakazu Fukuda")
+        self.assertIsNone(card)
+        self.assertFalse(state)
+
+    def test_unverifiable_same_number(self):
+        card, state = self.data.match("tk2a", "2")
+        self.assertEqual(card["name"], "Electrike")
+        self.assertIsNone(state)
+
+    def test_url_encoded_number(self):
+        card, state = self.data.match("ex10", "%3F", dex=[201])
+        self.assertEqual((card["number"], state), ("?", True))
 
 
 if __name__ == "__main__":

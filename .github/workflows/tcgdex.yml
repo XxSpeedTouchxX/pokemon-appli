@@ -15,6 +15,7 @@ on:
       - tools/tcgdex/sync_tcgdex.py
       - tools/tcgdex/build_index.py
       - tools/tcgdex/ptcg.py
+      - tools/tcgdex/test_ptcg.py
 
 permissions:
   contents: write
@@ -58,13 +59,15 @@ jobs:
             python3 tools/tcgdex/sync_tcgdex.py --lang en --skip-images --only-set "$id" --workers 6 --out data/tcgdex-en
           done
 
-      # Scans anglais haute définition (734 × 1024) de pokemontcg.io, pour les cartes que TCGdex n'illustre
-      # pas en français. Données publiques sur GitHub ; arrêt du service prévu le 1er mars 2027.
-      - name: Données pokemontcg.io (scans anglais HD)
+      # Dernier recours pour les cartes que TCGdex n'illustre dans aucune langue : scans anglais de
+      # pokemontcg.io (données publiques sur GitHub ; arrêt du service prévu le 1er mars 2027). Si le dépôt
+      # ne répond pas, les correspondances déjà validées (tools/tcgdex/ptcg_images.json) servent.
+      - name: Données pokemontcg.io (dernier recours)
         continue-on-error: true
         run: git clone --depth 1 https://github.com/PokemonTCG/pokemon-tcg-data data/ptcg
 
       - name: Tests du rapprochement des visuels
+        if: github.event_name == 'push'
         run: python3 -m unittest discover -s tools/tcgdex -p "test_*.py"
 
       - name: Construire le catalogue compact
@@ -78,6 +81,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add web/data/cards.json
+          if [ -f tools/tcgdex/ptcg_images.json ]; then git add tools/tcgdex/ptcg_images.json; fi
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
           git commit -m "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))"
           for i in 1 2 3 4; do

@@ -1273,9 +1273,9 @@ class Component extends DCLogic {
   // - Images : CDN TCGdex (assets.tcgdex.net), jamais stockées chez nous. Vignettes en low.webp
   //   (245 × 337) ; grilles en low ou high.webp selon l'écran (srcset) ; fiche et zoom en high.png
   //   (600 × 825, sans perte), la meilleure qualité que publie TCGdex.
-  // - Cartes sans scan français : scan anglais pokemontcg.io (734 × 1024, chemins « ptcg: » et « scx: »),
-  //   sinon une autre version TCGdex ; si rien n'existe, une carte « visuel à venir » dessinée par l'app.
-  //   Si une image ne charge plus, data-fallback prend le relais (repli TCGdex, sinon carte dessinée).
+  // - Cartes sans scan TCGdex dans aucune langue : scan anglais pokemontcg.io (chemin « ptcg: », petit visuel
+  //   dans les grilles, 734 × 1024 sur la fiche) ; sinon une carte « visuel à venir » dessinée par l'app.
+  //   Si une image ne charge plus, data-fallback (« drawn:<id> ») affiche la carte dessinée, créée à la demande.
   const TCG = { status: 'loading', doc: null, F: null, rows: [], byId: {}, bySet: {}, setList: [], items: {}, saved: {}, fan: [] };
   // Sans accents ni casse ; « Pikachu-ex » se trouve aussi avec « pikachu ex ».
   const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[-‐–]/g, ' ').toLowerCase();
@@ -1285,19 +1285,16 @@ class Component extends DCLogic {
   const LIMIT = 40;
   // Langue d'un visuel de repli (même dessin officiel, texte dans une autre langue).
   const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole' };
-  const PTCG = 'https://images.pokemontcg.io/', SCX = 'https://images.scrydex.com/pokemon/';
+  const PTCG = 'https://images.pokemontcg.io/', ASSETS = 'https://assets.tcgdex.net/';
   // Adresses d'un visuel selon sa source (chemin de cards.json).
   function visual(path) {
     if (!path) return null;
     if (path.indexOf('ptcg:') === 0) {
+      // Grilles : le petit visuel seulement (le grand pèse jusqu'à 1 Mo) ; fiche et zoom : le grand.
       const b = PTCG + path.slice(5);
-      return { img: b + '.png', hi: b + '_hires.png', srcset: b + '.png 245w, ' + b + '_hires.png 734w', lang: 'EN', credit: 'pokemontcg.io · haute définition (734 × 1024)' };
+      return { img: b + '.png', hi: b + '_hires.png', srcset: '', lang: 'EN', credit: 'pokemontcg.io · haute définition (734 × 1024)' };
     }
-    if (path.indexOf('scx:') === 0) {
-      const b = SCX + path.slice(4);
-      return { img: b + '/small', hi: b + '/large', srcset: '', lang: 'EN', credit: 'Scrydex, via pokemontcg.io · haute définition' };
-    }
-    const b = /^https?:/.test(path) ? path : TCG.doc.img + path;
+    const b = /^https?:/.test(path) ? path : ((TCG.doc && TCG.doc.img) || ASSETS) + path;
     return { img: b + '/low.webp', hi: b + '/high.png', srcset: b + '/low.webp 245w, ' + b + '/high.webp 600w',
       lang: (/^([a-z]{2})\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · qualité maximale (PNG 600 × 825)' };
   }
@@ -1353,13 +1350,10 @@ class Component extends DCLogic {
     TCG.fan = last ? TCG.bySet[last.id].filter(x => x.r[F.img]).sort((a, b) => coteOf(b.r, F) - coteOf(a.r, F)).slice(0, 3).map(x => x.r[F.id]) : [];
     TCG.status = 'ready';
   };
-  // Carte TCGdex au format des articles de la maquette (mêmes champs de prix : cm, low, ebay, tcp, avg30).
-  TCG.item = function (id) {
-    if (TCG.items[id]) return TCG.items[id];
-    const x = TCG.byId[id];
-    if (!x) return TCG.saved[id] || null; // carte enregistrée sur l'appareil, en attendant le catalogue
-    const r = x.r, F = TCG.F, set = setOf(r[F.set]), v = visual(r[F.img] || ''), alt = visual((TCG.doc.alt || {})[id] || '');
-    const rarity = r[F.rarity] || '', num = String(r[F.num] || ''), official = set[4] || '';
+  // Carte TCGdex au format des articles de la maquette (mêmes champs de prix : cm, low, ebay, tcp, avg30),
+  // construite à partir d'une ligne de cards.json (champs F, extension set).
+  function buildItem(id, r, F, set) {
+    const v = visual(r[F.img] || ''), rarity = r[F.rarity] || '', num = String(r[F.num] || ''), official = set[4] || '';
     const lang = String(set[5] || 'fr').toUpperCase();
     const numShort = num + (official && /^\d+$/.test(num) ? '/' + official : '');
     let seed = 0;
@@ -1370,17 +1364,33 @@ class Component extends DCLogic {
       sub: [rarity || 'Rareté non renseignée', set[0], 'n° ' + numShort].join(' · ') + (lang === 'EN' ? ' · EN' : ''),
       setName: set[0], set: r[F.set], lang: lang, imgLang: v ? v.lang : '', credit: v ? v.credit : 'Carte dessinée par PKM en attendant le scan officiel',
       img: v ? v.img : '', imgHi: v ? v.hi : '', srcset: v ? v.srcset : '',
+      fallback: 'drawn:' + id, fallbackHi: 'drawn:' + id,
       logo: '', grade: null, release: null,
       cm: r[F.cm], low: r[F.low], ebay: null, tcp: r[F.tcp], avg30: r[F.avg30], upd: r[F.upd], seed: seed
     };
-    const drawn = drawnCard(p);
-    if (!v) { p.img = drawn; p.imgHi = drawn; }
-    // Si le visuel ne charge plus : repli TCGdex (cartes illustrées par pokemontcg.io), sinon carte dessinée.
-    p.fallback = alt ? alt.img : drawn;
-    p.fallbackHi = alt ? alt.hi : drawn;
+    if (!v) { p.img = p.imgHi = drawnCard(p); p.fallback = p.fallbackHi = ''; }
+    return p;
+  }
+  const fieldIndex = fields => { const F = {}; fields.forEach((k, i) => { F[k] = i; }); return F; };
+  TCG.item = function (id) {
+    if (TCG.items[id]) return TCG.items[id];
+    const x = TCG.byId[id], sv = TCG.saved[id];
+    let p = null;
+    if (x) p = buildItem(id, x.r, TCG.F, setOf(x.r[TCG.F.set]));
+    else if (sv && sv.r && sv.f) p = buildItem(id, sv.r, fieldIndex(sv.f), sv.set || [sv.r[2], '', '', '', '', 'fr']);
+    else return sv || null; // enregistrement d'une version précédente : l'article complet
     TCG.items[id] = p;
     return p;
   };
+  // Ligne brute d'une carte, pour l'enregistrer sur l'appareil (quelques centaines d'octets).
+  TCG.raw = function (id) {
+    const x = TCG.byId[id];
+    if (x) return { r: x.r, f: TCG.doc.fields, set: setOf(x.r[TCG.F.set]) };
+    const sv = TCG.saved[id];
+    return sv && sv.r ? sv : null;
+  };
+  // Carte dessinée d'une carte, créée seulement quand une image ne charge pas.
+  TCG.drawnFor = function (id) { const p = TCG.item(id); return p ? drawnCard(p) : ''; };
   // Recherche sans accents ni casse, tous les mots doivent apparaître (nom, extension, série, numéro, rareté).
   // Ordre : nom exact, puis nom qui commence par la recherche, puis cote décroissante.
   TCG.search = function (q, limit) {
@@ -1673,7 +1683,8 @@ class Component extends DCLogic {
   // ——— Collection enregistrée sur l'appareil ———
   // Achats, ventes et réglages sont enregistrés dans le navigateur (localStorage) à chaque changement,
   // puis relus à l'ouverture. Rien n'est envoyé en ligne. Les cartes du catalogue citées par la
-  // collection sont enregistrées avec elle, pour s'afficher avant le chargement du catalogue complet.
+  // collection sont enregistrées avec elle (ligne brute du catalogue), pour s'afficher avant le
+  // chargement du catalogue complet.
   // Les liens de démonstration (#novice, ?demo=…) montrent la démo sans toucher à la collection.
   const SAVE_KEY = 'pkm-collection-v1';
   const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts'];
@@ -1707,7 +1718,8 @@ class Component extends DCLogic {
   proto.saveNow = function () {
     if (!DEVICE.enabled) return;
     const s = this.st(), ids = usedIds(s), cards = {};
-    (s.extra || []).forEach(id => { if (ids.has(id)) { const p = TCG.item(id); if (p) cards[id] = p; } });
+    // Cartes du catalogue citées : leur ligne brute seulement (pas les images dessinées), pour rester léger.
+    (s.extra || []).forEach(id => { if (ids.has(id)) { const raw = TCG.raw(id); if (raw) cards[id] = raw; } });
     const out = { v: 1, savedAt: new Date().toISOString(), cards: cards };
     SAVED_KEYS.forEach(k => { out[k] = s[k]; });
     DEVICE.ok = storage.write(out);
@@ -6912,8 +6924,10 @@ return function render(_ctx, _cache) {
     const t = e.target;
     if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
     t.dataset.fellBack = t.dataset.fallback;
+    const src = t.dataset.fallback.indexOf('drawn:') === 0 ? TCG.drawnFor(t.dataset.fallback.slice(6)) : t.dataset.fallback;
+    if (!src) return;
     t.removeAttribute('srcset');
-    t.src = t.dataset.fallback;
+    t.src = src;
   }, true);
   // Échap ferme le zoom de la carte.
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && inst.st().zoom) inst.setState({ zoom: null }); });
