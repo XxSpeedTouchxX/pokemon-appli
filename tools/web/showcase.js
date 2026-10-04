@@ -49,7 +49,7 @@
   const baseShowHome = proto.vHome;
   proto.vHome = function (x) {
     const r = baseShowHome.call(this, x), items = SEALED.moment();
-    r.rel = items.length ? { show: true, items: items.map(p => this.featureCard(p, x.c.stock)), all: () => this.openSealedList(), allLabel: 'Tout le scellé' } : EMPTY_FEATURE;
+    r.rel = items.length ? { show: true, items: items.map(p => this.featureCard(p, x.c.stock)), all: () => this.openReleases(), allLabel: 'Toutes les sorties' } : EMPTY_FEATURE;
     if (r.near && r.near.aria) Object.assign(r.near, { aria: 'Démo · ' + r.near.aria, wk: r.near.isSealed ? 1.4 : 1 });
     return r;
   };

@@ -96,7 +96,7 @@ export const RULES = [
   ['line', '#0B1120', 'var(--pkm-ink)', { n: 1 }],
   ['line', '#FFFFFF', 'var(--pkm-white)'],
   // Textes
-  ['fg', '#0B1120', 'var(--pkm-on-accent)', { bg: 'var(--pkm-accent)', n: 10 }],
+  ['fg', '#0B1120', 'var(--pkm-on-accent)', { bg: 'var(--pkm-accent)', n: 11 }],
   ['fg', '#0B1120', 'var(--pkm-ink)'],
   ['fg', '#F3F6FC', 'var(--pkm-t1)'],
   ['fg', '#C9D3EA', 'var(--pkm-t2)'],

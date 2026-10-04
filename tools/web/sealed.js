@@ -15,7 +15,7 @@
   const SET_NAMES = { me06: 'Règne Delta' };
   // Photo de démo gardée si le visuel officiel manque.
   const DEMO_PHOTOS = { p2: 'img/products/etb-30e-anniversaire.webp' };
-  const TODAY = '2026-10-03'; // date de la démo (today() de la maquette)
+  const TODAY = realToday(); // sorties « à venir » d'après la date réelle
 
   SEALED.load = function (doc) {
     const F = {};
@@ -44,7 +44,9 @@
       // Avant la sortie, pas de cote : le prix Cardmarket des précommandes est affiché comme prix demandé.
       cm: upcoming ? null : trend, low: upcoming ? (low || trend) : low, avg30: r[F.avg30], ebay: null, tcp: null, seed: seed,
       release: upcoming ? rel : null, released: rel, releaseText: r[F.releaseText] || '', year: r[F.year],
-      photo: r[F.photo] ? 'img/products/' + r[F.id] + '.webp' : '', variants: r[F.variants] || 0
+      photo: r[F.photo] ? 'img/products/' + r[F.id] + '.webp' : '', variants: r[F.variants] || 0,
+      // Page Sorties (absents des fichiers plus anciens) : ASIN Amazon, prix de lancement constaté, recherche, sources.
+      amazon: r[F.amazon] || '', msrp: r[F.msrp] || null, msrpSource: r[F.msrpSource] || '', q: r[F.q] || '', dateSource: r[F.dateSource] || ''
     };
   }
   SEALED.item = function (id) {
@@ -105,7 +107,10 @@
         p.realId = real.id;
         if (real.photo) p.photo = real.photo;
         if (real.release) { p.cm = null; p.low = real.low; } // à venir : précommandes seulement
-        else if (typeof real.cm === 'number') { p.cm = real.cm; p.low = real.low; p.avg30 = real.avg30 || p.avg30; p.ebay = null; }
+        else {
+          if (p.release) p.release = null; // sorti pour de vrai : plus « à venir » dans la démo
+          if (typeof real.cm === 'number') { p.cm = real.cm; p.low = real.low; p.avg30 = real.avg30 || p.avg30; p.ebay = null; }
+        }
       }
       if (!p.photo && DEMO_PHOTOS[p.id]) p.photo = DEMO_PHOTOS[p.id];
     });

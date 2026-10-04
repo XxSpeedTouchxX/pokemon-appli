@@ -165,6 +165,80 @@ patch(FRAG['market-browse'], CAROUSEL('mk.feat', 'Scellé à la une') + FRAG['ma
 // - Produits scellés : une colonne de grandes cartes.
 patch('<!-- liste : produits scellés -->', '<div style="flex: none; display: flex; flex-direction: column; gap: 14px">\n<sc-for list="{{ sl.items }}" as="sp" hint-placeholder-count="4">\n'
   + FEATURE_CARD('sp', 'width: 100%;') + '\n</sc-for>\n</div>');
+// - Page Sorties (tools/web/releases.js) : à venir et sorties récentes, prix de lancement, cote, liens des enseignes.
+const RELEASE_CARD = v => `<article aria-label="{{ ${v}.name }}" style="flex: none; display: flex; flex-direction: column; border: 1px solid #24345C; border-radius: 22px; overflow: hidden; background: #111A2C">
+<button type="button" onClick="{{ ${v}.open }}" aria-label="{{ ${v}.sheetLabel }}" style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; background: {{ ${v}.bg }}; cursor: pointer">
+<sc-if value="{{ ${v}.hasPhoto }}" hint-placeholder-val="{{ true }}"><img src="{{ ${v}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover"></sc-if>
+<sc-if value="{{ ${v}.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ ${v}.logo }}" alt="" loading="lazy" style="position: absolute; left: 20%; top: 18%; width: 60%; height: 44%; object-fit: contain"><span style="position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 1px 6px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 6px; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ ${v}.code }}</span></sc-if>
+<span style="position: absolute; left: 10px; top: 10px; padding: 3px 10px; border-radius: 999px; background: {{ ${v}.tagBg }}; color: #0B1120; font-size: 12px; font-weight: 800">{{ ${v}.tag }}</span>
+<sc-if value="{{ ${v}.owned }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 10px; right: 10px; padding: 1px 8px; border-radius: 999px; background: rgba(8, 13, 26, 0.85); color: #FFFFFF; font-size: 11.5px; font-weight: 700">{{ ${v}.qty }}</span></sc-if>
+</button>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 12px 14px 14px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h3 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 16.5px; font-weight: 600; line-height: 1.3">{{ ${v}.name }}</h3>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ ${v}.type }}</span>
+<span style="font-size: 12.5px; color: #C9D3EA">{{ ${v}.when }}</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; border-radius: 14px; border: 1px solid #1E2B45">
+<span style="font-size: 11.5px; color: #9AA8C3">Prix de lancement</span>
+<sc-if value="{{ ${v}.hasMsrp }}" hint-placeholder-val="{{ true }}"><span style="font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700">{{ ${v}.msrp }}</span><span style="font-size: 11px; line-height: 1.35; color: #9AA8C3">{{ ${v}.msrpNote }}</span></sc-if>
+<sc-if value="{{ ${v}.noMsrp }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: #C9D3EA">non communiqué</span></sc-if>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px; padding: 9px 10px; border-radius: 14px; border: 1px solid #1E2B45">
+<span style="font-size: 11.5px; color: #9AA8C3">{{ ${v}.coteLabel }}</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700">{{ ${v}.cote }}</span>
+<span style="font-size: 11px; line-height: 1.35; color: #9AA8C3">{{ ${v}.coteNote }}</span>
+</div>
+</div>
+<div role="group" aria-label="Chercher ce produit chez une enseigne" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ ${v}.links }}" as="lk" hint-placeholder-count="5">
+<a href="{{ lk.href }}" target="_blank" rel="noopener noreferrer" aria-label="{{ lk.aria }}" style="display: inline-flex; align-items: center; gap: 5px; height: 40px; padding: 0 13px; box-sizing: border-box; border-radius: 999px; border: 1px solid {{ lk.bc }}; background: {{ lk.bg }}; color: {{ lk.fg }}; font-size: 13.5px; font-weight: 700; text-decoration: none">{{ lk.label }}<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M8 16L16 8 M9 8h7v7"></path></svg></a>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button type="button" onClick="{{ ${v}.open }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Fiche PKM</button>
+<button type="button" onClick="{{ ${v}.alert }}" aria-pressed="{{ ${v}.alertOn }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: {{ ${v}.alertBg }}; color: {{ ${v}.alertFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ ${v}.alertLabel }}</button>
+</div>
+</div>
+</article>`;
+const RELEASES_SCREEN = `<sc-if value="{{ ui.isReleases }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Invitations Amazon" style="flex: none; display: flex; gap: 12px; padding: 14px 16px; border-radius: 20px; border: 1px solid #24345C; background: #121C33">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 1px; fill: none; stroke: #B9C5FF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M4 7h16v12H4z M4 7l8 6 8-6"></path></svg>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 15.5px; font-weight: 600">Invitations Amazon</h2>
+<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #C9D3EA">{{ rl.amazonNote }}</p>
+</div>
+</section>
+<sc-if value="{{ rl.hasStatus }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 16px 0; text-align: center; font-size: 14px; color: #9AA8C3">{{ rl.status }}</p></sc-if>
+<sc-if value="{{ rl.hasSoon }}" hint-placeholder-val="{{ true }}">
+<h2 style="flex: none; margin: 6px 0 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">À venir</h2>
+<sc-for list="{{ rl.soon }}" as="rv" hint-placeholder-count="2">
+${RELEASE_CARD('rv')}
+</sc-for>
+</sc-if>
+<sc-if value="{{ rl.hasRecent }}" hint-placeholder-val="{{ true }}">
+<h2 style="flex: none; margin: 6px 0 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Sorties récentes</h2>
+<sc-for list="{{ rl.recent }}" as="rw" hint-placeholder-count="2">
+${RELEASE_CARD('rw')}
+</sc-for>
+</sc-if>
+<p style="flex: none; margin: 0; font-size: 12px; line-height: 1.5; color: #7D8BA8">{{ rl.footer }}</p>
+</sc-if>
+`;
+patch('<sc-if value="{{ ui.isProfile }}"', RELEASES_SCREEN + '<sc-if value="{{ ui.isProfile }}"');
+// - Marché : entrée vers la page Sorties, après le carrousel du scellé.
+patch(FRAG['market-browse'], `<sc-if value="{{ mk.releasesEntry.show }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ mk.releasesEntry.open }}" style="flex: none; display: flex; align-items: center; gap: 14px; min-height: 76px; padding: 10px 14px 10px 12px; border: 1px solid #24345C; border-radius: 22px; background: #121C33; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span aria-hidden="true" style="flex: none; width: 56px; height: 56px; border-radius: 16px; background: #A8B6FF; color: #0B1120; display: flex; align-items: center; justify-content: center"><svg width="28" height="28" viewBox="0 0 24 24" style="fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M4 6.5h16v13H4z M4 10.5h16 M8.5 4v4 M15.5 4v4 M8 14h3v3H8z"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.01em">Sorties · Pokémon 30 ans, Règne Delta</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ mk.releasesEntry.sub }}</span>
+</span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</sc-if>
+` + FRAG['market-browse']);
 // Produits scellés : chaque vignette a une variante « vraie photo » (tools/web/sealed.js), qui remplit son cadre.
 const PHOTO_INLINE = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover">`;
 const PHOTO_FILL = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover">`;
@@ -184,7 +258,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 40) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 40');
+if (brokenMarks !== 44) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 44');
 
 // Thème (tools/web/theme.mjs) : couleurs du gabarit et de la logique en variables CSS, surfaces sombres repérées.
 const themed = themeTemplate(tpl), themedJs = themeScript(logic);
@@ -248,6 +322,7 @@ const catalogJs = readFileSync(fileURLToPath(new URL('./catalog.js', import.meta
 const persistJs = readFileSync(fileURLToPath(new URL('./persist.js', import.meta.url)), 'utf8');
 const sealedJs = readFileSync(fileURLToPath(new URL('./sealed.js', import.meta.url)), 'utf8');
 const showcaseJs = readFileSync(fileURLToPath(new URL('./showcase.js', import.meta.url)), 'utf8');
+const releasesJs = readFileSync(fileURLToPath(new URL('./releases.js', import.meta.url)), 'utf8');
 const radarCoreJs = readFileSync(fileURLToPath(new URL('./radar-core.js', import.meta.url)), 'utf8');
 const radarJs = readFileSync(fileURLToPath(new URL('./radar.js', import.meta.url)), 'utf8');
 
@@ -263,7 +338,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + radarJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* PKM-App · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -283,7 +358,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${persistJs}${radarCoreJs}${radarJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -302,7 +377,7 @@ ${code}
   const HASH = { accueil: { start: 'home' }, collection: { start: 'collection' }, scan: { start: 'scan' }, marche: { start: 'market' },
     territoire: { start: 'territory' }, magasin: { start: 'store' }, profil: { start: 'profile' }, paliers: { start: 'tiers' },
     reglages: { start: 'settings' }, ventes: { start: 'sales' }, bienvenue: { onb: '1' }, novice: { demo: 'novice' },
-    extensions: { start: 'sets' }, scelle: { start: 'sealed' }, radar: { start: 'radar' } };
+    extensions: { start: 'sets' }, scelle: { start: 'sealed' }, radar: { start: 'radar' }, sorties: { start: 'releases' } };
   const props = Object.assign({}, HASH[location.hash.slice(1)] || {});
   try {
     const q = new URLSearchParams(location.search);
@@ -314,7 +389,7 @@ ${code}
   if (DEVICE.enabled) inst.restoreSaved();
   // Défilement : chaque liste retrouve sa position au retour (extensions, grille, Marché…) ; les autres
   // écrans s'ouvrent en haut.
-  const KEEP = ['home', 'collection', 'market', 'territory', 'sets', 'set', 'sealed'];
+  const KEEP = ['home', 'collection', 'market', 'territory', 'sets', 'set', 'sealed', 'releases'];
   const scrollKey = s => s.screen + ':' + (s.screen === 'set' ? s.setId : '');
   const scrolls = {};
   let lastKey = scrollKey(inst.st());

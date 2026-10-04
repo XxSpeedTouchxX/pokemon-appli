@@ -25,10 +25,7 @@
   const lvlOf = pct => (pct >= 70 ? 2 : pct >= 40 ? 1 : 0);
 
   // Date du jour (réelle) ; ?today=AAAA-MM-JJ pour les tests.
-  RADAR.today = function () {
-    try { const t = new URLSearchParams(location.search).get('today'); if (/^\d{4}-\d{2}-\d{2}$/.test(t || '')) return t; } catch (e) { /* adresse sans paramètres */ }
-    return new Date().toISOString().slice(0, 10);
-  };
+  RADAR.today = realToday;
   // Calendrier des sorties : extensions françaises (dates des produits scellés, sinon repères connus).
   RADAR.releases = function () {
     const list = [{ name: 'Nuit Noire', date: '2026-07-17' }, { name: '30ᵉ Anniversaire', date: '2026-09-16' }, { name: 'Règne Delta', date: '2026-11-06' }];
