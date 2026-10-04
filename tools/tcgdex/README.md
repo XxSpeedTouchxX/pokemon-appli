@@ -34,12 +34,22 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
 2. **Autres versions :** le même script récupère les extensions en anglais, allemand, italien et espagnol, sans le détail des cartes (une requête par extension). Elles servent à deux choses :
    - **visuels de repli :** une carte sans scan français prend celui d'une autre version (même dessin officiel), dans cet ordre : anglais, allemand, italien, espagnol. La carte est cherchée par identifiant, ou par numéro dans la même extension ou dans l'extension parente (Galerie de Dresseurs, Galerie Galaroise, Coffre Étincelant). Les logos manquants suivent la même règle ;
    - **extensions sans version française dans TCGdex :** `build_index.py --list-en-only` les liste, puis leur détail et leurs prix sont téléchargés en anglais. Leurs cartes entrent au catalogue, en anglais.
-3. **Catalogue compact :** `build_index.py` produit `web/data/cards.json`. Ce fichier est chargé par la démo web.
+3. **Visuels de dernier recours (pokemontcg.io) :** pour les cartes que TCGdex n'illustre dans aucune langue, le workflow clone le dépôt public `PokemonTCG/pokemon-tcg-data`. `ptcg.py` rapproche alors les cartes :
+   - **extensions :** par une table de correspondance (`30th-c` → `me55c`, `tk-ex-p` → `tk2a`…), puis par identifiant transformé (`sm7.5` → `sm75`), puis par nom anglais et date ;
+   - **cartes :** par numéro, avec vérification du nom anglais, ou du Pokédex et de l'illustrateur. Plusieurs cartes peuvent partager un numéro. Une carte invérifiable n'est prise que si la numérotation de l'extension est confirmée à 90 % au moins.
+
+   Les correspondances validées sont gardées dans `ptcg_images.json`, pour les jours où le dépôt manque. Les images sont retirées si l'hébergeur ne répond plus.
+   - **Bilan au 2026-10-04 :** 771 cartes reçoivent un scan pokemontcg.io ; 432 restent sans scan.
+   - **Cartes encore sans scan :** l'app dessine une carte « Visuel à venir » (nom, extension, numéro, rareté).
+   - **Exclu :** les scans récents servis par le CDN commercial Scrydex. La Collection Classique 30ᵉ Anniversaire reste donc dessinée.
+   - **Arrêt de l'API pokemontcg.io le 1ᵉʳ mars 2027 :** si une image ne charge plus, l'app passe seule à la carte dessinée.
+4. **Catalogue compact :** `build_index.py` produit `web/data/cards.json`. Ce fichier est chargé par la démo web.
    - **Pour chaque carte :** l'identifiant, le nom, l'extension, le numéro, la rareté, l'image (le chemin commence par la langue du visuel) et quatre prix (tendance, plus bas et moyenne 30 jours de Cardmarket ; TCGplayer converti en euros).
    - **Pour chaque extension :** le nom, la série, la date, le logo, le nombre officiel de cartes et la langue des cartes.
    - Le fichier contient une carte par ligne.
    - Le journal du workflow donne le bilan : cartes, visuels par langue, cartes encore sans visuel par extension.
-4. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site.
+5. **Prix du scellé :** `tools/sealed/build_sealed.py` met à jour `web/data/sealed.json` (voir `tools/sealed/README.md`).
+6. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site.
 
 TCG Pocket (cartes numériques) est exclu.
 

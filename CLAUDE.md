@@ -22,7 +22,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-03)
+## 3. État d'avancement (au 2026-10-04)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -44,6 +44,13 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - GitHub Actions met tout à jour chaque jour (`.github/workflows/tcgdex.yml`) ;
   - licence et usage commercial à vérifier avant toute sortie publique.
 - **Collection enregistrée sur l'appareil (2026-10-04) :** dans le navigateur, sans compte ni serveur ; « Vider ma collection » et « Remettre la démo » dans les Réglages.
+- **Visuels et scellé réels (2026-10-04) :**
+  - chaque carte a un visuel : scan TCGdex, sinon scan anglais pokemontcg.io (dernier recours, arrêt prévu le 1ᵉʳ mars 2027), sinon carte dessinée par l'app ;
+  - 61 produits scellés réels : galerie officielle Pokémon France, liste figée dans `tools/sealed/products.json`, visuels officiels, cote Cardmarket du jour.
+- **Radar (2026-10-04) :**
+  - écran plein écran ouvert depuis Territoire : carte de France des boutiques réelles (OpenStreetMap, chaque semaine) ;
+  - zoom par secteur, balayage radar, « Autour de moi », indice de chance expliqué ;
+  - jamais de badge « partenaire » ni d'arrivage annoncé sur une vraie boutique.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

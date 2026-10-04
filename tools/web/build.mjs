@@ -95,7 +95,7 @@ wrapSection('Mes plus belles pièces', 'home.hasBest');
 wrapSection('Derniers ajouts', 'home.hasAdds');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
-patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, visuels et prix via TCGdex · démo de collection, ventes et magasins fictifs');
+patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques du Radar réelles (OpenStreetMap) · collection, ventes et magasins de Territoire fictifs');
 // Produits scellés : chaque vignette a une variante « vraie photo » (tools/web/sealed.js), sur carte blanche.
 const PHOTO_INLINE = o => `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #FFFFFF"><img src="{{ ${o}.photo }}" alt="" loading="lazy" style="max-width: 90%; max-height: 90%; object-fit: contain"></span>`;
 const PHOTO_TILE = o => `<span style="position: absolute; left: 8%; top: 7%; width: 84%; height: 86%; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35)"><img src="{{ ${o}.photo }}" alt="" loading="lazy" style="max-width: 92%; max-height: 92%; object-fit: contain"></span>`;
@@ -307,7 +307,7 @@ const VUE_LOCAL = 'vendor/vue.runtime.global.prod.js';
 const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global.prod.js';
 const body = vue => `<div id="shell">
 <div id="app"></div>
-<p class="pkm-caption">Démo PKM-App · catalogue et prix réels via TCGdex ; collection, ventes et magasins fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
+<p class="pkm-caption">Démo PKM-App · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques du Radar réelles (OpenStreetMap) ; collection, ventes et magasins de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="${vue}"></script>
 <script src="app.js"></script>`;

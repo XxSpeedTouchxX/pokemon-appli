@@ -5,8 +5,10 @@ Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5
 - **Réel :**
   - le **catalogue complet** : toutes les cartes françaises, plus les extensions sans version française dans TCGdex (cartes en anglais) ;
   - leurs **visuels officiels**, en qualité maximale ;
-  - leurs prix Cardmarket et TCGplayer, via TCGdex, mis à jour chaque jour.
-- **Fictif :** la collection de démo de départ, les ventes, les prix eBay et les magasins.
+  - leurs prix Cardmarket et TCGplayer, via TCGdex, mis à jour chaque jour ;
+  - les **produits scellés** sortis en France depuis l'automne 2025 : visuels de la galerie officielle Pokémon France, cote Cardmarket du jour ;
+  - le **Radar** : les boutiques réelles de France métropolitaine (OpenStreetMap) sur une vraie carte.
+- **Fictif :** la collection de démo de départ, les ventes, les prix eBay et les magasins de l'onglet Territoire.
 
 Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil** (navigateur), à chaque changement.
 
@@ -31,9 +33,55 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 - **Visuels officiels :** ils viennent du CDN TCGdex, sans être stockés chez nous.
   - **Qualité :** la fiche et le zoom affichent `high.png`, 600 × 825 sans perte, la meilleure qualité publiée par TCGdex. Les grilles prennent `low.webp` ou `high.webp` selon la finesse de l'écran (`srcset`).
   - **Visuel manquant en français :** le scan d'une autre version (anglaise, puis allemande, italienne ou espagnole) est utilisé. Le dessin officiel est le même et l'app l'indique.
-  - **Sans visuel :** les cartes que TCGdex n'a dans aucune de ces langues gardent un emplacement « ? ».
+  - **Sans visuel dans TCGdex :** scan anglais de pokemontcg.io en dernier recours ; sinon une carte « Visuel à venir » dessinée par l'app (voir `tools/tcgdex/README.md`).
 - **Cote PKM d'une vraie carte :** moyenne de la tendance Cardmarket et du prix TCGplayer converti en euros, au taux de la BCE du jour. Le prix eBay n'est pas encore branché.
 - **Pas de courbe inventée :** la courbe sur 30 jours viendra de l'archive (l'historique git de `cards.json`).
+
+## Produits scellés
+
+- **Données :** `web/data/sealed.json`, mis à jour chaque jour, et les visuels de `web/img/products/` (voir `tools/sealed/README.md`).
+- **Dans l'app :** `tools/web/sealed.js`.
+  - **Marché :**
+    - la recherche trouve aussi le scellé ;
+    - « Sorties » liste les prochains produits (Règne Delta…) ;
+    - l'entrée **« Produits scellés »** ouvre une grille de photos, filtrable par type (ETB, display, UPC, lots de boosters, boîtes, coffrets, decks).
+  - **Toutes les cartes :** le scellé apparaît en tête.
+  - **Fiche produit :** photo officielle agrandissable, cote du jour datée, prix demandé, ajout à la collection (enregistré sur l'appareil).
+  - **Produits de la démo** (ETB 30e Anniversaire, Display Nuit Noire…) : ils prennent la photo officielle et le prix Cardmarket du produit réel.
+- **Sans visuel officiel** (displays, booster, Règne Delta) : l'app affiche le logo de l'extension sur son fond.
+- **Pas de courbe inventée** pour les produits réels : la courbe viendra de l'archive quotidienne.
+
+## Radar : carte de France des boutiques réelles
+
+- **Ouverture :** depuis le bandeau « Radar des boutiques » de Territoire, ou par le lien `#radar`.
+- **Données :**
+  - `web/data/stores.json` : boutiques OpenStreetMap, chaque semaine ;
+  - `web/data/geo/` : contours des régions et des départements.
+
+  Voir `tools/stores/README.md`.
+- **Carte :**
+  - MapLibre GL 6.12 (licence BSD, copié dans `web/vendor/maplibre/`) et fond sombre OpenFreeMap ;
+  - chargés seulement à l'ouverture de l'écran ;
+  - si OpenFreeMap ne répond pas, la carte garde les contours sur un fond uni.
+- **Navigation :**
+  - France › région › département, avec zoom animé ;
+  - une pastille par secteur donne son nombre de boutiques ;
+  - on choisit le secteur sur la carte ou dans la liste.
+- **Balayer :** un faisceau radar révèle les boutiques une à une. Les résultats sont ensuite triés par indice de chance, puis par distance.
+- **Autour de moi :** position du téléphone, rayon de 3, 5 ou 10 km.
+- **Fiche boutique :**
+  - indice de chance avec son détail (« Pourquoi ? ») ;
+  - itinéraire (Google Maps) et fiche OpenStreetMap ;
+  - alerte enregistrée sur l'appareil.
+
+  Une vraie boutique n'est jamais présentée comme partenaire PKM, ni comme ayant annoncé un arrivage.
+- **Liste :** le bouton « Liste » remplace la carte par une liste complète. C'est aussi le mode automatique sans WebGL.
+- **Accessibilité :** mouvements réduits respectés (pas d'animation) ; toutes les fonctions sont accessibles depuis la liste.
+- **Mentions :** © OpenStreetMap, OpenMapTiles, OpenFreeMap, IGN.
+- **Code :**
+  - `tools/web/radar.js` : écran et carte ;
+  - `tools/web/radar-core.js` : indice de chance, ordre du balayage, distances. Tests : `node --test tools/web/test_radar.mjs`.
+  - `?today=AAAA-MM-JJ` fixe la date du calendrier des sorties, pour les tests.
 
 ## Collection enregistrée sur l'appareil
 
@@ -57,6 +105,11 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
   - l'avatar ;
   - les logos Règne Delta et 30e Anniversaire, absents de TCGdex.
 - **Licence et usage commercial de TCGdex :** à vérifier (points V1 à V6 de `docs/05-sources-donnees-prix.md`).
+- **Autres sources à vérifier :**
+  - pokemontcg.io (scans de dernier recours) ;
+  - les fichiers publics Cardmarket (prix du scellé) ;
+  - les visuels de la galerie Pokémon France.
+- **OpenStreetMap (ODbL) et OpenFreeMap :** les mentions sont affichées dans le Radar ; elles doivent rester visibles.
 
 ## Mettre en ligne sur Cloudflare Pages
 
@@ -90,7 +143,7 @@ Le site n'est pas indexé par les moteurs de recherche : balise `robots` et en-t
 
 ## Ouvrir un écran précis
 
-- **Avec un ancrage :** `#territoire`, `#scan`, `#collection`, `#marche`, `#extensions` (toutes les cartes), `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
+- **Avec un ancrage :** `#territoire`, `#radar` (carte de France des boutiques), `#scan`, `#collection`, `#marche`, `#extensions` (toutes les cartes), `#scelle` (produits scellés), `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
 - **Avec des paramètres (hébergement uniquement) :** par exemple `?start=store&storeId=s3`, ou `?start=set&setId=sv08` pour une extension.
 
 ## Régénérer après une évolution de la maquette
@@ -107,18 +160,23 @@ Le script `tools/web/build.mjs` :
 - convertit le gabarit du canevas Design en gabarit Vue, compilé à l'avance (pas d'évaluation de code dans le navigateur) ;
 - adapte la page aux vraies tailles d'écran ;
 - ajoute les écrans et blocs de `tools/web/catalog.dc.html` (même syntaxe que le canevas) ;
-- ajoute la logique de `tools/web/catalog.js` (catalogue complet) et `tools/web/persist.js` (enregistrement sur l'appareil) ;
-- copie Vue 3.5.43 dans `web/vendor/` et les images dans `web/img/`.
+- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar) ;
+- copie Vue 3.5.43 dans `web/vendor/`, MapLibre GL 6.12 dans `web/vendor/maplibre/` et les images dans `web/img/`.
 
 ## Contenu du dossier `web/`
 
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Page de l'app |
-| `app.js` | Logique de la maquette, catalogue complet (`tools/web/catalog.js`), enregistrement sur l'appareil (`tools/web/persist.js`), gabarit compilé et démarrage |
+| `app.js` | Logique de la maquette, catalogue complet, produits scellés, enregistrement sur l'appareil, Radar (`tools/web/*.js`), gabarit compilé et démarrage |
 | `data/cards.json` | Catalogue complet, généré chaque jour par GitHub Actions (ne pas modifier à la main) |
+| `data/sealed.json` | Produits scellés et leurs prix du jour (GitHub Actions) |
+| `data/stores.json` | Boutiques réelles, OpenStreetMap (GitHub Actions, chaque semaine) |
+| `data/geo/` | Contours des régions et des départements (IGN, Licence Ouverte) |
 | `vendor/vue.runtime.global.prod.js` | Vue 3.5.43, licence MIT |
+| `vendor/maplibre/` | MapLibre GL 6.12, licence BSD (Radar, chargé à l'ouverture de l'écran) |
 | `img/` | Visuels provisoires (ceux qui ne sont pas sur TCGdex) |
+| `img/products/` | Visuels officiels des produits scellés (galerie Pokémon France) |
 | `icons/` | Icônes de l'app |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |

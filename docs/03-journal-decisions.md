@@ -6,6 +6,46 @@
 
 ---
 
+## 2026-10-04 — Vrais visuels partout et Radar : la carte de France des boutiques réelles
+
+- **Contexte :** le porteur demande trois choses :
+  - un visuel pour les 1 203 cartes qui n'en avaient pas ;
+  - de vrais visuels pour les produits scellés (ETB, UPC…), repris du web ;
+  - une carte de France « façon AXICALL » : zoom par secteur, balayage radar, boutiques réelles qui vendent du Pokémon, et chance d'y trouver des produits.
+
+  Choix validés le jour même : source gratuite, nouvel écran Radar ouvert depuis Territoire, estimation expliquée.
+- **Décision :**
+  - **Cartes sans visuel :**
+    - scan anglais de pokemontcg.io en dernier recours, pour 771 cartes ; chaque correspondance est vérifiée par le nom anglais, ou par le Pokédex et l'illustrateur ;
+    - sinon, une carte « Visuel à venir » dessinée par l'app (432 cartes) ;
+    - pokemontcg.io arrête son API le 1ᵉʳ mars 2027 : l'app bascule alors seule sur le repli.
+  - **Produits scellés :**
+    - 61 produits sortis en France depuis l'automne 2025, ou annoncés ;
+    - liste figée à la main (`tools/sealed/products.json`) à partir de la galerie officielle Pokémon France ;
+    - 53 visuels officiels : la vignette de la galerie, téléchargée une fois ;
+    - cote = tendance du guide des prix public Cardmarket, mise à jour chaque jour.
+  - **Radar :**
+    - boutiques réelles d'OpenStreetMap : 4 076, mises à jour chaque semaine ;
+    - carte MapLibre, fond OpenFreeMap, contours IGN ;
+    - indice de chance expliqué, entre 5 et 90 % : type de boutique, mention des cartes sur OpenStreetMap, produit recherché, calendrier des sorties ;
+    - une vraie boutique n'est jamais présentée comme partenaire PKM, ni comme ayant annoncé un arrivage ;
+    - Territoire garde sa liste de démo, et un bandeau ouvre le Radar.
+- **Écarté :**
+  - **Scrydex**, le CDN commercial des scans récents de pokemontcg.io (29 $/mois) : les 30 cartes de la Collection Classique 30ᵉ Anniversaire restent dessinées ;
+  - **le contournement de la protection anti-robots** du site Pokémon : seules la galerie et ses vignettes sont lues. Les dates de sortie viennent des extensions (TCGdex) ou de sources publiques ;
+  - **les images « contenu » des fiches officielles** (cartes promo, dés, poster) : elles ne montrent pas la boîte ;
+  - **un rapprochement Cardmarket automatique chaque jour** : un ETB et un ETB Pokémon Center se ressemblent trop ;
+  - **MapLibre 5** : une faille XSS est signalée sur les versions ≤ 6.4. L'app utilise MapLibre 6.12.
+- **Coût :** 0 €/mois. OpenFreeMap, Overpass, pokemontcg.io, la galerie Pokémon, les fichiers Cardmarket et Cloudflare Pages sont gratuits ; GitHub Actions reste sous le quota gratuit.
+- **Points d'attention avant tout partage public :**
+  - licences et usage commercial de pokemontcg.io, des fichiers Cardmarket et des visuels de la galerie Pokémon ;
+  - les mentions OpenStreetMap (ODbL), OpenMapTiles, OpenFreeMap et IGN sont déjà affichées dans le Radar.
+- **Impact :**
+  - CLAUDE.md (§3) ;
+  - `tools/tcgdex/ptcg.py` et `build_index.py` ; `tools/sealed/` ; `tools/stores/` et `tools/geo/` ;
+  - workflows `tcgdex.yml`, `sealed.yml` et `stores.yml` ;
+  - `tools/web/sealed.js`, `radar-core.js`, `radar.js`, `catalog.dc.html` et `build.mjs`.
+
 ## 2026-10-04 — Toutes les cartes en visuel officiel, collection enregistrée sur l'appareil
 
 - **Contexte :** le porteur demande de passer à l'étape suivante (enregistrer la collection) et de mettre « toutes les cartes possibles » dans l'app, avec leur design officiel, en qualité la plus haute possible.
