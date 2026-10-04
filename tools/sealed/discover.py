@@ -25,7 +25,8 @@ import unicodedata
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from http.cookiejar import CookieJar
+from urllib.request import HTTPCookieProcessor, Request, build_opener
 
 UA = "Mozilla/5.0 (compatible; PKM-App/1.0; +https://github.com/XxSpeedTouchxX/pokemon-appli)"
 BASE = "https://www.pokemon.com"
@@ -38,6 +39,7 @@ CM = "https://downloads.s3.cardmarket.com/productCatalog/"
 CM_PRODUCTS = CM + "productList/products_nonsingles_6.json"
 CM_PRICES = CM + "priceGuide/price_guide_6.json"
 OUT = Path(__file__).with_name("candidates.json")
+PNG = b"\x89PNG"
 
 # Extensions récentes : nom français → nom anglais (Cardmarket), et code des visuels officiels.
 SETS_FR_EN = {
@@ -71,10 +73,14 @@ def fold(t):
     return re.sub(r"[\W_]+", " ", t.lower()).strip()
 
 
+OPENER = build_opener(HTTPCookieProcessor(CookieJar()))  # cookies de session gardés, comme un navigateur
+PAUSE = 3  # secondes entre deux pages de pokemon.com
+
+
 def get(url, binary=False):
     req = Request(url, headers={"User-Agent": UA, "Accept-Language": "fr-FR,fr;q=0.9", "Accept-Encoding": "gzip"})
     try:
-        with urlopen(req, timeout=60) as resp:
+        with OPENER.open(req, timeout=60) as resp:
             data = resp.read()
             if resp.headers.get("Content-Encoding") == "gzip":
                 data = gzip.decompress(data)
@@ -86,13 +92,44 @@ def get(url, binary=False):
         return 0, b"" if binary else ""
 
 
+def blocked(text):
+    """Page de contrôle anti-robots à la place du contenu (le site répond 200 quand même)."""
+    return "og:title" not in text and ("Incapsula" in text or len(text) < 8000)
+
+
+class Polite:
+    """Lit les pages une à une ; si le site bloque, attend une fois puis s'arrête (pas d'insistance)."""
+
+    def __init__(self):
+        self.stopped = False
+        self.blocks = 0
+
+    def page(self, url):
+        if self.stopped:
+            return 0, ""
+        for attempt in range(2):
+            time.sleep(PAUSE)
+            status, text = get(url)
+            if status != 200 or not blocked(text):
+                self.blocks = 0
+                return status, text
+            print(f"  bloqué par le site ({len(text)} octets) : {url}" + (" · pause d'une minute" if attempt == 0 else ""))
+            if attempt == 0:
+                time.sleep(60)
+        self.blocks += 1
+        if self.blocks >= 2:
+            print("  le site bloque les lectures : arrêt des pages produits et articles (rien n'est forcé)")
+            self.stopped = True
+        return 0, ""
+
+
 class Page(HTMLParser):
     """Méta, liens, images et suite des titres et textes d'une page (sans les scripts)."""
 
     def __init__(self):
         super().__init__()
         self.meta, self.links, self.imgs, self.alternates, self.events = {}, [], [], {}, []
-        self.heading, self.skip = None, 0
+        self.heading, self.skip, self.anchor, self.cards = None, 0, None, {}
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -104,14 +141,19 @@ class Page(HTMLParser):
             self.alternates[a["hreflang"]] = a.get("href") or ""
         elif tag == "a" and a.get("href"):
             self.links.append(a["href"])
+            self.anchor = a["href"]
         elif tag == "img" and a.get("src"):
             alt = html.unescape(a.get("alt") or "")
             self.imgs.append((a["src"], alt))
             self.events.append(("img", a["src"], alt))
+            if self.anchor:
+                self.cards.setdefault(self.anchor, {"imgs": [], "text": []})["imgs"].append((a["src"], alt))
         elif tag in ("h1", "h2", "h3"):
             self.heading = [tag, ""]
 
     def handle_endtag(self, tag):
+        if tag == "a":
+            self.anchor = None
         if tag in ("script", "style", "noscript"):
             self.skip = max(0, self.skip - 1)
         elif self.heading and tag == self.heading[0]:
@@ -127,6 +169,8 @@ class Page(HTMLParser):
             t = clean(data)
             if t:
                 self.events.append(("text", t))
+                if self.anchor:
+                    self.cards.setdefault(self.anchor, {"imgs": [], "text": []})["text"].append(t)
 
 
 def clean(t):
@@ -195,15 +239,14 @@ def cardmarket_candidates(words, ptype, set_en, products):
              "trend": p["trend"], "avg30": p["avg30"]} for _, p in out[:5]]
 
 
-def monthly_articles(first, last):
+def monthly_articles(first, last, reader):
     """Articles mensuels de Pokémon France : chaque section (titre h2) avec sa date de sortie et ses visuels."""
     out = []
     y, m = first
-    while (y, m) <= last:
+    while (y, m) <= last and not reader.stopped:
         for prefix in MONTHLY:
             url = f"{NEWS}{prefix}{MONTHS[m - 1]}-{y}"
-            status, text = get(url)
-            time.sleep(1)
+            status, text = reader.page(url)
             if status != 200:
                 continue
             page = Page()
@@ -251,7 +294,7 @@ def main():
     args = ap.parse_args()
 
     listing = [GALLERY] + [f"{GALLERY}/{y}" for y in args.years.split(",") if y]
-    seen = []
+    seen, cards = [], {}
     for url in listing:
         status, text = get(url)
         page = Page()
@@ -259,45 +302,58 @@ def main():
         before = len(seen)
         for href in page.links:
             m = re.match(r"^(?:https://www\.pokemon\.com)?(/fr/jcc-pokemon/galerie-produits/([a-z0-9-]+))/?$", href)
-            if m and not m.group(2).isdigit() and m.group(1) not in seen:
-                seen.append(m.group(1))
+            if m and not m.group(2).isdigit():
+                if m.group(1) not in seen:
+                    seen.append(m.group(1))
+                card = page.cards.get(href) or {}
+                if card.get("imgs") and m.group(1) not in cards:
+                    cards[m.group(1)] = card
         print(f"{url} : {status} · {len(seen) - before} nouveau(x) produit(s)")
         time.sleep(1)
+    print(f"Vignettes de la galerie rattachées à leur produit : {len(cards)} sur {len(seen)}")
 
     cm = load_cardmarket()
-    products = []
+    reader, products = Polite(), []
     for path in seen:
         url = BASE + path
-        status, text = get(url)
-        time.sleep(1)
-        if status != 200:
-            print(f"  {path} : {status}")
-            continue
+        status, text = reader.page(url)
         page = Page()
-        page.feed(text)
-        title = strip_brand(page.meta.get("og:title", ""))
-        body = " ".join(ev[1] for ev in page.events if ev[0] == "text")
+        page.feed(text if status == 200 else "")
+        card = cards.get(path) or {"imgs": [], "text": []}
+        tile = [(absolute(s), re.sub(r"<[^>]+>", "", alt)) for s, alt in card["imgs"] if "/incrementals/" in s]
+        title = strip_brand(page.meta.get("og:title", "")) or strip_brand(next((alt for _, alt in tile if alt), ""))
+        body = " ".join(ev[1] for ev in page.events if ev[0] == "text") + " " + " ".join(card["text"])
         date = DATE_RE.search(body)
-        images = [absolute(s) for s, _ in page.imgs if "/trading-card-game/" in s and "/_ui/" not in s]
+        images = [absolute(s) for s, _ in page.imgs if "/trading-card-game/" in s and "/_ui/" not in s] or [s for s, _ in tile]
         en = page.alternates.get("en") or page.alternates.get("en-us") or ""
         en_slug = en.rstrip("/").rsplit("/", 1)[-1] if "/product-gallery/" in en else ""
         img_slug = next((m.group(1) for m in (re.search(r"/incrementals/\d{4}/([a-z0-9-]+)/", s) for s in images) if m), "")
-        ptype = product_type(title)
-        set_fr, set_en = product_set(title, images)
+        ptype = product_type(title or path)
+        set_fr, set_en = product_set(title or path.replace("-", " "), images)
         words = set(fold(title).split()) | set(en_slug.split("-")) | set(img_slug.split("-"))
         products.append({
-            "slug": path.rsplit("/", 1)[1], "url": url, "name": title, "enSlug": en_slug, "imgSlug": img_slug,
+            "slug": path.rsplit("/", 1)[1], "url": url, "source": "fiche" if page.meta.get("og:title") else "galerie",
+            "name": title, "enSlug": en_slug, "imgSlug": img_slug,
             "type": ptype, "setFr": set_fr, "setEn": set_en, "date": date.group(1) if date else "",
             "description": page.meta.get("og:description", ""), "ogImage": page.meta.get("og:image", ""), "images": images,
             "cardmarket": cardmarket_candidates(words, ptype, set_en, cm),
         })
         p = products[-1]
         best = p["cardmarket"][0] if p["cardmarket"] else None
-        print(f"  {ptype:3} {title} · {p['date'] or '?'} · {len(images)} image(s) · "
+        print(f"  {ptype:3} {title or path} · {p['source']} · {p['date'] or '?'} · {len(images)} image(s) · "
               + (f"Cardmarket {best['cmId']} {best['name']} ({best['trend']} €)" if best else "Cardmarket ?"))
 
+    # Les visuels sont-ils accessibles ? (fichiers statiques, lus par fetch_images.py)
+    for src in [next((i for p in products for i in p["images"] if "/inline/" not in i), ""),
+                next((i for p in products for i in p["images"] if "/inline/" in i), "")]:
+        if src:
+            time.sleep(PAUSE)
+            status, data = get(src, binary=True)
+            kind = "PNG" if data[:4] == PNG else repr(data[:12])
+            print(f"Visuel test : {status} · {len(data)} octets · {kind} · {src}")
+
     first, last = [tuple(int(x) for x in s.split("-")) for s in args.months.split(":")]
-    articles = monthly_articles(first, last)
+    articles = monthly_articles(first, last, reader)
 
     recent = sorted((p for p in cm if (p.get("dateAdded") or "") >= args.recent), key=lambda p: (p.get("idExpansion") or 0, p["idProduct"]))
     recent = [[p["idProduct"], p["name"], p.get("categoryName"), p.get("idExpansion"), (p.get("dateAdded") or "")[:10], p["trend"], p["avg30"]]
