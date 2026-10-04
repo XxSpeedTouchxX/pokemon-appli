@@ -2,10 +2,13 @@
 
 Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5/`) : mêmes écrans, même logique.
 
-- **Réel :** le **catalogue complet des cartes françaises** et leurs prix Cardmarket et TCGplayer, via TCGdex, mis à jour chaque jour.
-- **Fictif :** la collection de démo, les ventes, les prix eBay et les magasins.
+- **Réel :**
+  - le **catalogue complet** : toutes les cartes françaises, plus les extensions sans version française dans TCGdex (cartes en anglais) ;
+  - leurs **visuels officiels**, en qualité maximale ;
+  - leurs prix Cardmarket et TCGplayer, via TCGdex, mis à jour chaque jour.
+- **Fictif :** la collection de démo de départ, les ventes, les prix eBay et les magasins.
 
-Il n'y a ni compte ni serveur : la collection n'est pas enregistrée et repart de zéro à chaque ouverture.
+Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil** (navigateur), à chaque changement.
 
 - **Adresse :** https://pokemon-appli.pages.dev (Cloudflare Pages, accès limité par e-mail).
 - **Page claude.ai (privée) :** https://claude.ai/artifact/9sDF5mc4brvvYaZWLd64qe. Elle n'a pas le catalogue complet.
@@ -17,11 +20,35 @@ Il n'y a ni compte ni serveur : la collection n'est pas enregistrée et repart d
   - Il construit `web/data/cards.json` avec `tools/tcgdex/build_index.py`.
   - Il publie le résultat sur la branche, et Cloudflare redéploie le site.
 - **Dans l'app :** `tools/web/catalog.js` charge `cards.json` au démarrage.
-  - **Marché :** la recherche porte sur toutes les cartes (nom, extension, numéro, rareté), sans tenir compte des accents ni des majuscules.
-  - **Fiche carte :** image du CDN TCGdex, prix datés, cote PKM et ajout à la collection.
+  - **Marché :**
+    - la recherche porte sur toutes les cartes (nom, extension, numéro, rareté), sans tenir compte des accents ni des majuscules ;
+    - l'entrée **« Toutes les cartes »** ouvre la liste des extensions, groupées par série, des plus récentes aux plus anciennes. Celles sans version française viennent à la fin.
+  - **Extension :** toutes ses cartes en grille, avec leur numéro officiel (238/191) et leur cote.
+    - Filtres : toutes, les plus chères, ultra rares, à toi.
+    - La valeur de la série complète est affichée.
+  - **Fiche carte :** la carte entière en qualité maximale, à agrandir en plein écran (touche Échap pour fermer). On y trouve aussi les prix datés, la cote PKM et l'ajout à la collection.
   - **Scan :** « Ce n'est pas le bon article ? » ouvre cette recherche.
+- **Visuels officiels :** ils viennent du CDN TCGdex, sans être stockés chez nous.
+  - **Qualité :** la fiche et le zoom affichent `high.png`, 600 × 825 sans perte, la meilleure qualité publiée par TCGdex. Les grilles prennent `low.webp` ou `high.webp` selon la finesse de l'écran (`srcset`).
+  - **Visuel manquant en français :** le scan d'une autre version (anglaise, puis allemande, italienne ou espagnole) est utilisé. Le dessin officiel est le même et l'app l'indique.
+  - **Sans visuel :** les cartes que TCGdex n'a dans aucune de ces langues gardent un emplacement « ? ».
 - **Cote PKM d'une vraie carte :** moyenne de la tendance Cardmarket et du prix TCGplayer converti en euros, au taux de la BCE du jour. Le prix eBay n'est pas encore branché.
 - **Pas de courbe inventée :** la courbe sur 30 jours viendra de l'archive (l'historique git de `cards.json`).
+
+## Collection enregistrée sur l'appareil
+
+- **Enregistrement :** `tools/web/persist.js` enregistre la collection dans le navigateur (`localStorage`) à chaque changement, puis la relit à l'ouverture. Rien n'est envoyé en ligne.
+  - Sont enregistrés : achats, ventes, frais, réglages, alertes et profil déclaré.
+  - Les cartes du catalogue citées sont enregistrées avec la collection, pour s'afficher avant même le chargement du catalogue complet.
+- **Premier lancement :** la collection de démo sert de point de départ.
+- **Réglages, « Ma collection sur cet appareil » :**
+  - **Vider ma collection :** repartir de zéro et ajouter ses vraies cartes ;
+  - **Remettre la démo :** retrouver la collection de démo.
+- **Limites :**
+  - la collection reste propre à l'appareil et au navigateur ;
+  - elle disparaît si l'on efface les données du site ;
+  - en navigation privée, elle n'est pas conservée.
+- **Liens de démonstration :** `#novice` et `?demo=…` montrent la démo sans toucher à la collection enregistrée.
 
 ## Avant tout partage public
 
@@ -63,8 +90,8 @@ Le site n'est pas indexé par les moteurs de recherche : balise `robots` et en-t
 
 ## Ouvrir un écran précis
 
-- **Avec un ancrage :** `#territoire`, `#scan`, `#collection`, `#marche`, `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
-- **Avec des paramètres (hébergement uniquement) :** par exemple `?start=store&storeId=s3`.
+- **Avec un ancrage :** `#territoire`, `#scan`, `#collection`, `#marche`, `#extensions` (toutes les cartes), `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
+- **Avec des paramètres (hébergement uniquement) :** par exemple `?start=store&storeId=s3`, ou `?start=set&setId=sv08` pour une extension.
 
 ## Régénérer après une évolution de la maquette
 
@@ -79,6 +106,8 @@ npm run build
 Le script `tools/web/build.mjs` :
 - convertit le gabarit du canevas Design en gabarit Vue, compilé à l'avance (pas d'évaluation de code dans le navigateur) ;
 - adapte la page aux vraies tailles d'écran ;
+- ajoute les écrans et blocs de `tools/web/catalog.dc.html` (même syntaxe que le canevas) ;
+- ajoute la logique de `tools/web/catalog.js` (catalogue complet) et `tools/web/persist.js` (enregistrement sur l'appareil) ;
 - copie Vue 3.5.43 dans `web/vendor/` et les images dans `web/img/`.
 
 ## Contenu du dossier `web/`
@@ -86,7 +115,7 @@ Le script `tools/web/build.mjs` :
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Page de l'app |
-| `app.js` | Logique de la maquette, catalogue complet (`tools/web/catalog.js`), gabarit compilé et démarrage |
+| `app.js` | Logique de la maquette, catalogue complet (`tools/web/catalog.js`), enregistrement sur l'appareil (`tools/web/persist.js`), gabarit compilé et démarrage |
 | `data/cards.json` | Catalogue complet, généré chaque jour par GitHub Actions (ne pas modifier à la main) |
 | `vendor/vue.runtime.global.prod.js` | Vue 3.5.43, licence MIT |
 | `img/` | Visuels provisoires (ceux qui ne sont pas sur TCGdex) |

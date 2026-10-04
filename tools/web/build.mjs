@@ -40,6 +40,60 @@ patch('<sc-if value="{{ it.noCote }}" hint-placeholder-val="{{ false }}">\n<butt
 patch('placeholder="Rechercher « Display »"', 'placeholder="Rechercher « Dracaufeu », « Display »"');
 patch('<img src="{{ mi.img }}" alt=""', '<img src="{{ mi.img }}" alt="" loading="lazy"');
 
+// Écrans et blocs ajoutés (tools/web/catalog.dc.html) : toutes les cartes par extension, carte entière en
+// qualité maximale avec zoom, collection enregistrée sur l'appareil.
+const FRAG = {};
+const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.meta.url)), 'utf8').split(/<!-- fragment: ([\w-]+) -->\n/);
+for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
+const patchRe = (re, to) => {
+  const n = (tpl.match(new RegExp(re.source, 'g')) || []).length;
+  if (n !== 1) throw new Error(`Ajustement introuvable (${n}/1) : ${re.source.slice(0, 60)}`);
+  tpl = tpl.replace(re, to);
+};
+// Position juste après la fin de la section qui s'ouvre en `from` (sections imbriquées comprises).
+const sectionEnd = from => {
+  const re = /<section\b|<\/section>/g;
+  re.lastIndex = from;
+  let depth = 0, m;
+  while ((m = re.exec(tpl))) {
+    depth += m[0] === '</section>' ? -1 : 1;
+    if (depth === 0) return m.index + m[0].length;
+  }
+  throw new Error('Section non fermée');
+};
+const sectionAt = label => {
+  const tag = '<section aria-label="' + label + '"', i = tpl.indexOf(tag);
+  if (i < 0 || tpl.indexOf(tag, i + 1) >= 0) throw new Error('Section introuvable ou en double : ' + label);
+  return [i, sectionEnd(i)];
+};
+const wrapSection = (label, cond) => {
+  const [i, j] = sectionAt(label);
+  tpl = tpl.slice(0, i) + '<sc-if value="{{ ' + cond + ' }}" hint-placeholder-val="{{ true }}">\n' + tpl.slice(i, j) + '\n</sc-if>' + tpl.slice(j);
+};
+const afterSection = (label, html) => { const j = sectionAt(label)[1]; tpl = tpl.slice(0, j) + '\n' + html + tpl.slice(j); };
+// Marché : entrée « Toutes les cartes » ; écrans « Toutes les cartes » et « Extension ».
+patch('<div role="group" aria-label="Filtre du marché"', FRAG['market-browse'] + '<div role="group" aria-label="Filtre du marché"');
+patch('<sc-if value="{{ ui.isProfile }}"', FRAG.screens + '\n<sc-if value="{{ ui.isProfile }}"');
+// Fiche : la carte entière (et non plus le haut de la carte), agrandissable ; mention du visuel anglais.
+patchRe(/<sc-if value="\{\{ it\.plainCard \}\}"[^>]*>\n<img src="\{\{ it\.img \}\}"[^\n]*\n<\/sc-if>/, FRAG['item-card'].trim());
+patch('<section aria-label="Visuel" style="flex: none; position: relative; height: 292px;', '<section aria-label="Visuel" style="flex: none; position: relative; height: 330px;');
+patch('left: -40px; top: -40px; width: 438px; height: 372px;', 'left: -40px; top: -40px; width: 438px; height: 410px;');
+afterSection('Visuel', FRAG['item-note']);
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
+// Collection : cartes entières dans la grille, message adapté quand elle est vide.
+patchRe(/<img src="\{\{ ci\.img \}\}" alt="" style="position: absolute; left: 50%; top: 14px;[^"]*">/,
+  '<img src="{{ ci.img }}" srcset="{{ ci.srcset }}" sizes="114px" alt="" loading="lazy" style="position: absolute; left: 50%; top: 10px; width: 114px; height: 157px; margin-left: -57px; border-radius: 5% / 3.6%; object-fit: cover; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45)">');
+patch('>Rien ne correspond à ta recherche.<', '>{{ coll.emptyText }}<');
+// Accueil : collection vide, sans blocs vides.
+afterSection('Valeur de ma collection', FRAG['home-empty']);
+patch('<sc-if value="{{ home.notNovice }}" hint-placeholder-val="{{ true }}">\n<section aria-label="Mouvements sur ta collection"',
+  '<sc-if value="{{ home.showMovers }}" hint-placeholder-val="{{ true }}">\n<section aria-label="Mouvements sur ta collection"');
+wrapSection('Mes plus belles pièces', 'home.hasBest');
+wrapSection('Derniers ajouts', 'home.hasAdds');
+// Réglages : collection enregistrée sur l'appareil.
+patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
+patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, visuels et prix via TCGdex · démo de collection, ventes et magasins fictifs');
+
 // Gabarit du canevas → gabarit Vue. Les trous {{ a.b }} visent les valeurs de renderVals (préfixe V.)
 // ou un alias de boucle ; sc-if / sc-for deviennent v-if / v-for.
 function toVue(t) {
@@ -92,6 +146,7 @@ const vueTpl = toVue(tpl);
 const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, hoistStatic: true, whitespace: 'condense' });
 
 const catalogJs = readFileSync(fileURLToPath(new URL('./catalog.js', import.meta.url)), 'utf8');
+const persistJs = readFileSync(fileURLToPath(new URL('./persist.js', import.meta.url)), 'utf8');
 
 const img = Object.fromEntries([
   ['k1', 'card-pikachu-ex'], ['k2', 'card-mega-meganium-ex'], ['k3', 'card-favianos-ex'], ['k4', 'card-jirachi-ex'],
@@ -112,13 +167,17 @@ const app = `/* PKM-App · démo web. Fichier généré par tools/web/build.mjs 
   // Socle minimal attendu par la logique de la maquette : état local et nouveau rendu à chaque changement.
   class DCLogic {
     constructor(props) { this.props = props || {}; }
-    setState(patch) { this.state = Object.assign({}, this.state || {}, patch); if (this.__rerender) this.__rerender(); }
+    setState(patch) {
+      this.state = Object.assign({}, this.state || {}, patch);
+      if (this.__rerender) this.__rerender();
+      if (this.__changed) this.__changed();
+    }
   }
 ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${persistJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -135,22 +194,53 @@ ${code}
   // Écran de départ : #territoire, #scan… (lien partagé) ou ?start=territory&storeId=s2 (hébergement).
   const HASH = { accueil: { start: 'home' }, collection: { start: 'collection' }, scan: { start: 'scan' }, marche: { start: 'market' },
     territoire: { start: 'territory' }, magasin: { start: 'store' }, profil: { start: 'profile' }, paliers: { start: 'tiers' },
-    reglages: { start: 'settings' }, ventes: { start: 'sales' }, bienvenue: { onb: '1' }, novice: { demo: 'novice' } };
+    reglages: { start: 'settings' }, ventes: { start: 'sales' }, bienvenue: { onb: '1' }, novice: { demo: 'novice' },
+    extensions: { start: 'sets' } };
   const props = Object.assign({}, HASH[location.hash.slice(1)] || {});
   try {
     const q = new URLSearchParams(location.search);
-    ['start', 'demo', 'onb', 'itemId', 'storeId', 'saleId', 'tprod', 'tprob', 'adv'].forEach(k => { if (q.get(k)) props[k] = q.get(k); });
+    ['start', 'demo', 'onb', 'itemId', 'storeId', 'saleId', 'setId', 'tprod', 'tprob', 'adv'].forEach(k => { if (q.get(k)) props[k] = q.get(k); });
   } catch (e) { /* adresse sans paramètres */ }
   const inst = new Component(props);
+  // Collection enregistrée sur l'appareil, sauf pour les liens de démonstration.
+  DEVICE.enabled = !props.demo;
+  if (DEVICE.enabled) inst.restoreSaved();
+  // Défilement : chaque liste retrouve sa position au retour (extensions, grille, Marché…) ; les autres
+  // écrans s'ouvrent en haut.
+  const KEEP = ['home', 'collection', 'market', 'territory', 'sets', 'set'];
+  const scrollKey = s => s.screen + ':' + (s.screen === 'set' ? s.setId : '');
+  const scrolls = {};
+  let lastKey = scrollKey(inst.st());
+  let zoomOpen = false;
   Vue.createApp({
     setup() {
       const V = Vue.shallowRef(inst.renderVals());
-      inst.__rerender = () => { V.value = inst.renderVals(); };
+      inst.__rerender = () => {
+        const main = document.querySelector('#app main');
+        if (main) scrolls[lastKey] = main.scrollTop;
+        V.value = inst.renderVals();
+        const s = inst.st(), key = scrollKey(s);
+        if (key !== lastKey) {
+          lastKey = key;
+          const top = KEEP.indexOf(s.screen) >= 0 ? scrolls[key] || 0 : 0;
+          Vue.nextTick(() => { const m = document.querySelector('#app main'); if (m) m.scrollTop = top; });
+        }
+        // Zoom de la carte : le focus va sur « Fermer », puis revient sur la carte.
+        Vue.nextTick(() => {
+          const close = document.querySelector('#pkm-zoom button');
+          if (close && !zoomOpen) close.focus();
+          if (!close && zoomOpen) { const t = document.querySelector('#app button[aria-label^="Agrandir la carte"]'); if (t) t.focus(); }
+          zoomOpen = !!close;
+        });
+      };
       const A = v => (v === true ? 'true' : v === false ? 'false' : v);
       return { V: V, A: A };
     },
     render: render
   }).mount('#app');
+  inst.__changed = () => inst.scheduleSave();
+  // Échap ferme le zoom de la carte.
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && inst.st().zoom) inst.setState({ zoom: null }); });
   // Catalogue complet : chargé après le premier affichage.
   fetch('data/cards.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); })
