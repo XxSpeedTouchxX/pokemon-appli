@@ -1,0 +1,80 @@
+// Tests des calculs du Radar (tools/web/radar-core.js). Lancer : node --test tools/web/test_radar.mjs
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const code = readFileSync(new URL('./radar-core.js', import.meta.url), 'utf8');
+const R = new Function(code + '\nreturn RadarCore;')();
+const CTX = { prod: 'all', today: '2026-10-04', last: { name: '30ᵉ Anniversaire', date: '2026-09-16' }, next: { name: 'Règne Delta', date: '2026-11-06' } };
+
+test('boutique de jeux avec mention des cartes, 18 jours après une sortie', () => {
+  const c = R.chance({ kind: 'jeux', tcg: 1 }, CTX);
+  assert.equal(c.raw, 45 + 15 + 5);
+  assert.equal(c.pct, 65);
+  assert.deepEqual(c.reasons.map(r => r.sign), ['+45', '+15', '+5']);
+  assert.match(c.reasons[2].text, /il y a 18 jours : 30ᵉ Anniversaire/);
+});
+
+test('enseigne de jouets et magasin de jouets indépendant', () => {
+  assert.equal(R.chance({ kind: 'jouets', brand: 'JouéClub' }, CTX).raw, 35 + 5);
+  assert.match(R.chance({ kind: 'jouets', brand: 'JouéClub' }, CTX).reasons[0].text, /^Enseigne de jouets/);
+  assert.equal(R.chance({ kind: 'jouets', brand: '' }, CTX).raw, 20 + 5);
+});
+
+test('hypermarché et display : rare hors boutique spécialisée', () => {
+  const c = R.chance({ kind: 'hyper', tcg: 0 }, Object.assign({}, CTX, { prod: 'DSP' }));
+  assert.equal(c.raw, 35 - 25 + 5);
+  assert.equal(c.pct, 15);
+  assert.ok(c.reasons.some(r => r.sign === '−25' && /Display/.test(r.text)));
+});
+
+test('grande surface culturelle et UPC, boutique de jeux et ETB', () => {
+  assert.equal(R.chance({ kind: 'culture' }, Object.assign({}, CTX, { prod: 'UPC' })).raw, 40 - 15 + 5);
+  assert.equal(R.chance({ kind: 'jeux' }, Object.assign({}, CTX, { prod: 'ETB' })).raw, 45 + 5 + 5);
+});
+
+test('bornes : jamais moins de 5 %, jamais plus de 90 %', () => {
+  const low = R.chance({ kind: 'bd' }, { prod: 'value', today: '2026-10-04', last: { name: 'X', date: '2026-01-01' }, next: null });
+  assert.equal(low.raw, 15 - 30 - 5);
+  assert.equal(low.pct, 5);
+  assert.ok(low.clamped);
+  const high = R.chance({ kind: 'cartes', tcg: 1 }, { prod: 'value', today: '2026-11-01', last: { name: 'A', date: '2026-10-28' }, next: { name: 'B', date: '2026-11-06' } });
+  assert.equal(high.raw, 55 + 15 + 10 + 10 + 5);
+  assert.equal(high.pct, 90);
+  assert.ok(high.clamped);
+});
+
+test('sortie récente (moins de 14 jours) et précommandes', () => {
+  const c = R.chance({ kind: 'jeux' }, { prod: 'all', today: '2026-10-28', last: { name: '30ᵉ Anniversaire', date: '2026-10-20' }, next: { name: 'Règne Delta', date: '2026-11-06' } });
+  assert.ok(c.reasons.some(r => r.sign === '+10' && /le 20 oct\./.test(r.text)));
+  assert.ok(c.reasons.some(r => r.sign === '+5' && /Règne Delta sort le 6 nov\./.test(r.text)));
+});
+
+test('calendrier : dernière et prochaine sortie', () => {
+  const ctx = R.releaseContext([{ name: 'A', date: '2026-07-17' }, { name: 'B', date: '2026-09-16' }, { name: 'C', date: '2026-11-06' }, { name: 'D', date: '' }], '2026-10-04');
+  assert.equal(ctx.last.name, 'B');
+  assert.equal(ctx.next.name, 'C');
+});
+
+test('balayage : le faisceau part du nord et tourne dans le sens des aiguilles d’une montre', () => {
+  const c = { lat: 45, lon: 5 };
+  const pts = [{ id: 'o', lat: 45, lon: 4.9 }, { id: 's', lat: 44.9, lon: 5 }, { id: 'e', lat: 45, lon: 5.1 }, { id: 'n', lat: 45.1, lon: 5 }];
+  const plan = R.sweepPlan(pts, c, 2000);
+  assert.deepEqual(plan.map(p => p.id), ['n', 'e', 's', 'o']);
+  assert.deepEqual(plan.map(p => p.at), [0, 500, 1000, 1500]);
+});
+
+test('distances et cercle', () => {
+  const d = R.distanceKm({ lat: 48.8566, lon: 2.3522 }, { lat: 45.764, lon: 4.8357 });
+  assert.ok(d > 390 && d < 395, String(d));
+  const ring = R.circle({ lat: 45, lon: 5 }, 5, 36).coordinates[0];
+  assert.equal(ring.length, 37);
+  ring.forEach(([lon, lat]) => { const k = R.distanceKm({ lat: 45, lon: 5 }, { lat: lat, lon: lon }); assert.ok(Math.abs(k - 5) < 0.05, String(k)); });
+  const [w, s, e, n] = R.circleBounds({ lat: 45, lon: 5 }, 10);
+  assert.ok(w < 5 && e > 5 && s < 45 && n > 45);
+});
+
+test('classement : indice, puis distance, puis nom', () => {
+  const rows = R.rank([{ name: 'B', pct: 40, dist: 2 }, { name: 'A', pct: 40, dist: 2 }, { name: 'C', pct: 60, dist: 9 }, { name: 'D', pct: 40, dist: 1 }]);
+  assert.deepEqual(rows.map(r => r.name), ['C', 'D', 'A', 'B']);
+});

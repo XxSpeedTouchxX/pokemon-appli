@@ -40,8 +40,8 @@ patch('<sc-if value="{{ it.noCote }}" hint-placeholder-val="{{ false }}">\n<butt
 patch('placeholder="Rechercher « Display »"', 'placeholder="Rechercher « Dracaufeu », « Display »"');
 patch('<img src="{{ mi.img }}" alt=""', '<img src="{{ mi.img }}" alt="" loading="lazy"');
 
-// Écrans et blocs ajoutés (tools/web/catalog.dc.html) : toutes les cartes par extension, carte entière en
-// qualité maximale avec zoom, collection enregistrée sur l'appareil.
+// Écrans et blocs ajoutés (tools/web/catalog.dc.html) : toutes les cartes par extension, produits scellés,
+// carte entière en qualité maximale avec zoom, collection enregistrée sur l'appareil.
 const FRAG = {};
 const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.meta.url)), 'utf8').split(/<!-- fragment: ([\w-]+) -->\n/);
 for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
@@ -80,6 +80,9 @@ patch('<section aria-label="Visuel" style="flex: none; position: relative; heigh
 patch('left: -40px; top: -40px; width: 438px; height: 372px;', 'left: -40px; top: -40px; width: 438px; height: 410px;');
 afterSection('Visuel', FRAG['item-note']);
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
+// Radar : écran plein écran (carte de France des boutiques réelles), ouvert depuis un bandeau de Territoire.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG.radar + '\n<sc-if value="{{ ui.hasToast }}"');
+patch('<button type="button" onClick="{{ ter.release.open }}"', FRAG['territory-radar'] + '<button type="button" onClick="{{ ter.release.open }}"');
 // Collection : cartes entières dans la grille, message adapté quand elle est vide.
 patchRe(/<img src="\{\{ ci\.img \}\}" alt="" style="position: absolute; left: 50%; top: 14px;[^"]*">/,
   '<img src="{{ ci.img }}" srcset="{{ ci.srcset }}" sizes="114px" alt="" loading="lazy" style="position: absolute; left: 50%; top: 10px; width: 114px; height: 157px; margin-left: -57px; border-radius: 5% / 3.6%; object-fit: cover; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45)">');
@@ -162,6 +165,8 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const catalogJs = readFileSync(fileURLToPath(new URL('./catalog.js', import.meta.url)), 'utf8');
 const persistJs = readFileSync(fileURLToPath(new URL('./persist.js', import.meta.url)), 'utf8');
 const sealedJs = readFileSync(fileURLToPath(new URL('./sealed.js', import.meta.url)), 'utf8');
+const radarCoreJs = readFileSync(fileURLToPath(new URL('./radar-core.js', import.meta.url)), 'utf8');
+const radarJs = readFileSync(fileURLToPath(new URL('./radar.js', import.meta.url)), 'utf8');
 
 const img = Object.fromEntries([
   ['k1', 'card-pikachu-ex'], ['k2', 'card-mega-meganium-ex'], ['k3', 'card-favianos-ex'], ['k4', 'card-jirachi-ex'],
@@ -192,7 +197,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${persistJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${persistJs}${radarCoreJs}${radarJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -210,7 +215,7 @@ ${code}
   const HASH = { accueil: { start: 'home' }, collection: { start: 'collection' }, scan: { start: 'scan' }, marche: { start: 'market' },
     territoire: { start: 'territory' }, magasin: { start: 'store' }, profil: { start: 'profile' }, paliers: { start: 'tiers' },
     reglages: { start: 'settings' }, ventes: { start: 'sales' }, bienvenue: { onb: '1' }, novice: { demo: 'novice' },
-    extensions: { start: 'sets' } };
+    extensions: { start: 'sets' }, scelle: { start: 'sealed' }, radar: { start: 'radar' } };
   const props = Object.assign({}, HASH[location.hash.slice(1)] || {});
   try {
     const q = new URLSearchParams(location.search);
@@ -222,7 +227,7 @@ ${code}
   if (DEVICE.enabled) inst.restoreSaved();
   // Défilement : chaque liste retrouve sa position au retour (extensions, grille, Marché…) ; les autres
   // écrans s'ouvrent en haut.
-  const KEEP = ['home', 'collection', 'market', 'territory', 'sets', 'set'];
+  const KEEP = ['home', 'collection', 'market', 'territory', 'sets', 'set', 'sealed'];
   const scrollKey = s => s.screen + ':' + (s.screen === 'set' ? s.setId : '');
   const scrolls = {};
   let lastKey = scrollKey(inst.st());
@@ -266,10 +271,13 @@ ${code}
   }, true);
   // Échap ferme le zoom de la carte.
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && inst.st().zoom) inst.setState({ zoom: null }); });
-  // Catalogue complet : chargé après le premier affichage.
+  // Catalogue complet et catalogue scellé : chargés après le premier affichage.
   fetch('data/cards.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); })
     .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); });
+  fetch('data/sealed.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(doc => { SEALED.load(doc); inst.setState({ sealedN: SEALED.rows.length }); })
+    .catch(() => { SEALED.status = 'error'; inst.setState({ sealedN: -1 }); });
   // Hors ligne et installation (hébergement uniquement ; refusé dans les pages claude.ai).
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -291,6 +299,7 @@ body { margin: 0; background: var(--ground); color: var(--ink); font-family: 'Pl
 }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 input, button { -webkit-tap-highlight-color: transparent; }
+@keyframes pkmSpin { to { transform: rotate(360deg); } }
 ${keyframes}`;
 const fonts = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">';
 // Vue : copie locale pour l'hébergement (hors ligne possible), CDN autorisé pour la page claude.ai.
@@ -343,6 +352,10 @@ writeFileSync(OUT + 'app.js', app);
 writeFileSync(OUT + 'index.html', index);
 writeFileSync(ROOT + 'tools/web/artifact.html', artifact);
 copyFileSync(fileURLToPath(new URL('./node_modules/vue/dist/vue.runtime.global.prod.js', import.meta.url)), OUT + 'vendor/vue.runtime.global.prod.js');
+// MapLibre GL (licence BSD) pour le Radar : module ES chargé seulement à l'ouverture de l'écran.
+mkdirSync(OUT + 'vendor/maplibre', { recursive: true });
+['dist/maplibre-gl.mjs', 'dist/maplibre-gl-shared.mjs', 'dist/maplibre-gl-worker.mjs', 'dist/maplibre-gl.css', 'LICENSE.txt'].forEach(f =>
+  copyFileSync(fileURLToPath(new URL('./node_modules/maplibre-gl/' + f, import.meta.url)), OUT + 'vendor/maplibre/' + f.replace('dist/', '')));
 const imgs = readdirSync(IMG_SRC).filter(f => f.endsWith('.webp'));
 imgs.forEach(f => copyFileSync(IMG_SRC + f, OUT + 'img/' + f));
 console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères), ' + imgs.length + ' images.');

@@ -1,7 +1,7 @@
 <!--
   Fragments de gabarit ajoutés à la maquette par tools/web/build.mjs (même syntaxe que le canevas Design :
   sc-if, sc-for, trous {{ … }}). Chaque fragment commence par une ligne « fragment: nom ».
-  La logique correspondante est dans tools/web/catalog.js et tools/web/persist.js.
+  La logique correspondante est dans tools/web/catalog.js, sealed.js, persist.js et radar.js.
 -->
 
 <!-- fragment: market-browse -->
@@ -15,6 +15,21 @@
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
 <span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.01em">Toutes les cartes</span>
 <span style="font-size: 12.5px; color: #9AA8C3">{{ mk.browse.sub }}</span>
+</span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</sc-if>
+
+<sc-if value="{{ mk.sealedBrowse.show }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ mk.sealedBrowse.open }}" style="flex: none; display: flex; align-items: center; gap: 14px; min-height: 76px; padding: 10px 14px 10px 12px; border: 1px solid #24345C; border-radius: 22px; background: radial-gradient(120% 90% at 0% 0%, rgba(245, 177, 76, 0.18), rgba(245, 177, 76, 0) 62%), #121C33; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span aria-hidden="true" style="position: relative; flex: none; width: 70px; height: 58px">
+<sc-for list="{{ mk.sealedBrowse.fan }}" as="sf" hint-placeholder-count="3">
+<span style="position: absolute; top: {{ sf.top }}; left: {{ sf.left }}; width: 38px; height: 40px; border-radius: 8px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transform: rotate({{ sf.rot }})"><img src="{{ sf.photo }}" alt="" style="max-width: 90%; max-height: 90%; object-fit: contain"></span>
+</sc-for>
+</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.01em">Produits scellés</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ mk.sealedBrowse.sub }}</span>
 </span>
 <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
 </button>
@@ -96,6 +111,50 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ ui.isSealedList }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Catalogue scellé" style="flex: none; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 22px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 100% 0%, rgba(245, 177, 76, 0.16), rgba(245, 177, 76, 0) 60%), #121C33">
+<span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600">{{ sl.countText }}</span>
+<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ sl.note }}</span>
+</section>
+<div role="group" aria-label="Type de produit" style="flex: none; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px">
+<sc-for list="{{ sl.filters }}" as="sfi" hint-placeholder-count="6">
+<button type="button" onClick="{{ sfi.pick }}" aria-pressed="{{ sfi.on }}" style="flex: none; height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid {{ sfi.bc }}; background: {{ sfi.bg }}; color: {{ sfi.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ sfi.label }}</button>
+</sc-for>
+</div>
+<span style="flex: none; font-size: 12.5px; color: #7D8BA8">{{ sl.count }}</span>
+<sc-if value="{{ sl.empty }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; padding: 24px 0; text-align: center; font-size: 14px; color: #9AA8C3">Aucun produit de ce type.</p>
+</sc-if>
+<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px">
+<sc-for list="{{ sl.items }}" as="sp" hint-placeholder-count="6">
+<button type="button" onClick="{{ sp.open }}" aria-label="{{ sp.label }}" style="display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="position: relative; display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: 18px; overflow: hidden; background: {{ sp.bg }}; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08)">
+<sc-if value="{{ sp.hasPhoto }}" hint-placeholder-val="{{ true }}">
+<span style="position: absolute; inset: 0; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><img src="{{ sp.photo }}" alt="" loading="lazy" decoding="async" style="max-width: 88%; max-height: 88%; object-fit: contain"></span>
+</sc-if>
+<sc-if value="{{ sp.noPhoto }}" hint-placeholder-val="{{ false }}">
+<span style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; box-sizing: border-box">
+<img src="{{ sp.logo }}" alt="" loading="lazy" style="max-width: 82%; max-height: 42%; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5))">
+<span style="padding: 3px 9px; border-radius: 8px; border: 1.5px solid rgba(255, 255, 255, 0.4); font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: #FFFFFF">{{ sp.code }}</span>
+</span>
+</sc-if>
+<sc-if value="{{ sp.soon }}" hint-placeholder-val="{{ false }}">
+<span style="position: absolute; left: 7px; top: 7px; padding: 2px 8px; border-radius: 999px; background: #F5B14C; color: #0B1120; font-size: 11px; font-weight: 800">À venir</span>
+</sc-if>
+<sc-if value="{{ sp.owned }}" hint-placeholder-val="{{ false }}">
+<span style="position: absolute; top: 7px; right: 7px; padding: 1px 8px; border-radius: 999px; background: rgba(8, 13, 26, 0.85); border: 1px solid rgba(168, 182, 255, 0.5); color: #FFFFFF; font-size: 11.5px; font-weight: 700">{{ sp.qty }}</span>
+</sc-if>
+</span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 0 2px">
+<span style="font-size: 13px; font-weight: 700; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{ sp.name }}</span>
+<span style="font-size: 11.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ sp.sub }}</span>
+<span style="font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; color: {{ sp.priceColor }}">{{ sp.price }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
 <!-- fragment: item-card -->
 <sc-if value="{{ it.plainCard }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ it.zoom }}" aria-label="{{ it.zoomLabel }}" style="position: absolute; left: 50%; top: 14px; width: 196px; height: 270px; margin-left: -98px; padding: 0; border: 0; border-radius: 4.8% / 3.4%; overflow: hidden; background: #16213A; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55); cursor: zoom-in">
@@ -145,3 +204,140 @@
 <button type="button" onClick="{{ set.dev.demo }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Remettre la démo</button>
 </div>
 </section>
+
+<!-- fragment: territory-radar -->
+<button type="button" onClick="{{ ter.radar }}" style="flex: none; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #1F5A55; border-radius: 20px; background: radial-gradient(120% 140% at 0% 0%, rgba(94, 224, 207, 0.26), rgba(94, 224, 207, 0) 62%), #0F1D2B; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span aria-hidden="true" style="position: relative; flex: none; width: 46px; height: 46px; border-radius: 23px; background: radial-gradient(circle, rgba(94, 224, 207, 0.22), rgba(94, 224, 207, 0.04) 70%); box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.45); overflow: hidden">
+<span style="position: absolute; inset: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.4)"></span>
+<span class="pkm-anim" style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(94, 224, 207, 0) 0deg, rgba(94, 224, 207, 0) 270deg, rgba(94, 224, 207, 0.55) 360deg); animation: pkmSpin 3s linear infinite"></span>
+<span style="position: absolute; left: 20px; top: 20px; width: 6px; height: 6px; border-radius: 3px; background: #5EE0CF"></span>
+</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<span style="font-size: 12px; font-weight: 700; color: #5EE0CF">Nouveau · carte de France</span>
+<span style="font-size: 15px; font-weight: 700">Radar des boutiques</span>
+<span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ter.radarSub }}</span>
+</span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+
+<!-- fragment: radar -->
+<sc-if value="{{ ui.isRadar }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Radar des boutiques" style="position: absolute; inset: 0; z-index: 15; overflow: hidden; background: #05080F">
+<div id="pkm-radar-map" aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 30%, #0E1A33, #05080F 70%)"></div>
+<div style="position: absolute; left: 0; right: 0; top: 0; z-index: 3; display: flex; flex-direction: column; gap: 8px; padding: 14px 14px 10px; background: linear-gradient(180deg, rgba(5, 8, 15, 0.85), rgba(5, 8, 15, 0))">
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" onClick="{{ rd.close }}" aria-label="Fermer le radar" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 22px; background: rgba(8, 13, 26, 0.86); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+<nav aria-label="Secteur" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 0; height: 44px; padding: 0 6px; box-sizing: border-box; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(8, 13, 26, 0.86); overflow-x: auto; scrollbar-width: none">
+<sc-for list="{{ rd.crumbs }}" as="rc" hint-placeholder-count="2">
+<sc-if value="{{ rc.sep }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex: none; color: #5A6B8C; font-size: 14px">›</span></sc-if>
+<button type="button" onClick="{{ rc.go }}" aria-current="{{ rc.current }}" style="flex: none; height: 36px; padding: 0 8px; border: 0; border-radius: 18px; background: transparent; color: {{ rc.color }}; font: inherit; font-size: 13.5px; font-weight: {{ rc.weight }}; white-space: nowrap; cursor: pointer">{{ rc.label }}</button>
+</sc-for>
+</nav>
+<sc-if value="{{ rd.canMap }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ rd.toggleList }}" aria-pressed="{{ rd.listMode }}" style="flex: none; height: 44px; padding: 0 14px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 22px; background: rgba(8, 13, 26, 0.86); color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">{{ rd.listLabel }}</button>
+</sc-if>
+</div>
+<div role="group" aria-label="Produit recherché" style="display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -14px; padding: 0 14px">
+<sc-for list="{{ rd.prods }}" as="rp" hint-placeholder-count="5">
+<button type="button" onClick="{{ rp.pick }}" aria-pressed="{{ rp.on }}" style="flex: none; height: 36px; padding: 0 13px; border-radius: 999px; border: 1px solid {{ rp.bc }}; background: {{ rp.bg2 }}; color: {{ rp.fg }}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{ rp.label }}</button>
+</sc-for>
+</div>
+<sc-if value="{{ rd.showLegend }}" hint-placeholder-val="{{ false }}">
+<span aria-hidden="true" style="align-self: flex-start; display: flex; align-items: center; gap: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); font-size: 11px; font-weight: 600; color: #C9D3EA">
+<span style="display: flex; align-items: center; gap: 4px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #3DDC84"></span>Forte</span>
+<span style="display: flex; align-items: center; gap: 4px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #F5B14C"></span>Moyenne</span>
+<span style="display: flex; align-items: center; gap: 4px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #9AA8C3"></span>Faible</span>
+</span>
+</sc-if>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: {{ rd.sheetMax }}; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; border-top: 1px solid #24345C; background: rgba(11, 17, 32, 0.97); box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.5)">
+<div id="pkm-radar-sheet" style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<sc-if value="{{ rd.hasStore }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ rd.st.back }}" style="align-self: flex-start; height: 36px; padding: 0 12px 0 6px; border: 0; border-radius: 18px; background: transparent; color: #B9C5FF; font: inherit; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 2px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M15 5l-7 7 7 7"></path></svg>Résultats</button>
+<section aria-label="{{ rd.st.name }}" style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 600; letter-spacing: -0.02em">{{ rd.st.name }}</h2>
+<span style="font-size: 13px; color: #C9D3EA">{{ rd.st.kind }}</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ rd.st.place }}</span>
+</span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; color: {{ rd.st.color }}">{{ rd.st.pct }}</span><span style="padding: 2px 9px; border-radius: 999px; background: {{ rd.st.tint }}; color: {{ rd.st.color }}; font-size: 11.5px; font-weight: 800">{{ rd.st.level }}</span></span>
+</div>
+<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">Indice de chance estimé : pas un stock réel. Boutique repérée sur OpenStreetMap, ni partenaire PKM ni arrivage annoncé.</p>
+<button type="button" onClick="{{ rd.st.toggleWhy }}" aria-expanded="{{ rd.st.why }}" style="align-self: flex-start; height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">{{ rd.st.whyLabel }}</button>
+<sc-if value="{{ rd.st.why }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 16px; border: 1px solid #1E2B45; background: #0F1828">
+<sc-for list="{{ rd.st.reasons }}" as="rr" hint-placeholder-count="3">
+<span style="display: flex; align-items: baseline; gap: 10px; font-size: 13px; line-height: 1.4"><span style="flex: none; width: 34px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; color: {{ rr.color }}">{{ rr.sign }}</span><span style="color: #C9D3EA">{{ rr.text }}</span></span>
+</sc-for>
+<span style="font-size: 12px; color: #7D8BA8">{{ rd.st.total }}</span>
+</div>
+</sc-if>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
+<a href="{{ rd.st.route }}" target="_blank" rel="noopener" style="height: 46px; border-radius: 999px; background: #A8B6FF; color: #0B1120; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none">Itinéraire</a>
+<button type="button" onClick="{{ rd.st.toggleAlert }}" aria-pressed="{{ rd.st.alertOn }}" style="height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: {{ rd.st.alertBg }}; color: {{ rd.st.alertFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ rd.st.alertLabel }}</button>
+</div>
+<a href="{{ rd.st.osm }}" target="_blank" rel="noopener" style="align-self: flex-start; font-size: 12.5px; color: #B9C5FF">Voir la fiche OpenStreetMap</a>
+</section>
+</sc-if>
+<sc-if value="{{ rd.notStore }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.02em">{{ rd.title }}</h2>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ rd.subtitle }}</span>
+</div>
+<sc-if value="{{ rd.hasMsg }}" hint-placeholder-val="{{ false }}">
+<p role="status" style="margin: 0; padding: 10px 12px; border-radius: 14px; background: rgba(245, 177, 76, 0.12); color: #F7C77E; font-size: 13px; line-height: 1.45">{{ rd.msg }}</p>
+</sc-if>
+<sc-if value="{{ rd.error }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ rd.retry }}" style="height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Réessayer</button>
+</sc-if>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
+<button type="button" onClick="{{ rd.scan }}" disabled="{{ rd.noScan }}" style="height: 48px; border: 0; border-radius: 999px; background: {{ rd.scanBg }}; color: {{ rd.scanFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ rd.scanLabel }}</button>
+<button type="button" onClick="{{ rd.around }}" aria-pressed="{{ rd.aroundOn }}" style="height: 48px; border: 1px solid #1F5A55; border-radius: 999px; background: rgba(94, 224, 207, 0.1); color: #5EE0CF; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3 M12 19v3 M2 12h3 M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg>Autour de moi</button>
+</div>
+<sc-if value="{{ rd.hasRadii }}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="Rayon autour de toi" style="display: flex; gap: 8px">
+<sc-for list="{{ rd.radii }}" as="rk" hint-placeholder-count="3">
+<button type="button" onClick="{{ rk.pick }}" aria-pressed="{{ rk.on }}" style="flex: 1; height: 40px; border-radius: 999px; border: 1px solid {{ rk.bc }}; background: {{ rk.bg }}; color: {{ rk.fg }}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{ rk.label }}</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ rd.hasHint }}" hint-placeholder-val="{{ true }}">
+<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ rd.hint }}</p>
+</sc-if>
+<sc-if value="{{ rd.empty }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; padding: 8px 0; font-size: 13.5px; color: #9AA8C3">Aucune boutique repérée ici : élargis le rayon ou choisis un autre secteur.</p>
+</sc-if>
+<sc-if value="{{ rd.hasResults }}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 12.5px; color: #7D8BA8">{{ rd.resultsTitle }}</span>
+<div style="border-radius: 20px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-for list="{{ rd.results }}" as="rs" hint-placeholder-count="5">
+<button type="button" onClick="{{ rs.open }}" aria-label="{{ rs.label }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; border: 0; border-top: {{ rs.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ rs.name }}</span>
+<span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ rs.kind }}</span>
+<span style="font-size: 11.5px; color: #7D8BA8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ rs.place }}</span>
+</span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px"><span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: {{ rs.color }}">{{ rs.pct }}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{ rs.tint }}; color: {{ rs.color }}; font-size: 11px; font-weight: 800">{{ rs.level }}</span></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ rd.hasSectors }}" hint-placeholder-val="{{ true }}">
+<span style="font-size: 12.5px; font-weight: 700; color: #C9D3EA">{{ rd.sectorsTitle }}</span>
+<div style="border-radius: 20px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-for list="{{ rd.sectors }}" as="rg" hint-placeholder-count="5">
+<button type="button" onClick="{{ rg.open }}" aria-label="{{ rg.label }}" style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 14px; border: 0; border-top: {{ rg.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1; min-width: 0; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ rg.name }}</span>
+<span style="flex: none; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; color: #5EE0CF">{{ rg.count }}</span>
+<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+<p style="margin: 0; font-size: 11px; line-height: 1.45; color: #5A6B8C">{{ rd.attribution }} · Indice estimé selon le type de boutique, le produit recherché et le calendrier des sorties.</p>
+</div>
+</div>
+</section>
+</sc-if>
