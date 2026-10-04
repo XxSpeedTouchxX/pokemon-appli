@@ -30,7 +30,10 @@ jobs:
         with:
           ref: claude/pokemon-app-mockup-1mxt7p
 
+      # La découverte (lecture de la galerie) ne tourne qu'à la demande ou si discover.py change ;
+      # une nouvelle liste de produits ne déclenche que le téléchargement des visuels manquants.
       - name: Produits de la galerie officielle et candidats Cardmarket
+        if: github.event_name == 'workflow_dispatch' || contains(toJSON(github.event.commits), 'tools/sealed/discover.py')
         run: python3 tools/sealed/discover.py
 
       - name: Visuels des produits retenus
@@ -44,7 +47,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tools/sealed/candidates.json
+          if [ -f tools/sealed/candidates.json ]; then git add tools/sealed/candidates.json; fi
           if [ -d web/img/products ]; then git add web/img/products; fi
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
           git commit -m "Met à jour le catalogue scellé ($(date -u +%Y-%m-%d))"

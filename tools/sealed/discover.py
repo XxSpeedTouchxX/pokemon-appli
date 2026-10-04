@@ -197,7 +197,8 @@ def product_type(name):
 
 
 def product_set(name, images):
-    for fr in sorted(SETS_FR_EN, key=len, reverse=True):
+    # « Méga-Évolution » est aussi le nom du bloc : les extensions précises passent d'abord.
+    for fr in sorted(SETS_FR_EN, key=lambda k: (k == "Méga-Évolution", -len(k))):
         if fold(fr) in fold(name):
             return fr, SETS_FR_EN[fr]
     for src in images:
