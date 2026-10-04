@@ -88,6 +88,55 @@
     });
   };
 
+  // ——— Radar de l'accueil : vraies boutiques à moins de 5 km (OpenStreetMap), balayage, repères nom et ville ———
+  // Même position que Territoire (arrondie à 100 m, jamais enregistrée ni envoyée). « Scanner les boutiques » lance le
+  // faisceau : chaque boutique apparaît à sa vraie direction et devient cliquable à ce moment-là (animation CSS, sans
+  // calcul à chaque image) ; un appui ouvre sa fiche. Animations réduites : boutiques affichées tout de suite.
+  const HOME_KM = 5, HOME_PINS = 8, HOME_R = 120;
+  let homeScanTimer = null;
+  const homeClamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  proto.homeRadar = function (s) {
+    const pos = s.tpos || s.raround || null;
+    const r = {
+      needPos: false, loading: false, located: false, hasMsg: false, msg: '', locate: () => this.terLocate(false),
+      france: () => this.openRadar(), list: () => this.tab('territory'), rings: [], pins: [], sweeping: false, scanned: false,
+      scan: null, scanLabel: '', busy: false, status: ''
+    };
+    if (!pos) return Object.assign(r, { needPos: true, hasMsg: !!s.tmsg, msg: s.tmsg || '' });
+    if (RADAR.status !== 'ready') {
+      if (RADAR.status !== 'loading') RADAR.load().then(() => this.setState({ rdata: Date.now() }));
+      return Object.assign(r, { loading: true });
+    }
+    const rows = terRows(Object.assign({}, s, { tkm: String(HOME_KM), tsort: 'dist', tprod: 'all' }), pos);
+    const sweeping = s.hscan === 'run', scanned = s.hscan === 'done', scale = d => HOME_R * Math.sqrt(Math.min(d, HOME_KM) / HOME_KM);
+    const pins = RadarCore.pinLayout(rows, HOME_KM, HOME_R, 118, 40, HOME_PINS).map(x => {
+      const city = x.st.city || ((RADAR.dept[x.st.dept] || {}).nom || ''), d = this.km(Math.round(x.d * 10) / 10);
+      return {
+        // Étiquettes gardées dans le cadre ; la direction reste celle de la boutique.
+        x: homeClamp(50 + x.px / 358 * 100, 21, 79).toFixed(2) + '%', y: homeClamp(50 + x.py / 358 * 100, 7, 93).toFixed(2) + '%',
+        name: x.st.name, city: city, fill: this.probLevel(x.c.pct).color, delay: Math.round(x.deg / 360 * TURN) + 'ms',
+        label: x.st.name + ', ' + city + ', à ' + d + ', chance ' + x.c.pct + ' %. Ouvrir la fiche',
+        open: () => this.push('shop', { shopId: x.st.id, swhy: false })
+      };
+    });
+    const n = rows.length, many = n > 1 ? ' boutiques' : ' boutique';
+    return Object.assign(r, {
+      located: true, sweeping: sweeping, scanned: scanned, pins: pins, busy: sweeping,
+      rings: [1, 3, 5].map(v => ({ r: scale(v).toFixed(1), label: v + ' km', ly: (-scale(v) + 13).toFixed(1) })),
+      scanLabel: sweeping ? 'Scan en cours…' : scanned ? 'Scanner à nouveau' : 'Scanner les boutiques',
+      scan: () => {
+        if (this.st().hscan === 'run') return;
+        clearTimeout(homeScanTimer);
+        if (homeStill()) { this.setState({ hscan: 'done' }); return; }
+        this.setState({ hscan: 'run' });
+        homeScanTimer = setTimeout(() => this.setState({ hscan: 'done' }), TURN + 400);
+      },
+      status: !n ? 'Aucune boutique repérée à moins de ' + HOME_KM + ' km : « Voir la liste » permet d’élargir.'
+        : !(sweeping || scanned) ? n + many + ' à moins de ' + HOME_KM + ' km : lance le scan pour les voir sur le radar.'
+        : n + many + ' à moins de ' + HOME_KM + ' km · ' + (pins.length < n ? 'les ' + pins.length + ' meilleures chances sur le radar · ' : '') + 'position à 100 m près'
+    });
+  };
+
   const homeBaseView = proto.vHome;
   proto.vHome = function (x) {
     const r = homeBaseView.call(this, x);
@@ -95,6 +144,8 @@
     r.hs = this.homeSearch(x);
     r.hl = this.homeList(x);
     r.hv = this.homeTrend(x, r.valueBig);
+    if (!x.s.tpos && !x.s.raround) terAutoLocate(this); // autorisation déjà donnée : position retrouvée sans rien demander
+    r.hr = this.homeRadar(x.s);
     return r;
   };
 

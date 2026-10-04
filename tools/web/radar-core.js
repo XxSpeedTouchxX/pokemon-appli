@@ -166,6 +166,21 @@
         .replace(/\bPH\b/g, 'fériés').replace(/\b(off|closed)\b/gi, 'fermé').replace(/24\/7/, '24 h/24, 7 j/7')
         .replace(/(\d)-(\d)/g, '$1–$2').replace(/\.-/g, '.–').replace(/\s*;\s*/g, ' · ').replace(/,(?=\d)/g, ', ');
     }
+    // Repères d'une mini-carte (Territoire, accueil) : nord en haut, distance à l'échelle racine carrée (R au bord du
+    // rayon km) ; les meilleures chances d'abord, puis les plus proches ; un repère qui en chevaucherait un autre
+    // (boîte w × h) est omis ; max repères au plus. rows : [{ d, deg, c: { pct } }] ; ajoute px, py.
+    function pinLayout(rows, km, R, w, h, max) {
+      const placed = [];
+      return rows.slice().sort((a, b) => b.c.pct - a.c.pct || a.d - b.d).map(x => {
+        const a = x.deg * Math.PI / 180, rr = R * Math.sqrt(Math.min(x.d, km) / km);
+        return Object.assign({ px: Math.sin(a) * rr, py: -Math.cos(a) * rr }, x);
+      }).filter(x => {
+        if (placed.some(q => Math.abs(q[0] - x.px) < w && Math.abs(q[1] - x.py) < h)) return false;
+        placed.push([x.px, x.py]);
+        return true;
+      }).slice(0, max);
+    }
     return { KINDS: KINDS, PRODUCTS: PRODUCTS, chance: chance, releaseContext: releaseContext, distanceKm: distanceKm, bearing: bearing,
-      sweepPlan: sweepPlan, circle: circle, circleBounds: circleBounds, rank: rank, parseHours: parseHours, openState: openState, hoursText: hoursText };
+      sweepPlan: sweepPlan, circle: circle, circleBounds: circleBounds, rank: rank, parseHours: parseHours, openState: openState, hoursText: hoursText,
+      pinLayout: pinLayout };
   })();

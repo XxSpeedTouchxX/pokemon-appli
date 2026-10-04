@@ -121,17 +121,7 @@
       // Carte : nord en haut, distance à l'échelle racine carrée (les boutiques proches restent lisibles).
       rings: [1, 3, 5, 10, 20].filter(v => v <= km).map(v => ({ r: scale(v).toFixed(1), label: v + ' km', ly: (-scale(v) + 11).toFixed(1) })),
       // Pastilles : les meilleures chances d'abord, sans recouvrement (une pastille qui en cache une autre est omise).
-      pins: (() => {
-        const placed = [];
-        return rows.slice().sort((a, b) => b.c.pct - a.c.pct || a.d - b.d).map(x => {
-          const a = x.deg * Math.PI / 180, rr = scale(x.d);
-          return Object.assign({ px: Math.sin(a) * rr, py: -Math.cos(a) * rr }, x);
-        }).filter(x => {
-          if (placed.some(q => Math.abs(q[0] - x.px) < 46 && Math.abs(q[1] - x.py) < 24)) return false;
-          placed.push([x.px, x.py]);
-          return true;
-        }).slice(0, TER_PINS);
-      })().map(x => {
+      pins: RadarCore.pinLayout(rows, km, 100, 46, 24, TER_PINS).map(x => {
         return { x: (50 + x.px / 358 * 100).toFixed(2) + '%', y: (50 + x.py / 230 * 100).toFixed(2) + '%', text: x.c.pct + ' %',
           fill: this.probLevel(x.c.pct).color, label: x.st.name + ', ' + this.km(Math.round(x.d * 10) / 10) + ', chance ' + x.c.pct + ' %', open: () => this.push('shop', { shopId: x.st.id, swhy: false }) };
       }),

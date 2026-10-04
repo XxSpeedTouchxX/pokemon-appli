@@ -109,3 +109,14 @@ test('horaires trop complexes : texte brut', () => {
   assert.equal(R.openState(null, at(2026, 10, 5, 10, 0)), null);
   assert.equal(R.hoursText('Mo-Sa 10:00-19:00; Su off'), 'lun.–sam. 10:00–19:00 · dim. fermé');
 });
+
+test('repères de mini-carte : meilleures chances d’abord, sans chevauchement, nombre limité', () => {
+  const row = (d, deg, pct) => ({ d: d, deg: deg, c: { pct: pct } });
+  const rows = [row(1, 0, 30), row(1.05, 2, 60), row(4, 90, 45), row(4, 180, 45), row(2, 270, 90)];
+  const pins = R.pinLayout(rows, 5, 100, 46, 24, 3);
+  assert.deepEqual(pins.map(p => p.c.pct), [90, 60, 45]); // la boutique à 30 % (cachée par celle à 60 %) est omise ; 3 au plus
+  for (const a of pins) for (const b of pins) if (a !== b) assert.ok(Math.abs(a.px - b.px) >= 46 || Math.abs(a.py - b.py) >= 24);
+  const north = R.pinLayout([row(5, 0, 50)], 5, 100, 46, 24, 12)[0];
+  assert.ok(Math.abs(north.px) < 1e-9 && Math.abs(north.py + 100) < 1e-9); // au bord du rayon, plein nord
+  assert.ok(Math.abs(R.pinLayout([row(1.25, 90, 50)], 5, 100, 46, 24, 12)[0].px - 50) < 1e-9); // racine carrée : 1,25 km sur 5 → mi-rayon
+});

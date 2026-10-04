@@ -228,6 +228,68 @@
 </sc-if>
 </section>
 
+<section aria-label="Boutiques près de toi" style="flex: none; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
+<button type="button" onClick="{{ home.hr.list }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir la liste</button>
+</div>
+<sc-if value="{{ home.hr.needPos }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #24345C; background: #121C33; display: flex; flex-direction: column; gap: 12px">
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #C9D3EA">Active ta position : le radar repère les vraies boutiques autour de toi (cartes, jeux, jouets, grandes surfaces), avec leur nom, leur ville et leur chance d’avoir du Pokémon.</p>
+<sc-if value="{{ home.hr.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13px; line-height: 1.45; color: #F5B14C">{{ home.hr.msg }}</p></sc-if>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
+<button type="button" onClick="{{ home.hr.locate }}" style="height: 48px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Me localiser</button>
+<button type="button" onClick="{{ home.hr.france }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Carte de France</button>
+</div>
+<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">Ta position reste sur ton téléphone : arrondie à 100 m environ, elle n’est ni enregistrée ni envoyée.</p>
+</div>
+</sc-if>
+<sc-if value="{{ home.hr.loading }}" hint-placeholder-val="{{ false }}">
+<p role="status" style="margin: 0; padding: 18px 0; text-align: center; font-size: 14px; color: #9AA8C3">Chargement des boutiques…</p>
+</sc-if>
+<sc-if value="{{ home.hr.located }}" hint-placeholder-val="{{ true }}">
+<div style="position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 24px; overflow: hidden; border: 1px solid #24345C; background: radial-gradient(closest-side, rgba(var(--pkm-accent-rgb), 0.1), rgba(var(--pkm-accent-rgb), 0)), #111A2C">
+<svg width="100%" height="100%" viewBox="-179 -179 358 358" aria-hidden="true" style="position: absolute; left: 0; top: 0; display: block">
+<path d="M-168 0H168 M0 -168V168" style="fill: none; stroke: rgba(168, 182, 255, 0.12); stroke-width: 1"></path>
+<sc-for list="{{ home.hr.rings }}" as="hrr" hint-placeholder-count="3">
+<circle cx="0" cy="0" r="{{ hrr.r }}" style="fill: none; stroke: rgba(168, 182, 255, 0.4); stroke-width: 1; stroke-dasharray: 3 4"></circle>
+<text x="5" y="{{ hrr.ly }}" style="fill: #9AA8C3; font-size: 10px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif">{{ hrr.label }}</text>
+</sc-for>
+</svg>
+<span aria-hidden="true" style="position: absolute; left: 50%; top: 6px; transform: translateX(-50%); font-size: 11px; font-weight: 800; color: #9AA8C3">N</span>
+<sc-if value="{{ home.hr.sweeping }}" hint-placeholder-val="{{ false }}">
+<div aria-hidden="true" class="pkm-anim" style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from -70deg, rgba(var(--pkm-accent-rgb), 0) 0deg, rgba(var(--pkm-accent-rgb), 0.38) 70deg, rgba(var(--pkm-accent-rgb), 0) 70.5deg); animation: pkmSpin 2.6s linear 1 both"></div>
+</sc-if>
+<span aria-hidden="true" style="position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 7px; background: #A8B6FF; box-shadow: 0 0 0 3px rgba(168, 182, 255, 0.35)"></span>
+<sc-if value="{{ home.hr.sweeping }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ home.hr.pins }}" as="hrp" hint-placeholder-count="5">
+<button type="button" class="pkm-anim" onClick="{{ hrp.open }}" aria-label="{{ hrp.label }}" style="position: absolute; left: {{ hrp.x }}; top: {{ hrp.y }}; transform: translate(-50%, -50%); max-width: 40%; min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; display: flex; align-items: center; cursor: pointer; animation: pkmReveal 0.25s ease-out {{ hrp.delay }} both">
+<span style="min-width: 0; display: flex; flex-direction: column; padding: 3px 9px 4px; border-radius: 10px; border: 2px solid {{ hrp.fill }}; background: #111A2C; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); text-align: left">
+<span style="font-size: 11.5px; font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrp.name }}</span>
+<span style="font-size: 10.5px; line-height: 1.25; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrp.city }}</span>
+</span>
+</button>
+</sc-for>
+</sc-if>
+<sc-if value="{{ home.hr.scanned }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ home.hr.pins }}" as="hrq" hint-placeholder-count="5">
+<button type="button" onClick="{{ hrq.open }}" aria-label="{{ hrq.label }}" style="position: absolute; left: {{ hrq.x }}; top: {{ hrq.y }}; transform: translate(-50%, -50%); max-width: 40%; min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; display: flex; align-items: center; cursor: pointer">
+<span style="min-width: 0; display: flex; flex-direction: column; padding: 3px 9px 4px; border-radius: 10px; border: 2px solid {{ hrq.fill }}; background: #111A2C; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); text-align: left">
+<span style="font-size: 11.5px; font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrq.name }}</span>
+<span style="font-size: 10.5px; line-height: 1.25; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrq.city }}</span>
+</span>
+</button>
+</sc-for>
+</sc-if>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
+<button type="button" onClick="{{ home.hr.scan }}" aria-disabled="{{ home.hr.busy }}" style="height: 48px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">{{ home.hr.scanLabel }}</button>
+<button type="button" onClick="{{ home.hr.france }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Carte de France</button>
+</div>
+<span role="status" style="font-size: 12.5px; line-height: 1.45; color: #7D8BA8">{{ home.hr.status }}</span>
+</sc-if>
+</section>
+
 <!-- carrousel : home.rel -->
 
 <section aria-label="Liste de ma collection" style="flex: none; display: flex; flex-direction: column; gap: 10px">

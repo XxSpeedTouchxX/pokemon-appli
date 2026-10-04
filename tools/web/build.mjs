@@ -537,6 +537,8 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 @keyframes pkmSpin { to { transform: rotate(360deg); } }
 /* Compagnon de l'accueil : léger flottement, arrêté si l'utilisateur limite les animations. */
 @keyframes pkmFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+/* Radar de l'accueil : une boutique apparaît (et devient cliquable) quand le faisceau passe sur elle. */
+@keyframes pkmReveal { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
 .pkm-buddy { animation: pkmFloat 2.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pkm-buddy { animation: none; } }
 ${cssVars()}
