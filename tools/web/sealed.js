@@ -212,6 +212,7 @@
       r.list = hits.map((p, i) => row(p, i)).concat(r.list).map((l, i) => Object.assign(l, { border: x.line(i) }));
       r.empty = false;
       r.count = hits.length + (hits.length > 1 ? ' produits scellés · ' : ' produit scellé · ') + r.count;
+      if (typeof r.total === 'number') r.total += hits.length;
     }
     return r;
   };

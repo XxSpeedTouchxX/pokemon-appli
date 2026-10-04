@@ -65,6 +65,18 @@ patch('width: 44px; height: 44px; padding: 0; border: 0; background: transparent
 const FRAG = {};
 const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.meta.url)), 'utf8').split(/<!-- fragment: ([\w-]+) -->\n/);
 for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
+// Accueil (octobre 2026, tools/web/home.js) : recherche dans le catalogue, valeur de la collection, Sorties du moment,
+// liste complète de la collection, marge réalisée ; « Premiers pas » et « Suggestion » (profils) repris de la maquette.
+// Retirés : palier, arrivage de démo, mouvements, plus belles pièces, derniers ajouts.
+{
+  const open = '<sc-if value="{{ ui.isHome }}" hint-placeholder-val="{{ true }}">\n', close = '\n</sc-if>\n\n<sc-if value="{{ ui.isCollection }}"';
+  const i = tpl.indexOf(open), j = tpl.indexOf(close);
+  if (i < 0 || tpl.indexOf(open, i + 1) >= 0 || j < i || tpl.indexOf(close, j + 1) >= 0) throw new Error('Accueil de la maquette introuvable');
+  const old = tpl.slice(i + open.length, j), a = old.indexOf('<sc-if value="{{ home.novice }}"');
+  const b = old.indexOf('</sc-if>', old.indexOf('<sc-if value="{{ home.passion }}"')) + '</sc-if>'.length;
+  if (a < 0 || b < a) throw new Error('Accueil : « Premiers pas » et « Suggestion » introuvables');
+  tpl = tpl.slice(0, i + open.length) + FRAG.home.replace('<!-- profils : premiers pas et suggestion -->', old.slice(a, b)).trimEnd() + tpl.slice(j);
+}
 const patchRe = (re, to) => {
   const n = (tpl.match(new RegExp(re.source, 'g')) || []).length;
   if (n !== 1) throw new Error(`Ajustement introuvable (${n}/1) : ${re.source.slice(0, 60)}`);
@@ -111,21 +123,10 @@ patch('</section>\n</sc-if>\n\n<sc-if value="{{ ui.isStore }}"', '</section>\n</
 patchRe(/<img src="\{\{ ci\.img \}\}" alt="" style="position: absolute; left: 50%; top: 14px;[^"]*">/,
   '<img src="{{ ci.img }}" srcset="{{ ci.srcset }}" sizes="114px" alt="" loading="lazy" style="position: absolute; left: 50%; top: 10px; width: 114px; height: 157px; margin-left: -57px; border-radius: 5% / 3.6%; object-fit: cover; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45)">');
 patch('>Rien ne correspond à ta recherche.<', '>{{ coll.emptyText }}<');
-// Accueil : collection vide, sans blocs vides.
-afterSection('Valeur de ma collection', FRAG['home-empty']);
-patch('<sc-if value="{{ home.notNovice }}" hint-placeholder-val="{{ true }}">\n<section aria-label="Mouvements sur ta collection"',
-  '<sc-if value="{{ home.showMovers }}" hint-placeholder-val="{{ true }}">\n<section aria-label="Mouvements sur ta collection"');
-wrapSection('Mes plus belles pièces', 'home.hasBest');
-wrapSection('Derniers ajouts', 'home.hasAdds');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs');
 // Articles mis en avant (tools/web/showcase.js).
-// - Accueil, « Mes plus belles pièces » : tuile double (220 px) pour le scellé, photo 16:9 en haut.
-patch('style="position: relative; flex: none; width: 118px; height: 164px;', 'style="position: relative; flex: none; width: {{ bp.tileW }}; height: 164px;');
-patch('<img src="{{ bp.logo }}" alt="" style="position: absolute; left: 12px; right: 12px; top: 26px; width: 94px; height: 48px; object-fit: contain">',
-  '<img src="{{ bp.logo }}" alt="" style="position: absolute; left: 12px; right: 12px; top: 26px; width: calc(100% - 24px); height: 48px; object-fit: contain">');
-patch('style="position: absolute; left: 42px; top: 80px; fill: none;', 'style="position: absolute; left: 50%; margin-left: -17px; top: 80px; fill: none;');
 // - Vignettes des listes (ventes, lots, arrivages, Marché, scan…) : plus larges pour le scellé (largeur × wk),
 //   cadre doré des cartes ultra rares (ring).
 let slots = 0;
@@ -133,7 +134,7 @@ tpl = tpl.replace(/(<(?:span|button)\b[^>]*?style="position: relative; flex: non
   slots++;
   return head + 'width: calc({{ ' + o + '.wk }} * ' + w + 'px); height: calc({{ ' + o + '.hk }} * ' + h + 'px); outline: {{ ' + o + '.ring }}; outline-offset: -1.5px;' + rest;
 });
-if (slots !== 10) throw new Error('Vignettes de liste : ' + slots + ' au lieu de 10');
+if (slots !== 8) throw new Error('Vignettes de liste : ' + slots + ' au lieu de 8'); // dont 2 sur l'accueil : recherche, liste
 patch('aria-label="{{ po.label }}" style="flex: none; width: 104px;', 'aria-label="{{ po.label }}" style="flex: none; width: calc({{ po.wk }} * 104px);');
 // - Collection : le scellé sur toute la largeur de la grille, visuel 16:9 ; grille sans trous.
 patch('<button type="button" onClick="{{ ci.open }}" style="display: flex;', '<button type="button" onClick="{{ ci.open }}" style="grid-column: {{ ci.col }}; display: flex;');
@@ -141,8 +142,6 @@ patch('<span style="position: relative; display: block; height: 176px; border-ra
   '<span style="position: relative; display: block; height: {{ ci.h }}; aspect-ratio: {{ ci.ar }}; border-radius: 14px; overflow: hidden; background: {{ ci.bg }};');
 patch('<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">\n<sc-for list="{{ coll.list }}"',
   '<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: dense; gap: 10px">\n<sc-for list="{{ coll.list }}"');
-// - Accueil : l'arrivage près de toi vient des magasins de démonstration.
-patch('</svg>Arrivage près de toi</span>', '</svg><span style="white-space: nowrap">Arrivage près de toi</span><span style="flex: none; padding: 0 5px; border-radius: 999px; border: 1px solid rgba(94, 224, 207, 0.34); font-size: 10px; font-weight: 700">Démo</span></span>');
 // - Carrousels de produits scellés en grand (16:9) : « Sorties du moment » (Accueil), « Scellé à la une » (Marché).
 const FEATURE_CARD = (v, box) => `<button type="button" onClick="{{ ${v}.open }}" aria-label="{{ ${v}.label }}" style="${box} display: flex; flex-direction: column; padding: 0; border: 1px solid #24345C; border-radius: 20px; overflow: hidden; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
 <span style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; background: {{ ${v}.bg }}">
@@ -171,7 +170,7 @@ ${FEATURE_CARD('fx', 'flex: none; width: 240px; scroll-snap-align: start;')}
 </section>
 </sc-if>
 `;
-afterSection('Valeur de ma collection', CAROUSEL('home.rel', 'Sorties du moment'));
+patch('<!-- carrousel : home.rel -->', CAROUSEL('home.rel', 'Sorties du moment'));
 patch(FRAG['market-browse'], CAROUSEL('mk.feat', 'Scellé à la une') + FRAG['market-browse']);
 // - Produits scellés : une colonne de grandes cartes.
 patch('<!-- liste : produits scellés -->', '<div style="flex: none; display: flex; flex-direction: column; gap: 14px">\n<sc-for list="{{ sl.items }}" as="sp" hint-placeholder-count="4">\n'
@@ -293,23 +292,22 @@ ${SHOP_BODY('bq', false)}
 // Produits scellés : chaque vignette a une variante « vraie photo » (tools/web/sealed.js), qui remplit son cadre.
 const PHOTO_INLINE = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover">`;
 const PHOTO_FILL = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover">`;
-const PHOTO_BEST = '<img src="{{ bp.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 124px; object-fit: cover">';
 const PHOTO_ITEM = '<button type="button" onClick="{{ it.zoom }}" aria-label="{{ it.zoomLabel }}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in"><img src="{{ it.photo }}" alt="{{ it.name }}" style="display: block; width: 100%; height: 100%; object-fit: cover"></button>';
 const PHOTO_SCAN = '<div style="position: absolute; left: 12px; top: 88px; width: 220px; height: 124px; border-radius: 14px; overflow: hidden; transform: rotate(-2deg); box-shadow: 0 26px 44px rgba(0, 0, 0, 0.6)"><img src="{{ scan.photo }}" alt="{{ scan.name }}" style="display: block; width: 100%; height: 100%; object-fit: cover"></div>';
 let sealedBlocks = 0; const sealedSeen = [];
 tpl = tpl.replace(/<sc-if value="\{\{ ([\w.]+)\.isSealed \}\}"([^>]*)>([\s\S]*?)<\/sc-if>/g, (m, o, attrs, body) => {
   sealedBlocks++; sealedSeen.push(o);
-  const photo = o === 'it' ? PHOTO_ITEM : o === 'scan' ? PHOTO_SCAN : o === 'bp' ? PHOTO_BEST : o === 'ci' ? PHOTO_FILL(o) : PHOTO_INLINE(o);
+  const photo = o === 'it' ? PHOTO_ITEM : o === 'scan' ? PHOTO_SCAN : o === 'ci' ? PHOTO_FILL(o) : PHOTO_INLINE(o);
   return `<sc-if value="{{ ${o}.sealedArt }}"${attrs}>${body}</sc-if><sc-if value="{{ ${o}.hasPhoto }}" hint-placeholder-val="{{ false }}">${photo}</sc-if>`;
 });
-if (sealedBlocks !== 15) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 15 (' + sealedSeen.join(', ') + ')');
+if (sealedBlocks !== 12) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 12 (' + sealedSeen.join(', ') + ')'); // dont 2 sur l'accueil
 // Visuel de secours de chaque image de carte (data-fallback), utilisé si l'image ne charge plus.
 tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fallback="{{ ' + o + (o === 'it' ? '.fallbackHi' : '.fallback') + ' }}"');
 // Photos et logos du scellé (data-broken) : si l'image ne charge pas, l'app passe au visuel suivant
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 46) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 46');
+if (brokenMarks !== 40) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 40'); // dont 4 sur l'accueil (2 vignettes)
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -380,6 +378,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
+const homeJs = mod('home.js');
 if (rebranded !== REBRANDED) throw new Error('Libellés « PKM » renommés : ' + rebranded + ' au lieu de ' + REBRANDED);
 
 const img = Object.fromEntries([
@@ -394,7 +393,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -414,7 +413,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -525,6 +524,8 @@ body { margin: 0; background: var(--ground); color: var(--ink); font-family: 'Pl
 }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 input, button { -webkit-tap-highlight-color: transparent; }
+/* Recherche de l'accueil : sa propre croix (44 px), pas celle du navigateur. */
+input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button { display: none; }
 @keyframes pkmSpin { to { transform: rotate(360deg); } }
 ${cssVars()}
 ${v6Css()}

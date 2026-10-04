@@ -1,7 +1,6 @@
   // ——— Articles mis en avant : ETB, UPC, coffrets et cartes ———
   // - Vignettes des listes : plus larges pour le scellé (wk), cadre doré des cartes ultra rares (ring).
-  // - Accueil : tuile double (220 px) pour le scellé dans « Mes plus belles pièces » ; carrousel « Sorties du
-  //   moment » (sorties récentes et à venir).
+  // - Accueil : carrousel « Sorties du moment » (sorties récentes et à venir).
   // - Collection : le scellé sur toute la largeur de la grille, visuel 16:9.
   // - Marché : carrousel « Scellé à la une », cartes du jeu en vignettes plus grandes.
   // - Fiche d'un produit en photo : visuel 16:9 sur toute la largeur ; « Ajouter » : choix plus large pour le scellé.
@@ -13,7 +12,7 @@
     const l = baseShowLook.call(this, p), sealed = l.isSealed;
     return Object.assign(l, {
       wk: sealed ? WIDE : 1, hk: 1, ring: l.ur && !l.graded ? '1.5px solid var(--pkm-gold)' : 'none',
-      tileW: sealed ? '220px' : '118px', col: sealed ? '1 / -1' : 'auto', h: sealed ? 'auto' : '176px', ar: sealed ? '16 / 9' : 'auto'
+      col: sealed ? '1 / -1' : 'auto', h: sealed ? 'auto' : '176px', ar: sealed ? '16 / 9' : 'auto'
     });
   };
   // Symbole des decks (la maquette n'en avait pas) : deux cartes décalées.
@@ -50,7 +49,6 @@
   proto.vHome = function (x) {
     const r = baseShowHome.call(this, x), items = SEALED.moment();
     r.rel = items.length ? { show: true, items: items.map(p => this.featureCard(p, x.c.stock)), all: () => this.openReleases(), allLabel: 'Toutes les sorties' } : EMPTY_FEATURE;
-    if (r.near && r.near.aria) Object.assign(r.near, { aria: 'Démo · ' + r.near.aria, wk: r.near.isSealed ? 1.4 : 1 });
     return r;
   };
 

@@ -216,6 +216,7 @@
       });
     }));
     r.empty = r.list.length === 0;
+    r.total = start + res.total; // nombre de résultats, cartes au-delà des 40 affichées comprises (recherche de l'accueil)
     r.count = res.total === 0 ? 'Aucune carte trouvée parmi ' + total
       : (res.total > LIMIT ? LIMIT + ' premières cartes sur ' + res.total.toLocaleString('fr-FR') : res.total + (res.total > 1 ? ' cartes trouvées' : ' carte trouvée')) + ' · catalogue TCGdex';
     return r;
