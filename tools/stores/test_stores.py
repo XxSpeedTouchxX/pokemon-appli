@@ -1,7 +1,7 @@
 """Tests de sync_stores.py. Lancer : python3 -m unittest discover -s tools/stores"""
 import unittest
 
-from sync_stores import Departments, build, classify
+from sync_stores import FIELDS, MAX_BYTES, Departments, build, classify, contact, render
 
 DEPTS = Departments()
 
@@ -73,6 +73,41 @@ class Build(unittest.TestCase):
         self.assertEqual((fnac[2], fnac[5], fnac[6], fnac[7]), ("culture", "69", "Lyon", "Fnac"))
         self.assertEqual(rows[1][8], 1)  # indice « cartes » repéré dans la description
         self.assertEqual(skipped, {"écartés": 1, "hors France": 1, "doublons": 1})
+        self.assertEqual(len(fnac), len(FIELDS))
+
+    def test_twins_share_contacts(self):
+        elements = [
+            node(1, 45.7578, 4.8320, name="Ludik & Co", shop="games", phone="+33 4 78 00 00 00"),
+            {"type": "way", "id": 2, "center": {"lat": 45.7579, "lon": 4.8321},
+             "tags": {"name": "Ludik & Co", "shop": "games", "website": "ludik.example.fr", "opening_hours": "Tu-Sa 10:00-19:00"}},
+        ]
+        rows, _ = build(elements, DEPTS)
+        f = {k: i for i, k in enumerate(FIELDS)}
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][f["site"]], "https://ludik.example.fr")
+        self.assertEqual(rows[0][f["tel"]], "+33 4 78 00 00 00")  # repris du point en double
+        self.assertEqual(rows[0][f["horaires"]], "Tu-Sa 10:00-19:00")
+
+
+class Contact(unittest.TestCase):
+    def test_clean(self):
+        site, tel, hours, address = contact({"contact:website": "www.ludik.fr/ ; https://autre.fr", "phone": "04 78 12 34 56;06 00 00 00 00",
+                                             "opening_hours": "Mo-Sa  10:00-19:00", "addr:housenumber": "12", "addr:street": "Rue de la Paix",
+                                             "addr:postcode": "69002", "addr:city": "Lyon"})
+        self.assertEqual(site, "https://www.ludik.fr/")
+        self.assertEqual(tel, "04 78 12 34 56")
+        self.assertEqual(hours, "Mo-Sa 10:00-19:00")
+        self.assertEqual(address, "12 Rue de la Paix, 69002 Lyon")
+
+    def test_rejected(self):
+        self.assertEqual(contact({"website": "pas un site", "phone": "appeler", "opening_hours": "x" * 200, "addr:city": "Lyon"}), ["", "", "", ""])
+        self.assertEqual(contact({}), ["", "", "", ""])
+
+    def test_size_budget(self):
+        # 4 500 boutiques aux coordonnées complètes tiennent dans la limite de taille.
+        row = ["n12345678", "Boutique de cartes du centre", "cartes", 45.7578, 4.832, "69", "Lyon", "", 1,
+               "https://www.boutique-exemple.fr/", "+33 4 78 12 34 56", "Tu-Sa 10:00-12:30,14:00-19:00", "12 Rue de la République, 69002 Lyon"]
+        self.assertLess(len(render([row] * 4500).encode("utf-8")), MAX_BYTES)
 
 
 if __name__ == "__main__":

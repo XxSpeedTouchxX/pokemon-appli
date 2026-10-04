@@ -17,11 +17,12 @@ Données de l'écran Radar :
 - **Rattachement :** chaque boutique est rattachée à son département, d'après les contours, sinon d'après son code postal, sinon d'après le département le plus proche (moins de 3 km).
 - **Doublons :** un même nom à moins de 100 m (le point et le bâtiment d'un même magasin) n'est gardé qu'une fois.
 - **Prudence :** si la nouvelle liste compte moins de 80 % des boutiques de la précédente, elle est refusée (réponse Overpass incomplète).
-- **Sortie :** `web/data/stores.json`, une boutique par ligne :
+- **Sortie :** `web/data/stores.json` (1 Mo au plus, sinon la liste n'est pas remplacée), une boutique par ligne :
   - identifiant OpenStreetMap ;
   - nom, type, latitude, longitude ;
   - département, ville, enseigne ;
-  - indice « cartes » : sa fiche mentionne les cartes à collectionner ou Pokémon.
+  - indice « cartes » : sa fiche mentionne les cartes à collectionner ou Pokémon ;
+  - coordonnées, quand la fiche OpenStreetMap les donne : site (`website`, `contact:website`), téléphone (`phone`, `contact:phone`), horaires (`opening_hours`, format OSM), adresse (numéro, rue, code postal, ville). Valeurs nettoyées ; un doublon complète l'autre.
 
 Bilan au 2026-10-04 : 4 076 boutiques.
 

@@ -11,7 +11,8 @@ Retenu :
 Écarté : boutiques sans nom, fermées, Warhammer, LEGO, puériculture.
 
 Chaque boutique est rattachée à son département (contours de web/data/geo/departements.json, sinon
-code postal). Sortie : web/data/stores.json, une boutique par ligne, triée pour des différences lisibles.
+code postal). Coordonnées gardées quand la fiche OSM les donne : site, téléphone, horaires (format OSM),
+adresse. Sortie : web/data/stores.json (1 Mo au plus), une boutique par ligne, triée pour des différences lisibles.
 Données © les contributeurs d'OpenStreetMap, sous licence ODbL : la mention est obligatoire dans l'app.
 
 Usage : python3 tools/stores/sync_stores.py [--input overpass.json]
@@ -35,6 +36,9 @@ UA = "PKM-App/1.0 (+https://github.com/XxSpeedTouchxX/pokemon-appli)"
 ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter",
              "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]
 BBOX = "41.3,-5.3,51.2,9.7"  # France métropolitaine et Corse
+FIELDS = ["id", "nom", "type", "lat", "lon", "dept", "ville", "enseigne", "cartes", "site", "tel", "horaires", "adresse"]
+CONTACT = slice(9, 13)  # site, tel, horaires, adresse
+MAX_BYTES = 1_000_000
 
 # brand:wikidata → (type de boutique, nom de l'enseigne)
 BRANDS = {
@@ -110,6 +114,30 @@ def classify(tags):
     return (kind, "") if kind else None
 
 
+def first(value):
+    """Première valeur d'un champ OSM à plusieurs valeurs (« a;b »)."""
+    return str(value or "").split(";")[0].strip()
+
+
+def contact(tags):
+    """[site, téléphone, horaires, adresse] nettoyés ; chaîne vide quand l'information manque ou paraît fausse."""
+    site = first(tags.get("website") or tags.get("contact:website") or tags.get("url"))
+    if site and not re.match(r"^https?://", site, re.I):
+        site = "https://" + site
+    if not re.match(r"^https?://[\w.-]+\.[a-z]{2,}(?:[/?#]\S*)?$", site, re.I) or len(site) > 200:
+        site = ""
+    tel = " ".join(first(tags.get("phone") or tags.get("contact:phone")).split())
+    if not re.fullmatch(r"\+?[\d .()-]{8,24}", tel):
+        tel = ""
+    hours = " ".join(str(tags.get("opening_hours") or "").split())
+    if len(hours) > 160:
+        hours = ""
+    street = " ".join(x for x in (tags.get("addr:housenumber", ""), tags.get("addr:street", "")) if x).strip()
+    place = " ".join(x for x in (tags.get("addr:postcode", ""), tags.get("addr:city", "")) if x).strip()
+    address = ", ".join(x for x in (street, place) if x) if street else ""
+    return [site, tel, hours, address]
+
+
 def ring_inside(x, y, ring):
     c = False
     for (x1, y1), (x2, y2) in zip(ring, ring[1:]):
@@ -175,7 +203,7 @@ def build(elements, depts):
         text = " ".join(str(v) for k, v in tags.items() if k in ("name", "description", "shop", "sells", "games", "trade") or k.startswith("sells:"))
         tcg = 1 if kind == "cartes" or re.search(TCG_HINT, text, re.I) else 0
         city = tags.get("addr:city") or ""
-        rows.append([el["type"][0] + str(el["id"]), " ".join(tags["name"].split()), kind, round(lat, 4), round(lon, 4), dept, city, brand, tcg])
+        rows.append([el["type"][0] + str(el["id"]), " ".join(tags["name"].split()), kind, round(lat, 4), round(lon, 4), dept, city, brand, tcg] + contact(tags))
     # Doublons : même nom à moins de 100 m (un point et le bâtiment du même magasin, par exemple).
     rows.sort(key=lambda r: (r[0][0] != "w", r[0]))
     out, by_name = [], {}
@@ -186,6 +214,7 @@ def build(elements, depts):
         if twin:
             twin[6] = twin[6] or r[6]  # garde la ville connue par l'un ou l'autre
             twin[8] = max(twin[8], r[8])
+            twin[CONTACT] = [a or b for a, b in zip(twin[CONTACT], r[CONTACT])]  # et ses coordonnées
             skipped["doublons"] += 1
             continue
         prev.append(r)
@@ -194,13 +223,20 @@ def build(elements, depts):
     return out, skipped
 
 
-def write(rows):
+def render(rows):
     head = {"generated": time.strftime("%Y-%m-%d"), "source": "© les contributeurs d’OpenStreetMap, licence ODbL",
-            "fields": ["id", "nom", "type", "lat", "lon", "dept", "ville", "enseigne", "cartes"], "kinds": KINDS, "count": len(rows)}
+            "fields": FIELDS, "kinds": KINDS, "count": len(rows)}
     body = ",\n".join(json.dumps(r, ensure_ascii=False, separators=(",", ":")) for r in rows)
-    text = json.dumps(head, ensure_ascii=False)[:-1] + ',\n"stores":[\n' + body + "\n]}\n"
+    return json.dumps(head, ensure_ascii=False)[:-1] + ',\n"stores":[\n' + body + "\n]}\n"
+
+
+def write(rows):
+    text = render(rows)
+    size = len(text.encode("utf-8"))
+    if size > MAX_BYTES:
+        sys.exit(f"stores.json ferait {size // 1024} Ko (plus de {MAX_BYTES // 1000} Ko) : fichier inchangé.")
     OUT.write_text(text, "utf-8")
-    return len(text.encode("utf-8"))
+    return size
 
 
 def main():
@@ -230,6 +266,7 @@ def main():
     print("Par type : " + ", ".join(f"{KINDS[k]} {n}" for k, n in sorted(by_kind.items(), key=lambda x: -x[1])))
     print("Par région : " + ", ".join(f"{k} {n}" for k, n in sorted(by_region.items())))
     print(f"Avec un indice cartes / Pokémon : {sum(r[8] for r in rows)}")
+    print("Coordonnées : " + ", ".join(f"{k} {sum(1 for r in rows if r[FIELDS.index(k)])}" for k in FIELDS[CONTACT]))
 
 
 if __name__ == "__main__":
