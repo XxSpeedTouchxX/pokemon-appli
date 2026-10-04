@@ -7,6 +7,8 @@ un commit, l'historique git sert d'archive quotidienne des prix (comme pour les 
 Entrées :
   - tools/sealed/products.json : liste figée des produits (nom, type, extension, sortie, ids Cardmarket) ;
   - guide des prix public Cardmarket (price_guide_6.json) : tendance, moyennes 30, 7 et 1 jours, plus bas ;
+    le guide public ne donne pas encore de moyennes pour le scellé : la tendance du jour est donc archivée ici,
+    31 jours glissants (en-tête « days », colonne « hist » alignée sur ces jours) ;
   - web/img/products/<id>.webp : visuel officiel, s'il a été téléchargé (fetch_images.py).
 Prix d'un produit à plusieurs variantes (ex. deux coffrets) : médiane des variantes.
 Page Sorties de l'app : ASIN Amazon (amazon, refusé s'il est mal formé), prix de lancement constatés (msrp, une
@@ -30,7 +32,8 @@ OUT = ROOT / "web" / "data" / "sealed.json"
 IMG = ROOT / "web" / "img" / "products"
 PRICES = "https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json"
 FIELDS = ["id", "name", "type", "set", "release", "releaseText", "year", "photo", "trend", "avg30", "low", "variants",
-          "amazon", "msrp", "msrpSource", "q", "dateSource", "avg7", "avg1"]
+          "amazon", "msrp", "msrpSource", "q", "dateSource", "avg7", "avg1", "hist"]
+HIST_DAYS = 31
 PRICED = ("trend", "avg30", "low", "avg7", "avg1")  # prix gardés d'un jour à l'autre si le guide manque
 ASIN = re.compile(r"^[A-Z0-9]{10}$")
 
@@ -82,9 +85,28 @@ def build(products, guide, previous):
         rows.append([p["id"], p["name"], p["type"], p.get("set") or "", p.get("release") or "", p.get("releaseText") or "",
                      p.get("year") or 0, 1 if photo else 0, trend, avg30, low, len(p.get("cm", [])),
                      asin(p), price, p.get("msrpSource") if price else None, p.get("q") or None, p.get("dateSource") or None,
-                     avg7, avg1])
+                     avg7, avg1, None])
         priced += trend is not None
     return rows, priced
+
+
+def archive(rows, old, day):
+    """Archive glissante de la tendance : jours (31 au plus) et, par produit, la tendance de chaque jour.
+    day : jour du guide des prix, ou None sans guide (archive gardée telle quelle). Retourne la liste des jours."""
+    f = {k: i for i, k in enumerate(FIELDS)}
+    days, prev = list((old or {}).get("days") or []), {}
+    if old and "hist" in old.get("fields", []):
+        of = {k: i for i, k in enumerate(old["fields"])}
+        prev = {r[of["id"]]: list(r[of["hist"]] or []) for r in old["products"]}
+    if day and day not in days:
+        days.append(day)
+    for r in rows:
+        h = (prev.get(r[f["id"]]) or [])[:len(days)]
+        h += [None] * (len(days) - len(h))  # nouveau produit : jours d'avant sans valeur
+        if day:
+            h[days.index(day)] = r[f["trend"]]
+        r[f["hist"]] = h[-HIST_DAYS:]
+    return days[-HIST_DAYS:]
 
 
 def main():
@@ -94,19 +116,20 @@ def main():
     args = ap.parse_args()
     manifest = json.loads(PRODUCTS.read_text("utf-8"))
     guide = json.loads(Path(args.prices).read_text("utf-8")) if args.prices else (None if args.offline else fetch_prices())
-    previous, stamp = {}, ""
+    previous, stamp, old = {}, "", None
     if OUT.exists():
         old = json.loads(OUT.read_text("utf-8"))
         stamp = old.get("prices", "")
         f = {k: i for i, k in enumerate(old["fields"])}
         previous = {r[f["id"]]: [r[f[k]] if k in f else None for k in PRICED] for r in old["products"]}  # anciens fichiers : sans avg7, avg1
     rows, priced = build(manifest["products"], guide, previous)
+    days = archive(rows, old, guide.get("createdAt", "")[:10] or None if guide is not None else None)
     head = {
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         # Sans guide des prix, la date des prix gardés reste celle du fichier précédent.
         "prices": guide.get("createdAt", "") if guide is not None else (stamp if re.match(r"\d{4}-\d{2}-\d{2}", stamp) else "veille (guide des prix injoignable)"),
         "source": "Cardmarket, guide des prix public · visuels : galerie officielle Pokémon France",
-        "fields": FIELDS, "demo": manifest.get("demo", {}), "count": len(rows),
+        "fields": FIELDS, "days": days, "demo": manifest.get("demo", {}), "count": len(rows),
     }
     body = ",\n".join(json.dumps(r, ensure_ascii=False, separators=(",", ":")) for r in rows)
     OUT.write_text(json.dumps(head, ensure_ascii=False)[:-1] + ',\n"products":[\n' + body + "\n]}\n", "utf-8")

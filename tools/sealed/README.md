@@ -64,7 +64,9 @@ Les displays, le booster 30ᵉ Anniversaire et Règne Delta (6 novembre 2026) ne
 
 ### 4. Prix (`build_sealed.py`)
 
-- **Cote :** tendance du guide des prix public Cardmarket (`price_guide_6.json`). Le fichier donne aussi les moyennes sur 30, 7 et 1 jours (`avg30`, `avg7`, `avg1` : tendance de la collection sur l'accueil) et le plus bas.
+- **Cote :** tendance du guide des prix public Cardmarket (`price_guide_6.json`), et le plus bas.
+  - Les colonnes `avg30`, `avg7` et `avg1` (moyennes sur 30, 7 et 1 jours) sont prévues, mais le guide public ne les remplit pas pour le scellé (vides en octobre 2026).
+  - **Archive maison :** la tendance du jour est donc archivée dans `sealed.json`, sur 31 jours glissants : en-tête `days`, colonne `hist` alignée sur ces jours. Un passage le même jour remplace la valeur du jour ; sans guide des prix, l'archive reste telle quelle. Elle dessine la tendance du scellé sur l'accueil.
 - **Plusieurs versions d'un produit :** l'app prend la médiane.
 - **Avant la sortie :** pas de cote ; le prix des précommandes est affiché comme prix demandé.
 - **Guide des prix injoignable :** les prix de la veille sont gardés, avec leur date. En local, `--offline` fait de même sans attendre.

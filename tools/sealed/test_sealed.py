@@ -3,7 +3,7 @@ import json
 import unittest
 from pathlib import Path
 
-from build_sealed import ASIN, FIELDS, build, median
+from build_sealed import ASIN, FIELDS, HIST_DAYS, archive, build, median
 
 PRODUCTS = [
     {"id": "coffret", "name": "Coffret A ou B", "type": "CFT", "set": "30th", "cm": [1, 2]},
@@ -70,6 +70,39 @@ class Sealed(unittest.TestCase):
         self.assertEqual((by["etb"][f["avg7"]], by["etb"][f["avg1"]]), (68.0, 69.5))
         self.assertEqual(by["coffret"][8:11], [None, None, None])
         self.assertEqual(priced, 1)
+
+
+class Archive(unittest.TestCase):
+    def old(self, days, hist):
+        return {"fields": ["id", "trend", "hist"], "days": days, "products": [["etb", 1, h] for h in [hist]]}
+
+    def test_new_day_appended(self):
+        rows, _ = build(PRODUCTS, GUIDE, {})
+        f = {k: i for i, k in enumerate(FIELDS)}
+        days = archive(rows, self.old(["2026-10-02", "2026-10-03"], [68.0, 69.5]), "2026-10-04")
+        by = {r[0]: r for r in rows}
+        self.assertEqual(days, ["2026-10-02", "2026-10-03", "2026-10-04"])
+        self.assertEqual(by["etb"][f["hist"]], [68.0, 69.5, 70.01])
+        self.assertEqual(by["coffret"][f["hist"]], [None, None, 45.0])  # nouveau dans l'archive
+
+    def test_same_day_replaced_and_offline_kept(self):
+        rows, _ = build(PRODUCTS, GUIDE, {})
+        f = {k: i for i, k in enumerate(FIELDS)}
+        old = self.old(["2026-10-03", "2026-10-04"], [69.5, 60.0])
+        self.assertEqual(archive(rows, old, "2026-10-04"), ["2026-10-03", "2026-10-04"])
+        self.assertEqual({r[0]: r for r in rows}["etb"][f["hist"]], [69.5, 70.01])  # le jour même : valeur remplacée
+        self.assertEqual(archive(rows, old, None), ["2026-10-03", "2026-10-04"])  # sans guide : archive gardée
+        self.assertEqual({r[0]: r for r in rows}["etb"][f["hist"]], [69.5, 60.0])
+
+    def test_window(self):
+        rows, _ = build(PRODUCTS, GUIDE, {})
+        f = {k: i for i, k in enumerate(FIELDS)}
+        days0 = [f"2026-09-{d:02d}" for d in range(1, 31)] + ["2026-10-01", "2026-10-02"]
+        days = archive(rows, self.old(days0, list(range(32))), "2026-10-03")
+        self.assertEqual(len(days), HIST_DAYS)
+        self.assertEqual(days[0], "2026-09-03")
+        self.assertEqual({r[0]: r for r in rows}["etb"][f["hist"]][-2:], [31, 70.01])
+        self.assertEqual(archive(rows, None, "2026-10-04"), ["2026-10-04"])  # premier jour
 
 
 if __name__ == "__main__":
