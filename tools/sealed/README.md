@@ -64,7 +64,7 @@ Les displays, le booster 30ᵉ Anniversaire et Règne Delta (6 novembre 2026) ne
 
 ### 4. Prix (`build_sealed.py`)
 
-- **Cote :** tendance du guide des prix public Cardmarket (`price_guide_6.json`). Le fichier donne aussi la moyenne sur 30 jours et le plus bas.
+- **Cote :** tendance du guide des prix public Cardmarket (`price_guide_6.json`). Le fichier donne aussi les moyennes sur 30, 7 et 1 jours (`avg30`, `avg7`, `avg1` : tendance de la collection sur l'accueil) et le plus bas.
 - **Plusieurs versions d'un produit :** l'app prend la médiane.
 - **Avant la sortie :** pas de cote ; le prix des précommandes est affiché comme prix demandé.
 - **Guide des prix injoignable :** les prix de la veille sont gardés, avec leur date. En local, `--offline` fait de même sans attendre.

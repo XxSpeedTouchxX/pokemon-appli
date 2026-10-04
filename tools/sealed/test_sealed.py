@@ -14,8 +14,8 @@ PRODUCTS = [
     {"id": "asin-faux", "name": "ASIN faux", "type": "ETB", "cm": [], "amazon": "b0h8-12", "msrp": [59.99]},
 ]
 GUIDE = {"createdAt": "2026-10-04T02:00:00+0200", "priceGuides": [
-    {"idProduct": 1, "trend": 50.0, "avg30": 48.0, "low": 45.0},
-    {"idProduct": 2, "trend": 40.0, "avg30": None, "low": 39.0},
+    {"idProduct": 1, "trend": 50.0, "avg30": 48.0, "low": 45.0, "avg7": 49.0, "avg1": 51.0},
+    {"idProduct": 2, "trend": 40.0, "avg30": None, "low": 39.0, "avg7": 41.0, "avg1": 39.0},
     {"idProduct": 3, "trend": 70.01, "avg30": 72.5, "low": 0},
 ]}
 
@@ -34,6 +34,9 @@ class Sealed(unittest.TestCase):
         self.assertIsNone(by["etb"][10])  # « plus bas » à 0 : ignoré
         self.assertEqual(by["inconnu"][8:11], [None, None, None])
         self.assertEqual(priced, 2)
+        f = {k: i for i, k in enumerate(FIELDS)}
+        self.assertEqual((by["coffret"][f["avg7"]], by["coffret"][f["avg1"]]), (45.0, 45.0))  # médianes des moyennes 7 j et 1 j
+        self.assertEqual((by["etb"][f["avg7"]], by["etb"][f["avg1"]]), (None, None))  # absentes du guide
 
     def test_release_fields(self):
         rows, _ = build(PRODUCTS, GUIDE, {})
@@ -60,9 +63,11 @@ class Sealed(unittest.TestCase):
                 self.assertTrue(1 <= len(p["msrp"]) <= 2 and all(v > 0 for v in p["msrp"]), p["id"])
 
     def test_previous_prices_kept_without_guide(self):
-        rows, priced = build(PRODUCTS, None, {"etb": [69.0, 70.0, 65.0]})
+        rows, priced = build(PRODUCTS, None, {"etb": [69.0, 70.0, 65.0, 68.0, 69.5]})
         by = {r[0]: r for r in rows}
+        f = {k: i for i, k in enumerate(FIELDS)}
         self.assertEqual(by["etb"][8:11], [69.0, 70.0, 65.0])
+        self.assertEqual((by["etb"][f["avg7"]], by["etb"][f["avg1"]]), (68.0, 69.5))
         self.assertEqual(by["coffret"][8:11], [None, None, None])
         self.assertEqual(priced, 1)
 

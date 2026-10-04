@@ -6,7 +6,7 @@ un commit, l'historique git sert d'archive quotidienne des prix (comme pour les 
 
 Entrées :
   - tools/sealed/products.json : liste figée des produits (nom, type, extension, sortie, ids Cardmarket) ;
-  - guide des prix public Cardmarket (price_guide_6.json) : tendance, moyenne 30 jours, plus bas ;
+  - guide des prix public Cardmarket (price_guide_6.json) : tendance, moyennes 30, 7 et 1 jours, plus bas ;
   - web/img/products/<id>.webp : visuel officiel, s'il a été téléchargé (fetch_images.py).
 Prix d'un produit à plusieurs variantes (ex. deux coffrets) : médiane des variantes.
 Page Sorties de l'app : ASIN Amazon (amazon, refusé s'il est mal formé), prix de lancement constatés (msrp, une
@@ -30,7 +30,8 @@ OUT = ROOT / "web" / "data" / "sealed.json"
 IMG = ROOT / "web" / "img" / "products"
 PRICES = "https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json"
 FIELDS = ["id", "name", "type", "set", "release", "releaseText", "year", "photo", "trend", "avg30", "low", "variants",
-          "amazon", "msrp", "msrpSource", "q", "dateSource"]
+          "amazon", "msrp", "msrpSource", "q", "dateSource", "avg7", "avg1"]
+PRICED = ("trend", "avg30", "low", "avg7", "avg1")  # prix gardés d'un jour à l'autre si le guide manque
 ASIN = re.compile(r"^[A-Z0-9]{10}$")
 
 
@@ -73,14 +74,15 @@ def build(products, guide, previous):
     for p in products:
         found = [prices[i] for i in p.get("cm", []) if i in prices]
         if guide is not None:
-            trend, avg30, low = (median(g.get(k) for g in found) for k in ("trend", "avg30", "low"))
+            trend, avg30, low, avg7, avg1 = (median(g.get(k) for g in found) for k in PRICED)
         else:
-            trend, avg30, low = (previous.get(p["id"]) or [None, None, None])
+            trend, avg30, low, avg7, avg1 = (previous.get(p["id"]) or [None] * len(PRICED))
         photo = (IMG / (p["id"] + ".webp")).exists()
         price = msrp(p)
         rows.append([p["id"], p["name"], p["type"], p.get("set") or "", p.get("release") or "", p.get("releaseText") or "",
                      p.get("year") or 0, 1 if photo else 0, trend, avg30, low, len(p.get("cm", [])),
-                     asin(p), price, p.get("msrpSource") if price else None, p.get("q") or None, p.get("dateSource") or None])
+                     asin(p), price, p.get("msrpSource") if price else None, p.get("q") or None, p.get("dateSource") or None,
+                     avg7, avg1])
         priced += trend is not None
     return rows, priced
 
@@ -97,7 +99,7 @@ def main():
         old = json.loads(OUT.read_text("utf-8"))
         stamp = old.get("prices", "")
         f = {k: i for i, k in enumerate(old["fields"])}
-        previous = {r[f["id"]]: [r[f["trend"]], r[f["avg30"]], r[f["low"]]] for r in old["products"]}
+        previous = {r[f["id"]]: [r[f[k]] if k in f else None for k in PRICED] for r in old["products"]}  # anciens fichiers : sans avg7, avg1
     rows, priced = build(manifest["products"], guide, previous)
     head = {
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
