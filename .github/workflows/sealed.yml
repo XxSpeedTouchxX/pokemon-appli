@@ -1,5 +1,7 @@
-# Catalogue scellé : produits officiels Pokémon France (galerie des produits) et prix Cardmarket.
-# Étape 1 (en cours) : reconnaissance des sources, sans rien écrire.
+# Catalogue scellé, à la demande : liste les produits de la galerie officielle Pokémon France et leurs
+# correspondances Cardmarket possibles (tools/sealed/candidates.json, rapport de travail), puis télécharge
+# les visuels des produits retenus (tools/sealed/products.json) dans web/img/products/.
+# Les prix du scellé sont mis à jour chaque jour par le workflow « Catalogue TCGdex ».
 name: Catalogue scellé
 
 on:
@@ -8,7 +10,9 @@ on:
     branches: [claude/pokemon-app-mockup-1mxt7p]
     paths:
       - .github/workflows/sealed.yml
-      - tools/sealed/**
+      - tools/sealed/discover.py
+      - tools/sealed/fetch_images.py
+      - tools/sealed/products.json
 
 permissions:
   contents: write
@@ -18,12 +22,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  recon:
+  sealed:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
           ref: claude/pokemon-app-mockup-1mxt7p
-      - name: Reconnaissance des sources
-        run: python3 tools/sealed/recon.py
+
+      - name: Produits de la galerie officielle et candidats Cardmarket
+        run: python3 tools/sealed/discover.py
+
+      - name: Visuels des produits retenus
+        run: |
+          if [ -f tools/sealed/fetch_images.py ] && [ -f tools/sealed/products.json ]; then
+            pip install --quiet pillow
+            python3 tools/sealed/fetch_images.py
+          fi
+
+      - name: Publier sur la branche
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/sealed/candidates.json
+          if [ -d web/img/products ]; then git add web/img/products; fi
+          if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
+          git commit -m "Met à jour le catalogue scellé ($(date -u +%Y-%m-%d))"
+          for i in 1 2 3 4; do
+            git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
