@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
-import { TOKENS, themeTemplate, themeScript, cssVars, usedTokens } from './theme.mjs';
+import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens } from './theme.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const SRC = ROOT + 'docs/12-maquette-v5/Main.dc.html';
@@ -396,11 +396,14 @@ body { margin: 0; background: var(--ground); color: var(--ink); font-family: 'Pl
 input, button { -webkit-tap-highlight-color: transparent; }
 @keyframes pkmSpin { to { transform: rotate(360deg); } }
 ${cssVars()}
+${v6Css()}
 ${keyframes}`;
 const fonts = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">';
 // Vue : copie locale pour l'hébergement (hors ligne possible), CDN autorisé pour la page claude.ai.
 const VUE_LOCAL = 'vendor/vue.runtime.global.prod.js';
 const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global.prod.js';
+// Thème : jaune et verre par défaut ; ?theme=classic garde l'ancien thème (comparaison, retour arrière).
+const THEME_SWITCH = '<script>try { if (/[?&]theme=classic(&|$)/.test(location.search)) { document.documentElement.classList.add(\'pkm-classic\'); var m = document.querySelector(\'meta[name="theme-color"]\'); if (m) m.content = \'#0B1120\'; } } catch (e) {}</script>';
 const body = vue => `<div id="shell">
 <div id="app"></div>
 <p class="pkm-caption">Démo PKM-App · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques du Radar réelles (OpenStreetMap) ; collection, ventes et magasins de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
@@ -414,7 +417,7 @@ const index = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0B1120">
+<meta name="theme-color" content="#FFCB05">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PKM">
@@ -422,6 +425,7 @@ const index = `<!doctype html>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+${THEME_SWITCH}
 ${fonts}
 <style>
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; height: 100%; }
@@ -435,6 +439,7 @@ ${body(VUE_LOCAL)}
 `;
 // Page claude.ai : le squelette (doctype, head, body) est ajouté à la publication.
 const artifact = `<title>PKM-App</title>
+${THEME_SWITCH}
 ${fonts}
 <style>
 ${style}

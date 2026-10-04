@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { TOKENS, RULES, themeTemplate, themeScript, cssVars, usedTokens } from './theme.mjs';
+import { TOKENS, RULES, V6_LIGHT, V6_DARK, themeTemplate, themeScript, cssVars, v6Css, usedTokens } from './theme.mjs';
 
 const RULE = (g, c, to, o) => [g, c, to, o || {}];
 
@@ -76,7 +76,7 @@ test('variables : toutes celles des règles existent, valeurs classiques au form
   });
   Object.entries(TOKENS).forEach(([k, v]) => {
     if (k.endsWith('-rgb')) assert.match(v, /^\d{1,3}, \d{1,3}, \d{1,3}$/, k);
-    else assert.match(v, /^(#[0-9A-F]{6}|transparent)$/, k);
+    else assert.match(v, /^(#[0-9A-F]{6}|transparent|0\.\d+)$/, k);
   });
   assert.match(cssVars(), /^:root \{ --pkm-app: #0B1120; .* \}$/);
 });
@@ -86,4 +86,28 @@ test('modules de l’app : chaque variable utilisée existe', () => {
     const unknown = usedTokens(readFileSync(new URL('./' + f, import.meta.url), 'utf8')).filter(n => !(n in TOKENS));
     assert.deepEqual(unknown, [], f);
   }
+});
+
+test('thème v6 : variables connues, ton sombre complet, classique en retrait', () => {
+  [V6_LIGHT, V6_DARK].forEach(o => Object.keys(o).forEach(k => assert.ok(k in TOKENS, 'variable v6 inconnue : ' + k)));
+  const css = v6Css(), light = css.match(/\.pkm-root \{([^}]*)\}/)[1], dark = css.match(/\.pkm-dark \{([^}]*)\}/)[1];
+  // Toute variable du ton clair est redéfinie par le ton sombre (une surface n'hérite jamais du fond jaune).
+  for (const k of Object.keys(V6_LIGHT)) assert.ok(dark.includes('--pkm-' + k + ':'), 'ton sombre sans ' + k);
+  assert.match(light, /--pkm-t1: #0B1120;/);
+  assert.match(dark, /--pkm-t1: #F5F7FC;/);
+  assert.match(css, /^html:not\(\.pkm-classic\) \.pkm-root/);
+});
+
+test('surface sans couleur de texte : elle déclare la sienne', () => {
+  const rules = [RULE('bg', '#111A2C', 'var(--pkm-card)', { surface: true })];
+  assert.match(themeTemplate('<div style="background: #111A2C">x</div>', rules).tpl, /background: var\(--pkm-card\); color: var\(--pkm-t1\)"/);
+  assert.match(themeTemplate('<button style="background: #111A2C; color: inherit">x</button>', rules).tpl, /color: var\(--pkm-t1\)"/);
+  assert.match(themeTemplate('<p style="background: #111A2C; color: {{ x.fg }}">x</p>', rules).tpl, /color: \{\{ x\.fg \}\}"/);
+});
+
+test('logique : une méthode d’une ligne ne recouvre pas la suivante', () => {
+  const js = "\n  profRules() { return { ur: [3, 10], val: [1000, 5000] }; }\n  cats() {\n    return { regular: { color: '#A8B6FF', tint: 'rgba(168, 182, 255, 0.12)' } };\n  }";
+  const r = themeScript(js);
+  assert.deepEqual(r.missing, []);
+  assert.match(r.js, /color: 'var\(--pkm-regular\)', tint: 'rgba\(var\(--pkm-regular-rgb\), 0\.12\)'/);
 });

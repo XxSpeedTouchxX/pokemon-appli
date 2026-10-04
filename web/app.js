@@ -98,7 +98,7 @@ class Component extends DCLogic {
   }
   tiers() {
     return [
-      { name: 'Commune', min: 0, color: '#9AA8C3', glow: 'rgba(154, 168, 195, 0.24)', sym: 'M9.4 12a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z' },
+      { name: 'Commune', min: 0, color: 'var(--pkm-t3)', glow: 'rgba(154, 168, 195, 0.24)', sym: 'M9.4 12a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0z' },
       { name: 'Peu commune', min: 500, color: '#5EE0CF', glow: 'rgba(94, 224, 207, 0.24)', sym: 'M12 8.3l3.5 3.7-3.5 3.7-3.5-3.7z' },
       { name: 'Rare', min: 1500, color: '#FFD66B', glow: 'rgba(255, 214, 107, 0.24)', sym: this.star(12, 12.4, 4.2, 1.8) },
       { name: 'Ultra rare', min: 3000, color: '#E8ECFF', glow: 'rgba(232, 236, 255, 0.24)', sym: this.star(9, 12.4, 3, 1.3) + ' ' + this.star(15, 12.4, 3, 1.3) },
@@ -120,7 +120,7 @@ class Component extends DCLogic {
   cats() {
     return {
       novice: { name: 'Novice', color: 'var(--pkm-teal)', tint: 'rgba(var(--pkm-teal-rgb), 0.12)', edge: 'rgba(var(--pkm-teal-rgb), 0.34)', icon: 'M12 20.5v-8 M12 12.5C12 9 9.4 6.5 5.5 6.5c0 3.6 2.6 6 6.5 6z M12 14.5c0-3 2.3-5.2 5.6-5.2 0 3.1-2.3 5.2-5.6 5.2z', desc: 'Tu démarres : moins de 3 cartes ultra rares et moins de 1 000 € de collection. Chaque prix est expliqué.' },
-      regular: { name: 'Régulier', color: 'var(--pkm-accent)', tint: 'rgba(var(--pkm-accent-rgb), 0.12)', edge: 'rgba(var(--pkm-accent-rgb), 0.34)', icon: 'M13 3L5 13.5h6L10 21l8-10.5h-6z', desc: 'Collection installée : au moins 3 cartes ultra rares ou 1 000 € de valeur.' },
+      regular: { name: 'Régulier', color: 'var(--pkm-regular)', tint: 'rgba(var(--pkm-regular-rgb), 0.12)', edge: 'rgba(var(--pkm-regular-rgb), 0.34)', icon: 'M13 3L5 13.5h6L10 21l8-10.5h-6z', desc: 'Collection installée : au moins 3 cartes ultra rares ou 1 000 € de valeur.' },
       passion: { name: 'Passionné', color: 'var(--pkm-amber)', tint: 'rgba(var(--pkm-amber-rgb), 0.12)', edge: 'rgba(var(--pkm-amber-rgb), 0.34)', icon: 'M4 17.5L3 8l5 4 4-6.5 4 6.5 5-4-1 9.5z M5 20.5h14', desc: 'Grosse collection : au moins 10 cartes ultra rares ou 5 000 € de valeur. Tous les détails.' }
     };
   }
@@ -878,7 +878,7 @@ class Component extends DCLogic {
       name: r.name, color: r.color, sym: r.sym, min: i === 0 ? 'Dès le premier article' : 'À partir de ' + this.eur0(r.min),
       state: i < t.i ? 'Atteint' : i === t.i ? (t.next ? 'En cours · ' + Math.floor(t.pct) + ' %' : 'Atteint') : 'À venir',
       stateColor: i < t.i ? 'var(--pkm-green)' : i === t.i ? r.color : 'var(--pkm-t4)',
-      bg: i === t.i ? 'rgba(var(--pkm-accent-rgb), 0.08)' : 'transparent', op: i > t.i ? '0.6' : '1'
+      bg: i === t.i ? 'rgba(var(--pkm-accent-rgb), 0.08)' : 'transparent', op: i > t.i ? 'var(--pkm-dim)' : '1'
     })).reverse().map((r, i) => Object.assign(r, { border: x.line(i) }));
     const weeks = [];
     for (let k = 7; k >= 0; k--) weeks.push({ bg: w[k] ? 'var(--pkm-accent)' : 'var(--pkm-track)', h: w[k] ? '34px' : '14px' });
@@ -2620,7 +2620,7 @@ class Component extends DCLogic {
     };
     if (!ready) {
       r.title = r.error ? 'Boutiques indisponibles' : 'Chargement des boutiques…';
-      return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-chip-on-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Balayer', hasHint: false });
+      return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-off-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Balayer', hasHint: false });
     }
     const rows = RADAR.rows(s), n = s.rlevel === 'france' ? RADAR.stores.length : rows.length;
     const where = s.rlevel === 'france' ? 'France métropolitaine' : s.rlevel === 'region' ? (reg ? reg.nom : '') : s.rlevel === 'dept' ? (dep ? dep.nom + ' (' + dep.code + ')' : '') : 'Autour de toi · ' + s.rkm + ' km';
@@ -2658,7 +2658,7 @@ class Component extends DCLogic {
     }
     if (s.rlevel === 'france') r.scanLabel = 'Choisis une région';
     r.noScan = !r.canScan;
-    r.scanBg = r.canScan ? 'var(--pkm-accent)' : 'var(--pkm-chip-on-bg)';
+    r.scanBg = r.canScan ? 'var(--pkm-accent)' : 'var(--pkm-off-bg)';
     r.scanFg = r.canScan ? 'var(--pkm-on-accent)' : 'var(--pkm-t4)';
     r.hasHint = !!r.hint && !r.hasResults;
     const sel = s.rstore ? rows.find(x => x.st.id === s.rstore) : null;
@@ -2775,7 +2775,7 @@ const _hoisted_20 = { style: {"flex":"1","min-height":"0","overflow-y":"auto","s
 const _hoisted_21 = {
   class: "pkm-dark",
   "aria-label": "Valeur de ma collection",
-  style: {"flex":"none","padding":"16px 18px 14px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 85% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.26), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px 18px 14px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 85% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.26), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
 }
 const _hoisted_22 = { style: {"display":"flex","justify-content":"space-between","align-items":"center","gap":"10px"} }
 const _hoisted_23 = { style: {"display":"flex","align-items":"center","gap":"2px","font-size":"14px","font-weight":"600","color":"var(--pkm-t2)"} }
@@ -2827,7 +2827,7 @@ const _hoisted_51 = {
   key: 1,
   class: "pkm-dark",
   "aria-label": "Collection vide",
-  style: {"flex":"none","padding":"18px 16px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"18px 16px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_52 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
 const _hoisted_53 = ["onClick"]
@@ -2877,7 +2877,7 @@ const _hoisted_75 = {
   key: 2,
   class: "pkm-dark",
   "aria-label": "Premiers pas",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid rgba(var(--pkm-teal-rgb), 0.34)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-teal-rgb), 0.16), rgba(var(--pkm-teal-rgb), 0) 60%), var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid rgba(var(--pkm-teal-rgb), 0.34)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-teal-rgb), 0.16), rgba(var(--pkm-teal-rgb), 0) 60%), var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
 }
 const _hoisted_76 = { style: {"flex":"1","font-size":"14px"} }
 const _hoisted_77 = {
@@ -2982,7 +2982,7 @@ const _hoisted_122 = { style: {"display":"flex","align-items":"center","justify-
 const _hoisted_123 = ["onClick"]
 const _hoisted_124 = {
   class: "pkm-dark",
-  style: {"border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_125 = ["onClick"]
 const _hoisted_126 = ["src", "data-fallback"]
@@ -2995,7 +2995,7 @@ const _hoisted_132 = { style: {"flex":"none","display":"flex","flex-direction":"
 const _hoisted_133 = { style: {"font-size":"14.5px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
 const _hoisted_134 = {
   class: "pkm-dark",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
 }
 const _hoisted_135 = {
   width: "20",
@@ -3022,7 +3022,7 @@ const _hoisted_140 = ["onClick", "aria-pressed"]
 const _hoisted_141 = {
   class: "pkm-dark",
   "aria-label": "Résumé de la collection",
-  style: {"flex":"none","display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","padding":"14px 4px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+  style: {"flex":"none","display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","padding":"14px 4px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
 }
 const _hoisted_142 = { style: {"display":"flex","flex-direction":"column","align-items":"center","gap":"2px"} }
 const _hoisted_143 = { style: {"font-family":"'Sora', sans-serif","font-size":"15.5px","font-weight":"700","white-space":"nowrap"} }
@@ -3076,7 +3076,7 @@ const _hoisted_171 = ["src", "data-fallback", "alt"]
 const _hoisted_172 = {
   class: "pkm-dark",
   "aria-hidden": "true",
-  style: {"position":"absolute","left":"12px","bottom":"12px","width":"32px","height":"32px","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.72)","display":"flex","align-items":"center","justify-content":"center"}
+  style: {"position":"absolute","left":"12px","bottom":"12px","width":"32px","height":"32px","border-radius":"16px","background":"rgba(var(--pkm-ink-rgb), 0.72)","display":"flex","align-items":"center","justify-content":"center","color":"var(--pkm-t1)"}
 }
 const _hoisted_173 = {
   width: "16",
@@ -3112,7 +3112,7 @@ const _hoisted_183 = {
 const _hoisted_184 = {
   class: "pkm-dark",
   "aria-label": "Cote PKM",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
 }
 const _hoisted_185 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-start","gap":"10px"} }
 const _hoisted_186 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
@@ -3139,7 +3139,7 @@ const _hoisted_200 = {
 const _hoisted_201 = {
   class: "pkm-dark",
   "aria-label": "Comparatif des prix",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
 }
 const _hoisted_202 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_203 = { style: {"font-size":"14.5px","font-weight":"600"} }
@@ -3149,7 +3149,7 @@ const _hoisted_206 = {
   key: 1,
   class: "pkm-dark",
   "aria-label": "Historique d’achat",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
 }
 const _hoisted_207 = { style: {"flex":"1","min-width":"0","font-size":"14px","color":"var(--pkm-t2)"} }
 const _hoisted_208 = {
@@ -3174,7 +3174,7 @@ const _hoisted_214 = ["onClick", "disabled"]
 const _hoisted_215 = ["onClick"]
 const _hoisted_216 = {
   class: "pkm-dark",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
 }
 const _hoisted_217 = {
   width: "20",
@@ -3249,7 +3249,7 @@ const _hoisted_248 = {
 }
 const _hoisted_249 = {
   class: "pkm-dark",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_250 = ["onClick"]
 const _hoisted_251 = ["src", "data-fallback"]
@@ -3267,7 +3267,7 @@ const _hoisted_259 = { style: {"flex":"none","display":"flex","flex-direction":"
 const _hoisted_260 = { style: {"font-size":"15px","font-weight":"700","font-variant-numeric":"tabular-nums"} }
 const _hoisted_261 = {
   class: "pkm-dark",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"10px","height":"52px","padding":"0 16px","border-radius":"999px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
 }
 const _hoisted_262 = {
   width: "20",
@@ -3290,7 +3290,7 @@ const _hoisted_268 = {
 }
 const _hoisted_269 = {
   class: "pkm-dark",
-  style: {"border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_270 = ["onClick", "aria-label"]
 const _hoisted_271 = { style: {"flex":"none","width":"78px","height":"42px","display":"flex","align-items":"center","justify-content":"center"} }
@@ -3316,7 +3316,7 @@ const _hoisted_278 = {
 const _hoisted_279 = {
   class: "pkm-dark",
   "aria-label": "Extension",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","padding":"14px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","padding":"14px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","color":"var(--pkm-t1)"}
 }
 const _hoisted_280 = ["src"]
 const _hoisted_281 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
@@ -3341,7 +3341,7 @@ const _hoisted_289 = { style: {"flex":"none","display":"grid","grid-template-col
 const _hoisted_290 = ["onClick", "aria-label"]
 const _hoisted_291 = {
   class: "pkm-dark",
-  style: {"position":"relative","display":"block","width":"100%","aspect-ratio":"600 / 825","border-radius":"5% / 3.6%","overflow":"hidden","background":"var(--pkm-img-bg)","box-shadow":"0 6px 14px rgba(var(--pkm-shadow-rgb), 0.35), inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.08)"}
+  style: {"position":"relative","display":"block","width":"100%","aspect-ratio":"600 / 825","border-radius":"5% / 3.6%","overflow":"hidden","background":"var(--pkm-img-bg)","box-shadow":"0 6px 14px rgba(var(--pkm-shadow-rgb), 0.35), inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.08)","color":"var(--pkm-t1)"}
 }
 const _hoisted_292 = ["src", "data-fallback", "srcset"]
 const _hoisted_293 = {
@@ -3356,7 +3356,7 @@ const _hoisted_297 = { style: {"min-width":"0","white-space":"nowrap","overflow"
 const _hoisted_298 = {
   class: "pkm-dark",
   "aria-label": "Catalogue scellé",
-  style: {"flex":"none","display":"flex","flex-direction":"column","gap":"4px","padding":"14px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-orange-rgb), 0.16), rgba(var(--pkm-orange-rgb), 0) 60%), var(--pkm-card-hi)"}
+  style: {"flex":"none","display":"flex","flex-direction":"column","gap":"4px","padding":"14px 16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-orange-rgb), 0.16), rgba(var(--pkm-orange-rgb), 0) 60%), var(--pkm-card-hi)","color":"var(--pkm-t1)"}
 }
 const _hoisted_299 = { style: {"font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"600"} }
 const _hoisted_300 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
@@ -3389,7 +3389,7 @@ const _hoisted_315 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)"} }
 const _hoisted_316 = {
   class: "pkm-dark",
   "aria-label": "Identité",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.22), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.22), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","color":"var(--pkm-t1)"}
 }
 const _hoisted_317 = { style: {"position":"relative","flex":"none","width":"76px","height":"76px"} }
 const _hoisted_318 = ["src"]
@@ -3406,7 +3406,7 @@ const _hoisted_322 = { style: {"font-size":"13px","color":"var(--pkm-t3)"} }
 const _hoisted_323 = {
   class: "pkm-dark",
   "aria-label": "Type de collectionneur",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_324 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
 const _hoisted_325 = ["d"]
@@ -3433,7 +3433,7 @@ const _hoisted_332 = {
 const _hoisted_333 = {
   class: "pkm-dark",
   "aria-label": "Ce qui fixe ton profil",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px","color":"var(--pkm-t1)"}
 }
 const _hoisted_334 = { style: {"display":"flex","align-items":"center","justify-content":"space-between","gap":"10px"} }
 const _hoisted_335 = { style: {"display":"flex","flex-direction":"column"} }
@@ -3452,12 +3452,12 @@ const _hoisted_341 = { style: {"position":"absolute","right":"0"} }
 const _hoisted_342 = {
   class: "pkm-dark",
   "aria-label": "Ce que ça change pour toi",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
 }
 const _hoisted_343 = {
   class: "pkm-dark",
   "aria-label": "Raccourcis du profil",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_344 = ["onClick"]
 const _hoisted_345 = {
@@ -3539,7 +3539,7 @@ const _hoisted_363 = { style: {"font-size":"13px","font-weight":"600"} }
 const _hoisted_364 = {
   class: "pkm-dark",
   "aria-label": "Les paliers",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_365 = {
   width: "34",
@@ -3555,7 +3555,7 @@ const _hoisted_369 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
 const _hoisted_370 = {
   class: "pkm-dark",
   "aria-label": "Série en cours",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
 }
 const _hoisted_371 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px"} }
 const _hoisted_372 = { style: {"font-family":"'Sora', sans-serif","font-size":"17px","font-weight":"700","color":"var(--pkm-accent)"} }
@@ -3596,7 +3596,7 @@ const _hoisted_383 = {
 const _hoisted_384 = {
   class: "pkm-dark",
   "aria-label": "Valorisation",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_385 = {
   role: "group",
@@ -3608,7 +3608,7 @@ const _hoisted_387 = { style: {"font-size":"12.5px","line-height":"1.45","color"
 const _hoisted_388 = {
   class: "pkm-dark",
   "aria-label": "Sources de prix",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px","color":"var(--pkm-t1)"}
 }
 const _hoisted_389 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_390 = { style: {"font-weight":"600"} }
@@ -3617,7 +3617,7 @@ const _hoisted_392 = { style: {"flex":"none","font-size":"12px","font-weight":"6
 const _hoisted_393 = {
   class: "pkm-dark",
   "aria-label": "Mode avancé",
-  style: {"flex":"none","padding":"20px 18px 18px","border-radius":"26px","border":"1px solid var(--pkm-line-2)","background":"radial-gradient(110% 80% at 50% 0%, rgba(var(--pkm-glow-rgb), 0.26), rgba(var(--pkm-glow-rgb), 0) 65%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","align-items":"center","gap":"12px","text-align":"center"}
+  style: {"flex":"none","padding":"20px 18px 18px","border-radius":"26px","border":"1px solid var(--pkm-line-2)","background":"radial-gradient(110% 80% at 50% 0%, rgba(var(--pkm-glow-rgb), 0.26), rgba(var(--pkm-glow-rgb), 0) 65%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","align-items":"center","gap":"12px","text-align":"center","color":"var(--pkm-t1)"}
 }
 const _hoisted_394 = { style: {"display":"flex","align-items":"center","gap":"6px","padding":"4px 12px","border-radius":"999px","background":"var(--pkm-pearl)","color":"var(--pkm-ink)","font-size":"12px","font-weight":"800","letter-spacing":"0.06em"} }
 const _hoisted_395 = {
@@ -3637,7 +3637,7 @@ const _hoisted_399 = ["onClick", "aria-pressed"]
 const _hoisted_400 = {
   class: "pkm-dark",
   "aria-label": "Frais par plateforme",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
 }
 const _hoisted_401 = { style: {"padding":"3px 10px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","font-size":"13px","font-weight":"600"} }
 const _hoisted_402 = { style: {"font-size":"13px","color":"var(--pkm-t3)","text-align":"right"} }
@@ -3645,7 +3645,7 @@ const _hoisted_403 = ["onClick"]
 const _hoisted_404 = {
   class: "pkm-dark",
   "aria-label": "Outils avancés",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_405 = ["onClick"]
 const _hoisted_406 = { style: {"flex":"none","width":"40px","height":"40px","border-radius":"12px","background":"rgba(var(--pkm-accent-rgb), 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
@@ -3702,7 +3702,7 @@ const _hoisted_420 = {
 const _hoisted_421 = {
   class: "pkm-dark",
   "aria-label": "Ma collection sur cet appareil",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
 }
 const _hoisted_422 = { style: {"margin":"0","font-size":"13px","line-height":"1.5","color":"var(--pkm-t3)"} }
 const _hoisted_423 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
@@ -3711,7 +3711,7 @@ const _hoisted_425 = ["onClick"]
 const _hoisted_426 = {
   class: "pkm-dark",
   "aria-label": "À propos",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"8px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"8px","color":"var(--pkm-t1)"}
 }
 const _hoisted_427 = ["onClick"]
 const _hoisted_428 = {
@@ -3723,7 +3723,7 @@ const _hoisted_429 = ["onClick", "aria-pressed"]
 const _hoisted_430 = {
   class: "pkm-dark",
   "aria-label": "Résumé des ventes",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"10px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.18), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
 }
 const _hoisted_431 = { style: {"display":"flex","align-items":"flex-end","justify-content":"space-between","gap":"12px"} }
 const _hoisted_432 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
@@ -3740,7 +3740,7 @@ const _hoisted_439 = { style: {"display":"flex","align-items":"center","gap":"6p
 const _hoisted_440 = {
   key: 0,
   class: "pkm-dark",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_441 = ["onClick"]
 const _hoisted_442 = ["src", "data-fallback"]
@@ -3764,7 +3764,7 @@ const _hoisted_453 = ["onClick"]
 const _hoisted_454 = {
   class: "pkm-dark",
   "aria-label": "Résultat de la vente",
-  style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"14px"}
+  style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"14px","color":"var(--pkm-t1)"}
 }
 const _hoisted_455 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
 const _hoisted_456 = ["src", "data-fallback"]
@@ -3782,7 +3782,7 @@ const _hoisted_464 = {
 const _hoisted_465 = {
   class: "pkm-dark",
   "aria-label": "Décomposition de la marge",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_466 = { style: {"display":"flex","flex-direction":"column","gap":"11px","font-size":"14px"} }
 const _hoisted_467 = { style: {"display":"flex","justify-content":"space-between","gap":"12px"} }
@@ -3808,7 +3808,7 @@ const _hoisted_483 = { style: {"margin":"0","font-size":"13px","line-height":"1.
 const _hoisted_484 = {
   key: 0,
   class: "pkm-dark",
-  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","min-height":"54px","padding":"0 16px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","font-size":"14px"}
+  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","min-height":"54px","padding":"0 16px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","font-size":"14px","color":"var(--pkm-t1)"}
 }
 const _hoisted_485 = { style: {"font-weight":"700"} }
 const _hoisted_486 = ["onClick"]
@@ -3845,7 +3845,7 @@ const _hoisted_500 = ["onClick", "aria-pressed"]
 const _hoisted_501 = {
   class: "pkm-dark",
   "aria-label": "Carte des magasins",
-  style: {"flex":"none","position":"relative","width":"100%","max-width":"100%","aspect-ratio":"358 / 210","border-radius":"22px","overflow":"hidden","border":"1px solid var(--pkm-line)","background":"#0E1729"}
+  style: {"flex":"none","position":"relative","width":"100%","max-width":"100%","aspect-ratio":"358 / 210","border-radius":"22px","overflow":"hidden","border":"1px solid var(--pkm-line)","background":"#0E1729","color":"var(--pkm-t1)"}
 }
 const _hoisted_502 = ["aria-label"]
 const _hoisted_503 = ["rx", "ry"]
@@ -3870,7 +3870,7 @@ const _hoisted_511 = {
 }
 const _hoisted_512 = {
   class: "pkm-dark",
-  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"flex":"none","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_513 = ["onClick"]
 const _hoisted_514 = { style: {"flex":"none","width":"42px","height":"42px","border-radius":"13px","background":"rgba(var(--pkm-accent-rgb), 0.12)","display":"flex","align-items":"center","justify-content":"center"} }
@@ -3897,7 +3897,7 @@ const _hoisted_525 = { style: {"flex":"none","display":"flex","flex-direction":"
 const _hoisted_526 = {
   class: "pkm-dark",
   "aria-label": "Magasin",
-  style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 90% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_527 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
 const _hoisted_528 = { style: {"flex":"none","width":"52px","height":"52px","border-radius":"16px","background":"rgba(var(--pkm-accent-rgb), 0.14)","display":"flex","align-items":"center","justify-content":"center"} }
@@ -3921,7 +3921,7 @@ const _hoisted_536 = { style: {"margin":"0","font-size":"12.5px","line-height":"
 const _hoisted_537 = {
   class: "pkm-dark",
   "aria-label": "Prochains arrivages",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px","color":"var(--pkm-t1)"}
 }
 const _hoisted_538 = ["onClick", "aria-label"]
 const _hoisted_539 = ["src", "data-fallback"]
@@ -3940,7 +3940,7 @@ const _hoisted_548 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)"} }
 const _hoisted_549 = {
   class: "pkm-dark",
   "aria-label": "Historique des arrivages",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"4px","color":"var(--pkm-t1)"}
 }
 const _hoisted_550 = { style: {"flex":"none","width":"44px","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-t3)"} }
 const _hoisted_551 = { style: {"flex":"1","font-size":"13.5px","line-height":"1.4"} }
@@ -3950,7 +3950,7 @@ const _hoisted_554 = ["onClick"]
 const _hoisted_555 = {
   class: "pkm-dark",
   "aria-label": "Lot",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_556 = { style: {"display":"flex","justify-content":"space-between","align-items":"flex-start","gap":"12px"} }
 const _hoisted_557 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
@@ -3979,7 +3979,7 @@ const _hoisted_575 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_576 = {
   class: "pkm-dark",
   "aria-label": "Effet sur tes marges",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
 }
 const _hoisted_577 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_578 = { style: {"font-size":"14px","font-weight":"600"} }
@@ -3997,7 +3997,7 @@ const _hoisted_589 = { style: {"margin":"0","font-size":"12.5px","color":"var(--
 const _hoisted_590 = {
   class: "pkm-dark",
   "aria-label": "Équipe",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"14px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"14px","color":"var(--pkm-t1)"}
 }
 const _hoisted_591 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_592 = { style: {"font-weight":"600"} }
@@ -4007,7 +4007,7 @@ const _hoisted_595 = { style: {"font-size":"14.5px","font-weight":"700","font-va
 const _hoisted_596 = {
   class: "pkm-dark",
   "aria-label": "Partage de la marge nette",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_597 = {
   role: "group",
@@ -4022,7 +4022,7 @@ const _hoisted_602 = { style: {"margin":"0","padding-top":"10px","border-top":"1
 const _hoisted_603 = {
   class: "pkm-dark",
   "aria-label": "Importer",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_604 = ["onClick"]
 const _hoisted_605 = { style: {"flex":"1","color":"var(--pkm-t3)"} }
@@ -4037,14 +4037,14 @@ const _hoisted_607 = { style: {"flex":"1","font-weight":"600"} }
 const _hoisted_608 = {
   class: "pkm-dark",
   "aria-label": "Exporter",
-  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px"}
+  style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
 const _hoisted_609 = ["onClick"]
 const _hoisted_610 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
 const _hoisted_611 = {
   class: "pkm-dark",
   "aria-label": "Navigation principale",
-  style: {"position":"absolute","left":"14px","right":"14px","bottom":"14px","z-index":"10","height":"68px","box-sizing":"border-box","display":"grid","grid-template-columns":"repeat(5, minmax(0, 1fr))","align-items":"center","padding":"0 6px","border-radius":"26px","border":"1px solid var(--pkm-line)","background":"rgba(var(--pkm-ink-rgb), 0.92)","backdrop-filter":"blur(14px)","-webkit-backdrop-filter":"blur(14px)","box-shadow":"0 14px 34px rgba(var(--pkm-shadow-rgb), 0.5)"}
+  style: {"position":"absolute","left":"14px","right":"14px","bottom":"14px","z-index":"10","height":"68px","box-sizing":"border-box","display":"grid","grid-template-columns":"repeat(5, minmax(0, 1fr))","align-items":"center","padding":"0 6px","border-radius":"26px","border":"1px solid var(--pkm-line)","background":"rgba(var(--pkm-ink-rgb), 0.92)","backdrop-filter":"blur(14px)","-webkit-backdrop-filter":"blur(14px)","box-shadow":"0 14px 34px rgba(var(--pkm-shadow-rgb), 0.5)","color":"var(--pkm-t1)"}
 }
 const _hoisted_612 = ["onClick", "aria-current"]
 const _hoisted_613 = {
@@ -4090,7 +4090,7 @@ const _hoisted_622 = {
   key: 4,
   class: "pkm-dark",
   "aria-label": "Scanner",
-  style: {"position":"absolute","inset":"0","z-index":"15","display":"flex","flex-direction":"column","overflow":"hidden","background":"radial-gradient(90% 60% at 50% 40%, #2B3550 0%, #131A2A 55%, #07090F 100%)"}
+  style: {"position":"absolute","inset":"0","z-index":"15","display":"flex","flex-direction":"column","overflow":"hidden","background":"radial-gradient(90% 60% at 50% 40%, #2B3550 0%, #131A2A 55%, #07090F 100%)","color":"var(--pkm-t1)"}
 }
 const _hoisted_623 = { style: {"position":"relative","display":"flex","align-items":"center","justify-content":"space-between","gap":"10px","padding":"16px 16px 0"} }
 const _hoisted_624 = ["onClick"]
@@ -4105,7 +4105,7 @@ const _hoisted_626 = {
   class: "pkm-dark",
   role: "group",
   "aria-label": "Que scannes-tu ?",
-  style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"3px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.6)","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)"}
+  style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"3px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.6)","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","color":"var(--pkm-t1)"}
 }
 const _hoisted_627 = ["onClick", "aria-pressed"]
 const _hoisted_628 = ["onClick", "aria-pressed"]
@@ -4144,7 +4144,7 @@ const _hoisted_642 = ["src", "alt"]
 const _hoisted_643 = {
   class: "pkm-dark",
   role: "status",
-  style: {"display":"flex","align-items":"center","gap":"8px","max-width":"340px","padding":"9px 14px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.78)","border":"1px solid rgba(var(--pkm-green-rgb), 0.45)","font-size":"13.5px","font-weight":"600"}
+  style: {"display":"flex","align-items":"center","gap":"8px","max-width":"340px","padding":"9px 14px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.78)","border":"1px solid rgba(var(--pkm-green-rgb), 0.45)","font-size":"13.5px","font-weight":"600","color":"var(--pkm-t1)"}
 }
 const _hoisted_644 = { style: {"white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_645 = { style: {"margin-top":"-6px","font-size":"12.5px","color":"var(--pkm-t2)"} }
@@ -4177,7 +4177,7 @@ const _hoisted_656 = ["onClick"]
 const _hoisted_657 = {
   class: "pkm-dark",
   "aria-label": "Résultat du scan",
-  style: {"flex":"none","max-height":"770px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 24px","display":"flex","flex-direction":"column","gap":"14px"}
+  style: {"flex":"none","max-height":"770px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 24px","display":"flex","flex-direction":"column","gap":"14px","color":"var(--pkm-t1)"}
 }
 const _hoisted_658 = { style: {"flex":"none","display":"flex","gap":"14px","align-items":"flex-start"} }
 const _hoisted_659 = ["src", "data-fallback"]
@@ -4198,7 +4198,7 @@ const _hoisted_667 = {
 const _hoisted_668 = {
   class: "pkm-dark",
   "aria-label": "Cote",
-  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)"}
+  style: {"flex":"none","display":"flex","justify-content":"space-between","align-items":"center","gap":"12px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","color":"var(--pkm-t1)"}
 }
 const _hoisted_669 = { style: {"display":"flex","flex-direction":"column","gap":"1px"} }
 const _hoisted_670 = { style: {"font-family":"'Sora', sans-serif","font-size":"30px","line-height":"1.1","font-weight":"700","letter-spacing":"-0.03em"} }
@@ -4224,7 +4224,7 @@ const _hoisted_681 = ["value", "onInput"]
 const _hoisted_682 = { style: {"display":"flex","flex-direction":"column","gap":"6px"} }
 const _hoisted_683 = {
   class: "pkm-dark",
-  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)"}
+  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)"}
 }
 const _hoisted_684 = ["onClick"]
 const _hoisted_685 = {
@@ -4250,7 +4250,7 @@ const _hoisted_689 = { style: {"flex":"none","margin-top":"-6px","font-size":"12
 const _hoisted_690 = {
   class: "pkm-dark",
   "aria-label": "Effet sur ta collection",
-  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
 }
 const _hoisted_691 = {
   width: "40",
@@ -4280,14 +4280,14 @@ const _hoisted_700 = ["onClick"]
 const _hoisted_701 = {
   class: "pkm-dark",
   "aria-label": "Saisie",
-  style: {"flex":"none","max-height":"796px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 26px","display":"flex","flex-direction":"column","gap":"14px"}
+  style: {"flex":"none","max-height":"796px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 26px","display":"flex","flex-direction":"column","gap":"14px","color":"var(--pkm-t1)"}
 }
 const _hoisted_702 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"8px"} }
 const _hoisted_703 = {
   class: "pkm-dark",
   role: "group",
   "aria-label": "Type de saisie",
-  style: {"flex":"1","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"4px","border-radius":"999px","background":"var(--pkm-field)","border":"1px solid var(--pkm-line)"}
+  style: {"flex":"1","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"4px","padding":"4px","border-radius":"999px","background":"var(--pkm-field)","border":"1px solid var(--pkm-line)","color":"var(--pkm-t1)"}
 }
 const _hoisted_704 = ["onClick", "aria-pressed"]
 const _hoisted_705 = ["onClick", "aria-pressed"]
@@ -4314,7 +4314,7 @@ const _hoisted_719 = ["value", "onInput"]
 const _hoisted_720 = { style: {"display":"flex","flex-direction":"column","gap":"6px"} }
 const _hoisted_721 = {
   class: "pkm-dark",
-  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)"}
+  style: {"display":"flex","align-items":"center","height":"52px","box-sizing":"border-box","border":"1px solid var(--pkm-line-2)","border-radius":"16px","background":"var(--pkm-field)","color":"var(--pkm-t1)"}
 }
 const _hoisted_722 = ["onClick"]
 const _hoisted_723 = {
@@ -4391,7 +4391,7 @@ const _hoisted_753 = {
 const _hoisted_754 = ["src", "data-fallback"]
 const _hoisted_755 = {
   class: "pkm-dark",
-  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
 }
 const _hoisted_756 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
 const _hoisted_757 = {
@@ -4428,7 +4428,7 @@ const _hoisted_766 = ["onClick", "aria-pressed"]
 const _hoisted_767 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
 const _hoisted_768 = {
   class: "pkm-dark",
-  style: {"flex":"none","width":"42px","height":"42px","border-radius":"14px","background":"rgba(var(--pkm-ink-rgb), 0.5)","display":"flex","align-items":"center","justify-content":"center"}
+  style: {"flex":"none","width":"42px","height":"42px","border-radius":"14px","background":"rgba(var(--pkm-ink-rgb), 0.5)","display":"flex","align-items":"center","justify-content":"center","color":"var(--pkm-t1)"}
 }
 const _hoisted_769 = ["d"]
 const _hoisted_770 = { style: {"flex":"1","display":"flex","flex-direction":"column"} }
@@ -4457,7 +4457,7 @@ const _hoisted_779 = { style: {"margin":"0","font-size":"15px","line-height":"1.
 const _hoisted_780 = {
   class: "pkm-dark",
   "aria-label": "Ce qu’on a préparé pour toi",
-  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+  style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
 }
 const _hoisted_781 = ["onClick"]
 const _hoisted_782 = { style: {"display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px","margin-top":"-4px"} }
@@ -4482,11 +4482,11 @@ const _hoisted_794 = {
   key: 9,
   class: "pkm-dark",
   "aria-label": "Radar des boutiques",
-  style: {"position":"absolute","inset":"0","z-index":"15","overflow":"hidden","background":"#05080F"}
+  style: {"position":"absolute","inset":"0","z-index":"15","overflow":"hidden","background":"#05080F","color":"var(--pkm-t1)"}
 }
 const _hoisted_795 = {
   class: "pkm-dark",
-  style: {"position":"absolute","left":"0","right":"0","top":"0","z-index":"3","display":"flex","flex-direction":"column","gap":"8px","padding":"14px 14px 10px","background":"linear-gradient(180deg, rgba(var(--pkm-deep-rgb), 0.85), rgba(var(--pkm-deep-rgb), 0))"}
+  style: {"position":"absolute","left":"0","right":"0","top":"0","z-index":"3","display":"flex","flex-direction":"column","gap":"8px","padding":"14px 14px 10px","background":"linear-gradient(180deg, rgba(var(--pkm-deep-rgb), 0.85), rgba(var(--pkm-deep-rgb), 0))","color":"var(--pkm-t1)"}
 }
 const _hoisted_796 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
 const _hoisted_797 = ["onClick"]
@@ -4500,7 +4500,7 @@ const _hoisted_798 = {
 const _hoisted_799 = {
   class: "pkm-dark",
   "aria-label": "Secteur",
-  style: {"flex":"1","min-width":"0","display":"flex","align-items":"center","gap":"0","height":"44px","padding":"0 6px","box-sizing":"border-box","border-radius":"22px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.12)","background":"rgba(var(--pkm-ink-rgb), 0.86)","overflow-x":"auto","scrollbar-width":"none"}
+  style: {"flex":"1","min-width":"0","display":"flex","align-items":"center","gap":"0","height":"44px","padding":"0 6px","box-sizing":"border-box","border-radius":"22px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.12)","background":"rgba(var(--pkm-ink-rgb), 0.86)","overflow-x":"auto","scrollbar-width":"none","color":"var(--pkm-t1)"}
 }
 const _hoisted_800 = {
   key: 0,
@@ -4544,7 +4544,7 @@ const _hoisted_816 = ["onClick", "aria-expanded"]
 const _hoisted_817 = {
   key: 0,
   class: "pkm-dark",
-  style: {"display":"flex","flex-direction":"column","gap":"6px","padding":"12px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)"}
+  style: {"display":"flex","flex-direction":"column","gap":"6px","padding":"12px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","color":"var(--pkm-t1)"}
 }
 const _hoisted_818 = { style: {"color":"var(--pkm-t2)"} }
 const _hoisted_819 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
@@ -4589,7 +4589,7 @@ const _hoisted_836 = {
 const _hoisted_837 = { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }
 const _hoisted_838 = {
   class: "pkm-dark",
-  style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_839 = ["onClick", "aria-label"]
 const _hoisted_840 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
@@ -4600,7 +4600,7 @@ const _hoisted_844 = { style: {"flex":"none","display":"flex","flex-direction":"
 const _hoisted_845 = { style: {"font-size":"12.5px","font-weight":"700","color":"var(--pkm-t2)"} }
 const _hoisted_846 = {
   class: "pkm-dark",
-  style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column"}
+  style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
 const _hoisted_847 = ["onClick", "aria-label"]
 const _hoisted_848 = { style: {"flex":"1","min-width":"0","font-size":"14px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
@@ -4789,7 +4789,7 @@ return function render(_ctx, _cache) {
                         type: "button",
                         onClick: fx.open,
                         "aria-label": _ctx.A(fx.label),
-                        style: {"flex":"none","width":"240px","scroll-snap-align":"start","display":"flex","flex-direction":"column","padding":"0","border":"1px solid var(--pkm-line-3)","border-radius":"20px","overflow":"hidden","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                        style: {"flex":"none","width":"240px","scroll-snap-align":"start","display":"flex","flex-direction":"column","padding":"0","border":"1px solid var(--pkm-line-3)","border-radius":"20px","overflow":"hidden","background":"var(--pkm-card)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
                       }, [
                         _createElementVNode("span", {
                           style: _normalizeStyle(`position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; background: ${fx.bg}`)
@@ -4864,7 +4864,7 @@ return function render(_ctx, _cache) {
               type: "button",
               onClick: _ctx.V.goTiers,
               "aria-label": _ctx.A(_ctx.V.home.tier.aria),
-              style: _normalizeStyle(`flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 16px; border: 1px solid var(--pkm-line); border-radius: 22px; background: radial-gradient(90% 120% at 0% 50%, ${_ctx.V.home.tier.glow}, rgba(var(--pkm-shadow-rgb), 0) 60%), var(--pkm-card); color: inherit; font: inherit; text-align: left; cursor: pointer`)
+              style: _normalizeStyle(`flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 16px; border: 1px solid var(--pkm-line); border-radius: 22px; background: radial-gradient(90% 120% at 0% 50%, ${_ctx.V.home.tier.glow}, rgba(var(--pkm-shadow-rgb), 0) 60%), var(--pkm-card); color: var(--pkm-t1); font: inherit; text-align: left; cursor: pointer`)
             }, [
               (_openBlock(), _createElementBlock("svg", _hoisted_56, [
                 _createElementVNode("path", {
@@ -4899,7 +4899,7 @@ return function render(_ctx, _cache) {
               type: "button",
               onClick: _ctx.V.home.near.open,
               "aria-label": _ctx.A(_ctx.V.home.near.aria),
-              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
             }, [
               _createElementVNode("span", {
                 style: _normalizeStyle(`position: relative; flex: none; width: calc(${_ctx.V.home.near.wk} * 40px); height: calc(${_ctx.V.home.near.hk} * 52px); outline: ${_ctx.V.home.near.ring}; outline-offset: -1.5px; border-radius: 8px; overflow: hidden; background: ${_ctx.V.home.near.bg}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.12)`)
@@ -5002,7 +5002,7 @@ return function render(_ctx, _cache) {
                     class: "pkm-dark",
                     type: "button",
                     onClick: _ctx.V.home.up.open,
-                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
                   }, [
                     _createElementVNode("span", _hoisted_83, _toDisplayString(_ctx.V.home.up.label), 1 /* TEXT */),
                     _createElementVNode("span", _hoisted_84, [
@@ -5050,7 +5050,7 @@ return function render(_ctx, _cache) {
                     class: "pkm-dark",
                     type: "button",
                     onClick: _ctx.V.home.down.open,
-                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
                   }, [
                     _createElementVNode("span", _hoisted_91, _toDisplayString(_ctx.V.home.down.label), 1 /* TEXT */),
                     _createElementVNode("span", _hoisted_92, [
@@ -5184,7 +5184,7 @@ return function render(_ctx, _cache) {
                   class: "pkm-dark",
                   type: "button",
                   onClick: _ctx.V.goSales,
-                  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"14px 14px 14px 16px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                  style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"14px 14px 14px 16px","border":"1px solid var(--pkm-line)","border-radius":"20px","background":"var(--pkm-card)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", _hoisted_116, [
                     (_openBlock(), _createElementBlock("svg", _hoisted_117, [...(_cache[20] || (_cache[20] = [
@@ -5339,7 +5339,7 @@ return function render(_ctx, _cache) {
                   class: "pkm-dark",
                   type: "button",
                   onClick: ci.open,
-                  style: _normalizeStyle(`grid-column: ${ci.col}; display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 12px; border: 1px solid var(--pkm-line); border-radius: 20px; background: var(--pkm-card); color: inherit; font: inherit; text-align: left; cursor: pointer`)
+                  style: _normalizeStyle(`grid-column: ${ci.col}; display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 12px; border: 1px solid var(--pkm-line); border-radius: 20px; background: var(--pkm-card); color: var(--pkm-t1); font: inherit; text-align: left; cursor: pointer`)
                 }, [
                   _createElementVNode("span", {
                     style: _normalizeStyle(`position: relative; display: block; height: ${ci.h}; aspect-ratio: ${ci.ar}; border-radius: 14px; overflow: hidden; background: ${ci.bg}; box-shadow: inset 0 0 0 1px rgba(var(--pkm-hl-rgb), 0.1)`)
@@ -5449,7 +5449,7 @@ return function render(_ctx, _cache) {
                       type: "button",
                       onClick: _ctx.V.it.zoom,
                       "aria-label": _ctx.A(_ctx.V.it.zoomLabel),
-                      style: {"position":"absolute","left":"50%","top":"14px","width":"196px","height":"270px","margin-left":"-98px","padding":"0","border":"0","border-radius":"4.8% / 3.4%","overflow":"hidden","background":"var(--pkm-img-bg)","box-shadow":"0 18px 40px rgba(var(--pkm-shadow-rgb), 0.55)","cursor":"zoom-in"}
+                      style: {"position":"absolute","left":"50%","top":"14px","width":"196px","height":"270px","margin-left":"-98px","padding":"0","border":"0","border-radius":"4.8% / 3.4%","overflow":"hidden","background":"var(--pkm-img-bg)","box-shadow":"0 18px 40px rgba(var(--pkm-shadow-rgb), 0.55)","cursor":"zoom-in","color":"var(--pkm-t1)"}
                     }, [
                       _createElementVNode("img", {
                         src: _ctx.V.it.img,
@@ -5729,7 +5729,7 @@ return function render(_ctx, _cache) {
                         type: "button",
                         onClick: fx.open,
                         "aria-label": _ctx.A(fx.label),
-                        style: {"flex":"none","width":"240px","scroll-snap-align":"start","display":"flex","flex-direction":"column","padding":"0","border":"1px solid var(--pkm-line-3)","border-radius":"20px","overflow":"hidden","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                        style: {"flex":"none","width":"240px","scroll-snap-align":"start","display":"flex","flex-direction":"column","padding":"0","border":"1px solid var(--pkm-line-3)","border-radius":"20px","overflow":"hidden","background":"var(--pkm-card)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
                       }, [
                         _createElementVNode("span", {
                           style: _normalizeStyle(`position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; background: ${fx.bg}`)
@@ -5787,7 +5787,7 @@ return function render(_ctx, _cache) {
                   class: "pkm-dark",
                   type: "button",
                   onClick: _ctx.V.mk.browse.open,
-                  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","min-height":"76px","padding":"10px 14px 10px 12px","border":"1px solid var(--pkm-line-3)","border-radius":"22px","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.24), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-card-hi)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","min-height":"76px","padding":"10px 14px 10px 12px","border":"1px solid var(--pkm-line-3)","border-radius":"22px","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-glow-rgb), 0.24), rgba(var(--pkm-glow-rgb), 0) 62%), var(--pkm-card-hi)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", _hoisted_234, [
                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.mk.browse.fan || []), (bf, bf_i) => {
@@ -5815,7 +5815,7 @@ return function render(_ctx, _cache) {
                   class: "pkm-dark",
                   type: "button",
                   onClick: _ctx.V.mk.sealedBrowse.open,
-                  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","min-height":"76px","padding":"10px 14px 10px 12px","border":"1px solid var(--pkm-line-3)","border-radius":"22px","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-orange-rgb), 0.18), rgba(var(--pkm-orange-rgb), 0) 62%), var(--pkm-card-hi)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                  style: {"flex":"none","display":"flex","align-items":"center","gap":"14px","min-height":"76px","padding":"10px 14px 10px 12px","border":"1px solid var(--pkm-line-3)","border-radius":"22px","background":"radial-gradient(120% 90% at 0% 0%, rgba(var(--pkm-orange-rgb), 0.18), rgba(var(--pkm-orange-rgb), 0) 62%), var(--pkm-card-hi)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", _hoisted_240, [
                     (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.mk.sealedBrowse.fan || []), (sf, sf_i) => {
@@ -5918,7 +5918,7 @@ return function render(_ctx, _cache) {
             _cache[45] || (_cache[45] = _createElementVNode("section", {
               class: "pkm-dark",
               "aria-label": "D’où viennent les prix",
-              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"6px"}
+              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
             }, [
               _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"15px","font-weight":"600"} }, "D’où viennent les prix ?"),
               _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Cardmarket (fichier public quotidien), eBay (API officielle, ventes réussies) et TCGplayer via TCGdex. La cote PKM est la médiane de ces prix « marché ». Vinted et Leboncoin ne sont pas connectés : pas d’API publique, pas de scraping. PKM ne vend rien : c’est un outil de suivi de valeur.")
@@ -6103,7 +6103,7 @@ return function render(_ctx, _cache) {
                   type: "button",
                   onClick: sp.open,
                   "aria-label": _ctx.A(sp.label),
-                  style: {"width":"100%","display":"flex","flex-direction":"column","padding":"0","border":"1px solid var(--pkm-line-3)","border-radius":"20px","overflow":"hidden","background":"var(--pkm-card)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+                  style: {"width":"100%","display":"flex","flex-direction":"column","padding":"0","border":"1px solid var(--pkm-line-3)","border-radius":"20px","overflow":"hidden","background":"var(--pkm-card)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
                 }, [
                   _createElementVNode("span", {
                     style: _normalizeStyle(`position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; background: ${sp.bg}`)
@@ -6381,7 +6381,7 @@ return function render(_ctx, _cache) {
             _createElementVNode("section", {
               class: "pkm-dark",
               "aria-label": "Ton palier",
-              style: _normalizeStyle(`flex: none; padding: 20px 16px 16px; border-radius: 26px; border: 1px solid var(--pkm-line-2); background: radial-gradient(100% 75% at 50% 0%, ${_ctx.V.tr.glow}, rgba(var(--pkm-shadow-rgb), 0) 66%), var(--pkm-card-hi); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center`)
+              style: _normalizeStyle(`flex: none; padding: 20px 16px 16px; border-radius: 26px; border: 1px solid var(--pkm-line-2); background: radial-gradient(100% 75% at 50% 0%, ${_ctx.V.tr.glow}, rgba(var(--pkm-shadow-rgb), 0) 66%), var(--pkm-card-hi); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; color: var(--pkm-t1)`)
             }, [
               (_openBlock(), _createElementBlock("svg", _hoisted_359, [
                 _createElementVNode("path", {
@@ -6460,7 +6460,7 @@ return function render(_ctx, _cache) {
                   return (_openBlock(), _createElementBlock("div", {
                     key: ac_i,
                     class: "pkm-dark",
-                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)"}
+                    style: {"display":"flex","flex-direction":"column","gap":"8px","padding":"12px","border-radius":"18px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","color":"var(--pkm-t1)"}
                   }, [
                     _createElementVNode("span", {
                       style: _normalizeStyle(`width: 34px; height: 34px; border-radius: 11px; background: ${ac.bg}; display: flex; align-items: center; justify-content: center`)
@@ -6921,7 +6921,7 @@ return function render(_ctx, _cache) {
               class: "pkm-dark",
               type: "button",
               onClick: _ctx.V.ter.radar,
-              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line-teal)","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(var(--pkm-teal-rgb), 0.26), rgba(var(--pkm-teal-rgb), 0) 62%), var(--pkm-card-teal)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line-teal)","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(var(--pkm-teal-rgb), 0.14), rgba(var(--pkm-teal-rgb), 0) 62%), var(--pkm-card-teal)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
             }, [
               _cache[112] || (_cache[112] = _createElementVNode("span", {
                 "aria-hidden": "true",
@@ -6947,7 +6947,7 @@ return function render(_ctx, _cache) {
               class: "pkm-dark",
               type: "button",
               onClick: _ctx.V.ter.release.open,
-              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line-3)","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(35, 118, 92, 0.34), rgba(35, 118, 92, 0) 62%), var(--pkm-card-hi)","color":"inherit","font":"inherit","text-align":"left","cursor":"pointer"}
+              style: {"flex":"none","display":"flex","align-items":"center","gap":"12px","padding":"12px 14px","border":"1px solid var(--pkm-line-3)","border-radius":"20px","background":"radial-gradient(120% 140% at 0% 0%, rgba(35, 118, 92, 0.34), rgba(35, 118, 92, 0) 62%), var(--pkm-card-hi)","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
             }, [
               _createElementVNode("span", _hoisted_492, [
                 _createElementVNode("img", {
@@ -7106,7 +7106,7 @@ return function render(_ctx, _cache) {
             _cache[120] || (_cache[120] = _createElementVNode("section", {
               class: "pkm-dark",
               "aria-label": "Comment on estime la probabilité",
-              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"6px"}
+              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"6px","color":"var(--pkm-t1)"}
             }, [
               _createElementVNode("h2", { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"15px","font-weight":"600"} }, "Comment on estime la probabilité ?"),
               _createElementVNode("p", { style: {"margin":"0","font-size":"12.5px","line-height":"1.5","color":"var(--pkm-t3)"} }, "Trois sources : l’annonce du magasin (boutiques partenaires PKM), les signalements des collectionneurs et l’historique des arrivages (jour de la semaine, délai après une sortie). C’est une estimation, pas une garantie de stock. Aucune donnée n’est récupérée sur les sites des enseignes.")
@@ -7345,7 +7345,7 @@ return function render(_ctx, _cache) {
                 key: fe_i,
                 class: "pkm-dark",
                 "aria-label": _ctx.A(fe.label),
-                style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px"}
+                style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","display":"flex","flex-direction":"column","gap":"10px","color":"var(--pkm-t1)"}
               }, [
                 _createElementVNode("h2", _hoisted_581, _toDisplayString(fe.label), 1 /* TEXT */),
                 _createElementVNode("div", _hoisted_582, [
@@ -7521,7 +7521,7 @@ return function render(_ctx, _cache) {
         onClick: _ctx.V.openScan,
         "aria-label": "Scanner une carte ou un produit",
         class: "pkm-anim",
-        style: {"justify-self":"center","width":"62px","height":"62px","margin-top":"-30px","padding":"0","border":"4px solid var(--pkm-scan-ring)","border-radius":"31px","background":"linear-gradient(160deg, var(--pkm-scan-1), var(--pkm-scan-3) 60%, var(--pkm-scan-2))","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer","animation":"pkmPulse 2.6s ease-in-out infinite"}
+        style: {"justify-self":"center","width":"62px","height":"62px","margin-top":"-30px","padding":"0","border":"4px solid var(--pkm-scan-ring)","border-radius":"31px","background":"linear-gradient(160deg, var(--pkm-scan-1), var(--pkm-scan-3) 60%, var(--pkm-scan-2))","color":"var(--pkm-scan-fg)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer","animation":"pkmPulse 2.6s ease-in-out infinite"}
       }, [
         (_openBlock(), _createElementBlock("svg", _hoisted_617, [...(_cache[144] || (_cache[144] = [
           _createElementVNode("path", { d: "M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.6-2.2h5.4L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" }, null, -1 /* CACHED */),
@@ -8129,7 +8129,7 @@ return function render(_ctx, _cache) {
             _createElementVNode("section", {
               class: "pkm-dark",
               "aria-label": _ctx.A(_ctx.V.sh.previewTitle),
-              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"8px"}
+              style: {"flex":"none","padding":"14px 16px","border-radius":"20px","border":"1px solid var(--pkm-line-3)","background":"radial-gradient(120% 100% at 100% 0%, rgba(var(--pkm-glow-rgb), 0.2), rgba(var(--pkm-glow-rgb), 0) 60%), var(--pkm-card-hi)","display":"flex","flex-direction":"column","gap":"8px","color":"var(--pkm-t1)"}
             }, [
               _createElementVNode("div", _hoisted_742, [
                 _createElementVNode("span", _hoisted_743, _toDisplayString(_ctx.V.sh.previewTitle), 1 /* TEXT */),
@@ -8192,7 +8192,7 @@ return function render(_ctx, _cache) {
                   }), 128 /* KEYED_FRAGMENT */)),
                   _cache[175] || (_cache[175] = _createElementVNode("span", {
                     class: "pkm-dark",
-                    style: {"position":"absolute","left":"50%","bottom":"8px","margin-left":"-88px","width":"176px","display":"flex","align-items":"center","justify-content":"center","gap":"8px","padding":"9px 0","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.88)","border":"1px solid var(--pkm-line-3)","font-size":"13px","font-weight":"700"}
+                    style: {"position":"absolute","left":"50%","bottom":"8px","margin-left":"-88px","width":"176px","display":"flex","align-items":"center","justify-content":"center","gap":"8px","padding":"9px 0","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.88)","border":"1px solid var(--pkm-line-3)","font-size":"13px","font-weight":"700","color":"var(--pkm-t1)"}
                   }, [
                     _createElementVNode("span", { style: {"width":"8px","height":"8px","border-radius":"4px","background":"var(--pkm-green)"} }),
                     _createTextVNode("Cote PKM 99,00 €")
@@ -8387,7 +8387,7 @@ return function render(_ctx, _cache) {
           role: "dialog",
           "aria-modal": "true",
           "aria-label": _ctx.A(_ctx.V.zoom.label),
-          style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","flex-direction":"column","align-items":"center","gap":"14px","padding":"70px 18px 28px","box-sizing":"border-box","background":"rgba(var(--pkm-deep-rgb), 0.95)"}
+          style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","flex-direction":"column","align-items":"center","gap":"14px","padding":"70px 18px 28px","box-sizing":"border-box","background":"rgba(var(--pkm-deep-rgb), 0.95)","color":"var(--pkm-t1)"}
         }, [
           _createElementVNode("button", {
             class: "pkm-dark",
@@ -8407,7 +8407,7 @@ return function render(_ctx, _cache) {
               "data-fallback": _ctx.V.zoom.fallback,
               alt: _ctx.V.zoom.name,
               onClick: _ctx.V.zoom.close,
-              style: {"display":"block","max-width":"100%","max-height":"100%","width":"auto","height":"auto","border-radius":"4.8% / 3.4%","background":"var(--pkm-img-bg)","box-shadow":"0 24px 60px rgba(var(--pkm-shadow-rgb), 0.65)","cursor":"zoom-out"}
+              style: {"display":"block","max-width":"100%","max-height":"100%","width":"auto","height":"auto","border-radius":"4.8% / 3.4%","background":"var(--pkm-img-bg)","box-shadow":"0 24px 60px rgba(var(--pkm-shadow-rgb), 0.65)","cursor":"zoom-out","color":"var(--pkm-t1)"}
             }, null, 8 /* PROPS */, _hoisted_789)
           ]),
           _createElementVNode("span", _hoisted_790, [
@@ -8423,7 +8423,7 @@ return function render(_ctx, _cache) {
             class: "pkm-dark",
             id: "pkm-radar-map",
             "aria-hidden": "true",
-            style: {"position":"absolute","inset":"0","background":"radial-gradient(120% 80% at 50% 30%, #0E1A33, #05080F 70%)"}
+            style: {"position":"absolute","inset":"0","background":"radial-gradient(120% 80% at 50% 30%, #0E1A33, #05080F 70%)","color":"var(--pkm-t1)"}
           }, null, -1 /* CACHED */)),
           _createElementVNode("div", _hoisted_795, [
             _createElementVNode("div", _hoisted_796, [
@@ -8484,7 +8484,7 @@ return function render(_ctx, _cache) {
           ]),
           _createElementVNode("div", {
             class: "pkm-dark",
-            style: _normalizeStyle(`position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: ${_ctx.V.rd.sheetMax}; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; border-top: 1px solid var(--pkm-line-3); background: rgba(var(--pkm-app-rgb), 0.97); box-shadow: 0 -18px 40px rgba(var(--pkm-shadow-rgb), 0.5)`)
+            style: _normalizeStyle(`position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: ${_ctx.V.rd.sheetMax}; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; border-top: 1px solid var(--pkm-line-3); background: rgba(var(--pkm-app-rgb), 0.97); box-shadow: 0 -18px 40px rgba(var(--pkm-shadow-rgb), 0.5); color: var(--pkm-t1)`)
           }, [
             _createElementVNode("div", _hoisted_806, [
               (_ctx.V.rd.hasStore)

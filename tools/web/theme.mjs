@@ -19,7 +19,7 @@ export const TOKENS = {
   t1: '#F3F6FC', t2: '#C9D3EA', t3: '#9AA8C3', t4: '#7D8BA8', t5: '#5A6B8C', link: '#B9C5FF', ink: '#0B1120', white: '#FFFFFF',
   // Accent et marque
   accent: '#A8B6FF', 'on-accent': '#0B1120', brand: '#3D63FF', 'scan-1': '#5B7BFF', 'scan-2': '#2F4FE0', 'scan-3': '#3D63FF',
-  'scan-ring': '#0B1120', iris: '#6C84F2', regular: '#A8B6FF',
+  'scan-ring': '#0B1120', 'scan-fg': '#FFFFFF', iris: '#6C84F2', regular: '#A8B6FF',
   // Statuts
   green: '#3DDC84', up: '#3DDC84', down: '#FF6B6B', red: '#FF8A8A', orange: '#F5B14C', amber: '#FFB547', teal: '#5EE0CF',
   gold: '#FFD66B', sand: '#F7C77E', 'sand-2': '#F3D9AE', gray: '#9AA8C3', off: '#56648A', peach: '#FFC9A8',
@@ -30,6 +30,8 @@ export const TOKENS = {
   'choice-bg': '#111A2C', 'choice-bc': '#24345C', 'choice-on-bg': '#1A2645', 'choice-on-bc': '#A8B6FF',
   // Barre du bas
   'nav-on': '#FFFFFF', 'nav-off': '#7D8BA8', 'nav-dot': '#A8B6FF',
+  // Paliers à venir, estompés ; bouton inactif
+  dim: '0.6', 'off-bg': '#26345A',
   // Triplets pour les transparences
   'glow-rgb': '98, 122, 255', 'accent-rgb': '168, 182, 255', 'regular-rgb': '168, 182, 255', 'ink-rgb': '8, 13, 26',
   'app-rgb': '11, 17, 32', 'deep-rgb': '5, 8, 15', 'scrim-rgb': '3, 6, 14', 'hl-rgb': '255, 255, 255', 'shadow-rgb': '0, 0, 0',
@@ -103,6 +105,7 @@ export const RULES = [
   ['fg', '#5A6B8C', 'var(--pkm-t5)'],
   ['fg', '#B9C5FF', 'var(--pkm-link)'],
   ['fg', '#A8B6FF', 'var(--pkm-accent)'],
+  ['fg', '#FFFFFF', 'var(--pkm-scan-fg)', { ctx: /aria-label="Scanner une carte ou un produit"/, n: 1 }],
   ['fg', '#FFFFFF', 'var(--pkm-white)'],
   ['fg', '#5EE0CF', 'var(--pkm-teal)'],
   ['fg', '#F5B14C', 'var(--pkm-orange)'],
@@ -193,7 +196,12 @@ export function themeTemplate(tpl, rules = RULES) {
       });
     };
     const bgDone = decls.map(d => apply(d, true));
-    const all = bgDone.map(d => apply(d, false)).join(';');
+    let all = bgDone.map(d => apply(d, false)).join(';');
+    // Une surface déclare sa couleur de texte : la couleur héritée serait celle calculée sur le fond de l'app.
+    if (surface) {
+      if (/(^|;)\s*color:\s*inherit\b/.test(all)) all = all.replace(/(^|;)(\s*)color:\s*inherit\b/, '$1$2color: var(--pkm-t1)');
+      else if (!/(^|;)\s*color:/.test(all)) all = all.replace(/;?\s*$/, '') + '; color: var(--pkm-t1)';
+    }
     let t = tag.replace(' style="' + style + '"', ' style="' + all + '"');
     if (surface) {
       surfaces++;
@@ -207,16 +215,16 @@ export function themeTemplate(tpl, rules = RULES) {
 }
 
 // Logique de la maquette : couleurs des chaînes, méthode par méthode.
-// - SKIP : méthodes gardées telles quelles (fonds d'extension, drapeaux, fond des cartes, couleurs des paliers) ;
+// - SKIP : méthodes gardées telles quelles (fonds d'extension, drapeaux, fond des cartes) ;
 // - JS_EXACT : retouches exactes, quand une même couleur a deux rôles dans une méthode ;
 // - JS_METHOD : correspondances propres à une méthode ; JS_MAP : correspondances par défaut ;
-// - JS_KEEP : couleurs gardées dans une méthode (lueur de la lampe du scan).
-const SKIP = ['setArt', 'flag', 'look', 'tiers'];
+// - JS_KEEP : couleurs gardées dans une méthode (lueur de la lampe du scan, couleurs des paliers).
+const SKIP = ['setArt', 'flag', 'look'];
 const JS_EXACT = {
   vScan: [["torchFg: s.torch ? '#0B1120'", "torchFg: s.torch ? 'var(--pkm-ink)'"]],
   chip: [["bg: on ? '#26345A' : 'transparent'", "bg: on ? 'var(--pkm-chip-on-bg)' : 'var(--pkm-chip-bg)'"]],
   choice: [["ring: on ? 'inset 0 0 0 1px #A8B6FF' : 'none'", "ring: on ? 'inset 0 0 0 1px var(--pkm-choice-on-bc)' : 'none'"]],
-  vTiers: [["bg: w[k] ? '#A8B6FF' : '#24345C'", "bg: w[k] ? 'var(--pkm-accent)' : 'var(--pkm-track)'"]]
+  vTiers: [["bg: w[k] ? '#A8B6FF' : '#24345C'", "bg: w[k] ? 'var(--pkm-accent)' : 'var(--pkm-track)'"], ["op: i > t.i ? '0.6' : '1'", "op: i > t.i ? 'var(--pkm-dim)' : '1'"]]
 };
 const JS_METHOD = {
   chip: { '#3A4A75': 'var(--pkm-chip-on-bc)', '#2A3A5C': 'var(--pkm-chip-bc)', '#FFFFFF': 'var(--pkm-chip-on-fg)', '#C9D3EA': 'var(--pkm-chip-fg)' },
@@ -225,7 +233,8 @@ const JS_METHOD = {
   probLevel: { '#9AA8C3': 'var(--pkm-gray)' },
   renderVals: { '#3DDC84': 'var(--pkm-up)', '#FFFFFF': 'var(--pkm-nav-on)', '#7D8BA8': 'var(--pkm-nav-off)', '#A8B6FF': 'var(--pkm-nav-dot)' },
   spark: { '#3DDC84': 'var(--pkm-up)' },
-  vSettings: { '#56648A': 'var(--pkm-off)' }
+  vSettings: { '#56648A': 'var(--pkm-off)' },
+  tiers: { '#9AA8C3': 'var(--pkm-t3)' }
 };
 const JS_MAP = {
   '#F3F6FC': 'var(--pkm-t1)', '#C9D3EA': 'var(--pkm-t2)', '#9AA8C3': 'var(--pkm-t3)', '#7D8BA8': 'var(--pkm-t4)', '#B9C5FF': 'var(--pkm-link)',
@@ -236,7 +245,7 @@ const JS_MAP = {
   'rgb(168, 182, 255)': 'rgb:accent', 'rgb(61, 220, 132)': 'rgb:green', 'rgb(245, 177, 76)': 'rgb:orange', 'rgb(154, 168, 195)': 'rgb:gray',
   'rgb(94, 224, 207)': 'rgb:teal', 'rgb(255, 181, 71)': 'rgb:amber', 'rgb(8, 13, 26)': 'rgb:ink'
 };
-const JS_KEEP = { vScan: ['rgb(255, 244, 214)'] };
+const JS_KEEP = { vScan: ['rgb(255, 244, 214)'], tiers: ['#5EE0CF', '#FFD66B', '#E8ECFF', '#FFB547', 'rgb(154, 168, 195)', 'rgb(94, 224, 207)', 'rgb(255, 214, 107)', 'rgb(232, 236, 255)', 'rgb(255, 181, 71)'] };
 
 export function themeScript(js) {
   // Méthodes de la classe : « nom(…) { » à deux espaces, jusqu'à « } » à deux espaces.
@@ -244,7 +253,10 @@ export function themeScript(js) {
   const re = /\n  (\w+)\([^)\n]*\)\s*\{/g;
   let m;
   while ((m = re.exec(js))) {
-    const end = js.indexOf('\n  }', m.index + 1);
+    // Méthode d'une seule ligne (« profRules() { return …; } ») : elle s'arrête au bout de sa ligne.
+    const eol = js.indexOf('\n', m.index + 1), line = js.slice(m.index + 1, eol < 0 ? js.length : eol).replace(/'(?:[^'\\]|\\.)*'/g, "''");
+    const oneLine = (line.match(/\{/g) || []).length === (line.match(/\}/g) || []).length;
+    const end = oneLine ? (eol < 0 ? js.length : eol) : js.indexOf('\n  }', m.index + 1);
     methods.push({ name: m[1], start: m.index, end: end < 0 ? js.length : end });
   }
   const wrong = [], missing = [];
@@ -291,4 +303,58 @@ export function usedTokens(text) {
 // Variables CSS du thème classique.
 export function cssVars(tokens = TOKENS) {
   return ':root { ' + Object.entries(tokens).map(([k, v]) => '--pkm-' + k + ': ' + v + ';').join(' ') + ' }';
+}
+
+// Thème v6 « jaune et verre », par défaut (?theme=classic garde le thème classique).
+// - Ton clair : le fond jaune de l'app et ce qui est posé dessus (titres, liens, puces) : textes bleu nuit.
+// - Ton sombre (.pkm-dark) : cartes, fiches, champs et barre du bas en verre bleu nuit, contour clair,
+//   accent jaune ; contour jaune pour les cartes mises en avant (line-3).
+// Contraste : au moins 4,5:1 pour les textes (vérifié par le test de contraste des écrans).
+export const V6_LIGHT = {
+  app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFCB05 45%, #FFB703 100%)',
+  t1: '#0B1120', t2: '#1F2433', t3: '#33363F', t4: '#41434A', t5: '#41434A', link: '#0A2A88', ink: '#0B1120',
+  accent: '#0B1120', 'on-accent': '#FFD84D', 'accent-rgb': '11, 17, 32', 'glow-rgb': '255, 255, 255', brand: '#0B1120',
+  line: 'rgba(11, 17, 32, 0.16)', 'line-2': 'rgba(11, 17, 32, 0.22)', 'line-3': 'rgba(11, 17, 32, 0.2)', 'line-4': 'rgba(11, 17, 32, 0.32)',
+  track: 'rgba(11, 17, 32, 0.16)',
+  'chip-bg': 'rgba(255, 255, 255, 0.45)', 'chip-bc': 'rgba(11, 17, 32, 0.18)', 'chip-fg': '#1F2433',
+  'chip-on-bg': '#0B1120', 'chip-on-bc': '#0B1120', 'chip-on-fg': '#FFD84D',
+  'choice-bg': 'rgba(255, 255, 255, 0.45)', 'choice-bc': 'rgba(11, 17, 32, 0.18)', 'choice-on-bg': 'rgba(255, 255, 255, 0.85)', 'choice-on-bc': '#0B1120',
+  green: '#054A24', up: '#054A24', down: '#8F1414', red: '#8F1414', orange: '#6B3500', amber: '#6B3500', teal: '#04463F',
+  gold: '#5C4400', sand: '#5C3D00', 'sand-2': '#4D3810', gray: '#41434A', off: '#4D4F57', regular: '#22348F', iris: '#22348F',
+  'shadow-rgb': '70, 45, 0', 'off-bg': 'rgba(11, 17, 32, 0.08)'
+};
+export const V6_DARK = {
+  card: 'rgba(10, 17, 48, 0.9)', 'card-hi': 'rgba(12, 22, 66, 0.94)', 'card-2': 'rgba(8, 14, 40, 0.92)', 'card-teal': 'rgba(4, 32, 44, 0.9)',
+  field: 'rgba(0, 4, 18, 0.55)', toast: 'rgba(10, 17, 48, 0.86)',
+  t1: '#F5F7FC', t2: '#D7DDEA', t3: '#BCC5D9', t4: '#A3AEC6', t5: '#8F9AB4', link: '#FFD84D',
+  accent: '#FFCB05', 'on-accent': '#0B1120', 'accent-rgb': '255, 203, 5', 'glow-rgb': '12, 22, 66', brand: '#0B1120',
+  line: 'rgba(255, 255, 255, 0.14)', 'line-2': 'rgba(255, 255, 255, 0.2)', 'line-3': 'rgba(255, 210, 60, 0.4)', 'line-4': 'rgba(255, 255, 255, 0.3)',
+  track: 'rgba(255, 255, 255, 0.14)',
+  'chip-bg': 'rgba(255, 255, 255, 0.06)', 'chip-bc': 'rgba(255, 255, 255, 0.2)', 'chip-fg': '#D7DDEA',
+  'chip-on-bg': '#FFCB05', 'chip-on-bc': '#FFCB05', 'chip-on-fg': '#0B1120',
+  'choice-bg': 'rgba(255, 255, 255, 0.05)', 'choice-bc': 'rgba(255, 255, 255, 0.16)', 'choice-on-bg': 'rgba(255, 203, 5, 0.14)', 'choice-on-bc': '#FFCB05',
+  'nav-on': '#FFCB05', 'nav-off': '#BCC5D9', 'nav-dot': '#FFCB05',
+  'scan-1': '#FFE45C', 'scan-2': '#F2A900', 'scan-3': '#FFCB05', 'scan-ring': '#0B1120', 'scan-fg': '#0B1120', 'blue-rgb': '255, 203, 5',
+  gray: '#BCC5D9', dim: '0.8', 'off-bg': 'rgba(255, 255, 255, 0.1)'
+};
+// Flou réel seulement sur ce qui passe au-dessus d'un contenu qui défile (au plus 5 éléments par écran) ;
+// sans flou possible, fond opaque.
+const V6_EXTRA = `html:not(.pkm-classic) #app { background: #FFCB05; }
+html:not(.pkm-classic) nav[aria-label="Navigation principale"] { background: rgba(10, 17, 48, 0.8) !important; border-color: rgba(255, 255, 255, 0.16) !important; backdrop-filter: blur(18px) saturate(1.6) !important; -webkit-backdrop-filter: blur(18px) saturate(1.6) !important; }
+html:not(.pkm-classic) section[aria-label="Saisie"], html:not(.pkm-classic) section[aria-label="Résultat du scan"] { background: rgba(10, 17, 48, 0.86) !important; backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); }
+html:not(.pkm-classic) div[role="status"], html:not(.pkm-classic) #pkm-radar-sheet { backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); }
+html:not(.pkm-classic) #pkm-zoom { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html:not(.pkm-classic) nav[aria-label="Navigation principale"], html:not(.pkm-classic) section[aria-label="Saisie"], html:not(.pkm-classic) section[aria-label="Résultat du scan"] { background: #0A1130 !important; }
+  html:not(.pkm-classic) .pkm-dark { --pkm-toast: #0A1130; }
+}
+html:not(.pkm-classic) [aria-label="Scanner une carte ou un produit"] { animation-name: pkmPulseY !important; }
+@keyframes pkmPulseY { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 203, 5, 0.6), 0 10px 24px rgba(160, 100, 0, 0.45); } 50% { box-shadow: 0 0 0 9px rgba(255, 203, 5, 0), 0 10px 24px rgba(160, 100, 0, 0.45); } }`;
+// Le ton sombre reprend toutes les variables redéfinies par le ton clair (sinon une surface hériterait des
+// valeurs du fond jaune).
+export function v6Css() {
+  const keys = [...new Set(Object.keys(V6_LIGHT).concat(Object.keys(V6_DARK)))];
+  const decl = pick => keys.map(k => '--pkm-' + k + ': ' + pick(k) + ';').join(' ');
+  return 'html:not(.pkm-classic) .pkm-root { ' + decl(k => (k in V6_LIGHT ? V6_LIGHT[k] : k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n'
+    + 'html:not(.pkm-classic) .pkm-dark { ' + decl(k => (k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n' + V6_EXTRA;
 }

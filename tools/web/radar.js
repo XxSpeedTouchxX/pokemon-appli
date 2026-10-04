@@ -433,7 +433,7 @@
     };
     if (!ready) {
       r.title = r.error ? 'Boutiques indisponibles' : 'Chargement des boutiques…';
-      return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-chip-on-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Balayer', hasHint: false });
+      return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-off-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Balayer', hasHint: false });
     }
     const rows = RADAR.rows(s), n = s.rlevel === 'france' ? RADAR.stores.length : rows.length;
     const where = s.rlevel === 'france' ? 'France métropolitaine' : s.rlevel === 'region' ? (reg ? reg.nom : '') : s.rlevel === 'dept' ? (dep ? dep.nom + ' (' + dep.code + ')' : '') : 'Autour de toi · ' + s.rkm + ' km';
@@ -471,7 +471,7 @@
     }
     if (s.rlevel === 'france') r.scanLabel = 'Choisis une région';
     r.noScan = !r.canScan;
-    r.scanBg = r.canScan ? 'var(--pkm-accent)' : 'var(--pkm-chip-on-bg)';
+    r.scanBg = r.canScan ? 'var(--pkm-accent)' : 'var(--pkm-off-bg)';
     r.scanFg = r.canScan ? 'var(--pkm-on-accent)' : 'var(--pkm-t4)';
     r.hasHint = !!r.hint && !r.hasResults;
     const sel = s.rstore ? rows.find(x => x.st.id === s.rstore) : null;
