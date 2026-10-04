@@ -1,0 +1,50 @@
+# Boutiques réelles : chaque semaine, liste depuis OpenStreetMap (API Overpass) les boutiques de France
+# métropolitaine susceptibles de vendre des produits Pokémon et publie web/data/stores.json pour l'écran
+# Radar. Données © les contributeurs d'OpenStreetMap (ODbL). La liste n'est pas remplacée si la réponse
+# paraît incomplète.
+name: Boutiques OpenStreetMap
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "23 3 * * 1" # chaque lundi vers 05:23 (heure de Paris en été)
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/stores.yml
+      - tools/stores/sync_stores.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: osm-stores
+  cancel-in-progress: false
+
+jobs:
+  stores:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+
+      - name: Tests
+        run: python3 -m unittest discover -s tools/stores -v
+
+      - name: Boutiques depuis OpenStreetMap
+        run: python3 tools/stores/sync_stores.py
+
+      - name: Publier sur la branche
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data/stores.json
+          if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
+          git commit -m "Met à jour les boutiques OpenStreetMap ($(date -u +%Y-%m-%d))"
+          for i in 1 2 3 4; do
+            git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
