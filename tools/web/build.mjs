@@ -1,4 +1,4 @@
-// Génère la démo web de PKM-App (dossier web/) à partir de la maquette du canevas Design.
+// Génère la démo web de Dropicards, nom de code PKM-App (dossier web/) à partir de la maquette du canevas Design.
 // Source : docs/12-maquette-v5/Main.dc.html (gabarit + logique). Usage : npm ci && npm run build
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -30,6 +30,13 @@ patch('style="flex: none; position: relative; width: 358px; height: 210px;',
 patch('<svg width="358" height="210" viewBox="0 0 358 210"', '<svg width="100%" height="100%" viewBox="0 0 358 210"');
 patch('<svg width="324" height="56" viewBox="0 0 324 56"', '<svg width="100%" height="56" viewBox="0 0 324 56" preserveAspectRatio="none"');
 patch('<svg width="324" height="76" viewBox="0 0 324 76"', '<svg width="100%" height="76" viewBox="0 0 324 76" preserveAspectRatio="none"');
+// Identité Dropicards (2026-10-04) : logo du porteur redessiné en SVG (tools/brand/make_logo.mjs) dans l'en-tête ;
+// la pastille « Marché FR » devient « FR » pour laisser la place au logo sur un écran de 360 px.
+patch(`<span style="display: flex; align-items: center; gap: 8px">
+<span style="width: 30px; height: 30px; border-radius: 10px; background: #3D63FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(61, 99, 255, 0.35)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg></span>
+<span style="font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.03em">PKM</span>
+</span>`, '<span style="display: flex; align-items: center"><img src="img/brand/dropicards-small.svg" alt="Dropicards" width="154" height="30" style="display: block; width: auto; height: 30px"></span>');
+patch('</span>Marché FR</span>', '</span>FR</span>');
 // Catalogue complet (tools/web/catalog.js) : courbe seulement si un historique existe, ajout possible
 // d'une carte sans prix, recherche du Marché sur toutes les cartes.
 patch('<sc-if value="{{ it.hasCote }}" hint-placeholder-val="{{ true }}">\n<div style="display: flex; justify-content: space-between; align-items: baseline;',
@@ -304,6 +311,14 @@ let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
 if (brokenMarks !== 46) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 46');
 
+// Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
+// Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
+const BRAND = 'Dropicards', REBRANDED = 53;
+let rebranded = 0;
+const rebrand = t => t.replace(/PKM-App|\bPKM\b/g, () => { rebranded++; return BRAND; });
+tpl = rebrand(tpl);
+logic = rebrand(logic);
+
 // Thème (tools/web/theme.mjs) : couleurs du gabarit et de la logique en variables CSS, surfaces sombres repérées.
 const themed = themeTemplate(tpl), themedJs = themeScript(logic);
 const themeErrors = themed.missing.concat(themed.wrong, themedJs.missing, themedJs.wrong);
@@ -362,14 +377,10 @@ function toVue(t) {
 const vueTpl = toVue(tpl);
 const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, hoistStatic: true, whitespace: 'condense' });
 
-const catalogJs = readFileSync(fileURLToPath(new URL('./catalog.js', import.meta.url)), 'utf8');
-const persistJs = readFileSync(fileURLToPath(new URL('./persist.js', import.meta.url)), 'utf8');
-const sealedJs = readFileSync(fileURLToPath(new URL('./sealed.js', import.meta.url)), 'utf8');
-const showcaseJs = readFileSync(fileURLToPath(new URL('./showcase.js', import.meta.url)), 'utf8');
-const releasesJs = readFileSync(fileURLToPath(new URL('./releases.js', import.meta.url)), 'utf8');
-const radarCoreJs = readFileSync(fileURLToPath(new URL('./radar-core.js', import.meta.url)), 'utf8');
-const radarJs = readFileSync(fileURLToPath(new URL('./radar.js', import.meta.url)), 'utf8');
-const territoryJs = readFileSync(fileURLToPath(new URL('./territory.js', import.meta.url)), 'utf8');
+const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
+const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
+const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
+if (rebranded !== REBRANDED) throw new Error('Libellés « PKM » renommés : ' + rebranded + ' au lieu de ' + REBRANDED);
 
 const img = Object.fromEntries([
   ['k1', 'card-pikachu-ex'], ['k2', 'card-mega-meganium-ex'], ['k3', 'card-favianos-ex'], ['k4', 'card-jirachi-ex'],
@@ -386,7 +397,7 @@ Object.assign(img, Object.fromEntries([
 const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
-const app = `/* PKM-App · démo web. Fichier généré par tools/web/build.mjs à partir de
+const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
    docs/12-maquette-v5/Main.dc.html : ne pas le modifier à la main. Catalogue réel (web/data/cards.json), collection de démo fictive. */
 (function () {
   'use strict';
@@ -500,7 +511,7 @@ ${code}
 })();
 `;
 
-const style = `/* Démo PKM-App : un seul thème sombre, celui de l'app. Téléphone plein écran ; sur ordinateur, téléphone centré. */
+const style = `/* Démo Dropicards : un seul thème sombre, celui de l'app. Téléphone plein écran ; sur ordinateur, téléphone centré. */
 :root { --ground: #05080F; --app: #0B1120; --ink: #F3F6FC; --muted: #7D8BA8; --accent: #A8B6FF; --bezel: #161E2F; color-scheme: dark; }
 html, body { height: 100%; }
 body { margin: 0; background: var(--ground); color: var(--ink); font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
@@ -526,7 +537,7 @@ const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global
 const THEME_SWITCH = '<script>try { if (/[?&]theme=classic(&|$)/.test(location.search)) { document.documentElement.classList.add(\'pkm-classic\'); var m = document.querySelector(\'meta[name="theme-color"]\'); if (m) m.content = \'#0B1120\'; } } catch (e) {}</script>';
 const body = vue => `<div id="shell">
 <div id="app"></div>
-<p class="pkm-caption">Démo PKM-App · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
+<p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="${vue}"></script>
 <script src="app.js"></script>`;
@@ -537,12 +548,13 @@ const index = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#FFCB05">
+<meta name="theme-color" content="#FFD60A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PKM">
-<title>PKM-App</title>
+<meta name="apple-mobile-web-app-title" content="Dropicards">
+<title>Dropicards</title>
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="img/brand/icon.svg">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 ${THEME_SWITCH}
@@ -558,7 +570,7 @@ ${body(VUE_LOCAL)}
 </html>
 `;
 // Page claude.ai : le squelette (doctype, head, body) est ajouté à la publication.
-const artifact = `<title>PKM-App</title>
+const artifact = `<title>Dropicards</title>
 ${THEME_SWITCH}
 ${fonts}
 <style>

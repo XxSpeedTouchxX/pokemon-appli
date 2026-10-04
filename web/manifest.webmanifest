@@ -1,16 +1,17 @@
 {
-  "name": "PKM-App (démo)",
-  "short_name": "PKM",
-  "description": "Démo de PKM-App : valeur de ta collection Pokémon TCG au prix du marché, catalogue et scellé réels, boutiques autour de toi. Collection de démonstration.",
+  "name": "Dropicards (démo)",
+  "short_name": "Dropicards",
+  "description": "Dropicards, démo : valeur de ta collection Pokémon TCG au prix du marché, catalogue et scellé réels, boutiques autour de toi. Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FFCB05",
-  "theme_color": "#FFCB05",
+  "background_color": "#FFD60A",
+  "theme_color": "#FFD60A",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

@@ -61,7 +61,7 @@ export const RULES = [
   ['bg', '#FFFFFF', 'keep', { ctx: /repeating-linear-gradient\(90deg, #FFFFFF/, n: 2 }], // code-barres du viseur
   ['bg', '#05080F', 'keep', { surface: true, n: 2 }], ['bg', '#0E1A33', 'keep', { n: 1 }], // Radar
   // Fonds
-  ['bg', '#0B1120', 'var(--pkm-app)', { ctx: /class="pkm-root"|aria-label="Bienvenue sur PKM"/, n: 2 }],
+  ['bg', '#0B1120', 'var(--pkm-app)', { ctx: /class="pkm-root"|aria-label="Bienvenue sur Dropicards"/, n: 2 }],
   ['bg', '#0B1120', 'var(--pkm-field)', { surface: true, n: 11 }],
   ['bg', '#111A2C', 'var(--pkm-card)', { surface: true }],
   ['bg', '#121C33', 'var(--pkm-card-hi)', { surface: true }],
@@ -78,7 +78,6 @@ export const RULES = [
   ['bg', '#2A3A5C', 'var(--pkm-line-2)'],
   ['bg', '#1E2B45', 'var(--pkm-line)'],
   ['bg', '#A8B6FF', 'var(--pkm-accent)'],
-  ['bg', '#3D63FF', 'var(--pkm-brand)', { ctx: /width: 30px; height: 30px; border-radius: 10px/, n: 1 }],
   ['bg', '#3D63FF', 'var(--pkm-scan-3)', { ctx: /aria-label="Scanner une carte ou un produit"/, n: 1 }],
   ['bg', '#5B7BFF', 'var(--pkm-scan-1)'], ['bg', '#2F4FE0', 'var(--pkm-scan-2)'],
   ['bg', '#E8ECFF', 'var(--pkm-pearl)'],
@@ -312,7 +311,7 @@ export function cssVars(tokens = TOKENS) {
 //   accent jaune ; contour jaune pour les cartes mises en avant (line-3).
 // Contraste : au moins 4,5:1 pour les textes (vérifié par le test de contraste des écrans).
 export const V6_LIGHT = {
-  app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFCB05 45%, #FFB703 100%)',
+  app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFD60A 45%, #FFB703 100%)',
   t1: '#0B1120', t2: '#1F2433', t3: '#33363F', t4: '#41434A', t5: '#41434A', link: '#0A2A88', ink: '#0B1120',
   accent: '#0B1120', 'on-accent': '#FFD84D', 'accent-rgb': '11, 17, 32', 'glow-rgb': '255, 255, 255', brand: '#0B1120',
   line: 'rgba(11, 17, 32, 0.16)', 'line-2': 'rgba(11, 17, 32, 0.22)', 'line-3': 'rgba(11, 17, 32, 0.2)', 'line-4': 'rgba(11, 17, 32, 0.32)',
@@ -328,19 +327,19 @@ export const V6_DARK = {
   card: 'rgba(10, 17, 48, 0.9)', 'card-hi': 'rgba(12, 22, 66, 0.94)', 'card-2': 'rgba(8, 14, 40, 0.92)', 'card-teal': 'rgba(4, 32, 44, 0.9)',
   field: 'rgba(0, 4, 18, 0.55)', toast: 'rgba(10, 17, 48, 0.86)',
   t1: '#F5F7FC', t2: '#D7DDEA', t3: '#BCC5D9', t4: '#A3AEC6', t5: '#8F9AB4', link: '#FFD84D',
-  accent: '#FFCB05', 'on-accent': '#0B1120', 'accent-rgb': '255, 203, 5', 'glow-rgb': '12, 22, 66', brand: '#0B1120',
+  accent: '#FFD60A', 'on-accent': '#0B1120', 'accent-rgb': '255, 214, 10', 'glow-rgb': '12, 22, 66', brand: '#0B1120',
   line: 'rgba(255, 255, 255, 0.14)', 'line-2': 'rgba(255, 255, 255, 0.2)', 'line-3': 'rgba(255, 210, 60, 0.4)', 'line-4': 'rgba(255, 255, 255, 0.3)',
   track: 'rgba(255, 255, 255, 0.14)',
   'chip-bg': 'rgba(255, 255, 255, 0.06)', 'chip-bc': 'rgba(255, 255, 255, 0.2)', 'chip-fg': '#D7DDEA',
-  'chip-on-bg': '#FFCB05', 'chip-on-bc': '#FFCB05', 'chip-on-fg': '#0B1120',
-  'choice-bg': 'rgba(255, 255, 255, 0.05)', 'choice-bc': 'rgba(255, 255, 255, 0.16)', 'choice-on-bg': 'rgba(255, 203, 5, 0.14)', 'choice-on-bc': '#FFCB05',
-  'nav-on': '#FFCB05', 'nav-off': '#BCC5D9', 'nav-dot': '#FFCB05',
-  'scan-1': '#FFE45C', 'scan-2': '#F2A900', 'scan-3': '#FFCB05', 'scan-ring': '#0B1120', 'scan-fg': '#0B1120', 'blue-rgb': '255, 203, 5',
+  'chip-on-bg': '#FFD60A', 'chip-on-bc': '#FFD60A', 'chip-on-fg': '#0B1120',
+  'choice-bg': 'rgba(255, 255, 255, 0.05)', 'choice-bc': 'rgba(255, 255, 255, 0.16)', 'choice-on-bg': 'rgba(255, 214, 10, 0.14)', 'choice-on-bc': '#FFD60A',
+  'nav-on': '#FFD60A', 'nav-off': '#BCC5D9', 'nav-dot': '#FFD60A',
+  'scan-1': '#FFE45C', 'scan-2': '#F2A900', 'scan-3': '#FFD60A', 'scan-ring': '#0B1120', 'scan-fg': '#0B1120', 'blue-rgb': '255, 214, 10',
   gray: '#BCC5D9', dim: '0.8', 'off-bg': 'rgba(255, 255, 255, 0.1)'
 };
 // Flou réel seulement sur ce qui passe au-dessus d'un contenu qui défile (au plus 5 éléments par écran) ;
 // sans flou possible, fond opaque.
-const V6_EXTRA = `html:not(.pkm-classic) #app { background: #FFCB05; }
+const V6_EXTRA = `html:not(.pkm-classic) #app { background: #FFD60A; }
 html:not(.pkm-classic) nav[aria-label="Navigation principale"] { background: rgba(10, 17, 48, 0.8) !important; border-color: rgba(255, 255, 255, 0.16) !important; backdrop-filter: blur(18px) saturate(1.6) !important; -webkit-backdrop-filter: blur(18px) saturate(1.6) !important; }
 html:not(.pkm-classic) section[aria-label="Saisie"], html:not(.pkm-classic) section[aria-label="Résultat du scan"] { background: rgba(10, 17, 48, 0.86) !important; backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); }
 html:not(.pkm-classic) div[role="status"], html:not(.pkm-classic) #pkm-radar-sheet { backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); }
@@ -350,7 +349,7 @@ html:not(.pkm-classic) #pkm-zoom { backdrop-filter: blur(8px); -webkit-backdrop-
   html:not(.pkm-classic) .pkm-dark { --pkm-toast: #0A1130; }
 }
 html:not(.pkm-classic) [aria-label="Scanner une carte ou un produit"] { animation-name: pkmPulseY !important; }
-@keyframes pkmPulseY { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 203, 5, 0.6), 0 10px 24px rgba(160, 100, 0, 0.45); } 50% { box-shadow: 0 0 0 9px rgba(255, 203, 5, 0), 0 10px 24px rgba(160, 100, 0, 0.45); } }`;
+@keyframes pkmPulseY { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.6), 0 10px 24px rgba(160, 100, 0, 0.45); } 50% { box-shadow: 0 0 0 9px rgba(255, 214, 10, 0), 0 10px 24px rgba(160, 100, 0, 0.45); } }`;
 // Le ton sombre reprend toutes les variables redéfinies par le ton clair (sinon une surface hériterait des
 // valeurs du fond jaune).
 export function v6Css() {

@@ -1,0 +1,14 @@
+{
+  "name": "dropicards-brand",
+  "private": true,
+  "description": "Logo Dropicards redessiné en SVG (lettres Luckiest Guy en tracés) et icônes de l'app.",
+  "type": "module",
+  "scripts": {
+    "logo": "node make_logo.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/luckiest-guy": "5.3.0",
+    "opentype.js": "2.0.0",
+    "playwright-core": "1.56.1"
+  }
+}
