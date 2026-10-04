@@ -1,7 +1,7 @@
 # Boutiques réelles : chaque semaine, liste depuis OpenStreetMap (API Overpass) les boutiques de France
-# métropolitaine susceptibles de vendre des produits Pokémon et publie web/data/stores.json pour l'écran
-# Radar. Données © les contributeurs d'OpenStreetMap (ODbL). La liste n'est pas remplacée si la réponse
-# paraît incomplète.
+# métropolitaine susceptibles de vendre des produits Pokémon, avec leur commune, et publie web/data/stores.json
+# pour Territoire, le Radar et l'accueil. Données © les contributeurs d'OpenStreetMap (ODbL). La liste n'est
+# pas remplacée si la réponse paraît incomplète.
 name: Boutiques OpenStreetMap
 
 on:
@@ -32,6 +32,17 @@ jobs:
 
       - name: Tests
         run: python3 -m unittest discover -s tools/stores -v
+
+      # Ville de chaque boutique : contours des communes (france-geojson, données IGN, Licence Ouverte) et noms
+      # officiels avec leur article (code officiel géographique de l'INSEE, paquet npm @etalab/decoupage-administratif).
+      # Fichiers de travail dans data/ (non publiés). S'ils manquent, les villes viennent d'OpenStreetMap seulement.
+      - name: Communes (contours et noms officiels)
+        run: |
+          mkdir -p data
+          curl -fsSL --retry 3 -o data/communes.geojson https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson \
+            || echo "::warning::Contours des communes indisponibles"
+          curl -fsSL --retry 3 https://registry.npmjs.org/@etalab/decoupage-administratif/-/decoupage-administratif-6.0.0.tgz \
+            | tar -xzO package/data/communes.json > data/communes-noms.json || rm -f data/communes-noms.json
 
       - name: Boutiques depuis OpenStreetMap
         run: python3 tools/stores/sync_stores.py

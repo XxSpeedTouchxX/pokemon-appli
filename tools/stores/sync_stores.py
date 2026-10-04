@@ -11,8 +11,11 @@ Retenu :
 Écarté : boutiques sans nom, fermées, Warhammer, LEGO, puériculture.
 
 Chaque boutique est rattachée à son département (contours de web/data/geo/departements.json, sinon
-code postal). Coordonnées gardées quand la fiche OSM les donne : site, téléphone, horaires (format OSM),
-adresse. Sortie : web/data/stores.json (1 Mo au plus), une boutique par ligne, triée pour des différences lisibles.
+code postal) et à sa commune : addr:city d'OSM, sinon la commune trouvée par la position. Contours des communes :
+france-geojson (données IGN, Licence Ouverte) ; noms officiels, article compris (« Le Havre ») : code officiel
+géographique de l'INSEE (paquet npm @etalab/decoupage-administratif). Les deux fichiers sont téléchargés par le
+workflow dans data/ et ne sont pas publiés. Arrondissement de Paris, Lyon et Marseille d'après le code postal. Coordonnées gardées quand la fiche OSM les donne : site,
+téléphone, horaires (format OSM), adresse. Sortie : web/data/stores.json (1 Mo au plus), une boutique par ligne, triée pour des différences lisibles.
 Données © les contributeurs d'OpenStreetMap, sous licence ODbL : la mention est obligatoire dans l'app.
 
 Usage : python3 tools/stores/sync_stores.py [--input overpass.json]
@@ -32,6 +35,8 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "web" / "data" / "stores.json"
 DEPTS = ROOT / "web" / "data" / "geo" / "departements.json"
+COMMUNES = ROOT / "data" / "communes.geojson"  # gitignorés ; voir .github/workflows/stores.yml
+COMMUNE_NAMES = ROOT / "data" / "communes-noms.json"
 UA = "PKM-App/1.0 (+https://github.com/XxSpeedTouchxX/pokemon-appli)"
 ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter",
              "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]
@@ -144,8 +149,9 @@ def first(value):
     return str(value or "").split(";")[0].strip()
 
 
-def contact(tags):
-    """[site, téléphone, horaires, adresse] nettoyés ; chaîne vide quand l'information manque ou paraît fausse."""
+def contact(tags, city=""):
+    """[site, téléphone, horaires, adresse] nettoyés ; chaîne vide quand l'information manque ou paraît fausse.
+    city : commune trouvée par la position, ajoutée à l'adresse quand la fiche OSM n'en donne pas."""
     site = first(tags.get("website") or tags.get("contact:website") or tags.get("url"))
     if site and not re.match(r"^https?://", site, re.I):
         site = "https://" + site
@@ -158,7 +164,7 @@ def contact(tags):
     if len(hours) > 160:
         hours = ""
     street = " ".join(x for x in (tags.get("addr:housenumber", ""), tags.get("addr:street", "")) if x).strip()
-    place = " ".join(x for x in (tags.get("addr:postcode", ""), tags.get("addr:city", "")) if x).strip()
+    place = " ".join(x for x in (tags.get("addr:postcode", ""), tags.get("addr:city", "") or city) if x).strip()
     address = ", ".join(x for x in (street, place) if x) if street else ""
     return [site, tel, hours, address]
 
@@ -203,6 +209,63 @@ class Departments:
         return best
 
 
+class Communes:
+    """Commune (nom officiel) d'un point, d'après les contours simplifiés des communes, rangés par département.
+    Les contours de france-geojson donnent des noms sans article (« Havre ») : le nom vient du code officiel
+    géographique quand il est fourni (names : liste de {code, nom, type})."""
+
+    def __init__(self, path=COMMUNES, names=COMMUNE_NAMES):
+        official = {}
+        if names and Path(names).exists():
+            for c in json.loads(Path(names).read_text("utf-8")):
+                if c.get("type") == "commune-actuelle" or c["code"] not in official:
+                    official[c["code"]] = c["nom"]
+        self.named = 0
+        self.by_dept = {}
+        for f in json.loads(Path(path).read_text("utf-8"))["features"]:
+            g = f.get("geometry")
+            if not g:
+                continue
+            polys = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"]
+            xs = [x for p in polys for x, _ in p[0]]
+            ys = [y for p in polys for _, y in p[0]]
+            code = f["properties"]["code"]
+            self.named += code in official
+            name = official.get(code) or f["properties"]["nom"]
+            self.by_dept.setdefault(code[:2], []).append((name, (min(xs), min(ys), max(xs), max(ys)), polys))
+
+    def locate(self, lon, lat, dept):
+        items = self.by_dept.get(dept, [])
+        for name, (w, s, e, n), polys in items:
+            if w <= lon <= e and s <= lat <= n and any(sum(ring_inside(lon, lat, r) for r in p) % 2 for p in polys):
+                return name
+        # Hors des contours simplifiés (littoral, limites) : commune la plus proche à moins de 2 km.
+        best, dist = None, 2.0
+        k = math.cos(math.radians(lat))
+        for name, (w, s, e, n), polys in items:
+            if not (w - 0.03 <= lon <= e + 0.03 and s - 0.03 <= lat <= n + 0.03):
+                continue
+            for p in polys:
+                for (x1, y1), (x2, y2) in zip(p[0], p[0][1:]):
+                    d = seg_km(lon, lat, x1, y1, x2, y2, k)
+                    if d < dist:
+                        best, dist = name, d
+        return best
+
+
+ARRONDISSEMENTS = {"paris": ("75", 20), "lyon": ("69", 9), "marseille": ("13", 16)}
+
+
+def with_district(city, postcode):
+    """« Lyon » + 69002 → « Lyon 2e » ; « Paris » + 75116 → « Paris 16e » ; « Marseille » + 13001 → « Marseille 1er »."""
+    a = ARRONDISSEMENTS.get(fold(city))
+    m = re.fullmatch(r"(\d{2})(\d{3})", (postcode or "").strip())
+    if not a or not m or m.group(1) != a[0]:
+        return city
+    n = int(m.group(2)) % 100 if a[0] != "75" or m.group(2) != "116" else 16
+    return f"{city} {n}{'er' if n == 1 else 'e'}" if 1 <= n <= a[1] else city
+
+
 def seg_km(px, py, ax, ay, bx, by, k):
     """Distance en km d'un point à un segment (projection locale)."""
     px, ax, bx = px * k, ax * k, bx * k
@@ -211,7 +274,7 @@ def seg_km(px, py, ax, ay, bx, by, k):
     return math.hypot(ax + t * dx - px, ay + t * dy - py) * 111.2
 
 
-def build(elements, depts):
+def build(elements, depts, communes=None):
     rows, skipped = [], {"écartés": 0, "hors France": 0, "doublons": 0}
     for el in elements:
         tags = el.get("tags") or {}
@@ -227,8 +290,10 @@ def build(elements, depts):
         kind, brand = c
         text = " ".join(str(v) for k, v in tags.items() if k in ("name", "description", "shop", "sells", "games", "trade") or k.startswith("sells:"))
         tcg = 1 if kind == "cartes" or re.search(TCG_HINT, text, re.I) else 0
-        city = tags.get("addr:city") or ""
-        rows.append([el["type"][0] + str(el["id"]), " ".join(tags["name"].split()), kind, round(lat, 4), round(lon, 4), dept, city, brand, tcg] + contact(tags))
+        commune = communes.locate(lon, lat, dept) if communes else None
+        city = with_district(" ".join(str(tags.get("addr:city") or commune or "").split()), tags.get("addr:postcode", ""))
+        rows.append([el["type"][0] + str(el["id"]), " ".join(tags["name"].split()), kind, round(lat, 4), round(lon, 4), dept, city, brand, tcg]
+                    + contact(tags, commune or ""))
     # Doublons : même nom à moins de 100 m (un point et le bâtiment du même magasin, par exemple).
     rows.sort(key=lambda r: (r[0][0] != "w", r[0]))
     out, by_name = [], {}
@@ -270,7 +335,14 @@ def main():
     ap.add_argument("--min-ratio", type=float, default=0.8, help="refuse une liste plus courte que ce ratio de la précédente")
     args = ap.parse_args()
     doc = json.loads(Path(args.input).read_text("utf-8")) if args.input else overpass()
-    rows, skipped = build(doc.get("elements", []), Departments())
+    communes = None
+    if COMMUNES.exists():
+        communes = Communes()
+        total = sum(len(v) for v in communes.by_dept.values())
+        print(f"Communes : {total} contours, {communes.named} noms officiels" + ("" if COMMUNE_NAMES.exists() else f" ({COMMUNE_NAMES} absent)"), flush=True)
+    else:
+        print(f"{COMMUNES} absent : villes tirées d'OpenStreetMap seulement.", flush=True)
+    rows, skipped = build(doc.get("elements", []), Departments(), communes)
     previous = 0
     if OUT.exists():
         try:
@@ -292,6 +364,8 @@ def main():
     print("Par région : " + ", ".join(f"{k} {n}" for k, n in sorted(by_region.items())))
     print(f"Avec un indice cartes / Pokémon : {sum(r[8] for r in rows)}")
     print("Coordonnées : " + ", ".join(f"{k} {sum(1 for r in rows if r[FIELDS.index(k)])}" for k in FIELDS[CONTACT]))
+    district = sum(1 for r in rows if re.search(r" \d+(er|e)$", r[6]))
+    print(f"Avec une ville : {sum(1 for r in rows if r[6])} (dont {district} avec l'arrondissement)")
 
 
 if __name__ == "__main__":

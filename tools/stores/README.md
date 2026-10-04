@@ -15,6 +15,13 @@ Données de l'écran Radar :
   - les boutiques sans nom ou fermées ;
   - Warhammer, LEGO, puériculture.
 - **Rattachement :** chaque boutique est rattachée à son département, d'après les contours, sinon d'après son code postal, sinon d'après le département le plus proche (moins de 3 km).
+- **Ville :** celle de la fiche OpenStreetMap (`addr:city`), sinon la commune où se trouve la boutique.
+  - Contours des communes : `gregoiredavid/france-geojson` (données IGN Admin Express, Licence Ouverte), version complète : en limite de commune, elle fait deux fois moins d'erreurs que la version simplifiée.
+  - Noms officiels, article compris (« Le Havre », pas « Havre ») : code officiel géographique de l'INSEE, paquet npm `@etalab/decoupage-administratif` 6.0.0.
+  - Les deux fichiers sont téléchargés par le workflow dans `data/` (non publié). S'ils manquent, la ville vient d'OpenStreetMap seulement.
+  - Paris, Lyon et Marseille : l'arrondissement vient du code postal (« Lyon 2e », « Paris 16e »).
+  - L'adresse sans ville reçoit la commune (« 23 Quai Jean Moulin, 69002 Lyon »).
+  - Une boutique en limite de deux communes peut recevoir sa voisine : « Signaler une erreur » reste dans la fiche.
 - **Doublons :** un même nom à moins de 100 m (le point et le bâtiment d'un même magasin) n'est gardé qu'une fois.
 - **Prudence :** si la nouvelle liste compte moins de 80 % des boutiques de la précédente, elle est refusée (réponse Overpass incomplète).
 - **Requêtes :** la France est découpée en 6 tuiles. Une seule requête pour tout le pays est refusée quand les serveurs sont chargés (« 504 Gateway Timeout »).

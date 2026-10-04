@@ -2,11 +2,13 @@
 import http.client
 import io
 import json
+import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 import sync_stores
-from sync_stores import FIELDS, MAX_BYTES, Departments, build, classify, contact, render
+from sync_stores import FIELDS, MAX_BYTES, Communes, Departments, build, classify, contact, render, with_district
 
 DEPTS = Departments()
 
@@ -94,6 +96,68 @@ class Build(unittest.TestCase):
         self.assertEqual(rows[0][f["horaires"]], "Tu-Sa 10:00-19:00")
 
 
+def square(code, name, w, s, e, n):
+    return {"type": "Feature", "properties": {"code": code, "nom": name},
+            "geometry": {"type": "Polygon", "coordinates": [[[w, s], [e, s], [e, n], [w, n], [w, s]]]}}
+
+
+def communes(*features, names=None):
+    with tempfile.TemporaryDirectory() as d:
+        path, npath = Path(d) / "communes.geojson", Path(d) / "noms.json"
+        path.write_text(json.dumps({"type": "FeatureCollection", "features": list(features)}), "utf-8")
+        npath.write_text(json.dumps(names or []), "utf-8")
+        return Communes(path, npath if names else None)
+
+
+# Deux communes du Rhône côte à côte (carrés de 0,02° de côté), une de l'Ain, une commune sans contour.
+RHONE = communes(square("69123", "Lyon", 4.82, 45.75, 4.84, 45.77), square("69266", "Villeurbanne", 4.84, 45.75, 4.86, 45.77),
+                 square("01001", "L'Abergement-Clémenciat", 4.82, 45.75, 4.84, 45.77),
+                 {"type": "Feature", "properties": {"code": "69999", "nom": "Sans contour"}, "geometry": None})
+
+
+class Commune(unittest.TestCase):
+    def test_locate(self):
+        self.assertEqual(RHONE.locate(4.83, 45.76, "69"), "Lyon")
+        self.assertEqual(RHONE.locate(4.85, 45.76, "69"), "Villeurbanne")
+        self.assertEqual(RHONE.locate(4.83, 45.76, "01"), "L'Abergement-Clémenciat")  # seules les communes du département
+        self.assertEqual(RHONE.locate(4.83, 45.776, "69"), "Lyon")  # juste au nord (0,7 km) : la plus proche
+        self.assertIsNone(RHONE.locate(4.83, 45.85, "69"))  # à 9 km de toute commune
+        self.assertIsNone(RHONE.locate(4.83, 45.76, "75"))
+
+    def test_official_name(self):
+        # Les contours donnent « Havre » ; le code officiel géographique, « Le Havre ».
+        c = communes(square("76351", "Havre", 0.0, 49.4, 0.2, 49.6),
+                     names=[{"code": "76351", "nom": "Le Havre", "type": "commune-actuelle"}])
+        self.assertEqual(c.locate(0.1, 49.5, "76"), "Le Havre")
+        self.assertEqual(c.named, 1)
+        self.assertEqual(communes(square("76351", "Havre", 0.0, 49.4, 0.2, 49.6)).locate(0.1, 49.5, "76"), "Havre")
+
+    def test_district(self):
+        self.assertEqual(with_district("Lyon", "69002"), "Lyon 2e")
+        self.assertEqual(with_district("Paris", "75116"), "Paris 16e")
+        self.assertEqual(with_district("Paris", "75001"), "Paris 1er")
+        self.assertEqual(with_district("Marseille", "13016"), "Marseille 16e")
+        self.assertEqual(with_district("Lyon", ""), "Lyon")
+        self.assertEqual(with_district("Lyon", "69100"), "Lyon")  # code postal de Villeurbanne : pas d'arrondissement
+        self.assertEqual(with_district("Villeurbanne", "69100"), "Villeurbanne")
+
+    def test_build_city(self):
+        f = {k: i for i, k in enumerate(FIELDS)}
+        elements = [
+            node(1, 45.76, 4.83, name="Game Spirit", shop="video_games", **{"addr:housenumber": "23", "addr:street": "Quai Jean Moulin", "addr:postcode": "69002"}),
+            node(2, 45.76, 4.85, name="Ludik", shop="games", **{"addr:city": "Villeurbanne"}),
+            node(3, 45.76, 4.851, name="Sans ville", shop="toys"),
+        ]
+        rows, _ = build(elements, DEPTS, RHONE)
+        by = {r[0]: r for r in rows}
+        self.assertEqual(by["n1"][f["ville"]], "Lyon 2e")  # commune par la position, arrondissement par le code postal
+        self.assertEqual(by["n1"][f["adresse"]], "23 Quai Jean Moulin, 69002 Lyon")  # adresse complétée par la commune
+        self.assertEqual(by["n2"][f["ville"]], "Villeurbanne")  # addr:city d'OSM d'abord
+        self.assertEqual(by["n3"][f["ville"]], "Villeurbanne")
+        rows, _ = build(elements, DEPTS)  # sans contours : addr:city seulement
+        self.assertEqual({r[0]: r[f["ville"]] for r in rows}, {"n1": "", "n2": "Villeurbanne", "n3": ""})
+
+
 class Contact(unittest.TestCase):
     def test_clean(self):
         site, tel, hours, address = contact({"contact:website": "www.ludik.fr/ ; https://autre.fr", "phone": "04 78 12 34 56;06 00 00 00 00",
@@ -109,10 +173,12 @@ class Contact(unittest.TestCase):
         self.assertEqual(contact({}), ["", "", "", ""])
 
     def test_size_budget(self):
-        # 4 500 boutiques aux coordonnées complètes tiennent dans la limite de taille.
-        row = ["n12345678", "Boutique de cartes du centre", "cartes", 45.7578, 4.832, "69", "Lyon", "", 1,
-               "https://www.boutique-exemple.fr/", "+33 4 78 12 34 56", "Tu-Sa 10:00-12:30,14:00-19:00", "12 Rue de la République, 69002 Lyon"]
-        self.assertLess(len(render([row] * 4500).encode("utf-8")), MAX_BYTES)
+        # 4 500 boutiques (10 % de plus qu'en octobre 2026), toutes avec leur ville, deux tiers avec toutes leurs
+        # coordonnées (en réalité : site 60 %, horaires 69 %, adresse 34 %), tiennent dans la limite de taille.
+        full = ["n12345678", "Boutique de cartes du centre", "cartes", 45.7578, 4.832, "69", "Villeurbanne", "", 1,
+                "https://www.boutique-exemple.fr/", "+33 4 78 12 34 56", "Tu-Sa 10:00-12:30,14:00-19:00", "12 Rue de la République, 69100 Villeurbanne"]
+        bare = full[:9] + ["", "", "", ""]
+        self.assertLess(len(render([full] * 3000 + [bare] * 1500).encode("utf-8")), MAX_BYTES)
 
 
 
