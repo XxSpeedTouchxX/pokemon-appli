@@ -31,10 +31,12 @@ numéro), sinon dans l'extension parente (« swsh9tg » TG01 → « swsh9 » TG0
 Contenu de cards.json :
     sets      { set_id: [nom, série, date de sortie, logo, nombre officiel de cartes, langue des cartes] }
     fields    noms des colonnes de chaque carte
-    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj], ...]
+    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1], ...]
               cm    = tendance Cardmarket (€)      low = plus bas Cardmarket (€, prix demandé)
               avg30 = moyenne Cardmarket 30 jours  tcp = TCGplayer « market », converti en €
               maj   = date de mise à jour des prix Cardmarket
+              avg7, avg1 = moyennes Cardmarket 7 jours et 1 jour (tendance de la collection sur l'accueil)
+              cm et les moyennes viennent de la même variante (normale, sinon holo).
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
               Le chemin commence par la langue du visuel (fr/… ou en/…) ; « ptcg:set/numéro » pour
               pokemontcg.io.
@@ -114,7 +116,10 @@ def prices(card, rate):
                 tcp = round(usd * rate, 2)
                 break
     upd = str(cm.get("updated") or "")[:10] or None
-    return (first(cm, "trend", "trend-holo"), first(cm, "low", "low-holo"), first(cm, "avg30", "avg30-holo"), tcp, upd)
+    # Tendance et moyennes d'une même variante : normale si sa tendance existe, sinon holo.
+    sfx = "" if num(cm.get("trend")) is not None or num(cm.get("trend-holo")) is None else "-holo"
+    trend, avg30, avg7, avg1 = (num(cm.get(k + sfx)) for k in ("trend", "avg30", "avg7", "avg1"))
+    return (trend, first(cm, "low", "low-holo"), avg30, tcp, upd, avg7, avg1)
 
 
 def short_img(url):
@@ -317,8 +322,7 @@ def main():
                 rarity = RARITY_FR.get(rarity.lower(), rarity)
                 stats["cardsEn"] += 1
             rarities[rarity] = rarities.get(rarity, 0) + 1
-            cm, low, avg30, tcp, upd = prices(c, rate)
-            cards.append([cid, r["name"], sid, str(r["local"]), rarity, short_img(img), cm, low, avg30, tcp, upd])
+            cards.append([cid, r["name"], sid, str(r["local"]), rarity, short_img(img), *prices(c, rate)])
 
     for sid, s in fr_sets.items():
         add_set(sid, s, "fr", src)
@@ -352,7 +356,7 @@ def main():
         "img": ASSETS,
         "usdEur": rate, "usdEurDate": rate_day, "usdEurSource": rate_src,
         "sets": sets,
-        "fields": ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd"],
+        "fields": ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1"],
         "stats": stats,
         "rarities": dict(sorted(rarities.items(), key=lambda kv: -kv[1])),
         "cards": cards,

@@ -17,6 +17,7 @@ on:
       - tools/tcgdex/build_index.py
       - tools/tcgdex/ptcg.py
       - tools/tcgdex/test_ptcg.py
+      - tools/tcgdex/test_build_index.py
 
 permissions:
   contents: write

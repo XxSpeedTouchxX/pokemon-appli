@@ -44,7 +44,7 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
    - **Exclu :** les scans récents servis par le CDN commercial Scrydex. La Collection Classique 30ᵉ Anniversaire reste donc dessinée.
    - **Arrêt de l'API pokemontcg.io le 1ᵉʳ mars 2027 :** si une image ne charge plus, l'app passe seule à la carte dessinée.
 4. **Catalogue compact :** `build_index.py` produit `web/data/cards.json`. Ce fichier est chargé par la démo web.
-   - **Pour chaque carte :** l'identifiant, le nom, l'extension, le numéro, la rareté, l'image (le chemin commence par la langue du visuel) et quatre prix (tendance, plus bas et moyenne 30 jours de Cardmarket ; TCGplayer converti en euros).
+   - **Pour chaque carte :** l'identifiant, le nom, l'extension, le numéro, la rareté, l'image (le chemin commence par la langue du visuel) et les prix : tendance, plus bas et moyennes 30, 7 et 1 jours de Cardmarket (tendance et moyennes d'une même variante, normale sinon holo) ; TCGplayer converti en euros. Les moyennes 7 et 1 jours (`avg7`, `avg1`, en fin de ligne) dessinent la tendance de la collection sur l'accueil.
    - **Pour chaque extension :** le nom, la série, la date, le logo, le nombre officiel de cartes et la langue des cartes.
    - Le fichier contient une carte par ligne.
    - Le journal du workflow donne le bilan : cartes, visuels par langue, cartes encore sans visuel par extension.
