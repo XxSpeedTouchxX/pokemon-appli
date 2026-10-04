@@ -95,7 +95,11 @@ afterSection('Visuel', FRAG['item-note']);
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
 // Radar : écran plein écran (carte de France des boutiques réelles), ouvert depuis un bandeau de Territoire.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.radar + '\n<sc-if value="{{ ui.hasToast }}"');
-patch('<button type="button" onClick="{{ ter.release.open }}"', FRAG['territory-radar'] + '<button type="button" onClick="{{ ter.release.open }}"');
+// Territoire : vraies boutiques autour de toi (tools/web/territory.js), puis le Radar ; les magasins partenaires
+// de la maquette passent dans un encadré replié « Démo ».
+patch('<button type="button" onClick="{{ ter.release.open }}"', FRAG['territory-real'] + FRAG['territory-radar']
+  + '<sc-if value="{{ tx.demoOpen }}" hint-placeholder-val="{{ false }}">\n<button type="button" onClick="{{ ter.release.open }}"');
+patch('</section>\n</sc-if>\n\n<sc-if value="{{ ui.isStore }}"', '</section>\n</sc-if>\n</sc-if>\n\n<sc-if value="{{ ui.isStore }}"');
 // Collection : cartes entières dans la grille, message adapté quand elle est vide.
 patchRe(/<img src="\{\{ ci\.img \}\}" alt="" style="position: absolute; left: 50%; top: 14px;[^"]*">/,
   '<img src="{{ ci.img }}" srcset="{{ ci.srcset }}" sizes="114px" alt="" loading="lazy" style="position: absolute; left: 50%; top: 10px; width: 114px; height: 157px; margin-left: -57px; border-radius: 5% / 3.6%; object-fit: cover; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45)">');
@@ -239,6 +243,45 @@ patch(FRAG['market-browse'], `<sc-if value="{{ mk.releasesEntry.show }}" hint-pl
 </button>
 </sc-if>
 ` + FRAG['market-browse']);
+// - Fiche d'une vraie boutique : même gabarit dans le Radar et dans Territoire (écran « shop »).
+const SHOP_BODY = o => `<section aria-label="{{ ${o}.name }}" style="flex: none; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: flex-start; gap: 12px">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 600; letter-spacing: -0.02em">{{ ${o}.name }}</h2>
+<span style="font-size: 13px; color: #C9D3EA">{{ ${o}.kind }}</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ ${o}.place }}</span>
+</span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; white-space: nowrap; color: {{ ${o}.color }}">{{ ${o}.pct }}</span><span style="padding: 2px 9px; border-radius: 999px; background: {{ ${o}.tint }}; color: {{ ${o}.color }}; font-size: 11.5px; font-weight: 800">{{ ${o}.level }}</span></span>
+</div>
+<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ ${o}.note }}</p>
+<button type="button" onClick="{{ ${o}.toggleWhy }}" aria-expanded="{{ ${o}.why }}" style="align-self: flex-start; height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">{{ ${o}.whyLabel }}</button>
+<sc-if value="{{ ${o}.why }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 16px; border: 1px solid #1E2B45; background: #0F1828">
+<sc-for list="{{ ${o}.reasons }}" as="rr" hint-placeholder-count="3">
+<span style="display: flex; align-items: baseline; gap: 10px; font-size: 13px; line-height: 1.4"><span style="flex: none; width: 34px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; color: {{ rr.color }}">{{ rr.sign }}</span><span style="color: #C9D3EA">{{ rr.text }}</span></span>
+</sc-for>
+<span style="font-size: 12px; color: #7D8BA8">{{ ${o}.total }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ ${o}.hasHours }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 11px 14px; border-radius: 16px; border: 1px solid #1E2B45"><span style="font-size: 13.5px; font-weight: 700; color: {{ ${o}.hoursColor }}">{{ ${o}.hoursState }}</span><span style="font-size: 12.5px; line-height: 1.45; color: #C9D3EA">{{ ${o}.hoursText }}</span></div>
+</sc-if>
+<sc-if value="{{ ${o}.hasAddress }}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA">{{ ${o}.address }}</p></sc-if>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
+<a href="{{ ${o}.route }}" target="_blank" rel="noopener noreferrer" style="height: 46px; border-radius: 999px; background: #A8B6FF; color: #0B1120; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none">Itinéraire</a>
+<button type="button" onClick="{{ ${o}.toggleAlert }}" aria-pressed="{{ ${o}.alertOn }}" style="height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: {{ ${o}.alertBg }}; color: {{ ${o}.alertFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ ${o}.alertLabel }}</button>
+<sc-if value="{{ ${o}.hasSite }}" hint-placeholder-val="{{ true }}"><a href="{{ ${o}.site }}" target="_blank" rel="noopener noreferrer" aria-label="{{ ${o}.siteAria }}" style="height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; box-sizing: border-box; color: #F3F6FC; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none">{{ ${o}.siteLabel }}</a></sc-if>
+<sc-if value="{{ ${o}.hasTel }}" hint-placeholder-val="{{ true }}"><a href="{{ ${o}.tel }}" aria-label="{{ ${o}.telAria }}" style="height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; box-sizing: border-box; color: #F3F6FC; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none">{{ ${o}.telLabel }}</a></sc-if>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 4px 18px"><a href="{{ ${o}.osm }}" target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; line-height: 2; color: #B9C5FF">Voir la fiche OpenStreetMap</a><a href="{{ ${o}.report }}" target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; line-height: 2; color: #B9C5FF">Signaler une erreur</a></div>
+</section>`;
+patch('<!-- fiche boutique : rd.st -->', SHOP_BODY('rd.st'));
+patch('<sc-if value="{{ ui.isProfile }}"', `<sc-if value="{{ ui.isShop }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ bq.found }}" hint-placeholder-val="{{ true }}">
+${SHOP_BODY('bq')}
+</sc-if>
+</sc-if>
+<sc-if value="{{ ui.isProfile }}"`);
 // Produits scellés : chaque vignette a une variante « vraie photo » (tools/web/sealed.js), qui remplit son cadre.
 const PHOTO_INLINE = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover">`;
 const PHOTO_FILL = o => `<img src="{{ ${o}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover">`;
@@ -258,7 +301,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 44) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 44');
+if (brokenMarks !== 46) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 46');
 
 // Thème (tools/web/theme.mjs) : couleurs du gabarit et de la logique en variables CSS, surfaces sombres repérées.
 const themed = themeTemplate(tpl), themedJs = themeScript(logic);
@@ -325,6 +368,7 @@ const showcaseJs = readFileSync(fileURLToPath(new URL('./showcase.js', import.me
 const releasesJs = readFileSync(fileURLToPath(new URL('./releases.js', import.meta.url)), 'utf8');
 const radarCoreJs = readFileSync(fileURLToPath(new URL('./radar-core.js', import.meta.url)), 'utf8');
 const radarJs = readFileSync(fileURLToPath(new URL('./radar.js', import.meta.url)), 'utf8');
+const territoryJs = readFileSync(fileURLToPath(new URL('./territory.js', import.meta.url)), 'utf8');
 
 const img = Object.fromEntries([
   ['k1', 'card-pikachu-ex'], ['k2', 'card-mega-meganium-ex'], ['k3', 'card-favianos-ex'], ['k4', 'card-jirachi-ex'],
@@ -338,7 +382,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* PKM-App · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -358,7 +402,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);

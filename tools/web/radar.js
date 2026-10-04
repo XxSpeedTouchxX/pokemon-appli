@@ -48,7 +48,9 @@
       RADAR.regions = rg; RADAR.depts = dp;
       RADAR.stores = st.stores.map(r => {
         const d = RADAR.dept[r[f.dept]] || {};
-        return { id: r[f.id], name: r[f.nom], kind: r[f.type], lat: r[f.lat], lon: r[f.lon], dept: r[f.dept], region: d.region || '', city: r[f.ville] || '', brand: r[f.enseigne] || '', tcg: r[f.cartes] || 0 };
+        return { id: r[f.id], name: r[f.nom], kind: r[f.type], lat: r[f.lat], lon: r[f.lon], dept: r[f.dept], region: d.region || '', city: r[f.ville] || '', brand: r[f.enseigne] || '', tcg: r[f.cartes] || 0,
+          // Coordonnées (absentes des fichiers plus anciens) : site, téléphone, horaires OSM, adresse.
+          site: r[f.site] || '', tel: r[f.tel] || '', hours: r[f.horaires] || '', address: r[f.adresse] || '' };
       });
       RADAR.stores.forEach(x => {
         RADAR.byId[x.id] = x;
@@ -473,22 +475,10 @@
     r.hasHint = !!r.hint && !r.hasResults;
     const sel = s.rstore ? rows.find(x => x.st.id === s.rstore) : null;
     if (sel) {
-      const x = sel, lv = this.probLevel(x.pct), k = RadarCore.KINDS[x.st.kind] || RadarCore.KINDS.collec, on = !!s.alerts['osm:' + x.st.id];
-      const osm = { n: 'node', w: 'way', r: 'relation' }[x.st.id[0]] + '/' + x.st.id.slice(1);
+      // Même fiche que celle de Territoire (tools/web/territory.js), avec un retour à la liste.
       r.hasStore = true;
-      r.st = {
-        name: x.st.name, kind: k.label + (x.st.brand && x.st.brand !== x.st.name ? ' · ' + x.st.brand : ''),
-        place: [x.st.city, (RADAR.dept[x.st.dept] || {}).nom + ' (' + x.st.dept + ')'].filter(Boolean).join(' · ') + (x.dist !== null ? ' · à ' + this.km(Math.round(x.dist * 10) / 10) : ''),
-        pct: x.pct + ' %', level: lv.label, color: lv.color, tint: lv.tint,
-        why: !!s.rwhy, whyLabel: s.rwhy ? 'Masquer le détail' : 'Pourquoi ' + x.pct + ' % ?', toggleWhy: () => this.setState({ rwhy: !s.rwhy }),
-        reasons: x.c.reasons.map(rs => ({ sign: rs.sign, text: rs.text, color: rs.pts > 0 ? 'var(--pkm-green)' : 'var(--pkm-red)' })),
-        total: 'Total ' + x.c.raw + ' points' + (x.c.clamped ? ', ramené entre 5 et 90 %' : '') + ' · arrondi à 5 % près.',
-        route: 'https://www.google.com/maps/dir/?api=1&destination=' + x.st.lat + ',' + x.st.lon,
-        osm: 'https://www.openstreetmap.org/' + osm,
-        alertOn: on, alertLabel: on ? 'Alerte activée' : 'Activer une alerte', toggleAlert: () => this.radarAlert(x.st.id),
-        alertBg: on ? 'var(--pkm-accent)' : 'transparent', alertFg: on ? 'var(--pkm-on-accent)' : 'var(--pkm-t1)',
-        back: () => this.setState({ rstore: '', rwhy: false })
-      };
+      r.st = Object.assign(this.shopInfo(sel.st, sel.c, sel.dist, { why: !!s.rwhy, toggleWhy: () => this.setState({ rwhy: !s.rwhy }) }),
+        { back: () => this.setState({ rstore: '', rwhy: false }) });
     }
     r.notStore = !r.hasStore;
     return r;

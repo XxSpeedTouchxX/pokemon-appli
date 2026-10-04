@@ -227,31 +227,7 @@
 <div id="pkm-radar-sheet" style="flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 12px">
 <sc-if value="{{ rd.hasStore }}" hint-placeholder-val="{{ false }}">
 <button type="button" onClick="{{ rd.st.back }}" style="align-self: flex-start; height: 36px; padding: 0 12px 0 6px; border: 0; border-radius: 18px; background: transparent; color: #B9C5FF; font: inherit; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 2px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M15 5l-7 7 7 7"></path></svg>Résultats</button>
-<section aria-label="{{ rd.st.name }}" style="display: flex; flex-direction: column; gap: 12px">
-<div style="display: flex; align-items: flex-start; gap: 12px">
-<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
-<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 600; letter-spacing: -0.02em">{{ rd.st.name }}</h2>
-<span style="font-size: 13px; color: #C9D3EA">{{ rd.st.kind }}</span>
-<span style="font-size: 12.5px; color: #9AA8C3">{{ rd.st.place }}</span>
-</span>
-<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; color: {{ rd.st.color }}">{{ rd.st.pct }}</span><span style="padding: 2px 9px; border-radius: 999px; background: {{ rd.st.tint }}; color: {{ rd.st.color }}; font-size: 11.5px; font-weight: 800">{{ rd.st.level }}</span></span>
-</div>
-<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">Indice de chance estimé : pas un stock réel. Boutique repérée sur OpenStreetMap, ni partenaire PKM ni arrivage annoncé.</p>
-<button type="button" onClick="{{ rd.st.toggleWhy }}" aria-expanded="{{ rd.st.why }}" style="align-self: flex-start; height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">{{ rd.st.whyLabel }}</button>
-<sc-if value="{{ rd.st.why }}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 16px; border: 1px solid #1E2B45; background: #0F1828">
-<sc-for list="{{ rd.st.reasons }}" as="rr" hint-placeholder-count="3">
-<span style="display: flex; align-items: baseline; gap: 10px; font-size: 13px; line-height: 1.4"><span style="flex: none; width: 34px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; color: {{ rr.color }}">{{ rr.sign }}</span><span style="color: #C9D3EA">{{ rr.text }}</span></span>
-</sc-for>
-<span style="font-size: 12px; color: #7D8BA8">{{ rd.st.total }}</span>
-</div>
-</sc-if>
-<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
-<a href="{{ rd.st.route }}" target="_blank" rel="noopener" style="height: 46px; border-radius: 999px; background: #A8B6FF; color: #0B1120; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none">Itinéraire</a>
-<button type="button" onClick="{{ rd.st.toggleAlert }}" aria-pressed="{{ rd.st.alertOn }}" style="height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: {{ rd.st.alertBg }}; color: {{ rd.st.alertFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ rd.st.alertLabel }}</button>
-</div>
-<a href="{{ rd.st.osm }}" target="_blank" rel="noopener" style="align-self: flex-start; font-size: 12.5px; color: #B9C5FF">Voir la fiche OpenStreetMap</a>
-</section>
+<!-- fiche boutique : rd.st -->
 </sc-if>
 <sc-if value="{{ rd.notStore }}" hint-placeholder-val="{{ true }}">
 <div style="display: flex; flex-direction: column; gap: 2px">
@@ -314,3 +290,102 @@
 </div>
 </section>
 </sc-if>
+
+<!-- fragment: territory-real -->
+<sc-if value="{{ tx.hasNext }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ tx.next.open }}" aria-label="{{ tx.next.aria }}" style="flex: none; display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; border: 1px solid #24345C; border-radius: 20px; background: #121C33; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: none; position: relative; width: 84px; height: 48px; border-radius: 11px; overflow: hidden; background: {{ tx.next.bg }}; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)">
+<sc-if value="{{ tx.next.hasPhoto }}" hint-placeholder-val="{{ true }}"><img src="{{ tx.next.photo }}" alt="" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover"></sc-if>
+<sc-if value="{{ tx.next.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ tx.next.logo }}" alt="" style="position: absolute; left: 10%; top: 12%; width: 80%; height: 76%; object-fit: contain"></sc-if>
+</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<span style="font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #F5B14C">Sortie {{ tx.next.days }}</span>
+<span style="font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tx.next.name }}</span>
+<span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tx.next.sub }}</span>
+</span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</sc-if>
+<section aria-label="Boutiques autour de toi" style="flex: none; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
+<span style="font-size: 12.5px; color: #7D8BA8">Vraies boutiques, d’après OpenStreetMap</span>
+</div>
+<sc-if value="{{ tx.needPos }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 22px; border: 1px solid #24345C; background: #121C33">
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #C9D3EA">{{ tx.intro }}</p>
+<sc-if value="{{ tx.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13px; line-height: 1.45; color: #F7C77E">{{ tx.msg }}</p></sc-if>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button type="button" onClick="{{ tx.locate }}" style="height: 48px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3v3 M12 18v3 M3 12h3 M18 12h3 M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0 -8z"></path></svg>Me localiser</button>
+<button type="button" onClick="{{ tx.radar }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Carte de France</button>
+</div>
+<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">Ta position reste sur ton téléphone : arrondie à 100 m environ, elle n’est ni enregistrée ni envoyée.</p>
+</div>
+</sc-if>
+<sc-if value="{{ tx.loading }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; padding: 16px 0; text-align: center; font-size: 14px; color: #9AA8C3">Chargement des boutiques…</p></sc-if>
+<sc-if value="{{ tx.located }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="Produit recherché" style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px">
+<sc-for list="{{ tx.prods }}" as="tp2" hint-placeholder-count="5">
+<button type="button" onClick="{{ tp2.pick }}" aria-pressed="{{ tp2.on }}" style="flex: none; height: 40px; padding: 0 15px; border-radius: 999px; border: 1px solid {{ tp2.bc }}; background: {{ tp2.bg }}; color: {{ tp2.fg }}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer">{{ tp2.label }}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+<div role="group" aria-label="Rayon autour de toi" style="display: flex; gap: 6px">
+<sc-for list="{{ tx.radii }}" as="tk" hint-placeholder-count="4">
+<button type="button" onClick="{{ tk.pick }}" aria-pressed="{{ tk.on }}" style="flex: none; height: 40px; padding: 0 11px; border-radius: 999px; border: 1px solid {{ tk.bc }}; background: {{ tk.bg }}; color: {{ tk.fg }}; font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer">{{ tk.label }}</button>
+</sc-for>
+</div>
+<div role="group" aria-label="Ordre de la liste" style="display: flex; gap: 6px">
+<sc-for list="{{ tx.sorts }}" as="ts" hint-placeholder-count="2">
+<button type="button" onClick="{{ ts.pick }}" aria-pressed="{{ ts.on }}" style="flex: none; height: 40px; padding: 0 11px; border-radius: 999px; border: 1px solid {{ ts.bc }}; background: {{ ts.bg }}; color: {{ ts.fg }}; font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer">{{ ts.label }}</button>
+</sc-for>
+</div>
+</div>
+<div style="position: relative; width: 100%; aspect-ratio: 358 / 230; border-radius: 22px; overflow: hidden; border: 1px solid #1E2B45; background: #111A2C">
+<svg width="100%" height="100%" viewBox="-179 -115 358 230" aria-hidden="true" style="position: absolute; left: 0; top: 0; display: block">
+<path d="M0 -112 L0 -104" style="fill: none; stroke: #7D8BA8; stroke-width: 1.5; stroke-linecap: round"></path>
+<sc-for list="{{ tx.rings }}" as="rg" hint-placeholder-count="3">
+<circle cx="0" cy="0" r="{{ rg.r }}" style="fill: none; stroke: rgba(168, 182, 255, 0.4); stroke-width: 1; stroke-dasharray: 3 4"></circle>
+<text x="3" y="{{ rg.ly }}" style="fill: #9AA8C3; font-size: 9.5px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif">{{ rg.label }}</text>
+</sc-for>
+</svg>
+<span aria-hidden="true" style="position: absolute; left: 50%; top: 4px; transform: translateX(-50%); font-size: 10px; font-weight: 800; color: #9AA8C3">N</span>
+<span aria-hidden="true" style="position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 7px; background: #A8B6FF; box-shadow: 0 0 0 3px rgba(168, 182, 255, 0.35)"></span>
+<sc-for list="{{ tx.pins }}" as="tpn" hint-placeholder-count="6">
+<button type="button" onClick="{{ tpn.open }}" aria-label="{{ tpn.label }}" style="position: absolute; left: {{ tpn.x }}; top: {{ tpn.y }}; transform: translate(-50%, -50%); min-width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; font: inherit; cursor: pointer">
+<span style="flex: none; white-space: nowrap; height: 22px; box-sizing: border-box; padding: 0 6px; border-radius: 11px; border: 2px solid #0B1120; background: {{ tpn.fill }}; color: #0B1120; display: flex; align-items: center; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45)">{{ tpn.text }}</span>
+</button>
+</sc-for>
+<button type="button" onClick="{{ tx.radar }}" style="position: absolute; right: 8px; bottom: 8px; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #2A3A5C; background: rgba(8, 13, 26, 0.82); color: #F3F6FC; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer">Carte de France</button>
+</div>
+<span style="font-size: 12.5px; color: #7D8BA8">{{ tx.count }}</span>
+<sc-if value="{{ tx.empty }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 0">
+<p style="margin: 0; text-align: center; font-size: 14px; color: #C9D3EA">{{ tx.emptyText }}</p>
+<sc-if value="{{ tx.canWiden }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ tx.widen }}" style="height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ tx.widenLabel }}</button></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ tx.hasRows }}" hint-placeholder-val="{{ true }}">
+<div style="border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-for list="{{ tx.rows }}" as="tw" hint-placeholder-count="6">
+<button type="button" onClick="{{ tw.open }}" aria-label="{{ tw.label }}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 0; border-top: {{ tw.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tw.name }}</span>
+<span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tw.sub }}</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px"><span style="color: #C9D3EA">{{ tw.dist }}</span><sc-if value="{{ tw.hasNow }}" hint-placeholder-val="{{ true }}"><span style="font-weight: 700; color: {{ tw.nowColor }}">{{ tw.now }}</span></sc-if></span>
+</span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px"><span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; white-space: nowrap; color: {{ tw.color }}">{{ tw.pct }}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{ tw.tint }}; color: {{ tw.color }}; font-size: 11px; font-weight: 800">{{ tw.level }}</span></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+</section>
+<section aria-label="Comment on estime la chance" style="flex: none; padding: 14px 16px; border-radius: 20px; border: 1px solid #1E2B45; background: #0F1828; display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600">Comment on estime la chance ?</h2>
+<p style="margin: 0; font-size: 12.5px; line-height: 1.5; color: #9AA8C3">C’est une estimation expliquée, jamais un stock réel : type de boutique (une boutique de cartes avant une grande surface), mention des cartes à collectionner sur sa fiche OpenStreetMap, produit recherché et calendrier des sorties. Chaque fiche détaille les points (« Pourquoi ? »). Les signalements des collectionneurs l’affineront quand un serveur existera.</p>
+</section>
+<button type="button" onClick="{{ tx.toggleDemo }}" aria-expanded="{{ tx.demoOpen }}" style="flex: none; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 14px; border: 1px dashed #3A4A75; border-radius: 18px; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 14px; font-weight: 700">Démo · boutiques partenaires fictives</span><span style="font-size: 12px; color: #9AA8C3">Ce que verrait un collectionneur avec des boutiques partenaires de PKM</span></span>
+<span style="flex: none; font-size: 13px; font-weight: 700; color: #B9C5FF">{{ tx.demoLabel }}</span>
+</button>

@@ -93,10 +93,10 @@ export const RULES = [
   ['line', '#1F5A55', 'var(--pkm-line-teal)'],
   ['line', '#A8B6FF', 'var(--pkm-accent)'],
   ['line', '#0B1120', 'var(--pkm-scan-ring)', { ctx: /aria-label="Scanner une carte ou un produit"/, n: 1 }],
-  ['line', '#0B1120', 'var(--pkm-ink)', { n: 1 }],
+  ['line', '#0B1120', 'var(--pkm-ink)', { n: 2 }],
   ['line', '#FFFFFF', 'var(--pkm-white)'],
   // Textes
-  ['fg', '#0B1120', 'var(--pkm-on-accent)', { bg: 'var(--pkm-accent)', n: 11 }],
+  ['fg', '#0B1120', 'var(--pkm-on-accent)', { bg: 'var(--pkm-accent)', n: 14 }],
   ['fg', '#0B1120', 'var(--pkm-ink)'],
   ['fg', '#F3F6FC', 'var(--pkm-t1)'],
   ['fg', '#C9D3EA', 'var(--pkm-t2)'],
@@ -124,6 +124,7 @@ export const RULES = [
   ['stroke', '#121C33', 'var(--pkm-card-hi)'],
   ['stroke', '#3A4A75', 'var(--pkm-line-4)'],
   ['fill', '#121C33', 'var(--pkm-card-hi)'],
+  ['fill', '#9AA8C3', 'var(--pkm-t3)'],
   // Couleurs de statut, ombres et reflets (toutes transparences)
   ['*', '#3DDC84', 'var(--pkm-green)'],
   ['*', '#F5B14C', 'var(--pkm-orange)'],

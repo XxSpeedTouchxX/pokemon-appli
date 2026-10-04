@@ -78,3 +78,34 @@ test('classement : indice, puis distance, puis nom', () => {
   const rows = R.rank([{ name: 'B', pct: 40, dist: 2 }, { name: 'A', pct: 40, dist: 2 }, { name: 'C', pct: 60, dist: 9 }, { name: 'D', pct: 40, dist: 1 }]);
   assert.deepEqual(rows.map(r => r.name), ['C', 'D', 'A', 'B']);
 });
+
+// Horaires OpenStreetMap.
+const at = (y, m, d, h, n) => new Date(y, m - 1, d, h, n); // 2026-10-05 est un lundi
+
+test('horaires : semaine, plages multiples et jour fermé', () => {
+  const h = R.parseHours('Mo-Fr 09:00-12:00,14:00-18:30; Sa 10:00-19:00; Su off');
+  assert.deepEqual(h.week[0], [[540, 720], [840, 1110]]);
+  assert.deepEqual(h.week[6], []);
+  assert.deepEqual(R.openState(h, at(2026, 10, 5, 10, 0)), { open: true, label: 'Ouvert · ferme à 12 h' });
+  assert.deepEqual(R.openState(h, at(2026, 10, 5, 12, 30)), { open: false, label: 'Fermé · ouvre à 14 h' });
+  assert.deepEqual(R.openState(h, at(2026, 10, 5, 17, 0)), { open: true, label: 'Ouvert · ferme à 18 h 30' });
+  assert.deepEqual(R.openState(h, at(2026, 10, 10, 20, 0)), { open: false, label: 'Fermé · ouvre lun. à 9 h' }); // samedi soir
+  assert.deepEqual(R.openState(h, at(2026, 10, 9, 19, 0)), { open: false, label: 'Fermé · ouvre demain à 10 h' }); // vendredi soir
+});
+
+test('horaires : listes de jours, après minuit, 24/7, jours fériés ignorés', () => {
+  const h = R.parseHours('Tu,Th-Sa 11:00-02:00; PH off');
+  assert.deepEqual(h.week[1], [[660, 1560]]);
+  assert.deepEqual(h.week[0], []);
+  assert.equal(R.openState(h, at(2026, 10, 7, 1, 0)).label, 'Ouvert · ferme à 2 h'); // mercredi 1 h, plage de mardi
+  assert.deepEqual(R.openState(R.parseHours('24/7'), at(2026, 10, 5, 3, 0)), { open: true, label: 'Ouvert 24 h/24' });
+  assert.deepEqual(R.parseHours('10:00-19:00').week.map(r => r.length), [1, 1, 1, 1, 1, 1, 1]);
+});
+
+test('horaires trop complexes : texte brut', () => {
+  for (const t of ['Jan-Mar Mo-Fr 10:00-18:00', 'Mo-Fr sunrise-sunset', 'Mo-Fr 10:00-18:00 "sur rendez-vous"', 'week 1-26 Mo 10:00-12:00', '']) {
+    assert.equal(R.parseHours(t), null, t);
+  }
+  assert.equal(R.openState(null, at(2026, 10, 5, 10, 0)), null);
+  assert.equal(R.hoursText('Mo-Sa 10:00-19:00; Su off'), 'lun.–sam. 10:00–19:00 · dim. fermé');
+});

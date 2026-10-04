@@ -100,6 +100,72 @@
     function rank(rows) {
       return rows.slice().sort((a, b) => b.pct - a.pct || ((a.dist === undefined || a.dist === null ? 1e9 : a.dist) - (b.dist === undefined || b.dist === null ? 1e9 : b.dist)) || String(a.name).localeCompare(String(b.name), 'fr'));
     }
+    // Horaires OpenStreetMap (opening_hours), cas courants : « Mo-Sa 10:00-19:00 », plusieurs plages
+    // (« 09:00-12:00,14:00-18:00 »), plusieurs règles séparées par « ; », jours fermés (« Su off »), « 24/7 ».
+    // Les jours fériés (PH) sont ignorés. Tout le reste (mois, semaines, lever du soleil, commentaires…) : null,
+    // l'app affiche alors le texte brut. Semaine : lundi = 0 ; plages en minutes depuis minuit.
+    const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    const DAY_FR = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
+    function dayList(spec) {
+      const out = [];
+      for (const part of spec.split(',')) {
+        const [a, b] = part.split('-').map(d => DAYS.indexOf(d));
+        if (a < 0 || (b !== undefined && b < 0)) return null;
+        for (let i = a; ; i = (i + 1) % 7) { out.push(i); if (b === undefined || i === b) break; }
+      }
+      return out;
+    }
+    function parseHours(text) {
+      const t = String(text || '').trim();
+      if (!t) return null;
+      if (t === '24/7') return { always: true };
+      const week = [[], [], [], [], [], [], []];
+      for (const rule of t.split(';').map(r => r.trim()).filter(Boolean)) {
+        if (/^PH\b/.test(rule)) continue;
+        const m = rule.match(/^((?:Mo|Tu|We|Th|Fr|Sa|Su)(?:[-,](?:Mo|Tu|We|Th|Fr|Sa|Su))*)?\s*(.*)$/);
+        const days = m && m[1] ? dayList(m[1]) : m ? [0, 1, 2, 3, 4, 5, 6] : null;
+        if (!days) return null;
+        const spec = m[2].trim();
+        let ranges = [];
+        if (!/^(off|closed)$/i.test(spec)) {
+          for (const part of spec.split(',')) {
+            const r = part.trim().match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/);
+            if (!r || +r[1] > 24 || +r[3] > 48 || +r[2] > 59 || +r[4] > 59) return null;
+            const from = +r[1] * 60 + +r[2];
+            let to = +r[3] * 60 + +r[4];
+            if (to <= from) to += 1440; // jusqu'au lendemain
+            ranges.push([from, to]);
+          }
+        }
+        days.forEach(d => { week[d] = ranges; });
+      }
+      return { week: week };
+    }
+    const hm = m => { m %= 1440; const h = Math.floor(m / 60), n = m % 60; return h + ' h' + (n ? ' ' + String(n).padStart(2, '0') : ''); };
+    // Ouvert ou fermé à une date (Date locale) : { open, label } ; null si les horaires sont inconnus.
+    function openState(hours, date) {
+      if (!hours) return null;
+      if (hours.always) return { open: true, label: 'Ouvert 24 h/24' };
+      const d = (date.getDay() + 6) % 7, now = date.getHours() * 60 + date.getMinutes();
+      const prev = hours.week[(d + 6) % 7].find(r => r[1] > 1440 && now < r[1] - 1440);
+      if (prev) return { open: true, label: 'Ouvert · ferme à ' + hm(prev[1]) };
+      const cur = hours.week[d].find(r => now >= r[0] && now < r[1]);
+      if (cur) return { open: true, label: 'Ouvert · ferme à ' + hm(cur[1]) };
+      const later = hours.week[d].filter(r => r[0] > now).sort((a, b) => a[0] - b[0])[0];
+      if (later) return { open: false, label: 'Fermé · ouvre à ' + hm(later[0]) };
+      for (let k = 1; k <= 7; k++) {
+        const next = hours.week[(d + k) % 7].slice().sort((a, b) => a[0] - b[0])[0];
+        if (next) return { open: false, label: 'Fermé · ouvre ' + (k === 1 ? 'demain' : DAY_FR[(d + k) % 7]) + ' à ' + hm(next[0]) };
+      }
+      return { open: false, label: 'Fermé' };
+    }
+    // Horaires lisibles en français : « lun.–sam. 10:00–19:00 · dim. fermé ».
+    function hoursText(text) {
+      return String(text || '').trim()
+        .replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su)\b/g, d => DAY_FR[DAYS.indexOf(d)])
+        .replace(/\bPH\b/g, 'fériés').replace(/\b(off|closed)\b/gi, 'fermé').replace(/24\/7/, '24 h/24, 7 j/7')
+        .replace(/(\d)-(\d)/g, '$1–$2').replace(/\.-/g, '.–').replace(/\s*;\s*/g, ' · ').replace(/,(?=\d)/g, ', ');
+    }
     return { KINDS: KINDS, PRODUCTS: PRODUCTS, chance: chance, releaseContext: releaseContext, distanceKm: distanceKm, bearing: bearing,
-      sweepPlan: sweepPlan, circle: circle, circleBounds: circleBounds, rank: rank };
+      sweepPlan: sweepPlan, circle: circle, circleBounds: circleBounds, rank: rank, parseHours: parseHours, openState: openState, hoursText: hoursText };
   })();
