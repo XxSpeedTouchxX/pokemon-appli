@@ -44,6 +44,15 @@ Pour chaque produit :
 - `img` : vignette officielle ;
 - `cm` : identifiants Cardmarket. Il y en a plusieurs quand le produit existe en plusieurs versions.
 
+Pour la page Sorties de l'app (champs facultatifs) :
+- `dateSource` : source de la date de sortie (`pokemon.com` pour la date officielle ; sinon le site qui l'a publiée) ;
+- `msrp` : prix de lancement constaté, une valeur ou une fourchette `[bas, haut]` en euros. Aucun prix conseillé officiel en euros n'est publié : ce sont des prix relevés en boutique ;
+- `msrpSource` : source de ce prix, obligatoire avec `msrp` ;
+- `amazon` : ASIN de la fiche Amazon.fr, vérifié à la main (10 lettres majuscules et chiffres). C'est sur cette fiche qu'on demande une invitation. Sans ASIN, l'app ouvre la recherche Amazon ;
+- `q` : texte des recherches chez les enseignes (eBay, Fnac, Cultura, Micromania).
+
+Relevés du 2026-10-04 (gamme 30ᵉ Anniversaire et Règne Delta) : poketrack.fr, boostacote.app, pokecop.com.
+
 `demo` relie les produits de la démo (p1 à m4) aux produits réels.
 
 Les displays, le booster 30ᵉ Anniversaire et Règne Delta (6 novembre 2026) ne sont pas dans la galerie : ils n'ont pas de visuel officiel. L'app affiche alors le logo de l'extension.
@@ -58,7 +67,8 @@ Les displays, le booster 30ᵉ Anniversaire et Règne Delta (6 novembre 2026) ne
 - **Cote :** tendance du guide des prix public Cardmarket (`price_guide_6.json`). Le fichier donne aussi la moyenne sur 30 jours et le plus bas.
 - **Plusieurs versions d'un produit :** l'app prend la médiane.
 - **Avant la sortie :** pas de cote ; le prix des précommandes est affiché comme prix demandé.
-- **Guide des prix injoignable :** les prix de la veille sont gardés.
+- **Guide des prix injoignable :** les prix de la veille sont gardés, avec leur date. En local, `--offline` fait de même sans attendre.
+- **Champs de la page Sorties :** recopiés tels quels ; un ASIN mal formé ou un prix sans source est écarté.
 - **Lancement :** chaque jour vers 06:17 (heure de Paris), par le workflow « Catalogue scellé », après les visuels. C'est le seul workflow qui écrit `sealed.json`, ce qui évite les conflits de publication. L'historique git de `sealed.json` sert d'archive quotidienne des prix.
 
 ## Tests
