@@ -1273,16 +1273,60 @@ class Component extends DCLogic {
   // - Images : CDN TCGdex (assets.tcgdex.net), jamais stockées chez nous. Vignettes en low.webp
   //   (245 × 337) ; grilles en low ou high.webp selon l'écran (srcset) ; fiche et zoom en high.png
   //   (600 × 825, sans perte), la meilleure qualité que publie TCGdex.
+  // - Cartes sans scan français : scan anglais pokemontcg.io (734 × 1024, chemins « ptcg: » et « scx: »),
+  //   sinon une autre version TCGdex ; si rien n'existe, une carte « visuel à venir » dessinée par l'app.
+  //   Si une image ne charge plus, data-fallback prend le relais (repli TCGdex, sinon carte dessinée).
   const TCG = { status: 'loading', doc: null, F: null, rows: [], byId: {}, bySet: {}, setList: [], items: {}, saved: {}, fan: [] };
   // Sans accents ni casse ; « Pikachu-ex » se trouve aussi avec « pikachu ex ».
   const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[-‐–]/g, ' ').toLowerCase();
   // Raretés comptées comme « ultra rares » pour le profil automatique (ultra rare et au-dessus).
   const UR_RARITY = /^(ultra rare|chromatique ultra rare|illustration spéciale rare|magnifique rare|hyper rare|méga hyper rare|couronne|rare secrète)$/i;
-  const NO_IMG = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 63 88"><rect width="63" height="88" rx="4" fill="#1A2645"/><text x="31.5" y="52" font-size="26" text-anchor="middle" fill="#7D8BA8" font-family="sans-serif">?</text></svg>');
   const FLAG_EN = 'linear-gradient(90deg, transparent 42%, #C8102E 42% 58%, transparent 58%), linear-gradient(180deg, #012169 38%, #C8102E 38% 62%, #012169 62%)';
   const LIMIT = 40;
   // Langue d'un visuel de repli (même dessin officiel, texte dans une autre langue).
   const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole' };
+  const PTCG = 'https://images.pokemontcg.io/', SCX = 'https://images.scrydex.com/pokemon/';
+  // Adresses d'un visuel selon sa source (chemin de cards.json).
+  function visual(path) {
+    if (!path) return null;
+    if (path.indexOf('ptcg:') === 0) {
+      const b = PTCG + path.slice(5);
+      return { img: b + '.png', hi: b + '_hires.png', srcset: b + '.png 245w, ' + b + '_hires.png 734w', lang: 'EN', credit: 'pokemontcg.io · haute définition (734 × 1024)' };
+    }
+    if (path.indexOf('scx:') === 0) {
+      const b = SCX + path.slice(4);
+      return { img: b + '/small', hi: b + '/large', srcset: '', lang: 'EN', credit: 'Scrydex, via pokemontcg.io · haute définition' };
+    }
+    const b = /^https?:/.test(path) ? path : TCG.doc.img + path;
+    return { img: b + '/low.webp', hi: b + '/high.png', srcset: b + '/low.webp 245w, ' + b + '/high.webp 600w',
+      lang: (/^([a-z]{2})\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · qualité maximale (PNG 600 × 825)' };
+  }
+  // Carte dessinée en attendant un scan officiel : nom, extension, numéro et rareté, aux couleurs PKM.
+  const esc = t => String(t || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+  const wrap = (t, n) => {
+    const lines = [''];
+    String(t || '').split(/\s+/).forEach(w => {
+      const cur = lines[lines.length - 1];
+      if (cur && (cur + ' ' + w).length > n) lines.push(w); else lines[lines.length - 1] = (cur + ' ' + w).trim();
+    });
+    return lines.slice(0, 2);
+  };
+  function drawnCard(p) {
+    const edge = p.ur ? '#FFD66B' : '#A8B6FF';
+    const text = (lines, y, dy, size, attrs) => lines.map((l, i) => '<text x="56" y="' + (y + i * dy) + '" font-size="' + size + '" ' + attrs + '>' + esc(l) + '</text>').join('');
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 825" font-family="Helvetica, Arial, sans-serif">'
+      + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A3B66"/><stop offset="1" stop-color="#0E1729"/></linearGradient></defs>'
+      + '<rect width="600" height="825" rx="28" fill="#0B1120"/>'
+      + '<rect x="16" y="16" width="568" height="793" rx="22" fill="url(#g)" stroke="' + edge + '" stroke-opacity="0.55" stroke-width="5"/>'
+      + text(wrap(p.name, 16), 104, 54, 46, 'font-weight="700" fill="#F3F6FC"')
+      + '<rect x="56" y="230" width="488" height="320" rx="18" fill="#0B1120" fill-opacity="0.55" stroke="' + edge + '" stroke-opacity="0.4" stroke-width="3" stroke-dasharray="14 10"/>'
+      + '<text x="300" y="380" text-anchor="middle" font-size="36" font-weight="700" fill="#C9D3EA">Visuel à venir</text>'
+      + '<text x="300" y="428" text-anchor="middle" font-size="25" fill="#9AA8C3">scan officiel pas encore publié</text>'
+      + text(wrap(p.setName, 28), 618, 40, 30, 'font-weight="700" fill="#F3F6FC"')
+      + text(['n° ' + p.numShort + (p.rarity ? ' · ' + p.rarity : '')], 708, 0, 26, 'fill="#9AA8C3"')
+      + '<text x="544" y="772" text-anchor="end" font-size="34" font-weight="800" fill="' + edge + '">PKM</text></svg>';
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
   const setOf = id => (TCG.doc && TCG.doc.sets[id]) || [id, '', '', '', '', 'fr'];
   // Cote PKM d'une ligne du catalogue : la même règle que cote() (Cardmarket et TCGplayer).
   function coteOf(r, F) { const a = r[F.cm], b = r[F.tcp]; return a && b ? (a + b) / 2 : a || b || 0; }
@@ -1314,8 +1358,7 @@ class Component extends DCLogic {
     if (TCG.items[id]) return TCG.items[id];
     const x = TCG.byId[id];
     if (!x) return TCG.saved[id] || null; // carte enregistrée sur l'appareil, en attendant le catalogue
-    const r = x.r, F = TCG.F, set = setOf(r[F.set]), path = r[F.img] || '';
-    const base = path ? (/^https?:/.test(path) ? path : TCG.doc.img + path) : '';
+    const r = x.r, F = TCG.F, set = setOf(r[F.set]), v = visual(r[F.img] || ''), alt = visual((TCG.doc.alt || {})[id] || '');
     const rarity = r[F.rarity] || '', num = String(r[F.num] || ''), official = set[4] || '';
     const lang = String(set[5] || 'fr').toUpperCase();
     const numShort = num + (official && /^\d+$/.test(num) ? '/' + official : '');
@@ -1325,12 +1368,16 @@ class Component extends DCLogic {
       id: id, tcg: true, type: 'card', code: 'CRT', name: r[F.name], rarity: rarity, ur: UR_RARITY.test(rarity),
       num: num, numShort: numShort, numLabel: 'n° ' + numShort,
       sub: [rarity || 'Rareté non renseignée', set[0], 'n° ' + numShort].join(' · ') + (lang === 'EN' ? ' · EN' : ''),
-      setName: set[0], set: r[F.set], lang: lang, imgLang: base ? (/^([a-z]{2})\//.exec(path) || [0, 'fr'])[1].toUpperCase() : '',
-      img: base ? base + '/low.webp' : NO_IMG, imgHi: base ? base + '/high.png' : NO_IMG,
-      srcset: base ? base + '/low.webp 245w, ' + base + '/high.webp 600w' : '',
+      setName: set[0], set: r[F.set], lang: lang, imgLang: v ? v.lang : '', credit: v ? v.credit : 'Carte dessinée par PKM en attendant le scan officiel',
+      img: v ? v.img : '', imgHi: v ? v.hi : '', srcset: v ? v.srcset : '',
       logo: '', grade: null, release: null,
       cm: r[F.cm], low: r[F.low], ebay: null, tcp: r[F.tcp], avg30: r[F.avg30], upd: r[F.upd], seed: seed
     };
+    const drawn = drawnCard(p);
+    if (!v) { p.img = drawn; p.imgHi = drawn; }
+    // Si le visuel ne charge plus : repli TCGdex (cartes illustrées par pokemontcg.io), sinon carte dessinée.
+    p.fallback = alt ? alt.img : drawn;
+    p.fallbackHi = alt ? alt.hi : drawn;
     TCG.items[id] = p;
     return p;
   };
@@ -1360,7 +1407,7 @@ class Component extends DCLogic {
   const baseHistory = proto.history;
   proto.history = function (p) { return p.tcg ? null : baseHistory.call(this, p); };
   const baseLook = proto.look;
-  proto.look = function (p) { return Object.assign(baseLook.call(this, p), { srcset: p.srcset || '' }); };
+  proto.look = function (p) { return Object.assign(baseLook.call(this, p), { srcset: p.srcset || '', fallback: p.fallback || '' }); };
   const baseFlag = proto.flag;
   proto.flag = function (lang) { return lang === 'EN' ? FLAG_EN : baseFlag.call(this, lang); };
   // « Toutes les cartes » vient du Marché ; une extension, de « Toutes les cartes ».
@@ -1401,7 +1448,7 @@ class Component extends DCLogic {
     if (!q) {
       r.browse = {
         show: true, sub: total + ' cartes · ' + TCG.setList.length + ' extensions · visuels officiels', open: () => this.openSets(),
-        fan: TCG.fan.map((id, i) => ({ img: TCG.item(id).img, top: ['9px', '2px', '9px'][i], left: ['0px', '17px', '34px'][i], rot: ['-10deg', '0deg', '10deg'][i] }))
+        fan: TCG.fan.map((id, i) => ({ img: TCG.item(id).img, fallback: TCG.item(id).fallback, top: ['9px', '2px', '9px'][i], left: ['0px', '17px', '34px'][i], rot: ['-10deg', '0deg', '10deg'][i] }))
       };
     }
     if (q.length < 2 || s.mfilter === 'soon') { r.count = r.count + ' · cherche parmi ' + total + ' cartes'; return r; }
@@ -1478,7 +1525,7 @@ class Component extends DCLogic {
       notes.push(foreign.length + (foreign.length > 1 ? ' visuels viennent de la version ' : ' visuel vient de la version ') + versions.join(', ')
         + ' : même dessin officiel, le scan ' + (e.lang === 'EN' ? 'anglais' : 'français') + ' n’est pas encore disponible.');
     }
-    if (noImgs) notes.push(noImgs + (noImgs > 1 ? ' cartes n’ont' : ' carte n’a') + ' pas encore de visuel chez TCGdex.');
+    if (noImgs) notes.push(noImgs + (noImgs > 1 ? ' cartes n’ont' : ' carte n’a') + ' pas encore de scan officiel : PKM les dessine en attendant.');
     const defs = [['all', 'Toutes · ' + all.length], ['top', 'Les plus chères'], ['ur', 'Ultra rares · ' + nUr], ['own', 'À toi · ' + mine.length]];
     return {
       title: e.name, subtitle: [e.serie, e.date ? this.d3(e.date) : '', e.lang === 'EN' ? 'EN' : ''].filter(Boolean).join(' · '),
@@ -1492,7 +1539,7 @@ class Component extends DCLogic {
       cards: shown.map(p => {
         const k = this.cote(p), q = qty(p);
         return {
-          img: p.img, srcset: p.srcset, name: p.name, num: p.numShort, owned: q > 0, qty: '×' + q,
+          img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: p.numShort, owned: q > 0, qty: '×' + q,
           cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), coteColor: k === null ? '#7D8BA8' : '#F3F6FC',
           label: p.name + ', ' + p.numLabel + (k !== null ? ', cote ' + this.eur(k) : ', sans prix') + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
@@ -1509,6 +1556,8 @@ class Component extends DCLogic {
     it.upcoming = it.noCote && !p.tcg;
     // Carte entière en qualité maximale, agrandissable.
     it.zoomImg = hiOf(p);
+    it.fallbackHi = p.fallbackHi || '';
+    it.zoomCredit = p.tcg ? (p.imgLang ? 'Visuel officiel via ' + p.credit : p.credit) : 'Visuel officiel via TCGdex · qualité maximale (PNG 600 × 825)';
     if (it.plainCard) it.img = it.zoomImg;
     it.zoom = () => this.setState({ zoom: p.id });
     it.zoomLabel = 'Agrandir la carte ' + p.name;
@@ -1524,7 +1573,7 @@ class Component extends DCLogic {
       if (it.hasCote) it.change = 'Courbe après quelques jours d’archivage';
       const notes = [];
       if (p.lang === 'EN') notes.push('Carte en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.');
-      if (!p.imgLang) notes.push('Pas encore de visuel pour cette carte chez TCGdex.');
+      if (!p.imgLang) notes.push('Pas encore de scan officiel pour cette carte : PKM affiche une carte dessinée en attendant.');
       else if (p.imgLang !== p.lang) notes.push('Visuel de la version ' + (VERSION[p.imgLang] || p.imgLang) + ' (même dessin officiel) : le scan ' + (p.lang === 'EN' ? 'anglais' : 'français') + ' de cette carte n’est pas encore disponible.');
       it.imgNote = notes.join(' ');
       it.hasImgNote = it.imgNote !== '';
@@ -1551,7 +1600,7 @@ class Component extends DCLogic {
     ui.zoomOpen = !!s.zoom && s.zoom === s.itemId && ui.isItem && !!r.it.plainCard;
     r.zoom = {
       img: r.it.zoomImg || '', name: r.it.name, sub: r.it.sub, label: 'Carte ' + r.it.name + ' en grand',
-      credit: 'Visuel officiel via TCGdex · qualité maximale (PNG 600 × 825)' + (r.it.zoomVersion ? ' · version ' + r.it.zoomVersion : ''),
+      credit: (r.it.zoomCredit || '') + (r.it.zoomVersion ? ' · version ' + r.it.zoomVersion : ''), fallback: r.it.fallbackHi || '',
       close: () => this.setState({ zoom: null })
     };
     return r;
@@ -1799,7 +1848,7 @@ const _hoisted_49 = {
   style: {"flex":"none","fill":"none","stroke":"#7D8BA8","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_50 = ["onClick", "aria-label"]
-const _hoisted_51 = ["src"]
+const _hoisted_51 = ["src", "data-fallback"]
 const _hoisted_52 = ["src"]
 const _hoisted_53 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"1px"} }
 const _hoisted_54 = { style: {"display":"flex","align-items":"center","gap":"6px","font-size":"12px","font-weight":"700","color":"#5EE0CF"} }
@@ -1844,14 +1893,14 @@ const _hoisted_66 = {
 const _hoisted_67 = ["onClick"]
 const _hoisted_68 = { style: {"font-size":"12px","color":"#9AA8C3"} }
 const _hoisted_69 = { style: {"display":"flex","align-items":"center","gap":"10px","min-width":"0"} }
-const _hoisted_70 = ["src"]
+const _hoisted_70 = ["src", "data-fallback"]
 const _hoisted_71 = ["src"]
 const _hoisted_72 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
 const _hoisted_73 = { style: {"font-size":"13.5px","font-weight":"700","line-height":"1.25","display":"-webkit-box","-webkit-line-clamp":"2","-webkit-box-orient":"vertical","overflow":"hidden"} }
 const _hoisted_74 = ["onClick"]
 const _hoisted_75 = { style: {"font-size":"12px","color":"#9AA8C3"} }
 const _hoisted_76 = { style: {"display":"flex","align-items":"center","gap":"10px","min-width":"0"} }
-const _hoisted_77 = ["src"]
+const _hoisted_77 = ["src", "data-fallback"]
 const _hoisted_78 = ["src"]
 const _hoisted_79 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
 const _hoisted_80 = { style: {"font-size":"13.5px","font-weight":"700","line-height":"1.25","display":"-webkit-box","-webkit-line-clamp":"2","-webkit-box-orient":"vertical","overflow":"hidden"} }
@@ -1864,9 +1913,9 @@ const _hoisted_82 = { style: {"display":"flex","align-items":"center","justify-c
 const _hoisted_83 = ["onClick"]
 const _hoisted_84 = { style: {"display":"flex","gap":"10px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -16px","padding":"0 16px 2px"} }
 const _hoisted_85 = ["onClick", "aria-label"]
-const _hoisted_86 = ["src"]
+const _hoisted_86 = ["src", "data-fallback"]
 const _hoisted_87 = { style: {"position":"absolute","left":"10px","right":"10px","top":"8px","height":"16px","border-radius":"4px","background":"#E9ECF2","color":"#1B2236","font-family":"'Sora', sans-serif","font-size":"9px","font-weight":"700","letter-spacing":"0.04em","display":"flex","align-items":"center","justify-content":"center"} }
-const _hoisted_88 = ["src"]
+const _hoisted_88 = ["src", "data-fallback"]
 const _hoisted_89 = ["src"]
 const _hoisted_90 = {
   width: "34",
@@ -1914,7 +1963,7 @@ const _hoisted_104 = { style: {"display":"flex","align-items":"center","justify-
 const _hoisted_105 = ["onClick"]
 const _hoisted_106 = { style: {"border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"} }
 const _hoisted_107 = ["onClick"]
-const _hoisted_108 = ["src"]
+const _hoisted_108 = ["src", "data-fallback"]
 const _hoisted_109 = ["src"]
 const _hoisted_110 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_111 = { style: {"font-weight":"600","font-size":"14.5px","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
@@ -1956,9 +2005,9 @@ const _hoisted_127 = { style: {"display":"flex","flex-direction":"column","align
 const _hoisted_128 = { style: {"flex":"none","font-size":"12.5px","color":"#7D8BA8"} }
 const _hoisted_129 = { style: {"flex":"none","display":"grid","grid-template-columns":"repeat(2, minmax(0, 1fr))","gap":"10px"} }
 const _hoisted_130 = ["onClick"]
-const _hoisted_131 = ["src", "srcset"]
+const _hoisted_131 = ["src", "data-fallback", "srcset"]
 const _hoisted_132 = { style: {"position":"absolute","left":"14px","right":"14px","top":"12px","height":"20px","border-radius":"5px","background":"#E9ECF2","color":"#1B2236","font-family":"'Sora', sans-serif","font-size":"10.5px","font-weight":"700","letter-spacing":"0.04em","display":"flex","align-items":"center","justify-content":"center"} }
-const _hoisted_133 = ["src"]
+const _hoisted_133 = ["src", "data-fallback"]
 const _hoisted_134 = ["src"]
 const _hoisted_135 = {
   width: "44",
@@ -1986,9 +2035,9 @@ const _hoisted_147 = {
   style: {"margin":"0","padding":"24px 0","text-align":"center","font-size":"14px","color":"#9AA8C3"}
 }
 const _hoisted_148 = { style: {"flex":"none","display":"flex","align-items":"center","gap":"6px","font-size":"12px","color":"#7D8BA8"} }
-const _hoisted_149 = ["src"]
+const _hoisted_149 = ["src", "data-fallback"]
 const _hoisted_150 = ["onClick", "aria-label"]
-const _hoisted_151 = ["src", "alt"]
+const _hoisted_151 = ["src", "data-fallback", "alt"]
 const _hoisted_152 = {
   "aria-hidden": "true",
   style: {"position":"absolute","left":"12px","bottom":"12px","width":"32px","height":"32px","border-radius":"16px","background":"rgba(8, 13, 26, 0.72)","display":"flex","align-items":"center","justify-content":"center"}
@@ -2000,7 +2049,7 @@ const _hoisted_153 = {
   style: {"fill":"none","stroke":"#FFFFFF","stroke-width":"2.2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
 const _hoisted_154 = { style: {"position":"absolute","left":"50%","top":"22px","width":"220px","margin-left":"-110px","height":"30px","border-radius":"8px 8px 0 0","background":"#E9ECF2","color":"#1B2236","display":"flex","align-items":"center","justify-content":"space-between","padding":"0 12px","box-sizing":"border-box","font-family":"'Sora', sans-serif","font-size":"12px","font-weight":"700"} }
-const _hoisted_155 = ["src", "alt"]
+const _hoisted_155 = ["src", "data-fallback", "alt"]
 const _hoisted_156 = ["src", "alt"]
 const _hoisted_157 = {
   width: "72",
@@ -2090,7 +2139,7 @@ const _hoisted_198 = {
   "aria-hidden": "true",
   style: {"position":"relative","flex":"none","width":"70px","height":"58px"}
 }
-const _hoisted_199 = ["src"]
+const _hoisted_199 = ["src", "data-fallback"]
 const _hoisted_200 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
 const _hoisted_201 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
 const _hoisted_202 = {
@@ -2113,7 +2162,7 @@ const _hoisted_206 = {
 }
 const _hoisted_207 = { style: {"flex":"none","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"} }
 const _hoisted_208 = ["onClick"]
-const _hoisted_209 = ["src"]
+const _hoisted_209 = ["src", "data-fallback"]
 const _hoisted_210 = ["src"]
 const _hoisted_211 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
 const _hoisted_212 = { style: {"font-weight":"600","font-size":"14.5px","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
@@ -2193,7 +2242,7 @@ const _hoisted_245 = {
 const _hoisted_246 = { style: {"flex":"none","display":"grid","grid-template-columns":"repeat(3, minmax(0, 1fr))","gap":"16px 10px"} }
 const _hoisted_247 = ["onClick", "aria-label"]
 const _hoisted_248 = { style: {"position":"relative","display":"block","width":"100%","aspect-ratio":"600 / 825","border-radius":"5% / 3.6%","overflow":"hidden","background":"#16213A","box-shadow":"0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08)"} }
-const _hoisted_249 = ["src", "srcset"]
+const _hoisted_249 = ["src", "data-fallback", "srcset"]
 const _hoisted_250 = {
   key: 0,
   style: {"position":"absolute","top":"5px","right":"5px","padding":"1px 7px","border-radius":"999px","background":"rgba(8, 13, 26, 0.82)","border":"1px solid rgba(168, 182, 255, 0.5)","color":"#FFFFFF","font-size":"11.5px","font-weight":"700"}
@@ -2437,7 +2486,7 @@ const _hoisted_335 = {
   "aria-hidden": "true",
   style: {"position":"relative","width":"194px","height":"110px"}
 }
-const _hoisted_336 = ["src"]
+const _hoisted_336 = ["src", "data-fallback"]
 const _hoisted_337 = { style: {"font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.01em"} }
 const _hoisted_338 = ["onClick", "aria-pressed"]
 const _hoisted_339 = {
@@ -2543,7 +2592,7 @@ const _hoisted_379 = {
   style: {"flex":"none","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","overflow":"hidden","display":"flex","flex-direction":"column"}
 }
 const _hoisted_380 = ["onClick"]
-const _hoisted_381 = ["src"]
+const _hoisted_381 = ["src", "data-fallback"]
 const _hoisted_382 = ["src"]
 const _hoisted_383 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
 const _hoisted_384 = { style: {"font-weight":"600","font-size":"14.5px","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
@@ -2565,7 +2614,7 @@ const _hoisted_392 = {
   style: {"flex":"none","padding":"16px","border-radius":"24px","border":"1px solid #24345C","background":"radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.2), rgba(98, 122, 255, 0) 60%), #121C33","display":"flex","flex-direction":"column","gap":"14px"}
 }
 const _hoisted_393 = { style: {"display":"flex","align-items":"center","gap":"12px"} }
-const _hoisted_394 = ["src"]
+const _hoisted_394 = ["src", "data-fallback"]
 const _hoisted_395 = ["src"]
 const _hoisted_396 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_397 = { style: {"font-weight":"600"} }
@@ -2703,7 +2752,7 @@ const _hoisted_470 = {
   style: {"flex":"none","padding":"16px","border-radius":"22px","border":"1px solid #1E2B45","background":"#111A2C","display":"flex","flex-direction":"column","gap":"4px"}
 }
 const _hoisted_471 = ["onClick", "aria-label"]
-const _hoisted_472 = ["src"]
+const _hoisted_472 = ["src", "data-fallback"]
 const _hoisted_473 = ["src"]
 const _hoisted_474 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"4px"} }
 const _hoisted_475 = { style: {"display":"flex","justify-content":"space-between","align-items":"baseline","gap":"8px"} }
@@ -2743,7 +2792,7 @@ const _hoisted_496 = {
 }
 const _hoisted_497 = ["onClick", "aria-pressed"]
 const _hoisted_498 = { style: {"font-size":"12.5px","line-height":"1.45","color":"#9AA8C3"} }
-const _hoisted_499 = ["src"]
+const _hoisted_499 = ["src", "data-fallback"]
 const _hoisted_500 = ["src"]
 const _hoisted_501 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
 const _hoisted_502 = { style: {"font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
@@ -2887,13 +2936,13 @@ const _hoisted_561 = {
 const _hoisted_562 = { style: {"position":"relative","flex":"1","min-height":"0","display":"flex","flex-direction":"column","align-items":"center","justify-content":"center","gap":"14px"} }
 const _hoisted_563 = { style: {"font-size":"13px","color":"#C9D3EA"} }
 const _hoisted_564 = { style: {"position":"relative","width":"244px","height":"300px"} }
-const _hoisted_565 = ["src", "alt"]
+const _hoisted_565 = ["src", "data-fallback", "alt"]
 const _hoisted_566 = {
   key: 1,
   style: {"position":"absolute","left":"24px","top":"16px","width":"196px","transform":"rotate(-2deg)","box-shadow":"0 26px 44px rgba(0, 0, 0, 0.6)","border-radius":"8px","overflow":"hidden"}
 }
 const _hoisted_567 = { style: {"display":"flex","align-items":"center","justify-content":"space-between","height":"28px","padding":"0 10px","background":"#E9ECF2","color":"#1B2236","font-family":"'Sora', sans-serif","font-size":"11px","font-weight":"700"} }
-const _hoisted_568 = ["src", "alt"]
+const _hoisted_568 = ["src", "data-fallback", "alt"]
 const _hoisted_569 = ["src", "alt"]
 const _hoisted_570 = {
   width: "56",
@@ -2940,7 +2989,7 @@ const _hoisted_586 = {
   style: {"flex":"none","max-height":"770px","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"#0F1828","border-top":"1px solid #24345C","border-radius":"28px 28px 0 0","padding":"8px 16px 24px","display":"flex","flex-direction":"column","gap":"14px"}
 }
 const _hoisted_587 = { style: {"flex":"none","display":"flex","gap":"14px","align-items":"flex-start"} }
-const _hoisted_588 = ["src"]
+const _hoisted_588 = ["src", "data-fallback"]
 const _hoisted_589 = ["src"]
 const _hoisted_590 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","align-items":"flex-start","gap":"4px"} }
 const _hoisted_591 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"21px","line-height":"1.2","font-weight":"700","letter-spacing":"-0.02em"} }
@@ -3055,7 +3104,7 @@ const _hoisted_636 = { style: {"flex":"none","margin":"0","font-family":"'Sora',
 const _hoisted_637 = { style: {"flex":"none","margin":"0","padding":"0","border":"0","min-width":"0"} }
 const _hoisted_638 = { style: {"display":"flex","gap":"10px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -16px","padding":"2px 16px 4px"} }
 const _hoisted_639 = ["onClick", "aria-pressed", "aria-label"]
-const _hoisted_640 = ["src"]
+const _hoisted_640 = ["src", "data-fallback"]
 const _hoisted_641 = ["src"]
 const _hoisted_642 = { style: {"padding":"0 2px","font-size":"12.5px","font-weight":"700","line-height":"1.25","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
 const _hoisted_643 = { style: {"padding":"0 2px","font-size":"11.5px","color":"#9AA8C3","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
@@ -3136,7 +3185,7 @@ const _hoisted_680 = {
   "aria-hidden": "true",
   style: {"position":"relative","align-self":"center","width":"262px","height":"232px"}
 }
-const _hoisted_681 = ["src"]
+const _hoisted_681 = ["src", "data-fallback"]
 const _hoisted_682 = { style: {"display":"flex","flex-direction":"column","gap":"10px","padding":"14px 16px","border-radius":"20px","border":"1px solid #1E2B45","background":"#111A2C"} }
 const _hoisted_683 = { style: {"display":"flex","align-items":"center","gap":"12px","font-size":"14px"} }
 const _hoisted_684 = {
@@ -3214,7 +3263,7 @@ const _hoisted_714 = {
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2.2","stroke-linecap":"round"}
 }
 const _hoisted_715 = { style: {"flex":"1 1 auto","min-height":"0","width":"100%","display":"flex","align-items":"center","justify-content":"center"} }
-const _hoisted_716 = ["src", "alt", "onClick"]
+const _hoisted_716 = ["src", "data-fallback", "alt", "onClick"]
 const _hoisted_717 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"center","gap":"2px","text-align":"center"} }
 const _hoisted_718 = { style: {"font-family":"'Sora', sans-serif","font-size":"16px","font-weight":"600"} }
 const _hoisted_719 = { style: {"font-size":"12.5px","color":"#9AA8C3"} }
@@ -3438,6 +3487,7 @@ return function render(_ctx, _cache) {
                   ? (_openBlock(), _createElementBlock("img", {
                       key: 0,
                       src: _ctx.V.home.near.img,
+                      "data-fallback": _ctx.V.home.near.fallback,
                       alt: "",
                       style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                     }, null, 8 /* PROPS */, _hoisted_51))
@@ -3529,6 +3579,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 0,
                               src: _ctx.V.home.up.img,
+                              "data-fallback": _ctx.V.home.up.fallback,
                               alt: "",
                               style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                             }, null, 8 /* PROPS */, _hoisted_70))
@@ -3564,6 +3615,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 0,
                               src: _ctx.V.home.down.img,
+                              "data-fallback": _ctx.V.home.down.fallback,
                               alt: "",
                               style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                             }, null, 8 /* PROPS */, _hoisted_77))
@@ -3610,6 +3662,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 0,
                               src: bp.img,
+                              "data-fallback": bp.fallback,
                               alt: "",
                               style: {"position":"absolute","left":"9px","top":"9px","width":"100px","height":"116px","border-radius":"6px 6px 0 0","object-fit":"cover","object-position":"top","-webkit-mask-image":"linear-gradient(180deg, #000 78%, transparent)","mask-image":"linear-gradient(180deg, #000 78%, transparent)"}
                             }, null, 8 /* PROPS */, _hoisted_86))
@@ -3619,6 +3672,7 @@ return function render(_ctx, _cache) {
                               _createElementVNode("span", _hoisted_87, _toDisplayString(bp.grade), 1 /* TEXT */),
                               _createElementVNode("img", {
                                 src: bp.img,
+                                "data-fallback": bp.fallback,
                                 alt: "",
                                 style: {"position":"absolute","left":"10px","top":"26px","width":"98px","height":"92px","border-radius":"4px","object-fit":"cover","object-position":"top"}
                               }, null, 8 /* PROPS */, _hoisted_88)
@@ -3707,6 +3761,7 @@ return function render(_ctx, _cache) {
                             ? (_openBlock(), _createElementBlock("img", {
                                 key: 0,
                                 src: ad.img,
+                                "data-fallback": ad.fallback,
                                 alt: "",
                                 style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                               }, null, 8 /* PROPS */, _hoisted_108))
@@ -3812,6 +3867,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("img", {
                           key: 0,
                           src: ci.img,
+                          "data-fallback": ci.fallback,
                           srcset: ci.srcset,
                           sizes: "114px",
                           alt: "",
@@ -3824,6 +3880,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("span", _hoisted_132, _toDisplayString(ci.grade), 1 /* TEXT */),
                           _createElementVNode("img", {
                             src: ci.img,
+                            "data-fallback": ci.fallback,
                             alt: "",
                             style: {"position":"absolute","left":"14px","right":"14px","top":"36px","width":"calc(100% - 28px)","height":"128px","border-radius":"5px","object-fit":"cover","object-position":"top"}
                           }, null, 8 /* PROPS */, _hoisted_133)
@@ -3887,6 +3944,7 @@ return function render(_ctx, _cache) {
                 ? (_openBlock(), _createElementBlock("img", {
                     key: 0,
                     src: _ctx.V.it.img,
+                    "data-fallback": _ctx.V.it.fallbackHi,
                     alt: "",
                     "aria-hidden": "true",
                     style: {"position":"absolute","left":"-40px","top":"-40px","width":"438px","height":"410px","object-fit":"cover","filter":"blur(28px) saturate(1.4)","opacity":"0.5"}
@@ -3902,6 +3960,7 @@ return function render(_ctx, _cache) {
                     }, [
                       _createElementVNode("img", {
                         src: _ctx.V.it.img,
+                        "data-fallback": _ctx.V.it.fallbackHi,
                         alt: _ctx.V.it.name,
                         style: {"display":"block","width":"100%","height":"100%","object-fit":"cover"}
                       }, null, 8 /* PROPS */, _hoisted_151)
@@ -3926,6 +3985,7 @@ return function render(_ctx, _cache) {
                     ]),
                     _createElementVNode("img", {
                       src: _ctx.V.it.img,
+                      "data-fallback": _ctx.V.it.fallbackHi,
                       alt: _ctx.V.it.name,
                       style: {"position":"absolute","left":"50%","top":"52px","width":"220px","height":"220px","margin-left":"-110px","border-radius":"0 0 8px 8px","object-fit":"cover","object-position":"top","box-shadow":"0 18px 40px rgba(0, 0, 0, 0.55)"}
                     }, null, 8 /* PROPS */, _hoisted_155)
@@ -4153,6 +4213,7 @@ return function render(_ctx, _cache) {
                       return (_openBlock(), _createElementBlock("img", {
                         key: bf_i,
                         src: bf.img,
+                        "data-fallback": bf.fallback,
                         alt: "",
                         style: _normalizeStyle(`position: absolute; top: ${bf.top}; left: ${bf.left}; width: 36px; height: 50px; border-radius: 3px; object-fit: cover; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transform: rotate(${bf.rot})`)
                       }, null, 12 /* STYLE, PROPS */, _hoisted_199))
@@ -4197,6 +4258,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("img", {
                           key: 0,
                           src: mi.img,
+                          "data-fallback": mi.fallback,
                           alt: "",
                           loading: "lazy",
                           style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
@@ -4359,6 +4421,7 @@ return function render(_ctx, _cache) {
                   _createElementVNode("span", _hoisted_248, [
                     _createElementVNode("img", {
                       src: ca.img,
+                      "data-fallback": ca.fallback,
                       srcset: ca.srcset,
                       sizes: "(max-width: 520px) 30vw, 118px",
                       alt: "",
@@ -4769,6 +4832,7 @@ return function render(_ctx, _cache) {
                   return (_openBlock(), _createElementBlock("img", {
                     key: fn_i,
                     src: fn.img,
+                    "data-fallback": fn.fallback,
                     alt: "",
                     style: _normalizeStyle(`position: absolute; top: ${fn.top}; left: ${fn.left}; width: 74px; height: 86px; border-radius: 8px 8px 0 0; object-fit: cover; object-position: top; box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35); transform: rotate(${fn.rot}); -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent)`)
                   }, null, 12 /* STYLE, PROPS */, _hoisted_336))
@@ -4970,6 +5034,7 @@ return function render(_ctx, _cache) {
                           ? (_openBlock(), _createElementBlock("img", {
                               key: 0,
                               src: sl.img,
+                              "data-fallback": sl.fallback,
                               alt: "",
                               style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                             }, null, 8 /* PROPS */, _hoisted_381))
@@ -5025,6 +5090,7 @@ return function render(_ctx, _cache) {
                     ? (_openBlock(), _createElementBlock("img", {
                         key: 0,
                         src: _ctx.V.sale.img,
+                        "data-fallback": _ctx.V.sale.fallback,
                         alt: "",
                         style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                       }, null, 8 /* PROPS */, _hoisted_394))
@@ -5332,6 +5398,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("img", {
                           key: 0,
                           src: ar.img,
+                          "data-fallback": ar.fallback,
                           alt: "",
                           style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                         }, null, 8 /* PROPS */, _hoisted_472))
@@ -5443,6 +5510,7 @@ return function render(_ctx, _cache) {
                       ? (_openBlock(), _createElementBlock("img", {
                           key: 0,
                           src: ll.img,
+                          "data-fallback": ll.fallback,
                           alt: "",
                           style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                         }, null, 8 /* PROPS */, _hoisted_499))
@@ -5767,6 +5835,7 @@ return function render(_ctx, _cache) {
                 ? (_openBlock(), _createElementBlock("img", {
                     key: 0,
                     src: _ctx.V.scan.img,
+                    "data-fallback": _ctx.V.scan.fallback,
                     alt: _ctx.V.scan.name,
                     style: {"position":"absolute","left":"22px","top":"18px","width":"200px","height":"232px","border-radius":"10px 10px 0 0","object-fit":"cover","object-position":"top","transform":"rotate(-3deg)","box-shadow":"0 26px 44px rgba(0, 0, 0, 0.6)","-webkit-mask-image":"linear-gradient(180deg, #000 86%, transparent)","mask-image":"linear-gradient(180deg, #000 86%, transparent)"}
                   }, null, 8 /* PROPS */, _hoisted_565))
@@ -5779,6 +5848,7 @@ return function render(_ctx, _cache) {
                     ]),
                     _createElementVNode("img", {
                       src: _ctx.V.scan.img,
+                      "data-fallback": _ctx.V.scan.fallback,
                       alt: _ctx.V.scan.name,
                       style: {"display":"block","width":"196px","height":"220px","object-fit":"cover","object-position":"top"}
                     }, null, 8 /* PROPS */, _hoisted_568)
@@ -5881,6 +5951,7 @@ return function render(_ctx, _cache) {
                   ? (_openBlock(), _createElementBlock("img", {
                       key: 0,
                       src: _ctx.V.sr.img,
+                      "data-fallback": _ctx.V.sr.fallback,
                       alt: "",
                       style: {"width":"100%","height":"100%","object-fit":"cover","object-position":"top"}
                     }, null, 8 /* PROPS */, _hoisted_588))
@@ -6101,6 +6172,7 @@ return function render(_ctx, _cache) {
                         ? (_openBlock(), _createElementBlock("img", {
                             key: 0,
                             src: po.img,
+                            "data-fallback": po.fallback,
                             alt: "",
                             style: {"position":"relative","width":"58px","height":"68px","margin-top":"10px","border-radius":"4px 4px 0 0","object-fit":"cover","object-position":"top"}
                           }, null, 8 /* PROPS */, _hoisted_640))
@@ -6282,6 +6354,7 @@ return function render(_ctx, _cache) {
                     return (_openBlock(), _createElementBlock("img", {
                       key: fc_i,
                       src: fc.img,
+                      "data-fallback": fc.fallback,
                       alt: "",
                       style: _normalizeStyle(`position: absolute; left: ${fc.left}; top: ${fc.top}; width: 104px; height: 121px; border-radius: 9px 9px 0 0; object-fit: cover; object-position: top; transform: rotate(${fc.rot}); box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5); -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent)`)
                     }, null, 12 /* STYLE, PROPS */, _hoisted_681))
@@ -6494,6 +6567,7 @@ return function render(_ctx, _cache) {
           _createElementVNode("div", _hoisted_715, [
             _createElementVNode("img", {
               src: _ctx.V.zoom.img,
+              "data-fallback": _ctx.V.zoom.fallback,
               alt: _ctx.V.zoom.name,
               onClick: _ctx.V.zoom.close,
               style: {"display":"block","max-width":"100%","max-height":"100%","width":"auto","height":"auto","border-radius":"4.8% / 3.4%","background":"#16213A","box-shadow":"0 24px 60px rgba(0, 0, 0, 0.65)","cursor":"zoom-out"}
@@ -6571,6 +6645,14 @@ return function render(_ctx, _cache) {
     render: render
   }).mount('#app');
   inst.__changed = () => inst.scheduleSave();
+  // Image qui ne charge plus (ex. arrêt de pokemontcg.io) : on passe au visuel de secours, une fois par visuel.
+  document.addEventListener('error', e => {
+    const t = e.target;
+    if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
+    t.dataset.fellBack = t.dataset.fallback;
+    t.removeAttribute('srcset');
+    t.src = t.dataset.fallback;
+  }, true);
   // Échap ferme le zoom de la carte.
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && inst.st().zoom) inst.setState({ zoom: null }); });
   // Catalogue complet : chargé après le premier affichage.

@@ -93,6 +93,8 @@ wrapSection('Derniers ajouts', 'home.hasAdds');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, visuels et prix via TCGdex · démo de collection, ventes et magasins fictifs');
+// Visuel de secours de chaque image de carte (data-fallback), utilisé si l'image ne charge plus.
+tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fallback="{{ ' + o + (o === 'it' ? '.fallbackHi' : '.fallback') + ' }}"');
 
 // Gabarit du canevas → gabarit Vue. Les trous {{ a.b }} visent les valeurs de renderVals (préfixe V.)
 // ou un alias de boucle ; sc-if / sc-for deviennent v-if / v-for.
@@ -239,6 +241,14 @@ ${code}
     render: render
   }).mount('#app');
   inst.__changed = () => inst.scheduleSave();
+  // Image qui ne charge plus (ex. arrêt de pokemontcg.io) : on passe au visuel de secours, une fois par visuel.
+  document.addEventListener('error', e => {
+    const t = e.target;
+    if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
+    t.dataset.fellBack = t.dataset.fallback;
+    t.removeAttribute('srcset');
+    t.src = t.dataset.fallback;
+  }, true);
   // Échap ferme le zoom de la carte.
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && inst.st().zoom) inst.setState({ zoom: null }); });
   // Catalogue complet : chargé après le premier affichage.

@@ -7,16 +7,60 @@
   // - Images : CDN TCGdex (assets.tcgdex.net), jamais stockées chez nous. Vignettes en low.webp
   //   (245 × 337) ; grilles en low ou high.webp selon l'écran (srcset) ; fiche et zoom en high.png
   //   (600 × 825, sans perte), la meilleure qualité que publie TCGdex.
+  // - Cartes sans scan français : scan anglais pokemontcg.io (734 × 1024, chemins « ptcg: » et « scx: »),
+  //   sinon une autre version TCGdex ; si rien n'existe, une carte « visuel à venir » dessinée par l'app.
+  //   Si une image ne charge plus, data-fallback prend le relais (repli TCGdex, sinon carte dessinée).
   const TCG = { status: 'loading', doc: null, F: null, rows: [], byId: {}, bySet: {}, setList: [], items: {}, saved: {}, fan: [] };
   // Sans accents ni casse ; « Pikachu-ex » se trouve aussi avec « pikachu ex ».
   const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[-‐–]/g, ' ').toLowerCase();
   // Raretés comptées comme « ultra rares » pour le profil automatique (ultra rare et au-dessus).
   const UR_RARITY = /^(ultra rare|chromatique ultra rare|illustration spéciale rare|magnifique rare|hyper rare|méga hyper rare|couronne|rare secrète)$/i;
-  const NO_IMG = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 63 88"><rect width="63" height="88" rx="4" fill="#1A2645"/><text x="31.5" y="52" font-size="26" text-anchor="middle" fill="#7D8BA8" font-family="sans-serif">?</text></svg>');
   const FLAG_EN = 'linear-gradient(90deg, transparent 42%, #C8102E 42% 58%, transparent 58%), linear-gradient(180deg, #012169 38%, #C8102E 38% 62%, #012169 62%)';
   const LIMIT = 40;
   // Langue d'un visuel de repli (même dessin officiel, texte dans une autre langue).
   const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole' };
+  const PTCG = 'https://images.pokemontcg.io/', SCX = 'https://images.scrydex.com/pokemon/';
+  // Adresses d'un visuel selon sa source (chemin de cards.json).
+  function visual(path) {
+    if (!path) return null;
+    if (path.indexOf('ptcg:') === 0) {
+      const b = PTCG + path.slice(5);
+      return { img: b + '.png', hi: b + '_hires.png', srcset: b + '.png 245w, ' + b + '_hires.png 734w', lang: 'EN', credit: 'pokemontcg.io · haute définition (734 × 1024)' };
+    }
+    if (path.indexOf('scx:') === 0) {
+      const b = SCX + path.slice(4);
+      return { img: b + '/small', hi: b + '/large', srcset: '', lang: 'EN', credit: 'Scrydex, via pokemontcg.io · haute définition' };
+    }
+    const b = /^https?:/.test(path) ? path : TCG.doc.img + path;
+    return { img: b + '/low.webp', hi: b + '/high.png', srcset: b + '/low.webp 245w, ' + b + '/high.webp 600w',
+      lang: (/^([a-z]{2})\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · qualité maximale (PNG 600 × 825)' };
+  }
+  // Carte dessinée en attendant un scan officiel : nom, extension, numéro et rareté, aux couleurs PKM.
+  const esc = t => String(t || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+  const wrap = (t, n) => {
+    const lines = [''];
+    String(t || '').split(/\s+/).forEach(w => {
+      const cur = lines[lines.length - 1];
+      if (cur && (cur + ' ' + w).length > n) lines.push(w); else lines[lines.length - 1] = (cur + ' ' + w).trim();
+    });
+    return lines.slice(0, 2);
+  };
+  function drawnCard(p) {
+    const edge = p.ur ? '#FFD66B' : '#A8B6FF';
+    const text = (lines, y, dy, size, attrs) => lines.map((l, i) => '<text x="56" y="' + (y + i * dy) + '" font-size="' + size + '" ' + attrs + '>' + esc(l) + '</text>').join('');
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 825" font-family="Helvetica, Arial, sans-serif">'
+      + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A3B66"/><stop offset="1" stop-color="#0E1729"/></linearGradient></defs>'
+      + '<rect width="600" height="825" rx="28" fill="#0B1120"/>'
+      + '<rect x="16" y="16" width="568" height="793" rx="22" fill="url(#g)" stroke="' + edge + '" stroke-opacity="0.55" stroke-width="5"/>'
+      + text(wrap(p.name, 16), 104, 54, 46, 'font-weight="700" fill="#F3F6FC"')
+      + '<rect x="56" y="230" width="488" height="320" rx="18" fill="#0B1120" fill-opacity="0.55" stroke="' + edge + '" stroke-opacity="0.4" stroke-width="3" stroke-dasharray="14 10"/>'
+      + '<text x="300" y="380" text-anchor="middle" font-size="36" font-weight="700" fill="#C9D3EA">Visuel à venir</text>'
+      + '<text x="300" y="428" text-anchor="middle" font-size="25" fill="#9AA8C3">scan officiel pas encore publié</text>'
+      + text(wrap(p.setName, 28), 618, 40, 30, 'font-weight="700" fill="#F3F6FC"')
+      + text(['n° ' + p.numShort + (p.rarity ? ' · ' + p.rarity : '')], 708, 0, 26, 'fill="#9AA8C3"')
+      + '<text x="544" y="772" text-anchor="end" font-size="34" font-weight="800" fill="' + edge + '">PKM</text></svg>';
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
   const setOf = id => (TCG.doc && TCG.doc.sets[id]) || [id, '', '', '', '', 'fr'];
   // Cote PKM d'une ligne du catalogue : la même règle que cote() (Cardmarket et TCGplayer).
   function coteOf(r, F) { const a = r[F.cm], b = r[F.tcp]; return a && b ? (a + b) / 2 : a || b || 0; }
@@ -48,8 +92,7 @@
     if (TCG.items[id]) return TCG.items[id];
     const x = TCG.byId[id];
     if (!x) return TCG.saved[id] || null; // carte enregistrée sur l'appareil, en attendant le catalogue
-    const r = x.r, F = TCG.F, set = setOf(r[F.set]), path = r[F.img] || '';
-    const base = path ? (/^https?:/.test(path) ? path : TCG.doc.img + path) : '';
+    const r = x.r, F = TCG.F, set = setOf(r[F.set]), v = visual(r[F.img] || ''), alt = visual((TCG.doc.alt || {})[id] || '');
     const rarity = r[F.rarity] || '', num = String(r[F.num] || ''), official = set[4] || '';
     const lang = String(set[5] || 'fr').toUpperCase();
     const numShort = num + (official && /^\d+$/.test(num) ? '/' + official : '');
@@ -59,12 +102,16 @@
       id: id, tcg: true, type: 'card', code: 'CRT', name: r[F.name], rarity: rarity, ur: UR_RARITY.test(rarity),
       num: num, numShort: numShort, numLabel: 'n° ' + numShort,
       sub: [rarity || 'Rareté non renseignée', set[0], 'n° ' + numShort].join(' · ') + (lang === 'EN' ? ' · EN' : ''),
-      setName: set[0], set: r[F.set], lang: lang, imgLang: base ? (/^([a-z]{2})\//.exec(path) || [0, 'fr'])[1].toUpperCase() : '',
-      img: base ? base + '/low.webp' : NO_IMG, imgHi: base ? base + '/high.png' : NO_IMG,
-      srcset: base ? base + '/low.webp 245w, ' + base + '/high.webp 600w' : '',
+      setName: set[0], set: r[F.set], lang: lang, imgLang: v ? v.lang : '', credit: v ? v.credit : 'Carte dessinée par PKM en attendant le scan officiel',
+      img: v ? v.img : '', imgHi: v ? v.hi : '', srcset: v ? v.srcset : '',
       logo: '', grade: null, release: null,
       cm: r[F.cm], low: r[F.low], ebay: null, tcp: r[F.tcp], avg30: r[F.avg30], upd: r[F.upd], seed: seed
     };
+    const drawn = drawnCard(p);
+    if (!v) { p.img = drawn; p.imgHi = drawn; }
+    // Si le visuel ne charge plus : repli TCGdex (cartes illustrées par pokemontcg.io), sinon carte dessinée.
+    p.fallback = alt ? alt.img : drawn;
+    p.fallbackHi = alt ? alt.hi : drawn;
     TCG.items[id] = p;
     return p;
   };
@@ -94,7 +141,7 @@
   const baseHistory = proto.history;
   proto.history = function (p) { return p.tcg ? null : baseHistory.call(this, p); };
   const baseLook = proto.look;
-  proto.look = function (p) { return Object.assign(baseLook.call(this, p), { srcset: p.srcset || '' }); };
+  proto.look = function (p) { return Object.assign(baseLook.call(this, p), { srcset: p.srcset || '', fallback: p.fallback || '' }); };
   const baseFlag = proto.flag;
   proto.flag = function (lang) { return lang === 'EN' ? FLAG_EN : baseFlag.call(this, lang); };
   // « Toutes les cartes » vient du Marché ; une extension, de « Toutes les cartes ».
@@ -135,7 +182,7 @@
     if (!q) {
       r.browse = {
         show: true, sub: total + ' cartes · ' + TCG.setList.length + ' extensions · visuels officiels', open: () => this.openSets(),
-        fan: TCG.fan.map((id, i) => ({ img: TCG.item(id).img, top: ['9px', '2px', '9px'][i], left: ['0px', '17px', '34px'][i], rot: ['-10deg', '0deg', '10deg'][i] }))
+        fan: TCG.fan.map((id, i) => ({ img: TCG.item(id).img, fallback: TCG.item(id).fallback, top: ['9px', '2px', '9px'][i], left: ['0px', '17px', '34px'][i], rot: ['-10deg', '0deg', '10deg'][i] }))
       };
     }
     if (q.length < 2 || s.mfilter === 'soon') { r.count = r.count + ' · cherche parmi ' + total + ' cartes'; return r; }
@@ -212,7 +259,7 @@
       notes.push(foreign.length + (foreign.length > 1 ? ' visuels viennent de la version ' : ' visuel vient de la version ') + versions.join(', ')
         + ' : même dessin officiel, le scan ' + (e.lang === 'EN' ? 'anglais' : 'français') + ' n’est pas encore disponible.');
     }
-    if (noImgs) notes.push(noImgs + (noImgs > 1 ? ' cartes n’ont' : ' carte n’a') + ' pas encore de visuel chez TCGdex.');
+    if (noImgs) notes.push(noImgs + (noImgs > 1 ? ' cartes n’ont' : ' carte n’a') + ' pas encore de scan officiel : PKM les dessine en attendant.');
     const defs = [['all', 'Toutes · ' + all.length], ['top', 'Les plus chères'], ['ur', 'Ultra rares · ' + nUr], ['own', 'À toi · ' + mine.length]];
     return {
       title: e.name, subtitle: [e.serie, e.date ? this.d3(e.date) : '', e.lang === 'EN' ? 'EN' : ''].filter(Boolean).join(' · '),
@@ -226,7 +273,7 @@
       cards: shown.map(p => {
         const k = this.cote(p), q = qty(p);
         return {
-          img: p.img, srcset: p.srcset, name: p.name, num: p.numShort, owned: q > 0, qty: '×' + q,
+          img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: p.numShort, owned: q > 0, qty: '×' + q,
           cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), coteColor: k === null ? '#7D8BA8' : '#F3F6FC',
           label: p.name + ', ' + p.numLabel + (k !== null ? ', cote ' + this.eur(k) : ', sans prix') + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
@@ -243,6 +290,8 @@
     it.upcoming = it.noCote && !p.tcg;
     // Carte entière en qualité maximale, agrandissable.
     it.zoomImg = hiOf(p);
+    it.fallbackHi = p.fallbackHi || '';
+    it.zoomCredit = p.tcg ? (p.imgLang ? 'Visuel officiel via ' + p.credit : p.credit) : 'Visuel officiel via TCGdex · qualité maximale (PNG 600 × 825)';
     if (it.plainCard) it.img = it.zoomImg;
     it.zoom = () => this.setState({ zoom: p.id });
     it.zoomLabel = 'Agrandir la carte ' + p.name;
@@ -258,7 +307,7 @@
       if (it.hasCote) it.change = 'Courbe après quelques jours d’archivage';
       const notes = [];
       if (p.lang === 'EN') notes.push('Carte en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.');
-      if (!p.imgLang) notes.push('Pas encore de visuel pour cette carte chez TCGdex.');
+      if (!p.imgLang) notes.push('Pas encore de scan officiel pour cette carte : PKM affiche une carte dessinée en attendant.');
       else if (p.imgLang !== p.lang) notes.push('Visuel de la version ' + (VERSION[p.imgLang] || p.imgLang) + ' (même dessin officiel) : le scan ' + (p.lang === 'EN' ? 'anglais' : 'français') + ' de cette carte n’est pas encore disponible.');
       it.imgNote = notes.join(' ');
       it.hasImgNote = it.imgNote !== '';
@@ -285,7 +334,7 @@
     ui.zoomOpen = !!s.zoom && s.zoom === s.itemId && ui.isItem && !!r.it.plainCard;
     r.zoom = {
       img: r.it.zoomImg || '', name: r.it.name, sub: r.it.sub, label: 'Carte ' + r.it.name + ' en grand',
-      credit: 'Visuel officiel via TCGdex · qualité maximale (PNG 600 × 825)' + (r.it.zoomVersion ? ' · version ' + r.it.zoomVersion : ''),
+      credit: (r.it.zoomCredit || '') + (r.it.zoomVersion ? ' · version ' + r.it.zoomVersion : ''), fallback: r.it.fallbackHi || '',
       close: () => this.setState({ zoom: null })
     };
     return r;

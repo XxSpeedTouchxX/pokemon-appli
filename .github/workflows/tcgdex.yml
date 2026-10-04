@@ -14,6 +14,7 @@ on:
       - .github/workflows/tcgdex.yml
       - tools/tcgdex/sync_tcgdex.py
       - tools/tcgdex/build_index.py
+      - tools/tcgdex/ptcg.py
 
 permissions:
   contents: write
@@ -57,10 +58,20 @@ jobs:
             python3 tools/tcgdex/sync_tcgdex.py --lang en --skip-images --only-set "$id" --workers 6 --out data/tcgdex-en
           done
 
+      # Scans anglais haute définition (734 × 1024) de pokemontcg.io, pour les cartes que TCGdex n'illustre
+      # pas en français. Données publiques sur GitHub ; arrêt du service prévu le 1er mars 2027.
+      - name: Données pokemontcg.io (scans anglais HD)
+        continue-on-error: true
+        run: git clone --depth 1 https://github.com/PokemonTCG/pokemon-tcg-data data/ptcg
+
+      - name: Tests du rapprochement des visuels
+        run: python3 -m unittest discover -s tools/tcgdex -p "test_*.py"
+
       - name: Construire le catalogue compact
         run: >-
           python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en
-          --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --out web/data/cards.json
+          --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --ptcg data/ptcg
+          --out web/data/cards.json
 
       - name: Publier sur la branche
         run: |

@@ -17,6 +17,12 @@ Sources :
            - --list-en-only liste ces extensions, pour en télécharger le détail.
     --alt  autres versions (langue=dossier), facultatives : visuels de repli, après l'anglais.
            Même dessin officiel, texte dans une autre langue.
+    --ptcg copie du dépôt PokemonTCG/pokemon-tcg-data, facultative : scans anglais 734 × 1024 (ptcg.py).
+
+Ordre des visuels : scan français TCGdex ; sinon pokemontcg.io (aussi préféré pour les cartes en anglais,
+plus défini) ; sinon TCGdex anglais, allemand, italien, espagnol. Quand pokemontcg.io est retenu et qu'un
+visuel TCGdex existe aussi, ce dernier est gardé dans « alt » : l'app s'en sert si l'image ne charge plus
+(arrêt de pokemontcg.io prévu le 1er mars 2027).
 
 Repli d'un visuel absent : même carte dans l'autre langue (même identifiant, ou même extension et même
 numéro), sinon dans l'extension parente (« swsh9tg » TG01 → « swsh9 » TG01, « swsh12.5gg » GG01 →
@@ -30,7 +36,9 @@ Contenu de cards.json :
               avg30 = moyenne Cardmarket 30 jours  tcp = TCGplayer « market », converti en €
               maj   = date de mise à jour des prix Cardmarket
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
-              Le chemin commence par la langue du visuel (fr/… ou en/…).
+              Le chemin commence par la langue du visuel (fr/… ou en/…) ; « ptcg:set/numéro » ou
+              « scx:identifiant » pour pokemontcg.io.
+    alt       { carte: chemin TCGdex } : visuel de secours des cartes illustrées par pokemontcg.io
     usdEur    taux appliqué aux prix TCGplayer (BCE du jour, sinon taux de secours)
     stats     contrôle : cartes, visuels dans la langue de la carte, visuels de repli par langue, sans visuel
     rarities  nombre de cartes par rareté (contrôle)
@@ -44,6 +52,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
+
+from ptcg import PtcgData  # visuels anglais haute définition (pokemontcg.io)
 
 ASSETS = "https://assets.tcgdex.net/"
 ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
@@ -150,9 +160,10 @@ class Fallback:
     """Visuels et logos d'une autre langue, cherchés par identifiant puis par (extension, numéro)."""
 
     def __init__(self, lang, sets):
-        self.lang, self.sets, self.by_id, self.by_local = lang, sets, {}, {}
+        self.lang, self.sets, self.by_id, self.by_local, self.names = lang, sets, {}, {}, {}
         for sid, s in sets.items():
             for b in s.get("cards") or []:
+                self.names[b["id"]] = b.get("name")
                 if b.get("image"):
                     self.by_id[b["id"]] = b["image"]
                     self.by_local[(sid, norm_local(b.get("localId", "")))] = b["image"]
@@ -179,6 +190,7 @@ def main():
     p.add_argument("--src", default="data/tcgdex", help="copie française")
     p.add_argument("--en", default=None, help="copie anglaise (facultative)")
     p.add_argument("--alt", action="append", default=[], metavar="LANGUE=DOSSIER", help="autre version, pour les visuels de repli")
+    p.add_argument("--ptcg", default=None, help="copie de PokemonTCG/pokemon-tcg-data (facultative)")
     p.add_argument("--out", default="web/data/cards.json")
     p.add_argument("--list-en-only", action="store_true", help="affiche les extensions absentes du catalogue français, puis s'arrête")
     p.add_argument("--min-cards", type=int, default=1000, help="échec si moins de cartes (protège contre un index vide)")
@@ -203,9 +215,24 @@ def main():
         if alt:
             fallbacks.append(Fallback(lang, alt))
     own = Fallback("fr", fr_sets)
+    en_fb = fallbacks[0] if fallbacks and fallbacks[0].lang == "en" else None
+    ptcg = PtcgData(args.ptcg) if args.ptcg else None
+    if args.ptcg and not ptcg:
+        print(f"pokemontcg.io : aucune donnée dans {args.ptcg}, visuels anglais HD ignorés.")
+    ptcg_sets = {}
 
-    sets, cards, rarities = {}, [], {}
+    sets, cards, rarities, alt_img = {}, [], {}, {}
     stats = {"cards": 0, "cardsEn": 0, "imgOwn": 0, "imgAlt": {}, "imgNone": 0, "noDetail": 0}
+
+    def ptcg_image(cid, sid, s, lang, local, name):
+        """Scan anglais HD de pokemontcg.io, contrôlé par le nom anglais quand on le connaît."""
+        if not ptcg:
+            return None
+        if sid not in ptcg_sets:
+            en_name = s.get("name") if lang == "en" else (en_sets.get(sid) or {}).get("name")
+            ptcg_sets[sid] = ptcg.map_set(sid, en_name, s.get("releaseDate"))
+        en_card = name if lang == "en" else (en_fb.names.get(cid) if en_fb else None)
+        return ptcg.image(ptcg_sets[sid], local, en_card) if ptcg_sets[sid] else None
 
     def add_set(sid, s, lang, root):
         serie = s.get("serie") or {}
@@ -223,17 +250,31 @@ def main():
                 stats["noDetail"] += 1
                 c = b
             local = c.get("localId") or b.get("localId") or ""
-            img = c.get("image") or b.get("image")
-            if img:
+            name = c.get("name") or b.get("name") or ""
+            own_img = c.get("image") or b.get("image")
+            if own_img and lang == "fr":
+                img = own_img
                 stats["imgOwn"] += 1
             else:
-                for fb in fallbacks:
+                # Repli TCGdex : le visuel de la carte elle-même (cartes en anglais), sinon une autre version.
+                tcg, tcg_lang = own_img, lang
+                for fb in ([] if own_img else fallbacks):
                     if fb.lang != lang:
-                        img = fb.image(cid, sid, local)
-                        if img:
-                            stats["imgAlt"][fb.lang] = stats["imgAlt"].get(fb.lang, 0) + 1
+                        tcg = fb.image(cid, sid, local)
+                        if tcg:
+                            tcg_lang = fb.lang
                             break
-                if not img:
+                hd = ptcg_image(cid, sid, s, lang, local, name)
+                img = hd or tcg
+                if hd:
+                    stats["imgAlt"]["pokemontcg.io"] = stats["imgAlt"].get("pokemontcg.io", 0) + 1
+                    if tcg:
+                        alt_img[cid] = short_img(tcg)
+                elif tcg and tcg_lang == lang:
+                    stats["imgOwn"] += 1
+                elif tcg:
+                    stats["imgAlt"][tcg_lang] = stats["imgAlt"].get(tcg_lang, 0) + 1
+                else:
                     stats["imgNone"] += 1
             rarity = c.get("rarity") or ""
             if lang == "en":
@@ -241,7 +282,7 @@ def main():
                 stats["cardsEn"] += 1
             rarities[rarity] = rarities.get(rarity, 0) + 1
             cm, low, avg30, tcp, upd = prices(c, rate)
-            cards.append([cid, c.get("name") or b.get("name") or "", sid, str(local),
+            cards.append([cid, name, sid, str(local),
                           rarity, short_img(img), cm, low, avg30, tcp, upd])
 
     for sid, s in fr_sets.items():
@@ -266,6 +307,7 @@ def main():
         "sets": sets,
         "fields": ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd"],
         "stats": stats,
+        "alt": alt_img,
         "rarities": dict(sorted(rarities.items(), key=lambda kv: -kv[1])),
         "cards": cards,
     }
