@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-10-05 — Retouches de l'accueil : logo à l'éclair, compagnons, montant, petit radar
+
+- **Contexte :** demandes du porteur sur l'accueil. Ses choix : le logo complet **dans l'en-tête, en plus grand** ; le petit radar **lance le balayage**.
+- **Décision :**
+  - **En-tête :** le logo complet de la planche (I à l'éclair, O étoilé) remplace le petit logo simplifié, 196 px de large au plus contre 154 (27 % de plus), réduit sur les petits écrans pour rester centré entre la pastille « FR » et l'avatar. `dropicards-small.svg` est retiré.
+  - **Compagnons :** 154 au lieu de 151 : les 151 de Kanto, plus **Kyogre, Groudon et Rayquaza**, à la fin, dans l'ordre du Pokédex. Ce choix élargit celui du 2026-10-04 (« compagnon parmi les 151 Pokémon de Kanto »).
+  - **Choix du compagnon :**
+    - 3 Pokémon par ligne ;
+    - panneau opaque : le compagnon de l'accueil se voyait à travers (le « Pokémon derrière Florizarre ») ;
+    - icônes refaites : le Pokémon seul, recadré, agrandi sans flou et centré, au lieu du sprite coupé sur les bords. Les 154 vérifiées sur une planche.
+  - **Montant de « Ma collection » :** même police et même style que le logo (lettres blanches, contour et ombre noirs), au lieu du jaune.
+  - **Petit radar animé** à côté de « Boutiques autour de toi » : il lance le balayage, comme « Scanner les boutiques » ; sans position, il la demande d'abord.
+- **Coût :** 0 € ; 240 Ko d'icônes et 0,3 Mo de sprites en plus.
+
+---
+
 ## 2026-10-04 (nuit, suite) — Scan réel à l'appareil photo ; langue et état des exemplaires
 
 - **Contexte :**

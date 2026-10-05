@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-04)
+## 3. État d'avancement (au 2026-10-05)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -67,6 +67,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - scan à l'appareil photo : lecture sur le téléphone (Tesseract.js, aucune image envoyée) du numéro et du nom, 3 propositions à confirmer, carte suivante ; photo, import ou recherche sans caméra ; onglet Scellé en recherche ;
   - langue et état de chaque ajout enregistrés et affichés (liste, Collection, fiche) ;
   - lecture réglée sur des cartes de test dessinées : la vraie mesure se fait sur téléphone (`?debug=scan`).
+- **Retouches de l'accueil (2026-10-05) :**
+  - logo complet dans l'en-tête (I à l'éclair, O étoilé), plus grand ;
+  - compagnons : 154 (les 151 de Kanto, plus Kyogre, Groudon, Rayquaza) ; choix sur 3 colonnes, icônes recadrées, panneau opaque ;
+  - montant de la collection au style du logo (blanc, contour noir) ; petit radar animé qui lance le balayage des boutiques.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
