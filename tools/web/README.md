@@ -21,7 +21,7 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 
 ## Identité Dropicards
 
-- **Logo :** celui de la planche du porteur, redessiné en SVG (`tools/brand/`, voir son README) ; dans l'en-tête, la pastille « Marché FR » devient « FR ».
+- **Logo :** celui de la planche du porteur, redessiné en SVG (`tools/brand/`, voir son README). Dans l'en-tête : le logo complet, avec le I à l'éclair et le O étoilé, 196 px de large au plus (réduit sur les petits écrans pour rester centré) ; la pastille « Marché FR » devient « FR ».
 - **Nom :** « Dropicards » dans le titre, le manifeste (icône « maskable » à part) et la légende.
 - **Libellés :** « PKM » devient « Dropicards » au build (cote Dropicards, Bienvenue sur Dropicards…), avec un compte vérifié. Les noms techniques gardent `pkm` (classes, variables CSS, clé d'enregistrement de la collection).
 - **Jaune :** celui de la planche (`#FFD60A`), repris par le thème v6.
@@ -31,14 +31,15 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`, testés par `node --test tools/web/test_home.mjs`) :
 1. **Recherche** dans tout le catalogue : 8 résultats sous le champ (scellé, articles suivis, puis cartes), « Voir les N résultats » ouvre le Marché sur la même recherche.
 2. **Valeur de ma collection :**
-   - montant dans la police du logo (Luckiest Guy), en jaune ;
+   - montant dans la police du logo (Luckiest Guy), comme le logo : lettres blanches, contour et ombre noirs ;
    - variation sur 7 jours ;
    - **courbe sur 4 points réels** (il y a 30 jours, 7 jours, hier, aujourd'hui). Cartes : moyennes Cardmarket ramenées à la valeur du jour ; scellé : cote archivée chaque jour (`sealed.json`) ; démo : sa courbe simulée. Une valeur inconnue reste plate, jamais inventée ;
    - plus-value latente, source et date ;
-   - **compagnon animé** : un des 151 Pokémon de Kanto, Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » (recherche par nom ou numéro). Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites : `tools/sprites/`.
+   - **compagnon animé** : un des 151 Pokémon de Kanto, ou Kyogre, Groudon, Rayquaza ; Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » : 3 Pokémon par ligne, icônes nettes (le Pokémon seul, recadré et centré), panneau opaque, recherche par nom ou numéro. Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites et icônes : `tools/sprites/`.
 3. **Boutiques autour de toi :**
    - radar en SVG (anneaux 1, 3, 5 km) ;
    - « Scanner les boutiques » lance le faisceau : chaque vraie boutique apparaît à sa direction réelle, avec son nom et sa ville, et devient cliquable à ce moment-là ;
+   - le **petit radar animé** à côté du titre lance le même balayage. Sans position, il la demande d'abord, puis le balayage part tout seul. Immobile si l'utilisateur limite les animations ;
    - un appui ouvre sa fiche ;
    - sans position : « Me localiser » ;
    - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
@@ -302,8 +303,8 @@ Le script `tools/web/build.mjs` :
 | `vendor/tesseract/7.0.0/` | Tesseract.js 7, ses cœurs WebAssembly (avec et sans SIMD) et le modèle français, licence Apache 2.0 (scan, chargé à l'ouverture de l'écran) |
 | `img/` | Visuels provisoires (ceux qui ne sont pas sur TCGdex) |
 | `img/products/` | Visuels officiels des produits scellés (galerie Pokémon France) |
-| `img/brand/` | Logo Dropicards (SVG : clair, petit, sombre, icône), voir `tools/brand/` |
-| `img/pokemon/` | Compagnons de l'accueil : sprites animés et fixes des 151 Pokémon de Kanto, voir `tools/sprites/` |
+| `img/brand/` | Logo Dropicards (SVG : clair, aussi dans l'en-tête ; sombre ; icône), voir `tools/brand/` |
+| `img/pokemon/` | Compagnons de l'accueil : sprites animés et fixes des 151 Pokémon de Kanto, de Kyogre, Groudon et Rayquaza ; icônes du choix dans `icon/`. Voir `tools/sprites/` |
 | `icons/` | Icônes de l'app Dropicards (dont une « maskable ») |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |

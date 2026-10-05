@@ -2,8 +2,8 @@
 // qui n'existe qu'en image. Lettres : police Luckiest Guy (Google Fonts, licence Apache 2.0, paquet
 // @fontsource/luckiest-guy), converties en tracés : le logo ne dépend d'aucune police chargée.
 // Le O et le I sont des cartes (rond étoilé, éclair). Sorties :
-//   web/img/brand/dropicards.svg        fond clair : lettres blanches, contour et ombre noirs (grand format)
-//   web/img/brand/dropicards-small.svg  petite taille (en-tête) : contour plus fin, cartes simplifiées
+//   web/img/brand/dropicards.svg        fond clair : lettres blanches, contour et ombre noirs (aussi l'en-tête de l'app,
+//                                       lisible dès 32 px de haut)
 //   web/img/brand/dropicards-dark.svg   fond sombre : lettres jaunes, sans contour
 //   web/img/brand/icon.svg              icône « D + carte »
 //   web/icons/icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png (rendus par Chromium)
@@ -103,13 +103,11 @@ function iconBody(full, scale = 1) {
 
 const out = (p, s) => { mkdirSync(new URL('.', new URL(p, 'file://' + ROOT)).pathname, { recursive: true }); writeFileSync(ROOT + p, s); };
 const big = wordmark({ outline: 14, shadow: [5, 7], letter: WHITE, detail: true, iCard: true, gap: 3 });
-const small = wordmark({ outline: 12, shadow: [3, 5], letter: WHITE, detail: false, iCard: false, gap: 3 });
 const dark = wordmark({ outline: 0, letter: YELLOW, detail: false, iCard: false, gap: 7, cardStroke: WHITE, cardStrokeW: 6 });
 out('web/img/brand/dropicards.svg', doc(big.box, big.svg, 'Dropicards'));
-out('web/img/brand/dropicards-small.svg', doc(small.box, small.svg, 'Dropicards'));
 out('web/img/brand/dropicards-dark.svg', doc(dark.box, dark.svg, 'Dropicards'));
 out('web/img/brand/icon.svg', doc([0, 0, 512, 512], iconBody(false), 'Dropicards'));
-console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), small, dark, icon');
+console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, icon');
 
 // Icônes PNG (Chromium headless) : « any » avec bord noir et coins transparents ; « maskable » et Apple en plein cadre.
 const { chromium } = await import('playwright-core');

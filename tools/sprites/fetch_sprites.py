@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-fetch_sprites.py : compagnons de l'accueil, les 151 Pokémon de Kanto (thème 30 ans). Lancé une fois, à la main ;
-les fichiers sont ensuite gardés dans le dépôt (version figée, empreintes SHA-256 dans kanto.json).
+fetch_sprites.py : compagnons de l'accueil, les 151 Pokémon de Kanto (thème 30 ans), plus Kyogre, Groudon et
+Rayquaza (demande du porteur, 2026-10-05). Lancé à la main ; les fichiers sont ensuite gardés dans le dépôt (version
+figée, empreintes SHA-256 dans companions.json). Les icônes du choix sont faites ensuite par make_icons.py.
 
 Sources (dépôts GitHub de PokeAPI, données publiques) :
   - sprites animés et fixes de Pokémon Noir et Blanc : PokeAPI/sprites,
@@ -9,10 +10,10 @@ Sources (dépôts GitHub de PokeAPI, données publiques) :
     images © The Pokémon Company (dépôt sous CC0 pour sa structure) ;
   - noms français : PokeAPI/pokeapi, data/v2/csv/pokemon_species_names.csv (langue 5 = français).
 
-Sorties : web/img/pokemon/<n>.gif (animé), web/img/pokemon/<n>.png (fixe : choix et animations réduites),
-tools/sprites/kanto.json (n°, nom français, empreintes, sources).
+Sorties : web/img/pokemon/<n>.gif (animé), web/img/pokemon/<n>.png (fixe : animations réduites, source des icônes),
+tools/sprites/companions.json (n°, nom français, empreintes, sources).
 
-Usage : python3 tools/sprites/fetch_sprites.py
+Usage : python3 tools/sprites/fetch_sprites.py && python3 tools/sprites/make_icons.py
 """
 import csv
 import hashlib
@@ -24,7 +25,7 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "web" / "img" / "pokemon"
-INDEX = Path(__file__).with_name("kanto.json")
+INDEX = Path(__file__).with_name("companions.json")
 RAW = "https://raw.githubusercontent.com/PokeAPI/"
 ANIMATED = RAW + "sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/{n}.gif"
 STILL = RAW + "sprites/master/sprites/pokemon/versions/generation-v/black-white/{n}.png"
@@ -32,6 +33,7 @@ NAMES = RAW + "pokeapi/master/data/v2/csv/pokemon_species_names.csv"
 UA = "Dropicards/1.0 (+https://github.com/XxSpeedTouchxX/pokemon-appli)"
 MAX_GIF, MAX_PNG = 200_000, 20_000  # octets : un sprite plus gros est refusé
 KANTO = range(1, 152)
+EXTRA = (382, 383, 384)  # Kyogre, Groudon, Rayquaza, à la suite dans l'ordre du Pokédex
 
 
 def get(url):
@@ -50,7 +52,7 @@ def main():
     names = {int(r["pokemon_species_id"]): r["name"] for r in rows if r["local_language_id"] == "5"}
     OUT.mkdir(parents=True, exist_ok=True)
     index, total = [], 0
-    for n in KANTO:
+    for n in [*KANTO, *EXTRA]:
         gif, png = get(ANIMATED.format(n=n)), get(STILL.format(n=n))
         if not gif.startswith(b"GIF8") or len(gif) > MAX_GIF or not png.startswith(b"\x89PNG") or len(png) > MAX_PNG:
             raise SystemExit(f"Sprite n° {n} refusé (format ou taille)")

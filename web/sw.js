@@ -1,6 +1,6 @@
 // Dropicards (nom de code PKM-App) · démo : réseau d'abord (les mises à jour s'affichent), copie locale si le réseau manque.
-const CACHE = 'pkm-demo-v3';
-const FILES = ['./', 'index.html', 'app.js', 'vendor/vue.runtime.global.prod.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'img/brand/dropicards-small.svg'];
+const CACHE = 'pkm-demo-v4';
+const FILES = ['./', 'index.html', 'app.js', 'vendor/vue.runtime.global.prod.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'img/brand/dropicards.svg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });

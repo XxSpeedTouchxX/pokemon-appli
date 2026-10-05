@@ -1,6 +1,6 @@
 // Génère la démo web de Dropicards, nom de code PKM-App (dossier web/) à partir de la maquette du canevas Design.
 // Source : docs/12-maquette-v5/Main.dc.html (gabarit + logique). Usage : npm ci && npm run build
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
 import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens } from './theme.mjs';
@@ -30,12 +30,13 @@ patch('style="flex: none; position: relative; width: 358px; height: 210px;',
 patch('<svg width="358" height="210" viewBox="0 0 358 210"', '<svg width="100%" height="100%" viewBox="0 0 358 210"');
 patch('<svg width="324" height="56" viewBox="0 0 324 56"', '<svg width="100%" height="56" viewBox="0 0 324 56" preserveAspectRatio="none"');
 patch('<svg width="324" height="76" viewBox="0 0 324 76"', '<svg width="100%" height="76" viewBox="0 0 324 76" preserveAspectRatio="none"');
-// Identité Dropicards (2026-10-04) : logo du porteur redessiné en SVG (tools/brand/make_logo.mjs) dans l'en-tête ;
-// la pastille « Marché FR » devient « FR » pour laisser la place au logo sur un écran de 360 px.
+// Identité Dropicards (2026-10-04) : logo du porteur redessiné en SVG (tools/brand/make_logo.mjs) dans l'en-tête,
+// avec le I à l'éclair et le O étoilé (2026-10-05) : 196 px de large au plus, réduit sur les petits écrans pour rester
+// centré entre la pastille et l'avatar. La pastille « Marché FR » devient « FR » pour lui laisser la place.
 patch(`<span style="display: flex; align-items: center; gap: 8px">
 <span style="width: 30px; height: 30px; border-radius: 10px; background: #3D63FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(61, 99, 255, 0.35)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg></span>
 <span style="font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.03em">PKM</span>
-</span>`, '<span style="display: flex; align-items: center"><img src="img/brand/dropicards-small.svg" alt="Dropicards" width="154" height="30" style="display: block; width: auto; height: 30px"></span>');
+</span>`, '<span style="display: flex; align-items: center"><img src="img/brand/dropicards.svg" alt="Dropicards" width="196" height="39" style="display: block; width: min(196px, calc(100vw - 194px)); height: auto"></span>');
 patch('</span>Marché FR</span>', '</span>FR</span>');
 // Catalogue complet (tools/web/catalog.js) : courbe seulement si un historique existe, ajout possible
 // d'une carte sans prix, recherche du Marché sur toutes les cartes.
@@ -395,10 +396,13 @@ const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.met
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
 const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js');
-// Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto (tools/sprites/kanto.json).
-const kanto = JSON.parse(readFileSync(ROOT + 'tools/sprites/kanto.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
-if (kanto.length !== 151) throw new Error('Compagnons : ' + kanto.length + ' au lieu de 151');
-const kantoJs = '  const HOME_KANTO = ' + JSON.stringify(kanto) + ';\n';
+// Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Kyogre, Groudon et Rayquaza
+// (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
+const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
+if (buddies.length !== 154) throw new Error('Compagnons : ' + buddies.length + ' au lieu de 154');
+for (const [n] of buddies) for (const f of [n + '.gif', n + '.png', 'icon/' + n + '.png'])
+  if (!existsSync(ROOT + 'web/img/pokemon/' + f)) throw new Error('Compagnon sans image : web/img/pokemon/' + f);
+const buddiesJs = '  const HOME_BUDDIES = ' + JSON.stringify(buddies) + ';\n';
 if (rebranded !== REBRANDED) throw new Error('Libellés « PKM » renommés : ' + rebranded + ' au lieu de ' + REBRANDED);
 
 const img = Object.fromEntries([
@@ -433,7 +437,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${kantoJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -553,6 +557,10 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 @keyframes pkmReveal { from { opacity: 0; visibility: hidden; } to { opacity: 1; visibility: visible; } }
 .pkm-buddy { animation: pkmFloat 2.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pkm-buddy { animation: none; } }
+/* Petit radar du titre « Boutiques autour de toi » : un point s'allume quand le faisceau passe dessus. */
+@keyframes pkmBlip { 0% { opacity: 1; transform: scale(1.3); } 70%, 100% { opacity: 0.2; transform: scale(1); } }
+/* Montant de la collection à la manière du logo : lettres blanches, contour noir (8 directions) et ombre portée noire. */
+.pkm-logo-text { text-shadow: 0.05em 0 0 #111111, -0.05em 0 0 #111111, 0 0.05em 0 #111111, 0 -0.05em 0 #111111, 0.036em 0.036em 0 #111111, -0.036em 0.036em 0 #111111, 0.036em -0.036em 0 #111111, -0.036em -0.036em 0 #111111, 0.09em 0.06em 0 #111111, 0.076em 0.096em 0 #111111, 0.04em 0.11em 0 #111111, 0.076em 0.024em 0 #111111, 0.004em 0.096em 0 #111111; }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${cssVars()}

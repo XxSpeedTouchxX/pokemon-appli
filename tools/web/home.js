@@ -7,14 +7,14 @@
   const HOME_SORTS = [['recent', 'Récents'], ['value', 'Valeur']];
   const HOME_BUDDY = 25; // Pikachu
   const HOME_NAMES = {};
-  HOME_KANTO.forEach(([n, nom]) => { HOME_NAMES[n] = nom; });
+  HOME_BUDDIES.forEach(([n, nom]) => { HOME_NAMES[n] = nom; });
   const homeBaseSt = proto.st;
   proto.st = function () {
     const d = homeBaseSt.call(this);
     if (typeof d.hq !== 'string') d.hq = '';
     if (d.hsort !== 'value') d.hsort = 'recent';
     if (!(d.hmore >= 1)) d.hmore = 1;
-    if (!HOME_KANTO.some(([n]) => n === d.buddy)) d.buddy = HOME_BUDDY;
+    if (!HOME_BUDDIES.some(([n]) => n === d.buddy)) d.buddy = HOME_BUDDY;
     if (typeof d.hbq !== 'string') d.hbq = '';
     return d;
   };
@@ -92,21 +92,37 @@
   // Même position que Territoire (arrondie à 100 m, jamais enregistrée ni envoyée). « Scanner les boutiques » lance le
   // faisceau : chaque boutique apparaît à sa vraie direction et devient cliquable à ce moment-là (animation CSS, sans
   // calcul à chaque image) ; un appui ouvre sa fiche. Animations réduites : boutiques affichées tout de suite.
+  // Le petit radar animé à côté du titre lance le même balayage ; sans position, il la demande d'abord et le
+  // balayage part dès que les boutiques sont prêtes.
   const HOME_KM = 5, HOME_PINS = 8, HOME_R = 120;
-  let homeScanTimer = null;
+  let homeScanTimer = null, homeNextTimer = null;
   const homeClamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  proto.homeSweep = function () {
+    if (this.st().hscan === 'run') return;
+    clearTimeout(homeScanTimer);
+    if (homeStill()) { this.setState({ hscan: 'done' }); return; }
+    this.setState({ hscan: 'run' });
+    homeScanTimer = setTimeout(() => this.setState({ hscan: 'done' }), TURN + 400);
+  };
   proto.homeRadar = function (s) {
     const pos = s.tpos || s.raround || null;
     const r = {
       needPos: false, loading: false, located: false, hasMsg: false, msg: '', locate: () => this.terLocate(false),
       france: () => this.openRadar(), list: () => this.tab('territory'), rings: [], pins: [], sweeping: false, scanned: false,
-      scan: null, scanLabel: '', busy: false, status: ''
+      scan: null, scanLabel: '', busy: false, status: '',
+      tap: () => {
+        if (pos && RADAR.status === 'ready') { this.homeSweep(); return; }
+        this.setState({ hscanNext: true });
+        if (!pos) this.terLocate(false);
+      },
+      tapLabel: pos ? 'Radar : scanner les boutiques autour de toi' : 'Radar : me localiser et scanner les boutiques autour de toi'
     };
     if (!pos) return Object.assign(r, { needPos: true, hasMsg: !!s.tmsg, msg: s.tmsg || '' });
     if (RADAR.status !== 'ready') {
       if (RADAR.status !== 'loading') RADAR.load().then(() => this.setState({ rdata: Date.now() }));
       return Object.assign(r, { loading: true });
     }
+    if (s.hscanNext && !homeNextTimer) homeNextTimer = setTimeout(() => { homeNextTimer = null; this.setState({ hscanNext: false }); this.homeSweep(); }, 60);
     const rows = terRows(Object.assign({}, s, { tkm: String(HOME_KM), tsort: 'dist', tprod: 'all' }), pos);
     const sweeping = s.hscan === 'run', scanned = s.hscan === 'done', scale = d => HOME_R * Math.sqrt(Math.min(d, HOME_KM) / HOME_KM);
     const pins = RadarCore.pinLayout(rows, HOME_KM, HOME_R, 118, 40, HOME_PINS).map(x => {
@@ -124,13 +140,7 @@
       located: true, sweeping: sweeping, scanned: scanned, pins: pins, busy: sweeping,
       rings: [1, 3, 5].map(v => ({ r: scale(v).toFixed(1), label: v + ' km', ly: (-scale(v) + 13).toFixed(1) })),
       scanLabel: sweeping ? 'Scan en cours…' : scanned ? 'Scanner à nouveau' : 'Scanner les boutiques',
-      scan: () => {
-        if (this.st().hscan === 'run') return;
-        clearTimeout(homeScanTimer);
-        if (homeStill()) { this.setState({ hscan: 'done' }); return; }
-        this.setState({ hscan: 'run' });
-        homeScanTimer = setTimeout(() => this.setState({ hscan: 'done' }), TURN + 400);
-      },
+      scan: () => this.homeSweep(),
       status: !n ? 'Aucune boutique repérée à moins de ' + HOME_KM + ' km : « Voir la liste » permet d’élargir.'
         : !(sweeping || scanned) ? n + many + ' à moins de ' + HOME_KM + ' km : lance le scan pour les voir sur le radar.'
         : n + many + ' à moins de ' + HOME_KM + ' km · ' + (pins.length < n ? 'les ' + pins.length + ' meilleures chances sur le radar · ' : '') + 'position à 100 m près'
@@ -149,11 +159,14 @@
     return r;
   };
 
-  // ——— Compagnon : un des 151 Pokémon de Kanto, animé à côté de la valeur ; choix enregistré sur l'appareil ———
+  // ——— Compagnon : un des 151 Pokémon de Kanto, ou Kyogre, Groudon, Rayquaza ; animé à côté de la valeur ; choix
+  // enregistré sur l'appareil ———
   // Sprites de Pokémon Noir et Blanc (tools/sprites/fetch_sprites.py) : animé (GIF), image fixe si l'utilisateur
-  // limite les animations, et dans le panneau de choix (plus léger).
+  // limite les animations. Le panneau de choix montre des icônes : le Pokémon seul, recadré, agrandi sans flou et
+  // centré (tools/sprites/make_icons.py).
   const homeStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
   const homeSprite = (n, still) => 'img/pokemon/' + n + (still ? '.png' : '.gif');
+  const homeIcon = n => 'img/pokemon/icon/' + n + '.png';
   const HOME_CREDIT = 'Sprites de Pokémon Noir et Blanc © The Pokémon Company, via PokeAPI. Dropicards est une application indépendante, non affiliée.';
   proto.homeBuddy = function (s) {
     const n = s.buddy, name = HOME_NAMES[n], still = homeStill();
@@ -165,10 +178,10 @@
     };
     if (!r.picking) return r;
     const q = fold(String(s.hbq || '').trim());
-    const list = HOME_KANTO.filter(([k, nom]) => !q || fold(nom).indexOf(q) >= 0 || String(k) === q.replace(/^0+/, ''));
-    r.count = list.length ? list.length + (list.length > 1 ? ' Pokémon' : ' Pokémon') + ' · n° 1 à 151 (Kanto)' : 'Aucun Pokémon ne correspond.';
+    const list = HOME_BUDDIES.filter(([k, nom]) => !q || fold(nom).indexOf(q) >= 0 || String(k) === q.replace(/^0+/, ''));
+    r.count = !list.length ? 'Aucun Pokémon ne correspond.' : list.length + ' Pokémon' + (q ? '' : ' · Kanto, Kyogre, Groudon, Rayquaza');
     r.list = list.map(([k, nom]) => Object.assign({
-      name: nom, src: homeSprite(k, true), on: k === n, aria: nom + ', n° ' + k + (k === n ? ' (ton compagnon)' : ''),
+      name: nom, src: homeIcon(k), on: k === n, aria: nom + ', n° ' + k + (k === n ? ' (ton compagnon)' : ''),
       pick: () => { this.setState({ buddy: k, buddyPick: false, toast: nom + ' t’accompagne' }); this.flash(); }
     }, this.chip(k === n)));
     return r;

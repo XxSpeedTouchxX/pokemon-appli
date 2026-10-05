@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "credit": "Sprites de Pokémon Noir et Blanc © The Pokémon Company, via PokeAPI",
  "sources": {
   "animated": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/{n}.gif",
@@ -918,6 +918,24 @@
    "Mew",
    "6e40f8201fe25427",
    "dfbeeafd63240304"
+  ],
+  [
+   382,
+   "Kyogre",
+   "afc2c736643a2f90",
+   "02c45c92e404ddb7"
+  ],
+  [
+   383,
+   "Groudon",
+   "30af1fa229286904",
+   "4a29eaa120446ce6"
+  ],
+  [
+   384,
+   "Rayquaza",
+   "ecdd9c1958b86a4b",
+   "2377f7a7be0f3fe2"
   ]
  ]
 }

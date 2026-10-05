@@ -203,7 +203,7 @@
 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="2.8"></circle><path d="{{ ui.eyeSlash }}"></path></svg>
 </button>
 </div>
-<div style="font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 36px; font-size: min(46px, calc((100cqw - 104px) / {{ home.hv.fit }})); line-height: 1.12; letter-spacing: 0.01em; white-space: nowrap; color: var(--pkm-logo); text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35)">{{ home.hv.value }}</div>
+<div class="pkm-logo-text" style="font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 36px; font-size: min(46px, calc((100cqw - 112px) / {{ home.hv.fit }})); line-height: 1.12; letter-spacing: 0.03em; white-space: nowrap; padding: 0.02em 0.12em 0.1em 0.05em; margin-left: -0.05em; color: var(--pkm-white)">{{ home.hv.value }}</div>
 <span style="font-size: 13px; color: #9AA8C3">{{ home.units }}</span>
 </div>
 <button type="button" onClick="{{ hb.open }}" aria-label="{{ hb.aria }}" style="flex: none; position: relative; width: 96px; height: 96px; margin: -10px -10px -8px 0; padding: 0; border: 0; border-radius: 24px; background: radial-gradient(closest-side, rgba(var(--pkm-accent-rgb), 0.24), rgba(var(--pkm-accent-rgb), 0)); cursor: pointer">
@@ -230,8 +230,20 @@
 
 <section aria-label="Boutiques près de toi" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
-<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
-<button type="button" onClick="{{ home.hr.list }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir la liste</button>
+<div style="flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 6px">
+<h2 style="margin: 0; min-width: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-size: min(18px, 4.7vw); font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
+<button type="button" class="pkm-dark" onClick="{{ home.hr.tap }}" aria-label="{{ home.hr.tapLabel }}" aria-disabled="{{ home.hr.busy }}" style="flex: none; position: relative; width: 32px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer">
+<span aria-hidden="true" style="position: absolute; left: 1px; top: 7px; width: 30px; height: 30px; border-radius: 15px; overflow: hidden; background: var(--pkm-card); box-shadow: 0 0 0 1.5px var(--pkm-accent), 0 4px 10px rgba(var(--pkm-shadow-rgb), 0.3)">
+<svg width="30" height="30" viewBox="-15 -15 30 30" style="position: absolute; left: 0; top: 0; display: block"><path d="M-13 0H13 M0 -13V13" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.3); stroke-width: 1"></path><circle cx="0" cy="0" r="5" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.5); stroke-width: 1"></circle><circle cx="0" cy="0" r="10" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.5); stroke-width: 1"></circle></svg>
+<span class="pkm-anim" style="position: absolute; inset: 0; border-radius: 15px; background: conic-gradient(from -70deg, rgba(var(--pkm-accent-rgb), 0) 0deg, rgba(var(--pkm-accent-rgb), 0.75) 70deg, rgba(var(--pkm-accent-rgb), 0) 70.5deg); animation: pkmSpin 2.4s linear infinite"></span>
+<span class="pkm-anim" style="position: absolute; left: 19px; top: 8px; width: 4px; height: 4px; border-radius: 2px; background: var(--pkm-accent); animation: pkmBlip 2.4s ease-out -2.067s infinite"></span>
+<span class="pkm-anim" style="position: absolute; left: 17px; top: 23px; width: 4px; height: 4px; border-radius: 2px; background: var(--pkm-accent); animation: pkmBlip 2.4s ease-out -1.333s infinite"></span>
+<span class="pkm-anim" style="position: absolute; left: 6px; top: 11px; width: 4px; height: 4px; border-radius: 2px; background: var(--pkm-accent); animation: pkmBlip 2.4s ease-out -0.467s infinite"></span>
+<span style="position: absolute; left: 13px; top: 13px; width: 4px; height: 4px; border-radius: 2px; background: var(--pkm-accent)"></span>
+</span>
+</button>
+</div>
+<button type="button" onClick="{{ home.hr.list }}" style="flex: none; height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir la liste</button>
 </div>
 <sc-if value="{{ home.hr.needPos }}" hint-placeholder-val="{{ false }}">
 <div style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #24345C; background: #121C33; display: flex; flex-direction: column; gap: 12px">
@@ -591,11 +603,11 @@
 <input type="search" aria-label="Chercher un Pokémon" placeholder="Pikachu, 133…" value="{{ hb.q }}" onChange="{{ hb.onQ }}" style="flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; outline-offset: 4px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px">
 </div>
 <span style="flex: none; font-size: 12.5px; color: #7D8BA8">{{ hb.count }}</span>
-<div role="group" aria-label="Pokémon de Kanto" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); align-content: start; gap: 8px">
+<div role="group" aria-label="Compagnons" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start; gap: 8px">
 <sc-for list="{{ hb.list }}" as="hbp" hint-placeholder-count="12">
-<button type="button" onClick="{{ hbp.pick }}" aria-pressed="{{ hbp.on }}" aria-label="{{ hbp.aria }}" style="display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 4px 2px 8px; border-radius: 16px; border: 1px solid {{ hbp.bc }}; background: {{ hbp.bg }}; color: {{ hbp.fg }}; font: inherit; cursor: pointer">
-<img src="{{ hbp.src }}" alt="" loading="lazy" width="72" height="72" style="display: block; width: 72px; height: 72px; object-fit: none; object-position: 50% 62%; image-rendering: pixelated">
-<span style="max-width: 100%; font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hbp.name }}</span>
+<button type="button" onClick="{{ hbp.pick }}" aria-pressed="{{ hbp.on }}" aria-label="{{ hbp.aria }}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 6px 4px 10px; border-radius: 18px; border: 1px solid {{ hbp.bc }}; background: {{ hbp.bg }}; color: {{ hbp.fg }}; font: inherit; cursor: pointer">
+<img src="{{ hbp.src }}" alt="" loading="lazy" width="96" height="96" style="display: block; width: 96px; max-width: 100%; height: auto">
+<span style="max-width: 100%; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hbp.name }}</span>
 </button>
 </sc-for>
 </div>
