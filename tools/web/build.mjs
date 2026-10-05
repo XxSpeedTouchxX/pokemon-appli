@@ -396,10 +396,10 @@ const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.met
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
 const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js');
-// Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Kyogre, Groudon et Rayquaza
-// (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
+// Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Latias, Latios, Kyogre, Groudon et
+// Rayquaza (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
 const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
-if (buddies.length !== 154) throw new Error('Compagnons : ' + buddies.length + ' au lieu de 154');
+if (buddies.length !== 156) throw new Error('Compagnons : ' + buddies.length + ' au lieu de 156');
 for (const [n] of buddies) for (const f of [n + '.gif', n + '.png', 'icon/' + n + '.png'])
   if (!existsSync(ROOT + 'web/img/pokemon/' + f)) throw new Error('Compagnon sans image : web/img/pokemon/' + f);
 const buddiesJs = '  const HOME_BUDDIES = ' + JSON.stringify(buddies) + ';\n';

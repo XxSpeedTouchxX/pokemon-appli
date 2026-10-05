@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-fetch_sprites.py : compagnons de l'accueil, les 151 Pokémon de Kanto (thème 30 ans), plus Kyogre, Groudon et
-Rayquaza (demande du porteur, 2026-10-05). Lancé à la main ; les fichiers sont ensuite gardés dans le dépôt (version
+fetch_sprites.py : compagnons de l'accueil, les 151 Pokémon de Kanto (thème 30 ans), plus Latias, Latios, Kyogre,
+Groudon et Rayquaza (demandes du porteur, 2026-10-05). Lancé à la main ; les fichiers sont ensuite gardés dans le dépôt (version
 figée, empreintes SHA-256 dans companions.json). Les icônes du choix sont faites ensuite par make_icons.py.
 
 Sources (dépôts GitHub de PokeAPI, données publiques) :
@@ -33,7 +33,7 @@ NAMES = RAW + "pokeapi/master/data/v2/csv/pokemon_species_names.csv"
 UA = "Dropicards/1.0 (+https://github.com/XxSpeedTouchxX/pokemon-appli)"
 MAX_GIF, MAX_PNG = 200_000, 20_000  # octets : un sprite plus gros est refusé
 KANTO = range(1, 152)
-EXTRA = (382, 383, 384)  # Kyogre, Groudon, Rayquaza, à la suite dans l'ordre du Pokédex
+EXTRA = (380, 381, 382, 383, 384)  # Latias, Latios, Kyogre, Groudon, Rayquaza, à la suite dans l'ordre du Pokédex
 
 
 def get(url):

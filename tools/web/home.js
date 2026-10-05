@@ -157,8 +157,8 @@
     return r;
   };
 
-  // ——— Compagnon : un des 151 Pokémon de Kanto, ou Kyogre, Groudon, Rayquaza ; animé à côté de la valeur ; choix
-  // enregistré sur l'appareil ———
+  // ——— Compagnon : un des 151 Pokémon de Kanto, ou Latias, Latios, Kyogre, Groudon, Rayquaza ; animé à côté de la
+  // valeur ; choix enregistré sur l'appareil ———
   // Sprites de Pokémon Noir et Blanc (tools/sprites/fetch_sprites.py) : animé (GIF), image fixe si l'utilisateur
   // limite les animations. Le panneau de choix montre des icônes : le Pokémon seul, recadré, agrandi sans flou et
   // centré (tools/sprites/make_icons.py).
@@ -177,7 +177,7 @@
     if (!r.picking) return r;
     const q = fold(String(s.hbq || '').trim());
     const list = HOME_BUDDIES.filter(([k, nom]) => !q || fold(nom).indexOf(q) >= 0 || String(k) === q.replace(/^0+/, ''));
-    r.count = !list.length ? 'Aucun Pokémon ne correspond.' : list.length + ' Pokémon' + (q ? '' : ' · Kanto, Kyogre, Groudon, Rayquaza');
+    r.count = !list.length ? 'Aucun Pokémon ne correspond.' : list.length + ' Pokémon' + (q ? '' : ' disponibles');
     r.list = list.map(([k, nom]) => Object.assign({
       name: nom, src: homeIcon(k), on: k === n, aria: nom + ', n° ' + k + (k === n ? ' (ton compagnon)' : ''),
       pick: () => { this.setState({ buddy: k, buddyPick: false, toast: nom + ' t’accompagne' }); this.flash(); }

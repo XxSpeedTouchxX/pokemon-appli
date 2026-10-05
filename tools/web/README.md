@@ -35,7 +35,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - variation sur 7 jours ;
    - **courbe sur 4 points réels** (il y a 30 jours, 7 jours, hier, aujourd'hui). Cartes : moyennes Cardmarket ramenées à la valeur du jour ; scellé : cote archivée chaque jour (`sealed.json`) ; démo : sa courbe simulée. Une valeur inconnue reste plate, jamais inventée ;
    - plus-value latente, source et date ;
-   - **compagnon animé** : un des 151 Pokémon de Kanto, ou Kyogre, Groudon, Rayquaza ; Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » : 3 Pokémon par ligne, icônes à la taille d'origine de chaque Pokémon (rien autour, centrées, jamais agrandies), panneau opaque, recherche par nom ou numéro. Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites et icônes : `tools/sprites/`.
+   - **compagnon animé** : un des 151 Pokémon de Kanto, ou Latias, Latios, Kyogre, Groudon, Rayquaza ; Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » : « 156 Pokémon disponibles », 3 par ligne, icônes à la taille d'origine de chaque Pokémon (rien autour, centrées, jamais agrandies), panneau opaque, recherche par nom ou numéro. Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites et icônes : `tools/sprites/`.
 3. **Boutiques autour de toi :**
    - radar en SVG (anneaux 1, 3, 5 km) ;
    - « Scanner les boutiques » lance le faisceau : chaque vraie boutique apparaît à sa direction réelle, avec son nom et sa ville, et devient cliquable à ce moment-là ;
@@ -303,7 +303,7 @@ Le script `tools/web/build.mjs` :
 | `img/` | Visuels provisoires (ceux qui ne sont pas sur TCGdex) |
 | `img/products/` | Visuels officiels des produits scellés (galerie Pokémon France) |
 | `img/brand/` | Logo Dropicards (SVG : clair, aussi dans l'en-tête ; sombre ; icône), voir `tools/brand/` |
-| `img/pokemon/` | Compagnons de l'accueil : sprites animés et fixes des 151 Pokémon de Kanto, de Kyogre, Groudon et Rayquaza ; icônes du choix dans `icon/`. Voir `tools/sprites/` |
+| `img/pokemon/` | Compagnons de l'accueil : sprites animés et fixes des 151 Pokémon de Kanto, de Latias, Latios, Kyogre, Groudon et Rayquaza ; icônes du choix dans `icon/`. Voir `tools/sprites/` |
 | `icons/` | Icônes de l'app Dropicards (dont une « maskable ») |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |
