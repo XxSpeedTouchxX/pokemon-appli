@@ -92,7 +92,7 @@
   // Même position que Territoire (arrondie à 100 m, jamais enregistrée ni envoyée). « Scanner les boutiques » lance le
   // faisceau : chaque boutique apparaît à sa vraie direction et devient cliquable à ce moment-là (animation CSS, sans
   // calcul à chaque image) ; un appui ouvre sa fiche. Animations réduites : boutiques affichées tout de suite.
-  // Le petit radar animé à côté du titre lance le même balayage ; sans position, il la demande d'abord et le
+  // Sans position, un logo radar animé dans l'encadré, au-dessus de « Me localiser », demande la position ; le
   // balayage part dès que les boutiques sont prêtes.
   const HOME_KM = 5, HOME_PINS = 8, HOME_R = 120;
   let homeScanTimer = null, homeNextTimer = null;
@@ -109,15 +109,13 @@
     const r = {
       needPos: false, loading: false, located: false, hasMsg: false, msg: '', locate: () => this.terLocate(false),
       france: () => this.openRadar(), list: () => this.tab('territory'), rings: [], pins: [], sweeping: false, scanned: false,
-      scan: null, scanLabel: '', busy: false, status: '',
-      tap: () => {
-        if (pos && RADAR.status === 'ready') { this.homeSweep(); return; }
-        this.setState({ hscanNext: true });
-        if (!pos) this.terLocate(false);
-      },
-      tapLabel: pos ? 'Radar : scanner les boutiques autour de toi' : 'Radar : me localiser et scanner les boutiques autour de toi'
+      scan: null, scanLabel: '', busy: false, status: '', tap: null, tapLabel: ''
     };
-    if (!pos) return Object.assign(r, { needPos: true, hasMsg: !!s.tmsg, msg: s.tmsg || '' });
+    if (!pos) return Object.assign(r, {
+      needPos: true, hasMsg: !!s.tmsg, msg: s.tmsg || '',
+      tap: () => { this.setState({ hscanNext: true }); this.terLocate(false); },
+      tapLabel: 'Radar : me localiser et scanner les boutiques autour de toi'
+    });
     if (RADAR.status !== 'ready') {
       if (RADAR.status !== 'loading') RADAR.load().then(() => this.setState({ rdata: Date.now() }));
       return Object.assign(r, { loading: true });

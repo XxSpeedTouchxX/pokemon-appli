@@ -230,25 +230,24 @@
 
 <section aria-label="Boutiques près de toi" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
-<div style="flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 6px">
-<h2 style="margin: 0; min-width: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-size: min(18px, 4.7vw); font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
-<button type="button" class="pkm-dark" onClick="{{ home.hr.tap }}" aria-label="{{ home.hr.tapLabel }}" aria-disabled="{{ home.hr.busy }}" style="flex: none; position: relative; width: 32px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer">
-<span aria-hidden="true" style="position: absolute; left: 1px; top: 7px; width: 30px; height: 30px; border-radius: 15px; overflow: hidden; background: var(--pkm-card); box-shadow: 0 0 0 1.5px var(--pkm-accent), 0 4px 10px rgba(var(--pkm-shadow-rgb), 0.3)">
-<svg width="30" height="30" viewBox="-15 -15 30 30" style="position: absolute; left: 0; top: 0; display: block"><path d="M-13 0H13 M0 -13V13" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.3); stroke-width: 1"></path><circle cx="0" cy="0" r="5" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.5); stroke-width: 1"></circle><circle cx="0" cy="0" r="10" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.5); stroke-width: 1"></circle></svg>
-<span class="pkm-anim" style="position: absolute; inset: 0; border-radius: 15px; background: conic-gradient(from -70deg, rgba(var(--pkm-accent-rgb), 0) 0deg, rgba(var(--pkm-accent-rgb), 0.75) 70deg, rgba(var(--pkm-accent-rgb), 0) 70.5deg); animation: pkmSpin 2.4s linear infinite"></span>
-<span class="pkm-anim" style="position: absolute; left: 19px; top: 8px; width: 4px; height: 4px; border-radius: 2px; background: var(--pkm-accent); animation: pkmBlip 2.4s ease-out -2.067s infinite"></span>
-<span class="pkm-anim" style="position: absolute; left: 17px; top: 23px; width: 4px; height: 4px; border-radius: 2px; background: var(--pkm-accent); animation: pkmBlip 2.4s ease-out -1.333s infinite"></span>
-<span class="pkm-anim" style="position: absolute; left: 6px; top: 11px; width: 4px; height: 4px; border-radius: 2px; background: var(--pkm-accent); animation: pkmBlip 2.4s ease-out -0.467s infinite"></span>
-<span style="position: absolute; left: 13px; top: 13px; width: 4px; height: 4px; border-radius: 2px; background: var(--pkm-accent)"></span>
-</span>
-</button>
-</div>
-<button type="button" onClick="{{ home.hr.list }}" style="flex: none; height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir la liste</button>
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
+<button type="button" onClick="{{ home.hr.list }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir la liste</button>
 </div>
 <sc-if value="{{ home.hr.needPos }}" hint-placeholder-val="{{ false }}">
 <div style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #24345C; background: #121C33; display: flex; flex-direction: column; gap: 12px">
 <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #C9D3EA">Active ta position : le radar repère les vraies boutiques autour de toi (cartes, jeux, jouets, grandes surfaces), avec leur nom, leur ville et leur chance d’avoir du Pokémon.</p>
 <sc-if value="{{ home.hr.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13px; line-height: 1.45; color: #F5B14C">{{ home.hr.msg }}</p></sc-if>
+<button type="button" onClick="{{ home.hr.tap }}" aria-label="{{ home.hr.tapLabel }}" style="align-self: center; position: relative; width: 132px; height: 132px; margin: 2px 0; padding: 0; border: 0; border-radius: 66px; background: transparent; cursor: pointer">
+<span aria-hidden="true" style="position: absolute; inset: 0; border-radius: 66px; overflow: hidden; background: radial-gradient(closest-side, rgba(var(--pkm-accent-rgb), 0.14), rgba(var(--pkm-accent-rgb), 0)), var(--pkm-field); box-shadow: inset 0 0 0 2px rgba(var(--pkm-accent-rgb), 0.7)">
+<svg width="132" height="132" viewBox="-66 -66 132 132" style="position: absolute; left: 0; top: 0; display: block"><path d="M-60 0H60 M0 -60V60" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.25); stroke-width: 1"></path><circle cx="0" cy="0" r="20" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.45); stroke-width: 1; stroke-dasharray: 3 4"></circle><circle cx="0" cy="0" r="40" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.45); stroke-width: 1; stroke-dasharray: 3 4"></circle><circle cx="0" cy="0" r="58" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.45); stroke-width: 1; stroke-dasharray: 3 4"></circle></svg>
+<span class="pkm-anim" style="position: absolute; inset: 0; border-radius: 66px; background: conic-gradient(from -70deg, rgba(var(--pkm-accent-rgb), 0) 0deg, rgba(var(--pkm-accent-rgb), 0.55) 70deg, rgba(var(--pkm-accent-rgb), 0) 70.5deg); animation: pkmSpin 2.6s linear infinite"></span>
+<span class="pkm-anim" style="position: absolute; left: 92px; top: 27px; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-accent); animation: pkmBlip 2.6s ease-out -2.31s infinite"></span>
+<span class="pkm-anim" style="position: absolute; left: 88px; top: 76px; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-accent); animation: pkmBlip 2.6s ease-out -1.75s infinite"></span>
+<span class="pkm-anim" style="position: absolute; left: 38px; top: 108px; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-accent); animation: pkmBlip 2.6s ease-out -1.10s infinite"></span>
+<span class="pkm-anim" style="position: absolute; left: 41px; top: 50px; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-accent); animation: pkmBlip 2.6s ease-out -0.43s infinite"></span>
+<span style="position: absolute; left: 60px; top: 60px; width: 12px; height: 12px; border-radius: 6px; background: var(--pkm-accent); box-shadow: 0 0 0 4px rgba(var(--pkm-accent-rgb), 0.3)"></span>
+</span>
+</button>
 <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
 <button type="button" onClick="{{ home.hr.locate }}" style="height: 48px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Me localiser</button>
 <button type="button" onClick="{{ home.hr.france }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Carte de France</button>
@@ -606,7 +605,7 @@
 <div role="group" aria-label="Compagnons" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start; gap: 8px">
 <sc-for list="{{ hb.list }}" as="hbp" hint-placeholder-count="12">
 <button type="button" onClick="{{ hbp.pick }}" aria-pressed="{{ hbp.on }}" aria-label="{{ hbp.aria }}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 6px 4px 10px; border-radius: 18px; border: 1px solid {{ hbp.bc }}; background: {{ hbp.bg }}; color: {{ hbp.fg }}; font: inherit; cursor: pointer">
-<img src="{{ hbp.src }}" alt="" loading="lazy" width="96" height="96" style="display: block; width: 96px; max-width: 100%; height: auto">
+<img src="{{ hbp.src }}" alt="" loading="lazy" width="96" height="96" style="display: block; width: 96px; max-width: 100%; height: auto; image-rendering: pixelated">
 <span style="max-width: 100%; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hbp.name }}</span>
 </button>
 </sc-for>

@@ -35,13 +35,12 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - variation sur 7 jours ;
    - **courbe sur 4 points réels** (il y a 30 jours, 7 jours, hier, aujourd'hui). Cartes : moyennes Cardmarket ramenées à la valeur du jour ; scellé : cote archivée chaque jour (`sealed.json`) ; démo : sa courbe simulée. Une valeur inconnue reste plate, jamais inventée ;
    - plus-value latente, source et date ;
-   - **compagnon animé** : un des 151 Pokémon de Kanto, ou Kyogre, Groudon, Rayquaza ; Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » : 3 Pokémon par ligne, icônes nettes (le Pokémon seul, recadré et centré), panneau opaque, recherche par nom ou numéro. Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites et icônes : `tools/sprites/`.
+   - **compagnon animé** : un des 151 Pokémon de Kanto, ou Kyogre, Groudon, Rayquaza ; Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » : 3 Pokémon par ligne, icônes à la taille d'origine de chaque Pokémon (rien autour, centrées, jamais agrandies), panneau opaque, recherche par nom ou numéro. Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites et icônes : `tools/sprites/`.
 3. **Boutiques autour de toi :**
    - radar en SVG (anneaux 1, 3, 5 km) ;
    - « Scanner les boutiques » lance le faisceau : chaque vraie boutique apparaît à sa direction réelle, avec son nom et sa ville, et devient cliquable à ce moment-là ;
-   - le **petit radar animé** à côté du titre lance le même balayage. Sans position, il la demande d'abord, puis le balayage part tout seul. Immobile si l'utilisateur limite les animations ;
    - un appui ouvre sa fiche ;
-   - sans position : « Me localiser » ;
+   - sans position : « Me localiser », ou le **logo radar animé** de l'encadré, juste au-dessus : un appui demande la position, puis le balayage part tout seul (logo immobile si l'utilisateur limite les animations) ;
    - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
 4. **Sorties du moment** (carrousel).
 5. **Ma collection :** tous les articles, les plus récents d'abord ou par valeur, 20 par page ; variation sur 7 jours ; collection vide : « Rechercher une carte » et « Scanner ».

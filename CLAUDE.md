@@ -69,8 +69,9 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - lecture réglée sur des cartes de test dessinées : la vraie mesure se fait sur téléphone (`?debug=scan`).
 - **Retouches de l'accueil (2026-10-05) :**
   - logo complet dans l'en-tête (I à l'éclair, O étoilé), plus grand ;
-  - compagnons : 154 (les 151 de Kanto, plus Kyogre, Groudon, Rayquaza) ; choix sur 3 colonnes, icônes recadrées, panneau opaque ;
-  - montant de la collection au style du logo (blanc, contour noir) ; petit radar animé qui lance le balayage des boutiques.
+  - compagnons : 154 (les 151 de Kanto, plus Kyogre, Groudon, Rayquaza) ; choix sur 3 colonnes, icônes à la taille d'origine de chaque Pokémon, panneau opaque ;
+  - montant de la collection au style du logo (blanc, contour noir) ;
+  - logo radar interactif dans l'encadré « Active ta position » (au-dessus de « Me localiser ») : position, puis balayage.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
