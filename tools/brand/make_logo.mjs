@@ -3,13 +3,12 @@
 // @fontsource/luckiest-guy), converties en tracés : le logo ne dépend d'aucune police chargée.
 // Le O et le I sont des cartes (rond étoilé, éclair). Sorties :
 //   web/img/brand/dropicards.svg        fond clair : lettres blanches, contour et ombre noirs (l'en-tête de l'app utilise
-//                                       le fichier exact du porteur depuis le 2026-10-07, voir import_header.py)
+//                                       le fichier exact du porteur depuis le 2026-10-07, voir import_logo.py)
 //   web/img/brand/dropicards-dark.svg   fond sombre : lettres jaunes, sans contour
-//   web/img/brand/icon.svg              icône « D + carte »
 //   web/img/brand/classeur.svg          rubrique « Mon classeur » de l'accueil : classeur à anneaux, Poké Ball sur la
 //                                       couverture, cartes qui dépassent (même contour et même ombre que le logo)
-//   web/icons/icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png (rendus par Chromium)
-// Usage : cd tools/brand && npm install && node make_logo.mjs   (Chromium : variable CHROMIUM, sinon Playwright)
+// Les icônes de l'app et le logo de l'en-tête viennent du fichier du porteur : import_logo.py.
+// Usage : cd tools/brand && npm install && node make_logo.mjs
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import opentype from 'opentype.js';
@@ -88,21 +87,6 @@ function wordmark(o) {
 }
 const doc = (box, body, title) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box.join(' ')}" role="img" aria-label="${title}"><title>${title}</title>${body}</svg>\n`;
 
-// Icône : carré arrondi jaune bordé de noir, « D » blanc contouré et carte jaune au rond noir.
-function iconBody(full, scale = 1) {
-  const g = glyph('D', 200), dW = g.w, card = cardO(112, 172, false);
-  const inner = `<g transform="translate(256 262) scale(${scale}) translate(-256 -262)">`
-    + `<g transform="translate(${r1(150 - dW / 2)} 362) rotate(-6 ${r1(dW / 2)} -100)">`
-    + `<path transform="translate(9 11)" d="${g.d}" fill="${INK}" stroke="${INK}" stroke-width="26" stroke-linejoin="round"/>`
-    + `<path d="${g.d}" fill="${INK}" stroke="${INK}" stroke-width="26" stroke-linejoin="round"/><path d="${g.d}" fill="${WHITE}"/></g>`
-    + `<g transform="translate(300 176) rotate(8 56 86)"><path d="${card.shape}" fill="${INK}" stroke="${INK}" stroke-width="22" stroke-linejoin="round" transform="translate(7 9)"/>`
-    + `<path d="${card.shape}" fill="${YELLOW}" stroke="${INK}" stroke-width="20" stroke-linejoin="round"/>`
-    + `<path d="${rrect(14, 14, 84, 144, 14)}" fill="none" stroke="${WHITE}" stroke-width="6"/>${card.inside}</g></g>`;
-  return full
-    ? `<rect width="512" height="512" fill="${YELLOW}"/>${inner}`
-    : `<rect x="20" y="20" width="472" height="472" rx="112" fill="${YELLOW}" stroke="${INK}" stroke-width="24"/>${inner}`;
-}
-
 // Classeur de cartes (rubrique « Mon classeur ») : jaune, anneaux sur la tranche, Poké Ball sur la couverture, deux
 // cartes qui dépassent, étincelle ; contour noir et ombre portée comme les lettres du logo. 150 × 120.
 const RED = '#E3350D', BLUE = '#3B6FD8', SKY = '#BFE3FF';
@@ -133,23 +117,5 @@ const big = wordmark({ outline: 14, shadow: [5, 7], letter: WHITE, detail: true,
 const dark = wordmark({ outline: 0, letter: YELLOW, detail: false, iCard: false, gap: 7, cardStroke: WHITE, cardStrokeW: 6 });
 out('web/img/brand/dropicards.svg', doc(big.box, big.svg, 'Dropicards'));
 out('web/img/brand/dropicards-dark.svg', doc(dark.box, dark.svg, 'Dropicards'));
-out('web/img/brand/icon.svg', doc([0, 0, 512, 512], iconBody(false), 'Dropicards'));
 out('web/img/brand/classeur.svg', doc([0, 0, 150, 122], binderSvg(), 'Classeur de cartes'));
-console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, icon, classeur');
-
-// Icônes PNG (Chromium headless) : « any » avec bord noir et coins transparents ; « maskable » et Apple en plein cadre.
-const { chromium } = await import('playwright-core');
-const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
-const page = await browser.newPage();
-const shoot = async (svg, size, file) => {
-  await page.setViewportSize({ width: size, height: size });
-  await page.setContent(`<html><body style="margin:0;background:transparent">${svg.replace('<svg ', `<svg width="${size}" height="${size}" `)}</body></html>`);
-  await page.screenshot({ path: ROOT + file, omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
-};
-const any = doc([0, 0, 512, 512], iconBody(false), 'Dropicards'), full = doc([0, 0, 512, 512], iconBody(true, 0.84), 'Dropicards');
-await shoot(any, 512, 'web/icons/icon-512.png');
-await shoot(any, 192, 'web/icons/icon-192.png');
-await shoot(doc([0, 0, 512, 512], iconBody(true, 0.72), 'Dropicards'), 512, 'web/icons/icon-maskable-512.png');
-await shoot(full, 180, 'web/icons/apple-touch-icon.png');
-await browser.close();
-console.log('PNG : icon-512, icon-192, icon-maskable-512, apple-touch-icon');
+console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, classeur');

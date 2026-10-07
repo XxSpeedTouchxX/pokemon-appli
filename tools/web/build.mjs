@@ -31,7 +31,7 @@ patch('<svg width="358" height="210" viewBox="0 0 358 210"', '<svg width="100%" 
 patch('<svg width="324" height="56" viewBox="0 0 324 56"', '<svg width="100%" height="56" viewBox="0 0 324 56" preserveAspectRatio="none"');
 patch('<svg width="324" height="76" viewBox="0 0 324 76"', '<svg width="100%" height="76" viewBox="0 0 324 76" preserveAspectRatio="none"');
 // Identité Dropicards : dans l'en-tête, le logo exact du porteur (2026-10-07), son fichier au fond rendu transparent
-// (tools/brand/import_header.py) : 196 px de large au plus, réduit sur les petits écrans pour rester centré entre la
+// (tools/brand/import_logo.py) : 196 px de large au plus, réduit sur les petits écrans pour rester centré entre la
 // pastille et l'avatar. La pastille « Marché FR » devient « FR » pour lui laisser la place.
 patch(`<span style="display: flex; align-items: center; gap: 8px">
 <span style="width: 30px; height: 30px; border-radius: 10px; background: #3D63FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(61, 99, 255, 0.35)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg></span>
@@ -592,8 +592,8 @@ const index = `<!doctype html>
 <meta name="apple-mobile-web-app-title" content="Dropicards">
 <title>Dropicards</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/svg+xml" href="img/brand/icon.svg">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 ${THEME_SWITCH}
 ${fonts}
