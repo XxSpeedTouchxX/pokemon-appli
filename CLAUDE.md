@@ -80,7 +80,8 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - icône de l'app (écran d'accueil du téléphone) : le logo du porteur sur deux lignes ; carte O dans l'onglet du navigateur ;
   - liste « Ma collection » retirée de l'accueil (la marge réalisée reste) ;
   - thèmes des compagnons : Kyogre (océan, bleu), Groudon (volcan, rouge), Rayquaza (vert et blanc) changent le fond de l'app.
-- **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
+- **Propositions d'améliorations v1 (2026-10-07) :** `docs/13-propositions-ameliorations.md`, 43 propositions classées en trois vagues (fiabiliser, faire venir et garder, se différencier), **à valider** ; rien n'est lancé sans « go ».
+- **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
 ## 4. Décisions et orientations déjà prises
