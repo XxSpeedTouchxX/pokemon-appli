@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-05)
+## 3. État d'avancement (au 2026-10-07)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -72,6 +72,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - compagnons : 156 (les 151 de Kanto, plus Latias, Latios, Kyogre, Groudon, Rayquaza) ; choix sur 3 colonnes, icônes à la taille d'origine de chaque Pokémon, panneau opaque ;
   - montant de la collection au style du logo (blanc, contour noir) ;
   - logo radar interactif dans l'encadré « Active ta position » (au-dessus de « Me localiser ») : position, puis balayage.
+- **Mon classeur (2026-10-07) :**
+  - rubrique de l'accueil entre la valeur et « Boutiques autour de toi » : logo de classeur Pokémon et deux onglets ;
+  - « Mes cartes » : pages de 9 visuels avec drapeau, cote et état, d'après l'aperçu de PokéItem ; « Mes produits scellés » : vitrine 2 par ligne ;
+  - « Sorties du moment » tout en bas de l'accueil.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

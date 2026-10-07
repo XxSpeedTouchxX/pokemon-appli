@@ -228,6 +228,69 @@
 </sc-if>
 </section>
 
+<section aria-label="Mon classeur" style="flex: none; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Mon classeur</h2>
+<div style="flex: none; padding: 14px 14px 12px; border-radius: 24px; border: 1px solid #24345C; background: #121C33; display: flex; flex-direction: column; gap: 12px">
+<img src="img/brand/classeur.svg" alt="" width="132" height="107" style="align-self: center; display: block; width: 132px; height: auto">
+<div role="tablist" aria-label="Mon classeur" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid #2A3A5C">
+<sc-for list="{{ home.hk.tabs }}" as="hkt" hint-placeholder-count="2">
+<button type="button" role="tab" onClick="{{ hkt.pick }}" aria-selected="{{ hkt.on }}" style="min-width: 0; height: 40px; padding: 0 4px; border-radius: 999px; border: 1px solid {{ hkt.bc }}; background: {{ hkt.bg }}; color: {{ hkt.fg }}; font: inherit; font-size: 13.5px; font-size: min(13.5px, 3.55vw); font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; cursor: pointer">{{ hkt.label }}</button>
+</sc-for>
+</div>
+<div role="tabpanel" aria-label="{{ home.hk.tabLabel }}" style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12.5px; color: #9AA8C3">{{ home.hk.summary }}</span>
+<sc-if value="{{ home.hk.cardsTab }}" hint-placeholder-val="{{ true }}">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{ home.hk.cards }}" as="hkc" hint-placeholder-count="9">
+<button type="button" onClick="{{ hkc.open }}" aria-label="{{ hkc.label }}" style="position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer">
+<img src="{{ hkc.img }}" srcset="{{ hkc.srcset }}" sizes="(max-width: 520px) 30vw, 118px" alt="" loading="lazy" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
+<sc-if value="{{ hkc.graded }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; right: 5px; padding: 1px 6px; border-radius: 6px; background: var(--pkm-white); color: var(--pkm-ink); font-size: 10.5px; font-weight: 800; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35)">{{ hkc.grade }}</span></sc-if>
+<sc-if value="{{ hkc.many }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; left: 5px; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: var(--pkm-white); font-size: 11px; font-weight: 700">{{ hkc.qty }}</span></sc-if>
+<span style="position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); max-width: 92%; box-sizing: border-box; display: flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.86); color: var(--pkm-white); font-size: 11px; font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4)">
+<span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hkc.flag }}"></span>
+<span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums">{{ hkc.cote }}</span>
+<span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hkc.condColor }}"></span>
+</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ home.hk.sealedTab }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{ home.hk.sealed }}" as="hks" hint-placeholder-count="4">
+<button type="button" onClick="{{ hks.open }}" aria-label="{{ hks.label }}" style="display: flex; flex-direction: column; min-width: 0; padding: 0; border: 1px solid #24345C; border-radius: 18px; overflow: hidden; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; background: {{ hks.bg }}">
+<sc-if value="{{ hks.hasPhoto }}" hint-placeholder-val="{{ true }}"><img src="{{ hks.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: contain"></sc-if>
+<sc-if value="{{ hks.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ hks.logo }}" alt="" loading="lazy" style="position: absolute; left: 15%; top: 16%; width: 70%; height: 46%; object-fit: contain"></sc-if>
+<sc-if value="{{ hks.many }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; left: 5px; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: var(--pkm-white); font-size: 11px; font-weight: 700">{{ hks.qty }}</span></sc-if>
+<span style="position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); max-width: 92%; box-sizing: border-box; display: flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.86); color: var(--pkm-white); font-size: 11px; font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4)">
+<span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hks.flag }}"></span>
+<span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums">{{ hks.cote }}</span>
+<span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hks.condColor }}"></span>
+</span>
+</span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding: 8px 10px 10px; min-width: 0">
+<span style="font-size: 13px; font-weight: 700; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{ hks.name }}</span>
+<span style="font-size: 11.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hks.sub }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ home.hk.empty }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; padding: 12px 4px; text-align: center; font-size: 13.5px; line-height: 1.5; color: #9AA8C3">{{ home.hk.emptyText }}</p>
+</sc-if>
+<sc-if value="{{ home.hk.hasPages }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<button type="button" onClick="{{ home.hk.prev }}" aria-label="Page précédente" aria-disabled="{{ home.hk.prevOff }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: transparent; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: {{ home.hk.prevDim }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<span aria-live="polite" style="font-size: 13px; font-weight: 600; color: #C9D3EA">{{ home.hk.pageLabel }}</span>
+<button type="button" onClick="{{ home.hk.next }}" aria-label="Page suivante" aria-disabled="{{ home.hk.nextOff }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: transparent; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: {{ home.hk.nextDim }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></button>
+</div>
+</sc-if>
+</div>
+</div>
+</section>
+
 <section aria-label="Boutiques près de toi" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
@@ -301,8 +364,6 @@
 </sc-if>
 </section>
 
-<!-- carrousel : home.rel -->
-
 <section aria-label="Liste de ma collection" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Ma collection</h2>
@@ -364,6 +425,8 @@
 </sc-if>
 
 <!-- profils : premiers pas et suggestion -->
+
+<!-- carrousel : home.rel -->
 <p style="margin: 2px 0 0; font-size: 11.5px; line-height: 1.5; color: #7D8BA8; text-align: center">Dropicards, application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company. Prix réels du marché ; collection de démonstration.</p>
 
 <!-- fragment: settings-device -->

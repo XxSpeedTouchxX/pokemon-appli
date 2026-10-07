@@ -13,6 +13,7 @@ Le logo vient de la planche du porteur (« B6 · I avec éclair vertical », 202
 | `web/img/brand/dropicards.svg` | Fond clair : lettres blanches, contour et ombre noirs ; aussi l'en-tête de l'app (I à l'éclair et O étoilé lisibles dès 32 px de haut) |
 | `web/img/brand/dropicards-dark.svg` | Fond sombre : lettres jaunes, sans contour |
 | `web/img/brand/icon.svg` | Icône « D + carte » (aussi favicon) |
+| `web/img/brand/classeur.svg` | Logo de la rubrique « Mon classeur » de l'accueil : classeur à anneaux jaune, Poké Ball sur la couverture, cartes qui dépassent ; contour et ombre noirs comme le logo |
 | `web/icons/icon-192.png`, `icon-512.png` | Icône d'app « any » : bord noir, coins transparents |
 | `web/icons/icon-maskable-512.png` | Icône « maskable » : plein cadre, motif dans la zone sûre |
 | `web/icons/apple-touch-icon.png` | Écran d'accueil iPhone (180 px, plein cadre) |

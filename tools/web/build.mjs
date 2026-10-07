@@ -63,8 +63,9 @@ patch('width: 44px; height: 44px; padding: 0; border: 0; background: transparent
 const FRAG = {};
 const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.meta.url)), 'utf8').split(/<!-- fragment: ([\w-]+) -->\n/);
 for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
-// Accueil (octobre 2026, tools/web/home.js) : recherche dans le catalogue, valeur de la collection, Sorties du moment,
-// liste complète de la collection, marge réalisée ; « Premiers pas » et « Suggestion » (profils) repris de la maquette.
+// Accueil (octobre 2026, tools/web/home.js) : recherche dans le catalogue, valeur de la collection, Mon classeur,
+// boutiques autour de toi, liste complète de la collection, marge réalisée ; « Premiers pas » et « Suggestion »
+// (profils) repris de la maquette ; Sorties du moment tout en bas.
 // Retirés : palier, arrivage de démo, mouvements, plus belles pièces, derniers ajouts.
 {
   const open = '<sc-if value="{{ ui.isHome }}" hint-placeholder-val="{{ true }}">\n', close = '\n</sc-if>\n\n<sc-if value="{{ ui.isCollection }}"';
@@ -324,7 +325,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 38) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 38'); // dont 4 sur l'accueil (2 vignettes) ; plus celles du viseur simulé
+if (brokenMarks !== 40) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 40'); // dont 6 sur l'accueil (2 vignettes, vitrine du classeur) ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.

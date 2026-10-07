@@ -6,6 +6,8 @@
 //                                       lisible dès 32 px de haut)
 //   web/img/brand/dropicards-dark.svg   fond sombre : lettres jaunes, sans contour
 //   web/img/brand/icon.svg              icône « D + carte »
+//   web/img/brand/classeur.svg          rubrique « Mon classeur » de l'accueil : classeur à anneaux, Poké Ball sur la
+//                                       couverture, cartes qui dépassent (même contour et même ombre que le logo)
 //   web/icons/icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png (rendus par Chromium)
 // Usage : cd tools/brand && npm install && node make_logo.mjs   (Chromium : variable CHROMIUM, sinon Playwright)
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -101,13 +103,39 @@ function iconBody(full, scale = 1) {
     : `<rect x="20" y="20" width="472" height="472" rx="112" fill="${YELLOW}" stroke="${INK}" stroke-width="24"/>${inner}`;
 }
 
+// Classeur de cartes (rubrique « Mon classeur ») : jaune, anneaux sur la tranche, Poké Ball sur la couverture, deux
+// cartes qui dépassent, étincelle ; contour noir et ombre portée comme les lettres du logo. 150 × 120.
+const RED = '#E3350D', BLUE = '#3B6FD8', SKY = '#BFE3FF';
+function binderSvg() {
+  const card = (x, y, a) => `<g transform="translate(${x} ${y}) rotate(${a} 17 24)"><path d="${rrect(0, 0, 34, 48, 4)}" fill="${YELLOW}"/>`
+    + `<path d="${rrect(4, 4, 26, 22, 2)}" fill="${SKY}"/><path d="M8 30H26 M8 35H22 M8 40H24" stroke="${INK}" stroke-width="2" stroke-linecap="round" opacity="0.55"/></g>`;
+  const cardShape = (x, y, a) => `<path transform="translate(${x} ${y}) rotate(${a} 17 24)" d="${rrect(0, 0, 34, 48, 4)}"/>`;
+  const body = rrect(20, 30, 100, 82, 12), spine = rrect(20, 30, 22, 82, 10);
+  const cards = cardShape(66, 4, -8) + cardShape(88, 10, 12), shapes = cards + `<path d="${body}"/>`;
+  const outline = d => `<g fill="${INK}" stroke="${INK}" stroke-width="7" stroke-linejoin="round">${d}</g>`;
+  const ball = (cx, cy, r) => `<path d="M${cx - r} ${cy}A${r} ${r} 0 0 1 ${cx + r} ${cy}Z" fill="${RED}"/>`
+    + `<path d="M${cx - r} ${cy}A${r} ${r} 0 0 0 ${cx + r} ${cy}Z" fill="${WHITE}"/>`
+    + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${INK}" stroke-width="4"/><path d="M${cx - r} ${cy}H${cx + r}" stroke="${INK}" stroke-width="4"/>`
+    + `<circle cx="${cx}" cy="${cy}" r="7" fill="${WHITE}" stroke="${INK}" stroke-width="4"/><circle cx="${cx}" cy="${cy}" r="2.5" fill="${INK}" opacity="0.25"/>`;
+  const ring = y => `<path d="${rrect(14, y, 16, 9, 4.5)}" fill="${WHITE}" stroke="${INK}" stroke-width="3"/>`;
+  // Ombre, puis cartes, puis classeur par-dessus avec son propre contour (le bord passe devant les cartes).
+  return `<g transform="translate(4 5)" fill="${INK}" stroke="${INK}" stroke-width="7" stroke-linejoin="round">${shapes}</g>`
+    + outline(cards) + card(66, 4, -8) + card(88, 10, 12) + outline(`<path d="${body}"/>`)
+    + `<path d="${body}" fill="${YELLOW}"/><path d="${spine}" fill="#F2A900"/><path d="M42 30V112" stroke="${INK}" stroke-width="3"/>`
+    + `<path d="${rrect(50, 38, 62, 66, 8)}" fill="none" stroke="${WHITE}" stroke-width="3"/>`
+    + ring(44) + ring(66.5) + ring(89) + ball(81, 71, 20)
+    + `<path d="${spark(14, 14, 10)}" fill="${WHITE}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>`
+    + `<path d="${spark(136, 58, 6)}" fill="${WHITE}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
+}
+
 const out = (p, s) => { mkdirSync(new URL('.', new URL(p, 'file://' + ROOT)).pathname, { recursive: true }); writeFileSync(ROOT + p, s); };
 const big = wordmark({ outline: 14, shadow: [5, 7], letter: WHITE, detail: true, iCard: true, gap: 3 });
 const dark = wordmark({ outline: 0, letter: YELLOW, detail: false, iCard: false, gap: 7, cardStroke: WHITE, cardStrokeW: 6 });
 out('web/img/brand/dropicards.svg', doc(big.box, big.svg, 'Dropicards'));
 out('web/img/brand/dropicards-dark.svg', doc(dark.box, dark.svg, 'Dropicards'));
 out('web/img/brand/icon.svg', doc([0, 0, 512, 512], iconBody(false), 'Dropicards'));
-console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, icon');
+out('web/img/brand/classeur.svg', doc([0, 0, 150, 122], binderSvg(), 'Classeur de cartes'));
+console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, icon, classeur');
 
 // Icônes PNG (Chromium headless) : « any » avec bord noir et coins transparents ; « maskable » et Apple en plein cadre.
 const { chromium } = await import('playwright-core');

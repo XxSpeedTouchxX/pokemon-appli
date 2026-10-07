@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-10-07 — « Mon classeur » sur l'accueil ; « Sorties du moment » tout en bas
+
+- **Contexte :** le porteur demande une rubrique « Mon classeur » entre la valeur de la collection et « Boutiques autour de toi », avec un logo de classeur Pokémon au centre et deux onglets, « Mes cartes » et « Mes produits scellés ». Pour « Mes cartes », il montre l'aperçu des cartes de PokéItem. Il demande aussi de mettre « Sorties du moment » tout en bas de l'accueil. Ses choix : **pages de classeur** pour les cartes, **vitrine 2 par ligne** pour le scellé.
+- **Décision :**
+  - **Mes cartes :** pages de 9 pochettes (3 × 3), de la plus chère à la moins chère ; sur chaque visuel, une pastille avec le drapeau de la langue, la cote et un point de couleur pour l'état, comme l'aperçu de PokéItem ; note de gradation et exemplaires en plus.
+  - **Mes produits scellés :** vitrine 2 par ligne, pages de 4, photo officielle, même pastille.
+  - En tête de chaque onglet : nombre, valeur totale, cartes gradées et doublons (données réelles de la collection).
+  - **Logo :** classeur à anneaux dessiné au style du logo Dropicards (jaune, contour et ombre noirs), Poké Ball sur la couverture : illustration de rubrique, pas l'identité de l'app.
+  - **Sorties du moment** passe tout en bas de l'accueil, juste avant la mention de non-affiliation.
+- **Écarté :** le reste de l'aperçu de PokéItem (fardes, decks, souhaits, pré-gradation) : hors périmètre (CLAUDE.md §5, pas de dispersion).
+- **Coût :** 0 €.
+
+---
+
 ## 2026-10-05 — Retouches de l'accueil : logo à l'éclair, compagnons, montant, petit radar
 
 - **Contexte :** demandes du porteur sur l'accueil. Ses choix : le logo complet **dans l'en-tête, en plus grand** ; le radar **lance le balayage**. Après une première version, il corrige deux points : chaque Pokémon garde sa **taille d'origine** (pas d'agrandissement des petits), et le radar va **dans l'encadré, au-dessus de « Me localiser » et « Carte de France »**, pas à côté du titre.

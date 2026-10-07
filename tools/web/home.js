@@ -16,6 +16,9 @@
     if (!(d.hmore >= 1)) d.hmore = 1;
     if (!HOME_BUDDIES.some(([n]) => n === d.buddy)) d.buddy = HOME_BUDDY;
     if (typeof d.hbq !== 'string') d.hbq = '';
+    if (d.hbk !== 'sealed') d.hbk = 'cards';
+    if (!(d.hbcp >= 0)) d.hbcp = 0;
+    if (!(d.hbsp >= 0)) d.hbsp = 0;
     return d;
   };
 
@@ -64,6 +67,59 @@
         const el = document.querySelector('input[aria-label="Rechercher dans le catalogue"]');
         if (el) { el.focus(); el.scrollIntoView({ block: 'center' }); }
       }
+    };
+  };
+
+  // ——— Mon classeur : les cartes et les produits scellés de la collection, du plus cher au moins cher ———
+  // « Mes cartes » reprend l'aperçu de PokéItem montré par le porteur : visuel officiel, pastille avec le drapeau de
+  // la langue, la cote et un point de couleur pour l'état ; note de gradation et exemplaires en plus. Pages de 9
+  // pochettes (3 × 3), comme un classeur. « Mes produits scellés » : vitrine 2 par ligne, pages de 4. La langue et
+  // l'état sont ceux des exemplaires ajoutés (copies.js) ; un ajout sans langue prend celle de l'article.
+  const HOME_BINDER = { cards: 9, sealed: 4 };
+  const HOME_COND = { NM: 'var(--pkm-up)', EX: 'var(--pkm-amber)', PL: 'var(--pkm-down)', SO: 'var(--pkm-up)', AB: 'var(--pkm-amber)' };
+  const homeCopy = (purchases, p) => {
+    const g = copiesOf(purchases, p)[0], set = (purchases || []).some(a => (a.lines || []).some(l => l.pid === p.id && l.lang));
+    return { lang: set && g ? g.lang : p.lang || 'FR', cond: g ? g.cond : copyConds(p)[0][0] };
+  };
+  proto.homeBinder = function (x) {
+    const s = x.s, tab = s.hbk, key = tab === 'sealed' ? 'hbsp' : 'hbcp';
+    const unit = p => x.val(p) || 0, qty = p => x.c.stock[p.id].qty;
+    const mine = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed)
+      .sort((a, b) => unit(b) - unit(a) || String(a.name).localeCompare(String(b.name), 'fr'));
+    const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, per = HOME_BINDER[tab];
+    const pages = Math.max(1, Math.ceil(list.length / per)), page = Math.min(s[key], pages - 1);
+    const sum = l => l.reduce((t, p) => t + unit(p) * qty(p), 0), units = l => l.reduce((t, p) => t + qty(p), 0);
+    const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
+    // Cote courte sur la pastille : à l'euro près dès 100 €, comme l'aperçu de PokéItem.
+    const cote = p => { const v = unit(p); return v ? x.mask(v >= 100 ? this.eur0(v) : this.eur(v)) : '—'; };
+    const tile = p => {
+      const k = homeCopy(s.purchases, p), q = qty(p), l = this.look(p);
+      return Object.assign(l, {
+        name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(p), condColor: HOME_COND[k.cond] || HOME_COND.NM,
+        many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg,
+        label: p.name + (p.grade ? ', gradée ' + p.grade : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
+          + copyLabel(p, k.cond) + ', cote ' + (unit(p) ? x.mask(this.eur(unit(p))) : 'inconnue') + '. Ouvrir la fiche',
+        open: () => this.push('item', { itemId: p.id })
+      });
+    };
+    const graded = cards.filter(p => p.grade).length, extra = cards.reduce((t, p) => t + Math.max(0, qty(p) - 1), 0);
+    const shown = list.slice(page * per, page * per + per).map(tile);
+    return {
+      tabs: [['cards', 'Mes cartes'], ['sealed', 'Mes produits scellés']].map(([k, label]) =>
+        Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k }) }, this.chip(tab === k))),
+      tabLabel: tab === 'sealed' ? 'Mes produits scellés' : 'Mes cartes',
+      cardsTab: tab !== 'sealed' && shown.length > 0, sealedTab: tab === 'sealed' && shown.length > 0,
+      cards: tab === 'sealed' ? [] : shown, sealed: tab === 'sealed' ? shown : [],
+      summary: tab === 'sealed'
+        ? plural(units(sealed), 'produit', 'produits') + ' · ' + x.mask(this.eur(sum(sealed)))
+        : [plural(units(cards), 'carte', 'cartes') + ' · ' + x.mask(this.eur(sum(cards)))]
+          .concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · '),
+      empty: !list.length,
+      emptyText: tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant.' : 'Aucune carte dans ton classeur pour l’instant : scanne une carte ou cherche-la dans le catalogue.',
+      hasPages: pages > 1, pageLabel: 'Page ' + (page + 1) + ' sur ' + pages,
+      prevOff: page === 0, nextOff: page === pages - 1, prevDim: page === 0 ? 0.35 : 1, nextDim: page === pages - 1 ? 0.35 : 1,
+      prev: () => { if (page > 0) this.setState({ [key]: page - 1 }); },
+      next: () => { if (page < pages - 1) this.setState({ [key]: page + 1 }); }
     };
   };
 
@@ -152,6 +208,7 @@
     r.hs = this.homeSearch(x);
     r.hl = this.homeList(x);
     r.hv = this.homeTrend(x, r.valueBig);
+    r.hk = this.homeBinder(x);
     if (!x.s.tpos && !x.s.raround) terAutoLocate(this); // autorisation déjà donnée : position retrouvée sans rien demander
     r.hr = this.homeRadar(x.s);
     return r;
