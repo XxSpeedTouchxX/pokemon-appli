@@ -209,14 +209,27 @@
     r.count = !list.length ? 'Aucun Pokémon ne correspond.' : list.length + ' Pokémon' + (q ? '' : ' disponibles');
     r.list = list.map(([k, nom]) => Object.assign({
       name: nom, src: homeIcon(k), on: k === n, aria: nom + ', n° ' + k + (k === n ? ' (ton compagnon)' : ''),
-      pick: () => { this.setState({ buddy: k, buddyPick: false, toast: nom + ' t’accompagne' }); this.flash(); }
+      pick: () => { this.setState({ buddy: k, buddyPick: false, toast: nom + ' t’accompagne' + (HOME_THEMES[k] ? ' · thème ' + HOME_THEMES[k].name : '') }); this.flash(); }
     }, this.chip(k === n)));
     return r;
   };
   const HOME_NO_BUDDY = { picking: false, list: [] };
+  // Thème du compagnon (2026-10-07) : Kyogre (océan), Groudon (volcan) et Rayquaza (vert et blanc) changent le fond de
+  // l'app : classe pkm-theme-… sur <html> (variables dans theme.mjs) et couleur de la barre du navigateur.
+  let homeTheme = null;
+  const homeApplyTheme = n => {
+    const t = HOME_THEMES[n] || null, key = t ? t.key : '', html = document.documentElement;
+    if (key === homeTheme) return;
+    if (homeTheme) html.classList.remove('pkm-theme-' + homeTheme);
+    if (key) html.classList.add('pkm-theme-' + key);
+    homeTheme = key;
+    const bar = document.querySelector('meta[name="theme-color"]');
+    if (bar && !html.classList.contains('pkm-classic')) bar.content = t ? t.bar : '#FFD60A';
+  };
   const homeBaseRender = proto.renderVals;
   proto.renderVals = function () {
     const r = homeBaseRender.call(this), s = this.st();
+    homeApplyTheme(s.buddy);
     r.hb = r.ui.isHome || s.buddyPick ? this.homeBuddy(s) : HOME_NO_BUDDY;
     return r;
   };

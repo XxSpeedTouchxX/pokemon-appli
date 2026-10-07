@@ -47,9 +47,10 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - un appui ouvre sa fiche ;
    - sans position : « Me localiser », ou le **logo radar animé** de l'encadré, juste au-dessus : un appui demande la position, puis le balayage part tout seul (logo immobile si l'utilisateur limite les animations) ;
    - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
-5. **Ma collection :** tous les articles, les plus récents d'abord ou par valeur, 20 par page ; variation sur 7 jours ; collection vide : « Rechercher une carte » et « Scanner ».
-6. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
-7. **Sorties du moment** (carrousel), tout en bas ; puis la mention de non-affiliation.
+5. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
+6. **Sorties du moment** (carrousel), tout en bas ; puis la mention de non-affiliation.
+
+La liste « Ma collection » (récents ou valeur, 20 par page) est retirée le 2026-10-07 : « Mon classeur » montre déjà toute la collection.
 
 Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage de démo, mouvements, plus belles pièces, derniers ajouts. Le build remplace l'accueil de la maquette par le fragment `home` de `catalog.dc.html`.
 
@@ -98,6 +99,11 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 - **Flou réel** seulement sur ce qui passe au-dessus d'un contenu qui défile : barre du bas, fiches, toast, zoom, panneau du Radar (2 éléments au plus par écran). Fond opaque si le navigateur ne gère pas le flou.
 - **Lisibilité :** chaque texte a un contraste d'au moins 4,5:1 (3:1 pour les grands titres), vérifié écran par écran.
 - **Ancien thème :** `?theme=classic` (comparaison, retour arrière).
+- **Thèmes des compagnons** (2026-10-07) : choisir Kyogre, Groudon ou Rayquaza dans « Choisis ton compagnon » change le fond de l'app, sur tous les onglets, et la couleur de la barre du navigateur. Le message de choix l'annonce (« Kyogre t'accompagne · thème Océan »).
+  - **Océan** (Kyogre) : dégradé de bleus profonds ; **Volcan** (Groudon) : dégradé de rouges lave, lueur orange. Titres et textes blancs, liens jaunes.
+  - **Vert et blanc** (Rayquaza) : dégradé du blanc au vert ; textes bleu nuit, comme sur le jaune.
+  - Seul ce qui est posé sur le fond change : cartes, fiches, champs et barre du bas restent en verre bleu nuit. Un autre compagnon remet le jaune. Rien ne change avec `?theme=classic`.
+  - Mise en œuvre : `BUDDY_THEMES` dans `theme.mjs` (variables du fond par thème), classe `pkm-theme-…` sur `<html>` posée par `home.js`. Contraste vérifié écran par écran dans les quatre thèmes.
 - **Mise en œuvre :** la maquette v5 reste intacte. `tools/web/theme.mjs` remplace, au build, chaque couleur écrite en dur (gabarit et logique) par une variable CSS selon son rôle : fond de carte, ligne, textes 1 à 5, accent, statuts… Le thème classique leur donne les couleurs d'origine (l'app reste identique au pixel près), le thème v6 ses propres valeurs.
   - Une surface sombre reçoit la classe `pkm-dark` : ses textes prennent les couleurs du ton sombre, ceux posés sur le jaune celles du ton clair.
   - Le build échoue si une couleur n'a pas de règle, si une règle à contexte ne s'applique plus le nombre de fois prévu ou si une variable n'existe pas. Tests : `node --test tools/web/test_theme.mjs`.
@@ -309,7 +315,7 @@ Le script `tools/web/build.mjs` :
 | `img/products/` | Visuels officiels des produits scellés (galerie Pokémon France) |
 | `img/brand/` | Logo de l'en-tête (fichier du porteur, PNG transparent), logos SVG (clair, sombre), icône, logo de « Mon classeur » ; voir `tools/brand/` |
 | `img/pokemon/` | Compagnons de l'accueil : sprites animés et fixes des 151 Pokémon de Kanto, de Latias, Latios, Kyogre, Groudon et Rayquaza ; icônes du choix dans `icon/`. Voir `tools/sprites/` |
-| `icons/` | Icônes de l'app Dropicards (dont une « maskable ») |
+| `icons/` | Icônes de l'app : le logo du porteur sur deux lignes (dont une « maskable » et celle de l'iPhone) ; `favicon-32.png` avec la carte O, pour l'onglet du navigateur (`tools/brand/import_logo.py`) |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |
 | `_headers` | En-têtes Cloudflare : non-indexation, cache |

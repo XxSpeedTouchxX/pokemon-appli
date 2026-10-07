@@ -76,7 +76,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - rubrique de l'accueil entre la valeur et « Boutiques autour de toi » : logo de classeur Pokémon et deux onglets ;
   - « Mes cartes » : pages de 9 visuels avec drapeau, cote et état, d'après l'aperçu de PokéItem ; « Mes produits scellés » : vitrine 2 par ligne ;
   - « Sorties du moment » tout en bas de l'accueil ;
-  - en-tête : le logo exact du porteur (son fichier PNG, fond rendu transparent), à la place du logo redessiné.
+  - en-tête : le logo exact du porteur (son fichier PNG, fond rendu transparent), à la place du logo redessiné ;
+  - icône de l'app (écran d'accueil du téléphone) : le logo du porteur sur deux lignes ; carte O dans l'onglet du navigateur ;
+  - liste « Ma collection » retirée de l'accueil (la marge réalisée reste) ;
+  - thèmes des compagnons : Kyogre (océan, bleu), Groudon (volcan, rouge), Rayquaza (vert et blanc) changent le fond de l'app.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

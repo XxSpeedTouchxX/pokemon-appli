@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
-import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens } from './theme.mjs';
+import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens, BUDDY_THEMES } from './theme.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const SRC = ROOT + 'docs/12-maquette-v5/Main.dc.html';
@@ -162,10 +162,11 @@ patch('<span style="position: relative; display: block; height: 176px; border-ra
 patch('<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">\n<sc-for list="{{ coll.list }}"',
   '<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: dense; gap: 10px">\n<sc-for list="{{ coll.list }}"');
 // - Carrousels de produits scellés en grand (16:9) : « Sorties du moment » (Accueil), « Scellé à la une » (Marché).
+// Sigle des plaques dessinées (ETB, DSP…) : léger fond sombre, lisible quel que soit le visuel de l'extension derrière.
 const FEATURE_CARD = (v, box) => `<button type="button" onClick="{{ ${v}.open }}" aria-label="{{ ${v}.label }}" style="${box} display: flex; flex-direction: column; padding: 0; border: 1px solid #24345C; border-radius: 20px; overflow: hidden; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
 <span style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; background: {{ ${v}.bg }}">
 <sc-if value="{{ ${v}.hasPhoto }}" hint-placeholder-val="{{ true }}"><img src="{{ ${v}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover"></sc-if>
-<sc-if value="{{ ${v}.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ ${v}.logo }}" alt="" loading="lazy" style="position: absolute; left: 20%; top: 18%; width: 60%; height: 44%; object-fit: contain"><span style="position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 1px 6px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 6px; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ ${v}.code }}</span></sc-if>
+<sc-if value="{{ ${v}.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ ${v}.logo }}" alt="" loading="lazy" style="position: absolute; left: 20%; top: 18%; width: 60%; height: 44%; object-fit: contain"><span style="position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 1px 6px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 6px; background: rgba(8, 13, 26, 0.4); font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ ${v}.code }}</span></sc-if>
 <sc-if value="{{ ${v}.hasTag }}" hint-placeholder-val="{{ true }}"><span style="position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 999px; background: {{ ${v}.tagBg }}; color: #0B1120; font-size: 11px; font-weight: 800">{{ ${v}.tag }}</span></sc-if>
 <sc-if value="{{ ${v}.owned }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 8px; right: 8px; padding: 1px 8px; border-radius: 999px; background: rgba(8, 13, 26, 0.85); color: #FFFFFF; font-size: 11.5px; font-weight: 700">{{ ${v}.qty }}</span></sc-if>
 </span>
@@ -198,7 +199,7 @@ patch('<!-- liste : produits scellés -->', '<div style="flex: none; display: fl
 const RELEASE_CARD = v => `<article aria-label="{{ ${v}.name }}" style="flex: none; display: flex; flex-direction: column; border: 1px solid #24345C; border-radius: 22px; overflow: hidden; background: #111A2C">
 <button type="button" onClick="{{ ${v}.open }}" aria-label="{{ ${v}.sheetLabel }}" style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; background: {{ ${v}.bg }}; cursor: pointer">
 <sc-if value="{{ ${v}.hasPhoto }}" hint-placeholder-val="{{ true }}"><img src="{{ ${v}.photo }}" alt="" loading="lazy" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover"></sc-if>
-<sc-if value="{{ ${v}.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ ${v}.logo }}" alt="" loading="lazy" style="position: absolute; left: 20%; top: 18%; width: 60%; height: 44%; object-fit: contain"><span style="position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 1px 6px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 6px; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ ${v}.code }}</span></sc-if>
+<sc-if value="{{ ${v}.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ ${v}.logo }}" alt="" loading="lazy" style="position: absolute; left: 20%; top: 18%; width: 60%; height: 44%; object-fit: contain"><span style="position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 1px 6px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 6px; background: rgba(8, 13, 26, 0.4); font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #FFFFFF">{{ ${v}.code }}</span></sc-if>
 <span style="position: absolute; left: 10px; top: 10px; padding: 3px 10px; border-radius: 999px; background: {{ ${v}.tagBg }}; color: #0B1120; font-size: 12px; font-weight: 800">{{ ${v}.tag }}</span>
 <sc-if value="{{ ${v}.owned }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 10px; right: 10px; padding: 1px 8px; border-radius: 999px; background: rgba(8, 13, 26, 0.85); color: #FFFFFF; font-size: 11.5px; font-weight: 700">{{ ${v}.qty }}</span></sc-if>
 </button>
@@ -403,7 +404,10 @@ const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 
 if (buddies.length !== 156) throw new Error('Compagnons : ' + buddies.length + ' au lieu de 156');
 for (const [n] of buddies) for (const f of [n + '.gif', n + '.png', 'icon/' + n + '.png'])
   if (!existsSync(ROOT + 'web/img/pokemon/' + f)) throw new Error('Compagnon sans image : web/img/pokemon/' + f);
-const buddiesJs = '  const HOME_BUDDIES = ' + JSON.stringify(buddies) + ';\n';
+const buddiesJs = '  const HOME_BUDDIES = ' + JSON.stringify(buddies) + ';\n'
+  // Thèmes des compagnons (theme.mjs) : n° du Pokémon → classe, nom et couleur de la barre du navigateur.
+  + '  const HOME_THEMES = ' + JSON.stringify(Object.fromEntries(BUDDY_THEMES.map(t => [t.buddy, { key: t.key, name: t.name, bar: t.bar }]))) + ';\n';
+for (const t of BUDDY_THEMES) if (!buddies.some(([n]) => n === t.buddy)) throw new Error('Thème sans compagnon : ' + t.key);
 if (rebranded !== REBRANDED) throw new Error('Libellés « PKM » renommés : ' + rebranded + ' au lieu de ' + REBRANDED);
 
 const img = Object.fromEntries([

@@ -336,6 +336,31 @@ export const V6_DARK = {
   'scan-1': '#FFE45C', 'scan-2': '#F2A900', 'scan-3': '#FFD60A', 'scan-ring': '#0B1120', 'scan-fg': '#0B1120', 'blue-rgb': '255, 214, 10',
   gray: '#BCC5D9', dim: '0.8', 'off-bg': 'rgba(255, 255, 255, 0.1)'
 };
+// Thèmes des compagnons (2026-10-07) : choisir Kyogre, Groudon ou Rayquaza change le fond de l'app et ce qui est posé
+// dessus (titres, liens, puces). Cartes, fiches, champs et barre du bas restent en verre bleu nuit (ton sombre).
+// - Kyogre, océan : dégradé de bleus profonds ; Groudon, volcan : dégradé de rouges lave, lueur orange. Textes clairs.
+// - Rayquaza : dégradé du blanc au vert ; textes bleu nuit, comme sur le jaune.
+// Contraste : chaque texte au moins 4,5:1 sur le point le plus clair (ou le plus sombre) du dégradé, vérifié par le
+// test de contraste des écrans, thème par thème. bar : couleur de la barre du navigateur et du fond derrière l'app.
+const ON_DEEP = { 'chip-bg': 'rgba(255, 255, 255, 0.1)', 'chip-bc': 'rgba(255, 255, 255, 0.32)', 'off-bg': 'rgba(255, 255, 255, 0.12)', link: '#FFE45C' };
+export const BUDDY_THEMES = [
+  { buddy: 382, key: 'sea', name: 'Océan', bar: '#0A4893', dark: true, tokens: Object.assign({}, ON_DEEP, {
+    app: 'radial-gradient(120% 55% at 0% 0%, rgba(64, 196, 255, 0.14), rgba(64, 196, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(0, 12, 40, 0.55), rgba(0, 12, 40, 0) 70%), linear-gradient(165deg, #0A4893 0%, #083A78 45%, #05234E 100%)',
+    t1: '#FFFFFF', t2: '#EAF3FF', t3: '#DCEAFD', t4: '#D2E3FA', t5: '#D2E3FA', 'chip-fg': '#EAF3FF', 'glow-rgb': '6, 42, 92', 'shadow-rgb': '0, 10, 30',
+    green: '#8DF5BC', up: '#8DF5BC', down: '#FFCFC7', red: '#FFCFC7', orange: '#FFDE96', amber: '#FFDE96', teal: '#9CF7EA',
+    gold: '#FFE7A3', sand: '#FFE3B5', 'sand-2': '#F8E8C8', gray: '#D2E3FA', off: '#C9DAF4', regular: '#D5DCFF', iris: '#D5DCFF'
+  }) },
+  { buddy: 383, key: 'lava', name: 'Volcan', bar: '#9E1F18', dark: true, tokens: Object.assign({}, ON_DEEP, {
+    app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 140, 40, 0.2), rgba(255, 140, 40, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(20, 0, 0, 0.55), rgba(20, 0, 0, 0) 70%), linear-gradient(165deg, #9E1F18 0%, #7A140F 45%, #3A0604 100%)',
+    t1: '#FFFFFF', t2: '#FFF0EB', t3: '#FFE4DB', t4: '#FFDACE', t5: '#FFDACE', 'chip-fg': '#FFF0EB', 'glow-rgb': '60, 8, 4', 'shadow-rgb': '30, 0, 0',
+    green: '#9DF7C6', up: '#9DF7C6', down: '#FFE0D6', red: '#FFE0D6', orange: '#FFE3A6', amber: '#FFE3A6', teal: '#A8F7EC',
+    gold: '#FFE9AD', sand: '#FFE6BE', 'sand-2': '#FBEDD5', gray: '#FFDACE', off: '#FFD3C6', regular: '#E6E3FF', iris: '#E6E3FF'
+  }) },
+  { buddy: 384, key: 'leaf', name: 'Vert et blanc', bar: '#E8FAEF', dark: false, tokens: {
+    app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(20, 140, 70, 0.22), rgba(20, 140, 70, 0) 70%), linear-gradient(165deg, #FFFFFF 0%, #CFF5DD 40%, #7DE3A8 100%)',
+    'shadow-rgb': '20, 70, 40'
+  } }
+];
 // Flou réel seulement sur ce qui passe au-dessus d'un contenu qui défile (au plus 5 éléments par écran) ;
 // sans flou possible, fond opaque. Le choix du compagnon est toujours opaque : le compagnon de l'accueil ne doit
 // pas se voir derrière les icônes.
@@ -357,5 +382,9 @@ export function v6Css() {
   const keys = [...new Set(Object.keys(V6_LIGHT).concat(Object.keys(V6_DARK)))];
   const decl = pick => keys.map(k => '--pkm-' + k + ': ' + pick(k) + ';').join(' ');
   return 'html:not(.pkm-classic) .pkm-root { ' + decl(k => (k in V6_LIGHT ? V6_LIGHT[k] : k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n'
-    + 'html:not(.pkm-classic) .pkm-dark { ' + decl(k => (k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n' + V6_EXTRA;
+    + 'html:not(.pkm-classic) .pkm-dark { ' + decl(k => (k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n' + V6_EXTRA
+    // Thème d'un compagnon : variables du fond (ton sombre ou clair, puis celles du thème) ; fond derrière l'app.
+    + BUDDY_THEMES.map(t => '\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) .pkm-root { '
+      + decl(k => (k in t.tokens ? t.tokens[k] : t.dark ? (k in V6_DARK ? V6_DARK[k] : TOKENS[k]) : k in V6_LIGHT ? V6_LIGHT[k] : k in V6_DARK ? V6_DARK[k] : TOKENS[k]))
+      + ' }\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) #app { background: ' + t.bar + '; }').join('');
 }
