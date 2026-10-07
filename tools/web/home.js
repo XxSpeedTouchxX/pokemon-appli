@@ -1,10 +1,10 @@
   // ——— Accueil (octobre 2026) ———
-  // De haut en bas : recherche dans tout le catalogue, valeur de la collection, Sorties du moment, liste complète de
-  // la collection (récents ou valeur), marge réalisée ; « Premiers pas » et « Suggestion » selon le profil.
+  // De haut en bas : recherche dans tout le catalogue, valeur de la collection, Mon classeur, boutiques autour de toi,
+  // marge réalisée ; « Premiers pas » et « Suggestion » selon le profil ; Sorties du moment tout en bas. La liste
+  // « Ma collection » est retirée (2026-10-07) : « Mon classeur » montre déjà toute la collection.
   // Les calculs de l'accueil ne tournent que sur l'accueil ; les calculs purs sont dans home-core.js (HomeCore).
   // Ce module partage la portée des autres : ses noms commencent par HOME_ ou home.
-  const HOME_PAGE = 20, HOME_HITS = 8;
-  const HOME_SORTS = [['recent', 'Récents'], ['value', 'Valeur']];
+  const HOME_HITS = 8;
   const HOME_BUDDY = 25; // Pikachu
   const HOME_NAMES = {};
   HOME_BUDDIES.forEach(([n, nom]) => { HOME_NAMES[n] = nom; });
@@ -12,8 +12,6 @@
   proto.st = function () {
     const d = homeBaseSt.call(this);
     if (typeof d.hq !== 'string') d.hq = '';
-    if (d.hsort !== 'value') d.hsort = 'recent';
-    if (!(d.hmore >= 1)) d.hmore = 1;
     if (!HOME_BUDDIES.some(([n]) => n === d.buddy)) d.buddy = HOME_BUDDY;
     if (typeof d.hbq !== 'string') d.hbq = '';
     if (d.hbk !== 'sealed') d.hbk = 'cards';
@@ -43,31 +41,6 @@
       hasMore: total > shown.length, moreLabel: 'Voir les ' + total.toLocaleString('fr-FR') + ' résultats dans le Marché',
       more: () => { this.setState({ mq: q, mfilter: 'trend' }); this.tab('market'); }
     });
-  };
-
-  // Ma collection : tous les articles, les plus récents d'abord (ou par valeur), 20 par page.
-  proto.homeList = function (x) {
-    const s = x.s, c = x.c, worth = p => x.val(p) * c.stock[p.id].qty;
-    const items = HomeCore.order(x.owned, s.hsort, HomeCore.added(s.purchases), worth);
-    const n = Math.min(items.length, s.hmore * HOME_PAGE), units = items.reduce((t, p) => t + c.stock[p.id].qty, 0);
-    return {
-      hasItems: items.length > 0, isEmpty: items.length === 0,
-      count: items.length + (items.length > 1 ? ' références · ' : ' référence · ') + units + (units > 1 ? ' articles' : ' article'),
-      sorts: HOME_SORTS.map(([k, label]) => Object.assign({ label: label, on: s.hsort === k, pick: () => this.setState({ hsort: k, hmore: 1 }) }, this.chip(s.hsort === k))),
-      rows: items.slice(0, n).map((p, i) => {
-        const ch = HomeCore.change7(p, x.ch7[p.id], SEALED.doc && SEALED.doc.days, TODAY), known = typeof ch === 'number';
-        return Object.assign(this.look(p), {
-          name: p.name, sub: this.copySub(p, s), qty: '×' + c.stock[p.id].qty, value: x.mask(this.eur(worth(p))), border: x.line(i),
-          change: known ? this.chg(ch) + ' · 7 j' : '—', changeColor: known ? x.col(ch) : 'var(--pkm-t3)',
-          open: () => this.push('item', { itemId: p.id })
-        });
-      }),
-      hasMore: items.length > n, moreLabel: 'Voir plus (' + (items.length - n) + ')', more: () => this.setState({ hmore: s.hmore + 1 }),
-      find: () => {
-        const el = document.querySelector('input[aria-label="Rechercher dans le catalogue"]');
-        if (el) { el.focus(); el.scrollIntoView({ block: 'center' }); }
-      }
-    };
   };
 
   // ——— Mon classeur : les cartes et les produits scellés de la collection, du plus cher au moins cher ———
@@ -206,7 +179,6 @@
     const r = homeBaseView.call(this, x);
     if (x.s.screen !== 'home') return r;
     r.hs = this.homeSearch(x);
-    r.hl = this.homeList(x);
     r.hv = this.homeTrend(x, r.valueBig);
     r.hk = this.homeBinder(x);
     if (!x.s.tpos && !x.s.raround) terAutoLocate(this); // autorisation déjà donnée : position retrouvée sans rien demander

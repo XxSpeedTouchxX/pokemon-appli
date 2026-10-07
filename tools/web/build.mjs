@@ -153,7 +153,7 @@ tpl = tpl.replace(/(<(?:span|button)\b[^>]*?style="position: relative; flex: non
   slots++;
   return head + 'width: calc({{ ' + o + '.wk }} * ' + w + 'px); height: calc({{ ' + o + '.hk }} * ' + h + 'px); outline: {{ ' + o + '.ring }}; outline-offset: -1.5px;' + rest;
 });
-if (slots !== 8) throw new Error('Vignettes de liste : ' + slots + ' au lieu de 8'); // dont 2 sur l'accueil : recherche, liste
+if (slots !== 7) throw new Error('Vignettes de liste : ' + slots + ' au lieu de 7'); // dont 1 sur l'accueil : la recherche
 patch('aria-label="{{ po.label }}" style="flex: none; width: 104px;', 'aria-label="{{ po.label }}" style="flex: none; width: calc({{ po.wk }} * 104px);');
 // - Collection : le scellé sur toute la largeur de la grille, visuel 16:9 ; grille sans trous.
 patch('<button type="button" onClick="{{ ci.open }}" style="display: flex;', '<button type="button" onClick="{{ ci.open }}" style="grid-column: {{ ci.col }}; display: flex;');
@@ -318,14 +318,14 @@ tpl = tpl.replace(/<sc-if value="\{\{ ([\w.]+)\.isSealed \}\}"([^>]*)>([\s\S]*?)
   const photo = o === 'it' ? PHOTO_ITEM : o === 'ci' ? PHOTO_FILL(o) : PHOTO_INLINE(o);
   return `<sc-if value="{{ ${o}.sealedArt }}"${attrs}>${body}</sc-if><sc-if value="{{ ${o}.hasPhoto }}" hint-placeholder-val="{{ false }}">${photo}</sc-if>`;
 });
-if (sealedBlocks !== 11) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 11 (' + sealedSeen.join(', ') + ')'); // dont 2 sur l'accueil ; plus celle du viseur simulé
+if (sealedBlocks !== 10) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 10 (' + sealedSeen.join(', ') + ')'); // dont 1 sur l'accueil (la recherche) ; plus celle du viseur simulé
 // Visuel de secours de chaque image de carte (data-fallback), utilisé si l'image ne charge plus.
 tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fallback="{{ ' + o + (o === 'it' ? '.fallbackHi' : '.fallback') + ' }}"');
 // Photos et logos du scellé (data-broken) : si l'image ne charge pas, l'app passe au visuel suivant
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 40) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 40'); // dont 6 sur l'accueil (2 vignettes, vitrine du classeur) ; plus celles du viseur simulé
+if (brokenMarks !== 38) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 38'); // dont 4 sur l'accueil (vignette de la recherche, vitrine du classeur) ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.

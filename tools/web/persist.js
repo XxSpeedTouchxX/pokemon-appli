@@ -5,7 +5,7 @@
   // chargement du catalogue complet.
   // Les liens de démonstration (#novice, ?demo=…) montrent la démo sans toucher à la collection.
   const SAVE_KEY = 'pkm-collection-v1';
-  const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts', 'hsort', 'buddy'];
+  const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts', 'buddy'];
   const DEVICE = { enabled: true, ok: null, timer: null };
   const storage = {
     read() { try { const t = window.localStorage.getItem(SAVE_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } },
