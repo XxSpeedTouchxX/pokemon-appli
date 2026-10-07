@@ -6777,10 +6777,10 @@ return function render(_ctx, _cache) {
           ], -1 /* CACHED */)),
           _cache[1] || (_cache[1] = _createElementVNode("span", { style: {"display":"flex","align-items":"center"} }, [
             _createElementVNode("img", {
-              src: "img/brand/dropicards.svg",
+              src: "img/brand/dropicards-header.png",
               alt: "Dropicards",
-              width: "196",
-              height: "39",
+              width: "562",
+              height: "76",
               style: {"display":"block","width":"min(196px, calc(100vw - 194px))","height":"auto"}
             })
           ], -1 /* CACHED */)),

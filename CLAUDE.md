@@ -75,7 +75,8 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - **Mon classeur (2026-10-07) :**
   - rubrique de l'accueil entre la valeur et « Boutiques autour de toi » : logo de classeur Pokémon et deux onglets ;
   - « Mes cartes » : pages de 9 visuels avec drapeau, cote et état, d'après l'aperçu de PokéItem ; « Mes produits scellés » : vitrine 2 par ligne ;
-  - « Sorties du moment » tout en bas de l'accueil.
+  - « Sorties du moment » tout en bas de l'accueil ;
+  - en-tête : le logo exact du porteur (son fichier PNG, fond rendu transparent), à la place du logo redessiné.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

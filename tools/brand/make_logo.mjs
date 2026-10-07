@@ -2,8 +2,8 @@
 // qui n'existe qu'en image. Lettres : police Luckiest Guy (Google Fonts, licence Apache 2.0, paquet
 // @fontsource/luckiest-guy), converties en tracés : le logo ne dépend d'aucune police chargée.
 // Le O et le I sont des cartes (rond étoilé, éclair). Sorties :
-//   web/img/brand/dropicards.svg        fond clair : lettres blanches, contour et ombre noirs (aussi l'en-tête de l'app,
-//                                       lisible dès 32 px de haut)
+//   web/img/brand/dropicards.svg        fond clair : lettres blanches, contour et ombre noirs (l'en-tête de l'app utilise
+//                                       le fichier exact du porteur depuis le 2026-10-07, voir import_header.py)
 //   web/img/brand/dropicards-dark.svg   fond sombre : lettres jaunes, sans contour
 //   web/img/brand/icon.svg              icône « D + carte »
 //   web/img/brand/classeur.svg          rubrique « Mon classeur » de l'accueil : classeur à anneaux, Poké Ball sur la

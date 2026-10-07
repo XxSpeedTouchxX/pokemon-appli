@@ -21,7 +21,7 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 
 ## Identité Dropicards
 
-- **Logo :** celui de la planche du porteur, redessiné en SVG (`tools/brand/`, voir son README). Dans l'en-tête : le logo complet, avec le I à l'éclair et le O étoilé, 196 px de large au plus (réduit sur les petits écrans pour rester centré) ; la pastille « Marché FR » devient « FR ».
+- **Logo :** dans l'en-tête, le logo exact fourni par le porteur (son fichier, fond rendu transparent : `tools/brand/`, voir son README), 196 px de large au plus (réduit sur les petits écrans pour rester centré) ; la pastille « Marché FR » devient « FR ». Les icônes et le logo de « Mon classeur » sont redessinés en SVG.
 - **Nom :** « Dropicards » dans le titre, le manifeste (icône « maskable » à part) et la légende.
 - **Libellés :** « PKM » devient « Dropicards » au build (cote Dropicards, Bienvenue sur Dropicards…), avec un compte vérifié. Les noms techniques gardent `pkm` (classes, variables CSS, clé d'enregistrement de la collection).
 - **Jaune :** celui de la planche (`#FFD60A`), repris par le thème v6.
@@ -307,7 +307,7 @@ Le script `tools/web/build.mjs` :
 | `vendor/tesseract/7.0.0/` | Tesseract.js 7, ses cœurs WebAssembly (avec et sans SIMD) et le modèle français, licence Apache 2.0 (scan, chargé à l'ouverture de l'écran) |
 | `img/` | Visuels provisoires (ceux qui ne sont pas sur TCGdex) |
 | `img/products/` | Visuels officiels des produits scellés (galerie Pokémon France) |
-| `img/brand/` | Logo Dropicards (SVG : clair, aussi dans l'en-tête ; sombre ; icône), voir `tools/brand/` |
+| `img/brand/` | Logo de l'en-tête (fichier du porteur, PNG transparent), logos SVG (clair, sombre), icône, logo de « Mon classeur » ; voir `tools/brand/` |
 | `img/pokemon/` | Compagnons de l'accueil : sprites animés et fixes des 151 Pokémon de Kanto, de Latias, Latios, Kyogre, Groudon et Rayquaza ; icônes du choix dans `icon/`. Voir `tools/sprites/` |
 | `icons/` | Icônes de l'app Dropicards (dont une « maskable ») |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |

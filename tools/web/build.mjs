@@ -30,13 +30,13 @@ patch('style="flex: none; position: relative; width: 358px; height: 210px;',
 patch('<svg width="358" height="210" viewBox="0 0 358 210"', '<svg width="100%" height="100%" viewBox="0 0 358 210"');
 patch('<svg width="324" height="56" viewBox="0 0 324 56"', '<svg width="100%" height="56" viewBox="0 0 324 56" preserveAspectRatio="none"');
 patch('<svg width="324" height="76" viewBox="0 0 324 76"', '<svg width="100%" height="76" viewBox="0 0 324 76" preserveAspectRatio="none"');
-// Identité Dropicards (2026-10-04) : logo du porteur redessiné en SVG (tools/brand/make_logo.mjs) dans l'en-tête,
-// avec le I à l'éclair et le O étoilé (2026-10-05) : 196 px de large au plus, réduit sur les petits écrans pour rester
-// centré entre la pastille et l'avatar. La pastille « Marché FR » devient « FR » pour lui laisser la place.
+// Identité Dropicards : dans l'en-tête, le logo exact du porteur (2026-10-07), son fichier au fond rendu transparent
+// (tools/brand/import_header.py) : 196 px de large au plus, réduit sur les petits écrans pour rester centré entre la
+// pastille et l'avatar. La pastille « Marché FR » devient « FR » pour lui laisser la place.
 patch(`<span style="display: flex; align-items: center; gap: 8px">
 <span style="width: 30px; height: 30px; border-radius: 10px; background: #3D63FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(61, 99, 255, 0.35)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg></span>
 <span style="font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.03em">PKM</span>
-</span>`, '<span style="display: flex; align-items: center"><img src="img/brand/dropicards.svg" alt="Dropicards" width="196" height="39" style="display: block; width: min(196px, calc(100vw - 194px)); height: auto"></span>');
+</span>`, '<span style="display: flex; align-items: center"><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: min(196px, calc(100vw - 194px)); height: auto"></span>');
 patch('</span>Marché FR</span>', '</span>FR</span>');
 // Catalogue complet (tools/web/catalog.js) : courbe seulement si un historique existe, ajout possible
 // d'une carte sans prix, recherche du Marché sur toutes les cartes.
