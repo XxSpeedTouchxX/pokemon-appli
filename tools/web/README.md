@@ -59,7 +59,7 @@ Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de
   - +10 PK par nouvel article de la collection, une seule fois par article. Le message d'ajout l'annonce (« … · +10 PK ») ;
   - +300 PK une fois, en partageant l'app depuis « Mes PK » (WhatsApp, Facebook, X, ou la feuille de partage du téléphone ; « Copier le lien » ne rapporte rien).
   - Les articles de la démo et ceux déjà présents au premier lancement ne rapportent rien.
-- **« Mes PK »** (appui sur le compteur) : solde, façons de gagner, compagnons à débloquer. Rappel : les PK ne s'achètent pas et n'ont aucune valeur en euros.
+- **« Mes PK »** (appui sur le compteur) : solde, façons de gagner (du plus petit gain au plus grand : +10, +10, +100, +300), compagnons à débloquer. Rappel : les PK ne s'achètent pas et n'ont aucune valeur en euros.
 - **Déblocage** (`pkPriceOf` dans `pk.js`) :
   - Bulbizarre, Salamèche, Carapuce et Pikachu sont offerts ;
   - les autres coûtent 50 PK (Pokémon de base), 100 PK (première évolution) ou 200 PK (deuxième évolution), selon leur stade dans Pokémon Rouge et Bleu ;

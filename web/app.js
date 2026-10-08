@@ -4500,9 +4500,9 @@ class Component extends DCLogic {
       rules: [
         ['+' + PK_NEW, 'par nouvelle carte ou nouveau produit scellé dans ta collection'],
         ['+' + PK_DAY, 'par jour où tu ouvres l’app'],
-        ['+' + PK_SHARE, 'une fois, en partageant l’app sur un réseau social'],
-        ['+' + PK_WELCOME, 'de bienvenue, offerts une fois']
-      ].map(([n, t]) => ({ n: n, text: t })),
+        ['+' + PK_WELCOME, 'de bienvenue, offerts une fois'],
+        ['+' + PK_SHARE, 'une fois, en partageant l’app sur un réseau social']
+      ].map(([n, t]) => ({ n: n, text: t })), // du plus petit gain au plus grand (demande du porteur)
       shop: shop,
       locked: (() => { const n = HOME_BUDDIES.filter(([k]) => !pkOwns(s, k)).length; return n + (n > 1 ? ' compagnons à débloquer, de 50 à 500 PK' : ' compagnon à débloquer'); })(),
       all: () => this.setState({ pkSheet: false, buddyPick: true, hbq: '', pkAsk: null }),
