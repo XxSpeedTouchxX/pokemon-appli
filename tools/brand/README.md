@@ -16,7 +16,7 @@ Le logo vient de la planche du porteur (« B6 · I avec éclair vertical », 202
 | `web/img/brand/dropicards.svg` | Redessin SVG de la planche, fond clair : lettres blanches, contour et ombre noirs |
 | `web/img/brand/dropicards-dark.svg` | Fond sombre : lettres jaunes, sans contour |
 | `web/img/brand/classeur.svg` | Logo de la rubrique « Mon classeur » de l'accueil : classeur à anneaux jaune, Poké Ball sur la couverture, cartes qui dépassent ; contour et ombre noirs comme le logo |
-| `web/img/brand/pk.svg` | Poké Ball des PK, la monnaie de l'app (proposition C « Éclair traversant ») : moitié haute bleu nuit, moitié basse blanche, bande noire ; l'éclair du I du logo, jaune à contour noir, traverse toute la balle ; lisible de 14 à 72 px |
+| `web/img/brand/pk.svg` | Poké Ball des PK, la monnaie de l'app (proposition C « Éclair traversant ») : moitié haute jaune du logo (#FFD60A), moitié basse blanche, bande noire ; l'éclair du I du logo, jaune à contour noir, traverse toute la balle ; lisible de 14 à 72 px |
 | `web/icons/icon-192.png`, `icon-512.png` | Icône d'app « any » : le logo du porteur sur deux lignes (« DROPI » au-dessus de « CARDS »), carré jaune bordé de noir, coins transparents (`import_logo.py`) |
 | `web/icons/icon-maskable-512.png` | Icône « maskable » : plein cadre jaune, mot sur deux lignes dans la zone sûre |
 | `web/icons/apple-touch-icon.png` | Écran d'accueil iPhone (180 px, plein cadre, mot sur deux lignes) |
