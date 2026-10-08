@@ -693,7 +693,20 @@
 <li style="display: flex; align-items: center; gap: 10px; font-size: 14px; line-height: 1.35"><span style="flex: none; min-width: 52px; box-sizing: border-box; padding: 3px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-weight: 800; text-align: center">{{ pkr.n }}</span><span>{{ pkr.text }}</span></li>
 </sc-for>
 </ul>
-<h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA">À débloquer</h3>
+<h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Partager Dropicards</h3>
+<div style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 18px; border: 1px dashed #3A4A75">
+<span style="font-size: 13.5px; line-height: 1.4">{{ pk.shareText }}</span>
+<div role="group" aria-label="Partager Dropicards" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ pk.nets }}" as="pkn" hint-placeholder-count="3">
+<a href="{{ pkn.href }}" target="_blank" rel="noopener" onClick="{{ pkn.go }}" aria-label="{{ pkn.label }}" style="display: flex; align-items: center; height: 44px; padding: 0 16px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 14px; font-weight: 800; text-decoration: none">{{ pkn.name }}</a>
+</sc-for>
+<sc-if value="{{ pk.native }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ pk.shareNative }}" style="height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Autre…</button>
+</sc-if>
+<button type="button" onClick="{{ pk.copy }}" style="height: 44px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Copier le lien</button>
+</div>
+</div>
+<h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Compagnons à thème</h3>
 <div style="flex: none; display: flex; flex-direction: column; gap: 8px">
 <sc-for list="{{ pk.shop }}" as="pks" hint-placeholder-count="3">
 <div style="display: flex; align-items: center; gap: 12px; padding: 6px 12px 6px 6px; border-radius: 18px; border: 1px solid #1E2B45; background: #111A2C">
@@ -710,6 +723,10 @@
 </sc-if>
 </div>
 </sc-for>
+<button type="button" onClick="{{ pk.all }}" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; padding: 8px 16px; border: 1px solid #2A3A5C; border-radius: 18px; background: transparent; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer">
+<span style="display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700">Tous les compagnons</span><span style="font-size: 12.5px; color: #9AA8C3">{{ pk.locked }}</span></span>
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
 </div>
 <p style="flex: none; margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ pk.note }}</p>
 </section>

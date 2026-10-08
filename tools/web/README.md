@@ -56,12 +56,18 @@ Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de
 - **Gains :**
   - 100 PK de bienvenue, au premier lancement ;
   - +10 PK par jour où l'app est ouverte (date réelle ; `?today=AAAA-MM-JJ` pour les tests) ;
-  - +10 PK par nouvel article de la collection, une seule fois par article. Le message d'ajout l'annonce (« … · +10 PK »).
+  - +10 PK par nouvel article de la collection, une seule fois par article. Le message d'ajout l'annonce (« … · +10 PK ») ;
+  - +300 PK une fois, en partageant l'app depuis « Mes PK » (WhatsApp, Facebook, X, ou la feuille de partage du téléphone ; « Copier le lien » ne rapporte rien).
   - Les articles de la démo et ceux déjà présents au premier lancement ne rapportent rien.
 - **« Mes PK »** (appui sur le compteur) : solde, façons de gagner, compagnons à débloquer. Rappel : les PK ne s'achètent pas et n'ont aucune valeur en euros.
-- **Déblocage :** Kyogre, Groudon et Rayquaza coûtent 500 PK chacun (`PK_SHOP`). Dans « Choisis ton compagnon », ils portent un cadenas et leur prix ; un appui ouvre la confirmation, ou « Il te manque … PK ». Une fois débloqué, le compagnon est choisi et son thème appliqué.
-- **Transition :** un compagnon à thème choisi avant l'arrivée des PK reste acquis.
-- **Enregistrement :** `pk`, `pkOwn` (compagnons débloqués), `pkSeen` (articles déjà récompensés) et `pkDay` (dernier jour d'ouverture) sont gardés avec la collection (`persist.js`). « Vider ma collection » et « Remettre la démo » n'y touchent pas.
+- **Déblocage** (`pkPriceOf` dans `pk.js`) :
+  - Bulbizarre, Salamèche, Carapuce et Pikachu sont offerts ;
+  - les autres coûtent 50 PK (Pokémon de base), 100 PK (première évolution) ou 200 PK (deuxième évolution), selon leur stade dans Pokémon Rouge et Bleu ;
+  - légendaires et fabuleux : 400 PK ; Kyogre, Groudon et Rayquaza : 500 PK, thème compris.
+  - Dans « Choisis ton compagnon », un compagnon verrouillé porte un cadenas et son prix ; un appui ouvre la confirmation, ou « Il te manque … PK ». Une fois débloqué, le compagnon est choisi (et son thème appliqué).
+  - « Mes PK » montre les compagnons à thème et « Tous les compagnons ».
+- **Transition :** un compagnon déjà choisi avant son verrouillage reste acquis (`pkV`, version des règles).
+- **Enregistrement :** `pk`, `pkOwn` (compagnons débloqués), `pkSeen` (articles déjà récompensés), `pkDay` (dernier jour d'ouverture), `pkV` (version des règles) et `pkShared` (partage récompensé) sont gardés avec la collection (`persist.js`). « Vider ma collection » et « Remettre la démo » n'y touchent pas.
 6. **Sorties du moment** (carrousel), tout en bas ; puis la mention de non-affiliation.
 
 La liste « Ma collection » (récents ou valeur, 20 par page) est retirée le 2026-10-07 : « Mon classeur » montre déjà toute la collection.

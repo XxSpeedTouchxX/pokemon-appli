@@ -82,8 +82,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - thèmes des compagnons : Kyogre (océan, bleu), Groudon (volcan, rouge), Rayquaza (ouragan, vert émeraude et ardoise, depuis le 2026-10-08) changent le fond de l'app.
 - **Monnaie « PK » (2026-10-08) :**
   - logo : une gemme jaune à facettes avec l'éclair du logo (jaune, contour noir) et une étincelle, sans aucun repère de Poké Ball pour limiter le risque de droits (choisie le 2026-10-08 après plusieurs séries de propositions) ; compteur à gauche de l'avatar (accueil, Collection, Marché, Territoire), qui ouvre « Mes PK » ; sur l'accueil, logo à gauche, pastille « FR » retirée ;
-  - gains : 100 de bienvenue, +10 par jour d'ouverture, +10 par nouvel article de la collection (une fois par article) ;
-  - Kyogre, Groudon et Rayquaza à 500 PK chacun, thème compris ; un compagnon à thème déjà choisi reste acquis ;
+  - gains : 100 de bienvenue, +10 par jour d'ouverture, +10 par nouvel article de la collection (une fois par article), +300 pour un partage ;
+  - compagnons : Bulbizarre, Salamèche, Carapuce, Pikachu offerts ; les autres de 50 à 200 PK selon le stade d'évolution, légendaires 400, Kyogre, Groudon et Rayquaza 500 avec leur thème ; un compagnon déjà choisi reste acquis ;
+  - +300 PK une fois pour un partage sur un réseau social ; parrainage (+500) **en attente** d'un choix (serveur ou version locale) ;
+  - logo de « Mon classeur » : la gemme des PK remplace la Poké Ball ;
   - sur l'appareil, sans achat en argent réel ni valeur en euros ; gains et règles **validés par le porteur (2026-10-08)** ; prochains déblocages à définir.
 - **Propositions d'améliorations v1 (2026-10-07) :** `docs/13-propositions-ameliorations.md`, 43 propositions classées en trois vagues (fiabiliser, faire venir et garder, se différencier), **à valider** ; rien n'est lancé sans « go ».
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.

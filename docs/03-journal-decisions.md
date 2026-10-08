@@ -6,6 +6,35 @@
 
 ---
 
+## 2026-10-08 (fin) — PK : compagnons à débloquer, partage récompensé, logo du classeur
+
+- **Contexte :** le porteur valide les règles des PK et demande :
+  - de verrouiller presque tous les compagnons, sauf Salamèche, Carapuce, Bulbizarre et Pikachu, offerts dès le premier lancement ;
+  - 300 PK pour un partage de l'app sur un réseau social, 500 PK pour un parrainage ;
+  - la gemme des PK à la place de la Poké Ball sur le logo de « Mon classeur ».
+- **Décision :**
+  - **Prix des compagnons** (défaut proposé, ajustable) : selon le stade d'évolution dans Pokémon Rouge et Bleu.
+
+    | Compagnons | Prix |
+    |---|---|
+    | Pokémon de base | 50 PK |
+    | Première évolution | 100 PK |
+    | Deuxième évolution | 200 PK |
+    | Légendaires et fabuleux (Artikodin, Électhor, Sulfura, Mewtwo, Mew, Latias, Latios) | 400 PK |
+    | Kyogre, Groudon, Rayquaza, thème compris | 500 PK |
+
+    152 compagnons sont à débloquer, 4 sont offerts. Un compagnon déjà choisi avant son verrouillage reste acquis (règle validée).
+  - **« Mes PK » :** les compagnons à thème, puis « Tous les compagnons » qui ouvre le choix.
+  - **Partage :** +300 PK la première fois, via WhatsApp, Facebook, X ou la feuille de partage du téléphone ; « Copier le lien » ne rapporte rien. L'app ne peut pas vérifier que la publication a eu lieu : le clic suffit, une seule fois.
+  - **Logo de « Mon classeur » :** la gemme des PK remplace la Poké Ball rouge et blanche sur la couverture.
+- **En attente : parrainage (+500 PK).** Sans serveur, l'app d'un parrain ne peut pas savoir qu'un filleul s'est inscrit sur un autre téléphone. Options proposées au porteur :
+  - un petit serveur gratuit (Cloudflare Worker et KV) ;
+  - ou une version locale : le filleul arrive par un lien d'invitation et reçoit les PK, le parrain ne reçoit rien automatiquement.
+- **Point d'attention :** le partage expose publiquement la démo (`pokemon-appli.pages.dev`). Disponibilité du nom, licence des données et cadre juridique ne sont pas encore vérifiés (CLAUDE.md §1, §4).
+- **Coût :** 0 €.
+
+---
+
 ## 2026-10-08 (suite) — Thème « Ouragan » pour Rayquaza
 
 - **Contexte :** le porteur demande un thème « ouragan » pour Rayquaza, affiché « Compagnon et thème Ouragan ».

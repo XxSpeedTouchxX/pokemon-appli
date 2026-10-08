@@ -2114,10 +2114,10 @@ class Component extends DCLogic {
   // puis relus à l'ouverture. Rien n'est envoyé en ligne. Les cartes du catalogue citées par la
   // collection sont enregistrées avec elle (ligne brute du catalogue), pour s'afficher avant le
   // chargement du catalogue complet.
-  // PK (pk.js) : solde, compagnons débloqués, articles déjà récompensés, dernier jour d'ouverture.
+  // PK (pk.js) : solde, compagnons débloqués, articles déjà récompensés, dernier jour d'ouverture, version des règles, partage récompensé.
   // Les liens de démonstration (#novice, ?demo=…) montrent la démo sans toucher à la collection.
   const SAVE_KEY = 'pkm-collection-v1';
-  const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts', 'buddy', 'pk', 'pkOwn', 'pkSeen', 'pkDay'];
+  const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts', 'buddy', 'pk', 'pkOwn', 'pkSeen', 'pkDay', 'pkV', 'pkShared'];
   const DEVICE = { enabled: true, ok: null, timer: null };
   const storage = {
     read() { try { const t = window.localStorage.getItem(SAVE_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } },
@@ -4313,17 +4313,38 @@ class Component extends DCLogic {
     if (g.length) it.flag = this.flag(g[0].lang);
     return it;
   };
-  // ——— PK, la monnaie virtuelle de l'app (2026-10-08) ———
-  // Les PK se gagnent dans l'app et servent à débloquer des compagnons et leur thème (Kyogre, Groudon, Rayquaza :
-  // 500 PK chacun). Ils ne s'achètent pas, ne se convertissent pas en euros et restent sur l'appareil, avec la collection.
+  // ——— PK, la monnaie virtuelle de l'app (2026-10-08, règles validées par le porteur) ———
+  // Les PK se gagnent dans l'app et servent à débloquer des compagnons (et le thème de Kyogre, Groudon, Rayquaza).
+  // Ils ne s'achètent pas, ne se convertissent pas en euros et restent sur l'appareil, avec la collection.
   // Gains : 100 PK de bienvenue (une fois), 10 PK par jour d'ouverture de l'app, 10 PK par nouvel article ajouté à la
-  // collection (carte ou produit scellé, une seule fois par article : retirer puis rajouter ne rapporte rien).
-  // Les articles déjà dans la collection au premier lancement, et ceux de la démo, ne rapportent rien ; un compagnon à
-  // thème déjà choisi avant l'arrivée des PK reste acquis.
+  // collection (carte ou produit scellé, une seule fois par article : retirer puis rajouter ne rapporte rien), 300 PK
+  // une fois pour un partage de l'app sur un réseau social.
+  // Les articles déjà dans la collection au premier lancement, et ceux de la démo, ne rapportent rien ; un compagnon
+  // déjà choisi avant son verrouillage reste acquis.
   // Compteur en haut à droite (accueil, Collection, Marché, Territoire) : il ouvre « Mes PK » (solde, gains, déblocages).
   // Ce module partage la portée des autres : ses noms commencent par PK_ ou pk.
-  const PK_SHOP = { 382: 500, 383: 500, 384: 500 }; // Kyogre, Groudon, Rayquaza
-  const PK_WELCOME = 100, PK_DAY = 10, PK_NEW = 10, PK_GAIN_MS = 2600;
+  // Prix des compagnons (v2, 2026-10-08) : Bulbizarre, Salamèche, Carapuce et Pikachu offerts dès le premier lancement ;
+  // les autres selon leur stade d'évolution dans Pokémon Rouge et Bleu : de base 50 PK, première évolution 100 PK,
+  // deuxième évolution 200 PK ; légendaires et fabuleux 400 PK ; Kyogre, Groudon et Rayquaza, thème compris, 500 PK.
+  const PK_FREE = [1, 4, 7, 25];
+  const PK_STAGE1 = [2, 5, 8, 11, 14, 17, 20, 22, 24, 26, 28, 30, 33, 36, 38, 40, 42, 44, 47, 49, 51, 53, 55, 57, 59, 61, 64, 67, 70, 73,
+    75, 78, 80, 82, 85, 87, 89, 91, 93, 97, 99, 101, 103, 105, 110, 112, 117, 119, 121, 130, 134, 135, 136, 139, 141, 148];
+  const PK_STAGE2 = [3, 6, 9, 12, 15, 18, 31, 34, 45, 62, 65, 68, 71, 76, 94, 149];
+  const PK_LEGEND = [144, 145, 146, 150, 151, 380, 381];
+  const pkPriceOf = n => PK_FREE.indexOf(n) >= 0 ? 0 : HOME_THEMES[n] ? 500 : PK_LEGEND.indexOf(n) >= 0 ? 400
+    : PK_STAGE2.indexOf(n) >= 0 ? 200 : PK_STAGE1.indexOf(n) >= 0 ? 100 : 50;
+  const PK_SHOP = {};
+  HOME_BUDDIES.forEach(([n]) => { const p = pkPriceOf(n); if (p) PK_SHOP[n] = p; });
+  const PK_WELCOME = 100, PK_DAY = 10, PK_NEW = 10, PK_SHARE = 300, PK_GAIN_MS = 2600, PK_V = 2;
+  // Partage de l'app (+300 PK, une fois) : réseaux proposés, ou la feuille de partage du téléphone.
+  const PK_URL = 'https://pokemon-appli.pages.dev';
+  const PK_TEXT = 'Je suis la valeur de ma collection Pokémon TCG avec Dropicards, au prix du marché :';
+  const PK_NETS = [
+    ['WhatsApp', 'https://wa.me/?text=' + encodeURIComponent(PK_TEXT + ' ' + PK_URL)],
+    ['Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(PK_URL)],
+    ['X', 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(PK_TEXT) + '&url=' + encodeURIComponent(PK_URL)]
+  ];
+  const pkCanShare = () => { try { return typeof navigator.share === 'function'; } catch (e) { return false; } };
   const pkNum = n => Number(n || 0).toLocaleString('fr-FR');
   const pkIds = purchases => {
     const ids = new Set();
@@ -4340,20 +4361,23 @@ class Component extends DCLogic {
     if (!Array.isArray(d.pkOwn)) d.pkOwn = [];
     if (!Array.isArray(d.pkSeen)) d.pkSeen = [];
     if (typeof d.pkDay !== 'string') d.pkDay = '';
+    if (typeof d.pkShared !== 'string') d.pkShared = '';
     // Compagnon payant pas encore débloqué (après l'arrivée des PK) : retour au compagnon par défaut.
     if (d.pkDay && !pkOwns(d, d.buddy)) d.buddy = HOME_BUDDY;
     return d;
   };
 
   // Au lancement (après la relecture de la collection) : bienvenue la première fois, sinon visite du jour.
+  // Le compagnon enregistré (état brut, avant le contrôle de st) reste acquis s'il est devenu payant (v2).
   proto.pkInit = function () {
-    const raw = this.state || {}, s = this.st(), today = realToday(), patch = {};
+    const raw = this.state || {}, s = this.st(), today = realToday(), patch = {}, kept = raw.buddy;
     if (!raw.pkDay) {
       const seen = pkIds(s.purchases);
       ['full', 'novice'].forEach(m => pkIds(this.purchasesSeed(m)).forEach(id => seen.add(id)));
-      Object.assign(patch, { pk: PK_WELCOME, pkSeen: Array.from(seen), pkOwn: PK_SHOP[s.buddy] ? [s.buddy] : [], pkDay: today, pkGain: PK_WELCOME });
-    } else if (raw.pkDay !== today) {
-      Object.assign(patch, { pk: s.pk + PK_DAY, pkDay: today, pkGain: PK_DAY });
+      Object.assign(patch, { pk: PK_WELCOME, pkSeen: Array.from(seen), pkOwn: PK_SHOP[kept] ? [kept] : [], pkDay: today, pkGain: PK_WELCOME, pkV: PK_V });
+    } else {
+      if (raw.pkDay !== today) Object.assign(patch, { pk: s.pk + PK_DAY, pkDay: today, pkGain: PK_DAY });
+      if (raw.pkV !== PK_V) Object.assign(patch, { pkV: PK_V, pkOwn: PK_SHOP[kept] && s.pkOwn.indexOf(kept) < 0 ? s.pkOwn.concat([kept]) : s.pkOwn });
     }
     if (!Object.keys(patch).length) return;
     this.state = Object.assign({}, this.state, patch);
@@ -4381,6 +4405,23 @@ class Component extends DCLogic {
       }
     }
     return pkBaseSet.call(this, patch);
+  };
+
+  // Partage de l'app sur un réseau social : +300 PK la première fois (l'app ne peut pas vérifier la publication).
+  proto.pkShare = function (via) {
+    const s = this.st();
+    if (s.pkShared) return;
+    this.setState({ pk: s.pk + PK_SHARE, pkShared: via, pkGain: PK_SHARE, toast: 'Merci pour le partage ! +' + PK_SHARE + ' PK' });
+    this.pkGainEnd();
+    this.flash();
+  };
+  proto.pkShareNative = function () {
+    if (!pkCanShare()) return;
+    navigator.share({ title: 'Dropicards', text: PK_TEXT, url: PK_URL }).then(() => this.pkShare('appareil')).catch(() => {});
+  };
+  proto.pkCopy = function () {
+    const done = () => { this.setState({ toast: 'Lien de l’app copié' }); this.flash(); };
+    try { navigator.clipboard.writeText(PK_URL).then(done, () => {}); } catch (e) { /* presse-papiers indisponible */ }
   };
 
   // Débloquer un compagnon : confirmation dans le panneau de choix, puis il devient ton compagnon.
@@ -4415,6 +4456,10 @@ class Component extends DCLogic {
     r.open = () => this.setState({ buddyPick: true, hbq: '', pkAsk: null });
     r.close = () => this.setState({ buddyPick: false, pkAsk: null });
     r.balance = pkNum(s.pk);
+    if (!String(s.hbq || '').trim() && r.list.length) {
+      const free = HOME_BUDDIES.filter(([n]) => pkOwns(s, n)).length;
+      r.count = r.list.length + ' Pokémon · ' + free + ' débloqués, les autres avec tes PK';
+    }
     r.ask = r.picking ? pkAskView.call(this, s) : { on: false };
     r.list = r.list.map(it => {
       const k = Number((/(\d+)\.png$/.exec(it.src) || [])[1]), price = PK_SHOP[k];
@@ -4430,7 +4475,7 @@ class Component extends DCLogic {
 
   // Compteur de l'en-tête et panneau « Mes PK ».
   proto.pkView = function (s) {
-    const shop = Object.keys(PK_SHOP).map(Number).map(k => {
+    const shop = Object.keys(HOME_THEMES).map(Number).map(k => {
       const own = pkOwns(s, k), name = HOME_NAMES[k], price = PK_SHOP[k], cur = s.buddy === k;
       return {
         name: name, src: 'img/pokemon/icon/' + k + '.png', theme: HOME_THEMES[k] ? 'Compagnon et ' + pkTheme(k) : 'Compagnon',
@@ -4452,9 +4497,16 @@ class Component extends DCLogic {
       rules: [
         ['+' + PK_NEW, 'par nouvelle carte ou nouveau produit scellé dans ta collection'],
         ['+' + PK_DAY, 'par jour où tu ouvres l’app'],
+        ['+' + PK_SHARE, 'une fois, en partageant l’app sur un réseau social'],
         ['+' + PK_WELCOME, 'de bienvenue, offerts une fois']
       ].map(([n, t]) => ({ n: n, text: t })),
       shop: shop,
+      locked: (() => { const n = HOME_BUDDIES.filter(([k]) => !pkOwns(s, k)).length; return n + (n > 1 ? ' compagnons à débloquer, de 50 à 500 PK' : ' compagnon à débloquer'); })(),
+      all: () => this.setState({ pkSheet: false, buddyPick: true, hbq: '', pkAsk: null }),
+      shareDone: !!s.pkShared, shareOpen: !s.pkShared,
+      shareText: s.pkShared ? 'Merci pour le partage ! Tes +' + PK_SHARE + ' PK sont reçus.' : '+' + PK_SHARE + ' PK la première fois que tu partages Dropicards sur un réseau social.',
+      nets: PK_NETS.map(([name, href]) => ({ name: name, href: href, label: 'Partager Dropicards sur ' + name, go: () => this.pkShare(name) })),
+      native: pkCanShare(), shareNative: () => this.pkShareNative(), copy: () => this.pkCopy(),
       note: 'Les PK se gagnent dans l’app : ils ne s’achètent pas et n’ont aucune valeur en euros. Ils restent sur cet appareil, avec ta collection.'
     };
   };
@@ -6780,165 +6832,185 @@ const _hoisted_1014 = { style: {"display":"flex","flex-direction":"column"} }
 const _hoisted_1015 = { style: {"font-family":"'Sora', sans-serif","font-size":"32px","line-height":"1.1","font-weight":"700"} }
 const _hoisted_1016 = { style: {"flex":"none","margin":"0","padding":"0","list-style":"none","display":"flex","flex-direction":"column","gap":"8px"} }
 const _hoisted_1017 = { style: {"flex":"none","min-width":"52px","box-sizing":"border-box","padding":"3px 8px","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font-weight":"800","text-align":"center"} }
-const _hoisted_1018 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"8px"} }
-const _hoisted_1019 = ["src"]
-const _hoisted_1020 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
-const _hoisted_1021 = { style: {"font-size":"15px","font-weight":"700"} }
-const _hoisted_1022 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
-const _hoisted_1023 = ["onClick", "aria-label"]
-const _hoisted_1024 = ["onClick", "aria-label"]
-const _hoisted_1025 = { style: {"flex":"none","margin":"0","font-size":"12px","line-height":"1.45","color":"var(--pkm-t4)"} }
-const _hoisted_1026 = {
+const _hoisted_1018 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"10px","padding":"12px","border-radius":"18px","border":"1px dashed var(--pkm-line-4)"} }
+const _hoisted_1019 = { style: {"font-size":"13.5px","line-height":"1.4"} }
+const _hoisted_1020 = {
+  role: "group",
+  "aria-label": "Partager Dropicards",
+  style: {"display":"flex","flex-wrap":"wrap","gap":"8px"}
+}
+const _hoisted_1021 = ["href", "onClick", "aria-label"]
+const _hoisted_1022 = ["onClick"]
+const _hoisted_1023 = ["onClick"]
+const _hoisted_1024 = { style: {"flex":"none","display":"flex","flex-direction":"column","gap":"8px"} }
+const _hoisted_1025 = ["src"]
+const _hoisted_1026 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column"} }
+const _hoisted_1027 = { style: {"font-size":"15px","font-weight":"700"} }
+const _hoisted_1028 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_1029 = ["onClick", "aria-label"]
+const _hoisted_1030 = ["onClick", "aria-label"]
+const _hoisted_1031 = ["onClick"]
+const _hoisted_1032 = { style: {"display":"flex","flex-direction":"column"} }
+const _hoisted_1033 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_1034 = {
+  width: "20",
+  height: "20",
+  viewBox: "0 0 24 24",
+  "aria-hidden": "true",
+  style: {"flex":"none","fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
+}
+const _hoisted_1035 = { style: {"flex":"none","margin":"0","font-size":"12px","line-height":"1.45","color":"var(--pkm-t4)"} }
+const _hoisted_1036 = {
   key: 11,
   class: "pkm-dark",
   "aria-label": "Radar des boutiques",
   style: {"position":"absolute","inset":"0","z-index":"15","overflow":"hidden","background":"#05080F","color":"var(--pkm-t1)"}
 }
-const _hoisted_1027 = {
+const _hoisted_1037 = {
   class: "pkm-dark",
   style: {"position":"absolute","left":"0","right":"0","top":"0","z-index":"3","display":"flex","flex-direction":"column","gap":"8px","padding":"14px 14px 10px","background":"linear-gradient(180deg, rgba(var(--pkm-deep-rgb), 0.85), rgba(var(--pkm-deep-rgb), 0))","color":"var(--pkm-t1)"}
 }
-const _hoisted_1028 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
-const _hoisted_1029 = ["onClick"]
-const _hoisted_1030 = {
+const _hoisted_1038 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
+const _hoisted_1039 = ["onClick"]
+const _hoisted_1040 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1031 = {
+const _hoisted_1041 = {
   class: "pkm-dark",
   "aria-label": "Secteur",
   style: {"flex":"1","min-width":"0","display":"flex","align-items":"center","gap":"0","height":"44px","padding":"0 6px","box-sizing":"border-box","border-radius":"22px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.12)","background":"rgba(var(--pkm-ink-rgb), 0.86)","overflow-x":"auto","scrollbar-width":"none","color":"var(--pkm-t1)"}
 }
-const _hoisted_1032 = {
+const _hoisted_1042 = {
   key: 0,
   "aria-hidden": "true",
   style: {"flex":"none","color":"var(--pkm-t5)","font-size":"14px"}
 }
-const _hoisted_1033 = ["onClick", "aria-current"]
-const _hoisted_1034 = ["onClick", "aria-pressed"]
-const _hoisted_1035 = {
+const _hoisted_1043 = ["onClick", "aria-current"]
+const _hoisted_1044 = ["onClick", "aria-pressed"]
+const _hoisted_1045 = {
   role: "group",
   "aria-label": "Produit recherché",
   style: {"display":"flex","gap":"6px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -14px","padding":"0 14px"}
 }
-const _hoisted_1036 = ["onClick", "aria-pressed"]
-const _hoisted_1037 = {
+const _hoisted_1046 = ["onClick", "aria-pressed"]
+const _hoisted_1047 = {
   key: 0,
   class: "pkm-dark",
   "aria-hidden": "true",
   style: {"align-self":"flex-start","display":"flex","align-items":"center","gap":"10px","padding":"4px 10px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.82)","font-size":"11px","font-weight":"600","color":"var(--pkm-t2)"}
 }
-const _hoisted_1038 = {
+const _hoisted_1048 = {
   id: "pkm-radar-sheet",
   style: {"flex":"1","min-height":"0","overflow-y":"auto","scrollbar-width":"none","padding":"16px 16px 18px","display":"flex","flex-direction":"column","gap":"12px"}
 }
-const _hoisted_1039 = ["onClick"]
-const _hoisted_1040 = {
+const _hoisted_1049 = ["onClick"]
+const _hoisted_1050 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1041 = ["aria-label"]
-const _hoisted_1042 = { style: {"display":"flex","align-items":"flex-start","gap":"12px"} }
-const _hoisted_1043 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
-const _hoisted_1044 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.02em"} }
-const _hoisted_1045 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
-const _hoisted_1046 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
-const _hoisted_1047 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"4px"} }
-const _hoisted_1048 = { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
-const _hoisted_1049 = ["onClick", "aria-expanded"]
-const _hoisted_1050 = {
+const _hoisted_1051 = ["aria-label"]
+const _hoisted_1052 = { style: {"display":"flex","align-items":"flex-start","gap":"12px"} }
+const _hoisted_1053 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
+const _hoisted_1054 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.02em"} }
+const _hoisted_1055 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
+const _hoisted_1056 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_1057 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"4px"} }
+const _hoisted_1058 = { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
+const _hoisted_1059 = ["onClick", "aria-expanded"]
+const _hoisted_1060 = {
   key: 0,
   class: "pkm-dark",
   style: {"display":"flex","flex-direction":"column","gap":"6px","padding":"12px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","color":"var(--pkm-t1)"}
 }
-const _hoisted_1051 = { style: {"color":"var(--pkm-t2)"} }
-const _hoisted_1052 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
-const _hoisted_1053 = {
+const _hoisted_1061 = { style: {"color":"var(--pkm-t2)"} }
+const _hoisted_1062 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
+const _hoisted_1063 = {
   key: 1,
   style: {"display":"flex","flex-direction":"column","gap":"2px","padding":"11px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)"}
 }
-const _hoisted_1054 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t2)"} }
-const _hoisted_1055 = {
+const _hoisted_1064 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t2)"} }
+const _hoisted_1065 = {
   key: 2,
   style: {"margin":"0","font-size":"13px","line-height":"1.45","color":"var(--pkm-t2)"}
 }
-const _hoisted_1056 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
-const _hoisted_1057 = ["href"]
-const _hoisted_1058 = ["onClick", "aria-pressed"]
-const _hoisted_1059 = ["href", "aria-label"]
-const _hoisted_1060 = ["href", "aria-label"]
-const _hoisted_1061 = { style: {"display":"flex","flex-wrap":"wrap","gap":"4px 18px"} }
-const _hoisted_1062 = ["href"]
-const _hoisted_1063 = ["href"]
-const _hoisted_1064 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_1065 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.02em"} }
-const _hoisted_1066 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
-const _hoisted_1067 = {
+const _hoisted_1066 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
+const _hoisted_1067 = ["href"]
+const _hoisted_1068 = ["onClick", "aria-pressed"]
+const _hoisted_1069 = ["href", "aria-label"]
+const _hoisted_1070 = ["href", "aria-label"]
+const _hoisted_1071 = { style: {"display":"flex","flex-wrap":"wrap","gap":"4px 18px"} }
+const _hoisted_1072 = ["href"]
+const _hoisted_1073 = ["href"]
+const _hoisted_1074 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
+const _hoisted_1075 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.02em"} }
+const _hoisted_1076 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_1077 = {
   key: 0,
   role: "status",
   style: {"margin":"0","padding":"10px 12px","border-radius":"14px","background":"rgba(var(--pkm-orange-rgb), 0.12)","color":"var(--pkm-sand)","font-size":"13px","line-height":"1.45"}
 }
-const _hoisted_1068 = ["onClick"]
-const _hoisted_1069 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
-const _hoisted_1070 = ["onClick", "disabled"]
-const _hoisted_1071 = ["onClick", "aria-pressed"]
-const _hoisted_1072 = {
+const _hoisted_1078 = ["onClick"]
+const _hoisted_1079 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
+const _hoisted_1080 = ["onClick", "disabled"]
+const _hoisted_1081 = ["onClick", "aria-pressed"]
+const _hoisted_1082 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1073 = {
+const _hoisted_1083 = {
   key: 2,
   role: "group",
   "aria-label": "Rayon autour de toi",
   style: {"display":"flex","gap":"8px"}
 }
-const _hoisted_1074 = ["onClick", "aria-pressed"]
-const _hoisted_1075 = {
+const _hoisted_1084 = ["onClick", "aria-pressed"]
+const _hoisted_1085 = {
   key: 3,
   style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"}
 }
-const _hoisted_1076 = {
+const _hoisted_1086 = {
   key: 4,
   style: {"margin":"0","padding":"8px 0","font-size":"13.5px","color":"var(--pkm-t3)"}
 }
-const _hoisted_1077 = { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }
-const _hoisted_1078 = {
+const _hoisted_1087 = { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }
+const _hoisted_1088 = {
   class: "pkm-dark",
   style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
-const _hoisted_1079 = ["onClick", "aria-label"]
-const _hoisted_1080 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_1081 = { style: {"font-size":"14px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_1082 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_1083 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_1084 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
-const _hoisted_1085 = { style: {"font-size":"12.5px","font-weight":"700","color":"var(--pkm-t2)"} }
-const _hoisted_1086 = {
+const _hoisted_1089 = ["onClick", "aria-label"]
+const _hoisted_1090 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
+const _hoisted_1091 = { style: {"font-size":"14px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1092 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1093 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1094 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
+const _hoisted_1095 = { style: {"font-size":"12.5px","font-weight":"700","color":"var(--pkm-t2)"} }
+const _hoisted_1096 = {
   class: "pkm-dark",
   style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
-const _hoisted_1087 = ["onClick", "aria-label"]
-const _hoisted_1088 = { style: {"flex":"1","min-width":"0","font-size":"14px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_1089 = { style: {"flex":"none","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-teal)"} }
-const _hoisted_1090 = {
+const _hoisted_1097 = ["onClick", "aria-label"]
+const _hoisted_1098 = { style: {"flex":"1","min-width":"0","font-size":"14px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1099 = { style: {"flex":"none","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-teal)"} }
+const _hoisted_1100 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1091 = { style: {"margin":"0","font-size":"11px","line-height":"1.45","color":"var(--pkm-t5)"} }
-const _hoisted_1092 = { style: {"flex":"none","width":"26px","height":"26px","border-radius":"13px","background":"rgba(var(--pkm-green-rgb), 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
-const _hoisted_1093 = {
+const _hoisted_1101 = { style: {"margin":"0","font-size":"11px","line-height":"1.45","color":"var(--pkm-t5)"} }
+const _hoisted_1102 = { style: {"flex":"none","width":"26px","height":"26px","border-radius":"13px","background":"rgba(var(--pkm-green-rgb), 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_1103 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
@@ -11798,7 +11870,7 @@ return function render(_ctx, _cache) {
             style: {"flex":"1 1 auto","min-height":"44px","padding":"0","border":"0","background":"transparent","cursor":"pointer"}
           }, null, 8 /* PROPS */, _hoisted_1008),
           _createElementVNode("section", _hoisted_1009, [
-            _cache[244] || (_cache[244] = _createElementVNode("div", {
+            _cache[246] || (_cache[246] = _createElementVNode("div", {
               "aria-hidden": "true",
               style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
@@ -11830,7 +11902,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("span", _hoisted_1015, _toDisplayString(_ctx.V.pk.balance) + " PK", 1 /* TEXT */)
               ])
             ]),
-            _cache[245] || (_cache[245] = _createElementVNode("h3", { style: {"margin":"0","font-size":"14px","font-weight":"700","color":"var(--pkm-t2)"} }, "Gagner des PK", -1 /* CACHED */)),
+            _cache[247] || (_cache[247] = _createElementVNode("h3", { style: {"margin":"0","font-size":"14px","font-weight":"700","color":"var(--pkm-t2)"} }, "Gagner des PK", -1 /* CACHED */)),
             _createElementVNode("ul", _hoisted_1016, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.pk.rules || []), (pkr, pkr_i) => {
                 return (_openBlock(), _createElementBlock("li", {
@@ -11842,8 +11914,38 @@ return function render(_ctx, _cache) {
                 ]))
               }), 128 /* KEYED_FRAGMENT */))
             ]),
-            _cache[246] || (_cache[246] = _createElementVNode("h3", { style: {"margin":"0","font-size":"14px","font-weight":"700","color":"var(--pkm-t2)"} }, "À débloquer", -1 /* CACHED */)),
+            _cache[248] || (_cache[248] = _createElementVNode("h3", { style: {"margin":"0","font-size":"14px","font-weight":"700","color":"var(--pkm-t2)"} }, "Partager Dropicards", -1 /* CACHED */)),
             _createElementVNode("div", _hoisted_1018, [
+              _createElementVNode("span", _hoisted_1019, _toDisplayString(_ctx.V.pk.shareText), 1 /* TEXT */),
+              _createElementVNode("div", _hoisted_1020, [
+                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.pk.nets || []), (pkn, pkn_i) => {
+                  return (_openBlock(), _createElementBlock("a", {
+                    key: pkn_i,
+                    href: pkn.href,
+                    target: "_blank",
+                    rel: "noopener",
+                    onClick: pkn.go,
+                    "aria-label": _ctx.A(pkn.label),
+                    style: {"display":"flex","align-items":"center","height":"44px","padding":"0 16px","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font-size":"14px","font-weight":"800","text-decoration":"none"}
+                  }, _toDisplayString(pkn.name), 9 /* TEXT, PROPS */, _hoisted_1021))
+                }), 128 /* KEYED_FRAGMENT */)),
+                (_ctx.V.pk.native)
+                  ? (_openBlock(), _createElementBlock("button", {
+                      key: 0,
+                      type: "button",
+                      onClick: _ctx.V.pk.shareNative,
+                      style: {"height":"44px","padding":"0 16px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"14px","font-weight":"800","cursor":"pointer"}
+                    }, "Autre…", 8 /* PROPS */, _hoisted_1022))
+                  : _createCommentVNode("v-if", true),
+                _createElementVNode("button", {
+                  type: "button",
+                  onClick: _ctx.V.pk.copy,
+                  style: {"height":"44px","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
+                }, "Copier le lien", 8 /* PROPS */, _hoisted_1023)
+              ])
+            ]),
+            _cache[249] || (_cache[249] = _createElementVNode("h3", { style: {"margin":"0","font-size":"14px","font-weight":"700","color":"var(--pkm-t2)"} }, "Compagnons à thème", -1 /* CACHED */)),
+            _createElementVNode("div", _hoisted_1024, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.pk.shop || []), (pks, pks_i) => {
                 return (_openBlock(), _createElementBlock("div", {
                   key: pks_i,
@@ -11856,10 +11958,10 @@ return function render(_ctx, _cache) {
                     width: "96",
                     height: "96",
                     style: {"flex":"none","display":"block","width":"64px","height":"64px","image-rendering":"pixelated"}
-                  }, null, 8 /* PROPS */, _hoisted_1019),
-                  _createElementVNode("div", _hoisted_1020, [
-                    _createElementVNode("span", _hoisted_1021, _toDisplayString(pks.name), 1 /* TEXT */),
-                    _createElementVNode("span", _hoisted_1022, _toDisplayString(pks.theme), 1 /* TEXT */)
+                  }, null, 8 /* PROPS */, _hoisted_1025),
+                  _createElementVNode("div", _hoisted_1026, [
+                    _createElementVNode("span", _hoisted_1027, _toDisplayString(pks.name), 1 /* TEXT */),
+                    _createElementVNode("span", _hoisted_1028, _toDisplayString(pks.theme), 1 /* TEXT */)
                   ]),
                   (pks.locked)
                     ? (_openBlock(), _createElementBlock("button", {
@@ -11877,7 +11979,7 @@ return function render(_ctx, _cache) {
                           style: {"display":"block"}
                         }, null, -1 /* CACHED */)),
                         _createTextVNode(_toDisplayString(pks.action), 1 /* TEXT */)
-                      ], 8 /* PROPS */, _hoisted_1023))
+                      ], 8 /* PROPS */, _hoisted_1029))
                     : _createCommentVNode("v-if", true),
                   (pks.owned)
                     ? (_openBlock(), _createElementBlock("button", {
@@ -11886,25 +11988,38 @@ return function render(_ctx, _cache) {
                         onClick: pks.go,
                         "aria-label": _ctx.A(pks.aria),
                         style: {"flex":"none","height":"44px","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"700","white-space":"nowrap","cursor":"pointer"}
-                      }, _toDisplayString(pks.action), 9 /* TEXT, PROPS */, _hoisted_1024))
+                      }, _toDisplayString(pks.action), 9 /* TEXT, PROPS */, _hoisted_1030))
                     : _createCommentVNode("v-if", true)
                 ]))
-              }), 128 /* KEYED_FRAGMENT */))
+              }), 128 /* KEYED_FRAGMENT */)),
+              _createElementVNode("button", {
+                type: "button",
+                onClick: _ctx.V.pk.all,
+                style: {"display":"flex","align-items":"center","justify-content":"space-between","gap":"10px","min-height":"52px","padding":"8px 16px","border":"1px solid var(--pkm-line-2)","border-radius":"18px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","text-align":"left","cursor":"pointer"}
+              }, [
+                _createElementVNode("span", _hoisted_1032, [
+                  _cache[244] || (_cache[244] = _createElementVNode("span", { style: {"font-size":"15px","font-weight":"700"} }, "Tous les compagnons", -1 /* CACHED */)),
+                  _createElementVNode("span", _hoisted_1033, _toDisplayString(_ctx.V.pk.locked), 1 /* TEXT */)
+                ]),
+                (_openBlock(), _createElementBlock("svg", _hoisted_1034, [...(_cache[245] || (_cache[245] = [
+                  _createElementVNode("path", { d: "M9 5l7 7-7 7" }, null, -1 /* CACHED */)
+                ]))]))
+              ], 8 /* PROPS */, _hoisted_1031)
             ]),
-            _createElementVNode("p", _hoisted_1025, _toDisplayString(_ctx.V.pk.note), 1 /* TEXT */)
+            _createElementVNode("p", _hoisted_1035, _toDisplayString(_ctx.V.pk.note), 1 /* TEXT */)
           ])
         ]))
       : _createCommentVNode("v-if", true),
     (_ctx.V.ui.isRadar)
-      ? (_openBlock(), _createElementBlock("section", _hoisted_1026, [
-          _cache[254] || (_cache[254] = _createElementVNode("div", {
+      ? (_openBlock(), _createElementBlock("section", _hoisted_1036, [
+          _cache[257] || (_cache[257] = _createElementVNode("div", {
             class: "pkm-dark",
             id: "pkm-radar-map",
             "aria-hidden": "true",
             style: {"position":"absolute","inset":"0","background":"radial-gradient(120% 80% at 50% 30%, #0E1A33, #05080F 70%)","color":"var(--pkm-t1)"}
           }, null, -1 /* CACHED */)),
-          _createElementVNode("div", _hoisted_1027, [
-            _createElementVNode("div", _hoisted_1028, [
+          _createElementVNode("div", _hoisted_1037, [
+            _createElementVNode("div", _hoisted_1038, [
               _createElementVNode("button", {
                 class: "pkm-dark",
                 type: "button",
@@ -11912,23 +12027,23 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer le radar",
                 style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_1030, [...(_cache[247] || (_cache[247] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_1040, [...(_cache[250] || (_cache[250] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
-              ], 8 /* PROPS */, _hoisted_1029),
-              _createElementVNode("nav", _hoisted_1031, [
+              ], 8 /* PROPS */, _hoisted_1039),
+              _createElementVNode("nav", _hoisted_1041, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.crumbs || []), (rc, rc_i) => {
                   return (_openBlock(), _createElementBlock(_Fragment, { key: rc_i }, [
                     (rc.sep)
-                      ? (_openBlock(), _createElementBlock("span", _hoisted_1032, "›"))
+                      ? (_openBlock(), _createElementBlock("span", _hoisted_1042, "›"))
                       : _createCommentVNode("v-if", true),
                     _createElementVNode("button", {
                       type: "button",
                       onClick: rc.go,
                       "aria-current": _ctx.A(rc.current),
                       style: _normalizeStyle(`flex: none; height: 36px; padding: 0 8px; border: 0; border-radius: 18px; background: transparent; color: ${rc.color}; font: inherit; font-size: 13.5px; font-weight: ${rc.weight}; white-space: nowrap; cursor: pointer`)
-                    }, _toDisplayString(rc.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1033)
+                    }, _toDisplayString(rc.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1043)
                   ], 64 /* STABLE_FRAGMENT */))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
@@ -11940,10 +12055,10 @@ return function render(_ctx, _cache) {
                     onClick: _ctx.V.rd.toggleList,
                     "aria-pressed": _ctx.A(_ctx.V.rd.listMode),
                     style: {"flex":"none","height":"44px","padding":"0 14px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-                  }, _toDisplayString(_ctx.V.rd.listLabel), 9 /* TEXT, PROPS */, _hoisted_1034))
+                  }, _toDisplayString(_ctx.V.rd.listLabel), 9 /* TEXT, PROPS */, _hoisted_1044))
                 : _createCommentVNode("v-if", true)
             ]),
-            _createElementVNode("div", _hoisted_1035, [
+            _createElementVNode("div", _hoisted_1045, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.prods || []), (rp, rp_i) => {
                 return (_openBlock(), _createElementBlock("button", {
                   key: rp_i,
@@ -11951,11 +12066,11 @@ return function render(_ctx, _cache) {
                   onClick: rp.pick,
                   "aria-pressed": _ctx.A(rp.on),
                   style: _normalizeStyle(`flex: none; height: 36px; padding: 0 13px; border-radius: 999px; border: 1px solid ${rp.bc}; background: ${rp.bg2}; color: ${rp.fg}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer`)
-                }, _toDisplayString(rp.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1036))
+                }, _toDisplayString(rp.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1046))
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             (_ctx.V.rd.showLegend)
-              ? (_openBlock(), _createElementBlock("span", _hoisted_1037, [...(_cache[248] || (_cache[248] = [
+              ? (_openBlock(), _createElementBlock("span", _hoisted_1047, [...(_cache[251] || (_cache[251] = [
                   _createStaticVNode("<span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-green);\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-orange);\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-gray);\"></span>Faible</span>", 3)
                 ]))]))
               : _createCommentVNode("v-if", true)
@@ -11964,7 +12079,7 @@ return function render(_ctx, _cache) {
             class: "pkm-dark",
             style: _normalizeStyle(`position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: ${_ctx.V.rd.sheetMax}; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; border-top: 1px solid var(--pkm-line-3); background: rgba(var(--pkm-app-rgb), 0.97); box-shadow: 0 -18px 40px rgba(var(--pkm-shadow-rgb), 0.5); color: var(--pkm-t1)`)
           }, [
-            _createElementVNode("div", _hoisted_1038, [
+            _createElementVNode("div", _hoisted_1048, [
               (_ctx.V.rd.hasStore)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                     _createElementVNode("button", {
@@ -11972,22 +12087,22 @@ return function render(_ctx, _cache) {
                       onClick: _ctx.V.rd.st.back,
                       style: {"align-self":"flex-start","height":"36px","padding":"0 12px 0 6px","border":"0","border-radius":"18px","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"13.5px","font-weight":"600","display":"flex","align-items":"center","gap":"2px","cursor":"pointer"}
                     }, [
-                      (_openBlock(), _createElementBlock("svg", _hoisted_1040, [...(_cache[249] || (_cache[249] = [
+                      (_openBlock(), _createElementBlock("svg", _hoisted_1050, [...(_cache[252] || (_cache[252] = [
                         _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
                       ]))])),
-                      _cache[250] || (_cache[250] = _createTextVNode("Résultats", -1 /* CACHED */))
-                    ], 8 /* PROPS */, _hoisted_1039),
+                      _cache[253] || (_cache[253] = _createTextVNode("Résultats", -1 /* CACHED */))
+                    ], 8 /* PROPS */, _hoisted_1049),
                     _createElementVNode("section", {
                       "aria-label": _ctx.A(_ctx.V.rd.st.name),
                       style: {"flex":"none","display":"flex","flex-direction":"column","gap":"12px"}
                     }, [
-                      _createElementVNode("div", _hoisted_1042, [
-                        _createElementVNode("span", _hoisted_1043, [
-                          _createElementVNode("h2", _hoisted_1044, _toDisplayString(_ctx.V.rd.st.name), 1 /* TEXT */),
-                          _createElementVNode("span", _hoisted_1045, _toDisplayString(_ctx.V.rd.st.kind), 1 /* TEXT */),
-                          _createElementVNode("span", _hoisted_1046, _toDisplayString(_ctx.V.rd.st.place), 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_1052, [
+                        _createElementVNode("span", _hoisted_1053, [
+                          _createElementVNode("h2", _hoisted_1054, _toDisplayString(_ctx.V.rd.st.name), 1 /* TEXT */),
+                          _createElementVNode("span", _hoisted_1055, _toDisplayString(_ctx.V.rd.st.kind), 1 /* TEXT */),
+                          _createElementVNode("span", _hoisted_1056, _toDisplayString(_ctx.V.rd.st.place), 1 /* TEXT */)
                         ]),
-                        _createElementVNode("span", _hoisted_1047, [
+                        _createElementVNode("span", _hoisted_1057, [
                           _createElementVNode("span", {
                             style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; white-space: nowrap; color: ${_ctx.V.rd.st.color}`)
                           }, _toDisplayString(_ctx.V.rd.st.pct), 5 /* TEXT, STYLE */),
@@ -11996,15 +12111,15 @@ return function render(_ctx, _cache) {
                           }, _toDisplayString(_ctx.V.rd.st.level), 5 /* TEXT, STYLE */)
                         ])
                       ]),
-                      _createElementVNode("p", _hoisted_1048, _toDisplayString(_ctx.V.rd.st.note), 1 /* TEXT */),
+                      _createElementVNode("p", _hoisted_1058, _toDisplayString(_ctx.V.rd.st.note), 1 /* TEXT */),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.st.toggleWhy,
                         "aria-expanded": _ctx.A(_ctx.V.rd.st.why),
                         style: {"align-self":"flex-start","height":"40px","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-                      }, _toDisplayString(_ctx.V.rd.st.whyLabel), 9 /* TEXT, PROPS */, _hoisted_1049),
+                      }, _toDisplayString(_ctx.V.rd.st.whyLabel), 9 /* TEXT, PROPS */, _hoisted_1059),
                       (_ctx.V.rd.st.why)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1050, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1060, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.st.reasons || []), (rr, rr_i) => {
                               return (_openBlock(), _createElementBlock("span", {
                                 key: rr_i,
@@ -12013,36 +12128,36 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("span", {
                                   style: _normalizeStyle(`flex: none; width: 34px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; color: ${rr.color}`)
                                 }, _toDisplayString(rr.sign), 5 /* TEXT, STYLE */),
-                                _createElementVNode("span", _hoisted_1051, _toDisplayString(rr.text), 1 /* TEXT */)
+                                _createElementVNode("span", _hoisted_1061, _toDisplayString(rr.text), 1 /* TEXT */)
                               ]))
                             }), 128 /* KEYED_FRAGMENT */)),
-                            _createElementVNode("span", _hoisted_1052, _toDisplayString(_ctx.V.rd.st.total), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_1062, _toDisplayString(_ctx.V.rd.st.total), 1 /* TEXT */)
                           ]))
                         : _createCommentVNode("v-if", true),
                       (_ctx.V.rd.st.hasHours)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1053, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1063, [
                             _createElementVNode("span", {
                               style: _normalizeStyle(`font-size: 13.5px; font-weight: 700; color: ${_ctx.V.rd.st.hoursColor}`)
                             }, _toDisplayString(_ctx.V.rd.st.hoursState), 5 /* TEXT, STYLE */),
-                            _createElementVNode("span", _hoisted_1054, _toDisplayString(_ctx.V.rd.st.hoursText), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_1064, _toDisplayString(_ctx.V.rd.st.hoursText), 1 /* TEXT */)
                           ]))
                         : _createCommentVNode("v-if", true),
                       (_ctx.V.rd.st.hasAddress)
-                        ? (_openBlock(), _createElementBlock("p", _hoisted_1055, _toDisplayString(_ctx.V.rd.st.address), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("p", _hoisted_1065, _toDisplayString(_ctx.V.rd.st.address), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
-                      _createElementVNode("div", _hoisted_1056, [
+                      _createElementVNode("div", _hoisted_1066, [
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.route,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"height":"46px","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                        }, "Itinéraire", 8 /* PROPS */, _hoisted_1057),
+                        }, "Itinéraire", 8 /* PROPS */, _hoisted_1067),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: _ctx.V.rd.st.toggleAlert,
                           "aria-pressed": _ctx.A(_ctx.V.rd.st.alertOn),
                           style: _normalizeStyle(`height: 46px; border: 1px solid var(--pkm-line-2); border-radius: 999px; background: ${_ctx.V.rd.st.alertBg}; color: ${_ctx.V.rd.st.alertFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
-                        }, _toDisplayString(_ctx.V.rd.st.alertLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1058),
+                        }, _toDisplayString(_ctx.V.rd.st.alertLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1068),
                         (_ctx.V.rd.st.hasSite)
                           ? (_openBlock(), _createElementBlock("a", {
                               key: 0,
@@ -12051,7 +12166,7 @@ return function render(_ctx, _cache) {
                               rel: "noopener noreferrer",
                               "aria-label": _ctx.A(_ctx.V.rd.st.siteAria),
                               style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","box-sizing":"border-box","color":"var(--pkm-t1)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                            }, _toDisplayString(_ctx.V.rd.st.siteLabel), 9 /* TEXT, PROPS */, _hoisted_1059))
+                            }, _toDisplayString(_ctx.V.rd.st.siteLabel), 9 /* TEXT, PROPS */, _hoisted_1069))
                           : _createCommentVNode("v-if", true),
                         (_ctx.V.rd.st.hasTel)
                           ? (_openBlock(), _createElementBlock("a", {
@@ -12059,34 +12174,34 @@ return function render(_ctx, _cache) {
                               href: _ctx.V.rd.st.tel,
                               "aria-label": _ctx.A(_ctx.V.rd.st.telAria),
                               style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","box-sizing":"border-box","color":"var(--pkm-t1)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                            }, _toDisplayString(_ctx.V.rd.st.telLabel), 9 /* TEXT, PROPS */, _hoisted_1060))
+                            }, _toDisplayString(_ctx.V.rd.st.telLabel), 9 /* TEXT, PROPS */, _hoisted_1070))
                           : _createCommentVNode("v-if", true)
                       ]),
-                      _createElementVNode("div", _hoisted_1061, [
+                      _createElementVNode("div", _hoisted_1071, [
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.osm,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"font-size":"12.5px","line-height":"2","color":"var(--pkm-link)"}
-                        }, "Voir la fiche OpenStreetMap", 8 /* PROPS */, _hoisted_1062),
+                        }, "Voir la fiche OpenStreetMap", 8 /* PROPS */, _hoisted_1072),
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.report,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"font-size":"12.5px","line-height":"2","color":"var(--pkm-link)"}
-                        }, "Signaler une erreur", 8 /* PROPS */, _hoisted_1063)
+                        }, "Signaler une erreur", 8 /* PROPS */, _hoisted_1073)
                       ])
-                    ], 8 /* PROPS */, _hoisted_1041)
+                    ], 8 /* PROPS */, _hoisted_1051)
                   ], 64 /* STABLE_FRAGMENT */))
                 : _createCommentVNode("v-if", true),
               (_ctx.V.rd.notStore)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                    _createElementVNode("div", _hoisted_1064, [
-                      _createElementVNode("h2", _hoisted_1065, _toDisplayString(_ctx.V.rd.title), 1 /* TEXT */),
-                      _createElementVNode("span", _hoisted_1066, _toDisplayString(_ctx.V.rd.subtitle), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_1074, [
+                      _createElementVNode("h2", _hoisted_1075, _toDisplayString(_ctx.V.rd.title), 1 /* TEXT */),
+                      _createElementVNode("span", _hoisted_1076, _toDisplayString(_ctx.V.rd.subtitle), 1 /* TEXT */)
                     ]),
                     (_ctx.V.rd.hasMsg)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_1067, _toDisplayString(_ctx.V.rd.msg), 1 /* TEXT */))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1077, _toDisplayString(_ctx.V.rd.msg), 1 /* TEXT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.error)
                       ? (_openBlock(), _createElementBlock("button", {
@@ -12094,22 +12209,22 @@ return function render(_ctx, _cache) {
                           type: "button",
                           onClick: _ctx.V.rd.retry,
                           style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
-                        }, "Réessayer", 8 /* PROPS */, _hoisted_1068))
+                        }, "Réessayer", 8 /* PROPS */, _hoisted_1078))
                       : _createCommentVNode("v-if", true),
-                    _createElementVNode("div", _hoisted_1069, [
+                    _createElementVNode("div", _hoisted_1079, [
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.scan,
                         disabled: _ctx.V.rd.noScan,
                         style: _normalizeStyle(`height: 48px; border: 0; border-radius: 999px; background: ${_ctx.V.rd.scanBg}; color: ${_ctx.V.rd.scanFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
-                      }, _toDisplayString(_ctx.V.rd.scanLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1070),
+                      }, _toDisplayString(_ctx.V.rd.scanLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1080),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.around,
                         "aria-pressed": _ctx.A(_ctx.V.rd.aroundOn),
                         style: {"height":"48px","border":"1px solid var(--pkm-line-teal)","border-radius":"999px","background":"rgba(var(--pkm-teal-rgb), 0.1)","color":"var(--pkm-teal)","font":"inherit","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","gap":"6px","cursor":"pointer"}
                       }, [
-                        (_openBlock(), _createElementBlock("svg", _hoisted_1072, [...(_cache[251] || (_cache[251] = [
+                        (_openBlock(), _createElementBlock("svg", _hoisted_1082, [...(_cache[254] || (_cache[254] = [
                           _createElementVNode("circle", {
                             cx: "12",
                             cy: "12",
@@ -12122,11 +12237,11 @@ return function render(_ctx, _cache) {
                             r: "7"
                           }, null, -1 /* CACHED */)
                         ]))])),
-                        _cache[252] || (_cache[252] = _createTextVNode("Autour de moi", -1 /* CACHED */))
-                      ], 8 /* PROPS */, _hoisted_1071)
+                        _cache[255] || (_cache[255] = _createTextVNode("Autour de moi", -1 /* CACHED */))
+                      ], 8 /* PROPS */, _hoisted_1081)
                     ]),
                     (_ctx.V.rd.hasRadii)
-                      ? (_openBlock(), _createElementBlock("div", _hoisted_1073, [
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_1083, [
                           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.radii || []), (rk, rk_i) => {
                             return (_openBlock(), _createElementBlock("button", {
                               key: rk_i,
@@ -12134,20 +12249,20 @@ return function render(_ctx, _cache) {
                               onClick: rk.pick,
                               "aria-pressed": _ctx.A(rk.on),
                               style: _normalizeStyle(`flex: 1; height: 40px; border-radius: 999px; border: 1px solid ${rk.bc}; background: ${rk.bg}; color: ${rk.fg}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer`)
-                            }, _toDisplayString(rk.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1074))
+                            }, _toDisplayString(rk.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1084))
                           }), 128 /* KEYED_FRAGMENT */))
                         ]))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasHint)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_1075, _toDisplayString(_ctx.V.rd.hint), 1 /* TEXT */))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1085, _toDisplayString(_ctx.V.rd.hint), 1 /* TEXT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.empty)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_1076, "Aucune boutique repérée ici : élargis le rayon ou choisis un autre secteur."))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1086, "Aucune boutique repérée ici : élargis le rayon ou choisis un autre secteur."))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasResults)
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
-                          _createElementVNode("span", _hoisted_1077, _toDisplayString(_ctx.V.rd.resultsTitle), 1 /* TEXT */),
-                          _createElementVNode("div", _hoisted_1078, [
+                          _createElementVNode("span", _hoisted_1087, _toDisplayString(_ctx.V.rd.resultsTitle), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_1088, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.results || []), (rs, rs_i) => {
                               return (_openBlock(), _createElementBlock("button", {
                                 key: rs_i,
@@ -12156,12 +12271,12 @@ return function render(_ctx, _cache) {
                                 "aria-label": _ctx.A(rs.label),
                                 style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; border: 0; border-top: ${rs.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                               }, [
-                                _createElementVNode("span", _hoisted_1080, [
-                                  _createElementVNode("span", _hoisted_1081, _toDisplayString(rs.name), 1 /* TEXT */),
-                                  _createElementVNode("span", _hoisted_1082, _toDisplayString(rs.kind), 1 /* TEXT */),
-                                  _createElementVNode("span", _hoisted_1083, _toDisplayString(rs.place), 1 /* TEXT */)
+                                _createElementVNode("span", _hoisted_1090, [
+                                  _createElementVNode("span", _hoisted_1091, _toDisplayString(rs.name), 1 /* TEXT */),
+                                  _createElementVNode("span", _hoisted_1092, _toDisplayString(rs.kind), 1 /* TEXT */),
+                                  _createElementVNode("span", _hoisted_1093, _toDisplayString(rs.place), 1 /* TEXT */)
                                 ]),
-                                _createElementVNode("span", _hoisted_1084, [
+                                _createElementVNode("span", _hoisted_1094, [
                                   _createElementVNode("span", {
                                     style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: ${rs.color}`)
                                   }, _toDisplayString(rs.pct), 5 /* TEXT, STYLE */),
@@ -12169,15 +12284,15 @@ return function render(_ctx, _cache) {
                                     style: _normalizeStyle(`padding: 1px 8px; border-radius: 999px; background: ${rs.tint}; color: ${rs.color}; font-size: 11px; font-weight: 800`)
                                   }, _toDisplayString(rs.level), 5 /* TEXT, STYLE */)
                                 ])
-                              ], 12 /* STYLE, PROPS */, _hoisted_1079))
+                              ], 12 /* STYLE, PROPS */, _hoisted_1089))
                             }), 128 /* KEYED_FRAGMENT */))
                           ])
                         ], 64 /* STABLE_FRAGMENT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasSectors)
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 6 }, [
-                          _createElementVNode("span", _hoisted_1085, _toDisplayString(_ctx.V.rd.sectorsTitle), 1 /* TEXT */),
-                          _createElementVNode("div", _hoisted_1086, [
+                          _createElementVNode("span", _hoisted_1095, _toDisplayString(_ctx.V.rd.sectorsTitle), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_1096, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.sectors || []), (rg, rg_i) => {
                               return (_openBlock(), _createElementBlock("button", {
                                 key: rg_i,
@@ -12186,19 +12301,19 @@ return function render(_ctx, _cache) {
                                 "aria-label": _ctx.A(rg.label),
                                 style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 14px; border: 0; border-top: ${rg.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                               }, [
-                                _createElementVNode("span", _hoisted_1088, _toDisplayString(rg.name), 1 /* TEXT */),
-                                _createElementVNode("span", _hoisted_1089, _toDisplayString(rg.count), 1 /* TEXT */),
-                                (_openBlock(), _createElementBlock("svg", _hoisted_1090, [...(_cache[253] || (_cache[253] = [
+                                _createElementVNode("span", _hoisted_1098, _toDisplayString(rg.name), 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_1099, _toDisplayString(rg.count), 1 /* TEXT */),
+                                (_openBlock(), _createElementBlock("svg", _hoisted_1100, [...(_cache[256] || (_cache[256] = [
                                   _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
                                 ]))]))
-                              ], 12 /* STYLE, PROPS */, _hoisted_1087))
+                              ], 12 /* STYLE, PROPS */, _hoisted_1097))
                             }), 128 /* KEYED_FRAGMENT */))
                           ])
                         ], 64 /* STABLE_FRAGMENT */))
                       : _createCommentVNode("v-if", true)
                   ], 64 /* STABLE_FRAGMENT */))
                 : _createCommentVNode("v-if", true),
-              _createElementVNode("p", _hoisted_1091, _toDisplayString(_ctx.V.rd.attribution) + " · Indice estimé selon le type de boutique, le produit recherché et le calendrier des sorties.", 1 /* TEXT */)
+              _createElementVNode("p", _hoisted_1101, _toDisplayString(_ctx.V.rd.attribution) + " · Indice estimé selon le type de boutique, le produit recherché et le calendrier des sorties.", 1 /* TEXT */)
             ])
           ], 4 /* STYLE */)
         ]))
@@ -12210,8 +12325,8 @@ return function render(_ctx, _cache) {
           role: "status",
           style: _normalizeStyle(`position: absolute; z-index: 50; left: 16px; right: 16px; bottom: ${_ctx.V.ui.toastBottom}; display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 18px; border: 1px solid var(--pkm-line-3); background: var(--pkm-toast); color: var(--pkm-t1); font-size: 14px; font-weight: 600; box-shadow: 0 14px 30px rgba(var(--pkm-shadow-rgb), 0.45)`)
         }, [
-          _createElementVNode("span", _hoisted_1092, [
-            (_openBlock(), _createElementBlock("svg", _hoisted_1093, [...(_cache[255] || (_cache[255] = [
+          _createElementVNode("span", _hoisted_1102, [
+            (_openBlock(), _createElementBlock("svg", _hoisted_1103, [...(_cache[258] || (_cache[258] = [
               _createElementVNode("path", { d: "M5 12.5l4.5 4.5L19 7.5" }, null, -1 /* CACHED */)
             ]))]))
           ]),

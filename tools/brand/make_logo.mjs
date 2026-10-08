@@ -87,9 +87,10 @@ function wordmark(o) {
 }
 const doc = (box, body, title) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box.join(' ')}" role="img" aria-label="${title}"><title>${title}</title>${body}</svg>\n`;
 
-// Classeur de cartes (rubrique « Mon classeur ») : jaune, anneaux sur la tranche, Poké Ball sur la couverture, deux
+// Classeur de cartes (rubrique « Mon classeur ») : jaune, anneaux sur la tranche, gemme des PK sur la couverture (à la
+// place de la Poké Ball depuis le 2026-10-08, choix du porteur pour les droits), deux
 // cartes qui dépassent, étincelle ; contour noir et ombre portée comme les lettres du logo. 150 × 120.
-const RED = '#E3350D', BLUE = '#3B6FD8', SKY = '#BFE3FF';
+const SKY = '#BFE3FF';
 function binderSvg() {
   const card = (x, y, a) => `<g transform="translate(${x} ${y}) rotate(${a} 17 24)"><path d="${rrect(0, 0, 34, 48, 4)}" fill="${YELLOW}"/>`
     + `<path d="${rrect(4, 4, 26, 22, 2)}" fill="${SKY}"/><path d="M8 30H26 M8 35H22 M8 40H24" stroke="${INK}" stroke-width="2" stroke-linecap="round" opacity="0.55"/></g>`;
@@ -97,17 +98,14 @@ function binderSvg() {
   const body = rrect(20, 30, 100, 82, 12), spine = rrect(20, 30, 22, 82, 10);
   const cards = cardShape(66, 4, -8) + cardShape(88, 10, 12), shapes = cards + `<path d="${body}"/>`;
   const outline = d => `<g fill="${INK}" stroke="${INK}" stroke-width="7" stroke-linejoin="round">${d}</g>`;
-  const ball = (cx, cy, r) => `<path d="M${cx - r} ${cy}A${r} ${r} 0 0 1 ${cx + r} ${cy}Z" fill="${RED}"/>`
-    + `<path d="M${cx - r} ${cy}A${r} ${r} 0 0 0 ${cx + r} ${cy}Z" fill="${WHITE}"/>`
-    + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${INK}" stroke-width="4"/><path d="M${cx - r} ${cy}H${cx + r}" stroke="${INK}" stroke-width="4"/>`
-    + `<circle cx="${cx}" cy="${cy}" r="7" fill="${WHITE}" stroke="${INK}" stroke-width="4"/><circle cx="${cx}" cy="${cy}" r="2.5" fill="${INK}" opacity="0.25"/>`;
   const ring = y => `<path d="${rrect(14, y, 16, 9, 4.5)}" fill="${WHITE}" stroke="${INK}" stroke-width="3"/>`;
   // Ombre, puis cartes, puis classeur par-dessus avec son propre contour (le bord passe devant les cartes).
   return `<g transform="translate(4 5)" fill="${INK}" stroke="${INK}" stroke-width="7" stroke-linejoin="round">${shapes}</g>`
     + outline(cards) + card(66, 4, -8) + card(88, 10, 12) + outline(`<path d="${body}"/>`)
     + `<path d="${body}" fill="${YELLOW}"/><path d="${spine}" fill="#F2A900"/><path d="M42 30V112" stroke="${INK}" stroke-width="3"/>`
     + `<path d="${rrect(50, 38, 62, 66, 8)}" fill="none" stroke="${WHITE}" stroke-width="3"/>`
-    + ring(44) + ring(66.5) + ring(89) + ball(81, 71, 20)
+    + ring(44) + ring(66.5) + ring(89)
+    + `<g transform="translate(${r1(81 - 32 * 0.74)} ${r1(71 - 32 * 0.74)}) scale(0.74)">${pkGemSvg()}</g>`
     + `<path d="${spark(14, 14, 10)}" fill="${WHITE}" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>`
     + `<path d="${spark(136, 58, 6)}" fill="${WHITE}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
 }
