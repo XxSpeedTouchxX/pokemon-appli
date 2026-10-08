@@ -63,7 +63,8 @@ Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de
 - **Déblocage** (`pkPriceOf` dans `pk.js`) :
   - Bulbizarre, Salamèche, Carapuce et Pikachu sont offerts ;
   - les autres coûtent 50 PK (Pokémon de base), 100 PK (première évolution) ou 200 PK (deuxième évolution), selon leur stade dans Pokémon Rouge et Bleu ;
-  - légendaires et fabuleux : 400 PK ; Kyogre, Groudon et Rayquaza : 500 PK, thème compris.
+  - légendaires et fabuleux : 400 PK ; Kyogre, Groudon et Rayquaza : 500 PK, thème compris ;
+  - prix fixés par le porteur (`PK_SET`) : Ptéra 100 PK, Ronflex 200 PK ; Kabutops 100 PK (son stade).
   - Dans « Choisis ton compagnon », un compagnon verrouillé porte un cadenas et son prix ; un appui ouvre la confirmation, ou « Il te manque … PK ». Une fois débloqué, le compagnon est choisi (et son thème appliqué).
   - « Mes PK » montre les compagnons à thème et « Tous les compagnons ».
 - **Transition :** un compagnon déjà choisi avant son verrouillage reste acquis (`pkV`, version des règles).

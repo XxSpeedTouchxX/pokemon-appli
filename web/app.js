@@ -4331,7 +4331,10 @@ class Component extends DCLogic {
     75, 78, 80, 82, 85, 87, 89, 91, 93, 97, 99, 101, 103, 105, 110, 112, 117, 119, 121, 130, 134, 135, 136, 139, 141, 148];
   const PK_STAGE2 = [3, 6, 9, 12, 15, 18, 31, 34, 45, 62, 65, 68, 71, 76, 94, 149];
   const PK_LEGEND = [144, 145, 146, 150, 151, 380, 381];
-  const pkPriceOf = n => PK_FREE.indexOf(n) >= 0 ? 0 : HOME_THEMES[n] ? 500 : PK_LEGEND.indexOf(n) >= 0 ? 400
+  // Prix fixés par le porteur (2026-10-08), prioritaires sur la règle des stades : Ptéra 100 PK, Ronflex 200 PK
+  // (Kabutops, première évolution, est déjà à 100 PK).
+  const PK_SET = { 142: 100, 143: 200 };
+  const pkPriceOf = n => PK_SET[n] ? PK_SET[n] : PK_FREE.indexOf(n) >= 0 ? 0 : HOME_THEMES[n] ? 500 : PK_LEGEND.indexOf(n) >= 0 ? 400
     : PK_STAGE2.indexOf(n) >= 0 ? 200 : PK_STAGE1.indexOf(n) >= 0 ? 100 : 50;
   const PK_SHOP = {};
   HOME_BUDDIES.forEach(([n]) => { const p = pkPriceOf(n); if (p) PK_SHOP[n] = p; });
