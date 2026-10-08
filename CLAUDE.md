@@ -79,7 +79,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - en-tête : le logo exact du porteur (son fichier PNG, fond rendu transparent), à la place du logo redessiné ;
   - icône de l'app (écran d'accueil du téléphone) : le logo du porteur sur deux lignes ; carte O dans l'onglet du navigateur ;
   - liste « Ma collection » retirée de l'accueil (la marge réalisée reste) ;
-  - thèmes des compagnons : Kyogre (océan, bleu), Groudon (volcan, rouge), Rayquaza (vert et blanc) changent le fond de l'app.
+  - thèmes des compagnons : Kyogre (océan, bleu), Groudon (volcan, rouge), Rayquaza (ouragan, vert émeraude et ardoise, depuis le 2026-10-08) changent le fond de l'app.
 - **Monnaie « PK » (2026-10-08) :**
   - logo : une gemme jaune à facettes avec l'éclair du logo (jaune, contour noir) et une étincelle, sans aucun repère de Poké Ball pour limiter le risque de droits (choisie le 2026-10-08 après plusieurs séries de propositions) ; compteur à gauche de l'avatar (accueil, Collection, Marché, Territoire), qui ouvre « Mes PK » ; sur l'accueil, logo à gauche, pastille « FR » retirée ;
   - gains : 100 de bienvenue, +10 par jour d'ouverture, +10 par nouvel article de la collection (une fois par article) ;

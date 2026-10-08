@@ -115,7 +115,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 - **Ancien thème :** `?theme=classic` (comparaison, retour arrière).
 - **Thèmes des compagnons** (2026-10-07) : choisir Kyogre, Groudon ou Rayquaza dans « Choisis ton compagnon » change le fond de l'app, sur tous les onglets, et la couleur de la barre du navigateur. Le message de choix l'annonce (« Kyogre t'accompagne · thème Océan »).
   - **Océan** (Kyogre) : dégradé de bleus profonds ; **Volcan** (Groudon) : dégradé de rouges lave, lueur orange. Titres et textes blancs, liens jaunes.
-  - **Vert et blanc** (Rayquaza) : dégradé du blanc au vert ; textes bleu nuit, comme sur le jaune.
+  - **Ouragan** (Rayquaza, depuis le 2026-10-08, à la place du « vert et blanc ») : ciel d'orage vert émeraude et ardoise, lueur d'éclair en haut à gauche, arc de tourbillon en haut à droite ; textes clairs.
   - Seul ce qui est posé sur le fond change : cartes, fiches, champs et barre du bas restent en verre bleu nuit. Un autre compagnon remet le jaune. Rien ne change avec `?theme=classic`.
   - Mise en œuvre : `BUDDY_THEMES` dans `theme.mjs` (variables du fond par thème), classe `pkm-theme-…` sur `<html>` posée par `home.js`. Contraste vérifié écran par écran dans les quatre thèmes.
 - **Mise en œuvre :** la maquette v5 reste intacte. `tools/web/theme.mjs` remplace, au build, chaque couleur écrite en dur (gabarit et logique) par une variable CSS selon son rôle : fond de carte, ligne, textes 1 à 5, accent, statuts… Le thème classique leur donne les couleurs d'origine (l'app reste identique au pixel près), le thème v6 ses propres valeurs.

@@ -338,7 +338,8 @@ export const V6_DARK = {
 // Thèmes des compagnons (2026-10-07) : choisir Kyogre, Groudon ou Rayquaza change le fond de l'app et ce qui est posé
 // dessus (titres, liens, puces). Cartes, fiches, champs et barre du bas restent en verre bleu nuit (ton sombre).
 // - Kyogre, océan : dégradé de bleus profonds ; Groudon, volcan : dégradé de rouges lave, lueur orange. Textes clairs.
-// - Rayquaza : dégradé du blanc au vert ; textes bleu nuit, comme sur le jaune.
+// - Rayquaza, ouragan (2026-10-08, à la place du « vert et blanc ») : ciel d'orage vert émeraude et ardoise, lueur
+//   d'éclair en haut à gauche, arc de tourbillon en haut à droite. Textes clairs.
 // Contraste : chaque texte au moins 4,5:1 sur le point le plus clair (ou le plus sombre) du dégradé, vérifié par le
 // test de contraste des écrans, thème par thème. bar : couleur de la barre du navigateur et du fond derrière l'app.
 const ON_DEEP = { 'chip-bg': 'rgba(255, 255, 255, 0.1)', 'chip-bc': 'rgba(255, 255, 255, 0.32)', 'off-bg': 'rgba(255, 255, 255, 0.12)', link: '#FFE45C' };
@@ -355,10 +356,12 @@ export const BUDDY_THEMES = [
     green: '#9DF7C6', up: '#9DF7C6', down: '#FFE0D6', red: '#FFE0D6', orange: '#FFE3A6', amber: '#FFE3A6', teal: '#A8F7EC',
     gold: '#FFE9AD', sand: '#FFE6BE', 'sand-2': '#FBEDD5', gray: '#FFDACE', off: '#FFD3C6', regular: '#E6E3FF', iris: '#E6E3FF'
   }) },
-  { buddy: 384, key: 'leaf', name: 'Vert et blanc', bar: '#E8FAEF', dark: false, tokens: {
-    app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(20, 140, 70, 0.22), rgba(20, 140, 70, 0) 70%), linear-gradient(165deg, #FFFFFF 0%, #CFF5DD 40%, #7DE3A8 100%)',
-    'shadow-rgb': '20, 70, 40'
-  } }
+  { buddy: 384, key: 'storm', name: 'Ouragan', bar: '#174D48', dark: true, tokens: Object.assign({}, ON_DEEP, {
+    app: 'radial-gradient(120% 55% at 0% 0%, rgba(190, 255, 230, 0.09), rgba(190, 255, 230, 0) 60%), radial-gradient(75% 45% at 100% 0%, rgba(220, 255, 240, 0) 45%, rgba(220, 255, 240, 0.09) 58%, rgba(220, 255, 240, 0) 72%), radial-gradient(110% 60% at 100% 100%, rgba(0, 6, 10, 0.55), rgba(0, 6, 10, 0) 70%), linear-gradient(165deg, #174D48 0%, #113A3A 45%, #071E22 100%)',
+    t1: '#FFFFFF', t2: '#EAFBF4', t3: '#DCF5EC', t4: '#D0EFE4', t5: '#D0EFE4', 'chip-fg': '#EAFBF4', 'glow-rgb': '6, 50, 44', 'shadow-rgb': '0, 14, 12',
+    green: '#9DF7C6', up: '#9DF7C6', down: '#FFD6CF', red: '#FFD6CF', orange: '#FFE0A0', amber: '#FFE0A0', teal: '#A8F7EC',
+    gold: '#FFE9AD', sand: '#FFE6BE', 'sand-2': '#FBEDD5', gray: '#D0EFE4', off: '#C4E8DC', regular: '#DCE2FF', iris: '#DCE2FF'
+  }) }
 ];
 // Flou réel seulement sur ce qui passe au-dessus d'un contenu qui défile (au plus 5 éléments par écran) ;
 // sans flou possible, fond opaque. Le choix du compagnon, sa confirmation de déblocage et « Mes PK » sont toujours

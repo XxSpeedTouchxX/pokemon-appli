@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-10-08 (suite) — Thème « Ouragan » pour Rayquaza
+
+- **Contexte :** le porteur demande un thème « ouragan » pour Rayquaza, affiché « Compagnon et thème Ouragan ».
+- **Décision :**
+  - le thème « Vert et blanc » (clair) est remplacé par **Ouragan** (sombre) : un ciel d'orage en dégradé vert émeraude et ardoise ;
+  - une lueur d'éclair en haut à gauche, un arc de tourbillon en haut à droite, des textes clairs ;
+  - la barre du navigateur prend le vert profond du haut du dégradé ;
+  - « Mes PK » affiche « Compagnon et thème Ouragan », et le message de choix « Rayquaza t'accompagne · thème Ouragan ».
+- **Contraste :** au moins 4,5:1 sur tous les écrans. Le haut du dégradé a été assombri pour les puces (première mesure : 4,41).
+- **Coût :** 0 €.
+
+---
+
 ## 2026-10-08 — Monnaie virtuelle « PK »
 
 - **Contexte :** le porteur demande une monnaie virtuelle, les **PK** :

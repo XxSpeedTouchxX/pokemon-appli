@@ -214,7 +214,7 @@
     return r;
   };
   const HOME_NO_BUDDY = { picking: false, list: [] };
-  // Thème du compagnon (2026-10-07) : Kyogre (océan), Groudon (volcan) et Rayquaza (vert et blanc) changent le fond de
+  // Thème du compagnon (2026-10-07) : Kyogre (océan), Groudon (volcan) et Rayquaza (ouragan) changent le fond de
   // l'app : classe pkm-theme-… sur <html> (variables dans theme.mjs) et couleur de la barre du navigateur.
   let homeTheme = null;
   const homeApplyTheme = n => {
