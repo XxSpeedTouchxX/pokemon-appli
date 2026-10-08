@@ -112,17 +112,20 @@ function binderSvg() {
     + `<path d="${spark(136, 58, 6)}" fill="${WHITE}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
 }
 
-// Poké Ball des PK, la monnaie de l'app (2026-10-08) : moitié haute jaune Dropicards avec l'éclair du I du logo, moitié
-// basse blanche, bande et bouton noirs. Lisible de 14 px (pastilles) à 72 px (panneau « Mes PK »). 64 × 64.
+// Poké Ball des PK, la monnaie de l'app (2026-10-08, proposition C « Éclair traversant » choisie par le porteur) :
+// moitié haute bleu nuit, moitié basse blanche, bande noire ; l'éclair du I du logo, jaune à contour noir, traverse
+// toute la balle à la place du bouton. Lisible de 14 px (pastilles) à 72 px (panneau « Mes PK »). 64 × 64.
+const NAVY = '#1A2A78';
 function pkBallSvg() {
-  const top = 'M5 32A27 27 0 0 1 59 32Z', bottom = 'M5 32A27 27 0 0 0 59 32Z';
-  const bolt = 'M42 7.5L32 21.5H38L33.5 29L46.5 15.5H40.5L45 7.5Z';
-  return `<circle cx="32" cy="32" r="29.5" fill="${INK}"/><path d="${top}" fill="${YELLOW}"/><path d="${bottom}" fill="${WHITE}"/>`
+  // Éclair du I (cardI), recadré de sa pointe haute à sa pointe basse ; hauteur 50, largeur 30, centré.
+  const P = [[0.64, 0], [0.16, 0.565], [0.45, 0.565], [0.28, 1], [0.86, 0.38], [0.57, 0.38], [0.8, 0]];
+  const h = 50, w = 30, x0 = 32.5 - w / 2 - 0.01 * w, y0 = 7;
+  const bolt = 'M' + P.map(([x, y]) => r1(x0 + x * w) + ' ' + r1(y0 + y * h)).join('L') + 'Z';
+  return `<circle cx="32" cy="32" r="29.5" fill="${INK}"/><path d="M5 32A27 27 0 0 1 59 32Z" fill="${NAVY}"/><path d="M5 32A27 27 0 0 0 59 32Z" fill="${WHITE}"/>`
     + `<path d="M10 40A24 24 0 0 0 54 40" fill="none" stroke="#D9DEE8" stroke-width="5" stroke-linecap="round"/>`
-    + `<ellipse cx="19" cy="17" rx="7" ry="3.6" transform="rotate(-35 19 17)" fill="${WHITE}" opacity="0.7"/>`
-    + `<path d="${bolt}" fill="${WHITE}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>`
-    + `<path d="M3 32H61" stroke="${INK}" stroke-width="6"/><circle cx="32" cy="32" r="9.5" fill="${WHITE}" stroke="${INK}" stroke-width="5"/>`
-    + `<circle cx="32" cy="32" r="3.6" fill="${YELLOW}" stroke="${INK}" stroke-width="1.6"/>`;
+    + `<ellipse cx="17" cy="18" rx="6" ry="3.2" transform="rotate(-40 17 18)" fill="${WHITE}" opacity="0.55"/>`
+    + `<path d="M3 32H61" stroke="${INK}" stroke-width="6"/>`
+    + `<path d="${bolt}" fill="${YELLOW}" stroke="${INK}" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/>`;
 }
 
 const out = (p, s) => { mkdirSync(new URL('.', new URL(p, 'file://' + ROOT)).pathname, { recursive: true }); writeFileSync(ROOT + p, s); };

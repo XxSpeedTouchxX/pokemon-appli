@@ -13,7 +13,7 @@
   - un compteur en haut à droite de l'app ;
   - elle sert à débloquer des interfaces, notamment des compagnons. Premiers prix : **Groudon, Kyogre et Rayquaza à 500 PK** chacun.
 - **Décision** (défauts retenus sans validation préalable, à confirmer ; voir « À valider ») :
-  - **Logo :** une Poké Ball maison, moitié haute jaune Dropicards avec l'éclair du I du logo, moitié basse blanche (`web/img/brand/pk.svg`, `tools/brand/make_logo.mjs`). Ce n'est pas un logo officiel Pokémon.
+  - **Logo :** une Poké Ball maison (`web/img/brand/pk.svg`, `tools/brand/make_logo.mjs`) ; ce n'est pas un logo officiel Pokémon. Le porteur a demandé un éclair Dropicards bien plus visible, jaune à contour noir, et a choisi parmi 4 propositions (rouge classique, bleu nuit, éclair traversant, carte « I ») : **l'éclair traversant**, moitié haute bleu nuit, moitié basse blanche, l'éclair du I du logo traversant toute la balle à la place du bouton. Le plus lisible en petit (18 px).
   - **Compteur :** à gauche de l'avatar, sur l'accueil, Collection, Marché et Territoire. Un appui ouvre « Mes PK » : solde, façons de gagner, compagnons à débloquer. Chaque gain s'affiche quelques secondes sous le compteur (« +10 PK »).
   - **En-tête de l'accueil :** pour faire la place, le logo passe à gauche (toujours 196 px au plus) et la pastille « FR » est retirée.
   - **Gains :**

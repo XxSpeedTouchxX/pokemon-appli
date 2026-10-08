@@ -81,7 +81,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - liste « Ma collection » retirée de l'accueil (la marge réalisée reste) ;
   - thèmes des compagnons : Kyogre (océan, bleu), Groudon (volcan, rouge), Rayquaza (vert et blanc) changent le fond de l'app.
 - **Monnaie « PK » (2026-10-08) :**
-  - Poké Ball maison (jaune Dropicards, éclair du logo) ; compteur à gauche de l'avatar (accueil, Collection, Marché, Territoire), qui ouvre « Mes PK » ; sur l'accueil, logo à gauche, pastille « FR » retirée ;
+  - Poké Ball maison (bleu nuit et blanc, l'éclair du logo en jaune à contour noir qui la traverse, choisi parmi 4 propositions) ; compteur à gauche de l'avatar (accueil, Collection, Marché, Territoire), qui ouvre « Mes PK » ; sur l'accueil, logo à gauche, pastille « FR » retirée ;
   - gains : 100 de bienvenue, +10 par jour d'ouverture, +10 par nouvel article de la collection (une fois par article) ;
   - Kyogre, Groudon et Rayquaza à 500 PK chacun, thème compris ; un compagnon à thème déjà choisi reste acquis ;
   - sur l'appareil, sans achat en argent réel ni valeur en euros ; montants et prochains déblocages **à valider**.
