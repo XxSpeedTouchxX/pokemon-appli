@@ -84,7 +84,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - logo : une gemme jaune à facettes avec l'éclair du logo (jaune, contour noir) et une étincelle, sans aucun repère de Poké Ball pour limiter le risque de droits (choisie le 2026-10-08 après plusieurs séries de propositions) ; compteur à gauche de l'avatar (accueil, Collection, Marché, Territoire), qui ouvre « Mes PK » ; sur l'accueil, logo à gauche, pastille « FR » retirée ;
   - gains : 100 de bienvenue, +10 par jour d'ouverture, +10 par nouvel article de la collection (une fois par article) ;
   - Kyogre, Groudon et Rayquaza à 500 PK chacun, thème compris ; un compagnon à thème déjà choisi reste acquis ;
-  - sur l'appareil, sans achat en argent réel ni valeur en euros ; montants et prochains déblocages **à valider**.
+  - sur l'appareil, sans achat en argent réel ni valeur en euros ; gains et règles **validés par le porteur (2026-10-08)** ; prochains déblocages à définir.
 - **Propositions d'améliorations v1 (2026-10-07) :** `docs/13-propositions-ameliorations.md`, 43 propositions classées en trois vagues (fiabiliser, faire venir et garder, se différencier), **à valider** ; rien n'est lancé sans « go ».
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
