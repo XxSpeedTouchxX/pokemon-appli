@@ -48,6 +48,20 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - sans position : « Me localiser », ou le **logo radar animé** de l'encadré, juste au-dessus : un appui demande la position, puis le balayage part tout seul (logo immobile si l'utilisateur limite les animations) ;
    - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
 5. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
+
+## PK, la monnaie de l'app
+
+Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de `catalog.dc.html`). Les montants sont des propositions à valider par le porteur.
+- **Compteur :** en haut à droite, à gauche de l'avatar (accueil, Collection, Marché, Territoire), avec la Poké Ball des PK (`img/brand/pk.svg`, `tools/brand/make_logo.mjs`). Sur l'accueil, le logo est à gauche et la pastille « FR » est retirée. Chaque gain s'affiche quelques secondes sous le compteur (« +10 PK »).
+- **Gains :**
+  - 100 PK de bienvenue, au premier lancement ;
+  - +10 PK par jour où l'app est ouverte (date réelle ; `?today=AAAA-MM-JJ` pour les tests) ;
+  - +10 PK par nouvel article de la collection, une seule fois par article. Le message d'ajout l'annonce (« … · +10 PK »).
+  - Les articles de la démo et ceux déjà présents au premier lancement ne rapportent rien.
+- **« Mes PK »** (appui sur le compteur) : solde, façons de gagner, compagnons à débloquer. Rappel : les PK ne s'achètent pas et n'ont aucune valeur en euros.
+- **Déblocage :** Kyogre, Groudon et Rayquaza coûtent 500 PK chacun (`PK_SHOP`). Dans « Choisis ton compagnon », ils portent un cadenas et leur prix ; un appui ouvre la confirmation, ou « Il te manque … PK ». Une fois débloqué, le compagnon est choisi et son thème appliqué.
+- **Transition :** un compagnon à thème choisi avant l'arrivée des PK reste acquis.
+- **Enregistrement :** `pk`, `pkOwn` (compagnons débloqués), `pkSeen` (articles déjà récompensés) et `pkDay` (dernier jour d'ouverture) sont gardés avec la collection (`persist.js`). « Vider ma collection » et « Remettre la démo » n'y touchent pas.
 6. **Sorties du moment** (carrousel), tout en bas ; puis la mention de non-affiliation.
 
 La liste « Ma collection » (récents ou valeur, 20 par page) est retirée le 2026-10-07 : « Mon classeur » montre déjà toute la collection.
@@ -294,7 +308,7 @@ Le script `tools/web/build.mjs` :
 - convertit le gabarit du canevas Design en gabarit Vue, compilé à l'avance (pas d'évaluation de code dans le navigateur) ;
 - adapte la page aux vraies tailles d'écran ;
 - ajoute les écrans et blocs de `tools/web/catalog.dc.html` (même syntaxe que le canevas) ;
-- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `showcase.js` (articles mis en avant), `releases.js` (Sorties), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar), `territory.js` (Territoire et fiche boutique), `home-core.js` et `home.js` (accueil), `scan-core.js`, `scan-ocr.js` et `scan.js` (scan), `copies.js` (langue et état des exemplaires), plus les noms des 151 compagnons (`tools/sprites/kanto.json`) ;
+- ajoute la logique de `tools/web/catalog.js` (catalogue complet), `sealed.js` (produits scellés), `showcase.js` (articles mis en avant), `releases.js` (Sorties), `persist.js` (enregistrement sur l'appareil), `radar-core.js` et `radar.js` (Radar), `territory.js` (Territoire et fiche boutique), `home-core.js` et `home.js` (accueil), `scan-core.js`, `scan-ocr.js` et `scan.js` (scan), `copies.js` (langue et état des exemplaires), `pk.js` (monnaie PK), plus les noms des 151 compagnons (`tools/sprites/kanto.json`) ;
 - applique le thème (`tools/web/theme.mjs`) ;
 - copie Vue 3.5.43 dans `web/vendor/`, MapLibre GL 6.12 dans `web/vendor/maplibre/`, Tesseract.js 7 et son modèle français dans `web/vendor/tesseract/7.0.0/`, et les images dans `web/img/`.
 

@@ -16,6 +16,7 @@ Le logo vient de la planche du porteur (« B6 · I avec éclair vertical », 202
 | `web/img/brand/dropicards.svg` | Redessin SVG de la planche, fond clair : lettres blanches, contour et ombre noirs |
 | `web/img/brand/dropicards-dark.svg` | Fond sombre : lettres jaunes, sans contour |
 | `web/img/brand/classeur.svg` | Logo de la rubrique « Mon classeur » de l'accueil : classeur à anneaux jaune, Poké Ball sur la couverture, cartes qui dépassent ; contour et ombre noirs comme le logo |
+| `web/img/brand/pk.svg` | Poké Ball des PK, la monnaie de l'app : moitié haute jaune avec l'éclair du I du logo, moitié basse blanche, bande et bouton noirs ; lisible de 14 à 72 px |
 | `web/icons/icon-192.png`, `icon-512.png` | Icône d'app « any » : le logo du porteur sur deux lignes (« DROPI » au-dessus de « CARDS »), carré jaune bordé de noir, coins transparents (`import_logo.py`) |
 | `web/icons/icon-maskable-512.png` | Icône « maskable » : plein cadre jaune, mot sur deux lignes dans la zone sûre |
 | `web/icons/apple-touch-icon.png` | Écran d'accueil iPhone (180 px, plein cadre, mot sur deux lignes) |
@@ -28,7 +29,7 @@ cd tools/brand && npm install && node make_logo.mjs
 python3 tools/brand/import_logo.py
 ```
 
-`make_logo.mjs` produit les SVG redessinés (logo clair et sombre, classeur) ; `import_logo.py` (Pillow) produit le logo de l'en-tête et toutes les icônes à partir du fichier du porteur.
+`make_logo.mjs` produit les SVG redessinés (logo clair et sombre, classeur, Poké Ball des PK) ; `import_logo.py` (Pillow) produit le logo de l'en-tête et toutes les icônes à partir du fichier du porteur.
 
 Sur un téléphone où l'app est déjà installée, la nouvelle icône n'apparaît qu'après avoir retiré l'app de l'écran d'accueil et l'avoir ajoutée à nouveau (iPhone) ; Android la met à jour de lui-même, en général sous 24 h.
 

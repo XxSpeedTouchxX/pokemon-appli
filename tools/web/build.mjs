@@ -31,13 +31,14 @@ patch('<svg width="358" height="210" viewBox="0 0 358 210"', '<svg width="100%" 
 patch('<svg width="324" height="56" viewBox="0 0 324 56"', '<svg width="100%" height="56" viewBox="0 0 324 56" preserveAspectRatio="none"');
 patch('<svg width="324" height="76" viewBox="0 0 324 76"', '<svg width="100%" height="76" viewBox="0 0 324 76" preserveAspectRatio="none"');
 // Identité Dropicards : dans l'en-tête, le logo exact du porteur (2026-10-07), son fichier au fond rendu transparent
-// (tools/brand/import_logo.py) : 196 px de large au plus, réduit sur les petits écrans pour rester centré entre la
-// pastille et l'avatar. La pastille « Marché FR » devient « FR » pour lui laisser la place.
+// (tools/brand/import_logo.py) : à gauche, 196 px de large au plus, réduit sur les petits écrans. À droite, le
+// compteur de PK (pk.js, 2026-10-08) puis l'avatar ; la pastille « Marché FR » est retirée pour leur laisser la place.
+patch('<header style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 14px 16px 8px">\n<span style="justify-self: start; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; font-size: 13px; font-weight: 600; color: #C9D3EA"><span style="flex: none; width: 18px; height: 12px; border-radius: 2px; background: linear-gradient(90deg, #0055A4 0 33.3%, #FFFFFF 33.3% 66.6%, #EF4135 66.6%)"></span>Marché FR</span>\n',
+  '<header style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px 8px">\n');
 patch(`<span style="display: flex; align-items: center; gap: 8px">
 <span style="width: 30px; height: 30px; border-radius: 10px; background: #3D63FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(61, 99, 255, 0.35)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg></span>
 <span style="font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.03em">PKM</span>
-</span>`, '<span style="display: flex; align-items: center"><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: min(196px, calc(100vw - 194px)); height: auto"></span>');
-patch('</span>Marché FR</span>', '</span>FR</span>');
+</span>`, '<span style="flex: 0 1 196px; min-width: 0; display: flex; align-items: center"><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: 100%; max-width: 196px; height: auto"></span>');
 // Catalogue complet (tools/web/catalog.js) : courbe seulement si un historique existe, ajout possible
 // d'une carte sans prix, recherche du Marché sur toutes les cartes.
 patch('<sc-if value="{{ it.hasCote }}" hint-placeholder-val="{{ true }}">\n<div style="display: flex; justify-content: space-between; align-items: baseline;',
@@ -63,6 +64,13 @@ patch('width: 44px; height: 44px; padding: 0; border: 0; background: transparent
 const FRAG = {};
 const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.meta.url)), 'utf8').split(/<!-- fragment: ([\w-]+) -->\n/);
 for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
+// Compteur de PK (fragment pk-counter) à gauche de l'avatar : accueil et grands titres (Collection, Marché, Territoire).
+{
+  const avatar = '<button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" style="';
+  patch(avatar + 'flex: none; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + FRAG['pk-counter'] + avatar + 'flex: none; width: 44px;');
+  patch(avatar + 'justify-self: end; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + FRAG['pk-counter'] + avatar + 'flex: none; width: 44px;');
+  patch('object-fit: cover">\n</button>\n</header>', 'object-fit: cover">\n</button>\n</span>\n</header>', 2);
+}
 // Accueil (octobre 2026, tools/web/home.js) : recherche dans le catalogue, valeur de la collection, Mon classeur,
 // boutiques autour de toi, liste complète de la collection, marge réalisée ; « Premiers pas » et « Suggestion »
 // (profils) repris de la maquette ; Sorties du moment tout en bas.
@@ -129,6 +137,8 @@ afterSection('Visuel', FRAG['item-note']);
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
 // Accueil : choix du compagnon (tools/web/home.js), au premier plan comme le zoom.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['buddy-picker'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Panneau « Mes PK » (pk.js), ouvert par le compteur de l'en-tête.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Réglages, « À propos » : crédit des sprites des compagnons et du moteur de lecture du scan.
 patch('sont des marques de leurs propriétaires respectifs.</p>', 'sont des marques de leurs propriétaires respectifs. Compagnons de l’accueil : sprites de Pokémon Noir et Blanc (© The Pokémon Company), via PokeAPI. Scan : lecture sur l’appareil avec Tesseract.js et son modèle français (licence Apache 2.0) ; aucune image n’est envoyée.</p>');
 // Radar : écran plein écran (carte de France des boutiques réelles), ouvert depuis un bandeau de Territoire.
@@ -397,7 +407,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Latias, Latios, Kyogre, Groudon et
 // Rayquaza (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
 const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
@@ -422,7 +432,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -442,7 +452,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -471,6 +481,8 @@ ${code}
   // Collection enregistrée sur l'appareil, sauf pour les liens de démonstration.
   DEVICE.enabled = !props.demo;
   if (DEVICE.enabled) inst.restoreSaved();
+  // PK : bienvenue la première fois, puis 10 PK par jour d'ouverture (pk.js).
+  inst.pkInit();
   // Défilement : chaque liste retrouve sa position au retour (extensions, grille, Marché…) ; les autres
   // écrans s'ouvrent en haut.
   const KEEP = ['home', 'collection', 'market', 'territory', 'sets', 'set', 'sealed', 'releases'];
@@ -566,6 +578,10 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 @keyframes pkmBlip { 0% { opacity: 1; transform: scale(1.3); } 70%, 100% { opacity: 0.2; transform: scale(1); } }
 /* Montant de la collection à la manière du logo : lettres blanches, contour noir (8 directions) et ombre portée noire. */
 .pkm-logo-text { text-shadow: 0.05em 0 0 #111111, -0.05em 0 0 #111111, 0 0.05em 0 #111111, 0 -0.05em 0 #111111, 0.036em 0.036em 0 #111111, -0.036em 0.036em 0 #111111, 0.036em -0.036em 0 #111111, -0.036em -0.036em 0 #111111, 0.09em 0.06em 0 #111111, 0.076em 0.096em 0 #111111, 0.04em 0.11em 0 #111111, 0.076em 0.024em 0 #111111, 0.004em 0.096em 0 #111111; }
+/* PK gagnés : « +10 PK » sous le compteur, qui monte puis s'efface (affiché sans mouvement si l'utilisateur limite les animations). */
+@keyframes pkmGain { 0% { opacity: 0; transform: translateY(6px); } 12%, 75% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-4px); } }
+.pkm-gain { animation: pkmGain 2.6s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) { .pkm-gain { animation: none; } }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${cssVars()}

@@ -112,10 +112,24 @@ function binderSvg() {
     + `<path d="${spark(136, 58, 6)}" fill="${WHITE}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
 }
 
+// Poké Ball des PK, la monnaie de l'app (2026-10-08) : moitié haute jaune Dropicards avec l'éclair du I du logo, moitié
+// basse blanche, bande et bouton noirs. Lisible de 14 px (pastilles) à 72 px (panneau « Mes PK »). 64 × 64.
+function pkBallSvg() {
+  const top = 'M5 32A27 27 0 0 1 59 32Z', bottom = 'M5 32A27 27 0 0 0 59 32Z';
+  const bolt = 'M42 7.5L32 21.5H38L33.5 29L46.5 15.5H40.5L45 7.5Z';
+  return `<circle cx="32" cy="32" r="29.5" fill="${INK}"/><path d="${top}" fill="${YELLOW}"/><path d="${bottom}" fill="${WHITE}"/>`
+    + `<path d="M10 40A24 24 0 0 0 54 40" fill="none" stroke="#D9DEE8" stroke-width="5" stroke-linecap="round"/>`
+    + `<ellipse cx="19" cy="17" rx="7" ry="3.6" transform="rotate(-35 19 17)" fill="${WHITE}" opacity="0.7"/>`
+    + `<path d="${bolt}" fill="${WHITE}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>`
+    + `<path d="M3 32H61" stroke="${INK}" stroke-width="6"/><circle cx="32" cy="32" r="9.5" fill="${WHITE}" stroke="${INK}" stroke-width="5"/>`
+    + `<circle cx="32" cy="32" r="3.6" fill="${YELLOW}" stroke="${INK}" stroke-width="1.6"/>`;
+}
+
 const out = (p, s) => { mkdirSync(new URL('.', new URL(p, 'file://' + ROOT)).pathname, { recursive: true }); writeFileSync(ROOT + p, s); };
 const big = wordmark({ outline: 14, shadow: [5, 7], letter: WHITE, detail: true, iCard: true, gap: 3 });
 const dark = wordmark({ outline: 0, letter: YELLOW, detail: false, iCard: false, gap: 7, cardStroke: WHITE, cardStrokeW: 6 });
 out('web/img/brand/dropicards.svg', doc(big.box, big.svg, 'Dropicards'));
 out('web/img/brand/dropicards-dark.svg', doc(dark.box, dark.svg, 'Dropicards'));
 out('web/img/brand/classeur.svg', doc([0, 0, 150, 122], binderSvg(), 'Classeur de cartes'));
-console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, classeur');
+out('web/img/brand/pk.svg', doc([0, 0, 64, 64], pkBallSvg(), 'PK'));
+console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, classeur, pk');

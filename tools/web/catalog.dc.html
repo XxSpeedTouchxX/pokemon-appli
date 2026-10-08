@@ -606,10 +606,11 @@
 <sc-if value="{{ hb.picking }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer le choix du compagnon" onClick="{{ hb.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Choisis ton compagnon" role="dialog" aria-modal="true" style="flex: none; height: 78%; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<section aria-label="Choisis ton compagnon" role="dialog" aria-modal="true" style="flex: none; position: relative; height: 78%; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 18px; display: flex; flex-direction: column; gap: 10px">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
-<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Choisis ton compagnon</h2>
+<h2 style="flex: 1; min-width: 0; margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Choisis ton compagnon</h2>
+<span style="flex: none; display: flex; align-items: center; gap: 5px; height: 32px; padding: 0 10px 0 4px; border-radius: 999px; border: 1px solid #1E2B45; font-family: 'Sora', sans-serif; font-size: 13.5px; font-weight: 700; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="22" height="22" style="display: block">{{ hb.balance }}<span style="font-size: 11px; color: #9AA8C3">PK</span></span>
 <button type="button" onClick="{{ hb.close }}" aria-label="Fermer" style="flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
 </div>
 <div style="flex: none; display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C">
@@ -619,13 +620,98 @@
 <span style="flex: none; font-size: 12.5px; color: #7D8BA8">{{ hb.count }}</span>
 <div role="group" aria-label="Compagnons" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start; gap: 8px">
 <sc-for list="{{ hb.list }}" as="hbp" hint-placeholder-count="12">
-<button type="button" onClick="{{ hbp.pick }}" aria-pressed="{{ hbp.on }}" aria-label="{{ hbp.aria }}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 6px 4px 10px; border-radius: 18px; border: 1px solid {{ hbp.bc }}; background: {{ hbp.bg }}; color: {{ hbp.fg }}; font: inherit; cursor: pointer">
+<button type="button" onClick="{{ hbp.pick }}" aria-pressed="{{ hbp.on }}" aria-label="{{ hbp.aria }}" style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 6px 4px 10px; border-radius: 18px; border: 1px solid {{ hbp.bc }}; background: {{ hbp.bg }}; color: {{ hbp.fg }}; font: inherit; cursor: pointer">
 <img src="{{ hbp.src }}" alt="" loading="lazy" width="96" height="96" style="display: block; width: 96px; max-width: 100%; height: auto; image-rendering: pixelated">
 <span style="max-width: 100%; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hbp.name }}</span>
+<sc-if value="{{ hbp.locked }}" hint-placeholder-val="{{ false }}">
+<span style="display: flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px 0 3px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12px; font-weight: 800; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="18" height="18" style="display: block">{{ hbp.price }}</span>
+<span aria-hidden="true" style="position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 13px; background: var(--pkm-accent); color: var(--pkm-on-accent); display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" style="fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+</sc-if>
 </button>
 </sc-for>
 </div>
 <p style="flex: none; margin: 0; font-size: 11px; line-height: 1.4; color: #7D8BA8">{{ hb.credit }}</p>
+<sc-if value="{{ hb.ask.on }}" hint-placeholder-val="{{ false }}">
+<div role="alertdialog" aria-modal="true" aria-label="{{ hb.ask.title }}" style="position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 2; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 22px; border: 1px solid #24345C; background: #16223A; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.55)">
+<div style="display: flex; align-items: center; gap: 12px">
+<img src="{{ hb.ask.src }}" alt="" width="96" height="96" style="flex: none; display: block; width: 72px; height: 72px; image-rendering: pixelated">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<h3 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700">{{ hb.ask.title }}</h3>
+<span style="font-size: 13px; line-height: 1.4; color: #C9D3EA">{{ hb.ask.text }}</span>
+</div>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: #C9D3EA">
+<span style="display: flex; align-items: center; gap: 6px; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: #F3F6FC"><img src="img/brand/pk.svg" alt="" width="28" height="28" style="display: block">{{ hb.ask.price }} PK</span>
+<span>{{ hb.ask.balance }}</span>
+</div>
+<sc-if value="{{ hb.ask.can }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ hb.ask.buy }}" style="height: 50px; border: 0; border-radius: 16px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15.5px; font-weight: 700; cursor: pointer">{{ hb.ask.buyLabel }}</button>
+</sc-if>
+<sc-if value="{{ hb.ask.cannot }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 14px; border: 1px dashed #3A4A75">
+<span style="font-size: 14.5px; font-weight: 700">{{ hb.ask.missText }}</span>
+<span style="font-size: 12.5px; line-height: 1.4; color: #C9D3EA">{{ hb.ask.earn }}</span>
+</div>
+</sc-if>
+<button type="button" onClick="{{ hb.ask.cancel }}" style="height: 46px; border: 1px solid #2A3A5C; border-radius: 16px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Annuler</button>
+</div>
+</sc-if>
+</section>
+</div>
+</sc-if>
+
+<!-- fragment: pk-counter -->
+<span style="flex: none; position: relative; display: flex">
+<button type="button" onClick="{{ pk.open }}" aria-label="{{ pk.aria }}" style="display: flex; align-items: center; height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer">
+<span style="display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 11px 0 4px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="26" height="26" style="flex: none; display: block; width: 26px; height: 26px">{{ pk.n }}<span style="font-size: 11px; color: #9AA8C3">PK</span></span>
+</button>
+<sc-if value="{{ pk.gain }}" hint-placeholder-val="{{ false }}">
+<span aria-hidden="true" class="pkm-gain" style="position: absolute; z-index: 5; right: 4px; top: 100%; margin-top: -6px; padding: 2px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12.5px; font-weight: 800; white-space: nowrap; pointer-events: none">{{ pk.gainText }} PK</span>
+</sc-if>
+</span>
+
+<!-- fragment: pk-sheet -->
+<sc-if value="{{ pk.sheet }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
+<button type="button" aria-label="Fermer Mes PK" onClick="{{ pk.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
+<section aria-label="Mes PK" role="dialog" aria-modal="true" style="flex: none; max-height: 86%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+<div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
+<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Mes PK</h2>
+<button type="button" onClick="{{ pk.close }}" aria-label="Fermer" style="flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+</div>
+<div style="flex: none; display: flex; align-items: center; gap: 14px">
+<img src="img/brand/pk.svg" alt="" width="64" height="64" style="flex: none; display: block">
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 13px; color: #9AA8C3">Ton solde</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700">{{ pk.balance }} PK</span>
+</div>
+</div>
+<h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Gagner des PK</h3>
+<ul style="flex: none; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{ pk.rules }}" as="pkr" hint-placeholder-count="3">
+<li style="display: flex; align-items: center; gap: 10px; font-size: 14px; line-height: 1.35"><span style="flex: none; min-width: 52px; box-sizing: border-box; padding: 3px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-weight: 800; text-align: center">{{ pkr.n }}</span><span>{{ pkr.text }}</span></li>
+</sc-for>
+</ul>
+<h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA">À débloquer</h3>
+<div style="flex: none; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{ pk.shop }}" as="pks" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 12px; padding: 6px 12px 6px 6px; border-radius: 18px; border: 1px solid #1E2B45; background: #111A2C">
+<img src="{{ pks.src }}" alt="" width="96" height="96" style="flex: none; display: block; width: 64px; height: 64px; image-rendering: pixelated">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<span style="font-size: 15px; font-weight: 700">{{ pks.name }}</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ pks.theme }}</span>
+</div>
+<sc-if value="{{ pks.locked }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ pks.go }}" aria-label="{{ pks.aria }}" style="flex: none; display: flex; align-items: center; gap: 5px; height: 44px; padding: 0 12px 0 6px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 14px; font-weight: 800; white-space: nowrap; cursor: pointer"><img src="img/brand/pk.svg" alt="" width="24" height="24" style="display: block">{{ pks.action }}</button>
+</sc-if>
+<sc-if value="{{ pks.owned }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ pks.go }}" aria-label="{{ pks.aria }}" style="flex: none; height: 44px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ pks.action }}</button>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<p style="flex: none; margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ pk.note }}</p>
 </section>
 </div>
 </sc-if>

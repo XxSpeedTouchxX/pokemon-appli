@@ -50,7 +50,6 @@ export const RULES = [
   // Gardées telles quelles.
   ['mask', '#000', 'keep', { n: 4 }],
   ['bg', '#E9ECF2', 'keep', { n: 2 }], ['fg', '#1B2236', 'keep', { n: 2 }], // étiquette des cartes gradées
-  ['bg', '#0055A4', 'keep', { n: 1 }], ['bg', '#EF4135', 'keep', { n: 1 }], ['bg', '#FFFFFF', 'keep', { ctx: /#0055A4 0 33\.3%/, n: 1 }], // drapeau
   ['bg', '#23765C', 'keep', { n: 1 }], ['bg', '#0A251C', 'keep', { n: 1 }], ['bg', 'rgb(35, 118, 92)', 'keep', { n: 2 }], // fond d'extension (Règne Delta)
   ['bg', '#0E1729', 'keep', { surface: true, n: 1 }], // carte de démonstration de Territoire
   ['fill', '#11294A', 'keep', { n: 1 }], ['fill', '#11291F', 'keep', { n: 2 }], ['stroke', '#1B2944', 'keep', { n: 4 }], ['stroke', '#172339', 'keep', { n: 1 }],
@@ -362,14 +361,14 @@ export const BUDDY_THEMES = [
   } }
 ];
 // Flou réel seulement sur ce qui passe au-dessus d'un contenu qui défile (au plus 5 éléments par écran) ;
-// sans flou possible, fond opaque. Le choix du compagnon est toujours opaque : le compagnon de l'accueil ne doit
-// pas se voir derrière les icônes.
+// sans flou possible, fond opaque. Le choix du compagnon, sa confirmation de déblocage et « Mes PK » sont toujours
+// opaques : rien de l'accueil ni de la grille ne doit se voir derrière.
 const V6_EXTRA = `html:not(.pkm-classic) #app { background: #FFD60A; }
 html:not(.pkm-classic) nav[aria-label="Navigation principale"] { background: rgba(10, 17, 48, 0.8) !important; border-color: rgba(255, 255, 255, 0.16) !important; backdrop-filter: blur(18px) saturate(1.6) !important; -webkit-backdrop-filter: blur(18px) saturate(1.6) !important; }
 html:not(.pkm-classic) section[aria-label="Saisie"], html:not(.pkm-classic) section[aria-label="Résultat du scan"] { background: rgba(10, 17, 48, 0.86) !important; backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); }
 html:not(.pkm-classic) div[role="status"], html:not(.pkm-classic) #pkm-radar-sheet { backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); }
 html:not(.pkm-classic) #pkm-zoom { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-html:not(.pkm-classic) section[aria-label="Choisis ton compagnon"] { background: #0A1130 !important; }
+html:not(.pkm-classic) section[aria-label="Choisis ton compagnon"], html:not(.pkm-classic) section[aria-label="Mes PK"], html:not(.pkm-classic) section[aria-label="Choisis ton compagnon"] [role="alertdialog"] { background: #0A1130 !important; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   html:not(.pkm-classic) nav[aria-label="Navigation principale"], html:not(.pkm-classic) section[aria-label="Saisie"], html:not(.pkm-classic) section[aria-label="Résultat du scan"] { background: #0A1130 !important; }
   html:not(.pkm-classic) .pkm-dark { --pkm-toast: #0A1130; }

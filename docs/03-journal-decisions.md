@@ -6,6 +6,41 @@
 
 ---
 
+## 2026-10-08 — Monnaie virtuelle « PK »
+
+- **Contexte :** le porteur demande une monnaie virtuelle, les **PK** :
+  - un petit logo de Poké Ball, dessin laissé à notre choix ;
+  - un compteur en haut à droite de l'app ;
+  - elle sert à débloquer des interfaces, notamment des compagnons. Premiers prix : **Groudon, Kyogre et Rayquaza à 500 PK** chacun.
+- **Décision** (défauts retenus sans validation préalable, à confirmer ; voir « À valider ») :
+  - **Logo :** une Poké Ball maison, moitié haute jaune Dropicards avec l'éclair du I du logo, moitié basse blanche (`web/img/brand/pk.svg`, `tools/brand/make_logo.mjs`). Ce n'est pas un logo officiel Pokémon.
+  - **Compteur :** à gauche de l'avatar, sur l'accueil, Collection, Marché et Territoire. Un appui ouvre « Mes PK » : solde, façons de gagner, compagnons à débloquer. Chaque gain s'affiche quelques secondes sous le compteur (« +10 PK »).
+  - **En-tête de l'accueil :** pour faire la place, le logo passe à gauche (toujours 196 px au plus) et la pastille « FR » est retirée.
+  - **Gains :**
+    - 100 PK de bienvenue, une fois ;
+    - +10 PK par jour où l'app est ouverte ;
+    - +10 PK par nouvel article ajouté à la collection (carte ou produit scellé), une seule fois par article : retirer puis rajouter ne rapporte rien.
+    - Les articles déjà présents au premier lancement et ceux de la démo ne rapportent rien.
+  - **Déblocage :**
+    - dans « Choisis ton compagnon », Kyogre, Groudon et Rayquaza portent un cadenas et leur prix ;
+    - un appui ouvre une confirmation : « Débloquer pour 500 PK », ou « Il te manque … PK » avec les façons d'en gagner ;
+    - une fois débloqué, le compagnon est choisi et son thème appliqué (Océan, Volcan, Vert et blanc). Il reste acquis.
+  - **Transition :** un compagnon à thème choisi avant l'arrivée des PK reste acquis, sans payer.
+  - **Enregistrement :** solde, compagnons débloqués et articles déjà récompensés sont gardés sur l'appareil avec la collection. « Vider ma collection » et « Remettre la démo » ne touchent pas aux PK.
+  - **Garde-fou :** les PK ne s'achètent pas, ne se convertissent pas en euros et ne s'échangent pas. Le panneau le dit.
+- **Écarté :**
+  - un achat de PK en argent réel : il ferait de l'app une boutique, avec ses règles (achats intégrés des stores, protection des mineurs) ;
+  - des quêtes, des séries de jours ou des saisons : CLAUDE.md §5.4 écarte les quêtes et saisons de PokéItem. Le bonus du jour reste un simple +10, sans série ;
+  - des PK par scan réussi : ils feraient double emploi avec l'ajout de la carte scannée.
+- **À valider par le porteur :**
+  - montants des gains ;
+  - prochaines interfaces à débloquer (autres compagnons, thèmes seuls, cadres du classeur…) ;
+  - si les PK doivent un jour récompenser des usages utiles au test (inviter un proche, importer sa collection), à mesurer.
+- **Limite :** tout est sur l'appareil. Quelqu'un qui modifie les données de son navigateur peut se donner des PK. C'est sans conséquence tant que les PK ne débloquent que de l'affichage. Il faudra un compte et un serveur s'ils prennent de la valeur.
+- **Coût :** 0 €.
+
+---
+
 ## 2026-10-07 (fin) — Icône de l'app, liste « Ma collection » retirée, thèmes des compagnons
 
 - **Contexte :** demandes du porteur :
