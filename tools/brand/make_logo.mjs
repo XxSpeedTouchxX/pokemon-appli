@@ -112,19 +112,22 @@ function binderSvg() {
     + `<path d="${spark(136, 58, 6)}" fill="${WHITE}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
 }
 
-// Poké Ball des PK, la monnaie de l'app (2026-10-08, proposition C « Éclair traversant » choisie par le porteur, haut passé au jaune du logo le 2026-10-08) :
-// moitié haute jaune du logo (#FFD60A), moitié basse blanche, bande noire ; l'éclair du I du logo, jaune à contour noir, traverse
-// toute la balle à la place du bouton. Lisible de 14 px (pastilles) à 72 px (panneau « Mes PK »). 64 × 64.
-function pkBallSvg() {
-  // Éclair du I (cardI), recadré de sa pointe haute à sa pointe basse ; hauteur 50, largeur 30, centré.
+// Gemme des PK, la monnaie de l'app (2026-10-08, proposition « D2c » choisie par le porteur) : hexagone jaune taillé en
+// 6 facettes, du jaune clair à l'ambre, contour noir ; au centre, l'éclair du I du logo, jaune à contour noir ; étincelle
+// du logo en haut à droite. Aucun repère de Poké Ball (ni bande, ni bouton, ni rouge et blanc) : risque de droits réduit.
+// Lisible de 14 px (pastilles) à 72 px (panneau « Mes PK »). 64 × 64.
+function pkGemSvg() {
+  const pts = R => Array.from({ length: 6 }, (_, i) => { const a = (-90 + i * 60) * Math.PI / 180; return [r1(32 + R * Math.cos(a)), r1(32 + R * Math.sin(a))]; });
+  const hex = R => 'M' + pts(R).map(p => p.join(' ')).join('L') + 'Z';
+  const FACETS = ['#FFF1A0', YELLOW, '#E8A000', '#C97F00', '#E8A000', YELLOW];
+  const facets = pts(26.5).map((p, i, a) => `<path d="M32 32L${p.join(' ')}L${a[(i + 1) % 6].join(' ')}Z" fill="${FACETS[i]}"/>`).join('');
+  // Éclair du I (cardI), recadré de sa pointe haute à sa pointe basse : hauteur 38, largeur 22,8, centré en (32,5 ; 33).
   const P = [[0.64, 0], [0.16, 0.565], [0.45, 0.565], [0.28, 1], [0.86, 0.38], [0.57, 0.38], [0.8, 0]];
-  const h = 50, w = 30, x0 = 32.5 - w / 2 - 0.01 * w, y0 = 7;
+  const h = 38, w = h * 0.6, x0 = 32.5 - w / 2, y0 = 33 - h / 2;
   const bolt = 'M' + P.map(([x, y]) => r1(x0 + x * w) + ' ' + r1(y0 + y * h)).join('L') + 'Z';
-  return `<circle cx="32" cy="32" r="29.5" fill="${INK}"/><path d="M5 32A27 27 0 0 1 59 32Z" fill="${YELLOW}"/><path d="M5 32A27 27 0 0 0 59 32Z" fill="${WHITE}"/>`
-    + `<path d="M10 40A24 24 0 0 0 54 40" fill="none" stroke="#D9DEE8" stroke-width="5" stroke-linecap="round"/>`
-    + `<ellipse cx="17" cy="18" rx="6" ry="3.2" transform="rotate(-40 17 18)" fill="${WHITE}" opacity="0.55"/>`
-    + `<path d="M3 32H61" stroke="${INK}" stroke-width="6"/>`
-    + `<path d="${bolt}" fill="${YELLOW}" stroke="${INK}" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/>`;
+  return `<path d="${hex(30.5)}" fill="${INK}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>${facets}`
+    + `<path d="${bolt}" fill="${YELLOW}" stroke="${INK}" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/>`
+    + `<path d="${spark(49, 12, 6.5)}" fill="${WHITE}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
 }
 
 const out = (p, s) => { mkdirSync(new URL('.', new URL(p, 'file://' + ROOT)).pathname, { recursive: true }); writeFileSync(ROOT + p, s); };
@@ -133,5 +136,5 @@ const dark = wordmark({ outline: 0, letter: YELLOW, detail: false, iCard: false,
 out('web/img/brand/dropicards.svg', doc(big.box, big.svg, 'Dropicards'));
 out('web/img/brand/dropicards-dark.svg', doc(dark.box, dark.svg, 'Dropicards'));
 out('web/img/brand/classeur.svg', doc([0, 0, 150, 122], binderSvg(), 'Classeur de cartes'));
-out('web/img/brand/pk.svg', doc([0, 0, 64, 64], pkBallSvg(), 'PK'));
-console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, classeur, pk');
+out('web/img/brand/pk.svg', doc([0, 0, 64, 64], pkGemSvg(), 'PK'));
+console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, classeur, pk (gemme)');
