@@ -103,7 +103,7 @@ const states = {
   'résultat du scan': async () => { await page.goto(BASE + '?start=scan'); await page.waitForTimeout(900); await page.click('button:has-text("Scellé")'); await page.click('[aria-label="Produits scellés"] button'); },
   'toast': async () => { await page.goto(BASE + '?start=scan'); await page.waitForTimeout(900); await page.click('button:has-text("Scellé")'); await page.click('[aria-label="Produits scellés"] button'); await page.click('button:has-text("Ajouter à ma collection")'); },
   'scan : onglet Scellé': async () => { await page.goto(BASE + '?start=scan'); await page.waitForTimeout(900); await page.click('button:has-text("Scellé")'); await page.waitForTimeout(400); },
-  'scan : propositions (photo importée)': async () => { await page.goto(BASE + '?start=scan'); await page.waitForTimeout(900); await page.setInputFiles('#pkm-scan-file', 'photo-tg05.png'); await page.waitForSelector('section[aria-label="C’est laquelle ?"]', { timeout: 60000 }); await page.waitForTimeout(300); },
+  'scan : propositions (photo importée)': async () => { await page.goto(BASE + '?start=scan'); await page.waitForTimeout(900); await page.setInputFiles('#pkm-scan-file', ROOT + 'tools/web/e2e/files/photo-tg05.jpg'); await page.waitForSelector('section[aria-label="C’est laquelle ?"]', { timeout: 60000 }); await page.waitForTimeout(300); },
   'zoom': async () => { await page.goto(BASE + '?start=item&itemId=k1'); await page.waitForTimeout(900); await page.click('button[aria-label^="Agrandir la carte"]'); },
   'radar': async () => { await page.goto(BASE + '#radar'); await page.waitForTimeout(3500); },
   'recherche de l’accueil': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'pika'); await page.waitForTimeout(800); },
@@ -129,4 +129,5 @@ for (const [name, act] of Object.entries(states)) {
 console.log('éléments floutés : ' + blurs.join(' · '));
 console.log(report.join('\n'));
 console.log(total + ' texte(s) sous le seuil de contraste');
+console.log(total === 0 ? '✓ contraste suffisant partout (4,5:1 et plus)' : '✗ ' + total + ' texte(s) sous le seuil de contraste');
 await browser.close();

@@ -13,7 +13,7 @@ const pick = async name => {
   await page.locator('[aria-label="Compagnons"] button').first().click(); await page.waitForTimeout(700);
 };
 const state = () => page.evaluate(() => ({
-  cls: document.documentElement.className, bar: document.querySelector('meta[name="theme-color"]').content,
+  cls: [...document.documentElement.classList].filter(c => c.indexOf('pkm-theme') === 0 || c === 'pkm-classic').join(' '), bar: document.querySelector('meta[name="theme-color"]').content,
   bg: getComputedStyle(document.querySelector('.pkm-root')).backgroundImage, t1: getComputedStyle(document.querySelector('#app main h2')).color
 }));
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1000); await unlockPaid(page);
@@ -35,7 +35,7 @@ for (const [name, key, bar, color] of [['Kyogre', 'sea', '#0A4893', /10, 72, 147
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(2000);
 ok('après rechargement : ' + (await state()).cls, (await state()).cls === 'pkm-theme-storm');
 await page.click('button[aria-label="Collection"]').catch(() => {}); await page.waitForTimeout(800);
-ok('onglet Collection : même thème', (await page.evaluate(() => document.documentElement.className)) === 'pkm-theme-storm');
+ok('onglet Collection : même thème', (await page.evaluate(() => [...document.documentElement.classList].filter(c => c.indexOf('pkm-theme') === 0 || c === 'pkm-classic').join(' '))) === 'pkm-theme-storm');
 await page.screenshot({ path: shot('theme-storm-collection.png') });
 await page.click('button[aria-label="Accueil"]').catch(() => {}); await page.waitForTimeout(800);
 // Retour au jaune avec un autre compagnon.
@@ -45,7 +45,7 @@ ok('Pikachu : retour au jaune', back.cls === '' && back.bar === '#FFD60A' && /25
 // Thème classique : pas de thème de compagnon.
 await pick('Kyogre');
 await page.goto(BASE + '&theme=classic', { waitUntil: 'load' }); await page.waitForTimeout(1500);
-const cl = await page.evaluate(() => ({ cls: document.documentElement.className, bar: document.querySelector('meta[name="theme-color"]').content, bg: getComputedStyle(document.querySelector('.pkm-root')).backgroundImage }));
+const cl = await page.evaluate(() => ({ cls: [...document.documentElement.classList].filter(c => c.indexOf('pkm-theme') === 0 || c === 'pkm-classic').join(' '), bar: document.querySelector('meta[name="theme-color"]').content, bg: getComputedStyle(document.querySelector('.pkm-root')).backgroundImage }));
 ok('thème classique : fond inchangé (' + cl.bar + ')', /pkm-classic/.test(cl.cls) && cl.bar === '#0B1120' && !/10, 72, 147/.test(cl.bg));
 ok('aucune erreur JS' + (errors.length ? ' : ' + errors.join(' | ') : ''), errors.length === 0);
 await browser.close();

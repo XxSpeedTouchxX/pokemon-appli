@@ -42,7 +42,7 @@ await page.goto(B, { waitUntil: 'load' }); await page.waitForTimeout(500);
 // En local (http) l'app n'enregistre pas le service worker : le test l'enregistre comme le ferait l'hébergement.
 await page.evaluate(() => navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready)); await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1500);
 ok('service worker actif', await page.evaluate(() => !!navigator.serviceWorker.controller));
-const cached = await page.evaluate(async () => { const c = await caches.open('pkm-demo-v16'); return !!(await c.match('data/cards.json')) && !!(await c.match('data/sealed.json')); });
+const cached = await page.evaluate(async () => { const k = (await caches.keys()).find(n => /^pkm-demo-v\d+$/.test(n)); if (!k) return false; const c = await caches.open(k); return !!(await c.match('data/cards.json')) && !!(await c.match('data/sealed.json')); });
 ok('catalogue et scellé gardés par le service worker', cached);
 await ctx.setOffline(true);
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(2500);

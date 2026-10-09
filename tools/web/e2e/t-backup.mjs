@@ -36,15 +36,15 @@ let after = await saved();
 ok('remplacée : ' + after.purchases.length + ' ajouts, ' + after.sales.length + ' ventes', after.purchases.length === before.purchases.length && after.sales.length === before.sales.length && after.pk === before.pk);
 // Ajouter à la collection : une sauvegarde avec un ajout de plus.
 const extra = JSON.parse(JSON.stringify(doc)); extra.data.purchases.push({ id: 'n100', date: '2026-10-01', seq: 100, lines: [{ pid: extra.data.purchases[0].lines[0].pid, qty: 3, lang: 'EN', cond: 'EX' }], total: 12, where: 'Test', by: 'toi' });
-writeFileSync('dl/extra.json', JSON.stringify(extra));
+writeFileSync(shot('extra.json'), JSON.stringify(extra));
 await page.goto(BASE + '&start=io', { waitUntil: 'load' }); await page.waitForTimeout(1200);
-await page.setInputFiles('#pkm-io-file', 'dl/extra.json'); await page.waitForTimeout(400);
+await page.setInputFiles('#pkm-io-file', shot('extra.json')); await page.waitForTimeout(400);
 await Promise.all([page.waitForEvent('load'), page.click('button:has-text("Ajouter à ma collection")')]); await page.waitForTimeout(1500);
 after = await saved();
 ok('ajoutée : ' + after.purchases.length + ' ajouts (un seul nouveau), ids uniques', after.purchases.length === before.purchases.length + 1 && new Set(after.purchases.map(a => a.id)).size === after.purchases.length);
 // Fichier invalide.
-writeFileSync('dl/autre.json', '{"bonjour": 1}');
-await page.setInputFiles('#pkm-io-file', 'dl/autre.json'); await page.waitForTimeout(400);
+writeFileSync(shot('autre.json'), '{"bonjour": 1}');
+await page.setInputFiles('#pkm-io-file', shot('autre.json')); await page.waitForTimeout(400);
 ok('fichier invalide : message', /pas une sauvegarde Dropicards/.test(await page.locator('section[aria-label="Restaurer ou importer"]').innerText()));
 await page.screenshot({ path: shot('backup-ecran.png'), fullPage: false });
 // Rappel sur l'accueil.

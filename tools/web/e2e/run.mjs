@@ -22,7 +22,7 @@ for (const name of pick) {
     ch.on('close', code => { clearTimeout(kill); done({ text: text, code: code }); });
   });
   const lines = out.text.split('\n'), ok = lines.filter(l => l.indexOf('✓') >= 0).length;
-  const ko = lines.filter(l => l.indexOf('✗') >= 0 || /^ERREURS :|^Erreurs :|sous le seuil de contraste/.test(l) && !/^0 texte/.test(l)).length;
+  const ko = lines.filter(l => l.indexOf('✗') >= 0 || /^ERREURS :|^Erreurs :/.test(l)).length;
   const bad = ko > 0 || out.code !== 0 || ok === 0;
   if (bad) failed++;
   console.log((bad ? '✗ ' : '✓ ') + name + ' : ' + ok + ' ✓, ' + ko + ' ✗' + (out.code ? ' (code ' + out.code + ')' : ''));
