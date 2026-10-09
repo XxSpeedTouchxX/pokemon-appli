@@ -183,6 +183,25 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 - Affichés dans la liste « Ma collection » et la grille de la Collection (« EN · Excellent », ou « EN, FR · 2 états ») et dans la fiche : résumé des ajouts, langue et état de chaque ligne de l'historique, drapeau de la langue la plus présente.
 - **Limites :** la cote ne dépend pas encore de l'état ; à la vente, on ne choisit pas encore l'exemplaire qui part.
 
+## Corriger ou supprimer un ajout
+
+- **Où :** fiche d'un article › « Historique d'achat » › crayon au bout de chaque ligne (`tools/web/edit.js`, 2026-10-09, D5).
+- **Ce qu'on change :** quantité, prix payé (facultatif), date d'achat, langue, état. « Supprimer cet ajout » demande une confirmation ; pour un lot, « Retirer cet article du lot » retire aussi sa part du prix du lot.
+- **Garde-fou :** une modification qui laisserait une vente déjà saisie sans assez d'exemplaires à sa date est refusée, avec la vente en cause.
+- **Annuler :** le message qui suit garde un bouton « Annuler » pendant 6 secondes. Les PK déjà gagnés ne changent pas.
+- **Dates :** les nouveaux ajouts et les nouvelles ventes prennent la date du jour réelle (la maquette les datait toujours du 03/10).
+
+## Source et date des cotes
+
+- **En-têtes** (`tools/web/sources.js`, 2026-10-09, B7) : « Cotes du 08/10 · TCGdex, Cardmarket, TCGplayer », d'après la date du catalogue et celle des prix du scellé (plus de date figée « 3 oct. à 07:00 »). Fiche : date de la carte (« Cote du 08/10 · Cardmarket et TCGplayer via TCGdex »), du produit (« · Cardmarket »), ou « Article de la collection de démo · prix d'exemple ».
+- **Mon classeur :** bouton « i » à côté du résumé : méthode de la cote (Réglages), sources et date de l'onglet affiché, rappel que le prix demandé n'est jamais compté, nombre d'articles de démo.
+- **Hors ligne :** l'en-tête commence par « Hors ligne · » ; les dernières cotes restent affichées.
+
+## Visuels de secours et hors ligne
+
+- **Cartes de démo** (A4) : si le CDN TCGdex ne répond pas, les 5 cartes de démo affichent leur visuel local (`web/img/card-*.webp`) ; contrôlé par le build.
+- **Hors ligne :** le service worker (`web/sw.js`, hébergement en https) garde dès la première visite l'app, le catalogue (`data/cards.json`) et les prix du scellé (`data/sealed.json`). Sans réseau, l'app s'ouvre avec les dernières cotes. Les visuels des cartes réelles restent ceux du cache du navigateur.
+
 ## Design : jaune et verre (thème v6)
 
 - **Look :** fond jaune en dégradé ; cartes, fiches, champs et barre du bas en verre bleu nuit translucide, avec un contour clair ; contour jaune pour les cartes mises en avant ; bouton Scan jaune.

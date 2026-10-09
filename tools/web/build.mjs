@@ -187,6 +187,13 @@ patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Corriger ou supprimer un ajout (edit.js) : bouton « Modifier » sur chaque ligne de l'historique d'achat, panneau de
+// modification, « Annuler » dans le message qui suit.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['buy-edit'] + '\n<sc-if value="{{ ui.hasToast }}"');
+patchJs("isLot: a.lines.length > 1, border: x.line(i) };", "isLot: a.lines.length > 1, border: x.line(i), aid: a.id, lk: kk };");
+patch('<span style="font-size: 14px; font-variant-numeric: tabular-nums">{{ cp.amount }}</span>',
+  '<span style="font-size: 14px; font-variant-numeric: tabular-nums">{{ cp.amount }}</span>\n<button type="button" onClick="{{ cp.edit }}" aria-label="{{ cp.editLabel }}" style="flex: none; width: 40px; height: 40px; margin-right: -6px; padding: 0; border: 0; border-radius: 20px; background: transparent; color: #9AA8C3; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="M13.5 6.5l4 4"></path></svg></button>');
+patch('<span>{{ ui.toast }}</span>', '<span style="flex: 1; min-width: 0">{{ ui.toast }}</span>\n<sc-if value="{{ ui.hasUndo }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ ui.undo }}" style="flex: none; min-height: 40px; margin: -8px -4px -8px 0; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: #A8B6FF; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Annuler</button></sc-if>');
 patch('onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim" style="', 'onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim" style="visibility: {{ admv.scan }}; ');
 patch('onClick="{{ tabTerritory }}" aria-label="Territoire" aria-current="{{ tab.terCur }}" style="', 'onClick="{{ tabTerritory }}" aria-label="Territoire" aria-current="{{ tab.terCur }}" style="visibility: {{ admv.ter }}; ');
 // Réglages, « À propos » : crédit des sprites des compagnons et du moteur de lecture du scan.
@@ -458,7 +465,11 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), editJs = mod('edit.js');
+// Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
+const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
+for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
+const sourcesJs = '  const SRC_DEMO_LOCAL = ' + JSON.stringify(Object.fromEntries(Object.entries(DEMO_LOCAL).map(([k, f]) => [k, 'img/' + f + '.webp']))) + ';\n' + mod('sources.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Latias, Latios, Kyogre, Groudon et
 // Rayquaza (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
 const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
@@ -483,7 +494,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + editJs + sourcesJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -503,7 +514,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${editJs}${sourcesJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -647,7 +658,7 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 .pkm-plus { transition: transform 0.2s ease; }
 @media (prefers-reduced-motion: reduce) { .pkm-pop { animation: none; } .pkm-plus { transition: none; } }
 /* Mode Admin, animations désactivées : plus aucune animation ni transition. */
-section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > * { flex-shrink: 0; }
+section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > *, section[aria-label="Modifier l’ajout"] > * { flex-shrink: 0; }
 html.pkm-calm *, html.pkm-calm *::before, html.pkm-calm *::after { animation: none !important; transition: none !important; }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
