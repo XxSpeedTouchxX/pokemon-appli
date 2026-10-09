@@ -49,6 +49,11 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
 5. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
 
+## Informations légales et polices
+
+- **Informations légales** (`tools/web/legal.js`, fragment `legal-sheet`) : Réglages › À propos › « Informations légales et confidentialité », et « Règles des PK » dans « Mes PK ». Quatre rubriques : Mentions légales, Confidentialité, Conditions, Règles des PK. Les champs de l'éditeur sont « à compléter » ; liste des vérifications dans `docs/14-verifications-avant-publication.md`.
+- **Polices hébergées avec l'app** (`web/fonts/`, paquets `@fontsource`, licence SIL OFL) : la démo n'appelle plus Google Fonts. Seule la page claude.ai (`artifact.html`) garde Google Fonts.
+
 ## Tests
 
 - `npm test` (dans `tools/web/`) : tests unitaires, dont **le calcul de marge** (`test_margin.mjs`, 14 cas : vente simple, coût moyen pondéré, coût figé au jour de la vente, lots répartis par valeur ou à parts égales, port par défaut, vente à perte, articles sans prix d'achat, ordre du jour, frais de plateforme, arrondis, démo complète vérifiée à la main). Ces tests exécutent la logique de la maquette, celle de l'app.

@@ -185,6 +185,8 @@ patch(`<span style="font-size: 13px; color: #9AA8C3">{{ pf.since }}</span>
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 patch('onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim" style="', 'onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim" style="visibility: {{ admv.scan }}; ');
 patch('onClick="{{ tabTerritory }}" aria-label="Territoire" aria-current="{{ tab.terCur }}" style="', 'onClick="{{ tabTerritory }}" aria-label="Territoire" aria-current="{{ tab.terCur }}" style="visibility: {{ admv.ter }}; ');
 // Réglages, « À propos » : crédit des sprites des compagnons et du moteur de lecture du scan.
@@ -203,7 +205,7 @@ patch('>Rien ne correspond à ta recherche.<', '>{{ coll.emptyText }}<');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs');
-patch('partenaires de Territoire fictifs</p>', 'partenaires de Territoire fictifs</p>\n<button type="button" onClick="{{ adm.tapVersion }}" aria-label="{{ adm.versionLabel }}" style="align-self: flex-start; min-height: 32px; padding: 0; border: 0; background: transparent; color: #7D8BA8; font: inherit; font-size: 12px; cursor: default">{{ adm.versionLabel }}</button>');
+patch('partenaires de Territoire fictifs</p>', 'partenaires de Territoire fictifs</p>\n<button type="button" onClick="{{ adm.tapVersion }}" aria-label="{{ adm.versionLabel }}" style="align-self: flex-start; min-height: 32px; padding: 0; border: 0; background: transparent; color: #7D8BA8; font: inherit; font-size: 12px; cursor: default">{{ adm.versionLabel }}</button>\n<button type="button" onClick="{{ legal.openMentions }}" style="height: 44px; margin-top: 4px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Informations légales et confidentialité</button>');
 // Articles mis en avant (tools/web/showcase.js).
 // - Vignettes des listes (ventes, lots, arrivages, Marché, scan…) : plus larges pour le scellé (largeur × wk),
 //   cadre doré des cartes ultra rares (ring).
@@ -456,7 +458,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Latias, Latios, Kyogre, Groudon et
 // Rayquaza (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
 const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
@@ -481,7 +483,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -501,7 +503,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -645,14 +647,21 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 .pkm-plus { transition: transform 0.2s ease; }
 @media (prefers-reduced-motion: reduce) { .pkm-pop { animation: none; } .pkm-plus { transition: none; } }
 /* Mode Admin, animations désactivées : plus aucune animation ni transition. */
-section[aria-label="Panneau Admin"] > * { flex-shrink: 0; }
+section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > * { flex-shrink: 0; }
 html.pkm-calm *, html.pkm-calm *::before, html.pkm-calm *::after { animation: none !important; transition: none !important; }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${cssVars()}
 ${v6Css()}
 ${keyframes}`;
+// Polices : Google Fonts pour la page claude.ai (seule source de feuilles de style permise) ; pour la démo hébergée,
+// copies locales (paquets @fontsource, licence SIL OFL) dans web/fonts/ : aucune adresse IP envoyée à Google.
 const fonts = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Luckiest+Guy&display=swap">';
+const FONT_FILES = [['sora', 'Sora', [500, 600, 700]], ['plus-jakarta-sans', 'Plus Jakarta Sans', [400, 500, 600, 700, 800]], ['luckiest-guy', 'Luckiest Guy', [400]]];
+const localFonts = FONT_FILES.map(([pkg, family, weights]) => weights.map(w => ['latin', 'latin-ext'].map(sub =>
+  `@font-face { font-family: '${family}'; font-style: normal; font-weight: ${w}; font-display: swap; src: url(fonts/${pkg}-${sub}-${w}-normal.woff2) format('woff2');`
+  + (sub === 'latin' ? ' unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }'
+    : ' unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }')).join('\n')).join('\n')).join('\n');
 // Vue : copie locale pour l'hébergement (hors ligne possible), CDN autorisé pour la page claude.ai.
 const VUE_LOCAL = 'vendor/vue.runtime.global.prod.js';
 const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global.prod.js';
@@ -681,8 +690,9 @@ const index = `<!doctype html>
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 ${THEME_SWITCH}
-${fonts}
+<link rel="preload" href="fonts/plus-jakarta-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+${localFonts}
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; height: 100%; }
 ${style}
 </style>
@@ -703,6 +713,12 @@ ${body(VUE_CDN)}
 `;
 
 mkdirSync(OUT + 'vendor', { recursive: true });
+mkdirSync(OUT + 'fonts', { recursive: true });
+for (const [pkg, , weights] of FONT_FILES) {
+  for (const w of weights) for (const sub of ['latin', 'latin-ext'])
+    copyFileSync(fileURLToPath(new URL('./node_modules/@fontsource/' + pkg + '/files/' + pkg + '-' + sub + '-' + w + '-normal.woff2', import.meta.url)), OUT + 'fonts/' + pkg + '-' + sub + '-' + w + '-normal.woff2');
+  copyFileSync(fileURLToPath(new URL('./node_modules/@fontsource/' + pkg + '/LICENSE', import.meta.url)), OUT + 'fonts/LICENSE-' + pkg + '.txt');
+}
 mkdirSync(OUT + 'img', { recursive: true });
 writeFileSync(OUT + 'app.js', app);
 writeFileSync(OUT + 'index.html', index);

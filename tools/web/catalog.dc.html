@@ -772,6 +772,7 @@
 </button>
 </div>
 <p style="flex: none; margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ pk.note }}</p>
+<button type="button" onClick="{{ legal.openPk }}" style="flex: none; align-self: flex-start; min-height: 44px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Règles des PK</button>
 </section>
 </div>
 </sc-if>
@@ -1013,6 +1014,29 @@
 <button type="button" onClick="{{ bkr.later }}" style="flex: none; min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Plus tard</button>
 </div>
 </section>
+</sc-if>
+
+<!-- fragment: legal-sheet -->
+<sc-if value="{{ legal.open }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; z-index: 35; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
+<button type="button" aria-label="Fermer les informations légales" onClick="{{ legal.close }}" style="flex: 1 1 auto; min-height: 36px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
+<section aria-label="Informations légales" role="dialog" aria-modal="true" style="flex: none; max-height: 92%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 12px">
+<div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
+<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">{{ legal.title }}</h2>
+<button type="button" onClick="{{ legal.close }}" aria-label="Fermer" style="flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+</div>
+<div role="group" aria-label="Rubriques" style="flex: none; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px">
+<sc-for list="{{ legal.tabs }}" as="lgt" hint-placeholder-count="4"><button type="button" onClick="{{ lgt.pick }}" aria-pressed="{{ lgt.on }}" style="flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid {{ lgt.bc }}; background: {{ lgt.bg }}; color: {{ lgt.fg }}; font: inherit; font-size: 13.5px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ lgt.label }}</button></sc-for>
+</div>
+<sc-for list="{{ legal.blocks }}" as="lgb" hint-placeholder-count="4">
+<div style="flex: none; display: flex; flex-direction: column; gap: 4px">
+<h3 style="margin: 0; font-size: 14.5px; font-weight: 700">{{ lgb.title }}</h3>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: #C9D3EA">{{ lgb.text }}</p>
+</div>
+</sc-for>
+</section>
+</div>
 </sc-if>
 
 <!-- fragment: scan -->

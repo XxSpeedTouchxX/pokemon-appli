@@ -8,6 +8,9 @@
     "test": "node --test test_home.mjs test_margin.mjs test_radar.mjs test_scan.mjs test_theme.mjs"
   },
   "devDependencies": {
+    "@fontsource/luckiest-guy": "5.2.6",
+    "@fontsource/plus-jakarta-sans": "5.2.6",
+    "@fontsource/sora": "5.2.6",
     "@tesseract.js-data/fra": "1.0.0",
     "@vue/compiler-dom": "3.5.43",
     "maplibre-gl": "6.12.0",
