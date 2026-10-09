@@ -49,6 +49,11 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
 5. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
 
+## Navigation
+
+- **Toujours en haut** (2026-10-09) : chaque changement de page s'ouvre en haut : onglet du bas, fiche, retour, autre carte ou autre boutique (`pageKey` dans `build.mjs`).
+- **Réglages gardés :** recherche, filtres, onglets du classeur, rayon et tri de Territoire restent dans l'état de l'app. On les retrouve en revenant sur la page.
+
 ## PK, la monnaie de l'app
 
 Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de `catalog.dc.html`). Gains et règles validés par le porteur le 2026-10-08.

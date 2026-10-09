@@ -12355,25 +12355,21 @@ return function render(_ctx, _cache) {
   if (DEVICE.enabled) inst.restoreSaved();
   // PK : bienvenue la première fois, puis 10 PK par jour d'ouverture (pk.js).
   inst.pkInit();
-  // Défilement : chaque liste retrouve sa position au retour (extensions, grille, Marché…) ; les autres
-  // écrans s'ouvrent en haut.
-  const KEEP = ['home', 'collection', 'market', 'territory', 'sets', 'set', 'sealed', 'releases'];
-  const scrollKey = s => s.screen + ':' + (s.screen === 'set' ? s.setId : '');
-  const scrolls = {};
-  let lastKey = scrollKey(inst.st());
+  // Défilement (demande du porteur, 2026-10-09) : chaque changement de page (onglet, fiche, retour, autre carte ou
+  // autre boutique) s'ouvre en haut. Les réglages de la page (recherche, filtres, onglets, vues) restent dans l'état
+  // de l'app : on les retrouve au retour.
+  const pageKey = s => [s.screen, s.setId, s.itemId, s.storeId, s.shopId, s.saleId].join(':');
+  let lastKey = pageKey(inst.st());
   let zoomOpen = false;
   Vue.createApp({
     setup() {
       const V = Vue.shallowRef(inst.renderVals());
       inst.__rerender = () => {
-        const main = document.querySelector('#app main');
-        if (main) scrolls[lastKey] = main.scrollTop;
         V.value = inst.renderVals();
-        const s = inst.st(), key = scrollKey(s);
+        const key = pageKey(inst.st());
         if (key !== lastKey) {
           lastKey = key;
-          const top = KEEP.indexOf(s.screen) >= 0 ? scrolls[key] || 0 : 0;
-          Vue.nextTick(() => { const m = document.querySelector('#app main'); if (m) m.scrollTop = top; });
+          Vue.nextTick(() => { const m = document.querySelector('#app main'); if (m) m.scrollTop = 0; });
         }
         // Zoom de la carte : le focus va sur « Fermer », puis revient sur la carte.
         Vue.nextTick(() => {
