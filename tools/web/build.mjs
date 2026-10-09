@@ -137,6 +137,23 @@ afterSection('Visuel', FRAG['item-note']);
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
 // Accueil : choix du compagnon (tools/web/home.js), au premier plan comme le zoom.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['buddy-picker'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Compte (profile.js, 2026-10-09) : palier avant « Membre depuis », en plus petit ; « Type de collectionneur » replié,
+// déplié au toucher (fragment profile-cat) ; « Ce qui fixe ton profil » et « Ce que ça change pour toi » avec lui.
+patch(`<span style="font-size: 13px; color: #9AA8C3">{{ pf.since }}</span>
+<span style="font-size: 12.5px; font-weight: 700; color: {{ pf.tierColor }}">{{ pf.tierLine }}</span>`,
+`<span style="font-size: 13.5px; font-weight: 700; color: {{ pf.tierColor }}">{{ pf.tierLine }}</span>
+<span style="font-size: 11.5px; color: #9AA8C3">{{ pf.since }}</span>`);
+{
+  const start = tpl.indexOf('<section aria-label="Type de collectionneur"'), end = tpl.indexOf('</section>', start) + '</section>'.length;
+  if (start < 0 || tpl.indexOf('<section aria-label="Type de collectionneur"', start + 1) >= 0) throw new Error('Type de collectionneur introuvable');
+  tpl = tpl.slice(0, start) + FRAG['profile-cat'].trim() + tpl.slice(end);
+  for (const [label, d] of [['Ce qui fixe ton profil', 'd3'], ['Ce que ça change pour toi', 'd4']]) {
+    const open = '<section aria-label="' + label + '" style="', i = tpl.indexOf(open), j = tpl.indexOf('</section>', i) + '</section>'.length;
+    if (i < 0 || tpl.indexOf(open, i + 1) >= 0) throw new Error('Section du Compte introuvable : ' + label);
+    tpl = tpl.slice(0, i) + '<sc-if value="{{ pf.fold.open }}" hint-placeholder-val="{{ false }}">\n'
+      + tpl.slice(i, j).replace(open, '<section aria-label="' + label + '" class="pkm-rise" style="animation-delay: {{ pf.fold.' + d + ' }}; ') + '\n</sc-if>' + tpl.slice(j);
+  }
+}
 // Panneau « Mes PK » (pk.js), ouvert par le compteur de l'en-tête.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Réglages, « À propos » : crédit des sprites des compagnons et du moteur de lecture du scan.
@@ -407,7 +424,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Latias, Latios, Kyogre, Groudon et
 // Rayquaza (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
 const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
@@ -432,7 +449,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -452,7 +469,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -482,6 +499,7 @@ ${code}
   DEVICE.enabled = !props.demo;
   if (DEVICE.enabled) inst.restoreSaved();
   // PK : bienvenue la première fois, puis 10 PK par jour d'ouverture (pk.js).
+  inst.profileInit();
   inst.pkInit();
   // Défilement (demande du porteur, 2026-10-09) : chaque changement de page (onglet, fiche, retour, autre carte ou
   // autre boutique) s'ouvre en haut. Les réglages de la page (recherche, filtres, onglets, vues) restent dans l'état
@@ -578,6 +596,16 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 @keyframes pkmGain { 0% { opacity: 0; transform: translateY(6px); } 12%, 75% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-4px); } }
 .pkm-gain { animation: pkmGain 2.6s ease-out forwards; }
 @media (prefers-reduced-motion: reduce) { .pkm-gain { animation: none; } }
+/* Compte : texte qui s'écrit lettre par lettre (boîte de dialogue), triangle qui clignote, blocs qui se déplient. */
+@keyframes pkmShow { to { opacity: 1; } }
+@keyframes pkmBlink { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes pkmRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.pkm-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.pkm-type-c { opacity: 0; animation: pkmShow 1ms linear forwards; }
+.pkm-dialog-next { opacity: 0; animation: pkmBlink 0.9s steps(1) infinite; }
+.pkm-rise { animation: pkmRise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pkm-chevron { transition: transform 0.25s ease; }
+@media (prefers-reduced-motion: reduce) { .pkm-type-c, .pkm-rise, .pkm-dialog-next { animation: none; opacity: 1; } .pkm-chevron { transition: none; } }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${cssVars()}

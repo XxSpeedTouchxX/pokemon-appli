@@ -733,6 +733,37 @@
 </div>
 </sc-if>
 
+<!-- fragment: profile-cat -->
+<section aria-label="Type de collectionneur" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<button type="button" onClick="{{ pf.fold.toggle }}" aria-expanded="{{ pf.fold.open }}" aria-controls="pkm-cat-more" aria-label="{{ pf.fold.label }}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: none; width: 50px; height: 50px; border-radius: 16px; background: {{ pf.catTint }}; display: flex; align-items: center; justify-content: center"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: {{ pf.catColor }}; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="{{ pf.catIcon }}"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 12.5px; color: #9AA8C3">Type de collectionneur</span><span style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: {{ pf.catColor }}">{{ pf.catName }}</span></span>
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" class="pkm-chevron" style="flex: none; transform: rotate({{ pf.fold.turn }}); fill: none; stroke: #7D8BA8; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<sc-if value="{{ pf.fold.open }}" hint-placeholder-val="{{ false }}">
+<div id="pkm-cat-more" style="display: flex; flex-direction: column; gap: 12px">
+<p class="pkm-dialog" onClick="{{ pf.fold.skip }}" style="position: relative; margin: 0; padding: 12px 30px 12px 14px; border-radius: 14px; border: 2px solid #3A4A75; font-size: 14px; font-weight: 600; line-height: 1.5; cursor: pointer">
+<span class="pkm-sr">{{ pf.catSource }}</span>
+<span aria-hidden="true"><sc-for list="{{ pf.fold.chars }}" as="pfc" hint-placeholder-count="12"><span class="{{ pf.fold.charClass }}" style="animation-delay: {{ pfc.d }}">{{ pfc.c }}</span></sc-for></span>
+<span aria-hidden="true" class="pkm-dialog-next" style="position: absolute; right: 12px; bottom: 9px; font-size: 11px; animation-delay: {{ pf.fold.end }}">▼</span>
+</p>
+<p class="pkm-rise" style="margin: 0; font-size: 13.5px; line-height: 1.5; color: #C9D3EA; animation-delay: {{ pf.fold.d1 }}">{{ pf.catDesc }}</p>
+<div role="list" aria-label="Les trois profils" class="pkm-rise" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; animation-delay: {{ pf.fold.d2 }}">
+<sc-for list="{{ pf.steps }}" as="ps" hint-placeholder-count="3">
+<span role="listitem" style="height: 34px; border-radius: 999px; border: 1px solid {{ ps.bc }}; background: {{ ps.bg }}; color: {{ ps.fg }}; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: {{ ps.weight }}">{{ ps.name }}</span>
+</sc-for>
+</div>
+<sc-if value="{{ pf.hasDeclared }}" hint-placeholder-val="{{ false }}">
+<span class="pkm-rise" style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3; animation-delay: {{ pf.fold.d2 }}">{{ pf.declared }}</span>
+</sc-if>
+</div>
+</sc-if>
+<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 16px; background: {{ pf.nextTint }}; border: 1px solid {{ pf.nextEdge }}">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 1px; fill: none; stroke: {{ pf.nextColor }}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M3.5 17l6-6 4 4 7-7.5"></path><path d="M15 7.5h5.5V13"></path></svg>
+<span style="font-size: 13.5px; line-height: 1.45">{{ pf.anticip }}</span>
+</div>
+</section>
+
 <!-- fragment: scan -->
 <div id="pkm-scan-cam" aria-hidden="true" style="position: absolute; inset: 0; overflow: hidden"></div>
 <input type="file" id="pkm-scan-photo" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true" onChange="{{ scan.onFile }}" style="position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none">

@@ -54,6 +54,17 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Toujours en haut** (2026-10-09) : chaque changement de page s'ouvre en haut : onglet du bas, fiche, retour, autre carte ou autre boutique (`pageKey` dans `build.mjs`).
 - **Réglages gardés :** recherche, filtres, onglets du classeur, rayon et tri de Territoire restent dans l'état de l'app. On les retrouve en revenant sur la page.
 
+## Compte
+
+`tools/web/profile.js` et fragment `profile-cat` (2026-10-09) :
+- **Identité :** le palier (« Palier Rare · 73 % vers Ultra rare ») passe avant « Membre depuis », écrit en plus petit avec le mois du premier lancement (`since`, gardé avec la collection).
+- **Type de collectionneur, replié :** seuls la catégorie et la ligne « Passionné dès… » restent visibles.
+- **Au toucher de la catégorie :**
+  - « S'adapte tout seul à chaque ajout, scan ou vente » s'écrit lettre par lettre, comme une boîte de dialogue des jeux Pokémon (32 lettres par seconde, triangle ▼ qui clignote) ;
+  - puis le reste se déplie, bloc après bloc : description, trois profils, « Ce qui fixe ton profil », « Ce que ça change pour toi ».
+- **Raccourcis :** un appui sur le texte l'affiche d'un coup ; un second appui sur la catégorie replie.
+- **Accessibilité :** le texte complet est lu par les lecteurs d'écran ; tout s'affiche sans mouvement si l'utilisateur limite les animations.
+
 ## PK, la monnaie de l'app
 
 Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de `catalog.dc.html`). Gains et règles validés par le porteur le 2026-10-08.
