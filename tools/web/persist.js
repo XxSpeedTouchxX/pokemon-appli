@@ -6,7 +6,7 @@
   // PK (pk.js) : solde, compagnons débloqués, articles déjà récompensés, dernier jour d'ouverture, version des règles, partage récompensé.
   // Les liens de démonstration (#novice, ?demo=…) montrent la démo sans toucher à la collection.
   const SAVE_KEY = 'pkm-collection-v1';
-  const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts', 'buddy', 'pk', 'pkOwn', 'pkSeen', 'pkDay', 'pkV', 'pkShared', 'since', 'admin'];
+  const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts', 'buddy', 'pk', 'pkOwn', 'pkSeen', 'pkDay', 'pkV', 'pkShared', 'since', 'admin', 'backupAt', 'backupSnooze'];
   const DEVICE = { enabled: true, ok: null, timer: null };
   const storage = {
     read() { try { const t = window.localStorage.getItem(SAVE_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } },
@@ -66,7 +66,7 @@
       text: !DEVICE.enabled ? 'Lien de démonstration : cette collection n’est pas enregistrée sur l’appareil.'
         : DEVICE.ok === false ? 'Impossible d’enregistrer sur cet appareil (navigation privée ?) : la collection repart de zéro à chaque ouverture.'
           : 'Enregistrée automatiquement sur cet appareil · ' + n + (n > 1 ? ' articles' : ' article') + '. Rien n’est envoyé en ligne.',
-      clear: () => this.resetCollection('empty'), demo: () => this.resetCollection('demo')
+      clear: () => this.resetCollection('empty'), demo: () => this.resetCollection('demo'), backup: () => this.push('io')
     };
     return r;
   };

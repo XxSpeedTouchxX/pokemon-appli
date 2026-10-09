@@ -66,10 +66,10 @@ const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.m
 for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
 // Fragments réutilisés (views.js) : « @@view-switch tx.vs@@ » insère le sélecteur de vues sur l'objet tx.vs ;
 // « @@ter-bubble tw@@ » insère la bulle d'infos d'une boutique sur l'alias tw.
-const ALIAS = { 'view-switch': 'VS', 'ter-bubble': 'BB' };
-for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+) ([\w.]+)@@/g, (m, name, o) => {
-  if (!FRAG[name] || !ALIAS[name]) throw new Error('Fragment réutilisé inconnu : ' + name);
-  return FRAG[name].trim().split(ALIAS[name] + '.').join(o + '.');
+const ALIAS = { 'view-switch': 'VS', 'ter-bubble': 'BB', 'backup-reminder': '' };
+for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w.]+))?@@/g, (m, name, o) => {
+  if (!FRAG[name] || ALIAS[name] === undefined) throw new Error('Fragment réutilisé inconnu : ' + name);
+  return ALIAS[name] ? FRAG[name].trim().split(ALIAS[name] + '.').join(o + '.') : FRAG[name].trim();
 });
 // Compteur de PK (fragment pk-counter) à gauche de l'avatar : accueil et grands titres (Collection, Marché, Territoire).
 {
@@ -138,6 +138,14 @@ patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x
 // Marché : entrée « Toutes les cartes » ; écrans « Toutes les cartes » et « Extension ».
 patch('<div role="group" aria-label="Filtre du marché"', FRAG['market-browse'] + '<div role="group" aria-label="Filtre du marché"');
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG.screens + '\n<sc-if value="{{ ui.isProfile }}"');
+// Sauvegarde et restauration (backup.js) : l'écran « Importer / exporter » de la maquette devient réel et accessible
+// sans le mode avancé (bouton « Sauvegarder ou restaurer » dans Réglages).
+{
+  const open = '<sc-if value="{{ ui.isIO }}" hint-placeholder-val="{{ false }}">\n', i = tpl.indexOf(open), j = tpl.indexOf('</sc-if>', tpl.indexOf('<section aria-label="Exporter"', i));
+  if (i < 0 || j < 0) throw new Error('Écran Importer / exporter introuvable');
+  tpl = tpl.slice(0, i + open.length) + FRAG['io-real'] + tpl.slice(j);
+}
+patchJs("advOnly = ['lots', 'fees', 'team', 'io']", "advOnly = ['lots', 'fees', 'team']", 2);
 // Marché : choix de la vue (views.js) à côté du nombre de résultats ; la liste de la maquette devient la vue « Liste ».
 patch('<span style="flex: none; font-size: 12.5px; color: #7D8BA8">{{ mk.count }}</span>',
   '<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px">\n<span style="flex: 1; min-width: 0; font-size: 12.5px; color: #7D8BA8">{{ mk.count }}</span>\n'
@@ -448,7 +456,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Latias, Latios, Kyogre, Groudon et
 // Rayquaza (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
 const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
@@ -473,7 +481,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -493,7 +501,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);

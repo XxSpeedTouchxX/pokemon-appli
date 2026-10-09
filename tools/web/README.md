@@ -49,6 +49,14 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
 5. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
 
+## Sauvegarde et restauration
+
+`tools/web/backup.js`, fragments `io-real` et `backup-reminder` (A3, 2026-10-09). L'écran « Importer / exporter » de la maquette devient réel ; il est ouvert par « Sauvegarder ou restaurer » dans Réglages, sans le mode avancé.
+- **Sauvegarder (fichier) :** sauvegarde complète en JSON (`dropicards-sauvegarde-AAAA-MM-JJ.json`), avec le même contenu que l'enregistrement sur l'appareil : ajouts (langue, état, prix), ventes, frais, réglages, compagnon, PK, cartes du catalogue citées. Sur téléphone, elle passe par le partage (Fichiers, Drive, e-mail…), sinon elle est téléchargée.
+- **Exporter en tableur (CSV) :** une ligne par ajout ; séparateur « ; », UTF-8 avec BOM (Excel).
+- **Restaurer :** choisir le fichier ; aperçu (date, cartes, produits, ventes, PK) ; puis « Remplacer ma collection » ou « Ajouter à ma collection ». En fusion, les ajouts et ventes absents sont ajoutés (sans doublon ni PK gagnés une seconde fois) ; PK et réglages locaux sont gardés. L'app se recharge.
+- **Rappel sur l'accueil :** si la dernière sauvegarde a plus de 30 jours, ou si aucune n'a été faite après 7 jours d'usage, pour au moins 5 ajouts. « Plus tard » le masque 7 jours.
+
 ## Navigation
 
 - **Toujours en haut** (2026-10-09) : chaque changement de page s'ouvre en haut : onglet du bas, fiche, retour, autre carte ou autre boutique (`pageKey` dans `build.mjs`).

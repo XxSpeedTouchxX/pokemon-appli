@@ -60,7 +60,7 @@ export const RULES = [
   ['bg', '#05080F', 'keep', { surface: true, n: 2 }], ['bg', '#0E1A33', 'keep', { n: 1 }], // Radar
   // Fonds
   ['bg', '#0B1120', 'var(--pkm-app)', { ctx: /class="pkm-root"|aria-label="Bienvenue sur Dropicards"/, n: 2 }],
-  ['bg', '#0B1120', 'var(--pkm-field)', { surface: true, n: 16 }], // dont 5 champs du panneau Admin
+  ['bg', '#0B1120', 'var(--pkm-field)', { surface: true, n: 15 }], // dont 5 champs du panneau Admin (le bouton d'import simulé de la maquette est retiré)
   ['bg', '#111A2C', 'var(--pkm-card)', { surface: true }],
   ['bg', '#121C33', 'var(--pkm-card-hi)', { surface: true }],
   ['bg', '#0F1828', 'var(--pkm-card-2)', { surface: true }],
@@ -93,7 +93,7 @@ export const RULES = [
   ['line', '#0B1120', 'var(--pkm-ink)', { n: 2 }],
   ['line', '#FFFFFF', 'var(--pkm-white)'],
   // Textes
-  ['fg', '#0B1120', 'var(--pkm-on-accent)', { bg: 'var(--pkm-accent)', n: 15 }],
+  ['fg', '#0B1120', 'var(--pkm-on-accent)', { bg: 'var(--pkm-accent)', n: 14 }],
   ['fg', '#0B1120', 'var(--pkm-ink)'],
   ['fg', '#F3F6FC', 'var(--pkm-t1)'],
   ['fg', '#C9D3EA', 'var(--pkm-t2)'],

@@ -228,6 +228,7 @@
 </sc-if>
 </section>
 
+@@backup-reminder@@
 <section aria-label="Mon classeur" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Mon classeur</h2>
 <div style="flex: none; padding: 14px 14px 12px; border-radius: 24px; border: 1px solid #24345C; background: #121C33; display: flex; flex-direction: column; gap: 12px">
@@ -389,6 +390,7 @@
 <button type="button" onClick="{{ set.dev.clear }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #FF8A8A; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Vider ma collection</button>
 <button type="button" onClick="{{ set.dev.demo }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Remettre la démo</button>
 </div>
+<button type="button" onClick="{{ set.dev.backup }}" style="height: 48px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer">Sauvegarder ou restaurer</button>
 </section>
 
 <!-- fragment: territory-radar -->
@@ -975,6 +977,42 @@
 <button type="button" onClick="{{ adm.quit }}" style="margin-top: 6px; min-height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #FF8A8A; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Quitter le mode Admin</button>
 </section>
 </div>
+</sc-if>
+
+<!-- fragment: io-real -->
+<input type="file" id="pkm-io-file" accept=".json,.csv,application/json,text/csv" tabindex="-1" aria-hidden="true" onChange="{{ bk.onFile }}" style="position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none">
+<section aria-label="Sauvegarder" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Sauvegarder ma collection</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #C9D3EA">Ta collection n’existe que sur cet appareil. Un fichier de sauvegarde la garde en entier : ajouts, langue et état, prix payés, ventes, frais, compagnon et PK.</p>
+<span style="font-size: 13px; line-height: 1.45; color: #9AA8C3">{{ bk.saveInfo }}</span>
+<button type="button" onClick="{{ bk.save }}" style="min-height: 52px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Sauvegarder (fichier)</button>
+<button type="button" onClick="{{ bk.csv }}" style="min-height: 48px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Exporter en tableur (CSV)</button>
+</section>
+<section aria-label="Restaurer ou importer" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Restaurer ou importer</h2>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #C9D3EA">Une sauvegarde Dropicards (nouveau téléphone, données effacées), ou un tableur CSV de ta collection.</p>
+<button type="button" onClick="{{ bk.pick }}" style="min-height: 52px; border: 1.5px dashed #3A4A75; border-radius: 16px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Choisir un fichier</button>
+<sc-if value="{{ bk.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #F7C77E">{{ bk.msg }}</p></sc-if>
+<sc-if value="{{ bk.preview }}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="Aperçu de la sauvegarde" style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 16px; border: 1px solid #24345C; background: #16223A">
+<span style="font-size: 15px; font-weight: 700">{{ bk.previewTitle }}</span>
+<span style="font-size: 13.5px; line-height: 1.45; color: #C9D3EA">{{ bk.previewText }}</span>
+<button type="button" onClick="{{ bk.replace }}" style="min-height: 52px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Remplacer ma collection</button>
+<button type="button" onClick="{{ bk.merge }}" style="min-height: 48px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Ajouter à ma collection</button>
+<button type="button" onClick="{{ bk.cancel }}" style="min-height: 44px; border: 0; background: transparent; color: #9AA8C3; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Annuler</button>
+</div>
+</sc-if>
+</section>
+
+<!-- fragment: backup-reminder -->
+<sc-if value="{{ hasBkr }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Rappel de sauvegarde" style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 20px; border: 1px solid #24345C; background: #111A2C">
+<span style="display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; line-height: 1.45"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3v12 M7 10l5 5 5-5 M5 19h14"></path></svg>{{ bkr.text }}</span>
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{ bkr.save }}" style="flex: 1; min-height: 44px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Sauvegarder</button>
+<button type="button" onClick="{{ bkr.later }}" style="flex: none; min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Plus tard</button>
+</div>
+</section>
 </sc-if>
 
 <!-- fragment: scan -->
