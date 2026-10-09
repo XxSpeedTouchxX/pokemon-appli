@@ -4799,6 +4799,7 @@ class Component extends DCLogic {
       ['Collection complète', () => ({ purchases: this.purchasesSeed('full'), sales: this.salesSeed('full'), extra: [] })]
     ].map(([label, mk]) => ({ label: label, go: () => { this.setState(Object.assign(mk(), { toast: label + ' chargée' })); this.flash(); } }));
     r.replayOnb = () => this.setState({ admSheet: false, onb: 1 });
+    r.replayIntro = () => { try { window.localStorage.removeItem('pkm-intro'); } catch (e) { /* stockage indisponible */ } location.href = location.pathname + '?intro=1'; };
     // Diagnostic.
     r.errors = admErrors.slice(0, 5).map(e => ({ text: e.at + ' · ' + e.msg }));
     r.hasErrors = r.errors.length > 0;
@@ -7675,213 +7676,214 @@ const _hoisted_1176 = ["onClick"]
 const _hoisted_1177 = { style: {"display":"flex","flex-wrap":"wrap","gap":"8px"} }
 const _hoisted_1178 = ["onClick"]
 const _hoisted_1179 = ["onClick"]
-const _hoisted_1180 = { style: {"display":"flex","flex-wrap":"wrap","gap":"8px"} }
-const _hoisted_1181 = ["onClick"]
+const _hoisted_1180 = ["onClick"]
+const _hoisted_1181 = { style: {"display":"flex","flex-wrap":"wrap","gap":"8px"} }
 const _hoisted_1182 = ["onClick"]
 const _hoisted_1183 = ["onClick"]
-const _hoisted_1184 = {
+const _hoisted_1184 = ["onClick"]
+const _hoisted_1185 = {
   key: 12,
   style: {"position":"absolute","inset":"0","z-index":"40","display":"flex","align-items":"center","justify-content":"center","padding":"16px","background":"rgba(var(--pkm-scrim-rgb), 0.62)"}
 }
-const _hoisted_1185 = {
+const _hoisted_1186 = {
   class: "pkm-dark",
   "aria-label": "Code Admin",
   role: "dialog",
   "aria-modal": "true",
   style: {"width":"100%","max-width":"340px","box-sizing":"border-box","padding":"18px","border-radius":"24px","border":"1px solid var(--pkm-line-3)","background":"var(--pkm-card-2)","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
-const _hoisted_1186 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"} }
-const _hoisted_1187 = { style: {"margin":"0","font-size":"13.5px","line-height":"1.45","color":"var(--pkm-t2)"} }
-const _hoisted_1188 = ["value", "onInput"]
-const _hoisted_1189 = {
+const _hoisted_1187 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"} }
+const _hoisted_1188 = { style: {"margin":"0","font-size":"13.5px","line-height":"1.45","color":"var(--pkm-t2)"} }
+const _hoisted_1189 = ["value", "onInput"]
+const _hoisted_1190 = {
   key: 0,
   role: "status",
   style: {"margin":"0","font-size":"13px","color":"var(--pkm-sand)"}
 }
-const _hoisted_1190 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
-const _hoisted_1191 = ["onClick"]
+const _hoisted_1191 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
 const _hoisted_1192 = ["onClick"]
-const _hoisted_1193 = {
+const _hoisted_1193 = ["onClick"]
+const _hoisted_1194 = {
   key: 13,
   style: {"position":"absolute","inset":"0","z-index":"35","display":"flex","flex-direction":"column","background":"rgba(var(--pkm-scrim-rgb), 0.62)"}
 }
-const _hoisted_1194 = ["onClick"]
-const _hoisted_1195 = {
+const _hoisted_1195 = ["onClick"]
+const _hoisted_1196 = {
   class: "pkm-dark",
   "aria-label": "Informations légales",
   role: "dialog",
   "aria-modal": "true",
   style: {"flex":"none","max-height":"92%","overflow-y":"auto","scrollbar-width":"none","box-sizing":"border-box","background":"var(--pkm-card-2)","border-top":"1px solid var(--pkm-line-3)","border-radius":"28px 28px 0 0","padding":"8px 16px 22px","display":"flex","flex-direction":"column","gap":"12px","color":"var(--pkm-t1)"}
 }
-const _hoisted_1196 = { style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","gap":"8px"} }
-const _hoisted_1197 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"} }
-const _hoisted_1198 = ["onClick"]
-const _hoisted_1199 = {
+const _hoisted_1197 = { style: {"flex":"none","display":"flex","align-items":"center","justify-content":"space-between","gap":"8px"} }
+const _hoisted_1198 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600"} }
+const _hoisted_1199 = ["onClick"]
+const _hoisted_1200 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1200 = {
+const _hoisted_1201 = {
   role: "group",
   "aria-label": "Rubriques",
   style: {"flex":"none","display":"flex","gap":"6px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -16px","padding":"0 16px"}
 }
-const _hoisted_1201 = ["onClick", "aria-pressed"]
-const _hoisted_1202 = { style: {"margin":"0","font-size":"14.5px","font-weight":"700"} }
-const _hoisted_1203 = { style: {"margin":"0","font-size":"13.5px","line-height":"1.55","color":"var(--pkm-t2)"} }
-const _hoisted_1204 = {
+const _hoisted_1202 = ["onClick", "aria-pressed"]
+const _hoisted_1203 = { style: {"margin":"0","font-size":"14.5px","font-weight":"700"} }
+const _hoisted_1204 = { style: {"margin":"0","font-size":"13.5px","line-height":"1.55","color":"var(--pkm-t2)"} }
+const _hoisted_1205 = {
   key: 14,
   class: "pkm-dark",
   "aria-label": "Radar des boutiques",
   style: {"position":"absolute","inset":"0","z-index":"15","overflow":"hidden","background":"#05080F","color":"var(--pkm-t1)"}
 }
-const _hoisted_1205 = {
+const _hoisted_1206 = {
   class: "pkm-dark",
   style: {"position":"absolute","left":"0","right":"0","top":"0","z-index":"3","display":"flex","flex-direction":"column","gap":"8px","padding":"14px 14px 10px","background":"linear-gradient(180deg, rgba(var(--pkm-deep-rgb), 0.85), rgba(var(--pkm-deep-rgb), 0))","color":"var(--pkm-t1)"}
 }
-const _hoisted_1206 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
-const _hoisted_1207 = ["onClick"]
-const _hoisted_1208 = {
+const _hoisted_1207 = { style: {"display":"flex","align-items":"center","gap":"8px"} }
+const _hoisted_1208 = ["onClick"]
+const _hoisted_1209 = {
   width: "20",
   height: "20",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1209 = {
+const _hoisted_1210 = {
   class: "pkm-dark",
   "aria-label": "Secteur",
   style: {"flex":"1","min-width":"0","display":"flex","align-items":"center","gap":"0","height":"44px","padding":"0 6px","box-sizing":"border-box","border-radius":"22px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.12)","background":"rgba(var(--pkm-ink-rgb), 0.86)","overflow-x":"auto","scrollbar-width":"none","color":"var(--pkm-t1)"}
 }
-const _hoisted_1210 = {
+const _hoisted_1211 = {
   key: 0,
   "aria-hidden": "true",
   style: {"flex":"none","color":"var(--pkm-t5)","font-size":"14px"}
 }
-const _hoisted_1211 = ["onClick", "aria-current"]
-const _hoisted_1212 = ["onClick", "aria-pressed"]
-const _hoisted_1213 = {
+const _hoisted_1212 = ["onClick", "aria-current"]
+const _hoisted_1213 = ["onClick", "aria-pressed"]
+const _hoisted_1214 = {
   role: "group",
   "aria-label": "Produit recherché",
   style: {"display":"flex","gap":"6px","overflow-x":"auto","scrollbar-width":"none","margin":"0 -14px","padding":"0 14px"}
 }
-const _hoisted_1214 = ["onClick", "aria-pressed"]
-const _hoisted_1215 = {
+const _hoisted_1215 = ["onClick", "aria-pressed"]
+const _hoisted_1216 = {
   key: 0,
   class: "pkm-dark",
   "aria-hidden": "true",
   style: {"align-self":"flex-start","display":"flex","align-items":"center","gap":"10px","padding":"4px 10px","border-radius":"999px","background":"rgba(var(--pkm-ink-rgb), 0.82)","font-size":"11px","font-weight":"600","color":"var(--pkm-t2)"}
 }
-const _hoisted_1216 = {
+const _hoisted_1217 = {
   id: "pkm-radar-sheet",
   style: {"flex":"1","min-height":"0","overflow-y":"auto","scrollbar-width":"none","padding":"16px 16px 18px","display":"flex","flex-direction":"column","gap":"12px"}
 }
-const _hoisted_1217 = ["onClick"]
-const _hoisted_1218 = {
+const _hoisted_1218 = ["onClick"]
+const _hoisted_1219 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1219 = ["aria-label"]
-const _hoisted_1220 = { style: {"display":"flex","align-items":"flex-start","gap":"12px"} }
-const _hoisted_1221 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
-const _hoisted_1222 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.02em"} }
-const _hoisted_1223 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
-const _hoisted_1224 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
-const _hoisted_1225 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"4px"} }
-const _hoisted_1226 = { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
-const _hoisted_1227 = ["onClick", "aria-expanded"]
-const _hoisted_1228 = {
+const _hoisted_1220 = ["aria-label"]
+const _hoisted_1221 = { style: {"display":"flex","align-items":"flex-start","gap":"12px"} }
+const _hoisted_1222 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"3px"} }
+const _hoisted_1223 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"19px","font-weight":"600","letter-spacing":"-0.02em"} }
+const _hoisted_1224 = { style: {"font-size":"13px","color":"var(--pkm-t2)"} }
+const _hoisted_1225 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_1226 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"4px"} }
+const _hoisted_1227 = { style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"} }
+const _hoisted_1228 = ["onClick", "aria-expanded"]
+const _hoisted_1229 = {
   key: 0,
   class: "pkm-dark",
   style: {"display":"flex","flex-direction":"column","gap":"6px","padding":"12px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card-2)","color":"var(--pkm-t1)"}
 }
-const _hoisted_1229 = { style: {"color":"var(--pkm-t2)"} }
-const _hoisted_1230 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
-const _hoisted_1231 = {
+const _hoisted_1230 = { style: {"color":"var(--pkm-t2)"} }
+const _hoisted_1231 = { style: {"font-size":"12px","color":"var(--pkm-t4)"} }
+const _hoisted_1232 = {
   key: 1,
   style: {"display":"flex","flex-direction":"column","gap":"2px","padding":"11px 14px","border-radius":"16px","border":"1px solid var(--pkm-line)"}
 }
-const _hoisted_1232 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t2)"} }
-const _hoisted_1233 = {
+const _hoisted_1233 = { style: {"font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t2)"} }
+const _hoisted_1234 = {
   key: 2,
   style: {"margin":"0","font-size":"13px","line-height":"1.45","color":"var(--pkm-t2)"}
 }
-const _hoisted_1234 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
-const _hoisted_1235 = ["href"]
-const _hoisted_1236 = ["onClick", "aria-pressed"]
-const _hoisted_1237 = ["href", "aria-label"]
+const _hoisted_1235 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
+const _hoisted_1236 = ["href"]
+const _hoisted_1237 = ["onClick", "aria-pressed"]
 const _hoisted_1238 = ["href", "aria-label"]
-const _hoisted_1239 = { style: {"display":"flex","flex-wrap":"wrap","gap":"4px 18px"} }
-const _hoisted_1240 = ["href"]
+const _hoisted_1239 = ["href", "aria-label"]
+const _hoisted_1240 = { style: {"display":"flex","flex-wrap":"wrap","gap":"4px 18px"} }
 const _hoisted_1241 = ["href"]
-const _hoisted_1242 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_1243 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.02em"} }
-const _hoisted_1244 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
-const _hoisted_1245 = {
+const _hoisted_1242 = ["href"]
+const _hoisted_1243 = { style: {"display":"flex","flex-direction":"column","gap":"2px"} }
+const _hoisted_1244 = { style: {"margin":"0","font-family":"'Sora', sans-serif","font-size":"18px","font-weight":"600","letter-spacing":"-0.02em"} }
+const _hoisted_1245 = { style: {"font-size":"12.5px","color":"var(--pkm-t3)"} }
+const _hoisted_1246 = {
   key: 0,
   role: "status",
   style: {"margin":"0","padding":"10px 12px","border-radius":"14px","background":"rgba(var(--pkm-orange-rgb), 0.12)","color":"var(--pkm-sand)","font-size":"13px","line-height":"1.45"}
 }
-const _hoisted_1246 = ["onClick"]
-const _hoisted_1247 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
-const _hoisted_1248 = ["onClick", "disabled"]
-const _hoisted_1249 = ["onClick", "aria-pressed"]
-const _hoisted_1250 = {
+const _hoisted_1247 = ["onClick"]
+const _hoisted_1248 = { style: {"display":"grid","grid-template-columns":"minmax(0, 1fr) minmax(0, 1fr)","gap":"10px"} }
+const _hoisted_1249 = ["onClick", "disabled"]
+const _hoisted_1250 = ["onClick", "aria-pressed"]
+const _hoisted_1251 = {
   width: "18",
   height: "18",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"fill":"none","stroke":"currentColor","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1251 = {
+const _hoisted_1252 = {
   key: 2,
   role: "group",
   "aria-label": "Rayon autour de toi",
   style: {"display":"flex","gap":"8px"}
 }
-const _hoisted_1252 = ["onClick", "aria-pressed"]
-const _hoisted_1253 = {
+const _hoisted_1253 = ["onClick", "aria-pressed"]
+const _hoisted_1254 = {
   key: 3,
   style: {"margin":"0","font-size":"12.5px","line-height":"1.45","color":"var(--pkm-t3)"}
 }
-const _hoisted_1254 = {
+const _hoisted_1255 = {
   key: 4,
   style: {"margin":"0","padding":"8px 0","font-size":"13.5px","color":"var(--pkm-t3)"}
 }
-const _hoisted_1255 = { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }
-const _hoisted_1256 = {
+const _hoisted_1256 = { style: {"font-size":"12.5px","color":"var(--pkm-t4)"} }
+const _hoisted_1257 = {
   class: "pkm-dark",
   style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
-const _hoisted_1257 = ["onClick", "aria-label"]
-const _hoisted_1258 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
-const _hoisted_1259 = { style: {"font-size":"14px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_1260 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_1261 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_1262 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
-const _hoisted_1263 = { style: {"font-size":"12.5px","font-weight":"700","color":"var(--pkm-t2)"} }
-const _hoisted_1264 = {
+const _hoisted_1258 = ["onClick", "aria-label"]
+const _hoisted_1259 = { style: {"flex":"1","min-width":"0","display":"flex","flex-direction":"column","gap":"2px"} }
+const _hoisted_1260 = { style: {"font-size":"14px","font-weight":"700","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1261 = { style: {"font-size":"12px","color":"var(--pkm-t3)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1262 = { style: {"font-size":"11.5px","color":"var(--pkm-t4)","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1263 = { style: {"flex":"none","display":"flex","flex-direction":"column","align-items":"flex-end","gap":"3px"} }
+const _hoisted_1264 = { style: {"font-size":"12.5px","font-weight":"700","color":"var(--pkm-t2)"} }
+const _hoisted_1265 = {
   class: "pkm-dark",
   style: {"border-radius":"20px","border":"1px solid var(--pkm-line)","background":"var(--pkm-card)","overflow":"hidden","display":"flex","flex-direction":"column","color":"var(--pkm-t1)"}
 }
-const _hoisted_1265 = ["onClick", "aria-label"]
-const _hoisted_1266 = { style: {"flex":"1","min-width":"0","font-size":"14px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
-const _hoisted_1267 = { style: {"flex":"none","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-teal)"} }
-const _hoisted_1268 = {
+const _hoisted_1266 = ["onClick", "aria-label"]
+const _hoisted_1267 = { style: {"flex":"1","min-width":"0","font-size":"14px","font-weight":"600","white-space":"nowrap","overflow":"hidden","text-overflow":"ellipsis"} }
+const _hoisted_1268 = { style: {"flex":"none","font-size":"13px","font-weight":"700","font-variant-numeric":"tabular-nums","color":"var(--pkm-teal)"} }
+const _hoisted_1269 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
   "aria-hidden": "true",
   style: {"flex":"none","fill":"none","stroke":"var(--pkm-t4)","stroke-width":"2","stroke-linecap":"round","stroke-linejoin":"round"}
 }
-const _hoisted_1269 = { style: {"margin":"0","font-size":"11px","line-height":"1.45","color":"var(--pkm-t5)"} }
-const _hoisted_1270 = { style: {"flex":"none","width":"26px","height":"26px","border-radius":"13px","background":"rgba(var(--pkm-green-rgb), 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
-const _hoisted_1271 = {
+const _hoisted_1270 = { style: {"margin":"0","font-size":"11px","line-height":"1.45","color":"var(--pkm-t5)"} }
+const _hoisted_1271 = { style: {"flex":"none","width":"26px","height":"26px","border-radius":"13px","background":"rgba(var(--pkm-green-rgb), 0.16)","display":"flex","align-items":"center","justify-content":"center"} }
+const _hoisted_1272 = {
   width: "16",
   height: "16",
   viewBox: "0 0 24 24",
@@ -13789,7 +13791,12 @@ return function render(_ctx, _cache) {
                 type: "button",
                 onClick: _ctx.V.adm.replayOnb,
                 style: {"display":"flex","align-items":"center","justify-content":"center","min-height":"44px","padding":"0 14px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-              }, "Revoir l’accueil guidé", 8 /* PROPS */, _hoisted_1179)
+              }, "Revoir l’accueil guidé", 8 /* PROPS */, _hoisted_1179),
+              _createElementVNode("button", {
+                type: "button",
+                onClick: _ctx.V.adm.replayIntro,
+                style: {"display":"flex","align-items":"center","justify-content":"center","min-height":"44px","padding":"0 14px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
+              }, "Rejouer l’animation d’entrée", 8 /* PROPS */, _hoisted_1180)
             ]),
             _cache[269] || (_cache[269] = _createElementVNode("h3", { style: {"margin":"4px 0 0","font-size":"14px","font-weight":"700","color":"var(--pkm-t2)"} }, "Diagnostic", -1 /* CACHED */)),
             (_ctx.V.adm.hasErrors)
@@ -13800,31 +13807,31 @@ return function render(_ctx, _cache) {
                   }, _toDisplayString(aer.text), 1 /* TEXT */))
                 }), 128 /* KEYED_FRAGMENT */))
               : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_1180, [
+            _createElementVNode("div", _hoisted_1181, [
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.adm.scanDebug,
                 style: {"display":"flex","align-items":"center","justify-content":"center","min-height":"44px","padding":"0 14px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-              }, "Diagnostic du scan", 8 /* PROPS */, _hoisted_1181),
+              }, "Diagnostic du scan", 8 /* PROPS */, _hoisted_1182),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.adm.exportState,
                 style: {"display":"flex","align-items":"center","justify-content":"center","min-height":"44px","padding":"0 14px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-              }, "Exporter l’état (JSON)", 8 /* PROPS */, _hoisted_1182)
+              }, "Exporter l’état (JSON)", 8 /* PROPS */, _hoisted_1183)
             ]),
             _createElementVNode("button", {
               type: "button",
               onClick: _ctx.V.adm.quit,
               style: {"margin-top":"6px","min-height":"48px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-red)","font":"inherit","font-size":"14.5px","font-weight":"700","cursor":"pointer"}
-            }, "Quitter le mode Admin", 8 /* PROPS */, _hoisted_1183)
+            }, "Quitter le mode Admin", 8 /* PROPS */, _hoisted_1184)
           ])
         ]))
       : _createCommentVNode("v-if", true),
     (_ctx.V.adm.lock)
-      ? (_openBlock(), _createElementBlock("div", _hoisted_1184, [
-          _createElementVNode("section", _hoisted_1185, [
-            _createElementVNode("h2", _hoisted_1186, _toDisplayString(_ctx.V.adm.lockTitle), 1 /* TEXT */),
-            _createElementVNode("p", _hoisted_1187, _toDisplayString(_ctx.V.adm.lockText), 1 /* TEXT */),
+      ? (_openBlock(), _createElementBlock("div", _hoisted_1185, [
+          _createElementVNode("section", _hoisted_1186, [
+            _createElementVNode("h2", _hoisted_1187, _toDisplayString(_ctx.V.adm.lockTitle), 1 /* TEXT */),
+            _createElementVNode("p", _hoisted_1188, _toDisplayString(_ctx.V.adm.lockText), 1 /* TEXT */),
             _createElementVNode("input", {
               id: "pkm-champ-18",
               class: "pkm-dark",
@@ -13836,40 +13843,40 @@ return function render(_ctx, _cache) {
               value: _ctx.V.adm.code,
               onInput: _ctx.V.adm.onCode,
               style: {"height":"44px","box-sizing":"border-box","padding":"0 14px","border-radius":"14px","border":"1px solid var(--pkm-line)","background":"var(--pkm-field)","color":"var(--pkm-t1)","font":"inherit","font-size":"20px","text-align":"center","letter-spacing":"0.4em"}
-            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1188),
+            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_1189),
             (_ctx.V.adm.hasMsg)
-              ? (_openBlock(), _createElementBlock("p", _hoisted_1189, _toDisplayString(_ctx.V.adm.msg), 1 /* TEXT */))
+              ? (_openBlock(), _createElementBlock("p", _hoisted_1190, _toDisplayString(_ctx.V.adm.msg), 1 /* TEXT */))
               : _createCommentVNode("v-if", true),
-            _createElementVNode("div", _hoisted_1190, [
+            _createElementVNode("div", _hoisted_1191, [
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.adm.cancel,
                 style: {"display":"flex","align-items":"center","justify-content":"center","min-height":"44px","padding":"0 14px","border-radius":"999px","border":"1px solid var(--pkm-line-2)","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-              }, "Annuler", 8 /* PROPS */, _hoisted_1191),
+              }, "Annuler", 8 /* PROPS */, _hoisted_1192),
               _createElementVNode("button", {
                 type: "button",
                 onClick: _ctx.V.adm.submit,
                 style: {"min-height":"44px","border":"0","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font":"inherit","font-size":"14px","font-weight":"800","cursor":"pointer"}
-              }, "Valider", 8 /* PROPS */, _hoisted_1192)
+              }, "Valider", 8 /* PROPS */, _hoisted_1193)
             ])
           ])
         ]))
       : _createCommentVNode("v-if", true),
     (_ctx.V.legal.open)
-      ? (_openBlock(), _createElementBlock("div", _hoisted_1193, [
+      ? (_openBlock(), _createElementBlock("div", _hoisted_1194, [
           _createElementVNode("button", {
             type: "button",
             "aria-label": "Fermer les informations légales",
             onClick: _ctx.V.legal.close,
             style: {"flex":"1 1 auto","min-height":"36px","padding":"0","border":"0","background":"transparent","cursor":"pointer"}
-          }, null, 8 /* PROPS */, _hoisted_1194),
-          _createElementVNode("section", _hoisted_1195, [
+          }, null, 8 /* PROPS */, _hoisted_1195),
+          _createElementVNode("section", _hoisted_1196, [
             _cache[271] || (_cache[271] = _createElementVNode("div", {
               "aria-hidden": "true",
               style: {"flex":"none","align-self":"center","width":"40px","height":"5px","border-radius":"3px","background":"var(--pkm-line-2)"}
             }, null, -1 /* CACHED */)),
-            _createElementVNode("div", _hoisted_1196, [
-              _createElementVNode("h2", _hoisted_1197, _toDisplayString(_ctx.V.legal.title), 1 /* TEXT */),
+            _createElementVNode("div", _hoisted_1197, [
+              _createElementVNode("h2", _hoisted_1198, _toDisplayString(_ctx.V.legal.title), 1 /* TEXT */),
               _createElementVNode("button", {
                 class: "pkm-dark",
                 type: "button",
@@ -13877,13 +13884,13 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer",
                 style: {"flex":"none","width":"46px","height":"46px","padding":"0","border":"1px solid var(--pkm-line)","border-radius":"23px","background":"var(--pkm-card)","color":"var(--pkm-t1)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_1199, [...(_cache[270] || (_cache[270] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_1200, [...(_cache[270] || (_cache[270] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
-              ], 8 /* PROPS */, _hoisted_1198)
+              ], 8 /* PROPS */, _hoisted_1199)
             ]),
-            _createElementVNode("div", _hoisted_1200, [
+            _createElementVNode("div", _hoisted_1201, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.legal.tabs || []), (lgt, lgt_i) => {
                 return (_openBlock(), _createElementBlock("button", {
                   key: lgt_i,
@@ -13891,7 +13898,7 @@ return function render(_ctx, _cache) {
                   onClick: lgt.pick,
                   "aria-pressed": _ctx.A(lgt.on),
                   style: _normalizeStyle(`flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid ${lgt.bc}; background: ${lgt.bg}; color: ${lgt.fg}; font: inherit; font-size: 13.5px; font-weight: 700; white-space: nowrap; cursor: pointer`)
-                }, _toDisplayString(lgt.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1201))
+                }, _toDisplayString(lgt.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1202))
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.legal.blocks || []), (lgb, lgb_i) => {
@@ -13899,23 +13906,23 @@ return function render(_ctx, _cache) {
                 key: lgb_i,
                 style: {"flex":"none","display":"flex","flex-direction":"column","gap":"4px"}
               }, [
-                _createElementVNode("h3", _hoisted_1202, _toDisplayString(lgb.title), 1 /* TEXT */),
-                _createElementVNode("p", _hoisted_1203, _toDisplayString(lgb.text), 1 /* TEXT */)
+                _createElementVNode("h3", _hoisted_1203, _toDisplayString(lgb.title), 1 /* TEXT */),
+                _createElementVNode("p", _hoisted_1204, _toDisplayString(lgb.text), 1 /* TEXT */)
               ]))
             }), 128 /* KEYED_FRAGMENT */))
           ])
         ]))
       : _createCommentVNode("v-if", true),
     (_ctx.V.ui.isRadar)
-      ? (_openBlock(), _createElementBlock("section", _hoisted_1204, [
+      ? (_openBlock(), _createElementBlock("section", _hoisted_1205, [
           _cache[279] || (_cache[279] = _createElementVNode("div", {
             class: "pkm-dark",
             id: "pkm-radar-map",
             "aria-hidden": "true",
             style: {"position":"absolute","inset":"0","background":"radial-gradient(120% 80% at 50% 30%, #0E1A33, #05080F 70%)","color":"var(--pkm-t1)"}
           }, null, -1 /* CACHED */)),
-          _createElementVNode("div", _hoisted_1205, [
-            _createElementVNode("div", _hoisted_1206, [
+          _createElementVNode("div", _hoisted_1206, [
+            _createElementVNode("div", _hoisted_1207, [
               _createElementVNode("button", {
                 class: "pkm-dark",
                 type: "button",
@@ -13923,23 +13930,23 @@ return function render(_ctx, _cache) {
                 "aria-label": "Fermer le radar",
                 style: {"flex":"none","width":"44px","height":"44px","padding":"0","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-white)","display":"flex","align-items":"center","justify-content":"center","cursor":"pointer"}
               }, [
-                (_openBlock(), _createElementBlock("svg", _hoisted_1208, [...(_cache[272] || (_cache[272] = [
+                (_openBlock(), _createElementBlock("svg", _hoisted_1209, [...(_cache[272] || (_cache[272] = [
                   _createElementVNode("path", { d: "M6 6l12 12" }, null, -1 /* CACHED */),
                   _createElementVNode("path", { d: "M18 6L6 18" }, null, -1 /* CACHED */)
                 ]))]))
-              ], 8 /* PROPS */, _hoisted_1207),
-              _createElementVNode("nav", _hoisted_1209, [
+              ], 8 /* PROPS */, _hoisted_1208),
+              _createElementVNode("nav", _hoisted_1210, [
                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.crumbs || []), (rc, rc_i) => {
                   return (_openBlock(), _createElementBlock(_Fragment, { key: rc_i }, [
                     (rc.sep)
-                      ? (_openBlock(), _createElementBlock("span", _hoisted_1210, "›"))
+                      ? (_openBlock(), _createElementBlock("span", _hoisted_1211, "›"))
                       : _createCommentVNode("v-if", true),
                     _createElementVNode("button", {
                       type: "button",
                       onClick: rc.go,
                       "aria-current": _ctx.A(rc.current),
                       style: _normalizeStyle(`flex: none; height: 36px; padding: 0 8px; border: 0; border-radius: 18px; background: transparent; color: ${rc.color}; font: inherit; font-size: 13.5px; font-weight: ${rc.weight}; white-space: nowrap; cursor: pointer`)
-                    }, _toDisplayString(rc.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1211)
+                    }, _toDisplayString(rc.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1212)
                   ], 64 /* STABLE_FRAGMENT */))
                 }), 128 /* KEYED_FRAGMENT */))
               ]),
@@ -13951,10 +13958,10 @@ return function render(_ctx, _cache) {
                     onClick: _ctx.V.rd.toggleList,
                     "aria-pressed": _ctx.A(_ctx.V.rd.listMode),
                     style: {"flex":"none","height":"44px","padding":"0 14px","border":"1px solid rgba(var(--pkm-hl-rgb), 0.14)","border-radius":"22px","background":"rgba(var(--pkm-ink-rgb), 0.86)","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-                  }, _toDisplayString(_ctx.V.rd.listLabel), 9 /* TEXT, PROPS */, _hoisted_1212))
+                  }, _toDisplayString(_ctx.V.rd.listLabel), 9 /* TEXT, PROPS */, _hoisted_1213))
                 : _createCommentVNode("v-if", true)
             ]),
-            _createElementVNode("div", _hoisted_1213, [
+            _createElementVNode("div", _hoisted_1214, [
               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.prods || []), (rp, rp_i) => {
                 return (_openBlock(), _createElementBlock("button", {
                   key: rp_i,
@@ -13962,11 +13969,11 @@ return function render(_ctx, _cache) {
                   onClick: rp.pick,
                   "aria-pressed": _ctx.A(rp.on),
                   style: _normalizeStyle(`flex: none; height: 36px; padding: 0 13px; border-radius: 999px; border: 1px solid ${rp.bc}; background: ${rp.bg2}; color: ${rp.fg}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer`)
-                }, _toDisplayString(rp.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1214))
+                }, _toDisplayString(rp.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1215))
               }), 128 /* KEYED_FRAGMENT */))
             ]),
             (_ctx.V.rd.showLegend)
-              ? (_openBlock(), _createElementBlock("span", _hoisted_1215, [...(_cache[273] || (_cache[273] = [
+              ? (_openBlock(), _createElementBlock("span", _hoisted_1216, [...(_cache[273] || (_cache[273] = [
                   _createStaticVNode("<span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-green);\"></span>Forte</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-orange);\"></span>Moyenne</span><span style=\"display:flex;align-items:center;gap:4px;\"><span style=\"width:8px;height:8px;border-radius:4px;background:var(--pkm-gray);\"></span>Faible</span>", 3)
                 ]))]))
               : _createCommentVNode("v-if", true)
@@ -13975,7 +13982,7 @@ return function render(_ctx, _cache) {
             class: "pkm-dark",
             style: _normalizeStyle(`position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: ${_ctx.V.rd.sheetMax}; display: flex; flex-direction: column; border-radius: 26px 26px 0 0; border-top: 1px solid var(--pkm-line-3); background: rgba(var(--pkm-app-rgb), 0.97); box-shadow: 0 -18px 40px rgba(var(--pkm-shadow-rgb), 0.5); color: var(--pkm-t1)`)
           }, [
-            _createElementVNode("div", _hoisted_1216, [
+            _createElementVNode("div", _hoisted_1217, [
               (_ctx.V.rd.hasStore)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                     _createElementVNode("button", {
@@ -13983,22 +13990,22 @@ return function render(_ctx, _cache) {
                       onClick: _ctx.V.rd.st.back,
                       style: {"align-self":"flex-start","height":"36px","padding":"0 12px 0 6px","border":"0","border-radius":"18px","background":"transparent","color":"var(--pkm-link)","font":"inherit","font-size":"13.5px","font-weight":"600","display":"flex","align-items":"center","gap":"2px","cursor":"pointer"}
                     }, [
-                      (_openBlock(), _createElementBlock("svg", _hoisted_1218, [...(_cache[274] || (_cache[274] = [
+                      (_openBlock(), _createElementBlock("svg", _hoisted_1219, [...(_cache[274] || (_cache[274] = [
                         _createElementVNode("path", { d: "M15 5l-7 7 7 7" }, null, -1 /* CACHED */)
                       ]))])),
                       _cache[275] || (_cache[275] = _createTextVNode("Résultats", -1 /* CACHED */))
-                    ], 8 /* PROPS */, _hoisted_1217),
+                    ], 8 /* PROPS */, _hoisted_1218),
                     _createElementVNode("section", {
                       "aria-label": _ctx.A(_ctx.V.rd.st.name),
                       style: {"flex":"none","display":"flex","flex-direction":"column","gap":"12px"}
                     }, [
-                      _createElementVNode("div", _hoisted_1220, [
-                        _createElementVNode("span", _hoisted_1221, [
-                          _createElementVNode("h2", _hoisted_1222, _toDisplayString(_ctx.V.rd.st.name), 1 /* TEXT */),
-                          _createElementVNode("span", _hoisted_1223, _toDisplayString(_ctx.V.rd.st.kind), 1 /* TEXT */),
-                          _createElementVNode("span", _hoisted_1224, _toDisplayString(_ctx.V.rd.st.place), 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_1221, [
+                        _createElementVNode("span", _hoisted_1222, [
+                          _createElementVNode("h2", _hoisted_1223, _toDisplayString(_ctx.V.rd.st.name), 1 /* TEXT */),
+                          _createElementVNode("span", _hoisted_1224, _toDisplayString(_ctx.V.rd.st.kind), 1 /* TEXT */),
+                          _createElementVNode("span", _hoisted_1225, _toDisplayString(_ctx.V.rd.st.place), 1 /* TEXT */)
                         ]),
-                        _createElementVNode("span", _hoisted_1225, [
+                        _createElementVNode("span", _hoisted_1226, [
                           _createElementVNode("span", {
                             style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; white-space: nowrap; color: ${_ctx.V.rd.st.color}`)
                           }, _toDisplayString(_ctx.V.rd.st.pct), 5 /* TEXT, STYLE */),
@@ -14007,15 +14014,15 @@ return function render(_ctx, _cache) {
                           }, _toDisplayString(_ctx.V.rd.st.level), 5 /* TEXT, STYLE */)
                         ])
                       ]),
-                      _createElementVNode("p", _hoisted_1226, _toDisplayString(_ctx.V.rd.st.note), 1 /* TEXT */),
+                      _createElementVNode("p", _hoisted_1227, _toDisplayString(_ctx.V.rd.st.note), 1 /* TEXT */),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.st.toggleWhy,
                         "aria-expanded": _ctx.A(_ctx.V.rd.st.why),
                         style: {"align-self":"flex-start","height":"40px","padding":"0 14px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"13.5px","font-weight":"700","cursor":"pointer"}
-                      }, _toDisplayString(_ctx.V.rd.st.whyLabel), 9 /* TEXT, PROPS */, _hoisted_1227),
+                      }, _toDisplayString(_ctx.V.rd.st.whyLabel), 9 /* TEXT, PROPS */, _hoisted_1228),
                       (_ctx.V.rd.st.why)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1228, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1229, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.st.reasons || []), (rr, rr_i) => {
                               return (_openBlock(), _createElementBlock("span", {
                                 key: rr_i,
@@ -14024,36 +14031,36 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("span", {
                                   style: _normalizeStyle(`flex: none; width: 34px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; color: ${rr.color}`)
                                 }, _toDisplayString(rr.sign), 5 /* TEXT, STYLE */),
-                                _createElementVNode("span", _hoisted_1229, _toDisplayString(rr.text), 1 /* TEXT */)
+                                _createElementVNode("span", _hoisted_1230, _toDisplayString(rr.text), 1 /* TEXT */)
                               ]))
                             }), 128 /* KEYED_FRAGMENT */)),
-                            _createElementVNode("span", _hoisted_1230, _toDisplayString(_ctx.V.rd.st.total), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_1231, _toDisplayString(_ctx.V.rd.st.total), 1 /* TEXT */)
                           ]))
                         : _createCommentVNode("v-if", true),
                       (_ctx.V.rd.st.hasHours)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_1231, [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_1232, [
                             _createElementVNode("span", {
                               style: _normalizeStyle(`font-size: 13.5px; font-weight: 700; color: ${_ctx.V.rd.st.hoursColor}`)
                             }, _toDisplayString(_ctx.V.rd.st.hoursState), 5 /* TEXT, STYLE */),
-                            _createElementVNode("span", _hoisted_1232, _toDisplayString(_ctx.V.rd.st.hoursText), 1 /* TEXT */)
+                            _createElementVNode("span", _hoisted_1233, _toDisplayString(_ctx.V.rd.st.hoursText), 1 /* TEXT */)
                           ]))
                         : _createCommentVNode("v-if", true),
                       (_ctx.V.rd.st.hasAddress)
-                        ? (_openBlock(), _createElementBlock("p", _hoisted_1233, _toDisplayString(_ctx.V.rd.st.address), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("p", _hoisted_1234, _toDisplayString(_ctx.V.rd.st.address), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
-                      _createElementVNode("div", _hoisted_1234, [
+                      _createElementVNode("div", _hoisted_1235, [
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.route,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"height":"46px","border-radius":"999px","background":"var(--pkm-accent)","color":"var(--pkm-on-accent)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                        }, "Itinéraire", 8 /* PROPS */, _hoisted_1235),
+                        }, "Itinéraire", 8 /* PROPS */, _hoisted_1236),
                         _createElementVNode("button", {
                           type: "button",
                           onClick: _ctx.V.rd.st.toggleAlert,
                           "aria-pressed": _ctx.A(_ctx.V.rd.st.alertOn),
                           style: _normalizeStyle(`height: 46px; border: 1px solid var(--pkm-line-2); border-radius: 999px; background: ${_ctx.V.rd.st.alertBg}; color: ${_ctx.V.rd.st.alertFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
-                        }, _toDisplayString(_ctx.V.rd.st.alertLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1236),
+                        }, _toDisplayString(_ctx.V.rd.st.alertLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1237),
                         (_ctx.V.rd.st.hasSite)
                           ? (_openBlock(), _createElementBlock("a", {
                               key: 0,
@@ -14062,7 +14069,7 @@ return function render(_ctx, _cache) {
                               rel: "noopener noreferrer",
                               "aria-label": _ctx.A(_ctx.V.rd.st.siteAria),
                               style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","box-sizing":"border-box","color":"var(--pkm-t1)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                            }, _toDisplayString(_ctx.V.rd.st.siteLabel), 9 /* TEXT, PROPS */, _hoisted_1237))
+                            }, _toDisplayString(_ctx.V.rd.st.siteLabel), 9 /* TEXT, PROPS */, _hoisted_1238))
                           : _createCommentVNode("v-if", true),
                         (_ctx.V.rd.st.hasTel)
                           ? (_openBlock(), _createElementBlock("a", {
@@ -14070,34 +14077,34 @@ return function render(_ctx, _cache) {
                               href: _ctx.V.rd.st.tel,
                               "aria-label": _ctx.A(_ctx.V.rd.st.telAria),
                               style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","box-sizing":"border-box","color":"var(--pkm-t1)","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","text-decoration":"none"}
-                            }, _toDisplayString(_ctx.V.rd.st.telLabel), 9 /* TEXT, PROPS */, _hoisted_1238))
+                            }, _toDisplayString(_ctx.V.rd.st.telLabel), 9 /* TEXT, PROPS */, _hoisted_1239))
                           : _createCommentVNode("v-if", true)
                       ]),
-                      _createElementVNode("div", _hoisted_1239, [
+                      _createElementVNode("div", _hoisted_1240, [
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.osm,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"font-size":"12.5px","line-height":"2","color":"var(--pkm-link)"}
-                        }, "Voir la fiche OpenStreetMap", 8 /* PROPS */, _hoisted_1240),
+                        }, "Voir la fiche OpenStreetMap", 8 /* PROPS */, _hoisted_1241),
                         _createElementVNode("a", {
                           href: _ctx.V.rd.st.report,
                           target: "_blank",
                           rel: "noopener noreferrer",
                           style: {"font-size":"12.5px","line-height":"2","color":"var(--pkm-link)"}
-                        }, "Signaler une erreur", 8 /* PROPS */, _hoisted_1241)
+                        }, "Signaler une erreur", 8 /* PROPS */, _hoisted_1242)
                       ])
-                    ], 8 /* PROPS */, _hoisted_1219)
+                    ], 8 /* PROPS */, _hoisted_1220)
                   ], 64 /* STABLE_FRAGMENT */))
                 : _createCommentVNode("v-if", true),
               (_ctx.V.rd.notStore)
                 ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                    _createElementVNode("div", _hoisted_1242, [
-                      _createElementVNode("h2", _hoisted_1243, _toDisplayString(_ctx.V.rd.title), 1 /* TEXT */),
-                      _createElementVNode("span", _hoisted_1244, _toDisplayString(_ctx.V.rd.subtitle), 1 /* TEXT */)
+                    _createElementVNode("div", _hoisted_1243, [
+                      _createElementVNode("h2", _hoisted_1244, _toDisplayString(_ctx.V.rd.title), 1 /* TEXT */),
+                      _createElementVNode("span", _hoisted_1245, _toDisplayString(_ctx.V.rd.subtitle), 1 /* TEXT */)
                     ]),
                     (_ctx.V.rd.hasMsg)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_1245, _toDisplayString(_ctx.V.rd.msg), 1 /* TEXT */))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1246, _toDisplayString(_ctx.V.rd.msg), 1 /* TEXT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.error)
                       ? (_openBlock(), _createElementBlock("button", {
@@ -14105,22 +14112,22 @@ return function render(_ctx, _cache) {
                           type: "button",
                           onClick: _ctx.V.rd.retry,
                           style: {"height":"46px","border":"1px solid var(--pkm-line-2)","border-radius":"999px","background":"transparent","color":"var(--pkm-t1)","font":"inherit","font-size":"14px","font-weight":"700","cursor":"pointer"}
-                        }, "Réessayer", 8 /* PROPS */, _hoisted_1246))
+                        }, "Réessayer", 8 /* PROPS */, _hoisted_1247))
                       : _createCommentVNode("v-if", true),
-                    _createElementVNode("div", _hoisted_1247, [
+                    _createElementVNode("div", _hoisted_1248, [
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.scan,
                         disabled: _ctx.V.rd.noScan,
                         style: _normalizeStyle(`height: 48px; border: 0; border-radius: 999px; background: ${_ctx.V.rd.scanBg}; color: ${_ctx.V.rd.scanFg}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer`)
-                      }, _toDisplayString(_ctx.V.rd.scanLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1248),
+                      }, _toDisplayString(_ctx.V.rd.scanLabel), 13 /* TEXT, STYLE, PROPS */, _hoisted_1249),
                       _createElementVNode("button", {
                         type: "button",
                         onClick: _ctx.V.rd.around,
                         "aria-pressed": _ctx.A(_ctx.V.rd.aroundOn),
                         style: {"height":"48px","border":"1px solid var(--pkm-line-teal)","border-radius":"999px","background":"rgba(var(--pkm-teal-rgb), 0.1)","color":"var(--pkm-teal)","font":"inherit","font-size":"14px","font-weight":"700","display":"flex","align-items":"center","justify-content":"center","gap":"6px","cursor":"pointer"}
                       }, [
-                        (_openBlock(), _createElementBlock("svg", _hoisted_1250, [...(_cache[276] || (_cache[276] = [
+                        (_openBlock(), _createElementBlock("svg", _hoisted_1251, [...(_cache[276] || (_cache[276] = [
                           _createElementVNode("circle", {
                             cx: "12",
                             cy: "12",
@@ -14134,10 +14141,10 @@ return function render(_ctx, _cache) {
                           }, null, -1 /* CACHED */)
                         ]))])),
                         _cache[277] || (_cache[277] = _createTextVNode("Autour de moi", -1 /* CACHED */))
-                      ], 8 /* PROPS */, _hoisted_1249)
+                      ], 8 /* PROPS */, _hoisted_1250)
                     ]),
                     (_ctx.V.rd.hasRadii)
-                      ? (_openBlock(), _createElementBlock("div", _hoisted_1251, [
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_1252, [
                           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.radii || []), (rk, rk_i) => {
                             return (_openBlock(), _createElementBlock("button", {
                               key: rk_i,
@@ -14145,20 +14152,20 @@ return function render(_ctx, _cache) {
                               onClick: rk.pick,
                               "aria-pressed": _ctx.A(rk.on),
                               style: _normalizeStyle(`flex: 1; height: 40px; border-radius: 999px; border: 1px solid ${rk.bc}; background: ${rk.bg}; color: ${rk.fg}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer`)
-                            }, _toDisplayString(rk.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1252))
+                            }, _toDisplayString(rk.label), 13 /* TEXT, STYLE, PROPS */, _hoisted_1253))
                           }), 128 /* KEYED_FRAGMENT */))
                         ]))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasHint)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_1253, _toDisplayString(_ctx.V.rd.hint), 1 /* TEXT */))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1254, _toDisplayString(_ctx.V.rd.hint), 1 /* TEXT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.empty)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_1254, "Aucune boutique repérée ici : élargis le rayon ou choisis un autre secteur."))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1255, "Aucune boutique repérée ici : élargis le rayon ou choisis un autre secteur."))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasResults)
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 5 }, [
-                          _createElementVNode("span", _hoisted_1255, _toDisplayString(_ctx.V.rd.resultsTitle), 1 /* TEXT */),
-                          _createElementVNode("div", _hoisted_1256, [
+                          _createElementVNode("span", _hoisted_1256, _toDisplayString(_ctx.V.rd.resultsTitle), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_1257, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.results || []), (rs, rs_i) => {
                               return (_openBlock(), _createElementBlock("button", {
                                 key: rs_i,
@@ -14167,12 +14174,12 @@ return function render(_ctx, _cache) {
                                 "aria-label": _ctx.A(rs.label),
                                 style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; border: 0; border-top: ${rs.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                               }, [
-                                _createElementVNode("span", _hoisted_1258, [
-                                  _createElementVNode("span", _hoisted_1259, _toDisplayString(rs.name), 1 /* TEXT */),
-                                  _createElementVNode("span", _hoisted_1260, _toDisplayString(rs.kind), 1 /* TEXT */),
-                                  _createElementVNode("span", _hoisted_1261, _toDisplayString(rs.place), 1 /* TEXT */)
+                                _createElementVNode("span", _hoisted_1259, [
+                                  _createElementVNode("span", _hoisted_1260, _toDisplayString(rs.name), 1 /* TEXT */),
+                                  _createElementVNode("span", _hoisted_1261, _toDisplayString(rs.kind), 1 /* TEXT */),
+                                  _createElementVNode("span", _hoisted_1262, _toDisplayString(rs.place), 1 /* TEXT */)
                                 ]),
-                                _createElementVNode("span", _hoisted_1262, [
+                                _createElementVNode("span", _hoisted_1263, [
                                   _createElementVNode("span", {
                                     style: _normalizeStyle(`font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: ${rs.color}`)
                                   }, _toDisplayString(rs.pct), 5 /* TEXT, STYLE */),
@@ -14180,15 +14187,15 @@ return function render(_ctx, _cache) {
                                     style: _normalizeStyle(`padding: 1px 8px; border-radius: 999px; background: ${rs.tint}; color: ${rs.color}; font-size: 11px; font-weight: 800`)
                                   }, _toDisplayString(rs.level), 5 /* TEXT, STYLE */)
                                 ])
-                              ], 12 /* STYLE, PROPS */, _hoisted_1257))
+                              ], 12 /* STYLE, PROPS */, _hoisted_1258))
                             }), 128 /* KEYED_FRAGMENT */))
                           ])
                         ], 64 /* STABLE_FRAGMENT */))
                       : _createCommentVNode("v-if", true),
                     (_ctx.V.rd.hasSectors)
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 6 }, [
-                          _createElementVNode("span", _hoisted_1263, _toDisplayString(_ctx.V.rd.sectorsTitle), 1 /* TEXT */),
-                          _createElementVNode("div", _hoisted_1264, [
+                          _createElementVNode("span", _hoisted_1264, _toDisplayString(_ctx.V.rd.sectorsTitle), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_1265, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList((_ctx.V.rd.sectors || []), (rg, rg_i) => {
                               return (_openBlock(), _createElementBlock("button", {
                                 key: rg_i,
@@ -14197,19 +14204,19 @@ return function render(_ctx, _cache) {
                                 "aria-label": _ctx.A(rg.label),
                                 style: _normalizeStyle(`display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 8px 14px; border: 0; border-top: ${rg.border}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer`)
                               }, [
-                                _createElementVNode("span", _hoisted_1266, _toDisplayString(rg.name), 1 /* TEXT */),
-                                _createElementVNode("span", _hoisted_1267, _toDisplayString(rg.count), 1 /* TEXT */),
-                                (_openBlock(), _createElementBlock("svg", _hoisted_1268, [...(_cache[278] || (_cache[278] = [
+                                _createElementVNode("span", _hoisted_1267, _toDisplayString(rg.name), 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_1268, _toDisplayString(rg.count), 1 /* TEXT */),
+                                (_openBlock(), _createElementBlock("svg", _hoisted_1269, [...(_cache[278] || (_cache[278] = [
                                   _createElementVNode("path", { d: "M9 6l6 6-6 6" }, null, -1 /* CACHED */)
                                 ]))]))
-                              ], 12 /* STYLE, PROPS */, _hoisted_1265))
+                              ], 12 /* STYLE, PROPS */, _hoisted_1266))
                             }), 128 /* KEYED_FRAGMENT */))
                           ])
                         ], 64 /* STABLE_FRAGMENT */))
                       : _createCommentVNode("v-if", true)
                   ], 64 /* STABLE_FRAGMENT */))
                 : _createCommentVNode("v-if", true),
-              _createElementVNode("p", _hoisted_1269, _toDisplayString(_ctx.V.rd.attribution) + " · Indice estimé selon le type de boutique, le produit recherché et le calendrier des sorties.", 1 /* TEXT */)
+              _createElementVNode("p", _hoisted_1270, _toDisplayString(_ctx.V.rd.attribution) + " · Indice estimé selon le type de boutique, le produit recherché et le calendrier des sorties.", 1 /* TEXT */)
             ])
           ], 4 /* STYLE */)
         ]))
@@ -14221,8 +14228,8 @@ return function render(_ctx, _cache) {
           role: "status",
           style: _normalizeStyle(`position: absolute; z-index: 50; left: 16px; right: 16px; bottom: ${_ctx.V.ui.toastBottom}; display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 18px; border: 1px solid var(--pkm-line-3); background: var(--pkm-toast); color: var(--pkm-t1); font-size: 14px; font-weight: 600; box-shadow: 0 14px 30px rgba(var(--pkm-shadow-rgb), 0.45)`)
         }, [
-          _createElementVNode("span", _hoisted_1270, [
-            (_openBlock(), _createElementBlock("svg", _hoisted_1271, [...(_cache[280] || (_cache[280] = [
+          _createElementVNode("span", _hoisted_1271, [
+            (_openBlock(), _createElementBlock("svg", _hoisted_1272, [...(_cache[280] || (_cache[280] = [
               _createElementVNode("path", { d: "M5 12.5l4.5 4.5L19 7.5" }, null, -1 /* CACHED */)
             ]))]))
           ]),

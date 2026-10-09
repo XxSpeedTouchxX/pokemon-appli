@@ -667,6 +667,8 @@ const VUE_LOCAL = 'vendor/vue.runtime.global.prod.js';
 const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global.prod.js';
 // Thème : jaune et verre par défaut ; ?theme=classic garde l'ancien thème (comparaison, retour arrière).
 const THEME_SWITCH = '<script>try { if (/[?&]theme=classic(&|$)/.test(location.search)) { document.documentElement.classList.add(\'pkm-classic\'); var m = document.querySelector(\'meta[name="theme-color"]\'); if (m) m.content = \'#0B1120\'; } } catch (e) {}</script>';
+// Animation d'entrée « Ouverture de booster » (tools/web/intro.html) : démo hébergée seulement.
+const INTRO = readFileSync(fileURLToPath(new URL('./intro.html', import.meta.url)), 'utf8').trim();
 const body = vue => `<div id="shell">
 <div id="app"></div>
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
@@ -698,6 +700,7 @@ ${style}
 </style>
 </head>
 <body>
+${INTRO}
 ${body(VUE_LOCAL)}
 </body>
 </html>

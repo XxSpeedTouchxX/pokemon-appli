@@ -154,6 +154,7 @@
       ['Collection complète', () => ({ purchases: this.purchasesSeed('full'), sales: this.salesSeed('full'), extra: [] })]
     ].map(([label, mk]) => ({ label: label, go: () => { this.setState(Object.assign(mk(), { toast: label + ' chargée' })); this.flash(); } }));
     r.replayOnb = () => this.setState({ admSheet: false, onb: 1 });
+    r.replayIntro = () => { try { window.localStorage.removeItem('pkm-intro'); } catch (e) { /* stockage indisponible */ } location.href = location.pathname + '?intro=1'; };
     // Diagnostic.
     r.errors = admErrors.slice(0, 5).map(e => ({ text: e.at + ' · ' + e.msg }));
     r.hasErrors = r.errors.length > 0;

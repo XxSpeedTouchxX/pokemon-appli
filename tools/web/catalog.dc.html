@@ -968,6 +968,7 @@
 <div style="display: flex; flex-wrap: wrap; gap: 8px">
 <sc-for list="{{ adm.demos }}" as="adm2" hint-placeholder-count="3"><button type="button" onClick="{{ adm2.go }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">{{ adm2.label }}</button></sc-for>
 <button type="button" onClick="{{ adm.replayOnb }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Revoir l’accueil guidé</button>
+<button type="button" onClick="{{ adm.replayIntro }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Rejouer l’animation d’entrée</button>
 </div>
 <h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Diagnostic</h3>
 <sc-if value="{{ adm.hasErrors }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ adm.errors }}" as="aer" hint-placeholder-count="2"><span style="font-size: 12px; line-height: 1.4; color: #FF8A8A">{{ aer.text }}</span></sc-for></sc-if>

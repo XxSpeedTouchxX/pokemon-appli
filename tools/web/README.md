@@ -67,6 +67,12 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Restaurer :** choisir le fichier ; aperçu (date, cartes, produits, ventes, PK) ; puis « Remplacer ma collection » ou « Ajouter à ma collection ». En fusion, les ajouts et ventes absents sont ajoutés (sans doublon ni PK gagnés une seconde fois) ; PK et réglages locaux sont gardés. L'app se recharge.
 - **Rappel sur l'accueil :** si la dernière sauvegarde a plus de 30 jours, ou si aucune n'a été faite après 7 jours d'usage, pour au moins 5 ajouts. « Plus tard » le masque 7 jours.
 
+## Animation d'entrée : ouverture de booster
+
+- **Ce qu'on voit** (2026-10-09, K1) : un booster Dropicards tombe, tremble, s'ouvre d'un éclair ; cinq cartes sortent en éventail, la carte O se pose et laisse place au logo. Environ 2 s la première ouverture du jour, 0,6 s ensuite ; un appui n'importe où la passe.
+- **Sans gêne** : dessinée en SVG dans `tools/web/intro.html` (insérée dans `index.html` par le build), sans image ni dépendance ; l'app se charge dessous. Version calme (fondu court) si le téléphone demande moins d'animations ou si l'Admin coupe les animations.
+- **Forcer** : `?intro=1` (complète) ou `?intro=court`. Admin › « Rejouer l'animation d'entrée ». Pas d'animation sous les tests automatisés, sauf avec ces paramètres.
+
 ## Navigation
 
 - **Toujours en haut** (2026-10-09) : chaque changement de page s'ouvre en haut : onglet du bas, fiche, retour, autre carte ou autre boutique (`pageKey` dans `build.mjs`).
