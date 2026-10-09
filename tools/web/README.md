@@ -65,6 +65,16 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Raccourcis :** un appui sur le texte l'affiche d'un coup ; un second appui sur la catégorie replie.
 - **Accessibilité :** le texte complet est lu par les lecteurs d'écran ; tout s'affiche sans mouvement si l'utilisateur limite les animations.
 
+## Vues au choix et bulle d'infos
+
+`tools/web/views.js`, fragments `view-switch`, `ter-bubble` et `market-views` (2026-10-09) :
+- **Bouton de vue** (à côté du nombre de résultats), avec un petit menu ; le choix est gardé au retour sur la page (`tview`, `mview`).
+- **Territoire :** Liste, Galerie (2 par ligne), Compacte (une ligne), Carte plein écran (ouvre le Radar).
+  - Chaque boutique ne montre que l'essentiel : nom, distance, ouvert ou fermé, chance.
+  - **« + »** ouvre une **bulle accrochée à la boutique** : type, adresse, horaires du jour, Itinéraire, Appeler, Site, Fiche complète. Elle suit la boutique au défilement ; un appui ailleurs ou Échap la ferme ; « + » devient « × ».
+  - Un appui sur la boutique elle-même ouvre sa fiche.
+- **Marché :** Liste, Galerie (3 visuels par ligne), Compacte (nom, cote, variation sur une ligne), Grandes cartes (16:9).
+
 ## PK, la monnaie de l'app
 
 Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de `catalog.dc.html`). Gains et règles validés par le porteur le 2026-10-08.

@@ -132,7 +132,8 @@
           dist: this.km(Math.round(x.d * 10) / 10), hasNow: !!x.now, now: x.now ? x.now.label.split(' · ')[0] : '', nowColor: x.now && x.now.open ? 'var(--pkm-green)' : 'var(--pkm-t3)',
           pct: x.c.pct + ' %', level: lv.label, color: lv.color, tint: lv.tint, border: i === 0 ? 'none' : '1px solid var(--pkm-line)',
           label: x.st.name + ', ' + this.km(Math.round(x.d * 10) / 10) + (x.now ? ', ' + x.now.label : '') + ', chance ' + lv.label.toLowerCase() + ' ' + x.c.pct + ' %',
-          open: () => this.push('shop', { shopId: x.st.id, swhy: false })
+          open: () => this.push('shop', { shopId: x.st.id, swhy: false }),
+          id: x.st.id, src: x // boutique, distance et chance, pour la bulle d'infos (views.js)
         };
       }),
       count: rows.length ? rows.length + (rows.length > 1 ? ' boutiques' : ' boutique') + ' à moins de ' + km + ' km' + (rows.length > TER_LIST ? ' · les ' + TER_LIST + ' ' + (s.tsort === 'chance' ? 'meilleures' : 'plus proches') : '') + ' · position à 100 m près' : '',

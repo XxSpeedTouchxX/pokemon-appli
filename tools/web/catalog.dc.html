@@ -570,24 +570,63 @@
 </sc-for>
 <button type="button" onClick="{{ tx.radar }}" style="position: absolute; right: 8px; bottom: 8px; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #2A3A5C; background: rgba(8, 13, 26, 0.82); color: #F3F6FC; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer">Carte de France</button>
 </div>
-<span style="font-size: 12.5px; color: #7D8BA8">{{ tx.count }}</span>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+<span style="flex: 1; min-width: 0; font-size: 12.5px; color: #7D8BA8">{{ tx.count }}</span>
+@@view-switch tx.vs@@
+</div>
 <sc-if value="{{ tx.empty }}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 0">
 <p style="margin: 0; text-align: center; font-size: 14px; color: #C9D3EA">{{ tx.emptyText }}</p>
 <sc-if value="{{ tx.canWiden }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ tx.widen }}" style="height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ tx.widenLabel }}</button></sc-if>
 </div>
 </sc-if>
-<sc-if value="{{ tx.hasRows }}" hint-placeholder-val="{{ true }}">
-<div style="border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-if value="{{ tx.popOpen }}" hint-placeholder-val="{{ false }}">
+<button type="button" aria-label="Fermer les détails" onClick="{{ tx.popClose }}" style="position: fixed; inset: 0; z-index: 20; padding: 0; border: 0; background: transparent; cursor: default"></button>
+</sc-if>
+<sc-if value="{{ tx.vList }}" hint-placeholder-val="{{ true }}">
+<div style="border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column">
 <sc-for list="{{ tx.rows }}" as="tw" hint-placeholder-count="6">
-<button type="button" onClick="{{ tw.open }}" aria-label="{{ tw.label }}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 0; border-top: {{ tw.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<div style="position: relative; z-index: {{ tw.z }}; display: flex; align-items: center; gap: 4px; padding-right: 10px; border-top: {{ tw.border }}">
+<button type="button" onClick="{{ tw.open }}" aria-label="{{ tw.label }}" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 6px 10px 14px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
 <span style="font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tw.name }}</span>
-<span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tw.sub }}</span>
 <span style="display: flex; align-items: center; gap: 8px; font-size: 12px"><span style="color: #C9D3EA">{{ tw.dist }}</span><sc-if value="{{ tw.hasNow }}" hint-placeholder-val="{{ true }}"><span style="font-weight: 700; color: {{ tw.nowColor }}">{{ tw.now }}</span></sc-if></span>
 </span>
 <span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px"><span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; white-space: nowrap; color: {{ tw.color }}">{{ tw.pct }}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{ tw.tint }}; color: {{ tw.color }}; font-size: 11px; font-weight: 800">{{ tw.level }}</span></span>
 </button>
+<button type="button" onClick="{{ tw.more.toggle }}" aria-expanded="{{ tw.more.open }}" aria-label="{{ tw.more.label }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-plus" style="transform: rotate({{ tw.more.turn }}); fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round"><path d="M12 5v14 M5 12h14"></path></svg></button>
+<sc-if value="{{ tw.more.open }}" hint-placeholder-val="{{ false }}">@@ter-bubble tw@@</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ tx.vGallery }}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{ tx.rows }}" as="tg" hint-placeholder-count="4">
+<div style="position: relative; z-index: {{ tg.z }}; min-width: 0">
+<button type="button" onClick="{{ tg.open }}" aria-label="{{ tg.label }}" style="width: 100%; min-height: 150px; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 18px; border: 1px solid #1E2B45; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="height: 72px; box-sizing: border-box; padding: 8px 10px; border-radius: 12px; background: {{ tg.tint }}; display: flex; flex-direction: column; justify-content: flex-end"><span style="font-family: 'Sora', sans-serif; font-size: 22px; line-height: 1.1; font-weight: 700; color: {{ tg.color }}">{{ tg.pct }}</span><span style="font-size: 11px; font-weight: 800; color: {{ tg.color }}">{{ tg.level }}</span></span>
+<span style="font-size: 13.5px; font-weight: 700; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{ tg.name }}</span>
+<span style="font-size: 12px; color: #C9D3EA">{{ tg.dist }}<sc-if value="{{ tg.hasNow }}" hint-placeholder-val="{{ true }}"> · <span style="font-weight: 700; color: {{ tg.nowColor }}">{{ tg.now }}</span></sc-if></span>
+</button>
+<span style="position: absolute; top: 6px; right: 6px"><button type="button" onClick="{{ tg.more.toggle }}" aria-expanded="{{ tg.more.open }}" aria-label="{{ tg.more.label }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-plus" style="transform: rotate({{ tg.more.turn }}); fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round"><path d="M12 5v14 M5 12h14"></path></svg></button></span>
+<sc-if value="{{ tg.more.open }}" hint-placeholder-val="{{ false }}">@@ter-bubble tg@@</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ tx.vCompact }}" hint-placeholder-val="{{ false }}">
+<div style="border-radius: 18px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column">
+<sc-for list="{{ tx.rows }}" as="tc" hint-placeholder-count="8">
+<div style="position: relative; z-index: {{ tc.z }}; display: flex; align-items: center; gap: 4px; padding-right: 4px; border-top: {{ tc.border }}">
+<button type="button" onClick="{{ tc.open }}" aria-label="{{ tc.label }}" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 4px 6px 4px 14px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1; min-width: 0; font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tc.name }}</span>
+<span style="flex: none; font-size: 12px; color: #C9D3EA">{{ tc.dist }}</span>
+<span style="flex: none; min-width: 42px; text-align: right; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: {{ tc.color }}">{{ tc.pct }}</span>
+</button>
+<button type="button" onClick="{{ tc.more.toggle }}" aria-expanded="{{ tc.more.open }}" aria-label="{{ tc.more.label }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-plus" style="transform: rotate({{ tc.more.turn }}); fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round"><path d="M12 5v14 M5 12h14"></path></svg></button>
+<sc-if value="{{ tc.more.open }}" hint-placeholder-val="{{ false }}">@@ter-bubble tc@@</sc-if>
+</div>
 </sc-for>
 </div>
 </sc-if>
@@ -763,6 +802,81 @@
 <span style="font-size: 13.5px; line-height: 1.45">{{ pf.anticip }}</span>
 </div>
 </section>
+
+<!-- fragment: view-switch -->
+<div style="position: relative; flex: none">
+<button type="button" onClick="{{ VS.toggle }}" aria-expanded="{{ VS.open }}" aria-haspopup="true" aria-label="{{ VS.aria }}" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px 0 10px; border-radius: 999px; border: 1px solid #2A3A5C; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{ VS.icon }}"></path></svg>{{ VS.label }}<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" class="pkm-chevron" style="flex: none; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<sc-if value="{{ VS.open }}" hint-placeholder-val="{{ false }}">
+<button type="button" aria-label="Fermer le choix de la vue" onClick="{{ VS.close }}" style="position: fixed; inset: 0; z-index: 20; padding: 0; border: 0; background: transparent; cursor: default"></button>
+<div role="group" aria-label="Choisir la vue" class="pkm-pop" style="position: absolute; z-index: 21; top: calc(100% + 6px); right: 0; width: 210px; padding: 6px; border-radius: 18px; border: 1px solid #24345C; background: #16223A; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{ VS.options }}" as="vo" hint-placeholder-count="4">
+<button type="button" onClick="{{ vo.pick }}" aria-pressed="{{ vo.on }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid {{ vo.bc }}; background: {{ vo.bg }}; color: {{ vo.fg }}; font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="{{ vo.icon }}"></path></svg>{{ vo.label }}</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<!-- fragment: ter-bubble -->
+<div role="dialog" aria-label="{{ BB.info.title }}" class="pkm-pop" style="position: absolute; z-index: 25; top: calc(100% - 2px); {{ BB.side }}: 4px; width: min(300px, calc(100vw - 40px)); box-sizing: border-box; padding: 14px; border-radius: 18px; border: 1px solid #24345C; background: #16223A; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; gap: 8px; text-align: left">
+<span aria-hidden="true" style="position: absolute; top: -7px; {{ BB.side }}: {{ BB.arrow }}; width: 12px; height: 12px; background: #16223A; border-left: 1px solid #24345C; border-top: 1px solid #24345C; transform: rotate(45deg)"></span>
+<span style="font-size: 12.5px; font-weight: 700; color: #9AA8C3">{{ BB.info.kind }}</span>
+<sc-if value="{{ BB.info.hasAddress }}" hint-placeholder-val="{{ true }}"><span style="font-size: 13.5px; line-height: 1.4">{{ BB.info.address }}</span></sc-if>
+<span style="font-size: 13px; line-height: 1.4; color: #C9D3EA">{{ BB.info.place }}</span>
+<sc-if value="{{ BB.info.hasHours }}" hint-placeholder-val="{{ true }}"><span style="font-size: 13px; line-height: 1.45"><span style="font-weight: 700; color: {{ BB.info.hoursColor }}">{{ BB.info.hoursState }}</span> · {{ BB.info.hoursText }}</span></sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px">
+<a href="{{ BB.info.route }}" target="_blank" rel="noopener" style="display: flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 13.5px; font-weight: 800; text-decoration: none">Itinéraire</a>
+<sc-if value="{{ BB.info.hasTel }}" hint-placeholder-val="{{ true }}"><a href="{{ BB.info.tel }}" aria-label="{{ BB.info.telAria }}" style="display: flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; color: #F3F6FC; font-size: 13.5px; font-weight: 700; text-decoration: none">Appeler</a></sc-if>
+<sc-if value="{{ BB.info.hasSite }}" hint-placeholder-val="{{ true }}"><a href="{{ BB.info.site }}" target="_blank" rel="noopener" aria-label="{{ BB.info.siteAria }}" style="display: flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; color: #F3F6FC; font-size: 13.5px; font-weight: 700; text-decoration: none">{{ BB.info.siteLabel }}</a></sc-if>
+<button type="button" onClick="{{ BB.open }}" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Fiche complète</button>
+</div>
+<span style="font-size: 11.5px; line-height: 1.4; color: #9AA8C3">Chance {{ BB.pct }} · indice estimé, pas un stock réel.</span>
+</div>
+
+<!-- fragment: market-views -->
+<sc-if value="{{ mk.vGallery }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{ mk.list }}" as="mg" hint-placeholder-count="9">
+<button type="button" onClick="{{ mg.open }}" style="display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 6px 6px 8px; border-radius: 14px; border: 1px solid #1E2B45; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="position: relative; width: 100%; aspect-ratio: 600 / 825; border-radius: 8px; overflow: hidden; background: {{ mg.bg }}; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{ mg.isCard }}" hint-placeholder-val="{{ true }}"><img src="{{ mg.img }}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; object-position: top"></sc-if>
+<sc-if value="{{ mg.isSealed }}" hint-placeholder-val="{{ false }}"><img src="{{ mg.logo }}" alt="" loading="lazy" style="max-width: 80%; max-height: 40%; object-fit: contain"></sc-if>
+</span>
+<span style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ mg.name }}</span>
+<span style="font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums">{{ mg.cote }}</span>
+<span style="font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: {{ mg.rightColor }}">{{ mg.right }}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ mk.vCompact }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; border-radius: 18px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-for list="{{ mk.list }}" as="mc" hint-placeholder-count="10">
+<button type="button" onClick="{{ mc.open }}" style="display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 4px 14px; border: 0; border-top: {{ mc.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ mc.name }}</span>
+<span style="flex: none; font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums">{{ mc.cote }}</span>
+<span style="flex: none; width: 104px; text-align: right; font-size: 11.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: {{ mc.rightColor }}">{{ mc.right }}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ mk.vBig }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{ mk.list }}" as="mb" hint-placeholder-count="3">
+<button type="button" onClick="{{ mb.open }}" style="display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: {{ mb.bg }}; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{ mb.isCard }}" hint-placeholder-val="{{ true }}"><img src="{{ mb.img }}" alt="" loading="lazy" style="height: 92%; width: auto; border-radius: 6px; object-fit: contain; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4)"></sc-if>
+<sc-if value="{{ mb.isSealed }}" hint-placeholder-val="{{ false }}"><img src="{{ mb.logo }}" alt="" loading="lazy" style="max-width: 70%; max-height: 50%; object-fit: contain"></sc-if>
+</span>
+<span style="display: flex; align-items: flex-end; justify-content: space-between; gap: 10px">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ mb.name }}</span><span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ mb.sub }}</span></span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end"><span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700">{{ mb.cote }}</span><span style="font-size: 12px; font-weight: 700; color: {{ mb.rightColor }}">{{ mb.right }}</span></span>
+</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
 
 <!-- fragment: scan -->
 <div id="pkm-scan-cam" aria-hidden="true" style="position: absolute; inset: 0; overflow: hidden"></div>

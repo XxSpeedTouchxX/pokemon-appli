@@ -64,6 +64,13 @@ patch('width: 44px; height: 44px; padding: 0; border: 0; background: transparent
 const FRAG = {};
 const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.meta.url)), 'utf8').split(/<!-- fragment: ([\w-]+) -->\n/);
 for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
+// Fragments réutilisés (views.js) : « @@view-switch tx.vs@@ » insère le sélecteur de vues sur l'objet tx.vs ;
+// « @@ter-bubble tw@@ » insère la bulle d'infos d'une boutique sur l'alias tw.
+const ALIAS = { 'view-switch': 'VS', 'ter-bubble': 'BB' };
+for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+) ([\w.]+)@@/g, (m, name, o) => {
+  if (!FRAG[name] || !ALIAS[name]) throw new Error('Fragment réutilisé inconnu : ' + name);
+  return FRAG[name].trim().split(ALIAS[name] + '.').join(o + '.');
+});
 // Compteur de PK (fragment pk-counter) à gauche de l'avatar : accueil et grands titres (Collection, Marché, Territoire).
 {
   const avatar = '<button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" style="';
@@ -129,6 +136,16 @@ patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x
 // Marché : entrée « Toutes les cartes » ; écrans « Toutes les cartes » et « Extension ».
 patch('<div role="group" aria-label="Filtre du marché"', FRAG['market-browse'] + '<div role="group" aria-label="Filtre du marché"');
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG.screens + '\n<sc-if value="{{ ui.isProfile }}"');
+// Marché : choix de la vue (views.js) à côté du nombre de résultats ; la liste de la maquette devient la vue « Liste ».
+patch('<span style="flex: none; font-size: 12.5px; color: #7D8BA8">{{ mk.count }}</span>',
+  '<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px">\n<span style="flex: 1; min-width: 0; font-size: 12.5px; color: #7D8BA8">{{ mk.count }}</span>\n'
+  + FRAG['view-switch'].trim().split('VS.').join('mk.vs.') + '\n</div>');
+{
+  const open = '<div style="flex: none; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">\n<sc-for list="{{ mk.list }}"';
+  const i = tpl.indexOf(open), j = tpl.indexOf('</sc-for>\n</div>', i) + '</sc-for>\n</div>'.length;
+  if (i < 0 || tpl.indexOf(open, i + 1) >= 0) throw new Error('Liste du Marché introuvable');
+  tpl = tpl.slice(0, i) + '<sc-if value="{{ mk.vList }}" hint-placeholder-val="{{ true }}">\n' + tpl.slice(i, j) + '\n</sc-if>\n' + FRAG['market-views'] + tpl.slice(j);
+}
 // Fiche : la carte entière (et non plus le haut de la carte), agrandissable ; mention du visuel anglais.
 patchRe(/<sc-if value="\{\{ it\.plainCard \}\}"[^>]*>\n<img src="\{\{ it\.img \}\}"[^\n]*\n<\/sc-if>/, FRAG['item-card'].trim());
 patch('<section aria-label="Visuel" style="flex: none; position: relative; height: 292px;', '<section aria-label="Visuel" style="flex: none; position: relative; height: {{ it.visH }}; aspect-ratio: {{ it.visAr }};');
@@ -346,14 +363,14 @@ tpl = tpl.replace(/<sc-if value="\{\{ ([\w.]+)\.isSealed \}\}"([^>]*)>([\s\S]*?)
   const photo = o === 'it' ? PHOTO_ITEM : o === 'ci' ? PHOTO_FILL(o) : PHOTO_INLINE(o);
   return `<sc-if value="{{ ${o}.sealedArt }}"${attrs}>${body}</sc-if><sc-if value="{{ ${o}.hasPhoto }}" hint-placeholder-val="{{ false }}">${photo}</sc-if>`;
 });
-if (sealedBlocks !== 10) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 10 (' + sealedSeen.join(', ') + ')'); // dont 1 sur l'accueil (la recherche) ; plus celle du viseur simulé
+if (sealedBlocks !== 12) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 12 (' + sealedSeen.join(', ') + ')'); // dont 1 sur l'accueil (la recherche), 2 dans les vues du Marché (galerie, grandes cartes) ; plus celle du viseur simulé
 // Visuel de secours de chaque image de carte (data-fallback), utilisé si l'image ne charge plus.
 tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fallback="{{ ' + o + (o === 'it' ? '.fallbackHi' : '.fallback') + ' }}"');
 // Photos et logos du scellé (data-broken) : si l'image ne charge pas, l'app passe au visuel suivant
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 38) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 38'); // dont 4 sur l'accueil (vignette de la recherche, vitrine du classeur) ; plus celles du viseur simulé
+if (brokenMarks !== 42) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 42'); // dont 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -424,7 +441,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Latias, Latios, Kyogre, Groudon et
 // Rayquaza (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
 const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
@@ -449,7 +466,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -469,7 +486,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -606,6 +623,11 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 .pkm-rise { animation: pkmRise 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 .pkm-chevron { transition: transform 0.25s ease; }
 @media (prefers-reduced-motion: reduce) { .pkm-type-c, .pkm-rise, .pkm-dialog-next { animation: none; opacity: 1; } .pkm-chevron { transition: none; } }
+/* Vues et bulle d'infos (views.js) : menu et bulle apparaissent en douceur ; « + » tourne en « × ». */
+@keyframes pkmPop { from { opacity: 0; transform: translateY(-6px) scale(0.97); } to { opacity: 1; transform: none; } }
+.pkm-pop { animation: pkmPop 0.18s ease-out both; transform-origin: top right; }
+.pkm-plus { transition: transform 0.2s ease; }
+@media (prefers-reduced-motion: reduce) { .pkm-pop { animation: none; } .pkm-plus { transition: none; } }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${cssVars()}
