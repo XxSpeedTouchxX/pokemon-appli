@@ -3,6 +3,8 @@
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
+import { transformSync } from 'esbuild';
+import { applyMarginPatches } from './margin-patch.mjs';
 import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens, BUDDY_THEMES } from './theme.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -187,6 +189,19 @@ patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Cote selon l'état et la langue, vente d'un exemplaire précis (value.js, margin-patch.mjs).
+logic = applyMarginPatches(logic);
+patchJs("platform: d.platform, commission: d.commission, port: d.port, by: d.by };", "platform: d.platform, commission: d.commission, port: d.port, by: d.by, from: d.from || null };");
+patchJs("commission: this.fmtIn(this.r2(v.commission)), by: v.by || 'toi', editId: v.id", "commission: this.fmtIn(this.r2(v.commission)), by: v.by || 'toi', editId: v.id, from: v.from || null");
+patch('<sc-if value="{{ sh.isSell }}" hint-placeholder-val="{{ false }}">\n<fieldset style="flex: none; margin: 0; padding: 0; border: 0; min-width: 0">\n<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #9AA8C3">Vendu sur</legend>',
+  FRAG['sell-from'] + '<sc-if value="{{ sh.isSell }}" hint-placeholder-val="{{ false }}">\n<fieldset style="flex: none; margin: 0; padding: 0; border: 0; min-width: 0">\n<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #9AA8C3">Vendu sur</legend>');
+patch('<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ set.valHelp }}</span>', '<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ set.valHelp }}</span>\n' + FRAG['val-adj']);
+patch('font-size: 17px; font-weight: 600">Historique d’achat</h2>\n', 'font-size: 17px; font-weight: 600">Historique d’achat</h2>\n<sc-if value="{{ it.hasValNote }}" hint-placeholder-val="{{ false }}"><p style="margin: 0 0 4px; font-size: 13px; line-height: 1.45; color: #C9D3EA">{{ it.valNote }}</p></sc-if>\n');
+// Importer un tableur (import-core.js, import.js) : panneau ouvert après le choix d'un CSV.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['import-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Fonds animés et micro-animations (fx.js, fx.css) : calque décoratif en premier enfant de l'app ; choix dans Réglages.
+patchRe(/(<div class="pkm-root"[^>]*>)/, '$1\n<div id="pkm-fx" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>');
+patch('<section aria-label="Sources de prix"', FRAG['fx-set'] + '<section aria-label="Sources de prix"');
 // Corriger ou supprimer un ajout (edit.js) : bouton « Modifier » sur chaque ligne de l'historique d'achat, panneau de
 // modification, « Annuler » dans le message qui suit.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['buy-edit'] + '\n<sc-if value="{{ ui.hasToast }}"');
@@ -465,7 +480,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), editJs = mod('edit.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -494,7 +509,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + editJs + sourcesJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -514,7 +529,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${editJs}${sourcesJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -658,10 +673,11 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 .pkm-plus { transition: transform 0.2s ease; }
 @media (prefers-reduced-motion: reduce) { .pkm-pop { animation: none; } .pkm-plus { transition: none; } }
 /* Mode Admin, animations désactivées : plus aucune animation ni transition. */
-section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > *, section[aria-label="Modifier l’ajout"] > * { flex-shrink: 0; }
+section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > *, section[aria-label="Modifier l’ajout"] > *, section[aria-label="Importer un tableur"] > * { flex-shrink: 0; }
 html.pkm-calm *, html.pkm-calm *::before, html.pkm-calm *::after { animation: none !important; transition: none !important; }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
+${readFileSync(new URL('./fx.css', import.meta.url), 'utf8')}
 ${cssVars()}
 ${v6Css()}
 ${keyframes}`;
@@ -734,7 +750,11 @@ for (const [pkg, , weights] of FONT_FILES) {
   copyFileSync(fileURLToPath(new URL('./node_modules/@fontsource/' + pkg + '/LICENSE', import.meta.url)), OUT + 'fonts/LICENSE-' + pkg + '.txt');
 }
 mkdirSync(OUT + 'img', { recursive: true });
-writeFileSync(OUT + 'app.js', app);
+// Démo hébergée : app.js minifié (esbuild, version figée, sortie identique d'une machine à l'autre) ; environ 40 %
+// de moins une fois compressé. Les sources lisibles restent dans tools/web ; tools/web/artifact.html n'est pas minifié.
+const appMin = '/* Dropicards · démo web générée par tools/web/build.mjs (sources : tools/web, docs/12-maquette-v5). */\n'
+  + transformSync(app, { minify: true, charset: 'utf8', legalComments: 'none' }).code;
+writeFileSync(OUT + 'app.js', appMin);
 writeFileSync(OUT + 'index.html', index);
 writeFileSync(ROOT + 'tools/web/artifact.html', artifact);
 copyFileSync(fileURLToPath(new URL('./node_modules/vue/dist/vue.runtime.global.prod.js', import.meta.url)), OUT + 'vendor/vue.runtime.global.prod.js');
@@ -756,5 +776,5 @@ mkdirSync(TESS + 'lang', { recursive: true });
 ].forEach(([from, to]) => copyFileSync(fileURLToPath(new URL('./node_modules/' + from, import.meta.url)), TESS + to));
 const imgs = readdirSync(IMG_SRC).filter(f => f.endsWith('.webp'));
 imgs.forEach(f => copyFileSync(IMG_SRC + f, OUT + 'img/' + f));
-console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli, thème : '
+console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères, ' + appMin.length + ' minifié), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli, thème : '
   + themed.replaced + ' couleurs du gabarit et ' + themedJs.replaced + ' de la logique en variables, ' + themed.surfaces + ' surfaces sombres.');

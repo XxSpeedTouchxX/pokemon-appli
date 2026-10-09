@@ -57,9 +57,22 @@
   proto.homeBinder = function (x) {
     const s = x.s, tab = s.hbk, key = tab === 'sealed' ? 'hbsp' : 'hbcp';
     const unit = p => x.val(p) || 0, qty = p => x.c.stock[p.id].qty;
-    const mine = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed)
-      .sort((a, b) => unit(b) - unit(a) || String(a.name).localeCompare(String(b.name), 'fr'));
+    // Tri et filtres (D1) : cote, ajouts récents ou nom ; langue, état, rareté, extension des exemplaires restants.
+    const sort = s.hbSort || 'value', F = s.hbF || {}, left = valLeft(s);
+    const lastAdd = {};
+    (s.purchases || []).forEach(a => a.lines.forEach(l => { if (!lastAdd[l.pid] || a.date > lastAdd[l.pid]) lastAdd[l.pid] = a.date; }));
+    const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'fr');
+    const order = { value: (a, b) => unit(b) - unit(a) || byName(a, b), date: (a, b) => String(lastAdd[b.id] || '').localeCompare(String(lastAdd[a.id] || '')) || byName(a, b), name: byName }[sort] || byName;
+    const copiesLeft = p => (left[p.id] || []).filter(g => g.left > 0).map(g => ({ lang: g.lang, cond: g.cond || copyConds(p)[0][0] }));
+    const keep = p => {
+      const cp = copiesLeft(p), cps = cp.length ? cp : [{ lang: p.lang || 'FR', cond: copyConds(p)[0][0] }];
+      return (!F.lang || cps.some(c => c.lang === F.lang)) && (!F.cond || cps.some(c => c.cond === F.cond))
+        && (!F.rare || p.ur || p.grade) && (!F.set || (p.setName || '') === F.set);
+    };
+    const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
+    const mine = sealed => all(sealed).filter(keep).sort(order);
     const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, per = HOME_BINDER[tab];
+    const total = all(tab === 'sealed').length, filtered = !!(F.lang || F.cond || F.rare || F.set);
     const pages = Math.max(1, Math.ceil(list.length / per)), page = Math.min(s[key], pages - 1);
     const sum = l => l.reduce((t, p) => t + unit(p) * qty(p), 0), units = l => l.reduce((t, p) => t + qty(p), 0);
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
@@ -88,11 +101,46 @@
         : [plural(units(cards), 'carte', 'cartes') + ' · ' + x.mask(this.eur(sum(cards)))]
           .concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · '),
       empty: !list.length,
-      emptyText: tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant.' : 'Aucune carte dans ton classeur pour l’instant : scanne une carte ou cherche-la dans le catalogue.',
+      emptyText: filtered ? 'Aucun article ne correspond à ces filtres.' : tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant.' : 'Aucune carte dans ton classeur pour l’instant : scanne une carte ou cherche-la dans le catalogue.',
       hasPages: pages > 1, pageLabel: 'Page ' + (page + 1) + ' sur ' + pages,
       prevOff: page === 0, nextOff: page === pages - 1, prevDim: page === 0 ? 0.35 : 1, nextDim: page === pages - 1 ? 0.35 : 1,
       prev: () => { if (page > 0) this.setState({ [key]: page - 1 }); },
-      next: () => { if (page < pages - 1) this.setState({ [key]: page + 1 }); }
+      next: () => { if (page < pages - 1) this.setState({ [key]: page + 1 }); },
+      // Glisser vers la gauche ou la droite : page suivante ou précédente.
+      touchStart: e => { const t = e.touches && e.touches[0]; homeSwipe = t ? { x: t.clientX, y: t.clientY } : null; },
+      touchEnd: e => {
+        const t = e.changedTouches && e.changedTouches[0], o = homeSwipe;
+        homeSwipe = null;
+        if (!t || !o) return;
+        const dx = t.clientX - o.x, dy = t.clientY - o.y;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+        if (dx < 0 && page < pages - 1) this.setState({ [key]: page + 1 });
+        if (dx > 0 && page > 0) this.setState({ [key]: page - 1 });
+      },
+      tools: this.homeBinderTools(s, tab, all(tab === 'sealed'), filtered, list.length, total, key)
+    };
+  };
+  let homeSwipe = null;
+  // Barre du classeur : tri (chips) et filtres (panneau replié).
+  proto.homeBinderTools = function (s, tab, items, filtered, shown, total, key) {
+    const F = s.hbF || {}, sort = s.hbSort || 'value', open = !!s.hbFOpen;
+    const set = (patch) => this.setState(Object.assign({ hbF: Object.assign({}, F, patch), [key]: 0 }));
+    const chips = (list, cur, pick) => list.map(([v, label]) => Object.assign({ label: label, on: cur === v, pick: () => pick(v) }, this.chip(cur === v)));
+    const conds = tab === 'sealed' ? COPY.conds.sealed : COPY.conds.card;
+    const sets = [...new Set(items.map(p => p.setName).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+    const n = [F.lang, F.cond, F.rare, F.set].filter(Boolean).length;
+    return {
+      sorts: chips([['value', 'Cote'], ['date', 'Récents'], ['name', 'Nom']], sort, v => this.setState({ hbSort: v, [key]: 0 })),
+      filterLabel: n ? 'Filtres (' + n + ')' : 'Filtrer', open: open, toggle: () => this.setState({ hbFOpen: !open }),
+      filterOn: n > 0, filterBg: n ? 'var(--pkm-accent)' : 'transparent', filterFg: n ? 'var(--pkm-on-accent)' : 'var(--pkm-t2)',
+      langs: chips([['', 'Toutes'], ['FR', 'FR'], ['EN', 'EN'], ['JP', 'JP']], F.lang || '', v => set({ lang: v })),
+      conds: chips([['', 'Tous']].concat(conds.map(c => [c[0], c[1]])), F.cond || '', v => set({ cond: v })),
+      showRare: tab !== 'sealed', rares: chips([['', 'Toutes'], ['ur', 'Ultra rares et gradées']], F.rare ? 'ur' : '', v => set({ rare: v === 'ur' })),
+      showSets: sets.length > 1,
+      sets: [{ label: 'Toutes les extensions', v: '', on: !F.set }].concat(sets.map(t => ({ label: t, v: t, on: F.set === t }))),
+      onSet: e => set({ set: e.target.value }),
+      clear: () => this.setState({ hbF: {}, [key]: 0 }),
+      hasNote: filtered, note: shown + ' sur ' + total + ' · filtre actif'
     };
   };
 

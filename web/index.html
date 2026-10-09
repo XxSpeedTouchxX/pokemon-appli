@@ -82,10 +82,85 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 .pkm-plus { transition: transform 0.2s ease; }
 @media (prefers-reduced-motion: reduce) { .pkm-pop { animation: none; } .pkm-plus { transition: none; } }
 /* Mode Admin, animations désactivées : plus aucune animation ni transition. */
-section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > *, section[aria-label="Modifier l’ajout"] > * { flex-shrink: 0; }
+section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > *, section[aria-label="Modifier l’ajout"] > *, section[aria-label="Importer un tableur"] > * { flex-shrink: 0; }
 html.pkm-calm *, html.pkm-calm *::before, html.pkm-calm *::after { animation: none !important; transition: none !important; }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
+/* ——— Fonds animés (K2) et micro-animations (K3) ; fx.js choisit le décor ; 2026-10-09 ———
+   Calque décoratif derrière l'app (#pkm-fx, 8 éléments), en CSS seulement : rien ne tourne en JavaScript.
+   Décor selon le contexte (classes sur <html>) : accueil (reflet holo et étincelles), Marché (gemmes qui montent),
+   Territoire (ondes radar), compagnons à thème (bulles pour Kyogre, braises pour Groudon, éclairs et pluie pour
+   Rayquaza). Réglages › « Fonds animés » : Animés, Calmes (deux fois plus lents, plus discrets) ou Sans.
+   Arrêtés si l'app est cachée, si l'appareil demande moins d'animations ou si l'Admin coupe les animations. */
+.pkm-root { isolation: isolate; }
+#pkm-fx { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; display: none; }
+html.pkm-fx-on:not(.pkm-classic) #pkm-fx { display: block; }
+#pkm-fx i { position: absolute; display: block; opacity: 0; will-change: transform, opacity; }
+html.pkm-fx-paused #pkm-fx i, html.pkm-fx-paused #pkm-fx::before { animation-play-state: paused !important; }
+html.pkm-fx-calm #pkm-fx i, html.pkm-fx-calm #pkm-fx::before { animation-duration: var(--fx-d2, 30s) !important; }
+html.pkm-fx-calm #pkm-fx { opacity: 0.6; }
+
+/* Accueil (et autres écrans) : reflet holo qui traverse lentement, étincelles. */
+#pkm-fx::before { content: ''; position: absolute; inset: -40% -60%; opacity: 0;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.16) 46%, rgba(255, 190, 240, 0.1) 50%, rgba(170, 230, 255, 0.12) 54%, transparent 62%); }
+html.pkm-fx-holo #pkm-fx::before { animation: pkmFxHolo 11s ease-in-out infinite; --fx-d2: 22s; }
+@keyframes pkmFxHolo { 0% { opacity: 0; transform: translateX(-45%); } 15% { opacity: 1; } 55% { opacity: 1; transform: translateX(45%); } 70%, 100% { opacity: 0; transform: translateX(45%); } }
+html.pkm-fx-holo #pkm-fx i { width: 10px; height: 10px; animation: pkmFxSpark 6s ease-in-out infinite;
+  background: radial-gradient(circle, #FFFFFF 0 18%, transparent 20%), linear-gradient(0deg, transparent 44%, rgba(255, 255, 255, 0.9) 47% 53%, transparent 56%), linear-gradient(90deg, transparent 44%, rgba(255, 255, 255, 0.9) 47% 53%, transparent 56%); }
+@keyframes pkmFxSpark { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 50% { opacity: 0.85; transform: scale(1) rotate(45deg); } }
+
+/* Marché : petites gemmes qui montent. */
+html.pkm-fx-gems #pkm-fx i { width: 12px; height: 14px; bottom: -20px; animation: pkmFxRise 14s linear infinite;
+  clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: linear-gradient(160deg, #FFF1A0, #FFD60A 45%, #E8A000); }
+@keyframes pkmFxRise { 0% { opacity: 0; transform: translateY(0) rotate(0deg); } 10% { opacity: 0.55; } 85% { opacity: 0.45; } 100% { opacity: 0; transform: translateY(-110vh) rotate(160deg); } }
+
+/* Territoire : ondes radar depuis le bas de l'écran. */
+html.pkm-fx-radar #pkm-fx i { left: 50%; bottom: 8%; width: 40px; height: 40px; margin-left: -20px; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35); animation: pkmFxWave 6s ease-out infinite; }
+@keyframes pkmFxWave { 0% { opacity: 0.7; transform: scale(0.2); } 100% { opacity: 0; transform: scale(14); } }
+
+/* Kyogre (océan) : bulles ; Groudon (volcan) : braises. */
+html.pkm-fx-bubbles #pkm-fx i { bottom: -20px; width: 14px; height: 14px; border-radius: 50%; animation: pkmFxRise 12s ease-in infinite;
+  border: 1.5px solid rgba(220, 245, 255, 0.55); background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.5), transparent 45%); }
+html.pkm-fx-embers #pkm-fx i { bottom: -10px; width: 5px; height: 5px; border-radius: 50%; animation: pkmFxRise 9s ease-in infinite;
+  background: #FFB347; box-shadow: 0 0 8px 2px rgba(255, 120, 40, 0.7); }
+
+/* Rayquaza (ouragan) : pluie fine et éclair. */
+html.pkm-fx-storm #pkm-fx i { top: -30%; width: 1.5px; height: 70px; background: linear-gradient(transparent, rgba(220, 255, 245, 0.45));
+  transform: rotate(14deg); animation: pkmFxRain 1.6s linear infinite; --fx-d2: 3.2s; }
+@keyframes pkmFxRain { 0% { opacity: 0; transform: translate(0, 0) rotate(14deg); } 10% { opacity: 1; } 100% { opacity: 0.6; transform: translate(-30vh, 140vh) rotate(14deg); } }
+html.pkm-fx-storm #pkm-fx::before { inset: 0; background: rgba(230, 255, 250, 0.22); animation: pkmFxFlash 13s linear infinite; --fx-d2: 26s; }
+@keyframes pkmFxFlash { 0%, 90%, 93%, 100% { opacity: 0; } 91%, 94% { opacity: 1; } }
+
+/* Positions et décalages des 8 éléments (communs à tous les décors). */
+#pkm-fx i:nth-child(1) { left: 8%; top: 18%; animation-delay: 0s; }
+#pkm-fx i:nth-child(2) { left: 26%; top: 62%; animation-delay: -1.7s; }
+#pkm-fx i:nth-child(3) { left: 44%; top: 34%; animation-delay: -3.1s; }
+#pkm-fx i:nth-child(4) { left: 63%; top: 80%; animation-delay: -4.6s; }
+#pkm-fx i:nth-child(5) { left: 81%; top: 22%; animation-delay: -2.4s; }
+#pkm-fx i:nth-child(6) { left: 92%; top: 55%; animation-delay: -5.5s; }
+#pkm-fx i:nth-child(7) { left: 15%; top: 88%; animation-delay: -7.2s; }
+#pkm-fx i:nth-child(8) { left: 53%; top: 8%; animation-delay: -8.8s; }
+html.pkm-fx-radar #pkm-fx i:nth-child(n) { left: 50%; top: auto; }
+html.pkm-fx-radar #pkm-fx i:nth-child(2) { animation-delay: -2s; } html.pkm-fx-radar #pkm-fx i:nth-child(3) { animation-delay: -4s; }
+html.pkm-fx-radar #pkm-fx i:nth-child(n+4) { display: none; }
+html.pkm-fx-gems #pkm-fx i:nth-child(n), html.pkm-fx-bubbles #pkm-fx i:nth-child(n), html.pkm-fx-embers #pkm-fx i:nth-child(n) { top: auto; }
+html.pkm-fx-storm #pkm-fx i:nth-child(n) { top: -30%; }
+
+/* ——— Micro-animations (K3) : éléments ajoutés au-dessus de l'app, retirés après l'animation ——— */
+.pkm-burst { position: fixed; z-index: 80; width: 0; height: 0; pointer-events: none; }
+.pkm-burst i { position: absolute; left: -6px; top: -8px; width: 12px; height: 16px; opacity: 0; animation: pkmBurst 0.9s cubic-bezier(0.15, 0.7, 0.3, 1) forwards; }
+.pkm-burst-card i { border-radius: 2px; background: linear-gradient(160deg, #FFFFFF, #FFE36B 60%, #FFB800); box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.6); }
+.pkm-burst-gem i { width: 11px; height: 13px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: linear-gradient(160deg, #FFF1A0, #FFD60A 45%, #E8A000); animation-name: pkmGemRain; animation-duration: 1.1s; }
+.pkm-burst-star i { width: 14px; height: 14px; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); background: #FFE36B; animation-duration: 1.2s; }
+@keyframes pkmBurst { 0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.6); } 100% { opacity: 0; transform: translate(var(--bx), var(--by)) rotate(var(--br)) scale(1); } }
+@keyframes pkmGemRain { 0% { opacity: 0; transform: translate(0, 0) scale(0.5); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--bx), calc(var(--by) * -1 + 60px)) rotate(var(--br)) scale(1); } }
+/* Palier franchi ou compagnon débloqué : halo sous le message. */
+@keyframes pkmHalo { 0% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.75); } 100% { box-shadow: 0 0 0 18px rgba(255, 214, 10, 0); } }
+.pkm-halo { animation: pkmHalo 0.9s ease-out 2; }
+@media (prefers-reduced-motion: reduce) { #pkm-fx { display: none !important; } .pkm-burst { display: none; } .pkm-halo { animation: none; } }
+html.pkm-calm #pkm-fx, html.pkm-calm .pkm-burst { display: none !important; }
+
 :root { --pkm-app: #0B1120; --pkm-field: #0B1120; --pkm-card: #111A2C; --pkm-card-hi: #121C33; --pkm-card-2: #0F1828; --pkm-card-teal: #0F1D2B; --pkm-img-bg: #16213A; --pkm-toast: #16223A; --pkm-track: #24345C; --pkm-photo-mat: #FFFFFF; --pkm-pearl: #E8ECFF; --pkm-line: #1E2B45; --pkm-line-2: #2A3A5C; --pkm-line-3: #24345C; --pkm-line-4: #3A4A75; --pkm-line-teal: #1F5A55; --pkm-t1: #F3F6FC; --pkm-t2: #C9D3EA; --pkm-t3: #9AA8C3; --pkm-t4: #7D8BA8; --pkm-t5: #5A6B8C; --pkm-link: #B9C5FF; --pkm-ink: #0B1120; --pkm-white: #FFFFFF; --pkm-accent: #A8B6FF; --pkm-on-accent: #0B1120; --pkm-brand: #3D63FF; --pkm-scan-1: #5B7BFF; --pkm-scan-2: #2F4FE0; --pkm-scan-3: #3D63FF; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #FFFFFF; --pkm-iris: #6C84F2; --pkm-regular: #A8B6FF; --pkm-green: #3DDC84; --pkm-up: #3DDC84; --pkm-down: #FF6B6B; --pkm-red: #FF8A8A; --pkm-orange: #F5B14C; --pkm-amber: #FFB547; --pkm-teal: #5EE0CF; --pkm-logo: #FFD60A; --pkm-gold: #FFD66B; --pkm-sand: #F7C77E; --pkm-sand-2: #F3D9AE; --pkm-gray: #9AA8C3; --pkm-off: #56648A; --pkm-peach: #FFC9A8; --pkm-bar-cost: #34415F; --pkm-bar-edge: #56648A; --pkm-bar-fees: #D5763A; --pkm-bar-margin: #6C84F2; --pkm-chip-bg: transparent; --pkm-chip-bc: #2A3A5C; --pkm-chip-fg: #C9D3EA; --pkm-chip-on-bg: #26345A; --pkm-chip-on-bc: #3A4A75; --pkm-chip-on-fg: #FFFFFF; --pkm-choice-bg: #111A2C; --pkm-choice-bc: #24345C; --pkm-choice-on-bg: #1A2645; --pkm-choice-on-bc: #A8B6FF; --pkm-nav-on: #FFFFFF; --pkm-nav-off: #7D8BA8; --pkm-nav-dot: #A8B6FF; --pkm-dim: 0.6; --pkm-off-bg: #26345A; --pkm-glow-rgb: 98, 122, 255; --pkm-accent-rgb: 168, 182, 255; --pkm-regular-rgb: 168, 182, 255; --pkm-ink-rgb: 8, 13, 26; --pkm-app-rgb: 11, 17, 32; --pkm-deep-rgb: 5, 8, 15; --pkm-scrim-rgb: 3, 6, 14; --pkm-hl-rgb: 255, 255, 255; --pkm-shadow-rgb: 0, 0, 0; --pkm-orange-rgb: 245, 177, 76; --pkm-teal-rgb: 94, 224, 207; --pkm-green-rgb: 61, 220, 132; --pkm-amber-rgb: 255, 181, 71; --pkm-gold-rgb: 255, 214, 107; --pkm-iris-rgb: 108, 132, 242; --pkm-blue-rgb: 61, 99, 255; --pkm-gray-rgb: 154, 168, 195; }
 html:not(.pkm-classic) .pkm-root { --pkm-app: radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFD60A 45%, #FFB703 100%); --pkm-t1: #0B1120; --pkm-t2: #1F2433; --pkm-t3: #33363F; --pkm-t4: #41434A; --pkm-t5: #41434A; --pkm-link: #0A2A88; --pkm-ink: #0B1120; --pkm-logo: #0B1120; --pkm-accent: #0B1120; --pkm-on-accent: #FFD84D; --pkm-accent-rgb: 11, 17, 32; --pkm-glow-rgb: 255, 255, 255; --pkm-brand: #0B1120; --pkm-line: rgba(11, 17, 32, 0.16); --pkm-line-2: rgba(11, 17, 32, 0.22); --pkm-line-3: rgba(11, 17, 32, 0.2); --pkm-line-4: rgba(11, 17, 32, 0.32); --pkm-track: rgba(11, 17, 32, 0.16); --pkm-chip-bg: rgba(255, 255, 255, 0.45); --pkm-chip-bc: rgba(11, 17, 32, 0.18); --pkm-chip-fg: #1F2433; --pkm-chip-on-bg: #0B1120; --pkm-chip-on-bc: #0B1120; --pkm-chip-on-fg: #FFD84D; --pkm-choice-bg: rgba(255, 255, 255, 0.45); --pkm-choice-bc: rgba(11, 17, 32, 0.18); --pkm-choice-on-bg: rgba(255, 255, 255, 0.85); --pkm-choice-on-bc: #0B1120; --pkm-green: #054A24; --pkm-up: #054A24; --pkm-down: #8F1414; --pkm-red: #8F1414; --pkm-orange: #6B3500; --pkm-amber: #6B3500; --pkm-teal: #04463F; --pkm-gold: #5C4400; --pkm-sand: #5C3D00; --pkm-sand-2: #4D3810; --pkm-gray: #41434A; --pkm-off: #4D4F57; --pkm-regular: #22348F; --pkm-iris: #22348F; --pkm-shadow-rgb: 70, 45, 0; --pkm-off-bg: rgba(11, 17, 32, 0.08); --pkm-card: rgba(10, 17, 48, 0.9); --pkm-card-hi: rgba(12, 22, 66, 0.94); --pkm-card-2: rgba(8, 14, 40, 0.92); --pkm-card-teal: rgba(4, 32, 44, 0.9); --pkm-field: rgba(0, 4, 18, 0.55); --pkm-toast: rgba(10, 17, 48, 0.86); --pkm-nav-on: #FFD60A; --pkm-nav-off: #BCC5D9; --pkm-nav-dot: #FFD60A; --pkm-scan-1: #FFE45C; --pkm-scan-2: #F2A900; --pkm-scan-3: #FFD60A; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #0B1120; --pkm-blue-rgb: 255, 214, 10; --pkm-dim: 0.8; }
 html:not(.pkm-classic) .pkm-dark { --pkm-app: #0B1120; --pkm-t1: #F5F7FC; --pkm-t2: #D7DDEA; --pkm-t3: #BCC5D9; --pkm-t4: #A3AEC6; --pkm-t5: #8F9AB4; --pkm-link: #FFD84D; --pkm-ink: #0B1120; --pkm-logo: #FFD60A; --pkm-accent: #FFD60A; --pkm-on-accent: #0B1120; --pkm-accent-rgb: 255, 214, 10; --pkm-glow-rgb: 12, 22, 66; --pkm-brand: #0B1120; --pkm-line: rgba(255, 255, 255, 0.14); --pkm-line-2: rgba(255, 255, 255, 0.2); --pkm-line-3: rgba(255, 210, 60, 0.4); --pkm-line-4: rgba(255, 255, 255, 0.3); --pkm-track: rgba(255, 255, 255, 0.14); --pkm-chip-bg: rgba(255, 255, 255, 0.06); --pkm-chip-bc: rgba(255, 255, 255, 0.2); --pkm-chip-fg: #D7DDEA; --pkm-chip-on-bg: #FFD60A; --pkm-chip-on-bc: #FFD60A; --pkm-chip-on-fg: #0B1120; --pkm-choice-bg: rgba(255, 255, 255, 0.05); --pkm-choice-bc: rgba(255, 255, 255, 0.16); --pkm-choice-on-bg: rgba(255, 214, 10, 0.14); --pkm-choice-on-bc: #FFD60A; --pkm-green: #3DDC84; --pkm-up: #3DDC84; --pkm-down: #FF6B6B; --pkm-red: #FF8A8A; --pkm-orange: #F5B14C; --pkm-amber: #FFB547; --pkm-teal: #5EE0CF; --pkm-gold: #FFD66B; --pkm-sand: #F7C77E; --pkm-sand-2: #F3D9AE; --pkm-gray: #BCC5D9; --pkm-off: #56648A; --pkm-regular: #A8B6FF; --pkm-iris: #6C84F2; --pkm-shadow-rgb: 0, 0, 0; --pkm-off-bg: rgba(255, 255, 255, 0.1); --pkm-card: rgba(10, 17, 48, 0.9); --pkm-card-hi: rgba(12, 22, 66, 0.94); --pkm-card-2: rgba(8, 14, 40, 0.92); --pkm-card-teal: rgba(4, 32, 44, 0.9); --pkm-field: rgba(0, 4, 18, 0.55); --pkm-toast: rgba(10, 17, 48, 0.86); --pkm-nav-on: #FFD60A; --pkm-nav-off: #BCC5D9; --pkm-nav-dot: #FFD60A; --pkm-scan-1: #FFE45C; --pkm-scan-2: #F2A900; --pkm-scan-3: #FFD60A; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #0B1120; --pkm-blue-rgb: 255, 214, 10; --pkm-dim: 0.8; }
@@ -94,7 +169,7 @@ html:not(.pkm-classic) nav[aria-label="Navigation principale"] { background: rgb
 html:not(.pkm-classic) section[aria-label="Saisie"], html:not(.pkm-classic) section[aria-label="Résultat du scan"] { background: rgba(10, 17, 48, 0.86) !important; backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); }
 html:not(.pkm-classic) div[role="status"], html:not(.pkm-classic) #pkm-radar-sheet { backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); }
 html:not(.pkm-classic) #pkm-zoom { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-html:not(.pkm-classic) section[aria-label="Choisis ton compagnon"], html:not(.pkm-classic) section[aria-label="Mes PK"], html:not(.pkm-classic) section[aria-label="Choisis ton compagnon"] [role="alertdialog"], html:not(.pkm-classic) section[aria-label="Panneau Admin"], html:not(.pkm-classic) section[aria-label="Code Admin"], html:not(.pkm-classic) section[aria-label="Informations légales"], html:not(.pkm-classic) section[aria-label="Modifier l’ajout"] { background: #0A1130 !important; }
+html:not(.pkm-classic) section[aria-label="Choisis ton compagnon"], html:not(.pkm-classic) section[aria-label="Mes PK"], html:not(.pkm-classic) section[aria-label="Choisis ton compagnon"] [role="alertdialog"], html:not(.pkm-classic) section[aria-label="Panneau Admin"], html:not(.pkm-classic) section[aria-label="Code Admin"], html:not(.pkm-classic) section[aria-label="Informations légales"], html:not(.pkm-classic) section[aria-label="Modifier l’ajout"], html:not(.pkm-classic) section[aria-label="Importer un tableur"] { background: #0A1130 !important; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   html:not(.pkm-classic) nav[aria-label="Navigation principale"], html:not(.pkm-classic) section[aria-label="Saisie"], html:not(.pkm-classic) section[aria-label="Résultat du scan"] { background: #0A1130 !important; }
   html:not(.pkm-classic) .pkm-dark { --pkm-toast: #0A1130; }

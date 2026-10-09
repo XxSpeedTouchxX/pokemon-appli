@@ -1,5 +1,6 @@
-# Vérification de la démo web à chaque envoi : tests unitaires (marge, accueil, Radar, scan, thème), puis
+# Vérification de la démo web à chaque envoi : tests unitaires (marge, import, accueil, Radar, scan, thème), puis
 # reconstruction de web/ ; échec si la démo publiée n'est pas celle que produisent les sources (build oublié).
+# Puis tests navigateur (tools/web/e2e, Chromium) sur la démo servie localement ; captures jointes en cas d'échec.
 name: Tests de la démo
 
 on:
@@ -13,6 +14,7 @@ on:
       - tools/sprites/companions.json
       - web/app.js
       - web/index.html
+      - web/sw.js
 
 permissions:
   contents: read
@@ -39,3 +41,31 @@ jobs:
         run: npm run build
       - name: La démo publiée correspond aux sources
         run: git diff --stat --exit-code -- web/app.js web/index.html
+
+  e2e:
+    needs: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/web/package-lock.json
+      - name: Dépendances
+        working-directory: tools/web
+        run: npm ci
+      - name: Chromium
+        working-directory: tools/web
+        run: npx playwright-core install --with-deps chromium
+      - name: Tests navigateur
+        working-directory: tools/web
+        run: npm run e2e
+      - name: Captures (en cas d'échec)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: captures-e2e
+          path: tools/web/e2e/out/
+          retention-days: 7

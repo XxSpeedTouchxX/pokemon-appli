@@ -239,6 +239,24 @@
 </sc-for>
 </div>
 <div role="tabpanel" aria-label="{{ home.hk.tabLabel }}" style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 6px">
+<span style="flex: none; font-size: 12.5px; font-weight: 600; color: #9AA8C3">Trier</span>
+<div role="group" aria-label="Trier le classeur" style="flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none"><sc-for list="{{ home.hk.tools.sorts }}" as="hts" hint-placeholder-count="3"><button type="button" onClick="{{ hts.pick }}" aria-pressed="{{ hts.on }}" style="flex: none; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{ hts.bc }}; background: {{ hts.bg }}; color: {{ hts.fg }}; font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ hts.label }}</button></sc-for></div>
+<button type="button" onClick="{{ home.hk.tools.toggle }}" aria-expanded="{{ home.hk.tools.open }}" style="flex: none; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #2A3A5C; background: {{ home.hk.tools.filterBg }}; color: {{ home.hk.tools.filterFg }}; font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ home.hk.tools.filterLabel }}</button>
+</div>
+<sc-if value="{{ home.hk.tools.open }}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="Filtres du classeur" class="pkm-rise" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 16px; border: 1px solid #24345C; background: rgba(8, 13, 26, 0.5)">
+<span style="font-size: 12px; font-weight: 600; color: #9AA8C3">Langue</span>
+<div role="group" aria-label="Langue" style="display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none"><sc-for list="{{ home.hk.tools.langs }}" as="htl" hint-placeholder-count="3"><button type="button" onClick="{{ htl.pick }}" aria-pressed="{{ htl.on }}" style="flex: none; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{ htl.bc }}; background: {{ htl.bg }}; color: {{ htl.fg }}; font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ htl.label }}</button></sc-for></div>
+<span style="font-size: 12px; font-weight: 600; color: #9AA8C3">État</span>
+<div role="group" aria-label="État" style="display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none"><sc-for list="{{ home.hk.tools.conds }}" as="htc" hint-placeholder-count="3"><button type="button" onClick="{{ htc.pick }}" aria-pressed="{{ htc.on }}" style="flex: none; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{ htc.bc }}; background: {{ htc.bg }}; color: {{ htc.fg }}; font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ htc.label }}</button></sc-for></div>
+<sc-if value="{{ home.hk.tools.showRare }}" hint-placeholder-val="{{ true }}"><span style="font-size: 12px; font-weight: 600; color: #9AA8C3">Rareté</span>
+<div role="group" aria-label="Rareté" style="display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none"><sc-for list="{{ home.hk.tools.rares }}" as="htr" hint-placeholder-count="3"><button type="button" onClick="{{ htr.pick }}" aria-pressed="{{ htr.on }}" style="flex: none; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{ htr.bc }}; background: {{ htr.bg }}; color: {{ htr.fg }}; font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ htr.label }}</button></sc-for></div></sc-if>
+<sc-if value="{{ home.hk.tools.showSets }}" hint-placeholder-val="{{ false }}"><select aria-label="Extension" onChange="{{ home.hk.tools.onSet }}" style="height: 40px; padding: 0 10px; border: 1px solid #2A3A5C; border-radius: 12px; background: var(--pkm-field); color: #F3F6FC; font: inherit; font-size: 13.5px; color-scheme: dark"><sc-for list="{{ home.hk.tools.sets }}" as="hst" hint-placeholder-count="3"><option value="{{ hst.v }}" selected="{{ hst.on }}">{{ hst.label }}</option></sc-for></select></sc-if>
+<button type="button" onClick="{{ home.hk.tools.clear }}" style="align-self: flex-start; min-height: 36px; padding: 0 4px; border: 0; background: transparent; color: #C9D3EA; font: inherit; font-size: 13px; font-weight: 700; text-decoration: underline; cursor: pointer">Tout afficher</button>
+</div>
+</sc-if>
+<sc-if value="{{ home.hk.tools.hasNote }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12.5px; color: #F5B14C">{{ home.hk.tools.note }}</span></sc-if>
 <div style="display: flex; align-items: center; gap: 8px; min-height: 32px">
 <span style="flex: 1; min-width: 0; font-size: 12.5px; color: #9AA8C3">{{ home.hk.summary }}</span>
 <button type="button" onClick="{{ home.hk.info.toggle }}" aria-expanded="{{ home.hk.info.open }}" aria-label="{{ home.hk.info.label }}" style="flex: none; width: 32px; height: 32px; margin: -4px -4px -4px 0; padding: 0; border: 1px solid #2A3A5C; border-radius: 16px; background: transparent; color: #C9D3EA; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; font-style: italic; cursor: pointer">i</button>
@@ -249,7 +267,7 @@
 </div>
 </sc-if>
 <sc-if value="{{ home.hk.cardsTab }}" hint-placeholder-val="{{ true }}">
-<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<div onTouchstart="{{ home.hk.touchStart }}" onTouchend="{{ home.hk.touchEnd }}" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
 <sc-for list="{{ home.hk.cards }}" as="hkc" hint-placeholder-count="9">
 <button type="button" onClick="{{ hkc.open }}" aria-label="{{ hkc.label }}" style="position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer">
 <img src="{{ hkc.img }}" srcset="{{ hkc.srcset }}" sizes="(max-width: 520px) 30vw, 118px" alt="" loading="lazy" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
@@ -265,7 +283,7 @@
 </div>
 </sc-if>
 <sc-if value="{{ home.hk.sealedTab }}" hint-placeholder-val="{{ false }}">
-<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div onTouchstart="{{ home.hk.touchStart }}" onTouchend="{{ home.hk.touchEnd }}" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
 <sc-for list="{{ home.hk.sealed }}" as="hks" hint-placeholder-count="4">
 <button type="button" onClick="{{ hks.open }}" aria-label="{{ hks.label }}" style="display: flex; flex-direction: column; min-width: 0; padding: 0; border: 1px solid #24345C; border-radius: 18px; overflow: hidden; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
 <span style="position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; background: {{ hks.bg }}">
@@ -1093,6 +1111,92 @@
 </section>
 </div>
 </sc-if>
+
+<!-- fragment: sell-from -->
+<sc-if value="{{ sh.showFrom }}" hint-placeholder-val="{{ true }}">
+<fieldset style="flex: none; margin: 0; padding: 0; border: 0; min-width: 0">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #9AA8C3">Quel exemplaire part ?</legend>
+<div role="group" aria-label="Exemplaire vendu" style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{ sh.fromOpts }}" as="fo" hint-placeholder-count="3">
+<button type="button" onClick="{{ fo.pick }}" aria-pressed="{{ fo.on }}" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; padding: 6px 14px; border-radius: 16px; border: 1px solid {{ fo.bc }}; box-shadow: {{ fo.ring }}; background: {{ fo.bg }}; color: {{ fo.fg }}; font: inherit; font-size: 13.5px; font-weight: 600; text-align: left; cursor: pointer"><span style="min-width: 0">{{ fo.label }}</span><span style="flex: none; font-size: 12.5px; font-weight: 500; color: #9AA8C3">{{ fo.right }}</span></button>
+</sc-for>
+</div>
+<span style="display: block; margin-top: 6px; font-size: 12.5px; line-height: 1.45; color: #7D8BA8">La marge prend le prix d’achat de l’exemplaire choisi ; « Peu importe » garde le coût moyen.</span>
+</fieldset>
+</sc-if>
+
+<!-- fragment: val-adj -->
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding-top: 12px; border-top: 1px solid #1E2B45">
+<button type="button" role="switch" aria-checked="{{ set.valAdj.on }}" onClick="{{ set.valAdj.toggle }}" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 0; border: 0; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 600; text-align: left; cursor: pointer"><span>{{ set.valAdj.label }}</span><span style="flex: none; min-width: 84px; padding: 6px 12px; border-radius: 999px; border: 1px solid #2A3A5C; background: {{ set.valAdj.bg }}; color: {{ set.valAdj.fg }}; font-size: 13px; font-weight: 700; text-align: center">{{ set.valAdj.state }}</span></button>
+<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ set.valAdj.rule }}</span>
+</div>
+
+<!-- fragment: import-sheet -->
+<sc-if value="{{ imp.open }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; z-index: 35; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
+<button type="button" aria-label="Fermer l’import" onClick="{{ imp.close }}" style="flex: 1 1 auto; min-height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
+<section aria-label="Importer un tableur" role="dialog" aria-modal="true" style="flex: none; max-height: 94%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 12px">
+<div aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px">
+<div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Importer un tableur</h2>
+<span style="font-size: 12.5px; color: #9AA8C3; overflow-wrap: anywhere">{{ imp.name }} · {{ imp.lines }}</span>
+</div>
+<button type="button" onClick="{{ imp.close }}" aria-label="Fermer" style="flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+</div>
+<sc-if value="{{ imp.isMap }}" hint-placeholder-val="{{ true }}">
+<p style="margin: 0; font-size: 13.5px; line-height: 1.5; color: #C9D3EA">1. Vérifie la colonne de chaque information. Le fichier est lu sur ton téléphone, rien n’est envoyé.</p>
+<div role="group" aria-label="Colonnes du tableur" style="display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 8px 10px; align-items: center">
+<sc-for list="{{ imp.fields }}" as="ifd" hint-placeholder-count="8">
+<span style="font-size: 13.5px; font-weight: 600">{{ ifd.label }}</span>
+<select aria-label="{{ ifd.label }}" onChange="{{ ifd.onPick }}" style="min-width: 0; height: 42px; padding: 0 10px; border: 1px solid #2A3A5C; border-radius: 12px; background: var(--pkm-field); color: #F3F6FC; font: inherit; font-size: 13.5px; color-scheme: dark">
+<sc-for list="{{ ifd.opts }}" as="ifo" hint-placeholder-count="4"><option value="{{ ifo.v }}" selected="{{ ifo.on }}">{{ ifo.label }}</option></sc-for>
+</select>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 14px; border: 1px solid #24345C">
+<span style="font-size: 12.5px; font-weight: 700; color: #9AA8C3">Aperçu</span>
+<sc-for list="{{ imp.preview }}" as="ipv" hint-placeholder-count="3"><span style="font-size: 13px; line-height: 1.45; color: #C9D3EA; overflow-wrap: anywhere">{{ ipv.t }}</span></sc-for>
+</div>
+<button type="button" onClick="{{ imp.match }}" aria-disabled="{{ imp.matchOff }}" style="min-height: 52px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; opacity: {{ imp.matchDim }}">{{ imp.matchLabel }}</button>
+</sc-if>
+<sc-if value="{{ imp.isReview }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 14px; font-weight: 700">{{ imp.counts }}</p>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<sc-for list="{{ imp.okList }}" as="iok" hint-placeholder-count="3"><span style="font-size: 13px; line-height: 1.45; color: #C9D3EA">✓ {{ iok.t }}</span></sc-for>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ imp.okMore }}</span>
+</div>
+<sc-if value="{{ imp.hasAsk }}" hint-placeholder-val="{{ false }}">
+<h3 style="margin: 4px 0 0; font-size: 15px; font-weight: 700">À vérifier</h3>
+<sc-for list="{{ imp.ask }}" as="iak" hint-placeholder-count="2">
+<div role="group" aria-label="{{ iak.raw }}" style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 16px; border: 1px solid #24345C">
+<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3; overflow-wrap: anywhere">{{ iak.raw }}</span>
+<sc-for list="{{ iak.opts }}" as="iao" hint-placeholder-count="3"><button type="button" onClick="{{ iao.pick }}" aria-pressed="{{ iao.on }}" style="min-height: 42px; padding: 6px 12px; border-radius: 14px; border: 1px solid {{ iao.bc }}; box-shadow: {{ iao.ring }}; background: {{ iao.bg }}; color: {{ iao.fg }}; font: inherit; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer">{{ iao.label }}</button></sc-for>
+</div>
+</sc-for>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ imp.askMore }}</span>
+</sc-if>
+<sc-if value="{{ imp.hasNone }}" hint-placeholder-val="{{ false }}">
+<h3 style="margin: 4px 0 0; font-size: 15px; font-weight: 700">Non reconnues</h3>
+<sc-for list="{{ imp.none }}" as="ino" hint-placeholder-count="2"><span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3; overflow-wrap: anywhere">{{ ino.t }}</span></sc-for>
+<span style="font-size: 12.5px; color: #C9D3EA">{{ imp.noneHint }}</span>
+</sc-if>
+<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">Un ajout par ligne, avec sa date, sa langue et son état ; tu pourras les corriger dans la fiche. Les articles importés ne rapportent pas de PK.</p>
+<button type="button" onClick="{{ imp.apply }}" aria-disabled="{{ imp.applyOff }}" style="min-height: 52px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; opacity: {{ imp.applyDim }}">{{ imp.applyLabel }}</button>
+<button type="button" onClick="{{ imp.back }}" style="min-height: 48px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Revoir les colonnes</button>
+</sc-if>
+</section>
+</div>
+</sc-if>
+
+<!-- fragment: fx-set -->
+<section aria-label="Fonds animés" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Fonds animés</h2>
+<div role="group" aria-label="Fonds animés" style="display: flex; gap: 8px">
+<sc-for list="{{ set.fx.modes }}" as="fxm" hint-placeholder-count="3"><button type="button" onClick="{{ fxm.pick }}" aria-pressed="{{ fxm.on }}" style="flex: 1; min-height: 44px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ fxm.bc }}; background: {{ fxm.bg }}; color: {{ fxm.fg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ fxm.label }}</button></sc-for>
+</div>
+<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ set.fx.help }}</span>
+</section>
 
 <!-- fragment: scan -->
 <div id="pkm-scan-cam" aria-hidden="true" style="position: absolute; inset: 0; overflow: hidden"></div>

@@ -56,14 +56,30 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 
 ## Tests
 
-- `npm test` (dans `tools/web/`) : tests unitaires, dont **le calcul de marge** (`test_margin.mjs`, 14 cas : vente simple, coût moyen pondéré, coût figé au jour de la vente, lots répartis par valeur ou à parts égales, port par défaut, vente à perte, articles sans prix d'achat, ordre du jour, frais de plateforme, arrondis, démo complète vérifiée à la main). Ces tests exécutent la logique de la maquette, celle de l'app.
-- GitHub Actions (`.github/workflows/tests.yml`) lance ces tests à chaque envoi, reconstruit la démo et échoue si `web/` ne correspond pas aux sources.
+- `npm test` (dans `tools/web/`) : tests unitaires, 71 cas.
+  - **Calcul de marge** (`test_margin.mjs`, 18 cas) : vente simple, coût moyen pondéré, coût figé au jour de la vente, lots répartis par valeur ou à parts égales, port par défaut, vente à perte, articles sans prix d'achat, ordre du jour, frais de plateforme, arrondis, démo complète vérifiée à la main ; vente d'un exemplaire précis (B2), avec le même correctif que le build (`margin-patch.mjs`). Ces tests exécutent la logique de la maquette, celle de l'app.
+  - **Import d'un tableur** (`test_import.mjs`, 8 cas) sur le vrai catalogue ; accueil, Radar, scan, thème.
+- `npm run e2e` : **tests navigateur** (`tools/web/e2e/`, A2, 2026-10-09), une suite par fichier `t-*.mjs` : accueil, classeur, fiche, correction d'un ajout, cote selon l'état, vente d'un exemplaire, import, sources et hors ligne, PK, compagnons, thèmes, Compte, vues, Admin, sauvegarde, pages légales, animation d'entrée, fonds animés, Territoire, Sorties, contraste dans les 4 thèmes… La démo est servie localement (`serve.mjs`) ; CDN externes coupés pour des résultats identiques partout. `npm run e2e -- edit value` lance certaines suites ; `CHROMIUM=/chemin/chromium` choisit le navigateur. Captures dans `e2e/out/` (non suivi).
+  - Restent hors du dépôt : les suites du scan à la fausse caméra (vidéos générées, lourdes) et les planches de captures.
+- GitHub Actions (`.github/workflows/tests.yml`) : tests unitaires, reconstruction de la démo (échec si `web/` ne correspond pas aux sources), puis tests navigateur avec Chromium ; captures jointes en cas d'échec.
+
+## Poids de l'app
+
+- `web/app.js` est **minifié** au build (esbuild 0.25.10, version figée : sortie identique partout), environ 620 Ko au lieu de 1,09 Mo, soit **147 Ko compressés au lieu de 204** (−28 %), 2026-10-09, A5. Les sources lisibles restent dans `tools/web/` ; `tools/web/artifact.html` n'est pas minifié.
+- Déjà à la demande : boutiques (`stores.json`, 148 Ko compressés) chargées seulement avec une position ou à l'ouverture du Radar ; MapLibre et le moteur du scan à l'ouverture de leur écran.
+- Reste à faire : catalogue par différence (seules les cotes du jour chaque jour, au lieu des 531 Ko compressés de `cards.json`), à préparer avec le workflow TCGdex.
+
+## Fonds animés et micro-animations
+
+- **Fonds animés** (`tools/web/fx.css`, `tools/web/fx.js`, 2026-10-09, K2) : calque décoratif derrière l'app, en CSS seulement. Accueil : reflet holo et étincelles ; Marché et fiches : gemmes qui montent ; Territoire : ondes radar ; Kyogre : bulles ; Groudon : braises ; Rayquaza : pluie et éclairs. Scan : aucun décor.
+- **Réglages › Fonds animés :** Animés (par défaut), Calmes (deux fois plus lents, plus discrets), Sans. Pause quand l'app est cachée ; rien si le téléphone demande moins d'animations ou si l'Admin coupe les animations.
+- **Micro-animations** (K3) : cartes qui jaillissent à chaque ajout, pluie de gemmes depuis le compteur quand des PK sont gagnés, étoiles et halo du message pour un nouveau palier ou un compagnon débloqué.
 
 ## Sauvegarde et restauration
 
 `tools/web/backup.js`, fragments `io-real` et `backup-reminder` (A3, 2026-10-09). L'écran « Importer / exporter » de la maquette devient réel ; il est ouvert par « Sauvegarder ou restaurer » dans Réglages, sans le mode avancé.
 - **Sauvegarder (fichier) :** sauvegarde complète en JSON (`dropicards-sauvegarde-AAAA-MM-JJ.json`), avec le même contenu que l'enregistrement sur l'appareil : ajouts (langue, état, prix), ventes, frais, réglages, compagnon, PK, cartes du catalogue citées. Sur téléphone, elle passe par le partage (Fichiers, Drive, e-mail…), sinon elle est téléchargée.
-- **Exporter en tableur (CSV) :** une ligne par ajout ; séparateur « ; », UTF-8 avec BOM (Excel).
+- **Exporter en tableur (CSV) :** une ligne par ajout (prix payé : part de la ligne dans un lot) ; séparateur « ; », UTF-8 avec BOM (Excel).
 - **Restaurer :** choisir le fichier ; aperçu (date, cartes, produits, ventes, PK) ; puis « Remplacer ma collection » ou « Ajouter à ma collection ». En fusion, les ajouts et ventes absents sont ajoutés (sans doublon ni PK gagnés une seconde fois) ; PK et réglages locaux sont gardés. L'app se recharge.
 - **Rappel sur l'accueil :** si la dernière sauvegarde a plus de 30 jours, ou si aucune n'a été faite après 7 jours d'usage, pour au moins 5 ajouts. « Plus tard » le masque 7 jours.
 
@@ -181,7 +197,23 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 - `tools/web/copies.js` : chaque ligne d'achat garde sa langue (`lang` : FR, JP, EN) et son état (`cond` : NM, EX, PL pour Near Mint, Excellent, Joué ; SO, AB pour Scellé d'origine, Boîte abîmée).
 - Choisis dans la fiche du scan et dans « Ajout » ; enregistrés sur l'appareil avec le reste. Les ajouts plus anciens comptent comme FR et Near Mint (ou Scellé d'origine).
 - Affichés dans la liste « Ma collection » et la grille de la Collection (« EN · Excellent », ou « EN, FR · 2 états ») et dans la fiche : résumé des ajouts, langue et état de chaque ligne de l'historique, drapeau de la langue la plus présente.
-- **Limites :** la cote ne dépend pas encore de l'état ; à la vente, on ne choisit pas encore l'exemplaire qui part.
+- **Cote selon l'état et la langue** (`tools/web/value.js`, 2026-10-09, B1) : la valeur de la collection compte chaque exemplaire restant avec un coefficient d'estimation : Near Mint 100 %, Excellent 85 %, Joué 55 %, Boîte abîmée 85 % ; FR et EN 100 %, JP 70 % (les cotes relevées sont celles des versions FR et EN). La fiche montre le calcul (« 1 × FR Joué (55 %) = 54,45 € au lieu de 99,00 € en Near Mint ») et garde la cote Near Mint. Réglages › « Selon l'état et la langue » revient à la cote brute.
+- **Vendre un exemplaire précis** (B2) : « Quel exemplaire part ? » dans « J'ai vendu » : chaque ajout restant (langue, état, date, prix unitaire, nombre restant), ou « Peu importe » (coût moyen). La marge prend alors le prix d'achat de cet ajout (`tools/web/margin-patch.mjs`, appliqué par le build et vérifié par `test_margin.mjs`). Exemplaires restants : une vente désignée retire de son ajout ; les autres retirent les plus anciens d'abord.
+
+## Mon classeur : trier, filtrer, glisser
+
+- **Trier** (`tools/web/home.js`, 2026-10-09, D1) : Cote (par défaut), Récents (dernier ajout), Nom.
+- **Filtrer** (bouton « Filtrer », replié) : langue, état et rareté (ultra rares et gradées) des exemplaires restants ; extension s'il y en a plusieurs. « Filtres (2) » rappelle les filtres actifs ; « 3 sur 6 · filtre actif » sous la barre ; « Tout afficher » remet tout.
+- **Glisser** la grille vers la gauche ou la droite pour changer de page (les flèches restent).
+
+## Importer un tableur
+
+- **Où :** Réglages › « Sauvegarder ou restaurer » › « Choisir un fichier » avec un CSV (`tools/web/import-core.js`, `tools/web/import.js`, 2026-10-09, C1).
+- **1. Colonnes :** séparateur deviné (« ; », « , », tabulation) ; chaque information (nom, extension, numéro, détail, quantité, prix payé, langue, état, date, type) reçoit la colonne devinée d'après son titre, en français ou en anglais, modifiable ; aperçu des 3 premières lignes.
+- **2. Rapprochement :** par extension (nom ou code) et numéro, sinon par numéro complet et nom avec l'index du scan, sinon produit scellé par son nom. Bilan : reconnues, à vérifier (3 propositions ou « Ignorer »), non reconnues (à chercher dans le Marché).
+- **3. Ajout :** un ajout « Import » par ligne, avec date, prix, langue et état du fichier ; « Annuler » pendant 6 secondes. **Pas de PK pour un import** (sinon un fichier inventé suffirait).
+- **Export Dropicards relu :** l'export CSV se réimporte ; dans un lot, chaque ligne exporte désormais sa part du prix (et non plus le prix du lot entier).
+- **À faire avec le porteur :** modèles PokéItem et PokéCardex, à caler sur de vrais exports.
 
 ## Corriger ou supprimer un ajout
 

@@ -52,11 +52,12 @@
     const tab = s.hbk === 'sealed' ? 'sealed' : 'cards', mine = owned.filter(p => (p.type === 'sealed') === (tab === 'sealed'));
     const demo = mine.filter(p => srcKind(p) === 'demo').length;
     const lines = [
-      'Chaque cote est ' + (SRC_METHOD[s.valuation] || SRC_METHOD.pkm) + ', pour un exemplaire.',
+      'Chaque cote est ' + (SRC_METHOD[s.valuation] || SRC_METHOD.pkm) + ', pour un exemplaire Near Mint.',
       tab === 'sealed'
         ? 'Produits scellés : prix Cardmarket du ' + this.srcDay(pricesDay()) + ', archivés chaque jour par Dropicards.'
         : 'Cartes : prix Cardmarket et TCGplayer relevés par TCGdex, catalogue du ' + this.srcDay(srcCardsDay()) + ' (la fiche donne la date de chaque carte).',
-      'Le prix le plus bas demandé est montré dans la fiche, jamais compté dans la cote. La cote ne dépend pas encore de l’état ni de la langue.'
+      'Le prix le plus bas demandé est montré dans la fiche, jamais compté dans la cote.',
+      s.valAdj === false ? 'Cote brute : l’état et la langue ne sont pas comptés (Réglages).' : 'Chaque exemplaire compte selon son état et sa langue : Joué 55 %, Excellent 85 %, JP 70 %… (règle dans Réglages).'
     ];
     if (demo) lines.push(demo + (demo > 1 ? ' articles viennent' : ' article vient') + ' de la collection de démo : prix d’exemple.');
     if (srcOffline()) lines.push('Hors ligne : dernières cotes gardées sur l’appareil.');

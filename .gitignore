@@ -3,3 +3,4 @@ tools/web/artifact.html
 /data/
 __pycache__/
 tools/brand/node_modules/
+tools/web/e2e/out/

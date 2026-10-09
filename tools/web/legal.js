@@ -18,6 +18,7 @@
       ['En bref', 'Dropicards n’a pas de compte ni de serveur pour tes données : ta collection, tes ventes, tes réglages et tes PK restent dans ce navigateur, sur ton appareil. Personne d’autre, pas même l’éditeur, n’y a accès.'],
       ['Position', 'Ta position n’est demandée que si tu touches « Me localiser ». Elle est arrondie à environ 100 m, utilisée sur l’appareil pour trouver les boutiques proches, et n’est ni enregistrée ni envoyée.'],
       ['Appareil photo', 'Le scan lit le numéro et le nom de la carte directement sur ton téléphone. Aucune image n’est envoyée ni gardée.'],
+      ['Fichiers', 'Une sauvegarde restaurée ou un tableur importé est lu sur ton appareil. Il n’est envoyé nulle part.'],
       ['Services contactés', 'Pour afficher l’app, ton navigateur télécharge des fichiers depuis : Cloudflare (l’app elle-même), assets.tcgdex.net et images.pokemontcg.io (visuels des cartes), tiles.openfreemap.org (fond de carte du Radar). Les polices sont hébergées avec l’app. Comme toute page web, ces services voient l’adresse IP de ton appareil ; Dropicards ne leur transmet aucune donnée de ta collection.'],
       ['Liens et partage', 'Les liens vers Amazon, eBay, Fnac, Cultura, Micromania, WhatsApp, Facebook ou X ouvrent ces sites, qui appliquent leurs propres règles. Dropicards ne touche aucune commission.'],
       ['Mesure d’audience', 'Aucun cookie et aucune mesure d’audience pour l’instant. Si une mesure est ajoutée, elle sera sans cookie et indiquée ici.'],
@@ -33,7 +34,7 @@
     pk: { label: 'Règles des PK', blocks: [
       ['Ce que sont les PK', 'Les PK sont une monnaie virtuelle de l’app. Ils servent seulement à débloquer des compagnons et des thèmes.'],
       ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas et ne se convertissent pas en argent ni en biens. Ils n’ont aucune valeur en euros. Il n’y a ni tirage au sort ni jeu d’argent.'],
-      ['Gains', '+10 par nouvelle carte ou nouveau produit scellé ajouté (une seule fois par article) ; +10 par jour où tu ouvres l’app ; +100 de bienvenue ; +300 une fois pour un partage de l’app.'],
+      ['Gains', '+10 par nouvelle carte ou nouveau produit scellé ajouté (une seule fois par article) ; +10 par jour où tu ouvres l’app ; +100 de bienvenue ; +300 une fois pour un partage de l’app. Les articles importés depuis un tableur ne rapportent pas de PK.'],
       ['Sur ton appareil', 'Ton solde est enregistré avec ta collection, sur cet appareil. Il est inclus dans la sauvegarde. Il peut être perdu si les données du site sont effacées.'],
       ['Évolution', 'Les montants, les prix des compagnons et ces règles peuvent évoluer, et les PK peuvent être remis à zéro pendant la démonstration.']
     ] }

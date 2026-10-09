@@ -53,6 +53,18 @@
       this.setBed({ ask: false, err: 'Impossible : ' + (v ? 'la vente du ' + this.d2(v.date) + ' (' + edQtyText(v.qty) + ')' : 'une vente déjà saisie') + ' n’aurait plus assez d’exemplaires. Modifie ou supprime d’abord la vente.' });
       return;
     }
+    // Ventes qui désignent cet ajout (B2) : il doit garder assez d'exemplaires de l'article.
+    const need = {};
+    s.sales.forEach(v => { if (v.from && v.pid === pid) need[v.from] = (need[v.from] || 0) + v.qty; });
+    const short = Object.keys(need).find(aid => {
+      const a = purchases.find(q => q.id === aid), l = a && a.lines.find(q => q.pid === pid);
+      return s.purchases.some(q => q.id === aid) && (!l || l.qty < need[aid]);
+    });
+    if (short) {
+      const v = s.sales.find(q => q.from === short && q.pid === pid);
+      this.setBed({ ask: false, err: 'Impossible : la vente du ' + this.d2(v.date) + ' désigne un exemplaire de cet ajout. Modifie d’abord la vente (« Quel exemplaire part ? »).' });
+      return;
+    }
     const msg = done + ' · collection à ' + this.eur(this.snap(s, { purchases: purchases }).total);
     this.setState({ purchases: purchases, bed: null, toast: msg, edUndo: { msg: msg, purchases: s.purchases } });
     if (this._tt) clearTimeout(this._tt);

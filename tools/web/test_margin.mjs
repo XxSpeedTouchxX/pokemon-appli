@@ -130,3 +130,42 @@ test('démo complète : marges des 6 ventes, vérifiées à la main', () => {
   const total = Object.values(r.sales).reduce((t, v) => t + v.margin, 0);
   assert.ok(Object.keys(r.sales).length === 6 && Number.isFinite(total));
 });
+
+// ——— Vente d'un exemplaire précis (B2) : logique de la maquette + margin-patch.mjs, comme dans l'app ———
+import { applyMarginPatches } from './margin-patch.mjs';
+const Patched = new Function('DCLogic', applyMarginPatches(logic) + '\nreturn Component;')(class { constructor(props) { this.props = props || {}; } setState() {} });
+const mkP = items => { const c = new Patched({}); c.catalog = () => items.map(id => ({ id: id, type: 'card', name: id })); return c; };
+const from = (v, aid) => Object.assign(v, { from: aid });
+
+test('B2 : sans exemplaire désigné, le calcul corrigé donne les mêmes marges que la maquette', () => {
+  const s = state([buy('a1', '2026-09-01', [{ pid: 'A', qty: 2 }], 10), buy('a2', '2026-09-03', [{ pid: 'A', qty: 1 }], 8)], [sell('v1', '2026-09-05', 'A', 2, 30, 0, 1.5)]);
+  const a = mk(['A']).compute(s), b = mkP(['A']).compute(s);
+  near(b.sales.v1.margin, a.sales.v1.margin, 'marge'); near(b.stock.A.cost, a.stock.A.cost, 'coût restant');
+  const cd = mk(), full = state(cd.purchasesSeed('full'), cd.salesSeed('full')); full.platforms = cd.platformsSeed();
+  const pd = new Patched({}), r1 = cd.compute(full), r2 = pd.compute(full);
+  Object.keys(r1.sales).forEach(id => near(r2.sales[id].margin, r1.sales[id].margin, 'démo ' + id));
+});
+
+test('B2 : exemplaire désigné → coût de son ajout, le reste garde le bon coût', () => {
+  const c = mkP(['A']);
+  const r = c.compute(state([buy('a1', '2026-09-01', [{ pid: 'A', qty: 1 }], 10), buy('a2', '2026-09-03', [{ pid: 'A', qty: 1 }], 50)],
+    [from(sell('v1', '2026-09-05', 'A', 1, 60, 0, 0), 'a2')]));
+  near(r.sales.v1.cost, 50, 'coût de l’ajout a2'); near(r.sales.v1.margin, 10, 'marge'); near(r.stock.A.cost, 10, 'reste a1 à 10 €');
+});
+
+test('B2 : exemplaire tiré d’un lot → sa part du lot ; ajout sans prix → coût inconnu', () => {
+  const c = mkP(['A', 'B']);
+  const r = c.compute(state([buy('a1', '2026-09-01', [{ pid: 'A', qty: 1, ref: 25 }, { pid: 'B', qty: 1, ref: 75 }], 60), buy('a2', '2026-09-02', [{ pid: 'B', qty: 1 }], 20)],
+    [from(sell('v1', '2026-09-03', 'B', 1, 80, 0, 0), 'a1')]));
+  near(r.sales.v1.cost, 45, 'B porte 75 % de 60'); near(r.stock.B.cost, 20, 'reste a2');
+  const r2 = c.compute(state([buy('a1', '2026-09-01', [{ pid: 'A', qty: 1 }], null), buy('a2', '2026-09-02', [{ pid: 'A', qty: 1 }], 20)],
+    [from(sell('v1', '2026-09-03', 'A', 1, 30, 0, 0), 'a1')]));
+  assert.equal(r2.sales.v1.costUnknown, true); near(r2.sales.v1.cost, 0, 'coût inconnu'); near(r2.stock.A.cost, 20, 'reste a2 connu');
+});
+
+test('B2 : ajout désigné postérieur à la vente ou disparu → coût moyen', () => {
+  const c = mkP(['A']);
+  const r = c.compute(state([buy('a1', '2026-09-01', [{ pid: 'A', qty: 2 }], 20), buy('a2', '2026-09-10', [{ pid: 'A', qty: 1 }], 50)],
+    [from(sell('v1', '2026-09-05', 'A', 1, 30, 0, 0), 'a2'), from(sell('v2', '2026-09-06', 'A', 1, 30, 0, 0), 'zz')]));
+  near(r.sales.v1.cost, 10, 'a2 pas encore acheté'); near(r.sales.v2.cost, 10, 'ajout inconnu');
+});

@@ -6,15 +6,30 @@
 
 ---
 
-## 2026-10-09 — Vague 3 et fiabilisation (en cours)
+## 2026-10-09 — Vague 3 et fiabilisation livrées
 
 - **Contexte :** « go » du porteur : « Lance la vague 3 avec ouverture de booster, et fiabilise tout comme tu le sens ».
-- **Livré :**
+- **Livré, vague 3 :**
   - **K1, ouverture de booster :** animation d'entrée en SVG (booster, éclair, éventail de cartes, logo) ; environ 2 s à la première ouverture du jour, 0,6 s ensuite ; un appui la passe ; version calme si moins d'animations.
   - **D5, corriger ou supprimer un ajout :** crayon sur chaque ligne de l'historique d'achat ; quantité, prix, date, langue, état ; suppression confirmée ; « Annuler » pendant 6 s ; refus si une vente déjà saisie manquerait d'exemplaires.
   - **B7, source et date :** dates réelles des données dans les en-têtes, la fiche et les Réglages (fin du « 3 oct. à 07:00 » figé) ; bouton « i » dans Mon classeur ; « Hors ligne » indiqué.
   - **A4, visuels de secours et hors ligne :** visuels locaux des cartes de démo si TCGdex ne répond pas ; catalogue et prix du scellé gardés dès la première visite.
-  - **Correctif :** les nouveaux ajouts et ventes prennent la date du jour réelle (ils étaient datés du 03/10).
+  - **B1, cote selon l'état et la langue :** coefficients d'estimation affichés avec leur règle (Near Mint 100 %, Excellent 85 %, Joué 55 %, Boîte abîmée 85 % ; FR et EN 100 %, JP 70 %) ; la fiche montre le calcul ; interrupteur dans les Réglages.
+  - **B2, vendre un exemplaire précis :** « Quel exemplaire part ? » dans la vente ; la marge prend le prix d'achat de cet ajout (identification spécifique), sinon le coût moyen ; 4 tests de marge en plus.
+  - **D1, classeur :** tri (cote, récents, nom), filtres (langue, état, rareté, extension), glisser pour changer de page.
+  - **C1, importer un tableur :** CSV lu sur l'appareil, colonnes devinées (français, anglais, export Dropicards), rapprochement avec le catalogue, lignes à vérifier, ajout avec « Annuler ».
+  - **K2, fonds animés :** décors CSS selon l'écran et le compagnon (holo, gemmes, radar, bulles, braises, orage) ; Réglages : Animés, Calmes, Sans.
+  - **K3, micro-animations :** ajout, gain de PK, palier, déblocage.
+- **Livré, fiabilisation :**
+  - **A1** (marge) et **A3** (sauvegarde), **H1, H4** (pages légales) : livrés plus tôt dans la journée.
+  - **A5, alléger :** `app.js` minifié, −28 % une fois compressé.
+  - **A2, tests navigateur dans le dépôt :** 28 suites dans `tools/web/e2e`, lancées par GitHub Actions après les tests unitaires.
+  - **Correctifs :** les nouveaux ajouts et ventes prennent la date du jour réelle (ils étaient datés du 03/10) ; l'export CSV donne la part de chaque ligne d'un lot (et non le prix du lot entier).
+- **Choix par défaut, à valider par le porteur :**
+  - pas de PK pour les articles importés depuis un tableur (sinon un fichier inventé suffirait) ;
+  - coefficients d'état et de langue (provisoires, à caler sur les prix Cardmarket par état) ;
+  - fonds animés activés par défaut.
+- **Reste à faire :** modèles d'import PokéItem et PokéCardex (exports réels du porteur), catalogue mis à jour par différence, réglage du scan sur téléphone (C2), logo en grande taille (F1).
 
 ## 2026-10-09 — Vague 1 des propositions v2 : navigation, Compte, vues, bulle d'infos, mode Admin
 

@@ -93,6 +93,12 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - choix de vue (Territoire : liste, galerie, compacte, carte ; Marché : liste, galerie, compacte, grandes cartes) ;
   - bulle d'infos accrochée aux boutiques ;
   - mode Admin (7 appuis sur « Version » et code ; PK, prix, profil, palier, date, interrupteurs, données, diagnostic).
+- **Vague 3 et fiabilisation livrées (2026-10-09, « go » du porteur) :**
+  - ouverture de booster à l'entrée ; corriger ou supprimer un ajout ; source et date sur chaque cote ; visuels de secours et hors ligne ;
+  - cote selon l'état et la langue (coefficients affichés) ; vente d'un exemplaire précis ;
+  - classeur trié, filtré, à glisser ; import d'un tableur CSV (sans PK) ;
+  - fonds animés (Animés, Calmes, Sans) et micro-animations ;
+  - app.js minifié ; tests navigateur dans `tools/web/e2e` et en CI.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

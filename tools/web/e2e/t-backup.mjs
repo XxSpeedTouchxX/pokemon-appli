@@ -1,0 +1,66 @@
+// A3 : sauvegarde (JSON), tableur (CSV), restauration (remplacer, ajouter), fichier invalide, rappel sur l'accueil.
+import { readFileSync, writeFileSync } from 'node:fs';
+import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
+const BASE = E2E + '/?today=2026-10-09';
+const browser = await launch();
+const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
+const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true }); await withFonts(ctx);
+const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+page.on('dialog', d => d.accept());
+const saved = () => page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || 'null'));
+await page.goto(BASE + '&start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+await page.click('button:has-text("Sauvegarder ou restaurer")'); await page.waitForTimeout(500);
+const info = await page.locator('section[aria-label="Sauvegarder"]').innerText();
+ok('écran sauvegarde : « ' + info.split('\n').filter(l => /Contenu/.test(l))[0] + ' »', /Aucune sauvegarde/.test(info) && /Contenu : \d+ cartes et \d+ produits scellés ajoutés, \d+ ventes, 100 PK/.test(info.replace(/\s+/g, ' ')));
+const before = await saved();
+let [dl] = await Promise.all([page.waitForEvent('download'), page.click('button:has-text("Sauvegarder (fichier)")')]);
+const jf = shot(dl.suggestedFilename()); await dl.saveAs(jf);
+const doc = JSON.parse(readFileSync(jf, 'utf8'));
+ok('fichier ' + dl.suggestedFilename() + ' : ' + doc.data.purchases.length + ' ajouts, ' + doc.data.sales.length + ' ventes, ' + doc.data.pk + ' PK', doc.app === 'dropicards' && doc.kind === 'sauvegarde' && doc.data.purchases.length === before.purchases.length && doc.data.sales.length === before.sales.length && /2026-10-09\.json$/.test(dl.suggestedFilename()));
+await page.waitForFunction(() => (JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').backupAt) === '2026-10-09', null, { timeout: 5000 }).catch(() => {});
+ok('date de sauvegarde enregistrée', (await saved()).backupAt === '2026-10-09' && /Dernière sauvegarde le 09\/10\/2026/.test(await page.locator('section[aria-label="Sauvegarder"]').innerText()));
+[dl] = await Promise.all([page.waitForEvent('download'), page.click('button:has-text("Exporter en tableur (CSV)")')]);
+const cf = shot(dl.suggestedFilename()); await dl.saveAs(cf);
+const csv = readFileSync(cf, 'utf8'), lines = csv.split('\r\n');
+ok('tableur : BOM, « ; », ' + (lines.length - 1) + ' lignes, en-tête « ' + lines[0].replace('﻿', '').slice(0, 50) + '… »', csv.charCodeAt(0) === 0xfeff && /^﻿Date;Article;Détail;Type;Langue;État;Quantité/.test(lines[0]) && lines.length - 1 >= before.purchases.length);
+// Vider, puis restaurer en remplaçant.
+await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(400);
+await page.click('button:has-text("Vider ma collection")'); await page.waitForTimeout(500);
+ok('collection vidée', (await saved()).purchases.length === 0);
+await page.click('button:has-text("Sauvegarder ou restaurer")'); await page.waitForTimeout(400);
+await page.setInputFiles('#pkm-io-file', jf); await page.waitForTimeout(500);
+const pv = await page.locator('[aria-label="Aperçu de la sauvegarde"]').innerText();
+ok('aperçu : « ' + pv.replace(/\s+/g, ' ').slice(0, 90) + '… »', /Sauvegarde du 09\/10\/2026/.test(pv) && /\d+ cartes et \d+ produits scellés ajoutés, \d+ ventes, 100 PK/.test(pv.replace(/\s+/g, ' ')));
+await Promise.all([page.waitForEvent('load'), page.click('button:has-text("Remplacer ma collection")')]); await page.waitForTimeout(1500);
+let after = await saved();
+ok('remplacée : ' + after.purchases.length + ' ajouts, ' + after.sales.length + ' ventes', after.purchases.length === before.purchases.length && after.sales.length === before.sales.length && after.pk === before.pk);
+// Ajouter à la collection : une sauvegarde avec un ajout de plus.
+const extra = JSON.parse(JSON.stringify(doc)); extra.data.purchases.push({ id: 'n100', date: '2026-10-01', seq: 100, lines: [{ pid: extra.data.purchases[0].lines[0].pid, qty: 3, lang: 'EN', cond: 'EX' }], total: 12, where: 'Test', by: 'toi' });
+writeFileSync('dl/extra.json', JSON.stringify(extra));
+await page.goto(BASE + '&start=io', { waitUntil: 'load' }); await page.waitForTimeout(1200);
+await page.setInputFiles('#pkm-io-file', 'dl/extra.json'); await page.waitForTimeout(400);
+await Promise.all([page.waitForEvent('load'), page.click('button:has-text("Ajouter à ma collection")')]); await page.waitForTimeout(1500);
+after = await saved();
+ok('ajoutée : ' + after.purchases.length + ' ajouts (un seul nouveau), ids uniques', after.purchases.length === before.purchases.length + 1 && new Set(after.purchases.map(a => a.id)).size === after.purchases.length);
+// Fichier invalide.
+writeFileSync('dl/autre.json', '{"bonjour": 1}');
+await page.setInputFiles('#pkm-io-file', 'dl/autre.json'); await page.waitForTimeout(400);
+ok('fichier invalide : message', /pas une sauvegarde Dropicards/.test(await page.locator('section[aria-label="Restaurer ou importer"]').innerText()));
+await page.screenshot({ path: shot('backup-ecran.png'), fullPage: false });
+// Rappel sur l'accueil.
+await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); delete d.backupAt; d.since = '2026-09-20'; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
+await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1200);
+const rm = page.locator('section[aria-label="Rappel de sauvegarde"]');
+ok('rappel sans sauvegarde après 19 jours : « ' + (await rm.innerText()).split('\n')[0] + ' »', (await rm.count()) === 1 && /fais-en une sauvegarde/.test(await rm.innerText()));
+await page.screenshot({ path: shot('backup-rappel.png'), clip: { x: 0, y: 0, width: 390, height: 800 } });
+await rm.locator('button:has-text("Plus tard")').click(); await page.waitForTimeout(400);
+ok('« Plus tard » : rappel masqué 7 jours', (await rm.count()) === 0 && (await saved()).backupSnooze === '2026-10-16');
+await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); d.backupAt = '2026-08-30'; delete d.backupSnooze; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
+await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
+ok('rappel après 40 jours : « ' + (await rm.innerText()).split('\n')[0] + ' »', /il y a 40 jours/.test(await rm.innerText()));
+await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); d.backupAt = '2026-10-01'; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
+await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
+ok('sauvegarde récente : pas de rappel', (await rm.count()) === 0);
+ok('aucune erreur JS', errors.length === 0);
+console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
+await browser.close();

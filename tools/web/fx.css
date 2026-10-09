@@ -1,0 +1,74 @@
+/* ——— Fonds animés (K2) et micro-animations (K3) ; fx.js choisit le décor ; 2026-10-09 ———
+   Calque décoratif derrière l'app (#pkm-fx, 8 éléments), en CSS seulement : rien ne tourne en JavaScript.
+   Décor selon le contexte (classes sur <html>) : accueil (reflet holo et étincelles), Marché (gemmes qui montent),
+   Territoire (ondes radar), compagnons à thème (bulles pour Kyogre, braises pour Groudon, éclairs et pluie pour
+   Rayquaza). Réglages › « Fonds animés » : Animés, Calmes (deux fois plus lents, plus discrets) ou Sans.
+   Arrêtés si l'app est cachée, si l'appareil demande moins d'animations ou si l'Admin coupe les animations. */
+.pkm-root { isolation: isolate; }
+#pkm-fx { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; display: none; }
+html.pkm-fx-on:not(.pkm-classic) #pkm-fx { display: block; }
+#pkm-fx i { position: absolute; display: block; opacity: 0; will-change: transform, opacity; }
+html.pkm-fx-paused #pkm-fx i, html.pkm-fx-paused #pkm-fx::before { animation-play-state: paused !important; }
+html.pkm-fx-calm #pkm-fx i, html.pkm-fx-calm #pkm-fx::before { animation-duration: var(--fx-d2, 30s) !important; }
+html.pkm-fx-calm #pkm-fx { opacity: 0.6; }
+
+/* Accueil (et autres écrans) : reflet holo qui traverse lentement, étincelles. */
+#pkm-fx::before { content: ''; position: absolute; inset: -40% -60%; opacity: 0;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.16) 46%, rgba(255, 190, 240, 0.1) 50%, rgba(170, 230, 255, 0.12) 54%, transparent 62%); }
+html.pkm-fx-holo #pkm-fx::before { animation: pkmFxHolo 11s ease-in-out infinite; --fx-d2: 22s; }
+@keyframes pkmFxHolo { 0% { opacity: 0; transform: translateX(-45%); } 15% { opacity: 1; } 55% { opacity: 1; transform: translateX(45%); } 70%, 100% { opacity: 0; transform: translateX(45%); } }
+html.pkm-fx-holo #pkm-fx i { width: 10px; height: 10px; animation: pkmFxSpark 6s ease-in-out infinite;
+  background: radial-gradient(circle, #FFFFFF 0 18%, transparent 20%), linear-gradient(0deg, transparent 44%, rgba(255, 255, 255, 0.9) 47% 53%, transparent 56%), linear-gradient(90deg, transparent 44%, rgba(255, 255, 255, 0.9) 47% 53%, transparent 56%); }
+@keyframes pkmFxSpark { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 50% { opacity: 0.85; transform: scale(1) rotate(45deg); } }
+
+/* Marché : petites gemmes qui montent. */
+html.pkm-fx-gems #pkm-fx i { width: 12px; height: 14px; bottom: -20px; animation: pkmFxRise 14s linear infinite;
+  clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: linear-gradient(160deg, #FFF1A0, #FFD60A 45%, #E8A000); }
+@keyframes pkmFxRise { 0% { opacity: 0; transform: translateY(0) rotate(0deg); } 10% { opacity: 0.55; } 85% { opacity: 0.45; } 100% { opacity: 0; transform: translateY(-110vh) rotate(160deg); } }
+
+/* Territoire : ondes radar depuis le bas de l'écran. */
+html.pkm-fx-radar #pkm-fx i { left: 50%; bottom: 8%; width: 40px; height: 40px; margin-left: -20px; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35); animation: pkmFxWave 6s ease-out infinite; }
+@keyframes pkmFxWave { 0% { opacity: 0.7; transform: scale(0.2); } 100% { opacity: 0; transform: scale(14); } }
+
+/* Kyogre (océan) : bulles ; Groudon (volcan) : braises. */
+html.pkm-fx-bubbles #pkm-fx i { bottom: -20px; width: 14px; height: 14px; border-radius: 50%; animation: pkmFxRise 12s ease-in infinite;
+  border: 1.5px solid rgba(220, 245, 255, 0.55); background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.5), transparent 45%); }
+html.pkm-fx-embers #pkm-fx i { bottom: -10px; width: 5px; height: 5px; border-radius: 50%; animation: pkmFxRise 9s ease-in infinite;
+  background: #FFB347; box-shadow: 0 0 8px 2px rgba(255, 120, 40, 0.7); }
+
+/* Rayquaza (ouragan) : pluie fine et éclair. */
+html.pkm-fx-storm #pkm-fx i { top: -30%; width: 1.5px; height: 70px; background: linear-gradient(transparent, rgba(220, 255, 245, 0.45));
+  transform: rotate(14deg); animation: pkmFxRain 1.6s linear infinite; --fx-d2: 3.2s; }
+@keyframes pkmFxRain { 0% { opacity: 0; transform: translate(0, 0) rotate(14deg); } 10% { opacity: 1; } 100% { opacity: 0.6; transform: translate(-30vh, 140vh) rotate(14deg); } }
+html.pkm-fx-storm #pkm-fx::before { inset: 0; background: rgba(230, 255, 250, 0.22); animation: pkmFxFlash 13s linear infinite; --fx-d2: 26s; }
+@keyframes pkmFxFlash { 0%, 90%, 93%, 100% { opacity: 0; } 91%, 94% { opacity: 1; } }
+
+/* Positions et décalages des 8 éléments (communs à tous les décors). */
+#pkm-fx i:nth-child(1) { left: 8%; top: 18%; animation-delay: 0s; }
+#pkm-fx i:nth-child(2) { left: 26%; top: 62%; animation-delay: -1.7s; }
+#pkm-fx i:nth-child(3) { left: 44%; top: 34%; animation-delay: -3.1s; }
+#pkm-fx i:nth-child(4) { left: 63%; top: 80%; animation-delay: -4.6s; }
+#pkm-fx i:nth-child(5) { left: 81%; top: 22%; animation-delay: -2.4s; }
+#pkm-fx i:nth-child(6) { left: 92%; top: 55%; animation-delay: -5.5s; }
+#pkm-fx i:nth-child(7) { left: 15%; top: 88%; animation-delay: -7.2s; }
+#pkm-fx i:nth-child(8) { left: 53%; top: 8%; animation-delay: -8.8s; }
+html.pkm-fx-radar #pkm-fx i:nth-child(n) { left: 50%; top: auto; }
+html.pkm-fx-radar #pkm-fx i:nth-child(2) { animation-delay: -2s; } html.pkm-fx-radar #pkm-fx i:nth-child(3) { animation-delay: -4s; }
+html.pkm-fx-radar #pkm-fx i:nth-child(n+4) { display: none; }
+html.pkm-fx-gems #pkm-fx i:nth-child(n), html.pkm-fx-bubbles #pkm-fx i:nth-child(n), html.pkm-fx-embers #pkm-fx i:nth-child(n) { top: auto; }
+html.pkm-fx-storm #pkm-fx i:nth-child(n) { top: -30%; }
+
+/* ——— Micro-animations (K3) : éléments ajoutés au-dessus de l'app, retirés après l'animation ——— */
+.pkm-burst { position: fixed; z-index: 80; width: 0; height: 0; pointer-events: none; }
+.pkm-burst i { position: absolute; left: -6px; top: -8px; width: 12px; height: 16px; opacity: 0; animation: pkmBurst 0.9s cubic-bezier(0.15, 0.7, 0.3, 1) forwards; }
+.pkm-burst-card i { border-radius: 2px; background: linear-gradient(160deg, #FFFFFF, #FFE36B 60%, #FFB800); box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.6); }
+.pkm-burst-gem i { width: 11px; height: 13px; clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%); background: linear-gradient(160deg, #FFF1A0, #FFD60A 45%, #E8A000); animation-name: pkmGemRain; animation-duration: 1.1s; }
+.pkm-burst-star i { width: 14px; height: 14px; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); background: #FFE36B; animation-duration: 1.2s; }
+@keyframes pkmBurst { 0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.6); } 100% { opacity: 0; transform: translate(var(--bx), var(--by)) rotate(var(--br)) scale(1); } }
+@keyframes pkmGemRain { 0% { opacity: 0; transform: translate(0, 0) scale(0.5); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--bx), calc(var(--by) * -1 + 60px)) rotate(var(--br)) scale(1); } }
+/* Palier franchi ou compagnon débloqué : halo sous le message. */
+@keyframes pkmHalo { 0% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.75); } 100% { box-shadow: 0 0 0 18px rgba(255, 214, 10, 0); } }
+.pkm-halo { animation: pkmHalo 0.9s ease-out 2; }
+@media (prefers-reduced-motion: reduce) { #pkm-fx { display: none !important; } .pkm-burst { display: none; } .pkm-halo { animation: none; } }
+html.pkm-calm #pkm-fx, html.pkm-calm .pkm-burst { display: none !important; }

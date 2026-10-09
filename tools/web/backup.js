@@ -68,16 +68,17 @@
     });
   };
   proto.bkCsv = function () {
-    const s = this.st(), cat = this.catalog(), byId = {};
+    const s = this.st(), cat = this.catalog(), byId = {}, buys = this.compute(s).buys;
     cat.forEach(p => { byId[p.id] = p; });
     const head = ['Date', 'Article', 'Détail', 'Type', 'Langue', 'État', 'Quantité', 'Prix payé (€)', 'Cote unitaire (€)', 'Valeur (€)', 'Origine'];
     const rows = [];
-    (s.purchases || []).forEach(a => (a.lines || []).forEach(l => {
+    // Prix payé : part de la ligne (un lot est réparti entre ses articles, comme dans la fiche).
+    (s.purchases || []).forEach(a => (a.lines || []).forEach((l, li) => {
       const p = byId[l.pid];
       if (!p) return;
       const k = this.cote(p), q = l.qty || 0;
       rows.push([a.date, p.name, p.sub, p.type === 'sealed' ? 'Produit scellé' : 'Carte', l.lang || p.lang || 'FR', l.cond || '', q,
-        a.total !== null && a.total !== undefined ? bkNum(a.total) : '', k !== null ? bkNum(k) : '', k !== null ? bkNum(k * q) : '', a.where || '']);
+        buys[a.id] ? bkNum(buys[a.id][li]) : '', k !== null ? bkNum(k) : '', k !== null ? bkNum(k * q) : '', a.where || '']);
     }));
     const text = '\ufeff' + [head].concat(rows).map(r => r.map(bkCsv).join(';')).join('\r\n');
     bkGive('dropicards-collection-' + realToday() + '.csv', 'text/csv', text).then(ok => { if (ok) { this.setState({ toast: 'Tableur exporté : ' + bkPlural(rows.length, 'ligne', 'lignes') }); this.flash(); } });

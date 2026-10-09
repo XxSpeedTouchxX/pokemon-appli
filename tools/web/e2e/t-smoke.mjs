@@ -1,0 +1,50 @@
+import { launch, BASE, shot, ROOT } from './helpers.mjs';
+const browser = await launch();
+const errors = [];
+const check = async (width, height, label) => {
+  const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 2 });
+  page.on('pageerror', e => errors.push(label + ' pageerror: ' + e.message));
+  // Visuels externes coupés (CDN TCGdex, pokemontcg.io, fond de carte) : l'app affiche ses visuels de secours.
+  await page.route(/openfreemap|tcgdex|pokemontcg|fonts\.(googleapis|gstatic)/, r => r.abort());
+  page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(label + ' console: ' + m.text()); });
+  await page.goto(BASE + '/', { waitUntil: 'load' });
+  await page.waitForSelector('text=Ma collection', { timeout: 5000 });
+  const steps = [];
+  const has = async t => (await page.locator('text=' + t).count()) > 0;
+  steps.push(['accueil', (await page.locator('section[aria-label="Mon classeur"]').count()) === 1]);
+  await page.click('button[aria-label="Territoire"]'); await page.click('button:has-text("Démo · boutiques partenaires fictives")'); steps.push(['territoire', await has('Comptoir des Cartes')]);
+  // la carte : repères dans le cadre
+  const box = await page.locator('section[aria-label="Carte des magasins"]').boundingBox();
+  const pins = await page.locator('section[aria-label="Carte des magasins"] button').evaluateAll(bs => bs.map(b => { const r = b.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; }));
+  steps.push(['repères dans la carte', pins.length === 8 && pins.every(([l, t, r, b]) => l >= box.x - 1 && r <= box.x + box.width + 1 && t >= box.y - 1 && b <= box.y + box.height + 1)]);
+  await page.click('[aria-label="Produit recherché"] button:has-text("ETB")'); await page.click('[aria-label="Probabilité d’arrivage"] button:has-text("Forte")');
+  steps.push(['filtre ETB forte', (await page.locator('text=3 magasins').count()) > 0]);
+  await page.click('button[aria-label^="Comptoir des Cartes"]'); steps.push(['fiche magasin', await has('Historique des arrivages')]);
+  await page.click('button:has-text("Me prévenir des arrivages")'); steps.push(['alerte', await has('Alerte activée')]);
+  await page.click('button[aria-label="Retour"]'); await page.click('button[aria-label="Scanner une carte ou un produit"]');
+  // Scan réel : sans caméra dans ce test, panneau de repli ; l'ajout passe par l'onglet Scellé.
+  await page.waitForSelector('section[aria-label="Pas de caméra disponible"], section[aria-label="Caméra refusée"]', { timeout: 10000 }).catch(() => {});
+  steps.push(['scan', await has('Prendre une photo')]);
+  await page.click('button:has-text("Scellé")'); await page.waitForSelector('[aria-label="Produits scellés"] button');
+  await page.click('[aria-label="Produits scellés"] button'); steps.push(['résultat du scan', await has('Ajouter à ma collection')]);
+  await page.click('button:has-text("Ajouter à ma collection")'); steps.push(['ajout', await has('ajouté')]);
+  await page.click('button[aria-label="Fermer le scan"]'); await page.click('button[aria-label="Collection"]');
+  await page.fill('input[type="search"]', 'Mew'); steps.push(['recherche', (await page.locator('text=1 référence').count()) > 0]);
+  await page.click('button[aria-label^="Mon profil"]'); steps.push(['profil', await has('Type de collectionneur')]);
+  const hscroll = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  steps.push(['pas de défilement horizontal', !hscroll]);
+  console.log(label, steps.map(([k, ok]) => (ok ? '✓ ' : '✗ ') + k).join(' | '));
+  return page;
+};
+await check(360, 740, 'téléphone 360');
+const p = await check(390, 844, 'téléphone 390');
+await p.goto(BASE + '/', { waitUntil: 'load' }); await p.waitForSelector('text=Ma collection');
+await p.screenshot({ path: shot('home-390.png') });
+await p.click('button[aria-label="Territoire"]'); await p.waitForTimeout(200); await p.screenshot({ path: shot('territoire-390.png') });
+const d = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+await d.route(/openfreemap|tcgdex|pokemontcg/, r => r.abort());
+d.on('pageerror', e => errors.push('bureau pageerror: ' + e.message));
+await d.goto(BASE + '/#territoire', { waitUntil: 'load' }); await d.click('button:has-text("Démo · boutiques partenaires fictives")'); await d.waitForSelector('text=Comptoir des Cartes');
+await d.screenshot({ path: shot('bureau.png') });
+console.log(errors.length ? 'ERREURS :\n' + errors.join('\n') : 'Aucune erreur JavaScript.');
+await browser.close();

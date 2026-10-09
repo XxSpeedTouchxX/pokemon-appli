@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test test_home.mjs test_margin.mjs test_radar.mjs test_scan.mjs test_theme.mjs"
+    "e2e": "node e2e/run.mjs",
+    "test": "node --test test_home.mjs test_import.mjs test_margin.mjs test_radar.mjs test_scan.mjs test_theme.mjs"
   },
   "devDependencies": {
     "@fontsource/luckiest-guy": "5.2.6",
@@ -13,7 +14,9 @@
     "@fontsource/sora": "5.2.6",
     "@tesseract.js-data/fra": "1.0.0",
     "@vue/compiler-dom": "3.5.43",
+    "esbuild": "0.25.10",
     "maplibre-gl": "6.12.0",
+    "playwright-core": "1.56.1",
     "tesseract.js": "7.0.0",
     "tesseract.js-core": "7.0.0",
     "vue": "3.5.43"
