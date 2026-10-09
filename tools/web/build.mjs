@@ -74,8 +74,10 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+) ([\w.]+
 // Compteur de PK (fragment pk-counter) à gauche de l'avatar : accueil et grands titres (Collection, Marché, Territoire).
 {
   const avatar = '<button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" style="';
-  patch(avatar + 'flex: none; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + FRAG['pk-counter'] + avatar + 'flex: none; width: 44px;');
-  patch(avatar + 'justify-self: end; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + FRAG['pk-counter'] + avatar + 'flex: none; width: 44px;');
+  // Badge « Admin » (admin.js) avant le compteur, tant que le mode Admin est actif ; compteur masquable depuis l'Admin.
+  const right = FRAG['admin-badge'] + '<sc-if value="{{ pk.show }}" hint-placeholder-val="{{ true }}">\n' + FRAG['pk-counter'] + '</sc-if>\n';
+  patch(avatar + 'flex: none; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + right + avatar + 'flex: none; width: 44px;');
+  patch(avatar + 'justify-self: end; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + right + avatar + 'flex: none; width: 44px;');
   patch('object-fit: cover">\n</button>\n</header>', 'object-fit: cover">\n</button>\n</span>\n</header>', 2);
 }
 // Accueil (octobre 2026, tools/web/home.js) : recherche dans le catalogue, valeur de la collection, Mon classeur,
@@ -173,6 +175,10 @@ patch(`<span style="font-size: 13px; color: #9AA8C3">{{ pf.since }}</span>
 }
 // Panneau « Mes PK » (pk.js), ouvert par le compteur de l'en-tête.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
+patch('onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim" style="', 'onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim" style="visibility: {{ admv.scan }}; ');
+patch('onClick="{{ tabTerritory }}" aria-label="Territoire" aria-current="{{ tab.terCur }}" style="', 'onClick="{{ tabTerritory }}" aria-label="Territoire" aria-current="{{ tab.terCur }}" style="visibility: {{ admv.ter }}; ');
 // Réglages, « À propos » : crédit des sprites des compagnons et du moteur de lecture du scan.
 patch('sont des marques de leurs propriétaires respectifs.</p>', 'sont des marques de leurs propriétaires respectifs. Compagnons de l’accueil : sprites de Pokémon Noir et Blanc (© The Pokémon Company), via PokeAPI. Scan : lecture sur l’appareil avec Tesseract.js et son modèle français (licence Apache 2.0) ; aucune image n’est envoyée.</p>');
 // Radar : écran plein écran (carte de France des boutiques réelles), ouvert depuis un bandeau de Territoire.
@@ -189,6 +195,7 @@ patch('>Rien ne correspond à ta recherche.<', '>{{ coll.emptyText }}<');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs');
+patch('partenaires de Territoire fictifs</p>', 'partenaires de Territoire fictifs</p>\n<button type="button" onClick="{{ adm.tapVersion }}" aria-label="{{ adm.versionLabel }}" style="align-self: flex-start; min-height: 32px; padding: 0; border: 0; background: transparent; color: #7D8BA8; font: inherit; font-size: 12px; cursor: default">{{ adm.versionLabel }}</button>');
 // Articles mis en avant (tools/web/showcase.js).
 // - Vignettes des listes (ventes, lots, arrivages, Marché, scan…) : plus larges pour le scellé (largeur × wk),
 //   cadre doré des cartes ultra rares (ring).
@@ -441,7 +448,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js');
 // Compagnons de l'accueil : n° et nom français des 151 Pokémon de Kanto, puis Latias, Latios, Kyogre, Groudon et
 // Rayquaza (tools/sprites/companions.json) ; chacun a son sprite animé, son image fixe et son icône.
 const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 'utf8')).pokemon.map(([n, nom]) => [n, nom]);
@@ -466,7 +473,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -486,7 +493,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -516,6 +523,7 @@ ${code}
   DEVICE.enabled = !props.demo;
   if (DEVICE.enabled) inst.restoreSaved();
   // PK : bienvenue la première fois, puis 10 PK par jour d'ouverture (pk.js).
+  inst.adminInit();
   inst.profileInit();
   inst.pkInit();
   // Défilement (demande du porteur, 2026-10-09) : chaque changement de page (onglet, fiche, retour, autre carte ou
@@ -628,6 +636,9 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 .pkm-pop { animation: pkmPop 0.18s ease-out both; transform-origin: top right; }
 .pkm-plus { transition: transform 0.2s ease; }
 @media (prefers-reduced-motion: reduce) { .pkm-pop { animation: none; } .pkm-plus { transition: none; } }
+/* Mode Admin, animations désactivées : plus aucune animation ni transition. */
+section[aria-label="Panneau Admin"] > * { flex-shrink: 0; }
+html.pkm-calm *, html.pkm-calm *::before, html.pkm-calm *::after { animation: none !important; transition: none !important; }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${cssVars()}

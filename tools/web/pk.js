@@ -22,7 +22,13 @@
   const pkPriceOf = n => PK_SET[n] ? PK_SET[n] : PK_FREE.indexOf(n) >= 0 ? 0 : HOME_THEMES[n] ? 500 : PK_LEGEND.indexOf(n) >= 0 ? 400
     : PK_STAGE2.indexOf(n) >= 0 ? 200 : PK_STAGE1.indexOf(n) >= 0 ? 100 : 50;
   const PK_SHOP = {};
-  HOME_BUDDIES.forEach(([n]) => { const p = pkPriceOf(n); if (p) PK_SHOP[n] = p; });
+  // Prix en vigueur : règle des stades, puis prix fixés depuis le mode Admin (admin.js) ; PK désactivés : tout est offert.
+  const pkApplyPrices = (over, off) => {
+    Object.keys(PK_SHOP).forEach(k => { delete PK_SHOP[k]; });
+    if (off) return;
+    HOME_BUDDIES.forEach(([n]) => { const p = over && over[n] !== undefined ? Number(over[n]) : pkPriceOf(n); if (p > 0) PK_SHOP[n] = p; });
+  };
+  pkApplyPrices(null, false);
   const PK_WELCOME = 100, PK_DAY = 10, PK_NEW = 10, PK_SHARE = 300, PK_GAIN_MS = 2600, PK_V = 2;
   // Partage de l'app (+300 PK, une fois) : réseaux proposés, ou la feuille de partage du téléphone.
   const PK_URL = 'https://pokemon-appli.pages.dev';

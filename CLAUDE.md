@@ -87,6 +87,12 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - +300 PK une fois pour un partage sur un réseau social ; parrainage (+500) **mis en attente** par le porteur ;
   - logo de « Mon classeur » : la gemme des PK remplace la Poké Ball ;
   - sur l'appareil, sans achat en argent réel ni valeur en euros ; gains et règles **validés par le porteur (2026-10-08)** ; prochains déblocages à définir.
+- **Vague 1 livrée (2026-10-09, « go » du porteur) :**
+  - chaque page s'ouvre en haut, réglages gardés au retour ;
+  - page Compte : palier en tête, texte qui s'écrit lettre par lettre, profil replié qui se déplie ;
+  - choix de vue (Territoire : liste, galerie, compacte, carte ; Marché : liste, galerie, compacte, grandes cartes) ;
+  - bulle d'infos accrochée aux boutiques ;
+  - mode Admin (7 appuis sur « Version » et code ; PK, prix, profil, palier, date, interrupteurs, données, diagnostic).
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

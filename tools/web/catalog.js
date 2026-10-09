@@ -19,10 +19,19 @@
   const LIMIT = 40;
   // Adresses d'images qui n'ont pas chargé (photos et logos) : l'app affiche alors le visuel suivant.
   const BROKEN = new Set();
-  // Date du jour réelle (heure locale) pour le scellé, le Radar et les Sorties ; ?today=AAAA-MM-JJ pour les tests.
+  // Date du jour réelle (heure locale) pour le scellé, le Radar et les Sorties ; ?today=AAAA-MM-JJ pour les tests,
+  // ou date simulée par le mode Admin.
   // La collection de démo garde sa date fixe (today() de la maquette).
+  // Date simulée par le mode Admin (admin.js) : lue dans la collection enregistrée, avant tout calcul.
+  const ADMIN_TODAY = (function () {
+    try {
+      const a = (JSON.parse(window.localStorage.getItem('pkm-collection-v1') || '{}') || {}).admin || {};
+      return a.on && /^\d{4}-\d{2}-\d{2}$/.test(a.today || '') ? a.today : '';
+    } catch (e) { return ''; }
+  })();
   const realToday = function () {
     try { const t = new URLSearchParams(location.search).get('today'); if (/^\d{4}-\d{2}-\d{2}$/.test(t || '')) return t; } catch (e) { /* adresse sans paramètres */ }
+    if (ADMIN_TODAY) return ADMIN_TODAY;
     const d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   };

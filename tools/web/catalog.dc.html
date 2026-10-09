@@ -636,10 +636,12 @@
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600">Comment on estime la chance ?</h2>
 <p style="margin: 0; font-size: 12.5px; line-height: 1.5; color: #9AA8C3">C’est une estimation expliquée, jamais un stock réel : type de boutique (une boutique de cartes avant une grande surface), mention des cartes à collectionner sur sa fiche OpenStreetMap, produit recherché et calendrier des sorties. Chaque fiche détaille les points (« Pourquoi ? »). Les signalements des collectionneurs l’affineront quand un serveur existera.</p>
 </section>
+<sc-if value="{{ tx.demoAllowed }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ tx.toggleDemo }}" aria-expanded="{{ tx.demoOpen }}" style="flex: none; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 14px; border: 1px dashed #3A4A75; border-radius: 18px; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 14px; font-weight: 700">Démo · boutiques partenaires fictives</span><span style="font-size: 12px; color: #9AA8C3">Ce que verrait un collectionneur avec des boutiques partenaires de PKM</span></span>
 <span style="flex: none; font-size: 13px; font-weight: 700; color: #B9C5FF">{{ tx.demoLabel }}</span>
 </button>
+</sc-if>
 
 <!-- fragment: buddy-picker -->
 <sc-if value="{{ hb.picking }}" hint-placeholder-val="{{ false }}">
@@ -875,6 +877,103 @@
 </span>
 </button>
 </sc-for>
+</div>
+</sc-if>
+
+<!-- fragment: admin-badge -->
+<sc-if value="{{ adm.on }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ adm.open }}" aria-label="Ouvrir le panneau Admin" style="flex: none; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer"><span style="width: 34px; height: 34px; border-radius: 17px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.2-7.5 9.5-4.4-1.3-7.5-5.1-7.5-9.5V6z"></path><path d="M9 12l2 2 4-4"></path></svg></span></button>
+</sc-if>
+
+<!-- fragment: admin-lock -->
+<sc-if value="{{ adm.lock }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(3, 6, 14, 0.62)">
+<section aria-label="Code Admin" role="dialog" aria-modal="true" style="width: 100%; max-width: 340px; box-sizing: border-box; padding: 18px; border-radius: 24px; border: 1px solid #24345C; background: #0F1828; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">{{ adm.lockTitle }}</h2>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">{{ adm.lockText }}</p>
+<input type="password" inputmode="numeric" autocomplete="off" maxlength="6" aria-label="Code à 6 chiffres" value="{{ adm.code }}" onChange="{{ adm.onCode }}" style="height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid #1E2B45; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; text-align: center; letter-spacing: 0.4em; font-size: 20px">
+<sc-if value="{{ adm.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13px; color: #F7C77E">{{ adm.msg }}</p></sc-if>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
+<button type="button" onClick="{{ adm.cancel }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Annuler</button>
+<button type="button" onClick="{{ adm.submit }}" style="min-height: 44px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Valider</button>
+</div>
+</section>
+</div>
+</sc-if>
+
+<!-- fragment: admin-sheet -->
+<sc-if value="{{ adm.sheet }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
+<button type="button" aria-label="Fermer le panneau Admin" onClick="{{ adm.close }}" style="flex: 1 1 auto; min-height: 36px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
+<section aria-label="Panneau Admin" role="dialog" aria-modal="true" style="flex: none; max-height: 92%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 10px">
+<div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
+<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Panneau Admin</h2>
+<button type="button" onClick="{{ adm.close }}" aria-label="Fermer" style="flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+</div>
+<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">Réglages de démonstration, sur cet appareil seulement.</p>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">PK et compagnons</h3>
+<span style="font-size: 13px; color: #C9D3EA">{{ adm.pkText }}</span>
+<div style="display: flex; gap: 8px">
+<input type="text" inputmode="numeric" aria-label="Nouveau solde de PK" value="{{ adm.bal }}" onChange="{{ adm.onBal }}" style="height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid #1E2B45; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; flex: 1; min-width: 0">
+<button type="button" onClick="{{ adm.setBal }}" style="flex: none; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Fixer le solde</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ adm.pkActions }}" as="apa" hint-placeholder-count="5"><button type="button" onClick="{{ apa.go }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">{{ apa.label }}</button></sc-for>
+</div>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Prix des compagnons</h3>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ adm.pricesNote }}Cherche un Pokémon ; un prix vide reprend la règle des stades, 0 le rend gratuit.</span>
+<input type="search" aria-label="Chercher un compagnon à mettre à prix" placeholder="Dracaufeu, 6…" value="{{ adm.pq }}" onChange="{{ adm.onPq }}" style="height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid #1E2B45; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px">
+<sc-if value="{{ adm.hasPrices }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{ adm.prices }}" as="apr" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 8px">
+<span style="flex: 1; min-width: 0; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ apr.name }}</span>
+<input type="text" inputmode="numeric" aria-label="{{ apr.label }}" value="{{ apr.value }}" onChange="{{ apr.onValue }}" style="height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid #1E2B45; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; flex: none; width: 84px; text-align: right">
+<span style="flex: none; width: 34px; font-size: 11.5px; color: #9AA8C3">{{ apr.note }}</span>
+<button type="button" onClick="{{ apr.reset }}" aria-label="Prix par défaut" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: transparent; color: #F3F6FC; font: inherit; font-size: 16px; cursor: pointer">↺</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Profil forcé</h3>
+<div role="group" aria-label="Profil forcé" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ adm.cats }}" as="acat" hint-placeholder-count="4"><button type="button" onClick="{{ acat.pick }}" aria-pressed="{{ acat.on }}" style="min-height: 40px; padding: 0 13px; border-radius: 999px; border: 1px solid {{ acat.bc }}; background: {{ acat.bg }}; color: {{ acat.fg }}; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ acat.label }}</button></sc-for>
+</div>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Palier forcé</h3>
+<div role="group" aria-label="Palier forcé" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ adm.tiers }}" as="atier" hint-placeholder-count="5"><button type="button" onClick="{{ atier.pick }}" aria-pressed="{{ atier.on }}" style="min-height: 40px; padding: 0 13px; border-radius: 999px; border: 1px solid {{ atier.bc }}; background: {{ atier.bg }}; color: {{ atier.fg }}; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ atier.label }}</button></sc-for>
+</div>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Date simulée</h3>
+<span style="font-size: 13px; color: #C9D3EA">{{ adm.dateText }}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<input type="date" aria-label="Date simulée" value="{{ adm.date }}" onChange="{{ adm.onDate }}" style="height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid #1E2B45; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; flex: 1; min-width: 150px">
+<button type="button" onClick="{{ adm.setDate }}" style="flex: none; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer">Appliquer (recharge)</button>
+<button type="button" onClick="{{ adm.realDate }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Date réelle</button>
+</div>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Fonctions</h3>
+<div role="group" aria-label="Fonctions affichées" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ adm.flags }}" as="afl" hint-placeholder-count="5"><button type="button" onClick="{{ afl.pick }}" aria-pressed="{{ afl.on }}" style="min-height: 40px; padding: 0 13px; border-radius: 999px; border: 1px solid {{ afl.bc }}; background: {{ afl.bg }}; color: {{ afl.fg }}; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ afl.label }}</button></sc-for>
+</div>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Données</h3>
+<sc-for list="{{ adm.data }}" as="adt" hint-placeholder-count="3"><span style="font-size: 13px; color: #C9D3EA">{{ adt.text }}</span></sc-for>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" onClick="{{ adm.reload }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Recharger l’app</button>
+<button type="button" onClick="{{ adm.clearCache }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Vider le cache hors ligne</button>
+</div>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Démo</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ adm.demos }}" as="adm2" hint-placeholder-count="3"><button type="button" onClick="{{ adm2.go }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">{{ adm2.label }}</button></sc-for>
+<button type="button" onClick="{{ adm.replayOnb }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Revoir l’accueil guidé</button>
+</div>
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Diagnostic</h3>
+<sc-if value="{{ adm.hasErrors }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ adm.errors }}" as="aer" hint-placeholder-count="2"><span style="font-size: 12px; line-height: 1.4; color: #FF8A8A">{{ aer.text }}</span></sc-for></sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" onClick="{{ adm.scanDebug }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Diagnostic du scan</button>
+<button type="button" onClick="{{ adm.exportState }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Exporter l’état (JSON)</button>
+</div>
+<button type="button" onClick="{{ adm.quit }}" style="margin-top: 6px; min-height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #FF8A8A; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Quitter le mode Admin</button>
+</section>
 </div>
 </sc-if>
 

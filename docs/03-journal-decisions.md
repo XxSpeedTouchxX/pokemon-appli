@@ -6,6 +6,37 @@
 
 ---
 
+## 2026-10-09 — Vague 1 des propositions v2 : navigation, Compte, vues, bulle d'infos, mode Admin
+
+- **Contexte :** le porteur donne son « go » pour la vague 1 de `docs/13-propositions-ameliorations-v2.md` (J1, L1 et K4, M2, N1, M3, P1).
+- **Livré :**
+  - **J1, haut de page :**
+    - chaque changement de page s'ouvre en haut ;
+    - recherches, filtres, onglets et vues sont retrouvés au retour ;
+    - l'ancienne mémoire de défilement par page est retirée.
+  - **L1 et K4, Compte :**
+    - le palier passe avant « Membre depuis », écrit en plus petit avec le vrai mois du premier lancement ;
+    - « Type de collectionneur » est replié ; au toucher, « S'adapte tout seul… » s'écrit lettre par lettre comme dans les jeux Pokémon, puis le reste se déplie bloc par bloc.
+  - **M2 et N1, vues :**
+    - bouton de vue sur Territoire : liste, galerie, compacte, carte plein écran ;
+    - bouton de vue sur le Marché : liste, galerie, compacte, grandes cartes ;
+    - la vue choisie est gardée au retour.
+  - **M3, bulle d'infos (Territoire) :**
+    - l'essentiel sur chaque boutique ;
+    - « + » ouvre une bulle accrochée à la boutique : adresse, horaires du jour, itinéraire, appel, site, fiche ;
+    - un appui sur la boutique ouvre sa fiche.
+  - **P1, mode Admin :**
+    - accès par 7 appuis sur « Version », puis un code à 6 chiffres choisi par le porteur (gardé en empreinte sur l'appareil) ;
+    - panneau : PK et prix des compagnons, profil et palier forcés, date simulée, interrupteurs (Scan, Territoire, PK, partenaires fictifs, animations), données, collections types, diagnostic.
+- **Écarts avec la proposition :**
+  - « Carte » de Territoire ouvre le Radar plein écran existant, plutôt qu'une nouvelle carte avec tiroir ;
+  - la bulle « + » n'est pas encore ajoutée au Marché ;
+  - les interrupteurs ne couvrent pas Radar et Sorties.
+- **Limite du mode Admin :** sans serveur, il ne contrôle que l'appareil où il est ouvert ; le contrôle de tous les utilisateurs demandera des comptes et un back-office (P2).
+- **Coût :** 0 €.
+
+---
+
 ## 2026-10-08 (fin) — PK : compagnons à débloquer, partage récompensé, logo du classeur
 
 - **Contexte :** le porteur valide les règles des PK et demande :

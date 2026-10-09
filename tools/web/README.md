@@ -75,6 +75,26 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
   - Un appui sur la boutique elle-même ouvre sa fiche.
 - **Marché :** Liste, Galerie (3 visuels par ligne), Compacte (nom, cote, variation sur une ligne), Grandes cartes (16:9).
 
+## Mode Admin de la démo
+
+`tools/web/admin.js`, fragments `admin-badge`, `admin-lock` et `admin-sheet` (2026-10-09) :
+- **Accès :**
+  - 7 appuis rapides sur « Version » (Réglages › À propos) ;
+  - la première fois, choisir un code à 6 chiffres puis le confirmer ; il est gardé sur l'appareil en empreinte, jamais en clair ;
+  - ensuite, le code est demandé à chaque ouverture ;
+  - tant que le mode est actif, un bouton « Admin » (bouclier) dans l'en-tête ouvre le panneau.
+- **Panneau :**
+  - PK : fixer le solde, +100, +500, tout débloquer, tout reverrouiller, rejouer le bonus du jour et le partage ;
+  - prix des compagnons : recherche, prix modifiable ; vide = règle des stades, 0 = gratuit (`pkApplyPrices` dans `pk.js`) ;
+  - profil et palier forcés ;
+  - date simulée : l'app se recharge avec cette date (`ADMIN_TODAY` dans `catalog.js`) ;
+  - interrupteurs : bouton Scan, onglet Territoire, monnaie PK, partenaires fictifs, animations ;
+  - données : dates et volumes du catalogue, du scellé, des boutiques ; recharger l'app ; vider le cache hors ligne ;
+  - démo : collection vide, Novice ou complète ; revoir l'accueil guidé ;
+  - diagnostic : dernières erreurs, diagnostic du scan, export de l'état en JSON ;
+  - quitter le mode Admin.
+- **Limite :** sans serveur, tout se passe sur cet appareil et le code de l'app est lisible : c'est une porte contre les ouvertures par hasard, pas une protection forte.
+
 ## PK, la monnaie de l'app
 
 Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de `catalog.dc.html`). Gains et règles validés par le porteur le 2026-10-08.
