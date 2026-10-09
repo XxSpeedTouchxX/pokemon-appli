@@ -1,0 +1,22 @@
+# Diagnostic temporaire (2026-10-09) : logos et cartes manquantes, vus depuis GitHub Actions (TCGdex est
+# inaccessible depuis l'environnement de développement). À retirer après lecture du journal.
+name: Diagnostic TCGdex (temporaire)
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/diag-tcgdex.yml
+      - tools/tcgdex/diag_logos_cards.py
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/tcgdex/diag_logos_cards.py
