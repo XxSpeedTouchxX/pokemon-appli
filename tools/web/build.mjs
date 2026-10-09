@@ -244,6 +244,14 @@ patch('<span style="position: relative; display: block; height: 176px; border-ra
   '<span style="position: relative; display: block; height: {{ ci.h }}; aspect-ratio: {{ ci.ar }}; border-radius: 14px; overflow: hidden; background: {{ ci.bg }};');
 patch('<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">\n<sc-for list="{{ coll.list }}"',
   '<div style="flex: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: dense; gap: 10px">\n<sc-for list="{{ coll.list }}"');
+// Onglet « Toutes les séries » (series.js) : remplace l'écran « Collection » de la maquette (porteur, 2026-10-09).
+{
+  const open = '<sc-if value="{{ ui.isCollection }}" hint-placeholder-val="{{ false }}">\n', i = tpl.indexOf(open), j = tpl.indexOf('<sc-if value="{{ ui.isItem }}"', i);
+  if (i < 0 || j < 0) throw new Error('Écran Collection introuvable');
+  tpl = tpl.slice(0, i + open.length) + FRAG.series + '</sc-if>\n\n' + tpl.slice(j);
+}
+patch('onClick="{{ tabCollection }}" aria-label="Collection"', 'onClick="{{ tabCollection }}" aria-label="Toutes les séries"');
+patchJs("const titles = { collection: 'Collection',", "const titles = { collection: 'Toutes les séries',");
 // - Carrousels de produits scellés en grand (16:9) : « Sorties du moment » (Accueil), « Scellé à la une » (Marché).
 // Sigle des plaques dessinées (ETB, DSP…) : léger fond sombre, lisible quel que soit le visuel de l'extension derrière.
 const FEATURE_CARD = (v, box) => `<button type="button" onClick="{{ ${v}.open }}" aria-label="{{ ${v}.label }}" style="${box} display: flex; flex-direction: column; padding: 0; border: 1px solid #24345C; border-radius: 20px; overflow: hidden; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
@@ -402,14 +410,14 @@ tpl = tpl.replace(/<sc-if value="\{\{ ([\w.]+)\.isSealed \}\}"([^>]*)>([\s\S]*?)
   const photo = o === 'it' ? PHOTO_ITEM : o === 'ci' ? PHOTO_FILL(o) : PHOTO_INLINE(o);
   return `<sc-if value="{{ ${o}.sealedArt }}"${attrs}>${body}</sc-if><sc-if value="{{ ${o}.hasPhoto }}" hint-placeholder-val="{{ false }}">${photo}</sc-if>`;
 });
-if (sealedBlocks !== 12) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 12 (' + sealedSeen.join(', ') + ')'); // dont 1 sur l'accueil (la recherche), 2 dans les vues du Marché (galerie, grandes cartes) ; plus celle du viseur simulé
+if (sealedBlocks !== 11) throw new Error('Vignettes de produits scellés : ' + sealedBlocks + ' au lieu de 11 (' + sealedSeen.join(', ') + ')'); // l'ancien écran Collection retiré (2026-10-09) ; dont 1 sur l'accueil (la recherche), 2 dans les vues du Marché (galerie, grandes cartes) ; plus celle du viseur simulé
 // Visuel de secours de chaque image de carte (data-fallback), utilisé si l'image ne charge plus.
 tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fallback="{{ ' + o + (o === 'it' ? '.fallbackHi' : '.fallback') + ' }}"');
 // Photos et logos du scellé (data-broken) : si l'image ne charge pas, l'app passe au visuel suivant
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 42) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 42'); // dont 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 43) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 43'); // dont 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -480,7 +488,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -509,7 +517,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -529,7 +537,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -545,7 +553,7 @@ ${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${rad
 ${code}
   })();
   // Écran de départ : #territoire, #scan… (lien partagé) ou ?start=territory&storeId=s2 (hébergement).
-  const HASH = { accueil: { start: 'home' }, collection: { start: 'collection' }, scan: { start: 'scan' }, marche: { start: 'market' },
+  const HASH = { accueil: { start: 'home' }, collection: { start: 'collection' }, series: { start: 'collection' }, scan: { start: 'scan' }, marche: { start: 'market' },
     territoire: { start: 'territory' }, magasin: { start: 'store' }, profil: { start: 'profile' }, paliers: { start: 'tiers' },
     reglages: { start: 'settings' }, ventes: { start: 'sales' }, bienvenue: { onb: '1' }, novice: { demo: 'novice' },
     extensions: { start: 'sets' }, scelle: { start: 'sealed' }, radar: { start: 'radar' }, sorties: { start: 'releases' } };
@@ -678,6 +686,8 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 /* Mode Admin, animations désactivées : plus aucune animation ni transition. */
 section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > *, section[aria-label="Modifier l’ajout"] > *, section[aria-label="Importer un tableur"] > * { flex-shrink: 0; }
 html.pkm-calm *, html.pkm-calm *::before, html.pkm-calm *::after { animation: none !important; transition: none !important; }
+/* « Toutes les séries » : barre des séries en verre sombre, collée en haut pendant le défilement. */
+nav[aria-label="Aller à une série"] { background: rgba(10, 17, 48, 0.88); backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${readFileSync(new URL('./fx.css', import.meta.url), 'utf8')}

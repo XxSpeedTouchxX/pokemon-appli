@@ -34,7 +34,7 @@ for (const [name, key, bar, color] of [['Kyogre', 'sea', '#0A4893', /10, 72, 147
 // Gardé après rechargement, et sur les autres onglets.
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(2000);
 ok('après rechargement : ' + (await state()).cls, (await state()).cls === 'pkm-theme-storm');
-await page.click('button[aria-label="Collection"]').catch(() => {}); await page.waitForTimeout(800);
+await page.click('button[aria-label="Toutes les séries"]').catch(() => {}); await page.waitForTimeout(800);
 ok('onglet Collection : même thème', (await page.evaluate(() => [...document.documentElement.classList].filter(c => c.indexOf('pkm-theme') === 0 || c === 'pkm-classic').join(' '))) === 'pkm-theme-storm');
 await page.screenshot({ path: shot('theme-storm-collection.png') });
 await page.click('button[aria-label="Accueil"]').catch(() => {}); await page.waitForTimeout(800);

@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-09 — Le 2ᵉ onglet devient « Toutes les séries »
+
+- **Demande du porteur** (vidéo d'une application concurrente à l'appui) : remplacer « Collection » par « Toutes les séries », avec toutes les séries, les extensions de chaque série et leur nombre de cartes ; chaque extension donne accès à toutes ses cartes.
+- **Livré :** barre des séries collée en haut, séries dépliables (logo, extensions, années, progression), extensions en grille (logo, cartes, mois de sortie, progression, « Bientôt » pour une extension annoncée), recherche ; chaque extension ouvre la grille de toutes ses cartes.
+- **Retiré :** l'ancien écran Collection (la collection reste sur l'accueil, « Mon classeur », et dans les fiches).
+- **Non repris de la vidéo :** l'onglet Pokédex (exclu, CLAUDE.md §5.4).
+
 ## 2026-10-09 — Vague 3 et fiabilisation livrées
 
 - **Contexte :** « go » du porteur : « Lance la vague 3 avec ouverture de booster, et fiabilise tout comme tu le sens ».

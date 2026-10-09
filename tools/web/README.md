@@ -200,6 +200,16 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 - **Cote selon l'état et la langue** (`tools/web/value.js`, 2026-10-09, B1) : la valeur de la collection compte chaque exemplaire restant avec un coefficient d'estimation : Near Mint 100 %, Excellent 85 %, Joué 55 %, Boîte abîmée 85 % ; FR et EN 100 %, JP 70 % (les cotes relevées sont celles des versions FR et EN). La fiche montre le calcul (« 1 × FR Joué (55 %) = 54,45 € au lieu de 99,00 € en Near Mint ») et garde la cote Near Mint. Réglages › « Selon l'état et la langue » revient à la cote brute.
 - **Vendre un exemplaire précis** (B2) : « Quel exemplaire part ? » dans « J'ai vendu » : chaque ajout restant (langue, état, date, prix unitaire, nombre restant), ou « Peu importe » (coût moyen). La marge prend alors le prix d'achat de cet ajout (`tools/web/margin-patch.mjs`, appliqué par le build et vérifié par `test_margin.mjs`). Exemplaires restants : une vente désignée retire de son ajout ; les autres retirent les plus anciens d'abord.
 
+## Toutes les séries (2ᵉ onglet)
+
+- **Demande du porteur** (2026-10-09, d'après sa vidéo) : le 2ᵉ onglet « Collection » devient **« Toutes les séries »** ; l'ancien écran Collection est retiré (la collection reste sur l'accueil, dans « Mon classeur », et dans chaque fiche). `tools/web/series.js`, fragment `series`.
+- **En haut :** recherche (série ou extension), compte « 18 séries · 204 extensions · 21 265 cartes », puis la barre des séries (logos) qui reste collée en haut : un appui ouvre la série et la fait venir à l'écran.
+- **Chaque série :** logo, nom, nombre d'extensions et années (« 2025 → » pour la série en cours), progression (cartes différentes possédées / cartes de la série). La plus récente d'abord ; McDonald's, POP, Kits du dresseur et Autre à la fin ; « Sans version française » en dernier. La première série est ouverte.
+- **Série ouverte :** ses extensions en grille de 2, la plus récente d'abord : logo, nom, nombre de cartes, mois de sortie, progression si tu en as. Une extension annoncée (produits scellés à venir) apparaît en « Bientôt · Sortie le … » et mène aux Sorties.
+- **Chaque extension ouvre toutes ses cartes** (écran « Extension » : visuels officiels, numéros, cotes ; filtres Toutes, Les plus chères, Ultra rares, À toi) ; « Retour » revient à la série.
+- Le Marché (« Toutes les cartes ») mène aussi à cet onglet. Lien direct : `#series` ou `#collection`.
+- Pas de Pokédex (exclu, CLAUDE.md §5.4), contrairement à l'application de la vidéo.
+
 ## Mon classeur : trier, filtrer, glisser
 
 - **Trier** (`tools/web/home.js`, 2026-10-09, D1) : Cote (par défaut), Récents (dernier ajout), Nom.
@@ -418,7 +428,7 @@ Le site n'est pas indexé par les moteurs de recherche : balise `robots` et en-t
 
 ## Ouvrir un écran précis
 
-- **Avec un ancrage :** `#territoire`, `#radar` (carte de France des boutiques), `#sorties`, `#scan`, `#collection`, `#marche`, `#extensions` (toutes les cartes), `#scelle` (produits scellés), `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
+- **Avec un ancrage :** `#series` (Toutes les séries), `#territoire`, `#radar` (carte de France des boutiques), `#sorties`, `#scan`, `#collection`, `#marche`, `#extensions` (toutes les cartes), `#scelle` (produits scellés), `#profil`, `#paliers`, `#reglages`, `#ventes`, `#bienvenue` (accueil en 3 étapes), `#novice` (petite collection de démo).
 - **Avec des paramètres (hébergement uniquement) :** par exemple `?start=store&storeId=s3`, ou `?start=set&setId=sv08` pour une extension.
 - **Diagnostic du scan :** `?debug=scan#scan` (voir « Scan à l'appareil photo »).
 

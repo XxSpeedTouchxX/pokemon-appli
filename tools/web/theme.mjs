@@ -49,7 +49,7 @@ const MAP_SVG = /aria-label="Carte des magasins"|M0 168 C|M262 18 h66|M22 22 h54
 export const RULES = [
   // Gardées telles quelles.
   ['mask', '#000', 'keep', { n: 4 }],
-  ['bg', '#E9ECF2', 'keep', { n: 2 }], ['fg', '#1B2236', 'keep', { n: 2 }], // étiquette des cartes gradées
+  ['bg', '#E9ECF2', 'keep', { n: 1 }], ['fg', '#1B2236', 'keep', { n: 1 }], // étiquette des cartes gradées (fiche ; l'écran Collection est retiré)
   ['bg', '#23765C', 'keep', { n: 1 }], ['bg', '#0A251C', 'keep', { n: 1 }], ['bg', 'rgb(35, 118, 92)', 'keep', { n: 2 }], // fond d'extension (Règne Delta)
   ['bg', '#0E1729', 'keep', { surface: true, n: 1 }], // carte de démonstration de Territoire
   ['fill', '#11294A', 'keep', { n: 1 }], ['fill', '#11291F', 'keep', { n: 2 }], ['stroke', '#1B2944', 'keep', { n: 4 }], ['stroke', '#172339', 'keep', { n: 1 }],

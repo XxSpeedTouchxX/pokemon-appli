@@ -84,6 +84,8 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 /* Mode Admin, animations désactivées : plus aucune animation ni transition. */
 section[aria-label="Panneau Admin"] > *, section[aria-label="Informations légales"] > *, section[aria-label="Modifier l’ajout"] > *, section[aria-label="Importer un tableur"] > * { flex-shrink: 0; }
 html.pkm-calm *, html.pkm-calm *::before, html.pkm-calm *::after { animation: none !important; transition: none !important; }
+/* « Toutes les séries » : barre des séries en verre sombre, collée en haut pendant le défilement. */
+nav[aria-label="Aller à une série"] { background: rgba(10, 17, 48, 0.88); backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 /* ——— Fonds animés (K2) et micro-animations (K3) ; fx.js choisit le décor ; 2026-10-09 ———

@@ -40,9 +40,9 @@ await page.click('button:has-text("+ Ajouter un exemplaire")'); await page.waitF
 await page.locator('button:has-text("Ajouter à ma collection")').last().click(); await page.waitForTimeout(700);
 const saved = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); const k = Object.keys(d.cards || {}).filter(x => x.indexOf('sp-') === 0); return { k: k, s: k.length ? !!d.cards[k[0]].s : false }; });
 ok('enregistré sur l’appareil : ' + saved.k.join(', '), saved.k.length === 1 && saved.s);
-await page.goto(E2E + '/?start=collection', { waitUntil: 'load' });
-await page.waitForTimeout(600);
-ok('après rechargement : dans la collection', (await page.locator('text=Coffret Dresseur d’élite Chaos Ascendant').count()) > 0);
+await page.goto(E2E + '/?start=item&itemId=' + saved.k[0], { waitUntil: 'load' });
+await page.waitForTimeout(900);
+ok('après rechargement : dans la collection (fiche, historique d’achat)', (await page.locator('section[aria-label="Historique d’achat"]').count()) === 1 && (await page.locator('text=Coffret Dresseur d’élite Chaos Ascendant').count()) > 0);
 // Recherche et sorties
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' });
 await page.waitForSelector('text=Produits scellés');

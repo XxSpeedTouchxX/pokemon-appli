@@ -61,9 +61,9 @@ await page.click('button:has-text("+ Ajouter un exemplaire")'); await page.waitF
 await page.locator('button:has-text("Ajouter à ma collection")').last().click(); await page.waitForTimeout(600);
 const saved = await page.evaluate(() => { const t = localStorage.getItem('pkm-collection-v1'); const d = JSON.parse(t); return { size: t.length, cards: Object.keys(d.cards), data: /data:image/.test(t) }; });
 ok('enregistrement : ' + saved.size + ' caractères, ' + saved.cards.length + ' carte(s), sans image dessinée', saved.size < 20000 && !saved.data && saved.cards.length === 1);
-await page.goto(E2E + '/?start=collection', { waitUntil: 'load' });
-await page.waitForTimeout(300);
-ok('carte dessinée dans la collection après rechargement', (await page.locator('text=Bulbizarre').count()) > 0);
+await page.goto(E2E + '/?start=home', { waitUntil: 'load' });
+await page.waitForTimeout(800);
+ok('carte dessinée dans le classeur après rechargement', (await page.locator('section[aria-label="Mon classeur"] button[aria-label^="Bulbizarre"]').count()) > 0);
 console.log(steps.join('\n'));
 console.log(errors.length ? 'ERREURS\n' + errors.join('\n') : 'aucune erreur');
 await browser.close();

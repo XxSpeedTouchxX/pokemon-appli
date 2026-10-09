@@ -28,8 +28,8 @@ const check = async (width, height, label) => {
   await page.click('button:has-text("Scellé")'); await page.waitForSelector('[aria-label="Produits scellés"] button');
   await page.click('[aria-label="Produits scellés"] button'); steps.push(['résultat du scan', await has('Ajouter à ma collection')]);
   await page.click('button:has-text("Ajouter à ma collection")'); steps.push(['ajout', await has('ajouté')]);
-  await page.click('button[aria-label="Fermer le scan"]'); await page.click('button[aria-label="Collection"]');
-  await page.fill('input[type="search"]', 'Mew'); steps.push(['recherche', (await page.locator('text=1 référence').count()) > 0]);
+  await page.click('button[aria-label="Fermer le scan"]'); await page.click('button[aria-label="Toutes les séries"]');
+  await page.waitForSelector('nav[aria-label="Aller à une série"]', { timeout: 20000 }); steps.push(['toutes les séries', (await page.locator('main section[aria-label="Méga-Évolution"]').count()) === 1]);
   await page.click('button[aria-label^="Mon profil"]'); steps.push(['profil', await has('Type de collectionneur')]);
   const hscroll = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   steps.push(['pas de défilement horizontal', !hscroll]);

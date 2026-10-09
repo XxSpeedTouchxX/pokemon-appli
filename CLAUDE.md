@@ -99,6 +99,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - classeur trié, filtré, à glisser ; import d'un tableur CSV (sans PK) ;
   - fonds animés (Animés, Calmes, Sans) et micro-animations ;
   - app.js minifié ; tests navigateur dans `tools/web/e2e` et en CI.
+- **2ᵉ onglet « Toutes les séries » (2026-10-09, demande du porteur avec vidéo) :** remplace l'écran Collection ; séries dépliables avec barre de logos, extensions (logo, nombre de cartes, sortie, progression, « Bientôt »), recherche ; chaque extension ouvre toutes ses cartes. La collection reste dans « Mon classeur » sur l'accueil.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

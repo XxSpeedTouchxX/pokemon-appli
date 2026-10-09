@@ -28,12 +28,12 @@ await step('marché', async () => {
 });
 await step('extensions', async () => {
   await page.click('button:has-text("Toutes les cartes")');
-  await page.waitForSelector('h1:has-text("Toutes les cartes")');
-  const groups = await page.locator('main section h2').allInnerTexts();
-  ok('groupes (' + groups.length + ') : ' + groups.slice(0, 4).join(', ') + ' … ' + groups.slice(-2).join(', '), groups.length > 5 && groups[groups.length - 1] === 'Sans version française');
+  await page.waitForSelector('nav[aria-label="Aller à une série"]', { timeout: 20000 });
+  const groups = await page.locator('main section[id^="pkm-ser-"]').evaluateAll(g => g.map(x => x.getAttribute('aria-label')));
+  ok('« Toutes les cartes » mène à « Toutes les séries » (' + groups.length + ') : ' + groups.slice(0, 4).join(', ') + ' … ' + groups.slice(-2).join(', '), groups.length > 5 && groups[groups.length - 1] === 'Sans version française');
   await page.waitForTimeout(300); await shot('v6-extensions');
-  await page.fill('input[aria-label="Rechercher une extension"]', 'etincelles');
-  ok('recherche extension : ' + await page.locator('main > span').first().innerText(), (await page.locator('main section button').count()) >= 2);
+  await page.fill('input[aria-label="Rechercher une série ou une extension"]', 'etincelles'); await page.waitForTimeout(300);
+  ok('recherche extension : ' + (await page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').count()) + ' extension(s)', (await page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').count()) >= 1);
 });
 await step('grille', async () => {
   await page.locator('button[aria-label^="Étincelles Déferlantes,"]').click();
@@ -85,11 +85,9 @@ await step('ajout', async () => {
 });
 await step('rechargement', async () => {
   await page.waitForTimeout(500);
-  await page.goto(E2E + '/?start=collection', { waitUntil: 'load' });
-  await page.fill('input[type="search"]', 'pikachu');
-  await page.waitForTimeout(150);
-  const coll = await page.locator('main').innerText();
-  ok('après rechargement, la carte est toujours là', /Pikachu-ex/.test(coll) && /Étincelles Déferlantes/.test(coll));
+  await page.goto(E2E + '/?start=home', { waitUntil: 'load' });
+  await page.waitForTimeout(800);
+  ok('après rechargement, la carte est toujours là (classeur)', (await page.locator('section[aria-label="Mon classeur"] button[aria-label^="Pikachu-ex"]').count()) > 0);
   await page.waitForTimeout(400); await shot('v6-collection');
 });
 await step('vider / démo', async () => {
@@ -100,8 +98,8 @@ await step('vider / démo', async () => {
   ok('collection vide après rechargement', await has('Aucune carte dans ton classeur'));
   ok('pas de blocs vides', !(await has('Mes plus belles pièces')) && !(await has('Derniers ajouts')) && !(await has('Plus forte hausse')));
   await page.waitForTimeout(300); await shot('v6-accueil-vide');
-  await page.goto(E2E + '/?start=collection&r=1', { waitUntil: 'load' });
-  ok('collection vide : message', await has('Ta collection est vide. Ajoute'));
+  await page.goto(E2E + '/?start=collection&r=1', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+  ok('collection vide : « Toutes les séries » à 0 %', await has('Toutes les séries') && /0\/[\d\s\u202f]+ · 0 %/.test(await page.locator('main').innerText()));
   await page.goto(E2E + '/?start=settings', { waitUntil: 'load' });
   await page.click('button:has-text("Remettre la démo")'); await page.waitForTimeout(500);
   await page.goto(E2E + '/?start=home', { waitUntil: 'load' });
