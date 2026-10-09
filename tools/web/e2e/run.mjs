@@ -17,7 +17,7 @@ for (const name of pick) {
   const out = await new Promise(done => {
     let text = '';
     const ch = spawn(process.execPath, [HERE + 't-' + name + '.mjs'], { env: env, cwd: HERE });
-    const kill = setTimeout(() => ch.kill('SIGKILL'), 10 * 60 * 1000);
+    const kill = setTimeout(() => ch.kill('SIGKILL'), Number(process.env.E2E_TIMEOUT || 8 * 60) * 1000);
     ch.stdout.on('data', d => { text += d; }); ch.stderr.on('data', d => { text += d; });
     ch.on('close', code => { clearTimeout(kill); done({ text: text, code: code }); });
   });
