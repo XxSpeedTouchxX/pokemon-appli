@@ -1,0 +1,41 @@
+# Vérification de la démo web à chaque envoi : tests unitaires (marge, accueil, Radar, scan, thème), puis
+# reconstruction de web/ ; échec si la démo publiée n'est pas celle que produisent les sources (build oublié).
+name: Tests de la démo
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/tests.yml
+      - docs/12-maquette-v5/**
+      - tools/web/**
+      - tools/sprites/companions.json
+      - web/app.js
+      - web/index.html
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/web/package-lock.json
+      - name: Dépendances
+        working-directory: tools/web
+        run: npm ci
+      - name: Tests unitaires
+        working-directory: tools/web
+        run: npm test
+      - name: Reconstruire la démo
+        working-directory: tools/web
+        run: npm run build
+      - name: La démo publiée correspond aux sources
+        run: git diff --stat --exit-code -- web/app.js web/index.html

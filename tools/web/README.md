@@ -49,6 +49,11 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
 5. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
 
+## Tests
+
+- `npm test` (dans `tools/web/`) : tests unitaires, dont **le calcul de marge** (`test_margin.mjs`, 14 cas : vente simple, coût moyen pondéré, coût figé au jour de la vente, lots répartis par valeur ou à parts égales, port par défaut, vente à perte, articles sans prix d'achat, ordre du jour, frais de plateforme, arrondis, démo complète vérifiée à la main). Ces tests exécutent la logique de la maquette, celle de l'app.
+- GitHub Actions (`.github/workflows/tests.yml`) lance ces tests à chaque envoi, reconstruit la démo et échoue si `web/` ne correspond pas aux sources.
+
 ## Sauvegarde et restauration
 
 `tools/web/backup.js`, fragments `io-real` et `backup-reminder` (A3, 2026-10-09). L'écran « Importer / exporter » de la maquette devient réel ; il est ouvert par « Sauvegarder ou restaurer » dans Réglages, sans le mode avancé.
