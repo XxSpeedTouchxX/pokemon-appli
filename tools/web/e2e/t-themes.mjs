@@ -24,11 +24,11 @@ for (const [name, key, bar, color] of [['Kyogre', 'sea', '#0A4893', /10, 72, 147
   const st = await state(), toast = await page.locator('#app').innerText();
   ok(name + ' : thème ' + st.cls + ', barre ' + st.bar + ', titres ' + st.t1, st.cls === 'pkm-theme-' + key && st.bar === bar && color.test(st.bg));
   ok(name + ' : message « thème »', new RegExp(name + ' t’accompagne · thème ').test(toast));
-  await page.screenshot({ path: 'theme-' + key + '-1.png' });
+  await page.screenshot({ path: shot('theme-' + key + '-1.png') });
   await page.evaluate(() => document.querySelector('section[aria-label="Mon classeur"]').scrollIntoView({ block: 'start' })); await page.waitForTimeout(600);
-  await page.screenshot({ path: 'theme-' + key + '-2.png' });
+  await page.screenshot({ path: shot('theme-' + key + '-2.png') });
   await page.evaluate(() => document.querySelector('section[aria-label="Boutiques près de toi"]').scrollIntoView({ block: 'start' })); await page.waitForTimeout(500);
-  await page.screenshot({ path: 'theme-' + key + '-3.png' });
+  await page.screenshot({ path: shot('theme-' + key + '-3.png') });
   await page.evaluate(() => { const m = document.querySelector('#app main'); m.scrollTop = 0; }); await page.waitForTimeout(300);
 }
 // Gardé après rechargement, et sur les autres onglets.
