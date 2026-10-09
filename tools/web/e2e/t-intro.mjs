@@ -30,8 +30,14 @@ ok('navigateur de test : pas d’animation', !(await has()));
 // Animations réduites.
 const ctx2 = await browser.newContext({ viewport: { width: 360, height: 740 }, reducedMotion: 'reduce' }); await withFonts(ctx2);
 const p2 = await ctx2.newPage();
-await p2.goto(B + '?intro=1', { waitUntil: 'domcontentloaded' });
-ok('animations réduites : fondu simple (' + await p2.evaluate(() => document.getElementById('pkm-intro') && document.getElementById('pkm-intro').className) + ')', (await p2.evaluate(() => document.getElementById('pkm-intro') && document.getElementById('pkm-intro').className)) === 'pi-calm');
+// La version calme ne dure que 0,65 s : la classe est relevée dès qu'elle est posée (machine lente comprise).
+await p2.addInitScript(() => {
+  new MutationObserver(() => { const el = document.getElementById('pkm-intro'); if (el && el.className && !window.__introCls) window.__introCls = el.className; })
+    .observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+});
+await p2.goto(B + '?intro=1', { waitUntil: 'domcontentloaded' }); await p2.waitForTimeout(200);
+const calmCls = await p2.evaluate(() => window.__introCls || '');
+ok('animations réduites : fondu simple (' + calmCls + ')', calmCls === 'pi-calm');
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();
