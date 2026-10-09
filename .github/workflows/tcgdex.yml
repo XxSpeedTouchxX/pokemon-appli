@@ -18,6 +18,8 @@ on:
       - tools/tcgdex/ptcg.py
       - tools/tcgdex/test_ptcg.py
       - tools/tcgdex/test_build_index.py
+      - tools/tcgdex/split_catalog.py
+      - tools/tcgdex/test_split_catalog.py
 
 permissions:
   contents: write
@@ -78,11 +80,15 @@ jobs:
           --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --ptcg data/ptcg
           --out web/data/cards.json
 
+      # Partie fixe et prix du jour en deux fichiers : la démo ne retélécharge chaque jour que les prix.
+      - name: Découper le catalogue (partie fixe, prix du jour)
+        run: python3 tools/tcgdex/split_catalog.py --src web/data/cards.json
+
       - name: Publier sur la branche
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/data/cards.json
+          git add web/data/cards.json web/data/cards-base.json web/data/cards-prices.json
           if [ -f tools/tcgdex/ptcg_images.json ]; then git add tools/tcgdex/ptcg_images.json; fi
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
           git commit -m "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))"

@@ -22,14 +22,14 @@
   - **K3, micro-animations :** ajout, gain de PK, palier, déblocage.
 - **Livré, fiabilisation :**
   - **A1** (marge) et **A3** (sauvegarde), **H1, H4** (pages légales) : livrés plus tôt dans la journée.
-  - **A5, alléger :** `app.js` minifié, −28 % une fois compressé.
-  - **A2, tests navigateur dans le dépôt :** 28 suites dans `tools/web/e2e`, lancées par GitHub Actions après les tests unitaires.
+  - **A5, alléger :** `app.js` minifié, −28 % une fois compressé ; catalogue en deux fichiers (partie fixe gardée par le navigateur, prix du jour) : 200 Ko par jour au lieu de 531.
+  - **A2, tests navigateur dans le dépôt :** 29 suites dans `tools/web/e2e`, lancées par GitHub Actions après les tests unitaires.
   - **Correctifs :** les nouveaux ajouts et ventes prennent la date du jour réelle (ils étaient datés du 03/10) ; l'export CSV donne la part de chaque ligne d'un lot (et non le prix du lot entier).
 - **Choix par défaut, à valider par le porteur :**
   - pas de PK pour les articles importés depuis un tableur (sinon un fichier inventé suffirait) ;
   - coefficients d'état et de langue (provisoires, à caler sur les prix Cardmarket par état) ;
   - fonds animés activés par défaut.
-- **Reste à faire :** modèles d'import PokéItem et PokéCardex (exports réels du porteur), catalogue mis à jour par différence, réglage du scan sur téléphone (C2), logo en grande taille (F1).
+- **Reste à faire :** modèles d'import PokéItem et PokéCardex (exports réels du porteur), réglage du scan sur téléphone (C2), logo en grande taille (F1).
 
 ## 2026-10-09 — Vague 1 des propositions v2 : navigation, Compte, vues, bulle d'infos, mode Admin
 

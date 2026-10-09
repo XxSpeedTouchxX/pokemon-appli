@@ -67,7 +67,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 
 - `web/app.js` est **minifié** au build (esbuild 0.25.10, version figée : sortie identique partout), environ 620 Ko au lieu de 1,09 Mo, soit **147 Ko compressés au lieu de 204** (−28 %), 2026-10-09, A5. Les sources lisibles restent dans `tools/web/` ; `tools/web/artifact.html` n'est pas minifié.
 - Déjà à la demande : boutiques (`stores.json`, 148 Ko compressés) chargées seulement avec une position ou à l'ouverture du Radar ; MapLibre et le moteur du scan à l'ouverture de leur écran.
-- Reste à faire : catalogue par différence (seules les cotes du jour chaque jour, au lieu des 531 Ko compressés de `cards.json`), à préparer avec le workflow TCGdex.
+- **Catalogue en deux fichiers** (2026-10-09) : `data/cards-base.json` (extensions, noms, numéros, raretés, visuels : 302 Ko compressés, identique d'un jour à l'autre, donc gardé par le navigateur) et `data/cards-prices.json` (prix du jour, taux, date : 200 Ko compressés). Chaque jour, le téléphone ne retélécharge que les prix : **200 Ko au lieu de 531** (−63 %). Écrits par `tools/tcgdex/split_catalog.py` dans le workflow TCGdex, liés par une empreinte ; si elles ne vont pas ensemble, l'app charge `cards.json`, qui reste publié et sert toujours d'archive quotidienne des prix (`catalog-join.js`, testé).
 
 ## Fonds animés et micro-animations
 

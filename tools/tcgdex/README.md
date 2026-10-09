@@ -62,3 +62,7 @@ Le workflow se lance :
 ## Accès réseau
 
 Le script appelle `api.tcgdex.net` et `assets.tcgdex.net`. Ces domaines sont bloqués dans l'environnement Claude Code actuel : c'est pourquoi la synchronisation passe par GitHub Actions. Pour lancer le script ailleurs, il suffit de Python 3.9 ou plus.
+
+## Catalogue en deux fichiers (démo web)
+
+`split_catalog.py` découpe `web/data/cards.json` en `cards-base.json` (partie fixe) et `cards-prices.json` (prix du jour), liés par une empreinte, après chaque construction (workflow « Catalogue TCGdex »). La démo charge les deux et ne retélécharge chaque jour que les prix ; `cards.json` reste publié (repli et archive). Tests : `python3 -m unittest tools/tcgdex/test_split_catalog.py` (depuis `tools/tcgdex`).
