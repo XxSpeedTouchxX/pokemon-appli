@@ -12,9 +12,9 @@ const tab = async n => { await page.click('nav[aria-label="Navigation principale
 // Accueil : onglet « Mes produits scellés » du classeur, puis défilement.
 await page.click('section[aria-label="Mon classeur"] [role="tab"]:has-text("Mes produits scellés")'); await page.waitForTimeout(300);
 ok('accueil défilé : ' + await down(), (await top()) > 300);
-await tab('Collection');
-ok('Collection : en haut (' + await top() + ')', (await top()) === 0);
-const cq = page.locator('main input[type="search"]').first();
+await tab('Toutes les séries');
+ok('Toutes les séries : en haut (' + await top() + ')', (await top()) === 0);
+const cq = page.locator('input[aria-label="Rechercher une série ou une extension"]');
 await cq.fill('pika'); await page.waitForTimeout(300); await down();
 await tab('Marché');
 ok('Marché : en haut', (await top()) === 0);
@@ -28,8 +28,8 @@ await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(600);
 ok('retour au Marché : en haut, recherche gardée « ' + await mq.inputValue() + ' »', (await top()) === 0 && (await mq.inputValue()) === 'dracaufeu');
 await tab('Territoire');
 ok('Territoire : en haut à l’arrivée', (await top()) === 0); await down();
-await tab('Collection');
-ok('retour Collection : en haut, recherche gardée « ' + await cq.inputValue() + ' »', (await top()) === 0 && (await cq.inputValue()) === 'pika');
+await tab('Toutes les séries');
+ok('retour Toutes les séries : en haut, recherche gardée « ' + await cq.inputValue() + ' »', (await top()) === 0 && (await cq.inputValue()) === 'pika');
 await tab('Accueil');
 ok('retour Accueil : en haut, onglet scellé gardé', (await top()) === 0 && (await page.getAttribute('section[aria-label="Mon classeur"] [role="tab"]:has-text("Mes produits scellés")', 'aria-selected')) === 'true');
 // Profil (avatar) puis retour.

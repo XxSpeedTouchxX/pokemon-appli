@@ -134,7 +134,7 @@ d = await saved();
 ok('2e partage : rien de plus, « Merci » affiché', d.pk === before + 300 && /Tes \+300 PK sont reçus/.test(await page.locator('section[aria-label="Mes PK"]').innerText()));
 await page.click('section[aria-label="Mes PK"] button[aria-label="Fermer"]'); await page.waitForTimeout(300);
 // 8. Grands titres et écrans de détail.
-for (const [tab, name] of [['Collection', 'Collection'], ['Marché', 'Marché'], ['Territoire', 'Territoire']]) {
+for (const [tab, name] of [['Toutes les séries', 'Toutes les séries'], ['Marché', 'Marché'], ['Territoire', 'Territoire']]) {
   await page.click('nav button[aria-label="' + tab + '"]'); await page.waitForTimeout(500);
   ok(name + ' : compteur à droite', (await counter.count()) === 1 && await cText() === '400 PK');
 }
