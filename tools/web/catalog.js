@@ -77,6 +77,10 @@
     return 'data:image/svg+xml,' + encodeURIComponent(svg);
   }
   const setOf = id => (TCG.doc && TCG.doc.sets[id]) || [id, '', '', '', '', 'fr'];
+  // Collections rattachées à leur extension (2026-10-09, demande du porteur) : la Collection Classique du
+  // 30ᵉ Anniversaire s'affiche avec le 30ᵉ Anniversaire, comme sur le site officiel et les autres applis.
+  const SET_PARENT = { '30th-c': '30th', cel25cc: 'cel25' };
+  const setHome = id => (SET_PARENT[id] && TCG.doc && TCG.doc.sets[SET_PARENT[id]] ? SET_PARENT[id] : id);
   // Cote PKM d'une ligne du catalogue : la même règle que cote() (Cardmarket et TCGplayer).
   function coteOf(r, F) { const a = r[F.cm], b = r[F.tcp]; return a && b ? (a + b) / 2 : a || b || 0; }
 
@@ -90,7 +94,13 @@
     });
     TCG.rows.forEach(x => {
       TCG.byId[x.r[F.id]] = x;
-      (TCG.bySet[x.r[F.set]] = TCG.bySet[x.r[F.set]] || []).push(x);
+      const sid = setHome(x.r[F.set]);
+      (TCG.bySet[sid] = TCG.bySet[sid] || []).push(x);
+    });
+    // Extension regroupée : ses propres cartes d'abord, puis celles de la collection rattachée.
+    Object.keys(TCG.bySet).forEach(sid => {
+      const list = TCG.bySet[sid];
+      if (list.some(x => x.r[F.set] !== sid)) TCG.bySet[sid] = list.filter(x => x.r[F.set] === sid).concat(list.filter(x => x.r[F.set] !== sid));
     });
     // Extensions, des plus récentes aux plus anciennes.
     TCG.setList = Object.keys(doc.sets).filter(id => TCG.bySet[id]).map(id => {
@@ -106,7 +116,8 @@
   // construite à partir d'une ligne de cards.json (champs F, extension set).
   function buildItem(id, r, F, set) {
     const v = visual(r[F.img] || ''), rarity = r[F.rarity] || '', num = String(r[F.num] || ''), official = set[4] || '';
-    const lang = String(set[5] || 'fr').toUpperCase();
+    // Carte en anglais : extension sans version française, ou carte ajoutée depuis la version anglaise (champ lang).
+    const lang = F.lang !== undefined && r[F.lang] ? String(r[F.lang]).toUpperCase() : String(set[5] || 'fr').toUpperCase();
     const numShort = num + (official && /^\d+$/.test(num) ? '/' + official : '');
     let seed = 0;
     for (let i = 0; i < id.length; i++) seed = (seed * 31 + id.charCodeAt(i)) % 9973;
@@ -159,7 +170,21 @@
   };
   // Visuel en qualité maximale : high.png pour les cartes TCGdex (y compris celles de la démo).
   const hiOf = p => p.imgHi || (typeof p.img === 'string' && /\/high\.webp$/.test(p.img) ? p.img.replace(/high\.webp$/, 'high.png') : p.img);
-  const logoUrl = path => (path ? (/^https?:/.test(path) ? path : TCG.doc.img + path) + '.webp' : '');
+  // Logo d'une extension : premier visuel qui charge, dans l'ordre TCGdex français (webp, png), TCGdex anglais,
+  // puis logo gardé avec la page ; '' si aucun (l'app montre alors une icône). Certains logos n'existent qu'en
+  // png (Nuit Noire), d'autres nulle part sur TCGdex (30ᵉ Anniversaire).
+  const SET_LOGO_LOCAL = { '30th': 'logo-30-anniversaire', '30th-c': 'logo-30-anniversaire', me05: 'logo-nuit-noire', me04: 'logo-chaos-ascendant', me01: 'logo-mega-evolution' };
+  function setLogo(id, path) {
+    const out = [];
+    if (path && /^https?:/.test(path)) out.push(path + '.webp');
+    else if (path) {
+      const base = TCG.doc.img + path, en = /^fr\//.test(path) ? TCG.doc.img + 'en/' + path.slice(3) : '';
+      out.push(base + '.webp', base + '.png');
+      if (en) out.push(en + '.webp', en + '.png');
+    }
+    if (SET_LOGO_LOCAL[id]) out.push('img/' + SET_LOGO_LOCAL[id] + '.webp');
+    return out.find(u => !BROKEN.has(u)) || '';
+  }
 
   const proto = Component.prototype;
   const baseCatalog = proto.catalog;
@@ -197,7 +222,7 @@
     const c = this.compute(s), own = {};
     ((this.state && this.state.extra) || []).forEach(id => {
       const p = TCG.item(id), st = c.stock[id];
-      if (p && st && st.qty > 0) own[p.set] = (own[p.set] || 0) + 1;
+      if (p && st && st.qty > 0) own[setHome(p.set)] = (own[setHome(p.set)] || 0) + 1;
     });
     return own;
   };
@@ -253,7 +278,7 @@
     res.groups = groups.map(g => ({
       name: g.name, hasNote: g.en, note: g.en ? 'Cartes en anglais : ces extensions n’ont pas de version française dans le catalogue TCGdex.' : '',
       sets: g.sets.map((e, i) => {
-        const k = own[e.id] || 0, cards = e.n + (e.n > 1 ? ' cartes' : ' carte'), logo = logoUrl(e.logo), hasLogo = !!logo && !BROKEN.has(logo);
+        const k = own[e.id] || 0, cards = e.n + (e.n > 1 ? ' cartes' : ' carte'), logo = setLogo(e.id, e.logo), hasLogo = !!logo;
         return {
           name: e.name, sub: (e.date ? this.d3(e.date) + ' · ' : '') + cards, logo: logo, hasLogo: hasLogo, noLogo: !hasLogo,
           code: e.id.toUpperCase(), owned: k > 0, ownedText: k + ' à toi', border: i === 0 ? 'none' : '1px solid var(--pkm-line)',
@@ -284,8 +309,10 @@
     const priced = all.filter(p => this.cote(p) !== null), full = priced.reduce((t, p) => t + this.cote(p), 0);
     const foreign = all.filter(p => p.imgLang && p.imgLang !== p.lang), noImgs = all.filter(p => !p.imgLang).length;
     const versions = foreign.map(p => VERSION[p.imgLang] || p.imgLang).filter((v, i, a) => a.indexOf(v) === i);
-    const notes = [];
+    const notes = [], kids = all.filter(p => p.set !== e.id), enCards = e.lang === 'EN' ? [] : all.filter(p => p.lang === 'EN');
     if (e.lang === 'EN') notes.push('Cartes en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.');
+    if (kids.length) notes.push('Dont ' + kids.length + ' cartes de la ' + (setOf(kids[0].set)[0] || 'collection rattachée') + ' (numéros « CC »).');
+    if (enCards.length) notes.push(enCards.length + (enCards.length > 1 ? ' cartes sont en anglais : absentes' : ' carte est en anglais : absente') + ' de la version française du catalogue TCGdex.');
     if (foreign.length) {
       notes.push(foreign.length + (foreign.length > 1 ? ' visuels viennent de la version ' : ' visuel vient de la version ') + versions.join(', ')
         + ' : même dessin officiel, le scan ' + (e.lang === 'EN' ? 'anglais' : 'français') + ' n’est pas encore disponible.');
@@ -294,7 +321,7 @@
     const defs = [['all', 'Toutes · ' + all.length], ['top', 'Les plus chères'], ['ur', 'Ultra rares · ' + nUr], ['own', 'À toi · ' + mine.length]];
     return {
       title: e.name, subtitle: [e.serie, e.date ? this.d3(e.date) : '', e.lang === 'EN' ? 'EN' : ''].filter(Boolean).join(' · '),
-      hasLogo: !!e.logo && !BROKEN.has(logoUrl(e.logo)), logo: logoUrl(e.logo),
+      hasLogo: !!setLogo(e.id, e.logo), logo: setLogo(e.id, e.logo),
       countText: all.length + (all.length > 1 ? ' cartes' : ' carte') + (e.official && Number(e.official) !== all.length ? ' · ' + e.official + ' officielles' : ''),
       valueText: priced.length ? 'Série complète ≈ ' + this.eur0(full) + ' (cote PKM de ' + priced.length + ' cartes)' : 'Pas encore de prix pour cette extension',
       hasNote: notes.length > 0, note: notes.join(' '),
@@ -304,7 +331,7 @@
       cards: shown.map(p => {
         const k = this.cote(p), q = qty(p);
         return {
-          img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: p.numShort, owned: q > 0, qty: '×' + q,
+          img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: (p.set !== e.id ? 'CC ' : '') + p.numShort, owned: q > 0, qty: '×' + q,
           cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), coteColor: k === null ? 'var(--pkm-t4)' : 'var(--pkm-t1)',
           label: p.name + ', ' + p.numLabel + (k !== null ? ', cote ' + this.eur(k) : ', sans prix') + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
@@ -337,7 +364,8 @@
       if (it.noCote) it.release = 'Pas encore de prix « marché » pour cette carte (Cardmarket et TCGplayer, via TCGdex). Tu peux quand même l’ajouter à ta collection.';
       if (it.hasCote) it.change = 'Courbe après quelques jours d’archivage';
       const notes = [];
-      if (p.lang === 'EN') notes.push('Carte en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.');
+      if (p.lang === 'EN') notes.push(String(setOf(p.set)[5] || 'fr') === 'en' ? 'Carte en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.'
+        : 'Carte en anglais : absente de la version française du catalogue TCGdex, elle vient de la version anglaise.');
       if (!p.imgLang) notes.push('Pas encore de scan officiel pour cette carte : PKM affiche une carte dessinée en attendant.');
       else if (p.imgLang !== p.lang) notes.push('Visuel de la version ' + (VERSION[p.imgLang] || p.imgLang) + ' (même dessin officiel) : le scan ' + (p.lang === 'EN' ? 'anglais' : 'français') + ' de cette carte n’est pas encore disponible.');
       it.imgNote = notes.join(' ');

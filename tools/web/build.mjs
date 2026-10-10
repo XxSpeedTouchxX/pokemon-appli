@@ -511,10 +511,10 @@ const img = Object.fromEntries([
   ['delta', 'logo-regne-delta'], ['anniv', 'logo-30-anniversaire'], ['nuit', 'logo-nuit-noire'], ['chaos', 'logo-chaos-ascendant']
 ].map(([k, f]) => [k, 'img/' + f + '.webp']));
 // Vrais visuels du CDN TCGdex (CLAUDE.md §4) ; restent provisoires : la carte gradée, l'avatar et les
-// logos absents de TCGdex (Règne Delta, pas encore sorti ; 30e Anniversaire, sans logo).
+// logos absents de TCGdex (Règne Delta, pas encore sorti ; 30e Anniversaire, sans logo ; Nuit Noire, en png seulement).
 Object.assign(img, Object.fromEntries([
   ['k1', 'sv/sv08/238/high'], ['k2', 'me/me02.5/272/high'], ['k3', 'me/me02.5/288/high'], ['k4', 'me/30th/155/high'],
-  ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo'], ['nuit', 'me/me05/logo']
+  ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
 const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs).filter(n => !(n in TOKENS));

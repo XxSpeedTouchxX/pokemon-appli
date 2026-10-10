@@ -33,7 +33,7 @@
   // Produit du catalogue scellé au format des articles de la maquette (mêmes champs de prix).
   function sealedItem(id, r, F) {
     const set = r[F.set] || '', setName = setLabel(set), code = r[F.type], rel = r[F.release] || '';
-    const tset = TCG.doc && TCG.doc.sets[set], logo = SET_ART[set] ? IMG[SET_ART[set]] : (tset && tset[3] ? logoUrl(tset[3]) : '');
+    const tset = TCG.doc && TCG.doc.sets[set], logo = tset ? setLogo(set, tset[3]) : SET_ART[set] ? IMG[SET_ART[set]] : '';
     const upcoming = rel > TODAY, trend = r[F.trend], low = r[F.low];
     let seed = 0;
     for (let i = 0; i < id.length; i++) seed = (seed * 31 + id.charCodeAt(i)) % 9973;

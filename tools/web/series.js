@@ -57,8 +57,9 @@
       g.first = dates[0] || ''; g.last = dates[dates.length - 1] || '';
       g.n = real.reduce((t, e) => t + e.n, 0); g.own = real.reduce((t, e) => t + (own[e.id] || 0), 0);
       g.live = g.sets.some(e => e.soon) || (g.last && Date.parse(today) - Date.parse(g.last) < 200 * 86400000);
-      const named = real.find(e => fold(e.name) === fold(g.name) && e.logo) || real.find(e => e.logo);
-      g.logo = named ? logoUrl(named.logo) : '';
+      // Logo de la série : celui de l'extension du même nom, sinon le premier qui charge (setLogo, catalog.js).
+      const named = real.filter(e => fold(e.name) === fold(g.name)).concat(real);
+      g.logo = named.reduce((u, e) => u || setLogo(e.id, e.logo), '');
       g.rank = g.name === SER_EN ? 2 : SER_LAST.indexOf(g.name) >= 0 ? 1 : 0;
     });
     groups.sort((a, b) => a.rank - b.rank || (a.last < b.last ? 1 : a.last > b.last ? -1 : 0));
@@ -69,7 +70,7 @@
       const sets = words.length ? g.sets.filter(e => match(e) || words.every(w => fold(g.name).indexOf(w) >= 0)) : g.sets;
       if (!sets.length) return null;
       shown += sets.length;
-      const isOpen = words.length > 0 || open === g.name, pct = serPct(g.own, g.n), hasLogo = !!g.logo && !BROKEN.has(g.logo);
+      const isOpen = words.length > 0 || open === g.name, pct = serPct(g.own, g.n), hasLogo = !!g.logo;
       const span = g.first ? (g.live ? serYear(g.first) + ' →' : serYear(g.first) === serYear(g.last) ? serYear(g.first) : serYear(g.first) + ' – ' + serYear(g.last)) : '';
       return {
         key: serKey(g.name), name: g.name, logo: g.logo, hasLogo: hasLogo, noLogo: !hasLogo, initials: g.name.slice(0, 2).toUpperCase(),
@@ -85,7 +86,7 @@
               line1: 'Bientôt', line2: 'Sortie le ' + this.d3(e.date), owned: false, progress: '', bar: '0%',
               label: e.name + ', sortie le ' + this.d3(e.date) + ', voir les sorties', open: () => this.openReleases ? this.openReleases() : null };
           }
-          const k = own[e.id] || 0, logo = logoUrl(e.logo), ok = !!logo && !BROKEN.has(logo), p = serPct(k, e.n);
+          const k = own[e.id] || 0, logo = setLogo(e.id, e.logo), ok = !!logo, p = serPct(k, e.n);
           return { name: e.name, logo: logo, hasLogo: ok, noLogo: !ok, initials: e.name.slice(0, 2).toUpperCase(), soon: false, ready: true,
             line1: e.n + (e.n > 1 ? ' cartes' : ' carte'), line2: serMonth(e.date) + (e.lang === 'EN' ? ' · EN' : ''),
             owned: k > 0, progress: k + '/' + e.n + ' · ' + p + ' %', bar: Math.max(2, p) + '%',
@@ -95,7 +96,7 @@
       };
     }).filter(Boolean);
     res.chips = groups.filter(g => g.logo || g.name).map(g => {
-      const on = open === g.name && !words.length, ok = !!g.logo && !BROKEN.has(g.logo);
+      const on = open === g.name && !words.length, ok = !!g.logo;
       return { name: g.name, logo: g.logo, hasLogo: ok, noLogo: !ok, on: on, bc: on ? 'var(--pkm-accent)' : 'rgba(255, 255, 255, 0.14)', pick: () => this.serJump(g.name) };
     });
     res.ready = true;

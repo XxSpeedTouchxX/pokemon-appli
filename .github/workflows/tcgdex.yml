@@ -16,6 +16,8 @@ on:
       - tools/tcgdex/sync_tcgdex.py
       - tools/tcgdex/build_index.py
       - tools/tcgdex/ptcg.py
+      - tools/tcgdex/complete.py
+      - tools/tcgdex/test_complete.py
       - tools/tcgdex/test_ptcg.py
       - tools/tcgdex/test_build_index.py
       - tools/tcgdex/split_catalog.py
@@ -56,10 +58,13 @@ jobs:
             python3 tools/tcgdex/sync_tcgdex.py --lang "$lang" --skip-images --skip-details --workers 6 --out "data/tcgdex-$lang" || true
           done
 
-      - name: Extensions sans version française (détail et prix, en anglais)
+      # Détail en anglais : extensions sans version française, et extensions françaises auxquelles il manque
+      # des cartes que la version anglaise a (promos, kits…) : ces cartes sont ajoutées en anglais (complete.py).
+      - name: Extensions sans version française et cartes manquantes (détail et prix, en anglais)
         continue-on-error: true
         run: |
-          for id in $(python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en --list-en-only); do
+          for id in $(python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en --list-en-only) \
+                    $(python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en --list-en-extra); do
             python3 tools/tcgdex/sync_tcgdex.py --lang en --skip-images --only-set "$id" --workers 6 --out data/tcgdex-en
           done
 

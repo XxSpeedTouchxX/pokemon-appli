@@ -69,6 +69,24 @@ await p2.fill('input[aria-label="Rechercher une série ou une extension"]', '151
 const t151 = (await p2.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').allInnerTexts()).find(t => /(^|\n)151(\n|$)/.test(t)) || '';
 ok('progression de l’extension 151 : ' + t151.replace(/\n/g, ' · '), /1\/\d+ · \d+ %/.test(t151));
 await page.screenshot({ path: shot('series-search.png') });
+// 30ᵉ Anniversaire : la Collection Classique est rattachée (une seule tuile, cartes additionnées), logo de repli.
+await page.fill('input[aria-label="Rechercher une série ou une extension"]', 'anniversaire'); await page.waitForTimeout(2500);
+const annTiles = page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button');
+const annTxt = await annTiles.allInnerTexts(), n30 = DOC.cards.filter(c => c[2] === '30th' || c[2] === '30th-c').length;
+ok('30ᵉ Anniversaire avec sa Collection Classique : ' + annTxt.map(t => t.replace(/\n/g, ' · ')).join(' | '),
+  annTxt.some(t => /30ᵉ Anniversaire/.test(t) && new RegExp('(^|\n)' + n30 + ' cartes').test(t)) && !annTxt.some(t => /Collection Classique 30/.test(t)));
+const annImg = await annTiles.filter({ hasText: '30ᵉ Anniversaire' }).first().locator('img').evaluateAll(l => l.map(i => [i.getAttribute('src'), i.complete && i.naturalWidth > 0]));
+ok('logo du 30ᵉ Anniversaire affiché : ' + JSON.stringify(annImg), annImg.length === 1 && annImg[0][1]);
+await annTiles.filter({ hasText: '30ᵉ Anniversaire' }).first().click(); await page.waitForTimeout(1200);
+const annSet = await page.locator('#app').innerText();
+ok('fiche du 30ᵉ : ' + n30 + ' cartes, dont 30 de la Collection Classique', new RegExp('Toutes · ' + n30).test(annSet) && /Dont 30 cartes de la Collection Classique/.test(annSet) && /CC 001/.test(annSet));
+await page.locator('button[aria-label="Retour"]').click(); await page.waitForTimeout(700);
+// Logos : chaque image de la série Méga-Évolution charge, sinon elle est remplacée (jamais d'image cassée).
+await page.fill('input[aria-label="Rechercher une série ou une extension"]', ''); await page.waitForTimeout(300);
+await page.locator('nav[aria-label="Aller à une série"] button[aria-label="Méga-Évolution"]').click(); await page.waitForTimeout(4000);
+const megaImgs = await page.locator('section#pkm-ser-mega-evolution img').evaluateAll(l => l.map(i => [i.getAttribute('src'), i.complete && i.naturalWidth > 0]));
+ok('logos de Méga-Évolution : ' + megaImgs.filter(x => x[1]).length + '/' + megaImgs.length + ' chargés, aucun cassé', megaImgs.length >= 6 && megaImgs.every(x => x[1]));
+await page.screenshot({ path: shot('series-logos.png') });
 // 360 px : pas de défilement horizontal.
 await page.setViewportSize({ width: 360, height: 740 }); await page.fill('input[aria-label="Rechercher une série ou une extension"]', ''); await page.waitForTimeout(400);
 ok('360 px : pas de défilement horizontal', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));

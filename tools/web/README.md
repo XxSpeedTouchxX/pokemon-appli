@@ -209,6 +209,9 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 - **Chaque extension ouvre toutes ses cartes** (écran « Extension » : visuels officiels, numéros, cotes ; filtres Toutes, Les plus chères, Ultra rares, À toi) ; « Retour » revient à la série.
 - Le Marché (« Toutes les cartes ») mène aussi à cet onglet. Lien direct : `#series` ou `#collection`.
 - Pas de Pokédex (exclu, CLAUDE.md §5.4), contrairement à l'application de la vidéo.
+- **Logos** (2026-10-09, `setLogo`, catalog.js) : premier visuel qui charge parmi le logo TCGdex français en webp, puis en png (Nuit Noire n'existe qu'en png), le logo anglais, puis les logos gardés avec la page (`web/img/logo-*.webp` : 30ᵉ Anniversaire, absent de TCGdex ; Nuit Noire ; Chaos Ascendant ; Méga-Évolution) ; sinon une icône.
+- **Collections rattachées** (`SET_PARENT`, catalog.js) : la Collection Classique du 30ᵉ Anniversaire s'affiche dans le 30ᵉ Anniversaire (une seule tuile, cartes additionnées, numéros « CC 001 » dans la grille), de même pour celle de Célébrations.
+- **Cartes manquantes :** les cartes absentes de la version française de TCGdex sont ajoutées depuis la version anglaise, puis pokemontcg.io (voir `tools/tcgdex/README.md`) ; elles portent « EN » et la fiche le dit. Le 30ᵉ Anniversaire passe ainsi à 191 cartes (158 + Mew rouge, vert, bleu + 30 de la Collection Classique), au prochain passage du workflow quotidien.
 
 ## Mon classeur : trier, filtrer, glisser
 

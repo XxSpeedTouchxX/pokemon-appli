@@ -31,12 +31,14 @@ numéro), sinon dans l'extension parente (« swsh9tg » TG01 → « swsh9 » TG0
 Contenu de cards.json :
     sets      { set_id: [nom, série, date de sortie, logo, nombre officiel de cartes, langue des cartes] }
     fields    noms des colonnes de chaque carte
-    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1], ...]
+    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue], ...]
               cm    = tendance Cardmarket (€)      low = plus bas Cardmarket (€, prix demandé)
               avg30 = moyenne Cardmarket 30 jours  tcp = TCGplayer « market », converti en €
               maj   = date de mise à jour des prix Cardmarket
               avg7, avg1 = moyennes Cardmarket 7 jours et 1 jour (tendance de la collection sur l'accueil)
               cm et les moyennes viennent de la même variante (normale, sinon holo).
+              langue = « en » pour une carte ajoutée à une extension française depuis la version anglaise
+              (TCGdex, sinon pokemontcg.io : complete.py), vide sinon.
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
               Le chemin commence par la langue du visuel (fr/… ou en/…) ; « ptcg:set/numéro » pour
               pokemontcg.io.
@@ -55,6 +57,7 @@ from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
 
 from ptcg import PTCG_IMG, PtcgData, compact_image, norm_number  # visuels anglais de dernier recours (pokemontcg.io)
+from complete import en_extra, ptcg_extra, ptcg_prices  # cartes manquantes en français (version anglaise, pokemontcg.io)
 
 PTCG_CACHE = Path(__file__).with_name("ptcg_images.json")
 
@@ -211,6 +214,7 @@ def main():
     p.add_argument("--no-probe", action="store_true", help="ne pas vérifier que les images pokemontcg.io répondent (tests)")
     p.add_argument("--out", default="web/data/cards.json")
     p.add_argument("--list-en-only", action="store_true", help="affiche les extensions absentes du catalogue français, puis s'arrête")
+    p.add_argument("--list-en-extra", action="store_true", help="affiche les extensions françaises dont la version anglaise a des cartes en plus, puis s'arrête")
     p.add_argument("--min-cards", type=int, default=1000, help="échec si moins de cartes (protège contre un index vide)")
     args = p.parse_args()
     src, out = Path(args.src), Path(args.out)
@@ -220,6 +224,9 @@ def main():
     en_only = [sid for sid in en_sets if sid not in fr_sets]
     if args.list_en_only:
         print("\n".join(en_only))
+        return
+    if args.list_en_extra:
+        print("\n".join(sid for sid in fr_sets if en_extra(fr_sets[sid], en_sets.get(sid))))
         return
 
     t0 = time.time()
@@ -241,7 +248,14 @@ def main():
     ptcg_found, ptcg_report = {}, []
 
     sets, cards, rarities = {}, [], {}
-    stats = {"cards": 0, "cardsEn": 0, "imgOwn": 0, "imgAlt": {}, "imgNone": 0, "noDetail": 0}
+    stats = {"cards": 0, "cardsEn": 0, "cardsEnExtra": 0, "cardsPtcg": 0, "imgOwn": 0, "imgAlt": {}, "imgNone": 0, "noDetail": 0}
+    # Extensions pokemontcg.io visées par plusieurs extensions TCGdex (Zarbi d'EX Forces Cachées) : pas de complément.
+    ptcg_of = {sid: ptcg.map_set(sid, (en_sets.get(sid) or {}).get("name"), s.get("releaseDate")) for sid, s in fr_sets.items()} if ptcg else {}
+    ptcg_count = {}
+    for ps in ptcg_of.values():
+        if ps:
+            ptcg_count[ps] = ptcg_count.get(ps, 0) + 1
+    ptcg_shared = {ps for ps, k in ptcg_count.items() if k > 1}
 
     def ptcg_for_set(sid, s, lang, rows):
         """Visuels pokemontcg.io des cartes encore sans visuel d'une extension. Les correspondances non vérifiables
@@ -322,7 +336,40 @@ def main():
                 rarity = RARITY_FR.get(rarity.lower(), rarity)
                 stats["cardsEn"] += 1
             rarities[rarity] = rarities.get(rarity, 0) + 1
-            cards.append([cid, r["name"], sid, str(r["local"]), rarity, short_img(img), *prices(c, rate)])
+            cards.append([cid, r["name"], sid, str(r["local"]), rarity, short_img(img), *prices(c, rate), ""])
+        if lang == "fr":
+            complete_set(sid, s, rows)
+
+    def complete_set(sid, s, rows):
+        """Cartes manquantes en français : version anglaise de TCGdex, puis pokemontcg.io (complete.py)."""
+        have_n, have_ids = {norm_number(r["local"]) for r in rows}, {r["cid"] for r in rows}
+        for b in en_extra(s, en_sets.get(sid)):
+            c = (load(en / "cards" / sid / (safe_name(b["id"]) + ".json")) if en else None) or b
+            rarity = c.get("rarity") or ""
+            rarity = RARITY_FR.get(rarity.lower(), rarity)
+            rarities[rarity] = rarities.get(rarity, 0) + 1
+            cards.append([b["id"], c.get("name") or b.get("name") or "", sid, str(b.get("localId") or ""), rarity,
+                          short_img(c.get("image") or b.get("image")), *prices(c, rate), "en"])
+            have_n.add(norm_number(b.get("localId", "")))
+            have_ids.add(b["id"])
+            stats["cardsEnExtra"] += 1
+        ps = ptcg_of.get(sid)
+        if ptcg and ps and ps not in ptcg_shared:
+            # Numérotation confirmée d'abord (mêmes cartes aux mêmes numéros), sinon aucun ajout.
+            good = bad = 0
+            for r in rows:
+                card, state = ptcg.match(ps, r["local"], r["en"], r["dex"], r["artist"])
+                if state is True and card is not None:
+                    good += 1
+                elif state is not None:
+                    bad += 1
+            if not (good >= 3 and good / (good + bad) >= 0.9):
+                ps = None
+        for x in ptcg_extra(sid, ps, ptcg.cards.get(ps) if ptcg and ps else None, have_n, have_ids, ptcg_shared):
+            rarity = RARITY_FR.get(x["rarity"].lower(), x["rarity"])
+            rarities[rarity] = rarities.get(rarity, 0) + 1
+            cards.append([x["id"], x["name"], sid, x["local"], rarity, x["img"], *ptcg_prices(x["card"], rate), "en"])
+            stats["cardsPtcg"] += 1
 
     for sid, s in fr_sets.items():
         add_set(sid, s, "fr", src)
@@ -356,7 +403,7 @@ def main():
         "img": ASSETS,
         "usdEur": rate, "usdEurDate": rate_day, "usdEurSource": rate_src,
         "sets": sets,
-        "fields": ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1"],
+        "fields": ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang"],
         "stats": stats,
         "rarities": dict(sorted(rarities.items(), key=lambda kv: -kv[1])),
         "cards": cards,
@@ -373,6 +420,8 @@ def main():
     priced = sum(1 for c in cards if c[6] is not None or c[9] is not None)
     print(f"{len(cards)} cartes dans {len(sets)} extensions, dont {stats['cardsEn']} cartes en anglais "
           f"({len(en_only)} extensions sans version française dans TCGdex) ; {priced} avec un prix.")
+    print(f"Cartes ajoutées aux extensions françaises : {stats['cardsEnExtra']} de TCGdex en anglais, "
+          f"{stats['cardsPtcg']} de pokemontcg.io.")
     print(f"Visuels : {stats['imgOwn']} dans la langue de la carte, repli {json.dumps(stats['imgAlt'])}, "
           f"{stats['imgNone']} sans visuel. {stats['noDetail']} cartes sans détail.")
     missing = {}
