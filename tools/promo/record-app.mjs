@@ -48,7 +48,8 @@ async function take(name, hash, script) {
   await page.addStyleTag({ content: '#pkm-touch{position:fixed;left:0;top:0;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:rgba(255,255,255,.5);border:3px solid #fff;box-shadow:0 0 0 7px rgba(255,210,31,.5),0 6px 18px rgba(0,0,0,.35);pointer-events:none;z-index:99999;opacity:0} #pkm-ring{position:fixed;left:0;top:0;border-radius:50%;border:3px solid rgba(255,210,31,.9);pointer-events:none;z-index:99998;opacity:0} .pkm-sweep .ping{animation:none!important}' });
   await page.evaluate(() => { ['pkm-touch', 'pkm-ring'].forEach(id => { const d = document.createElement('div'); d.id = id; document.body.appendChild(d); }); });
   let n = 0, touch = null;
-  const blurs = [], marks = {};
+  const blurs = [], marks = {}, counts = [];
+  let lastCount = '';
   // Zones à flouter : noms, villes et adresses des vraies boutiques (résultats du balayage, fiche d'une boutique).
   const hide = () => {
     const out = [], R = window.__pkmRadar, add = el => { const r = el.getBoundingClientRect(); if (r.width && r.height && r.bottom > 0 && r.top < innerHeight) out.push([r.x, r.y, r.width, r.height]); };
@@ -68,6 +69,8 @@ async function take(name, hash, script) {
     page,
     mark: k => { marks[k] = n; },
     note: (k, v) => { marks[k] = v; },
+    // Montant affiché dans « Ma collection » (accueil), tel qu'à l'image.
+    value: () => page.evaluate(() => { const e = [...document.querySelectorAll('#app main *')].find(e => !e.children.length && /^[\d\s\u202f\u00a0]+,\d\d\s?€$/.test((e.textContent || '').trim()) && parseFloat(getComputedStyle(e).fontSize) >= 26); return e ? e.textContent.trim() : ''; }),
     // Cercle du balayage en cours (pixels CSS) : centre et rayon, pour cadrer la pub sur le secteur.
     sweepGeom: () => page.evaluate(() => { const el = document.querySelector('.pkm-sweep'); if (!el) return null; const r = el.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2), r: Math.round(r.width / 2) }; }),
     get n() { return n; },
@@ -89,6 +92,9 @@ async function take(name, hash, script) {
           touch.f++; if (touch.f > 16) touch = null;
         }
         blurs.push(await page.evaluate(hide));
+        // Compteur du faisceau (« 57 boutiques ») : la pub le recopie en grand, image par image.
+        const c = await page.evaluate(() => { const e = document.querySelector('.pkm-sweep .count'); return e ? e.textContent.replace(/\D/g, '') : ''; });
+        if (c && c !== lastCount) { counts.push([n, Number(c)]); lastCount = c; }
         await page.screenshot({ path: dir + String(n++).padStart(4, '0') + '.jpg', type: 'jpeg', quality: 92 });
       }
     },
@@ -137,7 +143,7 @@ async function take(name, hash, script) {
   if (bl.status !== 0) throw new Error(`[${name}] floutage en échec`);
   const ff = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', String(FPS), '-i', dir + '%04d.jpg', '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', TAKES + name + '.mp4'], { stdio: 'inherit' });
   if (ff.status !== 0) throw new Error(`[${name}] ffmpeg en échec`);
-  allMarkers[name] = Object.assign({ frames: n }, marks);
+  allMarkers[name] = Object.assign({ frames: n }, marks, counts.length ? { counts } : {});
   console.log(`[${name}] ${n} images`, JSON.stringify(marks));
 }
 
@@ -190,7 +196,7 @@ R.around = () => take('around', '#radar', async T => {
 });
 
 R.collect = () => take('collect', '', async T => {
-  await T.images(); await T.frames(4); T.mark('home');
+  await T.images(); await T.frames(4); T.mark('home'); T.note('value', await T.value());
   await T.frames(30);
   const y = await T.page.evaluate(() => { const s = document.querySelector('section[aria-label="Mon classeur"]'); const m = document.querySelector('main'); return s.getBoundingClientRect().top + m.scrollTop - 96; });
   await T.scroll(y, 26); T.mark('binder');
@@ -226,7 +232,7 @@ R.add = () => take('add', '#series', async T => {
   await T.tapOn(T.page.getByRole('button', { name: 'Ajouter à ma collection' }), 6, true); T.mark('added'); // bouton fixe de la fenêtre d'ajout
   await T.frames(40);
   await T.tapOn(T.page.locator('nav[aria-label="Navigation principale"] button[aria-label="Accueil"]'), 6, true); T.mark('home');
-  await T.frames(4); await T.images(); await T.frames(40);
+  await T.frames(4); await T.images(); await T.frames(40); T.note('valueAfter', await T.value());
   // Le classeur, avec la carte ajoutée en première case (tri par cote), puis la vitrine du scellé.
   const y = await T.page.evaluate(() => { const s = document.querySelector('section[aria-label="Mon classeur"]'); const m = document.querySelector('main'); return s.getBoundingClientRect().top + m.scrollTop - 96; });
   await T.scroll(y, 26); T.mark('binder');
