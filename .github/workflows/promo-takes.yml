@@ -1,22 +1,28 @@
-# Pub TikTok (docs/15-pub-tiktok-30ans) : enregistre le vrai Radar de la démo avec son fond de carte OpenFreeMap,
-# injoignable depuis le bac à sable de développement. Produit tools/promo/radar-demo.mp4 et le publie sur la branche.
-name: Pub · enregistrement du Radar
+# Pub TikTok (docs/15-pub-tiktok-30ans) : enregistre les vraies prises de la démo (Radar avec son fond de carte
+# OpenFreeMap, visuels TCGdex des cartes), injoignables depuis le bac à sable de développement.
+# Produit tools/promo/takes/*.mp4 et takes.json (repères des touchers) et les publie sur la branche.
+name: Pub · prises de l'app
 
 on:
   workflow_dispatch: {}
   push:
     branches: [claude/pokemon-app-mockup-1mxt7p]
     paths:
-      - .github/workflows/promo-radar.yml
-      - tools/promo/record-radar.mjs
+      - .github/workflows/promo-takes.yml
+      - tools/promo/record-app.mjs
+      - tools/promo/blur_frames.py
 
 permissions:
   contents: write
 
+concurrency:
+  group: promo-takes
+  cancel-in-progress: true
+
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,23 +35,23 @@ jobs:
       - name: Dépendances
         working-directory: tools/web
         run: npm ci
-      - name: Chromium et ffmpeg
+      - name: Chromium, ffmpeg, Pillow
         working-directory: tools/web
         run: |
           npx playwright-core install --with-deps chromium
           sudo apt-get install -y ffmpeg
           python3 -m pip install --user pillow
-      - name: Enregistrer le Radar
-        run: node tools/promo/record-radar.mjs
+      - name: Enregistrer les prises
+        run: node tools/promo/record-app.mjs
       - name: Contrôle
-        run: cat tools/promo/out/radar-store.json
+        run: cat tools/promo/takes/takes.json
       - name: Publier sur la branche
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tools/promo/radar-demo.mp4
+          git add tools/promo/takes
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
-          git commit -m "Pub : enregistrement du Radar avec fond de carte ($(date -u +%Y-%m-%d))"
+          git commit -m "Pub : prises de l'app avec fond de carte et visuels ($(date -u +%Y-%m-%d))"
           for i in 1 2 3 4; do
             git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
             sleep $((i * 5))
