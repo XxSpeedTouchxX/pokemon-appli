@@ -67,10 +67,13 @@ async function take(name, hash, script) {
   const T = {
     page,
     mark: k => { marks[k] = n; },
+    note: (k, v) => { marks[k] = v; },
+    // Cercle du balayage en cours (pixels CSS) : centre et rayon, pour cadrer la pub sur le secteur.
+    sweepGeom: () => page.evaluate(() => { const el = document.querySelector('.pkm-sweep'); if (!el) return null; const r = el.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2), r: Math.round(r.width / 2) }; }),
     get n() { return n; },
-    async frames(count, each) {
+    async frames(count, each, dt = DT) {
       for (let i = 0; i < count; i++) {
-        await page.clock.runFor(DT);
+        await page.clock.runFor(dt);
         if (each) await each(i, count);
         await page.waitForTimeout(20);
         if (touch) {
@@ -152,7 +155,9 @@ R.radar = () => take('radar', '#radar', async T => {
   await T.tapOn(badge(T, 'Rhône'), 6, true); T.mark('tapDept');
   await T.frames(40); await T.settleMap(10000); await T.frames(8);
   await T.tapOn(T.page.getByRole('button', { name: /Balayer le département/ }), 6, true); T.mark('sweepStart');
-  await T.frames(TURN + 4); T.mark('sweepEnd');
+  // Balayage filmé à 60 images/s (ralenti fluide dans la pub) : repères en images, à 2 images par 1/30 s.
+  await T.frames(2, null, DT / 2); T.note('sweepGeom', await T.sweepGeom());
+  await T.frames(TURN * 2 + 6, null, DT / 2); T.mark('sweepEnd'); T.note('sweepFps', 60);
   await T.frames(22);
   // Une boutique isolée, spécialisée (cartes, jeux, BD) et bien placée, vers le haut de la carte.
   const pick = await T.page.evaluate(() => {
@@ -178,7 +183,8 @@ R.around = () => take('around', '#radar', async T => {
   await T.frames(36); await T.settleMap(10000); await T.frames(4);
   const startAt = T.n;
   await T.frames(6); T.mark('sweepStart');
-  await T.frames(TURN + 4); T.mark('sweepEnd');
+  await T.frames(2); T.note('sweepGeom', await T.sweepGeom());
+  await T.frames(TURN + 2); T.mark('sweepEnd');
   await T.frames(36);
   if (T.n - startAt < TURN) throw new Error('[around] balayage trop court');
 });
@@ -221,6 +227,12 @@ R.add = () => take('add', '#series', async T => {
   await T.frames(40);
   await T.tapOn(T.page.locator('nav[aria-label="Navigation principale"] button[aria-label="Accueil"]'), 6, true); T.mark('home');
   await T.frames(4); await T.images(); await T.frames(40);
+  // Le classeur, avec la carte ajoutée en première case (tri par cote), puis la vitrine du scellé.
+  const y = await T.page.evaluate(() => { const s = document.querySelector('section[aria-label="Mon classeur"]'); const m = document.querySelector('main'); return s.getBoundingClientRect().top + m.scrollTop - 96; });
+  await T.scroll(y, 26); T.mark('binder');
+  await T.images(); await T.frames(34);
+  await T.tapOn(T.page.getByRole('tab', { name: 'Mes produits scellés' }).or(T.page.getByRole('button', { name: 'Mes produits scellés' }))); T.mark('sealed');
+  await T.images(); await T.frames(36);
 });
 
 R.sorties = () => take('sorties', '#sorties', async T => {
