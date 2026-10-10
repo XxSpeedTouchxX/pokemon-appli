@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dropicards · pub TikTok 30 ans</title>
+<!-- Pub verticale 1080 × 1920 en motion design (2026-10-10, demande du porteur).
+     Chaque image est calculée par render(t) (t en secondes) : rendu image par image, identique à chaque fois
+     (tools/promo/render.mjs). Ouvrir la page seule la joue en boucle. Sert depuis la racine du dépôt. -->
+<style>
+@font-face { font-family: 'Luckiest Guy'; src: url(../../web/fonts/luckiest-guy-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Luckiest Guy'; src: url(../../web/fonts/luckiest-guy-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-024F, U+1E00-1EFF; }
+@font-face { font-family: 'Sora'; font-weight: 700; src: url(../../web/fonts/sora-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Sora'; font-weight: 600; src: url(../../web/fonts/sora-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 600; src: url(../../web/fonts/plus-jakarta-sans-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 800; src: url(../../web/fonts/plus-jakarta-sans-latin-800-normal.woff2) format('woff2'); }
+:root { --y: #FFD21F; --y2: #FFB400; --navy: #0A1130; --ink: #050814; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: 'Jakarta', sans-serif; color: #fff; }
+.layer, .scene { position: absolute; inset: 0; }
+.scene { opacity: 0; }
+.abs { position: absolute; }
+.center { left: 0; right: 0; text-align: center; }
+.big { font-family: 'Luckiest Guy', cursive; letter-spacing: 2px; line-height: .95; -webkit-text-stroke: 10px #000; paint-order: stroke fill; }
+.y { color: var(--y); }
+.w { color: #fff; }
+.sora { font-family: 'Sora', sans-serif; font-weight: 700; }
+.pill { display: inline-block; padding: 14px 30px; border-radius: 999px; font-family: 'Sora'; font-weight: 700; font-size: 38px; }
+.glass { background: rgba(10, 17, 48, .78); border: 2px solid rgba(255, 255, 255, .16); border-radius: 36px; backdrop-filter: blur(6px); }
+.phone { position: absolute; width: 640px; height: 1385px; border-radius: 86px; background: #0b0d14; padding: 18px; box-shadow: 0 60px 120px rgba(0,0,0,.55), inset 0 0 0 4px #2a2f3d; }
+.phone .scr { position: relative; width: 100%; height: 100%; border-radius: 70px; overflow: hidden; background: #FFD21F; }
+.phone .scr img { position: absolute; left: 0; top: 0; width: 100%; height: auto; }
+.phone .notch { position: absolute; left: 50%; top: 34px; width: 170px; height: 46px; margin-left: -85px; border-radius: 30px; background: #000; z-index: 3; }
+canvas { position: absolute; left: 0; top: 0; }
+.px { image-rendering: pixelated; }
+#flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+#footer { position: absolute; left: 60px; right: 60px; bottom: 360px; text-align: center; font-size: 24px; line-height: 1.3; color: rgba(255,255,255,.75); opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cam" class="layer">
+
+    <!-- 1. Accroche : 6 novembre, les UPC 30 ans -->
+    <div id="s1" class="scene" style="background: radial-gradient(circle at 50% 46%, #18245a 0%, #0A1130 45%, #050814 100%)">
+      <div id="s1sweep" class="abs" style="left: -260px; top: 220px; width: 1600px; height: 1600px; border-radius: 50%; background: conic-gradient(from 0deg, rgba(255,210,31,.0) 0deg, rgba(255,210,31,.0) 300deg, rgba(255,210,31,.35) 358deg, rgba(255,210,31,0) 360deg)"></div>
+      <canvas id="s1rings" width="1080" height="1920"></canvas>
+      <div id="s1a" class="abs center big y" style="top: 560px; font-size: 190px">LE 6</div>
+      <div id="s1b" class="abs center big y" style="top: 740px; font-size: 150px">NOVEMBRE</div>
+      <div id="s1c" class="abs center big w" style="top: 950px; font-size: 104px">LES UPC 30 ANS</div>
+      <div id="s1d" class="abs center big w" style="top: 1060px; font-size: 104px">DÉBARQUENT</div>
+      <div id="s1e" class="abs center sora" style="top: 1250px; font-size: 52px; color: #fff">… et tu vas encore les rater ?</div>
+    </div>
+
+    <!-- 2. Les produits -->
+    <div id="s2" class="scene" style="background: linear-gradient(160deg, #FFE36A 0%, #FFD21F 40%, #FFB400 100%)">
+      <canvas id="s2rays" width="1080" height="1920"></canvas>
+      <img id="s2logo" class="abs" src="../../web/img/logo-30-anniversaire.webp" style="left: 300px; top: 230px; width: 480px">
+      <div id="s2upcWrap" class="abs" style="left: 40px; top: 610px; width: 1000px; height: 568px; perspective: 1600px">
+        <div id="s2upc" style="position: relative; width: 100%; height: 100%; border-radius: 40px; overflow: hidden; box-shadow: 0 50px 90px rgba(80,40,0,.45); border: 6px solid #000">
+          <img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="width: 100%; height: 100%; object-fit: cover">
+          <div id="s2shine" class="abs" style="top: -20%; height: 140%; width: 260px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.75), rgba(255,255,255,0)); mix-blend-mode: screen"></div>
+        </div>
+      </div>
+      <div id="s2t1" class="abs center big w" style="top: 1225px; font-size: 92px">ULTRA-PREMIUM</div>
+      <div id="s2t2" class="abs center sora" style="top: 1335px; font-size: 46px; color: #2a1a00">Journée &amp; Soirée · 30ᵉ Anniversaire</div>
+      <div id="s2date" class="abs" style="left: 700px; top: 520px; width: 300px; height: 300px; border-radius: 50%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 20px 40px rgba(0,0,0,.35)">
+        <div class="sora" style="font-size: 34px; color: var(--y)">SORTIE</div>
+        <div class="big y" style="font-size: 110px; -webkit-text-stroke: 0">06/11</div>
+      </div>
+      <div id="s2more" class="abs" style="left: 40px; top: 560px; width: 1000px; height: 900px">
+        <div class="abs" id="s2m1" style="left: 0; top: 0; width: 480px"><div style="border-radius: 28px; overflow: hidden; border: 5px solid #000; box-shadow: 0 30px 60px rgba(80,40,0,.35)"><img src="../../web/img/products/30th-celebration-ditto-premium-collection.webp" style="display: block; width: 100%"></div><div class="sora" style="margin-top: 18px; font-size: 34px; color: #2a1a00; text-align: center">Premium Métamorph · 06/11</div></div>
+        <div class="abs" id="s2m2" style="left: 520px; top: 0; width: 480px"><div style="border-radius: 28px; overflow: hidden; border: 5px solid #000; box-shadow: 0 30px 60px rgba(80,40,0,.35)"><img src="../../web/img/products/30th-celebration-figure-collection.webp" style="display: block; width: 100%"></div><div class="sora" style="margin-top: 18px; font-size: 34px; color: #2a1a00; text-align: center">Collection figurine · 06/11</div></div>
+        <div class="abs" id="s2m3" style="left: 260px; top: 380px; width: 480px"><div style="border-radius: 28px; overflow: hidden; border: 5px solid #000; box-shadow: 0 30px 60px rgba(80,40,0,.35)"><img src="../../web/img/products/30th-celebration-battle-deck-espeon-ex-umbreon-ex.webp" style="display: block; width: 100%"></div><div class="sora" style="margin-top: 18px; font-size: 34px; color: #2a1a00; text-align: center">Decks Mentali-ex · Noctali-ex · 30/10</div></div>
+      </div>
+      <div id="s2t3" class="abs center big w" style="top: 1410px; font-size: 84px">TOUT LE MÊME MOIS</div>
+    </div>
+
+    <!-- 3. Le Radar de la France -->
+    <div id="s3" class="scene" style="background: radial-gradient(circle at 50% 50%, #0F1A44 0%, #070B1F 70%, #04060F 100%)">
+      <canvas id="s3map" width="1080" height="1920"></canvas>
+      <div id="s3t1" class="abs center big y" style="top: 210px; font-size: 112px">LE RADAR</div>
+      <div id="s3t2" class="abs center sora" style="top: 340px; font-size: 44px">toute la France, boutique par boutique</div>
+      <div id="s3count" class="abs center" style="top: 1430px">
+        <div id="s3n" class="big y" style="font-size: 150px">0</div>
+        <div class="sora" style="font-size: 44px; margin-top: 6px">boutiques repérées</div>
+        <div style="font-size: 26px; margin-top: 10px; color: rgba(255,255,255,.6)">Données OpenStreetMap</div>
+      </div>
+    </div>
+
+    <!-- 4. Démo : Radar et Territoire dans l'app -->
+    <div id="s4" class="scene" style="background: linear-gradient(170deg, #FFE36A 0%, #FFD21F 45%, #FFB400 100%)">
+      <canvas id="s4bg" width="1080" height="1920"></canvas>
+      <div id="s4cap" class="abs center" style="top: 190px">
+        <div id="s4c1" class="big w" style="font-size: 92px">AUTOUR DE TOI</div>
+        <div id="s4c2" class="sora" style="font-size: 42px; color: #2a1a00; margin-top: 14px">les boutiques les plus proches + un indice de chance</div>
+      </div>
+      <div id="s4phone" class="phone" style="left: 220px; top: 420px">
+        <div class="notch"></div>
+        <div class="scr">
+          <img id="s4a" src="shots/radar.png">
+          <img id="s4b" src="shots/territoire-floue.png">
+          <div id="s4ring" class="abs" style="border: 8px solid #FF3B6B; border-radius: 40px; box-shadow: 0 0 0 6px rgba(255,59,107,.25)"></div>
+        </div>
+      </div>
+      <div id="s4tag1" class="abs pill" style="left: 40px; top: 1000px; background: #000; color: var(--y)">📍 Autour de moi</div>
+      <div id="s4tag2" class="abs pill" style="left: 640px; top: 740px; background: #000; color: var(--y)">Filtre UPC</div>
+    </div>
+
+    <!-- 5. Valeur, sorties, séries -->
+    <div id="s5" class="scene" style="background: radial-gradient(circle at 50% 40%, #18245a 0%, #0A1130 55%, #050814 100%)">
+      <canvas id="s5bg" width="1080" height="1920"></canvas>
+      <div id="s5cap" class="abs center" style="top: 190px">
+        <div id="s5c1" class="big y" style="font-size: 88px">TA COLLECTION</div>
+        <div id="s5c2" class="big w" style="font-size: 88px">COTÉE CHAQUE JOUR</div>
+      </div>
+      <div id="s5phone" class="phone" style="left: 220px; top: 470px">
+        <div class="notch"></div>
+        <div class="scr">
+          <img id="s5a" src="shots/home.png">
+          <img id="s5b" src="shots/sorties.png">
+          <img id="s5c" src="shots/series.png">
+        </div>
+      </div>
+      <div id="s5val" class="abs glass" style="left: 60px; top: 760px; padding: 26px 34px; border-color: var(--y)">
+        <div class="sora" style="font-size: 30px; color: rgba(255,255,255,.8)">Ma collection</div>
+        <div id="s5num" class="big w" style="font-size: 96px; -webkit-text-stroke: 8px #000">0 €</div>
+        <div class="sora" style="font-size: 30px; color: #3BE08A">Cardmarket · TCGplayer</div>
+      </div>
+      <div id="s5tagA" class="abs pill" style="left: 600px; top: 1250px; background: var(--y); color: #000">Sorties : dates et prix</div>
+      <div id="s5tagB" class="abs pill" style="left: 50px; top: 1180px; background: var(--y); color: #000">30ᵉ Anniversaire · 191 cartes</div>
+    </div>
+
+    <!-- 6. Appel à l'action -->
+    <div id="s6" class="scene" style="background: linear-gradient(165deg, #FFE36A 0%, #FFD21F 45%, #FFB400 100%)">
+      <canvas id="s6bg" width="1080" height="1920"></canvas>
+      <img id="s6logo" class="abs" src="../../web/img/brand/dropicards-header.png" style="left: 90px; top: 330px; width: 900px">
+      <div id="s6stamp" class="abs center" style="top: 560px"><span class="pill" style="font-size: 54px; padding: 22px 46px; background: #000; color: var(--y); border: 6px solid #fff">AVANT-PREMIÈRE</span></div>
+      <div id="s6l1" class="abs center big w" style="top: 760px; font-size: 96px">PRÊT POUR</div>
+      <div id="s6l2" class="abs center big w" style="top: 860px; font-size: 96px">LE 6 NOVEMBRE ?</div>
+      <div id="s6list" class="abs" style="left: 120px; top: 1010px; width: 840px">
+        <div class="s6i sora" style="font-size: 44px; color: #2a1a00; margin: 10px 0">✦ Radar de 3 397 boutiques</div>
+        <div class="s6i sora" style="font-size: 44px; color: #2a1a00; margin: 10px 0">✦ Toutes les sorties 30 ans</div>
+        <div class="s6i sora" style="font-size: 44px; color: #2a1a00; margin: 10px 0">✦ Ta collection cotée chaque jour</div>
+      </div>
+      <div id="s6cta" class="abs center" style="top: 1290px; padding-left: 120px"><span class="pill" style="font-size: 50px; padding: 24px 50px; background: #000; color: #fff">Gratuit · lien en bio 👆</span></div>
+      <img id="s6pika" class="abs px" src="../../web/img/pokemon/25.png" style="left: 0px; top: 1180px; width: 250px">
+      <div id="s6legal" class="abs" style="left: 70px; right: 70px; top: 1440px; text-align: center; font-size: 25px; line-height: 1.35; color: #2a1a00">Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company. Pokémon et les noms associés appartiennent à leurs propriétaires.</div>
+    </div>
+
+  </div>
+  <div id="flash"></div>
+</div>
+
+<script>
+// ——— Outils de temps ———
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const eOut = x => 1 - Math.pow(1 - x, 3);
+const eIn = x => x * x * x;
+const eIO = x => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const eBack = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const eElastic = x => (x === 0 || x === 1 ? x : Math.pow(2, -10 * x) * Math.sin((x * 10 - .75) * (2 * Math.PI) / 3) + 1);
+const lerp = (a, b, x) => a + (b - a) * x;
+const $ = id => document.getElementById(id);
+const css = (el, o) => { el = typeof el === 'string' ? $(el) : el; for (const k in o) el.style[k] = o[k]; };
+// Mot qui « tombe » : grand et transparent, puis à sa taille avec un rebond.
+const slam = (id, t, t0, d = .28) => { const x = prog(t, t0, t0 + d); css(id, { opacity: x > 0 ? 1 : 0, transform: `scale(${lerp(2.6, 1, eBack(x))}) rotate(${lerp(-6, 0, eOut(x))}deg)` }); return x; };
+const rise = (id, t, t0, d = .4, dy = 80) => { const x = eOut(prog(t, t0, t0 + d)); css(id, { opacity: x, transform: `translateY(${(1 - x) * dy}px)` }); return x; };
+// Scènes : [début, fin] en secondes.
+const S = { s1: [0, 2.7], s2: [2.7, 7.4], s3: [7.4, 11.9], s4: [11.9, 16.4], s5: [16.4, 21.4], s6: [21.4, 27] };
+const DURATION = 27;
+
+// ——— Données : France et boutiques (OpenStreetMap, comme le Radar de l'app) ———
+let FR = [], SHOPS = [];
+const LON0 = 2.4, LAT0 = 46.6, K = 118, KX = K * Math.cos(46.6 * Math.PI / 180);
+const proj = (lon, lat, cx, cy, z) => [cx + (lon - LON0) * KX * z, cy - (lat - LAT0) * K * z];
+async function loadData() {
+  const [geo, st] = await Promise.all([fetch('../../web/data/geo/regions.json').then(r => r.json()), fetch('../../web/data/stores.json').then(r => r.json())]);
+  geo.features.forEach(f => { const g = f.geometry; (g.type === 'Polygon' ? [g.coordinates] : g.coordinates).forEach(poly => FR.push(poly[0])); });
+  const F = {}; st.fields.forEach((k, i) => { F[k] = i; });
+  SHOPS = st.stores.filter(s => s[F.lat] > 41 && s[F.lat] < 51.5 && s[F.lon] > -5.5 && s[F.lon] < 10).map((s, i) => {
+    const lon = s[F.lon], lat = s[F.lat], a = Math.atan2(-(lat - 48.85) , (lon - 2.35) * Math.cos(0.81));
+    return { lon, lat, a: (a + Math.PI * 2.5) % (Math.PI * 2), r: (i * 7919 % 1000) / 1000 };
+  });
+}
+
+// ——— Dessins sur canvas ———
+function rings(ctx, cx, cy, n, gap, color, w) { ctx.strokeStyle = color; ctx.lineWidth = w; for (let i = 1; i <= n; i++) { ctx.beginPath(); ctx.arc(cx, cy, i * gap, 0, Math.PI * 2); ctx.stroke(); } }
+function rays(ctx, t, color, n = 18) {
+  ctx.clearRect(0, 0, 1080, 1920); ctx.save(); ctx.translate(540, 900); ctx.rotate(t * .25); ctx.fillStyle = color;
+  for (let i = 0; i < n; i++) { ctx.rotate(Math.PI * 2 / n); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-90, -1600); ctx.lineTo(90, -1600); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+}
+function sparkles(ctx, t, color, n = 26, seed = 1) {
+  ctx.fillStyle = color;
+  for (let i = 0; i < n; i++) {
+    const s = Math.sin(i * 12.9898 + seed) * 43758.5453, r = s - Math.floor(s), r2 = (Math.sin(i * 78.233 + seed) * 12345.678) % 1;
+    const x = r * 1080, y = (Math.abs(r2) * 1920 - t * (60 + r * 120)) % 1920, yy = y < 0 ? y + 1920 : y, k = (Math.sin(t * 4 + i) + 1) / 2;
+    star(ctx, x, yy, 6 + 14 * k * r);
+  }
+}
+function star(ctx, x, y, s) { ctx.beginPath(); ctx.moveTo(x, y - s); ctx.quadraticCurveTo(x, y, x + s, y); ctx.quadraticCurveTo(x, y, x, y + s); ctx.quadraticCurveTo(x, y, x - s, y); ctx.quadraticCurveTo(x, y, x, y - s); ctx.fill(); }
+function france(ctx, t, lt) {
+  ctx.clearRect(0, 0, 1080, 1920);
+  const z = lerp(1.25, 1, eOut(prog(lt, 0, 1.2))), cx = 540, cy = 930;
+  // Anneaux et balayage du radar, centrés sur Paris.
+  const [px, py] = proj(2.35, 48.85, cx, cy, z);
+  ctx.save(); rings(ctx, px, py, 7, 150 * z, 'rgba(255,210,31,.10)', 2); ctx.restore();
+  const sweep = Math.max(0, lt - .5) * 2.4; // radians parcourus
+  ctx.save(); ctx.translate(px, py); ctx.rotate(sweep - Math.PI / 2);
+  const g = ctx.createConicGradient ? ctx.createConicGradient(0, 0, 0) : null;
+  if (g) { g.addColorStop(0, 'rgba(255,210,31,.0)'); g.addColorStop(.85, 'rgba(255,210,31,0)'); g.addColorStop(.995, 'rgba(255,210,31,.32)'); g.addColorStop(1, 'rgba(255,210,31,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 1400, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+  // Contour qui se dessine.
+  const draw = eIO(prog(lt, 0, 1.4));
+  ctx.save(); ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(255,210,31,.9)'; ctx.lineWidth = 3; ctx.fillStyle = `rgba(40,60,140,${.35 * draw})`;
+  ctx.shadowColor = 'rgba(255,210,31,.6)'; ctx.shadowBlur = 18;
+  FR.forEach(ring => { const n = Math.max(2, Math.floor(ring.length * draw)); ctx.beginPath(); for (let i = 0; i < n; i++) { const [x, y] = proj(ring[i][0], ring[i][1], cx, cy, z); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } if (draw >= 1) { ctx.closePath(); ctx.fill(); } ctx.stroke(); });
+  ctx.restore();
+  // Boutiques : un point s'allume quand le balayage passe (premier tour), avec un éclat.
+  let lit = 0;
+  for (const s of SHOPS) {
+    const seen = sweep - s.a; if (seen < 0) continue; lit++;
+    const [x, y] = proj(s.lon, s.lat, cx, cy, z), flash = clamp(1 - seen / .5);
+    ctx.fillStyle = flash > 0 ? `rgba(255,255,255,${.6 + .4 * flash})` : 'rgba(255,210,31,.85)';
+    const r = 2.6 + 5 * flash; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    if (flash > .3 && s.r < .12) { ctx.strokeStyle = `rgba(255,210,31,${flash})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 30 * (1 - flash) + 6, 0, Math.PI * 2); ctx.stroke(); }
+  }
+  // Paris
+  ctx.fillStyle = '#FF3B6B'; ctx.beginPath(); ctx.arc(px, py, 10 + 3 * Math.sin(t * 8), 0, Math.PI * 2); ctx.fill();
+  return lit;
+}
+
+// ——— Rendu d'une image ———
+const nf = n => Math.round(n).toLocaleString('fr-FR').replace(/\s/g, ' ');
+function render(t) {
+  t = t % DURATION;
+  const vis = (id, a, b) => { const on = t >= a && t < b; $(id).style.opacity = on ? 1 : 0; $(id).style.visibility = on ? 'visible' : 'hidden'; return on; };
+  // Caméra : petite secousse après chaque mot qui tombe.
+  const hits = [.15, .55, .95, 1.25, 3.0, 4.15, 7.6, 12.1, 16.6, 21.6];
+  let sh = 0; hits.forEach(h => { const d = t - h - .2; if (d > 0 && d < .25) sh = Math.max(sh, 1 - d / .25); });
+  css('cam', { transform: `translate(${Math.sin(t * 90) * 14 * sh}px, ${Math.cos(t * 77) * 14 * sh}px)` });
+  // Flashs de transition.
+  let fl = 0; [S.s2[0], S.s3[0], S.s4[0], S.s5[0], S.s6[0]].forEach(c => { const d = t - c; if (d >= -.06 && d < .3) fl = Math.max(fl, d < 0 ? 1 + d / .06 : 1 - d / .3); });
+  css('flash', { opacity: fl * .9 });
+
+  // 1. Accroche
+  if (vis('s1', ...S.s1)) {
+    const lt = t; css('s1sweep', { transform: `rotate(${lt * 200}deg)` });
+    const c = $('s1rings').getContext('2d'); c.clearRect(0, 0, 1080, 1920);
+    rings(c, 540, 1020, 9, 95 + 6 * Math.sin(lt * 3), 'rgba(255,210,31,.12)', 2);
+    const pulse = (lt * 1.6) % 1; c.strokeStyle = `rgba(255,210,31,${.5 * (1 - pulse)})`; c.lineWidth = 6; c.beginPath(); c.arc(540, 1020, 60 + pulse * 700, 0, Math.PI * 2); c.stroke();
+    slam('s1a', t, .15); slam('s1b', t, .55); slam('s1c', t, .95, .24); slam('s1d', t, 1.25, .24); rise('s1e', t, 1.75, .35, 40);
+    const out = prog(t, 2.45, 2.7); css('s1a', { opacity: 1 - out }); ['s1b', 's1c', 's1d', 's1e'].forEach(id => { if (t > 2.45) $(id).style.opacity = 1 - out; });
+  }
+
+  // 2. Produits
+  if (vis('s2', ...S.s2)) {
+    const lt = t - S.s2[0];
+    rays($('s2rays').getContext('2d'), lt, 'rgba(255,255,255,.18)');
+    const k = $('s2rays').getContext('2d'); sparkles(k, lt, 'rgba(255,255,255,.9)', 22, 3);
+    const lg = eElastic(prog(lt, 0, .8)); css('s2logo', { transform: `scale(${lg}) rotate(${(1 - lg) * -20}deg)`, opacity: lg > 0 ? 1 : 0 });
+    // UPC : arrive en 3D, reflet holo, puis s'efface pour les autres produits.
+    const a = eOut(prog(lt, .25, .9)), out = eIn(prog(lt, 2.75, 3.1));
+    css('s2upc', { transform: `translateY(${(1 - a) * 900 - out * 120}px) rotateX(${(1 - a) * 35 + 6 * Math.sin(lt * 1.6)}deg) rotateY(${8 * Math.sin(lt * 1.1)}deg) scale(${lerp(.7, 1, a) * (1 + .03 * Math.sin(lt * 2))})` });
+    css('s2upcWrap', { opacity: 1 - out });
+    css('s2shine', { left: `${lerp(-30, 130, (lt * .7) % 1)}%`, transform: 'skewX(-18deg)' });
+    slam('s2t1', t, S.s2[0] + .75); rise('s2t2', t, S.s2[0] + 1.05, .35, 30);
+    const d = eBack(prog(lt, 1.2, 1.55)); css('s2date', { transform: `scale(${d}) rotate(${lerp(-40, 12, d)}deg)`, opacity: d > 0 ? 1 - out : 0 });
+    ['s2t1', 's2t2'].forEach(id => { if (lt > 2.75) $(id).style.opacity = 1 - out; });
+    // Autres sorties du mois, en cascade.
+    css('s2more', { opacity: lt > 3 ? 1 : 0 });
+    [['s2m1', 3.0, -1], ['s2m2', 3.15, 1], ['s2m3', 3.3, 0]].forEach(([id, t0, dir]) => {
+      const x = eBack(prog(lt, t0, t0 + .4)); css(id, { opacity: x > 0 ? 1 : 0, transform: `translate(${dir * (1 - x) * 700}px, ${dir === 0 ? (1 - x) * 900 : 0}px) rotate(${dir * (1 - x) * 25 + Math.sin(lt * 2 + t0) * 2}deg)` });
+    });
+    if (lt > 3.5) slam('s2t3', t, S.s2[0] + 3.5); else $('s2t3').style.opacity = 0;
+  }
+
+  // 3. Radar France
+  if (vis('s3', ...S.s3)) {
+    const lt = t - S.s3[0];
+    const lit = france($('s3map').getContext('2d'), t, lt);
+    slam('s3t1', t, S.s3[0] + .2); rise('s3t2', t, S.s3[0] + .5, .4, 30);
+    rise('s3count', t, S.s3[0] + .8, .4, 60);
+    $('s3n').textContent = nf(lit >= SHOPS.length - 5 ? 3397 : lit * 3397 / Math.max(1, SHOPS.length));
+  }
+
+  // 4. Démo Radar → Territoire
+  if (vis('s4', ...S.s4)) {
+    const lt = t - S.s4[0];
+    const c = $('s4bg').getContext('2d'); rays(c, lt, 'rgba(255,255,255,.14)', 14); sparkles(c, lt, 'rgba(255,255,255,.8)', 16, 9);
+    const ph = eOut(prog(lt, 0, .6)); css('s4phone', { transform: `translateY(${(1 - ph) * 1400}px) rotate(${(1 - ph) * 12 + Math.sin(lt * 1.3) * 1.2}deg)` });
+    // Écran 1 : radar de France (l'image monte doucement) ; écran 2 : Territoire, radar autour de soi.
+    const sw = eIO(prog(lt, 2.0, 2.45));
+    css('s4a', { transform: `translateX(${-sw * 100}%) translateY(${-lerp(0, 4, prog(lt, 0, 2))}%)` });
+    css('s4b', { transform: `translateX(${(1 - sw) * 100}%)` });
+    // Repère rouge sur le radar de Territoire (sans nom de boutique).
+    const ring = eBack(prog(lt, 3.35, 3.65));
+    css('s4ring', { left: '20px', width: '564px', top: '616px', height: '366px', opacity: ring > 0 ? 1 : 0, transform: `scale(${lerp(1.4, 1, ring)})` });
+    const cap2 = prog(lt, 2.0, 2.3);
+    $('s4c1').textContent = lt < 2.15 ? 'LA FRANCE ENTIÈRE' : 'AUTOUR DE TOI';
+    $('s4c2').textContent = lt < 2.15 ? '3 397 boutiques, région par région' : 'les plus proches + un indice de chance';
+    slam('s4c1', t, lt < 2.15 ? S.s4[0] + .25 : S.s4[0] + 2.15); rise('s4c2', t, lt < 2.15 ? S.s4[0] + .45 : S.s4[0] + 2.3, .3, 20);
+    const g1 = eBack(prog(lt, 1.0, 1.35)), g2 = eBack(prog(lt, 3.6, 3.95));
+    css('s4tag1', { opacity: g1 > 0 ? 1 : 0, transform: `scale(${g1}) rotate(-6deg)` });
+    css('s4tag2', { opacity: g2 > 0 ? 1 : 0, transform: `scale(${g2}) rotate(5deg)` });
+  }
+
+  // 5. Valeur, sorties, séries
+  if (vis('s5', ...S.s5)) {
+    const lt = t - S.s5[0];
+    const c = $('s5bg').getContext('2d'); c.clearRect(0, 0, 1080, 1920); sparkles(c, lt, 'rgba(255,210,31,.8)', 24, 5);
+    const ph = eOut(prog(lt, 0, .55)); css('s5phone', { transform: `translateY(${(1 - ph) * 1400}px) rotate(${Math.sin(lt * 1.2) * 1.2}deg)` });
+    const s1 = eIO(prog(lt, 1.85, 2.25)), s2 = eIO(prog(lt, 3.35, 3.75));
+    css('s5a', { transform: `translateX(${-s1 * 100}%)` });
+    css('s5b', { transform: `translateX(${(1 - s1) * 100 - s2 * 100}%) translateY(-${lerp(0, 22, eIO(prog(lt, 2.4, 3.3)))}%)` });
+    css('s5c', { transform: `translateX(${(1 - s2) * 100}%) translateY(-${lerp(0, 8, eIO(prog(lt, 3.9, 4.6)))}%)` });
+    // Montant qui compte, en vignette au-dessus du téléphone (collection de démonstration).
+    const v = eOut(prog(lt, .45, 1.3)); $('s5num').textContent = nf(2603 * v) + ' €';
+    const vb = eBack(prog(lt, .4, .75)), vo = prog(lt, 1.85, 2.05);
+    css('s5val', { opacity: vb > 0 ? 1 - vo : 0, transform: `scale(${vb}) rotate(-4deg)` });
+    // Légendes successives.
+    const cap = lt < 1.95 ? ['TA COLLECTION', 'COTÉE CHAQUE JOUR'] : lt < 3.45 ? ['LES SORTIES', 'DATES ET PRIX'] : ['TOUTES LES SÉRIES', 'TOUTES LES CARTES'];
+    $('s5c1').textContent = cap[0]; $('s5c2').textContent = cap[1];
+    const t0 = lt < 1.95 ? .15 : lt < 3.45 ? 1.95 : 3.45;
+    slam('s5c1', t, S.s5[0] + t0); slam('s5c2', t, S.s5[0] + t0 + .15);
+    const a = eBack(prog(lt, 2.5, 2.8)), b = eBack(prog(lt, 4.1, 4.4));
+    css('s5tagA', { opacity: a > 0 && lt < 3.4 ? 1 : 0, transform: `scale(${a}) rotate(5deg)` });
+    css('s5tagB', { opacity: b > 0 ? 1 : 0, transform: `scale(${b}) rotate(-5deg)` });
+  }
+
+  // 6. Appel à l'action
+  if (vis('s6', ...S.s6)) {
+    const lt = t - S.s6[0];
+    const c = $('s6bg').getContext('2d'); rays(c, lt, 'rgba(255,255,255,.2)', 20); sparkles(c, lt, 'rgba(255,255,255,.95)', 30, 7);
+    const lg = eElastic(prog(lt, .05, .9)); css('s6logo', { opacity: lg > 0 ? 1 : 0, transform: `scale(${lg}) rotate(${Math.sin(lt * 2) * 2}deg)` });
+    const st = eBack(prog(lt, .7, 1.0)); css('s6stamp', { opacity: st > 0 ? 1 : 0, transform: `scale(${lerp(3, 1, st)}) rotate(${lerp(20, -4, st)}deg)` });
+    slam('s6l1', t, S.s6[0] + 1.1); slam('s6l2', t, S.s6[0] + 1.3);
+    [...document.querySelectorAll('.s6i')].forEach((el, i) => { const x = eOut(prog(lt, 1.8 + i * .2, 2.2 + i * .2)); css(el, { opacity: x, transform: `translateX(${(1 - x) * -200}px)` }); });
+    const ct = eBack(prog(lt, 2.6, 2.95)); css('s6cta', { opacity: ct > 0 ? 1 : 0, transform: `scale(${ct * (1 + .04 * Math.sin(lt * 6))})` });
+    // Pikachu, compagnon de l'app, qui saute.
+    const pk = eOut(prog(lt, 1.6, 2.1)), hop = Math.abs(Math.sin(lt * 5)) * 60;
+    css('s6pika', { opacity: pk, transform: `translate(${(1 - pk) * -400}px, ${-hop}px) scaleX(-1)` });
+    rise('s6legal', t, S.s6[0] + 1.0, .4, 20);
+  }
+}
+window.render = render;
+window.DURATION = DURATION;
+window.ready = (async () => {
+  await loadData();
+  await document.fonts.ready;
+  await Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; })));
+  render(0);
+  return true;
+})();
+// Lecture en boucle quand la page est ouverte seule (pas pendant le rendu image par image).
+if (!/render=1/.test(location.search)) window.ready.then(() => { const t0 = performance.now(); const loop = () => { render((performance.now() - t0) / 1000); requestAnimationFrame(loop); }; loop(); });
+</script>
+</body>
+</html>
