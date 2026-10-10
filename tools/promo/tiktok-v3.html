@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Dropicards · pub TikTok v3</title>
+<!-- Pub verticale 1080 × 1920, 35,8 s, montée sur « Montagem Uranium (slowed) » (2026-10-10, demande du porteur).
+     Synchro : grille des coups de grosse caisse mesurée sur la musique, G(k) = 0,662 + 0,55921 × k s (107,3 BPM).
+     Prises réelles de l'app (tools/promo/record-app.mjs, images extraites par render.mjs dans out/play/) et
+     motion design calculé image par image par render(t). Sert depuis la racine du dépôt. -->
+<style>
+@font-face { font-family: 'Luckiest Guy'; src: url(../../web/fonts/luckiest-guy-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Luckiest Guy'; src: url(../../web/fonts/luckiest-guy-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-024F, U+1E00-1EFF; }
+@font-face { font-family: 'Sora'; font-weight: 700; src: url(../../web/fonts/sora-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Sora'; font-weight: 600; src: url(../../web/fonts/sora-latin-600-normal.woff2) format('woff2'); }
+:root { --y: #FFD21F; --navy: #0A1130; --ink: #04060F; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--navy); font-family: 'Sora', sans-serif; color: #fff; }
+.L { position: absolute; inset: 0; }
+.abs { position: absolute; }
+.big { font-family: 'Luckiest Guy', cursive; line-height: .95; letter-spacing: 1px; -webkit-text-stroke: 12px #000; paint-order: stroke fill; }
+.sora { font-family: 'Sora', sans-serif; font-weight: 700; }
+.ctr { left: 0; right: 0; text-align: center; }
+canvas { position: absolute; left: 0; top: 0; }
+#full, #phone .scr { overflow: hidden; }
+#full { position: absolute; inset: 0; opacity: 0; }
+#full img, #phone .scr img { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+#phone { position: absolute; left: 0; top: 0; width: 740px; height: 1600px; border-radius: 92px; background: #07090f; padding: 20px; opacity: 0;
+  box-shadow: 0 0 0 5px var(--y), 0 0 60px rgba(255,210,31,.55), 0 60px 120px rgba(0,0,0,.6); }
+#phone .scr { position: relative; width: 700px; height: 1560px; border-radius: 74px; background: #0B1120; }
+#phone .notch { position: absolute; left: 50%; top: 36px; width: 170px; height: 46px; margin-left: -85px; border-radius: 30px; background: #000; z-index: 3; }
+.t { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; white-space: pre-line; }
+.plate { display: inline-block; padding: 10px 26px; border-radius: 18px; background: rgba(10,17,48,.88); border: 2px solid rgba(255,210,31,.6); }
+#flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+#vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 45%, rgba(0,0,0,.65) 100%); opacity: 0; }
+#scan { position: absolute; inset: 0; pointer-events: none; opacity: .07; background: repeating-linear-gradient(0deg, rgba(255,255,255,.5) 0 2px, transparent 2px 6px); }
+#topfade { position: absolute; left: 0; right: 0; top: 0; height: 640px; background: linear-gradient(180deg, rgba(4,6,15,.88) 0%, rgba(4,6,15,.55) 60%, rgba(4,6,15,0) 100%); opacity: 0; }
+.px { image-rendering: pixelated; }
+.prod { position: absolute; opacity: 0; border-radius: 30px; overflow: hidden; border: 6px solid #000; box-shadow: 0 0 0 4px var(--y), 0 40px 80px rgba(0,0,0,.55); }
+.prod img { display: block; width: 100%; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cam" class="L">
+    <canvas id="bg" width="1080" height="1920"></canvas>
+    <div id="full"><img id="fullImg" alt=""></div>
+    <div id="phone"><div class="notch"></div><div class="scr"><img id="phoneImg" alt=""></div></div>
+    <canvas id="fx" width="1080" height="1920"></canvas>
+    <div id="prods" class="L">
+      <div class="prod" id="pDeck" style="width: 760px"><img src="../../web/img/products/30th-celebration-battle-deck-espeon-ex-umbreon-ex.webp" alt=""></div>
+      <div class="prod" id="pEtb" style="width: 760px"><img src="../../web/img/products/30th-celebration-elite-trainer-box.webp" alt=""></div>
+      <div class="prod" id="pDitto" style="width: 760px"><img src="../../web/img/products/30th-celebration-ditto-premium-collection.webp" alt=""></div>
+      <div class="prod" id="pFig" style="width: 760px"><img src="../../web/img/products/30th-celebration-figure-collection.webp" alt=""></div>
+      <div class="abs" id="upcL" style="width: 400px; height: 454px; overflow: hidden; opacity: 0"><img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="position: absolute; left: 0; top: 0; width: 800px; height: 454px" alt=""></div>
+      <div class="abs" id="upcR" style="width: 400px; height: 454px; overflow: hidden; opacity: 0"><img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="position: absolute; left: -400px; top: 0; width: 800px; height: 454px" alt=""></div>
+      <img id="logo30" class="abs" src="../../web/img/logo-30-anniversaire.webp" style="width: 520px; left: 280px; opacity: 0" alt="">
+    </div>
+    <div id="topfade"></div>
+    <div id="texts" class="L">
+      <div id="tA" class="t big"></div>
+      <div id="tB" class="t big"></div>
+      <div id="tC" class="t sora"></div>
+      <div id="tD" class="t sora"></div>
+    </div>
+    <img id="logo" class="abs" src="../../web/img/brand/dropicards-header.png" style="width: 860px; left: 110px; opacity: 0" alt="">
+    <img id="gem" class="abs" src="../../web/img/brand/pk.svg" style="width: 150px; opacity: 0" alt="">
+    <img id="pika" class="abs px" src="../../web/img/pokemon/25.png" style="width: 230px; opacity: 0" alt="">
+    <div id="legal" class="abs" style="left: 60px; width: 820px; top: 1290px; opacity: 0">
+      <div class="plate" style="font-size: 27px; line-height: 1.35; font-weight: 600; text-align: center">Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</div>
+      <div style="margin-top: 10px; font-size: 22px; color: rgba(255,255,255,.75); text-align: center">Fond de carte : © contributeurs OpenStreetMap · OpenFreeMap</div>
+    </div>
+  </div>
+  <div id="vig"></div>
+  <div id="scan"></div>
+  <div id="flash"></div>
+</div>
+
+<script>
+// ——— Temps ———
+const BPM0 = 0.662, BEAT = 0.55921, b = k => BPM0 + BEAT * k; // coup n° k de la grille
+const DURATION = 35.79; // b(64) − b(0) : la boucle retombe en rythme
+const clamp = (x, a = 0, c = 1) => Math.min(c, Math.max(a, x));
+const prog = (t, a, c) => clamp((t - a) / (c - a));
+const eOut = x => 1 - Math.pow(1 - x, 3), eIn = x => x * x * x;
+const eIO = x => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const eBack = x => { const c = 2.2; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const eEl = x => (x <= 0 ? 0 : x >= 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - .75) * (2 * Math.PI) / 3) + 1);
+const lerp = (a, c, x) => a + (c - a) * x;
+const $ = id => document.getElementById(id);
+const css = (el, o) => { el = typeof el === 'string' ? $(el) : el; for (const k in o) el.style[k] = o[k]; };
+const nf = n => Math.round(n).toLocaleString('fr-FR').replace(/\s/g, ' ');
+// Coup qui vient de tomber (0..1 sur d secondes) ; « impact » pour les secousses et les flashs.
+const hit = (t, at, d = .3) => { const x = (t - at) / d; return x >= 0 && x < 1 ? 1 - x : 0; };
+
+// ——— Données : prises de l'app, France et boutiques ———
+let TK = {}, FR = [], SHOPS = [];
+const C = { x: 480, y: 960, r: 400 }; // disque du radar néon (hors des boutons TikTok)
+const K = 78, KX = K * Math.cos(46.6 * Math.PI / 180), LON0 = 2.2, LAT0 = 46.2;
+const proj = (lon, lat, z = 1, cx = C.x, cy = C.y) => [cx + (lon - LON0) * KX * z, cy - (lat - LAT0) * K * z];
+async function load() {
+  const [tk, geo, st] = await Promise.all(['takes/takes.json', '../../web/data/geo/regions.json', '../../web/data/stores.json'].map(u => fetch(u).then(r => r.json())));
+  TK = tk;
+  geo.features.forEach(f => { const g = f.geometry; (g.type === 'Polygon' ? [g.coordinates] : g.coordinates).forEach(p => FR.push(p[0])); });
+  const F = {}; st.fields.forEach((k, i) => { F[k] = i; });
+  SHOPS = st.stores.filter(s => s[F.lat] > 41 && s[F.lat] < 51.5 && s[F.lon] > -5.5 && s[F.lon] < 10).map((s, i) => {
+    const [x, y] = proj(s[F.lon], s[F.lat]);
+    return { lon: s[F.lon], lat: s[F.lat], a: (Math.atan2(x - C.x, -(y - C.y)) + 2 * Math.PI) % (2 * Math.PI), r: (i * 7919 % 1000) / 1000 };
+  });
+  SHOPS.sort((p, q) => p.a - q.a);
+}
+// Image d'une prise : n° d'image, borné.
+const frameOf = (take, f) => Math.max(0, Math.min((TK[take] ? TK[take].frames : 1) - 1, Math.round(f)));
+// Correspondance temps de la pub → image de la prise, par segments [t, image].
+const seg = (t, pts) => { for (let i = 1; i < pts.length; i++) if (t <= pts[i][0]) return lerp(pts[i - 1][1], pts[i][1], prog(t, pts[i - 1][0], pts[i][0])); return pts[pts.length - 1][1]; };
+const countAt = (take, f) => { let c = 0; ((TK[take] || {}).counts || []).forEach(([i, v]) => { if (i <= f) c = v; }); return c; };
+let pending = [];
+function showFrame(imgId, take, f) {
+  const src = 'out/play/' + take + '/' + String(frameOf(take, f)).padStart(4, '0') + '.jpg', img = $(imgId);
+  if (img.getAttribute('src') !== src) { img.setAttribute('src', src); if (img.decode) pending.push(img.decode().catch(() => null)); }
+}
+// Vue plein écran d'une prise (pixels CSS de l'app 390 × 844, images ×2) : point (cx, cy) de l'app placé en (X, Y), échelle k.
+function full(take, f, cx, cy, X, Y, k, op = 1) {
+  showFrame('fullImg', take, f);
+  css('full', { opacity: op, visibility: op > 0 ? 'visible' : 'hidden' });
+  css('fullImg', { transform: `translate(${X - cx * k}px, ${Y - cy * k}px) scale(${k / 2})` });
+}
+// Téléphone néon : position, rotation, et caméra dans l'écran (point (cx, cy) de l'app au centre, zoom z).
+function phone(take, f, o) {
+  showFrame('phoneImg', take, f);
+  const z = o.z || 1, k = 700 / 390 * z, cx = o.cx == null ? 195 : o.cx, cy = o.cy == null ? 422 : o.cy;
+  const tx = Math.min(0, Math.max(700 - 390 * k, 350 - cx * k)), ty = Math.min(0, Math.max(1560 - 844 * k, 780 - cy * k));
+  css('phoneImg', { transform: `translate(${tx}px, ${ty}px) scale(${k / 2})` });
+  css('phone', { opacity: o.op == null ? 1 : o.op, visibility: (o.op == null ? 1 : o.op) > 0 ? 'visible' : 'hidden',
+    transform: `translate(${o.x}px, ${o.y}px) perspective(1800px) rotateY(${o.ry || 0}deg) rotate(${o.rz || 0}deg) scale(${o.s || 1})` });
+}
+// Textes : jusqu'à 4 lignes (A, B : titres ; C, D : sous-titres).
+function txt(id, text, o = {}) {
+  const el = $(id);
+  if (!text) { el.style.opacity = 0; return; }
+  if (el.textContent !== text) el.textContent = text;
+  const at = o.at == null ? -9 : o.at, p = o.t == null ? 1 : prog(o.t, at, at + (o.d || .22));
+  const sc = o.pop === false ? 1 : lerp(o.from || 2.3, 1, eBack(p));
+  const gl = o.glitch ? hit(o.t, at, .12) : 0;
+  css(el, { top: o.y + 'px', fontSize: o.size + 'px', color: o.color || '#fff', opacity: p > 0 ? (o.op == null ? 1 : o.op) : 0,
+    transform: `translateX(${o.dx || 0}px) scale(${sc}) rotate(${o.rot || 0}deg)`,
+    textShadow: gl ? `${10 * gl}px 0 rgba(255,0,80,.9), ${-10 * gl}px 0 rgba(0,255,255,.9)` : (o.shadow || 'none'),
+    webkitTextStroke: o.stroke == null ? '' : o.stroke + 'px #000', letterSpacing: o.ls || '' });
+}
+function clearScene() {
+  ['tA', 'tB', 'tC', 'tD'].forEach(id => txt(id, ''));
+  ['full', 'phone', 'logo', 'gem', 'pika', 'legal', 'logo30', 'upcL', 'upcR', 'pDeck', 'pEtb', 'pDitto', 'pFig', 'topfade', 'vig'].forEach(id => { $(id).style.opacity = 0; });
+  $('full').style.visibility = $('phone').style.visibility = 'hidden';
+}
+
+// ——— Dessins ———
+const bg = () => $('bg').getContext('2d'), fxc = () => $('fx').getContext('2d');
+function grid(ctx, a) { ctx.save(); ctx.strokeStyle = `rgba(120,150,255,${a})`; ctx.lineWidth = 1; for (let x = 0; x <= 1080; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1920); ctx.stroke(); } for (let y = 0; y <= 1920; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1080, y); ctx.stroke(); } ctx.restore(); }
+function rings(ctx, cx, cy, r, a, ticks = true) {
+  ctx.save(); ctx.strokeStyle = `rgba(255,210,31,${a})`; ctx.lineWidth = 2;
+  for (let i = 1; i <= 4; i++) { ctx.beginPath(); ctx.arc(cx, cy, r * i / 4, 0, 2 * Math.PI); ctx.stroke(); }
+  if (ticks) for (let d = 0; d < 360; d += 10) { const q = d * Math.PI / 180, l = d % 30 ? 10 : 24; ctx.beginPath(); ctx.moveTo(cx + Math.sin(q) * r, cy - Math.cos(q) * r); ctx.lineTo(cx + Math.sin(q) * (r + l), cy - Math.cos(q) * (r + l)); ctx.stroke(); }
+  ctx.restore();
+}
+// Faisceau : angle a (radians depuis 12 h, sens horaire), traîne de 70°.
+function beam(ctx, cx, cy, r, a, alpha = 1, color = '255,210,31') {
+  if (!ctx.createConicGradient) return;
+  ctx.save(); ctx.translate(cx, cy);
+  const g = ctx.createConicGradient(a - Math.PI / 2 - 1.22, 0, 0);
+  g.addColorStop(0, `rgba(${color},0)`); g.addColorStop(.194, `rgba(${color},${.5 * alpha})`); g.addColorStop(.1945, `rgba(${color},0)`); g.addColorStop(1, `rgba(${color},0)`);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, a - Math.PI / 2 - 1.22, a - Math.PI / 2); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = `rgba(255,255,255,${.95 * alpha})`; ctx.lineWidth = 5; ctx.shadowColor = `rgba(${color},1)`; ctx.shadowBlur = 24;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.sin(a) * r, -Math.cos(a) * r); ctx.stroke();
+  ctx.restore();
+}
+function progressRing(ctx, cx, cy, r, frac, alpha = 1) {
+  ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(255,210,31,${alpha})`; ctx.lineWidth = 10; ctx.shadowColor = 'rgba(255,210,31,.9)'; ctx.shadowBlur = 20;
+  ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * frac); ctx.stroke(); ctx.restore();
+}
+function shock(ctx, cx, cy, p, rmax, color = '255,255,255') { if (p <= 0 || p >= 1) return; ctx.save(); ctx.strokeStyle = `rgba(${color},${1 - p})`; ctx.lineWidth = 10 * (1 - p) + 2; ctx.beginPath(); ctx.arc(cx, cy, rmax * eOut(p), 0, 2 * Math.PI); ctx.stroke(); ctx.restore(); }
+function rays(ctx, t, color, n = 18, cx = 540, cy = 900) { ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * .35); ctx.fillStyle = color; for (let i = 0; i < n; i++) { ctx.rotate(Math.PI * 2 / n); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-80, -1700); ctx.lineTo(80, -1700); ctx.closePath(); ctx.fill(); } ctx.restore(); }
+function sparks(ctx, t, color, n = 30, seed = 1) {
+  ctx.fillStyle = color;
+  for (let i = 0; i < n; i++) {
+    const s = Math.sin(i * 12.9898 + seed) * 43758.5453, r = s - Math.floor(s), r2 = Math.abs((Math.sin(i * 78.233 + seed) * 12345.678) % 1);
+    const x = r * 1080, y = ((r2 * 1920 - t * (90 + r * 160)) % 1920 + 1920) % 1920, k = (Math.sin(t * 5 + i) + 1) / 2, sz = 5 + 14 * k * r;
+    ctx.beginPath(); ctx.moveTo(x, y - sz); ctx.quadraticCurveTo(x, y, x + sz, y); ctx.quadraticCurveTo(x, y, x, y + sz); ctx.quadraticCurveTo(x, y, x - sz, y); ctx.quadraticCurveTo(x, y, x, y - sz); ctx.fill();
+  }
+}
+function burst(ctx, cx, cy, p, n = 20, color = '255,210,31') { if (p <= 0 || p >= 1) return; ctx.save(); ctx.fillStyle = `rgba(${color},${1 - p})`; for (let i = 0; i < n; i++) { const a = i / n * 2 * Math.PI + i, d = 60 + 420 * eOut(p) * (.6 + .4 * Math.sin(i * 7)); ctx.beginPath(); ctx.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 9 * (1 - p) + 2, 0, 2 * Math.PI); ctx.fill(); } ctx.restore(); }
+// France en néon, points des boutiques allumés jusqu'à l'angle « sweep » (radians, > 2π = tout allumé).
+function france(ctx, sweep, o = {}) {
+  const z = o.z || 1, cx = o.cx || C.x, cy = o.cy || C.y, glow = o.glow == null ? 1 : o.glow;
+  ctx.save(); ctx.lineJoin = 'round'; ctx.strokeStyle = `rgba(255,210,31,${.95 * glow})`; ctx.lineWidth = 4; ctx.shadowColor = 'rgba(255,210,31,.8)'; ctx.shadowBlur = 18 * glow;
+  ctx.fillStyle = `rgba(40,62,150,${.28 * glow})`;
+  FR.forEach(ring => { ctx.beginPath(); ring.forEach(([lon, lat], i) => { const [x, y] = proj(lon, lat, z, cx, cy); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+  ctx.restore();
+  let lit = 0;
+  for (const s of SHOPS) {
+    const [x, y] = proj(s.lon, s.lat, z, cx, cy), seen = sweep - s.a;
+    if (seen < 0) { ctx.fillStyle = `rgba(150,165,200,${.35 * glow})`; ctx.fillRect(x - 1.5, y - 1.5, 3, 3); continue; }
+    lit++;
+    const fl = clamp(1 - seen / .35), rr = 2.6 + 5 * fl + (o.pulse || 0) * 3;
+    ctx.fillStyle = fl > 0 ? `rgba(255,255,255,${.7 + .3 * fl})` : `rgba(255,210,31,${.85 * glow})`;
+    ctx.beginPath(); ctx.arc(x, y, rr, 0, 2 * Math.PI); ctx.fill();
+  }
+  return lit;
+}
+
+// ——— Rendu d'une image ———
+function render(T) {
+  pending = [];
+  const t = ((T % DURATION) + DURATION) % DURATION;
+  clearScene();
+  const g = bg(), f = fxc();
+  g.clearRect(0, 0, 1080, 1920); f.clearRect(0, 0, 1080, 1920);
+  // Secousses et flashs sur les coups forts.
+  const big = [b(0), b(8), b(24), b(40), b(50), b(53), b(56)], small = [];
+  for (let k = 24; k <= 36; k++) small.push(b(k)); for (let k = 41; k <= 54; k++) small.push(b(k));
+  let sh = 0; big.forEach(h => { sh = Math.max(sh, hit(t, h, .4) * 30); }); small.forEach(h => { sh = Math.max(sh, hit(t, h, .22) * 9); });
+  css('cam', { transform: `translate(${Math.sin(t * 97) * sh}px, ${Math.cos(t * 83) * sh}px)` });
+  let fl = 0; big.forEach(h => { fl = Math.max(fl, hit(t, h, .12)); });
+  css('flash', { opacity: fl * .85 });
+  $('stage').style.background = '#0A1130';
+
+  // 1. Accroche : le radar néon (avant le premier coup, puis un tour complet en 4 temps)
+  if (t < b(5)) {
+    grid(g, .06);
+    const a = t < b(0) ? 0 : t < b(4) ? 2 * Math.PI * prog(t, b(0), b(4)) : 7;
+    const zoom = t > b(4) ? 1 + 7 * eIn(prog(t, b(4) + .3, b(5))) : 1 + .06 * hit(t, b(1), .5);
+    const zc = [C.x + (proj(4.835, 45.76)[0] - C.x), C.y + (proj(4.835, 45.76)[1] - C.y)]; // Lyon
+    g.save(); g.translate(zc[0], zc[1]); g.scale(zoom, zoom); g.translate(-zc[0], -zc[1]);
+    rings(g, C.x, C.y, C.r, .16 + .1 * hit(t, b(4), .5));
+    const lit = france(g, a, { pulse: hit(t, b(4), .4) });
+    beam(g, C.x, C.y, C.r + 20, a < 7 ? a : 2 * Math.PI, t < b(0) ? .35 : t < b(4) + .35 ? 1 : 1 - prog(t, b(4) + .1, b(4) + .5));
+    shock(g, C.x, C.y, prog(t, b(4), b(4) + .35), C.r + 60);
+    g.restore();
+    // Réticule avant le premier coup
+    if (t < b(0)) { const s = lerp(1.4, 1, prog(t, 0, b(0))); g.save(); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 4; g.beginPath(); g.arc(C.x, C.y, 60 * s, 0, 2 * Math.PI); g.stroke(); g.restore(); }
+    const n = t >= b(4) ? 3397 : Math.round(lit * 3397 / Math.max(1, SHOPS.length));
+    if (t < b(0)) { txt('tA', 'UPC 30 ANS', { y: 250, size: 200, color: 'rgba(255,210,31,.35)', stroke: 6, pop: false }); txt('tC', 'le 6 novembre…', { y: 470, size: 54, op: .5, pop: false }); }
+    else if (t < b(1)) { txt('tA', 'UPC 30 ANS', { y: 240, size: 210, color: '#FFD21F', t, at: b(0) }); txt('tB', 'LE 6 NOVEMBRE', { y: 450, size: 96, t, at: b(0) + .08 }); }
+    else if (t < b(2)) { txt('tA', 'TU SAIS', { y: 250, size: 150, t, at: b(1) }); txt('tB', 'OÙ CHERCHER ?', { y: 400, size: 130, color: '#FFD21F', t, at: b(1) + .06 }); }
+    else if (t < b(3)) { txt('tA', 'LE RADAR', { y: 260, size: 230, color: '#FFD21F', t, at: b(2), glitch: true }); rays(f, t, 'rgba(255,210,31,.06)', 16, 540, 380); }
+    else if (t < b(4)) { txt('tC', 'LE RADAR', { y: 200, size: 60, color: '#FFD21F', pop: false }); txt('tA', nf(n), { y: 300, size: 230, t, at: b(3), from: 1.6 }); }
+    else { txt('tA', '3 397', { y: 200, size: 240, t, at: b(4), from: 1.5 }); txt('tB', 'BOUTIQUES EN FRANCE', { y: 430, size: 74, color: '#FFD21F', t, at: b(4) + .05 }); txt('tD', 'source : OpenStreetMap', { y: 520, size: 30, op: .75, pop: false }); }
+  }
+  // 2. Autour de moi : vrai Radar, un tour complet
+  else if (t < b(7)) {
+    const A = TK.around || {}, gx = (A.sweepGeom || { x: 195, y: 330 }), k = 2.77;
+    const fA = seg(t, [[b(5), A.sweepStart - 2], [b(5) + .1, A.sweepStart], [b(7) - .05, A.sweepEnd - 2]]);
+    full('around', fA, gx.x, gx.y, 540 - (195 - gx.x) * k, 1000, k * (1 + .05 * prog(t, b(5), b(7))));
+    const fr = clamp((fA - A.sweepStart - 1) / 78);
+    progressRing(f, 540 - (195 - gx.x) * k, 1000, 470, fr, .9);
+    css('topfade', { opacity: 1 });
+    txt('tA', '5 KM', { y: 220, size: 200, color: '#FFD21F', t, at: b(5) });
+    txt('tB', 'AUTOUR DE TOI', { y: 410, size: 110, t, at: b(5) + .08 });
+    if (t < b(5) + .12) { css('flash', { opacity: .9 * (1 - prog(t, b(5), b(5) + .12)) }); }
+  }
+  // 3. Fiche d'une boutique : indice estimé, puis itinéraire et alerte (noms floutés à l'enregistrement)
+  else if (t < b(8)) {
+    const R = TK.radar || {}, fR = (R.tapStore || 0) + 70, half = b(7) + BEAT / 2, k = 2.77;
+    const pan = eIO(prog(t, half - .08, half + .08));
+    const cy = lerp(430, 640, pan), z = lerp(1.35, 1.12, eOut(prog(t, b(7), b(7) + .2)));
+    full('radar', fR, 195, cy, 540, 1000, k * z);
+    css('topfade', { opacity: 1 });
+    if (t < half) { txt('tA', 'INDICE DE CHANCE', { y: 230, size: 112, color: '#FFD21F', t, at: b(7) }); txt('tB', 'ESTIMÉ', { y: 360, size: 96, t, at: b(7) + .06 }); }
+    else { txt('tA', 'ITINÉRAIRE', { y: 230, size: 120, t, at: half }); txt('tB', '+ ALERTE', { y: 370, size: 110, color: '#FFD21F', t, at: half + .06 }); }
+    if (t > b(8) - .07) css('full', { opacity: 1 - prog(t, b(8) - .07, b(8)) }); // aspiration vers le coup du logo
+  }
+  // 4. Le logo sur le coup isolé
+  else if (t < b(9)) {
+    rays(g, t, 'rgba(255,210,31,.10)', 18, 540, 760); sparks(f, t, 'rgba(255,210,31,.9)', 28, 4);
+    const p = eEl(prog(t, b(8), b(8) + .5)), out = eIn(prog(t, b(9) - .12, b(9)));
+    css('logo', { top: '560px', opacity: 1 - out, transform: `scale(${p * (1 - .85 * out)}) rotate(${(1 - p) * -12}deg)` });
+    css('logo', { webkitMaskImage: 'none', maskImage: 'none' });
+    txt('tC', 'LE RADAR, EN VRAI', { y: 760, size: 64, t, at: b(8) + .2, op: 1 - out });
+    burst(f, 540, 640, prog(t, b(8), b(8) + .5));
+  }
+  // 5. Démo : France → Auvergne-Rhône-Alpes → Rhône → « Balayer »
+  else if (t < b(16)) {
+    const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77;
+    const fR = seg(t, [[b(9), R.france], [b(10) - .2, R.tapRegion - 6], [b(10), R.tapRegion], [b(12) - .2, R.tapDept - 6], [b(12), R.tapDept],
+      [b(14), R.tapDept + 48], [b(16) - .2, R.sweepStart - 6], [b(16), R.sweepStart]]);
+    const push = 1 + .05 * prog(t, b(14), b(16));
+    full('radar', fR, gx.x, gx.y, 540 - (195 - gx.x) * k, 1000, k * push, eOut(prog(t, b(9), b(9) + .15)));
+    css('topfade', { opacity: 1 });
+    // Raccord : contour néon qui se dissout sur la vraie carte
+    if (t < b(9) + .3) { g.save(); g.globalAlpha = 1 - prog(t, b(9), b(9) + .3); france(g, 7, { glow: 1 }); g.restore(); }
+    const pulse = .5 + .5 * Math.cos((t - b(9)) / BEAT * 2 * Math.PI);
+    if (t < b(10)) txt('tA', 'CHOISIS TA RÉGION', { y: 240, size: 104, t, at: b(9) });
+    else if (t < b(12)) { txt('tC', 'RÉGION', { y: 210, size: 40, color: '#FFD21F', pop: false }); txt('tA', 'AUVERGNE-\nRHÔNE-ALPES', { y: 260, size: 104, t, at: b(10) }); }
+    else if (t < b(14)) { txt('tC', 'DÉPARTEMENT', { y: 210, size: 40, color: '#FFD21F', pop: false }); txt('tA', 'RHÔNE', { y: 260, size: 190, t, at: b(12) }); }
+    else { txt('tA', 'LANCE LE', { y: 220, size: 120, t, at: b(14) }); txt('tB', 'BALAYAGE', { y: 350, size: 150, color: '#FFD21F', t, at: b(14) + .06, op: .85 + .15 * pulse }); }
+    css('vig', { opacity: .5 * prog(t, b(12), b(16)) });
+  }
+  // 6. LE BALAYAGE : un tour complet, ralenti, sur 8 temps (fin pile sur le drop)
+  else if (t < b(24)) {
+    const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77, fps = R.sweepFps || 30, turn = 2.6 * fps;
+    const fR = seg(t, [[b(16), R.sweepStart + 1], [b(24), R.sweepStart + 1 + turn]]);
+    const X = 540 - (195 - gx.x) * k, Y = 1000, beat = Math.max(0, Math.floor((t - b(16)) / BEAT)), bp = hit(t, b(16) + beat * BEAT, .25);
+    full('radar', fR, gx.x, gx.y, X, Y, k * (1.05 + .06 * prog(t, b(16), b(24)) + .012 * bp));
+    css('topfade', { opacity: 1 });
+    const fr = clamp((fR - R.sweepStart - 1) / turn);
+    progressRing(f, X, Y, 470, fr, .95);
+    // Tremblement RVB avant le drop
+    const rgb = 6 * prog(t, b(23), b(24));
+    const n = countAt('radar', fR);
+    txt('tA', nf(n), { y: 200, size: 170, color: '#FFD21F', pop: false, shadow: rgb ? `${rgb}px 0 rgba(255,0,80,.8), ${-rgb}px 0 rgba(0,255,255,.8)` : 'none' });
+    txt('tD', 'boutiques', { y: 370, size: 44, pop: false });
+    const titles = [[16, 'BALAYAGE…'], [18, 'TOUT LE SECTEUR'], [20, 'AU PEIGNE FIN'], [22, '']];
+    let cur = titles[0]; titles.forEach(x => { if (t >= b(x[0])) cur = x; });
+    txt('tB', cur[1], { y: 440, size: 86, t, at: b(cur[0]) });
+    css('vig', { opacity: .55 });
+  }
+  // 7. DROP : tout le département révélé
+  else if (t < b(25)) {
+    const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77, X = 540 - (195 - gx.x) * k;
+    const fps = R.sweepFps || 30, n = countAt('radar', R.sweepEnd);
+    full('radar', R.sweepStart + 1 + 2.6 * fps + 8, gx.x, gx.y, X, 1000, k * lerp(1.11, 1.2, eOut(prog(t, b(24), b(25)))));
+    css('topfade', { opacity: 1 });
+    shock(f, X, 1000, prog(t, b(24), b(24) + .45), 900); progressRing(f, X, 1000, 470, 1, 1 - prog(t, b(24), b(25)));
+    txt('tA', nf(n) + ' BOUTIQUES', { y: 210, size: 150, color: '#FFD21F', t, at: b(24), glitch: true });
+    txt('tB', 'DANS LE RHÔNE', { y: 380, size: 92, t, at: b(24) + .06 });
+  }
+  // 8. Jusqu'à la rue : une boutique touchée, zoom sur sa position
+  else if (t < b(26)) {
+    const R = TK.radar || {}, k = 2.77;
+    const fR = seg(t, [[b(25), R.tapStore - 3], [b(26), R.tapStore + 36]]);
+    full('radar', fR, 195, 300, 540, 900, k * 1.05);
+    css('topfade', { opacity: 1 });
+    txt('tA', "JUSQU'À", { y: 220, size: 130, t, at: b(25) }); txt('tB', 'LA RUE', { y: 360, size: 160, color: '#FFD21F', t, at: b(25) + .05 });
+  }
+  // 9. Ta collection, cotée chaque jour
+  else if (t < b(28)) {
+    const Cc = TK.collect || {};
+    rays(g, t, 'rgba(255,210,31,.07)', 16, 540, 900); sparks(f, t, 'rgba(255,210,31,.8)', 22, 2);
+    const fC = seg(t, [[b(26), Cc.home], [b(28), Cc.home + 34]]);
+    const z = t < b(27) ? lerp(1.55, 1.4, prog(t, b(26), b(27))) : lerp(1.4, 1, eOut(prog(t, b(27), b(27) + .25)));
+    const rise = eOut(prog(t, b(26), b(26) + .2));
+    phone('collect', fC, { x: 170, y: lerp(1900, 560, rise), rz: lerp(-8, 0, rise), cx: 120, cy: 220, z });
+    // Petite onde jaune qui découvre l'écran (« coup de radar »)
+    shock(f, 540, 900, prog(t, b(26), b(26) + .3), 1100, '255,210,31');
+    if (t < b(27)) { txt('tA', Cc.value || '', { y: 220, size: 150, t, at: b(26) + .05 }); txt('tC', 'ma collection · démo', { y: 400, size: 40, color: '#FFD21F', pop: false }); }
+    else { txt('tA', 'COTÉE', { y: 220, size: 160, color: '#FFD21F', t, at: b(27) }); txt('tB', 'CHAQUE JOUR', { y: 380, size: 110, t, at: b(27) + .06 }); }
+  }
+  // 10. Ajoute tes cartes : la plus chère de Héros Transcendants, +10 PK
+  else if (t < b(29)) {
+    const A = TK.add || {};
+    rays(g, t, 'rgba(255,210,31,.08)', 16, 540, 900);
+    const fA = seg(t, [[b(28), A.added - 7], [b(28) + .1, A.added], [b(29), A.added + 22]]);
+    phone('add', fA, { x: 170, y: 560, cx: 195, cy: 560, z: 1.05 });
+    txt('tA', 'AJOUTE', { y: 210, size: 140, t, at: b(28) }); txt('tB', 'TES CARTES', { y: 350, size: 130, color: '#FFD21F', t, at: b(28) + .05 });
+    const gp = eBack(prog(t, b(28) + BEAT / 2, b(28) + BEAT / 2 + .2));
+    css('gem', { left: '760px', top: '700px', opacity: gp > 0 ? 1 : 0, transform: `scale(${gp}) rotate(${(1 - gp) * 40}deg)` });
+    txt('tD', '+10 PK', { y: 870, size: 58, color: '#FFD21F', t, at: b(28) + BEAT / 2, dx: 300, stroke: 0 });
+    burst(f, 835, 775, prog(t, b(28) + BEAT / 2, b(28) + BEAT / 2 + .45));
+  }
+  // 11. Ton classeur (la carte ajoutée en tête), langue · état · cote, puis le scellé
+  else if (t < b(32)) {
+    const A = TK.add || {};
+    rays(g, t, 'rgba(255,210,31,.07)', 16, 540, 900); sparks(f, t, 'rgba(255,210,31,.7)', 18, 6);
+    let fA, cam;
+    if (t < b(30)) { fA = seg(t, [[b(29), A.binder - 8], [b(30), A.binder + 10]]); cam = { cx: 195, cy: 330, z: 1 }; }
+    else if (t < b(31)) { fA = A.binder + 24; const p = eOut(prog(t, b(30), b(30) + .2)); cam = { cx: lerp(195, 95, p), cy: lerp(330, 300, p), z: lerp(1, 2.1, p) }; }
+    else { fA = seg(t, [[b(31), A.sealed - 6], [b(32), A.sealed + 26]]); cam = { cx: 195, cy: 400, z: 1 }; }
+    const sw = t < b(29) + .12 ? eOut(prog(t, b(29), b(29) + .12)) : 1;
+    phone('add', fA, Object.assign({ x: 170, y: 560, ry: lerp(-30, 0, sw) }, cam));
+    if (t < b(30)) { txt('tA', 'TON', { y: 210, size: 130, t, at: b(29) }); txt('tB', 'CLASSEUR', { y: 340, size: 160, color: '#FFD21F', t, at: b(29) + .05 }); }
+    else if (t < b(31)) {
+      txt('tA', 'LANGUE · ÉTAT', { y: 220, size: 110, t, at: b(30) }); txt('tB', '· COTE', { y: 345, size: 110, color: '#FFD21F', t, at: b(30) + .05 });
+      // Crochets HUD sur la première case
+      const p = eOut(prog(t, b(30) + .1, b(30) + .3)); f.save(); f.strokeStyle = `rgba(255,210,31,${p})`; f.lineWidth = 8; const bx = [250, 780, 560, 900];
+      [[bx[0], bx[1], 1, 1], [bx[2], bx[1], -1, 1], [bx[0], bx[3] + 300, 1, -1], [bx[2], bx[3] + 300, -1, -1]].forEach(([x, y, sx, sy]) => { f.beginPath(); f.moveTo(x, y + 60 * sy); f.lineTo(x, y); f.lineTo(x + 60 * sx, y); f.stroke(); }); f.restore();
+    }
+    else { txt('tA', '+ TON', { y: 210, size: 130, t, at: b(31) }); txt('tB', 'SCELLÉ', { y: 340, size: 170, color: '#FFD21F', t, at: b(31) + .05 }); }
+  }
+  // 12. Toutes les collections : séries, extensions, cartes, puis les 30 ans
+  else if (t < b(37)) {
+    const S = TK.series || {};
+    rays(g, t, 'rgba(255,210,31,.07)', 16, 540, 900);
+    const fS = seg(t, [[b(32), S.series], [b(33), S.series + 20], [b(34), S.scrolled], [b(35) - .3, S.tapMega + 30], [b(35), S.tap30 - 6], [b(35) + .15, S.tap30],
+      [b(36) - .1, S.grid], [b(36) + .3, S.grid + 30], [b(37), S.gridEnd]]);
+    const flip = t < b(32) + .15 ? eOut(prog(t, b(32), b(32) + .15)) : 1;
+    phone('series', fS, { x: 170, y: 560, ry: lerp(90, 0, flip), cx: 195, cy: 422, z: 1 });
+    if (t < b(33)) { txt('tA', 'TOUTES LES', { y: 210, size: 120, t, at: b(32) }); txt('tB', 'COLLECTIONS', { y: 340, size: 140, color: '#FFD21F', t, at: b(32) + .05 }); }
+    else if (t < b(34)) { txt('tA', '202', { y: 200, size: 220, color: '#FFD21F', t, at: b(33) }); txt('tB', 'EXTENSIONS', { y: 400, size: 110, t, at: b(33) + .05 }); }
+    else if (t < b(35)) { const roll = prog(t, b(34), b(34) + BEAT / 2); txt('tA', nf(lerp(1200, 21365, eOut(roll))), { y: 200, size: 220, color: '#FFD21F', pop: false }); txt('tB', 'CARTES', { y: 400, size: 120, t, at: b(34) }); if (roll >= 1) css('flash', { opacity: Math.max(+$('flash').style.opacity || 0, .5 * hit(t, b(34) + BEAT / 2, .1)) }); }
+    else if (t < b(36)) { txt('tA', '30 ANS', { y: 210, size: 180, color: '#FFD21F', t, at: b(35) }); txt('tB', '191 CARTES', { y: 390, size: 110, t, at: b(35) + .05 }); }
+    else { txt('tA', 'TOUTES.', { y: 200, size: 130, t, at: b(36) }); txt('tB', 'LES CARTES.', { y: 330, size: 140, color: '#FFD21F', t, at: b(36) + .05 }); }
+  }
+  // 13. Coupure : le logo 30 ans, « 30 ANS. », « PRÉPARE-TOI. »
+  else if (t < b(40)) {
+    $('stage').style.background = '#03040A';
+    const p = prog(t, b(37), b(40)), strobe = t > b(39) && Math.floor((t - b(39)) / (BEAT / 4)) % 2 === 0;
+    css('logo30', { top: '760px', opacity: .9 * eOut(prog(t, b(37), b(37) + .3)) * (strobe ? .4 : 1), transform: `scale(${lerp(1, 1.15, p)})`, filter: `drop-shadow(0 0 ${30 + 20 * Math.sin(t * 6)}px rgba(255,210,31,.7))` });
+    sparks(f, t * .4, 'rgba(255,210,31,.35)', 18, 9);
+    txt('tA', '30 ANS.', { y: 280, size: 150, t, at: b(37), from: 1.2 });
+    if (t >= b(38)) txt('tB', 'PRÉPARE-TOI.', { y: 1180, size: 120, color: '#FFD21F', t, at: b(38), from: 1.4 });
+  }
+  // 14. Relance : les sorties 30 ans, une photo par temps
+  else if (t < b(45)) {
+    rays(g, t, 'rgba(255,210,31,.12)', 18, 540, 960); sparks(f, t, 'rgba(255,255,255,.9)', 26, 3);
+    $('stage').style.background = '#0A1130';
+    if (t < b(41)) { const p = eBack(prog(t, b(40), b(40) + .25)); css('logo30', { top: '700px', opacity: 1, transform: `scale(${lerp(1.6, 1.25, p)})`, filter: 'none' }); txt('tA', 'LES SORTIES', { y: 230, size: 140, t, at: b(40) }); txt('tB', '30 ANS', { y: 370, size: 170, color: '#FFD21F', t, at: b(40) + .05 }); burst(f, 540, 830, prog(t, b(40), b(40) + .5)); }
+    const P = [[41, 'pDeck', 'DECKS', '30/10'], [42, 'pEtb', 'ETB', 'SORTI LE 16/09'], [43, 'pDitto', 'MÉTAMORPH', '06/11'], [44, 'pFig', 'FIGURINE', '06/11']];
+    P.forEach(([k, id, name, date]) => {
+      if (t < b(k) || t >= b(k + 1)) return;
+      const p = eBack(prog(t, b(k), b(k) + .2));
+      css(id, { left: '160px', top: '640px', opacity: 1, transform: `scale(${lerp(1.5, 1, p)}) rotate(${lerp(-6, k % 2 ? 2 : -2, p)}deg)` });
+      txt('tA', name, { y: 230, size: 150, t, at: b(k) });
+      txt('tB', date, { y: 1110, size: 120, color: '#FFD21F', t, at: b(k) + .06, rot: -6, from: 2.8 });
+    });
+  }
+  // 15. La page Sorties dans le téléphone : dates, prix, liens directs
+  else if (t < b(47)) {
+    const O = TK.sorties || {};
+    rays(g, t, 'rgba(255,210,31,.08)', 16, 540, 900);
+    const fO = seg(t, [[b(45), O.top], [b(46), O.upc], [b(47), O.upc + 30]]);
+    const rise = eBack(prog(t, b(45), b(45) + .25));
+    const cam = t < b(46) ? { cx: 195, cy: 422, z: 1 } : { cx: 195, cy: lerp(422, 690, eOut(prog(t, b(46), b(46) + .2))), z: lerp(1, 1.5, eOut(prog(t, b(46), b(46) + .2))) };
+    phone('sorties', fO, Object.assign({ x: 170, y: lerp(1900, 560, rise), ry: 10 }, cam));
+    if (t < b(46)) { txt('tA', 'DATES', { y: 210, size: 150, t, at: b(45) }); txt('tB', '· PRIX ·', { y: 360, size: 120, color: '#FFD21F', t, at: b(45) + .05 }); }
+    else { txt('tA', 'LIENS', { y: 210, size: 150, t, at: b(46) }); txt('tB', 'DIRECTS', { y: 360, size: 150, color: '#FFD21F', t, at: b(46) + .05 }); }
+  }
+  // 16. « Et la plus attendue… » : les deux UPC s'approchent, puis se percutent sur le coup
+  else if (t < b(52)) {
+    $('stage').style.background = t < b(50) ? '#03040A' : '#0A1130';
+    if (t < b(50)) {
+      const typed = 'ET LA PLUS ATTENDUE...'.slice(0, Math.round(22 * prog(t, b(47), b(47) + .35)));
+      txt('tC', typed, { y: 300, size: 80, color: '#fff', pop: false });
+      const p = eIn(prog(t, b(48), b(50))), strobe = Math.floor((t - b(48)) / (BEAT / 2)) % 2 === 0;
+      const dark = 'brightness(.12) drop-shadow(0 0 3px rgba(255,210,31,1)) drop-shadow(0 0 18px rgba(255,210,31,.6))';
+      css('upcL', { left: lerp(-260, 120, p) + 'px', top: '700px', opacity: t > b(48) ? 1 : 0, filter: dark + (strobe ? ' brightness(1.6)' : '') });
+      css('upcR', { left: lerp(940, 560, p) + 'px', top: '700px', opacity: t > b(48) ? 1 : 0, filter: dark + (strobe ? ' brightness(1.6)' : '') });
+      const rumble = 2 + 10 * p; css('cam', { transform: `translate(${Math.sin(t * 120) * rumble}px, ${Math.cos(t * 110) * rumble}px)` });
+    } else {
+      rays(g, t, 'rgba(255,210,31,.16)', 20, 540, 930); sparks(f, t, 'rgba(255,255,255,.95)', 30, 5);
+      const p = eBack(prog(t, b(50), b(50) + .2));
+      css('upcL', { left: '120px', top: '700px', opacity: 1, filter: 'none', transform: `scale(${lerp(1.25, 1, p)})` });
+      css('upcR', { left: '560px', top: '700px', opacity: 1, filter: 'none', transform: `scale(${lerp(1.25, 1, p)})` });
+      burst(f, 540, 930, prog(t, b(50), b(50) + .5), 28);
+      if (t < b(51)) { txt('tA', "L'UPC", { y: 230, size: 170, t, at: b(50) }); txt('tB', '30 ANS', { y: 400, size: 150, color: '#FFD21F', t, at: b(50) + .05 }); }
+      else { txt('tA', '06.11', { y: 260, size: 260, color: '#FFD21F', t, at: b(51), rot: -6, from: 3 }); txt('tB', 'JOURNÉE OU SOIRÉE', { y: 1230, size: 76, t, at: b(51) + .08 }); }
+    }
+  }
+  // 17. Prix de lancement et précommandes, sur la fiche réelle
+  else if (t < b(53)) {
+    const O = TK.sorties || {};
+    rays(g, t, 'rgba(255,210,31,.08)', 16, 540, 900);
+    const p = eOut(prog(t, b(52), b(52) + .2)), half = b(52) + BEAT / 2;
+    const cam = t < half ? { cx: 105, cy: 690, z: lerp(1.2, 2.2, p) } : { cx: 290, cy: 690, z: 2.2 };
+    phone('sorties', O.upc + 30, Object.assign({ x: 170, y: 560, ry: 10 }, cam));
+    txt('tA', t < half ? 'PRIX DE' : 'PRÉCOS', { y: 210, size: 140, t, at: t < half ? b(52) : half }); txt('tB', t < half ? 'LANCEMENT' : 'CARDMARKET', { y: 350, size: 120, color: '#FFD21F', t, at: (t < half ? b(52) : half) + .05 });
+  }
+  // 18. Le radar revient : repère tes boutiques avant le 6/11, puis le faisceau révèle le logo
+  else if (t < b(56)) {
+    grid(g, .06);
+    const a = 2 * Math.PI * prog(t, b(53), b(55));
+    rings(g, C.x, C.y, C.r, .18);
+    france(g, 7, { pulse: hit(t, b(54), .3) });
+    if (t < b(55)) beam(g, C.x, C.y, C.r + 20, a, 1);
+    if (t < b(54)) { txt('tA', 'REPÈRE TES', { y: 220, size: 130, t, at: b(53) }); txt('tB', 'BOUTIQUES', { y: 350, size: 150, color: '#FFD21F', t, at: b(53) + .05 }); }
+    else if (t < b(55)) { txt('tA', 'AVANT', { y: 220, size: 150, t, at: b(54) }); txt('tB', 'LE 6/11', { y: 360, size: 170, color: '#FFD21F', t, at: b(54) + .05 }); }
+    else {
+      const p = prog(t, b(55), b(56));
+      g.save(); g.globalAlpha = 1 - p; g.fillStyle = '#0A1130'; g.globalAlpha = p; g.fillRect(0, 0, 1080, 1920); g.restore();
+      beam(g, 540, 690, 900, 2 * Math.PI * p, 1);
+      // Le faisceau découvre le logo (masque conique qui suit l'angle).
+      const m = `conic-gradient(from 0deg at 50% 50%, #000 ${360 * p}deg, transparent ${360 * p}deg)`;
+      css('logo', { top: '560px', opacity: 1, transform: 'scale(.92)', webkitMaskImage: m, maskImage: m });
+    }
+  }
+  // 19. Fin : logo, GRATUIT, lien en bio, mention ; retour à l'image du début pour la boucle
+  else {
+    rays(g, t, 'rgba(255,210,31,.10)', 18, 540, 700); sparks(f, t, 'rgba(255,210,31,.85)', 26, 7);
+    const fadeOut = prog(t, b(62), b(63));
+    const p = eEl(prog(t, b(56), b(56) + .5)), breath = 1 + .03 * Math.sin((t - b(56)) / BEAT * Math.PI);
+    css('logo', { top: '340px', opacity: 1 - fadeOut, transform: `scale(${p * breath})`, webkitMaskImage: 'none', maskImage: 'none' });
+    burst(f, 540, 420, prog(t, b(56), b(56) + .5), 24);
+    txt('tB', 'GRATUIT', { y: 560, size: 150, color: '#FFD21F', t, at: b(56) + .08, rot: -8, from: 3, op: 1 - fadeOut });
+    const gp = eBack(prog(t, b(56) + .1, b(56) + .35));
+    css('gem', { left: '70px', top: '560px', opacity: (gp > 0 ? 1 : 0) * (1 - fadeOut), transform: `scale(${gp}) rotate(${t * 60}deg)` });
+    if (t >= b(57)) txt('tA', 'LIEN EN BIO', { y: 830, size: 120 * (1 + .04 * hit(t, b(57) + Math.floor((t - b(57)) / BEAT) * BEAT, .3)), t, at: b(57), op: 1 - fadeOut, dx: -60 });
+    if (t >= b(58)) txt('tC', 'web app · avant-première', { y: 990, size: 46, op: 1 - fadeOut, pop: false, dx: -60 });
+    const pk = eOut(prog(t, b(58), b(58) + .5)), hop = Math.abs(Math.sin((t - b(58)) * 6)) * 50;
+    css('pika', { left: lerp(-240, 600, pk) + 'px', top: 1060 - hop + 'px', opacity: (pk > 0 ? 1 : 0) * (1 - fadeOut), transform: 'scaleX(-1)' });
+    css('legal', { opacity: t < b(63) + .2 ? eOut(prog(t, b(56), b(56) + .2)) : 1 - prog(t, b(63) + .2, b(63) + .4) });
+    // Dernier temps : retour au radar néon du début (boucle sans couture)
+    if (t > b(63)) { const q = prog(t, b(63), DURATION); g.save(); g.globalAlpha = q; grid(g, .06); rings(g, C.x, C.y, C.r, .16); france(g, 0); beam(g, C.x, C.y, C.r + 20, 0, .35); g.restore(); }
+  }
+  return pending.length ? Promise.all(pending) : null;
+}
+window.render = render;
+window.DURATION = DURATION;
+window.ready = (async () => {
+  await load();
+  await document.fonts.ready;
+  await Promise.all([...document.images].map(i => (i.complete || !i.getAttribute('src') ? 0 : new Promise(r => { i.onload = i.onerror = r; }))));
+  await render(0);
+  return true;
+})();
+if (!/render=1/.test(location.search)) window.ready.then(() => { const t0 = performance.now(); const loop = () => { render((performance.now() - t0) / 1000); requestAnimationFrame(loop); }; loop(); });
+</script>
+</body>
+</html>
