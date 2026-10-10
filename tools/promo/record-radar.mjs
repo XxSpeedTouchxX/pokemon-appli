@@ -119,7 +119,7 @@ await frames(2);
 const chosen = await page.evaluate(() => { const R = window.__pkmRadar; return R.sel; });
 if (chosen !== pick.id) console.warn('Boutique ouverte :', chosen, '(visée :', pick.id + ')');
 await frames(38); await settle(8000); await frames(36);
-const box = await page.evaluate(id => { const R = window.__pkmRadar, st = R.byId[R.sel || id]; return { opened: st.id, name: st.name, city: st.city }; }, pick.id);
+const box = await page.evaluate(id => { const R = window.__pkmRadar, st = R.byId[R.sel || id]; return { opened: st.id, name: st.name, city: st.city, mapStyle: R.tiles ? 'OpenFreeMap' : 'fond uni (carte injoignable)' }; }, pick.id);
 await writeFile(ROOT + 'tools/promo/out/radar-store.json', JSON.stringify(Object.assign({ id: pick.id, frames: n, tiles }, box)));
 await writeFile(ROOT + 'tools/promo/out/radar-blurs.json', JSON.stringify(blurs));
 await browser.close(); server.close();
