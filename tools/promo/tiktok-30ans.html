@@ -92,19 +92,16 @@ canvas { position: absolute; left: 0; top: 0; }
     <div id="s4" class="scene" style="background: linear-gradient(170deg, #FFE36A 0%, #FFD21F 45%, #FFB400 100%)">
       <canvas id="s4bg" width="1080" height="1920"></canvas>
       <div id="s4cap" class="abs center" style="top: 190px">
-        <div id="s4c1" class="big w" style="font-size: 92px">AUTOUR DE TOI</div>
-        <div id="s4c2" class="sora" style="font-size: 42px; color: #2a1a00; margin-top: 14px">les boutiques les plus proches + un indice de chance</div>
+        <div id="s4c1" class="big w" style="font-size: 92px">LE VRAI RADAR</div>
+        <div id="s4c2" class="sora" style="font-size: 42px; color: #2a1a00; margin-top: 14px">3 397 boutiques en France</div>
       </div>
       <div id="s4phone" class="phone" style="left: 220px; top: 420px">
         <div class="notch"></div>
-        <div class="scr">
-          <img id="s4a" src="shots/radar.png">
-          <img id="s4b" src="shots/territoire-floue.png">
-          <div id="s4ring" class="abs" style="border: 8px solid #FF3B6B; border-radius: 40px; box-shadow: 0 0 0 6px rgba(255,59,107,.25)"></div>
+        <div class="scr" style="background: #0B1120">
+          <img id="s4map" src="out/radar-play/0000.jpg" style="width: 100%; height: 100%; object-fit: cover; object-position: top">
         </div>
       </div>
-      <div id="s4tag1" class="abs pill" style="left: 40px; top: 1000px; background: #000; color: var(--y)">📍 Autour de moi</div>
-      <div id="s4tag2" class="abs pill" style="left: 640px; top: 740px; background: #000; color: var(--y)">Filtre UPC</div>
+      <div id="s4step" class="abs" style="left: 40px; top: 1060px; width: 150px; height: 150px; border-radius: 50%; background: #000; border: 6px solid #fff; display: flex; align-items: center; justify-content: center"><span id="s4n" class="big y" style="font-size: 92px; -webkit-text-stroke: 0">1</span></div>
     </div>
 
     <!-- 5. Valeur, sorties, séries -->
@@ -117,9 +114,9 @@ canvas { position: absolute; left: 0; top: 0; }
       <div id="s5phone" class="phone" style="left: 220px; top: 470px">
         <div class="notch"></div>
         <div class="scr">
-          <img id="s5a" src="shots/home.png">
-          <img id="s5b" src="shots/sorties.png">
-          <img id="s5c" src="shots/series.png">
+          <img id="s5a" src="shots/home.png" style="height: 100%; object-fit: cover; object-position: top">
+          <img id="s5b" src="shots/sorties.png" style="height: 100%; object-fit: cover; object-position: top">
+          <img id="s5c" src="shots/series.png" style="height: 100%; object-fit: cover; object-position: top">
         </div>
       </div>
       <div id="s5val" class="abs glass" style="left: 60px; top: 760px; padding: 26px 34px; border-color: var(--y)">
@@ -168,12 +165,15 @@ const css = (el, o) => { el = typeof el === 'string' ? $(el) : el; for (const k 
 const slam = (id, t, t0, d = .28) => { const x = prog(t, t0, t0 + d); css(id, { opacity: x > 0 ? 1 : 0, transform: `scale(${lerp(2.6, 1, eBack(x))}) rotate(${lerp(-6, 0, eOut(x))}deg)` }); return x; };
 const rise = (id, t, t0, d = .4, dy = 80) => { const x = eOut(prog(t, t0, t0 + d)); css(id, { opacity: x, transform: `translateY(${(1 - x) * dy}px)` }); return x; };
 // Scènes : [début, fin] en secondes.
-const S = { s1: [0, 2.7], s2: [2.7, 7.4], s3: [7.4, 11.9], s4: [11.9, 16.4], s5: [16.4, 21.4], s6: [21.4, 27] };
-const DURATION = 27;
+const S = { s1: [0, 2.7], s2: [2.7, 7.4], s3: [7.4, 11.6], s4: [11.6, 19.0], s5: [19.0, 24.0], s6: [24.0, 29.6] };
+const DURATION = 29.6;
+// Vrai Radar : 324 images enregistrées à 30 images/s, lues 1,5 fois plus vite ; touchers (secondes de la scène).
+const RADAR_RATE = 1.5, RADAR_FRAMES = 324, RADAR_STEPS = [0, 1.0, 1.96, 3.24, 5.5];
+const RADAR_CAPS = [['LE VRAI RADAR', '3 397 boutiques en France'], ['TA RÉGION', 'un toucher, ça zoome'], ['TON SECTEUR', 'département par département'], ['ÇA BALAIE', 'toutes les boutiques du secteur'], ['TOUCHE UNE BOUTIQUE', 'où elle est, itinéraire, indice estimé']];
 
 // ——— Données : France et boutiques (OpenStreetMap, comme le Radar de l'app) ———
 let FR = [], SHOPS = [];
-const LON0 = 2.4, LAT0 = 46.6, K = 118, KX = K * Math.cos(46.6 * Math.PI / 180);
+const LON0 = 2.2, LAT0 = 46.2, K = 96, KX = K * Math.cos(46.6 * Math.PI / 180); // 14,8° de longitude ≈ 980 px
 const proj = (lon, lat, cx, cy, z) => [cx + (lon - LON0) * KX * z, cy - (lat - LAT0) * K * z];
 async function loadData() {
   const [geo, st] = await Promise.all([fetch('../../web/data/geo/regions.json').then(r => r.json()), fetch('../../web/data/stores.json').then(r => r.json())]);
@@ -203,7 +203,7 @@ function sparkles(ctx, t, color, n = 26, seed = 1) {
 function star(ctx, x, y, s) { ctx.beginPath(); ctx.moveTo(x, y - s); ctx.quadraticCurveTo(x, y, x + s, y); ctx.quadraticCurveTo(x, y, x, y + s); ctx.quadraticCurveTo(x, y, x - s, y); ctx.quadraticCurveTo(x, y, x, y - s); ctx.fill(); }
 function france(ctx, t, lt) {
   ctx.clearRect(0, 0, 1080, 1920);
-  const z = lerp(1.25, 1, eOut(prog(lt, 0, 1.2))), cx = 540, cy = 930;
+  const z = lerp(.86, 1, eOut(prog(lt, 0, 1.2))), cx = 540, cy = 935;
   // Anneaux et balayage du radar, centrés sur Paris.
   const [px, py] = proj(2.35, 48.85, cx, cy, z);
   ctx.save(); rings(ctx, px, py, 7, 150 * z, 'rgba(255,210,31,.10)', 2); ctx.restore();
@@ -238,7 +238,7 @@ function render(t) {
   t = t % DURATION;
   const vis = (id, a, b) => { const on = t >= a && t < b; $(id).style.opacity = on ? 1 : 0; $(id).style.visibility = on ? 'visible' : 'hidden'; return on; };
   // Caméra : petite secousse après chaque mot qui tombe.
-  const hits = [.15, .55, .95, 1.25, 3.0, 4.15, 7.6, 12.1, 16.6, 21.6];
+  const hits = [.15, .55, .95, 1.25, S.s2[0] + .3, S.s2[0] + 1.45, S.s3[0] + .2, ...RADAR_STEPS.map(x => S.s4[0] + x + .1), S.s5[0] + .15, S.s6[0] + .2];
   let sh = 0; hits.forEach(h => { const d = t - h - .2; if (d > 0 && d < .25) sh = Math.max(sh, 1 - d / .25); });
   css('cam', { transform: `translate(${Math.sin(t * 90) * 14 * sh}px, ${Math.cos(t * 77) * 14 * sh}px)` });
   // Flashs de transition.
@@ -286,25 +286,21 @@ function render(t) {
     $('s3n').textContent = nf(lit >= SHOPS.length - 5 ? 3397 : lit * 3397 / Math.max(1, SHOPS.length));
   }
 
-  // 4. Démo Radar → Territoire
+  // 4. Démo : le vrai Radar (région, département, balayage, boutique touchée)
+  let wait = null;
   if (vis('s4', ...S.s4)) {
     const lt = t - S.s4[0];
     const c = $('s4bg').getContext('2d'); rays(c, lt, 'rgba(255,255,255,.14)', 14); sparkles(c, lt, 'rgba(255,255,255,.8)', 16, 9);
-    const ph = eOut(prog(lt, 0, .6)); css('s4phone', { transform: `translateY(${(1 - ph) * 1400}px) rotate(${(1 - ph) * 12 + Math.sin(lt * 1.3) * 1.2}deg)` });
-    // Écran 1 : radar de France (l'image monte doucement) ; écran 2 : Territoire, radar autour de soi.
-    const sw = eIO(prog(lt, 2.0, 2.45));
-    css('s4a', { transform: `translateX(${-sw * 100}%) translateY(${-lerp(0, 4, prog(lt, 0, 2))}%)` });
-    css('s4b', { transform: `translateX(${(1 - sw) * 100}%)` });
-    // Repère rouge sur le radar de Territoire (sans nom de boutique).
-    const ring = eBack(prog(lt, 3.35, 3.65));
-    css('s4ring', { left: '20px', width: '564px', top: '616px', height: '366px', opacity: ring > 0 ? 1 : 0, transform: `scale(${lerp(1.4, 1, ring)})` });
-    const cap2 = prog(lt, 2.0, 2.3);
-    $('s4c1').textContent = lt < 2.15 ? 'LA FRANCE ENTIÈRE' : 'AUTOUR DE TOI';
-    $('s4c2').textContent = lt < 2.15 ? '3 397 boutiques, région par région' : 'les plus proches + un indice de chance';
-    slam('s4c1', t, lt < 2.15 ? S.s4[0] + .25 : S.s4[0] + 2.15); rise('s4c2', t, lt < 2.15 ? S.s4[0] + .45 : S.s4[0] + 2.3, .3, 20);
-    const g1 = eBack(prog(lt, 1.0, 1.35)), g2 = eBack(prog(lt, 3.6, 3.95));
-    css('s4tag1', { opacity: g1 > 0 ? 1 : 0, transform: `scale(${g1}) rotate(-6deg)` });
-    css('s4tag2', { opacity: g2 > 0 ? 1 : 0, transform: `scale(${g2}) rotate(5deg)` });
+    const ph = eOut(prog(lt, 0, .6));
+    let bump = 0; RADAR_STEPS.slice(1).forEach(x => { const d = lt - x; if (d > 0 && d < .3) bump = Math.max(bump, Math.sin(d / .3 * Math.PI)); });
+    css('s4phone', { transform: `translateY(${(1 - ph) * 1400}px) rotate(${(1 - ph) * 12 + Math.sin(lt * 1.3) * .8}deg) scale(${1 + .025 * bump})` });
+    const f = Math.min(RADAR_FRAMES - 1, Math.max(0, Math.floor(lt * 30 * RADAR_RATE))), src = 'out/radar-play/' + String(f).padStart(4, '0') + '.jpg', img = $('s4map');
+    if (img.getAttribute('src') !== src) { img.setAttribute('src', src); wait = img.decode ? img.decode().catch(() => null) : null; }
+    let k = 0; RADAR_STEPS.forEach((x, i) => { if (lt >= x) k = i; });
+    $('s4c1').textContent = RADAR_CAPS[k][0]; $('s4c2').textContent = RADAR_CAPS[k][1]; $('s4n').textContent = String(k + 1);
+    slam('s4c1', t, S.s4[0] + RADAR_STEPS[k] + (k ? 0 : .25)); rise('s4c2', t, S.s4[0] + RADAR_STEPS[k] + (k ? .12 : .45), .3, 20);
+    const sn = eBack(prog(lt, RADAR_STEPS[k] + (k ? 0 : .5), RADAR_STEPS[k] + (k ? .3 : .8)));
+    css('s4step', { opacity: sn > 0 ? 1 : 0, transform: `scale(${sn}) rotate(${lerp(-90, -8, sn)}deg)` });
   }
 
   // 5. Valeur, sorties, séries
@@ -314,8 +310,8 @@ function render(t) {
     const ph = eOut(prog(lt, 0, .55)); css('s5phone', { transform: `translateY(${(1 - ph) * 1400}px) rotate(${Math.sin(lt * 1.2) * 1.2}deg)` });
     const s1 = eIO(prog(lt, 1.85, 2.25)), s2 = eIO(prog(lt, 3.35, 3.75));
     css('s5a', { transform: `translateX(${-s1 * 100}%)` });
-    css('s5b', { transform: `translateX(${(1 - s1) * 100 - s2 * 100}%) translateY(-${lerp(0, 22, eIO(prog(lt, 2.4, 3.3)))}%)` });
-    css('s5c', { transform: `translateX(${(1 - s2) * 100}%) translateY(-${lerp(0, 8, eIO(prog(lt, 3.9, 4.6)))}%)` });
+    css('s5b', { transform: `translateX(${(1 - s1) * 100 - s2 * 100}%)` });
+    css('s5c', { transform: `translateX(${(1 - s2) * 100}%)` });
     // Montant qui compte, en vignette au-dessus du téléphone (collection de démonstration).
     const v = eOut(prog(lt, .45, 1.3)); $('s5num').textContent = nf(2603 * v) + ' €';
     const vb = eBack(prog(lt, .4, .75)), vo = prog(lt, 1.85, 2.05);
@@ -344,6 +340,7 @@ function render(t) {
     css('s6pika', { opacity: pk, transform: `translate(${(1 - pk) * -400}px, ${-hop}px) scaleX(-1)` });
     rise('s6legal', t, S.s6[0] + 1.0, .4, 20);
   }
+  return wait;
 }
 window.render = render;
 window.DURATION = DURATION;

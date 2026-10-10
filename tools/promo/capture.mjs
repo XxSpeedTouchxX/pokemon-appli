@@ -14,7 +14,11 @@ const go = async (hash, name, wait = 2500, fn) => {
   await p.screenshot({ path: OUT + name + '.png' }); console.log(name);
 };
 await go('', 'home', 4000);
-await go('#sorties', 'sorties', 3000);
+// Sorties : la fiche des UPC 30ᵉ Anniversaire (6 novembre) en haut de l'écran.
+await go('#sorties', 'sorties', 3000, async () => {
+  await p.evaluate(() => { const el = [...document.querySelectorAll('#app *')].find(e => !e.children.length && /Ultra-Premium 30/.test(e.textContent || '')); const card = el && (el.closest('article, section, li, button') || el); if (card) card.scrollIntoView({ block: 'start' }); window.scrollBy(0, -150); document.querySelectorAll('main, #app, .pkm-scroll').forEach(s => { if (s.scrollTop) s.scrollTop -= 150; }); });
+  await p.waitForTimeout(800);
+});
 await go('#radar', 'radar', 5000);
 await go('#territoire', 'territoire', 4000);
 await go('#series', 'series', 3000);

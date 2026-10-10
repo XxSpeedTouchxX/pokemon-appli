@@ -4,11 +4,11 @@
 //   CHROMIUM=... node tools/promo/render.mjs --stills 1,4,9,13,18,24          → captures fixes aux secondes indiquées
 import { launch } from '../web/e2e/helpers.mjs'; // playwright-core de tools/web
 import { createServer } from 'node:http';
-import { readFile, mkdir } from 'node:fs/promises';
-import { spawn } from 'node:child_process';
+import { readFile, mkdir, rm } from 'node:fs/promises';
+import { spawn, spawnSync } from 'node:child_process';
 import { extname, join, normalize } from 'node:path';
 const ROOT = new URL('../../', import.meta.url).pathname, OUT = ROOT + 'tools/promo/out/';
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
+const TYPES = { '.jpg': 'image/jpeg', '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.svg': 'image/svg+xml' };
 const server = createServer(async (req, res) => {
   const path = normalize(decodeURIComponent(req.url.split('?')[0])).replace(/^(\.\.[/\\])+/, '');
   try { const body = await readFile(join(ROOT, path)); res.writeHead(200, { 'content-type': TYPES[extname(path)] || 'application/octet-stream' }); res.end(body); }
@@ -16,6 +16,13 @@ const server = createServer(async (req, res) => {
 }).listen(0);
 const port = server.address().port;
 await mkdir(OUT, { recursive: true });
+// Vrai Radar (record-radar.mjs, workflow promo-radar.yml) : images extraites de radar-demo.mp4 pour la scène 4.
+{
+  const play = OUT + 'radar-play/';
+  await rm(play, { recursive: true, force: true }); await mkdir(play, { recursive: true });
+  const x = spawnSync('ffmpeg', ['-loglevel', 'error', '-i', ROOT + 'tools/promo/radar-demo.mp4', '-q:v', '2', '-start_number', '0', play + '%04d.jpg'], { stdio: 'inherit' });
+  if (x.status !== 0) throw new Error('radar-demo.mp4 illisible : lancer record-radar.mjs');
+}
 const browser = await launch();
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
 page.on('pageerror', e => console.error('Erreur page :', e.message));
