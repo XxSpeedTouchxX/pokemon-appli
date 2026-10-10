@@ -165,20 +165,38 @@ R.radar = () => take('radar', '#radar', async T => {
   await T.frames(2, null, DT / 2); T.note('sweepGeom', await T.sweepGeom());
   await T.frames(TURN * 2 + 6, null, DT / 2); T.mark('sweepEnd'); T.note('sweepFps', 60);
   await T.frames(22);
-  // Une boutique isolée, spécialisée (cartes, jeux, BD) et bien placée, vers le haut de la carte.
+  // Une boutique du centre de Lyon, au milieu de nombreuses autres (au moins 8 à moins de 800 m), et sans aucun nom
+  // de rue ni de lieu sur le fond de carte une fois zoomé : aucune boutique n'est reconnaissable dans la pub (son nom,
+  // sa ville et son adresse sont en plus floutés). Au niveau du département, les points du centre se superposent :
+  // le toucher vise le plus entouré, l'app ouvre celui du dessus (tous dans le même quartier).
   const pick = await T.page.evaluate(() => {
-    const R = window.__pkmRadar, m = R.map, c = m.getCanvas(), w = c.clientWidth, h = c.clientHeight, cx = w / 2, cy = h * .32;
-    const fs = m.queryRenderedFeatures([[w * .15, h * .14], [w * .85, h * .5]], { layers: ['stores-dot'] });
-    const pts = fs.map(f => { const p = m.project(f.geometry.coordinates); return { id: f.properties.id, lvl: f.properties.lvl, x: p.x, y: p.y, d: Math.hypot(p.x - cx, p.y - cy) }; });
-    const alone = pts.filter(a => pts.every(b => b === a || Math.hypot(a.x - b.x, a.y - b.y) > 24));
-    const shop = a => { const st = R.byId[a.id] || {}; return st.tcg || /^(cartes|jeux|bd|collec)$/.test(st.kind || '') ? 1 : 0; };
-    const best = alone.sort((a, b) => (shop(b) - shop(a)) || (b.lvl - a.lvl) || (a.d - b.d))[0];
+    const R = window.__pkmRadar, m = R.map, c = m.getCanvas(), w = c.clientWidth, h = c.clientHeight;
+    const km = (a, b) => { const dx = (a.lon - b.lon) * 111.32 * Math.cos(a.lat * Math.PI / 180), dy = (a.lat - b.lat) * 110.57; return Math.hypot(dx, dy); };
+    const near = id => { const a = R.byId[id]; return a ? R.stores.filter(s => s.id !== a.id && km(a, s) < .8).length : 0; };
+    // Point touché : celui où la boutique que l'app ouvrira (la plus haute dans un carré de 16 px, comme radar.js)
+    // est au centre, avec l'indice le plus haut, en restant au plus près de son point affiché.
     const r = c.getBoundingClientRect();
-    return best ? { id: best.id, x: r.x + best.x, y: r.y + best.y } : null;
+    let best = null;
+    for (let y = 100; y < h * .6; y += 3) for (let x = 30; x < w - 30; x += 3) {
+      const top = m.queryRenderedFeatures([[x - 8, y - 8], [x + 8, y + 8]], { layers: ['stores-dot'] })[0];
+      if (!top) continue;
+      const n = near(top.properties.id), l = top.properties.lvl || 0, p = m.project(top.geometry.coordinates), d = Math.hypot(p.x - x, p.y - y);
+      if (n >= 8 && (!best || l > best.l || (l === best.l && d < best.d))) best = { n, l, d, x, y };
+    }
+    if (best) return { x: r.x + best.x, y: r.y + best.y };
+    return null;
   });
-  if (!pick) throw new Error('[radar] aucune boutique à toucher');
+  if (!pick) throw new Error('[radar] aucune boutique du centre à toucher');
+  // Noms des rues, lieux et villes du fond de carte masqués avant le zoom sur la boutique.
+  await T.page.evaluate(() => { const m = window.__pkmRadar.map; m.getStyle().layers.filter(l => l.type === 'symbol' && !/^stores|^depts|^regions|^around/.test(l.id)).forEach(l => m.setLayoutProperty(l.id, 'visibility', 'none')); });
   await T.tap(pick.x, pick.y); T.mark('tapStore');
-  await T.frames(36); await T.settleMap(10000); await T.frames(40);
+  await T.frames(36); await T.settleMap(10000);
+  const opened = await T.page.evaluate(() => { const R = window.__pkmRadar, a = R.byId[R.sel]; if (!a) return null;
+    const km = b => Math.hypot((a.lon - b.lon) * 111.32 * Math.cos(a.lat * Math.PI / 180), (a.lat - b.lat) * 110.57);
+    return R.stores.filter(s => s.id !== a.id && km(s) < .8).length; });
+  if (opened == null || opened < 8) throw new Error('[radar] boutique ouverte hors du centre (' + opened + ')');
+  T.note('storeNear', opened);
+  await T.frames(40);
 });
 
 R.around = () => take('around', '#radar', async T => {
