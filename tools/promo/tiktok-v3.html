@@ -6,7 +6,8 @@
 <!-- Pub verticale 1080 × 1920, 35,8 s, montée sur « Montagem Uranium (slowed) » (2026-10-10, demande du porteur).
      Synchro : grille des coups de grosse caisse mesurée sur la musique, G(k) = 0,662 + 0,55921 × k s (107,3 BPM).
      Prises réelles de l'app (tools/promo/record-app.mjs, images extraites par render.mjs dans out/play/) et
-     motion design calculé image par image par render(t). Sert depuis la racine du dépôt. -->
+     motion design calculé image par image par render(t). Sert depuis la racine du dépôt.
+     Zone sûre TikTok : textes et éléments utiles entre y 150 et 1500, x 40 et 880 (boutons à droite, légende en bas). -->
 <style>
 @font-face { font-family: 'Luckiest Guy'; src: url(../../web/fonts/luckiest-guy-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: 'Luckiest Guy'; src: url(../../web/fonts/luckiest-guy-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-024F, U+1E00-1EFF; }
@@ -19,8 +20,7 @@ html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--
 .L { position: absolute; inset: 0; }
 .abs { position: absolute; }
 .big { font-family: 'Luckiest Guy', cursive; line-height: .95; letter-spacing: 1px; -webkit-text-stroke: 12px #000; paint-order: stroke fill; }
-.sora { font-family: 'Sora', sans-serif; font-weight: 700; }
-.ctr { left: 0; right: 0; text-align: center; }
+.sora { font-family: 'Sora', sans-serif; font-weight: 700; -webkit-text-stroke: 5px #000; paint-order: stroke fill; }
 canvas { position: absolute; left: 0; top: 0; }
 #full, #phone .scr { overflow: hidden; }
 #full { position: absolute; inset: 0; opacity: 0; }
@@ -28,16 +28,32 @@ canvas { position: absolute; left: 0; top: 0; }
 #phone { position: absolute; left: 0; top: 0; width: 740px; height: 1600px; border-radius: 92px; background: #07090f; padding: 20px; opacity: 0;
   box-shadow: 0 0 0 5px var(--y), 0 0 60px rgba(255,210,31,.55), 0 60px 120px rgba(0,0,0,.6); }
 #phone .scr { position: relative; width: 700px; height: 1560px; border-radius: 74px; background: #0B1120; }
-#phone .notch { position: absolute; left: 50%; top: 36px; width: 170px; height: 46px; margin-left: -85px; border-radius: 30px; background: #000; z-index: 3; }
 .t { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; white-space: pre-line; }
 .plate { display: inline-block; padding: 10px 26px; border-radius: 18px; background: rgba(10,17,48,.88); border: 2px solid rgba(255,210,31,.6); }
+.mask { position: absolute; opacity: 0; border-radius: 10px; backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px); background: rgba(11,17,32,.35); }
 #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
-#vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 45%, rgba(0,0,0,.65) 100%); opacity: 0; }
 #scan { position: absolute; inset: 0; pointer-events: none; opacity: .07; background: repeating-linear-gradient(0deg, rgba(255,255,255,.5) 0 2px, transparent 2px 6px); }
-#topfade { position: absolute; left: 0; right: 0; top: 0; height: 640px; background: linear-gradient(180deg, rgba(4,6,15,.88) 0%, rgba(4,6,15,.55) 60%, rgba(4,6,15,0) 100%); opacity: 0; }
-.px { image-rendering: pixelated; }
+#topfade { position: absolute; left: 0; right: 0; top: 0; height: 680px; background: linear-gradient(180deg, rgba(4,6,15,.95) 0, rgba(4,6,15,.9) 470px, rgba(4,6,15,0) 680px); opacity: 0; }
+#botfade { position: absolute; left: 0; right: 0; bottom: 0; height: 560px; background: linear-gradient(0deg, rgba(4,6,15,.94) 0, rgba(4,6,15,.8) 330px, rgba(4,6,15,0) 560px); opacity: 0; }
 .prod { position: absolute; opacity: 0; border-radius: 30px; overflow: hidden; border: 6px solid #000; box-shadow: 0 0 0 4px var(--y), 0 40px 80px rgba(0,0,0,.55); }
 .prod img { display: block; width: 100%; }
+/* Insigne « 30 ANS » maison (aucun logo officiel, aucune Poké Ball) */
+#b30 { position: absolute; left: 260px; width: 560px; height: 560px; opacity: 0; }
+#b30 .ring { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 42%, #22357F 0%, #0A1130 72%); border: 12px solid var(--y);
+  box-shadow: 0 0 0 9px #000, 0 0 70px rgba(255,210,31,.55), inset 0 0 50px rgba(255,210,31,.3); }
+#b30 .ring::after { content: ''; position: absolute; inset: 22px; border-radius: 50%; border: 3px dashed rgba(255,210,31,.55); }
+#b30 .num { position: absolute; left: 0; right: 0; top: 58px; text-align: center; font-size: 330px; color: var(--y); -webkit-text-stroke: 16px #000; }
+#b30 .ans { position: absolute; left: 0; right: 0; top: 365px; text-align: center; font-size: 118px; color: #fff; }
+/* Bandeaux fixes : mention de non-affiliation, précision sur l'indice, collection de démo */
+#foot { position: absolute; left: 60px; width: 820px; top: 1416px; text-align: center; opacity: 0; }
+#foot .plate { font-size: 23px; line-height: 1.3; font-weight: 600; color: rgba(255,255,255,.82); padding: 7px 18px; border-color: rgba(255,210,31,.35); background: rgba(6,10,28,.78); }
+#honest { position: absolute; left: 60px; width: 820px; text-align: center; opacity: 0; }
+#honest .plate { font-size: 40px; font-weight: 700; padding: 8px 24px; background: rgba(6,10,28,.9); }
+#demo { position: absolute; left: 60px; width: 820px; text-align: center; opacity: 0; }
+#demo .plate { font-size: 52px; font-weight: 700; color: var(--y); padding: 6px 30px; background: rgba(6,10,28,.92); border-color: var(--y); }
+#legal { position: absolute; left: 60px; width: 820px; top: 1120px; opacity: 0; text-align: center; }
+#legal .plate { font-size: 34px; line-height: 1.32; font-weight: 600; background: #0A1130; border-color: rgba(255,210,31,.75); }
+#legal .credit { margin-top: 12px; font-size: 24px; color: rgba(255,255,255,.8); }
 </style>
 </head>
 <body>
@@ -45,7 +61,9 @@ canvas { position: absolute; left: 0; top: 0; }
   <div id="cam" class="L">
     <canvas id="bg" width="1080" height="1920"></canvas>
     <div id="full"><img id="fullImg" alt=""></div>
-    <div id="phone"><div class="notch"></div><div class="scr"><img id="phoneImg" alt=""></div></div>
+    <div id="phone"><div class="scr"><img id="phoneImg" alt=""></div></div>
+    <div id="mask1" class="mask"></div>
+    <div id="mask2" class="mask"></div>
     <canvas id="fx" width="1080" height="1920"></canvas>
     <div id="prods" class="L">
       <div class="prod" id="pDeck" style="width: 760px"><img src="../../web/img/products/30th-celebration-battle-deck-espeon-ex-umbreon-ex.webp" alt=""></div>
@@ -54,24 +72,26 @@ canvas { position: absolute; left: 0; top: 0; }
       <div class="prod" id="pFig" style="width: 760px"><img src="../../web/img/products/30th-celebration-figure-collection.webp" alt=""></div>
       <div class="abs" id="upcL" style="width: 430px; height: 488px; overflow: hidden; opacity: 0; border-radius: 22px"><img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="position: absolute; left: 0; top: 0; width: 860px; height: 488px" alt=""></div>
       <div class="abs" id="upcR" style="width: 430px; height: 488px; overflow: hidden; opacity: 0; border-radius: 22px"><img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="position: absolute; left: -430px; top: 0; width: 860px; height: 488px" alt=""></div>
-      <img id="logo30" class="abs" src="../../web/img/logo-30-anniversaire.webp" style="width: 520px; left: 280px; opacity: 0" alt="">
+      <div id="b30"><div class="ring"></div><div class="num big">30</div><div class="ans big">ANS</div></div>
     </div>
     <div id="topfade"></div>
+    <div id="botfade"></div>
     <div id="texts" class="L">
       <div id="tA" class="t big"></div>
       <div id="tB" class="t big"></div>
       <div id="tC" class="t sora"></div>
       <div id="tD" class="t sora"></div>
     </div>
+    <div id="honest"><div class="plate">indice estimé · aucun stock garanti</div></div>
+    <div id="demo"><div class="plate">collection de démo</div></div>
     <img id="logo" class="abs" src="../../web/img/brand/dropicards-header.png" style="width: 860px; left: 110px; opacity: 0" alt="">
     <img id="gem" class="abs" src="../../web/img/brand/pk.svg" style="width: 150px; opacity: 0" alt="">
-    <img id="pika" class="abs px" src="../../web/img/pokemon/25.png" style="width: 230px; opacity: 0" alt="">
-    <div id="legal" class="abs" style="left: 60px; width: 820px; top: 1290px; opacity: 0">
-      <div class="plate" style="font-size: 27px; line-height: 1.35; font-weight: 600; text-align: center">Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</div>
-      <div style="margin-top: 10px; font-size: 22px; color: rgba(255,255,255,.75); text-align: center">Fond de carte : © contributeurs OpenStreetMap · OpenFreeMap</div>
+    <div id="legal">
+      <div class="plate">Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</div>
+      <div class="credit">Fond de carte : © OpenStreetMap · OpenMapTiles · OpenFreeMap · contours IGN</div>
     </div>
+    <div id="foot"><div class="plate">Application indépendante, non affiliée à Nintendo,<br>GAME FREAK ou The Pokémon Company.</div></div>
   </div>
-  <div id="vig"></div>
   <div id="scan"></div>
   <div id="flash"></div>
 </div>
@@ -89,9 +109,15 @@ const eEl = x => (x <= 0 ? 0 : x >= 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x *
 const lerp = (a, c, x) => a + (c - a) * x;
 const $ = id => document.getElementById(id);
 const css = (el, o) => { el = typeof el === 'string' ? $(el) : el; for (const k in o) el.style[k] = o[k]; };
-const nf = n => Math.round(n).toLocaleString('fr-FR').replace(/\s/g, ' ');
+// Nombres à la française avec une espace insécable classique (Luckiest Guy n'a pas l'espace fine U+202F).
+const nf = n => Math.round(n).toLocaleString('fr-FR').replace(/\s/g, ' ');
+const nbsp = s => String(s || '').replace(/[\s ]/g, ' ');
+const euros = s => parseFloat(String(s || '').replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+const money = v => v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\s/g, ' ') + ' €';
 // Coup qui vient de tomber (0..1 sur d secondes) ; « impact » pour les secousses et les flashs.
 const hit = (t, at, d = .3) => { const x = (t - at) / d; return x >= 0 && x < 1 ? 1 - x : 0; };
+// Dernier coup tombé depuis le coup k0 (pour les petites impulsions à chaque temps).
+const lastBeat = (t, k0) => b(k0) + Math.max(0, Math.floor((t - b(k0)) / BEAT)) * BEAT;
 
 // ——— Données : prises de l'app, France et boutiques ———
 let TK = {}, FR = [], SHOPS = [];
@@ -114,26 +140,41 @@ const frameOf = (take, f) => Math.max(0, Math.min((TK[take] ? TK[take].frames : 
 // Correspondance temps de la pub → image de la prise, par segments [t, image].
 const seg = (t, pts) => { for (let i = 1; i < pts.length; i++) if (t <= pts[i][0]) return lerp(pts[i - 1][1], pts[i][1], prog(t, pts[i - 1][0], pts[i][0])); return pts[pts.length - 1][1]; };
 const countAt = (take, f) => { let c = 0; ((TK[take] || {}).counts || []).forEach(([i, v]) => { if (i <= f) c = v; }); return c; };
+// Touchers d'une prise : [image du clic, x, y] (pixels CSS de l'app), dans l'ordre ; valeurs par défaut sinon.
+const tapOf = (take, i, def) => { const a = ((TK[take] || {}).taps || [])[i]; return a ? { f: a[0], x: a[1], y: a[2] } : def; };
 let pending = [];
 function showFrame(imgId, take, f) {
   const src = 'out/play/' + take + '/' + String(frameOf(take, f)).padStart(4, '0') + '.jpg', img = $(imgId);
   if (img.getAttribute('src') !== src) { img.setAttribute('src', src); if (img.decode) pending.push(img.decode().catch(() => null)); }
 }
 // Vue plein écran d'une prise (pixels CSS de l'app 390 × 844, images ×2) : point (cx, cy) de l'app placé en (X, Y), échelle k.
+let FULL = { cx: 0, cy: 0, X: 0, Y: 0, k: 1 };
 function full(take, f, cx, cy, X, Y, k, op = 1) {
   showFrame('fullImg', take, f);
+  FULL = { cx, cy, X, Y, k };
   css('full', { opacity: op, visibility: op > 0 ? 'visible' : 'hidden' });
   css('fullImg', { transform: `translate(${X - cx * k}px, ${Y - cy * k}px) scale(${k / 2})` });
 }
-// Téléphone néon : position, rotation, et caméra dans l'écran (point (cx, cy) de l'app au centre, zoom z).
+const fullPt = (ax, ay) => [FULL.X + (ax - FULL.cx) * FULL.k, FULL.Y + (ay - FULL.cy) * FULL.k];
+// Flou sur une zone de l'app (pixels CSS) dans la vue plein écran.
+function mask(id, ax, ay, w, h, op = 1) {
+  const [x, y] = fullPt(ax, ay);
+  css(id, { left: x + 'px', top: y + 'px', width: w * FULL.k + 'px', height: h * FULL.k + 'px', opacity: op });
+}
+// Téléphone néon : caméra dans l'écran (point (cx, cy) de l'app au centre, zoom z) ; position (x, y), ou bien
+// point fy de l'app placé à la hauteur Y de la pub (le téléphone suit), pour garder l'utile au-dessus de la légende TikTok.
+let PH = { x: 0, y: 0, tx: 0, ty: 0, k: 1 };
 function phone(take, f, o) {
   showFrame('phoneImg', take, f);
   const z = o.z || 1, k = 700 / 390 * z, cx = o.cx == null ? 195 : o.cx, cy = o.cy == null ? 422 : o.cy;
   const tx = Math.min(0, Math.max(700 - 390 * k, 350 - cx * k)), ty = Math.min(0, Math.max(1560 - 844 * k, 780 - cy * k));
+  const y = o.Y == null ? o.y : o.Y - 20 - (ty + (o.fy == null ? cy : o.fy) * k);
+  PH = { x: o.x, y, tx, ty, k };
   css('phoneImg', { transform: `translate(${tx}px, ${ty}px) scale(${k / 2})` });
   css('phone', { opacity: o.op == null ? 1 : o.op, visibility: (o.op == null ? 1 : o.op) > 0 ? 'visible' : 'hidden',
-    transform: `translate(${o.x}px, ${o.y}px) perspective(1800px) rotateY(${o.ry || 0}deg) rotate(${o.rz || 0}deg) scale(${o.s || 1})` });
+    transform: `translate(${o.x}px, ${y}px) perspective(1800px) rotateY(${o.ry || 0}deg) rotate(${o.rz || 0}deg) scale(${o.s || 1})` });
 }
+const phonePt = (ax, ay) => [PH.x + 20 + PH.tx + ax * PH.k, PH.y + 20 + PH.ty + ay * PH.k];
 // Textes : jusqu'à 4 lignes (A, B : titres ; C, D : sous-titres).
 function txt(id, text, o = {}) {
   const el = $(id);
@@ -145,14 +186,18 @@ function txt(id, text, o = {}) {
   css(el, { top: o.y + 'px', fontSize: o.size + 'px', color: o.color || '#fff', opacity: p > 0 ? (o.op == null ? 1 : o.op) : 0,
     transform: `translateX(${o.dx || 0}px) scale(${sc}) rotate(${o.rot || 0}deg)`,
     textShadow: gl ? `${10 * gl}px 0 rgba(255,0,80,.9), ${-10 * gl}px 0 rgba(0,255,255,.9)` : (o.shadow || 'none'),
-    webkitTextStroke: o.stroke == null ? '' : o.stroke + 'px #000', letterSpacing: o.ls || '' });
+    webkitTextStroke: o.stroke == null ? '' : o.stroke + 'px #000', letterSpacing: o.ls || '', fontFamily: o.font || '' });
   const w = el.firstChild ? el.firstChild.offsetWidth : 0, max = o.max || 960;
   if (w > max) el.style.fontSize = (o.size * max / w) + 'px';
 }
+// Titre court qui claque : entrée brève depuis ×1,35 (lisible dès la 3ᵉ image).
+const slam = (t, at) => ({ t, at, from: 1.35, d: .1 });
+const band = (id, y, op = 1) => css(id, { top: y + 'px', opacity: op });
 function clearScene() {
   ['tA', 'tB', 'tC', 'tD'].forEach(id => txt(id, ''));
-  ['full', 'phone', 'logo', 'gem', 'pika', 'legal', 'logo30', 'upcL', 'upcR', 'pDeck', 'pEtb', 'pDitto', 'pFig', 'topfade', 'vig'].forEach(id => { $(id).style.opacity = 0; });
+  ['full', 'phone', 'logo', 'gem', 'legal', 'b30', 'upcL', 'upcR', 'pDeck', 'pEtb', 'pDitto', 'pFig', 'topfade', 'botfade', 'mask1', 'mask2', 'honest', 'demo', 'foot'].forEach(id => { $(id).style.opacity = 0; });
   $('full').style.visibility = $('phone').style.visibility = 'hidden';
+  $('full').style.filter = '';
 }
 
 // ——— Dessins ———
@@ -208,6 +253,17 @@ function france(ctx, sweep, o = {}) {
   }
   return lit;
 }
+// Image d'attente : radar néon éteint, « UPC 30 ANS / le 6 novembre… ». Première image de la pub et fin de la boucle
+// (même fonction : la vidéo repart sans couture). q : opacité ; s : taille du réticule.
+function preroll(g, q, s = 1.4) {
+  g.save(); g.globalAlpha = q;
+  grid(g, .06); rings(g, C.x, C.y, C.r, .16); france(g, 0); beam(g, C.x, C.y, C.r + 20, 0, .45);
+  g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 4; g.beginPath(); g.arc(C.x, C.y, 60 * s, 0, 2 * Math.PI); g.stroke();
+  g.restore();
+  txt('tA', 'UPC 30 ANS', { y: 250, size: 200, color: '#FFD21F', pop: false, op: .88 * q });
+  txt('tC', 'le 6 novembre…', { y: 470, size: 54, op: .9 * q, pop: false });
+}
+const RADAR_FX = 'brightness(1.22) contrast(1.08) saturate(1.25)'; // prises du Radar un peu éclaircies (néon de l'accroche)
 
 // ——— Rendu d'une image ———
 function render(T) {
@@ -217,121 +273,144 @@ function render(T) {
   const g = bg(), f = fxc();
   g.clearRect(0, 0, 1080, 1920); f.clearRect(0, 0, 1080, 1920);
   // Secousses et flashs sur les coups forts.
-  const big = [b(0), b(8), b(24), b(40), b(50), b(53), b(56)], small = [];
+  const big = [b(0), b(8), b(24), b(40), b(50), b(53), b(56)], small = [b(48), b(49)];
   for (let k = 24; k <= 36; k++) small.push(b(k)); for (let k = 41; k <= 54; k++) small.push(b(k));
   let sh = 0; big.forEach(h => { sh = Math.max(sh, hit(t, h, .4) * 30); }); small.forEach(h => { sh = Math.max(sh, hit(t, h, .22) * 9); });
   css('cam', { transform: `translate(${Math.sin(t * 97) * sh}px, ${Math.cos(t * 83) * sh}px)` });
   let fl = 0; big.forEach(h => { fl = Math.max(fl, hit(t, h, .12)); });
   css('flash', { opacity: fl * .85 });
   $('stage').style.background = '#0A1130';
+  // Mention de non-affiliation : toujours à l'écran (bandeau discret), en grand sur la carte de fin.
+  css('foot', { opacity: t < b(56) ? 1 - prog(t, b(56), b(56) + .15) : prog(t, b(62), b(62) + .2) });
+  // Précision sur l'indice dès qu'il est question de boutiques et de chances.
+  if ((t >= b(3) && t < b(8)) || (t >= b(21) && t < b(26)) || (t >= b(53) && t < b(55))) band('honest', 585);
 
   // 1. Accroche : le radar néon (avant le premier coup, puis un tour complet en 4 temps)
-  if (t < b(5)) {
+  if (t < b(0)) preroll(g, 1, lerp(1.4, 1, prog(t, 0, b(0))));
+  else if (t < b(5)) {
     grid(g, .06);
-    const a = t < b(0) ? 0 : t < b(4) ? 2 * Math.PI * prog(t, b(0), b(4)) : 7;
-    const zoom = t > b(4) ? 1 + 7 * eIn(prog(t, b(4) + .3, b(5))) : 1 + .06 * hit(t, b(1), .5);
-    const zc = [C.x + (proj(4.835, 45.76)[0] - C.x), C.y + (proj(4.835, 45.76)[1] - C.y)]; // Lyon
+    const a = t < b(4) ? 2 * Math.PI * prog(t, b(0), b(4)) : 7;
+    const zoom = t > b(4) ? 1 + 7 * eIn(prog(t, b(4) + .45, b(5))) : 1 + .06 * hit(t, b(1), .5);
+    const zc = proj(4.835, 45.76); // Lyon
     g.save(); g.translate(zc[0], zc[1]); g.scale(zoom, zoom); g.translate(-zc[0], -zc[1]);
     rings(g, C.x, C.y, C.r, .16 + .1 * hit(t, b(4), .5));
-    const lit = france(g, a, { pulse: hit(t, b(4), .4) });
-    beam(g, C.x, C.y, C.r + 20, a < 7 ? a : 2 * Math.PI, t < b(0) ? .35 : t < b(4) + .35 ? 1 : 1 - prog(t, b(4) + .1, b(4) + .5));
+    france(g, a, { pulse: hit(t, b(4), .4) });
+    beam(g, C.x, C.y, C.r + 20, a < 7 ? a : 2 * Math.PI, t < b(4) + .35 ? 1 : 1 - prog(t, b(4) + .1, b(4) + .5));
     shock(g, C.x, C.y, prog(t, b(4), b(4) + .35), C.r + 60);
     g.restore();
-    // Réticule avant le premier coup
-    if (t < b(0)) { const s = lerp(1.4, 1, prog(t, 0, b(0))); g.save(); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 4; g.beginPath(); g.arc(C.x, C.y, 60 * s, 0, 2 * Math.PI); g.stroke(); g.restore(); }
-    const n = t >= b(4) ? 3397 : Math.round(lit * 3397 / Math.max(1, SHOPS.length));
-    if (t < b(0)) { txt('tA', 'UPC 30 ANS', { y: 250, size: 200, color: 'rgba(255,210,31,.35)', stroke: 6, pop: false }); txt('tC', 'le 6 novembre…', { y: 470, size: 54, op: .5, pop: false }); }
-    else if (t < b(1)) { txt('tA', 'UPC 30 ANS', { y: 240, size: 210, color: '#FFD21F', t, at: b(0) }); txt('tB', 'LE 6 NOVEMBRE', { y: 450, size: 96, t, at: b(0) + .08 }); }
+    if (t < b(1)) { txt('tA', 'UPC 30 ANS', { y: 240, size: 210, color: '#FFD21F', t, at: b(0) }); txt('tB', 'LE 6 NOVEMBRE', { y: 450, size: 96, t, at: b(0) + .08 }); }
     else if (t < b(2)) { txt('tA', 'TU SAIS', { y: 250, size: 150, t, at: b(1) }); txt('tB', 'OÙ CHERCHER ?', { y: 400, size: 130, color: '#FFD21F', t, at: b(1) + .06 }); }
     else if (t < b(3)) { txt('tA', 'LE RADAR', { y: 260, size: 230, color: '#FFD21F', t, at: b(2), glitch: true }); rays(f, t, 'rgba(255,210,31,.06)', 16, 540, 380); }
-    else if (t < b(4)) { txt('tC', 'LE RADAR', { y: 200, size: 60, color: '#FFD21F', pop: false }); txt('tA', nf(n), { y: 300, size: 230, t, at: b(3), from: 1.6 }); }
-    else { txt('tA', '3 397', { y: 200, size: 240, t, at: b(4), from: 1.5 }); txt('tB', 'BOUTIQUES EN FRANCE', { y: 430, size: 74, color: '#FFD21F', t, at: b(4) + .05 }); txt('tD', 'source : OpenStreetMap', { y: 520, size: 30, op: .75, pop: false }); }
+    else if (t < b(4)) {
+      // Compteur 0 → 3 397 sur le temps
+      txt('tC', 'LE RADAR', { y: 170, size: 54, color: '#FFD21F', pop: false });
+      txt('tA', nf(3397 * eOut(prog(t, b(3), b(4) - .06))), { y: 250, size: 220, pop: false });
+      txt('tB', 'BOUTIQUES', { y: 455, size: 90, color: '#FFD21F', t, at: b(3) });
+    }
+    else { txt('tA', nf(3397), { y: 200, size: 240, t, at: b(4), from: 1.5 }); txt('tB', 'BOUTIQUES EN FRANCE', { y: 430, size: 74, color: '#FFD21F', t, at: b(4) + .05 }); txt('tD', 'lieux de vente possibles · source : OpenStreetMap', { y: 522, size: 30, op: .85, pop: false }); }
   }
   // 2. Autour de moi : vrai Radar, un tour complet
   else if (t < b(7)) {
     const A = TK.around || {}, gx = (A.sweepGeom || { x: 195, y: 330 }), k = 2.77;
     const fA = seg(t, [[b(5), A.sweepStart - 2], [b(5) + .1, A.sweepStart], [b(7) - .05, A.sweepEnd - 2]]);
-    full('around', fA, gx.x, gx.y, 540 - (195 - gx.x) * k, 1000, k * (1 + .05 * prog(t, b(5), b(7))));
+    full('around', fA, gx.x, gx.y, 540 - (195 - gx.x) * k, 1000, k * (1 + .05 * prog(t, b(5), b(7)) + .02 * hit(t, b(6), .25)));
+    $('full').style.filter = RADAR_FX;
     const fr = clamp((fA - A.sweepStart - 1) / 78);
     progressRing(f, 540 - (195 - gx.x) * k, 1000, 470, fr, .9);
-    css('topfade', { opacity: 1 });
+    css('topfade', { opacity: 1 }); css('botfade', { opacity: 1 });
     txt('tA', '5 KM', { y: 220, size: 200, color: '#FFD21F', t, at: b(5) });
     txt('tB', 'AUTOUR DE TOI', { y: 410, size: 110, t, at: b(5) + .08 });
     if (t < b(5) + .12) { css('flash', { opacity: .9 * (1 - prog(t, b(5), b(5) + .12)) }); }
   }
-  // 3. Fiche d'une boutique : indice estimé, puis itinéraire et alerte (noms floutés à l'enregistrement)
+  // 3. Fiche d'une boutique : l'indice est une estimation (un temps entier, fiche entière dans la zone sûre)
   else if (t < b(8)) {
-    const R = TK.radar || {}, fR = (R.tapStore || 0) + 70, half = b(7) + BEAT / 2, k = 2.77;
-    const pan = eIO(prog(t, half - .08, half + .08));
-    const cy = lerp(430, 640, pan), z = lerp(1.35, 1.12, eOut(prog(t, b(7), b(7) + .2)));
-    full('radar', fR, 195, cy, 540, 1000, k * z);
-    css('topfade', { opacity: 1 });
-    if (t < half) { txt('tA', 'INDICE DE CHANCE', { y: 230, size: 112, color: '#FFD21F', t, at: b(7) }); txt('tB', 'ESTIMÉ', { y: 360, size: 96, t, at: b(7) + .06 }); }
-    else { txt('tA', 'ITINÉRAIRE', { y: 230, size: 120, t, at: half }); txt('tB', '+ ALERTE', { y: 370, size: 110, color: '#FFD21F', t, at: half + .06 }); }
+    const R = TK.radar || {}, fR = (R.tapStore || 0) + 70, z = lerp(1.08, 1, eOut(prog(t, b(7), b(7) + .25)));
+    full('radar', fR, 195, 560, 480, 1050, 2.3 * z);
+    $('full').style.filter = RADAR_FX;
+    css('topfade', { opacity: 1 }); css('botfade', { opacity: 1 });
+    txt('tA', 'INDICE DE CHANCE', { y: 205, size: 112, color: '#FFD21F', ...slam(t, b(7)) });
+    txt('tB', 'ESTIMÉ', { y: 330, size: 130, ...slam(t, b(7) + .05) });
     if (t > b(8) - .07) css('full', { opacity: 1 - prog(t, b(8) - .07, b(8)) }); // aspiration vers le coup du logo
   }
   // 4. Le logo sur le coup isolé
   else if (t < b(9)) {
     rays(g, t, 'rgba(255,210,31,.10)', 18, 540, 760); sparks(f, t, 'rgba(255,210,31,.9)', 28, 4);
     const p = eEl(prog(t, b(8), b(8) + .5)), out = eIn(prog(t, b(9) - .12, b(9)));
-    css('logo', { top: '560px', opacity: 1 - out, transform: `scale(${p * (1 - .85 * out)}) rotate(${(1 - p) * -12}deg)` });
-    css('logo', { webkitMaskImage: 'none', maskImage: 'none' });
-    txt('tC', 'LE RADAR, EN VRAI', { y: 760, size: 64, t, at: b(8) + .2, op: 1 - out });
+    css('logo', { top: '560px', opacity: 1 - out, transform: `scale(${p * (1 - .85 * out)}) rotate(${(1 - p) * -12}deg)`, webkitMaskImage: 'none', maskImage: 'none' });
+    txt('tC', 'LE RADAR, EN VRAI', { y: 760, size: 64, t, at: b(8), op: 1 - out });
     burst(f, 540, 640, prog(t, b(8), b(8) + .5));
   }
-  // 5. Démo : France → Auvergne-Rhône-Alpes → Rhône → « Balayer »
-  else if (t < b(16)) {
-    const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77;
-    const fR = seg(t, [[b(9), R.france], [b(10) - .2, R.tapRegion - 6], [b(10), R.tapRegion], [b(12) - .2, R.tapDept - 6], [b(12), R.tapDept],
-      [b(14), R.tapDept + 48], [b(16) - .2, R.sweepStart - 6], [b(16), R.sweepStart]]);
-    const push = 1 + .05 * prog(t, b(14), b(16)), down = eIO(prog(t, b(15), b(15) + .35));
-    full('radar', fR, gx.x, lerp(gx.y, 610, down), 540 - (195 - gx.x) * k, 1000, k * push, eOut(prog(t, b(9), b(9) + .15)));
-    css('topfade', { opacity: 1 });
+  // 5. Démo : France (sud-est) → Auvergne-Rhône-Alpes → Rhône → « Balayer » (un toucher pile sur chaque coup)
+  else if (t < b(15)) {
+    const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77, Xs = 540 - (195 - gx.x) * k;
+    const t0 = tapOf('radar', 0, { f: R.tapRegion, x: 257, y: 340 }), t1 = tapOf('radar', 1, { f: R.tapDept }), t2 = tapOf('radar', 2, { f: R.sweepStart });
+    const fR = seg(t, [[b(9), t0.f - 18], [b(10), t0.f], [b(12) - .2, t1.f - 6], [b(12), t1.f], [b(14), t1.f + 48], [b(15), t2.f]]);
+    // Caméra : plan serré sur le sud-est (badge de la région touchée), puis cadrage du secteur ; descente vers « Balayer ».
+    const e = eIO(prog(t, b(10), b(10) + .6)), down = eIO(prog(t, b(14), b(14) + .3));
+    const punch = 1 + .07 * hit(t, lastBeat(t, 9), .3);
+    const cx = lerp(t0.x, gx.x, e), cy = lerp(lerp(t0.y, gx.y, e), 650, down);
+    full('radar', fR, cx, cy, lerp(560, Xs, e), 1000, lerp(4.2, k, e) * punch, eOut(prog(t, b(9), b(9) + .15)));
+    $('full').style.filter = RADAR_FX;
+    css('topfade', { opacity: 1 }); css('botfade', { opacity: down ? 1 - .7 * down : 1 });
+    css('flash', { opacity: Math.max(+$('flash').style.opacity || 0, .22 * hit(t, lastBeat(t, 10), .1)) });
+    // Le nombre de boutiques du Rhône reste caché jusqu'au drop (ligne de la fiche floutée).
+    if (down > 0) mask('mask1', 10, 684, 150, 24, down);
     // Raccord : contour néon qui se dissout sur la vraie carte
     if (t < b(9) + .3) { g.save(); g.globalAlpha = 1 - prog(t, b(9), b(9) + .3); france(g, 7, { glow: 1 }); g.restore(); }
     const pulse = .5 + .5 * Math.cos((t - b(9)) / BEAT * 2 * Math.PI);
-    if (t < b(10)) txt('tA', 'CHOISIS TA RÉGION', { y: 240, size: 104, t, at: b(9) });
-    else if (t < b(12)) { txt('tC', 'RÉGION', { y: 186, size: 36, color: '#FFD21F', pop: false }); txt('tA', 'AUVERGNE-\nRHÔNE-ALPES', { y: 250, size: 104, t, at: b(10) }); }
-    else if (t < b(14)) { txt('tC', 'DÉPARTEMENT', { y: 186, size: 36, color: '#FFD21F', pop: false }); txt('tA', 'RHÔNE', { y: 250, size: 190, t, at: b(12) }); }
+    if (t < b(10)) txt('tA', 'CHOISIS TA RÉGION', { y: 240, size: 104, ...slam(t, b(9)) });
+    else if (t < b(12)) { txt('tC', 'RÉGION', { y: 186, size: 40, color: '#FFD21F', pop: false }); txt('tA', 'AUVERGNE-\nRHÔNE-ALPES', { y: 250, size: 104, t, at: b(10) }); }
+    else if (t < b(14)) { txt('tC', 'DÉPARTEMENT', { y: 186, size: 40, color: '#FFD21F', pop: false }); txt('tA', 'RHÔNE', { y: 250, size: 190, t, at: b(12) }); }
     else { txt('tA', 'LANCE LE', { y: 220, size: 120, t, at: b(14) }); txt('tB', 'BALAYAGE', { y: 350, size: 150, color: '#FFD21F', t, at: b(14) + .06, op: .85 + .15 * pulse }); }
-    css('vig', { opacity: .5 * prog(t, b(12), b(16)) });
   }
-  // 6. LE BALAYAGE : un tour complet, ralenti, sur 8 temps (fin pile sur le drop)
+  // 6. LE BALAYAGE : un tour complet sur 9 temps. Secteur dense (Lyon) étalé, demi-tour vide accéléré, chiffre caché
+  //    au dernier temps : « 104 » n'apparaît que sur le drop.
   else if (t < b(24)) {
-    const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77, fps = R.sweepFps || 30, turn = 2.6 * fps;
-    const fR = seg(t, [[b(16), R.sweepStart + 1], [b(24), R.sweepStart + 1 + turn]]);
-    const X = 540 - (195 - gx.x) * k, Y = 1000, beat = Math.max(0, Math.floor((t - b(16)) / BEAT)), bp = hit(t, b(16) + beat * BEAT, .25);
-    full('radar', fR, gx.x, gx.y, X, Y, k * (1.05 + .06 * prog(t, b(16), b(24)) + .012 * bp));
-    css('topfade', { opacity: 1 });
-    const fr = clamp((fR - R.sweepStart - 1) / turn);
+    const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77, fps = R.sweepFps || 30, turn = 2.6 * fps, s0 = R.sweepStart + 1;
+    const cnt = R.counts || [], last = cnt.length ? cnt[cnt.length - 1][1] : 0;
+    // Image où le compteur atteint 97 % du total (fin du secteur dense).
+    const dense = (cnt.find(([, v]) => v >= .97 * last) || [s0 + turn * .45])[0];
+    const fR = seg(t, [[b(15), s0 - 1], [b(16), s0 + .17 * turn], [b(21), dense], [b(24), s0 + turn]]);
+    const X = 540 - (195 - gx.x) * k, Y = 1000, bp = hit(t, lastBeat(t, 15), .25);
+    const back = eOut(prog(t, b(15), b(15) + .25)), cy = lerp(650, gx.y, back);
+    full('radar', fR, gx.x, cy, X, Y, k * (1.05 + .06 * prog(t, b(15), b(24)) + .015 * bp));
+    $('full').style.filter = RADAR_FX;
+    if (back < 1) mask('mask1', 10, 684, 150, 24, 1 - back);
+    css('topfade', { opacity: 1 }); css('botfade', { opacity: 1 });
+    const fr = clamp((fR - s0) / turn);
     progressRing(f, X, Y, 470, fr, .95);
-    // Tremblement RVB avant le drop
+    const hide = t >= b(23);
+    // Tremblement RVB avant le drop ; pastille du compteur de l'app floutée pendant le dernier temps.
     const rgb = 6 * prog(t, b(23), b(24));
-    const n = countAt('radar', fR);
-    txt('tA', nf(n), { y: 200, size: 170, color: '#FFD21F', pop: false, shadow: rgb ? `${rgb}px 0 rgba(255,0,80,.8), ${-rgb}px 0 rgba(0,255,255,.8)` : 'none' });
+    if (hide) mask('mask2', gx.x - 46, gx.y + 14, 92, 24, 1);
+    const n = countAt('radar', Math.round(fR) + 1);
+    const dots = hide ? '?'.repeat(1 + Math.floor((t - b(23)) / (BEAT / 3)) % 3) : '';
+    txt('tA', hide ? dots : nf(n), { y: 200, size: 170, color: '#FFD21F', pop: false, shadow: rgb ? `${rgb}px 0 rgba(255,0,80,.8), ${-rgb}px 0 rgba(0,255,255,.8)` : 'none' });
     txt('tD', 'boutiques', { y: 370, size: 44, pop: false });
-    const titles = [[16, 'BALAYAGE…'], [18, 'TOUT LE SECTEUR'], [20, 'AU PEIGNE FIN'], [22, '']];
+    const titles = [[15, 'BALAYAGE…'], [17, 'BOUTIQUE PAR BOUTIQUE'], [19, 'AU PEIGNE FIN'], [21, 'CHANCE ESTIMÉE'], [23, '']];
     let cur = titles[0]; titles.forEach(x => { if (t >= b(x[0])) cur = x; });
-    txt('tB', cur[1], { y: 440, size: 86, t, at: b(cur[0]) });
-    css('vig', { opacity: .55 });
+    txt('tB', cur[1], { y: 440, size: 86, ...slam(t, b(cur[0])) });
   }
   // 7. DROP : tout le département révélé
   else if (t < b(25)) {
     const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77, X = 540 - (195 - gx.x) * k;
     const fps = R.sweepFps || 30, n = countAt('radar', R.sweepEnd);
-    full('radar', R.sweepStart + 1 + 2.6 * fps + 8, gx.x, gx.y, X, 1000, k * lerp(1.11, 1.2, eOut(prog(t, b(24), b(25)))));
-    css('topfade', { opacity: 1 });
+    full('radar', R.sweepStart + 1 + 2.6 * fps + 8, gx.x, gx.y, X, 1000, k * lerp(1.2, .98, eOut(prog(t, b(24), b(24) + .4))));
+    $('full').style.filter = RADAR_FX;
+    css('topfade', { opacity: 1 }); css('botfade', { opacity: 1 });
     shock(f, X, 1000, prog(t, b(24), b(24) + .45), 900); progressRing(f, X, 1000, 470, 1, 1 - prog(t, b(24), b(25)));
-    txt('tA', nf(n) + ' BOUTIQUES', { y: 210, size: 150, color: '#FFD21F', t, at: b(24), glitch: true });
+    txt('tA', nf(n) + ' BOUTIQUES', { y: 210, size: 150, color: '#FFD21F', t, at: b(24), glitch: true });
     txt('tB', 'DANS LE RHÔNE', { y: 380, size: 92, t, at: b(24) + .06 });
   }
-  // 8. Jusqu'à la rue : une boutique touchée, zoom sur sa position
+  // 8. Une boutique touchée au centre de Lyon : itinéraire et alerte (nom, ville, adresse floutés à l'enregistrement)
   else if (t < b(26)) {
-    const R = TK.radar || {}, k = 2.77;
-    const fR = seg(t, [[b(25), R.tapStore - 3], [b(26), R.tapStore + 36]]);
-    full('radar', fR, 195, 300, 540, 900, k * 1.05);
-    css('topfade', { opacity: 1 });
-    txt('tA', "JUSQU'À", { y: 220, size: 130, t, at: b(25) }); txt('tB', 'LA RUE', { y: 360, size: 160, color: '#FFD21F', t, at: b(25) + .05 });
+    const R = TK.radar || {}, ts = tapOf('radar', 3, { f: R.tapStore });
+    const fR = seg(t, [[b(25), ts.f - 6], [b(25) + .12, ts.f], [b(26), ts.f + 30]]);
+    const pan = eIO(prog(t, b(25) + .28, b(25) + .5));
+    full('radar', fR, 195, lerp(430, 640, pan), 480, 1000, 2.3);
+    $('full').style.filter = RADAR_FX;
+    css('topfade', { opacity: 1 }); css('botfade', { opacity: 1 });
+    txt('tA', 'ITINÉRAIRE', { y: 210, size: 130, ...slam(t, b(25)) }); txt('tB', '+ ALERTE', { y: 350, size: 130, color: '#FFD21F', ...slam(t, b(25) + .28) });
   }
   // 9. Ta collection, cotée chaque jour
   else if (t < b(28)) {
@@ -341,102 +420,110 @@ function render(T) {
     const z = t < b(27) ? lerp(1.55, 1.4, prog(t, b(26), b(27))) : lerp(1.4, 1, eOut(prog(t, b(27), b(27) + .25)));
     const rise = eOut(prog(t, b(26), b(26) + .2));
     phone('collect', fC, { x: 170, y: lerp(1900, 560, rise), rz: lerp(-8, 0, rise), cx: 120, cy: 220, z });
-    // Petite onde jaune qui découvre l'écran (« coup de radar »)
-    shock(f, 540, 900, prog(t, b(26), b(26) + .3), 1100, '255,210,31');
-    if (t < b(27)) { txt('tA', Cc.value || '', { y: 220, size: 150, t, at: b(26) + .05 }); txt('tC', 'ma collection · démo', { y: 400, size: 40, color: '#FFD21F', pop: false }); }
-    else { txt('tA', 'COTÉE', { y: 220, size: 160, color: '#FFD21F', t, at: b(27) }); txt('tB', 'CHAQUE JOUR', { y: 380, size: 110, t, at: b(27) + .06 }); }
+    shock(f, 540, 900, prog(t, b(26), b(26) + .3), 1100, '255,210,31'); // onde jaune qui découvre l'écran
+    if (t < b(27)) txt('tA', nbsp(Cc.value), { y: 220, size: 150, t, at: b(26) + .05 });
+    else { txt('tA', 'COTÉE', { y: 200, size: 160, color: '#FFD21F', ...slam(t, b(27)) }); txt('tB', 'CHAQUE JOUR', { y: 360, size: 110, ...slam(t, b(27) + .05) }); }
+    band('demo', 485);
   }
-  // 10. Ajoute tes cartes : la plus chère de Héros Transcendants, +10 PK
+  // 10. Ajoute tes cartes : la plus chère de Héros Transcendants, appui sur « Ajouter » dans le temps, « +842,73 € »
   else if (t < b(29)) {
-    const A = TK.add || {};
+    const A = TK.add || {}, ta = tapOf('add', 4, { f: A.added }), tap = b(28) + .6 * BEAT;
     rays(g, t, 'rgba(255,210,31,.08)', 16, 540, 900);
-    const fA = seg(t, [[b(28), A.added - 7], [b(28) + .1, A.added], [b(29), A.added + 22]]);
-    phone('add', fA, { x: 170, y: 560, cx: 195, cy: 560, z: 1.05 });
-    txt('tA', 'AJOUTE', { y: 210, size: 140, t, at: b(28) }); txt('tB', 'TES CARTES', { y: 350, size: 130, color: '#FFD21F', t, at: b(28) + .05 });
-    const gp = eBack(prog(t, b(28) + BEAT / 2, b(28) + BEAT / 2 + .2));
-    css('gem', { left: '760px', top: '700px', opacity: gp > 0 ? 1 : 0, transform: `scale(${gp}) rotate(${(1 - gp) * 40}deg)` });
-    txt('tD', '+10 PK', { y: 870, size: 58, color: '#FFD21F', t, at: b(28) + BEAT / 2, dx: 300, stroke: 0 });
-    burst(f, 835, 775, prog(t, b(28) + BEAT / 2, b(28) + BEAT / 2 + .45));
+    const fA = seg(t, [[b(28), ta.f - 16], [tap, ta.f], [b(29), ta.f + 10]]);
+    phone('add', fA, { x: 170, cx: 195, cy: 700, z: 1.15, fy: 660, Y: 900 });
+    css('topfade', { opacity: 1 });
+    txt('tA', 'AJOUTE', { y: 190, size: 140, ...slam(t, b(28)) }); txt('tB', 'TES CARTES', { y: 330, size: 130, color: '#FFD21F', ...slam(t, b(28) + .05) });
+    const gain = euros((TK.add || {}).valueAfter) - euros((TK.collect || {}).value);
+    if (t >= tap && gain > 0) {
+      txt('tC', '+' + money(gain), { y: 560, size: 120, color: '#FFD21F', t, at: tap, from: 2.6, rot: -5, stroke: 12, max: 780, font: "'Luckiest Guy', cursive" });
+      burst(f, 540, 620, prog(t, tap, tap + .45));
+    }
+    band('demo', 485, t < tap ? 1 : 0);
   }
   // 11. Ton classeur (la carte ajoutée en tête), langue · état · cote, puis le scellé
   else if (t < b(32)) {
     const A = TK.add || {};
     rays(g, t, 'rgba(255,210,31,.07)', 16, 540, 900); sparks(f, t, 'rgba(255,210,31,.7)', 18, 6);
     let fA, cam;
-    if (t < b(30)) { fA = seg(t, [[b(29), A.binder - 8], [b(30), A.binder + 10]]); cam = { cx: 195, cy: 330, z: 1 }; }
-    else if (t < b(31)) { fA = A.binder + 24; const p = eOut(prog(t, b(30), b(30) + .2)); cam = { cx: lerp(195, 82, p), cy: lerp(330, 486, p), z: lerp(1, 2.1, p) }; }
-    else { fA = seg(t, [[b(31), A.sealed - 6], [b(32), A.sealed + 26]]); cam = { cx: 195, cy: 400, z: 1 }; }
-    const sw = t < b(29) + .12 ? eOut(prog(t, b(29), b(29) + .12)) : 1;
-    phone('add', fA, Object.assign({ x: 170, y: 560, ry: lerp(-30, 0, sw) }, cam));
-    if (t < b(30)) { txt('tA', 'TON', { y: 210, size: 130, t, at: b(29) }); txt('tB', 'CLASSEUR', { y: 340, size: 160, color: '#FFD21F', t, at: b(29) + .05 }); }
+    if (t < b(30)) { fA = seg(t, [[b(29), A.binder - 8], [b(30), A.binder + 10]]); cam = { cx: 195, cy: 470, z: 1, fy: 470, Y: 1000 }; }
     else if (t < b(31)) {
-      txt('tA', 'LANGUE · ÉTAT', { y: 220, size: 110, t, at: b(30) }); txt('tB', '· COTE', { y: 345, size: 110, color: '#FFD21F', t, at: b(30) + .05 });
-      // Crochets HUD sur la première case
-      // Case 1 du classeur (pixels CSS 32→133 × 418→555) dans le téléphone zoomé (×3,77, origine de l'écran 190, 580).
-      const p = eOut(prog(t, b(30) + .12, b(30) + .3)), m = 18 * (1 - p); f.save(); f.strokeStyle = `rgba(255,210,31,${p})`; f.lineWidth = 9; f.shadowColor = 'rgba(255,210,31,.9)'; f.shadowBlur = 16;
-      const x0 = 300 - m, x1 = 702 + m, y0 = 1094 - m, y1 = 1630 + m;
-      [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]].forEach(([x, y, sx, sy]) => { f.beginPath(); f.moveTo(x, y + 70 * sy); f.lineTo(x, y); f.lineTo(x + 70 * sx, y); f.stroke(); }); f.restore();
+      fA = A.binder + 24; const p = eOut(prog(t, b(30), b(30) + .2));
+      cam = { cx: lerp(195, 85, p), cy: lerp(470, 480, p), z: lerp(1, 2.1, p), fy: lerp(470, 480, p), Y: 1000 };
     }
-    else { txt('tA', '+ TON', { y: 210, size: 130, t, at: b(31) }); txt('tB', 'SCELLÉ', { y: 340, size: 170, color: '#FFD21F', t, at: b(31) + .05 }); }
+    else { fA = seg(t, [[b(31), A.sealed - 6], [b(32), A.sealed + 26]]); cam = { cx: 195, cy: 500, z: 1, fy: 500, Y: 1000 }; }
+    const sw = t < b(29) + .12 ? eOut(prog(t, b(29), b(29) + .12)) : 1;
+    phone('add', fA, Object.assign({ x: 170, ry: lerp(-30, 0, sw) }, cam));
+    css('topfade', { opacity: 1 });
+    if (t < b(30)) { txt('tA', 'TON', { y: 190, size: 130, ...slam(t, b(29)) }); txt('tB', 'CLASSEUR', { y: 320, size: 160, color: '#FFD21F', ...slam(t, b(29) + .05) }); }
+    else if (t < b(31)) {
+      txt('tA', 'LANGUE · ÉTAT', { y: 200, size: 110, ...slam(t, b(30)) }); txt('tB', 'ET COTE', { y: 325, size: 120, color: '#FFD21F', ...slam(t, b(30) + .05) });
+      // Crochets HUD sur la première case du classeur (pixels CSS 34→137 × 415→544), placés par phonePt.
+      const p = eOut(prog(t, b(30) + .12, b(30) + .3)), m = 18 * (1 - p), [x0, y0] = phonePt(34, 415), [x1, y1] = phonePt(137, 544);
+      f.save(); f.strokeStyle = `rgba(255,210,31,${p})`; f.lineWidth = 9; f.shadowColor = 'rgba(255,210,31,.9)'; f.shadowBlur = 16;
+      [[x0 - m, y0 - m, 1, 1], [x1 + m, y0 - m, -1, 1], [x0 - m, y1 + m, 1, -1], [x1 + m, y1 + m, -1, -1]].forEach(([x, y, sx, sy]) => { f.beginPath(); f.moveTo(x, y + 70 * sy); f.lineTo(x, y); f.lineTo(x + 70 * sx, y); f.stroke(); });
+      f.restore();
+    }
+    else { txt('tA', '+ TON', { y: 190, size: 130, ...slam(t, b(31)) }); txt('tB', 'SCELLÉ', { y: 320, size: 170, color: '#FFD21F', ...slam(t, b(31) + .05) }); }
   }
-  // 12. Toutes les collections : séries, extensions, cartes, puis les 30 ans
+  // 12. Toutes les collections : séries, extensions, cartes, puis les 30 ans (toucher pile sur b35)
   else if (t < b(37)) {
     const S = TK.series || {};
     rays(g, t, 'rgba(255,210,31,.07)', 16, 540, 900);
-    const fS = seg(t, [[b(32), S.series], [b(33), S.series + 20], [b(34), S.scrolled], [b(35) - .3, S.tapMega + 30], [b(35), S.tap30 - 6], [b(35) + .15, S.tap30],
+    const fS = seg(t, [[b(32), S.series], [b(33), S.series + 20], [b(34), S.scrolled], [b(35) - .3, S.tapMega + 30], [b(35) - .2, S.tap30 - 6], [b(35), S.tap30],
       [b(36) - .1, S.grid], [b(36) + .3, S.grid + 30], [b(37), S.gridEnd]]);
     const flip = t < b(32) + .15 ? eOut(prog(t, b(32), b(32) + .15)) : 1;
-    phone('series', fS, { x: 170, y: 560, ry: lerp(90, 0, flip), cx: 195, cy: 422, z: 1 });
-    if (t < b(33)) { txt('tA', 'TOUTES LES', { y: 210, size: 120, t, at: b(32) }); txt('tB', 'COLLECTIONS', { y: 340, size: 140, color: '#FFD21F', t, at: b(32) + .05 }); }
-    else if (t < b(34)) { txt('tA', '202', { y: 200, size: 220, color: '#FFD21F', t, at: b(33) }); txt('tB', 'EXTENSIONS', { y: 400, size: 110, t, at: b(33) + .05 }); }
-    else if (t < b(35)) { const roll = prog(t, b(34), b(34) + BEAT / 2); txt('tA', nf(lerp(1200, 21365, eOut(roll))), { y: 200, size: 220, color: '#FFD21F', pop: false }); txt('tB', 'CARTES', { y: 400, size: 120, t, at: b(34) }); if (roll >= 1) css('flash', { opacity: Math.max(+$('flash').style.opacity || 0, .5 * hit(t, b(34) + BEAT / 2, .1)) }); }
-    else if (t < b(36)) { txt('tA', '30 ANS', { y: 210, size: 180, color: '#FFD21F', t, at: b(35) }); txt('tB', '191 CARTES', { y: 390, size: 110, t, at: b(35) + .05 }); }
-    else { txt('tA', 'TOUTES.', { y: 200, size: 130, t, at: b(36) }); txt('tB', 'LES CARTES.', { y: 330, size: 140, color: '#FFD21F', t, at: b(36) + .05 }); }
+    phone('series', fS, { x: 170, y: 420, ry: lerp(90, 0, flip), cx: 195, cy: 422, z: 1 });
+    css('topfade', { opacity: 1 });
+    if (t < b(33)) { txt('tA', 'TOUTES LES', { y: 190, size: 120, ...slam(t, b(32)) }); txt('tB', 'COLLECTIONS', { y: 320, size: 140, color: '#FFD21F', ...slam(t, b(32) + .05) }); }
+    else if (t < b(34)) { txt('tA', '202', { y: 180, size: 220, color: '#FFD21F', ...slam(t, b(33)) }); txt('tB', 'EXTENSIONS', { y: 380, size: 110, ...slam(t, b(33) + .05) }); }
+    else if (t < b(35)) { const roll = prog(t, b(34), b(34) + BEAT / 2); txt('tA', nf(lerp(1200, 21365, eOut(roll))), { y: 180, size: 220, color: '#FFD21F', pop: false }); txt('tB', 'CARTES', { y: 380, size: 120, ...slam(t, b(34)) }); if (roll >= 1) css('flash', { opacity: Math.max(+$('flash').style.opacity || 0, .5 * hit(t, b(34) + BEAT / 2, .1)) }); }
+    else if (t < b(36)) { txt('tA', '30 ANS', { y: 180, size: 180, color: '#FFD21F', ...slam(t, b(35)) }); txt('tB', '191 CARTES', { y: 350, size: 110, ...slam(t, b(35) + .05) }); txt('tD', 'dont la Collection Classique', { y: 470, size: 40, pop: false }); }
+    else { txt('tA', 'TOUTES.', { y: 180, size: 130, ...slam(t, b(36)) }); txt('tB', 'LES CARTES.', { y: 310, size: 140, color: '#FFD21F', ...slam(t, b(36) + .05) }); }
   }
-  // 13. Coupure : le logo 30 ans, « 30 ANS. », « PRÉPARE-TOI. »
+  // 13. Coupure : l'insigne « 30 ANS » maison, « PRÉPARE-TOI. »
   else if (t < b(40)) {
     $('stage').style.background = '#03040A';
-    const p = prog(t, b(37), b(40)), strobe = t > b(39) && Math.floor((t - b(39)) / (BEAT / 4)) % 2 === 0;
-    css('logo30', { top: '760px', opacity: .9 * eOut(prog(t, b(37), b(37) + .3)) * (strobe ? .4 : 1), transform: `scale(${lerp(1, 1.15, p)})`, filter: `drop-shadow(0 0 ${30 + 20 * Math.sin(t * 6)}px rgba(255,210,31,.7))` });
+    const p = prog(t, b(37), b(40)), strobe = t > b(39) && Math.floor((t - b(39)) / (BEAT / 4)) % 2 === 0, inn = eBack(prog(t, b(37), b(37) + .3));
+    css('b30', { top: '600px', opacity: (t >= b(37) ? 1 : 0) * (strobe ? .45 : 1), transform: `scale(${lerp(.4, 1, inn) * lerp(1, 1.12, p)}) rotate(${lerp(-14, 0, inn)}deg)`, filter: `drop-shadow(0 0 ${30 + 20 * Math.sin(t * 6)}px rgba(255,210,31,.7))` });
     sparks(f, t * .4, 'rgba(255,210,31,.35)', 18, 9);
-    txt('tA', '30 ANS.', { y: 280, size: 150, t, at: b(37), from: 1.2 });
-    if (t >= b(38)) txt('tB', 'PRÉPARE-TOI.', { y: 1180, size: 120, color: '#FFD21F', t, at: b(38), from: 1.4 });
+    shock(f, 540, 880, prog(t, b(37), b(37) + .4), 700, '255,210,31');
+    if (t >= b(38)) txt('tB', 'PRÉPARE-TOI.', { y: 1240, size: 120, color: '#FFD21F', t, at: b(38), from: 1.4 });
   }
   // 14. Relance : les sorties 30 ans, une photo par temps
   else if (t < b(45)) {
     rays(g, t, 'rgba(255,210,31,.12)', 18, 540, 960); sparks(f, t, 'rgba(255,255,255,.9)', 26, 3);
-    $('stage').style.background = '#0A1130';
-    if (t < b(41)) { const p = eBack(prog(t, b(40), b(40) + .25)); css('logo30', { top: '700px', opacity: 1, transform: `scale(${lerp(1.6, 1.25, p)})`, filter: 'none' }); txt('tA', 'LES SORTIES', { y: 230, size: 140, t, at: b(40) }); txt('tB', '30 ANS', { y: 370, size: 170, color: '#FFD21F', t, at: b(40) + .05 }); burst(f, 540, 830, prog(t, b(40), b(40) + .5)); }
-    const P = [[41, 'pDeck', 'DECKS', '30/10'], [42, 'pEtb', 'ETB', 'SORTI LE 16/09'], [43, 'pDitto', 'MÉTAMORPH', '06/11'], [44, 'pFig', 'FIGURINE', '06/11']];
-    P.forEach(([k, id, name, date]) => {
+    if (t < b(41)) { const p = eBack(prog(t, b(40), b(40) + .25)); css('b30', { top: '640px', opacity: 1, transform: `scale(${lerp(1.5, 1.1, p)}) rotate(${lerp(8, 0, p)}deg)`, filter: 'none' }); txt('tA', 'LES SORTIES', { y: 230, size: 150, ...slam(t, b(40)) }); burst(f, 540, 920, prog(t, b(40), b(40) + .5)); }
+    const P = [[41, 'pDeck', 'DECKS', '30/10', 0], [42, 'pEtb', 'ETB', 'SORTI LE 16/09', -40], [43, 'pDitto', 'MÉTAMORPH', '6/11', 0], [44, 'pFig', 'FIGURINE', '6/11', 0]];
+    P.forEach(([k, id, name, date, dx]) => {
       if (t < b(k) || t >= b(k + 1)) return;
       const p = eBack(prog(t, b(k), b(k) + .2));
       css(id, { left: '160px', top: '640px', opacity: 1, transform: `scale(${lerp(1.5, 1, p)}) rotate(${lerp(-6, k % 2 ? 2 : -2, p)}deg)` });
-      txt('tA', name, { y: 230, size: 150, t, at: b(k) });
-      txt('tB', date, { y: 1110, size: 120, color: '#FFD21F', t, at: b(k) + .06, rot: -6, from: 2.8 });
+      txt('tA', name, { y: 230, size: 150, ...slam(t, b(k)) });
+      txt('tB', date, { y: 1110, size: 120, color: '#FFD21F', t, at: b(k) + .06, rot: -6, from: 2.2, dx, max: 760 });
     });
   }
-  // 15. La page Sorties dans le téléphone : dates, prix, liens directs
+  // 15. La page Sorties dans le téléphone : dates, prix, liens directs (défilement fini pile sur b46)
   else if (t < b(47)) {
     const O = TK.sorties || {};
     rays(g, t, 'rgba(255,210,31,.08)', 16, 540, 900);
-    const fO = seg(t, [[b(45), O.top], [b(46), O.upc], [b(47), O.upc + 30]]);
-    const rise = eBack(prog(t, b(45), b(45) + .25));
-    const cam = t < b(46) ? { cx: 195, cy: 422, z: 1 } : { cx: 195, cy: lerp(422, 640, eOut(prog(t, b(46), b(46) + .2))), z: lerp(1, 1.25, eOut(prog(t, b(46), b(46) + .2))) };
-    phone('sorties', fO, Object.assign({ x: 170, y: lerp(1900, 560, rise), ry: 10 }, cam));
-    if (t < b(46)) { txt('tA', 'DATES', { y: 210, size: 150, t, at: b(45) }); txt('tB', '· PRIX ·', { y: 360, size: 120, color: '#FFD21F', t, at: b(45) + .05 }); }
-    else { txt('tA', 'LIENS', { y: 210, size: 150, t, at: b(46) }); txt('tB', 'DIRECTS', { y: 360, size: 150, color: '#FFD21F', t, at: b(46) + .05 }); }
+    const fO = seg(t, [[b(45), O.upc - 34], [b(46), O.upc], [b(47), O.upc + 30]]);
+    const rise = eBack(prog(t, b(45), b(45) + .25)), zp = eOut(prog(t, b(46), b(46) + .2));
+    phone('sorties', fO, { x: 170, ry: 8, cx: 195, cy: lerp(420, 560, zp), z: lerp(1, 1.15, zp), fy: lerp(420, 560, zp), Y: lerp(1900, 1000, rise) });
+    css('topfade', { opacity: 1 });
+    if (t < b(46)) { txt('tA', 'DATES', { y: 190, size: 150, ...slam(t, b(45)) }); txt('tB', '& PRIX', { y: 340, size: 130, color: '#FFD21F', ...slam(t, b(45) + .05) }); }
+    else { txt('tA', 'LIENS', { y: 190, size: 150, ...slam(t, b(46)) }); txt('tB', 'DIRECTS', { y: 340, size: 150, color: '#FFD21F', ...slam(t, b(46) + .05) }); }
   }
-  // 16. « Et la plus attendue… » : les deux UPC s'approchent, puis se percutent sur le coup
+  // 16. « Et la plus attendue… » : les deux UPC approchent dès b47 (impulsions sur b48 et b49), puis se percutent sur b50
   else if (t < b(52)) {
     $('stage').style.background = t < b(50) ? '#03040A' : '#0A1130';
     if (t < b(50)) {
-      const typed = 'ET LA PLUS ATTENDUE...'.slice(0, Math.round(22 * prog(t, b(47), b(47) + .35)));
-      txt('tC', typed, { y: 300, size: 80, color: '#fff', pop: false });
-      const p = eIn(prog(t, b(48), b(50))), strobe = Math.floor((t - b(48)) / (BEAT / 2)) % 2 === 0;
-      const dark = 'brightness(.12) drop-shadow(0 0 3px rgba(255,210,31,1)) drop-shadow(0 0 18px rgba(255,210,31,.6))';
-      css('upcL', { left: lerp(-300, 40, p) + 'px', top: '680px', opacity: t > b(48) ? 1 : 0, filter: dark + (strobe ? ' brightness(1.6)' : '') });
-      css('upcR', { left: lerp(900, 470, p) + 'px', top: '680px', opacity: t > b(48) ? 1 : 0, filter: dark + (strobe ? ' brightness(1.6)' : '') });
+      txt('tA', 'ET LA PLUS', { y: 210, size: 120, ...slam(t, b(47)) });
+      if (t >= b(48)) txt('tB', 'ATTENDUE…', { y: 345, size: 150, color: '#FFD21F', ...slam(t, b(48)) });
+      const p = eIn(prog(t, b(47), b(50))), pulse = Math.max(hit(t, b(48), .1), hit(t, b(49), .1));
+      const dark = `brightness(${.35 + .45 * pulse}) drop-shadow(0 0 4px rgba(255,210,31,1)) drop-shadow(0 0 26px rgba(255,210,31,.8))`;
+      css('upcL', { left: lerp(-260, 40, p) + 'px', top: '680px', opacity: 1, filter: dark, transform: `scale(${1 + .05 * pulse})` });
+      css('upcR', { left: lerp(880, 470, p) + 'px', top: '680px', opacity: 1, filter: dark, transform: `scale(${1 + .05 * pulse})` });
+      css('flash', { opacity: Math.max(+$('flash').style.opacity || 0, .3 * pulse) });
       const rumble = 2 + 10 * p; css('cam', { transform: `translate(${Math.sin(t * 120) * rumble}px, ${Math.cos(t * 110) * rumble}px)` });
     } else {
       rays(g, t, 'rgba(255,210,31,.16)', 20, 540, 930); sparks(f, t, 'rgba(255,255,255,.95)', 30, 5);
@@ -444,18 +531,24 @@ function render(T) {
       css('upcL', { left: '40px', top: '680px', opacity: 1, filter: 'none', transform: `scale(${lerp(1.25, 1, p)}) rotate(-3deg)` });
       css('upcR', { left: '470px', top: '680px', opacity: 1, filter: 'none', transform: `scale(${lerp(1.25, 1, p)}) rotate(3deg)` });
       burst(f, 540, 930, prog(t, b(50), b(50) + .5), 28);
-      if (t < b(51)) { txt('tA', "L'UPC", { y: 230, size: 170, t, at: b(50) }); txt('tB', '30 ANS', { y: 400, size: 150, color: '#FFD21F', t, at: b(50) + .05 }); }
-      else { txt('tA', '06.11', { y: 260, size: 260, color: '#FFD21F', t, at: b(51), rot: -6, from: 3 }); txt('tB', 'JOURNÉE OU SOIRÉE', { y: 1230, size: 76, t, at: b(51) + .08 }); }
+      if (t < b(51)) { txt('tA', 'L’UPC', { y: 230, size: 170, ...slam(t, b(50)) }); txt('tB', '30 ANS', { y: 400, size: 150, color: '#FFD21F', ...slam(t, b(50) + .05) }); }
+      else {
+        txt('tA', '6/11', { y: 250, size: 270, color: '#FFD21F', t, at: b(51), rot: -6, from: 2.4 });
+        txt('tB', 'JOURNÉE OU SOIRÉE', { y: 1230, size: 76, ...slam(t, b(51) + .08) });
+        txt('tD', 'date annoncée · poketrack.fr', { y: 1340, size: 32, pop: false, op: .9 });
+      }
     }
   }
-  // 17. Prix de lancement et précommandes, sur la fiche réelle
+  // 17. Prix de lancement → précommandes, sur la fiche réelle (un seul titre, caméra qui glisse d'un prix à l'autre)
   else if (t < b(53)) {
     const O = TK.sorties || {};
     rays(g, t, 'rgba(255,210,31,.08)', 16, 540, 900);
-    const p = eOut(prog(t, b(52), b(52) + .2)), half = b(52) + BEAT / 2;
-    const cam = t < half ? { cx: 105, cy: 690, z: lerp(1.2, 2.2, p) } : { cx: 290, cy: 690, z: 2.2 };
-    phone('sorties', O.upc + 30, Object.assign({ x: 170, y: 560, ry: 10 }, cam));
-    txt('tA', t < half ? 'PRIX DE' : 'PRÉCOS', { y: 210, size: 140, t, at: t < half ? b(52) : half }); txt('tB', t < half ? 'LANCEMENT' : 'CARDMARKET', { y: 350, size: 120, color: '#FFD21F', t, at: (t < half ? b(52) : half) + .05 });
+    const p = eOut(prog(t, b(52), b(52) + .15)), slide = eIO(prog(t, b(52) + .18, b(52) + .42));
+    phone('sorties', O.upc + 30, { x: 170, ry: 8, cx: lerp(110, 278, slide), cy: 525, z: lerp(1.3, 2.2, p), fy: 525, Y: 1000 });
+    css('topfade', { opacity: 1 });
+    txt('tA', 'PRIX & PRÉCOS', { y: 200, size: 130, ...slam(t, b(52)) });
+    txt('tB', slide < .5 ? 'AU LANCEMENT' : 'EN PRÉCOMMANDE', { y: 340, size: 96, color: '#FFD21F', pop: false });
+    txt('tD', 'précommandes : prix demandés · sources dans l’app', { y: 1330, size: 34, pop: false, op: .92 });
   }
   // 18. Le radar revient : repère tes boutiques avant le 6/11, puis le faisceau révèle le logo
   else if (t < b(56)) {
@@ -464,9 +557,8 @@ function render(T) {
     rings(g, C.x, C.y, C.r, .18);
     france(g, 7, { pulse: hit(t, b(54), .3) });
     if (t < b(55)) beam(g, C.x, C.y, C.r + 20, a, 1);
-    if (t >= b(55)) txt('tA', '');
-    if (t < b(54)) { txt('tA', 'REPÈRE TES', { y: 220, size: 130, t, at: b(53) }); txt('tB', 'BOUTIQUES', { y: 350, size: 150, color: '#FFD21F', t, at: b(53) + .05 }); }
-    else if (t < b(55)) { txt('tA', 'AVANT', { y: 220, size: 150, t, at: b(54) }); txt('tB', 'LE 6/11', { y: 360, size: 170, color: '#FFD21F', t, at: b(54) + .05 }); }
+    if (t < b(54)) { txt('tA', 'REPÈRE TES', { y: 220, size: 130, ...slam(t, b(53)) }); txt('tB', 'BOUTIQUES', { y: 350, size: 150, color: '#FFD21F', ...slam(t, b(53) + .05) }); }
+    else if (t < b(55)) { txt('tA', 'AVANT', { y: 220, size: 150, ...slam(t, b(54)) }); txt('tB', 'LE 6/11', { y: 360, size: 170, color: '#FFD21F', ...slam(t, b(54) + .05) }); }
     else {
       const p = prog(t, b(55), b(56));
       g.save(); g.globalAlpha = Math.min(1, p * 5); g.fillStyle = '#0A1130'; g.fillRect(0, 0, 1080, 1920); g.restore();
@@ -477,23 +569,23 @@ function render(T) {
       css('logo', { top: '560px', opacity: 1, transform: 'scale(.92)', webkitMaskImage: m, maskImage: m });
     }
   }
-  // 19. Fin : logo, GRATUIT, lien en bio, mention ; retour à l'image du début pour la boucle
+  // 19. Fin : logo, GRATUIT, lien en bio, mention ; fondu sur b61→b62 puis retour à l'image du début (boucle)
   else {
-    rays(g, t, 'rgba(255,210,31,.10)', 18, 540, 700); sparks(f, t, 'rgba(255,210,31,.85)', 26, 7);
-    const fadeOut = prog(t, b(62), b(63));
-    const p = eEl(prog(t, b(56), b(56) + .5)), breath = 1 + .03 * Math.sin((t - b(56)) / BEAT * Math.PI);
-    css('logo', { top: '340px', opacity: 1 - fadeOut, transform: `scale(${p * breath})`, webkitMaskImage: 'none', maskImage: 'none' });
-    burst(f, 540, 420, prog(t, b(56), b(56) + .5), 24);
-    txt('tB', 'GRATUIT', { y: 560, size: 150, color: '#FFD21F', t, at: b(56) + .08, rot: -8, from: 3, op: 1 - fadeOut });
-    const gp = eBack(prog(t, b(56) + .1, b(56) + .35));
-    css('gem', { left: '70px', top: '560px', opacity: (gp > 0 ? 1 : 0) * (1 - fadeOut), transform: `scale(${gp}) rotate(${t * 60}deg)` });
-    if (t >= b(57)) txt('tA', 'LIEN EN BIO', { y: 830, size: 120 * (1 + .04 * hit(t, b(57) + Math.floor((t - b(57)) / BEAT) * BEAT, .3)), t, at: b(57), op: 1 - fadeOut, dx: -60 });
-    if (t >= b(58)) txt('tC', 'web app · avant-première', { y: 990, size: 46, op: 1 - fadeOut, pop: false, dx: -60 });
-    const pk = eOut(prog(t, b(58), b(58) + .5)), hop = Math.abs(Math.sin((t - b(58)) * 6)) * 50;
-    css('pika', { left: lerp(-240, 600, pk) + 'px', top: 1060 - hop + 'px', opacity: (pk > 0 ? 1 : 0) * (1 - fadeOut), transform: 'scaleX(-1)' });
-    css('legal', { opacity: t < b(63) + .2 ? eOut(prog(t, b(56), b(56) + .2)) : 1 - prog(t, b(63) + .2, b(63) + .4) });
-    // Dernier temps : retour au radar néon du début (boucle sans couture)
-    if (t > b(63)) { const q = prog(t, b(63), DURATION); g.save(); g.globalAlpha = q; grid(g, .06); rings(g, C.x, C.y, C.r, .16); france(g, 0); beam(g, C.x, C.y, C.r + 20, 0, .35); g.restore(); }
+    const out = prog(t, b(61), b(62)), on = 1 - out;
+    if (on > 0) {
+      g.save(); g.globalAlpha = on; rays(g, t, 'rgba(255,210,31,.10)', 18, 540, 700); g.restore();
+      f.save(); f.globalAlpha = on; sparks(f, t, 'rgba(255,210,31,.85)', 26, 7); f.restore();
+      const p = eEl(prog(t, b(56), b(56) + .5)), breath = 1 + .03 * Math.sin((t - b(56)) / BEAT * Math.PI);
+      css('logo', { top: '340px', opacity: on, transform: `scale(${p * breath})`, webkitMaskImage: 'none', maskImage: 'none' });
+      burst(f, 540, 420, prog(t, b(56), b(56) + .5), 24);
+      txt('tB', 'GRATUIT', { y: 560, size: 150, color: '#FFD21F', t, at: b(56) + .08, rot: -8, from: 3, op: on });
+      const gp = eBack(prog(t, b(56) + .1, b(56) + .35));
+      css('gem', { left: '70px', top: '560px', opacity: (gp > 0 ? 1 : 0) * on, transform: `scale(${gp}) rotate(${t * 60}deg)` });
+      if (t >= b(57)) txt('tA', 'LIEN EN BIO', { y: 800, size: 120 * (1 + .04 * hit(t, lastBeat(t, 57), .3)), t, at: b(57), op: on });
+      if (t >= b(58)) txt('tC', 'web app · avant-première', { y: 960, size: 46, op: on, pop: false });
+      css('legal', { opacity: eOut(prog(t, b(56), b(56) + .2)) * on });
+    }
+    if (t >= b(62)) preroll(g, prog(t, b(62), DURATION));
   }
   return pending.length ? Promise.all(pending) : null;
 }
