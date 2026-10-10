@@ -30,7 +30,7 @@ ok('collection vidée', (await saved()).purchases.length === 0);
 await page.click('button:has-text("Sauvegarder ou restaurer")'); await page.waitForTimeout(400);
 await page.setInputFiles('#pkm-io-file', jf); await page.waitForTimeout(500);
 const pv = await page.locator('[aria-label="Aperçu de la sauvegarde"]').innerText();
-ok('aperçu : « ' + pv.replace(/\s+/g, ' ').slice(0, 90) + '… »', /Sauvegarde du 09\/10\/2026/.test(pv) && /\d+ cartes et \d+ produits scellés ajoutés, \d+ ventes, 100 PK/.test(pv.replace(/\s+/g, ' ')));
+ok('aperçu : « ' + pv.replace(/\s+/g, ' ').slice(0, 90) + '… »', /Sauvegarde du \d{2}\/\d{2}\/20\d{2}/.test(pv) && /\d+ cartes et \d+ produits scellés ajoutés, \d+ ventes, 100 PK/.test(pv.replace(/\s+/g, ' ')));
 await Promise.all([page.waitForEvent('load'), page.click('button:has-text("Remplacer ma collection")')]); await page.waitForTimeout(1500);
 let after = await saved();
 ok('remplacée : ' + after.purchases.length + ' ajouts, ' + after.sales.length + ' ventes', after.purchases.length === before.purchases.length && after.sales.length === before.sales.length && after.pk === before.pk);

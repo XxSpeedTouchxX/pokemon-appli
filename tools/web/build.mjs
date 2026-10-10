@@ -608,7 +608,7 @@ ${code}
     if (!t || t.tagName !== 'IMG' || !t.dataset) return;
     if (t.dataset.broken) {
       const bad = t.getAttribute('src');
-      if (bad && !BROKEN.has(bad)) { BROKEN.add(bad); clearTimeout(brokenTimer); brokenTimer = setTimeout(() => inst.__rerender(), 60); }
+      if (bad && !BROKEN.has(bad)) { BROKEN.add(bad); if (!brokenTimer) brokenTimer = setTimeout(() => { brokenTimer = null; inst.__rerender(); }, 60); }
       return;
     }
     if (!t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;

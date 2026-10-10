@@ -71,6 +71,8 @@ for (const [label, opts] of [['photos bloquées', { blockPhotos: true }], ['phot
     await page.goto(E2E + '/' + url, { waitUntil: 'load' });
     await page.waitForTimeout(900);
     if (url === '#scan') { await page.click('button:has-text("Scellé")'); await page.waitForTimeout(300); }
+    // Logos des extensions : la cascade webp, png, logo local, icône prend quelques rendus quand tout est bloqué.
+    for (let i = 0; i < 20 && (await broken(page)).length; i++) await page.waitForTimeout(400);
     const bb = await broken(page);
     ok(label + ' · ' + (url || 'accueil') + ' : aucune image cassée' + (bb.length ? ' ' + JSON.stringify(bb) : ''), bb.length === 0);
   }

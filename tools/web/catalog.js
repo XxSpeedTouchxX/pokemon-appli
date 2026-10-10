@@ -170,17 +170,15 @@
   };
   // Visuel en qualité maximale : high.png pour les cartes TCGdex (y compris celles de la démo).
   const hiOf = p => p.imgHi || (typeof p.img === 'string' && /\/high\.webp$/.test(p.img) ? p.img.replace(/high\.webp$/, 'high.png') : p.img);
-  // Logo d'une extension : premier visuel qui charge, dans l'ordre TCGdex français (webp, png), TCGdex anglais,
-  // puis logo gardé avec la page ; '' si aucun (l'app montre alors une icône). Certains logos n'existent qu'en
-  // png (Nuit Noire), d'autres nulle part sur TCGdex (30ᵉ Anniversaire).
+  // Logo d'une extension : premier visuel qui charge, dans l'ordre TCGdex (webp, puis png), puis logo gardé avec
+  // la page ; '' si aucun (l'app montre alors une icône). Certains logos n'existent qu'en png (Nuit Noire),
+  // d'autres nulle part sur TCGdex (30ᵉ Anniversaire). Le chemin vient déjà de la langue qui a un logo (build_index.py).
   const SET_LOGO_LOCAL = { '30th': 'logo-30-anniversaire', '30th-c': 'logo-30-anniversaire', me05: 'logo-nuit-noire', me04: 'logo-chaos-ascendant', me01: 'logo-mega-evolution' };
   function setLogo(id, path) {
     const out = [];
     if (path && /^https?:/.test(path)) out.push(path + '.webp');
     else if (path) {
-      const base = TCG.doc.img + path, en = /^fr\//.test(path) ? TCG.doc.img + 'en/' + path.slice(3) : '';
-      out.push(base + '.webp', base + '.png');
-      if (en) out.push(en + '.webp', en + '.png');
+      out.push(TCG.doc.img + path + '.webp', TCG.doc.img + path + '.png');
     }
     if (SET_LOGO_LOCAL[id]) out.push('img/' + SET_LOGO_LOCAL[id] + '.webp');
     return out.find(u => !BROKEN.has(u)) || '';
