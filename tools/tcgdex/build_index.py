@@ -57,7 +57,7 @@ from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
 
 from ptcg import PTCG_IMG, PtcgData, compact_image, norm_number  # visuels anglais de dernier recours (pokemontcg.io)
-from complete import en_extra, ptcg_extra, ptcg_prices  # cartes manquantes en français (version anglaise, pokemontcg.io)
+from complete import en_extra, numbering_confirmed, ptcg_extra, ptcg_prices  # cartes manquantes en français (version anglaise, pokemontcg.io)
 
 PTCG_CACHE = Path(__file__).with_name("ptcg_images.json")
 
@@ -354,17 +354,9 @@ def main():
             have_ids.add(b["id"])
             stats["cardsEnExtra"] += 1
         ps = ptcg_of.get(sid)
-        if ptcg and ps and ps not in ptcg_shared:
-            # Numérotation confirmée d'abord (mêmes cartes aux mêmes numéros), sinon aucun ajout.
-            good = bad = 0
-            for r in rows:
-                card, state = ptcg.match(ps, r["local"], r["en"], r["dex"], r["artist"])
-                if state is True and card is not None:
-                    good += 1
-                elif state is not None:
-                    bad += 1
-            if not (good >= 3 and good / (good + bad) >= 0.9):
-                ps = None
+        # Numérotation confirmée d'abord (mêmes cartes aux mêmes numéros), sinon aucun ajout.
+        if ptcg and ps and ps not in ptcg_shared and not numbering_confirmed(lambda *a: ptcg.match(ps, *a), rows):
+            ps = None
         for x in ptcg_extra(sid, ps, ptcg.cards.get(ps) if ptcg and ps else None, have_n, have_ids, ptcg_shared):
             rarity = RARITY_FR.get(x["rarity"].lower(), x["rarity"])
             rarities[rarity] = rarities.get(rarity, 0) + 1

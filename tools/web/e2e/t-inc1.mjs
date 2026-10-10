@@ -20,7 +20,12 @@ const newCtx = async (opts = {}) => {
 const errors = [];
 const watch = (page, tag) => { page.on('pageerror', e => errors.push(tag + ' : ' + e.message)); };
 // Images cassées visibles (chargées sans contenu).
-const broken = page => page.evaluate(() => [...document.querySelectorAll('#app img')].filter(i => i.complete && i.naturalWidth === 0 && i.getAttribute('loading') !== 'lazy' || (i.complete && i.naturalWidth === 0 && i.getBoundingClientRect().top < innerHeight)).map(i => (i.getAttribute('src') || '(vide)').slice(0, 70)));
+// Image paresseuse (loading="lazy") hors de l'écran, en hauteur ou en largeur (barre des séries) : pas encore chargée, pas cassée.
+const broken = page => page.evaluate(() => [...document.querySelectorAll('#app img')].filter(i => {
+  if (!i.complete || i.naturalWidth !== 0) return false;
+  const r = i.getBoundingClientRect();
+  return i.getAttribute('loading') !== 'lazy' || (r.top < innerHeight && r.bottom > 0 && r.left < innerWidth && r.right > 0);
+}).map(i => (i.getAttribute('src') || '(vide)').slice(0, 70)));
 
 // 1. Scan réel, onglet Scellé : chaque produit de la liste a un visuel chargé (photos officielles).
 {

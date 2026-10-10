@@ -1,7 +1,7 @@
 """Tests des compléments d'extensions (complete.py). Lancer : python3 -m unittest discover -s tools/tcgdex -p 'test_*.py'"""
 import unittest
 
-from complete import en_extra, ptcg_extra, ptcg_prices
+from complete import en_extra, numbering_confirmed, ptcg_extra, ptcg_prices
 
 IMG = "https://images.pokemontcg.io/"
 
@@ -20,6 +20,24 @@ class EnExtra(unittest.TestCase):
 
     def test_no_english_version(self):
         self.assertEqual(en_extra({"cards": [{"localId": "1"}]}, None), [])
+
+
+class Numbering(unittest.TestCase):
+    def rows(self, n):
+        return [{"local": f"{i:03d}", "en": f"Card {i}"} for i in range(1, n + 1)]
+
+    def test_same_numbers(self):
+        match = lambda num, en, dex, artist: ({"number": str(int(num))}, True)
+        self.assertTrue(numbering_confirmed(match, self.rows(5)))
+
+    def test_classic_collection_original_numbers(self):
+        # Même carte trouvée, mais à son numéro d'origine (Dracaufeu 4/102) : numérotation non confirmée.
+        match = lambda num, en, dex, artist: ({"number": str(int(num) + 40)}, True)
+        self.assertFalse(numbering_confirmed(match, self.rows(30)))
+
+    def test_too_few_checks(self):
+        match = lambda num, en, dex, artist: ({"number": str(int(num))}, True)
+        self.assertFalse(numbering_confirmed(match, self.rows(2)))
 
 
 class PtcgExtra(unittest.TestCase):

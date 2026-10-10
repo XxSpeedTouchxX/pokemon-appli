@@ -79,7 +79,8 @@ const annImg = await annTiles.filter({ hasText: '30ᵉ Anniversaire' }).first().
 ok('logo du 30ᵉ Anniversaire affiché : ' + JSON.stringify(annImg), annImg.length === 1 && annImg[0][1]);
 await annTiles.filter({ hasText: '30ᵉ Anniversaire' }).first().click(); await page.waitForTimeout(1200);
 const annSet = await page.locator('#app').innerText();
-ok('fiche du 30ᵉ : ' + n30 + ' cartes, dont 30 de la Collection Classique', new RegExp('Toutes · ' + n30).test(annSet) && /Dont 30 cartes de la Collection Classique/.test(annSet) && /CC 001/.test(annSet));
+const nCC = DOC.cards.filter(c => c[2] === '30th-c').length;
+ok('fiche du 30ᵉ : ' + n30 + ' cartes, dont ' + nCC + ' de la Collection Classique', new RegExp('Toutes · ' + n30).test(annSet) && new RegExp('Dont ' + nCC + ' cartes de la Collection Classique').test(annSet) && /CC 001/.test(annSet));
 await page.locator('button[aria-label="Retour"]').click(); await page.waitForTimeout(700);
 // Logos : chaque image de la série Méga-Évolution charge, sinon elle est remplacée (jamais d'image cassée).
 await page.fill('input[aria-label="Rechercher une série ou une extension"]', ''); await page.waitForTimeout(300);

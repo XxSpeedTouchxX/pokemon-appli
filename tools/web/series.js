@@ -57,9 +57,10 @@
       g.first = dates[0] || ''; g.last = dates[dates.length - 1] || '';
       g.n = real.reduce((t, e) => t + e.n, 0); g.own = real.reduce((t, e) => t + (own[e.id] || 0), 0);
       g.live = g.sets.some(e => e.soon) || (g.last && Date.parse(today) - Date.parse(g.last) < 200 * 86400000);
-      // Logo de la série : celui de l'extension du même nom, sinon le premier qui charge (setLogo, catalog.js).
-      const named = real.filter(e => fold(e.name) === fold(g.name)).concat(real);
-      g.logo = named.reduce((u, e) => u || setLogo(e.id, e.logo), '');
+      // Logo de la série : celui de l'extension du même nom, sinon de la plus récente qui en a un (setLogo,
+      // catalog.js, essaie ses variantes) ; une seule extension, pour ne pas enchaîner les essais hors ligne.
+      const named = real.find(e => fold(e.name) === fold(g.name)) || real.find(e => e.logo) || real[0];
+      g.logo = named ? setLogo(named.id, named.logo) : '';
       g.rank = g.name === SER_EN ? 2 : SER_LAST.indexOf(g.name) >= 0 ? 1 : 0;
     });
     groups.sort((a, b) => a.rank - b.rank || (a.last < b.last ? 1 : a.last > b.last ? -1 : 0));
