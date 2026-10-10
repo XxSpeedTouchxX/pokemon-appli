@@ -52,8 +52,8 @@ canvas { position: absolute; left: 0; top: 0; }
       <div class="prod" id="pEtb" style="width: 760px"><img src="../../web/img/products/30th-celebration-elite-trainer-box.webp" alt=""></div>
       <div class="prod" id="pDitto" style="width: 760px"><img src="../../web/img/products/30th-celebration-ditto-premium-collection.webp" alt=""></div>
       <div class="prod" id="pFig" style="width: 760px"><img src="../../web/img/products/30th-celebration-figure-collection.webp" alt=""></div>
-      <div class="abs" id="upcL" style="width: 400px; height: 454px; overflow: hidden; opacity: 0"><img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="position: absolute; left: 0; top: 0; width: 800px; height: 454px" alt=""></div>
-      <div class="abs" id="upcR" style="width: 400px; height: 454px; overflow: hidden; opacity: 0"><img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="position: absolute; left: -400px; top: 0; width: 800px; height: 454px" alt=""></div>
+      <div class="abs" id="upcL" style="width: 430px; height: 488px; overflow: hidden; opacity: 0; border-radius: 22px"><img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="position: absolute; left: 0; top: 0; width: 860px; height: 488px" alt=""></div>
+      <div class="abs" id="upcR" style="width: 430px; height: 488px; overflow: hidden; opacity: 0; border-radius: 22px"><img src="../../web/img/products/30th-celebration-ultra-premium-collections-day-night.webp" style="position: absolute; left: -430px; top: 0; width: 860px; height: 488px" alt=""></div>
       <img id="logo30" class="abs" src="../../web/img/logo-30-anniversaire.webp" style="width: 520px; left: 280px; opacity: 0" alt="">
     </div>
     <div id="topfade"></div>
@@ -138,7 +138,7 @@ function phone(take, f, o) {
 function txt(id, text, o = {}) {
   const el = $(id);
   if (!text) { el.style.opacity = 0; return; }
-  if (el.textContent !== text) el.textContent = text;
+  if (el.textContent !== text) { el.innerHTML = ''; const sp = document.createElement('span'); sp.style.display = 'inline-block'; sp.textContent = text; el.appendChild(sp); }
   const at = o.at == null ? -9 : o.at, p = o.t == null ? 1 : prog(o.t, at, at + (o.d || .22));
   const sc = o.pop === false ? 1 : lerp(o.from || 2.3, 1, eBack(p));
   const gl = o.glitch ? hit(o.t, at, .12) : 0;
@@ -146,6 +146,8 @@ function txt(id, text, o = {}) {
     transform: `translateX(${o.dx || 0}px) scale(${sc}) rotate(${o.rot || 0}deg)`,
     textShadow: gl ? `${10 * gl}px 0 rgba(255,0,80,.9), ${-10 * gl}px 0 rgba(0,255,255,.9)` : (o.shadow || 'none'),
     webkitTextStroke: o.stroke == null ? '' : o.stroke + 'px #000', letterSpacing: o.ls || '' });
+  const w = el.firstChild ? el.firstChild.offsetWidth : 0, max = o.max || 960;
+  if (w > max) el.style.fontSize = (o.size * max / w) + 'px';
 }
 function clearScene() {
   ['tA', 'tB', 'tC', 'tD'].forEach(id => txt(id, ''));
@@ -282,15 +284,15 @@ function render(T) {
     const R = TK.radar || {}, gx = R.sweepGeom || { x: 182, y: 357 }, k = 2.77;
     const fR = seg(t, [[b(9), R.france], [b(10) - .2, R.tapRegion - 6], [b(10), R.tapRegion], [b(12) - .2, R.tapDept - 6], [b(12), R.tapDept],
       [b(14), R.tapDept + 48], [b(16) - .2, R.sweepStart - 6], [b(16), R.sweepStart]]);
-    const push = 1 + .05 * prog(t, b(14), b(16));
-    full('radar', fR, gx.x, gx.y, 540 - (195 - gx.x) * k, 1000, k * push, eOut(prog(t, b(9), b(9) + .15)));
+    const push = 1 + .05 * prog(t, b(14), b(16)), down = eIO(prog(t, b(15), b(15) + .35));
+    full('radar', fR, gx.x, lerp(gx.y, 610, down), 540 - (195 - gx.x) * k, 1000, k * push, eOut(prog(t, b(9), b(9) + .15)));
     css('topfade', { opacity: 1 });
     // Raccord : contour néon qui se dissout sur la vraie carte
     if (t < b(9) + .3) { g.save(); g.globalAlpha = 1 - prog(t, b(9), b(9) + .3); france(g, 7, { glow: 1 }); g.restore(); }
     const pulse = .5 + .5 * Math.cos((t - b(9)) / BEAT * 2 * Math.PI);
     if (t < b(10)) txt('tA', 'CHOISIS TA RÉGION', { y: 240, size: 104, t, at: b(9) });
-    else if (t < b(12)) { txt('tC', 'RÉGION', { y: 210, size: 40, color: '#FFD21F', pop: false }); txt('tA', 'AUVERGNE-\nRHÔNE-ALPES', { y: 260, size: 104, t, at: b(10) }); }
-    else if (t < b(14)) { txt('tC', 'DÉPARTEMENT', { y: 210, size: 40, color: '#FFD21F', pop: false }); txt('tA', 'RHÔNE', { y: 260, size: 190, t, at: b(12) }); }
+    else if (t < b(12)) { txt('tC', 'RÉGION', { y: 186, size: 36, color: '#FFD21F', pop: false }); txt('tA', 'AUVERGNE-\nRHÔNE-ALPES', { y: 250, size: 104, t, at: b(10) }); }
+    else if (t < b(14)) { txt('tC', 'DÉPARTEMENT', { y: 186, size: 36, color: '#FFD21F', pop: false }); txt('tA', 'RHÔNE', { y: 250, size: 190, t, at: b(12) }); }
     else { txt('tA', 'LANCE LE', { y: 220, size: 120, t, at: b(14) }); txt('tB', 'BALAYAGE', { y: 350, size: 150, color: '#FFD21F', t, at: b(14) + .06, op: .85 + .15 * pulse }); }
     css('vig', { opacity: .5 * prog(t, b(12), b(16)) });
   }
@@ -362,7 +364,7 @@ function render(T) {
     rays(g, t, 'rgba(255,210,31,.07)', 16, 540, 900); sparks(f, t, 'rgba(255,210,31,.7)', 18, 6);
     let fA, cam;
     if (t < b(30)) { fA = seg(t, [[b(29), A.binder - 8], [b(30), A.binder + 10]]); cam = { cx: 195, cy: 330, z: 1 }; }
-    else if (t < b(31)) { fA = A.binder + 24; const p = eOut(prog(t, b(30), b(30) + .2)); cam = { cx: lerp(195, 95, p), cy: lerp(330, 300, p), z: lerp(1, 2.1, p) }; }
+    else if (t < b(31)) { fA = A.binder + 24; const p = eOut(prog(t, b(30), b(30) + .2)); cam = { cx: lerp(195, 82, p), cy: lerp(330, 486, p), z: lerp(1, 2.1, p) }; }
     else { fA = seg(t, [[b(31), A.sealed - 6], [b(32), A.sealed + 26]]); cam = { cx: 195, cy: 400, z: 1 }; }
     const sw = t < b(29) + .12 ? eOut(prog(t, b(29), b(29) + .12)) : 1;
     phone('add', fA, Object.assign({ x: 170, y: 560, ry: lerp(-30, 0, sw) }, cam));
@@ -370,8 +372,10 @@ function render(T) {
     else if (t < b(31)) {
       txt('tA', 'LANGUE · ÉTAT', { y: 220, size: 110, t, at: b(30) }); txt('tB', '· COTE', { y: 345, size: 110, color: '#FFD21F', t, at: b(30) + .05 });
       // Crochets HUD sur la première case
-      const p = eOut(prog(t, b(30) + .1, b(30) + .3)); f.save(); f.strokeStyle = `rgba(255,210,31,${p})`; f.lineWidth = 8; const bx = [250, 780, 560, 900];
-      [[bx[0], bx[1], 1, 1], [bx[2], bx[1], -1, 1], [bx[0], bx[3] + 300, 1, -1], [bx[2], bx[3] + 300, -1, -1]].forEach(([x, y, sx, sy]) => { f.beginPath(); f.moveTo(x, y + 60 * sy); f.lineTo(x, y); f.lineTo(x + 60 * sx, y); f.stroke(); }); f.restore();
+      // Case 1 du classeur (pixels CSS 32→133 × 418→555) dans le téléphone zoomé (×3,77, origine de l'écran 190, 580).
+      const p = eOut(prog(t, b(30) + .12, b(30) + .3)), m = 18 * (1 - p); f.save(); f.strokeStyle = `rgba(255,210,31,${p})`; f.lineWidth = 9; f.shadowColor = 'rgba(255,210,31,.9)'; f.shadowBlur = 16;
+      const x0 = 300 - m, x1 = 702 + m, y0 = 1094 - m, y1 = 1630 + m;
+      [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]].forEach(([x, y, sx, sy]) => { f.beginPath(); f.moveTo(x, y + 70 * sy); f.lineTo(x, y); f.lineTo(x + 70 * sx, y); f.stroke(); }); f.restore();
     }
     else { txt('tA', '+ TON', { y: 210, size: 130, t, at: b(31) }); txt('tB', 'SCELLÉ', { y: 340, size: 170, color: '#FFD21F', t, at: b(31) + .05 }); }
   }
@@ -418,7 +422,7 @@ function render(T) {
     rays(g, t, 'rgba(255,210,31,.08)', 16, 540, 900);
     const fO = seg(t, [[b(45), O.top], [b(46), O.upc], [b(47), O.upc + 30]]);
     const rise = eBack(prog(t, b(45), b(45) + .25));
-    const cam = t < b(46) ? { cx: 195, cy: 422, z: 1 } : { cx: 195, cy: lerp(422, 690, eOut(prog(t, b(46), b(46) + .2))), z: lerp(1, 1.5, eOut(prog(t, b(46), b(46) + .2))) };
+    const cam = t < b(46) ? { cx: 195, cy: 422, z: 1 } : { cx: 195, cy: lerp(422, 640, eOut(prog(t, b(46), b(46) + .2))), z: lerp(1, 1.25, eOut(prog(t, b(46), b(46) + .2))) };
     phone('sorties', fO, Object.assign({ x: 170, y: lerp(1900, 560, rise), ry: 10 }, cam));
     if (t < b(46)) { txt('tA', 'DATES', { y: 210, size: 150, t, at: b(45) }); txt('tB', '· PRIX ·', { y: 360, size: 120, color: '#FFD21F', t, at: b(45) + .05 }); }
     else { txt('tA', 'LIENS', { y: 210, size: 150, t, at: b(46) }); txt('tB', 'DIRECTS', { y: 360, size: 150, color: '#FFD21F', t, at: b(46) + .05 }); }
@@ -431,14 +435,14 @@ function render(T) {
       txt('tC', typed, { y: 300, size: 80, color: '#fff', pop: false });
       const p = eIn(prog(t, b(48), b(50))), strobe = Math.floor((t - b(48)) / (BEAT / 2)) % 2 === 0;
       const dark = 'brightness(.12) drop-shadow(0 0 3px rgba(255,210,31,1)) drop-shadow(0 0 18px rgba(255,210,31,.6))';
-      css('upcL', { left: lerp(-260, 120, p) + 'px', top: '700px', opacity: t > b(48) ? 1 : 0, filter: dark + (strobe ? ' brightness(1.6)' : '') });
-      css('upcR', { left: lerp(940, 560, p) + 'px', top: '700px', opacity: t > b(48) ? 1 : 0, filter: dark + (strobe ? ' brightness(1.6)' : '') });
+      css('upcL', { left: lerp(-300, 40, p) + 'px', top: '680px', opacity: t > b(48) ? 1 : 0, filter: dark + (strobe ? ' brightness(1.6)' : '') });
+      css('upcR', { left: lerp(900, 470, p) + 'px', top: '680px', opacity: t > b(48) ? 1 : 0, filter: dark + (strobe ? ' brightness(1.6)' : '') });
       const rumble = 2 + 10 * p; css('cam', { transform: `translate(${Math.sin(t * 120) * rumble}px, ${Math.cos(t * 110) * rumble}px)` });
     } else {
       rays(g, t, 'rgba(255,210,31,.16)', 20, 540, 930); sparks(f, t, 'rgba(255,255,255,.95)', 30, 5);
       const p = eBack(prog(t, b(50), b(50) + .2));
-      css('upcL', { left: '120px', top: '700px', opacity: 1, filter: 'none', transform: `scale(${lerp(1.25, 1, p)})` });
-      css('upcR', { left: '560px', top: '700px', opacity: 1, filter: 'none', transform: `scale(${lerp(1.25, 1, p)})` });
+      css('upcL', { left: '40px', top: '680px', opacity: 1, filter: 'none', transform: `scale(${lerp(1.25, 1, p)}) rotate(-3deg)` });
+      css('upcR', { left: '470px', top: '680px', opacity: 1, filter: 'none', transform: `scale(${lerp(1.25, 1, p)}) rotate(3deg)` });
       burst(f, 540, 930, prog(t, b(50), b(50) + .5), 28);
       if (t < b(51)) { txt('tA', "L'UPC", { y: 230, size: 170, t, at: b(50) }); txt('tB', '30 ANS', { y: 400, size: 150, color: '#FFD21F', t, at: b(50) + .05 }); }
       else { txt('tA', '06.11', { y: 260, size: 260, color: '#FFD21F', t, at: b(51), rot: -6, from: 3 }); txt('tB', 'JOURNÉE OU SOIRÉE', { y: 1230, size: 76, t, at: b(51) + .08 }); }
@@ -460,12 +464,14 @@ function render(T) {
     rings(g, C.x, C.y, C.r, .18);
     france(g, 7, { pulse: hit(t, b(54), .3) });
     if (t < b(55)) beam(g, C.x, C.y, C.r + 20, a, 1);
+    if (t >= b(55)) txt('tA', '');
     if (t < b(54)) { txt('tA', 'REPÈRE TES', { y: 220, size: 130, t, at: b(53) }); txt('tB', 'BOUTIQUES', { y: 350, size: 150, color: '#FFD21F', t, at: b(53) + .05 }); }
     else if (t < b(55)) { txt('tA', 'AVANT', { y: 220, size: 150, t, at: b(54) }); txt('tB', 'LE 6/11', { y: 360, size: 170, color: '#FFD21F', t, at: b(54) + .05 }); }
     else {
       const p = prog(t, b(55), b(56));
-      g.save(); g.globalAlpha = 1 - p; g.fillStyle = '#0A1130'; g.globalAlpha = p; g.fillRect(0, 0, 1080, 1920); g.restore();
-      beam(g, 540, 690, 900, 2 * Math.PI * p, 1);
+      g.save(); g.globalAlpha = Math.min(1, p * 5); g.fillStyle = '#0A1130'; g.fillRect(0, 0, 1080, 1920); g.restore();
+      rings(g, 540, 618, 420, .2 * Math.min(1, p * 5), false);
+      beam(g, 540, 618, 700, 2 * Math.PI * p, 1);
       // Le faisceau découvre le logo (masque conique qui suit l'angle).
       const m = `conic-gradient(from 0deg at 50% 50%, #000 ${360 * p}deg, transparent ${360 * p}deg)`;
       css('logo', { top: '560px', opacity: 1, transform: 'scale(.92)', webkitMaskImage: m, maskImage: m });
