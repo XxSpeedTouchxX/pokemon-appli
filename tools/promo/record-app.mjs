@@ -48,7 +48,7 @@ async function take(name, hash, script) {
   await page.addStyleTag({ content: '#pkm-touch{position:fixed;left:0;top:0;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:rgba(255,255,255,.5);border:3px solid #fff;box-shadow:0 0 0 7px rgba(255,210,31,.5),0 6px 18px rgba(0,0,0,.35);pointer-events:none;z-index:99999;opacity:0} #pkm-ring{position:fixed;left:0;top:0;border-radius:50%;border:3px solid rgba(255,210,31,.9);pointer-events:none;z-index:99998;opacity:0} .pkm-sweep .ping{animation:none!important}' });
   await page.evaluate(() => { ['pkm-touch', 'pkm-ring'].forEach(id => { const d = document.createElement('div'); d.id = id; document.body.appendChild(d); }); });
   let n = 0, touch = null;
-  const blurs = [], marks = {}, counts = [];
+  const blurs = [], marks = {}, counts = [], taps = []; // taps : [image du clic, x, y] en pixels CSS
   let lastCount = '';
   // Zones à flouter : noms, villes et adresses des vraies boutiques (résultats du balayage, fiche d'une boutique).
   const hide = () => {
@@ -99,7 +99,7 @@ async function take(name, hash, script) {
       }
     },
     // Toucher : la pastille apparaît, le clic part au milieu de son animation.
-    async tap(x, y, before = 6) { touch = { x, y, f: 0 }; await T.frames(before); await page.mouse.click(x, y); },
+    async tap(x, y, before = 6) { touch = { x, y, f: 0 }; await T.frames(before); taps.push([n, Math.round(x), Math.round(y)]); await page.mouse.click(x, y); },
     async tapOn(locator, before = 6, fixed = false) {
       // Élément caché sous l'en-tête ou la barre du bas : défilement doux pour l'amener à l'écran d'abord.
       let b = await locator.first().boundingBox();
@@ -143,7 +143,7 @@ async function take(name, hash, script) {
   if (bl.status !== 0) throw new Error(`[${name}] floutage en échec`);
   const ff = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', String(FPS), '-i', dir + '%04d.jpg', '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', TAKES + name + '.mp4'], { stdio: 'inherit' });
   if (ff.status !== 0) throw new Error(`[${name}] ffmpeg en échec`);
-  allMarkers[name] = Object.assign({ frames: n }, marks, counts.length ? { counts } : {});
+  allMarkers[name] = Object.assign({ frames: n }, marks, counts.length ? { counts } : {}, taps.length ? { taps } : {});
   console.log(`[${name}] ${n} images`, JSON.stringify(marks));
 }
 
