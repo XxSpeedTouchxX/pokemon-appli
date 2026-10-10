@@ -1,4 +1,4 @@
-{"generated":"2026-10-10T01:33:57Z","usdEur":0.89238,"usdEurDate":"2026-10-09","usdEurSource":"BCE","stats":{"cards":21365,"cardsEn":1211,"cardsEnExtra":93,"cardsPtcg":7,"imgOwn":18245,"imgAlt":{"pokemontcg.io":771,"en":1402,"de":78,"es":60,"it":277},"imgNone":432,"noDetail":1},"base":"bb2ebcb97f1b4cb5","order":["id","name","set","num","rarity","img","cm","low","avg30","tcp","upd","avg7","avg1","lang"],"fields":["cm","low","avg30","tcp","upd","avg7","avg1"],"n":21365,
+{"generated":"2026-10-10T11:02:05Z","usdEur":0.89238,"usdEurDate":"2026-10-09","usdEurSource":"BCE","stats":{"cards":21365,"cardsEn":1211,"cardsEnExtra":93,"cardsPtcg":7,"imgOwn":18245,"imgAlt":{"pokemontcg.io":771,"en":1402,"de":78,"es":60,"it":277},"imgNone":432,"noDetail":1},"base":"bb2ebcb97f1b4cb5","order":["id","name","set","num","rarity","img","cm","low","avg30","tcp","upd","avg7","avg1","lang"],"fields":["cm","low","avg30","tcp","upd","avg7","avg1"],"n":21365,
 "prices":[
 [null,null,null,null,null,null,null],
 [null,null,null,null,null,null,null],
