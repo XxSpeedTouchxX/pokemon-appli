@@ -1,6 +1,7 @@
 // Enregistre de vraies prises de la démo, image par image, pour la pub (tools/promo, docs/15-pub-tiktok-30ans).
 // Horloge du navigateur pilotée (page.clock) : chaque image avance de 1/30 s, quelle que soit la vitesse de la
 // machine ; animations MapLibre, faisceau du Radar, défilements et transitions restent fluides et complets.
+// Les touchers du Radar visent la carte et sa fiche fixe en bas (fixed = true : pas de défilement).
 // Prises : radar (France › région › département › balayage › boutique), around (« Autour de moi » et son balayage),
 // collect (accueil, valeur, classeur), series (toutes les séries, 30ᵉ Anniversaire), add (carte la plus chère,
 // ajout à la collection), sorties (UPC 30 ans du 6 novembre).
@@ -43,7 +44,7 @@ async function take(name, hash, script) {
   await page.addInitScript(() => { const raf = window.requestAnimationFrame.bind(window); window.requestAnimationFrame = cb => raf(() => cb(performance.now())); });
   await page.goto(BASE + '/?today=2026-10-20&fx=calm&debug&take=' + name + hash, { waitUntil: 'load' });
   // Horloge figée : elle n'avance plus avec le temps réel, seulement de 1/30 s par image (runFor).
-  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 200);
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1500);
   await page.addStyleTag({ content: '#pkm-touch{position:fixed;left:0;top:0;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:rgba(255,255,255,.5);border:3px solid #fff;box-shadow:0 0 0 7px rgba(255,210,31,.5),0 6px 18px rgba(0,0,0,.35);pointer-events:none;z-index:99999;opacity:0} #pkm-ring{position:fixed;left:0;top:0;border-radius:50%;border:3px solid rgba(255,210,31,.9);pointer-events:none;z-index:99998;opacity:0} .pkm-sweep .ping{animation:none!important}' });
   await page.evaluate(() => { ['pkm-touch', 'pkm-ring'].forEach(id => { const d = document.createElement('div'); d.id = id; document.body.appendChild(d); }); });
   let n = 0, touch = null;
@@ -146,11 +147,11 @@ R.radar = () => take('radar', '#radar', async T => {
   const tiles = await T.settleMap();
   console.log('[radar] carte', tiles ? 'chargée' : 'sans tuiles');
   T.mark('france'); await T.frames(18);
-  await T.tapOn(badge(T, 'Auvergne-Rhône-Alpes')); T.mark('tapRegion');
+  await T.tapOn(badge(T, 'Auvergne-Rhône-Alpes'), 6, true); T.mark('tapRegion');
   await T.frames(40); await T.settleMap(10000); await T.frames(8);
-  await T.tapOn(badge(T, 'Rhône')); T.mark('tapDept');
+  await T.tapOn(badge(T, 'Rhône'), 6, true); T.mark('tapDept');
   await T.frames(40); await T.settleMap(10000); await T.frames(8);
-  await T.tapOn(T.page.getByRole('button', { name: /Balayer le département/ })); T.mark('sweepStart');
+  await T.tapOn(T.page.getByRole('button', { name: /Balayer le département/ }), 6, true); T.mark('sweepStart');
   await T.frames(TURN + 4); T.mark('sweepEnd');
   await T.frames(22);
   // Une boutique isolée, spécialisée (cartes, jeux, BD) et bien placée, vers le haut de la carte.
@@ -172,7 +173,7 @@ R.radar = () => take('radar', '#radar', async T => {
 R.around = () => take('around', '#radar', async T => {
   await T.settleMap();
   T.mark('france'); await T.frames(14);
-  await T.tapOn(T.page.getByRole('button', { name: 'Autour de moi' })); T.mark('tapAround');
+  await T.tapOn(T.page.getByRole('button', { name: 'Autour de moi' }), 6, true); T.mark('tapAround');
   // Position, cadrage (1,2 s), puis balayage lancé par l'app 1,3 s après.
   await T.frames(36); await T.settleMap(10000); await T.frames(4);
   const startAt = T.n;
@@ -216,7 +217,7 @@ R.add = () => take('add', '#series', async T => {
   await T.frames(4); await T.images(); await T.frames(26); T.mark('fiche');
   await T.tapOn(T.page.getByRole('button', { name: '+ Ajouter un exemplaire' })); T.mark('form');
   await T.frames(4); await T.images(); await T.frames(30);
-  await T.tapOn(T.page.getByRole('button', { name: 'Ajouter à ma collection' })); T.mark('added');
+  await T.tapOn(T.page.getByRole('button', { name: 'Ajouter à ma collection' }), 6, true); T.mark('added'); // bouton fixe de la fenêtre d'ajout
   await T.frames(40);
   await T.tapOn(T.page.locator('nav[aria-label="Navigation principale"] button[aria-label="Accueil"]'), 6, true); T.mark('home');
   await T.frames(4); await T.images(); await T.frames(40);
