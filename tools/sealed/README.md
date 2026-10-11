@@ -66,10 +66,15 @@ Les displays, le booster 30ᵉ Anniversaire et Règne Delta (6 novembre 2026) ne
 
 - **Cote :** tendance du guide des prix public Cardmarket (`price_guide_6.json`), et le plus bas.
   - Les colonnes `avg30`, `avg7` et `avg1` (moyennes sur 30, 7 et 1 jours) sont prévues, mais le guide public ne les remplit pas pour le scellé (vides en octobre 2026).
-  - **Archive maison :** la tendance du jour est donc archivée dans `sealed.json`, sur 31 jours glissants : en-tête `days`, colonne `hist` alignée sur ces jours. Un passage le même jour remplace la valeur du jour ; sans guide des prix, l'archive reste telle quelle. Elle dessine la tendance du scellé sur l'accueil.
+  - **Archive maison :** la tendance du jour est donc archivée dans `sealed.json`, sur 31 jours glissants : en-tête `days`, colonne `hist` alignée sur ces jours. Un passage le même jour remplace la valeur du jour ; sans guide des prix, l'archive reste telle quelle. Les jours se suivent sans trou : un jour sans guide accepté vaut `null` (depuis le 2026-10-11 ; le 2026-10-05, manquant, est comblé au passage suivant). Elle dessine la tendance du scellé sur l'accueil.
 - **Plusieurs versions d'un produit :** l'app prend la médiane.
 - **Avant la sortie :** pas de cote ; le prix des précommandes est affiché comme prix demandé.
 - **Guide des prix injoignable :** les prix de la veille sont gardés, avec leur date. En local, `--offline` fait de même sans attendre.
+- **Guide refusé (2026-10-11) :** `sealed.json` n'est pas modifié (prix de la veille gardés) et le script échoue, pour que GitHub prévienne le porteur, si :
+  - le guide a plus de 30 h (`createdAt`) : Cardmarket n'a pas encore publié celui du jour ;
+  - la liste `priceGuides` est vide ou absente (format changé) ;
+  - moins de 80 % des produits cotés la veille ont un prix.
+- **Contrôle avant publication :** `tools/check_data.py sealed` vérifie le fichier (format, jours consécutifs, guide de moins de 30 h, baisse de plus de 5 % des produits ou des produits cotés) et met à jour `web/data/status.json`. Les visuels et `status.json` sont publiés quoi qu'il arrive ; le job échoue à la fin en cas d'anomalie.
 - **Champs de la page Sorties :** recopiés tels quels ; un ASIN mal formé ou un prix sans source est écarté.
 - **Lancement :** chaque jour vers 06:17 (heure de Paris), par le workflow « Catalogue scellé », après les visuels. C'est le seul workflow qui écrit `sealed.json`, ce qui évite les conflits de publication. L'historique git de `sealed.json` sert d'archive quotidienne des prix.
 

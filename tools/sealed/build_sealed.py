@@ -14,6 +14,9 @@ Prix d'un produit à plusieurs variantes (ex. deux coffrets) : médiane des vari
 Page Sorties de l'app : ASIN Amazon (amazon, refusé s'il est mal formé), prix de lancement constatés (msrp, une
 valeur ou une fourchette) et leur source, texte des recherches chez les enseignes (q), source de la date.
 Si le guide des prix est injoignable, les prix de la veille sont gardés.
+Garde-fous (2026-10-11) : un guide de plus de 30 h (createdAt), vide ou renommé, ou qui prix moins de 80 % des
+produits cotés la veille, est refusé : sealed.json n'est pas modifié (prix de la veille gardés) et le script échoue,
+pour que GitHub prévienne le porteur. L'archive a un jour par date, sans trou : un jour manquant vaut null.
 
 Usage : python3 tools/sealed/build_sealed.py [--prices price_guide_6.json | --offline]
 """
@@ -21,7 +24,9 @@ import argparse
 import json
 import re
 import statistics
+import sys
 import time
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -36,6 +41,8 @@ FIELDS = ["id", "name", "type", "set", "release", "releaseText", "year", "photo"
 HIST_DAYS = 31
 PRICED = ("trend", "avg30", "low", "avg7", "avg1")  # prix gardés d'un jour à l'autre si le guide manque
 ASIN = re.compile(r"^[A-Z0-9]{10}$")
+STALE_HOURS = 30  # guide plus ancien : celui de la veille, pas encore remplacé par Cardmarket
+MIN_PRICED = 0.8  # part des produits cotés la veille qui doivent l'être encore
 
 
 def fetch_prices():
@@ -90,23 +97,59 @@ def build(products, guide, previous):
     return rows, priced
 
 
+def guide_age(guide, now=None):
+    """Âge du guide des prix en heures, d'après createdAt (« 2026-10-11T02:44:21+0200 ») ; None s'il est illisible."""
+    raw = str((guide or {}).get("createdAt") or "")
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z"):
+        try:
+            made = datetime.strptime(raw.replace("Z", "+0000"), fmt)
+            break
+        except ValueError:
+            continue
+    else:
+        return None
+    return ((now or datetime.now(timezone.utc)) - made).total_seconds() / 3600
+
+
+def check_guide(guide, priced, previous_priced, now=None):
+    """Raisons de refuser le guide du jour (liste vide s'il est bon)."""
+    problems = []
+    age = guide_age(guide, now)
+    if age is None:
+        problems.append(f"date du guide illisible ({(guide or {}).get('createdAt')!r})")
+    elif age > STALE_HOURS:
+        problems.append(f"guide du {guide['createdAt']}, vieux de {age:.0f} h (plus de {STALE_HOURS} h) : Cardmarket ne l'a pas encore remplacé")
+    if not isinstance((guide or {}).get("priceGuides"), list) or not guide["priceGuides"]:
+        problems.append("liste « priceGuides » vide ou absente (format du guide changé ?)")
+    elif previous_priced and priced < previous_priced * MIN_PRICED:
+        problems.append(f"{priced} produits cotés contre {previous_priced} la veille (moins de {MIN_PRICED:.0%})")
+    return problems
+
+
+def contiguous(days):
+    """Toutes les dates du premier au dernier jour (format AAAA-MM-JJ), sans trou."""
+    if not days:
+        return []
+    d0, d1 = date.fromisoformat(min(days)), date.fromisoformat(max(days))
+    return [(d0 + timedelta(n)).isoformat() for n in range((d1 - d0).days + 1)]
+
+
 def archive(rows, old, day):
-    """Archive glissante de la tendance : jours (31 au plus) et, par produit, la tendance de chaque jour.
-    day : jour du guide des prix, ou None sans guide (archive gardée telle quelle). Retourne la liste des jours."""
+    """Archive glissante de la tendance : jours (31 au plus, consécutifs) et, par produit, la tendance de chaque jour.
+    Un jour sans guide vaut null. day : jour du guide des prix, ou None sans guide (archive gardée telle quelle).
+    Retourne la liste des jours."""
     f = {k: i for i, k in enumerate(FIELDS)}
-    days, prev = list((old or {}).get("days") or []), {}
+    old_days, prev = list((old or {}).get("days") or []), {}
     if old and "hist" in old.get("fields", []):
         of = {k: i for i, k in enumerate(old["fields"])}
-        prev = {r[of["id"]]: list(r[of["hist"]] or []) for r in old["products"]}
-    if day and day not in days:
-        days.append(day)
+        prev = {r[of["id"]]: dict(zip(old_days, r[of["hist"]] or [])) for r in old["products"]}
+    days = contiguous(old_days + ([day] if day else []))[-HIST_DAYS:]
     for r in rows:
-        h = (prev.get(r[f["id"]]) or [])[:len(days)]
-        h += [None] * (len(days) - len(h))  # nouveau produit : jours d'avant sans valeur
+        h = prev.get(r[f["id"]]) or {}  # nouveau produit : jours d'avant sans valeur
         if day:
-            h[days.index(day)] = r[f["trend"]]
-        r[f["hist"]] = h[-HIST_DAYS:]
-    return days[-HIST_DAYS:]
+            h[day] = r[f["trend"]]
+        r[f["hist"]] = [h.get(d) for d in days]
+    return days
 
 
 def main():
@@ -116,13 +159,22 @@ def main():
     args = ap.parse_args()
     manifest = json.loads(PRODUCTS.read_text("utf-8"))
     guide = json.loads(Path(args.prices).read_text("utf-8")) if args.prices else (None if args.offline else fetch_prices())
-    previous, stamp, old = {}, "", None
+    previous, stamp, old, previous_priced = {}, "", None, 0
     if OUT.exists():
         old = json.loads(OUT.read_text("utf-8"))
         stamp = old.get("prices", "")
         f = {k: i for i, k in enumerate(old["fields"])}
         previous = {r[f["id"]]: [r[f[k]] if k in f else None for k in PRICED] for r in old["products"]}  # anciens fichiers : sans avg7, avg1
+        previous_priced = sum(1 for v in previous.values() if v[0] is not None)
     rows, priced = build(manifest["products"], guide, previous)
+    if guide is not None:
+        problems = check_guide(guide, priced, previous_priced)
+        if problems:
+            for p in problems:
+                print(f"::warning::Guide des prix Cardmarket refusé : {p}")
+            sys.exit("sealed.json n'est pas modifié : les prix de la veille restent affichés.")
+    else:
+        print("::warning::Guide des prix Cardmarket injoignable : prix de la veille gardés.")
     days = archive(rows, old, guide.get("createdAt", "")[:10] or None if guide is not None else None)
     head = {
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

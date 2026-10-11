@@ -1,6 +1,8 @@
 # Catalogue scellé, chaque jour : télécharge les visuels manquants des produits retenus
 # (tools/sealed/products.json) dans web/img/products/, puis construit web/data/sealed.json avec les prix du
-# jour (guide public Cardmarket). C'est le seul workflow qui écrit ces fichiers.
+# jour (guide public Cardmarket). C'est le seul workflow qui écrit ces fichiers. Un guide de plus de 30 h, vide ou
+# trop court est refusé (prix de la veille gardés) ; tools/check_data.py contrôle ensuite sealed.json et met à jour
+# web/data/status.json. Les visuels et status.json sont publiés quoi qu'il arrive ; le job échoue sur une anomalie.
 # À la demande (ou si discover.py change), il liste aussi les produits de la galerie officielle Pokémon France
 # et leurs correspondances Cardmarket possibles (tools/sealed/candidates.json, rapport de travail).
 name: Catalogue scellé
@@ -48,21 +50,36 @@ jobs:
           fi
 
       - name: Prix du scellé (guide public Cardmarket)
+        id: build
+        continue-on-error: true
         run: |
           python3 -m unittest discover -s tools/sealed -p "test_*.py"
           python3 tools/sealed/build_sealed.py
 
+      - name: Contrôle des données (status.json)
+        id: check
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: python3 tools/check_data.py sealed --revert
+
       - name: Publier sur la branche
+        if: ${{ !cancelled() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -f tools/sealed/candidates.json ]; then git add tools/sealed/candidates.json; fi
           if [ -d web/img/products ]; then git add web/img/products; fi
-          git add web/data/sealed.json
+          git add web/data/sealed.json web/data/status.json
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
           git commit -m "Met à jour le catalogue scellé ($(date -u +%Y-%m-%d))"
           for i in 1 2 3 4; do
             git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
             sleep $((i * 5))
           done
+          exit 1
+
+      - name: Échec signalé (guide refusé ou anomalie)
+        if: ${{ !cancelled() && (steps.build.outcome == 'failure' || steps.check.outcome == 'failure') }}
+        run: |
+          echo "::error::Scellé : guide des prix refusé ou anomalie (voir le résumé du job et web/data/status.json)."
           exit 1

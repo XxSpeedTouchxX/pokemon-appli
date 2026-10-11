@@ -1,11 +1,18 @@
 # Boutiques réelles : chaque semaine, liste depuis OpenStreetMap (API Overpass) les boutiques de France
 # métropolitaine susceptibles de vendre des produits Pokémon, avec leur commune, et publie web/data/stores.json
 # pour Territoire, le Radar et l'accueil. Données © les contributeurs d'OpenStreetMap (ODbL). La liste n'est
-# pas remplacée si la réponse paraît incomplète.
+# pas remplacée si la réponse paraît incomplète (tuile vide ou trop courte, région ou total sous les meilleurs comptes
+# connus de tools/stores/reference.json). tools/check_data.py contrôle ensuite le fichier et met à jour
+# web/data/status.json ; en cas d'anomalie, seul status.json est publié et le job échoue (courriel au porteur).
 name: Boutiques OpenStreetMap
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      reset_reference:
+        description: "Accepter la liste du jour et repartir de ses comptes (après vérification à la main)"
+        type: boolean
+        default: false
   schedule:
     - cron: "23 3 * * 1" # chaque lundi vers 05:23 (heure de Paris en été)
   push:
@@ -45,17 +52,32 @@ jobs:
             | tar -xzO package/data/communes.json > data/communes-noms.json || rm -f data/communes-noms.json
 
       - name: Boutiques depuis OpenStreetMap
-        run: python3 tools/stores/sync_stores.py
+        id: build
+        continue-on-error: true
+        run: python3 tools/stores/sync_stores.py ${{ inputs.reset_reference && '--reset-reference' || '' }}
+
+      - name: Contrôle des données (status.json)
+        id: check
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: python3 tools/check_data.py stores --revert ${{ inputs.reset_reference && '--force' || '' }}
 
       - name: Publier sur la branche
+        if: ${{ !cancelled() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/data/stores.json
+          git add web/data/stores.json web/data/status.json tools/stores/reference.json
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
           git commit -m "Met à jour les boutiques OpenStreetMap ($(date -u +%Y-%m-%d))"
           for i in 1 2 3 4; do
             git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
             sleep $((i * 5))
           done
+          exit 1
+
+      - name: Échec signalé (liste refusée ou anomalie)
+        if: ${{ !cancelled() && (steps.build.outcome == 'failure' || steps.check.outcome == 'failure') }}
+        run: |
+          echo "::error::Boutiques : liste refusée ou anomalie (voir le résumé du job et web/data/status.json)."
           exit 1

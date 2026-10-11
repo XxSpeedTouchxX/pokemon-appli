@@ -248,5 +248,98 @@ class Overpass(unittest.TestCase):
         self.assertEqual(timeouts, [360, 360, 220])
 
 
+def answer(body):
+    data = io.BytesIO(json.dumps(body).encode())
+    return mock.MagicMock(__enter__=lambda s: data, __exit__=lambda *a: False)
+
+
+def nodes(n, start=0):
+    return [{"type": "node", "id": start + i} for i in range(n)]
+
+
+class Guards(unittest.TestCase):
+    """Garde-fous ajoutés après la tuile vide du 2026-10-05 (Normandie et Bretagne à zéro)."""
+
+    def run_overpass(self, replies, best=None):
+        calls = []
+
+        def fake_urlopen(req, timeout):
+            calls.append(req.full_url)
+            return answer(replies(len(calls)))
+
+        with mock.patch.object(sync_stores, "urlopen", fake_urlopen), mock.patch.object(sync_stores.time, "sleep"):
+            doc = sync_stores.overpass(best_tiles=best)
+        return doc, calls
+
+    def test_empty_tile_retried_elsewhere(self):
+        # Le premier serveur répond « 0 élément » sans remarque : refusé, le suivant est essayé, puis gardé.
+        doc, calls = self.run_overpass(lambda k: {"elements": [] if k == 1 else nodes(3, 10 * k)})
+        self.assertEqual(calls[:2], sync_stores.ENDPOINTS[:2])
+        self.assertEqual(doc["tiles"][sync_stores.TILES[0]], 3)
+        self.assertEqual(len(doc["tiles"]), len(sync_stores.TILES))
+
+    def test_low_tile_retried_elsewhere(self):
+        # Moins de 50 % du meilleur compte connu (100) : réponse tronquée, serveur suivant.
+        best = {b: 100 for b in sync_stores.TILES}
+        doc, calls = self.run_overpass(lambda k: {"elements": nodes(10 if k == 1 else 60, 1000 * k)}, best)
+        self.assertEqual(calls[:2], sync_stores.ENDPOINTS[:2])
+        self.assertEqual(doc["tiles"][sync_stores.TILES[0]], 60)
+        self.assertEqual(sync_stores.tile_minimum(100), 50)
+        self.assertEqual(sync_stores.tile_minimum(0), 1)
+
+    def test_always_empty_fails(self):
+        # Tous les serveurs, deux fois : toujours vide → échec, stores.json n'est pas modifié.
+        with self.assertRaises(SystemExit) as e:
+            self.run_overpass(lambda k: {"elements": []})
+        self.assertIn("tuile 1/6", str(e.exception.code))
+
+    def test_region_drop(self):
+        ref = {"date": "2026-10-04", "total": 1000, "regions": {"28": 239, "53": 272, "11": 489}, "tiles": {}}
+        ok = {"28": 239, "53": 272, "11": 489}
+        self.assertEqual(sync_stores.guard(1000, ok, ref), [])
+        self.assertEqual(sync_stores.guard(960, dict(ok, **{"11": 449}), ref), [])  # –8 % dans une région, –4 % en tout : accepté
+        problems = sync_stores.guard(1000, {"53": 272, "11": 728}, ref, {"28": "Normandie"})
+        self.assertEqual(len(problems), 1)
+        self.assertIn("Normandie : 0 boutiques contre 239", problems[0])
+        self.assertTrue(any("moins de 95" in p for p in sync_stores.guard(940, ok, ref)))
+
+    def test_reference_only_rises(self):
+        ref = {"date": "2026-10-04", "total": 100, "regions": {"28": 50, "53": 50}, "tiles": {sync_stores.TILES[0]: 40}}
+        new = sync_stores.raise_reference(ref, 98, {"28": 55, "53": 43}, {sync_stores.TILES[0]: 30}, "2026-10-12")
+        self.assertEqual((new["total"], new["regions"], new["tiles"]), (100, {"28": 55, "53": 50}, {sync_stores.TILES[0]: 40}))
+        self.assertEqual(new["date"], "2026-10-12")
+        self.assertEqual(sync_stores.raise_reference(ref, 90, {"28": 1}, {}, "2026-10-12"), ref)  # rien de plus haut : inchangé
+        reset = sync_stores.raise_reference(ref, 90, {"28": 1}, {}, "2026-10-12", reset=True)
+        self.assertEqual((reset["total"], reset["regions"]), (90, {"28": 1}))
+
+    def test_reference_file(self):
+        # Référence amorcée avec la liste du 2026-10-04 (4 075 boutiques), avant la tuile vide du 2026-10-05.
+        ref = sync_stores.load_reference()
+        self.assertGreaterEqual(ref["total"], 4075)
+        self.assertEqual(len(ref["regions"]), 13)
+        self.assertEqual(set(ref["tiles"]), set(sync_stores.TILES))
+        self.assertGreaterEqual(ref["regions"]["28"], 239)  # Normandie
+
+    def test_main_refuses_without_writing(self):
+        with tempfile.TemporaryDirectory() as d:
+            out, refp, inp = Path(d) / "stores.json", Path(d) / "reference.json", Path(d) / "overpass.json"
+            out.write_text("ancien", "utf-8")
+            sync_stores.save_reference({"date": "2026-10-04", "total": 2, "regions": {"84": 2}, "tiles": {}}, refp)
+            inp.write_text(json.dumps({"elements": [node(1, 45.76, 4.83, name="Ludik", shop="games")]}), "utf-8")
+            with mock.patch.object(sync_stores, "OUT", out), mock.patch.object(sync_stores, "REFERENCE", refp), \
+                    mock.patch.object(sync_stores, "COMMUNES", Path(d) / "absent"), \
+                    mock.patch("sys.argv", ["sync_stores.py", "--input", str(inp)]), mock.patch("sys.stdout", io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    sync_stores.main()
+                self.assertEqual(out.read_text("utf-8"), "ancien")
+                # Deux boutiques dans la région : acceptée, en-tête de contrôle et référence gardée.
+                inp.write_text(json.dumps({"elements": [node(1, 45.76, 4.83, name="Ludik", shop="games"),
+                                                        node(2, 45.70, 4.80, name="Jouets", shop="toys")], "tiles": {}}), "utf-8")
+                sync_stores.main()
+                doc = json.loads(out.read_text("utf-8"))
+                self.assertEqual((doc["count"], doc["regions"]), (2, {"84": 2}))
+                self.assertEqual(json.loads(refp.read_text("utf-8"))["total"], 2)
+
+
 if __name__ == "__main__":
     unittest.main()

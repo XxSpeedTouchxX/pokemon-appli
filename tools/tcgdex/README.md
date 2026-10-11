@@ -30,7 +30,7 @@ python tools/tcgdex/sync_tcgdex.py --skip-images --workers 4 --out data/tcgdex
 
 Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveurs de GitHub :
 
-1. **Téléchargement :** `sync_tcgdex.py --skip-images` récupère toutes les cartes françaises et leurs prix. Une seconde passe reprend les échecs éventuels.
+1. **Téléchargement :** `sync_tcgdex.py --skip-images` récupère toutes les cartes françaises et leurs prix. Une seconde passe reprend les échecs éventuels. S'il en reste après elle (`failures.json` non vide), le job échoue à la fin (2026-10-11).
 2. **Autres versions :** le même script récupère les extensions en anglais, allemand, italien et espagnol, sans le détail des cartes (une requête par extension). Elles servent à deux choses :
    - **visuels de repli :** une carte sans scan français prend celui d'une autre version (même dessin officiel), dans cet ordre : anglais, allemand, italien, espagnol. La carte est cherchée par identifiant, ou par numéro dans la même extension ou dans l'extension parente (Galerie de Dresseurs, Galerie Galaroise, Coffre Étincelant). Les logos manquants suivent la même règle ;
    - **extensions sans version française dans TCGdex :** `build_index.py --list-en-only` les liste, puis leur détail et leurs prix sont téléchargés en anglais. Leurs cartes entrent au catalogue, en anglais ;
@@ -45,12 +45,29 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
    - **Exclu :** les scans récents servis par le CDN commercial Scrydex. La Collection Classique 30ᵉ Anniversaire reste donc dessinée.
    - **Arrêt de l'API pokemontcg.io le 1ᵉʳ mars 2027 :** si une image ne charge plus, l'app passe seule à la carte dessinée.
 4. **Catalogue compact :** `build_index.py` produit `web/data/cards.json`. Ce fichier est chargé par la démo web.
-   - **Pour chaque carte :** l'identifiant, le nom, l'extension, le numéro, la rareté, l'image (le chemin commence par la langue du visuel) et les prix : tendance, plus bas et moyennes 30, 7 et 1 jours de Cardmarket (tendance et moyennes d'une même variante, normale sinon holo) ; TCGplayer converti en euros. Les moyennes 7 et 1 jours (`avg7`, `avg1`, en fin de ligne) dessinent la tendance de la collection sur l'accueil.
+   - **Pour chaque carte :** l'identifiant, le nom, l'extension, le numéro, la rareté, l'image (le chemin commence par la langue du visuel) et les prix : tendance, plus bas et moyennes 30, 7 et 1 jours de Cardmarket (tous du même groupe de prix, voir ci-dessous) ; TCGplayer converti en euros. Les moyennes 7 et 1 jours (`avg7`, `avg1`) dessinent la tendance de la collection sur l'accueil.
+   - **Groupe de prix Cardmarket (2026-10-11, bug Rayquaza ☆ signalé par le porteur) :** TCGdex donne deux groupes, les champs normaux (`trend`, `low`, `avg30`, `avg7`, `avg1`) et les champs `-holo` (`trend-holo`…), et les versions de la carte (`variants` : `normal`, `holo`, `reverse`) :
+     - **carte holo seulement** (ni normale ni reverse) : la cote vient du groupe `-holo`. Exemple : Rayquaza ☆ (ex8-107), 135,39 € au lieu de 32,35 € (groupe normal, autre produit mal rangé) ;
+     - **carte qui a une reverse :** le groupe `-holo` est le prix de la reverse ; la cote reste celle du groupe normal, la reverse est donnée à part (`cmh`) ;
+     - **sinon :** groupe normal s'il a une tendance, sinon groupe `-holo` (comme avant).
+   - **Champs ajoutés en fin de ligne (2026-10-11), après `lang` :**
+
+     | Champ | Contenu |
+     |---|---|
+     | `cmh` | tendance de l'autre groupe : la reverse (carte avec reverse), la version normale (carte holo seulement), sinon le groupe `-holo` ; `null` s'il manque |
+     | `cmv` | groupe d'où vient `cm` : `"n"` (champs normaux) ou `"h"` (champs `-holo`) ; `null` sans cote |
+     | `q` | `1` si la cote est douteuse, `0` sinon : plus bas sous 5 % de la tendance, moyenne 1 jour à plus de 3 fois d'écart de la tendance, ou carte holo seulement cotée sans le groupe `-holo`. Jamais sous 1 € de tendance (l'écart n'y dit rien) |
+
+     Ils sont dans `cards-prices.json` (prix du jour) : la partie fixe `cards-base.json` et son empreinte ne changent pas.
+   - **Couverture des prix (`stats`, 2026-10-11) :** `cardsCm` (cartes avec une cote Cardmarket), `cardsPriced` (avec une cote Cardmarket ou TCGplayer), `cardsHolo` (cote tirée du groupe `-holo`), `cardsDoubt` (cote douteuse), `setsNoCm` (extensions sans aucune cote Cardmarket, avec leur nombre de cartes) et `setsPriceSoon` (parmi elles, celles sorties depuis moins de 90 jours : l'app peut afficher « cote à venir »). Aucune cote n'est inventée : au 2026-10-11, 17 extensions (937 cartes) n'ont pas de cote Cardmarket, dont `30th` et `30th-c` (sorties le 2026-09-16), sans prix TCGdex ni en français ni en anglais.
+   - **Garde-fous face à la veille (2026-10-11) :** l'index n'est pas écrit (le job échoue) si les cartes baissent de plus de 2 %, si une extension de la veille disparaît, si les cartes cotées sur Cardmarket baissent de plus de 5 %, si `cardsEn` ou les visuels de repli (`imgAlt`) baissent de plus de 25 % (avertissement dès 10 %), ou si les cartes sans visuel (`imgNone`) montent de plus de 25 % (avertissement dès 10 %). Changement vérifié à la main : lancer le workflow avec « force » (`--force`).
+   - **Hébergeur pokemontcg.io :** il est déclaré muet seulement après 3 essais sur 3 images différentes, espacés de 30 s.
    - **Pour chaque extension :** le nom, la série, la date, le logo, le nombre officiel de cartes et la langue des cartes.
    - **Langue d'une carte** (`lang`, dernière colonne) : « en » pour une carte ajoutée depuis la version anglaise, vide sinon.
    - Le fichier contient une carte par ligne.
    - Le journal du workflow donne le bilan : cartes, visuels par langue, cartes encore sans visuel par extension.
-5. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site.
+5. **Contrôle :** `tools/check_data.py cards` vérifie les trois fichiers (format, découpage, date des prix, mêmes seuils face au dernier état publié) et met à jour `web/data/status.json`. En cas d'anomalie, les fichiers reprennent leur dernier état publié et seul `status.json` est publié.
+6. **Publication :** le workflow fait un commit sur la branche, puis Cloudflare Pages redéploie le site. Il échoue ensuite si une étape a signalé un problème (courriel au porteur).
 
 TCG Pocket (cartes numériques) est exclu.
 

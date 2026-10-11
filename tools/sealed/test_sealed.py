@@ -3,7 +3,10 @@ import json
 import unittest
 from pathlib import Path
 
-from build_sealed import ASIN, FIELDS, HIST_DAYS, archive, build, median
+from datetime import datetime, timezone
+
+import build_sealed
+from build_sealed import ASIN, FIELDS, HIST_DAYS, archive, build, check_guide, guide_age, median
 
 PRODUCTS = [
     {"id": "coffret", "name": "Coffret A ou B", "type": "CFT", "set": "30th", "cm": [1, 2]},
@@ -103,6 +106,54 @@ class Archive(unittest.TestCase):
         self.assertEqual(days[0], "2026-09-03")
         self.assertEqual({r[0]: r for r in rows}["etb"][f["hist"]][-2:], [31, 70.01])
         self.assertEqual(archive(rows, None, "2026-10-04"), ["2026-10-04"])  # premier jour
+
+    def test_missing_days_are_null(self):
+        # Le 2026-10-05 manque (guide de la veille refusé) : la date est gardée, avec null.
+        rows, _ = build(PRODUCTS, GUIDE, {})
+        f = {k: i for i, k in enumerate(FIELDS)}
+        days = archive(rows, self.old(["2026-10-03", "2026-10-04", "2026-10-06"], [1, 2, 3]), "2026-10-08")
+        self.assertEqual(days, ["2026-10-03", "2026-10-04", "2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08"])
+        self.assertEqual({r[0]: r for r in rows}["etb"][f["hist"]], [1, 2, None, 3, None, 70.01])
+        self.assertEqual(archive(rows, self.old(["2026-10-04", "2026-10-06"], [2, 3]), None), ["2026-10-04", "2026-10-05", "2026-10-06"])
+
+
+NOW = datetime(2026, 10, 11, 6, 20, tzinfo=timezone.utc)
+
+
+class Guard(unittest.TestCase):
+    def test_age(self):
+        self.assertAlmostEqual(guide_age({"createdAt": "2026-10-11T02:44:21+0200"}, NOW), 5.6, places=1)
+        self.assertIsNone(guide_age({"createdAt": "hier"}, NOW))
+
+    def test_fresh_guide_accepted(self):
+        self.assertEqual(check_guide({"createdAt": "2026-10-11T02:44:21+0200", "priceGuides": [{}]}, 60, 61, NOW), [])
+
+    def test_stale_guide_refused(self):
+        problems = check_guide({"createdAt": "2026-10-09T23:44:21+0200", "priceGuides": [{}]}, 61, 61, NOW)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("plus de 30 h", problems[0])
+
+    def test_empty_or_thin_guide_refused(self):
+        self.assertTrue(check_guide({"createdAt": "2026-10-11T02:44:21+0200", "priceGuides": []}, 0, 61, NOW))
+        self.assertTrue(check_guide({"createdAt": "2026-10-11T02:44:21+0200", "guides": [{}]}, 0, 61, NOW))  # clé renommée
+        self.assertTrue(check_guide({"createdAt": "2026-10-11T02:44:21+0200", "priceGuides": [{}]}, 48, 61, NOW))  # 79 %
+        self.assertEqual(check_guide({"createdAt": "2026-10-11T02:44:21+0200", "priceGuides": [{}]}, 49, 61, NOW), [])
+
+    def test_main_keeps_file(self):
+        import io
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as d:
+            out, guide = Path(d) / "sealed.json", Path(d) / "guide.json"
+            out.write_text(json.dumps({"fields": ["id", "trend"], "products": [["etb", 70.0]]}), "utf-8")
+            before = out.read_text("utf-8")
+            guide.write_text(json.dumps({"createdAt": "2026-01-01T02:00:00+0100", "priceGuides": GUIDE["priceGuides"]}), "utf-8")
+            with mock.patch.object(build_sealed, "OUT", out), mock.patch("sys.argv", ["build_sealed.py", "--prices", str(guide)]), \
+                    mock.patch("sys.stdout", io.StringIO()):
+                with self.assertRaises(SystemExit) as e:
+                    build_sealed.main()
+            self.assertIn("n'est pas modifié", str(e.exception.code))
+            self.assertEqual(out.read_text("utf-8"), before)
 
 
 if __name__ == "__main__":

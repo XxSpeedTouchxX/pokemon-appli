@@ -23,7 +23,13 @@ Données de l'écran Radar :
   - L'adresse sans ville reçoit la commune (« 23 Quai Jean Moulin, 69002 Lyon »).
   - Une boutique en limite de deux communes peut recevoir sa voisine : « Signaler une erreur » reste dans la fiche.
 - **Doublons :** un même nom à moins de 100 m (le point et le bâtiment d'un même magasin) n'est gardé qu'une fois.
-- **Prudence :** si la nouvelle liste compte moins de 80 % des boutiques de la précédente, elle est refusée (réponse Overpass incomplète).
+- **Prudence (2026-10-11, après la tuile vide du 2026-10-05 qui a vidé la Normandie et la Bretagne) :**
+  - une tuile vide, ou à moins de 50 % de son meilleur compte connu, est redemandée aux autres serveurs (pas seulement à celui qui a répondu) ; si aucun ne donne mieux, le script échoue et la liste n'est pas modifiée ;
+  - chaque région doit garder au moins 70 % de son meilleur compte connu, et la France au moins 95 % ; sinon la liste est refusée ;
+  - meilleurs comptes connus : `tools/stores/reference.json` (total, par région, éléments Overpass par tuile). Ils ne font que monter, après une liste acceptée. Amorcés avec la liste du 2026-10-04 (4 075 boutiques ; par tuile, les boutiques retenues, borne basse des éléments bruts) ;
+  - baisse réelle et vérifiée à la main : lancer le workflow à la main avec « Accepter la liste du jour » (`--reset-reference`) ;
+  - l'en-tête de `stores.json` donne les boutiques par région (`regions`) et les éléments par tuile (`tiles`) ;
+  - `tools/check_data.py stores` contrôle ensuite le fichier (format, baisse de plus de 5 % ou d'une région de plus de 30 % face au dernier état publié) et met à jour `web/data/status.json`. En cas d'anomalie, seul `status.json` est publié et le job échoue (courriel au porteur).
 - **Requêtes :** la France est découpée en 6 tuiles. Une seule requête pour tout le pays est refusée quand les serveurs sont chargés (« 504 Gateway Timeout »).
   - Pour chaque tuile, trois serveurs Overpass sont essayés tour à tour, deux fois, en commençant par le dernier qui a répondu.
   - Une réponse interrompue côté serveur est refusée, et la tuile redemandée.
@@ -62,6 +68,7 @@ Bilan au 2026-10-04 : 4 076 boutiques.
 
 ```bash
 python3 -m unittest discover -s tools/stores
+python3 -m unittest discover -s tools -p test_check_data.py   # contrôle avant publication
 node --test tools/web/test_radar.mjs   # indice de chance et balayage
 ```
 

@@ -18,7 +18,14 @@ workflow dans data/ et ne sont pas publiés. Arrondissement de Paris, Lyon et Ma
 téléphone, horaires (format OSM), adresse. Sortie : web/data/stores.json (1 Mo au plus), une boutique par ligne, triée pour des différences lisibles.
 Données © les contributeurs d'OpenStreetMap, sous licence ODbL : la mention est obligatoire dans l'app.
 
-Usage : python3 tools/stores/sync_stores.py [--input overpass.json]
+Garde-fous (2026-10-11, après la tuile vide du 2026-10-05 : Normandie et Bretagne à zéro) :
+  - une tuile vide, ou à moins de 50 % de son meilleur compte connu, est redemandée aux autres serveurs, puis le
+    script échoue sans toucher à stores.json ;
+  - chaque région doit garder au moins 70 % de son meilleur compte connu, et la France 95 % ;
+  - meilleurs comptes connus : tools/stores/reference.json, relevés seulement après une liste acceptée
+    (--reset-reference pour repartir des comptes du jour, après vérification à la main).
+
+Usage : python3 tools/stores/sync_stores.py [--input overpass.json] [--reset-reference]
 """
 import argparse
 import http.client
@@ -37,6 +44,8 @@ OUT = ROOT / "web" / "data" / "stores.json"
 DEPTS = ROOT / "web" / "data" / "geo" / "departements.json"
 COMMUNES = ROOT / "data" / "communes.geojson"  # gitignorés ; voir .github/workflows/stores.yml
 COMMUNE_NAMES = ROOT / "data" / "communes-noms.json"
+REFERENCE = Path(__file__).with_name("reference.json")  # meilleurs comptes connus (tuiles, régions, total)
+TILE_MIN, REGION_MIN, TOTAL_MIN = 0.5, 0.7, 0.95
 UA = "PKM-App/1.0 (+https://github.com/XxSpeedTouchxX/pokemon-appli)"
 ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter",
              "https://maps.mail.ru/osm/tools/overpass/api/interpreter"]
@@ -79,8 +88,9 @@ area["ISO3166-1"="FR"][admin_level=2]->.fr;
 out center tags qt;"""
 
 
-def fetch(q, end, first=0):
-    """(réponse, n° du serveur) : chaque serveur tour à tour, en commençant par `first`, deux tours, avant `end`."""
+def fetch(q, end, first=0, minimum=1):
+    """(réponse, n° du serveur) : chaque serveur tour à tour, en commençant par `first`, deux tours, avant `end`.
+    Une réponse de moins de `minimum` éléments (vide, ou tronquée sans « remark ») est refusée : serveur suivant."""
     data = urlencode({"data": q}).encode()
     for attempt in range(2):
         for i in [(first + k) % len(ENDPOINTS) for k in range(len(ENDPOINTS))]:
@@ -93,6 +103,9 @@ def fetch(q, end, first=0):
                     doc = json.loads(resp.read().decode("utf-8"))
                 if doc.get("remark"):  # requête interrompue côté serveur : réponse incomplète
                     raise ValueError(doc["remark"])
+                n = len(doc.get("elements") or [])
+                if n < minimum:
+                    raise ValueError(f"{n} éléments seulement, au moins {minimum} attendus : réponse vide ou tronquée")
                 return doc, i
             except (OSError, http.client.HTTPException, ValueError) as e:  # dont HTTPError, URLError, coupure de connexion
                 print(f"{ENDPOINTS[i]} : {type(e).__name__} {e}", flush=True)
@@ -100,21 +113,30 @@ def fetch(q, end, first=0):
     return None, first
 
 
-def overpass(deadline=DEADLINE):
-    """Toutes les tuiles, sans doublon (un bâtiment à cheval sur deux tuiles revient deux fois)."""
+def tile_minimum(best):
+    """Nombre d'éléments en dessous duquel la réponse d'une tuile est refusée : 50 % du meilleur compte, 1 au moins."""
+    return max(1, math.ceil(TILE_MIN * (best or 0)))
+
+
+def overpass(deadline=DEADLINE, best_tiles=None):
+    """Toutes les tuiles, sans doublon (un bâtiment à cheval sur deux tuiles revient deux fois).
+    best_tiles : meilleurs comptes connus par tuile ; une tuile trop courte est redemandée aux autres serveurs."""
     end = time.monotonic() + deadline
-    found, good = {}, 0
+    found, good, tiles = {}, 0, {}
     for n, bbox in enumerate(TILES, 1):
         if n > 1:
             time.sleep(10)  # politesse envers les serveurs publics
-        doc, good = fetch(query(bbox), end, good)
+        minimum = tile_minimum((best_tiles or {}).get(bbox))
+        doc, good = fetch(query(bbox), end, good, minimum)
         if doc is None:
-            sys.exit(f"Overpass : tuile {n}/{len(TILES)} sans réponse (serveurs saturés, ou {deadline // 60} min écoulées) : "
-                     "stores.json n'est pas modifié.")
+            print(f"::error::Overpass : tuile {n}/{len(TILES)} ({bbox}) sans réponse complète (au moins {minimum} éléments attendus)", flush=True)
+            sys.exit(f"Overpass : tuile {n}/{len(TILES)} sans réponse complète (serveurs saturés, réponse vide ou tronquée, "
+                     f"ou {deadline // 60} min écoulées) : stores.json n'est pas modifié.")
         elements = doc.get("elements", [])
+        tiles[bbox] = len(elements)
         found.update(((e.get("type"), e.get("id")), e) for e in elements)
         print(f"Tuile {n}/{len(TILES)} : {len(elements)} éléments ({ENDPOINTS[good]})", flush=True)
-    return {"elements": list(found.values())}
+    return {"elements": list(found.values()), "tiles": tiles}
 
 
 def fold(t):
@@ -313,15 +335,19 @@ def build(elements, depts, communes=None):
     return out, skipped
 
 
-def render(rows):
+def render(rows, regions=None, tiles=None):
     head = {"generated": time.strftime("%Y-%m-%d"), "source": "© les contributeurs d’OpenStreetMap, licence ODbL",
             "fields": FIELDS, "kinds": KINDS, "count": len(rows)}
+    if regions:
+        head["regions"] = dict(sorted(regions.items()))  # boutiques par région (contrôle)
+    if tiles:
+        head["tiles"] = tiles  # éléments Overpass par tuile (contrôle)
     body = ",\n".join(json.dumps(r, ensure_ascii=False, separators=(",", ":")) for r in rows)
     return json.dumps(head, ensure_ascii=False)[:-1] + ',\n"stores":[\n' + body + "\n]}\n"
 
 
-def write(rows):
-    text = render(rows)
+def write(rows, regions=None, tiles=None):
+    text = render(rows, regions, tiles)
     size = len(text.encode("utf-8"))
     if size > MAX_BYTES:
         sys.exit(f"stores.json ferait {size // 1024} Ko (plus de {MAX_BYTES // 1000} Ko) : fichier inchangé.")
@@ -329,12 +355,67 @@ def write(rows):
     return size
 
 
+def count_regions(rows, region):
+    out = {}
+    for r in rows:
+        out[region[r[5]]] = out.get(region[r[5]], 0) + 1
+    return out
+
+
+def load_reference(path=None):
+    try:
+        ref = json.loads(Path(path or REFERENCE).read_text("utf-8"))
+    except (OSError, ValueError):
+        ref = {}
+    return {"date": ref.get("date"), "total": ref.get("total", 0), "regions": ref.get("regions") or {}, "tiles": ref.get("tiles") or {}}
+
+
+def guard(total, regions, ref, names=None):
+    """Anomalies d'une nouvelle liste face aux meilleurs comptes connus : liste de messages (vide si tout va bien)."""
+    problems = []
+    if ref["total"] and total < ref["total"] * TOTAL_MIN:
+        problems.append(f"{total} boutiques contre {ref['total']} au mieux ({ref['date']}) : moins de {TOTAL_MIN:.0%}")
+    for code, best in sorted(ref["regions"].items()):
+        n = regions.get(code, 0)
+        if best and n < best * REGION_MIN:
+            problems.append(f"région {(names or {}).get(code, code)} : {n} boutiques contre {best} au mieux, moins de {REGION_MIN:.0%}")
+    return problems
+
+
+def raise_reference(ref, total, regions, tiles, day, reset=False):
+    """Meilleurs comptes connus après une liste acceptée : chaque compte ne fait que monter (sauf reset)."""
+    if reset:
+        return {"date": day, "total": total, "regions": dict(sorted(regions.items())), "tiles": dict(tiles or {})}
+    new = {"date": ref["date"], "total": max(ref["total"], total),
+           "regions": {k: max(ref["regions"].get(k, 0), regions.get(k, 0)) for k in sorted(set(ref["regions"]) | set(regions))},
+           "tiles": {k: max(ref["tiles"].get(k, 0), (tiles or {}).get(k, 0)) for k in TILES if k in ref["tiles"] or k in (tiles or {})}}
+    if new != ref:
+        new["date"] = day
+    return new
+
+
+def save_reference(ref, path=None):
+    note = ("Meilleurs comptes connus de stores.json (sync_stores.py) : boutiques au total et par région (code INSEE), "
+            "éléments Overpass par tuile. Relevés seulement après une liste acceptée ; --reset-reference pour repartir à zéro.")
+    Path(path or REFERENCE).write_text(json.dumps(dict({"note": note}, **ref), ensure_ascii=False, indent=1) + "\n", "utf-8")
+
+
+def region_names():
+    try:
+        geo = json.loads((ROOT / "web" / "data" / "geo" / "regions.json").read_text("utf-8"))
+        return {f["properties"]["code"]: f["properties"].get("nom") or f["properties"]["code"] for f in geo["features"]}
+    except (OSError, ValueError, KeyError):
+        return {}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", help="réponse Overpass déjà téléchargée (JSON)")
-    ap.add_argument("--min-ratio", type=float, default=0.8, help="refuse une liste plus courte que ce ratio de la précédente")
+    ap.add_argument("--reset-reference", action="store_true",
+                    help="accepte la liste du jour quels que soient les comptes et repart de ses comptes (après vérification)")
     args = ap.parse_args()
-    doc = json.loads(Path(args.input).read_text("utf-8")) if args.input else overpass()
+    ref = load_reference()
+    doc = json.loads(Path(args.input).read_text("utf-8")) if args.input else overpass(best_tiles=ref["tiles"])
     communes = None
     if COMMUNES.exists():
         communes = Communes()
@@ -342,26 +423,26 @@ def main():
         print(f"Communes : {total} contours, {communes.named} noms officiels" + ("" if COMMUNE_NAMES.exists() else f" ({COMMUNE_NAMES} absent)"), flush=True)
     else:
         print(f"{COMMUNES} absent : villes tirées d'OpenStreetMap seulement.", flush=True)
-    rows, skipped = build(doc.get("elements", []), Departments(), communes)
-    previous = 0
-    if OUT.exists():
-        try:
-            previous = json.loads(OUT.read_text("utf-8")).get("count", 0)
-        except ValueError:
-            previous = 0
-    if previous and len(rows) < previous * args.min_ratio:
-        sys.exit(f"Seulement {len(rows)} boutiques contre {previous} la dernière fois : réponse Overpass incomplète ? Fichier inchangé.")
-    size = write(rows)
+    depts = Departments()
+    rows, skipped = build(doc.get("elements", []), depts, communes)
+    by_region = count_regions(rows, depts.region)
+    names = region_names()
+    problems = guard(len(rows), by_region, ref, names)
+    if problems and not args.reset_reference:
+        for p in problems:
+            print(f"::error::Boutiques : {p}", flush=True)
+        sys.exit("Réponse Overpass incomplète ? stores.json n'est pas modifié (voir tools/stores/reference.json).")
+    size = write(rows, by_region, doc.get("tiles"))
+    new_ref = raise_reference(ref, len(rows), by_region, doc.get("tiles"), time.strftime("%Y-%m-%d"), args.reset_reference)
+    if new_ref != ref:
+        save_reference(new_ref)
+        print(f"Meilleurs comptes connus relevés : {new_ref['total']} boutiques.")
     by_kind = {}
     for r in rows:
         by_kind[r[2]] = by_kind.get(r[2], 0) + 1
-    by_region = {}
-    region = Departments().region
-    for r in rows:
-        by_region[region[r[5]]] = by_region.get(region[r[5]], 0) + 1
     print(f"{len(rows)} boutiques ({size // 1024} Ko) · écartées : {skipped}")
     print("Par type : " + ", ".join(f"{KINDS[k]} {n}" for k, n in sorted(by_kind.items(), key=lambda x: -x[1])))
-    print("Par région : " + ", ".join(f"{k} {n}" for k, n in sorted(by_region.items())))
+    print("Par région : " + ", ".join(f"{names.get(k, k)} {n}" for k, n in sorted(by_region.items())))
     print(f"Avec un indice cartes / Pokémon : {sum(r[8] for r in rows)}")
     print("Coordonnées : " + ", ".join(f"{k} {sum(1 for r in rows if r[FIELDS.index(k)])}" for k in FIELDS[CONTACT]))
     district = sum(1 for r in rows if re.search(r" \d+(er|e)$", r[6]))

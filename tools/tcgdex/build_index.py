@@ -31,19 +31,33 @@ numéro), sinon dans l'extension parente (« swsh9tg » TG01 → « swsh9 » TG0
 Contenu de cards.json :
     sets      { set_id: [nom, série, date de sortie, logo, nombre officiel de cartes, langue des cartes] }
     fields    noms des colonnes de chaque carte
-    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue], ...]
+    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue, cmh, cmv, q], ...]
               cm    = tendance Cardmarket (€)      low = plus bas Cardmarket (€, prix demandé)
               avg30 = moyenne Cardmarket 30 jours  tcp = TCGplayer « market », converti en €
               maj   = date de mise à jour des prix Cardmarket
               avg7, avg1 = moyennes Cardmarket 7 jours et 1 jour (tendance de la collection sur l'accueil)
-              cm et les moyennes viennent de la même variante (normale, sinon holo).
+              cm, low et les moyennes viennent d'un même groupe de prix Cardmarket (variante, voir cmv).
               langue = « en » pour une carte ajoutée à une extension française depuis la version anglaise
               (TCGdex, sinon pokemontcg.io : complete.py), vide sinon.
+              cmh   = tendance de l'autre groupe de prix : reverse (carte qui a une version reverse), normale
+                      (carte holo seulement, cote tirée du groupe holo), ou holo ; null s'il manque
+              cmv   = groupe de prix de cm : « n » (champs normaux) ou « h » (champs « -holo ») ; null sans cm
+              q     = 1 si la cote est douteuse (plus bas < 5 % de la tendance, moyenne 1 jour et tendance à plus
+                      de 3 fois d'écart, carte holo seulement cotée sans le groupe holo), 0 sinon
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
               Le chemin commence par la langue du visuel (fr/… ou en/…) ; « ptcg:set/numéro » pour
               pokemontcg.io.
     usdEur    taux appliqué aux prix TCGplayer (BCE du jour, sinon taux de secours)
-    stats     contrôle : cartes, visuels dans la langue de la carte, visuels de repli par langue, sans visuel
+    stats     contrôle : cartes, visuels dans la langue de la carte, visuels de repli par langue, sans visuel ;
+              couverture des prix : cartes avec une cote Cardmarket (cardsCm), avec un prix (cardsPriced), cote
+              tirée du groupe holo (cardsHolo), cote douteuse (cardsDoubt), extensions sans aucune cote Cardmarket
+              (setsNoCm : {extension: cartes}), dont celles sorties depuis moins de 90 jours (setsPriceSoon :
+              « cote à venir »)
+
+Garde-fous (2026-10-11) : comparé au catalogue publié la veille (--out), l'index n'est pas écrit si les cartes
+baissent de plus de 2 %, si une extension disparaît, si les cotes Cardmarket baissent de plus de 5 %, ou si les
+compléments anglais et visuels de repli chutent (cardsEn, imgAlt : avertissement à −10 %, échec à −25 % ; imgNone :
+avertissement à +10 %, échec à +25 %). --force accepte un changement vérifié à la main.
     rarities  nombre de cartes par rareté (contrôle)
 """
 import argparse
@@ -51,7 +65,7 @@ import json
 import re
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
@@ -65,6 +79,9 @@ ASSETS = "https://assets.tcgdex.net/"
 ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 FALLBACK_USD_EUR = 0.86  # taux de secours si la BCE ne répond pas
 SKIP_SERIES = {"tcgp"}  # Pokémon TCG Pocket : cartes numériques, hors collection physique
+FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q"]
+Q_MIN_TREND = 1.0  # en dessous de 1 €, l'écart entre plus bas et tendance ne dit rien : pas de « cote douteuse »
+SOON_DAYS = 90  # extension récente sans cote Cardmarket : « cote à venir »
 TCP_VARIANTS = ["normal", "holofoil", "reverse-holofoil", "1st-edition-holofoil", "1st-edition", "unlimited-holofoil", "unlimited"]
 # Raretés des cartes en anglais, dites comme dans le catalogue français.
 RARITY_FR = {
@@ -106,7 +123,20 @@ def first(d, *keys):
     return None
 
 
+def doubtful(trend, low, avg1):
+    """Cote douteuse : plus bas sous 5 % de la tendance, ou moyenne 1 jour à plus de 3 fois d'écart de la tendance."""
+    if trend is None or trend < Q_MIN_TREND:
+        return False
+    return (low is not None and low < 0.05 * trend) or (avg1 is not None and (avg1 > 3 * trend or 3 * avg1 < trend))
+
+
 def prices(card, rate):
+    """(cm, low, avg30, tcp, maj, avg7, avg1, cmh, cmv, q) d'une carte TCGdex.
+    Cardmarket donne deux groupes de prix : champs normaux (trend, low…) et champs « -holo » (trend-holo…).
+    - Carte holo seulement (variants : ni normale ni reverse ; ex. Rayquaza ☆ ex8-107) : le groupe holo est le
+      sien, le groupe normal est un autre produit mal rangé : cote tirée du groupe holo.
+    - Carte avec une version reverse : « -holo » est le prix de la reverse ; cote du groupe normal, reverse à part (cmh).
+    - Sinon : groupe normal s'il a une tendance, sinon groupe holo."""
     pr = card.get("pricing") or {}
     cm = pr.get("cardmarket") or {}
     tp = pr.get("tcgplayer") or {}
@@ -119,10 +149,29 @@ def prices(card, rate):
                 tcp = round(usd * rate, 2)
                 break
     upd = str(cm.get("updated") or "")[:10] or None
-    # Tendance et moyennes d'une même variante : normale si sa tendance existe, sinon holo.
-    sfx = "" if num(cm.get("trend")) is not None or num(cm.get("trend-holo")) is None else "-holo"
-    trend, avg30, avg7, avg1 = (num(cm.get(k + sfx)) for k in ("trend", "avg30", "avg7", "avg1"))
-    return (trend, first(cm, "low", "low-holo"), avg30, tcp, upd, avg7, avg1)
+    variants = card.get("variants") or {}
+    has_n, has_h = num(cm.get("trend")) is not None, num(cm.get("trend-holo")) is not None
+    holo_only = bool(variants.get("holo")) and not variants.get("normal") and not variants.get("reverse")
+    if holo_only:
+        sfx = "-holo" if has_h else ""
+    else:
+        sfx = "" if has_n or not has_h else "-holo"
+    trend, low, avg30, avg7, avg1 = (num(cm.get(k + sfx)) for k in ("trend", "low", "avg30", "avg7", "avg1"))
+    cmh = num(cm.get("trend" + ("" if sfx else "-holo")))
+    cmv = None if trend is None else ("h" if sfx else "n")
+    q = 1 if doubtful(trend, low, avg1) or (holo_only and trend is not None and not has_h) else 0
+    return (trend, low, avg30, tcp, upd, avg7, avg1, cmh, cmv, q)
+
+
+def row(cid, name, sid, local, rarity, img, p, lang=""):
+    """Ligne du catalogue dans l'ordre de FIELDS ; p : prix au format de prices()."""
+    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:]]
+
+
+def ptcg_row_prices(card, rate):
+    """Prix pokemontcg.io (complete.ptcg_prices) complétés au format de prices() : un seul groupe de prix."""
+    p = ptcg_prices(card, rate)
+    return (*p, None, None if p[0] is None else "n", 1 if doubtful(p[0], p[1], p[6]) else 0)
 
 
 def short_img(url):
@@ -189,15 +238,88 @@ class Fallback:
         return None
 
 
-def ptcg_alive(path):
-    """L'hébergeur d'images de pokemontcg.io répond-il encore (vraie image, pas une page d'erreur) ?"""
+def probe_image(path):
     url = PTCG_IMG + path[len("ptcg:"):] + ".png"
     try:
         with urlopen(Request(url, method="HEAD", headers={"User-Agent": "PKM-App-index/1.0"}), timeout=20) as resp:
-            return resp.status == 200 and (resp.headers.get("Content-Type") or "").startswith("image/")
+            if resp.status == 200 and (resp.headers.get("Content-Type") or "").startswith("image/"):
+                return True
+            print(f"pokemontcg.io : {url} → {resp.status} {resp.headers.get('Content-Type')}")
     except Exception as e:  # noqa: BLE001
-        print(f"pokemontcg.io ne répond pas ({e}).")
-        return False
+        print(f"pokemontcg.io ne répond pas pour {url} ({e}).")
+    return False
+
+
+def ptcg_alive(paths, tries=3, pause=30):
+    """L'hébergeur d'images de pokemontcg.io répond-il encore (vraie image, pas une page d'erreur) ?
+    Vrai dès qu'une image répond ; faux après `tries` essais sur des images différentes, espacés de `pause` s."""
+    paths = sorted(set(paths))
+    if not paths:
+        return True
+    picks = []
+    for p in (paths[0], paths[len(paths) // 2], paths[-1]) + tuple(paths):
+        if p not in picks:
+            picks.append(p)
+    picks = (picks * tries)[:tries]
+    for k, path in enumerate(picks):
+        if k:
+            time.sleep(pause)
+        if probe_image(path):
+            return True
+    return False
+
+
+def coverage(cards, sets, today=None):
+    """Couverture des prix par extension (E, 2026-10-11) : extensions sans aucune cote Cardmarket, et parmi elles
+    celles sorties depuis moins de SOON_DAYS jours (« cote à venir »). Aucune cote n'est inventée."""
+    f = {k: i for i, k in enumerate(FIELDS)}
+    total, with_cm = {}, {}
+    for c in cards:
+        total[c[f["set"]]] = total.get(c[f["set"]], 0) + 1
+        with_cm[c[f["set"]]] = with_cm.get(c[f["set"]], 0) + (c[f["cm"]] is not None)
+    no_cm = {sid: n for sid, n in total.items() if not with_cm[sid]}
+    limit = ((today or datetime.now(timezone.utc).date()) - timedelta(SOON_DAYS)).isoformat()
+    soon = sorted(sid for sid in no_cm if (sets.get(sid) or ["", "", ""])[2] >= limit)
+    return {"cardsCm": sum(with_cm.values()),
+            "cardsPriced": sum(1 for c in cards if c[f["cm"]] is not None or c[f["tcp"]] is not None),
+            "cardsHolo": sum(1 for c in cards if c[f["cmv"]] == "h"),
+            "cardsDoubt": sum(1 for c in cards if c[f["q"]]),
+            "setsNoCm": dict(sorted(no_cm.items(), key=lambda kv: (-kv[1], kv[0]))), "setsPriceSoon": soon}
+
+
+def compare_catalog(prev, doc):
+    """Anomalies du nouveau catalogue face à celui de la veille : (erreurs, avertissements)."""
+    errors, warnings = [], []
+    if not prev or not prev.get("cards"):
+        return errors, warnings
+    pf = {k: i for i, k in enumerate(prev["fields"])}
+    nf = {k: i for i, k in enumerate(doc["fields"])}
+    n0, n1 = len(prev["cards"]), len(doc["cards"])
+    if n1 < n0 * 0.98:
+        errors.append(f"{n1} cartes contre {n0} la veille (moins de 98 %)")
+    gone = sorted(set(prev.get("sets") or {}) - set(doc.get("sets") or {}))
+    if gone:
+        errors.append(f"extensions disparues depuis la veille : {', '.join(gone)}")
+    cm0 = sum(1 for c in prev["cards"] if c[pf["cm"]] is not None)
+    cm1 = sum(1 for c in doc["cards"] if c[nf["cm"]] is not None)
+    if cm1 < cm0 * 0.95:
+        errors.append(f"{cm1} cartes avec une cote Cardmarket contre {cm0} la veille (moins de 95 %)")
+    s0, s1 = prev.get("stats") or {}, doc.get("stats") or {}
+
+    def drop(label, a, b):
+        if a and b < a * 0.75:
+            errors.append(f"{label} : {b} contre {a} la veille (−{1 - b / a:.0%})")
+        elif a and b < a * 0.9:
+            warnings.append(f"{label} : {b} contre {a} la veille (−{1 - b / a:.0%})")
+
+    drop("cartes en anglais (cardsEn)", s0.get("cardsEn", 0), s1.get("cardsEn", 0))
+    drop("visuels de repli (imgAlt)", sum((s0.get("imgAlt") or {}).values()), sum((s1.get("imgAlt") or {}).values()))
+    a, b = s0.get("imgNone", 0), s1.get("imgNone", 0)
+    if b > a * 1.25 + 50:
+        errors.append(f"cartes sans visuel (imgNone) : {b} contre {a} la veille")
+    elif b > a * 1.1 + 20:
+        warnings.append(f"cartes sans visuel (imgNone) : {b} contre {a} la veille")
+    return errors, warnings
 
 
 def natural(n):
@@ -216,6 +338,8 @@ def main():
     p.add_argument("--list-en-only", action="store_true", help="affiche les extensions absentes du catalogue français, puis s'arrête")
     p.add_argument("--list-en-extra", action="store_true", help="affiche les extensions françaises dont la version anglaise a des cartes en plus, puis s'arrête")
     p.add_argument("--min-cards", type=int, default=1000, help="échec si moins de cartes (protège contre un index vide)")
+    p.add_argument("--previous", default=None, help="catalogue de la veille à comparer (par défaut : --out avant écriture)")
+    p.add_argument("--force", action="store_true", help="écrit l'index malgré une baisse face à la veille (vérifiée à la main)")
     args = p.parse_args()
     src, out = Path(args.src), Path(args.out)
     en = Path(args.en) if args.en else None
@@ -336,7 +460,7 @@ def main():
                 rarity = RARITY_FR.get(rarity.lower(), rarity)
                 stats["cardsEn"] += 1
             rarities[rarity] = rarities.get(rarity, 0) + 1
-            cards.append([cid, r["name"], sid, str(r["local"]), rarity, short_img(img), *prices(c, rate), ""])
+            cards.append(row(cid, r["name"], sid, str(r["local"]), rarity, short_img(img), prices(c, rate)))
         if lang == "fr":
             complete_set(sid, s, rows)
 
@@ -348,8 +472,8 @@ def main():
             rarity = c.get("rarity") or ""
             rarity = RARITY_FR.get(rarity.lower(), rarity)
             rarities[rarity] = rarities.get(rarity, 0) + 1
-            cards.append([b["id"], c.get("name") or b.get("name") or "", sid, str(b.get("localId") or ""), rarity,
-                          short_img(c.get("image") or b.get("image")), *prices(c, rate), "en"])
+            cards.append(row(b["id"], c.get("name") or b.get("name") or "", sid, str(b.get("localId") or ""), rarity,
+                             short_img(c.get("image") or b.get("image")), prices(c, rate), "en"))
             have_n.add(norm_number(b.get("localId", "")))
             have_ids.add(b["id"])
             stats["cardsEnExtra"] += 1
@@ -360,7 +484,7 @@ def main():
         for x in ptcg_extra(sid, ps, ptcg.cards.get(ps) if ptcg and ps else None, have_n, have_ids, ptcg_shared):
             rarity = RARITY_FR.get(x["rarity"].lower(), x["rarity"])
             rarities[rarity] = rarities.get(rarity, 0) + 1
-            cards.append([x["id"], x["name"], sid, x["local"], rarity, x["img"], *ptcg_prices(x["card"], rate), "en"])
+            cards.append(row(x["id"], x["name"], sid, x["local"], rarity, x["img"], ptcg_row_prices(x["card"], rate), "en"))
             stats["cardsPtcg"] += 1
 
     for sid, s in fr_sets.items():
@@ -368,13 +492,14 @@ def main():
     for sid in en_only:
         add_set(sid, en_sets[sid], "en", en)
     stats["cards"] = len(cards)
+    stats.update(coverage(cards, sets))
     if ptcg_report:
         print("pokemontcg.io, par extension :", " · ".join(ptcg_report))
     # Correspondances validées : gardées pour les jours où le dépôt pokemontcg.io ne répond pas.
     if ptcg and ptcg_found:
         PTCG_CACHE.write_text(json.dumps(dict(sorted(ptcg_found.items())), ensure_ascii=False, indent=0) + "\n", "utf-8")
     # Si l'hébergeur d'images ne répond plus, ces visuels sont retirés (les cartes redeviennent « à venir »).
-    if ptcg_found and not args.no_probe and not ptcg_alive(next(iter(ptcg_found.values()))):
+    if ptcg_found and not args.no_probe and not ptcg_alive(ptcg_found.values()):
         print(f"Images pokemontcg.io indisponibles : {len(ptcg_found)} visuels retirés.")
         for c in cards:
             if c[5].startswith("ptcg:"):
@@ -395,11 +520,19 @@ def main():
         "img": ASSETS,
         "usdEur": rate, "usdEurDate": rate_day, "usdEurSource": rate_src,
         "sets": sets,
-        "fields": ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang"],
+        "fields": FIELDS,
         "stats": stats,
         "rarities": dict(sorted(rarities.items(), key=lambda kv: -kv[1])),
         "cards": cards,
     }
+    errors, warnings = compare_catalog(load(Path(args.previous) if args.previous else out), doc)
+    for w in warnings:
+        print(f"::warning::Catalogue TCGdex : {w}")
+    if errors:
+        for e in errors:
+            print(f"::error::Catalogue TCGdex : {e}")
+        if not args.force:
+            sys.exit(f"Index non écrit : {len(errors)} anomalie(s) face au catalogue de la veille (--force après vérification).")
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_suffix(".tmp")
     # Une carte par ligne : le fichier reste lisible et l'historique git (archive des prix) reste léger.
@@ -409,9 +542,12 @@ def main():
     tmp.write_text(text, "utf-8")
     tmp.replace(out)
 
-    priced = sum(1 for c in cards if c[6] is not None or c[9] is not None)
     print(f"{len(cards)} cartes dans {len(sets)} extensions, dont {stats['cardsEn']} cartes en anglais "
-          f"({len(en_only)} extensions sans version française dans TCGdex) ; {priced} avec un prix.")
+          f"({len(en_only)} extensions sans version française dans TCGdex) ; {stats['cardsPriced']} avec un prix, "
+          f"{stats['cardsCm']} avec une cote Cardmarket ({stats['cardsHolo']} tirées du groupe holo, {stats['cardsDoubt']} douteuses).")
+    if stats["setsNoCm"]:
+        print("Extensions sans cote Cardmarket :", ", ".join(f"{k} ({v})" for k, v in stats["setsNoCm"].items()),
+              f"· cote à venir : {', '.join(stats['setsPriceSoon']) or 'aucune'}")
     print(f"Cartes ajoutées aux extensions françaises : {stats['cardsEnExtra']} de TCGdex en anglais, "
           f"{stats['cardsPtcg']} de pokemontcg.io.")
     print(f"Visuels : {stats['imgOwn']} dans la langue de la carte, repli {json.dumps(stats['imgAlt'])}, "

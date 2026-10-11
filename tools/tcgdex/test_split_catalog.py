@@ -38,6 +38,17 @@ class SplitTest(unittest.TestCase):
         base, prices = S.split(doc)
         self.assertEqual(S.join(base, prices), doc)
 
+    def test_new_price_fields(self):
+        # cmh, cmv, q (2026-10-11) : en fin de ligne, dans le fichier des prix du jour ; la partie fixe ne change pas.
+        new = json.loads(json.dumps(DOC))
+        new["fields"] = DOC["fields"] + ["lang", "cmh", "cmv", "q"]
+        for c, extra in zip(new["cards"], [["", 32.35, "h", 0], ["en", None, None, 1]]):
+            c.extend(extra)
+        base, prices = S.split(new)
+        self.assertEqual(prices["fields"][-3:], ["cmh", "cmv", "q"])
+        self.assertNotIn("cmv", base["fields"])
+        self.assertEqual(S.join(base, prices), new)
+
 
 if __name__ == "__main__":
     unittest.main()

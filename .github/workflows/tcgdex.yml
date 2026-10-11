@@ -3,10 +3,19 @@
 # (catalogue compact chargé par la démo web) et le publie sur la branche. Cloudflare Pages redéploie ensuite.
 # Les prix du scellé sont mis à jour par le workflow « Catalogue scellé » (un seul workflow par fichier publié).
 # Chaque mise à jour est un commit : l'historique git de cards.json sert d'archive quotidienne des prix.
+# Garde-fous (2026-10-11) : build_index.py n'écrit pas un catalogue en baisse face à la veille (cartes −2 %, extension
+# disparue, cotes −5 %, compléments anglais et visuels de repli en chute) ; tools/check_data.py contrôle ensuite les
+# trois fichiers et met à jour web/data/status.json. Des échecs de téléchargement restants après la reprise, un
+# catalogue refusé ou une anomalie font échouer le job à la fin (courriel au porteur), après publication de status.json.
 name: Catalogue TCGdex
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Publier malgré une baisse face à la veille (vérifiée à la main)"
+        type: boolean
+        default: false
   schedule:
     - cron: "47 4 * * *" # chaque jour vers 06:47 (heure de Paris en été)
   push:
@@ -48,6 +57,22 @@ jobs:
             python3 tools/tcgdex/sync_tcgdex.py --skip-images --workers 2 --out data/tcgdex
           fi
 
+      # Après la reprise, il ne doit plus rester d'échec : sinon des cartes perdraient leur prix sans bruit.
+      # Le catalogue est quand même construit (garde-fous de build_index.py), et le job échoue à la fin.
+      - name: Échecs restants après la reprise
+        id: failures
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          f = json.load(open("data/tcgdex/failures.json"))
+          for x in f[:30]:
+              print(f"::error::TCGdex : {x['type']} {x['id']} : {x['error']}")
+          if f:
+              sys.exit(f"{len(f)} échec(s) de téléchargement après la reprise (data/tcgdex/failures.json)")
+          print("Aucun échec restant.")
+          PY
+
       # Autres versions, sans le détail des cartes (une requête par extension) : elles complètent les
       # visuels absents en français (même dessin officiel) ; l'anglais liste aussi les extensions sans
       # version française dans TCGdex.
@@ -79,21 +104,30 @@ jobs:
         if: github.event_name == 'push'
         run: python3 -m unittest discover -s tools/tcgdex -p "test_*.py"
 
-      - name: Construire le catalogue compact
-        run: >-
-          python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en
-          --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --ptcg data/ptcg
-          --out web/data/cards.json
+      # Comparé au catalogue publié la veille : pas d'écriture en cas de baisse (cartes, extensions, cotes,
+      # compléments anglais cardsEn, visuels de repli imgAlt, cartes sans visuel imgNone), sauf « force ».
+      # Puis partie fixe et prix du jour en deux fichiers : la démo ne retélécharge chaque jour que les prix.
+      - name: Construire et découper le catalogue compact
+        id: build
+        continue-on-error: true
+        run: |
+          python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en \
+            --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --ptcg data/ptcg \
+            --out web/data/cards.json ${{ inputs.force && '--force' || '' }}
+          python3 tools/tcgdex/split_catalog.py --src web/data/cards.json
 
-      # Partie fixe et prix du jour en deux fichiers : la démo ne retélécharge chaque jour que les prix.
-      - name: Découper le catalogue (partie fixe, prix du jour)
-        run: python3 tools/tcgdex/split_catalog.py --src web/data/cards.json
+      - name: Contrôle des données (status.json)
+        id: check
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: python3 tools/check_data.py cards --revert ${{ inputs.force && '--force' || '' }}
 
       - name: Publier sur la branche
+        if: ${{ !cancelled() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/data/cards.json web/data/cards-base.json web/data/cards-prices.json
+          git add web/data/cards.json web/data/cards-base.json web/data/cards-prices.json web/data/status.json
           if [ -f tools/tcgdex/ptcg_images.json ]; then git add tools/tcgdex/ptcg_images.json; fi
           if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
           git commit -m "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))"
@@ -101,4 +135,10 @@ jobs:
             git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
             sleep $((i * 5))
           done
+          exit 1
+
+      - name: Échec signalé (échecs restants, catalogue refusé ou anomalie)
+        if: ${{ !cancelled() && (steps.failures.outcome == 'failure' || steps.build.outcome == 'failure' || steps.check.outcome == 'failure') }}
+        run: |
+          echo "::error::Catalogue TCGdex : voir le résumé du job et web/data/status.json."
           exit 1

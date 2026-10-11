@@ -1,6 +1,7 @@
 # Vérification de la démo web à chaque envoi : tests unitaires (marge, import, accueil, Radar, scan, thème), puis
 # reconstruction de web/ ; échec si la démo publiée n'est pas celle que produisent les sources (build oublié).
 # Puis tests navigateur (tools/web/e2e, Chromium) sur la démo servie localement ; captures jointes en cas d'échec.
+# Tests unitaires des chaînes de données (boutiques, scellé, TCGdex, contrôle check_data.py), en Python.
 name: Tests de la démo
 
 on:
@@ -11,6 +12,11 @@ on:
       - .github/workflows/tests.yml
       - docs/12-maquette-v5/**
       - tools/web/**
+      - tools/stores/**
+      - tools/sealed/**
+      - tools/tcgdex/**
+      - tools/check_data.py
+      - tools/test_check_data.py
       - tools/sprites/companions.json
       - web/app.js
       - web/index.html
@@ -20,6 +26,18 @@ permissions:
   contents: read
 
 jobs:
+  pipelines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests des chaînes de données (Python)
+        run: |
+          python3 -m unittest discover -s tools/stores -p "test_*.py"
+          python3 -m unittest discover -s tools/sealed -p "test_*.py"
+          python3 -m unittest discover -s tools/tcgdex -p "test_*.py"
+          python3 -m unittest discover -s tools -p "test_check_data.py"
+
   unit:
     runs-on: ubuntu-latest
     timeout-minutes: 15
