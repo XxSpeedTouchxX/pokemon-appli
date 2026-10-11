@@ -29,26 +29,38 @@
       price: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur0(p.low) : 'Prix à venir'),
       priceLabel: k !== null ? 'cote PKM' : (typeof p.low === 'number' ? 'précommandes' : ''),
       priceColor: k !== null ? 'var(--pkm-t1)' : 'var(--pkm-t3)',
-      hasTag: soon || recent, tag: soon ? 'À venir' : 'Nouveau', tagBg: soon ? 'var(--pkm-orange)' : 'var(--pkm-green)',
+      hasTag: soon || recent, tag: soon ? showCountdown(p.release) : 'Nouveau', tagBg: soon ? 'var(--pkm-orange)' : 'var(--pkm-green)',
       owned: q > 0, qty: '×' + q,
       label: p.name + ', ' + (when ? when.toLowerCase() : 'date à venir') + (k !== null ? ', cote ' + this.eur(k) : '') + (q ? ', ' + q + ' dans ta collection' : ''),
       open: () => this.openTcg(p.id)
     });
   };
-  const EMPTY_FEATURE = { show: false, items: [], all: null, allLabel: '' };
-  // Sorties du moment : à venir (la plus proche d'abord), puis sorties des 60 derniers jours.
-  SEALED.moment = function () {
-    if (SEALED.status !== 'ready') return [];
-    const day = Date.parse(TODAY), all = SEALED.list();
-    const soon = all.filter(p => p.release).sort((a, b) => (a.release < b.release ? -1 : 1));
-    const recent = all.filter(p => !p.release && p.released && (day - Date.parse(p.released)) / 86400000 <= 60);
-    return soon.concat(recent).slice(0, FEATURE_MAX);
+  // Compte à rebours d'une sortie à venir (« Dans 26 j », « Demain », « Aujourd'hui »).
+  const showCountdown = day => {
+    const n = Math.round((Date.parse(day) - Date.parse(TODAY)) / 86400000);
+    return n <= 0 ? 'Aujourd’hui' : n === 1 ? 'Demain' : 'Dans ' + n + ' j';
   };
+  const EMPTY_FEATURE = { show: false, items: [], all: null, allLabel: '' };
+  // Accueil (2026-10-11) : « Prochaines sorties » en haut (à venir, la plus proche d'abord) ; « Sorties récentes »
+  // en bas (sorties des 60 derniers jours, la plus récente d'abord).
+  SEALED.soon = function () {
+    if (SEALED.status !== 'ready') return [];
+    return SEALED.list().filter(p => p.release).sort((a, b) => (a.release < b.release ? -1 : 1)).slice(0, FEATURE_MAX);
+  };
+  SEALED.recent = function () {
+    if (SEALED.status !== 'ready') return [];
+    const day = Date.parse(TODAY);
+    return SEALED.list().filter(p => !p.release && p.released && (day - Date.parse(p.released)) / 86400000 <= 60)
+      .sort((a, b) => (a.released < b.released ? 1 : -1)).slice(0, FEATURE_MAX);
+  };
+  SEALED.moment = function () { return SEALED.soon().concat(SEALED.recent()).slice(0, FEATURE_MAX); };
 
   const baseShowHome = proto.vHome;
   proto.vHome = function (x) {
-    const r = baseShowHome.call(this, x), items = SEALED.moment();
-    r.rel = items.length ? { show: true, items: items.map(p => this.featureCard(p, x.c.stock)), all: () => this.openReleases(), allLabel: 'Toutes les sorties' } : EMPTY_FEATURE;
+    const r = baseShowHome.call(this, x), soon = SEALED.soon(), recent = SEALED.recent();
+    const feat = items => ({ show: true, items: items.map(p => this.featureCard(p, x.c.stock)), all: () => this.openReleases(), allLabel: 'Toutes les sorties' });
+    r.next = soon.length ? feat(soon) : EMPTY_FEATURE;
+    r.rel = recent.length ? feat(recent) : EMPTY_FEATURE;
     return r;
   };
 

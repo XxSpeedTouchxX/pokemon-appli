@@ -21,7 +21,7 @@ const shot = async n => page.screenshot({ path: OUTF(n + '.png') });
 const step = async (name, fn) => { try { await fn(); } catch (e) { ok(name + ' — ÉCHEC : ' + e.message.split('\n')[0], false); } };
 
 await step('marché', async () => {
-  await page.goto(E2E + '/#marche', { waitUntil: 'load' });
+  await page.goto(E2E + '/?start=search', { waitUntil: 'load' });
   await page.waitForSelector('button:has-text("Toutes les cartes")', { timeout: 10000 });
   ok('bandeau : ' + (await page.locator('button:has-text("Toutes les cartes")').innerText()).replace(/\n/g, ' | '), true);
   await page.waitForTimeout(300); await shot('v6-marche');
@@ -80,7 +80,7 @@ await step('ajout', async () => {
   await page.waitForSelector('text=Série complète');
   await page.waitForTimeout(250);
   const st = await page.evaluate(() => document.querySelector('#app main').scrollTop);
-  ok('retour en haut de page (J1, 2026-10-09) : ' + st, st === 0);
+  ok('retour : l’extension reprend sa position (2026-10-11, avant : en haut) : ' + st, st > 0);
   ok('badge ×1 dans la grille', (await page.locator('main button[aria-label*="n° 238/191"]').first().innerText()).includes('×1'));
 });
 await step('rechargement', async () => {

@@ -11,7 +11,7 @@ ok('panneau ouvert : ' + await sh.locator('h2').innerText(), (await sh.locator('
 const t1 = await sh.innerText();
 ok('mentions : hébergeur, non-affiliation, éditeur à compléter', /Cloudflare, Inc\./.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /à compléter par l’éditeur/.test(t1));
 await page.screenshot({ path: shot('legal-mentions.png') });
-for (const [tab, re] of [['Confidentialité', /arrondie à environ 100 m/], ['Conditions', /pas une plateforme de vente/], ['Règles des PK', /ne s’achètent pas, ne se vendent pas/]]) {
+for (const [tab, re] of [['Confidentialité', /arrondie à environ 100 m/], ['Conditions', /pas une plateforme de vente/], ['PK et jeux', /ne s’achètent pas, ne se vendent pas/]]) {
   await sh.locator('[aria-label="Rubriques"] button:has-text("' + tab + '")').click(); await page.waitForTimeout(250);
   ok(tab + ' : texte attendu', re.test(await sh.innerText()) && (await sh.locator('h2').innerText()) === tab);
 }
@@ -21,7 +21,7 @@ ok('fermé', (await sh.count()) === 0);
 await page.goto(E2E + '/', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('header button[aria-label^="Mes PK"]'); await page.waitForTimeout(300);
 await page.click('section[aria-label="Mes PK"] button:has-text("Règles des PK")'); await page.waitForTimeout(300);
-ok('depuis « Mes PK » : Règles des PK', (await page.locator('section[aria-label="Informations légales"] h2').innerText()) === 'Règles des PK');
+ok('depuis « Mes PK » : PK et jeux', (await page.locator('section[aria-label="Informations légales"] h2').innerText()) === 'PK et jeux');
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

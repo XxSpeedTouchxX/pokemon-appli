@@ -102,16 +102,12 @@ def main():
     logo.save(HEADER, optimize=True)
     print(f"{HEADER.relative_to(ROOT)} : {logo.width} × {logo.height}")
     ICONS.mkdir(parents=True, exist_ok=True)
-    # Largeur du mot : 78 % du carré arrondi, 64 % en plein cadre « maskable » (zone sûre), 80 % pour Apple.
-    outs = {"icon-512.png": (512, 0.78, True), "icon-192.png": (192, 0.78, True),
-            "icon-maskable-512.png": (512, 0.64, False), "apple-touch-icon.png": (180, 0.8, False)}
-    for name, (size, part, rounded) in outs.items():
-        icon(size, two_lines(logo, round(size * part)), rounded).save(ICONS / name, optimize=True)
+    # Icônes de l'app : depuis le 2026-10-11, monogramme « D » + carte O (make_icons.mjs) ; ici le favicon seulement.
     card = trim(logo.crop((SPLIT - 151, 0, SPLIT - 100, logo.height)), 0)  # la carte O
     k = 28 / card.height
     card = card.resize((round(card.width * k), 28), Image.LANCZOS)
     icon(32, card, False).save(ICONS / "favicon-32.png", optimize=True)
-    print("Icônes : " + ", ".join(list(outs) + ["favicon-32.png"]))
+    print("Icône : favicon-32.png")
 
 
 if __name__ == "__main__":

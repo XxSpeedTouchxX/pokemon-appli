@@ -78,7 +78,7 @@ ok('aucun badge partenaire sur la fiche', !/Partenaire Dropicards/.test(shop.rep
 await page.click('button:has-text("Pourquoi")'); await page.waitForTimeout(300);
 ok('« Pourquoi ? » : détail des points', /Total \d+ points/.test(await page.locator('main').innerText()));
 await page.click('button:has-text("Activer une alerte")'); await page.waitForTimeout(300);
-ok('alerte : toast', (await page.locator('text=Alerte enregistrée pour').count()) === 1);
+ok('alerte : toast (rappel à l’ouverture, sans info de stock)', (await page.locator('text=Boutique suivie : rappel').count()) === 1);
 await page.screenshot({ path: shot('ter-4-fiche.png') });
 await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(400);
 ok('retour à Territoire', (await page.locator('section[aria-label="Boutiques autour de toi"]').count()) === 1);

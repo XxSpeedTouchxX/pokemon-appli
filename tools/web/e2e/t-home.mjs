@@ -13,10 +13,11 @@ const page = await mk();
 await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(2500);
 // 1. Ordre des blocs et retraits.
 const order = await page.$$eval('main section[aria-label], main > button, main > div > button', els => els.map(e => e.getAttribute('aria-label') || (e.textContent.includes('Marge réalisée') ? 'Marge' : '')).filter(Boolean));
-// Depuis le 2026-10-07 : « Mon classeur » après la valeur, « Sorties du moment » tout en bas.
-const want = ['Recherche dans le catalogue', 'Valeur de ma collection', 'Mon classeur', 'Boutiques près de toi', 'Marge', 'Sorties du moment'];
+// Depuis le 2026-10-07 : « Mon classeur » après la valeur ; depuis le 2026-10-11 : « Prochaines sorties » avant le
+// classeur, « Sorties récentes » tout en bas.
+const want = ['Recherche dans le catalogue', 'Valeur de ma collection', 'Prochaines sorties', 'Mon classeur', 'Boutiques près de toi', 'Marge', 'Sorties récentes'];
 const idx = want.map(l => order.indexOf(l));
-ok('ordre : ' + order.join(' › '), idx.every((v, i) => v >= 0 && (i === 0 || v > idx[i - 1])) && order[order.length - 1] === 'Sorties du moment');
+ok('ordre : ' + order.join(' › '), idx.every((v, i) => v >= 0 && (i === 0 || v > idx[i - 1])) && order[order.length - 1] === 'Sorties récentes');
 const text = await page.locator('main').innerText();
 for (const gone of ['Palier Rare', 'Arrivage près de toi', 'Mouvements sur ta collection', 'Mes plus belles pièces', 'Derniers ajouts', 'Plus forte hausse'])
   ok('retiré : ' + gone, !text.includes(gone));

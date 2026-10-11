@@ -6,6 +6,31 @@
 
 ---
 
+## 2026-10-11 — L'onglet « Marché » devient « Jeux » ; corrections des données et de l'app
+
+- **Demande du porteur :** supprimer le contenu de l'onglet « Marché » et en faire un endroit pour gagner des PK (icône manette), avec deux mini-jeux.
+- **Livré :**
+  - **Booster PK**, gratuit : 10 PK (60 %), 30 PK (20 %), 50 PK (15 %), 100 PK (4 %), 1 000 PK (1 %), taux du porteur ;
+  - **Pile ou face**, gratuit, toutes les 8 h : face « gemme PK » +30 PK (une chance sur deux), face perdante « cristal éteint » (choix laissé à Claude) ;
+  - la recherche de l'ancien Marché reste accessible depuis l'accueil et le scan (écran « Recherche »).
+- **Par défaut, à confirmer :** un booster toutes les 24 h (fréquence non précisée par le porteur).
+- **Point d'attention :** les jeux sont des tirages au hasard. Ils restent hors du champ des jeux d'argent tant que les PK ne s'achètent pas et n'ont aucune valeur en euros. Si les PK deviennent payants (`docs/16`), les jeux sont à revoir avant (avis juridique).
+- **Prix :**
+  - cote Cardmarket selon la version de la carte (holo, normale, reverse), avec le prix de l'autre version à côté ;
+  - « cote à confirmer » quand les prix s'écartent anormalement ;
+  - ventes réussies eBay : un lien vers la recherche eBay, pas de chiffre (pas d'API ouverte, pas de scraping, §4).
+- **Données :** les pipelines refusent une mise à jour incomplète (boutiques, scellé, catalogue) et publient `web/data/status.json`.
+- **App :**
+  - date réelle ;
+  - enregistrement sûr de la collection ;
+  - première visite sans la collection de démo ;
+  - bouton Retour du téléphone et glissement au retour, position gardée ;
+  - alertes à l'ouverture de l'app ;
+  - mentions légales refaites ;
+  - Admin dans les Réglages ;
+  - animation d'entrée à chaque démarrage ;
+  - icône « D » + carte O.
+
 ## 2026-10-09 — Logos des séries et cartes manquantes
 
 - **Signalement du porteur :** logos des séries absents, cartes manquantes dans certaines extensions (30ᵉ Anniversaire).

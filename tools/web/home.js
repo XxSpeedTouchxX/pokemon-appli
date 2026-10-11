@@ -39,7 +39,7 @@
         : total === 0 ? 'Aucun résultat pour « ' + q + ' »'
         : total.toLocaleString('fr-FR') + (total > 1 ? ' résultats' : ' résultat') + (total > shown.length ? ' · les ' + shown.length + ' premiers' : ''),
       hasMore: total > shown.length, moreLabel: 'Voir les ' + total.toLocaleString('fr-FR') + ' résultats dans le Marché',
-      more: () => { this.setState({ mq: q, mfilter: 'trend' }); this.tab('market'); }
+      more: () => this.openSearch(q)
     });
   };
 
@@ -165,60 +165,43 @@
     });
   };
 
-  // ——— Radar de l'accueil : vraies boutiques à moins de 5 km (OpenStreetMap), balayage, repères nom et ville ———
-  // Même position que Territoire (arrondie à 100 m, jamais enregistrée ni envoyée). « Scanner les boutiques » lance le
-  // faisceau : chaque boutique apparaît à sa vraie direction et devient cliquable à ce moment-là (animation CSS, sans
-  // calcul à chaque image) ; un appui ouvre sa fiche. Animations réduites : boutiques affichées tout de suite.
-  // Sans position, un logo radar animé dans l'encadré, au-dessus de « Me localiser », demande la position ; le
-  // balayage part dès que les boutiques sont prêtes.
-  const HOME_KM = 5, HOME_PINS = 8, HOME_R = 120;
-  let homeScanTimer = null, homeNextTimer = null;
-  const homeClamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  proto.homeSweep = function () {
-    if (this.st().hscan === 'run') return;
-    clearTimeout(homeScanTimer);
-    if (homeStill()) { this.setState({ hscan: 'done' }); return; }
-    this.setState({ hscan: 'run' });
-    homeScanTimer = setTimeout(() => this.setState({ hscan: 'done' }), TURN + 400);
-  };
+  // ——— Radar de l'accueil (simplifié le 2026-10-11, demande du porteur) : le bandeau vert du Radar de Territoire,
+  // puis les 3 boutiques réelles (OpenStreetMap) les plus proches, à moins de 5 km. Même position que Territoire
+  // (arrondie à 100 m, jamais enregistrée ni envoyée). Sans position, un appui sur le bandeau la demande ; ensuite,
+  // il ouvre le Radar (carte de France des boutiques). Le radar animé s'arrête si l'utilisateur limite les animations.
+  const HOME_KM = 5, HOME_NEAR = 3;
+  const HOME_BLIPS = [['70%', '28%', '-2.4s'], ['30%', '66%', '-1.2s'], ['74%', '72%', '-0.4s']];
   proto.homeRadar = function (s) {
     const pos = s.tpos || s.raround || null;
     const r = {
-      needPos: false, loading: false, located: false, hasMsg: false, msg: '', locate: () => this.terLocate(false),
-      france: () => this.openRadar(), list: () => this.tab('territory'), rings: [], pins: [], sweeping: false, scanned: false,
-      scan: null, scanLabel: '', busy: false, status: '', tap: null, tapLabel: ''
+      main: null, mainLabel: '', title: '', sub: '', blips: [], hasMsg: false, msg: '', hasNear: false, near: [], status: '',
+      list: () => this.tab('territory'), france: () => this.openRadar()
     };
     if (!pos) return Object.assign(r, {
-      needPos: true, hasMsg: !!s.tmsg, msg: s.tmsg || '',
-      tap: () => { this.setState({ hscanNext: true }); this.terLocate(false); },
-      tapLabel: 'Radar : me localiser et scanner les boutiques autour de toi'
+      main: () => this.terLocate(false), mainLabel: 'Radar des boutiques : activer ma position',
+      title: 'Repère les boutiques autour de toi', sub: 'Touche pour activer ta position : elle reste sur ton téléphone.',
+      hasMsg: !!s.tmsg, msg: s.tmsg || '', status: 'Position arrondie à 100 m environ, ni enregistrée ni envoyée.'
     });
     if (RADAR.status !== 'ready') {
       if (RADAR.status !== 'loading') RADAR.load().then(() => this.setState({ rdata: Date.now() }));
-      return Object.assign(r, { loading: true });
+      return Object.assign(r, { main: () => this.openRadar(), mainLabel: 'Ouvrir le Radar des boutiques', title: 'Chargement des boutiques…', sub: 'Boutiques réelles d’OpenStreetMap' });
     }
-    if (s.hscanNext && !homeNextTimer) homeNextTimer = setTimeout(() => { homeNextTimer = null; this.setState({ hscanNext: false }); this.homeSweep(); }, 60);
     const rows = terRows(Object.assign({}, s, { tkm: String(HOME_KM), tsort: 'dist', tprod: 'all' }), pos);
-    const sweeping = s.hscan === 'run', scanned = s.hscan === 'done', scale = d => HOME_R * Math.sqrt(Math.min(d, HOME_KM) / HOME_KM);
-    const pins = RadarCore.pinLayout(rows, HOME_KM, HOME_R, 118, 40, HOME_PINS).map(x => {
+    const n = rows.length, many = n > 1 ? ' boutiques' : ' boutique';
+    const near = rows.slice(0, HOME_NEAR).map((x, i) => {
       const city = x.st.city || ((RADAR.dept[x.st.dept] || {}).nom || ''), d = this.km(Math.round(x.d * 10) / 10);
       return {
-        // Étiquettes gardées dans le cadre ; la direction reste celle de la boutique.
-        x: homeClamp(50 + x.px / 358 * 100, 21, 79).toFixed(2) + '%', y: homeClamp(50 + x.py / 358 * 100, 7, 93).toFixed(2) + '%',
-        name: x.st.name, city: city, fill: this.probLevel(x.c.pct).color, delay: Math.round(x.deg / 360 * TURN) + 'ms',
-        label: x.st.name + ', ' + city + ', à ' + d + ', chance ' + x.c.pct + ' %. Ouvrir la fiche',
+        name: x.st.name, sub: [city, d].filter(Boolean).join(' · '), pct: x.c.pct + '\u00a0%', color: this.probLevel(x.c.pct).color,
+        border: i ? '1px solid #1E2B45' : '0', label: x.st.name + ', ' + city + ', à ' + d + ', chance estimée ' + x.c.pct + ' %. Ouvrir la fiche',
         open: () => this.push('shop', { shopId: x.st.id, swhy: false })
       };
     });
-    const n = rows.length, many = n > 1 ? ' boutiques' : ' boutique';
     return Object.assign(r, {
-      located: true, sweeping: sweeping, scanned: scanned, pins: pins, busy: sweeping,
-      rings: [1, 3, 5].map(v => ({ r: scale(v).toFixed(1), label: v + ' km', ly: (-scale(v) + 13).toFixed(1) })),
-      scanLabel: sweeping ? 'Scan en cours…' : scanned ? 'Scanner à nouveau' : 'Scanner les boutiques',
-      scan: () => this.homeSweep(),
-      status: !n ? 'Aucune boutique repérée à moins de ' + HOME_KM + ' km : « Voir la liste » permet d’élargir.'
-        : !(sweeping || scanned) ? n + many + ' à moins de ' + HOME_KM + ' km : lance le scan pour les voir sur le radar.'
-        : n + many + ' à moins de ' + HOME_KM + ' km · ' + (pins.length < n ? 'les ' + pins.length + ' meilleures chances sur le radar · ' : '') + 'position à 100 m près'
+      main: () => this.openRadar(), mainLabel: 'Ouvrir le Radar des boutiques', blips: n ? HOME_BLIPS.slice(0, Math.min(3, n)).map(b => ({ x: b[0], y: b[1], delay: b[2] })) : [],
+      title: n ? n + many + ' à moins de ' + HOME_KM + ' km' : 'Aucune boutique à moins de ' + HOME_KM + ' km',
+      sub: n ? 'Touche pour les voir sur la carte' : '« Voir la liste » permet d’élargir le rayon',
+      hasNear: near.length > 0, near: near,
+      status: n ? 'Les plus proches · indice de chance estimé, aucun stock garanti · position à 100 m près' : ''
     });
   };
 

@@ -1,8 +1,8 @@
 <!-- Animation d'entrée « Ouverture de booster » (K1, 2026-10-09), insérée par build.mjs dans web/index.html.
      Un booster Dropicards tombe et tremble ; l'éclair du logo le déchire ; le haut s'envole ; cinq cartes jaillissent en
      éventail ; la carte « O » grandit et laisse place au logo. 2 s au plus ; un appui la passe.
-     Version complète au premier lancement de la journée, version éclair (0,6 s) ensuite ; fondu simple si l'utilisateur
-     limite les animations ; rien si le mode Admin coupe les animations, ni dans un navigateur piloté par des tests
+     Version complète à chaque démarrage (2026-10-11, demande du porteur ; avant : une fois par jour, puis 0,6 s), y compris
+     au retour dans l'app installée après 10 min en arrière-plan ; fondu simple si l'utilisateur limite les animations ; rien si le mode Admin coupe les animations, ni dans un navigateur piloté par des tests
      (?intro=1 force la version complète, ?intro=court la version éclair). Elle joue pendant le chargement de l'app, sans la retarder. Dessin en SVG, animations en CSS. -->
 <style>
 #pkm-intro { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;
@@ -84,19 +84,33 @@
 (function () {
   var el = document.getElementById('pkm-intro');
   if (!el) return;
-  var done = function () { if (el && el.parentNode) el.parentNode.removeChild(el); el = null; };
+  var timer = 0, hiddenAt = 0;
+  var done = function () { clearTimeout(timer); if (el) { el.style.display = 'none'; el.className = ''; } };
+  var play = function (kind) {
+    if (!el) return;
+    el.style.display = '';
+    el.className = '';
+    void el.offsetWidth; // relance les animations CSS depuis le début
+    el.className = kind;
+    clearTimeout(timer);
+    timer = setTimeout(done, kind === 'pi-full' ? 3000 : 1200); // filet de sécurité
+  };
   try {
     var q = location.search, force = /[?&]intro=(1|court)(&|$)/.test(q);
     var admin = {};
     try { admin = (JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}') || {}).admin || {}; } catch (e) { admin = {}; }
-    if (!force && (navigator.webdriver || /[?&]intro=0(&|$)/.test(q) || (admin.on && admin.flags && admin.flags.motion === false))) { done(); return; }
-    var d = new Date(), day = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(), seen = '';
-    try { seen = localStorage.getItem('pkm-intro') || ''; localStorage.setItem('pkm-intro', day); } catch (e) { seen = ''; }
+    if (!force && (navigator.webdriver || /[?&]intro=0(&|$)/.test(q) || (admin.on && admin.flags && admin.flags.motion === false))) { el.parentNode.removeChild(el); el = null; return; }
     var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    el.className = calm ? 'pi-calm' : (/[?&]intro=court(&|$)/.test(q) || (seen === day && !/[?&]intro=1(&|$)/.test(q)) ? 'pi-short' : 'pi-full');
+    var kind = function () { return calm ? 'pi-calm' : /[?&]intro=court(&|$)/.test(q) ? 'pi-short' : 'pi-full'; };
     el.addEventListener('animationend', function (e) { if (e.target === el) done(); });
-    el.addEventListener('click', function () { if (el) { el.className = 'pi-out'; } });
-    setTimeout(done, 3000); // filet de sécurité
+    el.addEventListener('click', function () { if (el && el.className !== 'pi-out') { el.className = 'pi-out'; } });
+    play(kind());
+    // App installée sur le téléphone : elle reprend souvent sans recharger la page. Après 10 min en arrière-plan,
+    // le retour compte comme un démarrage et rejoue l'animation complète.
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') hiddenAt = Date.now();
+      else if (hiddenAt && Date.now() - hiddenAt > 600000) { hiddenAt = 0; play(kind()); }
+    });
   } catch (e) { done(); }
 })();
 </script>

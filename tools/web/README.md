@@ -51,7 +51,11 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 
 ## Informations légales et polices
 
-- **Informations légales** (`tools/web/legal.js`, fragment `legal-sheet`) : Réglages › À propos › « Informations légales et confidentialité », et « Règles des PK » dans « Mes PK ». Quatre rubriques : Mentions légales, Confidentialité, Conditions, Règles des PK. Les champs de l'éditeur sont « à compléter » ; liste des vérifications dans `docs/14-verifications-avant-publication.md`.
+- **Informations légales** (`tools/web/legal.js`, fragment `legal-sheet`, refaites le 2026-10-11) : Réglages › À propos › « Informations légales et confidentialité », et « Règles des PK » dans « Mes PK ». Quatre rubriques : Mentions légales (LCEN), Confidentialité (stockage local sans cookie, position, caméra, notifications, services contactés), Conditions, PK et jeux. Les champs de l'éditeur sont « à compléter » ; liste des vérifications dans `docs/14-verifications-avant-publication.md`.
+- **Jeux** (`tools/web/games.js`, `games.css`, fragment `games`, 2026-10-11) : l'onglet « Marché » (écran `market`) devient « Jeux » ; Booster PK (24 h) et Pile ou face (8 h), tirage `crypto.getRandomValues`, dates gardées avec la collection (`games`). L'ancienne recherche du Marché devient l'écran `search` (accueil, scan).
+- **Navigation** (`tools/web/nav.js`, 2026-10-11) : bouton Retour du téléphone (historique du navigateur), geste depuis le bord gauche, glissement au retour, position de la page gardée au retour.
+- **Première visite et alertes** (`tools/web/start.js`, 2026-10-11) : collection vide et accueil guidé à la première visite (démo sur choix) ; « Tes alertes » à l'ouverture de l'app, notification du téléphone si autorisée.
+- **Fiche d'une carte** (`catalog.js`, 2026-10-11) : cote Cardmarket de la version de la carte et prix de l'autre version (`cmh`, `cmv`), « cote à confirmer » (`q`), « cote à venir » (`stats.setsPriceSoon`), lien vers les ventes réussies eBay. Logos de séries : TCGdex, logos locaux, pokemontcg.io, sinon nom dessiné.
 - **Polices hébergées avec l'app** (`web/fonts/`, paquets `@fontsource`, licence SIL OFL) : la démo n'appelle plus Google Fonts. Seule la page claude.ai (`artifact.html`) garde Google Fonts.
 
 ## Tests

@@ -30,21 +30,21 @@ ok('UPC : recherche Amazon (pas d’ASIN connu)', /Amazon/.test(upc));
 // Alerte.
 await page.locator('main article').first().locator('button:has-text("Me prévenir")').click();
 await page.waitForTimeout(300);
-ok('alerte : toast', (await page.locator('text=Alerte enregistrée sur cet appareil').count()) > 0);
+ok('alerte : toast (rappel à l’ouverture de l’app)', (await page.locator('text=Alerte enregistrée : tu seras prévenu').count()) > 0);
 await page.waitForTimeout(500);
 const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').alerts || {});
 ok('alerte enregistrée : ' + Object.keys(saved).filter(k => k.startsWith('rel:')).join(', '), Object.keys(saved).some(k => k.startsWith('rel:')));
 await page.screenshot({ path: shot('sorties-1.png') });
 await page.evaluate(() => { document.querySelector('#app main').scrollTop = 1500; }); await page.waitForTimeout(300);
 await page.screenshot({ path: shot('sorties-2.png') });
-// Retour : Marché.
+// Retour : l'accueil (2026-10-11 : le Marché est devenu Jeux).
 await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(400);
-ok('retour vers le Marché', (await page.locator('h1:has-text("Marché"), h2:has-text("Marché")').count()) > 0 || (await page.locator('text=Scellé à la une').count()) > 0);
+ok('retour vers l’accueil', (await page.locator('section[aria-label="Valeur de ma collection"]').count()) > 0);
 // Entrées.
 await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(1200);
-await page.click('section[aria-label="Sorties du moment"] button:has-text("Toutes les sorties")'); await page.waitForTimeout(400);
+await page.click('section[aria-label="Sorties récentes"] button:has-text("Toutes les sorties")'); await page.waitForTimeout(400);
 ok('Accueil → Sorties', (await page.locator('text=Invitations Amazon').count()) > 0);
-await page.goto(BASE + '?today=2026-10-04&start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);
+await page.goto(BASE + '?today=2026-10-04&start=search', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('button:has-text("Sorties · Pokémon 30 ans")'); await page.waitForTimeout(400);
 ok('Marché → Sorties', (await page.locator('text=Invitations Amazon').count()) > 0);
 await page.goto(BASE + '?today=2026-10-04&start=territory', { waitUntil: 'load' }); await page.waitForTimeout(1200);

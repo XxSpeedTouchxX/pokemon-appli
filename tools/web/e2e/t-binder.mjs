@@ -1,6 +1,6 @@
 // « Mon classeur » de l'accueil : place (entre la valeur et les boutiques), logo, onglets « Mes cartes » (pages de 9,
 // visuel, pastille drapeau + cote + état, gradation, exemplaires) et « Mes produits scellés » (vitrine 2 par ligne,
-// pages de 4), fiche au toucher, montants masqués, classeur vide ; « Sorties du moment » tout en bas.
+// pages de 4), fiche au toucher, montants masqués, classeur vide ; « Sorties récentes » tout en bas.
 import { withFonts, withDemoCards, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const BASE = E2E + '/?today=2026-10-04';
 const SEC = 'section[aria-label="Mon classeur"]', PANEL = SEC + ' [role="tabpanel"]', TILE = PANEL + ' button[aria-label$="Ouvrir la fiche"]';
@@ -17,9 +17,9 @@ const panelText = async page => (await page.locator(PANEL + ' > div:has(> button
   const [ctx, page] = await mk();
   await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2500);
   const order = await page.$$eval('#app section[aria-label]', ss => ss.map(s => s.getAttribute('aria-label')).filter(l => !/^(Navigation|Recherche dans)/.test(l)));
-  ok('ordre de l’accueil : ' + order.join(' > '), order.join('|') === 'Valeur de ma collection|Mon classeur|Boutiques près de toi|Sorties du moment');
-  const last = await page.evaluate(() => { const s = document.querySelector('section[aria-label="Sorties du moment"]'); let n = s.nextElementSibling; const after = []; while (n) { after.push(n.tagName + ':' + (n.getAttribute('aria-label') || n.innerText.slice(0, 30))); n = n.nextElementSibling; } return after; });
-  ok('« Sorties du moment » tout en bas, juste avant la mention de non-affiliation (' + last.join(', ') + ')', last.length === 1 && /non affiliée/.test(await page.locator('section[aria-label="Sorties du moment"] + p').innerText()));
+  ok('ordre de l’accueil : ' + order.join(' > '), order.join('|') === 'Valeur de ma collection|Prochaines sorties|Mon classeur|Boutiques près de toi|Sorties récentes');
+  const last = await page.evaluate(() => { const s = document.querySelector('section[aria-label="Sorties récentes"]'); let n = s.nextElementSibling; const after = []; while (n) { after.push(n.tagName + ':' + (n.getAttribute('aria-label') || n.innerText.slice(0, 30))); n = n.nextElementSibling; } return after; });
+  ok('« Sorties récentes » tout en bas, juste avant la mention de non-affiliation (' + last.join(', ') + ')', last.length === 1 && /non affiliée/.test(await page.locator('section[aria-label="Sorties récentes"] + p').innerText()));
   ok('titre « Mon classeur »', (await page.locator(SEC + ' h2').innerText()) === 'Mon classeur');
   const logo = page.locator(SEC + ' img[src="img/brand/classeur.svg"]');
   const lb = await logo.boundingBox(), sb = await page.locator(SEC + ' > div').boundingBox();

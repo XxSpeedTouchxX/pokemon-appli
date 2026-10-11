@@ -17,9 +17,10 @@ Le logo vient de la planche du porteur (« B6 · I avec éclair vertical », 202
 | `web/img/brand/dropicards-dark.svg` | Fond sombre : lettres jaunes, sans contour |
 | `web/img/brand/classeur.svg` | Logo de la rubrique « Mon classeur » de l'accueil : classeur à anneaux jaune, gemme des PK sur la couverture (à la place de la Poké Ball depuis le 2026-10-08), cartes qui dépassent ; contour et ombre noirs comme le logo |
 | `web/img/brand/pk.svg` | Gemme des PK, la monnaie de l'app (proposition « D2c ») : hexagone jaune taillé en 6 facettes (jaune clair à ambre), contour noir ; l'éclair du I du logo, jaune à contour noir ; étincelle du logo. Aucun repère de Poké Ball ; lisible de 14 à 72 px |
-| `web/icons/icon-192.png`, `icon-512.png` | Icône d'app « any » : le logo du porteur sur deux lignes (« DROPI » au-dessus de « CARDS »), carré jaune bordé de noir, coins transparents (`import_logo.py`) |
-| `web/icons/icon-maskable-512.png` | Icône « maskable » : plein cadre jaune, mot sur deux lignes dans la zone sûre |
-| `web/icons/apple-touch-icon.png` | Écran d'accueil iPhone (180 px, plein cadre, mot sur deux lignes) |
+| `web/img/brand/monogram.svg` | Monogramme de l'icône (2026-10-11, demande du porteur) : le « D » du logo et la carte « O » étoilée, même style que le mot (`make_logo.mjs`) |
+| `web/icons/icon-192.png`, `icon-512.png` | Icône d'app « any » : le monogramme D + carte O sur un carré jaune bordé de noir, coins transparents (`make_icons.mjs`) |
+| `web/icons/icon-maskable-512.png` | Icône « maskable » : plein cadre jaune, monogramme dans la zone sûre |
+| `web/icons/apple-touch-icon.png` | Écran d'accueil iPhone (180 px, plein cadre, monogramme) |
 | `web/icons/favicon-32.png` | Onglet du navigateur : la carte O du logo (le mot serait illisible à 32 px) |
 
 ## Régénérer
@@ -27,9 +28,10 @@ Le logo vient de la planche du porteur (« B6 · I avec éclair vertical », 202
 ```
 cd tools/brand && npm install && node make_logo.mjs
 python3 tools/brand/import_logo.py
+CHROMIUM=/chemin/vers/chromium node tools/brand/make_icons.mjs
 ```
 
-`make_logo.mjs` produit les SVG redessinés (logo clair et sombre, classeur, gemme des PK) ; `import_logo.py` (Pillow) produit le logo de l'en-tête et toutes les icônes à partir du fichier du porteur.
+`make_logo.mjs` produit les SVG redessinés (logo clair et sombre, classeur, gemme des PK) ; `import_logo.py` (Pillow) produit le logo de l'en-tête et le favicon à partir du fichier du porteur ; `make_icons.mjs` rend les icônes de l'app à partir du monogramme (Chromium, via `playwright-core` de `tools/web`), nettes à chaque taille.
 
 Sur un téléphone où l'app est déjà installée, la nouvelle icône n'apparaît qu'après avoir retiré l'app de l'écran d'accueil et l'avoir ajoutée à nouveau (iPhone) ; Android la met à jour de lui-même, en général sous 24 h.
 

@@ -9,7 +9,7 @@ await ctx.route('https://assets.tcgdex.net/**', r => r.fulfill({ contentType: 'i
 await ctx.route('https://fonts.googleapis.com/**', r => r.abort());
 const page = await ctx.newPage();
 page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-await page.goto(E2E + '/?start=market', { waitUntil: 'load' });
+await page.goto(E2E + '/?start=search', { waitUntil: 'load' });
 await page.waitForSelector('text=Produits scellés', { timeout: 8000 });
 ok('Marché : entrée « ' + await page.locator('button:has-text("Produits scellés") span span').nth(1).innerText() + ' »', true);
 await page.screenshot({ path: shot('sealed-1-marche.png') });
@@ -22,7 +22,7 @@ await page.screenshot({ path: shot('sealed-2-grille.png') });
 await page.click('[aria-label="Type de produit"] button:has-text("ETB")');
 const etb = await page.locator('main button:has(span[style*="aspect-ratio: 1"])').count();
 ok('filtre ETB : ' + etb, etb === 8);
-ok('« À venir » sur Règne Delta', (await page.locator('main button:has-text("Règne Delta") :text("À venir")').count()) === 1);
+ok('compte à rebours sur Règne Delta (« Dans N j »)', /Dans \d+ j|Demain|Aujourd’hui|À venir/.test(await page.locator('main button:has-text("Règne Delta")').first().innerText()));
 await page.screenshot({ path: shot('sealed-3-etb.png') });
 await page.locator('main button:has-text("Coffret Dresseur d’élite Chaos Ascendant")').click();
 await page.waitForSelector('button[aria-label^="Agrandir la photo"]');
@@ -44,7 +44,7 @@ await page.goto(E2E + '/?start=item&itemId=' + saved.k[0], { waitUntil: 'load' }
 await page.waitForTimeout(900);
 ok('après rechargement : dans la collection (fiche, historique d’achat)', (await page.locator('section[aria-label="Historique d’achat"]').count()) === 1 && (await page.locator('text=Coffret Dresseur d’élite Chaos Ascendant').count()) > 0);
 // Recherche et sorties
-await page.goto(E2E + '/?start=market', { waitUntil: 'load' });
+await page.goto(E2E + '/?start=search', { waitUntil: 'load' });
 await page.waitForSelector('text=Produits scellés');
 await page.fill('input[type="search"]', 'Nuit Noire');
 await page.waitForTimeout(300);

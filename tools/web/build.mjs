@@ -41,6 +41,11 @@ patch(`<span style="display: flex; align-items: center; gap: 8px">
 <span style="width: 30px; height: 30px; border-radius: 10px; background: #3D63FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(61, 99, 255, 0.35)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg></span>
 <span style="font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.03em">PKM</span>
 </span>`, '<span style="flex: 0 1 196px; min-width: 0; display: flex; align-items: center"><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: 100%; max-width: 196px; height: auto"></span>');
+// Accueil guidé (start.js, 2026-10-11) : ouvert tout seul à la première visite ; « Essayer avec la collection de démo »
+// tant que la collection est vide ; texte fidèle aux sources réellement branchées (pas encore d'eBay).
+patch('PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.',
+  'PKM suit la cote Cardmarket et TCGplayer de chaque carte, chaque jour, avec sa source et sa date.');
+patch('cursor: pointer">Commencer</button>', 'cursor: pointer">Commencer</button>\n<sc-if value="{{ ob.canDemo }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ ob.tryDemo }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Essayer avec la collection de démo</button></sc-if>');
 // Catalogue complet (tools/web/catalog.js) : courbe seulement si un historique existe, ajout possible
 // d'une carte sans prix, recherche du Marché sur toutes les cartes.
 patch('<sc-if value="{{ it.hasCote }}" hint-placeholder-val="{{ true }}">\n<div style="display: flex; justify-content: space-between; align-items: baseline;',
@@ -137,6 +142,19 @@ patchJs("name: p.name, sub: p.sub, qty: '×' + st.qty, value: this.eur(x.val(p) 
   "name: p.name, sub: this.copySub(p, x.s), qty: '×' + st.qty, value: this.eur(x.val(p) * st.qty), unit: this.eur(x.val(p)) + ' / u',");
 patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x.who[a.by || 'toi'] : ''), amount:",
   "return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x.who[a.by || 'toi'] : '') + this.copyMeta(p, l), amount:");
+// Onglet « Jeux » (games.js, 2026-10-11, demande du porteur) : l'onglet « Marché » devient « Jeux » (manette) ; son
+// écran montre le booster PK et le pile ou face. L'ancien Marché reste l'écran de recherche (« search »).
+patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.games + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
+// Fiche d'une carte (2026-10-11) : cote à confirmer, et lien vers les ventes réussies eBay (pas de chiffre : ni API
+// ouverte, ni scraping).
+patch('<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">Vinted et Leboncoin ne sont pas comparés : pas d’API publique, et pas de scraping.</p>',
+  '<sc-if value="{{ it.doubt }}" hint-placeholder-val="{{ false }}">\n<p style="margin: 0; font-size: 12.5px; line-height: 1.5; color: #F7C77E">{{ it.doubtText }}</p>\n</sc-if>\n'
+  + '<a href="{{ it.ebayUrl }}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px; border-radius: 14px; border: 1px solid #1E2B45; text-decoration: none; color: #F3F6FC"><span style="flex: none; width: 8px; height: 8px; border-radius: 4px; background: #F5B14C"></span><span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">eBay · ventes réussies</span><span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ it.ebayText }}</span></span><span style="flex: none; font-size: 13px; font-weight: 700; color: #F5B14C">Voir ↗</span></a>\n'
+  + '<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">eBay ne publie pas ses ventes réussies en accès libre et PKM ne fait pas de scraping : le lien ouvre la recherche eBay des annonces vendues. Vinted et Leboncoin ne sont pas comparés pour la même raison.</p>');
+patch('onClick="{{ tabMarket }}" aria-label="Marché"', 'onClick="{{ tabMarket }}" aria-label="Jeux"');
+patch('<svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M4 19.5h16"></path><path d="M5 15.5l4.5-4.5 3.5 3 6-6.5"></path><path d="M15 7.5h4v4"></path></svg>',
+  '<svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M7 7.5h10a5 5 0 0 1 4.8 6.4l-1.1 3.7a2.3 2.3 0 0 1-3.9.9L14.5 16h-5l-2.3 2.5a2.3 2.3 0 0 1-3.9-.9l-1.1-3.7A5 5 0 0 1 7 7.5z"></path><path d="M7.5 10.5v3 M6 12h3"></path><circle cx="15.5" cy="11" r="0.6" style="fill: currentColor"></circle><circle cx="17.5" cy="13" r="0.6" style="fill: currentColor"></circle></svg>');
+patchJs("market: 'Marché', territory: 'Territoire', profile: 'Profil'", "market: 'Jeux', territory: 'Territoire', profile: 'Profil'");
 // Marché : entrée « Toutes les cartes » ; écrans « Toutes les cartes » et « Extension ».
 patch('<div role="group" aria-label="Filtre du marché"', FRAG['market-browse'] + '<div role="group" aria-label="Filtre du marché"');
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG.screens + '\n<sc-if value="{{ ui.isProfile }}"');
@@ -227,7 +245,7 @@ patch('>Rien ne correspond à ta recherche.<', '>{{ coll.emptyText }}<');
 // Réglages : collection enregistrée sur l'appareil.
 patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs');
-patch('partenaires de Territoire fictifs</p>', 'partenaires de Territoire fictifs</p>\n<button type="button" onClick="{{ adm.tapVersion }}" aria-label="{{ adm.versionLabel }}" style="align-self: flex-start; min-height: 32px; padding: 0; border: 0; background: transparent; color: #7D8BA8; font: inherit; font-size: 12px; cursor: default">{{ adm.versionLabel }}</button>\n<button type="button" onClick="{{ legal.openMentions }}" style="height: 44px; margin-top: 4px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Informations légales et confidentialité</button>');
+patch('partenaires de Territoire fictifs</p>', 'partenaires de Territoire fictifs</p>\n<button type="button" onClick="{{ adm.tapVersion }}" aria-label="{{ adm.versionLabel }}" style="align-self: flex-start; min-height: 32px; padding: 0; border: 0; background: transparent; color: #7D8BA8; font: inherit; font-size: 12px; cursor: default">{{ adm.versionLabel }}</button>\n<button type="button" onClick="{{ legal.openMentions }}" style="height: 44px; margin-top: 4px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Informations légales et confidentialité</button>\n<button type="button" onClick="{{ adm.menu }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ adm.menuLabel }}</button>');
 // Articles mis en avant (tools/web/showcase.js).
 // - Vignettes des listes (ventes, lots, arrivages, Marché, scan…) : plus larges pour le scellé (largeur × wk),
 //   cadre doré des cartes ultra rares (ring).
@@ -281,7 +299,8 @@ ${FEATURE_CARD('fx', 'flex: none; width: 240px; scroll-snap-align: start;')}
 </section>
 </sc-if>
 `;
-patch('<!-- carrousel : home.rel -->', CAROUSEL('home.rel', 'Sorties du moment'));
+patch('<!-- carrousel : home.rel -->', CAROUSEL('home.rel', 'Sorties récentes'));
+patch('<!-- carrousel : home.next -->', CAROUSEL('home.next', 'Prochaines sorties'));
 patch(FRAG['market-browse'], CAROUSEL('mk.feat', 'Scellé à la une') + FRAG['market-browse']);
 // - Produits scellés : une colonne de grandes cartes.
 patch('<!-- liste : produits scellés -->', '<div style="flex: none; display: flex; flex-direction: column; gap: 14px">\n<sc-for list="{{ sl.items }}" as="sp" hint-placeholder-count="4">\n'
@@ -417,11 +436,11 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 43) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 43'); // dont 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 45) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 45'); // dont 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
-const BRAND = 'Dropicards', REBRANDED = 53;
+const BRAND = 'Dropicards', REBRANDED = 54;
 let rebranded = 0;
 const rebrand = t => t.replace(/PKM-App|\bPKM\b/g, () => { rebranded++; return BRAND; });
 tpl = rebrand(tpl);
@@ -488,7 +507,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), navJs = mod('nav.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -517,7 +536,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + navJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -537,7 +556,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -565,27 +584,31 @@ ${code}
   const inst = new Component(props);
   // Collection enregistrée sur l'appareil, sauf pour les liens de démonstration.
   DEVICE.enabled = !props.demo;
-  if (DEVICE.enabled) inst.restoreSaved();
+  const restored = DEVICE.enabled && inst.restoreSaved();
+  // Première visite (2026-10-11) : collection vide et accueil guidé ; la collection de démo seulement sur choix
+  // (« Essayer avec la collection de démo »). Sous les tests automatisés, la démo reste le point de départ, sauf ?first=1.
+  try {
+    const robot = navigator.webdriver && !/[?&]first=1(&|$)/.test(location.search);
+    if (DEVICE.enabled && !restored && !storage.raw() && !robot)
+      inst.state = Object.assign({}, inst.state || {}, { purchases: [], sales: [], onb: props.onb ? Number(props.onb) || 1 : 1, firstRun: true });
+    // Enregistrement illisible (copie gardée par persist.js) : on repart d'une collection vide, jamais de la démo.
+    else if (DEVICE.enabled && !restored && DEVICE.kept) inst.state = Object.assign({}, inst.state || {}, { purchases: [], sales: [] });
+  } catch (e) { /* stockage indisponible : démo */ }
   // PK : bienvenue la première fois, puis 10 PK par jour d'ouverture (pk.js).
   inst.adminInit();
   inst.profileInit();
   inst.pkInit();
-  // Défilement (demande du porteur, 2026-10-09) : chaque changement de page (onglet, fiche, retour, autre carte ou
-  // autre boutique) s'ouvre en haut. Les réglages de la page (recherche, filtres, onglets, vues) restent dans l'état
-  // de l'app : on les retrouve au retour.
-  const pageKey = s => [s.screen, s.setId, s.itemId, s.storeId, s.shopId, s.saleId].join(':');
-  let lastKey = pageKey(inst.st());
+  // Défilement (demande du porteur, 2026-10-09, revue le 2026-10-11) : une nouvelle page s'ouvre en haut ; en
+  // revenant en arrière, la page reprend là où on l'avait laissée, avec un glissement (nav.js). Les réglages de la
+  // page (recherche, filtres, onglets, vues) restent dans l'état de l'app : on les retrouve au retour.
+  navSetup(inst);
   let zoomOpen = false;
   Vue.createApp({
     setup() {
       const V = Vue.shallowRef(inst.renderVals());
       inst.__rerender = () => {
         V.value = inst.renderVals();
-        const key = pageKey(inst.st());
-        if (key !== lastKey) {
-          lastKey = key;
-          Vue.nextTick(() => { const m = document.querySelector('#app main'); if (m) m.scrollTop = 0; });
-        }
+        navAfter(inst);
         // Zoom de la carte : le focus va sur « Fermer », puis revient sur la carte.
         Vue.nextTick(() => {
           const close = document.querySelector('#pkm-zoom button');
@@ -622,14 +645,29 @@ ${code}
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && inst.st().zoom) inst.setState({ zoom: null }); });
   // Catalogue complet et catalogue scellé : chargés après le premier affichage.
   // Catalogue : partie fixe (gardée par le navigateur) + prix du jour ; cards.json complet si elles ne vont pas ensemble.
+  // En cas d'échec (réseau, serveur), nouvel essai automatique : après 5 s, 15 s puis 45 s, au retour du réseau et
+  // quand l'app revient au premier plan (2026-10-11 ; avant, l'utilisateur restait bloqué sans catalogue).
   const getJson = u => fetch(u).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-  Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json')]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
+  const loadCatalog = () => Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json')]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
     .then(doc => doc || getJson('data/cards.json'))
     .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); })
-    .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); });
-  fetch('data/sealed.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); retryLater(); });
+  const loadSealed = () => getJson('data/sealed.json')
     .then(doc => { SEALED.load(doc); inst.setState({ sealedN: SEALED.rows.length }); })
-    .catch(() => { SEALED.status = 'error'; inst.setState({ sealedN: -1 }); });
+    .catch(() => { SEALED.status = 'error'; inst.setState({ sealedN: -1 }); retryLater(); });
+  let retryN = 0, retryTimer = null;
+  const retryNow = () => {
+    clearTimeout(retryTimer); retryTimer = null;
+    if (TCG.status === 'error') { TCG.status = 'loading'; loadCatalog(); }
+    if (SEALED.status === 'error') { SEALED.status = 'loading'; loadSealed(); }
+  };
+  const retryLater = () => { if (!retryTimer && retryN < 3) retryTimer = setTimeout(() => { retryN++; retryNow(); }, [5000, 15000, 45000][retryN]); };
+  window.addEventListener('online', () => { retryN = 0; retryNow(); });
+  loadCatalog();
+  loadSealed();
+  // Enregistrement immédiat quand l'app passe en arrière-plan ou se ferme ; nouvel essai du catalogue au retour.
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') inst.saveFlush(); else retryNow(); });
+  window.addEventListener('pagehide', () => inst.saveFlush());
   // Hors ligne et installation (hébergement uniquement ; refusé dans les pages claude.ai).
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -691,6 +729,7 @@ nav[aria-label="Aller à une série"] { background: rgba(10, 17, 48, 0.88); back
 /* Scan : ligne de lecture qui parcourt le cadre (arrêtée si l'utilisateur limite les animations : classe pkm-anim). */
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${readFileSync(new URL('./fx.css', import.meta.url), 'utf8')}
+${readFileSync(new URL('./games.css', import.meta.url), 'utf8')}
 ${cssVars()}
 ${v6Css()}
 ${keyframes}`;

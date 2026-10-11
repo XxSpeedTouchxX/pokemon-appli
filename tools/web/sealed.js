@@ -238,7 +238,7 @@
   // Écran « Produits scellés » : grille de photos, filtre par type.
   const EMPTY_SEALED = { countText: '', note: '', filters: [], count: '', empty: false, items: [] };
   proto.vSealedList = function (s) {
-    if (SEALED.status !== 'ready') return Object.assign({}, EMPTY_SEALED, { count: SEALED.status === 'error' ? 'Catalogue scellé indisponible pour le moment.' : 'Chargement du catalogue scellé…' });
+    if (SEALED.status !== 'ready') return Object.assign({}, EMPTY_SEALED, { count: SEALED.status === 'error' ? 'Catalogue scellé indisponible pour le moment · nouvel essai automatique.' : 'Chargement du catalogue scellé…' });
     const c = this.compute(s), all = SEALED.list(), f = TYPE_FILTERS.some(d => d[0] === s.sfilter) ? s.sfilter : 'all';
     const shown = f === 'all' ? all : all.filter(p => p.code === f);
     const withPhoto = all.filter(p => p.photo).length;

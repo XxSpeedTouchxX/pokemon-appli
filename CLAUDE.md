@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-09)
+## 3. État d'avancement (au 2026-10-11)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -100,6 +100,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - fonds animés (Animés, Calmes, Sans) et micro-animations ;
   - app.js minifié ; tests navigateur dans `tools/web/e2e` et en CI.
 - **2ᵉ onglet « Toutes les séries » (2026-10-09, demande du porteur avec vidéo) :** remplace l'écran Collection ; séries dépliables avec barre de logos, extensions (logo, nombre de cartes, sortie, progression, « Bientôt »), recherche ; chaque extension ouvre toutes ses cartes. La collection reste dans « Mon classeur » sur l'accueil. Logos en cascade (webp, png, logos locaux) et cartes manquantes complétées en anglais (TCGdex EN, pokemontcg.io) ; Collection Classique rattachée au 30ᵉ Anniversaire (191 cartes).
+- **Jeux et corrections (2026-10-11, demande du porteur) :**
+  - l'onglet « Marché » devient **« Jeux »** (manette) : Booster PK gratuit (10 PK 60 %, 30 PK 20 %, 50 PK 15 %, 100 PK 4 %, 1 000 PK 1 % ; un toutes les 24 h, à confirmer) et Pile ou face toutes les 8 h (+30 PK, une chance sur deux) ; la recherche de l'ancien Marché reste accessible depuis l'accueil ;
+  - cote Cardmarket selon la version (holo, normale, reverse) avec l'autre version à côté, « cote à confirmer », lien vers les ventes réussies eBay (pas de chiffre : ni API ouverte ni scraping) ; filtre « Les plus chères » de toutes les séries ;
+  - pipelines : mise à jour incomplète refusée (boutiques, scellé, catalogue), `web/data/status.json` ;
+  - app : date réelle, enregistrement sûr, première visite sans démo, bouton Retour et glissement au retour avec position gardée, alertes à l'ouverture, prochaines sorties et radar simplifié sur l'accueil, logos de séries manquants, mentions légales refaites (identité de l'éditeur **à compléter par le porteur**), Admin dans les Réglages, animation d'entrée à chaque démarrage, icône « D » + carte O.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

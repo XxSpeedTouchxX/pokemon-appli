@@ -84,7 +84,11 @@
     const chip = (on, extra) => Object.assign({ on: on }, this.chip(on), extra);
     const r = {
       on: a.on, version: ADM_VERSION, versionLabel: 'Version ' + ADM_VERSION, tapVersion: () => this.admTap(),
-      open: () => this.setState({ admSheet: true }), close: () => this.setState({ admSheet: false }), sheet: a.on && !!s.admSheet,
+      open: () => this.setState({ admSheet: true }),
+      // Entrée « Mode Admin · paramétrage » des Réglages (2026-10-11, demande du porteur) : code, puis panneau
+      // (solde de PK en premier). Les 7 appuis sur « Version » restent possibles.
+      menu: () => (a.on ? this.setState({ admSheet: true }) : this.setState({ admLock: a.hash ? 'enter' : 'create', admCode: '', admCode1: '', admMsg: '' })),
+      menuLabel: a.on ? 'Panneau Admin · paramétrage' : 'Mode Admin · paramétrage', close: () => this.setState({ admSheet: false }), sheet: a.on && !!s.admSheet,
       lock: !!s.admLock, lockTitle: s.admLock === 'create' ? (s.admCode1 ? 'Confirme ton code Admin' : 'Choisis ton code Admin') : 'Code Admin',
       lockText: s.admLock === 'create' ? 'Un code à 6 chiffres, gardé sur cet appareil seulement. Il te sera demandé pour rouvrir le panneau.' : 'Tape ton code à 6 chiffres.',
       code: s.admCode || '', onCode: e => this.setState({ admCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 6) }),
@@ -103,6 +107,7 @@
       ['+500 PK', () => this.setState({ pk: pk + 500, admBal: undefined })],
       ['Tout débloquer', () => { this.setState({ pkOwn: HOME_BUDDIES.map(([k]) => k), toast: 'Tous les compagnons sont débloqués' }); this.flash(); }],
       ['Tout reverrouiller', () => { this.setState({ pkOwn: [], buddy: 25, toast: 'Compagnons reverrouillés (Pikachu remis)' }); this.flash(); }],
+      ['Rejouer les jeux (booster, pile ou face)', () => { this.setState({ games: Object.assign({}, s.games || {}, { boosterAt: '', coinAt: '', bPhase: 'idle', cPhase: '' }), toast: 'Booster et pile ou face de nouveau disponibles' }); this.flash(); }],
       ['Rejouer bonus du jour et partage', () => { this.setState({ pkDay: '2000-01-01', pkShared: '', toast: 'Bonus du jour au prochain lancement ; partage de nouveau récompensé' }); this.flash(); }]
     ].map(([label, go]) => ({ label: label, go: go }));
     // Prix des compagnons : recherche, puis prix modifiable (vide = règle des stades).

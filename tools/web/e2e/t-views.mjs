@@ -64,7 +64,7 @@ ok('vue gardée au retour : « ' + (await vs.innerText()).trim() + ' »', /Compa
 await pick('Carte plein écran'); await page.waitForTimeout(1500);
 ok('carte plein écran : le Radar s’ouvre', /radar/i.test(await page.evaluate(() => document.body.innerText.slice(0, 400))) || (await page.locator('#pkm-radar-sheet, [aria-label*="Radar"]').count()) > 0);
 // Marché.
-await page.goto('about:blank'); await page.goto(BASE + '&start=market', { waitUntil: 'load' }); await page.waitForTimeout(2500);
+await page.goto('about:blank'); await page.goto(BASE + '&start=search', { waitUntil: 'load' }); await page.waitForTimeout(2500);
 const mvs = page.locator('main button[aria-haspopup]').first();
 await page.fill('input[aria-label="Rechercher une carte ou un produit"]', 'pika'); await page.waitForTimeout(800);
 for (const [name, check] of [['Galerie', 'galerie'], ['Compacte', 'compacte'], ['Grandes cartes', 'grandes'], ['Liste', 'liste']]) {

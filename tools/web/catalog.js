@@ -131,7 +131,10 @@
       logo: '', grade: null, release: null,
       cm: r[F.cm], low: r[F.low], ebay: null, tcp: r[F.tcp], avg30: r[F.avg30], upd: r[F.upd], seed: seed,
       // Moyennes Cardmarket 7 jours et 1 jour (absentes des fichiers plus anciens) : tendance sur l'accueil.
-      avg7: typeof r[F.avg7] === 'number' ? r[F.avg7] : null, avg1: typeof r[F.avg1] === 'number' ? r[F.avg1] : null
+      avg7: typeof r[F.avg7] === 'number' ? r[F.avg7] : null, avg1: typeof r[F.avg1] === 'number' ? r[F.avg1] : null,
+      // Cote selon la version (2026-10-11) : cmv = groupe de prix de cm (« n » normal, « h » holo), cmh = tendance de
+      // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
+      cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1
     };
     if (!v) { p.img = p.imgHi = drawnCard(p); p.fallback = p.fallbackHi = ''; }
     return p;
@@ -181,10 +184,41 @@
       out.push(TCG.doc.img + path + '.webp', TCG.doc.img + path + '.png');
     }
     if (SET_LOGO_LOCAL[id]) out.push('img/' + SET_LOGO_LOCAL[id] + '.webp');
-    return out.find(u => !BROKEN.has(u)) || '';
+    if (SET_LOGO_PTCG[id]) out.push('https://images.pokemontcg.io/' + SET_LOGO_PTCG[id] + '/logo.png');
+    return out.find(u => !BROKEN.has(u)) || setBadge(id);
+  }
+  // Logos absents de TCGdex (2026-10-11, signalés par le porteur) : ceux de pokemontcg.io quand ils existent
+  // (McDonald's, énergies et promos Écarlate et Violet, Coffre Étincelant), sinon un nom de série dessiné par l'app.
+  const SET_LOGO_PTCG = { '2011bw': 'mcd11', '2012bw': 'mcd12', '2014xy': 'mcd14', '2015xy': 'mcd15', '2016xy': 'mcd16', '2017sm': 'mcd17',
+    '2018sm': 'mcd18', '2018sm-fr': 'mcd18', '2019sm': 'mcd19', '2019sm-fr': 'mcd19', '2021swsh': 'mcd21', '2022swsh': 'mcd22', sve: 'sve', svp: 'svp', sma: 'sma' };
+  const BADGES = {};
+  function setBadge(id) {
+    if (BADGES[id]) return BADGES[id];
+    const name = String(((TCG.doc && TCG.doc.sets[id]) || [id])[0] || id).replace(/^Collection /, '');
+    const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/'/g, '&#39;');
+    let lines = [name];
+    const year = name.match(/^(.*\S)\s+(\d{4})$/);
+    if (year) lines = [year[1], year[2]];
+    else if (name.length > 14) {
+      const w = name.split(' '); let best = 1, gap = 1e9;
+      for (let i = 1; i < w.length; i++) { const d = Math.abs(w.slice(0, i).join(' ').length - w.slice(i).join(' ').length); if (d < gap) { gap = d; best = i; } }
+      lines = [w.slice(0, best).join(' '), w.slice(best).join(' ')];
+    }
+    const size = Math.min(52, Math.floor(560 / Math.max(...lines.map(l => l.length)) * 1.15));
+    const y0 = lines.length === 1 ? 100 + size * 0.35 : 100 - size * 0.2;
+    const text = lines.map((l, i) => '<text x="200" y="' + (y0 + i * size * 1.05).toFixed(0) + '" text-anchor="middle" font-family="Sora,Arial,sans-serif" font-weight="800" font-size="' + (i && year ? size * 1.15 : size).toFixed(0)
+      + '" fill="#FFD60A" stroke="#0B1120" stroke-width="7" paint-order="stroke" stroke-linejoin="round">' + esc(l) + '</text>').join('');
+    return (BADGES[id] = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">' + text + '</svg>'));
   }
 
   const proto = Component.prototype;
+  // Date du jour (2026-10-11) : la logique de la maquette comptait depuis le 3 octobre 2026 (today() figé), d'où des
+  // périodes de ventes, une marge sur 30 jours, des semaines actives et des comptes à rebours faux. Date réelle
+  // désormais (?today= et la date simulée de l'Admin compris) ; les liens de démonstration gardent celle de la maquette.
+  const baseToday = proto.today;
+  proto.today = function () { return (this.props || {}).demo ? baseToday.call(this) : realToday(); };
+  // Historique simulé des articles de démo : ses jours vont jusqu'à aujourd'hui.
+  proto.histDate = function (i, n) { return new Date(Date.parse(this.today()) - (n - 1 - i) * 86400000).toISOString().slice(0, 10); };
   const baseCatalog = proto.catalog;
   proto.catalog = function () {
     const base = baseCatalog.call(this), extra = (this.state && this.state.extra) || [];
@@ -230,7 +264,7 @@
     const r = baseMarket.call(this, x), s = x.s, q = String(s.mq || '').trim();
     r.browse = { show: false, fan: [], sub: '', open: null };
     if (TCG.status === 'loading') { r.count = q ? 'Chargement du catalogue complet…' : r.count; return r; }
-    if (TCG.status === 'error') { r.count = r.count + ' · catalogue complet indisponible'; return r; }
+    if (TCG.status === 'error') { r.count = r.count + ' · catalogue complet indisponible, nouvel essai automatique'; return r; }
     const total = TCG.rows.length.toLocaleString('fr-FR');
     if (!q) {
       r.browse = {
@@ -261,7 +295,7 @@
   proto.vSets = function (s) {
     const res = { q: s.eq || '', onQ: e => this.setState({ eq: e.target.value }), count: '', subtitle: '', empty: false, groups: [] };
     if (TCG.status !== 'ready') {
-      res.count = TCG.status === 'error' ? 'Catalogue complet indisponible pour le moment.' : 'Chargement du catalogue…';
+      res.count = TCG.status === 'error' ? 'Catalogue complet indisponible pour le moment · nouvel essai automatique dès que le réseau revient.' : 'Chargement du catalogue…';
       return res;
     }
     const own = this.ownedBySet(s), words = fold(s.eq || '').split(/\s+/).filter(Boolean);
@@ -295,7 +329,7 @@
   const EMPTY_SET = { title: '', subtitle: '', hasLogo: false, logo: '', countText: '', valueText: '', hasNote: false, note: '', filters: [], count: '', empty: false, emptyText: '', cards: [] };
   proto.vSet = function (s) {
     if (TCG.status !== 'ready') {
-      return Object.assign({}, EMPTY_SET, { title: 'Extension', count: TCG.status === 'error' ? 'Catalogue complet indisponible pour le moment.' : 'Chargement du catalogue…' });
+      return Object.assign({}, EMPTY_SET, { title: 'Extension', count: TCG.status === 'error' ? 'Catalogue complet indisponible pour le moment · nouvel essai automatique dès que le réseau revient.' : 'Chargement du catalogue…' });
     }
     const e = TCG.setList.find(z => z.id === s.setId);
     if (!e) return Object.assign({}, EMPTY_SET, { title: 'Extension introuvable', empty: true, emptyText: 'Cette extension n’est pas dans le catalogue.' });
@@ -361,6 +395,17 @@
       if (n === 2) it.coteRule = 'Cote PKM = moyenne des 2 prix « marché » disponibles (tendance Cardmarket et TCGplayer). Le prix demandé est affiché, jamais compté.';
       if (it.noCote) it.release = 'Pas encore de prix « marché » pour cette carte (Cardmarket et TCGplayer, via TCGdex). Tu peux quand même l’ajouter à ta collection.';
       if (it.hasCote) it.change = 'Courbe après quelques jours d’archivage';
+      // Deuxième prix Cardmarket : l'autre version de la carte (reverse, normale ou holo), affiché, jamais compté.
+      if (typeof p.cmh === 'number' && typeof p.cm === 'number') {
+        const other = p.cmv === 'h' ? 'version normale' : /holo|rare/i.test(p.rarity) && !/reverse/i.test(p.rarity) ? 'version reverse ou holo' : 'version reverse';
+        it.sources.splice(1, 0, Object.assign({}, it.sources[0], { sub: 'Tendance · ' + other + ' · via TCGdex' + day, tag: 'autre version', value: this.eur(p.cmh), weight: '500', fg: '#C9D3EA' }));
+        it.sources[0] = Object.assign({}, it.sources[0], { sub: 'Tendance · ' + (p.cmv === 'h' ? 'version holo' : 'version normale') + ' · via TCGdex' + day });
+        it.sources.forEach((so, i) => { so.border = x.line(i); });
+      }
+      it.doubt = !!p.doubt;
+      it.doubtText = 'Cote à confirmer : les prix Cardmarket de cette carte s’écartent anormalement (peu de ventes ou annonce isolée). Vérifie les ventes réussies avant de te fier au chiffre.';
+      const soon = (((TCG.doc || {}).stats || {}).setsPriceSoon || []);
+      if (it.noCote && soon.some(z => (z.id || z) === p.set)) it.release = 'Cote à venir : extension sortie récemment, Cardmarket et TCGplayer ne publient pas encore de prix (via TCGdex). Tu peux déjà l’ajouter à ta collection.';
       const notes = [];
       if (p.lang === 'EN') notes.push(String(setOf(p.set)[5] || 'fr') === 'en' ? 'Carte en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.'
         : 'Carte en anglais : absente de la version française du catalogue TCGdex, elle vient de la version anglaise.');
@@ -369,6 +414,11 @@
       it.imgNote = notes.join(' ');
       it.hasImgNote = it.imgNote !== '';
     }
+    // Ventes réussies eBay : pas d'API ouverte ni de scraping autorisé, donc un lien vers la recherche eBay
+    // (annonces terminées et vendues) au lieu d'un chiffre inventé.
+    const q = p.tcg ? [p.name, p.numShort, p.lang === 'EN' ? '' : 'FR'].filter(Boolean).join(' ') : p.name;
+    it.ebayUrl = 'https://www.ebay.fr/sch/i.html?_nkw=' + encodeURIComponent(q) + '&LH_Sold=1&LH_Complete=1';
+    it.ebayText = 'Ventes réussies eBay pour « ' + q + ' »';
     return it;
   };
 
@@ -412,7 +462,7 @@
   const baseScanResult = proto.vScanResult;
   proto.vScanResult = function (x) {
     const r = baseScanResult.call(this, x);
-    r.wrong = () => { this.setState({ scanSheet: false, screen: 'market', stack: [], hi: null }); };
+    r.wrong = () => { this.setState({ scanSheet: false, screen: 'search', stack: ['home'], hi: null }); };
     return r;
   };
 

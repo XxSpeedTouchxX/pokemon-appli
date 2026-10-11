@@ -53,7 +53,7 @@ function wordmark(o) {
   const H = 100, items = [];
   const tilt = { D: -3, R: 3, P: 2, C: -3, A: 2, S: -3, D2: 3, R2: -2, O: -4, I: 5 };
   let x = 0, n = 0;
-  for (const ch of 'DROPICARDS') {
+  for (const ch of o.text || 'DROPICARDS') {
     const key = (ch === 'D' || ch === 'R') && n++ >= 2 ? ch + '2' : ch;
     if (ch === 'O') {
       const w = 64, h = 114, c = cardO(w, h, o.detail);
@@ -135,4 +135,8 @@ out('web/img/brand/dropicards.svg', doc(big.box, big.svg, 'Dropicards'));
 out('web/img/brand/dropicards-dark.svg', doc(dark.box, dark.svg, 'Dropicards'));
 out('web/img/brand/classeur.svg', doc([0, 0, 150, 122], binderSvg(), 'Classeur de cartes'));
 out('web/img/brand/pk.svg', doc([0, 0, 64, 64], pkGemSvg(), 'PK'));
+// Monogramme de l'icône de l'app (2026-10-11, demande du porteur) : le « D » du logo et la carte « O » étoilée, au même
+// style que le mot (lettre blanche, contour et ombre noirs). Rendu en PNG par make_icons.mjs.
+const mono = wordmark({ text: 'DO', outline: 14, shadow: [5, 7], letter: WHITE, detail: true, iCard: true, gap: 8 });
+out('web/img/brand/monogram.svg', doc(mono.box, mono.svg, 'Dropicards'));
 console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, classeur, pk (gemme)');

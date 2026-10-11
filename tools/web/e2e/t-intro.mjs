@@ -1,4 +1,4 @@
-// K1 : animation d'entrée. Complète (?intro=1) puis retirée en moins de 2,3 s ; un appui la passe ; version éclair ;
+// K1 : animation d'entrée, complète à chaque démarrage (2026-10-11). Complète (?intro=1) puis retirée en moins de 2,3 s ; un appui la passe ; version éclair ;
 // animations réduites ; absente pour un navigateur de test ; l'app se charge en dessous pendant ce temps.
 import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const B = E2E + '/';
@@ -6,23 +6,25 @@ const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); await withFonts(ctx);
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
-const has = () => page.evaluate(() => !!document.getElementById('pkm-intro'));
+// Visible : l'animation est masquée à la fin (gardée pour être rejouée au retour dans l'app, 2026-10-11).
+const gone = () => { const el = document.getElementById('pkm-intro'); return !el || el.style.display === 'none'; };
+const has = () => page.evaluate(gone).then(g => !g);
 let t0 = Date.now();
 await page.goto(B + '?intro=1', { waitUntil: 'domcontentloaded' });
 ok('complète : affichée (' + await page.evaluate(() => document.getElementById('pkm-intro') && document.getElementById('pkm-intro').className) + ')', await has() && (await page.evaluate(() => document.getElementById('pkm-intro').className)) === 'pi-full');
-await page.waitForFunction(() => !document.getElementById('pkm-intro'), null, { timeout: 4000 }).catch(() => {});
+await page.waitForFunction(gone, null, { timeout: 4000 }).catch(() => {});
 const dur = Date.now() - t0;
 ok('retirée après ' + dur + ' ms (≤ 2 300 ms)', !(await has()) && dur <= 2300);
 ok('l’app est prête dessous', (await page.locator('header img[alt="Dropicards"]').count()) === 1);
 // Appui pour passer.
 await page.goto(B + '?intro=1', { waitUntil: 'domcontentloaded' }); await page.waitForTimeout(300);
 t0 = Date.now(); await page.mouse.click(195, 420);
-await page.waitForFunction(() => !document.getElementById('pkm-intro'), null, { timeout: 2000 }).catch(() => {});
+await page.waitForFunction(gone, null, { timeout: 2000 }).catch(() => {});
 ok('appui : passée en ' + (Date.now() - t0) + ' ms', !(await has()) && Date.now() - t0 < 600);
 // Version éclair.
 t0 = Date.now(); await page.goto(B + '?intro=court', { waitUntil: 'domcontentloaded' });
 ok('éclair : classe pi-short', (await page.evaluate(() => document.getElementById('pkm-intro') && document.getElementById('pkm-intro').className)) === 'pi-short');
-await page.waitForFunction(() => !document.getElementById('pkm-intro'), null, { timeout: 2000 }).catch(() => {});
+await page.waitForFunction(gone, null, { timeout: 2000 }).catch(() => {});
 ok('éclair : ' + (Date.now() - t0) + ' ms', !(await has()) && Date.now() - t0 < 1000);
 // Navigateur de test sans forçage : rien.
 await page.goto(B, { waitUntil: 'domcontentloaded' });

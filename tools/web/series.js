@@ -39,7 +39,7 @@
   serProto.vSeries = function (s) {
     const res = { ready: false, loading: '', q: s.serQ || '', onQ: e => this.setState({ serQ: e.target.value }), chips: [], groups: [], count: '', empty: false };
     if (TCG.status !== 'ready') {
-      res.loading = TCG.status === 'error' ? 'Catalogue indisponible pour le moment.' : 'Chargement du catalogue…';
+      res.loading = TCG.status === 'error' ? 'Catalogue indisponible pour le moment · nouvel essai automatique dès que le réseau revient.' : 'Chargement du catalogue…';
       return res;
     }
     const own = this.ownedBySet(s), today = realToday(), words = fold(s.serQ || '').split(/\s+/).filter(Boolean);
@@ -119,5 +119,51 @@
       r.ui.title = 'Toutes les séries';
       if (r.ser.ready) { r.ui.subtitle = r.ser.count; r.ui.hasSubtitle = true; }
     }
+    return r;
+  };
+
+  // « Les plus chères », toutes séries confondues (2026-10-11, demande du porteur) : les 200 cartes les mieux cotées
+  // du catalogue, dans l'écran « Extension » (identifiant virtuel « *top »), de la plus chère à la moins chère.
+  // Préclassement sur la ligne brute (coteOf), puis cote Dropicards exacte des 200 retenues. Les cotes douteuses
+  // (champ q du catalogue, écart anormal entre les prix) sont écartées : elles faussaient le haut du classement.
+  const SER_TOP_ID = '*top', SER_TOP_N = 200;
+  let serTopCache = { doc: null, ids: [] };
+  const serTopIds = () => {
+    if (serTopCache.doc === TCG.doc) return serTopCache.ids;
+    const F = TCG.F;
+    const ids = TCG.rows.filter(x => !(F.q !== undefined && x.r[F.q] === 1)).map(x => [x.r[F.id], coteOf(x.r, F)]).filter(a => a[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, SER_TOP_N).map(a => a[0]);
+    serTopCache = { doc: TCG.doc, ids: ids };
+    return ids;
+  };
+  serProto.openTop = function () { this.push('set', { setId: SER_TOP_ID, setFilter: 'all' }); };
+  const serBaseSet = serProto.vSet;
+  serProto.vSet = function (s) {
+    if (s.setId !== SER_TOP_ID || TCG.status !== 'ready') return serBaseSet.call(this, s);
+    const c = this.compute(s), all = serTopIds().map(id => TCG.item(id)).filter(p => p && this.cote(p) !== null).sort((a, b) => this.cote(b) - this.cote(a));
+    const qty = p => (c.stock[p.id] ? c.stock[p.id].qty : 0), mine = all.filter(p => qty(p) > 0);
+    const f = s.setFilter === 'own' ? 'own' : 'all', shown = f === 'own' ? mine : all;
+    const defs = [['all', 'Top ' + all.length], ['own', 'À toi · ' + mine.length]];
+    return {
+      title: 'Les plus chères', subtitle: 'Toutes séries confondues · cote Dropicards du jour', hasLogo: false, logo: '',
+      countText: 'Les ' + all.length + ' cartes les mieux cotées du catalogue', valueText: '', hasNote: true,
+      note: 'Cote Dropicards : tendance Cardmarket et TCGplayer, selon la version de la carte (normale ou holo). Une cote marquée « incertaine » dans la fiche est à vérifier.',
+      filters: defs.map(([k, label]) => Object.assign({ label: label, on: f === k, pick: () => this.setState({ setFilter: k }) }, this.chip(f === k))),
+      count: shown.length + (shown.length > 1 ? ' cartes' : ' carte') + ' · par cote décroissante',
+      empty: shown.length === 0, emptyText: f === 'own' ? 'Aucune de ces cartes dans ta collection.' : 'Aucune carte cotée.',
+      cards: shown.map((p, i) => {
+        const k = this.cote(p), q = qty(p), set = (setOf(p.set) || [])[0] || '';
+        return {
+          img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: '#' + (i + 1) + ' · ' + set, owned: q > 0, qty: '×' + q,
+          cote: k >= 100 ? this.eur0(k) : this.eur(k), coteColor: 'var(--pkm-t1)',
+          label: (i + 1) + 'e, ' + p.name + ', ' + set + ' ' + p.numLabel + ', cote ' + this.eur(k) + (q ? ', ' + q + ' dans ta collection' : ''),
+          open: () => this.openTcg(p.id)
+        };
+      })
+    };
+  };
+  const serBaseSeries = serProto.vSeries;
+  serProto.vSeries = function (s) {
+    const r = serBaseSeries.call(this, s);
+    r.top = () => this.openTop();
     return r;
   };

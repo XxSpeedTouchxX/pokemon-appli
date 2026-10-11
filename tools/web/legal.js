@@ -1,42 +1,53 @@
   // ——— Informations légales (H1, H4 ; 2026-10-09) ———
   // Panneau ouvert depuis Réglages › À propos (« Informations légales ») et depuis « Mes PK » (« Règles des PK ») :
-  // mentions légales, confidentialité, conditions d'utilisation, règles des PK. Les champs de l'éditeur restent
+  // mentions légales, confidentialité, conditions d'utilisation, PK et jeux. Les champs de l'éditeur restent
   // « à compléter » : ils dépendent du porteur (nom ou société, adresse, contact) et ne sont jamais inventés.
   // Textes à faire relire avant toute sortie publique (docs/14-verifications-avant-publication.md).
   // Ce module partage la portée des autres : ses noms commencent par LEGAL_ ou legal.
   const LEGAL_TODO = '[à compléter par l’éditeur avant publication]';
+  const LEGAL_UPDATED = '11 octobre 2026';
+  // Refonte du 2026-10-11 (demande du porteur) : mentions conformes à l'article 6-III de la loi pour la confiance dans
+  // l'économie numérique (LCEN), confidentialité (RGPD, stockage local sans cookie), sources et licences, jeux et PK.
   const LEGAL = {
     mentions: { label: 'Mentions légales', blocks: [
-      ['Éditeur', 'Nom ou raison sociale : ' + LEGAL_TODO + '. Adresse : ' + LEGAL_TODO + '. Contact : ' + LEGAL_TODO + '.'],
+      ['Éditeur', 'Personne physique : nom et prénom, adresse, téléphone et adresse électronique. Société : dénomination, forme, capital, siège, numéro RCS ou SIRET et, le cas échéant, numéro de TVA. ' + LEGAL_TODO],
       ['Directeur de la publication', LEGAL_TODO],
-      ['Hébergeur', 'Cloudflare, Inc. (service Cloudflare Pages), 101 Townsend Street, San Francisco, CA 94107, États-Unis.'],
-      ['Indépendance', 'Dropicards est une application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company. Pokémon et les noms, images et marques associés appartiennent à leurs propriétaires respectifs ; ils sont affichés pour identifier les cartes et produits de ta collection.'],
-      ['Sources', 'Catalogue, visuels et prix des cartes : TCGdex (et pokemontcg.io en dernier recours pour certains visuels). Cote du scellé : Cardmarket. Boutiques : © les contributeurs d’OpenStreetMap (licence ODbL). Compagnons : sprites de Pokémon Noir et Blanc via PokeAPI. Lecture du scan : Tesseract.js (licence Apache 2.0).'],
-      ['Version', 'Démonstration en cours de développement : les cotes sont indicatives et peuvent contenir des erreurs.']
+      ['Contact', 'Adresse électronique de contact : ' + LEGAL_TODO + '. Elle sert aussi aux demandes sur tes données et aux signalements de contenu.'],
+      ['Hébergeur', 'Cloudflare, Inc. (service Cloudflare Pages), 101 Townsend Street, San Francisco, CA 94107, États-Unis · www.cloudflare.com.'],
+      ['Indépendance', 'Dropicards est une application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company, ni à Cardmarket, eBay ou aux enseignes citées. Pokémon et les noms, illustrations et marques associés appartiennent à leurs propriétaires respectifs ; ils sont affichés seulement pour identifier les cartes et les produits de ta collection.'],
+      ['Propriété intellectuelle', 'Le nom Dropicards, son logo, ses textes et son code appartiennent à l’éditeur, sauf les éléments de tiers cités dans « Sources et licences ». Toute reproduction sans accord est interdite.'],
+      ['Sources et licences', 'Catalogue, visuels et prix des cartes : TCGdex (projet communautaire) et, pour certains visuels, pokemontcg.io. Cotes : Cardmarket et TCGplayer, via TCGdex et les fichiers publics de Cardmarket. Boutiques : © les contributeurs d’OpenStreetMap, données sous licence ODbL. Fond de carte : OpenFreeMap (données OpenStreetMap). Compagnons : sprites Pokémon via PokeAPI. Lecture du scan : Tesseract.js (Apache 2.0). Carte : MapLibre GL JS (BSD-3). Interface : Vue.js (MIT). Polices : Luckiest Guy (Apache 2.0), Sora et Plus Jakarta Sans (SIL Open Font License).'],
+      ['Liens sortants', 'Les liens vers Amazon, eBay, Fnac, Cultura, Micromania ou d’autres sites sont fournis pour information, sans affiliation ni commission. L’éditeur n’est pas responsable du contenu de ces sites.'],
+      ['Droit applicable', 'Ces mentions et l’app sont soumises au droit français. Mises à jour le ' + LEGAL_UPDATED + '.']
     ] },
     privacy: { label: 'Confidentialité', blocks: [
-      ['En bref', 'Dropicards n’a pas de compte ni de serveur pour tes données : ta collection, tes ventes, tes réglages et tes PK restent dans ce navigateur, sur ton appareil. Personne d’autre, pas même l’éditeur, n’y a accès.'],
+      ['En bref', 'Dropicards n’a ni compte ni serveur pour tes données : ta collection, tes ventes, tes réglages, tes PK et tes alertes restent dans ce navigateur, sur ton appareil. L’éditeur n’y a pas accès et ne les reçoit jamais.'],
+      ['Stockage sur l’appareil', 'L’app utilise le stockage local du navigateur (pas de cookie) pour garder ta collection et tes réglages, et une copie hors ligne de l’app et du catalogue. Ce stockage est strictement nécessaire au service que tu demandes : il ne demande pas de consentement et ne sert à aucun suivi.'],
       ['Position', 'Ta position n’est demandée que si tu touches « Me localiser ». Elle est arrondie à environ 100 m, utilisée sur l’appareil pour trouver les boutiques proches, et n’est ni enregistrée ni envoyée.'],
       ['Appareil photo', 'Le scan lit le numéro et le nom de la carte directement sur ton téléphone. Aucune image n’est envoyée ni gardée.'],
+      ['Notifications', 'L’app ne demande l’autorisation d’afficher des notifications que lorsque tu crées une alerte. Les rappels sont calculés sur ton appareil, à l’ouverture de l’app : aucun serveur ne t’envoie de message. Tu peux retirer l’autorisation dans les réglages du navigateur.'],
       ['Fichiers', 'Une sauvegarde restaurée ou un tableur importé est lu sur ton appareil. Il n’est envoyé nulle part.'],
-      ['Services contactés', 'Pour afficher l’app, ton navigateur télécharge des fichiers depuis : Cloudflare (l’app elle-même), assets.tcgdex.net et images.pokemontcg.io (visuels des cartes), tiles.openfreemap.org (fond de carte du Radar). Les polices sont hébergées avec l’app. Comme toute page web, ces services voient l’adresse IP de ton appareil ; Dropicards ne leur transmet aucune donnée de ta collection.'],
-      ['Liens et partage', 'Les liens vers Amazon, eBay, Fnac, Cultura, Micromania, WhatsApp, Facebook ou X ouvrent ces sites, qui appliquent leurs propres règles. Dropicards ne touche aucune commission.'],
-      ['Mesure d’audience', 'Aucun cookie et aucune mesure d’audience pour l’instant. Si une mesure est ajoutée, elle sera sans cookie et indiquée ici.'],
-      ['Tes droits', 'Tu peux effacer tes données à tout moment : Réglages › « Vider ma collection », ou en effaçant les données du site dans ton navigateur. Pense à faire une sauvegarde avant. Pour toute question : ' + LEGAL_TODO + '.']
+      ['Services contactés', 'Pour fonctionner, ton navigateur télécharge des fichiers depuis : Cloudflare (l’app et ses données), assets.tcgdex.net et images.pokemontcg.io (visuels des cartes et logos des séries), tiles.openfreemap.org (fond de carte du Radar). Comme toute page web, ces services voient l’adresse IP de ton appareil et peuvent la journaliser selon leurs propres règles ; Dropicards ne leur transmet aucune donnée de ta collection.'],
+      ['Mesure d’audience', 'Aucune mesure d’audience et aucune publicité. Si une mesure est ajoutée, elle sera sans cookie et décrite ici avant sa mise en service.'],
+      ['Tes droits', 'Tes données sont sur ton appareil : tu peux les exporter (Réglages › « Sauvegarder ou restaurer ») et les effacer à tout moment (Réglages › « Vider ma collection », ou en effaçant les données du site). Pour toute question : ' + LEGAL_TODO + '. Tu peux aussi saisir la CNIL (www.cnil.fr).']
     ] },
     terms: { label: 'Conditions', blocks: [
-      ['Objet', 'Dropicards t’aide à suivre la valeur de tes cartes et produits Pokémon TCG. Ce n’est pas une plateforme de vente : l’app ne vend rien et ne sert pas d’intermédiaire.'],
-      ['Cotes', 'Les cotes sont calculées à partir de prix publics de plusieurs sources, avec leur date. Ce sont des estimations, pas des offres d’achat ni des conseils financiers ou fiscaux. L’éditeur ne garantit ni leur exactitude ni leur disponibilité.'],
+      ['Objet', 'Dropicards t’aide à suivre la valeur de tes cartes et produits Pokémon TCG. Ce n’est pas une plateforme de vente : l’app ne vend rien, n’achète rien et ne sert pas d’intermédiaire.'],
+      ['Accès', 'L’app est gratuite et sans compte. Elle peut être modifiée, suspendue ou arrêtée à tout moment, sans préavis, notamment pendant la démonstration.'],
+      ['Cotes', 'Les cotes sont calculées à partir de prix publics de plusieurs sources, avec leur date. Ce sont des estimations, pas des offres d’achat ni des conseils financiers ou fiscaux. Une cote peut être fausse ou absente : « cote à confirmer » et « cote à venir » le signalent. Les ventes réussies eBay ne sont pas chiffrées dans l’app : le lien ouvre la recherche eBay. L’éditeur ne garantit ni l’exactitude ni la disponibilité des prix.'],
+      ['Boutiques et alertes', 'Les boutiques viennent d’OpenStreetMap et peuvent être fermées ou mal placées. L’indice de chance est une estimation, jamais une information de stock. Les boutiques « partenaires » de l’encadré Démo de Territoire sont fictives ; aucune vraie boutique n’a d’accord avec Dropicards.'],
       ['Tes données', 'Elles restent sur ton appareil. Tu es responsable de leur sauvegarde (Réglages › « Sauvegarder ou restaurer »).'],
-      ['Démonstration', 'L’app est en cours de développement : fonctions et règles peuvent changer. Les boutiques « partenaires » de l’encadré Démo de Territoire sont fictives ; aucune vraie boutique n’a d’accord avec Dropicards.'],
+      ['Bon usage', 'N’utilise pas l’app pour perturber les services cités ni pour en extraire les données en masse.'],
       ['Contact', LEGAL_TODO]
     ] },
-    pk: { label: 'Règles des PK', blocks: [
+    pk: { label: 'PK et jeux', blocks: [
       ['Ce que sont les PK', 'Les PK sont une monnaie virtuelle de l’app. Ils servent seulement à débloquer des compagnons et des thèmes.'],
-      ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas et ne se convertissent pas en argent ni en biens. Ils n’ont aucune valeur en euros. Il n’y a ni tirage au sort ni jeu d’argent.'],
-      ['Gains', '+10 par nouvelle carte ou nouveau produit scellé ajouté (une seule fois par article) ; +10 par jour où tu ouvres l’app ; +100 de bienvenue ; +300 une fois pour un partage de l’app. Les articles importés depuis un tableur ne rapportent pas de PK.'],
+      ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas et ne se convertissent pas en argent ni en biens. Ils n’ont aucune valeur en euros.'],
+      ['Gains', '+100 de bienvenue ; +10 par jour où tu ouvres l’app ; +10 par nouvelle carte ou nouveau produit scellé ajouté (une seule fois par article) ; +300 une fois pour un partage de l’app ; les jeux de l’onglet Jeux. Les articles importés depuis un tableur ne rapportent pas de PK.'],
+      ['Jeux', 'Booster PK : un booster gratuit toutes les 24 h, qui contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %), 100 PK (4 %) ou 1 000 PK (1 %). Pile ou face : un lancer gratuit toutes les 8 h ; la face « gemme PK » rapporte 30 PK (une chance sur deux), la face « cristal éteint » rien. Le tirage est fait au hasard sur ton appareil.'],
+      ['Pas un jeu d’argent', 'Les jeux sont gratuits : aucune mise, aucun achat, aucune participation en argent, et les gains (des PK) n’ont aucune valeur en euros. Ce ne sont ni des loteries ni des jeux d’argent.'],
       ['Sur ton appareil', 'Ton solde est enregistré avec ta collection, sur cet appareil. Il est inclus dans la sauvegarde. Il peut être perdu si les données du site sont effacées.'],
-      ['Évolution', 'Les montants, les prix des compagnons et ces règles peuvent évoluer, et les PK peuvent être remis à zéro pendant la démonstration.']
+      ['Évolution', 'Les montants, les taux, les prix des compagnons et ces règles peuvent évoluer, et les PK peuvent être remis à zéro pendant la démonstration.']
     ] }
   };
   const LEGAL_TABS = ['mentions', 'privacy', 'terms', 'pk'];

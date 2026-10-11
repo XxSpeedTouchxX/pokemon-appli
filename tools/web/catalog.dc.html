@@ -195,6 +195,24 @@
 </sc-if>
 </section>
 
+<sc-if value="{{ home.al.show }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Tes alertes" class="pkm-rise" style="flex: none; display: flex; flex-direction: column; gap: 8px; padding: 14px 14px 12px; border-radius: 22px; border: 1px solid #1F5A55; background: radial-gradient(120% 140% at 0% 0%, rgba(94, 224, 207, 0.16), rgba(94, 224, 207, 0) 62%), #0F1D2B">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; display: flex; align-items: center; gap: 8px; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #5EE0CF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z M10 20a2 2 0 0 0 4 0"></path></svg>Tes alertes · {{ home.al.count }}</h2>
+<button type="button" onClick="{{ home.al.okAll }}" style="flex: none; height: 40px; padding: 0 4px; border: 0; background: transparent; color: #5EE0CF; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Tout marquer lu</button>
+</div>
+<sc-for list="{{ home.al.items }}" as="hal" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; padding-top: 8px; border-top: 1px solid rgba(94, 224, 207, 0.2)">
+<button type="button" onClick="{{ hal.open }}" style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="font-size: 14px; font-weight: 700; line-height: 1.3">{{ hal.title }}</span>
+<span style="font-size: 12.5px; line-height: 1.4; color: #C9D3EA">{{ hal.text }}</span>
+</button>
+<button type="button" onClick="{{ hal.ok }}" aria-label="Marquer cette alerte comme lue" style="flex: none; width: 40px; height: 40px; padding: 0; border: 1px solid #1F5A55; border-radius: 20px; background: transparent; color: #5EE0CF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></button>
+</div>
+</sc-for>
+</section>
+</sc-if>
+
 <section aria-label="Valeur de ma collection" style="flex: none; container-type: inline-size; padding: 16px 18px 14px; border-radius: 24px; border: 1px solid #24345C; background: radial-gradient(120% 85% at 100% 0%, rgba(98, 122, 255, 0.26), rgba(98, 122, 255, 0) 62%), #121C33; display: flex; flex-direction: column; gap: 6px">
 <div style="display: flex; align-items: flex-start; gap: 10px">
 <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
@@ -228,6 +246,7 @@
 </sc-if>
 </section>
 
+<!-- carrousel : home.next -->
 @@backup-reminder@@
 <section aria-label="Mon classeur" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Mon classeur</h2>
@@ -323,72 +342,37 @@
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
 <button type="button" onClick="{{ home.hr.list }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Voir la liste</button>
 </div>
-<sc-if value="{{ home.hr.needPos }}" hint-placeholder-val="{{ false }}">
-<div style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #24345C; background: #121C33; display: flex; flex-direction: column; gap: 12px">
-<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #C9D3EA">Active ta position : le radar repère les vraies boutiques autour de toi (cartes, jeux, jouets, grandes surfaces), avec leur nom, leur ville et leur chance d’avoir du Pokémon.</p>
+<button type="button" onClick="{{ home.hr.main }}" aria-label="{{ home.hr.mainLabel }}" style="flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid #1F5A55; border-radius: 22px; background: radial-gradient(120% 140% at 0% 0%, rgba(94, 224, 207, 0.16), rgba(94, 224, 207, 0) 62%), #0F1D2B; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span aria-hidden="true" style="position: relative; flex: none; width: 64px; height: 64px; border-radius: 32px; background: radial-gradient(circle, rgba(94, 224, 207, 0.22), rgba(94, 224, 207, 0.04) 70%); box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.45); overflow: hidden">
+<span style="position: absolute; inset: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.4)"></span>
+<span style="position: absolute; inset: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.3)"></span>
+<span class="pkm-anim" style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(94, 224, 207, 0) 0deg, rgba(94, 224, 207, 0) 270deg, rgba(94, 224, 207, 0.55) 360deg); animation: pkmSpin 3s linear infinite"></span>
+<span style="position: absolute; left: 29px; top: 29px; width: 6px; height: 6px; border-radius: 3px; background: #5EE0CF"></span>
+<sc-for list="{{ home.hr.blips }}" as="hrb" hint-placeholder-count="3"><span class="pkm-anim" style="position: absolute; left: {{ hrb.x }}; top: {{ hrb.y }}; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 3px; background: #5EE0CF; animation: pkmBlip 3s ease-out {{ hrb.delay }} infinite"></span></sc-for>
+</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; font-weight: 700; color: #5EE0CF">Radar des boutiques</span>
+<span style="font-size: 15.5px; font-weight: 700; line-height: 1.3">{{ home.hr.title }}</span>
+<span style="font-size: 12.5px; line-height: 1.4; color: #9AA8C3">{{ home.hr.sub }}</span>
+</span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
 <sc-if value="{{ home.hr.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13px; line-height: 1.45; color: #F5B14C">{{ home.hr.msg }}</p></sc-if>
-<button type="button" onClick="{{ home.hr.tap }}" aria-label="{{ home.hr.tapLabel }}" style="align-self: center; position: relative; width: 132px; height: 132px; margin: 2px 0; padding: 0; border: 0; border-radius: 66px; background: transparent; cursor: pointer">
-<span aria-hidden="true" style="position: absolute; inset: 0; border-radius: 66px; overflow: hidden; background: radial-gradient(closest-side, rgba(var(--pkm-accent-rgb), 0.14), rgba(var(--pkm-accent-rgb), 0)), var(--pkm-field); box-shadow: inset 0 0 0 2px rgba(var(--pkm-accent-rgb), 0.7)">
-<svg width="132" height="132" viewBox="-66 -66 132 132" style="position: absolute; left: 0; top: 0; display: block"><path d="M-60 0H60 M0 -60V60" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.25); stroke-width: 1"></path><circle cx="0" cy="0" r="20" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.45); stroke-width: 1; stroke-dasharray: 3 4"></circle><circle cx="0" cy="0" r="40" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.45); stroke-width: 1; stroke-dasharray: 3 4"></circle><circle cx="0" cy="0" r="58" style="fill: none; stroke: rgba(var(--pkm-accent-rgb), 0.45); stroke-width: 1; stroke-dasharray: 3 4"></circle></svg>
-<span class="pkm-anim" style="position: absolute; inset: 0; border-radius: 66px; background: conic-gradient(from -70deg, rgba(var(--pkm-accent-rgb), 0) 0deg, rgba(var(--pkm-accent-rgb), 0.55) 70deg, rgba(var(--pkm-accent-rgb), 0) 70.5deg); animation: pkmSpin 2.6s linear infinite"></span>
-<span class="pkm-anim" style="position: absolute; left: 92px; top: 27px; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-accent); animation: pkmBlip 2.6s ease-out -2.31s infinite"></span>
-<span class="pkm-anim" style="position: absolute; left: 88px; top: 76px; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-accent); animation: pkmBlip 2.6s ease-out -1.75s infinite"></span>
-<span class="pkm-anim" style="position: absolute; left: 38px; top: 108px; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-accent); animation: pkmBlip 2.6s ease-out -1.10s infinite"></span>
-<span class="pkm-anim" style="position: absolute; left: 41px; top: 50px; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-accent); animation: pkmBlip 2.6s ease-out -0.43s infinite"></span>
-<span style="position: absolute; left: 60px; top: 60px; width: 12px; height: 12px; border-radius: 6px; background: var(--pkm-accent); box-shadow: 0 0 0 4px rgba(var(--pkm-accent-rgb), 0.3)"></span>
+<sc-if value="{{ home.hr.hasNear }}" hint-placeholder-val="{{ true }}">
+<div style="flex: none; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-for list="{{ home.hr.near }}" as="hrn" hint-placeholder-count="3">
+<button type="button" onClick="{{ hrn.open }}" aria-label="{{ hrn.label }}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 0; border-top: {{ hrn.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span aria-hidden="true" style="flex: none; width: 10px; height: 10px; border-radius: 5px; background: {{ hrn.color }}"></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrn.name }}</span>
+<span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrn.sub }}</span>
 </span>
-</button>
-<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
-<button type="button" onClick="{{ home.hr.locate }}" style="height: 48px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Me localiser</button>
-<button type="button" onClick="{{ home.hr.france }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Carte de France</button>
-</div>
-<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">Ta position reste sur ton téléphone : arrondie à 100 m environ, elle n’est ni enregistrée ni envoyée.</p>
-</div>
-</sc-if>
-<sc-if value="{{ home.hr.loading }}" hint-placeholder-val="{{ false }}">
-<p role="status" style="margin: 0; padding: 18px 0; text-align: center; font-size: 14px; color: #9AA8C3">Chargement des boutiques…</p>
-</sc-if>
-<sc-if value="{{ home.hr.located }}" hint-placeholder-val="{{ true }}">
-<div style="position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 24px; overflow: hidden; border: 1px solid #24345C; background: radial-gradient(closest-side, rgba(var(--pkm-accent-rgb), 0.1), rgba(var(--pkm-accent-rgb), 0)), #111A2C">
-<svg width="100%" height="100%" viewBox="-179 -179 358 358" aria-hidden="true" style="position: absolute; left: 0; top: 0; display: block">
-<path d="M-168 0H168 M0 -168V168" style="fill: none; stroke: rgba(168, 182, 255, 0.12); stroke-width: 1"></path>
-<sc-for list="{{ home.hr.rings }}" as="hrr" hint-placeholder-count="3">
-<circle cx="0" cy="0" r="{{ hrr.r }}" style="fill: none; stroke: rgba(168, 182, 255, 0.4); stroke-width: 1; stroke-dasharray: 3 4"></circle>
-<text x="5" y="{{ hrr.ly }}" style="fill: #9AA8C3; font-size: 10px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif">{{ hrr.label }}</text>
-</sc-for>
-</svg>
-<span aria-hidden="true" style="position: absolute; left: 50%; top: 6px; transform: translateX(-50%); font-size: 11px; font-weight: 800; color: #9AA8C3">N</span>
-<sc-if value="{{ home.hr.sweeping }}" hint-placeholder-val="{{ false }}">
-<div aria-hidden="true" class="pkm-anim" style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from -70deg, rgba(var(--pkm-accent-rgb), 0) 0deg, rgba(var(--pkm-accent-rgb), 0.38) 70deg, rgba(var(--pkm-accent-rgb), 0) 70.5deg); animation: pkmSpin 2.6s linear 1 both"></div>
-</sc-if>
-<span aria-hidden="true" style="position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 7px; background: #A8B6FF; box-shadow: 0 0 0 3px rgba(168, 182, 255, 0.35)"></span>
-<sc-if value="{{ home.hr.sweeping }}" hint-placeholder-val="{{ false }}">
-<sc-for list="{{ home.hr.pins }}" as="hrp" hint-placeholder-count="5">
-<button type="button" class="pkm-anim" onClick="{{ hrp.open }}" aria-label="{{ hrp.label }}" style="position: absolute; left: {{ hrp.x }}; top: {{ hrp.y }}; transform: translate(-50%, -50%); max-width: 40%; min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; display: flex; align-items: center; cursor: pointer; animation: pkmReveal 0.25s ease-out {{ hrp.delay }} both">
-<span style="min-width: 0; display: flex; flex-direction: column; padding: 3px 9px 4px; border-radius: 10px; border: 2px solid {{ hrp.fill }}; background: #111A2C; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); text-align: left">
-<span style="font-size: 11.5px; font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrp.name }}</span>
-<span style="font-size: 10.5px; line-height: 1.25; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrp.city }}</span>
-</span>
+<span style="flex: none; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; color: {{ hrn.color }}">{{ hrn.pct }}</span>
 </button>
 </sc-for>
-</sc-if>
-<sc-if value="{{ home.hr.scanned }}" hint-placeholder-val="{{ true }}">
-<sc-for list="{{ home.hr.pins }}" as="hrq" hint-placeholder-count="5">
-<button type="button" onClick="{{ hrq.open }}" aria-label="{{ hrq.label }}" style="position: absolute; left: {{ hrq.x }}; top: {{ hrq.y }}; transform: translate(-50%, -50%); max-width: 40%; min-height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; display: flex; align-items: center; cursor: pointer">
-<span style="min-width: 0; display: flex; flex-direction: column; padding: 3px 9px 4px; border-radius: 10px; border: 2px solid {{ hrq.fill }}; background: #111A2C; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); text-align: left">
-<span style="font-size: 11.5px; font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrq.name }}</span>
-<span style="font-size: 10.5px; line-height: 1.25; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrq.city }}</span>
-</span>
-</button>
-</sc-for>
-</sc-if>
 </div>
-<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
-<button type="button" onClick="{{ home.hr.scan }}" aria-disabled="{{ home.hr.busy }}" style="height: 48px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">{{ home.hr.scanLabel }}</button>
-<button type="button" onClick="{{ home.hr.france }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer">Carte de France</button>
-</div>
-<span role="status" style="font-size: 12.5px; line-height: 1.45; color: #7D8BA8">{{ home.hr.status }}</span>
 </sc-if>
+<span role="status" style="font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ home.hr.status }}</span>
 </section>
 
 <sc-if value="{{ home.hasMargin }}" hint-placeholder-val="{{ true }}">
@@ -1205,6 +1189,14 @@
 <input type="search" value="{{ ser.q }}" onInput="{{ ser.onQ }}" placeholder="Rechercher « 151 », « Flammes »…" aria-label="Rechercher une série ou une extension" style="flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; outline-offset: 4px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px">
 </div>
 <sc-if value="{{ ser.ready }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ ser.top }}" style="flex: none; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 1px solid #24345C; border-radius: 20px; background: #121C33; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span aria-hidden="true" style="flex: none; width: 44px; height: 44px; border-radius: 14px; background: var(--pkm-accent); color: var(--pkm-on-accent); display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 3h12l3 6-9 12L3 9z M3 9h18 M9 3l3 6 3-6 M12 9v12"></path></svg></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-family: 'Sora', sans-serif; font-size: 15.5px; font-weight: 600">Les plus chères</span>
+<span style="font-size: 12.5px; color: #9AA8C3">Toutes séries confondues · top 200 du catalogue</span>
+</span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
 <p style="margin: -2px 0 0; font-size: 13px; color: #9AA8C3">{{ ser.count }}</p>
 <nav aria-label="Aller à une série" class="pkm-dark" style="position: sticky; top: -4px; z-index: 4; margin: 0 -16px; padding: 8px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none">
 <sc-for list="{{ ser.chips }}" as="sc" hint-placeholder-count="5">
@@ -1406,4 +1398,85 @@
 </sc-for>
 </div>
 </div>
+</sc-if>
+<!-- fragment: games -->
+<sc-if value="{{ ui.isGames }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Mes PK" style="flex: none; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 22px; border: 1px solid #24345C; background: #121C33">
+<img src="img/brand/pk.svg" alt="" width="40" height="40" style="flex: none; display: block; width: 40px; height: 40px">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 12.5px; color: #9AA8C3">Ton solde</span><span style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">{{ gm.pk }} PK</span></span>
+<span style="flex: none; font-size: 12px; line-height: 1.35; color: #9AA8C3; text-align: right">Débloque des<br>compagnons</span>
+</section>
+
+<section aria-label="Booster PK" class="pkm-gm-boost pkm-dark" style="color: #F3F6FC; flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Booster PK</h2>
+<span style="font-size: 12.5px; color: #9AA8C3">1 offert toutes les 24 h</span>
+</div>
+<div aria-live="polite" style="position: relative; height: 250px; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{ gm.b.showPack }}" hint-placeholder-val="{{ true }}">
+<div class="{{ gm.b.packClass }}" aria-hidden="true" style="position: relative; width: 150px; height: 220px">
+<span class="pkm-gm-top"></span>
+<span class="pkm-gm-body">
+<span style="position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.55) 45%, rgba(255, 255, 255, 0) 60%); background-size: 260% 100%" class="pkm-gm-shine"></span>
+<img src="img/brand/pk.svg" alt="" width="74" height="74" style="position: relative; display: block; width: 74px; height: 74px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35))">
+<span class="pkm-gm-label">BOOSTER</span>
+<span class="pkm-gm-tag">DROPICARDS</span>
+</span>
+</div>
+</sc-if>
+<sc-if value="{{ gm.b.reveal }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-gm-reveal pkm-gm-card" style="box-shadow: {{ gm.b.prizeGlow }}">
+<sc-if value="{{ gm.b.jackpot }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" class="pkm-gm-rays"></span></sc-if>
+<img src="img/brand/pk.svg" alt="" width="70" height="70" style="position: relative; display: block; width: 70px; height: 70px">
+<span class="pkm-logo-text" style="position: relative; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 30px; color: #FFFFFF; white-space: nowrap">{{ gm.b.prizePk }}</span>
+<span style="position: relative; padding: 3px 12px; border-radius: 999px; background: {{ gm.b.prizeColor }}; color: #0B1120; font-size: 12.5px; font-weight: 800">{{ gm.b.prizeName }}</span>
+</div>
+</sc-if>
+</div>
+<button type="button" onClick="{{ gm.b.open }}" aria-disabled="{{ gm.b.wait }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; opacity: 1">{{ gm.b.button }}</button>
+<details style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px">
+<summary style="min-height: 36px; display: flex; align-items: center; font-size: 13.5px; font-weight: 700; color: #C9D3EA; cursor: pointer">Contenu possible et chances</summary>
+<div role="list" style="display: flex; flex-direction: column; gap: 6px; padding: 6px 0 2px">
+<sc-for list="{{ gm.b.odds }}" as="gmo" hint-placeholder-count="5">
+<span role="listitem" style="display: flex; align-items: center; gap: 10px; font-size: 13.5px"><span aria-hidden="true" style="flex: none; width: 10px; height: 10px; border-radius: 5px; background: {{ gmo.color }}"></span><span style="flex: 1">{{ gmo.pk }} · {{ gmo.name }}</span><span style="font-weight: 800; font-variant-numeric: tabular-nums">{{ gmo.pct }}</span></span>
+</sc-for>
+</div>
+</details>
+</section>
+
+<section aria-label="Pile ou face" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 50% 0%, rgba(168, 182, 255, 0.18), rgba(168, 182, 255, 0) 60%), #111A2C">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Pile ou face</h2>
+<span style="font-size: 12.5px; color: #9AA8C3">1 lancer toutes les 8 h</span>
+</div>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">Gemme PK : tu gagnes 30 PK. Cristal éteint : rien cette fois. Une chance sur deux.</p>
+<div style="height: 190px; display: flex; align-items: center; justify-content: center; perspective: 900px">
+<sc-if value="{{ gm.c.flipping }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-gm-coin pkm-gm-flip" aria-hidden="true" style="--end: {{ gm.c.angle }}">
+<span class="pkm-gm-face pkm-gm-win"><img src="img/brand/pk.svg" alt="" width="84" height="84"></span>
+<span class="pkm-gm-face pkm-gm-lose"><span class="pkm-gm-dead"></span></span>
+</div>
+</sc-if>
+<sc-if value="{{ gm.c.still }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-gm-coin" aria-hidden="true" style="transform: rotateY({{ gm.c.angle }})">
+<span class="pkm-gm-face pkm-gm-win"><img src="img/brand/pk.svg" alt="" width="84" height="84"></span>
+<span class="pkm-gm-face pkm-gm-lose"><span class="pkm-gm-dead"></span></span>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ gm.c.resultDone }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: -4px 0 0; text-align: center; font-size: 15px; font-weight: 800; color: {{ gm.c.resultColor }}">{{ gm.c.resultText }}</p></sc-if>
+<div aria-hidden="true" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; font-size: 12.5px; color: #C9D3EA">
+<span style="display: flex; align-items: center; gap: 8px"><img src="img/brand/pk.svg" alt="" width="22" height="22">Gagnant : +30 PK</span>
+<span style="display: flex; align-items: center; gap: 8px"><span class="pkm-gm-dead" style="width: 18px; height: 18px"></span>Perdant</span>
+</div>
+<button type="button" onClick="{{ gm.c.flip }}" aria-disabled="{{ gm.c.flipping }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer">{{ gm.c.button }}</button>
+</section>
+
+<sc-if value="{{ gm.hasHist }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Derniers gains" style="flex: none; display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; border-radius: 20px; border: 1px solid #1E2B45; background: #111A2C">
+<h2 style="margin: 0 0 2px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600">Derniers tirages</h2>
+<sc-for list="{{ gm.hist }}" as="gmh" hint-placeholder-count="3"><span style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span style="color: #C9D3EA">{{ gmh.text }}</span><span style="font-weight: 800; color: {{ gmh.color }}">{{ gmh.pk }}</span></span></sc-for>
+</section>
+</sc-if>
+<p style="flex: none; margin: 0; font-size: 12px; line-height: 1.5; color: #7D8BA8">{{ gm.rules }}</p>
 </sc-if>
