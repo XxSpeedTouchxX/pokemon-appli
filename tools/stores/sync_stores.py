@@ -142,7 +142,7 @@ def fetch_tile(bbox, end, good, minimum, depth=0):
     print(f"Tuile {bbox} : découpée en 4", flush=True)
     found = {}
     for part in quarters(bbox):
-        time.sleep(5)
+        time.sleep(max(0, min(5, end - time.monotonic() - 60)))
         got, good = fetch_tile(part, end, good, 0, depth + 1)
         if got is None:
             return None, good
@@ -159,18 +159,32 @@ def overpass(deadline=DEADLINE, best_tiles=None):
     puis en 4 quarts (fetch_tile)."""
     end = time.monotonic() + deadline
     found, good, tiles = {}, 0, {}
-    for n, bbox in enumerate(TILES, 1):
-        if n > 1:
-            time.sleep(10)  # politesse envers les serveurs publics
+    # Une tuile qui échoue est remise en fin de file (2026-10-11) : les serveurs publics saturent par moments et
+    # répondent quelques minutes plus tard. Échec seulement quand le temps manque ou après 3 passages.
+    todo = list(enumerate(TILES, 1))
+    for attempt in range(3):
+        left = []
+        for k, (n, bbox) in enumerate(todo):
+            if k or attempt:
+                time.sleep(max(0, min(10, end - time.monotonic() - 60)))  # politesse envers les serveurs publics
+            minimum = tile_minimum((best_tiles or {}).get(bbox))
+            got, good = fetch_tile(bbox, end, good, minimum)
+            if got is None:
+                print(f"Tuile {n}/{len(TILES)} ({bbox}) : pas de réponse complète, redemandée plus tard", flush=True)
+                left.append((n, bbox))
+                continue
+            tiles[bbox] = len(got)
+            found.update(got)
+            print(f"Tuile {n}/{len(TILES)} : {len(got)} éléments ({ENDPOINTS[good]})", flush=True)
+        todo = left
+        if not todo or end - time.monotonic() < 120:
+            break
+    if todo:
+        n, bbox = todo[0]
         minimum = tile_minimum((best_tiles or {}).get(bbox))
-        got, good = fetch_tile(bbox, end, good, minimum)
-        if got is None:
-            print(f"::error::Overpass : tuile {n}/{len(TILES)} ({bbox}) sans réponse complète (au moins {minimum} éléments attendus)", flush=True)
-            sys.exit(f"Overpass : tuile {n}/{len(TILES)} sans réponse complète (serveurs saturés, réponse vide ou tronquée, "
-                     f"ou {deadline // 60} min écoulées) : stores.json n'est pas modifié.")
-        tiles[bbox] = len(got)
-        found.update(got)
-        print(f"Tuile {n}/{len(TILES)} : {len(got)} éléments ({ENDPOINTS[good]})", flush=True)
+        print(f"::error::Overpass : tuile {n}/{len(TILES)} ({bbox}) sans réponse complète (au moins {minimum} éléments attendus)", flush=True)
+        sys.exit(f"Overpass : tuile {n}/{len(TILES)} sans réponse complète (serveurs saturés, réponse vide ou tronquée, "
+                 f"ou {deadline // 60} min écoulées) : stores.json n'est pas modifié.")
     return {"elements": list(found.values()), "tiles": tiles}
 
 

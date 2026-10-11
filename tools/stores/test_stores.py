@@ -327,6 +327,27 @@ class Guards(unittest.TestCase):
             self.run_split(5, {sync_stores.TILES[4]: 100})
         self.assertIn("tuile 5/6", str(e.exception.code))
 
+    def test_failed_tile_retried_after_others(self):
+        # Serveurs saturés pendant la tuile 5 et ses quarts ; ils répondent de nouveau après la tuile 6 (2026-10-11).
+        from urllib.parse import parse_qs
+        t5, t6 = sync_stores.TILES[4], sync_stores.TILES[5]
+        seen = {"t6": False}
+
+        def fake_urlopen(req, timeout):
+            q = parse_qs(req.data.decode())["data"][0]
+            if t6 in q:
+                seen["t6"] = True
+            if t5 not in q and not seen["t6"] and not any(t in q for t in sync_stores.TILES):
+                raise sync_stores.http.client.HTTPException("504 Gateway Timeout")  # quarts de la tuile 5
+            if t5 in q and not seen["t6"]:
+                raise sync_stores.http.client.HTTPException("504 Gateway Timeout")
+            return answer({"elements": nodes(3, abs(hash(q)) % 100000 * 10)})
+
+        with mock.patch.object(sync_stores, "urlopen", fake_urlopen), mock.patch.object(sync_stores.time, "sleep"):
+            doc = sync_stores.overpass()
+        self.assertEqual(len(doc["tiles"]), len(sync_stores.TILES))
+        self.assertEqual(doc["tiles"][t5], 3)
+
     def test_region_drop(self):
         ref = {"date": "2026-10-04", "total": 1000, "regions": {"28": 239, "53": 272, "11": 489}, "tiles": {}}
         ok = {"28": 239, "53": 272, "11": 489}
