@@ -79,11 +79,13 @@ TCG_HINT = r"pok[ée]mon|\btcg\b|trading card|cartes? [àa] collectionner|jeux? 
 def query(bbox):
     sel = "|".join(SHOPS)
     brands = "|".join(BRANDS)
+    # Sans filtre « dans la France » (area) depuis le 2026-10-11 : c'est la partie la plus lourde de la requête, et les
+    # serveurs saturés répondaient 504 même sur un quart de tuile. Les points hors de France sont écartés ensuite
+    # (build : contours des départements, pays de l'adresse).
     return f"""[out:json][timeout:{TILE_TIMEOUT}];
-area["ISO3166-1"="FR"][admin_level=2]->.fr;
 (
-  nwr["shop"~"^({sel})$"](area.fr)({bbox});
-  nwr["shop"]["brand:wikidata"~"^({brands})$"](area.fr)({bbox});
+  nwr["shop"~"^({sel})$"]({bbox});
+  nwr["shop"]["brand:wikidata"~"^({brands})$"]({bbox});
 );
 out center tags qt;"""
 
@@ -249,7 +251,10 @@ class Departments:
         pc = re.match(r"^(\d{2})(\d{3})$", (postcode or "").strip())
         if pc:
             code = pc.group(1) if pc.group(1) != "20" else ("2A" if int(pc.group(2)) < 200 else "2B")
-            if code in self.region:
+            # Seulement près du département (îles, littoral) : un code postal allemand à 5 chiffres (« 79539 ») ne
+            # doit pas rattacher une boutique d'outre-Rhin aux Deux-Sèvres.
+            box = next((b for c, _, b, _ in self.items if c == code), None)
+            if code in self.region and box and box[0] - 0.3 <= lon <= box[2] + 0.3 and box[1] - 0.3 <= lat <= box[3] + 0.3:
                 return code
         best, dist = None, 3.0
         k = math.cos(math.radians(lat))
@@ -338,7 +343,8 @@ def build(elements, depts, communes=None):
         if not c or lat is None:
             skipped["écartés"] += 1
             continue
-        dept = depts.locate(lon, lat, tags.get("addr:postcode", ""))
+        country = (tags.get("addr:country") or "FR").strip().upper()
+        dept = depts.locate(lon, lat, tags.get("addr:postcode", "")) if country in ("FR", "FRANCE") else None
         if not dept:
             skipped["hors France"] += 1
             continue

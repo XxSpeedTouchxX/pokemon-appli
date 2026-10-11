@@ -63,6 +63,8 @@ class Locate(unittest.TestCase):
         self.assertEqual(DEPTS.locate(9.60, 42.70, "20200"), "2B")
         # En pleine mer, loin de tout : écarté.
         self.assertIsNone(DEPTS.locate(-7.0, 46.0))
+        # Lörrach (Allemagne), code postal 79539 : pas les Deux-Sèvres (requête sans filtre « France », 2026-10-11).
+        self.assertIsNone(DEPTS.locate(7.66, 47.62, "79539"))
 
 
 class Build(unittest.TestCase):
@@ -189,7 +191,9 @@ class Overpass(unittest.TestCase):
         self.assertEqual(len(boxes), 6)
         self.assertEqual((min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)),
                          (41.3, -5.3, 51.2, 9.7))
-        self.assertIn("(area.fr)(" + sync_stores.TILES[2] + ")", sync_stores.query(sync_stores.TILES[2]))
+        q = sync_stores.query(sync_stores.TILES[2])
+        self.assertIn("](" + sync_stores.TILES[2] + ");", q)
+        self.assertNotIn("area", q)  # requête allégée (2026-10-11) : la France est vérifiée ensuite, dans build
 
     def test_next_server_after_disconnect(self):
         # Le premier serveur coupe la connexion sans répondre : le suivant est essayé, puis gardé pour les tuiles
