@@ -88,11 +88,11 @@ area["ISO3166-1"="FR"][admin_level=2]->.fr;
 out center tags qt;"""
 
 
-def fetch(q, end, first=0, minimum=1):
-    """(réponse, n° du serveur) : chaque serveur tour à tour, en commençant par `first`, deux tours, avant `end`.
+def fetch(q, end, first=0, minimum=1, rounds=2):
+    """(réponse, n° du serveur) : chaque serveur tour à tour, en commençant par `first`, `rounds` tours, avant `end`.
     Une réponse de moins de `minimum` éléments (vide, ou tronquée sans « remark ») est refusée : serveur suivant."""
     data = urlencode({"data": q}).encode()
-    for attempt in range(2):
+    for attempt in range(rounds):
         for i in [(first + k) % len(ENDPOINTS) for k in range(len(ENDPOINTS))]:
             left = end - time.monotonic()
             if left < 60:
@@ -118,24 +118,57 @@ def tile_minimum(best):
     return max(1, math.ceil(TILE_MIN * (best or 0)))
 
 
+def quarters(bbox):
+    """Les 4 quarts d'une tuile « s,w,n,e »."""
+    s, w, n, e = (float(v) for v in bbox.split(","))
+    ms, mw = round((s + n) / 2, 3), round((w + e) / 2, 3)
+    return [f"{a},{b},{c},{d}" for a, c in ((s, ms), (ms, n)) for b, d in ((w, mw), (mw, e))]
+
+
+SPLIT_DEPTH = 2  # une tuile refusée est redemandée en 4 quarts, puis chaque quart refusé en 4 (2026-10-11)
+
+
+def fetch_tile(bbox, end, good, minimum, depth=0):
+    """(éléments sans doublon, n° du serveur) d'une tuile, ou (None, n°). La tuile entière d'abord ; si les serveurs
+    saturent (cas de la tuile Bretagne-Normandie, très dense), ses 4 quarts. Un quart peut être vide (la mer) : c'est
+    le total des quarts qui doit atteindre `minimum`, si bien qu'une réponse vide ne passe jamais pour la tuile."""
+    doc, good = fetch(query(bbox), end, good, minimum if depth == 0 else 0, rounds=1 if depth < SPLIT_DEPTH else 2)
+    if doc is not None:
+        return {(e.get("type"), e.get("id")): e for e in doc.get("elements", [])}, good
+    if depth >= SPLIT_DEPTH or end - time.monotonic() < 120:
+        return None, good
+    print(f"Tuile {bbox} : découpée en 4", flush=True)
+    found = {}
+    for part in quarters(bbox):
+        time.sleep(5)
+        got, good = fetch_tile(part, end, good, 0, depth + 1)
+        if got is None:
+            return None, good
+        found.update(got)
+    if len(found) < minimum:
+        print(f"Tuile {bbox} : {len(found)} éléments en 4 quarts, au moins {minimum} attendus", flush=True)
+        return None, good
+    return found, good
+
+
 def overpass(deadline=DEADLINE, best_tiles=None):
     """Toutes les tuiles, sans doublon (un bâtiment à cheval sur deux tuiles revient deux fois).
-    best_tiles : meilleurs comptes connus par tuile ; une tuile trop courte est redemandée aux autres serveurs."""
+    best_tiles : meilleurs comptes connus par tuile ; une tuile trop courte est redemandée aux autres serveurs,
+    puis en 4 quarts (fetch_tile)."""
     end = time.monotonic() + deadline
     found, good, tiles = {}, 0, {}
     for n, bbox in enumerate(TILES, 1):
         if n > 1:
             time.sleep(10)  # politesse envers les serveurs publics
         minimum = tile_minimum((best_tiles or {}).get(bbox))
-        doc, good = fetch(query(bbox), end, good, minimum)
-        if doc is None:
+        got, good = fetch_tile(bbox, end, good, minimum)
+        if got is None:
             print(f"::error::Overpass : tuile {n}/{len(TILES)} ({bbox}) sans réponse complète (au moins {minimum} éléments attendus)", flush=True)
             sys.exit(f"Overpass : tuile {n}/{len(TILES)} sans réponse complète (serveurs saturés, réponse vide ou tronquée, "
                      f"ou {deadline // 60} min écoulées) : stores.json n'est pas modifié.")
-        elements = doc.get("elements", [])
-        tiles[bbox] = len(elements)
-        found.update(((e.get("type"), e.get("id")), e) for e in elements)
-        print(f"Tuile {n}/{len(TILES)} : {len(elements)} éléments ({ENDPOINTS[good]})", flush=True)
+        tiles[bbox] = len(got)
+        found.update(got)
+        print(f"Tuile {n}/{len(TILES)} : {len(got)} éléments ({ENDPOINTS[good]})", flush=True)
     return {"elements": list(found.values()), "tiles": tiles}
 
 

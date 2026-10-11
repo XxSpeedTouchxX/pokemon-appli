@@ -293,6 +293,36 @@ class Guards(unittest.TestCase):
             self.run_overpass(lambda k: {"elements": []})
         self.assertIn("tuile 1/6", str(e.exception.code))
 
+    def run_split(self, per_quarter, best):
+        # Tuile 5 (Bretagne-Normandie) : la tuile entière échoue partout (504) ; ses quarts répondent.
+        from urllib.parse import parse_qs
+        big = sync_stores.TILES[4]
+        calls = []
+
+        def fake_urlopen(req, timeout):
+            q = parse_qs(req.data.decode())["data"][0]
+            calls.append(q)
+            if big in q:
+                raise sync_stores.http.client.HTTPException("504 Gateway Timeout")
+            if any(t in q for t in sync_stores.TILES):
+                return answer({"elements": nodes(3, 10 * len(calls))})
+            return answer({"elements": nodes(per_quarter, 100000 + 100 * len(calls))})
+
+        with mock.patch.object(sync_stores, "urlopen", fake_urlopen), mock.patch.object(sync_stores.time, "sleep"):
+            return sync_stores.overpass(best_tiles=best), calls
+
+    def test_heavy_tile_split_in_quarters(self):
+        best = {sync_stores.TILES[4]: 100}
+        doc, calls = self.run_split(20, best)
+        self.assertEqual(doc["tiles"][sync_stores.TILES[4]], 80)  # 4 quarts × 20, au moins 50 attendus
+        self.assertEqual(len(sync_stores.quarters(sync_stores.TILES[4])), 4)
+
+    def test_split_still_needs_minimum(self):
+        # Quarts presque vides (serveurs saturés qui répondent vide) : le total reste sous 50 % du meilleur compte.
+        with self.assertRaises(SystemExit) as e:
+            self.run_split(5, {sync_stores.TILES[4]: 100})
+        self.assertIn("tuile 5/6", str(e.exception.code))
+
     def test_region_drop(self):
         ref = {"date": "2026-10-04", "total": 1000, "regions": {"28": 239, "53": 272, "11": 489}, "tiles": {}}
         ok = {"28": 239, "53": 272, "11": 489}
