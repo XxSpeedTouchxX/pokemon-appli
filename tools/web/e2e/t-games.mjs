@@ -1,5 +1,5 @@
 // 2026-10-11 : onglet Jeux (booster PK, pile ou face, délais gardés), Admin dans les Réglages, fiche d'une carte
-// (lien eBay ventes réussies), logo de série dessiné quand aucun logo n'existe.
+// (lien eBay ventes réussies), logo de série repris de ptcg-assets quand TCGdex n'en a pas.
 import { withFonts, launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -31,8 +31,8 @@ await page.click('button:has-text("Mode Admin · paramétrage")'); await page.wa
 ok('Admin depuis les Réglages : code demandé', (await page.locator('section[aria-label="Code Admin"]').count()) === 1);
 
 await page.goto(E2E + '/?start=set&setId=2013bw', { waitUntil: 'load' }); await page.waitForTimeout(2500);
-const logo = await page.locator('main img[src^="data:image/svg"]').count();
-ok('McDonald’s 2013 : nom de série dessiné à la place du logo', logo >= 1);
+const logo = await page.locator('main img[src="img/logo-mcdonalds.webp"]').count();
+ok('McDonald’s 2013 : logo McDonald’s (absent de TCGdex)', logo >= 1);
 await page.locator('main button[aria-label*="n°"]').first().click(); await page.waitForTimeout(800);
 const ebay = await page.locator('a:has-text("eBay · ventes réussies")').getAttribute('href');
 ok('fiche : lien eBay ventes réussies', /ebay\.fr\/sch\/.*LH_Sold=1&LH_Complete=1/.test(ebay || ''));

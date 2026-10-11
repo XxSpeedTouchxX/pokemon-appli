@@ -184,13 +184,14 @@
       out.push(TCG.doc.img + path + '.webp', TCG.doc.img + path + '.png');
     }
     if (SET_LOGO_LOCAL[id]) out.push('img/' + SET_LOGO_LOCAL[id] + '.webp');
-    if (SET_LOGO_PTCG[id]) out.push('https://images.pokemontcg.io/' + SET_LOGO_PTCG[id] + '/logo.png');
+    if (moreLogo(id)) out.push('img/' + moreLogo(id) + '.webp');
     return out.find(u => !BROKEN.has(u)) || setBadge(id);
   }
-  // Logos absents de TCGdex (2026-10-11, signalés par le porteur) : ceux de pokemontcg.io quand ils existent
-  // (McDonald's, énergies et promos Écarlate et Violet, Coffre Étincelant), sinon un nom de série dessiné par l'app.
-  const SET_LOGO_PTCG = { '2011bw': 'mcd11', '2012bw': 'mcd12', '2014xy': 'mcd14', '2015xy': 'mcd15', '2016xy': 'mcd16', '2017sm': 'mcd17',
-    '2018sm': 'mcd18', '2018sm-fr': 'mcd18', '2019sm': 'mcd19', '2019sm-fr': 'mcd19', '2021swsh': 'mcd21', '2022swsh': 'mcd22', sve: 'sve', svp: 'svp', sma: 'sma' };
+  // Logos absents de TCGdex (2026-10-11, signalés par le porteur) : repris du dépôt GitHub 1niceroli/ptcg-assets et
+  // gardés avec la page (web/img) ; sinon un nom de série dessiné par l'app.
+  const SET_LOGO_MORE = { mcd: 'logo-mcdonalds', '2022swsh': 'logo-mcdonalds-match-battle', svp: 'logo-promo-black-star', mep: 'logo-promo-black-star',
+    sma: 'logo-destinees-occultes', sve: 'logo-pokemon-jcc', mee: 'logo-pokemon-jcc', mfb: 'logo-pokemon-jcc' };
+  const moreLogo = id => SET_LOGO_MORE[id] || (/^20\d\d(bw|xy|sm|swsh|sv)(-fr)?$/.test(id) ? SET_LOGO_MORE.mcd : '');
   const BADGES = {};
   function setBadge(id) {
     if (BADGES[id]) return BADGES[id];

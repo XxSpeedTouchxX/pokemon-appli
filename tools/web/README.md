@@ -55,7 +55,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Jeux** (`tools/web/games.js`, `games.css`, fragment `games`, 2026-10-11) : l'onglet « Marché » (écran `market`) devient « Jeux » ; Booster PK (24 h) et Pile ou face (8 h), tirage `crypto.getRandomValues`, dates gardées avec la collection (`games`). L'ancienne recherche du Marché devient l'écran `search` (accueil, scan).
 - **Navigation** (`tools/web/nav.js`, 2026-10-11) : bouton Retour du téléphone (historique du navigateur), geste depuis le bord gauche, glissement au retour, position de la page gardée au retour.
 - **Première visite et alertes** (`tools/web/start.js`, 2026-10-11) : collection vide et accueil guidé à la première visite (démo sur choix) ; « Tes alertes » à l'ouverture de l'app, notification du téléphone si autorisée.
-- **Fiche d'une carte** (`catalog.js`, 2026-10-11) : cote Cardmarket de la version de la carte et prix de l'autre version (`cmh`, `cmv`), « cote à confirmer » (`q`), « cote à venir » (`stats.setsPriceSoon`), lien vers les ventes réussies eBay. Logos de séries : TCGdex, logos locaux, pokemontcg.io, sinon nom dessiné.
+- **Fiche d'une carte** (`catalog.js`, 2026-10-11) : cote Cardmarket de la version de la carte et prix de l'autre version (`cmh`, `cmv`), « cote à confirmer » (`q`), « cote à venir » (`stats.setsPriceSoon`), lien vers les ventes réussies eBay. Logos de séries : TCGdex, puis logos gardés avec la page (dont McDonald's, promos, énergies, Coffre Étincelant, repris du dépôt GitHub 1niceroli/ptcg-assets), sinon nom dessiné.
 - **Polices hébergées avec l'app** (`web/fonts/`, paquets `@fontsource`, licence SIL OFL) : la démo n'appelle plus Google Fonts. Seule la page claude.ai (`artifact.html`) garde Google Fonts.
 
 ## Tests
