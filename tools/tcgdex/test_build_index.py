@@ -42,9 +42,10 @@ class Prices(unittest.TestCase):
         self.assertEqual(p, (135.39, 10, 95.21, None, "2026-10-10", 146.29, 220, 32.35, "h", 0))
 
     def test_holo_only_without_holo_bucket(self):
-        # Carte holo seulement mais seul le groupe normal est coté : cote gardée, marquée douteuse.
+        # Carte holo seulement mais seul le groupe normal est coté (vieilles holos) : c'est son prix, pas un doute
+        # (2026-10-11 : marquées douteuses avant, 2 858 cartes « cote à confirmer » sans raison).
         cm = {"trend": 20, "low": 15, "avg1": 21}
-        self.assertEqual(prices(card(cm, variants=variants(holo=True)), 0.9)[6:], (21, None, "n", 1))
+        self.assertEqual(prices(card(cm, variants=variants(holo=True)), 0.9)[6:], (21, None, "n", 0))
 
     def test_reverse_card(self):
         # Carte avec une reverse : « -holo » est la reverse ; cote du groupe normal, reverse exposée à part.

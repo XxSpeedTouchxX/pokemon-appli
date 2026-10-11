@@ -159,7 +159,8 @@ def prices(card, rate):
     trend, low, avg30, avg7, avg1 = (num(cm.get(k + sfx)) for k in ("trend", "low", "avg30", "avg7", "avg1"))
     cmh = num(cm.get("trend" + ("" if sfx else "-holo")))
     cmv = None if trend is None else ("h" if sfx else "n")
-    q = 1 if doubtful(trend, low, avg1) or (holo_only and trend is not None and not has_h) else 0
+    # Carte holo seulement sans groupe « -holo » : le groupe normal est alors son prix (vieilles holos), pas un doute.
+    q = 1 if doubtful(trend, low, avg1) else 0
     return (trend, low, avg30, tcp, upd, avg7, avg1, cmh, cmv, q)
 
 

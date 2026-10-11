@@ -56,7 +56,7 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
      |---|---|
      | `cmh` | tendance de l'autre groupe : la reverse (carte avec reverse), la version normale (carte holo seulement), sinon le groupe `-holo` ; `null` s'il manque |
      | `cmv` | groupe d'où vient `cm` : `"n"` (champs normaux) ou `"h"` (champs `-holo`) ; `null` sans cote |
-     | `q` | `1` si la cote est douteuse, `0` sinon : plus bas sous 5 % de la tendance, moyenne 1 jour à plus de 3 fois d'écart de la tendance, ou carte holo seulement cotée sans le groupe `-holo`. Jamais sous 1 € de tendance (l'écart n'y dit rien) |
+     | `q` | `1` si la cote est douteuse, `0` sinon : plus bas sous 5 % de la tendance, ou moyenne 1 jour à plus de 3 fois d'écart de la tendance (une carte holo seulement cotée sans le groupe `-holo` n'est plus marquée : le groupe normal est son prix). Jamais sous 1 € de tendance (l'écart n'y dit rien) |
 
      Ils sont dans `cards-prices.json` (prix du jour) : la partie fixe `cards-base.json` et son empreinte ne changent pas.
    - **Couverture des prix (`stats`, 2026-10-11) :** `cardsCm` (cartes avec une cote Cardmarket), `cardsPriced` (avec une cote Cardmarket ou TCGplayer), `cardsHolo` (cote tirée du groupe `-holo`), `cardsDoubt` (cote douteuse), `setsNoCm` (extensions sans aucune cote Cardmarket, avec leur nombre de cartes) et `setsPriceSoon` (parmi elles, celles sorties depuis moins de 90 jours : l'app peut afficher « cote à venir »). Aucune cote n'est inventée : au 2026-10-11, 17 extensions (937 cartes) n'ont pas de cote Cardmarket, dont `30th` et `30th-c` (sorties le 2026-09-16), sans prix TCGdex ni en français ni en anglais.
