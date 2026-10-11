@@ -125,17 +125,7 @@ jobs:
       - name: Publier sur la branche
         if: ${{ !cancelled() }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/data/cards.json web/data/cards-base.json web/data/cards-prices.json web/data/status.json
-          if [ -f tools/tcgdex/ptcg_images.json ]; then git add tools/tcgdex/ptcg_images.json; fi
-          if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
-          git commit -m "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))"
-          for i in 1 2 3 4; do
-            git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
-            sleep $((i * 5))
-          done
-          exit 1
+          tools/publish_data.sh cards "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))" web/data/cards.json web/data/cards-base.json web/data/cards-prices.json web/data/status.json tools/tcgdex/ptcg_images.json
 
       - name: Échec signalé (échecs restants, catalogue refusé ou anomalie)
         if: ${{ !cancelled() && (steps.failures.outcome == 'failure' || steps.build.outcome == 'failure' || steps.check.outcome == 'failure') }}

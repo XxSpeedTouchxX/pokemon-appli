@@ -14,8 +14,9 @@ Pour la source donnée :
     les fichiers de la source reprennent leur dernier état publié : seul status.json change ce jour-là.
 --force (lancement à la main, après vérification) : les anomalies deviennent des avertissements.
 
-status.json garde une source par ligne, séparées par une ligne vide : trois workflows l'écrivent, et git fusionne
-sans conflit des modifications sur des lignes séparées.
+status.json garde une source par ligne, séparées par une ligne vide : trois workflows l'écrivent. Si deux publications
+se croisent, tools/publish_data.sh reprend la dernière version publiée et n'y remplace que la ligne de sa source
+(--merge-status REV : ligne de la source lue dans le commit REV, posée sur le status.json du disque).
 """
 import argparse
 import json
@@ -243,13 +244,28 @@ def summary(source, entry):
     return "\n".join(out) + "\n"
 
 
+def merge_status(source, rev):
+    """Conflit de publication : status.json publié par les autres sources, plus la ligne de `source` venue de `rev`."""
+    mine = git_json("web/data/status.json", rev) or {}
+    if source not in mine:
+        print(f"{rev} n'a pas de ligne « {source} » dans status.json", file=sys.stderr)
+        return 1
+    status = git_json("web/data/status.json", "HEAD") or {}
+    status[source] = mine[source]
+    STATUS.write_text(render_status(status), "utf-8")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     ap.add_argument("source", choices=SOURCES)
     ap.add_argument("--base", default="HEAD", help="dernier état publié (révision git)")
     ap.add_argument("--revert", action="store_true", help="en cas d'anomalie, remet les fichiers de la source à leur dernier état publié")
     ap.add_argument("--force", action="store_true", help="anomalies acceptées à la main : simples avertissements")
+    ap.add_argument("--merge-status", metavar="REV", help="sans contrôle : ligne de la source prise dans REV, posée sur status.json")
     args = ap.parse_args()
+    if args.merge_status:
+        sys.exit(merge_status(args.source, args.merge_status))
     files = FILES[args.source]
     cur = {p: read_json(p) for p in files}
     prev = {p: git_json(p, args.base) for p in files}

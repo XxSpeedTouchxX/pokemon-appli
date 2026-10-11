@@ -65,18 +65,7 @@ jobs:
       - name: Publier sur la branche
         if: ${{ !cancelled() }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -f tools/sealed/candidates.json ]; then git add tools/sealed/candidates.json; fi
-          if [ -d web/img/products ]; then git add web/img/products; fi
-          git add web/data/sealed.json web/data/status.json
-          if git diff --cached --quiet; then echo "Aucun changement."; exit 0; fi
-          git commit -m "Met à jour le catalogue scellé ($(date -u +%Y-%m-%d))"
-          for i in 1 2 3 4; do
-            git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && exit 0
-            sleep $((i * 5))
-          done
-          exit 1
+          tools/publish_data.sh sealed "Met à jour le catalogue scellé ($(date -u +%Y-%m-%d))" tools/sealed/candidates.json web/img/products web/data/sealed.json web/data/status.json
 
       - name: Échec signalé (guide refusé ou anomalie)
         if: ${{ !cancelled() && (steps.build.outcome == 'failure' || steps.check.outcome == 'failure') }}
