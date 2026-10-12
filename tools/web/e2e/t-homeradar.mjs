@@ -26,7 +26,7 @@ await page.locator(SEC + ' button[aria-label^="Radar des boutiques"]').click().c
 await page.waitForSelector(SEC + ' button[aria-label="Ouvrir le Radar des boutiques"]', { timeout: 15000 }).catch(() => {});
 await page.waitForTimeout(1500);
 const txt = await page.locator(SEC).innerText();
-ok('avec position : « N boutiques à moins de 5 km »', /\d+ boutiques? à moins de 5 km/.test(txt));
+ok('avec position : « N boutiques à moins de 20 km »', /\d+ boutiques? à moins de 20 km/.test(txt));
 const rows = page.locator(SEC + ' button[aria-label$="Ouvrir la fiche"]');
 ok('3 boutiques les plus proches : ' + await rows.count(), (await rows.count()) === 3);
 ok('ligne : nom, ville, distance, indice en %', /chance estimée \d+ %/.test(await rows.first().getAttribute('aria-label')) && /\d+\s?%/.test(await rows.first().innerText()));

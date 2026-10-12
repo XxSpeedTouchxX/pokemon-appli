@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-11)
+## 3. État d'avancement (au 2026-10-12)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -105,6 +105,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - cote Cardmarket selon la version (holo, normale, reverse) avec l'autre version à côté, « cote à confirmer », lien vers les ventes réussies eBay (pas de chiffre : ni API ouverte ni scraping) ; filtre « Les plus chères » de toutes les séries ;
   - pipelines : mise à jour incomplète refusée (boutiques, scellé, catalogue), `web/data/status.json` ;
   - app : date réelle, enregistrement sûr, première visite sans démo, bouton Retour et glissement au retour avec position gardée, alertes à l'ouverture, prochaines sorties et radar simplifié sur l'accueil, logos de séries manquants, mentions légales refaites (identité de l'éditeur **à compléter par le porteur**), Admin dans les Réglages, animation d'entrée à chaque démarrage, icône « D » + carte O.
+- **PK shop et roulette (2026-10-12, demande du porteur) :**
+  - le 4ᵉ onglet (Territoire) devient **« PK shop »** : ticket de participation au tirage au sort d'un booster Pokémon, 500 PK (prix à confirmer) ; tirage **non fait par l'app** (règlement, organisateur, contact du gagnant à prévoir) ;
+  - Territoire s'ouvre depuis l'accueil ; la carte de l'accueil s'ouvre sur 20 km autour de soi ;
+  - roulette dans Jeux : PK ÷ 2 (15 %), × 2 (10 %), +100 (40 %), −100 (35 %), un tour toutes les 24 h (à confirmer) ;
+  - ciseaux qui ouvrent le booster, pièce plus longue (16 demi-tours), déblocage de compagnon en 3 s avec confettis, icône (D légèrement remonté).
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

@@ -169,13 +169,13 @@
   // puis les 3 boutiques réelles (OpenStreetMap) les plus proches, à moins de 5 km. Même position que Territoire
   // (arrondie à 100 m, jamais enregistrée ni envoyée). Sans position, un appui sur le bandeau la demande ; ensuite,
   // il ouvre le Radar (carte de France des boutiques). Le radar animé s'arrête si l'utilisateur limite les animations.
-  const HOME_KM = 5, HOME_NEAR = 3;
+  const HOME_KM = 20, HOME_NEAR = 3; // 20 km autour de soi (2026-10-12, demande du porteur)
   const HOME_BLIPS = [['70%', '28%', '-2.4s'], ['30%', '66%', '-1.2s'], ['74%', '72%', '-0.4s']];
   proto.homeRadar = function (s) {
     const pos = s.tpos || s.raround || null;
     const r = {
       main: null, mainLabel: '', title: '', sub: '', blips: [], hasMsg: false, msg: '', hasNear: false, near: [], status: '',
-      list: () => this.tab('territory'), france: () => this.openRadar()
+      list: () => this.push('territory', { tkm: String(HOME_KM) }), france: () => this.openRadar()
     };
     if (!pos) return Object.assign(r, {
       main: () => this.terLocate(false), mainLabel: 'Radar des boutiques : activer ma position',
@@ -197,7 +197,8 @@
       };
     });
     return Object.assign(r, {
-      main: () => this.openRadar(), mainLabel: 'Ouvrir le Radar des boutiques', blips: n ? HOME_BLIPS.slice(0, Math.min(3, n)).map(b => ({ x: b[0], y: b[1], delay: b[2] })) : [],
+      // La carte s'ouvre directement sur « autour de moi », 20 km, partout en France.
+      main: () => this.push('radar', { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: pos, rkm: String(HOME_KM), rmsg: '' }), mainLabel: 'Ouvrir le Radar des boutiques', blips: n ? HOME_BLIPS.slice(0, Math.min(3, n)).map(b => ({ x: b[0], y: b[1], delay: b[2] })) : [],
       title: n ? n + many + ' à moins de ' + HOME_KM + ' km' : 'Aucune boutique à moins de ' + HOME_KM + ' km',
       sub: n ? 'Touche pour les voir sur la carte' : '« Voir la liste » permet d’élargir le rayon',
       hasNear: near.length > 0, near: near,

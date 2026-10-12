@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-10-12 — Le 4ᵉ onglet devient « PK shop » ; roulette ; Territoire depuis l'accueil
+
+- **Demande du porteur :**
+  - remplacer l'onglet Territoire par un « PK shop » où dépenser ses PK ;
+  - premier article : un ticket de participation au tirage au sort d'un booster Pokémon ;
+  - une roulette dans Jeux : PK ÷ 2 (15 %), PK × 2 (10 %), +100 PK (40 %), −100 PK (35 %).
+- **Livré :**
+  - PK shop (onglet sac étoilé) : solde, ticket à 500 PK (prix par défaut, à confirmer), tickets gardés sur l'appareil ;
+  - roulette : un tour gratuit toutes les 24 h (fréquence par défaut, à confirmer), le solde ne descend jamais sous 0 ;
+  - Territoire s'ouvre depuis l'accueil (« Voir la liste ») ; la carte de l'accueil s'ouvre sur 20 km autour de soi.
+- **Point d'attention (tirage au sort) :** l'app ne fait pas le tirage. Avant le premier tirage, il faut :
+  - un règlement du jeu ;
+  - l'identité de l'organisateur ;
+  - un moyen de désigner et contacter le gagnant (comptes, serveur) ;
+  - la livraison du lot.
+
+  La participation reste gratuite tant que les PK ne s'achètent pas. Si les PK deviennent payants, le tirage et la roulette sont à revoir avec un avis juridique avant.
+
 ## 2026-10-11 — L'onglet « Marché » devient « Jeux » ; corrections des données et de l'app
 
 - **Demande du porteur :** supprimer le contenu de l'onglet « Marché » et en faire un endroit pour gagner des PK (icône manette), avec deux mini-jeux.

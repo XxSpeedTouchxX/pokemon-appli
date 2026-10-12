@@ -19,8 +19,8 @@ const cq = page.locator('input[aria-label="Rechercher une série ou une extensio
 await cq.fill('pika'); await page.waitForTimeout(300); await down();
 await tab('Jeux');
 ok('Jeux : en haut', (await top()) === 0);
-await tab('Territoire');
-ok('Territoire : en haut à l’arrivée', (await top()) === 0); await down();
+await tab('PK shop');
+ok('PK shop : en haut à l’arrivée', (await top()) === 0); await down();
 await tab('Toutes les séries');
 ok('retour Toutes les séries : en haut, recherche gardée « ' + await cq.inputValue() + ' »', (await top()) === 0 && (await cq.inputValue()) === 'pika');
 await tab('Accueil');

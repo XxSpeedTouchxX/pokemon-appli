@@ -144,7 +144,9 @@ patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x
   "return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x.who[a.by || 'toi'] : '') + this.copyMeta(p, l), amount:");
 // Onglet « Jeux » (games.js, 2026-10-11, demande du porteur) : l'onglet « Marché » devient « Jeux » (manette) ; son
 // écran montre le booster PK et le pile ou face. L'ancien Marché reste l'écran de recherche (« search »).
-patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.games + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
+patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.games + FRAG.pkshop + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
+// 4ᵉ onglet : « PK shop » à la place de Territoire (2026-10-12) ; Territoire s'ouvre depuis l'accueil.
+patch('<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>\n<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.terDot }}"></span>', '<path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"></path><path d="M9 8V6.5a3 3 0 0 1 6 0V8"></path><path d="M12 11.5l1 2 2 .3-1.5 1.4.4 2-1.9-1-1.9 1 .4-2-1.5-1.4 2-.3z"></path></svg>\n<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.terDot }}"></span>');
 // Fiche d'une carte (2026-10-11) : cote à confirmer, et lien vers les ventes réussies eBay (pas de chiffre : ni API
 // ouverte, ni scraping).
 patch('<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">Vinted et Leboncoin ne sont pas comparés : pas d’API publique, et pas de scraping.</p>',
@@ -230,6 +232,7 @@ patch('<span style="font-size: 14px; font-variant-numeric: tabular-nums">{{ cp.a
 patch('<span>{{ ui.toast }}</span>', '<span style="flex: 1; min-width: 0">{{ ui.toast }}</span>\n<sc-if value="{{ ui.hasUndo }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ ui.undo }}" style="flex: none; min-height: 40px; margin: -8px -4px -8px 0; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: #A8B6FF; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Annuler</button></sc-if>');
 patch('onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim" style="', 'onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim" style="visibility: {{ admv.scan }}; ');
 patch('onClick="{{ tabTerritory }}" aria-label="Territoire" aria-current="{{ tab.terCur }}" style="', 'onClick="{{ tabTerritory }}" aria-label="Territoire" aria-current="{{ tab.terCur }}" style="visibility: {{ admv.ter }}; ');
+patch('onClick="{{ tabTerritory }}" aria-label="Territoire"', 'onClick="{{ tabShop }}" aria-label="PK shop"');
 // Réglages, « À propos » : crédit des sprites des compagnons et du moteur de lecture du scan.
 patch('sont des marques de leurs propriétaires respectifs.</p>', 'sont des marques de leurs propriétaires respectifs. Compagnons de l’accueil : sprites de Pokémon Noir et Blanc (© The Pokémon Company), via PokeAPI. Scan : lecture sur l’appareil avec Tesseract.js et son modèle français (licence Apache 2.0) ; aucune image n’est envoyée.</p>');
 // Radar : écran plein écran (carte de France des boutiques réelles), ouvert depuis un bandeau de Territoire.
@@ -508,7 +511,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), navJs = mod('nav.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), navJs = mod('nav.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -537,7 +540,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + navJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + navJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -557,7 +560,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);

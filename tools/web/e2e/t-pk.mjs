@@ -104,7 +104,7 @@ ok('thème océan appliqué', await page.evaluate(() => document.documentElement
 ok('compteur : ' + await cText(), await cText() === '120 PK');
 ok('animation de déblocage affichée', (await page.locator('button.pkm-unl').count()) === 1);
 await page.screenshot({ path: shot('pk-unlock.png') });
-await page.waitForTimeout(1600); // fin de l'animation de déblocage (1,9 s)
+await page.waitForTimeout(2800); // fin de l'animation de déblocage (3 s)
 ok('animation de déblocage terminée', (await page.locator('button.pkm-unl').count()) === 0);
 await page.screenshot({ path: shot('pk-kyogre.png'), clip: { x: 0, y: 0, width: 390, height: 420 } });
 await page.click('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]'); await page.waitForTimeout(400);
@@ -137,7 +137,7 @@ d = await saved();
 ok('2e partage : rien de plus, « Merci » affiché', d.pk === before + 300 && /Tes \+300 PK sont reçus/.test(await page.locator('section[aria-label="Mes PK"]').innerText()));
 await page.click('section[aria-label="Mes PK"] button[aria-label="Fermer"]'); await page.waitForTimeout(300);
 // 8. Grands titres et écrans de détail.
-for (const [tab, name] of [['Toutes les séries', 'Toutes les séries'], ['Jeux', 'Jeux'], ['Territoire', 'Territoire']]) {
+for (const [tab, name] of [['Toutes les séries', 'Toutes les séries'], ['Jeux', 'Jeux'], ['PK shop', 'PK shop']]) {
   await page.click('nav button[aria-label="' + tab + '"]'); await page.waitForTimeout(500);
   ok(name + ' : compteur à droite', (await counter.count()) === 1 && await cText() === '400 PK');
 }

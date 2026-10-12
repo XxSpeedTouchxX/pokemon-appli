@@ -123,7 +123,10 @@
     const k = s.pkUnlock;
     if (!k || !HOME_NAMES[k]) return { on: false };
     return { on: true, key: 'unl-' + k, name: HOME_NAMES[k], src: 'img/pokemon/icon/' + k + '.png', title: HOME_NAMES[k] + ' débloqué !',
-      sub: HOME_THEMES[k] ? 'Nouveau compagnon · ' + pkTheme(k) : 'Nouveau compagnon', close: () => this.setState({ pkUnlock: null }) };
+      sub: HOME_THEMES[k] ? 'Nouveau compagnon · ' + pkTheme(k) : 'Nouveau compagnon', close: () => this.setState({ pkUnlock: null }),
+      // Confettis : 28 morceaux répartis sur la largeur, départs décalés, dérive et rotation variées (fixes : pas de hasard).
+      confetti: Array.from({ length: 28 }, (_, i) => ({ cls: 'pkm-unl-conf pkm-unl-c' + (i % 5),
+        style: 'left: ' + ((i * 37) % 100) + '%; --dx: ' + (((i * 53) % 120) - 60) + 'px; --r: ' + (((i * 97) % 720) - 360) + 'deg; animation-delay: ' + ((i % 7) * 0.05).toFixed(2) + 's' })) };
   };
   // Débloquer un compagnon : confirmation dans le panneau de choix, puis il devient ton compagnon.
   proto.pkBuy = function (k) {
@@ -131,12 +134,12 @@
     if (!price || pkOwns(s, k) || s.pk < price) return;
     const left = s.pk - price;
     // Animation de déblocage (2026-10-12, demande du porteur) : cadenas qui tremble, s'ouvre et éclate, puis le
-    // Pokémon jaillit (pkUnlock, 1,9 s ; games.css). Un appui la ferme plus tôt.
+    // Pokémon jaillit dans une pluie de confettis (pkUnlock, 3 s ; games.css). Un appui la ferme plus tôt.
     this.setState({ pk: left, pkOwn: s.pkOwn.concat([k]), pkAsk: null, buddy: k, buddyPick: false, pkUnlock: k,
       toast: name + ' débloqué' + (HOME_THEMES[k] ? ' · ' + pkTheme(k) : '') + ' · il te reste ' + pkNum(left) + ' PK' });
     this.flash();
     clearTimeout(pkUnlockTimer);
-    pkUnlockTimer = setTimeout(() => { if (this.st().pkUnlock === k) this.setState({ pkUnlock: null }); }, 1900);
+    pkUnlockTimer = setTimeout(() => { if (this.st().pkUnlock === k) this.setState({ pkUnlock: null }); }, 3000);
   };
   const pkAskView = function (s) {
     const k = s.pkAsk, price = PK_SHOP[k];

@@ -65,7 +65,7 @@ function wordmark(o) {
       items.push({ x, y: -H - 3, w, h, a: tilt.I, card: c, fill: WHITE });
       x += w + o.gap;
     } else {
-      const g = glyph(ch, H), lift = { R: 2, P: -2, C: 1, A: -1, S: 2, D2: -1, R2: 1 }[key] || 0;
+      const g = glyph(ch, H), lift = (key === 'D' && o.dLift) || { R: 2, P: -2, C: 1, A: -1, S: 2, D2: -1, R2: 1 }[key] || 0;
       items.push({ x, y: lift, w: g.w, h: H, a: tilt[key] || 0, glyph: g });
       x += g.w + o.gap;
     }
@@ -139,6 +139,6 @@ out('web/img/brand/pk.svg', doc([0, 0, 64, 64], pkGemSvg(), 'PK'));
 // Monogramme de l'icône de l'app (2026-10-11, demande du porteur) : le « D » du logo et la carte « O » étoilée, au même
 // style que le mot (lettre blanche, contour et ombre noirs). Rendu en PNG par make_icons.mjs.
 // 2026-10-12 (porteur) : le D plus grand que la carte, la carte à 65 % de la hauteur du D.
-const mono = wordmark({ text: 'DO', outline: 14, shadow: [5, 7], letter: WHITE, detail: true, iCard: true, gap: 6, cardH: 0.65 });
+const mono = wordmark({ text: 'DO', outline: 14, shadow: [5, 7], letter: WHITE, detail: true, iCard: true, gap: 6, cardH: 0.65, dLift: -4 }); // D remonté très légèrement (2026-10-12)
 out('web/img/brand/monogram.svg', doc(mono.box, mono.svg, 'Dropicards'));
 console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, classeur, pk (gemme)');
