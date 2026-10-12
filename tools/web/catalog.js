@@ -10,7 +10,7 @@
   // - Cartes sans scan TCGdex dans aucune langue : scan anglais pokemontcg.io (chemin « ptcg: », petit visuel
   //   dans les grilles, 734 × 1024 sur la fiche) ; sinon une carte « visuel à venir » dessinée par l'app.
   //   Si une image ne charge plus, data-fallback (« drawn:<id> ») affiche la carte dessinée, créée à la demande.
-  const TCG = { status: 'loading', doc: null, F: null, rows: [], byId: {}, bySet: {}, setList: [], items: {}, saved: {}, fan: [] };
+  const TCG = { status: 'loading', doc: null, F: null, rows: [], byId: {}, bySet: {}, setList: [], items: {}, saved: {}, fan: [], dup: new Set() };
   // Sans accents ni casse ; « Pikachu-ex » se trouve aussi avec « pikachu ex ».
   const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[-‐–]/g, ' ').toLowerCase();
   // Raretés comptées comme « ultra rares » pour le profil automatique (ultra rare et au-dessus).
@@ -82,7 +82,12 @@
   const SET_PARENT = { '30th-c': '30th', cel25cc: 'cel25' };
   const setHome = id => (SET_PARENT[id] && TCG.doc && TCG.doc.sets[SET_PARENT[id]] ? SET_PARENT[id] : id);
   // Cote PKM d'une ligne du catalogue : la même règle que cote() (Cardmarket et TCGplayer).
-  function coteOf(r, F) { const a = r[F.cm], b = r[F.tcp]; return a && b ? (a + b) / 2 : a || b || 0; }
+  // Cote Dropicards (2026-10-12, demande du porteur) : Cardmarket seul (tendance de la bonne version de la carte).
+  // TCGplayer (marché US des cartes anglaises) reste affiché mais n'est plus compté : il s'écartait souvent d'un facteur
+  // 10 ou plus (versions gradées ou 1re édition). Une cote recopiée sur plusieurs cartes d'une même extension (erreur de
+  // rattachement chez TCGdex, ex. promos XY à 5 550 €) n'est pas comptée non plus : « cote à confirmer ».
+  // Sans aucun prix Cardmarket (631 cartes anglaises : Gym, promos Black Star, cartes ☆…), TCGplayer sert de repli.
+  function coteOf(r, F) { return TCG.dup.has(r[F.id]) ? 0 : r[F.cm] || (typeof r[F.cm] === 'number' ? 0 : r[F.tcp] || 0); }
 
   TCG.load = function (doc) {
     const F = {};
@@ -110,6 +115,15 @@
     // Bandeau du Marché : les trois cartes les plus cotées de la dernière extension française.
     const last = TCG.setList.find(e => e.lang === 'FR' && TCG.bySet[e.id].some(x => x.r[F.img]));
     TCG.fan = last ? TCG.bySet[last.id].filter(x => x.r[F.img]).sort((a, b) => coteOf(b.r, F) - coteOf(a.r, F)).slice(0, 3).map(x => x.r[F.id]) : [];
+    // Même cote Cardmarket (tendance, moyennes 30 j et 7 j) sur plusieurs cartes d'une extension : rattachement erroné.
+    TCG.dup = new Set();
+    const seen = {};
+    doc.cards.forEach(r => {
+      if (!(r[F.cm] >= 20)) return;
+      const k = [r[F.set], r[F.cm], r[F.avg30], r[F.avg7]].join('|');
+      (seen[k] = seen[k] || []).push(r[F.id]);
+    });
+    Object.keys(seen).forEach(k => { if (seen[k].length > 1) seen[k].forEach(id => TCG.dup.add(id)); });
     TCG.status = 'ready';
   };
   // Carte TCGdex au format des articles de la maquette (mêmes champs de prix : cm, low, ebay, tcp, avg30),
@@ -134,7 +148,8 @@
       avg7: typeof r[F.avg7] === 'number' ? r[F.avg7] : null, avg1: typeof r[F.avg1] === 'number' ? r[F.avg1] : null,
       // Cote selon la version (2026-10-11) : cmv = groupe de prix de cm (« n » normal, « h » holo), cmh = tendance de
       // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
-      cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1
+      cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1,
+      dup: !!(TCG.dup && TCG.dup.has(id))
     };
     if (!v) { p.img = p.imgHi = drawnCard(p); p.fallback = p.fallbackHi = ''; }
     return p;
@@ -213,6 +228,13 @@
   }
 
   const proto = Component.prototype;
+  // Cote d'une carte du catalogue : Cardmarket seul (voir coteOf) ; les articles de démo gardent la règle de la maquette.
+  const baseCote = proto.cote;
+  proto.cote = function (p) {
+    if (!p || !p.tcg) return baseCote.call(this, p);
+    if (p.dup) return null;
+    return typeof p.cm === 'number' ? p.cm : typeof p.tcp === 'number' ? p.tcp : null;
+  };
   // Date du jour (2026-10-11) : la logique de la maquette comptait depuis le 3 octobre 2026 (today() figé), d'où des
   // périodes de ventes, une marge sur 30 jours, des semaines actives et des comptes à rebours faux. Date réelle
   // désormais (?today= et la date simulée de l'Admin compris) ; les liens de démonstration gardent celle de la maquette.
@@ -393,7 +415,10 @@
       const day = p.upd ? ', prix du ' + this.d2(p.upd) : '';
       it.sources.forEach(so => { so.sub = so.sub.replace(' · fichier public du 03/10', ' · via TCGdex' + day).replace(' · annonces du 03/10', ' · via TCGdex' + day); });
       const n = [p.cm, p.tcp].filter(v => typeof v === 'number').length;
-      if (n === 2) it.coteRule = 'Cote PKM = moyenne des 2 prix « marché » disponibles (tendance Cardmarket et TCGplayer). Le prix demandé est affiché, jamais compté.';
+      it.coteRule = p.dup ? 'Cote à confirmer : TCGdex donne la même cote Cardmarket à plusieurs cartes de cette extension (rattachement erroné). Aucune cote n’est comptée pour cette carte.'
+        : typeof p.cm === 'number' ? 'Cote Dropicards = tendance Cardmarket de cette version de la carte. TCGplayer (marché US) est affiché pour information, jamais compté, comme le prix demandé.'
+          : typeof p.tcp === 'number' ? 'Pas de prix Cardmarket pour cette carte : la cote reprend TCGplayer (marché US, converti en euros), à confirmer.'
+            : 'Pas encore de prix « marché » pour cette carte.';
       if (it.noCote) it.release = 'Pas encore de prix « marché » pour cette carte (Cardmarket et TCGplayer, via TCGdex). Tu peux quand même l’ajouter à ta collection.';
       if (it.hasCote) it.change = 'Courbe après quelques jours d’archivage';
       // Deuxième prix Cardmarket : l'autre version de la carte (reverse, normale ou holo), affiché, jamais compté.

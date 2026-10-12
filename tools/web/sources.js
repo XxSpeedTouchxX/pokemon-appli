@@ -24,13 +24,13 @@
   srcProto.srcLine = function () {
     const c = srcCardsDay(), k = pricesDay();
     const when = c && k && c !== k ? 'cartes du ' + this.d2(c) + ', scellé du ' + this.d2(k) : (c || k ? 'du ' + this.d2(c || k) : 'en cours de chargement');
-    return 'Cotes ' + when + ' · TCGdex, Cardmarket, TCGplayer';
+    return 'Cotes ' + when + ' · Cardmarket, via TCGdex'; // cote = Cardmarket seul depuis le 2026-10-12
   };
   const srcKind = p => (!p ? 'none' : p.tcg ? 'card' : p.type === 'sealed' && (p.real || p.realId) ? 'sealed' : 'demo');
   // Source d'un article, en une ligne.
   srcProto.srcOf = function (p) {
     const k = srcKind(p);
-    if (k === 'card') return 'Cote du ' + this.srcDay(p.upd || srcCardsDay()) + ' · Cardmarket et TCGplayer via TCGdex';
+    if (k === 'card') return 'Cote du ' + this.srcDay(p.upd || srcCardsDay()) + ' · Cardmarket via TCGdex';
     if (k === 'sealed') return 'Cote du ' + this.srcDay(pricesDay()) + ' · Cardmarket';
     if (k === 'demo') return 'Article de la collection de démo · prix d’exemple';
     return '';

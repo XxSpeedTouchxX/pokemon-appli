@@ -1,14 +1,14 @@
   // ——— Jeux : gagner des PK (2026-10-11, demande du porteur) ———
   // L'onglet « Marché » devient « Jeux » (manette) : deux mini-jeux gratuits pour gagner des PK. La recherche de
   // l'ancien Marché reste accessible depuis l'accueil (« Voir les N résultats ») et le scan : écran « search ».
-  // - Booster PK : un booster offert toutes les 24 h ; il tremble, des ciseaux coupent le haut, puis le gain apparaît ; il contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %),
+  // - Booster PK : un booster offert toutes les 12 h (24 h jusqu'au 2026-10-12) ; il tremble, des ciseaux coupent le haut, puis le gain apparaît ; il contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %),
   //   100 PK (4 %) ou 1 000 PK (1 %). Taux fixés par le porteur, affichés dans l'app.
   // - Pile ou face : un lancer toutes les 8 h ; face « gemme PK » (gagnante) : +30 PK, une chance sur deux ; face
   //   « cristal éteint » : rien.
   // Les PK restent sans valeur en euros et ne s'achètent pas : ces jeux ne demandent aucun paiement (règles des PK).
   // Tirage avec crypto.getRandomValues ; dates des derniers tirages enregistrées avec la collection (« games »).
   // Ce module partage la portée des autres : ses noms commencent par GM_ ou gm.
-  const GM_BOOSTER_MS = 24 * 3600000, GM_COIN_MS = 8 * 3600000, GM_COIN_WIN = 30;
+  const GM_BOOSTER_MS = 12 * 3600000, GM_COIN_MS = 8 * 3600000, GM_COIN_WIN = 30;
   // Roulette (2026-10-12, paramètres du porteur) : PK ÷ 2 (15 %), PK × 2 (10 %), +100 PK (40 %), −100 PK (35 %), sur le
   // solde. Un tour toutes les 24 h (fréquence par défaut, à confirmer). Le solde ne descend jamais sous 0.
   // [libellé, %, effet, classe de couleur] ; les secteurs de la roue suivent cet ordre et ces parts.
@@ -117,13 +117,14 @@
         button: busyC ? 'La pièce tourne…' : cw > 0 ? 'Prochain lancer dans ' + gmLeft(cw) : 'Lancer la pièce',
         flip: () => this.gmFlip(), key: 'coin-' + (g.cN || 0)
       },
-      rules: 'Gratuit, sans achat : les PK n’ont aucune valeur en euros et ne s’échangent pas. Un booster et un tour de roulette toutes les 24 h, un lancer de pièce toutes les 8 h. Tirage au hasard sur ton appareil.',
+      rules: 'Gratuit, sans achat : les PK n’ont aucune valeur en euros et ne s’échangent pas. Un booster toutes les 12 h, un tour de roulette toutes les 24 h, un lancer de pièce toutes les 8 h. Tirage au hasard sur ton appareil.',
       w: (() => {
         const ww = gmWait(g.wheelAt, GM_WHEEL_MS), busy = g.wPhase === 'spin', r = GM_WHEEL[g.wWin || 0];
         return {
           every: '1 tour toutes les 24 h', deg: (g.wDeg || 0) + 'deg', wheelClass: 'pkm-gm-wheel' + (busy ? ' pkm-gm-wspin' : ''), spinning: busy,
           labels: GM_WHEEL.map((x, i) => { const [a, b] = gmSector(i), m = (a + b) / 2; return { text: x[0], at: m + 'deg', back: (-m) + 'deg' }; }),
-          odds: GM_WHEEL.map(x => ({ text: x[0] + ' · ' + x[1] + ' %', dot: 'pkm-gm-wdot pkm-gm-' + x[3] })),
+          // Ni chances ni description sous la roue (2026-10-12, porteur) ; elles restent dans les règles des PK.
+          aria: 'Roue à 4 cases : ' + GM_WHEEL.map(x => x[0]).join(', '),
           resultDone: g.wPhase === 'done', resultText: 'La roue s’arrête sur ' + r[0] + (r[1] === 35 || r[1] === 15 ? ' : pas de chance.' : ' !'),
           resultColor: r[1] === 35 || r[1] === 15 ? '#9AA8C3' : 'var(--pkm-accent)',
           button: busy ? 'La roue tourne…' : ww > 0 ? 'Prochain tour dans ' + gmLeft(ww) : 'Faire tourner la roue',
@@ -151,7 +152,7 @@
     if (ui.isMarket) Object.assign(ui, { title: 'Recherche', subtitle: 'Toutes les cartes et le scellé', hasSubtitle: true, headerBig: false, headerDetail: true });
     return r;
   };
-  const GM_EMPTY = { pk: '', b: { odds: [] }, c: {}, w: { labels: [], odds: [] }, hist: [], hasHist: false };
+  const GM_EMPTY = { pk: '', b: { odds: [] }, c: {}, w: { labels: [] }, hist: [], hasHist: false };
   // Écran de recherche (l'ancien Marché) : on y vient de l'accueil ou du scan ; Retour ramène à l'écran d'avant.
   const gmBaseParent = gmProto.parentOf;
   gmProto.parentOf = function (sc) { return sc === 'search' ? 'home' : sc === 'sealed' || sc === 'releases' ? 'home' : sc === 'sets' ? 'collection' : gmBaseParent.call(this, sc); };

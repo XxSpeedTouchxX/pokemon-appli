@@ -714,10 +714,11 @@
 </sc-if>
 
 <!-- fragment: pk-counter -->
-<span style="flex: none; position: relative; display: flex">
+<span style="flex: none; position: relative; display: flex; flex-direction: column; align-items: flex-end">
 <button type="button" onClick="{{ pk.open }}" aria-label="{{ pk.aria }}" style="display: flex; align-items: center; height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer">
 <span style="display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 11px 0 4px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="26" height="26" style="flex: none; display: block; width: 26px; height: 26px">{{ pk.n }}<span style="font-size: 11px; color: #9AA8C3">PK</span></span>
 </button>
+<sc-if value="{{ pk.hasTickets }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pk.openShop }}" aria-label="{{ pk.ticketsAria }}" class="pkm-tk-head"><span class="pkm-tk-bar"><span class="pkm-tk-mini" aria-hidden="true"></span>{{ pk.tickets }}</span></button></sc-if>
 <sc-if value="{{ pk.gain }}" hint-placeholder-val="{{ false }}">
 <span aria-hidden="true" class="pkm-gain" style="position: absolute; z-index: 5; right: 4px; top: 100%; margin-top: -6px; padding: 2px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12.5px; font-weight: 800; white-space: nowrap; pointer-events: none">{{ pk.gainText }} PK</span>
 </sc-if>
@@ -1403,13 +1404,14 @@
 <sc-if value="{{ ui.isPkShop }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Mon solde de PK" class="pkm-dark" style="flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 22px; border: 1px solid #24345C; background: #0F1828; color: #F3F6FC">
 <img src="img/brand/pk.svg" alt="" width="48" height="48" style="flex: none; display: block">
-<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 13px; color: #9AA8C3">Ton solde</span><span style="font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700">{{ pks.pk }} PK</span></span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 13px; color: #9AA8C3">Ton solde</span><span style="font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700">{{ pks.pk }} PK</span><sc-if value="{{ pk.hasTickets }}" hint-placeholder-val="{{ false }}"><span class="pkm-tk-bar"><span class="pkm-tk-mini" aria-hidden="true"></span>{{ pk.tickets }}</span></sc-if></span>
 <button type="button" onClick="{{ pks.earn }}" style="flex: none; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Gagner des PK</button>
 </section>
 <sc-for list="{{ pks.items }}" as="si" hint-placeholder-count="1">
 <section aria-label="{{ si.name }}" class="pkm-dark pkm-shop-item" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; color: #F3F6FC">
 <div style="display: flex; align-items: center; gap: 14px">
-<span class="pkm-shop-ticket" aria-hidden="true"><span class="pkm-shop-ticket-in">TICKET</span></span>
+<sc-if value="{{ si.isTicket }}" hint-placeholder-val="{{ true }}"><span class="pkm-shop-ticket" aria-hidden="true"><span class="pkm-shop-ticket-in">TICKET</span></span></sc-if>
+<sc-if value="{{ si.hasImg }}" hint-placeholder-val="{{ false }}"><img src="{{ si.img }}" alt="{{ si.imgAlt }}" width="284" height="520" class="pkm-shop-img"></sc-if>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
 <span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">{{ si.name }}</span>
 <span style="font-size: 14px; font-weight: 700; color: var(--pkm-accent)">{{ si.prize }}</span>
@@ -1428,7 +1430,7 @@
 <button type="button" onClick="{{ si.buy }}" style="height: 48px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Confirmer</button>
 </div>
 </sc-if>
-<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ pks.drawText }}</p>
+<p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ si.note }}</p>
 </section>
 </sc-for>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ pks.rules }}</p>
@@ -1459,7 +1461,7 @@
 <section aria-label="Booster PK" class="pkm-gm-boost pkm-dark" style="color: #F3F6FC; flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Booster PK</h2>
-<span style="font-size: 12.5px; color: #9AA8C3">1 offert toutes les 24 h</span>
+<span style="font-size: 12.5px; color: #9AA8C3">1 offert toutes les 12 h</span>
 </div>
 <div aria-live="polite" style="position: relative; height: 250px; display: flex; align-items: center; justify-content: center">
 <sc-if value="{{ gm.b.showPack }}" hint-placeholder-val="{{ true }}">
@@ -1528,8 +1530,7 @@
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Roulette</h2>
 <span style="font-size: 12.5px; color: #9AA8C3">{{ gm.w.every }}</span>
 </div>
-<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">Fais tourner la roue : elle agit sur ton solde de PK. Attention, elle peut aussi en retirer.</p>
-<div class="pkm-gm-wheelbox" aria-hidden="true">
+<div class="pkm-gm-wheelbox" role="img" aria-label="{{ gm.w.aria }}">
 <span class="pkm-gm-needle"></span>
 <div class="{{ gm.w.wheelClass }}" style="--spin: {{ gm.w.deg }}">
 <sc-for list="{{ gm.w.labels }}" as="gwl" hint-placeholder-count="4"><span class="pkm-gm-wlabel" style="transform: rotate({{ gwl.at }}) translateY(-74px) rotate({{ gwl.back }})">{{ gwl.text }}</span></sc-for>
@@ -1537,9 +1538,6 @@
 <span class="pkm-gm-hub"></span>
 </div>
 <sc-if value="{{ gm.w.resultDone }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: -4px 0 0; text-align: center; font-size: 15px; font-weight: 800; color: {{ gm.w.resultColor }}">{{ gm.w.resultText }}</p></sc-if>
-<div role="list" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 10px; font-size: 12.5px; color: #C9D3EA">
-<sc-for list="{{ gm.w.odds }}" as="gwo" hint-placeholder-count="4"><span role="listitem" style="display: flex; align-items: center; gap: 8px"><span class="{{ gwo.dot }}" aria-hidden="true"></span>{{ gwo.text }}</span></sc-for>
-</div>
 <button type="button" onClick="{{ gm.w.spin }}" aria-disabled="{{ gm.w.spinning }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer">{{ gm.w.button }}</button>
 </section>
 

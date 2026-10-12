@@ -435,7 +435,7 @@
       sheetMax: listMode ? 'calc(100% - 118px)' : '42%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
       msg: s.rmsg || '', hasMsg: !!s.rmsg, scanning: scanning, attribution: ATTRIBUTION,
       around: () => this.radarAround(), aroundOn: s.rlevel === 'around',
-      radii: [['3', '3 km'], ['5', '5 km'], ['10', '10 km']].map(([k, label]) => chip(String(s.rkm) === k, label, () => this.setState({ rkm: k, rscan: '', rstore: '' }))),
+      radii: [['3', '3 km'], ['5', '5 km'], ['10', '10 km'], ['20', '20 km']].map(([k, label]) => chip(String(s.rkm) === k, label, () => this.setState({ rkm: k, rscan: '', rstore: '' }))),
       hasRadii: s.rlevel === 'around',
       sectors: [], hasSectors: false, sectorsTitle: '', results: [], hasResults: false, resultsTitle: '',
       canScan: false, scan: () => this.radarScan(), scanLabel: '', hasStore: false, st: null, hint: '', title: '', subtitle: '', empty: false

@@ -61,14 +61,13 @@ ok('ajout : gerbe de cartes (' + b1.join(', ') + ')', b1.some(c => /pkm-burst-ca
 await page3.screenshot({ path: shot('fx-burst.png') });
 await page3.waitForTimeout(1700);
 ok('gerbe retirée après l’animation', (await page3.locator('.pkm-burst').count()) === 0);
-// Gain de PK : article jamais ajouté (pkSeen vidé) → +10 PK → pluie de gemmes depuis le compteur.
-await page3.evaluate(() => { const s = JSON.parse(localStorage.getItem('pkm-collection-v1')); s.pkSeen = []; localStorage.setItem('pkm-collection-v1', JSON.stringify(s)); });
-await page3.goto(B + 'start=item&itemId=p6&r=2', { waitUntil: 'load' }); await page3.waitForTimeout(2000);
+// Gain de PK (pluie de gemmes) : la pièce de l'onglet Jeux (+30), seul gain courant depuis le 2026-10-12.
+await page3.evaluate(() => { const s = JSON.parse(localStorage.getItem('pkm-collection-v1')); s.games = {}; localStorage.setItem('pkm-collection-v1', JSON.stringify(s)); });
+await page3.goto(B + 'start=market&r=2', { waitUntil: 'load' }); await page3.waitForTimeout(2000);
 await page3.evaluate(() => { window.__bursts = []; new MutationObserver(m => m.forEach(r => r.addedNodes.forEach(n => { if (n.classList && n.classList.contains('pkm-burst')) window.__bursts.push(n.className); }))).observe(document.body, { childList: true }); });
-await page3.click('button:has-text("+ Ajouter un exemplaire")'); await page3.waitForTimeout(300);
-await page3.click('button:has-text("Enregistrer l’ajout"), button:has-text("Ajouter à ma collection")'); await page3.waitForTimeout(300);
+await page3.click('button:has-text("Ouvrir mon booster")'); await page3.waitForTimeout(2800);
 const b2 = await page3.evaluate(() => window.__bursts.slice());
-ok('+10 PK : pluie de gemmes (' + b2.join(', ') + ')', b2.some(c => /pkm-burst-gem/.test(c)));
+ok('gain de PK (booster) : pluie de gemmes (' + b2.join(', ') + ')', b2.some(c => /pkm-burst-gem/.test(c)));
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

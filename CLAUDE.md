@@ -82,7 +82,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - thèmes des compagnons : Kyogre (océan, bleu), Groudon (volcan, rouge), Rayquaza (ouragan, vert émeraude et ardoise, depuis le 2026-10-08) changent le fond de l'app.
 - **Monnaie « PK » (2026-10-08) :**
   - logo : une gemme jaune à facettes avec l'éclair du logo (jaune, contour noir) et une étincelle, sans aucun repère de Poké Ball pour limiter le risque de droits (choisie le 2026-10-08 après plusieurs séries de propositions) ; compteur à gauche de l'avatar (accueil, Collection, Marché, Territoire), qui ouvre « Mes PK » ; sur l'accueil, logo à gauche, pastille « FR » retirée ;
-  - gains : 100 de bienvenue, +10 par jour d'ouverture, +10 par nouvel article de la collection (une fois par article), +300 pour un partage ;
+  - gains : 100 de bienvenue, +300 pour un partage, et les jeux ; les +10 par jour et par nouvel article ont été retirés le 2026-10-12 ;
   - compagnons : Bulbizarre, Salamèche, Carapuce, Pikachu offerts ; les autres de 50 à 200 PK selon le stade d'évolution, légendaires 400, Kyogre, Groudon et Rayquaza 500 avec leur thème ; un compagnon déjà choisi reste acquis ;
   - +300 PK une fois pour un partage sur un réseau social ; parrainage (+500) **mis en attente** par le porteur ;
   - logo de « Mon classeur » : la gemme des PK remplace la Poké Ball ;
@@ -110,6 +110,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - Territoire s'ouvre depuis l'accueil ; la carte de l'accueil s'ouvre sur 20 km autour de soi ;
   - roulette dans Jeux : PK ÷ 2 (15 %), × 2 (10 %), +100 (40 %), −100 (35 %), un tour toutes les 24 h (à confirmer) ;
   - ciseaux qui ouvrent le booster, pièce plus longue (16 demi-tours), déblocage de compagnon en 3 s avec confettis, icône (D légèrement remonté).
+- **Cote, PK shop et transitions (2026-10-12, soir, demande du porteur) :**
+  - cote = **tendance Cardmarket seule** (bonne version), TCGplayer en repli pour 631 cartes sans Cardmarket ; cotes recopiées par TCGdex (242 cartes) « à confirmer » ; « Les plus chères » refaite. **Contradiction avec le principe 2 (plusieurs sources), à trancher** ;
+  - prix par état (Near Mint) et moyenne des ventes eBay **impossibles sans API officielle** (Cardmarket, eBay Marketplace Insights) : demandes d'accès à faire par le porteur ;
+  - ticket 2 000 PK, lot Booster 30 ans 15 000 PK, barre des tickets sous le solde ; roulette sans chances affichées, sans plafond ; booster toutes les 12 h ; 20 km dans le Radar ; gains +10 (jour, nouvelle carte) retirés ;
+  - transition entre pages façon iOS (d'après la vidéo du porteur).
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

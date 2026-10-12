@@ -52,7 +52,9 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 ## Informations légales et polices
 
 - **Informations légales** (`tools/web/legal.js`, fragment `legal-sheet`, refaites le 2026-10-11) : Réglages › À propos › « Informations légales et confidentialité », et « Règles des PK » dans « Mes PK ». Quatre rubriques : Mentions légales (LCEN), Confidentialité (stockage local sans cookie, position, caméra, notifications, services contactés), Conditions, PK et jeux. Les champs de l'éditeur sont « à compléter » ; liste des vérifications dans `docs/14-verifications-avant-publication.md`.
-- **Jeux** (`tools/web/games.js`, `games.css`, fragment `games`, 2026-10-11) : l'onglet « Marché » (écran `market`) devient « Jeux » ; Booster PK (24 h) et Pile ou face (8 h), tirage `crypto.getRandomValues`, dates gardées avec la collection (`games`). L'ancienne recherche du Marché devient l'écran `search` (accueil, scan).
+- **PK shop** (`tools/web/pkshop.js`, 2026-10-12) : ticket du tirage au sort 2 000 PK ; lot « Booster 30 ans Pokémon » 15 000 PK (visuel `web/img/shop-booster-30-anniversaire.webp`, échange direct, envoi à organiser) ; tickets et lots dans `tickets`.
+- **Transition entre pages** (`tools/web/nav.js`, 2026-10-12, d'après la vidéo du porteur) : copie figée et inerte de la page quittée (`NAV.snap`, sans `main` ni `header`) ; en avant, la nouvelle page arrive de la droite avec un fond qui glisse, l'ancienne recule de 30 % en s'assombrissant ; en arrière, l'inverse ; 450 ms ; geste depuis le bord : la suite repart de la position du doigt.
+- **Jeux** (`tools/web/games.js`, `games.css`, fragment `games`, 2026-10-11) : l'onglet « Marché » (écran `market`) devient « Jeux » ; Booster PK (12 h depuis le 2026-10-12) et Pile ou face (8 h), roulette (24 h, sans chances affichées sous la roue), tirage `crypto.getRandomValues`, dates gardées avec la collection (`games`). L'ancienne recherche du Marché devient l'écran `search` (accueil, scan).
 - **Navigation** (`tools/web/nav.js`, 2026-10-11) : bouton Retour du téléphone (historique du navigateur), geste depuis le bord gauche, glissement au retour, position de la page gardée au retour.
 - **Première visite et alertes** (`tools/web/start.js`, 2026-10-11) : collection vide et accueil guidé à la première visite (démo sur choix) ; « Tes alertes » à l'ouverture de l'app, notification du téléphone si autorisée.
 - **Fiche d'une carte** (`catalog.js`, 2026-10-11) : cote Cardmarket de la version de la carte et prix de l'autre version (`cmh`, `cmv`), « cote à confirmer » (`q`), « cote à venir » (`stats.setsPriceSoon`), lien vers les ventes réussies eBay. Logos de séries : TCGdex, puis logos gardés avec la page (dont McDonald's, promos, énergies, Coffre Étincelant, repris du dépôt GitHub 1niceroli/ptcg-assets), sinon nom dessiné.
@@ -142,14 +144,13 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 ## PK, la monnaie de l'app
 
 Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de `catalog.dc.html`). Gains et règles validés par le porteur le 2026-10-08.
-- **Compteur :** en haut à droite, à gauche de l'avatar (accueil, Collection, Marché, Territoire), avec la gemme des PK (`img/brand/pk.svg`, `tools/brand/make_logo.mjs`). Sur l'accueil, le logo est à gauche et la pastille « FR » est retirée. Chaque gain s'affiche quelques secondes sous le compteur (« +10 PK »).
+- **Compteur :** en haut à droite, à gauche de l'avatar (accueil, Collection, Marché, Territoire), avec la gemme des PK (`img/brand/pk.svg`, `tools/brand/make_logo.mjs`). Sur l'accueil, le logo est à gauche et la pastille « FR » est retirée. Chaque gain s'affiche quelques secondes sous le compteur (« +30 PK »). Si l'on possède des tickets du PK shop, une barre « N tickets » s'affiche sous le compteur (elle ouvre le PK shop).
 - **Gains :**
   - 100 PK de bienvenue, au premier lancement ;
-  - +10 PK par jour où l'app est ouverte (date réelle ; `?today=AAAA-MM-JJ` pour les tests) ;
-  - +10 PK par nouvel article de la collection, une seule fois par article. Le message d'ajout l'annonce (« … · +10 PK ») ;
+  - les jeux de l'onglet Jeux ; les +10 PK par jour et par nouvel article ont été retirés le 2026-10-12 ;
   - +300 PK une fois, en partageant l'app depuis « Mes PK » (WhatsApp, Facebook, X, ou la feuille de partage du téléphone ; « Copier le lien » ne rapporte rien).
   - Les articles de la démo et ceux déjà présents au premier lancement ne rapportent rien.
-- **« Mes PK »** (appui sur le compteur) : solde, façons de gagner (du plus petit gain au plus grand : +10, +10, +100, +300), compagnons à débloquer. Rappel : les PK ne s'achètent pas et n'ont aucune valeur en euros.
+- **« Mes PK »** (appui sur le compteur) : solde, façons de gagner (Jeux, puis +100 et +300), compagnons à débloquer. Rappel : les PK ne s'achètent pas et n'ont aucune valeur en euros.
 - **Déblocage** (`pkPriceOf` dans `pk.js`) :
   - Bulbizarre, Salamèche, Carapuce et Pikachu sont offerts ;
   - les autres coûtent 50 PK (Pokémon de base), 100 PK (première évolution) ou 200 PK (deuxième évolution), selon leur stade dans Pokémon Rouge et Bleu ;
@@ -242,7 +243,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 
 ## Source et date des cotes
 
-- **En-têtes** (`tools/web/sources.js`, 2026-10-09, B7) : « Cotes du 08/10 · TCGdex, Cardmarket, TCGplayer », d'après la date du catalogue et celle des prix du scellé (plus de date figée « 3 oct. à 07:00 »). Fiche : date de la carte (« Cote du 08/10 · Cardmarket et TCGplayer via TCGdex »), du produit (« · Cardmarket »), ou « Article de la collection de démo · prix d'exemple ».
+- **En-têtes** (`tools/web/sources.js`, 2026-10-09, B7) : « Cotes du 08/10 · Cardmarket, via TCGdex » (depuis le 2026-10-12), d'après la date du catalogue et celle des prix du scellé (plus de date figée « 3 oct. à 07:00 »). Fiche : date de la carte (« Cote du 08/10 · Cardmarket via TCGdex »), du produit (« · Cardmarket »), ou « Article de la collection de démo · prix d'exemple ».
 - **Mon classeur :** bouton « i » à côté du résumé : méthode de la cote (Réglages), sources et date de l'onglet affiché, rappel que le prix demandé n'est jamais compté, nombre d'articles de démo.
 - **Hors ligne :** l'en-tête commence par « Hors ligne · » ; les dernières cotes restent affichées.
 
@@ -296,7 +297,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
   - **Qualité :** la fiche et le zoom affichent `high.png`, 600 × 825 sans perte, la meilleure qualité publiée par TCGdex. Les grilles prennent `low.webp` ou `high.webp` selon la finesse de l'écran (`srcset`).
   - **Visuel manquant en français :** le scan d'une autre version (anglaise, puis allemande, italienne ou espagnole) est utilisé. Le dessin officiel est le même et l'app l'indique.
   - **Sans visuel dans TCGdex :** scan anglais de pokemontcg.io en dernier recours ; sinon une carte « Visuel à venir » dessinée par l'app (voir `tools/tcgdex/README.md`).
-- **Cote PKM d'une vraie carte :** moyenne de la tendance Cardmarket et du prix TCGplayer converti en euros, au taux de la BCE du jour. Le prix eBay n'est pas encore branché.
+- **Cote d'une vraie carte (2026-10-12, porteur) :** tendance Cardmarket de la bonne version (holo, normale, reverse), seule. TCGplayer (converti au taux BCE) est affiché sans être compté, sauf pour les 631 cartes sans aucun prix Cardmarket (repli « à confirmer »). Une cote identique (tendance, moyennes 30 j et 7 j, ≥ 20 €) sur plusieurs cartes d'une même extension est un rattachement erroné de TCGdex (`TCG.dup`, 242 cartes) : pas de cote, « cote à confirmer ». Prix par état et ventes réussies eBay : seulement avec les API officielles (non obtenues).
 - **Pas de courbe inventée :** la courbe sur 30 jours viendra de l'archive (l'historique git de `cards.json`).
 
 ## Produits scellés

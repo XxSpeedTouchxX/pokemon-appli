@@ -18,7 +18,7 @@ await page.screenshot({ path: shot('games-scissors.png') });
 await page.waitForTimeout(1300);
 const pk1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('booster ouvert : PK crédités (' + pk0 + ' → ' + pk1 + ')', [10, 30, 50, 100, 1000].indexOf(pk1 - pk0) >= 0);
-ok('booster suivant dans 24 h', /Prochain booster dans 2[34] h/.test(await boost.innerText()));
+ok('booster suivant dans 12 h', /Prochain booster dans 1[12] h/.test(await boost.innerText()));
 await page.screenshot({ path: shot('games-booster.png') });
 await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(3400);
 const pk2 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
@@ -27,7 +27,7 @@ ok('lancer suivant dans 8 h', /Prochain lancer dans [78] h/.test(await coin.inne
 await page.screenshot({ path: shot('games-coin.png') });
 // Roulette (2026-10-12) : ÷2, ×2, +100, −100 sur le solde, jamais sous 0.
 const wheel = page.locator('section[aria-label="Roulette"]');
-ok('roulette : 4 secteurs et chances affichées', (await wheel.locator('.pkm-gm-wlabel').count()) === 4 && /PK ÷ 2 · 15 %/.test(await wheel.innerText()) && /−100 PK · 35 %/.test(await wheel.innerText()));
+ok('roulette : 4 secteurs, ni chances ni description', (await wheel.locator('.pkm-gm-wlabel').count()) === 4 && !/%/.test(await wheel.innerText()) && !/Fais tourner la roue :/.test(await wheel.innerText()));
 const w0 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 await wheel.locator('button:has-text("Faire tourner la roue")').click(); await page.waitForTimeout(4900);
 const w1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
@@ -37,13 +37,17 @@ await page.screenshot({ path: shot('games-roulette.png') });
 // PK shop (2026-10-12) : 4ᵉ onglet, ticket du tirage au sort.
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
 const ticket = page.locator('section[aria-label="Ticket · tirage au sort"]');
-ok('PK shop : ticket à 500 PK', (await ticket.count()) === 1 && /500 PK/.test(await ticket.innerText()));
-await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pk = 1200; localStorage.setItem(k, JSON.stringify(d)); });
+ok('PK shop : ticket à 2 000 PK', (await ticket.count()) === 1 && /2[\s\u202f\u00a0]000 PK/.test(await ticket.innerText()));
+const lot = page.locator('section[aria-label="Booster 30 ans Pokémon"]');
+ok('PK shop : lot Booster 30 ans à 15 000 PK, avec son visuel', (await lot.count()) === 1 && /15[\s\u202f\u00a0]000 PK/.test(await lot.innerText()) && (await lot.locator('img[src="img/shop-booster-30-anniversaire.webp"]').count()) === 1);
+ok('sans ticket : pas de barre de tickets', (await page.locator('.pkm-tk-head').count()) === 0);
+await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pk = 2700; localStorage.setItem(k, JSON.stringify(d)); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
 await ticket.locator('button:has-text("Acheter un ticket")').click(); await ticket.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(500);
 const sd = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'));
 ok('ticket acheté : 1 ticket, 700 PK', sd.pk === 700 && sd.tickets && sd.tickets['ticket-booster'] === 1 && /Tu as 1 ticket/.test(await ticket.innerText()));
+ok('barre « 1 ticket » sous le solde de PK', /1 ticket/.test(await page.locator('.pkm-tk-head').first().innerText()));
 await page.screenshot({ path: shot('pkshop.png') });
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 ok('délais gardés après rechargement', /Prochain booster/.test(await boost.innerText()) && /Prochain lancer/.test(await coin.innerText()));

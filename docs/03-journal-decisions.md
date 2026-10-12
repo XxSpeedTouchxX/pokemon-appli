@@ -6,6 +6,28 @@
 
 ---
 
+## 2026-10-12 (soir) — Cote Cardmarket seule ; PK shop à 2 000 PK et lot Booster 30 ans ; gains +10 retirés ; transition iOS
+
+- **Demande du porteur :**
+  - cote affichée = prix Cardmarket selon l'état (le moins cher en Near Mint, par exemple) + moyenne des ventes réussies eBay ;
+  - « Les plus chères » à refaire (Mewtwo à 5 550 € faux) ;
+  - ticket à 2 000 PK, sans plafond sur × 2 et ÷ 2 ; barre des tickets sous le solde de PK ; lot « Booster 30 ans Pokémon » à 15 000 PK ;
+  - roulette sans chances ni description ; booster toutes les 12 h ; bouton 20 km sur la carte ;
+  - retirer « +10 PK par nouvelle carte » et « +10 par jour » ; transition entre pages comme dans sa vidéo.
+- **Livré :**
+  - **cote = tendance Cardmarket de la bonne version** (holo, normale, reverse) ; TCGplayer affiché, plus compté, sauf pour les 631 cartes sans aucun prix Cardmarket (repli signalé « à confirmer ») ;
+  - **cote recopiée** sur plusieurs cartes d'une même extension (rattachement erroné chez TCGdex, 242 cartes, dont les promos XY à 5 550 €) : non comptée, « cote à confirmer » ;
+  - « Les plus chères » cohérente (Ectoplasma Skyridge, Dracaufeu Skyridge, Noctali VMAX…) ;
+  - PK shop : ticket 2 000 PK, lot Booster 30 ans 15 000 PK (visuel officiel, échange direct, envoi à organiser), barre « N tickets » sous le compteur de PK seulement si on en a ;
+  - roulette sans chances ni description (elles restent dans les règles des PK) ; booster toutes les 12 h ; 20 km dans le Radar ;
+  - gains : bienvenue, partage et jeux seulement ;
+  - transition « iOS » : la nouvelle page arrive de la droite, l'ancienne recule d'un tiers en s'assombrissant (450 ms), l'inverse au retour ; le geste depuis le bord repart de la position du doigt.
+- **Pas faisable sans accès officiel (pas de scraping, règle du 2026-10-03) :**
+  - prix Cardmarket **par état** (le moins cher en Near Mint) : seulement par l'API Cardmarket, réservée aux comptes approuvés ; TCGdex ne donne que la tendance ;
+  - **moyenne des ventes réussies eBay** : API Marketplace Insights, à accès restreint (demande auprès d'eBay) ;
+  - en attendant, la fiche garde le lien « eBay · ventes réussies » et les coefficients d'état (cote selon l'état et la langue).
+- **Contradiction signalée :** le principe 2 de CLAUDE.md (médiane de plusieurs sources) et le scénario A (« ne jamais dépendre d'une seule source ») ne sont plus suivis pour la cote affichée, qui repose sur Cardmarket seul. À trancher par le porteur : garder Cardmarket seul, ou ajouter eBay dès que l'accès est obtenu.
+
 ## 2026-10-12 — Le 4ᵉ onglet devient « PK shop » ; roulette ; Territoire depuis l'accueil
 
 - **Demande du porteur :**

@@ -87,3 +87,12 @@
 .pkm-shop-ticket::before, .pkm-shop-ticket::after { content: ''; position: absolute; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: #111A2C; border: 3px solid #111111; box-sizing: border-box; }
 .pkm-shop-ticket::before { left: -9px; } .pkm-shop-ticket::after { right: -9px; }
 .pkm-shop-ticket-in { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 15px; letter-spacing: 0.06em; color: #111111; border-top: 2px dashed #111111; border-bottom: 2px dashed #111111; padding: 2px 4px; }
+
+/* PK shop (2026-10-12) : visuel d'un lot (booster 30 ans) ; barre des tickets sous le solde de PK (en-tête et boutique),
+   affichée seulement quand on en possède. */
+.pkm-shop-img { flex: none; display: block; width: 70px; height: auto; transform: rotate(-4deg); filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45)); }
+.pkm-tk-head { position: absolute; top: 100%; right: 0; z-index: 4; margin-top: -6px; padding: 0; border: 0; background: transparent; cursor: pointer; font: inherit; }
+.pkm-tk-bar { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px 0 6px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; white-space: nowrap; align-self: flex-start; margin-top: 4px; }
+.pkm-tk-mini { position: relative; width: 18px; height: 12px; border-radius: 3px; border: 1.5px solid #111111; box-sizing: border-box; background: linear-gradient(135deg, #FFE46B, #FFD60A 50%, #F2A900); }
+.pkm-tk-mini::before, .pkm-tk-mini::after { content: ''; position: absolute; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: #111A2C; }
+.pkm-tk-mini::before { left: -3px; } .pkm-tk-mini::after { right: -3px; }

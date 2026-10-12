@@ -444,7 +444,7 @@ if (brokenMarks !== 45) throw new Error('Photos et logos repérés : ' + brokenM
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
-const BRAND = 'Dropicards', REBRANDED = 54;
+const BRAND = 'Dropicards', REBRANDED = 53;
 let rebranded = 0;
 const rebrand = t => t.replace(/PKM-App|\bPKM\b/g, () => { rebranded++; return BRAND; });
 tpl = rebrand(tpl);

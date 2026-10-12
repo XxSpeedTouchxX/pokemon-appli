@@ -1,6 +1,6 @@
 import { launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
-// PK, la monnaie de l'app : compteur en haut à droite, bienvenue (100), visite du jour (+10), nouvelle carte (+10, une
-// fois), panneau « Mes PK », compagnons verrouillés (500 PK), achat de Kyogre et thème, migration, 360 px.
+// PK, la monnaie de l'app : compteur en haut à droite, bienvenue (100), ni visite du jour ni nouvelle carte (gains
+// retirés le 2026-10-12), panneau « Mes PK », compagnons verrouillés (500 PK), achat de Kyogre et thème, migration, 360 px.
 import { withFont } from './hero.mjs';
 const BASE = E2E + '/';
 const browser = await launch();
@@ -27,28 +27,26 @@ const geo = async () => page.evaluate(() => {
 let g = await geo();
 ok('390 : logo à gauche ' + Math.round(g.logo[2]) + ' px, puis PK, puis avatar ; bouton de 44 px', g.logo[0] < 30 && g.logo[1] <= g.pk[0] && g.pk[1] <= g.av[0] && g.av[1] <= g.vw - 12 && g.pk[2] >= 44 && g.logo[2] >= 180);
 await page.screenshot({ path: shot('pk-accueil.png'), clip: { x: 0, y: 0, width: 390, height: 300 } });
-// 2. Même jour : rien de plus ; lendemain : +10.
+// 2. Même jour, lendemain : rien de plus (gain du jour retiré le 2026-10-12).
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(800);
 ok('même jour : toujours 100 PK, pas de « + »', await cText() === '100 PK' && (await page.locator('header .pkm-gain').count()) === 0);
 await page.goto(BASE + '?today=2026-10-09', { waitUntil: 'load' }); await page.waitForTimeout(800);
-ok('lendemain : ' + await cText() + ' et « +10 PK »', await cText() === '110 PK' && (await page.locator('header .pkm-gain').innerText()).trim() === '+10 PK');
-await page.waitForTimeout(3000);
-ok('« +10 PK » disparaît', (await page.locator('header .pkm-gain').count()) === 0);
+ok('lendemain : ' + await cText() + ', sans gain', await cText() === '100 PK' && (await page.locator('header .pkm-gain').count()) === 0);
 // 3. Panneau « Mes PK ».
 await counter.click(); await page.waitForTimeout(400);
 const sheet = page.locator('section[aria-label="Mes PK"]');
 const sheetText = (await sheet.innerText()).replace(/\s+/g, ' ');
-ok('panneau : solde, 3 façons de gagner, 3 compagnons à 500 PK', /Ton solde 110 PK/.test(sheetText) && /\+10 par nouvelle carte/.test(sheetText) && /\+10 par jour/.test(sheetText) && /\+100 de bienvenue/.test(sheetText)
+ok('panneau : solde, jeux, bienvenue, partage (sans +10), 3 compagnons à 500 PK', /Ton solde 100 PK/.test(sheetText) && /Jeux booster PK/.test(sheetText) && !/\+10 /.test(sheetText) && /\+100 de bienvenue/.test(sheetText)
   && (await sheet.locator('button[aria-label^="Débloquer"]').count()) === 3 && /Kyogre Compagnon et thème Océan/.test(sheetText) && /Groudon Compagnon et thème Volcan/.test(sheetText));
 const order = await sheet.locator('ul li span:first-child').allInnerTexts();
-ok('gains dans l’ordre croissant : ' + order.join(' / '), order.join() === '+10,+10,+100,+300');
+ok('gains : ' + order.join(' / '), order.join() === 'Jeux,+100,+300');
 ok('panneau : les PK ne s’achètent pas', /ne s’achètent pas et n’ont aucune valeur en euros/.test(sheetText));
 ok('panneau : +300 partage, « Tous les compagnons · 152 compagnons à débloquer »', /\+300 une fois, en partageant/.test(sheetText) && /Tous les compagnons 152 compagnons à débloquer, de 50 à 500 PK/.test(sheetText) && /Rayquaza Compagnon et thème Ouragan/.test(sheetText));
 await page.screenshot({ path: shot('pk-panneau.png') });
-// 4. Débloquer Kyogre sans assez de PK : le panneau de choix s'ouvre sur la confirmation, « Il te manque 390 PK ».
+// 4. Débloquer Kyogre sans assez de PK : le panneau de choix s'ouvre sur la confirmation, « Il te manque 400 PK ».
 await sheet.locator('button[aria-label="Débloquer Kyogre pour 500 PK"]').click(); await page.waitForTimeout(400);
 const ask = page.locator('[role="alertdialog"]');
-ok('confirmation : « ' + (await ask.innerText()).replace(/\s+/g, ' ').slice(0, 120) + ' »', /Il te manque 390 PK/.test(await ask.innerText()) && (await ask.locator('button:has-text("Débloquer pour")').count()) === 0);
+ok('confirmation : « ' + (await ask.innerText()).replace(/\s+/g, ' ').slice(0, 120) + ' »', /Il te manque 400 PK/.test(await ask.innerText()) && (await ask.locator('button:has-text("Débloquer pour")').count()) === 0);
 await page.screenshot({ path: shot('pk-manque.png') });
 await ask.locator('button:has-text("Annuler")').click(); await page.waitForTimeout(300);
 ok('« Annuler » ferme la confirmation', (await ask.count()) === 0 && (await page.locator('section[aria-label="Choisis ton compagnon"]').count()) === 1);
@@ -60,14 +58,14 @@ ok('152 verrouillés, 4 offerts : ' + free.join(', '), locked.length === 152 && 
 ok('prix : Herbizarre ' + price('Herbizarre') + ', Florizarre ' + price('Florizarre') + ', Évoli ' + price('Évoli') + ', Mewtwo ' + price('Mewtwo') + ', Latias ' + price('Latias') + ', Kyogre ' + price('Kyogre'),
   price('Herbizarre') === '100 PK' && price('Florizarre') === '200 PK' && price('Évoli') === '50 PK' && price('Mewtwo') === '400 PK' && price('Latias') === '400 PK' && price('Kyogre') === '500 PK' && price('Dracolosse') === '200 PK' && price('Raichu') === '100 PK' && price('Kabutops') === '100 PK' && price('Ptéra') === '100 PK' && price('Ronflex') === '200 PK');
 ok('compte : « ' + await page.locator('section[aria-label="Choisis ton compagnon"] > span').innerText() + ' »', (await page.locator('section[aria-label="Choisis ton compagnon"] > span').innerText()) === '156 Pokémon · 4 débloqués, les autres avec tes PK');
-ok('solde dans le panneau de choix : ' + (await page.locator('section[aria-label="Choisis ton compagnon"] h2 + span').innerText()).replace(/\s+/g, ' '), /110 ?PK/.test((await page.locator('section[aria-label="Choisis ton compagnon"] h2 + span').innerText()).replace(/\s+/g, ' ')));
+ok('solde dans le panneau de choix : ' + (await page.locator('section[aria-label="Choisis ton compagnon"] h2 + span').innerText()).replace(/\s+/g, ' '), /100 ?PK/.test((await page.locator('section[aria-label="Choisis ton compagnon"] h2 + span').innerText()).replace(/\s+/g, ' ')));
 await page.fill('input[aria-label="Chercher un Pokémon"]', 'groudon'); await page.waitForTimeout(300);
 await tiles.first().click(); await page.waitForTimeout(300);
 ok('Groudon verrouillé : confirmation, pas de changement', /Débloquer Groudon/.test(await ask.innerText()) && /Pikachu/.test(await page.evaluate(() => document.title + (document.querySelector('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]') || {}).ariaLabel)));
 await page.screenshot({ path: shot('pk-choix.png') });
 await page.click('button[aria-label="Fermer"]').catch(() => {}); await page.waitForTimeout(300);
 await page.keyboard.press('Escape');
-// 5. Nouvelle carte : +10 PK, une seule fois par carte.
+// 5. Nouvelle carte : plus de gain de PK (2026-10-12).
 await page.goto(BASE + '?today=2026-10-09', { waitUntil: 'load' }); await page.waitForTimeout(2500);
 await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'dracaufeu'); await page.waitForTimeout(800);
 await page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').nth(1).click(); await page.waitForTimeout(800);
@@ -80,14 +78,14 @@ const addOnce = async () => {
 };
 const t1 = await addOnce();
 d = await saved();
-ok('nouvelle carte : « ' + t1 + ' », solde ' + d.pk, /· \+10 PK$/.test(t1) && d.pk === 120);
+ok('nouvelle carte : « ' + t1 + ' », solde ' + d.pk + ' (sans gain)', !/PK/.test(t1) && d.pk === 100);
 await page.waitForTimeout(3000);
 const t2 = await addOnce();
 d = await saved();
-ok('même carte une 2e fois : « ' + t2 + ' », solde ' + d.pk, !/PK/.test(t2) && d.pk === 120);
+ok('même carte une 2e fois : « ' + t2 + ' », solde ' + d.pk, !/PK/.test(t2) && d.pk === 100);
 await page.click('button[aria-label="Retour"]').catch(() => {}); await page.waitForTimeout(300);
 await page.click('button[aria-label="Accueil"]').catch(() => {}); await page.waitForTimeout(400);
-ok('compteur à jour : ' + await cText(), await cText() === '120 PK');
+ok('compteur : ' + await cText(), await cText() === '100 PK');
 // 6. Achat : 620 PK, Kyogre débloqué, thème océan, solde 120.
 await edit(d => { d.pk = 620; });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1000);

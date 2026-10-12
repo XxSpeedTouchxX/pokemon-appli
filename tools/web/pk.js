@@ -1,9 +1,8 @@
   // ——— PK, la monnaie virtuelle de l'app (2026-10-08, règles validées par le porteur) ———
   // Les PK se gagnent dans l'app et servent à débloquer des compagnons (et le thème de Kyogre, Groudon, Rayquaza).
   // Ils ne s'achètent pas, ne se convertissent pas en euros et restent sur l'appareil, avec la collection.
-  // Gains : 100 PK de bienvenue (une fois), 10 PK par jour d'ouverture de l'app, 10 PK par nouvel article ajouté à la
-  // collection (carte ou produit scellé, une seule fois par article : retirer puis rajouter ne rapporte rien), 300 PK
-  // une fois pour un partage de l'app sur un réseau social.
+  // Gains : 100 PK de bienvenue (une fois), 300 PK une fois pour un partage de l'app sur un réseau social, et les jeux
+  // (games.js). Les +10 PK par jour d'ouverture et par nouvel article de la collection sont retirés (2026-10-12, porteur).
   // Les articles déjà dans la collection au premier lancement, et ceux de la démo, ne rapportent rien ; un compagnon
   // déjà choisi avant son verrouillage reste acquis.
   // Compteur en haut à droite (accueil, Collection, Marché, Territoire) : il ouvre « Mes PK » (solde, gains, déblocages).
@@ -29,7 +28,7 @@
     HOME_BUDDIES.forEach(([n]) => { const p = over && over[n] !== undefined ? Number(over[n]) : pkPriceOf(n); if (p > 0) PK_SHOP[n] = p; });
   };
   pkApplyPrices(null, false);
-  const PK_WELCOME = 100, PK_DAY = 10, PK_NEW = 10, PK_SHARE = 300, PK_GAIN_MS = 2600, PK_V = 2;
+  const PK_WELCOME = 100, PK_SHARE = 300, PK_GAIN_MS = 2600, PK_V = 2;
   // Partage de l'app (+300 PK, une fois) : réseaux proposés, ou la feuille de partage du téléphone.
   const PK_URL = 'https://pokemon-appli.pages.dev';
   const PK_TEXT = 'Je suis la valeur de ma collection Pokémon TCG avec Dropicards, au prix du marché :';
@@ -70,7 +69,7 @@
       ['full', 'novice'].forEach(m => pkIds(this.purchasesSeed(m)).forEach(id => seen.add(id)));
       Object.assign(patch, { pk: PK_WELCOME, pkSeen: Array.from(seen), pkOwn: PK_SHOP[kept] ? [kept] : [], pkDay: today, pkGain: PK_WELCOME, pkV: PK_V });
     } else {
-      if (raw.pkDay !== today) Object.assign(patch, { pk: s.pk + PK_DAY, pkDay: today, pkGain: PK_DAY });
+      if (raw.pkDay !== today) Object.assign(patch, { pkDay: today }); // dernier jour d'ouverture, sans gain
       if (raw.pkV !== PK_V) Object.assign(patch, { pkV: PK_V, pkOwn: PK_SHOP[kept] && s.pkOwn.indexOf(kept) < 0 ? s.pkOwn.concat([kept]) : s.pkOwn });
     }
     if (!Object.keys(patch).length) return;
@@ -82,23 +81,6 @@
   proto.pkGainEnd = function () {
     clearTimeout(this._pkT);
     this._pkT = setTimeout(() => { this._pkT = null; this.setState({ pkGain: 0 }); }, PK_GAIN_MS);
-  };
-
-  // Nouvel article dans la collection (Marché, fiche, scan, exemplaire en plus) : +10 PK par article jamais ajouté.
-  const pkBaseSet = proto.setState;
-  proto.setState = function (patch) {
-    const raw = this.state || {};
-    if (patch && patch.purchases && raw.pkDay && Array.isArray(raw.pkSeen)) {
-      const seen = new Set(raw.pkSeen), fresh = [];
-      pkIds(patch.purchases).forEach(id => { if (!seen.has(id)) { seen.add(id); fresh.push(id); } });
-      if (fresh.length) {
-        const n = fresh.length * PK_NEW;
-        patch = Object.assign({}, patch, { pk: (raw.pk || 0) + n, pkSeen: raw.pkSeen.concat(fresh), pkGain: n });
-        if (patch.toast) patch.toast += ' · +' + n + ' PK';
-        this.pkGainEnd();
-      }
-    }
-    return pkBaseSet.call(this, patch);
   };
 
   // Partage de l'app sur un réseau social : +300 PK la première fois (l'app ne peut pas vérifier la publication).
@@ -151,7 +133,7 @@
       price: pkNum(price), balance: 'Ton solde : ' + pkNum(s.pk) + ' PK',
       can: can, cannot: !can, buyLabel: 'Débloquer pour ' + pkNum(price) + ' PK',
       missText: 'Il te manque ' + pkNum(miss) + ' PK',
-      earn: 'Gagne des PK : +' + PK_NEW + ' par nouvelle carte ou nouveau produit dans ta collection, +' + PK_DAY + ' par jour où tu ouvres l’app.',
+      earn: 'Gagne des PK dans l’onglet Jeux : booster PK, pile ou face et roulette.',
       buy: () => this.pkBuy(k), cancel: () => this.setState({ pkAsk: null })
     };
   };
@@ -203,8 +185,7 @@
       open: () => this.setState({ pkSheet: true }), close: () => this.setState({ pkSheet: false }), sheet: !!s.pkSheet,
       balance: pkNum(s.pk),
       rules: [
-        ['+' + PK_NEW, 'par nouvelle carte ou nouveau produit scellé dans ta collection'],
-        ['+' + PK_DAY, 'par jour où tu ouvres l’app'],
+        ['Jeux', 'booster PK, pile ou face et roulette, dans l’onglet Jeux'],
         ['+' + PK_WELCOME, 'de bienvenue, offerts une fois'],
         ['+' + PK_SHARE, 'une fois, en partageant l’app sur un réseau social']
       ].map(([n, t]) => ({ n: n, text: t })), // du plus petit gain au plus grand (demande du porteur)
