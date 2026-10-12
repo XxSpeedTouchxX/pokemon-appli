@@ -28,11 +28,20 @@
     return false;
   };
   const navCanBack = s => !!(s.zoom || s.sheet || s.buddyPick || (s.stack || []).length || s.screen !== 'home');
+  // Glissement plus lent et plus doux depuis le 2026-10-12 (demande du porteur) : 620 ms, départ franc puis longue
+  // arrivée amortie (courbe des feuilles d'iOS), légère profondeur (échelle) et ombre sur le bord qui arrive.
   const navAnimate = (main, dir) => {
     if (!main || !main.animate || navStill()) return;
-    const from = dir === 'back' ? 'translateX(-26%)' : dir === 'fwd' ? 'translateX(26%)' : 'translateY(6px)';
-    main.animate([{ transform: from, opacity: dir === 'tab' ? 0 : 0.35 }, { transform: 'none', opacity: 1 }],
-      { duration: dir === 'tab' ? 200 : 340, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+    if (dir === 'tab') {
+      main.animate([{ transform: 'translateY(10px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+      return;
+    }
+    const x = dir === 'back' ? '-34%' : '34%', edge = dir === 'back' ? '18px 0 30px rgba(0, 0, 0, 0.35)' : '-18px 0 30px rgba(0, 0, 0, 0.35)';
+    main.animate([
+      { transform: 'translateX(' + x + ') scale(0.97)', opacity: 0.25, boxShadow: edge },
+      { offset: 0.55, opacity: 0.92 },
+      { transform: 'none', opacity: 1, boxShadow: '0 0 0 rgba(0, 0, 0, 0)' }
+    ], { duration: 620, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
   };
   // Après chaque rendu : position de la page, glissement, entrée d'historique pour le bouton Retour.
   const navAfter = inst => {
@@ -91,13 +100,13 @@
       if (m) {
         if (go && !navStill()) {
           // La page part vers la droite, puis la précédente revient de la gauche (navAnimate).
-          const a = m.animate([{ transform: 'translateX(' + dx + 'px)', opacity: 1 - Math.min(0.35, dx / w) }, { transform: 'translateX(' + w + 'px)', opacity: 0.4 }], { duration: 140, easing: 'ease-in' });
+          const a = m.animate([{ transform: 'translateX(' + dx + 'px)', opacity: 1 - Math.min(0.35, dx / w) }, { transform: 'translateX(' + w + 'px)', opacity: 0.4 }], { duration: 220, easing: 'cubic-bezier(0.4, 0, 1, 1)' });
           a.onfinish = () => { m.style.transform = ''; m.style.opacity = ''; inst.navBack(); };
           return;
         }
-        m.style.transition = 'transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s';
+        m.style.transition = 'transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.38s';
         m.style.transform = ''; m.style.opacity = '';
-        setTimeout(() => { m.style.transition = ''; }, 240);
+        setTimeout(() => { m.style.transition = ''; }, 400);
       }
       if (go) inst.navBack();
     };

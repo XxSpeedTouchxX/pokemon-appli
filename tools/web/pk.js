@@ -118,14 +118,25 @@
     try { navigator.clipboard.writeText(PK_URL).then(done, () => {}); } catch (e) { /* presse-papiers indisponible */ }
   };
 
+  let pkUnlockTimer = null;
+  proto.vUnlock = function (s) {
+    const k = s.pkUnlock;
+    if (!k || !HOME_NAMES[k]) return { on: false };
+    return { on: true, key: 'unl-' + k, name: HOME_NAMES[k], src: 'img/pokemon/icon/' + k + '.png', title: HOME_NAMES[k] + ' débloqué !',
+      sub: HOME_THEMES[k] ? 'Nouveau compagnon · ' + pkTheme(k) : 'Nouveau compagnon', close: () => this.setState({ pkUnlock: null }) };
+  };
   // Débloquer un compagnon : confirmation dans le panneau de choix, puis il devient ton compagnon.
   proto.pkBuy = function (k) {
     const s = this.st(), price = PK_SHOP[k], name = HOME_NAMES[k];
     if (!price || pkOwns(s, k) || s.pk < price) return;
     const left = s.pk - price;
-    this.setState({ pk: left, pkOwn: s.pkOwn.concat([k]), pkAsk: null, buddy: k, buddyPick: false,
+    // Animation de déblocage (2026-10-12, demande du porteur) : cadenas qui tremble, s'ouvre et éclate, puis le
+    // Pokémon jaillit (pkUnlock, 1,9 s ; games.css). Un appui la ferme plus tôt.
+    this.setState({ pk: left, pkOwn: s.pkOwn.concat([k]), pkAsk: null, buddy: k, buddyPick: false, pkUnlock: k,
       toast: name + ' débloqué' + (HOME_THEMES[k] ? ' · ' + pkTheme(k) : '') + ' · il te reste ' + pkNum(left) + ' PK' });
     this.flash();
+    clearTimeout(pkUnlockTimer);
+    pkUnlockTimer = setTimeout(() => { if (this.st().pkUnlock === k) this.setState({ pkUnlock: null }); }, 1900);
   };
   const pkAskView = function (s) {
     const k = s.pkAsk, price = PK_SHOP[k];

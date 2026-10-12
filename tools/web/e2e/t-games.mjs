@@ -13,7 +13,9 @@ ok('booster et pile ou face affichés', (await boost.count()) === 1 && (await co
 const odds = (await boost.textContent()).replace(/[\u202f\u00a0]/g, ' ');
 ok('taux affichés (1 000 PK · 1 %)', /1 000 PK/.test(odds) && /1 %/.test(odds) && /60 %/.test(odds));
 const pk0 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
-await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(2000);
+await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(1300);
+await page.screenshot({ path: shot('games-hand.png') });
+await page.waitForTimeout(1300);
 const pk1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('booster ouvert : PK crédités (' + pk0 + ' → ' + pk1 + ')', [10, 30, 50, 100, 1000].indexOf(pk1 - pk0) >= 0);
 ok('booster suivant dans 24 h', /Prochain booster dans 2[34] h/.test(await boost.innerText()));

@@ -1,7 +1,7 @@
   // ——— Jeux : gagner des PK (2026-10-11, demande du porteur) ———
   // L'onglet « Marché » devient « Jeux » (manette) : deux mini-jeux gratuits pour gagner des PK. La recherche de
   // l'ancien Marché reste accessible depuis l'accueil (« Voir les N résultats ») et le scan : écran « search ».
-  // - Booster PK : un booster offert toutes les 24 h ; il contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %),
+  // - Booster PK : un booster offert toutes les 24 h ; il tremble, une main déchire le haut, puis le gain apparaît ; il contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %),
   //   100 PK (4 %) ou 1 000 PK (1 %). Taux fixés par le porteur, affichés dans l'app.
   // - Pile ou face : un lancer toutes les 8 h ; face « gemme PK » (gagnante) : +30 PK, une chance sur deux ; face
   //   « cristal éteint » : rien.
@@ -41,8 +41,9 @@
     // Enregistré tout de suite (une fermeture pendant l'animation ne rejoue pas le booster), crédité à la révélation.
     this.setState({ games: Object.assign({}, g, { boosterAt: at, bWin: i, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
     if (gmStill()) { credit(); return; }
-    gmLater(() => this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'tear' }) }), 750);
-    gmLater(() => { this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'reveal' }) }); credit(); }, 1350);
+    gmLater(() => this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'tear' }) }), 700);
+    // Une main déchire le haut (1,15 s), le booster tombe, puis le gain apparaît.
+    gmLater(() => { this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'reveal' }) }); credit(); }, 2150);
   };
   gmProto.gmFlip = function () {
     const s = this.st(), g = s.games || {};
@@ -106,6 +107,7 @@
       // Compte à rebours : nouveau rendu chaque minute tant que l'écran est ouvert.
       if (!gmTick) gmTick = setInterval(() => { if (this.st().screen === 'market') this.setState({ gmNow: Date.now() }); else { clearInterval(gmTick); gmTick = null; } }, 30000);
     } else r.gm = GM_EMPTY;
+    r.unl = this.vUnlock(s);
     if (ui.isMarket) Object.assign(ui, { title: 'Recherche', subtitle: 'Toutes les cartes et le scellé', hasSubtitle: true, headerBig: false, headerDetail: true });
     return r;
   };

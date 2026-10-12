@@ -80,7 +80,7 @@ const p2 = await ctx2.newPage(); p2.on('pageerror', e => errors.push(e.message))
 await p2.goto(BASE, { waitUntil: 'load' }); await p2.waitForTimeout(1500);
 const img2 = p2.locator('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"] img');
 ok('animations réduites : ' + await img2.getAttribute('src') + ' · ' + await img2.evaluate(i => getComputedStyle(i).animationName), /\/25\.png$/.test(await img2.getAttribute('src')) && await img2.evaluate(i => getComputedStyle(i).animationName === 'none'));
-const v = p2.locator('section[aria-label="Valeur de ma collection"] div[style*="Luckiest"]');
+const v = p2.locator('section[aria-label="Valeur de ma collection"] div.pkm-strict-text');
 ok('360 : montant à côté du compagnon, sans débord : ' + await v.evaluate(e => getComputedStyle(e).fontSize), await v.evaluate(e => e.scrollWidth <= e.clientWidth + 1));
 await p2.screenshot({ path: shot('buddy-360.png'), clip: { x: 0, y: 0, width: 360, height: 520 } });
 await ctx2.close();

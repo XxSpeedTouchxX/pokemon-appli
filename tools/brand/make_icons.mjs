@@ -11,7 +11,9 @@ const { chromium } = createRequire(ROOT + 'tools/web/package.json')('playwright-
 const YELLOW = '#FFD60A', INK = '#111111';
 const mono = readFileSync(ROOT + 'web/img/brand/monogram.svg', 'utf8').replace(/<title>.*?<\/title>/, '');
 // any : carré arrondi bordé de noir, coins transparents ; maskable et Apple : plein cadre (le système arrondit).
-const OUT = [['icon-512.png', 512, 0.7, true], ['icon-192.png', 192, 0.7, true], ['icon-maskable-512.png', 512, 0.58, false], ['apple-touch-icon.png', 180, 0.72, false]];
+// part : place occupée par le monogramme (largeur et hauteur), presque tout le carré depuis le 2026-10-12 ; la version
+// « maskable » garde la zone sûre d'Android (cercle de 80 %).
+const OUT = [['icon-512.png', 512, 0.9, true], ['icon-192.png', 192, 0.9, true], ['icon-maskable-512.png', 512, 0.74, false], ['apple-touch-icon.png', 180, 0.94, false]];
 
 const page = size => `<!doctype html><html><body style="margin:0;background:transparent">
 <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">BODY</svg></body></html>`;
@@ -22,8 +24,9 @@ const square = rounded => rounded
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined });
 const tab = await browser.newPage();
 for (const [name, size, part, rounded] of OUT) {
-  const box = mono.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number), w = 512 * part, h = w * box[3] / box[2];
-  const inner = mono.replace(/<svg[^>]*>/, `<svg x="${(512 - w) / 2}" y="${(512 - h) / 2 + 6}" width="${w}" height="${h}" viewBox="${box.join(' ')}">`);
+  const box = mono.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number), k = Math.min(512 * part / box[2], 512 * part / box[3]);
+  const w = box[2] * k, h = box[3] * k;
+  const inner = mono.replace(/<svg[^>]*>/, `<svg x="${(512 - w) / 2}" y="${(512 - h) / 2}" width="${w}" height="${h}" viewBox="${box.join(' ')}">`);
   await tab.setViewportSize({ width: size, height: size });
   await tab.setContent(page(size).replace('BODY', square(rounded) + inner));
   writeFileSync(ROOT + 'web/icons/' + name, await tab.screenshot({ omitBackground: true }));

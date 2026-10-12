@@ -8,7 +8,7 @@ const B = E2E + '/?today=2026-10-09&';
 const eur = t => Number(String(t).replace(/[^\d,-]/g, '').replace(',', '.'));
 const saved = () => page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'));
 const total = async () => eur(await page.locator('section[aria-label="Ma collection"], [aria-label="Valeur de la collection"]').first().locator('text=/€/').first().innerText().catch(() => '0'));
-const homeValue = async () => { await page.goto(B, { waitUntil: 'load' }); await page.waitForTimeout(1500); return eur((await page.locator('#app').innerText()).match(/Ma collection\s*\n?\s*([\d\s  ]+,\d\d)\s*€/)[1]); };
+const homeValue = async () => { await page.goto(B, { waitUntil: 'load' }); await page.waitForTimeout(1500); return eur((await page.locator('#app').innerText()).match(/ma collection\s*\n?\s*([\d\s  ]+,\d\d)\s*€/i)[1]); };
 const v0 = await homeValue();
 ok('valeur de départ : ' + v0, v0 > 0);
 // k1 passe en « Joué » par D5.

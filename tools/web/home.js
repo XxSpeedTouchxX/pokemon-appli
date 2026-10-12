@@ -161,7 +161,7 @@
       // Police du logo : l'espace fine des milliers (U+202F) n'y a pas de largeur ; espace normale, sans retour à la ligne.
       value: String(valueBig).replace(/[\u202f\u00a0]/g, ' '),
       aria: 'Tendance de ta collection : ' + V.map((v, i) => HOME_LABELS[i] + ' ' + x.mask(this.eur(v))).join(', '),
-      fit: Math.max(4, String(valueBig).length * 0.6).toFixed(2)
+      fit: Math.max(4, String(valueBig).length * 0.66).toFixed(2)
     });
   };
 

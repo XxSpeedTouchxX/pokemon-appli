@@ -207,6 +207,7 @@ patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-unlock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Cote selon l'état et la langue, vente d'un exemplaire précis (value.js, margin-patch.mjs).
 logic = applyMarginPatches(logic);
 patchJs("platform: d.platform, commission: d.commission, port: d.port, by: d.by };", "platform: d.platform, commission: d.commission, port: d.port, by: d.by, from: d.from || null };");
@@ -701,6 +702,8 @@ input[aria-label="Rechercher dans le catalogue"]::-webkit-search-cancel-button {
 /* Petit radar du titre « Boutiques autour de toi » : un point s'allume quand le faisceau passe dessus. */
 @keyframes pkmBlip { 0% { opacity: 1; transform: scale(1.3); } 70%, 100% { opacity: 0.2; transform: scale(1); } }
 /* Montant de la collection à la manière du logo : lettres blanches, contour noir (8 directions) et ombre portée noire. */
+/* Montant de la collection (2026-10-12) : police droite (Sora), blanc, contour noir net et ombre droite. */
+.pkm-strict-text { text-shadow: 0.045em 0 0 #111111, -0.045em 0 0 #111111, 0 0.045em 0 #111111, 0 -0.045em 0 #111111, 0.032em 0.032em 0 #111111, -0.032em 0.032em 0 #111111, 0.032em -0.032em 0 #111111, -0.032em -0.032em 0 #111111, 0 0.09em 0 #111111, 0.03em 0.09em 0 #111111, -0.03em 0.09em 0 #111111; }
 .pkm-logo-text { text-shadow: 0.05em 0 0 #111111, -0.05em 0 0 #111111, 0 0.05em 0 #111111, 0 -0.05em 0 #111111, 0.036em 0.036em 0 #111111, -0.036em 0.036em 0 #111111, 0.036em -0.036em 0 #111111, -0.036em -0.036em 0 #111111, 0.09em 0.06em 0 #111111, 0.076em 0.096em 0 #111111, 0.04em 0.11em 0 #111111, 0.076em 0.024em 0 #111111, 0.004em 0.096em 0 #111111; }
 /* PK gagnés : « +10 PK » sous le compteur, qui monte puis s'efface (affiché sans mouvement si l'utilisateur limite les animations). */
 @keyframes pkmGain { 0% { opacity: 0; transform: translateY(6px); } 12%, 75% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-4px); } }

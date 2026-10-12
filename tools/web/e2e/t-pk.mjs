@@ -102,7 +102,10 @@ d = await saved();
 ok('achat : « ' + toast + ' »', /^Kyogre débloqué · thème Océan · il te reste 120 PK$/.test(toast) && d.pk === 120 && JSON.stringify(d.pkOwn) === '[382]' && d.buddy === 382);
 ok('thème océan appliqué', await page.evaluate(() => document.documentElement.classList.contains('pkm-theme-sea')));
 ok('compteur : ' + await cText(), await cText() === '120 PK');
-await page.waitForTimeout(500);
+ok('animation de déblocage affichée', (await page.locator('button.pkm-unl').count()) === 1);
+await page.screenshot({ path: shot('pk-unlock.png') });
+await page.waitForTimeout(1600); // fin de l'animation de déblocage (1,9 s)
+ok('animation de déblocage terminée', (await page.locator('button.pkm-unl').count()) === 0);
 await page.screenshot({ path: shot('pk-kyogre.png'), clip: { x: 0, y: 0, width: 390, height: 420 } });
 await page.click('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]'); await page.waitForTimeout(400);
 const after = await page.$$eval('[aria-label="Compagnons"] button', bs => bs.map(b => b.getAttribute('aria-label')).filter(a => /Kyogre|Groudon|Rayquaza/.test(a)));
