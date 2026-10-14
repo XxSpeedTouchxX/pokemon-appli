@@ -99,16 +99,19 @@
   };
 
   // ——— Grades (2026-10-14, demande du porteur) ———
-  // Cinq grades selon la valeur de la collection, chacun avec son logo (web/img/grades/) : Recrue (0 à 500 €),
-  // Chasseur (500 à 2 500 €), Collectionneur (2 500 à 7 500 €), Maître (7 500 à 15 000 €), Légende (15 000 € et plus).
-  // Remplacent les paliers « Commune » à « Hyper rare » (0, 500, 1 500, 3 000, 7 500 €). Le champ sym, qui dessinait le
-  // symbole dans un hexagone, porte maintenant le chemin du logo (build.mjs remplace les hexagones par des images).
+  // Six grades selon la valeur de la collection, chacun avec son emblème (web/img/grades/, tools/brand/make_grades.mjs) :
+  // Recrue (0 à 500 €, marron), Chasseur (500 à 2 500 €, bronze), Collectionneur (2 500 à 7 500 €, argent), Dresseur
+  // Pokémon (7 500 à 15 000 €, or), Maître Pokémon (15 000 à 30 000 €, rouge), Grand maître Pokémon (30 000 € et plus,
+  // couronne). Le seuil de 30 000 € est une valeur par défaut, à confirmer par le porteur (il a donné 5 tranches).
+  // Remplacent les paliers « Commune » à « Hyper rare ». Le champ sym porte le chemin de l'emblème (build.mjs remplace
+  // les hexagones de la maquette par des images).
   const PF_GRADES = [
-    ['Recrue', 0, '#E0965A', 'rgba(224, 150, 90, 0.26)'],
-    ['Chasseur', 500, '#C9D1DE', 'rgba(201, 209, 222, 0.24)'],
-    ['Collectionneur', 2500, '#FFC93C', 'rgba(255, 201, 60, 0.26)'],
-    ['Maître', 7500, '#B79BFF', 'rgba(183, 155, 255, 0.28)'],
-    ['Légende', 15000, '#FF7AD9', 'rgba(255, 122, 217, 0.28)']
+    ['Recrue', 0, '#C9926A', 'rgba(160, 104, 62, 0.30)'],
+    ['Chasseur', 500, '#F2A35E', 'rgba(240, 160, 85, 0.28)'],
+    ['Collectionneur', 2500, '#C9D1DE', 'rgba(201, 209, 222, 0.24)'],
+    ['Dresseur Pokémon', 7500, '#FFC93C', 'rgba(255, 201, 60, 0.26)'],
+    ['Maître Pokémon', 15000, '#FF6A4D', 'rgba(227, 53, 13, 0.30)'],
+    ['Grand maître Pokémon', 30000, '#7CF5FF', 'rgba(124, 245, 255, 0.26)']
   ];
   proto.tiers = function () {
     return PF_GRADES.map(([name, min, color, glow], i) => ({ name: name, min: min, color: color, glow: glow, sym: 'img/grades/grade-' + (i + 1) + '.svg' }));

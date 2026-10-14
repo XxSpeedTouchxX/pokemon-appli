@@ -17,15 +17,18 @@
   - « Mon profil », photo de la photothèque, rubrique « Informations du dresseur » (pseudo, e-mail, membre depuis, palier) ;
   - 5 grades selon la valeur de la collection, avec logos ; « Série en cours » retirée ;
   - premier écran sans pastille de cote, avec Dracaufeu 1re édition, Lugia réimpression 30 ans, Mew ALT 30 ans.
-- **Grades (noms et logos proposés, à valider) :**
+- **Grades (noms, couleurs et styles validés par le porteur ; seuil de 30 000 € à confirmer) :**
 
-  | Grade | Valeur de la collection | Emblème |
+  | Grade | Valeur de la collection | Emblème (couleur, plumes par aile) |
   |---|---|---|
-  | Recrue | 0 à 500 € | bronze, 1 plume par aile |
-  | Chasseur | 500 à 2 500 € | argent, 2 plumes, pointe en haut |
-  | Collectionneur | 2 500 à 7 500 € | or, 3 plumes, étincelles |
-  | Maître | 7 500 à 15 000 € | violet holo, 4 plumes, cristal |
-  | Légende | 15 000 € et plus | or et cristal, 6 plumes, couronne |
+  | Recrue | 0 à 500 € | marron foncé, 1 |
+  | Chasseur | 500 à 2 500 € | bronze brillant, 2 |
+  | Collectionneur | 2 500 à 7 500 € | argent, 3 |
+  | Dresseur Pokémon | 7 500 à 15 000 € | or, 4 |
+  | Maître Pokémon | 15 000 à 30 000 € | rouge Pokémon, 5 |
+  | Grand maître Pokémon | 30 000 € et plus | or et cristal, 6, couronne |
+
+  Noms et couleurs choisis par le porteur (même jour, 6 grades au lieu de 5). **Seuil de 30 000 € proposé par défaut, à confirmer** : le porteur a donné 5 tranches pour 6 grades.
 
   **Style des emblèmes (demande du porteur, même jour) :** inspiré des rangs de League of Legends (ailes métalliques qui se déploient à chaque grade, plaque centrale en V, bannière derrière), adapté au style Dropicards (contour noir, jaune de la marque), avec une **Poké Ball dessinée au centre, choix du porteur** (le logo des PK l'avait écartée le 2026-10-08 par prudence sur les droits). Dessin original, sans reprise des emblèmes de LoL.
 
