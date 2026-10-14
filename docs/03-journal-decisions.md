@@ -21,10 +21,10 @@
 
   | Grade | Valeur de la collection | Emblème |
   |---|---|---|
-  | Recrue | 0 à 500 € | bronze, 2 plumes par aile |
-  | Chasseur | 500 à 2 500 € | argent, 3 plumes, pointe en haut |
-  | Collectionneur | 2 500 à 7 500 € | or, 4 plumes, étincelles |
-  | Maître | 7 500 à 15 000 € | violet holo, 5 plumes, cristal |
+  | Recrue | 0 à 500 € | bronze, 1 plume par aile |
+  | Chasseur | 500 à 2 500 € | argent, 2 plumes, pointe en haut |
+  | Collectionneur | 2 500 à 7 500 € | or, 3 plumes, étincelles |
+  | Maître | 7 500 à 15 000 € | violet holo, 4 plumes, cristal |
   | Légende | 15 000 € et plus | or et cristal, 6 plumes, couronne |
 
   **Style des emblèmes (demande du porteur, même jour) :** inspiré des rangs de League of Legends (ailes métalliques qui se déploient à chaque grade, plaque centrale en V, bannière derrière), adapté au style Dropicards (contour noir, jaune de la marque), avec une **Poké Ball dessinée au centre, choix du porteur** (le logo des PK l'avait écartée le 2026-10-08 par prudence sur les droits). Dessin original, sans reprise des emblèmes de LoL.

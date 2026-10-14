@@ -51,19 +51,19 @@ const crest = (fill, depth) => `<path d="M${CX - 27} ${CY - 8} L${CX - 12} ${CY 
 const sparkle = (x, y, s, c = '#FFFFFF') => `<path d="M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s} Z" fill="${c}" stroke="${INK}" stroke-width="1"/>`;
 
 const G = [];
-// 1. Recrue : bronze, deux plumes courtes.
+// 1. Recrue : bronze, une plume par aile (2026-10-14 : une pointe de moins par aile sur les 4 premiers grades).
 G.push(svg('Grade Recrue', grad('m', [[0, '#F6C08A'], [0.5, '#C77B3F'], [1, '#6E3712']]) + grad('t', [[0, '#E89A5C'], [1, '#9C5422']]),
-  `${banner}${wings([[34, 30, 10, 7], [10, 36, 10, 4]], 'm')}${chin(8, 7, 'url(#m)')}${crest('url(#m)', 0)}${ball('url(#t)')}`));
-// 2. Chasseur : argent, trois plumes, pointe en haut.
+  `${banner}${wings([[16, 36, 10, 5]], 'm')}${chin(8, 7, 'url(#m)')}${crest('url(#m)', 0)}${ball('url(#t)')}`));
+// 2. Chasseur : argent, deux plumes par aile, pointe en haut.
 G.push(svg('Grade Chasseur', grad('m', [[0, '#FFFFFF'], [0.45, '#C3CCDA'], [1, '#5E6B80']]) + grad('t', [[0, '#E8EDF5'], [1, '#8C98AC']]),
-  `${banner}${spike(16, 6, 'url(#m)')}${wings([[48, 30, 9, 8], [26, 39, 10, 6], [4, 40, 10, 3]], 'm')}${chin(10, 7, 'url(#m)')}${crest('url(#m)', 3)}${ball('url(#t)')}`));
-// 3. Collectionneur : or, quatre plumes, pointe et menton plus longs.
+  `${banner}${spike(16, 6, 'url(#m)')}${wings([[30, 38, 10, 6], [6, 40, 10, 3]], 'm')}${chin(10, 7, 'url(#m)')}${crest('url(#m)', 3)}${ball('url(#t)')}`));
+// 3. Collectionneur : or, trois plumes par aile, pointe et menton plus longs.
 G.push(svg('Grade Collectionneur', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
-  `${banner}${spike(20, 7, 'url(#m)')}${wings([[60, 28, 8, 8], [42, 37, 9, 7], [22, 43, 10, 5], [0, 42, 10, 3]], 'm')}${chin(13, 8, 'url(#m)')}${crest('url(#m)', 6)}${ball('url(#t)')}
+  `${banner}${spike(20, 7, 'url(#m)')}${wings([[46, 36, 9, 7], [24, 43, 10, 5], [2, 42, 10, 3]], 'm')}${chin(13, 8, 'url(#m)')}${crest('url(#m)', 6)}${ball('url(#t)')}
 ${sparkle(26, 26, 4)}${sparkle(95, 30, 3)}`));
-// 4. Maître : holo violet et cyan, cinq plumes, plume intérieure cristal.
+// 4. Maître : holo violet et cyan, quatre plumes par aile, plume intérieure cristal.
 G.push(svg('Grade Maître', grad('m', [[0, '#F0C8FF'], [0.45, '#A86BFF'], [1, '#4A1C9C']]) + grad('i', [[0, '#C9FBFF'], [1, '#3FA8FF']]) + grad('t', [[0, '#C79BFF'], [1, '#7B3FE0']]),
-  `${banner}${spike(24, 7, 'url(#i)')}${wings([[68, 26, 7, 8], [52, 35, 8, 8], [34, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${chin(15, 8, 'url(#m)')}${crest('url(#i)', 9)}${ball('url(#t)')}
+  `${banner}${spike(24, 7, 'url(#i)')}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${chin(15, 8, 'url(#m)')}${crest('url(#i)', 9)}${ball('url(#t)')}
 ${sparkle(22, 22, 5)}${sparkle(99, 26, 4)}${sparkle(98, 92, 3)}`));
 // 5. Légende : or et cristal, six plumes, couronne jaune au-dessus de la balle.
 G.push(svg('Grade Légende', grad('m', [[0, '#FFF6C2'], [0.4, '#FFD60A'], [1, '#A86E00']]) + grad('i', [[0, '#D8FDFF'], [0.5, '#5EE0CF'], [1, '#2F6BFF']]) + grad('t', [[0, '#7CF5FF'], [1, '#2F6BFF']]) + grad('c', [[0, '#FFF1A6'], [1, '#F2A900']]),
