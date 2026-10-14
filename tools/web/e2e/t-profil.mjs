@@ -1,5 +1,6 @@
 // 2026-10-14 (porteur) : « Mon profil » à la place de « Ton espace », photo de profil choisie dans la photothèque
-// (recadrée en 256 px, gardée sur l'appareil, affichée dans l'en-tête), rubrique « Informations du dresseur »,
+// (recadrée en 256 px, gardée sur l'appareil, affichée dans l'en-tête), « Informations du dresseur » (pseudo, e-mail,
+// membre depuis, palier),
 // plus de badge Admin dans l'en-tête de l'accueil.
 import { withFonts, launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
@@ -20,14 +21,15 @@ let d = await saved();
 ok('photo recadrée et gardée (' + (d.avatarImg || '').length + ' caractères)', /^data:image\/jpeg;base64,/.test(d.avatarImg || ''));
 ok('bulle : « Changer ma photo de profil »', (await idt.locator('button[aria-label="Changer ma photo de profil"]').count()) === 1 && (await idt.locator('img[src^="data:image/jpeg"]').count()) === 1);
 const tr = page.locator('section[aria-label="Informations du dresseur"]');
-ok('rubrique « Informations du dresseur » : 6 champs', (await tr.count()) === 1 && (await tr.locator('input').count()) === 6);
-await tr.locator('input[aria-label="Nom de dresseur"]').fill('Nico');
-await tr.locator('input[aria-label="Pokémon préféré"]').fill('Dracaufeu'); await page.waitForTimeout(300);
+ok('rubrique « Informations du dresseur » : pseudo, e-mail, membre depuis, palier', (await tr.count()) === 1 && (await tr.locator('input').count()) === 2
+  && /Membre depuis/.test(await tr.innerText()) && /Palier/.test(await tr.innerText()) && (await tr.locator('img[src^="img/grades/grade-"]').count()) === 1);
+await tr.locator('input[aria-label="Pseudo"]').fill('Nico');
+await tr.locator('input[aria-label="Adresse e-mail"]').fill('nico@exemple.fr'); await page.waitForTimeout(300);
 await page.screenshot({ path: shot('profil.png') });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
 d = await saved();
-ok('champs gardés après rechargement : ' + JSON.stringify(d.trainer), d.trainer && d.trainer.name === 'Nico' && d.trainer.fav === 'Dracaufeu' && (await tr.locator('input[aria-label="Nom de dresseur"]').inputValue()) === 'Nico');
-ok('nom affiché sous « Mon profil »', /Dresseur · Nico/.test(await idt.innerText()));
+ok('champs gardés après rechargement : ' + JSON.stringify(d.trainer), d.trainer && d.trainer.name === 'Nico' && d.trainer.email === 'nico@exemple.fr' && (await tr.locator('input[aria-label="Pseudo"]').inputValue()) === 'Nico');
+ok('pseudo affiché sous « Mon profil »', /@Nico/.test(await idt.innerText()));
 await page.goto(E2E + '/?start=home', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 ok('en-tête : la photo remplace l’illustration', (await page.locator('header button img[src^="data:image/jpeg"]').count()) === 1);
 ok('en-tête : pas de badge Admin', (await page.locator('header button[aria-label="Ouvrir le panneau Admin"]').count()) === 0);
