@@ -100,18 +100,18 @@
 
   // ——— Grades (2026-10-14, demande du porteur) ———
   // Six grades selon la valeur de la collection, chacun avec son emblème (web/img/grades/, tools/brand/make_grades.mjs) :
-  // Recrue (0 à 500 €, marron), Chasseur (500 à 2 500 €, bronze), Collectionneur (2 500 à 7 500 €, argent), Dresseur
-  // Pokémon (7 500 à 15 000 €, or), Maître Pokémon (15 000 à 30 000 €, rouge), Grand maître Pokémon (30 000 € et plus,
-  // couronne). Le seuil de 30 000 € est une valeur par défaut, à confirmer par le porteur (il a donné 5 tranches).
+  // Recrue (0 à 500 €, bronze), Chasseur (500 à 2 500 €, argent), Collectionneur (2 500 à 7 500 €, or), Dresseur
+  // Pokémon (7 500 à 15 000 €, or et vert), Maître Pokémon (15 000 à 30 000 €, or et cristal), Grand maître Pokémon
+  // (30 000 € et plus, rouge, couronne). Le seuil de 30 000 € est une valeur par défaut, à confirmer par le porteur.
   // Remplacent les paliers « Commune » à « Hyper rare ». Le champ sym porte le chemin de l'emblème (build.mjs remplace
   // les hexagones de la maquette par des images).
   const PF_GRADES = [
-    ['Recrue', 0, '#C9926A', 'rgba(160, 104, 62, 0.30)'],
-    ['Chasseur', 500, '#F2A35E', 'rgba(240, 160, 85, 0.28)'],
-    ['Collectionneur', 2500, '#C9D1DE', 'rgba(201, 209, 222, 0.24)'],
-    ['Dresseur Pokémon', 7500, '#FFC93C', 'rgba(255, 201, 60, 0.26)'],
-    ['Maître Pokémon', 15000, '#FF6A4D', 'rgba(227, 53, 13, 0.30)'],
-    ['Grand maître Pokémon', 30000, '#7CF5FF', 'rgba(124, 245, 255, 0.26)']
+    ['Recrue', 0, '#F2A35E', 'rgba(240, 160, 85, 0.28)'],
+    ['Chasseur', 500, '#C9D1DE', 'rgba(201, 209, 222, 0.24)'],
+    ['Collectionneur', 2500, '#FFC93C', 'rgba(255, 201, 60, 0.26)'],
+    ['Dresseur Pokémon', 7500, '#5BE08F', 'rgba(47, 211, 122, 0.26)'],
+    ['Maître Pokémon', 15000, '#7CF5FF', 'rgba(124, 245, 255, 0.26)'],
+    ['Grand maître Pokémon', 30000, '#FF6A4D', 'rgba(227, 53, 13, 0.30)']
   ];
   proto.tiers = function () {
     return PF_GRADES.map(([name, min, color, glow], i) => ({ name: name, min: min, color: color, glow: glow, sym: 'img/grades/grade-' + (i + 1) + '.svg' }));

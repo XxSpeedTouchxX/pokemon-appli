@@ -1,8 +1,8 @@
 // Logos des 6 grades (2026-10-14, demande du porteur) : emblèmes inspirés des rangs des jeux compétitifs (ailes
 // métalliques qui se déploient à chaque grade, bannière sombre derrière), adaptés au style Dropicards : contour noir
-// épais, jaune de la marque, et une Poké Ball dessinée au centre (choix du porteur). Couronne sur Légende.
-// Recrue (marron), Chasseur (bronze), Collectionneur (argent), Dresseur Pokémon (or), Maître Pokémon (rouge),
-// Grand maître Pokémon (or et cristal, couronne).
+// épais, jaune de la marque, et une Poké Ball dessinée au centre (choix du porteur). Couronne sur le dernier grade.
+// Recrue (bronze), Chasseur (argent), Collectionneur (or), Dresseur Pokémon (or et vert), Maître Pokémon (or et
+// cristal), Grand maître Pokémon (rouge, couronne).
 // Dessin original (aucun emblème de jeu repris tel quel). Sortie : web/img/grades/grade-1.svg … grade-6.svg.
 // Usage : node tools/brand/make_grades.mjs
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -52,32 +52,32 @@ const crest = (fill, depth) => `<path d="M${CX - 27} ${CY - 8} L${CX - 12} ${CY 
 const sparkle = (x, y, s, c = '#FFFFFF') => `<path d="M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s} Z" fill="${c}" stroke="${INK}" stroke-width="1"/>`;
 
 const G = [];
-// Couleurs et noms du porteur (2026-10-14) : 6 grades. Les plumes suivent la progression (1 à 5 par aile), le dernier
-// garde l'emblème de « Légende » (6 plumes, couronne).
-// 1. Recrue : marron foncé, une plume par aile.
-G.push(svg('Grade Recrue', grad('m', [[0, '#B8875E'], [0.5, '#6B4226'], [1, '#2E1709']]) + grad('t', [[0, '#8B5A35'], [1, '#4A2812']]),
+// Ordre et couleurs du porteur (2026-10-14, 3ᵉ version) : bronze (1 pointe par aile), argent (2), or (3), or et vert (4),
+// or et cristal (6, sans couronne), rouge Pokémon (5) avec la couronne.
+// 1. Recrue : bronze brillant, une plume par aile.
+G.push(svg('Grade Recrue', grad('m', [[0, '#FFE2BC'], [0.4, '#F0A055'], [0.75, '#C06A24'], [1, '#7A3A0E']]) + grad('t', [[0, '#FFC48A'], [1, '#C8702C']]),
   `${banner}${wings([[16, 36, 10, 5]], 'm')}${chin(8, 7, 'url(#m)')}${crest('url(#m)', 0)}${ball('url(#t)')}`));
-// 2. Chasseur : bronze brillant, deux plumes par aile, pointe en haut.
-G.push(svg('Grade Chasseur', grad('m', [[0, '#FFE2BC'], [0.4, '#F0A055'], [0.75, '#C06A24'], [1, '#7A3A0E']]) + grad('t', [[0, '#FFC48A'], [1, '#C8702C']]),
-  `${banner}${spike(16, 6, 'url(#m)')}${wings([[30, 38, 10, 6], [6, 40, 10, 3]], 'm')}${chin(10, 7, 'url(#m)')}${crest('url(#m)', 3)}${ball('url(#t)')}
-${sparkle(30, 28, 3)}`));
-// 3. Collectionneur : argent, trois plumes par aile.
-G.push(svg('Grade Collectionneur', grad('m', [[0, '#FFFFFF'], [0.45, '#C3CCDA'], [1, '#5E6B80']]) + grad('t', [[0, '#E8EDF5'], [1, '#8C98AC']]),
+// 2. Chasseur : argent, deux plumes par aile, pointe en haut.
+G.push(svg('Grade Chasseur', grad('m', [[0, '#FFFFFF'], [0.45, '#C3CCDA'], [1, '#5E6B80']]) + grad('t', [[0, '#E8EDF5'], [1, '#8C98AC']]),
+  `${banner}${spike(16, 6, 'url(#m)')}${wings([[30, 38, 10, 6], [6, 40, 10, 3]], 'm')}${chin(10, 7, 'url(#m)')}${crest('url(#m)', 3)}${ball('url(#t)')}`));
+// 3. Collectionneur : or, trois plumes par aile.
+G.push(svg('Grade Collectionneur', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
   `${banner}${spike(20, 7, 'url(#m)')}${wings([[46, 36, 9, 7], [24, 43, 10, 5], [2, 42, 10, 3]], 'm')}${chin(13, 8, 'url(#m)')}${crest('url(#m)', 6)}${ball('url(#t)')}
 ${sparkle(26, 26, 4)}${sparkle(95, 30, 3)}`));
-// 4. Dresseur Pokémon : or, quatre plumes par aile, plume intérieure or clair.
-G.push(svg('Grade Dresseur Pokémon', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('i', [[0, '#FFFBE0'], [1, '#FFD60A']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
-  `${banner}${spike(24, 7, 'url(#i)')}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${chin(15, 8, 'url(#m)')}${crest('url(#i)', 9)}${ball('url(#t)')}
-${sparkle(22, 22, 5)}${sparkle(99, 26, 4)}${sparkle(98, 92, 3)}`));
-// 5. Maître Pokémon : rouge Pokémon, cinq plumes par aile, plume intérieure blanche rosée.
-G.push(svg('Grade Maître Pokémon', grad('m', [[0, '#FF9A8A'], [0.45, '#E3350D'], [1, '#7E1003']]) + grad('i', [[0, '#FFFFFF'], [1, '#FFB4A6']]) + grad('t', [[0, '#FF5A3C'], [1, '#B81E08']]),
-  `${banner}${spike(26, 8, 'url(#i)')}${wings([[66, 28, 7, 8], [50, 36, 8, 7], [32, 43, 9, 6], [12, 46, 10, 4], [-10, 38, 9, 2]], 'm', 'i')}${chin(16, 8, 'url(#m)')}${crest('url(#i)', 11)}${ball('url(#t)')}
-${sparkle(20, 22, 5)}${sparkle(100, 24, 5)}${sparkle(98, 92, 3)}${sparkle(22, 94, 3)}`));
-// 6. Grand maître Pokémon : l'emblème « Légende » inchangé (or et cristal, six plumes, couronne).
-G.push(svg('Grade Grand maître Pokémon', grad('m', [[0, '#FFF6C2'], [0.4, '#FFD60A'], [1, '#A86E00']]) + grad('i', [[0, '#D8FDFF'], [0.5, '#5EE0CF'], [1, '#2F6BFF']]) + grad('t', [[0, '#7CF5FF'], [1, '#2F6BFF']]) + grad('c', [[0, '#FFF1A6'], [1, '#F2A900']]),
-  `${banner}${wings([[74, 24, 7, 7], [60, 32, 8, 7], [44, 40, 9, 6], [26, 45, 10, 5], [6, 45, 10, 3], [-14, 35, 9, 1]], 'm', 'i')}${chin(18, 9, 'url(#i)')}${crest('url(#i)', 12)}${ball('url(#t)')}
+// 4. Dresseur Pokémon : or avec des notes de vert émeraude (plume intérieure, plaque, pointe, gemmes), quatre plumes.
+G.push(svg('Grade Dresseur Pokémon', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('i', [[0, '#C8FFD9'], [0.5, '#2FD37A'], [1, '#0B7A44']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
+  `${banner}${spike(24, 7, 'url(#i)')}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${chin(15, 8, 'url(#i)')}${crest('url(#i)', 9)}${ball('url(#t)')}
+<circle cx="31" cy="54" r="2.6" fill="#2FD37A" stroke="${INK}" stroke-width="1.2"/><circle cx="89" cy="54" r="2.6" fill="#2FD37A" stroke="${INK}" stroke-width="1.2"/>
+${sparkle(22, 22, 5, '#C8FFD9')}${sparkle(99, 26, 4)}${sparkle(98, 92, 3, '#C8FFD9')}`));
+// 5. Maître Pokémon : or et cristal, six plumes par aile (ancien emblème à couronne, sans la couronne).
+G.push(svg('Grade Maître Pokémon', grad('m', [[0, '#FFF6C2'], [0.4, '#FFD60A'], [1, '#A86E00']]) + grad('i', [[0, '#D8FDFF'], [0.5, '#5EE0CF'], [1, '#2F6BFF']]) + grad('t', [[0, '#7CF5FF'], [1, '#2F6BFF']]),
+  `${banner}${spike(26, 8, 'url(#i)')}${wings([[74, 24, 7, 7], [60, 32, 8, 7], [44, 40, 9, 6], [26, 45, 10, 5], [6, 45, 10, 3], [-14, 35, 9, 1]], 'm', 'i')}${chin(18, 9, 'url(#i)')}${crest('url(#i)', 12)}${ball('url(#t)')}
+${sparkle(18, 20, 5)}${sparkle(103, 22, 5)}${sparkle(20, 96, 3)}${sparkle(100, 94, 3)}`));
+// 6. Grand maître Pokémon : rouge Pokémon, cinq plumes par aile, plume intérieure blanche rosée, couronne.
+G.push(svg('Grade Grand maître Pokémon', grad('m', [[0, '#FF9A8A'], [0.45, '#E3350D'], [1, '#7E1003']]) + grad('i', [[0, '#FFFFFF'], [1, '#FFB4A6']]) + grad('t', [[0, '#FF5A3C'], [1, '#B81E08']]) + grad('c', [[0, '#FFF1A6'], [1, '#F2A900']]),
+  `${banner}${wings([[66, 28, 7, 8], [50, 36, 8, 7], [32, 43, 9, 6], [12, 46, 10, 4], [-10, 38, 9, 2]], 'm', 'i')}${chin(16, 8, 'url(#m)')}${crest('url(#i)', 11)}${ball('url(#t)')}
 <path d="M42 44 L43 24 L51 34 L60 18 L69 34 L77 24 L78 44 Z" fill="url(#c)" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
 <circle cx="60" cy="33" r="3.2" fill="#FF7AD9" stroke="${INK}" stroke-width="1.4"/><circle cx="49" cy="39" r="2" fill="#5EE0CF" stroke="${INK}" stroke-width="1.2"/><circle cx="71" cy="39" r="2" fill="#5EE0CF" stroke="${INK}" stroke-width="1.2"/>
-${sparkle(18, 20, 5)}${sparkle(103, 22, 5)}${sparkle(20, 96, 3)}${sparkle(100, 94, 3)}`));
+${sparkle(20, 22, 5)}${sparkle(100, 24, 5)}${sparkle(98, 92, 3)}${sparkle(22, 94, 3)}`));
 G.forEach((s, i) => writeFileSync(OUT + 'grade-' + (i + 1) + '.svg', s.replace(/id="(\w)"/g, 'id="$1' + (i + 1) + '"').replace(/url\(#(\w)\)/g, 'url(#$1' + (i + 1) + ')')));
 console.log('Grades : ' + G.length + ' logos dans web/img/grades/');
