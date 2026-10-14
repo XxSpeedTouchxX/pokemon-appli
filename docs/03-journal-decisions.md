@@ -19,13 +19,15 @@
   - premier écran sans pastille de cote, avec Dracaufeu 1re édition, Lugia réimpression 30 ans, Mew ALT 30 ans.
 - **Grades (noms et logos proposés, à valider) :**
 
-  | Grade | Valeur de la collection | Logo |
+  | Grade | Valeur de la collection | Emblème |
   |---|---|---|
-  | Recrue | 0 à 500 € | médaille bronze, une carte |
-  | Chasseur | 500 à 2 500 € | hexagone argent, un booster |
-  | Collectionneur | 2 500 à 7 500 € | écu or, trois cartes |
-  | Maître | 7 500 à 15 000 € | étoile holo, carte étoilée |
-  | Légende | 15 000 € et plus | badge arc-en-ciel, couronne et gemme éclair |
+  | Recrue | 0 à 500 € | bronze, 2 plumes par aile |
+  | Chasseur | 500 à 2 500 € | argent, 3 plumes, pointe en haut |
+  | Collectionneur | 2 500 à 7 500 € | or, 4 plumes, étincelles |
+  | Maître | 7 500 à 15 000 € | violet holo, 5 plumes, cristal |
+  | Légende | 15 000 € et plus | or et cristal, 6 plumes, couronne |
+
+  **Style des emblèmes (demande du porteur, même jour) :** inspiré des rangs de League of Legends (ailes métalliques qui se déploient à chaque grade, plaque centrale en V, bannière derrière), adapté au style Dropicards (contour noir, jaune de la marque), avec une **Poké Ball dessinée au centre, choix du porteur** (le logo des PK l'avait écartée le 2026-10-08 par prudence sur les droits). Dessin original, sans reprise des emblèmes de LoL.
 
   Ils remplacent les paliers « Commune » à « Hyper rare » (0, 500, 1 500, 3 000, 7 500 €). Logos : `web/img/grades/`, générés par `tools/brand/make_grades.mjs`, sans élément officiel Pokémon.
 - **Point d'attention :** l'inscription n'existe pas. L'adresse e-mail est saisie et gardée sur l'appareil en attendant les comptes. La photo de profil est réduite à 256 px sur le téléphone, jamais envoyée.

@@ -1,65 +1,75 @@
-// Logos des 5 grades (2026-10-14, demande du porteur) : la valeur de la collection fait évoluer le badge.
-// Recrue (bronze, une carte), Chasseur (argent, un booster), Collectionneur (or, trois cartes en éventail),
-// Maître (holo, carte étoilée), Légende (arc-en-ciel, couronne et gemme éclair des PK). Contour noir et jaune de la
-// marque, sans aucun logo officiel Pokémon. Sortie : web/img/grades/grade-1.svg … grade-5.svg (viewBox 0 0 96 96).
+// Logos des 5 grades (2026-10-14, demande du porteur) : emblèmes inspirés des rangs des jeux compétitifs (ailes
+// métalliques qui se déploient à chaque grade, bannière sombre derrière), adaptés au style Dropicards : contour noir
+// épais, jaune de la marque, et une Poké Ball dessinée au centre (choix du porteur). Couronne sur Légende.
+// Recrue (bronze), Chasseur (argent), Collectionneur (or), Maître (holo violet), Légende (or et cristal, couronne).
+// Dessin original (aucun emblème de jeu repris tel quel). Sortie : web/img/grades/grade-1.svg … grade-5.svg.
 // Usage : node tools/brand/make_grades.mjs
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 const OUT = fileURLToPath(new URL('../../web/img/grades/', import.meta.url));
 mkdirSync(OUT, { recursive: true });
 const INK = '#111111', Y = '#FFD60A';
-const grad = (id, stops, x2 = 0, y2 = 1) => `<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</linearGradient>`;
-// Carte stylisée (dos jaune de la marque, cadre noir) centrée en (cx, cy), inclinée de rot degrés.
-const card = (cx, cy, w, h, rot, fill = Y, star = false) => `<g transform="translate(${cx} ${cy}) rotate(${rot})">
-<rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="${w * 0.12}" fill="${fill}" stroke="${INK}" stroke-width="3"/>
-<rect x="${-w / 2 + 4}" y="${-h / 2 + 4}" width="${w - 8}" height="${h * 0.48}" rx="2" fill="#FFF6C2" stroke="${INK}" stroke-width="1.6"/>
-${star ? `<path d="${starPath(0, -h * 0.02 - h * 0.25 + h * 0.24, w * 0.2, w * 0.085)}" fill="${INK}"/>` : ''}
-<rect x="${-w / 2 + 6}" y="${h * 0.12}" width="${w - 12}" height="2.4" rx="1.2" fill="${INK}"/>
-<rect x="${-w / 2 + 6}" y="${h * 0.24}" width="${(w - 12) * 0.6}" height="2.4" rx="1.2" fill="${INK}"/>
-</g>`;
-function starPath(cx, cy, R, r, n = 5) {
-  let d = '';
-  for (let i = 0; i < n * 2; i++) { const a = -Math.PI / 2 + i * Math.PI / n, rr = i % 2 ? r : R; d += (i ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(2) + ' ' + (cy + rr * Math.sin(a)).toFixed(2); }
-  return d + 'Z';
+const CX = 60, CY = 66;
+const f = n => n.toFixed(1);
+const grad = (id, stops, x1 = 0, y1 = 0, x2 = 0, y2 = 1) => `<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</linearGradient>`;
+// Une plume (lame courbe) de l'aile gauche : de la racine près de la balle jusqu'à la pointe (angle en degrés, 0 = vers
+// la gauche, positif = vers le haut), longueur L, largeur à la racine w, courbure k.
+function blade(angle, L, w, k, rootR = 14) {
+  const a = (180 - angle) * Math.PI / 180;
+  const ux = Math.cos(a), uy = -Math.sin(a), nx = -uy, ny = ux; // direction et normale
+  const rx = CX + ux * rootR, ry = CY + uy * rootR;
+  const tx = CX + ux * (rootR + L), ty = CY + uy * (rootR + L) - k * 1.15;
+  const p1x = rx + nx * w, p1y = ry + ny * w, p2x = rx - nx * w, p2y = ry - ny * w;
+  const c1x = rx + ux * L * 0.55 + nx * (w * 0.9) , c1y = ry + uy * L * 0.55 + ny * (w * 0.9) - k;
+  const c2x = rx + ux * L * 0.6 - nx * (w * 0.2), c2y = ry + uy * L * 0.6 - ny * (w * 0.2) - k * 0.4;
+  return `M${f(p1x)} ${f(p1y)} Q${f(c1x)} ${f(c1y)} ${f(tx)} ${f(ty)} Q${f(c2x)} ${f(c2y)} ${f(p2x)} ${f(p2y)} Z`;
 }
-const bolt = (cx, cy, s) => `<path transform="translate(${cx} ${cy}) scale(${s})" d="M2 -12 L-7 2 L-1 2 L-3 12 L7 -3 L1 -3 Z" fill="${Y}" stroke="${INK}" stroke-width="${2.2 / s}" stroke-linejoin="round"/>`;
-const hex = (cx, cy, R) => { let d = ''; for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + i * Math.PI / 3; d += (i ? 'L' : 'M') + (cx + R * Math.cos(a)).toFixed(2) + ' ' + (cy + R * Math.sin(a)).toFixed(2); } return d + 'Z'; };
-const svg = (title, defs, body) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96"><title>${title}</title><defs>${defs}</defs>${body}</svg>\n`;
-const G = [];
-// 1. Recrue : médaille bronze, une carte.
-G.push(svg('Grade Recrue', grad('b', [[0, '#F2B27A'], [0.55, '#C77B3F'], [1, '#8A4E22']]),
-  `<circle cx="48" cy="50" r="40" fill="url(#b)" stroke="${INK}" stroke-width="4"/>
-<circle cx="48" cy="50" r="31" fill="none" stroke="#FFE0B8" stroke-opacity="0.55" stroke-width="2.5" stroke-dasharray="4 5"/>
-${card(48, 50, 30, 42, -8)}`));
-// 2. Chasseur : hexagone argent, un booster.
-const booster = `<g transform="translate(48 50) rotate(6)">
-<path d="M-17 -24 L17 -24 L15 -18 L17 -12 L17 24 L-17 24 L-17 -12 L-15 -18 Z" fill="${Y}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-<path d="M-17 -18 L17 -18" stroke="${INK}" stroke-width="2" stroke-dasharray="3 2.5"/>
-${bolt(0, 4, 0.95)}
+const mirror = d => d.replace(/([MQLZ])?\s?(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g, (m, c, x, y) => (c || ' ') + f(2 * CX - Number(x)) + ' ' + y);
+// Poké Ball au style Dropicards : moitié haute aux couleurs du grade, moitié basse blanche, bande et bouton noirs.
+const ball = (top, r = 16) => `<g>
+<circle cx="${CX}" cy="${CY}" r="${r}" fill="#FFFFFF" stroke="${INK}" stroke-width="3.2"/>
+<path d="M${CX - r} ${CY} A${r} ${r} 0 0 1 ${CX + r} ${CY} Z" fill="${top}" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
+<path d="M${CX - r + 1} ${CY} H${CX + r - 1}" stroke="${INK}" stroke-width="4"/>
+<circle cx="${CX}" cy="${CY}" r="${r * 0.36}" fill="#FFFFFF" stroke="${INK}" stroke-width="3"/>
+<circle cx="${CX}" cy="${CY}" r="${r * 0.14}" fill="${Y}"/>
+<path d="M${CX - r * 0.62} ${CY - r * 0.55} Q${CX - r * 0.35} ${CY - r * 0.85} ${CX} ${CY - r * 0.88}" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
 </g>`;
-G.push(svg('Grade Chasseur', grad('s', [[0, '#FFFFFF'], [0.5, '#C9D1DE'], [1, '#7E8BA0']]),
-  `<path d="${hex(48, 50, 43)}" fill="url(#s)" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
-<path d="${hex(48, 50, 34)}" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2"/>
-${booster}`));
-// 3. Collectionneur : écu or, trois cartes en éventail.
-G.push(svg('Grade Collectionneur', grad('g', [[0, '#FFF1A6'], [0.5, '#FFC93C'], [1, '#C98A00']]),
-  `<path d="M48 5 L84 17 L84 47 C84 70 68 84 48 92 C28 84 12 70 12 47 L12 17 Z" fill="url(#g)" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
-<path d="M48 13 L77 22.5 L77 47 C77 65 64 77 48 84" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="2.5"/>
-${card(34, 54, 22, 32, -20)}${card(62, 54, 22, 32, 20)}${card(48, 49, 24, 34, 0, Y, true)}`));
-// 4. Maître : étoile holo, carte étoilée.
-G.push(svg('Grade Maître', grad('h', [[0, '#7CF5FF'], [0.35, '#A88BFF'], [0.7, '#FF7AD9'], [1, '#FFD60A']], 1, 1),
-  `<path d="${starPath(48, 50, 46, 30, 8)}" fill="url(#h)" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
-<circle cx="48" cy="50" r="25" fill="#1B1F3A" stroke="${INK}" stroke-width="3"/>
-${card(48, 50, 26, 36, -6, Y, true)}`));
-// 5. Légende : arc-en-ciel, rayons, couronne et gemme éclair.
-let rays = '';
-for (let i = 0; i < 12; i++) { const a = i * 30; rays += `<path transform="rotate(${a} 48 52)" d="M45.5 9 L50.5 9 L48 21 Z" fill="${Y}" stroke="${INK}" stroke-width="1.5" stroke-linejoin="round"/>`; }
-G.push(svg('Grade Légende', grad('r', [[0, '#FF6B6B'], [0.25, '#FFD60A'], [0.5, '#5EE0CF'], [0.75, '#7C8CFF'], [1, '#FF7AD9']], 1, 1),
-  `${rays}
-<circle cx="48" cy="52" r="32" fill="url(#r)" stroke="${INK}" stroke-width="4"/>
-<path d="${hex(48, 54, 20)}" fill="#1B1F3A" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-${bolt(48, 54, 1.15)}
-<path d="M30 24 L36 8 L42 18 L48 4 L54 18 L60 8 L66 24 Z" fill="${Y}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-<circle cx="48" cy="15" r="2.6" fill="#FF7AD9" stroke="${INK}" stroke-width="1.2"/>`));
-G.forEach((s, i) => writeFileSync(OUT + 'grade-' + (i + 1) + '.svg', s));
+const banner = `<path d="M36 10 H84 V110 L60 97 L36 110 Z" fill="#1B2233" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M40 14 H80 V103 L60 92 L40 103 Z" fill="none" stroke="${Y}" stroke-opacity="0.55" stroke-width="1.6"/>`;
+const svg = (title, defs, body, n) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><title>${title}</title><defs>${defs}</defs>${body}</svg>\n`;
+// Ailes : liste de plumes [angle, longueur, largeur, courbure], dessinées de l'arrière vers l'avant, puis miroir.
+const wings = (feathers, fillId, innerId) => feathers.map(([a, L, w, k], i) => {
+  const d = blade(a, L, w, k);
+  const fill = i === feathers.length - 1 && innerId ? `url(#${innerId})` : `url(#${fillId})`;
+  return `<path d="${d}" fill="${fill}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/><path d="${mirror(d)}" fill="${fill}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>`;
+}).join('\n');
+const spike = (h, w, fill, y0 = CY - 13) => `<path d="M${CX - w} ${y0} L${CX} ${y0 - h} L${CX + w} ${y0} Z" fill="${fill}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>`;
+const chin = (h, w, fill) => `<path d="M${CX - w} ${CY + 12} L${CX} ${CY + 12 + h} L${CX + w} ${CY + 12} Z" fill="${fill}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>`;
+// Plaque centrale en V derrière la balle (le « cimier » des emblèmes), biseau clair en haut.
+const crest = (fill, depth) => `<path d="M${CX - 27} ${CY - 8} L${CX - 12} ${CY - 19} L${CX + 12} ${CY - 19} L${CX + 27} ${CY - 8} L${CX} ${CY + 20 + depth} Z" fill="${fill}" stroke="${INK}" stroke-width="2.8" stroke-linejoin="round"/>
+<path d="M${CX - 21} ${CY - 8} L${CX - 10} ${CY - 15} L${CX + 10} ${CY - 15} L${CX + 21} ${CY - 8}" fill="none" stroke="#FFFFFF" stroke-opacity="0.65" stroke-width="2" stroke-linejoin="round"/>`;
+const sparkle = (x, y, s, c = '#FFFFFF') => `<path d="M${x} ${y - s} Q${x} ${y} ${x + s} ${y} Q${x} ${y} ${x} ${y + s} Q${x} ${y} ${x - s} ${y} Q${x} ${y} ${x} ${y - s} Z" fill="${c}" stroke="${INK}" stroke-width="1"/>`;
+
+const G = [];
+// 1. Recrue : bronze, deux plumes courtes.
+G.push(svg('Grade Recrue', grad('m', [[0, '#F6C08A'], [0.5, '#C77B3F'], [1, '#6E3712']]) + grad('t', [[0, '#E89A5C'], [1, '#9C5422']]),
+  `${banner}${wings([[34, 30, 10, 7], [10, 36, 10, 4]], 'm')}${chin(8, 7, 'url(#m)')}${crest('url(#m)', 0)}${ball('url(#t)')}`));
+// 2. Chasseur : argent, trois plumes, pointe en haut.
+G.push(svg('Grade Chasseur', grad('m', [[0, '#FFFFFF'], [0.45, '#C3CCDA'], [1, '#5E6B80']]) + grad('t', [[0, '#E8EDF5'], [1, '#8C98AC']]),
+  `${banner}${spike(16, 6, 'url(#m)')}${wings([[48, 30, 9, 8], [26, 39, 10, 6], [4, 40, 10, 3]], 'm')}${chin(10, 7, 'url(#m)')}${crest('url(#m)', 3)}${ball('url(#t)')}`));
+// 3. Collectionneur : or, quatre plumes, pointe et menton plus longs.
+G.push(svg('Grade Collectionneur', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
+  `${banner}${spike(20, 7, 'url(#m)')}${wings([[60, 28, 8, 8], [42, 37, 9, 7], [22, 43, 10, 5], [0, 42, 10, 3]], 'm')}${chin(13, 8, 'url(#m)')}${crest('url(#m)', 6)}${ball('url(#t)')}
+${sparkle(26, 26, 4)}${sparkle(95, 30, 3)}`));
+// 4. Maître : holo violet et cyan, cinq plumes, plume intérieure cristal.
+G.push(svg('Grade Maître', grad('m', [[0, '#F0C8FF'], [0.45, '#A86BFF'], [1, '#4A1C9C']]) + grad('i', [[0, '#C9FBFF'], [1, '#3FA8FF']]) + grad('t', [[0, '#C79BFF'], [1, '#7B3FE0']]),
+  `${banner}${spike(24, 7, 'url(#i)')}${wings([[68, 26, 7, 8], [52, 35, 8, 8], [34, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${chin(15, 8, 'url(#m)')}${crest('url(#i)', 9)}${ball('url(#t)')}
+${sparkle(22, 22, 5)}${sparkle(99, 26, 4)}${sparkle(98, 92, 3)}`));
+// 5. Légende : or et cristal, six plumes, couronne jaune au-dessus de la balle.
+G.push(svg('Grade Légende', grad('m', [[0, '#FFF6C2'], [0.4, '#FFD60A'], [1, '#A86E00']]) + grad('i', [[0, '#D8FDFF'], [0.5, '#5EE0CF'], [1, '#2F6BFF']]) + grad('t', [[0, '#7CF5FF'], [1, '#2F6BFF']]) + grad('c', [[0, '#FFF1A6'], [1, '#F2A900']]),
+  `${banner}${wings([[74, 24, 7, 7], [60, 32, 8, 7], [44, 40, 9, 6], [26, 45, 10, 5], [6, 45, 10, 3], [-14, 35, 9, 1]], 'm', 'i')}${chin(18, 9, 'url(#i)')}${crest('url(#i)', 12)}${ball('url(#t)')}
+<path d="M42 44 L43 24 L51 34 L60 18 L69 34 L77 24 L78 44 Z" fill="url(#c)" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="60" cy="33" r="3.2" fill="#FF7AD9" stroke="${INK}" stroke-width="1.4"/><circle cx="49" cy="39" r="2" fill="#5EE0CF" stroke="${INK}" stroke-width="1.2"/><circle cx="71" cy="39" r="2" fill="#5EE0CF" stroke="${INK}" stroke-width="1.2"/>
+${sparkle(18, 20, 5)}${sparkle(103, 22, 5)}${sparkle(20, 96, 3)}${sparkle(100, 94, 3)}`));
+G.forEach((s, i) => writeFileSync(OUT + 'grade-' + (i + 1) + '.svg', s.replace(/id="(\w)"/g, 'id="$1' + (i + 1) + '"').replace(/url\(#(\w)\)/g, 'url(#$1' + (i + 1) + ')')));
 console.log('Grades : ' + G.length + ' logos dans web/img/grades/');

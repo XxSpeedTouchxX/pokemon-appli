@@ -1,21 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96"><title>Grade Collectionneur</title><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF1A6"/><stop offset="0.5" stop-color="#FFC93C"/><stop offset="1" stop-color="#C98A00"/></linearGradient></defs><path d="M48 5 L84 17 L84 47 C84 70 68 84 48 92 C28 84 12 70 12 47 L12 17 Z" fill="url(#g)" stroke="#111111" stroke-width="4" stroke-linejoin="round"/>
-<path d="M48 13 L77 22.5 L77 47 C77 65 64 77 48 84" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="2.5"/>
-<g transform="translate(34 54) rotate(-20)">
-<rect x="-11" y="-16" width="22" height="32" rx="2.6399999999999997" fill="#FFD60A" stroke="#111111" stroke-width="3"/>
-<rect x="-7" y="-12" width="14" height="15.36" rx="2" fill="#FFF6C2" stroke="#111111" stroke-width="1.6"/>
-
-<rect x="-5" y="3.84" width="10" height="2.4" rx="1.2" fill="#111111"/>
-<rect x="-5" y="7.68" width="6" height="2.4" rx="1.2" fill="#111111"/>
-</g><g transform="translate(62 54) rotate(20)">
-<rect x="-11" y="-16" width="22" height="32" rx="2.6399999999999997" fill="#FFD60A" stroke="#111111" stroke-width="3"/>
-<rect x="-7" y="-12" width="14" height="15.36" rx="2" fill="#FFF6C2" stroke="#111111" stroke-width="1.6"/>
-
-<rect x="-5" y="3.84" width="10" height="2.4" rx="1.2" fill="#111111"/>
-<rect x="-5" y="7.68" width="6" height="2.4" rx="1.2" fill="#111111"/>
-</g><g transform="translate(48 49) rotate(0)">
-<rect x="-12" y="-17" width="24" height="34" rx="2.88" fill="#FFD60A" stroke="#111111" stroke-width="3"/>
-<rect x="-8" y="-13" width="16" height="16.32" rx="2" fill="#FFF6C2" stroke="#111111" stroke-width="1.6"/>
-<path d="M0.00 -5.82L1.20 -2.67L4.57 -2.50L1.94 -0.39L2.82 2.86L0.00 1.02L-2.82 2.86L-1.94 -0.39L-4.57 -2.50L-1.20 -2.67Z" fill="#111111"/>
-<rect x="-6" y="4.08" width="12" height="2.4" rx="1.2" fill="#111111"/>
-<rect x="-6" y="8.16" width="7.199999999999999" height="2.4" rx="1.2" fill="#111111"/>
-</g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><title>Grade Collectionneur</title><defs><linearGradient id="m3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6C2"/><stop offset="0.45" stop-color="#FFC93C"/><stop offset="1" stop-color="#9C6500"/></linearGradient><linearGradient id="t3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE46B"/><stop offset="1" stop-color="#F2A900"/></linearGradient></defs><path d="M36 10 H84 V110 L60 97 L36 110 Z" fill="#1B2233" stroke="#111111" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M40 14 H80 V103 L60 92 L40 103 Z" fill="none" stroke="#FFD60A" stroke-opacity="0.55" stroke-width="1.6"/><path d="M53 53 L60 33 L67 53 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/><path d="M59.9 49.9 Q51.5 28.9 39.0 20.4 Q43.2 36.9 46.1 57.9 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/><path d="M60.1 49.9 Q68.5 28.9 81.0 20.4 Q76.8 36.9 73.9 57.9 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M55.6 49.9 Q39.9 30.0 22.1 23.8 Q31.9 40.3 43.6 63.3 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/><path d="M64.4 49.9 Q80.1 30.0 97.9 23.8 Q88.1 40.3 76.4 63.3 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M50.8 51.5 Q28.5 38.6 7.2 38.9 Q22.3 50.9 43.3 70.0 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/><path d="M69.2 51.5 Q91.5 38.6 112.8 38.9 Q97.7 50.9 76.7 70.0 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M46.0 56.0 Q22.9 54.0 4.0 62.5 Q20.8 66.8 46.0 76.0 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/><path d="M74.0 56.0 Q97.1 54.0 116.0 62.5 Q99.2 66.8 74.0 76.0 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/><path d="M52 78 L60 91 L68 78 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.6" stroke-linejoin="round"/><path d="M33 58 L48 47 L72 47 L87 58 L60 92 Z" fill="url(#m3)" stroke="#111111" stroke-width="2.8" stroke-linejoin="round"/>
+<path d="M39 58 L50 51 L70 51 L81 58" fill="none" stroke="#FFFFFF" stroke-opacity="0.65" stroke-width="2" stroke-linejoin="round"/><g>
+<circle cx="60" cy="66" r="16" fill="#FFFFFF" stroke="#111111" stroke-width="3.2"/>
+<path d="M44 66 A16 16 0 0 1 76 66 Z" fill="url(#t3)" stroke="#111111" stroke-width="3.2" stroke-linejoin="round"/>
+<path d="M45 66 H75" stroke="#111111" stroke-width="4"/>
+<circle cx="60" cy="66" r="5.76" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+<circle cx="60" cy="66" r="2.24" fill="#FFD60A"/>
+<path d="M50.08 57.2 Q54.4 52.4 60 51.92" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
+</g>
+<path d="M26 22 Q26 26 30 26 Q26 26 26 30 Q26 26 22 26 Q26 26 26 22 Z" fill="#FFFFFF" stroke="#111111" stroke-width="1"/><path d="M95 27 Q95 30 98 30 Q95 30 95 33 Q95 30 92 30 Q95 30 95 27 Z" fill="#FFFFFF" stroke="#111111" stroke-width="1"/></svg>
