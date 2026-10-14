@@ -9,5 +9,4 @@
 <circle cx="60" cy="66" r="5.76" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
 <circle cx="60" cy="66" r="2.24" fill="#FFD60A"/>
 <path d="M50.08 57.2 Q54.4 52.4 60 51.92" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
-</g>
-<path d="M26 22 Q26 26 30 26 Q26 26 26 30 Q26 26 22 26 Q26 26 26 22 Z" fill="#FFFFFF" stroke="#111111" stroke-width="1"/><path d="M95 27 Q95 30 98 30 Q95 30 95 33 Q95 30 92 30 Q95 30 95 27 Z" fill="#FFFFFF" stroke="#111111" stroke-width="1"/></svg>
+</g></svg>

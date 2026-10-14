@@ -23,9 +23,9 @@
   |---|---|---|
   | Recrue | 0 à 500 € | bronze brillant, 1 |
   | Chasseur | 500 à 2 500 € | argent, 2 |
-  | Collectionneur | 2 500 à 7 500 € | or, 3 |
-  | Dresseur Pokémon | 7 500 à 15 000 € | or avec notes de vert, 4 |
-  | Maître Pokémon | 15 000 à 30 000 € | or et cristal, 6, sans couronne |
+  | Collectionneur | 2 500 à 7 500 € | or, 3, sans éclats |
+  | Dresseur Pokémon | 7 500 à 15 000 € | or avec notes de vert, 4, deux éclats |
+  | Maître Pokémon | 15 000 à 30 000 € | or et cristal, 5, pointe bleue, trois éclats |
   | Grand maître Pokémon | 30 000 € et plus | rouge Pokémon, 5, couronne |
 
   Noms, couleurs et ordre choisis par le porteur (même jour, 3ᵉ version, 6 grades au lieu de 5). **Seuil de 30 000 € proposé par défaut, à confirmer** : le porteur a donné 5 tranches pour 6 grades.
