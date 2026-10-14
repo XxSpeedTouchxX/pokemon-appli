@@ -65,7 +65,7 @@ G.push(svg('Grade Collectionneur', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'],
   `${banner}${spike(20, 7, 'url(#m)')}${wings([[46, 36, 9, 7], [24, 43, 10, 5], [2, 42, 10, 3]], 'm')}${chin(13, 8, 'url(#m)')}${crest('url(#m)', 6)}${ball('url(#t)')}`));
 // 4. Dresseur Pokémon : or avec des notes de vert émeraude (pointe, plume intérieure, plaque, menton), quatre plumes, deux éclats.
 G.push(svg('Grade Dresseur Pokémon', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('i', [[0, '#C8FFD9'], [0.5, '#2FD37A'], [1, '#0B7A44']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
-  `${banner}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${spike(26, 7, 'url(#i)')}${chin(15, 8, 'url(#i)')}${crest('url(#i)', 9)}${ball('url(#t)')}
+  `${banner}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${spike(22, 6.5, 'url(#i)')}${chin(15, 8, 'url(#i)')}${crest('url(#i)', 9)}${ball('url(#t)')}
 ${sparkle(22, 22, 5, '#C8FFD9')}${sparkle(98, 22, 5, '#C8FFD9')}`));
 // 5. Maître Pokémon : or et cristal, cinq plumes par aile (la plus haute, qui cachait la pointe bleue, est retirée),
 // trois éclats, sans couronne.
