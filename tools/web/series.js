@@ -30,10 +30,25 @@
     return Object.values(out);
   }
 
+  // Série ouverte (2026-10-14, vidéo du porteur) : son en-tête vient se placer juste sous la barre des logos, et ses
+  // extensions se lisent en descendant. Sans ce recalage, fermer la série du dessus faisait remonter le contenu et
+  // l'écran tombait au milieu (ou à la fin) des extensions de la série touchée.
+  const serScroll = name => {
+    if (typeof window === 'undefined') return;
+    const go = () => {
+      const el = document.getElementById(serKey(name)), main = document.querySelector('#app main');
+      if (!el || !main) return;
+      const bar = main.querySelector('nav[aria-label="Aller à une série"]');
+      // Bas de la barre une fois collée en haut (sticky, top: -4px), même si elle ne l'est pas encore.
+      const top = main.getBoundingClientRect().top + (bar ? bar.offsetHeight - 4 : 0);
+      const y = main.scrollTop + el.getBoundingClientRect().top - top - 8;
+      try { main.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); } catch (e) { main.scrollTop = Math.max(0, y); }
+    };
+    (window.requestAnimationFrame || setTimeout)(() => setTimeout(go, 30));
+  };
   serProto.serJump = function (name) {
     this.setState({ serOpen: name, serQ: '' });
-    const go = () => { const el = document.getElementById(serKey(name)); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); };
-    if (typeof window !== 'undefined') (window.requestAnimationFrame || setTimeout)(() => setTimeout(go, 30));
+    serScroll(name);
   };
 
   serProto.vSeries = function (s) {
@@ -78,7 +93,7 @@
         sub: g.sets.length + (g.sets.length > 1 ? ' extensions' : ' extension') + (span ? ' · ' + span : ''),
         progress: g.own + '/' + g.n.toLocaleString('fr-FR') + ' · ' + pct + ' %', bar: Math.max(g.own ? 2 : 0, pct) + '%',
         open: isOpen, turn: isOpen ? '180deg' : '0deg',
-        toggle: () => this.setState({ serOpen: isOpen && !words.length ? '' : g.name, serQ: '' }),
+        toggle: () => { const opening = !(isOpen && !words.length); this.setState({ serOpen: opening ? g.name : '', serQ: '' }); if (opening) serScroll(g.name); },
         label: g.name + ', ' + g.sets.length + ' extensions, ' + g.own + ' cartes à toi sur ' + g.n + (isOpen ? ', ouverte' : ''),
         sets: isOpen ? sets.map(e => {
           if (e.soon) {

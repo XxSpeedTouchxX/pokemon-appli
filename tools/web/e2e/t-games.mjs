@@ -11,6 +11,7 @@ ok('onglet « Jeux » dans la barre du bas', (await page.locator('nav button[ari
 const boost = page.locator('section[aria-label="Booster PK"]'), coin = page.locator('section[aria-label="Pile ou face"]');
 ok('booster et pile ou face affichés', (await boost.count()) === 1 && (await coin.count()) === 1);
 const odds = (await boost.textContent()).replace(/[\u202f\u00a0]/g, ' ');
+ok('flèche sur « Contenu possible et chances »', (await boost.locator('summary .pkm-gm-chev svg').count()) === 1);
 ok('taux affichés (1 000 PK · 1 %)', /1 000 PK/.test(odds) && /1 %/.test(odds) && /60 %/.test(odds));
 const pk0 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(1300);
@@ -32,6 +33,9 @@ const w0 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collec
 await wheel.locator('button:has-text("Faire tourner la roue")').click(); await page.waitForTimeout(4900);
 const w1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('roulette : solde ' + w0 + ' → ' + w1, [Math.floor(w0 / 2), w0 * 2, w0 + 100, Math.max(0, w0 - 100)].indexOf(w1) >= 0);
+// Animation de fin (2026-10-14) : confettis si le solde monte, nuage de pluie s'il baisse.
+const fxWin = await wheel.locator('.pkm-gm-wconf').count(), fxLose = await wheel.locator('.pkm-gm-cloud').count();
+ok('roulette : animation de fin (' + (w1 > w0 ? 'gain → confettis ' + fxWin : w1 < w0 ? 'perte → nuage ' + fxLose : 'sans changement') + ')', w1 > w0 ? fxWin > 10 && fxLose === 0 : w1 < w0 ? fxLose === 1 && fxWin === 0 : true);
 ok('roulette : prochain tour dans 24 h', /Prochain tour dans 2[34] h/.test(await wheel.innerText()));
 await page.screenshot({ path: shot('games-roulette.png') });
 // PK shop (2026-10-12) : 4ᵉ onglet, ticket du tirage au sort.

@@ -54,7 +54,8 @@
   const shopBasePk = shopProto.pkView;
   shopProto.pkView = function (s) {
     const v = shopBasePk.call(this, s), n = shopTickets(s);
-    return Object.assign(v, { hasTickets: n > 0, tickets: n > 1 ? n + ' tickets' : n + ' ticket',
+    // Avec des tickets, le compteur se resserre et la barre se place juste dessous (sans cacher le sous-titre).
+    return Object.assign(v, { wrapCls: n > 0 ? 'pkm-pk-tk' : '', hasTickets: n > 0, tickets: n > 1 ? n + ' tickets' : n + ' ticket',
       ticketsAria: 'Mes tickets du tirage au sort : ' + n + '. Ouvrir le PK shop', openShop: () => this.tab('pkshop') });
   };
 

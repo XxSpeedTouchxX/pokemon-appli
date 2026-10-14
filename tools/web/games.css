@@ -91,8 +91,43 @@
 /* PK shop (2026-10-12) : visuel d'un lot (booster 30 ans) ; barre des tickets sous le solde de PK (en-tête et boutique),
    affichée seulement quand on en possède. */
 .pkm-shop-img { flex: none; display: block; width: 70px; height: auto; transform: rotate(-4deg); filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45)); }
-.pkm-tk-head { position: absolute; top: 100%; right: 0; z-index: 4; margin-top: -6px; padding: 0; border: 0; background: transparent; cursor: pointer; font: inherit; }
+.pkm-tk-head { display: block; margin-top: 2px; padding: 0; border: 0; background: transparent; cursor: pointer; font: inherit; }
+.pkm-tk-head .pkm-tk-bar { margin-top: 0; height: 20px; font-size: 11.5px; }
+/* Compteur resserré quand la barre des tickets est affichée (2026-10-14) : pastille de 28 px au lieu de 34. */
+.pkm-pk-tk > button { height: 30px !important; }
+.pkm-pk-tk > button > span { height: 28px !important; font-size: 13px !important; padding-right: 10px !important; }
+.pkm-pk-tk > button > span > img { width: 22px !important; height: 22px !important; }
 .pkm-tk-bar { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px 0 6px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; white-space: nowrap; align-self: flex-start; margin-top: 4px; }
 .pkm-tk-mini { position: relative; width: 18px; height: 12px; border-radius: 3px; border: 1.5px solid #111111; box-sizing: border-box; background: linear-gradient(135deg, #FFE46B, #FFD60A 50%, #F2A900); }
 .pkm-tk-mini::before, .pkm-tk-mini::after { content: ''; position: absolute; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: #111A2C; }
 .pkm-tk-mini::before { left: -3px; } .pkm-tk-mini::after { right: -3px; }
+
+/* Mon profil (2026-10-14) : pastille appareil photo sur la bulle, champs « Informations du dresseur ». */
+.pkm-pf-cam { position: absolute; left: -4px; bottom: -2px; width: 26px; height: 26px; border-radius: 13px; background: var(--pkm-accent); color: #111111; border: 2px solid #121C33; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.pkm-tr-in { box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 14px; border: 1px solid #2A3A5C; background: #0B1322; color: #F3F6FC; font: inherit; font-size: 16px; font-weight: 500; }
+.pkm-tr-in::placeholder { color: #7D8BA8; }
+
+/* « Contenu possible et chances » (2026-10-14) : flèche qui montre qu'on peut toucher, tournée quand c'est ouvert. */
+.pkm-gm-sum { list-style: none; }
+.pkm-gm-sum::-webkit-details-marker { display: none; }
+.pkm-gm-chev { flex: none; width: 30px; height: 30px; border-radius: 15px; display: flex; align-items: center; justify-content: center; background: rgba(255, 214, 10, 0.16); color: var(--pkm-accent); transition: transform 0.25s ease; }
+details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
+
+/* Roulette (2026-10-14) : confettis quand le solde monte, nuage de pluie et roue qui tremble quand il baisse. */
+.pkm-gm-wfx { position: absolute; inset: -20px -8px; pointer-events: none; overflow: hidden; z-index: 3; }
+.pkm-gm-wconf { animation-name: pkmGmWConf; animation-duration: 2.4s; }
+@keyframes pkmGmWConf { 0% { transform: translate(0, -10px) rotate(0); opacity: 0; } 8% { opacity: 1; } 100% { transform: translate(var(--dx), 300px) rotate(var(--r)); opacity: 1; } }
+.pkm-gm-wpop { position: absolute; left: 50%; top: 50%; padding: 6px 14px; border-radius: 999px; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; white-space: nowrap; transform: translate(-50%, -50%); animation: pkmGmWPop 2.5s ease-out both; }
+.pkm-gm-wpop-win { background: var(--pkm-accent); color: #111111; border: 3px solid #111111; }
+.pkm-gm-wpop-lose { background: #2B3448; color: #D7DEEE; border: 3px solid #111111; }
+@keyframes pkmGmWPop { 0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; } 14% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; } 24%, 80% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -70%) scale(0.95); opacity: 0; } }
+.pkm-gm-cloud { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); animation: pkmGmCloud 2.5s ease-out both; }
+@keyframes pkmGmCloud { 0% { transform: translate(-50%, -40px); opacity: 0; } 15%, 82% { transform: translate(-50%, 0); opacity: 1; } 100% { transform: translate(-50%, -10px); opacity: 0; } }
+.pkm-gm-drop { position: absolute; top: 58px; width: 4px; height: 12px; border-radius: 2px; background: #8FB4FF; opacity: 0; animation: pkmGmDrop 0.7s 3 linear both; }
+@keyframes pkmGmDrop { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 0.9; } 100% { transform: translateY(150px); opacity: 0; } }
+.pkm-gm-wsad .pkm-gm-wheel { filter: saturate(0.35) brightness(0.8); transition: filter 0.4s; }
+.pkm-gm-wsad { animation: pkmGmShake 0.5s 0.1s ease-in-out 2; }
+@keyframes pkmGmShake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+@media (prefers-reduced-motion: reduce) { .pkm-gm-wfx *, .pkm-gm-wsad { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; } .pkm-gm-wconf, .pkm-gm-drop { display: none; } }
+.pkm-gm-cloud-body { fill: #5A6782; stroke: #2B3448; stroke-width: 3; }
+.pkm-gm-cloud-face { fill: none; stroke: #1B2233; stroke-width: 3; stroke-linecap: round; }

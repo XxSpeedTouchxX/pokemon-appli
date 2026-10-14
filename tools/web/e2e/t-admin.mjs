@@ -47,7 +47,7 @@ await page.waitForTimeout(300);
 await page.screenshot({ path: shot('admin-panneau-2.png') });
 await panel.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
 await page.goto(BASE + 'start=home', { waitUntil: 'load' }); await page.waitForTimeout(1200);
-ok('badge Admin dans l’en-tête', (await page.locator('header button[aria-label="Ouvrir le panneau Admin"]').count()) === 1);
+ok('pas de badge Admin dans l’en-tête (panneau depuis les Réglages)', (await page.locator('header button[aria-label="Ouvrir le panneau Admin"]').count()) === 0);
 ok('compteur PK masqué', (await page.locator('header button[aria-label^="Mes PK"]').count()) === 0);
 ok('bouton Scan masqué', (await page.evaluate(() => getComputedStyle(document.querySelector('button[aria-label="Scanner une carte ou un produit"]')).visibility)) === 'hidden');
 ok('animations coupées', await page.evaluate(() => document.documentElement.classList.contains('pkm-calm')));
@@ -58,7 +58,6 @@ await page.goto(BASE + 'start=profile', { waitUntil: 'load' }); await page.waitF
 const idt = await page.locator('section[aria-label="Identité"]').innerText(), cat = await page.locator('section[aria-label="Type de collectionneur"]').innerText();
 ok('profil forcé Passionné, palier forcé « ' + tierName + ' » : ' + idt.replace(/\s+/g, ' ').slice(0, 60), /Passionné/.test(cat) && idt.includes('Palier ' + tierName));
 // Date simulée.
-await page.click('header button[aria-label="Ouvrir le panneau Admin"]').catch(() => {});
 await page.goto(BASE + 'start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1000);
 await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); d.admin.today = '2026-12-25'; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1000);
@@ -68,7 +67,7 @@ ok('date simulée : ' + await panel.locator('span:has-text("Date")').first().inn
 // Sortie.
 await panel.locator('button:has-text("Quitter le mode Admin")').click(); await page.waitForTimeout(300);
 await page.goto(BASE + 'start=home', { waitUntil: 'load' }); await page.waitForTimeout(1000);
-ok('sortie : badge retiré, compteur et Scan revenus', (await page.locator('header button[aria-label="Ouvrir le panneau Admin"]').count()) === 0 && (await page.locator('header button[aria-label^="Mes PK"]').count()) === 1
+ok('sortie : compteur et Scan revenus', (await page.locator('header button[aria-label^="Mes PK"]').count()) === 1
   && (await page.evaluate(() => getComputedStyle(document.querySelector('button[aria-label="Scanner une carte ou un produit"]')).visibility)) === 'visible');
 // Nouvel accès : faux code, puis bon code.
 await page.goto(BASE + 'start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1000);

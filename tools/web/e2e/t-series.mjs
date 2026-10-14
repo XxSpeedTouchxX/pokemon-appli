@@ -91,6 +91,16 @@ await page.screenshot({ path: shot('series-logos.png') });
 // 360 px : pas de défilement horizontal.
 await page.setViewportSize({ width: 360, height: 740 }); await page.fill('input[aria-label="Rechercher une série ou une extension"]', ''); await page.waitForTimeout(400);
 ok('360 px : pas de défilement horizontal', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
+// Ouverture d'une série (2026-10-14, vidéo du porteur) : son en-tête vient juste sous la barre des logos.
+for (const name of ['Écarlate et Violet', 'Épée et Bouclier']) {
+  const c2 = await browser.newContext({ viewport: { width: 390, height: 844 } }), page = await c2.newPage();
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(E2E + '/?start=collection', { waitUntil: 'load' }); await page.waitForTimeout(2500);
+  await page.locator('main section[aria-label="' + name + '"] button').first().click(); await page.waitForTimeout(1200);
+  const gap = await page.evaluate(n => { const bar = document.querySelector('main nav[aria-label="Aller à une série"]').getBoundingClientRect(), h = document.querySelector('main section[aria-label="' + n + '"]').getBoundingClientRect(); return Math.round(h.top - bar.bottom); }, name);
+  ok('« ' + name + ' » ouverte : en-tête juste sous la barre des logos (' + gap + ' px)', gap >= 0 && gap <= 24);
+  await c2.close();
+}
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

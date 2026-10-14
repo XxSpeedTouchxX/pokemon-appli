@@ -70,6 +70,7 @@
 
   // Secteur i de la roue : [début, fin] en degrés, dans le sens des aiguilles d'une montre depuis le haut.
   const gmSector = i => { let a = 0; for (let k = 0; k < i; k++) a += GM_WHEEL[k][1] * 3.6; return [a, a + GM_WHEEL[i][1] * 3.6]; };
+  let gmFxTimer = null;
   gmProto.gmSpin = function () {
     const s = this.st(), g = s.games || {};
     if (g.wPhase === 'spin' || gmWait(g.wheelAt, GM_WHEEL_MS) > 0) return;
@@ -82,8 +83,13 @@
       const t = this.st(), now = Number(t.pk) || 0, val = GM_WHEEL[i][2](now), diff = val - now;
       const patch = { games: Object.assign({}, t.games, { wPhase: 'done' }), pk: val, toast: 'Roulette : ' + GM_WHEEL[i][0] + ' · ' + (diff >= 0 ? '+' : '−') + Math.abs(diff).toLocaleString('fr-FR') + ' PK' };
       if (diff > 0) patch.pkGain = diff;
+      // Animation de fin (2026-10-14, porteur) : confettis si le solde monte, nuage de pluie et roue qui tremble s'il
+      // baisse (PK ÷ 2, −100). 2,6 s ; état passager, non enregistré.
+      patch.wFx = { kind: diff > 0 ? 'win' : diff < 0 ? 'lose' : '', n: Date.now(), diff: diff };
       this.setState(patch);
       if (diff > 0) this.pkGainEnd();
+      clearTimeout(gmFxTimer);
+      gmFxTimer = setTimeout(() => this.setState({ wFx: null }), 2600);
       this.flash();
     };
     this.setState({ games: Object.assign({}, g, { wheelAt: at, wWin: i, wDeg: deg, wPhase: gmStill() ? 'done' : 'spin', hist: hist }) });
@@ -127,6 +133,15 @@
           aria: 'Roue à 4 cases : ' + GM_WHEEL.map(x => x[0]).join(', '),
           resultDone: g.wPhase === 'done', resultText: 'La roue s’arrête sur ' + r[0] + (r[1] === 35 || r[1] === 15 ? ' : pas de chance.' : ' !'),
           resultColor: r[1] === 35 || r[1] === 15 ? '#9AA8C3' : 'var(--pkm-accent)',
+          fx: (() => {
+            const f = s.wFx, on = !!(f && f.kind && g.wPhase === 'done');
+            return { win: on && f.kind === 'win', lose: on && f.kind === 'lose', key: 'wfx-' + (f ? f.n : 0),
+              text: on ? (f.kind === 'win' ? '+' : '−') + Math.abs(f.diff).toLocaleString('fr-FR') + ' PK' : '',
+              boxClass: 'pkm-gm-wheelbox' + (on && f.kind === 'lose' ? ' pkm-gm-wsad' : ''),
+              confetti: on && f.kind === 'win' ? Array.from({ length: 26 }, (_, i) => ({ cls: 'pkm-unl-conf pkm-gm-wconf pkm-unl-c' + (i % 5),
+                style: 'left: ' + ((i * 41) % 100) + '%; --dx: ' + (((i * 53) % 100) - 50) + 'px; --r: ' + (((i * 97) % 720) - 360) + 'deg; animation-delay: ' + ((i % 6) * 0.06).toFixed(2) + 's' })) : [],
+              drops: on && f.kind === 'lose' ? Array.from({ length: 9 }, (_, i) => ({ style: 'left: ' + (14 + i * 9) + '%; animation-delay: ' + ((i * 0.13) % 0.6).toFixed(2) + 's' })) : [] };
+          })(),
           button: busy ? 'La roue tourne…' : ww > 0 ? 'Prochain tour dans ' + gmLeft(ww) : 'Faire tourner la roue',
           spin: () => this.gmSpin()
         };
@@ -152,7 +167,7 @@
     if (ui.isMarket) Object.assign(ui, { title: 'Recherche', subtitle: 'Toutes les cartes et le scellé', hasSubtitle: true, headerBig: false, headerDetail: true });
     return r;
   };
-  const GM_EMPTY = { pk: '', b: { odds: [] }, c: {}, w: { labels: [] }, hist: [], hasHist: false };
+  const GM_EMPTY = { pk: '', b: { odds: [] }, c: {}, w: { labels: [], fx: { confetti: [], drops: [] } }, hist: [], hasHist: false };
   // Écran de recherche (l'ancien Marché) : on y vient de l'accueil ou du scan ; Retour ramène à l'écran d'avant.
   const gmBaseParent = gmProto.parentOf;
   gmProto.parentOf = function (sc) { return sc === 'search' ? 'home' : sc === 'sealed' || sc === 'releases' ? 'home' : sc === 'sets' ? 'collection' : gmBaseParent.call(this, sc); };

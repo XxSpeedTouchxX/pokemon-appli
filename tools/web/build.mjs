@@ -81,12 +81,26 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
 // Compteur de PK (fragment pk-counter) à gauche de l'avatar : accueil et grands titres (Collection, Marché, Territoire).
 {
   const avatar = '<button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" style="';
-  // Badge « Admin » (admin.js) avant le compteur, tant que le mode Admin est actif ; compteur masquable depuis l'Admin.
-  const right = FRAG['admin-badge'] + '<sc-if value="{{ pk.show }}" hint-placeholder-val="{{ true }}">\n' + FRAG['pk-counter'] + '</sc-if>\n';
+  // Compteur masquable depuis l'Admin. Le badge « Admin » de l'en-tête est retiré (2026-10-14, porteur) : le panneau
+  // s'ouvre depuis les Réglages (« Panneau Admin · paramétrage »).
+  const right = '<sc-if value="{{ pk.show }}" hint-placeholder-val="{{ true }}">\n' + FRAG['pk-counter'] + '</sc-if>\n';
   patch(avatar + 'flex: none; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + right + avatar + 'flex: none; width: 44px;');
   patch(avatar + 'justify-self: end; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + right + avatar + 'flex: none; width: 44px;');
   patch('object-fit: cover">\n</button>\n</header>', 'object-fit: cover">\n</button>\n</span>\n</header>', 2);
 }
+// Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de la photo ouvre la photothèque
+// (input caché) ; rubrique « Informations du dresseur » sous l'identité.
+patch(`<span style="position: relative; flex: none; width: 76px; height: 76px">
+<img src="{{ pf.avatar }}"`, `<input type="file" id="pkm-pf-photo" accept="image/*" tabindex="-1" aria-hidden="true" onChange="{{ pf.photo.onFile }}" style="position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none">
+<button type="button" onClick="{{ pf.photo.pick }}" aria-label="{{ pf.photo.label }}" class="pkm-pf-photo" style="position: relative; flex: none; width: 76px; height: 76px; padding: 0; border: 0; background: transparent; cursor: pointer">
+<img src="{{ pf.avatar }}"`);
+patch(`<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"></path></svg>
+</span>`, `<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"></path></svg>
+<span class="pkm-pf-cam" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></span>
+</button>`);
+patch(`letter-spacing: -0.02em">Ton espace</span>`, `letter-spacing: -0.02em">Mon profil</span>
+<sc-if value="{{ pf.hasName }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13.5px; font-weight: 700; color: var(--pkm-accent)">{{ pf.nameLine }}</span></sc-if>`);
+patch('<section aria-label="Type de collectionneur"', FRAG['profile-trainer'] + '\n<section aria-label="Type de collectionneur"');
 // Accueil (octobre 2026, tools/web/home.js) : recherche dans le catalogue, valeur de la collection, Mon classeur,
 // boutiques autour de toi, liste complète de la collection, marge réalisée ; « Premiers pas » et « Suggestion »
 // (profils) repris de la maquette ; Sorties du moment tout en bas.

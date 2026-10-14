@@ -38,3 +38,61 @@
     };
     return r;
   };
+
+  // ——— Mon profil (2026-10-14, demande du porteur) ———
+  // « Ton espace » devient « Mon profil ». La bulle de la photo ouvre la photothèque du téléphone (ou l'appareil photo,
+  // au choix du système) : l'image est recadrée au carré et réduite à 256 px sur l'appareil, gardée avec la collection
+  // (avatarImg), jamais envoyée. Elle remplace l'illustration partout (en-tête, profil).
+  // « Informations du dresseur » : quelques champs libres, facultatifs, gardés sur l'appareil (trainer).
+  const PF_PHOTO_PX = 256;
+  const PF_TRAINER = [
+    ['name', 'Nom de dresseur', 'Ex. : Sacha du Bourg', 24],
+    ['city', 'Ville ou région', 'Ex. : Lyon', 40],
+    ['since', 'Collectionne depuis', 'Ex. : 1999', 10],
+    ['fav', 'Pokémon préféré', 'Ex. : Dracaufeu', 24],
+    ['set', 'Extension préférée', 'Ex. : 151', 40],
+    ['bio', 'Un mot sur toi', 'Ce que tu collectionnes, ce que tu cherches…', 140]
+  ];
+  const pfImgBase = proto.img;
+  proto.img = function () {
+    const o = pfImgBase.call(this), a = this.state && this.state.avatarImg;
+    return typeof a === 'string' && a.startsWith('data:image/') ? Object.assign({}, o, { avatar: a }) : o;
+  };
+  // Lecture de la photo choisie : recadrage centré, carré de 256 px, JPEG.
+  proto.pfPhoto = function (file) {
+    if (!file || !/^image\//.test(file.type || 'image/')) return;
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      try {
+        const side = Math.min(im.naturalWidth, im.naturalHeight), c = document.createElement('canvas');
+        c.width = c.height = PF_PHOTO_PX;
+        c.getContext('2d').drawImage(im, (im.naturalWidth - side) / 2, (im.naturalHeight - side) / 2, side, side, 0, 0, PF_PHOTO_PX, PF_PHOTO_PX);
+        this.setState({ avatarImg: c.toDataURL('image/jpeg', 0.85), toast: 'Photo de profil mise à jour' });
+        this.flash();
+      } catch (e) { this.setState({ toast: 'Cette photo ne peut pas être lue' }); }
+      URL.revokeObjectURL(url);
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); this.setState({ toast: 'Cette photo ne peut pas être lue' }); };
+    im.src = url;
+  };
+  const pfBaseView2 = proto.vProfile;
+  proto.vProfile = function (x) {
+    const r = pfBaseView2.call(this, x), s = x.s, t = s.trainer && typeof s.trainer === 'object' ? s.trainer : {};
+    const has = typeof s.avatarImg === 'string' && s.avatarImg.startsWith('data:image/');
+    r.nameLine = t.name ? 'Dresseur · ' + t.name : '';
+    r.hasName = !!t.name;
+    r.photo = {
+      label: has ? 'Changer ma photo de profil' : 'Choisir une photo de profil dans ma photothèque',
+      pick: () => { const el = document.getElementById('pkm-pf-photo'); if (el) { el.value = ''; el.click(); } },
+      onFile: e => this.pfPhoto(e && e.target && e.target.files && e.target.files[0]),
+      has: has, remove: () => this.setState({ avatarImg: '', toast: 'Photo retirée · illustration d’origine' })
+    };
+    r.trainer = {
+      fields: PF_TRAINER.map(([k, label, ph, max]) => ({
+        id: 'pkm-tr-' + k, label: label, ph: ph, max: max, value: t[k] || '',
+        onInput: e => { const v = String(e.target.value || '').slice(0, max); this.setState({ trainer: Object.assign({}, this.st().trainer || {}, { [k]: v }) }); }
+      })),
+      note: 'Facultatif. Ces informations restent sur cet appareil, avec ta collection : rien n’est envoyé ni publié.'
+    };
+    return r;
+  };
