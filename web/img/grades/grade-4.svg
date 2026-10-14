@@ -11,4 +11,4 @@
 <circle cx="60" cy="66" r="2.24" fill="#FFD60A"/>
 <path d="M50.08 57.2 Q54.4 52.4 60 51.92" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
 </g>
-<path d="M22 17 Q22 22 27 22 Q22 22 22 27 Q22 22 17 22 Q22 22 22 17 Z" fill="#C8FFD9" stroke="#111111" stroke-width="1"/><path d="M99 22 Q99 26 103 26 Q99 26 99 30 Q99 26 95 26 Q99 26 99 22 Z" fill="#FFFFFF" stroke="#111111" stroke-width="1"/></svg>
+<path d="M22 17 Q22 22 27 22 Q22 22 22 27 Q22 22 17 22 Q22 22 22 17 Z" fill="#C8FFD9" stroke="#111111" stroke-width="1"/><path d="M98 17 Q98 22 103 22 Q98 22 98 27 Q98 22 93 22 Q98 22 98 17 Z" fill="#C8FFD9" stroke="#111111" stroke-width="1"/></svg>
