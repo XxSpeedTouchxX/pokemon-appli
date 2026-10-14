@@ -102,7 +102,7 @@
   // Six grades selon la valeur de la collection, chacun avec son emblème (web/img/grades/, tools/brand/make_grades.mjs) :
   // Recrue (0 à 500 €, bronze), Chasseur (500 à 2 500 €, argent), Collectionneur (2 500 à 7 500 €, or), Dresseur
   // Pokémon (7 500 à 15 000 €, or et vert), Maître Pokémon (15 000 à 30 000 €, or et cristal), Grand maître Pokémon
-  // (30 000 € et plus, rouge, couronne). Le seuil de 30 000 € est une valeur par défaut, à confirmer par le porteur.
+  // (30 000 € et plus, rouge, couronne). Seuil de 30 000 € proposé par défaut, gardé pour l'instant par le porteur.
   // Remplacent les paliers « Commune » à « Hyper rare ». Le champ sym porte le chemin de l'emblème (build.mjs remplace
   // les hexagones de la maquette par des images).
   const PF_GRADES = [
