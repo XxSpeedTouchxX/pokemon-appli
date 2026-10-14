@@ -63,9 +63,9 @@ G.push(svg('Grade Chasseur', grad('m', [[0, '#FFFFFF'], [0.45, '#C3CCDA'], [1, '
 // 3. Collectionneur : or, trois plumes par aile, sans éclats autour.
 G.push(svg('Grade Collectionneur', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
   `${banner}${spike(20, 7, 'url(#m)')}${wings([[46, 36, 9, 7], [24, 43, 10, 5], [2, 42, 10, 3]], 'm')}${chin(13, 8, 'url(#m)')}${crest('url(#m)', 6)}${ball('url(#t)')}`));
-// 4. Dresseur Pokémon : or avec des notes de vert émeraude (plume intérieure, plaque, menton), quatre plumes, deux éclats.
+// 4. Dresseur Pokémon : or avec des notes de vert émeraude (pointe, plume intérieure, plaque, menton), quatre plumes, deux éclats.
 G.push(svg('Grade Dresseur Pokémon', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('i', [[0, '#C8FFD9'], [0.5, '#2FD37A'], [1, '#0B7A44']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
-  `${banner}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${chin(15, 8, 'url(#i)')}${crest('url(#i)', 9)}${ball('url(#t)')}
+  `${banner}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${spike(26, 7, 'url(#i)')}${chin(15, 8, 'url(#i)')}${crest('url(#i)', 9)}${ball('url(#t)')}
 ${sparkle(22, 22, 5, '#C8FFD9')}${sparkle(99, 26, 4)}`));
 // 5. Maître Pokémon : or et cristal, cinq plumes par aile (la plus haute, qui cachait la pointe bleue, est retirée),
 // trois éclats, sans couronne.
@@ -77,6 +77,6 @@ G.push(svg('Grade Grand maître Pokémon', grad('m', [[0, '#FF9A8A'], [0.45, '#E
   `${banner}${wings([[66, 28, 7, 8], [50, 36, 8, 7], [32, 43, 9, 6], [12, 46, 10, 4], [-10, 38, 9, 2]], 'm', 'i')}${chin(16, 8, 'url(#m)')}${crest('url(#i)', 11)}${ball('url(#t)')}
 <path d="M42 44 L43 24 L51 34 L60 18 L69 34 L77 24 L78 44 Z" fill="url(#c)" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
 <circle cx="60" cy="33" r="3.2" fill="#FF7AD9" stroke="${INK}" stroke-width="1.4"/><circle cx="49" cy="39" r="2" fill="#5EE0CF" stroke="${INK}" stroke-width="1.2"/><circle cx="71" cy="39" r="2" fill="#5EE0CF" stroke="${INK}" stroke-width="1.2"/>
-${sparkle(20, 22, 5)}${sparkle(100, 24, 5)}${sparkle(98, 92, 3)}${sparkle(22, 94, 3)}`));
+${sparkle(20, 22, 5)}${sparkle(100, 24, 5)}${sparkle(98, 92, 5)}${sparkle(22, 94, 5)}`));
 G.forEach((s, i) => writeFileSync(OUT + 'grade-' + (i + 1) + '.svg', s.replace(/id="(\w)"/g, 'id="$1' + (i + 1) + '"').replace(/url\(#(\w)\)/g, 'url(#$1' + (i + 1) + ')')));
 console.log('Grades : ' + G.length + ' logos dans web/img/grades/');
