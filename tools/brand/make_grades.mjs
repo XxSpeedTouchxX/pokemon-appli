@@ -71,7 +71,7 @@ ${sparkle(22, 22, 5, '#C8FFD9')}${sparkle(99, 26, 4)}`));
 // trois éclats, sans couronne.
 G.push(svg('Grade Maître Pokémon', grad('m', [[0, '#FFF6C2'], [0.4, '#FFD60A'], [1, '#A86E00']]) + grad('i', [[0, '#D8FDFF'], [0.5, '#5EE0CF'], [1, '#2F6BFF']]) + grad('t', [[0, '#7CF5FF'], [1, '#2F6BFF']]),
   `${banner}${spike(26, 8, 'url(#i)')}${wings([[60, 32, 8, 7], [44, 40, 9, 6], [26, 45, 10, 5], [6, 45, 10, 3], [-14, 35, 9, 1]], 'm', 'i')}${chin(18, 9, 'url(#i)')}${crest('url(#i)', 12)}${ball('url(#t)')}
-${sparkle(18, 20, 5)}${sparkle(103, 22, 5)}${sparkle(100, 94, 3)}`));
+${sparkle(18, 20, 5)}${sparkle(103, 22, 5)}${sparkle(100, 94, 5)}`));
 // 6. Grand maître Pokémon : rouge Pokémon, cinq plumes par aile, plume intérieure blanche rosée, couronne.
 G.push(svg('Grade Grand maître Pokémon', grad('m', [[0, '#FF9A8A'], [0.45, '#E3350D'], [1, '#7E1003']]) + grad('i', [[0, '#FFFFFF'], [1, '#FFB4A6']]) + grad('t', [[0, '#FF5A3C'], [1, '#B81E08']]) + grad('c', [[0, '#FFF1A6'], [1, '#F2A900']]),
   `${banner}${wings([[66, 28, 7, 8], [50, 36, 8, 7], [32, 43, 9, 6], [12, 46, 10, 4], [-10, 38, 9, 2]], 'm', 'i')}${chin(16, 8, 'url(#m)')}${crest('url(#i)', 11)}${ball('url(#t)')}
