@@ -6,6 +6,31 @@
 
 ---
 
+## 2026-10-14 — Grades selon la valeur, Mon profil, séries, roulette animée, premier écran
+
+- **Demande du porteur :**
+  - barre des tickets qui ne cache plus de texte ;
+  - série ouverte depuis son en-tête (vidéo) ;
+  - flèche sur « Contenu possible et chances » ;
+  - confettis ou animation triste à la roulette ;
+  - badge Admin retiré de l'accueil ;
+  - « Mon profil », photo de la photothèque, rubrique « Informations du dresseur » (pseudo, e-mail, membre depuis, palier) ;
+  - 5 grades selon la valeur de la collection, avec logos ; « Série en cours » retirée ;
+  - premier écran sans pastille de cote, avec Dracaufeu 1re édition, Lugia réimpression 30 ans, Mew ALT 30 ans.
+- **Grades (noms et logos proposés, à valider) :**
+
+  | Grade | Valeur de la collection | Logo |
+  |---|---|---|
+  | Recrue | 0 à 500 € | médaille bronze, une carte |
+  | Chasseur | 500 à 2 500 € | hexagone argent, un booster |
+  | Collectionneur | 2 500 à 7 500 € | écu or, trois cartes |
+  | Maître | 7 500 à 15 000 € | étoile holo, carte étoilée |
+  | Légende | 15 000 € et plus | badge arc-en-ciel, couronne et gemme éclair |
+
+  Ils remplacent les paliers « Commune » à « Hyper rare » (0, 500, 1 500, 3 000, 7 500 €). Logos : `web/img/grades/`, générés par `tools/brand/make_grades.mjs`, sans élément officiel Pokémon.
+- **Point d'attention :** l'inscription n'existe pas. L'adresse e-mail est saisie et gardée sur l'appareil en attendant les comptes. La photo de profil est réduite à 256 px sur le téléphone, jamais envoyée.
+- **Lugia réimpression 30 ans :** TCGdex n'a pas encore son scan. Le premier écran montre l'illustration du Lugia de Neo Genesis (même dessin), puis le scan de la réimpression dès qu'il existe.
+
 ## 2026-10-12 (soir) — Cote Cardmarket seule ; PK shop à 2 000 PK et lot Booster 30 ans ; gains +10 retirés ; transition iOS
 
 - **Demande du porteur :**

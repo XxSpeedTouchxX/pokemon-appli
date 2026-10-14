@@ -161,7 +161,7 @@
     return {
       title: 'Les plus chères', subtitle: 'Toutes séries confondues · cote Dropicards du jour', hasLogo: false, logo: '',
       countText: 'Les ' + all.length + ' cartes les mieux cotées du catalogue', valueText: '', hasNote: true,
-      note: 'Cote Dropicards : tendance Cardmarket et TCGplayer, selon la version de la carte (normale ou holo). Une cote marquée « incertaine » dans la fiche est à vérifier.',
+      note: 'Cote Dropicards : tendance Cardmarket, selon la version de la carte (normale, holo ou reverse). Une cote marquée « incertaine » dans la fiche est à vérifier.',
       filters: defs.map(([k, label]) => Object.assign({ label: label, on: f === k, pick: () => this.setState({ setFilter: k }) }, this.chip(f === k))),
       count: shown.length + (shown.length > 1 ? ' cartes' : ' carte') + ' · par cote décroissante',
       empty: shown.length === 0, emptyText: f === 'own' ? 'Aucune de ces cartes dans ta collection.' : 'Aucune carte cotée.',

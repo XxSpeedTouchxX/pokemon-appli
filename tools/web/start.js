@@ -9,10 +9,20 @@
   const ST_DAY = 86400000;
   const stDays = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / ST_DAY);
 
+  // Lugia de la Collection Classique : pas encore de scan chez TCGdex ; repli sur le Lugia de Neo Genesis (même illustration).
+  const ST_FAN = [['base1-4'], ['30th-c-029', 'neo1-9'], ['30th-152']];
   const stBaseOnb = proto.vOnb;
   proto.vOnb = function (x) {
     const r = stBaseOnb.call(this, x), s = x.s;
     r.canDemo = !(s.purchases || []).length && !(s.sales || []).length;
+    // Premier écran (2026-10-14, porteur) : Dracaufeu du Set de Base (1re édition) à gauche, Lugia réimprimé de la
+    // Collection Classique du 30ᵉ anniversaire au milieu, Mew-ex illustration spéciale (30ᵉ anniversaire) à droite.
+    if (TCG.status === 'ready' && r.fan && r.fan.length === 3) {
+      ST_FAN.forEach((ids, i) => {
+        const id = ids.find(k => TCG.byId[k] && TCG.byId[k].r[TCG.F.img]);
+        if (id) { const it = TCG.item(id); r.fan[i].img = it.imgHi || it.img; }
+      });
+    }
     r.tryDemo = () => this.setState({ purchases: this.purchasesSeed('full'), sales: this.salesSeed('full'), onb: 2, firstRun: false, toast: 'Collection de démo chargée · « Vider ma collection » dans les Réglages pour repartir de zéro' });
     return r;
   };

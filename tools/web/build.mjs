@@ -44,7 +44,7 @@ patch(`<span style="display: flex; align-items: center; gap: 8px">
 // Accueil guidé (start.js, 2026-10-11) : ouvert tout seul à la première visite ; « Essayer avec la collection de démo »
 // tant que la collection est vide ; texte fidèle aux sources réellement branchées (pas encore d'eBay).
 patch('PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.',
-  'PKM suit la cote Cardmarket et TCGplayer de chaque carte, chaque jour, avec sa source et sa date.');
+  'PKM suit la cote Cardmarket de chaque carte, chaque jour, avec sa source et sa date.');
 patch('cursor: pointer">Commencer</button>', 'cursor: pointer">Commencer</button>\n<sc-if value="{{ ob.canDemo }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ ob.tryDemo }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Essayer avec la collection de démo</button></sc-if>');
 // Catalogue complet (tools/web/catalog.js) : courbe seulement si un historique existe, ajout possible
 // d'une carte sans prix, recherche du Marché sur toutes les cartes.
@@ -88,6 +88,12 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
   patch(avatar + 'justify-self: end; width: 44px;', '<span style="flex: none; display: flex; align-items: center; gap: 4px">\n' + right + avatar + 'flex: none; width: 44px;');
   patch('object-fit: cover">\n</button>\n</header>', 'object-fit: cover">\n</button>\n</span>\n</header>', 2);
 }
+// Premier écran de l'accueil guidé (2026-10-14, porteur) : la pastille « Cote … 99,00 € » sous les cartes est retirée.
+{
+  const re = /<span style="position: absolute; left: 50%; bottom: 8px; margin-left: -88px;[^\n]*?99,00 €<\/span>/;
+  if (!re.test(tpl)) throw new Error('Pastille de cote du premier écran introuvable');
+  tpl = tpl.replace(re, '');
+}
 // Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de la photo ouvre la photothèque
 // (input caché) ; rubrique « Informations du dresseur » sous l'identité.
 patch(`<span style="position: relative; flex: none; width: 76px; height: 76px">
@@ -101,6 +107,20 @@ patch(`<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"
 patch(`letter-spacing: -0.02em">Ton espace</span>`, `letter-spacing: -0.02em">Mon profil</span>
 <sc-if value="{{ pf.hasName }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13.5px; font-weight: 700; color: var(--pkm-accent)">{{ pf.nameLine }}</span></sc-if>`);
 patch('<section aria-label="Type de collectionneur"', FRAG['profile-trainer'] + '\n<section aria-label="Type de collectionneur"');
+// Grades (2026-10-14, porteur, profile.js) : les hexagones des paliers deviennent les logos des 5 grades
+// (web/img/grades/, tools/brand/make_grades.mjs). Le symbole « sym » d'un palier est désormais le chemin du logo.
+{
+  const re = /<svg width="(\d+)" height="\1" viewBox="0 0 24 24" aria-hidden="true" style="([^"]*)"><path d="M12 2l8\.66 5v10L12 22l-8\.66-5V7z"[^>]*><\/path><path d="(\{\{ [\w.]+ \}\})"[^>]*><\/path><\/svg>/g;
+  let n = 0;
+  tpl = tpl.replace(re, (m, w, style, expr) => { n++; return `<img src="${expr}" alt="" width="${w}" height="${w}" class="pkm-grade" style="${style.replace(/;?\s*overflow: visible/, '')}; display: block; object-fit: contain">`; });
+  if (n !== 6) throw new Error('Grades : ' + n + ' badges remplacés au lieu de 6');
+}
+// Paliers et succès : la rubrique « Série en cours » est retirée (2026-10-14, porteur).
+{
+  const a = tpl.indexOf('<section aria-label="Série en cours"'), b = tpl.indexOf('</section>', a);
+  if (a < 0) throw new Error('Série en cours introuvable');
+  tpl = tpl.slice(0, a) + tpl.slice(b + '</section>'.length);
+}
 // Accueil (octobre 2026, tools/web/home.js) : recherche dans le catalogue, valeur de la collection, Mon classeur,
 // boutiques autour de toi, liste complète de la collection, marge réalisée ; « Premiers pas » et « Suggestion »
 // (profils) repris de la maquette ; Sorties du moment tout en bas.
@@ -458,7 +478,7 @@ if (brokenMarks !== 45) throw new Error('Photos et logos repérés : ' + brokenM
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
-const BRAND = 'Dropicards', REBRANDED = 53;
+const BRAND = 'Dropicards', REBRANDED = 52;
 let rebranded = 0;
 const rebrand = t => t.replace(/PKM-App|\bPKM\b/g, () => { rebranded++; return BRAND; });
 tpl = rebrand(tpl);

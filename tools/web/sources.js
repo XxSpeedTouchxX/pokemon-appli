@@ -42,7 +42,7 @@
     low: 'le plus bas Cardmarket : un prix demandé, pas un prix vendu'
   };
   srcProto.valStamp = function (v) {
-    const label = { pkm: 'Cote Dropicards : Cardmarket et TCGplayer', cm: 'Tendance Cardmarket', low: 'Plus bas Cardmarket (prix demandé)' }[v] || 'Cote Dropicards';
+    const label = { pkm: 'Cote Dropicards : Cardmarket', cm: 'Tendance Cardmarket', low: 'Plus bas Cardmarket (prix demandé)' }[v] || 'Cote Dropicards';
     const c = srcCardsDay(), k = pricesDay();
     return label + ' · ' + (c || k ? 'du ' + this.d2(c > k ? c : k) : 'date en cours de chargement');
   };

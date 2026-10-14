@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96"><title>Grade Collectionneur</title><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF1A6"/><stop offset="0.5" stop-color="#FFC93C"/><stop offset="1" stop-color="#C98A00"/></linearGradient></defs><path d="M48 5 L84 17 L84 47 C84 70 68 84 48 92 C28 84 12 70 12 47 L12 17 Z" fill="url(#g)" stroke="#111111" stroke-width="4" stroke-linejoin="round"/>
+<path d="M48 13 L77 22.5 L77 47 C77 65 64 77 48 84" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="2.5"/>
+<g transform="translate(34 54) rotate(-20)">
+<rect x="-11" y="-16" width="22" height="32" rx="2.6399999999999997" fill="#FFD60A" stroke="#111111" stroke-width="3"/>
+<rect x="-7" y="-12" width="14" height="15.36" rx="2" fill="#FFF6C2" stroke="#111111" stroke-width="1.6"/>
+
+<rect x="-5" y="3.84" width="10" height="2.4" rx="1.2" fill="#111111"/>
+<rect x="-5" y="7.68" width="6" height="2.4" rx="1.2" fill="#111111"/>
+</g><g transform="translate(62 54) rotate(20)">
+<rect x="-11" y="-16" width="22" height="32" rx="2.6399999999999997" fill="#FFD60A" stroke="#111111" stroke-width="3"/>
+<rect x="-7" y="-12" width="14" height="15.36" rx="2" fill="#FFF6C2" stroke="#111111" stroke-width="1.6"/>
+
+<rect x="-5" y="3.84" width="10" height="2.4" rx="1.2" fill="#111111"/>
+<rect x="-5" y="7.68" width="6" height="2.4" rx="1.2" fill="#111111"/>
+</g><g transform="translate(48 49) rotate(0)">
+<rect x="-12" y="-17" width="24" height="34" rx="2.88" fill="#FFD60A" stroke="#111111" stroke-width="3"/>
+<rect x="-8" y="-13" width="16" height="16.32" rx="2" fill="#FFF6C2" stroke="#111111" stroke-width="1.6"/>
+<path d="M0.00 -5.82L1.20 -2.67L4.57 -2.50L1.94 -0.39L2.82 2.86L0.00 1.02L-2.82 2.86L-1.94 -0.39L-4.57 -2.50L-1.20 -2.67Z" fill="#111111"/>
+<rect x="-6" y="4.08" width="12" height="2.4" rx="1.2" fill="#111111"/>
+<rect x="-6" y="8.16" width="7.199999999999999" height="2.4" rx="1.2" fill="#111111"/>
+</g></svg>

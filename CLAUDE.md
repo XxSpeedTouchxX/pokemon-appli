@@ -115,6 +115,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - prix par état (Near Mint) et moyenne des ventes eBay **impossibles sans API officielle** (Cardmarket, eBay Marketplace Insights) : demandes d'accès à faire par le porteur ;
   - ticket 2 000 PK, lot Booster 30 ans 15 000 PK, barre des tickets sous le solde ; roulette sans chances affichées, sans plafond ; booster toutes les 12 h ; 20 km dans le Radar ; gains +10 (jour, nouvelle carte) retirés ;
   - transition entre pages façon iOS (d'après la vidéo du porteur).
+- **Grades, Mon profil et retouches (2026-10-14, demande du porteur) :**
+  - 5 grades selon la valeur de la collection, avec logos (`web/img/grades/`) : Recrue (0-500 €), Chasseur (500-2 500 €), Collectionneur (2 500-7 500 €), Maître (7 500-15 000 €), Légende (15 000 € et plus) ; **noms et logos proposés, à valider** ; « Série en cours » retirée ;
+  - « Mon profil » : photo choisie dans la photothèque (gardée sur l'appareil), « Informations du dresseur » (pseudo, e-mail en attendant l'inscription, membre depuis, palier) ; badge Admin retiré de l'en-tête ;
+  - série ouverte depuis son en-tête, barre des tickets sous un compteur resserré, flèche sur les chances du booster, confettis ou nuage de pluie à la roulette ;
+  - premier écran : Dracaufeu 1re édition, Lugia réimpression 30 ans (illustration Neo Genesis en attendant le scan), Mew-ex illustration spéciale 30 ans ; pastille de cote retirée.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

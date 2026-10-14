@@ -1555,11 +1555,13 @@
 <!-- fragment: profile-trainer -->
 <section aria-label="Informations du dresseur" class="pkm-dark" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; display: flex; flex-direction: column; gap: 12px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600">Informations du dresseur</h2>
-<sc-for list="{{ pf.trainer.fields }}" as="tf" hint-placeholder-count="6">
+<sc-for list="{{ pf.trainer.fields }}" as="tf" hint-placeholder-count="2">
 <label style="display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; font-weight: 700; color: #C9D3EA">{{ tf.label }}
-<input type="text" class="pkm-tr-in" aria-label="{{ tf.label }}" maxlength="{{ tf.max }}" placeholder="{{ tf.ph }}" value="{{ tf.value }}" onChange="{{ tf.onInput }}" autocomplete="off">
+<input type="{{ tf.type }}" class="pkm-tr-in" aria-label="{{ tf.label }}" maxlength="{{ tf.max }}" placeholder="{{ tf.ph }}" value="{{ tf.value }}" onChange="{{ tf.onInput }}" autocomplete="{{ tf.auto }}">
 </label>
 </sc-for>
+<div class="pkm-tr-row"><span class="pkm-tr-k">Membre depuis</span><span class="pkm-tr-v">{{ pf.trainer.since }}</span></div>
+<div class="pkm-tr-row"><span class="pkm-tr-k">Palier</span><span class="pkm-tr-v" style="display: flex; align-items: center; gap: 8px; color: {{ pf.trainer.gradeColor }}"><img src="{{ pf.trainer.gradeBadge }}" alt="" width="28" height="28" style="display: block">{{ pf.trainer.grade }}</span></div>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ pf.trainer.note }}</p>
 <sc-if value="{{ pf.photo.has }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.photo.remove }}" style="align-self: flex-start; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Retirer ma photo de profil</button></sc-if>
 </section>

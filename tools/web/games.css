@@ -131,3 +131,6 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .pkm-gm-wfx *, .pkm-gm-wsad { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; } .pkm-gm-wconf, .pkm-gm-drop { display: none; } }
 .pkm-gm-cloud-body { fill: #5A6782; stroke: #2B3448; stroke-width: 3; }
 .pkm-gm-cloud-face { fill: none; stroke: #1B2233; stroke-width: 3; stroke-linecap: round; }
+.pkm-tr-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 2px; border-top: 1px solid #1E2B45; }
+.pkm-tr-k { font-size: 13px; font-weight: 700; color: #C9D3EA; }
+.pkm-tr-v { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; text-align: right; }

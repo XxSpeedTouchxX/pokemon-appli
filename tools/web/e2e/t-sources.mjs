@@ -12,7 +12,7 @@ await page.goto(B, { waitUntil: 'load' }); await page.waitForTimeout(2500);
 const all = await page.locator('#app').innerText();
 ok('plus de date figée « 3 oct. à 07:00 »', !/3 oct\. à 07:00|03\/10 à 07:00/.test(all));
 const s1 = await sync(); ok('en-tête accueil : ' + s1, /^Cotes (du|cartes du) \d\d\/\d\d.* · Cardmarket, via TCGdex/.test(s1));
-ok('valeur : méthode et date', /Cote Dropicards : Cardmarket et TCGplayer · du \d\d\/\d\d/.test(all));
+ok('valeur : méthode et date', /Cote Dropicards : Cardmarket · du \d\d\/\d\d/.test(all));
 const bi = page.locator('section[aria-label="Mon classeur"] button[aria-label="Source et date des cotes"]');
 ok('bouton « i » du classeur', (await bi.count()) === 1);
 await bi.click(); await page.waitForTimeout(300);

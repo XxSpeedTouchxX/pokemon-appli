@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96"><title>Grade Recrue</title><defs><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2B27A"/><stop offset="0.55" stop-color="#C77B3F"/><stop offset="1" stop-color="#8A4E22"/></linearGradient></defs><circle cx="48" cy="50" r="40" fill="url(#b)" stroke="#111111" stroke-width="4"/>
+<circle cx="48" cy="50" r="31" fill="none" stroke="#FFE0B8" stroke-opacity="0.55" stroke-width="2.5" stroke-dasharray="4 5"/>
+<g transform="translate(48 50) rotate(-8)">
+<rect x="-15" y="-21" width="30" height="42" rx="3.5999999999999996" fill="#FFD60A" stroke="#111111" stroke-width="3"/>
+<rect x="-11" y="-17" width="22" height="20.16" rx="2" fill="#FFF6C2" stroke="#111111" stroke-width="1.6"/>
+
+<rect x="-9" y="5.04" width="18" height="2.4" rx="1.2" fill="#111111"/>
+<rect x="-9" y="10.08" width="10.799999999999999" height="2.4" rx="1.2" fill="#111111"/>
+</g></svg>

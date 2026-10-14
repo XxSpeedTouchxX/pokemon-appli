@@ -45,13 +45,11 @@
   // (avatarImg), jamais envoyée. Elle remplace l'illustration partout (en-tête, profil).
   // « Informations du dresseur » : quelques champs libres, facultatifs, gardés sur l'appareil (trainer).
   const PF_PHOTO_PX = 256;
+  // Champs demandés par le porteur (2026-10-14) : pseudo et adresse e-mail (modifiables), membre depuis et palier
+  // (affichés). L'inscription n'existe pas encore : l'adresse est gardée sur l'appareil en attendant les comptes.
   const PF_TRAINER = [
-    ['name', 'Nom de dresseur', 'Ex. : Sacha du Bourg', 24],
-    ['city', 'Ville ou région', 'Ex. : Lyon', 40],
-    ['since', 'Collectionne depuis', 'Ex. : 1999', 10],
-    ['fav', 'Pokémon préféré', 'Ex. : Dracaufeu', 24],
-    ['set', 'Extension préférée', 'Ex. : 151', 40],
-    ['bio', 'Un mot sur toi', 'Ce que tu collectionnes, ce que tu cherches…', 140]
+    ['name', 'Pseudo', 'Ex. : Sacha du Bourg', 24, 'text', 'nickname'],
+    ['email', 'Adresse e-mail', 'Ex. : sacha@exemple.fr', 80, 'email', 'email']
   ];
   const pfImgBase = proto.img;
   proto.img = function () {
@@ -79,7 +77,7 @@
   proto.vProfile = function (x) {
     const r = pfBaseView2.call(this, x), s = x.s, t = s.trainer && typeof s.trainer === 'object' ? s.trainer : {};
     const has = typeof s.avatarImg === 'string' && s.avatarImg.startsWith('data:image/');
-    r.nameLine = t.name ? 'Dresseur · ' + t.name : '';
+    r.nameLine = t.name ? '@' + t.name : '';
     r.hasName = !!t.name;
     r.photo = {
       label: has ? 'Changer ma photo de profil' : 'Choisir une photo de profil dans ma photothèque',
@@ -87,12 +85,38 @@
       onFile: e => this.pfPhoto(e && e.target && e.target.files && e.target.files[0]),
       has: has, remove: () => this.setState({ avatarImg: '', toast: 'Photo retirée · illustration d’origine' })
     };
+    const tier = x.tier && x.tier.cur ? x.tier.cur : null;
     r.trainer = {
-      fields: PF_TRAINER.map(([k, label, ph, max]) => ({
-        id: 'pkm-tr-' + k, label: label, ph: ph, max: max, value: t[k] || '',
+      since: (r.since || '').replace(/^Membre depuis /, ''),
+      grade: tier ? tier.name : '', gradeBadge: tier ? tier.sym : '', gradeColor: tier ? tier.color : 'var(--pkm-accent)',
+      fields: PF_TRAINER.map(([k, label, ph, max, type, auto]) => ({
+        label: label, ph: ph, max: max, value: t[k] || '', type: type, auto: auto,
         onInput: e => { const v = String(e.target.value || '').slice(0, max); this.setState({ trainer: Object.assign({}, this.st().trainer || {}, { [k]: v }) }); }
       })),
-      note: 'Facultatif. Ces informations restent sur cet appareil, avec ta collection : rien n’est envoyé ni publié.'
+      note: 'Les comptes Dropicards n’existent pas encore : ton pseudo et ton adresse restent sur cet appareil, avec ta collection. Rien n’est envoyé ni publié.'
     };
+    return r;
+  };
+
+  // ——— Grades (2026-10-14, demande du porteur) ———
+  // Cinq grades selon la valeur de la collection, chacun avec son logo (web/img/grades/) : Recrue (0 à 500 €),
+  // Chasseur (500 à 2 500 €), Collectionneur (2 500 à 7 500 €), Maître (7 500 à 15 000 €), Légende (15 000 € et plus).
+  // Remplacent les paliers « Commune » à « Hyper rare » (0, 500, 1 500, 3 000, 7 500 €). Le champ sym, qui dessinait le
+  // symbole dans un hexagone, porte maintenant le chemin du logo (build.mjs remplace les hexagones par des images).
+  const PF_GRADES = [
+    ['Recrue', 0, '#E0965A', 'rgba(224, 150, 90, 0.26)'],
+    ['Chasseur', 500, '#C9D1DE', 'rgba(201, 209, 222, 0.24)'],
+    ['Collectionneur', 2500, '#FFC93C', 'rgba(255, 201, 60, 0.26)'],
+    ['Maître', 7500, '#B79BFF', 'rgba(183, 155, 255, 0.28)'],
+    ['Légende', 15000, '#FF7AD9', 'rgba(255, 122, 217, 0.28)']
+  ];
+  proto.tiers = function () {
+    return PF_GRADES.map(([name, min, color, glow], i) => ({ name: name, min: min, color: color, glow: glow, sym: 'img/grades/grade-' + (i + 1) + '.svg' }));
+  };
+  // « Série en cours » est retirée de Paliers et succès : le succès « 4 semaines d'affilée » garde son compteur.
+  const pfBaseTiersView = proto.vTiers;
+  proto.vTiers = function (x) {
+    const r = pfBaseTiersView.call(this, x);
+    (r.ach || []).forEach(a => { if (/^Série en cours : /.test(a.sub)) a.sub = a.sub.replace('Série en cours : ', '') + ' / 4 semaines'; });
     return r;
   };
