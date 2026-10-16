@@ -522,6 +522,15 @@ if (brokenMarks !== 45) throw new Error('Photos et logos repérés : ' + brokenM
   if (i < 0 || a < 0 || tpl.indexOf(open, i + 1) >= 0) throw new Error('En-tête de l’accueil introuvable');
   tpl = tpl.slice(0, a) + FRAG['home-header'].trim().replace('PKCOUNTER', '<sc-if value="{{ pk.show }}" hint-placeholder-val="{{ true }}">\n' + FRAG['pk-counter'] + '</sc-if>') + tpl.slice(b);
 }
+// Même en-tête sur les onglets Toutes les séries, Jeux et PK shop (2026-10-16, porteur) ; le titre de la page passe
+// juste en dessous.
+{
+  const open = '<sc-if value="{{ ui.headerBig }}" hint-placeholder-val="{{ false }}">\n', i = tpl.indexOf(open);
+  const a = tpl.indexOf('<header', i), b = tpl.indexOf('</header>', a) + '</header>'.length;
+  if (i < 0 || a < 0 || tpl.indexOf(open, i + 1) >= 0 || !/<h1[^>]*>\{\{ ui\.title \}\}<\/h1>/.test(tpl.slice(a, b))) throw new Error('En-tête des grands titres introuvable');
+  tpl = tpl.slice(0, a) + FRAG['home-header'].trim().replace('PKCOUNTER', '<sc-if value="{{ pk.show }}" hint-placeholder-val="{{ true }}">\n' + FRAG['pk-counter'] + '</sc-if>')
+    + '\n<h1 class="pkm-hb-title" style="flex: none; margin: 0; padding: 6px 16px 4px; font-family: \'Sora\', sans-serif; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em">{{ ui.title }}</h1>' + tpl.slice(b);
+}
 // « Palier » devient « Grade » partout (2026-10-16, porteur) ; « Paliers et succès » devient « Information sur les grades ».
 {
   const regrade = t => t.split('Paliers et succès').join('Information sur les grades').replace(/\bPaliers\b/g, 'Grades').replace(/\bpaliers\b/g, 'grades')

@@ -23,6 +23,7 @@
   - mise à jour TCGdex relancée ;
   - en-tête de l'accueil (demande du même jour) : solde de PK et tickets en haut à gauche, logo Dropicards plus petit au centre, avatar plus grand à droite avec l'emblème du grade en bas à droite ;
   - premier écran : « Monte en grade… » prend le pictogramme de la bannière des emblèmes à la place de l'étoile.
+  - même en-tête sur les onglets **Toutes les séries**, **Jeux** et **PK shop** (demande du même jour) : solde de PK et tickets à gauche, logo au centre, avatar avec l'emblème du grade à droite ; le titre de la page passe juste en dessous.
 - **À valider par le porteur :**
   - **avantages des grades**, proposés par Claude, affichés mais pas encore activés (tickets offerts, booster plus fréquent, réductions sur les compagnons, concours…) ; le porteur les verra plus tard ;
   - choix des **PK gagnés au total** plutôt que du solde.
