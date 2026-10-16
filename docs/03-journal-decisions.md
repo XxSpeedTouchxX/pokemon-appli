@@ -18,7 +18,7 @@
 - **Livré :**
   - grades calculés sur les **PK gagnés au total** (`pkEarned`) : une dépense au PK shop ou une perte à la roulette ne fait pas redescendre ; parrainages comptés dans `referrals`, à 0 tant que les comptes n'existent pas ;
   - fiche de chaque grade (écran `grade`), grade actuel dans le profil, liste des grades cliquable, succès retirés, « Grade » partout ;
-  - animation : l'ancien emblème se charge (étincelles, tremblement), éclate dans un flash avec onde de choc et éclats, le nouvel emblème s'abat avec des rayons, puis « Nouveau grade » et son nom, « Continuer » ; allongée d'une seconde et terminée par un éclat (reflet diagonal, halo blanc-bleu, étoile, toutes les 3,2 s) d'après la vidéo du porteur ;
+  - animation : l'ancien emblème se charge (étincelles, tremblement), éclate dans un flash avec onde de choc et éclats, le nouvel emblème s'abat avec des rayons, puis « Nouveau grade » et son nom, « Continuer » ; allongée d'une seconde et terminée par un voile brillant qui glisse sur l'emblème seul (toutes les 3,2 s), d'après la vidéo LoL du porteur ; sans onde de choc ni forme circulaire au centre (flash d'éclatement plein écran) ;
   - **cote = médiane de la tendance et des moyennes 7 et 30 jours Cardmarket, et du prix TCGplayer** (calculé sur les ventes conclues). Une médiane écarte les pics d'un jour (Ectoplasma Skyridge : tendance 4 356 €, moyenne 30 jours 2 270 €, cote 2 856 €) ; les cartes dont les prix Cardmarket varient de plus de 2,5 fois sortent de « Les plus chères » ;
   - mise à jour TCGdex relancée ;
   - en-tête de l'accueil (demande du même jour) : solde de PK et tickets en haut à gauche, logo Dropicards plus petit au centre, avatar plus grand à droite avec l'emblème du grade en bas à droite ;

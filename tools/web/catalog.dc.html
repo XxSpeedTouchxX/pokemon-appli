@@ -1609,10 +1609,9 @@
 <sc-for list="{{ gu.sparks }}" as="gs" hint-placeholder-count="4"><i class="pkm-gu-spark" style="{{ gs.style }}"></i></sc-for>
 <img class="pkm-gu-old" src="{{ gu.oldBadge }}" alt="" width="200" height="200">
 <span class="pkm-gu-flash"></span>
-<span class="pkm-gu-ring"></span>
 <sc-for list="{{ gu.shards }}" as="gsh" hint-placeholder-count="4"><i class="pkm-gu-shard" style="{{ gsh.style }}"></i></sc-for>
 <img class="pkm-gu-new" src="{{ gu.newBadge }}" alt="" width="200" height="200">
-<span class="pkm-gu-flare"></span>
+<span class="pkm-gu-sheen" style="{{ gu.maskStyle }}"></span>
 </span>
 <span class="pkm-gu-kicker">Nouveau grade</span>
 <span class="pkm-gu-name">{{ gu.name }}</span>
