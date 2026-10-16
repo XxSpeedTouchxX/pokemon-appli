@@ -10,7 +10,7 @@ await page.goto(B, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 const tab = page.locator('nav[aria-label="Navigation principale"] button[aria-label="Toutes les séries"]');
 ok('bouton « Toutes les séries » dans la barre du bas', (await tab.count()) === 1);
 await tab.click(); await page.waitForFunction(() => document.querySelector('nav[aria-label="Aller à une série"]'), null, { timeout: 20000 }); await page.waitForTimeout(1200);
-const head = await page.locator('header').innerText(), cnt = ((await page.locator('main').innerText()).match(/\d+ séries · \d+ extensions · [\d\s\u202f]+ cartes/) || [''])[0];
+const head = await page.locator('h1').first().innerText(), cnt = ((await page.locator('main').innerText()).match(/\d+ séries · \d+ extensions · [\d\s\u202f]+ cartes/) || [''])[0];
 ok('titre « Toutes les séries » et compte : ' + cnt, /Toutes les séries/.test(head) && cnt !== '');
 ok('plus d’écran Collection (résumé retiré)', (await page.locator('section[aria-label="Résumé de la collection"]').count()) === 0);
 const groups = page.locator('main section[aria-label][id^="pkm-ser-"]');
@@ -41,7 +41,7 @@ const setTxt = await page.locator('#app').innerText();
 ok('extension : toutes ses cartes (' + (setTxt.match(/Toutes · \d+/) || [''])[0] + ')', /Toutes · \d+/.test(setTxt) && (await page.locator('main button[aria-label*="n° "]').count()) > 10);
 await page.screenshot({ path: shot('series-set.png') });
 await page.locator('button[aria-label="Retour"]').click(); await page.waitForTimeout(700);
-ok('retour : Toutes les séries', /Toutes les séries/.test(await page.locator('header').innerText()));
+ok('retour : Toutes les séries', /Toutes les séries/.test(await page.locator('h1').first().innerText()));
 // Recherche.
 await page.fill('input[aria-label="Rechercher une série ou une extension"]', '151'); await page.waitForTimeout(500);
 const found = await page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').allInnerTexts();
