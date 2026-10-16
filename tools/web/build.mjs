@@ -514,6 +514,14 @@ if (brokenMarks !== 45) throw new Error('Photos et logos repérés : ' + brokenM
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
+// En-tête de l'accueil (2026-10-16, porteur) : solde de PK (et tickets s'il y en a) en haut à gauche, logo Dropicards
+// plus petit au centre, avatar plus grand à droite avec l'emblème du grade en bas à droite (fragment home-header).
+{
+  const open = '<sc-if value="{{ ui.headerHome }}" hint-placeholder-val="{{ true }}">\n', i = tpl.indexOf(open);
+  const a = tpl.indexOf('<header', i), b = tpl.indexOf('</header>', a) + '</header>'.length;
+  if (i < 0 || a < 0 || tpl.indexOf(open, i + 1) >= 0) throw new Error('En-tête de l’accueil introuvable');
+  tpl = tpl.slice(0, a) + FRAG['home-header'].trim().replace('PKCOUNTER', '<sc-if value="{{ pk.show }}" hint-placeholder-val="{{ true }}">\n' + FRAG['pk-counter'] + '</sc-if>') + tpl.slice(b);
+}
 // « Palier » devient « Grade » partout (2026-10-16, porteur) ; « Paliers et succès » devient « Information sur les grades ».
 {
   const regrade = t => t.split('Paliers et succès').join('Information sur les grades').replace(/\bPaliers\b/g, 'Grades').replace(/\bpaliers\b/g, 'grades')

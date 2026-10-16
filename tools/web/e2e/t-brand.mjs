@@ -11,7 +11,7 @@ for (const [w, h] of [[390, 844], [360, 740]]) {
   const logo = page.locator('header img[alt="Dropicards"]');
   ok(w + ' : logo dans l’en-tête', (await logo.count()) === 1 && await logo.evaluate(i => i.complete && i.naturalWidth > 0));
   const box = await logo.boundingBox(), pk = await page.locator('header button[aria-label^="Mes PK"]').boundingBox(), av = await page.locator('header button').last().boundingBox();
-  ok(w + ' : en-tête sans chevauchement (logo ' + Math.round(box.x) + '–' + Math.round(box.x + box.width) + ' < PK ' + Math.round(pk.x) + '–' + Math.round(pk.x + pk.width) + ' < avatar ' + Math.round(av.x) + ')', box.x + box.width <= pk.x && pk.x + pk.width <= av.x && av.x + av.width <= w);
+  ok(w + ' : en-tête sans chevauchement (PK ' + Math.round(pk.x) + '–' + Math.round(pk.x + pk.width) + ' < logo ' + Math.round(box.x) + '–' + Math.round(box.x + box.width) + ' < avatar ' + Math.round(av.x) + ')', pk.x + pk.width <= box.x && box.x + box.width <= av.x && av.x + av.width <= w);
   ok(w + ' : plus de pastille « FR »', !/FR|Marché/.test(await page.locator('header').innerText()));
   if (w === 390) {
     ok('titre : ' + await page.title(), await page.title() === 'Dropicards');

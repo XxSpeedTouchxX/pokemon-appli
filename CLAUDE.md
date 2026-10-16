@@ -123,9 +123,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - **Grades par PK et parrainages, cote médiane (2026-10-16, demande du porteur) :**
   - conditions : Recrue dès l'inscription, Chasseur 3 000 PK, Collectionneur 7 500 PK, Dresseur Pokémon 15 000 PK + 3 parrainages, Maître Pokémon 30 000 PK + 5, Grand maître Pokémon 100 000 PK + 10 ; PK gagnés au total (dépenses non déduites) ; parrainages à 0 tant que les comptes n'existent pas ;
   - « Grade » partout, « Information sur les grades » (grades cliquables, fiche avec emblème et avantages, succès retirés), « Grade actuel » dans Mon profil à la place de « Type de collectionneur » ; **avantages proposés, à valider, pas encore activés** ;
-  - animation de passage de grade inspirée des promotions de League of Legends ;
+  - animation de passage de grade inspirée des promotions de League of Legends (charge, éclatement, nouvel emblème, éclat final en boucle) ; avantages des grades à revoir plus tard avec le porteur ;
   - cote = **médiane** de la tendance et des moyennes 7 et 30 jours Cardmarket et du prix TCGplayer (ventes conclues) ; marchés trop volatils hors « Les plus chères » ; la contradiction avec le principe 2 est levée ;
-  - premier écran : cartes entières, cinq lignes de présentation (scan, radar, estimation, grades, concours).
+  - premier écran : cartes entières, cinq lignes de présentation (scan, radar, estimation, grades avec pictogramme bannière, concours) ;
+  - en-tête de l'accueil : PK et tickets à gauche, logo plus petit au centre, avatar plus grand avec l'emblème du grade à droite.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

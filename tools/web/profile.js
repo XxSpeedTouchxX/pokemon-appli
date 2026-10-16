@@ -168,7 +168,7 @@
       if (typeof before === 'number' && now > before) {
         pfBaseSet.call(this, { gradeSeen: now, gradeUp: { from: before, to: now, n: Date.now() } });
         clearTimeout(pfGradeTimer);
-        pfGradeTimer = setTimeout(() => { if (this.st().gradeUp) pfBaseSet.call(this, { gradeUp: null }); }, 9000);
+        pfGradeTimer = setTimeout(() => { if (this.st().gradeUp) pfBaseSet.call(this, { gradeUp: null }); }, 15000);
       } else if (typeof before !== 'number' || now < before) pfBaseSet.call(this, { gradeSeen: now });
     }
     return out;
@@ -204,7 +204,7 @@
     return {
       name: g.name, aria: 'Grade ' + g.name, alt: 'Emblème ' + g.name, badge: g.sym, color: g.color, glow: g.glow, cond: g.cond,
       state: i < cur ? 'Grade obtenu' : i === cur ? 'Ton grade actuel' : 'À débloquer',
-      stateColor: i <= cur ? '#3DDC84' : '#9AA8C3',
+      stateColor: i <= cur ? '#3DDC84' : '#C9D3EA',
       perks: g.perks.map(t => ({ text: t })),
       note: 'Avantages en préparation : ils s’activeront avec une prochaine mise à jour.',
       prev: i > 0 ? () => this.setState({ gradeIx: i - 1 }) : null, hasPrev: i > 0,
@@ -226,7 +226,7 @@
     r.grade = this.vGradeNow(x);
     return r;
   };
-  const pfSpark = (n, rad) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2 + (i % 2) * 0.2, d = rad + (i % 3) * 18; return { style: '--x: ' + Math.round(Math.cos(a) * d) + 'px; --y: ' + Math.round(Math.sin(a) * d) + 'px; animation-delay: ' + (0.2 + (i % 6) * 0.1).toFixed(2) + 's' }; });
+  const pfSpark = (n, rad) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2 + (i % 2) * 0.2, d = rad + (i % 3) * 18; return { style: '--x: ' + Math.round(Math.cos(a) * d) + 'px; --y: ' + Math.round(Math.sin(a) * d) + 'px; animation-delay: ' + (0.2 + (i % 9) * 0.17).toFixed(2) + 's' }; });
   const pfShard = n => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2, d = 130 + (i % 3) * 40; return { style: '--x: ' + Math.round(Math.cos(a) * d) + 'px; --y: ' + Math.round(Math.sin(a) * d) + 'px; --r: ' + ((i * 97) % 540 - 270) + 'deg' }; });
   const PF_SPARKS = pfSpark(18, 120), PF_SHARDS = pfShard(12);
   proto.vGradeUp = function (s) {
@@ -241,6 +241,8 @@
   proto.renderVals = function () {
     const s = this.st(), r = pfBaseRender.call(this), ui = r.ui;
     ui.isGrade = s.screen === 'grade';
+    const ht = this.tierOf().cur;
+    r.hh = { badge: ht.sym, grade: ht.name }; // emblème du grade sur l'avatar (en-tête de l'accueil)
     r.gr = ui.isGrade ? this.vGrade(s) : { perks: [] };
     if (ui.isGrade) Object.assign(ui, { title: r.gr.name, subtitle: '', hasSubtitle: false, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
     r.gu = this.vGradeUp(s);

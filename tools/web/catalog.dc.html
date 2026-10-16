@@ -1612,6 +1612,7 @@
 <span class="pkm-gu-ring"></span>
 <sc-for list="{{ gu.shards }}" as="gsh" hint-placeholder-count="4"><i class="pkm-gu-shard" style="{{ gsh.style }}"></i></sc-for>
 <img class="pkm-gu-new" src="{{ gu.newBadge }}" alt="" width="200" height="200">
+<span class="pkm-gu-flare"></span>
 </span>
 <span class="pkm-gu-kicker">Nouveau grade</span>
 <span class="pkm-gu-name">{{ gu.name }}</span>
@@ -1625,6 +1626,18 @@
 <li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.6-2.2h5.4L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"></path><circle cx="12" cy="13" r="3.5"></circle></svg><span>Scan en quelques secondes, cartes et scellé</span></li>
 <li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><path d="M12 12l5.5-5.5"></path></svg><span>Radar pour détecter tous les shops Pokémon à proximité</span></li>
 <li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M4 19.5h16"></path><path d="M5 15.5l4.5-4.5 3.5 3 6-6.5"></path><path d="M15 7.5h4v4"></path></svg><span>Estimation du prix des cartes au plus proche du marché</span></li>
-<li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"></path></svg><span>Monte en grade pour débloquer de nouveaux avantages</span></li>
+<li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M6.5 3h11v17.5l-5.5-3.6-5.5 3.6z"></path><path d="M9 6h6v9.4l-3-2-3 2z"></path></svg><span>Monte en grade pour débloquer de nouveaux avantages</span></li>
 <li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M7 4h10v4a5 5 0 0 1-10 0z"></path><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 4"></path><path d="M17 6h2.5a2.5 2.5 0 0 1-2.5 4"></path><path d="M12 13v4"></path><path d="M8.5 20h7"></path></svg><span>Participe à des concours pour gagner des lots Pokémon</span></li>
 </ul>
+
+<!-- fragment: home-header -->
+<header class="pkm-hh" style="flex: none; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 12px 14px 6px">
+<span class="pkm-hh-left" style="justify-self: start; min-width: 0; display: flex">
+PKCOUNTER
+</span>
+<span style="justify-self: center; min-width: 0; display: flex; align-items: center"><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: 128px; max-width: 100%; height: auto"></span>
+<button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" class="pkm-hh-me" style="justify-self: end; position: relative; width: 62px; height: 62px; padding: 0; border: 0; border-radius: 31px; background: transparent; cursor: pointer">
+<img src="{{ ui.avatar }}" alt="" style="display: block; width: 58px; height: 58px; margin: 2px; box-sizing: border-box; border-radius: 29px; border: 3px solid {{ ui.ring }}; object-fit: cover">
+<img src="{{ hh.badge }}" alt="" width="34" height="34" class="pkm-hh-grade">
+</button>
+</header>

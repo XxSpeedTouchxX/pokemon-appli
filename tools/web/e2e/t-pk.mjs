@@ -25,7 +25,8 @@ const geo = async () => page.evaluate(() => {
   return { logo: [r(logo).left, r(logo).right, r(logo).width], pk: [r(pk).left, r(pk).right, r(pk).height], av: [r(av).left, r(av).right], vw: innerWidth, sw: document.documentElement.scrollWidth };
 });
 let g = await geo();
-ok('390 : logo à gauche ' + Math.round(g.logo[2]) + ' px, puis PK, puis avatar ; bouton de 44 px', g.logo[0] < 30 && g.logo[1] <= g.pk[0] && g.pk[1] <= g.av[0] && g.av[1] <= g.vw - 12 && g.pk[2] >= 44 && g.logo[2] >= 180);
+// En-tête de l'accueil (2026-10-16) : PK à gauche, logo au centre (plus petit), avatar plus grand à droite.
+ok('390 : PK à gauche, logo ' + Math.round(g.logo[2]) + ' px au centre, avatar à droite ; bouton de 44 px', g.pk[0] < 30 && g.pk[1] <= g.logo[0] && g.logo[1] <= g.av[0] && g.av[1] <= g.vw - 10 && g.pk[2] >= 44 && g.logo[2] >= 110 && g.av[1] - g.av[0] >= 56);
 await page.screenshot({ path: shot('pk-accueil.png'), clip: { x: 0, y: 0, width: 390, height: 300 } });
 // 2. Même jour, lendemain : rien de plus (gain du jour retiré le 2026-10-12).
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(800);
@@ -145,7 +146,7 @@ await edit(d => { d.pk = 12500; });
 for (const w of [360, 320]) {
   await page.setViewportSize({ width: w, height: 740 }); await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(900);
   g = await geo();
-  ok(w + ' : « ' + await cText() + ' », logo ' + Math.round(g.logo[2]) + ' px, sans chevauchement ni défilement', g.logo[1] <= g.pk[0] + 0.5 && g.pk[1] <= g.av[0] + 0.5 && g.av[1] <= w && g.sw <= w && g.logo[2] >= (w === 360 ? 150 : 110));
+  ok(w + ' : « ' + await cText() + ' », logo ' + Math.round(g.logo[2]) + ' px, sans chevauchement ni défilement', g.pk[1] <= g.logo[0] + 0.5 && g.logo[1] <= g.av[0] + 0.5 && g.av[1] <= w && g.sw <= w && g.logo[2] >= (w === 360 ? 110 : 70));
   await page.screenshot({ path: shot('pk-' + w + '.png'), clip: { x: 0, y: 0, width: w, height: 200 } });
 }
 ok('aucune erreur JS', errors.length === 0);
