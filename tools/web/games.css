@@ -158,14 +158,14 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 @keyframes pkmGuSpark { 0% { opacity: 0; transform: translate(var(--x), var(--y)) scale(0.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(0, 0) scale(1.4); } }
 .pkm-gu-flash { position: fixed; inset: 0; background: #FFFFFF; opacity: 0; pointer-events: none; animation: pkmGuFlash 0.55s 2.35s ease-out both; }
 @keyframes pkmGuFlash { 0% { opacity: 0; } 18% { opacity: 0.85; } 100% { opacity: 0; } }
-.pkm-gu-shard { position: absolute; left: 50%; top: 50%; width: 12px; height: 18px; margin: -9px 0 0 -6px; background: var(--gu); border: 1.5px solid #111111; clip-path: polygon(50% 0, 100% 100%, 0 80%); opacity: 0; animation: pkmGuShard 0.85s 2.38s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-@keyframes pkmGuShard { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)); } }
+.pkm-gu-shard { position: absolute; left: 50%; top: 50%; width: 12px; height: 18px; margin: -9px 0 0 -6px; background: var(--gu); border: 1.5px solid #111111; clip-path: polygon(50% 0, 100% 100%, 0 80%); opacity: 0; animation: pkmGuShard 0.85s 2.38s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
+@keyframes pkmGuShard { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 4% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)); } }
 .pkm-gu-new { opacity: 0; animation: pkmGuNew 0.75s 2.5s cubic-bezier(0.2, 1.4, 0.4, 1) forwards, pkmGuGlow 3.2s 3.9s ease-in-out infinite; }
 @keyframes pkmGuNew { 0% { opacity: 0; transform: scale(1.9); filter: brightness(3) drop-shadow(0 0 30px #FFFFFF); } 45% { opacity: 1; transform: scale(0.94); } 100% { opacity: 1; transform: scale(1); filter: brightness(1) drop-shadow(0 0 22px var(--gu)); } }
 .pkm-gu-kicker, .pkm-gu-name, .pkm-gu-sub, .pkm-gu-go { position: relative; opacity: 0; animation: pkmGuText 0.6s ease-out forwards; }
 .pkm-gu-kicker { margin-top: 10px; font-size: 13px; font-weight: 800; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gu); animation-delay: 3.05s; }
-.pkm-gu-name { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 34px; line-height: 1.05; text-align: center; color: #FFFFFF; -webkit-text-stroke: 1.5px #111111; text-shadow: 0 3px 0 #111111, 0 0 22px var(--gu); padding: 0 16px; animation-name: pkmGuName; animation-delay: 3.2s; }
-@keyframes pkmGuName { 0% { opacity: 0; letter-spacing: 0.4em; } 100% { opacity: 1; letter-spacing: 0.02em; } }
+.pkm-gu-name { max-width: 100%; box-sizing: border-box; white-space: nowrap; letter-spacing: 0.02em; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: clamp(18px, 6.6vw, 34px); line-height: 1.05; text-align: center; color: #FFFFFF; -webkit-text-stroke: 1.5px #111111; text-shadow: 0 3px 0 #111111, 0 0 22px var(--gu); padding: 0 16px; animation-name: pkmGuName; animation-delay: 3.2s; }
+@keyframes pkmGuName { 0% { opacity: 0; transform: scale(1.25); filter: blur(4px); } 100% { opacity: 1; transform: none; filter: none; } }
 .pkm-gu-sub { max-width: 300px; font-size: 13.5px; line-height: 1.45; color: #C9D3EA; text-align: center; animation-delay: 3.5s; }
 .pkm-gu-go { margin-top: 14px; min-width: 200px; height: 50px; border: 2px solid #111111; border-radius: 999px; background: #FFD60A; color: #111111; font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; animation-delay: 3.9s; }
 @keyframes pkmGuText { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
