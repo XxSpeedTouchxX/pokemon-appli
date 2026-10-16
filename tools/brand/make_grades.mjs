@@ -27,13 +27,14 @@ function blade(angle, L, w, k, rootR = 14) {
 }
 const mirror = d => d.replace(/([MQLZ])?\s?(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g, (m, c, x, y) => (c || ' ') + f(2 * CX - Number(x)) + ' ' + y);
 // Poké Ball au style Dropicards : moitié haute aux couleurs du grade, moitié basse blanche, bande et bouton noirs.
+// Reflet descendu de 0,13 r (2026-10-16, porteur) : il ne touche plus le contour noir du haut de la balle.
 const ball = (top, r = 16) => `<g>
 <circle cx="${CX}" cy="${CY}" r="${r}" fill="#FFFFFF" stroke="${INK}" stroke-width="3.2"/>
 <path d="M${CX - r} ${CY} A${r} ${r} 0 0 1 ${CX + r} ${CY} Z" fill="${top}" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
 <path d="M${CX - r + 1} ${CY} H${CX + r - 1}" stroke="${INK}" stroke-width="4"/>
 <circle cx="${CX}" cy="${CY}" r="${r * 0.36}" fill="#FFFFFF" stroke="${INK}" stroke-width="3"/>
 <circle cx="${CX}" cy="${CY}" r="${r * 0.14}" fill="${Y}"/>
-<path d="M${CX - r * 0.62} ${CY - r * 0.55} Q${CX - r * 0.35} ${CY - r * 0.85} ${CX} ${CY - r * 0.88}" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
+<path d="M${CX - r * 0.62} ${CY - r * 0.42} Q${CX - r * 0.35} ${CY - r * 0.72} ${CX} ${CY - r * 0.75}" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
 </g>`;
 const banner = `<path d="M36 10 H84 V110 L60 97 L36 110 Z" fill="#1B2233" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M40 14 H80 V103 L60 92 L40 103 Z" fill="none" stroke="${Y}" stroke-opacity="0.55" stroke-width="1.6"/>`;

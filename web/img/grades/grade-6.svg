@@ -10,7 +10,7 @@
 <path d="M45 66 H75" stroke="#111111" stroke-width="4"/>
 <circle cx="60" cy="66" r="5.76" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
 <circle cx="60" cy="66" r="2.24" fill="#FFD60A"/>
-<path d="M50.08 57.2 Q54.4 52.4 60 51.92" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
+<path d="M50.08 59.28 Q54.4 54.480000000000004 60 54" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
 </g>
 <path d="M42 44 L43 24 L51 34 L60 18 L69 34 L77 24 L78 44 Z" fill="url(#c6)" stroke="#111111" stroke-width="3" stroke-linejoin="round"/>
 <circle cx="60" cy="33" r="3.2" fill="#FF7AD9" stroke="#111111" stroke-width="1.4"/><circle cx="49" cy="39" r="2" fill="#5EE0CF" stroke="#111111" stroke-width="1.2"/><circle cx="71" cy="39" r="2" fill="#5EE0CF" stroke="#111111" stroke-width="1.2"/>
