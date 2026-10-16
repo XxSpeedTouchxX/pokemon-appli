@@ -60,7 +60,7 @@
     if (after.purchases !== before.purchases && fxUnits(after) > fxUnits(before)) later(() => fxBurst('card', W / 2, H - 150));
     if ((after.pk || 0) > (before.pk || 0)) later(() => { const c = fxCenter(document.querySelector('header button[aria-label^="Mes PK"]')); fxBurst('gem', c ? c[0] : W - 80, c ? c[1] : 40); });
     const unlocked = Array.isArray(after.pkOwn) && Array.isArray(before.pkOwn) && after.pkOwn.length > before.pkOwn.length;
-    const tier = typeof after.toast === 'string' && after.toast !== before.toast && /palier/.test(after.toast);
+    const tier = typeof after.toast === 'string' && after.toast !== before.toast && /grade/.test(after.toast);
     if (unlocked || tier) later(() => {
       fxBurst('star', W / 2, H * 0.45);
       const t = document.querySelector('div[role="status"]');

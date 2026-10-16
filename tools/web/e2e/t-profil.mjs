@@ -22,7 +22,7 @@ ok('photo recadrée et gardée (' + (d.avatarImg || '').length + ' caractères)'
 ok('bulle : « Changer ma photo de profil »', (await idt.locator('button[aria-label="Changer ma photo de profil"]').count()) === 1 && (await idt.locator('img[src^="data:image/jpeg"]').count()) === 1);
 const tr = page.locator('section[aria-label="Informations du dresseur"]');
 ok('rubrique « Informations du dresseur » : pseudo, e-mail, membre depuis, palier', (await tr.count()) === 1 && (await tr.locator('input').count()) === 2
-  && /Membre depuis/.test(await tr.innerText()) && /Palier/.test(await tr.innerText()) && (await tr.locator('img[src^="img/grades/grade-"]').count()) === 1);
+  && /Membre depuis/.test(await tr.innerText()) && /Grade/.test(await tr.innerText()) && (await tr.locator('img[src^="img/grades/grade-"]').count()) === 1);
 await tr.locator('input[aria-label="Pseudo"]').fill('Nico');
 await tr.locator('input[aria-label="Adresse e-mail"]').fill('nico@exemple.fr'); await page.waitForTimeout(300);
 await page.screenshot({ path: shot('profil.png') });

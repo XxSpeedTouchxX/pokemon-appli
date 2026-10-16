@@ -48,7 +48,7 @@ export const TOKENS = {
 const MAP_SVG = /aria-label="Carte des magasins"|M0 168 C|M262 18 h66|M22 22 h54|M-10 74|M-10 132|M110 -10|M238 -10|M30 200|cx="179"|pkmPing|left: 10px; bottom: 9px|right: 10px; top: 9px/;
 export const RULES = [
   // Gardées telles quelles.
-  ['mask', '#000', 'keep', { n: 4 }],
+  ['mask', '#000', 'keep', { n: 2 }], // 2 depuis le 2026-10-16 : cartes du premier écran entières, sans fondu
   ['bg', '#E9ECF2', 'keep', { n: 1 }], ['fg', '#1B2236', 'keep', { n: 1 }], // étiquette des cartes gradées (fiche ; l'écran Collection est retiré)
   ['bg', '#23765C', 'keep', { n: 1 }], ['bg', '#0A251C', 'keep', { n: 1 }], ['bg', 'rgb(35, 118, 92)', 'keep', { n: 2 }], // fond d'extension (Règne Delta)
   ['bg', '#0E1729', 'keep', { surface: true, n: 1 }], // carte de démonstration de Territoire

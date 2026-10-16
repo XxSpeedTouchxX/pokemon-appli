@@ -954,8 +954,8 @@
 <div role="group" aria-label="Profil forcé" style="display: flex; flex-wrap: wrap; gap: 6px">
 <sc-for list="{{ adm.cats }}" as="acat" hint-placeholder-count="4"><button type="button" onClick="{{ acat.pick }}" aria-pressed="{{ acat.on }}" style="min-height: 40px; padding: 0 13px; border-radius: 999px; border: 1px solid {{ acat.bc }}; background: {{ acat.bg }}; color: {{ acat.fg }}; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ acat.label }}</button></sc-for>
 </div>
-<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Palier forcé</h3>
-<div role="group" aria-label="Palier forcé" style="display: flex; flex-wrap: wrap; gap: 6px">
+<h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Grade forcé</h3>
+<div role="group" aria-label="Grade forcé" style="display: flex; flex-wrap: wrap; gap: 6px">
 <sc-for list="{{ adm.tiers }}" as="atier" hint-placeholder-count="5"><button type="button" onClick="{{ atier.pick }}" aria-pressed="{{ atier.on }}" style="min-height: 40px; padding: 0 13px; border-radius: 999px; border: 1px solid {{ atier.bc }}; background: {{ atier.bg }}; color: {{ atier.fg }}; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ atier.label }}</button></sc-for>
 </div>
 <h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Date simulée</h3>
@@ -1561,7 +1561,70 @@
 </label>
 </sc-for>
 <div class="pkm-tr-row"><span class="pkm-tr-k">Membre depuis</span><span class="pkm-tr-v">{{ pf.trainer.since }}</span></div>
-<div class="pkm-tr-row"><span class="pkm-tr-k">Palier</span><span class="pkm-tr-v" style="display: flex; align-items: center; gap: 8px; color: {{ pf.trainer.gradeColor }}"><img src="{{ pf.trainer.gradeBadge }}" alt="" width="28" height="28" style="display: block">{{ pf.trainer.grade }}</span></div>
+<div class="pkm-tr-row"><span class="pkm-tr-k">Grade</span><span class="pkm-tr-v" style="display: flex; align-items: center; gap: 8px; color: {{ pf.trainer.gradeColor }}"><img src="{{ pf.trainer.gradeBadge }}" alt="" width="28" height="28" style="display: block">{{ pf.trainer.grade }}</span></div>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ pf.trainer.note }}</p>
 <sc-if value="{{ pf.photo.has }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.photo.remove }}" style="align-self: flex-start; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Retirer ma photo de profil</button></sc-if>
 </section>
+
+<!-- fragment: profile-grade -->
+<section aria-label="Grade actuel" class="pkm-dark pkm-gr-now" style="flex: none; padding: 18px 16px 16px; border-radius: 24px; border: 1px solid #2A3A5C; background: radial-gradient(100% 70% at 50% 0%, {{ pf.grade.glow }}, rgba(0, 0, 0, 0) 66%), #121C33; color: #F3F6FC; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center">
+<h2 style="margin: 0; align-self: flex-start; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600">Grade actuel</h2>
+<button type="button" onClick="{{ pf.grade.open }}" aria-label="{{ pf.grade.aria }}" style="padding: 0; border: 0; background: transparent; cursor: pointer"><img src="{{ pf.grade.badge }}" alt="" width="132" height="132" class="pkm-gr-hero" style="display: block"></button>
+<span style="font-family: 'Sora', sans-serif; font-size: 24px; line-height: 1.1; font-weight: 700; color: {{ pf.grade.color }}">{{ pf.grade.name }}</span>
+<div aria-hidden="true" style="align-self: stretch; height: 8px; margin-top: 4px; border-radius: 4px; background: #24345C; overflow: hidden"><div style="width: {{ pf.grade.barW }}; height: 100%; border-radius: 4px; background: linear-gradient(90deg, {{ pf.grade.color }}, {{ pf.grade.nextColor }})"></div></div>
+<span style="font-size: 12.5px; font-weight: 600; color: #C9D3EA">{{ pf.grade.next }}</span>
+<h3 style="margin: 6px 0 0; align-self: flex-start; font-size: 14px; font-weight: 700">Tes avantages</h3>
+<ul style="align-self: stretch; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; text-align: left">
+<sc-for list="{{ pf.grade.perks }}" as="gp" hint-placeholder-count="3"><li class="pkm-gr-perk"><span class="pkm-gr-tick" aria-hidden="true"></span><span>{{ gp.text }}</span></li></sc-for>
+</ul>
+<button type="button" onClick="{{ pf.grade.all }}" style="align-self: stretch; margin-top: 4px; min-height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Information sur les grades</button>
+</section>
+
+<!-- fragment: grade-screen -->
+<sc-if value="{{ ui.isGrade }}" hint-placeholder-val="{{ false }}">
+<section aria-label="{{ gr.aria }}" class="pkm-dark" style="flex: none; padding: 22px 16px 18px; border-radius: 26px; border: 1px solid #2A3A5C; background: radial-gradient(100% 70% at 50% 0%, {{ gr.glow }}, rgba(0, 0, 0, 0) 66%), #121C33; color: #F3F6FC; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center">
+<img src="{{ gr.badge }}" alt="{{ gr.alt }}" width="190" height="190" class="pkm-gr-hero" style="display: block">
+<span style="font-family: 'Sora', sans-serif; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -0.02em; color: {{ gr.color }}">{{ gr.name }}</span>
+<span style="font-size: 14px; color: #C9D3EA">{{ gr.cond }}</span>
+<span style="font-size: 13px; font-weight: 700; color: {{ gr.stateColor }}">{{ gr.state }}</span>
+</section>
+<section aria-label="Avantages du grade" class="pkm-dark" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Avantages</h2>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{ gr.perks }}" as="grp" hint-placeholder-count="3"><li class="pkm-gr-perk"><span class="pkm-gr-tick" aria-hidden="true"></span><span>{{ grp.text }}</span></li></sc-for>
+</ul>
+<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ gr.note }}</p>
+</section>
+<div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
+<sc-if value="{{ gr.hasPrev }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ gr.prev }}" style="min-height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">‹ Grade précédent</button></sc-if>
+<sc-if value="{{ gr.hasNext }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ gr.next }}" style="grid-column: 2; min-height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Grade suivant ›</button></sc-if>
+</div>
+</sc-if>
+
+<!-- fragment: grade-up -->
+<sc-if value="{{ gu.on }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-gu" key="{{ gu.key }}" role="dialog" aria-modal="true" aria-label="{{ gu.title }}" style="--gu: {{ gu.color }}">
+<span class="pkm-gu-rays" aria-hidden="true"></span>
+<span class="pkm-gu-stage" aria-hidden="true">
+<sc-for list="{{ gu.sparks }}" as="gs" hint-placeholder-count="4"><i class="pkm-gu-spark" style="{{ gs.style }}"></i></sc-for>
+<img class="pkm-gu-old" src="{{ gu.oldBadge }}" alt="" width="200" height="200">
+<span class="pkm-gu-flash"></span>
+<span class="pkm-gu-ring"></span>
+<sc-for list="{{ gu.shards }}" as="gsh" hint-placeholder-count="4"><i class="pkm-gu-shard" style="{{ gsh.style }}"></i></sc-for>
+<img class="pkm-gu-new" src="{{ gu.newBadge }}" alt="" width="200" height="200">
+</span>
+<span class="pkm-gu-kicker">Nouveau grade</span>
+<span class="pkm-gu-name">{{ gu.name }}</span>
+<span class="pkm-gu-sub">{{ gu.sub }}</span>
+<button type="button" class="pkm-gu-go" onClick="{{ gu.close }}">Continuer</button>
+</div>
+</sc-if>
+
+<!-- fragment: onb-points -->
+<ul aria-label="Ce que fait Dropicards" style="margin: 0; padding: 14px 16px; list-style: none; display: flex; flex-direction: column; gap: 12px; border-radius: 20px; border: 1px solid #1E2B45; background: #111A2C">
+<li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.6-2.2h5.4L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"></path><circle cx="12" cy="13" r="3.5"></circle></svg><span>Scan en quelques secondes, cartes et scellé</span></li>
+<li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><path d="M12 12l5.5-5.5"></path></svg><span>Radar pour détecter tous les shops Pokémon à proximité</span></li>
+<li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M4 19.5h16"></path><path d="M5 15.5l4.5-4.5 3.5 3 6-6.5"></path><path d="M15 7.5h4v4"></path></svg><span>Estimation du prix des cartes au plus proche du marché</span></li>
+<li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"></path></svg><span>Monte en grade pour débloquer de nouveaux avantages</span></li>
+<li style="display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M7 4h10v4a5 5 0 0 1-10 0z"></path><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 4"></path><path d="M17 6h2.5a2.5 2.5 0 0 1-2.5 4"></path><path d="M12 13v4"></path><path d="M8.5 20h7"></path></svg><span>Participe à des concours pour gagner des lots Pokémon</span></li>
+</ul>

@@ -6,6 +6,27 @@
 
 ---
 
+## 2026-10-16 — Grades par PK et parrainages, Information sur les grades, animation de passage, cote médiane
+
+- **Demande du porteur :**
+  - Mon profil : « Type de collectionneur » remplacé par « Grade actuel » (emblème et avantages) ; « Palier » devient « Grade » ;
+  - « Paliers et succès » devient « Information sur les grades » : interface gardée, chaque grade cliquable vers sa fiche (emblème en haut, avantages dessous), succès retirés ;
+  - nouvelles conditions : Recrue dès l'inscription ; Chasseur 3 000 PK ; Collectionneur 7 500 PK ; Dresseur Pokémon 15 000 PK + 3 parrainages ; Maître Pokémon 30 000 PK + 5 parrainages ; Grand maître Pokémon 100 000 PK + 10 parrainages ;
+  - animation de passage de grade inspirée des promotions de rang de League of Legends ;
+  - premier écran : cartes entières, cinq nouvelles lignes de présentation ;
+  - « Les plus chères » encore incohérente face aux ventes réussies eBay : refaire un scan.
+- **Livré :**
+  - grades calculés sur les **PK gagnés au total** (`pkEarned`) : une dépense au PK shop ou une perte à la roulette ne fait pas redescendre ; parrainages comptés dans `referrals`, à 0 tant que les comptes n'existent pas ;
+  - fiche de chaque grade (écran `grade`), grade actuel dans le profil, liste des grades cliquable, succès retirés, « Grade » partout ;
+  - animation : l'ancien emblème se charge (étincelles, tremblement), éclate dans un flash avec onde de choc et éclats, le nouvel emblème s'abat avec des rayons et un reflet, puis « Nouveau grade » et son nom, « Continuer » ;
+  - **cote = médiane de la tendance et des moyennes 7 et 30 jours Cardmarket, et du prix TCGplayer** (calculé sur les ventes conclues). Une médiane écarte les pics d'un jour (Ectoplasma Skyridge : tendance 4 356 €, moyenne 30 jours 2 270 €, cote 2 856 €) ; les cartes dont les prix Cardmarket varient de plus de 2,5 fois sortent de « Les plus chères » ;
+  - mise à jour TCGdex relancée.
+- **À valider par le porteur :**
+  - **avantages des grades**, proposés par Claude, affichés mais pas encore activés (tickets offerts, booster plus fréquent, réductions sur les compagnons, concours…) ;
+  - choix des **PK gagnés au total** plutôt que du solde.
+- **Limites :** les ventes réussies eBay restent inaccessibles sans l'API Marketplace Insights ; le prix TCGplayer (ventes conclues aux États-Unis) en tient lieu. Les parrainages demandent des comptes : Dresseur Pokémon et au-dessus ne s'obtiennent pas encore sans l'Admin.
+- **Principe 2 (plusieurs sources) :** de nouveau suivi pour la cote (quatre indicateurs, deux sources), ce qui lève la contradiction signalée le 2026-10-12.
+
 ## 2026-10-14 — Grades selon la valeur, Mon profil, séries, roulette animée, premier écran
 
 - **Demande du porteur :**

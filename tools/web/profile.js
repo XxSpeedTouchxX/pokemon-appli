@@ -98,28 +98,155 @@
     return r;
   };
 
-  // ——— Grades (2026-10-14, demande du porteur) ———
-  // Six grades selon la valeur de la collection, chacun avec son emblème (web/img/grades/, tools/brand/make_grades.mjs) :
-  // Recrue (0 à 500 €, bronze), Chasseur (500 à 2 500 €, argent), Collectionneur (2 500 à 7 500 €, or), Dresseur
-  // Pokémon (7 500 à 15 000 €, or et vert), Maître Pokémon (15 000 à 30 000 €, or et cristal), Grand maître Pokémon
-  // (30 000 € et plus, rouge, couronne). Seuil de 30 000 € proposé par défaut, gardé pour l'instant par le porteur.
-  // Remplacent les paliers « Commune » à « Hyper rare ». Le champ sym porte le chemin de l'emblème (build.mjs remplace
-  // les hexagones de la maquette par des images).
+  // ——— Grades (2026-10-14 ; conditions du 2026-10-16, demande du porteur) ———
+  // Six grades, chacun avec son emblème (web/img/grades/, tools/brand/make_grades.mjs). Ils ne suivent plus la valeur de
+  // la collection mais les PK gagnés et les parrainages :
+  //   Recrue : dès l'inscription ; Chasseur : 3 000 PK ; Collectionneur : 7 500 PK ; Dresseur Pokémon : 15 000 PK et
+  //   3 parrainages ; Maître Pokémon : 30 000 PK et 5 parrainages ; Grand maître Pokémon : 100 000 PK et 10 parrainages.
+  // PK comptés : le total gagné depuis le début (pkEarned), pour qu'une dépense au PK shop ou une perte à la roulette ne
+  // fasse pas redescendre de grade. Parrainages : pas encore possibles (ils demandent des comptes) ; compteur
+  // « referrals » gardé avec la collection, à 0 pour l'instant (forçable depuis l'Admin).
+  // Le champ sym d'un grade porte le chemin de son emblème (build.mjs remplace les hexagones de la maquette).
+  // Avantages : liste proposée par Claude, à valider par le porteur ; affichés, pas encore activés.
   const PF_GRADES = [
-    ['Recrue', 0, '#F2A35E', 'rgba(240, 160, 85, 0.28)'],
-    ['Chasseur', 500, '#C9D1DE', 'rgba(201, 209, 222, 0.24)'],
-    ['Collectionneur', 2500, '#FFC93C', 'rgba(255, 201, 60, 0.26)'],
-    ['Dresseur Pokémon', 7500, '#5BE08F', 'rgba(47, 211, 122, 0.26)'],
-    ['Maître Pokémon', 15000, '#7CF5FF', 'rgba(124, 245, 255, 0.26)'],
-    ['Grand maître Pokémon', 30000, '#FF6A4D', 'rgba(227, 53, 13, 0.30)']
+    { name: 'Recrue', pk: 0, ref: 0, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)',
+      perks: ['Toutes les fonctions de l’app : valeur de ta collection, scan, classeur, radar des boutiques', 'Booster PK toutes les 12 h, pile ou face et roulette', 'Bulbizarre, Salamèche, Carapuce et Pikachu offerts comme compagnons'] },
+    { name: 'Chasseur', pk: 3000, ref: 0, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)',
+      perks: ['Emblème Chasseur sur ton profil', '1 ticket du tirage au sort offert', 'Booster PK toutes les 10 h'] },
+    { name: 'Collectionneur', pk: 7500, ref: 0, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)',
+      perks: ['Emblème Collectionneur sur ton profil', '2 tickets du tirage au sort offerts', 'Booster PK toutes les 8 h', 'Compagnons à −10 %'] },
+    { name: 'Dresseur Pokémon', pk: 15000, ref: 3, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)',
+      perks: ['Emblème Dresseur Pokémon sur ton profil', '3 tickets du tirage au sort offerts', 'Deux tours de roulette par jour', 'Accès anticipé aux nouveaux concours'] },
+    { name: 'Maître Pokémon', pk: 30000, ref: 5, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)',
+      perks: ['Emblème Maître Pokémon sur ton profil', '5 tickets du tirage au sort offerts', 'Compagnons légendaires à moitié prix', 'Concours réservés aux Maîtres Pokémon'] },
+    { name: 'Grand maître Pokémon', pk: 100000, ref: 10, color: '#FF6A4D', glow: 'rgba(227, 53, 13, 0.30)',
+      perks: ['Emblème couronné sur ton profil', '10 tickets du tirage au sort offerts', 'Tous les compagnons débloqués, thèmes compris', 'Lot exclusif au PK shop'] }
   ];
+  const pfNum = n => Number(n || 0).toLocaleString('fr-FR');
+  const pfCond = g => g.pk === 0 ? 'Dès l’inscription' : pfNum(g.pk) + ' PK gagnés' + (g.ref ? ' + ' + g.ref + ' parrainages' : '');
   proto.tiers = function () {
-    return PF_GRADES.map(([name, min, color, glow], i) => ({ name: name, min: min, color: color, glow: glow, sym: 'img/grades/grade-' + (i + 1) + '.svg' }));
+    return PF_GRADES.map((g, i) => ({ name: g.name, min: g.pk, ref: g.ref, color: g.color, glow: g.glow, sym: 'img/grades/grade-' + (i + 1) + '.svg', perks: g.perks, cond: pfCond(g) }));
   };
-  // « Série en cours » est retirée de Paliers et succès : le succès « 4 semaines d'affilée » garde son compteur.
-  const pfBaseTiersView = proto.vTiers;
-  proto.vTiers = function (x) {
-    const r = pfBaseTiersView.call(this, x);
-    (r.ach || []).forEach(a => { if (/^Série en cours : /.test(a.sub)) a.sub = a.sub.replace('Série en cours : ', '') + ' / 4 semaines'; });
+  const pfEarned = s => Math.max(Number(s.pkEarned) || 0, 0);
+  const pfRefs = s => Math.max(Number(s.referrals) || 0, 0);
+  // Grade obtenu (le paramètre « total » de la maquette, valeur de la collection, n'est plus utilisé).
+  proto.tierOf = function () {
+    const s = this.st(), T = this.tiers(), pk = pfEarned(s), ref = pfRefs(s);
+    let i = 0;
+    T.forEach((t, k) => { if (pk >= t.min && ref >= t.ref) i = k; });
+    const cur = T[i], next = T[i + 1] || null;
+    // Progression vers le suivant : PK et parrainages à parts égales quand le grade suivant en demande.
+    const fp = next ? Math.min(1, Math.max(0, (pk - cur.min) / Math.max(1, next.min - cur.min))) : 1;
+    const fr = next && next.ref ? Math.min(1, ref / next.ref) : 1;
+    const pct = next ? (next.ref ? (fp + fr) / 2 : fp) * 100 : 100;
+    return { i: i, cur: cur, next: next, pct: pct, remaining: next ? Math.max(0, next.min - pk) : 0, refMissing: next ? Math.max(0, next.ref - ref) : 0 };
+  };
+  const pfBaseTierView = proto.tierView;
+  proto.tierView = function (x) {
+    const r = pfBaseTierView.call(this, x), t = x.tier;
+    if (t.next) {
+      const bits = [];
+      if (t.remaining > 0) bits.push(pfNum(t.remaining) + ' PK');
+      if (t.refMissing > 0) bits.push(t.refMissing + (t.refMissing > 1 ? ' parrainages' : ' parrainage'));
+      r.next = (bits.length ? 'Encore ' + bits.join(' et ') : 'Presque') + ' pour ' + t.next.name;
+    } else r.next = 'Grade maximal atteint';
+    r.aria = 'Grade ' + t.cur.name + ', ' + Math.floor(t.pct) + ' % vers le suivant. Voir les grades';
     return r;
   };
+  // PK gagnés au total : chaque hausse du solde s'ajoute (gains, jeux, partage, Admin) ; une baisse ne retire rien.
+  // Passage de grade : quand le grade monte, l'animation façon « promotion » se lance (gradeUp, fragment grade-up).
+  const pfBaseSet = proto.setState;
+  proto.setState = function (patch) {
+    const raw = this.state || {};
+    if (patch && typeof patch.pk === 'number' && typeof raw.pk === 'number' && patch.pk > raw.pk && !('pkEarned' in patch)) {
+      patch = Object.assign({}, patch, { pkEarned: pfEarned(raw) + (patch.pk - raw.pk) });
+    }
+    const before = raw.gradeSeen;
+    const out = pfBaseSet.call(this, patch);
+    if (patch && ('pk' in patch || 'pkEarned' in patch || 'referrals' in patch || 'admin' in patch)) {
+      const now = this.tierOf().i;
+      if (typeof before === 'number' && now > before) {
+        pfBaseSet.call(this, { gradeSeen: now, gradeUp: { from: before, to: now, n: Date.now() } });
+        clearTimeout(pfGradeTimer);
+        pfGradeTimer = setTimeout(() => { if (this.st().gradeUp) pfBaseSet.call(this, { gradeUp: null }); }, 9000);
+      } else if (typeof before !== 'number' || now < before) pfBaseSet.call(this, { gradeSeen: now });
+    }
+    return out;
+  };
+  let pfGradeTimer = null;
+  // Premier lancement après la mise à jour : PK gagnés = solde actuel ; grade vu = grade actuel (pas d'animation).
+  // (après pkInit, pour compter les 100 PK de bienvenue).
+  const pfBasePkInit = proto.pkInit;
+  proto.pkInit = function () {
+    pfBasePkInit.call(this);
+    const raw = this.state || {}, patch = {};
+    if (typeof raw.pkEarned !== 'number') patch.pkEarned = Math.max(Number(raw.pk) || 0, 0);
+    if (Object.keys(patch).length) this.state = Object.assign({}, this.state, patch);
+    if (typeof this.state.gradeSeen !== 'number') this.state = Object.assign({}, this.state, { gradeSeen: this.tierOf().i });
+    this.saveNow();
+  };
+  // « Série en cours » est retirée de Paliers et succès : le succès « 4 semaines d'affilée » garde son compteur.
+  // Information sur les grades (2026-10-16) : chaque grade de la liste ouvre sa fiche (emblème et avantages) ; les
+  // succès sont retirés. Les lignes indiquent la condition d'obtention (PK gagnés, parrainages).
+  const pfBaseTiersView = proto.vTiers;
+  proto.vTiers = function (x) {
+    const r = pfBaseTiersView.call(this, x), T = this.tiers(), s = x.s;
+    r.value = pfNum(pfEarned(s)) + ' PK gagnés · ' + pfRefs(s) + (pfRefs(s) > 1 ? ' parrainages' : ' parrainage');
+    r.ladder = (r.ladder || []).map(ld => {
+      const i = T.findIndex(t => t.name === ld.name), t = T[i];
+      return Object.assign(ld, { min: t ? t.cond : ld.min, open: () => this.push('grade', { gradeIx: i }), aria: 'Voir le grade ' + ld.name + ' et ses avantages' });
+    });
+    return r;
+  };
+  // Fiche d'un grade : emblème en grand, condition, avantages, état (obtenu, en cours, à venir).
+  proto.vGrade = function (s) {
+    const T = this.tiers(), i = Math.max(0, Math.min(T.length - 1, Number(s.gradeIx) || 0)), g = T[i], cur = this.tierOf().i;
+    return {
+      name: g.name, aria: 'Grade ' + g.name, alt: 'Emblème ' + g.name, badge: g.sym, color: g.color, glow: g.glow, cond: g.cond,
+      state: i < cur ? 'Grade obtenu' : i === cur ? 'Ton grade actuel' : 'À débloquer',
+      stateColor: i <= cur ? '#3DDC84' : '#9AA8C3',
+      perks: g.perks.map(t => ({ text: t })),
+      note: 'Avantages en préparation : ils s’activeront avec une prochaine mise à jour.',
+      prev: i > 0 ? () => this.setState({ gradeIx: i - 1 }) : null, hasPrev: i > 0,
+      next: i < T.length - 1 ? () => this.setState({ gradeIx: i + 1 }) : null, hasNext: i < T.length - 1
+    };
+  };
+  // Grade actuel (Mon profil) : emblème mis en avant, progression, avantages.
+  proto.vGradeNow = function (x) {
+    const t = x.tier, v = this.tierView(x);
+    return {
+      name: t.cur.name, aria: 'Voir les avantages du grade ' + t.cur.name, badge: t.cur.sym, color: t.cur.color, glow: t.cur.glow, barW: v.barW, nextColor: v.nextColor, next: v.next,
+      perks: (t.cur.perks || []).map(p => ({ text: p })), open: () => this.push('grade', { gradeIx: t.i }), all: () => this.push('tiers')
+    };
+  };
+  // Écran « grade » (fiche d'un grade), grade actuel du profil, animation de passage de grade.
+  const pfBaseView3 = proto.vProfile;
+  proto.vProfile = function (x) {
+    const r = pfBaseView3.call(this, x);
+    r.grade = this.vGradeNow(x);
+    return r;
+  };
+  const pfSpark = (n, rad) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2 + (i % 2) * 0.2, d = rad + (i % 3) * 18; return { style: '--x: ' + Math.round(Math.cos(a) * d) + 'px; --y: ' + Math.round(Math.sin(a) * d) + 'px; animation-delay: ' + (0.2 + (i % 6) * 0.1).toFixed(2) + 's' }; });
+  const pfShard = n => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2, d = 130 + (i % 3) * 40; return { style: '--x: ' + Math.round(Math.cos(a) * d) + 'px; --y: ' + Math.round(Math.sin(a) * d) + 'px; --r: ' + ((i * 97) % 540 - 270) + 'deg' }; });
+  const PF_SPARKS = pfSpark(18, 120), PF_SHARDS = pfShard(12);
+  proto.vGradeUp = function (s) {
+    const u = s.gradeUp, T = this.tiers();
+    if (!u || !T[u.to]) return { on: false, sparks: [], shards: [] };
+    const g = T[u.to], o = T[Math.max(0, Math.min(u.from, u.to - 1))];
+    return { on: true, key: 'gu-' + u.n, title: 'Nouveau grade : ' + g.name, color: g.color, oldBadge: o.sym, newBadge: g.sym, name: g.name,
+      sub: 'Tu passes de ' + o.name + ' à ' + g.name + '. Découvre tes nouveaux avantages.', sparks: PF_SPARKS, shards: PF_SHARDS,
+      close: () => this.setState({ gradeUp: null }) };
+  };
+  const pfBaseRender = proto.renderVals;
+  proto.renderVals = function () {
+    const s = this.st(), r = pfBaseRender.call(this), ui = r.ui;
+    ui.isGrade = s.screen === 'grade';
+    r.gr = ui.isGrade ? this.vGrade(s) : { perks: [] };
+    if (ui.isGrade) Object.assign(ui, { title: r.gr.name, subtitle: '', hasSubtitle: false, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
+    r.gu = this.vGradeUp(s);
+    return r;
+  };
+  const pfBaseParent = proto.parentOf;
+  proto.parentOf = function (sc) { return sc === 'grade' ? 'tiers' : pfBaseParent.call(this, sc); };
+  const pfBaseSection = proto.section;
+  proto.section = function (s) { return s.screen === 'grade' ? pfBaseSection.call(this, Object.assign({}, s, { screen: 'tiers' })) : pfBaseSection.call(this, s); };

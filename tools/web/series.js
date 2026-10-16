@@ -146,7 +146,7 @@
   const serTopIds = () => {
     if (serTopCache.doc === TCG.doc) return serTopCache.ids;
     const F = TCG.F;
-    const ids = TCG.rows.filter(x => !(F.q !== undefined && x.r[F.q] === 1)).map(x => [x.r[F.id], coteOf(x.r, F)]).filter(a => a[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, SER_TOP_N).map(a => a[0]);
+    const ids = TCG.rows.filter(x => !(F.q !== undefined && x.r[F.q] === 1) && coteSteady(x.r, F)).map(x => [x.r[F.id], coteOf(x.r, F)]).filter(a => a[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, SER_TOP_N).map(a => a[0]);
     serTopCache = { doc: TCG.doc, ids: ids };
     return ids;
   };

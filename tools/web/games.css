@@ -134,3 +134,43 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-tr-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 2px; border-top: 1px solid #1E2B45; }
 .pkm-tr-k { font-size: 13px; font-weight: 700; color: #C9D3EA; }
 .pkm-tr-v { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; text-align: right; }
+
+/* Grades (2026-10-16) : grade actuel du profil, fiche d'un grade, avantages. */
+.pkm-gr-hero { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45)); }
+.pkm-gr-perk { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.4; }
+.pkm-gr-tick { flex: none; position: relative; width: 20px; height: 20px; margin-top: 1px; border-radius: 10px; background: var(--pkm-accent); border: 1.5px solid #111111; box-sizing: border-box; }
+.pkm-gr-tick::after { content: ''; position: absolute; left: 5px; top: 2.5px; width: 5px; height: 9px; border: solid #111111; border-width: 0 2.2px 2.2px 0; transform: rotate(45deg); }
+
+/* Passage de grade (2026-10-16, d'après les promotions de rang de League of Legends) : l'ancien emblème se charge
+   d'énergie (étincelles qui convergent, tremblement), éclate dans un flash et une onde de choc, le nouvel emblème
+   s'abat avec des rayons qui tournent et un reflet, puis le nom du grade. --gu : couleur du nouveau grade. */
+.pkm-gu { position: absolute; inset: 0; z-index: 70; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: radial-gradient(70% 50% at 50% 42%, rgba(30, 40, 70, 0.92), rgba(5, 8, 15, 0.97) 75%); color: #FFFFFF; animation: pkmGuIn 0.35s ease-out both; }
+@keyframes pkmGuIn { from { opacity: 0; } to { opacity: 1; } }
+.pkm-gu-rays { position: absolute; left: 50%; top: 42%; width: 760px; height: 760px; margin: -380px 0 0 -380px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, var(--gu) 0deg 6deg, transparent 6deg 22deg); -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 62%); mask-image: radial-gradient(circle, #000 0%, transparent 62%); opacity: 0; animation: pkmGuRays 1.2s 1.45s ease-out forwards, pkmGuSpin 18s 1.45s linear infinite; }
+@keyframes pkmGuRays { from { opacity: 0; transform: scale(0.4); } to { opacity: 0.3; transform: scale(1); } }
+@keyframes pkmGuSpin { to { rotate: 360deg; } }
+.pkm-gu-stage { position: relative; width: 220px; height: 220px; flex: none; }
+.pkm-gu-old, .pkm-gu-new { position: absolute; left: 10px; top: 10px; width: 200px; height: 200px; }
+.pkm-gu-old { animation: pkmGuCharge 1.35s ease-in both, pkmGuBreak 0.35s 1.35s ease-out forwards; }
+@keyframes pkmGuCharge { 0% { transform: scale(0.85); opacity: 0; filter: brightness(1); } 15% { transform: scale(1); opacity: 1; } 55% { transform: translate(-2px, 1px) scale(1.02); filter: brightness(1.2) drop-shadow(0 0 8px var(--gu)); } 65% { transform: translate(3px, -2px) scale(1.03); } 75% { transform: translate(-3px, 2px) scale(1.04); } 85% { transform: translate(3px, 1px) scale(1.05); filter: brightness(1.8) drop-shadow(0 0 22px var(--gu)); } 100% { transform: translate(0, 0) scale(1.06); filter: brightness(2.6) drop-shadow(0 0 30px #FFFFFF); } }
+@keyframes pkmGuBreak { to { transform: scale(1.5); opacity: 0; filter: brightness(3) blur(6px); } }
+.pkm-gu-spark { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--gu); box-shadow: 0 0 8px var(--gu), 0 0 2px #FFFFFF; opacity: 0; animation: pkmGuSpark 0.9s ease-in both; }
+@keyframes pkmGuSpark { 0% { opacity: 0; transform: translate(var(--x), var(--y)) scale(0.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(0, 0) scale(1.4); } }
+.pkm-gu-flash { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; background: #FFFFFF; opacity: 0; animation: pkmGuFlash 0.6s 1.35s ease-out both; }
+@keyframes pkmGuFlash { 0% { opacity: 0; transform: scale(0.2); } 20% { opacity: 1; } 100% { opacity: 0; transform: scale(14); } }
+.pkm-gu-ring { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; border: 4px solid var(--gu); box-shadow: 0 0 18px var(--gu); opacity: 0; animation: pkmGuRing 0.9s 1.45s ease-out both; }
+@keyframes pkmGuRing { 0% { opacity: 0.95; transform: scale(0.4); } 100% { opacity: 0; transform: scale(7); } }
+.pkm-gu-shard { position: absolute; left: 50%; top: 50%; width: 12px; height: 18px; margin: -9px 0 0 -6px; background: var(--gu); border: 1.5px solid #111111; clip-path: polygon(50% 0, 100% 100%, 0 80%); opacity: 0; animation: pkmGuShard 0.85s 1.38s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+@keyframes pkmGuShard { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)); } }
+.pkm-gu-new { opacity: 0; animation: pkmGuNew 0.75s 1.5s cubic-bezier(0.2, 1.4, 0.4, 1) forwards; }
+@keyframes pkmGuNew { 0% { opacity: 0; transform: scale(1.9); filter: brightness(3) drop-shadow(0 0 30px #FFFFFF); } 45% { opacity: 1; transform: scale(0.94); } 100% { opacity: 1; transform: scale(1); filter: brightness(1) drop-shadow(0 0 22px var(--gu)); } }
+.pkm-gu-stage::after { content: ''; position: absolute; inset: 20px; background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.75) 50%, transparent 65%); -webkit-mask-image: radial-gradient(circle, #000 55%, transparent 72%); mask-image: radial-gradient(circle, #000 55%, transparent 72%); transform: translateX(-120%); animation: pkmGuShine 0.9s 2.35s ease-in-out forwards; pointer-events: none; }
+@keyframes pkmGuShine { to { transform: translateX(120%); } }
+.pkm-gu-kicker, .pkm-gu-name, .pkm-gu-sub, .pkm-gu-go { position: relative; opacity: 0; animation: pkmGuText 0.6s ease-out forwards; }
+.pkm-gu-kicker { margin-top: 10px; font-size: 13px; font-weight: 800; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gu); animation-delay: 2.05s; }
+.pkm-gu-name { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 34px; line-height: 1.05; text-align: center; color: #FFFFFF; -webkit-text-stroke: 1.5px #111111; text-shadow: 0 3px 0 #111111, 0 0 22px var(--gu); padding: 0 16px; animation-name: pkmGuName; animation-delay: 2.2s; }
+@keyframes pkmGuName { 0% { opacity: 0; letter-spacing: 0.4em; } 100% { opacity: 1; letter-spacing: 0.02em; } }
+.pkm-gu-sub { max-width: 300px; font-size: 13.5px; line-height: 1.45; color: #C9D3EA; text-align: center; animation-delay: 2.5s; }
+.pkm-gu-go { margin-top: 14px; min-width: 200px; height: 50px; border: 2px solid #111111; border-radius: 999px; background: #FFD60A; color: #111111; font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; animation-delay: 2.9s; }
+@keyframes pkmGuText { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-gu *, .pkm-gu::after, .pkm-gu-stage::after { animation-duration: 0.01s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; } .pkm-gu-old, .pkm-gu-spark, .pkm-gu-shard, .pkm-gu-flash, .pkm-gu-ring { display: none; } }

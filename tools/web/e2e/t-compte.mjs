@@ -1,54 +1,57 @@
-// L1 + K4 : page Compte. Palier avant « Membre depuis » (plus petit, mois réel) ; type de collectionneur replié ;
-// au toucher, texte écrit lettre par lettre puis dépliage ; appui sur le texte : tout d'un coup ; animations réduites.
-import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
+// Mon profil et grades (2026-10-16, porteur) : « Grade actuel » (emblème mis en avant, avantages) à la place de « Type
+// de collectionneur » ; « Palier » devient « Grade » ; « Information sur les grades » (ex « Paliers et succès ») sans
+// succès, grades cliquables vers leur fiche (emblème, condition, avantages) ; conditions par PK gagnés et parrainages ;
+// animation de passage de grade.
+import { withFonts, launch, BASE as E2E, shot } from './helpers.mjs';
 const BASE = E2E + '/?today=2026-10-09';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); await withFonts(ctx);
-const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+let page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+const KEY = 'pkm-collection-v1';
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-await page.click('header button[aria-label*="rofil"]'); await page.waitForTimeout(600);
+await page.click('header button[aria-label*="rofil"]'); await page.waitForTimeout(700);
 const id = page.locator('section[aria-label="Identité"]');
 const lines = (await id.locator('span > span').allInnerTexts()).map(t => t.trim()).filter(Boolean);
-ok('identité : ' + lines.join(' | '), /^Palier .* vers /.test(lines[1]) && lines[2] === 'Membre depuis octobre 2026');
-const sizes = await id.evaluate(e => [...e.querySelectorAll('span > span')].map(s => [s.innerText.slice(0, 12), getComputedStyle(s).fontSize]));
-ok('« Membre depuis » plus petit que le palier : ' + JSON.stringify(sizes.slice(1)), parseFloat(sizes[2][1]) < parseFloat(sizes[1][1]));
-const sec = page.locator('section[aria-label="Type de collectionneur"]');
-let txt = (await sec.innerText()).replace(/\s+/g, ' ');
-ok('replié : catégorie + « Passionné dès… » seulement : « ' + txt + ' »', /Type de collectionneur Régulier/.test(txt) && /Passionné dès 10 cartes ultra rares \(encore \d+\)/.test(txt) && !/S’adapte|Collection installée|Novice/.test(txt)
-  && (await page.locator('section[aria-label="Ce qui fixe ton profil"]').count()) === 0 && (await page.locator('section[aria-label="Ce que ça change pour toi"]').count()) === 0);
-const btn = sec.locator('button[aria-expanded]');
-ok('bouton déplier : ' + await btn.getAttribute('aria-label') + ', aria-expanded ' + await btn.getAttribute('aria-expanded'), (await btn.getAttribute('aria-expanded')) === 'false');
-await page.screenshot({ path: shot('compte-replie.png') });
-await btn.click(); await page.waitForTimeout(500);
-const visible = () => page.evaluate(() => [...document.querySelectorAll('.pkm-dialog span[aria-hidden] > span')].filter(s => getComputedStyle(s).opacity === '1').length);
-const v1 = await visible();
-await page.screenshot({ path: shot('compte-ecriture.png') });
-await page.waitForTimeout(1300);
-const v2 = await visible(), total = await page.locator('.pkm-dialog span[aria-hidden] > span').count();
-ok('écriture lettre par lettre : ' + v1 + ' lettres à 0,5 s, ' + v2 + ' sur ' + total + ' à 1,8 s', v1 > 5 && v1 < total && v2 === total);
-ok('texte lu en entier par les lecteurs d’écran : « ' + await page.locator('.pkm-dialog .pkm-sr').innerText() + ' »', (await page.locator('.pkm-dialog .pkm-sr').innerText()) === 'S’adapte tout seul à chaque ajout, scan ou vente');
-await page.waitForTimeout(900);
-txt = (await sec.innerText()).replace(/\s+/g, ' ');
-ok('déplié : « Collection installée… », 3 profils, puis les 2 sections', /Collection installée : au moins 3 cartes ultra rares ou 1 000 € de valeur/.test(txt) && /Novice Régulier Passionné/.test(txt)
-  && (await page.locator('section[aria-label="Ce qui fixe ton profil"]').count()) === 1 && (await page.locator('section[aria-label="Ce que ça change pour toi"]').count()) === 1 && (await btn.getAttribute('aria-expanded')) === 'true');
-const op = await page.evaluate(() => getComputedStyle(document.querySelector('section[aria-label="Ce que ça change pour toi"]')).opacity);
-ok('sections apparues (opacité ' + op + ')', op === '1');
-await page.screenshot({ path: shot('compte-deplie.png'), fullPage: false });
-// Replier, redéplier puis appui sur le texte : tout d'un coup.
-await btn.click(); await page.waitForTimeout(300);
-ok('replié à nouveau', (await page.locator('.pkm-dialog').count()) === 0);
-await btn.click(); await page.waitForTimeout(150);
-await page.click('.pkm-dialog'); await page.waitForTimeout(150);
-ok('appui sur le texte : tout s’affiche (' + await visible() + '/' + total + ')', (await visible()) === total);
-// Animations réduites.
-const ctx2 = await browser.newContext({ viewport: { width: 360, height: 740 }, reducedMotion: 'reduce' }); await withFonts(ctx2);
-const p2 = await ctx2.newPage(); p2.on('pageerror', e => errors.push(e.message));
-await p2.goto(BASE + '&start=profile', { waitUntil: 'load' }); await p2.waitForTimeout(1200);
-await p2.click('section[aria-label="Type de collectionneur"] button[aria-expanded]'); await p2.waitForTimeout(100);
-const all2 = await p2.evaluate(() => [...document.querySelectorAll('.pkm-dialog span[aria-hidden] > span')].every(s => getComputedStyle(s).opacity === '1'));
-ok('animations réduites : texte complet tout de suite', all2);
-ok('360 : pas de défilement horizontal', !(await p2.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
+ok('identité : ' + lines.join(' | '), /^Grade Recrue · \d+ % vers Chasseur$/.test(lines[1]) && lines[2] === 'Membre depuis octobre 2026');
+ok('plus de « Type de collectionneur »', (await page.locator('section[aria-label="Type de collectionneur"]').count()) === 0 && (await page.locator('section[aria-label="Ce qui fixe ton profil"]').count()) === 0);
+const gnow = page.locator('section[aria-label="Grade actuel"]');
+const gtxt = (await gnow.innerText()).replace(/\s+/g, ' ');
+ok('« Grade actuel » : emblème, nom, progression, avantages : « ' + gtxt.slice(0, 120) + ' »', (await gnow.locator('img[src="img/grades/grade-1.svg"]').count()) === 1 && /Recrue/.test(gtxt) && /Encore 2[   ]?900 PK pour Chasseur/.test(gtxt) && (await gnow.locator('li').count()) >= 3);
+await page.screenshot({ path: shot('compte-grade.png'), fullPage: true });
+await gnow.locator('button:has-text("Information sur les grades")').click(); await page.waitForTimeout(800);
+ok('titre « Information sur les grades »', /Information sur les grades/.test(await page.locator('header').innerText()));
+ok('succès retirés', (await page.locator('section[aria-label="Succès"]').count()) === 0 && (await page.locator('section[aria-label="Série en cours"]').count()) === 0);
+const rows = page.locator('button[aria-label^="Voir le grade"]');
+const rtxt = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
+ok('6 grades cliquables avec leurs conditions', (await rows.count()) === 6 && /Dès l’inscription/.test(rtxt) && /3[   ]000 PK gagnés/.test(rtxt) && /15[   ]000 PK gagnés \+ 3 parrainages/.test(rtxt) && /100[   ]000 PK gagnés \+ 10 parrainages/.test(rtxt));
+await page.screenshot({ path: shot('grades-liste.png'), fullPage: true });
+await page.click('button[aria-label="Voir le grade Maître Pokémon et ses avantages"]'); await page.waitForTimeout(800);
+const gs = page.locator('section[aria-label="Grade Maître Pokémon"]');
+ok('fiche du grade : emblème, condition, état', (await gs.locator('img[src="img/grades/grade-5.svg"]').count()) === 1 && /30[   ]000 PK gagnés \+ 5 parrainages/.test(await gs.innerText()) && /À débloquer/.test(await gs.innerText()));
+ok('fiche du grade : avantages listés', (await page.locator('section[aria-label="Avantages du grade"] li').count()) >= 3);
+await page.screenshot({ path: shot('grade-fiche.png') });
+await page.click('button:has-text("Grade suivant")'); await page.waitForTimeout(500);
+ok('grade suivant : Grand maître Pokémon', (await page.locator('section[aria-label="Grade Grand maître Pokémon"]').count()) === 1);
+await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(600);
+ok('retour : Information sur les grades', /Information sur les grades/.test(await page.locator('header').innerText()));
+// Passage de grade : 3 000 PK gagnés → Chasseur, animation.
+await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.pkEarned = 2995; d.gradeSeen = 0; d.games = {}; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
+await page.close(); page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+await page.goto(BASE + '&start=market', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+await page.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(3200);
+ok('animation de passage de grade : « Nouveau grade Chasseur »', (await page.locator('.pkm-gu').count()) === 1 && /Chasseur/.test(await page.locator('.pkm-gu-name').innerText()));
+await page.screenshot({ path: shot('grade-passage.png') });
+await page.waitForTimeout(1500);
+await page.click('.pkm-gu-go'); await page.waitForTimeout(400);
+const d = await page.evaluate(k => JSON.parse(localStorage.getItem(k)), KEY);
+ok('« Continuer » ferme l’animation ; grade vu : ' + d.gradeSeen + ', PK gagnés : ' + d.pkEarned, (await page.locator('.pkm-gu').count()) === 0 && d.gradeSeen === 1 && d.pkEarned >= 3000);
+// Une dépense ne fait pas redescendre.
+await page.evaluate(k => { const x = JSON.parse(localStorage.getItem(k)); x.pk = 0; localStorage.setItem(k, JSON.stringify(x)); }, KEY);
+await page.close(); page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+await page.goto(BASE + '&start=profile', { waitUntil: 'load' }); await page.waitForTimeout(1200);
+ok('solde à 0 : toujours Chasseur', /Chasseur/.test(await page.locator('section[aria-label="Grade actuel"]').innerText()));
+ok('360 : pas de défilement horizontal', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

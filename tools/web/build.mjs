@@ -94,6 +94,20 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
   if (!re.test(tpl)) throw new Error('Pastille de cote du premier écran introuvable');
   tpl = tpl.replace(re, '');
 }
+// Premier écran (2026-10-16, porteur) : cartes entières (plus de bas coupé en fondu) ; la description et les trois
+// points sont remplacés par les cinq lignes du porteur, chacune avec son pictogramme.
+{
+  const re = /<img src="\{\{ fc\.img \}\}" alt="" style="position: absolute; left: \{\{ fc\.left \}\}; top: \{\{ fc\.top \}\}; width: 104px; height: 121px;[^"]*"/;
+  if (!re.test(tpl)) throw new Error('Cartes du premier écran introuvables');
+  tpl = tpl.replace(re, '<img src="{{ fc.img }}" alt="" style="position: absolute; left: {{ fc.left }}; top: {{ fc.top }}; width: 100px; height: 140px; border-radius: 6px; object-fit: contain; transform: rotate({{ fc.rot }}); box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5)"');
+}
+{
+  const a = tpl.indexOf('<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #C9D3EA; text-align: center">Scanne tes cartes');
+  const endMark = 'Des paliers selon la valeur de ta collection</div>\n</div>';
+  const b = tpl.indexOf(endMark, a);
+  if (a < 0 || b < 0) throw new Error('Description du premier écran introuvable');
+  tpl = tpl.slice(0, a) + FRAG['onb-points'].trim() + tpl.slice(b + endMark.length);
+}
 // Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de la photo ouvre la photothèque
 // (input caché) ; rubrique « Informations du dresseur » sous l'identité.
 patch(`<span style="position: relative; flex: none; width: 76px; height: 76px">
@@ -226,17 +240,37 @@ patch(`<span style="font-size: 13px; color: #9AA8C3">{{ pf.since }}</span>
 <span style="font-size: 12.5px; font-weight: 700; color: {{ pf.tierColor }}">{{ pf.tierLine }}</span>`,
 `<span style="font-size: 13.5px; font-weight: 700; color: {{ pf.tierColor }}">{{ pf.tierLine }}</span>
 <span style="font-size: 11.5px; color: #9AA8C3">{{ pf.since }}</span>`);
+// Mon profil (2026-10-16, porteur) : « Type de collectionneur » et ses deux sections (« Ce qui fixe ton profil »,
+// « Ce que ça change pour toi ») sont remplacés par « Grade actuel » (emblème mis en avant, avantages ; fragment
+// profile-grade). Le profil Novice / Régulier / Passionné reste calculé pour le reste de l'app.
 {
   const start = tpl.indexOf('<section aria-label="Type de collectionneur"'), end = tpl.indexOf('</section>', start) + '</section>'.length;
   if (start < 0 || tpl.indexOf('<section aria-label="Type de collectionneur"', start + 1) >= 0) throw new Error('Type de collectionneur introuvable');
-  tpl = tpl.slice(0, start) + FRAG['profile-cat'].trim() + tpl.slice(end);
-  for (const [label, d] of [['Ce qui fixe ton profil', 'd3'], ['Ce que ça change pour toi', 'd4']]) {
+  tpl = tpl.slice(0, start) + FRAG['profile-grade'].trim() + tpl.slice(end);
+  for (const label of ['Ce qui fixe ton profil', 'Ce que ça change pour toi']) {
     const open = '<section aria-label="' + label + '" style="', i = tpl.indexOf(open), j = tpl.indexOf('</section>', i) + '</section>'.length;
     if (i < 0 || tpl.indexOf(open, i + 1) >= 0) throw new Error('Section du Compte introuvable : ' + label);
-    tpl = tpl.slice(0, i) + '<sc-if value="{{ pf.fold.open }}" hint-placeholder-val="{{ false }}">\n'
-      + tpl.slice(i, j).replace(open, '<section aria-label="' + label + '" class="pkm-rise" style="animation-delay: {{ pf.fold.' + d + ' }}; ') + '\n</sc-if>' + tpl.slice(j);
+    tpl = tpl.slice(0, i) + tpl.slice(j);
   }
 }
+// Information sur les grades (2026-10-16, porteur) : chaque grade de la liste ouvre sa fiche (écran « grade »,
+// fragment grade-screen) ; les succès sont retirés ; texte du bas adapté aux grades par PK et parrainages.
+patch(`<div style="display: flex; align-items: center; gap: 12px; min-height: 62px; padding: 6px 16px; border-top: {{ ld.border }}; background: {{ ld.bg }}; opacity: {{ ld.op }}">`,
+  `<button type="button" onClick="{{ ld.open }}" aria-label="{{ ld.aria }}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 6px 16px; border: 0; border-top: {{ ld.border }}; background: {{ ld.bg }}; opacity: {{ ld.op }}; color: inherit; font: inherit; text-align: left; cursor: pointer">`);
+patch(`<span style="flex: none; font-size: 12.5px; font-weight: 700; color: {{ ld.stateColor }}">{{ ld.state }}</span>
+</div>
+</sc-for>`, `<span style="flex: none; font-size: 12.5px; font-weight: 700; color: {{ ld.stateColor }}">{{ ld.state }}</span>
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</sc-for>`);
+patch('<span style="font-size: 14px; color: #C9D3EA">Collection valorisée à {{ tr.value }}</span>', '<span style="font-size: 14px; color: #C9D3EA">{{ tr.value }}</span>');
+{
+  const a = tpl.indexOf('<section aria-label="Succès" style="flex: none; display: flex; flex-direction: column; gap: 10px">'), b = tpl.indexOf('</section>', a);
+  if (a < 0) throw new Error('Succès introuvable');
+  tpl = tpl.slice(0, a) + tpl.slice(b + '</section>'.length);
+}
+patch('Pas de quêtes ni de saisons : les paliers suivent seulement la valeur de ta collection, au prix du marché.', 'Les grades montent avec les PK que tu gagnes et tes parrainages. Touche un grade pour voir ses avantages.');
+patch('<sc-if value="{{ ui.isProfile }}"', FRAG['grade-screen'] + '\n<sc-if value="{{ ui.isProfile }}"');
 // Panneau « Mes PK » (pk.js), ouvert par le compteur de l'en-tête.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
@@ -244,6 +278,8 @@ patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-unlock'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Passage de grade (2026-10-16) : animation façon « promotion » (profile.js, games.css).
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['grade-up'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Cote selon l'état et la langue, vente d'un exemplaire précis (value.js, margin-patch.mjs).
 logic = applyMarginPatches(logic);
 patchJs("platform: d.platform, commission: d.commission, port: d.port, by: d.by };", "platform: d.platform, commission: d.commission, port: d.port, by: d.by, from: d.from || null };");
@@ -478,7 +514,13 @@ if (brokenMarks !== 45) throw new Error('Photos et logos repérés : ' + brokenM
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
-const BRAND = 'Dropicards', REBRANDED = 52;
+// « Palier » devient « Grade » partout (2026-10-16, porteur) ; « Paliers et succès » devient « Information sur les grades ».
+{
+  const regrade = t => t.split('Paliers et succès').join('Information sur les grades').replace(/\bPaliers\b/g, 'Grades').replace(/\bpaliers\b/g, 'grades')
+    .replace(/\bPalier\b/g, 'Grade').replace(/\bpalier\b/g, 'grade');
+  tpl = regrade(tpl); logic = regrade(logic);
+}
+const BRAND = 'Dropicards', REBRANDED = 51;
 let rebranded = 0;
 const rebrand = t => t.replace(/PKM-App|\bPKM\b/g, () => { rebranded++; return BRAND; });
 tpl = rebrand(tpl);

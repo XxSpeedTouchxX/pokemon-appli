@@ -21,6 +21,8 @@
       ST_FAN.forEach((ids, i) => {
         const id = ids.find(k => TCG.byId[k] && TCG.byId[k].r[TCG.F.img]);
         if (id) { const it = TCG.item(id); r.fan[i].img = it.imgHi || it.img; }
+        // Cartes entières (100 × 140), en éventail.
+        Object.assign(r.fan[i], [{ left: '8px', top: '30px', rot: '-12deg' }, { left: '81px', top: '6px', rot: '0deg' }, { left: '154px', top: '30px', rot: '12deg' }][i]);
       });
     }
     r.tryDemo = () => this.setState({ purchases: this.purchasesSeed('full'), sales: this.salesSeed('full'), onb: 2, firstRun: false, toast: 'Collection de démo chargée · « Vider ma collection » dans les Réglages pour repartir de zéro' });

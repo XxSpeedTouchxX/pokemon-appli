@@ -37,10 +37,10 @@ await panel.locator('button:has-text("Tout reverrouiller")').click(); await page
 await page.fill('input[aria-label="Chercher un compagnon à mettre à prix"]', 'dracaufeu'); await page.waitForTimeout(300);
 await page.fill('input[aria-label="Prix de Dracaufeu en PK"]', '777'); await page.waitForTimeout(300);
 d = await saved(); ok('prix fixé : Dracaufeu ' + d.admin.prices[6], d.admin.prices[6] === 777);
-// Profil et palier forcés.
+// Profil et grade forcés.
 await panel.locator('[aria-label="Profil forcé"] button:has-text("Passionné")').click(); await page.waitForTimeout(200);
-await panel.locator('[aria-label="Palier forcé"] button').nth(1).click(); await page.waitForTimeout(200);
-const tierName = await panel.locator('[aria-label="Palier forcé"] button').nth(1).innerText();
+await panel.locator('[aria-label="Grade forcé"] button').nth(1).click(); await page.waitForTimeout(200);
+const tierName = await panel.locator('[aria-label="Grade forcé"] button').nth(1).innerText();
 // Interrupteurs.
 for (const f of ['Bouton Scan', 'Monnaie PK', 'Animations']) await panel.locator('[aria-label="Fonctions affichées"] button:has-text("' + f + '")').click();
 await page.waitForTimeout(300);
@@ -55,8 +55,8 @@ await page.click('section[aria-label="Valeur de ma collection"] button[aria-labe
 ok('PK masqués : aucun compagnon verrouillé', (await page.locator('[aria-label="Compagnons"] button[aria-label*="à débloquer"]').count()) === 0);
 await page.keyboard.press('Escape'); await page.click('button[aria-label="Fermer le choix du compagnon"]').catch(() => {});
 await page.goto(BASE + 'start=profile', { waitUntil: 'load' }); await page.waitForTimeout(1000);
-const idt = await page.locator('section[aria-label="Identité"]').innerText(), cat = await page.locator('section[aria-label="Type de collectionneur"]').innerText();
-ok('profil forcé Passionné, palier forcé « ' + tierName + ' » : ' + idt.replace(/\s+/g, ' ').slice(0, 60), /Passionné/.test(cat) && idt.includes('Palier ' + tierName));
+const idt = await page.locator('section[aria-label="Identité"]').innerText(), cat = await page.locator('section[aria-label="Grade actuel"]').innerText();
+ok('grade forcé « ' + tierName + ' » : ' + idt.replace(/\s+/g, ' ').slice(0, 60), cat.includes(tierName) && idt.includes('Grade ' + tierName));
 // Date simulée.
 await page.goto(BASE + 'start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1000);
 await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); d.admin.today = '2026-12-25'; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });

@@ -30,7 +30,7 @@ const check = async (width, height, label) => {
   await page.click('button:has-text("Ajouter à ma collection")'); steps.push(['ajout', await has('ajouté')]);
   await page.click('button[aria-label="Fermer le scan"]'); await page.click('button[aria-label="Toutes les séries"]');
   await page.waitForSelector('nav[aria-label="Aller à une série"]', { timeout: 20000 }); steps.push(['toutes les séries', (await page.locator('main section[aria-label="Méga-Évolution"]').count()) === 1]);
-  await page.click('button[aria-label^="Mon profil"]'); steps.push(['profil', await has('Type de collectionneur')]);
+  await page.click('button[aria-label^="Mon profil"]'); steps.push(['profil', await has('Grade actuel')]);
   const hscroll = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   steps.push(['pas de défilement horizontal', !hscroll]);
   console.log(label, steps.map(([k, ok]) => (ok ? '✓ ' : '✗ ') + k).join(' | '));

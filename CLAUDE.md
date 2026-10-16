@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-12)
+## 3. État d'avancement (au 2026-10-16)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -111,7 +111,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - roulette dans Jeux : PK ÷ 2 (15 %), × 2 (10 %), +100 (40 %), −100 (35 %), un tour toutes les 24 h (à confirmer) ;
   - ciseaux qui ouvrent le booster, pièce plus longue (16 demi-tours), déblocage de compagnon en 3 s avec confettis, icône (D légèrement remonté).
 - **Cote, PK shop et transitions (2026-10-12, soir, demande du porteur) :**
-  - cote = **tendance Cardmarket seule** (bonne version), TCGplayer en repli pour 631 cartes sans Cardmarket ; cotes recopiées par TCGdex (242 cartes) « à confirmer » ; « Les plus chères » refaite. **Contradiction avec le principe 2 (plusieurs sources), à trancher** ;
+  - cote = tendance Cardmarket seule (bonne version), TCGplayer en repli pour 631 cartes sans Cardmarket ; cotes recopiées par TCGdex (242 cartes) « à confirmer » ; « Les plus chères » refaite (remplacé le 2026-10-16 par la cote médiane) ;
   - prix par état (Near Mint) et moyenne des ventes eBay **impossibles sans API officielle** (Cardmarket, eBay Marketplace Insights) : demandes d'accès à faire par le porteur ;
   - ticket 2 000 PK, lot Booster 30 ans 15 000 PK, barre des tickets sous le solde ; roulette sans chances affichées, sans plafond ; booster toutes les 12 h ; 20 km dans le Radar ; gains +10 (jour, nouvelle carte) retirés ;
   - transition entre pages façon iOS (d'après la vidéo du porteur).
@@ -120,6 +120,12 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - « Mon profil » : photo choisie dans la photothèque (gardée sur l'appareil), « Informations du dresseur » (pseudo, e-mail en attendant l'inscription, membre depuis, palier) ; badge Admin retiré de l'en-tête ;
   - série ouverte depuis son en-tête, barre des tickets sous un compteur resserré, flèche sur les chances du booster, confettis ou nuage de pluie à la roulette ;
   - premier écran : Dracaufeu 1re édition, Lugia réimpression 30 ans (illustration Neo Genesis en attendant le scan), Mew-ex illustration spéciale 30 ans ; pastille de cote retirée.
+- **Grades par PK et parrainages, cote médiane (2026-10-16, demande du porteur) :**
+  - conditions : Recrue dès l'inscription, Chasseur 3 000 PK, Collectionneur 7 500 PK, Dresseur Pokémon 15 000 PK + 3 parrainages, Maître Pokémon 30 000 PK + 5, Grand maître Pokémon 100 000 PK + 10 ; PK gagnés au total (dépenses non déduites) ; parrainages à 0 tant que les comptes n'existent pas ;
+  - « Grade » partout, « Information sur les grades » (grades cliquables, fiche avec emblème et avantages, succès retirés), « Grade actuel » dans Mon profil à la place de « Type de collectionneur » ; **avantages proposés, à valider, pas encore activés** ;
+  - animation de passage de grade inspirée des promotions de League of Legends ;
+  - cote = **médiane** de la tendance et des moyennes 7 et 30 jours Cardmarket et du prix TCGplayer (ventes conclues) ; marchés trop volatils hors « Les plus chères » ; la contradiction avec le principe 2 est levée ;
+  - premier écran : cartes entières, cinq lignes de présentation (scan, radar, estimation, grades, concours).
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;
