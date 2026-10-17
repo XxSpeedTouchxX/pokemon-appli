@@ -143,11 +143,23 @@
   };
   // Carte TCGdex au format des articles de la maquette (mêmes champs de prix : cm, low, ebay, tcp, avg30),
   // construite à partir d'une ligne de cards.json (champs F, extension set).
+  // Collection Classique du 30ᵉ Anniversaire (2026-10-17, demande du porteur) : TCGdex n'a aucun scan de ces 30
+  // réimpressions. Chacune reprend exactement une carte d'origine (même dessin, même numéro imprimé, seul le logo des
+  // 30 ans change) : la liste officielle, dans l'ordre TCGdex 30th-c-001 à 030, donne la carte d'origine, dont on
+  // affiche le visuel et le numéro (« 4/102 »). Source : liste officielle relayée par Cardrake et TCG Collector.
+  const CLASSIC_30 = ['base1-4', 'ex1-5', 'ex11-11', 'bw10-11', 'gym1-18', 'ex7-19', 'neo1-25', 'sm9-33', 'xy9-41', 'dp6-43',
+    'pl1-47', 'swsh4-50', 'sm4-57', 'base1-58', 'gym2-69', 'bw6-85', 'sm1-89', 'hgss4-94', 'hgss4-99', 'hgss4-100',
+    'bw3-101', 'dp4-106', 'xy5-106', 'neo4-106', 'ex10-108', 'swsh8-114', 'swsh9-123', 'swsh1-138', 'ecard2-149', 'sv02-203'];
+  const reprintOf = id => { const m = /^30th-c-(\d{3})$/.exec(id); return m ? CLASSIC_30[Number(m[1]) - 1] || null : null; };
   function buildItem(id, r, F, set) {
-    const v = visual(r[F.img] || ''), rarity = r[F.rarity] || '', num = String(r[F.num] || ''), official = set[4] || '';
+    const orig = reprintOf(id), ox = orig && !r[F.img] && TCG.byId ? TCG.byId[orig] : null;
+    const ov = ox ? { r: ox.r, set: setOf(ox.r[TCG.F.set]) } : null;
+    const v = visual(r[F.img] || (ov ? ov.r[TCG.F.img] : '') || ''), num = String(r[F.num] || ''), official = set[4] || '';
+    const rarity = ov && (!r[F.rarity] || r[F.rarity] === 'Sans Rareté') ? 'Collection Classique' : r[F.rarity] || '';
     // Carte en anglais : extension sans version française, ou carte ajoutée depuis la version anglaise (champ lang).
     const lang = F.lang !== undefined && r[F.lang] ? String(r[F.lang]).toUpperCase() : String(set[5] || 'fr').toUpperCase();
-    const numShort = num + (official && /^\d+$/.test(num) ? '/' + official : '');
+    const onum = ov ? String(ov.r[TCG.F.num] || '') : '';
+    const numShort = ov ? onum + (ov.set[4] && /^\d+$/.test(onum) ? '/' + ov.set[4] : '') : num + (official && /^\d+$/.test(num) ? '/' + official : '');
     let seed = 0;
     for (let i = 0; i < id.length; i++) seed = (seed * 31 + id.charCodeAt(i)) % 9973;
     const p = {
@@ -164,8 +176,11 @@
       // Cote selon la version (2026-10-11) : cmv = groupe de prix de cm (« n » normal, « h » holo), cmh = tendance de
       // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
       cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1,
-      dup: !!(TCG.dup && TCG.dup.has(id))
+      dup: !!(TCG.dup && TCG.dup.has(id)),
+      // Réimpression : carte et extension d'origine (visuel et numéro repris).
+      reprintOf: ov ? orig : '', reprintSet: ov ? ov.set[0] : ''
     };
+    if (ov && v) p.credit = 'Visuel de la carte d’origine (' + ov.set[0] + ', ' + numShort + ') via TCGdex';
     if (!v) { p.img = p.imgHi = drawnCard(p); p.fallback = p.fallbackHi = ''; }
     return p;
   }
@@ -378,11 +393,12 @@
     const shown = f === 'ur' ? all.filter(p => p.ur) : f === 'own' ? mine
       : f === 'top' ? all.filter(p => this.cote(p) !== null).sort((a, b) => this.cote(b) - this.cote(a)) : all;
     const priced = all.filter(p => this.cote(p) !== null), full = priced.reduce((t, p) => t + this.cote(p), 0);
-    const foreign = all.filter(p => p.imgLang && p.imgLang !== p.lang), noImgs = all.filter(p => !p.imgLang).length;
+    const foreign = all.filter(p => p.imgLang && p.imgLang !== p.lang && !p.reprintOf), noImgs = all.filter(p => !p.imgLang).length;
     const versions = foreign.map(p => VERSION[p.imgLang] || p.imgLang).filter((v, i, a) => a.indexOf(v) === i);
     const notes = [], kids = all.filter(p => p.set !== e.id), enCards = e.lang === 'EN' ? [] : all.filter(p => p.lang === 'EN');
     if (e.lang === 'EN') notes.push('Cartes en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.');
-    if (kids.length) notes.push('Dont ' + kids.length + ' cartes de la ' + (setOf(kids[0].set)[0] || 'collection rattachée') + ' (numéros « CC »).');
+    if (kids.length) notes.push('Dont ' + kids.length + ' cartes de la ' + (setOf(kids[0].set)[0] || 'collection rattachée')
+      + (kids.some(p => p.reprintOf) ? ' : des réimpressions, avec le numéro et le visuel de leur carte d’origine.' : ' (numéros « CC »).'));
     if (enCards.length) notes.push(enCards.length + (enCards.length > 1 ? ' cartes sont en anglais : absentes' : ' carte est en anglais : absente') + ' de la version française du catalogue TCGdex.');
     if (foreign.length) {
       notes.push(foreign.length + (foreign.length > 1 ? ' visuels viennent de la version ' : ' visuel vient de la version ') + versions.join(', ')
@@ -451,14 +467,15 @@
       const notes = [];
       if (p.lang === 'EN') notes.push(String(setOf(p.set)[5] || 'fr') === 'en' ? 'Carte en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.'
         : 'Carte en anglais : absente de la version française du catalogue TCGdex, elle vient de la version anglaise.');
-      if (!p.imgLang) notes.push('Pas encore de scan officiel pour cette carte : PKM affiche une carte dessinée en attendant.');
+      if (p.reprintOf) notes.push('Réimpression de la carte ' + p.reprintSet + ' n° ' + p.numShort + ' : visuel de la carte d’origine, même dessin. La réimpression porte en plus le logo des 30 ans.');
+      else if (!p.imgLang) notes.push('Pas encore de scan officiel pour cette carte : PKM affiche une carte dessinée en attendant.');
       else if (p.imgLang !== p.lang) notes.push('Visuel de la version ' + (VERSION[p.imgLang] || p.imgLang) + ' (même dessin officiel) : le scan ' + (p.lang === 'EN' ? 'anglais' : 'français') + ' de cette carte n’est pas encore disponible.');
       it.imgNote = notes.join(' ');
       it.hasImgNote = it.imgNote !== '';
     }
     // Ventes réussies eBay : pas d'API ouverte ni de scraping autorisé, donc un lien vers la recherche eBay
     // (annonces terminées et vendues) au lieu d'un chiffre inventé.
-    const q = p.tcg ? [p.name, p.numShort, p.lang === 'EN' ? '' : 'FR'].filter(Boolean).join(' ') : p.name;
+    const q = p.tcg ? [p.name, p.numShort, p.reprintOf ? '30 ans' : '', p.lang === 'EN' ? '' : 'FR'].filter(Boolean).join(' ') : p.name;
     it.ebayUrl = 'https://www.ebay.fr/sch/i.html?_nkw=' + encodeURIComponent(q) + '&LH_Sold=1&LH_Complete=1';
     it.ebayText = 'Ventes réussies eBay pour « ' + q + ' »';
     return it;

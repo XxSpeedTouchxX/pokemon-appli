@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-16)
+## 3. État d'avancement (au 2026-10-17)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -119,7 +119,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - 6 grades selon la valeur de la collection, emblèmes à ailes façon LoL avec une Poké Ball au centre (choix du porteur), validés par le porteur (`web/img/grades/`) : Recrue (0-500 €, bronze), Chasseur (500-2 500 €, argent), Collectionneur (2 500-7 500 €, or), Dresseur Pokémon (7 500-15 000 €, or et vert), Maître Pokémon (15 000-30 000 €, or et cristal), Grand maître Pokémon (30 000 € et plus, rouge, couronne) ; seuil de 30 000 € gardé pour l'instant (porteur, 2026-10-14) ; « Série en cours » retirée ;
   - « Mon profil » : photo choisie dans la photothèque (gardée sur l'appareil), « Informations du dresseur » (pseudo, e-mail en attendant l'inscription, membre depuis, palier) ; badge Admin retiré de l'en-tête ;
   - série ouverte depuis son en-tête, barre des tickets sous un compteur resserré, flèche sur les chances du booster, confettis ou nuage de pluie à la roulette ;
-  - premier écran : Dracaufeu 1re édition, Lugia réimpression 30 ans (illustration Neo Genesis en attendant le scan), Mew-ex illustration spéciale 30 ans ; pastille de cote retirée.
+  - premier écran : Dracaufeu 1re édition, Lugia réimpression 30 ans (visuel de la carte d'origine, Aquapolis, depuis le 2026-10-17), Mew-ex illustration spéciale 30 ans ; pastille de cote retirée.
 - **Grades par PK et parrainages, cote médiane (2026-10-16, demande du porteur) :**
   - conditions : Recrue dès l'inscription, Chasseur 3 000 PK, Collectionneur 7 500 PK, Dresseur Pokémon 15 000 PK + 3 parrainages, Maître Pokémon 30 000 PK + 5, Grand maître Pokémon 100 000 PK + 10 ; PK gagnés au total (dépenses non déduites) ; parrainages à 0 tant que les comptes n'existent pas ;
   - « Grade » partout, « Information sur les grades » (grades cliquables, fiche avec emblème et avantages, succès retirés), « Grade actuel » dans Mon profil à la place de « Type de collectionneur » ; **avantages proposés, à valider, pas encore activés** ;
@@ -127,6 +127,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - cote = **médiane** de la tendance et des moyennes 7 et 30 jours Cardmarket et du prix TCGplayer (ventes conclues) ; marchés trop volatils hors « Les plus chères » ; la contradiction avec le principe 2 est levée ;
   - premier écran : cartes entières, cinq lignes de présentation (scan, radar, estimation, grades avec pictogramme bannière, concours) ;
   - en-tête de l'accueil : PK et tickets à gauche, logo plus petit au centre, avatar plus grand avec l'emblème du grade à droite ; le même sur Toutes les séries, Jeux et PK shop, titre de la page juste en dessous.
+- **Extensions façon vidéo et classeur vide (2026-10-17, demande du porteur) :**
+  - écran de chaque extension (et « Les plus chères ») : progression, Toutes / Possédées / Manquantes / Doublons, Petit / Moyen / Grand, recherche, tri, filtres de rareté avec symbole et nombre, cartes manquantes en gris, cœur (favori) et « + » (ajout immédiat) ;
+  - 30 réimpressions de la Collection Classique : visuel et numéro de leur carte d'origine (TCGdex n'a pas leurs scans) ; 3 Mew (B, G, R) restent dessinés ;
+  - « Mon classeur » vide : boutons « Ajouter des cartes » ou « Ajouter des produits scellés », « Scanner ».
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

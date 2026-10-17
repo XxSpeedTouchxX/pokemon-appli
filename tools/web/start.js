@@ -9,7 +9,8 @@
   const ST_DAY = 86400000;
   const stDays = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / ST_DAY);
 
-  // Lugia de la Collection Classique : pas encore de scan chez TCGdex ; repli sur le Lugia de Neo Genesis (même illustration).
+  // Lugia de la Collection Classique : visuel de la carte d'origine (Aquapolis 149/147, voir CLASSIC_30) ; repli sur le
+  // Lugia de Neo Genesis si le catalogue ne l'a pas.
   const ST_FAN = [['base1-4'], ['30th-c-029', 'neo1-9'], ['30th-152']];
   const stBaseOnb = proto.vOnb;
   proto.vOnb = function (x) {
@@ -19,7 +20,7 @@
     // Collection Classique du 30ᵉ anniversaire au milieu, Mew-ex illustration spéciale (30ᵉ anniversaire) à droite.
     if (TCG.status === 'ready' && r.fan && r.fan.length === 3) {
       ST_FAN.forEach((ids, i) => {
-        const id = ids.find(k => TCG.byId[k] && TCG.byId[k].r[TCG.F.img]);
+        const id = ids.find(k => TCG.byId[k] && TCG.item(k).imgLang);
         if (id) { const it = TCG.item(id); r.fan[i].img = it.imgHi || it.img; }
         // Cartes entières (100 × 140), en éventail.
         Object.assign(r.fan[i], [{ left: '8px', top: '30px', rot: '-12deg' }, { left: '81px', top: '6px', rot: '0deg' }, { left: '154px', top: '30px', rot: '12deg' }][i]);

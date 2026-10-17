@@ -44,10 +44,11 @@ await step('grille', async () => {
   await page.waitForTimeout(600); await shot('v6-grille');
   const srcs = await page.evaluate(() => [...document.querySelectorAll('main img[srcset]')].slice(0, 3).map(i => i.currentSrc));
   ok('grille en écran 3x → ' + srcs.map(u => u.split('/').slice(-2).join('/')).join(', '), srcs.length && srcs.every(u => /high\.webp$/.test(u)));
-  await page.click('button:has-text("Les plus chères")');
+  // Tri par cote (2026-10-17 : bouton « Tri », qui passe de numéro à cote, puis nom).
+  await page.click('button:has-text("Tri : numéro")');
   const first = await page.locator('main button[aria-label*=", n° "]').first().getAttribute('aria-label');
-  ok('les plus chères : ' + first, /cote/.test(first));
-  await page.click('button:has-text("Toutes ·")');
+  ok('tri par cote : ' + first, /cote/.test(first));
+  await page.click('button:has-text("Tri : cote")'); await page.click('button:has-text("Tri : nom")');
 });
 await step('fiche et zoom', async () => {
   await page.evaluate(() => { document.querySelector('#app main').scrollTop = 1500; });

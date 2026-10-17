@@ -74,39 +74,75 @@
 </sc-if>
 
 <sc-if value="{{ ui.isSet }}" hint-placeholder-val="{{ false }}">
-<section aria-label="Extension" style="flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 22px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.18), rgba(98, 122, 255, 0) 60%), #121C33">
+<section aria-label="Extension" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border-radius: 22px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.18), rgba(98, 122, 255, 0) 60%), #121C33">
+<div style="display: flex; align-items: center; gap: 14px">
 <sc-if value="{{ cset.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ cset.logo }}" alt="" style="flex: none; width: 104px; height: 56px; object-fit: contain"></sc-if>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
 <span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600">{{ cset.countText }}</span>
+<sc-if value="{{ cset.hasDate }}" hint-placeholder-val="{{ true }}">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #C9D3EA"><span style="flex: none; width: 16px; height: 11px; border-radius: 2px; background: {{ cset.setFlag }}"></span><span style="min-width: 0">{{ cset.dateText }}</span></span>
+</sc-if>
 <span style="font-size: 12.5px; color: #C9D3EA">{{ cset.valueText }}</span>
 </span>
+</div>
+<sc-if value="{{ cset.hasProg }}" hint-placeholder-val="{{ true }}">
+<div role="img" aria-label="{{ cset.progLabel }}" style="display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: #C9D3EA"><span>{{ cset.progText }}</span><span style="font-weight: 700; color: #F3F6FC">{{ cset.pct }}</span></span>
+<span class="pkm-sv-bar"><span class="pkm-sv-bar-in" style="width: {{ cset.progW }}"></span></span>
+</div>
+</sc-if>
 </section>
 <sc-if value="{{ cset.hasNote }}" hint-placeholder-val="{{ false }}">
 <p style="margin: 0 2px; font-size: 12.5px; line-height: 1.45; color: #F7C77E">{{ cset.note }}</p>
 </sc-if>
-<div role="group" aria-label="Filtre des cartes" style="flex: none; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px">
-<sc-for list="{{ cset.filters }}" as="cf" hint-placeholder-count="4">
-<button type="button" onClick="{{ cf.pick }}" aria-pressed="{{ cf.on }}" style="flex: none; height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid {{ cf.bc }}; background: {{ cf.bg }}; color: {{ cf.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ cf.label }}</button>
+<sc-if value="{{ cset.v2 }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="Cartes affichées" style="flex: none; display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ cset.tabs }}" as="svt" hint-placeholder-count="4">
+<button type="button" onClick="{{ svt.pick }}" aria-pressed="{{ svt.on }}" style="flex: none; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid {{ svt.bc }}; background: {{ svt.bg }}; color: {{ svt.fg }}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer">{{ svt.label }}</button>
 </sc-for>
 </div>
+<div role="group" aria-label="Taille des cartes" class="pkm-sv-sizes">
+<sc-for list="{{ cset.sizes }}" as="svz" hint-placeholder-count="3">
+<button type="button" onClick="{{ svz.pick }}" aria-pressed="{{ svz.on }}" class="{{ svz.cls }}">{{ svz.label }}</button>
+</sc-for>
+</div>
+<div style="flex: none; display: flex; gap: 8px">
+<div style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 14px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C">
+<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #9AA8C3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+<input type="search" aria-label="Rechercher une carte de l’extension, par nom ou numéro" placeholder="Nom ou numéro…" value="{{ cset.q }}" onInput="{{ cset.onQ }}" style="flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; outline-offset: 4px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px">
+</div>
+<button type="button" onClick="{{ cset.sortNext }}" aria-label="{{ cset.sortAria }}" style="flex: none; height: 48px; padding: 0 14px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round"><path d="M4 7h16 M7 12h10 M10 17h4"></path></svg>{{ cset.sortLabel }}</button>
+</div>
+<sc-if value="{{ cset.hasRars }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="Filtrer par rareté" style="flex: none; display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ cset.rars }}" as="svr" hint-placeholder-count="8">
+<button type="button" onClick="{{ svr.pick }}" aria-pressed="{{ svr.on }}" aria-label="{{ svr.label }}" style="flex: none; height: 36px; padding: 0 11px; border-radius: 999px; border: 1px solid {{ svr.bc }}; background: {{ svr.bg }}; color: {{ svr.fg }}; font: inherit; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer"><span class="{{ svr.cls }}" aria-hidden="true">{{ svr.glyph }}</span><span style="font-variant-numeric: tabular-nums">{{ svr.n }}</span></button>
+</sc-for>
+<sc-if value="{{ cset.hasRarClear }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ cset.rarClear }}" style="flex: none; height: 36px; padding: 0 12px; border: 0; background: transparent; color: var(--pkm-link); font: inherit; font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Effacer</button>
+</sc-if>
+</div>
+</sc-if>
+</sc-if>
 <span style="flex: none; font-size: 12.5px; color: #7D8BA8">{{ cset.count }}</span>
 <sc-if value="{{ cset.empty }}" hint-placeholder-val="{{ false }}">
 <p style="margin: 0; padding: 24px 0; text-align: center; font-size: 14px; color: #9AA8C3">{{ cset.emptyText }}</p>
 </sc-if>
-<div style="flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 10px">
+<div class="{{ cset.gridCls }}" style="flex: none; display: grid; grid-template-columns: {{ cset.cols }}; gap: 14px 8px">
 <sc-for list="{{ cset.cards }}" as="ca" hint-placeholder-count="9">
-<button type="button" onClick="{{ ca.open }}" aria-label="{{ ca.label }}" style="display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
-<span style="position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08)">
+<div class="{{ ca.cls }}">
+<button type="button" onClick="{{ ca.open }}" aria-label="{{ ca.label }}" class="pkm-sv-open">
+<span class="pkm-sv-pic">
 <img src="{{ ca.img }}" srcset="{{ ca.srcset }}" sizes="(max-width: 520px) 30vw, 118px" alt="" loading="lazy" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
-<sc-if value="{{ ca.owned }}" hint-placeholder-val="{{ false }}">
-<span style="position: absolute; top: 5px; right: 5px; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: #FFFFFF; font-size: 11.5px; font-weight: 700">{{ ca.qty }}</span>
-</sc-if>
+<span class="pkm-sv-num">{{ ca.num }}</span>
+<sc-if value="{{ ca.owned }}" hint-placeholder-val="{{ false }}"><span class="pkm-sv-qty">{{ ca.qty }}</span></sc-if>
 </span>
-<span style="display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 0 2px">
-<span style="font-size: 12.5px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ca.name }}</span>
-<span style="display: flex; justify-content: space-between; gap: 4px; font-size: 11.5px; color: #9AA8C3"><span style="min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ca.num }}</span><span style="flex: none; font-weight: 700; font-variant-numeric: tabular-nums; color: {{ ca.coteColor }}">{{ ca.cote }}</span></span>
-</span>
+<span class="pkm-sv-name">{{ ca.name }}</span>
+<span class="pkm-sv-meta"><span class="pkm-sv-flag" style="background: {{ ca.flag }}"></span><span>{{ ca.cote }}</span></span>
 </button>
+<button type="button" onClick="{{ ca.fav }}" aria-label="{{ ca.favLabel }}" aria-pressed="{{ ca.favOn }}" class="{{ ca.favCls }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></button>
+<button type="button" onClick="{{ ca.add }}" aria-label="{{ ca.addLabel }}" class="pkm-sv-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12 M6 12h12"></path></svg></button>
+</div>
 </sc-for>
 </div>
 </sc-if>
@@ -324,6 +360,15 @@
 </sc-if>
 <sc-if value="{{ home.hk.empty }}" hint-placeholder-val="{{ false }}">
 <p style="margin: 0; padding: 12px 4px; text-align: center; font-size: 13.5px; line-height: 1.5; color: #9AA8C3">{{ home.hk.emptyText }}</p>
+</sc-if>
+<sc-if value="{{ home.hk.canAdd }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-hb-add" style="display: flex; flex-direction: column; gap: 8px; padding: 0 4px 6px">
+<button type="button" onClick="{{ home.hk.add }}" style="height: 52px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 15.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round"><path d="M12 5v14 M5 12h14"></path></svg>{{ home.hk.addLabel }}</button>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+<button type="button" onClick="{{ home.hk.scan }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Scanner</button>
+<button type="button" onClick="{{ home.hk.other }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ home.hk.otherLabel }}</button>
+</div>
+</div>
 </sc-if>
 <sc-if value="{{ home.hk.hasPages }}" hint-placeholder-val="{{ true }}">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">

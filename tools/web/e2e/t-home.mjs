@@ -69,7 +69,14 @@ await p2.click('button:has-text("Vider ma collection")'); await p2.waitForTimeou
 await p2.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await p2.waitForTimeout(1500);
 ok('vide : « Mon classeur » vide, message', /Aucune carte dans ton classeur/.test(await p2.locator('section[aria-label="Mon classeur"]').innerText()));
 ok('pas de défilement horizontal (360)', !(await p2.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
+// Classeur vide (2026-10-17) : bouton pour ajouter des cartes, puis des produits scellés.
+const addCards = p2.getByRole('button', { name: 'Ajouter des cartes', exact: true });
+ok('vide : bouton « Ajouter des cartes »', (await addCards.count()) === 1);
+await addCards.scrollIntoViewIfNeeded(); await p2.evaluate(() => document.querySelector('main').scrollBy(0, 160)); await p2.waitForTimeout(300);
 await p2.screenshot({ path: shot('home-vide.png') });
+await p2.getByRole('tab', { name: 'Mes produits scellés' }).click(); await p2.waitForTimeout(300);
+await p2.getByRole('button', { name: 'Ajouter des produits scellés' }).click(); await p2.waitForTimeout(900);
+ok('vide : « Ajouter des produits scellés » ouvre le catalogue du scellé', /Produits scellés/.test(await p2.locator('h1').first().innerText()));
 await p2.goto(BASE + '?start=settings', { waitUntil: 'load' }); await p2.waitForTimeout(600);
 await p2.click('button:has-text("Remettre la démo")'); await p2.waitForTimeout(400);
 console.log(res.join('\n'));

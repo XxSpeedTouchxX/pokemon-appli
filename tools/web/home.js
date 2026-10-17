@@ -101,7 +101,15 @@
         : [plural(units(cards), 'carte', 'cartes') + ' · ' + x.mask(this.eur(sum(cards)))]
           .concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · '),
       empty: !list.length,
-      emptyText: filtered ? 'Aucun article ne correspond à ces filtres.' : tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant.' : 'Aucune carte dans ton classeur pour l’instant : scanne une carte ou cherche-la dans le catalogue.',
+      emptyText: filtered ? 'Aucun article ne correspond à ces filtres.' : tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant : ajoute tes ETB, coffrets et boosters.' : 'Aucune carte dans ton classeur pour l’instant : ajoute tes cartes pour connaître leur valeur.',
+      // Classeur vide (2026-10-17, demande du porteur) : un bouton invite à ajouter des cartes ou des produits scellés
+      // (recherche dans tout le catalogue, ou catalogue du scellé), avec le scan et l'autre catalogue à côté.
+      canAdd: !list.length && !filtered,
+      addLabel: tab === 'sealed' ? 'Ajouter des produits scellés' : 'Ajouter des cartes',
+      add: () => (tab === 'sealed' ? this.openSealedList() : this.openSearch('')),
+      scan: () => this.openScan(),
+      otherLabel: tab === 'sealed' ? 'Ajouter des cartes' : 'Produits scellés',
+      other: () => (tab === 'sealed' ? this.openSearch('') : this.openSealedList()),
       hasPages: pages > 1, pageLabel: 'Page ' + (page + 1) + ' sur ' + pages,
       prevOff: page === 0, nextOff: page === pages - 1, prevDim: page === 0 ? 0.35 : 1, nextDim: page === pages - 1 ? 0.35 : 1,
       prev: () => { if (page > 0) this.setState({ [key]: page - 1 }); },

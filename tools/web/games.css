@@ -180,3 +180,56 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-hh-left > span { align-items: flex-start !important; }
 .pkm-hh-left .pkm-tk-head { align-self: flex-start; }
 .pkm-hh-grade { position: absolute; right: -8px; bottom: -8px; width: 34px; height: 34px; display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5)); pointer-events: none; }
+/* Écran d'une extension façon vidéo du porteur (2026-10-17, setview.js) : progression, taille de la grille, raretés,
+   cartes manquantes en gris, cœur (favori) et « + » (ajout rapide) sur chaque carte. */
+.pkm-sv-bar { display: block; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.pkm-sv-bar-in { display: block; height: 100%; min-width: 2px; border-radius: 4px; background: var(--pkm-accent); transition: width 0.4s ease; }
+.pkm-sv-sizes { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C; }
+.pkm-sv-size { height: 40px; padding: 0; border: 0; border-radius: 999px; background: transparent; color: #C9D3EA; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.pkm-sv-size-on { background: #26345A; color: #FFFFFF; box-shadow: inset 0 0 0 1px #3A4A75; }
+.pkm-rar { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 4px; box-sizing: border-box; border-radius: 10px; background: #0B1120; font-size: 11px; line-height: 1; letter-spacing: -0.06em; color: #FFFFFF; }
+.pkm-rar-c, .pkm-rar-u { color: #C9D3EA; }
+.pkm-rar-ur { color: #D9E2F2; }
+.pkm-rar-ir, .pkm-rar-sir, .pkm-rar-hr { color: #FFD60A; }
+.pkm-rar-pk { color: #FFE14D; text-shadow: 0 0 4px rgba(255, 90, 60, 0.9); }
+.pkm-rar-cc { color: #0B1120; background: #FFD60A; font-size: 10px; font-weight: 800; letter-spacing: 0; }
+.pkm-rar-p { color: #A8B6FF; font-weight: 800; letter-spacing: 0; }
+.pkm-rar-sh { color: #7CF5FF; }
+.pkm-rar-ace { color: #FF8AD8; }
+.pkm-rar-fu { color: #5BE08F; }
+.pkm-rar-ra { color: #FFB347; }
+.pkm-rar-n { color: #9AA8C3; }
+.pkm-sv-card { position: relative; min-width: 0; }
+.pkm-sv-open { display: flex; flex-direction: column; align-items: stretch; gap: 5px; width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: center; cursor: pointer; }
+.pkm-sv-pic { position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.pkm-sv-miss .pkm-sv-pic { background: #2A3346; }
+.pkm-sv-miss .pkm-sv-pic img { filter: grayscale(1) contrast(0.85) brightness(1.05); opacity: 0.5; }
+.pkm-sv-num, .pkm-sv-qty { position: absolute; bottom: 3.5%; padding: 1px 6px; border-radius: 6px; background: rgba(8, 13, 26, 0.86); color: #FFFFFF; font-size: 10.5px; font-weight: 700; line-height: 1.35; font-variant-numeric: tabular-nums; }
+.pkm-sv-num { left: 5%; }
+.pkm-sv-qty { right: 5%; box-shadow: inset 0 0 0 1px var(--pkm-accent); }
+.pkm-sv-name { font-size: 12.5px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--pkm-t1); }
+.pkm-sv-meta { display: flex; justify-content: center; align-items: center; gap: 5px; min-width: 0; font-size: 11.5px; font-weight: 700; color: var(--pkm-t2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pkm-sv-flag { flex: none; width: 14px; height: 10px; border-radius: 2px; }
+.pkm-sv-fav, .pkm-sv-add { position: absolute; top: 4px; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 16px; background: rgba(8, 13, 26, 0.8); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-sv-fav { left: 4px; }
+.pkm-sv-add { right: 4px; }
+.pkm-sv-fav svg, .pkm-sv-add svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-sv-fav-on { color: #FF5A7A; }
+.pkm-sv-fav-on svg { fill: currentColor; }
+.pkm-sv-add:active, .pkm-sv-fav:active { transform: scale(0.9); }
+.pkm-sv-s .pkm-sv-name { font-size: 11px; }
+.pkm-sv-s .pkm-sv-meta { font-size: 10px; gap: 3px; }
+.pkm-sv-s .pkm-sv-flag { width: 11px; height: 8px; }
+.pkm-sv-s .pkm-sv-num, .pkm-sv-s .pkm-sv-qty { font-size: 9px; padding: 0 4px; }
+.pkm-sv-s .pkm-sv-fav, .pkm-sv-s .pkm-sv-add { top: 2px; width: 26px; height: 26px; border-radius: 13px; }
+.pkm-sv-s .pkm-sv-fav { left: 2px; }
+.pkm-sv-s .pkm-sv-add { right: 2px; }
+.pkm-sv-s .pkm-sv-fav svg, .pkm-sv-s .pkm-sv-add svg { width: 14px; height: 14px; }
+.pkm-sv-l .pkm-sv-name { font-size: 14.5px; }
+.pkm-sv-l .pkm-sv-meta { font-size: 13px; }
+.pkm-sv-l .pkm-sv-num, .pkm-sv-l .pkm-sv-qty { font-size: 12px; padding: 2px 8px; }
+.pkm-sv-l .pkm-sv-fav, .pkm-sv-l .pkm-sv-add { top: 6px; width: 38px; height: 38px; border-radius: 19px; }
+.pkm-sv-l .pkm-sv-fav { left: 6px; }
+.pkm-sv-l .pkm-sv-add { right: 6px; }
+.pkm-sv-l .pkm-sv-fav svg, .pkm-sv-l .pkm-sv-add svg { width: 20px; height: 20px; }
+@media (prefers-reduced-motion: reduce) { .pkm-sv-bar-in { transition: none; } }

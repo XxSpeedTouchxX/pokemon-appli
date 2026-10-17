@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-10-17 — Écran d'une extension façon vidéo, réimpressions du 30ᵉ Anniversaire, classeur vide
+
+- **Demande du porteur (avec vidéo) :**
+  - « Mon classeur » vide : un bouton pour ajouter des cartes et des produits ;
+  - 30ᵉ Anniversaire : visuels manquants, surtout les réimpressions ;
+  - filtres sur chaque extension, sur le modèle de la vidéo (série 30 ans), reproduits sur toutes les séries.
+- **Livré :**
+  - classeur vide : « Ajouter des cartes » (recherche dans tout le catalogue) ou « Ajouter des produits scellés » (catalogue du scellé), avec « Scanner » et l'autre catalogue à côté ;
+  - **Collection Classique (30 réimpressions)** : TCGdex n'en a aucun scan. Chaque réimpression reprend exactement une carte d'origine : la liste officielle (relayée par Cardrake et TCG Collector) donne, pour chacune, la carte d'origine, dont l'app affiche le visuel et le numéro imprimé (Dracaufeu 4/102, Lugia 149/147, Magicarpe 203/193…), avec une note dans la fiche. Le premier écran montre désormais le Lugia d'Aquapolis, celui de la réimpression. Restent dessinées : 3 cartes Mew (B, G, R) sans visuel ni détail chez TCGdex ;
+  - **écran d'une extension** (toutes les extensions et « Les plus chères ») : logo, date et série, progression des cartes possédées ; Toutes, Possédées, Manquantes, Doublons ; Petit, Moyen, Grand ; recherche par nom ou numéro ; tri par numéro, cote ou nom ; filtres de rareté avec symbole et nombre, cumulables ; cartes manquantes en gris ; cœur (favori, gardé sur l'appareil) et « + » (ajout immédiat d'un exemplaire, FR ou EN, Near Mint, « Annuler » quelques secondes) sur chaque carte ;
+  - écarté : « Sélectionner », « Stamps » et « Options » de la vidéo (pas de besoin identifié à ce stade).
+
+---
+
 ## 2026-10-16 — Grades par PK et parrainages, Information sur les grades, animation de passage, cote médiane
 
 - **Demande du porteur :**
