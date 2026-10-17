@@ -107,6 +107,10 @@ class CmFiles:
         for name, keys in ours.items():
             ids = prods.get(name)
             if not ids:
+                # « M Gardevoir EX » ↔ « MGardevoir EX » : mêmes lettres, espaces mis à part.
+                same = [n for n in prods if n.replace(" ", "") == name.replace(" ", "")]
+                ids = prods[same[0]] if len(same) == 1 else None
+            if not ids:
                 # « Palkia » ↔ « Palkia LV.X », « Metagross δ » ↔ « Metagross » : un seul candidat qui commence pareil.
                 near = [n for n in prods if n.startswith(name + " ") or name.startswith(n + " ")]
                 ids = prods[near[0]] if len(near) == 1 else None

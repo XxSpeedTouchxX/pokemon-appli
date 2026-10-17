@@ -301,19 +301,28 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
     by_set = {}
     for c in cards:
         by_set.setdefault(c[f["set"]], []).append(c)
+    # Extensions TCGdex rangées par Cardmarket dans une même extension (30ᵉ Anniversaire et sa Collection Classique) :
+    # rapprochées ensemble, dans l'ordre des extensions puis des numéros, pour que les 31 Pikachu ou les 2 Lugia
+    # retrouvent autant de produits.
+    groups = {}
+    for sid in sorted(by_set):
+        groups.setdefault(tuple(cmfiles.EXPANSIONS[sid]) if sid in cmfiles.EXPANSIONS else sid, []).append(sid)
     n, report = 0, []
-    for sid, rows in sorted(by_set.items()):
+    for sids in groups.values():
+        sid = "+".join(sids)
+        rows = [c for s in sids for c in sorted(by_set[s], key=lambda c: natural(c[f["num"]]))]
         if not files or not any(no_cm(c) for c in rows):
             continue
-        rows = sorted(rows, key=lambda c: natural(c[f["num"]]))
-        english = (sets.get(sid) or [""] * 6)[5] == "en"
-        names = {c[f["id"]]: en_names.get(c[f["id"]]) or (c[f["name"]] if english or c[f["lang"]] == "en" else None) for c in rows}
+        english = lambda c: (sets.get(c[f["set"]]) or [""] * 6)[5] == "en"
+        names = {c[f["id"]]: en_names.get(c[f["id"]]) or (c[f["name"]] if english(c) or c[f["lang"]] == "en" else None) for c in rows}
         known = [cm_ids[c[f["id"]]] for c in rows if c[f["id"]] in cm_ids]
-        if not known and sid not in cmfiles.EXPANSIONS and sum(1 for v in names.values() if v) < len(rows) / 2:
+        if not known and sids[0] not in cmfiles.EXPANSIONS and sum(1 for v in names.values() if v) < len(rows) / 2:
             continue  # ni carte reliée, ni table, ni noms anglais : rien à rapprocher
-        if sum(1 for v in names.values() if v) < len(rows) / 2:
-            names.update({k: v for k, v in en_fetch(sid).items() if k in names and v})
-        exps = files.expansions_for(sid, known, [names.get(c[f["id"]]) for c in rows])
+        for s in sids:
+            mine = [c[f["id"]] for c in by_set[s]]
+            if sum(1 for k in mine if names.get(k)) < len(mine) / 2:
+                names.update({k: v for k, v in en_fetch(s).items() if k in names and v})
+        exps = files.expansions_for(sids[0], known, [names.get(c[f["id"]]) for c in rows])
         if not exps:
             continue
         found = files.match([(c[f["id"]], names.get(c[f["id"]])) for c in rows], exps)
