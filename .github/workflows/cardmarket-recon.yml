@@ -1,0 +1,17 @@
+# Reconnaissance des fichiers publics Cardmarket des cartes (2026-10-18) : lancée à la main, n'écrit rien.
+# Sert à vérifier la présence et le nom des cartes du 30ᵉ Anniversaire avant d'écrire leur rapprochement.
+name: Reconnaissance Cardmarket (cartes)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/cardmarket/recon_singles.py
