@@ -62,6 +62,20 @@ for (const tab of [0, 1]) {
 ok('article ajouté visible dans « Mon classeur » : ' + target, seen.some(l => l.startsWith(target + ',')));
 ok('pas de défilement horizontal (390)', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
 await page.context().close();
+// Valeur par type (2026-10-17) : « Cartes » + « Produits scellés » = valeur de toute la collection.
+{
+  const p3 = await mk(390, 844);
+  await p3.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await p3.waitForTimeout(2500);
+  const eur = t => Number(String(t).replace(/[^\d,]/g, '').replace(',', '.'));
+  const parts = await p3.locator('[aria-label="Valeur de ma collection par type"] button').allInnerTexts();
+  const total = (await p3.locator('main').innerText()).match(/Valeur de toute ma collection\s*\n?\s*([\d\s\u202f\u00a0]+,\d\d\s?€)/);
+  const sum = parts.reduce((t, x) => t + eur(x.split('\n')[1]), 0);
+  ok('Cartes + Produits scellés = valeur totale : ' + parts.map(x => x.replace(/\n/g, ' ')).join(' + ') + ' = ' + (total ? total[1] : '?'),
+    parts.length === 2 && !!total && Math.abs(sum - eur(total[1])) < 0.02);
+  await p3.locator('[aria-label="Valeur de ma collection par type"] button').nth(1).click(); await p3.waitForTimeout(300);
+  ok('tuile Produits scellés : ouvre l’onglet du classeur', (await p3.getByRole('tab', { name: 'Mes produits scellés' }).getAttribute('aria-selected')) === 'true');
+  await p3.context().close();
+}
 // 5. Collection vide.
 const p2 = await mk(360, 740);
 await p2.goto(BASE + '?start=settings', { waitUntil: 'load' }); await p2.waitForTimeout(800);

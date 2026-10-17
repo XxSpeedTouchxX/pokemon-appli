@@ -177,6 +177,8 @@
       // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
       cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1,
       dup: !!(TCG.dup && TCG.dup.has(id)),
+      // Prix TCGplayer venu de TCGCSV (carte sans aucun prix dans TCGdex, 2026-10-17) : « à confirmer ».
+      tcs: F.ts !== undefined && r[F.ts] === 1,
       // Réimpression : carte et extension d'origine (visuel et numéro repris).
       reprintOf: ov ? orig : '', reprintSet: ov ? ov.set[0] : ''
     };
@@ -446,9 +448,11 @@
     if (p.tcg) {
       const day = p.upd ? ', prix du ' + this.d2(p.upd) : '';
       it.sources.forEach(so => { so.sub = so.sub.replace(' · fichier public du 03/10', ' · via TCGdex' + day).replace(' · annonces du 03/10', ' · via TCGdex' + day); });
+      if (p.tcs) it.sources.forEach(so => { if (/TCGplayer/.test(so.label + ' ' + so.sub)) so.sub = so.sub.replace(/via TCGdex.*$/, 'via TCGCSV · à confirmer'); });
       const n = [p.cm, p.tcp].filter(v => typeof v === 'number').length;
       it.coteRule = p.dup ? 'Cote à confirmer : TCGdex donne la même cote Cardmarket à plusieurs cartes de cette extension (rattachement erroné). Aucune cote n’est comptée pour cette carte.'
         : typeof p.cm === 'number' ? 'Cote Dropicards = médiane de la tendance et des moyennes 7 et 30 jours Cardmarket de cette version, et du prix TCGplayer (ventes conclues, converti en euros). Une médiane écarte un pic isolé ; le prix demandé est affiché, jamais compté.' + (coteSpread(p.cm, p.avg30, p.avg7) > COTE_SPREAD ? ' Marché peu actif : les prix Cardmarket varient fortement, cote à confirmer.' : '')
+          : typeof p.tcp === 'number' && p.tcs ? 'Pas encore de prix Cardmarket pour cette carte : la cote reprend le prix « market » TCGplayer (ventes conclues aux États-Unis, converti en euros), via TCGCSV. À confirmer.'
           : typeof p.tcp === 'number' ? 'Pas de prix Cardmarket pour cette carte : la cote reprend TCGplayer (marché US, converti en euros), à confirmer.'
             : 'Pas encore de prix « marché » pour cette carte.';
       if (it.noCote) it.release = 'Pas encore de prix « marché » pour cette carte (Cardmarket et TCGplayer, via TCGdex). Tu peux quand même l’ajouter à ta collection.';

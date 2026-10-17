@@ -67,7 +67,7 @@ const p2 = await ctx2.newPage(); p2.on('pageerror', e => errors.push(e.message))
 await p2.goto(B + '#series', { waitUntil: 'load' }); await p2.waitForFunction(() => document.querySelector('nav[aria-label="Aller à une série"]'), null, { timeout: 20000 });
 await p2.fill('input[aria-label="Rechercher une série ou une extension"]', '151'); await p2.waitForTimeout(500);
 const t151 = (await p2.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').allInnerTexts()).find(t => /(^|\n)151(\n|$)/.test(t)) || '';
-ok('progression de l’extension 151 : ' + t151.replace(/\n/g, ' · '), /1\/\d+ · \d+ %/.test(t151));
+ok('progression de l’extension 151 : ' + t151.replace(/\n/g, ' · '), /(^|\n)1\/\d+(\n|$)/.test(t151));
 await page.screenshot({ path: shot('series-search.png') });
 // 30ᵉ Anniversaire : la Collection Classique est rattachée (une seule tuile, cartes additionnées), logo de repli.
 await page.fill('input[aria-label="Rechercher une série ou une extension"]', 'anniversaire'); await page.waitForTimeout(2500);
@@ -109,14 +109,20 @@ await page.screenshot({ path: shot('series-logos.png') });
 // 360 px : pas de défilement horizontal.
 await page.setViewportSize({ width: 360, height: 740 }); await page.fill('input[aria-label="Rechercher une série ou une extension"]', ''); await page.waitForTimeout(400);
 ok('360 px : pas de défilement horizontal', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
-// Ouverture d'une série (2026-10-14, vidéo du porteur) : son en-tête vient juste sous la barre des logos.
+// Ouverture d'une série par son en-tête (2026-10-17, vidéo du porteur) : la page ne remonte pas, l'en-tête reste à sa
+// place (même si la série ouverte au-dessus se referme) et les extensions se déplient dessous, 3 par ligne.
 for (const name of ['Écarlate et Violet', 'Épée et Bouclier']) {
   const c2 = await browser.newContext({ viewport: { width: 390, height: 844 } }), page = await c2.newPage();
   page.on('pageerror', e => errors.push(e.message));
   await page.goto(E2E + '/?start=collection', { waitUntil: 'load' }); await page.waitForTimeout(2500);
-  await page.locator('main section[aria-label="' + name + '"] button').first().click(); await page.waitForTimeout(1200);
-  const gap = await page.evaluate(n => { const bar = document.querySelector('main nav[aria-label="Aller à une série"]').getBoundingClientRect(), h = document.querySelector('main section[aria-label="' + n + '"]').getBoundingClientRect(); return Math.round(h.top - bar.bottom); }, name);
-  ok('« ' + name + ' » ouverte : en-tête juste sous la barre des logos (' + gap + ' px)', gap >= 0 && gap <= 24);
+  const head = page.locator('main section[aria-label="' + name + '"] button').first();
+  await head.scrollIntoViewIfNeeded(); await page.waitForTimeout(300);
+  const before = (await head.boundingBox()).y;
+  await head.click(); await page.waitForTimeout(1200);
+  const after = (await head.boundingBox()).y;
+  ok('« ' + name + ' » ouverte : en-tête resté en place (' + Math.round(before) + ' → ' + Math.round(after) + ' px)', Math.abs(after - before) <= 4);
+  const cols = await page.evaluate(n => getComputedStyle(document.querySelector('main section[aria-label="' + n + '"] .pkm-ser-unfold')).gridTemplateColumns.split(' ').length, name);
+  ok('« ' + name + ' » : 3 extensions par ligne', cols === 3);
   await c2.close();
 }
 ok('aucune erreur JS', errors.length === 0);

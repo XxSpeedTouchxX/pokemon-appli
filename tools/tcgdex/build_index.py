@@ -31,7 +31,7 @@ numéro), sinon dans l'extension parente (« swsh9tg » TG01 → « swsh9 » TG0
 Contenu de cards.json :
     sets      { set_id: [nom, série, date de sortie, logo, nombre officiel de cartes, langue des cartes] }
     fields    noms des colonnes de chaque carte
-    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue, cmh, cmv, q], ...]
+    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue, cmh, cmv, q, ts], ...]
               cm    = tendance Cardmarket (€)      low = plus bas Cardmarket (€, prix demandé)
               avg30 = moyenne Cardmarket 30 jours  tcp = TCGplayer « market », converti en €
               maj   = date de mise à jour des prix Cardmarket
@@ -42,6 +42,7 @@ Contenu de cards.json :
               cmh   = tendance de l'autre groupe de prix : reverse (carte qui a une version reverse), normale
                       (carte holo seulement, cote tirée du groupe holo), ou holo ; null s'il manque
               cmv   = groupe de prix de cm : « n » (champs normaux) ou « h » (champs « -holo ») ; null sans cm
+              ts    = 1 si tcp vient de TCGCSV (carte sans aucun prix dans TCGdex, tcgcsv.py), 0 sinon
               q     = 1 si la cote est douteuse (plus bas < 5 % de la tendance, moyenne 1 jour et tendance à plus
                       de 3 fois d'écart, carte holo seulement cotée sans le groupe holo), 0 sinon
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
@@ -72,6 +73,7 @@ import xml.etree.ElementTree as ET
 
 from ptcg import PTCG_IMG, PtcgData, compact_image, norm_number  # visuels anglais de dernier recours (pokemontcg.io)
 from complete import en_extra, numbering_confirmed, ptcg_extra, ptcg_prices  # cartes manquantes en français (version anglaise, pokemontcg.io)
+import tcgcsv  # prix TCGplayer des cartes sans prix (TCGCSV, 2026-10-17)
 
 PTCG_CACHE = Path(__file__).with_name("ptcg_images.json")
 
@@ -79,7 +81,7 @@ ASSETS = "https://assets.tcgdex.net/"
 ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 FALLBACK_USD_EUR = 0.86  # taux de secours si la BCE ne répond pas
 SKIP_SERIES = {"tcgp"}  # Pokémon TCG Pocket : cartes numériques, hors collection physique
-FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q"]
+FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q", "ts"]
 Q_MIN_TREND = 1.0  # en dessous de 1 €, l'écart entre plus bas et tendance ne dit rien : pas de « cote douteuse »
 SOON_DAYS = 90  # extension récente sans cote Cardmarket : « cote à venir »
 TCP_VARIANTS = ["normal", "holofoil", "reverse-holofoil", "1st-edition-holofoil", "1st-edition", "unlimited-holofoil", "unlimited"]
@@ -166,7 +168,7 @@ def prices(card, rate):
 
 def row(cid, name, sid, local, rarity, img, p, lang=""):
     """Ligne du catalogue dans l'ordre de FIELDS ; p : prix au format de prices()."""
-    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:]]
+    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:], 0]
 
 
 def ptcg_row_prices(card, rate):
@@ -288,6 +290,55 @@ def coverage(cards, sets, today=None):
             "setsNoCm": dict(sorted(no_cm.items(), key=lambda kv: (-kv[1], kv[0]))), "setsPriceSoon": soon}
 
 
+def fill_tcgcsv(cards, sets, set_en, en_names, rate, client, prev=None):
+    """Cartes sans aucun prix (ni Cardmarket ni TCGplayer via TCGdex) : prix TCGplayer « market » de TCGCSV, en euros,
+    marqué ts = 1. Si TCGCSV ne répond pas pour une extension, le prix TCGCSV de la veille est gardé.
+    Retourne (cartes complétées, rapport par extension, échecs de téléchargement)."""
+    f = {k: i for i, k in enumerate(FIELDS)}
+    need = {}
+    for c in cards:
+        if all(c[f[k]] is None for k in ("cm", "avg30", "avg7", "tcp")):
+            need.setdefault(c[f["set"]], []).append(c)
+    if not need:
+        return 0, [], []
+    groups = client.groups()
+    cache, n, report = {}, 0, []
+    for sid, rows in sorted(need.items()):
+        s = sets.get(sid) or [sid, "", "", "", "", "fr"]
+        english = s[5] == "en"  # extension sans version française : noms déjà en anglais
+        gids = tcgcsv.groups_for(sid, set_en.get(sid) or (s[0] if english else None), groups)
+        idx = {}
+        for g in gids:
+            if g not in cache:
+                cache[g] = client.group_index(g)
+            if cache[g]:
+                idx[g] = cache[g]
+        got = 0
+        for c in rows:
+            en = en_names.get(c[f["id"]]) or (c[f["name"]] if english or c[f["lang"]] == "en" else None)
+            usd = tcgcsv.price_for(sid, c[f["num"]], en, idx) if idx else None
+            if usd:
+                c[f["tcp"]], c[f["ts"]] = round(usd * rate, 2), 1
+                got += 1
+        n += got
+        if gids:
+            report.append(f"{sid} {got}/{len(rows)}")
+    # Repli : prix TCGCSV de la veille pour les cartes restées sans prix (TCGCSV absent ou en panne ce jour-là).
+    if prev and prev.get("cards") and "ts" in (prev.get("fields") or []):
+        pf = {k: i for i, k in enumerate(prev["fields"])}
+        old = {c[pf["id"]]: c[pf["tcp"]] for c in prev["cards"] if c[pf["ts"]] == 1 and c[pf["tcp"]] is not None}
+        kept = 0
+        for rows in need.values():
+            for c in rows:
+                if c[f["ts"]] != 1 and c[f["id"]] in old:
+                    c[f["tcp"]], c[f["ts"]] = old[c[f["id"]]], 1
+                    kept += 1
+        if kept:
+            report.append(f"repris de la veille {kept}")
+            n += kept
+    return n, report, client.failures
+
+
 def compare_catalog(prev, doc):
     """Anomalies du nouveau catalogue face à celui de la veille : (erreurs, avertissements)."""
     errors, warnings = [], []
@@ -341,6 +392,7 @@ def main():
     p.add_argument("--min-cards", type=int, default=1000, help="échec si moins de cartes (protège contre un index vide)")
     p.add_argument("--previous", default=None, help="catalogue de la veille à comparer (par défaut : --out avant écriture)")
     p.add_argument("--force", action="store_true", help="écrit l'index malgré une baisse face à la veille (vérifiée à la main)")
+    p.add_argument("--tcgcsv", action="store_true", help="complète les cartes sans prix avec TCGplayer via TCGCSV (réseau)")
     args = p.parse_args()
     src, out = Path(args.src), Path(args.out)
     en = Path(args.en) if args.en else None
@@ -493,6 +545,15 @@ def main():
     for sid in en_only:
         add_set(sid, en_sets[sid], "en", en)
     stats["cards"] = len(cards)
+    if args.tcgcsv:
+        en_names = dict(en_fb.names) if en_fb else {}
+        set_en = {sid: (en_sets.get(sid) or {}).get("name") for sid in sets}
+        n_tc, report, fails = fill_tcgcsv(cards, sets, set_en, en_names, rate, tcgcsv.Client(),
+                                          load(Path(args.previous) if args.previous else out))
+        stats["cardsTcgcsv"] = n_tc
+        print(f"TCGCSV : {n_tc} cartes sans prix complétées · " + " · ".join(report))
+        for x in fails[:20]:
+            print(f"TCGCSV ne répond pas : {x}")
     stats.update(coverage(cards, sets))
     if ptcg_report:
         print("pokemontcg.io, par extension :", " · ".join(ptcg_report))

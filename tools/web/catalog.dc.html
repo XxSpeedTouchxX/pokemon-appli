@@ -379,6 +379,16 @@
 </sc-if>
 </div>
 </div>
+<div role="group" aria-label="Valeur de ma collection par type" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
+<sc-for list="{{ home.hk.split }}" as="hsp" hint-placeholder-count="2">
+<button type="button" onClick="{{ hsp.open }}" aria-label="{{ hsp.label }}" class="pkm-hb-type" style="position: relative; min-height: 142px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; color: #F3F6FC; font: inherit; text-align: left; overflow: hidden; cursor: pointer">
+<span style="font-size: 13px; font-weight: 600; color: #C9D3EA">{{ hsp.title }}</span>
+<span class="pkm-hb-type-v" style="font-family: 'Sora', sans-serif; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap">{{ hsp.value }}</span>
+<span style="font-size: 12px; color: #9AA8C3">{{ hsp.count }}</span>
+<span class="pkm-hb-fan" aria-hidden="true"><sc-for list="{{ hsp.imgs }}" as="hsi" hint-placeholder-count="3"><img src="{{ hsi.src }}" alt="" loading="lazy" class="{{ hsi.cls }}"></sc-for></span>
+</button>
+</sc-for>
+</div>
 </section>
 
 <section aria-label="Boutiques près de toi" style="flex: none; display: flex; flex-direction: column; gap: 10px">
@@ -1272,19 +1282,19 @@
 <span style="flex: none; font-size: 12px; font-variant-numeric: tabular-nums; color: #9AA8C3">{{ sg.progress }}</span>
 </div>
 <sc-if value="{{ sg.open }}" hint-placeholder-val="{{ false }}">
-<div class="pkm-rise" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 12px 14px">
+<div class="pkm-rise pkm-ser-unfold" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 10px 12px">
 <sc-for list="{{ sg.sets }}" as="se" hint-placeholder-count="4">
-<button type="button" onClick="{{ se.open }}" aria-label="{{ se.label }}" style="min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 10px; border-radius: 16px; border: 1px solid #1E2B45; background: rgba(255, 255, 255, 0.04); color: #F3F6FC; font: inherit; text-align: left; cursor: pointer">
-<span style="height: 64px; display: flex; align-items: center; justify-content: center">
-<sc-if value="{{ se.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ se.logo }}" alt="" loading="lazy" style="display: block; max-width: 100%; max-height: 60px; object-fit: contain"></sc-if>
-<sc-if value="{{ se.noLogo }}" hint-placeholder-val="{{ false }}"><span style="width: 52px; height: 52px; border-radius: 14px; background: rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #9AA8C3; stroke-width: 1.8; stroke-linejoin: round"><rect x="6.5" y="3.5" width="11" height="15" rx="2"></rect><path d="M4.5 7v11a2.5 2.5 0 0 0 2.5 2.5h8"></path></svg></span></sc-if>
+<button type="button" onClick="{{ se.open }}" aria-label="{{ se.label }}" style="min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 8px 7px; border-radius: 14px; border: 1px solid #1E2B45; background: rgba(255, 255, 255, 0.04); color: #F3F6FC; font: inherit; text-align: left; cursor: pointer">
+<span style="height: 50px; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{ se.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ se.logo }}" alt="" loading="lazy" style="display: block; max-width: 100%; max-height: 46px; object-fit: contain"></sc-if>
+<sc-if value="{{ se.noLogo }}" hint-placeholder-val="{{ false }}"><span style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #9AA8C3; stroke-width: 1.8; stroke-linejoin: round"><rect x="6.5" y="3.5" width="11" height="15" rx="2"></rect><path d="M4.5 7v11a2.5 2.5 0 0 0 2.5 2.5h8"></path></svg></span></sc-if>
 </span>
-<span style="font-size: 14px; font-weight: 700; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical">{{ se.name }}</span>
-<sc-if value="{{ se.soon }}" hint-placeholder-val="{{ false }}"><span style="align-self: flex-start; padding: 2px 9px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 11.5px; font-weight: 800">{{ se.line1 }}</span></sc-if>
-<sc-if value="{{ se.ready }}" hint-placeholder-val="{{ true }}"><span style="font-size: 12.5px; font-weight: 600; color: #C9D3EA">{{ se.line1 }}</span></sc-if>
-<span style="font-size: 12px; color: #9AA8C3">{{ se.line2 }}</span>
+<span style="font-size: 12.5px; font-weight: 700; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical">{{ se.name }}</span>
+<sc-if value="{{ se.soon }}" hint-placeholder-val="{{ false }}"><span style="align-self: flex-start; padding: 2px 7px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 10.5px; font-weight: 800">{{ se.line1 }}</span></sc-if>
+<sc-if value="{{ se.ready }}" hint-placeholder-val="{{ true }}"><span style="font-size: 11.5px; font-weight: 600; color: #C9D3EA">{{ se.line1 }}</span></sc-if>
+<span style="font-size: 11px; color: #9AA8C3">{{ se.line2 }}</span>
 <sc-if value="{{ se.owned }}" hint-placeholder-val="{{ false }}">
-<span style="display: flex; align-items: center; gap: 6px; margin-top: 2px"><span aria-hidden="true" style="flex: 1; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.12); overflow: hidden"><span style="display: block; height: 100%; width: {{ se.bar }}; background: var(--pkm-accent)"></span></span><span style="flex: none; font-size: 11px; color: #C9D3EA">{{ se.progress }}</span></span>
+<span style="display: flex; align-items: center; gap: 6px; margin-top: 2px"><span aria-hidden="true" style="flex: 1; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.12); overflow: hidden"><span style="display: block; height: 100%; width: {{ se.bar }}; background: var(--pkm-accent)"></span></span><span style="flex: none; font-size: 10.5px; color: #C9D3EA">{{ se.progress }}</span></span>
 </sc-if>
 </button>
 </sc-for>

@@ -30,7 +30,7 @@
   // Source d'un article, en une ligne.
   srcProto.srcOf = function (p) {
     const k = srcKind(p);
-    if (k === 'card') return 'Cote du ' + this.srcDay(p.upd || srcCardsDay()) + ' · Cardmarket et TCGplayer via TCGdex';
+    if (k === 'card') return 'Cote du ' + this.srcDay(p.upd || srcCardsDay()) + (p.tcs ? ' · TCGplayer via TCGCSV, à confirmer' : ' · Cardmarket et TCGplayer via TCGdex');
     if (k === 'sealed') return 'Cote du ' + this.srcDay(pricesDay()) + ' · Cardmarket';
     if (k === 'demo') return 'Article de la collection de démo · prix d’exemple';
     return '';

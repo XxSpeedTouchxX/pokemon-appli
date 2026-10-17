@@ -2,7 +2,7 @@
   // Remplace l'ancien écran « Collection » (la collection reste sur l'accueil, dans « Mon classeur »).
   // En haut : recherche et barre des séries (logos) qui défile ; un appui ouvre la série et la fait venir à l'écran.
   // Chaque série : logo, nom, nombre d'extensions et années, progression (cartes différentes possédées / cartes
-  // de la série). Ouverte, elle montre ses extensions en grille de 2 : logo, nom, nombre de cartes, date de sortie,
+  // de la série). Ouverte, elle montre ses extensions en grille de 3 (2026-10-17 ; 2 avant) : logo, nom, nombre de cartes, date de sortie,
   // progression ; « Bientôt » pour une extension annoncée (produits scellés à venir). Un appui sur une extension
   // ouvre toutes ses cartes (écran « Extension » : visuels officiels, numéros, cotes, filtres).
   // Ce module partage la portée des autres : ses noms commencent par SER_ ou ser.
@@ -30,9 +30,8 @@
     return Object.values(out);
   }
 
-  // Série ouverte (2026-10-14, vidéo du porteur) : son en-tête vient se placer juste sous la barre des logos, et ses
-  // extensions se lisent en descendant. Sans ce recalage, fermer la série du dessus faisait remonter le contenu et
-  // l'écran tombait au milieu (ou à la fin) des extensions de la série touchée.
+  // Série choisie dans la barre des logos (2026-10-14) : son en-tête vient se placer juste sous la barre, et ses
+  // extensions se lisent en descendant. Un appui sur l'en-tête d'une série ne fait plus défiler (serAnchor).
   const serScroll = name => {
     if (typeof window === 'undefined') return;
     const go = () => {
@@ -45,6 +44,19 @@
       try { main.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); } catch (e) { main.scrollTop = Math.max(0, y); }
     };
     (window.requestAnimationFrame || setTimeout)(() => setTimeout(go, 30));
+  };
+  // Appui sur l'en-tête d'une série (2026-10-17, vidéo du porteur) : la page ne remonte plus. L'en-tête touché reste
+  // à sa place à l'écran, même quand la série ouverte au-dessus se referme, et ses extensions se déplient vers le bas
+  // (animation pkm-ser-unfold, games.css). La barre des logos, elle, mène toujours en haut de la série choisie.
+  const serAnchor = name => {
+    if (typeof window === 'undefined') return () => {};
+    const el0 = document.getElementById(serKey(name)), main = document.querySelector('#app main');
+    if (!el0 || !main) return () => {};
+    const top0 = el0.getBoundingClientRect().top;
+    return () => (window.requestAnimationFrame || setTimeout)(() => {
+      const el = document.getElementById(serKey(name));
+      if (el) main.scrollTop += el.getBoundingClientRect().top - top0;
+    });
   };
   serProto.serJump = function (name) {
     this.setState({ serOpen: name, serQ: '' });
@@ -93,7 +105,7 @@
         sub: g.sets.length + (g.sets.length > 1 ? ' extensions' : ' extension') + (span ? ' · ' + span : ''),
         progress: g.own + '/' + g.n.toLocaleString('fr-FR') + ' · ' + pct + ' %', bar: Math.max(g.own ? 2 : 0, pct) + '%',
         open: isOpen, turn: isOpen ? '180deg' : '0deg',
-        toggle: () => { const opening = !(isOpen && !words.length); this.setState({ serOpen: opening ? g.name : '', serQ: '' }); if (opening) serScroll(g.name); },
+        toggle: () => { const opening = !(isOpen && !words.length), keep = serAnchor(g.name); this.setState({ serOpen: opening ? g.name : '', serQ: '' }); keep(); },
         label: g.name + ', ' + g.sets.length + ' extensions, ' + g.own + ' cartes à toi sur ' + g.n + (isOpen ? ', ouverte' : ''),
         sets: isOpen ? sets.map(e => {
           if (e.soon) {
@@ -105,7 +117,7 @@
           const k = own[e.id] || 0, logo = setLogo(e.id, e.logo), ok = !!logo, p = serPct(k, e.n);
           return { name: e.name, logo: logo, hasLogo: ok, noLogo: !ok, initials: e.name.slice(0, 2).toUpperCase(), soon: false, ready: true,
             line1: e.n + (e.n > 1 ? ' cartes' : ' carte'), line2: serMonth(e.date) + (e.lang === 'EN' ? ' · EN' : ''),
-            owned: k > 0, progress: k + '/' + e.n + ' · ' + p + ' %', bar: Math.max(2, p) + '%',
+            owned: k > 0, progress: k + '/' + e.n, bar: Math.max(2, p) + '%',
             label: e.name + ', ' + e.n + ' cartes' + (k ? ', ' + k + ' à toi' : '') + ', voir toutes les cartes',
             open: () => this.push('set', { setId: e.id, setFilter: 'all' }) };
         }) : []

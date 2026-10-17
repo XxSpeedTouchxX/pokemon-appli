@@ -78,6 +78,15 @@ Le workflow se lance :
 - à chaque modification de ces scripts ou du workflow ;
 - à la main, depuis l'onglet *Actions* du dépôt.
 
+## Cartes sans prix : TCGplayer via TCGCSV (2026-10-17)
+
+Décision du porteur du 2026-10-17 : chaque carte doit avoir une valeur au plus près du marché. Les cartes sans **aucun** prix dans TCGdex (ni Cardmarket ni TCGplayer : tout le 30ᵉ Anniversaire et sa Collection Classique, des promos, des kits du dresseur…, 783 cartes au 2026-10-17) reçoivent le prix « market » TCGplayer (calculé sur les ventes conclues) publié chaque jour par [TCGCSV](https://tcgcsv.com) en fichiers JSON (deux fichiers par extension : produits et prix ; aucune page web téléchargée).
+
+- `tcgcsv.py` : extension → groupe TCGplayer (table `GROUPS`, sinon même nom anglais), puis carte → produit par numéro imprimé (le nom anglais départage plusieurs produits au même numéro ; sinon aucun prix). Collection Classique : numéro de la carte d'origine (`CLASSIC_30_NUM`). Version : holo, sinon normale, sinon une autre, la reverse en dernier.
+- `build_index.py --tcgcsv` : prix converti en euros (taux BCE du jour), champ `ts` = 1 ; `stats.cardsTcgcsv` compte ces cartes. Si TCGCSV ne répond pas, le prix TCGCSV de la veille est repris.
+- La démo affiche ces cotes « TCGplayer via TCGCSV, à confirmer » (fiche, source et date).
+- Tests : `test_tcgcsv.py` (noms d'extensions, numéros, versions, Collection Classique, panne de TCGCSV).
+
 ## Accès réseau
 
 Le script appelle `api.tcgdex.net` et `assets.tcgdex.net`. Ces domaines sont bloqués dans l'environnement Claude Code actuel : c'est pourquoi la synchronisation passe par GitHub Actions. Pour lancer le script ailleurs, il suffit de Python 3.9 ou plus.

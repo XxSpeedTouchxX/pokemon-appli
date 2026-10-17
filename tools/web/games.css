@@ -233,3 +233,25 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-sv-l .pkm-sv-add { right: 6px; }
 .pkm-sv-l .pkm-sv-fav svg, .pkm-sv-l .pkm-sv-add svg { width: 20px; height: 20px; }
 @media (prefers-reduced-motion: reduce) { .pkm-sv-bar-in { transition: none; } }
+/* Séries (2026-10-17, vidéo du porteur) : les extensions d'une série ouverte se déplient vers le bas, ligne après ligne. */
+.pkm-ser-unfold { animation: pkmSerUnfold 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both; transform-origin: top center; }
+.pkm-ser-unfold > button { animation: pkmSerTile 0.36s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pkm-ser-unfold > button:nth-child(n+4) { animation-delay: 0.05s; }
+.pkm-ser-unfold > button:nth-child(n+7) { animation-delay: 0.1s; }
+.pkm-ser-unfold > button:nth-child(n+10) { animation-delay: 0.15s; }
+.pkm-ser-unfold > button:nth-child(n+13) { animation-delay: 0.2s; }
+@keyframes pkmSerUnfold { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes pkmSerTile { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-ser-unfold, .pkm-ser-unfold > button { animation: none; } }
+/* Accueil : valeur des cartes et du scellé sous « Mon classeur » (2026-10-17, home.js), quelques visuels en éventail. */
+.pkm-hb-type-v { font-size: 20px; font-size: min(20px, 5.4vw); }
+.pkm-hb-fan { position: absolute; right: 8px; bottom: 8px; width: 104px; height: 64px; pointer-events: none; }
+.pkm-hb-fan img { position: absolute; bottom: 0; display: block; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); }
+.pkm-hb-fan-c0, .pkm-hb-fan-c1, .pkm-hb-fan-c2 { width: 40px; aspect-ratio: 600 / 825; height: auto; border-radius: 3px; object-fit: cover; }
+.pkm-hb-fan-c0 { right: 6px; transform: rotate(10deg); z-index: 1; }
+.pkm-hb-fan-c1 { right: 30px; bottom: 4px; transform: rotate(0deg); z-index: 2; }
+.pkm-hb-fan-c2 { right: 54px; transform: rotate(-10deg); z-index: 1; }
+.pkm-hb-fan-s0, .pkm-hb-fan-s1 { width: 62px; height: 56px; object-fit: contain; box-shadow: none; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
+.pkm-hb-fan-s0 { right: 0; z-index: 2; }
+.pkm-hb-fan-s1 { right: 40px; bottom: 6px; z-index: 1; }
+.pkm-hb-type:active { transform: scale(0.98); }

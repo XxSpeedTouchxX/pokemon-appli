@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-10-17 (soir) — Une valeur pour chaque carte (TCGCSV), cartes + scellé sur l'accueil, séries en 3 colonnes
+
+- **Demande du porteur (avec vidéos) :**
+  - chaque carte de chaque série avec sa valeur la plus proche du marché ; la valeur visible dans le classeur ; la valeur des cartes et celle du scellé, dont la somme fait la valeur de la collection (modèle PokéItem, en gardant l'interface Dropicards) ;
+  - « Toutes les séries » : extensions 3 par ligne ; une série touchée se déplie vers le bas, sans remonter la page.
+- **Décision (porteur, 2026-10-17) : nouvelle source de prix, TCGplayer via TCGCSV**, pour les cartes sans aucun prix dans TCGdex (783 cartes, dont tout le 30ᵉ Anniversaire). Prix « market » (ventes conclues), converti en euros, mis à jour chaque jour, marqué « à confirmer » ; 0 €.
+- **Livré :**
+  - pipeline : `tools/tcgdex/tcgcsv.py` et ses tests, `build_index.py --tcgcsv`, champ `ts` du catalogue, repli sur le prix de la veille si TCGCSV ne répond pas ; la mise à jour quotidienne s'en charge ;
+  - app : source « TCGplayer via TCGCSV, à confirmer » sur ces cartes ;
+  - accueil : sous « Mon classeur », tuiles « Cartes » et « Produits scellés » (valeur, nombre, visuels des plus chers) ; leur somme est la valeur de toute la collection (vérifié par les tests) ; un appui ouvre l'onglet du classeur ;
+  - séries : extensions 3 par ligne ; l'en-tête touché reste en place et les extensions se déplient dessous (la remontée du 2026-10-14 est retirée ; la barre des logos mène toujours en haut de la série choisie).
+
+---
+
 ## 2026-10-17 — Écran d'une extension façon vidéo, réimpressions du 30ᵉ Anniversaire, classeur vide
 
 - **Demande du porteur (avec vidéo) :**

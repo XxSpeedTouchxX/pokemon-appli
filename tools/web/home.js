@@ -125,7 +125,19 @@
         if (dx < 0 && page < pages - 1) this.setState({ [key]: page + 1 });
         if (dx > 0 && page > 0) this.setState({ [key]: page - 1 });
       },
-      tools: this.homeBinderTools(s, tab, all(tab === 'sealed'), filtered, list.length, total, key)
+      tools: this.homeBinderTools(s, tab, all(tab === 'sealed'), filtered, list.length, total, key),
+      // Valeur par type (2026-10-17, vidéo du porteur) : « Cartes » et « Produits scellés », dont la somme est la
+      // valeur de toute la collection ; quelques visuels des plus chers ; un appui ouvre l'onglet du classeur.
+      split: [false, true].map(sl => {
+        const l = all(sl).sort((a, b) => unit(b) - unit(a)), n = units(l), v = x.mask(this.eur(sum(l)));
+        const imgs = l.map(p => this.look(p)).map(k => (sl ? (k.hasPhoto ? k.photo : '') : k.img)).filter(Boolean).slice(0, sl ? 2 : 3);
+        return {
+          title: sl ? 'Produits scellés' : 'Cartes', value: v, count: sl ? plural(n, 'produit', 'produits') : plural(n, 'carte', 'cartes'),
+          imgs: imgs.map((src, i) => ({ src: src, cls: 'pkm-hb-fan-' + (sl ? 's' : 'c') + i })),
+          label: (sl ? 'Produits scellés : ' : 'Cartes : ') + v + ', ' + (sl ? plural(n, 'produit', 'produits') : plural(n, 'carte', 'cartes')) + '. Voir dans le classeur',
+          open: () => this.setState({ hbk: sl ? 'sealed' : 'cards' })
+        };
+      })
     };
   };
   let homeSwipe = null;
