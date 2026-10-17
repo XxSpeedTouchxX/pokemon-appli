@@ -130,10 +130,11 @@
       // valeur de toute la collection ; quelques visuels des plus chers ; un appui ouvre l'onglet du classeur.
       split: [false, true].map(sl => {
         const l = all(sl).sort((a, b) => unit(b) - unit(a)), n = units(l), v = x.mask(this.eur(sum(l)));
-        const imgs = l.map(p => this.look(p)).map(k => (sl ? (k.hasPhoto ? k.photo : '') : k.img)).filter(Boolean).slice(0, sl ? 2 : 3);
+        const imgs = l.map(p => this.look(p)).map(k => (sl ? { img: k.hasPhoto ? k.photo : '', fallback: '' } : { img: k.img, fallback: k.fallback || '' }))
+          .filter(k => k.img).slice(0, sl ? 2 : 3);
         return {
           title: sl ? 'Produits scellés' : 'Cartes', value: v, count: sl ? plural(n, 'produit', 'produits') : plural(n, 'carte', 'cartes'),
-          imgs: imgs.map((src, i) => ({ src: src, cls: 'pkm-hb-fan-' + (sl ? 's' : 'c') + i })),
+          imgs: imgs.map((k, i) => ({ img: k.img, fallback: k.fallback, cls: 'pkm-hb-fan-' + (sl ? 's' : 'c') + i })),
           label: (sl ? 'Produits scellés : ' : 'Cartes : ') + v + ', ' + (sl ? plural(n, 'produit', 'produits') : plural(n, 'carte', 'cartes')) + '. Voir dans le classeur',
           open: () => this.setState({ hbk: sl ? 'sealed' : 'cards' })
         };

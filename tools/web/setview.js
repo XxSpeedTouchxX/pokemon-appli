@@ -4,10 +4,10 @@
   // - Toutes, Possédées, Manquantes, Doublons (avec leur nombre) ; taille de la grille Petit (4 par ligne), Moyen (3),
   //   Grand (2) ; recherche par nom ou numéro ; tri par numéro, cote ou nom ;
   // - filtres de rareté avec leur symbole et leur nombre de cartes, cumulables ;
-  // - grille : les cartes manquantes en gris, les cartes possédées en couleur ; sur chaque carte, un cœur (favori,
-  //   gardé sur l'appareil) et un « + » qui ajoute un exemplaire tout de suite (FR, ou EN pour une carte anglaise,
-  //   Near Mint, sans prix payé ; « Annuler » pendant quelques secondes) ; le numéro sur le visuel, le nom, le drapeau
-  //   et la cote dessous.
+  // - grille : toutes les cartes en couleur (2026-10-17, porteur ; en gris avant), pastille ×N sur celles possédées ;
+  //   sur chaque carte, un cœur (favori, gardé sur l'appareil) et, en haut à droite, un « + » qui ajoute un exemplaire
+  //   tout de suite avec sa cote du jour comme prix (FR, ou EN pour une carte anglaise, Near Mint ; « Annuler » pendant
+  //   quelques secondes) ; le numéro sur le visuel, le nom, le drapeau et la cote dessous.
   // La recherche et les filtres de rareté valent pour l'extension ouverte (setKey) ; la taille et le tri sont gardés.
   // Ce module partage la portée des autres : ses noms commencent par SV_ ou sv.
   const svProto = Component.prototype;
@@ -33,15 +33,18 @@
     this.setState({ favs: on ? f.filter(id => id !== p.id) : f.concat([p.id]), toast: on ? p.name + ' retiré des favoris' : p.name + ' ajouté aux favoris' });
     this.flash();
   };
-  // « + » : un exemplaire ajouté tout de suite. La carte entre d'abord au catalogue de l'app (extra), comme au scan.
+  // « + » : un exemplaire ajouté tout de suite, au prix de sa cote du jour (rien si la carte n'a pas encore de cote).
+  // La carte entre d'abord au catalogue de l'app (extra), comme au scan.
   svProto.svQuickAdd = function (p) {
     const s0 = this.st(), prev = s0.purchases;
     if ((s0.extra || []).indexOf(p.id) < 0) this.setState({ extra: (s0.extra || []).concat([p.id]) });
     const s = this.st();
     this.__copy = { lang: p.lang === 'EN' ? 'EN' : 'FR', cond: copyConds(p)[0][0] };
     let r;
-    try { r = this.addRecord(s, p.id, 1, 0, 'Ajout rapide', 'toi'); } finally { this.__copy = null; }
-    this.setState({ purchases: r.purchases, seq: s.seq + 1, toast: r.msg, edUndo: { msg: r.msg, purchases: prev } });
+    const k = this.cote(p);
+    try { r = this.addRecord(s, p.id, 1, k || 0, 'Ajout rapide', 'toi'); } finally { this.__copy = null; }
+    const msg = p.name + ' ajouté' + (k ? ' · cote ' + this.eur(k) : ' · pas encore de cote') + ' · collection à ' + this.eur(this.snap(this.st(), { purchases: r.purchases }).total);
+    this.setState({ purchases: r.purchases, seq: s.seq + 1, toast: msg, edUndo: { msg: msg, purchases: prev } });
     if (this._tt) clearTimeout(this._tt);
     this._tt = setTimeout(() => { this._tt = null; this.setState({ toast: null, edUndo: null }); }, SV_UNDO_MS);
   };
@@ -110,7 +113,7 @@
           open: () => this.openTcg(p.id),
           favOn: fav, favCls: 'pkm-sv-fav' + (fav ? ' pkm-sv-fav-on' : ''), favLabel: fav ? 'Retirer ' + p.name + ' des favoris' : 'Ajouter ' + p.name + ' aux favoris',
           fav: () => this.svToggleFav(p),
-          addLabel: 'Ajouter un exemplaire de ' + p.name + ' à ma collection', add: () => this.svQuickAdd(p)
+          addLabel: 'Ajouter un exemplaire de ' + p.name + ' à ma collection' + (k !== null ? ', au prix de sa cote, ' + this.eur(k) : ''), add: () => this.svQuickAdd(p)
         };
       })
     });

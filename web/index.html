@@ -348,7 +348,7 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-hh-left .pkm-tk-head { align-self: flex-start; }
 .pkm-hh-grade { position: absolute; right: -8px; bottom: -8px; width: 34px; height: 34px; display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5)); pointer-events: none; }
 /* Écran d'une extension façon vidéo du porteur (2026-10-17, setview.js) : progression, taille de la grille, raretés,
-   cartes manquantes en gris, cœur (favori) et « + » (ajout rapide) sur chaque carte. */
+   cœur (favori) et « + » (ajout avec la cote du jour) sur chaque carte. */
 .pkm-sv-bar { display: block; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
 .pkm-sv-bar-in { display: block; height: 100%; min-width: 2px; border-radius: 4px; background: var(--pkm-accent); transition: width 0.4s ease; }
 .pkm-sv-sizes { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C; }
@@ -369,8 +369,7 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-sv-card { position: relative; min-width: 0; }
 .pkm-sv-open { display: flex; flex-direction: column; align-items: stretch; gap: 5px; width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: center; cursor: pointer; }
 .pkm-sv-pic { position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
-.pkm-sv-miss .pkm-sv-pic { background: #2A3346; }
-.pkm-sv-miss .pkm-sv-pic img { filter: grayscale(1) contrast(0.85) brightness(1.05); opacity: 0.5; }
+/* Cartes toujours en couleur (2026-10-17, porteur) ; les cartes possédées portent leur pastille ×N. */
 .pkm-sv-num, .pkm-sv-qty { position: absolute; bottom: 3.5%; padding: 1px 6px; border-radius: 6px; background: rgba(8, 13, 26, 0.86); color: #FFFFFF; font-size: 10.5px; font-weight: 700; line-height: 1.35; font-variant-numeric: tabular-nums; }
 .pkm-sv-num { left: 5%; }
 .pkm-sv-qty { right: 5%; box-shadow: inset 0 0 0 1px var(--pkm-accent); }

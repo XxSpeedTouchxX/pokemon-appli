@@ -135,6 +135,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - nouvelle source validée par le porteur : **TCGplayer via TCGCSV** pour les cartes sans aucun prix dans TCGdex (783, dont tout le 30ᵉ Anniversaire), « à confirmer », mise à jour quotidienne (`tools/tcgdex/tcgcsv.py`) ;
   - accueil : tuiles « Cartes » et « Produits scellés » sous « Mon classeur », leur somme = valeur de la collection ;
   - « Toutes les séries » : 3 extensions par ligne, dépliage vers le bas sans remontée de la page.
+  - écran d'une extension : cartes toutes en couleur ; « + » en haut à droite = ajout avec la cote du jour comme prix.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

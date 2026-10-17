@@ -67,12 +67,12 @@ await page.context().close();
   const p3 = await mk(390, 844);
   await p3.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await p3.waitForTimeout(2500);
   const eur = t => Number(String(t).replace(/[^\d,]/g, '').replace(',', '.'));
-  const parts = await p3.locator('[aria-label="Valeur de ma collection par type"] button').allInnerTexts();
+  const parts = await p3.locator('section[aria-label="Valeur de ma collection par type"] button').allInnerTexts();
   const total = (await p3.locator('main').innerText()).match(/Valeur de toute ma collection\s*\n?\s*([\d\s\u202f\u00a0]+,\d\d\s?€)/);
   const sum = parts.reduce((t, x) => t + eur(x.split('\n')[1]), 0);
   ok('Cartes + Produits scellés = valeur totale : ' + parts.map(x => x.replace(/\n/g, ' ')).join(' + ') + ' = ' + (total ? total[1] : '?'),
     parts.length === 2 && !!total && Math.abs(sum - eur(total[1])) < 0.02);
-  await p3.locator('[aria-label="Valeur de ma collection par type"] button').nth(1).click(); await p3.waitForTimeout(300);
+  await p3.locator('section[aria-label="Valeur de ma collection par type"] button').nth(1).click(); await p3.waitForTimeout(300);
   ok('tuile Produits scellés : ouvre l’onglet du classeur', (await p3.getByRole('tab', { name: 'Mes produits scellés' }).getAttribute('aria-selected')) === 'true');
   await p3.context().close();
 }

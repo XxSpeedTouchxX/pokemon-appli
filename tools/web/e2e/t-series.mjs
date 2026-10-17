@@ -87,9 +87,12 @@ const reprint = page.locator('main button[aria-label^="Dracaufeu, n° 4/102"]');
 ok('réimpression : Dracaufeu 4/102 avec le visuel du Set de Base', (await reprint.count()) === 1 && /\/base\/base1\/4\//.test(await reprint.locator('img').getAttribute('src')));
 await page.locator('[aria-label="Filtrer par rareté"] button[aria-label^="Collection Classique"]').click(); await page.waitForTimeout(400);
 ok('rareté Collection Classique : ' + nCC + ' cartes', (await page.locator('main .pkm-sv-card').count()) === nCC);
+ok('cartes en couleur, même celles qu’on n’a pas (2026-10-17)', await page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img')].slice(0, 6).every(i => getComputedStyle(i).filter === 'none' && getComputedStyle(i).opacity === '1')));
 const owned0 = await page.locator('button:has-text("Possédées (")').innerText();
 await page.locator('main .pkm-sv-add').first().click(); await page.waitForTimeout(400);
 const owned1 = await page.locator('button:has-text("Possédées (")').innerText();
+const toastAdd = (await page.locator('[role="status"]').allInnerTexts()).join(' ');
+ok('« + » : ajoutée avec sa cote du jour : ' + toastAdd.replace(/\n/g, ' '), /ajouté · (cote \d|pas encore de cote)/.test(toastAdd));
 ok('« + » : ' + owned0 + ' → ' + owned1 + ', carte en couleur avec ×1', owned0 !== owned1 && (await page.locator('main .pkm-sv-card').first().getAttribute('class')).indexOf('pkm-sv-miss') < 0
   && /×1/.test(await page.locator('main .pkm-sv-card').first().innerText()));
 const fav = page.locator('main .pkm-sv-fav').first();

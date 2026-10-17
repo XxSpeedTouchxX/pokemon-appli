@@ -379,16 +379,17 @@
 </sc-if>
 </div>
 </div>
-<div role="group" aria-label="Valeur de ma collection par type" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
+</section>
+
+<section aria-label="Valeur de ma collection par type" style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
 <sc-for list="{{ home.hk.split }}" as="hsp" hint-placeholder-count="2">
 <button type="button" onClick="{{ hsp.open }}" aria-label="{{ hsp.label }}" class="pkm-hb-type" style="position: relative; min-height: 142px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; color: #F3F6FC; font: inherit; text-align: left; overflow: hidden; cursor: pointer">
 <span style="font-size: 13px; font-weight: 600; color: #C9D3EA">{{ hsp.title }}</span>
 <span class="pkm-hb-type-v" style="font-family: 'Sora', sans-serif; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap">{{ hsp.value }}</span>
 <span style="font-size: 12px; color: #9AA8C3">{{ hsp.count }}</span>
-<span class="pkm-hb-fan" aria-hidden="true"><sc-for list="{{ hsp.imgs }}" as="hsi" hint-placeholder-count="3"><img src="{{ hsi.src }}" alt="" loading="lazy" class="{{ hsi.cls }}"></sc-for></span>
+<span class="pkm-hb-fan" aria-hidden="true"><sc-for list="{{ hsp.imgs }}" as="hsi" hint-placeholder-count="3"><img src="{{ hsi.img }}" alt="" loading="lazy" class="{{ hsi.cls }}"></sc-for></span>
 </button>
 </sc-for>
-</div>
 </section>
 
 <section aria-label="Boutiques près de toi" style="flex: none; display: flex; flex-direction: column; gap: 10px">

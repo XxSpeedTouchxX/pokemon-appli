@@ -17,6 +17,8 @@
   - app : source « TCGplayer via TCGCSV, à confirmer » sur ces cartes ;
   - accueil : sous « Mon classeur », tuiles « Cartes » et « Produits scellés » (valeur, nombre, visuels des plus chers) ; leur somme est la valeur de toute la collection (vérifié par les tests) ; un appui ouvre l'onglet du classeur ;
   - séries : extensions 3 par ligne ; l'en-tête touché reste en place et les extensions se déplient dessous (la remontée du 2026-10-14 est retirée ; la barre des logos mène toujours en haut de la série choisie).
+  - mise à jour du catalogue du même soir : 708 cartes complétées par TCGCSV, dont les 191 du 30ᵉ Anniversaire (réimpression de Dracaufeu : 123 €) ; 21 290 cartes sur 21 365 ont une valeur ;
+  - extensions (demande du même soir) : toutes les cartes en couleur (plus de gris pour celles qu'on n'a pas, la pastille ×N marque celles qu'on a) ; le « + » en haut à droite ajoute la carte avec sa cote du jour comme prix.
 
 ---
 
