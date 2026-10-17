@@ -12,7 +12,7 @@
 - **Livré :**
   - app : cote = médiane de la tendance et des moyennes 7 et 30 jours **Cardmarket** de la bonne version ; plus de TCGplayer dans la cote, la fiche ni les libellés ; sans prix Cardmarket, pas de cote ;
   - données : les cartes que TCGdex ne relie pas à Cardmarket (tout le 30ᵉ) prennent leurs prix dans les fichiers publics de Cardmarket, déjà utilisés pour le scellé (`tools/tcgdex/cmfiles.py`) : réimpression de Dracaufeu à 174 € environ (tendance 173,99 €, moyenne 30 jours 172,61 €).
-- **eBay non branché, à décider par le porteur :** eBay ne publie pas les ventes réussies en libre accès. Deux voies : l'API officielle « Marketplace Insights » (accès réservé, demande à faire par le porteur auprès d'eBay) ou un avis juridique préalable au scraping (règle du 2026-10-03, toujours en vigueur). Le lien « Ventes réussies eBay » reste dans chaque fiche.
+- **eBay non branché :** eBay ne publie pas les ventes réussies en libre accès. Le porteur a demandé le scraping des ventes réussies (2026-10-18, en passant outre la règle du 2026-10-03). Test fait le même jour depuis GitHub : le robots.txt d'eBay.fr interdit les pages de recherche à tous les robots (`Disallow: /sch/`, ventes réussies comprises) et eBay répond 403 à chaque requête. Pas de contournement (faux navigateur, serveurs intermédiaires) : scraping abandonné, test retiré. **Seule voie restante : l'API officielle « Marketplace Insights »**, accès réservé, à demander par le porteur sur developer.ebay.com. Le lien « Ventes réussies eBay » reste dans chaque fiche.
 
 ---
 

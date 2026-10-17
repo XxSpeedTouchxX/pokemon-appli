@@ -136,7 +136,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - accueil : tuiles « Cartes » et « Produits scellés » sous « Mon classeur », leur somme = valeur de la collection ;
   - « Toutes les séries » : 3 extensions par ligne, dépliage vers le bas sans remontée de la page.
   - écran d'une extension : cartes toutes en couleur ; « + » en haut à droite = ajout avec la cote du jour comme prix.
-- **Cote Cardmarket uniquement (2026-10-18, décision du porteur) :** cote = médiane de la tendance et des moyennes 7 et 30 jours Cardmarket ; TCGplayer et TCGCSV ne comptent plus ; cartes non reliées par TCGdex (30ᵉ) : fichiers publics de Cardmarket (`tools/tcgdex/cmfiles.py`). **Ventes réussies eBay demandées par le porteur, non branchées** : ni API ouverte ni scraping sans avis juridique ; API « Marketplace Insights » à demander par le porteur.
+- **Cote Cardmarket uniquement (2026-10-18, décision du porteur) :** cote = médiane de la tendance et des moyennes 7 et 30 jours Cardmarket ; TCGplayer et TCGCSV ne comptent plus ; cartes non reliées par TCGdex (30ᵉ) : fichiers publics de Cardmarket (`tools/tcgdex/cmfiles.py`). **Ventes réussies eBay demandées par le porteur, non branchées** : scraping demandé par le porteur puis abandonné le 2026-10-18 (robots.txt d'eBay qui interdit les pages de recherche, réponses 403 depuis GitHub, aucun contournement) ; seule voie : l'API « Marketplace Insights », à demander par le porteur.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;
