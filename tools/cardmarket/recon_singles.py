@@ -41,3 +41,8 @@ for exp, n in by_exp.most_common(12):
             g = pg.get(p["idProduct"], {})
             print(exp, p["idProduct"], p["name"], p.get("dateAdded"), "| trend", g.get("trend"), "avg", g.get("avg"), "avg7", g.get("avg7"),
                   "avg30", g.get("avg30"), "low", g.get("low"), "| holo", g.get("trend-holo"), g.get("avg30-holo"))
+# Extension 6601 en entier, dans l'ordre des identifiants (rapprochement des 31 Pikachu, 2 Lugia, M-Gardevoir).
+print("\n== 6601 dans l'ordre")
+for i, p in enumerate(sorted((p for p in prods if p["idExpansion"] == 6601), key=lambda p: p["idProduct"])):
+    g = pg.get(p["idProduct"], {})
+    print(i + 1, p["idProduct"], p["name"], "| trend", g.get("trend"), "avg30", g.get("avg30"), "holo", g.get("trend-holo"))
