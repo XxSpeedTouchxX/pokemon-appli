@@ -14,7 +14,7 @@ import hashlib
 import json
 from pathlib import Path
 
-PRICE_FIELDS = ["cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "cmh", "cmv", "q", "ts"]  # cmh, cmv, q : 2026-10-11 ; ts : 2026-10-17
+PRICE_FIELDS = ["cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "cmh", "cmv", "q", "cmf"]  # cmh, cmv, q : 2026-10-11 ; cmf : 2026-10-18
 DAILY_KEYS = ["generated", "usdEur", "usdEurDate", "usdEurSource", "stats"]
 
 

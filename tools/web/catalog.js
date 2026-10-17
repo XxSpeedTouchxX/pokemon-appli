@@ -81,26 +81,23 @@
   // 30ᵉ Anniversaire s'affiche avec le 30ᵉ Anniversaire, comme sur le site officiel et les autres applis.
   const SET_PARENT = { '30th-c': '30th', cel25cc: 'cel25' };
   const setHome = id => (SET_PARENT[id] && TCG.doc && TCG.doc.sets[SET_PARENT[id]] ? SET_PARENT[id] : id);
-  // Cote PKM d'une ligne du catalogue : la même règle que cote() (Cardmarket et TCGplayer).
-  // Cote Dropicards (2026-10-16, demande du porteur : « Les plus chères » encore incohérente face aux ventes réussies).
-  // La tendance Cardmarket seule (2026-10-12) bougeait trop sur les cartes rares peu échangées (Ectoplasma Skyridge :
-  // tendance 4 356 €, moyenne 30 jours 2 270 €). La cote est désormais la médiane des indicateurs disponibles :
-  // tendance, moyennes 7 et 30 jours Cardmarket de la bonne version, et prix « market » TCGplayer, calculé sur les
-  // ventes réellement conclues (le plus proche des ventes réussies eBay, inaccessibles sans API officielle).
-  // Une médiane écarte un pic isolé. Sans aucun prix Cardmarket, TCGplayer seul sert de repli (« à confirmer »).
+  // Cote PKM d'une ligne du catalogue : la même règle que cote().
+  // Cote Dropicards = Cardmarket uniquement (2026-10-18, décision du porteur : « uniquement les prix Cardmarket et les
+  // ventes réussies eBay », plus TCGplayer ni TCGCSV). Médiane de la tendance et des moyennes 7 et 30 jours Cardmarket
+  // de la bonne version : une médiane écarte un pic isolé (Ectoplasma Skyridge : tendance 4 356 €, moyenne 30 jours
+  // 2 270 €). Sans prix Cardmarket, pas de cote. Les ventes réussies eBay s'ajouteront dès qu'un accès officiel existe.
   // Une cote recopiée sur plusieurs cartes d'une même extension (erreur de rattachement chez TCGdex, ex. promos XY à
   // 5 550 €) n'est pas comptée : « cote à confirmer ». Les cartes dont les indicateurs Cardmarket divergent de plus de
   // 2,5 fois (marché trop mince) gardent leur cote mais sortent de « Les plus chères ».
   const COTE_SPREAD = 2.5;
   const coteNum = v => typeof v === 'number' && v > 0;
-  function coteMed(cm, a30, a7, tcp) {
-    const k = [cm, a30, a7].filter(coteNum);
-    if (!k.length) return coteNum(tcp) ? tcp : 0;
-    const v = k.concat(coteNum(tcp) ? [tcp] : []).sort((a, b) => a - b), m = v.length >> 1;
+  function coteMed(cm, a30, a7) {
+    const v = [cm, a30, a7].filter(coteNum).sort((a, b) => a - b), m = v.length >> 1;
+    if (!v.length) return 0;
     return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
   }
   const coteSpread = (cm, a30, a7) => { const k = [cm, a30, a7].filter(coteNum); return k.length > 1 ? Math.max(...k) / Math.min(...k) : 1; };
-  function coteOf(r, F) { return TCG.dup.has(r[F.id]) ? 0 : coteMed(r[F.cm], r[F.avg30], r[F.avg7], r[F.tcp]); }
+  function coteOf(r, F) { return TCG.dup.has(r[F.id]) ? 0 : coteMed(r[F.cm], r[F.avg30], r[F.avg7]); }
   // Marché assez régulier pour figurer dans « Les plus chères ».
   const coteSteady = (r, F) => coteSpread(r[F.cm], r[F.avg30], r[F.avg7]) <= COTE_SPREAD;
 
@@ -177,8 +174,6 @@
       // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
       cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1,
       dup: !!(TCG.dup && TCG.dup.has(id)),
-      // Prix TCGplayer venu de TCGCSV (carte sans aucun prix dans TCGdex, 2026-10-17) : « à confirmer ».
-      tcs: F.ts !== undefined && r[F.ts] === 1,
       // Réimpression : carte et extension d'origine (visuel et numéro repris).
       reprintOf: ov ? orig : '', reprintSet: ov ? ov.set[0] : ''
     };
@@ -265,7 +260,7 @@
   proto.cote = function (p) {
     if (!p || !p.tcg) return baseCote.call(this, p);
     if (p.dup) return null;
-    const v = coteMed(p.cm, p.avg30, p.avg7, p.tcp);
+    const v = coteMed(p.cm, p.avg30, p.avg7);
     return v > 0 ? v : null;
   };
   // Date du jour (2026-10-11) : la logique de la maquette comptait depuis le 3 octobre 2026 (today() figé), d'où des
@@ -448,14 +443,13 @@
     if (p.tcg) {
       const day = p.upd ? ', prix du ' + this.d2(p.upd) : '';
       it.sources.forEach(so => { so.sub = so.sub.replace(' · fichier public du 03/10', ' · via TCGdex' + day).replace(' · annonces du 03/10', ' · via TCGdex' + day); });
-      if (p.tcs) it.sources.forEach(so => { if (/TCGplayer/.test(so.label + ' ' + so.sub)) so.sub = so.sub.replace(/via TCGdex.*$/, 'via TCGCSV · à confirmer'); });
-      const n = [p.cm, p.tcp].filter(v => typeof v === 'number').length;
+      // Cardmarket uniquement (2026-10-18) : plus de ligne TCGplayer dans la fiche.
+      it.sources = it.sources.filter(so => so.label !== 'TCGplayer');
+      it.sources.forEach((so, i) => { so.border = x.line(i); });
       it.coteRule = p.dup ? 'Cote à confirmer : TCGdex donne la même cote Cardmarket à plusieurs cartes de cette extension (rattachement erroné). Aucune cote n’est comptée pour cette carte.'
-        : typeof p.cm === 'number' ? 'Cote Dropicards = médiane de la tendance et des moyennes 7 et 30 jours Cardmarket de cette version, et du prix TCGplayer (ventes conclues, converti en euros). Une médiane écarte un pic isolé ; le prix demandé est affiché, jamais compté.' + (coteSpread(p.cm, p.avg30, p.avg7) > COTE_SPREAD ? ' Marché peu actif : les prix Cardmarket varient fortement, cote à confirmer.' : '')
-          : typeof p.tcp === 'number' && p.tcs ? 'Pas encore de prix Cardmarket pour cette carte : la cote reprend le prix « market » TCGplayer (ventes conclues aux États-Unis, converti en euros), via TCGCSV. À confirmer.'
-          : typeof p.tcp === 'number' ? 'Pas de prix Cardmarket pour cette carte : la cote reprend TCGplayer (marché US, converti en euros), à confirmer.'
-            : 'Pas encore de prix « marché » pour cette carte.';
-      if (it.noCote) it.release = 'Pas encore de prix « marché » pour cette carte (Cardmarket et TCGplayer, via TCGdex). Tu peux quand même l’ajouter à ta collection.';
+        : typeof p.cm === 'number' ? 'Cote Dropicards = Cardmarket uniquement : médiane de la tendance et des moyennes 7 et 30 jours de cette version. Une médiane écarte un pic isolé ; le prix demandé est affiché, jamais compté. Les ventes réussies eBay s’ajouteront dès qu’un accès officiel sera ouvert.' + (coteSpread(p.cm, p.avg30, p.avg7) > COTE_SPREAD ? ' Marché peu actif : les prix Cardmarket varient fortement, cote à confirmer.' : '')
+          : 'Pas encore de prix Cardmarket pour cette carte : pas de cote pour l’instant.';
+      if (it.noCote) it.release = 'Pas encore de prix Cardmarket pour cette carte. Tu peux quand même l’ajouter à ta collection.';
       if (it.hasCote) it.change = 'Courbe après quelques jours d’archivage';
       // Deuxième prix Cardmarket : l'autre version de la carte (reverse, normale ou holo), affiché, jamais compté.
       if (typeof p.cmh === 'number' && typeof p.cm === 'number') {
@@ -467,7 +461,7 @@
       it.doubt = !!p.doubt;
       it.doubtText = 'Cote à confirmer : les prix Cardmarket de cette carte s’écartent anormalement (peu de ventes ou annonce isolée). Vérifie les ventes réussies avant de te fier au chiffre.';
       const soon = (((TCG.doc || {}).stats || {}).setsPriceSoon || []);
-      if (it.noCote && soon.some(z => (z.id || z) === p.set)) it.release = 'Cote à venir : extension sortie récemment, Cardmarket et TCGplayer ne publient pas encore de prix (via TCGdex). Tu peux déjà l’ajouter à ta collection.';
+      if (it.noCote && soon.some(z => (z.id || z) === p.set)) it.release = 'Cote à venir : extension sortie récemment, pas encore de prix Cardmarket pour cette carte. Tu peux déjà l’ajouter à ta collection.';
       const notes = [];
       if (p.lang === 'EN') notes.push(String(setOf(p.set)[5] || 'fr') === 'en' ? 'Carte en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.'
         : 'Carte en anglais : absente de la version française du catalogue TCGdex, elle vient de la version anglaise.');
@@ -533,7 +527,7 @@
   const baseSettingsSources = proto.vSettings;
   proto.vSettings = function (x) {
     const r = baseSettingsSources.call(this, x);
-    const sub = { Cardmarket: 'Tendance, plus bas et moyenne 30 jours · via TCGdex, chaque jour', TCGdex: 'Catalogue FR (complété en anglais), visuels et prix TCGplayer',
+    const sub = { Cardmarket: 'Tendance, plus bas et moyenne 30 jours · via TCGdex, chaque jour', TCGdex: 'Catalogue FR (complété en anglais), visuels et prix Cardmarket',
       'Archive maison': 'Un relevé par jour (historique du catalogue) depuis le 03/10/2026' };
     r.sources.forEach(so => { if (sub[so.label]) so.sub = sub[so.label]; });
     return r;

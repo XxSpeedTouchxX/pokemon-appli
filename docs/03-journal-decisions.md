@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-10-18 — Cote Cardmarket uniquement ; eBay en attente d'un accès officiel
+
+- **Décision du porteur :** la cote se base **uniquement sur Cardmarket et la moyenne des ventes réussies eBay**, plus rien d'autre (exemple : la réimpression de Dracaufeu du 30ᵉ vaut environ 180 €, pas 123 € comme le donnait TCGplayer). Remplace la cote médiane avec TCGplayer (2026-10-16) et TCGCSV (2026-10-17, retiré).
+- **Livré :**
+  - app : cote = médiane de la tendance et des moyennes 7 et 30 jours **Cardmarket** de la bonne version ; plus de TCGplayer dans la cote, la fiche ni les libellés ; sans prix Cardmarket, pas de cote ;
+  - données : les cartes que TCGdex ne relie pas à Cardmarket (tout le 30ᵉ) prennent leurs prix dans les fichiers publics de Cardmarket, déjà utilisés pour le scellé (`tools/tcgdex/cmfiles.py`) : réimpression de Dracaufeu à 174 € environ (tendance 173,99 €, moyenne 30 jours 172,61 €).
+- **eBay non branché, à décider par le porteur :** eBay ne publie pas les ventes réussies en libre accès. Deux voies : l'API officielle « Marketplace Insights » (accès réservé, demande à faire par le porteur auprès d'eBay) ou un avis juridique préalable au scraping (règle du 2026-10-03, toujours en vigueur). Le lien « Ventes réussies eBay » reste dans chaque fiche.
+
+---
+
 ## 2026-10-17 (soir) — Une valeur pour chaque carte (TCGCSV), cartes + scellé sur l'accueil, séries en 3 colonnes
 
 - **Demande du porteur (avec vidéos) :**

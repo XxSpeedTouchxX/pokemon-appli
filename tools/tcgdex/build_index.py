@@ -31,7 +31,7 @@ numéro), sinon dans l'extension parente (« swsh9tg » TG01 → « swsh9 » TG0
 Contenu de cards.json :
     sets      { set_id: [nom, série, date de sortie, logo, nombre officiel de cartes, langue des cartes] }
     fields    noms des colonnes de chaque carte
-    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue, cmh, cmv, q, ts], ...]
+    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue, cmh, cmv, q, cmf], ...]
               cm    = tendance Cardmarket (€)      low = plus bas Cardmarket (€, prix demandé)
               avg30 = moyenne Cardmarket 30 jours  tcp = TCGplayer « market », converti en €
               maj   = date de mise à jour des prix Cardmarket
@@ -42,7 +42,8 @@ Contenu de cards.json :
               cmh   = tendance de l'autre groupe de prix : reverse (carte qui a une version reverse), normale
                       (carte holo seulement, cote tirée du groupe holo), ou holo ; null s'il manque
               cmv   = groupe de prix de cm : « n » (champs normaux) ou « h » (champs « -holo ») ; null sans cm
-              ts    = 1 si tcp vient de TCGCSV (carte sans aucun prix dans TCGdex, tcgcsv.py), 0 sinon
+              cmf   = 1 si les prix Cardmarket viennent des fichiers publics de Cardmarket (carte que TCGdex ne relie
+                      pas à Cardmarket, cmfiles.py), 0 sinon
               q     = 1 si la cote est douteuse (plus bas < 5 % de la tendance, moyenne 1 jour et tendance à plus
                       de 3 fois d'écart, carte holo seulement cotée sans le groupe holo), 0 sinon
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
@@ -73,7 +74,7 @@ import xml.etree.ElementTree as ET
 
 from ptcg import PTCG_IMG, PtcgData, compact_image, norm_number  # visuels anglais de dernier recours (pokemontcg.io)
 from complete import en_extra, numbering_confirmed, ptcg_extra, ptcg_prices  # cartes manquantes en français (version anglaise, pokemontcg.io)
-import tcgcsv  # prix TCGplayer des cartes sans prix (TCGCSV, 2026-10-17)
+import cmfiles  # prix Cardmarket des cartes que TCGdex ne relie pas (fichiers publics Cardmarket, 2026-10-18)
 
 PTCG_CACHE = Path(__file__).with_name("ptcg_images.json")
 
@@ -81,7 +82,7 @@ ASSETS = "https://assets.tcgdex.net/"
 ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 FALLBACK_USD_EUR = 0.86  # taux de secours si la BCE ne répond pas
 SKIP_SERIES = {"tcgp"}  # Pokémon TCG Pocket : cartes numériques, hors collection physique
-FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q", "ts"]
+FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q", "cmf"]
 Q_MIN_TREND = 1.0  # en dessous de 1 €, l'écart entre plus bas et tendance ne dit rien : pas de « cote douteuse »
 SOON_DAYS = 90  # extension récente sans cote Cardmarket : « cote à venir »
 TCP_VARIANTS = ["normal", "holofoil", "reverse-holofoil", "1st-edition-holofoil", "1st-edition", "unlimited-holofoil", "unlimited"]
@@ -290,53 +291,59 @@ def coverage(cards, sets, today=None):
             "setsNoCm": dict(sorted(no_cm.items(), key=lambda kv: (-kv[1], kv[0]))), "setsPriceSoon": soon}
 
 
-def fill_tcgcsv(cards, sets, set_en, en_names, rate, client, prev=None):
-    """Cartes sans aucun prix (ni Cardmarket ni TCGplayer via TCGdex) : prix TCGplayer « market » de TCGCSV, en euros,
-    marqué ts = 1. Si TCGCSV ne répond pas pour une extension, le prix TCGCSV de la veille est gardé.
-    Retourne (cartes complétées, rapport par extension, échecs de téléchargement)."""
+def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cmfiles.en_names):
+    """Cartes sans aucun prix Cardmarket dans TCGdex : prix des fichiers publics de Cardmarket (cmfiles.py), cmf = 1.
+    Le rapprochement porte sur toutes les cartes de l'extension (noms anglais, ordre TCGdex) ; seules les cartes sans
+    prix reçoivent celui du produit trouvé. Sans fichiers Cardmarket ce jour-là, les prix de la veille sont repris.
+    Retourne (cartes complétées, rapport par extension)."""
     f = {k: i for i, k in enumerate(FIELDS)}
-    need = {}
+    no_cm = lambda c: all(c[f[k]] is None for k in ("cm", "avg30", "avg7"))
+    by_set = {}
     for c in cards:
-        if all(c[f[k]] is None for k in ("cm", "avg30", "avg7", "tcp")):
-            need.setdefault(c[f["set"]], []).append(c)
-    if not need:
-        return 0, [], []
-    groups = client.groups()
-    cache, n, report = {}, 0, []
-    for sid, rows in sorted(need.items()):
-        s = sets.get(sid) or [sid, "", "", "", "", "fr"]
-        english = s[5] == "en"  # extension sans version française : noms déjà en anglais
-        gids = tcgcsv.groups_for(sid, set_en.get(sid) or (s[0] if english else None), groups)
-        idx = {}
-        for g in gids:
-            if g not in cache:
-                cache[g] = client.group_index(g)
-            if cache[g]:
-                idx[g] = cache[g]
+        by_set.setdefault(c[f["set"]], []).append(c)
+    n, report = 0, []
+    for sid, rows in sorted(by_set.items()):
+        if not files or not any(no_cm(c) for c in rows):
+            continue
+        rows = sorted(rows, key=lambda c: natural(c[f["num"]]))
+        english = (sets.get(sid) or [""] * 6)[5] == "en"
+        names = {c[f["id"]]: en_names.get(c[f["id"]]) or (c[f["name"]] if english or c[f["lang"]] == "en" else None) for c in rows}
+        known = [cm_ids[c[f["id"]]] for c in rows if c[f["id"]] in cm_ids]
+        if not known and sid not in cmfiles.EXPANSIONS and sum(1 for v in names.values() if v) < len(rows) / 2:
+            continue  # ni carte reliée, ni table, ni noms anglais : rien à rapprocher
+        if sum(1 for v in names.values() if v) < len(rows) / 2:
+            names.update({k: v for k, v in en_fetch(sid).items() if k in names and v})
+        exps = files.expansions_for(sid, known, [names.get(c[f["id"]]) for c in rows])
+        if not exps:
+            continue
+        found = files.match([(c[f["id"]], names.get(c[f["id"]])) for c in rows], exps)
         got = 0
         for c in rows:
-            en = en_names.get(c[f["id"]]) or (c[f["name"]] if english or c[f["lang"]] == "en" else None)
-            usd = tcgcsv.price_for(sid, c[f["num"]], en, idx) if idx else None
-            if usd:
-                c[f["tcp"]], c[f["ts"]] = round(usd * rate, 2), 1
-                got += 1
+            p = files.prices(found[c[f["id"]]]) if no_cm(c) and c[f["id"]] in found else None
+            if not p:
+                continue
+            trend, low, avg30, avg7, avg1, other, grp = p
+            c[f["cm"]], c[f["low"]], c[f["avg30"]], c[f["avg7"]], c[f["avg1"]] = trend, low, avg30, avg7, avg1
+            c[f["cmh"]], c[f["cmv"]], c[f["upd"]], c[f["cmf"]] = other, grp, files.created, 1
+            c[f["q"]] = 1 if doubtful(trend, low, avg1) else 0
+            got += 1
         n += got
-        if gids:
-            report.append(f"{sid} {got}/{len(rows)}")
-    # Repli : prix TCGCSV de la veille pour les cartes restées sans prix (TCGCSV absent ou en panne ce jour-là).
-    if prev and prev.get("cards") and "ts" in (prev.get("fields") or []):
+        report.append(f"{sid} {got}/{sum(1 for c in rows if no_cm(c) or c[f['cmf']] == 1)}")
+    # Repli : prix des fichiers Cardmarket de la veille pour les cartes restées sans prix.
+    if prev and prev.get("cards") and "cmf" in (prev.get("fields") or []):
         pf = {k: i for i, k in enumerate(prev["fields"])}
-        old = {c[pf["id"]]: c[pf["tcp"]] for c in prev["cards"] if c[pf["ts"]] == 1 and c[pf["tcp"]] is not None}
+        old = {c[pf["id"]]: c for c in prev["cards"] if c[pf["cmf"]] == 1}
         kept = 0
-        for rows in need.values():
-            for c in rows:
-                if c[f["ts"]] != 1 and c[f["id"]] in old:
-                    c[f["tcp"]], c[f["ts"]] = old[c[f["id"]]], 1
-                    kept += 1
+        for c in cards:
+            o = old.get(c[f["id"]])
+            if o and no_cm(c):
+                for k in ("cm", "low", "avg30", "avg7", "avg1", "cmh", "cmv", "upd", "q", "cmf"):
+                    c[f[k]] = o[pf[k]]
+                kept += 1
         if kept:
             report.append(f"repris de la veille {kept}")
             n += kept
-    return n, report, client.failures
+    return n, report
 
 
 def compare_catalog(prev, doc):
@@ -392,7 +399,7 @@ def main():
     p.add_argument("--min-cards", type=int, default=1000, help="échec si moins de cartes (protège contre un index vide)")
     p.add_argument("--previous", default=None, help="catalogue de la veille à comparer (par défaut : --out avant écriture)")
     p.add_argument("--force", action="store_true", help="écrit l'index malgré une baisse face à la veille (vérifiée à la main)")
-    p.add_argument("--tcgcsv", action="store_true", help="complète les cartes sans prix avec TCGplayer via TCGCSV (réseau)")
+    p.add_argument("--cardmarket", action="store_true", help="complète les cartes sans prix Cardmarket avec les fichiers publics de Cardmarket (réseau)")
     args = p.parse_args()
     src, out = Path(args.src), Path(args.out)
     en = Path(args.en) if args.en else None
@@ -424,7 +431,7 @@ def main():
         print(f"pokemontcg.io : aucune donnée dans {args.ptcg} ; correspondances reprises de {PTCG_CACHE.name} ({len(cache)}).")
     ptcg_found, ptcg_report = {}, []
 
-    sets, cards, rarities = {}, [], {}
+    sets, cards, rarities, cm_ids = {}, [], {}, {}
     stats = {"cards": 0, "cardsEn": 0, "cardsEnExtra": 0, "cardsPtcg": 0, "imgOwn": 0, "imgAlt": {}, "imgNone": 0, "noDetail": 0}
     # Extensions pokemontcg.io visées par plusieurs extensions TCGdex (Zarbi d'EX Forces Cachées) : pas de complément.
     ptcg_of = {sid: ptcg.map_set(sid, (en_sets.get(sid) or {}).get("name"), s.get("releaseDate")) for sid, s in fr_sets.items()} if ptcg else {}
@@ -513,6 +520,9 @@ def main():
                 rarity = RARITY_FR.get(rarity.lower(), rarity)
                 stats["cardsEn"] += 1
             rarities[rarity] = rarities.get(rarity, 0) + 1
+            idp = ((c.get("pricing") or {}).get("cardmarket") or {}).get("idProduct")
+            if idp:
+                cm_ids[cid] = idp
             cards.append(row(cid, r["name"], sid, str(r["local"]), rarity, short_img(img), prices(c, rate)))
         if lang == "fr":
             complete_set(sid, s, rows)
@@ -545,15 +555,16 @@ def main():
     for sid in en_only:
         add_set(sid, en_sets[sid], "en", en)
     stats["cards"] = len(cards)
-    if args.tcgcsv:
-        en_names = dict(en_fb.names) if en_fb else {}
-        set_en = {sid: (en_sets.get(sid) or {}).get("name") for sid in sets}
-        n_tc, report, fails = fill_tcgcsv(cards, sets, set_en, en_names, rate, tcgcsv.Client(),
-                                          load(Path(args.previous) if args.previous else out))
-        stats["cardsTcgcsv"] = n_tc
-        print(f"TCGCSV : {n_tc} cartes sans prix complétées · " + " · ".join(report))
-        for x in fails[:20]:
-            print(f"TCGCSV ne répond pas : {x}")
+    if args.cardmarket:
+        try:
+            files = cmfiles.CmFiles.download()
+        except Exception as e:  # noqa: BLE001
+            print(f"Fichiers publics Cardmarket indisponibles ({e}) : prix de la veille repris.")
+            files = None
+        n_cm, report = fill_cardmarket(cards, sets, dict(en_fb.names) if en_fb else {}, cm_ids, files,
+                                       load(Path(args.previous) if args.previous else out))
+        stats["cardsCmFiles"] = n_cm
+        print(f"Cardmarket (fichiers publics) : {n_cm} cartes complétées · " + " · ".join(report))
     stats.update(coverage(cards, sets))
     if ptcg_report:
         print("pokemontcg.io, par extension :", " · ".join(ptcg_report))

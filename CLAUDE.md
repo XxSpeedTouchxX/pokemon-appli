@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-17)
+## 3. État d'avancement (au 2026-10-18)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -132,10 +132,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - 30 réimpressions de la Collection Classique : visuel et numéro de leur carte d'origine (TCGdex n'a pas leurs scans) ; 3 Mew (B, G, R) restent dessinés ;
   - « Mon classeur » vide : boutons « Ajouter des cartes » ou « Ajouter des produits scellés », « Scanner ».
 - **Valeurs et séries (2026-10-17, soir, demande du porteur) :**
-  - nouvelle source validée par le porteur : **TCGplayer via TCGCSV** pour les cartes sans aucun prix dans TCGdex (783, dont tout le 30ᵉ Anniversaire), « à confirmer », mise à jour quotidienne (`tools/tcgdex/tcgcsv.py`) ;
+  - TCGplayer via TCGCSV pour les cartes sans prix TCGdex (retiré le 2026-10-18, voir ci-dessous) ;
   - accueil : tuiles « Cartes » et « Produits scellés » sous « Mon classeur », leur somme = valeur de la collection ;
   - « Toutes les séries » : 3 extensions par ligne, dépliage vers le bas sans remontée de la page.
   - écran d'une extension : cartes toutes en couleur ; « + » en haut à droite = ajout avec la cote du jour comme prix.
+- **Cote Cardmarket uniquement (2026-10-18, décision du porteur) :** cote = médiane de la tendance et des moyennes 7 et 30 jours Cardmarket ; TCGplayer et TCGCSV ne comptent plus ; cartes non reliées par TCGdex (30ᵉ) : fichiers publics de Cardmarket (`tools/tcgdex/cmfiles.py`). **Ventes réussies eBay demandées par le porteur, non branchées** : ni API ouverte ni scraping sans avis juridique ; API « Marketplace Insights » à demander par le porteur.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;
@@ -156,7 +157,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - écartés à ce stade : marketplace (E4), service à l'acte (E5), app native à deux bases de code (T4).
 
   L'ancien scénario « test concierge d'abord » (E5+T1, Comparatif v1) est abandonné par le porteur.
-- Données : **scénario A** proposé = TCGdex (catalogue FR + prix) + fichiers publics Cardmarket (scellé) + archivage quotidien maison. Complément validé le 2026-10-17 : TCGplayer via TCGCSV pour les cartes sans prix TCGdex. Accès, licence et usage commercial **à vérifier** (V1 à V6 dans `docs/05-sources-donnees-prix.md`).
+- Données : **scénario A** proposé = TCGdex (catalogue FR + prix) + fichiers publics Cardmarket (scellé) + archivage quotidien maison. Depuis le 2026-10-18 (porteur) : cote Cardmarket uniquement, fichiers publics de Cardmarket pour les cartes que TCGdex ne relie pas ; TCGplayer et TCGCSV retirés. Accès, licence et usage commercial **à vérifier** (V1 à V6 dans `docs/05-sources-donnees-prix.md`).
 - **Pas de scraping** (eBay, Vinted, Leboncoin, Cardmarket) sans avis juridique préalable. Sujet à revoir plus tard (décision du 2026-10-03).
 - **Visuels et noms Pokémon : AUTORISÉS par le porteur du projet (Nico, décision du 2026-10-03).** L'app peut afficher les noms, illustrations de cartes et visuels de produits scellés, comme le font tous les concurrents (PokéItem, TCG Crew, Pokéindex…). C'est une décision du porteur, qui en assume le risque ; ne bloque pas le travail dessus et ne redemande pas l'autorisation.
   - **Sourcing des images :** utilise en priorité les URLs ou CDN fournis par les sources de données retenues (ex. TCGdex, voir `docs/05-sources-donnees-prix.md`) ; à défaut, stockage local des images nécessaires au prototype. Pas de téléchargement massif depuis les pages des marketplaces.

@@ -78,14 +78,16 @@ Le workflow se lance :
 - à chaque modification de ces scripts ou du workflow ;
 - à la main, depuis l'onglet *Actions* du dépôt.
 
-## Cartes sans prix : TCGplayer via TCGCSV (2026-10-17)
+## Cote Cardmarket uniquement, fichiers publics pour les cartes non reliées (2026-10-18)
 
-Décision du porteur du 2026-10-17 : chaque carte doit avoir une valeur au plus près du marché. Les cartes sans **aucun** prix dans TCGdex (ni Cardmarket ni TCGplayer : tout le 30ᵉ Anniversaire et sa Collection Classique, des promos, des kits du dresseur…, 783 cartes au 2026-10-17) reçoivent le prix « market » TCGplayer (calculé sur les ventes conclues) publié chaque jour par [TCGCSV](https://tcgcsv.com) en fichiers JSON (deux fichiers par extension : produits et prix ; aucune page web téléchargée).
+Décision du porteur du 2026-10-18 : la cote ne vient plus que de **Cardmarket** (et, plus tard, des ventes réussies eBay si un accès officiel est obtenu). TCGplayer n'est plus compté par l'app ; TCGCSV (ajouté le 2026-10-17) est retiré.
 
-- `tcgcsv.py` : extension → groupe TCGplayer (table `GROUPS`, sinon même nom anglais), puis carte → produit par numéro imprimé (le nom anglais départage plusieurs produits au même numéro ; sinon aucun prix). Collection Classique : numéro de la carte d'origine (`CLASSIC_30_NUM`). Version : holo, sinon normale, sinon une autre, la reverse en dernier.
-- `build_index.py --tcgcsv` : prix converti en euros (taux BCE du jour), champ `ts` = 1 ; `stats.cardsTcgcsv` compte ces cartes. Si TCGCSV ne répond pas, le prix TCGCSV de la veille est repris.
-- La démo affiche ces cotes « TCGplayer via TCGCSV, à confirmer » (fiche, source et date).
-- Tests : `test_tcgcsv.py` (noms d'extensions, numéros, versions, Collection Classique, panne de TCGCSV).
+Les cartes que TCGdex ne relie pas à Cardmarket (tout le 30ᵉ Anniversaire et sa Collection Classique au 2026-10-18) prennent leurs prix dans les **fichiers publics de Cardmarket** (liste des produits « singles » et guide des prix du jour, comme le scellé) :
+
+- `cmfiles.py` : extension Cardmarket (table `EXPANSIONS`, sinon celle de la majorité des cartes que TCGdex relie déjà), puis carte → produit par nom anglais ; plusieurs cartes du même nom (30 Pikachu…) appariées dans l'ordre s'il y a autant de produits que de cartes, sinon aucun prix. Noms anglais absents de la liste TCGdex (30ᵉ) : chargés depuis `api.tcgdex.net/v2/en/sets/<id>`.
+- `build_index.py --cardmarket` : tendance, plus bas, moyennes 30, 7 et 1 jours, champ `cmf` = 1 ; `stats.cardsCmFiles` compte ces cartes. Si les fichiers ne répondent pas, les prix de la veille sont repris.
+- Reconnaissance : `tools/cardmarket/recon_singles.py` (workflow manuel « Reconnaissance Cardmarket (cartes) ») ; le 2026-10-18, l'extension 6601 contient les 191 cartes du 30ᵉ (Dracaufeu 4/102 : tendance 173,99 €, moyenne 30 jours 172,61 €).
+- Tests : `test_cmfiles.py`.
 
 ## Accès réseau
 

@@ -111,13 +111,13 @@ await step('vider / démo', async () => {
 });
 await step('anglais et sous-extensions', async () => {
   await page.goto(E2E + '/?start=set&setId=gym1', { waitUntil: 'load' });
-  await page.waitForSelector('text=Série complète');
+  await page.waitForSelector('main .pkm-sv-card');
   ok('Gym Heroes : ' + await page.locator('main p').first().innerText(), await has('version française'));
   await page.locator('main button[aria-label*=", n° "]').first().click();
   await page.waitForSelector('button[aria-label^="Agrandir la carte"]');
   ok('carte EN : ' + (await page.locator('main p').first().innerText()).slice(0, 100), await has('Carte en anglais'));
   await page.goto(E2E + '/?start=set&setId=swsh9tg', { waitUntil: 'load' });
-  await page.waitForSelector('text=Série complète');
+  await page.waitForSelector('main .pkm-sv-card');
   ok('Galerie de dresseurs : ' + (await page.locator('main').innerText()).split('\n').slice(0, 4).join(' | '), true);
   const hscroll = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   ok('pas de défilement horizontal', !hscroll);

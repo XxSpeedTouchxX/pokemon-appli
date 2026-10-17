@@ -31,8 +31,8 @@ on:
       - tools/tcgdex/test_build_index.py
       - tools/tcgdex/split_catalog.py
       - tools/tcgdex/test_split_catalog.py
-      - tools/tcgdex/tcgcsv.py
-      - tools/tcgdex/test_tcgcsv.py
+      - tools/tcgdex/cmfiles.py
+      - tools/tcgdex/test_cmfiles.py
 
 permissions:
   contents: write
@@ -106,9 +106,9 @@ jobs:
         if: github.event_name == 'push'
         run: python3 -m unittest discover -s tools/tcgdex -p "test_*.py"
 
-      # Cartes sans aucun prix dans TCGdex (30ᵉ Anniversaire, promos, kits…) : prix TCGplayer « market » via TCGCSV
-      # (fichiers JSON publics, tcgcsv.py ; décision du porteur du 2026-10-17). Si TCGCSV ne répond pas, le prix de la
-      # veille est gardé.
+      # Cote = Cardmarket uniquement (décision du porteur du 2026-10-18). Cartes que TCGdex ne relie pas à Cardmarket
+      # (30ᵉ Anniversaire…) : prix des fichiers publics de Cardmarket (cmfiles.py), comme pour le scellé. Si ces
+      # fichiers ne répondent pas, les prix de la veille sont gardés.
       # Comparé au catalogue publié la veille : pas d'écriture en cas de baisse (cartes, extensions, cotes,
       # compléments anglais cardsEn, visuels de repli imgAlt, cartes sans visuel imgNone), sauf « force ».
       # Puis partie fixe et prix du jour en deux fichiers : la démo ne retélécharge chaque jour que les prix.
@@ -117,7 +117,7 @@ jobs:
         continue-on-error: true
         run: |
           python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en \
-            --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --ptcg data/ptcg --tcgcsv \
+            --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --ptcg data/ptcg --cardmarket \
             --out web/data/cards.json ${{ inputs.force && '--force' || '' }}
           python3 tools/tcgdex/split_catalog.py --src web/data/cards.json
 

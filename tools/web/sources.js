@@ -24,25 +24,25 @@
   srcProto.srcLine = function () {
     const c = srcCardsDay(), k = pricesDay();
     const when = c && k && c !== k ? 'cartes du ' + this.d2(c) + ', scellé du ' + this.d2(k) : (c || k ? 'du ' + this.d2(c || k) : 'en cours de chargement');
-    return 'Cotes ' + when + ' · Cardmarket et TCGplayer, via TCGdex'; // médiane des indicateurs (2026-10-16)
+    return 'Cotes ' + when + ' · Cardmarket'; // Cardmarket uniquement (2026-10-18, porteur)
   };
   const srcKind = p => (!p ? 'none' : p.tcg ? 'card' : p.type === 'sealed' && (p.real || p.realId) ? 'sealed' : 'demo');
   // Source d'un article, en une ligne.
   srcProto.srcOf = function (p) {
     const k = srcKind(p);
-    if (k === 'card') return 'Cote du ' + this.srcDay(p.upd || srcCardsDay()) + (p.tcs ? ' · TCGplayer via TCGCSV, à confirmer' : ' · Cardmarket et TCGplayer via TCGdex');
+    if (k === 'card') return 'Cote du ' + this.srcDay(p.upd || srcCardsDay()) + ' · Cardmarket';
     if (k === 'sealed') return 'Cote du ' + this.srcDay(pricesDay()) + ' · Cardmarket';
     if (k === 'demo') return 'Article de la collection de démo · prix d’exemple';
     return '';
   };
 
   const SRC_METHOD = {
-    pkm: 'la cote Dropicards : prix du marché (tendance Cardmarket et prix TCGplayer, calculés sur les ventes)',
+    pkm: 'la cote Dropicards : prix Cardmarket (médiane de la tendance et des moyennes 7 et 30 jours)',
     cm: 'la tendance Cardmarket (calculée sur les ventes)',
     low: 'le plus bas Cardmarket : un prix demandé, pas un prix vendu'
   };
   srcProto.valStamp = function (v) {
-    const label = { pkm: 'Cote Dropicards : Cardmarket et TCGplayer', cm: 'Tendance Cardmarket', low: 'Plus bas Cardmarket (prix demandé)' }[v] || 'Cote Dropicards';
+    const label = { pkm: 'Cote Dropicards : Cardmarket', cm: 'Tendance Cardmarket', low: 'Plus bas Cardmarket (prix demandé)' }[v] || 'Cote Dropicards';
     const c = srcCardsDay(), k = pricesDay();
     return label + ' · ' + (c || k ? 'du ' + this.d2(c > k ? c : k) : 'date en cours de chargement');
   };
@@ -55,7 +55,7 @@
       'Chaque cote est ' + (SRC_METHOD[s.valuation] || SRC_METHOD.pkm) + ', pour un exemplaire Near Mint.',
       tab === 'sealed'
         ? 'Produits scellés : prix Cardmarket du ' + this.srcDay(pricesDay()) + ', archivés chaque jour par Dropicards.'
-        : 'Cartes : prix Cardmarket et TCGplayer relevés par TCGdex, catalogue du ' + this.srcDay(srcCardsDay()) + ' (la fiche donne la date de chaque carte).',
+        : 'Cartes : prix Cardmarket relevés par TCGdex, catalogue du ' + this.srcDay(srcCardsDay()) + ' (la fiche donne la date de chaque carte).',
       'Le prix le plus bas demandé est montré dans la fiche, jamais compté dans la cote.',
       s.valAdj === false ? 'Cote brute : l’état et la langue ne sont pas comptés (Réglages).' : 'Chaque exemplaire compte selon son état et sa langue : Joué 55 %, Excellent 85 %, JP 70 %… (règle dans Réglages).'
     ];
@@ -102,12 +102,12 @@
     const r = srcBaseSettings.call(this, x), c = srcCardsDay(), k = pricesDay(), days = SEALED.doc && Array.isArray(SEALED.doc.days) ? SEALED.doc.days.slice().sort() : [];
     const rows = [
       ['Cardmarket', 'Prix du scellé, chaque jour' + (k ? ' · ' + this.d2(k) : ''), '#3DDC84', 'connecté'],
-      ['TCGdex', 'Catalogue, visuels, prix Cardmarket et TCGplayer des cartes' + (c ? ' · ' + this.d2(c) : ''), '#3DDC84', 'connecté'],
+      ['TCGdex', 'Catalogue, visuels et prix Cardmarket des cartes' + (c ? ' · ' + this.d2(c) : ''), '#3DDC84', 'connecté'],
       ['eBay', 'API officielle, ventes réussies · accès à confirmer', '#F5B14C', 'à vérifier'],
       ['Archive maison', days.length ? 'Cote du scellé gardée chaque jour depuis le ' + this.d2(days[0]) : 'Cote du scellé gardée chaque jour', '#3DDC84', 'actif'],
       ['Vinted, Leboncoin', 'Pas d’API publique, pas de scraping', '#56648A', 'non connectés']
     ];
     r.sources = rows.map((q, i) => Object.assign({}, r.sources[i] || {}, { label: q[0], sub: q[1], dot: q[2], state: q[3] }));
-    if (x.s.valuation === 'pkm' || !x.s.valuation) r.valHelp = 'Recommandé. Prix du marché : médiane de la tendance et des moyennes 7 et 30 jours Cardmarket et du prix TCGplayer (ventes conclues). Les ventes eBay s’ajouteront si l’accès est confirmé.';
+    if (x.s.valuation === 'pkm' || !x.s.valuation) r.valHelp = 'Recommandé. Prix Cardmarket : médiane de la tendance et des moyennes 7 et 30 jours. Les ventes réussies eBay s’ajouteront dès qu’un accès officiel sera ouvert.';
     return r;
   };
