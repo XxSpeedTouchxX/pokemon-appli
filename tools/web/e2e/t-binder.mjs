@@ -19,7 +19,7 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   const [ctx, page] = await mk();
   await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2500);
   const order = await page.$$eval('#app section[aria-label]', ss => ss.map(s => s.getAttribute('aria-label')).filter(l => !/^(Navigation|Recherche dans)/.test(l)));
-  ok('ordre de l’accueil : ' + order.join(' > '), order.join('|') === 'Valeur de ma collection|Mon classeur|Valeur de ma collection par type|Boutiques près de toi|Sorties récentes|Prochaines sorties');
+  ok('ordre de l’accueil : ' + order.join(' > '), order.join('|') === 'Valeur de ma collection|Mon classeur|Boutiques près de toi|Sorties récentes|Prochaines sorties');
   const last = await page.evaluate(() => { const s = document.querySelector('section[aria-label="Prochaines sorties"]'); let n = s.nextElementSibling; const after = []; while (n) { after.push(n.tagName + ':' + (n.getAttribute('aria-label') || n.innerText.slice(0, 30))); n = n.nextElementSibling; } return after; });
   ok('« Prochaines sorties » tout en bas, juste avant la mention de non-affiliation (' + last.join(', ') + ')', last.length === 1 && /non affiliée/.test(await page.locator('section[aria-label="Prochaines sorties"] + p').innerText()));
   ok('titre « Mon classeur »', (await page.locator(SEC + ' h2').innerText()) === 'Mon classeur');

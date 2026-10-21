@@ -122,3 +122,19 @@
     if (r.fi.open && s.fiZoom && r.fi.big.img) { r.ui.zoomOpen = true; r.zoom = r.fi.big; }
     return r;
   };
+
+  // Ajout d'un produit scellé (2026-10-21, demande du porteur) : seul l'article choisi, sans onglet « Vente », sans
+  // état ni prix payé ; restent la langue, la quantité et la valeur Cardmarket ajoutée.
+  const fiBaseSheet = fiProto.vSheet;
+  fiProto.vSheet = function (x) {
+    const sh = fiBaseSheet.call(this, x), f = x.s.f || {}, p = x.P[f.pid];
+    const sealed = !!(sh.isBuy && p && p.type === 'sealed');
+    Object.assign(sh, { showKind: !sealed, hideKind: sealed, showPrice: !sealed, showCond: !sealed });
+    if (sealed) {
+      sh.products = (sh.products || []).filter(po => po.sel);
+      sh.hasPriceHint = false;
+      sh.lines = (sh.lines || []).filter(l => !/Plus-value/.test(l.label));
+      sh.lines.forEach(l => { if (/^Cote Dropicards unitaire/.test(l.label)) l.label = 'Valeur Cardmarket à l’unité'; });
+    }
+    return sh;
+  };

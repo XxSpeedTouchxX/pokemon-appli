@@ -41,6 +41,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - **Mes produits scellés** (2026-10-21, choix du porteur) : vitrine en verre éclairée (`.pkm-vit`, `games.css`), 3 produits par tablette, pages de 9, photo officielle (ou plaque dessinée), même pastille que les cartes (vert Scellé d'origine, orange Boîte abîmée) ;
    - en tête de chaque onglet (2026-10-21) : « Valeur de mes cartes » ou « Valeur de mes produits scellés », écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir), puis le nombre de cartes ou de produits, les cartes gradées et les doublons ; montants masqués avec l'œil de la valeur ; « Page suivante » et « Page précédente » ;
    - un appui ouvre la **fiche en panneau** (`fiche.js`, ci-dessous) ;
+   - classeur vide (2026-10-21) : un seul bouton jaune, « Ajouter des cartes » (ouvre « Toutes les séries ») ou « Ajouter des produits scellés » (catalogue du scellé) ;
    - langue et état : ceux des exemplaires ajoutés ; un ajout sans langue prend celle de l'article.
 4. **Boutiques autour de toi :**
    - radar en SVG (anneaux 1, 3, 5 km) ;
@@ -57,7 +58,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Mon profil** (`tools/web/profile.js`, 2026-10-14) : photo de la photothèque (input caché `#pkm-pf-photo`, recadrée en 256 px, `avatarImg`), « Informations du dresseur » (pseudo et e-mail dans `trainer`, membre depuis, palier) ; badge Admin retiré de l'en-tête.
 - **Écran d'une extension** (`tools/web/setview.js`, 2026-10-17, d'après la vidéo du porteur) : progression, Toutes / Possédées / Manquantes / Doublons (`setFilter`), Petit / Moyen / Grand (`setSize`, 4, 3 ou 2 cartes par ligne), recherche et filtres de rareté propres à l'extension ouverte (`setQ`, `setRar`, `setKey`), tri numéro / cote / nom (`setSort`) ; cartes manquantes en gris ; cœur (`favs`) et « + » (ajout immédiat, « Annuler »). Symboles des raretés : classes `pkm-rar-*` dans `games.css`.
 - **Collection Classique du 30ᵉ Anniversaire** (`CLASSIC_30` dans `catalog.js`) : chaque réimpression `30th-c-NNN` prend le visuel et le numéro imprimé de sa carte d'origine (TCGdex n'a pas leurs scans).
-- **Valeur par type** (`home.js`, 2026-10-17) : tuiles « Cartes » et « Produits scellés » sous « Mon classeur » (`hk.split`), dont la somme est la valeur de la collection ; un appui ouvre l'onglet du classeur. Cote Dropicards = Cardmarket uniquement depuis le 2026-10-18 (`coteMed`, `catalog.js`).
+- **Valeur par type** : les tuiles « Cartes » et « Produits scellés » sous « Mon classeur » (2026-10-17) sont retirées le 2026-10-21 (demande du porteur) ; la valeur de chaque onglet est en haut du classeur, et leur somme est la valeur de la collection. Cote Dropicards = Cardmarket uniquement depuis le 2026-10-18 (`coteMed`, `catalog.js`).
 - **Séries** (`series.js`, 2026-10-17) : extensions 3 par ligne ; un appui sur l'en-tête garde la série à sa place (`serAnchor`) et ses extensions se déplient (`pkm-ser-unfold`, `games.css`).
 - **Classeur vide** (`home.js`, 2026-10-17) : « Ajouter des cartes » ou « Ajouter des produits scellés », « Scanner ».
 - **En-tête commun** (`tools/web/build.mjs`, fragment `home-header`, 2026-10-16) : accueil, Toutes les séries, Jeux et PK shop ; solde de PK et tickets à gauche, logo au centre, avatar avec l'emblème du grade à droite ; sur les trois onglets, le titre de la page (`pkm-hb-title`) passe dessous.
@@ -239,6 +240,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
   - **Historique du prix** : archive quotidienne (scellé, démo) sur 7 jours, 1 mois ou tout ; cartes : moyennes Cardmarket 30 jours, 7 jours, veille, tendance ;
   - **Investi** et plus-value latente ; **Prix par état** (coefficients de `value.js`) ; **Mes exemplaires** (un appui corrige l'ajout) ; « Voir la fiche complète ».
   - Pas de prix des cartes gradées, de population PSA ni de dernière vente eBay (vidéo du porteur) : aucune source ouverte.
+- **Ajouter un produit scellé** (formulaire d'ajout, 2026-10-21, demande du porteur) : seul l'article choisi, sans onglet « Vente », sans état ni prix payé ; restent la langue, la quantité et la valeur Cardmarket ajoutée (`vSheet` dans `fiche.js`). Le formulaire tient dans l'écran et défile jusqu'au bouton « Ajouter à ma collection » (il dépassait sous la barre du navigateur sur téléphone).
 
 ## Importer un tableur
 

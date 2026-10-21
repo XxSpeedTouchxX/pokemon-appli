@@ -51,6 +51,11 @@ ok('zoom de la photo : ' + await page.locator('#pkm-zoom span span').last().inne
 await page.click('#pkm-zoom button[aria-label="Fermer"]'); await page.waitForTimeout(200);
 // Ajout à la collection puis rechargement
 await page.click(FI + ' button:has-text("Ajouter à mes produits scellés")'); await page.waitForTimeout(200);
+const SH = 'section[aria-label="Saisie"]';
+ok('ajout du scellé : seul l’article choisi, sans « Vente », état ni prix payé', (await page.locator(SH + ' fieldset button[aria-pressed]').count()) === 1
+  && (await page.locator('[aria-label="Type de saisie"]').count()) === 0 && (await page.locator('[aria-label="État de l’exemplaire"]').count()) === 0
+  && (await page.locator(SH + ' input[inputmode="decimal"]').count()) === 0 && (await page.locator(SH + ' button[aria-label="Augmenter la quantité"]').count()) === 1);
+ok('ajout du scellé : valeur Cardmarket à l’unité', /Valeur Cardmarket à l’unité/.test(await page.locator(SH).innerText()));
 await page.locator('button:has-text("Ajouter à ma collection")').last().click(); await page.waitForTimeout(700);
 const saved = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); const k = Object.keys(d.cards || {}).filter(x => x.indexOf('sp-') === 0); return { k: k, s: k.length ? !!d.cards[k[0]].s : false }; });
 ok('enregistré sur l’appareil : ' + saved.k.join(', '), saved.k.length === 1 && saved.s);

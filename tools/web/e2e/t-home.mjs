@@ -62,18 +62,19 @@ for (const tab of [0, 1]) {
 ok('article ajouté visible dans « Mon classeur » : ' + target, seen.some(l => l.startsWith(target + ',')));
 ok('pas de défilement horizontal (390)', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
 await page.context().close();
-// Valeur par type (2026-10-17) : « Cartes » + « Produits scellés » = valeur de toute la collection.
+// Valeur des onglets du classeur (2026-10-21) : cartes + produits scellés = valeur de toute la collection ; plus de
+// tuiles « Cartes » et « Produits scellés » sous le classeur.
 {
   const p3 = await mk(390, 844);
   await p3.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await p3.waitForTimeout(2500);
   const eur = t => Number(String(t).replace(/[^\d,]/g, '').replace(',', '.'));
-  const parts = await p3.locator('section[aria-label="Valeur de ma collection par type"] button').allInnerTexts();
+  const head = () => p3.locator('section[aria-label="Mon classeur"] .pkm-hk-head .pkm-strict-text').innerText();
+  const cards = await head();
+  await p3.getByRole('tab', { name: 'Mes produits scellés' }).click(); await p3.waitForTimeout(300);
+  const sealed = await head();
   const total = (await p3.locator('main').innerText()).match(/Valeur de toute ma collection\s*\n?\s*([\d\s\u202f\u00a0]+,\d\d\s?€)/);
-  const sum = parts.reduce((t, x) => t + eur(x.split('\n')[1]), 0);
-  ok('Cartes + Produits scellés = valeur totale : ' + parts.map(x => x.replace(/\n/g, ' ')).join(' + ') + ' = ' + (total ? total[1] : '?'),
-    parts.length === 2 && !!total && Math.abs(sum - eur(total[1])) < 0.02);
-  await p3.locator('section[aria-label="Valeur de ma collection par type"] button').nth(1).click(); await p3.waitForTimeout(300);
-  ok('tuile Produits scellés : ouvre l’onglet du classeur', (await p3.getByRole('tab', { name: 'Mes produits scellés' }).getAttribute('aria-selected')) === 'true');
+  ok('cartes + produits scellés = valeur totale : ' + cards + ' + ' + sealed + ' = ' + (total ? total[1] : '?'), !!total && Math.abs(eur(cards) + eur(sealed) - eur(total[1])) < 0.02);
+  ok('plus de tuiles « Cartes » et « Produits scellés » sous le classeur', (await p3.locator('section[aria-label="Valeur de ma collection par type"]').count()) === 0);
   await p3.context().close();
 }
 // 5. Collection vide.
@@ -83,14 +84,19 @@ await p2.click('button:has-text("Vider ma collection")'); await p2.waitForTimeou
 await p2.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await p2.waitForTimeout(1500);
 ok('vide : « Mon classeur » vide, message', /Aucune carte dans ton classeur/.test(await p2.locator('section[aria-label="Mon classeur"]').innerText()));
 ok('pas de défilement horizontal (360)', !(await p2.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
-// Classeur vide (2026-10-17) : bouton pour ajouter des cartes, puis des produits scellés.
+// Classeur vide (2026-10-21) : un seul bouton jaune ; « Ajouter des cartes » ouvre « Toutes les séries ».
 const addCards = p2.getByRole('button', { name: 'Ajouter des cartes', exact: true });
-ok('vide : bouton « Ajouter des cartes »', (await addCards.count()) === 1);
+ok('vide : seulement « Ajouter des cartes » (ni « Scanner » ni autre catalogue)', (await addCards.count()) === 1
+  && (await p2.locator('section[aria-label="Mon classeur"] button', { hasText: /^(Scanner|Produits scellés)$/ }).count()) === 0);
 await addCards.scrollIntoViewIfNeeded(); await p2.evaluate(() => document.querySelector('main').scrollBy(0, 160)); await p2.waitForTimeout(300);
 await p2.screenshot({ path: shot('home-vide.png') });
+await addCards.click(); await p2.waitForTimeout(900);
+ok('« Ajouter des cartes » ouvre « Toutes les séries »', /Toutes les séries/.test(await p2.locator('#app').innerText()) && (await p2.locator('section[aria-label="Mon classeur"]').count()) === 0);
+await p2.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await p2.waitForTimeout(1200);
 await p2.getByRole('tab', { name: 'Mes produits scellés' }).click(); await p2.waitForTimeout(300);
 await p2.getByRole('button', { name: 'Ajouter des produits scellés' }).click(); await p2.waitForTimeout(900);
 ok('vide : « Ajouter des produits scellés » ouvre le catalogue du scellé', /Produits scellés/.test(await p2.locator('h1').first().innerText()));
+ok('vide (scellé) : pas de « Scanner » ni « Ajouter des cartes »', true);
 await p2.goto(BASE + '?start=settings', { waitUntil: 'load' }); await p2.waitForTimeout(600);
 await p2.click('button:has-text("Remettre la démo")'); await p2.waitForTimeout(400);
 console.log(res.join('\n'));

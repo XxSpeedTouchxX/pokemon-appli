@@ -280,6 +280,12 @@ patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value=
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-unlock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Passage de grade (2026-10-16) : animation façon « promotion » (profile.js, games.css).
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['grade-up'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Formulaire d'ajout (2026-10-21, demande du porteur) : tient dans l'écran et défile jusqu'au bouton (il dépassait
+// sous la barre du navigateur) ; pour un produit scellé, ni onglet « Vente » ni prix payé (sh.showKind, sh.showPrice).
+patch('<section aria-label="Saisie" style="flex: none; max-height: 796px; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 26px;',
+  '<section aria-label="Saisie" style="flex: 0 1 auto; min-height: 0; max-height: calc(100% - 44px); overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px calc(26px + env(safe-area-inset-bottom));');
+patchRe(/<div role="group" aria-label="Type de saisie"[\s\S]*?<\/div>\n/, m => '<sc-if value="{{ sh.showKind }}" hint-placeholder-val="{{ true }}">\n' + m + '</sc-if>\n<sc-if value="{{ sh.hideKind }}" hint-placeholder-val="{{ false }}"><div style="flex: 1"></div></sc-if>\n');
+patchRe(/<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #9AA8C3">\{\{ sh\.priceLabel \}\}[\s\S]*?<\/label>/, m => '<sc-if value="{{ sh.showPrice }}" hint-placeholder-val="{{ true }}">' + m + '</sc-if>');
 // Fiche d'une carte ou d'un produit (fiche.js, 2026-10-21) : panneau qui monte du bas, sous les formulaires d'ajout.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['fiche-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Cote selon l'état et la langue, vente d'un exemplaire précis (value.js, margin-patch.mjs).

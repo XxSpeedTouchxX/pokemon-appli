@@ -102,14 +102,11 @@
       cards: tab === 'sealed' ? [] : shown, sealed: tab === 'sealed' ? shown : [],
       empty: !list.length,
       emptyText: tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant : ajoute tes ETB, coffrets et boosters.' : 'Aucune carte dans ton classeur pour l’instant : ajoute tes cartes pour connaître leur valeur.',
-      // Classeur vide (2026-10-17, demande du porteur) : un bouton invite à ajouter des cartes ou des produits scellés
-      // (recherche dans tout le catalogue, ou catalogue du scellé), avec le scan et l'autre catalogue à côté.
+      // Classeur vide : un seul bouton (2026-10-21, demande du porteur) : « Ajouter des cartes » ouvre l'onglet
+      // « Toutes les séries », « Ajouter des produits scellés » le catalogue du scellé.
       canAdd: !list.length,
       addLabel: tab === 'sealed' ? 'Ajouter des produits scellés' : 'Ajouter des cartes',
-      add: () => (tab === 'sealed' ? this.openSealedList() : this.openSearch('')),
-      scan: () => this.openScan(),
-      otherLabel: tab === 'sealed' ? 'Ajouter des cartes' : 'Produits scellés',
-      other: () => (tab === 'sealed' ? this.openSearch('') : this.openSealedList()),
+      add: () => (tab === 'sealed' ? this.openSealedList() : this.tab('collection')),
       hasPages: pages > 1, pageLabel: 'Page ' + (page + 1) + ' sur ' + pages,
       prevOff: page === 0, nextOff: page === pages - 1, prevDim: page === 0 ? 0.35 : 1, nextDim: page === pages - 1 ? 0.35 : 1,
       prev: () => { if (page > 0) this.setState({ [key]: page - 1 }); },
@@ -124,20 +121,7 @@
         if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
         if (dx < 0 && page < pages - 1) this.setState({ [key]: page + 1 });
         if (dx > 0 && page > 0) this.setState({ [key]: page - 1 });
-      },
-      // Valeur par type (2026-10-17, vidéo du porteur) : « Cartes » et « Produits scellés », dont la somme est la
-      // valeur de toute la collection ; quelques visuels des plus chers ; un appui ouvre l'onglet du classeur.
-      split: [false, true].map(sl => {
-        const l = all(sl).sort((a, b) => unit(b) - unit(a)), n = units(l), v = x.mask(this.eur(sum(l)));
-        const imgs = l.map(p => this.look(p)).map(k => (sl ? { img: k.hasPhoto ? k.photo : '', fallback: '' } : { img: k.img, fallback: k.fallback || '' }))
-          .filter(k => k.img).slice(0, sl ? 2 : 3);
-        return {
-          title: sl ? 'Produits scellés' : 'Cartes', value: v, count: sl ? plural(n, 'produit', 'produits') : plural(n, 'carte', 'cartes'),
-          imgs: imgs.map((k, i) => ({ img: k.img, fallback: k.fallback, cls: 'pkm-hb-fan-' + (sl ? 's' : 'c') + i })),
-          label: (sl ? 'Produits scellés : ' : 'Cartes : ') + v + ', ' + (sl ? plural(n, 'produit', 'produits') : plural(n, 'carte', 'cartes')) + '. Voir dans le classeur',
-          open: () => this.setState({ hbk: sl ? 'sealed' : 'cards' })
-        };
-      })
+      }
     };
   };
   let homeSwipe = null;

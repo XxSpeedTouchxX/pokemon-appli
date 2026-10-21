@@ -402,10 +402,6 @@
 <sc-if value="{{ home.hk.canAdd }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-hb-add" style="display: flex; flex-direction: column; gap: 8px; padding: 0 4px 6px">
 <button type="button" onClick="{{ home.hk.add }}" style="height: 52px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 15.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round"><path d="M12 5v14 M5 12h14"></path></svg>{{ home.hk.addLabel }}</button>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-<button type="button" onClick="{{ home.hk.scan }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Scanner</button>
-<button type="button" onClick="{{ home.hk.other }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ home.hk.otherLabel }}</button>
-</div>
 </div>
 </sc-if>
 <sc-if value="{{ home.hk.hasPages }}" hint-placeholder-val="{{ true }}">
@@ -419,16 +415,6 @@
 </div>
 </section>
 
-<section aria-label="Valeur de ma collection par type" style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
-<sc-for list="{{ home.hk.split }}" as="hsp" hint-placeholder-count="2">
-<button type="button" onClick="{{ hsp.open }}" aria-label="{{ hsp.label }}" class="pkm-hb-type" style="position: relative; min-height: 142px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; color: #F3F6FC; font: inherit; text-align: left; overflow: hidden; cursor: pointer">
-<span style="font-size: 13px; font-weight: 600; color: #C9D3EA">{{ hsp.title }}</span>
-<span class="pkm-hb-type-v" style="font-family: 'Sora', sans-serif; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap">{{ hsp.value }}</span>
-<span style="font-size: 12px; color: #9AA8C3">{{ hsp.count }}</span>
-<span class="pkm-hb-fan" aria-hidden="true"><sc-for list="{{ hsp.imgs }}" as="hsi" hint-placeholder-count="3"><img src="{{ hsi.img }}" alt="" loading="lazy" class="{{ hsi.cls }}"></sc-for></span>
-</button>
-</sc-for>
-</section>
 
 <section aria-label="Boutiques près de toi" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
@@ -1486,12 +1472,14 @@
 <button type="button" onClick="{{ cl.pick }}" aria-pressed="{{ cl.on }}" style="flex: 1; height: 44px; border-radius: 999px; border: 1px solid {{ cl.bc }}; background: {{ cl.bg }}; color: {{ cl.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ cl.label }}</button>
 </sc-for>
 </div>
+<sc-if value="{{ sh.showCond }}" hint-placeholder-val="{{ true }}">
 <span style="font-size: 13px; font-weight: 600; color: #9AA8C3">État</span>
 <div role="group" aria-label="État de l’exemplaire" style="display: flex; gap: 8px">
 <sc-for list="{{ sh.copyConds }}" as="cc" hint-placeholder-count="3">
 <button type="button" onClick="{{ cc.pick }}" aria-pressed="{{ cc.on }}" style="flex: 1; height: 44px; padding: 0 6px; border-radius: 999px; border: 1px solid {{ cc.bc }}; background: {{ cc.bg }}; color: {{ cc.fg }}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer">{{ cc.label }}</button>
 </sc-for>
 </div>
+</sc-if>
 </div>
 </sc-if>
 <!-- fragment: pkshop -->
