@@ -280,6 +280,8 @@ patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value=
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-unlock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Passage de grade (2026-10-16) : animation façon « promotion » (profile.js, games.css).
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['grade-up'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Fiche d'une carte ou d'un produit (fiche.js, 2026-10-21) : panneau qui monte du bas, sous les formulaires d'ajout.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['fiche-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Cote selon l'état et la langue, vente d'un exemplaire précis (value.js, margin-patch.mjs).
 logic = applyMarginPatches(logic);
 patchJs("platform: d.platform, commission: d.commission, port: d.port, by: d.by };", "platform: d.platform, commission: d.commission, port: d.port, by: d.by, from: d.from || null };");
@@ -377,8 +379,7 @@ patch('<!-- carrousel : home.rel -->', CAROUSEL('home.rel', 'Sorties récentes')
 patch('<!-- carrousel : home.next -->', CAROUSEL('home.next', 'Prochaines sorties'));
 patch(FRAG['market-browse'], CAROUSEL('mk.feat', 'Scellé à la une') + FRAG['market-browse']);
 // - Produits scellés : une colonne de grandes cartes.
-patch('<!-- liste : produits scellés -->', '<div style="flex: none; display: flex; flex-direction: column; gap: 14px">\n<sc-for list="{{ sl.items }}" as="sp" hint-placeholder-count="4">\n'
-  + FEATURE_CARD('sp', 'width: 100%;') + '\n</sc-for>\n</div>');
+// Écran « Produits scellés » : grille de 3 refaite le 2026-10-21 (gabarit catalog.dc.html, sealed.js).
 // - Page Sorties (tools/web/releases.js) : à venir et sorties récentes, prix de lancement, cote, liens des enseignes.
 const RELEASE_CARD = v => `<article aria-label="{{ ${v}.name }}" style="flex: none; display: flex; flex-direction: column; border: 1px solid #24345C; border-radius: 22px; overflow: hidden; background: #111A2C">
 <button type="button" onClick="{{ ${v}.open }}" aria-label="{{ ${v}.sheetLabel }}" style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; background: {{ ${v}.bg }}; cursor: pointer">
@@ -510,7 +511,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 45) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 45'); // dont 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 49) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 49'); // dont 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -604,7 +605,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), navJs = mod('nav.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -633,7 +634,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + navJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + ficheJs + navJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -653,7 +654,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -699,6 +700,8 @@ ${code}
   // revenant en arrière, la page reprend là où on l'avait laissée, avec un glissement (nav.js). Les réglages de la
   // page (recherche, filtres, onglets, vues) restent dans l'état de l'app : on les retrouve au retour.
   navSetup(inst);
+  // Diagnostic (?debug) : l’app est accessible depuis la console (window.__pkm).
+  try { if (/[?&]debug([&=]|$)/.test(location.search)) window.__pkm = inst; } catch (e) { /* adresse sans paramètres */ }
   let zoomOpen = false;
   Vue.createApp({
     setup() {

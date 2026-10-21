@@ -9,7 +9,6 @@
   const SP = 'sp-';
   const TYPE_LABEL = { ETB: 'Coffret Dresseur d’élite', UPC: 'Collection Ultra-Premium', DSP: 'Display', BDL: 'Lot de boosters',
     TIN: 'Boîte', BST: 'Booster', DCK: 'Deck', CFT: 'Coffret' };
-  const TYPE_FILTERS = [['all', 'Tout'], ['ETB', 'ETB'], ['DSP', 'Display'], ['UPC', 'UPC'], ['BDL', 'Lots de boosters'], ['TIN', 'Boîtes'], ['CFT', 'Coffrets'], ['DCK', 'Decks'], ['BST', 'Boosters']];
   // Fond (setArt de la maquette) et logo de démo des extensions connues de la maquette.
   const SET_ART = { me05: 'nuit', me04: 'chaos', '30th': 'anniv', me01: 'megaEvo', me06: 'delta' };
   const SET_NAMES = { me06: 'Règne Delta' };
@@ -137,9 +136,10 @@
     const d = baseSealedSt.call(this), pr = this.props || {};
     if (!(this.state && this.state.screen) && pr.start === 'sealed') d.screen = 'sealed';
     if (d.sfilter === undefined) d.sfilter = 'all';
+    if (d.smode !== 'serie') d.smode = 'type';
     return d;
   };
-  proto.openSealedList = function () { this.push('sealed', { sfilter: 'all' }); };
+  proto.openSealedList = function () { this.push('sealed', { sfilter: 'all', sset: null }); };
   const pricesDay = () => (SEALED.doc && /^\d{4}-\d{2}-\d{2}/.test(SEALED.doc.prices || '') ? SEALED.doc.prices.slice(0, 10) : '');
 
   // Fiche d'un produit : photo agrandissable, sources de prix du jour, pas de courbe inventée.
@@ -235,21 +235,78 @@
     return res;
   };
 
-  // Écran « Produits scellés » : grille de photos, filtre par type.
-  const EMPTY_SEALED = { countText: '', note: '', filters: [], count: '', empty: false, items: [] };
+  // Écran « Produits scellés » (refait le 2026-10-21, vidéo du porteur) : « Par type » ou « Par série ».
+  // Par type : Tout, ETB, Display, UPC, Boosters, Pokébox (coffrets), Mini tin (boîtes), Bundle (lots de boosters) ;
+  // les decks ne sont que dans « Tout ». Par série : séries et extensions avec leur logo et leur nombre de produits ;
+  // une extension ouvre ses produits, filtrables par type. Grille de 3 : photo, nom, prix Cardmarket, « + Ajouter »
+  // (formulaire d'ajout : quantité, prix, date) et « Détails » (fiche avec prix du marché et historique, fiche.js).
+  const SL_TYPES = [['all', 'Tout'], ['ETB', 'ETB'], ['DSP', 'Display'], ['UPC', 'UPC'], ['BST', 'Boosters'], ['CFT', 'Pokébox'], ['TIN', 'Mini tin'], ['BDL', 'Bundle']];
+  const SL_OTHER = 'Autres produits';
+  const EMPTY_SEALED = { ready: false, status: '', modes: [], byType: true, bySerie: false, q: '', onQ: null, hasQ: false, clear: null, types: [], showTypes: false,
+    groups: [], showSeries: false, hasSet: false, set: {}, count: '', empty: false, showGrid: false, items: [], note: '' };
+  proto.slAdd = function (id) {
+    const ex = this.st().extra || [];
+    if (!this.catalog().some(q => q.id === id)) this.setState({ extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) });
+    this.openSheet('buy', id);
+  };
   proto.vSealedList = function (s) {
-    if (SEALED.status !== 'ready') return Object.assign({}, EMPTY_SEALED, { count: SEALED.status === 'error' ? 'Catalogue scellé indisponible pour le moment · nouvel essai automatique.' : 'Chargement du catalogue scellé…' });
-    const c = this.compute(s), all = SEALED.list(), f = TYPE_FILTERS.some(d => d[0] === s.sfilter) ? s.sfilter : 'all';
-    const shown = f === 'all' ? all : all.filter(p => p.code === f);
-    const withPhoto = all.filter(p => p.photo).length;
-    const defs = TYPE_FILTERS.filter(d => d[0] === 'all' || all.some(p => p.code === d[0]));
+    if (SEALED.status !== 'ready') return Object.assign({}, EMPTY_SEALED, { status: SEALED.status === 'error' ? 'Catalogue scellé indisponible pour le moment · nouvel essai automatique.' : 'Chargement du catalogue scellé…' });
+    const c = this.compute(s), all = SEALED.list(), mode = s.smode === 'serie' ? 'serie' : 'type';
+    const f = SL_TYPES.some(d => d[0] === s.sfilter) ? s.sfilter : 'all', q = String(s.sq || '').trim();
+    const setOf = p => p.setId || '', setName = id => (id ? setLabel(id) || id : SL_OTHER);
+    const set = mode === 'serie' && s.sset !== undefined && s.sset !== null && all.some(p => setOf(p) === s.sset) ? s.sset : null;
+    const words = fold(q).split(/\s+/).filter(Boolean);
+    let shown = all.filter(p => (f === 'all' || p.code === f) && (set === null || setOf(p) === set));
+    if (words.length) { const hit = new Set(SEALED.search(q).map(p => p.id)); shown = shown.filter(p => hit.has(p.id)); }
+    const logoOf = id => { const t = TCG.doc && TCG.doc.sets[id]; return t ? setLogo(id, t[3]) : (SET_ART[id] ? IMG[SET_ART[id]] : ''); };
+    // Séries : extensions du scellé rangées sous leur série (cards.json), la plus récente d'abord.
+    const sets = {};
+    all.forEach(p => { const k = setOf(p); (sets[k] = sets[k] || []).push(p); });
+    const groupsMap = {};
+    Object.keys(sets).forEach(k => {
+      const t = TCG.doc && TCG.doc.sets[k], serie = k ? (t ? t[1] : 'Méga-Évolution') : SL_OTHER;
+      const latest = sets[k].reduce((m, p) => (relKey(p) > m ? relKey(p) : m), '');
+      (groupsMap[serie] = groupsMap[serie] || []).push({ k: k, latest: latest });
+    });
+    const groups = Object.keys(groupsMap).map(name => ({ name: name, list: groupsMap[name].sort((a, b) => (a.latest < b.latest ? 1 : -1)) }))
+      .sort((a, b) => (a.name === SL_OTHER) - (b.name === SL_OTHER) || (a.list[0].latest < b.list[0].latest ? 1 : -1))
+      .map(g => ({
+        name: g.name, count: g.list.reduce((t, e) => t + sets[e.k].length, 0) + ' produits',
+        sets: g.list.map(e => {
+          const logo = e.k ? logoOf(e.k) : '', n = sets[e.k].length;
+          return { name: setName(e.k), logo: logo, hasLogo: !!logo, noLogo: !logo, initials: setName(e.k).slice(0, 2).toUpperCase(),
+            count: n + (n > 1 ? ' produits' : ' produit'), label: setName(e.k) + ', ' + n + (n > 1 ? ' produits' : ' produit'),
+            pick: () => this.setState({ sset: e.k, sfilter: 'all' }) };
+        })
+      }));
+    const typeDefs = SL_TYPES.filter(d => d[0] === 'all' || all.some(p => p.code === d[0] && (set === null || setOf(p) === set)));
+    const tile = p => {
+      const l = this.look(p), k = this.cote(p), st = c.stock[p.id], n = st ? st.qty : 0;
+      return Object.assign(l, {
+        name: p.name, sub: TYPE_LABEL[p.code] || 'Produit scellé', flag: this.flag('FR'),
+        price: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Prix à venir'),
+        owned: n > 0, qty: '×' + n, soon: !!p.release, canAdd: !p.release, soonText: p.release ? 'Sortie le ' + this.d2(p.release) : '',
+        label: p.name + (k !== null ? ', cote ' + this.eur(k) : '') + (n ? ', ' + n + ' dans ta collection' : ''),
+        add: () => this.slAdd(p.id), addLabel: 'Ajouter ' + p.name + ' à mes produits scellés',
+        details: () => this.fiOpen(p.id), detailsLabel: 'Détails de ' + p.name
+      });
+    };
+    const showGrid = mode === 'type' || set !== null || words.length > 0;
+    const setLogoImg = set !== null && set ? logoOf(set) : '';
     return {
-      countText: all.length + ' produits · ' + withPhoto + ' visuels officiels',
-      note: 'Galerie officielle Pokémon France · cote = tendance Cardmarket' + (pricesDay() ? ' du ' + this.d2(pricesDay()) : '') + ' · produits sortis en France depuis l’automne 2025 ou annoncés.',
-      filters: defs.map(([k, label]) => Object.assign({ label: label, on: f === k, pick: () => this.setState({ sfilter: k }) }, this.chip(f === k))),
-      count: shown.length + (shown.length > 1 ? ' produits' : ' produit') + ' · du plus récent au plus ancien',
-      empty: shown.length === 0,
-      items: shown.map(p => this.featureCard(p, c.stock))
+      ready: true, status: '',
+      modes: [['type', 'Par type'], ['serie', 'Par série']].map(([k, label]) => Object.assign({ label: label, on: mode === k, pick: () => this.setState({ smode: k, sset: null }) }, this.chip(mode === k))),
+      byType: mode === 'type', bySerie: mode === 'serie',
+      q: s.sq || '', onQ: e => this.setState({ sq: e.target.value }), hasQ: !!q, clear: () => this.setState({ sq: '' }),
+      types: typeDefs.map(([k, label]) => Object.assign({ label: label, on: f === k, pick: () => this.setState({ sfilter: k }) }, this.chip(f === k))),
+      showTypes: showGrid,
+      groups: groups, showSeries: mode === 'serie' && set === null && !words.length,
+      hasSet: set !== null,
+      set: set !== null ? { name: setName(set), logo: setLogoImg, hasLogo: !!setLogoImg, back: () => this.setState({ sset: null, sfilter: 'all' }) } : {},
+      count: showGrid ? shown.length + (shown.length > 1 ? ' produits' : ' produit') + ' · du plus récent au plus ancien' : groups.length + ' séries · ' + all.length + ' produits',
+      empty: showGrid && shown.length === 0, showGrid: showGrid,
+      items: showGrid ? shown.map(tile) : [],
+      note: 'Galerie officielle Pokémon France · prix = cote Cardmarket' + (pricesDay() ? ' du ' + this.d2(pricesDay()) : '') + '.'
     };
   };
 

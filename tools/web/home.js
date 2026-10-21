@@ -44,11 +44,13 @@
   };
 
   // ——— Mon classeur : les cartes et les produits scellés de la collection, du plus cher au moins cher ———
-  // « Mes cartes » reprend l'aperçu de PokéItem montré par le porteur : visuel officiel, pastille avec le drapeau de
-  // la langue, la cote et un point de couleur pour l'état ; note de gradation et exemplaires en plus. Pages de 9
-  // pochettes (3 × 3), comme un classeur. « Mes produits scellés » : vitrine 2 par ligne, pages de 4. La langue et
+  // « Mes cartes » : visuel officiel, pastille avec le drapeau de la langue, la cote et un point de couleur pour
+  // l'état ; note de gradation et exemplaires en plus. Pages de 9 pochettes (3 × 3), comme un classeur.
+  // « Mes produits scellés » (2026-10-21, choix du porteur) : vitrine en verre éclairée, 3 produits par tablette,
+  // pages de 9, mêmes pastilles que les cartes. En haut de chaque onglet, la valeur totale, écrite comme « Valeur de
+  // toute ma collection » ; tri par cote, sans bulles de tri ni de filtre (retirées le 2026-10-21). La langue et
   // l'état sont ceux des exemplaires ajoutés (copies.js) ; un ajout sans langue prend celle de l'article.
-  const HOME_BINDER = { cards: 9, sealed: 4 };
+  const HOME_BINDER = { cards: 9, sealed: 9 };
   const HOME_COND = { NM: 'var(--pkm-up)', EX: 'var(--pkm-amber)', PL: 'var(--pkm-down)', SO: 'var(--pkm-up)', AB: 'var(--pkm-amber)' };
   const homeCopy = (purchases, p) => {
     const g = copiesOf(purchases, p)[0], set = (purchases || []).some(a => (a.lines || []).some(l => l.pid === p.id && l.lang));
@@ -57,22 +59,12 @@
   proto.homeBinder = function (x) {
     const s = x.s, tab = s.hbk, key = tab === 'sealed' ? 'hbsp' : 'hbcp';
     const unit = p => x.val(p) || 0, qty = p => x.c.stock[p.id].qty;
-    // Tri et filtres (D1) : cote, ajouts récents ou nom ; langue, état, rareté, extension des exemplaires restants.
-    const sort = s.hbSort || 'value', F = s.hbF || {}, left = valLeft(s);
-    const lastAdd = {};
-    (s.purchases || []).forEach(a => a.lines.forEach(l => { if (!lastAdd[l.pid] || a.date > lastAdd[l.pid]) lastAdd[l.pid] = a.date; }));
+    // Du plus cher au moins cher (les bulles de tri et de filtre sont retirées le 2026-10-21).
     const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'fr');
-    const order = { value: (a, b) => unit(b) - unit(a) || byName(a, b), date: (a, b) => String(lastAdd[b.id] || '').localeCompare(String(lastAdd[a.id] || '')) || byName(a, b), name: byName }[sort] || byName;
-    const copiesLeft = p => (left[p.id] || []).filter(g => g.left > 0).map(g => ({ lang: g.lang, cond: g.cond || copyConds(p)[0][0] }));
-    const keep = p => {
-      const cp = copiesLeft(p), cps = cp.length ? cp : [{ lang: p.lang || 'FR', cond: copyConds(p)[0][0] }];
-      return (!F.lang || cps.some(c => c.lang === F.lang)) && (!F.cond || cps.some(c => c.cond === F.cond))
-        && (!F.rare || p.ur || p.grade) && (!F.set || (p.setName || '') === F.set);
-    };
+    const order = (a, b) => unit(b) - unit(a) || byName(a, b);
     const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
-    const mine = sealed => all(sealed).filter(keep).sort(order);
+    const mine = sealed => all(sealed).sort(order);
     const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, per = HOME_BINDER[tab];
-    const total = all(tab === 'sealed').length, filtered = !!(F.lang || F.cond || F.rare || F.set);
     const pages = Math.max(1, Math.ceil(list.length / per)), page = Math.min(s[key], pages - 1);
     const sum = l => l.reduce((t, p) => t + unit(p) * qty(p), 0), units = l => l.reduce((t, p) => t + qty(p), 0);
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
@@ -85,26 +77,34 @@
         many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg,
         label: p.name + (p.grade ? ', gradée ' + p.grade : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
           + copyLabel(p, k.cond) + ', cote ' + (unit(p) ? x.mask(this.eur(unit(p))) : 'inconnue') + '. Ouvrir la fiche',
-        open: () => this.push('item', { itemId: p.id })
+        open: () => this.fiOpen(p.id)
       });
     };
     const graded = cards.filter(p => p.grade).length, extra = cards.reduce((t, p) => t + Math.max(0, qty(p) - 1), 0);
     const shown = list.slice(page * per, page * per + per).map(tile);
+    // Vitrine : la dernière tablette est complétée par des emplacements vides, pour que le verre reste d'un seul tenant.
+    const shelf = tab === 'sealed' ? shown.map(t => Object.assign(t, { real: true }))
+      .concat(Array.from({ length: (3 - shown.length % 3) % 3 }, () => ({ real: false }))) : [];
+    const headV = sum(list), headBig = x.mask(this.eur(headV));
     return {
+      // Valeur totale de l'onglet, écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir).
+      head: {
+        label: tab === 'sealed' ? 'Valeur de mes produits scellés' : 'Valeur de mes cartes',
+        value: String(headBig).replace(/[\u202f\u00a0]/g, ' '), fit: Math.max(4, String(headBig).length * 0.66).toFixed(2),
+        sub: tab === 'sealed' ? plural(units(sealed), 'produit', 'produits')
+          : [plural(units(cards), 'carte', 'cartes')].concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · ')
+      },
+      shelf: shelf,
       tabs: [['cards', 'Mes cartes'], ['sealed', 'Mes produits scellés']].map(([k, label]) =>
         Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k }) }, this.chip(tab === k))),
       tabLabel: tab === 'sealed' ? 'Mes produits scellés' : 'Mes cartes',
       cardsTab: tab !== 'sealed' && shown.length > 0, sealedTab: tab === 'sealed' && shown.length > 0,
       cards: tab === 'sealed' ? [] : shown, sealed: tab === 'sealed' ? shown : [],
-      summary: tab === 'sealed'
-        ? plural(units(sealed), 'produit', 'produits') + ' · ' + x.mask(this.eur(sum(sealed)))
-        : [plural(units(cards), 'carte', 'cartes') + ' · ' + x.mask(this.eur(sum(cards)))]
-          .concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · '),
       empty: !list.length,
-      emptyText: filtered ? 'Aucun article ne correspond à ces filtres.' : tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant : ajoute tes ETB, coffrets et boosters.' : 'Aucune carte dans ton classeur pour l’instant : ajoute tes cartes pour connaître leur valeur.',
+      emptyText: tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant : ajoute tes ETB, coffrets et boosters.' : 'Aucune carte dans ton classeur pour l’instant : ajoute tes cartes pour connaître leur valeur.',
       // Classeur vide (2026-10-17, demande du porteur) : un bouton invite à ajouter des cartes ou des produits scellés
       // (recherche dans tout le catalogue, ou catalogue du scellé), avec le scan et l'autre catalogue à côté.
-      canAdd: !list.length && !filtered,
+      canAdd: !list.length,
       addLabel: tab === 'sealed' ? 'Ajouter des produits scellés' : 'Ajouter des cartes',
       add: () => (tab === 'sealed' ? this.openSealedList() : this.openSearch('')),
       scan: () => this.openScan(),
@@ -125,7 +125,6 @@
         if (dx < 0 && page < pages - 1) this.setState({ [key]: page + 1 });
         if (dx > 0 && page > 0) this.setState({ [key]: page - 1 });
       },
-      tools: this.homeBinderTools(s, tab, all(tab === 'sealed'), filtered, list.length, total, key),
       // Valeur par type (2026-10-17, vidéo du porteur) : « Cartes » et « Produits scellés », dont la somme est la
       // valeur de toute la collection ; quelques visuels des plus chers ; un appui ouvre l'onglet du classeur.
       split: [false, true].map(sl => {
@@ -142,29 +141,6 @@
     };
   };
   let homeSwipe = null;
-  // Barre du classeur : tri (chips) et filtres (panneau replié).
-  proto.homeBinderTools = function (s, tab, items, filtered, shown, total, key) {
-    const F = s.hbF || {}, sort = s.hbSort || 'value', open = !!s.hbFOpen;
-    const set = (patch) => this.setState(Object.assign({ hbF: Object.assign({}, F, patch), [key]: 0 }));
-    const chips = (list, cur, pick) => list.map(([v, label]) => Object.assign({ label: label, on: cur === v, pick: () => pick(v) }, this.chip(cur === v)));
-    const conds = tab === 'sealed' ? COPY.conds.sealed : COPY.conds.card;
-    const sets = [...new Set(items.map(p => p.setName).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
-    const n = [F.lang, F.cond, F.rare, F.set].filter(Boolean).length;
-    return {
-      sorts: chips([['value', 'Cote'], ['date', 'Récents'], ['name', 'Nom']], sort, v => this.setState({ hbSort: v, [key]: 0 })),
-      filterLabel: n ? 'Filtres (' + n + ')' : 'Filtrer', open: open, toggle: () => this.setState({ hbFOpen: !open }),
-      filterOn: n > 0, filterBg: n ? 'var(--pkm-accent)' : 'transparent', filterFg: n ? 'var(--pkm-on-accent)' : 'var(--pkm-t2)',
-      langs: chips([['', 'Toutes'], ['FR', 'FR'], ['EN', 'EN'], ['JP', 'JP']], F.lang || '', v => set({ lang: v })),
-      conds: chips([['', 'Tous']].concat(conds.map(c => [c[0], c[1]])), F.cond || '', v => set({ cond: v })),
-      showRare: tab !== 'sealed', rares: chips([['', 'Toutes'], ['ur', 'Ultra rares et gradées']], F.rare ? 'ur' : '', v => set({ rare: v === 'ur' })),
-      showSets: sets.length > 1,
-      sets: [{ label: 'Toutes les extensions', v: '', on: !F.set }].concat(sets.map(t => ({ label: t, v: t, on: F.set === t }))),
-      onSet: e => set({ set: e.target.value }),
-      clear: () => this.setState({ hbF: {}, [key]: 0 }),
-      hasNote: filtered, note: shown + ' sur ' + total + ' · filtre actif'
-    };
-  };
-
   // Tendance de la collection : 4 points (il y a 30 jours, 7 jours, hier, aujourd'hui), calculés par HomeCore.points :
   // moyennes Cardmarket pour les cartes, cote archivée chaque jour pour le scellé, courbe simulée pour la démo.
   const HOME_LABELS = ['il y a 30 jours', 'il y a 7 jours', 'hier', 'aujourd’hui'];

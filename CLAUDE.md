@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-18)
+## 3. État d'avancement (au 2026-10-21)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -137,6 +137,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - « Toutes les séries » : 3 extensions par ligne, dépliage vers le bas sans remontée de la page.
   - écran d'une extension : cartes toutes en couleur ; « + » en haut à droite = ajout avec la cote du jour comme prix.
 - **Cote Cardmarket uniquement (2026-10-18, décision du porteur) :** cote = médiane de la tendance et des moyennes 7 et 30 jours Cardmarket ; TCGplayer et TCGCSV ne comptent plus ; cartes non reliées par TCGdex (30ᵉ) : fichiers publics de Cardmarket (`tools/tcgdex/cmfiles.py`). **Ventes réussies eBay demandées par le porteur, non branchées** : scraping demandé par le porteur puis abandonné le 2026-10-18 (robots.txt d'eBay qui interdit les pages de recherche, réponses 403 depuis GitHub, aucun contournement) ; seule voie : l'API « Marketplace Insights », à demander par le porteur.
+- **Mon classeur v2 et catalogue du scellé (2026-10-21, demande du porteur avec deux vidéos) :**
+  - « Mes cartes » en 3 × 3 et « Mes produits scellés » en vitrine en verre (3 par tablette), valeur totale en haut de chaque onglet écrite comme « Valeur de toute ma collection » ; bulles de tri et de filtre retirées ;
+  - fiche en panneau au toucher (`tools/web/fiche.js`) : cote, ajouter, vendre, retirer, prix du marché Cardmarket, historique, investi, prix par état, exemplaires ; sans prix gradés, population PSA ni dernière vente eBay (pas de source ouverte) ;
+  - « Ajouter des produits scellés » : Par type (Tout, ETB, Display, UPC, Boosters, Pokébox, Mini tin, Bundle) ou Par série, grille de 3 avec « + Ajouter » et « Détails ».
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

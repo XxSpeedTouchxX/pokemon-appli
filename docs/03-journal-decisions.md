@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-10-21 — Mon classeur : valeur en haut, vitrine du scellé, fiche en panneau, catalogue du scellé par type et par série
+
+- **Demande du porteur** (2026-10-21, avec deux vidéos), après des maquettes de 6 puis 5 propositions : garder la grille 3 × 3 de « Mes cartes » avec la valeur totale en haut, écrite comme « Valeur de toute ma collection » ; vitrine en verre éclairée (proposition 2) pour « Mes produits scellés », avec le même en-tête et les mêmes pastilles de prix que les cartes ; retirer les bulles « Trier », « Cote », « Récents », « Nom », « Filtrer » ; une fiche proche de sa vidéo 1 au toucher d'une carte ; « Ajouter des produits scellés » avec les seuls filtres Tout, ETB, Display, UPC, Boosters, Pokébox, Mini tin, Bundle, un choix par série et une fiche avec tendance, prix et ajout direct (vidéo 2).
+- **Livré :**
+  - classeur : valeur totale de l'onglet en haut (Sora, blanc, contour noir), tri par cote seulement, vitrine 3 par tablette (pages de 9) ;
+  - fiche en panneau (`tools/web/fiche.js`) : visuel, cote Cardmarket, ajouter, vendre, retirer, prix du marché Cardmarket (tendance, moyennes 7 et 30 jours, veille, plus bas demandé), acheter sur Cardmarket, ventes réussies eBay (lien), historique du prix (7 j, 1 mois, tout pour le scellé), investi, prix par état, mes exemplaires ;
+  - catalogue du scellé : « Par type » et « Par série », recherche, grille de 3 avec « + Ajouter » et « Détails ».
+- **Pas repris de la vidéo 1 :** prix des cartes gradées, population PSA, dernière vente eBay, alertes de prix (aucune source ouverte pour les trois premiers ; alertes non demandées explicitement).
+
 ## 2026-10-18 — Cote Cardmarket uniquement ; eBay en attente d'un accès officiel
 
 - **Décision du porteur :** la cote se base **uniquement sur Cardmarket et la moyenne des ventes réussies eBay**, plus rien d'autre (exemple : la réimpression de Dracaufeu du 30ᵉ vaut environ 180 €, pas 123 € comme le donnait TCGplayer). Remplace la cote médiane avec TCGplayer (2026-10-16) et TCGCSV (2026-10-17, retiré).

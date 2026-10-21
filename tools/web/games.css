@@ -254,3 +254,58 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-hb-fan-s0 { right: 0; z-index: 2; }
 .pkm-hb-fan-s1 { right: 40px; bottom: 6px; z-index: 1; }
 .pkm-hb-type:active { transform: scale(0.98); }
+/* Mon classeur · vitrine en verre éclairée du scellé (2026-10-21, choix du porteur) : 3 produits par tablette,
+   lumière en haut, tablettes en verre, reflets ; pastille de prix identique à celle des cartes. */
+.pkm-vit { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 14px; padding: 18px 6px 8px; border-radius: 18px; border: 1px solid #3A4A75; background: linear-gradient(180deg, rgba(168, 182, 255, 0.12), rgba(8, 13, 26, 0.6)); overflow: hidden; }
+.pkm-vit::before { content: ""; position: absolute; left: 8%; right: 8%; top: 0; height: 5px; border-radius: 0 0 6px 6px; background: #FFF6C2; box-shadow: 0 0 22px 8px rgba(255, 236, 150, 0.45); }
+.pkm-vit-slot { position: relative; height: 132px; min-width: 0; }
+.pkm-vit-slot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 16px; height: 8px; background: linear-gradient(rgba(220, 235, 255, 0.55), rgba(160, 190, 255, 0.15)); box-shadow: 0 0 12px rgba(168, 182, 255, 0.35); }
+.pkm-vit-item { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+.pkm-vit-photo { position: absolute; left: 5%; right: 5%; top: 4px; bottom: 24px; display: flex; align-items: flex-end; justify-content: center; }
+.pkm-vit-photo > img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.6)); -webkit-box-reflect: below 2px linear-gradient(transparent 74%, rgba(255, 255, 255, 0.16)); }
+.pkm-vit-art { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 4 / 3; border-radius: 8px; box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5); }
+.pkm-vit-art > img { width: 80%; height: 70%; object-fit: contain; }
+.pkm-vit-pill { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); max-width: 96%; box-sizing: border-box; z-index: 2; }
+/* Fiche d'une carte ou d'un produit (2026-10-21, vidéos du porteur) : panneau qui monte du bas. */
+.pkm-fi-wrap { position: absolute; inset: 0; z-index: 18; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62); }
+.pkm-fi-back { flex: 0 0 52px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.pkm-fi { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 28px; display: flex; flex-direction: column; gap: 12px; color: #F3F6FC; }
+.pkm-fi-grip { flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C; }
+.pkm-fi-head { flex: none; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.pkm-fi-title { margin: 0; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.25; }
+.pkm-fi-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; color: #9AA8C3; white-space: nowrap; }
+.pkm-fi-setlogo { display: block; height: 30px; max-width: 140px; object-fit: contain; object-position: left center; margin-top: 4px; }
+.pkm-fi-x { flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #1E2B45; border-radius: 22px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.pkm-fi-x svg, .pkm-fi-main svg, .pkm-fi-fold svg { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-fi-visual { flex: none; align-self: center; position: relative; padding: 0; border: 0; background: transparent; cursor: zoom-in; display: flex; justify-content: center; }
+.pkm-fi-card { display: block; width: 190px; aspect-ratio: 600 / 825; border-radius: 4.8% / 3.4%; background: #16213A; object-fit: cover; box-shadow: 0 0 40px rgba(255, 214, 10, 0.25), 0 18px 40px rgba(0, 0, 0, 0.55); }
+.pkm-fi-photo { display: block; width: 240px; max-height: 210px; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.55)); }
+.pkm-fi-art { display: flex; align-items: center; justify-content: center; width: 240px; aspect-ratio: 4 / 3; border-radius: 16px; }
+.pkm-fi-art img { width: 80%; height: 70%; object-fit: contain; }
+.pkm-fi-rarity { align-self: center; font-size: 12.5px; font-weight: 700; color: #FFD66B; }
+.pkm-fi-price { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.pkm-fi-cote { font-family: 'Sora', sans-serif; font-size: 34px; font-weight: 700; line-height: 1.15; color: #FFFFFF; font-variant-numeric: tabular-nums; padding: 0 0.1em 0.06em; }
+.pkm-fi-src { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: #C9D3EA; }
+.pkm-fi-flag { width: 16px; height: 11px; border-radius: 2px; }
+.pkm-fi-owned { font-size: 12.5px; color: #9AA8C3; }
+.pkm-fi-main { flex: none; height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.pkm-fi-pair { display: flex; justify-content: center; gap: 18px; }
+.pkm-fi-link { min-height: 36px; padding: 0 4px; border: 0; background: transparent; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.pkm-fi-sold { color: #3DDC84; }
+.pkm-fi-del { color: #FF8A8A; }
+.pkm-fi-box { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 20px; border: 1px solid #24345C; background: #121C33; }
+.pkm-fi-h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; color: #F3F6FC; }
+.pkm-fi-chip { padding: 2px 8px; border-radius: 999px; background: rgba(168, 182, 255, 0.14); color: #B9C5FF; font-size: 11.5px; font-weight: 700; }
+.pkm-fi-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.pkm-fi-row-l { flex: 1; min-width: 0; font-size: 13.5px; color: #C9D3EA; }
+.pkm-fi-row-v { font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: #F3F6FC; }
+.pkm-fi-tag { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.pkm-fi-note { font-size: 12px; line-height: 1.45; color: #9AA8C3; }
+.pkm-fi-buy { height: 46px; border-radius: 999px; background: #F3F6FC; color: #0B1120; font-size: 14.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+.pkm-fi-ebay { min-height: 40px; display: flex; align-items: center; justify-content: center; color: #B9C5FF; font-size: 13.5px; font-weight: 700; text-decoration: none; }
+.pkm-fi-big { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: #F3F6FC; }
+.pkm-fi-axis { display: flex; justify-content: space-between; font-size: 11px; color: #7D8BA8; }
+.pkm-fi-fold { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px; padding: 0; border: 0; background: transparent; color: #F3F6FC; font: inherit; font-size: 14.5px; font-weight: 700; text-align: left; cursor: pointer; }
+.pkm-fi-fold[aria-expanded="true"] svg { transform: rotate(180deg); }
+.pkm-fi-copy { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; padding: 6px 0; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: #C9D3EA; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.pkm-fi-full { flex: none; height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }

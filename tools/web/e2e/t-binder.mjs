@@ -1,6 +1,7 @@
 // « Mon classeur » de l'accueil : place (entre la valeur et les boutiques), logo, onglets « Mes cartes » (pages de 9,
-// visuel, pastille drapeau + cote + état, gradation, exemplaires) et « Mes produits scellés » (vitrine 2 par ligne,
-// pages de 4), fiche au toucher, montants masqués, classeur vide ; « Sorties récentes » tout en bas.
+// visuel, pastille drapeau + cote + état, gradation, exemplaires) et « Mes produits scellés » (vitrine en verre, 3 par
+// tablette, pages de 9, mêmes pastilles) ; valeur totale en haut de chaque onglet (2026-10-21), sans bulles de tri ;
+// fiche en panneau au toucher (fiche.js), montants masqués, classeur vide ; « Sorties récentes » tout en bas.
 import { withFonts, withDemoCards, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const BASE = E2E + '/?today=2026-10-04';
 const SEC = 'section[aria-label="Mon classeur"]', PANEL = SEC + ' [role="tabpanel"]', TILE = PANEL + ' button[aria-label$="Ouvrir la fiche"]';
@@ -12,7 +13,8 @@ const mk = async (w = 390, h = 844) => {
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
   return [ctx, page];
 };
-const panelText = async page => (await page.locator(PANEL + ' > div:has(> button[aria-label*="cotes"]) > span').first().innerText()).replace(/[\u202f\u00a0]/g, ' ');
+// En-tête de l'onglet : « libellé | valeur | détail ».
+const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div').first().evaluate(d => [...d.children].map(c => c.innerText.trim()).join(' | '))).replace(/[\u202f\u00a0]/g, ' ');
 {
   const [ctx, page] = await mk();
   await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2500);
@@ -27,7 +29,10 @@ const panelText = async page => (await page.locator(PANEL + ' > div:has(> button
   const tabs = page.locator(SEC + ' [role="tablist"] [role="tab"]');
   ok('2 onglets : ' + (await tabs.allInnerTexts()).join(' | '), (await tabs.allInnerTexts()).join('|') === 'Mes cartes|Mes produits scellés' && (await tabs.first().getAttribute('aria-selected')) === 'true');
   // Mes cartes
-  ok('résumé : ' + await panelText(page), /^6 cartes · .+ € · 1 gradée$/.test(await panelText(page)));
+  ok('valeur des cartes en haut : ' + await panelText(page), /^Valeur de mes cartes \| [\d ]+,\d\d € \| 6 cartes · 1 gradée$/.test(await panelText(page)));
+  const headFont = await page.locator(PANEL + ' .pkm-hk-head .pkm-strict-text').evaluate(e => [getComputedStyle(e).fontFamily, getComputedStyle(e).fontWeight].join(' '));
+  ok('valeur écrite comme « Valeur de toute ma collection » (Sora 700, contour) : ' + headFont, /Sora/.test(headFont) && /700/.test(headFont));
+  ok('plus de bulles de tri ni de filtre', (await page.locator(SEC + ' [aria-label="Trier le classeur"]').count()) === 0 && (await page.locator(SEC + ' button', { hasText: /^(Filtrer|Cote|Récents|Nom)$/ }).count()) === 0);
   const cards = await page.$$eval(TILE, bs => bs.map(b => b.getAttribute('aria-label')));
   ok('6 cartes, de la plus chère à la moins chère : ' + cards.map(c => c.split(',')[0]).join(', '), cards.length === 6 && /^Mewtwo ex, gradée PCA 9,5/.test(cards[0]));
   const vals = await page.$$eval(TILE, bs => bs.map(b => b.querySelector('span[style*="bottom: 6%"]').innerText.trim()));
@@ -42,18 +47,15 @@ const panelText = async page => (await page.locator(PANEL + ' > div:has(> button
   // Mes produits scellés
   await tabs.nth(1).click(); await page.waitForTimeout(600);
   ok('onglet scellé choisi', (await tabs.nth(1).getAttribute('aria-selected')) === 'true' && (await page.locator(PANEL).getAttribute('aria-label')) === 'Mes produits scellés');
-  ok('résumé scellé : ' + await panelText(page), /^15 produits · .+ €$/.test(await panelText(page)));
-  const cols = await page.locator(PANEL + ' > div[style*="grid-template-columns"]').first().evaluate(e => getComputedStyle(e).gridTemplateColumns.split(' ').length);
-  ok('vitrine 2 par ligne, 4 par page : ' + await page.locator(TILE).count() + ' tuiles', cols === 2 && (await page.locator(TILE).count()) === 4);
-  ok('page : ' + await page.locator(SEC + ' [aria-live="polite"]').innerText(), (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 1 sur 2' && (await page.locator(SEC + ' button[aria-label="Page précédente"]').getAttribute('aria-disabled')) === 'true');
-  const first = await page.locator(TILE).first().getAttribute('aria-label');
+  ok('valeur du scellé en haut : ' + await panelText(page), /^Valeur de mes produits scellés \| [\d ]+,\d\d € \| 15 produits$/.test(await panelText(page)));
+  const vit = page.locator(PANEL + ' .pkm-vit');
+  const cols = await vit.evaluate(e => getComputedStyle(e).gridTemplateColumns.split(' ').length);
+  ok('vitrine en verre, 3 par tablette : ' + await page.locator(TILE).count() + ' produits', cols === 3 && (await page.locator(TILE).count()) === 6 && (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0);
+  const vpill = await page.locator(TILE).first().evaluate(b => { const p = b.querySelector('.pkm-vit-pill'), s = p.querySelectorAll(':scope > span'); return s.length === 3 && /linear-gradient/.test(getComputedStyle(s[0]).backgroundImage) && /€/.test(s[1].innerText); });
+  ok('pastille du scellé identique aux cartes (drapeau, cote, état)', vpill);
+  ok('quantité affichée (×2, ×3)', (await page.locator(TILE + ' span', { hasText: /^×\d$/ }).count()) >= 2);
   await page.locator(SEC).evaluate(e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(800);
   await page.screenshot({ path: shot('binder-scelle.png') });
-  await page.click(SEC + ' button[aria-label="Page suivante"]'); await page.waitForTimeout(400);
-  ok('page suivante : ' + await page.locator(SEC + ' [aria-live="polite"]').innerText() + ', ' + await page.locator(TILE).count() + ' tuiles', (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 2 sur 2' && (await page.locator(TILE).first().getAttribute('aria-label')) !== first && (await page.locator(SEC + ' button[aria-label="Page suivante"]').getAttribute('aria-disabled')) === 'true');
-  await page.click(SEC + ' button[aria-label="Page précédente"]'); await page.waitForTimeout(400);
-  ok('page précédente : retour page 1', (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 1 sur 2');
-  ok('quantité affichée (×2, ×3)', (await page.locator(TILE + ' span', { hasText: /^×\d$/ }).count()) >= 2);
   // Montants masqués
   await page.click('button[aria-label*="Masquer"], section[aria-label="Valeur de ma collection"] button[aria-pressed]'); await page.waitForTimeout(400);
   ok('montants masqués : ' + await panelText(page), /•••• €/.test(await panelText(page)) && (await page.$$eval(TILE, bs => bs.every(b => /••••/.test(b.innerText)))));
@@ -61,7 +63,18 @@ const panelText = async page => (await page.locator(PANEL + ' > div:has(> button
   // Fiche
   await tabs.first().click(); await page.waitForTimeout(400);
   await page.locator(TILE).nth(1).click(); await page.waitForTimeout(900);
-  ok('un appui ouvre la fiche : ' + (await page.locator('#app h1, #app h2').first().innerText()).slice(0, 40), /Pikachu ex/.test(await page.locator('#app').innerText()) && !(await page.locator(SEC).count()));
+  const FI = 'section.pkm-fi[role="dialog"]';
+  ok('un appui ouvre la fiche en panneau : ' + await page.locator(FI).getAttribute('aria-label'), (await page.locator(FI).getAttribute('aria-label')) === 'Pikachu ex' && (await page.locator(SEC).count()) === 1);
+  const fiText = (await page.locator(FI).innerText()).replace(/[\u202f\u00a0]/g, ' ');
+  ok('fiche : cote, ajout, vendu, retirer, prix du marché, Cardmarket, eBay, historique, investi', /99,00 €/.test(fiText) && /Ajouter un exemplaire/.test(fiText) && /Marquer comme vendu/.test(fiText)
+    && /Retirer de ma collection/.test(fiText) && /Prix du marché/.test(fiText) && /Tendance/.test(fiText) && /Acheter sur Cardmarket/.test(fiText) && /eBay/.test(fiText) && /Historique du prix/.test(fiText) && /Investi/.test(fiText));
+  ok('fiche : pas de TCGplayer', !/TCGplayer/.test(fiText));
+  await page.locator(FI + ' button[aria-expanded]', { hasText: 'Prix par état' }).click(); await page.waitForTimeout(300);
+  ok('prix par état : Near Mint, Excellent, Joué', /Near Mint[\s\S]*100 %[\s\S]*Excellent[\s\S]*85 %[\s\S]*Joué[\s\S]*55 %/.test(await page.locator(FI).innerText()));
+  await page.locator(FI).evaluate(e => e.scrollTo(0, 0)); await page.waitForTimeout(200);
+  await page.screenshot({ path: shot('binder-fiche.png') });
+  await page.locator(FI + ' button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
+  ok('« Fermer » ramène au classeur', (await page.locator(FI).count()) === 0 && (await page.locator(SEC).count()) === 1);
   ok('pas de défilement horizontal', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await ctx.close();
 }
@@ -86,15 +99,17 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   const [ctx, page] = await mk();
   await page.addInitScript(v => { if (!sessionStorage.getItem('seeded')) { localStorage.setItem('pkm-collection-v1', v); sessionStorage.setItem('seeded', '1'); } }, saved(rows));
   await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2500);
-  ok('11 cartes : ' + await panelText(page), /^12 cartes · .+ € · 1 doublon$/.test(await panelText(page)));
+  ok('11 cartes : ' + await panelText(page), / \| 12 cartes · 1 doublon$/.test(await panelText(page)));
   ok('page 1 : 9 cartes, « Page 1 sur 2 »', (await page.locator(TILE).count()) === 9 && (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 1 sur 2');
   await page.click(SEC + ' button[aria-label="Page suivante"]'); await page.waitForTimeout(400);
   ok('page 2 : 2 cartes', (await page.locator(TILE).count()) === 2 && (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 2 sur 2');
+  // Libellés et points d'état des deux pages (l'ordre suit les cotes du jour).
+  const grab = () => page.$$eval(TILE, bs => bs.map(b => [b.getAttribute('aria-label'), getComputedStyle(b.querySelector('span[style*="bottom: 6%"] > span:last-child')).backgroundColor]));
+  const page2 = await grab();
   await page.click(SEC + ' button[aria-label="Page précédente"]'); await page.waitForTimeout(400);
-  const labels = await page.$$eval(TILE, bs => bs.map(b => b.getAttribute('aria-label')));
+  const dots = (await grab()).concat(page2), labels = dots.map(d => d[0]);
   const en = labels.find(l => /, EN, /.test(l)), pl = labels.find(l => /, Joué, /.test(l)), two = labels.find(l => /2 exemplaires/.test(l));
   ok('langue, état et exemplaires repris des ajouts (EN, Joué, ×2)', !!en && !!pl && !!two);
-  const dots = await page.$$eval(TILE, bs => bs.map(b => [b.getAttribute('aria-label'), getComputedStyle(b.querySelector('span[style*="bottom: 6%"] > span:last-child')).backgroundColor]));
   const plDot = dots.find(d => /Joué/.test(d[0]))[1], nmDot = dots.find(d => /Near Mint/.test(d[0]))[1];
   ok('point de l’état : Joué ' + plDot + ' ≠ Near Mint ' + nmDot, plDot !== nmDot);
   await page.locator(SEC + ' [role="tab"]').nth(1).click(); await page.waitForTimeout(400);

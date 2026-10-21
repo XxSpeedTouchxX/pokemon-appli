@@ -37,9 +37,10 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - plus-value latente, source et date ;
    - **compagnon animé** : un des 151 Pokémon de Kanto, ou Latias, Latios, Kyogre, Groudon, Rayquaza ; Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » : « 156 Pokémon disponibles », 3 par ligne, icônes à la taille d'origine de chaque Pokémon (rien autour, centrées, jamais agrandies), panneau opaque, recherche par nom ou numéro. Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites et icônes : `tools/sprites/`.
 3. **Mon classeur** (`homeBinder` dans `home.js`) : logo du classeur (`img/brand/classeur.svg`) et deux onglets.
-   - **Mes cartes**, d'après l'aperçu de PokéItem montré par le porteur : pages de 9 pochettes (3 × 3), de la carte la plus chère à la moins chère. Sur chaque visuel officiel, une pastille : drapeau de la langue, cote (à l'euro près dès 100 €), point de couleur de l'état (vert Near Mint, orange Excellent, rouge Joué). Note de gradation et exemplaires (×2) en haut de la carte ;
-   - **Mes produits scellés** : vitrine 2 par ligne, pages de 4, photo officielle (ou plaque dessinée), même pastille (vert Scellé d'origine, orange Boîte abîmée), nom et type ;
-   - en tête de l'onglet : nombre de cartes ou de produits, valeur totale, cartes gradées et doublons ; montants masqués avec l'œil de la valeur ; un appui ouvre la fiche ; « Page suivante » et « Page précédente » ;
+   - **Mes cartes** : pages de 9 pochettes (3 × 3), de la carte la plus chère à la moins chère. Sur chaque visuel officiel, une pastille : drapeau de la langue, cote (à l'euro près dès 100 €), point de couleur de l'état (vert Near Mint, orange Excellent, rouge Joué). Note de gradation et exemplaires (×2) en haut de la carte ;
+   - **Mes produits scellés** (2026-10-21, choix du porteur) : vitrine en verre éclairée (`.pkm-vit`, `games.css`), 3 produits par tablette, pages de 9, photo officielle (ou plaque dessinée), même pastille que les cartes (vert Scellé d'origine, orange Boîte abîmée) ;
+   - en tête de chaque onglet (2026-10-21) : « Valeur de mes cartes » ou « Valeur de mes produits scellés », écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir), puis le nombre de cartes ou de produits, les cartes gradées et les doublons ; montants masqués avec l'œil de la valeur ; « Page suivante » et « Page précédente » ;
+   - un appui ouvre la **fiche en panneau** (`fiche.js`, ci-dessous) ;
    - langue et état : ceux des exemplaires ajoutés ; un ajout sans langue prend celle de l'article.
 4. **Boutiques autour de toi :**
    - radar en SVG (anneaux 1, 3, 5 km) ;
@@ -227,11 +228,17 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 - **Collections rattachées** (`SET_PARENT`, catalog.js) : la Collection Classique du 30ᵉ Anniversaire s'affiche dans le 30ᵉ Anniversaire (une seule tuile, cartes additionnées, numéros « CC 001 » dans la grille), de même pour celle de Célébrations.
 - **Cartes manquantes :** les cartes absentes de la version française de TCGdex sont ajoutées depuis la version anglaise, puis pokemontcg.io (voir `tools/tcgdex/README.md`) ; elles portent « EN » et la fiche le dit. Le 30ᵉ Anniversaire passe ainsi à 191 cartes (158 + Mew rouge, vert, bleu + 30 de la Collection Classique), au prochain passage du workflow quotidien.
 
-## Mon classeur : trier, filtrer, glisser
+## Mon classeur : glisser, fiche en panneau
 
-- **Trier** (`tools/web/home.js`, 2026-10-09, D1) : Cote (par défaut), Récents (dernier ajout), Nom.
-- **Filtrer** (bouton « Filtrer », replié) : langue, état et rareté (ultra rares et gradées) des exemplaires restants ; extension s'il y en a plusieurs. « Filtres (2) » rappelle les filtres actifs ; « 3 sur 6 · filtre actif » sous la barre ; « Tout afficher » remet tout.
+- **Tri** : de la plus chère à la moins chère. Les bulles « Trier », « Cote », « Récents », « Nom » et « Filtrer » (D1, 2026-10-09) sont retirées le 2026-10-21 à la demande du porteur.
 - **Glisser** la grille vers la gauche ou la droite pour changer de page (les flèches restent).
+- **Fiche en panneau** (`tools/web/fiche.js`, fragment `fiche-sheet`, 2026-10-21, d'après la vidéo 1 du porteur) : panneau qui monte du bas, ouvert depuis le classeur (cartes et scellé) et depuis « Détails » du catalogue scellé :
+  - nom, numéro, logo de l'extension, grand visuel (agrandissable), rareté, cote Cardmarket ;
+  - « Ajouter un exemplaire » (ou « Ajouter à mes produits scellés »), « Marquer comme vendu », « Retirer de ma collection » (ouvre la correction de l'ajout, avec « Supprimer ») ;
+  - **Prix du marché** Cardmarket : tendance, moyennes 7 et 30 jours, veille, plus bas en vente (prix demandé), date ; « Acheter sur Cardmarket », « Ventes réussies sur eBay » (liens, sans chiffre) ;
+  - **Historique du prix** : archive quotidienne (scellé, démo) sur 7 jours, 1 mois ou tout ; cartes : moyennes Cardmarket 30 jours, 7 jours, veille, tendance ;
+  - **Investi** et plus-value latente ; **Prix par état** (coefficients de `value.js`) ; **Mes exemplaires** (un appui corrige l'ajout) ; « Voir la fiche complète ».
+  - Pas de prix des cartes gradées, de population PSA ni de dernière vente eBay (vidéo du porteur) : aucune source ouverte.
 
 ## Importer un tableur
 
@@ -316,7 +323,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
   - **Marché :**
     - la recherche trouve aussi le scellé ;
     - « Sorties » liste les prochains produits (Règne Delta…) ;
-    - l'entrée **« Produits scellés »** ouvre la liste en grandes cartes, filtrable par type (ETB, display, UPC, lots de boosters, boîtes, coffrets, decks).
+    - l'entrée **« Produits scellés »** (aussi « Ajouter des produits scellés » du classeur) ouvre le catalogue refait le 2026-10-21 (vidéo 2 du porteur) : « Par type » (Tout, ETB, Display, UPC, Boosters, Pokébox = coffrets, Mini tin = boîtes, Bundle = lots de boosters ; les decks ne sont que dans « Tout ») ou « Par série » (séries et extensions avec logo et nombre de produits ; une extension ouvre ses produits) ; recherche ; grille de 3 : photo, nom, prix Cardmarket, « + Ajouter » (formulaire d'ajout) et « Détails » (fiche en panneau avec prix du marché et historique).
   - **Toutes les cartes :** le scellé apparaît en tête.
   - **Fiche produit :** photo officielle agrandissable, cote du jour datée, prix demandé, ajout à la collection (enregistré sur l'appareil).
   - **Produits de la démo** (ETB 30e Anniversaire, Display Nuit Noire…) : ils prennent la photo officielle et le prix Cardmarket du produit réel.
