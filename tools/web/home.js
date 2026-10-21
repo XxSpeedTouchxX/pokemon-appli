@@ -102,9 +102,9 @@
       cards: tab === 'sealed' ? [] : shown, sealed: tab === 'sealed' ? shown : [],
       empty: !list.length,
       emptyText: tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant : ajoute tes ETB, coffrets et boosters.' : 'Aucune carte dans ton classeur pour l’instant : ajoute tes cartes pour connaître leur valeur.',
-      // Classeur vide : un seul bouton (2026-10-21, demande du porteur) : « Ajouter des cartes » ouvre l'onglet
-      // « Toutes les séries », « Ajouter des produits scellés » le catalogue du scellé.
-      canAdd: !list.length,
+      // Bouton jaune en bas de chaque onglet, vide ou non (2026-10-21, demande du porteur) : « Ajouter des cartes »
+      // ouvre l'onglet « Toutes les séries », « Ajouter des produits scellés » le catalogue du scellé.
+      canAdd: true,
       addLabel: tab === 'sealed' ? 'Ajouter des produits scellés' : 'Ajouter des cartes',
       add: () => (tab === 'sealed' ? this.openSealedList() : this.tab('collection')),
       hasPages: pages > 1, pageLabel: 'Page ' + (page + 1) + ' sur ' + pages,

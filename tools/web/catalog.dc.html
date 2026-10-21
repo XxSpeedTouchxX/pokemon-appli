@@ -399,16 +399,16 @@
 <sc-if value="{{ home.hk.empty }}" hint-placeholder-val="{{ false }}">
 <p style="margin: 0; padding: 12px 4px; text-align: center; font-size: 13.5px; line-height: 1.5; color: #9AA8C3">{{ home.hk.emptyText }}</p>
 </sc-if>
-<sc-if value="{{ home.hk.canAdd }}" hint-placeholder-val="{{ false }}">
-<div class="pkm-hb-add" style="display: flex; flex-direction: column; gap: 8px; padding: 0 4px 6px">
-<button type="button" onClick="{{ home.hk.add }}" style="height: 52px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 15.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round"><path d="M12 5v14 M5 12h14"></path></svg>{{ home.hk.addLabel }}</button>
-</div>
-</sc-if>
 <sc-if value="{{ home.hk.hasPages }}" hint-placeholder-val="{{ true }}">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <button type="button" onClick="{{ home.hk.prev }}" aria-label="Page précédente" aria-disabled="{{ home.hk.prevOff }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: transparent; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: {{ home.hk.prevDim }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M15 6l-6 6 6 6"></path></svg></button>
 <span aria-live="polite" style="font-size: 13px; font-weight: 600; color: #C9D3EA">{{ home.hk.pageLabel }}</span>
 <button type="button" onClick="{{ home.hk.next }}" aria-label="Page suivante" aria-disabled="{{ home.hk.nextOff }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: transparent; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: {{ home.hk.nextDim }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></button>
+</div>
+</sc-if>
+<sc-if value="{{ home.hk.canAdd }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-hb-add" style="display: flex; flex-direction: column; gap: 8px; padding: 2px 4px 6px">
+<button type="button" onClick="{{ home.hk.add }}" style="height: 52px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 15.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round"><path d="M12 5v14 M5 12h14"></path></svg>{{ home.hk.addLabel }}</button>
 </div>
 </sc-if>
 </div>

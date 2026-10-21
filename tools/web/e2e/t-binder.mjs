@@ -44,6 +44,9 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('6 cartes : une seule page, sans flèches', (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0);
   await page.locator(SEC).evaluate(e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(800);
   await page.screenshot({ path: shot('binder-cartes.png') });
+  const addBtn = page.locator(PANEL + ' .pkm-hb-add button');
+  ok('bouton jaune « Ajouter des cartes » en bas de « Mes cartes »', (await addBtn.innerText()).trim() === 'Ajouter des cartes'
+    && await page.locator(PANEL).evaluate(p => p.lastElementChild && p.lastElementChild.classList.contains('pkm-hb-add')));
   // Mes produits scellés
   await tabs.nth(1).click(); await page.waitForTimeout(600);
   ok('onglet scellé choisi', (await tabs.nth(1).getAttribute('aria-selected')) === 'true' && (await page.locator(PANEL).getAttribute('aria-label')) === 'Mes produits scellés');
@@ -53,6 +56,13 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('vitrine en verre, 3 par tablette : ' + await page.locator(TILE).count() + ' produits', cols === 3 && (await page.locator(TILE).count()) === 6 && (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0);
   const vpill = await page.locator(TILE).first().evaluate(b => { const p = b.querySelector('.pkm-vit-pill'), s = p.querySelectorAll(':scope > span'); return s.length === 3 && /linear-gradient/.test(getComputedStyle(s[0]).backgroundImage) && /€/.test(s[1].innerText); });
   ok('pastille du scellé identique aux cartes (drapeau, cote, état)', vpill);
+  ok('bouton jaune « Ajouter des produits scellés » en bas de l’onglet', (await page.locator(PANEL + ' .pkm-hb-add button').innerText()).trim() === 'Ajouter des produits scellés'
+    && await page.locator(PANEL).evaluate(p => p.lastElementChild && p.lastElementChild.classList.contains('pkm-hb-add')));
+  await page.locator(PANEL + ' .pkm-hb-add button').click(); await page.waitForTimeout(800);
+  ok('« Ajouter des produits scellés » ouvre le catalogue du scellé', (await page.locator('[role="tablist"][aria-label="Parcourir le scellé"]').count()) === 1);
+  await page.goBack(); await page.waitForTimeout(800);
+  if (!(await page.locator(SEC).count())) { await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2000); }
+  if ((await tabs.nth(1).getAttribute('aria-selected')) !== 'true') { await tabs.nth(1).click(); await page.waitForTimeout(400); }
   ok('quantité affichée (×2, ×3)', (await page.locator(TILE + ' span', { hasText: /^×\d$/ }).count()) >= 2);
   await page.locator(SEC).evaluate(e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(800);
   await page.screenshot({ path: shot('binder-scelle.png') });

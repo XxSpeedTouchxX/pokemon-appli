@@ -41,7 +41,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - **Mes produits scellés** (2026-10-21, choix du porteur) : vitrine en verre éclairée (`.pkm-vit`, `games.css`), 3 produits par tablette, pages de 9, photo officielle (ou plaque dessinée), même pastille que les cartes (vert Scellé d'origine, orange Boîte abîmée) ;
    - en tête de chaque onglet (2026-10-21) : « Valeur de mes cartes » ou « Valeur de mes produits scellés », écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir), puis le nombre de cartes ou de produits, les cartes gradées et les doublons ; montants masqués avec l'œil de la valeur ; « Page suivante » et « Page précédente » ;
    - un appui ouvre la **fiche en panneau** (`fiche.js`, ci-dessous) ;
-   - classeur vide (2026-10-21) : un seul bouton jaune, « Ajouter des cartes » (ouvre « Toutes les séries ») ou « Ajouter des produits scellés » (catalogue du scellé) ;
+   - en bas de chaque onglet, vide ou non (2026-10-21) : un bouton jaune, « Ajouter des cartes » (ouvre « Toutes les séries ») ou « Ajouter des produits scellés » (catalogue du scellé) ;
    - langue et état : ceux des exemplaires ajoutés ; un ajout sans langue prend celle de l'article.
 4. **Boutiques autour de toi :**
    - radar en SVG (anneaux 1, 3, 5 km) ;

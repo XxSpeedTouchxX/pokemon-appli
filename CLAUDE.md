@@ -141,7 +141,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - « Mes cartes » en 3 × 3 et « Mes produits scellés » en vitrine en verre (3 par tablette), valeur totale en haut de chaque onglet écrite comme « Valeur de toute ma collection » ; bulles de tri et de filtre retirées ;
   - fiche en panneau au toucher (`tools/web/fiche.js`) : cote, ajouter, vendre, retirer, prix du marché Cardmarket, historique, investi, prix par état, exemplaires ; sans prix gradés, population PSA ni dernière vente eBay (pas de source ouverte) ;
   - « Ajouter des produits scellés » : Par type (Tout, ETB, Display, UPC, Boosters, Pokébox, Mini tin, Bundle) ou Par série, grille de 3 avec « + Ajouter » et « Détails ».
-  - ajout d'un produit scellé : seul l'article, sans « Vente », état ni prix payé (quantité et valeur Cardmarket) ; classeur vide : un seul bouton jaune ; tuiles « Cartes » et « Produits scellés » retirées sous le classeur.
+  - ajout d'un produit scellé : seul l'article, sans « Vente », état ni prix payé (quantité et valeur Cardmarket) ; bouton jaune « Ajouter des cartes » (vers Toutes les séries) ou « Ajouter des produits scellés » (vers le catalogue du scellé) en bas de chaque onglet ; tuiles « Cartes » et « Produits scellés » retirées sous le classeur.
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;
