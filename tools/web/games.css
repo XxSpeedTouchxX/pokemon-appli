@@ -323,3 +323,17 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .pkm-turn-next-0, .pkm-turn-next-1, .pkm-turn-prev-0, .pkm-turn-prev-1 { animation: none; } }
 .pkm-hk-pocket { display: block; width: 100%; aspect-ratio: 600 / 825; box-sizing: border-box; border-radius: 5% / 3.6%; border: 1.5px dashed rgba(168, 182, 255, 0.22); background: rgba(255, 255, 255, 0.03); }
 .pkm-hk-all { min-height: 28px; padding: 0; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 12.5px; font-weight: 700; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* « Tout afficher » du classeur (2026-10-21, vidéo du porteur) : écran plein, classé par valeur, grille de 3. */
+.pkm-hf { position: absolute; inset: 0; z-index: 17; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; padding: 18px 14px calc(28px + env(safe-area-inset-bottom)); background: #0B1120; color: #F3F6FC; display: flex; flex-direction: column; gap: 12px; }
+.pkm-hf-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.pkm-hf-title { margin: 0; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.pkm-hf-sub { margin: 0; font-size: 12.5px; color: #9AA8C3; }
+.pkm-hf-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.pkm-hf-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.pkm-hf-tile { position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer; }
+.pkm-hf-card { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pkm-hf-photo { position: absolute; left: 6%; top: 8%; width: 88%; height: 70%; object-fit: contain; }
+.pkm-hf-grade { position: absolute; top: 5px; right: 5px; padding: 1px 6px; border-radius: 6px; background: #FFFFFF; color: #0B1120; font-size: 10.5px; font-weight: 800; }
+.pkm-hf-qty { position: absolute; top: 5px; left: 5px; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: #FFFFFF; font-size: 11px; font-weight: 700; }
+.pkm-hf-pill { position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); max-width: 92%; box-sizing: border-box; display: flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.86); color: #FFFFFF; font-size: 11px; font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
+.pkm-hf-more { align-self: center; height: 44px; padding: 0 22px; border-radius: 999px; border: 1px solid #2A3A5C; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }

@@ -1812,3 +1812,33 @@ PKCOUNTER
 </section>
 </div>
 </sc-if>
+
+<!-- fragment: binder-all -->
+<sc-if value="{{ hf.open }}" hint-placeholder-val="{{ false }}">
+<section aria-label="{{ hf.title }}" role="dialog" aria-modal="true" class="pkm-hf pkm-dark pkm-rise">
+<div class="pkm-hf-head">
+<div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<h2 class="pkm-hf-title">{{ hf.title }}</h2>
+<span class="pkm-hf-sub">{{ hf.sub }}</span>
+</div>
+<button type="button" onClick="{{ hf.close }}" aria-label="Fermer" class="pkm-fi-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18"></path></svg></button>
+</div>
+<sc-if value="{{ hf.hasChips }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="Filtrer mes cartes" class="pkm-hf-chips"><sc-for list="{{ hf.chips }}" as="hfc" hint-placeholder-count="3"><button type="button" onClick="{{ hfc.pick }}" aria-pressed="{{ hfc.on }}" style="flex: none; height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid {{ hfc.bc }}; background: {{ hfc.bg }}; color: {{ hfc.fg }}; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ hfc.label }}</button></sc-for></div>
+</sc-if>
+<sc-if value="{{ hf.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-hf-sub" style="text-align: center; padding: 24px 0">Aucun article ici.</p></sc-if>
+<div class="pkm-hf-grid">
+<sc-for list="{{ hf.items }}" as="hfi" hint-placeholder-count="9">
+<button type="button" onClick="{{ hfi.open }}" aria-label="{{ hfi.label }}" class="pkm-hf-tile" style="background: {{ hfi.bg }}">
+<sc-if value="{{ hf.isCards }}" hint-placeholder-val="{{ true }}"><img src="{{ hfi.img }}" srcset="{{ hfi.srcset }}" sizes="30vw" alt="" loading="lazy" decoding="async" class="pkm-hf-card"></sc-if>
+<sc-if value="{{ hfi.hasPhoto }}" hint-placeholder-val="{{ false }}"><img src="{{ hfi.photo }}" alt="" loading="lazy" class="pkm-hf-photo"></sc-if>
+<sc-if value="{{ hfi.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ hfi.logo }}" alt="" loading="lazy" class="pkm-hf-photo"></sc-if>
+<sc-if value="{{ hfi.graded }}" hint-placeholder-val="{{ false }}"><span class="pkm-hf-grade">{{ hfi.grade }}</span></sc-if>
+<sc-if value="{{ hfi.many }}" hint-placeholder-val="{{ false }}"><span class="pkm-hf-qty">{{ hfi.qty }}</span></sc-if>
+<span class="pkm-hf-pill"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hfi.flag }}"></span><span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums">{{ hfi.cote }}</span><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hfi.condColor }}"></span></span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{ hf.more }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ hf.loadMore }}" class="pkm-hf-more">{{ hf.moreLabel }}</button></sc-if>
+</section>
+</sc-if>

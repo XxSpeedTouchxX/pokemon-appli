@@ -64,9 +64,7 @@
     const order = (a, b) => unit(b) - unit(a) || byName(a, b);
     const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
     const mine = sealed => all(sealed).sort(order);
-    // « Tout afficher » (2026-10-21) : tout l'onglet d'un coup, à faire défiler, sans pages.
-    const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, allOn = !!(s.hbAll && s.hbAll[tab]);
-    const per = allOn ? Math.max(1, list.length) : HOME_BINDER[tab];
+    const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, per = HOME_BINDER[tab];
     const pages = Math.max(1, Math.ceil(list.length / per)), page = Math.min(s[key], pages - 1);
     const sum = l => l.reduce((t, p) => t + unit(p) * qty(p), 0), units = l => l.reduce((t, p) => t + qty(p), 0);
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
@@ -101,10 +99,10 @@
           : [plural(units(cards), 'carte', 'cartes')].concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · ')
       },
       shelf: shelf, gridCls: 'pkm-hk-grid' + (tab !== 'sealed' && s.hbTurn ? ' pkm-turn-' + s.hbTurn : ''),
-      all: {
-        show: list.length > HOME_BINDER[tab] || allOn, on: allOn, label: allOn ? 'Par pages' : 'Tout afficher',
-        toggle: () => this.setState({ hbAll: Object.assign({}, s.hbAll || {}, { [tab]: !allOn }), [key]: 0, hbTurn: null })
-      },
+      // « Tout afficher » (2026-10-21, vidéo du porteur) : écran plein « Toutes mes cartes » ou « Tous mes produits
+      // scellés », classés par valeur, à faire défiler ; filtres Toutes, Loose, Gradées ; « Charger plus » par 30.
+      all: { show: true, on: false, label: 'Tout afficher', toggle: () => this.setState({ hbFull: tab, hbFullF: 'all', hbFullN: HOME_FULL }) },
+      full: s.hbFull ? this.homeFull(s, s.hbFull === 'sealed' ? sealed : cards, s.hbFull === 'sealed', tile, l => x.mask(this.eur(sum(l))), units, plural) : HOME_NO_FULL,
       tabs: [['cards', 'Mes cartes'], ['sealed', 'Mes produits scellés']].map(([k, label]) =>
         Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k, hbTurn: null }) }, this.chip(tab === k))),
       tabLabel: tab === 'sealed' ? 'Mes produits scellés' : 'Mes cartes',
@@ -135,6 +133,22 @@
     };
   };
   let homeSwipe = null;
+  const HOME_FULL = 30, HOME_NO_FULL = { open: false };
+  proto.homeFull = function (s, list, sealed, tile, money, units, plural) {
+    const F = sealed ? 'all' : (['loose', 'graded'].indexOf(s.hbFullF) >= 0 ? s.hbFullF : 'all');
+    const kept = list.filter(p => F === 'all' || (F === 'graded') === !!p.grade);
+    const n = Math.max(HOME_FULL, s.hbFullN || HOME_FULL), shown = kept.slice(0, n), left = kept.length - shown.length;
+    const count = l => (sealed ? plural(units(l), 'produit', 'produits') : plural(units(l), 'carte', 'cartes'));
+    const chip = (k, label, l) => Object.assign({ label: label + ' (' + l.length + ')', on: F === k, pick: () => this.setState({ hbFullF: k, hbFullN: HOME_FULL }) }, this.chip(F === k));
+    return {
+      open: true, isCards: !sealed, isSealed: sealed,
+      title: sealed ? 'Tous mes produits scellés' : 'Toutes mes cartes',
+      sub: 'Classés par valeur · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
+      chips: sealed ? [] : [chip('all', 'Toutes', list), chip('loose', 'Loose', list.filter(p => !p.grade)), chip('graded', 'Gradées', list.filter(p => p.grade))],
+      hasChips: !sealed, items: shown.map(tile), empty: !kept.length,
+      more: left > 0, moreLabel: 'Charger plus (' + Math.min(left, HOME_FULL) + ')', loadMore: () => this.setState({ hbFullN: n + HOME_FULL })
+    };
+  };
   // Tendance de la collection : 4 points (il y a 30 jours, 7 jours, hier, aujourd'hui), calculés par HomeCore.points :
   // moyennes Cardmarket pour les cartes, cote archivée chaque jour pour le scellé, courbe simulée pour la démo.
   const HOME_LABELS = ['il y a 30 jours', 'il y a 7 jours', 'hier', 'aujourd’hui'];
@@ -254,5 +268,7 @@
     const r = homeBaseRender.call(this), s = this.st();
     homeApplyTheme(s.buddy);
     r.hb = r.ui.isHome || s.buddyPick ? this.homeBuddy(s) : HOME_NO_BUDDY;
+    // Écran « Tout afficher » du classeur (accueil seulement).
+    r.hf = r.ui.isHome && r.home && r.home.hk && r.home.hk.full && r.home.hk.full.open ? r.home.hk.full : HOME_NO_FULL;
     return r;
   };

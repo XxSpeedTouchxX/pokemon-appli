@@ -42,7 +42,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - en tête de chaque onglet (2026-10-21) : « Valeur de mes cartes » ou « Valeur de mes produits scellés », écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir), puis le nombre de cartes ou de produits, les cartes gradées et les doublons ; montants masqués avec l'œil de la valeur ; « Page suivante » et « Page précédente » ;
    - un appui ouvre la **fiche en panneau** (`fiche.js`, ci-dessous) ;
    - « Mes cartes » sur plusieurs pages (2026-10-21) : la page se tourne comme dans un classeur (`pkm-turn-*`, `games.css`), l'écran ne bouge pas, pochettes vides jusqu'à 9 sur la dernière page ; le scellé (vitrine) change de page sans animation ;
-   - « Tout afficher » sous le « i » de l'en-tête (dès qu'il y a plus de 9 cartes ou produits) : tout l'onglet d'un coup, sans pages ; « Par pages » revient aux pages ;
+   - « Tout afficher » sous le « i » de l'en-tête des deux onglets (toujours visible, 2026-10-21, vidéo du porteur) : écran plein « Toutes mes cartes » ou « Tous mes produits scellés » (fragment `binder-all`, `homeFull` dans `home.js`), classés par valeur, nombre et total, filtres Toutes / Loose / Gradées pour les cartes, grille de 3, « Charger plus » par 30 ; un appui ouvre la fiche par-dessus ;
    - en bas de chaque onglet, vide ou non (2026-10-21) : un bouton jaune, « Ajouter des cartes » (ouvre « Toutes les séries ») ou « Ajouter des produits scellés » (catalogue du scellé) ;
    - langue et état : ceux des exemplaires ajoutés ; un ajout sans langue prend celle de l'article.
 4. **Boutiques autour de toi :**

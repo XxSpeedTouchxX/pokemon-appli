@@ -286,6 +286,8 @@ patch('<section aria-label="Saisie" style="flex: none; max-height: 796px; overfl
   '<section aria-label="Saisie" style="flex: 0 1 auto; min-height: 0; max-height: calc(100% - 44px); overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px calc(26px + env(safe-area-inset-bottom));');
 patchRe(/<div role="group" aria-label="Type de saisie"[\s\S]*?<\/div>\n/, m => '<sc-if value="{{ sh.showKind }}" hint-placeholder-val="{{ true }}">\n' + m + '</sc-if>\n<sc-if value="{{ sh.hideKind }}" hint-placeholder-val="{{ false }}"><div style="flex: 1"></div></sc-if>\n');
 patchRe(/<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #9AA8C3">\{\{ sh\.priceLabel \}\}[\s\S]*?<\/label>/, m => '<sc-if value="{{ sh.showPrice }}" hint-placeholder-val="{{ true }}">' + m + '</sc-if>');
+// « Tout afficher » du classeur (home.js, 2026-10-21) : écran plein sous la fiche.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['binder-all'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Fiche d'une carte ou d'un produit (fiche.js, 2026-10-21) : panneau qui monte du bas, sous les formulaires d'ajout.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['fiche-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Cote selon l'état et la langue, vente d'un exemplaire précis (value.js, margin-patch.mjs).
@@ -517,7 +519,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 49) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 49'); // dont 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 51) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 51'); // dont 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.

@@ -56,6 +56,7 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('vitrine en verre, 3 par tablette : ' + await page.locator(TILE).count() + ' produits', cols === 3 && (await page.locator(TILE).count()) === 6 && (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0);
   const vpill = await page.locator(TILE).first().evaluate(b => { const p = b.querySelector('.pkm-vit-pill'), s = p.querySelectorAll(':scope > span'); return s.length === 3 && /linear-gradient/.test(getComputedStyle(s[0]).backgroundImage) && /€/.test(s[1].innerText); });
   ok('pastille du scellé identique aux cartes (drapeau, cote, état)', vpill);
+  ok('« Tout afficher » aussi sur le scellé', (await page.locator(PANEL + ' .pkm-hk-all').innerText()) === 'Tout afficher');
   ok('bouton jaune « Ajouter des produits scellés » en bas de l’onglet', (await page.locator(PANEL + ' .pkm-hb-add button').innerText()).trim() === 'Ajouter des produits scellés'
     && await page.locator(PANEL).evaluate(p => p.lastElementChild && p.lastElementChild.classList.contains('pkm-hb-add')));
   await page.locator(PANEL + ' .pkm-hb-add button').click(); await page.waitForTimeout(800);
@@ -130,11 +131,20 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   ok('langue, état et exemplaires repris des ajouts (EN, Joué, ×2)', !!en && !!pl && !!two);
   const plDot = dots.find(d => /Joué/.test(d[0]))[1], nmDot = dots.find(d => /Near Mint/.test(d[0]))[1];
   ok('point de l’état : Joué ' + plDot + ' ≠ Near Mint ' + nmDot, plDot !== nmDot);
-  // « Tout afficher » : toutes les cartes d'un coup, sans pages ; « Par pages » revient en arrière.
-  await page.locator(SEC + ' .pkm-hk-all').click(); await page.waitForTimeout(400);
-  ok('« Tout afficher » : 11 cartes, sans pages', (await page.locator(TILE).count()) === 11 && (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0 && (await page.locator(SEC + ' .pkm-hk-all').innerText()) === 'Par pages');
-  await page.locator(SEC + ' .pkm-hk-all').click(); await page.waitForTimeout(400);
-  ok('« Par pages » : retour à la page 1', (await page.locator(TILE).count()) === 9 && (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 1 sur 2');
+  // « Tout afficher » (vidéo du porteur) : écran plein « Toutes mes cartes », classées par valeur, filtres, fiche au toucher.
+  await page.locator(SEC + ' .pkm-hk-all').click(); await page.waitForTimeout(500);
+  const HF = 'section.pkm-hf[role="dialog"]';
+  const hfSub = (await page.locator(HF + ' .pkm-hf-sub').first().innerText()).replace(/[\u202f\u00a0]/g, ' ');
+  ok('« Tout afficher » : « Toutes mes cartes », 11 cartes classées par valeur (' + hfSub + ')', (await page.locator(HF + ' h2').innerText()) === 'Toutes mes cartes'
+    && (await page.locator(HF + ' .pkm-hf-tile').count()) === 11 && /^Classés par valeur · 12 cartes · .+ €$/.test(hfSub));
+  const hv = (await page.locator(HF + ' .pkm-hf-pill').allInnerTexts()).map(t => Number(t.replace(/[^\d,]/g, '').replace(',', '.')));
+  ok('du plus cher au moins cher', hv.every((v, i) => !i || hv[i - 1] >= v));
+  ok('filtres : ' + (await page.locator(HF + ' [aria-label="Filtrer mes cartes"] button').allInnerTexts()).join(', '), /^Toutes \(11\)\|Loose \(11\)\|Gradées \(0\)$/.test((await page.locator(HF + ' [aria-label="Filtrer mes cartes"] button').allInnerTexts()).join('|')));
+  await page.locator(HF + ' .pkm-hf-tile').first().click(); await page.waitForTimeout(500);
+  ok('une carte ouvre sa fiche par-dessus', (await page.locator('section.pkm-fi[role="dialog"]').count()) === 1);
+  await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
+  await page.locator(HF + ' button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
+  ok('« Fermer » ramène au classeur', (await page.locator(HF).count()) === 0 && (await page.locator(TILE).count()) === 9);
   await page.locator(SEC + ' [role="tab"]').nth(1).click(); await page.waitForTimeout(400);
   ok('aucun produit scellé : message', /Aucun produit scellé dans ton classeur/.test(await page.locator(PANEL).innerText()) && (await page.locator(TILE).count()) === 0);
   await page.screenshot({ path: shot('binder-vide-scelle.png') });
