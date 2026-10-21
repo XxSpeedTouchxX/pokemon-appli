@@ -64,7 +64,9 @@
     const order = (a, b) => unit(b) - unit(a) || byName(a, b);
     const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
     const mine = sealed => all(sealed).sort(order);
-    const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, per = HOME_BINDER[tab];
+    // « Tout afficher » (2026-10-21) : tout l'onglet d'un coup, à faire défiler, sans pages.
+    const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, allOn = !!(s.hbAll && s.hbAll[tab]);
+    const per = allOn ? Math.max(1, list.length) : HOME_BINDER[tab];
     const pages = Math.max(1, Math.ceil(list.length / per)), page = Math.min(s[key], pages - 1);
     const sum = l => l.reduce((t, p) => t + unit(p) * qty(p), 0), units = l => l.reduce((t, p) => t + qty(p), 0);
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
@@ -81,9 +83,13 @@
       });
     };
     const graded = cards.filter(p => p.grade).length, extra = cards.reduce((t, p) => t + Math.max(0, qty(p) - 1), 0);
-    const shown = list.slice(page * per, page * per + per).map(tile);
+    const shown = list.slice(page * per, page * per + per).map(tile).map(t => Object.assign(t, { real: true, pocket: false }));
+    // Cartes sur plusieurs pages : pochettes vides jusqu'à 9, pour que la page garde sa hauteur quand on la tourne.
+    const pockets = tab !== 'sealed' && pages > 1 ? Array.from({ length: per - shown.length }, () => ({ real: false, pocket: true })) : [];
+    // Tourner la page (cartes seulement ; le scellé est une vitrine) : sens et parité pour relancer l'animation.
+    const turn = (to, dir) => this.setState({ [key]: to, hbTurn: tab === 'sealed' ? null : dir + '-' + (to % 2) });
     // Vitrine : la dernière tablette est complétée par des emplacements vides, pour que le verre reste d'un seul tenant.
-    const shelf = tab === 'sealed' ? shown.map(t => Object.assign(t, { real: true }))
+    const shelf = tab === 'sealed' ? shown
       .concat(Array.from({ length: (3 - shown.length % 3) % 3 }, () => ({ real: false }))) : [];
     const headV = sum(list), headBig = x.mask(this.eur(headV));
     return {
@@ -94,12 +100,16 @@
         sub: tab === 'sealed' ? plural(units(sealed), 'produit', 'produits')
           : [plural(units(cards), 'carte', 'cartes')].concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · ')
       },
-      shelf: shelf,
+      shelf: shelf, gridCls: 'pkm-hk-grid' + (tab !== 'sealed' && s.hbTurn ? ' pkm-turn-' + s.hbTurn : ''),
+      all: {
+        show: list.length > HOME_BINDER[tab] || allOn, on: allOn, label: allOn ? 'Par pages' : 'Tout afficher',
+        toggle: () => this.setState({ hbAll: Object.assign({}, s.hbAll || {}, { [tab]: !allOn }), [key]: 0, hbTurn: null })
+      },
       tabs: [['cards', 'Mes cartes'], ['sealed', 'Mes produits scellés']].map(([k, label]) =>
-        Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k }) }, this.chip(tab === k))),
+        Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k, hbTurn: null }) }, this.chip(tab === k))),
       tabLabel: tab === 'sealed' ? 'Mes produits scellés' : 'Mes cartes',
       cardsTab: tab !== 'sealed' && shown.length > 0, sealedTab: tab === 'sealed' && shown.length > 0,
-      cards: tab === 'sealed' ? [] : shown, sealed: tab === 'sealed' ? shown : [],
+      cards: tab === 'sealed' ? [] : shown.concat(pockets), sealed: tab === 'sealed' ? shown : [],
       empty: !list.length,
       emptyText: tab === 'sealed' ? 'Aucun produit scellé dans ton classeur pour l’instant : ajoute tes ETB, coffrets et boosters.' : 'Aucune carte dans ton classeur pour l’instant : ajoute tes cartes pour connaître leur valeur.',
       // Bouton jaune en bas de chaque onglet, vide ou non (2026-10-21, demande du porteur) : « Ajouter des cartes »
@@ -109,8 +119,8 @@
       add: () => (tab === 'sealed' ? this.openSealedList() : this.tab('collection')),
       hasPages: pages > 1, pageLabel: 'Page ' + (page + 1) + ' sur ' + pages,
       prevOff: page === 0, nextOff: page === pages - 1, prevDim: page === 0 ? 0.35 : 1, nextDim: page === pages - 1 ? 0.35 : 1,
-      prev: () => { if (page > 0) this.setState({ [key]: page - 1 }); },
-      next: () => { if (page < pages - 1) this.setState({ [key]: page + 1 }); },
+      prev: () => { if (page > 0) turn(page - 1, 'prev'); },
+      next: () => { if (page < pages - 1) turn(page + 1, 'next'); },
       // Glisser vers la gauche ou la droite : page suivante ou précédente.
       touchStart: e => { const t = e.touches && e.touches[0]; homeSwipe = t ? { x: t.clientX, y: t.clientY } : null; },
       touchEnd: e => {
@@ -119,8 +129,8 @@
         if (!t || !o) return;
         const dx = t.clientX - o.x, dy = t.clientY - o.y;
         if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
-        if (dx < 0 && page < pages - 1) this.setState({ [key]: page + 1 });
-        if (dx > 0 && page > 0) this.setState({ [key]: page - 1 });
+        if (dx < 0 && page < pages - 1) turn(page + 1, 'next');
+        if (dx > 0 && page > 0) turn(page - 1, 'prev');
       }
     };
   };

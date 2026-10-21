@@ -324,10 +324,6 @@
 </svg>
 <div aria-hidden="true" style="position: relative; height: 15px; font-size: 11px; color: #7D8BA8"><span style="position: absolute; left: 0">30 j</span><span style="position: absolute; left: 33.33%; transform: translateX(-50%)">7 j</span><span style="position: absolute; left: 66.67%; transform: translateX(-50%)">hier</span><span style="position: absolute; right: 0">aujourd’hui</span></div>
 <span style="font-size: 11.5px; line-height: 1.35; color: #7D8BA8">{{ home.hv.source }}</span>
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 4px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08)">
-<span style="font-size: 12.5px; color: #9AA8C3">Plus-value latente</span>
-<span style="font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: {{ home.latentColor }}">{{ home.latent }}</span>
-</div>
 <span style="font-size: 11.5px; line-height: 1.35; color: #7D8BA8">{{ home.stamp }}</span>
 <sc-if value="{{ home.hasUnk }}" hint-placeholder-val="{{ false }}">
 <span style="font-size: 12px; color: #F5B14C">{{ home.unkNote }}</span>
@@ -351,7 +347,10 @@
 <div class="pkm-strict-text" style="font-family: 'Sora', sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 32px; font-size: min(38px, calc((100cqw - 56px) / {{ home.hk.head.fit }})); line-height: 1.15; letter-spacing: -0.01em; white-space: nowrap; padding: 0.02em 0.1em 0.08em 0.04em; margin-left: -0.04em; color: var(--pkm-white)">{{ home.hk.head.value }}</div>
 <span style="font-size: 13px; color: #9AA8C3">{{ home.hk.head.sub }}</span>
 </div>
+<div style="flex: none; align-self: stretch; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px">
 <button type="button" onClick="{{ home.hk.info.toggle }}" aria-expanded="{{ home.hk.info.open }}" aria-label="{{ home.hk.info.label }}" style="flex: none; width: 32px; height: 32px; padding: 0; border: 1px solid #2A3A5C; border-radius: 16px; background: transparent; color: #C9D3EA; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; font-style: italic; cursor: pointer">i</button>
+<sc-if value="{{ home.hk.all.show }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ home.hk.all.toggle }}" aria-pressed="{{ home.hk.all.on }}" class="pkm-hk-all">{{ home.hk.all.label }}</button></sc-if>
+</div>
 </div>
 <sc-if value="{{ home.hk.info.open }}" hint-placeholder-val="{{ false }}">
 <div role="note" aria-label="Source et date des cotes" class="pkm-rise" style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 16px; border: 1px solid #24345C; background: rgba(8, 13, 26, 0.5)">
@@ -359,8 +358,11 @@
 </div>
 </sc-if>
 <sc-if value="{{ home.hk.cardsTab }}" hint-placeholder-val="{{ true }}">
-<div onTouchstart="{{ home.hk.touchStart }}" onTouchend="{{ home.hk.touchEnd }}" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<div class="{{ home.hk.gridCls }}" onTouchstart="{{ home.hk.touchStart }}" onTouchend="{{ home.hk.touchEnd }}" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
 <sc-for list="{{ home.hk.cards }}" as="hkc" hint-placeholder-count="9">
+<div style="min-width: 0">
+<sc-if value="{{ hkc.pocket }}" hint-placeholder-val="{{ false }}"><span class="pkm-hk-pocket" aria-hidden="true"></span></sc-if>
+<sc-if value="{{ hkc.real }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ hkc.open }}" aria-label="{{ hkc.label }}" style="position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer">
 <img src="{{ hkc.img }}" srcset="{{ hkc.srcset }}" sizes="(max-width: 520px) 30vw, 118px" alt="" loading="lazy" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
 <sc-if value="{{ hkc.graded }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; right: 5px; padding: 1px 6px; border-radius: 6px; background: var(--pkm-white); color: var(--pkm-ink); font-size: 10.5px; font-weight: 800; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35)">{{ hkc.grade }}</span></sc-if>
@@ -371,6 +373,8 @@
 <span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hkc.condColor }}"></span>
 </span>
 </button>
+</sc-if>
+</div>
 </sc-for>
 </div>
 </sc-if>

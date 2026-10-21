@@ -111,8 +111,16 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2500);
   ok('11 cartes : ' + await panelText(page), / \| 12 cartes · 1 doublon$/.test(await panelText(page)));
   ok('page 1 : 9 cartes, « Page 1 sur 2 »', (await page.locator(TILE).count()) === 9 && (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 1 sur 2');
-  await page.click(SEC + ' button[aria-label="Page suivante"]'); await page.waitForTimeout(400);
-  ok('page 2 : 2 cartes', (await page.locator(TILE).count()) === 2 && (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 2 sur 2');
+  // Tourner la page (2026-10-21) : animation de page, l'écran ne bouge pas, pochettes vides sur la dernière page.
+  const NEXT = SEC + ' button[aria-label="Page suivante"]';
+  await page.locator(NEXT).scrollIntoViewIfNeeded(); await page.waitForTimeout(300);
+  const y0 = (await page.locator(NEXT).boundingBox()).y, top0 = await page.evaluate(() => document.querySelector('main').scrollTop);
+  await page.click(NEXT); await page.waitForTimeout(100);
+  const anim = await page.locator(PANEL + ' .pkm-hk-grid').evaluate(g => getComputedStyle(g).animationName);
+  await page.waitForTimeout(700);
+  const y1 = (await page.locator(NEXT).boundingBox()).y, top1 = await page.evaluate(() => document.querySelector('main').scrollTop);
+  ok('page tournée : animation ' + anim + ', écran immobile (' + y0 + ' → ' + y1 + ')', /pkmTurnNext/.test(anim) && Math.abs(y1 - y0) < 1 && top1 === top0);
+  ok('page 2 : 2 cartes et 7 pochettes vides', (await page.locator(TILE).count()) === 2 && (await page.locator(PANEL + ' .pkm-hk-pocket').count()) === 7 && (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 2 sur 2');
   // Libellés et points d'état des deux pages (l'ordre suit les cotes du jour).
   const grab = () => page.$$eval(TILE, bs => bs.map(b => [b.getAttribute('aria-label'), getComputedStyle(b.querySelector('span[style*="bottom: 6%"] > span:last-child')).backgroundColor]));
   const page2 = await grab();
@@ -122,6 +130,11 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   ok('langue, état et exemplaires repris des ajouts (EN, Joué, ×2)', !!en && !!pl && !!two);
   const plDot = dots.find(d => /Joué/.test(d[0]))[1], nmDot = dots.find(d => /Near Mint/.test(d[0]))[1];
   ok('point de l’état : Joué ' + plDot + ' ≠ Near Mint ' + nmDot, plDot !== nmDot);
+  // « Tout afficher » : toutes les cartes d'un coup, sans pages ; « Par pages » revient en arrière.
+  await page.locator(SEC + ' .pkm-hk-all').click(); await page.waitForTimeout(400);
+  ok('« Tout afficher » : 11 cartes, sans pages', (await page.locator(TILE).count()) === 11 && (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0 && (await page.locator(SEC + ' .pkm-hk-all').innerText()) === 'Par pages');
+  await page.locator(SEC + ' .pkm-hk-all').click(); await page.waitForTimeout(400);
+  ok('« Par pages » : retour à la page 1', (await page.locator(TILE).count()) === 9 && (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 1 sur 2');
   await page.locator(SEC + ' [role="tab"]').nth(1).click(); await page.waitForTimeout(400);
   ok('aucun produit scellé : message', /Aucun produit scellé dans ton classeur/.test(await page.locator(PANEL).innerText()) && (await page.locator(TILE).count()) === 0);
   await page.screenshot({ path: shot('binder-vide-scelle.png') });

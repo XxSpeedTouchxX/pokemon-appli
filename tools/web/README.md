@@ -34,13 +34,15 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - montant dans la police du logo (Luckiest Guy), comme le logo : lettres blanches, contour et ombre noirs ;
    - variation sur 7 jours ;
    - **courbe sur 4 points réels** (il y a 30 jours, 7 jours, hier, aujourd'hui). Cartes : moyennes Cardmarket ramenées à la valeur du jour ; scellé : cote archivée chaque jour (`sealed.json`) ; démo : sa courbe simulée. Une valeur inconnue reste plate, jamais inventée ;
-   - plus-value latente, source et date ;
+   - source et date (la plus-value latente est retirée de l'encadré le 2026-10-21, demande du porteur) ;
    - **compagnon animé** : un des 151 Pokémon de Kanto, ou Latias, Latios, Kyogre, Groudon, Rayquaza ; Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » : « 156 Pokémon disponibles », 3 par ligne, icônes à la taille d'origine de chaque Pokémon (rien autour, centrées, jamais agrandies), panneau opaque, recherche par nom ou numéro. Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites et icônes : `tools/sprites/`.
 3. **Mon classeur** (`homeBinder` dans `home.js`) : logo du classeur (`img/brand/classeur.svg`) et deux onglets.
    - **Mes cartes** : pages de 9 pochettes (3 × 3), de la carte la plus chère à la moins chère. Sur chaque visuel officiel, une pastille : drapeau de la langue, cote (à l'euro près dès 100 €), point de couleur de l'état (vert Near Mint, orange Excellent, rouge Joué). Note de gradation et exemplaires (×2) en haut de la carte ;
    - **Mes produits scellés** (2026-10-21, choix du porteur) : vitrine en verre éclairée (`.pkm-vit`, `games.css`), 3 produits par tablette, pages de 9, photo officielle (ou plaque dessinée), même pastille que les cartes (vert Scellé d'origine, orange Boîte abîmée) ;
    - en tête de chaque onglet (2026-10-21) : « Valeur de mes cartes » ou « Valeur de mes produits scellés », écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir), puis le nombre de cartes ou de produits, les cartes gradées et les doublons ; montants masqués avec l'œil de la valeur ; « Page suivante » et « Page précédente » ;
    - un appui ouvre la **fiche en panneau** (`fiche.js`, ci-dessous) ;
+   - « Mes cartes » sur plusieurs pages (2026-10-21) : la page se tourne comme dans un classeur (`pkm-turn-*`, `games.css`), l'écran ne bouge pas, pochettes vides jusqu'à 9 sur la dernière page ; le scellé (vitrine) change de page sans animation ;
+   - « Tout afficher » sous le « i » de l'en-tête (dès qu'il y a plus de 9 cartes ou produits) : tout l'onglet d'un coup, sans pages ; « Par pages » revient aux pages ;
    - en bas de chaque onglet, vide ou non (2026-10-21) : un bouton jaune, « Ajouter des cartes » (ouvre « Toutes les séries ») ou « Ajouter des produits scellés » (catalogue du scellé) ;
    - langue et état : ceux des exemplaires ajoutés ; un ajout sans langue prend celle de l'article.
 4. **Boutiques autour de toi :**

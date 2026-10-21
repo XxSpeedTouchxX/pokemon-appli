@@ -309,3 +309,17 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fi-fold[aria-expanded="true"] svg { transform: rotate(180deg); }
 .pkm-fi-copy { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; padding: 6px 0; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: #C9D3EA; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
 .pkm-fi-full { flex: none; height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+/* Mon classeur (2026-10-21, demande du porteur) : la page des cartes se tourne comme dans un classeur (la nouvelle
+   page pivote depuis la reliure) ; pochettes vides pour garder la même hauteur de page ; « Tout afficher ». */
+.pkm-hk-grid { transform-origin: left center; }
+.pkm-turn-next-0 { animation: pkmTurnNextA 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: left center; }
+.pkm-turn-next-1 { animation: pkmTurnNextB 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: left center; }
+.pkm-turn-prev-0 { animation: pkmTurnPrevA 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: right center; }
+.pkm-turn-prev-1 { animation: pkmTurnPrevB 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: right center; }
+@keyframes pkmTurnNextA { 0% { transform: perspective(1400px) rotateY(-92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
+@keyframes pkmTurnNextB { 0% { transform: perspective(1400px) rotateY(-92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
+@keyframes pkmTurnPrevA { 0% { transform: perspective(1400px) rotateY(92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
+@keyframes pkmTurnPrevB { 0% { transform: perspective(1400px) rotateY(92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-turn-next-0, .pkm-turn-next-1, .pkm-turn-prev-0, .pkm-turn-prev-1 { animation: none; } }
+.pkm-hk-pocket { display: block; width: 100%; aspect-ratio: 600 / 825; box-sizing: border-box; border-radius: 5% / 3.6%; border: 1.5px dashed rgba(168, 182, 255, 0.22); background: rgba(255, 255, 255, 0.03); }
+.pkm-hk-all { min-height: 28px; padding: 0; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 12.5px; font-weight: 700; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

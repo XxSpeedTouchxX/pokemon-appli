@@ -14,6 +14,7 @@
   - fiche en panneau (`tools/web/fiche.js`) : visuel, cote Cardmarket, ajouter, vendre, retirer, prix du marché Cardmarket (tendance, moyennes 7 et 30 jours, veille, plus bas demandé), acheter sur Cardmarket, ventes réussies eBay (lien), historique du prix (7 j, 1 mois, tout pour le scellé), investi, prix par état, mes exemplaires ;
   - catalogue du scellé : « Par type » et « Par série », recherche, grille de 3 avec « + Ajouter » et « Détails ».
 - **Retouches du même jour (porteur) :** formulaire d'ajout réparé sur téléphone (le bouton « Ajouter à ma collection » sortait de l'écran) ; pour un produit scellé, seul l'article choisi, sans onglet « Vente », état ni prix payé (restent langue, quantité, valeur Cardmarket) ; un seul bouton jaune en bas de chaque onglet, vide ou non (« Ajouter des cartes » ouvre « Toutes les séries », « Ajouter des produits scellés » le catalogue du scellé) ; tuiles « Cartes » et « Produits scellés » retirées sous le classeur.
+- **Retouches suivantes (porteur, 2026-10-21) :** « Plus-value latente » retirée de « Valeur de toute ma collection » ; « Mes cartes » : la page se tourne comme dans un classeur, sans faire bouger l'écran ; « Tout afficher » sous le « i » des deux onglets (tout le classeur ou toute la vitrine, sans pages).
 - **Pas repris de la vidéo 1 :** prix des cartes gradées, population PSA, dernière vente eBay, alertes de prix (aucune source ouverte pour les trois premiers ; alertes non demandées explicitement).
 
 ## 2026-10-18 — Cote Cardmarket uniquement ; eBay en attente d'un accès officiel
