@@ -742,6 +742,15 @@ ${code}
       if (bad && !BROKEN.has(bad)) { BROKEN.add(bad); if (!brokenTimer) brokenTimer = setTimeout(() => { brokenTimer = null; inst.__rerender(); }, 60); }
       return;
     }
+    // Visuel TCGdex en WebP qui ne charge pas (réseau, format refusé par le téléphone : 2026-10-22, visuels absents chez
+    // le porteur alors que le CDN répond) : un nouvel essai en PNG, même adresse, avant le visuel de secours.
+    const cur = t.currentSrc || t.getAttribute('src') || '';
+    if (!t.dataset.png && cur.indexOf('https://assets.tcgdex.net/') === 0 && (cur.slice(-9) === '/low.webp' || cur.slice(-10) === '/high.webp')) {
+      t.dataset.png = '1';
+      t.removeAttribute('srcset');
+      t.src = cur.slice(0, -5) + '.png';
+      return;
+    }
     if (!t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
     t.dataset.fellBack = t.dataset.fallback;
     const src = t.dataset.fallback.indexOf('drawn:') === 0 ? TCG.drawnFor(t.dataset.fallback.slice(6)) : t.dataset.fallback;

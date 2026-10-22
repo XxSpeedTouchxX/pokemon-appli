@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-10-22 — Visuels des cartes : nouvel essai en PNG, diagnostic du CDN
+
+- **Signalement du porteur :** plus aucun visuel de carte (classeur, Toutes les séries).
+- **Constat :** le CDN TCGdex répond normalement (200, image/webp, vérifié depuis GitHub) et la démo affiche les visuels dans Chromium et WebKit avec le vrai CDN (workflow manuel `images-check.yml`, `tools/web/e2e/diag-images.mjs`) ; le site est désormais derrière Cloudflare Access (page de connexion), sans effet sur les images qui viennent du CDN.
+- **Livré :** un visuel TCGdex en WebP qui ne se charge pas est redemandé en PNG (même adresse) avant la carte dessinée ; test navigateur (`t-lotA`).
+
 ## 2026-10-21 — Mon classeur : valeur en haut, vitrine du scellé, fiche en panneau, catalogue du scellé par type et par série
 
 - **Demande du porteur** (2026-10-21, avec deux vidéos), après des maquettes de 6 puis 5 propositions : garder la grille 3 × 3 de « Mes cartes » avec la valeur totale en haut, écrite comme « Valeur de toute ma collection » ; vitrine en verre éclairée (proposition 2) pour « Mes produits scellés », avec le même en-tête et les mêmes pastilles de prix que les cartes ; retirer les bulles « Trier », « Cote », « Récents », « Nom », « Filtrer » ; une fiche proche de sa vidéo 1 au toucher d'une carte ; « Ajouter des produits scellés » avec les seuls filtres Tout, ETB, Display, UPC, Boosters, Pokébox, Mini tin, Bundle, un choix par série et une fiche avec tendance, prix et ajout direct (vidéo 2).

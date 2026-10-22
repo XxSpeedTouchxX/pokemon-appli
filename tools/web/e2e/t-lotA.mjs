@@ -64,6 +64,19 @@ ok('enregistrement : ' + saved.size + ' caractères, ' + saved.cards.length + ' 
 await page.goto(E2E + '/?start=home', { waitUntil: 'load' });
 await page.waitForTimeout(800);
 ok('carte dessinée dans le classeur après rechargement', (await page.locator('section[aria-label="Mon classeur"] button[aria-label^="Bulbizarre"]').count()) > 0);
+// WebP refusé (2026-10-22) : le visuel TCGdex est redemandé en PNG avant la carte dessinée.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+  const asked = [];
+  await ctx.route('https://assets.tcgdex.net/**', r => { const u = r.request().url(); asked.push(u); return /\.webp$/.test(u) ? r.fulfill({ status: 404, body: '' }) : r.fulfill({ contentType: 'image/svg+xml', body: stub('PNG', 600, 825) }); });
+  await ctx.route(/fonts\.g|openfreemap|pokemontcg/, r => r.abort());
+  const p = await ctx.newPage(); p.on('pageerror', e => errors.push('pageerror: ' + e.message));
+  await p.goto(E2E + '/?today=2026-10-04', { waitUntil: 'load' }); await p.waitForTimeout(2500);
+  const imgs = await p.$$eval('section[aria-label="Mon classeur"] [role="tabpanel"] button img', is => is.map(i => [i.currentSrc || i.src, i.naturalWidth]));
+  const tc = imgs.filter(i => /tcgdex/.test(i[0]));
+  ok('WebP refusé : visuels repris en PNG (' + tc.length + ')', tc.length >= 5 && tc.every(i => /\.png$/.test(i[0]) && i[1] > 0) && asked.some(u => /\.png$/.test(u)));
+  await ctx.close();
+}
 console.log(steps.join('\n'));
 console.log(errors.length ? 'ERREURS\n' + errors.join('\n') : 'aucune erreur');
 await browser.close();
