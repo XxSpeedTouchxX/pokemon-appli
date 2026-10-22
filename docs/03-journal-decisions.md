@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-10-22 — Retouches : valeur, scellé, classeur, son du passage de grade
+
+- **Demande du porteur :**
+  - sous la courbe de « Valeur de toute ma collection », seulement « Calculé selon les cotes Cardmarket » (source, date et note retirées ; la date reste dans l'en-tête) ;
+  - catalogue du scellé : « Pokébox » devient « Autres items » (tout ce qui n'est ni ETB, Display, UPC, Boosters, Mini tin ni Bundle) ; la flèche de retour dans une extension revient à la liste des séries ;
+  - « Tout afficher » du scellé : 2 produits par ligne, photos plus grandes ;
+  - « Mon classeur » : plus de cadre autour des onglets « Mes cartes » et « Mes produits scellés » ;
+  - un son à chaque passage de grade (charge, éclatement, fanfare), synthétisé dans le navigateur (Web Audio), sans fichier.
+
 ## 2026-10-22 — Visuels des cartes : nouvel essai en PNG, diagnostic du CDN
 
 - **Signalement du porteur :** plus aucun visuel de carte (classeur, Toutes les séries).

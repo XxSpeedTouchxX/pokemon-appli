@@ -141,7 +141,7 @@
     const count = l => (sealed ? plural(units(l), 'produit', 'produits') : plural(units(l), 'carte', 'cartes'));
     const chip = (k, label, l) => Object.assign({ label: label + ' (' + l.length + ')', on: F === k, pick: () => this.setState({ hbFullF: k, hbFullN: HOME_FULL }) }, this.chip(F === k));
     return {
-      open: true, isCards: !sealed, isSealed: sealed,
+      open: true, isCards: !sealed, isSealed: sealed, gridCls: 'pkm-hf-grid' + (sealed ? ' pkm-hf-grid-s' : ''),
       title: sealed ? 'Tous mes produits scellés' : 'Toutes mes cartes',
       sub: 'Classés par valeur · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
       chips: sealed ? [] : [chip('all', 'Toutes', list), chip('loose', 'Loose', list.filter(p => !p.grade)), chip('graded', 'Gradées', list.filter(p => p.grade))],

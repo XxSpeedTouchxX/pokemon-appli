@@ -323,11 +323,7 @@
 <path d="{{ home.hv.line }}" style="fill: none; stroke: {{ home.hv.color }}; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke"></path>
 </svg>
 <div aria-hidden="true" style="position: relative; height: 15px; font-size: 11px; color: #7D8BA8"><span style="position: absolute; left: 0">30 j</span><span style="position: absolute; left: 33.33%; transform: translateX(-50%)">7 j</span><span style="position: absolute; left: 66.67%; transform: translateX(-50%)">hier</span><span style="position: absolute; right: 0">aujourd’hui</span></div>
-<span style="font-size: 11.5px; line-height: 1.35; color: #7D8BA8">{{ home.hv.source }}</span>
-<span style="font-size: 11.5px; line-height: 1.35; color: #7D8BA8">{{ home.stamp }}</span>
-<sc-if value="{{ home.hasUnk }}" hint-placeholder-val="{{ false }}">
-<span style="font-size: 12px; color: #F5B14C">{{ home.unkNote }}</span>
-</sc-if>
+<span style="font-size: 11.5px; line-height: 1.35; color: #7D8BA8">Calculé selon les cotes Cardmarket</span>
 </section>
 
 @@backup-reminder@@
@@ -335,7 +331,7 @@
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Mon classeur</h2>
 <div style="flex: none; padding: 14px 14px 12px; border-radius: 24px; border: 1px solid #24345C; background: #121C33; display: flex; flex-direction: column; gap: 12px">
 <img src="img/brand/classeur.svg" alt="" width="132" height="107" style="align-self: center; display: block; width: 132px; height: auto">
-<div role="tablist" aria-label="Mon classeur" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid #2A3A5C">
+<div role="tablist" aria-label="Mon classeur" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
 <sc-for list="{{ home.hk.tabs }}" as="hkt" hint-placeholder-count="2">
 <button type="button" role="tab" onClick="{{ hkt.pick }}" aria-selected="{{ hkt.on }}" style="min-width: 0; height: 40px; padding: 0 4px; border-radius: 999px; border: 1px solid {{ hkt.bc }}; background: {{ hkt.bg }}; color: {{ hkt.fg }}; font: inherit; font-size: 13.5px; font-size: min(13.5px, 3.55vw); font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; cursor: pointer">{{ hkt.label }}</button>
 </sc-for>
@@ -1827,7 +1823,7 @@ PKCOUNTER
 <div role="group" aria-label="Filtrer mes cartes" class="pkm-hf-chips"><sc-for list="{{ hf.chips }}" as="hfc" hint-placeholder-count="3"><button type="button" onClick="{{ hfc.pick }}" aria-pressed="{{ hfc.on }}" style="flex: none; height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid {{ hfc.bc }}; background: {{ hfc.bg }}; color: {{ hfc.fg }}; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ hfc.label }}</button></sc-for></div>
 </sc-if>
 <sc-if value="{{ hf.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-hf-sub" style="text-align: center; padding: 24px 0">Aucun article ici.</p></sc-if>
-<div class="pkm-hf-grid">
+<div class="{{ hf.gridCls }}">
 <sc-for list="{{ hf.items }}" as="hfi" hint-placeholder-count="9">
 <button type="button" onClick="{{ hfi.open }}" aria-label="{{ hfi.label }}" class="pkm-hf-tile" style="background: {{ hfi.bg }}">
 <sc-if value="{{ hf.isCards }}" hint-placeholder-val="{{ true }}"><img src="{{ hfi.img }}" srcset="{{ hfi.srcset }}" sizes="30vw" alt="" loading="lazy" decoding="async" class="pkm-hf-card"></sc-if>

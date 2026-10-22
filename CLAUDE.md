@@ -23,7 +23,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 > - Le porteur a aussi indiqué que le test de la Phase 3 n'est **pas pour maintenant**.
 > - Le Comparatif v2 dit que la Règle d'or est à reformuler. Tant qu'une nouvelle formulation n'est pas validée, la règle ci-dessus s'applique.
 
-## 3. État d'avancement (au 2026-10-21)
+## 3. État d'avancement (au 2026-10-22)
 - Phase 1 (cadrage, cartographie) : cartographie faite ; besoins de la cible (≥ 10 entretiens) **non faits**.
 - Phase 2 (sourcing, hypothèse) : sources de données, hypothèses, comparatif des options faits ; **cadre juridique & droits Pokémon non produit**.
 - Phase 3 (test) : protocole rédigé, **non validé, non gelé** ; **pas pour maintenant** (décision du 2026-10-03).
@@ -143,6 +143,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - « Ajouter des produits scellés » : Par type (Tout, ETB, Display, UPC, Boosters, Pokébox, Mini tin, Bundle) ou Par série, grille de 3 avec « + Ajouter » et « Détails ».
   - ajout d'un produit scellé : seul l'article, sans « Vente », état ni prix payé (quantité et valeur Cardmarket) ; bouton jaune « Ajouter des cartes » (vers Toutes les séries) ou « Ajouter des produits scellés » (vers le catalogue du scellé) en bas de chaque onglet ; tuiles « Cartes » et « Produits scellés » retirées sous le classeur.
   - « Mes cartes » : page qui se tourne comme dans un classeur (écran immobile) ; « Tout afficher » (toujours visible) ouvre l'album complet en plein écran, classé par valeur, filtres Toutes / Loose / Gradées, « Charger plus » ; plus-value latente retirée de « Valeur de toute ma collection ».
+- **Retouches (2026-10-22, demande du porteur) :** visuel TCGdex redemandé en PNG si le WebP ne se charge pas ; « Calculé selon les cotes Cardmarket » seul sous la courbe de la valeur ; scellé : « Autres items » à la place de « Pokébox », retour d'une extension vers la liste des séries, « Tout afficher » en 2 colonnes ; onglets du classeur sans cadre ; son du passage de grade (Web Audio).
 - **Propositions d'améliorations v2 (2026-10-09) :** `docs/13-propositions-ameliorations-v2.md` (remplace la v1 du 2026-10-07, gardée) ; 92 propositions en 16 catégories, dont les demandes du porteur du 2026-10-09 :
   - haut de page et réglages gardés ;
   - mode Admin ;

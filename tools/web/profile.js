@@ -155,6 +155,48 @@
   };
   // PK gagnés au total : chaque hausse du solde s'ajoute (gains, jeux, partage, Admin) ; une baisse ne retire rien.
   // Passage de grade : quand le grade monte, l'animation façon « promotion » se lance (gradeUp, fragment grade-up).
+  // Son du passage de grade (2026-10-22, demande du porteur), joué avec l'animation : la charge monte (2,35 s),
+  // l'emblème éclate, puis un accord de fanfare et des scintillements quand le nouvel emblème apparaît. Synthétisé
+  // dans le navigateur (Web Audio), sans fichier ; silencieux si le navigateur ne le permet pas.
+  let pfAudio = null;
+  function pfGradeSound() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      pfAudio = pfAudio || new AC();
+      const ac = pfAudio, t0 = ac.currentTime + 0.05, out = ac.createGain();
+      if (ac.state === 'suspended') ac.resume();
+      out.gain.value = 0.55; out.connect(ac.destination);
+      const tone = (type, f0, f1, at, dur, vol) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = type; o.frequency.setValueAtTime(f0, at); if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, at + dur);
+        g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + Math.min(0.04, dur / 4)); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+        o.connect(g); g.connect(out); o.start(at); o.stop(at + dur + 0.05);
+      };
+      // Charge : deux notes qui montent ensemble, de plus en plus fort.
+      const charge = (f0, f1, vol) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(f1, t0 + 2.3);
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 2.25); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.4);
+        const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(400, t0); lp.frequency.exponentialRampToValueAtTime(3200, t0 + 2.3);
+        o.connect(lp); lp.connect(g); g.connect(out); o.start(t0); o.stop(t0 + 2.45);
+      };
+      charge(110, 440, 0.18); charge(165, 660, 0.12);
+      // Éclatement : souffle de bruit filtré et coup sourd.
+      const n = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.6), ac.sampleRate), d = n.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+      const ns = ac.createBufferSource(), nf = ac.createBiquadFilter(), ng = ac.createGain();
+      ns.buffer = n; nf.type = 'lowpass'; nf.frequency.setValueAtTime(6000, t0 + 2.35); nf.frequency.exponentialRampToValueAtTime(300, t0 + 2.9);
+      ng.gain.value = 0.7; ns.connect(nf); nf.connect(ng); ng.connect(out); ns.start(t0 + 2.35);
+      tone('sine', 120, 45, t0 + 2.35, 0.5, 0.9);
+      // Fanfare : accord do majeur en arpège, puis tenue ; scintillements aigus.
+      [[523.25, 0], [659.25, 0.09], [783.99, 0.18], [1046.5, 0.27]].forEach(([f, dt]) => {
+        tone('triangle', f, f, t0 + 2.55 + dt, 1.6 - dt, 0.22);
+        tone('sine', f * 2, f * 2, t0 + 2.55 + dt, 0.9 - dt / 2, 0.06);
+      });
+      [2093, 2637, 3136, 2349, 2794].forEach((f, i) => tone('sine', f, f, t0 + 3.3 + i * 0.11, 0.35, 0.05));
+    } catch (e) { /* son indisponible */ }
+  }
   const pfBaseSet = proto.setState;
   proto.setState = function (patch) {
     const raw = this.state || {};
@@ -167,6 +209,7 @@
       const now = this.tierOf().i;
       if (typeof before === 'number' && now > before) {
         pfBaseSet.call(this, { gradeSeen: now, gradeUp: { from: before, to: now, n: Date.now() } });
+        pfGradeSound();
         clearTimeout(pfGradeTimer);
         pfGradeTimer = setTimeout(() => { if (this.st().gradeUp) pfBaseSet.call(this, { gradeUp: null }); }, 15000);
       } else if (typeof before !== 'number' || now < before) pfBaseSet.call(this, { gradeSeen: now });

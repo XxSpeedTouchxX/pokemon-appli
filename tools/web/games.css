@@ -337,3 +337,7 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-hf-qty { position: absolute; top: 5px; left: 5px; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: #FFFFFF; font-size: 11px; font-weight: 700; }
 .pkm-hf-pill { position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%); max-width: 92%; box-sizing: border-box; display: flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.86); color: #FFFFFF; font-size: 11px; font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
 .pkm-hf-more { align-self: center; height: 44px; padding: 0 22px; border-radius: 999px; border: 1px solid #2A3A5C; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+/* « Tout afficher » du scellé (2026-10-22, demande du porteur) : 2 par ligne, photos plus grandes. */
+.pkm-hf-grid-s { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pkm-hf-grid-s .pkm-hf-tile { aspect-ratio: 1 / 1.08; border-radius: 16px; }
+.pkm-hf-grid-s .pkm-hf-photo { left: 4%; top: 4%; width: 92%; height: 76%; }

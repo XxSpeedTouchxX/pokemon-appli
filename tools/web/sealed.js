@@ -140,6 +140,14 @@
     return d;
   };
   proto.openSealedList = function () { this.push('sealed', { sfilter: 'all', sset: null }); };
+  // Retour depuis une extension du scellé (2026-10-22, demande du porteur) : on revient à la liste des séries, pas à
+  // l'écran d'avant le catalogue.
+  const baseSealedPop = proto.pop;
+  proto.pop = function () {
+    const s = this.st();
+    if (s.screen === 'sealed' && s.smode === 'serie' && s.sset !== undefined && s.sset !== null) { this.setState({ sset: null, sfilter: 'all' }); return; }
+    return baseSealedPop.call(this);
+  };
   const pricesDay = () => (SEALED.doc && /^\d{4}-\d{2}-\d{2}/.test(SEALED.doc.prices || '') ? SEALED.doc.prices.slice(0, 10) : '');
 
   // Fiche d'un produit : photo agrandissable, sources de prix du jour, pas de courbe inventée.
@@ -240,7 +248,11 @@
   // les decks ne sont que dans « Tout ». Par série : séries et extensions avec leur logo et leur nombre de produits ;
   // une extension ouvre ses produits, filtrables par type. Grille de 3 : photo, nom, prix Cardmarket, « + Ajouter »
   // (formulaire d'ajout : quantité, prix, date) et « Détails » (fiche avec prix du marché et historique, fiche.js).
-  const SL_TYPES = [['all', 'Tout'], ['ETB', 'ETB'], ['DSP', 'Display'], ['UPC', 'UPC'], ['BST', 'Boosters'], ['CFT', 'Pokébox'], ['TIN', 'Mini tin'], ['BDL', 'Bundle']];
+  // « Autres items » (2026-10-22, demande du porteur ; « Pokébox » avant) : tout ce qui n'est pas dans les autres types
+  // (Pokébox, coffrets, collections, classeurs, decks…).
+  const SL_TYPES = [['all', 'Tout'], ['ETB', 'ETB'], ['DSP', 'Display'], ['UPC', 'UPC'], ['BST', 'Boosters'], ['TIN', 'Mini tin'], ['BDL', 'Bundle'], ['other', 'Autres items']];
+  const SL_MAIN = new Set(['ETB', 'DSP', 'UPC', 'BST', 'TIN', 'BDL']);
+  const slIs = (p, f) => f === 'all' || (f === 'other' ? !SL_MAIN.has(p.code) : p.code === f);
   const SL_OTHER = 'Autres produits';
   const EMPTY_SEALED = { ready: false, status: '', modes: [], byType: true, bySerie: false, q: '', onQ: null, hasQ: false, clear: null, types: [], showTypes: false,
     groups: [], showSeries: false, hasSet: false, set: {}, count: '', empty: false, showGrid: false, items: [], note: '' };
@@ -256,7 +268,7 @@
     const setOf = p => p.setId || '', setName = id => (id ? setLabel(id) || id : SL_OTHER);
     const set = mode === 'serie' && s.sset !== undefined && s.sset !== null && all.some(p => setOf(p) === s.sset) ? s.sset : null;
     const words = fold(q).split(/\s+/).filter(Boolean);
-    let shown = all.filter(p => (f === 'all' || p.code === f) && (set === null || setOf(p) === set));
+    let shown = all.filter(p => slIs(p, f) && (set === null || setOf(p) === set));
     if (words.length) { const hit = new Set(SEALED.search(q).map(p => p.id)); shown = shown.filter(p => hit.has(p.id)); }
     const logoOf = id => { const t = TCG.doc && TCG.doc.sets[id]; return t ? setLogo(id, t[3]) : (SET_ART[id] ? IMG[SET_ART[id]] : ''); };
     // Séries : extensions du scellé rangées sous leur série (cards.json), la plus récente d'abord.
@@ -279,7 +291,7 @@
             pick: () => this.setState({ sset: e.k, sfilter: 'all' }) };
         })
       }));
-    const typeDefs = SL_TYPES.filter(d => d[0] === 'all' || all.some(p => p.code === d[0] && (set === null || setOf(p) === set)));
+    const typeDefs = SL_TYPES.filter(d => d[0] === 'all' || all.some(p => slIs(p, d[0]) && (set === null || setOf(p) === set)));
     const tile = p => {
       const l = this.look(p), k = this.cote(p), st = c.stock[p.id], n = st ? st.qty : 0;
       return Object.assign(l, {
