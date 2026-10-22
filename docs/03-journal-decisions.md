@@ -13,7 +13,7 @@
   - six états partout (ajout, scan, « Modifier l'ajout », import CSV, fiche « Prix selon l'état ») ; Near Mint par défaut ; les anciens « Joué » deviennent « Played » ;
   - coefficients d'estimation Dropicards appliqués à la cote Cardmarket (celle d'un exemplaire Near Mint) : Mint 115 %, Near Mint 100 %, Excellent 85 %, Good 70 %, Played 55 %, Poor 30 % ; la valeur de l'ajout, la vignette et la valeur de la collection suivent l'état (et la langue : JP 70 %) ; une phrase décrit l'état choisi ;
   - fenêtre d'ajout : article seul, centré et agrandi ; scellé toujours sans état.
-- **À valider par le porteur :** les coefficients Mint (115 %), Good (70 %) et Poor (30 %) sont des propositions ; Cardmarket ne publie pas de cote par état en accès ouvert.
+- **Validé par le porteur (2026-10-22) :** les coefficients Mint (115 %), Good (70 %) et Poor (30 %), proposés faute de cote par état en accès ouvert chez Cardmarket.
 
 ## 2026-10-22 — Ajout d'une carte comme celui du scellé
 

@@ -1,6 +1,6 @@
   // ——— Cote selon l'état et la langue (B1), vendre un exemplaire précis (B2) ; 2026-10-09 ———
   // B1 : la valeur de la collection compte chaque exemplaire restant avec un coefficient d'estimation, affiché avec sa
-  // règle : état (Mint 115 %, Near Mint 100 %, Excellent 85 %, Good 70 %, Played 55 %, Poor 30 % depuis le 2026-10-22 ;
+  // règle : état (Mint 115 %, Near Mint 100 %, Excellent 85 %, Good 70 %, Played 55 %, Poor 30 % depuis le 2026-10-22, validés par le porteur ;
   // Boîte abîmée 85 %) et langue (FR et EN 100 %, JP 70 %,
   // les cotes relevées étant celles des versions FR et EN). La cote d'une carte (fiche, Marché) reste celle d'un
   // exemplaire Near Mint. Réglages › « Selon l'état et la langue » permet de revenir à la cote brute.
