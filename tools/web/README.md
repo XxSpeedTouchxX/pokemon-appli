@@ -242,7 +242,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
   - **Historique du prix** : archive quotidienne (scellé, démo) sur 7 jours, 1 mois ou tout ; cartes : moyennes Cardmarket 30 jours, 7 jours, veille, tendance ;
   - **Investi** et plus-value latente ; **Prix par état** (coefficients de `value.js`) ; **Mes exemplaires** (un appui corrige l'ajout) ; « Voir la fiche complète ».
   - Pas de prix des cartes gradées, de population PSA ni de dernière vente eBay (vidéo du porteur) : aucune source ouverte.
-- **Ajouter un produit scellé** (formulaire d'ajout, 2026-10-21, demande du porteur) : seul l'article choisi, sans onglet « Vente », sans état ni prix payé ; restent la langue, la quantité et la valeur Cardmarket ajoutée (`vSheet` dans `fiche.js`). Le formulaire tient dans l'écran et défile jusqu'au bouton « Ajouter à ma collection » (il dépassait sous la barre du navigateur sur téléphone).
+- **Ajouter une carte ou un produit scellé** (formulaire d'ajout, 2026-10-21 pour le scellé, 2026-10-22 pour les cartes, demandes du porteur) : seul l'article choisi, sans onglet « Vente », sans état ni prix payé ; restent la langue, la quantité et la valeur Cardmarket ajoutée (`vSheet` dans `fiche.js`). Le formulaire tient dans l'écran et défile jusqu'au bouton « Ajouter à ma collection » (il dépassait sous la barre du navigateur sur téléphone).
 
 ## Importer un tableur
 

@@ -123,14 +123,14 @@
     return r;
   };
 
-  // Ajout d'un produit scellé (2026-10-21, demande du porteur) : seul l'article choisi, sans onglet « Vente », sans
-  // état ni prix payé ; restent la langue, la quantité et la valeur Cardmarket ajoutée.
+  // Ajout d'un article (2026-10-21 pour le scellé, 2026-10-22 pour les cartes, demandes du porteur) : seul l'article
+  // choisi, sans onglet « Vente », sans état ni prix payé ; restent la langue, la quantité et la valeur Cardmarket ajoutée.
   const fiBaseSheet = fiProto.vSheet;
   fiProto.vSheet = function (x) {
     const sh = fiBaseSheet.call(this, x), f = x.s.f || {}, p = x.P[f.pid];
-    const sealed = !!(sh.isBuy && p && p.type === 'sealed');
-    Object.assign(sh, { showKind: !sealed, hideKind: sealed, showPrice: !sealed, showCond: !sealed });
-    if (sealed) {
+    const simple = !!(sh.isBuy && p);
+    Object.assign(sh, { showKind: !simple, hideKind: simple, showPrice: !simple, showCond: !simple });
+    if (simple) {
       sh.products = (sh.products || []).filter(po => po.sel);
       sh.hasPriceHint = false;
       sh.lines = (sh.lines || []).filter(l => !/Plus-value/.test(l.label));

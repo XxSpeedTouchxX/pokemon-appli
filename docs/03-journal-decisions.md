@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-22 — Ajout d'une carte comme celui du scellé
+
+- **Demande du porteur :** « Ajouter un exemplaire » sur une carte (ouverte depuis une extension, le classeur ou sa fiche) ouvre la même interface que l'ajout d'un produit scellé.
+- **Fait :** seul l'article choisi, sans onglet « Vente », sans état ni prix payé ; restent la langue, la quantité et la valeur Cardmarket ajoutée (valeur à l'unité, collection, grade). L'exemplaire est enregistré en Near Mint, sans prix d'achat.
+- **Inchangé :** « Modifier l'ajout » (historique de la fiche) permet toujours de saisir un prix payé et un état ; la vente reste accessible par « Marquer comme vendu ».
+- **Conséquence :** la marge d'une carte ajoutée ainsi reste « Prix d'achat à compléter » tant que le prix n'est pas saisi par « Modifier l'ajout ».
+
 ## 2026-10-22 — Retouches : valeur, scellé, classeur, son du passage de grade
 
 - **Demande du porteur :**

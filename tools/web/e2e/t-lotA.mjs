@@ -58,6 +58,13 @@ await page.goto(E2E + '/?start=set&setId=2019sm-fr', { waitUntil: 'load' });
 await page.waitForSelector('text=Série complète');
 await page.locator('main button[aria-label*=", n° "]').first().click();
 await page.click('button:has-text("+ Ajouter un exemplaire")'); await page.waitForTimeout(150);
+// Ajout d'une carte comme celui du scellé (2026-10-22) : seul l'article choisi, sans « Vente », état ni prix payé.
+const SH = 'section[aria-label="Saisie"]', shTxt = await page.locator(SH).innerText();
+ok('ajout de la carte : seul l’article, sans « Vente », état ni prix payé ; langue, quantité, valeur Cardmarket',
+  (await page.locator(SH + ' fieldset button[aria-pressed]').count()) === 1 && (await page.locator('[aria-label="Type de saisie"]').count()) === 0
+  && (await page.locator('[aria-label="État de l’exemplaire"]').count()) === 0 && (await page.locator(SH + ' input[inputmode="decimal"]').count()) === 0
+  && (await page.locator('[aria-label="Langue de l’exemplaire"]').count()) === 1 && /Quantité/.test(shTxt) && /Valeur Cardmarket à l’unité/.test(shTxt) && !/Plus-value/.test(shTxt));
+await page.screenshot({ path: shot('add-card-sheet.png') });
 await page.locator('button:has-text("Ajouter à ma collection")').last().click(); await page.waitForTimeout(600);
 const saved = await page.evaluate(() => { const t = localStorage.getItem('pkm-collection-v1'); const d = JSON.parse(t); return { size: t.length, cards: Object.keys(d.cards), data: /data:image/.test(t) }; });
 ok('enregistrement : ' + saved.size + ' caractères, ' + saved.cards.length + ' carte(s), sans image dessinée', saved.size < 20000 && !saved.data && saved.cards.length === 1);
