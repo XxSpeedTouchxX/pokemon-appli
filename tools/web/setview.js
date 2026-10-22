@@ -39,7 +39,7 @@
     const s0 = this.st(), prev = s0.purchases;
     if ((s0.extra || []).indexOf(p.id) < 0) this.setState({ extra: (s0.extra || []).concat([p.id]) });
     const s = this.st();
-    this.__copy = { lang: p.lang === 'EN' ? 'EN' : 'FR', cond: copyConds(p)[0][0] };
+    this.__copy = { lang: p.lang === 'EN' ? 'EN' : 'FR', cond: copyDef(p) };
     let r;
     const k = this.cote(p);
     try { r = this.addRecord(s, p.id, 1, k || 0, 'Ajout rapide', 'toi'); } finally { this.__copy = null; }

@@ -63,6 +63,11 @@ ok('ajout du scellé : seul l’article choisi, sans « Vente », état ni prix 
   && (await page.locator('[aria-label="Type de saisie"]').count()) === 0 && (await page.locator('[aria-label="État de l’exemplaire"]').count()) === 0
   && (await page.locator(SH + ' input[inputmode="decimal"]').count()) === 0 && (await page.locator(SH + ' button[aria-label="Augmenter la quantité"]').count()) === 1);
 ok('ajout du scellé : valeur Cardmarket à l’unité', /Valeur Cardmarket à l’unité/.test(await page.locator(SH).innerText()));
+{ // Article centré et agrandi (2026-10-22).
+  const bb = await page.locator(SH + ' fieldset button[aria-pressed]').boundingBox();
+  ok('ajout du scellé : article centré et agrandi (' + Math.round(bb.x) + ', ' + Math.round(bb.width) + ' px)', Math.abs(bb.x + bb.width / 2 - 195) < 3 && bb.width > 200);
+  await page.screenshot({ path: shot('sealed-5-ajout.png') });
+}
 await page.locator('button:has-text("Ajouter à ma collection")').last().click(); await page.waitForTimeout(700);
 const saved = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); const k = Object.keys(d.cards || {}).filter(x => x.indexOf('sp-') === 0); return { k: k, s: k.length ? !!d.cards[k[0]].s : false }; });
 ok('enregistré sur l’appareil : ' + saved.k.join(', '), saved.k.length === 1 && saved.s);

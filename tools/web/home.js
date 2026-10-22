@@ -51,10 +51,10 @@
   // toute ma collection » ; tri par cote, sans bulles de tri ni de filtre (retirées le 2026-10-21). La langue et
   // l'état sont ceux des exemplaires ajoutés (copies.js) ; un ajout sans langue prend celle de l'article.
   const HOME_BINDER = { cards: 9, sealed: 9 };
-  const HOME_COND = { NM: 'var(--pkm-up)', EX: 'var(--pkm-amber)', PL: 'var(--pkm-down)', SO: 'var(--pkm-up)', AB: 'var(--pkm-amber)' };
+  const HOME_COND = { MT: 'var(--pkm-up)', NM: 'var(--pkm-up)', EX: 'var(--pkm-amber)', GD: 'var(--pkm-orange)', PL: 'var(--pkm-down)', PO: 'var(--pkm-down)', SO: 'var(--pkm-up)', AB: 'var(--pkm-amber)' };
   const homeCopy = (purchases, p) => {
     const g = copiesOf(purchases, p)[0], set = (purchases || []).some(a => (a.lines || []).some(l => l.pid === p.id && l.lang));
-    return { lang: set && g ? g.lang : p.lang || 'FR', cond: g ? g.cond : copyConds(p)[0][0] };
+    return { lang: set && g ? g.lang : p.lang || 'FR', cond: g ? g.cond : copyDef(p) };
   };
   proto.homeBinder = function (x) {
     const s = x.s, tab = s.hbk, key = tab === 'sealed' ? 'hbsp' : 'hbcp';

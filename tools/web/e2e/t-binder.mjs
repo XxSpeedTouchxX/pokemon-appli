@@ -81,7 +81,7 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
     && /Retirer de ma collection/.test(fiText) && /Prix du marché/.test(fiText) && /Tendance/.test(fiText) && /Acheter sur Cardmarket/.test(fiText) && /eBay/.test(fiText) && /Historique du prix/.test(fiText) && /Investi/.test(fiText));
   ok('fiche : pas de TCGplayer', !/TCGplayer/.test(fiText));
   await page.locator(FI + ' button[aria-expanded]', { hasText: 'Prix par état' }).click(); await page.waitForTimeout(300);
-  ok('prix par état : Near Mint, Excellent, Joué', /Near Mint[\s\S]*100 %[\s\S]*Excellent[\s\S]*85 %[\s\S]*Joué[\s\S]*55 %/.test(await page.locator(FI).innerText()));
+  ok('prix par état : Near Mint, Excellent, Played', /Near Mint[\s\S]*100 %[\s\S]*Excellent[\s\S]*85 %[\s\S]*Played[\s\S]*55 %/.test(await page.locator(FI).innerText()));
   await page.locator(FI).evaluate(e => e.scrollTo(0, 0)); await page.waitForTimeout(200);
   await page.screenshot({ path: shot('binder-fiche.png') });
   await page.locator(FI + ' button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
@@ -127,10 +127,10 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   const page2 = await grab();
   await page.click(SEC + ' button[aria-label="Page précédente"]'); await page.waitForTimeout(400);
   const dots = (await grab()).concat(page2), labels = dots.map(d => d[0]);
-  const en = labels.find(l => /, EN, /.test(l)), pl = labels.find(l => /, Joué, /.test(l)), two = labels.find(l => /2 exemplaires/.test(l));
-  ok('langue, état et exemplaires repris des ajouts (EN, Joué, ×2)', !!en && !!pl && !!two);
-  const plDot = dots.find(d => /Joué/.test(d[0]))[1], nmDot = dots.find(d => /Near Mint/.test(d[0]))[1];
-  ok('point de l’état : Joué ' + plDot + ' ≠ Near Mint ' + nmDot, plDot !== nmDot);
+  const en = labels.find(l => /, EN, /.test(l)), pl = labels.find(l => /, Played, /.test(l)), two = labels.find(l => /2 exemplaires/.test(l));
+  ok('langue, état et exemplaires repris des ajouts (EN, Played, ×2)', !!en && !!pl && !!two);
+  const plDot = dots.find(d => /Played/.test(d[0]))[1], nmDot = dots.find(d => /Near Mint/.test(d[0]))[1];
+  ok('point de l’état : Played ' + plDot + ' ≠ Near Mint ' + nmDot, plDot !== nmDot);
   // « Tout afficher » (vidéo du porteur) : écran plein « Toutes mes cartes », classées par valeur, filtres, fiche au toucher.
   await page.locator(SEC + ' .pkm-hk-all').click(); await page.waitForTimeout(500);
   const HF = 'section.pkm-hf[role="dialog"]';

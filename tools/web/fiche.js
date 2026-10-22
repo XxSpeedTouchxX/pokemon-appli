@@ -124,17 +124,36 @@
   };
 
   // Ajout d'un article (2026-10-21 pour le scellé, 2026-10-22 pour les cartes, demandes du porteur) : seul l'article
-  // choisi, sans onglet « Vente », sans état ni prix payé ; restent la langue, la quantité et la valeur Cardmarket ajoutée.
+  // choisi, centré et agrandi, sans onglet « Vente » ni prix payé ; restent la langue, la quantité, l'état (cartes
+  // seulement : Mint à Poor) et la valeur Cardmarket ajoutée, qui suit l'état et la langue.
   const fiBaseSheet = fiProto.vSheet;
   fiProto.vSheet = function (x) {
     const sh = fiBaseSheet.call(this, x), f = x.s.f || {}, p = x.P[f.pid];
     const simple = !!(sh.isBuy && p);
-    Object.assign(sh, { showKind: !simple, hideKind: simple, showPrice: !simple, showCond: !simple });
+    Object.assign(sh, { showKind: !simple, hideKind: simple, showPrice: !simple, showCond: !(simple && p.type === 'sealed') });
+    sh.artCls = simple ? 'pkm-art-one' : '';
+    sh.hasCondNote = false;
     if (simple) {
       sh.products = (sh.products || []).filter(po => po.sel);
       sh.hasPriceHint = false;
       sh.lines = (sh.lines || []).filter(l => !/Plus-value/.test(l.label));
-      sh.lines.forEach(l => { if (/^Cote Dropicards unitaire/.test(l.label)) l.label = 'Valeur Cardmarket à l’unité'; });
+      // Valeur selon l'état et la langue choisis (2026-10-22, demande du porteur) : cote Cardmarket (Near Mint) × coefficient,
+      // comme dans la valeur de la collection ; cote brute si Réglages › « Selon l'état et la langue » est désactivé.
+      const sealed = p.type === 'sealed', lang = f.lang || 'FR', cond = copyCode(p, f.cond), raw = this.rawVal(p, x.s.valuation);
+      const coef = this.valOn() ? valCoef(lang, cond) : 1, unit = raw ? raw * coef : 0, add = unit * (f.qty || 1);
+      const pct = Math.round(coef * 100) + ' %', tag = coef !== 1 ? ' (' + (sealed ? lang : copyLabel(p, cond) + (lang === 'JP' ? ', JP' : '')) + ', ' + pct + ')' : '';
+      if (raw) {
+        sh.big = this.signed(add);
+        sh.products.forEach(po => { po.right = (String(po.right).match(/^×\d+ · /) || [''])[0] + this.eur(unit); });
+      }
+      sh.lines.forEach(l => {
+        if (/^Cote Dropicards unitaire/.test(l.label)) { l.label = 'Valeur Cardmarket à l’unité' + tag; if (raw) l.value = this.eur(unit); }
+        else if (l.label === 'Collection' && raw) l.value = this.eur(x.total) + ' → ' + this.eur(x.total + add);
+      });
+      if (!sealed) {
+        sh.hasCondNote = true;
+        sh.condNote = copyLabel(p, cond) + ' · ' + Math.round(VAL_COND[cond] * 100) + ' % de la cote Near Mint. ' + COPY.notes[cond];
+      }
     }
     return sh;
   };

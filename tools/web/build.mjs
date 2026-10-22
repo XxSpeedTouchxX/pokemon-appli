@@ -339,7 +339,10 @@ tpl = tpl.replace(/(<(?:span|button)\b[^>]*?style="position: relative; flex: non
   return head + 'width: calc({{ ' + o + '.wk }} * ' + w + 'px); height: calc({{ ' + o + '.hk }} * ' + h + 'px); outline: {{ ' + o + '.ring }}; outline-offset: -1.5px;' + rest;
 });
 if (slots !== 7) throw new Error('Vignettes de liste : ' + slots + ' au lieu de 7'); // dont 1 sur l'accueil : la recherche
-patch('aria-label="{{ po.label }}" style="flex: none; width: 104px;', 'aria-label="{{ po.label }}" style="flex: none; width: calc({{ po.wk }} * 104px);');
+patch('aria-label="{{ po.label }}" style="flex: none; width: 104px;', 'aria-label="{{ po.label }}" style="--wk: {{ po.wk }}; flex: none; width: calc({{ po.wk }} * 104px);');
+// Ajout d'un seul article (fiche.js, 2026-10-22) : article centré et agrandi (classe pkm-art-one, games.css).
+patch('<div style="display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 4px">\n<sc-for list="{{ sh.products }}"',
+  '<div class="{{ sh.artCls }}" style="display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 4px">\n<sc-for list="{{ sh.products }}"');
 // - Collection : le scellé sur toute la largeur de la grille, visuel 16:9 ; grille sans trous.
 patch('<button type="button" onClick="{{ ci.open }}" style="display: flex;', '<button type="button" onClick="{{ ci.open }}" style="grid-column: {{ ci.col }}; display: flex;');
 patch('<span style="position: relative; display: block; height: 176px; border-radius: 14px; overflow: hidden; background: {{ ci.bg }};',

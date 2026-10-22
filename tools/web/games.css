@@ -341,3 +341,17 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-hf-grid-s { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .pkm-hf-grid-s .pkm-hf-tile { aspect-ratio: 1 / 1.08; border-radius: 16px; }
 .pkm-hf-grid-s .pkm-hf-photo { left: 4%; top: 4%; width: 92%; height: 76%; }
+
+/* États des cartes (2026-10-22) : six choix sur 3 colonnes (ajout, scan, modification d'un ajout). */
+[role="group"][aria-label="État de l’exemplaire"], [role="group"][aria-label="État"] { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
+
+/* Ajout d'un seul article (2026-10-22) : centré et agrandi. */
+.pkm-art-one { justify-content: center; }
+.pkm-art-one > button { width: calc(var(--wk, 1) * 156px) !important; align-items: center; text-align: center !important; padding: 8px 8px 10px !important; }
+.pkm-art-one > button > span { align-self: stretch; }
+.pkm-art-one > button > span:first-child { height: 196px !important; }
+.pkm-art-one > button > span:first-child > img[data-fallback] { width: auto !important; height: 176px !important; aspect-ratio: 63 / 88; margin-top: 0 !important; border-radius: 7px !important; object-fit: contain !important; }
+.pkm-art-one > button > span:first-child > img[loading] { object-fit: contain !important; padding: 8px; box-sizing: border-box; }
+.pkm-art-one > button > span:first-child > img[data-broken]:not([loading]) { width: 80% !important; height: 60% !important; }
+.pkm-art-one > button > span:nth-child(2) { font-size: 15px !important; white-space: normal !important; display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
+.pkm-art-one > button > span:nth-child(3) { font-size: 13.5px !important; }

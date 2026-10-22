@@ -11,17 +11,17 @@ const total = async () => eur(await page.locator('section[aria-label="Ma collect
 const homeValue = async () => { await page.goto(B, { waitUntil: 'load' }); await page.waitForTimeout(1500); return eur((await page.locator('#app').innerText()).match(/ma collection\s*\n?\s*([\d\s  ]+,\d\d)\s*€/i)[1]); };
 const v0 = await homeValue();
 ok('valeur de départ : ' + v0, v0 > 0);
-// k1 passe en « Joué » par D5.
+// k1 passe en « Played » par D5.
 await page.goto(B + 'start=item&itemId=k1', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 const hist = page.locator('section[aria-label="Historique d’achat"]');
 const cote = eur((await page.locator('#app').innerText()).match(/Cote Dropicards[^\n]*\n?[^\d]*([\d\s ]+,\d\d)/)?.[1] || '0');
 await hist.locator('button[aria-label^="Modifier l’ajout du"]').first().click(); await page.waitForTimeout(250);
 const sh = page.locator('section[aria-label="Modifier l’ajout"]');
-await sh.locator('[aria-label="État de l’exemplaire"] button:has-text("Joué")').click();
+await sh.locator('[aria-label="État de l’exemplaire"] button:has-text("Played")').click();
 await sh.locator('button:has-text("Enregistrer les modifications")').click(); await page.waitForTimeout(500);
 const toastTxt = (await page.locator('[role="status"]').last().innerText()).replace(/[\u202f\u00a0]/g, ' ');
 const note = await hist.innerText();
-ok('fiche : valeur de tes exemplaires (Joué 55 %)', /Valeur de tes exemplaires : 1 × FR Joué \(55 %\) = .+ au lieu de .+ en Near Mint/.test(note));
+ok('fiche : valeur de tes exemplaires (Played 55 %)', /Valeur de tes exemplaires : 1 × FR Played \(55 %\) = .+ au lieu de .+ en Near Mint/.test(note));
 await page.screenshot({ path: shot('value-item.png') });
 const m = note.match(/= ([\d,]+)\s*€ au lieu de ([\d,]+)\s*€/);
 const adj = eur(m[1]), raw = eur(m[2]);
@@ -32,7 +32,7 @@ ok('valeur de la collection baisse de 45 % de la carte : ' + v0 + ' → ' + v1, 
 // Réglages : interrupteur.
 await page.goto(B + 'start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 const sw = page.locator('button[role="switch"]:has-text("Selon l’état et la langue")');
-ok('Réglages : interrupteur activé et règle', (await sw.getAttribute('aria-checked')) === 'true' && /Joué 55 %/.test(await page.locator('#app').innerText()));
+ok('Réglages : interrupteur activé et règle', (await sw.getAttribute('aria-checked')) === 'true' && /Played 55 %/.test(await page.locator('#app').innerText()));
 await sw.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('value-settings.png') });
 await sw.click(); await page.waitForTimeout(300);
 ok('désactivé', (await sw.getAttribute('aria-checked')) === 'false' && (await saved()).valAdj === false);

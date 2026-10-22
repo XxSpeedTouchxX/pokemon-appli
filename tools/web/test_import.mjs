@@ -30,7 +30,8 @@ test('colonnes reconnues en français et en anglais, export Dropicards compris',
 test('valeurs : montants, langue, état, date', () => {
   assert.equal(I.money('1 234,50 €'), 1234.5); assert.equal(I.money('12.99'), 12.99); assert.equal(I.money('1,234.5'), 1234.5); assert.equal(I.money(''), null);
   assert.deepEqual(['Français', 'english', 'JP', 'japonais', 'x'].map(I.lang), ['FR', 'EN', 'JP', 'JP', '']);
-  assert.deepEqual(['Near Mint', 'NM', 'Excellent', 'Light Played', 'Joué', 'Poor', ''].map(t => I.cond(t)), ['NM', 'NM', 'EX', 'EX', 'PL', 'PL', '']);
+  assert.deepEqual(['Near Mint', 'NM', 'Excellent', 'Light Played', 'Joué', 'Poor', ''].map(t => I.cond(t)), ['NM', 'NM', 'EX', 'EX', 'PL', 'PO', '']);
+  assert.deepEqual(['Mint', 'MT', 'Good', 'Moderately Played', 'Heavily Played', 'Damaged', 'DMG'].map(t => I.cond(t)), ['MT', 'MT', 'GD', 'GD', 'PL', 'PO', 'PO']);
   assert.equal(I.cond('', true), 'SO'); assert.equal(I.cond('boîte abîmée', true), 'AB');
   assert.equal(I.date('05/09/2026'), '2026-09-05'); assert.equal(I.date('2026-9-5'), '2026-09-05'); assert.equal(I.date('5.9.26'), '2026-09-05');
 });

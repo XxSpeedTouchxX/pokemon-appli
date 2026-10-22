@@ -1479,6 +1479,9 @@
 <button type="button" onClick="{{ cc.pick }}" aria-pressed="{{ cc.on }}" style="flex: 1; height: 44px; padding: 0 6px; border-radius: 999px; border: 1px solid {{ cc.bc }}; background: {{ cc.bg }}; color: {{ cc.fg }}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer">{{ cc.label }}</button>
 </sc-for>
 </div>
+<sc-if value="{{ sh.hasCondNote }}" hint-placeholder-val="{{ true }}">
+<p aria-live="polite" style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ sh.condNote }}</p>
+</sc-if>
 </sc-if>
 </div>
 </sc-if>

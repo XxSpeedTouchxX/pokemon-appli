@@ -57,7 +57,7 @@
         ? 'Produits scellés : prix Cardmarket du ' + this.srcDay(pricesDay()) + ', archivés chaque jour par Dropicards.'
         : 'Cartes : prix Cardmarket relevés par TCGdex, catalogue du ' + this.srcDay(srcCardsDay()) + ' (la fiche donne la date de chaque carte).',
       'Le prix le plus bas demandé est montré dans la fiche, jamais compté dans la cote.',
-      s.valAdj === false ? 'Cote brute : l’état et la langue ne sont pas comptés (Réglages).' : 'Chaque exemplaire compte selon son état et sa langue : Joué 55 %, Excellent 85 %, JP 70 %… (règle dans Réglages).'
+      s.valAdj === false ? 'Cote brute : l’état et la langue ne sont pas comptés (Réglages).' : 'Chaque exemplaire compte selon son état et sa langue : Mint 115 %, Excellent 85 %, Played 55 %, JP 70 %… (règle dans Réglages).'
     ];
     if (demo) lines.push(demo + (demo > 1 ? ' articles viennent' : ' article vient') + ' de la collection de démo : prix d’exemple.');
     if (srcOffline()) lines.push('Hors ligne : dernières cotes gardées sur l’appareil.');

@@ -72,9 +72,13 @@
       const f = fold(t);
       if (sealed) return /abim|damag|dent|cabos|ouvert/.test(f) ? 'AB' : 'SO';
       if (!f) return '';
-      if (/^(nm|m|mt|mint|near mint|neuf|parfait|comme neuf|excellent plus)$/.test(f) || f.indexOf('near') === 0 || f.indexOf('mint') === 0) return 'NM';
-      if (/^(ex|exc|excellent|lp|light played|lightly played|tres bon|tb|good|gd|bon|b)$/.test(f) || f.indexOf('excel') === 0) return 'EX';
-      if (/^(pl|mp|hp|played|joue|jouee|moderately played|heavily played|poor|po|abime|mauvais|damaged)$/.test(f) || /play|jou|abim|poor|damag/.test(f)) return 'PL';
+      // Six états depuis le 2026-10-22 : Mint, Near Mint, Excellent, Good, Played, Poor.
+      if (/^(m|mt|mint|gem mint|neuf|parfait)$/.test(f)) return 'MT';
+      if (/^(nm|near mint|comme neuf|excellent plus)$/.test(f) || f.indexOf('near') === 0 || f.indexOf('mint') === 0) return 'NM';
+      if (/^(ex|exc|excellent|lp|light played|lightly played|tres bon|tb)$/.test(f) || f.indexOf('excel') === 0 || f.indexOf('light') === 0) return 'EX';
+      if (/^(gd|good|bon|b|mp|moderately played)$/.test(f) || f.indexOf('moder') === 0) return 'GD';
+      if (/^(po|poor|dmg|damaged|abime|abimee|mauvais|mauvais etat)$/.test(f) || /poor|damag|abim/.test(f)) return 'PO';
+      if (/^(pl|hp|played|heavily played|joue|jouee)$/.test(f) || /play|jou/.test(f)) return 'PL';
       if (/scelle|sealed|neuf sous blister/.test(f)) return 'NM';
       return '';
     }

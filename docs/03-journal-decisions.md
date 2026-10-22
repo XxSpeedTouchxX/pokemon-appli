@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-10-22 — Six états des cartes, valeur selon l'état, article centré
+
+- **Demande du porteur :** dans la fenêtre d'ajout, l'article choisi centré et agrandi (scellé et cartes) ; pour les cartes, garder le choix de l'état avec sa liste (Mint, Near Mint, Excellent, Good, Played, Poor) et faire varier le prix selon l'état.
+- **Fait :**
+  - six états partout (ajout, scan, « Modifier l'ajout », import CSV, fiche « Prix selon l'état ») ; Near Mint par défaut ; les anciens « Joué » deviennent « Played » ;
+  - coefficients d'estimation Dropicards appliqués à la cote Cardmarket (celle d'un exemplaire Near Mint) : Mint 115 %, Near Mint 100 %, Excellent 85 %, Good 70 %, Played 55 %, Poor 30 % ; la valeur de l'ajout, la vignette et la valeur de la collection suivent l'état (et la langue : JP 70 %) ; une phrase décrit l'état choisi ;
+  - fenêtre d'ajout : article seul, centré et agrandi ; scellé toujours sans état.
+- **À valider par le porteur :** les coefficients Mint (115 %), Good (70 %) et Poor (30 %) sont des propositions ; Cardmarket ne publie pas de cote par état en accès ouvert.
+
 ## 2026-10-22 — Ajout d'une carte comme celui du scellé
 
 - **Demande du porteur :** « Ajouter un exemplaire » sur une carte (ouverte depuis une extension, le classeur ou sa fiche) ouvre la même interface que l'ajout d'un produit scellé.

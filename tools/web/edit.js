@@ -43,7 +43,7 @@
     if (!a || !a.lines[k]) return;
     const l = a.lines[k], p = this.catalog().find(q => q.id === l.pid), conds = copyConds(p);
     this.setState({ bed: { aid: aid, k: k, qty: l.qty, total: this.fmtIn(a.total), date: a.date, lang: l.lang || 'FR',
-      cond: Math.max(0, conds.findIndex(c => c[0] === (l.cond || conds[0][0]))), ask: false, err: '' } });
+      cond: Math.max(0, conds.findIndex(c => c[0] === (l.cond || copyDef(p)))), ask: false, err: '' } });
   };
   // Vérifie et applique de nouveaux achats ; message avec « Annuler ».
   edProto.edCommit = function (purchases, pid, done) {

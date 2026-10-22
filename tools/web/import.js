@@ -45,7 +45,7 @@
       if (!p) return;
       const r = x.r, conds = copyConds(p);
       add.push({ id: 'i' + seq, date: r.date && r.date <= realToday() ? r.date : realToday(), seq: seq, where: 'Import', by: 'toi',
-        lines: [{ pid: id, qty: r.qty, lang: r.lang || (p.lang === 'EN' ? 'EN' : 'FR'), cond: conds.some(c => c[0] === r.cond) ? r.cond : conds[0][0] }],
+        lines: [{ pid: id, qty: r.qty, lang: r.lang || (p.lang === 'EN' ? 'EN' : 'FR'), cond: conds.some(c => c[0] === r.cond) ? r.cond : copyDef(p) }],
         total: r.price > 0 ? r.price : null });
       ids.push(id); seq++; n += r.qty;
     });

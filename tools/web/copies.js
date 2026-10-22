@@ -3,22 +3,39 @@
   // choisis dans la fiche du scan étaient perdus. Chaque ligne d'achat garde désormais sa langue (FR, JP, EN) et son
   // état (cartes : Near Mint, Excellent, Joué ; scellé : Scellé d'origine, Boîte abîmée), choisis au scan ou dans
   // « Ajout », et enregistrés sur l'appareil avec le reste. Les ajouts plus anciens comptent comme FR et Near Mint (ou
-  // Scellé d'origine). La cote ne dépend pas encore de l'état ; à la vente, on ne choisit pas encore l'exemplaire.
+  // Scellé d'origine).
+  // États des cartes (2026-10-22, liste du porteur) : Mint, Near Mint, Excellent, Good, Played, Poor, du meilleur au
+  // moins bon ; l'état par défaut reste Near Mint (celui des cotes Cardmarket). Les anciens « Joué » (PL) deviennent Played.
   const COPY = {
     langs: ['FR', 'JP', 'EN'],
-    conds: { card: [['NM', 'Near Mint'], ['EX', 'Excellent'], ['PL', 'Joué']], sealed: [['SO', 'Scellé d’origine'], ['AB', 'Boîte abîmée']] }
+    conds: {
+      card: [['MT', 'Mint'], ['NM', 'Near Mint'], ['EX', 'Excellent'], ['GD', 'Good'], ['PL', 'Played'], ['PO', 'Poor']],
+      sealed: [['SO', 'Scellé d’origine'], ['AB', 'Boîte abîmée']]
+    },
+    notes: {
+      MT: 'Neuve, tout juste sortie du booster, sans aucun défaut visible à l’œil nu (coins parfaits, surface intacte, centrage optimal).',
+      NM: 'Quasi neuve : de très légères imperfections de fabrication (un tout petit point blanc, une micro-rayure quasi invisible).',
+      EX: 'Usure légère mais visible : petits points blancs sur les bords ou les coins, légères micro-rayures sur l’illustration ou l’holo.',
+      GD: 'Usure marquée, visible sans effort : bords et coins blanchis, rayures plus nettes, légers coups ou pressions.',
+      PL: 'Usure avancée, défauts importants : pliures visibles, creux, rayures profondes, surface ternie.',
+      PO: 'État très dégradé : pliures majeures, déchirures, dégâts liés à l’humidité, morceaux manquants.'
+    }
   };
   const copyConds = p => COPY.conds[p && p.type === 'sealed' ? 'sealed' : 'card'];
-  const copyCode = (p, i) => { const l = copyConds(p); return (l[i] || l[0])[0]; };
-  const copyLabel = (p, code) => { const l = copyConds(p), f = l.find(c => c[0] === code); return (f || l[0])[1]; };
+  // État par défaut : Near Mint pour une carte, Scellé d'origine pour le scellé.
+  const copyDef = p => (p && p.type === 'sealed' ? 'SO' : 'NM');
+  // Rang de l'état choisi dans un formulaire (null ou absent : l'état par défaut).
+  const copyIdx = (p, v) => { const l = copyConds(p); return typeof v === 'number' && v >= 0 && v < l.length ? v : Math.max(0, l.findIndex(c => c[0] === copyDef(p))); };
+  const copyCode = (p, i) => copyConds(p)[copyIdx(p, i)][0];
+  const copyLabel = (p, code) => { const l = copyConds(p), f = l.find(c => c[0] === code) || l.find(c => c[0] === copyDef(p)); return f[1]; };
   // Sous-titre d'un article sans sa langue ni son état (« Ultra rare · FR · Near Mint » → « Ultra rare »).
-  const copyBase = sub => String(sub || '').replace(/ · (FR|EN|JP)( · (Near Mint|Excellent|Joué))?$/, '');
+  const copyBase = sub => String(sub || '').replace(/ · (FR|EN|JP)( · (Mint|Near Mint|Excellent|Good|Played|Poor|Joué))?$/, '');
   // Exemplaires ajoutés d'un article, par langue et état, du groupe le plus nombreux au moins nombreux.
   function copiesOf(purchases, p) {
     const g = new Map();
     (purchases || []).forEach(a => (a.lines || []).forEach(l => {
       if (l.pid !== p.id) return;
-      const k = (l.lang || 'FR') + '|' + (l.cond || copyConds(p)[0][0]);
+      const k = (l.lang || 'FR') + '|' + (l.cond || copyDef(p));
       g.set(k, (g.get(k) || 0) + (l.qty || 0));
     }));
     return [...g.entries()].map(([k, qty]) => { const [lang, cond] = k.split('|'); return { lang: lang, cond: cond, label: copyLabel(p, cond), qty: qty }; })
@@ -49,24 +66,34 @@
   const baseCopySaveScan = copyProto.saveScan;
   copyProto.saveScan = function () {
     const s = this.st(), sf = s.sf || {};
-    this.__copy = { lang: sf.lang || 'FR', cond: copyCode(copyItemOf(this, this.scanTarget(s)), sf.cond || 0) };
+    this.__copy = { lang: sf.lang || 'FR', cond: copyCode(copyItemOf(this, this.scanTarget(s)), sf.cond) };
     try { baseCopySaveScan.call(this); } finally { this.__copy = null; }
   };
   const baseCopySaveBuy = copyProto.saveBuy;
   copyProto.saveBuy = function () {
     const s = this.st(), f = s.f || {};
-    this.__copy = { lang: f.lang || 'FR', cond: copyCode(copyItemOf(this, f.pid), f.cond || 0) };
+    this.__copy = { lang: f.lang || 'FR', cond: copyCode(copyItemOf(this, f.pid), f.cond) };
     try { baseCopySaveBuy.call(this); } finally { this.__copy = null; }
   };
   const baseCopySeed = copyProto.formSeed;
-  copyProto.formSeed = function (p) { return Object.assign(baseCopySeed.call(this, p), { lang: 'FR', cond: 0 }); };
+  copyProto.formSeed = function (p) { return Object.assign(baseCopySeed.call(this, p), { lang: 'FR', cond: null }); };
+
+  // Fiche du scan : mêmes états que le formulaire « Ajout » (Near Mint par défaut).
+  const baseCopyScanSeed = copyProto.scanFormSeed;
+  copyProto.scanFormSeed = function () { return Object.assign(baseCopyScanSeed.call(this), { cond: null }); };
+  const baseCopyScanResult = copyProto.vScanResult;
+  copyProto.vScanResult = function (x) {
+    const r = baseCopyScanResult.call(this, x), sf = x.s.sf || {}, p = x.P[this.scanTarget(x.s)], ci = copyIdx(p, sf.cond);
+    r.conds = copyConds(p).map((c, i) => Object.assign({ label: c[1], on: ci === i, pick: () => this.setSF({ cond: i }) }, this.chip(ci === i)));
+    return r;
+  };
 
   // Formulaire « Ajout » : langue et état, comme dans la fiche du scan.
   const baseCopySheet = copyProto.vSheet;
   copyProto.vSheet = function (x) {
     const sh = baseCopySheet.call(this, x), f = x.s.f || {};
     if (!sh.isBuy) return Object.assign(sh, { showCopy: false, copyLangs: [], copyConds: [] });
-    const lang = f.lang || 'FR', list = copyConds(x.P[f.pid]), ci = Math.min(f.cond || 0, list.length - 1);
+    const lang = f.lang || 'FR', list = copyConds(x.P[f.pid]), ci = copyIdx(x.P[f.pid], f.cond);
     return Object.assign(sh, {
       showCopy: true,
       copyLangs: COPY.langs.map(l => Object.assign({ label: l, on: lang === l, pick: () => this.setF({ lang: l }) }, this.chip(lang === l))),

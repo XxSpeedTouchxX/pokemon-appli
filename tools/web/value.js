@@ -1,12 +1,13 @@
   // ——— Cote selon l'état et la langue (B1), vendre un exemplaire précis (B2) ; 2026-10-09 ———
   // B1 : la valeur de la collection compte chaque exemplaire restant avec un coefficient d'estimation, affiché avec sa
-  // règle : état (Near Mint 100 %, Excellent 85 %, Joué 55 % ; Boîte abîmée 85 %) et langue (FR et EN 100 %, JP 70 %,
+  // règle : état (Mint 115 %, Near Mint 100 %, Excellent 85 %, Good 70 %, Played 55 %, Poor 30 % depuis le 2026-10-22 ;
+  // Boîte abîmée 85 %) et langue (FR et EN 100 %, JP 70 %,
   // les cotes relevées étant celles des versions FR et EN). La cote d'une carte (fiche, Marché) reste celle d'un
   // exemplaire Near Mint. Réglages › « Selon l'état et la langue » permet de revenir à la cote brute.
   // B2 : à la vente, on choisit l'ajout d'où vient l'exemplaire ; la marge prend son prix d'achat (margin-patch.mjs).
   // Exemplaires restants : une vente désignée retire de son ajout ; les autres retirent les plus anciens d'abord.
   // Ce module partage la portée des autres : ses noms commencent par VAL_ ou val.
-  const VAL_COND = { NM: 1, EX: 0.85, PL: 0.55, SO: 1, AB: 0.85 };
+  const VAL_COND = { MT: 1.15, NM: 1, EX: 0.85, GD: 0.7, PL: 0.55, PO: 0.3, SO: 1, AB: 0.85 };
   const VAL_LANG = { FR: 1, EN: 1, JP: 0.7 };
   const valPct = n => Math.round(n * 100) + ' %';
   const valCoef = (lang, cond) => (lang in VAL_LANG ? VAL_LANG[lang] : 1) * (cond in VAL_COND ? VAL_COND[cond] : 1);
@@ -67,7 +68,7 @@
     const it = valBaseItem.call(this, x), s = x.s, p = x.P[s.itemId] || x.cat[0];
     const list = p ? (valLeft(s)[p.id] || []).filter(g => g.left > 0) : [];
     const groups = new Map();
-    list.forEach(g => { const key = g.lang + '|' + (g.cond || copyConds(p)[0][0]); groups.set(key, (groups.get(key) || 0) + g.left); });
+    list.forEach(g => { const key = g.lang + '|' + (g.cond || copyDef(p)); groups.set(key, (groups.get(key) || 0) + g.left); });
     const raw = p ? this.rawVal(p, s.valuation) : 0, n = list.reduce((t, g) => t + g.left, 0);
     const adj = [...groups.keys()].some(k => { const [l, c] = k.split('|'); return valCoef(l, c) !== 1; });
     it.hasValNote = !!(raw && n && adj);
@@ -85,7 +86,7 @@
     r.valAdj = {
       on: on, label: 'Selon l’état et la langue', state: on ? 'Activé' : 'Désactivé',
       toggle: () => this.setState({ valAdj: !on }),
-      rule: 'Estimation : Near Mint 100 %, Excellent 85 %, Joué 55 %, Boîte abîmée 85 % ; FR et EN 100 %, JP 70 % (les cotes relevées sont celles des versions FR et EN). La fiche de chaque carte garde la cote Near Mint.',
+      rule: 'Estimation : Mint 115 %, Near Mint 100 %, Excellent 85 %, Good 70 %, Played 55 %, Poor 30 %, Boîte abîmée 85 % ; FR et EN 100 %, JP 70 % (les cotes relevées sont celles des versions FR et EN). La fiche de chaque carte garde la cote Near Mint.',
       bg: on ? 'var(--pkm-accent)' : 'transparent', fg: on ? 'var(--pkm-on-accent)' : 'var(--pkm-t2)'
     };
     return r;

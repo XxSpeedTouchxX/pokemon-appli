@@ -62,11 +62,26 @@ await page.click('button:has-text("+ Ajouter un exemplaire")'); await page.waitF
 const SH = 'section[aria-label="Saisie"]', shTxt = await page.locator(SH).innerText();
 ok('ajout de la carte : seul l’article, sans « Vente », état ni prix payé ; langue, quantité, valeur Cardmarket',
   (await page.locator(SH + ' fieldset button[aria-pressed]').count()) === 1 && (await page.locator('[aria-label="Type de saisie"]').count()) === 0
-  && (await page.locator('[aria-label="État de l’exemplaire"]').count()) === 0 && (await page.locator(SH + ' input[inputmode="decimal"]').count()) === 0
+  && (await page.locator(SH + ' input[inputmode="decimal"]').count()) === 0
   && (await page.locator('[aria-label="Langue de l’exemplaire"]').count()) === 1 && /Quantité/.test(shTxt) && /Valeur Cardmarket à l’unité/.test(shTxt) && !/Plus-value/.test(shTxt));
+const bb = await page.locator(SH + ' fieldset button[aria-pressed]').boundingBox();
+ok('ajout de la carte : article centré et agrandi', Math.abs(bb.x + bb.width / 2 - 195) < 3 && bb.width > 140);
+// Six états (2026-10-22), Near Mint par défaut ; la valeur suit l'état choisi.
+const condBtns = page.locator('[aria-label="État de l’exemplaire"] button');
+ok('états : ' + (await condBtns.allInnerTexts()).join(', '), (await condBtns.allInnerTexts()).join(',') === 'Mint,Near Mint,Excellent,Good,Played,Poor'
+  && (await condBtns.nth(1).getAttribute('aria-pressed')) === 'true');
+const unitOf = async () => Number((await page.locator(SH).innerText()).match(/Valeur Cardmarket à l’unité[^\n]*\n?\s*([\d\s ]+,\d\d)/)[1].replace(/\D/g, '')) / 100;
+const uNM = await unitOf();
+await condBtns.nth(0).click(); await page.waitForTimeout(150);
+const uMT = await unitOf();
+await condBtns.nth(5).click(); await page.waitForTimeout(150);
+const uPO = await unitOf();
+ok('valeur selon l’état : Mint ' + uMT + ' > Near Mint ' + uNM + ' > Poor ' + uPO, uMT > uNM && uNM > uPO && Math.abs(uMT - uNM * 1.15) < 0.011 && /Poor · 30 %/.test(await page.locator(SH).innerText()));
+await condBtns.nth(0).click(); await page.waitForTimeout(150);
 await page.screenshot({ path: shot('add-card-sheet.png') });
 await page.locator('button:has-text("Ajouter à ma collection")').last().click(); await page.waitForTimeout(600);
 const saved = await page.evaluate(() => { const t = localStorage.getItem('pkm-collection-v1'); const d = JSON.parse(t); return { size: t.length, cards: Object.keys(d.cards), data: /data:image/.test(t) }; });
+ok('état enregistré : Mint', await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1')).purchases.slice(-1)[0].lines[0].cond) === 'MT');
 ok('enregistrement : ' + saved.size + ' caractères, ' + saved.cards.length + ' carte(s), sans image dessinée', saved.size < 20000 && !saved.data && saved.cards.length === 1);
 await page.goto(E2E + '/?start=home', { waitUntil: 'load' });
 await page.waitForTimeout(800);
