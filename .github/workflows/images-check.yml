@@ -1,4 +1,5 @@
-# Diagnostic manuel (2026-10-22) : les visuels des cartes (CDN TCGdex) répondent-ils ? N'écrit rien.
+# Diagnostic manuel (2026-10-22) : les visuels des cartes (CDN TCGdex) répondent-ils, et s'affichent-ils dans la démo
+# (Chromium et WebKit, format iPhone) ? N'écrit rien.
 name: Vérification des visuels (diagnostic)
 
 on:
@@ -10,16 +11,22 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
-      - run: |
-          for u in \
-            https://assets.tcgdex.net/fr/sv/sv08/238/low.webp \
-            https://assets.tcgdex.net/fr/sv/sv08/238/high.webp \
-            https://assets.tcgdex.net/fr/sv/sv08/238/high.png \
-            https://assets.tcgdex.net/fr/me/me01/001/low.webp \
-            https://assets.tcgdex.net/en/base/base1/4/low.webp \
-            https://pokemon-appli.pages.dev/ \
-            https://pokemon-appli.pages.dev/data/cards-base.json ; do
-            echo "== $u"; curl -sS -o /dev/null -D - -A "Mozilla/5.0 (iPhone)" -H "Referer: https://pokemon-appli.pages.dev/" "$u" | grep -iE "^HTTP|content-type|content-length|access-control|cross-origin|location" || echo "ÉCHEC"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/web/package-lock.json
+      - name: Dépendances
+        working-directory: tools/web
+        run: npm ci && npx playwright-core install --with-deps chromium webkit
+      - name: CDN TCGdex
+        run: |
+          for u in https://assets.tcgdex.net/fr/sv/sv08/238/low.webp https://assets.tcgdex.net/fr/sv/sv08/238/high.webp https://assets.tcgdex.net/fr/me/30th/155/low.webp; do
+            echo "== $u"; curl -sS -o /dev/null -D - "$u" | grep -iE "^HTTP|content-type" || echo "ÉCHEC"
           done
+      - name: Visuels dans la démo (vrai CDN)
+        working-directory: tools/web
+        run: node e2e/diag-images.mjs
