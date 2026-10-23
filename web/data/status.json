@@ -2,6 +2,6 @@
 
 "cards":{"checked":"2026-10-22T09:51:45Z","ok":true,"upstream":"2026-10-22","count":21365,"previous":21365,"delta":0,"warnings":[],"errors":[],"details":{"cardsCm":20836,"cardsPriced":21091,"cardsEn":1211,"imgNone":432,"cardsDoubt":1941,"sets":208}},
 
-"sealed":{"checked":"2026-10-22T09:23:58Z","ok":true,"upstream":"2026-10-22T02:45:11+0200","count":61,"previous":61,"delta":0,"warnings":[],"errors":[],"details":{"priced":58,"pricedBefore":58,"days":19}},
+"sealed":{"checked":"2026-10-23T09:20:23Z","ok":false,"upstream":"2026-10-22T02:45:11+0200","count":61,"previous":61,"delta":0,"warnings":[],"errors":["prix du 2026-10-22 : guide Cardmarket non renouvelé depuis 33 h"],"details":{"priced":58,"pricedBefore":58,"days":19}},
 
 "stores":{"checked":"2026-10-19T09:38:38Z","ok":true,"upstream":"2026-10-19","count":4117,"previous":4110,"delta":7,"warnings":[],"errors":[],"details":{"regions":{"11":596,"24":169,"27":204,"28":239,"32":325,"44":360,"52":257,"53":276,"75":437,"76":391,"84":510,"93":318,"94":35}}}}
