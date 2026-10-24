@@ -90,6 +90,17 @@
    "artist": "Cultura",
    "restrictions": ""
   },
+  "La Grande Récré": {
+   "file": "img/brands/la-grande-recre.png",
+   "wikidata": "",
+   "label": "La Grande Récré",
+   "description": "logo du site officiel de l’enseigne",
+   "commons": "https://lagranderecre-lagranderecre-fr-storage.omn.proximis.com/Imagestorage/images/2560/1600/6486ec3c097a1_Logo_LGR.png",
+   "source": "www.lagranderecre.fr",
+   "license": "marque déposée",
+   "artist": "La Grande Récré",
+   "restrictions": "trademarked"
+  },
   "Smyths Toys": {
    "file": "img/brands/smyths.png",
    "wikidata": "Q7546779",
@@ -99,6 +110,17 @@
    "source": "commons.wikimedia.org",
    "license": "Public domain",
    "artist": "Smyths",
+   "restrictions": "trademarked"
+  },
+  "Orchestra": {
+   "file": "img/brands/orchestra.svg",
+   "wikidata": "",
+   "label": "Orchestra",
+   "description": "logo du site officiel de l’enseigne",
+   "commons": "https://fr.shop-orchestra.com/on/demandware.static/-/Library-Sites-OrchestraSharedLibrary/default/dw5246eb4b/logo-orchestra-header-fr.svg",
+   "source": "fr.shop-orchestra.com",
+   "license": "marque déposée",
+   "artist": "Orchestra",
    "restrictions": "trademarked"
   },
   "Espace Culturel E.Leclerc": {
