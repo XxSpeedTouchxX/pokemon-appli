@@ -4,7 +4,7 @@ import { withFonts, launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
-  geolocation: { latitude: 48.8566, longitude: 2.3522 }, permissions: ['geolocation'] });
+  geolocation: { latitude: 49.2583, longitude: 4.0317 }, permissions: ['geolocation'] }); // Reims : enseignes et indépendants
 await withFonts(ctx);
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?today=2026-10-24&debug#radar', { waitUntil: 'load' });
@@ -46,7 +46,18 @@ const title = await page.locator('#pkm-radar-sheet h2').first().innerText();
 ok('zone : ' + title, /Ma zone · 15 km/.test(title));
 await page.waitForTimeout(2500);
 ok('pop-ups retirés après le balayage', (await page.locator('.pkm-pop').count()) === 0);
-await page.locator('#pkm-radar-sheet button[aria-label*="indice"]').first().click(); await page.waitForTimeout(800);
+if (mapOn) {
+  // Les logos restent sur la carte après le scan (2026-10-24), sans se chevaucher.
+  const kept = await page.evaluate(() => window.__pkmRadar.map.queryRenderedFeatures({ layers: ['stores-logo'] }).map(f => f.properties.logo));
+  ok('logos restés sur la carte après le scan : ' + kept.length + ' (' + [...new Set(kept)].slice(0, 4).join(', ') + ')', kept.length > 0);
+  await page.screenshot({ path: shot('radar-2b-logos.png') });
+}
+// Logos en face des boutiques dans la liste des résultats.
+ok('liste : logos en face des boutiques (' + await page.locator('#pkm-radar-sheet button[aria-label*="indice"] img[src^="img/brands/"]').count() + ')',
+  (await page.locator('#pkm-radar-sheet button[aria-label*="indice"] img[src^="img/brands/"]').count()) > 0);
+await page.screenshot({ path: shot('radar-2c-liste.png') });
+await page.locator('#pkm-radar-sheet button[aria-label*="indice"]:has(img[src^="img/brands/"])').first().click(); await page.waitForTimeout(800);
+ok('fiche : logo de l’enseigne en bas', (await page.locator('#pkm-radar-sheet [role="img"][aria-label^="Enseigne"] img[src^="img/brands/"]').count()) === 1);
 const acts = await page.locator('[aria-label="Actions de la boutique"] > a, [aria-label="Actions de la boutique"] > button').allInnerTexts();
 ok('fiche : 4 bulles ' + acts.join(', '), acts.join(',') === 'Itinéraire,Activer une alerte,Site,Appeler');
 await page.click('[aria-label="Actions de la boutique"] button[aria-pressed]'); await page.waitForTimeout(300);

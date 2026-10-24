@@ -29,6 +29,7 @@ const txt = await page.locator(SEC).innerText();
 ok('avec position : « N boutiques à moins de 20 km »', /\d+ boutiques? à moins de 20 km/.test(txt));
 const rows = page.locator(SEC + ' button[aria-label$="Ouvrir la fiche"]');
 ok('3 boutiques les plus proches : ' + await rows.count(), (await rows.count()) === 3);
+ok('logo ou pictogramme en face de chaque boutique', (await rows.evaluateAll(l => l.filter(b => b.querySelector('span[aria-hidden="true"] img, span[aria-hidden="true"] svg')).length)) === 3);
 ok('ligne : nom, ville, distance, indice en %', /chance estimée \d+ %/.test(await rows.first().getAttribute('aria-label')) && /\d+\s?%/.test(await rows.first().innerText()));
 ok('aucun badge partenaire', !/[Pp]artenaire/.test(txt));
 await page.locator(SEC).scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('homeradar-2-proches.png') });

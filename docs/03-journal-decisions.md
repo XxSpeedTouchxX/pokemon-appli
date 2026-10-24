@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-10-24 (fin) — Logos sur la carte, dans les listes et la fiche ; couleurs de la chance ; La Grande Récré et Orchestra
+
+- **Demande du porteur :**
+  - les logos restent sur la carte après le scan ;
+  - logo de l'enseigne en bas de la fiche d'une boutique ;
+  - logos en face des boutiques dans la liste de l'accueil ;
+  - couleur selon la chance : rouge 0-20 %, orange 20-40 %, vert clair 40-60 %, vert foncé 60-80 % ;
+  - logos de La Grande Récré et d'Orchestra « coûte que coûte ».
+- **Fait :**
+  - logos gardés sur la carte après le scan, sans chevauchement (d'autres apparaissent en zoomant) ;
+  - logo en bas de la fiche ; logo (ou pictogramme pour une boutique indépendante) en face des boutiques sur l'accueil, dans Territoire et dans les résultats du Radar ;
+  - 4 couleurs de chance partout (points, légende, listes, fiches) ; libellés Faible, Moyenne, Bonne, Forte ; vert foncé ajusté à #2BC06A pour la lisibilité ;
+  - La Grande Récré et Orchestra : logos pris sur leurs sites officiels (absents de Wikimedia et Wikipédia), recadrés ;
+  - Orchestra (mode enfant et puériculture) ajoutée aux enseignes suivies dans OpenStreetMap (Wikidata Q28042940, type « Mode enfant et puériculture », indice de base faible : 10 points) ; ses magasins arrivent avec la synchronisation des boutiques.
+- **Point d'attention :** logos de marques déposées (H3), pris aussi sur les sites des enseignes.
+
 ## 2026-10-24 (suite) — Vrais logos des enseignes ; Radar ouvert sur 5 km
 
 - **Demande du porteur :** les vrais logos des enseignes dans les pop-ups du Radar ; le Radar s'ouvre par défaut à 5 km.

@@ -62,6 +62,8 @@
       hasHours: !!st.hours, hoursState: now ? now.label : 'Horaires', hoursColor: now ? (now.open ? 'var(--pkm-green)' : 'var(--pkm-t3)') : 'var(--pkm-t2)',
       hoursText: RadarCore.hoursText(st.hours) + (hours ? '' : ' (horaires OpenStreetMap)'),
       hasAddress: !!st.address, address: st.address || '',
+      // Logo de l'enseigne en bas de la fiche (2026-10-24, demande du porteur).
+      lg: RADAR.logoOf(st), hasBrand: !!(RADAR.logos[st.brand] || RADAR.brand(st)), brandAria: 'Enseigne : ' + (st.brand || ''),
       alertOn: on, alertLabel: on ? 'Alerte activée' : 'Activer une alerte', toggleAlert: () => this.radarAlert(st.id),
       alertBg: on ? 'var(--pkm-accent)' : 'transparent', alertFg: on ? 'var(--pkm-on-accent)' : 'var(--pkm-t1)',
       // Alerte de stock demandée par le porteur : le stock en ligne des boutiques n'est pas encore suivi (aucune source
@@ -133,7 +135,7 @@
       rows: rows.slice(0, TER_LIST).map((x, i) => {
         const lv = this.probLevel(x.c.pct), k = RadarCore.KINDS[x.st.kind] || RadarCore.KINDS.collec;
         return {
-          name: x.st.name, sub: [x.st.brand && x.st.brand !== x.st.name ? x.st.brand : k.label, x.st.city].filter(Boolean).join(' · '),
+          name: x.st.name, lg: RADAR.logoOf(x.st), sub: [x.st.brand && x.st.brand !== x.st.name ? x.st.brand : k.label, x.st.city].filter(Boolean).join(' · '),
           dist: this.km(Math.round(x.d * 10) / 10), hasNow: !!x.now, now: x.now ? x.now.label.split(' · ')[0] : '', nowColor: x.now && x.now.open ? 'var(--pkm-green)' : 'var(--pkm-t3)',
           pct: x.c.pct + ' %', level: lv.label, color: lv.color, tint: lv.tint, border: i === 0 ? 'none' : '1px solid var(--pkm-line)',
           label: x.st.name + ', ' + this.km(Math.round(x.d * 10) / 10) + (x.now ? ', ' + x.now.label : '') + ', chance ' + lv.label.toLowerCase() + ' ' + x.c.pct + ' %',

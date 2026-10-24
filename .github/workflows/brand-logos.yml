@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Logos
-        run: python tools/brands/fetch_logos.py
+        run: pip install --quiet pillow && python tools/brands/fetch_logos.py
       - name: Commit
         run: |
           git add web/img/brands

@@ -196,7 +196,7 @@
     const near = rows.slice(0, HOME_NEAR).map((x, i) => {
       const city = x.st.city || ((RADAR.dept[x.st.dept] || {}).nom || ''), d = this.km(Math.round(x.d * 10) / 10);
       return {
-        name: x.st.name, sub: [city, d].filter(Boolean).join(' · '), pct: x.c.pct + '\u00a0%', color: this.probLevel(x.c.pct).color,
+        name: x.st.name, lg: RADAR.logoOf(x.st), sub: [city, d].filter(Boolean).join(' · '), pct: x.c.pct + '\u00a0%', color: this.probLevel(x.c.pct).color,
         border: i ? '1px solid #1E2B45' : '0', label: x.st.name + ', ' + city + ', à ' + d + ', chance estimée ' + x.c.pct + ' %. Ouvrir la fiche',
         open: () => this.push('shop', { shopId: x.st.id, swhy: false })
       };

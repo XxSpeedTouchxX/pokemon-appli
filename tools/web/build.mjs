@@ -498,6 +498,9 @@ ${named ? `<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 19p
 <div style="display: flex; flex-direction: column; gap: 2px; padding: 11px 14px; border-radius: 16px; border: 1px solid #1E2B45"><span style="font-size: 13.5px; font-weight: 700; color: {{ ${o}.hoursColor }}">{{ ${o}.hoursState }}</span><span style="font-size: 12.5px; line-height: 1.45; color: #C9D3EA">{{ ${o}.hoursText }}</span></div>
 </sc-if>
 <sc-if value="{{ ${o}.hasAddress }}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA">{{ ${o}.address }}</p></sc-if>
+<sc-if value="{{ ${o}.hasBrand }}" hint-placeholder-val="{{ true }}">
+<div aria-label="{{ ${o}.brandAria }}" role="img" style="align-self: center; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 4px"><span style="width: 168px; height: 64px; box-sizing: border-box; padding: 10px 16px; border-radius: 16px; background: {{ ${o}.lg.bg }}; color: {{ ${o}.lg.fg }}; display: flex; align-items: center; justify-content: center; overflow: hidden"><sc-if value="{{ ${o}.lg.img }}" hint-placeholder-val="{{ true }}"><img src="{{ ${o}.lg.src }}" alt="" style="display: block; max-width: 100%; max-height: 100%; object-fit: contain"></sc-if><sc-if value="{{ ${o}.lg.text }}" hint-placeholder-val="{{ false }}"><span style="font-size: 17px; font-weight: 800">{{ ${o}.lg.t }}</span></sc-if></span></div>
+</sc-if>
 <div style="display: flex; flex-wrap: wrap; gap: 4px 18px"><a href="{{ ${o}.osm }}" target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; line-height: 2; color: #B9C5FF">Voir la fiche OpenStreetMap</a><a href="{{ ${o}.report }}" target="_blank" rel="noopener noreferrer" style="font-size: 12.5px; line-height: 2; color: #B9C5FF">Signaler une erreur</a></div>
 </section>`;
 patch('<!-- fiche boutique : rd.st -->', SHOP_BODY('rd.st'));

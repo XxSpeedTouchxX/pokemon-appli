@@ -92,6 +92,25 @@ def frwiki_logo(article, term):
     return good[0] if good else None
 
 
+def trim(path):
+    """Logo d'un site : marges transparentes retirées et 320 px au plus (Pillow, s'il est installé)."""
+    if not re.search(r'\.(png|webp|jpg)$', path):
+        return
+    try:
+        from PIL import Image
+        from PIL import ImageChops
+        im = Image.open(path).convert('RGBA')
+        # Contenu : pixels opaques et pas presque blancs (marges transparentes ou blanches retirées).
+        ink = ImageChops.difference(im.convert('RGB'), Image.new('RGB', im.size, (255, 255, 255))).convert('L').point(lambda v: 255 if v > 24 else 0)
+        box = ImageChops.multiply(ink, im.getchannel('A').point(lambda a: 255 if a > 8 else 0)).getbbox()
+        if box:
+            im = im.crop(box)
+        im.thumbnail((320, 320))
+        im.save(path)
+    except Exception as e:  # noqa: BLE001 - logo gardé tel quel
+        print('   recadrage impossible :', e)
+
+
 def fetch(url, ua=None):
     req = urllib.request.Request(url, headers={'User-Agent': ua or BROWSER, 'Accept': '*/*', 'Accept-Language': 'fr-FR,fr;q=0.9'})
     with urllib.request.urlopen(req, timeout=30) as r:
@@ -163,6 +182,7 @@ def main():
                 name = slug + '.' + ext
                 with open(os.path.join(OUT, name), 'wb') as f:
                     f.write(data)
+                trim(os.path.join(OUT, name))
                 result[brand] = {'file': 'img/brands/' + name, 'wikidata': '', 'label': brand, 'description': 'logo du site officiel de l’enseigne',
                                  'commons': url, 'source': urllib.parse.urlparse(SITES[brand]).netloc, 'license': 'marque déposée', 'artist': brand, 'restrictions': 'trademarked'}
                 continue

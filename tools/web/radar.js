@@ -19,16 +19,20 @@
   const FRANCE_BOX = [-5.2, 41.3, 9.6, 51.1];
   const TURN = 4200; // durée d'un tour de faisceau (ms), assez lente pour lire les pop-ups des enseignes
   const KMS = ['5', '15', '30'];
-  const LEVEL_COLOR = ['#9AA8C3', '#F5B14C', '#3DDC84'];
+  // Couleur selon la chance (2026-10-24, demande du porteur) : rouge sous 20 %, orange de 20 à 40 %, vert clair de
+  // 40 à 60 %, vert foncé à partir de 60 %. Mêmes seuils pour les points de la carte, les listes et les fiches.
+  const PROB = [[60, 'Forte', '#2BC06A', 'rgba(43, 192, 106, 0.18)'], [40, 'Bonne', '#9BE15D', 'rgba(155, 225, 93, 0.16)'],
+    [20, 'Moyenne', '#F5B14C', 'rgba(245, 177, 76, 0.16)'], [0, 'Faible', '#FF6B6B', 'rgba(255, 107, 107, 0.16)']];
+  const LEVEL_COLOR = PROB.map(p => p[2]).reverse();
+  proto.probLevel = function (n) { const p = PROB.find(q => n >= q[0]) || PROB[PROB.length - 1]; return { label: p[1], color: p[2], tint: p[3] }; };
   // Noms courts des régions pour le fil « France › région › département ».
   const REGION_SHORT = { 84: 'Auvergne-Rhône-A.', 27: 'Bourgogne-F.-C.', 93: 'PACA', 75: 'Nouvelle-Aquitaine', 24: 'Centre-Val de L.', 32: 'Hauts-de-France', 52: 'Pays de la Loire' };
   const ATTRIBUTION = '© OpenStreetMap · OpenMapTiles · OpenFreeMap · IGN';
   try { if (/[?&]debug\b/.test(location.search)) window.__pkmRadar = RADAR; } catch (e) { /* adresse sans paramètres */ }
   const reducedMotion = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
   const fmt = n => Number(n).toLocaleString('fr-FR');
-  const lvlOf = pct => (pct >= 70 ? 2 : pct >= 40 ? 1 : 0);
-  // Badges des enseignes (pop-ups du balayage) : nom et couleurs de l'enseigne, dessinés par l'app. Les logos
-  // officiels sont des marques des enseignes : à n'utiliser qu'après vérification (docs/14, H3).
+  const lvlOf = pct => (pct >= 60 ? 3 : pct >= 40 ? 2 : pct >= 20 ? 1 : 0);
+  // Enseignes suivies : badge de secours (nom et couleurs) si leur logo (img/brands/) ne se charge pas.
   const BRANDS = {
     'E.Leclerc': { t: 'E.Leclerc', bg: '#FFFFFF', fg: '#0055A4', mk: '#F39200' },
     'Espace Culturel E.Leclerc': { t: 'E.Leclerc Culture', bg: '#FFFFFF', fg: '#0055A4', mk: '#F39200' },
@@ -40,10 +44,19 @@
     'Fnac': { t: 'fnac', bg: '#F9B000', fg: '#111111', mk: '#111111' },
     'Cultura': { t: 'cultura', bg: '#6D2C8F', fg: '#FFFFFF', mk: '#F28C00' },
     'La Grande Récré': { t: 'La Grande Récré', bg: '#FFFFFF', fg: '#C8006A', mk: '#00A0E3' },
-    'Smyths Toys': { t: 'Smyths Toys', bg: '#0047BB', fg: '#FFFFFF', mk: '#FFD100' }
+    'Smyths Toys': { t: 'Smyths Toys', bg: '#0047BB', fg: '#FFFFFF', mk: '#FFD100' },
+    'Orchestra': { t: 'Orchestra', bg: '#FFFFFF', fg: '#E3001B', mk: '#E3001B' }
   };
   RADAR.brand = st => BRANDS[st.brand] || null;
   RADAR.logos = {};
+  // Logo d'une boutique pour les listes et la fiche : vrai logo, sinon badge aux couleurs de l'enseigne, sinon
+  // pictogramme de boutique indépendante.
+  RADAR.logoOf = st => {
+    const l = st && RADAR.logos[st.brand], b = st && BRANDS[st.brand];
+    if (l) return { img: true, src: l.file, text: false, icon: false, t: '', bg: 'rgb(255, 255, 255)', fg: '', name: st.brand };
+    if (b) return { img: false, src: '', text: true, icon: false, t: b.t, bg: b.bg, fg: b.fg, name: st.brand };
+    return { img: false, src: '', text: false, icon: true, t: '', bg: 'rgba(94, 224, 207, 0.1)', fg: 'var(--pkm-teal)', name: '' };
+  };
 
   // Date du jour (réelle) ; ?today=AAAA-MM-JJ pour les tests.
   RADAR.today = realToday;
@@ -245,23 +258,65 @@
     map.addLayer({ id: 'around-fill', type: 'fill', source: 'around', paint: { 'fill-color': '#5EE0CF', 'fill-opacity': 0.06 } });
     map.addLayer({ id: 'around-line', type: 'line', source: 'around', paint: { 'line-color': '#5EE0CF', 'line-width': 1.6, 'line-dasharray': [2, 2], 'line-opacity': 0.8 } });
     const on = ['boolean', ['feature-state', 'on'], false], pick = ['boolean', ['feature-state', 'sel'], false];
-    const col = ['match', ['get', 'lvl'], 2, LEVEL_COLOR[2], 1, LEVEL_COLOR[1], LEVEL_COLOR[0]];
+    const col = ['match', ['get', 'lvl'], 3, LEVEL_COLOR[3], 2, LEVEL_COLOR[2], 1, LEVEL_COLOR[1], LEVEL_COLOR[0]];
     map.addLayer({ id: 'stores-halo', type: 'circle', source: 'stores', paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 6, 12, 14], 'circle-color': col,
       'circle-opacity': ['case', pick, 0.45, on, 0.18, 0] } });
     // Taille selon le zoom : MapLibre n'accepte le zoom qu'en tête d'expression (sinon la couche est refusée et les
     // points n'apparaissent pas) ; l'état (choisie, révélée, niveau) se décide à chaque palier de zoom.
-    const radius = k => ['case', pick, 9, ['!', on], k(2.4, 6), ['match', ['get', 'lvl'], 2, k(4.6, 9), 1, k(3.8, 8), k(2.6, 6.5)]];
+    const radius = k => ['case', pick, 9, ['!', on], k(2.4, 6), ['match', ['get', 'lvl'], 3, k(4.6, 9), 2, k(4.2, 8.5), 1, k(3.6, 7.5), k(3, 6.5)]];
     map.addLayer({ id: 'stores-dot', type: 'circle', source: 'stores', paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, radius(a => a), 10, radius(a => a * 1.7), 14, radius((a, b) => b)],
-      'circle-color': ['case', on, col, '#5A6B8C'], 'circle-opacity': ['case', on, ['match', ['get', 'lvl'], 0, 0.75, 1], 0.5],
+      'circle-color': ['case', on, col, '#5A6B8C'], 'circle-opacity': ['case', on, 1, 0.5],
       'circle-stroke-color': ['case', pick, '#FFFFFF', '#0B1120'], 'circle-stroke-width': ['case', pick, 2.5, 1.2] } });
+    map.addLayer({ id: 'stores-logo', type: 'symbol', source: 'stores', filter: ['has', 'logo'], layout: {
+      visibility: 'none', 'icon-image': ['get', 'logo'], 'icon-anchor': 'bottom', 'icon-offset': [0, -6], 'icon-padding': 2,
+      'icon-allow-overlap': false, 'symbol-sort-key': ['-', 10, ['get', 'lvl']] } });
+    map.on('styleimagemissing', () => { /* logo pas encore prêt : il apparaît dès son chargement */ });
+    logoImages(map);
   }
+  // Logos restés sur la carte après le scan (2026-10-24, demande du porteur) : une image par enseigne (vrai logo sur
+  // fond blanc, sinon badge), placée par MapLibre sans chevauchement ; d'autres apparaissent en zoomant.
+  function logoImages(map) {
+    const make = (name, draw, w) => {
+      const r = 2, h = 30, c = document.createElement('canvas');
+      c.width = Math.round(w * r); c.height = h * r;
+      const g = c.getContext('2d');
+      g.scale(r, r);
+      draw(g, w, h);
+      try { if (!map.hasImage('brand:' + name)) map.addImage('brand:' + name, g.getImageData(0, 0, c.width, c.height), { pixelRatio: r }); } catch (e) { /* image déjà là */ }
+    };
+    const box = (g, w, h, bg) => {
+      g.fillStyle = bg; g.strokeStyle = 'rgba(11, 17, 32, 0.25)'; g.lineWidth = 1;
+      g.beginPath(); g.roundRect ? g.roundRect(0.5, 0.5, w - 1, h - 1, 7) : g.rect(0.5, 0.5, w - 1, h - 1); g.fill(); g.stroke();
+    };
+    Object.keys(BRANDS).forEach(name => {
+      const b = BRANDS[name], l = RADAR.logos[name];
+      if (l) {
+        const img = new Image();
+        img.onload = () => {
+          const ih = 20, iw = Math.min(104, img.naturalWidth * ih / img.naturalHeight), w = Math.round(iw + 14);
+          make(name, (g, W, H) => { box(g, W, H, '#FFFFFF'); g.drawImage(img, (W - iw) / 2, (H - ih) / 2, iw, ih); }, w);
+        };
+        img.src = l.file;
+      } else {
+        const g0 = document.createElement('canvas').getContext('2d');
+        g0.font = '800 12px "Plus Jakarta Sans", system-ui, sans-serif';
+        const w = Math.round(g0.measureText(b.t).width + 30);
+        make(name, (g, W, H) => {
+          box(g, W, H, b.bg);
+          g.fillStyle = b.mk; g.fillRect(8, H / 2 - 4, 8, 8);
+          g.fillStyle = b.fg; g.font = '800 12px "Plus Jakarta Sans", system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText(b.t, 21, H / 2 + 0.5);
+        }, w);
+      }
+    });
+  }
+
   function onClick(inst, e) {
     const s = inst.st(), map = RADAR.map;
     if (!map) return;
     const box = [[e.point.x - 8, e.point.y - 8], [e.point.x + 8, e.point.y + 8]];
-    const st = map.queryRenderedFeatures(box, { layers: ['stores-dot'] })[0];
+    const st = map.queryRenderedFeatures(e.point, { layers: ['stores-logo'] })[0] || map.queryRenderedFeatures(box, { layers: ['stores-dot'] })[0];
     // Pendant le balayage, une boutique déjà apparue s'ouvre tout de suite (le balayage se termine).
     if (st && (s.rscan !== 'scanning' || (map.getFeatureState({ source: 'stores', id: st.properties.id }) || {}).on)) { inst.radarStore(st.properties.id); return; }
     if (s.rscan === 'scanning') return;
@@ -327,12 +382,14 @@
     if (dataKey !== RADAR.dataKey) {
       RADAR.dataKey = dataKey;
       map.getSource('stores').setData({ type: 'FeatureCollection', features: rows.map(r => ({
-        type: 'Feature', properties: { id: r.st.id, lvl: r.lvl }, geometry: { type: 'Point', coordinates: [r.st.lon, r.st.lat] } })) });
+        type: 'Feature', properties: Object.assign({ id: r.st.id, lvl: r.lvl }, BRANDS[r.st.brand] ? { logo: 'brand:' + r.st.brand } : {}), geometry: { type: 'Point', coordinates: [r.st.lon, r.st.lat] } })) });
       map.removeFeatureState({ source: 'stores' });
       RADAR.sel = '';
       if (s.rscan === 'done') setStates('stores', rows.map(r => r.st.id), 'on', true);
     }
     if (RADAR.el) RADAR.el.classList.toggle('pkm-scanned', s.rscan === 'scanning' || s.rscan === 'done');
+    const logosOn = s.rscan === 'done' ? 'visible' : 'none';
+    if (map.getLayoutProperty('stores-logo', 'visibility') !== logosOn) map.setLayoutProperty('stores-logo', 'visibility', logosOn);
     if (s.rstore !== RADAR.sel) {
       if (RADAR.sel && RADAR.byId[RADAR.sel]) map.setFeatureState({ source: 'stores', id: RADAR.sel }, { sel: false });
       RADAR.sel = s.rstore || '';
@@ -529,6 +586,7 @@
       // Produit recherché (2026-10-24) : une bulle à la fois, un second appui la retire (toutes les boutiques).
       prods: [['BST', 'Booster'], ['ETB', 'ETB'], ['UPC', 'UPC'], ['other', 'Autres items']].map(([k, label]) => chip(s.rprod === k, label, () => this.setState({ rprod: s.rprod === k ? '' : k }))),
       sheetMax: listMode ? 'calc(100% - 118px)' : '42%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
+      legend: PROB.map(p => ({ label: p[0] >= 60 ? '60 %+' : p[0] ? p[0] + '-' + (p[0] + 20) + ' %' : '< 20 %', color: p[2] })),
       msg: s.rmsg || '', hasMsg: !!s.rmsg, scanning: scanning, attribution: ATTRIBUTION,
       radii: KMS.map(k => chip(String(s.rkm) === k && s.rlevel === 'around', k + ' km', () => this.radarKm(k))),
       hasRadii: true,
@@ -563,15 +621,15 @@
       r.results = top.map((x, i) => {
         const lv = this.probLevel(x.pct), k = RadarCore.KINDS[x.st.kind] || RadarCore.KINDS.collec;
         return {
-          name: x.st.name, kind: k.label + (x.st.brand && x.st.brand !== x.st.name ? ' · ' + x.st.brand : ''),
+          name: x.st.name, kind: k.label + (x.st.brand && x.st.brand !== x.st.name ? ' · ' + x.st.brand : ''), lg: RADAR.logoOf(x.st),
           place: [x.st.city, (RADAR.dept[x.st.dept] || {}).nom].filter(Boolean).join(' · ') + (x.dist !== null ? ' · ' + this.km(Math.round(x.dist * 10) / 10) : ''),
           pct: x.pct + ' %', color: lv.color, tint: lv.tint, level: lv.label, border: i ? '1px solid var(--pkm-line)' : 'none',
           label: x.st.name + ', indice ' + x.pct + ' %, ' + lv.label.toLowerCase(), open: () => this.radarStore(x.st.id)
         };
       });
       r.hasResults = r.results.length > 0;
-      const strong = rows.filter(x => x.pct >= 70).length, mid = rows.filter(x => x.pct >= 40 && x.pct < 70).length;
-      r.resultsTitle = fmt(rows.length) + (rows.length > 1 ? ' boutiques balayées' : ' boutique balayée') + ' · ' + strong + ' forte' + (strong > 1 ? 's' : '') + ', ' + mid + ' moyenne' + (mid > 1 ? 's' : '') + (rows.length > 40 ? ' · les 40 meilleures' : '');
+      const strong = rows.filter(x => x.pct >= 60).length, good = rows.filter(x => x.pct >= 40 && x.pct < 60).length;
+      r.resultsTitle = fmt(rows.length) + (rows.length > 1 ? ' boutiques balayées' : ' boutique balayée') + ' · ' + strong + ' forte' + (strong > 1 ? 's' : '') + ', ' + good + ' bonne' + (good > 1 ? 's' : '') + (rows.length > 40 ? ' · les 40 meilleures' : '');
     }
     r.noScan = !r.canScan;
     // Bouton bleu-vert (2026-10-24, demande du porteur).
