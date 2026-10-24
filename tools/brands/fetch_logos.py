@@ -60,6 +60,26 @@ def norm(s):
     return re.sub(r'[^a-z0-9]', '', s.lower().replace('é', 'e').replace('è', 'e'))
 
 
+def current_logo(claims):
+    """Logo actuel : rang « préféré », sinon un logo sans date de fin (P582), sinon le dernier."""
+    ok = [c for c in claims if c.get('rank') != 'deprecated' and c['mainsnak'].get('datavalue')]
+    pref = [c for c in ok if c.get('rank') == 'preferred']
+    live = [c for c in ok if 'P582' not in c.get('qualifiers', {})]
+    pick = (pref or live or ok or [None])[-1]
+    return pick['mainsnak']['datavalue']['value'] if pick else None
+
+
+def commons_logo(term):
+    """Repli : un fichier « logo » de l'enseigne sur Wikimedia Commons (SVG d'abord, logos datés en dernier)."""
+    hits = get('https://commons.wikimedia.org/w/api.php?' + urllib.parse.urlencode({
+        'action': 'query', 'list': 'search', 'srnamespace': 6, 'srsearch': term + ' logo', 'srlimit': 20, 'format': 'json'}))
+    titles = [h['title'][5:] for h in hits.get('query', {}).get('search', [])]
+    good = [x for x in titles if norm(term) in norm(x) and 'logo' in x.lower() and re.search(r'\.(svg|png)$', x, re.I)]
+    print('   Commons :', ', '.join(good[:6]) or 'rien')
+    good.sort(key=lambda x: (bool(re.search(r'(19|20)\d\d', x)), not x.lower().endswith('.svg'), len(x)))
+    return good[0] if good else None
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     result, missing = {}, []
@@ -72,9 +92,13 @@ def main():
             logos = ent.get('claims', {}).get('P154', [])
             desc = (ent.get('descriptions', {}).get('fr') or ent.get('descriptions', {}).get('en') or {}).get('value', '')
             print('  ', qid, label, '·', desc, '· logo' if logos else '')
-            if logos and norm(term) in norm(label):
-                pick = (qid, label, desc, logos[0]['mainsnak']['datavalue']['value'])
+            if logos and norm(term) in norm(label) and current_logo(logos):
+                pick = (qid, label, desc, current_logo(logos))
                 break
+        if not pick:
+            f = commons_logo(term)
+            if f:
+                pick = ('', term, 'fichier trouvé sur Wikimedia Commons', f)
         if not pick:
             missing.append(brand); continue
         qid, label, desc, file = pick
