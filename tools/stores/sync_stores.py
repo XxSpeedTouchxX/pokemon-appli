@@ -66,11 +66,14 @@ BRANDS = {
     "Q3187152": ("jouets", "JouéClub"), "Q3197009": ("jouets", "King Jouet"),
     "Q3209556": ("jouets", "La Grande Récré"), "Q7546779": ("jouets", "Smyths Toys"),
     "Q1273376": ("hyper", "E.Leclerc"), "Q217599": ("hyper", "Carrefour"), "Q758603": ("hyper", "Auchan"),
+    # Orchestra (mode enfant et puériculture, rayon jouets) : demande du porteur du 2026-10-24.
+    "Q28042940": ("enfant", "Orchestra"),
 }
 SHOPS = {"trading_cards": "cartes", "games": "jeux", "video_games": "jv", "toys": "jouets",
          "comic": "bd", "anime": "bd", "collector": "collec"}
 KINDS = {"cartes": "Boutique de cartes", "jeux": "Boutique de jeux", "jv": "Jeux vidéo", "jouets": "Magasin de jouets",
-         "culture": "Grande surface culturelle", "hyper": "Hypermarché", "bd": "BD et mangas", "collec": "Objets de collection"}
+         "culture": "Grande surface culturelle", "hyper": "Hypermarché", "bd": "BD et mangas", "collec": "Objets de collection",
+         "enfant": "Mode enfant et puériculture"}
 NOT_HYPER = r"\b(express|drive|market|city|contact|proxi|piéton|pieton|supermarché|supermarche|relais|station|montagne|bio|my auchan|location|voyages?)\b"
 EXCLUDED = r"warhammer|games workshop|\blego\b|playmobil|disney store|build.a.bear|oxybul|nature (?:&|et) d[ée]couvertes|b[ée]b[ée]|pu[ée]riculture|aubert"
 TCG_HINT = r"pok[ée]mon|\btcg\b|trading card|cartes? [àa] collectionner|jeux? de cartes|magic the gathering|\bmtg\b|yu.?gi.?oh|lorcana"
@@ -198,11 +201,11 @@ def classify(tags):
     name = (tags.get("name") or "").strip()
     shop = tags.get("shop") or ""
     text = " ".join(str(v) for k, v in tags.items() if k in ("name", "brand", "description", "operator", "shop"))
-    if not name or tags.get("disused:shop") or tags.get("access") == "private" or re.search(EXCLUDED, text, re.I):
+    brand = BRANDS.get(tags.get("brand:wikidata", ""))
+    if not name or tags.get("disused:shop") or tags.get("access") == "private" or (not brand and re.search(EXCLUDED, text, re.I)):
         return None
     if re.search(r"\b(fermé|closed)\b", tags.get("opening_hours", ""), re.I):
         return None
-    brand = BRANDS.get(tags.get("brand:wikidata", ""))
     if brand:
         kind, label = brand
         if label == "E.Leclerc" and shop == "books":

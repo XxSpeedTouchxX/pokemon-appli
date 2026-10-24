@@ -26,7 +26,12 @@ BRANDS = [
     ('Cultura', 'cultura', 'Cultura', 'Q142', 'Cultura'),
     ('La Grande Récré', 'la-grande-recre', 'La Grande Récré', 'Q142', 'La Grande Récré (magasin)'),
     ('Smyths Toys', 'smyths', 'Smyths', None, None),
+    ('Orchestra', 'orchestra', 'Orchestra', 'Q142', 'Orchestra Prémaman'),
 ]
+# Derniers replis (2026-10-24, demande du porteur) : logo publié sur le site officiel de l'enseigne, puis icône du site.
+SITES = {'La Grande Récré': 'https://www.lagranderecre.fr/', 'Orchestra': 'https://fr.shop-orchestra.com/',
+         'King Jouet': 'https://www.king-jouet.com/', 'JouéClub': 'https://www.joueclub.fr/', 'Cultura': 'https://www.cultura.com/'}
+BROWSER = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36'
 ALIAS = {'Espace Culturel E.Leclerc': 'E.Leclerc'}
 
 
@@ -87,6 +92,50 @@ def frwiki_logo(article, term):
     return good[0] if good else None
 
 
+def fetch(url, ua=None):
+    req = urllib.request.Request(url, headers={'User-Agent': ua or BROWSER, 'Accept': '*/*', 'Accept-Language': 'fr-FR,fr;q=0.9'})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return r.read(), r.headers.get('Content-Type', '')
+
+
+def site_logo(site):
+    """Logo du site officiel : une image dont la source, la classe ou le texte alternatif contient « logo »,
+    sinon l'icône Apple, sinon l'image de partage. Renvoie (octets, extension, adresse) ou None."""
+    try:
+        html = fetch(site)[0].decode('utf-8', 'replace')
+    except Exception as e:  # noqa: BLE001
+        print('   site injoignable :', e); html = ''
+    cands = []
+    for m in re.finditer(r'<img\b[^>]*>', html, re.I):
+        tag = m.group(0)
+        if re.search(r'logo', tag, re.I):
+            src = re.search(r'\b(?:src|data-src)=["\']([^"\']+)["\']', tag, re.I)
+            if src and not src.group(1).startswith('data:'):
+                cands.append(src.group(1))
+    for pat in (r'<link[^>]+rel=["\'][^"\']*apple-touch-icon[^"\']*["\'][^>]*href=["\']([^"\']+)', r'<meta[^>]+property=["\']og:image["\'][^>]*content=["\']([^"\']+)'):
+        cands += re.findall(pat, html, re.I)
+    for c in cands[:6]:
+        url = urllib.parse.urljoin(site, c.strip())
+        try:
+            data, ctype = fetch(url)
+        except Exception as e:  # noqa: BLE001
+            print('   échec', url, e); continue
+        ext = 'svg' if 'svg' in ctype or url.lower().split('?')[0].endswith('.svg') else 'png' if 'png' in ctype else 'webp' if 'webp' in ctype else 'jpg' if 'jpeg' in ctype else ''
+        if ext and len(data) > 300:
+            print('   site :', url, ctype, len(data), 'octets')
+            return data, ext, url
+    # Icône du site, grande taille (service public de Google).
+    host = urllib.parse.urlparse(site).netloc
+    try:
+        data, ctype = fetch('https://www.google.com/s2/favicons?domain=' + host + '&sz=256')
+        if len(data) > 600:
+            print('   icône du site :', host, len(data), 'octets')
+            return data, 'png', 'https://www.google.com/s2/favicons?domain=' + host + '&sz=256'
+    except Exception as e:  # noqa: BLE001
+        print('   icône indisponible :', e)
+    return None
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     result, missing = {}, []
@@ -107,6 +156,16 @@ def main():
             f = frwiki_logo(article, term)
             if f:
                 pick, wiki = ('', term, 'logo de l’article « ' + article + ' » de Wikipédia', f), 'fr.wikipedia.org'
+        if not pick and brand in SITES:
+            got = site_logo(SITES[brand])
+            if got:
+                data, ext, url = got
+                name = slug + '.' + ext
+                with open(os.path.join(OUT, name), 'wb') as f:
+                    f.write(data)
+                result[brand] = {'file': 'img/brands/' + name, 'wikidata': '', 'label': brand, 'description': 'logo du site officiel de l’enseigne',
+                                 'commons': url, 'source': urllib.parse.urlparse(SITES[brand]).netloc, 'license': 'marque déposée', 'artist': brand, 'restrictions': 'trademarked'}
+                continue
         if not pick:
             missing.append(brand); continue
         qid, label, desc, file = pick
@@ -129,7 +188,7 @@ def main():
     # Logos qui ne servent plus (enseigne retirée, mauvais fichier d'une version précédente) : supprimés.
     used = {os.path.basename(v['file']) for v in result.values()}
     for name in os.listdir(OUT):
-        if name.endswith('.png') and name not in used:
+        if re.search(r'\.(png|svg|webp|jpg)$', name) and name not in used:
             os.remove(os.path.join(OUT, name)); print('retiré :', name)
     with open(os.path.join(OUT, 'brands.json'), 'w', encoding='utf-8') as f:
         json.dump({'source': 'Wikidata (P154) et Wikimedia Commons', 'note': 'Marques de leurs propriétaires.', 'brands': result}, f, ensure_ascii=False, indent=1)

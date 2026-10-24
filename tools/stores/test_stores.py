@@ -23,6 +23,10 @@ class Classify(unittest.TestCase):
         self.assertEqual(classify({"name": "Micromania-Zing", "shop": "video_games", "brand:wikidata": "Q3312221"}), ("jv", "Micromania-Zing"))
         self.assertEqual(classify({"name": "E.Leclerc Espace Culturel", "shop": "books", "brand:wikidata": "Q1273376"}),
                          ("culture", "Espace Culturel E.Leclerc"))
+        # Orchestra (2026-10-24) : enseigne suivie malgré « puériculture » dans sa description.
+        self.assertEqual(classify({"name": "Orchestra", "shop": "clothes", "brand:wikidata": "Q28042940", "description": "Mode enfant et puériculture"}),
+                         ("enfant", "Orchestra"))
+        self.assertIsNone(classify({"name": "Bébé Center", "shop": "baby_goods"}))
 
     def test_hypermarkets_only(self):
         self.assertEqual(classify({"name": "E.Leclerc", "shop": "supermarket", "brand:wikidata": "Q1273376"}), ("hyper", "E.Leclerc"))

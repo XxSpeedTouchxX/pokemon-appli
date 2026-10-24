@@ -11,7 +11,8 @@
       jouets: { label: 'Magasin de jouets', base: 20, spec: false, why: 'cartes parfois au rayon jeux', chain: 35, chainWhy: 'rayon cartes fréquent dans ces enseignes' },
       jv: { label: 'Jeux vidéo', base: 30, spec: false, why: 'cartes souvent proposées à côté des jeux' },
       bd: { label: 'BD et mangas', base: 15, spec: false, why: 'cartes à collectionner plus rares' },
-      collec: { label: 'Objets de collection', base: 15, spec: false, why: 'stock variable, souvent de seconde main' }
+      collec: { label: 'Objets de collection', base: 15, spec: false, why: 'stock variable, souvent de seconde main' },
+      enfant: { label: 'Mode enfant et puériculture', base: 10, spec: false, why: 'petit rayon jouets, cartes rares' }
     };
     // Produit recherché : points selon le type de boutique (clé « other » pour les autres).
     const PRODUCTS = {
