@@ -123,6 +123,17 @@
    "artist": "Orchestra",
    "restrictions": "trademarked"
   },
+  "Maxi Toys": {
+   "file": "img/brands/maxi-toys.png",
+   "wikidata": "",
+   "label": "Maxi Toys",
+   "description": "logo du site officiel de l’enseigne",
+   "commons": "https://www.google.com/s2/favicons?domain=www.maxitoys.fr&sz=256",
+   "source": "www.maxitoys.fr",
+   "license": "marque déposée",
+   "artist": "Maxi Toys",
+   "restrictions": "trademarked"
+  },
   "Espace Culturel E.Leclerc": {
    "file": "img/brands/leclerc.png",
    "wikidata": "Q1273376",
