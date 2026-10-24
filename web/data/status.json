@@ -4,4 +4,4 @@
 
 "sealed":{"checked":"2026-10-24T08:51:51Z","ok":true,"upstream":"2026-10-24T02:45:46+0200","count":61,"previous":61,"delta":0,"warnings":[],"errors":[],"details":{"priced":58,"pricedBefore":58,"days":21}},
 
-"stores":{"checked":"2026-10-24T22:06:45Z","ok":true,"upstream":"2026-10-24","count":4241,"previous":4117,"delta":124,"warnings":[],"errors":[],"details":{"regions":{"11":612,"24":177,"27":213,"28":243,"32":343,"44":368,"52":267,"53":273,"75":458,"76":405,"84":522,"93":324,"94":36}}}}
+"stores":{"checked":"2026-10-24T22:51:35Z","ok":true,"upstream":"2026-10-24","count":4228,"previous":4241,"delta":-13,"warnings":[],"errors":[],"details":{"regions":{"11":612,"24":172,"27":213,"28":243,"32":343,"44":368,"52":264,"53":278,"75":448,"76":405,"84":522,"93":324,"94":36}}}}
