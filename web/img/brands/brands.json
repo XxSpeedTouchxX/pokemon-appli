@@ -8,6 +8,7 @@
    "label": "E.Leclerc",
    "description": "enseigne française de grande distribution",
    "commons": "https://commons.wikimedia.org/wiki/File:E.Leclerc_logo.svg",
+   "source": "commons.wikimedia.org",
    "license": "Public domain",
    "artist": "E.Leclerc",
    "restrictions": "trademarked"
@@ -16,10 +17,22 @@
    "file": "img/brands/carrefour.png",
    "wikidata": "",
    "label": "Carrefour",
-   "description": "fichier trouvé sur Wikimedia Commons",
-   "commons": "https://commons.wikimedia.org/wiki/File:Carrefour-Mobile-logo.svg",
-   "license": "Public domain",
-   "artist": "Carrefour S.A.",
+   "description": "logo de l’article « Carrefour (enseigne) » de Wikipédia",
+   "commons": "https://fr.wikipedia.org/wiki/Fichier:Logo_Carrefour.svg",
+   "source": "fr.wikipedia.org",
+   "license": "marque déposée",
+   "artist": "Groupe Carrefour",
+   "restrictions": ""
+  },
+  "King Jouet": {
+   "file": "img/brands/king-jouet.png",
+   "wikidata": "",
+   "label": "King Jouet",
+   "description": "logo de l’article « King Jouet » de Wikipédia",
+   "commons": "https://fr.wikipedia.org/wiki/Fichier:Logo_King_Jouet.svg",
+   "source": "fr.wikipedia.org",
+   "license": "marque déposée",
+   "artist": "Groupe King Jouet",
    "restrictions": ""
   },
   "Micromania-Zing": {
@@ -28,8 +41,20 @@
    "label": "Micromania-Zing",
    "description": "Magasin de vente de jeux vidéos",
    "commons": "https://commons.wikimedia.org/wiki/File:Logo_de_Micromania-Zing.svg",
+   "source": "commons.wikimedia.org",
    "license": "CC BY-SA 4.0",
    "artist": "Futurhit12",
+   "restrictions": ""
+  },
+  "JouéClub": {
+   "file": "img/brands/joueclub.png",
+   "wikidata": "",
+   "label": "JouéClub",
+   "description": "logo de l’article « JouéClub » de Wikipédia",
+   "commons": "https://fr.wikipedia.org/wiki/Fichier:Joueclub-logo.png",
+   "source": "fr.wikipedia.org",
+   "license": "marque déposée",
+   "artist": "inconnu",
    "restrictions": ""
   },
   "Auchan": {
@@ -38,6 +63,7 @@
    "label": "Auchan",
    "description": "entreprise française de grande distribution",
    "commons": "https://commons.wikimedia.org/wiki/File:Auchan_Retail_logo.svg",
+   "source": "commons.wikimedia.org",
    "license": "Public domain",
    "artist": "Auchan",
    "restrictions": "trademarked"
@@ -48,18 +74,9 @@
    "label": "Fnac",
    "description": "chaîne de magasins française",
    "commons": "https://commons.wikimedia.org/wiki/File:Fnac_Logo.svg",
+   "source": "commons.wikimedia.org",
    "license": "Public domain",
    "artist": "Unknown authorUnknown author",
-   "restrictions": "trademarked"
-  },
-  "Cultura": {
-   "file": "img/brands/cultura.png",
-   "wikidata": "",
-   "label": "Cultura",
-   "description": "fichier trouvé sur Wikimedia Commons",
-   "commons": "https://commons.wikimedia.org/wiki/File:Cultura_Inglesa_logo_(former).svg",
-   "license": "Public domain",
-   "artist": "Cultura Inglesa",
    "restrictions": "trademarked"
   },
   "Smyths Toys": {
@@ -68,6 +85,7 @@
    "label": "Smyths",
    "description": "chaîne de magasins de jouets",
    "commons": "https://commons.wikimedia.org/wiki/File:Smyths_Logo.svg",
+   "source": "commons.wikimedia.org",
    "license": "Public domain",
    "artist": "Smyths",
    "restrictions": "trademarked"
@@ -78,6 +96,7 @@
    "label": "E.Leclerc",
    "description": "enseigne française de grande distribution",
    "commons": "https://commons.wikimedia.org/wiki/File:E.Leclerc_logo.svg",
+   "source": "commons.wikimedia.org",
    "license": "Public domain",
    "artist": "E.Leclerc",
    "restrictions": "trademarked"
