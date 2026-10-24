@@ -12,6 +12,16 @@
    "artist": "E.Leclerc",
    "restrictions": "trademarked"
   },
+  "Carrefour": {
+   "file": "img/brands/carrefour.png",
+   "wikidata": "",
+   "label": "Carrefour",
+   "description": "fichier trouvé sur Wikimedia Commons",
+   "commons": "https://commons.wikimedia.org/wiki/File:Carrefour-Mobile-logo.svg",
+   "license": "Public domain",
+   "artist": "Carrefour S.A.",
+   "restrictions": ""
+  },
   "Micromania-Zing": {
    "file": "img/brands/micromania.png",
    "wikidata": "Q3312221",
@@ -27,7 +37,7 @@
    "wikidata": "Q758603",
    "label": "Auchan",
    "description": "entreprise française de grande distribution",
-   "commons": "https://commons.wikimedia.org/wiki/File:Logo_Auchan_(1961-1983).svg",
+   "commons": "https://commons.wikimedia.org/wiki/File:Auchan_Retail_logo.svg",
    "license": "Public domain",
    "artist": "Auchan",
    "restrictions": "trademarked"
@@ -40,6 +50,16 @@
    "commons": "https://commons.wikimedia.org/wiki/File:Fnac_Logo.svg",
    "license": "Public domain",
    "artist": "Unknown authorUnknown author",
+   "restrictions": "trademarked"
+  },
+  "Cultura": {
+   "file": "img/brands/cultura.png",
+   "wikidata": "",
+   "label": "Cultura",
+   "description": "fichier trouvé sur Wikimedia Commons",
+   "commons": "https://commons.wikimedia.org/wiki/File:Cultura_Inglesa_logo_(former).svg",
+   "license": "Public domain",
+   "artist": "Cultura Inglesa",
    "restrictions": "trademarked"
   },
   "Smyths Toys": {
