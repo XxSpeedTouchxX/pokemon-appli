@@ -50,6 +50,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - « Scanner les boutiques » lance le faisceau : chaque vraie boutique apparaît à sa direction réelle, avec son nom et sa ville, et devient cliquable à ce moment-là ;
    - un appui ouvre sa fiche ;
    - sans position : « Me localiser », ou le **logo radar animé** de l'encadré, juste au-dessus : un appui demande la position, puis le balayage part tout seul (logo immobile si l'utilisateur limite les animations) ;
+   - en descendant jusqu'à cette rubrique, la position est demandée sans appui (une fois par ouverture, rien si elle a déjà été refusée) : les repères des boutiques apparaissent tout de suite (2026-10-25, porteur) ;
    - « Carte de France » ouvre le Radar ; le lien « Voir la liste » est retiré (2026-10-25, porteur) : Territoire reste accessible par `?start=territory`.
 5. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
 

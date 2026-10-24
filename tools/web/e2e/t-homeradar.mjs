@@ -19,6 +19,20 @@ const main = page.locator(SEC + ' button[aria-label="Radar des boutiques : activ
 ok('sans position : bandeau « activer ma position »', (await main.count()) === 1);
 ok('mention de confidentialité', /ni enregistrée ni envoyée/.test(await page.locator(SEC).innerText()));
 await page.locator(SEC).scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('homeradar-1-sans-position.png') });
+// 1 bis. En descendant jusqu'au radar (2026-10-25, porteur) : la position est demandée sans appui, les repères apparaissent.
+page = await mk();
+await page.addInitScript(() => {
+  window.__geoAsks = 0;
+  Object.defineProperty(navigator, 'permissions', { value: { query: () => Promise.resolve({ state: 'prompt' }) } });
+  Object.defineProperty(navigator, 'geolocation', { value: { getCurrentPosition: ok => { window.__geoAsks++; setTimeout(() => ok({ coords: { latitude: 48.8566, longitude: 2.3522 } }), 50); } } });
+});
+await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1500);
+ok('pas de demande de position avant d’arriver au radar', (await page.evaluate(() => window.__geoAsks)) === 0);
+await page.locator(SEC).scrollIntoViewIfNeeded(); await page.waitForTimeout(400);
+await page.waitForSelector(SEC + ' .pkm-hr-pin', { timeout: 15000 }).catch(() => {});
+ok('arrivé au radar : position demandée sans appui (' + await page.evaluate(() => window.__geoAsks) + ' fois), repères affichés (' + await page.locator(SEC + ' .pkm-hr-pin').count() + ')',
+  (await page.evaluate(() => window.__geoAsks)) === 1 && (await page.locator(SEC + ' .pkm-hr-pin').count()) > 0);
+await page.screenshot({ path: shot('homeradar-1b-auto.png') });
 // 2. Position accordée (Paris).
 page = await mk({ geolocation: { latitude: 48.8566, longitude: 2.3522 }, permissions: ['geolocation'] });
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2000);

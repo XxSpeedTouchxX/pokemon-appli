@@ -211,6 +211,29 @@
     });
   };
 
+  // Petit radar de l'accueil (2026-10-25, porteur) : dès que l'utilisateur descend jusqu'à « Boutiques autour de toi »,
+  // la position est demandée sans attendre un appui, pour que les repères des boutiques apparaissent tout de suite.
+  // Une fois par ouverture de l'app ; rien si la position a déjà été refusée (l'appui sur le radar reste possible).
+  let homeRadarAsked = false, homeRadarObs = null;
+  const homeRadarWatch = inst => {
+    if (homeRadarAsked || homeRadarObs || typeof IntersectionObserver === 'undefined' || !navigator.geolocation) return;
+    setTimeout(() => {
+      const el = document.querySelector('section[aria-label="Boutiques près de toi"]');
+      if (!el || homeRadarAsked || homeRadarObs) return;
+      homeRadarObs = new IntersectionObserver(es => {
+        if (!es.some(e => e.isIntersecting)) return;
+        homeRadarObs.disconnect(); homeRadarObs = null;
+        if (homeRadarAsked) return;
+        homeRadarAsked = true;
+        const s = inst.state || {};
+        if (s.tpos || s.raround) return;
+        const ask = () => inst.terLocate(false);
+        if (navigator.permissions) navigator.permissions.query({ name: 'geolocation' }).then(p => { if (p.state !== 'denied') ask(); }).catch(ask);
+        else ask();
+      }, { threshold: 0.35 });
+      homeRadarObs.observe(el);
+    }, 0);
+  };
   const homeBaseView = proto.vHome;
   proto.vHome = function (x) {
     const r = homeBaseView.call(this, x);
@@ -218,7 +241,7 @@
     r.hs = this.homeSearch(x);
     r.hv = this.homeTrend(x, r.valueBig);
     r.hk = this.homeBinder(x);
-    if (!x.s.tpos && !x.s.raround) terAutoLocate(this); // autorisation déjà donnée : position retrouvée sans rien demander
+    if (!x.s.tpos && !x.s.raround) { terAutoLocate(this); homeRadarWatch(this); } // autorisation déjà donnée : position retrouvée sans rien demander
     r.hr = this.homeRadar(x.s);
     return r;
   };
