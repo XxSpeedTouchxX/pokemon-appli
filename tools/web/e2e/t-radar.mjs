@@ -27,17 +27,18 @@ await page.click('[aria-label="Produit recherché"] button:has-text("ETB")');
 ok('aucune bulle choisie', (await page.locator('[aria-label="Produit recherché"] button[aria-pressed="true"]').count()) === 0);
 await page.click('[aria-label="Produit recherché"] button:has-text("Autres items")');
 await page.click('[aria-label="Distance de la zone"] button:has-text("15 km")'); await page.waitForTimeout(300);
+await page.evaluate(() => { window.__popped = new Set(); new MutationObserver(m => m.forEach(r => r.addedNodes.forEach(n => { if (n.classList && n.classList.contains('pkm-popw')) window.__popped.add(n); }))).observe(document.body, { childList: true, subtree: true }); });
 await page.click('button:has-text("Scanner ma zone")');
 const mapOn = (await page.evaluate(() => window.__pkm.st().rmap)) === 'on';
 let pops = 0;
 if (mapOn) {
-  for (let i = 0; i < 30 && !pops; i++) { await page.waitForTimeout(150); pops = await page.locator('.pkm-pop').count(); }
+  for (let i = 0; i < 30 && !pops; i++) { await page.waitForTimeout(150); pops = await page.locator('.pkm-rpop').count(); }
   await page.waitForTimeout(600); await page.screenshot({ path: shot('radar-2-balayage.png') });
-  const labels = await page.locator('.pkm-pop').allInnerTexts();
+  const labels = await page.locator('.pkm-rpop').allInnerTexts();
   ok('pop-ups des boutiques pendant le balayage : ' + labels.slice(0, 4).join(', '), pops > 0);
   // Vrais logos des enseignes (img/brands/, Wikidata et Wikimedia Commons) quand l'enseigne en a un.
   const seen = new Set();
-  for (let i = 0; i < 40; i++) { (await page.locator('.pkm-pop.logo img').evaluateAll(l => l.filter(x => x.complete && x.naturalWidth > 0).map(x => x.getAttribute('src')))).forEach(x => seen.add(x)); await page.waitForTimeout(100); }
+  for (let i = 0; i < 40; i++) { (await page.locator('.pkm-rpop.logo img').evaluateAll(l => l.filter(x => x.complete && x.naturalWidth > 0).map(x => x.getAttribute('src')))).forEach(x => seen.add(x)); await page.waitForTimeout(100); }
   ok('logos d’enseigne affichés : ' + [...seen].join(', '), seen.size > 0);
 }
 await page.waitForSelector('#pkm-radar-sheet button[aria-label*="indice"]', { timeout: 15000 });
@@ -45,7 +46,13 @@ ok('carte : ' + (mapOn ? 'balayage avec pop-ups' : 'liste (sans WebGL)'), true);
 const title = await page.locator('#pkm-radar-sheet h2').first().innerText();
 ok('zone : ' + title, /Ma zone · 15 km/.test(title));
 await page.waitForTimeout(2500);
-ok('pop-ups retirés après le balayage', (await page.locator('.pkm-pop').count()) === 0);
+ok('pop-ups retirés après le balayage', (await page.locator('.pkm-rpop').count()) === 0);
+if (mapOn) {
+  // Chaque boutique trouvée a eu son pop-up (2026-10-24).
+  const popped = await page.evaluate(() => window.__popped.size), found = Number((title.match(/(\d+) boutiques? réelles?/) || (await page.locator('#pkm-radar-sheet').innerText()).match(/(\d+) boutiques? balayées?/) || [0, 0])[1]);
+  ok('un pop-up pour chaque boutique trouvée : ' + popped + ' / ' + found, popped > 0 && popped === found);
+}
+ok('« Probabilité » au-dessus des pourcentages', (await page.locator('#pkm-radar-sheet button[aria-label*="indice"] >> text=Probabilité').count()) > 0);
 if (mapOn) {
   // Les logos restent sur la carte après le scan (2026-10-24), sans se chevaucher.
   const kept = await page.evaluate(() => window.__pkmRadar.map.queryRenderedFeatures({ layers: ['stores-logo'] }).map(f => f.properties.logo));
@@ -57,13 +64,21 @@ ok('liste : logos en face des boutiques (' + await page.locator('#pkm-radar-shee
   (await page.locator('#pkm-radar-sheet button[aria-label*="indice"] img[src^="img/brands/"]').count()) > 0);
 await page.screenshot({ path: shot('radar-2c-liste.png') });
 await page.locator('#pkm-radar-sheet button[aria-label*="indice"]:has(img[src^="img/brands/"])').first().click(); await page.waitForTimeout(800);
-ok('fiche : logo de l’enseigne en bas', (await page.locator('#pkm-radar-sheet [role="img"][aria-label^="Enseigne"] img[src^="img/brands/"]').count()) === 1);
+const head = await page.locator('#pkm-radar-sheet h2').first().boundingBox(), lg = await page.locator('#pkm-radar-sheet [role="img"][aria-label^="Enseigne"]').boundingBox();
+ok('fiche : logo de l’enseigne à droite du nom', !!lg && (await page.locator('#pkm-radar-sheet [role="img"][aria-label^="Enseigne"] img[src^="img/brands/"]').count()) === 1
+  && lg.x > head.x + head.width - 2 && Math.abs((lg.y + lg.height / 2) - (head.y + head.height / 2)) < 14);
+ok('fiche : « Probabilité » au-dessus du pourcentage', /Probabilité/i.test(await page.locator('#pkm-radar-sheet section').first().innerText()));
 const acts = await page.locator('[aria-label="Actions de la boutique"] > a, [aria-label="Actions de la boutique"] > button').allInnerTexts();
 ok('fiche : 4 bulles ' + acts.join(', '), acts.join(',') === 'Itinéraire,Activer une alerte,Site,Appeler');
 await page.click('[aria-label="Actions de la boutique"] button[aria-pressed]'); await page.waitForTimeout(300);
 ok('alerte activée et expliquée', /Alerte activée/.test(await page.locator('[aria-label="Actions de la boutique"]').innerText())
   && /suivi du stock sur le site de la boutique/.test(await page.locator('#pkm-radar-sheet').innerText()));
 await page.screenshot({ path: shot('radar-3-fiche.png') });
+// Mode « Liste » : la liste défile (2026-10-24 : les blocs étaient comprimés et rognés).
+await page.click('button:has-text("Résultats")'); await page.waitForTimeout(300);
+await page.click('button:has-text("Liste")'); await page.waitForTimeout(500);
+const scroll = await page.evaluate(() => { const s = document.getElementById('pkm-radar-sheet'); s.scrollTop = 400; return { top: s.scrollTop, more: s.scrollHeight > s.clientHeight }; });
+ok('mode Liste : la liste défile (' + scroll.top + ' px)', scroll.more && scroll.top > 0);
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

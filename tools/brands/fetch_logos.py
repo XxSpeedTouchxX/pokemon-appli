@@ -27,12 +27,10 @@ BRANDS = [
     ('La Grande Récré', 'la-grande-recre', 'La Grande Récré', 'Q142', 'La Grande Récré (magasin)'),
     ('Smyths Toys', 'smyths', 'Smyths', None, None),
     ('Orchestra', 'orchestra', 'Orchestra', 'Q142', 'Orchestra Prémaman'),
-    ('Maxi Toys', 'maxi-toys', 'Maxi Toys', None, 'Maxi Toys'),
 ]
 # Derniers replis (2026-10-24, demande du porteur) : logo publié sur le site officiel de l'enseigne, puis icône du site.
 SITES = {'La Grande Récré': 'https://www.lagranderecre.fr/', 'Orchestra': 'https://fr.shop-orchestra.com/',
-         'King Jouet': 'https://www.king-jouet.com/', # Maxi Toys : magasins devenus King Jouet (2022-2023), le site actuel redirige ; logo pris sur l'ancien site archivé.
-         'Maxi Toys': 'https://web.archive.org/web/20210615000000/https://www.maxitoys.fr/', 'JouéClub': 'https://www.joueclub.fr/', 'Cultura': 'https://www.cultura.com/'}
+         'King Jouet': 'https://www.king-jouet.com/', 'JouéClub': 'https://www.joueclub.fr/', 'Cultura': 'https://www.cultura.com/'}
 BROWSER = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36'
 ALIAS = {'Espace Culturel E.Leclerc': 'E.Leclerc'}
 

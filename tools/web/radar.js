@@ -47,6 +47,13 @@
     'Smyths Toys': { t: 'Smyths Toys', bg: '#0047BB', fg: '#FFFFFF', mk: '#FFD100' },
     'Orchestra': { t: 'Orchestra', bg: '#FFFFFF', fg: '#E3001B', mk: '#E3001B' }
   };
+  // Enseigne retrouvée par le nom quand OpenStreetMap ne la donne pas. Seulement pour des enseignes spécialisées, jamais
+  // pour les hypermarchés. Maxi Toys : magasins rachetés et devenus King Jouet (2022-2023), affichés comme King Jouet
+  // (2026-10-24, demande du porteur), nom compris.
+  const NAME_BRANDS = [['maxitoys', 'King Jouet'], ['kingjouet', 'King Jouet'], ['joueclub', 'JouéClub'], ['lagranderecre', 'La Grande Récré'],
+    ['smythstoys', 'Smyths Toys'], ['micromania', 'Micromania-Zing'], ['cultura', 'Cultura'], ['fnac', 'Fnac'], ['orchestra', 'Orchestra']];
+  const foldName = s => String(s || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '');
+  RADAR.brandByName = name => { const n = foldName(name), hit = NAME_BRANDS.find(b => n.indexOf(b[0]) === 0); return hit ? hit[1] : ''; };
   RADAR.brand = st => BRANDS[st.brand] || null;
   RADAR.logos = {};
   // Logo d'une boutique pour les listes et la fiche : vrai logo, sinon badge aux couleurs de l'enseigne, sinon
@@ -85,7 +92,8 @@
       RADAR.regions = rg; RADAR.depts = dp;
       RADAR.stores = st.stores.map(r => {
         const d = RADAR.dept[r[f.dept]] || {};
-        return { id: r[f.id], name: r[f.nom], kind: r[f.type], lat: r[f.lat], lon: r[f.lon], dept: r[f.dept], region: d.region || '', city: r[f.ville] || '', brand: r[f.enseigne] || '', tcg: r[f.cartes] || 0,
+        const maxi = /^maxi\s*-?\s*toys/i.test(r[f.nom] || '');
+        return { id: r[f.id], name: maxi ? 'King Jouet' : r[f.nom], kind: r[f.type], lat: r[f.lat], lon: r[f.lon], dept: r[f.dept], region: d.region || '', city: r[f.ville] || '', brand: r[f.enseigne] || RADAR.brandByName(r[f.nom]), tcg: r[f.cartes] || 0,
           // Coordonnées (absentes des fichiers plus anciens) : site, téléphone, horaires OSM, adresse.
           site: r[f.site] || '', tel: r[f.tel] || '', hours: r[f.horaires] || '', address: r[f.adresse] || '' };
       });
@@ -155,16 +163,16 @@
       + '.maplibregl-ctrl-attrib{display:none}'
       // Pop-up d'une boutique trouvée pendant le balayage (badge de l'enseigne, ou nom de la boutique).
       + '.pkm-popw{cursor:pointer;z-index:4}'
-      + '.pkm-pop{position:relative;display:flex;align-items:center;gap:6px;max-width:150px;height:28px;padding:0 10px 0 7px;border-radius:9px;background:var(--bg);color:var(--fg);font:800 12.5px/1 "Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:-.01em;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.55),0 0 0 1.5px rgba(255,255,255,.9);transform-origin:50% 120%;animation:pkmPopIn .42s cubic-bezier(.2,1.5,.4,1) both;transition:opacity .35s,transform .35s}'
-      + '.pkm-pop::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;background:var(--bg);transform:rotate(45deg);box-shadow:1.5px 1.5px 0 rgba(255,255,255,.9)}'
-      + '.pkm-pop i{flex:none;width:9px;height:9px;border-radius:3px;background:var(--mk)}'
-      + '.pkm-pop span{overflow:hidden;text-overflow:ellipsis}'
-      + '.pkm-pop.ind{--bg:#0B1120;--fg:#F3F6FC;font-weight:700;font-size:12px;box-shadow:0 8px 20px rgba(0,0,0,.55),0 0 0 1.5px #5EE0CF}'
-      + '.pkm-pop.ind::after{box-shadow:1.5px 1.5px 0 #5EE0CF}'
-      + '.pkm-pop.ind svg{flex:none;width:14px;height:14px;fill:none;stroke:#5EE0CF;stroke-width:2;stroke-linejoin:round}'
-      + '.pkm-pop.logo{--bg:#FFFFFF;height:34px;padding:0 9px}'
-      + '.pkm-pop.logo img{display:block;max-width:116px;max-height:24px;width:auto;height:auto;object-fit:contain}'
-      + '.pkm-pop.out{opacity:0;transform:translateY(-8px) scale(.85)}'
+      + '.pkm-rpop{position:relative;display:flex;align-items:center;gap:6px;max-width:150px;height:28px;padding:0 10px 0 7px;border-radius:9px;background:var(--bg);color:var(--fg);font:800 12.5px/1 "Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:-.01em;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.55),0 0 0 1.5px rgba(255,255,255,.9);transform-origin:50% 120%;animation:pkmPopIn .42s cubic-bezier(.2,1.5,.4,1) both;transition:opacity .35s,transform .35s}'
+      + '.pkm-rpop::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;background:var(--bg);transform:rotate(45deg);box-shadow:1.5px 1.5px 0 rgba(255,255,255,.9)}'
+      + '.pkm-rpop i{flex:none;width:9px;height:9px;border-radius:3px;background:var(--mk)}'
+      + '.pkm-rpop span{overflow:hidden;text-overflow:ellipsis}'
+      + '.pkm-rpop.ind{--bg:#0B1120;--fg:#F3F6FC;font-weight:700;font-size:12px;box-shadow:0 8px 20px rgba(0,0,0,.55),0 0 0 1.5px #5EE0CF}'
+      + '.pkm-rpop.ind::after{box-shadow:1.5px 1.5px 0 #5EE0CF}'
+      + '.pkm-rpop.ind svg{flex:none;width:14px;height:14px;fill:none;stroke:#5EE0CF;stroke-width:2;stroke-linejoin:round}'
+      + '.pkm-rpop.logo{--bg:#FFFFFF;height:34px;padding:0 9px}'
+      + '.pkm-rpop.logo img{display:block;max-width:116px;max-height:24px;width:auto;height:auto;object-fit:contain}'
+      + '.pkm-rpop.out{opacity:0;transform:translateY(-8px) scale(.85)}'
       + '@keyframes pkmPopIn{0%{opacity:0;transform:translateY(10px) scale(.3)}100%{opacity:1;transform:none}}';
     document.head.appendChild(st);
   }
@@ -404,7 +412,7 @@
   };
 
   // ——— Balayage radar ———
-  // Pop-ups des boutiques trouvées : 8 à la fois au plus (les plus anciennes partent d'abord), 1,8 s chacun, sans se chevaucher.
+  // Pop-ups des boutiques trouvées : chacune le sien, 24 à la fois au plus (les plus anciens partent d'abord).
   RADAR.pops = [];
   function clearPops() { RADAR.pops.forEach(p => { clearTimeout(p.timer); p.m.remove(); }); RADAR.pops = []; }
   function dropPop(p) {
@@ -418,20 +426,23 @@
   function popStore(inst, st) {
     const map = RADAR.map;
     if (!map || !st) return;
-    // Pas de pop-up par-dessus un autre (centres-villes denses) : la boutique apparaît quand même sur la carte.
+    // Chaque boutique trouvée a son pop-up (2026-10-24, demande du porteur) ; s'il en recouvrirait un autre, il monte
+    // d'un ou plusieurs crans au-dessus de son point.
     const at = map.project([st.lon, st.lat]);
-    if (RADAR.pops.some(q => Math.abs(q.x - at.x) < 116 && Math.abs(q.y - at.y) < 36)) return;
+    let lift = 0;
+    while (lift < 4 && RADAR.pops.some(q => Math.abs(q.x - at.x) < 116 && Math.abs(q.y - (at.y - 36 * lift)) < 34)) lift++;
+    if (lift === 4) lift = 0;
     const b = RADAR.brand(st), wrap = document.createElement('div'), pop = document.createElement('div');
     wrap.className = 'pkm-popw'; wrap.setAttribute('aria-hidden', 'true');
     const logo = RADAR.logos[st.brand];
-    pop.className = logo ? 'pkm-pop logo' : b ? 'pkm-pop' : 'pkm-pop ind';
+    pop.className = logo ? 'pkm-rpop logo' : b ? 'pkm-rpop' : 'pkm-rpop ind';
     const label = document.createElement('span');
     label.textContent = b ? b.t : st.name;
     if (logo) {
       // Vrai logo de l'enseigne ; s'il ne se charge pas, le badge dessiné prend sa place.
       const img = document.createElement('img');
       img.src = logo.file; img.alt = '';
-      img.onerror = () => { pop.className = 'pkm-pop'; img.remove(); pop.style.cssText = '--bg:' + b.bg + ';--fg:' + b.fg + ';--mk:' + b.mk; pop.insertBefore(document.createElement('i'), label); label.hidden = false; };
+      img.onerror = () => { pop.className = 'pkm-rpop'; img.remove(); pop.style.cssText = '--bg:' + b.bg + ';--fg:' + b.fg + ';--mk:' + b.mk; pop.insertBefore(document.createElement('i'), label); label.hidden = false; };
       pop.appendChild(img);
       label.hidden = true;
     } else if (b) {
@@ -441,10 +452,10 @@
     pop.appendChild(label);
     wrap.appendChild(pop);
     wrap.addEventListener('click', ev => { ev.stopPropagation(); inst.radarStore(st.id); });
-    const p = { x: at.x, y: at.y, el: wrap, m: new RADAR.ml.Marker({ element: wrap, anchor: 'bottom', offset: [0, -9] }).setLngLat([st.lon, st.lat]).addTo(map) };
-    p.timer = setTimeout(() => dropPop(p), 1800);
+    const p = { x: at.x, y: at.y - 36 * lift, el: wrap, m: new RADAR.ml.Marker({ element: wrap, anchor: 'bottom', offset: [0, -9 - 36 * lift] }).setLngLat([st.lon, st.lat]).addTo(map) };
+    p.timer = setTimeout(() => dropPop(p), RADAR.popMs || 1800);
     RADAR.pops.push(p);
-    while (RADAR.pops.length > 8) dropPop(RADAR.pops[0]);
+    while (RADAR.pops.length > 24) dropPop(RADAR.pops[0]);
   }
   RADAR.popStore = popStore;
   function removeSweep() {
@@ -476,6 +487,8 @@
     placeSweep();
     const beam = el.querySelector('.beam'), count = el.querySelector('.count');
     const plan = RadarCore.sweepPlan(rows.map(r => r.st), center, TURN);
+    // Durée d'un pop-up : 1,8 s, plus courte quand les boutiques sont nombreuses (une douzaine visibles à la fois).
+    RADAR.popMs = Math.max(700, Math.min(1800, TURN * 12 / Math.max(1, plan.length)));
     const finish = () => {
       if (gen !== RADAR.sweepGen) return;
       RADAR.sweepGen++; // arrête le faisceau s'il tourne encore

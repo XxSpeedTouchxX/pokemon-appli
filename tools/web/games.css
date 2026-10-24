@@ -355,3 +355,12 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-art-one > button > span:first-child > img[data-broken]:not([loading]) { width: 80% !important; height: 60% !important; }
 .pkm-art-one > button > span:nth-child(2) { font-size: 15px !important; white-space: normal !important; display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
 .pkm-art-one > button > span:nth-child(3) { font-size: 13.5px !important; }
+
+/* Radar (2026-10-24) : le panneau défile au lieu de comprimer ses blocs (liste et résultats rognés sinon). */
+#pkm-radar-sheet > * { flex-shrink: 0; }
+
+/* Petit radar de l'accueil (2026-10-24) : un repère de localisation surgit à chaque passage du faisceau. */
+.pkm-hr-pin { position: absolute; width: 12px; height: 15px; margin: -16px 0 0 -6px; color: #FFFFFF; opacity: 0; transform-origin: 50% 100%; animation: pkmPinPop 3s ease-out infinite; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.6)); }
+.pkm-hr-pin svg { display: block; width: 100%; height: 100%; }
+@keyframes pkmPinPop { 0% { opacity: 0; transform: translateY(4px) scale(0.2); } 7% { opacity: 1; transform: translateY(-1px) scale(1.2); } 13% { transform: none; } 45% { opacity: 1; transform: none; } 62%, 100% { opacity: 0; transform: translateY(-3px) scale(0.85); } }
+@media (prefers-reduced-motion: reduce) { .pkm-hr-pin { animation: none; opacity: 1; } }

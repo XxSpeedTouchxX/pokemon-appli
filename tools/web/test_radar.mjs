@@ -29,8 +29,13 @@ test('hypermarché et display : rare hors boutique spécialisée', () => {
 });
 
 test('grande surface culturelle et UPC, boutique de jeux et ETB', () => {
-  assert.equal(R.chance({ kind: 'culture' }, Object.assign({}, CTX, { prod: 'UPC' })).raw, 40 - 15 + 5);
-  assert.equal(R.chance({ kind: 'jeux' }, Object.assign({}, CTX, { prod: 'ETB' })).raw, 45 + 5 + 5);
+  assert.equal(R.chance({ kind: 'culture' }, Object.assign({}, CTX, { prod: 'UPC' })).raw, 40 - 40 + 5);
+  assert.equal(R.chance({ kind: 'jeux' }, Object.assign({}, CTX, { prod: 'ETB' })).raw, 45 - 20 + 5);
+  // ETB et UPC (2026-10-24) : rouges en grande surface et en magasin de jouets, orange au mieux en boutique de cartes.
+  assert.equal(R.chance({ kind: 'hyper' }, Object.assign({}, CTX, { prod: 'ETB' })).pct, 15);
+  assert.equal(R.chance({ kind: 'jouets', brand: 'King Jouet' }, Object.assign({}, CTX, { prod: 'ETB' })).pct, 15);
+  assert.equal(R.chance({ kind: 'cartes' }, Object.assign({}, CTX, { prod: 'UPC' })).pct, 35);
+  assert.equal(R.chance({ kind: 'hyper' }, Object.assign({}, CTX, { prod: 'UPC' })).pct, 5);
   // Radar (2026-10-24) : Booster et Autres items, plus favorables aux grandes surfaces et aux magasins de jouets.
   assert.equal(R.chance({ kind: 'hyper' }, Object.assign({}, CTX, { prod: 'BST' })).raw, 35 + 10 + 5);
   assert.equal(R.chance({ kind: 'jouets', brand: 'King Jouet' }, Object.assign({}, CTX, { prod: 'other' })).raw, 35 + 10 + 5);

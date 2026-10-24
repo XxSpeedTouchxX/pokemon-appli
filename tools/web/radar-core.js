@@ -16,9 +16,10 @@
     };
     // Produit recherché : points selon le type de boutique (clé « other » pour les autres).
     const PRODUCTS = {
-      ETB: { label: 'ETB', why: 'un classique des boutiques spécialisées', pts: { spec: 5, culture: 0, other: -5 } },
+      // ETB et UPC revus le 2026-10-24 (porteur) : très prisés des collectionneurs, vite épuisés, rares hors boutique de cartes.
+      ETB: { label: 'ETB', why: 'très prisé des collectionneurs, vite épuisé', pts: { cartes: -15, jeux: -20, other: -25 } },
       DSP: { label: 'Display', why: 'surtout vendu en boutique spécialisée', pts: { spec: 0, culture: -15, other: -25 } },
-      UPC: { label: 'UPC', why: 'produit premium, rare hors boutique spécialisée', pts: { spec: -5, culture: -15, other: -25 } },
+      UPC: { label: 'UPC', why: 'produit premium très recherché, quelques exemplaires par boutique', pts: { cartes: -25, jeux: -30, other: -40 } },
       value: { label: 'Objets de valeur', why: 'cartes de valeur surtout en boutique de cartes', pts: { cartes: 10, collec: 5, jeux: -10, other: -30 } },
       // Radar (2026-10-24, demande du porteur) : bulles Booster, ETB, UPC et Autres items.
       BST: { label: 'Booster', why: 'vendu presque partout, grandes surfaces comprises', pts: { hyper: 10, culture: 5, jouets: 5, jv: 5, spec: 0, other: -5 } },

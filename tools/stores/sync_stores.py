@@ -202,6 +202,9 @@ def classify(tags):
     shop = tags.get("shop") or ""
     text = " ".join(str(v) for k, v in tags.items() if k in ("name", "brand", "description", "operator", "shop"))
     brand = BRANDS.get(tags.get("brand:wikidata", ""))
+    # Maxi Toys : magasins rachetés et devenus King Jouet (2022-2023), souvent encore « Maxi Toys » dans OSM.
+    if not brand and re.match(r"maxi\s*-?\s*toys", name, re.I):
+        brand = ("jouets", "King Jouet")
     if not name or tags.get("disused:shop") or tags.get("access") == "private" or (not brand and re.search(EXCLUDED, text, re.I)):
         return None
     if re.search(r"\b(fermé|closed)\b", tags.get("opening_hours", ""), re.I):
@@ -370,7 +373,10 @@ def build(elements, depts, communes=None):
         tcg = 1 if kind == "cartes" or re.search(TCG_HINT, text, re.I) else 0
         commune = communes.locate(lon, lat, dept) if communes else None
         city = with_district(" ".join(str(tags.get("addr:city") or commune or "").split()), tags.get("addr:postcode", ""))
-        rows.append([el["type"][0] + str(el["id"]), " ".join(tags["name"].split()), kind, round(lat, 4), round(lon, 4), dept, city, brand, tcg]
+        label = " ".join(tags["name"].split())
+        if re.match(r"maxi\s*-?\s*toys", label, re.I):
+            label = "King Jouet"  # Maxi Toys devenus King Jouet
+        rows.append([el["type"][0] + str(el["id"]), label, kind, round(lat, 4), round(lon, 4), dept, city, brand, tcg]
                     + contact(tags, commune or ""))
     # Doublons : même nom à moins de 100 m (un point et le bâtiment du même magasin, par exemple).
     rows.sort(key=lambda r: (r[0][0] != "w", r[0]))

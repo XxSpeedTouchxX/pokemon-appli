@@ -427,7 +427,7 @@
 <span style="position: absolute; inset: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.3)"></span>
 <span class="pkm-anim" style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(94, 224, 207, 0) 0deg, rgba(94, 224, 207, 0) 270deg, rgba(94, 224, 207, 0.55) 360deg); animation: pkmSpin 3s linear infinite"></span>
 <span style="position: absolute; left: 29px; top: 29px; width: 6px; height: 6px; border-radius: 3px; background: #5EE0CF"></span>
-<sc-for list="{{ home.hr.blips }}" as="hrb" hint-placeholder-count="3"><span class="pkm-anim" style="position: absolute; left: {{ hrb.x }}; top: {{ hrb.y }}; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 3px; background: #5EE0CF; animation: pkmBlip 3s ease-out {{ hrb.delay }} infinite"></span></sc-for>
+<sc-for list="{{ home.hr.blips }}" as="hrb" hint-placeholder-count="3"><span class="pkm-anim" style="position: absolute; left: {{ hrb.x }}; top: {{ hrb.y }}; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 3px; background: #5EE0CF; animation: pkmBlip 3s ease-out {{ hrb.delay }} infinite"></span><span class="pkm-anim pkm-hr-pin" style="left: {{ hrb.x }}; top: {{ hrb.y }}; animation-delay: {{ hrb.delay }}"><svg viewBox="0 0 24 30"><path d="M12 1C6.5 1 2 5.4 2 10.9 2 18.3 12 29 12 29s10-10.7 10-18.1C22 5.4 17.5 1 12 1z" fill="currentColor"></path><circle cx="12" cy="11" r="4" fill="#0F1D2B"></circle></svg></span></sc-for>
 </span>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
 <span style="font-size: 12px; font-weight: 700; color: #5EE0CF">Radar des boutiques</span>
@@ -446,7 +446,7 @@
 <span style="font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrn.name }}</span>
 <span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hrn.sub }}</span>
 </span>
-<span style="flex: none; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; color: {{ hrn.color }}">{{ hrn.pct }}</span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px"><span style="font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #9AA8C3">Probabilité</span><span style="font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; color: {{ hrn.color }}">{{ hrn.pct }}</span></span>
 </button>
 </sc-for>
 </div>
@@ -568,7 +568,7 @@
 <span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ rs.kind }}</span>
 <span style="font-size: 11.5px; color: #7D8BA8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ rs.place }}</span>
 </span>
-<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px"><span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: {{ rs.color }}">{{ rs.pct }}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{ rs.tint }}; color: {{ rs.color }}; font-size: 11px; font-weight: 800">{{ rs.level }}</span></span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px"><span style="font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #9AA8C3">Probabilité</span><span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: {{ rs.color }}">{{ rs.pct }}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{ rs.tint }}; color: {{ rs.color }}; font-size: 11px; font-weight: 800">{{ rs.level }}</span></span>
 </button>
 </sc-for>
 </div>
@@ -681,7 +681,7 @@
 <span style="font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ tw.name }}</span>
 <span style="display: flex; align-items: center; gap: 8px; font-size: 12px"><span style="color: #C9D3EA">{{ tw.dist }}</span><sc-if value="{{ tw.hasNow }}" hint-placeholder-val="{{ true }}"><span style="font-weight: 700; color: {{ tw.nowColor }}">{{ tw.now }}</span></sc-if></span>
 </span>
-<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px"><span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; white-space: nowrap; color: {{ tw.color }}">{{ tw.pct }}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{ tw.tint }}; color: {{ tw.color }}; font-size: 11px; font-weight: 800">{{ tw.level }}</span></span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px"><span style="font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #9AA8C3">Probabilité</span><span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; white-space: nowrap; color: {{ tw.color }}">{{ tw.pct }}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{ tw.tint }}; color: {{ tw.color }}; font-size: 11px; font-weight: 800">{{ tw.level }}</span></span>
 </button>
 <button type="button" onClick="{{ tw.more.toggle }}" aria-expanded="{{ tw.more.open }}" aria-label="{{ tw.more.label }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #2A3A5C; border-radius: 22px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-plus" style="transform: rotate({{ tw.more.turn }}); fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round"><path d="M12 5v14 M5 12h14"></path></svg></button>
 <sc-if value="{{ tw.more.open }}" hint-placeholder-val="{{ false }}">@@ter-bubble tw@@</sc-if>
@@ -912,7 +912,7 @@
 </div>
 
 <!-- fragment: ter-bubble -->
-<div role="dialog" aria-label="{{ BB.info.title }}" class="pkm-pop" style="position: absolute; z-index: 25; top: calc(100% - 2px); {{ BB.side }}: 4px; width: min(300px, calc(100vw - 40px)); box-sizing: border-box; padding: 14px; border-radius: 18px; border: 1px solid #24345C; background: #16223A; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; gap: 8px; text-align: left">
+<div role="dialog" aria-label="{{ BB.info.title }}" class="pkm-pop" style="position: absolute; z-index: 25; top: calc(50% + 24px); {{ BB.side }}: 4px; width: min(300px, calc(100vw - 40px)); box-sizing: border-box; padding: 14px; border-radius: 18px; border: 1px solid #24345C; background: #16223A; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; gap: 8px; text-align: left">
 <span aria-hidden="true" style="position: absolute; top: -7px; {{ BB.side }}: {{ BB.arrow }}; width: 12px; height: 12px; background: #16223A; border-left: 1px solid #24345C; border-top: 1px solid #24345C; transform: rotate(45deg)"></span>
 <span style="font-size: 12.5px; font-weight: 700; color: #9AA8C3">{{ BB.info.kind }}</span>
 <sc-if value="{{ BB.info.hasAddress }}" hint-placeholder-val="{{ true }}"><span style="font-size: 13.5px; line-height: 1.4">{{ BB.info.address }}</span></sc-if>

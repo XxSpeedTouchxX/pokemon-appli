@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-10-25 — Radar : logo à côté du nom, « Probabilité », ETB et UPC revus, tous les pop-ups, liste qui défile ; Maxi Toys devenus King Jouet
+
+- **Demande du porteur :**
+  - logo à droite du nom dans la fiche d'une boutique, plus en bas ;
+  - mot « Probabilité » au-dessus des pourcentages ;
+  - ETB rouge (comme UPC) : produit très prisé ; Booster et Autres items orange à vert ;
+  - la liste du Radar ne défilait pas ;
+  - certaines boutiques n'avaient pas de pop-up pendant le scan ;
+  - petit radar de l'accueil : un repère de localisation qui surgit à chaque passage du faisceau, en continu ;
+  - Maxi Toys : logo abandonné ; les magasins Maxi Toys, rachetés, s'affichent comme King Jouet.
+- **Fait :**
+  - fiche : logo à droite du nom, « Probabilité » au-dessus du pourcentage (fiche, résultats, Territoire, accueil) ;
+  - indice : ETB −25 points et UPC −40 hors boutique spécialisée (ETB −15 et UPC −25 en boutique de cartes) : rouges en grande surface et magasin de jouets, orange au mieux en boutique de cartes ;
+  - liste : les blocs du panneau ne sont plus comprimés, la liste défile ;
+  - pop-ups : chaque boutique trouvée a le sien (empilés quand ils se recouvriraient, durée selon le nombre) ;
+  - accueil : repère de localisation animé sur chaque point du petit radar, au passage du faisceau ;
+  - Maxi Toys → King Jouet : nom, enseigne, logo et indice d'enseigne de jouets, dans l'app et dans la synchronisation OpenStreetMap ;
+  - bulle d'infos de Territoire accrochée au bouton « + » ; styles des pop-ups du Radar renommés (ils pouvaient déformer cette bulle).
+
 ## 2026-10-24 (fin) — Logos sur la carte, dans les listes et la fiche ; couleurs de la chance ; La Grande Récré et Orchestra
 
 - **Demande du porteur :**

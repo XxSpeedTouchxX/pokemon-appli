@@ -27,6 +27,8 @@ class Classify(unittest.TestCase):
         self.assertEqual(classify({"name": "Orchestra", "shop": "clothes", "brand:wikidata": "Q28042940", "description": "Mode enfant et puériculture"}),
                          ("enfant", "Orchestra"))
         self.assertIsNone(classify({"name": "Bébé Center", "shop": "baby_goods"}))
+        # Maxi Toys (2026-10-24) : devenus King Jouet.
+        self.assertEqual(classify({"name": "Maxi Toys", "shop": "toys"}), ("jouets", "King Jouet"))
 
     def test_hypermarkets_only(self):
         self.assertEqual(classify({"name": "E.Leclerc", "shop": "supermarket", "brand:wikidata": "Q1273376"}), ("hyper", "E.Leclerc"))
