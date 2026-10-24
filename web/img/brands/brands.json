@@ -1,0 +1,66 @@
+{
+ "source": "Wikidata (P154) et Wikimedia Commons",
+ "note": "Marques de leurs propriétaires.",
+ "brands": {
+  "E.Leclerc": {
+   "file": "img/brands/leclerc.png",
+   "wikidata": "Q1273376",
+   "label": "E.Leclerc",
+   "description": "enseigne française de grande distribution",
+   "commons": "https://commons.wikimedia.org/wiki/File:E.Leclerc_logo.svg",
+   "license": "Public domain",
+   "artist": "E.Leclerc",
+   "restrictions": "trademarked"
+  },
+  "Micromania-Zing": {
+   "file": "img/brands/micromania.png",
+   "wikidata": "Q3312221",
+   "label": "Micromania-Zing",
+   "description": "Magasin de vente de jeux vidéos",
+   "commons": "https://commons.wikimedia.org/wiki/File:Logo_de_Micromania-Zing.svg",
+   "license": "CC BY-SA 4.0",
+   "artist": "Futurhit12",
+   "restrictions": ""
+  },
+  "Auchan": {
+   "file": "img/brands/auchan.png",
+   "wikidata": "Q758603",
+   "label": "Auchan",
+   "description": "entreprise française de grande distribution",
+   "commons": "https://commons.wikimedia.org/wiki/File:Logo_Auchan_(1961-1983).svg",
+   "license": "Public domain",
+   "artist": "Auchan",
+   "restrictions": "trademarked"
+  },
+  "Fnac": {
+   "file": "img/brands/fnac.png",
+   "wikidata": "Q676585",
+   "label": "Fnac",
+   "description": "chaîne de magasins française",
+   "commons": "https://commons.wikimedia.org/wiki/File:Fnac_Logo.svg",
+   "license": "Public domain",
+   "artist": "Unknown authorUnknown author",
+   "restrictions": "trademarked"
+  },
+  "Smyths Toys": {
+   "file": "img/brands/smyths.png",
+   "wikidata": "Q7546779",
+   "label": "Smyths",
+   "description": "chaîne de magasins de jouets",
+   "commons": "https://commons.wikimedia.org/wiki/File:Smyths_Logo.svg",
+   "license": "Public domain",
+   "artist": "Smyths",
+   "restrictions": "trademarked"
+  },
+  "Espace Culturel E.Leclerc": {
+   "file": "img/brands/leclerc.png",
+   "wikidata": "Q1273376",
+   "label": "E.Leclerc",
+   "description": "enseigne française de grande distribution",
+   "commons": "https://commons.wikimedia.org/wiki/File:E.Leclerc_logo.svg",
+   "license": "Public domain",
+   "artist": "E.Leclerc",
+   "restrictions": "trademarked"
+  }
+ }
+}
