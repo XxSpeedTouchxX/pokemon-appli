@@ -31,7 +31,8 @@ BRANDS = [
 ]
 # Derniers replis (2026-10-24, demande du porteur) : logo publié sur le site officiel de l'enseigne, puis icône du site.
 SITES = {'La Grande Récré': 'https://www.lagranderecre.fr/', 'Orchestra': 'https://fr.shop-orchestra.com/',
-         'King Jouet': 'https://www.king-jouet.com/', 'Maxi Toys': 'https://www.maxitoys.fr/', 'JouéClub': 'https://www.joueclub.fr/', 'Cultura': 'https://www.cultura.com/'}
+         'King Jouet': 'https://www.king-jouet.com/', # Maxi Toys : magasins devenus King Jouet (2022-2023), le site actuel redirige ; logo pris sur l'ancien site archivé.
+         'Maxi Toys': 'https://web.archive.org/web/2021/https://www.maxitoys.fr/', 'JouéClub': 'https://www.joueclub.fr/', 'Cultura': 'https://www.cultura.com/'}
 BROWSER = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36'
 ALIAS = {'Espace Culturel E.Leclerc': 'E.Leclerc'}
 
@@ -144,8 +145,10 @@ def site_logo(site):
         if ext and len(data) > 300:
             print('   site :', url, ctype, len(data), 'octets')
             return data, ext, url
-    # Icône du site, grande taille (service public de Google).
+    # Icône du site, grande taille (service public de Google) ; pas pour un site archivé (ce serait celle des archives).
     host = urllib.parse.urlparse(site).netloc
+    if host == 'web.archive.org':
+        return None
     try:
         data, ctype = fetch('https://www.google.com/s2/favicons?domain=' + host + '&sz=256')
         if len(data) > 600:
