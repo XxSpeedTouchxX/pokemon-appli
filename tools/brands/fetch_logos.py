@@ -23,8 +23,8 @@ BRANDS = [
     ('JouéClub', 'joueclub', 'JouéClub', 'Q142', 'JouéClub'),
     ('Auchan', 'auchan', 'Auchan', 'Q142', 'Auchan'),
     ('Fnac', 'fnac', 'Fnac', 'Q142', 'Fnac'),
-    ('Cultura', 'cultura', 'Cultura', 'Q142', 'Cultura (entreprise)'),
-    ('La Grande Récré', 'la-grande-recre', 'La Grande Récré', 'Q142', 'La Grande Récré'),
+    ('Cultura', 'cultura', 'Cultura', 'Q142', 'Cultura'),
+    ('La Grande Récré', 'la-grande-recre', 'La Grande Récré', 'Q142', 'La Grande Récré (magasin)'),
     ('Smyths Toys', 'smyths', 'Smyths', None, None),
 ]
 ALIAS = {'Espace Culturel E.Leclerc': 'E.Leclerc'}
@@ -78,7 +78,7 @@ def frwiki_logo(article, term):
         'action': 'query', 'titles': article, 'prop': 'images', 'imlimit': 100, 'redirects': 1, 'format': 'json'}))
     page = next(iter(q.get('query', {}).get('pages', {}).values()), {})
     files = [x['title'].split(':', 1)[1] for x in page.get('images', [])]
-    word = norm(term)[:6]
+    word = norm(re.sub(r'^(la|le|les)\s+', '', term, flags=re.I))[:6]
     good = [x for x in files if 'logo' in x.lower() and word in norm(x) and re.search(r'\.(svg|png)$', x, re.I)]
     print('   Wikipédia :', ', '.join(good[:6]) or 'rien')
     # Logo actuel d'abord : sans année ou avec l'année la plus récente, SVG de préférence.
