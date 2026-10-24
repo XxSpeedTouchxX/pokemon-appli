@@ -1,0 +1,30 @@
+# Logos des enseignes du Radar (2026-10-24, demande du porteur) : Wikidata + Wikimedia Commons, à la demande.
+# Écrit web/img/brands/ (PNG et brands.json avec licence et auteur), puis le commite s'il a changé.
+name: Logos des enseignes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  logos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Logos
+        run: python tools/brands/fetch_logos.py
+      - name: Commit
+        run: |
+          git add web/img/brands
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Logos des enseignes du Radar (Wikidata, Wikimedia Commons)"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
