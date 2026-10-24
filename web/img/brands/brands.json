@@ -79,6 +79,17 @@
    "artist": "Unknown authorUnknown author",
    "restrictions": "trademarked"
   },
+  "Cultura": {
+   "file": "img/brands/cultura.png",
+   "wikidata": "",
+   "label": "Cultura",
+   "description": "logo de l’article « Cultura » de Wikipédia",
+   "commons": "https://fr.wikipedia.org/wiki/Fichier:Cultura_Logo_2021.svg",
+   "source": "fr.wikipedia.org",
+   "license": "marque déposée",
+   "artist": "Cultura",
+   "restrictions": ""
+  },
   "Smyths Toys": {
    "file": "img/brands/smyths.png",
    "wikidata": "Q7546779",
