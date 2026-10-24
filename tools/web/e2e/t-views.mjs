@@ -58,8 +58,9 @@ await pick('Compacte');
 const h = await page.locator('section[aria-label="Boutiques autour de toi"] button[aria-label*="chance"]').first().boundingBox();
 ok('compacte : lignes de ' + Math.round(h.height) + ' px', h.height < 50);
 await page.screenshot({ path: shot('views-ter-compacte.png') });
-await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(500);
-await page.click('section[aria-label="Boutiques près de toi"] button:has-text("Voir la liste")'); await page.waitForTimeout(600);
+// « Voir la liste » retiré de l'accueil (2026-10-25) : la vue doit tenir au retour de la fiche d'une boutique.
+await page.locator('section[aria-label="Boutiques autour de toi"] button[aria-label*="chance"]').first().click(); await page.waitForTimeout(600);
+await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(600);
 ok('vue gardée au retour : « ' + (await vs.innerText()).trim() + ' »', /Compacte/.test(await vs.innerText()));
 await pick('Carte plein écran'); await page.waitForTimeout(1500);
 ok('carte plein écran : le Radar s’ouvre', /radar/i.test(await page.evaluate(() => document.body.innerText.slice(0, 400))) || (await page.locator('#pkm-radar-sheet, [aria-label*="Radar"]').count()) > 0);

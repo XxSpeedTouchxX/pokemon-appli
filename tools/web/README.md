@@ -50,7 +50,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
    - « Scanner les boutiques » lance le faisceau : chaque vraie boutique apparaît à sa direction réelle, avec son nom et sa ville, et devient cliquable à ce moment-là ;
    - un appui ouvre sa fiche ;
    - sans position : « Me localiser », ou le **logo radar animé** de l'encadré, juste au-dessus : un appui demande la position, puis le balayage part tout seul (logo immobile si l'utilisateur limite les animations) ;
-   - « Carte de France » ouvre le Radar, « Voir la liste » Territoire.
+   - « Carte de France » ouvre le Radar ; le lien « Voir la liste » est retiré (2026-10-25, porteur) : Territoire reste accessible par `?start=territory`.
 5. **Marge réalisée** ; puis « Premiers pas » (Novice) et « Suggestion » (Passionné).
 
 ## Informations légales et polices
@@ -104,7 +104,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 
 ## Animation d'entrée : ouverture de booster
 
-- **Ce qu'on voit** (2026-10-09, K1) : un booster Dropicards tombe, tremble, s'ouvre d'un éclair ; cinq cartes sortent en éventail, la carte O se pose et laisse place au logo. Environ 2 s la première ouverture du jour, 0,6 s ensuite ; un appui n'importe où la passe.
+- **Ce qu'on voit** (2026-10-09, K1 ; revu le 2026-10-25) : un booster Dropicards tombe, tremble, s'ouvre d'un éclair ; sept gemmes PK (la monnaie de l'app, `img/brand/pk.svg`) en sortent en éventail à la place des cartes, la gemme du milieu grandit et laisse place au logo. 3 s à chaque démarrage (ralentie d'une seconde, porteur) ; un appui n'importe où la passe.
 - **Sans gêne** : dessinée en SVG dans `tools/web/intro.html` (insérée dans `index.html` par le build), sans image ni dépendance ; l'app se charge dessous. Version calme (fondu court) si le téléphone demande moins d'animations ou si l'Admin coupe les animations.
 - **Forcer** : `?intro=1` (complète) ou `?intro=court`. Admin › « Rejouer l'animation d'entrée ». Pas d'animation sous les tests automatisés, sauf avec ces paramètres.
 

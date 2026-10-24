@@ -180,7 +180,7 @@
     const pos = s.tpos || s.raround || null;
     const r = {
       main: null, mainLabel: '', title: '', sub: '', blips: [], hasMsg: false, msg: '', hasNear: false, near: [], status: '',
-      list: () => this.push('territory', { tkm: String(HOME_KM) }), france: () => this.openRadar()
+      france: () => this.openRadar()
     };
     if (!pos) return Object.assign(r, {
       main: () => this.terLocate(false), mainLabel: 'Radar des boutiques : activer ma position',
@@ -205,7 +205,7 @@
       // La carte s'ouvre directement sur « autour de moi », 20 km, partout en France.
       main: () => this.push('radar', { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: pos, rkm: '5', rmsg: '' }), mainLabel: 'Ouvrir le Radar des boutiques', blips: n ? HOME_BLIPS.slice(0, Math.min(3, n)).map(b => ({ x: b[0], y: b[1], delay: b[2] })) : [],
       title: n ? n + many + ' à moins de ' + HOME_KM + ' km' : 'Aucune boutique à moins de ' + HOME_KM + ' km',
-      sub: n ? 'Touche pour les voir sur la carte' : '« Voir la liste » permet d’élargir le rayon',
+      sub: n ? 'Touche pour les voir sur la carte' : 'Touche le radar pour chercher plus loin (jusqu’à 30 km)',
       hasNear: near.length > 0, near: near,
       status: n ? 'Les plus proches · indice de chance estimé, aucun stock garanti · position à 100 m près' : ''
     });

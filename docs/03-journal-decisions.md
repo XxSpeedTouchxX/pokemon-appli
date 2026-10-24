@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-10-25 — Accueil sans « Voir la liste », logo de l'en-tête agrandi, intro avec les PK
+
+- **Demande du porteur :**
+  - retirer « Voir la liste » à côté de « Boutiques autour de toi » ;
+  - agrandir le logo Dropicards en haut au centre ;
+  - ralentir l'animation d'ouverture d'une seconde et faire sortir la monnaie PK du booster à la place des cartes.
+- **Fait :**
+  - lien retiré ; Territoire reste ouvert par `?start=territory` ; texte « aucune boutique » revu (« Touche le radar pour chercher plus loin ») ;
+  - logo de l'en-tête (accueil, Toutes les séries, Jeux, PK shop) : 172 px de large au lieu de 128 ;
+  - intro : 3 s au lieu de 2 (tous les temps × 1,5) ; sept gemmes PK en éventail, celle du milieu grandit puis laisse place au logo ; version calme et version éclair inchangées.
+
+---
+
 ## 2026-10-25 — Radar : logo à côté du nom, « Probabilité », ETB et UPC revus, tous les pop-ups, liste qui défile ; Maxi Toys devenus King Jouet
 
 - **Demande du porteur :**

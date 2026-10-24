@@ -12,7 +12,7 @@ const check = async (width, height, label) => {
   const steps = [];
   const has = async t => (await page.locator('text=' + t).count()) > 0;
   steps.push(['accueil', (await page.locator('section[aria-label="Mon classeur"]').count()) === 1]);
-  await page.click('section[aria-label="Boutiques près de toi"] button:has-text("Voir la liste")'); await page.click('button:has-text("Démo · boutiques partenaires fictives")'); steps.push(['territoire', await has('Comptoir des Cartes')]);
+  await page.goto(BASE + '/?start=territory', { waitUntil: 'load' }); await page.click('button:has-text("Démo · boutiques partenaires fictives")'); steps.push(['territoire', await has('Comptoir des Cartes')]);
   // la carte : repères dans le cadre
   const box = await page.locator('section[aria-label="Carte des magasins"]').boundingBox();
   const pins = await page.locator('section[aria-label="Carte des magasins"] button').evaluateAll(bs => bs.map(b => { const r = b.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; }));
@@ -40,7 +40,7 @@ await check(360, 740, 'téléphone 360');
 const p = await check(390, 844, 'téléphone 390');
 await p.goto(BASE + '/', { waitUntil: 'load' }); await p.waitForSelector('text=Ma collection');
 await p.screenshot({ path: shot('home-390.png') });
-await p.click('section[aria-label="Boutiques près de toi"] button:has-text("Voir la liste")'); await p.waitForTimeout(200); await p.screenshot({ path: shot('territoire-390.png') });
+await p.goto(BASE + '/?start=territory', { waitUntil: 'load' }); await p.waitForTimeout(200); await p.screenshot({ path: shot('territoire-390.png') });
 const d = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 await d.route(/openfreemap|tcgdex|pokemontcg/, r => r.abort());
 d.on('pageerror', e => errors.push('bureau pageerror: ' + e.message));
