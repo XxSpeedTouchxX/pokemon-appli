@@ -2,6 +2,7 @@
 
 Pour chaque enseigne du fichier des boutiques, cherche l'élément Wikidata de l'enseigne (logo, propriété P154),
 puis télécharge ce logo depuis Wikimedia Commons en PNG de 320 px de large, avec sa licence et son auteur.
+Sans logo sur Wikidata : le logo de l'article de l'enseigne sur Wikipédia en français.
 Écrit web/img/brands/<slug>.png et web/img/brands/brands.json. Une enseigne sans logo trouvé garde le badge
 dessiné par l'app. Lancé par .github/workflows/brand-logos.yml (Wikimedia n'est pas joignable partout).
 
@@ -12,17 +13,19 @@ import json, os, re, sys, time, urllib.parse, urllib.request
 UA = 'DropicardsDemo/1.0 (https://github.com/XxSpeedTouchxX/pokemon-appli; demo app, brand logos)'
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'web', 'img', 'brands')
 # Enseigne du fichier des boutiques → recherche Wikidata (France : P17 = Q142, sauf Smyths, irlandaise).
+# Dernier élément : article de Wikipédia en français dont le logo sert de repli (logos absents de Commons, hébergés
+# par Wikipédia au titre de marque déposée).
 BRANDS = [
-    ('E.Leclerc', 'leclerc', 'E.Leclerc', 'Q142'),
-    ('Carrefour', 'carrefour', 'Carrefour', 'Q142'),
-    ('King Jouet', 'king-jouet', 'King Jouet', 'Q142'),
-    ('Micromania-Zing', 'micromania', 'Micromania', 'Q142'),
-    ('JouéClub', 'joueclub', 'JouéClub', 'Q142'),
-    ('Auchan', 'auchan', 'Auchan', 'Q142'),
-    ('Fnac', 'fnac', 'Fnac', 'Q142'),
-    ('Cultura', 'cultura', 'Cultura', 'Q142'),
-    ('La Grande Récré', 'la-grande-recre', 'La Grande Récré', 'Q142'),
-    ('Smyths Toys', 'smyths', 'Smyths', None),
+    ('E.Leclerc', 'leclerc', 'E.Leclerc', 'Q142', 'E.Leclerc'),
+    ('Carrefour', 'carrefour', 'Carrefour', 'Q142', 'Carrefour (enseigne)'),
+    ('King Jouet', 'king-jouet', 'King Jouet', 'Q142', 'King Jouet'),
+    ('Micromania-Zing', 'micromania', 'Micromania', 'Q142', 'Micromania-Zing'),
+    ('JouéClub', 'joueclub', 'JouéClub', 'Q142', 'JouéClub'),
+    ('Auchan', 'auchan', 'Auchan', 'Q142', 'Auchan'),
+    ('Fnac', 'fnac', 'Fnac', 'Q142', 'Fnac'),
+    ('Cultura', 'cultura', 'Cultura', 'Q142', 'Cultura (entreprise)'),
+    ('La Grande Récré', 'la-grande-recre', 'La Grande Récré', 'Q142', 'La Grande Récré'),
+    ('Smyths Toys', 'smyths', 'Smyths', None, None),
 ]
 ALIAS = {'Espace Culturel E.Leclerc': 'E.Leclerc'}
 
@@ -69,21 +72,25 @@ def current_logo(claims):
     return pick['mainsnak']['datavalue']['value'] if pick else None
 
 
-def commons_logo(term):
-    """Repli : un fichier « logo » de l'enseigne sur Wikimedia Commons (SVG d'abord, logos datés en dernier)."""
-    hits = get('https://commons.wikimedia.org/w/api.php?' + urllib.parse.urlencode({
-        'action': 'query', 'list': 'search', 'srnamespace': 6, 'srsearch': term + ' logo', 'srlimit': 20, 'format': 'json'}))
-    titles = [h['title'][5:] for h in hits.get('query', {}).get('search', [])]
-    good = [x for x in titles if norm(term) in norm(x) and 'logo' in x.lower() and re.search(r'\.(svg|png)$', x, re.I)]
-    print('   Commons :', ', '.join(good[:6]) or 'rien')
-    good.sort(key=lambda x: (bool(re.search(r'(19|20)\d\d', x)), not x.lower().endswith('.svg'), len(x)))
+def frwiki_logo(article, term):
+    """Repli : le logo affiché dans l'article de Wikipédia en français (fichier local ou de Commons)."""
+    q = get('https://fr.wikipedia.org/w/api.php?' + urllib.parse.urlencode({
+        'action': 'query', 'titles': article, 'prop': 'images', 'imlimit': 100, 'redirects': 1, 'format': 'json'}))
+    page = next(iter(q.get('query', {}).get('pages', {}).values()), {})
+    files = [x['title'].split(':', 1)[1] for x in page.get('images', [])]
+    word = norm(term)[:6]
+    good = [x for x in files if 'logo' in x.lower() and word in norm(x) and re.search(r'\.(svg|png)$', x, re.I)]
+    print('   Wikipédia :', ', '.join(good[:6]) or 'rien')
+    # Logo actuel d'abord : sans année ou avec l'année la plus récente, SVG de préférence.
+    year = lambda x: max([int(y) for y in re.findall(r'(?:19|20)\d\d', x)] or [9999])
+    good.sort(key=lambda x: (-year(x), not x.lower().endswith('.svg'), len(x)))
     return good[0] if good else None
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
     result, missing = {}, []
-    for brand, slug, term, country in BRANDS:
+    for brand, slug, term, country, article in BRANDS:
         print('==', brand)
         pick = None
         for qid in candidates(term, country):
@@ -95,14 +102,15 @@ def main():
             if logos and norm(term) in norm(label) and current_logo(logos):
                 pick = (qid, label, desc, current_logo(logos))
                 break
-        if not pick:
-            f = commons_logo(term)
+        wiki = 'commons.wikimedia.org'
+        if not pick and article:
+            f = frwiki_logo(article, term)
             if f:
-                pick = ('', term, 'fichier trouvé sur Wikimedia Commons', f)
+                pick, wiki = ('', term, 'logo de l’article « ' + article + ' » de Wikipédia', f), 'fr.wikipedia.org'
         if not pick:
             missing.append(brand); continue
         qid, label, desc, file = pick
-        info = get('https://commons.wikimedia.org/w/api.php?' + urllib.parse.urlencode({
+        info = get('https://' + wiki + '/w/api.php?' + urllib.parse.urlencode({
             'action': 'query', 'titles': 'File:' + file, 'prop': 'imageinfo', 'iiprop': 'url|extmetadata', 'iiurlwidth': 320, 'format': 'json'}))
         page = next(iter(info['query']['pages'].values()))
         ii = page['imageinfo'][0]
@@ -113,11 +121,16 @@ def main():
         with open(os.path.join(OUT, name), 'wb') as f:
             f.write(png)
         result[brand] = {'file': 'img/brands/' + name, 'wikidata': qid, 'label': label, 'description': desc, 'commons': ii.get('descriptionurl', ''),
-                         'license': val('LicenseShortName'), 'artist': val('Artist'), 'restrictions': val('Restrictions')}
+                         'source': wiki, 'license': val('LicenseShortName'), 'artist': val('Artist'), 'restrictions': val('Restrictions')}
         print('  →', qid, file, '·', result[brand]['license'], '·', len(png), 'octets')
     for a, b in ALIAS.items():
         if b in result:
             result[a] = result[b]
+    # Logos qui ne servent plus (enseigne retirée, mauvais fichier d'une version précédente) : supprimés.
+    used = {os.path.basename(v['file']) for v in result.values()}
+    for name in os.listdir(OUT):
+        if name.endswith('.png') and name not in used:
+            os.remove(os.path.join(OUT, name)); print('retiré :', name)
     with open(os.path.join(OUT, 'brands.json'), 'w', encoding='utf-8') as f:
         json.dump({'source': 'Wikidata (P154) et Wikimedia Commons', 'note': 'Marques de leurs propriétaires.', 'brands': result}, f, ensure_ascii=False, indent=1)
     print('Logos trouvés :', len(BRANDS) - len(missing), '/', len(BRANDS), '· sans logo :', ', '.join(missing) or 'aucune')
