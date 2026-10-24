@@ -31,6 +31,11 @@ test('hypermarché et display : rare hors boutique spécialisée', () => {
 test('grande surface culturelle et UPC, boutique de jeux et ETB', () => {
   assert.equal(R.chance({ kind: 'culture' }, Object.assign({}, CTX, { prod: 'UPC' })).raw, 40 - 15 + 5);
   assert.equal(R.chance({ kind: 'jeux' }, Object.assign({}, CTX, { prod: 'ETB' })).raw, 45 + 5 + 5);
+  // Radar (2026-10-24) : Booster et Autres items, plus favorables aux grandes surfaces et aux magasins de jouets.
+  assert.equal(R.chance({ kind: 'hyper' }, Object.assign({}, CTX, { prod: 'BST' })).raw, 35 + 10 + 5);
+  assert.equal(R.chance({ kind: 'jouets', brand: 'King Jouet' }, Object.assign({}, CTX, { prod: 'other' })).raw, 35 + 10 + 5);
+  assert.equal(R.chance({ kind: 'bd' }, Object.assign({}, CTX, { prod: 'other' })).raw, 15 - 10 + 5);
+  assert.equal(R.chance({ kind: 'jeux' }, Object.assign({}, CTX, { prod: '' })).raw, 45 + 5);
 });
 
 test('bornes : jamais moins de 5 %, jamais plus de 90 %', () => {

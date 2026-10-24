@@ -18,14 +18,17 @@
       ETB: { label: 'ETB', why: 'un classique des boutiques spécialisées', pts: { spec: 5, culture: 0, other: -5 } },
       DSP: { label: 'Display', why: 'surtout vendu en boutique spécialisée', pts: { spec: 0, culture: -15, other: -25 } },
       UPC: { label: 'UPC', why: 'produit premium, rare hors boutique spécialisée', pts: { spec: -5, culture: -15, other: -25 } },
-      value: { label: 'Objets de valeur', why: 'cartes de valeur surtout en boutique de cartes', pts: { cartes: 10, collec: 5, jeux: -10, other: -30 } }
+      value: { label: 'Objets de valeur', why: 'cartes de valeur surtout en boutique de cartes', pts: { cartes: 10, collec: 5, jeux: -10, other: -30 } },
+      // Radar (2026-10-24, demande du porteur) : bulles Booster, ETB, UPC et Autres items.
+      BST: { label: 'Booster', why: 'vendu presque partout, grandes surfaces comprises', pts: { hyper: 10, culture: 5, jouets: 5, jv: 5, spec: 0, other: -5 } },
+      other: { label: 'Autres items', why: 'boosters, coffrets classeur et collection, duo et tri packs, Pokébox : rayons jouets et grandes surfaces', pts: { hyper: 10, jouets: 10, culture: 5, jv: 0, spec: 0, other: -10 } }
     };
     const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
     const day = d => Number(d.slice(8, 10)) + (d.slice(8, 10) === '01' ? 'er' : '') + ' ' + MONTHS[Number(d.slice(5, 7)) - 1];
     const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
     const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n);
 
-    // ctx : { prod: 'all'|'ETB'|'DSP'|'UPC'|'value', today: 'AAAA-MM-JJ', last: {name, date}|null, next: {name, date}|null }
+    // ctx : { prod: 'all'|''|'BST'|'ETB'|'DSP'|'UPC'|'value'|'other', today: 'AAAA-MM-JJ', last: {name, date}|null, next: {name, date}|null }
     function chance(store, ctx) {
       const k = KINDS[store.kind] || KINDS.collec, reasons = [];
       const add = (pts, text) => { if (pts) reasons.push({ pts: pts, text: text, sign: signed(pts) }); };

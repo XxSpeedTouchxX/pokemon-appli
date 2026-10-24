@@ -361,7 +361,8 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 - **Position :** bouton « Me localiser », ou retrouvée seule si l'autorisation est déjà donnée. Arrondie à 100 m environ, gardée en mémoire : jamais enregistrée ni envoyée.
 - **Liste :** vraies boutiques (OpenStreetMap) dans un rayon de 3, 5, 10 ou 20 km, triées par distance ou par chance ; ouverture lue dans les horaires ; « élargir » si rien n'est trouvé.
 - **Carte :** nord en haut, anneaux de distance, pastilles à la vraie direction, sans recouvrement ; « Carte de France » ouvre le Radar.
-- **Fiche d'une boutique** (`tools/web/territory.js`, la même que dans le Radar) : chance et « Pourquoi ? », horaires, adresse, Itinéraire (Google Maps), Site (sinon celui de l'enseigne), Appeler, alerte, fiche OpenStreetMap, « Signaler une erreur » (note OpenStreetMap).
+- **Fiche d'une boutique** (`tools/web/territory.js`, la même que dans le Radar) : en haut, 4 bulles toujours visibles (2026-10-24) : Itinéraire (Google Maps), Activer une alerte, Site (sinon celui de l'enseigne, sinon une recherche web), Appeler (grisé sans numéro). Puis chance et « Pourquoi ? », horaires, adresse, fiche OpenStreetMap, « Signaler une erreur » (note OpenStreetMap).
+- **Alerte d'une boutique :** demandée pour être prévenu quand du stock réapparaît sur le site de la boutique. Ce suivi n'est pas branché (aucune source ouverte du stock des enseignes, pas de scraping) : l'alerte est gardée, l'app le dit, et prévient en attendant la veille et le jour de chaque sortie.
 - **Jamais** de badge partenaire ni d'arrivage annoncé sur une vraie boutique. Les magasins partenaires de la maquette sont dans l'encadré replié « Démo · boutiques partenaires fictives ».
 - **Horaires :** `RadarCore.parseHours` lit les formats courants (« Mo-Sa 10:00-19:00; Su off », plages multiples, 24/7) ; sinon le texte brut est affiché.
 
@@ -381,10 +382,12 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
   - France › région › département, avec zoom animé ;
   - une pastille par secteur donne son nombre de boutiques ;
   - on choisit le secteur sur la carte ou dans la liste.
-- **Balayer :** un faisceau radar révèle les boutiques une à une. Les résultats sont ensuite triés par indice de chance, puis par distance.
+- **Produit recherché (2026-10-24) :** bulles Booster, ETB, UPC et Autres items (boosters, coffrets classeur et collection, duo et tri packs, Pokébox), en haut de l'écran ; une à la fois, un second appui la retire. Elles pèsent sur l'indice de chance (`RadarCore.PRODUCTS`).
+- **Scanner ma zone (2026-10-24) :** un seul bouton bleu-vert, sous les trois distances 5, 15 et 30 km (15 km par défaut). Il demande la position puis balaie la zone ; si une région ou un département est choisi sur la carte, il balaie ce secteur. Position refusée : message, et choix d'une région sur la carte.
+- **Balayer :** un faisceau radar (un tour en 4,2 s) révèle les boutiques une à une. Les résultats sont ensuite triés par indice de chance, puis par distance.
+  - **Pop-ups des enseignes :** chaque boutique trouvée apparaît 1,8 s en pop-up au-dessus de son point : badge aux couleurs de l'enseigne (E.Leclerc, Carrefour, King Jouet, Micromania, JouéClub, Auchan, Fnac, Cultura, La Grande Récré, Smyths Toys), sinon le nom de la boutique. 8 à la fois au plus, sans chevauchement ; un appui ouvre la fiche. Ce sont des badges dessinés par l'app, pas les logos officiels (marques des enseignes, à vérifier avant d'en utiliser).
   - Pendant le balayage, un appui sur une boutique déjà apparue ouvre sa fiche ; le balayage se termine.
   - Les points des boutiques : la taille dépend du zoom, en tête d'expression (MapLibre refuse sinon la couche entière, corrigé le 2026-10-04).
-- **Autour de moi :** position du téléphone, rayon de 3, 5 ou 10 km.
 - **Fiche boutique :** la même que dans Territoire (voir plus haut).
 
   Une vraie boutique n'est jamais présentée comme partenaire Dropicards, ni comme ayant annoncé un arrivage. La fiche et la liste donnent la ville exacte (commune officielle, arrondissement à Paris, Lyon et Marseille).

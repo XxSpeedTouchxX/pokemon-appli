@@ -54,14 +54,19 @@
       route: 'https://www.google.com/maps/dir/?api=1&destination=' + st.lat + ',' + st.lon,
       osm: 'https://www.openstreetmap.org/' + osmPath(st.id),
       report: 'https://www.openstreetmap.org/note/new#map=19/' + st.lat + '/' + st.lon,
-      hasSite: !!site, site: site, siteLabel: st.site ? 'Site' : 'Site de l’enseigne',
-      siteAria: (st.site ? 'Site de la boutique ' : 'Site de l’enseigne ') + st.name + ' (nouvel onglet)',
-      hasTel: tel.length >= 8, tel: 'tel:' + tel, telLabel: 'Appeler', telAria: 'Appeler ' + st.name + ' : ' + st.tel,
+      // Quatre bulles toujours visibles (2026-10-24, demande du porteur) : Itinéraire, alerte, Site, Appeler.
+      // Sans site connu (ni celui de l'enseigne), « Site » cherche la boutique sur le web ; sans numéro, « Appeler » est grisé.
+      hasSite: !!site, site: site || 'https://www.google.com/search?q=' + encodeURIComponent([st.name, st.city].filter(Boolean).join(' ')), siteLabel: st.site ? 'Site' : 'Site de l’enseigne',
+      siteAria: (st.site ? 'Site de la boutique ' : site ? 'Site de l’enseigne ' : 'Chercher le site de ') + st.name + ' (nouvel onglet)',
+      hasTel: tel.length >= 8, noTel: tel.length < 8, tel: 'tel:' + tel, telLabel: 'Appeler', telAria: 'Appeler ' + st.name + ' : ' + st.tel,
       hasHours: !!st.hours, hoursState: now ? now.label : 'Horaires', hoursColor: now ? (now.open ? 'var(--pkm-green)' : 'var(--pkm-t3)') : 'var(--pkm-t2)',
       hoursText: RadarCore.hoursText(st.hours) + (hours ? '' : ' (horaires OpenStreetMap)'),
       hasAddress: !!st.address, address: st.address || '',
       alertOn: on, alertLabel: on ? 'Alerte activée' : 'Activer une alerte', toggleAlert: () => this.radarAlert(st.id),
       alertBg: on ? 'var(--pkm-accent)' : 'transparent', alertFg: on ? 'var(--pkm-on-accent)' : 'var(--pkm-t1)',
+      // Alerte de stock demandée par le porteur : le stock en ligne des boutiques n'est pas encore suivi (aucune source
+      // ouverte, pas de scraping) ; l'alerte est gardée et rappelle les sorties en attendant.
+      alertNote: 'Alerte active. Le suivi du stock sur le site de la boutique n’est pas encore branché : en attendant, tu es prévenu la veille et le jour de chaque sortie.',
       note: 'Indice estimé, pas un stock réel. Boutique réelle (OpenStreetMap) : PKM n’a pas d’accord avec elle.'
     };
   };

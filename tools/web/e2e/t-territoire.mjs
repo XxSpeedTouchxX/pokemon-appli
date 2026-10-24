@@ -78,7 +78,7 @@ ok('aucun badge partenaire sur la fiche', !/Partenaire Dropicards/.test(shop.rep
 await page.click('button:has-text("Pourquoi")'); await page.waitForTimeout(300);
 ok('« Pourquoi ? » : détail des points', /Total \d+ points/.test(await page.locator('main').innerText()));
 await page.click('button:has-text("Activer une alerte")'); await page.waitForTimeout(300);
-ok('alerte : toast (rappel à l’ouverture, sans info de stock)', (await page.locator('text=Boutique suivie : rappel').count()) === 1);
+ok('alerte : toast (rappel des sorties, suivi du stock pas encore branché)', (await page.locator('text=/Alerte activée pour cette boutique.*pas encore branché/').count()) === 1);
 await page.screenshot({ path: shot('ter-4-fiche.png') });
 await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(400);
 ok('retour à Territoire', (await page.locator('section[aria-label="Boutiques autour de toi"]').count()) === 1);
@@ -86,7 +86,9 @@ ok('retour à Territoire', (await page.locator('section[aria-label="Boutiques au
 const brandRow = page.locator('section[aria-label="Boutiques autour de toi"] button[aria-label*="chance"]:not([style*="position: absolute"])', { hasText: 'Auchan' }).first();
 if (await brandRow.count()) {
   await brandRow.click(); await page.waitForTimeout(500);
-  ok('enseigne : « Site de l’enseigne » → ' + await page.locator('a:has-text("Site de l’enseigne")').getAttribute('href'), (await page.locator('a:has-text("Site de l’enseigne")').getAttribute('href')) === 'https://www.auchan.fr/');
+  // Bulle « Site » (2026-10-24) : le site de l'enseigne, nommé dans le libellé accessible.
+  const brandSite = page.locator('a[aria-label^="Site de l’enseigne"]');
+  ok('enseigne : « Site » → ' + await brandSite.getAttribute('href'), (await brandSite.getAttribute('href')) === 'https://www.auchan.fr/');
   await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(400);
 }
 // Encadré démo.

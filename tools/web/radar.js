@@ -5,7 +5,10 @@
   // ou au choix, une liste offre les mêmes fonctions.
   // - Secteurs : France › région › département, avec zoom animé et nombre de boutiques par secteur.
   // - « Balayer » : un faisceau radar révèle les boutiques une à une, puis les résultats triés par indice.
-  // - « Autour de moi » : position du téléphone, rayon 3, 5 ou 10 km.
+  // - « Scanner ma zone » (2026-10-24, demande du porteur) : un seul bouton ; position du téléphone et distance de
+  //   5, 15 ou 30 km (ou le secteur choisi sur la carte). Pendant le balayage, chaque boutique trouvée apparaît
+  //   en pop-up avec le badge de son enseigne (couleurs de l'enseigne, pas son logo officiel).
+  // - Produit recherché : Booster, ETB, UPC, Autres items (boosters, coffrets, duo et tri packs, Pokébox).
   // - Fiche boutique : indice de chance expliqué (« Pourquoi ? »), itinéraire, alerte sur l'appareil.
   // Une vraie boutique n'est jamais présentée comme partenaire PKM ni comme ayant annoncé un arrivage.
   const RADAR = { status: 'idle', ready: null, meta: null, stores: [], byId: {}, regions: null, depts: null, region: {}, dept: {},
@@ -14,7 +17,8 @@
   const STYLE_URL = 'https://tiles.openfreemap.org/styles/dark';
   const ML_URL = 'vendor/maplibre/maplibre-gl.mjs', ML_CSS = 'vendor/maplibre/maplibre-gl.css';
   const FRANCE_BOX = [-5.2, 41.3, 9.6, 51.1];
-  const TURN = 2600; // durée d'un tour de faisceau (ms)
+  const TURN = 4200; // durée d'un tour de faisceau (ms), assez lente pour lire les pop-ups des enseignes
+  const KMS = ['5', '15', '30'];
   const LEVEL_COLOR = ['#9AA8C3', '#F5B14C', '#3DDC84'];
   // Noms courts des régions pour le fil « France › région › département ».
   const REGION_SHORT = { 84: 'Auvergne-Rhône-A.', 27: 'Bourgogne-F.-C.', 93: 'PACA', 75: 'Nouvelle-Aquitaine', 24: 'Centre-Val de L.', 32: 'Hauts-de-France', 52: 'Pays de la Loire' };
@@ -23,6 +27,22 @@
   const reducedMotion = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
   const fmt = n => Number(n).toLocaleString('fr-FR');
   const lvlOf = pct => (pct >= 70 ? 2 : pct >= 40 ? 1 : 0);
+  // Badges des enseignes (pop-ups du balayage) : nom et couleurs de l'enseigne, dessinés par l'app. Les logos
+  // officiels sont des marques des enseignes : à n'utiliser qu'après vérification (docs/14, H3).
+  const BRANDS = {
+    'E.Leclerc': { t: 'E.Leclerc', bg: '#FFFFFF', fg: '#0055A4', mk: '#F39200' },
+    'Espace Culturel E.Leclerc': { t: 'E.Leclerc Culture', bg: '#FFFFFF', fg: '#0055A4', mk: '#F39200' },
+    'Carrefour': { t: 'Carrefour', bg: '#FFFFFF', fg: '#004E9F', mk: '#E1000F' },
+    'King Jouet': { t: 'King Jouet', bg: '#E30613', fg: '#FFFFFF', mk: '#FFD200' },
+    'Micromania-Zing': { t: 'Micromania', bg: '#161616', fg: '#FFFFFF', mk: '#E2001A' },
+    'JouéClub': { t: 'JouéClub', bg: '#FFFFFF', fg: '#D6001C', mk: '#0057A8' },
+    'Auchan': { t: 'Auchan', bg: '#FFFFFF', fg: '#D6001C', mk: '#4E9A2E' },
+    'Fnac': { t: 'fnac', bg: '#F9B000', fg: '#111111', mk: '#111111' },
+    'Cultura': { t: 'cultura', bg: '#6D2C8F', fg: '#FFFFFF', mk: '#F28C00' },
+    'La Grande Récré': { t: 'La Grande Récré', bg: '#FFFFFF', fg: '#C8006A', mk: '#00A0E3' },
+    'Smyths Toys': { t: 'Smyths Toys', bg: '#0047BB', fg: '#FFFFFF', mk: '#FFD100' }
+  };
+  RADAR.brand = st => BRANDS[st.brand] || null;
 
   // Date du jour (réelle) ; ?today=AAAA-MM-JJ pour les tests.
   RADAR.today = realToday;
@@ -65,9 +85,9 @@
   RADAR.rows = function (s) {
     if (RADAR.status !== 'ready') return [];
     const km = Number(s.rkm) || 5, at = s.raround;
-    const key = [s.rlevel, s.rregion, s.rdept, at ? at.lat + ',' + at.lon : '', km, s.tprod, RADAR.today(), SEALED.status].join('|');
+    const key = [s.rlevel, s.rregion, s.rdept, at ? at.lat + ',' + at.lon : '', km, s.rprod, RADAR.today(), SEALED.status].join('|');
     if (RADAR.cache.key === key) return RADAR.cache.rows;
-    const ctx = Object.assign({ prod: s.tprod, today: RADAR.today() }, RadarCore.releaseContext(RADAR.releases(), RADAR.today()));
+    const ctx = Object.assign({ prod: s.rprod, today: RADAR.today() }, RadarCore.releaseContext(RADAR.releases(), RADAR.today()));
     let list = [];
     if (s.rlevel === 'around' && at) list = RADAR.stores.filter(x => Math.abs(x.lat - at.lat) < km / 100 && RadarCore.distanceKm(at, x) <= km);
     else if (s.rlevel === 'dept') list = RADAR.stores.filter(x => x.dept === s.rdept);
@@ -115,7 +135,18 @@
       + '.pkm-sweep .ping{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px;border-radius:50%;background:rgba(94,224,207,.6);animation:pkmPing 1.3s ease-out infinite}'
       + '.pkm-sweep .count{position:absolute;left:50%;top:50%;transform:translate(-50%,14px);padding:3px 9px;border-radius:999px;background:rgba(8,13,26,.85);color:#5EE0CF;font:700 12px "Plus Jakarta Sans",sans-serif;white-space:nowrap}'
       + '.pkm-me{width:16px;height:16px;border-radius:50%;background:#3D63FF;border:3px solid #fff;box-shadow:0 0 0 7px rgba(61,99,255,.28)}'
-      + '.maplibregl-ctrl-attrib{display:none}';
+      + '.maplibregl-ctrl-attrib{display:none}'
+      // Pop-up d'une boutique trouvée pendant le balayage (badge de l'enseigne, ou nom de la boutique).
+      + '.pkm-popw{cursor:pointer;z-index:4}'
+      + '.pkm-pop{position:relative;display:flex;align-items:center;gap:6px;max-width:150px;height:28px;padding:0 10px 0 7px;border-radius:9px;background:var(--bg);color:var(--fg);font:800 12.5px/1 "Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:-.01em;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.55),0 0 0 1.5px rgba(255,255,255,.9);transform-origin:50% 120%;animation:pkmPopIn .42s cubic-bezier(.2,1.5,.4,1) both;transition:opacity .35s,transform .35s}'
+      + '.pkm-pop::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;background:var(--bg);transform:rotate(45deg);box-shadow:1.5px 1.5px 0 rgba(255,255,255,.9)}'
+      + '.pkm-pop i{flex:none;width:9px;height:9px;border-radius:3px;background:var(--mk)}'
+      + '.pkm-pop span{overflow:hidden;text-overflow:ellipsis}'
+      + '.pkm-pop.ind{--bg:#0B1120;--fg:#F3F6FC;font-weight:700;font-size:12px;box-shadow:0 8px 20px rgba(0,0,0,.55),0 0 0 1.5px #5EE0CF}'
+      + '.pkm-pop.ind::after{box-shadow:1.5px 1.5px 0 #5EE0CF}'
+      + '.pkm-pop.ind svg{flex:none;width:14px;height:14px;fill:none;stroke:#5EE0CF;stroke-width:2;stroke-linejoin:round}'
+      + '.pkm-pop.out{opacity:0;transform:translateY(-8px) scale(.85)}'
+      + '@keyframes pkmPopIn{0%{opacity:0;transform:translateY(10px) scale(.3)}100%{opacity:1;transform:none}}';
     document.head.appendChild(st);
   }
   // Style du fond : OpenFreeMap sombre ; s'il ne répond pas, un fond uni (les contours restent).
@@ -171,7 +202,7 @@
   };
   RADAR.unmount = function () {
     RADAR.gen++; RADAR.sweepGen++;
-    clearMarkers();
+    clearMarkers(); clearPops();
     if (RADAR.me) { RADAR.me.remove(); RADAR.me = null; }
     if (RADAR.map) { try { RADAR.map.remove(); } catch (e) { /* déjà retirée */ } }
     RADAR.map = null; RADAR.el = null; RADAR.loaded = false; RADAR.view = ''; RADAR.sweep = null;
@@ -259,7 +290,7 @@
     const map = RADAR.map, s = inst.st();
     if (!map || !RADAR.loaded) return;
     const at = s.raround, view = [s.rlevel, s.rregion, s.rdept, at ? at.lat + ',' + at.lon : '', s.rkm].join('|');
-    const rows = RADAR.rows(s), dataKey = view + '|' + s.tprod;
+    const rows = RADAR.rows(s), dataKey = view + '|' + s.rprod;
     if (view !== RADAR.view) {
       const first = RADAR.view === '';
       RADAR.view = view; RADAR.sweepGen++; removeSweep();
@@ -310,6 +341,41 @@
   };
 
   // ——— Balayage radar ———
+  // Pop-ups des boutiques trouvées : 8 à la fois au plus (les plus anciennes partent d'abord), 1,8 s chacun, sans se chevaucher.
+  RADAR.pops = [];
+  function clearPops() { RADAR.pops.forEach(p => { clearTimeout(p.timer); p.m.remove(); }); RADAR.pops = []; }
+  function dropPop(p) {
+    const i = RADAR.pops.indexOf(p);
+    if (i < 0) return;
+    RADAR.pops.splice(i, 1);
+    clearTimeout(p.timer);
+    p.el.firstChild.classList.add('out');
+    setTimeout(() => p.m.remove(), 360);
+  }
+  function popStore(inst, st) {
+    const map = RADAR.map;
+    if (!map || !st) return;
+    // Pas de pop-up par-dessus un autre (centres-villes denses) : la boutique apparaît quand même sur la carte.
+    const at = map.project([st.lon, st.lat]);
+    if (RADAR.pops.some(q => Math.abs(q.x - at.x) < 116 && Math.abs(q.y - at.y) < 36)) return;
+    const b = RADAR.brand(st), wrap = document.createElement('div'), pop = document.createElement('div');
+    wrap.className = 'pkm-popw'; wrap.setAttribute('aria-hidden', 'true');
+    pop.className = b ? 'pkm-pop' : 'pkm-pop ind';
+    const label = document.createElement('span');
+    label.textContent = b ? b.t : st.name;
+    if (b) {
+      pop.style.cssText = '--bg:' + b.bg + ';--fg:' + b.fg + ';--mk:' + b.mk;
+      pop.appendChild(document.createElement('i'));
+    } else pop.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="11" height="16" rx="2"></rect><path d="M9 21h8a2 2 0 0 0 2-2V7"></path></svg>');
+    pop.appendChild(label);
+    wrap.appendChild(pop);
+    wrap.addEventListener('click', ev => { ev.stopPropagation(); inst.radarStore(st.id); });
+    const p = { x: at.x, y: at.y, el: wrap, m: new RADAR.ml.Marker({ element: wrap, anchor: 'bottom', offset: [0, -9] }).setLngLat([st.lon, st.lat]).addTo(map) };
+    p.timer = setTimeout(() => dropPop(p), 1800);
+    RADAR.pops.push(p);
+    while (RADAR.pops.length > 8) dropPop(RADAR.pops[0]);
+  }
+  RADAR.popStore = popStore;
   function removeSweep() {
     if (RADAR.sweep && RADAR.sweep.el) RADAR.sweep.el.remove();
     RADAR.sweep = null;
@@ -325,7 +391,7 @@
     const map = RADAR.map, s = inst.st(), rows = RADAR.rows(s);
     if (!map || !RADAR.loaded) { inst.setState({ rscan: 'done', rstore: '' }); return; }
     const gen = ++RADAR.sweepGen, center = centerOf(s), box = boxOf(s);
-    removeSweep();
+    removeSweep(); clearPops();
     map.removeFeatureState({ source: 'stores' });
     RADAR.sel = '';
     // Rayon du faisceau : jusqu'au coin le plus éloigné du secteur.
@@ -356,7 +422,7 @@
       if (gen !== RADAR.sweepGen || !RADAR.map) return;
       const t = now - t0;
       beam.style.transform = 'rotate(' + Math.min(360, 360 * t / TURN).toFixed(1) + 'deg)';
-      while (i < plan.length && plan[i].at <= t) { map.setFeatureState({ source: 'stores', id: plan[i].id }, { on: true }); i++; }
+      while (i < plan.length && plan[i].at <= t) { map.setFeatureState({ source: 'stores', id: plan[i].id }, { on: true }); popStore(inst, RADAR.byId[plan[i].id]); i++; }
       count.textContent = fmt(i) + (i > 1 ? ' boutiques' : ' boutique');
       if (t < TURN) requestAnimationFrame(frame); else finish();
     };
@@ -383,17 +449,29 @@
     if (s.rlist || !RADAR.map) this.setState({ rscan: 'done', rstore: '', rwhy: false });
     else RADAR.sweepStart(this);
   };
-  radarProto.radarAround = function () {
-    const done = (lat, lon) => {
-      this.setState({ rlevel: 'around', raround: { lat: Math.round(lat * 1e4) / 1e4, lon: Math.round(lon * 1e4) / 1e4 }, rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, rmsg: '' });
-      setTimeout(() => this.radarScan(), reducedMotion() ? 0 : 1300);
-    };
-    if (!navigator.geolocation) { this.setState({ rmsg: 'Position indisponible sur cet appareil : choisis une région.' }); return; }
+  // « Scanner ma zone » : le secteur choisi sur la carte (région, département), sinon la position du téléphone et
+  // la distance choisie (5, 15 ou 30 km). Sans position : un message, et le secteur choisi s'il y en a un.
+  radarProto.radarZone = function () {
+    const s = this.st();
+    if (s.rscan === 'scanning' || RADAR.status !== 'ready') return;
+    if (s.rlevel === 'region' || s.rlevel === 'dept' || (s.rlevel === 'around' && s.raround)) { this.setState({ rmsg: '' }); this.radarScan(); return; }
+    const later = () => setTimeout(() => this.radarScan(), reducedMotion() ? 0 : 1300);
+    if (s.raround) { this.setState({ rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, rmsg: '' }); later(); return; }
+    const fail = why => this.setState({ rmsg: why + ' : touche une région sur la carte ou dans la liste, puis « Scanner ma zone ».' });
+    if (!navigator.geolocation) { fail('Position indisponible sur cet appareil'); return; }
     this.setState({ rmsg: 'Recherche de ta position…' });
-    navigator.geolocation.getCurrentPosition(p => done(p.coords.latitude, p.coords.longitude),
-      () => this.setState({ rmsg: 'Position refusée ou introuvable : choisis une région sur la carte ou dans la liste.' }),
-      { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 });
+    navigator.geolocation.getCurrentPosition(p => {
+      this.setState({ rlevel: 'around', raround: { lat: Math.round(p.coords.latitude * 1e4) / 1e4, lon: Math.round(p.coords.longitude * 1e4) / 1e4 }, rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, rmsg: '' });
+      later();
+    }, () => fail('Position refusée ou introuvable'), { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 });
   };
+  // Distance de la zone : elle s'applique autour de la position (demandée au moment du scan).
+  radarProto.radarKm = function (km) {
+    const s = this.st();
+    if (s.rscan === 'scanning') return;
+    this.setState({ rkm: km, rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, rmsg: '' });
+  };
+  radarProto.radarAround = function () { this.radarZone(); };
   // Fiche d'une boutique ; pendant le balayage, il se termine d'abord (toutes les boutiques apparaissent).
   radarProto.radarStore = function (id) {
     if (this.st().rscan === 'scanning' && RADAR.finish) RADAR.finish();
@@ -411,8 +489,9 @@
   radarProto.st = function () {
     const d = radarSt.call(this), pr = this.props || {};
     if (!(this.state && this.state.screen) && pr.start === 'radar') d.screen = 'radar';
-    const defs = { rlevel: 'france', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: null, rkm: '5', rlist: false, rmap: '', rmsg: '' };
+    const defs = { rlevel: 'france', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: null, rkm: '15', rprod: '', rlist: false, rmap: '', rmsg: '' };
     Object.keys(defs).forEach(k => { if (d[k] === undefined) d[k] = defs[k]; });
+    if (KMS.indexOf(String(d.rkm)) < 0) d.rkm = '15'; // anciennes distances (3, 10, 20 km)
     return d;
   };
 
@@ -424,33 +503,33 @@
     const crumbs = [{ label: 'France', go: () => this.radarGo('france'), current: s.rlevel === 'france' }];
     if (s.rlevel === 'region' || s.rlevel === 'dept') crumbs.push({ label: reg ? (s.rlevel === 'dept' && REGION_SHORT[reg.code] ? REGION_SHORT[reg.code] : reg.court) : '…', go: () => this.radarGo('region', s.rregion), current: s.rlevel === 'region' });
     if (s.rlevel === 'dept') crumbs.push({ label: dep ? dep.nom : '…', go: () => null, current: true });
-    if (s.rlevel === 'around') crumbs.push({ label: 'Autour de moi', go: () => null, current: true });
+    if (s.rlevel === 'around') crumbs.push({ label: 'Ma zone · ' + s.rkm + ' km', go: () => null, current: true });
     const r = {
       close: () => this.pop(), loading: RADAR.status === 'loading' || RADAR.status === 'idle', error: RADAR.status === 'error',
       retry: () => { RADAR.status = 'idle'; RADAR.load().then(() => this.setState({ rdata: Date.now() })); },
       crumbs: crumbs.map((c, i) => ({ label: c.label, go: c.go, sep: i > 0, current: c.current ? 'location' : false, color: c.current ? 'var(--pkm-white)' : 'var(--pkm-link)', weight: c.current ? '700' : '600' })),
       canMap: s.rmap !== 'off', listMode: listMode, listLabel: listMode ? 'Carte' : 'Liste',
       toggleList: () => this.setState({ rlist: !s.rlist, rscan: s.rscan === 'scanning' ? '' : s.rscan }),
-      prods: [['all', 'Tout'], ['ETB', 'ETB'], ['DSP', 'Display'], ['UPC', 'UPC'], ['value', 'Objets de valeur']].map(([k, label]) => chip(s.tprod === k, label, () => this.setState({ tprod: k }))),
+      // Produit recherché (2026-10-24) : une bulle à la fois, un second appui la retire (toutes les boutiques).
+      prods: [['BST', 'Booster'], ['ETB', 'ETB'], ['UPC', 'UPC'], ['other', 'Autres items']].map(([k, label]) => chip(s.rprod === k, label, () => this.setState({ rprod: s.rprod === k ? '' : k }))),
       sheetMax: listMode ? 'calc(100% - 118px)' : '42%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
       msg: s.rmsg || '', hasMsg: !!s.rmsg, scanning: scanning, attribution: ATTRIBUTION,
-      around: () => this.radarAround(), aroundOn: s.rlevel === 'around',
-      radii: [['3', '3 km'], ['5', '5 km'], ['10', '10 km'], ['20', '20 km']].map(([k, label]) => chip(String(s.rkm) === k, label, () => this.setState({ rkm: k, rscan: '', rstore: '' }))),
-      hasRadii: s.rlevel === 'around',
+      radii: KMS.map(k => chip(String(s.rkm) === k && s.rlevel === 'around', k + ' km', () => this.radarKm(k))),
+      hasRadii: true,
       sectors: [], hasSectors: false, sectorsTitle: '', results: [], hasResults: false, resultsTitle: '',
-      canScan: false, scan: () => this.radarScan(), scanLabel: '', hasStore: false, st: null, hint: '', title: '', subtitle: '', empty: false
+      canScan: false, scan: () => this.radarZone(), scanLabel: '', hasStore: false, st: null, hint: '', title: '', subtitle: '', empty: false
     };
     if (!ready) {
       r.title = r.error ? 'Boutiques indisponibles' : 'Chargement des boutiques…';
-      return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-off-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Balayer', hasHint: false });
+      return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-off-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Scanner ma zone', hasHint: false });
     }
     const rows = RADAR.rows(s), n = s.rlevel === 'france' ? RADAR.stores.length : rows.length;
-    const where = s.rlevel === 'france' ? 'France métropolitaine' : s.rlevel === 'region' ? (reg ? reg.nom : '') : s.rlevel === 'dept' ? (dep ? dep.nom + ' (' + dep.code + ')' : '') : 'Autour de toi · ' + s.rkm + ' km';
+    const where = s.rlevel === 'france' ? 'France métropolitaine' : s.rlevel === 'region' ? (reg ? reg.nom : '') : s.rlevel === 'dept' ? (dep ? dep.nom + ' (' + dep.code + ')' : '') : 'Ma zone · ' + s.rkm + ' km';
     r.title = where;
     r.subtitle = fmt(n) + (n > 1 ? ' boutiques réelles' : ' boutique réelle') + ' · OpenStreetMap' + (RADAR.meta && RADAR.meta.generated ? ' du ' + this.d2(RADAR.meta.generated) : '');
-    r.canScan = s.rlevel !== 'france' && n > 0 && !scanning;
-    r.scanLabel = scanning ? 'Balayage en cours…' : s.rscan === 'done' ? 'Balayer à nouveau' : s.rlevel === 'region' ? 'Balayer la région' : s.rlevel === 'dept' ? 'Balayer le département' : 'Balayer autour de moi';
-    r.empty = s.rlevel !== 'france' && n === 0;
+    r.canScan = !scanning && !((s.rlevel === 'region' || s.rlevel === 'dept') && n === 0);
+    r.scanLabel = scanning ? 'Scan en cours…' : 'Scanner ma zone';
+    r.empty = s.rlevel !== 'france' && n === 0 && !(s.rlevel === 'around' && !s.raround);
     if (s.rlevel === 'france' || s.rlevel === 'region') {
       const feats = s.rlevel === 'france' ? RADAR.regions.features : RADAR.depts.features.filter(f => f.properties.region === s.rregion);
       r.sectorsTitle = s.rlevel === 'france' ? 'Régions' : 'Départements';
@@ -460,9 +539,9 @@
           label: p.nom + ' : ' + fmt(k) + ' boutiques', open: () => this.radarGo(s.rlevel === 'france' ? 'region' : 'dept', p.code) };
       });
       r.hasSectors = r.sectors.length > 0 && !(s.rscan === 'done' && s.rlevel === 'region');
-      r.hint = s.rlevel === 'france' ? 'Touche une région sur la carte ou dans la liste, ou cherche autour de toi.' : 'Choisis un département, ou balaie toute la région.';
+      r.hint = s.rlevel === 'france' ? 'Choisis une distance, puis « Scanner ma zone » : le radar balaie autour de toi. Tu peux aussi toucher une région.' : 'Choisis un département, ou « Scanner ma zone » pour balayer toute la région.';
     }
-    if (s.rlevel === 'around' && !s.raround) r.hint = 'Autorise ta position pour chercher autour de toi.';
+    if (s.rlevel === 'around' && !s.raround) r.hint = '« Scanner ma zone » demande ta position, puis balaie ' + s.rkm + ' km autour de toi.';
     if (s.rscan === 'done' && !s.rstore) {
       const top = rows.slice(0, 40);
       r.results = top.map((x, i) => {
@@ -478,10 +557,10 @@
       const strong = rows.filter(x => x.pct >= 70).length, mid = rows.filter(x => x.pct >= 40 && x.pct < 70).length;
       r.resultsTitle = fmt(rows.length) + (rows.length > 1 ? ' boutiques balayées' : ' boutique balayée') + ' · ' + strong + ' forte' + (strong > 1 ? 's' : '') + ', ' + mid + ' moyenne' + (mid > 1 ? 's' : '') + (rows.length > 40 ? ' · les 40 meilleures' : '');
     }
-    if (s.rlevel === 'france') r.scanLabel = 'Choisis une région';
     r.noScan = !r.canScan;
-    r.scanBg = r.canScan ? 'var(--pkm-accent)' : 'var(--pkm-off-bg)';
-    r.scanFg = r.canScan ? 'var(--pkm-on-accent)' : 'var(--pkm-t4)';
+    // Bouton bleu-vert (2026-10-24, demande du porteur).
+    r.scanBg = r.canScan ? 'linear-gradient(135deg, #2BD9B5, #3B8BFF)' : 'var(--pkm-off-bg)';
+    r.scanFg = r.canScan ? '#04121F' : 'var(--pkm-t4)';
     r.hasHint = !!r.hint && !r.hasResults;
     const sel = s.rstore ? rows.find(x => x.st.id === s.rstore) : null;
     if (sel) {

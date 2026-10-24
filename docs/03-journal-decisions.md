@@ -6,6 +6,23 @@
 
 ---
 
+## 2026-10-24 — Radar : « Scanner ma zone », distances, produits, pop-ups des enseignes ; fiche boutique à 4 bulles
+
+- **Demande du porteur :**
+  - trois distances 5, 15 et 30 km ;
+  - un seul bouton bleu-vert « Scanner ma zone » ;
+  - en haut, les bulles Booster, ETB, UPC et Autres items (boosters, coffrets classeur, coffrets collection, duo packs, tri packs, Pokébox) ;
+  - pendant le balayage, chaque boutique trouvée apparaît en pop-up avec le logo de son enseigne ;
+  - fiche d'une boutique trouvée : 4 bulles Itinéraire, Activer une alerte (prévenu quand du stock réapparaît sur le site de la boutique), Site, Appeler.
+- **Fait :**
+  - « Balayer… » et « Autour de moi » remplacés par « Scanner ma zone » (position, puis la distance choisie ; ou le secteur choisi sur la carte) ; 15 km par défaut ; les anciennes distances (3, 10, 20 km) deviennent 15 km ;
+  - « Tout », « Display » et « Objets de valeur » retirés du Radar ; Booster et Autres items ajoutés à l'indice de chance (plus favorables aux grandes surfaces et magasins de jouets) ; Territoire garde ses propres bulles ;
+  - pop-ups : badges aux couleurs des 11 enseignes du fichier, sinon le nom de la boutique ; 8 à la fois au plus, sans chevauchement ; balayage allongé à 4,2 s ;
+  - fiche : 4 bulles toujours visibles en haut.
+- **Écarts assumés, à valider par le porteur :**
+  - **logos :** les logos officiels des enseignes n'ont pas pu être récupérés (Wikimedia inaccessible depuis l'environnement de travail) et sont des marques déposées : badges dessinés aux couleurs des enseignes à la place ; les vrais logos demandent une vérification des droits (H3) ;
+  - **alerte de stock :** aucune source ouverte ne donne le stock en ligne des enseignes, et le scraping est exclu (décision du 2026-10-03) ; l'alerte est enregistrée, l'app explique que le suivi du stock n'est pas encore branché et prévient la veille et le jour des sorties. Un vrai suivi demanderait des accords ou des flux des enseignes, plus un serveur et des comptes (G2, G4).
+
 ## 2026-10-22 — Six états des cartes, valeur selon l'état, article centré
 
 - **Demande du porteur :** dans la fenêtre d'ajout, l'article choisi centré et agrandi (scellé et cartes) ; pour les cartes, garder le choix de l'état avec sa liste (Mint, Near Mint, Excellent, Good, Played, Poor) et faire varier le prix selon l'état.

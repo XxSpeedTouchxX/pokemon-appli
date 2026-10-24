@@ -545,17 +545,14 @@
 <sc-if value="{{ rd.error }}" hint-placeholder-val="{{ false }}">
 <button type="button" onClick="{{ rd.retry }}" style="height: 46px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Réessayer</button>
 </sc-if>
-<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
-<button type="button" onClick="{{ rd.scan }}" disabled="{{ rd.noScan }}" style="height: 48px; border: 0; border-radius: 999px; background: {{ rd.scanBg }}; color: {{ rd.scanFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ rd.scanLabel }}</button>
-<button type="button" onClick="{{ rd.around }}" aria-pressed="{{ rd.aroundOn }}" style="height: 48px; border: 1px solid #1F5A55; border-radius: 999px; background: rgba(94, 224, 207, 0.1); color: #5EE0CF; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3 M12 19v3 M2 12h3 M19 12h3"></path><circle cx="12" cy="12" r="7"></circle></svg>Autour de moi</button>
-</div>
-<sc-if value="{{ rd.hasRadii }}" hint-placeholder-val="{{ false }}">
-<div role="group" aria-label="Rayon autour de toi" style="display: flex; gap: 8px">
+<sc-if value="{{ rd.hasRadii }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="Distance de la zone" style="flex: none; display: flex; gap: 8px">
 <sc-for list="{{ rd.radii }}" as="rk" hint-placeholder-count="3">
-<button type="button" onClick="{{ rk.pick }}" aria-pressed="{{ rk.on }}" style="flex: 1; height: 40px; border-radius: 999px; border: 1px solid {{ rk.bc }}; background: {{ rk.bg }}; color: {{ rk.fg }}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{ rk.label }}</button>
+<button type="button" onClick="{{ rk.pick }}" aria-pressed="{{ rk.on }}" style="flex: 1; height: 44px; border-radius: 999px; border: 1px solid {{ rk.bc }}; background: {{ rk.bg }}; color: {{ rk.fg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ rk.label }}</button>
 </sc-for>
 </div>
 </sc-if>
+<button type="button" onClick="{{ rd.scan }}" disabled="{{ rd.noScan }}" style="flex: none; height: 52px; border: 0; border-radius: 999px; background: {{ rd.scanBg }}; color: {{ rd.scanFg }}; font: inherit; font-size: 15.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4.5"></circle><path d="M12 12l6-6"></path></svg>{{ rd.scanLabel }}</button>
 <sc-if value="{{ rd.hasHint }}" hint-placeholder-val="{{ true }}">
 <p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ rd.hint }}</p>
 </sc-if>

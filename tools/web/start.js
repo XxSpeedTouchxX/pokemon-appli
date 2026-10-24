@@ -83,7 +83,7 @@
       stBaseShopAlert.call(this, id);
       if (!on) return;
       stAsk();
-      this.setState({ toast: 'Boutique suivie : rappel à l’ouverture de l’app la veille et le jour de chaque sortie (aucune info de stock)' });
+      this.setState({ toast: 'Alerte activée pour cette boutique : rappel la veille et le jour de chaque sortie (suivi du stock en ligne pas encore branché)' });
     };
   }
 
