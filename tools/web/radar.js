@@ -43,6 +43,7 @@
     'Smyths Toys': { t: 'Smyths Toys', bg: '#0047BB', fg: '#FFFFFF', mk: '#FFD100' }
   };
   RADAR.brand = st => BRANDS[st.brand] || null;
+  RADAR.logos = {};
 
   // Date du jour (réelle) ; ?today=AAAA-MM-JJ pour les tests.
   RADAR.today = realToday;
@@ -59,7 +60,10 @@
     if (RADAR.ready) return RADAR.ready;
     RADAR.status = 'loading';
     const get = u => fetch(u).then(r => { if (!r.ok) throw new Error(u + ' : ' + r.status); return r.json(); });
-    RADAR.ready = Promise.all([get('data/stores.json'), get('data/geo/regions.json'), get('data/geo/departements.json')]).then(([st, rg, dp]) => {
+    // Logos des enseignes (img/brands/brands.json, Wikidata et Wikimedia Commons) : facultatifs, badge dessiné sinon.
+    const logos = get('img/brands/brands.json').then(d => d.brands || {}).catch(() => ({}));
+    RADAR.ready = Promise.all([get('data/stores.json'), get('data/geo/regions.json'), get('data/geo/departements.json'), logos]).then(([st, rg, dp, lg]) => {
+      RADAR.logos = lg;
       const f = {};
       st.fields.forEach((k, i) => { f[k] = i; });
       RADAR.meta = { generated: st.generated, count: st.count };
@@ -145,6 +149,8 @@
       + '.pkm-pop.ind{--bg:#0B1120;--fg:#F3F6FC;font-weight:700;font-size:12px;box-shadow:0 8px 20px rgba(0,0,0,.55),0 0 0 1.5px #5EE0CF}'
       + '.pkm-pop.ind::after{box-shadow:1.5px 1.5px 0 #5EE0CF}'
       + '.pkm-pop.ind svg{flex:none;width:14px;height:14px;fill:none;stroke:#5EE0CF;stroke-width:2;stroke-linejoin:round}'
+      + '.pkm-pop.logo{--bg:#FFFFFF;height:34px;padding:0 9px}'
+      + '.pkm-pop.logo img{display:block;max-width:116px;max-height:24px;width:auto;height:auto;object-fit:contain}'
       + '.pkm-pop.out{opacity:0;transform:translateY(-8px) scale(.85)}'
       + '@keyframes pkmPopIn{0%{opacity:0;transform:translateY(10px) scale(.3)}100%{opacity:1;transform:none}}';
     document.head.appendChild(st);
@@ -360,10 +366,18 @@
     if (RADAR.pops.some(q => Math.abs(q.x - at.x) < 116 && Math.abs(q.y - at.y) < 36)) return;
     const b = RADAR.brand(st), wrap = document.createElement('div'), pop = document.createElement('div');
     wrap.className = 'pkm-popw'; wrap.setAttribute('aria-hidden', 'true');
-    pop.className = b ? 'pkm-pop' : 'pkm-pop ind';
+    const logo = RADAR.logos[st.brand];
+    pop.className = logo ? 'pkm-pop logo' : b ? 'pkm-pop' : 'pkm-pop ind';
     const label = document.createElement('span');
     label.textContent = b ? b.t : st.name;
-    if (b) {
+    if (logo) {
+      // Vrai logo de l'enseigne ; s'il ne se charge pas, le badge dessiné prend sa place.
+      const img = document.createElement('img');
+      img.src = logo.file; img.alt = '';
+      img.onerror = () => { pop.className = 'pkm-pop'; img.remove(); pop.style.cssText = '--bg:' + b.bg + ';--fg:' + b.fg + ';--mk:' + b.mk; pop.insertBefore(document.createElement('i'), label); label.hidden = false; };
+      pop.appendChild(img);
+      label.hidden = true;
+    } else if (b) {
       pop.style.cssText = '--bg:' + b.bg + ';--fg:' + b.fg + ';--mk:' + b.mk;
       pop.appendChild(document.createElement('i'));
     } else pop.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="11" height="16" rx="2"></rect><path d="M9 21h8a2 2 0 0 0 2-2V7"></path></svg>');
@@ -432,7 +446,9 @@
   // ——— Logique de l'écran ———
   const radarProto = proto;
   radarProto.openRadar = function () {
-    this.push('radar', { rlevel: 'france', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: null, rmsg: '' });
+    // Ouverture sur « Ma zone » à 5 km (2026-10-24, demande du porteur), autour de la dernière position connue.
+    const s = this.st(), pos = s.raround || s.tpos || null;
+    this.push('radar', { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: pos, rkm: '5', rmsg: '' });
   };
   radarProto.radarGo = function (level, code) {
     const s = this.st();
@@ -489,9 +505,9 @@
   radarProto.st = function () {
     const d = radarSt.call(this), pr = this.props || {};
     if (!(this.state && this.state.screen) && pr.start === 'radar') d.screen = 'radar';
-    const defs = { rlevel: 'france', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: null, rkm: '15', rprod: '', rlist: false, rmap: '', rmsg: '' };
+    const defs = { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: null, rkm: '5', rprod: '', rlist: false, rmap: '', rmsg: '' };
     Object.keys(defs).forEach(k => { if (d[k] === undefined) d[k] = defs[k]; });
-    if (KMS.indexOf(String(d.rkm)) < 0) d.rkm = '15'; // anciennes distances (3, 10, 20 km)
+    if (KMS.indexOf(String(d.rkm)) < 0) d.rkm = '5'; // anciennes distances (3, 10, 20 km)
     return d;
   };
 
@@ -523,10 +539,10 @@
       r.title = r.error ? 'Boutiques indisponibles' : 'Chargement des boutiques…';
       return Object.assign(r, { notStore: true, noScan: true, scanBg: 'var(--pkm-off-bg)', scanFg: 'var(--pkm-t4)', scanLabel: 'Scanner ma zone', hasHint: false });
     }
-    const rows = RADAR.rows(s), n = s.rlevel === 'france' ? RADAR.stores.length : rows.length;
+    const rows = RADAR.rows(s), noPos = s.rlevel === 'around' && !s.raround, n = s.rlevel === 'france' || noPos ? RADAR.stores.length : rows.length;
     const where = s.rlevel === 'france' ? 'France métropolitaine' : s.rlevel === 'region' ? (reg ? reg.nom : '') : s.rlevel === 'dept' ? (dep ? dep.nom + ' (' + dep.code + ')' : '') : 'Ma zone · ' + s.rkm + ' km';
     r.title = where;
-    r.subtitle = fmt(n) + (n > 1 ? ' boutiques réelles' : ' boutique réelle') + ' · OpenStreetMap' + (RADAR.meta && RADAR.meta.generated ? ' du ' + this.d2(RADAR.meta.generated) : '');
+    r.subtitle = fmt(n) + (n > 1 ? ' boutiques réelles' : ' boutique réelle') + (noPos ? ' en France' : '') + ' · OpenStreetMap' + (RADAR.meta && RADAR.meta.generated ? ' du ' + this.d2(RADAR.meta.generated) : '');
     r.canScan = !scanning && !((s.rlevel === 'region' || s.rlevel === 'dept') && n === 0);
     r.scanLabel = scanning ? 'Scan en cours…' : 'Scanner ma zone';
     r.empty = s.rlevel !== 'france' && n === 0 && !(s.rlevel === 'around' && !s.raround);

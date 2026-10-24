@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-10-24 (suite) — Vrais logos des enseignes ; Radar ouvert sur 5 km
+
+- **Demande du porteur :** les vrais logos des enseignes dans les pop-ups du Radar ; le Radar s'ouvre par défaut à 5 km.
+- **Fait :**
+  - 9 logos sur 10 : E.Leclerc, Auchan, Fnac, Smyths Toys, Micromania-Zing depuis Wikimedia Commons (Wikidata) ; Carrefour, King Jouet, JouéClub et Cultura depuis Wikipédia en français (logos de marques déposées) ; La Grande Récré garde son badge dessiné (aucun logo dans son article) ;
+  - récupération par un workflow manuel GitHub Actions (Wikimedia n'est pas joignable depuis l'environnement de travail), avec source, licence et auteur de chaque fichier dans `web/img/brands/brands.json` ;
+  - mention dans les Informations légales : marques de leurs propriétaires, affichées seulement pour identifier les boutiques ;
+  - Radar ouvert sur « Ma zone · 5 km », autour de la dernière position connue.
+- **Point d'attention :** les logos restent des marques déposées des enseignes ; à inclure dans la consultation juridique (H3) avant toute sortie publique.
+
 ## 2026-10-24 — Radar : « Scanner ma zone », distances, produits, pop-ups des enseignes ; fiche boutique à 4 bulles
 
 - **Demande du porteur :**
