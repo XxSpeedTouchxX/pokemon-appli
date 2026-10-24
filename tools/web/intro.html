@@ -1,7 +1,7 @@
 <!-- Animation d'entrée « Ouverture de booster » (K1, 2026-10-09), insérée par build.mjs dans web/index.html.
      Un booster Dropicards tombe et tremble ; l'éclair du logo le déchire ; le haut s'envole ; des gemmes PK (la monnaie de
      l'app) jaillissent en éventail à la place des cartes (2026-10-25, porteur) ; la gemme du milieu grandit et laisse place
-     au logo. 3 s au plus (ralentie d'une seconde le 2026-10-25, porteur) ; un appui la passe.
+     au logo, qui reste affiché 0,5 s de plus. 3,5 s au plus (2026-10-25, porteur) ; un appui la passe.
      Version complète à chaque démarrage (2026-10-11, demande du porteur ; avant : une fois par jour, puis 0,6 s), y compris
      au retour dans l'app installée après 10 min en arrière-plan ; fondu simple si l'utilisateur limite les animations ; rien si le mode Admin coupe les animations, ni dans un navigateur piloté par des tests
      (?intro=1 force la version complète, ?intro=court la version éclair). Elle joue pendant le chargement de l'app, sans la retarder. Dessin en SVG, animations en CSS. -->
@@ -11,11 +11,11 @@
 #pkm-intro svg { width: min(100vw, 460px); height: auto; max-height: 100vh; overflow: visible; }
 #pkm-intro g, #pkm-intro path, #pkm-intro rect, #pkm-intro image { transform-box: fill-box; transform-origin: center; }
 #pkm-intro.pi-out { animation: piOut 0.22s ease-in forwards; }
-#pkm-intro.pi-full { animation: piOut 0.33s ease-in 2.67s forwards; }
+#pkm-intro.pi-full { animation: piOut 0.33s ease-in 3.17s forwards; }
 #pkm-intro.pi-short { animation: piOut 0.2s ease-in 0.42s forwards; }
 #pkm-intro.pi-calm { animation: piOut 0.3s ease-in 0.35s forwards; }
 @keyframes piOut { to { opacity: 0; visibility: hidden; } }
-/* Version complète : les temps de 2026-10-09 multipliés par 1,5 (3 s au lieu de 2 s) */
+/* Version complète : les temps de 2026-10-09 multipliés par 1,5, puis le logo seul tenu 0,5 s de plus (3,5 s, 2026-10-25) */
 .pi-full .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piShake 0.42s ease-in-out 0.54s 1, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
 .pi-full .pi-top { animation: piRip 0.54s cubic-bezier(0.3, 0.6, 0.4, 1) 1.05s forwards; }
 .pi-full .pi-bolt { opacity: 0; animation: piBolt 0.45s ease-out 0.9s both; }
@@ -98,7 +98,7 @@
     void el.offsetWidth; // relance les animations CSS depuis le début
     el.className = kind;
     clearTimeout(timer);
-    timer = setTimeout(done, kind === 'pi-full' ? 4000 : 1200); // filet de sécurité
+    timer = setTimeout(done, kind === 'pi-full' ? 4500 : 1200); // filet de sécurité
   };
   try {
     var q = location.search, force = /[?&]intro=(1|court)(&|$)/.test(q);

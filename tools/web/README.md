@@ -104,7 +104,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 
 ## Animation d'entrée : ouverture de booster
 
-- **Ce qu'on voit** (2026-10-09, K1 ; revu le 2026-10-25) : un booster Dropicards tombe, tremble, s'ouvre d'un éclair ; sept gemmes PK (la monnaie de l'app, `img/brand/pk.svg`) en sortent en éventail à la place des cartes, la gemme du milieu grandit et laisse place au logo. 3 s à chaque démarrage (ralentie d'une seconde, porteur) ; un appui n'importe où la passe.
+- **Ce qu'on voit** (2026-10-09, K1 ; revu le 2026-10-25) : un booster Dropicards tombe, tremble, s'ouvre d'un éclair ; sept gemmes PK (la monnaie de l'app, `img/brand/pk.svg`) en sortent en éventail à la place des cartes, la gemme du milieu grandit et laisse place au logo, tenu 0,5 s de plus. 3,5 s à chaque démarrage (ralentie d'1,5 s au total, porteur) ; un appui n'importe où la passe.
 - **Sans gêne** : dessinée en SVG dans `tools/web/intro.html` (insérée dans `index.html` par le build), sans image ni dépendance ; l'app se charge dessous. Version calme (fondu court) si le téléphone demande moins d'animations ou si l'Admin coupe les animations.
 - **Forcer** : `?intro=1` (complète) ou `?intro=court`. Admin › « Rejouer l'animation d'entrée ». Pas d'animation sous les tests automatisés, sauf avec ces paramètres.
 

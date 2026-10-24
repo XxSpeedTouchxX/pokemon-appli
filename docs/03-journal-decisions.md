@@ -15,7 +15,7 @@
 - **Fait :**
   - lien retiré ; Territoire reste ouvert par `?start=territory` ; texte « aucune boutique » revu (« Touche le radar pour chercher plus loin ») ;
   - logo de l'en-tête (accueil, Toutes les séries, Jeux, PK shop) : 172 px de large au lieu de 128 ;
-  - intro : 3 s au lieu de 2 (tous les temps × 1,5) ; sept gemmes PK en éventail, celle du milieu grandit puis laisse place au logo ; version calme et version éclair inchangées.
+  - intro : 3 s au lieu de 2 (tous les temps × 1,5), puis le logo Dropicards tenu 0,5 s de plus (3,5 s, porteur) ; sept gemmes PK en éventail, celle du milieu grandit puis laisse place au logo ; version calme et version éclair inchangées.
 
 ---
 

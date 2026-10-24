@@ -1,4 +1,4 @@
-// K1 : animation d'entrée, complète à chaque démarrage (2026-10-11). Complète (?intro=1) puis retirée en moins de 3,3 s (3 s depuis le 2026-10-25) ; un appui la passe ; version éclair ;
+// K1 : animation d'entrée, complète à chaque démarrage (2026-10-11). Complète (?intro=1) puis retirée en moins de 3,8 s (3,5 s depuis le 2026-10-25) ; un appui la passe ; version éclair ;
 // animations réduites ; absente pour un navigateur de test ; l'app se charge en dessous pendant ce temps.
 import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const B = E2E + '/';
@@ -12,9 +12,9 @@ const has = () => page.evaluate(gone).then(g => !g);
 let t0 = Date.now();
 await page.goto(B + '?intro=1', { waitUntil: 'domcontentloaded' });
 ok('complète : affichée (' + await page.evaluate(() => document.getElementById('pkm-intro') && document.getElementById('pkm-intro').className) + ')', await has() && (await page.evaluate(() => document.getElementById('pkm-intro').className)) === 'pi-full');
-await page.waitForFunction(gone, null, { timeout: 5000 }).catch(() => {});
+await page.waitForFunction(gone, null, { timeout: 6000 }).catch(() => {});
 const dur = Date.now() - t0;
-ok('retirée après ' + dur + ' ms (2 700 à 3 300 ms)', !(await has()) && dur >= 2700 && dur <= 3300);
+ok('retirée après ' + dur + ' ms (3 200 à 3 800 ms)', !(await has()) && dur >= 3200 && dur <= 3800);
 
 ok('l’app est prête dessous', (await page.locator('header img[alt="Dropicards"]').count()) === 1);
 // Appui pour passer.
