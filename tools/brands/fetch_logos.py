@@ -8,7 +8,7 @@ dessiné par l'app. Lancé par .github/workflows/brand-logos.yml (Wikimedia n'es
 
 Les logos sont des marques de leurs propriétaires : leur usage dans l'app reste un point d'attention (docs/14, H3).
 """
-import json, os, re, sys, time, urllib.parse, urllib.request
+import json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 UA = 'DropicardsDemo/1.0 (https://github.com/XxSpeedTouchxX/pokemon-appli; demo app, brand logos)'
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'web', 'img', 'brands')
@@ -32,7 +32,7 @@ BRANDS = [
 # Derniers replis (2026-10-24, demande du porteur) : logo publié sur le site officiel de l'enseigne, puis icône du site.
 SITES = {'La Grande Récré': 'https://www.lagranderecre.fr/', 'Orchestra': 'https://fr.shop-orchestra.com/',
          'King Jouet': 'https://www.king-jouet.com/', # Maxi Toys : magasins devenus King Jouet (2022-2023), le site actuel redirige ; logo pris sur l'ancien site archivé.
-         'Maxi Toys': 'https://web.archive.org/web/2021/https://www.maxitoys.fr/', 'JouéClub': 'https://www.joueclub.fr/', 'Cultura': 'https://www.cultura.com/'}
+         'Maxi Toys': 'https://web.archive.org/web/20210615000000/https://www.maxitoys.fr/', 'JouéClub': 'https://www.joueclub.fr/', 'Cultura': 'https://www.cultura.com/'}
 BROWSER = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36'
 ALIAS = {'Espace Culturel E.Leclerc': 'E.Leclerc'}
 
@@ -114,9 +114,17 @@ def trim(path):
 
 
 def fetch(url, ua=None):
-    req = urllib.request.Request(url, headers={'User-Agent': ua or BROWSER, 'Accept': '*/*', 'Accept-Language': 'fr-FR,fr;q=0.9'})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return r.read(), r.headers.get('Content-Type', '')
+    """Téléchargement, avec 4 nouvelles tentatives espacées si le site limite les requêtes (429, 503)."""
+    for i in range(5):
+        req = urllib.request.Request(url, headers={'User-Agent': ua or BROWSER, 'Accept': '*/*', 'Accept-Language': 'fr-FR,fr;q=0.9'})
+        try:
+            with urllib.request.urlopen(req, timeout=40) as r:
+                return r.read(), r.headers.get('Content-Type', '')
+        except urllib.error.HTTPError as e:
+            if e.code not in (429, 503) or i == 4:
+                raise
+            print('   limite du site (', e.code, '), nouvel essai dans', 15 * (i + 1), 's')
+            time.sleep(15 * (i + 1))
 
 
 def site_logo(site):
