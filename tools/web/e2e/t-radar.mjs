@@ -63,7 +63,10 @@ if (mapOn) {
   ok('fiche des boutiques : ' + Math.round(sheetH * 100) + ' % de l’écran (30 % au plus)', sheetH <= 0.305 && sheetH > 0.25);
   const zh = page.locator('button.pkm-zoomhint'), zb = await zh.boundingBox().catch(() => null);
   ok('aide au zoom affichée en haut à droite après le scan', (await zh.count()) === 1 && zb && zb.x + zb.width > 390 - 20 && zb.y < 200 && zb.width <= 46);
-  ok('aide au zoom : main A (pincement) par défaut', (await page.locator('button.pkm-zoomhint svg.pkm-zh-a').count()) === 1 && (await page.locator('button.pkm-zoomhint svg.pkm-zh-b').count()) === 0);
+  // Main qui pince (2026-10-25) : un seul trait pour la main, tout le dessin dans le rond du bouton.
+  const inside = await page.evaluate(() => { const b = document.querySelector('button.pkm-zoomhint'), r = b.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = r.width / 2 - 1;
+    return [...b.querySelectorAll('.pkm-zh-anim path')].every(p => { const q = p.getBoundingClientRect(); return [[q.left, q.top], [q.right, q.top], [q.left, q.bottom], [q.right, q.bottom]].every(([x, y]) => Math.hypot(x - cx, y - cy) <= R + 6) && q.left >= r.left && q.right <= r.right && q.top >= r.top && q.bottom <= r.bottom; }); });
+  ok('aide au zoom : main qui pince, dessin contenu dans le rond', (await page.locator('button.pkm-zoomhint svg.pkm-zh-a').count()) === 1 && inside);
   const z0 = await page.evaluate(() => window.__pkmRadar.map.getZoom());
   await zh.click(); await page.waitForTimeout(700);
   ok('un appui sur l’aide zoome la carte et la retire', (await zh.count()) === 0 && (await page.evaluate(() => window.__pkmRadar.map.getZoom())) > z0 + 0.5);

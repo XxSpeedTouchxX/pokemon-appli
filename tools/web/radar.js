@@ -29,14 +29,6 @@
   const REGION_SHORT = { 84: 'Auvergne-Rhône-A.', 27: 'Bourgogne-F.-C.', 93: 'PACA', 75: 'Nouvelle-Aquitaine', 24: 'Centre-Val de L.', 32: 'Hauts-de-France', 52: 'Pays de la Loire' };
   const ATTRIBUTION = '© OpenStreetMap · OpenMapTiles · OpenFreeMap · IGN';
   try { if (/[?&]debug\b/.test(location.search)) window.__pkmRadar = RADAR; } catch (e) { /* adresse sans paramètres */ }
-  // Main de l'aide au zoom (2026-10-25) : A (pincement) par défaut, B (index et flèche) avec ?main=b ; choix gardé sur l'appareil.
-  const zoomHand = () => {
-    try {
-      const m = /[?&]main=(a|b)(&|$)/.exec(location.search);
-      if (m) localStorage.setItem('pkm-zoomhand', m[1]);
-      return localStorage.getItem('pkm-zoomhand') || 'a';
-    } catch (e) { return 'a'; }
-  };
   const reducedMotion = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
   const fmt = n => Number(n).toLocaleString('fr-FR');
   const lvlOf = pct => (pct >= 60 ? 3 : pct >= 40 ? 2 : pct >= 20 ? 1 : 0);
@@ -617,7 +609,6 @@
       sheetMax: listMode ? 'calc(100% - 118px)' : s.rstore ? 'min(max(' + Math.round(SHEET * 100) + '%, ' + STORE_SHEET + 'px), ' + Math.round(STORE_MAX * 100) + '%)' : Math.round(SHEET * 100) + '%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
       // Aide au zoom (2026-10-25, porteur) : petite icône animée en haut à droite une fois le scan fini, jusqu'au premier zoom.
       showZoomHint: !listMode && s.rscan === 'done' && !s.rzoomed && !!RADAR.map,
-      handA: zoomHand() !== 'b', handB: zoomHand() === 'b',
       zoomIn: () => { if (RADAR.map) RADAR.map.zoomIn({ duration: reducedMotion() ? 0 : 400 }); this.setState({ rzoomed: true }); },
       legend: PROB.map(p => ({ label: p[0] >= 60 ? '60 %+' : p[0] ? p[0] + '-' + (p[0] + 20) + ' %' : '< 20 %', color: p[2] })),
       msg: s.rmsg || '', hasMsg: !!s.rmsg, scanning: scanning, attribution: ATTRIBUTION,
