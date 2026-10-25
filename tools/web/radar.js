@@ -186,8 +186,8 @@
       .then(st => { clearTimeout(timer); RADAR.style = st; RADAR.tiles = true; return st; })
       .catch(() => { clearTimeout(timer); RADAR.style = plain; RADAR.tiles = false; return plain; });
   }
-  // Carte 65 %, fiche des boutiques 35 % (2026-10-25, porteur ; avant : 58 / 42).
-  const SHEET = 0.35;
+  // Carte 70 %, fiche des boutiques 30 % (2026-10-25, porteur ; avant : 58 / 42, puis 65 / 35).
+  const SHEET = 0.3;
   const pad = () => {
     const h = RADAR.el ? RADAR.el.clientHeight : 800;
     return { top: 128, bottom: Math.round(h * SHEET) + 12, left: 18, right: 18 };

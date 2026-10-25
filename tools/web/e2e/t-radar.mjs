@@ -58,9 +58,9 @@ if (mapOn) {
   const kept = await page.evaluate(() => window.__pkmRadar.map.queryRenderedFeatures({ layers: ['stores-logo'] }).map(f => f.properties.logo));
   ok('logos restés sur la carte après le scan : ' + kept.length + ' (' + [...new Set(kept)].slice(0, 4).join(', ') + ')', kept.length > 0);
   await page.screenshot({ path: shot('radar-2b-logos.png') });
-  // Carte 65 %, fiche 35 % (2026-10-25) ; petite aide au zoom en haut à droite après le scan, retirée au premier zoom.
+  // Carte 70 %, fiche 30 % (2026-10-25) ; petite aide au zoom en haut à droite après le scan, retirée au premier zoom.
   const sheetH = await page.evaluate(() => { const sh = document.getElementById('pkm-radar-sheet').parentElement, sec = document.querySelector('section[aria-label="Radar des boutiques"]'); return sh.getBoundingClientRect().height / sec.getBoundingClientRect().height; });
-  ok('fiche des boutiques : ' + Math.round(sheetH * 100) + ' % de l’écran (35 % au plus)', sheetH <= 0.355 && sheetH > 0.3);
+  ok('fiche des boutiques : ' + Math.round(sheetH * 100) + ' % de l’écran (30 % au plus)', sheetH <= 0.305 && sheetH > 0.25);
   const zh = page.locator('button.pkm-zoomhint'), zb = await zh.boundingBox().catch(() => null);
   ok('aide au zoom affichée en haut à droite après le scan', (await zh.count()) === 1 && zb && zb.x + zb.width > 390 - 20 && zb.y < 200 && zb.width <= 46);
   const z0 = await page.evaluate(() => window.__pkmRadar.map.getZoom());
