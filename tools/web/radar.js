@@ -190,8 +190,11 @@
   const SHEET = 0.3;
   // Boutique choisie (2026-10-25, porteur) : la fiche monte juste assez pour montrer en entier son nom et ses quatre
   // bulles (Itinéraire, Activer une alerte, Site, Appeler) sans défiler ; la suite (indice, horaires) défile dessous.
+  // Puis (2026-10-25) : la fiche s'arrête juste sous les bulles, mesurées après l'affichage (RADAR.storeH) ; le texte
+  // qui suit (indice, horaires, adresse) se voit en faisant défiler.
   const STORE_SHEET = 344, STORE_MAX = 0.62;
-  const sheetPx = h => RADAR.sel ? Math.min(Math.max(h * SHEET, STORE_SHEET), h * STORE_MAX) : h * SHEET;
+  const storeH = h => Math.min(RADAR.storeH || STORE_SHEET, h * STORE_MAX);
+  const sheetPx = h => RADAR.sel ? Math.max(h * SHEET, storeH(h)) : h * SHEET;
   const pad = () => {
     const h = RADAR.el ? RADAR.el.clientHeight : 800;
     return { top: 128, bottom: Math.round(sheetPx(h)) + 12, left: 18, right: 18 };
@@ -251,6 +254,16 @@
       if (nav) nav.scrollLeft = nav.scrollWidth;
       const key = [s.rlevel, s.rregion, s.rdept, s.rstore, s.rscan === 'done', s.rlist].join('|'), sheet = document.getElementById('pkm-radar-sheet');
       if (sheet && key !== RADAR.sheetKey) { RADAR.sheetKey = key; sheet.scrollTop = 0; }
+      // Boutique choisie : hauteur de la fiche = jusqu'au bas des quatre bulles + 10 px (moins que l'écart de 12 px avant le texte, qui reste caché).
+      const acts = s.rstore && !s.rlist && sheet && sheet.querySelector('[aria-label="Actions de la boutique"]');
+      if (acts) {
+        const h = Math.ceil(acts.getBoundingClientRect().bottom - sheet.getBoundingClientRect().top + sheet.scrollTop + 10);
+        if (h > 0 && Math.abs(h - (RADAR.storeH || 0)) > 1) {
+          RADAR.storeH = h;
+          const box = sheet.parentElement, full = box.parentElement ? box.parentElement.clientHeight : 0;
+          box.style.maxHeight = (full ? Math.min(h, Math.round(full * STORE_MAX)) : h) + 'px';
+        }
+      }
     }
     if (on && el && RADAR.el !== el) { RADAR.unmount(); RADAR.mount(inst, el); return; }
     if (!on && RADAR.el) { RADAR.unmount(); return; }
@@ -606,7 +619,7 @@
       toggleList: () => this.setState({ rlist: !s.rlist, rscan: s.rscan === 'scanning' ? '' : s.rscan }),
       // Produit recherché (2026-10-24) : une bulle à la fois, un second appui la retire (toutes les boutiques).
       prods: [['BST', 'Booster'], ['ETB', 'ETB'], ['UPC', 'UPC'], ['other', 'Autres items']].map(([k, label]) => chip(s.rprod === k, label, () => this.setState({ rprod: s.rprod === k ? '' : k }))),
-      sheetMax: listMode ? 'calc(100% - 118px)' : s.rstore ? 'min(max(' + Math.round(SHEET * 100) + '%, ' + STORE_SHEET + 'px), ' + Math.round(STORE_MAX * 100) + '%)' : Math.round(SHEET * 100) + '%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
+      sheetMax: listMode ? 'calc(100% - 118px)' : s.rstore ? 'min(' + (RADAR.storeH || STORE_SHEET) + 'px, ' + Math.round(STORE_MAX * 100) + '%)' : Math.round(SHEET * 100) + '%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
       // Aide au zoom (2026-10-25, porteur) : petite icône animée en haut à droite une fois le scan fini, jusqu'au premier zoom.
       showZoomHint: !listMode && s.rscan === 'done' && !s.rzoomed && !!RADAR.map,
       zoomIn: () => { if (RADAR.map) RADAR.map.zoomIn({ duration: reducedMotion() ? 0 : 400 }); this.setState({ rzoomed: true }); },

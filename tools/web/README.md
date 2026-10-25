@@ -379,7 +379,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
   - MapLibre GL 6.12 (licence BSD, copié dans `web/vendor/maplibre/`) et fond sombre OpenFreeMap ;
   - chargés seulement à l'ouverture de l'écran ;
   - si OpenFreeMap ne répond pas, la carte garde les contours sur un fond uni.
-- **Place à l'écran** (2026-10-25, porteur) : carte sur 70 % de la hauteur, fiche des boutiques sur 30 % (`SHEET` dans `radar.js`) ; boutique choisie : la fiche monte à 344 px (62 % au plus, `STORE_SHEET`) pour montrer ses quatre bulles en entier.
+- **Place à l'écran** (2026-10-25, porteur) : carte sur 70 % de la hauteur, fiche des boutiques sur 30 % (`SHEET` dans `radar.js`) ; boutique choisie : la fiche s'arrête juste sous ses quatre bulles (hauteur mesurée après affichage, `RADAR.storeH`, 62 % au plus), le reste se voit en faisant défiler.
 - **Aide au zoom** (2026-10-25, porteur) : après le scan, petite icône animée en haut à droite, une main qui pince, au trait, d'après la photo du porteur : un seul trait, tout dans le rond, geste animé en déformant le tracé (SVG `<animate>`), flèche double et éclats ; un appui zoome d'un cran ; elle disparaît au premier zoom (pincement, molette, double appui) et revient au scan suivant ; immobile si l'utilisateur limite les animations.
 - **Navigation :**
   - France › région › département, avec zoom animé ;

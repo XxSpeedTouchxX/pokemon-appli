@@ -84,8 +84,11 @@ const acts = await page.locator('[aria-label="Actions de la boutique"] > a, [ari
 ok('fiche : 4 bulles ' + acts.join(', '), acts.join(',') === 'Itinéraire,Activer une alerte,Site,Appeler');
 // Boutique choisie (2026-10-25) : les quatre bulles se voient en entier sans défiler.
 {
-  const fit = await page.evaluate(() => { const sh = document.getElementById('pkm-radar-sheet'), g = document.querySelector('[aria-label="Actions de la boutique"]'), a = sh.getBoundingClientRect(), b = g.getBoundingClientRect(), sec = document.querySelector('section[aria-label="Radar des boutiques"]').getBoundingClientRect(); return { top: sh.scrollTop, gap: Math.round(a.bottom - b.bottom), share: Math.round((a.bottom - a.top) / sec.height * 100) }; });
-  ok('fiche : bulles visibles en entier sans défiler (marge ' + fit.gap + ' px, fiche ' + fit.share + ' % de l’écran)', fit.top === 0 && fit.gap >= 8 && fit.share <= 62);
+  const fit = await page.evaluate(() => { const sh = document.getElementById('pkm-radar-sheet'), g = document.querySelector('[aria-label="Actions de la boutique"]'), a = sh.getBoundingClientRect(), b = g.getBoundingClientRect(), sec = document.querySelector('section[aria-label="Radar des boutiques"]').getBoundingClientRect(); const nx = g.nextElementSibling ? g.parentElement.querySelector(':scope > p') : null, n = nx ? nx.getBoundingClientRect() : null; return { top: sh.scrollTop, gap: Math.round(a.bottom - b.bottom), share: Math.round((a.bottom - a.top) / sec.height * 100), textHidden: !!n && n.top >= a.bottom - 1 }; });
+  ok('fiche : s’arrête sous les 4 bulles, texte caché jusqu’au défilement (marge ' + fit.gap + ' px, fiche ' + fit.share + ' % de l’écran)', fit.top === 0 && fit.gap >= 8 && fit.gap <= 30 && fit.share <= 62 && fit.textHidden);
+  await page.locator('#pkm-radar-sheet').evaluate(e => { e.scrollTop = 400; }); await page.waitForTimeout(200);
+  ok('fiche : le texte apparaît en faisant défiler', /Indice estimé/.test(await page.locator('#pkm-radar-sheet').innerText()) && (await page.locator('#pkm-radar-sheet').evaluate(e => e.scrollTop)) > 0);
+  await page.locator('#pkm-radar-sheet').evaluate(e => { e.scrollTop = 0; }); await page.waitForTimeout(100);
   await page.screenshot({ path: shot('radar-2d-fiche.png') });
 }
 await page.click('[aria-label="Actions de la boutique"] button[aria-pressed]'); await page.waitForTimeout(300);
