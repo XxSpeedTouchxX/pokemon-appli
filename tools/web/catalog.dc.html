@@ -517,6 +517,9 @@
 <button type="button" onClick="{{ rp.pick }}" aria-pressed="{{ rp.on }}" style="flex: none; height: 36px; padding: 0 13px; border-radius: 999px; border: 1px solid {{ rp.bc }}; background: {{ rp.bg2 }}; color: {{ rp.fg }}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{ rp.label }}</button>
 </sc-for>
 </div>
+<sc-if value="{{ rd.showZoomHint }}" hint-placeholder-val="{{ false }}">
+<button type="button" class="pkm-zoomhint" onClick="{{ rd.zoomIn }}" aria-label="Zoome la carte avec deux doigts pour trouver les boutiques" title="Zoome avec deux doigts" style="position: absolute; right: 14px; top: 112px; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(94, 224, 207, 0.55); border-radius: 22px; background: rgba(8, 13, 26, 0.86); color: #5EE0CF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" style="overflow: visible; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><rect x="9" y="9" width="10" height="10" rx="2" class="pkm-zh-map"></rect><g class="pkm-zh-a"><path d="M8 8L3 3 M3 7V3H7"></path></g><g class="pkm-zh-b"><path d="M20 20L25 25 M25 21V25H21"></path></g></svg></button>
+</sc-if>
 <sc-if value="{{ rd.showLegend }}" hint-placeholder-val="{{ false }}">
 <span aria-hidden="true" style="align-self: flex-start; display: flex; align-items: center; gap: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); font-size: 11px; font-weight: 600; color: #C9D3EA">
 <sc-for list="{{ rd.legend }}" as="rlg" hint-placeholder-count="4"><span style="display: flex; align-items: center; gap: 4px; white-space: nowrap"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{ rlg.color }}"></span>{{ rlg.label }}</span></sc-for>

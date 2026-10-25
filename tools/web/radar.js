@@ -186,9 +186,11 @@
       .then(st => { clearTimeout(timer); RADAR.style = st; RADAR.tiles = true; return st; })
       .catch(() => { clearTimeout(timer); RADAR.style = plain; RADAR.tiles = false; return plain; });
   }
+  // Carte 65 %, fiche des boutiques 35 % (2026-10-25, porteur ; avant : 58 / 42).
+  const SHEET = 0.35;
   const pad = () => {
     const h = RADAR.el ? RADAR.el.clientHeight : 800;
-    return { top: 128, bottom: Math.round(h * 0.42) + 12, left: 18, right: 18 };
+    return { top: 128, bottom: Math.round(h * SHEET) + 12, left: 18, right: 18 };
   };
   function fit(box, instant) {
     const map = RADAR.map;
@@ -222,6 +224,8 @@
       });
       map.on('click', e => onClick(inst, e));
       map.on('move', placeSweep);
+      // Un premier zoom à la main (pincement, molette, double appui) retire l'aide « zoome avec deux doigts ».
+      map.on('zoomstart', e => { const s = inst.st(); if (e.originalEvent && s.rscan === 'done' && !s.rzoomed) inst.setState({ rzoomed: true }); });
     }).catch(e => {
       if (window.console) console.warn('Radar : carte indisponible, liste seule.', e);
       if (gen === RADAR.gen) inst.setState({ rmap: 'off' });
@@ -495,7 +499,7 @@
       setStates('stores', rows.map(r => r.st.id), 'on', true);
       el.style.opacity = '0';
       setTimeout(() => { if (RADAR.sweep && RADAR.sweep.el === el) removeSweep(); }, 500);
-      inst.setState({ rscan: 'done' });
+      inst.setState({ rscan: 'done', rzoomed: false });
     };
     RADAR.finish = finish;
     inst.setState({ rscan: 'scanning', rstore: '', rwhy: false });
@@ -575,7 +579,7 @@
   radarProto.st = function () {
     const d = radarSt.call(this), pr = this.props || {};
     if (!(this.state && this.state.screen) && pr.start === 'radar') d.screen = 'radar';
-    const defs = { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: null, rkm: '5', rprod: '', rlist: false, rmap: '', rmsg: '' };
+    const defs = { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: null, rkm: '5', rprod: '', rlist: false, rmap: '', rmsg: '', rzoomed: false };
     Object.keys(defs).forEach(k => { if (d[k] === undefined) d[k] = defs[k]; });
     if (KMS.indexOf(String(d.rkm)) < 0) d.rkm = '5'; // anciennes distances (3, 10, 20 km)
     return d;
@@ -598,7 +602,10 @@
       toggleList: () => this.setState({ rlist: !s.rlist, rscan: s.rscan === 'scanning' ? '' : s.rscan }),
       // Produit recherché (2026-10-24) : une bulle à la fois, un second appui la retire (toutes les boutiques).
       prods: [['BST', 'Booster'], ['ETB', 'ETB'], ['UPC', 'UPC'], ['other', 'Autres items']].map(([k, label]) => chip(s.rprod === k, label, () => this.setState({ rprod: s.rprod === k ? '' : k }))),
-      sheetMax: listMode ? 'calc(100% - 118px)' : '42%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
+      sheetMax: listMode ? 'calc(100% - 118px)' : Math.round(SHEET * 100) + '%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
+      // Aide au zoom (2026-10-25, porteur) : petite icône animée en haut à droite une fois le scan fini, jusqu'au premier zoom.
+      showZoomHint: !listMode && s.rscan === 'done' && !s.rzoomed && !!RADAR.map,
+      zoomIn: () => { if (RADAR.map) RADAR.map.zoomIn({ duration: reducedMotion() ? 0 : 400 }); this.setState({ rzoomed: true }); },
       legend: PROB.map(p => ({ label: p[0] >= 60 ? '60 %+' : p[0] ? p[0] + '-' + (p[0] + 20) + ' %' : '< 20 %', color: p[2] })),
       msg: s.rmsg || '', hasMsg: !!s.rmsg, scanning: scanning, attribution: ATTRIBUTION,
       radii: KMS.map(k => chip(String(s.rkm) === k && s.rlevel === 'around', k + ' km', () => this.radarKm(k))),
