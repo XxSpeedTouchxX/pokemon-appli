@@ -63,6 +63,7 @@ if (mapOn) {
   ok('fiche des boutiques : ' + Math.round(sheetH * 100) + ' % de l’écran (30 % au plus)', sheetH <= 0.305 && sheetH > 0.25);
   const zh = page.locator('button.pkm-zoomhint'), zb = await zh.boundingBox().catch(() => null);
   ok('aide au zoom affichée en haut à droite après le scan', (await zh.count()) === 1 && zb && zb.x + zb.width > 390 - 20 && zb.y < 200 && zb.width <= 46);
+  ok('aide au zoom : main A (pincement) par défaut', (await page.locator('button.pkm-zoomhint svg.pkm-zh-a').count()) === 1 && (await page.locator('button.pkm-zoomhint svg.pkm-zh-b').count()) === 0);
   const z0 = await page.evaluate(() => window.__pkmRadar.map.getZoom());
   await zh.click(); await page.waitForTimeout(700);
   ok('un appui sur l’aide zoome la carte et la retire', (await zh.count()) === 0 && (await page.evaluate(() => window.__pkmRadar.map.getZoom())) > z0 + 0.5);

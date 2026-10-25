@@ -365,16 +365,24 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 @keyframes pkmPinPop { 0% { opacity: 0; transform: translateY(4px) scale(0.2); } 7% { opacity: 1; transform: translateY(-1px) scale(1.2); } 13% { transform: none; } 45% { opacity: 1; transform: none; } 62%, 100% { opacity: 0; transform: translateY(-3px) scale(0.85); } }
 @media (prefers-reduced-motion: reduce) { .pkm-hr-pin { animation: none; opacity: 1; } }
 
-/* Radar : aide au zoom après le scan (2026-10-25) — une main (poing, doigts repliés) dont le pouce et l'index s'écartent sur l'écran. */
+/* Radar : aide au zoom après le scan (2026-10-25, porteur, d'après ses deux modèles de main) : A pincement (par défaut), B index et flèche (?main=b). */
 .pkm-zoomhint { animation: pkmZhIn 0.35s ease-out both; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45); }
-.pkm-zoomhint .pkm-zh-i, .pkm-zoomhint .pkm-zh-t { transform-box: view-box; }
-.pkm-zoomhint .pkm-zh-i { transform-origin: 24px 30px; }
-.pkm-zoomhint .pkm-zh-t { transform-origin: 18px 31px; }
-.pkm-zoomhint .pkm-zh-i { animation: pkmZhI 1.6s ease-in-out infinite; }
-.pkm-zoomhint .pkm-zh-t { animation: pkmZhT 1.6s ease-in-out infinite; }
-.pkm-zoomhint .pkm-zh-dot { animation: pkmZhDot 1.6s ease-in-out infinite; }
 @keyframes pkmZhIn { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
-@keyframes pkmZhI { 0%, 12% { transform: rotate(-16deg); } 58%, 80% { transform: rotate(10deg); } 100% { transform: rotate(-16deg); } }
-@keyframes pkmZhT { 0%, 12% { transform: rotate(16deg); } 58%, 80% { transform: rotate(-10deg); } 100% { transform: rotate(16deg); } }
-@keyframes pkmZhDot { 0%, 10% { opacity: 0.2; } 20%, 70% { opacity: 1; } 85%, 100% { opacity: 0.2; } }
-@media (prefers-reduced-motion: reduce) { .pkm-zoomhint, .pkm-zoomhint .pkm-zh-i, .pkm-zoomhint .pkm-zh-t, .pkm-zoomhint .pkm-zh-dot { animation: none; } }
+.pkm-zh g { transform-box: view-box; }
+/* A : pincement — l'index et le pouce s'écartent, la flèche s'étire entre eux, petits éclats au bout des doigts. */
+.pkm-zh-a .pkm-zh-i { transform-origin: 31px 27px; animation: pkmZhAI 1.8s ease-in-out infinite; }
+.pkm-zh-a .pkm-zh-t { transform-origin: 29px 36.5px; animation: pkmZhAT 1.8s ease-in-out infinite; }
+.pkm-zh-a .pkm-zh-arw { transform-origin: 7px 23.5px; animation: pkmZhAA 1.8s ease-in-out infinite; }
+.pkm-zh-a .pkm-zh-sp { animation: pkmZhSp 1.8s ease-in-out infinite; }
+@keyframes pkmZhAI { 0%, 12% { transform: rotate(-15deg); } 55%, 80% { transform: rotate(0); } 100% { transform: rotate(-15deg); } }
+@keyframes pkmZhAT { 0%, 12% { transform: rotate(13deg); } 55%, 80% { transform: rotate(0); } 100% { transform: rotate(13deg); } }
+@keyframes pkmZhAA { 0%, 12% { transform: scaleY(0.35); opacity: 0; } 55%, 80% { transform: none; opacity: 1; } 100% { transform: scaleY(0.35); opacity: 0; } }
+@keyframes pkmZhSp { 0%, 45% { opacity: 0; } 58%, 75% { opacity: 1; } 90%, 100% { opacity: 0; } }
+/* B : index levé, la flèche double s'ouvre en diagonale, la main appuie légèrement. */
+.pkm-zh-b .pkm-zh-a1 { animation: pkmZhB1 1.8s ease-in-out infinite; }
+.pkm-zh-b .pkm-zh-a2 { animation: pkmZhB2 1.8s ease-in-out infinite; }
+.pkm-zh-b .pkm-zh-hand { transform-origin: 30px 47px; animation: pkmZhBH 1.8s ease-in-out infinite; }
+@keyframes pkmZhB1 { 0%, 12% { transform: translate(-2px, 2px); opacity: 0.3; } 55%, 80% { transform: translate(1.5px, -1.5px); opacity: 1; } 100% { transform: translate(-2px, 2px); opacity: 0.3; } }
+@keyframes pkmZhB2 { 0%, 12% { transform: translate(2px, -2px); opacity: 0.3; } 55%, 80% { transform: translate(-1.5px, 1.5px); opacity: 1; } 100% { transform: translate(2px, -2px); opacity: 0.3; } }
+@keyframes pkmZhBH { 0%, 12% { transform: scale(1); } 30% { transform: scale(0.94); } 55%, 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .pkm-zoomhint, .pkm-zh g, .pkm-zh path { animation: none !important; } }

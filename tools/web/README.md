@@ -105,7 +105,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 
 ## Animation d'entrée : ouverture de booster
 
-- **Ce qu'on voit** (2026-10-09, K1 ; revu le 2026-10-25) : un booster Dropicards tombe, tremble, s'ouvre d'un éclair ; sept gemmes PK (la monnaie de l'app, `img/brand/pk.svg`) en sortent en éventail à la place des cartes, la gemme du milieu grandit et laisse place au logo, tenu 0,5 s de plus. 3,5 s à chaque démarrage (ralentie d'1,5 s au total, porteur) ; un appui n'importe où la passe.
+- **Ce qu'on voit** (2026-10-09, K1 ; revu le 2026-10-25) : un booster Dropicards tombe, tremble, s'ouvre d'un éclair ; sept gemmes PK (la monnaie de l'app, `img/brand/pk.svg`) en sortent en éventail à la place des cartes, la gemme du milieu grandit et laisse place au logo, tenu 0,5 s de plus. 3,5 s à chaque démarrage (ralentie d'1,5 s au total, porteur) ; un appui n'importe où la passe. Sortie : l'écran glisse vers le haut, opaque (2026-10-25), pour ne jamais voiler l'en-tête.
 - **Sans gêne** : dessinée en SVG dans `tools/web/intro.html` (insérée dans `index.html` par le build), sans image ni dépendance ; l'app se charge dessous. Version calme (fondu court) si le téléphone demande moins d'animations ou si l'Admin coupe les animations.
 - **Forcer** : `?intro=1` (complète) ou `?intro=court`. Admin › « Rejouer l'animation d'entrée ». Pas d'animation sous les tests automatisés, sauf avec ces paramètres.
 
@@ -380,7 +380,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
   - chargés seulement à l'ouverture de l'écran ;
   - si OpenFreeMap ne répond pas, la carte garde les contours sur un fond uni.
 - **Place à l'écran** (2026-10-25, porteur) : carte sur 70 % de la hauteur, fiche des boutiques sur 30 % (`SHEET` dans `radar.js`) ; boutique choisie : la fiche monte à 344 px (62 % au plus, `STORE_SHEET`) pour montrer ses quatre bulles en entier.
-- **Aide au zoom** (2026-10-25, porteur) : après le scan, petite icône animée en haut à droite (une main en poing, doigts repliés, dont le pouce et l'index s'écartent, avec un rond au bout de chaque doigt) ; un appui zoome d'un cran ; elle disparaît au premier zoom (pincement, molette, double appui) et revient au scan suivant ; immobile si l'utilisateur limite les animations.
+- **Aide au zoom** (2026-10-25, porteur) : après le scan, petite icône animée en haut à droite, une main au trait d'après les modèles du porteur : A pincement (par défaut) ou B index et flèche (`?main=b`, gardé sur l'appareil, `?main=a` pour revenir) ; un appui zoome d'un cran ; elle disparaît au premier zoom (pincement, molette, double appui) et revient au scan suivant ; immobile si l'utilisateur limite les animations.
 - **Navigation :**
   - France › région › département, avec zoom animé ;
   - une pastille par secteur donne son nombre de boutiques ;
