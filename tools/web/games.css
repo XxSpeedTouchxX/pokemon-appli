@@ -365,9 +365,11 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 @keyframes pkmPinPop { 0% { opacity: 0; transform: translateY(4px) scale(0.2); } 7% { opacity: 1; transform: translateY(-1px) scale(1.2); } 13% { transform: none; } 45% { opacity: 1; transform: none; } 62%, 100% { opacity: 0; transform: translateY(-3px) scale(0.85); } }
 @media (prefers-reduced-motion: reduce) { .pkm-hr-pin { animation: none; opacity: 1; } }
 
-/* Radar : aide au zoom après le scan (2026-10-25) — une main dont le pouce et l'index s'écartent sur l'écran (zoom à deux doigts). */
+/* Radar : aide au zoom après le scan (2026-10-25) — une main (poing, doigts repliés) dont le pouce et l'index s'écartent sur l'écran. */
 .pkm-zoomhint { animation: pkmZhIn 0.35s ease-out both; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45); }
-.pkm-zoomhint .pkm-zh-i, .pkm-zoomhint .pkm-zh-t { transform-box: view-box; transform-origin: 14.5px 17.5px; }
+.pkm-zoomhint .pkm-zh-i, .pkm-zoomhint .pkm-zh-t { transform-box: view-box; }
+.pkm-zoomhint .pkm-zh-i { transform-origin: 24px 30px; }
+.pkm-zoomhint .pkm-zh-t { transform-origin: 18px 31px; }
 .pkm-zoomhint .pkm-zh-i { animation: pkmZhI 1.6s ease-in-out infinite; }
 .pkm-zoomhint .pkm-zh-t { animation: pkmZhT 1.6s ease-in-out infinite; }
 .pkm-zoomhint .pkm-zh-dot { animation: pkmZhDot 1.6s ease-in-out infinite; }

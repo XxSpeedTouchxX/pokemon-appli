@@ -309,7 +309,8 @@ export function cssVars(tokens = TOKENS) {
 //   accent jaune ; contour jaune pour les cartes mises en avant (line-3).
 // Contraste : au moins 4,5:1 pour les textes (vérifié par le test de contraste des écrans).
 export const V6_LIGHT = {
-  app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFD60A 45%, #FFB703 100%)',
+  // Sans la lueur blanche en haut à gauche (2026-10-25, porteur) : elle donnait un effet de flou derrière l'en-tête.
+  app: 'radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFD60A 45%, #FFB703 100%)',
   t1: '#0B1120', t2: '#1F2433', t3: '#33363F', t4: '#41434A', t5: '#41434A', link: '#0A2A88', ink: '#0B1120',
   logo: '#0B1120', accent: '#0B1120', 'on-accent': '#FFD84D', 'accent-rgb': '11, 17, 32', 'glow-rgb': '255, 255, 255', brand: '#0B1120',
   line: 'rgba(11, 17, 32, 0.16)', 'line-2': 'rgba(11, 17, 32, 0.22)', 'line-3': 'rgba(11, 17, 32, 0.2)', 'line-4': 'rgba(11, 17, 32, 0.32)',

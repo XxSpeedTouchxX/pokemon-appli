@@ -15,7 +15,8 @@
 - **Fait :**
   - lien retiré ; Territoire reste ouvert par `?start=territory` ; texte « aucune boutique » revu (« Touche le radar pour chercher plus loin ») ;
   - logo de l'en-tête (accueil, Toutes les séries, Jeux, PK shop) : 172 px de large au lieu de 128 ;
-  - Radar : la carte prend 70 % de l'écran et la fiche des boutiques 30 % (avant : environ 58 / 42, puis 65 / 35) ; après le scan, une petite icône animée en haut à droite (une main dont le pouce et l'index s'écartent sur l'écran) invite à zoomer ; un appui zoome, elle disparaît au premier zoom ;
+  - Radar : la carte prend 70 % de l'écran et la fiche des boutiques 30 % (avant : environ 58 / 42, puis 65 / 35) ; après le scan, une petite icône animée en haut à droite (une main dessinée en poing, doigts repliés, dont le pouce et l'index s'écartent sur l'écran) invite à zoomer ; quand une boutique est choisie, la fiche monte juste assez (344 px, 62 % au plus) pour montrer en entier les quatre bulles sans défiler ;
+  - en-tête de l'app net dès l'ouverture : lueur blanche en haut à gauche du fond jaune retirée, reflet et étincelles animés masqués dans la zone de l'en-tête ; un appui zoome, elle disparaît au premier zoom ;
   - petit radar de l'accueil : la position est demandée dès que la rubrique apparaît à l'écran, sans appui (une fois par ouverture, pas si elle a été refusée), pour que les repères des boutiques s'affichent tout de suite ;
   - intro : 3 s au lieu de 2 (tous les temps × 1,5), puis le logo Dropicards tenu 0,5 s de plus (3,5 s, porteur) ; sept gemmes PK en éventail, celle du milieu grandit puis laisse place au logo ; version calme et version éclair inchangées.
 

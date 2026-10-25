@@ -5,7 +5,9 @@
    Rayquaza). Réglages › « Fonds animés » : Animés, Calmes (deux fois plus lents, plus discrets) ou Sans.
    Arrêtés si l'app est cachée, si l'appareil demande moins d'animations ou si l'Admin coupe les animations. */
 .pkm-root { isolation: isolate; }
-#pkm-fx { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; display: none; }
+#pkm-fx { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; display: none;
+  /* En-tête toujours net (2026-10-25, porteur) : ni reflet ni étincelle derrière les PK, le logo et l'avatar. */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 150px, #000 230px); mask-image: linear-gradient(180deg, transparent 0, transparent 150px, #000 230px); }
 html.pkm-fx-on:not(.pkm-classic) #pkm-fx { display: block; }
 #pkm-fx i { position: absolute; display: block; opacity: 0; will-change: transform, opacity; }
 html.pkm-fx-paused #pkm-fx i, html.pkm-fx-paused #pkm-fx::before { animation-play-state: paused !important; }

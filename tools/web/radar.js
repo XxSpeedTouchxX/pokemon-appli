@@ -188,9 +188,13 @@
   }
   // Carte 70 %, fiche des boutiques 30 % (2026-10-25, porteur ; avant : 58 / 42, puis 65 / 35).
   const SHEET = 0.3;
+  // Boutique choisie (2026-10-25, porteur) : la fiche monte juste assez pour montrer en entier son nom et ses quatre
+  // bulles (Itinéraire, Activer une alerte, Site, Appeler) sans défiler ; la suite (indice, horaires) défile dessous.
+  const STORE_SHEET = 344, STORE_MAX = 0.62;
+  const sheetPx = h => RADAR.sel ? Math.min(Math.max(h * SHEET, STORE_SHEET), h * STORE_MAX) : h * SHEET;
   const pad = () => {
     const h = RADAR.el ? RADAR.el.clientHeight : 800;
-    return { top: 128, bottom: Math.round(h * SHEET) + 12, left: 18, right: 18 };
+    return { top: 128, bottom: Math.round(sheetPx(h)) + 12, left: 18, right: 18 };
   };
   function fit(box, instant) {
     const map = RADAR.map;
@@ -602,7 +606,7 @@
       toggleList: () => this.setState({ rlist: !s.rlist, rscan: s.rscan === 'scanning' ? '' : s.rscan }),
       // Produit recherché (2026-10-24) : une bulle à la fois, un second appui la retire (toutes les boutiques).
       prods: [['BST', 'Booster'], ['ETB', 'ETB'], ['UPC', 'UPC'], ['other', 'Autres items']].map(([k, label]) => chip(s.rprod === k, label, () => this.setState({ rprod: s.rprod === k ? '' : k }))),
-      sheetMax: listMode ? 'calc(100% - 118px)' : Math.round(SHEET * 100) + '%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
+      sheetMax: listMode ? 'calc(100% - 118px)' : s.rstore ? 'min(max(' + Math.round(SHEET * 100) + '%, ' + STORE_SHEET + 'px), ' + Math.round(STORE_MAX * 100) + '%)' : Math.round(SHEET * 100) + '%', mapOn: !listMode, showLegend: !listMode && s.rscan === 'done',
       // Aide au zoom (2026-10-25, porteur) : petite icône animée en haut à droite une fois le scan fini, jusqu'au premier zoom.
       showZoomHint: !listMode && s.rscan === 'done' && !s.rzoomed && !!RADAR.map,
       zoomIn: () => { if (RADAR.map) RADAR.map.zoomIn({ duration: reducedMotion() ? 0 : 400 }); this.setState({ rzoomed: true }); },

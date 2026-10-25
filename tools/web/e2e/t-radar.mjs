@@ -78,6 +78,12 @@ ok('fiche : logo de l’enseigne à droite du nom', !!lg && (await page.locator(
 ok('fiche : « Probabilité » au-dessus du pourcentage', /Probabilité/i.test(await page.locator('#pkm-radar-sheet section').first().innerText()));
 const acts = await page.locator('[aria-label="Actions de la boutique"] > a, [aria-label="Actions de la boutique"] > button').allInnerTexts();
 ok('fiche : 4 bulles ' + acts.join(', '), acts.join(',') === 'Itinéraire,Activer une alerte,Site,Appeler');
+// Boutique choisie (2026-10-25) : les quatre bulles se voient en entier sans défiler.
+{
+  const fit = await page.evaluate(() => { const sh = document.getElementById('pkm-radar-sheet'), g = document.querySelector('[aria-label="Actions de la boutique"]'), a = sh.getBoundingClientRect(), b = g.getBoundingClientRect(), sec = document.querySelector('section[aria-label="Radar des boutiques"]').getBoundingClientRect(); return { top: sh.scrollTop, gap: Math.round(a.bottom - b.bottom), share: Math.round((a.bottom - a.top) / sec.height * 100) }; });
+  ok('fiche : bulles visibles en entier sans défiler (marge ' + fit.gap + ' px, fiche ' + fit.share + ' % de l’écran)', fit.top === 0 && fit.gap >= 8 && fit.share <= 62);
+  await page.screenshot({ path: shot('radar-2d-fiche.png') });
+}
 await page.click('[aria-label="Actions de la boutique"] button[aria-pressed]'); await page.waitForTimeout(300);
 ok('alerte activée et expliquée', /Alerte activée/.test(await page.locator('[aria-label="Actions de la boutique"]').innerText())
   && /suivi du stock sur le site de la boutique/.test(await page.locator('#pkm-radar-sheet').innerText()));
