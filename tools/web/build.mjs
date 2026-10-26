@@ -273,6 +273,10 @@ patch('Pas de quêtes ni de saisons : les paliers suivent seulement la valeur de
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG['grade-screen'] + '\n<sc-if value="{{ ui.isProfile }}"');
 // Panneau « Mes PK » (pk.js), ouvert par le compteur de l'en-tête.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Didacticiel (tuto.js, 2026-10-25) : question à la première installation, choix du starter, visite en 7 bulles.
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['tuto'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Profil : « Revoir le didacticiel », sous « Revoir l'accueil ».
+patchRe(/(<span style="font-weight: 600">Revoir l’accueil<\/span>[\s\S]*?<\/button>)/, m => m + '\n<button type="button" onClick="{{ tu.replay }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer"><img src="img/brand/pa.svg" alt="" width="24" height="24" style="flex: none; display: block; width: 24px; height: 24px"><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Revoir le didacticiel</span><span style="font-size: 12.5px; color: #9AA8C3">45 secondes avec ton starter</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></button>');
 // Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
@@ -680,7 +684,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -709,7 +713,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + ficheJs + navJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + tutoJs + ficheJs + navJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -729,7 +733,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${tutoJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -763,7 +767,7 @@ ${code}
   try {
     const robot = navigator.webdriver && !/[?&]first=1(&|$)/.test(location.search);
     if (DEVICE.enabled && !restored && !storage.raw() && !robot)
-      inst.state = Object.assign({}, inst.state || {}, { purchases: [], sales: [], onb: props.onb ? Number(props.onb) || 1 : 1, firstRun: true });
+      inst.state = Object.assign({}, inst.state || {}, { purchases: [], sales: [], onb: props.onb ? Number(props.onb) || 1 : 1, firstRun: true, tuto: 'ask' });
     // Enregistrement illisible (copie gardée par persist.js) : on repart d'une collection vide, jamais de la démo.
     else if (DEVICE.enabled && !restored && DEVICE.kept) inst.state = Object.assign({}, inst.state || {}, { purchases: [], sales: [] });
   } catch (e) { /* stockage indisponible : démo */ }

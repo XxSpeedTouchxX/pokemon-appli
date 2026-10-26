@@ -58,6 +58,7 @@ export const RULES = [
   ['bg', '#3D63FF', 'keep', { ctx: /box-shadow: 0 0 0 2px #FFFFFF/, n: 1 }], ['shadow', '#FFFFFF', 'keep', { n: 1 }],
   ['bg', '#2B3550', 'keep', { surface: true, n: 1 }], ['bg', '#131A2A', 'keep', { n: 1 }], ['bg', '#07090F', 'keep', { n: 1 }], // écran Scan
   ['bg', '#05080F', 'keep', { surface: true, n: 2 }], ['bg', '#0E1A33', 'keep', { n: 1 }], // Radar
+  ['bg', '#F3F6FC', 'keep', { ctx: /pkm-tuto-text/, n: 1 }], ['fg', '#0B1120', 'keep', { ctx: /pkm-tuto-text/, n: 1 }], // bulle de parole du didacticiel (2026-10-25)
   ['fg', '#C7A6FF', 'keep', { n: 3 }], ['line', '#3B2A6B', 'keep', { n: 3 }], ['bg', 'rgb(178, 107, 255)', 'keep', { n: 2 }], // PA et jeu d'évolution (2026-10-25) : violet de l'aura
   // Fonds
   ['bg', '#0B1120', 'var(--pkm-app)', { ctx: /class="pkm-root"|aria-label="Bienvenue sur Dropicards"/, n: 2 }],
