@@ -103,7 +103,9 @@ test('rapprochement en moins de 20 ms', () => {
 test('arrêt de la lecture continue', () => {
   const c = (id, score, numEv, nameEv) => ({ id, score, numEv, nameEv });
   assert.equal(S.decide([[c('a', 0.96, 1, 0.92)]]).state, 'auto', 'très sûre dès la première lecture');
-  assert.equal(S.decide([[c('a', 0.88, 1, 0.76)]]).state, 'wait', 'sûre mais une seule lecture');
+  assert.equal(S.decide([[c('a', 0.88, 1, 0.76)]]).state, 'auto', 'numéro sûr et nom qui concorde : une seule lecture (2026-10-25)');
+  assert.equal(S.decide([[c('a', 0.88, 0.9, 0.76)]]).state, 'wait', 'numéro moins sûr : une seule lecture ne suffit pas');
+  assert.equal(S.decide([[c('a', 0.88, 1, 0.76), c('b', 0.75, 1, 0.5)]]).state, 'wait', 'une autre carte trop proche');
   assert.equal(S.decide([[c('a', 0.88, 1, 0.76)], [c('a', 0.88, 1, 0.76)]]).state, 'auto', 'deux lectures de suite');
   assert.equal(S.decide([[c('a', 0.9, 1, 0.8), c('b', 0.85, 1, 0.7)]]).state, 'wait', 'écart trop faible');
   const weak = Array.from({ length: 6 }, () => [c('a', 0.53, 1, 0), c('b', 0.53, 1, 0)]);

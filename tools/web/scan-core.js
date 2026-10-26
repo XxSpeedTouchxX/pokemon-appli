@@ -311,8 +311,11 @@
       const order = [...acc.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]);
       const cur = frames[frames.length - 1] || [], top = cur[0], second = cur[1];
       const prev = frames.length > 1 ? frames[frames.length - 2][0] : null;
+      // Une seule lecture suffit (2026-10-25, objectif 1,5 s) quand le numéro est sûr, que le nom concorde et que la
+      // suivante est loin derrière ; sinon deux lectures de suite sur la même carte.
+      const sure = top && top.numEv >= 0.95 && top.nameEv >= 0.7 && top.score >= 0.86 && (!second || top.score - second.score >= 0.15);
       if (top && top.score >= 0.85 && top.numEv >= 0.85 && top.nameEv >= 0.7 && (!second || top.score - second.score >= 0.12)
-        && ((prev && prev.id === top.id) || top.score >= 0.93)) {
+        && ((prev && prev.id === top.id) || top.score >= 0.93 || sure)) {
         return { state: 'auto', ids: [top.id].concat(order.filter(id => id !== top.id)).slice(0, 3) };
       }
       if (frames.length >= 6 && order.length && acc.get(order[0]) >= 1.2) return { state: 'ask', ids: order.slice(0, 3) };

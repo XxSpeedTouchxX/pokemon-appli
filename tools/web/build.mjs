@@ -467,6 +467,59 @@ patch(FRAG['market-browse'], `<sc-if value="{{ mk.releasesEntry.show }}" hint-pl
 ` + FRAG['market-browse']);
 // - Fiche d'une vraie boutique : même gabarit dans le Radar et dans Territoire (écran « shop »).
 // named : nom et type en tête (fiche du Radar) ; l'écran boutique les a déjà dans son en-tête.
+// Fiche du scan (2026-10-25, porteur) : la carte reconnue en grand, sa valeur Cardmarket selon l'état et la langue, les
+// six états illustrés, la quantité et « Ajouter à ma collection » (dans le classeur) ; sans prix payé ni effet sur la
+// collection. « Pas la bonne carte ? » revient aux propositions.
+{
+  const open = '<section aria-label="Résultat du scan"', i = tpl.indexOf(open);
+  const hEnd = tpl.indexOf('</div>', tpl.indexOf('width: 40px; height: 5px', i)) + '</div>'.length;
+  const end = tpl.indexOf('</section>\n</div>\n</sc-if>', i);
+  const conds = tpl.slice(tpl.indexOf('<sc-for list="{{ sr.conds }}"', i), tpl.indexOf('</sc-for>', tpl.indexOf('<sc-for list="{{ sr.conds }}"', i)) + '</sc-for>'.length);
+  const langs = tpl.slice(tpl.indexOf('<sc-for list="{{ sr.langs }}"', i), tpl.indexOf('</sc-for>', tpl.indexOf('<sc-for list="{{ sr.langs }}"', i)) + '</sc-for>'.length);
+  if (i < 0 || tpl.indexOf(open, i + 1) >= 0 || hEnd < i || end < hEnd || !conds || !langs) throw new Error('Fiche du scan introuvable');
+  tpl = tpl.slice(0, hEnd) + `
+<div style="flex: none; display: flex; justify-content: flex-end; margin-bottom: -50px; position: relative; z-index: 1">
+<button type="button" onClick="{{ sr.close }}" aria-label="Fermer" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #1E2B45; border-radius: 22px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+</div>
+<span class="pkm-scan-card" style="flex: none; align-self: center; position: relative; width: 156px; aspect-ratio: 63 / 88; border-radius: 10px; overflow: hidden; background: {{ sr.bg }}; display: flex; align-items: center; justify-content: center; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55)">
+<sc-if value="{{ sr.isCard }}" hint-placeholder-val="{{ true }}"><img src="{{ sr.img }}" alt="{{ sr.name }}" style="width: 100%; height: 100%; object-fit: cover"></sc-if>
+<sc-if value="{{ sr.isSealed }}" hint-placeholder-val="{{ false }}"><img src="{{ sr.logo }}" alt="" style="max-width: 130px; max-height: 80px; object-fit: contain"></sc-if>
+</span>
+<div style="flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center">
+<span style="padding: 2px 9px; border-radius: 999px; background: {{ sr.ownedBg }}; color: {{ sr.ownedFg }}; font-size: 11.5px; font-weight: 700">{{ sr.ownedText }}</span>
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 21px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em">{{ sr.name }}</h2>
+<span style="font-size: 13px; color: #9AA8C3">{{ sr.sub }}</span>
+<span style="font-size: 12px; color: #7D8BA8">{{ sr.conf }}</span>
+</div>
+<section aria-label="Valeur de la carte" aria-live="polite" style="flex: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 16px; border-radius: 20px; border: 1px solid #24345C; background: radial-gradient(120% 100% at 100% 0%, rgba(98, 122, 255, 0.22), rgba(98, 122, 255, 0) 60%), #121C33; text-align: center">
+<span style="font-size: 12.5px; color: #C9D3EA">Valeur Cardmarket</span>
+<span style="font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">{{ sr.big }}</span>
+<span style="font-size: 12.5px; line-height: 1.35; color: #9AA8C3">{{ sr.bigSub }}</span>
+</section>
+<span style="flex: none; font-size: 13px; font-weight: 600; color: #9AA8C3">État de la carte</span>
+<div role="group" aria-label="État" style="flex: none; display: flex; gap: 8px">
+${conds}
+</div>
+<div style="flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end">
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<span style="font-size: 13px; font-weight: 600; color: #9AA8C3">Langue</span>
+<div role="group" aria-label="Langue" style="display: flex; gap: 6px">
+${langs}
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; font-weight: 600; color: #9AA8C3">Quantité</span>
+<div style="display: flex; align-items: center; height: 44px; box-sizing: border-box; border: 1px solid #2A3A5C; border-radius: 16px; background: #0B1120">
+<button type="button" onClick="{{ sr.dec }}" aria-label="Diminuer la quantité" style="width: 40px; height: 42px; padding: 0; border: 0; background: transparent; color: #F3F6FC; font: inherit; font-size: 20px; cursor: pointer">−</button>
+<span aria-live="polite" style="min-width: 22px; text-align: center; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">{{ sr.qty }}</span>
+<button type="button" onClick="{{ sr.inc }}" aria-label="Augmenter la quantité" style="width: 40px; height: 42px; padding: 0; border: 0; background: transparent; color: #F3F6FC; font: inherit; font-size: 20px; cursor: pointer">+</button>
+</div>
+</div>
+</div>
+<button type="button" onClick="{{ sr.save }}" style="flex: none; height: 56px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer">{{ sr.saveLabel }}</button>
+<button type="button" onClick="{{ sr.wrong }}" style="flex: none; height: 44px; margin-top: -6px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Pas la bonne carte ?</button>
+` + tpl.slice(end);
+}
 // États des cartes illustrés (2026-10-25, porteur) : une bulle par état (web/img/conds, tools/conds/make_conds.py),
 // le nom et le pourcentage de la cote ; le scellé garde ses deux états en texte. Même bouton dans « Ajouter un
 // exemplaire », « Modifier l'ajout » et la fiche du scan.
@@ -560,7 +613,7 @@ if (brokenMarks !== 51) throw new Error('Photos et logos repérés : ' + brokenM
     .replace(/\bPalier\b/g, 'Grade').replace(/\bpalier\b/g, 'grade');
   tpl = regrade(tpl); logic = regrade(logic);
 }
-const BRAND = 'Dropicards', REBRANDED = 51;
+const BRAND = 'Dropicards', REBRANDED = 50; // « Cote PKM » de la fiche du scan remplacée par « Valeur Cardmarket » (2026-10-25)
 let rebranded = 0;
 const rebrand = t => t.replace(/PKM-App|\bPKM\b/g, () => { rebranded++; return BRAND; });
 tpl = rebrand(tpl);

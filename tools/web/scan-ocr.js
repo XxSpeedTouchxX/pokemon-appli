@@ -1,7 +1,8 @@
   // ——— Scan : lecture des bandes avec Tesseract.js, chargé à la première ouverture du scan ———
   // Tesseract.js 7 (Apache 2.0), son cœur WebAssembly et le modèle français « best_int » sont servis avec le site
-  // (web/vendor/tesseract/7.0.0/, copiés par build.mjs depuis npm). Un seul worker, réutilisé. La lecture se fait
-  // sur l'appareil : aucune image n'est envoyée.
+  // (web/vendor/tesseract/7.0.0/, copiés par build.mjs depuis npm). La lecture se fait sur l'appareil : aucune image
+  // n'est envoyée. Objectif 1,5 s (2026-10-25, porteur) : deux workers, l'un pour le numéro, l'autre pour le nom, qui
+  // lisent en même temps ; chacun est « chauffé » par une première lecture à vide dès son démarrage.
   const ScanOcr = (function () {
     const DIR = 'vendor/tesseract/7.0.0/';
     // Test du SIMD de WebAssembly (le même que wasm-feature-detect) : cœur plus rapide s'il est pris en charge.
@@ -11,7 +12,7 @@
       num: { tessedit_pageseg_mode: '11', tessedit_char_whitelist: '0123456789/ABCDEFGHIJKLMNOPQRSTUVWXYZ', user_defined_dpi: '300', preserve_interword_spaces: '1' },
       name: { tessedit_pageseg_mode: '6', tessedit_char_whitelist: '', user_defined_dpi: '300', preserve_interword_spaces: '1' }
     };
-    const st = { ready: null, worker: null, mode: null, simd: null };
+    const st = { ready: null, worker: null, mode: null, simd: null, ready2: null, worker2: null, mode2: null };
     const url = f => new URL(DIR + f, document.baseURI).href;
     // Taille d'une source d'image (vidéo, image, canevas, ImageBitmap).
     const dims = src => ({ w: src.videoWidth || src.naturalWidth || src.width || 0, h: src.videoHeight || src.naturalHeight || src.height || 0 });
@@ -24,19 +25,29 @@
     });
     const simd = () => { try { return typeof WebAssembly === 'object' && WebAssembly.validate(SIMD); } catch (e) { return false; } };
     // Worker prêt (une seule fois ; nouvel essai possible après un échec). progress(étape, 0 à 1).
+    const make = logger => window.Tesseract.createWorker('fra', 1, {
+      workerPath: url('worker.min.js'),
+      corePath: url(st.simd ? 'tesseract-core-simd-lstm.wasm.js' : 'tesseract-core-lstm.wasm.js'),
+      langPath: url('lang'), gzip: true, cachePath: 'dropicards-ocr-fra-7', logger: logger
+    });
+    // Première lecture à vide : le moteur compile et charge son modèle avant la vraie carte.
+    const warm = w => { const c = document.createElement('canvas'); c.width = 64; c.height = 24; const g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, 64, 24); return w.recognize(c).then(() => w, () => w); };
     function start(progress) {
       if (st.ready) return st.ready;
       if (st.simd === null) st.simd = simd();
       const logger = m => { if (progress && m && typeof m.progress === 'number') progress(m.status, m.progress); };
       st.ready = (window.Tesseract ? Promise.resolve() : script(url('tesseract.min.js')))
-        .then(() => window.Tesseract.createWorker('fra', 1, {
-          workerPath: url('worker.min.js'),
-          corePath: url(st.simd ? 'tesseract-core-simd-lstm.wasm.js' : 'tesseract-core-lstm.wasm.js'),
-          langPath: url('lang'), gzip: true, cachePath: 'dropicards-ocr-fra-7', logger: logger
-        }))
-        .then(w => { st.worker = w; st.mode = null; return w; })
+        .then(() => make(logger))
+        .then(warm)
+        .then(w => { st.worker = w; st.mode = null; second(); return w; })
         .catch(e => { st.ready = null; st.worker = null; throw e; });
       return st.ready;
+    }
+    // Second worker (le nom), démarré une fois le premier prêt ; s'il échoue (mémoire), tout passe par le premier.
+    function second() {
+      if (st.ready2) return st.ready2;
+      st.ready2 = make(() => {}).then(warm).then(w => { st.worker2 = w; st.mode2 = null; return w; }).catch(() => { st.ready2 = null; st.worker2 = null; return null; });
+      return st.ready2;
     }
     // Bande d'une carte découpée dans src (vidéo, image, canevas) ; rect : la carte en pixels de src.
     // Agrandie (~36 px par caractère), préparée (ScanCore.prep), entourée de blanc pour Tesseract. La découpe reste
@@ -57,9 +68,10 @@
       g.putImageData(new ImageData(p.data, w, h), pad, pad);
       return { canvas: c, inverted: p.inverted, dark: p.dark };
     }
-    async function recognize(kind, canvas, psm) {
-      const w = st.worker, mode = kind + (psm || '');
-      if (st.mode !== mode) { await w.setParameters(Object.assign({}, PARAMS[kind], psm ? { tessedit_pageseg_mode: psm } : {})); st.mode = mode; }
+    // two : lecture sur le second worker (le nom), s'il est prêt.
+    async function recognize(kind, canvas, psm, two) {
+      const use2 = two && st.worker2, w = use2 ? st.worker2 : st.worker, mode = kind + (psm || ''), key = use2 ? 'mode2' : 'mode';
+      if (st[key] !== mode) { await w.setParameters(Object.assign({}, PARAMS[kind], psm ? { tessedit_pageseg_mode: psm } : {})); st[key] = mode; }
       const r = await w.recognize(canvas);
       return { text: (r.data && r.data.text) || '', conf: (r.data && r.data.confidence) || 0 };
     }
@@ -75,15 +87,17 @@
     async function readNow(src, rect, opts) {
       const o = opts || {}, t0 = performance.now();
       await start();
-      const nb = band(src, rect, 'num', { invert: o.invert });
+      const nb = band(src, rect, 'num', { invert: o.invert }), nm = band(src, rect, 'name', {});
+      // Nom lu en même temps que le numéro quand le second worker est prêt.
+      const nameJob = st.worker2 ? recognize('name', nm.canvas, o.psmName, true) : null;
       let num = await recognize('num', nb.canvas, o.psmNum), alt = null;
       if (o.fine && !/\d\s*\/\s*\d/.test(num.text)) {
         alt = band(src, rect, 'num', { invert: !nb.inverted });
         const r = await recognize('num', alt.canvas, o.psmNum);
         num = { text: num.text + '\n' + r.text, conf: Math.max(num.conf, r.conf) };
       }
-      const t1 = performance.now(), nm = band(src, rect, 'name', {});
-      const name = await recognize('name', nm.canvas, o.psmName);
+      const t1 = performance.now();
+      const name = nameJob ? await nameJob : await recognize('name', nm.canvas, o.psmName);
       return {
         num: num.text, name: name.text, inverted: nb.inverted,
         ms: { num: Math.round(t1 - t0), name: Math.round(performance.now() - t1) },
@@ -92,9 +106,10 @@
     }
     // Arrêt du worker (mémoire rendue) ; le prochain scan le relance.
     function stop() {
-      const w = st.worker;
-      st.worker = null; st.ready = null; st.mode = null;
+      const w = st.worker, w2 = st.worker2;
+      st.worker = null; st.ready = null; st.mode = null; st.worker2 = null; st.ready2 = null; st.mode2 = null;
       if (w) w.terminate().catch(() => {});
+      if (w2) w2.terminate().catch(() => {});
     }
     return { start: start, read: read, band: band, stop: stop, simd: () => (st.simd === null ? (st.simd = simd()) : st.simd) };
   })();

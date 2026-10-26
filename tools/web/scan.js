@@ -124,7 +124,8 @@
     if (bright / cur.length > 0.25) return 'Reflet sur la carte : incline-la un peu';
     return null;
   };
-  // Lecture continue : une lecture à la fois, environ une à deux par seconde ; en pause sous les propositions et la fiche.
+  // Lecture continue : une lecture à la fois, enchaînées presque sans pause (objectif 1,5 s, 2026-10-25) ; en pause
+  // sous les propositions et la fiche.
   SCAN.loop = function (inst, gen) {
     clearTimeout(SCAN.timer);
     const step = () => {
@@ -140,7 +141,7 @@
       ScanOcr.read(shot.canvas, shot.rect, { invert: invert, debug: SCAN.debug }).then(read => {
         if (gen !== SCAN.gen) return;
         if (inst.st().scanPhase === 'live') SCAN.consider(inst, read, false);
-        SCAN.timer = setTimeout(step, Math.max(150, 650 - (Date.now() - t0)));
+        SCAN.timer = setTimeout(step, Math.max(30, 250 - (Date.now() - t0)));
       }).catch(() => { if (gen === SCAN.gen) SCAN.timer = setTimeout(step, 1000); });
     };
     step();
@@ -155,16 +156,24 @@
     const cands = fine ? m.cands : m.cands.filter(c => !(SCAN.cool.get(c.id) > now));
     ['num', 'name', 'lang'].forEach(k => { if (m.ev[k]) SCAN.ev[k] = m.ev[k]; });
     if (SCAN.debug) SCAN.showDebug(read, m);
+    // Temps de reconnaissance : depuis la première image où quelque chose a été lu.
+    if (!fine && !SCAN.seen && (m.ev.num || m.ev.name)) SCAN.seen = now;
     SCAN.frames.push(cands);
     if (SCAN.frames.length > 12) SCAN.frames.shift();
-    const d = fine ? { state: cands.length ? 'ask' : 'wait', ids: cands.map(c => c.id) } : ScanCore.decide(SCAN.frames);
+    // Lecture fine (déclencheur, photo) : fiche directe si la lecture est sûre, sinon les propositions.
+    const d = fine ? (ScanCore.decide([cands]).state === 'auto' ? { state: 'auto', ids: cands.map(c => c.id) } : { state: cands.length ? 'ask' : 'wait', ids: cands.map(c => c.id) }) : ScanCore.decide(SCAN.frames);
     if (d.state !== 'wait' && d.ids.length) {
       const ids = d.ids.concat(cands.map(c => c.id).filter(id => d.ids.indexOf(id) < 0)).slice(0, 3);
       SCAN.frames = [];
       try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) { /* pas de vibreur */ }
-      inst.setState({ scanPhase: 'pick', scanCands: ids, scanEv: Object.assign({}, SCAN.ev), scanMsg: '' });
+      // Carte reconnue sans doute possible (2026-10-25) : sa fiche s'ouvre tout de suite (carte, cote, état, ajout) ;
+      // les 3 propositions restent derrière « Pas la bonne carte ? ». Sinon, on propose les 3.
+      SCAN.lastMs = SCAN.seen ? Date.now() - SCAN.seen : 0; SCAN.seen = 0;
+      inst.setState({ scanPhase: 'pick', scanCands: ids, scanEv: Object.assign({}, SCAN.ev), scanMsg: '', scanMs: SCAN.lastMs });
+      if (d.state === 'auto') inst.scanPick(ids[0]);
       return true;
     }
+
     const parts = [m.ev.num ? 'n° ' + m.ev.num : '', m.ev.name || ''].filter(Boolean);
     SCAN.say(inst, parts.length ? 'Lu : ' + parts.join(' · ') : now - SCAN.since > 12000 ? 'Toujours rien : rapproche la carte, ou appuie sur le déclencheur' : 'Lecture en cours…');
     return false;
@@ -381,6 +390,14 @@
     const p = TCG.item(s.scanPid), ev = s.scanEv || {}, parts = [ev.num ? 'n° ' + ev.num : '', ev.name ? '« ' + ev.name + ' »' : ''].filter(Boolean);
     r.conf = p && p.type === 'sealed' ? 'Choisi dans la liste des produits scellés' : parts.length ? 'Lu sur la carte : ' + parts.join(' · ') + ' · vérifie le nom et le numéro' : 'Choisie dans les propositions';
     r.wrong = () => this.setState({ scanSheet: false, scanPid: null, scanPhase: (s.scanCands || []).length ? 'pick' : s.scanPhase });
+    // Valeur selon l'état et la langue choisis (2026-10-25) : cote Cardmarket × coefficient, comme dans la collection.
+    const sf = s.sf || {}, raw = p ? this.rawVal(p, s.valuation) : 0, sealed = p && p.type === 'sealed', lang = sf.lang || 'FR', cond = copyCode(p, sf.cond);
+    const coef = this.valOn() ? valCoef(lang, cond) : 1, unit = raw ? raw * coef : 0, q = Math.max(1, sf.qty || 1);
+    r.fallback = (p && p.fallback) || '';
+    r.big = raw ? this.eur(unit) : 'Pas encore de cote';
+    r.bigSub = !raw ? 'Cardmarket ne la cote pas encore' : (sealed ? lang : copyLabel(p, cond) + (lang === 'JP' ? ', JP' : '')) + ' · ' + Math.round(coef * 100) + ' % de la cote (' + this.eur(raw) + ')'
+      + (q > 1 ? ' · ×' + q + ' = ' + this.eur(unit * q) : '');
+    r.saveLabel = q > 1 ? 'Ajouter ' + q + ' exemplaires à ma collection' : 'Ajouter à ma collection';
     return r;
   };
   // Après l'ajout : retour à la caméra pour la carte suivante ; la même carte n'est pas reproposée tout de suite.
