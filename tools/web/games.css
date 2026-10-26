@@ -373,3 +373,9 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-zh-static { display: none; }
 @media (prefers-reduced-motion: reduce) { .pkm-zoomhint { animation: none; } .pkm-zh-anim { display: none; } .pkm-zh-static { display: inline; } }
 html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { display: inline; }
+
+/* États des cartes illustrés (2026-10-25) : 3 par ligne, la bulle choisie grossit légèrement. */
+[role="group"][aria-label="État de l’exemplaire"], [role="group"][aria-label="État"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.pkm-cond img { transition: transform 0.18s ease; }
+.pkm-cond[aria-pressed="true"] img { transform: scale(1.1); }
+@media (prefers-reduced-motion: reduce) { .pkm-cond img { transition: none; } }

@@ -27,6 +27,12 @@
   // Rang de l'état choisi dans un formulaire (null ou absent : l'état par défaut).
   const copyIdx = (p, v) => { const l = copyConds(p); return typeof v === 'number' && v >= 0 && v < l.length ? v : Math.max(0, l.findIndex(c => c[0] === copyDef(p))); };
   const copyCode = (p, i) => copyConds(p)[copyIdx(p, i)][0];
+  // Bouton d'état : bulle illustrée et pourcentage de la cote pour une carte ; texte seul pour le scellé.
+  const copyChip = (self, p, c, on, pick) => {
+    const card = !(p && p.type === 'sealed'), pct = card ? Math.round((VAL_COND[c[0]] || 1) * 100) + ' %' : '';
+    return Object.assign({ label: c[1], on: on, pick: pick, hasIcon: card, icon: card ? 'img/conds/' + c[0].toLowerCase() + '.svg' : '', pct: pct,
+      aria: c[1] + (card ? ', ' + pct + ' de la cote' : '') }, self.choice(on));
+  };
   const copyLabel = (p, code) => { const l = copyConds(p), f = l.find(c => c[0] === code) || l.find(c => c[0] === copyDef(p)); return f[1]; };
   // Sous-titre d'un article sans sa langue ni son état (« Ultra rare · FR · Near Mint » → « Ultra rare »).
   const copyBase = sub => String(sub || '').replace(/ · (FR|EN|JP)( · (Mint|Near Mint|Excellent|Good|Played|Poor|Joué))?$/, '');
@@ -84,7 +90,7 @@
   const baseCopyScanResult = copyProto.vScanResult;
   copyProto.vScanResult = function (x) {
     const r = baseCopyScanResult.call(this, x), sf = x.s.sf || {}, p = x.P[this.scanTarget(x.s)], ci = copyIdx(p, sf.cond);
-    r.conds = copyConds(p).map((c, i) => Object.assign({ label: c[1], on: ci === i, pick: () => this.setSF({ cond: i }) }, this.chip(ci === i)));
+    r.conds = copyConds(p).map((c, i) => copyChip(this, p, c, ci === i, () => this.setSF({ cond: i })));
     return r;
   };
 
@@ -97,7 +103,7 @@
     return Object.assign(sh, {
       showCopy: true,
       copyLangs: COPY.langs.map(l => Object.assign({ label: l, on: lang === l, pick: () => this.setF({ lang: l }) }, this.chip(lang === l))),
-      copyConds: list.map((c, i) => Object.assign({ label: c[1], on: ci === i, pick: () => this.setF({ cond: i }) }, this.chip(ci === i)))
+      copyConds: list.map((c, i) => copyChip(this, x.P[f.pid], c, ci === i, () => this.setF({ cond: i })))
     });
   };
   // Fiche : résumé des exemplaires ajoutés ; drapeau de la langue la plus présente.

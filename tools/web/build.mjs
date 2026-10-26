@@ -467,6 +467,15 @@ patch(FRAG['market-browse'], `<sc-if value="{{ mk.releasesEntry.show }}" hint-pl
 ` + FRAG['market-browse']);
 // - Fiche d'une vraie boutique : même gabarit dans le Radar et dans Territoire (écran « shop »).
 // named : nom et type en tête (fiche du Radar) ; l'écran boutique les a déjà dans son en-tête.
+// États des cartes illustrés (2026-10-25, porteur) : une bulle par état (web/img/conds, tools/conds/make_conds.py),
+// le nom et le pourcentage de la cote ; le scellé garde ses deux états en texte. Même bouton dans « Ajouter un
+// exemplaire », « Modifier l'ajout » et la fiche du scan.
+{
+  const condBtn = v => `<button type="button" class="pkm-cond" onClick="{{ ${v}.pick }}" aria-pressed="{{ ${v}.on }}" aria-label="{{ ${v}.aria }}" style="min-height: 44px; padding: 8px 4px 7px; border-radius: 18px; border: 1px solid {{ ${v}.bc }}; box-shadow: {{ ${v}.ring }}; background: {{ ${v}.bg }}; color: {{ ${v}.fg }}; font: inherit; font-size: 13px; font-weight: 700; line-height: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer"><sc-if value="{{ ${v}.hasIcon }}" hint-placeholder-val="{{ true }}"><img src="{{ ${v}.icon }}" alt="" width="48" height="48" style="display: block; width: 48px; height: 48px"></sc-if><span>{{ ${v}.label }}</span><sc-if value="{{ ${v}.hasIcon }}" hint-placeholder-val="{{ true }}"><span style="font-size: 11.5px; font-weight: 600; color: #9AA8C3">{{ ${v}.pct }}</span></sc-if></button>`;
+  let n = 0;
+  tpl = tpl.replace(/(<sc-for list="\{\{ (?:sh\.copyConds|bed\.conds|sr\.conds) \}\}" as="(\w+)"[^>]*>\s*)<button[\s\S]*?<\/button>/g, (m, head, v) => { n++; return head + condBtn(v); });
+  if (n !== 3) throw new Error('États des cartes : ' + n + ' listes trouvées sur 3');
+}
 const SHOP_BODY = (o, named = true) => `<section aria-label="{{ ${o}.name }}" style="flex: none; display: flex; flex-direction: column; gap: 12px">
 <div style="display: flex; align-items: flex-start; gap: 12px">
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">

@@ -68,8 +68,14 @@ const bb = await page.locator(SH + ' fieldset button[aria-pressed]').boundingBox
 ok('ajout de la carte : article centré et agrandi', Math.abs(bb.x + bb.width / 2 - 195) < 3 && bb.width > 140);
 // Six états (2026-10-22), Near Mint par défaut ; la valeur suit l'état choisi.
 const condBtns = page.locator('[aria-label="État de l’exemplaire"] button');
-ok('états : ' + (await condBtns.allInnerTexts()).join(', '), (await condBtns.allInnerTexts()).join(',') === 'Mint,Near Mint,Excellent,Good,Played,Poor'
+const condNames = async () => (await condBtns.allInnerTexts()).map(t => t.split('\n')[0].trim());
+ok('états : ' + (await condNames()).join(', '), (await condNames()).join(',') === 'Mint,Near Mint,Excellent,Good,Played,Poor'
   && (await condBtns.nth(1).getAttribute('aria-pressed')) === 'true');
+// Icônes des états (2026-10-25) : une bulle par état, 3 par ligne, pourcentage de la cote.
+const icons = await condBtns.evaluateAll(bs => bs.map(b => { const i = b.querySelector('img'); return i && i.complete && i.naturalWidth > 0 ? i.getAttribute('src') : ''; }));
+const rows = await condBtns.evaluateAll(bs => new Set(bs.map(b => Math.round(b.getBoundingClientRect().top))).size);
+ok('états illustrés : ' + icons.map(x => x.replace('img/conds/', '')).join(', ') + ' · ' + rows + ' lignes', icons.join(',') === ['mt', 'nm', 'ex', 'gd', 'pl', 'po'].map(k => 'img/conds/' + k + '.svg').join(',') && rows === 2
+  && /115 %/.test(await condBtns.nth(0).innerText()) && /30 %/.test(await condBtns.nth(5).innerText()));
 const unitOf = async () => Number((await page.locator(SH).innerText()).match(/Valeur Cardmarket à l’unité[^\n]*\n?\s*([\d\s ]+,\d\d)/)[1].replace(/\D/g, '')) / 100;
 const uNM = await unitOf();
 await condBtns.nth(0).click(); await page.waitForTimeout(150);

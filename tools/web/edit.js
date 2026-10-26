@@ -129,7 +129,7 @@
       isLot: lot, lotNote: lot ? 'Ce prix est réparti entre les ' + nArt + ' articles du lot. Supprimer cet article retire sa part du prix.' : '',
       date: b.date, maxDate: realToday(), onDate: e => this.setBed({ date: e.target.value }),
       langs: COPY.langs.map(g => Object.assign({ label: g, on: b.lang === g, pick: () => this.setBed({ lang: g }) }, this.chip(b.lang === g))),
-      conds: conds.map((c, i) => Object.assign({ label: c[1], on: b.cond === i, pick: () => this.setBed({ cond: i }) }, this.chip(b.cond === i))),
+      conds: conds.map((c, i) => copyChip(this, p, c, b.cond === i, () => this.setBed({ cond: i }))),
       hasErr: !!b.err, err: b.err || '',
       save: () => this.edSave(),
       del: () => this.edDelete(), delLabel: b.ask ? 'Oui, supprimer' : (lot ? 'Retirer cet article du lot' : 'Supprimer cet ajout'),
