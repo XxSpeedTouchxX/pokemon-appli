@@ -94,7 +94,7 @@
 .pkm-tk-head { display: block; margin-top: 2px; padding: 0; border: 0; background: transparent; cursor: pointer; font: inherit; }
 .pkm-tk-head .pkm-tk-bar { margin-top: 0; height: 20px; font-size: 11.5px; }
 /* Compteur resserré quand la barre des tickets est affichée (2026-10-14) : pastille de 28 px au lieu de 34. */
-.pkm-pk-tk > button { height: 30px !important; }
+.pkm-pk-tk > button { height: 44px !important; margin-bottom: -10px; } /* zone de toucher de 44 px, pastille de 28 px (2026-10-25) */
 .pkm-pk-tk > button > span { height: 28px !important; font-size: 13px !important; padding-right: 10px !important; }
 .pkm-pk-tk > button > span > img { width: 22px !important; height: 22px !important; }
 .pkm-tk-bar { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px 0 6px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; white-space: nowrap; align-self: flex-start; margin-top: 4px; }
@@ -379,3 +379,24 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-cond img { transition: transform 0.18s ease; }
 .pkm-cond[aria-pressed="true"] img { transform: scale(1.1); }
 @media (prefers-reduced-motion: reduce) { .pkm-cond img { transition: none; } }
+
+/* PA (points d'Aura, 2026-10-25) : pastille sous le solde de PK, à la place des tickets. */
+.pkm-pa-bar { gap: 4px !important; padding-left: 3px !important; border-color: #3B2A6B !important; }
+.pkm-pa-pulse { animation: pkmPaPulse 0.9s ease-in-out 3; }
+@keyframes pkmPaPulse { 50% { box-shadow: 0 0 0 3px rgba(178, 107, 255, 0.55), 0 0 18px rgba(178, 107, 255, 0.8); transform: scale(1.06); } }
+@media (prefers-reduced-motion: reduce) { .pkm-pa-pulse { animation: none; } }
+/* Jeu d'évolution : évolutions en silhouette noire tant qu'elles ne sont pas débloquées ; forme actuelle mise en avant. */
+.pkm-evo-lock img { filter: brightness(0) drop-shadow(0 0 6px rgba(178, 107, 255, 0.55)); opacity: 0.92; }
+.pkm-evo-now { background: rgba(178, 107, 255, 0.16); box-shadow: inset 0 0 0 1px #B26BFF; }
+/* Évolution : le Pokémon brille en blanc, grandit, puis la nouvelle forme apparaît (3,2 s). */
+.pkm-evo-fx { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(178, 107, 255, 0.55), rgba(11, 17, 32, 0.96) 70%); }
+.pkm-evo-fx img { position: absolute; width: 120px; height: 120px; object-fit: contain; image-rendering: pixelated; }
+.pkm-evo-from { animation: pkmEvoFrom 3.2s ease-in-out forwards; }
+.pkm-evo-to { opacity: 0; animation: pkmEvoTo 3.2s ease-in-out forwards; }
+.pkm-evo-glow { position: absolute; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #FFFFFF, rgba(255, 255, 255, 0) 65%); opacity: 0; animation: pkmEvoGlow 3.2s ease-in-out forwards; }
+.pkm-evo-text { position: absolute; bottom: 18px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: #FFFFFF; }
+@keyframes pkmEvoFrom { 0% { filter: none; transform: scale(1); } 25% { filter: brightness(0) invert(1); transform: scale(1); } 35%, 45%, 55% { transform: scale(0.85); } 40%, 50%, 60% { transform: scale(1.12); } 66% { filter: brightness(0) invert(1); transform: scale(1.2); opacity: 1; } 72%, 100% { opacity: 0; } }
+@keyframes pkmEvoTo { 0%, 66% { opacity: 0; filter: brightness(0) invert(1); transform: scale(1.2); } 74% { opacity: 1; filter: brightness(0) invert(1); } 100% { opacity: 1; filter: none; transform: scale(1); } }
+@keyframes pkmEvoGlow { 0%, 20% { opacity: 0; transform: scale(0.4); } 66% { opacity: 1; transform: scale(1.3); } 100% { opacity: 0; transform: scale(1.6); } }
+@media (prefers-reduced-motion: reduce) { .pkm-evo-fx * { animation: none !important; } }
+.pkm-pa-head { position: relative; z-index: 1; height: 30px; margin-top: 0; display: flex; align-items: center; justify-content: flex-end; }

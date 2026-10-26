@@ -103,20 +103,20 @@
   // la collection mais les PK gagnés et les parrainages :
   //   Recrue : dès l'inscription ; Chasseur : 3 000 PK ; Collectionneur : 7 500 PK ; Dresseur Pokémon : 15 000 PK et
   //   3 parrainages ; Maître Pokémon : 30 000 PK et 5 parrainages ; Grand maître Pokémon : 100 000 PK et 10 parrainages.
-  // PK comptés : le total gagné depuis le début (pkEarned), pour qu'une dépense au PK shop ou une perte à la roulette ne
+  // PK comptés : le total gagné depuis le début (pkEarned), pour qu'une dépense au PK shop ou une ancienne perte à la roulette (retirée le 2026-10-25) ne
   // fasse pas redescendre de grade. Parrainages : pas encore possibles (ils demandent des comptes) ; compteur
   // « referrals » gardé avec la collection, à 0 pour l'instant (forçable depuis l'Admin).
   // Le champ sym d'un grade porte le chemin de son emblème (build.mjs remplace les hexagones de la maquette).
   // Avantages : liste proposée par Claude, à valider par le porteur ; affichés, pas encore activés.
   const PF_GRADES = [
     { name: 'Recrue', pk: 0, ref: 0, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)',
-      perks: ['Toutes les fonctions de l’app : valeur de ta collection, scan, classeur, radar des boutiques', 'Booster PK toutes les 12 h, pile ou face et roulette', 'Bulbizarre, Salamèche, Carapuce et Pikachu offerts comme compagnons'] },
+      perks: ['Toutes les fonctions de l’app : valeur de ta collection, scan, classeur, radar des boutiques', 'Booster PK toutes les 12 h, pile ou face et jeu d’évolution', 'Bulbizarre, Salamèche, Carapuce et Pikachu offerts comme compagnons'] },
     { name: 'Chasseur', pk: 3000, ref: 0, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)',
       perks: ['Emblème Chasseur sur ton profil', '1 ticket du tirage au sort offert', 'Booster PK toutes les 10 h'] },
     { name: 'Collectionneur', pk: 7500, ref: 0, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)',
       perks: ['Emblème Collectionneur sur ton profil', '2 tickets du tirage au sort offerts', 'Booster PK toutes les 8 h', 'Compagnons à −10 %'] },
     { name: 'Dresseur Pokémon', pk: 15000, ref: 3, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)',
-      perks: ['Emblème Dresseur Pokémon sur ton profil', '3 tickets du tirage au sort offerts', 'Deux tours de roulette par jour', 'Accès anticipé aux nouveaux concours'] },
+      perks: ['Emblème Dresseur Pokémon sur ton profil', '3 tickets du tirage au sort offerts', 'Deux lancers de pile ou face par jour', 'Accès anticipé aux nouveaux concours'] },
     { name: 'Maître Pokémon', pk: 30000, ref: 5, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)',
       perks: ['Emblème Maître Pokémon sur ton profil', '5 tickets du tirage au sort offerts', 'Compagnons légendaires à moitié prix', 'Concours réservés aux Maîtres Pokémon'] },
     { name: 'Grand maître Pokémon', pk: 100000, ref: 10, color: '#FF6A4D', glow: 'rgba(227, 53, 13, 0.30)',

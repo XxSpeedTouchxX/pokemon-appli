@@ -133,7 +133,7 @@
       price: pkNum(price), balance: 'Ton solde : ' + pkNum(s.pk) + ' PK',
       can: can, cannot: !can, buyLabel: 'Débloquer pour ' + pkNum(price) + ' PK',
       missText: 'Il te manque ' + pkNum(miss) + ' PK',
-      earn: 'Gagne des PK dans l’onglet Jeux : booster PK, pile ou face et roulette.',
+      earn: 'Gagne des PK dans l’onglet Jeux : booster PK et pile ou face.',
       buy: () => this.pkBuy(k), cancel: () => this.setState({ pkAsk: null })
     };
   };
@@ -185,7 +185,7 @@
       open: () => this.setState({ pkSheet: true }), close: () => this.setState({ pkSheet: false }), sheet: !!s.pkSheet,
       balance: pkNum(s.pk),
       rules: [
-        ['Jeux', 'booster PK, pile ou face et roulette, dans l’onglet Jeux'],
+        ['Jeux', 'booster PK et pile ou face, dans l’onglet Jeux'],
         ['+' + PK_WELCOME, 'de bienvenue, offerts une fois'],
         ['+' + PK_SHARE, 'une fois, en partageant l’app sur un réseau social']
       ].map(([n, t]) => ({ n: n, text: t })), // du plus petit gain au plus grand (demande du porteur)

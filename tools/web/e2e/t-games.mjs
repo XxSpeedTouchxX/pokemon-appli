@@ -26,32 +26,37 @@ const pk2 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-colle
 ok('pièce lancée : 0 ou 30 PK (' + (pk2 - pk1) + ')', pk2 - pk1 === 0 || pk2 - pk1 === 30);
 ok('lancer suivant dans 8 h', /Prochain lancer dans [78] h/.test(await coin.innerText()));
 await page.screenshot({ path: shot('games-coin.png') });
-// Roulette (2026-10-12) : ÷2, ×2, +100, −100 sur le solde, jamais sous 0.
-const wheel = page.locator('section[aria-label="Roulette"]');
-ok('roulette : 4 secteurs, ni chances ni description', (await wheel.locator('.pkm-gm-wlabel').count()) === 4 && !/%/.test(await wheel.innerText()) && !/Fais tourner la roue :/.test(await wheel.innerText()));
-const w0 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
-await wheel.locator('button:has-text("Faire tourner la roue")').click(); await page.waitForTimeout(4900);
-const w1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
-ok('roulette : solde ' + w0 + ' → ' + w1, [Math.floor(w0 / 2), w0 * 2, w0 + 100, Math.max(0, w0 - 100)].indexOf(w1) >= 0);
-// Animation de fin (2026-10-14) : confettis si le solde monte, nuage de pluie s'il baisse.
-const fxWin = await wheel.locator('.pkm-gm-wconf').count(), fxLose = await wheel.locator('.pkm-gm-cloud').count();
-ok('roulette : animation de fin (' + (w1 > w0 ? 'gain → confettis ' + fxWin : w1 < w0 ? 'perte → nuage ' + fxLose : 'sans changement') + ')', w1 > w0 ? fxWin > 10 && fxLose === 0 : w1 < w0 ? fxLose === 1 && fxWin === 0 : true);
-ok('roulette : prochain tour dans 24 h', /Prochain tour dans 2[34] h/.test(await wheel.innerText()));
-await page.screenshot({ path: shot('games-roulette.png') });
+// Roulette retirée (2026-10-25) : jeu d'évolution avec les PA (points d'Aura).
+ok('roulette retirée', (await page.locator('section[aria-label="Roulette"]').count()) === 0);
+const evo = page.locator('section[aria-label="Évolution"]');
+ok('évolution : 4 starters (' + (await evo.locator('[aria-label="Starters"] button').allInnerTexts()).join(', ') + ')', (await evo.locator('[aria-label="Starters"] button').allInnerTexts()).join(',') === 'Bulbizarre,Salamèche,Carapuce,Pikachu');
+await evo.locator('button[aria-label="Choisir Carapuce comme starter"]').click(); await page.waitForTimeout(400);
+const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy }; });
+ok('évolution : Carapuce choisi, devenu le compagnon', st.evo && st.evo.line === 'cara' && st.evo.stage === 0 && st.buddy === 7);
+ok('évolution : Carabaffe et Tortank en silhouette (500 et 1 500 PA)', (await evo.locator('.pkm-evo-lock').count()) === 2 && /500 PA/.test(await evo.innerText()) && /1[\s\u202f\u00a0]500 PA/.test(await evo.innerText()) && !/Carabaffe|Tortank/.test(await evo.innerText()));
+ok('évolution : bouton bloqué sans assez de PA', /Encore [\d\s\u202f\u00a0]+ PA pour évoluer/.test(await evo.innerText()));
+await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pa = 520; localStorage.setItem(k, JSON.stringify(d)); });
+await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200); await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(600);
+await evo.locator('button:has-text("Faire évoluer")').click(); await page.waitForTimeout(3700);
+const st2 = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy, pa: d.pa, own: d.pkOwn }; });
+ok('évolution : Carabaffe pour 500 PA (' + st2.pa + ' PA restants), nouveau compagnon', st2.evo.stage === 1 && st2.buddy === 8 && st2.pa === 20 && st2.own.indexOf(8) >= 0 && (await evo.locator('.pkm-evo-lock').count()) === 1);
+await evo.screenshot({ path: shot('games-evolution.png') });
+// PA dans l'en-tête, à la place des tickets.
+ok('en-tête : PA sous le solde de PK', /20\s*PA/.test(await page.locator('button[aria-label^="Mes points d’Aura"]').first().innerText()));
 // PK shop (2026-10-12) : 4ᵉ onglet, ticket du tirage au sort.
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
 const ticket = page.locator('section[aria-label="Ticket · tirage au sort"]');
 ok('PK shop : ticket à 2 000 PK', (await ticket.count()) === 1 && /2[\s\u202f\u00a0]000 PK/.test(await ticket.innerText()));
 const lot = page.locator('section[aria-label="Booster 30 ans Pokémon"]');
 ok('PK shop : lot Booster 30 ans à 15 000 PK, avec son visuel', (await lot.count()) === 1 && /15[\s\u202f\u00a0]000 PK/.test(await lot.innerText()) && (await lot.locator('img[src="img/shop-booster-30-anniversaire.webp"]').count()) === 1);
-ok('sans ticket : pas de barre de tickets', (await page.locator('.pkm-tk-head').count()) === 0);
+ok('en-tête : plus de barre de tickets, les PA à la place (2026-10-25)', (await page.locator('header button[aria-label^="Mes tickets"]').count()) === 0 && (await page.locator('header button[aria-label^="Mes points d’Aura"]').count()) >= 1);
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pk = 2700; localStorage.setItem(k, JSON.stringify(d)); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
 await ticket.locator('button:has-text("Acheter un ticket")').click(); await ticket.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(500);
 const sd = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'));
 ok('ticket acheté : 1 ticket, 700 PK', sd.pk === 700 && sd.tickets && sd.tickets['ticket-booster'] === 1 && /Tu as 1 ticket/.test(await ticket.innerText()));
-ok('barre « 1 ticket » sous le solde de PK', /1 ticket/.test(await page.locator('.pkm-tk-head').first().innerText()));
+ok('tickets affichés dans le PK shop (« 1 ticket » sous le solde)', /1 ticket/.test(await page.locator('section[aria-label="Mon solde de PK"]').innerText()));
 await page.screenshot({ path: shot('pkshop.png') });
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 ok('délais gardés après rechargement', /Prochain booster/.test(await boost.innerText()) && /Prochain lancer/.test(await coin.innerText()));

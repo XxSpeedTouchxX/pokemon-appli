@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node build.mjs",
     "e2e": "node e2e/run.mjs",
-    "test": "node --test test_catalog_join.mjs test_home.mjs test_import.mjs test_margin.mjs test_radar.mjs test_scan.mjs test_theme.mjs"
+    "test": "node --test test_catalog_join.mjs test_home.mjs test_import.mjs test_margin.mjs test_radar.mjs test_scan.mjs test_theme.mjs test_pa.mjs"
   },
   "devDependencies": {
     "@fontsource/luckiest-guy": "5.2.6",

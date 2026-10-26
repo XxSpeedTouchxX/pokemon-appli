@@ -806,7 +806,7 @@
 <button type="button" onClick="{{ pk.open }}" aria-label="{{ pk.aria }}" style="display: flex; align-items: center; height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer">
 <span style="display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 11px 0 4px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="26" height="26" style="flex: none; display: block; width: 26px; height: 26px">{{ pk.n }}<span style="font-size: 11px; color: #9AA8C3">PK</span></span>
 </button>
-<sc-if value="{{ pk.hasTickets }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pk.openShop }}" aria-label="{{ pk.ticketsAria }}" class="pkm-tk-head"><span class="pkm-tk-bar"><span class="pkm-tk-mini" aria-hidden="true"></span>{{ pk.tickets }}</span></button></sc-if>
+<button type="button" onClick="{{ pk.openPa }}" aria-label="{{ pk.paAria }}" class="pkm-tk-head pkm-pa-head"><span class="{{ pk.paCls }}"><img src="img/brand/pa.svg" alt="" width="18" height="18" style="flex: none; display: block; width: 18px; height: 18px">{{ pk.pa }}<span style="font-size: 10.5px; color: #C7A6FF">PA</span></span></button>
 <sc-if value="{{ pk.gain }}" hint-placeholder-val="{{ false }}">
 <span aria-hidden="true" class="pkm-gain" style="position: absolute; z-index: 5; right: 4px; top: 100%; margin-top: -6px; padding: 2px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12.5px; font-weight: 800; white-space: nowrap; pointer-events: none">{{ pk.gainText }} PK</span>
 </sc-if>
@@ -1618,22 +1618,30 @@
 <button type="button" onClick="{{ gm.c.flip }}" aria-disabled="{{ gm.c.flipping }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer">{{ gm.c.button }}</button>
 </section>
 
-<section aria-label="Roulette" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 50% 0%, rgba(168, 182, 255, 0.18), rgba(168, 182, 255, 0) 60%), #111A2C">
-<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
-<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Roulette</h2>
-<span style="font-size: 12.5px; color: #9AA8C3">{{ gm.w.every }}</span>
+<section aria-label="Évolution" class="pkm-dark pkm-evo" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #3B2A6B; background: radial-gradient(120% 90% at 50% 0%, rgba(178, 107, 255, 0.24), rgba(178, 107, 255, 0) 62%), #111A2C; color: #F3F6FC; position: relative; overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Évolution</h2>
+<span style="font-size: 12.5px; color: #C7A6FF">Série : {{ evo.streak }}</span>
 </div>
-<div class="{{ gm.w.fx.boxClass }}" role="img" aria-label="{{ gm.w.aria }}">
-<span class="pkm-gm-needle"></span>
-<div class="{{ gm.w.wheelClass }}" style="--spin: {{ gm.w.deg }}">
-<sc-for list="{{ gm.w.labels }}" as="gwl" hint-placeholder-count="4"><span class="pkm-gm-wlabel" style="transform: rotate({{ gwl.at }}) translateY(-74px) rotate({{ gwl.back }})">{{ gwl.text }}</span></sc-for>
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 18px; border: 1px solid #3B2A6B; background: rgba(11, 17, 32, 0.6)">
+<img src="img/brand/pa.svg" alt="" width="40" height="40" style="flex: none; display: block; width: 40px; height: 40px">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">{{ evo.pa }} PA</span><span style="font-size: 12.5px; color: #C9D3EA">{{ evo.tomorrow }}</span></span>
 </div>
-<span class="pkm-gm-hub"></span>
-<sc-if value="{{ gm.w.fx.win }}" hint-placeholder-val="{{ false }}"><span class="pkm-gm-wfx" key="{{ gm.w.fx.key }}" aria-hidden="true"><sc-for list="{{ gm.w.fx.confetti }}" as="wfc" hint-placeholder-count="6"><i class="{{ wfc.cls }}" style="{{ wfc.style }}"></i></sc-for><span class="pkm-gm-wpop pkm-gm-wpop-win">{{ gm.w.fx.text }}</span></span></sc-if>
-<sc-if value="{{ gm.w.fx.lose }}" hint-placeholder-val="{{ false }}"><span class="pkm-gm-wfx" key="{{ gm.w.fx.key }}" aria-hidden="true"><span class="pkm-gm-cloud"><svg width="120" height="64" viewBox="0 0 120 64"><path class="pkm-gm-cloud-body" d="M28 56h66a20 20 0 0 0 2-40 26 26 0 0 0-49-6A22 22 0 0 0 28 56z"></path><path class="pkm-gm-cloud-face" d="M46 36q4-4 8 0M66 36q4-4 8 0"></path><path class="pkm-gm-cloud-face" d="M52 48q8-6 16 0"></path></svg></span><sc-for list="{{ gm.w.fx.drops }}" as="wfd" hint-placeholder-count="4"><i class="pkm-gm-drop" style="{{ wfd.style }}"></i></sc-for><span class="pkm-gm-wpop pkm-gm-wpop-lose">{{ gm.w.fx.text }}</span></span></sc-if>
+<sc-if value="{{ evo.choosing }}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 14px; line-height: 1.45; color: #C9D3EA">Choisis ton starter : il te suivra dans l’app et évoluera grâce à tes PA.</p>
+<div role="group" aria-label="Starters" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{ evo.starters }}" as="evs" hint-placeholder-count="4"><button type="button" onClick="{{ evs.pick }}" aria-label="{{ evs.aria }}" style="min-height: 44px; padding: 8px 2px; border-radius: 18px; border: 1px solid #3B2A6B; background: rgba(11, 17, 32, 0.6); color: #F3F6FC; font: inherit; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer"><img src="{{ evs.img }}" alt="" width="56" height="56" style="display: block; width: 56px; height: 56px; object-fit: contain; image-rendering: pixelated">{{ evs.name }}</button></sc-for>
 </div>
-<sc-if value="{{ gm.w.resultDone }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: -4px 0 0; text-align: center; font-size: 15px; font-weight: 800; color: {{ gm.w.resultColor }}">{{ gm.w.resultText }}</p></sc-if>
-<button type="button" onClick="{{ gm.w.spin }}" aria-disabled="{{ gm.w.spinning }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer">{{ gm.w.button }}</button>
+</sc-if>
+<sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}">
+<div role="list" aria-label="Lignée de ton Pokémon" style="display: flex; align-items: center; justify-content: center; gap: 4px">
+<sc-for list="{{ evo.stages }}" as="evt" hint-placeholder-count="3"><sc-if value="{{ evt.arrow }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></sc-if><div role="listitem" aria-label="{{ evt.aria }}" class="{{ evt.cls }}" style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 18px"><img src="{{ evt.img }}" alt="" width="72" height="72" style="display: block; width: 72px; height: 72px; object-fit: contain; image-rendering: pixelated"><span style="font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">{{ evt.name }}</span><span style="font-size: 11.5px; font-weight: 700; color: {{ evt.statusColor }}">{{ evt.status }}</span></div></sc-for>
+</div>
+<button type="button" onClick="{{ evo.evolve }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; opacity: {{ evo.btnOp }}">{{ evo.button }}</button>
+<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ evo.note }}</span>
+</sc-if>
+<span style="font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ evo.rules }}</span>
+<sc-if value="{{ evo.fx }}" hint-placeholder-val="{{ false }}"><div class="pkm-evo-fx" key="{{ evo.fxKey }}" role="status" aria-live="polite"><span class="pkm-evo-glow" aria-hidden="true"></span><img class="pkm-evo-from" src="{{ evo.fxFrom }}" alt=""><img class="pkm-evo-to" src="{{ evo.fxTo }}" alt=""><span class="pkm-evo-text">{{ evo.fxText }}</span></div></sc-if>
 </section>
 
 <sc-if value="{{ gm.hasHist }}" hint-placeholder-val="{{ false }}">

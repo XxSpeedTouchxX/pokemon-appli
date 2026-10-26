@@ -5,15 +5,11 @@
   //   100 PK (4 %) ou 1 000 PK (1 %). Taux fixés par le porteur, affichés dans l'app.
   // - Pile ou face : un lancer toutes les 8 h ; face « gemme PK » (gagnante) : +30 PK, une chance sur deux ; face
   //   « cristal éteint » : rien.
+  // La roulette (2026-10-12) est retirée le 2026-10-25 (porteur) : le jeu d'évolution (pa.js) prend sa place.
   // Les PK restent sans valeur en euros et ne s'achètent pas : ces jeux ne demandent aucun paiement (règles des PK).
   // Tirage avec crypto.getRandomValues ; dates des derniers tirages enregistrées avec la collection (« games »).
   // Ce module partage la portée des autres : ses noms commencent par GM_ ou gm.
   const GM_BOOSTER_MS = 12 * 3600000, GM_COIN_MS = 8 * 3600000, GM_COIN_WIN = 30;
-  // Roulette (2026-10-12, paramètres du porteur) : PK ÷ 2 (15 %), PK × 2 (10 %), +100 PK (40 %), −100 PK (35 %), sur le
-  // solde. Un tour toutes les 24 h (fréquence par défaut, à confirmer). Le solde ne descend jamais sous 0.
-  // [libellé, %, effet, classe de couleur] ; les secteurs de la roue suivent cet ordre et ces parts.
-  const GM_WHEEL_MS = 24 * 3600000;
-  const GM_WHEEL = [['PK ÷ 2', 15, pk => Math.floor(pk / 2), 'w0'], ['PK × 2', 10, pk => pk * 2, 'w1'], ['+100 PK', 40, pk => pk + 100, 'w2'], ['−100 PK', 35, pk => Math.max(0, pk - 100), 'w3']];
   const GM_TABLE = [[10, 60, 'Commun', '#9AA8C3'], [30, 20, 'Peu commun', '#5EE0CF'], [50, 15, 'Rare', '#A8B6FF'], [100, 4, 'Ultra rare', '#FFD60A'], [1000, 1, 'Jackpot !', '#FF7AD9']];
   const gmRand = () => {
     try { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; } catch (e) { return Math.random(); }
@@ -68,35 +64,6 @@
     gmLater(done, 2900);
   };
 
-  // Secteur i de la roue : [début, fin] en degrés, dans le sens des aiguilles d'une montre depuis le haut.
-  const gmSector = i => { let a = 0; for (let k = 0; k < i; k++) a += GM_WHEEL[k][1] * 3.6; return [a, a + GM_WHEEL[i][1] * 3.6]; };
-  let gmFxTimer = null;
-  gmProto.gmSpin = function () {
-    const s = this.st(), g = s.games || {};
-    if (g.wPhase === 'spin' || gmWait(g.wheelAt, GM_WHEEL_MS) > 0) return;
-    const i = gmDraw(gmRand(), GM_WHEEL), [a, b] = gmSector(i), at = new Date().toISOString();
-    // L'aiguille est en haut : la roue tourne jusqu'à placer un point du secteur tiré sous l'aiguille, après 7 tours.
-    const land = a + (b - a) * (0.15 + 0.7 * gmRand()), deg = (g.wDeg || 0) - ((g.wDeg || 0) % 360) + 360 * 7 + (360 - land);
-    const before = Number(s.pk) || 0, after = GM_WHEEL[i][2](before);
-    const hist = [{ at: at, game: 'wheel', pk: after - before }].concat(g.hist || []).slice(0, 20);
-    const done = () => {
-      const t = this.st(), now = Number(t.pk) || 0, val = GM_WHEEL[i][2](now), diff = val - now;
-      const patch = { games: Object.assign({}, t.games, { wPhase: 'done' }), pk: val, toast: 'Roulette : ' + GM_WHEEL[i][0] + ' · ' + (diff >= 0 ? '+' : '−') + Math.abs(diff).toLocaleString('fr-FR') + ' PK' };
-      if (diff > 0) patch.pkGain = diff;
-      // Animation de fin (2026-10-14, porteur) : confettis si le solde monte, nuage de pluie et roue qui tremble s'il
-      // baisse (PK ÷ 2, −100). 2,6 s ; état passager, non enregistré.
-      patch.wFx = { kind: diff > 0 ? 'win' : diff < 0 ? 'lose' : '', n: Date.now(), diff: diff };
-      this.setState(patch);
-      if (diff > 0) this.pkGainEnd();
-      clearTimeout(gmFxTimer);
-      gmFxTimer = setTimeout(() => this.setState({ wFx: null }), 2600);
-      this.flash();
-    };
-    this.setState({ games: Object.assign({}, g, { wheelAt: at, wWin: i, wDeg: deg, wPhase: gmStill() ? 'done' : 'spin', hist: hist }) });
-    if (gmStill()) { done(); return; }
-    gmLater(done, 4300);
-  };
-
   gmProto.vGames = function (s) {
     const g = s.games || {}, bw = gmWait(g.boosterAt, GM_BOOSTER_MS), cw = gmWait(g.coinAt, GM_COIN_MS);
     const bPhase = g.bPhase || 'idle', prize = GM_TABLE[g.bWin || 0];
@@ -123,30 +90,8 @@
         button: busyC ? 'La pièce tourne…' : cw > 0 ? 'Prochain lancer dans ' + gmLeft(cw) : 'Lancer la pièce',
         flip: () => this.gmFlip(), key: 'coin-' + (g.cN || 0)
       },
-      rules: 'Gratuit, sans achat : les PK n’ont aucune valeur en euros et ne s’échangent pas. Un booster toutes les 12 h, un tour de roulette toutes les 24 h, un lancer de pièce toutes les 8 h. Tirage au hasard sur ton appareil.',
-      w: (() => {
-        const ww = gmWait(g.wheelAt, GM_WHEEL_MS), busy = g.wPhase === 'spin', r = GM_WHEEL[g.wWin || 0];
-        return {
-          every: '1 tour toutes les 24 h', deg: (g.wDeg || 0) + 'deg', wheelClass: 'pkm-gm-wheel' + (busy ? ' pkm-gm-wspin' : ''), spinning: busy,
-          labels: GM_WHEEL.map((x, i) => { const [a, b] = gmSector(i), m = (a + b) / 2; return { text: x[0], at: m + 'deg', back: (-m) + 'deg' }; }),
-          // Ni chances ni description sous la roue (2026-10-12, porteur) ; elles restent dans les règles des PK.
-          aria: 'Roue à 4 cases : ' + GM_WHEEL.map(x => x[0]).join(', '),
-          resultDone: g.wPhase === 'done', resultText: 'La roue s’arrête sur ' + r[0] + (r[1] === 35 || r[1] === 15 ? ' : pas de chance.' : ' !'),
-          resultColor: r[1] === 35 || r[1] === 15 ? '#9AA8C3' : 'var(--pkm-accent)',
-          fx: (() => {
-            const f = s.wFx, on = !!(f && f.kind && g.wPhase === 'done');
-            return { win: on && f.kind === 'win', lose: on && f.kind === 'lose', key: 'wfx-' + (f ? f.n : 0),
-              text: on ? (f.kind === 'win' ? '+' : '−') + Math.abs(f.diff).toLocaleString('fr-FR') + ' PK' : '',
-              boxClass: 'pkm-gm-wheelbox' + (on && f.kind === 'lose' ? ' pkm-gm-wsad' : ''),
-              confetti: on && f.kind === 'win' ? Array.from({ length: 26 }, (_, i) => ({ cls: 'pkm-unl-conf pkm-gm-wconf pkm-unl-c' + (i % 5),
-                style: 'left: ' + ((i * 41) % 100) + '%; --dx: ' + (((i * 53) % 100) - 50) + 'px; --r: ' + (((i * 97) % 720) - 360) + 'deg; animation-delay: ' + ((i % 6) * 0.06).toFixed(2) + 's' })) : [],
-              drops: on && f.kind === 'lose' ? Array.from({ length: 9 }, (_, i) => ({ style: 'left: ' + (14 + i * 9) + '%; animation-delay: ' + ((i * 0.13) % 0.6).toFixed(2) + 's' })) : [] };
-          })(),
-          button: busy ? 'La roue tourne…' : ww > 0 ? 'Prochain tour dans ' + gmLeft(ww) : 'Faire tourner la roue',
-          spin: () => this.gmSpin()
-        };
-      })(),
-      hist: (g.hist || []).slice(0, 5).map(h => ({ text: (h.game === 'booster' ? 'Booster' : h.game === 'wheel' ? 'Roulette' : 'Pile ou face') + ' · ' + this.d2(h.at.slice(0, 10)), pk: h.pk > 0 ? '+' + h.pk.toLocaleString('fr-FR') + ' PK' : h.pk < 0 ? '−' + Math.abs(h.pk).toLocaleString('fr-FR') + ' PK' : '0 PK', color: h.pk > 0 ? 'var(--pkm-accent)' : '#9AA8C3' })),
+      rules: 'Gratuit, sans achat : les PK n’ont aucune valeur en euros et ne s’échangent pas. Un booster toutes les 12 h, un lancer de pièce toutes les 8 h. Tirage au hasard sur ton appareil. Les PA (points d’Aura) se gagnent en ouvrant l’app chaque jour.',
+      hist: (g.hist || []).slice(0, 5).map(h => ({ text: (h.game === 'booster' ? 'Booster' : h.game === 'wheel' ? 'Roulette (retirée)' : 'Pile ou face') + ' · ' + this.d2(h.at.slice(0, 10)), pk: h.pk > 0 ? '+' + h.pk.toLocaleString('fr-FR') + ' PK' : h.pk < 0 ? '−' + Math.abs(h.pk).toLocaleString('fr-FR') + ' PK' : '0 PK', color: h.pk > 0 ? 'var(--pkm-accent)' : '#9AA8C3' })),
       hasHist: (g.hist || []).length > 0
     };
   };
@@ -158,7 +103,7 @@
     ui.isGames = s.screen === 'market';
     ui.isMarket = s.screen === 'search';
     if (ui.isGames) {
-      Object.assign(ui, { title: 'Jeux', subtitle: 'Gagne des PK : booster et pile ou face', hasSubtitle: true, hasSubRow: false });
+      Object.assign(ui, { title: 'Jeux', subtitle: 'Gagne des PK et fais évoluer ton Pokémon', hasSubtitle: true, hasSubRow: false });
       r.gm = this.vGames(s);
       // Compte à rebours : nouveau rendu chaque minute tant que l'écran est ouvert.
       if (!gmTick) gmTick = setInterval(() => { if (this.st().screen === 'market') this.setState({ gmNow: Date.now() }); else { clearInterval(gmTick); gmTick = null; } }, 30000);
@@ -167,7 +112,7 @@
     if (ui.isMarket) Object.assign(ui, { title: 'Recherche', subtitle: 'Toutes les cartes et le scellé', hasSubtitle: true, headerBig: false, headerDetail: true });
     return r;
   };
-  const GM_EMPTY = { pk: '', b: { odds: [] }, c: {}, w: { labels: [], fx: { confetti: [], drops: [] } }, hist: [], hasHist: false };
+  const GM_EMPTY = { pk: '', b: { odds: [] }, c: {}, hist: [], hasHist: false };
   // Écran de recherche (l'ancien Marché) : on y vient de l'accueil ou du scan ; Retour ramène à l'écran d'avant.
   const gmBaseParent = gmProto.parentOf;
   gmProto.parentOf = function (sc) { return sc === 'search' ? 'home' : sc === 'sealed' || sc === 'releases' ? 'home' : sc === 'sets' ? 'collection' : gmBaseParent.call(this, sc); };

@@ -680,7 +680,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -709,7 +709,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + ficheJs + navJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + ficheJs + navJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -729,7 +729,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -771,6 +771,8 @@ ${code}
   inst.adminInit();
   inst.profileInit();
   inst.pkInit();
+  // PA du jour (pa.js, 2026-10-25) : série de jours d'ouverture.
+  inst.paInit();
   // Défilement (demande du porteur, 2026-10-09, revue le 2026-10-11) : une nouvelle page s'ouvre en haut ; en
   // revenant en arrière, la page reprend là où on l'avait laissée, avec un glissement (nav.js). Les réglages de la
   // page (recherche, filtres, onglets, vues) restent dans l'état de l'app : on les retrouve au retour.
