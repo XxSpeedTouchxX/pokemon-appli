@@ -33,7 +33,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 2. **Valeur de ma collection :**
    - montant dans la police du logo (Luckiest Guy), comme le logo : lettres blanches, contour et ombre noirs ;
    - variation sur 7 jours ;
-   - **courbe sur 4 points réels** (il y a 30 jours, 7 jours, hier, aujourd'hui). Cartes : moyennes Cardmarket ramenées à la valeur du jour ; scellé : cote archivée chaque jour (`sealed.json`) ; démo : sa courbe simulée. Une valeur inconnue reste plate, jamais inventée ;
+   - **courbe en euros** (2026-10-26) : périodes « Aujourd'hui », « 1 semaine », « 1 mois » (par défaut) et « Depuis le début » ; 3 ou 4 montants ronds sur l'axe vertical (lignes pointillées), dates dessous, variation de la période. Quantités recalculées jour par jour d'après les ajouts et les ventes. Cartes : moyennes Cardmarket ramenées à la valeur du jour ; scellé : cote archivée chaque jour (`sealed.json`) ; au-delà de 30 jours, la plus ancienne valeur connue et les relevés quotidiens gardés sur l'appareil (`valDays`, 400 jours au plus) ; démo : sa courbe simulée. Une valeur inconnue reste plate, jamais inventée ;
    - source et date (la plus-value latente est retirée de l'encadré le 2026-10-21, demande du porteur) ;
    - **compagnon animé** : un des 151 Pokémon de Kanto, ou Latias, Latios, Kyogre, Groudon, Rayquaza ; Pikachu par défaut. Un appui ouvre « Choisis ton compagnon » : « 156 Pokémon disponibles », 3 par ligne, icônes à la taille d'origine de chaque Pokémon (rien autour, centrées, jamais agrandies), panneau opaque, recherche par nom ou numéro. Le choix est enregistré sur l'appareil ; image fixe si l'utilisateur limite les animations. Sprites et icônes : `tools/sprites/`.
 3. **Mon classeur** (`homeBinder` dans `home.js`) : logo du classeur (`img/brand/classeur.svg`) et deux onglets.
@@ -64,11 +64,11 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Valeur par type** : les tuiles « Cartes » et « Produits scellés » sous « Mon classeur » (2026-10-17) sont retirées le 2026-10-21 (demande du porteur) ; la valeur de chaque onglet est en haut du classeur, et leur somme est la valeur de la collection. Cote Dropicards = Cardmarket uniquement depuis le 2026-10-18 (`coteMed`, `catalog.js`).
 - **Séries** (`series.js`, 2026-10-17) : extensions 3 par ligne ; un appui sur l'en-tête garde la série à sa place (`serAnchor`) et ses extensions se déplient (`pkm-ser-unfold`, `games.css`).
 - **Classeur vide** (`home.js`, 2026-10-17) : « Ajouter des cartes » ou « Ajouter des produits scellés », « Scanner ».
-- **En-tête commun** (`tools/web/build.mjs`, fragment `home-header`, 2026-10-16) : accueil, Toutes les séries, Jeux et PK shop ; solde de PK et tickets à gauche, logo au centre, avatar avec l'emblème du grade à droite ; sur les trois onglets, le titre de la page (`pkm-hb-title`) passe dessous.
+- **En-tête commun** (`tools/web/build.mjs`, fragment `home-header`, 2026-10-16) : accueil, Toutes les séries, Jeux et PK shop ; solde de PK et PA à gauche (tickets dans le PK shop depuis le 2026-10-26), logo au centre, avatar avec l'emblème du grade à droite ; sur les trois onglets, le titre de la page (`pkm-hb-title`) passe dessous.
 - **Séries** (`tools/web/series.js`, 2026-10-14) : une série ouverte (en-tête ou barre des logos) vient se placer juste sous la barre des logos collée en haut.
 - **PK shop** (`tools/web/pkshop.js`, 2026-10-12) : ticket du tirage au sort 2 000 PK ; lot « Booster 30 ans Pokémon » 15 000 PK (visuel `web/img/shop-booster-30-anniversaire.webp`, échange direct, envoi à organiser) ; tickets et lots dans `tickets`.
 - **Transition entre pages** (`tools/web/nav.js`, 2026-10-12, d'après la vidéo du porteur) : copie figée et inerte de la page quittée (`NAV.snap`, sans `main` ni `header`) ; en avant, la nouvelle page arrive de la droite avec un fond qui glisse, l'ancienne recule de 30 % en s'assombrissant ; en arrière, l'inverse ; 450 ms ; geste depuis le bord : la suite repart de la position du doigt.
-- **Jeux** (`tools/web/games.js`, `games.css`, fragment `games`, 2026-10-11) : l'onglet « Marché » (écran `market`) devient « Jeux » ; Booster PK (12 h depuis le 2026-10-12) et Pile ou face (8 h), roulette (24 h, sans chances affichées sous la roue), tirage `crypto.getRandomValues`, dates gardées avec la collection (`games`). L'ancienne recherche du Marché devient l'écran `search` (accueil, scan).
+- **Jeux** (`tools/web/games.js`, `games.css`, fragment `games`, 2026-10-11) : l'onglet « Marché » (écran `market`) devient « Jeux » ; Booster PK (12 h depuis le 2026-10-12) et Pile ou face (8 h) ; la roulette est remplacée le 2026-10-26 par le jeu d'évolution (voir « PA et jeu d'évolution ») ; tirage `crypto.getRandomValues`, dates gardées avec la collection (`games`). L'ancienne recherche du Marché devient l'écran `search` (accueil, scan).
 - **Navigation** (`tools/web/nav.js`, 2026-10-11) : bouton Retour du téléphone (historique du navigateur), geste depuis le bord gauche, glissement au retour, position de la page gardée au retour.
 - **Première visite et alertes** (`tools/web/start.js`, 2026-10-11) : collection vide et accueil guidé à la première visite (démo sur choix) ; « Tes alertes » à l'ouverture de l'app, notification du téléphone si autorisée.
 - **Fiche d'une carte** (`catalog.js`, 2026-10-11) : cote Cardmarket de la version de la carte et prix de l'autre version (`cmh`, `cmv`), « cote à confirmer » (`q`), « cote à venir » (`stats.setsPriceSoon`), lien vers les ventes réussies eBay. Logos de séries : TCGdex, puis logos gardés avec la page (dont McDonald's, promos, énergies, Coffre Étincelant, repris du dépôt GitHub 1niceroli/ptcg-assets), sinon nom dessiné.
@@ -158,7 +158,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 ## PK, la monnaie de l'app
 
 Depuis le 2026-10-08 (`tools/web/pk.js`, fragments `pk-counter` et `pk-sheet` de `catalog.dc.html`). Gains et règles validés par le porteur le 2026-10-08.
-- **Compteur :** en haut à droite, à gauche de l'avatar (accueil, Collection, Marché, Territoire), avec la gemme des PK (`img/brand/pk.svg`, `tools/brand/make_logo.mjs`). Sur l'accueil, le logo est à gauche et la pastille « FR » est retirée. Chaque gain s'affiche quelques secondes sous le compteur (« +30 PK »). Si l'on possède des tickets du PK shop, une barre « N tickets » s'affiche sous le compteur (elle ouvre le PK shop).
+- **Compteur :** en haut à droite, à gauche de l'avatar (accueil, Collection, Marché, Territoire), avec la gemme des PK (`img/brand/pk.svg`, `tools/brand/make_logo.mjs`). Sur l'accueil, le logo est à gauche et la pastille « FR » est retirée. Chaque gain s'affiche quelques secondes sous le compteur (« +30 PK »). Sous le compteur, la pastille des PA (depuis le 2026-10-26, à la place de la barre des tickets, qui sont affichés dans le PK shop).
 - **Gains :**
   - 100 PK de bienvenue, au premier lancement ;
   - les jeux de l'onglet Jeux ; les +10 PK par jour et par nouvel article ont été retirés le 2026-10-12 ;
@@ -180,13 +180,29 @@ La liste « Ma collection » (récents ou valeur, 20 par page) est retirée le 2
 
 Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage de démo, mouvements, plus belles pièces, derniers ajouts. Le build remplace l'accueil de la maquette par le fragment `home` de `catalog.dc.html`.
 
+## PA et jeu d'évolution
+
+Depuis le 2026-10-26 (`tools/web/pa-core.js`, testé par `node --test tools/web/test_pa.mjs` ; `tools/web/pa.js` ; section « Évolution » du fragment `games`). Choix du porteur.
+- **PA (points d'Aura)** : logo `img/brand/pa.svg` (flamme d'aura violette avec un orbe). Crédités une fois par jour, à l'ouverture de l'app, selon les jours d'affilée : 1er jour +10, 2e +15, 3e +20, 4e +25, puis +30 chaque jour ; un jour sans ouvrir l'app : la série reprend à +15. Message à l'ouverture (« +20 PA · 3 jours d'affilée ») et pastille qui pulse sous le solde de PK ; un appui ouvre le jeu. Sur l'appareil, sans valeur en euros.
+- **Jeu d'évolution** (onglet Jeux, à la place de la roulette) : choix du starter (Bulbizarre, Salamèche, Carapuce ou Pikachu) ; la lignée s'affiche, le starter en couleur et les formes suivantes en silhouette noire avec leur prix ; « Faire évoluer » coûte 500 PA pour la 2e forme, 1 500 PA pour la 3e ; animation de 3 s (fixe si l'utilisateur limite les animations) ; la nouvelle forme devient le compagnon de l'accueil. Pikachu n'a qu'une évolution de la 1re génération (Raichu, 500 PA).
+- **Un seul choix de starter** : didacticiel, compagnon et jeu ; les autres compagnons restent à débloquer avec des PK.
+- **Enregistrement** : `pa`, `paDay`, `paStreak`, `evo` (lignée et stade) avec la collection. Mode Admin : « +500 PA ».
+
+## Didacticiel
+
+Depuis le 2026-10-26 (`tools/web/tuto.js`, fragment `tuto` de `catalog.dc.html`).
+- À la première installation, une fois l'accueil guidé fermé : « Veux-tu suivre le didacticiel ? ». Non : rien d'autre. Oui : « Choisis ton starter », puis 7 bulles de 6 s (42 s en tout, 45 s au plus) qui ouvrent chaque onglet et entourent ce dont elles parlent : la valeur de la collection (portefeuille), Mon classeur, le radar des boutiques, Toutes les séries, les mini-jeux (gagner des PK), le PK shop, puis le barème des PA dans le jeu d'évolution.
+- Le starter parle dans chaque bulle ; « Suivant » avance, « Passer » arrête ; points de progression et barre du temps.
+- État `tuto` enregistré (`ask`, puis `done`). À revoir : Profil › « Revoir le didacticiel », ou `?tuto=1`.
+
 ## Scan à l'appareil photo
 
 - **Parcours :**
   - le bouton Scan (barre du bas, « Scanner » de l'accueil, `#scan`) ouvre la caméra arrière, avec un cadre au format carte ;
-  - la lecture est continue, une à deux images par seconde. Le déclencheur lance une **lecture fine** (deux contrastes pour le numéro) ;
+  - la lecture est continue (pause de 30 à 250 ms entre deux lectures ; numéro et nom lus en parallèle par deux moteurs préchauffés). Le déclencheur lance une **lecture fine** (deux contrastes pour le numéro) ;
+  - **carte sûre dès la première lecture** (numéro et nom concordants, nette avance sur la suivante) : sa fiche s'ouvre directement (2026-10-26). Objectif du porteur : 1,5 s au plus ; mesuré 0,37 s sur la machine de test (ordinateur, fausse caméra, `e2e/t-scan.mjs`) : la mesure sur téléphone reste à faire ;
   - **« C'est laquelle ? »** propose 3 cartes : visuel, extension et numéro, cote, « à toi ×N ». « Aucune de ces cartes » ouvre le Marché sur ce qui a été lu ;
-  - la fiche résultat de la maquette s'ouvre avec la vraie carte. La langue est préremplie « EN » si la carte porte « EN » ou si son extension n'existe qu'en anglais ;
+  - **fiche de la carte** (refaite le 2026-10-26) : la carte en grand, sa valeur Cardmarket selon l'état choisi, les 6 états en bulles illustrées, langue, quantité et « Ajouter à ma collection ». La langue est préremplie « EN » si la carte porte « EN » ou si son extension n'existe qu'en anglais ;
   - après l'ajout, retour direct à la caméra pour la carte suivante. La carte ajoutée n'est pas reproposée pendant 8 secondes.
 - **Lecture (OCR) :**
   - Tesseract.js 7 et son modèle français « best_int » (licence Apache 2.0), servis par le site depuis `web/vendor/tesseract/7.0.0/` (cache long) ;
@@ -214,6 +230,7 @@ Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage
 ## Langue et état des exemplaires
 
 - `tools/web/copies.js` : chaque ligne d'achat garde sa langue (`lang` : FR, JP, EN) et son état (`cond` : NM, EX, PL pour Near Mint, Excellent, Joué ; SO, AB pour Scellé d'origine, Boîte abîmée).
+- **6 états des cartes** (2026-10-22) : Mint, Near Mint, Excellent, Good, Played, Poor (115, 100, 85, 70, 55 et 30 % de la cote). Depuis le 2026-10-26, des bulles illustrées (`web/img/conds/`, générées par `tools/conds/make_conds.py`) : Mint brillante avec des étoiles qui scintillent, jusqu'à Poor fendue aux coins abîmés ; dans le scan, « Ajouter un exemplaire » et « Modifier l'ajout » (`copyChip` dans `copies.js`).
 - Choisis dans la fiche du scan et dans « Ajout » ; enregistrés sur l'appareil avec le reste. Les ajouts plus anciens comptent comme FR et Near Mint (ou Scellé d'origine).
 - Affichés dans la liste « Ma collection » et la grille de la Collection (« EN · Excellent », ou « EN, FR · 2 états ») et dans la fiche : résumé des ajouts, langue et état de chaque ligne de l'historique, drapeau de la langue la plus présente.
 - **Cote selon l'état et la langue** (`tools/web/value.js`, 2026-10-09, B1) : la valeur de la collection compte chaque exemplaire restant avec un coefficient d'estimation : Near Mint 100 %, Excellent 85 %, Joué 55 %, Boîte abîmée 85 % ; FR et EN 100 %, JP 70 % (les cotes relevées sont celles des versions FR et EN). La fiche montre le calcul (« 1 × FR Joué (55 %) = 54,45 € au lieu de 99,00 € en Near Mint ») et garde la cote Near Mint. Réglages › « Selon l'état et la langue » revient à la cote brute.

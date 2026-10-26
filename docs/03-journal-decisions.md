@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-10-26 — Courbe en euros avec périodes, scan rapide avec les 6 états illustrés, PA et jeu d'évolution à la place de la roulette, didacticiel
+
+- **Demande du porteur :**
+  - courbe de la valeur : montants sur l'axe vertical, filtres « Aujourd'hui », « 1 semaine », « 1 mois », « Depuis le début » ;
+  - scan : carte reconnue en 1,5 s au plus, affichée avec son montant, choix parmi les 6 états (prix selon l'état), bouton « Ajouter à ma collection » ;
+  - les 6 états en bulles illustrées, de Mint (brillante, étoiles) à Poor (très abîmée) ;
+  - Jeux : roulette supprimée, remplacée par un jeu d'évolution avec les Pokémon de Kanto ; starters Bulbizarre, Salamèche, Carapuce, Pikachu ; PA (points d'Aura) gagnés à la connexion du jour : +10, +15, +20, +25, +30 ; un jour manqué : retour à +15 ; évolutions en silhouette noire ; 500 PA pour la 2ᵉ forme, 1 500 PA pour la 3ᵉ ; logo des PA à proposer, à la place de la barre des tickets en haut à gauche ;
+  - première installation : « Veux-tu suivre le didacticiel ? » ; si oui, choix du starter qui présente l'app en 45 s au plus, une phrase courte par onglet, puis le barème des PA.
+- **Réponses du porteur :** PA comptés en jours d'affilée ; un seul choix de starter (didacticiel, compagnon et jeu d'évolution) ; les autres compagnons restent à débloquer avec des PK ; tickets affichés dans le PK shop.
+- **Fait :**
+  - **courbe** (`home.js`, `home-core.js`) : 4 périodes, « 1 mois » par défaut ; 3 ou 4 montants ronds sur l'axe vertical avec lignes pointillées, dates sous la courbe, variation de la période ; quantités recalculées jour par jour d'après les ajouts et les ventes ; au-delà de 30 jours (pas de cote plus ancienne), la plus ancienne valeur connue et les relevés quotidiens gardés sur l'appareil ;
+  - **6 états illustrés** (`tools/conds/make_conds.py` → `web/img/conds/`) : Mint (étoiles qui scintillent, reflet), Near Mint, Excellent, Good, Played, Poor (fendue, coins abîmés) ; bulles dans le scan, « Ajouter un exemplaire » et « Modifier l'ajout » ;
+  - **scan** : deux lectures en parallèle (numéro et nom), moteur préchauffé, boucle plus rapide ; une carte sûre dès la première lecture ouvre directement sa fiche (sinon « C'est laquelle ? ») ; fiche : la carte en grand, sa valeur Cardmarket selon l'état choisi, les 6 bulles, « Ajouter à ma collection » ; mesuré **0,37 s** sur la machine de test (ordinateur, fausse caméra) : **la mesure sur téléphone reste à faire** (`?debug=scan`) ;
+  - **PA** (`pa-core.js`, `pa.js`, logo `web/img/brand/pa.svg` : flamme d'aura violette avec un orbe) : crédités une fois par jour à l'ouverture, avec un message (« +20 PA · 3 jours d'affilée ») ; pastille PA sous le solde de PK, qui ouvre le jeu ; les tickets passent dans le PK shop ; +500 PA dans le mode Admin ;
+  - **jeu d'évolution** (onglet Jeux, à la place de la roulette) : choix du starter, lignée avec les formes suivantes en silhouette noire et leur prix, « Faire évoluer » (500 puis 1 500 PA), animation d'évolution de 3 s ; la nouvelle forme devient le compagnon ; Pikachu n'a qu'une évolution de la 1re génération (Raichu, 500 PA) ;
+  - **didacticiel** (`tuto.js`) : proposé à la première installation, après l'accueil guidé ; choix du starter, puis 7 bulles de 6 s (42 s) qui ouvrent chaque onglet et entourent ce dont elles parlent : portefeuille, classeur, radar, séries, mini-jeux, shop, PA ; « Suivant » et « Passer » ; à revoir dans Profil › « Revoir le didacticiel » ou avec `?tuto=1`.
+
+---
+
 ## 2026-10-25 — Accueil sans « Voir la liste », logo de l'en-tête agrandi, intro avec les PK
 
 - **Demande du porteur :**
