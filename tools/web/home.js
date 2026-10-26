@@ -149,26 +149,66 @@
       more: left > 0, moreLabel: 'Charger plus (' + Math.min(left, HOME_FULL) + ')', loadMore: () => this.setState({ hbFullN: n + HOME_FULL })
     };
   };
-  // Tendance de la collection : 4 points (il y a 30 jours, 7 jours, hier, aujourd'hui), calculés par HomeCore.points :
-  // moyennes Cardmarket pour les cartes, cote archivée chaque jour pour le scellé, courbe simulée pour la démo.
-  const HOME_LABELS = ['il y a 30 jours', 'il y a 7 jours', 'hier', 'aujourd’hui'];
+  // Courbe de la valeur (2026-10-25, porteur) : axe des montants et 4 périodes (Aujourd'hui, 1 semaine, 1 mois, depuis
+  // le début). Chaque jour affiché reprend les articles possédés ce jour-là (ajouts et ventes datés) et leur cote à cette
+  // date (HomeCore.unitAt : moyennes Cardmarket pour les cartes, cote archivée chaque jour pour le scellé). Au-delà de
+  // 30 jours, aucune cote plus ancienne n'existe : la valeur relevée chaque jour sur l'appareil la remplace quand elle existe.
+  const HV_RANGES = [['1d', 'Aujourd’hui', 'Aujourd’hui'], ['7d', '1 semaine', 'Sur 7 jours'], ['30d', '1 mois', 'Sur 1 mois'], ['all', 'Début', 'Depuis le début']];
+  const HV_W = 300, HV_H = 84;
+  const hvMoney = v => (v >= 10000 ? (Math.round(v / 100) / 10).toLocaleString('fr-FR') + '\u202fk€' : Math.round(v).toLocaleString('fr-FR') + '\u00a0€');
+  const hvDate = (today, ago) => { const d = new Date(Date.parse(today) - ago * 86400000); return String(d.getUTCDate()).padStart(2, '0') + '/' + String(d.getUTCMonth() + 1).padStart(2, '0') + '/' + String(d.getUTCFullYear()).slice(2); };
+  let hvSaving = '';
   proto.homeTrend = function (x, valueBig) {
-    const c = x.c, V = [0, 0, 0, 0], days = SEALED.doc && SEALED.doc.days;
-    x.owned.forEach(p => {
-      const q = c.stock[p.id].qty;
-      HomeCore.points(p, x.val(p), x.hist[p.id], this.cote(p), days, TODAY).forEach((v, i) => { V[i] += q * v; });
+    const s = x.s, range = HV_RANGES.some(r => r[0] === s.hvr) ? s.hvr : '30d', days = SEALED.doc && SEALED.doc.days;
+    const n = HomeCore.span(range, s.purchases, TODAY), ago = HomeCore.samples(n);
+    // Articles déjà possédés à un moment : quantité à chaque jour affiché, puis valeur unitaire ce jour-là.
+    const ids = new Set();
+    (s.purchases || []).forEach(a => (a.lines || []).forEach(l => ids.add(l.pid)));
+    const V = ago.map(() => 0);
+    ids.forEach(id => {
+      const p = x.P[id];
+      if (!p) return;
+      const u = x.val(p) || 0, k = this.cote(p), h = x.hist[p.id];
+      ago.forEach((a, i) => {
+        const q = a === 0 ? (x.c.stock[id] ? x.c.stock[id].qty : 0) : HomeCore.qtyAt(s.purchases, s.sales, id, hvDate2(TODAY, a));
+        if (q > 0) V[i] += q * HomeCore.unitAt(p, u, h, k, days, TODAY, a);
+      });
     });
-    const d7 = V[3] - V[1], pct = V[1] > 0 ? d7 / V[1] * 100 : 0;
-    return Object.assign(HomeCore.chart(V, 324, 64, 8, 54), {
-      color: x.col(d7),
-      delta: 'Sur 7 jours : ' + x.mask(this.signed(d7)) + (V[1] > 0 ? ' (' + this.chg(pct) + ')' : ''),
+    const snaps = s.valDays || {};
+    ago.forEach((a, i) => { if (a > 30) { const v = snaps[hvDate2(TODAY, a)]; if (typeof v === 'number') V[i] = v; } });
+    // Relevé du jour, gardé sur l'appareil (400 jours au plus).
+    const today = Math.round(V[V.length - 1] * 100) / 100;
+    if (snaps[TODAY] !== today && hvSaving !== TODAY + today) {
+      hvSaving = TODAY + today;
+      setTimeout(() => {
+        const cur = Object.assign({}, this.st().valDays || {}); cur[TODAY] = today;
+        const keys = Object.keys(cur).sort(); keys.slice(0, Math.max(0, keys.length - 400)).forEach(d => { delete cur[d]; });
+        this.setState({ valDays: cur });
+      }, 0);
+    }
+    const T = HomeCore.ticks(Math.min(...V), Math.max(...V)), pl = HomeCore.plot(ago.map((a, i) => ({ ago: a, v: V[i] })), n, T, HV_W, HV_H);
+    const d = V[V.length - 1] - V[0], pct = V[0] > 0 ? d / V[0] * 100 : 0, R = HV_RANGES.find(r => r[0] === range);
+    const xl = range === '1d' ? [['hier', 0], ['aujourd’hui', 100]]
+      : range === '7d' ? [['il y a 7 j', 0], ['il y a 3 j', 57.1], ['aujourd’hui', 100]]
+      : range === '30d' ? [['il y a 30 j', 0], ['il y a 15 j', 50], ['aujourd’hui', 100]]
+      : [[hvDate(TODAY, n), 0], [hvDate(TODAY, Math.round(n / 2)), 50], ['aujourd’hui', 100]];
+    return {
+      line: pl.line, area: pl.line + ' L' + HV_W + ' ' + HV_H + ' L0 ' + HV_H + ' Z', color: x.col(d), w: HV_W, h: HV_H,
+      delta: R[2] + ' : ' + x.mask(this.signed(d)) + (V[0] > 0 ? ' (' + this.chg(pct) + ')' : ''),
+      ranges: HV_RANGES.map(r => ({ label: r[1], on: r[0] === range ? 'true' : 'false', pick: () => this.setState({ hvr: r[0] }),
+        bg: r[0] === range ? '#A8B6FF' : 'transparent', fg: r[0] === range ? '#0B1120' : '#C9D3EA', bc: r[0] === range ? '#A8B6FF' : '#2A3A5C' })),
+      yl: T.map((t, i) => ({ label: s.masked ? '•••' : hvMoney(t), top: (pl.grid[i] / HV_H * 100).toFixed(2) + '%' })),
+      grid: pl.grid.map(g => ({ d: 'M0 ' + g.toFixed(1) + ' H' + HV_W })),
+      xl: xl.map(([label, left], i, all) => ({ label: label, left: left + '%', tx: i === 0 ? 'none' : i === all.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)' })),
       source: 'Source : moyennes Cardmarket (cartes), cote archivée chaque jour (scellé)',
       // Police du logo : l'espace fine des milliers (U+202F) n'y a pas de largeur ; espace normale, sans retour à la ligne.
       value: String(valueBig).replace(/[\u202f\u00a0]/g, ' '),
-      aria: 'Tendance de ta collection : ' + V.map((v, i) => HOME_LABELS[i] + ' ' + x.mask(this.eur(v))).join(', '),
+      aria: 'Valeur de ta collection, ' + R[1] + ' : de ' + x.mask(this.eur(V[0])) + ' à ' + x.mask(this.eur(V[V.length - 1])),
       fit: Math.max(4, String(valueBig).length * 0.66).toFixed(2)
-    });
+    };
   };
+  // Date (AAAA-MM-JJ) « ago » jours avant aujourd'hui.
+  const hvDate2 = (today, ago) => new Date(Date.parse(today) - ago * 86400000).toISOString().slice(0, 10);
 
   // ——— Radar de l'accueil (simplifié le 2026-10-11, demande du porteur) : le bandeau vert du Radar de Territoire,
   // puis les 3 boutiques réelles (OpenStreetMap) les plus proches, à moins de 5 km. Même position que Territoire

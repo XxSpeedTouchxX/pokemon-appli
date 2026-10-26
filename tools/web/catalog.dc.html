@@ -318,11 +318,22 @@
 </button>
 </div>
 <span style="margin-top: 2px; font-size: 13px; font-weight: 700; color: {{ home.hv.color }}">{{ home.hv.delta }}</span>
-<svg width="100%" height="64" viewBox="0 0 324 64" preserveAspectRatio="none" role="img" aria-label="{{ home.hv.aria }}" style="display: block; overflow: visible">
+<div role="group" aria-label="Période de la courbe" style="display: flex; gap: 6px; margin: 4px 0 2px">
+<sc-for list="{{ home.hv.ranges }}" as="hvq" hint-placeholder-count="4"><button type="button" onClick="{{ hvq.pick }}" aria-pressed="{{ hvq.on }}" style="flex: 1 1 auto; min-width: 0; height: 36px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ hvq.bc }}; background: {{ hvq.bg }}; color: {{ hvq.fg }}; font: inherit; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ hvq.label }}</button></sc-for>
+</div>
+<div style="display: flex; gap: 8px; align-items: stretch; margin-top: 6px">
+<div aria-hidden="true" style="position: relative; flex: none; width: 52px; height: 84px; font-size: 10.5px; font-variant-numeric: tabular-nums; color: #9AA8C3">
+<sc-for list="{{ home.hv.yl }}" as="hvy" hint-placeholder-count="3"><span style="position: absolute; right: 0; top: {{ hvy.top }}; transform: translateY(-50%); white-space: nowrap">{{ hvy.label }}</span></sc-for>
+</div>
+<svg width="100%" height="84" viewBox="0 0 300 84" preserveAspectRatio="none" role="img" aria-label="{{ home.hv.aria }}" style="flex: 1; min-width: 0; display: block; overflow: visible; color: #7D8BA8">
+<sc-for list="{{ home.hv.grid }}" as="hvg" hint-placeholder-count="3"><path d="{{ hvg.d }}" style="fill: none; stroke: currentColor; stroke-opacity: 0.28; stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke"></path></sc-for>
 <path d="{{ home.hv.area }}" style="fill: {{ home.hv.color }}; fill-opacity: 0.12; stroke: none"></path>
 <path d="{{ home.hv.line }}" style="fill: none; stroke: {{ home.hv.color }}; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke"></path>
 </svg>
-<div aria-hidden="true" style="position: relative; height: 15px; font-size: 11px; color: #7D8BA8"><span style="position: absolute; left: 0">30 j</span><span style="position: absolute; left: 33.33%; transform: translateX(-50%)">7 j</span><span style="position: absolute; left: 66.67%; transform: translateX(-50%)">hier</span><span style="position: absolute; right: 0">aujourd’hui</span></div>
+</div>
+<div aria-hidden="true" style="position: relative; height: 15px; margin-left: 60px; font-size: 11px; color: #7D8BA8">
+<sc-for list="{{ home.hv.xl }}" as="hvx" hint-placeholder-count="3"><span style="position: absolute; left: {{ hvx.left }}; transform: {{ hvx.tx }}; white-space: nowrap">{{ hvx.label }}</span></sc-for>
+</div>
 <span style="font-size: 11.5px; line-height: 1.35; color: #7D8BA8">Calculé selon les cotes Cardmarket</span>
 </section>
 

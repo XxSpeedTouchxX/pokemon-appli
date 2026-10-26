@@ -18,6 +18,19 @@ const order = await page.$$eval('main section[aria-label], main > button, main >
 const want = ['Recherche dans le catalogue', 'Valeur de ma collection', 'Mon classeur', 'Boutiques près de toi', 'Marge', 'Sorties récentes', 'Prochaines sorties'];
 const idx = want.map(l => order.indexOf(l));
 ok('ordre : ' + order.join(' › '), idx.every((v, i) => v >= 0 && (i === 0 || v > idx[i - 1])) && order[order.length - 1] === 'Prochaines sorties');
+// Courbe de la valeur (2026-10-25) : axe des montants et 4 périodes.
+{
+  const V = page.locator('section[aria-label="Valeur de ma collection"]'), G = V.locator('[aria-label="Période de la courbe"] button');
+  ok('courbe : 4 périodes ' + (await G.allInnerTexts()).join(', '), (await G.allInnerTexts()).join(',') === 'Aujourd’hui,1 semaine,1 mois,Début' && (await G.nth(2).getAttribute('aria-pressed')) === 'true');
+  const yl = async () => (await V.innerText()).match(/\d[\d\s\u202f\u00a0,]*\s?k?€/g) || [];
+  ok('courbe : montants sur l’axe (' + (await yl()).slice(1).join(' · ') + ')', (await yl()).length >= 4);
+  const deltas = [];
+  for (let i = 0; i < 4; i++) { await G.nth(i).click(); await page.waitForTimeout(250); deltas.push((await V.innerText()).match(/(Aujourd’hui|Sur 7 jours|Sur 1 mois|Depuis le début) :/)?.[1]); }
+  ok('courbe : chaque période change la variation (' + deltas.join(', ') + ')', deltas.join(',') === 'Aujourd’hui,Sur 7 jours,Sur 1 mois,Depuis le début');
+  ok('courbe : la période choisie reste (Début)', (await G.nth(3).getAttribute('aria-pressed')) === 'true');
+  await V.screenshot({ path: shot('home-courbe.png') });
+  await G.nth(2).click(); await page.waitForTimeout(200);
+}
 const text = await page.locator('main').innerText();
 for (const gone of ['Palier Rare', 'Arrivage près de toi', 'Mouvements sur ta collection', 'Mes plus belles pièces', 'Derniers ajouts', 'Plus forte hausse'])
   ok('retiré : ' + gone, !text.includes(gone));

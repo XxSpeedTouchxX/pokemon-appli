@@ -37,3 +37,34 @@ test('courbe : 4 points à intervalles égaux, plate au milieu quand rien ne bou
   assert.match(up.area, / L324 64 L0 64 Z$/);
   assert.equal(H.chart([5, 5, 5, 5], 324, 64, 8, 54).line, 'M0.0 31.0 L108.0 31.0 L216.0 31.0 L324.0 31.0');
 });
+
+test('courbe filtrable : valeur unitaire à une date (droites entre les points connus, plat au-delà de 30 jours)', () => {
+  const card = { tcg: true, cm: 10, avg30: 8, avg7: 9, avg1: 10 };
+  assert.equal(H.unitAt(card, 10, null, 10, DAYS, TODAY, 0), 10);
+  assert.equal(H.unitAt(card, 10, null, 10, DAYS, TODAY, 30), 8);
+  assert.equal(H.unitAt(card, 10, null, 10, DAYS, TODAY, 90), 8);
+  assert.ok(Math.abs(H.unitAt(card, 10, null, 10, DAYS, TODAY, 18.5) - 8.5) < 1e-9);
+  const box = { real: true, cm: 100, hist: [80, 90, 95, 99, 100] };
+  assert.equal(H.unitAt(box, 100, null, 100, DAYS, TODAY, 1), 99);
+});
+
+test('courbe filtrable : quantité possédée à une date, ventes déduites', () => {
+  const P = [{ date: '2026-09-01', lines: [{ pid: 'a', qty: 2 }] }, { date: '2026-10-01', lines: [{ pid: 'a', qty: 1 }, { pid: 'b', qty: 1 }] }];
+  const S = [{ pid: 'a', qty: 1, date: '2026-10-03' }];
+  assert.equal(H.qtyAt(P, S, 'a', '2026-08-31'), 0);
+  assert.equal(H.qtyAt(P, S, 'a', '2026-09-15'), 2);
+  assert.equal(H.qtyAt(P, S, 'a', '2026-10-02'), 3);
+  assert.equal(H.qtyAt(P, S, 'a', '2026-10-04'), 2);
+  assert.equal(H.span('all', P, TODAY), 33);
+  assert.equal(H.span('7d', P, TODAY), 7);
+});
+
+test('courbe filtrable : échantillons et graduations rondes', () => {
+  assert.deepEqual(H.samples(1), [1, 0]);
+  assert.equal(H.samples(30).length, 31);
+  assert.ok(H.samples(400).length <= 62 && H.samples(400)[0] === 400);
+  assert.deepEqual(H.ticks(1900, 2600), [1500, 2000, 2500, 3000]);
+  assert.deepEqual(H.ticks(2583, 2583).length >= 3, true);
+  const T = H.ticks(0, 100), pl = H.plot([{ ago: 1, v: 0 }, { ago: 0, v: 100 }], 1, T, 300, 80);
+  assert.equal(pl.line, 'M0.0 80.0 L300.0 0.0');
+});
