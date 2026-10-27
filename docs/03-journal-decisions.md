@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-10-27 — Orientation serveur dédié et PostgreSQL ; propositions d'améliorations v5 avec la cybersécurité
+
+- **Demande du porteur :**
+  - l'app sera hébergée sur un **serveur dédié**, avec une base **PostgreSQL** ; domaines .fr et .com achetés ;
+  - ajouter la catégorie cybersécurité au fichier des améliorations, avec une base « extrêmement bien sécurisée », et enrichir toutes les catégories.
+- **Fait :** `docs/13-propositions-ameliorations-v5.md` (remplace la v4, gardée) :
+  - 348 propositions, dont 198 nouvelles ;
+  - cybersécurité refaite : 101 propositions en 14 parties (méthode, serveur, réseau et e-mail, PostgreSQL, sauvegardes, API, comptes, apps, anti-triche, GitHub, secrets, journaux et incidents, RGPD, vérifications) ;
+  - nouvelle catégorie U (serveur dédié, API, PostgreSQL) et X (international) ; toutes les autres enrichies ;
+  - vagues renumérotées : 12 « Socle du serveur sécurisé » (≈ 190 h) **avant** 13 « Comptes, synchronisation et PK sur le serveur » (≈ 175 h) ; coût annuel estimé de l'infrastructure : 400 à 1 100 €, plus un test d'intrusion conseillé (1 500 à 4 000 €) ;
+  - 8 nouvelles décisions attendues (n° 13 à 20 : dédié ou VPS au départ, hébergeur, site sur Cloudflare Pages, connexion, langage, âge, test d'intrusion, personne de confiance).
+- **Décalage signalé :** `docs/16` §5 déconseillait un serveur loué et recommandait Cloudflare Workers et D1 ; la v5 suit le choix du porteur (décision n° 13 à confirmer), `docs/16` à mettre à jour.
+- **Règle d'or :** le serveur, la base et les comptes sont du développement lourd ; rien n'est lancé sans « go ».
+
+---
+
 ## 2026-10-26 — Courbe en euros avec périodes, scan rapide avec les 6 états illustrés, PA et jeu d'évolution à la place de la roulette, didacticiel
 
 - **Demande du porteur :**
