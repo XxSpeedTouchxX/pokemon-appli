@@ -17,8 +17,9 @@ ok('liste : ' + nList + ' boutiques avec « + »', nList >= 3);
 // Bulle d'infos accrochée.
 const plus = page.locator('button[aria-label^="Plus d’infos sur"]').first();
 const shopName = (await plus.getAttribute('aria-label')).replace('Plus d’infos sur ', '');
-const pb = await plus.boundingBox();
+// Le toast « +10 PA » du jour peut couvrir le « + » : Playwright fait alors défiler la page avant le clic ; le bouton est mesuré après.
 await plus.click(); await page.waitForTimeout(400);
+const pb = await page.locator('button[aria-label^="Masquer les détails de"]').boundingBox();
 const bub = page.locator('[role="dialog"][aria-label^="Détails"]');
 const bb = await bub.boundingBox();
 const btxt = (await bub.innerText()).replace(/\s+/g, ' ');
