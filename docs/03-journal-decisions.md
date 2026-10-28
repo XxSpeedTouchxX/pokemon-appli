@@ -9,7 +9,7 @@
 ## 2026-10-28 (suite) — Méga-évolutions à 2 500 PA validées, 500 scans au Grand maître mondial, pastille PA décalée, propositions d'illustration des PA
 
 - **Décisions du porteur :** 2 500 PA par méga-évolution **validé** ; item « Deluxe » à définir plus tard ; Grand maître mondial Pokémon : **500 scans par jour** au lieu de 100.
-- **Fait :** pastille des PA descendue de 7 px dans l'en-tête (elle chevauchait celle des PK) ; 6 propositions d'illustration des PA (`tools/brand/make_pa_proposals.py`, `tools/brand/pa/planche.html`) autour d'une flamme ou d'une âme au plus profond de l'être (chakra, nen) : A Âme ardente (violet), B Chakra (or), C Nen (vert émeraude), D Cœur d'éveil (bleu glacier), E Flamme d'évolution (rouge et or, spirale), F Esprit (rose magenta) ; **choix du porteur attendu** avant de remplacer `web/img/brand/pa.svg`.
+- **Fait :** pastille des PA descendue de 7 px dans l'en-tête (elle chevauchait celle des PK) ; 6 propositions d'illustration des PA (`tools/brand/make_pa_proposals.py`, `tools/brand/pa/planche.html`) autour d'une flamme ou d'une âme au plus profond de l'être (chakra, nen) : A Âme ardente (violet), B Chakra (or), C Nen (vert émeraude), D Cœur d'éveil (bleu glacier), E Flamme d'évolution (rouge et or, spirale), F Esprit (rose magenta) ; **choix du porteur attendu** avant de remplacer `web/img/brand/pa.svg`. Le porteur retient E (spirale) et F (halo) et demande un style « flamme d'âme » : 2ᵉ série de 6 variantes G1 à G6 (`tools/brand/make_pa_soul.py`, `tools/brand/pa/planche-soul.html`) : flamme d'âme lumineuse, spirale au cœur, halo autour, flammèches ; rouge et or, rose, violet, bleu spectral, sphère en orbite, or vers rose.
 
 ---
 
