@@ -410,8 +410,10 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
    parle (bouche ouverte et fermée en alternance), texte qui s'écrit, saut final vers la place du compagnon. */
 .pkm-tuto-pop { animation: pkmTutoIn 0.3s ease-out both; }
 @keyframes pkmTutoIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
-.pkm-tuto-host { position: absolute; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
-.pkm-tt-frame { position: absolute; left: 0; top: 0; width: 60px; height: 60px; border-radius: 18px; border: 3px solid #FFD60A;
+/* Pendant la visite, l'app sous le calque ne réagit pas aux touchers : seule la bulle (Passer, son, Suivant) répond. */
+.pkm-tuto-host { position: absolute; inset: 0; z-index: 40; pointer-events: auto; overflow: hidden; touch-action: none; }
+.pkm-tt-frame, .pkm-tt-ring, .pkm-tt-link { pointer-events: none; }
+.pkm-tt-frame { position: absolute; left: 0; top: 0; transition-property: transform, width, height, border-radius, opacity; width: 60px; height: 60px; border-radius: 18px; border: 3px solid #FFD60A;
   box-shadow: 0 0 0 200vmax rgba(3, 6, 14, 0.62), 0 0 22px rgba(255, 214, 10, 0.75), inset 0 0 18px rgba(255, 214, 10, 0.35);
   transition: transform 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), width 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), height 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), border-radius 0.5s;
   animation: pkmTtPulse 1.4s ease-in-out infinite; }
@@ -437,7 +439,7 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-tt-m1 { visibility: hidden; }
 .pkm-tt-talk .pkm-tt-m1 { visibility: visible; }
 .pkm-tt-talk .pkm-tt-m0 { visibility: hidden; }
-.pkm-tt-typing .pkm-tt-mon { animation: pkmTtTalk 0.24s ease-in-out infinite alternate; }
+.pkm-tt-typing:not(.pkm-tt-hop) .pkm-tt-mon { animation: pkmTtTalk 0.24s ease-in-out infinite alternate; }
 @keyframes pkmTtIdle { 50% { transform: translateY(-4px); } }
 @keyframes pkmTtTalk { from { transform: scale(1, 1); } to { transform: scale(1.03, 0.97); } }
 @keyframes pkmTtJump { 0% { transform: translateY(30px) scale(0.6); opacity: 0; } 60% { transform: translateY(-14px) scale(1.06); opacity: 1; } 100% { transform: none; } }

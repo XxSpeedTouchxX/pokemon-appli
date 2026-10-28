@@ -93,6 +93,8 @@
       tutoAudioInit(); tutoSnd();
     });
     tutoSnd();
+    // Le focus va dans la bulle (il était sur le bouton du starter, retiré par Vue).
+    setTimeout(() => { try { TUTO.el && TUTO.el.next.focus({ preventScroll: true }); } catch (e) { /* rien */ } }, 80);
     return TUTO.el;
   };
   const tutoSnd = () => {
@@ -107,7 +109,9 @@
   const tutoType = text => {
     const el = TUTO.el;
     clearTimeout(TUTO.typing); clearTimeout(TUTO.hold);
-    TUTO.typed = 0; el.typed.textContent = ''; el.full.textContent = text; el.box.classList.add('pkm-tt-typing');
+    TUTO.text = text; TUTO.typed = 0; el.typed.textContent = ''; el.box.classList.add('pkm-tt-typing');
+    // Zone lue par les lecteurs d'écran : remplie juste après sa création, pour que la première phrase soit annoncée.
+    el.full.setAttribute('data-text', text); clearTimeout(TUTO.say); TUTO.say = setTimeout(() => { el.full.textContent = text; }, 60);
     if (tutoStill()) { TUTO.typed = text.length; el.typed.textContent = text; tutoBlip(TUTO.mon, 'a'); tutoTyped(); return; }
     const tick = () => {
       if (TUTO.typed >= text.length) { tutoTyped(); return; }
@@ -125,14 +129,22 @@
     tutoMouth(false);
     if (TUTO.el) TUTO.el.box.classList.remove('pkm-tt-typing');
     clearTimeout(TUTO.hold);
-    TUTO.hold = setTimeout(() => (st && st.final ? tutoFly() : tutoAdvance()), st && st.final ? 1500 : TUTO_HOLD_MS);
+    // Temps de lecture selon la longueur du texte (plus long si les mouvements sont réduits : le texte arrive d'un coup).
+    const read = st ? Math.max(TUTO_HOLD_MS, st.text.length * (tutoStill() ? 70 : 25)) : TUTO_HOLD_MS;
+    TUTO.hold = setTimeout(() => (st && st.final ? tutoFly() : tutoAdvance()), st && st.final ? Math.max(1500, read - 900) : read);
   };
-  const tutoAdvance = () => { if (TUTO.comp && TUTO.comp.st().tutoStep === TUTO.i) TUTO.comp.tutoGo(TUTO.i + 1); };
+  // Avance seule, sauf si la bulle a le focus ou est survolée (lecture au clavier, lecteur d'écran) : on attend « Suivant ».
+  const tutoAdvance = () => {
+    const box = TUTO.el && TUTO.el.box;
+    if (box && (box.matches(':focus-within') && !TUTO.el.next.matches(':focus') || box.matches(':hover'))) { TUTO.hold = setTimeout(tutoAdvance, 1200); return; }
+    if (TUTO.comp && TUTO.comp.st().tutoStep === TUTO.i) TUTO.comp.tutoGo(TUTO.i + 1);
+  };
   // « Suivant » : termine d'abord la phrase en cours.
   const tutoNext = () => {
     const st = TUTO_STEPS[TUTO.i];
     if (!st || !TUTO.el || TUTO.done) return;
-    if (TUTO.typed < st.text.length) { clearTimeout(TUTO.typing); TUTO.typed = st.text.length; TUTO.el.typed.textContent = st.text; tutoTyped(); return; }
+    const text = TUTO.text || st.text;
+    if (TUTO.typed < text.length) { clearTimeout(TUTO.typing); TUTO.typed = text.length; TUTO.el.typed.textContent = text; tutoTyped(); return; }
     clearTimeout(TUTO.hold);
     if (st.final) tutoFly(); else tutoAdvance();
   };
@@ -142,13 +154,13 @@
     if (TUTO.done) return;
     TUTO.done = true; clearTimeout(TUTO.hold); clearTimeout(TUTO.typing);
     const finish = () => TUTO.comp && TUTO.comp.tutoEnd(true);
-    if (!el || !target || tutoStill()) { finish(); return; }
+    if (!el || !target || tutoStill() || (TUTO.comp && TUTO.comp.st().buddy !== TUTO.mon)) { finish(); return; }
     const a = el.mon.getBoundingClientRect(), b = target.getBoundingClientRect();
     const k = Math.max(0.35, Math.min(1, b.height / a.height));
     el.host.classList.add('pkm-tt-out');
     el.mon.style.transform = 'translate(' + Math.round(b.left + b.width / 2 - (a.left + a.width / 2)) + 'px, ' + Math.round(b.top + b.height / 2 - (a.top + a.height / 2)) + 'px) scale(' + k.toFixed(2) + ')';
     el.mon.classList.add('pkm-tt-fly');
-    setTimeout(finish, 950);
+    TUTO.fly = setTimeout(finish, 950);
   };
   // Cadre, trait et position de la bulle : suivis à chaque image tant que la visite est ouverte.
   const tutoTrack = () => {
@@ -159,6 +171,8 @@
       let t = TUTO.target;
       if (!t || !document.contains(t)) t = TUTO.target = document.querySelector(st.sel);
       const H = el.host.getBoundingClientRect();
+      el.frame.style.opacity = t || TUTO.done ? '' : '0';
+      if (!t) { el.link.style.opacity = '0'; el.last = ''; }
       if (t && !TUTO.done) {
         const r = t.getBoundingClientRect(), pad = 6;
         const x = Math.max(4, r.left - H.left - pad), y = Math.max(4, r.top - H.top - pad);
@@ -205,17 +219,24 @@
     tutoScroll(TUTO.target);
     el.box.classList.toggle('pkm-tt-top', st.dock === 'top');
     el.box.classList.remove('pkm-tt-hop'); void el.box.offsetWidth; el.box.classList.add('pkm-tt-hop');
+    clearTimeout(TUTO.hopT); TUTO.hopT = setTimeout(() => el.box.classList.remove('pkm-tt-hop'), 600);
     el.m0.src = 'img/pokemon/talk/' + TUTO.mon + '-0.png'; el.m1.src = 'img/pokemon/talk/' + TUTO.mon + '-1.png';
     el.m0.alt = HOME_NAMES[TUTO.mon] || '';
     [...el.dots.children].forEach((d, k) => { d.className = k < i ? 'pkm-tt-d-done' : k === i ? 'pkm-tt-d-on' : ''; });
     el.count.textContent = 'Étape ' + (i + 1) + ' / ' + TUTO_STEPS.length;
     el.next.textContent = st.final ? 'Terminer' : 'Suivant';
     TUTO.tab = st.tab === 'home' ? null : document.querySelector('nav[aria-label="Navigation principale"] button[aria-current="page"]');
-    tutoType(st.text);
+    tutoType(tutoText(st));
     tutoTrack();
   };
+  // Dernière étape : si le compagnon n'est pas la mascotte (didacticiel revu après un changement de compagnon), le
+  // starter montre où retrouver le compagnon au lieu d'y sauter.
+  const tutoText = st => {
+    if (!st.final || !TUTO.comp) return st.text;
+    return TUTO.comp.st().buddy === TUTO.mon ? st.text : 'Maintenant que tu connais toute l’appli, tu retrouveras ton compagnon ici !';
+  };
   const tutoStop = () => {
-    clearTimeout(TUTO.typing); clearTimeout(TUTO.hold); cancelAnimationFrame(TUTO.raf);
+    clearTimeout(TUTO.typing); clearTimeout(TUTO.hold); clearTimeout(TUTO.fly); clearTimeout(TUTO.hopT); clearTimeout(TUTO.say); cancelAnimationFrame(TUTO.raf);
     if (TUTO.el && TUTO.el.host) TUTO.el.host.innerHTML = '';
     TUTO.el = null; TUTO.tab = null; TUTO.target = null; TUTO.i = -1;
   };
@@ -246,6 +267,8 @@
     setTimeout(() => { if (this.st().tutoStep === i) tutoShow(i); }, same ? 80 : 480);
   };
   tutoProto.tutoEnd = function (finished) {
+    if (TUTO.ended) return;
+    TUTO.ended = true; setTimeout(() => { TUTO.ended = false; }, 0);
     tutoForced = false;
     tutoStop();
     this.setState({ tuto: 'done', tutoStep: -2, toast: finished ? 'Ton Pokémon évolue avec tes PA dans Jeux › Pokédex.' : null });

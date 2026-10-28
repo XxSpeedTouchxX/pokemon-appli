@@ -41,8 +41,8 @@
       ['Contact', LEGAL_TODO]
     ] },
     pk: { label: 'PK et jeux', blocks: [
-      ['Ce que sont les PK', 'Les PK sont une monnaie virtuelle de l’app. Ils servent seulement à débloquer des compagnons et des thèmes.'],
-      ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas et ne se convertissent pas en argent ni en biens. Ils n’ont aucune valeur en euros.'],
+      ['Ce que sont les PK', 'Les PK sont une monnaie virtuelle de l’app. Ils servent à débloquer des compagnons et des thèmes, et, dans le PK shop, à obtenir des tickets du tirage au sort ou des lots offerts par l’éditeur.'],
+      ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas entre joueurs et ne se convertissent pas en argent. Ils n’ont aucune valeur en euros.'],
       ['Gains', '+100 de bienvenue ; +300 une fois pour un partage de l’app ; les jeux de l’onglet Jeux. Ajouter des cartes ou ouvrir l’app ne rapporte pas de PK.'],
       ['Jeux', 'Booster PK : un booster gratuit toutes les 24 h, puis plus souvent selon ton grade (10 h, 8 h, 6 h, jusqu’à 4 h), qui contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %), 100 PK (4 %) ou 1 000 PK (1 %). Pile ou face : à partir du grade Chasseur, un lancer gratuit toutes les 24 h, puis plus souvent selon ton grade (jusqu’à 4 h) ; la face « gemme PK » rapporte 30 PK (une chance sur deux), la face « cristal éteint » rien. Les tirages sont faits au hasard sur ton appareil. Pokédex : les PA (points d’Aura) se gagnent en ouvrant l’app une fois par jour, selon les jours d’affilée : +10, +15, +20, +25, puis +30 PA par jour ; un jour manqué, la série reprend à +15 PA. Ils font évoluer ton starter dans le Pokédex : 500 PA pour la deuxième forme, 1 500 PA pour la troisième, 2 500 PA pour une méga-évolution. Les PA n’ont aucune valeur en euros et ne s’achètent pas.'],
       ['PK shop et tirage au sort', 'Le PK shop échange des PK contre des tickets de participation au tirage au sort d’un booster Pokémon (2 000 PK le ticket) ou contre un lot direct, le booster 30 ans Pokémon (15 000 PK). La participation est gratuite : les PK se gagnent sans achat. Le tirage sera organisé par l’éditeur selon un règlement publié avant le tirage (date, modalités, désignation et contact du gagnant, remise du lot). L’envoi des lots demande un compte et une adresse, pas encore disponibles. Tes tickets et tes lots sont gardés sur cet appareil.'],
@@ -83,7 +83,7 @@
         { big: '+300', label: 'Partage', note: 'Une fois, en partageant l’app', icon: 'img/brand/pk.svg' },
         { big: 'Jeux', label: 'Booster et pièce', note: 'Dans l’onglet Jeux', icon: 'img/brand/pk.svg' }
       ],
-      odds: GM_TABLE.map(([pk, pct, label, color]) => ({ pk: legalNum(pk) + ' PK', pct: pct + ' %', label: label, w: 'flex: ' + Math.max(pct, 6) + ' 1 0', color: color })),
+      odds: GM_TABLE.map(([pk, pct, label, color]) => ({ pk: legalNum(pk) + ' PK', pct: pct + ' %', label: label, w: 'flex: ' + pct + ' 1 0; min-width: 4px', color: color })),
       coinWin: '+' + GM_COIN_WIN + ' PK',
       grades: PF_GRADES.map((g, i) => ({ name: g.name, img: 'img/grades/grade-' + (i + 1) + '.svg', booster: g.boosterH + ' h', coin: g.coinH ? g.coinH + ' h' : '—', scans: legalNum(g.scans),
         cls: 'pkm-rules-row' + (i === gi ? ' pkm-rules-me' : ''), aria: g.name + (i === gi ? ', ton grade' : '') + ' : booster toutes les ' + g.boosterH + ' h, ' + (g.coinH ? 'pièce toutes les ' + g.coinH + ' h' : 'pièce fermée') + ', ' + g.scans + ' scans par jour' })),

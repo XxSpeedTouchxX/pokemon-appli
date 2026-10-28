@@ -40,7 +40,7 @@
     const root = navRoot(), main = navMain();
     if (!root || !main || navStill() || !root.animate) return;
     const snap = root.cloneNode(true);
-    [...snap.querySelectorAll(':scope > nav, [role="status"], [role="dialog"]')].forEach(n => n.remove());
+    [...snap.querySelectorAll(':scope > nav, [role="status"], [role="dialog"], .pkm-tuto-host')].forEach(n => n.remove());
     // Copie inerte : sans identifiants ni second <main> (une seule zone principale dans la page).
     [snap, ...snap.querySelectorAll('[id]')].forEach(n => n.removeAttribute('id'));
     const asDiv = el => {

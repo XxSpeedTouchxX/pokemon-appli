@@ -172,7 +172,7 @@
       aria: (n.open ? paName(n.id) : (n.mega ? 'Méga-évolution' : 'Évolution') + ' à débloquer') + ', ' + n.form + ', ' + status(n),
       pick: () => this.setState({ dexSel: n.id, megaAsk: null })
     });
-    const curId = L[e.stage], next = PA_COST[e.stage];
+    const curId = L[e.stage], next = e.stage < L.length - 1 ? PA_COST[e.stage] : 0;
     const v = {
       dexW: cols * DEX_COL + 'px', dexH: (DEX_TOP + rows * DEX_ROW + 8) + 'px', dexBox: '0 0 ' + (cols * DEX_COL) + ' ' + (DEX_TOP + rows * DEX_ROW + 8),
       dexSolid: solid || 'M0 0', dexDots: dots || 'M0 0',
@@ -182,7 +182,7 @@
         bar: (next ? Math.min(100, Math.round(pa / next * 100)) : 100) + '%', barText: next ? pa.toLocaleString('fr-FR') + ' / ' + next.toLocaleString('fr-FR') + ' PA' : 'Forme finale' }
     };
     if (!sel) return v;
-    const megaOk = sel.mega && !sel.open && pkOwns(s, sel.mega[1]) && pa >= PA_MEGA;
+    const megaOk = sel.mega && !sel.open && pkOwns(s, sel.mega[1]) && pa >= PA_MEGA && !s.paFx;
     const evoOk = isNext(sel) && pa >= sel.cost && !s.paFx;
     v.sel = {
       img: sel.open ? paSprite(sel.id, still) : 'img/pokemon/' + sel.id + '.png', cls: sel.open ? 'pkm-dex-big' : 'pkm-dex-big pkm-dex-sil',

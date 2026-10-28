@@ -1168,7 +1168,7 @@
 <div class="pkm-rules">
 <div class="pkm-rules-hero">
 <div class="pkm-rules-logos" aria-hidden="true"><img src="img/brand/pk.svg" alt="" width="72" height="72" class="pkm-rules-pk"><img src="img/brand/pa-anim.svg" alt="" width="72" height="72" class="pkm-rules-pa"></div>
-<p class="pkm-rules-lead">Les PK et les PA se gagnent en jouant, gratuitement. Ils ne s’achètent pas, ne se vendent pas, ne s’échangent pas et n’ont aucune valeur en euros.</p>
+<p class="pkm-rules-lead">Les PK se gagnent en jouant, les PA en ouvrant l’app chaque jour : c’est gratuit. Ils ne s’achètent pas, ne se vendent pas, ne s’échangent pas et n’ont aucune valeur en euros.</p>
 <div class="pkm-rules-me-bar"><img src="{{ legal.pk.emblem }}" alt="" width="36" height="36"><span><b>{{ legal.pk.grade }}</b><span>{{ legal.pk.pk }} PK · {{ legal.pk.pa }} PA</span></span></div>
 </div>
 <section aria-label="Gagner des PK" class="pkm-rules-card">
@@ -1732,10 +1732,10 @@
 <div class="pkm-dex-card"><span class="pkm-dex-card-h"><img src="{{ evo.sel.icon }}" alt="" width="40" height="30" class="{{ evo.sel.iconCls }}">Pokémon sélectionné</span><b>{{ evo.sel.name }}</b><span class="pkm-dex-no">{{ evo.sel.no }} · {{ evo.sel.form }}</span><span class="pkm-dex-no">Coût : {{ evo.sel.cost }}</span><span class="pkm-dex-no pkm-dex-st">{{ evo.sel.status }}</span></div>
 </div>
 <div class="pkm-dex-route-wrap">
-<div role="list" aria-label="Lignée de ton Pokémon" class="pkm-dex-route" style="width: {{ evo.dexW }}; height: {{ evo.dexH }}">
+<div role="group" aria-label="Lignée de ton Pokémon" class="pkm-dex-route" style="width: {{ evo.dexW }}; height: {{ evo.dexH }}">
 <svg class="pkm-dex-lines" viewBox="{{ evo.dexBox }}" aria-hidden="true"><path d="{{ evo.dexSolid }}" class="pkm-dex-solid"></path><path d="{{ evo.dexDots }}" class="pkm-dex-dots"></path></svg>
 <sc-for list="{{ evo.dexCols }}" as="edc" hint-placeholder-count="3"><span class="pkm-dex-stage" aria-hidden="true" style="{{ edc.pos }}">{{ edc.label }}</span></sc-for>
-<sc-for list="{{ evo.dexNodes }}" as="edn" hint-placeholder-count="3"><button type="button" role="listitem" onClick="{{ edn.pick }}" aria-label="{{ edn.aria }}" aria-pressed="{{ edn.on }}" class="{{ edn.cls }}" style="{{ edn.pos }}"><sc-if value="{{ edn.tag }}" hint-placeholder-val="{{ false }}"><span class="pkm-dex-tag" aria-hidden="true">{{ edn.name }}</span></sc-if><img src="{{ edn.img }}" alt="" width="64" height="64"><i class="pkm-dex-ped" aria-hidden="true"></i><span class="pkm-dex-nm">{{ edn.name }}</span><span class="pkm-dex-ns" style="color: {{ edn.sc }}">{{ edn.status }}</span></button></sc-for>
+<sc-for list="{{ evo.dexNodes }}" as="edn" hint-placeholder-count="3"><button type="button" onClick="{{ edn.pick }}" aria-label="{{ edn.aria }}" aria-pressed="{{ edn.on }}" class="{{ edn.cls }}" style="{{ edn.pos }}"><sc-if value="{{ edn.tag }}" hint-placeholder-val="{{ false }}"><span class="pkm-dex-tag" aria-hidden="true">{{ edn.name }}</span></sc-if><img src="{{ edn.img }}" alt="" width="64" height="64"><i class="pkm-dex-ped" aria-hidden="true"></i><span class="pkm-dex-nm">{{ edn.name }}</span><span class="pkm-dex-ns" style="color: {{ edn.sc }}">{{ edn.status }}</span></button></sc-for>
 </div>
 </div>
 <div class="pkm-dex-sheet">
