@@ -37,45 +37,90 @@ ok('lendemain : ' + await cText() + ', sans gain', await cText() === '100 PK' &&
 await counter.click(); await page.waitForTimeout(400);
 const sheet = page.locator('section[aria-label="Mes PK"]');
 const sheetText = (await sheet.innerText()).replace(/\s+/g, ' ');
-ok('panneau : solde, jeux, bienvenue, partage (sans +10), 3 compagnons à 500 PK', /Ton solde 100 PK/.test(sheetText) && /Jeux booster PK/.test(sheetText) && !/\+10 /.test(sheetText) && /\+100 de bienvenue/.test(sheetText)
-  && (await sheet.locator('button[aria-label^="Débloquer"]').count()) === 3 && /Kyogre Compagnon et thème Océan/.test(sheetText) && /Groudon Compagnon et thème Volcan/.test(sheetText));
+// Compagnons à thème (2026-10-28) : prix en PA, un appui ouvre le Pokédex.
+ok('panneau : solde, jeux, bienvenue, partage (sans +10), 3 compagnons à thème à 3 000 PA', /Ton solde 100 PK/.test(sheetText) && /Jeux booster PK/.test(sheetText) && !/\+10 /.test(sheetText) && /\+100 de bienvenue/.test(sheetText)
+  && (await sheet.locator('button[aria-label^="Voir "][aria-label$=" PA"]').count()) === 3 && /Kyogre Compagnon et thème Océan 3 000 PA/.test(sheetText) && /Groudon Compagnon et thème Volcan 3 000 PA/.test(sheetText));
 const order = await sheet.locator('ul li span:first-child').allInnerTexts();
 ok('gains : ' + order.join(' / '), order.join() === 'Jeux,+100,+300');
 ok('panneau : les PK ne s’achètent pas', /ne s’achètent pas et n’ont aucune valeur en euros/.test(sheetText));
-ok('panneau : +300 partage, « Tous les compagnons · 152 compagnons à débloquer »', /\+300 une fois, en partageant/.test(sheetText) && /Tous les compagnons 152 compagnons à débloquer, de 50 à 500 PK/.test(sheetText) && /Rayquaza Compagnon et thème Ouragan/.test(sheetText));
+ok('panneau : +300 partage, « Mon Pokédex · 152 Pokémon à débloquer avec tes PA »', /\+300 une fois, en partageant/.test(sheetText) && /Mon Pokédex 152 Pokémon à débloquer avec tes PA dans le Pokédex/.test(sheetText) && /Rayquaza Compagnon et thème Ouragan/.test(sheetText) && !/Tous les compagnons/.test(sheetText));
 await page.screenshot({ path: shot('pk-panneau.png') });
-// 4. Débloquer Kyogre sans assez de PK : le panneau de choix s'ouvre sur la confirmation, « Il te manque 400 PK ».
-await sheet.locator('button[aria-label="Débloquer Kyogre pour 500 PK"]').click(); await page.waitForTimeout(400);
-const ask = page.locator('[role="alertdialog"]');
-ok('confirmation : « ' + (await ask.innerText()).replace(/\s+/g, ' ').slice(0, 120) + ' »', /Il te manque 400 PK/.test(await ask.innerText()) && (await ask.locator('button:has-text("Débloquer pour")').count()) === 0);
+// 4. Kyogre depuis « Mes PK » : le Pokédex s'ouvre (onglet Jeux) ; sans starter, on le choisit d'abord.
+await sheet.locator('button[aria-label^="Voir Kyogre dans le Pokédex"]').click(); await page.waitForTimeout(1200);
+const dex = page.locator('section[aria-label="Pokédex"]');
+ok('Kyogre : « Mes PK » fermé, onglet Jeux, Pokédex affiché', (await sheet.count()) === 0 && (await dex.count()) === 1 && (await page.locator('[role="alertdialog"]').count()) === 0
+  && (await page.locator('section[aria-label="Choisis ton compagnon"]').count()) === 0);
+const starters = await page.$$eval('[aria-label="Starters"] button', bs => bs.map(b => b.getAttribute('aria-label')));
+ok('sans starter : ' + starters.join(' ; '), starters.join() === 'Choisir Bulbizarre comme starter,Choisir Salamèche comme starter,Choisir Carapuce comme starter,Choisir Pikachu comme starter');
+await page.click('[aria-label="Starters"] button[aria-label="Choisir Pikachu comme starter"]'); await page.waitForTimeout(500);
+d = await saved();
+const fiche = page.locator('section[aria-label="Fiche du Pokémon"]'), act = fiche.locator('.pkm-dex-act-btn');
+const routeAria = () => page.$$eval('[aria-label="Route d’évolution"] button', bs => bs.map(b => b.getAttribute('aria-label') + (b.classList.contains('pkm-dex-lock') ? ' [verrou]' : '')));
+const actText = async () => (await act.innerText()).replace(/\s+/g, ' ').trim();
+let route = await routeAria();
+ok('starter Pikachu : evo ' + JSON.stringify(d.evo) + ', buddy ' + d.buddy + ' ; route : ' + route.join(' ; '), d.evo && d.evo.line === 'pika' && d.buddy === 25
+  && route.length === 1 && /^Kyogre, Forme de base, 3 000 PA \[verrou\]$/.test(route[0].replace(/\s/g, ' ')));
+ok('fiche de Kyogre : « ' + await actText() + ' », désactivé', /^Encore 3 000 PA pour le débloquer$/.test((await actText()).replace(/\s/g, ' ')) && (await act.getAttribute('aria-disabled')) === 'true');
+await act.click({ force: true }); await page.waitForTimeout(300); // aria-disabled : appui forcé, il ne doit rien faire
+d = await saved();
+ok('sans assez de PA : rien ne change (pa ' + d.pa + ', pkOwn ' + JSON.stringify(d.pkOwn) + ')', (d.pa || 0) === 0 && !d.pkOwn.includes(382) && d.buddy === 25 && d.pk === 100);
 await page.screenshot({ path: shot('pk-manque.png') });
-await ask.locator('button:has-text("Annuler")').click(); await page.waitForTimeout(300);
-ok('« Annuler » ferme la confirmation', (await ask.count()) === 0 && (await page.locator('section[aria-label="Choisis ton compagnon"]').count()) === 1);
-const tiles = page.locator('[aria-label="Compagnons"] button');
-const tilesAria = await page.$$eval('[aria-label="Compagnons"] button', bs => bs.map(b => b.getAttribute('aria-label')));
+// Liste complète « Tous les Pokémon » : 156, dont 4 offerts ; prix en PA selon le stade.
+await page.click('.pkm-dex-all'); await page.waitForTimeout(400);
+const dexl = page.locator('section[aria-label="Mon Pokédex"]');
+const tilesAria = await page.$$eval('[aria-label="Tous les Pokémon"] button', bs => bs.map(b => b.getAttribute('aria-label')));
 const locked = tilesAria.filter(a => /à débloquer/.test(a)), free = tilesAria.filter(a => !/à débloquer/.test(a)).map(a => a.split(',')[0]);
 const price = n => (tilesAria.find(a => a.startsWith(n + ',')) || '').replace(/.* pour /, '');
-ok('152 verrouillés, 4 offerts : ' + free.join(', '), locked.length === 152 && free.join() === 'Bulbizarre,Salamèche,Carapuce,Pikachu' && (await tiles.count()) === 156);
+ok('152 verrouillés, 4 offerts : ' + free.join(', '), locked.length === 152 && free.join() === 'Bulbizarre,Salamèche,Carapuce,Pikachu' && tilesAria.length === 156);
 ok('prix : Herbizarre ' + price('Herbizarre') + ', Florizarre ' + price('Florizarre') + ', Évoli ' + price('Évoli') + ', Mewtwo ' + price('Mewtwo') + ', Latias ' + price('Latias') + ', Kyogre ' + price('Kyogre'),
-  price('Herbizarre') === '100 PK' && price('Florizarre') === '200 PK' && price('Évoli') === '50 PK' && price('Mewtwo') === '400 PK' && price('Latias') === '400 PK' && price('Kyogre') === '500 PK' && price('Dracolosse') === '200 PK' && price('Raichu') === '100 PK' && price('Kabutops') === '100 PK' && price('Ptéra') === '100 PK' && price('Ronflex') === '200 PK');
-ok('compte : « ' + await page.locator('section[aria-label="Choisis ton compagnon"] > span').innerText() + ' »', (await page.locator('section[aria-label="Choisis ton compagnon"] > span').innerText()) === '156 Pokémon · 4 débloqués, les autres avec tes PK');
-ok('solde dans le panneau de choix : ' + (await page.locator('section[aria-label="Choisis ton compagnon"] h2 + span').innerText()).replace(/\s+/g, ' '), /100 ?PK/.test((await page.locator('section[aria-label="Choisis ton compagnon"] h2 + span').innerText()).replace(/\s+/g, ' ')));
-await page.fill('input[aria-label="Chercher un Pokémon"]', 'groudon'); await page.waitForTimeout(300);
-await tiles.first().click(); await page.waitForTimeout(300);
-ok('Groudon verrouillé : confirmation, pas de changement', /Débloquer Groudon/.test(await ask.innerText()) && /Pikachu/.test(await page.evaluate(() => document.title + (document.querySelector('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]') || {}).ariaLabel)));
+  price('Herbizarre') === '500 PA' && price('Florizarre') === '1500 PA' && price('Évoli') === '100 PA' && price('Mewtwo') === '2000 PA' && price('Latias') === '2000 PA' && price('Kyogre') === '3000 PA'
+  && price('Dracolosse') === '1500 PA' && price('Raichu') === '500 PA' && price('Kabutops') === '500 PA' && price('Ptéra') === '100 PA' && price('Ronflex') === '100 PA');
+const dexCount = async () => (await dexl.locator('.pkm-dexl-head > span > span').innerText()).replace(/\s/g, ' ').trim();
+ok('compte : « ' + await dexCount() + ' »', await dexCount() === '4 / 156 débloqués · 0 PA');
+const nTiles = () => page.locator('[aria-label="Tous les Pokémon"] button').count();
+await dexl.locator('button:has-text("À débloquer")').click(); await page.waitForTimeout(200);
+const nLock = await nTiles();
+await dexl.locator('button:has-text("Débloqués")').click(); await page.waitForTimeout(200);
+const nOwn = await nTiles();
+await dexl.locator('button:has-text("Légendaires")').click(); await page.waitForTimeout(200);
+const legs = await page.$$eval('[aria-label="Tous les Pokémon"] button', bs => bs.map(b => b.getAttribute('aria-label').split(',')[0]));
+await dexl.locator('button:has-text("Tous")').first().click(); await page.waitForTimeout(200);
+ok('filtres : ' + nLock + ' à débloquer, ' + nOwn + ' débloqués, ' + legs.length + ' légendaires (' + legs.slice(0, 4).join(', ') + '…), ' + await nTiles() + ' en tout',
+  nLock === 152 && nOwn === 4 && legs.includes('Mewtwo') && legs.includes('Kyogre') && !legs.includes('Pikachu') && await nTiles() === 156);
 await page.screenshot({ path: shot('pk-choix.png') });
-await page.click('button[aria-label="Fermer"]').catch(() => {}); await page.waitForTimeout(300);
-await page.keyboard.press('Escape');
+// Groudon verrouillé : sa fiche s'ouvre, rien ne change.
+await page.fill('input[aria-label="Chercher un Pokémon"]', 'groudon'); await page.waitForTimeout(300);
+ok('recherche « groudon » : ' + await nTiles() + ' résultat', await nTiles() === 1);
+await page.locator('[aria-label="Tous les Pokémon"] button').first().click(); await page.waitForTimeout(500);
+d = await saved();
+ok('Groudon verrouillé : liste fermée, « ' + await actText() + ' », compagnon inchangé', (await dexl.count()) === 0 && /^Encore 3 000 PA pour le débloquer$/.test((await actText()).replace(/\s/g, ' ')) && d.buddy === 25 && !d.pkOwn.includes(383)
+  && /Groudon/.test(await fiche.locator('h3').innerText()));
+// Forme évoluée : il faut d'abord la forme précédente ; la route montre la famille, méga-évolution au bout.
+await page.click('.pkm-dex-all'); await page.waitForTimeout(300);
+await page.fill('input[aria-label="Chercher un Pokémon"]', 'florizarre'); await page.waitForTimeout(300);
+await page.locator('[aria-label="Tous les Pokémon"] button').first().click(); await page.waitForTimeout(500);
+route = (await routeAria()).map(a => a.replace(/\s/g, ' '));
+ok('Florizarre : « ' + await actText() + ' » ; route : ' + route.join(' ; '), await actText() === 'Débloque d’abord Herbizarre'
+  && route.join('|') === 'Bulbizarre, Forme de base, Débloqué|Herbizarre, 1ʳᵉ évolution, 500 PA [verrou]|Florizarre, 2ᵉ évolution, 1 500 PA [verrou]|Méga-Florizarre, méga-évolution, 2 500 PA [verrou]');
 // 5. Nouvelle carte : plus de gain de PK (2026-10-12).
 await page.goto(BASE + '?today=2026-10-09', { waitUntil: 'load' }); await page.waitForTimeout(2500);
+// Rappel des PA du jour (2026-10-28) : un message comme les autres, qui doit s'effacer seul (sinon il couvre le bas de
+// l'écran et intercepte les appuis, dont « + Ajouter un exemplaire »).
+const remind = page.locator('div[role="status"]:has-text("Tes PA du jour t’attendent")');
+const remindAt = await remind.count();
+await page.waitForTimeout(4500);
+ok('rappel « Tes PA du jour t’attendent » : affiché à l’ouverture (' + remindAt + '), effacé seul après 7 s (' + await remind.count() + ' restant)', remindAt === 1 && (await remind.count()) === 0);
+// Tant que le rappel reste affiché, les appuis passent par l'événement « click » (sans test de recouvrement) pour
+// vérifier la suite du parcours.
+const tap = async l => ((await remind.count()) ? l.dispatchEvent('click') : l.click());
 await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'dracaufeu'); await page.waitForTimeout(800);
 await page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').nth(1).click(); await page.waitForTimeout(800);
 const addOnce = async () => {
-  await page.locator('button:has-text("Ajouter")').first().click(); await page.waitForTimeout(400);
+  await tap(page.locator('button:has-text("Ajouter")').first()); await page.waitForTimeout(400);
   const save = page.locator('button:has-text("Ajouter à ma collection")').first();
-  if (await save.count()) { await save.click(); }
+  if (await save.count()) { await tap(save); }
   await page.waitForTimeout(300);
-  return (await page.locator('div[role="status"]').innerText().catch(() => '')).trim();
+  return (await page.locator('div[role="status"]').allInnerTexts().catch(() => [])).join(' / ').trim();
 };
 const t1 = await addOnce();
 d = await saved();
@@ -87,29 +132,44 @@ ok('même carte une 2e fois : « ' + t2 + ' », solde ' + d.pk, !/PK/.test(t2) &
 await page.click('button[aria-label="Retour"]').catch(() => {}); await page.waitForTimeout(300);
 await page.click('button[aria-label="Accueil"]').catch(() => {}); await page.waitForTimeout(400);
 ok('compteur : ' + await cText(), await cText() === '100 PK');
-// 6. Achat : 620 PK, Kyogre débloqué, thème océan, solde 120.
-await edit(d => { d.pk = 620; });
+// 6. Déblocage avec des PA (2026-10-28) : 3 120 PA, le compagnon de l'accueil ouvre le Pokédex, Kyogre débloqué pour
+// 3 000 PA, thème océan, il te reste 120 PA ; les PK ne bougent pas.
+await edit(d => { d.pa = 3120; });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1000);
-await page.click('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]'); await page.waitForTimeout(400);
+const buddyBtn = page.locator('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon : "]');
+ok('compagnon de l’accueil : « ' + await buddyBtn.getAttribute('aria-label') + ' »', (await buddyBtn.getAttribute('aria-label')) === 'Compagnon : Pikachu. Ouvrir le Pokédex');
+await buddyBtn.click(); await page.waitForTimeout(1400);
+const dexTop = await page.evaluate(() => { const el = document.querySelector('section[aria-label="Pokédex"]'); return el ? Math.round(el.getBoundingClientRect().top) : null; });
+ok('le compagnon ouvre Jeux et le Pokédex (haut à ' + dexTop + ' px), sans panneau de choix', dexTop !== null && dexTop >= 0 && dexTop < 300
+  && (await dex.count()) === 1 && (await page.locator('section[aria-label="Choisis ton compagnon"]').count()) === 0);
+await page.click('.pkm-dex-all'); await page.waitForTimeout(300);
 await page.fill('input[aria-label="Chercher un Pokémon"]', 'kyogre'); await page.waitForTimeout(300);
-await tiles.first().click(); await page.waitForTimeout(300);
-ok('confirmation : « Débloquer pour 500 PK »', (await ask.locator('button:has-text("Débloquer pour 500 PK")').count()) === 1);
+await page.locator('[aria-label="Tous les Pokémon"] button').first().click(); await page.waitForTimeout(500);
+ok('fiche de Kyogre : « ' + await actText() + ' »', (await actText()).replace(/\s/g, ' ') === 'Débloquer · 3 000 PA' && (await act.getAttribute('aria-disabled')) === 'false');
 await page.screenshot({ path: shot('pk-achat.png') });
-await ask.locator('button:has-text("Débloquer pour 500 PK")').click(); await page.waitForTimeout(500);
-const toast = (await page.locator('div[role="status"]').innerText()).trim();
+await act.click(); await page.waitForTimeout(500);
+const toast = (await page.locator('div[role="status"]').innerText()).trim().replace(/\s/g, ' ');
 d = await saved();
-ok('achat : « ' + toast + ' »', /^Kyogre débloqué · thème Océan · il te reste 120 PK$/.test(toast) && d.pk === 120 && JSON.stringify(d.pkOwn) === '[382]' && d.buddy === 382);
+ok('déblocage : « ' + toast + ' »', /^Kyogre rejoint ton Pokédex · il te reste 120 PA$/.test(toast) && d.pa === 120 && d.pk === 100 && d.pkOwn.includes(382) && d.buddy === 382);
 ok('thème océan appliqué', await page.evaluate(() => document.documentElement.classList.contains('pkm-theme-sea')));
-ok('compteur : ' + await cText(), await cText() === '120 PK');
+ok('compteur : ' + await cText() + ' (PK inchangés)', await cText() === '100 PK');
 ok('animation de déblocage affichée', (await page.locator('button.pkm-unl').count()) === 1);
 await page.screenshot({ path: shot('pk-unlock.png') });
 await page.waitForTimeout(2800); // fin de l'animation de déblocage (3 s)
 ok('animation de déblocage terminée', (await page.locator('button.pkm-unl').count()) === 0);
+route = (await routeAria()).map(a => a.replace(/\s/g, ' '));
+ok('après déblocage : « ' + await actText() + ' », route ' + route.join(' ; '), await actText() === 'C’est ton compagnon' && route.join() === 'Kyogre, Forme de base, Compagnon');
+await page.click('nav button[aria-label="Accueil"]'); await page.waitForTimeout(600);
+ok('accueil : « ' + await buddyBtn.getAttribute('aria-label') + ' »', (await buddyBtn.getAttribute('aria-label')) === 'Compagnon : Kyogre. Ouvrir le Pokédex');
 await page.screenshot({ path: shot('pk-kyogre.png'), clip: { x: 0, y: 0, width: 390, height: 420 } });
-await page.click('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]'); await page.waitForTimeout(400);
-const after = await page.$$eval('[aria-label="Compagnons"] button', bs => bs.map(b => b.getAttribute('aria-label')).filter(a => /Kyogre|Groudon|Rayquaza/.test(a)));
-ok('après achat : ' + after.join(' ; '), after.some(a => /^Kyogre.*débloqué/.test(a)) && after.filter(a => /à débloquer/.test(a)).length === 2 && after.length === 3);
-await page.keyboard.press('Escape');
+await counter.click(); await page.waitForTimeout(400);
+const after = await page.$$eval('section[aria-label="Mes PK"] button[aria-label]', bs => bs.map(b => b.getAttribute('aria-label')).filter(a => /Kyogre|Groudon|Rayquaza/.test(a)));
+ok('après déblocage, « Mes PK » : ' + after.join(' ; '), after.length === 3 && after[0] === 'Kyogre est ton compagnon' && after.filter(a => /^Voir .* dans le Pokédex : 3\s000 PA$/.test(a)).length === 2);
+// « Mon Pokédex » (ex « Tous les compagnons ») ouvre la liste complète.
+await page.click('section[aria-label="Mes PK"] button:has-text("Mon Pokédex")'); await page.waitForTimeout(1000);
+ok('« Mon Pokédex » : liste ouverte, « ' + (await dexl.count() ? await dexCount() : '—') + ' »', (await dexl.count()) === 1 && await dexCount() === '5 / 156 débloqués · 120 PA');
+await dexl.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
+await page.click('nav button[aria-label="Accueil"]'); await page.waitForTimeout(600);
 // 7. Migration : compagnon à thème choisi avant les PK, gardé ; compagnon payant non débloqué, retiré.
 await edit(d => { delete d.pkDay; delete d.pk; delete d.pkOwn; delete d.pkSeen; d.buddy = 383; });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1000);
