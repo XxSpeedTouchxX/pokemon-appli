@@ -20,20 +20,20 @@ from make_pa_soul import halo  # noqa: E402
 
 OUT = Path(__file__).with_name("pa")
 
-# Flamme d'âme redessinée (2026-10-28, porteur : « des traits plus réguliers ») : corps rond, une seule pointe qui
-# s'enroule doucement vers la gauche, courbes continues sans cassure. Unités : corps centré en 0, 0, environ 30 × 51.
-SOUL2 = [("M", [(0, 18)]),
-         ("C", [(-9.5, 18), (-15, 11), (-15, 3)]), ("C", [(-15, -7), (-6.5, -12), (-2.5, -20)]),
-         ("C", [(-0.5, -24), (-0.5, -29), (-3, -33)]), ("C", [(6, -30), (11.5, -23), (13.5, -14)]),
-         ("C", [(14.6, -8.5), (15, -2.5), (15, 3)]), ("C", [(15, 11), (9.5, 18), (0, 18)])]
-
-
-# Variante « flamme régulière » : trois pointes (gauche, centre plus haute, droite) aux courbes régulières.
+# Deux formes (2026-10-28, porteur : « vraiment une goutte » et « vraiment une flamme »). Unités : corps centré en
+# 0, 0, base en y = 18. Courbes continues, trait régulier.
+# Goutte : symétrique, pointe fine en haut au centre, fond bien rond.
+SOUL2 = [("M", [(0, -33)]),
+         ("C", [(2.5, -24), (15, -11), (15, 3)]), ("C", [(15, 11.5), (8.5, 18), (0, 18)]),
+         ("C", [(-8.5, 18), (-15, 11.5), (-15, 3)]), ("C", [(-15, -11), (-2.5, -24), (0, -33)])]
+# Flamme : grande langue centrale qui s'incline à droite, langue gauche qui s'écarte vers l'extérieur, petite langue
+# droite ; base ronde.
 SOUL3 = [("M", [(0, 18)]),
-         ("C", [(-9.5, 18), (-15, 11), (-15, 3)]), ("C", [(-15, -5), (-11.5, -12), (-8, -20)]),
-         ("C", [(-5.5, -16.5), (-3.5, -14), (-2.6, -11)]), ("C", [(-2.6, -18), (-2, -26), (0.5, -33)]),
-         ("C", [(3, -27), (4.5, -21), (4.2, -15)]), ("C", [(6, -18), (7.8, -20.5), (9, -23)]),
-         ("C", [(13, -16), (15, -7), (15, 3)]), ("C", [(15, 11), (9.5, 18), (0, 18)])]
+         ("C", [(-10.5, 18), (-16.5, 10.5), (-16, 1)]), ("C", [(-15.6, -6.5), (-12.5, -11), (-12.8, -17.5)]),
+         ("C", [(-13, -20.5), (-14.2, -23), (-16, -25.5)]), ("C", [(-9.5, -23.5), (-5.8, -18.5), (-5, -11.5)]),
+         ("C", [(-5.6, -19), (-3.2, -27.5), (3, -35)]), ("C", [(1.6, -29), (4.2, -24.5), (7, -21)]),
+         ("C", [(8.6, -23), (9.6, -25.5), (9.4, -28.5)]), ("C", [(14.5, -22), (16.5, -11), (16, 1)]),
+         ("C", [(16, 10.5), (10.5, 18), (0, 18)])]
 SHAPE = {"goutte": SOUL2, "flamme": SOUL3}
 
 
@@ -80,6 +80,8 @@ def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape
     # Aura fantôme floue, puis la flamme d'âme.
     body += soul(32, 37, 1.02, glow, glow, 3, shape).replace('/>', ' filter="url(#gl)" opacity="0.85"/>')
     body += soul(32, 37, 0.98, "url(#fl)", shape=shape)
+    if shape == "flamme":
+        body += soul(32, 41, 0.62, lotus_color, "none", 0, shape).replace('/>', ' opacity="0.32"/>')
     # Cœur sombre au fond de la flamme, et le lotus qui y brille (trait lumineux + lueur).
     body += '<ellipse cx="32" cy="39.5" rx="11.5" ry="11" fill="url(#co)"/>'
     body += f'<g filter="url(#lg)" opacity="0.95">{lotus(32, 39, 0.8, lotus_color, 2.4)}</g>'
@@ -100,9 +102,9 @@ TINTS = [
      [(0, "#F3B8E6"), (0.4, "#9B3C8F"), (1, "#3A0E3A")], "#E59BD6", "#9B3C8F", "#1E061E", "#FFD1F2", "#FFE1F6"),
 ]
 V = {}
-for i, (shape, label) in enumerate((("goutte", "Goutte d'âme"), ("flamme", "Flamme régulière"))):
+for i, (shape, label) in enumerate((("goutte", "Goutte d'âme"), ("flamme", "Flamme d'âme"))):
     for j, (color, idea, stops, ring, glow, dark, lot, orbc) in enumerate(TINTS):
-        V["h%d" % (i * 3 + j + 1)] = (label, color, ("Une seule pointe, lisse. " if shape == "goutte" else "Trois pointes aux courbes régulières. ") + idea,
+        V["h%d" % (i * 3 + j + 1)] = (label, color, ("Une vraie goutte, symétrique, pointe fine. " if shape == "goutte" else "Une vraie flamme : langues qui ondulent, cœur plus clair. ") + idea,
                                       lotus_icon("PA · " + label + " · " + color, stops, ring, glow, dark, lot, orbc, shape))
 
 
