@@ -66,7 +66,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
   | Collectionneur | 5 000 PK + 15 compagnons | 20 | 10 h | 10 h | ticket du tirage |
   | Dresseur Pokémon | 10 000 PK + 30 compagnons | 50 | 8 h | 8 h | + booster du PK shop |
   | Maître Pokémon | 20 000 PK + 100 compagnons + 1 méga | 100 | 6 h | 6 h | + carte de France du Radar |
-  | Grand maître mondial Pokémon | 50 000 PK + 151 compagnons + 5 méga | 100 | 4 h | 4 h | + item « Deluxe » du PK shop |
+  | Grand maître mondial Pokémon | 50 000 PK + 151 compagnons + 5 méga | 500 | 4 h | 4 h | + item « Deluxe » du PK shop |
 
   - Tous les grades : valeur de la collection, classeur, toutes les séries, « Pokédex d'évolution » (choix du compagnon).
   - **Appliqué sur l'appareil** (falsifiable tant qu'il n'y a pas de serveur) : `perks()` donne les avantages du grade actuel. Scans comptés par jour (`scanQuota`, `scanDay`, `scanN` dans `scan.js` : une carte reconnue à la caméra ou sur une photo ; recherche à la main et onglet Scellé non comptés) ; délais du Booster et de la pièce (`games.js`, pièce fermée à la Recrue) ; ticket, booster et item Deluxe (article et prix à venir) du PK shop (`pkshop.js`) ; carte de France du Radar (`radarLocked` dans `radar.js` : un appui ou un lien `#radar` avant le grade Maître ouvre la fiche du grade ; le petit radar de l'accueil et Territoire restent ouverts).
@@ -202,7 +202,7 @@ Depuis le 2026-10-26 (`tools/web/pa-core.js`, testé par `node --test tools/web/
 - **Un seul choix de starter** : didacticiel, compagnon et jeu ; les autres compagnons restent à débloquer avec des PK.
 - **Enregistrement** : `pa`, `paDay`, `paStreak`, `evo` (lignée et stade) avec la collection. Mode Admin : « +500 PA ».
 
-- **Méga-évolutions** (2026-10-28, porteur ; `pa.js`, `tools/sprites/fetch_megas.py`, `megas.json`) : les 15 de Kanto (Méga-Florizarre, Méga-Dracaufeu X et Y, Méga-Tortank, Méga-Dardargnan, Méga-Roucarnage, Méga-Alakazam, Méga-Flagadoss, Méga-Ectoplasma, Méga-Kangourex, Méga-Scarabrute, Méga-Léviator, Méga-Ptéra, Méga-Mewtwo X et Y), sous la lignée du jeu d'évolution, en silhouette tant qu'elles ne sont pas débloquées. Chacune coûte **2 500 PA** (à confirmer) et demande d'avoir son Pokémon de base comme compagnon ; confirmation, animation d'évolution, puis elle devient le compagnon (et apparaît dans « Choisis ton compagnon »). Sprites : animés de Pokémon Showdown et fixes de PokeAPI (les sprites Noir et Blanc n'existent pas pour les méga-évolutions), via PokeAPI/sprites ; GIF jusqu'à 400 Ko.
+- **Méga-évolutions** (2026-10-28, porteur ; `pa.js`, `tools/sprites/fetch_megas.py`, `megas.json`) : les 15 de Kanto (Méga-Florizarre, Méga-Dracaufeu X et Y, Méga-Tortank, Méga-Dardargnan, Méga-Roucarnage, Méga-Alakazam, Méga-Flagadoss, Méga-Ectoplasma, Méga-Kangourex, Méga-Scarabrute, Méga-Léviator, Méga-Ptéra, Méga-Mewtwo X et Y), sous la lignée du jeu d'évolution, en silhouette tant qu'elles ne sont pas débloquées. Chacune coûte **2 500 PA** (validé par le porteur le 2026-10-28) et demande d'avoir son Pokémon de base comme compagnon ; confirmation, animation d'évolution, puis elle devient le compagnon (et apparaît dans « Choisis ton compagnon »). Sprites : animés de Pokémon Showdown et fixes de PokeAPI (les sprites Noir et Blanc n'existent pas pour les méga-évolutions), via PokeAPI/sprites ; GIF jusqu'à 400 Ko.
 
 ## Didacticiel
 

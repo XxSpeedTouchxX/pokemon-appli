@@ -572,7 +572,7 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 @keyframes pkmEvoTo { 0%, 66% { opacity: 0; filter: brightness(0) invert(1); transform: scale(1.2); } 74% { opacity: 1; filter: brightness(0) invert(1); } 100% { opacity: 1; filter: none; transform: scale(1); } }
 @keyframes pkmEvoGlow { 0%, 20% { opacity: 0; transform: scale(0.4); } 66% { opacity: 1; transform: scale(1.3); } 100% { opacity: 0; transform: scale(1.6); } }
 @media (prefers-reduced-motion: reduce) { .pkm-evo-fx * { animation: none !important; } }
-.pkm-pa-head { position: relative; z-index: 1; height: 30px; margin-top: 0; display: flex; align-items: center; justify-content: flex-end; }
+.pkm-pa-head { position: relative; z-index: 1; height: 30px; margin-top: 7px; display: flex; align-items: center; justify-content: flex-end; } /* 7 px sous les PK : les deux pastilles ne se touchent plus (2026-10-28) */
 
 /* Didacticiel (2026-10-25) : halo jaune sur ce dont parle le starter, bulle qui apparaît, barre de 6 s par étape. */
 .pkm-tuto-focus { position: relative; z-index: 2; box-shadow: 0 0 0 3px #FFD60A, 0 0 26px rgba(255, 214, 10, 0.7) !important; animation: pkmTutoGlow 1.4s ease-in-out infinite; }

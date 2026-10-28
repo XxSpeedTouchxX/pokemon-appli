@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-28 (suite) — Méga-évolutions à 2 500 PA validées, 500 scans au Grand maître mondial, pastille PA décalée, propositions d'illustration des PA
+
+- **Décisions du porteur :** 2 500 PA par méga-évolution **validé** ; item « Deluxe » à définir plus tard ; Grand maître mondial Pokémon : **500 scans par jour** au lieu de 100.
+- **Fait :** pastille des PA descendue de 7 px dans l'en-tête (elle chevauchait celle des PK) ; 6 propositions d'illustration des PA (`tools/brand/make_pa_proposals.py`, `tools/brand/pa/planche.html`) autour d'une flamme ou d'une âme au plus profond de l'être (chakra, nen) : A Âme ardente (violet), B Chakra (or), C Nen (vert émeraude), D Cœur d'éveil (bleu glacier), E Flamme d'évolution (rouge et or, spirale), F Esprit (rose magenta) ; **choix du porteur attendu** avant de remplacer `web/img/brand/pa.svg`.
+
+---
+
 ## 2026-10-28 — Avantages des grades appliqués, nouvelles conditions, méga-évolutions ; vague 9 mise de côté
 
 - **Décision du porteur :** la vague 9 des propositions v5 (« Chiffres justes ») est mise de côté, à reprendre plus tard.
