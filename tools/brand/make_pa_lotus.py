@@ -85,11 +85,10 @@ def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape
     # Aura fantôme floue, puis la flamme d'âme.
     body += soul(32, 37, 1.02, glow, glow, 3, shape).replace('/>', ' filter="url(#gl)" opacity="' + ("0.6" if shape == "goutte" else "0.85") + '"/>')
     if shape == "goutte":
-        # Goutte brillante : dégradé vertical sombre → lumineux, cœur sombre pour le lotus, reflet et éclat.
+        # Goutte brillante : dégradé vertical sombre → lumineux, cœur sombre pour le lotus, éclat en bas à droite.
         body += soul(32, 37, 0.98, "url(#dg)", shape=shape)
         body += '<ellipse cx="32" cy="40.5" rx="10.5" ry="10" fill="url(#co)"/>'
-        body += '<path d="M21.7 37C21.2 29.2 25.2 22.3 27.6 17.4" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" opacity="0.85"/>'
-        body += '<circle cx="22.6" cy="41" r="1.1" fill="#FFFFFF" opacity="0.85"/>'
+        # Reflet blanc à gauche retiré (2026-10-28, porteur) ; l'éclat en bas à droite reste.
         body += '<ellipse cx="38.5" cy="48" rx="5" ry="3.6" fill="#FFFFFF" filter="url(#lg)" opacity="0.55" transform="rotate(-25 38.5 48)"/>'
         lx, ly = 32, 40
     else:
@@ -121,7 +120,7 @@ TINTS = [
 V = {}
 for i, (shape, label) in enumerate((("goutte", "Goutte d'âme"), ("flamme", "Flamme d'âme"))):
     for j, (color, idea, stops, ring, glow, dark, lot, orbc, drop) in enumerate(TINTS):
-        V["h%d" % (i * 3 + j + 1)] = (label, color, ("Goutte brillante, d'après ton modèle : sombre en haut, lumineuse en bas, reflet et éclat. " if shape == "goutte" else "Le contour de ta flamme rouge, le lotus au cœur. ") + idea,
+        V["h%d" % (i * 3 + j + 1)] = (label, color, ("Goutte brillante, d'après ton modèle : sombre en haut, lumineuse en bas, éclat en bas à droite. " if shape == "goutte" else "Le contour de ta flamme rouge, le lotus au cœur. ") + idea,
                                       lotus_icon("PA · " + label + " · " + color, stops, ring, glow, dark, lot, orbc, shape, drop))
 
 
