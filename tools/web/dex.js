@@ -34,6 +34,16 @@
   const dexCapture = c => (c >= 190 ? 'Très facile' : c >= 120 ? 'Facile' : c >= 45 ? 'Moyenne' : c >= 25 ? 'Difficile' : 'Très difficile');
   const dexKids = n => DEX_DATA.filter(e => e.from === n);
   const dexProto = Component.prototype;
+  // Tailles proportionnelles (2026-10-28, demande du porteur) : dans une famille, chaque Pokémon est dessiné à la
+  // hauteur de sa taille réelle (fiche du Pokédex), le plus grand à DEX_PX px ; une méga-évolution est toujours un peu
+  // plus grande que sa forme de base (au moins 10 %), même quand le Pokédex leur donne la même taille. Plancher de
+  // DEX_PX_MIN px pour qu'un tout petit Pokémon reste visible (Magicarpe à côté de Léviator).
+  const DEX_PX = 84, DEX_PX_BIG = 104, DEX_PX_MIN = 20;
+  const dexH = e => (e.mega && DEX[e.from] ? Math.max(e.h, Math.ceil(DEX[e.from].h * 1.1)) : e.h);
+  const dexFamMax = n => Math.max(...DEX_DATA.filter(e => e.fam === DEX[n].fam && (e.mega || DEX_IDS.indexOf(e.n) >= 0)).map(dexH));
+  const dexPx = (e, max, top) => Math.max(DEX_PX_MIN, Math.round(top * dexH(e) / max));
+  // Image fixe (mouvements réduits) : cadre de 96 px avec des marges, agrandi d'autant pour garder la même taille.
+  const dexSize = (e, max, top, still) => { const px = dexPx(e, max, top); return still ? 'height: ' + Math.round(px * 1.6) + 'px; margin-bottom: -' + Math.round(px * 0.28) + 'px' : 'height: ' + px + 'px'; };
 
   // Ouvrir le Pokédex (compagnon de l'accueil, « Mes PK », didacticiel) : onglet Jeux, Pokémon choisi, liste au besoin.
   dexProto.dexOpen = function (n, list) {
@@ -63,8 +73,8 @@
   };
 
   // Route d'évolution de la famille de n : colonnes par stade, méga-évolutions dans la dernière colonne ; la première
-  // branche suit la ligne du haut, les autres partent dessous. Mesures en px (nœud de 78 × 118 ; socle à 72 px du haut).
-  const DEX_COL = 78, DEX_TOP = 44, DEX_ROW = 132, DEX_PED = 72;
+  // branche suit la ligne du haut, les autres partent dessous. Mesures en px (nœud de 78 × 134 ; socle à 88 px du haut).
+  const DEX_COL = 78, DEX_TOP = 44, DEX_ROW = 148, DEX_PED = 88;
   const dexRoute = n => {
     const fam = DEX[n].fam, nodes = DEX_DATA.filter(e => e.fam === fam && (e.mega || DEX_IDS.indexOf(e.n) >= 0)).map(e => ({ e: e, n: e.n }));
     const by = {}; nodes.forEach(x => { by[x.n] = x; });
@@ -94,7 +104,7 @@
 
   dexProto.vDex = function (s) {
     const still = dexStill(), pa = Number(s.pa) || 0, b = DEX[s.buddy] ? s.buddy : 25;
-    const sel = DEX[s.dexSel] ? s.dexSel : b, e = DEX[sel], route = dexRoute(sel);
+    const sel = DEX[s.dexSel] ? s.dexSel : b, e = DEX[sel], route = dexRoute(sel), hmax = dexFamMax(sel);
     const owned = DEX_IDS.filter(k => dexOwn(s, k)).length;
     const status = x => {
       if (dexOwn(s, x.n)) return s.buddy === x.n ? 'Compagnon' : 'Débloqué';
@@ -109,7 +119,7 @@
       nodes: route.nodes.map(x => {
         const own = dexOwn(s, x.n), on = x.n === sel;
         return {
-          img: dexSprite(x.n, still), name: x.e.name, status: status(x), on: on, tag: on,
+          img: dexSprite(x.n, still), sz: dexSize(x.e, hmax, DEX_PX, still), name: x.e.name, status: status(x), on: on, tag: on,
           sc: own ? '#9FF5C0' : can(x) ? '#FFE27A' : '#C9D3EA',
           cls: 'pkm-dex-node' + (own ? '' : ' pkm-dex-lock') + (x.row > 0 ? ' pkm-dex-alt' : '') + (s.buddy === x.n ? ' pkm-dex-now' : '') + (on ? ' pkm-dex-on' : '') + (still ? ' pkm-dex-still' : ''),
           pos: 'left: ' + (route.cx(x.col) - DEX_COL / 2) + 'px; top: ' + route.ty(x.row) + 'px',
@@ -135,7 +145,7 @@
     else if (s.paFx) act = 'Évolution en cours…';
     else { act = (from ? (e.mega ? 'Méga-évoluer' : 'Faire évoluer') : 'Débloquer') + ' · ' + dexNum(price) + ' PA'; actOn = true; actGo = () => (e.mega ? this.setState({ megaAsk: sel }) : this.dexUnlock(sel)); }
     v.sel = {
-      img: dexSprite(sel, still), cls: 'pkm-dex-big' + (own ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
+      img: dexSprite(sel, still), sz: dexSize(e, hmax, DEX_PX_BIG, still), size: (e.h / 10).toLocaleString('fr-FR') + ' m', cls: 'pkm-dex-big' + (own ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
       types: e.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })),
       rows: [
         ['Stade', stage], ['Taille', (e.h / 10).toLocaleString('fr-FR') + ' m'], ['Poids', (e.w / 10).toLocaleString('fr-FR') + ' kg'],

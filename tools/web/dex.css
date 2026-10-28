@@ -56,13 +56,12 @@
   background: linear-gradient(180deg, #1A6FB0, #0B3E7A); box-shadow: 0 0 8px rgba(41, 227, 255, 0.6); color: #FFFFFF; font-size: 11px; font-weight: 800; white-space: nowrap; }
 /* Nœud de la route (v2, 2026-10-28) : 78 × 118 px ; étiquette verte en haut (bien sous les étiquettes des étapes),
    Pokémon posé au centre du socle (bas du sprite au centre du rond), nom et état dessous. */
-.pkm-dex-node { position: absolute; width: 78px; height: 118px; padding: 0; border: 0; background: transparent; color: #FFFFFF; font: inherit; cursor: pointer; }
-.pkm-dex-node .pkm-dex-ped { position: absolute; left: 50%; top: 62px; width: 62px; height: 20px; margin: 0; transform: translateX(-50%); }
-.pkm-dex-node img { position: absolute; z-index: 1; left: 50%; bottom: 46px; width: 60px; height: 60px; transform: translateX(-50%); object-fit: contain; object-position: center bottom; image-rendering: pixelated; transition: transform 0.2s; }
-.pkm-dex-still img { bottom: 36px; width: 72px; height: 72px; }
+.pkm-dex-node { position: absolute; width: 78px; height: 134px; padding: 0; border: 0; background: transparent; color: #FFFFFF; font: inherit; cursor: pointer; }
+.pkm-dex-node .pkm-dex-ped { position: absolute; left: 50%; top: 78px; width: 62px; height: 20px; margin: 0; transform: translateX(-50%); }
+.pkm-dex-node img { position: absolute; z-index: 1; left: 50%; bottom: 46px; width: auto; max-width: 112px; height: 60px; transform: translateX(-50%); object-fit: contain; object-position: center bottom; image-rendering: pixelated; transition: transform 0.2s; }
 .pkm-dex-on img { transform: translateX(-50%) translateY(-4px) scale(1.08); }
-.pkm-dex-nm { position: absolute; left: 0; right: 0; top: 84px; font-size: 11.5px; font-weight: 800; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px #000000; }
-.pkm-dex-ns { position: absolute; left: 0; right: 0; top: 100px; font-size: 10.5px; font-weight: 800; text-align: center; white-space: nowrap; }
+.pkm-dex-nm { position: absolute; left: 0; right: 0; top: 100px; font-size: 11.5px; font-weight: 800; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px #000000; }
+.pkm-dex-ns { position: absolute; left: 0; right: 0; top: 116px; font-size: 10.5px; font-weight: 800; text-align: center; white-space: nowrap; }
 .pkm-dex-alt .pkm-dex-ped, .pkm-dex-on .pkm-dex-ped { background: radial-gradient(closest-side, #9FF5C0 0 38%, #1E7A45 40% 58%, #3DDC84 60% 76%, #0E4A26 78% 100%); box-shadow: 0 0 14px rgba(61, 220, 132, 0.8); }
 .pkm-dex-now .pkm-dex-ped { animation: pkmDexPed 1.6s ease-in-out infinite; }
 @keyframes pkmDexPed { 50% { box-shadow: 0 0 22px rgba(255, 214, 10, 1); } }
@@ -80,9 +79,9 @@
 /* Fiche du Pokémon */
 .pkm-dex-fiche { display: flex; flex-direction: column; gap: 10px; margin: 0 10px; padding: 10px; border-radius: 10px; border: 2px solid #8C7BFF; background: rgba(28, 27, 110, 0.85); }
 .pkm-dex-fiche-top { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 10px; align-items: center; }
-.pkm-dex-show { position: relative; height: 120px; }
+.pkm-dex-show { position: relative; height: 130px; }
 .pkm-dex-show .pkm-dex-ped { position: absolute; left: 50%; bottom: 6px; width: 92px; height: 26px; transform: translateX(-50%); }
-.pkm-dex-big { position: absolute; z-index: 1; left: 50%; bottom: 19px; width: 104px; height: 96px; transform: translateX(-50%); object-fit: contain; object-position: center bottom; image-rendering: pixelated; animation: pkmDexBob2 2.4s ease-in-out infinite; }
+.pkm-dex-big { position: absolute; z-index: 1; left: 50%; bottom: 19px; width: auto; max-width: 150px; height: 96px; transform: translateX(-50%); object-fit: contain; object-position: center bottom; image-rendering: pixelated; animation: pkmDexBob2 2.4s ease-in-out infinite; }
 @keyframes pkmDexBob2 { 50% { transform: translateX(-50%) translateY(-3px); } }
 .pkm-dex-id { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .pkm-dex-id h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.15; }

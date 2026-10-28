@@ -1773,12 +1773,12 @@
 <div role="group" aria-label="Route d’évolution" class="pkm-dex-route" style="width: {{ evo.routeW }}; height: {{ evo.routeH }}">
 <svg class="pkm-dex-lines" viewBox="{{ evo.routeBox }}" aria-hidden="true"><path d="{{ evo.solid }}" class="pkm-dex-solid"></path><path d="{{ evo.dots }}" class="pkm-dex-dots"></path></svg>
 <sc-for list="{{ evo.cols }}" as="edc" hint-placeholder-count="3"><span class="pkm-dex-stage" aria-hidden="true" style="{{ edc.pos }}">{{ edc.label }}</span></sc-for>
-<sc-for list="{{ evo.nodes }}" as="edn" hint-placeholder-count="3"><button type="button" onClick="{{ edn.pick }}" aria-label="{{ edn.aria }}" aria-pressed="{{ edn.on }}" class="{{ edn.cls }}" style="{{ edn.pos }}"><sc-if value="{{ edn.tag }}" hint-placeholder-val="{{ false }}"><span class="pkm-dex-tag" aria-hidden="true">{{ edn.name }}</span></sc-if><i class="pkm-dex-ped" aria-hidden="true"></i><img src="{{ edn.img }}" alt="" width="60" height="60"><span class="pkm-dex-nm">{{ edn.name }}</span><span class="pkm-dex-ns" style="color: {{ edn.sc }}">{{ edn.status }}</span></button></sc-for>
+<sc-for list="{{ evo.nodes }}" as="edn" hint-placeholder-count="3"><button type="button" onClick="{{ edn.pick }}" aria-label="{{ edn.aria }}" aria-pressed="{{ edn.on }}" class="{{ edn.cls }}" style="{{ edn.pos }}"><sc-if value="{{ edn.tag }}" hint-placeholder-val="{{ false }}"><span class="pkm-dex-tag" aria-hidden="true">{{ edn.name }}</span></sc-if><i class="pkm-dex-ped" aria-hidden="true"></i><img src="{{ edn.img }}" alt="" style="{{ edn.sz }}"><span class="pkm-dex-nm">{{ edn.name }}</span><span class="pkm-dex-ns" style="color: {{ edn.sc }}">{{ edn.status }}</span></button></sc-for>
 </div>
 </div>
 <section aria-label="Fiche du Pokémon" class="pkm-dex-fiche">
 <div class="pkm-dex-fiche-top">
-<div class="pkm-dex-show"><img src="{{ evo.sel.img }}" alt="" width="104" height="104" class="{{ evo.sel.cls }}"><i class="pkm-dex-ped" aria-hidden="true"></i></div>
+<div class="pkm-dex-show"><img src="{{ evo.sel.img }}" alt="" class="{{ evo.sel.cls }}" style="{{ evo.sel.sz }}"><i class="pkm-dex-ped" aria-hidden="true"></i></div>
 <div class="pkm-dex-id"><span class="pkm-dex-no">{{ evo.sel.no }}</span><h3>{{ evo.sel.name }}</h3><span class="pkm-dex-genus">{{ evo.sel.genus }}</span><span class="pkm-dex-types"><sc-for list="{{ evo.sel.types }}" as="edt" hint-placeholder-count="2"><b style="{{ edt.style }}">{{ edt.t }}</b></sc-for></span></div>
 </div>
 <div class="pkm-dex-info"><sc-for list="{{ evo.sel.rows }}" as="edr" hint-placeholder-count="8"><span><em>{{ edr.k }}</em>{{ edr.v }}</span></sc-for></div>
