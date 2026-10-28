@@ -1,6 +1,6 @@
 // Grades (2026-10-28, porteur) : conditions (PK gagnés, compagnons, méga-évolutions) et avantages appliqués sur
 // l'appareil : jeu de la pièce fermé à la Recrue, délais du Booster et de la pièce, scans par jour, ticket, booster et
-// item Deluxe du PK shop, carte de France du Radar ; méga-évolutions débloquées avec des PA. Le vrai grade est
+// item Deluxe du PK shop, carte de France du Radar ; méga-évolutions débloquées avec des PA dans le Pokédex (route d’évolution et fiche). Le vrai grade est
 // gardé (E2E_GRADE=0) : l'état est préparé dans le stockage de l'appareil.
 process.env.E2E_GRADE = '0';
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -48,17 +48,24 @@ await toShop();
 ok('Collectionneur : ticket achetable', (await page.locator('section[aria-label="Ticket · tirage au sort"] button:has-text("Acheter un ticket")').count()) === 1);
 ok('emblème Collectionneur dans l’en-tête', (await page.locator('header img[src="img/grades/grade-3.svg"]').count()) > 0);
 
-// 3. Méga-évolution avec des PA
-await seed({ pa: 3000, pkOwn: PAID.slice(0, 11).concat([6]), gradeSeen: 2 });
+// 3. Méga-évolution avec des PA, dans le Pokédex (2026-10-28) : route d'évolution de la famille, méga au bout
+// (Reptincel et Dracaufeu sont déjà dans PAID.slice(0, 11) ; starter Salamèche au dernier stade).
+await seed({ pa: 3000, pkOwn: PAID.slice(0, 11), gradeSeen: 2, evo: { line: 'sala', stage: 2 }, buddy: 6 });
 await go('start=market');
-const mega = page.locator('div[role="group"][aria-label="Méga-évolutions"]');
-ok('15 méga-évolutions, en silhouette', (await mega.locator('button').count()) === 15 && (await mega.locator('.pkm-evo-sil').count()) === 15);
-await mega.locator('button[aria-label^="Méga-évolution de Dracaufeu"]').first().click(); await page.waitForTimeout(200);
-ok('confirmation : « ' + (await text('div[role="group"][aria-label="Méga-évolutions"] p[role="status"]')) + ' »', /Faire méga-évoluer Dracaufeu en Méga-Dracaufeu X pour 2[   ]500 PA/.test(await text('div[role="group"][aria-label="Méga-évolutions"]')));
-await mega.locator('button:has-text("Méga-évoluer")').click(); await page.waitForTimeout(3600);
+const dex = page.locator('section[aria-label="Pokédex"]'), route = dex.locator('div[aria-label="Route d’évolution"]');
+const megaNodes = route.locator('button[aria-label*="méga-évolution"]');
+ok('route de Dracaufeu : 2 méga-évolutions au bout, en silhouette', (await megaNodes.count()) === 2 && (await route.locator('button.pkm-dex-lock[aria-label*="méga-évolution"]').count()) === 2);
+await route.locator('button[aria-label^="Méga-Dracaufeu X"]').click(); await page.waitForTimeout(200);
+const act = dex.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-act-btn');
+ok('fiche : « ' + (await act.innerText()) + ' »', /Méga-évoluer · 2\s?500 PA/.test(await act.innerText()));
+await act.click(); await page.waitForTimeout(200);
+const ask = await text('section[aria-label="Fiche du Pokémon"] .pkm-dex-ask');
+ok('confirmation : « ' + ask + ' »', /Faire méga-évoluer Dracaufeu en Méga-Dracaufeu X pour 2\s?500 PA/.test(ask));
+await dex.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-yes-btn').click(); await page.waitForTimeout(3800);
 const st2 = await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); return { megas: d.megas, buddy: d.buddy, pa: d.pa }; }, KEY);
-ok('Méga-Dracaufeu X débloquée et compagnon (' + JSON.stringify(st2) + ')', st2.megas.indexOf(10034) >= 0 && st2.buddy === 10034 && st2.pa === 500);
-await mega.screenshot({ path: shot('grades-mega.png') });
+ok('Méga-Dracaufeu X débloquée et compagnon (' + JSON.stringify(st2) + ')', (st2.megas || []).indexOf(10034) >= 0 && st2.buddy === 10034 && st2.pa === 500);
+ok('fiche après méga-évolution : « ' + (await act.innerText()) + ' »', /C’est ton compagnon/.test(await act.innerText()));
+await dex.screenshot({ path: shot('grades-mega.png') });
 await go('start=home');
 ok('compagnon de l’accueil : Méga-Dracaufeu X', (await page.locator('button[aria-label^="Compagnon : Méga-Dracaufeu X"]').count()) === 1);
 

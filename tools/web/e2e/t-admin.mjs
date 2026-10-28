@@ -1,5 +1,5 @@
-// P1 : mode Admin. 7 appuis sur « Version », code choisi puis confirmé, panneau ; solde, déblocages, prix, profil et
-// palier forcés, interrupteurs, date simulée ; sortie ; nouvel accès avec le code (faux puis bon).
+// P1 : mode Admin. 7 appuis sur « Version », code choisi puis confirmé, panneau ; solde, déblocages, prix (en PA depuis
+// le 2026-10-28), profil et palier forcés, interrupteurs, date simulée ; sortie ; nouvel accès avec le code (faux puis bon).
 import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const BASE = E2E + '/?';
 const browser = await launch();
@@ -35,8 +35,8 @@ d = await saved(); ok('tout débloqué : ' + d.pkOwn.length, d.pkOwn.length === 
 await panel.locator('button:has-text("Tout reverrouiller")').click(); await page.waitForTimeout(300);
 // Prix.
 await page.fill('input[aria-label="Chercher un compagnon à mettre à prix"]', 'dracaufeu'); await page.waitForTimeout(300);
-await page.fill('input[aria-label="Prix de Dracaufeu en PK"]', '777'); await page.waitForTimeout(300);
-d = await saved(); ok('prix fixé : Dracaufeu ' + d.admin.prices[6], d.admin.prices[6] === 777);
+await page.fill('input[aria-label="Prix de Dracaufeu en PA"]', '777'); await page.waitForTimeout(300);
+d = await saved(); ok('prix fixé (PA) : Dracaufeu ' + d.admin.prices[6], d.admin.prices[6] === 777);
 // Profil et grade forcés.
 await panel.locator('[aria-label="Profil forcé"] button:has-text("Passionné")').click(); await page.waitForTimeout(200);
 await panel.locator('[aria-label="Grade forcé"] button').nth(1).click(); await page.waitForTimeout(200);
@@ -51,9 +51,19 @@ ok('pas de badge Admin dans l’en-tête (panneau depuis les Réglages)', (await
 ok('compteur PK masqué', (await page.locator('header button[aria-label^="Mes PK"]').count()) === 0);
 ok('bouton Scan masqué', (await page.evaluate(() => getComputedStyle(document.querySelector('button[aria-label="Scanner une carte ou un produit"]')).visibility)) === 'hidden');
 ok('animations coupées', await page.evaluate(() => document.documentElement.classList.contains('pkm-calm')));
-await page.click('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]'); await page.waitForTimeout(400);
-ok('PK masqués : aucun compagnon verrouillé', (await page.locator('[aria-label="Compagnons"] button[aria-label*="à débloquer"]').count()) === 0);
-await page.keyboard.press('Escape'); await page.click('button[aria-label="Fermer le choix du compagnon"]').catch(() => {});
+// Le compagnon de l'accueil ouvre le Pokédex (onglet Jeux) depuis le 2026-10-28 ; PK masqués : tout y est offert.
+await page.click('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]'); await page.waitForTimeout(1200);
+const dexSec = page.locator('section[aria-label="Pokédex"]');
+ok('compagnon : Pokédex ouvert dans Jeux', (await dexSec.count()) === 1 && await dexSec.evaluate(el => { const r = el.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; }));
+// Pas encore de starter : on en choisit un pour accéder à la liste complète.
+const starter = page.locator('[aria-label="Starters"] button[aria-label="Choisir Pikachu comme starter"]');
+if (await starter.count()) { await starter.click(); await page.waitForTimeout(800); }
+await page.locator('.pkm-dex-all').click(); await page.waitForTimeout(500);
+const dexl = page.locator('section[aria-label="Mon Pokédex"]');
+const lockedNonMega = await dexl.locator('button[aria-label*="à débloquer"]').evaluateAll(b => b.map(x => x.getAttribute('aria-label')));
+ok('PK masqués : aucun compagnon verrouillé dans Mon Pokédex (' + (await dexl.locator('button[aria-label*=", n° "]').count()) + ' Pokémon' + (lockedNonMega.length ? ' ; ' + lockedNonMega.slice(0, 3).join(' | ') : '') + ')',
+  (await dexl.locator('button[aria-label*=", n° "]').count()) === 156 && lockedNonMega.length === 0);
+await page.keyboard.press('Escape'); await page.waitForTimeout(200);
 await page.goto(BASE + 'start=profile', { waitUntil: 'load' }); await page.waitForTimeout(1000);
 const idt = await page.locator('section[aria-label="Identité"]').innerText(), cat = await page.locator('section[aria-label="Grade actuel"]').innerText();
 ok('grade forcé « ' + tierName + ' » : ' + idt.replace(/\s+/g, ' ').slice(0, 60), cat.includes(tierName) && idt.includes('Grade ' + tierName));

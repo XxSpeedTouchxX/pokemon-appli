@@ -1,6 +1,7 @@
 import { launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 // PK, la monnaie de l'app : compteur en haut à droite, bienvenue (100), ni visite du jour ni nouvelle carte (gains
-// retirés le 2026-10-12), panneau « Mes PK », compagnons verrouillés (500 PK), achat de Kyogre et thème, migration, 360 px.
+// retirés le 2026-10-12), panneau « Mes PK », compagnons à débloquer avec des PA dans le Pokédex (2026-10-28 : plus de
+// choix du compagnon payé en PK), déblocage de Kyogre (3 000 PA) et thème, migration, 360 px.
 import { withFont } from './hero.mjs';
 const BASE = E2E + '/';
 const browser = await launch();
@@ -48,8 +49,9 @@ await page.screenshot({ path: shot('pk-panneau.png') });
 // 4. Kyogre depuis « Mes PK » : le Pokédex s'ouvre (onglet Jeux) ; sans starter, on le choisit d'abord.
 await sheet.locator('button[aria-label^="Voir Kyogre dans le Pokédex"]').click(); await page.waitForTimeout(1200);
 const dex = page.locator('section[aria-label="Pokédex"]');
-ok('Kyogre : « Mes PK » fermé, onglet Jeux, Pokédex affiché', (await sheet.count()) === 0 && (await dex.count()) === 1 && (await page.locator('[role="alertdialog"]').count()) === 0
-  && (await page.locator('section[aria-label="Choisis ton compagnon"]').count()) === 0);
+// (l'onglet Jeux a aussi un encadré « Mes PK », sans rôle de dialogue)
+const k4 = [await page.locator('section[aria-label="Mes PK"][role="dialog"]').count(), await dex.count(), await page.locator('[role="alertdialog"]').count(), await page.locator('section[aria-label="Choisis ton compagnon"]').count()];
+ok('Kyogre : « Mes PK » fermé, onglet Jeux, Pokédex affiché, sans confirmation en PK ni ancien choix du compagnon (' + k4.join(', ') + ')', k4.join() === '0,1,0,0');
 const starters = await page.$$eval('[aria-label="Starters"] button', bs => bs.map(b => b.getAttribute('aria-label')));
 ok('sans starter : ' + starters.join(' ; '), starters.join() === 'Choisir Bulbizarre comme starter,Choisir Salamèche comme starter,Choisir Carapuce comme starter,Choisir Pikachu comme starter');
 await page.click('[aria-label="Starters"] button[aria-label="Choisir Pikachu comme starter"]'); await page.waitForTimeout(500);
