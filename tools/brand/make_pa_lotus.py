@@ -74,7 +74,26 @@ def orb(x, y, r, core, glow):
             f'<circle cx="{x - r * 0.35}" cy="{y - r * 0.35}" r="{r * 0.35}" fill="#FFFFFF"/>')
 
 
-def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape="goutte", drop=None):
+def orbit_orbs(orb_core, glow, layer, dur=12):
+    # Orbes qui gravitent doucement (2026-10-28, porteur) sur une ellipse inclinée comme le halo : moitié avant (bas)
+    # devant la goutte, moitié arrière (haut) derrière. Animation SVG (SMIL) : « back » = toujours dessinée, derrière
+    # la goutte ; « front » = même orbe, visible seulement pendant la moitié avant du tour.
+    import math
+    cx, cy, rx, ry, rot = 32, 42, 29, 11, -14
+    a = math.radians(rot)
+    x1, y1 = cx - rx * math.cos(a), cy - rx * math.sin(a)
+    x2, y2 = cx + rx * math.cos(a), cy + rx * math.sin(a)
+    path = f"M{x1:.2f} {y1:.2f}A{rx} {ry} {rot} 0 0 {x2:.2f} {y2:.2f}A{rx} {ry} {rot} 0 0 {x1:.2f} {y1:.2f}"
+    out = ""
+    for r, phase in ((2.0, 0), (1.6, 1 / 3), (1.2, 2 / 3)):
+        begin = f"-{dur * phase:.2f}s"
+        vis = "" if layer == "back" else f'<animate attributeName="opacity" values="1;0" keyTimes="0;0.5" calcMode="discrete" dur="{dur}s" begin="{begin}" repeatCount="indefinite"/>'
+        out += (f'<g>{vis}<animateMotion dur="{dur}s" begin="{begin}" repeatCount="indefinite" path="{path}"/>'
+                + orb(0, 0, r, orb_core, glow) + '</g>')
+    return out
+
+
+def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape="goutte", drop=None, anim=False):
     defs = ('<filter id="gl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4"/></filter>'
             '<filter id="lg" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1"/></filter>'
             + rad("au", [(0, glow, 0.7), (0.6, glow, 0.22), (1, glow, 0)]) + grad("fl", stops)
@@ -82,6 +101,8 @@ def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape
             + (grad("dg", drop, 0.5, 0, 0.5, 1) if drop else ""))
     body = '<circle cx="32" cy="34" r="30" fill="url(#au)"/>'
     body += halo(32, 47, 26, 7.5, -14, ring, "back")
+    if anim:
+        body += orbit_orbs(orb_core, glow, "back")
     # Aura fantôme floue, puis la flamme d'âme.
     body += soul(32, 37, 1.02, glow, glow, 3, shape).replace('/>', ' filter="url(#gl)" opacity="' + ("0.6" if shape == "goutte" else "0.85") + '"/>')
     if shape == "goutte":
@@ -100,8 +121,11 @@ def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape
     body += f'<g filter="url(#lg)" opacity="0.95">{lotus(lx, ly, 0.78, lotus_color, 2.4)}</g>'
     body += lotus(lx, ly, 0.78, "#FFFFFF", 1.25)
     body += halo(32, 47, 26, 7.5, -14, ring, "front")
-    # Orbes d'énergie à la place des flammèches.
-    body += orb(11, 19, 2.0, orb_core, glow) + orb(54, 28, 1.6, orb_core, glow) + orb(9, 37, 1.2, orb_core, glow)
+    # Orbes d'énergie à la place des flammèches : fixes, ou qui gravitent (anim).
+    if anim:
+        body += orbit_orbs(orb_core, glow, "front")
+    else:
+        body += orb(11, 19, 2.0, orb_core, glow) + orb(54, 28, 1.6, orb_core, glow) + orb(9, 37, 1.2, orb_core, glow)
     body += spark(51, 8)
     return svg(title, defs, body)
 

@@ -1665,7 +1665,7 @@
 <span style="font-size: 12.5px; color: #C7A6FF">Série : {{ evo.streak }}</span>
 </div>
 <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 18px; border: 1px solid #3B2A6B; background: rgba(11, 17, 32, 0.6)">
-<img src="img/brand/pa.svg" alt="" width="40" height="40" style="flex: none; display: block; width: 40px; height: 40px">
+<img src="{{ evo.paLogo }}" alt="" width="64" height="64" class="pkm-pa-logo" style="flex: none; display: block; width: 64px; height: 64px">
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">{{ evo.pa }} PA</span><span style="font-size: 12.5px; color: #C9D3EA">{{ evo.tomorrow }}</span></span>
 </div>
 <sc-if value="{{ evo.choosing }}" hint-placeholder-val="{{ false }}">

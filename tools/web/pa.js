@@ -75,6 +75,8 @@
   paProto.vEvo = function (s) {
     const e = s.evo, still = paStill(), pa = Number(s.pa) || 0;
     const r = {
+      // Logo des PA : la goutte d'âme ; ses orbes gravitent ici, là où les PA sont expliqués (fixe si mouvements réduits).
+      paLogo: still ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
       pa: pa.toLocaleString('fr-FR'), streak: s.paStreak > 1 ? s.paStreak + ' jours d’affilée' : s.paStreak === 1 ? '1er jour' : '—',
       tomorrow: 'Reviens demain : +' + PaCore.tomorrow(s.paStreak) + ' PA',
       rules: 'Ouvre l’app chaque jour : +10, +15, +20, +25, puis +30 PA par jour d’affilée. Un jour manqué : la série reprend à +15 PA.',
@@ -133,7 +135,8 @@
   paProto.pkView = function (s) {
     const v = paBasePk.call(this, s), pa = Number(s.pa) || 0;
     return Object.assign(v, { wrapCls: 'pkm-pk-tk', pa: pa.toLocaleString('fr-FR'), paAria: 'Mes points d’Aura : ' + pa + ' PA. Ouvrir le jeu d’évolution',
-      openPa: () => this.tab('market'), paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') });
+      // Le solde de PA ouvre Jeux et descend jusqu'au jeu d'évolution, où les PA sont expliqués.
+      openPa: () => { this.tab('market'); setTimeout(() => { const el = document.querySelector('section[aria-label="Évolution"]'); if (el) el.scrollIntoView({ block: 'start', behavior: paStill() ? 'auto' : 'smooth' }); }, 520); }, paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') });
   };
   const paBaseRender = paProto.renderVals;
   paProto.renderVals = function () {
