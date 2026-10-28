@@ -148,6 +148,9 @@
   };
   // Une lecture → indices, puis propositions si une carte domine (ou tout de suite pour une lecture fine).
   SCAN.consider = function (inst, read, fine) {
+    // Scans du jour épuisés (selon le grade) : on n'ouvre plus de fiche.
+    const q = inst.scanQuota();
+    if (q.left <= 0) { SCAN.frames = []; SCAN.say(inst, q.over); return false; }
     const m = ScanCore.match(SCAN.idx, read), now = Date.now();
     if (!fine) { SCAN.inv = read.inverted; SCAN.miss = m.ev.num ? 0 : SCAN.miss + 1; }
     // La carte vue en tête vient d'être ajoutée (ou écartée) : rien à proposer tant qu'elle reste devant la caméra,
@@ -169,6 +172,7 @@
       // Carte reconnue sans doute possible (2026-10-25) : sa fiche s'ouvre tout de suite (carte, cote, état, ajout) ;
       // les 3 propositions restent derrière « Pas la bonne carte ? ». Sinon, on propose les 3.
       SCAN.lastMs = SCAN.seen ? Date.now() - SCAN.seen : 0; SCAN.seen = 0;
+      inst.scanCount();
       inst.setState({ scanPhase: 'pick', scanCands: ids, scanEv: Object.assign({}, SCAN.ev), scanMsg: '', scanMs: SCAN.lastMs });
       if (d.state === 'auto') inst.scanPick(ids[0]);
       return true;
@@ -286,6 +290,20 @@
     const id = s.scanPid;
     return id && (s.extra || []).indexOf(id) >= 0 && TCG.item(id) ? id : baseScanTarget.call(this, s);
   };
+  // Scans par jour selon le grade (2026-10-28, porteur ; profile.js) : Recrue 5, Chasseur 10, Collectionneur 20,
+  // Dresseur Pokémon 50, Maître et Grand maître mondial 100. Un scan = une carte reconnue (fiche ou propositions), à la
+  // caméra ou sur une photo ; la recherche à la main et l'onglet Scellé ne comptent pas. Remis à zéro chaque jour.
+  scanProto.scanQuota = function () {
+    const s = this.st(), P = this.perks(), used = s.scanDay === realToday() ? Number(s.scanN) || 0 : 0, left = Math.max(0, P.scans - used);
+    const T = this.tiers(), next = T.find(t => t.scans > P.scans);
+    return { max: P.scans, used: used, left: left,
+      text: left + (left > 1 ? ' scans restants' : ' scan restant') + ' aujourd’hui (' + P.scans + ' par jour au grade ' + P.name + ')',
+      over: 'Tes ' + P.scans + ' scans du jour sont utilisés. Reviens demain' + (next ? ', ou passe ' + next.name + ' pour ' + next.scans + ' par jour' : '') + '. La recherche reste ouverte.' };
+  };
+  scanProto.scanCount = function () {
+    const s = this.st(), today = realToday(), used = s.scanDay === today ? Number(s.scanN) || 0 : 0;
+    this.setState({ scanDay: today, scanN: used + 1 });
+  };
   // Choix d'une proposition (ou d'un produit scellé) : fiche résultat, langue préremplie (« EN » lu sur la carte,
   // ou extension sans version française).
   scanProto.scanPick = function (id) {
@@ -313,7 +331,8 @@
     const sealed = s.scanMode === 'sealed', ph = s.scanPhase, panel = SCAN_PANELS[ph], live = ph === 'live';
     const on = 'var(--pkm-accent)', onFg = 'var(--pkm-on-accent)', off = 'transparent', offFg = 'var(--pkm-t2)';
     const clickInput = id => () => { const el = document.getElementById(id); if (el) { el.value = ''; el.click(); } };
-    const status = ph === 'idle' ? 'Ouverture de la caméra…'
+    const quota = this.scanQuota();
+    const status = !sealed && !panel && quota.left <= 0 ? quota.over : ph === 'idle' ? 'Ouverture de la caméra…'
       : ph === 'loading' ? 'Préparation de la lecture… ' + (s.scanProg || 0) + ' % (une seule fois)'
         : ph === 'photo' ? 'Lecture de la photo…'
           : panel ? s.scanMsg || ''
@@ -329,12 +348,12 @@
       torchOn: !!s.scanTorch, torchLabel: s.scanTorch ? 'Éteindre la lampe' : 'Allumer la lampe',
       torchBg: s.scanTorch ? 'var(--pkm-accent)' : 'rgba(var(--pkm-ink-rgb), 0.66)', torchFg: s.scanTorch ? 'var(--pkm-on-accent)' : 'var(--pkm-white)',
       torch: () => SCAN.setTorch(this, !s.scanTorch),
-      showFrame: !panel, hasPanel: !!panel, panelTitle: panel ? panel[0] : '', panelText: panel ? panel[1] : '', panelRetry: !!(panel && panel[2]),
+      showFrame: !panel, hasPanel: !!panel, panelTitle: panel ? panel[0] : '', panelText: panel ? panel[1] + (sealed ? '' : ' ' + (quota.left > 0 ? quota.text.charAt(0).toUpperCase() + quota.text.slice(1) + '.' : quota.over)) : '', panelRetry: !!(panel && panel[2]),
       retryCam: () => this.setState({ scanPhase: 'idle', scanMsg: '' }),
-      hint: 'Place la carte dans le cadre, bien à plat',
+      hint: quota.left > 0 ? 'Place la carte dans le cadre, bien à plat' : 'Plus de scan aujourd’hui',
       reading: live || ph === 'photo',
       status: status, hasStatus: !panel || !!s.scanMsg, dot: panel ? 'var(--pkm-orange)' : live ? 'var(--pkm-green)' : 'var(--pkm-t3)',
-      count: n > 0 ? n + (n > 1 ? ' articles ajoutés depuis l’ouverture' : ' article ajouté depuis l’ouverture') : 'Lecture sur ton téléphone : aucune image n’est envoyée',
+      count: (n > 0 ? n + (n > 1 ? ' articles ajoutés depuis l’ouverture' : ' article ajouté depuis l’ouverture') : 'Lecture sur ton téléphone : aucune image n’est envoyée') + ' · ' + quota.text,
       shutter: () => SCAN.shutter(this), shutterLabel: 'Lecture fine de la carte', shutterOff: !live, shutterOp: live ? '1' : '0.45',
       takePhoto: clickInput('pkm-scan-photo'), importPhoto: clickInput('pkm-scan-file'),
       onFile: e => SCAN.photo(this, e && e.target && e.target.files && e.target.files[0]),

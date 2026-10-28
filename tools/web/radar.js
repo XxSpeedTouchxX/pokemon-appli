@@ -536,7 +536,17 @@
 
   // ——— Logique de l'écran ———
   const radarProto = proto;
+  // Radar des boutiques de France réservé au grade Maître Pokémon (2026-10-28, porteur ; profile.js) : avant, un appui
+  // ouvre la fiche du grade qui le débloque. Le petit radar de l'accueil et Territoire restent ouverts à tous.
+  radarProto.radarLocked = function () {
+    if (this.perks().radar) return false;
+    const T = this.tiers(), i = T.findIndex(t => t.radar);
+    this.setState({ toast: '🔒 Le Radar des boutiques de France se débloque au grade ' + T[i].name });
+    this.push('grade', { gradeIx: i });
+    return true;
+  };
   radarProto.openRadar = function () {
+    if (this.radarLocked()) return;
     // Ouverture sur « Ma zone » à 5 km (2026-10-24, demande du porteur), autour de la dernière position connue.
     const s = this.st(), pos = s.raround || s.tpos || null;
     this.push('radar', { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: pos, rkm: '5', rmsg: '' });
@@ -692,10 +702,13 @@
     return r;
   };
 
+  let radarBounce = false;
   const radarRender = radarProto.renderVals;
   radarProto.renderVals = function () {
     const r = radarRender.call(this), s = this.st(), on = s.screen === 'radar';
     r.ui.isRadar = on;
+    // Lien direct (#radar, ?start=radar) avant le grade Maître Pokémon : retour à Territoire, puis fiche du grade.
+    if (on && !this.perks().radar && !radarBounce) { radarBounce = true; setTimeout(() => { radarBounce = false; this.setState({ screen: 'territory', stack: [] }); this.radarLocked(); }, 0); }
     if (on) {
       if (RADAR.status === 'idle') RADAR.load().then(() => this.setState({ rdata: Date.now() }));
       r.rd = this.vRadar(s);

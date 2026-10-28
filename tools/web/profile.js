@@ -98,57 +98,73 @@
     return r;
   };
 
-  // ——— Grades (2026-10-14 ; conditions du 2026-10-16, demande du porteur) ———
-  // Six grades, chacun avec son emblème (web/img/grades/, tools/brand/make_grades.mjs). Ils ne suivent plus la valeur de
-  // la collection mais les PK gagnés et les parrainages :
-  //   Recrue : dès l'inscription ; Chasseur : 3 000 PK ; Collectionneur : 7 500 PK ; Dresseur Pokémon : 15 000 PK et
-  //   3 parrainages ; Maître Pokémon : 30 000 PK et 5 parrainages ; Grand maître Pokémon : 100 000 PK et 10 parrainages.
-  // PK comptés : le total gagné depuis le début (pkEarned), pour qu'une dépense au PK shop ou une ancienne perte à la roulette (retirée le 2026-10-25) ne
-  // fasse pas redescendre de grade. Parrainages : pas encore possibles (ils demandent des comptes) ; compteur
-  // « referrals » gardé avec la collection, à 0 pour l'instant (forçable depuis l'Admin).
+  // ——— Grades (2026-10-14 ; conditions et avantages du 2026-10-28, demande du porteur) ———
+  // Six grades, chacun avec son emblème (web/img/grades/, tools/brand/make_grades.mjs). Conditions : PK gagnés au total
+  // (pkEarned : une dépense ne fait pas redescendre), compagnons débloqués (les 4 offerts compris, méga-évolutions à
+  // part) et méga-évolutions débloquées avec des PA (pa.js). Les parrainages ne comptent plus (en attente).
+  //   Recrue : dès l'inscription · Chasseur : 1 500 PK · Collectionneur : 5 000 PK + 15 compagnons ·
+  //   Dresseur Pokémon : 10 000 PK + 30 compagnons · Maître Pokémon : 20 000 PK + 100 compagnons + 1 méga-évolution ·
+  //   Grand maître mondial Pokémon : 50 000 PK + 151 compagnons + 5 méga-évolutions.
+  // Avantages appliqués sur l'appareil (falsifiables tant qu'il n'y a pas de serveur) : scans par jour (scan.js), délai
+  // du Booster PK et de la pièce (games.js ; pièce fermée à la Recrue), ticket du tirage, booster et item Deluxe du
+  // PK shop (pkshop.js), carte de France du Radar (radar.js). Chaque grade garde ce que donnent les précédents.
+  // Grade forcé : mode Admin, ou la clé « pkm-grade-force » de l'appareil (1 à 6, utilisée par les tests).
   // Le champ sym d'un grade porte le chemin de son emblème (build.mjs remplace les hexagones de la maquette).
-  // Avantages : liste proposée par Claude, à valider par le porteur ; affichés, pas encore activés.
+  const PF_BASE = ['Accès à la valeur de toute ta collection', 'Accès à ton classeur de cartes et d’items scellés', 'Accès à toutes les séries Pokémon et à leurs extensions', 'Accès au Pokédex d’évolution pour choisir ton compagnon'];
   const PF_GRADES = [
-    { name: 'Recrue', pk: 0, ref: 0, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)',
-      perks: ['Toutes les fonctions de l’app : valeur de ta collection, scan, classeur, radar des boutiques', 'Booster PK toutes les 12 h, pile ou face et jeu d’évolution', 'Bulbizarre, Salamèche, Carapuce et Pikachu offerts comme compagnons'] },
-    { name: 'Chasseur', pk: 3000, ref: 0, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)',
-      perks: ['Emblème Chasseur sur ton profil', '1 ticket du tirage au sort offert', 'Booster PK toutes les 10 h'] },
-    { name: 'Collectionneur', pk: 7500, ref: 0, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)',
-      perks: ['Emblème Collectionneur sur ton profil', '2 tickets du tirage au sort offerts', 'Booster PK toutes les 8 h', 'Compagnons à −10 %'] },
-    { name: 'Dresseur Pokémon', pk: 15000, ref: 3, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)',
-      perks: ['Emblème Dresseur Pokémon sur ton profil', '3 tickets du tirage au sort offerts', 'Deux lancers de pile ou face par jour', 'Accès anticipé aux nouveaux concours'] },
-    { name: 'Maître Pokémon', pk: 30000, ref: 5, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)',
-      perks: ['Emblème Maître Pokémon sur ton profil', '5 tickets du tirage au sort offerts', 'Compagnons légendaires à moitié prix', 'Concours réservés aux Maîtres Pokémon'] },
-    { name: 'Grand maître Pokémon', pk: 100000, ref: 10, color: '#FF6A4D', glow: 'rgba(227, 53, 13, 0.30)',
-      perks: ['Emblème couronné sur ton profil', '10 tickets du tirage au sort offerts', 'Tous les compagnons débloqués, thèmes compris', 'Lot exclusif au PK shop'] }
+    { name: 'Recrue', pk: 0, comp: 0, mega: 0, scans: 5, boosterH: 24, coinH: 0, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)' },
+    { name: 'Chasseur', pk: 1500, comp: 0, mega: 0, scans: 10, boosterH: 24, coinH: 24, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)' },
+    { name: 'Collectionneur', pk: 5000, comp: 15, mega: 0, scans: 20, boosterH: 10, coinH: 10, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
+    { name: 'Dresseur Pokémon', pk: 10000, comp: 30, mega: 0, scans: 50, boosterH: 8, coinH: 8, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
+    { name: 'Maître Pokémon', pk: 20000, comp: 100, mega: 1, scans: 100, boosterH: 6, coinH: 6, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
+    { name: 'Grand maître mondial Pokémon', pk: 50000, comp: 151, mega: 5, scans: 100, boosterH: 4, coinH: 4, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF6A4D', glow: 'rgba(227, 53, 13, 0.30)' }
   ];
+  PF_GRADES.forEach((g, i) => {
+    g.perks = PF_BASE.concat([
+      g.scans + ' scans disponibles par jour',
+      'Booster PK toutes les ' + g.boosterH + ' h'
+    ], g.coinH ? ['Jeu de la pièce toutes les ' + g.coinH + ' h'] : [], i ? ['Emblème ' + g.name + ' sur ton profil'] : [],
+    g.ticket ? ['Possibilité d’acheter un ticket pour participer au tirage au sort'] : [],
+    g.shopBooster ? ['Possibilité d’acheter un booster au PK shop'] : [],
+    g.deluxe ? ['Possibilité d’acheter un item « Deluxe » au PK shop'] : [],
+    g.radar ? ['Radar des boutiques Pokémon de France'] : []);
+  });
   const pfNum = n => Number(n || 0).toLocaleString('fr-FR');
-  const pfCond = g => g.pk === 0 ? 'Dès l’inscription' : pfNum(g.pk) + ' PK gagnés' + (g.ref ? ' + ' + g.ref + ' parrainages' : '');
+  const pfCond = g => g.pk === 0 ? 'Dès l’inscription' : [pfNum(g.pk) + ' PK gagnés'].concat(g.comp ? [g.comp + ' compagnons débloqués'] : [], g.mega ? [g.mega + (g.mega > 1 ? ' méga-évolutions débloquées' : ' méga-évolution débloquée')] : []).join(' + ');
   proto.tiers = function () {
-    return PF_GRADES.map((g, i) => ({ name: g.name, min: g.pk, ref: g.ref, color: g.color, glow: g.glow, sym: 'img/grades/grade-' + (i + 1) + '.svg', perks: g.perks, cond: pfCond(g) }));
+    return PF_GRADES.map((g, i) => Object.assign({}, g, { min: g.pk, sym: 'img/grades/grade-' + (i + 1) + '.svg', cond: pfCond(g) }));
   };
   const pfEarned = s => Math.max(Number(s.pkEarned) || 0, 0);
-  const pfRefs = s => Math.max(Number(s.referrals) || 0, 0);
-  // Grade obtenu (le paramètre « total » de la maquette, valeur de la collection, n'est plus utilisé).
+  const pfComp = s => HOME_BUDDIES.filter(([k]) => pkOwns(s, k)).length;
+  const pfMega = s => (Array.isArray(s.megas) ? s.megas : []).length;
+  const pfForced = () => { try { const v = Number(localStorage.getItem('pkm-grade-force')); return v >= 1 && v <= PF_GRADES.length ? v - 1 : -1; } catch (e) { return -1; } };
+  // Grade obtenu : le plus haut dont les trois conditions sont remplies.
   proto.tierOf = function () {
-    const s = this.st(), T = this.tiers(), pk = pfEarned(s), ref = pfRefs(s);
+    const s = this.st(), T = this.tiers(), pk = pfEarned(s), comp = pfComp(s), mega = pfMega(s);
     let i = 0;
-    T.forEach((t, k) => { if (pk >= t.min && ref >= t.ref) i = k; });
+    T.forEach((t, k) => { if (pk >= t.pk && comp >= t.comp && mega >= t.mega) i = k; });
+    const f = pfForced();
+    if (f >= 0) i = f;
     const cur = T[i], next = T[i + 1] || null;
-    // Progression vers le suivant : PK et parrainages à parts égales quand le grade suivant en demande.
-    const fp = next ? Math.min(1, Math.max(0, (pk - cur.min) / Math.max(1, next.min - cur.min))) : 1;
-    const fr = next && next.ref ? Math.min(1, ref / next.ref) : 1;
-    const pct = next ? (next.ref ? (fp + fr) / 2 : fp) * 100 : 100;
-    return { i: i, cur: cur, next: next, pct: pct, remaining: next ? Math.max(0, next.min - pk) : 0, refMissing: next ? Math.max(0, next.ref - ref) : 0 };
+    // Progression vers le suivant : moyenne des conditions qu'il demande (PK, compagnons, méga-évolutions).
+    const parts = !next ? [] : [Math.min(1, Math.max(0, (pk - cur.pk) / Math.max(1, next.pk - cur.pk)))]
+      .concat(next.comp > cur.comp ? [Math.min(1, Math.max(0, (comp - cur.comp) / (next.comp - cur.comp)))] : [], next.mega ? [Math.min(1, mega / next.mega)] : []);
+    const pct = next ? parts.reduce((a, b) => a + b, 0) / parts.length * 100 : 100;
+    return { i: i, cur: cur, next: next, pct: pct, remaining: next ? Math.max(0, next.pk - pk) : 0,
+      compMissing: next ? Math.max(0, next.comp - comp) : 0, megaMissing: next ? Math.max(0, next.mega - mega) : 0 };
   };
+  // Avantages du grade actuel, et grade qui débloque un avantage (pour les messages « au grade … »).
+  proto.perks = function () { return PF_GRADES[this.tierOf().i]; };
+  proto.perkGrade = function (key) { const g = PF_GRADES.find(x => x[key]); return g ? g.name : ''; };
   const pfBaseTierView = proto.tierView;
   proto.tierView = function (x) {
     const r = pfBaseTierView.call(this, x), t = x.tier;
     if (t.next) {
       const bits = [];
       if (t.remaining > 0) bits.push(pfNum(t.remaining) + ' PK');
-      if (t.refMissing > 0) bits.push(t.refMissing + (t.refMissing > 1 ? ' parrainages' : ' parrainage'));
-      r.next = (bits.length ? 'Encore ' + bits.join(' et ') : 'Presque') + ' pour ' + t.next.name;
+      if (t.compMissing > 0) bits.push(t.compMissing + (t.compMissing > 1 ? ' compagnons' : ' compagnon'));
+      if (t.megaMissing > 0) bits.push(t.megaMissing + (t.megaMissing > 1 ? ' méga-évolutions' : ' méga-évolution'));
+      r.next = (bits.length ? 'Encore ' + (bits.length > 1 ? bits.slice(0, -1).join(', ') + ' et ' + bits[bits.length - 1] : bits[0]) : 'Presque') + ' pour ' + t.next.name;
     } else r.next = 'Grade maximal atteint';
     r.aria = 'Grade ' + t.cur.name + ', ' + Math.floor(t.pct) + ' % vers le suivant. Voir les grades';
     return r;
@@ -205,7 +221,7 @@
     }
     const before = raw.gradeSeen;
     const out = pfBaseSet.call(this, patch);
-    if (patch && ('pk' in patch || 'pkEarned' in patch || 'referrals' in patch || 'admin' in patch)) {
+    if (patch && ('pk' in patch || 'pkEarned' in patch || 'pkOwn' in patch || 'megas' in patch || 'admin' in patch)) {
       const now = this.tierOf().i;
       if (typeof before === 'number' && now > before) {
         pfBaseSet.call(this, { gradeSeen: now, gradeUp: { from: before, to: now, n: Date.now() } });
@@ -230,11 +246,11 @@
   };
   // « Série en cours » est retirée de Paliers et succès : le succès « 4 semaines d'affilée » garde son compteur.
   // Information sur les grades (2026-10-16) : chaque grade de la liste ouvre sa fiche (emblème et avantages) ; les
-  // succès sont retirés. Les lignes indiquent la condition d'obtention (PK gagnés, parrainages).
+  // succès sont retirés. Les lignes indiquent la condition d'obtention (PK gagnés, compagnons, méga-évolutions).
   const pfBaseTiersView = proto.vTiers;
   proto.vTiers = function (x) {
     const r = pfBaseTiersView.call(this, x), T = this.tiers(), s = x.s;
-    r.value = pfNum(pfEarned(s)) + ' PK gagnés · ' + pfRefs(s) + (pfRefs(s) > 1 ? ' parrainages' : ' parrainage');
+    r.value = pfNum(pfEarned(s)) + ' PK gagnés · ' + pfComp(s) + ' compagnons · ' + pfMega(s) + (pfMega(s) > 1 ? ' méga-évolutions' : ' méga-évolution');
     r.ladder = (r.ladder || []).map(ld => {
       const i = T.findIndex(t => t.name === ld.name), t = T[i];
       return Object.assign(ld, { min: t ? t.cond : ld.min, open: () => this.push('grade', { gradeIx: i }), aria: 'Voir le grade ' + ld.name + ' et ses avantages' });
@@ -249,7 +265,7 @@
       state: i < cur ? 'Grade obtenu' : i === cur ? 'Ton grade actuel' : 'À débloquer',
       stateColor: i <= cur ? '#3DDC84' : '#C9D3EA',
       perks: g.perks.map(t => ({ text: t })),
-      note: 'Avantages en préparation : ils s’activeront avec une prochaine mise à jour.',
+      note: 'Avantages actifs dès que tu atteins ce grade, sur cet appareil.',
       prev: i > 0 ? () => this.setState({ gradeIx: i - 1 }) : null, hasPrev: i > 0,
       next: i < T.length - 1 ? () => this.setState({ gradeIx: i + 1 }) : null, hasNext: i < T.length - 1
     };

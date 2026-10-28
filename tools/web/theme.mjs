@@ -59,7 +59,7 @@ export const RULES = [
   ['bg', '#2B3550', 'keep', { surface: true, n: 1 }], ['bg', '#131A2A', 'keep', { n: 1 }], ['bg', '#07090F', 'keep', { n: 1 }], // écran Scan
   ['bg', '#05080F', 'keep', { surface: true, n: 2 }], ['bg', '#0E1A33', 'keep', { n: 1 }], // Radar
   ['bg', '#F3F6FC', 'keep', { ctx: /pkm-tuto-text/, n: 1 }], ['fg', '#0B1120', 'keep', { ctx: /pkm-tuto-text/, n: 1 }], // bulle de parole du didacticiel (2026-10-25)
-  ['fg', '#C7A6FF', 'keep', { n: 3 }], ['line', '#3B2A6B', 'keep', { n: 3 }], ['bg', 'rgb(178, 107, 255)', 'keep', { n: 2 }], // PA et jeu d'évolution (2026-10-25) : violet de l'aura
+  ['fg', '#C7A6FF', 'keep', { n: 4 }], ['line', '#3B2A6B', 'keep', { n: 5 }], ['bg', 'rgb(178, 107, 255)', 'keep', { n: 2 }], // PA, jeu d'évolution et méga-évolutions (2026-10-25, 2026-10-28) : violet de l'aura
   // Fonds
   ['bg', '#0B1120', 'var(--pkm-app)', { ctx: /class="pkm-root"|aria-label="Bienvenue sur Dropicards"/, n: 2 }],
   ['bg', '#0B1120', 'var(--pkm-field)', { surface: true, n: 14 }], // dont 5 champs du panneau Admin (le bouton d'import simulé de la maquette est retiré ; le prix payé de la fiche du scan aussi, 2026-10-25)

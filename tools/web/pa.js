@@ -11,6 +11,13 @@
   const PA_STARTERS = [['bulbi', 1], ['sala', 4], ['cara', 7], ['pika', 25]];
   const paProto = Component.prototype;
   const paName = n => HOME_NAMES[n] || ('n° ' + n);
+  // Méga-évolutions (2026-10-28, porteur) : les 15 méga-évolutions des Pokémon de Kanto (HOME_MEGAS, injecté par le
+  // build depuis tools/sprites/megas.json : id, n° de base, nom). Chacune se débloque avec des PA quand on possède son
+  // Pokémon de base comme compagnon ; elle devient alors un compagnon. Elles comptent pour les grades Maître Pokémon
+  // (1) et Grand maître mondial Pokémon (5). Prix : PA_MEGA, à confirmer par le porteur.
+  const PA_MEGA = 2500;
+  HOME_MEGAS.forEach(([id, base, nom]) => { HOME_NAMES[id] = nom; });
+  const paMegas = s => (Array.isArray(s.megas) ? s.megas : []);
   const paStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('pkm-calm'); } catch (e) { return true; } };
 
   const paBaseSt = paProto.st;
@@ -20,6 +27,7 @@
     if (typeof d.paDay !== 'string') d.paDay = '';
     if (!(d.paStreak >= 0)) d.paStreak = 0;
     if (!d.evo || !PA_LINES[d.evo.line]) d.evo = null;
+    if (!Array.isArray(d.megas)) d.megas = [];
     return d;
   };
   // Au lancement : PA du jour (une seule fois par jour), avec le rappel de la série.
@@ -53,6 +61,16 @@
     clearTimeout(paFxTimer);
     paFxTimer = setTimeout(done, 3200);
   };
+  // Débloquer une méga-évolution : PA retirés, animation d'évolution (base → méga), la méga devient le compagnon.
+  paProto.paMega = function (id) {
+    const s = this.st(), m = HOME_MEGAS.find(x => x[0] === id), pa = Number(s.pa) || 0;
+    if (!m || s.paFx || paMegas(s).indexOf(id) >= 0 || !pkOwns(s, m[1]) || pa < PA_MEGA) return;
+    const done = () => { this.setState({ paFx: null, toast: 'Félicitations ! ' + paName(m[1]) + ' méga-évolue en ' + m[2] }); this.flash(); };
+    this.setState({ pa: pa - PA_MEGA, megas: paMegas(s).concat([id]), megaAsk: null, buddy: id, paFx: paStill() ? null : { from: m[1], to: id, n: Date.now() } });
+    if (paStill()) { done(); return; }
+    clearTimeout(paFxTimer);
+    paFxTimer = setTimeout(done, 3200);
+  };
   const paSprite = (n, still) => 'img/pokemon/' + n + (still ? '.png' : '.gif');
   paProto.vEvo = function (s) {
     const e = s.evo, still = paStill(), pa = Number(s.pa) || 0;
@@ -64,6 +82,29 @@
       fx: !!s.paFx, fxFrom: s.paFx ? paSprite(s.paFx.from, still) : '', fxTo: s.paFx ? paSprite(s.paFx.to, still) : '',
       fxKey: 'evo-' + (s.paFx ? s.paFx.n : 0), fxText: s.paFx ? paName(s.paFx.from) + ' évolue…' : ''
     };
+    // Méga-évolutions : couleur si débloquée, silhouette sinon ; un appui choisit le compagnon, ou demande confirmation.
+    const own = paMegas(s), ask = HOME_MEGAS.find(x => x[0] === s.megaAsk);
+    Object.assign(r, {
+      megaCount: own.length + ' / ' + HOME_MEGAS.length,
+      megaIntro: 'Débloque une méga-évolution pour ' + PA_MEGA.toLocaleString('fr-FR') + ' PA quand tu possèdes son Pokémon de base comme compagnon. Elle devient un compagnon et compte pour les grades Maître Pokémon et Grand maître mondial.',
+      megas: HOME_MEGAS.map(([id, base, nom]) => {
+        const has = own.indexOf(id) >= 0, baseOk = pkOwns(s, base), can = !has && baseOk && pa >= PA_MEGA;
+        return {
+          img: 'img/pokemon/icon/' + id + '.png', cls: has ? '' : 'pkm-evo-sil', name: has ? nom : '???', on: s.buddy === id,
+          status: has ? (s.buddy === id ? 'Ton compagnon' : 'Débloquée') : baseOk ? PA_MEGA.toLocaleString('fr-FR') + ' PA' : 'Il faut ' + paName(base),
+          sc: has ? '#5EE0CF' : can ? 'var(--pkm-accent)' : '#9AA8C3', bc: s.buddy === id ? '#B26BFF' : '#3B2A6B',
+          aria: has ? nom + (s.buddy === id ? ', ton compagnon' : ', débloquée. La choisir comme compagnon') : baseOk ? 'Méga-évolution de ' + paName(base) + ' à débloquer pour ' + PA_MEGA + ' PA' : 'Méga-évolution de ' + paName(base) + ' : débloque d’abord ' + paName(base),
+          tap: () => {
+            if (has) { this.setState({ buddy: id, megaAsk: null, toast: nom + ' t’accompagne' }); this.flash(); return; }
+            if (!baseOk) { this.setState({ megaAsk: null, toast: 'Débloque d’abord ' + paName(base) + ' comme compagnon' }); return; }
+            if (pa < PA_MEGA) { this.setState({ megaAsk: null, toast: 'Il te manque ' + (PA_MEGA - pa).toLocaleString('fr-FR') + ' PA pour cette méga-évolution' }); return; }
+            this.setState({ megaAsk: id });
+          }
+        };
+      }),
+      megaAsk: !!ask, megaAskText: ask ? 'Faire méga-évoluer ' + paName(ask[1]) + ' en ' + ask[2] + ' pour ' + PA_MEGA.toLocaleString('fr-FR') + ' PA ?' : '',
+      megaYes: () => ask && this.paMega(ask[0]), megaNo: () => this.setState({ megaAsk: null })
+    });
     if (!e) {
       r.starters = PA_STARTERS.map(([line, n]) => ({ name: paName(n), img: paSprite(n, still), pick: () => this.paChoose(line), aria: 'Choisir ' + paName(n) + ' comme starter' }));
       return r;
@@ -97,6 +138,6 @@
   const paBaseRender = paProto.renderVals;
   paProto.renderVals = function () {
     const s = this.st(), r = paBaseRender.call(this);
-    r.evo = r.ui.isGames ? this.vEvo(s) : { starters: [], stages: [] };
+    r.evo = r.ui.isGames ? this.vEvo(s) : { starters: [], stages: [], megas: [] };
     return r;
   };

@@ -254,7 +254,7 @@ patch(`<span style="font-size: 13px; color: #9AA8C3">{{ pf.since }}</span>
   }
 }
 // Information sur les grades (2026-10-16, porteur) : chaque grade de la liste ouvre sa fiche (écran « grade »,
-// fragment grade-screen) ; les succès sont retirés ; texte du bas adapté aux grades par PK et parrainages.
+// fragment grade-screen) ; les succès sont retirés ; texte du bas adapté aux grades par PK, compagnons et méga-évolutions.
 patch(`<div style="display: flex; align-items: center; gap: 12px; min-height: 62px; padding: 6px 16px; border-top: {{ ld.border }}; background: {{ ld.bg }}; opacity: {{ ld.op }}">`,
   `<button type="button" onClick="{{ ld.open }}" aria-label="{{ ld.aria }}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 6px 16px; border: 0; border-top: {{ ld.border }}; background: {{ ld.bg }}; opacity: {{ ld.op }}; color: inherit; font: inherit; text-align: left; cursor: pointer">`);
 patch(`<span style="flex: none; font-size: 12.5px; font-weight: 700; color: {{ ld.stateColor }}">{{ ld.state }}</span>
@@ -269,7 +269,7 @@ patch('<span style="font-size: 14px; color: #C9D3EA">Collection valorisée à {{
   if (a < 0) throw new Error('Succès introuvable');
   tpl = tpl.slice(0, a) + tpl.slice(b + '</section>'.length);
 }
-patch('Pas de quêtes ni de saisons : les paliers suivent seulement la valeur de ta collection, au prix du marché.', 'Les grades montent avec les PK que tu gagnes et tes parrainages. Touche un grade pour voir ses avantages.');
+patch('Pas de quêtes ni de saisons : les paliers suivent seulement la valeur de ta collection, au prix du marché.', 'Les grades montent avec les PK que tu gagnes, tes compagnons et tes méga-évolutions. Touche un grade pour voir ses avantages.');
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG['grade-screen'] + '\n<sc-if value="{{ ui.isProfile }}"');
 // Panneau « Mes PK » (pk.js), ouvert par le compteur de l'en-tête.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
@@ -695,7 +695,15 @@ const buddies = JSON.parse(readFileSync(ROOT + 'tools/sprites/companions.json', 
 if (buddies.length !== 156) throw new Error('Compagnons : ' + buddies.length + ' au lieu de 156');
 for (const [n] of buddies) for (const f of [n + '.gif', n + '.png', 'icon/' + n + '.png'])
   if (!existsSync(ROOT + 'web/img/pokemon/' + f)) throw new Error('Compagnon sans image : web/img/pokemon/' + f);
+// Méga-évolutions (2026-10-28, tools/sprites/megas.json) : id PokeAPI, n° du Pokémon de base, nom ; mêmes images.
+const megas = JSON.parse(readFileSync(ROOT + 'tools/sprites/megas.json', 'utf8')).megas.map(([id, base, nom]) => [id, base, nom]);
+if (megas.length !== 15) throw new Error('Méga-évolutions : ' + megas.length + ' au lieu de 15');
+for (const [id, base] of megas) {
+  if (!buddies.some(([n]) => n === base)) throw new Error('Méga-évolution sans compagnon de base : ' + id);
+  for (const f of [id + '.gif', id + '.png', 'icon/' + id + '.png']) if (!existsSync(ROOT + 'web/img/pokemon/' + f)) throw new Error('Méga-évolution sans image : web/img/pokemon/' + f);
+}
 const buddiesJs = '  const HOME_BUDDIES = ' + JSON.stringify(buddies) + ';\n'
+  + '  const HOME_MEGAS = ' + JSON.stringify(megas) + ';\n'
   // Thèmes des compagnons (theme.mjs) : n° du Pokémon → classe, nom et couleur de la barre du navigateur.
   + '  const HOME_THEMES = ' + JSON.stringify(Object.fromEntries(BUDDY_THEMES.map(t => [t.buddy, { key: t.key, name: t.name, bar: t.bar }]))) + ';\n';
 for (const t of BUDDY_THEMES) if (!buddies.some(([n]) => n === t.buddy)) throw new Error('Thème sans compagnon : ' + t.key);

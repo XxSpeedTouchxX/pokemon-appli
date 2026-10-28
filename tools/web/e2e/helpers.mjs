@@ -9,7 +9,20 @@ export const BASE = (process.env.E2E_BASE || 'http://localhost:8765').replace(/\
 export const OUT = fileURLToPath(new URL('./out/', import.meta.url));
 mkdirSync(OUT, { recursive: true });
 export const shot = name => OUT + name;
-export const launch = (opts = {}) => chromium.launch(Object.assign({}, opts, process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {}));
+// Grades (2026-10-28) : les avantages sont appliqués (scans par jour, délais des jeux, PK shop, Radar). Par défaut, les
+// tests jouent au grade maximal (clé « pkm-grade-force » = 6), comme avant ; E2E_GRADE=0 garde le vrai grade
+// (t-grades.mjs le règle lui-même).
+export const launch = async (opts = {}) => {
+  const b = await chromium.launch(Object.assign({}, opts, process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {}));
+  const grade = process.env.E2E_GRADE === undefined ? '6' : process.env.E2E_GRADE, newContext = b.newContext.bind(b);
+  b.newContext = async (o) => {
+    const c = await newContext(o);
+    if (grade !== '0') await c.addInitScript(g => { try { if (localStorage.getItem('pkm-grade-force') === null) localStorage.setItem('pkm-grade-force', g); } catch (e) { /* stockage indisponible */ } }, grade);
+    return c;
+  };
+  b.newPage = async (o) => (await b.newContext(o)).newPage();
+  return b;
+};
 // Polices : servies avec la démo (web/fonts). Cartes du Radar, CDN TCGdex et pokemontcg.io coupés : résultats
 // identiques partout (le bac à sable n'y a pas accès, la CI si).
 export const withFonts = async ctx => { await ctx.route(/openfreemap|tcgdex|pokemontcg|fonts\.googleapis|fonts\.gstatic/, r => r.abort()); };

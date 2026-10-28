@@ -13,3 +13,7 @@ Sur l'accueil, un Pokémon animé accompagne la valeur de la collection. On le c
 - **Noms français :** données PokeAPI (`pokemon_species_names.csv`, langue 5).
 - **Version figée :** les fichiers sont gardés dans `web/img/pokemon/` (5,6 Mo ; un seul GIF chargé à la fois, 34 Ko en moyenne ; icônes : 148 Ko en tout, chargées au défilement). `companions.json` donne le numéro, le nom, les empreintes SHA-256 et les sources.
 - **Régénérer :** `python3 tools/sprites/fetch_sprites.py && python3 tools/sprites/make_icons.py`. Un sprite au mauvais format ou trop lourd (GIF > 200 Ko, PNG > 20 Ko) est refusé. Le build vérifie qu'il y a 156 compagnons et que chacun a ses trois images.
+
+## Méga-évolutions (2026-10-28)
+
+`fetch_megas.py` récupère les 15 méga-évolutions des Pokémon de Kanto (identifiants PokeAPI 10033 à 10044, 10071, 10073, 10090) : GIF animé de Pokémon Showdown, PNG fixe de PokeAPI, icône recadrée et centrée sur 96 px. Elles se débloquent avec des PA dans le jeu d'évolution (`tools/web/pa.js`) et deviennent des compagnons. `megas.json` donne l'id, le n° de base, le nom français et les empreintes. Le build vérifie qu'il y en a 15, chacune avec ses trois images et son Pokémon de base parmi les compagnons. Régénérer : `python3 tools/sprites/fetch_megas.py`.

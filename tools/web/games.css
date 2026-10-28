@@ -86,6 +86,9 @@
 .pkm-shop-ticket { flex: none; position: relative; width: 82px; height: 56px; border-radius: 10px; border: 3px solid #111111; box-sizing: border-box; background: linear-gradient(135deg, #FFE46B, #FFD60A 50%, #F2A900); transform: rotate(-6deg); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; }
 .pkm-shop-ticket::before, .pkm-shop-ticket::after { content: ''; position: absolute; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: #111A2C; border: 3px solid #111111; box-sizing: border-box; }
 .pkm-shop-ticket::before { left: -9px; } .pkm-shop-ticket::after { right: -9px; }
+/* Item Deluxe (2026-10-28) : même étiquette, en violet et or. */
+.pkm-shop-deluxe { background: linear-gradient(135deg, #F0C8FF, #B26BFF 50%, #5B2BD6); transform: rotate(6deg); }
+.pkm-shop-deluxe .pkm-shop-ticket-in { color: #FFFFFF; border-color: #FFE46B; font-size: 13px; }
 .pkm-shop-ticket-in { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 15px; letter-spacing: 0.06em; color: #111111; border-top: 2px dashed #111111; border-bottom: 2px dashed #111111; padding: 2px 4px; }
 
 /* PK shop (2026-10-12) : visuel d'un lot (booster 30 ans) ; barre des tickets sous le solde de PK (en-tête et boutique),
@@ -387,6 +390,7 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 @media (prefers-reduced-motion: reduce) { .pkm-pa-pulse { animation: none; } }
 /* Jeu d'évolution : évolutions en silhouette noire tant qu'elles ne sont pas débloquées ; forme actuelle mise en avant. */
 .pkm-evo-lock img { filter: brightness(0) drop-shadow(0 0 6px rgba(178, 107, 255, 0.55)); opacity: 0.92; }
+.pkm-evo-sil img { filter: brightness(0) drop-shadow(0 0 6px rgba(178, 107, 255, 0.55)); opacity: 0.92; }
 .pkm-evo-now { background: rgba(178, 107, 255, 0.16); box-shadow: inset 0 0 0 1px #B26BFF; }
 /* Évolution : le Pokémon brille en blanc, grandit, puis la nouvelle forme apparaît (3,2 s). */
 .pkm-evo-fx { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(178, 107, 255, 0.55), rgba(11, 17, 32, 0.96) 70%); }

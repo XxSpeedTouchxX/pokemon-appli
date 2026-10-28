@@ -12,7 +12,8 @@
   proto.st = function () {
     const d = homeBaseSt.call(this);
     if (typeof d.hq !== 'string') d.hq = '';
-    if (!HOME_BUDDIES.some(([n]) => n === d.buddy)) d.buddy = HOME_BUDDY;
+    // Compagnon : un des 156, ou une méga-évolution débloquée (pa.js, 2026-10-28).
+    if (!HOME_BUDDIES.some(([n]) => n === d.buddy) && !(HOME_MEGAS.some(([id]) => id === d.buddy) && Array.isArray(d.megas) && d.megas.indexOf(d.buddy) >= 0)) d.buddy = HOME_BUDDY;
     if (typeof d.hbq !== 'string') d.hbq = '';
     if (d.hbk !== 'sealed') d.hbk = 'cards';
     if (!(d.hbcp >= 0)) d.hbcp = 0;
@@ -243,7 +244,7 @@
     });
     return Object.assign(r, {
       // La carte s'ouvre directement sur « autour de moi », 20 km, partout en France.
-      main: () => this.push('radar', { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: pos, rkm: '5', rmsg: '' }), mainLabel: 'Ouvrir le Radar des boutiques', blips: n ? HOME_BLIPS.slice(0, Math.min(3, n)).map(b => ({ x: b[0], y: b[1], delay: b[2] })) : [],
+      main: () => { if (!this.radarLocked()) this.push('radar', { rlevel: 'around', rregion: '', rdept: '', rscan: '', rstore: '', rwhy: false, raround: pos, rkm: '5', rmsg: '' }); }, mainLabel: 'Ouvrir le Radar des boutiques', blips: n ? HOME_BLIPS.slice(0, Math.min(3, n)).map(b => ({ x: b[0], y: b[1], delay: b[2] })) : [],
       title: n ? n + many + ' à moins de ' + HOME_KM + ' km' : 'Aucune boutique à moins de ' + HOME_KM + ' km',
       sub: n ? 'Touche pour les voir sur la carte' : 'Touche le radar pour chercher plus loin (jusqu’à 30 km)',
       hasNear: near.length > 0, near: near,
@@ -305,7 +306,9 @@
     };
     if (!r.picking) return r;
     const q = fold(String(s.hbq || '').trim());
-    const list = HOME_BUDDIES.filter(([k, nom]) => !q || fold(nom).indexOf(q) >= 0 || String(k) === q.replace(/^0+/, ''));
+    // Méga-évolutions débloquées (jeu d'évolution, pa.js) à la suite des 156.
+    const mine = HOME_MEGAS.filter(([id]) => (s.megas || []).indexOf(id) >= 0).map(([id, base, nom]) => [id, nom]);
+    const list = HOME_BUDDIES.concat(mine).filter(([k, nom]) => !q || fold(nom).indexOf(q) >= 0 || String(k) === q.replace(/^0+/, ''));
     r.count = !list.length ? 'Aucun Pokémon ne correspond.' : list.length + ' Pokémon' + (q ? '' : ' disponibles');
     r.list = list.map(([k, nom]) => Object.assign({
       name: nom, src: homeIcon(k), on: k === n, aria: nom + ', n° ' + k + (k === n ? ' (ton compagnon)' : ''),

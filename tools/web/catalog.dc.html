@@ -1543,6 +1543,7 @@
 <section aria-label="{{ si.name }}" class="pkm-dark pkm-shop-item" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; color: #F3F6FC">
 <div style="display: flex; align-items: center; gap: 14px">
 <sc-if value="{{ si.isTicket }}" hint-placeholder-val="{{ true }}"><span class="pkm-shop-ticket" aria-hidden="true"><span class="pkm-shop-ticket-in">TICKET</span></span></sc-if>
+<sc-if value="{{ si.isDeluxe }}" hint-placeholder-val="{{ false }}"><span class="pkm-shop-ticket pkm-shop-deluxe" aria-hidden="true"><span class="pkm-shop-ticket-in">DELUXE</span></span></sc-if>
 <sc-if value="{{ si.hasImg }}" hint-placeholder-val="{{ false }}"><img src="{{ si.img }}" alt="{{ si.imgAlt }}" width="284" height="520" class="pkm-shop-img"></sc-if>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
 <span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">{{ si.name }}</span>
@@ -1593,7 +1594,7 @@
 <section aria-label="Booster PK" class="pkm-gm-boost pkm-dark" style="color: #F3F6FC; flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Booster PK</h2>
-<span style="font-size: 12.5px; color: #9AA8C3">1 offert toutes les 12 h</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ gm.b.every }}</span>
 </div>
 <div aria-live="polite" style="position: relative; height: 250px; display: flex; align-items: center; justify-content: center">
 <sc-if value="{{ gm.b.showPack }}" hint-placeholder-val="{{ true }}">
@@ -1632,7 +1633,7 @@
 <section aria-label="Pile ou face" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 50% 0%, rgba(168, 182, 255, 0.18), rgba(168, 182, 255, 0) 60%), #111A2C">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Pile ou face</h2>
-<span style="font-size: 12.5px; color: #9AA8C3">1 lancer toutes les 8 h</span>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ gm.c.every }}</span>
 </div>
 <p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">Gemme PK : tu gagnes 30 PK. Cristal éteint : rien cette fois. Une chance sur deux.</p>
 <div style="height: 190px; display: flex; align-items: center; justify-content: center; perspective: 900px">
@@ -1654,7 +1655,8 @@
 <span style="display: flex; align-items: center; gap: 8px"><img src="img/brand/pk.svg" alt="" width="22" height="22">Gagnant : +30 PK</span>
 <span style="display: flex; align-items: center; gap: 8px"><span class="pkm-gm-dead" style="width: 18px; height: 18px"></span>Perdant</span>
 </div>
-<button type="button" onClick="{{ gm.c.flip }}" aria-disabled="{{ gm.c.flipping }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer">{{ gm.c.button }}</button>
+<button type="button" onClick="{{ gm.c.flip }}" aria-disabled="{{ gm.c.flipping }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; opacity: {{ gm.c.op }}">{{ gm.c.button }}</button>
+<sc-if value="{{ gm.c.locked }}" hint-placeholder-val="{{ false }}"><p style="margin: -4px 0 0; text-align: center; font-size: 13px; line-height: 1.4; color: #C9D3EA">{{ gm.c.lockText }}</p></sc-if>
 </section>
 
 <section aria-label="Évolution" class="pkm-dark pkm-evo" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #3B2A6B; background: radial-gradient(120% 90% at 50% 0%, rgba(178, 107, 255, 0.24), rgba(178, 107, 255, 0) 62%), #111A2C; color: #F3F6FC; position: relative; overflow: hidden">
@@ -1679,6 +1681,20 @@
 <button type="button" onClick="{{ evo.evolve }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; opacity: {{ evo.btnOp }}">{{ evo.button }}</button>
 <span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ evo.note }}</span>
 </sc-if>
+<div role="group" aria-label="Méga-évolutions" style="display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid #3B2A6B">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px"><h3 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600">Méga-évolutions</h3><span style="font-size: 12.5px; color: #C7A6FF">{{ evo.megaCount }}</span></div>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA">{{ evo.megaIntro }}</p>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{ evo.megas }}" as="evm" hint-placeholder-count="3"><button type="button" onClick="{{ evm.tap }}" aria-label="{{ evm.aria }}" aria-pressed="{{ evm.on }}" style="min-height: 44px; padding: 8px 4px; border-radius: 16px; border: 1px solid {{ evm.bc }}; background: rgba(11, 17, 32, 0.6); color: #F3F6FC; font: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer"><span class="{{ evm.cls }}" style="display: flex"><img src="{{ evm.img }}" alt="" width="64" height="64" loading="lazy" style="display: block; width: 64px; height: 64px; image-rendering: pixelated"></span><span style="font-size: 11.5px; font-weight: 700; line-height: 1.2; text-align: center">{{ evm.name }}</span><span style="font-size: 11px; font-weight: 700; line-height: 1.2; text-align: center; color: {{ evm.sc }}">{{ evm.status }}</span></button></sc-for>
+</div>
+<sc-if value="{{ evo.megaAsk }}" hint-placeholder-val="{{ false }}">
+<p role="status" style="margin: 0; font-size: 14px; font-weight: 700">{{ evo.megaAskText }}</p>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
+<button type="button" onClick="{{ evo.megaNo }}" style="height: 48px; border: 1px solid #3B2A6B; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Annuler</button>
+<button type="button" onClick="{{ evo.megaYes }}" style="height: 48px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Méga-évoluer</button>
+</div>
+</sc-if>
+</div>
 <span style="font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ evo.rules }}</span>
 <sc-if value="{{ evo.fx }}" hint-placeholder-val="{{ false }}"><div class="pkm-evo-fx" key="{{ evo.fxKey }}" role="status" aria-live="polite"><span class="pkm-evo-glow" aria-hidden="true"></span><img class="pkm-evo-from" src="{{ evo.fxFrom }}" alt=""><img class="pkm-evo-to" src="{{ evo.fxTo }}" alt=""><span class="pkm-evo-text">{{ evo.fxText }}</span></div></sc-if>
 </section>

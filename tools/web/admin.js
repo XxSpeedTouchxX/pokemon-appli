@@ -48,9 +48,9 @@
   proto.tierOf = function (total) {
     const a = admOf(this.st()), T = this.tiers();
     if (!a.on || !(a.tier >= 0) || !T[a.tier]) return admBaseTier.call(this, total);
-    // Grade forcé (grades par PK et parrainages depuis le 2026-10-16) : à mi-chemin du suivant.
+    // Grade forcé (conditions du 2026-10-28) : à mi-chemin du suivant, avec ses avantages (proto.perks).
     const next = T[a.tier + 1] || null;
-    return { i: a.tier, cur: T[a.tier], next: next, pct: next ? 50 : 100, remaining: next ? Math.ceil((next.min - T[a.tier].min) / 2) : 0, refMissing: 0 };
+    return { i: a.tier, cur: T[a.tier], next: next, pct: next ? 50 : 100, remaining: next ? Math.ceil((next.min - T[a.tier].min) / 2) : 0, compMissing: 0, megaMissing: 0 };
   };
 
   proto.admTap = function () {

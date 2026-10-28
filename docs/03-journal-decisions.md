@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-10-28 — Avantages des grades appliqués, nouvelles conditions, méga-évolutions ; vague 9 mise de côté
+
+- **Décision du porteur :** la vague 9 des propositions v5 (« Chiffres justes ») est mise de côté, à reprendre plus tard.
+- **Demande du porteur :** conditions et avantages de chaque grade (liste fournie le 2026-10-28).
+- **Réponses du porteur :** avantages **appliqués** dans l'app (pas seulement affichés) ; seule la **carte de France** du Radar est réservée au Maître Pokémon (petit radar de l'accueil et Territoire ouverts à tous) ; méga-évolutions débloquées **avec des PA** ; dernier grade renommé **« Grand maître mondial Pokémon »**.
+- **Fait :**
+  - conditions : Recrue dès l'inscription ; Chasseur 1 500 PK ; Collectionneur 5 000 PK + 15 compagnons ; Dresseur Pokémon 10 000 PK + 30 compagnons ; Maître Pokémon 20 000 PK + 100 compagnons + 1 méga-évolution ; Grand maître mondial Pokémon 50 000 PK + 151 compagnons + 5 méga-évolutions ; PK gagnés au total, compagnons offerts compris ; parrainages retirés des conditions ;
+  - avantages appliqués sur l'appareil : scans par jour (5, 10, 20, 50, 100, 100), Booster PK (24, 24, 10, 8, 6, 4 h), jeu de la pièce (fermé à la Recrue, puis 24, 10, 8, 6, 4 h), ticket du tirage dès Collectionneur, booster du PK shop dès Dresseur, item « Deluxe » au Grand maître mondial (article et prix à définir, affiché « bientôt »), carte de France du Radar dès Maître ; fiches des grades avec la liste du porteur ;
+  - « Emblème collectionneur » écrit pour Dresseur, Maître et Grand maître dans la liste du porteur : compris comme l'emblème **de chaque grade** (à confirmer) ;
+  - méga-évolutions : les 15 de Kanto, dans le jeu d'évolution, 2 500 PA chacune (**prix à confirmer**), Pokémon de base exigé comme compagnon ; elles deviennent des compagnons ; sprites de Pokémon Showdown et de PokeAPI ;
+  - grade forcé pour les tests (`pkm-grade-force`) et dans l'Admin ; nouveau test `t-grades.mjs`.
+- **Point d'attention :** tout reste sur l'appareil, donc falsifiable (mode Admin, stockage) tant qu'il n'y a pas de serveur (propositions S74 à S78 de la v5) ; les lots réels restent à protéger avant toute ouverture.
+
+---
+
 ## 2026-10-27 — Orientation serveur dédié et PostgreSQL ; propositions d'améliorations v5 avec la cybersécurité
 
 - **Demande du porteur :**

@@ -13,8 +13,14 @@
     { id: 'ticket-booster', kind: 'ticket', name: 'Ticket · tirage au sort', prize: '1 booster Pokémon à gagner', price: SHOP_TICKET_PRICE, note: SHOP_DRAW },
     { id: 'lot-booster-30', kind: 'lot', name: 'Booster 30 ans Pokémon', prize: 'Le booster, à recevoir chez toi', price: 15000,
       img: 'img/shop-booster-30-anniversaire.webp', imgAlt: 'Booster du 30ᵉ anniversaire Pokémon',
-      note: 'Échange direct, sans tirage. L’envoi se fera quand les comptes Dropicards existeront : ton lot est gardé sur cet appareil d’ici là.' }
+      note: 'Échange direct, sans tirage. L’envoi se fera quand les comptes Dropicards existeront : ton lot est gardé sur cet appareil d’ici là.', perk: 'shopBooster' },
+    // Item « Deluxe » (2026-10-28, porteur) : réservé au Grand maître mondial Pokémon ; article et prix à définir.
+    { id: 'item-deluxe', kind: 'deluxe', name: 'Item Deluxe', prize: 'Un article d’exception, bientôt', price: 0, soon: true,
+      note: 'Article et prix annoncés ici prochainement.', perk: 'deluxe' }
   ];
+  // Grade demandé par chaque article (2026-10-28, porteur ; profile.js) : ticket dès Collectionneur, booster dès
+  // Dresseur Pokémon, item Deluxe au Grand maître mondial Pokémon.
+  SHOP_ITEMS[0].perk = 'ticket';
   const shopProto = Component.prototype;
   // Tickets possédés (tous articles « ticket »), pour la barre sous le solde de PK.
   const shopTickets = s => SHOP_ITEMS.filter(x => x.kind === 'ticket').reduce((n, x) => n + ((s.tickets || {})[x.id] || 0), 0);
@@ -22,7 +28,7 @@
 
   shopProto.shopBuy = function (id) {
     const s = this.st(), item = SHOP_ITEMS.find(x => x.id === id), pk = Number(s.pk) || 0;
-    if (!item || pk < item.price) return;
+    if (!item || item.soon || pk < item.price || !this.perks()[item.perk]) return;
     const tickets = Object.assign({}, s.tickets || {});
     tickets[id] = (tickets[id] || 0) + 1;
     const left = (pk - item.price).toLocaleString('fr-FR');
@@ -35,12 +41,14 @@
     return {
       pk: pk.toLocaleString('fr-FR'),
       items: SHOP_ITEMS.map(it => {
-        const n = tickets[it.id] || 0, can = pk >= it.price, ask = s.shopAsk === it.id, price = it.price.toLocaleString('fr-FR') + ' PK';
+        const n = tickets[it.id] || 0, open = !!this.perks()[it.perk], can = open && !it.soon && pk >= it.price, ask = can && s.shopAsk === it.id;
+        const price = it.soon ? 'Prix à venir' : it.price.toLocaleString('fr-FR') + ' PK', g = this.tiers().find(t => t[it.perk]);
         return {
           name: it.name, prize: it.prize, price: price, note: it.note,
-          isTicket: !it.img, hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '',
+          isTicket: it.kind === 'ticket', isDeluxe: it.kind === 'deluxe', hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '',
           owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n),
-          can: can, cannot: !can, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
+          can: can, cannot: !can,
+          missText: !open ? '🔒 Réservé au grade ' + (g ? g.name + ' (' + g.cond + ')' : '') : it.soon ? 'Bientôt disponible' : 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
           ask: ask, idle: !ask, buyLabel: (it.kind === 'ticket' ? 'Acheter un ticket · ' : 'Échanger · ') + price,
           confirmText: 'Échanger ' + price + ' contre ' + (it.kind === 'ticket' ? '1 ticket' : 'le lot « ' + it.name + ' »') + ' ?',
           open: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => this.shopBuy(it.id)

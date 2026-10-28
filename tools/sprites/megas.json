@@ -1,0 +1,122 @@
+{
+ "fetched": "2026-10-28",
+ "credit": "Sprites © The Pokémon Company ; animés de Pokémon Showdown et fixes de PokeAPI, via PokeAPI/sprites",
+ "sources": {
+  "animated": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/{n}.gif",
+  "still": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{n}.png"
+ },
+ "fields": [
+  "id",
+  "base",
+  "nom",
+  "gif_sha256_16",
+  "png_sha256_16"
+ ],
+ "megas": [
+  [
+   10033,
+   3,
+   "Méga-Florizarre",
+   "2aaf2733c88b53d2",
+   "b161f109d5b70357"
+  ],
+  [
+   10034,
+   6,
+   "Méga-Dracaufeu X",
+   "6d01d016c5243ca3",
+   "1aa77f0c5c15bfa6"
+  ],
+  [
+   10035,
+   6,
+   "Méga-Dracaufeu Y",
+   "fe323548dc762d20",
+   "9c817e415f9acc17"
+  ],
+  [
+   10036,
+   9,
+   "Méga-Tortank",
+   "814c6f8f8091454c",
+   "e90b6fb83f8fd43b"
+  ],
+  [
+   10090,
+   15,
+   "Méga-Dardargnan",
+   "2077ff7dbbb002bb",
+   "32bbf6fff88be2fc"
+  ],
+  [
+   10073,
+   18,
+   "Méga-Roucarnage",
+   "f7dc72b9998b5045",
+   "e29be7f84caa727c"
+  ],
+  [
+   10037,
+   65,
+   "Méga-Alakazam",
+   "661a0dcc910c6fbe",
+   "e76b98794b6d2cff"
+  ],
+  [
+   10071,
+   80,
+   "Méga-Flagadoss",
+   "e28c047f1b8ced19",
+   "a9cafe9115fe5566"
+  ],
+  [
+   10038,
+   94,
+   "Méga-Ectoplasma",
+   "05eb9072c1712232",
+   "332966c21f74d3a8"
+  ],
+  [
+   10039,
+   115,
+   "Méga-Kangourex",
+   "aec470bfe962fa0f",
+   "f51be981bbbcb348"
+  ],
+  [
+   10040,
+   127,
+   "Méga-Scarabrute",
+   "2be7ba25efbe37c3",
+   "99a3deee3ae47e52"
+  ],
+  [
+   10041,
+   130,
+   "Méga-Léviator",
+   "00dc2967acfab1bd",
+   "45b13d14e572ebe7"
+  ],
+  [
+   10042,
+   142,
+   "Méga-Ptéra",
+   "49dcd930cd34cc60",
+   "b525d65d4b78fbc1"
+  ],
+  [
+   10043,
+   150,
+   "Méga-Mewtwo X",
+   "ee18015091046f84",
+   "85765ac3befbfe42"
+  ],
+  [
+   10044,
+   150,
+   "Méga-Mewtwo Y",
+   "fbeae62670307acd",
+   "734740bf02eefdef"
+  ]
+ ]
+}
