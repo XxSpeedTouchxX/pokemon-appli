@@ -13,7 +13,7 @@
   - fiche de chaque Pokémon **avec la description officielle du Pokédex** (texte des jeux) ;
   - les **PA ne sont plus crédités à l'ouverture** : pastille sur le solde, bouton « Récupérer mes PA », animation d'après sa vidéo (récompense façon Brawl Stars) ;
   - didacticiel : on avance avec « Suivant », place du compagnon vide jusqu'à la fin, bulles qui ne cachent rien, Pokédex balayé en détail, jeux et PK shop retirés (une phrase annonce le PK shop) ;
-  - voix : 7 propositions envoyées, **choix attendu** (par défaut « Babillage façon Animal Crossing »).
+  - voix : 7 propositions envoyées ; **« Bulles douces » (voix 4) choisie par le porteur**.
 - **Fait :** `tools/sprites/fetch_dex.py` et `dex.json` (données PokeAPI figées : catégorie, types, taille, poids, talents, habitat, capture, statistiques, évolution, description) ; `tools/web/dex.js` (route de la famille du Pokémon touché, méga-évolutions au bout de la ligne, fiche, « Tous les Pokémon », déblocage) ; boutons hexagonaux et grille des méga retirés ; Pokémon centrés sur leur socle ; récupération des PA (`pa.js`, `paClaim`) ; `tools/web/tuto.js` v3 ; `tools/web/voice.js` (6 voix synthétisées et la voix du téléphone, `?voix=1` à `?voix=7` pour les essayer).
 - **Point d'attention :** les grades demandent toujours 15, 30, 100 puis 151 compagnons débloqués, désormais avec des PA (+10 à +30 par jour) : **compléter le Pokédex prendra beaucoup plus de temps qu'avec les PK** ; barème des PA ou conditions des grades à revoir avec le porteur. Textes et descriptions Pokémon : décision du porteur sur les contenus Pokémon.
 

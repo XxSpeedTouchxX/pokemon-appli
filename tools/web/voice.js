@@ -20,8 +20,8 @@
     { id: 'carillon', name: 'Carillon magique', desc: 'Des clochettes cristallines qui scintillent à chaque syllabe.' },
     { id: 'tts', name: 'Voix parlée du téléphone', desc: 'La voix française du téléphone lit vraiment la phrase ; le rendu dépend de l’appareil.', tts: true }
   ];
-  // Voix par défaut : le babillage, la plus « parlée » et la plus vivante des voix synthétisées (choix à confirmer).
-  const VOICE_DEFAULT = 'babil';
+  // Voix par défaut : « Bulles douces », choisie par le porteur parmi les 7 propositions.
+  const VOICE_DEFAULT = 'bulles'; // choisie par le porteur le 2026-10-28 (voix 4)
   // Personnalité de chaque starter : p hauteur, f formants (petite bouche = plus aigus), b brillance, v vivacité,
   // w forme d'onde du petit cri, t réglages de la voix parlée [hauteur, débit].
   const VOICE_MON = {

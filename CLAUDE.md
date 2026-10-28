@@ -163,7 +163,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - choix du compagnon remplacé par le **Pokédex** : tous les Pokémon (156 + 15 méga) débloqués avec des **PA** selon le stade (100, 500, 1 500 ; légendaires 2 000 ; Kyogre, Groudon, Rayquaza 3 000 ; méga 2 500 ; starters offerts) ; les PK ne servent plus qu'au PK shop ;
   - route d'évolution de la famille du Pokémon touché (méga-évolutions au bout de la ligne), fiche complète (types, taille, poids, talents, statistiques, description officielle), « Tous les Pokémon » ; boutons hexagonaux et grille des méga retirés ;
   - PA du jour **à récupérer** (pastille sur le solde, « Récupérer mes PA », animation façon Brawl Stars d'après la vidéo du porteur) ;
-  - didacticiel v3 : « Suivant » obligatoire, place du compagnon vide jusqu'à la fin, bulles placées sans rien cacher, Pokédex présenté en 4 étapes, jeux et PK shop retirés ; **voix à choisir** parmi 7 propositions (`tools/web/voice.js`).
+  - didacticiel v3 : « Suivant » obligatoire, place du compagnon vide jusqu'à la fin, bulles placées sans rien cacher, Pokédex présenté en 4 étapes, jeux et PK shop retirés ; voix **« Bulles douces »** choisie par le porteur parmi 7 propositions (`tools/web/voice.js`).
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
