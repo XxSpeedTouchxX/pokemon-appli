@@ -1,6 +1,6 @@
-// Didacticiel (2026-10-25 ; refait le 2026-10-28) : question à la première installation, choix du starter (qui devient
-// le compagnon et le Pokémon du Pokédex), visite en 9 étapes : chaque partie encadrée, le starter qui parle (bouche
-// ouverte et fermée en alternance, texte qui s'écrit), fin sur la place du compagnon où le starter saute.
+// Didacticiel v3 (2026-10-28) : question à la première installation, choix du starter ; visite en 12 étapes où l'on
+// avance en touchant « Suivant » (rien n'avance seul) ; chaque partie encadrée sans être cachée par la bulle ; la place
+// du compagnon reste vide jusqu'à la fin, où le starter y saute ; Pokédex présenté en détail (bulle en haut).
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -13,11 +13,9 @@ ok('question : « Veux-tu suivre le didacticiel ? »', (await ask.count()) === 1
 await ask.locator('button:has-text("Oui")').click(); await page.waitForTimeout(400);
 const pick = page.locator('section[aria-label="Choisis ton starter"]');
 ok('starters : ' + (await pick.locator('button').allInnerTexts()).join(', '), (await pick.locator('button').allInnerTexts()).join(',') === 'Bulbizarre,Salamèche,Carapuce,Pikachu');
-const t0 = Date.now();
 await pick.locator('button[aria-label="Choisir Salamèche"]').click();
 const bubble = page.locator('section.pkm-tuto-bubble');
 await bubble.waitFor({ timeout: 3000 });
-// Pendant l'écriture : texte partiel, bouche qui s'ouvre au moins une fois, mascotte Salamèche.
 await page.waitForTimeout(700);
 const talk = await page.evaluate(async () => {
   const seen = { open: 0, closed: 0, partial: false };
@@ -28,54 +26,56 @@ const talk = await page.evaluate(async () => {
     await new Promise(r => setTimeout(r, 40));
   }
   seen.src = document.querySelector('.pkm-tt-m1').getAttribute('src');
+  seen.slot = getComputedStyle(document.querySelector('button[aria-label^="Compagnon : "] img')).visibility;
   return seen;
 });
-ok('texte qui s’écrit, bouche qui s’ouvre et se ferme (' + JSON.stringify(talk) + ')', talk.partial && talk.open > 0 && talk.closed > 0 && /talk\/4-1\.png$/.test(talk.src));
-await page.screenshot({ path: shot('tuto-1-parle.png') });
-const steps = []; let last = '';
-while (Date.now() - t0 < 70000) {
+ok('texte qui s’écrit, bouche qui bouge (' + JSON.stringify(talk) + ')', talk.partial && talk.open > 0 && talk.closed > 0 && /talk\/4-1\.png$/.test(talk.src));
+ok('place du compagnon vide pendant la visite', talk.slot === 'hidden');
+// Rien n'avance seul.
+const t0 = (await page.locator('.pkm-tt-full').textContent()).trim();
+await page.waitForTimeout(7000);
+ok('pas d’avance automatique (7 s)', (await page.locator('.pkm-tt-full').textContent()).trim() === t0);
+await page.screenshot({ path: shot('tuto-01.png') });
+const steps = [];
+for (let k = 0; k < 14; k++) {
   if (!(await bubble.count())) break;
-  const t = (await page.locator('.pkm-tt-full').textContent().catch(() => '')).trim();
-  if (t && t !== last) {
-    last = t;
-    await page.waitForTimeout(900);
-    const fr = await page.evaluate(() => {
-      const f = document.querySelector('.pkm-tt-frame'), r = f && f.getBoundingClientRect();
-      return { w: r ? Math.round(r.width) : 0, h: r ? Math.round(r.height) : 0, nav: [...document.querySelectorAll('nav button[aria-current="page"]')].map(b => b.getAttribute('aria-label')).join('') };
-    });
-    steps.push({ t: t, fr: fr });
-    const n = steps.length;
-    if ([2, 3, 6, 7, 8, 9].indexOf(n) >= 0) await page.screenshot({ path: shot('tuto-' + (n + 1) + '-etape.png') });
-  }
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(1400);
+  const info = await page.evaluate(() => {
+    if (!document.querySelector('.pkm-tt-frame') || document.querySelector('.pkm-tt-out')) return null;
+    const f = document.querySelector('.pkm-tt-frame').getBoundingClientRect(), b = document.querySelector('.pkm-tuto-bubble').getBoundingClientRect();
+    const overlap = Math.max(0, Math.min(f.bottom, b.bottom) - Math.max(f.top, b.top));
+    return { t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
+      fresh: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-fresh'), nav: [...document.querySelectorAll('nav button[aria-current="page"]')].map(b => b.getAttribute('aria-label')).join('') };
+  });
+  if (!info) break;
+  steps.push(info);
+  await page.screenshot({ path: shot('tuto-' + String(k + 2).padStart(2, '0') + '.png') });
+  await page.locator('.pkm-tt-next').click(); await page.waitForTimeout(80);
+  await page.locator('.pkm-tt-next').click().catch(() => {}); // la 1re touche termine la phrase, la 2e avance
 }
-const dur = Date.now() - t0;
-ok(steps.length + ' étapes en ' + Math.round(dur / 1000) + ' s', steps.length === 9 && dur <= 70000);
-ok('chaque étape encadre ce dont elle parle', steps.every(x => x.fr.w > 30 && x.fr.h > 30));
-ok('valeur, classeur, scan, radar, séries, jeux, shop, Pokédex', /valeur/.test(steps[0].t) && /classeur/.test(steps[1].t) && /scanne/.test(steps[2].t) && /radar/.test(steps[3].t) && /séries/.test(steps[4].t) && /PK/.test(steps[5].t) && /shop/.test(steps[6].t) && /Pokédex/.test(steps[7].t));
-ok('onglets ouverts : séries, Jeux, PK shop', steps[4].fr.nav === 'Toutes les séries' && steps[5].fr.nav === 'Jeux' && steps[6].fr.nav === 'PK shop');
-ok('fin : « Maintenant que tu connais toute l’appli, tu pourras me trouver ici ! »', /Maintenant que tu connais toute l’appli, tu pourras me trouver ici/.test(steps[8].t));
-await page.waitForTimeout(1200);
+ok(steps.length + ' étapes', steps.length === 12);
+ok('cadre jamais sous la bulle (' + steps.map(x => x.overlap).join(',') + ')', steps.every(x => x.overlap <= 2 && x.fh > 20));
+ok('valeur, classeur, scan, radar, séries', /valeur/.test(steps[0].t) && /classeur/.test(steps[1].t) && /scanne/.test(steps[2].t) && /radar/.test(steps[3].t) && /séries/.test(steps[4].t));
+ok('Pokédex en 4 étapes, bulle en haut, « Nouveau »', [5, 6, 7, 8].every(i => steps[i].top && steps[i].fresh && steps[i].nav === 'Jeux') && /Pokédex/.test(steps[5].t) && /Tous les Pokémon/.test(steps[6].t) && /évolution/.test(steps[7].t) && /fiche/.test(steps[8].t));
+ok('PA à récupérer, puis PK shop annoncé sans le présenter', /récupérer tes PA/.test(steps[9].t) && /PK shop/.test(steps[10].t) && steps[10].nav === 'Accueil');
+ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[11].t));
+ok('plus de booster ni de pièce présentés', !steps.some(x => /booster|pièce|mini-jeux/i.test(x.t)));
+await page.waitForTimeout(1400);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { tuto: d.tuto, evo: d.evo, buddy: d.buddy }; });
-ok('Salamèche : starter, compagnon et Pokédex ; didacticiel vu ; calque retiré', st.tuto === 'done' && st.evo && st.evo.line === 'sala' && st.buddy === 4 && (await page.locator('.pkm-tuto-host').count()) === 0);
-await page.screenshot({ path: shot('tuto-11-fin.png') });
-// Revoir le didacticiel avec un Pokémon déjà évolué : pas de nouveau choix, évolution gardée ; « Suivant » et « Passer ».
+const slot = await page.evaluate(() => getComputedStyle(document.querySelector('button[aria-label^="Compagnon : "] img')).visibility);
+ok('Salamèche de retour à sa place ; didacticiel vu', st.tuto === 'done' && st.evo && st.evo.line === 'sala' && st.buddy === 4 && slot === 'visible' && (await page.locator('.pkm-tuto-host').count()) === 0);
+await page.screenshot({ path: shot('tuto-14-fin.png') });
+// Revoir : pas de nouveau choix ; « Passer ».
 await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); d.evo = { line: 'sala', stage: 1 }; d.buddy = 5; d.pkOwn = (d.pkOwn || []).concat([5]); localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
 await page.goto(E2E + '/?tuto=1&today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.locator('section[role="dialog"][aria-label="Didacticiel"] button:has-text("Oui")').click(); await page.waitForTimeout(900);
 ok('revoir : visite directe, sans choix du starter', (await page.locator('section[aria-label="Choisis ton starter"]').count()) === 0 && (await bubble.count()) === 1);
-await page.locator('.pkm-tt-next').click(); await page.waitForTimeout(100);
-const full = await page.evaluate(() => document.querySelector('.pkm-tt-typed').textContent === document.querySelector('.pkm-tt-full').textContent);
-ok('« Suivant » termine d’abord la phrase', full);
 await page.locator('.pkm-tt-skip').click(); await page.waitForTimeout(400);
 const st2 = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy, tuto: d.tuto }; });
 ok('« Passer » arrête ; évolution gardée (' + JSON.stringify(st2) + ')', st2.evo.stage === 1 && st2.buddy === 5 && st2.tuto === 'done' && (await bubble.count()) === 0);
-// « Non merci ».
 await page.goto(E2E + '/?tuto=1&today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(1000);
 await page.locator('section[role="dialog"][aria-label="Didacticiel"] button:has-text("Non merci")').click(); await page.waitForTimeout(300);
 ok('« Non merci » ferme la question', (await page.locator('section[role="dialog"][aria-label="Didacticiel"]').count()) === 0);
-await page.goto(E2E + '/?today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(800);
-ok('plus de question ensuite', (await page.locator('section[role="dialog"][aria-label="Didacticiel"]').count()) === 0);
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
 await browser.close();

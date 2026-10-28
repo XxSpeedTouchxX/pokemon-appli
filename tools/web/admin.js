@@ -118,7 +118,7 @@
     r.prices = !q ? [] : HOME_BUDDIES.filter(([k, nom]) => fold(nom).indexOf(q) >= 0 || String(k) === q).slice(0, 6).map(([k, nom]) => {
       const set = a.prices[k] !== undefined;
       return {
-        name: nom + ' (n° ' + k + ')', value: String(set ? a.prices[k] : pkPriceOf(k)), label: 'Prix de ' + nom + ' en PK', note: set ? 'fixé' : 'règle',
+        name: nom + ' (n° ' + k + ')', value: String(set ? a.prices[k] : pkPriceOf(k)), label: 'Prix de ' + nom + ' en PA', note: set ? 'fixé' : 'règle',
         onValue: e => { const v = String(e.target.value || '').replace(/\D/g, '').slice(0, 5), p = Object.assign({}, a.prices); if (v === '') delete p[k]; else p[k] = Number(v); self.setAdmin({ prices: p }); },
         reset: () => { const p = Object.assign({}, a.prices); delete p[k]; self.setAdmin({ prices: p }); }
       };

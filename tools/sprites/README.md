@@ -5,7 +5,7 @@ Sur l'accueil, un Pokémon animé accompagne la valeur de la collection. On le c
 - **Sprites :** Pokémon Noir et Blanc, dépôt GitHub PokeAPI/sprites.
   - Animé (GIF) sur l'accueil.
   - Image fixe (PNG) sur l'accueil si l'utilisateur limite les animations.
-  - Images © The Pokémon Company. Elles relèvent de la décision du porteur sur les visuels Pokémon (CLAUDE.md §4). Crédit dans le panneau de choix et dans Réglages › À propos. Elles ne servent pas d'identité visuelle à l'app.
+  - Images © The Pokémon Company. Elles relèvent de la décision du porteur sur les visuels Pokémon (CLAUDE.md §4). Crédit dans Réglages › À propos. Elles ne servent pas d'identité visuelle à l'app.
 - **Icônes du choix** (`web/img/pokemon/icon/`, `make_icons.py`) : faites à partir de l'image fixe.
   - Le Pokémon seul, à sa **taille d'origine** (rien n'est agrandi : un petit Pokémon reste petit à côté d'un grand ; demande du porteur), recadré au plus près et centré dans un carré transparent de 96 px.
   - Affichées sur 96 px, pixels nets (`image-rendering: pixelated`) sur les écrans à haute densité.
@@ -21,3 +21,7 @@ Sur l'accueil, un Pokémon animé accompagne la valeur de la collection. On le c
 ## Mascotte qui parle (2026-10-28)
 
 `make_talk.py` prépare la mascotte du didacticiel (`tools/web/tuto.js`) pour les quatre starters (Bulbizarre, Salamèche, Carapuce, Pikachu) : à partir de l'image fixe, deux images recadrées sur 52 × 54 px, **bouche fermée** (`web/img/pokemon/talk/{n}-0.png`, le sprite d'origine) et **bouche ouverte** (`{n}-1.png`, bouche redessinée au pixel près : intérieur sombre, langue). Le didacticiel les alterne pendant que le texte s'écrit, affichées à 2 × (pixels nets). Régénérer : `python3 tools/sprites/make_talk.py`.
+
+## Fiches du Pokédex (2026-10-28)
+
+`fetch_dex.py` lit une fois les fichiers CSV publics de PokeAPI (`PokeAPI/pokeapi`, `data/v2/csv`) et fige dans `dex.json` les fiches des 156 compagnons et des 15 méga-évolutions : nom, catégorie, types, taille, poids, statistiques de base, talents, habitat, taux de capture, légendaire ou fabuleux, forme précédente et façon d'évoluer, famille d'évolution, description du Pokédex en français (texte des jeux le plus récent ; choix du porteur). Le build les injecte (`DEX_DATA`) et vérifie qu'il y en a 171, une par compagnon et par méga-évolution. Régénérer : `python3 tools/sprites/fetch_dex.py`. Textes et noms © The Pokémon Company (décision du porteur sur les contenus Pokémon).

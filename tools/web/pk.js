@@ -1,5 +1,6 @@
   // ——— PK, la monnaie virtuelle de l'app (2026-10-08, règles validées par le porteur) ———
-  // Les PK se gagnent dans l'app et servent à débloquer des compagnons (et le thème de Kyogre, Groudon, Rayquaza).
+  // Les PK se gagnent dans l'app et servent au PK shop (tickets du tirage au sort, lots) ; depuis le 2026-10-28, les
+  // compagnons se débloquent avec des PA dans le Pokédex (dex.js).
   // Ils ne s'achètent pas, ne se convertissent pas en euros et restent sur l'appareil, avec la collection.
   // Gains : 100 PK de bienvenue (une fois), 300 PK une fois pour un partage de l'app sur un réseau social, et les jeux
   // (games.js). Les +10 PK par jour d'ouverture et par nouvel article de la collection sont retirés (2026-10-12, porteur).
@@ -7,21 +8,22 @@
   // déjà choisi avant son verrouillage reste acquis.
   // Compteur en haut à droite (accueil, Collection, Marché, Territoire) : il ouvre « Mes PK » (solde, gains, déblocages).
   // Ce module partage la portée des autres : ses noms commencent par PK_ ou pk.
-  // Prix des compagnons (v2, 2026-10-08) : Bulbizarre, Salamèche, Carapuce et Pikachu offerts dès le premier lancement ;
-  // les autres selon leur stade d'évolution dans Pokémon Rouge et Bleu : de base 50 PK, première évolution 100 PK,
-  // deuxième évolution 200 PK ; légendaires et fabuleux 400 PK ; Kyogre, Groudon et Rayquaza, thème compris, 500 PK.
+  // Prix des compagnons : en PA depuis le 2026-10-28 (choix du porteur, « selon le stade »), dans le Pokédex (dex.js).
+  // Bulbizarre, Salamèche, Carapuce et Pikachu restent offerts ; forme de base 100 PA, 1re évolution 500 PA,
+  // 2e évolution 1 500 PA (comme les starters avant), légendaires et fabuleux 2 000 PA, Kyogre, Groudon et Rayquaza,
+  // thème compris, 3 000 PA ; méga-évolutions 2 500 PA (pa.js). Stade lu dans les fiches du Pokédex (DEX_DATA).
+  // Avant (v2, 2026-10-08) : 50, 100 et 200 PK selon le stade, 400 PK pour les légendaires, 500 PK avec un thème.
   const PK_FREE = [1, 4, 7, 25];
-  const PK_STAGE1 = [2, 5, 8, 11, 14, 17, 20, 22, 24, 26, 28, 30, 33, 36, 38, 40, 42, 44, 47, 49, 51, 53, 55, 57, 59, 61, 64, 67, 70, 73,
-    75, 78, 80, 82, 85, 87, 89, 91, 93, 97, 99, 101, 103, 105, 110, 112, 117, 119, 121, 130, 134, 135, 136, 139, 141, 148];
-  const PK_STAGE2 = [3, 6, 9, 12, 15, 18, 31, 34, 45, 62, 65, 68, 71, 76, 94, 149];
-  const PK_LEGEND = [144, 145, 146, 150, 151, 380, 381];
-  // Prix fixés par le porteur (2026-10-08), prioritaires sur la règle des stades : Ptéra 100 PK, Ronflex 200 PK
-  // (Kabutops, première évolution, est déjà à 100 PK).
-  const PK_SET = { 142: 100, 143: 200 };
-  const pkPriceOf = n => PK_SET[n] ? PK_SET[n] : PK_FREE.indexOf(n) >= 0 ? 0 : HOME_THEMES[n] ? 500 : PK_LEGEND.indexOf(n) >= 0 ? 400
-    : PK_STAGE2.indexOf(n) >= 0 ? 200 : PK_STAGE1.indexOf(n) >= 0 ? 100 : 50;
+  const pkStage = n => { let k = 0, e = DEX_DATA.find(x => x.n === n); while (e && e.from && k < 3) { k++; e = DEX_DATA.find(x => x.n === e.from); } return k; };
+  const pkPriceOf = n => {
+    const e = DEX_DATA.find(x => x.n === n);
+    if (PK_FREE.indexOf(n) >= 0) return 0;
+    if (HOME_THEMES[n]) return 3000;
+    if (e && e.leg) return 2000;
+    return [100, 500, 1500][Math.min(pkStage(n), 2)];
+  };
   const PK_SHOP = {};
-  // Prix en vigueur : règle des stades, puis prix fixés depuis le mode Admin (admin.js) ; PK désactivés : tout est offert.
+  // Prix en vigueur (en PA) : règle des stades, puis prix fixés depuis le mode Admin (admin.js) ; PK désactivés : tout est offert.
   const pkApplyPrices = (over, off) => {
     Object.keys(PK_SHOP).forEach(k => { delete PK_SHOP[k]; });
     if (off) return;
@@ -110,58 +112,14 @@
       confetti: Array.from({ length: 28 }, (_, i) => ({ cls: 'pkm-unl-conf pkm-unl-c' + (i % 5),
         style: 'left: ' + ((i * 37) % 100) + '%; --dx: ' + (((i * 53) % 120) - 60) + 'px; --r: ' + (((i * 97) % 720) - 360) + 'deg; animation-delay: ' + ((i % 7) * 0.05).toFixed(2) + 's' })) };
   };
-  // Débloquer un compagnon : confirmation dans le panneau de choix, puis il devient ton compagnon.
-  proto.pkBuy = function (k) {
-    const s = this.st(), price = PK_SHOP[k], name = HOME_NAMES[k];
-    if (!price || pkOwns(s, k) || s.pk < price) return;
-    const left = s.pk - price;
-    // Animation de déblocage (2026-10-12, demande du porteur) : cadenas qui tremble, s'ouvre et éclate, puis le
-    // Pokémon jaillit dans une pluie de confettis (pkUnlock, 3 s ; games.css). Un appui la ferme plus tôt.
-    this.setState({ pk: left, pkOwn: s.pkOwn.concat([k]), pkAsk: null, buddy: k, buddyPick: false, pkUnlock: k,
-      toast: name + ' débloqué' + (HOME_THEMES[k] ? ' · ' + pkTheme(k) : '') + ' · il te reste ' + pkNum(left) + ' PK' });
-    this.flash();
+  // Déblocage d'un compagnon : depuis le 2026-10-28, dans le Pokédex et avec des PA (dex.js, dexUnlock), avec
+  // l'animation de déblocage (pkUnlock, 3 s ; games.css) quand il n'y a pas d'évolution à montrer.
+  proto.pkUnlockShow = function (k) {
     clearTimeout(pkUnlockTimer);
+    this.setState({ pkUnlock: k });
     pkUnlockTimer = setTimeout(() => { if (this.st().pkUnlock === k) this.setState({ pkUnlock: null }); }, 3000);
   };
-  const pkAskView = function (s) {
-    const k = s.pkAsk, price = PK_SHOP[k];
-    if (!price || pkOwns(s, k)) return { on: false };
-    const name = HOME_NAMES[k], miss = price - s.pk, can = miss <= 0;
-    return {
-      on: true, name: name, src: 'img/pokemon/icon/' + k + '.png', title: 'Débloquer ' + name,
-      text: (HOME_THEMES[k] ? name + ' devient ton compagnon et change le fond de l’app (' + pkTheme(k) + ').' : name + ' devient ton compagnon.'),
-      price: pkNum(price), balance: 'Ton solde : ' + pkNum(s.pk) + ' PK',
-      can: can, cannot: !can, buyLabel: 'Débloquer pour ' + pkNum(price) + ' PK',
-      missText: 'Il te manque ' + pkNum(miss) + ' PK',
-      earn: 'Gagne des PK dans l’onglet Jeux : booster PK et pile ou face.',
-      buy: () => this.pkBuy(k), cancel: () => this.setState({ pkAsk: null })
-    };
-  };
-
   HOME_NO_BUDDY.ask = { on: false };
-  // Choix du compagnon : les compagnons payants montrent leur prix ; un appui ouvre la confirmation.
-  const pkBaseBuddy = proto.homeBuddy;
-  proto.homeBuddy = function (s) {
-    const r = pkBaseBuddy.call(this, s);
-    r.open = () => this.setState({ buddyPick: true, hbq: '', pkAsk: null });
-    r.close = () => this.setState({ buddyPick: false, pkAsk: null });
-    r.balance = pkNum(s.pk);
-    if (!String(s.hbq || '').trim() && r.list.length) {
-      const free = HOME_BUDDIES.filter(([n]) => pkOwns(s, n)).length;
-      r.count = r.list.length + ' Pokémon · ' + free + ' débloqués, les autres avec tes PK';
-    }
-    r.ask = r.picking ? pkAskView.call(this, s) : { on: false };
-    r.list = r.list.map(it => {
-      const k = Number((/(\d+)\.png$/.exec(it.src) || [])[1]), price = PK_SHOP[k];
-      if (!price) return Object.assign(it, { locked: false, owned: false });
-      if (pkOwns(s, k)) return Object.assign(it, { locked: false, owned: true, aria: it.aria + ', débloqué' });
-      return Object.assign(it, {
-        locked: true, owned: false, price: pkNum(price), aria: it.name + ', à débloquer pour ' + pkNum(price) + ' PK',
-        pick: () => this.setState({ pkAsk: k })
-      });
-    });
-    return r;
-  };
 
   // Compteur de l'en-tête et panneau « Mes PK ».
   proto.pkView = function (s) {
@@ -170,12 +128,12 @@
       return {
         name: name, src: 'img/pokemon/icon/' + k + '.png', theme: HOME_THEMES[k] ? 'Compagnon et ' + pkTheme(k) : 'Compagnon',
         owned: own, locked: !own, price: pkNum(price),
-        action: own ? (cur ? 'Ton compagnon' : 'Choisir') : pkNum(price) + ' PK',
-        aria: own ? (cur ? name + ' est ton compagnon' : 'Choisir ' + name + ' comme compagnon') : 'Débloquer ' + name + ' pour ' + pkNum(price) + ' PK',
+        action: own ? (cur ? 'Ton compagnon' : 'Choisir') : pkNum(price) + ' PA',
+        aria: own ? (cur ? name + ' est ton compagnon' : 'Choisir ' + name + ' comme compagnon') : 'Voir ' + name + ' dans le Pokédex : ' + pkNum(price) + ' PA',
         go: () => {
           if (cur) return;
           if (own) { this.setState({ buddy: k, pkSheet: false, toast: name + ' t’accompagne' + (HOME_THEMES[k] ? ' · ' + pkTheme(k) : '') }); this.flash(); return; }
-          this.setState({ pkSheet: false, buddyPick: true, hbq: '', pkAsk: k });
+          this.setState({ pkSheet: false }); this.dexOpen(k);
         }
       };
     });
@@ -190,8 +148,8 @@
         ['+' + PK_SHARE, 'une fois, en partageant l’app sur un réseau social']
       ].map(([n, t]) => ({ n: n, text: t })), // du plus petit gain au plus grand (demande du porteur)
       shop: shop,
-      locked: (() => { const n = HOME_BUDDIES.filter(([k]) => !pkOwns(s, k)).length; return n + (n > 1 ? ' compagnons à débloquer, de 50 à 500 PK' : ' compagnon à débloquer'); })(),
-      all: () => this.setState({ pkSheet: false, buddyPick: true, hbq: '', pkAsk: null }),
+      locked: (() => { const n = HOME_BUDDIES.filter(([k]) => !pkOwns(s, k)).length; return n + (n > 1 ? ' Pokémon à débloquer avec tes PA dans le Pokédex' : ' Pokémon à débloquer avec tes PA'); })(),
+      all: () => { this.setState({ pkSheet: false }); this.dexOpen(s.buddy, true); },
       shareDone: !!s.pkShared, shareOpen: !s.pkShared,
       shareText: s.pkShared ? 'Merci pour le partage ! Tes +' + PK_SHARE + ' PK sont reçus.' : '+' + PK_SHARE + ' PK la première fois que tu partages Dropicards sur un réseau social.',
       nets: PK_NETS.map(([name, href]) => ({ name: name, href: href, label: 'Partager Dropicards sur ' + name, go: () => this.pkShare(name) })),

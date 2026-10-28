@@ -296,25 +296,17 @@
   const homeSprite = (n, still) => 'img/pokemon/' + n + (still ? '.png' : '.gif');
   const homeIcon = n => 'img/pokemon/icon/' + n + '.png';
   const HOME_CREDIT = 'Sprites de Pokémon Noir et Blanc © The Pokémon Company, via PokeAPI. Dropicards est une application indépendante, non affiliée.';
+  // Le panneau « Choisis ton compagnon » est retiré le 2026-10-28 (demande du porteur) : un appui sur le compagnon
+  // ouvre le Pokédex (dex.js), où chaque Pokémon se débloque avec des PA et se choisit comme compagnon.
+  // Pendant le didacticiel, la place reste vide : le starter qui présente l'app y revient à la fin (tuto.js).
   proto.homeBuddy = function (s) {
     const n = s.buddy, name = HOME_NAMES[n], still = homeStill();
-    const r = {
+    return {
       // Image fixe : cadre de 96 px presque vide, agrandie pour avoir la taille du sprite animé.
-      src: homeSprite(n, still), scale: still ? 'scale(1.5)' : 'none', name: name, aria: 'Compagnon : ' + name + '. Changer de compagnon',
-      open: () => this.setState({ buddyPick: true, hbq: '' }), close: () => this.setState({ buddyPick: false }),
-      picking: !!s.buddyPick, q: s.hbq, onQ: e => this.setState({ hbq: e.target.value }), list: [], count: '', credit: HOME_CREDIT
+      src: homeSprite(n, still), scale: still ? 'scale(1.5)' : 'none', name: name, aria: 'Compagnon : ' + name + '. Ouvrir le Pokédex',
+      away: s.tutoStep >= 0 && !s.tutoBack, cls: 'pkm-buddy' + (s.tutoStep >= 0 && !s.tutoBack ? ' pkm-buddy-away' : ''),
+      open: () => this.dexOpen(n), close: () => {}, picking: false, list: [], count: '', credit: HOME_CREDIT
     };
-    if (!r.picking) return r;
-    const q = fold(String(s.hbq || '').trim());
-    // Méga-évolutions débloquées (jeu d'évolution, pa.js) à la suite des 156.
-    const mine = HOME_MEGAS.filter(([id]) => (s.megas || []).indexOf(id) >= 0).map(([id, base, nom]) => [id, nom]);
-    const list = HOME_BUDDIES.concat(mine).filter(([k, nom]) => !q || fold(nom).indexOf(q) >= 0 || String(k) === q.replace(/^0+/, ''));
-    r.count = !list.length ? 'Aucun Pokémon ne correspond.' : list.length + ' Pokémon' + (q ? '' : ' disponibles');
-    r.list = list.map(([k, nom]) => Object.assign({
-      name: nom, src: homeIcon(k), on: k === n, aria: nom + ', n° ' + k + (k === n ? ' (ton compagnon)' : ''),
-      pick: () => { this.setState({ buddy: k, buddyPick: false, toast: nom + ' t’accompagne' + (HOME_THEMES[k] ? ' · thème ' + HOME_THEMES[k].name : '') }); this.flash(); }
-    }, this.chip(k === n)));
-    return r;
   };
   const HOME_NO_BUDDY = { picking: false, list: [] };
   // Thème du compagnon (2026-10-07) : Kyogre (océan), Groudon (volcan) et Rayquaza (ouragan) changent le fond de
@@ -333,7 +325,7 @@
   proto.renderVals = function () {
     const r = homeBaseRender.call(this), s = this.st();
     homeApplyTheme(s.buddy);
-    r.hb = r.ui.isHome || s.buddyPick ? this.homeBuddy(s) : HOME_NO_BUDDY;
+    r.hb = r.ui.isHome ? this.homeBuddy(s) : HOME_NO_BUDDY;
     // Écran « Tout afficher » du classeur (accueil seulement).
     r.hf = r.ui.isHome && r.home && r.home.hk && r.home.hk.full && r.home.hk.full.open ? r.home.hk.full : HOME_NO_FULL;
     return r;

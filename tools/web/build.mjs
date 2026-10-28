@@ -233,7 +233,10 @@ patch('left: -40px; top: -40px; width: 438px; height: 372px;', 'left: -40px; top
 afterSection('Visuel', FRAG['item-note']);
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG.zoom + '\n<sc-if value="{{ ui.hasToast }}"');
 // Accueil : choix du compagnon (tools/web/home.js), au premier plan comme le zoom.
-patch('<sc-if value="{{ ui.hasToast }}"', FRAG['buddy-picker'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Choix du compagnon (fragment buddy-picker) retiré le 2026-10-28 : le Pokédex le remplace (dex.js, fragment dex-list).
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['dex-list'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// PA du jour à récupérer (2026-10-28) : fenêtre « Tes PA du jour » (pa.js, paClaim).
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pa-claim'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Compte (profile.js, 2026-10-09) : palier avant « Membre depuis », en plus petit ; « Type de collectionneur » replié,
 // déplié au toucher (fragment profile-cat) ; « Ce qui fixe ton profil » et « Ce que ça change pour toi » avec lui.
 patch(`<span style="font-size: 13px; color: #9AA8C3">{{ pf.since }}</span>
@@ -684,7 +687,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js'), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -698,12 +701,16 @@ for (const [n] of buddies) for (const f of [n + '.gif', n + '.png', 'icon/' + n 
 // Méga-évolutions (2026-10-28, tools/sprites/megas.json) : id PokeAPI, n° du Pokémon de base, nom ; mêmes images.
 const megas = JSON.parse(readFileSync(ROOT + 'tools/sprites/megas.json', 'utf8')).megas.map(([id, base, nom]) => [id, base, nom]);
 if (megas.length !== 15) throw new Error('Méga-évolutions : ' + megas.length + ' au lieu de 15');
+const dexData = JSON.parse(readFileSync(ROOT + 'tools/sprites/dex.json', 'utf8')).dex;
+if (dexData.length !== 171 || buddies.some(([n]) => !dexData.some(e => e.n === n)) || megas.some(([id]) => !dexData.some(e => e.n === id))) throw new Error('Pokédex : fiches incomplètes (' + dexData.length + ')');
 for (const [id, base] of megas) {
   if (!buddies.some(([n]) => n === base)) throw new Error('Méga-évolution sans compagnon de base : ' + id);
   for (const f of [id + '.gif', id + '.png', 'icon/' + id + '.png']) if (!existsSync(ROOT + 'web/img/pokemon/' + f)) throw new Error('Méga-évolution sans image : web/img/pokemon/' + f);
 }
 const buddiesJs = '  const HOME_BUDDIES = ' + JSON.stringify(buddies) + ';\n'
   + '  const HOME_MEGAS = ' + JSON.stringify(megas) + ';\n'
+  // Fiches du Pokédex (2026-10-28, tools/sprites/dex.json) : 156 compagnons et 15 méga-évolutions.
+  + '  const DEX_DATA = ' + JSON.stringify(dexData) + ';\n'
   // Thèmes des compagnons (theme.mjs) : n° du Pokémon → classe, nom et couleur de la barre du navigateur.
   + '  const HOME_THEMES = ' + JSON.stringify(Object.fromEntries(BUDDY_THEMES.map(t => [t.buddy, { key: t.key, name: t.name, bar: t.bar }]))) + ';\n';
 for (const t of BUDDY_THEMES) if (!buddies.some(([n]) => n === t.buddy)) throw new Error('Thème sans compagnon : ' + t.key);
@@ -721,7 +728,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + tutoJs + ficheJs + navJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + dexJs + voiceJs + tutoJs + ficheJs + navJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -741,7 +748,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${tutoJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${dexJs}${voiceJs}${tutoJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);

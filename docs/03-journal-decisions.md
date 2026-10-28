@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-10-28 (suite) — Pokédex v2 (tous les Pokémon débloqués avec des PA), PA du jour à récupérer, didacticiel v3, voix au choix
+
+- **Décisions du porteur :**
+  - le choix du compagnon est **remplacé par le Pokédex** : tous les Pokémon (156 compagnons et 15 méga-évolutions) se débloquent avec des **PA**, prix **selon le stade** (forme de base 100 PA, 1re évolution 500, 2e évolution 1 500, légendaires et fabuleux 2 000, Kyogre/Groudon/Rayquaza 3 000 avec leur thème, méga-évolutions 2 500 ; les 4 starters offerts) ; les PK ne servent plus qu'au PK shop ;
+  - fiche de chaque Pokémon **avec la description officielle du Pokédex** (texte des jeux) ;
+  - les **PA ne sont plus crédités à l'ouverture** : pastille sur le solde, bouton « Récupérer mes PA », animation d'après sa vidéo (récompense façon Brawl Stars) ;
+  - didacticiel : on avance avec « Suivant », place du compagnon vide jusqu'à la fin, bulles qui ne cachent rien, Pokédex balayé en détail, jeux et PK shop retirés (une phrase annonce le PK shop) ;
+  - voix : 7 propositions envoyées, **choix attendu** (par défaut « Babillage façon Animal Crossing »).
+- **Fait :** `tools/sprites/fetch_dex.py` et `dex.json` (données PokeAPI figées : catégorie, types, taille, poids, talents, habitat, capture, statistiques, évolution, description) ; `tools/web/dex.js` (route de la famille du Pokémon touché, méga-évolutions au bout de la ligne, fiche, « Tous les Pokémon », déblocage) ; boutons hexagonaux et grille des méga retirés ; Pokémon centrés sur leur socle ; récupération des PA (`pa.js`, `paClaim`) ; `tools/web/tuto.js` v3 ; `tools/web/voice.js` (6 voix synthétisées et la voix du téléphone, `?voix=1` à `?voix=7` pour les essayer).
+- **Point d'attention :** les grades demandent toujours 15, 30, 100 puis 151 compagnons débloqués, désormais avec des PA (+10 à +30 par jour) : **compléter le Pokédex prendra beaucoup plus de temps qu'avec les PK** ; barème des PA ou conditions des grades à revoir avec le porteur. Textes et descriptions Pokémon : décision du porteur sur les contenus Pokémon.
+
 ## 2026-10-28 (suite) — Didacticiel animé avec la mascotte qui parle, Évolution devenue Pokédex (route façon Digimon), règles des PK et des jeux en images
 
 - **Demandes du porteur :** didacticiel animé, chaque élément encadré, la mascotte (le starter) qui parle avec la bouche qui bouge et un petit bruit pendant que le texte défile, fin « Maintenant que tu connais toute l'appli, tu pourras me trouver ici » sur la place du compagnon ; « Évolution » devient « Pokédex » avec un visuel de Pokédex (sa photo) portant le logo PK ; design complet de l'évolution d'après sa vidéo (route d'évolution de Digimon World Dusk), adapté à Pokémon ; règles des PK et des jeux plus esthétiques et visuelles.
