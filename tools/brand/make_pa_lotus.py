@@ -20,21 +20,25 @@ from make_pa_soul import halo  # noqa: E402
 
 OUT = Path(__file__).with_name("pa")
 
-# Deux formes (2026-10-28, porteur : « vraiment une goutte » et « vraiment une flamme »). Unités : corps centré en
-# 0, 0, base en y = 18. Courbes continues, trait régulier.
-# Goutte : symétrique, pointe fine en haut au centre, fond bien rond.
-SOUL2 = [("M", [(0, -33)]),
-         ("C", [(2.5, -24), (15, -11), (15, 3)]), ("C", [(15, 11.5), (8.5, 18), (0, 18)]),
-         ("C", [(-8.5, 18), (-15, 11.5), (-15, 3)]), ("C", [(-15, -11), (-2.5, -24), (0, -33)])]
-# Flamme : grande langue centrale qui s'incline à droite, langue gauche qui s'écarte vers l'extérieur, petite langue
-# droite ; base ronde.
+# Deux formes, d'après les modèles envoyés par le porteur (2026-10-28). Unités : corps centré en 0, 0, base en
+# y = 18. Courbes continues, trait régulier.
+# Goutte (modèle : goutte d'eau brillante) : pointe fine qui s'incline à peine à gauche, fond bien rond.
+SOUL2 = [("M", [(-2.5, -33)]),
+         ("C", [(0, -27), (15, -13), (15, 3)]), ("C", [(15, 11.5), (8.5, 18), (0, 18)]),
+         ("C", [(-8.5, 18), (-15, 11.5), (-15, 3)]), ("C", [(-15, -9), (-5, -18), (-3.6, -26)]),
+         ("C", [(-3.1, -28.5), (-2.8, -31), (-2.5, -33)])]
+# Flamme (modèle : pictogramme de feu plein) : grande pointe centrale, langue à gauche, petite langue à droite,
+# base ronde ; une petite flamme intérieure plus sombre au fond (FLAME_IN).
 SOUL3 = [("M", [(0, 18)]),
-         ("C", [(-10.5, 18), (-16.5, 10.5), (-16, 1)]), ("C", [(-15.6, -6.5), (-12.5, -11), (-12.8, -17.5)]),
-         ("C", [(-13, -20.5), (-14.2, -23), (-16, -25.5)]), ("C", [(-9.5, -23.5), (-5.8, -18.5), (-5, -11.5)]),
-         ("C", [(-5.6, -19), (-3.2, -27.5), (3, -35)]), ("C", [(1.6, -29), (4.2, -24.5), (7, -21)]),
-         ("C", [(8.6, -23), (9.6, -25.5), (9.4, -28.5)]), ("C", [(14.5, -22), (16.5, -11), (16, 1)]),
-         ("C", [(16, 10.5), (10.5, 18), (0, 18)])]
-SHAPE = {"goutte": SOUL2, "flamme": SOUL3}
+         ("C", [(-10.5, 18), (-16.5, 10.5), (-16.5, 2)]), ("C", [(-16.5, -6), (-13, -12), (-9.5, -20)]),
+         ("C", [(-8.5, -15), (-6.5, -12.5), (-4, -11)]), ("C", [(-4.5, -20), (-1, -28), (3, -34.5)]),
+         ("C", [(2.6, -28), (5.2, -23), (8.5, -19.5)]), ("C", [(10, -21.5), (10.5, -24), (10, -26.5)]),
+         ("C", [(14.5, -20), (16.5, -10), (16.5, 2)]), ("C", [(16.5, 10.5), (10.5, 18), (0, 18)])]
+FLAME_IN = [("M", [(0, 15)]),
+            ("C", [(-6.5, 15), (-10, 10.5), (-10, 5)]), ("C", [(-10, -1), (-6.5, -5), (-3.5, -10)]),
+            ("C", [(-2.8, -6.5), (-1.2, -4.5), (0.8, -3.8)]), ("C", [(0.8, -7.5), (2.2, -11), (4.5, -13.5)]),
+            ("C", [(8.5, -8), (10, -1), (10, 5)]), ("C", [(10, 10.5), (6.5, 15), (0, 15)])]
+SHAPE = {"goutte": SOUL2, "flamme": SOUL3, "dedans": FLAME_IN}
 
 
 def soul(cx, cy, k, fill, stroke="#111111", sw=2.6, shape="goutte"):
@@ -70,22 +74,31 @@ def orb(x, y, r, core, glow):
             f'<circle cx="{x - r * 0.35}" cy="{y - r * 0.35}" r="{r * 0.35}" fill="#FFFFFF"/>')
 
 
-def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape="goutte"):
+def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape="goutte", drop=None):
     defs = ('<filter id="gl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4"/></filter>'
             '<filter id="lg" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1"/></filter>'
             + rad("au", [(0, glow, 0.7), (0.6, glow, 0.22), (1, glow, 0)]) + grad("fl", stops)
-            + rad("co", [(0, core_dark, 1), (0.7, core_dark, 0.85), (1, core_dark, 0)]))
+            + rad("co", [(0, core_dark, 1), (0.7, core_dark, 0.85), (1, core_dark, 0)])
+            + (grad("dg", drop, 0.5, 0, 0.5, 1) if drop else ""))
     body = '<circle cx="32" cy="34" r="30" fill="url(#au)"/>'
     body += halo(32, 47, 26, 7.5, -14, ring, "back")
     # Aura fantôme floue, puis la flamme d'âme.
-    body += soul(32, 37, 1.02, glow, glow, 3, shape).replace('/>', ' filter="url(#gl)" opacity="0.85"/>')
-    body += soul(32, 37, 0.98, "url(#fl)", shape=shape)
-    if shape == "flamme":
-        body += soul(32, 41, 0.62, lotus_color, "none", 0, shape).replace('/>', ' opacity="0.32"/>')
-    # Cœur sombre au fond de la flamme, et le lotus qui y brille (trait lumineux + lueur).
-    body += '<ellipse cx="32" cy="39.5" rx="11.5" ry="11" fill="url(#co)"/>'
-    body += f'<g filter="url(#lg)" opacity="0.95">{lotus(32, 39, 0.8, lotus_color, 2.4)}</g>'
-    body += lotus(32, 39, 0.8, "#FFFFFF", 1.25)
+    body += soul(32, 37, 1.02, glow, glow, 3, shape).replace('/>', ' filter="url(#gl)" opacity="' + ("0.6" if shape == "goutte" else "0.85") + '"/>')
+    if shape == "goutte":
+        # Goutte brillante : dégradé vertical sombre → lumineux, cœur sombre pour le lotus, reflet et éclat.
+        body += soul(32, 37, 0.98, "url(#dg)", shape=shape)
+        body += '<ellipse cx="32" cy="40.5" rx="10.5" ry="10" fill="url(#co)"/>'
+        body += '<path d="M21.7 37C21.2 29.2 25.2 22.3 27.6 17.4" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" opacity="0.85"/>'
+        body += '<circle cx="22.6" cy="41" r="1.1" fill="#FFFFFF" opacity="0.85"/>'
+        body += '<ellipse cx="38.5" cy="48" rx="5" ry="3.6" fill="#FFFFFF" filter="url(#lg)" opacity="0.55" transform="rotate(-25 38.5 48)"/>'
+        lx, ly = 32, 40
+    else:
+        body += soul(32, 37, 0.98, "url(#fl)", shape=shape)
+        body += soul(32, 37, 0.98, core_dark, "#111111", 1.6, "dedans").replace('/>', ' opacity="0.92"/>')
+        lx, ly = 32, 41.5
+    # Le lotus qui brille au fond (trait lumineux + lueur).
+    body += f'<g filter="url(#lg)" opacity="0.95">{lotus(lx, ly, 0.78, lotus_color, 2.4)}</g>'
+    body += lotus(lx, ly, 0.78, "#FFFFFF", 1.25)
     body += halo(32, 47, 26, 7.5, -14, ring, "front")
     # Orbes d'énergie à la place des flammèches.
     body += orb(11, 19, 2.0, orb_core, glow) + orb(54, 28, 1.6, orb_core, glow) + orb(9, 37, 1.2, orb_core, glow)
@@ -95,17 +108,20 @@ def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape
 
 TINTS = [
     ("Violet nuit", "Une flamme violet profond, presque noire à la base ; le lotus blanc brille au fond.",
-     [(0, "#C9A6FF"), (0.4, "#7A3CF0"), (1, "#2A0E5C")], "#B08CFF", "#7A3CF0", "#12052B", "#D9C2FF", "#E6D6FF"),
+     [(0, "#C9A6FF"), (0.4, "#7A3CF0"), (1, "#2A0E5C")], "#B08CFF", "#7A3CF0", "#12052B", "#D9C2FF", "#E6D6FF",
+     [(0, "#1A0838"), (0.5, "#5B21C8"), (1, "#C4A2FF")]),
     ("Améthyste et spectre", "Le violet glisse vers un bleu spectral sur les bords, comme un feu follet.",
-     [(0, "#B9E9FF"), (0.35, "#8C6CFF"), (1, "#2B1466")], "#8FD8FF", "#6C5CFF", "#0F0A2E", "#BFEFFF", "#D6F6FF"),
+     [(0, "#B9E9FF"), (0.35, "#8C6CFF"), (1, "#2B1466")], "#8FD8FF", "#6C5CFF", "#0F0A2E", "#BFEFFF", "#D6F6FF",
+     [(0, "#120E3A"), (0.5, "#4B3BD6"), (1, "#8FE3FF")]),
     ("Prune et violet", "Dans la couleur du logo du porteur : violet prune, lotus rosé.",
-     [(0, "#F3B8E6"), (0.4, "#9B3C8F"), (1, "#3A0E3A")], "#E59BD6", "#9B3C8F", "#1E061E", "#FFD1F2", "#FFE1F6"),
+     [(0, "#F3B8E6"), (0.4, "#9B3C8F"), (1, "#3A0E3A")], "#E59BD6", "#9B3C8F", "#1E061E", "#FFD1F2", "#FFE1F6",
+     [(0, "#2A0726"), (0.5, "#8A2A7E"), (1, "#F3A6E0")]),
 ]
 V = {}
 for i, (shape, label) in enumerate((("goutte", "Goutte d'âme"), ("flamme", "Flamme d'âme"))):
-    for j, (color, idea, stops, ring, glow, dark, lot, orbc) in enumerate(TINTS):
-        V["h%d" % (i * 3 + j + 1)] = (label, color, ("Une vraie goutte, symétrique, pointe fine. " if shape == "goutte" else "Une vraie flamme : langues qui ondulent, cœur plus clair. ") + idea,
-                                      lotus_icon("PA · " + label + " · " + color, stops, ring, glow, dark, lot, orbc, shape))
+    for j, (color, idea, stops, ring, glow, dark, lot, orbc, drop) in enumerate(TINTS):
+        V["h%d" % (i * 3 + j + 1)] = (label, color, ("Goutte brillante, d'après ton modèle : sombre en haut, lumineuse en bas, reflet et éclat. " if shape == "goutte" else "Flamme pleine, d'après ton modèle, avec une petite flamme sombre au fond. ") + idea,
+                                      lotus_icon("PA · " + label + " · " + color, stops, ring, glow, dark, lot, orbc, shape, drop))
 
 
 def main():
