@@ -19,12 +19,13 @@ await page.screenshot({ path: shot('games-scissors.png') });
 await page.waitForTimeout(1300);
 const pk1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('booster ouvert : PK crédités (' + pk0 + ' → ' + pk1 + ')', [10, 30, 50, 100, 1000].indexOf(pk1 - pk0) >= 0);
-ok('booster suivant dans 12 h', /Prochain booster dans 1[12] h/.test(await boost.innerText()));
+// Grade forcé à Grand maître mondial (helpers.mjs) : booster et pièce toutes les 4 h (2026-10-28).
+ok('booster suivant dans 4 h', /Prochain booster dans [34] h/.test(await boost.innerText()));
 await page.screenshot({ path: shot('games-booster.png') });
 await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(3400);
 const pk2 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('pièce lancée : 0 ou 30 PK (' + (pk2 - pk1) + ')', pk2 - pk1 === 0 || pk2 - pk1 === 30);
-ok('lancer suivant dans 8 h', /Prochain lancer dans [78] h/.test(await coin.innerText()));
+ok('lancer suivant dans 4 h', /Prochain lancer dans [34] h/.test(await coin.innerText()));
 await page.screenshot({ path: shot('games-coin.png') });
 // Roulette retirée (2026-10-25) : jeu d'évolution avec les PA (points d'Aura).
 ok('roulette retirée', (await page.locator('section[aria-label="Roulette"]').count()) === 0);
@@ -33,7 +34,7 @@ ok('évolution : 4 starters (' + (await evo.locator('[aria-label="Starters"] but
 await evo.locator('button[aria-label="Choisir Carapuce comme starter"]').click(); await page.waitForTimeout(400);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy }; });
 ok('évolution : Carapuce choisi, devenu le compagnon', st.evo && st.evo.line === 'cara' && st.evo.stage === 0 && st.buddy === 7);
-ok('évolution : Carabaffe et Tortank en silhouette (500 et 1 500 PA)', (await evo.locator('.pkm-evo-lock').count()) === 2 && /500 PA/.test(await evo.innerText()) && /1[\s\u202f\u00a0]500 PA/.test(await evo.innerText()) && !/Carabaffe|Tortank/.test(await evo.innerText()));
+ok('évolution : Carabaffe et Tortank en silhouette (500 et 1 500 PA)', (await evo.locator('.pkm-evo-lock').count()) === 2 && /500 PA/.test(await evo.innerText()) && /1[\s\u202f\u00a0]500 PA/.test(await evo.innerText()) && !/Carabaffe|Tortank/.test(await evo.locator('[aria-label="Lignée de ton Pokémon"]').innerText()));
 ok('évolution : bouton bloqué sans assez de PA', /Encore [\d\s\u202f\u00a0]+ PA pour évoluer/.test(await evo.innerText()));
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pa = 520; localStorage.setItem(k, JSON.stringify(d)); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200); await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(600);

@@ -117,7 +117,7 @@
     { name: 'Collectionneur', pk: 5000, comp: 15, mega: 0, scans: 20, boosterH: 10, coinH: 10, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
     { name: 'Dresseur Pokémon', pk: 10000, comp: 30, mega: 0, scans: 50, boosterH: 8, coinH: 8, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
     { name: 'Maître Pokémon', pk: 20000, comp: 100, mega: 1, scans: 100, boosterH: 6, coinH: 6, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
-    { name: 'Grand maître mondial Pokémon', pk: 50000, comp: 151, mega: 5, scans: 100, boosterH: 4, coinH: 4, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF6A4D', glow: 'rgba(227, 53, 13, 0.30)' }
+    { name: 'Grand maître mondial Pokémon', pk: 50000, comp: 151, mega: 5, scans: 100, boosterH: 4, coinH: 4, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
   ];
   PF_GRADES.forEach((g, i) => {
     g.perks = PF_BASE.concat([
