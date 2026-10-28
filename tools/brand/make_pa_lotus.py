@@ -28,7 +28,7 @@ SOUL2 = [("M", [(-2.5, -33)]),
          ("C", [(-8.5, 18), (-15, 11.5), (-15, 3)]), ("C", [(-15, -9), (-5, -18), (-3.6, -26)]),
          ("C", [(-3.1, -28.5), (-2.8, -31), (-2.5, -33)])]
 # Flamme (modèle : pictogramme de feu plein) : grande pointe centrale, langue à gauche, petite langue à droite,
-# base ronde ; une petite flamme intérieure plus sombre au fond (FLAME_IN).
+# base ronde. FLAME_IN (petite flamme intérieure) n'est plus utilisée : le porteur ne garde que le contour.
 SOUL3 = [("M", [(0, 18)]),
          ("C", [(-10.5, 18), (-16.5, 10.5), (-16.5, 2)]), ("C", [(-16.5, -6), (-13, -12), (-9.5, -20)]),
          ("C", [(-8.5, -15), (-6.5, -12.5), (-4, -11)]), ("C", [(-4.5, -20), (-1, -28), (3, -34.5)]),
@@ -94,8 +94,9 @@ def lotus_icon(title, stops, ring, glow, core_dark, lotus_color, orb_core, shape
         lx, ly = 32, 40
     else:
         body += soul(32, 37, 0.98, "url(#fl)", shape=shape)
-        body += soul(32, 37, 0.98, core_dark, "#111111", 1.6, "dedans").replace('/>', ' opacity="0.92"/>')
-        lx, ly = 32, 41.5
+        # Seulement le contour de la flamme du modèle (2026-10-28, porteur) ; à l'intérieur, le lotus sur un cœur sombre.
+        body += '<ellipse cx="32" cy="41" rx="11" ry="10.5" fill="url(#co)"/>'
+        lx, ly = 32, 40.5
     # Le lotus qui brille au fond (trait lumineux + lueur).
     body += f'<g filter="url(#lg)" opacity="0.95">{lotus(lx, ly, 0.78, lotus_color, 2.4)}</g>'
     body += lotus(lx, ly, 0.78, "#FFFFFF", 1.25)
@@ -120,7 +121,7 @@ TINTS = [
 V = {}
 for i, (shape, label) in enumerate((("goutte", "Goutte d'âme"), ("flamme", "Flamme d'âme"))):
     for j, (color, idea, stops, ring, glow, dark, lot, orbc, drop) in enumerate(TINTS):
-        V["h%d" % (i * 3 + j + 1)] = (label, color, ("Goutte brillante, d'après ton modèle : sombre en haut, lumineuse en bas, reflet et éclat. " if shape == "goutte" else "Flamme pleine, d'après ton modèle, avec une petite flamme sombre au fond. ") + idea,
+        V["h%d" % (i * 3 + j + 1)] = (label, color, ("Goutte brillante, d'après ton modèle : sombre en haut, lumineuse en bas, reflet et éclat. " if shape == "goutte" else "Le contour de ta flamme rouge, le lotus au cœur. ") + idea,
                                       lotus_icon("PA · " + label + " · " + color, stops, ring, glow, dark, lot, orbc, shape, drop))
 
 
