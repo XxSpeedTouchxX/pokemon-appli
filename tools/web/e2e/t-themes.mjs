@@ -7,10 +7,18 @@ const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const 
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 });
 await withFonts(ctx); await ctx.unroute(/openfreemap|tcgdex|pokemontcg/); await ctx.route(/openfreemap|pokemontcg/, r => r.abort()); await withDemoCards(ctx);
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+// Choix du compagnon dans le Pokédex (2026-10-28 : le panneau « Choisis ton compagnon » est retiré) : appui sur le
+// compagnon de l'accueil, « Tous les Pokémon », recherche, fiche, « Choisir comme compagnon », retour à l'accueil.
 const pick = async name => {
-  await page.click('button[aria-label^="Compagnon"]'); await page.waitForTimeout(300);
+  await page.click('button[aria-label^="Compagnon"]'); await page.waitForTimeout(700);
+  if (await page.locator('[aria-label="Starters"] button').count()) { await page.locator('button[aria-label="Choisir Pikachu comme starter"]').click(); await page.waitForTimeout(400); }
+  await page.locator('section[aria-label="Pokédex"] .pkm-dex-all').click(); await page.waitForTimeout(300);
   await page.fill('input[aria-label="Chercher un Pokémon"]', name); await page.waitForTimeout(250);
-  await page.locator('[aria-label="Compagnons"] button').first().click(); await page.waitForTimeout(700);
+  await page.locator('section[aria-label="Mon Pokédex"] .pkm-dexl-item').first().click(); await page.waitForTimeout(500);
+  const act = page.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-act-btn');
+  if (/Choisir comme compagnon/.test(await act.innerText())) await act.click();
+  await page.waitForTimeout(300);
+  await page.click('nav button[aria-label="Accueil"]'); await page.waitForTimeout(700);
 };
 const state = () => page.evaluate(() => ({
   cls: [...document.documentElement.classList].filter(c => c.indexOf('pkm-theme') === 0 || c === 'pkm-classic').join(' '), bar: document.querySelector('meta[name="theme-color"]').content,

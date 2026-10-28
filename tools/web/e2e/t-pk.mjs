@@ -60,10 +60,16 @@ const fiche = page.locator('section[aria-label="Fiche du Pokémon"]'), act = fic
 const routeAria = () => page.$$eval('[aria-label="Route d’évolution"] button', bs => bs.map(b => b.getAttribute('aria-label') + (b.classList.contains('pkm-dex-lock') ? ' [verrou]' : '')));
 const actText = async () => (await act.innerText()).replace(/\s+/g, ' ').trim();
 let route = await routeAria();
+// Le starter choisi ouvre sa propre fiche (2026-10-28) ; Kyogre se retrouve par « Tous les Pokémon ».
 ok('starter Pikachu : evo ' + JSON.stringify(d.evo) + ', buddy ' + d.buddy + ' ; route : ' + route.join(' ; '), d.evo && d.evo.line === 'pika' && d.buddy === 25
-  && route.length === 1 && /^Kyogre, Forme de base, 3 000 PA \[verrou\]$/.test(route[0].replace(/\s/g, ' ')));
+  && route.length === 2 && /^Pikachu, Forme de base, Compagnon$/.test(route[0].replace(/\s/g, ' ')) && /^Raichu, .*500 PA \[verrou\]$/.test(route[1].replace(/\s/g, ' ')));
+await page.click('.pkm-dex-all'); await page.waitForTimeout(300);
+await page.fill('input[aria-label="Chercher un Pokémon"]', 'kyogre'); await page.waitForTimeout(300);
+await page.locator('[aria-label="Tous les Pokémon"] button').first().click(); await page.waitForTimeout(500);
+route = await routeAria();
+ok('route de Kyogre : ' + route.join(' ; '), route.length === 1 && /^Kyogre, Forme de base, 3 000 PA \[verrou\]$/.test(route[0].replace(/\s/g, ' ')));
 ok('fiche de Kyogre : « ' + await actText() + ' », désactivé', /^Encore 3 000 PA pour le débloquer$/.test((await actText()).replace(/\s/g, ' ')) && (await act.getAttribute('aria-disabled')) === 'true');
-await act.click({ force: true }); await page.waitForTimeout(300); // aria-disabled : appui forcé, il ne doit rien faire
+await act.dispatchEvent('click'); await page.waitForTimeout(300); // aria-disabled : appui direct sur le bouton, il ne doit rien faire
 d = await saved();
 ok('sans assez de PA : rien ne change (pa ' + d.pa + ', pkOwn ' + JSON.stringify(d.pkOwn) + ')', (d.pa || 0) === 0 && !d.pkOwn.includes(382) && d.buddy === 25 && d.pk === 100);
 await page.screenshot({ path: shot('pk-manque.png') });
