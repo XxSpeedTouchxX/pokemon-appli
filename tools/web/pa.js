@@ -36,7 +36,10 @@
   const paPending = s => PaCore.next(s.paDay || '', s.paStreak || 0, realToday());
   paProto.paInit = function () {
     const raw = this.state || {};
-    if (paPending(raw) && raw.tuto === 'done') this.state = Object.assign({}, this.state, { toast: 'Tes PA du jour t’attendent : touche ton solde de PA pour les récupérer' });
+    if (!paPending(raw) || raw.tuto !== 'done') return;
+    this.state = Object.assign({}, this.state, { toast: 'Tes PA du jour t’attendent : touche ton solde de PA pour les récupérer' });
+    // Le message disparaît comme les autres (flash) : il ne doit pas rester sur les boutons du bas.
+    if (this.flash) setTimeout(() => this.flash(), 0);
   };
   // Récupérer : animation d'après la vidéo du porteur (récompense façon Brawl Stars) : éclat lumineux sur le bouton,
   // les gouttes de PA jaillissent, s'éparpillent puis volent en arc jusqu'au solde, qui grimpe à chaque goutte.
@@ -93,7 +96,7 @@
   paProto.paChoose = function (line, quiet) {
     if (!PA_LINES[line]) return;
     const s = this.st(), n = PA_LINES[line][0], own = (s.pkOwn || []).indexOf(n) >= 0 ? s.pkOwn : (s.pkOwn || []).concat([n]);
-    this.setState({ evo: { line: line, stage: 0 }, buddy: n, pkOwn: own, toast: quiet ? null : paName(n) + ' est ton starter' });
+    this.setState({ evo: { line: line, stage: 0 }, buddy: n, dexSel: n, pkOwn: own, toast: quiet ? null : paName(n) + ' est ton starter' });
     if (!quiet) this.flash();
   };
   // Évolution : 500 PA, puis 1 500 PA ; la nouvelle forme devient le compagnon.

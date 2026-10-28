@@ -21,7 +21,9 @@
   const DEX_TYPE = { Plante: '#3FA34D', Poison: '#9B4FC4', Feu: '#E8662F', Eau: '#3D7FD9', Vol: '#7F96E8', Insecte: '#8FAE1B', Normal: '#9A9480',
     Électrik: '#F4C430', Sol: '#D3A84F', Fée: '#EE90C8', Combat: '#C03028', Psy: '#F0507E', Roche: '#B09A3A', Acier: '#8C9CB0',
     Glace: '#6CC9D2', Spectre: '#6A5498', Dragon: '#6A3CEB', Ténèbres: '#5E4A3C' };
-  const dexLight = hex => { const v = parseInt(hex.slice(1), 16), r = v >> 16, g = (v >> 8) & 255, b = v & 255; return 0.299 * r + 0.587 * g + 0.114 * b > 150; };
+  // Texte de la pastille : blanc ou bleu nuit, celui qui contraste le plus avec la couleur du type (WCAG).
+  const dexLum = hex => { const v = parseInt(hex.slice(1), 16); return [v >> 16, (v >> 8) & 255, v & 255].map(c => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }).reduce((a, c, i) => a + c * [0.2126, 0.7152, 0.0722][i], 0); };
+  const dexLight = hex => { const L = dexLum(hex); return (L + 0.05) / (dexLum('#0B1120') + 0.05) > 1.05 / (L + 0.05); };
   const dexNo = e => '#' + String(e.mega ? e.from : e.n).padStart(3, '0') + (e.mega ? ' Méga' : '');
   const dexStage = n => { let k = 0, e = DEX[n]; while (e && !e.mega && e.from && k < 3) { k++; e = DEX[e.from]; } return k; };
   const dexTotal = e => e.stats.reduce((a, b) => a + b, 0);

@@ -8,13 +8,40 @@ const stub = (w, h, c) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" 
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, geolocation: { latitude: 45.764, longitude: 4.8357 }, permissions: ['geolocation'] });
 await ctx.route('https://assets.tcgdex.net/**', r => r.fulfill({ contentType: 'image/svg+xml', body: stub(300, 300, '#8EC5FC') }));
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|pokemontcg/, r => r.abort());
+// PA du jour (2026-10-28) : ils ne sont plus crédités à l'ouverture ; tant qu'ils attendent, un message reste affiché
+// en bas de l'écran. Ici, ils sont marqués comme déjà récupérés aujourd'hui (date de l'adresse ou du jour), sauf avec
+// « e2epa=1 » dans l'adresse (états « PA du jour à récupérer » et « Tes PA du jour », jamais récupérés).
+await ctx.addInitScript(() => {
+  try {
+    const k = 'pkm-collection-v1', raw = localStorage.getItem(k); if (!raw) return;
+    const d = JSON.parse(raw), q = new URLSearchParams(location.search), t = q.get('today'), n = new Date();
+    if (q.get('e2epa') === '1') { d.paDay = ''; d.paStreak = 0; } else {
+      const a = d.admin || {};
+      d.paDay = /^\d{4}-\d{2}-\d{2}$/.test(t || '') ? t : a.on && /^\d{4}-\d{2}-\d{2}$/.test(a.today || '') ? a.today : n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+      d.paStreak = Math.max(1, Number(d.paStreak) || 0);
+    }
+    localStorage.setItem(k, JSON.stringify(d));
+  } catch (e) { /* stockage indisponible */ }
+});
 const page = await ctx.newPage();
+// Pokédex (2026-10-28) : le compagnon de l'accueil ouvre l'onglet Jeux sur le Pokédex ; un Pokémon se choisit depuis
+// « Tous les Pokémon » (recherche, grille), puis sa fiche.
+const dexPick = async (name) => {
+  await page.click('button[aria-label^="Compagnon"]'); await page.waitForSelector('section[aria-label="Pokédex"]', { timeout: 10000 }); await page.waitForTimeout(700);
+  // Sans starter, le Pokédex propose d'abord les 4 starters : Pikachu (compagnon par défaut).
+  const st = page.locator('[aria-label="Starters"] button[aria-label="Choisir Pikachu comme starter"]');
+  if (await st.count()) { await st.click(); await page.waitForTimeout(900); }
+  await page.click('.pkm-dex-all'); await page.waitForSelector('section[aria-label="Mon Pokédex"]'); await page.waitForTimeout(300);
+  await page.fill('section[aria-label="Mon Pokédex"] input[aria-label="Chercher un Pokémon"]', name); await page.waitForTimeout(300);
+  await page.locator('section[aria-label="Mon Pokédex"] button[aria-label*=", n° "]').first().click(); await page.waitForTimeout(700);
+};
 // BUDDY=Kyogre (ou Groudon, Rayquaza) : compagnon choisi d'abord, donc thème appliqué à tous les écrans.
 if (process.env.BUDDY) {
   await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(1500); await unlockPaid(page);
-  await page.click('button[aria-label^="Compagnon"]'); await page.waitForTimeout(400);
-  await page.fill('input[aria-label="Chercher un Pokémon"]', process.env.BUDDY); await page.waitForTimeout(300);
-  await page.locator('[aria-label="Compagnons"] button').first().click(); await page.waitForTimeout(800);
+  await dexPick(process.env.BUDDY);
+  const act = page.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-act-btn');
+  if (/Choisir comme compagnon/.test(await act.textContent())) await act.click();
+  await page.waitForTimeout(800);
   console.log('thème : ' + await page.evaluate(() => document.documentElement.className));
 }
 const audit = () => page.evaluate(() => {
@@ -108,7 +135,10 @@ const states = {
   'radar': async () => { await page.goto(BASE + '#radar'); await page.waitForTimeout(3500); },
   'recherche de l’accueil': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'pika'); await page.waitForTimeout(800); },
   'Mes PK': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.click('header button[aria-label^="Mes PK"]'); await page.waitForTimeout(500); },
-  'déblocage d’un compagnon': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); const t = await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)), n = [382, 383, 384].find(v => v !== d.buddy); d.pkOwn = (d.pkOwn || []).filter(v => v !== n); localStorage.setItem(k, JSON.stringify(d)); return { 382: 'kyogre', 383: 'groudon', 384: 'rayquaza' }[n]; }); await page.reload(); await page.waitForTimeout(1500); await page.click('button[aria-label^="Compagnon"]'); await page.waitForTimeout(400); await page.fill('input[aria-label="Chercher un Pokémon"]', t); await page.waitForTimeout(300); await page.locator('[aria-label="Compagnons"] button').first().click(); await page.waitForTimeout(400); },
+  // Déblocage en PA dans le Pokédex : fiche d'un légendaire à thème verrouillé, bouton « Débloquer · 3 000 PA ».
+  'déblocage d’un compagnon (Pokédex)': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); const t = await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)), n = [382, 383, 384].find(v => v !== d.buddy); d.pkOwn = (d.pkOwn || []).filter(v => v !== n); d.pa = 5000; localStorage.setItem(k, JSON.stringify(d)); return { 382: 'kyogre', 383: 'groudon', 384: 'rayquaza' }[n]; }); await page.reload(); await page.waitForTimeout(1500); await dexPick(t); await page.locator('section[aria-label="Fiche du Pokémon"]').scrollIntoViewIfNeeded(); await page.waitForTimeout(400); },
+  // Méga-évolution : Florizarre débloqué, méga touchée sur la route, « Méga-évoluer · 2 500 PA » puis la confirmation.
+  'confirmation de méga-évolution': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pkOwn = [...new Set((d.pkOwn || []).concat([1, 2, 3]))]; d.megas = []; d.pa = 5000; localStorage.setItem(k, JSON.stringify(d)); }); await page.reload(); await page.waitForTimeout(1500); await dexPick('florizarre'); await page.click('[aria-label="Route d’évolution"] button[aria-label*="méga-évolution"]'); await page.waitForTimeout(400); await page.click('section[aria-label="Fiche du Pokémon"] .pkm-dex-act-btn'); await page.waitForTimeout(400); await page.locator('.pkm-dex-yes-btn').scrollIntoViewIfNeeded(); await page.waitForTimeout(300); },
   'Fiche d’un grade': async () => { await page.goto(BASE + '?today=2026-10-04&start=tiers'); await page.waitForTimeout(1200); await page.click('button[aria-label="Voir le grade Dresseur Pokémon et ses avantages"]'); await page.waitForTimeout(800); },
   'Territoire, bulle d’infos': async () => { await page.goto(BASE + '?today=2026-10-04#territoire'); await page.waitForTimeout(1500); const l = page.locator('button:has-text("Me localiser")').first(); if (await l.count()) await l.click(); await page.waitForSelector('button[aria-label^="Plus d’infos sur"]', { timeout: 20000 }); await page.locator('button[aria-label^="Plus d’infos sur"]').first().click(); await page.waitForTimeout(400); },
   'Territoire, galerie et menu des vues': async () => { await page.goto(BASE + '?today=2026-10-04#territoire'); await page.waitForTimeout(1500); const l = page.locator('button:has-text("Me localiser")').first(); if (await l.count()) await l.click(); await page.waitForSelector('button[aria-label^="Plus d’infos sur"]', { timeout: 20000 }); await page.click('section[aria-label="Boutiques autour de toi"] button[aria-haspopup]'); await page.waitForTimeout(300); await page.click('[aria-label="Choisir la vue"] button:has-text("Galerie")'); await page.waitForTimeout(300); await page.click('section[aria-label="Boutiques autour de toi"] button[aria-haspopup]'); await page.waitForTimeout(300); },
@@ -116,7 +146,12 @@ const states = {
   'Marché, compacte': async () => { await page.goto(BASE + '?today=2026-10-04&start=search'); await page.waitForTimeout(1500); await page.click('main button[aria-haspopup]'); await page.waitForTimeout(200); await page.click('[aria-label="Choisir la vue"] button:has-text("Compacte")'); await page.waitForTimeout(500); },
   'Panneau Admin': async () => { await page.goto(BASE + '?today=2026-10-04&start=settings'); await page.waitForTimeout(1000); await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.admin = Object.assign(d.admin || {}, { on: true, hash: 'x', salt: 'y' }); localStorage.setItem(k, JSON.stringify(d)); }); await page.reload(); await page.waitForTimeout(1000); for (let i = 0; i < 7; i++) await page.click('button[aria-label^="Version "]'); await page.waitForTimeout(400); },
   'Code Admin': async () => { await page.goto(BASE + '?today=2026-10-04&start=settings'); await page.waitForTimeout(600); await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.admin = Object.assign(d.admin || {}, { on: false }); localStorage.setItem(k, JSON.stringify(d)); }); await page.reload(); await page.waitForTimeout(1000); for (let i = 0; i < 7; i++) await page.click('button[aria-label^="Version "]'); await page.waitForTimeout(400); },
-  'choix du compagnon': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.click('button[aria-label^="Compagnon"]'); await page.waitForTimeout(500); },
+  // Le compagnon de l'accueil ouvre le Pokédex (onglet Jeux) ; « Tous les Pokémon » ouvre la liste.
+  'Pokédex (depuis le compagnon)': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.click('button[aria-label^="Compagnon"]'); await page.waitForSelector('section[aria-label="Pokédex"]', { timeout: 10000 }); await page.waitForTimeout(900); },
+  'Mon Pokédex (liste)': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.click('button[aria-label^="Compagnon"]'); await page.waitForSelector('section[aria-label="Pokédex"]', { timeout: 10000 }); await page.waitForTimeout(700); await page.click('.pkm-dex-all'); await page.waitForTimeout(500); },
+  // PA du jour pas encore récupérés : message, pastille « ! » sur le solde, puis la fiche « Tes PA du jour ».
+  'PA du jour à récupérer': async () => { await page.goto(BASE + '?today=2026-10-04&e2epa=1'); await page.waitForTimeout(1500); },
+  'Tes PA du jour': async () => { await page.goto(BASE + '?today=2026-10-04&e2epa=1'); await page.waitForTimeout(1500); await page.click('header button[aria-label^="Mes points d’Aura"]'); await page.waitForSelector('section[aria-label="Tes PA du jour"]'); await page.waitForTimeout(400); },
   'radar de l’accueil': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(3000); await page.click('section[aria-label="Boutiques près de toi"] button[aria-label*="Radar des boutiques"]'); await page.waitForTimeout(3500); },
   'sorties du Marché': async () => { await page.goto(BASE + '?start=search'); await page.waitForTimeout(900); await page.click('[aria-label="Filtre du marché"] button:has-text("Sorties")'); }
 };

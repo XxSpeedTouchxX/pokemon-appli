@@ -53,6 +53,20 @@ await more.click(); await page.waitForTimeout(800);
 ok('Marché sur la même recherche : ' + await page.inputValue('input[aria-label="Rechercher une carte ou un produit"]'), (await page.inputValue('input[aria-label="Rechercher une carte ou un produit"]')) === 'pika');
 // 4. Ajout récent en tête : une carte du catalogue ajoutée apparaît en premier.
 await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(2500);
+// PA du jour à récupérer (2026-10-28) : plus de crédit à l'ouverture ; au 2e lancement (didacticiel déjà vu), « ! » sur
+// le solde de PA de l'en-tête et un message d'invitation. Comme tous les messages (2,8 s), il doit s'effacer seul :
+// sinon il reste au-dessus de la barre du bas et intercepte les appuis (dont « + Ajouter un exemplaire » de la fiche).
+{
+  const pill = page.locator('header button[aria-label^="Mes points d’Aura"]').first();
+  const paToast = page.locator('[role="status"]', { hasText: 'Tes PA du jour t’attendent' });
+  ok('PA du jour : « ! » sur le solde de PA (' + await pill.getAttribute('aria-label') + ')', /PA à récupérer/.test(await pill.getAttribute('aria-label') || '') && (await pill.locator('.pkm-pa-dot').count()) === 1);
+  await page.waitForTimeout(1500);
+  ok('PA du jour : le message d’invitation s’efface seul (4 s après l’ouverture)', (await paToast.count()) === 0);
+  // Pour la suite : PA récupérés depuis l'en-tête (« Récupérer mes PA » efface le message, puis « +10 PA » s'efface).
+  await pill.click(); await page.waitForTimeout(500);
+  await page.locator('section[aria-label="Tes PA du jour"] .pkm-pa-claim-btn').click(); await page.waitForTimeout(5000);
+  ok('PA du jour récupérés : plus de « ! » ni de message', (await pill.locator('.pkm-pa-dot').count()) === 0 && (await paToast.count()) === 0);
+}
 await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'dracaufeu'); await page.waitForTimeout(800);
 const target = (await page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').nth(1).innerText()).split('\n')[0];
 await page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').nth(1).click(); await page.waitForTimeout(800);
