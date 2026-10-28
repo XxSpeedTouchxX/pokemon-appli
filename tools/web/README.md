@@ -56,7 +56,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 
 ## Informations légales et polices
 
-- **Informations légales** (`tools/web/legal.js`, fragment `legal-sheet`, refaites le 2026-10-11) : Réglages › À propos › « Informations légales et confidentialité », et « Règles des PK » dans « Mes PK ». Quatre rubriques : Mentions légales (LCEN), Confidentialité (stockage local sans cookie, position, caméra, notifications, services contactés), Conditions, PK et jeux. Les champs de l'éditeur sont « à compléter » ; liste des vérifications dans `docs/14-verifications-avant-publication.md`.
+- **Informations légales** (`tools/web/legal.js`, fragment `legal-sheet`, refaites le 2026-10-11) : Réglages › À propos › « Informations légales et confidentialité », et « Règles des PK » dans « Mes PK ». Quatre rubriques : Mentions légales (LCEN), Confidentialité (stockage local sans cookie, position, caméra, notifications, services contactés), Conditions, PK et jeux. La rubrique PK et jeux s'appelle « Règles des PK et des jeux » et se lit en images depuis le 2026-10-28 (demande du porteur ; `legal.js` `vRules`, `rules.css`) : gains, Booster PK (chances en barre colorée), pile ou face, tableau des délais et scans par grade (ligne du grade actuel en avant), série des PA en marches et prix du Pokédex, PK shop, « Pas un jeu d'argent » ; chiffres lus dans les modules qui les appliquent ; le texte complet reste dépliable en bas. Les champs de l'éditeur sont « à compléter » ; liste des vérifications dans `docs/14-verifications-avant-publication.md`.
 - **Grades** (`tools/web/profile.js`, 2026-10-14 ; conditions et avantages du 2026-10-28, porteur) : `tiers()` renvoie 6 grades ; on obtient le plus haut dont les trois conditions sont remplies : PK gagnés au total (`pkEarned`), compagnons débloqués (les 4 offerts compris) et méga-évolutions (`megas`).
 
   | Grade | Conditions | Scans / jour | Booster PK | Pièce | En plus |
@@ -194,11 +194,16 @@ La liste « Ma collection » (récents ou valeur, 20 par page) est retirée le 2
 
 Retirés de l'accueil de la maquette : palier (visible dans le profil), arrivage de démo, mouvements, plus belles pièces, derniers ajouts. Le build remplace l'accueil de la maquette par le fragment `home` de `catalog.dc.html`.
 
-## PA et jeu d'évolution
+## PA et Pokédex (ancien jeu d'évolution)
 
-Depuis le 2026-10-26 (`tools/web/pa-core.js`, testé par `node --test tools/web/test_pa.mjs` ; `tools/web/pa.js` ; section « Évolution » du fragment `games`). Choix du porteur.
+Depuis le 2026-10-26 (`tools/web/pa-core.js`, testé par `node --test tools/web/test_pa.mjs` ; `tools/web/pa.js` ; section « Pokédex » du fragment `games`, appelée « Évolution » jusqu'au 2026-10-28). Choix du porteur.
 - **PA (points d'Aura)** : logo `img/brand/pa.svg` (depuis le 2026-10-28, choix du porteur après 4 séries de propositions dans `tools/brand/pa/` : goutte d'âme prune, lotus du logo du porteur au cœur, halo autour de la base, petites orbes d'énergie ; `tools/brand/make_pa_logo.py`). Dans le jeu d'évolution, là où les PA sont expliqués, `img/brand/pa-anim.svg` : les orbes gravitent doucement autour de la goutte (animation SVG, 12 s par tour ; logo fixe si l'utilisateur limite les animations). Un appui sur le solde de PA ouvre Jeux et descend jusqu'au jeu d'évolution. Crédités une fois par jour, à l'ouverture de l'app, selon les jours d'affilée : 1er jour +10, 2e +15, 3e +20, 4e +25, puis +30 chaque jour ; un jour sans ouvrir l'app : la série reprend à +15. Message à l'ouverture (« +20 PA · 3 jours d'affilée ») et pastille qui pulse sous le solde de PK ; un appui ouvre le jeu. Sur l'appareil, sans valeur en euros.
 - **Jeu d'évolution** (onglet Jeux, à la place de la roulette) : choix du starter (Bulbizarre, Salamèche, Carapuce ou Pikachu) ; la lignée s'affiche, le starter en couleur et les formes suivantes en silhouette noire avec leur prix ; « Faire évoluer » coûte 500 PA pour la 2e forme, 1 500 PA pour la 3e ; animation de 3 s (fixe si l'utilisateur limite les animations) ; la nouvelle forme devient le compagnon de l'accueil. Pikachu n'a qu'une évolution de la 1re génération (Raichu, 500 PA).
+- **Pokédex** (2026-10-28, demande du porteur ; `pa.js` `vDex`, `dex.css`) : la section « Évolution » devient « Pokédex ».
+  - En tête, un Pokédex rouge dessiné d'après la photo du porteur, avec **la gemme des PK sur l'objectif** (`web/img/brand/pokedex.svg`, généré par `tools/brand/make_pokedex.py`) : le Pokémon du moment sur l'écran de gauche, le solde de PA (logo animé) sur celui de droite.
+  - Dessous, l'écran « Route d'évolution » d'après la « Digivolution Route » de Digimon World Dusk (vidéo du porteur) : cadre néon magenta, fond bleu quadrillé, étiquettes cyan des étapes (Base, Évolution 1, Évolution 2, Méga), un socle lumineux par Pokémon relié par un trait orange, une deuxième méga-évolution (Dracaufeu X et Y) en pointillés sur la ligne du dessous, étiquette verte sur le Pokémon touché.
+  - Panneaux « Pokémon actuel » (stade, jauge de PA vers la prochaine évolution) et « Pokémon sélectionné » (n°, forme, coût, état) ; fiche du Pokémon touché (grand sprite) ; boutons en hexagone **Évoluer**, **Compagnon**, **Méga** (gris quand ils ne s'appliquent pas) et message en bas. « Méga » demande confirmation.
+  - La grille des 15 méga-évolutions de Kanto reste en dessous.
 - **Un seul choix de starter** : didacticiel, compagnon et jeu ; les autres compagnons restent à débloquer avec des PK.
 - **Enregistrement** : `pa`, `paDay`, `paStreak`, `evo` (lignée et stade) avec la collection. Mode Admin : « +500 PA ».
 
@@ -206,10 +211,14 @@ Depuis le 2026-10-26 (`tools/web/pa-core.js`, testé par `node --test tools/web/
 
 ## Didacticiel
 
-Depuis le 2026-10-26 (`tools/web/tuto.js`, fragment `tuto` de `catalog.dc.html`).
-- À la première installation, une fois l'accueil guidé fermé : « Veux-tu suivre le didacticiel ? ». Non : rien d'autre. Oui : « Choisis ton starter », puis 7 bulles de 6 s (42 s en tout, 45 s au plus) qui ouvrent chaque onglet et entourent ce dont elles parlent : la valeur de la collection (portefeuille), Mon classeur, le radar des boutiques, Toutes les séries, les mini-jeux (gagner des PK), le PK shop, puis le barème des PA dans le jeu d'évolution.
-- Le starter parle dans chaque bulle ; « Suivant » avance, « Passer » arrête ; points de progression et barre du temps.
-- État `tuto` enregistré (`ask`, puis `done`). À revoir : Profil › « Revoir le didacticiel », ou `?tuto=1`.
+Depuis le 2026-10-26, refait le 2026-10-28 à la demande du porteur (`tools/web/tuto.js`, fragment `tuto` de `catalog.dc.html`, styles dans `games.css`).
+- À la première installation, une fois l'accueil guidé fermé : « Veux-tu suivre le didacticiel ? ». Non : rien d'autre. Oui : « Choisis ton starter », puis le starter présente l'app en 9 étapes (environ 55 s) : valeur de la collection, Mon classeur, bouton Scanner, radar des boutiques, Toutes les séries, mini-jeux, PK shop, PA et Pokédex, puis la place du compagnon.
+- **Chaque partie est encadrée** : cadre jaune animé (coins qui battent), le reste de l'écran assombri, trait pointillé de la mascotte vers le cadre ; l'onglet de la barre du bas qui y mène est cerclé de jaune.
+- **Le starter parle** : son texte s'écrit lettre par lettre ; sa **bouche s'ouvre et se ferme** pendant l'écriture (deux images au pixel près par starter : `web/img/pokemon/talk/{n}-0.png` et `-1.png`, générées par `tools/sprites/make_talk.py`) ; un **petit cri** accompagne les lettres (Web Audio, une voix par starter, Pikachu aigu, Bulbizarre grave ; bouton pour couper le son, gardé dans `pkm-tuto-sound`).
+- **Fin** : « Maintenant que tu connais toute l'appli, tu pourras me trouver ici ! », cadre sur le compagnon de « Valeur de toute ma collection », puis le starter saute à cette place.
+- « Suivant » termine d'abord la phrase en cours, puis avance ; « Passer » arrête. Mouvements réduits : texte affiché d'un coup, sans saut.
+- La visite est construite hors de Vue (calque `.pkm-tuto-host`) : l'écriture et le cadre qui suit l'élément ne relancent pas le rendu de l'app.
+- État `tuto` enregistré (`ask`, puis `done`). À revoir : Profil › « Revoir le didacticiel », ou `?tuto=1` ; si le starter est déjà choisi, la visite commence aussitôt et l'évolution est gardée (avant, revoir le didacticiel remettait le starter à sa première forme).
 
 ## Scan à l'appareil photo
 

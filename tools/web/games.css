@@ -405,13 +405,64 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 @media (prefers-reduced-motion: reduce) { .pkm-evo-fx * { animation: none !important; } }
 .pkm-pa-head { position: relative; z-index: 1; height: 30px; margin-top: 7px; display: flex; align-items: center; justify-content: flex-end; } /* 7 px sous les PK : les deux pastilles ne se touchent plus (2026-10-28) */
 
-/* Didacticiel (2026-10-25) : halo jaune sur ce dont parle le starter, bulle qui apparaît, barre de 6 s par étape. */
-.pkm-tuto-focus { position: relative; z-index: 2; box-shadow: 0 0 0 3px #FFD60A, 0 0 26px rgba(255, 214, 10, 0.7) !important; animation: pkmTutoGlow 1.4s ease-in-out infinite; }
-@keyframes pkmTutoGlow { 50% { box-shadow: 0 0 0 5px #FFD60A, 0 0 38px rgba(255, 214, 10, 0.9); } }
-.pkm-tuto-bubble { animation: pkmTutoIn 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+/* Didacticiel (2026-10-25, refait le 2026-10-28) : calque construit par tuto.js. Cadre jaune animé autour de ce que
+   présente le starter (le reste assombri), trait pointillé de la mascotte vers le cadre, bulle avec la mascotte qui
+   parle (bouche ouverte et fermée en alternance), texte qui s'écrit, saut final vers la place du compagnon. */
 .pkm-tuto-pop { animation: pkmTutoIn 0.3s ease-out both; }
 @keyframes pkmTutoIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
-.pkm-tuto-mon { animation: pkmFloat 2.4s ease-in-out infinite; }
-.pkm-tuto-time > span { transform-origin: left center; animation: pkmTutoTime 6s linear both; }
-@keyframes pkmTutoTime { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@media (prefers-reduced-motion: reduce) { .pkm-tuto-focus, .pkm-tuto-bubble, .pkm-tuto-pop, .pkm-tuto-mon { animation: none; } .pkm-tuto-time > span { animation: none; transform: scaleX(1); } }
+.pkm-tuto-host { position: absolute; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+.pkm-tt-frame { position: absolute; left: 0; top: 0; width: 60px; height: 60px; border-radius: 18px; border: 3px solid #FFD60A;
+  box-shadow: 0 0 0 200vmax rgba(3, 6, 14, 0.62), 0 0 22px rgba(255, 214, 10, 0.75), inset 0 0 18px rgba(255, 214, 10, 0.35);
+  transition: transform 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), width 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), height 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), border-radius 0.5s;
+  animation: pkmTtPulse 1.4s ease-in-out infinite; }
+@keyframes pkmTtPulse { 50% { box-shadow: 0 0 0 200vmax rgba(3, 6, 14, 0.62), 0 0 36px rgba(255, 214, 10, 0.95), inset 0 0 26px rgba(255, 214, 10, 0.5); } }
+.pkm-tt-c { position: absolute; width: 18px; height: 18px; border: 0 solid #FFFFFF; animation: pkmTtCorner 1.4s ease-in-out infinite; }
+.pkm-tt-c1 { left: -9px; top: -9px; border-width: 4px 0 0 4px; border-top-left-radius: 8px; --dx: -4px; --dy: -4px; }
+.pkm-tt-c2 { right: -9px; top: -9px; border-width: 4px 4px 0 0; border-top-right-radius: 8px; --dx: 4px; --dy: -4px; }
+.pkm-tt-c3 { right: -9px; bottom: -9px; border-width: 0 4px 4px 0; border-bottom-right-radius: 8px; --dx: 4px; --dy: 4px; }
+.pkm-tt-c4 { left: -9px; bottom: -9px; border-width: 0 0 4px 4px; border-bottom-left-radius: 8px; --dx: -4px; --dy: 4px; }
+@keyframes pkmTtCorner { 50% { transform: translate(var(--dx), var(--dy)); } }
+.pkm-tt-link { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; transition: opacity 0.25s; }
+.pkm-tt-link path { fill: none; stroke: #FFD60A; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 2 9; animation: pkmTtDash 0.7s linear infinite; filter: drop-shadow(0 0 4px rgba(255, 214, 10, 0.8)); }
+.pkm-tt-link circle { fill: #FFD60A; stroke: #0B1120; stroke-width: 2; }
+@keyframes pkmTtDash { to { stroke-dashoffset: -11; } }
+.pkm-tuto-bubble { position: absolute; left: 10px; right: 10px; bottom: 96px; pointer-events: auto; display: flex; align-items: flex-end; gap: 4px;
+  padding: 10px 10px 10px 4px; border-radius: 26px; border: 2px solid #FFD60A; background: linear-gradient(180deg, #16223A, #0B1120); color: #F3F6FC;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6); transition: top 0.45s ease, bottom 0.45s ease; }
+.pkm-tuto-bubble.pkm-tt-top { bottom: auto; top: 12px; }
+.pkm-tt-hop { animation: pkmTutoIn 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.pkm-tt-mon { flex: none; position: relative; width: 104px; height: 108px; margin: -46px 0 -4px; transform-origin: 50% 100%; animation: pkmTtIdle 2.4s ease-in-out infinite; }
+.pkm-tt-hop .pkm-tt-mon { animation: pkmTtJump 0.55s cubic-bezier(0.3, 0.9, 0.4, 1.3), pkmTtIdle 2.4s ease-in-out 0.55s infinite; }
+.pkm-tt-mon img { position: absolute; inset: 0; width: 104px; height: 108px; image-rendering: pixelated; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35)); }
+.pkm-tt-m1 { visibility: hidden; }
+.pkm-tt-talk .pkm-tt-m1 { visibility: visible; }
+.pkm-tt-talk .pkm-tt-m0 { visibility: hidden; }
+.pkm-tt-typing .pkm-tt-mon { animation: pkmTtTalk 0.24s ease-in-out infinite alternate; }
+@keyframes pkmTtIdle { 50% { transform: translateY(-4px); } }
+@keyframes pkmTtTalk { from { transform: scale(1, 1); } to { transform: scale(1.03, 0.97); } }
+@keyframes pkmTtJump { 0% { transform: translateY(30px) scale(0.6); opacity: 0; } 60% { transform: translateY(-14px) scale(1.06); opacity: 1; } 100% { transform: none; } }
+.pkm-tt-fly { transition: transform 0.9s cubic-bezier(0.5, -0.4, 0.4, 1.2) !important; animation: none !important; z-index: 3; }
+.pkm-tt-out .pkm-tt-frame, .pkm-tt-out .pkm-tt-link, .pkm-tt-out .pkm-tt-say { opacity: 0; transition: opacity 0.4s; }
+.pkm-tt-out .pkm-tuto-bubble { background: transparent; border-color: transparent; box-shadow: none; transition: background 0.4s, border-color 0.4s, box-shadow 0.4s; }
+.pkm-tt-say { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.pkm-tuto-text { position: relative; margin: 0; min-height: 60px; padding: 10px 12px; border-radius: 16px 16px 16px 4px; background: #F3F6FC; color: #0B1120; font-size: 14.5px; line-height: 1.4; font-weight: 700; }
+.pkm-tuto-text::before { content: ''; position: absolute; left: -8px; bottom: 6px; border: 8px solid transparent; border-right-color: #F3F6FC; border-left: 0; }
+.pkm-tt-caret { display: inline-block; width: 8px; height: 14px; margin-left: 2px; vertical-align: -2px; border-radius: 2px; background: #0B1120; animation: pkmTtCaret 0.8s steps(1) infinite; }
+@keyframes pkmTtCaret { 50% { opacity: 0; } }
+.pkm-tt-bar { display: flex; align-items: center; gap: 4px; }
+.pkm-tt-bar button { flex: none; height: 44px; border: 0; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.pkm-tt-skip { padding: 0 8px; background: transparent; color: #B9C5FF; }
+.pkm-tt-next { padding: 0 16px; border-radius: 999px; background: #FFD60A; color: #0B1120; }
+.pkm-tt-snd { width: 40px; border-radius: 20px; background: transparent; color: #C9D3EA; display: flex; align-items: center; justify-content: center; }
+.pkm-tt-snd svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-tt-dots { flex: 1; min-width: 0; display: flex; justify-content: center; gap: 4px; }
+.pkm-tt-dots i { width: 6px; height: 6px; border-radius: 3px; background: #2A3A5C; transition: width 0.3s, background 0.3s; }
+.pkm-tt-dots i.pkm-tt-d-done { background: #8A7A2A; }
+.pkm-tt-dots i.pkm-tt-d-on { width: 16px; background: #FFD60A; }
+/* Onglet de la barre du bas qui mène à ce que présente le starter. */
+.pkm-tt-ring { position: absolute; left: 0; top: 0; display: none; border-radius: 18px; border: 3px solid #FFD60A; box-shadow: 0 0 18px rgba(255, 214, 10, 0.8); animation: pkmTtTab 1.4s ease-in-out infinite; }
+@keyframes pkmTtTab { 50% { box-shadow: 0 0 30px rgba(255, 214, 10, 1); transform-origin: center; } }
+@media (prefers-reduced-motion: reduce) {
+  .pkm-tuto-pop, .pkm-tt-frame, .pkm-tt-c, .pkm-tt-link path, .pkm-tt-mon, .pkm-tt-hop, .pkm-tt-hop .pkm-tt-mon, .pkm-tt-caret, .pkm-tt-ring { animation: none !important; }
+  .pkm-tt-frame { transition: none; }
+}

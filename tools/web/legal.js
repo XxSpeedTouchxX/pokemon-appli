@@ -44,7 +44,7 @@
       ['Ce que sont les PK', 'Les PK sont une monnaie virtuelle de l’app. Ils servent seulement à débloquer des compagnons et des thèmes.'],
       ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas et ne se convertissent pas en argent ni en biens. Ils n’ont aucune valeur en euros.'],
       ['Gains', '+100 de bienvenue ; +300 une fois pour un partage de l’app ; les jeux de l’onglet Jeux. Ajouter des cartes ou ouvrir l’app ne rapporte pas de PK.'],
-      ['Jeux', 'Booster PK : un booster gratuit toutes les 24 h, puis plus souvent selon ton grade (10 h, 8 h, 6 h, jusqu’à 4 h), qui contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %), 100 PK (4 %) ou 1 000 PK (1 %). Pile ou face : à partir du grade Chasseur, un lancer gratuit toutes les 24 h, puis plus souvent selon ton grade (jusqu’à 4 h) ; la face « gemme PK » rapporte 30 PK (une chance sur deux), la face « cristal éteint » rien. Les tirages sont faits au hasard sur ton appareil. Évolution : les PA (points d’Aura) se gagnent en ouvrant l’app une fois par jour, selon les jours d’affilée : +10, +15, +20, +25, puis +30 PA par jour ; un jour manqué, la série reprend à +15 PA. Ils font évoluer ton starter : 500 PA pour la deuxième forme, 1 500 PA pour la troisième. Les PA n’ont aucune valeur en euros et ne s’achètent pas.'],
+      ['Jeux', 'Booster PK : un booster gratuit toutes les 24 h, puis plus souvent selon ton grade (10 h, 8 h, 6 h, jusqu’à 4 h), qui contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %), 100 PK (4 %) ou 1 000 PK (1 %). Pile ou face : à partir du grade Chasseur, un lancer gratuit toutes les 24 h, puis plus souvent selon ton grade (jusqu’à 4 h) ; la face « gemme PK » rapporte 30 PK (une chance sur deux), la face « cristal éteint » rien. Les tirages sont faits au hasard sur ton appareil. Pokédex : les PA (points d’Aura) se gagnent en ouvrant l’app une fois par jour, selon les jours d’affilée : +10, +15, +20, +25, puis +30 PA par jour ; un jour manqué, la série reprend à +15 PA. Ils font évoluer ton starter dans le Pokédex : 500 PA pour la deuxième forme, 1 500 PA pour la troisième, 2 500 PA pour une méga-évolution. Les PA n’ont aucune valeur en euros et ne s’achètent pas.'],
       ['PK shop et tirage au sort', 'Le PK shop échange des PK contre des tickets de participation au tirage au sort d’un booster Pokémon (2 000 PK le ticket) ou contre un lot direct, le booster 30 ans Pokémon (15 000 PK). La participation est gratuite : les PK se gagnent sans achat. Le tirage sera organisé par l’éditeur selon un règlement publié avant le tirage (date, modalités, désignation et contact du gagnant, remise du lot). L’envoi des lots demande un compte et une adresse, pas encore disponibles. Tes tickets et tes lots sont gardés sur cet appareil.'],
       ['Pas un jeu d’argent', 'Les jeux sont gratuits : aucune mise, aucun achat, aucune participation en argent, et les gains (des PK) n’ont aucune valeur en euros. Ce ne sont ni des loteries ni des jeux d’argent.'],
       ['Sur ton appareil', 'Ton solde est enregistré avec ta collection, sur cet appareil. Il est inclus dans la sauvegarde. Il peut être perdu si les données du site sont effacées.'],
@@ -62,7 +62,34 @@
       title: cur ? LEGAL[cur].label : '',
       tabs: LEGAL_TABS.map(k => Object.assign({ label: LEGAL[k].label, on: k === cur, pick: () => this.setState({ legal: k }) }, this.chip(k === cur))),
       blocks: cur ? LEGAL[cur].blocks.map(([t, p]) => ({ title: t, text: p, todo: p.indexOf(LEGAL_TODO) >= 0 })) : [],
-      openMentions: () => this.legalOpen('mentions'), openPk: () => this.legalOpen('pk')
+      openMentions: () => this.legalOpen('mentions'), openPk: () => this.legalOpen('pk'),
+      isPk: cur === 'pk', notPk: cur !== 'pk', pk: cur === 'pk' ? this.vRules(s) : { grades: [], odds: [], streak: [], evo: [], shop: [], earn: [], free: [] }
     };
+    if (cur === 'pk') r.legal.title = 'Règles des PK et des jeux';
     return r;
+  };
+  // ——— Règles des PK et des jeux, en images (2026-10-28, demande du porteur) ———
+  // Les mêmes règles que le texte (gardé en bas, dépliable), en cartes : gains, Booster PK (chances en barre), pile ou
+  // face, délais selon le grade (ligne du grade actuel en avant), PA et Pokédex, PK shop, « pas un jeu d'argent ».
+  // Chiffres lus dans les modules qui les appliquent (profile.js, games.js, pa.js, pkshop.js) : jamais recopiés.
+  const legalNum = n => Number(n).toLocaleString('fr-FR');
+  proto.vRules = function (s) {
+    const t = this.tierOf ? this.tierOf() : { i: 0 }, gi = t.i || 0, streak = Number(s.paStreak) || 0;
+    const shopPerk = { ticket: 'Collectionneur', shopBooster: 'Dresseur Pokémon', deluxe: 'Grand maître mondial Pokémon' };
+    return {
+      pk: legalNum(Number(s.pk) || 0), pa: legalNum(Number(s.pa) || 0), grade: PF_GRADES[gi].name, emblem: 'img/grades/grade-' + (gi + 1) + '.svg',
+      earn: [
+        { big: '+100', label: 'Bienvenue', note: 'Une fois, à l’arrivée', icon: 'img/brand/pk.svg' },
+        { big: '+300', label: 'Partage', note: 'Une fois, en partageant l’app', icon: 'img/brand/pk.svg' },
+        { big: 'Jeux', label: 'Booster et pièce', note: 'Dans l’onglet Jeux', icon: 'img/brand/pk.svg' }
+      ],
+      odds: GM_TABLE.map(([pk, pct, label, color]) => ({ pk: legalNum(pk) + ' PK', pct: pct + ' %', label: label, w: 'flex: ' + Math.max(pct, 6) + ' 1 0', color: color })),
+      coinWin: '+' + GM_COIN_WIN + ' PK',
+      grades: PF_GRADES.map((g, i) => ({ name: g.name, img: 'img/grades/grade-' + (i + 1) + '.svg', booster: g.boosterH + ' h', coin: g.coinH ? g.coinH + ' h' : '—', scans: legalNum(g.scans),
+        cls: 'pkm-rules-row' + (i === gi ? ' pkm-rules-me' : ''), aria: g.name + (i === gi ? ', ton grade' : '') + ' : booster toutes les ' + g.boosterH + ' h, ' + (g.coinH ? 'pièce toutes les ' + g.coinH + ' h' : 'pièce fermée') + ', ' + g.scans + ' scans par jour' })),
+      streak: [10, 15, 20, 25, 30].map((v, i) => ({ day: i === 4 ? 'J5 et +' : 'J' + (i + 1), pa: '+' + v, cls: 'pkm-rules-day' + (Math.min(streak, 5) === i + 1 ? ' pkm-rules-today' : '') + (i < Math.min(streak, 5) ? ' pkm-rules-done' : '') })),
+      evo: [['Évolution 1', PA_COST[0]], ['Évolution 2', PA_COST[1]], ['Méga-évolution', PA_MEGA]].map(([l, v]) => ({ label: l, pa: legalNum(v) + ' PA' })),
+      shop: SHOP_ITEMS.map(x => ({ name: x.name, price: x.soon ? 'Bientôt' : legalNum(x.price) + ' PK', grade: x.perk ? 'Dès le grade ' + shopPerk[x.perk] : '', img: x.img || 'img/brand/pk.svg' })),
+      free: [['0 €', 'de mise'], ['0 €', 'à gagner en argent'], ['0', 'achat possible']].map(([a, b]) => ({ big: a, label: b }))
+    };
   };

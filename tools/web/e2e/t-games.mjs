@@ -29,7 +29,7 @@ ok('lancer suivant dans 4 h', /Prochain lancer dans [34] h/.test(await coin.inne
 await page.screenshot({ path: shot('games-coin.png') });
 // Roulette retirée (2026-10-25) : jeu d'évolution avec les PA (points d'Aura).
 ok('roulette retirée', (await page.locator('section[aria-label="Roulette"]').count()) === 0);
-const evo = page.locator('section[aria-label="Évolution"]');
+const evo = page.locator('section[aria-label="Pokédex"]');
 ok('évolution : 4 starters (' + (await evo.locator('[aria-label="Starters"] button').allInnerTexts()).join(', ') + ')', (await evo.locator('[aria-label="Starters"] button').allInnerTexts()).join(',') === 'Bulbizarre,Salamèche,Carapuce,Pikachu');
 await evo.locator('button[aria-label="Choisir Carapuce comme starter"]').click(); await page.waitForTimeout(400);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy }; });
@@ -38,7 +38,7 @@ ok('évolution : Carabaffe et Tortank en silhouette (500 et 1 500 PA)', (await e
 ok('évolution : bouton bloqué sans assez de PA', /Encore [\d\s\u202f\u00a0]+ PA pour évoluer/.test(await evo.innerText()));
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pa = 520; localStorage.setItem(k, JSON.stringify(d)); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200); await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(600);
-await evo.locator('button:has-text("Faire évoluer")').click(); await page.waitForTimeout(3700);
+await evo.locator('[aria-label="Actions du Pokédex"] button:has-text("Évoluer")').click(); await page.waitForTimeout(3700);
 const st2 = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy, pa: d.pa, own: d.pkOwn }; });
 ok('évolution : Carabaffe pour 500 PA (' + st2.pa + ' PA restants), nouveau compagnon', st2.evo.stage === 1 && st2.buddy === 8 && st2.pa === 20 && st2.own.indexOf(8) >= 0 && (await evo.locator('.pkm-evo-lock').count()) === 1);
 await evo.screenshot({ path: shot('games-evolution.png') });

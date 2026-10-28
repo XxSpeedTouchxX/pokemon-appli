@@ -836,19 +836,7 @@
 </div>
 </sc-if>
 <sc-if value="{{ tu.tour }}" hint-placeholder-val="{{ false }}">
-<section aria-label="Didacticiel" aria-live="polite" class="pkm-dark pkm-tuto-bubble" key="{{ tu.key }}" style="position: absolute; left: 12px; right: 12px; bottom: 104px; z-index: 40; padding: 12px 12px 10px; border-radius: 24px; border: 1px solid var(--pkm-accent); background: #0F1828; color: #F3F6FC; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; gap: 8px">
-<div style="display: flex; align-items: flex-end; gap: 10px">
-<img src="{{ tu.sprite }}" alt="{{ tu.name }}" width="64" height="64" class="pkm-tuto-mon" style="flex: none; display: block; width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated">
-<p class="pkm-tuto-text" style="flex: 1; min-width: 0; margin: 0; padding: 10px 12px; border-radius: 16px 16px 16px 4px; background: #F3F6FC; color: #0B1120; font-size: 14px; line-height: 1.4; font-weight: 600">{{ tu.text }}</p>
-</div>
-<div class="pkm-tuto-time" aria-hidden="true" style="height: 3px; border-radius: 2px; background: #2A3A5C; overflow: hidden"><span key="{{ tu.key }}" style="display: block; height: 100%; background: var(--pkm-accent)"></span></div>
-<div style="display: flex; align-items: center; gap: 8px">
-<button type="button" onClick="{{ tu.skip }}" style="height: 44px; padding: 0 12px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Passer</button>
-<span aria-hidden="true" style="flex: 1; display: flex; justify-content: center; gap: 5px"><sc-for list="{{ tu.dots }}" as="tud" hint-placeholder-count="7"><span style="width: {{ tud.w }}; height: 7px; border-radius: 4px; background: {{ tud.bg }}"></span></sc-for></span>
-<span class="pkm-sr">Étape {{ tu.count }}</span>
-<button type="button" onClick="{{ tu.next }}" style="height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer">{{ tu.nextLabel }}</button>
-</div>
-</section>
+<div class="pkm-tuto-host"></div>
 </sc-if>
 
 <!-- fragment: pk-sheet -->
@@ -1168,12 +1156,75 @@
 <div role="group" aria-label="Rubriques" style="flex: none; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px">
 <sc-for list="{{ legal.tabs }}" as="lgt" hint-placeholder-count="4"><button type="button" onClick="{{ lgt.pick }}" aria-pressed="{{ lgt.on }}" style="flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid {{ lgt.bc }}; background: {{ lgt.bg }}; color: {{ lgt.fg }}; font: inherit; font-size: 13.5px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ lgt.label }}</button></sc-for>
 </div>
+<sc-if value="{{ legal.notPk }}" hint-placeholder-val="{{ true }}">
 <sc-for list="{{ legal.blocks }}" as="lgb" hint-placeholder-count="4">
 <div style="flex: none; display: flex; flex-direction: column; gap: 4px">
 <h3 style="margin: 0; font-size: 14.5px; font-weight: 700">{{ lgb.title }}</h3>
 <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: #C9D3EA">{{ lgb.text }}</p>
 </div>
 </sc-for>
+</sc-if>
+<sc-if value="{{ legal.isPk }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-rules">
+<div class="pkm-rules-hero">
+<div class="pkm-rules-logos" aria-hidden="true"><img src="img/brand/pk.svg" alt="" width="72" height="72" class="pkm-rules-pk"><img src="img/brand/pa-anim.svg" alt="" width="72" height="72" class="pkm-rules-pa"></div>
+<p class="pkm-rules-lead">Les PK et les PA se gagnent en jouant, gratuitement. Ils ne s’achètent pas, ne se vendent pas, ne s’échangent pas et n’ont aucune valeur en euros.</p>
+<div class="pkm-rules-me-bar"><img src="{{ legal.pk.emblem }}" alt="" width="36" height="36"><span><b>{{ legal.pk.grade }}</b><span>{{ legal.pk.pk }} PK · {{ legal.pk.pa }} PA</span></span></div>
+</div>
+<section aria-label="Gagner des PK" class="pkm-rules-card">
+<h3><img src="img/brand/pk.svg" alt="" width="22" height="22">Gagner des PK</h3>
+<div class="pkm-rules-earn"><sc-for list="{{ legal.pk.earn }}" as="lre" hint-placeholder-count="3"><div><b>{{ lre.big }}</b><span>{{ lre.label }}</span><em>{{ lre.note }}</em></div></sc-for></div>
+<p class="pkm-rules-note">Ajouter des cartes ou ouvrir l’app ne rapporte pas de PK.</p>
+</section>
+<section aria-label="Booster PK" class="pkm-rules-card">
+<h3><span class="pkm-rules-ico" aria-hidden="true">🎁</span>Booster PK</h3>
+<p class="pkm-rules-note">Un booster gratuit, plus souvent selon ton grade. Ce qu’il peut contenir :</p>
+<div class="pkm-rules-odds" aria-hidden="true"><sc-for list="{{ legal.pk.odds }}" as="lro" hint-placeholder-count="5"><i style="{{ lro.w }}; background: {{ lro.color }}"></i></sc-for></div>
+<ul class="pkm-rules-legend"><sc-for list="{{ legal.pk.odds }}" as="lrl" hint-placeholder-count="5"><li><i aria-hidden="true" style="background: {{ lrl.color }}"></i><b>{{ lrl.pk }}</b><span>{{ lrl.pct }}</span></li></sc-for></ul>
+</section>
+<section aria-label="Pile ou face" class="pkm-rules-card">
+<h3><span class="pkm-rules-ico" aria-hidden="true">🪙</span>Pile ou face</h3>
+<div class="pkm-rules-coin">
+<div><img src="img/brand/pk.svg" alt="" width="54" height="54" class="pkm-rules-spin"><b>{{ legal.pk.coinWin }}</b><span>Face « gemme PK »</span></div>
+<span class="pkm-rules-vs" aria-hidden="true">ou</span>
+<div><span class="pkm-gm-dead" style="width: 54px; height: 54px"></span><b>0 PK</b><span>Face « cristal éteint »</span></div>
+</div>
+<p class="pkm-rules-note">Une chance sur deux. Ouvert à partir du grade Chasseur.</p>
+</section>
+<section aria-label="Délais selon le grade" class="pkm-rules-card">
+<h3><span class="pkm-rules-ico" aria-hidden="true">⏱️</span>Plus ton grade monte, plus tu joues</h3>
+<div role="table" aria-label="Délais et scans par grade" class="pkm-rules-table">
+<div role="row" class="pkm-rules-row pkm-rules-th"><span role="columnheader">Grade</span><span role="columnheader">Booster</span><span role="columnheader">Pièce</span><span role="columnheader">Scans / j</span></div>
+<sc-for list="{{ legal.pk.grades }}" as="lrg" hint-placeholder-count="6"><div role="row" class="{{ lrg.cls }}" aria-label="{{ lrg.aria }}"><span role="cell" class="pkm-rules-gname"><img src="{{ lrg.img }}" alt="" width="28" height="28">{{ lrg.name }}</span><span role="cell">{{ lrg.booster }}</span><span role="cell">{{ lrg.coin }}</span><span role="cell">{{ lrg.scans }}</span></div></sc-for>
+</div>
+</section>
+<section aria-label="Points d’Aura" class="pkm-rules-card pkm-rules-aura">
+<h3><img src="img/brand/pa.svg" alt="" width="22" height="22">Points d’Aura (PA)</h3>
+<p class="pkm-rules-note">Ouvre l’app une fois par jour : tes PA montent avec les jours d’affilée.</p>
+<div class="pkm-rules-streak"><sc-for list="{{ legal.pk.streak }}" as="lrs" hint-placeholder-count="5"><div class="{{ lrs.cls }}"><b>{{ lrs.pa }}</b><span>{{ lrs.day }}</span></div></sc-for></div>
+<p class="pkm-rules-note">Un jour manqué : la série reprend à +15 PA. Les PA font évoluer ton Pokémon dans le Pokédex :</p>
+<div class="pkm-rules-evo"><sc-for list="{{ legal.pk.evo }}" as="lrv" hint-placeholder-count="3"><div><span>{{ lrv.label }}</span><b>{{ lrv.pa }}</b></div></sc-for></div>
+</section>
+<section aria-label="PK shop" class="pkm-rules-card">
+<h3><span class="pkm-rules-ico" aria-hidden="true">🛍️</span>PK shop</h3>
+<div class="pkm-rules-shop"><sc-for list="{{ legal.pk.shop }}" as="lrp" hint-placeholder-count="3"><div><img src="{{ lrp.img }}" alt="" width="44" height="44"><span><b>{{ lrp.name }}</b><em>{{ lrp.grade }}</em></span><strong>{{ lrp.price }}</strong></div></sc-for></div>
+<p class="pkm-rules-note">Le tirage au sort suivra un règlement publié avant le tirage. L’envoi des lots demandera un compte et une adresse.</p>
+</section>
+<section aria-label="Pas un jeu d’argent" class="pkm-rules-card pkm-rules-free">
+<h3><span class="pkm-rules-ico" aria-hidden="true">✅</span>Pas un jeu d’argent</h3>
+<div class="pkm-rules-badges"><sc-for list="{{ legal.pk.free }}" as="lrf" hint-placeholder-count="3"><div><b>{{ lrf.big }}</b><span>{{ lrf.label }}</span></div></sc-for></div>
+<p class="pkm-rules-note">Les tirages se font au hasard sur ton appareil. Ton solde est gardé sur cet appareil, avec ta sauvegarde. Les montants et les règles peuvent évoluer pendant la démonstration.</p>
+</section>
+<details class="pkm-rules-full"><summary>Lire le texte complet des règles</summary>
+<sc-for list="{{ legal.blocks }}" as="lgb" hint-placeholder-count="4">
+<div style="flex: none; display: flex; flex-direction: column; gap: 4px">
+<h3 style="margin: 0; font-size: 14.5px; font-weight: 700">{{ lgb.title }}</h3>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: #C9D3EA">{{ lgb.text }}</p>
+</div>
+</sc-for>
+</details>
+</div>
+</sc-if>
 </section>
 </div>
 </sc-if>
@@ -1659,29 +1710,50 @@
 <sc-if value="{{ gm.c.locked }}" hint-placeholder-val="{{ false }}"><p style="margin: -4px 0 0; text-align: center; font-size: 13px; line-height: 1.4; color: #C9D3EA">{{ gm.c.lockText }}</p></sc-if>
 </section>
 
-<section aria-label="Évolution" class="pkm-dark pkm-evo" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #3B2A6B; background: radial-gradient(120% 90% at 50% 0%, rgba(178, 107, 255, 0.24), rgba(178, 107, 255, 0) 62%), #111A2C; color: #F3F6FC; position: relative; overflow: hidden">
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
-<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Évolution</h2>
-<span style="font-size: 12.5px; color: #C7A6FF">Série : {{ evo.streak }}</span>
+<section aria-label="Pokédex" class="pkm-dark pkm-dex">
+<div class="pkm-dex-title"><h2>Pokédex</h2><span>Série : {{ evo.streak }}</span></div>
+<div class="pkm-dex-device">
+<img src="img/brand/pokedex.svg" alt="" width="400" height="250" class="pkm-dex-device-img">
+<span class="pkm-dex-lcd pkm-dex-lcd-l" aria-hidden="true"><sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><img src="{{ evo.dexImg }}" alt="" width="56" height="56"></sc-if><sc-if value="{{ evo.choosing }}" hint-placeholder-val="{{ false }}"><b class="pkm-dex-q">?</b></sc-if><span>{{ evo.dexName }}</span></span>
+<span class="pkm-dex-lcd pkm-dex-lcd-r"><img src="{{ evo.paLogo }}" alt="" width="64" height="64" class="pkm-pa-logo"><span>{{ evo.pa }} PA</span></span>
 </div>
-<div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 18px; border: 1px solid #3B2A6B; background: rgba(11, 17, 32, 0.6)">
-<img src="{{ evo.paLogo }}" alt="" width="64" height="64" class="pkm-pa-logo" style="flex: none; display: block; width: 64px; height: 64px">
-<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">{{ evo.pa }} PA</span><span style="font-size: 12.5px; color: #C9D3EA">{{ evo.tomorrow }}</span></span>
-</div>
+<p class="pkm-dex-tomorrow">{{ evo.tomorrow }}</p>
+<div class="pkm-dex-screen">
+<div class="pkm-dex-bar"><b>Pokédex</b><span>Route d’évolution<br>Touche un Pokémon pour le voir</span></div>
 <sc-if value="{{ evo.choosing }}" hint-placeholder-val="{{ false }}">
-<p style="margin: 0; font-size: 14px; line-height: 1.45; color: #C9D3EA">Choisis ton starter : il te suivra dans l’app et évoluera grâce à tes PA.</p>
-<div role="group" aria-label="Starters" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
-<sc-for list="{{ evo.starters }}" as="evs" hint-placeholder-count="4"><button type="button" onClick="{{ evs.pick }}" aria-label="{{ evs.aria }}" style="min-height: 44px; padding: 8px 2px; border-radius: 18px; border: 1px solid #3B2A6B; background: rgba(11, 17, 32, 0.6); color: #F3F6FC; font: inherit; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer"><img src="{{ evs.img }}" alt="" width="56" height="56" style="display: block; width: 56px; height: 56px; object-fit: contain; image-rendering: pixelated">{{ evs.name }}</button></sc-for>
+<p class="pkm-dex-intro">Choisis ton starter : il te suivra dans l’app et évoluera grâce à tes PA.</p>
+<div role="group" aria-label="Starters" class="pkm-dex-starters">
+<sc-for list="{{ evo.starters }}" as="evs" hint-placeholder-count="4"><button type="button" onClick="{{ evs.pick }}" aria-label="{{ evs.aria }}" class="pkm-dex-starter"><img src="{{ evs.img }}" alt="" width="56" height="56"><i aria-hidden="true"></i>{{ evs.name }}</button></sc-for>
 </div>
 </sc-if>
 <sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}">
-<div role="list" aria-label="Lignée de ton Pokémon" style="display: flex; align-items: center; justify-content: center; gap: 4px">
-<sc-for list="{{ evo.stages }}" as="evt" hint-placeholder-count="3"><sc-if value="{{ evt.arrow }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></sc-if><div role="listitem" aria-label="{{ evt.aria }}" class="{{ evt.cls }}" style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 18px"><img src="{{ evt.img }}" alt="" width="72" height="72" style="display: block; width: 72px; height: 72px; object-fit: contain; image-rendering: pixelated"><span style="font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">{{ evt.name }}</span><span style="font-size: 11.5px; font-weight: 700; color: {{ evt.statusColor }}">{{ evt.status }}</span></div></sc-for>
+<div class="pkm-dex-cards">
+<div class="pkm-dex-card"><span class="pkm-dex-card-h"><img src="{{ evo.cur.icon }}" alt="" width="40" height="30">Pokémon actuel</span><b>{{ evo.cur.name }}</b><span class="pkm-dex-no">{{ evo.cur.no }} · {{ evo.cur.stage }}</span><span class="pkm-dex-gauge" aria-hidden="true"><i style="width: {{ evo.cur.bar }}"></i></span><span class="pkm-dex-no">PA {{ evo.cur.barText }}</span></div>
+<div class="pkm-dex-card"><span class="pkm-dex-card-h"><img src="{{ evo.sel.icon }}" alt="" width="40" height="30" class="{{ evo.sel.iconCls }}">Pokémon sélectionné</span><b>{{ evo.sel.name }}</b><span class="pkm-dex-no">{{ evo.sel.no }} · {{ evo.sel.form }}</span><span class="pkm-dex-no">Coût : {{ evo.sel.cost }}</span><span class="pkm-dex-no pkm-dex-st">{{ evo.sel.status }}</span></div>
 </div>
-<button type="button" onClick="{{ evo.evolve }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; opacity: {{ evo.btnOp }}">{{ evo.button }}</button>
-<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ evo.note }}</span>
+<div class="pkm-dex-route-wrap">
+<div role="list" aria-label="Lignée de ton Pokémon" class="pkm-dex-route" style="width: {{ evo.dexW }}; height: {{ evo.dexH }}">
+<svg class="pkm-dex-lines" viewBox="{{ evo.dexBox }}" aria-hidden="true"><path d="{{ evo.dexSolid }}" class="pkm-dex-solid"></path><path d="{{ evo.dexDots }}" class="pkm-dex-dots"></path></svg>
+<sc-for list="{{ evo.dexCols }}" as="edc" hint-placeholder-count="3"><span class="pkm-dex-stage" aria-hidden="true" style="{{ edc.pos }}">{{ edc.label }}</span></sc-for>
+<sc-for list="{{ evo.dexNodes }}" as="edn" hint-placeholder-count="3"><button type="button" role="listitem" onClick="{{ edn.pick }}" aria-label="{{ edn.aria }}" aria-pressed="{{ edn.on }}" class="{{ edn.cls }}" style="{{ edn.pos }}"><sc-if value="{{ edn.tag }}" hint-placeholder-val="{{ false }}"><span class="pkm-dex-tag" aria-hidden="true">{{ edn.name }}</span></sc-if><img src="{{ edn.img }}" alt="" width="64" height="64"><i class="pkm-dex-ped" aria-hidden="true"></i><span class="pkm-dex-nm">{{ edn.name }}</span><span class="pkm-dex-ns" style="color: {{ edn.sc }}">{{ edn.status }}</span></button></sc-for>
+</div>
+</div>
+<div class="pkm-dex-sheet">
+<div class="pkm-dex-info">
+<span><em>N°</em>{{ evo.sel.no }}</span><span><em>Forme</em>{{ evo.sel.form }}</span><span><em>Coût</em>{{ evo.sel.cost }}</span><span><em>Lignée</em>{{ evo.sel.line }}</span>
+</div>
+<div class="pkm-dex-show"><img src="{{ evo.sel.img }}" alt="" width="96" height="96" class="{{ evo.sel.cls }}"></div>
+</div>
+<div class="pkm-dex-act">
+<div role="group" aria-label="Actions du Pokédex" class="pkm-dex-hexes"><sc-for list="{{ evo.hexes }}" as="edh" hint-placeholder-count="3"><button type="button" onClick="{{ edh.act }}" aria-disabled="{{ edh.dis }}" aria-label="{{ edh.aria }}" class="{{ edh.cls }}"><span>{{ edh.label }}</span></button></sc-for></div>
+<p class="pkm-dex-msg" role="status">{{ evo.msg }}</p>
+</div>
+<sc-if value="{{ evo.dexAsk }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-dex-ask"><p>{{ evo.dexAskText }}</p><div><button type="button" onClick="{{ evo.megaNo }}" class="pkm-dex-no-btn">Annuler</button><button type="button" onClick="{{ evo.megaYes }}" class="pkm-dex-yes-btn">Méga-évoluer</button></div></div>
 </sc-if>
-<div role="group" aria-label="Méga-évolutions" style="display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid #3B2A6B">
+</sc-if>
+</div>
+<div role="group" aria-label="Méga-évolutions" class="pkm-dex-megas">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px"><h3 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600">Méga-évolutions</h3><span style="font-size: 12.5px; color: #C7A6FF">{{ evo.megaCount }}</span></div>
 <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA">{{ evo.megaIntro }}</p>
 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
@@ -1695,7 +1767,7 @@
 </div>
 </sc-if>
 </div>
-<span style="font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ evo.rules }}</span>
+<p class="pkm-dex-rules">{{ evo.rules }}</p>
 <sc-if value="{{ evo.fx }}" hint-placeholder-val="{{ false }}"><div class="pkm-evo-fx" key="{{ evo.fxKey }}" role="status" aria-live="polite"><span class="pkm-evo-glow" aria-hidden="true"></span><img class="pkm-evo-from" src="{{ evo.fxFrom }}" alt=""><img class="pkm-evo-to" src="{{ evo.fxTo }}" alt=""><span class="pkm-evo-text">{{ evo.fxText }}</span></div></sc-if>
 </section>
 

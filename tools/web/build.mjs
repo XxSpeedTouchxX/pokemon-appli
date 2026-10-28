@@ -930,6 +930,8 @@ nav[aria-label="Aller à une série"] { background: rgba(10, 17, 48, 0.88); back
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${readFileSync(new URL('./fx.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./games.css', import.meta.url), 'utf8')}
+${readFileSync(new URL('./dex.css', import.meta.url), 'utf8')}
+${readFileSync(new URL('./rules.css', import.meta.url), 'utf8')}
 ${cssVars()}
 ${v6Css()}
 ${keyframes}`;

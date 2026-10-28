@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-10-28 (suite) — Didacticiel animé avec la mascotte qui parle, Évolution devenue Pokédex (route façon Digimon), règles des PK et des jeux en images
+
+- **Demandes du porteur :** didacticiel animé, chaque élément encadré, la mascotte (le starter) qui parle avec la bouche qui bouge et un petit bruit pendant que le texte défile, fin « Maintenant que tu connais toute l'appli, tu pourras me trouver ici » sur la place du compagnon ; « Évolution » devient « Pokédex » avec un visuel de Pokédex (sa photo) portant le logo PK ; design complet de l'évolution d'après sa vidéo (route d'évolution de Digimon World Dusk), adapté à Pokémon ; règles des PK et des jeux plus esthétiques et visuelles.
+- **Fait :**
+  - **Didacticiel** (`tools/web/tuto.js`) : 9 étapes ; cadre jaune animé sur chaque partie, reste de l'écran assombri, trait pointillé vers la mascotte, onglet de la barre du bas cerclé ; texte lettre par lettre ; bouche ouverte et fermée en alternance (images au pixel près, `tools/sprites/make_talk.py`) ; petit cri synthétisé (Web Audio, voix par starter, son coupable) ; fin sur le compagnon où le starter saute. Revoir le didacticiel ne remet plus le starter à sa première forme.
+  - **Pokédex** (`pa.js`, `dex.css`) : Pokédex rouge dessiné avec la gemme des PK sur l'objectif (`tools/brand/make_pokedex.py`), Pokémon du moment et solde de PA sur ses écrans ; écran « Route d'évolution » néon (étapes, socles lumineux, trait orange, branches en pointillés pour Méga-Dracaufeu X et Y, panneaux « actuel » et « sélectionné », boutons hexagonaux Évoluer, Compagnon, Méga). Règles inchangées (500, 1 500, 2 500 PA).
+  - **Règles des PK et des jeux** (`legal.js`, `rules.css`) : cartes visuelles (gains, chances du Booster PK en barre, pile ou face, délais et scans par grade avec le grade actuel en avant, série des PA, prix du Pokédex, PK shop, « Pas un jeu d'argent ») ; texte complet gardé, dépliable.
+- **Point d'attention :** Pokédex, sprites et noms relèvent de la décision du porteur sur les visuels Pokémon (2026-10-03) ; le Pokédex est redessiné, pas copié, et ne sert pas d'identité à l'app. Le son du didacticiel est à écouter sur téléphone.
+
 ## 2026-10-28 (suite) — Méga-évolutions à 2 500 PA validées, 500 scans au Grand maître mondial, pastille PA décalée, propositions d'illustration des PA
 
 - **Décisions du porteur :** 2 500 PA par méga-évolution **validé** ; item « Deluxe » à définir plus tard ; Grand maître mondial Pokémon : **500 scans par jour** au lieu de 100.

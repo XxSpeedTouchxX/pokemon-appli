@@ -109,7 +109,7 @@
       ['Tout débloquer', () => { this.setState({ pkOwn: HOME_BUDDIES.map(([k]) => k), toast: 'Tous les compagnons sont débloqués' }); this.flash(); }],
       ['Tout reverrouiller', () => { this.setState({ pkOwn: [], buddy: 25, toast: 'Compagnons reverrouillés (Pikachu remis)' }); this.flash(); }],
       ['Rejouer les jeux (booster, pile ou face)', () => { this.setState({ games: Object.assign({}, s.games || {}, { boosterAt: '', coinAt: '', bPhase: 'idle', cPhase: '' }), toast: 'Booster et pile ou face de nouveau disponibles' }); this.flash(); }],
-      ['+500 PA (jeu d’évolution)', () => { this.setState({ pa: (Number(s.pa) || 0) + 500, toast: '+500 PA' }); this.flash(); }],
+      ['+500 PA (Pokédex)', () => { this.setState({ pa: (Number(s.pa) || 0) + 500, toast: '+500 PA' }); this.flash(); }],
       ['Rejouer bonus du jour et partage', () => { this.setState({ pkDay: '2000-01-01', pkShared: '', toast: 'Bonus du jour au prochain lancement ; partage de nouveau récompensé' }); this.flash(); }]
     ].map(([label, go]) => ({ label: label, go: go }));
     // Prix des compagnons : recherche, puis prix modifiable (vide = règle des stades).

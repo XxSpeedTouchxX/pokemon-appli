@@ -80,7 +80,9 @@
       pa: pa.toLocaleString('fr-FR'), streak: s.paStreak > 1 ? s.paStreak + ' jours d’affilée' : s.paStreak === 1 ? '1er jour' : '—',
       tomorrow: 'Reviens demain : +' + PaCore.tomorrow(s.paStreak) + ' PA',
       rules: 'Ouvre l’app chaque jour : +10, +15, +20, +25, puis +30 PA par jour d’affilée. Un jour manqué : la série reprend à +15 PA.',
-      choosing: !e, chosen: !!e, starters: [], stages: [], button: '', canEvolve: false, evolve: () => this.paEvolve(), btnOp: '1', note: '',
+      choosing: !e, chosen: !!e, starters: [], stages: [], dexNodes: [], dexCols: [], hexes: [], cur: {}, sel: {}, msg: '', dexAsk: false,
+      // Écrans du Pokédex dessiné : le Pokémon du moment à gauche, le solde de PA à droite.
+      dexImg: e ? paSprite(PA_LINES[e.line][e.stage], still) : 'img/pokemon/talk/25-0.png', dexName: e ? paName(PA_LINES[e.line][e.stage]) : 'Choisis ton starter', button: '', canEvolve: false, evolve: () => this.paEvolve(), btnOp: '1', note: '',
       fx: !!s.paFx, fxFrom: s.paFx ? paSprite(s.paFx.from, still) : '', fxTo: s.paFx ? paSprite(s.paFx.to, still) : '',
       fxKey: 'evo-' + (s.paFx ? s.paFx.n : 0), fxText: s.paFx ? paName(s.paFx.from) + ' évolue…' : ''
     };
@@ -100,11 +102,11 @@
             if (has) { this.setState({ buddy: id, megaAsk: null, toast: nom + ' t’accompagne' }); this.flash(); return; }
             if (!baseOk) { this.setState({ megaAsk: null, toast: 'Débloque d’abord ' + paName(base) + ' comme compagnon' }); return; }
             if (pa < PA_MEGA) { this.setState({ megaAsk: null, toast: 'Il te manque ' + (PA_MEGA - pa).toLocaleString('fr-FR') + ' PA pour cette méga-évolution' }); return; }
-            this.setState({ megaAsk: id });
+            this.setState({ megaAsk: id, megaFrom: 'grid' });
           }
         };
       }),
-      megaAsk: !!ask, megaAskText: ask ? 'Faire méga-évoluer ' + paName(ask[1]) + ' en ' + ask[2] + ' pour ' + PA_MEGA.toLocaleString('fr-FR') + ' PA ?' : '',
+      megaAsk: !!ask && s.megaFrom !== 'dex', megaAskText: ask ? 'Faire méga-évoluer ' + paName(ask[1]) + ' en ' + ask[2] + ' pour ' + PA_MEGA.toLocaleString('fr-FR') + ' PA ?' : '',
       megaYes: () => ask && this.paMega(ask[0]), megaNo: () => this.setState({ megaAsk: null })
     });
     if (!e) {
@@ -128,19 +130,95 @@
       r.button = r.canEvolve ? 'Faire évoluer · ' + cost.toLocaleString('fr-FR') + ' PA' : 'Encore ' + (cost - pa).toLocaleString('fr-FR') + ' PA pour évoluer';
       r.note = 'Prochaine évolution : ' + cost.toLocaleString('fr-FR') + ' PA' + (e.stage === 0 && L.length > 2 ? ', puis ' + PA_COST[1].toLocaleString('fr-FR') + ' PA pour la dernière.' : '.');
     }
+    Object.assign(r, this.vDex(s, L, e, pa, still));
     return r;
+  };
+  // ——— Pokédex : route d'évolution (2026-10-28, demande du porteur, d'après la « Digivolution Route » de Digimon
+  // World Dusk) ———
+  // Étiquettes des étapes en haut (Base, Évolution 1, Évolution 2, Méga), un socle lumineux par Pokémon, reliés par un
+  // trait orange ; une deuxième méga-évolution (Dracaufeu X et Y) part en pointillés sur une ligne en dessous.
+  // Au-dessus : « Pokémon actuel » et « Pokémon sélectionné » ; en dessous : la fiche du Pokémon touché, avec ses
+  // boutons en hexagone (Évoluer, Compagnon, Méga) et un message. Le Pokémon touché est gardé dans dexSel (non
+  // enregistré) ; par défaut, la prochaine évolution.
+  const DEX_COL = 78, DEX_TOP = 50, DEX_ROW = 112, DEX_FORM = ['Base', 'Évolution 1', 'Évolution 2'];
+  const dexNo = n => '#' + String(n).padStart(3, '0');
+  paProto.vDex = function (s, L, e, pa, still) {
+    const owned = paMegas(s), megas = HOME_MEGAS.filter(m => L.indexOf(m[1]) >= 0);
+    const nodes = L.map((n, i) => ({ id: n, col: i, row: 0, mega: null, open: i <= e.stage, cost: i ? PA_COST[i - 1] : 0, form: DEX_FORM[i] }));
+    megas.forEach((m, k) => nodes.push({ id: m[0], col: L.length, row: k, mega: m, open: owned.indexOf(m[0]) >= 0, cost: PA_MEGA, form: 'Méga' }));
+    const cols = L.length + (megas.length ? 1 : 0), rows = megas.length > 1 ? 2 : 1;
+    const cx = c => c * DEX_COL + DEX_COL / 2, cy = w => DEX_TOP + w * DEX_ROW + 84;
+    const nextId = e.stage < L.length - 1 ? L[e.stage + 1] : L[e.stage];
+    const sel = nodes.find(n => n.id === s.dexSel) || nodes.find(n => n.id === nextId);
+    // Traits : la route (ligne du haut) en continu, les branches en pointillés.
+    let solid = '', dots = '';
+    nodes.forEach(n => {
+      if (n.row === 0 && n.col > 0) solid += 'M' + cx(n.col - 1) + ' ' + (cy(0) - 35) + 'H' + cx(n.col);
+      if (n.row > 0) { const b = L.indexOf(n.mega[1]); dots += 'M' + cx(b) + ' ' + (cy(0) - 24) + 'V' + (cy(n.row) - 35) + 'H' + (cx(n.col) - 30); }
+    });
+    const nm = n => n.open ? paName(n.id) : '???';
+    const status = n => {
+      if (n.open) return s.buddy === n.id ? 'Ton compagnon' : n.id === L[e.stage] ? 'Ton Pokémon' : 'Débloqué';
+      if (n.mega && !pkOwns(s, n.mega[1])) return 'Il faut ' + paName(n.mega[1]);
+      return 'À débloquer';
+    };
+    const isNext = n => !n.mega && n.col === e.stage + 1;
+    const nodeView = n => ({
+      img: n.open ? paSprite(n.id, still) : 'img/pokemon/' + n.id + '.png',
+      cls: 'pkm-dex-node' + (n.open ? '' : (n.mega ? ' pkm-dex-lockm' : ' pkm-evo-lock')) + (n.row > 0 ? ' pkm-dex-alt' : '') + (n.id === L[e.stage] ? ' pkm-dex-now' : '') + (sel && sel.id === n.id ? ' pkm-dex-on' : ''),
+      pos: 'left: ' + (cx(n.col) - 39) + 'px; top: ' + (cy(n.row) - 92) + 'px',
+      name: nm(n), status: n.open ? status(n) : n.cost.toLocaleString('fr-FR') + ' PA', sc: n.open ? '#9FF5C0' : isNext(n) || (n.mega && pa >= PA_MEGA && pkOwns(s, n.mega[1])) ? '#FFE27A' : '#C9D3EA',
+      on: !!(sel && sel.id === n.id), tag: !!(sel && sel.id === n.id),
+      aria: (n.open ? paName(n.id) : (n.mega ? 'Méga-évolution' : 'Évolution') + ' à débloquer') + ', ' + n.form + ', ' + status(n),
+      pick: () => this.setState({ dexSel: n.id, megaAsk: null })
+    });
+    const curId = L[e.stage], next = PA_COST[e.stage];
+    const v = {
+      dexW: cols * DEX_COL + 'px', dexH: (DEX_TOP + rows * DEX_ROW + 8) + 'px', dexBox: '0 0 ' + (cols * DEX_COL) + ' ' + (DEX_TOP + rows * DEX_ROW + 8),
+      dexSolid: solid || 'M0 0', dexDots: dots || 'M0 0',
+      dexCols: Array.from({ length: cols }, (x, i) => ({ label: i < L.length ? DEX_FORM[i] : 'Méga', pos: 'left: ' + (i * DEX_COL + 6) + 'px; width: ' + (DEX_COL - 12) + 'px' })),
+      dexNodes: nodes.map(nodeView),
+      cur: { img: paSprite(curId, still), icon: 'img/pokemon/icon/' + curId + '.png', name: paName(curId), no: dexNo(curId), stage: 'Stade ' + (e.stage + 1) + ' / ' + L.length,
+        bar: (next ? Math.min(100, Math.round(pa / next * 100)) : 100) + '%', barText: next ? pa.toLocaleString('fr-FR') + ' / ' + next.toLocaleString('fr-FR') + ' PA' : 'Forme finale' }
+    };
+    if (!sel) return v;
+    const megaOk = sel.mega && !sel.open && pkOwns(s, sel.mega[1]) && pa >= PA_MEGA;
+    const evoOk = isNext(sel) && pa >= sel.cost && !s.paFx;
+    v.sel = {
+      img: sel.open ? paSprite(sel.id, still) : 'img/pokemon/' + sel.id + '.png', cls: sel.open ? 'pkm-dex-big' : 'pkm-dex-big pkm-dex-sil',
+      icon: 'img/pokemon/icon/' + sel.id + '.png', iconCls: sel.open ? '' : 'pkm-dex-sil',
+      name: nm(sel), no: dexNo(sel.mega ? sel.mega[1] : sel.id) + (sel.mega ? ' Méga' : ''), form: sel.form, status: status(sel),
+      cost: sel.col === 0 ? 'Offert' : sel.cost.toLocaleString('fr-FR') + ' PA',
+      line: paName(L[0]) + (L.length > 1 ? ' › ' + L.slice(1).map((n, i) => (i < e.stage ? paName(n) : '???')).join(' › ') : '')
+    };
+    const hex = (label, ok, cls, act, aria) => ({ label: label, cls: 'pkm-dex-hex ' + (ok ? cls : 'pkm-dex-hex-off'), dis: !ok, act: ok ? act : () => {}, aria: aria });
+    v.hexes = [
+      hex('Évoluer', evoOk, 'pkm-dex-hex-or', () => this.paEvolve(), 'Faire évoluer ' + paName(curId) + (isNext(sel) ? ' pour ' + sel.cost + ' PA' : '')),
+      hex('Compagnon', sel.open && s.buddy !== sel.id, 'pkm-dex-hex-gr', () => { this.setState({ buddy: sel.id, toast: paName(sel.id) + ' t’accompagne' }); this.flash(); }, 'Choisir comme compagnon'),
+      hex('Méga', megaOk, 'pkm-dex-hex-pu', () => this.setState({ megaAsk: sel.id, megaFrom: 'dex' }), 'Méga-évoluer pour ' + PA_MEGA + ' PA')
+    ];
+    // Message du bas (la boîte « Check usable attacks » de la vidéo).
+    let msg;
+    if (sel.open) msg = s.buddy === sel.id ? paName(sel.id) + ' t’accompagne sur l’accueil.' : paName(sel.id) + ' est débloqué : touche « Compagnon » pour qu’il t’accompagne.';
+    else if (isNext(sel)) msg = evoOk ? 'Prêt ! Touche « Évoluer » : ' + sel.cost.toLocaleString('fr-FR') + ' PA.' : 'Encore ' + (sel.cost - pa).toLocaleString('fr-FR') + ' PA pour évoluer.';
+    else if (sel.mega) msg = !pkOwns(s, sel.mega[1]) ? 'Fais d’abord évoluer jusqu’à ' + paName(sel.mega[1]) + '.' : megaOk ? 'Touche « Méga » : ' + PA_MEGA.toLocaleString('fr-FR') + ' PA.' : 'Encore ' + (PA_MEGA - pa).toLocaleString('fr-FR') + ' PA pour la méga-évolution.';
+    else msg = 'Débloque d’abord l’évolution précédente.';
+    v.msg = msg;
+    const ask = s.megaFrom === 'dex' && HOME_MEGAS.find(x => x[0] === s.megaAsk);
+    v.dexAsk = !!ask; v.dexAskText = ask ? 'Faire méga-évoluer ' + paName(ask[1]) + ' en ' + ask[2] + ' pour ' + PA_MEGA.toLocaleString('fr-FR') + ' PA ?' : '';
+    return v;
   };
   // En-tête : les PA à la place de la barre des tickets (les tickets restent dans le PK shop).
   const paBasePk = paProto.pkView;
   paProto.pkView = function (s) {
     const v = paBasePk.call(this, s), pa = Number(s.pa) || 0;
-    return Object.assign(v, { wrapCls: 'pkm-pk-tk', pa: pa.toLocaleString('fr-FR'), paAria: 'Mes points d’Aura : ' + pa + ' PA. Ouvrir le jeu d’évolution',
+    return Object.assign(v, { wrapCls: 'pkm-pk-tk', pa: pa.toLocaleString('fr-FR'), paAria: 'Mes points d’Aura : ' + pa + ' PA. Ouvrir le Pokédex',
       // Le solde de PA ouvre Jeux et descend jusqu'au jeu d'évolution, où les PA sont expliqués.
-      openPa: () => { this.tab('market'); setTimeout(() => { const el = document.querySelector('section[aria-label="Évolution"]'); if (el) el.scrollIntoView({ block: 'start', behavior: paStill() ? 'auto' : 'smooth' }); }, 520); }, paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') });
+      openPa: () => { this.tab('market'); setTimeout(() => { const el = document.querySelector('section[aria-label="Pokédex"]'); if (el) el.scrollIntoView({ block: 'start', behavior: paStill() ? 'auto' : 'smooth' }); }, 520); }, paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') });
   };
   const paBaseRender = paProto.renderVals;
   paProto.renderVals = function () {
     const s = this.st(), r = paBaseRender.call(this);
-    r.evo = r.ui.isGames ? this.vEvo(s) : { starters: [], stages: [], megas: [] };
+    r.evo = r.ui.isGames ? this.vEvo(s) : { starters: [], stages: [], megas: [], dexNodes: [], dexCols: [], hexes: [], cur: {}, sel: {} };
     return r;
   };

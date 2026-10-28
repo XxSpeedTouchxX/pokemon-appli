@@ -17,3 +17,7 @@ Sur l'accueil, un Pokémon animé accompagne la valeur de la collection. On le c
 ## Méga-évolutions (2026-10-28)
 
 `fetch_megas.py` récupère les 15 méga-évolutions des Pokémon de Kanto (identifiants PokeAPI 10033 à 10044, 10071, 10073, 10090) : GIF animé de Pokémon Showdown, PNG fixe de PokeAPI, icône recadrée et centrée sur 96 px. Elles se débloquent avec des PA dans le jeu d'évolution (`tools/web/pa.js`) et deviennent des compagnons. `megas.json` donne l'id, le n° de base, le nom français et les empreintes. Le build vérifie qu'il y en a 15, chacune avec ses trois images et son Pokémon de base parmi les compagnons. Régénérer : `python3 tools/sprites/fetch_megas.py`.
+
+## Mascotte qui parle (2026-10-28)
+
+`make_talk.py` prépare la mascotte du didacticiel (`tools/web/tuto.js`) pour les quatre starters (Bulbizarre, Salamèche, Carapuce, Pikachu) : à partir de l'image fixe, deux images recadrées sur 52 × 54 px, **bouche fermée** (`web/img/pokemon/talk/{n}-0.png`, le sprite d'origine) et **bouche ouverte** (`{n}-1.png`, bouche redessinée au pixel près : intérieur sombre, langue). Le didacticiel les alterne pendant que le texte s'écrit, affichées à 2 × (pixels nets). Régénérer : `python3 tools/sprites/make_talk.py`.
