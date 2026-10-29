@@ -135,6 +135,42 @@
     return out;
   };
 
+  // ——— Vu, puis attrapé (2026-10-29, proposition 2 validée par le porteur) ———
+  // Comme dans les jeux : un Pokémon est « vu » dès qu'on scanne une de ses cartes (il sort de sa silhouette, en
+  // couleur), « attrapé » quand on le débloque avec des PA (statistiques et description). Le déblocage ne demande pas
+  // de l'avoir vu et le scan ne rapporte pas de PA (choix par défaut, en attendant l'équilibre des PA). État : dexSeen.
+  const dexSeenList = s => (Array.isArray(s.dexSeen) ? s.dexSeen : []);
+  const dexSeen = (s, n) => dexOwn(s, n) || dexSeenList(s).indexOf(n) >= 0;
+  const dexBaseScanPick = dexProto.scanPick;
+  dexProto.scanPick = function (id) {
+    dexBaseScanPick.call(this, id);
+    const p = TCG.item(id);
+    if (!p || p.type !== 'card') return;
+    const s = this.st(), fresh = dexMatch(p.name).filter(n => DEX[n] && !dexSeen(s, n));
+    if (!fresh.length) return;
+    this.setState({ dexSeen: dexSeenList(s).concat(fresh), toast: 'Pokédex : ' + fresh.map(n => DEX[n].name).join(' et ') + (fresh.length > 1 ? ' vus' : ' vu') + ' pour la première fois !' });
+    this.flash();
+  };
+  // ——— Progression (2026-10-29, proposition 4 validée par le porteur) ———
+  // Attrapés et vus sur les 171 Pokémon (156 et 15 méga-évolutions), par stade, et par type sur les 156 de « Tous les
+  // Pokémon » (un Pokémon à deux types compte dans les deux) ; un type ouvre cette liste filtrée sur lui.
+  const DEX_STAGES = [['Forme de base', e => !e.mega && !e.leg && dexStage(e.n) === 0], ['1ʳᵉ évolution', e => !e.mega && !e.leg && dexStage(e.n) === 1],
+    ['2ᵉ évolution', e => !e.mega && !e.leg && dexStage(e.n) >= 2], ['Légendaires et fabuleux', e => !e.mega && !!e.leg], ['Méga-évolutions', e => !!e.mega]];
+  const dexPct = (a, b) => 'width: ' + (b ? Math.round(a / b * 100) : 0) + '%';
+  dexProto.vDexProgress = function (s) {
+    const all = DEX_DATA, own = all.filter(e => dexOwn(s, e.n)).length, seen = all.filter(e => dexSeen(s, e.n)).length, N = all.length;
+    const types = Object.keys(DEX_TYPE).map(t => {
+      const list = DEX_IDS.map(n => DEX[n]).filter(e => e.types.indexOf(t) >= 0), got = list.filter(e => dexOwn(s, e.n)).length, c = DEX_TYPE[t];
+      return { t: t, n: got + '/' + list.length, total: list.length, style: 'background: ' + c + '; color: ' + (dexLight(c) ? '#0B1120' : '#FFFFFF'),
+        aria: t + ' : ' + got + ' attrapés sur ' + list.length + ', voir la liste', go: () => { this.setState({ dexList: true, dexQ: '', dexF: 'type:' + t }); dexListKeys(this); } };
+    }).filter(x => x.total > 0);
+    return {
+      own: own + ' / ' + N, seen: seen + ' / ' + N, ownW: dexPct(own, N), seenW: dexPct(seen, N), pct: Math.round(own / N * 100) + ' % attrapés',
+      stages: DEX_STAGES.map(([l, f]) => { const list = all.filter(f), got = list.filter(e => dexOwn(s, e.n)).length; return { label: l, n: got + ' / ' + list.length, w: dexPct(got, list.length) }; }),
+      types: types, tip: 'Scanne une carte d’un Pokémon pour le voir ; débloque-le avec tes PA pour l’attraper.'
+    };
+  };
+
   // Ouvrir le Pokédex (compagnon de l'accueil, « Mes PK », didacticiel) : onglet Jeux, Pokémon choisi, liste au besoin.
   dexProto.dexOpen = function (n, list) {
     const go = () => { const el = document.querySelector('section[aria-label="Pokédex"]'); if (el && !list) el.scrollIntoView({ block: 'start', behavior: dexStill() ? 'auto' : 'smooth' }); };
@@ -213,9 +249,9 @@
         return {
           img: dexSprite(x.n, still), sz: dexSize(x.e, hmax, DEX_PX, still, fit), name: dexShort(x.e), status: status(x), on: on, tag: on,
           sc: own ? '#9FF5C0' : can(x) ? '#FFE27A' : '#C9D3EA',
-          cls: 'pkm-dex-node' + (own ? '' : ' pkm-dex-lock') + (x.row > 0 ? ' pkm-dex-alt' : '') + (s.buddy === x.n ? ' pkm-dex-now' : '') + (on ? ' pkm-dex-on' : '') + (still ? ' pkm-dex-still' : ''),
+          cls: 'pkm-dex-node' + (own ? '' : ' pkm-dex-lock') + (!own && dexSeen(s, x.n) ? ' pkm-dex-seen' : '') + (x.row > 0 ? ' pkm-dex-alt' : '') + (s.buddy === x.n ? ' pkm-dex-now' : '') + (on ? ' pkm-dex-on' : '') + (still ? ' pkm-dex-still' : ''),
           pos: 'left: ' + (route.cx(x.col) - DEX_COL / 2) + 'px; top: ' + route.ty(x.row) + 'px',
-          aria: x.e.name + ', ' + (x.e.mega ? 'méga-évolution' : DEX_FORMS[Math.min(dexStage(x.n), 2)]) + ', ' + status(x),
+          aria: x.e.name + ', ' + (x.e.mega ? 'méga-évolution' : DEX_FORMS[Math.min(dexStage(x.n), 2)]) + ', ' + (!own && dexSeen(s, x.n) ? 'vu, ' : '') + status(x),
           pick: () => this.setState({ dexSel: x.n, megaAsk: null })
         };
       }),
@@ -237,12 +273,14 @@
     else if (s.paFx) act = 'Évolution en cours…';
     else { act = (from ? (e.mega ? 'Méga-évoluer' : 'Faire évoluer') : 'Débloquer') + ' · ' + dexNum(price) + ' PA'; actOn = true; actGo = () => (e.mega ? this.setState({ megaAsk: sel }) : this.dexUnlock(sel)); }
     v.sel = {
-      img: dexSprite(sel, still), sz: dexSize(e, hmax, DEX_PX_BIG, still, fitBig), size: (e.h / 10).toLocaleString('fr-FR') + ' m', cls: 'pkm-dex-big' + (own ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
+      img: dexSprite(sel, still), sz: dexSize(e, hmax, DEX_PX_BIG, still, fitBig), size: (e.h / 10).toLocaleString('fr-FR') + ' m', cls: 'pkm-dex-big' + (dexSeen(s, sel) ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
+      secret: dexSeen(s, sel) ? '🔒 Vu ! Débloque-le avec tes PA pour découvrir ses statistiques et sa description.' : '🔒 Pas encore vu : scanne une de ses cartes pour le voir, puis débloque-le avec tes PA pour découvrir ses statistiques et sa description.',
       types: e.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })),
       rows: [
         ['Stade', stage], ['Taille', (e.h / 10).toLocaleString('fr-FR') + ' m'], ['Poids', (e.w / 10).toLocaleString('fr-FR') + ' kg'],
         ['Talents', e.abil.join(', ') || '—'], ['Habitat', e.hab ? e.hab.charAt(0).toUpperCase() + e.hab.slice(1) : '—'],
-        ['Capture', e.cap ? dexCapture(e.cap) : '—'], ['Rareté', rare], ['Prix', price ? dexNum(price) + ' PA' : 'Offert']
+        ['Capture', e.cap ? dexCapture(e.cap) : '—'], ['Rareté', rare], ['Prix', price ? dexNum(price) + ' PA' : 'Offert'],
+        ['Pokédex', own ? 'Attrapé' : dexSeen(s, sel) ? 'Vu' : 'Pas encore vu']
       ].map(([k, x]) => ({ k: k, v: x })),
       evo: evoText.map(t => ({ t: t })), hasEvo: evoText.length > 0,
       stats: e.stats.map((x, i) => ({ k: DEX_STATS[i], v: x, w: 'width: ' + Math.round(x / 255 * 100) + '%' })),
@@ -257,8 +295,9 @@
     // évoluer, choisir comme compagnon), sinon dit pourquoi elle n'est pas possible.
     const order = route.nodes.slice().sort((a, b) => a.col - b.col || a.row - b.row).map(x => x.n);
     const fi = order.indexOf(sel), ni = DEX_NUMS.indexOf(e.mega ? e.from : sel), L = DEX_NUMS.length;
-    v.dexImg = dexSprite(sel, still); v.dexCls = own ? '' : 'pkm-dex-sil'; v.dexName = e.name;
-    v.dexSay = 'Pokédex : ' + e.name + ', ' + dexNo(e) + (own ? '' : ', à débloquer');
+    v.dexImg = dexSprite(sel, still); v.dexCls = dexSeen(s, sel) ? '' : 'pkm-dex-sil'; v.dexName = e.name;
+    v.dexSay = 'Pokédex : ' + e.name + ', ' + dexNo(e) + (own ? '' : dexSeen(s, sel) ? ', vu, à débloquer' : ', à débloquer');
+    v.prog = this.vDexProgress(s);
     v.pad = {
       left: () => this.dexPadGo(order[(fi - 1 + order.length) % order.length]),
       right: () => this.dexPadGo(order[(fi + 1) % order.length]),
@@ -293,7 +332,7 @@
     document.addEventListener('keydown', key);
   };
   // Liste complète : recherche par nom ou n°, filtres, grille de 3 ; un appui ouvre la route et la fiche.
-  const DEX_FILTERS = [['all', 'Tous'], ['own', 'Débloqués'], ['lock', 'À débloquer'], ['leg', 'Légendaires']];
+  const DEX_FILTERS = [['all', 'Tous'], ['own', 'Débloqués'], ['seen', 'Vus'], ['lock', 'À débloquer'], ['leg', 'Légendaires']];
   dexProto.vDexList = function (s) {
     if (!s.dexList) return { open: false, items: [], filters: [] };
     const f = s.dexF || 'all', q = fold(String(s.dexQ || '').trim()), qn = q.replace(/^(n°|no|#)?\s*0*/, ''), pa = Number(s.pa) || 0;
@@ -302,19 +341,23 @@
       if (f === 'own' && !own) return false;
       if (f === 'lock' && own) return false;
       if (f === 'leg' && !e.leg) return false;
+      if (f === 'seen' && (own || !dexSeen(s, e.n))) return false;
+      if (f.indexOf('type:') === 0 && e.types.indexOf(f.slice(5)) < 0) return false;
       return !q || fold(e.name).indexOf(q) >= 0 || (qn !== '' && String(e.n) === qn);
     }).map(e => {
       const own = dexOwn(s, e.n), price = dexPrice(e.n), ok = !own && (!e.from || dexOwn(s, e.from)) && pa >= price;
-      return { no: '#' + String(e.n).padStart(3, '0'), name: e.name, img: 'img/pokemon/icon/' + e.n + '.png', imgCls: own ? '' : 'pkm-dex-sil',
-        status: own ? (s.buddy === e.n ? 'Compagnon' : 'Débloqué') : price ? dexNum(price) + ' PA' : 'Offert',
+      return { no: '#' + String(e.n).padStart(3, '0'), name: e.name, img: 'img/pokemon/icon/' + e.n + '.png', imgCls: dexSeen(s, e.n) ? '' : 'pkm-dex-sil',
+        status: own ? (s.buddy === e.n ? 'Compagnon' : 'Débloqué') : (dexSeen(s, e.n) ? 'Vu · ' : '') + (price ? dexNum(price) + ' PA' : 'Offert'),
         cls: 'pkm-dexl-item' + (own ? ' pkm-dexl-own' : '') + (ok ? ' pkm-dexl-can' : '') + (s.buddy === e.n ? ' pkm-dexl-buddy' : ''),
-        aria: e.name + ', n° ' + e.n + ', ' + (own ? 'débloqué' : 'à débloquer pour ' + price + ' PA'),
+        aria: e.name + ', n° ' + e.n + ', ' + (own ? 'débloqué' : (dexSeen(s, e.n) ? 'vu, ' : '') + 'à débloquer pour ' + price + ' PA'),
         go: () => { if (this.st().screen !== 'market') this.tab('market'); this.setState({ dexList: false, dexSel: e.n }); setTimeout(() => { const el = document.querySelector('[aria-label="Route d’évolution"]'); if (el) el.scrollIntoView({ block: 'start', behavior: dexStill() ? 'auto' : 'smooth' }); }, 80); } };
     });
     return {
       open: true, close: () => { this.setState({ dexList: false }); setTimeout(() => { const b = document.querySelector('.pkm-dex-all'); if (b) b.focus({ preventScroll: true }); }, 60); }, q: s.dexQ || '', onQ: ev => this.setState({ dexQ: ev.target.value }),
       count: DEX_IDS.filter(k => dexOwn(s, k)).length + ' / ' + DEX_IDS.length + ' débloqués · ' + dexNum(pa) + ' PA',
-      filters: DEX_FILTERS.map(([k, l]) => Object.assign({ label: l, on: f === k, pick: () => this.setState({ dexF: k }) }, this.chip(f === k))),
+      // Filtre d'un type (depuis « Ma progression ») : une bulle de plus, qui le retire au toucher.
+      filters: DEX_FILTERS.map(([k, l]) => Object.assign({ label: l, on: f === k, pick: () => this.setState({ dexF: k }) }, this.chip(f === k)))
+        .concat(f.indexOf('type:') === 0 ? [Object.assign({ label: f.slice(5) + ' ✕', on: true, pick: () => this.setState({ dexF: 'all' }) }, this.chip(true))] : []),
       items: items, empty: !items.length
     };
   };

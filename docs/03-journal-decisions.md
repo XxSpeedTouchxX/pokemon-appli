@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-10-29 (suite) — Pokédex : vu par le scan, attrapé avec des PA, progression
+
+- **Décision du porteur** (« go faire 2 et 4 ») :
+  - **2. Vu / attrapé** : scanner une carte d'un Pokémon le fait « voir » (il sort de sa silhouette) ; le débloquer avec des PA l'« attrape » ;
+  - **4. Progression** : attrapés et vus sur 171, par stade et par type.
+- **Choix par défaut, à confirmer par le porteur** : le déblocage ne demande pas d'avoir vu le Pokémon ; le scan ne rapporte pas de PA (l'équilibre des PA reste à trancher) ; seul le scan fait « voir » (une carte ajoutée autrement ne compte pas), pour donner une raison de scanner.
+- **Mesure prévue** : scans par semaine et part des scans qui font voir un nouveau Pokémon.
+
+---
+
 ## 2026-10-29 — Pokédex : les cartes de chaque Pokémon et le Pokédex dessiné cliquable
 
 - **Décision du porteur** (« go faire 1 et 3 », sur ma liste de propositions pour le Pokédex) :
