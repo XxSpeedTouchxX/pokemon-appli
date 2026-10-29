@@ -40,7 +40,7 @@
   // hauteur de sa taille réelle (fiche du Pokédex), le plus grand à DEX_PX px ; une méga-évolution est toujours un peu
   // plus grande que sa forme de base (au moins 10 %), même quand le Pokédex leur donne la même taille. Plancher de
   // DEX_PX_MIN px pour qu'un tout petit Pokémon reste visible (Magicarpe à côté de Léviator).
-  const DEX_PX = 84, DEX_PX_BIG = 104, DEX_PX_MIN = 20, DEX_CAPW = 140, DEX_CAPW_BIG = 176;
+  const DEX_PX = 84, DEX_PX_BIG = 104, DEX_PX_MIN = 20, DEX_CAPW = 140, DEX_CAPW_BIG = 136;
   const dexH = e => (e.mega && DEX[e.from] ? Math.max(e.h, Math.ceil(DEX[e.from].h * 1.1)) : e.h);
   const dexFam = n => DEX_DATA.filter(e => e.fam === DEX[n].fam && (e.mega || DEX_IDS.indexOf(e.n) >= 0));
   const dexFamMax = n => Math.max(...dexFam(n).map(dexH));
@@ -49,12 +49,13 @@
   // proportions restent justes et rien ne déborde de plus d'une colonne.
   const dexAsp = (e, still) => (still ? (e.box[2] - e.box[0]) / Math.max(1, e.box[3] - e.box[1]) : e.gif[0] / Math.max(1, e.gif[1]));
   const dexFamFit = (n, max, top, cap, still) => Math.min(1, ...dexFam(n).map(e => cap / Math.max(1, top * dexH(e) / max * dexAsp(e, still))));
-  // Style de l'image : hauteur voulue du Pokémon ; image fixe agrandie d'après sa boîte, pieds et centre recalés.
+  // Style de l'image : hauteur voulue du Pokémon ; image fixe agrandie d'après sa boîte, pieds et centre recalés
+  // (décalage en px par « translate », jamais en %). La fiche ne déborde pas de sa colonne de 128 px (DEX_CAPW_BIG).
   const dexSize = (e, max, top, still, fit) => {
     const p = Math.max(DEX_PX_MIN, Math.round(top * fit * dexH(e) / max));
     if (!still) return 'height: ' + p + 'px';
     const [x0, y0, x1, y1] = e.box, H = Math.round(p * 96 / Math.max(1, y1 - y0));
-    return 'height: ' + H + 'px; width: ' + H + 'px; margin-bottom: -' + Math.round((96 - y1) * H / 96) + 'px; margin-left: ' + Math.round((48 - (x0 + x1) / 2) * H / 96) + 'px';
+    return 'height: ' + H + 'px; width: ' + H + 'px; margin-bottom: -' + Math.round((96 - y1) * H / 96) + 'px; translate: ' + Math.round((48 - (x0 + x1) / 2) * H / 96) + 'px 0';
   };
   // Nom court sur la route : « Méga X », « Méga Y » ou « Méga » (le nom complet est dans la fiche).
   const dexShort = e => (e.mega ? 'Méga' + ((/ ([XY])$/.exec(e.name) || [])[1] ? ' ' + / ([XY])$/.exec(e.name)[1] : '') : e.name);

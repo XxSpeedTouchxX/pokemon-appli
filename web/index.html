@@ -761,11 +761,14 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-dex-all svg { flex: none; fill: none; stroke: #FFD60A; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 /* Fiche du Pokémon */
 .pkm-dex-fiche { display: flex; flex-direction: column; gap: 10px; margin: 0 10px; padding: 10px; border-radius: 10px; border: 2px solid #8C7BFF; background: rgba(28, 27, 110, 0.85); }
-.pkm-dex-fiche-top { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 10px; align-items: center; }
-.pkm-dex-show { position: relative; height: 130px; }
+.pkm-dex-fiche-top { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 10px; align-items: center; }
+/* Pokémon centré sur son socle par la mise en page (flex), sans translateX(-50%) : Safari calcule le pourcentage d'une
+   animation au moment où elle démarre, avant que le GIF soit chargé (largeur 0), et laissait l'image décalée d'une
+   demi-largeur vers la droite, sur le nom (2026-10-29, capture du porteur sur iPhone). */
+.pkm-dex-show { position: relative; height: 130px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 19px; box-sizing: border-box; }
 .pkm-dex-show .pkm-dex-ped { position: absolute; left: 50%; bottom: 6px; width: 92px; height: 26px; transform: translateX(-50%); }
-.pkm-dex-big { position: absolute; z-index: 1; left: 50%; bottom: 19px; width: auto; height: 96px; transform: translateX(-50%); object-fit: contain; object-position: center bottom; image-rendering: pixelated; animation: pkmDexBob2 2.4s ease-in-out infinite; }
-@keyframes pkmDexBob2 { 50% { transform: translateX(-50%) translateY(-3px); } }
+.pkm-dex-big { position: relative; z-index: 1; flex: none; width: auto; height: 96px; object-fit: contain; object-position: center bottom; image-rendering: pixelated; animation: pkmDexBob2 2.4s ease-in-out infinite; }
+@keyframes pkmDexBob2 { 50% { transform: translateY(-3px); } }
 .pkm-dex-id { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .pkm-dex-id h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.15; }
 .pkm-dex-genus { font-size: 12.5px; font-weight: 700; color: #7CF5FF; }
