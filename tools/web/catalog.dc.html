@@ -1809,7 +1809,6 @@
 <div class="pkm-dex-id"><span class="pkm-dex-no">{{ evo.sel.no }}</span><h3>{{ evo.sel.name }}</h3><span class="pkm-dex-genus">{{ evo.sel.genus }}</span><span class="pkm-dex-types"><sc-for list="{{ evo.sel.types }}" as="edt" hint-placeholder-count="2"><b style="{{ edt.style }}">{{ edt.t }}</b></sc-for></span></div>
 </div>
 <div class="pkm-dex-info"><sc-for list="{{ evo.sel.rows }}" as="edr" hint-placeholder-count="8"><span><em>{{ edr.k }}</em>{{ edr.v }}</span></sc-for></div>
-<sc-if value="{{ evo.sel.hasEvo }}" hint-placeholder-val="{{ true }}"><div class="pkm-dex-evo"><sc-for list="{{ evo.sel.evo }}" as="ede" hint-placeholder-count="2"><span>{{ ede.t }}</span></sc-for></div></sc-if>
 <section aria-label="Ses cartes" class="pkm-dex-tcg">
 <h4>Ses cartes</h4>
 <sc-if value="{{ evo.sel.cards.loading }}" hint-placeholder-val="{{ false }}"><p class="pkm-dex-tcg-note">{{ evo.sel.cards.note }}</p></sc-if>
@@ -1823,8 +1822,6 @@
 </sc-if>
 </section>
 <sc-if value="{{ evo.sel.own }}" hint-placeholder-val="{{ true }}">
-<div class="pkm-dex-stats" role="group" aria-label="Statistiques de base"><sc-for list="{{ evo.sel.stats }}" as="eds" hint-placeholder-count="6"><span class="pkm-dex-stat"><em>{{ eds.k }}</em><i aria-hidden="true"><b style="{{ eds.w }}"></b></i><strong>{{ eds.v }}</strong></span></sc-for>
-<span class="pkm-dex-power"><em>Puissance</em><b>{{ evo.sel.total }}</b><span aria-hidden="true">{{ evo.sel.stars }}</span><span>{{ evo.sel.rank }}</span></span></div>
 <sc-if value="{{ evo.sel.hasText }}" hint-placeholder-val="{{ true }}"><p class="pkm-dex-text">{{ evo.sel.text }}</p></sc-if>
 </sc-if>
 <sc-if value="{{ evo.sel.lock }}" hint-placeholder-val="{{ false }}"><p class="pkm-dex-secret">{{ evo.sel.secret }}</p></sc-if>

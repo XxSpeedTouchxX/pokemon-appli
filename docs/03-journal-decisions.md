@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-29 (nuit, suite) — Pokédex allégé, tailles croissantes, centrage
+
+- **Demandes du porteur** : centrer les Pokémon sur leurs socles ; retirer les statistiques et les niveaux d'évolution de la fiche (surtout sur téléphone) ; tailles dans l'ordre croissant de l'évolution ; bulles du didacticiel centrées.
+- **Fait** : centre d'équilibre de chaque sprite (corps et pieds) posé au milieu du socle, sprites volants posés d'après leur image médiane ; chaque forme au moins 10 % plus grande que la précédente à l'écran (la taille écrite reste la vraie) ; statistiques, puissance et « Évolue en … · Niveau » retirés ; bulle du didacticiel centrée sans pourcentage animé (même défaut Safari que la fiche).
+
+---
+
 ## 2026-10-29 (nuit) — Pokédex : commandes visibles et guidées
 
 - **Demande du porteur** : les touches cliquables du Pokédex « n'étaient pas du tout intuitives » ; les rendre visuelles, animées et compréhensibles dès la première utilisation.

@@ -5,9 +5,9 @@
   // « Valeur de toute ma collection ».
   // - Route d'évolution (d'après la vidéo Digimon du porteur) : la famille du Pokémon touché, de la forme de base aux
   //   méga-évolutions, au bout de la ligne ; une branche (Évoli, Méga-Dracaufeu X et Y) part en pointillés dessous.
-  // - Fiche : n°, catégorie, types, taille, poids, talents, habitat, capture, rareté, évolution, statistiques de base,
-  //   puissance et rang, description du Pokédex (tools/sprites/dex.json, DEX_DATA) ; statistiques et description
-  //   cachées tant que le Pokémon n'est pas débloqué.
+  // - Fiche : n°, catégorie, types, taille, poids, talents, habitat, capture, rareté, description du Pokédex
+  //   (tools/sprites/dex.json, DEX_DATA), cachée tant que le Pokémon n'est pas débloqué. Statistiques, puissance et
+  //   niveaux d'évolution retirés le 2026-10-29 (porteur : trop chargé, surtout sur téléphone).
   // - « Tous les Pokémon » : la liste complète (recherche, filtres), un appui ouvre la route et la fiche.
   // État : dexSel (Pokémon touché), dexList (liste ouverte), dexF (filtre), dexQ (recherche) ; non enregistrés.
   // Ce module partage la portée des autres : ses noms commencent par DEX_ ou dex.
@@ -15,7 +15,6 @@
   DEX_DATA.forEach(e => { DEX[e.n] = e; });
   const DEX_IDS = HOME_BUDDIES.map(([n]) => n);
   const DEX_NUMS = DEX_IDS.slice().sort((a, b) => a - b);
-  const DEX_STATS = ['PV', 'Attaque', 'Défense', 'Atq. Spé.', 'Déf. Spé.', 'Vitesse'];
   const DEX_FORMS = ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution'];
   const DEX_COLS = ['Base', 'Évolution 1', 'Évolution 2'];
   // Couleurs des types (pastilles) ; le texte passe en sombre sur les couleurs claires.
@@ -27,22 +26,27 @@
   const dexLight = hex => { const L = dexLum(hex); return (L + 0.05) / (dexLum('#0B1120') + 0.05) > 1.05 / (L + 0.05); };
   const dexNo = e => '#' + String(e.mega ? e.from : e.n).padStart(3, '0') + (e.mega ? ' Méga' : '');
   const dexStage = n => { let k = 0, e = DEX[n]; while (e && !e.mega && e.from && k < 3) { k++; e = DEX[e.from]; } return k; };
-  const dexTotal = e => e.stats.reduce((a, b) => a + b, 0);
-  const DEX_RANK = DEX_DATA.slice().sort((a, b) => dexTotal(b) - dexTotal(a)).map(e => e.n);
   const dexOwn = (s, n) => (DEX[n] && DEX[n].mega ? (Array.isArray(s.megas) ? s.megas : []).indexOf(n) >= 0 : pkOwns(s, n));
   const dexPrice = n => (DEX[n] && DEX[n].mega ? PA_MEGA : (PK_SHOP[n] || 0));
   const dexStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return true; } };
   const dexSprite = (n, still) => 'img/pokemon/' + n + (still ? '.png' : '.gif');
   const dexNum = n => Number(n).toLocaleString('fr-FR');
   const dexCapture = c => (c >= 190 ? 'Très facile' : c >= 120 ? 'Facile' : c >= 45 ? 'Moyenne' : c >= 25 ? 'Difficile' : 'Très difficile');
-  const dexKids = n => DEX_DATA.filter(e => e.from === n);
   const dexProto = Component.prototype;
   // Tailles proportionnelles (2026-10-28, demande du porteur) : dans une famille, chaque Pokémon est dessiné à la
   // hauteur de sa taille réelle (fiche du Pokédex), le plus grand à DEX_PX px ; une méga-évolution est toujours un peu
   // plus grande que sa forme de base (au moins 10 %), même quand le Pokédex leur donne la même taille. Plancher de
   // DEX_PX_MIN px pour qu'un tout petit Pokémon reste visible (Magicarpe à côté de Léviator).
   const DEX_PX = 84, DEX_PX_BIG = 104, DEX_PX_MIN = 20, DEX_CAPW = 140, DEX_CAPW_BIG = 136;
-  const dexH = e => (e.mega && DEX[e.from] ? Math.max(e.h, Math.ceil(DEX[e.from].h * 1.1)) : e.h);
+  // Ordre croissant le long de l'évolution (2026-10-29, porteur) : chaque forme est au moins 10 % plus grande que la
+  // précédente, même quand le Pokédex la donne plus petite (Ectoplasma 1,5 m après Spectrum 1,6 m, Dracolosse 2,2 m après
+  // Draco 4,0 m) ; les méga-évolutions suivent la même règle. La taille affichée dans la fiche reste la vraie.
+  const DEX_HEFF = {};
+  const dexH = e => {
+    if (DEX_HEFF[e.n]) return DEX_HEFF[e.n];
+    const prev = e.from && DEX[e.from] ? DEX[e.from] : null;
+    return (DEX_HEFF[e.n] = prev ? Math.max(e.h, Math.ceil(dexH(prev) * 1.1)) : e.h);
+  };
   const dexFam = n => DEX_DATA.filter(e => e.fam === DEX[n].fam && (e.mega || DEX_IDS.indexOf(e.n) >= 0));
   const dexFamMax = n => Math.max(...dexFam(n).map(dexH));
   // Largeur du Pokémon pour 1 px de hauteur : GIF animé (cadre serré), ou boîte du Pokémon dans l'image fixe de 96 px
@@ -50,13 +54,21 @@
   // proportions restent justes et rien ne déborde de plus d'une colonne.
   const dexAsp = (e, still) => (still ? (e.box[2] - e.box[0]) / Math.max(1, e.box[3] - e.box[1]) : e.gif[0] / Math.max(1, e.gif[1]));
   const dexFamFit = (n, max, top, cap, still) => Math.min(1, ...dexFam(n).map(e => cap / Math.max(1, top * dexH(e) / max * dexAsp(e, still))));
-  // Style de l'image : hauteur voulue du Pokémon ; image fixe agrandie d'après sa boîte, pieds et centre recalés
-  // (décalage en px par « translate », jamais en %). La fiche ne déborde pas de sa colonne de 128 px (DEX_CAPW_BIG).
+  // Style de l'image : hauteur voulue du Pokémon ; image fixe agrandie d'après sa boîte, pieds recalés (décalage en px
+  // par « translate », jamais en %). La fiche ne déborde pas de sa colonne de 128 px (DEX_CAPW_BIG).
+  // Centrage (2026-10-29, porteur) : c'est le centre d'équilibre du Pokémon (corps et pieds, tools/sprites/dex_boxes.py :
+  // « gc » pour le GIF, « pc » pour l'image fixe) qui se pose au milieu du socle, pas le milieu de son cadre : la queue de
+  // Reptincel ne le décale plus ; décalage limité à 15 % de la largeur.
+  const dexShift = (px, w) => Math.round(Math.max(-0.15 * w, Math.min(0.15 * w, px)));
   const dexSize = (e, max, top, still, fit) => {
     const p = Math.max(DEX_PX_MIN, Math.round(top * fit * dexH(e) / max));
-    if (!still) return 'height: ' + p + 'px';
-    const [x0, y0, x1, y1] = e.box, H = Math.round(p * 96 / Math.max(1, y1 - y0));
-    return 'height: ' + H + 'px; width: ' + H + 'px; margin-bottom: -' + Math.round((96 - y1) * H / 96) + 'px; translate: ' + Math.round((48 - (x0 + x1) / 2) * H / 96) + 'px 0';
+    if (!still) {
+      const w = p * e.gif[0] / Math.max(1, e.gif[1]);
+      // Un Pokémon qui vole ou rebondit est posé d'après l'image médiane de son animation (« gb »).
+      return 'height: ' + p + 'px; margin-bottom: -' + Math.round((e.gb || 0) * p) + 'px; translate: ' + dexShift((0.5 - (e.gc || 0.5)) * w, w) + 'px 0';
+    }
+    const [, y0, , y1] = e.box, H = Math.round(p * 96 / Math.max(1, y1 - y0)), bw = (e.box[2] - e.box[0]) * H / 96;
+    return 'height: ' + H + 'px; width: ' + H + 'px; margin-bottom: -' + Math.round((96 - y1) * H / 96) + 'px; translate: ' + dexShift((48 - (e.pc || 48)) * H / 96, bw) + 'px 0';
   };
   // Nom court sur la route : « Méga X », « Méga Y » ou « Méga » (le nom complet est dans la fiche).
   const dexShort = e => (e.mega ? 'Méga' + ((/ ([XY])$/.exec(e.name) || [])[1] ? ' ' + / ([XY])$/.exec(e.name)[1] : '') : e.name);
@@ -137,7 +149,7 @@
 
   // ——— Vu, puis attrapé (2026-10-29, proposition 2 validée par le porteur) ———
   // Comme dans les jeux : un Pokémon est « vu » dès qu'on scanne une de ses cartes (il sort de sa silhouette, en
-  // couleur), « attrapé » quand on le débloque avec des PA (statistiques et description). Le déblocage ne demande pas
+  // couleur), « attrapé » quand on le débloque avec des PA (sa description). Le déblocage ne demande pas
   // de l'avoir vu et le scan ne rapporte pas de PA (choix par défaut, en attendant l'équilibre des PA). État : dexSeen.
   const dexSeenList = s => (Array.isArray(s.dexSeen) ? s.dexSeen : []);
   const dexSeen = (s, n) => dexOwn(s, n) || dexSeenList(s).indexOf(n) >= 0;
@@ -258,12 +270,9 @@
       buddy: { icon: 'img/pokemon/icon/' + b + '.png', name: DEX[b].name, no: dexNo(DEX[b]), types: DEX[b].types.join(' · ') }
     };
     // Fiche du Pokémon touché.
-    const own = dexOwn(s, sel), price = dexPrice(sel), from = e.from && DEX[e.from], tot = dexTotal(e), rank = DEX_RANK.indexOf(sel) + 1;
+    const own = dexOwn(s, sel), price = dexPrice(sel), from = e.from && DEX[e.from];
     const stage = e.mega ? 'Méga-évolution' : DEX_FORMS[Math.min(dexStage(sel), 2)];
     const rare = e.leg === 2 ? 'Fabuleux' : e.leg === 1 ? 'Légendaire' : e.mega ? 'Méga-évolution' : HOME_THEMES[sel] ? 'Légendaire · ' + HOME_THEMES[sel].name : 'Commun';
-    const kids = dexKids(sel).filter(k => k.mega || DEX_IDS.indexOf(k.n) >= 0);
-    const evoText = [].concat(from ? ['Évolue de ' + from.name + (e.how ? ' · ' + e.how : '')] : [],
-      kids.map(k => 'Évolue en ' + k.name + (k.how ? ' · ' + k.how : '')));
     let act, actOn = false, actGo = () => {};
     if (own) {
       if (s.buddy === sel) act = 'C’est ton compagnon';
@@ -274,7 +283,7 @@
     else { act = (from ? (e.mega ? 'Méga-évoluer' : 'Faire évoluer') : 'Débloquer') + ' · ' + dexNum(price) + ' PA'; actOn = true; actGo = () => (e.mega ? this.setState({ megaAsk: sel }) : this.dexUnlock(sel)); }
     v.sel = {
       img: dexSprite(sel, still), sz: dexSize(e, hmax, DEX_PX_BIG, still, fitBig), size: (e.h / 10).toLocaleString('fr-FR') + ' m', cls: 'pkm-dex-big' + (dexSeen(s, sel) ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
-      secret: dexSeen(s, sel) ? '🔒 Vu ! Débloque-le avec tes PA pour découvrir ses statistiques et sa description.' : '🔒 Pas encore vu : scanne une de ses cartes pour le voir, puis débloque-le avec tes PA pour découvrir ses statistiques et sa description.',
+      secret: dexSeen(s, sel) ? '🔒 Vu ! Débloque-le avec tes PA pour découvrir sa description.' : '🔒 Pas encore vu : scanne une de ses cartes pour le voir, puis débloque-le avec tes PA pour découvrir sa description.',
       types: e.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })),
       rows: [
         ['Stade', stage], ['Taille', (e.h / 10).toLocaleString('fr-FR') + ' m'], ['Poids', (e.w / 10).toLocaleString('fr-FR') + ' kg'],
@@ -282,9 +291,6 @@
         ['Capture', e.cap ? dexCapture(e.cap) : '—'], ['Rareté', rare], ['Prix', price ? dexNum(price) + ' PA' : 'Offert'],
         ['Pokédex', own ? 'Attrapé' : dexSeen(s, sel) ? 'Vu' : 'Pas encore vu']
       ].map(([k, x]) => ({ k: k, v: x })),
-      evo: evoText.map(t => ({ t: t })), hasEvo: evoText.length > 0,
-      stats: e.stats.map((x, i) => ({ k: DEX_STATS[i], v: x, w: 'width: ' + Math.round(x / 255 * 100) + '%' })),
-      total: dexNum(tot), rank: rank + 'ᵉ sur ' + DEX_DATA.length, stars: '★★★★★'.slice(0, Math.max(1, Math.min(5, Math.ceil((DEX_DATA.length - rank + 1) / DEX_DATA.length * 5)))),
       text: e.text, hasText: !!e.text,
       act: act, actOn: actOn, actDis: !actOn, actGo: actGo, actCls: 'pkm-dex-act-btn' + (actOn ? '' : ' pkm-dex-act-off')
     };

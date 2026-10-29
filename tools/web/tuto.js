@@ -26,7 +26,7 @@
     { tab: 'market', sel: '.pkm-dex-device', top: true, fresh: true, text: 'Voici ton Pokédex ! Ses écrans montrent ton compagnon et tes PA.' },
     { tab: 'market', sel: '.pkm-dex-all', top: true, fresh: true, text: 'Touche « Tous les Pokémon » : ils sont tous là, à débloquer avec tes PA.' },
     { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, fresh: true, text: 'La route d’évolution : chaque Pokémon, de sa forme de base jusqu’à sa méga-évolution.' },
-    { tab: 'market', sel: 'section[aria-label="Fiche du Pokémon"]', top: true, fresh: true, text: 'Sa fiche : taille, poids, types, statistiques… Débloque-le ou choisis-le comme compagnon.' },
+    { tab: 'market', sel: 'section[aria-label="Fiche du Pokémon"]', top: true, fresh: true, text: 'Sa fiche : types, taille, poids, ses cartes… Débloque-le ou choisis-le comme compagnon.' },
     { tab: 'market', sel: 'header .pkm-pa-bar', fresh: true, text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, puis jusqu’à +30 d’affilée !' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', text: 'Tu auras le temps de découvrir encore d’autres nouveautés, comme le PK shop !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
