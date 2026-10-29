@@ -213,6 +213,11 @@
     hits.sort((a, b) => a.rank - b.rank || b.v - a.v);
     return { total: hits.length, items: hits.slice(0, limit).map(h => TCG.item(h.x.r[F.id])) };
   };
+  // Cartes données (Pokédex) : celles du catalogue, de la plus cotée à la moins cotée.
+  TCG.pick = function (ids, limit) {
+    const F = TCG.F, rows = ids.map(id => TCG.byId[id]).filter(Boolean).sort((a, b) => coteOf(b.r, F) - coteOf(a.r, F));
+    return { total: rows.length, items: rows.slice(0, limit).map(x => TCG.item(x.r[F.id])) };
+  };
   // Visuel en qualité maximale : high.png pour les cartes TCGdex (y compris celles de la démo).
   const hiOf = p => p.imgHi || (typeof p.img === 'string' && /\/high\.webp$/.test(p.img) ? p.img.replace(/high\.webp$/, 'high.png') : p.img);
   // Logo d'une extension : premier visuel qui charge, dans l'ordre TCGdex (webp, puis png), puis logo gardé avec
@@ -324,7 +329,8 @@
       };
     }
     if (q.length < 2 || s.mfilter === 'soon') { r.count = r.count + ' · cherche parmi ' + total + ' cartes'; return r; }
-    const res = TCG.search(q, LIMIT), start = r.list.length;
+    // Cartes d'un Pokémon (Pokédex, « Voir ses cartes ») : la liste exacte tant que la recherche n'a pas changé.
+    const res = s.mIds && s.mIdsQ === q ? TCG.pick(s.mIds, LIMIT) : TCG.search(q, LIMIT), start = r.list.length;
     r.list = r.list.concat(res.items.map((p, i) => {
       const k = this.cote(p), st = x.c.stock[p.id];
       return Object.assign(this.look(p), {

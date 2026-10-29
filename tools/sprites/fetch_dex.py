@@ -24,6 +24,7 @@ OUT = HERE / "dex.json"
 CSV = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/{}.csv"
 UA = "Dropicards/1.0 (+https://github.com/XxSpeedTouchxX/pokemon-appli)"
 FR = "5"
+EN = "9"  # noms anglais : cartes des extensions sans version française (« Charizard », 2026-10-29)
 SPECIES = list(range(1, 152)) + [380, 381, 382, 383, 384]
 
 
@@ -44,7 +45,9 @@ def clean(t):
 def main():
     megas = json.loads((HERE / "megas.json").read_text("utf-8"))["megas"]
     sp = {int(r["id"]): r for r in table("pokemon_species")}
-    names = {int(r["pokemon_species_id"]): r for r in table("pokemon_species_names") if r["local_language_id"] == FR}
+    snames = table("pokemon_species_names")
+    names = {int(r["pokemon_species_id"]): r for r in snames if r["local_language_id"] == FR}
+    ennames = {int(r["pokemon_species_id"]): r["name"] for r in snames if r["local_language_id"] == EN}
     poke = {int(r["id"]): r for r in table("pokemon")}
     tnames = {r["type_id"]: r["name"] for r in table("type_names") if r["local_language_id"] == FR}
     types = {}
@@ -99,7 +102,7 @@ def main():
     for k in SPECIES:
         s, n = sp[k], names[k]
         frm = int(s["evolves_from_species_id"]) if s["evolves_from_species_id"] else 0
-        e = {"n": k, "name": n["name"], "genus": n["genus"], **card(k, s),
+        e = {"n": k, "name": n["name"], "en": ennames.get(k, ""), "genus": n["genus"], **card(k, s),
              "hab": habitats.get(s["habitat_id"], ""), "cap": int(s["capture_rate"]),
              "leg": 2 if s["is_mythical"] == "1" else 1 if s["is_legendary"] == "1" else 0,
              "from": frm if frm in SPECIES else 0, "how": how(k) if frm in SPECIES else "",

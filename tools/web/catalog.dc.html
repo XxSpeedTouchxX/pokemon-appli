@@ -1749,9 +1749,17 @@
 <div class="pkm-dex-title"><h2>Pokédex</h2><span>Série : {{ evo.streak }}</span></div>
 <div class="pkm-dex-device">
 <img src="img/brand/pokedex.svg" alt="" width="400" height="250" class="pkm-dex-device-img">
-<span class="pkm-dex-lcd pkm-dex-lcd-l" aria-hidden="true"><sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><img src="{{ evo.dexImg }}" alt="" width="56" height="56"></sc-if><sc-if value="{{ evo.choosing }}" hint-placeholder-val="{{ false }}"><b class="pkm-dex-q">?</b></sc-if><span>{{ evo.dexName }}</span></span>
+<span class="pkm-dex-lcd pkm-dex-lcd-l" role="status" aria-label="{{ evo.dexSay }}"><sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><img src="{{ evo.dexImg }}" alt="" width="56" height="56" class="{{ evo.dexCls }}"></sc-if><sc-if value="{{ evo.choosing }}" hint-placeholder-val="{{ false }}"><b class="pkm-dex-q">?</b></sc-if><span>{{ evo.dexName }}</span></span>
 <span class="pkm-dex-lcd pkm-dex-lcd-r"><img src="{{ evo.paLogo }}" alt="" width="64" height="64" class="pkm-pa-logo"><span>{{ evo.pa }} PA</span></span>
+<sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><span role="group" aria-label="Commandes du Pokédex" class="pkm-dex-pad">
+<button type="button" onClick="{{ evo.pad.up }}" aria-label="Pokémon précédent du Pokédex" class="pkm-dex-k pkm-dex-k-up"></button>
+<button type="button" onClick="{{ evo.pad.down }}" aria-label="Pokémon suivant du Pokédex" class="pkm-dex-k pkm-dex-k-down"></button>
+<button type="button" onClick="{{ evo.pad.left }}" aria-label="Pokémon précédent de la famille" class="pkm-dex-k pkm-dex-k-left"></button>
+<button type="button" onClick="{{ evo.pad.right }}" aria-label="Pokémon suivant de la famille" class="pkm-dex-k pkm-dex-k-right"></button>
+<button type="button" onClick="{{ evo.pad.a }}" aria-label="{{ evo.pad.aLabel }}" class="pkm-dex-k pkm-dex-k-a"></button>
+</span></sc-if>
 </div>
+<sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><p class="pkm-dex-hint">Croix : ◀ ▶ la famille, ▲ ▼ le Pokédex · bouton vert : débloquer ou choisir</p></sc-if>
 <p class="pkm-dex-tomorrow">{{ evo.tomorrow }}</p>
 <sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ evo.all }}" class="pkm-dex-all"><img src="img/brand/pokedex.svg" alt="" width="40" height="25"><span><b>{{ evo.allLabel }}</b><span>{{ evo.count }} débloqués · avec tes PA</span></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
@@ -1783,6 +1791,18 @@
 </div>
 <div class="pkm-dex-info"><sc-for list="{{ evo.sel.rows }}" as="edr" hint-placeholder-count="8"><span><em>{{ edr.k }}</em>{{ edr.v }}</span></sc-for></div>
 <sc-if value="{{ evo.sel.hasEvo }}" hint-placeholder-val="{{ true }}"><div class="pkm-dex-evo"><sc-for list="{{ evo.sel.evo }}" as="ede" hint-placeholder-count="2"><span>{{ ede.t }}</span></sc-for></div></sc-if>
+<section aria-label="Ses cartes" class="pkm-dex-tcg">
+<h4>Ses cartes</h4>
+<sc-if value="{{ evo.sel.cards.loading }}" hint-placeholder-val="{{ false }}"><p class="pkm-dex-tcg-note">{{ evo.sel.cards.note }}</p></sc-if>
+<sc-if value="{{ evo.sel.cards.ready }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-dex-mine"><div class="pkm-dex-mine-h"><b>{{ evo.sel.cards.mineTitle }}</b><sc-if value="{{ evo.sel.cards.hasMine }}" hint-placeholder-val="{{ true }}"><strong>{{ evo.sel.cards.mineValue }}</strong></sc-if></div><span class="pkm-dex-tcg-sub">{{ evo.sel.cards.mineText }}</span>
+<sc-if value="{{ evo.sel.cards.hasMine }}" hint-placeholder-val="{{ true }}"><div class="pkm-dex-mine-row"><sc-for list="{{ evo.sel.cards.mine }}" as="edm" hint-placeholder-count="3"><button type="button" onClick="{{ edm.open }}" aria-label="{{ edm.aria }}" class="pkm-dex-mine-card"><img src="{{ edm.img }}" alt="" loading="lazy"><b>{{ edm.qty }}</b></button></sc-for><sc-if value="{{ evo.sel.cards.hasMore }}" hint-placeholder-val="{{ false }}"><span class="pkm-dex-more">{{ evo.sel.cards.more }}</span></sc-if></div></sc-if>
+</div>
+<sc-if value="{{ evo.sel.cards.hasTop }}" hint-placeholder-val="{{ true }}"><b class="pkm-dex-tcg-h">Ses cartes les plus chères</b><ol class="pkm-dex-top"><sc-for list="{{ evo.sel.cards.top }}" as="edk" hint-placeholder-count="3"><li><button type="button" onClick="{{ edk.open }}" aria-label="{{ edk.aria }}"><i aria-hidden="true">{{ edk.rank }}</i><img src="{{ edk.img }}" alt="" loading="lazy"><span><b>{{ edk.name }}</b><span>{{ edk.set }}</span></span><strong>{{ edk.cote }}</strong></button></li></sc-for></ol></sc-if>
+<sc-if value="{{ evo.sel.cards.none }}" hint-placeholder-val="{{ false }}"><p class="pkm-dex-tcg-note">{{ evo.sel.cards.noneText }}</p></sc-if>
+<sc-if value="{{ evo.sel.cards.hasAll }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ evo.sel.cards.all }}" class="pkm-dex-tcg-all"><span>{{ evo.sel.cards.allLabel }}</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></sc-if>
+</sc-if>
+</section>
 <sc-if value="{{ evo.sel.own }}" hint-placeholder-val="{{ true }}">
 <div class="pkm-dex-stats" role="group" aria-label="Statistiques de base"><sc-for list="{{ evo.sel.stats }}" as="eds" hint-placeholder-count="6"><span class="pkm-dex-stat"><em>{{ eds.k }}</em><i aria-hidden="true"><b style="{{ eds.w }}"></b></i><strong>{{ eds.v }}</strong></span></sc-for>
 <span class="pkm-dex-power"><em>Puissance</em><b>{{ evo.sel.total }}</b><span aria-hidden="true">{{ evo.sel.stars }}</span><span>{{ evo.sel.rank }}</span></span></div>

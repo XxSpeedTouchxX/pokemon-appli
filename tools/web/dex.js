@@ -14,6 +14,7 @@
   const DEX = {};
   DEX_DATA.forEach(e => { DEX[e.n] = e; });
   const DEX_IDS = HOME_BUDDIES.map(([n]) => n);
+  const DEX_NUMS = DEX_IDS.slice().sort((a, b) => a - b);
   const DEX_STATS = ['PV', 'Attaque', 'Défense', 'Atq. Spé.', 'Déf. Spé.', 'Vitesse'];
   const DEX_FORMS = ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution'];
   const DEX_COLS = ['Base', 'Évolution 1', 'Évolution 2'];
@@ -59,6 +60,80 @@
   };
   // Nom court sur la route : « Méga X », « Méga Y » ou « Méga » (le nom complet est dans la fiche).
   const dexShort = e => (e.mega ? 'Méga' + ((/ ([XY])$/.exec(e.name) || [])[1] ? ' ' + / ([XY])$/.exec(e.name)[1] : '') : e.name);
+
+  // ——— Cartes de chaque Pokémon (2026-10-29, proposition 1 validée par le porteur) ———
+  // Une carte appartient à un Pokémon quand son nom contient le nom français ou anglais du Pokémon, mot pour mot
+  // (« Dracaufeu-ex », « Reshiram et Dracaufeu GX », « Blaine's Charizard ») ; « Méga-… » ou « M-… » devant le nom la
+  // range dans la méga-évolution (X ou Y d'après la lettre qui suit, les deux sans lettre : « M-Dracaufeu EX »). Les
+  // objets qui portent un nom de Pokémon (Poupée Ronflex, Fossile Dôme Kabuto, Lien Spirituel Dracaufeu) sont écartés,
+  // ainsi que Porygon-Z (pas un Porygon). Index construit une fois par catalogue chargé (≈ 0,3 s pour 21 000 cartes).
+  const dexNorm = t => fold(t).replace(/[.'’]/g, ' ').replace(/\s*([♀♂])/g, '$1').replace(/\s+/g, ' ').trim();
+  const DEX_FIRST = {}, DEX_MEGAS = {};
+  DEX_DATA.forEach(e => {
+    if (e.mega) { (DEX_MEGAS[e.from] = DEX_MEGAS[e.from] || []).push(e); return; }
+    [e.name, e.en].filter(Boolean).map(dexNorm).filter((v, i, a) => a.indexOf(v) === i).forEach(v => {
+      const t = v.split(' ');
+      (DEX_FIRST[t[0]] = DEX_FIRST[t[0]] || []).push({ n: e.n, t: t });
+    });
+  });
+  Object.keys(DEX_FIRST).forEach(k => DEX_FIRST[k].sort((a, b) => b.t.length - a.t.length));
+  const DEX_NOT_AFTER = { 137: 'z' }, DEX_NOT_BEFORE = ['poupee', 'peluche', 'tour', 'dome', 'nautile', 'ambre', 'spirituel', 'doll'];
+  const dexMatch = name => {
+    const t = dexNorm(name).split(' '), out = [];
+    for (let i = 0; i < t.length;) {
+      const hit = (DEX_FIRST[t[i]] || []).find(c => c.t.every((w, j) => t[i + j] === w));
+      if (!hit) { i++; continue; }
+      const after = t[i + hit.t.length] || '', before = i > 0 ? t[i - 1] : '', megas = DEX_MEGAS[hit.n];
+      if (DEX_NOT_AFTER[hit.n] === after || DEX_NOT_BEFORE.indexOf(before) >= 0) { i += hit.t.length; continue; }
+      if (megas && (before === 'mega' || before === 'm')) {
+        const xy = megas.filter(m => dexNorm(m.name).split(' ').pop() === after);
+        (xy.length ? xy : megas).forEach(m => out.push(m.n));
+      } else out.push(hit.n);
+      i += hit.t.length;
+    }
+    return out.filter((n, k) => out.indexOf(n) === k);
+  };
+  const DEX_CARDS = { doc: null, by: {} };
+  const dexCardIds = n => {
+    if (TCG.status !== 'ready') return null;
+    if (DEX_CARDS.doc !== TCG.doc) {
+      const F = TCG.F, by = {};
+      TCG.rows.forEach(x => dexMatch(x.r[F.name]).forEach(k => { (by[k] = by[k] || []).push(x.r[F.id]); }));
+      DEX_CARDS.doc = TCG.doc; DEX_CARDS.by = by;
+    }
+    return DEX_CARDS.by[n] || [];
+  };
+  // « Ses cartes » de la fiche : les miennes (exemplaires, valeur selon l'état et la langue, comme le classeur), les
+  // 3 plus cotées du catalogue (cote Cardmarket régulière), et « Voir ses N cartes » (recherche limitée à ces cartes).
+  dexProto.vDexCards = function (s, n) {
+    const e = DEX[n], ids = dexCardIds(n), name = e.name;
+    const out = { name: name, loading: ids === null, ready: ids !== null, mine: [], hasMine: false, noMine: false, top: [], hasTop: false, all: () => {}, allLabel: '', hasAll: false };
+    if (ids === null) { out.note = TCG.status === 'error' ? 'Catalogue des cartes indisponible pour le moment.' : 'Chargement des cartes…'; return out; }
+    const c = this.compute(s), F = TCG.F;
+    const open = p => (p.tcg ? this.openTcg(p.id) : this.push('item', { itemId: p.id }));
+    const mine = this.catalog().filter(p => p.type === 'card' && c.stock[p.id] && c.stock[p.id].qty > 0 && dexMatch(p.name).indexOf(n) >= 0)
+      .map(p => ({ p: p, q: c.stock[p.id].qty, v: (this.unitVal(p, s.valuation) || 0) * c.stock[p.id].qty }))
+      .sort((a, b) => b.v - a.v);
+    const copies = mine.reduce((t, m) => t + m.q, 0), value = mine.reduce((t, m) => t + m.v, 0);
+    out.mineTitle = 'Mes cartes de ' + name;
+    out.mineText = mine.length ? copies + (copies > 1 ? ' exemplaires' : ' exemplaire') + (mine.length !== copies ? ' · ' + mine.length + ' cartes différentes' : '') : 'Pas encore de carte de ' + name + ' dans ta collection.';
+    out.mineValue = mine.length ? this.eur(value) : '';
+    out.hasMine = mine.length > 0; out.noMine = !mine.length;
+    out.mine = mine.slice(0, 6).map(m => Object.assign(this.look(m.p), { name: m.p.name, qty: '×' + m.q, aria: m.p.name + ', ' + m.q + (m.q > 1 ? ' exemplaires' : ' exemplaire') + ', ' + this.eur(m.v), open: () => open(m.p) }));
+    out.more = mine.length > 6 ? '+ ' + (mine.length - 6) + ' autres' : ''; out.hasMore = mine.length > 6;
+    const top = ids.map(id => TCG.byId[id]).filter(x => x && coteOf(x.r, F) > 0 && coteSteady(x.r, F)).sort((a, b) => coteOf(b.r, F) - coteOf(a.r, F)).slice(0, 3);
+    out.top = top.map((x, i) => {
+      const p = TCG.item(x.r[F.id]), k = this.cote(p);
+      return Object.assign(this.look(p), { rank: String(i + 1), name: p.name, set: p.setName + ' · ' + p.numLabel, cote: k !== null ? this.eur(k) : '—',
+        aria: (i + 1) + 'ᵉ plus chère : ' + p.name + ', ' + p.setName + ', ' + (k !== null ? this.eur(k) : 'sans cote'), open: () => this.openTcg(p.id) });
+    });
+    out.hasTop = out.top.length > 0;
+    out.hasAll = ids.length > 0;
+    out.allLabel = 'Voir ses ' + ids.length.toLocaleString('fr-FR') + (ids.length > 1 ? ' cartes' : ' carte');
+    out.none = !ids.length; out.noneText = 'Aucune carte de ' + name + ' dans le catalogue pour l’instant.';
+    out.all = () => { this.setState({ mq: name, mIds: ids, mIdsQ: name, mfilter: 'trend' }); this.push('search'); };
+    return out;
+  };
 
   // Ouvrir le Pokédex (compagnon de l'accueil, « Mes PK », didacticiel) : onglet Jeux, Pokémon choisi, liste au besoin.
   dexProto.dexOpen = function (n, list) {
@@ -175,11 +250,31 @@
       text: e.text, hasText: !!e.text,
       act: act, actOn: actOn, actDis: !actOn, actGo: actGo, actCls: 'pkm-dex-act-btn' + (actOn ? '' : ' pkm-dex-act-off')
     };
+    v.sel.cards = this.vDexCards(s, sel);
+    // Pokédex dessiné cliquable (2026-10-29, proposition 3 validée par le porteur) : le petit écran de gauche montre le
+    // Pokémon touché (silhouette s'il est à débloquer) ; la croix fait défiler sa famille (gauche, droite, dans l'ordre
+    // de la route) ou le Pokédex par numéro (haut, bas) ; le bouton vert fait l'action de la fiche (débloquer, faire
+    // évoluer, choisir comme compagnon), sinon dit pourquoi elle n'est pas possible.
+    const order = route.nodes.slice().sort((a, b) => a.col - b.col || a.row - b.row).map(x => x.n);
+    const fi = order.indexOf(sel), ni = DEX_NUMS.indexOf(e.mega ? e.from : sel), L = DEX_NUMS.length;
+    v.dexImg = dexSprite(sel, still); v.dexCls = own ? '' : 'pkm-dex-sil'; v.dexName = e.name;
+    v.dexSay = 'Pokédex : ' + e.name + ', ' + dexNo(e) + (own ? '' : ', à débloquer');
+    v.pad = {
+      left: () => this.dexPadGo(order[(fi - 1 + order.length) % order.length]),
+      right: () => this.dexPadGo(order[(fi + 1) % order.length]),
+      up: () => this.dexPadGo(DEX_NUMS[(ni - 1 + L) % L]),
+      down: () => this.dexPadGo(DEX_NUMS[(ni + 1) % L]),
+      a: () => { if (actOn) actGo(); else { this.setState({ toast: act }); this.flash(); } },
+      aLabel: 'Bouton vert : ' + act
+    };
     const ask = DEX[s.megaAsk] && DEX[s.megaAsk].mega ? DEX[s.megaAsk] : null;
     Object.assign(v, { ask: !!ask, askText: ask ? 'Faire méga-évoluer ' + paName(ask.from) + ' en ' + ask.name + ' pour ' + dexNum(PA_MEGA) + ' PA ?' : '',
       askYes: () => ask && this.dexUnlock(ask.n), askNo: () => this.setState({ megaAsk: null }) });
     return v;
   };
+
+  // Croix du Pokédex dessiné : le Pokémon suivant s'affiche sur le petit écran et dans la route et la fiche.
+  dexProto.dexPadGo = function (n) { if (DEX[n]) this.setState({ dexSel: n, megaAsk: null }); };
 
   // « Mon Pokédex » au clavier : focus sur la recherche, Tab reste dans la fenêtre, Échap la ferme, le focus revient
   // au bouton « Tous les Pokémon ».

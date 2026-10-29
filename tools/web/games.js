@@ -123,7 +123,7 @@
   // Écran de recherche (l'ancien Marché) : on y vient de l'accueil ou du scan ; Retour ramène à l'écran d'avant.
   const gmBaseParent = gmProto.parentOf;
   gmProto.parentOf = function (sc) { return sc === 'search' ? 'home' : sc === 'sealed' || sc === 'releases' ? 'home' : sc === 'sets' ? 'collection' : gmBaseParent.call(this, sc); };
-  gmProto.openSearch = function (q) { this.setState({ mq: q || '', mfilter: 'trend' }); this.push('search'); };
+  gmProto.openSearch = function (q) { this.setState({ mq: q || '', mIds: null, mfilter: 'trend' }); this.push('search'); };
   // Lien direct vers la recherche : ?start=search (Retour ramène à l'accueil).
   const gmBaseSt = gmProto.st;
   gmProto.st = function () {

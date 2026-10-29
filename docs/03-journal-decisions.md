@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-10-29 — Pokédex : les cartes de chaque Pokémon et le Pokédex dessiné cliquable
+
+- **Décision du porteur** (« go faire 1 et 3 », sur ma liste de propositions pour le Pokédex) :
+  - **1. Les cartes de chaque Pokémon** dans sa fiche : mes cartes (exemplaires, valeur), ses 3 cartes les plus chères, « Voir ses N cartes » ;
+  - **3. Le Pokédex dessiné cliquable** : la croix fait défiler la famille et le Pokédex, le bouton vert fait l'action de la fiche, le petit écran montre le Pokémon touché.
+- **Écartés à ma recommandation** : une vraie Game Boy à l'écran (forme déposée par Nintendo), les vrais cris des Pokémon (sons officiels), un jeu « Qui est ce Pokémon ? ». En attente : « vu / attrapé » par le scan (après l'équilibre des PA), le compteur de progression, les shiny.
+- **Pourquoi** : relier le Pokédex à la valeur des cartes, le cœur de l'app (principe 4 de CLAUDE.md : pas de Pokédex « pour lui-même »). Mesure prévue : part des fiches où l'on touche « Voir ses cartes » ou une de ses cartes.
+- **Données** : noms anglais ajoutés à `tools/sprites/dex.json` (PokeAPI) pour les cartes des extensions sans version française ; aucune nouvelle source ni dépense.
+
+---
+
 ## 2026-10-28 (suite) — Pokédex v2 (tous les Pokémon débloqués avec des PA), PA du jour à récupérer, didacticiel v3, voix au choix
 
 - **Décisions du porteur :**

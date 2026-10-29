@@ -321,7 +321,7 @@
   };
   // Recherche du Marché, préremplie avec ce qui a été lu.
   scanProto.scanSearch = function (q) {
-    this.setState({ mq: q || '', mfilter: 'trend', scanSheet: false, screen: 'search', stack: ['home'], hi: null });
+    this.setState({ mq: q || '', mIds: null, mfilter: 'trend', scanSheet: false, screen: 'search', stack: ['home'], hi: null });
   };
 
   const SCAN_OFF = { modeCard: false, modeSealed: false, picking: false, cands: [], sealedRows: [] };

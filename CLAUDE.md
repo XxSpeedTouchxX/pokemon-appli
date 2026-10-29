@@ -164,6 +164,10 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - route d'évolution de la famille du Pokémon touché (méga-évolutions au bout de la ligne), fiche complète (types, taille, poids, talents, statistiques, description officielle), « Tous les Pokémon » ; boutons hexagonaux et grille des méga retirés ;
   - PA du jour **à récupérer** (pastille sur le solde, « Récupérer mes PA », animation façon Brawl Stars d'après la vidéo du porteur) ;
   - didacticiel v3 : « Suivant » obligatoire, place du compagnon vide jusqu'à la fin, bulles placées sans rien cacher, Pokédex présenté en 4 étapes, jeux et PK shop retirés ; voix **« Bulles douces »** choisie par le porteur parmi 7 propositions (`tools/web/voice.js`).
+- **Cartes du Pokédex et Pokédex cliquable (2026-10-29, « go » du porteur sur les propositions 1 et 3) :**
+  - fiche de chaque Pokémon : « Ses cartes » (mes cartes et leur valeur, ses 3 cartes les plus chères, « Voir ses N cartes » qui ouvre la recherche limitée à ces cartes) ; cartes reliées par le nom français ou anglais, méga-évolutions à part ;
+  - Pokédex dessiné cliquable : croix (famille, numéros), bouton vert (action de la fiche), petit écran (Pokémon touché) ;
+  - écartés : vraie Game Boy, vrais cris, « Qui est ce Pokémon ? » ; en attente : « vu / attrapé » par le scan, compteur, shiny.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
