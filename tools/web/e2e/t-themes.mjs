@@ -13,8 +13,11 @@ const pick = async name => {
   await page.click('button[aria-label^="Compagnon"]'); await page.waitForTimeout(700);
   if (await page.locator('[aria-label="Starters"] button').count()) { await page.locator('button[aria-label="Choisir Pikachu comme starter"]').click(); await page.waitForTimeout(400); }
   await page.locator('section[aria-label="Pokédex"] .pkm-dex-all').click(); await page.waitForTimeout(300);
-  await page.fill('input[aria-label="Chercher un Pokémon"]', name); await page.waitForTimeout(250);
-  await page.locator('section[aria-label="Mon Pokédex"] .pkm-dexl-item').first().click(); await page.waitForTimeout(500);
+  await page.fill('input[aria-label="Chercher un Pokémon"]', name);
+  // Sous charge, la liste filtrée et la fiche arrivent parfois tard : on les attend (5 s au plus).
+  await page.waitForFunction(n => { const b = document.querySelector('section[aria-label="Mon Pokédex"] .pkm-dexl-item'); return b && b.textContent.includes(n); }, name, { timeout: 5000 }).catch(() => {});
+  await page.locator('section[aria-label="Mon Pokédex"] .pkm-dexl-item').first().click();
+  await page.waitForFunction(n => { const f = document.querySelector('section[aria-label="Fiche du Pokémon"]'); return f && f.textContent.includes(n); }, name, { timeout: 5000 }).catch(() => {}); await page.waitForTimeout(300);
   const act = page.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-act-btn');
   if (/Choisir comme compagnon/.test(await act.innerText())) await act.click();
   await page.waitForTimeout(300);

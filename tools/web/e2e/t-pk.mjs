@@ -55,17 +55,20 @@ ok('Kyogre : « Mes PK » fermé, onglet Jeux, Pokédex affiché, sans confirmat
 const starters = await page.$$eval('[aria-label="Starters"] button', bs => bs.map(b => b.getAttribute('aria-label')));
 ok('sans starter : ' + starters.join(' ; '), starters.join() === 'Choisir Bulbizarre comme starter,Choisir Salamèche comme starter,Choisir Carapuce comme starter,Choisir Pikachu comme starter');
 await page.click('[aria-label="Starters"] button[aria-label="Choisir Pikachu comme starter"]'); await page.waitForTimeout(500);
-d = await saved();
+// Sous charge, la fiche et l'enregistrement peuvent arriver après 500 ms : on attend jusqu'à 5 s.
+for (let k = 0; k < 25 && !((d = await saved()).buddy === 25 && (await page.$$('[aria-label="Route d’évolution"] button.pkm-dex-lock')).length === 1); k++) await page.waitForTimeout(200);
 const fiche = page.locator('section[aria-label="Fiche du Pokémon"]'), act = fiche.locator('.pkm-dex-act-btn');
 const routeAria = () => page.$$eval('[aria-label="Route d’évolution"] button', bs => bs.map(b => b.getAttribute('aria-label') + (b.classList.contains('pkm-dex-lock') ? ' [verrou]' : '')));
 const actText = async () => (await act.innerText()).replace(/\s+/g, ' ').trim();
-let route = await routeAria();
+let route = (await routeAria()).map(t => t.trim());
 // Le starter choisi ouvre sa propre fiche (2026-10-28) ; Kyogre se retrouve par « Tous les Pokémon ».
 ok('starter Pikachu : evo ' + JSON.stringify(d.evo) + ', buddy ' + d.buddy + ' ; route : ' + route.join(' ; '), d.evo && d.evo.line === 'pika' && d.buddy === 25
   && route.length === 2 && /^Pikachu, Forme de base, Compagnon$/.test(route[0].replace(/\s/g, ' ')) && /^Raichu, .*500 PA \[verrou\]$/.test(route[1].replace(/\s/g, ' ')));
 await page.click('.pkm-dex-all'); await page.waitForTimeout(300);
-await page.fill('input[aria-label="Chercher un Pokémon"]', 'kyogre'); await page.waitForTimeout(300);
-await page.locator('[aria-label="Tous les Pokémon"] button').first().click(); await page.waitForTimeout(500);
+await page.fill('input[aria-label="Chercher un Pokémon"]', 'kyogre');
+await page.waitForFunction(() => { const b = document.querySelector('[aria-label="Tous les Pokémon"] button'); return b && /Kyogre/.test(b.getAttribute('aria-label') || b.textContent); }, null, { timeout: 5000 }).catch(() => {});
+await page.locator('[aria-label="Tous les Pokémon"] button').first().click();
+await page.waitForFunction(() => { const f = document.querySelector('section[aria-label="Fiche du Pokémon"]'); return f && /Kyogre/.test(f.textContent); }, null, { timeout: 5000 }).catch(() => {}); await page.waitForTimeout(200);
 route = await routeAria();
 ok('route de Kyogre : ' + route.join(' ; '), route.length === 1 && /^Kyogre, Forme de base, 3 000 PA \[verrou\]$/.test(route[0].replace(/\s/g, ' ')));
 ok('fiche de Kyogre : « ' + await actText() + ' », désactivé', /^Encore 3 000 PA pour le débloquer$/.test((await actText()).replace(/\s/g, ' ')) && (await act.getAttribute('aria-disabled')) === 'true');
@@ -151,8 +154,10 @@ const dexTop = await page.evaluate(() => { const el = document.querySelector('se
 ok('le compagnon ouvre Jeux et le Pokédex (haut à ' + dexTop + ' px), sans panneau de choix', dexTop !== null && dexTop >= 0 && dexTop < 300
   && (await dex.count()) === 1 && (await page.locator('section[aria-label="Choisis ton compagnon"]').count()) === 0);
 await page.click('.pkm-dex-all'); await page.waitForTimeout(300);
-await page.fill('input[aria-label="Chercher un Pokémon"]', 'kyogre'); await page.waitForTimeout(300);
-await page.locator('[aria-label="Tous les Pokémon"] button').first().click(); await page.waitForTimeout(500);
+await page.fill('input[aria-label="Chercher un Pokémon"]', 'kyogre');
+await page.waitForFunction(() => { const b = document.querySelector('[aria-label="Tous les Pokémon"] button'); return b && /Kyogre/.test(b.getAttribute('aria-label') || b.textContent); }, null, { timeout: 5000 }).catch(() => {});
+await page.locator('[aria-label="Tous les Pokémon"] button').first().click();
+await page.waitForFunction(() => { const f = document.querySelector('section[aria-label="Fiche du Pokémon"]'); return f && /Kyogre/.test(f.textContent); }, null, { timeout: 5000 }).catch(() => {}); await page.waitForTimeout(200);
 ok('fiche de Kyogre : « ' + await actText() + ' »', (await actText()).replace(/\s/g, ' ') === 'Débloquer · 3 000 PA' && (await act.getAttribute('aria-disabled')) === 'false');
 await page.screenshot({ path: shot('pk-achat.png') });
 await act.click(); await page.waitForTimeout(500);
