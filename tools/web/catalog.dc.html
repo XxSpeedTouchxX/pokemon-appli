@@ -1749,17 +1749,25 @@
 <div class="pkm-dex-title"><h2>Pokédex</h2><span>Série : {{ evo.streak }}</span></div>
 <div class="pkm-dex-device">
 <img src="img/brand/pokedex.svg" alt="" width="400" height="250" class="pkm-dex-device-img">
-<span class="pkm-dex-lcd pkm-dex-lcd-l" role="status" aria-label="{{ evo.dexSay }}"><sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><img src="{{ evo.dexImg }}" alt="" width="56" height="56" class="{{ evo.dexCls }}"></sc-if><sc-if value="{{ evo.choosing }}" hint-placeholder-val="{{ false }}"><b class="pkm-dex-q">?</b></sc-if><span>{{ evo.dexName }}</span></span>
+<span class="pkm-dex-lcd pkm-dex-lcd-l" role="status" aria-label="{{ evo.dexSay }}"><sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><img src="{{ evo.dexImg }}" alt="" width="56" height="56" class="{{ evo.dexCls }}" key="{{ evo.dexKey }}"></sc-if><sc-if value="{{ evo.choosing }}" hint-placeholder-val="{{ false }}"><b class="pkm-dex-q">?</b></sc-if><span>{{ evo.dexName }}</span></span>
 <span class="pkm-dex-lcd pkm-dex-lcd-r"><img src="{{ evo.paLogo }}" alt="" width="64" height="64" class="pkm-pa-logo"><span>{{ evo.pa }} PA</span></span>
-<sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><span role="group" aria-label="Commandes du Pokédex" class="pkm-dex-pad">
-<button type="button" onClick="{{ evo.pad.up }}" aria-label="Pokémon précédent du Pokédex" class="pkm-dex-k pkm-dex-k-up"></button>
-<button type="button" onClick="{{ evo.pad.down }}" aria-label="Pokémon suivant du Pokédex" class="pkm-dex-k pkm-dex-k-down"></button>
-<button type="button" onClick="{{ evo.pad.left }}" aria-label="Pokémon précédent de la famille" class="pkm-dex-k pkm-dex-k-left"></button>
-<button type="button" onClick="{{ evo.pad.right }}" aria-label="Pokémon suivant de la famille" class="pkm-dex-k pkm-dex-k-right"></button>
-<button type="button" onClick="{{ evo.pad.a }}" aria-label="{{ evo.pad.aLabel }}" class="pkm-dex-k pkm-dex-k-a"></button>
+<sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><span role="group" aria-label="Commandes du Pokédex : flèches pour parcourir, bouton vert pour valider" class="{{ evo.pad.cls }}" onKeydown="{{ evo.pad.key }}">
+<span class="pkm-dex-leds" aria-hidden="true" key="{{ evo.pad.tick }}"><i></i><i></i><i></i></span>
+<span class="pkm-dex-cross">
+<i class="pkm-dex-cross-c" aria-hidden="true"></i>
+<button type="button" onClick="{{ evo.pad.up }}" aria-label="Pokémon précédent du Pokédex" class="pkm-dex-k pkm-dex-k-up"><i aria-hidden="true"><b></b></i></button>
+<button type="button" onClick="{{ evo.pad.down }}" aria-label="Pokémon suivant du Pokédex" class="pkm-dex-k pkm-dex-k-down"><i aria-hidden="true"><b></b></i></button>
+<button type="button" onClick="{{ evo.pad.left }}" aria-label="Pokémon précédent de la famille" class="pkm-dex-k pkm-dex-k-left"><i aria-hidden="true"><b></b></i></button>
+<button type="button" onClick="{{ evo.pad.right }}" aria-label="Pokémon suivant de la famille" class="pkm-dex-k pkm-dex-k-right"><i aria-hidden="true"><b></b></i></button>
+</span>
+<button type="button" onClick="{{ evo.pad.a }}" aria-label="{{ evo.pad.aLabel }}" class="{{ evo.pad.aCls }}"><span aria-hidden="true">OK</span></button>
+<sc-if value="{{ evo.pad.tip }}" hint-placeholder-val="{{ false }}"><span class="{{ evo.pad.tipCls }}" aria-hidden="true"><span class="pkm-dex-finger"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-.5V4.5a1.5 1.5 0 0 1 3 0V10m0-1a1.5 1.5 0 0 1 3 0v4.5c0 4-2.5 7-6.5 7h-.5c-2.2 0-3.6-.9-4.8-2.4L3.4 15a1.6 1.6 0 0 1 2.5-2L9 15.5V11"></path></svg></span></span></sc-if>
 </span></sc-if>
 </div>
-<sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}"><p class="pkm-dex-hint">Croix : ◀ ▶ la famille, ▲ ▼ le Pokédex · bouton vert : débloquer ou choisir</p></sc-if>
+<sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ evo.pad.tip }}" hint-placeholder-val="{{ false }}"><div class="pkm-dex-tip" aria-live="polite"><b>{{ evo.pad.tipTitle }}</b><span>{{ evo.pad.tipText }}</span><button type="button" onClick="{{ evo.pad.tipOk }}">{{ evo.pad.tipBtn }}</button></div></sc-if>
+<div class="pkm-dex-legend" aria-hidden="true"><span><i class="pkm-dex-lg-cross"></i>Flèches : ◀ ▶ la famille · ▲ ▼ le Pokédex</span><span><i class="pkm-dex-lg-a">OK</i>{{ evo.pad.aShort }}</span></div>
+</sc-if>
 <p class="pkm-dex-tomorrow">{{ evo.tomorrow }}</p>
 <sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ evo.all }}" class="pkm-dex-all"><img src="img/brand/pokedex.svg" alt="" width="40" height="25"><span><b>{{ evo.allLabel }}</b><span>{{ evo.count }} débloqués · avec tes PA</span></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>

@@ -166,7 +166,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - didacticiel v3 : « Suivant » obligatoire, place du compagnon vide jusqu'à la fin, bulles placées sans rien cacher, Pokédex présenté en 4 étapes, jeux et PK shop retirés ; voix **« Bulles douces »** choisie par le porteur parmi 7 propositions (`tools/web/voice.js`).
 - **Cartes du Pokédex et Pokédex cliquable (2026-10-29, « go » du porteur sur les propositions 1 et 3) :**
   - fiche de chaque Pokémon : « Ses cartes » (mes cartes et leur valeur, ses 3 cartes les plus chères, « Voir ses N cartes » qui ouvre la recherche limitée à ces cartes) ; cartes reliées par le nom français ou anglais, méga-évolutions à part ;
-  - Pokédex dessiné cliquable : croix (famille, numéros), bouton vert (action de la fiche), petit écran (Pokémon touché) ;
+  - Pokédex dessiné cliquable : croix (famille, numéros), bouton vert (action de la fiche), petit écran (Pokémon touché) ; commandes refaites le soir même à la demande du porteur (croix en relief à flèches, « OK » qui brille, voyants, bip, aide de première utilisation avec doigt animé) ;
   - écartés : vraie Game Boy, vrais cris, « Qui est ce Pokémon ? » ; en attente : shiny.
   - **vu / attrapé et progression (2026-10-29, « go » sur 2 et 4)** : un scan de carte fait « voir » le Pokémon (fin de la silhouette), les PA l'« attrapent » ; « Ma progression » (attrapés et vus sur 171, par stade, par type) ; **choix par défaut à confirmer** : déblocage sans « vu » obligatoire, pas de PA pour un scan, seul le scan fait voir.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.

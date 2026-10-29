@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-29 (nuit) — Pokédex : commandes visibles et guidées
+
+- **Demande du porteur** : les touches cliquables du Pokédex « n'étaient pas du tout intuitives » ; les rendre visuelles, animées et compréhensibles dès la première utilisation.
+- **Fait** : croix en relief à flèches et bouton vert « OK » dessinés par-dessus l'appareil, retour à chaque appui (touche qui s'enfonce, voyants, écran qui glisse, bip), « OK » qui brille quand l'action est possible, aide de première utilisation (doigt animé, bulle, « Compris ! »).
+
+---
+
 ## 2026-10-29 (soir) — Hébergement : serveur dédié, Cloudflare Pages débranché
 
 - **Décision du porteur** : l'app est hébergée sur son **serveur dédié** (OVHcloud Rise-S, AMD Ryzen 7 9700X), à l'adresse **https://dropicards.fr** ; le serveur récupère seul la branche publiée chaque jour par GitHub Actions. Il demande de débrancher Cloudflare.

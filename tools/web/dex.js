@@ -295,16 +295,36 @@
     // évoluer, choisir comme compagnon), sinon dit pourquoi elle n'est pas possible.
     const order = route.nodes.slice().sort((a, b) => a.col - b.col || a.row - b.row).map(x => x.n);
     const fi = order.indexOf(sel), ni = DEX_NUMS.indexOf(e.mega ? e.from : sel), L = DEX_NUMS.length;
-    v.dexImg = dexSprite(sel, still); v.dexCls = dexSeen(s, sel) ? '' : 'pkm-dex-sil'; v.dexName = e.name;
+    v.dexImg = dexSprite(sel, still); v.dexCls = (dexSeen(s, sel) ? '' : 'pkm-dex-sil ') + 'pkm-lcd-in pkm-lcd-' + (s.dexDir || 'none'); v.dexName = e.name; v.dexKey = sel + '-' + (s.dexTick || 0);
     v.dexSay = 'Pokédex : ' + e.name + ', ' + dexNo(e) + (own ? '' : dexSeen(s, sel) ? ', vu, à débloquer' : ', à débloquer');
     v.prog = this.vDexProgress(s);
+    // Première utilisation (2026-10-29, demande du porteur : « pas du tout intuitif ») : un doigt animé tape sur la
+    // croix, les flèches s'allument à tour de rôle et une bulle explique ; après un premier appui sur la croix, le doigt
+    // passe au bouton vert ; « Compris » ou un appui sur le bouton vert termine (dexTips, enregistré). Rien pendant le
+    // didacticiel.
+    const tips = Number(s.dexTips) || 0, tipOn = tips < 2 && !(s.tutoStep >= 0);
+    const go = (n, dir) => { this.dexPadGo(n, dir); if (tips < 1) this.setState({ dexTips: 1 }); };
+    const pressA = () => {
+      this.dexBip(actOn ? 2 : 0);
+      this.setState({ dexTick: (Number(s.dexTick) || 0) + 1, dexTips: 2 });
+      if (actOn) actGo(); else { this.setState({ toast: act }); this.flash(); }
+    };
+    const keyMap = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
     v.pad = {
-      left: () => this.dexPadGo(order[(fi - 1 + order.length) % order.length]),
-      right: () => this.dexPadGo(order[(fi + 1) % order.length]),
-      up: () => this.dexPadGo(DEX_NUMS[(ni - 1 + L) % L]),
-      down: () => this.dexPadGo(DEX_NUMS[(ni + 1) % L]),
-      a: () => { if (actOn) actGo(); else { this.setState({ toast: act }); this.flash(); } },
-      aLabel: 'Bouton vert : ' + act
+      left: () => go(order[(fi - 1 + order.length) % order.length], 'left'),
+      right: () => go(order[(fi + 1) % order.length], 'right'),
+      up: () => go(DEX_NUMS[(ni - 1 + L) % L], 'up'),
+      down: () => go(DEX_NUMS[(ni + 1) % L], 'down'),
+      a: pressA,
+      key: ev => { const k = keyMap[ev.key]; if (k) { ev.preventDefault(); v.pad[k](); } },
+      aLabel: 'Bouton vert OK : ' + act, aShort: actOn ? act.replace(/ · .*$/, '') : 'Valider (débloquer ou choisir)',
+      aCls: 'pkm-dex-k pkm-dex-k-a' + (actOn ? ' pkm-dex-a-on' : ''),
+      cls: 'pkm-dex-pad' + (tipOn ? ' pkm-dex-pad-tip' + tips : '') + (still ? ' pkm-dex-pad-still' : ''), tick: 'p' + (Number(s.dexTick) || 0),
+      tip: tipOn, tipCls: 'pkm-dex-hand pkm-dex-hand-' + (tips ? 'a' : 'cross'),
+      tipTitle: tips ? 'Le bouton vert « OK »' : 'Ton Pokédex se pilote !',
+      tipText: tips ? 'Il fait l’action du Pokémon affiché : le débloquer avec tes PA, le faire évoluer ou le choisir comme compagnon.'
+        : 'Touche les flèches de la croix : ◀ ▶ pour sa famille, ▲ ▼ pour passer au Pokémon suivant du Pokédex.',
+      tipBtn: tips ? 'Compris !' : 'Plus tard', tipOk: () => this.setState({ dexTips: 2 })
     };
     const ask = DEX[s.megaAsk] && DEX[s.megaAsk].mega ? DEX[s.megaAsk] : null;
     Object.assign(v, { ask: !!ask, askText: ask ? 'Faire méga-évoluer ' + paName(ask.from) + ' en ' + ask.name + ' pour ' + dexNum(PA_MEGA) + ' PA ?' : '',
@@ -313,7 +333,28 @@
   };
 
   // Croix du Pokédex dessiné : le Pokémon suivant s'affiche sur le petit écran et dans la route et la fiche.
-  dexProto.dexPadGo = function (n) { if (DEX[n]) this.setState({ dexSel: n, megaAsk: null }); };
+  dexProto.dexPadGo = function (n, dir) {
+    if (!DEX[n]) return;
+    this.dexBip(1);
+    this.setState({ dexSel: n, megaAsk: null, dexDir: dir || 'none', dexTick: (Number(this.st().dexTick) || 0) + 1 });
+  };
+  // Petit bip de console à chaque touche (Web Audio, très court) ; coupé avec le son du didacticiel.
+  let dexAc = null;
+  dexProto.dexBip = function (kind) {
+    try {
+      if (localStorage.getItem('pkm-tuto-sound') === 'off') return;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!dexAc) dexAc = new AC();
+      if (dexAc.state === 'suspended') dexAc.resume();
+      const t = dexAc.currentTime, o = dexAc.createOscillator(), g = dexAc.createGain();
+      o.type = 'square';
+      o.frequency.setValueAtTime(kind === 2 ? 880 : kind === 1 ? 660 : 220, t);
+      if (kind === 2) o.frequency.setValueAtTime(1320, t + 0.06);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + (kind === 2 ? 0.14 : 0.07));
+      o.connect(g); g.connect(dexAc.destination); o.start(t); o.stop(t + 0.16);
+    } catch (e) { /* son indisponible */ }
+  };
 
   // « Mon Pokédex » au clavier : focus sur la recherche, Tab reste dans la fenêtre, Échap la ferme, le focus revient
   // au bouton « Tous les Pokémon ».

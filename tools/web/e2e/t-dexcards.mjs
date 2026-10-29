@@ -41,11 +41,13 @@ await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.click('button[aria-label^="Compagnon"]'); await page.waitForTimeout(1200);
 const lcd = async () => page.locator('.pkm-dex-lcd-l').getAttribute('aria-label');
 ok('petit écran : ' + await lcd(), /^Pokédex : Pikachu, #025$/.test(await lcd()));
-const pad = async k => { await page.click('.pkm-dex-k-' + k); await page.waitForTimeout(250); return lcd(); };
+// Croix en 4 triangles (2026-10-29) : on touche le bout de la branche, comme un doigt.
+const PADPOS = { up: [0.5, 0.15], down: [0.5, 0.85], left: [0.15, 0.5], right: [0.85, 0.5] };
+const pad = async k => { await page.locator('.pkm-dex-device').scrollIntoViewIfNeeded(); const b = await page.locator('.pkm-dex-cross').boundingBox(); await page.mouse.click(b.x + b.width * PADPOS[k][0], b.y + b.height * PADPOS[k][1]); await page.waitForTimeout(250); return lcd(); };
 const seq = [await pad('right'), await pad('right'), await pad('down'), await pad('up'), await pad('up'), await pad('down')];
 ok('croix : ' + seq.map(t => t.replace('Pokédex : ', '')).join(' → '), /Raichu, #026, à débloquer/.test(seq[0]) && /Pikachu, #025$/.test(seq[1]) && /Raichu/.test(seq[2]) && /Pikachu/.test(seq[3]) && /Arbok, #024/.test(seq[4]) && /Pikachu/.test(seq[5]));
 ok('la fiche suit la croix', /Pikachu/.test(await page.locator('section[aria-label="Fiche du Pokémon"] h3').innerText()));
-const silOk = await page.evaluate(() => document.querySelector('.pkm-dex-lcd-l img').className === '');
+const silOk = await page.evaluate(() => !document.querySelector('.pkm-dex-lcd-l img').classList.contains('pkm-dex-sil'));
 await pad('right');
 ok('silhouette sur l’écran tant que le Pokémon est à débloquer', silOk && await page.evaluate(() => document.querySelector('.pkm-dex-lcd-l img').classList.contains('pkm-dex-sil')));
 // Bouton vert : Raichu (500 PA) se débloque.
