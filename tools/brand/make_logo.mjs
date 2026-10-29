@@ -31,9 +31,14 @@ const rrect = (x, y, w, h, r) => `M${r1(x + r)} ${r1(y)}H${r1(x + w - r)}A${r} $
 const spark = (x, y, r) => { const q = r * 0.28; return `M${r1(x)} ${r1(y - r)}Q${r1(x + q)} ${r1(y - q)} ${r1(x + r)} ${r1(y)}Q${r1(x + q)} ${r1(y + q)} ${r1(x)} ${r1(y + r)}Q${r1(x - q)} ${r1(y + q)} ${r1(x - r)} ${r1(y)}Q${r1(x - q)} ${r1(y - q)} ${r1(x)} ${r1(y - r)}Z`; };
 
 // Carte du « O » : w × h, coin haut gauche en (0, 0). detail = barre, rond étoilé, petite étincelle.
-function cardO(w, h, detail) {
-  const cx = w / 2, cy = h * 0.54, R = w * 0.34;
-  const inside = detail
+// pk : la face de la carte porte la gemme des PK (icône de l'app, 2026-10-29, demande du porteur), à la place de la
+// barre, du rond étoilé et de l'étincelle ; le liseré blanc reste.
+function cardO(w, h, detail, pk) {
+  const cx = w / 2, cy = h * 0.54, R = w * 0.34, k = w * 0.92 / 64; // gemme : presque toute la largeur intérieure
+  const inside = pk
+    ? `<path d="${rrect(w * 0.1, h * 0.06, w * 0.8, h * 0.88, w * 0.12)}" fill="none" stroke="${WHITE}" stroke-width="${r1(w * 0.045)}"/>`
+      + `<g transform="translate(${r1(w / 2 - 32 * k)} ${r1(h / 2 - 32 * k)}) scale(${r1(k * 1000) / 1000})">${pkGemSvg()}</g>`
+    : detail
     ? `<path d="${rrect(w * 0.1, h * 0.06, w * 0.8, h * 0.88, w * 0.12)}" fill="none" stroke="${WHITE}" stroke-width="${r1(w * 0.045)}"/>`
       + `<path d="${rrect(w * 0.2, h * 0.12, w * 0.42, h * 0.055, h * 0.0275)}" fill="${INK}"/><circle cx="${r1(w * 0.75)}" cy="${r1(h * 0.148)}" r="${r1(w * 0.055)}" fill="${INK}"/>`
       + `<circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(R)}" fill="${INK}"/><circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(R * 0.62)}" fill="${WHITE}"/>`
@@ -57,7 +62,7 @@ function wordmark(o) {
     const key = (ch === 'D' || ch === 'R') && n++ >= 2 ? ch + '2' : ch;
     if (ch === 'O') {
       // cardH : hauteur de la carte en part de la hauteur des lettres (monogramme de l'icône : 0,65), centrée sur la lettre.
-      const h = o.cardH ? H * o.cardH : 114, w = h * 64 / 114, c = cardO(w, h, o.detail);
+      const h = o.cardH ? H * o.cardH : 114, w = h * 64 / 114, c = cardO(w, h, o.detail, o.pkCard);
       items.push({ x, y: o.cardH ? -H / 2 - h / 2 : -H - 8, w, h, a: tilt.O, card: c, fill: YELLOW });
       x += w + o.gap;
     } else if (ch === 'I' && o.iCard) {
@@ -139,6 +144,7 @@ out('web/img/brand/pk.svg', doc([0, 0, 64, 64], pkGemSvg(), 'PK'));
 // Monogramme de l'icône de l'app (2026-10-11, demande du porteur) : le « D » du logo et la carte « O » étoilée, au même
 // style que le mot (lettre blanche, contour et ombre noirs). Rendu en PNG par make_icons.mjs.
 // 2026-10-12 (porteur) : le D plus grand que la carte, la carte à 65 % de la hauteur du D.
-const mono = wordmark({ text: 'DO', outline: 14, shadow: [5, 7], letter: WHITE, detail: true, iCard: true, gap: 6, cardH: 0.65, dLift: -4 }); // D remonté très légèrement (2026-10-12)
+// 2026-10-29 (porteur) : la gemme des PK dans la carte, comme sur le logo de l'en-tête.
+const mono = wordmark({ text: 'DO', outline: 14, shadow: [5, 7], letter: WHITE, detail: true, pkCard: true, iCard: true, gap: 6, cardH: 0.65, dLift: -4 }); // D remonté très légèrement (2026-10-12)
 out('web/img/brand/monogram.svg', doc(mono.box, mono.svg, 'Dropicards'));
 console.log('SVG : dropicards (' + big.box.slice(2).join('×') + '), dark, classeur, pk (gemme)');

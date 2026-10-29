@@ -137,6 +137,9 @@
   paProto.paFxRun = function (from, to, done) {
     if (paStill()) { done(); return; }
     this.setState({ paFx: { from: from, to: to, n: Date.now() } });
+    // L'animation se joue au milieu du Pokédex : on l'amène au centre de l'écran, d'où que vienne l'appui (bouton de la
+    // fiche, bouton vert du Pokédex dessiné) ; plus besoin de remonter pour la voir (2026-10-29, porteur).
+    setTimeout(() => { const el = document.querySelector('.pkm-evo-fx .pkm-evo-to') || document.querySelector('.pkm-evo-fx'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 40);
     clearTimeout(paFxTimer);
     paFxTimer = setTimeout(() => { this.setState({ paFx: null }); done(); }, 3200);
   };

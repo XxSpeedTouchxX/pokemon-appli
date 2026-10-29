@@ -52,7 +52,11 @@ await pad('right');
 ok('silhouette sur l’écran tant que le Pokémon est à débloquer', silOk && await page.evaluate(() => document.querySelector('.pkm-dex-lcd-l img').classList.contains('pkm-dex-sil')));
 // Bouton vert : Raichu (500 PA) se débloque.
 ok('bouton vert : « ' + await page.locator('.pkm-dex-k-a').getAttribute('aria-label') + ' »', /Faire évoluer · 500 PA/.test(await page.locator('.pkm-dex-k-a').getAttribute('aria-label')));
-await page.click('.pkm-dex-k-a'); await page.waitForTimeout(4500);
+await page.click('.pkm-dex-k-a'); await page.waitForTimeout(900);
+// L'évolution est amenée au centre de l'écran (2026-10-29) : pas besoin de remonter pour la voir.
+const fxPos = await page.evaluate(() => { const el = document.querySelector('.pkm-evo-fx .pkm-evo-to'); if (!el) return null; const r = el.getBoundingClientRect(); return Math.round(r.top + r.height / 2 - innerHeight / 2); });
+ok('évolution centrée à l’écran (écart ' + fxPos + ' px)', fxPos !== null && Math.abs(fxPos) < 120);
+await page.waitForTimeout(3600);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { pa: d.pa, own: d.pkOwn, buddy: d.buddy }; });
 ok('Raichu débloqué au bouton vert (' + JSON.stringify(st) + ')', st.pa === 100 && st.own.indexOf(26) >= 0 && st.buddy === 26);
 // Forme précédente pas encore débloquée : le bouton vert dit pourquoi (Sablaireau, #028).
