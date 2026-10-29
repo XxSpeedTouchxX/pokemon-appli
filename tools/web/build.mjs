@@ -1,6 +1,7 @@
 // Génère la démo web de Dropicards, nom de code PKM-App (dossier web/) à partir de la maquette du canevas Design.
 // Source : docs/12-maquette-v5/Main.dc.html (gabarit + logique). Usage : npm ci && npm run build
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
 import { transformSync } from 'esbuild';
@@ -1015,8 +1016,16 @@ mkdirSync(OUT + 'img', { recursive: true });
 // de moins une fois compressé. Les sources lisibles restent dans tools/web ; tools/web/artifact.html n'est pas minifié.
 const appMin = '/* Dropicards · démo web générée par tools/web/build.mjs (sources : tools/web, docs/12-maquette-v5). */\n'
   + transformSync(app, { minify: true, charset: 'utf8', legalComments: 'none' }).code;
-writeFileSync(OUT + 'app.js', appMin);
-writeFileSync(OUT + 'index.html', index);
+// Logo et icônes : chaque adresse porte l'empreinte du fichier (?v=…), pour que téléphones et navigateurs reprennent
+// le nouveau dessin dès qu'il change, au lieu de garder l'ancien en cache sous le même nom (2026-10-29, porteur :
+// « au lancement, toujours l'ancien logo »). Manifeste compris (icônes de l'app installée).
+const BRAND_FILES = ['img/brand/dropicards-header.png', 'icons/favicon-32.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
+const brandVer = t => BRAND_FILES.reduce((acc, f) => acc.replace(new RegExp(f.replace(/[.]/g, '\\.') + '(\\?v=[0-9a-f]+)?(?=["\'])', 'g'), f + '?v=' + createHash('sha256').update(readFileSync(OUT + f)).digest('hex').slice(0, 8)), t);
+const manifest = brandVer(readFileSync(OUT + 'manifest.webmanifest', 'utf8'));
+writeFileSync(OUT + 'manifest.webmanifest', manifest);
+const manifestVer = 'manifest.webmanifest?v=' + createHash('sha256').update(manifest).digest('hex').slice(0, 8);
+writeFileSync(OUT + 'app.js', brandVer(appMin));
+writeFileSync(OUT + 'index.html', brandVer(index).replace(/manifest\.webmanifest(\?v=[0-9a-f]+)?"/, manifestVer + '"'));
 writeFileSync(ROOT + 'tools/web/artifact.html', artifact);
 copyFileSync(fileURLToPath(new URL('./node_modules/vue/dist/vue.runtime.global.prod.js', import.meta.url)), OUT + 'vendor/vue.runtime.global.prod.js');
 // MapLibre GL (licence BSD) pour le Radar : module ES chargé seulement à l'ouverture de l'écran.

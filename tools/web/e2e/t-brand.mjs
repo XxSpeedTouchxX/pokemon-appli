@@ -20,7 +20,8 @@ for (const [w, h] of [[390, 844], [360, 740]]) {
     for (const f of ['icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png', 'img/brand/dropicards-header.png', 'img/brand/dropicards.svg', 'img/brand/dropicards-dark.svg'])
       ok('servi : ' + f, await page.evaluate(u => fetch(u).then(r => r.ok), f));
     const links = await page.$$eval('link[rel="icon"], link[rel="apple-touch-icon"]', ls => ls.map(l => l.getAttribute('href')));
-    ok('icônes de la page : ' + links.join(', '), links.join() === 'icons/favicon-32.png,icons/icon-192.png,icons/apple-touch-icon.png');
+    // Adresses suivies de l'empreinte du fichier (?v=…, 2026-10-29) : le téléphone reprend la nouvelle icône.
+    ok('icônes de la page : ' + links.join(', '), links.map(h => h.split('?')[0]).join() === 'icons/favicon-32.png,icons/icon-192.png,icons/apple-touch-icon.png' && links.every(h => /\?v=[0-9a-f]{8}$/.test(h)));
     const sizes = await page.evaluate(() => Promise.all(['icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'].map(u => new Promise(ok => { const i = new Image(); i.onload = () => ok(i.naturalWidth + '×' + i.naturalHeight); i.onerror = () => ok('erreur'); i.src = u; }))));
     ok('tailles des icônes : ' + sizes.join(', '), sizes.join() === '512×512,512×512,180×180,32×32');
     // Plus aucun « PKM » visible sur les écrans principaux.
