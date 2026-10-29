@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-10-29 (soir) — Hébergement : serveur dédié, Cloudflare Pages débranché
+
+- **Décision du porteur** : l'app est hébergée sur son **serveur dédié** (OVHcloud Rise-S, AMD Ryzen 7 9700X), à l'adresse **https://dropicards.fr** ; le serveur récupère seul la branche publiée chaque jour par GitHub Actions. Il demande de débrancher Cloudflare.
+- **Fait dans le dépôt** : lien de partage (+300 PK) vers dropicards.fr ; mentions légales (hébergeur : OVH SAS, Roubaix ; services contactés) ; README (hébergement, en-têtes à reproduire dans le serveur web, marche à suivre pour débrancher Cloudflare) ; workflow et documents.
+- **Reste au porteur** (ses comptes) : déménager les collections enregistrées sur l'ancienne adresse (sauvegarde puis restauration), supprimer le projet Cloudflare Pages et l'application Access, retirer l'accès GitHub de Cloudflare, garder la zone DNS tant que les domaines en dépendent. **À vérifier** : nom exact de l'hébergeur dans les mentions légales (OVH SAS supposé d'après « Rise-S »).
+
+---
+
 ## 2026-10-29 (suite) — Pokédex : vu par le scan, attrapé avec des PA, progression
 
 - **Décision du porteur** (« go faire 2 et 4 ») :

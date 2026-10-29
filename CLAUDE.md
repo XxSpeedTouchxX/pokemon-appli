@@ -39,7 +39,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - « partenaires » = boutiques qui ont un accord avec PKM, pas une mention officielle Pokémon ;
   - probabilité d'arrivage estimée à partir de trois sources : annonce du magasin partenaire, signalements des collectionneurs (modérés, sans fil social), historique des arrivages.
 - **Catalogue réel (2026-10-03, « go » du porteur ; élargi le 2026-10-04) :**
-  - la démo web (https://pokemon-appli.pages.dev) charge toutes les cartes françaises de TCGdex, plus les extensions sans version française (cartes en anglais), avec leurs prix ;
+  - l'app web (https://dropicards.fr, serveur dédié du porteur depuis le 2026-10-29 ; avant : Cloudflare Pages, pokemon-appli.pages.dev) charge toutes les cartes françaises de TCGdex, plus les extensions sans version française (cartes en anglais), avec leurs prix ;
   - visuels officiels en qualité maximale, depuis le CDN TCGdex ; repli sur le scan d'une autre version (anglaise, allemande, italienne, espagnole) quand le français manque ;
   - parcours « Toutes les cartes » par extension ;
   - GitHub Actions met tout à jour chaque jour (`.github/workflows/tcgdex.yml`) ;

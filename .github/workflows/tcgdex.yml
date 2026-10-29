@@ -1,6 +1,6 @@
 # Catalogue TCGdex : télécharge toutes les cartes françaises et leurs prix, complétées par les autres
 # versions (extensions sans version française, visuels manquants), construit web/data/cards.json
-# (catalogue compact chargé par la démo web) et le publie sur la branche. Cloudflare Pages redéploie ensuite.
+# (catalogue compact chargé par la démo web) et le publie sur la branche. Le serveur dédié de dropicards.fr récupère ensuite la branche.
 # Les prix du scellé sont mis à jour par le workflow « Catalogue scellé » (un seul workflow par fichier publié).
 # Chaque mise à jour est un commit : l'historique git de cards.json sert d'archive quotidienne des prix.
 # Garde-fous (2026-10-11) : build_index.py n'écrit pas un catalogue en baisse face à la veille (cartes −2 %, extension

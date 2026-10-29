@@ -40,11 +40,11 @@ Pour chaque source : lire les conditions, puis écrire pour obtenir une confirma
 - **Marque « Dropicards » :**
   - recherche d'antériorité (INPI, EUIPO) ;
   - puis dépôt à l'INPI : 190 € pour une classe, environ 40 € par classe en plus. Classes probables : 9 (logiciel), 42 (services en ligne).
-- **Nom de domaine :** 10 à 15 €/an. Ensuite, brancher le domaine sur Cloudflare Pages (Claude peut préparer la marche à suivre).
+- **Nom de domaine :** fait (dropicards.fr et dropicards.com achetés) ; l'app est servie par le serveur dédié du porteur sur https://dropicards.fr depuis le 2026-10-29 (Cloudflare Pages débranché).
 
 ## 4. Mesure d'usage sans cookie (G1)
 
-- Le plus simple, gratuit : dans le tableau de bord Cloudflare, ouvrir le projet Pages `pokemon-appli`, puis **Web Analytics › Activer**. Aucune ligne de code, aucun cookie : visites, pages et pays.
+- *(Cloudflare Web Analytics n'est plus possible depuis le passage au serveur dédié, 2026-10-29 : à remplacer par une mesure d'audience sans cookie hébergée sur le serveur, par exemple les journaux du serveur web ou un outil auto-hébergé ; à choisir avec le porteur.)* Ancienne piste : Le plus simple, gratuit : dans le tableau de bord Cloudflare, ouvrir le projet Pages `pokemon-appli`, puis **Web Analytics › Activer**. Aucune ligne de code, aucun cookie : visites, pages et pays.
 - Une fois activée, prévenir Claude pour mettre à jour la rubrique « Mesure d'audience » de la page Confidentialité.
 - Les événements détaillés (carte ajoutée, scan réussi, sauvegarde) demanderont un petit service, à décider avec les entretiens.
 
@@ -52,7 +52,7 @@ Pour chaque source : lire les conditions, puis écrire pour obtenir une confirma
 
 | Point | Ce qu'il faut |
 |---|---|
-| **Scan** (C2) | Ouvrir `https://pokemon-appli.pages.dev/?debug=scan#scan` et scanner 30 vraies cartes (récentes, anciennes, full art). Noter combien sont trouvées en tête des 3 propositions ; envoyer les captures du mode diagnostic. |
+| **Scan** (C2) | Ouvrir `https://dropicards.fr/?debug=scan#scan` et scanner 30 vraies cartes (récentes, anciennes, full art). Noter combien sont trouvées en tête des 3 propositions ; envoyer les captures du mode diagnostic. |
 | **Logo net** (F1) | Envoyer ton logo en 1 200 px de large ou plus, ou en SVG. |
 | **Sauvegarde** | Faire une sauvegarde (Réglages › « Sauvegarder ou restaurer ») et vérifier que le fichier arrive bien dans Fichiers ou Drive. |
 

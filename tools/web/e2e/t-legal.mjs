@@ -9,7 +9,7 @@ await page.click('button:has-text("Informations légales et confidentialité")')
 const sh = page.locator('section[aria-label="Informations légales"]');
 ok('panneau ouvert : ' + await sh.locator('h2').innerText(), (await sh.locator('h2').innerText()) === 'Mentions légales');
 const t1 = await sh.innerText();
-ok('mentions : hébergeur, non-affiliation, éditeur à compléter', /Cloudflare, Inc\./.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /à compléter par l’éditeur/.test(t1));
+ok('mentions : hébergeur, non-affiliation, éditeur à compléter', /OVH SAS/.test(t1) && !/Cloudflare/.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /à compléter par l’éditeur/.test(t1));
 await page.screenshot({ path: shot('legal-mentions.png') });
 for (const [tab, re] of [['Confidentialité', /arrondie à environ 100 m/], ['Conditions', /pas une plateforme de vente/], ['PK et jeux', /ne s’achètent pas, ne se vendent pas/]]) {
   await sh.locator('[aria-label="Rubriques"] button:has-text("' + tab + '")').click(); await page.waitForTimeout(250);

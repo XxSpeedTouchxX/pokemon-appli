@@ -1,5 +1,7 @@
 # Préparation : domaine, App Store et Play Store, PK payants (PKM-App, vivant)
 
+> **Mise à jour du 2026-10-29 :** dropicards.fr et dropicards.com sont achetés et l'app est servie par le **serveur dédié du porteur** (OVHcloud Rise-S) sur https://dropicards.fr ; **Cloudflare Pages est débranché**. Les passages ci-dessous qui parlent de Cloudflare Pages décrivent l'ancien hébergement.
+
 *Créé le 2026-10-11, à la demande du porteur (« mets ça de côté pour pouvoir le préparer »). Rien n'est lancé : chaque étape attend un « go ». Les prix et les règles des stores changent souvent : à revérifier sur les sites officiels au moment de s'inscrire.*
 
 ## 1. Ce qui est hébergé aujourd'hui

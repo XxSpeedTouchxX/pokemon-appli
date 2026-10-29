@@ -32,7 +32,7 @@
   pkApplyPrices(null, false);
   const PK_WELCOME = 100, PK_SHARE = 300, PK_GAIN_MS = 2600, PK_V = 2;
   // Partage de l'app (+300 PK, une fois) : réseaux proposés, ou la feuille de partage du téléphone.
-  const PK_URL = 'https://pokemon-appli.pages.dev';
+  const PK_URL = 'https://dropicards.fr';
   const PK_TEXT = 'Je suis la valeur de ma collection Pokémon TCG avec Dropicards, au prix du marché :';
   const PK_NETS = [
     ['WhatsApp', 'https://wa.me/?text=' + encodeURIComponent(PK_TEXT + ' ' + PK_URL)],

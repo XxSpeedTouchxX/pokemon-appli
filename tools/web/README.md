@@ -16,7 +16,7 @@ Version web installable (dossier `web/`) de la maquette v5 (`docs/12-maquette-v5
 
 Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil** (navigateur), à chaque changement.
 
-- **Adresse :** https://pokemon-appli.pages.dev (Cloudflare Pages, accès limité par e-mail).
+- **Adresse :** https://dropicards.fr, sur le serveur dédié du porteur (OVHcloud Rise-S) depuis le 2026-10-29. Avant : https://pokemon-appli.pages.dev (Cloudflare Pages), débranché.
 - **Page claude.ai (privée) :** https://claude.ai/artifact/9sDF5mc4brvvYaZWLd64qe. Elle n'a pas le catalogue complet.
 
 ## Identité Dropicards
@@ -348,7 +348,7 @@ Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande 
 - **Mise à jour :** le workflow `.github/workflows/tcgdex.yml` tourne chaque jour vers 06:47, heure de Paris. Il peut aussi être lancé à la main depuis l'onglet *Actions* de GitHub.
   - Il télécharge le catalogue avec `tools/tcgdex/sync_tcgdex.py`.
   - Il construit `web/data/cards.json` avec `tools/tcgdex/build_index.py`.
-  - Il publie le résultat sur la branche, et Cloudflare redéploie le site.
+  - Il publie le résultat sur la branche ; le serveur dédié récupère la branche tout seul (réglé par le porteur).
 - **Dans l'app :** `tools/web/catalog.js` charge `cards.json` au démarrage.
   - **Marché :**
     - la recherche porte sur toutes les cartes (nom, extension, numéro, rareté), sans tenir compte des accents ni des majuscules ;
@@ -482,35 +482,34 @@ Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande 
   - les visuels de la galerie Pokémon France.
 - **OpenStreetMap (ODbL) et OpenFreeMap :** les mentions sont affichées dans le Radar ; elles doivent rester visibles.
 
-## Mettre en ligne sur Cloudflare Pages
+## Hébergement : serveur dédié (depuis le 2026-10-29)
 
-*Les libellés de l'interface Cloudflare peuvent varier.*
+L'app est servie par le **serveur dédié du porteur** (OVHcloud, Rise-S), à l'adresse **https://dropicards.fr** ; le serveur sert le dossier `web/` et récupère seul la branche publiée chaque jour par GitHub Actions (réglage fait par le porteur). Cloudflare Pages (`pokemon-appli.pages.dev`) est débranché.
 
-1. Crée un compte gratuit sur https://dash.cloudflare.com.
-2. Ouvre **Workers & Pages**, puis **Créer**, onglet **Pages**, puis **Se connecter à Git**. Autorise GitHub et choisis le dépôt `XxSpeedTouchxX/pokemon-appli`.
-3. Renseigne les réglages :
+**En-têtes à garder** (ceux de `_headers`, que seul Cloudflare lisait), par exemple avec nginx :
 
-   | Réglage | Valeur |
-   |---|---|
-   | Nom du projet | `pokemon-appli` (adresse `https://pokemon-appli.pages.dev`) |
-   | Branche de production | `claude/pokemon-app-mockup-1mxt7p`, tant qu'elle n'est pas fusionnée dans `main` |
-   | Préréglage du framework | Aucun |
-   | Commande de build | vide |
-   | Répertoire de sortie | `web` |
+```nginx
+add_header X-Robots-Tag "noindex, nofollow" always;   # pas d'indexation tant que l'app n'est pas publique
+add_header Referrer-Policy "same-origin" always;
+add_header X-Content-Type-Options "nosniff" always;
+location = /sw.js   { add_header Cache-Control "no-cache"; }
+location = /app.js  { add_header Cache-Control "no-cache"; }
+location /data/     { add_header Cache-Control "no-cache"; }
+location /vendor/tesseract/ { add_header Cache-Control "public, max-age=31536000, immutable"; }
+```
 
-4. Clique sur **Enregistrer et déployer**. Ensuite, chaque push sur la branche met le site à jour.
-5. Limite l'accès (recommandé) :
-   - ouvre **Zero Trust**, puis **Access**, puis **Applications** ;
-   - ajoute une application **Self-hosted** sur `pokemon-appli.pages.dev` et `*.pokemon-appli.pages.dev` ;
-   - crée une règle **Emails** avec la liste des personnes autorisées ;
-   - choisis la connexion par code reçu par e-mail (*One-time PIN*).
+(Dans nginx, un `add_header` placé dans un `location` remplace ceux du niveau supérieur : y répéter les trois premières lignes.) Le fichier `.webmanifest` doit partir en `application/manifest+json` et les fichiers `.wasm` de Tesseract en `application/wasm`. HTTPS est obligatoire pour la caméra du scan, la position du Radar et l'installation sur l'écran d'accueil.
 
-   C'est gratuit jusqu'à 50 utilisateurs.
-6. Installe la démo sur ton téléphone :
-   - **iPhone :** Safari, puis **Partager**, puis **Sur l'écran d'accueil** ;
-   - **Android :** Chrome, puis menu **⋮**, puis **Installer l'application**.
+**Débrancher Cloudflare** (fait par le porteur, dans ses comptes) :
+1. **Avant tout, déménager les collections** : chaque collection est enregistrée dans le navigateur, *par adresse*. Sur l'ancienne adresse, Réglages › « Sauvegarder ou restaurer » › Sauvegarder ; puis sur https://dropicards.fr, « Restaurer » › « Remplacer ma collection » (PK, PA, Pokédex et vus compris). L'app installée sur l'écran d'accueil depuis l'ancienne adresse est à supprimer puis à réinstaller depuis dropicards.fr.
+2. Tableau de bord Cloudflare › **Workers & Pages** › `pokemon-appli` › **Paramètres** › **Supprimer le projet** (l'adresse pages.dev et ses déploiements disparaissent ; irréversible).
+3. **Zero Trust › Access › Applications** : supprimer l'application qui protégeait `pokemon-appli.pages.dev`.
+4. GitHub › **Settings › Applications** › « Cloudflare Workers and Pages » › Configure : retirer l'accès au dépôt (ou désinstaller).
+5. Si les DNS de dropicards.fr ou dropicards.com sont chez Cloudflare : **ne pas supprimer la zone DNS** tant qu'ils n'ont pas été déplacés (sinon le site devient injoignable) ; vérifier que les enregistrements A et AAAA pointent vers le serveur, en « DNS only ».
 
-Le site n'est pas indexé par les moteurs de recherche : balise `robots` et en-tête `X-Robots-Tag` dans `_headers`.
+Installer l'app sur le téléphone : **iPhone** : Safari, puis **Partager**, puis **Sur l'écran d'accueil** ; **Android** : Chrome, puis menu **⋮**, puis **Installer l'application**.
+
+Le site n'est pas indexé par les moteurs de recherche : balise `robots` de la page et en-tête `X-Robots-Tag` (à régler dans le serveur web).
 
 ## Ouvrir un écran précis
 
@@ -556,4 +555,4 @@ Le script `tools/web/build.mjs` :
 | `icons/` | Icônes de l'app : le logo du porteur sur deux lignes (dont une « maskable » et celle de l'iPhone) ; `favicon-32.png` avec la carte O, pour l'onglet du navigateur (`tools/brand/import_logo.py`) |
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |
-| `_headers` | En-têtes Cloudflare : non-indexation, cache |
+| `_headers` | En-têtes voulus (non-indexation, cache), au format Cloudflare : plus lu depuis le passage au serveur dédié, à reproduire dans le serveur web (voir « Hébergement ») |
