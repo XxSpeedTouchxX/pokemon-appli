@@ -1,0 +1,5 @@
+# Lu seulement par Cloudflare Pages (ancienne adresse pokemon-appli.pages.dev, 2026-10-29) : chaque page est renvoyée
+# vers la même page de https://dropicards.fr, servi par le serveur dédié (qui ignore ce fichier).
+# 302 (temporaire) plutôt que 301 : les navigateurs ne la mémorisent pas ; retirer ce fichier rouvre l'ancienne adresse
+# (et les collections qui y sont encore enregistrées).
+/*  https://dropicards.fr/:splat  302

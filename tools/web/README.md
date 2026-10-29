@@ -500,7 +500,9 @@ location /vendor/tesseract/ { add_header Cache-Control "public, max-age=31536000
 
 (Dans nginx, un `add_header` placé dans un `location` remplace ceux du niveau supérieur : y répéter les trois premières lignes.) Le fichier `.webmanifest` doit partir en `application/manifest+json` et les fichiers `.wasm` de Tesseract en `application/wasm`. HTTPS est obligatoire pour la caméra du scan, la position du Radar et l'installation sur l'écran d'accueil.
 
-**Débrancher Cloudflare** (fait par le porteur, dans ses comptes) :
+**Redirection de l'ancienne adresse (2026-10-29, option choisie par le porteur)** : le projet Cloudflare Pages est gardé, mais `web/_redirects` (lu par Cloudflare seulement) renvoie chaque page de `pokemon-appli.pages.dev` vers la même page de https://dropicards.fr, en 302 (temporaire : les navigateurs ne la mémorisent pas). Les collections encore enregistrées sur l'ancienne adresse n'y sont plus accessibles tant que la redirection est en place ; supprimer `web/_redirects` et pousser rouvre l'ancienne adresse le temps de les sauvegarder. Le serveur dédié peut refuser les fichiers `/_headers` et `/_redirects` (ils ne servent qu'à Cloudflare).
+
+**Débrancher Cloudflare entièrement** (si un jour le porteur le décide, dans ses comptes) :
 1. **Avant tout, déménager les collections** : chaque collection est enregistrée dans le navigateur, *par adresse*. Sur l'ancienne adresse, Réglages › « Sauvegarder ou restaurer » › Sauvegarder ; puis sur https://dropicards.fr, « Restaurer » › « Remplacer ma collection » (PK, PA, Pokédex et vus compris). L'app installée sur l'écran d'accueil depuis l'ancienne adresse est à supprimer puis à réinstaller depuis dropicards.fr.
 2. Tableau de bord Cloudflare › **Workers & Pages** › `pokemon-appli` › **Paramètres** › **Supprimer le projet** (l'adresse pages.dev et ses déploiements disparaissent ; irréversible).
 3. **Zero Trust › Access › Applications** : supprimer l'application qui protégeait `pokemon-appli.pages.dev`.
@@ -556,3 +558,4 @@ Le script `tools/web/build.mjs` :
 | `manifest.webmanifest` | Installation sur l'écran d'accueil |
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |
 | `_headers` | En-têtes voulus (non-indexation, cache), au format Cloudflare : plus lu depuis le passage au serveur dédié, à reproduire dans le serveur web (voir « Hébergement ») |
+| `_redirects` | Redirection de l'ancienne adresse Cloudflare Pages vers https://dropicards.fr (lu par Cloudflare seulement) |
