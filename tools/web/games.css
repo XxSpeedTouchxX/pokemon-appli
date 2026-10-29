@@ -413,9 +413,10 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 /* Pendant la visite, l'app sous le calque ne réagit pas aux touchers : seule la bulle (Passer, son, Suivant) répond. */
 .pkm-tuto-host { position: absolute; inset: 0; z-index: 40; pointer-events: auto; overflow: hidden; touch-action: none; }
 .pkm-tt-frame, .pkm-tt-ring, .pkm-tt-link { pointer-events: none; }
-.pkm-tt-frame { position: absolute; left: 0; top: 0; transition-property: transform, width, height, border-radius, opacity; width: 60px; height: 60px; border-radius: 18px; border: 3px solid #FFD60A;
+/* Position et taille du cadre : suivies en douceur par tuto.js à chaque image (2026-10-29), sans transition CSS. */
+.pkm-tt-frame { position: absolute; left: 0; top: 0; box-sizing: border-box; width: 60px; height: 60px; border-radius: 18px; border: 3px solid #FFD60A; will-change: transform;
   box-shadow: 0 0 0 200vmax rgba(3, 6, 14, 0.62), 0 0 22px rgba(255, 214, 10, 0.75), inset 0 0 18px rgba(255, 214, 10, 0.35);
-  transition: transform 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), width 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), height 0.5s cubic-bezier(0.3, 0.9, 0.3, 1), border-radius 0.5s;
+  transition: border-radius 0.4s, opacity 0.3s;
   animation: pkmTtPulse 1.4s ease-in-out infinite; }
 @keyframes pkmTtPulse { 50% { box-shadow: 0 0 0 200vmax rgba(3, 6, 14, 0.62), 0 0 36px rgba(255, 214, 10, 0.95), inset 0 0 26px rgba(255, 214, 10, 0.5); } }
 .pkm-tt-c { position: absolute; width: 18px; height: 18px; border: 0 solid #FFFFFF; animation: pkmTtCorner 1.4s ease-in-out infinite; }
@@ -513,3 +514,15 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pafly-burst::after { content: ''; position: absolute; inset: -30px; border-radius: 50%; background: repeating-conic-gradient(rgba(255, 226, 122, 0.85) 0 8deg, rgba(255, 226, 122, 0) 8deg 30deg); -webkit-mask: radial-gradient(circle, transparent 30%, #000 32%, transparent 70%); mask: radial-gradient(circle, transparent 30%, #000 32%, transparent 70%); }
 @keyframes pkmPaBurst { 0% { transform: scale(0.1) rotate(0deg); opacity: 1; } 60% { opacity: 1; } 100% { transform: scale(1.35) rotate(40deg); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .pkm-pa-ready, .pkm-pa-dot, .pkm-pa-claim, .pkm-pa-claim-btn { animation: none; } }
+
+/* Mon profil › Notifications (notif.js, 2026-10-29) : une ligne par rappel, interrupteur à droite. */
+.pkm-nt-row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 0; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; }
+.pkm-nt-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-nt-label { font-size: 14.5px; font-weight: 700; }
+.pkm-nt-sub { font-size: 12px; line-height: 1.35; color: #9AA8C3; }
+.pkm-nt-sw { flex: none; position: relative; width: 50px; height: 30px; border-radius: 15px; background: #2A3A5C; transition: background 0.2s; }
+.pkm-nt-sw i { position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 12px; background: #F3F6FC; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35); transition: transform 0.2s cubic-bezier(0.3, 0.9, 0.4, 1.2); }
+.pkm-nt-on { background: #3DDC84; }
+.pkm-nt-on i { transform: translateX(20px); }
+.pkm-nt-row:focus-visible { outline: 3px solid var(--pkm-accent); outline-offset: 2px; border-radius: 12px; }
+@media (prefers-reduced-motion: reduce) { .pkm-nt-sw, .pkm-nt-sw i { transition: none; } }

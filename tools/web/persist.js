@@ -6,7 +6,7 @@
   // PK (pk.js) : solde, compagnons débloqués, articles déjà récompensés, dernier jour d'ouverture, version des règles, partage récompensé.
   // Les liens de démonstration (#novice, ?demo=…) montrent la démo sans toucher à la collection.
   const SAVE_KEY = 'pkm-collection-v1';
-  const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts', 'buddy', 'pk', 'pkOwn', 'pkSeen', 'pkDay', 'pkV', 'pkShared', 'since', 'admin', 'backupAt', 'backupSnooze', 'valAdj', 'bgFx', 'orphans', 'alertsDone', 'games', 'tickets', 'avatarImg', 'trainer', 'pkEarned', 'referrals', 'gradeSeen', 'favs', 'setSize', 'setSort', 'hvr', 'valDays', 'pa', 'paDay', 'paStreak', 'evo', 'tuto', 'megas', 'scanDay', 'scanN', 'dexSeen', 'dexTips'];
+  const SAVED_KEYS = ['purchases', 'sales', 'platforms', 'lotMethod', 'valuation', 'split', 'seq', 'adv', 'masked', 'answers', 'declared', 'alerts', 'buddy', 'pk', 'pkOwn', 'pkSeen', 'pkDay', 'pkV', 'pkShared', 'since', 'admin', 'backupAt', 'backupSnooze', 'valAdj', 'bgFx', 'orphans', 'alertsDone', 'games', 'tickets', 'avatarImg', 'trainer', 'pkEarned', 'referrals', 'gradeSeen', 'favs', 'setSize', 'setSort', 'hvr', 'valDays', 'pa', 'paDay', 'paStreak', 'evo', 'tuto', 'megas', 'scanDay', 'scanN', 'dexSeen', 'dexTips', 'notif', 'notifDone'];
   const DEVICE = { enabled: true, ok: null, timer: null, kept: '' };
   const SAVE_V = 1;
   const storage = {

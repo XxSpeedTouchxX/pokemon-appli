@@ -1,5 +1,5 @@
 // PA (points d'Aura, 2026-10-25) : gain une fois par jour, selon les jours d'affilée ; un jour manqué fait reprendre la
-// série à +15 PA. Depuis le 2026-10-28 (porteur), les PA ne sont plus crédités à l'ouverture : une pastille « ! » sur le
+// série à +15 PA. Depuis le 2026-10-28 (porteur), les PA ne sont plus crédités à l'ouverture : une pastille « 1 » (« ! » jusqu’au 2026-10-29) sur le
 // solde de l'en-tête prévient qu'ils attendent ; un appui ouvre « Tes PA du jour », « Récupérer mes PA » les crédite
 // (animation d'envol d'environ 1,6 s). Sans PA à récupérer, le solde ouvre le Pokédex. Dates simulées avec ?today=.
 import { launch, BASE as E2E, shot } from './helpers.mjs';
@@ -16,7 +16,7 @@ const sheet = page.locator('section[aria-label="Tes PA du jour"]');
 // Didacticiel déjà vu (il couvrirait l'en-tête).
 await page.goto(E2E + '/?today=2026-10-31', { waitUntil: 'load' }); await page.waitForTimeout(900);
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); d.tuto = 'done'; d.onb = 0; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
-// Un jour : ouverture (rien n'est crédité, pastille « ! »), appui sur le solde, « Récupérer mes PA ».
+// Un jour : ouverture (rien n'est crédité, pastille « 1 » (« ! » jusqu’au 2026-10-29)), appui sur le solde, « Récupérer mes PA ».
 const day = async d => {
   await page.goto(E2E + '/?today=' + d, { waitUntil: 'load' }); await page.waitForTimeout(900);
   const before = await saved(), dotOn = await dot.count() > 0 && await dot.isVisible(), aria = await pill.getAttribute('aria-label');
@@ -27,7 +27,7 @@ const day = async d => {
   return { before, dotOn, aria, open, pa: after.pa, streak: after.streak, day: after.day, closed: !(await sheet.isVisible().catch(() => false)), dotAfter: await dot.count() };
 };
 const a = await day('2026-11-01');
-ok('ouverture : rien de crédité, pastille « ! » (' + a.before.pa + ' PA)', a.before.pa === 0 && a.dotOn);
+ok('ouverture : rien de crédité, pastille « 1 » (« ! » jusqu’au 2026-10-29) (' + a.before.pa + ' PA)', a.before.pa === 0 && a.dotOn);
 ok('en-tête : « 10 PA à récupérer » (' + a.aria + ')', /10 PA à récupérer/.test(a.aria || ''));
 ok('appui sur le solde : « Tes PA du jour »', a.open);
 ok('1er jour récupéré : +10 PA (' + a.pa + ', série ' + a.streak + ')', a.pa === 10 && a.streak === 1 && a.day === '2026-11-01');

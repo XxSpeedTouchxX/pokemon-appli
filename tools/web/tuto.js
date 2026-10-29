@@ -10,7 +10,12 @@
   // - pendant la visite, la place du compagnon dans « Valeur de toute ma collection » est vide : le starter y revient
   //   à la fin (« Maintenant que tu connais toute l'appli, tu pourras me trouver ici ! ») ;
   // - le Pokédex est présenté en détail, nouveautés en avant : le starter se met en haut de l'écran et balaie tout le
-  //   Pokédex jusqu'aux évolutions ; les jeux et le PK shop ne sont plus présentés, une phrase les annonce.
+  //   Pokédex jusqu'aux évolutions ; les jeux ne sont plus présentés, une phrase annonce le PK shop.
+  // Retouches du 2026-10-29 (porteur : « plus fluide », cadres) : la place de la bulle est choisie avant de faire
+  // défiler (plus de saut ni de second défilement), la bulle prend d'emblée la hauteur de sa phrase, le cadre suit sa
+  // cible en douceur image par image (plus de transition CSS relancée à chaque image pendant le défilement) ; le cadre
+  // du radar s'arrête sous la carte du radar (« kids »), celui du PK shop est un carré centré sur l'icône (« ico ») ;
+  // l'étape « fiche du Pokémon » est retirée ; à la fin, le starter arrive exactement à la taille du compagnon.
   // Pour le revoir : Profil › « Revoir le didacticiel », ou le lien ?tuto=1 (sans redemander le starter s'il est déjà
   // choisi). La visite est construite hors de Vue (calque .pkm-tuto-host, vide dans le gabarit), comme la carte du
   // Radar : le texte qui s'écrit et le cadre qui suit l'élément ne relancent pas le rendu de l'app.
@@ -21,14 +26,13 @@
     { tab: 'home', sel: 'section[aria-label="Valeur de ma collection"]', text: 'Salut ! Ici, tu vois la valeur de toute ta collection : cartes et produits scellés, au prix du marché.' },
     { tab: 'home', sel: 'section[aria-label="Mon classeur"]', text: 'Ton classeur range toutes tes cartes et tes produits scellés.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label^="Scanner"]', text: 'Pour ajouter une carte, scanne-la avec l’appareil photo : c’est très rapide !' },
-    { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', text: 'Le radar repère les boutiques Pokémon autour de toi et leur chance d’arrivage.' },
+    { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', kids: 2, text: 'Le radar repère les boutiques Pokémon autour de toi et leur chance d’arrivage.' },
     { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', text: 'Toutes les séries et leurs extensions : touche une carte pour voir sa cote, ou ajoute-la.' },
     { tab: 'market', sel: '.pkm-dex-device', top: true, fresh: true, text: 'Voici ton Pokédex ! Ses écrans montrent ton compagnon et tes PA.' },
     { tab: 'market', sel: '.pkm-dex-all', top: true, fresh: true, text: 'Touche « Tous les Pokémon » : ils sont tous là, à débloquer avec tes PA.' },
     { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, fresh: true, text: 'La route d’évolution : chaque Pokémon, de sa forme de base jusqu’à sa méga-évolution.' },
-    { tab: 'market', sel: 'section[aria-label="Fiche du Pokémon"]', top: true, fresh: true, text: 'Sa fiche : types, taille, poids, ses cartes… Débloque-le ou choisis-le comme compagnon.' },
     { tab: 'market', sel: 'header .pkm-pa-bar', fresh: true, text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, puis jusqu’à +30 d’affilée !' },
-    { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', text: 'Tu auras le temps de découvrir encore d’autres nouveautés, comme le PK shop !' },
+    { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
   ];
   const TUTO_TALKERS = [1, 4, 7, 25];
@@ -149,33 +153,85 @@
     if (st.final) tutoFly();
     else if (TUTO.comp) TUTO.comp.tutoGo(TUTO.i + 1);
   };
-  // Fin : le starter saute à la place du compagnon (vide pendant la visite), puis le calque disparaît.
+  // Dessin d'une image (pixels non transparents), en coordonnées de l'écran, et la taille d'un pixel de l'image : le
+  // starter de la bulle et le compagnon n'ont ni les mêmes marges ni la même boîte (object-fit: contain).
+  const tutoInk = img => {
+    const R = img.getBoundingClientRect(), w = img.naturalWidth, h = img.naturalHeight;
+    if (!w || !h) return { left: R.left, top: R.top, width: R.width, height: R.height, px: 0 };
+    const k = Math.min(R.width / w, R.height / h), ox = R.left + (R.width - w * k) / 2, oy = R.top + (R.height - h * k) / 2;
+    let f = { l: 0, t: 0, r: w, b: h };
+    try {
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, w, h).data; let x0 = w, y0 = h, x1 = -1, y1 = -1;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 24) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      if (x1 >= 0) f = { l: x0, t: y0, r: x1 + 1, b: y1 + 1 };
+    } catch (e) { /* image illisible : sa boîte entière */ }
+    return { left: ox + f.l * k, top: oy + f.t * k, width: (f.r - f.l) * k, height: (f.b - f.t) * k, px: k };
+  };
+  // Fin : le starter saute à la place du compagnon (vide pendant la visite) et y arrive exactement à la taille du
+  // compagnon (2026-10-29, porteur : il ne doit plus grossir en entrant dans sa case), puis le calque disparaît.
   const tutoFly = () => {
-    const el = TUTO.el, target = document.querySelector('button[aria-label^="Compagnon : "]');
+    const el = TUTO.el, target = document.querySelector('button[aria-label^="Compagnon : "] img');
     if (TUTO.done) return;
     TUTO.done = true; clearTimeout(TUTO.typing);
     const finish = () => TUTO.comp && TUTO.comp.tutoEnd(true);
     if (!el || !target || tutoStill()) { finish(); return; }
-    const a = el.mon.getBoundingClientRect(), b = target.getBoundingClientRect();
-    const k = Math.max(0.5, Math.min(1.1, b.height / a.height));
+    tutoMouth(false);
     el.host.classList.add('pkm-tt-out');
-    el.mon.style.transform = 'translate(' + Math.round(b.left + b.width / 2 - (a.left + a.width / 2)) + 'px, ' + Math.round(b.top + b.height / 2 - (a.top + a.height / 2)) + 'px) scale(' + k.toFixed(2) + ')';
-    el.mon.classList.add('pkm-tt-fly');
+    // Sans l'animation de repos, depuis le coin haut gauche : la translation et l'échelle se calculent simplement.
+    el.mon.classList.add('pkm-tt-fly'); el.mon.style.transformOrigin = '0 0'; el.mon.style.transform = 'none';
+    // Même dessin, même taille de pixel : l'échelle vient de la taille d'un pixel (la boîte du dessin du compagnon
+    // change avec l'image en cours de son animation, la flamme de Salamèche par exemple) ; on aligne les pieds.
+    const m = el.mon.getBoundingClientRect(), a = tutoInk(el.m0), b = tutoInk(target);
+    const k = a.px && b.px ? b.px / a.px : b.height / a.height;
+    const tx = b.left + b.width / 2 - (m.left + (a.left - m.left + a.width / 2) * k);
+    const ty = b.top + b.height - (m.top + (a.top - m.top + a.height) * k);
+    void el.mon.offsetWidth;
+    el.mon.style.transform = 'translate(' + tx.toFixed(1) + 'px, ' + ty.toFixed(1) + 'px) scale(' + k.toFixed(4) + ')';
     TUTO.fly = setTimeout(finish, 950);
   };
-  // Place de la bulle : en bas (au-dessus de la barre du bas) ou en haut, là où il reste le plus de place à côté de ce
-  // qui est encadré ; les étapes du Pokédex la mettent en haut (le starter balaie le Pokédex de haut en bas).
-  const tutoDock = () => {
-    const el = TUTO.el, st = TUTO_STEPS[TUTO.i], t = TUTO.target;
-    if (!el || !st) return;
-    if (st.top) { el.box.classList.add('pkm-tt-top'); return; }
-    if (!t) return;
-    const H = el.host.getBoundingClientRect(), r = t.getBoundingClientRect(), nav = document.querySelector(TUTO_NAV.trim());
-    const navTop = nav ? nav.getBoundingClientRect().top : H.bottom, bh = el.box.offsetHeight + 16;
-    const below = navTop - r.bottom, above = r.top - H.top, top = below < bh && above >= below, was = el.box.classList.contains('pkm-tt-top');
-    el.box.classList.toggle('pkm-tt-top', top);
-    // Bulle passée en haut : l'élément redescend juste sous elle (petits écrans), pour qu'elle ne le cache pas.
-    if (top && !was) setTimeout(() => tutoScroll(t, { top: true }), 500);
+  // Rectangle encadré : l'élément, ses premiers enfants seulement (« kids » : le titre et la carte du radar, sans les
+  // petites lignes en dessous) ou un carré centré sur son icône (« ico » : l'onglet PK shop).
+  const tutoRect = (t, st) => {
+    if (st.ico) {
+      const r = (t.querySelector('svg') || t).getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, h = st.ico / 2;
+      return { left: cx - h, top: cy - h, right: cx + h, bottom: cy + h, width: st.ico, height: st.ico };
+    }
+    if (st.kids) {
+      const rs = [...t.children].slice(0, st.kids).map(k => k.getBoundingClientRect()).filter(r => r.height > 0);
+      if (rs.length) {
+        const o = { left: Math.min(...rs.map(r => r.left)), top: Math.min(...rs.map(r => r.top)), right: Math.max(...rs.map(r => r.right)), bottom: Math.max(...rs.map(r => r.bottom)) };
+        o.width = o.right - o.left; o.height = o.bottom - o.top;
+        return o;
+      }
+    }
+    return t.getBoundingClientRect();
+  };
+  // Place de la bulle, choisie avant de faire défiler : en bas (au-dessus de la barre du bas) si ce qui est présenté
+  // tient entre l'en-tête et elle, sinon en haut quand il reste plus de place sous elle ; les étapes du Pokédex la
+  // mettent en haut (le starter balaie le Pokédex de haut en bas). Plus de second placement ni de second défilement.
+  const tutoNavTop = H => { const nav = document.querySelector(TUTO_NAV.trim()); return nav ? nav.getBoundingClientRect().top : H.bottom; };
+  // Zone libre pour ce qui est présenté, bulle en haut ou en bas, et le décalage à faire défiler pour l'y amener
+  // (borné à ce que la page peut réellement défiler).
+  const tutoZone = (t, st, top) => {
+    const main = t.closest('main'), H = TUTO.el.host.getBoundingClientRect(), M = main.getBoundingClientRect(), r = tutoRect(t, st), bh = TUTO.el.box.offsetHeight;
+    const lo = top ? Math.max(M.top + 8, H.top + 14 + bh + 14) : M.top + 8, hi = top ? tutoNavTop(H) - 8 : H.bottom - 92 - bh - 14;
+    const want = Math.max(lo, Math.min(top ? lo : M.top + 96, hi - r.height));
+    const d = Math.max(-main.scrollTop, Math.min(main.scrollHeight - main.clientHeight - main.scrollTop, r.top - want));
+    return { d: d, seen: Math.min(hi, r.bottom - d) - Math.max(lo, r.top - d) };
+  };
+  const tutoPlace = (t, st) => {
+    const el = TUTO.el;
+    if (st.top) return true;
+    if (!t) return false;
+    const H = el.host.getBoundingClientRect(), r = tutoRect(t, st), bh = el.box.offsetHeight, navTop = tutoNavTop(H);
+    if (!t.closest('main') || t.closest(TUTO_NAV.trim()) || t.closest('header')) {
+      const below = navTop - r.bottom, above = r.top - H.top;
+      return below < bh + 16 && above >= below;
+    }
+    // Bulle en bas, sauf si ce qui est présenté se voit mieux avec la bulle en haut.
+    return tutoZone(t, st, true).seen > tutoZone(t, st, false).seen + 4;
   };
   // Cadre, trait et anneau de l'onglet : suivis à chaque image tant que la visite est ouverte. Le cadre s'arrête avant
   // la bulle : rien de ce qui est présenté n'est caché par le texte.
@@ -190,20 +246,25 @@
       el.frame.style.opacity = t || TUTO.done ? '' : '0';
       if (!t) { el.link.style.opacity = '0'; el.last = ''; }
       if (t && !TUTO.done) {
-        const r = t.getBoundingClientRect(), pad = 6, B = el.box.getBoundingClientRect(), top = el.box.classList.contains('pkm-tt-top');
+        const r = tutoRect(t, st), pad = 6, B = el.box.getBoundingClientRect(), top = el.box.classList.contains('pkm-tt-top');
         const lo = top ? B.bottom - H.top + 8 : 4, hi = top ? H.height - 4 : B.top - H.top - 8;
         const y0 = Math.max(lo, r.top - H.top - pad), y1 = Math.min(hi, r.bottom - H.top + pad);
         const x = Math.max(4, r.left - H.left - pad), w = Math.min(H.width - 4, r.right - H.left + pad) - x, h = y1 - y0;
-        const key = [x, y0, w, h].map(Math.round).join(',');
+        // Le cadre rejoint sa cible en douceur, image par image (aussi pendant le défilement) : plus d'à-coups.
+        const goal = [x, y0, Math.max(24, w), Math.max(24, h)], fr = TUTO.fr;
+        if (!fr || tutoStill()) TUTO.fr = goal.slice();
+        else fr.forEach((v, k) => { const d = goal[k] - v; fr[k] = Math.abs(d) < 0.4 ? goal[k] : v + d * 0.22; });
+        const key = TUTO.fr.map(v => v.toFixed(1)).join(',');
         if (key !== el.last) {
+          const f = TUTO.fr;
           el.last = key;
-          Object.assign(el.frame.style, { transform: 'translate(' + Math.round(x) + 'px, ' + Math.round(y0) + 'px)', width: Math.max(24, Math.round(w)) + 'px', height: Math.max(24, Math.round(h)) + 'px' });
-          el.frame.style.borderRadius = Math.min(26, parseFloat(getComputedStyle(t).borderTopLeftRadius) + pad || 18) + 'px';
+          Object.assign(el.frame.style, { transform: 'translate3d(' + f[0].toFixed(1) + 'px, ' + f[1].toFixed(1) + 'px, 0)', width: f[2].toFixed(1) + 'px', height: f[3].toFixed(1) + 'px' });
         }
+        if (el.rad !== TUTO.i) { el.rad = TUTO.i; el.frame.style.borderRadius = st.ico ? '18px' : Math.min(26, parseFloat(getComputedStyle(t).borderTopLeftRadius) + pad || 18) + 'px'; }
         const m = el.mon.getBoundingClientRect();
         const mx = m.left - H.left + m.width / 2, my = top ? m.bottom - H.top - 6 : m.top - H.top + 10;
-        const fx = Math.max(x + 14, Math.min(x + w - 14, mx)), fy = top ? y0 : y0 + h;
-        const ok = h > 20 && (top ? fy > my + 18 : fy < my - 18);
+        const F = TUTO.fr, fx = Math.max(F[0] + 14, Math.min(F[0] + F[2] - 14, mx)), fy = top ? F[1] : F[1] + F[3];
+        const ok = F[3] > 20 && (top ? fy > my + 18 : fy < my - 18);
         el.link.style.opacity = ok ? '1' : '0';
         if (ok) {
           const cy = (my + fy) / 2;
@@ -219,21 +280,26 @@
     };
     TUTO.raf = requestAnimationFrame(loop);
   };
-  // Amène l'élément présenté sous l'en-tête, ou sous la bulle quand elle est en haut (la barre du bas ne défile pas).
-  const tutoScroll = (t, st) => {
-    if (!t || t.closest(TUTO_NAV.trim()) || t.closest('header')) return;
-    const main = t.closest('main');
-    if (!main) return;
-    const off = st.top && TUTO.el ? TUTO.el.box.getBoundingClientRect().bottom - main.getBoundingClientRect().top + 14 : 96;
-    const top = t.getBoundingClientRect().top - main.getBoundingClientRect().top - off;
-    try { main.scrollBy({ top: top, behavior: tutoStill() ? 'auto' : 'smooth' }); } catch (e) { main.scrollTop += top; }
+  // Amène l'élément présenté dans la place libre : sous l'en-tête (jusqu'à 96 px dessous s'il reste de la place) quand
+  // la bulle est en bas, juste sous la bulle quand elle est en haut (la barre du bas ne défile pas).
+  const tutoScroll = (t, st, top) => {
+    if (!t || !TUTO.el || !t.closest('main') || t.closest(TUTO_NAV.trim()) || t.closest('header')) return;
+    const main = t.closest('main'), d = tutoZone(t, st, top).d;
+    if (Math.abs(d) < 2) return;
+    try { main.scrollBy({ top: d, behavior: tutoStill() ? 'auto' : 'smooth' }); } catch (e) { main.scrollTop += d; }
+  };
+  // La bulle prend tout de suite la hauteur de sa phrase complète : elle ne grandit plus pendant l'écriture.
+  const tutoSize = text => {
+    const el = TUTO.el, p = el.box.querySelector('.pkm-tuto-text');
+    p.style.minHeight = ''; el.typed.textContent = text;
+    const h = p.offsetHeight;
+    el.typed.textContent = ''; p.style.minHeight = h + 'px';
   };
   // Montre une étape : texte qui s'écrit, bulle placée, élément amené et encadré, onglet mis en avant.
   const tutoShow = i => {
     const el = tutoBuild(), st = TUTO_STEPS[i];
     if (!el || !st) return;
     TUTO.i = i; TUTO.target = document.querySelector(st.sel); el.last = '';
-    el.box.classList.toggle('pkm-tt-top', !!st.top);
     el.box.classList.toggle('pkm-tt-fresh', !!st.fresh);
     el.box.classList.remove('pkm-tt-ready');
     el.box.classList.remove('pkm-tt-hop'); void el.box.offsetWidth; el.box.classList.add('pkm-tt-hop');
@@ -245,9 +311,12 @@
     el.nextLabel.textContent = st.final ? 'Terminer' : 'Suivant';
     const navBtn = TUTO_STEPS[i].sel.indexOf(TUTO_NAV) === 0;
     TUTO.tab = st.tab === 'home' || navBtn ? null : document.querySelector(TUTO_NAV + 'button[aria-current="page"]');
-    tutoType(tutoText(st));
-    tutoScroll(TUTO.target, st);
-    clearTimeout(TUTO.dockT); TUTO.dockT = setTimeout(tutoDock, tutoStill() ? 0 : 480);
+    const text = tutoText(st);
+    tutoSize(text);
+    const top = tutoPlace(TUTO.target, st);
+    el.box.classList.toggle('pkm-tt-top', top);
+    tutoType(text);
+    tutoScroll(TUTO.target, st, top);
     tutoTrack();
   };
   // Dernière étape : si le compagnon n'est pas la mascotte (didacticiel revu après un changement de compagnon), le
@@ -257,10 +326,10 @@
     return TUTO.comp.st().buddy === TUTO.mon ? st.text : 'Maintenant que tu connais toute l’appli, tu retrouveras ton compagnon ici !';
   };
   const tutoStop = () => {
-    clearTimeout(TUTO.typing); clearTimeout(TUTO.fly); clearTimeout(TUTO.hopT); clearTimeout(TUTO.sayT); clearTimeout(TUTO.dockT); cancelAnimationFrame(TUTO.raf);
+    clearTimeout(TUTO.typing); clearTimeout(TUTO.fly); clearTimeout(TUTO.hopT); clearTimeout(TUTO.sayT); cancelAnimationFrame(TUTO.raf);
     voiceStop();
     if (TUTO.el && TUTO.el.host) TUTO.el.host.innerHTML = '';
-    TUTO.el = null; TUTO.tab = null; TUTO.target = null; TUTO.i = -1;
+    TUTO.el = null; TUTO.tab = null; TUTO.target = null; TUTO.fr = null; TUTO.i = -1;
   };
 
   const tutoBaseSt = tutoProto.st;

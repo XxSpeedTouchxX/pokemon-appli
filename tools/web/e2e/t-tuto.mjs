@@ -1,4 +1,5 @@
-// Didacticiel v3 (2026-10-28) : question à la première installation, choix du starter ; visite en 12 étapes où l'on
+// Didacticiel v3 (2026-10-28, retouché le 2026-10-29) : question à la première installation, choix du starter ; visite
+// en 11 étapes (fiche du Pokémon retirée) où l'on
 // avance en touchant « Suivant » (rien n'avance seul) ; chaque partie encadrée sans être cachée par la bulle ; la place
 // du compagnon reste vide jusqu'à la fin, où le starter y saute ; Pokédex présenté en détail (bulle en haut).
 import { launch, BASE as E2E, shot } from './helpers.mjs';
@@ -44,7 +45,15 @@ for (let k = 0; k < 14; k++) {
     if (!document.querySelector('.pkm-tt-frame') || document.querySelector('.pkm-tt-out')) return null;
     const f = document.querySelector('.pkm-tt-frame').getBoundingClientRect(), b = document.querySelector('.pkm-tuto-bubble').getBoundingClientRect();
     const overlap = Math.max(0, Math.min(f.bottom, b.bottom) - Math.max(f.top, b.top));
-    return { t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
+    // Valeur : part de la section hors du cadre ; radar : le cadre englobe le titre et la carte, pas les lignes dessous ;
+    // PK shop : carré centré sur l'icône.
+    const sec = document.querySelector('section[aria-label="Valeur de ma collection"]'), rs = sec && sec.getBoundingClientRect();
+    const clip = rs ? Math.round(Math.max(0, f.top - rs.top) + Math.max(0, rs.bottom - f.bottom)) : -1;
+    const shop = document.querySelector('section[aria-label="Boutiques près de toi"]'), kids = shop ? [...shop.children] : [];
+    const radar = kids.length > 2 ? (kids[1].getBoundingClientRect().bottom <= f.bottom + 1 && kids[2].getBoundingClientRect().bottom > f.bottom + 4 ? 'ok' : 'cadre ' + Math.round(f.bottom)) : '';
+    const ico = document.querySelector('nav button[aria-label="PK shop"] svg').getBoundingClientRect();
+    const off = Math.round(Math.hypot(f.left + f.width / 2 - ico.left - ico.width / 2, f.top + f.height / 2 - ico.top - ico.height / 2));
+    return { t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), fw: Math.round(f.width), clip: clip, radar: radar, off: off, top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
       fresh: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-fresh'), nav: [...document.querySelectorAll('nav button[aria-current="page"]')].map(b => b.getAttribute('aria-label')).join('') };
   });
   if (!info) break;
@@ -53,12 +62,13 @@ for (let k = 0; k < 14; k++) {
   await page.locator('.pkm-tt-next').click(); await page.waitForTimeout(80);
   await page.locator('.pkm-tt-next').click().catch(() => {}); // la 1re touche termine la phrase, la 2e avance
 }
-ok(steps.length + ' étapes', steps.length === 12);
+ok(steps.length + ' étapes', steps.length === 11);
 ok('cadre jamais sous la bulle (' + steps.map(x => x.overlap).join(',') + ')', steps.every(x => x.overlap <= 2 && x.fh > 20));
 ok('valeur, classeur, scan, radar, séries', /valeur/.test(steps[0].t) && /classeur/.test(steps[1].t) && /scanne/.test(steps[2].t) && /radar/.test(steps[3].t) && /séries/.test(steps[4].t));
-ok('Pokédex en 4 étapes, bulle en haut, « Nouveau »', [5, 6, 7, 8].every(i => steps[i].top && steps[i].fresh && steps[i].nav === 'Jeux') && /Pokédex/.test(steps[5].t) && /Tous les Pokémon/.test(steps[6].t) && /évolution/.test(steps[7].t) && /fiche/.test(steps[8].t));
-ok('PA à récupérer, puis PK shop annoncé sans le présenter', /récupérer tes PA/.test(steps[9].t) && /PK shop/.test(steps[10].t) && steps[10].nav === 'Accueil');
-ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[11].t));
+ok('Pokédex en 3 étapes, bulle en haut, « Nouveau », sans la fiche', [5, 6, 7].every(i => steps[i].top && steps[i].fresh && steps[i].nav === 'Jeux') && /Pokédex/.test(steps[5].t) && /Tous les Pokémon/.test(steps[6].t) && /évolution/.test(steps[7].t) && !steps.some(x => /Sa fiche/.test(x.t)));
+ok('PA à récupérer, puis PK shop : « ' + steps[9].t + ' » (cadre ' + steps[9].fw + ' × ' + steps[9].fh + ', écart au centre de l’icône ' + steps[9].off + ' px)', /récupérer tes PA/.test(steps[8].t) && /Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés/.test(steps[9].t) && steps[9].nav === 'Accueil' && steps[9].fw <= 60 && steps[9].fh <= 60 && steps[9].off <= 2);
+ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[10].t));
+ok('valeur entière dans le cadre (' + steps[0].clip + ' px coupés) ; radar sans ses petites lignes (' + steps[3].radar + ')', steps[0].clip <= 2 && steps[3].radar === 'ok');
 ok('plus de booster ni de pièce présentés', !steps.some(x => /booster|pièce|mini-jeux/i.test(x.t)));
 await page.waitForTimeout(1400);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { tuto: d.tuto, evo: d.evo, buddy: d.buddy }; });

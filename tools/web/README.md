@@ -84,7 +84,8 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Transition entre pages** (`tools/web/nav.js`, 2026-10-12, d'après la vidéo du porteur) : copie figée et inerte de la page quittée (`NAV.snap`, sans `main` ni `header`) ; en avant, la nouvelle page arrive de la droite avec un fond qui glisse, l'ancienne recule de 30 % en s'assombrissant ; en arrière, l'inverse ; 450 ms ; geste depuis le bord : la suite repart de la position du doigt.
 - **Jeux** (`tools/web/games.js`, `games.css`, fragment `games`, 2026-10-11) : l'onglet « Marché » (écran `market`) devient « Jeux » ; Booster PK (12 h depuis le 2026-10-12) et Pile ou face (8 h) ; la roulette est remplacée le 2026-10-26 par le jeu d'évolution (voir « PA et jeu d'évolution ») ; tirage `crypto.getRandomValues`, dates gardées avec la collection (`games`). L'ancienne recherche du Marché devient l'écran `search` (accueil, scan).
 - **Navigation** (`tools/web/nav.js`, 2026-10-11) : bouton Retour du téléphone (historique du navigateur), geste depuis le bord gauche, glissement au retour, position de la page gardée au retour.
-- **Première visite et alertes** (`tools/web/start.js`, 2026-10-11) : collection vide et accueil guidé à la première visite (démo sur choix) ; « Tes alertes » à l'ouverture de l'app, notification du téléphone si autorisée.
+- **Première visite et alertes** (`tools/web/start.js`, 2026-10-11) : collection vide et accueil guidé à la première visite ; « Tes alertes » à l'ouverture de l'app, notification du téléphone si autorisée (sauf si « Sorties et boutiques suivies » est décoché dans Mon profil › Notifications).
+- **Premier écran** (2026-10-29, porteur) : titre « Viens découvrir toutes les fonctionnalités de Dropicards » ; six lignes à pictogramme, dont en 4ᵉ « Gagne des PK et PA pour remporter des lots et enrichir ton Pokédex » (manette) ; cinq cartes en éventail (Pikachu-ex « forêt » de Héros Transcendants, me02.5-276 ; Dracaufeu du Set de Base ; Lugia de la Collection Classique ; Mew-ex et Mewtwo-ex illustrations spéciales du 30ᵉ anniversaire, 30th-152 et 30th-151) ; bouton « Commencer l'aventure ! ». Le bouton « Essayer avec la collection de démo » est retiré (Réglages › « Remettre la démo » reste).
 - **Fiche d'une carte** (`catalog.js`, 2026-10-11) : cote Cardmarket de la version de la carte et prix de l'autre version (`cmh`, `cmv`), « cote à confirmer » (`q`), « cote à venir » (`stats.setsPriceSoon`), lien vers les ventes réussies eBay. Logos de séries : TCGdex, puis logos gardés avec la page (dont McDonald's, promos, énergies, Coffre Étincelant, repris du dépôt GitHub 1niceroli/ptcg-assets), sinon nom dessiné.
 - **Polices hébergées avec l'app** (`web/fonts/`, paquets `@fontsource`, licence SIL OFL) : la démo n'appelle plus Google Fonts. Seule la page claude.ai (`artifact.html`) garde Google Fonts.
 
@@ -138,6 +139,15 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
   - puis le reste se déplie, bloc après bloc : description, trois profils, « Ce qui fixe ton profil », « Ce que ça change pour toi ».
 - **Raccourcis :** un appui sur le texte l'affiche d'un coup ; un second appui sur la catégorie replie.
 - **Accessibilité :** le texte complet est lu par les lecteurs d'écran ; tout s'affiche sans mouvement si l'utilisateur limite les animations.
+
+## Notifications
+
+`tools/web/notif.js`, fragment `profile-notif` (2026-10-29, demande du porteur) :
+- **Pastille « 1 »** (rouge, chiffre blanc) sur le solde de PA de l'en-tête quand les PA du jour attendent (à la place du « ! »).
+- **Mon profil › Notifications** : quatre interrupteurs, cochés par défaut et enregistrés (`notif`) : PA du jour à récupérer, Booster PK prêt, pièce prête, sorties et boutiques suivies. Bouton « Autoriser les notifications » tant que le navigateur n'a pas répondu ; état affiché (autorisées, bloquées, non prises en charge, avec la marche à suivre sur iPhone).
+- **Rappels calculés sur l'appareil** : 2,5 s après l'ouverture, puis chaque minute tant que l'app est ouverte ou en arrière-plan, et au retour sur l'app. Chaque rappel n'est montré qu'une fois par cycle (`notifDone` : par jour pour les PA, par booster ou lancer pour les jeux). Notification du téléphone par le service worker quand il est là (sinon `new Notification`) ; toucher la notification ramène l'app (`notificationclick` dans `web/sw.js`). Nombre de rappels prêts sur l'icône de l'app (`navigator.setAppBadge`, là où il existe).
+- **App fermée** : rien ne peut prévenir sans serveur ; ce sera l'envoi Web Push des comptes (`docs/17-proposition-comptes-dropicards.md`).
+- Test : `e2e/t-notif.mjs` (notifications et pastille de l'icône espionnées).
 
 ## Vues au choix et bulle d'infos
 
@@ -214,9 +224,16 @@ Depuis le 2026-10-26 (`tools/web/pa-core.js`, testé par `node --test tools/web/
 ## Didacticiel
 
 Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande du porteur (`tools/web/tuto.js`, `tools/web/voice.js`, fragment `tuto` de `catalog.dc.html`, styles dans `games.css`).
-- À la première installation : « Veux-tu suivre le didacticiel ? », puis « Choisis ton starter » ; le starter présente l'app en **12 étapes** : valeur de la collection, Mon classeur, bouton Scanner, radar des boutiques, Toutes les séries, **Pokédex en 4 étapes** (appareil, « Tous les Pokémon », route d'évolution, fiche ; badge « Nouveau », bulle en haut pendant que l'écran descend jusqu'aux évolutions), PA du jour à récupérer, « Tu auras le temps de découvrir encore d'autres nouveautés, comme le PK shop ! », puis la place du compagnon. Les jeux et le PK shop ne sont plus présentés.
+- À la première installation : « Veux-tu suivre le didacticiel ? », puis « Choisis ton starter » ; le starter présente l'app en **11 étapes** : valeur de la collection, Mon classeur, bouton Scanner, radar des boutiques, Toutes les séries, **Pokédex en 3 étapes** (appareil, « Tous les Pokémon », route d'évolution, fiche ; badge « Nouveau », bulle en haut pendant que l'écran descend jusqu'aux évolutions), PA du jour à récupérer, « Tu auras le temps de découvrir encore d'autres nouveautés, comme le PK shop ! », puis la place du compagnon. Les jeux et le PK shop ne sont plus présentés.
 - **On avance en touchant « Suivant »** (grand bouton jaune qui pulse quand la phrase est écrite ; le premier appui termine la phrase en cours) : rien n'avance seul. « Passer » arrête.
 - **La bulle ne cache rien** : centrée, elle se place en bas (au-dessus de la barre) ou en haut, là où il reste de la place ; le cadre jaune s'arrête avant elle.
+- **Retouches du 2026-10-29 (porteur : « plus fluide », cadres) :**
+  - la place de la bulle (en haut ou en bas) est choisie **avant** de faire défiler, d'après ce qui se verra le mieux : plus de saut de la bulle ni de second défilement ;
+  - la bulle prend d'emblée la hauteur de sa phrase complète (elle ne grandit plus pendant l'écriture) ;
+  - le cadre jaune suit sa cible en douceur, image par image (plus de transition CSS relancée pendant le défilement), bordure comprise dans sa taille ;
+  - « Valeur de toute ma collection » entière dans le cadre dès la première étape ; radar : seulement le titre « Boutiques autour de toi » et la carte du radar (`kids: 2`) ; PK shop : petit carré centré sur l'icône (`ico: 42`) et « Dans l'onglet PK shop, tu pourras acheter plein d'items grâce à tes PK gagnés ! » ;
+  - étape « Sa fiche » du Pokémon retirée ;
+  - à la fin, le starter arrive **exactement à la taille du compagnon** : même taille de pixel que le dessin du compagnon, pieds alignés (`tutoInk`), sans grossir en entrant dans sa case.
 - **Place du compagnon vide** pendant la visite ; à la fin (« Maintenant que tu connais toute l'appli, tu pourras me trouver ici ! »), le starter y saute et reprend sa place en haut à droite de « Valeur de toute ma collection ».
 - **Le starter parle** : texte lettre par lettre, bouche ouverte et fermée (`web/img/pokemon/talk/`, `tools/sprites/make_talk.py`), **voix** (`voice.js`) : 7 propositions envoyées au porteur, **« Bulles douces » choisie par le porteur** (voix 4, 2026-10-28) ; `?voix=1` à `?voix=7` (ou la clé `pkm-tuto-voice`) pour les essayer : 1 Babillage, 2 Petit cri de Pokémon, 3 Bip rétro, 4 Bulles douces, 5 Voix du Pokédex, 6 Carillon magique, 7 Voix parlée du téléphone (synthèse vocale de l'appareil). Bouton pour couper le son (`pkm-tuto-sound`).
 - La visite est construite hors de Vue (calque `.pkm-tuto-host`) ; pendant la visite, seule la bulle répond aux touchers. Mouvements réduits : texte d'un coup, sans saut.

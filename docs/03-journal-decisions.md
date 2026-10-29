@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-10-29 (nuit, suite) — Premier écran, didacticiel plus fluide, notifications ; comptes proposés
+
+- **Demandes du porteur** : premier écran retouché, création de compte à la première utilisation (e-mail et mot de passe, Face ID ensuite), didacticiel plus fluide et mieux cadré, pastille « 1 » sur le solde de PA, rubrique « Notifications » dans Mon profil. Le logo pas encore à jour sur son téléphone est mis de côté par le porteur.
+- **Fait** :
+  - premier écran : « Viens découvrir toutes les fonctionnalités de Dropicards » (texte demandé, corrigé : « Vient découvrir toutes fonctionnalités chez Dropicards ») ; 4ᵉ ligne « Gagne des PK et PA pour remporter des lots et enrichir ton Pokédex » avec une manette ; cinq cartes (Pikachu-ex « forêt » de Héros Transcendants à gauche, Mewtwo-ex illustration spéciale du 30ᵉ anniversaire à droite) ; « Commencer l'aventure ! » ; « Essayer avec la collection de démo » retiré ;
+  - didacticiel : 11 étapes (fiche du Pokémon retirée) ; bulle placée avant le défilement, à la hauteur de sa phrase ; cadre lissé image par image ; valeur entière encadrée ; radar sans les petites lignes ; PK shop en petit carré centré, nouveau texte ; starter à la taille exacte du compagnon à la fin ;
+  - pastille « 1 » à la place du « ! » ; Mon profil › Notifications (PA, Booster PK, pièce, sorties et boutiques), rappels calculés sur l'appareil, pastille sur l'icône de l'app ; `web/sw.js` v85.
+- **Proposé, à valider** : comptes Dropicards (`docs/17-proposition-comptes-dropicards.md`) : socle minimal du serveur d'abord (≈ 47 h), puis API des comptes, écrans, synchronisation, RGPD ; ≈ 137 h (17 j à 8 h/j, 46 j à 3 h/j), 2 à 20 €/mois. Face ID par clé d'accès (passkey) ; e-mails de nouveautés seulement avec consentement (case décochée). **Rien n'est codé côté serveur sans « go ».**
+- **Points ouverts** : six décisions du §5 de la proposition ; compte obligatoire probablement refusé par Apple pour les stores (règle 5.1.1) ; notifications app fermée seulement avec les comptes (Web Push).
+
 ## 2026-10-29 (nuit, fin) — Logo : gemme des PK dans la carte « O »
 
 - **Demande du porteur** : garder exactement le logo Dropicards, mais remplacer l'intérieur de la carte « O » par le logo des PK.

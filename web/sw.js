@@ -1,6 +1,6 @@
 // Dropicards (nom de code PKM-App) · démo : réseau d'abord (les mises à jour s'affichent), copie locale si le réseau manque.
 // Le catalogue et les prix du scellé sont gardés dès la première visite : l'app s'ouvre hors ligne avec les dernières cotes.
-const CACHE = 'pkm-demo-v84';
+const CACHE = 'pkm-demo-v85';
 const FILES = ['./', 'index.html', 'app.js', 'vendor/vue.runtime.global.prod.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'img/brand/dropicards-header.png', 'img/brand/pk.svg', 'data/cards-base.json', 'data/cards-prices.json', 'data/sealed.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -16,4 +16,12 @@ self.addEventListener('fetch', e => {
     caches.open(CACHE).then(c => c.put(e.request, copy));
     return res;
   }).catch(() => caches.match(e.request)));
+});
+// Toucher une notification (rappels PA, Booster PK, pièce, alertes ; notif.js) : ramène l'app au premier plan, ou l'ouvre.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    const c = list.find(w => 'focus' in w);
+    return c ? c.focus() : self.clients.openWindow('./');
+  }));
 });

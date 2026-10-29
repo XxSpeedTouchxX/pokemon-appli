@@ -42,11 +42,16 @@ patch(`<span style="display: flex; align-items: center; gap: 8px">
 <span style="width: 30px; height: 30px; border-radius: 10px; background: #3D63FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(61, 99, 255, 0.35)"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9"></path></svg></span>
 <span style="font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.03em">PKM</span>
 </span>`, '<span style="flex: 0 1 196px; min-width: 0; display: flex; align-items: center"><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: 100%; max-width: 196px; height: auto"></span>');
-// Accueil guidé (start.js, 2026-10-11) : ouvert tout seul à la première visite ; « Essayer avec la collection de démo »
-// tant que la collection est vide ; texte fidèle aux sources réellement branchées (pas encore d'eBay).
+// Accueil guidé (start.js, 2026-10-11) : ouvert tout seul à la première visite ; texte fidèle aux sources réellement branchées (pas encore d'eBay).
 patch('PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, avec sa source et sa date.',
   'PKM suit la cote Cardmarket de chaque carte, chaque jour, avec sa source et sa date.');
-patch('cursor: pointer">Commencer</button>', 'cursor: pointer">Commencer</button>\n<sc-if value="{{ ob.canDemo }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ ob.tryDemo }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Essayer avec la collection de démo</button></sc-if>');
+// Premier écran (2026-10-29, porteur) : « Commencer l’aventure ! » ; plus de bouton « Essayer avec la collection de
+// démo » (Réglages › « Remettre la démo » reste) ; nouveau titre.
+patch('cursor: pointer">Commencer</button>', 'cursor: pointer">Commencer l’aventure\u202f!</button>');
+patch('text-align: center">La vraie valeur de ta collection Pokémon</h1>', 'text-align: center">Viens découvrir toutes les fonctionnalités de Dropicards</h1>');
+// Éventail de cinq cartes (start.js) : cadre élargi à 320 px.
+patch('<div aria-hidden="true" style="position: relative; align-self: center; width: 262px; height: 232px">',
+  '<div aria-hidden="true" style="position: relative; align-self: center; width: 320px; max-width: 100%; height: 200px">');
 // Catalogue complet (tools/web/catalog.js) : courbe seulement si un historique existe, ajout possible
 // d'une carte sans prix, recherche du Marché sur toutes les cartes.
 patch('<sc-if value="{{ it.hasCote }}" hint-placeholder-val="{{ true }}">\n<div style="display: flex; justify-content: space-between; align-items: baseline;',
@@ -96,11 +101,12 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
   tpl = tpl.replace(re, '');
 }
 // Premier écran (2026-10-16, porteur) : cartes entières (plus de bas coupé en fondu) ; la description et les trois
-// points sont remplacés par les cinq lignes du porteur, chacune avec son pictogramme.
+// points sont remplacés par les lignes du porteur, chacune avec son pictogramme (six depuis le 2026-10-29 : PK et PA
+// en 4ᵉ ligne, avec la manette).
 {
   const re = /<img src="\{\{ fc\.img \}\}" alt="" style="position: absolute; left: \{\{ fc\.left \}\}; top: \{\{ fc\.top \}\}; width: 104px; height: 121px;[^"]*"/;
   if (!re.test(tpl)) throw new Error('Cartes du premier écran introuvables');
-  tpl = tpl.replace(re, '<img src="{{ fc.img }}" alt="" style="position: absolute; left: {{ fc.left }}; top: {{ fc.top }}; width: 100px; height: 140px; border-radius: 6px; object-fit: contain; transform: rotate({{ fc.rot }}); box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5)"');
+  tpl = tpl.replace(re, '<img src="{{ fc.img }}" alt="" style="position: absolute; left: {{ fc.left }}; top: {{ fc.top }}; width: 92px; height: 129px; border-radius: 6px; object-fit: contain; transform: rotate({{ fc.rot }}); box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5)"');
 }
 {
   const a = tpl.indexOf('<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #C9D3EA; text-align: center">Scanne tes cartes');
@@ -121,7 +127,7 @@ patch(`<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"
 </button>`);
 patch(`letter-spacing: -0.02em">Ton espace</span>`, `letter-spacing: -0.02em">Mon profil</span>
 <sc-if value="{{ pf.hasName }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13.5px; font-weight: 700; color: var(--pkm-accent)">{{ pf.nameLine }}</span></sc-if>`);
-patch('<section aria-label="Type de collectionneur"', FRAG['profile-trainer'] + '\n<section aria-label="Type de collectionneur"');
+patch('<section aria-label="Type de collectionneur"', FRAG['profile-trainer'] + '\n' + FRAG['profile-notif'] + '\n<section aria-label="Type de collectionneur"');
 // Grades (2026-10-14, porteur, profile.js) : les hexagones des paliers deviennent les logos des 5 grades
 // (web/img/grades/, tools/brand/make_grades.mjs). Le symbole « sym » d'un palier est désormais le chemin du logo.
 {
@@ -688,7 +694,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js').replace('__BUILD_VERSION__', 'v' + (/pkm-demo-v(\d+)/.exec(readFileSync(ROOT + 'web/sw.js', 'utf8')) || [0, '?'])[1]), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js').replace('__BUILD_VERSION__', 'v' + (/pkm-demo-v(\d+)/.exec(readFileSync(ROOT + 'web/sw.js', 'utf8')) || [0, '?'])[1]), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), notifJs = mod('notif.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), navJs = mod('nav.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -729,7 +735,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + dexJs + voiceJs + tutoJs + ficheJs + navJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + notifJs + dexJs + voiceJs + tutoJs + ficheJs + navJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -749,7 +755,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${dexJs}${voiceJs}${tutoJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${notifJs}${dexJs}${voiceJs}${tutoJs}${ficheJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -778,8 +784,8 @@ ${code}
   // Collection enregistrée sur l'appareil, sauf pour les liens de démonstration.
   DEVICE.enabled = !props.demo;
   const restored = DEVICE.enabled && inst.restoreSaved();
-  // Première visite (2026-10-11) : collection vide et accueil guidé ; la collection de démo seulement sur choix
-  // (« Essayer avec la collection de démo »). Sous les tests automatisés, la démo reste le point de départ, sauf ?first=1.
+  // Première visite (2026-10-11) : collection vide et accueil guidé ; la collection de démo seulement par les
+  // Réglages (« Remettre la démo »). Sous les tests automatisés, la démo reste le point de départ, sauf ?first=1.
   try {
     const robot = navigator.webdriver && !/[?&]first=1(&|$)/.test(location.search);
     if (DEVICE.enabled && !restored && !storage.raw() && !robot)
@@ -793,6 +799,8 @@ ${code}
   inst.pkInit();
   // PA du jour (pa.js, 2026-10-25) : série de jours d'ouverture.
   inst.paInit();
+  // Notifications (notif.js, 2026-10-29) : rappels PA, Booster PK, pièce, calculés sur l'appareil.
+  inst.notifInit();
   // Défilement (demande du porteur, 2026-10-09, revue le 2026-10-11) : une nouvelle page s'ouvre en haut ; en
   // revenant en arrière, la page reprend là où on l'avait laissée, avec un glissement (nav.js). Les réglages de la
   // page (recherche, filtres, onglets, vues) restent dans l'état de l'app : on les retrouve au retour.

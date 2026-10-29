@@ -54,10 +54,10 @@ const st2 = await page.evaluate(() => { const d = JSON.parse(localStorage.getIte
 ok('Pokédex : Carabaffe pour 500 PA (' + st2.pa + ' PA restants), nouveau compagnon', st2.evo.stage === 1 && st2.buddy === 8 && st2.pa === 20 && st2.own.indexOf(8) >= 0 && (await route.locator('.pkm-dex-lock').count()) === 2);
 ok('Pokédex : Carabaffe « C’est ton compagnon », Tortank à 1 500 PA', (await act.innerText()).trim() === 'C’est ton compagnon' && /^Tortank, 2ᵉ évolution, 1[\s\u202f\u00a0]500 PA$/.test(await route.locator('button[aria-label^="Tortank,"]').getAttribute('aria-label')));
 await evo.screenshot({ path: shot('games-evolution.png') });
-// PA dans l'en-tête, à la place des tickets ; PA du jour à récupérer (pastille « ! »), plus crédités à l'ouverture.
+// PA dans l'en-tête, à la place des tickets ; PA du jour à récupérer (pastille « 1 » (« ! » jusqu’au 2026-10-29)), plus crédités à l'ouverture.
 const paPill = page.locator('header button[aria-label^="Mes points d’Aura"]').first();
 ok('en-tête : PA sous le solde de PK', /20\s*PA/.test(await paPill.innerText()));
-ok('en-tête : PA du jour à récupérer (« ! »)', (await paPill.locator('.pkm-pa-dot').count()) === 1 && /PA à récupérer/.test(await paPill.getAttribute('aria-label')));
+ok('en-tête : PA du jour à récupérer (« 1 »)', (await paPill.locator('.pkm-pa-dot').count()) === 1 && /PA à récupérer/.test(await paPill.getAttribute('aria-label')));
 // PK shop (2026-10-12) : 4ᵉ onglet, ticket du tirage au sort.
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
 const ticket = page.locator('section[aria-label="Ticket · tirage au sort"]');

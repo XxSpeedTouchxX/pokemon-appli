@@ -1,6 +1,6 @@
   // ——— Première visite et alertes (2026-10-11) ———
-  // Première visite : collection vide et accueil guidé ouvert tout seul (build.mjs) ; la collection de démo
-  // seulement sur choix (« Essayer avec la collection de démo »).
+  // Première visite : collection vide et accueil guidé ouvert tout seul (build.mjs). La collection de démo n'est
+  // plus proposée sur le premier écran (2026-10-29, porteur) : Réglages › « Remettre la démo » seulement.
   // Alertes : « Me prévenir » (Sorties) et les alertes de boutique enregistraient seulement un choix, sans jamais
   // prévenir. Désormais, à chaque ouverture de l'app : un encadré « Tes alertes » sur l'accueil (et une notification
   // du téléphone si l'utilisateur l'a autorisée) quand un produit suivi sort, et la veille ou le jour d'une sortie
@@ -11,22 +11,29 @@
 
   // Lugia de la Collection Classique : visuel de la carte d'origine (Aquapolis 149/147, voir CLASSIC_30) ; repli sur le
   // Lugia de Neo Genesis si le catalogue ne l'a pas.
-  const ST_FAN = [['base1-4'], ['30th-c-029', 'neo1-9'], ['30th-152']];
+  // Premier écran (2026-10-29, porteur) : cinq cartes en éventail, de gauche à droite : Pikachu-ex « forêt »
+  // (Héros Transcendants, illustration spéciale de booota), Dracaufeu du Set de Base (1re édition), Lugia réimprimé
+  // de la Collection Classique, Mew-ex et Mewtwo-ex illustrations spéciales du 30ᵉ anniversaire.
+  const ST_FAN = [['me02.5-276'], ['base1-4'], ['30th-c-029', 'neo1-9'], ['30th-152'], ['30th-151']];
+  // Cartes de 92 × 129 dans un cadre de 320 px : le centre devant, les bords derrière et plus inclinés (l'ordre de la
+  // liste fait l'empilement).
+  const ST_POS = [
+    { i: 0, left: '10px', top: '44px', rot: '-18deg' }, { i: 4, left: '218px', top: '44px', rot: '18deg' },
+    { i: 1, left: '58px', top: '18px', rot: '-9deg' }, { i: 3, left: '170px', top: '18px', rot: '9deg' },
+    { i: 2, left: '114px', top: '4px', rot: '0deg' }
+  ];
   const stBaseOnb = proto.vOnb;
   proto.vOnb = function (x) {
-    const r = stBaseOnb.call(this, x), s = x.s;
-    r.canDemo = !(s.purchases || []).length && !(s.sales || []).length;
-    // Premier écran (2026-10-14, porteur) : Dracaufeu du Set de Base (1re édition) à gauche, Lugia réimprimé de la
-    // Collection Classique du 30ᵉ anniversaire au milieu, Mew-ex illustration spéciale (30ᵉ anniversaire) à droite.
-    if (TCG.status === 'ready' && r.fan && r.fan.length === 3) {
-      ST_FAN.forEach((ids, i) => {
-        const id = ids.find(k => TCG.byId[k] && TCG.item(k).imgLang);
-        if (id) { const it = TCG.item(id); r.fan[i].img = it.imgHi || it.img; }
-        // Cartes entières (100 × 140), en éventail.
-        Object.assign(r.fan[i], [{ left: '8px', top: '30px', rot: '-12deg' }, { left: '81px', top: '6px', rot: '0deg' }, { left: '154px', top: '30px', rot: '12deg' }][i]);
+    const r = stBaseOnb.call(this, x);
+    if (TCG.status === 'ready' && r.fan) {
+      const fan = ST_POS.map(p => {
+        const id = ST_FAN[p.i].find(k => TCG.byId[k] && TCG.item(k).imgLang);
+        if (!id) return null;
+        const it = TCG.item(id);
+        return { img: it.imgHi || it.img, fallback: it.fallback, left: p.left, top: p.top, rot: p.rot };
       });
+      if (fan.every(Boolean)) r.fan = fan;
     }
-    r.tryDemo = () => this.setState({ purchases: this.purchasesSeed('full'), sales: this.salesSeed('full'), onb: 2, firstRun: false, toast: 'Collection de démo chargée · « Vider ma collection » dans les Réglages pour repartir de zéro' });
     return r;
   };
 
@@ -92,7 +99,8 @@
     const r = stBaseHome.call(this, x);
     if (x.s.screen !== 'home') return r;
     const due = this.alertsDue(x.s);
-    stNotify(due);
+    // Mon profil › Notifications (notif.js) : « Sorties et boutiques suivies » décoché, l'encadré reste sur l'accueil.
+    if (!(x.s.notif && x.s.notif.alerts === false)) stNotify(due);
     r.al = { show: due.length > 0, items: due.map(a => Object.assign({}, a, { ok: () => this.alertsSeen([a.key]) })), okAll: () => this.alertsSeen(due.map(a => a.key)), count: due.length > 1 ? due.length + ' alertes' : '1 alerte' };
     return r;
   };

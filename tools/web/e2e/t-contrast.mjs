@@ -149,7 +149,7 @@ const states = {
   // Le compagnon de l'accueil ouvre le Pokédex (onglet Jeux) ; « Tous les Pokémon » ouvre la liste.
   'Pokédex (depuis le compagnon)': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.click('button[aria-label^="Compagnon"]'); await page.waitForSelector('section[aria-label="Pokédex"]', { timeout: 10000 }); await page.waitForTimeout(900); },
   'Mon Pokédex (liste)': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(1500); await page.click('button[aria-label^="Compagnon"]'); await page.waitForSelector('section[aria-label="Pokédex"]', { timeout: 10000 }); await page.waitForTimeout(700); await page.click('.pkm-dex-all'); await page.waitForTimeout(500); },
-  // PA du jour pas encore récupérés : message, pastille « ! » sur le solde, puis la fiche « Tes PA du jour ».
+  // PA du jour pas encore récupérés : message, pastille « 1 » (« ! » jusqu’au 2026-10-29) sur le solde, puis la fiche « Tes PA du jour ».
   'PA du jour à récupérer': async () => { await page.goto(BASE + '?today=2026-10-04&e2epa=1'); await page.waitForTimeout(1500); },
   'Tes PA du jour': async () => { await page.goto(BASE + '?today=2026-10-04&e2epa=1'); await page.waitForTimeout(1500); await page.click('header button[aria-label^="Mes points d’Aura"]'); await page.waitForSelector('section[aria-label="Tes PA du jour"]'); await page.waitForTimeout(400); },
   'radar de l’accueil': async () => { await page.goto(BASE + '?today=2026-10-04'); await page.waitForTimeout(3000); await page.click('section[aria-label="Boutiques près de toi"] button[aria-label*="Radar des boutiques"]'); await page.waitForTimeout(3500); },
