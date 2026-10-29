@@ -6,7 +6,9 @@
   // Limite : sans serveur, tout se passe sur cet appareil et le code de l'app est lisible ; ce n'est pas une protection
   // forte, seulement une porte pour ne pas ouvrir le panneau par hasard (P2 du document des propositions pour la suite).
   // Ce module partage la portée des autres : ses noms commencent par ADM_ ou adm.
-  const ADM_VERSION = '2026.10.09';
+  // Version affichée dans Réglages › À propos : celle du cache hors ligne (web/sw.js), écrite par le build ; elle permet
+  // de vérifier que le téléphone a bien la dernière mise en ligne (2026-10-29).
+  const ADM_VERSION = '__BUILD_VERSION__';
   const ADM_TAPS = 7, ADM_TAP_MS = 3000;
   const ADM_FLAGS = [['scan', 'Bouton Scan'], ['territory', 'Onglet Territoire'], ['pk', 'Monnaie PK'], ['partners', 'Partenaires fictifs (Territoire)'], ['motion', 'Animations']];
   const ADM_CATS = [['', 'Auto'], ['novice', 'Novice'], ['regular', 'Régulier'], ['passion', 'Passionné']];
