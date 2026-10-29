@@ -25,3 +25,5 @@ Sur l'accueil, un Pokémon animé accompagne la valeur de la collection. On le c
 ## Fiches du Pokédex (2026-10-28)
 
 `fetch_dex.py` lit une fois les fichiers CSV publics de PokeAPI (`PokeAPI/pokeapi`, `data/v2/csv`) et fige dans `dex.json` les fiches des 156 compagnons et des 15 méga-évolutions : nom, catégorie, types, taille, poids, statistiques de base, talents, habitat, taux de capture, légendaire ou fabuleux, forme précédente et façon d'évoluer, famille d'évolution, description du Pokédex en français (texte des jeux le plus récent ; choix du porteur). Le build les injecte (`DEX_DATA`) et vérifie qu'il y en a 171, une par compagnon et par méga-évolution. Régénérer : `python3 tools/sprites/fetch_dex.py`. Textes et noms © The Pokémon Company (décision du porteur sur les contenus Pokémon).
+
+`dex_boxes.py` (2026-10-29) ajoute à chaque fiche de `dex.json` la taille du GIF animé (`gif`) et la boîte du Pokémon dans l'image fixe de 96 px (`box`) : le Pokédex s'en sert pour dessiner chaque Pokémon à sa hauteur proportionnelle, en animé comme en image fixe. Régénérer après `fetch_dex.py` : `python3 tools/sprites/dex_boxes.py`.

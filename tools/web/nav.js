@@ -23,11 +23,18 @@
     if (s.zoom) { this.setState({ zoom: null }); return true; }
     if (s.sheet) { this.setState({ sheet: null }); return true; }
     if (s.buddyPick) { this.setState({ buddyPick: false }); return true; }
+    // Didacticiel (2026-10-29) : le retour l'arrête au lieu de changer d'écran sous la bulle ; puis les fenêtres du
+    // Pokédex et des PA du jour (liste complète, confirmation de méga-évolution, « Tes PA du jour »).
+    if (s.tutoStep >= 0) { this.tutoEnd(false); return true; }
+    if (s.tutoStep === -1) { this.setState({ tutoStep: -2, tuto: 'done' }); return true; }
+    if (s.dexList) { this.setState({ dexList: false }); return true; }
+    if (s.paClaim) { this.setState({ paClaim: false }); return true; }
+    if (s.megaAsk) { this.setState({ megaAsk: null }); return true; }
     if ((s.stack || []).length) { this.pop(); return true; }
     if (s.screen !== 'home') { this.tab('home'); return true; }
     return false;
   };
-  const navCanBack = s => !!(s.zoom || s.sheet || s.buddyPick || (s.stack || []).length || s.screen !== 'home');
+  const navCanBack = s => !!(s.zoom || s.sheet || s.buddyPick || s.tutoStep >= -1 || s.dexList || s.paClaim || s.megaAsk || (s.stack || []).length || s.screen !== 'home');
   // Transition « iOS », d'après la vidéo du porteur (2026-10-12) : en avant, la nouvelle page (en-tête compris) arrive du
   // bord droit par-dessus l'ancienne, qui recule d'un tiers en s'assombrissant ; en arrière, la page quittée part vers la
   // droite et découvre la précédente, qui revient de la gauche. La barre du bas ne bouge pas. Une copie figée de la page

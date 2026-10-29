@@ -34,12 +34,43 @@
   // « ! » sur le solde de PA prévient qu'ils attendent ; un appui ouvre « Tes PA du jour » et son bouton « Récupérer
   // mes PA ». La série suit les jours où les PA sont récupérés (un jour manqué : reprise à +15, PaCore).
   const paPending = s => PaCore.next(s.paDay || '', s.paStreak || 0, realToday());
+  // Série affichée : celle qui sera comptée en récupérant les PA du jour, sinon la série en cours.
+  const paStreakNow = s => { const n = paPending(s); return n ? n.streak : (Number(s.paStreak) || 0); };
+  const paStreakText = s => { const k = paStreakNow(s), n = paPending(s); return (k > 1 ? k + ' jours d’affilée' : k === 1 ? '1er jour' : '—') + (n ? ' (à récupérer)' : ''); };
+  // Rappel à l'ouverture, après l'animation d'entrée (sinon il expire derrière elle) ; de nouveau quand l'app revient
+  // au premier plan un autre jour.
   paProto.paInit = function () {
     const raw = this.state || {};
     if (!paPending(raw) || raw.tuto !== 'done') return;
-    this.state = Object.assign({}, this.state, { toast: 'Tes PA du jour t’attendent : touche ton solde de PA pour les récupérer' });
-    // Le message disparaît comme les autres (flash) : il ne doit pas rester sur les boutons du bas.
-    if (this.flash) setTimeout(() => this.flash(), 0);
+    let k = 0;
+    const tell = () => {
+      const intro = document.getElementById('pkm-intro');
+      if (intro && intro.offsetParent !== null && k++ < 30) { setTimeout(tell, 300); return; }
+      const t = this.st();
+      if (!paPending(t) || t.tutoStep >= 0 || t.paClaim) return;
+      this.setState({ toast: 'Tes PA du jour t’attendent : touche ton solde de PA pour les récupérer' });
+      this.flash();
+    };
+    setTimeout(tell, 400);
+    if (!paProto._paVis) {
+      paProto._paVis = true;
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && paPending(this.st()) && this.st().tuto === 'done') this.forceUpdate ? this.forceUpdate() : this.setState({}); });
+    }
+  };
+  // Fenêtre « Tes PA du jour » : le focus va sur « Récupérer mes PA », Échap la ferme, le focus revient au solde.
+  const paDialogKeys = comp => {
+    setTimeout(() => { const b = document.querySelector('.pkm-pa-claim-btn'); if (b) b.focus({ preventScroll: true }); }, 60);
+    const key = ev => {
+      if (!comp.st().paClaim) { document.removeEventListener('keydown', key); return; }
+      if (ev.key === 'Escape') { comp.setState({ paClaim: false }); document.removeEventListener('keydown', key); const p = document.querySelector('header .pkm-pa-head'); if (p) p.focus(); }
+      if (ev.key === 'Tab') {
+        const els = [...document.querySelectorAll('section[aria-label="Tes PA du jour"] button')];
+        if (!els.length) return;
+        const i = els.indexOf(document.activeElement), j = ev.shiftKey ? (i <= 0 ? els.length - 1 : i - 1) : (i + 1) % els.length;
+        ev.preventDefault(); els[j].focus();
+      }
+    };
+    document.addEventListener('keydown', key);
   };
   // Récupérer : animation d'après la vidéo du porteur (récompense façon Brawl Stars) : éclat lumineux sur le bouton,
   // les gouttes de PA jaillissent, s'éparpillent puis volent en arc jusqu'au solde, qui grimpe à chaque goutte.
@@ -117,8 +148,9 @@
     const r = {
       // Logo des PA : la goutte d'âme ; ses orbes gravitent ici, là où les PA sont expliqués (fixe si mouvements réduits).
       paLogo: still ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
-      pa: pa.toLocaleString('fr-FR'), streak: s.paStreak > 1 ? s.paStreak + ' jours d’affilée' : s.paStreak === 1 ? '1er jour' : '—',
-      tomorrow: 'Reviens demain : +' + PaCore.tomorrow(s.paStreak) + ' PA',
+      // Série et gain : d'après les PA en attente s'il y en a (une série cassée n'est plus affichée comme en cours).
+      pa: pa.toLocaleString('fr-FR'), streak: paStreakText(s),
+      tomorrow: paPending(s) ? 'Récupère tes PA du jour : +' + paPending(s).gain + ' PA, puis +' + PaCore.tomorrow(paPending(s).streak) + ' PA demain' : 'Reviens demain : +' + PaCore.tomorrow(s.paStreak) + ' PA',
       rules: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, +15, +20, +25, puis +30 PA par jour d’affilée. Un jour manqué : la série reprend à +15 PA.',
       choosing: !e, chosen: !!e, starters: [],
       // Écrans du Pokédex dessiné : ton compagnon à gauche, le solde de PA à droite.
@@ -137,7 +169,7 @@
     return Object.assign(v, { wrapCls: 'pkm-pk-tk', pa: Number(shown).toLocaleString('fr-FR'),
       paAria: 'Mes points d’Aura : ' + pa + ' PA.' + (n ? ' ' + n.gain + ' PA à récupérer' : ' Ouvrir le Pokédex'),
       // Avec des PA à récupérer : « Tes PA du jour » ; sinon le solde ouvre le Pokédex, où les PA servent.
-      openPa: () => (n ? this.setState({ paClaim: true }) : openDex()), paReady: !!n,
+      openPa: () => { if (n) { this.setState({ paClaim: true }); paDialogKeys(this); } else openDex(); }, paReady: !!n,
       paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') + (n ? ' pkm-pa-ready' : ''),
       claim: { open: !!(n && s.paClaim), gain: n ? '+' + n.gain + ' PA' : '', streak: n ? (n.streak > 1 ? n.streak + ' jours d’affilée' : 'Premier jour de ta série') : '',
         next: n ? 'Demain : +' + PaCore.tomorrow(n.streak) + ' PA si tu reviens' : '', drop: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',

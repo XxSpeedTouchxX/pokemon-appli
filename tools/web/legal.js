@@ -74,7 +74,7 @@
   // Chiffres lus dans les modules qui les appliquent (profile.js, games.js, pa.js, pkshop.js) : jamais recopiés.
   const legalNum = n => Number(n).toLocaleString('fr-FR');
   proto.vRules = function (s) {
-    const t = this.tierOf ? this.tierOf() : { i: 0 }, gi = t.i || 0, streak = Number(s.paStreak) || 0;
+    const t = this.tierOf ? this.tierOf() : { i: 0 }, gi = t.i || 0, streak = (() => { const n = PaCore.next(s.paDay || '', s.paStreak || 0, realToday()); return n ? n.streak : (Number(s.paStreak) || 0); })();
     const shopPerk = { ticket: 'Collectionneur', shopBooster: 'Dresseur Pokémon', deluxe: 'Grand maître mondial Pokémon' };
     return {
       pk: legalNum(Number(s.pk) || 0), pa: legalNum(Number(s.pa) || 0), grade: PF_GRADES[gi].name, emblem: 'img/grades/grade-' + (gi + 1) + '.svg',

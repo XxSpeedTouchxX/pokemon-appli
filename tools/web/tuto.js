@@ -76,7 +76,14 @@
     link.setAttribute('class', 'pkm-tt-link'); link.setAttribute('aria-hidden', 'true');
     link.innerHTML = '<path d=""></path><circle r="5"></circle>';
     const box = tutoMk('section', 'pkm-dark pkm-tuto-bubble');
-    box.setAttribute('aria-label', 'Didacticiel'); box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-label', 'Didacticiel'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+    // Clavier : Tab reste dans la bulle (Passer, son, Suivant), Échap arrête la visite.
+    box.addEventListener('keydown', ev => {
+      if (ev.key === 'Escape') { ev.preventDefault(); if (TUTO.comp) TUTO.comp.tutoEnd(false); return; }
+      if (ev.key !== 'Tab') return;
+      const els = [...box.querySelectorAll('button')], i = els.indexOf(document.activeElement);
+      if (i < 0 || (ev.shiftKey && i === 0) || (!ev.shiftKey && i === els.length - 1)) { ev.preventDefault(); els[ev.shiftKey ? els.length - 1 : 0].focus(); }
+    });
     box.innerHTML = '<div class="pkm-tt-row"><div class="pkm-tt-mon" aria-hidden="true"><img class="pkm-tt-m0" alt="" width="104" height="108"><img class="pkm-tt-m1" alt="" width="104" height="108"></div>'
       + '<div class="pkm-tt-say"><span class="pkm-tt-new" aria-hidden="true">Nouveau</span><p class="pkm-tuto-text"><span class="pkm-tt-typed" aria-hidden="true"></span><span class="pkm-tt-caret" aria-hidden="true"></span></p></div></div>'
       + '<p class="pkm-sr pkm-tt-full" aria-live="polite"></p>'
@@ -165,8 +172,10 @@
     if (!t) return;
     const H = el.host.getBoundingClientRect(), r = t.getBoundingClientRect(), nav = document.querySelector(TUTO_NAV.trim());
     const navTop = nav ? nav.getBoundingClientRect().top : H.bottom, bh = el.box.offsetHeight + 16;
-    const below = navTop - r.bottom, above = r.top - H.top;
-    el.box.classList.toggle('pkm-tt-top', below < bh && above >= below);
+    const below = navTop - r.bottom, above = r.top - H.top, top = below < bh && above >= below, was = el.box.classList.contains('pkm-tt-top');
+    el.box.classList.toggle('pkm-tt-top', top);
+    // Bulle passée en haut : l'élément redescend juste sous elle (petits écrans), pour qu'elle ne le cache pas.
+    if (top && !was) setTimeout(() => tutoScroll(t, { top: true }), 500);
   };
   // Cadre, trait et anneau de l'onglet : suivis à chaque image tant que la visite est ouverte. Le cadre s'arrête avant
   // la bulle : rien de ce qui est présenté n'est caché par le texte.
@@ -305,5 +314,9 @@
   tutoProto.renderVals = function () {
     const s = this.st(), r = tutoBaseRender.call(this);
     r.tu = this.vTuto(s);
+    // Question et choix du starter : le focus va sur leur premier bouton quand ils s'ouvrent.
+    const want = r.tu.ask ? 'ask' : r.tu.choose ? 'choose' : '';
+    if (want && TUTO.dlg !== want) setTimeout(() => { const b = document.querySelector(want === 'ask' ? 'section[role="dialog"][aria-label="Didacticiel"] button' : 'section[aria-label="Choisis ton starter"] button'); if (b) b.focus({ preventScroll: true }); }, 80);
+    TUTO.dlg = want;
     return r;
   };
