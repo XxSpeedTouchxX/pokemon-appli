@@ -2,7 +2,8 @@
 """
 import_logo.py : logo de l'en-tête et icônes de l'app, à partir du fichier du porteur (2026-10-07).
 
-Source : tools/brand/source/dropicards-porteur.png (600 × 127, fond jaune #FFD60A), gardée telle quelle.
+Source : tools/brand/source/dropicards-porteur.png (600 × 127, fond jaune #FFD60A), gardée telle quelle ; depuis le
+2026-10-29, l'intérieur de la carte O est remplacé par la gemme des PK (pk_card, source/pk-512.png).
 
 1. En-tête : le logo est repris exactement ; seul le fond jaune autour des lettres devient transparent. On part des
    bords de l'image et on avance sur les pixels qui mêlent le jaune du fond et le noir du contour, jamais au-delà du
@@ -97,8 +98,66 @@ def icon(size, content, rounded):
     return base
 
 
+# Carte « O » (2026-10-29, porteur : « même logo, mais l'intérieur de la carte O remplacé par le logo des PK ») :
+# le contour noir, le liseré blanc et le cadre noir intérieur de la carte sont gardés ; la face (disque étoilé, traits)
+# est repeinte en jaune, avec la gemme des PK (web/img/brand/pk.svg, rendue en
+# PNG dans source/pk-512.png) centrée sur la face.
+PK = Path(__file__).with_name("source") / "pk-512.png"
+O_SEED = (160, 46)  # un pixel jaune de la face de la carte O, dans le fichier du porteur (600 × 127)
+
+
+def pk_card(im):
+    """Remplace l'intérieur de la carte O par la gemme des PK ; renvoie une copie."""
+    im = im.copy()
+    w, h = im.size
+    px = im.load()
+    white = lambda p: min(p[:3]) > 170  # liseré blanc de la carte
+    # Région entourée par le liseré blanc : remplissage depuis la face, arrêté par le blanc.
+    seen, todo, region = {O_SEED}, deque([O_SEED]), []
+    while todo:
+        x, y = todo.popleft()
+        region.append((x, y))
+        for q in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if 0 <= q[0] < w and 0 <= q[1] < h and q not in seen and not white(px[q]):
+                seen.add(q)
+                todo.append(q)
+    if len(region) > 4000:
+        raise SystemExit("carte O : le liseré blanc n'est pas fermé (%d pixels)" % len(region))
+    xs, ys = [p[0] for p in region], [p[1] for p in region]
+    box = (min(xs), min(ys), max(xs), max(ys))
+    # Trous de la région (disque blanc du dessin d'origine, entouré de noir) : rattachés à la face.
+    mask = Image.new("L", im.size, 0)
+    mp = mask.load()
+    for q in region:
+        mp[q] = 255
+    outside = {(box[0] - 1, box[1] - 1)}
+    todo = deque(outside)
+    while todo:
+        x, y = todo.popleft()
+        for q in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if box[0] - 1 <= q[0] <= box[2] + 1 and box[1] - 1 <= q[1] <= box[3] + 1 and q not in outside and not (0 <= q[0] < w and 0 <= q[1] < h and mp[q]):
+                outside.add(q)
+                todo.append(q)
+    for x in range(box[0], box[2] + 1):
+        for y in range(box[1], box[3] + 1):
+            if (x, y) not in outside:
+                mp[x, y] = 255
+    # Face jaune : la région rognée de 2 px, pour garder intact le cadre noir intérieur d'origine (bords adoucis).
+    from PIL import ImageFilter
+    face = mask.filter(ImageFilter.MinFilter(5))
+    im.paste(BG + (255,), (0, 0), face.filter(ImageFilter.GaussianBlur(0.5)))
+    fb = face.getbbox()
+    fw, fh = fb[2] - fb[0], fb[3] - fb[1]
+    gem = Image.open(PK).convert("RGBA")
+    gem = gem.crop(gem.getchannel("A").getbbox())
+    k = min(fw * 0.86 / gem.width, fh * 0.86 / gem.height)
+    gem = gem.resize((max(1, round(gem.width * k)), max(1, round(gem.height * k))), Image.LANCZOS)
+    im.alpha_composite(gem, (fb[0] + (fw - gem.width) // 2, fb[1] + (fh - gem.height) // 2))
+    return im
+
+
 def main():
-    logo = trim(transparent(Image.open(SRC).convert("RGBA")))
+    logo = trim(transparent(pk_card(Image.open(SRC).convert("RGBA"))))
     logo.save(HEADER, optimize=True)
     print(f"{HEADER.relative_to(ROOT)} : {logo.width} × {logo.height}")
     ICONS.mkdir(parents=True, exist_ok=True)

@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-29 (nuit, fin) — Logo : gemme des PK dans la carte « O »
+
+- **Demande du porteur** : garder exactement le logo Dropicards, mais remplacer l'intérieur de la carte « O » par le logo des PK.
+- **Fait** : en-tête et favicon (carte O seule) régénérés depuis le fichier du porteur (`tools/brand/import_logo.py`, `pk_card`) ; contour, liseré blanc et cadre intérieur de la carte gardés ; icônes de l'écran d'accueil inchangées.
+
+---
+
 ## 2026-10-29 (nuit, suite) — Pokédex allégé, tailles croissantes, centrage
 
 - **Demandes du porteur** : centrer les Pokémon sur leurs socles ; retirer les statistiques et les niveaux d'évolution de la fiche (surtout sur téléphone) ; tailles dans l'ordre croissant de l'évolution ; bulles du didacticiel centrées.
