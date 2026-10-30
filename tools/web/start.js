@@ -29,8 +29,10 @@
       const fan = ST_POS.map(p => {
         const id = ST_FAN[p.i].find(k => TCG.byId[k] && TCG.item(k).imgLang);
         if (!id) return null;
+        // Copie gardée dans l'app (web/img/onb/, tools/brand/fetch_onb_cards.py, 2026-10-30) : les visuels du CDN
+        // restaient noirs sur le téléphone du porteur ; le CDN reste en secours.
         const it = TCG.item(id);
-        return { img: it.imgHi || it.img, fallback: it.fallback, left: p.left, top: p.top, rot: p.rot };
+        return { img: 'img/onb/' + ST_FAN[p.i][0] + '.webp', fallback: it.imgHi || it.img, left: p.left, top: p.top, rot: p.rot };
       });
       if (fan.every(Boolean)) r.fan = fan;
     }
