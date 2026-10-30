@@ -53,6 +53,12 @@ await sec.screenshot({ path: shot('notif-profil.png') });
 // Décocher les PA : enregistré, plus de rappel de PA.
 await sw.nth(0).click(); await page.waitForTimeout(300);
 ok('PA décoché : ' + await sw.nth(0).getAttribute('aria-checked'), (await sw.nth(0).getAttribute('aria-checked')) === 'false');
+// Message en bas de l'écran (2026-10-30, porteur : « Notifications refusées… » restait affiché) : il s'efface seul.
+await page.evaluate(() => window.__pkm.setState({ toast: 'Notifications refusées : tu peux les autoriser dans les réglages du navigateur' }));
+await page.waitForTimeout(300);
+const shown = await page.locator('text=Notifications refusées').count();
+await page.waitForTimeout(3300);
+ok('message « Notifications refusées » effacé tout seul (' + shown + ' → ' + (await page.locator('text=Notifications refusées').count()) + ')', shown === 1 && (await page.locator('text=Notifications refusées').count()) === 0);
 const due = await page.evaluate(() => window.__pkm.notifDue(window.__pkm.st()).map(d => d.key).join(','));
 ok('rappels encore prêts : ' + due, due === 'booster');
 await page.waitForTimeout(1500);

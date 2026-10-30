@@ -97,7 +97,10 @@
   };
   const ntBaseRender = ntProto.renderVals;
   ntProto.renderVals = function () {
-    const r = ntBaseRender.call(this);
-    r.nt = this.vNotif(this.st());
+    const r = ntBaseRender.call(this), st = this.st();
+    r.nt = this.vNotif(st);
+    // Tout message en bas de l'écran s'efface seul (2026-10-30, porteur : « Notifications refusées… » restait affiché
+    // pour toujours) : un message posé sans minuteur reçoit celui des autres (flash, 2,8 s).
+    if (st.toast && !this._tt) this.flash();
     return r;
   };

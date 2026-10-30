@@ -22,16 +22,20 @@
   // État « tuto » (enregistré) : 'ask' (à proposer), 'done' (vu ou refusé). Étape en cours : tutoStep (non enregistrée).
   const TUTO_CHAR_MS = 30;
   const TUTO_NAV = 'nav[aria-label="Navigation principale"] ';
+  // Textes du porteur (2026-10-30), orthographe revue ; encadré des PA dans le Pokédex et solde des PK ajoutés,
+  // « Tous les Pokémon » retiré. « fit » : sur un petit écran, seuls les premiers enfants sont encadrés (la valeur reste
+  // entière au-dessus de la bulle).
   const TUTO_STEPS = [
-    { tab: 'home', sel: 'section[aria-label="Valeur de ma collection"]', text: 'Salut ! Ici, tu vois la valeur de toute ta collection : cartes et produits scellés, au prix du marché.' },
-    { tab: 'home', sel: 'section[aria-label="Mon classeur"]', text: 'Ton classeur range toutes tes cartes et tes produits scellés.' },
-    { tab: 'home', sel: TUTO_NAV + 'button[aria-label^="Scanner"]', text: 'Pour ajouter une carte, scanne-la avec l’appareil photo : c’est très rapide !' },
-    { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', kids: 2, text: 'Le radar repère les boutiques Pokémon autour de toi et leur chance d’arrivage.' },
-    { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', text: 'Toutes les séries et leurs extensions : touche une carte pour voir sa cote, ou ajoute-la.' },
-    { tab: 'market', sel: '.pkm-dex-device', top: true, fresh: true, text: 'Voici ton Pokédex ! Ses écrans montrent ton compagnon et tes PA.' },
-    { tab: 'market', sel: '.pkm-dex-all', top: true, fresh: true, text: 'Touche « Tous les Pokémon » : ils sont tous là, à débloquer avec tes PA.' },
-    { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, fresh: true, text: 'La route d’évolution : chaque Pokémon, de sa forme de base jusqu’à sa méga-évolution.' },
+    { tab: 'home', sel: 'section[aria-label="Valeur de ma collection"]', fit: 2, text: 'Salut ! Ici, tu vois la valeur de toute ta collection : cartes et produits scellés, au prix du marché.' },
+    { tab: 'home', sel: 'section[aria-label="Mon classeur"]', text: 'Ici, tu pourras trouver ton classeur : il servira à ranger toutes les cartes et tous les produits scellés de ta collection.' },
+    { tab: 'home', sel: TUTO_NAV + 'button[aria-label^="Scanner"]', text: 'Ici, c’est le Scan Dropicards : grâce à lui, tu pourras scanner rapidement ta carte et connaître sa valeur sur le marché actuel.' },
+    { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', kids: 2, text: 'Tu pourras retrouver ici le radar des boutiques : il te permettra de localiser précisément les boutiques qui vendent du Pokémon autour de toi, et la probabilité d’y trouver des items.' },
+    { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', text: 'Ici, tu pourras retrouver toutes les séries et leurs extensions. Touche une carte pour voir ses infos, et ajoute-la dans ton classeur si tu la possèdes déjà.' },
+    { tab: 'market', sel: '.pkm-dex-device', top: true, fresh: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
+    { tab: 'market', sel: '.pkm-dex-lcd-r', top: true, fresh: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
+    { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, fresh: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
     { tab: 'market', sel: 'header .pkm-pa-bar', fresh: true, text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, puis jusqu’à +30 d’affilée !' },
+    { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
   ];
@@ -194,6 +198,10 @@
   // Rectangle encadré : l'élément, ses premiers enfants seulement (« kids » : le titre et la carte du radar, sans les
   // petites lignes en dessous) ou un carré centré sur son icône (« ico » : l'onglet PK shop).
   const tutoRect = (t, st) => {
+    if (st.fit && !st.kids) {
+      const full = t.getBoundingClientRect(), bh = TUTO.el ? TUTO.el.box.offsetHeight : 260;
+      if (full.height > window.innerHeight - bh - 230) st = Object.assign({}, st, { kids: st.fit });
+    }
     if (st.ico) {
       const r = (t.querySelector('svg') || t).getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, h = st.ico / 2;
       return { left: cx - h, top: cy - h, right: cx + h, bottom: cy + h, width: st.ico, height: st.ico };
@@ -243,6 +251,15 @@
       let t = TUTO.target;
       if (!t || !document.contains(t)) t = TUTO.target = document.querySelector(st.sel);
       const H = el.host.getBoundingClientRect();
+      if (TUTO.switching && TUTO.fr && !TUTO.done) {
+        const fr = TUTO.fr, goal = [fr[0] + fr[2] / 2, fr[1] + fr[3] / 2, 0, 0];
+        if (tutoStill()) TUTO.fr = goal; else fr.forEach((v, k) => { const d = goal[k] - v; fr[k] = Math.abs(d) < 0.4 ? goal[k] : v + d * 0.25; });
+        const f = TUTO.fr;
+        el.frame.classList.add('pkm-tt-iris'); el.frame.style.opacity = ''; el.link.style.opacity = '0'; el.ring.style.display = 'none'; el.last = '';
+        Object.assign(el.frame.style, { transform: 'translate3d(' + f[0].toFixed(1) + 'px, ' + f[1].toFixed(1) + 'px, 0)', width: f[2].toFixed(1) + 'px', height: f[3].toFixed(1) + 'px' });
+        TUTO.raf = requestAnimationFrame(loop);
+        return;
+      }
       el.frame.style.opacity = t || TUTO.done ? '' : '0';
       if (!t) { el.link.style.opacity = '0'; el.last = ''; }
       if (t && !TUTO.done) {
@@ -300,6 +317,13 @@
     const el = tutoBuild(), st = TUTO_STEPS[i];
     if (!el || !st) return;
     TUTO.i = i; TUTO.target = document.querySelector(st.sel); el.last = '';
+    if (TUTO.switching) {
+      // Après un changement d'onglet, le trou du cadre se rouvre depuis le centre de la nouvelle partie.
+      TUTO.switching = false;
+      const r = TUTO.target && tutoRect(TUTO.target, st), H = el.host.getBoundingClientRect();
+      if (r && r.width) TUTO.fr = [r.left - H.left + r.width / 2, r.top - H.top + r.height / 2, 0, 0];
+      el.frame.classList.remove('pkm-tt-iris'); el.box.classList.remove('pkm-tt-switch');
+    }
     el.box.classList.toggle('pkm-tt-fresh', !!st.fresh);
     el.box.classList.remove('pkm-tt-ready');
     el.box.classList.remove('pkm-tt-hop'); void el.box.offsetWidth; el.box.classList.add('pkm-tt-hop');
@@ -352,7 +376,9 @@
     TUTO.comp = this; TUTO.done = false; TUTO.mon = tutoMon(this.st());
     clearTimeout(TUTO.typing);
     const same = this.st().screen === st.tab;
-    if (!same) this.tab(st.tab);
+    // Changement d'onglet : le trou du cadre se referme (l'écran reste assombri) et la phrase s'efface pendant que la
+    // page glisse, puis il se rouvre sur la partie suivante : plus de flash ni de cadre qui traverse l'écran.
+    if (!same) { TUTO.switching = true; if (TUTO.el) TUTO.el.box.classList.add('pkm-tt-switch'); this.tab(st.tab); }
     this.setState({ tutoStep: i, dexList: false, paClaim: false, toast: null });
     // L'onglet s'ouvre (transition de page), puis l'étape se montre.
     setTimeout(() => { if (this.st().tutoStep === i) tutoShow(i); }, same ? 80 : 480);

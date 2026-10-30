@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-10-30 (suite 7) — Didacticiel : textes du porteur, PA et PK présentés, transitions ; message qui restait affiché
+
+- **Demandes du porteur** :
+  - « Notifications refusées… » restait affiché en bas de l'écran ;
+  - la valeur de la collection était coupée au début du didacticiel ;
+  - nouveaux textes pour le classeur, le scan, le radar, les séries, le Pokédex et l'arbre d'évolution ;
+  - une étape sur les PA (points d'Aura) et une sur le solde des PK ; l'étape « Tous les Pokémon » retirée ;
+  - une transition plus agréable quand le didacticiel change de page ; fautes d'orthographe corrigées.
+- **Fait** :
+  - tout message en bas de l'écran s'efface seul au bout de 2,8 s ;
+  - sur un petit écran, le cadre de la première étape se limite au montant (le nombre reste entier, au-dessus de la bulle) ;
+  - didacticiel en 12 étapes, textes du porteur avec l'orthographe revue ;
+  - changement d'onglet « en iris » : le trou du cadre se referme (l'écran reste assombri), la page glisse, puis il se rouvre au centre de la partie suivante. Cache v90.
+- **Lecture retenue** : « supprimer l'encadré Tous les Pokémon » = l'étape du didacticiel ; le bouton « Tous les Pokémon » reste dans le Pokédex.
+
 ## 2026-10-30 (suite 6) — Accueil revu : les 3 pages restent accessibles
 
 - **Constat du porteur** : depuis Mon profil › « Retour à la page d'accueil », impossible d'aller à la 2ᵉ page : l'accueil se fermait.
