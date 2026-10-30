@@ -1,6 +1,6 @@
 // Dropicards (nom de code PKM-App) · démo : réseau d'abord (les mises à jour s'affichent), copie locale si le réseau manque.
 // Le catalogue et les prix du scellé sont gardés dès la première visite : l'app s'ouvre hors ligne avec les dernières cotes.
-const CACHE = 'pkm-demo-v90';
+const CACHE = 'pkm-demo-v91';
 const FILES = ['./', 'index.html', 'app.js', 'vendor/vue.runtime.global.prod.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'img/brand/dropicards-header.png', 'img/brand/pk.svg', 'data/cards-base.json', 'data/cards-prices.json', 'data/sealed.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -11,11 +11,13 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   // Seulement nos fichiers : les images du CDN TCGdex restent dans le cache normal du navigateur.
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== self.location.origin) return;
-  e.respondWith(fetch(e.request).then(res => {
-    const copy = res.clone();
-    caches.open(CACHE).then(c => c.put(e.request, copy));
+  // Toujours redemandé au serveur (« no-cache ») : le téléphone ne garde plus une ancienne app.js en mémoire quand le
+  // serveur n'envoie pas d'en-tête de cache (dropicards.fr sur nginx, 2026-10-30). Réponse « 304 » légère si rien n'a changé.
+  const req = e.request.mode === 'navigate' ? fetch(e.request.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(e.request, { cache: 'no-cache' });
+  e.respondWith(req.then(res => {
+    if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
     return res;
-  }).catch(() => caches.match(e.request)));
+  }).catch(() => caches.match(e.request).then(r => r || caches.match(e.request, { ignoreSearch: true }))));
 });
 // Toucher une notification (rappels PA, Booster PK, pièce, alertes ; notif.js) : ramène l'app au premier plan, ou l'ouvre.
 self.addEventListener('notificationclick', e => {

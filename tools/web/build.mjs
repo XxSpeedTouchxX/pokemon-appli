@@ -913,7 +913,19 @@ ${code}
   window.addEventListener('pagehide', () => inst.saveFlush());
   // Hors ligne et installation (hébergement uniquement ; refusé dans les pages claude.ai).
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    // Mise à jour (2026-10-30, porteur : « le didacticiel n'est pas à jour sur l'appli ») : la nouvelle version est
+    // cherchée à chaque ouverture et à chaque retour sur l'app ; dès qu'elle est installée, l'app se recharge une fois,
+    // de préférence quand elle passe en arrière-plan (collection déjà enregistrée), sinon au prochain retour.
+    let swHad = !!navigator.serviceWorker.controller, swPending = false;
+    const swReload = () => { swPending = false; inst.saveFlush(); location.reload(); };
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!swHad) { swHad = true; return; }
+      if (document.visibilityState === 'hidden') swReload(); else swPending = true;
+    });
+    document.addEventListener('visibilitychange', () => { if (swPending && document.visibilityState === 'hidden') swReload(); });
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+    }).catch(() => {});
   }
 })();
 `;
@@ -1061,8 +1073,11 @@ const brandVer = t => BRAND_FILES.reduce((acc, f) => acc.replace(new RegExp(f.re
 const manifest = brandVer(readFileSync(OUT + 'manifest.webmanifest', 'utf8'));
 writeFileSync(OUT + 'manifest.webmanifest', manifest);
 const manifestVer = 'manifest.webmanifest?v=' + createHash('sha256').update(manifest).digest('hex').slice(0, 8);
-writeFileSync(OUT + 'app.js', brandVer(appMin));
-writeFileSync(OUT + 'index.html', brandVer(index).replace(/manifest\.webmanifest(\?v=[0-9a-f]+)?"/, manifestVer + '"'));
+const appOut = brandVer(appMin);
+writeFileSync(OUT + 'app.js', appOut);
+// app.js porte aussi son empreinte (2026-10-30) : une nouvelle version n'est jamais confondue avec l'ancienne en cache.
+const appVer = 'app.js?v=' + createHash('sha256').update(appOut).digest('hex').slice(0, 8);
+writeFileSync(OUT + 'index.html', brandVer(index).replace(/manifest\.webmanifest(\?v=[0-9a-f]+)?"/, manifestVer + '"').replace('<script src="app.js"></script>', '<script src="' + appVer + '"></script>'));
 writeFileSync(ROOT + 'tools/web/artifact.html', artifact);
 copyFileSync(fileURLToPath(new URL('./node_modules/vue/dist/vue.runtime.global.prod.js', import.meta.url)), OUT + 'vendor/vue.runtime.global.prod.js');
 // MapLibre GL (licence BSD) pour le Radar : module ES chargé seulement à l'ouverture de l'écran.

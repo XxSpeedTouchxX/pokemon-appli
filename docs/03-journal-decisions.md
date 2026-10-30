@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-30 (suite 8) — Le didacticiel n'apparaissait pas à jour sur le téléphone
+
+- **Constat du porteur** : le didacticiel de l'app n'est pas à jour.
+- **Vérifié** : https://dropicards.fr sert bien la dernière version (cache v90, lue en ligne) ; toutes les demandes du jour sont dans cette version. Le décalage vient du téléphone : nginx n'envoie pas « Cache-Control: no-cache » (le fichier `web/_headers` ne vaut que pour Cloudflare Pages), donc le navigateur pouvait resservir une ancienne `app.js`.
+- **Fait** (cache v91) : le service worker redemande toujours les fichiers au serveur (« no-cache », réponse légère si rien n'a changé) ; `app.js` porte son empreinte (`app.js?v=…`) ; la nouvelle version est cherchée à chaque ouverture et à chaque retour sur l'app, puis l'app se recharge d'elle-même une fois (quand elle passe en arrière-plan, collection enregistrée).
+- **Reste conseillé** : ajouter « Cache-Control: no-cache » pour `index.html`, `app.js` et `sw.js` dans nginx (voir `docs/18`, §4.3).
+
 ## 2026-10-30 (suite 7) — Didacticiel : textes du porteur, PA et PK présentés, transitions ; message qui restait affiché
 
 - **Demandes du porteur** :
