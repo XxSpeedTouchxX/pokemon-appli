@@ -83,7 +83,25 @@ Même si tu choisis A, ton serveur est en ligne aujourd'hui : il faut savoir s'i
 
 **Sur téléphone (plus simple) :** installe l'app **Termius** (iPhone ou Android), « New host », mets l'adresse IP, l'utilisateur et le mot de passe, puis « Connect ».
 
-### 4.3 Lancer l'audit (10 min)
+### 4.3 Brancher la mise à jour automatique du site (5 min, une seule fois)
+
+Depuis le passage sur le serveur OVH, le site ne se met plus à jour : le serveur ne va pas chercher les modifications sur GitHub. Une fois connecté (§4.2), tape ces deux lignes, une par une :
+
+1. `curl -fsSL https://raw.githubusercontent.com/XxSpeedTouchxX/pokemon-appli/claude/pokemon-app-mockup-1mxt7p/tools/server/install-autoupdate.sh -o maj.sh`
+2. `sudo bash maj.sh`
+
+Le script :
+- trouve tout seul le dossier du site ;
+- te montre ce qu'il va faire, puis attend que tu tapes `OUI` ;
+- sauvegarde le site actuel ;
+- règle la mise à jour toutes les 5 minutes ;
+- affiche la version avant et après (la dernière est la **v85**).
+
+Il ne touche ni à nginx, ni au pare-feu, ni à SSH. Copie-moi ce qu'il affiche à la fin. S'il s'arrête avec « Arrêt : … », copie-moi le message.
+
+Ensuite, sur ton téléphone : ferme et rouvre l'app deux fois, puis va dans Réglages › À propos pour voir le numéro de version.
+
+### 4.4 Lancer l'audit (10 min)
 
 Une fois connecté, tape ces commandes une par une :
 
@@ -96,7 +114,7 @@ Une fois connecté, tape ces commandes une par une :
 
 Je te réponds avec les corrections, de la plus urgente à la moins urgente, et, pour chacune, soit les commandes exactes à copier-coller, soit « à faire faire par un pro ».
 
-### 4.4 Option : me donner la main sur le serveur
+### 4.5 Option : me donner la main sur le serveur
 
 Possible, mais pas avant l'audit : installer Claude Code sur le serveur, puis lancer `claude remote-control` dans le dossier du site. La session apparaît alors dans l'app Claude sur ton téléphone, et je peux taper les commandes moi-même ; tu valides chacune. Je te guiderai pas à pas le moment venu, avec un utilisateur dédié qui n'est pas `root` et une sauvegarde OVH avant.
 

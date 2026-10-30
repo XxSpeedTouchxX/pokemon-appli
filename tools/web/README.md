@@ -501,7 +501,7 @@ Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande 
 
 ## Hébergement : serveur dédié (depuis le 2026-10-29)
 
-L'app est servie par le **serveur dédié du porteur** (OVHcloud, Rise-S), à l'adresse **https://dropicards.fr** ; le serveur sert le dossier `web/` et récupère seul la branche publiée chaque jour par GitHub Actions (réglage fait par le porteur). Cloudflare Pages (`pokemon-appli.pages.dev`) est débranché.
+L'app est servie par le **serveur dédié du porteur** (OVHcloud, Rise-S), à l'adresse **https://dropicards.fr** ; le serveur sert le dossier `web/`. **Constat du 2026-10-30 : il ne récupérait pas la branche publiée** (site resté sur une ancienne version) ; `tools/server/install-autoupdate.sh`, à lancer une fois sur le serveur, la récupère toutes les 5 minutes (voir `tools/server/README.md`). Cloudflare Pages (`pokemon-appli.pages.dev`) est débranché.
 
 **En-têtes à garder** (ceux de `_headers`, que seul Cloudflare lisait), par exemple avec nginx :
 

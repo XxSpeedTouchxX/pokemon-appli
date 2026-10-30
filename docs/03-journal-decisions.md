@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-10-30 (suite 2) — dropicards.fr ne se mettait plus à jour
+
+- **Constat du porteur** : rien ne change sur https://dropicards.fr depuis le passage sur le serveur OVH ; le serveur ne récupère pas la branche publiée sur GitHub.
+- **Fait** : `tools/server/install-autoupdate.sh`, à lancer une fois sur le serveur. Il trouve le dossier servi par nginx, demande « OUI », sauvegarde le site, puis copie toutes les 5 minutes le dossier `web/` de la branche publiée, avec un garde-fou contre une version incomplète. Il ne touche ni à nginx, ni au pare-feu, ni à SSH. Marche à suivre dans `docs/18` §4.3.
+- **Reste à faire par le porteur** : se connecter au serveur et lancer le script (Claude n'a aucun accès au serveur).
+
 ## 2026-10-30 (suite) — Option C renforcée envisagée ; prompt « Axicall Control »
 
 - **Porteur** : préfère gérer le serveur lui-même avec l'aide de l'IA (option C) plutôt que payer un prestataire ; demande comment voir les alertes et s'il peut faire tourner des IA en permanence.
