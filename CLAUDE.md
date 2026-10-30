@@ -175,6 +175,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - didacticiel en 11 étapes (fiche retirée), plus fluide (bulle placée avant le défilement, cadre lissé), cadres de la valeur, du radar et du PK shop corrigés, starter à la taille exacte du compagnon à la fin ;
   - pastille « 1 » sur le solde de PA ; Mon profil › **Notifications** (PA, Booster PK, pièce, sorties et boutiques), rappels calculés sur l'appareil (app ouverte ou en arrière-plan) ;
   - **comptes Dropicards proposés, à valider** (`docs/17-proposition-comptes-dropicards.md`) : e-mail et mot de passe, Face ID par passkey, connexion chaque jour, e-mails de nouveautés avec consentement ; socle minimal du serveur d'abord ; ≈ 137 h ; rien n'est codé sans « go ». Logo pas à jour sur le téléphone du porteur : mis de côté par lui.
+- **Guide du porteur (2026-10-30) :** le porteur n'est pas développeur ; `docs/18-guide-porteur-de-a-a-z.md` explique tout pas à pas (SSH, audit `tools/server/audit.sh` en lecture seule, étapes 0 à 6) ; **hébergement à rechoisir** : A géré (recommandé), B serveur dédié avec un professionnel, C serveur dédié géré par le porteur. Toujours expliquer sans jargon, commande par commande.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

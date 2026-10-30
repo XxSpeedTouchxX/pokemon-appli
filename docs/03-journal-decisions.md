@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-10-30 — Guide du porteur de A à Z ; hébergement à rechoisir
+
+- **Contexte** : le porteur n'est pas développeur et ne sait pas se connecter à son serveur ; il demande quoi faire de A à Z.
+- **Fait** : `docs/18-guide-porteur-de-a-a-z.md` (mots à connaître, état du projet, connexion SSH pas à pas, audit, protections personnelles, étapes 0 à 6 avec qui fait quoi et coûts) ; `tools/server/audit.sh`, audit du serveur en lecture seule.
+- **Décision attendue du porteur** : qui s'occupe du serveur. A, hébergement géré (site sur Cloudflare Pages, comptes sur un service géré européen), **recommandé** ; B, serveur dédié entretenu par un professionnel ; C, serveur dédié entretenu par le porteur avec Claude (risque élevé pour un non-développeur). Rappel : `docs/16` §5 déconseillait déjà un serveur géré soi-même ; la proposition des comptes (`docs/17`) supposait C et sera adaptée au choix.
+
 ## 2026-10-29 (nuit, suite) — Premier écran, didacticiel plus fluide, notifications ; comptes proposés
 
 - **Demandes du porteur** : premier écran retouché, création de compte à la première utilisation (e-mail et mot de passe, Face ID ensuite), didacticiel plus fluide et mieux cadré, pastille « 1 » sur le solde de PA, rubrique « Notifications » dans Mon profil. Le logo pas encore à jour sur son téléphone est mis de côté par le porteur.
