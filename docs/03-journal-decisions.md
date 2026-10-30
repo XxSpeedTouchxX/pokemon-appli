@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-10-30 (suite) — Option C renforcée envisagée ; prompt « Axicall Control »
+
+- **Porteur** : préfère gérer le serveur lui-même avec l'aide de l'IA (option C) plutôt que payer un prestataire ; demande comment voir les alertes et s'il peut faire tourner des IA en permanence.
+- **Proposé (à confirmer par le porteur)** : « C renforcée » = automatisation maximale (mises à jour, sauvegardes hors serveur avec restauration testée chaque mois, surveillance externe, alertes sur le téléphone), base PostgreSQL gérée par OVH, relecture ponctuelle par un professionnel avant les données d'utilisateurs ; agents d'IA en lecture seule (résumer, alerter, proposer), jamais d'action sans validation.
+- **Fait** : `docs/19-prompt-axicall-control.md`, prompt complet pour le projet « Axicall Control » (rôle, règles, étapes 0 à 7, outils : ntfy ou Telegram, UptimeRobot, Beszel ou Netdata, Healthchecks.io, CrowdSec, Cockpit derrière Tailscale, restic, Ollama, n8n).
+
 ## 2026-10-30 — Guide du porteur de A à Z ; hébergement à rechoisir
 
 - **Contexte** : le porteur n'est pas développeur et ne sait pas se connecter à son serveur ; il demande quoi faire de A à Z.
