@@ -357,13 +357,64 @@
     // L'onglet s'ouvre (transition de page), puis l'étape se montre.
     setTimeout(() => { if (this.st().tutoStep === i) tutoShow(i); }, same ? 80 : 480);
   };
-  // Accueil (start.js, 2026-10-30) : le starter choisi à la 3e page devient le compagnon et présente l'app aussitôt,
-  // sans redemander « Veux-tu suivre le didacticiel ? » ni le choix du starter.
-  tutoProto.tutoStartWith = function (line) {
+  // Remerciement (2026-10-30, porteur) : le starter choisi à la 3e page apparaît au milieu de l'écran, sourit et dit
+  // « Merci de m'avoir choisi ! … », puis rejoint la bulle du didacticiel, qui commence aussitôt. Calque hors de Vue,
+  // posé sur le cadre de l'app ; un toucher termine la phrase ou passe à la suite.
+  const TUTO_THANKS = 'Merci de m’avoir choisi ! Pour te remercier, je vais te montrer comment fonctionne l’application.';
+  tutoProto.tutoThanks = function (line, root) {
     tutoAudioInit();
+    const mon = PA_LINES[line][0], still = tutoStill(), name = HOME_NAMES[mon] || '';
+    const src = k => 'img/pokemon/talk/' + mon + '-' + k + '.png';
+    [0, 1, 2, 3].forEach(k => { const im = new Image(); im.src = src(k); });
     this.paChoose(line, true);
-    this.setState({ tuto: 'ask' });
-    setTimeout(() => this.tutoGo(0), 420);
+    TUTO.mon = mon;
+    const box = (root && root.getBoundingClientRect) ? root.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+    const ov = tutoMk('div', 'pkm-ty' + (still ? ' pkm-ty-still' : ''),
+      '<div class="pkm-ty-stage"><div class="pkm-ty-show"><i class="pkm-ty-rays" aria-hidden="true"></i><i class="pkm-ty-glow" aria-hidden="true"></i>'
+      + '<i class="pkm-dex-ped" aria-hidden="true"></i><img class="pkm-ty-m" alt="" width="208" height="216">'
+      + '<i class="pkm-ty-sp pkm-ty-sp1" aria-hidden="true">✦</i><i class="pkm-ty-sp pkm-ty-sp2" aria-hidden="true">✦</i><i class="pkm-ty-sp pkm-ty-sp3" aria-hidden="true">✦</i></div>'
+      + '<p class="pkm-ty-say"><b class="pkm-ty-name"></b><span class="pkm-ty-typed"></span><span class="pkm-ty-full"></span></p></div>');
+    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', name + ', ton compagnon');
+    Object.assign(ov.style, { left: box.left + 'px', top: box.top + 'px', width: box.width + 'px', height: box.height + 'px' });
+    const q = s => ov.querySelector(s), img = q('.pkm-ty-m'), typed = q('.pkm-ty-typed'), full = q('.pkm-ty-full');
+    img.src = src(3); img.alt = name; q('.pkm-ty-name').textContent = name;
+    document.body.appendChild(ov);
+    let i = 0, t = 0, phase = 'type';
+    const typedDone = () => { phase = 'hold'; img.src = src(3); t = setTimeout(leave, still ? 3200 : 1100); };
+    const tick = () => {
+      if (i >= TUTO_THANKS.length) { typedDone(); return; }
+      const ch = TUTO_THANKS[i++];
+      typed.textContent = TUTO_THANKS.slice(0, i);
+      img.src = src(/[0-9A-Za-zÀ-ÿ]/.test(ch) && Math.floor(i / 3) % 2 === 0 ? 2 : 3);
+      tutoSay(ch, i);
+      t = setTimeout(tick, /[.!?]/.test(ch) ? 260 : /[,:;]/.test(ch) ? 140 : TUTO_CHAR_MS + 4);
+    };
+    // Le compagnon rejoint la bulle du didacticiel : vol de son centre vers la mascotte de la bulle, le calque s'efface.
+    const leave = () => {
+      if (phase === 'gone') return;
+      phase = 'gone'; clearTimeout(t); voiceStop();
+      document.body.classList.add('pkm-tt-arrive');
+      this.tutoGo(0);
+      const t0 = Date.now();
+      const done = () => { document.body.classList.remove('pkm-tt-arrive'); ov.remove(); };
+      const fly = () => {
+        const m = document.querySelector('.pkm-tt-mon .pkm-tt-m0'), r = m && m.getBoundingClientRect();
+        if ((!r || !r.width || !TUTO.el || !TUTO.el.box.classList.contains('pkm-tt-typing')) && Date.now() - t0 < 2500) { setTimeout(fly, 60); return; }
+        if (still || !r || !r.width || !img.animate) { ov.style.opacity = '0'; setTimeout(done, 200); return; }
+        const a = img.getBoundingClientRect(), dx = (r.left + r.width / 2) - (a.left + a.width / 2), dy = (r.top + r.height / 2) - (a.top + a.height / 2), k = r.width / a.width;
+        ov.classList.add('pkm-ty-out');
+        img.animate([{ transform: 'none' }, { transform: 'translate(' + dx * 0.5 + 'px,' + (dy * 0.5 - 70) + 'px) scale(' + (1 + k) / 2 + ')', offset: 0.5 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + k + ')' }],
+          { duration: 640, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'forwards' }).onfinish = done;
+      };
+      setTimeout(fly, 120);
+    };
+    ov.addEventListener('click', () => {
+      if (phase === 'type') { clearTimeout(t); i = TUTO_THANKS.length; typed.textContent = TUTO_THANKS; typedDone(); }
+      else if (phase === 'hold') leave();
+    });
+    setTimeout(() => { full.textContent = TUTO_THANKS; }, 60);
+    if (still) { typed.textContent = TUTO_THANKS; i = TUTO_THANKS.length; tutoSay('a', 0); typedDone(); } else t = setTimeout(tick, 700);
+    return ov;
   };
   tutoProto.tutoEnd = function (finished) {
     if (TUTO.ended) return;

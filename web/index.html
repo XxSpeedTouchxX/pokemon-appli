@@ -726,14 +726,20 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-onb-page { will-change: transform; }
 .pkm-onb-set { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 .pkm-onb-set legend { padding: 0; margin-bottom: 8px; }
-.pkm-onb-ages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-.pkm-onb-chip { min-height: 44px; padding: 6px; border-radius: 14px; border: 1px solid #2A3A5C; background: #0B1322; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; line-height: 1.2; cursor: pointer; }
-.pkm-onb-chip-on { border-color: var(--pkm-accent); box-shadow: 0 0 0 2px var(--pkm-accent); background: #16223A; }
-.pkm-onb-starters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.pkm-onb-st { min-width: 0; height: 104px; padding: 6px 2px; border-radius: 16px; border: 1px solid #2A3A5C; background: #0B1322; color: #F3F6FC; font: inherit; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; cursor: pointer; transition: transform 0.2s; }
+.pkm-onb-ages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+/* Bulle choisie (âge, starter) : blanche ou à la couleur du Pokémon, coche, petit rebond ; les autres s'effacent. */
+.pkm-onb-chip { position: relative; min-height: 48px; padding: 6px 10px; border-radius: 16px; border: 2px solid #2A3A5C; background: #0B1322; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; line-height: 1.2; cursor: pointer; transition: opacity 0.2s, transform 0.2s, background-color 0.2s; }
+.pkm-onb-ages:has(.pkm-onb-chip-on) .pkm-onb-chip:not(.pkm-onb-chip-on), .pkm-onb-starters:has(.pkm-onb-st-on) .pkm-onb-st:not(.pkm-onb-st-on) { opacity: 0.55; }
+.pkm-onb-chip-on { border-color: #0B1120; background: #FFFFFF; color: #0B1120; font-weight: 800; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55), 0 8px 18px rgba(0, 0, 0, 0.3); transform: translateY(-2px); animation: pkmOnbPop 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+.pkm-onb-ok { display: none; position: absolute; top: -8px; right: -6px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #FFFFFF; background: #12A150; color: #FFFFFF; font-size: 14px; font-weight: 900; line-height: 20px; text-align: center; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-onb-chip-on .pkm-onb-ok, .pkm-onb-st-on .pkm-onb-ok { display: block; animation: pkmOnbPop 0.34s 0.08s cubic-bezier(0.2, 0.9, 0.3, 1.4) both; }
+@keyframes pkmOnbPop { 0% { transform: scale(0.9); } 60% { transform: translateY(-3px) scale(1.06); } 100% { transform: translateY(-2px) scale(1); } }
+.pkm-onb-starters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pkm-onb-st { position: relative; min-width: 0; height: 108px; padding: 6px 2px; border-radius: 16px; border: 2px solid #2A3A5C; background: #0B1322; color: #F3F6FC; font: inherit; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; cursor: pointer; transition: opacity 0.2s, transform 0.2s; }
 .pkm-onb-st img { display: block; max-width: 100%; object-fit: contain; image-rendering: pixelated; }
-.pkm-onb-st-on { border-color: var(--pkm-accent); box-shadow: 0 0 0 2px var(--pkm-accent), 0 8px 18px rgba(0, 0, 0, 0.35); transform: translateY(-3px); }
-.pkm-onb-focus { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 20px; border: 2px solid var(--pkm-accent); background: #111A2C; color: #F3F6FC; animation: pkmOnbFocus 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.pkm-onb-st-on { border-color: #FFFFFF; background: radial-gradient(90% 80% at 50% 30%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%), var(--st, #2E6BD8); box-shadow: 0 0 0 3px #0B1120, 0 0 24px 4px var(--st, #2E6BD8), 0 10px 20px rgba(0, 0, 0, 0.35); transform: translateY(-4px) scale(1.06); animation: pkmOnbStPop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+@keyframes pkmOnbStPop { 0% { transform: scale(0.92); } 60% { transform: translateY(-6px) scale(1.1); } 100% { transform: translateY(-4px) scale(1.06); } }
+.pkm-onb-focus { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 20px; border: 2px solid var(--st, var(--pkm-accent)); background: #111A2C; color: #F3F6FC; box-shadow: 0 0 18px var(--st, transparent); transition: border-color 0.3s, box-shadow 0.3s; animation: pkmOnbFocus 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
 @keyframes pkmOnbFocus { from { opacity: 0; transform: translateY(12px) scale(0.97); } to { opacity: 1; transform: none; } }
 .pkm-onb-focus-top { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 10px; align-items: center; }
 .pkm-onb-focus-show { position: relative; height: 140px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; box-sizing: border-box; border-radius: 14px; background: radial-gradient(70% 90% at 50% 100%, rgba(124, 245, 255, 0.3), rgba(124, 245, 255, 0) 75%); }
@@ -742,7 +748,32 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-onb-focus-id { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .pkm-onb-focus-id > b { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; }
 .pkm-onb-focus-id p { margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA; }
-@media (prefers-reduced-motion: reduce) { .pkm-onb-focus, .pkm-onb-st { animation: none; transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-onb-focus, .pkm-onb-st, .pkm-onb-st-on, .pkm-onb-chip, .pkm-onb-chip-on, .pkm-onb-ok { animation: none !important; transition: none; } }
+/* Remerciement du starter (tuto.js, tutoThanks) : au centre, rayons, socle, sourire, bulle qui s'écrit. */
+.pkm-ty { position: fixed; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; background: rgba(4, 8, 18, 0.82); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); cursor: pointer; animation: pkmTyIn 0.3s ease-out both; transition: background-color 0.5s, backdrop-filter 0.5s; }
+.pkm-ty-stage { width: 100%; max-width: 340px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.pkm-ty-show { position: relative; width: 260px; height: 260px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 26px; box-sizing: border-box; }
+.pkm-ty-rays { position: absolute; inset: -30px; border-radius: 50%; background: repeating-conic-gradient(rgba(255, 214, 10, 0.32) 0 10deg, rgba(255, 214, 10, 0) 10deg 30deg); -webkit-mask: radial-gradient(closest-side, #000 30%, transparent 100%); mask: radial-gradient(closest-side, #000 30%, transparent 100%); animation: pkmTyRays 14s linear infinite, pkmTyIn 0.6s ease-out both; }
+.pkm-ty-glow { position: absolute; left: 50%; top: 52%; width: 220px; height: 220px; margin: -110px 0 0 -110px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 236, 140, 0.55), rgba(255, 236, 140, 0)); }
+.pkm-ty-show .pkm-dex-ped { position: absolute; left: 50%; bottom: 10px; width: 170px; height: 46px; margin: 0 0 0 -85px; }
+.pkm-ty-m { position: relative; z-index: 1; width: 208px; height: 216px; image-rendering: pixelated; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.35)); transform-origin: 50% 100%; animation: pkmTyPop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+.pkm-ty-sp { position: absolute; z-index: 2; color: #FFE45C; font-style: normal; text-shadow: 0 0 8px rgba(255, 228, 92, 0.9); animation: pkmTySp 1.6s ease-in-out infinite; }
+.pkm-ty-sp1 { left: 30px; top: 40px; font-size: 26px; }
+.pkm-ty-sp2 { right: 26px; top: 70px; font-size: 18px; animation-delay: 0.5s; }
+.pkm-ty-sp3 { right: 54px; top: 18px; font-size: 14px; animation-delay: 1s; }
+.pkm-ty-say { position: relative; width: 100%; min-height: 96px; margin: 0; padding: 14px 16px; box-sizing: border-box; border-radius: 18px; border: 3px solid #FFD60A; background: #F7F9FF; color: #0B1120; font-size: 17px; font-weight: 700; line-height: 1.4; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45); animation: pkmTyIn 0.35s 0.45s ease-out both; }
+.pkm-ty-say::before { content: ''; position: absolute; left: 50%; top: -13px; width: 20px; height: 20px; margin-left: -10px; border-left: 3px solid #FFD60A; border-top: 3px solid #FFD60A; background: #F7F9FF; transform: rotate(45deg); }
+.pkm-ty-name { display: block; margin-bottom: 2px; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 800; color: #8A5A00; text-transform: uppercase; letter-spacing: 0.04em; }
+.pkm-ty-full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.pkm-ty-out { background: rgba(4, 8, 18, 0); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.pkm-ty-out .pkm-ty-say, .pkm-ty-out .pkm-ty-rays, .pkm-ty-out .pkm-ty-glow, .pkm-ty-out .pkm-dex-ped, .pkm-ty-out .pkm-ty-sp { opacity: 0; transition: opacity 0.25s; }
+.pkm-ty-out .pkm-ty-m { animation: none; }
+.pkm-tt-arrive .pkm-tt-mon { visibility: hidden; }
+@keyframes pkmTyIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pkmTyRays { to { transform: rotate(360deg); } }
+@keyframes pkmTyPop { 0% { opacity: 0; transform: translateY(40px) scale(0.3); } 60% { opacity: 1; transform: translateY(-14px) scale(1.08); } 80% { transform: translateY(0) scale(0.97, 1.03); } 100% { transform: none; } }
+@keyframes pkmTySp { 0%, 100% { opacity: 0.2; transform: scale(0.6) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(20deg); } }
+.pkm-ty-still, .pkm-ty-still * { animation: none !important; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde

@@ -1,7 +1,8 @@
 // Premier écran en 3 pages (2026-10-30, demande du porteur) : cinq cartes gardées dans l'app (web/img/onb/) ;
 // page 1 « Créer mon compte » → page 2 e-mail, mot de passe (12 caractères au moins, jamais enregistré), « Suivant »
-// → page 3 âge, pseudo de dresseur et starter (mise en avant, « Choisir X comme compagnon ») qui lance le didacticiel
-// avec ce Pokémon. Retour possible (flèche et points), saisies gardées, transition glissée entre les pages.
+// → page 3 âge (4 tranches), pseudo de dresseur et starter (bulle choisie bien visible, fiche qui change avec une
+// transition, « Choisir X comme compagnon ») ; le starter remercie au milieu de l'écran en souriant, puis lance le
+// didacticiel. Retour possible (flèche et points), saisies gardées, transition glissée entre les pages.
 // « Passer » seulement quand le compte existe ; Mon profil : « Retour à la page d'accueil », plus de « Ventes et marge ».
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
@@ -47,19 +48,38 @@ ok('flèche retour : page 3 → page 2', (await form.count()) === 1);
 await form.locator('button[type=submit]').click(); await page.waitForTimeout(600);
 // Page 3 : sans choix, refus ; âge, pseudo, starter.
 ok('quatre starters', (await f3.locator('button[aria-label^="Découvrir"]').count()) === 4);
-await f3.locator('button:has-text("15 à 17 ans")').click(); await page.waitForTimeout(150);
+const ages = (await f3.locator('.pkm-onb-ages button').allInnerTexts()).map(t => t.replace('✓', '').trim());
+ok('quatre tranches d’âge : ' + ages.join(' / '), ages.join('|') === 'Moins de 15 ans|Entre 15 et 25 ans|Entre 25 et 35 ans|35 ans et plus');
+await f3.locator('button:has-text("Entre 15 et 25 ans")').click(); await page.waitForTimeout(450);
+const chip = await f3.locator('button:has-text("Entre 15 et 25 ans")').evaluate(b => ({ bg: getComputedStyle(b).backgroundColor, ok: getComputedStyle(b.querySelector('.pkm-onb-ok')).display, other: getComputedStyle(b.parentElement.children[0]).opacity }));
+ok('âge choisi bien visible (fond ' + chip.bg + ', coche ' + chip.ok + ', autres ' + chip.other + ')', chip.bg === 'rgb(255, 255, 255)' && chip.ok === 'block' && Number(chip.other) < 0.7);
 await f3.locator('input[name=nickname]').fill('Sacha du Bourg');
-await f3.locator('button[aria-label="Découvrir Carapuce"]').click(); await page.waitForTimeout(700);
+await f3.locator('button[aria-label="Découvrir Pikachu"]').click(); await page.waitForTimeout(700);
+await f3.locator('button[aria-label="Découvrir Carapuce"]').click(); await page.waitForTimeout(100);
+const swap = await page.evaluate(() => document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('.pkm-onb-focus')).length);
+ok('transition entre les deux descriptions (' + swap + ' animations)', swap >= 2);
+await page.waitForTimeout(700);
+const stb = await f3.locator('button[aria-label="Découvrir Carapuce"]').evaluate(b => ({ bg: getComputedStyle(b).backgroundColor, other: getComputedStyle(b.parentElement.children[3]).opacity }));
+ok('compagnon choisi en couleur, les autres effacés (' + stb.bg + ', ' + stb.other + ')', stb.bg !== 'rgb(11, 19, 34)' && Number(stb.other) < 0.7);
 const focus = (await page.locator('.pkm-onb-focus').innerText()).replace(/\s+/g, ' ');
 ok('mise en avant de Carapuce : ' + focus.slice(0, 60) + '…', /Carapuce/.test(focus) && /Eau/.test(focus) && /carapace/.test(focus));
 await page.screenshot({ path: shot('onb-3-profil.png') });
-await page.click('button:has-text("Choisir Carapuce comme compagnon")'); await page.waitForTimeout(2500);
+await page.click('button:has-text("Choisir Carapuce comme compagnon")'); await page.waitForTimeout(1800);
+const ty = page.locator('.pkm-ty');
+const tyBox = await ty.evaluate(e => { const i = e.querySelector('.pkm-ty-m').getBoundingClientRect(); return { cx: Math.round(i.left + i.width / 2), w: Math.round(i.width), src: e.querySelector('.pkm-ty-m').getAttribute('src') }; }).catch(() => null);
+ok('Carapuce au milieu de l’écran, en grand et souriant (' + JSON.stringify(tyBox) + ')', tyBox && Math.abs(tyBox.cx - 195) <= 4 && tyBox.w >= 200 && /talk\/7-[23]\.png/.test(tyBox.src));
+await page.screenshot({ path: shot('onb-4-merci.png') });
+await page.waitForFunction(() => /Merci de m’avoir choisi.*application\./.test((document.querySelector('.pkm-ty-typed') || {}).textContent || ''), null, { timeout: 8000 }).catch(() => {});
+ok('« Merci de m’avoir choisi ! … »', /Pour te remercier, je vais te montrer comment fonctionne l’application\./.test(await page.locator('.pkm-ty-typed').textContent().catch(() => '')));
+await page.waitForSelector('.pkm-ty', { state: 'detached', timeout: 6000 }).catch(() => {});
+await page.waitForTimeout(400);
+ok('transition directe vers le didacticiel (calque retiré)', (await page.locator('.pkm-ty').count()) === 0 && !(await page.evaluate(() => document.body.classList.contains('pkm-tt-arrive'))));
 const st = await page.evaluate(() => { const t = localStorage.getItem('pkm-collection-v1') || ''; const d = JSON.parse(t || '{}'); return { acc: d.account, tr: d.trainer, evo: d.evo, buddy: d.buddy, pwd: t.includes('solide') }; });
-ok('compte, âge et pseudo gardés, mot de passe jamais enregistré (' + JSON.stringify(st.acc) + ')', st.acc && st.acc.email === 'sacha@exemple.fr' && st.acc.news === false && st.acc.age === '15-17' && st.tr.name === 'Sacha du Bourg' && !st.pwd);
+ok('compte, âge et pseudo gardés, mot de passe jamais enregistré (' + JSON.stringify(st.acc) + ')', st.acc && st.acc.email === 'sacha@exemple.fr' && st.acc.news === false && st.acc.age === '15-25' && st.tr.name === 'Sacha du Bourg' && !st.pwd);
 ok('Carapuce devient le compagnon (buddy ' + st.buddy + ')', st.buddy === 7);
 const mascot = await page.locator('.pkm-tt-m0').getAttribute('src').catch(() => '');
 ok('le didacticiel démarre avec Carapuce (' + mascot + ')', (await page.locator('section.pkm-tuto-bubble').count()) === 1 && /\/7-/.test(mascot || ''));
-await page.screenshot({ path: shot('onb-4-tuto.png') });
+await page.screenshot({ path: shot('onb-5-tuto.png') });
 // Mon profil.
 await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); d.tuto = 'done'; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
 await page.goto(E2E + '/?start=profile', { waitUntil: 'load' }); await page.waitForTimeout(1500);

@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-10-30 (suite 5) — Page 3 du premier écran : âges, choix visibles, remerciement du compagnon
+
+- **Demande du porteur** :
+  - 4 tranches d'âge : moins de 15 ans, entre 15 et 25 ans, entre 25 et 35 ans, 35 ans et plus ;
+  - âge et compagnon choisis bien visibles ;
+  - une transition entre les descriptions des starters ;
+  - après le choix : le compagnon au milieu de l'écran, qui sourit et dit « Merci de m'avoir choisi ! Pour te remercier, je vais te montrer comment fonctionne l'application », puis le didacticiel directement.
+- **Fait** :
+  - bulle d'âge choisie blanche avec une coche verte ; bulle du starter à la couleur de son type (Plante, Feu, Eau, Électrik), coche, halo ; les autres s'effacent ;
+  - la nouvelle description arrive en glissant du côté du Pokémon touché ;
+  - sourire dessiné au pixel pour les 4 starters (yeux fermés « ^ ^ ») ; scène au centre (rayons, socle, étincelles), phrase écrite avec la voix du didacticiel ; le compagnon vole ensuite jusqu'à la bulle du didacticiel, qui commence aussitôt. Cache v88.
+
 ## 2026-10-30 (suite 4) — Premier écran en 3 pages, starter choisi à l'inscription
 
 - **Demande du porteur** : un premier écran en 3 pages, avec retour possible et les mêmes transitions que dans l'app :

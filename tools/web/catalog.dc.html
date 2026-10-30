@@ -2087,17 +2087,17 @@ PKCOUNTER
 <h1 class="pkm-acc-h">Ton profil de dresseur</h1>
 <p class="pkm-acc-p">Dernière étape avant l’aventure !</p>
 <fieldset class="pkm-onb-set"><legend class="pkm-acc-l">Ton âge</legend>
-<div class="pkm-onb-ages"><sc-for list="{{ ob.p3.ages }}" as="oa" hint-placeholder-count="3"><button type="button" class="{{ oa.cls }}" aria-pressed="{{ oa.on }}" onClick="{{ oa.pick }}">{{ oa.label }}</button></sc-for></div>
+<div class="pkm-onb-ages"><sc-for list="{{ ob.p3.ages }}" as="oa" hint-placeholder-count="4"><button type="button" class="{{ oa.cls }}" aria-pressed="{{ oa.on }}" onClick="{{ oa.pick }}">{{ oa.label }}<i class="pkm-onb-ok" aria-hidden="true">✓</i></button></sc-for></div>
 <sc-if value="{{ ob.p3.kid }}" hint-placeholder-val="{{ false }}"><span class="pkm-acc-hint">Avant 15 ans, les nouveautés par e-mail demandent l’accord d’un parent : elles restent désactivées.</span></sc-if>
 </fieldset>
 <label class="pkm-acc-l">Pseudo de dresseur
 <input class="pkm-tr-in" type="text" name="nickname" autocomplete="nickname" maxlength="24" placeholder="Ex. : Sacha du Bourg" value="{{ ob.p3.nick }}" onChange="{{ ob.p3.onNick }}" aria-invalid="{{ ob.p3.nickBad }}">
 </label>
 <fieldset class="pkm-onb-set"><legend class="pkm-acc-l">Choisis ton compagnon de voyage</legend>
-<div class="pkm-onb-starters"><sc-for list="{{ ob.p3.starters }}" as="os" hint-placeholder-count="4"><button type="button" class="{{ os.cls }}" aria-pressed="{{ os.on }}" aria-label="{{ os.aria }}" onClick="{{ os.pick }}"><img src="{{ os.img }}" alt="" style="height: {{ os.h }}"><span>{{ os.name }}</span></button></sc-for></div>
+<div class="pkm-onb-starters"><sc-for list="{{ ob.p3.starters }}" as="os" hint-placeholder-count="4"><button type="button" class="{{ os.cls }}" style="{{ os.style }}" aria-pressed="{{ os.on }}" aria-label="{{ os.aria }}" onClick="{{ os.pick }}"><img src="{{ os.img }}" alt="" style="height: {{ os.h }}"><span>{{ os.name }}</span><i class="pkm-onb-ok" aria-hidden="true">✓</i></button></sc-for></div>
 </fieldset>
 <sc-if value="{{ ob.p3.hasSel }}" hint-placeholder-val="{{ false }}">
-<section class="pkm-onb-focus" aria-label="{{ ob.p3.selName }}" key="{{ ob.p3.selKey }}">
+<section class="pkm-onb-focus" aria-label="{{ ob.p3.selName }}" style="{{ ob.p3.selStyle }}" aria-live="polite">
 <div class="pkm-onb-focus-top">
 <div class="pkm-onb-focus-show"><img src="{{ ob.p3.selImg }}" alt="" style="height: {{ ob.p3.selH }}"><i class="pkm-dex-ped" aria-hidden="true"></i></div>
 <div class="pkm-onb-focus-id"><b>{{ ob.p3.selName }}</b><span class="pkm-dex-types"><sc-for list="{{ ob.p3.selTypes }}" as="ost" hint-placeholder-count="2"><b style="{{ ost.style }}">{{ ost.t }}</b></sc-for></span><p>{{ ob.p3.selDesc }}</p></div>

@@ -23,12 +23,25 @@
     { i: 2, left: '114px', top: '4px', rot: '0deg' }
   ];
   // Tranches d'âge (en France, avant 15 ans, ce qui repose sur le consentement demande l'accord d'un parent).
-  const ST_AGES = [['u15', 'Moins de 15 ans'], ['15-17', '15 à 17 ans'], ['18+', '18 ans et plus']];
+  // Quatre tranches (2026-10-30, porteur).
+  const ST_AGES = [['u15', 'Moins de 15 ans'], ['15-25', 'Entre 15 et 25 ans'], ['25-35', 'Entre 25 et 35 ans'], ['35+', '35 ans et plus']];
   const ST_STARTER_TXT = {
     bulbi: 'Calme et fidèle, il porte sur son dos une graine qui grandit avec lui. Parfait pour une aventure tout en douceur.',
     sala: 'Courageux et plein d’énergie : la flamme au bout de sa queue montre sa force et son humeur.',
     cara: 'Malin et joueur, il se protège dans sa carapace et ne lâche jamais rien.',
     pika: 'Vif et curieux, il garde de l’électricité dans ses joues. Le compagnon le plus célèbre de tous !'
+  };
+  // Bulle d'un starter choisi et fiche : couleur de son type (--st) ; texte sombre sur les couleurs claires.
+  const stStarterColor = n => DEX_TYPE[DEX[n].types[0]] || '#2E6BD8';
+  const stStarterStyle = (n, on) => '--st: ' + stStarterColor(n) + (on ? '; color: ' + (dexLight(stStarterColor(n)) ? '#0B1120' : '#FFFFFF') : '');
+  const stStarterIdx = line => PA_STARTERS.findIndex(x => x[0] === line);
+  // Nouvelle description : le Pokémon arrive du côté de celui touché en grandissant, le texte glisse et apparaît.
+  const stFocusSwap = (el, dir) => {
+    const img = el.querySelector('.pkm-onb-focus-show img'), id = el.querySelector('.pkm-onb-focus-id');
+    if (!el.animate) return;
+    el.animate([{ transform: 'scale(0.97)' }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1.2)' });
+    if (img) img.animate([{ opacity: 0, transform: 'translateX(' + dir * 40 + 'px) scale(0.55)' }, { opacity: 1, transform: 'none' }], { duration: 440, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1.25)' });
+    if (id) id.animate([{ opacity: 0, transform: 'translateX(' + dir * 30 + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 360, delay: 70, easing: 'cubic-bezier(0.32, 0.72, 0, 1)', fill: 'backwards' });
   };
   const stBaseOnb = proto.vOnb;
   proto.vOnb = function (x) {
@@ -96,12 +109,22 @@
       starters: PA_STARTERS.map(([line, n]) => ({
         name: DEX[n].name, img: 'img/pokemon/' + n + (still ? '.png' : '.gif'), h: still ? '72px' : Math.round(56 * Math.min(1.25, DEX[n].gif[1] / 44)) + 'px',
         on: sel === line ? 'true' : 'false', aria: 'Découvrir ' + DEX[n].name, cls: 'pkm-onb-st' + (sel === line ? ' pkm-onb-st-on' : ''),
-        pick: () => { this.setState({ obStarter: line, obErr: '' }); setTimeout(() => { const el = document.querySelector('.pkm-onb-focus'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' }); }, 60); }
+        style: stStarterStyle(n, sel === line),
+        pick: () => {
+          const prev = this.st().obStarter || '', was = document.querySelector('.pkm-onb-focus');
+          if (prev !== line) this.setState({ obStarter: line, obErr: '' });
+          // Fiche déjà ouverte : la description d'avant laisse place à la nouvelle, qui glisse depuis le côté du Pokémon touché.
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const el = document.querySelector('.pkm-onb-focus');
+            if (el && el === was && prev && prev !== line && !still) stFocusSwap(el, stStarterIdx(line) > stStarterIdx(prev) ? 1 : -1);
+            if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
+          }));
+        }
       })),
       hasSel: !!E, noSel: !E, selKey: 'st-' + sel, selName: name, selImg: E ? 'img/pokemon/' + selN + (still ? '.png' : '.gif') : '',
       selH: E && !still ? Math.round(96 * Math.min(1.2, E.gif[1] / 46)) + 'px' : '104px',
       selTypes: E ? E.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })) : [],
-      selDesc: ST_STARTER_TXT[sel] || '', go: 'Choisir ' + name + ' comme compagnon',
+      selDesc: ST_STARTER_TXT[sel] || '', go: 'Choisir ' + name + ' comme compagnon', selStyle: selN ? stStarterStyle(selN, false) : '',
       err: err, hasErr: !!err && page === 3,
       submit: e => {
         if (e && e.preventDefault) e.preventDefault();
@@ -111,14 +134,15 @@
         if (nick.length < 2) { this.setState({ obNick: nick, obErr: 'Choisis un pseudo de 2 à 24 caractères.' }); return; }
         if (!t.obStarter || !PA_LINES[t.obStarter]) { this.setState({ obNick: nick, obErr: 'Choisis ton compagnon de voyage.' }); return; }
         const line = t.obStarter, under = t.obAge === 'u15';
+        // Le starter remercie au milieu de l'écran (calque de tuto.js), puis présente l'app : le didacticiel commence.
+        const sec = document.querySelector('section[aria-label^="Bienvenue"]');
+        this.tutoThanks(line, sec);
         this.setState({
           account: { email: t.obEmail, news: !!t.obNews && !under, age: t.obAge, at: realToday(), server: false },
           trainer: Object.assign({}, t.trainer || {}, { email: t.obEmail, name: nick }),
           obEmail: undefined, obPwd: '', obShow: false, obNews: false, obNick: undefined, obAge: '', obStarter: '', obErr: ''
         });
-        this.finishOnb(false);
-        // Le starter choisi devient le compagnon et présente l'app (didacticiel, tuto.js).
-        this.tutoStartWith(line);
+        setTimeout(() => this.finishOnb(false), 320);
       }
     };
     return r;
