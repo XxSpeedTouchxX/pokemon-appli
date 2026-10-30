@@ -86,9 +86,25 @@ await page.goto(E2E + '/?start=profile', { waitUntil: 'load' }); await page.wait
 const prof = await page.locator('main').innerText();
 ok('Mon profil : pseudo, « Retour à la page d’accueil », sans « Ventes et marge »', /Sacha du Bourg/.test(prof) && /Retour à la page d’accueil/.test(prof) && !/Ventes et marge/.test(prof));
 await page.click('button:has-text("Retour à la page d’accueil")'); await page.waitForTimeout(600);
-ok('accueil revu : « Passer » présent, « Continuer l’aventure » ramène à l’app', (await page.locator('button:has-text("Passer")').count()) === 1 && (await page.locator('button:has-text("Continuer l’aventure")').count()) === 1);
-await page.click('button:has-text("Continuer l’aventure")'); await page.waitForTimeout(600);
-ok('pas de second compte', (await page.locator('form[aria-label="Crée ton compte Dropicards"]').count()) === 0 && (await page.locator('section[aria-label^="Bienvenue"]').count()) === 0);
+ok('accueil revu : « Passer » et « Continuer »', (await page.locator('button:has-text("Passer")').count()) === 1 && (await page.locator('button:has-text("Continuer")').count()) >= 1);
+// Les trois pages restent accessibles, préremplies, sans créer un second compte.
+await page.click('button:has-text("Continuer")'); await page.waitForTimeout(700);
+const f2b = page.locator('form[aria-label="Ton compte Dropicards"]');
+ok('accueil revu : page 2 « Ton compte Dropicards », adresse préremplie', (await f2b.count()) === 1 && (await f2b.locator('input[name=email]').inputValue()) === 'sacha@exemple.fr');
+await f2b.locator('button[type=submit]').click(); await page.waitForTimeout(700);
+const f3b = page.locator('form[aria-label="Ton profil de dresseur"]');
+const pre = await f3b.evaluate(f => ({ nick: f.querySelector('input[name=nickname]').value, age: (f.querySelector('.pkm-onb-chip-on') || {}).textContent || '', st: (f.querySelector('.pkm-onb-st-on') || {}).textContent || '' }));
+ok('accueil revu : page 3 préremplie (' + JSON.stringify(pre) + ')', (await f3b.count()) === 1 && pre.nick === 'Sacha du Bourg' && /15 et 25/.test(pre.age) && /Carapuce/.test(pre.st));
+await page.click('button[aria-label^="Présentation"]'); await page.waitForTimeout(600);
+ok('accueil revu : retour à la page 1', (await page.locator('section[aria-label^="Bienvenue"] button:has-text("Continuer")').count()) >= 1);
+await page.click('button:has-text("Continuer")'); await page.waitForTimeout(700);
+await f2b.locator('button[type=submit]').click(); await page.waitForTimeout(700);
+await f3b.locator('input[name=nickname]').fill('Sacha le Grand');
+await page.click('button:has-text("Choisir Carapuce comme compagnon")'); await page.waitForTimeout(800);
+ok('accueil revu : Carapuce remercie à nouveau', (await page.locator('.pkm-ty').count()) === 1);
+await page.waitForSelector('.pkm-ty', { state: 'detached', timeout: 9000 }).catch(() => {});
+const st2 = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); return { at: d.account.at, n: d.trainer.name, buddy: d.buddy }; });
+ok('pseudo modifié, compte gardé (' + JSON.stringify(st2) + ')', st2.n === 'Sacha le Grand' && st2.at === st.acc.at && st2.buddy === 7);
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
 await browser.close();

@@ -2066,16 +2066,16 @@ PKCOUNTER
 
 <!-- fragment: onb-account -->
 <sc-if value="{{ ob.is2 }}" hint-placeholder-val="{{ false }}">
-<form class="pkm-acc pkm-onb-page" aria-label="Crée ton compte Dropicards" onSubmit="{{ ob.acc.submit }}" novalidate="novalidate">
-<h1 class="pkm-acc-h">Crée ton compte Dropicards</h1>
-<p class="pkm-acc-p">Pour retrouver ta collection et te connecter chaque jour.</p>
+<form class="pkm-acc pkm-onb-page" aria-label="{{ ob.acc.title }}" onSubmit="{{ ob.acc.submit }}" novalidate="novalidate">
+<h1 class="pkm-acc-h">{{ ob.acc.title }}</h1>
+<p class="pkm-acc-p">{{ ob.acc.lead }}</p>
 <label class="pkm-acc-l">Adresse e-mail
 <input class="pkm-tr-in" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="Ex. : sacha@exemple.fr" value="{{ ob.acc.email }}" onChange="{{ ob.acc.onEmail }}" aria-invalid="{{ ob.acc.emailBad }}">
 </label>
 <label class="pkm-acc-l">Mot de passe
-<span class="pkm-acc-pw"><input class="pkm-tr-in" type="{{ ob.acc.pwType }}" name="password" autocomplete="new-password" placeholder="12 caractères au moins" value="{{ ob.acc.pwd }}" onChange="{{ ob.acc.onPwd }}" aria-invalid="{{ ob.acc.pwdBad }}"><button type="button" class="pkm-acc-eye" onClick="{{ ob.acc.toggle }}" aria-pressed="{{ ob.acc.shown }}">{{ ob.acc.eye }}</button></span>
+<span class="pkm-acc-pw"><input class="pkm-tr-in" type="{{ ob.acc.pwType }}" name="password" autocomplete="new-password" placeholder="{{ ob.acc.pwHold }}" value="{{ ob.acc.pwd }}" onChange="{{ ob.acc.onPwd }}" aria-invalid="{{ ob.acc.pwdBad }}"><button type="button" class="pkm-acc-eye" onClick="{{ ob.acc.toggle }}" aria-pressed="{{ ob.acc.shown }}">{{ ob.acc.eye }}</button></span>
 </label>
-<span class="pkm-acc-hint">12 caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.</span>
+<span class="pkm-acc-hint">{{ ob.acc.pwHint }}</span>
 <label class="pkm-acc-news"><input type="checkbox" name="news" checked="{{ ob.acc.news }}" onChange="{{ ob.acc.onNews }}"><span>Recevoir les nouveautés et bons plans Dropicards par e-mail (facultatif)</span></label>
 <sc-if value="{{ ob.acc.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.acc.err }}</p></sc-if>
 <button type="submit" class="pkm-acc-go">Suivant</button>
@@ -2085,7 +2085,7 @@ PKCOUNTER
 <sc-if value="{{ ob.is3 }}" hint-placeholder-val="{{ false }}">
 <form class="pkm-acc pkm-onb-page" aria-label="Ton profil de dresseur" onSubmit="{{ ob.p3.submit }}" novalidate="novalidate">
 <h1 class="pkm-acc-h">Ton profil de dresseur</h1>
-<p class="pkm-acc-p">Dernière étape avant l’aventure !</p>
+<p class="pkm-acc-p">{{ ob.p3.lead }}</p>
 <fieldset class="pkm-onb-set"><legend class="pkm-acc-l">Ton âge</legend>
 <div class="pkm-onb-ages"><sc-for list="{{ ob.p3.ages }}" as="oa" hint-placeholder-count="4"><button type="button" class="{{ oa.cls }}" aria-pressed="{{ oa.on }}" onClick="{{ oa.pick }}">{{ oa.label }}<i class="pkm-onb-ok" aria-hidden="true">✓</i></button></sc-for></div>
 <sc-if value="{{ ob.p3.kid }}" hint-placeholder-val="{{ false }}"><span class="pkm-acc-hint">Avant 15 ans, les nouveautés par e-mail demandent l’accord d’un parent : elles restent désactivées.</span></sc-if>

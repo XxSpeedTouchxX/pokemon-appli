@@ -361,12 +361,12 @@
   // « Merci de m'avoir choisi ! … », puis rejoint la bulle du didacticiel, qui commence aussitôt. Calque hors de Vue,
   // posé sur le cadre de l'app ; un toucher termine la phrase ou passe à la suite.
   const TUTO_THANKS = 'Merci de m’avoir choisi ! Pour te remercier, je vais te montrer comment fonctionne l’application.';
-  tutoProto.tutoThanks = function (line, root) {
+  tutoProto.tutoThanks = function (line, root, keep) {
     tutoAudioInit();
     const mon = PA_LINES[line][0], still = tutoStill(), name = HOME_NAMES[mon] || '';
     const src = k => 'img/pokemon/talk/' + mon + '-' + k + '.png';
     [0, 1, 2, 3].forEach(k => { const im = new Image(); im.src = src(k); });
-    this.paChoose(line, true);
+    if (!keep) this.paChoose(line, true);
     TUTO.mon = mon;
     const box = (root && root.getBoundingClientRect) ? root.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
     const ov = tutoMk('div', 'pkm-ty' + (still ? ' pkm-ty-still' : ''),

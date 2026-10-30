@@ -67,8 +67,10 @@
     const s = x.s, acc = s.account && s.account.email ? s.account : null, tr = s.trainer || {}, page = s.onb || 1;
     const ST_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     const go = n => this.setState({ onb: n, obErr: '' });
-    r.cta = acc ? 'Continuer l’aventure' : 'Créer mon compte';
-    r.next1 = () => { if (acc) this.finishOnb(false); else go(2); };
+    // Compte déjà créé (accueil revu depuis Mon profil, 2026-10-30, porteur) : les trois pages restent accessibles,
+    // préremplies ; « Passer » ramène à l'app à tout moment.
+    r.cta = acc ? 'Continuer' : 'Créer mon compte';
+    r.next1 = () => go(2);
     r.canSkip = !!acc;
     r.canBack = page > 1;
     r.back = () => go(Math.max(1, page - 1));
@@ -79,7 +81,11 @@
     }));
     const err = s.obErr || '';
     r.acc = {
-      email: s.obEmail !== undefined ? s.obEmail : (tr.email || ''), pwd: s.obPwd || '', news: !!s.obNews,
+      email: s.obEmail !== undefined ? s.obEmail : (tr.email || (acc && acc.email) || ''), pwd: s.obPwd || '', news: s.obNews !== undefined ? !!s.obNews : !!(acc && acc.news),
+      title: acc ? 'Ton compte Dropicards' : 'Crée ton compte Dropicards',
+      lead: acc ? 'Ton compte est déjà créé sur ce téléphone : vérifie ton adresse, puis « Suivant ».' : 'Pour retrouver ta collection et te connecter chaque jour.',
+      pwHold: acc ? 'Déjà choisi (facultatif)' : '12 caractères au moins',
+      pwHint: acc ? 'Laisse vide pour garder ton mot de passe actuel.' : '12 caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.',
       shown: s.obShow ? 'true' : 'false', pwType: s.obShow ? 'text' : 'password', eye: s.obShow ? 'Masquer' : 'Afficher',
       emailBad: /e-mail/.test(err) ? 'true' : 'false', pwdBad: /mot de passe/.test(err) ? 'true' : 'false',
       err: err, hasErr: !!err && page === 2,
@@ -92,15 +98,17 @@
         if (e && e.preventDefault) e.preventDefault();
         const f = e && e.target && e.target.elements, t = this.st();
         const email = String(f && f.email ? f.email.value : t.obEmail || '').trim().toLowerCase(), pwd = String(f && f.password ? f.password.value : t.obPwd || '');
-        const news = f && f.news ? !!f.news.checked : !!t.obNews;
+        const news = f && f.news ? !!f.news.checked : t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news);
         if (!ST_MAIL.test(email)) { this.setState({ obEmail: email, obErr: 'Adresse e-mail invalide : vérifie-la (exemple : sacha@exemple.fr).' }); return; }
-        if (pwd.length < 12) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
+        if (pwd.length < 12 && !(acc && !pwd)) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
         // Le mot de passe reste en mémoire (jamais enregistré) pour pouvoir revenir à cette page.
         this.setState({ obEmail: email, obPwd: pwd, obNews: news, obErr: '', onb: 3 });
       }
     };
     const still = (() => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e2) { return false; } })();
-    const age = s.obAge || '', kid = age === 'u15', sel = s.obStarter || '', selN = sel ? PA_LINES[sel][0] : 0, E = selN ? DEX[selN] : null;
+    // Compte déjà créé : âge et starter actuels préremplis (une tranche d'âge d'avant 4 tranches reste à choisir).
+    const accAge = acc && ST_AGES.some(a => a[0] === acc.age) ? acc.age : '', curLine = acc && s.evo && PA_LINES[s.evo.line] ? s.evo.line : '';
+    const age = s.obAge || accAge, kid = age === 'u15', sel = s.obStarter || curLine, selN = sel ? PA_LINES[sel][0] : 0, E = selN ? DEX[selN] : null;
     const name = E ? E.name : '';
     r.p3 = {
       ages: ST_AGES.map(([k, label]) => ({ label: label, on: age === k ? 'true' : 'false', cls: 'pkm-onb-chip' + (age === k ? ' pkm-onb-chip-on' : ''), pick: () => this.setState({ obAge: k, obErr: '' }) })),
@@ -111,7 +119,7 @@
         on: sel === line ? 'true' : 'false', aria: 'Découvrir ' + DEX[n].name, cls: 'pkm-onb-st' + (sel === line ? ' pkm-onb-st-on' : ''),
         style: stStarterStyle(n, sel === line),
         pick: () => {
-          const prev = this.st().obStarter || '', was = document.querySelector('.pkm-onb-focus');
+          const prev = this.st().obStarter || curLine, was = document.querySelector('.pkm-onb-focus');
           if (prev !== line) this.setState({ obStarter: line, obErr: '' });
           // Fiche déjà ouverte : la description d'avant laisse place à la nouvelle, qui glisse depuis le côté du Pokémon touché.
           requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -124,23 +132,26 @@
       hasSel: !!E, noSel: !E, selKey: 'st-' + sel, selName: name, selImg: E ? 'img/pokemon/' + selN + (still ? '.png' : '.gif') : '',
       selH: E && !still ? Math.round(96 * Math.min(1.2, E.gif[1] / 46)) + 'px' : '104px',
       selTypes: E ? E.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })) : [],
+      lead: acc ? 'Ton âge, ton pseudo et ton compagnon de voyage.' : 'Dernière étape avant l’aventure !',
       selDesc: ST_STARTER_TXT[sel] || '', go: 'Choisir ' + name + ' comme compagnon', selStyle: selN ? stStarterStyle(selN, false) : '',
       err: err, hasErr: !!err && page === 3,
       submit: e => {
         if (e && e.preventDefault) e.preventDefault();
         const f = e && e.target && e.target.elements, t = this.st();
         const nick = String(f && f.nickname ? f.nickname.value : t.obNick || '').replace(/\s+/g, ' ').trim().slice(0, 24);
-        if (!t.obAge) { this.setState({ obNick: nick, obErr: 'Indique ton âge.' }); return; }
+        const obAge = t.obAge || accAge, obStarter = t.obStarter || curLine;
+        if (!obAge) { this.setState({ obNick: nick, obErr: 'Indique ton âge.' }); return; }
         if (nick.length < 2) { this.setState({ obNick: nick, obErr: 'Choisis un pseudo de 2 à 24 caractères.' }); return; }
-        if (!t.obStarter || !PA_LINES[t.obStarter]) { this.setState({ obNick: nick, obErr: 'Choisis ton compagnon de voyage.' }); return; }
-        const line = t.obStarter, under = t.obAge === 'u15';
+        if (!obStarter || !PA_LINES[obStarter]) { this.setState({ obNick: nick, obErr: 'Choisis ton compagnon de voyage.' }); return; }
+        const line = obStarter, under = obAge === 'u15';
         // Le starter remercie au milieu de l'écran (calque de tuto.js), puis présente l'app : le didacticiel commence.
         const sec = document.querySelector('section[aria-label^="Bienvenue"]');
-        this.tutoThanks(line, sec);
+        // Même starter qu'avant : son évolution et le compagnon actuel sont gardés.
+        this.tutoThanks(line, sec, line === curLine);
         this.setState({
-          account: { email: t.obEmail, news: !!t.obNews && !under, age: t.obAge, at: realToday(), server: false },
-          trainer: Object.assign({}, t.trainer || {}, { email: t.obEmail, name: nick }),
-          obEmail: undefined, obPwd: '', obShow: false, obNews: false, obNick: undefined, obAge: '', obStarter: '', obErr: ''
+          account: { email: t.obEmail || (acc && acc.email), news: (t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news)) && !under, age: obAge, at: (acc && acc.at) || realToday(), server: false },
+          trainer: Object.assign({}, t.trainer || {}, { email: t.obEmail || (acc && acc.email), name: nick }),
+          obEmail: undefined, obPwd: '', obShow: false, obNews: undefined, obNick: undefined, obAge: '', obStarter: '', obErr: ''
         });
         setTimeout(() => this.finishOnb(false), 320);
       }

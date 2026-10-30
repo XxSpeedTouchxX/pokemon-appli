@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-10-30 (suite 6) — Accueil revu : les 3 pages restent accessibles
+
+- **Constat du porteur** : depuis Mon profil › « Retour à la page d'accueil », impossible d'aller à la 2ᵉ page : l'accueil se fermait.
+- **Fait** : compte déjà créé → page 1 « Continuer », page 2 « Ton compte Dropicards » (adresse préremplie, mot de passe facultatif), page 3 préremplie (âge, pseudo, starter actuel) ; retour par la flèche et les points ; « Passer » ramène à l'app. Valider rejoue le remerciement et le didacticiel ; même starter : évolution et compagnon gardés ; date d'inscription gardée. Cache v89.
+
 ## 2026-10-30 (suite 5) — Page 3 du premier écran : âges, choix visibles, remerciement du compagnon
 
 - **Demande du porteur** :
