@@ -1806,7 +1806,12 @@
 <section aria-label="Fiche du Pokémon" class="pkm-dex-fiche">
 <div class="pkm-dex-fiche-top">
 <div class="pkm-dex-show"><img src="{{ evo.sel.img }}" alt="" class="{{ evo.sel.cls }}" style="{{ evo.sel.sz }}"><i class="pkm-dex-ped" aria-hidden="true"></i></div>
-<div class="pkm-dex-id"><span class="pkm-dex-no">{{ evo.sel.no }}</span><h3>{{ evo.sel.name }}</h3><span class="pkm-dex-genus">{{ evo.sel.genus }}</span><span class="pkm-dex-types"><sc-for list="{{ evo.sel.types }}" as="edt" hint-placeholder-count="2"><b style="{{ edt.style }}">{{ edt.t }}</b></sc-for></span></div>
+<div class="pkm-dex-id"><span class="pkm-dex-no">{{ evo.sel.no }}</span><h3>{{ evo.sel.name }}</h3><span class="pkm-dex-genus">{{ evo.sel.genus }}</span><span class="pkm-dex-types"><sc-for list="{{ evo.sel.types }}" as="edt" hint-placeholder-count="2"><b style="{{ edt.style }}">{{ edt.t }}</b></sc-for></span>
+<sc-if value="{{ evo.sel.own }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ evo.sel.hasText }}" hint-placeholder-val="{{ true }}"><p class="pkm-dex-text">{{ evo.sel.text }}</p></sc-if>
+</sc-if>
+<sc-if value="{{ evo.sel.lock }}" hint-placeholder-val="{{ false }}"><p class="pkm-dex-secret">{{ evo.sel.secret }}</p></sc-if>
+</div>
 </div>
 <div class="pkm-dex-info"><sc-for list="{{ evo.sel.rows }}" as="edr" hint-placeholder-count="8"><span><em>{{ edr.k }}</em>{{ edr.v }}</span></sc-for></div>
 <section aria-label="Ses cartes" class="pkm-dex-tcg">
@@ -1821,10 +1826,6 @@
 <sc-if value="{{ evo.sel.cards.hasAll }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ evo.sel.cards.all }}" class="pkm-dex-tcg-all"><span>{{ evo.sel.cards.allLabel }}</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></sc-if>
 </sc-if>
 </section>
-<sc-if value="{{ evo.sel.own }}" hint-placeholder-val="{{ true }}">
-<sc-if value="{{ evo.sel.hasText }}" hint-placeholder-val="{{ true }}"><p class="pkm-dex-text">{{ evo.sel.text }}</p></sc-if>
-</sc-if>
-<sc-if value="{{ evo.sel.lock }}" hint-placeholder-val="{{ false }}"><p class="pkm-dex-secret">{{ evo.sel.secret }}</p></sc-if>
 <button type="button" onClick="{{ evo.sel.actGo }}" aria-disabled="{{ evo.sel.actDis }}" class="{{ evo.sel.actCls }}">{{ evo.sel.act }}</button>
 <sc-if value="{{ evo.ask }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-dex-ask"><p role="status">{{ evo.askText }}</p><div><button type="button" onClick="{{ evo.askNo }}" class="pkm-dex-no-btn">Annuler</button><button type="button" onClick="{{ evo.askYes }}" class="pkm-dex-yes-btn">Méga-évoluer</button></div></div>

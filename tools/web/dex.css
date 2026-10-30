@@ -79,12 +79,14 @@
 .pkm-dex-all svg { flex: none; fill: none; stroke: #FFD60A; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 /* Fiche du Pokémon */
 .pkm-dex-fiche { display: flex; flex-direction: column; gap: 10px; margin: 0 10px; padding: 10px; border-radius: 10px; border: 2px solid #8C7BFF; background: rgba(28, 27, 110, 0.85); }
-.pkm-dex-fiche-top { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 10px; align-items: center; }
+/* Pokémon touché mis en avant (2026-10-30, porteur) : en grand sous un halo de projecteur, sa description à côté. */
+.pkm-dex-fiche-top { display: grid; grid-template-columns: 142px minmax(0, 1fr); gap: 10px; align-items: start; }
 /* Pokémon centré sur son socle par la mise en page (flex), sans translateX(-50%) : Safari calcule le pourcentage d'une
    animation au moment où elle démarre, avant que le GIF soit chargé (largeur 0), et laissait l'image décalée d'une
    demi-largeur vers la droite, sur le nom (2026-10-29, capture du porteur sur iPhone). */
-.pkm-dex-show { position: relative; height: 130px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 19px; box-sizing: border-box; }
-.pkm-dex-show .pkm-dex-ped { position: absolute; left: 50%; bottom: 6px; width: 92px; height: 26px; transform: translateX(-50%); }
+.pkm-dex-show { position: relative; height: 176px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 24px; box-sizing: border-box; border-radius: 12px;
+  background: radial-gradient(70% 90% at 50% 100%, rgba(124, 245, 255, 0.32), rgba(124, 245, 255, 0.08) 55%, rgba(124, 245, 255, 0) 75%), linear-gradient(180deg, rgba(11, 17, 32, 0.55), rgba(11, 17, 32, 0.15)); box-shadow: inset 0 0 0 1px rgba(124, 245, 255, 0.35); }
+.pkm-dex-show .pkm-dex-ped { position: absolute; left: 0; right: 0; bottom: 8px; width: 118px; height: 30px; margin: 0 auto; transform: none; }
 .pkm-dex-big { position: relative; z-index: 1; flex: none; width: auto; height: 96px; object-fit: contain; object-position: center bottom; image-rendering: pixelated; animation: pkmDexBob2 2.4s ease-in-out infinite; }
 @keyframes pkmDexBob2 { 50% { transform: translateY(-3px); } }
 .pkm-dex-id { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -211,8 +213,8 @@
 .pkm-dex-prog-ty { display: flex; flex-wrap: wrap; gap: 6px; }
 .pkm-dex-prog-ty button { min-height: 32px; padding: 4px 10px; border: 0; border-radius: 999px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25); }
 .pkm-dex-prog-ty b { font-weight: 800; opacity: 0.9; }
-.pkm-dex-text { margin: 0; padding: 10px; border-radius: 6px; background: #0E1626; color: #B8FFD2; font-size: 13px; line-height: 1.5; font-weight: 600; box-shadow: inset 0 0 12px rgba(60, 220, 140, 0.18); }
-.pkm-dex-secret { margin: 0; padding: 8px 10px; border-radius: 8px; background: rgba(11, 17, 32, 0.6); font-size: 12.5px; font-weight: 700; color: #E2E6FF; }
+.pkm-dex-text { margin: 6px 0 0; padding: 8px 10px; border-radius: 6px; background: #0E1626; color: #B8FFD2; font-size: 13px; line-height: 1.5; font-weight: 600; box-shadow: inset 0 0 12px rgba(60, 220, 140, 0.18); }
+.pkm-dex-secret { margin: 6px 0 0; padding: 8px 10px; border-radius: 8px; background: rgba(11, 17, 32, 0.6); font-size: 12.5px; font-weight: 700; color: #E2E6FF; }
 .pkm-dex-act-btn { min-height: 50px; border: 0; border-radius: 999px; background: #FFD60A; color: #0B1120; font: inherit; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.25), 0 6px 16px rgba(0, 0, 0, 0.35); }
 .pkm-dex-act-off { background: #3A3F78; color: #E2E6FF; box-shadow: none; cursor: default; }
 .pkm-dex-ask { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 10px; border: 2px solid #FFD60A; background: #1C1B6E; }

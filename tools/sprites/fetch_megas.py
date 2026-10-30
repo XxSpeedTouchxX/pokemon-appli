@@ -3,9 +3,12 @@
 fetch_megas.py : méga-évolutions des Pokémon de Kanto, débloquées avec des PA dans le jeu d'évolution (2026-10-28,
 demande du porteur). Une fois débloquée, une méga-évolution devient un compagnon de l'accueil.
 
-Les sprites Noir et Blanc n'existent pas pour les méga-évolutions (apparues en 6e génération) :
-- animé : sprite de Pokémon Showdown (PokeAPI/sprites, sprites/pokemon/other/showdown/<id>.gif) ;
-- fixe : sprite par défaut de PokeAPI (sprites/pokemon/<id>.png), 96 px ;
+Style pixel « arcade » comme les autres Pokémon (2026-10-30, porteur : les méga-évolutions en 3D détonnaient) :
+sprites au style Noir et Blanc de PokeAPI (sprites/pokemon/versions/generation-v/black-white/), faits par la communauté
+pour les Pokémon apparus après la 5e génération :
+- animé : black-white/animated/<id>.gif quand il existe (Méga-Dracaufeu X, Méga-Dardargnan, Méga-Alakazam, Méga-Mewtwo X et Y),
+  sinon l'image fixe recadrée, en GIF d'une seule image ;
+- fixe : black-white/<id>.png, 96 px ;
 - icône du choix du compagnon : sprite fixe recadré au plus près et centré dans 96 px, comme make_icons.py.
 Identifiants : ceux de PokeAPI (pokemon.csv), vérifiés le 2026-10-28.
 
@@ -17,6 +20,7 @@ import io
 import json
 import time
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from PIL import Image
@@ -25,10 +29,10 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "web" / "img" / "pokemon"
 INDEX = Path(__file__).with_name("megas.json")
 RAW = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/"
-ANIMATED = RAW + "other/showdown/{n}.gif"
-STILL = RAW + "{n}.png"
+ANIMATED = RAW + "versions/generation-v/black-white/animated/{n}.gif"
+STILL = RAW + "versions/generation-v/black-white/{n}.png"
 UA = "Dropicards/1.0 (+https://github.com/XxSpeedTouchxX/pokemon-appli)"
-MAX_GIF, MAX_PNG = 400_000, 20_000  # octets (GIF de Showdown plus lourds que ceux de Noir et Blanc) : au-delà, refusé
+MAX_GIF, MAX_PNG = 400_000, 20_000  # octets : au-delà, refusé
 SIZE = 96
 # id PokeAPI, n° du Pokémon de base, nom français
 MEGAS = [
@@ -40,15 +44,34 @@ MEGAS = [
 ]
 
 
-def get(url):
+def get(url, optional=False):
     for attempt in range(3):
         try:
             with urlopen(Request(url, headers={"User-Agent": UA}), timeout=60) as resp:
                 return resp.read()
+        except HTTPError as e:
+            if e.code == 404 and optional:
+                return None
+            print(f"{url} : {e}")
+            time.sleep(2 * (attempt + 1))
         except OSError as e:  # noqa: PERF203
             print(f"{url} : {e}")
             time.sleep(2 * (attempt + 1))
     raise SystemExit(f"Injoignable : {url}")
+
+
+def still_gif(png):
+    """GIF d'une seule image, transparent, à partir du sprite fixe (méga-évolution sans animation au style Noir et Blanc)."""
+    im = Image.open(io.BytesIO(png)).convert("RGBA")
+    box = im.getchannel("A").getbbox()
+    im = im.crop(box)
+    alpha = im.getchannel("A")
+    pal = im.convert("RGB").quantize(colors=255, method=Image.Quantize.MEDIANCUT)
+    mask = alpha.point(lambda v: 255 if v <= 128 else 0)
+    pal.paste(255, mask=mask)
+    buf = io.BytesIO()
+    pal.save(buf, "GIF", transparency=255)
+    return buf.getvalue()
 
 
 def icon(n, png):
@@ -63,7 +86,8 @@ def main():
     (OUT / "icon").mkdir(parents=True, exist_ok=True)
     index, total = [], 0
     for n, base, nom in MEGAS:
-        gif, png = get(ANIMATED.format(n=n)), get(STILL.format(n=n))
+        png = get(STILL.format(n=n))
+        gif = get(ANIMATED.format(n=n), optional=True) or still_gif(png)
         if not gif.startswith(b"GIF8") or len(gif) > MAX_GIF or not png.startswith(b"\x89PNG") or len(png) > MAX_PNG:
             raise SystemExit(f"Sprite n° {n} refusé (format ou taille : {len(gif)} et {len(png)} octets)")
         (OUT / f"{n}.gif").write_bytes(gif)
@@ -73,7 +97,7 @@ def main():
         total += len(gif) + len(png)
     INDEX.write_text(json.dumps({
         "fetched": time.strftime("%Y-%m-%d"),
-        "credit": "Sprites © The Pokémon Company ; animés de Pokémon Showdown et fixes de PokeAPI, via PokeAPI/sprites",
+        "credit": "Sprites © The Pokémon Company ; style Noir et Blanc de la communauté, via PokeAPI/sprites",
         "sources": {"animated": ANIMATED, "still": STILL},
         "fields": ["id", "base", "nom", "gif_sha256_16", "png_sha256_16"], "megas": index,
     }, ensure_ascii=False, indent=1) + "\n", "utf-8")

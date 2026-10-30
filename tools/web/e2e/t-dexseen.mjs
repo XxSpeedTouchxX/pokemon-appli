@@ -30,7 +30,7 @@ await pick('Dracaufeu');
 const fiche = page.locator('section[aria-label="Fiche du Pokémon"]');
 const f0 = (await fiche.innerText()).replace(/\s+/g, ' ');
 const sil0 = await page.evaluate(() => [document.querySelector('.pkm-dex-lcd-l img').classList.contains('pkm-dex-sil'), document.querySelector('.pkm-dex-big').classList.contains('pkm-dex-sil')]);
-ok('Dracaufeu pas encore vu : silhouette (écran, fiche), « Pas encore vu », conseil de scanner', sil0.join() === 'true,true' && /Pokédex Pas encore vu/.test(f0) && /scanne une de ses cartes/.test(f0));
+ok('Dracaufeu pas encore vu : silhouette (écran, fiche), conseil de scanner', sil0.join() === 'true,true' && /Pas encore vu/.test(f0) && /scanne une de ses cartes/.test(f0));
 // Scan d'une carte « Reshiram et Dracaufeu GX ».
 await page.evaluate(() => window.__pkm.scanPick('sm10-20')); await page.waitForTimeout(300);
 const toast = await page.locator('body').innerText();
@@ -39,7 +39,7 @@ ok('scan : « Pokédex : Dracaufeu vu pour la première fois ! » (' + JSON.stri
 await openDex(); await page.waitForTimeout(400);
 const f1 = (await fiche.innerText()).replace(/\s+/g, ' ');
 const st1 = await page.evaluate(() => ({ lcd: document.querySelector('.pkm-dex-lcd-l img').className, big: document.querySelector('.pkm-dex-big').className, node: document.querySelector('[aria-label="Route d’évolution"] button[aria-label^="Dracaufeu,"]').className, aria: document.querySelector('.pkm-dex-lcd-l').getAttribute('aria-label') }));
-ok('Dracaufeu vu : en couleur (écran, fiche, route), « Vu », statistiques toujours cachées (' + st1.aria + ')', !/pkm-dex-sil/.test(st1.lcd) && !/pkm-dex-sil/.test(st1.big) && /pkm-dex-seen/.test(st1.node) && /Pokédex Vu /.test(f1) && /Vu ! Débloque-le/.test(f1) && !(await page.locator('[aria-label="Statistiques de base"]').count()) && /vu, à débloquer/.test(st1.aria));
+ok('Dracaufeu vu : en couleur (écran, fiche, route), « Vu », statistiques toujours cachées (' + st1.aria + ')', !/pkm-dex-sil/.test(st1.lcd) && !/pkm-dex-sil/.test(st1.big) && /pkm-dex-seen/.test(st1.node) && /Vu ! Débloque-le/.test(f1) && !(await page.locator('[aria-label="Statistiques de base"]').count()) && /vu, à débloquer/.test(st1.aria));
 ok('progression : un vu de plus (' + (await prog()).slice(0, 60) + ')', new RegExp('Vus ' + (seen0 + 1) + ' / 171').test(await prog()) && new RegExp('Attrapés ' + own0 + ' / 171').test(await prog()));
 await page.screenshot({ path: shot('dexseen-vu.png') });
 // Méga-évolution : une carte « Méga-Dracaufeu X-ex » ne fait voir que la méga X ; même carte rescannée : rien de plus.

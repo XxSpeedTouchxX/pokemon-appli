@@ -31,13 +31,15 @@
   const dexStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return true; } };
   const dexSprite = (n, still) => 'img/pokemon/' + n + (still ? '.png' : '.gif');
   const dexNum = n => Number(n).toLocaleString('fr-FR');
-  const dexCapture = c => (c >= 190 ? 'Très facile' : c >= 120 ? 'Facile' : c >= 45 ? 'Moyenne' : c >= 25 ? 'Difficile' : 'Très difficile');
   const dexProto = Component.prototype;
   // Tailles proportionnelles (2026-10-28, demande du porteur) : dans une famille, chaque Pokémon est dessiné à la
   // hauteur de sa taille réelle (fiche du Pokédex), le plus grand à DEX_PX px ; une méga-évolution est toujours un peu
   // plus grande que sa forme de base (au moins 10 %), même quand le Pokédex leur donne la même taille. Plancher de
   // DEX_PX_MIN px pour qu'un tout petit Pokémon reste visible (Magicarpe à côté de Léviator).
-  const DEX_PX = 84, DEX_PX_BIG = 104, DEX_PX_MIN = 20, DEX_CAPW = 140, DEX_CAPW_BIG = 136;
+  const DEX_PX = 84, DEX_PX_MIN = 20, DEX_CAPW = 140;
+  // Fiche (2026-10-30, porteur) : le Pokémon touché est montré en grand, comme mis en avant, quelle que soit sa taille
+  // sur la route (Salamèche y reste petit à côté de Dracaufeu) ; jamais plus large que 136 px.
+  const DEX_PX_FOCUS = 120, DEX_CAPW_FOCUS = 136;
   // Ordre croissant le long de l'évolution (2026-10-29, porteur) : chaque forme est au moins 10 % plus grande que la
   // précédente, même quand le Pokédex la donne plus petite (Ectoplasma 1,5 m après Spectrum 1,6 m, Dracolosse 2,2 m après
   // Draco 4,0 m) ; les méga-évolutions suivent la même règle. La taille affichée dans la fiche reste la vraie.
@@ -58,8 +60,9 @@
   // par « translate », jamais en %). La fiche ne déborde pas de sa colonne de 128 px (DEX_CAPW_BIG).
   // Centrage (2026-10-29, porteur) : c'est le centre d'équilibre du Pokémon (corps et pieds, tools/sprites/dex_boxes.py :
   // « gc » pour le GIF, « pc » pour l'image fixe) qui se pose au milieu du socle, pas le milieu de son cadre : la queue de
-  // Reptincel ne le décale plus ; décalage limité à 15 % de la largeur.
-  const dexShift = (px, w) => Math.round(Math.max(-0.15 * w, Math.min(0.15 * w, px)));
+  // Reptincel ne le décale plus ; décalage limité à 22 % de la largeur. Depuis le 2026-10-30, ce centre est celui du corps
+  // seul (queue, flamme et ailes effacées par érosion, tools/sprites/dex_boxes.py) : Reptincel était encore à gauche.
+  const dexShift = (px, w) => Math.round(Math.max(-0.22 * w, Math.min(0.22 * w, px)));
   const dexSize = (e, max, top, still, fit) => {
     const p = Math.max(DEX_PX_MIN, Math.round(top * fit * dexH(e) / max));
     if (!still) {
@@ -244,7 +247,7 @@
   dexProto.vDex = function (s) {
     const still = dexStill(), pa = Number(s.pa) || 0, b = DEX[s.buddy] ? s.buddy : 25;
     const sel = DEX[s.dexSel] ? s.dexSel : b, e = DEX[sel], route = dexRoute(sel), hmax = dexFamMax(sel);
-    const fit = dexFamFit(sel, hmax, DEX_PX, DEX_CAPW, still), fitBig = dexFamFit(sel, hmax, DEX_PX_BIG, DEX_CAPW_BIG, still);
+    const fit = dexFamFit(sel, hmax, DEX_PX, DEX_CAPW, still), fitFocus = Math.min(1, DEX_CAPW_FOCUS / Math.max(1, DEX_PX_FOCUS * dexAsp(e, still)));
     const owned = DEX_IDS.filter(k => dexOwn(s, k)).length;
     const status = x => {
       if (dexOwn(s, x.n)) return s.buddy === x.n ? 'Compagnon' : 'Débloqué';
@@ -272,7 +275,6 @@
     // Fiche du Pokémon touché.
     const own = dexOwn(s, sel), price = dexPrice(sel), from = e.from && DEX[e.from];
     const stage = e.mega ? 'Méga-évolution' : DEX_FORMS[Math.min(dexStage(sel), 2)];
-    const rare = e.leg === 2 ? 'Fabuleux' : e.leg === 1 ? 'Légendaire' : e.mega ? 'Méga-évolution' : HOME_THEMES[sel] ? 'Légendaire · ' + HOME_THEMES[sel].name : 'Commun';
     let act, actOn = false, actGo = () => {};
     if (own) {
       if (s.buddy === sel) act = 'C’est ton compagnon';
@@ -282,14 +284,13 @@
     else if (s.paFx) act = 'Évolution en cours…';
     else { act = (from ? (e.mega ? 'Méga-évoluer' : 'Faire évoluer') : 'Débloquer') + ' · ' + dexNum(price) + ' PA'; actOn = true; actGo = () => (e.mega ? this.setState({ megaAsk: sel }) : this.dexUnlock(sel)); }
     v.sel = {
-      img: dexSprite(sel, still), sz: dexSize(e, hmax, DEX_PX_BIG, still, fitBig), size: (e.h / 10).toLocaleString('fr-FR') + ' m', cls: 'pkm-dex-big' + (dexSeen(s, sel) ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
+      img: dexSprite(sel, still), sz: dexSize(e, dexH(e), DEX_PX_FOCUS, still, fitFocus), size: (e.h / 10).toLocaleString('fr-FR') + ' m', cls: 'pkm-dex-big' + (dexSeen(s, sel) ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
       secret: dexSeen(s, sel) ? '🔒 Vu ! Débloque-le avec tes PA pour découvrir sa description.' : '🔒 Pas encore vu : scanne une de ses cartes pour le voir, puis débloque-le avec tes PA pour découvrir sa description.',
       types: e.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })),
+      // Fiche allégée (2026-10-30, porteur) : talents, capture, rareté, prix et état dans le Pokédex retirés.
       rows: [
         ['Stade', stage], ['Taille', (e.h / 10).toLocaleString('fr-FR') + ' m'], ['Poids', (e.w / 10).toLocaleString('fr-FR') + ' kg'],
-        ['Talents', e.abil.join(', ') || '—'], ['Habitat', e.hab ? e.hab.charAt(0).toUpperCase() + e.hab.slice(1) : '—'],
-        ['Capture', e.cap ? dexCapture(e.cap) : '—'], ['Rareté', rare], ['Prix', price ? dexNum(price) + ' PA' : 'Offert'],
-        ['Pokédex', own ? 'Attrapé' : dexSeen(s, sel) ? 'Vu' : 'Pas encore vu']
+        ['Habitat', e.hab ? e.hab.charAt(0).toUpperCase() + e.hab.slice(1) : '—']
       ].map(([k, x]) => ({ k: k, v: x })),
       text: e.text, hasText: !!e.text,
       act: act, actOn: actOn, actDis: !actOn, actGo: actGo, actCls: 'pkm-dex-act-btn' + (actOn ? '' : ' pkm-dex-act-off')

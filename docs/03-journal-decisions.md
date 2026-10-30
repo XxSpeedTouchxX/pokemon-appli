@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-10-30 (suite 3) — Compte à la première ouverture, Pokédex mis en avant, méga-évolutions en pixel
+
+- **Demandes du porteur** :
+  - « Retour à la page d'accueil » dans Mon profil ;
+  - les 5 cartes du premier écran restaient noires ;
+  - après « Commencer l'aventure ! » : plus de questions, création du compte (e-mail, mot de passe), puis pseudo ;
+  - « Ventes et marge » retiré de Mon profil ; « PA dispo aujourd'hui » ;
+  - Pokédex : Reptincel et les autres centrés sur leur socle, Pokémon touché en grand avec sa description à côté, fiche sans talents, capture, prix, état dans le Pokédex ni rareté ;
+  - méga-évolutions en pixel comme les autres.
+- **Fait** : tout ce qui précède. Cartes gardées dans l'app (`web/img/onb/`). Centre du corps seul (érosion). Sprites des méga au style Noir et Blanc (PokeAPI). Cache v86.
+- **Limite connue** : le compte est créé **sur l'appareil seulement**, faute de serveur (`docs/17`, en attente de « go »). L'e-mail et le pseudo sont gardés ; le mot de passe n'est jamais enregistré par l'app (le trousseau du téléphone peut le garder) et ne sert donc encore à rien.
+
 ## 2026-10-30 (suite 2) — dropicards.fr ne se mettait plus à jour
 
 - **Constat du porteur** : rien ne change sur https://dropicards.fr depuis le passage sur le serveur OVH ; le serveur ne récupère pas la branche publiée sur GitHub.

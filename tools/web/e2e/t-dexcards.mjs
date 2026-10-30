@@ -72,6 +72,14 @@ await page.locator('[aria-label="Tous les Pokémon"] button').first().click(); a
 await pad('right');
 const mega = (await sec.innerText()).replace(/\s+/g, ' ');
 ok('Méga-Dracaufeu X : ses propres cartes (' + mega.slice(-40) + ')', /Mes cartes de Méga-Dracaufeu X/.test(mega) && /Voir ses \d+ cartes/.test(mega) && /(Méga-Dracaufeu X-ex|M-Dracaufeu)/.test(mega));
+// Fiche mise en avant (2026-10-30, porteur) : Pokémon en grand, description à côté, sans talents, capture, rareté, prix
+// ni état dans le Pokédex.
+const focus = await page.evaluate(() => {
+  const f = document.querySelector('section[aria-label="Fiche du Pokémon"]'), big = f.querySelector('.pkm-dex-big');
+  return { h: Math.round(big.getBoundingClientRect().height), keys: [...f.querySelectorAll('.pkm-dex-info em')].map(e => e.textContent).join(','),
+    side: !!f.querySelector('.pkm-dex-id .pkm-dex-text, .pkm-dex-id .pkm-dex-secret') };
+});
+ok('fiche : Pokémon en grand (' + focus.h + ' px), description à côté, champs ' + focus.keys, focus.h >= 90 && focus.side && focus.keys === 'Stade,Taille,Poids,Habitat');
 // Mise en page : pas de défilement horizontal à 360 px ; zones de la croix assez grandes.
 const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 const kb = await page.$$eval('.pkm-dex-k', ks => ks.map(k => { const r = k.getBoundingClientRect(); return Math.round(Math.min(r.width, r.height)); }));

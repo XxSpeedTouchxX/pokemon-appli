@@ -85,6 +85,7 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Jeux** (`tools/web/games.js`, `games.css`, fragment `games`, 2026-10-11) : l'onglet « Marché » (écran `market`) devient « Jeux » ; Booster PK (12 h depuis le 2026-10-12) et Pile ou face (8 h) ; la roulette est remplacée le 2026-10-26 par le jeu d'évolution (voir « PA et jeu d'évolution ») ; tirage `crypto.getRandomValues`, dates gardées avec la collection (`games`). L'ancienne recherche du Marché devient l'écran `search` (accueil, scan).
 - **Navigation** (`tools/web/nav.js`, 2026-10-11) : bouton Retour du téléphone (historique du navigateur), geste depuis le bord gauche, glissement au retour, position de la page gardée au retour.
 - **Première visite et alertes** (`tools/web/start.js`, 2026-10-11) : collection vide et accueil guidé à la première visite ; « Tes alertes » à l'ouverture de l'app, notification du téléphone si autorisée (sauf si « Sorties et boutiques suivies » est décoché dans Mon profil › Notifications).
+- **Création du compte** (2026-10-30, porteur) : après « Commencer l'aventure ! », les questions du profil sont remplacées par « Crée ton compte Dropicards » (e-mail, mot de passe de 12 caractères au moins avec « Afficher », nouveautés par e-mail décochées par défaut), puis « Choisis ton pseudo de dresseur » (2 à 24 caractères, repris dans Mon profil). Les comptes n'existent pas encore côté serveur (`docs/17`) : l'adresse, le choix des nouveautés et le pseudo sont gardés sur l'appareil (`account`, `trainer`) ; **le mot de passe n'est jamais enregistré par l'app** (le trousseau du téléphone peut le garder). « Passer » n'apparaît que si le compte existe (accueil revu depuis Mon profil › « Retour à la page d'accueil »). Cartes de l'éventail gardées dans l'app (`web/img/onb/`, `tools/brand/fetch_onb_cards.py`, workflow « Cartes du premier écran ») : elles restaient noires sur le téléphone du porteur. Mon profil : rubrique « Ventes et marge » retirée ; fenêtre des PA renommée « PA dispo aujourd'hui ».
 - **Premier écran** (2026-10-29, porteur) : titre « Viens découvrir toutes les fonctionnalités de Dropicards » ; six lignes à pictogramme, dont en 4ᵉ « Gagne des PK et PA pour remporter des lots et enrichir ton Pokédex » (manette) ; cinq cartes en éventail (Pikachu-ex « forêt » de Héros Transcendants, me02.5-276 ; Dracaufeu du Set de Base ; Lugia de la Collection Classique ; Mew-ex et Mewtwo-ex illustrations spéciales du 30ᵉ anniversaire, 30th-152 et 30th-151) ; bouton « Commencer l'aventure ! ». Le bouton « Essayer avec la collection de démo » est retiré (Réglages › « Remettre la démo » reste).
 - **Fiche d'une carte** (`catalog.js`, 2026-10-11) : cote Cardmarket de la version de la carte et prix de l'autre version (`cmh`, `cmv`), « cote à confirmer » (`q`), « cote à venir » (`stats.setsPriceSoon`), lien vers les ventes réussies eBay. Logos de séries : TCGdex, puis logos gardés avec la page (dont McDonald's, promos, énergies, Coffre Étincelant, repris du dépôt GitHub 1niceroli/ptcg-assets), sinon nom dessiné.
 - **Polices hébergées avec l'app** (`web/fonts/`, paquets `@fontsource`, licence SIL OFL) : la démo n'appelle plus Google Fonts. Seule la page claude.ai (`artifact.html`) garde Google Fonts.
@@ -139,6 +140,13 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
   - puis le reste se déplie, bloc après bloc : description, trois profils, « Ce qui fixe ton profil », « Ce que ça change pour toi ».
 - **Raccourcis :** un appui sur le texte l'affiche d'un coup ; un second appui sur la catégorie replie.
 - **Accessibilité :** le texte complet est lu par les lecteurs d'écran ; tout s'affiche sans mouvement si l'utilisateur limite les animations.
+
+## Pokédex : fiche mise en avant (2026-10-30)
+
+- Le Pokémon touché est montré en grand (120 px de haut, 136 px de large au plus) sous un halo, quelle que soit sa taille sur la route ; sa description (ou le message pour le débloquer) est à côté de lui.
+- Fiche allégée : Stade, Taille, Poids, Habitat (talents, capture, rareté, prix et état dans le Pokédex retirés).
+- Centrage sur les socles : centre du corps seul (`tools/sprites/dex_boxes.py`), décalage limité à 22 % de la largeur.
+- Méga-évolutions en pixel, au style Noir et Blanc (`tools/sprites/fetch_megas.py`).
 
 ## Notifications
 
