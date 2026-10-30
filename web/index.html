@@ -712,6 +712,38 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-acc-note { margin: 0; font-size: 12px; line-height: 1.5; color: var(--pkm-t2); }
 .pkm-tr-in[aria-invalid="true"] { border-color: #C21807; }
 
+/* Accueil en 3 pages (2026-10-30) : retour, points cliquables, âge, choix du compagnon de voyage mis en avant. */
+.pkm-onb-top { display: flex; align-items: center; gap: 6px; }
+.pkm-onb-back { width: 44px; height: 44px; margin-left: -10px; padding: 0; border: 0; border-radius: 22px; background: transparent; color: var(--pkm-t1); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.pkm-onb-back svg { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-onb-dots { display: flex; align-items: center; }
+.pkm-onb-dot { width: 24px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.pkm-onb-dot i { display: block; width: 8px; height: 8px; border-radius: 4px; background: var(--pkm-line-2); transition: width 0.3s, background 0.3s; }
+.pkm-onb-dot-done i { background: var(--pkm-accent); }
+.pkm-onb-dot-on { width: 34px; }
+.pkm-onb-dot-on i { width: 22px; background: var(--pkm-accent); }
+.pkm-onb-dot[aria-disabled="true"] { cursor: default; }
+.pkm-onb-page { will-change: transform; }
+.pkm-onb-set { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.pkm-onb-set legend { padding: 0; margin-bottom: 8px; }
+.pkm-onb-ages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pkm-onb-chip { min-height: 44px; padding: 6px; border-radius: 14px; border: 1px solid #2A3A5C; background: #0B1322; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; line-height: 1.2; cursor: pointer; }
+.pkm-onb-chip-on { border-color: var(--pkm-accent); box-shadow: 0 0 0 2px var(--pkm-accent); background: #16223A; }
+.pkm-onb-starters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.pkm-onb-st { min-width: 0; height: 104px; padding: 6px 2px; border-radius: 16px; border: 1px solid #2A3A5C; background: #0B1322; color: #F3F6FC; font: inherit; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; cursor: pointer; transition: transform 0.2s; }
+.pkm-onb-st img { display: block; max-width: 100%; object-fit: contain; image-rendering: pixelated; }
+.pkm-onb-st-on { border-color: var(--pkm-accent); box-shadow: 0 0 0 2px var(--pkm-accent), 0 8px 18px rgba(0, 0, 0, 0.35); transform: translateY(-3px); }
+.pkm-onb-focus { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 20px; border: 2px solid var(--pkm-accent); background: #111A2C; color: #F3F6FC; animation: pkmOnbFocus 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+@keyframes pkmOnbFocus { from { opacity: 0; transform: translateY(12px) scale(0.97); } to { opacity: 1; transform: none; } }
+.pkm-onb-focus-top { display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 10px; align-items: center; }
+.pkm-onb-focus-show { position: relative; height: 140px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; box-sizing: border-box; border-radius: 14px; background: radial-gradient(70% 90% at 50% 100%, rgba(124, 245, 255, 0.3), rgba(124, 245, 255, 0) 75%); }
+.pkm-onb-focus-show img { position: relative; z-index: 1; display: block; max-width: 116px; object-fit: contain; image-rendering: pixelated; }
+.pkm-onb-focus-show .pkm-dex-ped { position: absolute; left: 0; right: 0; bottom: 6px; width: 100px; height: 26px; margin: 0 auto; transform: none; }
+.pkm-onb-focus-id { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.pkm-onb-focus-id > b { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; }
+.pkm-onb-focus-id p { margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA; }
+@media (prefers-reduced-motion: reduce) { .pkm-onb-focus, .pkm-onb-st { animation: none; transition: none; } }
+
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
    de PA sur celui de droite. Puis l'écran « Route d'évolution » d'après la « Digivolution Route » de Digimon World Dusk

@@ -2066,7 +2066,7 @@ PKCOUNTER
 
 <!-- fragment: onb-account -->
 <sc-if value="{{ ob.is2 }}" hint-placeholder-val="{{ false }}">
-<form class="pkm-acc" aria-label="Crée ton compte Dropicards" onSubmit="{{ ob.acc.submit }}" novalidate="novalidate">
+<form class="pkm-acc pkm-onb-page" aria-label="Crée ton compte Dropicards" onSubmit="{{ ob.acc.submit }}" novalidate="novalidate">
 <h1 class="pkm-acc-h">Crée ton compte Dropicards</h1>
 <p class="pkm-acc-p">Pour retrouver ta collection et te connecter chaque jour.</p>
 <label class="pkm-acc-l">Adresse e-mail
@@ -2078,19 +2078,40 @@ PKCOUNTER
 <span class="pkm-acc-hint">12 caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.</span>
 <label class="pkm-acc-news"><input type="checkbox" name="news" checked="{{ ob.acc.news }}" onChange="{{ ob.acc.onNews }}"><span>Recevoir les nouveautés et bons plans Dropicards par e-mail (facultatif)</span></label>
 <sc-if value="{{ ob.acc.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.acc.err }}</p></sc-if>
-<button type="submit" class="pkm-acc-go">Créer mon compte</button>
+<button type="submit" class="pkm-acc-go">Suivant</button>
 <p class="pkm-acc-note">{{ ob.acc.note }}</p>
 </form>
 </sc-if>
 <sc-if value="{{ ob.is3 }}" hint-placeholder-val="{{ false }}">
-<form class="pkm-acc" aria-label="Ton pseudo de dresseur" onSubmit="{{ ob.nick.submit }}" novalidate="novalidate">
-<h1 class="pkm-acc-h">Choisis ton pseudo de dresseur</h1>
-<p class="pkm-acc-p">C’est le nom qui t’identifie dans l’app, dans Mon profil.</p>
+<form class="pkm-acc pkm-onb-page" aria-label="Ton profil de dresseur" onSubmit="{{ ob.p3.submit }}" novalidate="novalidate">
+<h1 class="pkm-acc-h">Ton profil de dresseur</h1>
+<p class="pkm-acc-p">Dernière étape avant l’aventure !</p>
+<fieldset class="pkm-onb-set"><legend class="pkm-acc-l">Ton âge</legend>
+<div class="pkm-onb-ages"><sc-for list="{{ ob.p3.ages }}" as="oa" hint-placeholder-count="3"><button type="button" class="{{ oa.cls }}" aria-pressed="{{ oa.on }}" onClick="{{ oa.pick }}">{{ oa.label }}</button></sc-for></div>
+<sc-if value="{{ ob.p3.kid }}" hint-placeholder-val="{{ false }}"><span class="pkm-acc-hint">Avant 15 ans, les nouveautés par e-mail demandent l’accord d’un parent : elles restent désactivées.</span></sc-if>
+</fieldset>
 <label class="pkm-acc-l">Pseudo de dresseur
-<input class="pkm-tr-in" type="text" name="nickname" autocomplete="nickname" maxlength="24" placeholder="Ex. : Sacha du Bourg" value="{{ ob.nick.value }}" onChange="{{ ob.nick.onInput }}" aria-invalid="{{ ob.nick.bad }}">
+<input class="pkm-tr-in" type="text" name="nickname" autocomplete="nickname" maxlength="24" placeholder="Ex. : Sacha du Bourg" value="{{ ob.p3.nick }}" onChange="{{ ob.p3.onNick }}" aria-invalid="{{ ob.p3.nickBad }}">
 </label>
-<span class="pkm-acc-hint">2 à 24 caractères. Tu pourras le changer dans Mon profil.</span>
-<sc-if value="{{ ob.nick.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.nick.err }}</p></sc-if>
-<button type="submit" class="pkm-acc-go">C’est parti !</button>
+<fieldset class="pkm-onb-set"><legend class="pkm-acc-l">Choisis ton compagnon de voyage</legend>
+<div class="pkm-onb-starters"><sc-for list="{{ ob.p3.starters }}" as="os" hint-placeholder-count="4"><button type="button" class="{{ os.cls }}" aria-pressed="{{ os.on }}" aria-label="{{ os.aria }}" onClick="{{ os.pick }}"><img src="{{ os.img }}" alt="" style="height: {{ os.h }}"><span>{{ os.name }}</span></button></sc-for></div>
+</fieldset>
+<sc-if value="{{ ob.p3.hasSel }}" hint-placeholder-val="{{ false }}">
+<section class="pkm-onb-focus" aria-label="{{ ob.p3.selName }}" key="{{ ob.p3.selKey }}">
+<div class="pkm-onb-focus-top">
+<div class="pkm-onb-focus-show"><img src="{{ ob.p3.selImg }}" alt="" style="height: {{ ob.p3.selH }}"><i class="pkm-dex-ped" aria-hidden="true"></i></div>
+<div class="pkm-onb-focus-id"><b>{{ ob.p3.selName }}</b><span class="pkm-dex-types"><sc-for list="{{ ob.p3.selTypes }}" as="ost" hint-placeholder-count="2"><b style="{{ ost.style }}">{{ ost.t }}</b></sc-for></span><p>{{ ob.p3.selDesc }}</p></div>
+</div>
+<sc-if value="{{ ob.p3.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.p3.err }}</p></sc-if>
+<button type="submit" class="pkm-acc-go">{{ ob.p3.go }}</button>
+</section>
+</sc-if>
+<sc-if value="{{ ob.p3.noSel }}" hint-placeholder-val="{{ true }}"><p class="pkm-acc-hint">Touche un Pokémon pour le découvrir.</p></sc-if>
 </form>
 </sc-if>
+
+<!-- fragment: onb-top -->
+<span class="pkm-onb-top">
+<sc-if value="{{ ob.canBack }}" hint-placeholder-val="{{ false }}"><button type="button" class="pkm-onb-back" onClick="{{ ob.back }}" aria-label="Page précédente"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button></sc-if>
+<span class="pkm-onb-dots"><sc-for list="{{ ob.dots }}" as="dt" hint-placeholder-count="3"><button type="button" class="{{ dt.cls }}" onClick="{{ dt.go }}" aria-label="{{ dt.label }}" aria-current="{{ dt.cur }}" aria-disabled="{{ dt.off }}"><i></i></button></sc-for></span>
+</span>

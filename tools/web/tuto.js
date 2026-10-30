@@ -357,6 +357,14 @@
     // L'onglet s'ouvre (transition de page), puis l'étape se montre.
     setTimeout(() => { if (this.st().tutoStep === i) tutoShow(i); }, same ? 80 : 480);
   };
+  // Accueil (start.js, 2026-10-30) : le starter choisi à la 3e page devient le compagnon et présente l'app aussitôt,
+  // sans redemander « Veux-tu suivre le didacticiel ? » ni le choix du starter.
+  tutoProto.tutoStartWith = function (line) {
+    tutoAudioInit();
+    this.paChoose(line, true);
+    this.setState({ tuto: 'ask' });
+    setTimeout(() => this.tutoGo(0), 420);
+  };
   tutoProto.tutoEnd = function (finished) {
     if (TUTO.ended) return;
     TUTO.ended = true; setTimeout(() => { TUTO.ended = false; }, 0);

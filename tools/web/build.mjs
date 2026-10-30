@@ -47,7 +47,7 @@ patch('PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, av
   'PKM suit la cote Cardmarket de chaque carte, chaque jour, avec sa source et sa date.');
 // Premier écran (2026-10-29, porteur) : « Commencer l’aventure ! » ; plus de bouton « Essayer avec la collection de
 // démo » (Réglages › « Remettre la démo » reste) ; nouveau titre.
-patch('cursor: pointer">Commencer</button>', 'cursor: pointer">Commencer l’aventure\u202f!</button>');
+patch('cursor: pointer">Commencer</button>', 'cursor: pointer">{{ ob.cta }}</button>');
 patch('text-align: center">La vraie valeur de ta collection Pokémon</h1>', 'text-align: center">Viens découvrir toutes les fonctionnalités de Dropicards</h1>');
 // « Passer » seulement quand le compte existe déjà (accueil revu depuis le profil).
 {
@@ -141,6 +141,9 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
   if (a < 0 || i3 < 0 || b < 0) throw new Error('Étapes 2 et 3 du premier écran introuvables');
   tpl = tpl.slice(0, a) + FRAG['onb-account'].trim() + '\n' + tpl.slice(b + '</sc-if>\n'.length);
 }
+// Accueil en 3 pages (2026-10-30) : flèche de retour et points cliquables (pages déjà vues), pages qui glissent.
+patch('<span aria-hidden="true" style="display: flex; gap: 6px"><sc-for list="{{ ob.dots }}" as="dt" hint-placeholder-count="3"><span style="width: {{ dt.w }}; height: 8px; border-radius: 4px; background: {{ dt.bg }}"></span></sc-for></span>', FRAG['onb-top'].trim());
+patch('<sc-if value="{{ ob.is1 }}" hint-placeholder-val="{{ true }}">\n<div style="flex: 1; display: flex;', '<sc-if value="{{ ob.is1 }}" hint-placeholder-val="{{ true }}">\n<div class="pkm-onb-page" style="flex: 1; display: flex;');
 // Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de la photo ouvre la photothèque
 // (input caché) ; rubrique « Informations du dresseur » sous l'identité.
 patch(`<span style="position: relative; flex: none; width: 76px; height: 76px">

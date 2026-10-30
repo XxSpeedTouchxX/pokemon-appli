@@ -1,7 +1,8 @@
-// Premier écran (2026-10-30, demande du porteur) : cinq cartes gardées dans l'app (web/img/onb/), « Commencer
-// l'aventure ! » mène à la création du compte (e-mail, mot de passe de 12 caractères au moins, nouveautés décochées),
-// puis au pseudo de dresseur ; le mot de passe n'est jamais enregistré ; « Passer » seulement quand le compte existe ;
-// Mon profil : « Retour à la page d'accueil », plus de « Ventes et marge ».
+// Premier écran en 3 pages (2026-10-30, demande du porteur) : cinq cartes gardées dans l'app (web/img/onb/) ;
+// page 1 « Créer mon compte » → page 2 e-mail, mot de passe (12 caractères au moins, jamais enregistré), « Suivant »
+// → page 3 âge, pseudo de dresseur et starter (mise en avant, « Choisir X comme compagnon ») qui lance le didacticiel
+// avec ce Pokémon. Retour possible (flèche et points), saisies gardées, transition glissée entre les pages.
+// « Passer » seulement quand le compte existe ; Mon profil : « Retour à la page d'accueil », plus de « Ventes et marge ».
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -9,15 +10,20 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, de
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?first=1', { waitUntil: 'load' });
-await page.waitForSelector('button:has-text("Commencer l’aventure")', { timeout: 15000 });
+await page.waitForSelector('button:has-text("Créer mon compte")', { timeout: 15000 });
 await page.waitForTimeout(800);
 const fan = await page.evaluate(() => [...document.querySelectorAll('section[aria-label^="Bienvenue"] img')].map(i => [i.getAttribute('src'), i.naturalWidth]));
 ok('cinq cartes de l’app : ' + fan.map(f => f[0].replace('img/onb/', '')).join(', '), fan.length === 5 && fan.every(f => /^img\/onb\/.+\.webp$/.test(f[0]) && f[1] > 100));
-ok('pas de « Passer » avant le compte', (await page.locator('button:has-text("Passer")').count()) === 0);
+ok('page 1 : ni « Passer » ni retour avant le compte', (await page.locator('button:has-text("Passer")').count()) === 0 && (await page.locator('button[aria-label="Page précédente"]').count()) === 0);
+ok('trois points de progression', (await page.locator('.pkm-onb-dot').count()) === 3);
 await page.screenshot({ path: shot('onb-1.png') });
-await page.click('button:has-text("Commencer l’aventure")'); await page.waitForTimeout(400);
+// Page 2 : compte, avec transition glissée.
+await page.click('button:has-text("Créer mon compte")'); await page.waitForTimeout(120);
+const tr = await page.evaluate(() => { const e = document.querySelector('.pkm-onb-page'); return e ? getComputedStyle(e).transform : ''; });
+ok('transition glissée vers la page 2 (' + tr + ')', /matrix/.test(tr) && tr !== 'none');
+await page.waitForTimeout(500);
 const form = page.locator('form[aria-label="Crée ton compte Dropicards"]');
-ok('création du compte (sans les questions du profil)', (await form.count()) === 1 && !(await page.locator('body').innerText()).includes('Faisons connaissance'));
+ok('page 2 : création du compte avec « Suivant »', (await form.count()) === 1 && (await form.locator('button[type=submit]:has-text("Suivant")').count()) === 1);
 await form.locator('input[name=email]').fill('pas-une-adresse');
 await form.locator('button[type=submit]').click(); await page.waitForTimeout(250);
 ok('adresse invalide refusée', /Adresse e-mail invalide/.test(await page.locator('.pkm-acc-err').innerText()));
@@ -27,19 +33,41 @@ ok('mot de passe trop court refusé', /au moins 12 caractères/.test(await page.
 ok('nouveautés décochées par défaut', !(await form.locator('input[name=news]').isChecked()));
 await form.locator('input[name=password]').fill('un-mot-de-passe-solide');
 await page.screenshot({ path: shot('onb-2-compte.png') });
-await form.locator('button[type=submit]').click(); await page.waitForTimeout(400);
-const nick = page.locator('form[aria-label="Ton pseudo de dresseur"]');
-ok('puis le pseudo de dresseur', (await nick.count()) === 1);
-await nick.locator('input[name=nickname]').fill('Sacha du Bourg'); await nick.locator('button[type=submit]').click(); await page.waitForTimeout(1500);
-const st = await page.evaluate(() => { const t = localStorage.getItem('pkm-collection-v1') || ''; const d = JSON.parse(t || '{}'); return { acc: d.account, tr: d.trainer, pwd: t.includes('solide') }; });
-ok('compte et pseudo gardés, mot de passe jamais enregistré (' + JSON.stringify(st.acc) + ')', st.acc && st.acc.email === 'sacha@exemple.fr' && st.acc.news === false && st.tr.name === 'Sacha du Bourg' && st.tr.email === 'sacha@exemple.fr' && !st.pwd);
+await form.locator('button[type=submit]').click(); await page.waitForTimeout(600);
+const f3 = page.locator('form[aria-label="Ton profil de dresseur"]');
+ok('page 3 : profil de dresseur', (await f3.count()) === 1);
+// Retour à la page 1 depuis la page 3, puis saisies gardées.
+await page.click('button[aria-label^="Présentation"]'); await page.waitForTimeout(600);
+ok('retour à la page 1 depuis la page 3', (await page.locator('button:has-text("Créer mon compte")').count()) === 1);
+await page.click('button:has-text("Créer mon compte")'); await page.waitForTimeout(600);
+ok('e-mail et mot de passe gardés au retour', (await form.locator('input[name=email]').inputValue()) === 'sacha@exemple.fr' && (await form.locator('input[name=password]').inputValue()).length === 22);
+await form.locator('button[type=submit]').click(); await page.waitForTimeout(600);
+await page.click('button[aria-label="Page précédente"]'); await page.waitForTimeout(600);
+ok('flèche retour : page 3 → page 2', (await form.count()) === 1);
+await form.locator('button[type=submit]').click(); await page.waitForTimeout(600);
+// Page 3 : sans choix, refus ; âge, pseudo, starter.
+ok('quatre starters', (await f3.locator('button[aria-label^="Découvrir"]').count()) === 4);
+await f3.locator('button:has-text("15 à 17 ans")').click(); await page.waitForTimeout(150);
+await f3.locator('input[name=nickname]').fill('Sacha du Bourg');
+await f3.locator('button[aria-label="Découvrir Carapuce"]').click(); await page.waitForTimeout(700);
+const focus = (await page.locator('.pkm-onb-focus').innerText()).replace(/\s+/g, ' ');
+ok('mise en avant de Carapuce : ' + focus.slice(0, 60) + '…', /Carapuce/.test(focus) && /Eau/.test(focus) && /carapace/.test(focus));
+await page.screenshot({ path: shot('onb-3-profil.png') });
+await page.click('button:has-text("Choisir Carapuce comme compagnon")'); await page.waitForTimeout(2500);
+const st = await page.evaluate(() => { const t = localStorage.getItem('pkm-collection-v1') || ''; const d = JSON.parse(t || '{}'); return { acc: d.account, tr: d.trainer, evo: d.evo, buddy: d.buddy, pwd: t.includes('solide') }; });
+ok('compte, âge et pseudo gardés, mot de passe jamais enregistré (' + JSON.stringify(st.acc) + ')', st.acc && st.acc.email === 'sacha@exemple.fr' && st.acc.news === false && st.acc.age === '15-17' && st.tr.name === 'Sacha du Bourg' && !st.pwd);
+ok('Carapuce devient le compagnon (buddy ' + st.buddy + ')', st.buddy === 7);
+const mascot = await page.locator('.pkm-tt-m0').getAttribute('src').catch(() => '');
+ok('le didacticiel démarre avec Carapuce (' + mascot + ')', (await page.locator('section.pkm-tuto-bubble').count()) === 1 && /\/7-/.test(mascot || ''));
+await page.screenshot({ path: shot('onb-4-tuto.png') });
 // Mon profil.
+await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); d.tuto = 'done'; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
 await page.goto(E2E + '/?start=profile', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 const prof = await page.locator('main').innerText();
 ok('Mon profil : pseudo, « Retour à la page d’accueil », sans « Ventes et marge »', /Sacha du Bourg/.test(prof) && /Retour à la page d’accueil/.test(prof) && !/Ventes et marge/.test(prof));
 await page.click('button:has-text("Retour à la page d’accueil")'); await page.waitForTimeout(600);
-ok('accueil revu : « Passer » présent, « Commencer l’aventure ! » ramène à l’app', (await page.locator('button:has-text("Passer")').count()) === 1);
-await page.click('button:has-text("Commencer l’aventure")'); await page.waitForTimeout(600);
+ok('accueil revu : « Passer » présent, « Continuer l’aventure » ramène à l’app', (await page.locator('button:has-text("Passer")').count()) === 1 && (await page.locator('button:has-text("Continuer l’aventure")').count()) === 1);
+await page.click('button:has-text("Continuer l’aventure")'); await page.waitForTimeout(600);
 ok('pas de second compte', (await page.locator('form[aria-label="Crée ton compte Dropicards"]').count()) === 0 && (await page.locator('section[aria-label^="Bienvenue"]').count()) === 0);
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');

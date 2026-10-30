@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-10-30 (suite 4) — Premier écran en 3 pages, starter choisi à l'inscription
+
+- **Demande du porteur** : un premier écran en 3 pages, avec retour possible et les mêmes transitions que dans l'app :
+  1. présentation et bouton « Créer mon compte » (à la place de « Commencer l'aventure ! ») ;
+  2. e-mail, mot de passe, bouton « Suivant » ;
+  3. âge, pseudo de dresseur, choix du compagnon parmi les 4 starters.
+  Le starter touché est mis en avant avec une courte description et « Choisir X comme compagnon » ; c'est lui qui fait le didacticiel.
+- **Fait** :
+  - flèche de retour et trois points (on revient à une page déjà vue, jamais en avant sans valider) ; e-mail et mot de passe gardés en mémoire pendant le retour ;
+  - transition glissée façon iOS entre les pages (aucune si les animations sont réduites) ;
+  - âge en trois choix (moins de 15 ans, 15 à 17 ans, 18 ans et plus) ; moins de 15 ans : pas d'e-mails de nouveautés ;
+  - le starter choisi devient compagnon et Pokémon du Pokédex, puis lance le didacticiel ; la question du starter du didacticiel n'est plus posée ;
+  - compte déjà créé (accueil revu depuis Mon profil) : « Continuer l'aventure » et « Passer ». Cache v87.
+- **Limite connue** : toujours **sur l'appareil seulement** (âge compris) en attendant le serveur ; le mot de passe n'est jamais enregistré.
+
 ## 2026-10-30 (suite 3) — Compte à la première ouverture, Pokédex mis en avant, méga-évolutions en pixel
 
 - **Demandes du porteur** :

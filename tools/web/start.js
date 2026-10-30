@@ -22,6 +22,14 @@
     { i: 1, left: '58px', top: '18px', rot: '-9deg' }, { i: 3, left: '170px', top: '18px', rot: '9deg' },
     { i: 2, left: '114px', top: '4px', rot: '0deg' }
   ];
+  // Tranches d'âge (en France, avant 15 ans, ce qui repose sur le consentement demande l'accord d'un parent).
+  const ST_AGES = [['u15', 'Moins de 15 ans'], ['15-17', '15 à 17 ans'], ['18+', '18 ans et plus']];
+  const ST_STARTER_TXT = {
+    bulbi: 'Calme et fidèle, il porte sur son dos une graine qui grandit avec lui. Parfait pour une aventure tout en douceur.',
+    sala: 'Courageux et plein d’énergie : la flamme au bout de sa queue montre sa force et son humeur.',
+    cara: 'Malin et joueur, il se protège dans sa carapace et ne lâche jamais rien.',
+    pika: 'Vif et curieux, il garde de l’électricité dans ses joues. Le compagnon le plus célèbre de tous !'
+  };
   const stBaseOnb = proto.vOnb;
   proto.vOnb = function (x) {
     const r = stBaseOnb.call(this, x);
@@ -36,21 +44,32 @@
       });
       if (fan.every(Boolean)) r.fan = fan;
     }
-    // Après « Commencer l'aventure ! » (2026-10-30, porteur) : plus de questions sur le profil ; création du compte
-    // (e-mail et mot de passe), puis pseudo de dresseur. Les comptes Dropicards n'existent pas encore côté serveur
-    // (docs/17, en attente de « go ») : l'adresse, le choix des nouveautés et le pseudo sont gardés sur l'appareil
-    // (account, trainer) ; le mot de passe n'est jamais enregistré par l'app (le trousseau du téléphone peut le garder).
-    const s = x.s, acc = s.account && s.account.email ? s.account : null, tr = s.trainer || {};
+    // Accueil en trois pages (2026-10-30, porteur) : 1. présentation et « Créer mon compte » ; 2. e-mail et mot de passe,
+    // « Suivant » ; 3. âge, pseudo de dresseur et choix du compagnon de voyage parmi les quatre starters (un appui le met
+    // en avant avec une brève description et « Choisir … comme compagnon ») ; ce starter fait ensuite le didacticiel.
+    // Retour possible à tout moment (flèche, points), transitions glissées comme entre les pages de l'app.
+    // Les comptes Dropicards n'existent pas encore côté serveur (docs/17, en attente de « go ») : l'adresse, l'âge, le
+    // choix des nouveautés et le pseudo sont gardés sur l'appareil (account, trainer) ; le mot de passe ne reste qu'en
+    // mémoire le temps des pages et n'est jamais enregistré par l'app (le trousseau du téléphone peut le garder).
+    const s = x.s, acc = s.account && s.account.email ? s.account : null, tr = s.trainer || {}, page = s.onb || 1;
     const ST_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    r.next1 = () => { if (acc) this.finishOnb(false); else this.setState({ onb: 2, obErr: '' }); };
+    const go = n => this.setState({ onb: n, obErr: '' });
+    r.cta = acc ? 'Continuer l’aventure' : 'Créer mon compte';
+    r.next1 = () => { if (acc) this.finishOnb(false); else go(2); };
     r.canSkip = !!acc;
-    r.dots = [1, 2, 3].map(n => ({ w: n === s.onb ? '22px' : '8px', bg: n <= s.onb ? 'var(--pkm-accent)' : '#2A3A5C' }));
+    r.canBack = page > 1;
+    r.back = () => go(Math.max(1, page - 1));
+    r.dots = [1, 2, 3].map(n => ({
+      cls: 'pkm-onb-dot' + (n === page ? ' pkm-onb-dot-on' : n < page ? ' pkm-onb-dot-done' : ''), cur: n === page ? 'step' : 'false',
+      off: n > page ? 'true' : 'false', label: ['Présentation', 'Compte', 'Profil de dresseur'][n - 1] + ' (page ' + n + ' sur 3)',
+      go: () => { if (n < page) go(n); }
+    }));
     const err = s.obErr || '';
     r.acc = {
       email: s.obEmail !== undefined ? s.obEmail : (tr.email || ''), pwd: s.obPwd || '', news: !!s.obNews,
       shown: s.obShow ? 'true' : 'false', pwType: s.obShow ? 'text' : 'password', eye: s.obShow ? 'Masquer' : 'Afficher',
       emailBad: /e-mail/.test(err) ? 'true' : 'false', pwdBad: /mot de passe/.test(err) ? 'true' : 'false',
-      err: err, hasErr: !!err && s.onb === 2,
+      err: err, hasErr: !!err && page === 2,
       note: 'Ton adresse sert à te connecter et, seulement si tu le coches, à recevoir nos nouveautés. Tu peux te désinscrire à tout moment.',
       onEmail: e => this.setState({ obEmail: String(e.target.value || '').trim() }),
       onPwd: e => this.setState({ obPwd: String(e.target.value || '') }),
@@ -63,22 +82,69 @@
         const news = f && f.news ? !!f.news.checked : !!t.obNews;
         if (!ST_MAIL.test(email)) { this.setState({ obEmail: email, obErr: 'Adresse e-mail invalide : vérifie-la (exemple : sacha@exemple.fr).' }); return; }
         if (pwd.length < 12) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
-        this.setState({ account: { email: email, news: news, at: realToday(), server: false }, trainer: Object.assign({}, t.trainer || {}, { email: email }),
-          obEmail: undefined, obPwd: '', obShow: false, obNews: false, obErr: '', onb: 3 });
+        // Le mot de passe reste en mémoire (jamais enregistré) pour pouvoir revenir à cette page.
+        this.setState({ obEmail: email, obPwd: pwd, obNews: news, obErr: '', onb: 3 });
       }
     };
-    r.nick = {
-      value: s.obNick !== undefined ? s.obNick : (tr.name || ''), bad: /pseudo/.test(err) ? 'true' : 'false', err: err, hasErr: !!err && s.onb === 3,
-      onInput: e => this.setState({ obNick: String(e.target.value || '').slice(0, 24) }),
+    const still = (() => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e2) { return false; } })();
+    const age = s.obAge || '', kid = age === 'u15', sel = s.obStarter || '', selN = sel ? PA_LINES[sel][0] : 0, E = selN ? DEX[selN] : null;
+    const name = E ? E.name : '';
+    r.p3 = {
+      ages: ST_AGES.map(([k, label]) => ({ label: label, on: age === k ? 'true' : 'false', cls: 'pkm-onb-chip' + (age === k ? ' pkm-onb-chip-on' : ''), pick: () => this.setState({ obAge: k, obErr: '' }) })),
+      kid: kid, nick: s.obNick !== undefined ? s.obNick : (tr.name || ''), nickBad: /pseudo/.test(err) ? 'true' : 'false',
+      onNick: e => this.setState({ obNick: String(e.target.value || '').slice(0, 24) }),
+      starters: PA_STARTERS.map(([line, n]) => ({
+        name: DEX[n].name, img: 'img/pokemon/' + n + (still ? '.png' : '.gif'), h: still ? '72px' : Math.round(56 * Math.min(1.25, DEX[n].gif[1] / 44)) + 'px',
+        on: sel === line ? 'true' : 'false', aria: 'Découvrir ' + DEX[n].name, cls: 'pkm-onb-st' + (sel === line ? ' pkm-onb-st-on' : ''),
+        pick: () => { this.setState({ obStarter: line, obErr: '' }); setTimeout(() => { const el = document.querySelector('.pkm-onb-focus'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' }); }, 60); }
+      })),
+      hasSel: !!E, noSel: !E, selKey: 'st-' + sel, selName: name, selImg: E ? 'img/pokemon/' + selN + (still ? '.png' : '.gif') : '',
+      selH: E && !still ? Math.round(96 * Math.min(1.2, E.gif[1] / 46)) + 'px' : '104px',
+      selTypes: E ? E.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })) : [],
+      selDesc: ST_STARTER_TXT[sel] || '', go: 'Choisir ' + name + ' comme compagnon',
+      err: err, hasErr: !!err && page === 3,
       submit: e => {
         if (e && e.preventDefault) e.preventDefault();
         const f = e && e.target && e.target.elements, t = this.st();
-        const name = String(f && f.nickname ? f.nickname.value : t.obNick || '').replace(/\s+/g, ' ').trim().slice(0, 24);
-        if (name.length < 2) { this.setState({ obNick: name, obErr: 'Choisis un pseudo de 2 à 24 caractères.' }); return; }
-        this.setState({ trainer: Object.assign({}, t.trainer || {}, { name: name }), obNick: undefined, obErr: '', toast: 'Bienvenue, ' + name + ' !' });
+        const nick = String(f && f.nickname ? f.nickname.value : t.obNick || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+        if (!t.obAge) { this.setState({ obNick: nick, obErr: 'Indique ton âge.' }); return; }
+        if (nick.length < 2) { this.setState({ obNick: nick, obErr: 'Choisis un pseudo de 2 à 24 caractères.' }); return; }
+        if (!t.obStarter || !PA_LINES[t.obStarter]) { this.setState({ obNick: nick, obErr: 'Choisis ton compagnon de voyage.' }); return; }
+        const line = t.obStarter, under = t.obAge === 'u15';
+        this.setState({
+          account: { email: t.obEmail, news: !!t.obNews && !under, age: t.obAge, at: realToday(), server: false },
+          trainer: Object.assign({}, t.trainer || {}, { email: t.obEmail, name: nick }),
+          obEmail: undefined, obPwd: '', obShow: false, obNews: false, obNick: undefined, obAge: '', obStarter: '', obErr: ''
+        });
         this.finishOnb(false);
+        // Le starter choisi devient le compagnon et présente l'app (didacticiel, tuto.js).
+        this.tutoStartWith(line);
       }
     };
+    return r;
+  };
+
+  // Transition entre les pages de l'accueil (2026-10-30, porteur : « les mêmes transitions que l'app ») : la nouvelle
+  // page glisse depuis la droite en avançant, depuis la gauche en revenant (courbe d'iOS, comme nav.js), en pixels.
+  let stOnbPage = 0;
+  const stOnbSlide = (from, to) => {
+    const sec = document.querySelector('section[aria-label^="Bienvenue"]');
+    if (sec) sec.scrollTop = 0;
+    const el = sec && sec.querySelector('.pkm-onb-page');
+    if (!el || !el.animate) return;
+    try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) { /* rien */ }
+    const w = el.getBoundingClientRect().width || 360, fwd = to > from;
+    el.animate([{ transform: 'translateX(' + Math.round(fwd ? w : -0.3 * w) + 'px)', opacity: fwd ? 1 : 0.4 }, { transform: 'none', opacity: 1 }],
+      { duration: 420, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
+  };
+  const stBaseRender = proto.renderVals;
+  proto.renderVals = function () {
+    const r = stBaseRender.call(this), p = this.st().onb || 0;
+    if (p !== stOnbPage) {
+      const from = stOnbPage;
+      stOnbPage = p;
+      if (p > 0 && from > 0) requestAnimationFrame(() => requestAnimationFrame(() => stOnbSlide(from, p)));
+    }
     return r;
   };
 
