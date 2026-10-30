@@ -25,7 +25,7 @@
     const out = [];
     if (ntOn(s, 'pa')) {
       const n = paPending(s);
-      if (n) out.push({ key: 'pa', cycle: realToday(), title: 'Tes PA du jour t’attendent', text: '+' + n.gain + ' PA à récupérer dans Dropicards' });
+      if (n) out.push({ key: 'pa', cycle: realToday(), title: 'PA dispo aujourd’hui', text: '+' + n.gain + ' PA à récupérer dans Dropicards' });
     }
     const g = s.games || {}, P = this.perks();
     if (ntOn(s, 'booster') && g.boosterAt && gmWait(g.boosterAt, gmBoosterMs(this)) === 0)

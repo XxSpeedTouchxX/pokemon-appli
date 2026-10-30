@@ -36,6 +36,49 @@
       });
       if (fan.every(Boolean)) r.fan = fan;
     }
+    // Après « Commencer l'aventure ! » (2026-10-30, porteur) : plus de questions sur le profil ; création du compte
+    // (e-mail et mot de passe), puis pseudo de dresseur. Les comptes Dropicards n'existent pas encore côté serveur
+    // (docs/17, en attente de « go ») : l'adresse, le choix des nouveautés et le pseudo sont gardés sur l'appareil
+    // (account, trainer) ; le mot de passe n'est jamais enregistré par l'app (le trousseau du téléphone peut le garder).
+    const s = x.s, acc = s.account && s.account.email ? s.account : null, tr = s.trainer || {};
+    const ST_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    r.next1 = () => { if (acc) this.finishOnb(false); else this.setState({ onb: 2, obErr: '' }); };
+    r.canSkip = !!acc;
+    r.dots = [1, 2, 3].map(n => ({ w: n === s.onb ? '22px' : '8px', bg: n <= s.onb ? 'var(--pkm-accent)' : '#2A3A5C' }));
+    const err = s.obErr || '';
+    r.acc = {
+      email: s.obEmail !== undefined ? s.obEmail : (tr.email || ''), pwd: s.obPwd || '', news: !!s.obNews,
+      shown: s.obShow ? 'true' : 'false', pwType: s.obShow ? 'text' : 'password', eye: s.obShow ? 'Masquer' : 'Afficher',
+      emailBad: /e-mail/.test(err) ? 'true' : 'false', pwdBad: /mot de passe/.test(err) ? 'true' : 'false',
+      err: err, hasErr: !!err && s.onb === 2,
+      note: 'Ton adresse sert à te connecter et, seulement si tu le coches, à recevoir nos nouveautés. Tu peux te désinscrire à tout moment.',
+      onEmail: e => this.setState({ obEmail: String(e.target.value || '').trim() }),
+      onPwd: e => this.setState({ obPwd: String(e.target.value || '') }),
+      onNews: e => this.setState({ obNews: !!e.target.checked }),
+      toggle: () => this.setState({ obShow: !this.st().obShow }),
+      submit: e => {
+        if (e && e.preventDefault) e.preventDefault();
+        const f = e && e.target && e.target.elements, t = this.st();
+        const email = String(f && f.email ? f.email.value : t.obEmail || '').trim().toLowerCase(), pwd = String(f && f.password ? f.password.value : t.obPwd || '');
+        const news = f && f.news ? !!f.news.checked : !!t.obNews;
+        if (!ST_MAIL.test(email)) { this.setState({ obEmail: email, obErr: 'Adresse e-mail invalide : vérifie-la (exemple : sacha@exemple.fr).' }); return; }
+        if (pwd.length < 12) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
+        this.setState({ account: { email: email, news: news, at: realToday(), server: false }, trainer: Object.assign({}, t.trainer || {}, { email: email }),
+          obEmail: undefined, obPwd: '', obShow: false, obNews: false, obErr: '', onb: 3 });
+      }
+    };
+    r.nick = {
+      value: s.obNick !== undefined ? s.obNick : (tr.name || ''), bad: /pseudo/.test(err) ? 'true' : 'false', err: err, hasErr: !!err && s.onb === 3,
+      onInput: e => this.setState({ obNick: String(e.target.value || '').slice(0, 24) }),
+      submit: e => {
+        if (e && e.preventDefault) e.preventDefault();
+        const f = e && e.target && e.target.elements, t = this.st();
+        const name = String(f && f.nickname ? f.nickname.value : t.obNick || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+        if (name.length < 2) { this.setState({ obNick: name, obErr: 'Choisis un pseudo de 2 à 24 caractères.' }); return; }
+        this.setState({ trainer: Object.assign({}, t.trainer || {}, { name: name }), obNick: undefined, obErr: '', toast: 'Bienvenue, ' + name + ' !' });
+        this.finishOnb(false);
+      }
+    };
     return r;
   };
 

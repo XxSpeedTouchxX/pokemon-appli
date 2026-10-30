@@ -64,7 +64,7 @@ await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.w
   ok('PA du jour : le message d’invitation s’efface seul (4 s après l’ouverture)', (await paToast.count()) === 0);
   // Pour la suite : PA récupérés depuis l'en-tête (« Récupérer mes PA » efface le message, puis « +10 PA » s'efface).
   await pill.click(); await page.waitForTimeout(500);
-  await page.locator('section[aria-label="Tes PA du jour"] .pkm-pa-claim-btn').click(); await page.waitForTimeout(5000);
+  await page.locator('section[aria-label="PA dispo aujourd’hui"] .pkm-pa-claim-btn').click(); await page.waitForTimeout(5000);
   ok('PA du jour récupérés : plus de « 1 » ni de message', (await pill.locator('.pkm-pa-dot').count()) === 0 && (await paToast.count()) === 0);
 }
 await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'dracaufeu'); await page.waitForTimeout(800);

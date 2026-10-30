@@ -64,7 +64,7 @@
       if (!comp.st().paClaim) { document.removeEventListener('keydown', key); return; }
       if (ev.key === 'Escape') { comp.setState({ paClaim: false }); document.removeEventListener('keydown', key); const p = document.querySelector('header .pkm-pa-head'); if (p) p.focus(); }
       if (ev.key === 'Tab') {
-        const els = [...document.querySelectorAll('section[aria-label="Tes PA du jour"] button')];
+        const els = [...document.querySelectorAll('section[aria-label="PA dispo aujourd’hui"] button')];
         if (!els.length) return;
         const i = els.indexOf(document.activeElement), j = ev.shiftKey ? (i <= 0 ? els.length - 1 : i - 1) : (i + 1) % els.length;
         ev.preventDefault(); els[j].focus();

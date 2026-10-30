@@ -526,3 +526,19 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-nt-on i { transform: translateX(20px); }
 .pkm-nt-row:focus-visible { outline: 3px solid var(--pkm-accent); outline-offset: 2px; border-radius: 12px; }
 @media (prefers-reduced-motion: reduce) { .pkm-nt-sw, .pkm-nt-sw i { transition: none; } }
+
+/* Création du compte et pseudo à la première ouverture (start.js, 2026-10-30, demande du porteur). */
+.pkm-acc { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 8px 20px 24px; margin: 0; }
+.pkm-acc-h { margin: 6px 0 0; font-family: 'Sora', sans-serif; font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.03em; }
+.pkm-acc-p { margin: -4px 0 6px; font-size: 14.5px; line-height: 1.5; color: var(--pkm-t2); }
+.pkm-acc-l { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; font-weight: 700; color: var(--pkm-t1); }
+.pkm-acc-pw { position: relative; display: block; }
+.pkm-acc-pw .pkm-tr-in { padding-right: 96px; }
+.pkm-acc-eye { position: absolute; right: 4px; top: 50%; translate: 0 -50%; min-width: 44px; height: 38px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: #B9C5FF; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.pkm-acc-hint { margin-top: -4px; font-size: 12.5px; line-height: 1.45; color: var(--pkm-t2); }
+.pkm-acc-news { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; font-size: 13.5px; line-height: 1.4; color: var(--pkm-t1); cursor: pointer; }
+.pkm-acc-news input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--pkm-accent); }
+.pkm-acc-err { margin: 0; padding: 10px 12px; border-radius: 12px; background: #FFE9E6; border: 1px solid #C21807; color: #8A1406; font-size: 13.5px; font-weight: 600; }
+.pkm-acc-go { height: 54px; margin-top: 4px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
+.pkm-acc-note { margin: 0; font-size: 12px; line-height: 1.5; color: var(--pkm-t2); }
+.pkm-tr-in[aria-invalid="true"] { border-color: #C21807; }

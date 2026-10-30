@@ -49,6 +49,22 @@ patch('PKM compare Cardmarket, eBay et TCGplayer et te donne une cote claire, av
 // démo » (Réglages › « Remettre la démo » reste) ; nouveau titre.
 patch('cursor: pointer">Commencer</button>', 'cursor: pointer">Commencer l’aventure\u202f!</button>');
 patch('text-align: center">La vraie valeur de ta collection Pokémon</h1>', 'text-align: center">Viens découvrir toutes les fonctionnalités de Dropicards</h1>');
+// « Passer » seulement quand le compte existe déjà (accueil revu depuis le profil).
+{
+  const re = /(<button type="button" onClick="\{\{ ob\.skip \}\}"[^>]*>Passer<\/button>)/;
+  if (!re.test(tpl)) throw new Error('Bouton « Passer » du premier écran introuvable');
+  tpl = tpl.replace(re, m => '<sc-if value="{{ ob.canSkip }}" hint-placeholder-val="{{ false }}">' + m + '</sc-if>');
+}
+// Profil (2026-10-30, porteur) : « Revoir l'accueil » devient « Retour à la page d'accueil » ; rubrique « Ventes et
+// marge » retirée du menu du profil.
+patch('<span style="font-weight: 600">Revoir l’accueil</span><span style="font-size: 12.5px; color: #9AA8C3">Les 2 questions qui anticipent ton profil</span>',
+  '<span style="font-weight: 600">Retour à la page d’accueil</span><span style="font-size: 12.5px; color: #9AA8C3">Revoir l’écran de bienvenue de Dropicards</span>');
+patch('cursor: pointer">Revoir l’accueil</button>', 'cursor: pointer">Retour à la page d’accueil</button>');
+{
+  const re = /<button type="button" onClick="\{\{ goSales \}\}" style="display: flex; align-items: center; gap: 12px; min-height: 60px;[^>]*>(?:(?!<\/button>)[\s\S])*?>Ventes et marge<[\s\S]*?<\/button>\n/;
+  if (!re.test(tpl)) throw new Error('Rubrique « Ventes et marge » du profil introuvable');
+  tpl = tpl.replace(re, '');
+}
 // Éventail de cinq cartes (start.js) : cadre élargi à 320 px.
 patch('<div aria-hidden="true" style="position: relative; align-self: center; width: 262px; height: 232px">',
   '<div aria-hidden="true" style="position: relative; align-self: center; width: 320px; max-width: 100%; height: 200px">');
@@ -114,6 +130,16 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
   const b = tpl.indexOf(endMark, a);
   if (a < 0 || b < 0) throw new Error('Description du premier écran introuvable');
   tpl = tpl.slice(0, a) + FRAG['onb-points'].trim() + tpl.slice(b + endMark.length);
+}
+// Après « Commencer l'aventure ! » (2026-10-30, porteur) : les deux écrans de questions (profil anticipé, ce qu'on a
+// préparé) sont remplacés par la création du compte, puis le pseudo de dresseur (start.js, fragment onb-account).
+{
+  const a = tpl.indexOf('<sc-if value="{{ ob.is2 }}" hint-placeholder-val="{{ false }}">');
+  const i3 = tpl.indexOf('<sc-if value="{{ ob.is3 }}" hint-placeholder-val="{{ false }}">', a);
+  const endMark = '</sc-if>\n</section>';
+  const b = tpl.indexOf(endMark, i3);
+  if (a < 0 || i3 < 0 || b < 0) throw new Error('Étapes 2 et 3 du premier écran introuvables');
+  tpl = tpl.slice(0, a) + FRAG['onb-account'].trim() + '\n' + tpl.slice(b + '</sc-if>\n'.length);
 }
 // Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de la photo ouvre la photothèque
 // (input caché) ; rubrique « Informations du dresseur » sous l'identité.
@@ -286,7 +312,7 @@ patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{
 // Didacticiel (tuto.js, 2026-10-25) : question à la première installation, choix du starter, visite en 7 bulles.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['tuto'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Profil : « Revoir le didacticiel », sous « Revoir l'accueil ».
-patchRe(/(<span style="font-weight: 600">Revoir l’accueil<\/span>[\s\S]*?<\/button>)/, m => m + '\n<button type="button" onClick="{{ tu.replay }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer"><img src="img/brand/pa.svg" alt="" width="24" height="24" style="flex: none; display: block; width: 24px; height: 24px"><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Revoir le didacticiel</span><span style="font-size: 12.5px; color: #9AA8C3">45 secondes avec ton starter</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></button>');
+patchRe(/(<span style="font-weight: 600">Retour à la page d’accueil<\/span>[\s\S]*?<\/button>)/, m => m + '\n<button type="button" onClick="{{ tu.replay }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer"><img src="img/brand/pa.svg" alt="" width="24" height="24" style="flex: none; display: block; width: 24px; height: 24px"><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Revoir le didacticiel</span><span style="font-size: 12.5px; color: #9AA8C3">45 secondes avec ton starter</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></button>');
 // Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».

@@ -12,7 +12,7 @@ const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.messag
 const saved = () => page.evaluate(k => { const s = JSON.parse(localStorage.getItem(k) || '{}'); return { pa: s.pa || 0, streak: s.paStreak || 0, day: s.paDay || '' }; }, KEY);
 const pill = page.locator('header button[aria-label^="Mes points d’Aura"]').first();
 const dot = pill.locator('.pkm-pa-dot');
-const sheet = page.locator('section[aria-label="Tes PA du jour"]');
+const sheet = page.locator('section[aria-label="PA dispo aujourd’hui"]');
 // Didacticiel déjà vu (il couvrirait l'en-tête).
 await page.goto(E2E + '/?today=2026-10-31', { waitUntil: 'load' }); await page.waitForTimeout(900);
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); d.tuto = 'done'; d.onb = 0; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
@@ -29,7 +29,7 @@ const day = async d => {
 const a = await day('2026-11-01');
 ok('ouverture : rien de crédité, pastille « 1 » (« ! » jusqu’au 2026-10-29) (' + a.before.pa + ' PA)', a.before.pa === 0 && a.dotOn);
 ok('en-tête : « 10 PA à récupérer » (' + a.aria + ')', /10 PA à récupérer/.test(a.aria || ''));
-ok('appui sur le solde : « Tes PA du jour »', a.open);
+ok('appui sur le solde : « PA dispo aujourd’hui »', a.open);
 ok('1er jour récupéré : +10 PA (' + a.pa + ', série ' + a.streak + ')', a.pa === 10 && a.streak === 1 && a.day === '2026-11-01');
 ok('après récupération : fenêtre fermée, pastille retirée', a.closed && a.dotAfter === 0);
 const b = await day('2026-11-02'); ok('2e jour d’affilée : +15 PA (' + b.pa + ')', b.before.pa === 10 && b.dotOn && b.pa === 25 && b.streak === 2);

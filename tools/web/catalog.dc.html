@@ -747,9 +747,9 @@
 <sc-if value="{{ pk.claim.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-pa-claim-wrap">
 <button type="button" aria-label="Fermer" onClick="{{ pk.claim.close }}" class="pkm-pa-claim-scrim"></button>
-<section aria-label="Tes PA du jour" role="dialog" aria-modal="true" class="pkm-dark pkm-pa-claim">
+<section aria-label="PA dispo aujourd’hui" role="dialog" aria-modal="true" class="pkm-dark pkm-pa-claim">
 <img src="{{ pk.claim.drop }}" alt="" width="96" height="96" class="pkm-pa-claim-logo">
-<h2>Tes PA du jour</h2>
+<h2>PA dispo aujourd’hui</h2>
 <b class="pkm-pa-claim-gain">{{ pk.claim.gain }}</b>
 <span class="pkm-pa-claim-streak">{{ pk.claim.streak }}</span>
 <button type="button" onClick="{{ pk.claim.go }}" class="pkm-pa-claim-btn">Récupérer mes PA</button>
@@ -2061,4 +2061,35 @@ PKCOUNTER
 </div>
 <sc-if value="{{ hf.more }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ hf.loadMore }}" class="pkm-hf-more">{{ hf.moreLabel }}</button></sc-if>
 </section>
+</sc-if>
+
+<!-- fragment: onb-account -->
+<sc-if value="{{ ob.is2 }}" hint-placeholder-val="{{ false }}">
+<form class="pkm-acc" aria-label="Crée ton compte Dropicards" onSubmit="{{ ob.acc.submit }}" novalidate="novalidate">
+<h1 class="pkm-acc-h">Crée ton compte Dropicards</h1>
+<p class="pkm-acc-p">Pour retrouver ta collection et te connecter chaque jour.</p>
+<label class="pkm-acc-l">Adresse e-mail
+<input class="pkm-tr-in" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="Ex. : sacha@exemple.fr" value="{{ ob.acc.email }}" onChange="{{ ob.acc.onEmail }}" aria-invalid="{{ ob.acc.emailBad }}">
+</label>
+<label class="pkm-acc-l">Mot de passe
+<span class="pkm-acc-pw"><input class="pkm-tr-in" type="{{ ob.acc.pwType }}" name="password" autocomplete="new-password" placeholder="12 caractères au moins" value="{{ ob.acc.pwd }}" onChange="{{ ob.acc.onPwd }}" aria-invalid="{{ ob.acc.pwdBad }}"><button type="button" class="pkm-acc-eye" onClick="{{ ob.acc.toggle }}" aria-pressed="{{ ob.acc.shown }}">{{ ob.acc.eye }}</button></span>
+</label>
+<span class="pkm-acc-hint">12 caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.</span>
+<label class="pkm-acc-news"><input type="checkbox" name="news" checked="{{ ob.acc.news }}" onChange="{{ ob.acc.onNews }}"><span>Recevoir les nouveautés et bons plans Dropicards par e-mail (facultatif)</span></label>
+<sc-if value="{{ ob.acc.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.acc.err }}</p></sc-if>
+<button type="submit" class="pkm-acc-go">Créer mon compte</button>
+<p class="pkm-acc-note">{{ ob.acc.note }}</p>
+</form>
+</sc-if>
+<sc-if value="{{ ob.is3 }}" hint-placeholder-val="{{ false }}">
+<form class="pkm-acc" aria-label="Ton pseudo de dresseur" onSubmit="{{ ob.nick.submit }}" novalidate="novalidate">
+<h1 class="pkm-acc-h">Choisis ton pseudo de dresseur</h1>
+<p class="pkm-acc-p">C’est le nom qui t’identifie dans l’app, dans Mon profil.</p>
+<label class="pkm-acc-l">Pseudo de dresseur
+<input class="pkm-tr-in" type="text" name="nickname" autocomplete="nickname" maxlength="24" placeholder="Ex. : Sacha du Bourg" value="{{ ob.nick.value }}" onChange="{{ ob.nick.onInput }}" aria-invalid="{{ ob.nick.bad }}">
+</label>
+<span class="pkm-acc-hint">2 à 24 caractères. Tu pourras le changer dans Mon profil.</span>
+<sc-if value="{{ ob.nick.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.nick.err }}</p></sc-if>
+<button type="submit" class="pkm-acc-go">C’est parti !</button>
+</form>
 </sc-if>
