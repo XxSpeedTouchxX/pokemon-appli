@@ -51,7 +51,9 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
     sp.textContent = t; tile.style.width = keep; return out;
   });
   ok('carte de 79 px (écran de 320 px), « 12 345 € · NM » : ' + narrow.slice(0, 2).join(' × ') + ' px, une ligne, rien de coupé', narrow[0] <= 79 && narrow[2] && narrow[3]);
-  ok('note de gradation sur Mewtwo : ' + await page.locator(TILE).first().locator('span', { hasText: 'PCA 9,5' }).count(), (await page.locator(TILE).first().locator('span', { hasText: 'PCA 9,5' }).count()) === 1);
+  // Carte gradée (2026-11-01) : logo de l'entreprise et note, plus « PCA 9,5 » en texte.
+  const gb = page.locator(TILE).first().locator('.pkm-gr-badge');
+  ok('note de gradation sur Mewtwo : logo PCA et « ' + (await gb.locator('b').innerText().catch(() => '')) + ' »', (await gb.count()) === 1 && (await gb.locator('b').innerText()) === '9,5' && /pca\.png$/.test(await gb.locator('img').getAttribute('src')));
   ok('6 cartes : une seule page, sans flèches', (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0);
   await page.locator(SEC).evaluate(e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(800);
   await page.screenshot({ path: shot('binder-cartes.png') });
