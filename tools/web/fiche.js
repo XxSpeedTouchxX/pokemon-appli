@@ -108,20 +108,38 @@
   };
   const fiDay = d => { const t = new Date(Date.parse(d)); return t.getUTCDate() + ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][t.getUTCMonth()]; };
   const fiMoney = v => (v >= 100 ? Math.round(v).toLocaleString('fr-FR') : (Math.round(v * 100) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })) + ' €';
-  // Courbe lissée sans dépassement (monotone, Fritsch-Carlson) passant par chaque point.
-  const fiSmooth = P => {
-    const n = P.length;
-    if (n < 3) return 'M' + P.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L');
-    const dx = [], m = [], t = [];
+  // Courbe lissée sans dépassement (monotone, Fritsch-Carlson) passant par chaque point : pentes, tracé et échantillons.
+  const fiSlopes = P => {
+    const n = P.length, dx = [], m = [], t = [];
     for (let i = 0; i < n - 1; i++) { dx[i] = P[i + 1][0] - P[i][0] || 1e-6; m[i] = (P[i + 1][1] - P[i][1]) / dx[i]; }
     t[0] = m[0]; t[n - 1] = m[n - 2];
     for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : 3 * (dx[i - 1] + dx[i]) / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+    return { dx: dx, t: t };
+  };
+  const fiSmooth = P => {
+    const n = P.length;
+    if (n < 3) return 'M' + P.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L');
+    const { dx, t } = fiSlopes(P);
     let d = 'M' + P[0][0].toFixed(1) + ' ' + P[0][1].toFixed(1);
     for (let i = 0; i < n - 1; i++) {
       const h = dx[i] / 3;
       d += ' C' + (P[i][0] + h).toFixed(1) + ' ' + (P[i][1] + t[i] * h).toFixed(1) + ' ' + (P[i + 1][0] - h).toFixed(1) + ' ' + (P[i + 1][1] - t[i + 1] * h).toFixed(1) + ' ' + P[i + 1][0].toFixed(1) + ' ' + P[i + 1][1].toFixed(1);
     }
     return d;
+  };
+  // Hauteur de la courbe lissée en FI_N abscisses régulières (0 → FI_W) : base du glissement d'une période à l'autre.
+  const FI_N = 72;
+  const fiSample = P => {
+    const n = P.length, sl = n > 2 ? fiSlopes(P) : null, out = [];
+    for (let i = 0, j = 0; i < FI_N; i++) {
+      const xx = i / (FI_N - 1) * FI_W;
+      while (j < n - 2 && P[j + 1][0] < xx) j++;
+      const a = P[j], b = P[Math.min(j + 1, n - 1)], h = b[0] - a[0], u = h > 0 ? Math.max(0, Math.min(1, (xx - a[0]) / h)) : 0;
+      if (!sl) { out.push(a[1] + (b[1] - a[1]) * u); continue; }
+      const u2 = u * u, u3 = u2 * u;
+      out.push((2 * u3 - 3 * u2 + 1) * a[1] + (u3 - 2 * u2 + u) * h * sl.t[j] + (-2 * u3 + 3 * u2) * b[1] + (u3 - u2) * h * sl.t[j + 1]);
+    }
+    return out;
   };
   // Historique façon photo : valeur, variation sur la période, axe des montants, dates, ligne du prix d'achat.
   // f : coefficient de l'état des exemplaires possédés (la courbe suit alors la valeur affichée en haut de la fiche).
@@ -138,11 +156,13 @@
     const lo = T[0], hi = T[T.length - 1], y = v => FI_H - (v - lo) / (hi - lo || 1) * FI_H;
     const t0 = Date.parse(pts[0].d), t1 = Date.parse(end), X = d2 => (t1 > t0 ? (Date.parse(d2) - t0) / (t1 - t0) : 1) * FI_W;
     const XY = pts.map((q, i) => [X(q.d), y(V[i])]), line = fiSmooth(XY), col = x.col(d);
+    const key = p.id + '|' + per + '|' + line + '|' + buy;
     const mid = pts[Math.floor((pts.length - 1) / 2)].d;
     const xl = [[pts[0].d, 0], [mid, X(mid) / FI_W * 100], [end, 100]].filter((q, i, all) => i !== 1 || (q[1] > 22 && q[1] < 78 && q[0] !== all[0][0]));
     const label = x.mask(this.signed(d)) + ' (' + this.chg(pct) + ') · ' + P[2];
     return {
       has: true, loading: false, ready: true, line: line, area: line + ' L' + FI_W + ' ' + FI_H + ' L0 ' + FI_H + ' Z', color: col,
+      fx: { id: p.id, key: key, line: line, samp: fiSample(XY), buyY: showBuy ? y(buy) : null },
       value: x.mask(this.eur(last)), change: label, w: FI_W, h: FI_H,
       dotX: (XY[XY.length - 1][0] / FI_W * 100).toFixed(2) + '%', dotY: (XY[XY.length - 1][1] / FI_H * 100).toFixed(2) + '%',
       yl: T.map(t => ({ label: x.s.masked ? '•••' : fiMoney(t), top: (y(t) / FI_H * 100).toFixed(2) + '%' })),
@@ -161,20 +181,26 @@
   // vidéo ; PCA, CCC et PSA uniquement) ———
   // Aucune source ouverte des ventes de cartes gradées : chaque note est une estimation Dropicards, cote Cardmarket
   // (Near Mint) × coefficient de la note, signalée « ≈ … · estimation ». Coefficients proposés, à valider par le porteur.
+  // 2026-11-01 (porteur) : logo de chaque entreprise ; notes 10 à 6, une nuance par note (10 or, 9,5 vert très foncé,
+  // 9 vert foncé, 8 vert, 7 vert-jaune, 6 jaune-orangé) ; chez CCC, 10 Black Label (note parfaite) et 10 Gold Label
+  // (« Pristine », une imperfection), en plus du 10. PSA n'a pas de 9,5. Notes 8,5 retirées.
   const FI_GRADERS = [
-    ['PCA', [['10', 2.6], ['9.5', 1.9], ['9', 1.45], ['8.5', 1.25], ['8', 1.12]]],
-    ['CCC', [['10', 2.8], ['9.5', 2.0], ['9', 1.5], ['8.5', 1.28], ['8', 1.15]]],
-    ['PSA', [['10', 3.5], ['9', 1.6], ['8.5', 1.35], ['8', 1.2]]]
+    ['PCA', 'img/grading/pca.png', [['10', 2.6], ['9.5', 1.9], ['9', 1.45], ['8', 1.12], ['7', 0.85], ['6', 0.7]]],
+    ['CCC', 'img/grading/ccc.svg', [['10', 6, 'Black Label'], ['10', 4, 'Gold Label'], ['10', 2.8], ['9.5', 2.0], ['9', 1.5], ['8', 1.15], ['7', 0.9], ['6', 0.72]]],
+    ['PSA', 'img/grading/psa.svg', [['10', 3.5], ['9', 1.6], ['8', 1.2], ['7', 0.9], ['6', 0.75]]]
   ];
-  const FI_GRADE_COL = { '10': ['#F5C518', '#1A1300'], '9.5': ['#22C55E', '#04210F'], '9': ['#16A34A', '#FFFFFF'], '8.5': ['#3B82F6', '#FFFFFF'], '8': ['#2563EB', '#FFFFFF'] };
+  const FI_GRADE_CLS = { '10': 'g10', '9.5': 'g95', '9': 'g9', '8': 'g8', '7': 'g7', '6': 'g6', 'Black Label': 'black', 'Gold Label': 'gold' };
   fiProto.fiGraded = function (p, x, k) {
     if (p.type === 'sealed' || !(k > 0)) return { has: false, companies: [] };
     return {
       has: true,
-      companies: FI_GRADERS.map(([name, grades]) => ({
-        name: name, aria: 'Prix estimés ' + name,
-        grades: grades.map(([g, c]) => ({ g: g.replace('.', ','), value: '≈ ' + x.mask(this.eur(k * c)), bg: FI_GRADE_COL[g][0], fg: FI_GRADE_COL[g][1],
-          aria: name + ' ' + g.replace('.', ',') + ' : environ ' + x.mask(this.eur(k * c)) + ', estimation' }))
+      companies: FI_GRADERS.map(([name, logo, grades]) => ({
+        name: name, mark: logo, nameCls: 'pkm-fg-name pkm-fg-name-' + name.toLowerCase(), aria: 'Prix estimés ' + name,
+        grades: grades.map(([g, c, lab]) => {
+          const t = g.replace('.', ','), v = x.mask(this.eur(k * c));
+          return { g: t, label: lab || '', hasLabel: !!lab, value: '≈ ' + v, cls: 'pkm-fg-pill pkm-fg-' + FI_GRADE_CLS[lab || g],
+            aria: name + ' ' + t + (lab ? ' ' + lab : '') + ' : environ ' + v + ', estimation' };
+        })
       })),
       note: '≈ valeur estimée (modèle Dropicards : cote Cardmarket Near Mint × coefficient de la note) — aucune vente réelle enregistrée pour ces notes. Sous 10 €, une gradation coûte souvent plus que la carte.'
     };
@@ -201,7 +227,7 @@
     }));
     // Prix selon l'état : cote × coefficient d'estimation (value.js), exemplaire FR ou EN.
     // Bulle illustrée de chaque état à côté de son nom (2026-10-31, porteur) ; le scellé garde ses deux états en texte.
-    const conds = copyConds(p).map(([c, label]) => ({ label: label, pct: Math.round((VAL_COND[c] || 1) * 100) + ' %', value: k ? eur(k * (VAL_COND[c] || 1)) : '—',
+    const conds = copyConds(p).map(([c, label]) => ({ label: label, value: k ? eur(k * (VAL_COND[c] || 1)) : '—',
       hasIcon: !sealed, icon: sealed ? '' : 'img/conds/' + c.toLowerCase() + '.svg' }));
     const q = encodeURIComponent(p.name + (sealed || !p.numShort ? '' : ' ' + String(p.numShort).split('/')[0]));
     const last = (it.copies || [])[0];
@@ -254,11 +280,48 @@
     };
   };
 
+  // Changement de période de l'historique (2026-11-01, porteur : « la transition entre graph doit être plus
+  // satisfaisante, là c'est trop direct ») : la courbe et son aire glissent de l'ancienne forme à la nouvelle (650 ms,
+  // FI_N points), la ligne du prix d'achat et le point du jour suivent, l'axe, les dates et la variation réapparaissent
+  // en fondu ; le tracé exact est posé à la fin. Rien ne bouge si l'utilisateur limite les animations.
+  const fiAnim = { id: '', key: '', samp: null, buyY: null, cur: null, raf: 0 };
+  const fiStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+  const fiEase = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+  const fiMorph = fx => {
+    const same = fiAnim.id === fx.id, from = fiAnim.cur || fiAnim.samp, fromBuy = fiAnim.buyY;
+    Object.assign(fiAnim, { id: fx.id, key: fx.key, samp: fx.samp, buyY: fx.buyY });
+    cancelAnimationFrame(fiAnim.raf);
+    const box = document.querySelector('.pkm-fh'), line = box && box.querySelector('.pkm-fh-line'), area = box && box.querySelector('.pkm-fh-area');
+    if (!same || !from || !line || !area || fiStill()) { fiAnim.cur = null; return; }
+    const buy = box.querySelector('.pkm-fh-buy'), close = ' L' + FI_W + ' ' + FI_H + ' L0 ' + FI_H + ' Z', t0 = performance.now();
+    const b0 = fromBuy === null ? fx.buyY : fromBuy;
+    const step = now => {
+      const k = Math.min(1, (now - t0) / 650), e = fiEase(k);
+      if (k >= 1) {
+        fiAnim.cur = null; line.setAttribute('d', fx.line); area.setAttribute('d', fx.line + close);
+        if (buy && fx.buyY !== null) buy.setAttribute('d', 'M0 ' + fx.buyY.toFixed(1) + ' H' + FI_W);
+        return;
+      }
+      const P = from.map((v, i) => v + (fx.samp[i] - v) * e);
+      const d = 'M' + P.map((v, i) => (i / (FI_N - 1) * FI_W).toFixed(1) + ' ' + v.toFixed(1)).join(' L');
+      fiAnim.cur = P; line.setAttribute('d', d); area.setAttribute('d', d + close);
+      if (buy && fx.buyY !== null) buy.setAttribute('d', 'M0 ' + (b0 + (fx.buyY - b0) * e).toFixed(1) + ' H' + FI_W);
+      fiAnim.raf = requestAnimationFrame(step);
+    };
+    step(t0);
+    box.querySelectorAll('.pkm-fh-y, .pkm-fh-grid, .pkm-fh-x').forEach(el => { if (el.animate) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 480, easing: 'ease-out' }); });
+    box.querySelectorAll('.pkm-fh-top').forEach(el => { if (el.animate) el.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' }); });
+  };
+
   const fiBaseRender = fiProto.renderVals;
   fiProto.renderVals = function () {
     const r = fiBaseRender.call(this);
     const s = this.st();
     r.fi = this.fiView(s);
+    // La courbe affichée change (autre période, autre état, archive arrivée) → glissement, après la mise à jour de la page.
+    const fx = r.fi.open && r.fi.hist && r.fi.hist.fx;
+    if (fx && fx.key !== fiAnim.key) queueMicrotask(() => fiMorph(fx));
+    else if (!r.fi.open) { fiAnim.id = ''; fiAnim.key = ''; }
     if (r.fi.open && s.fiZoom && r.fi.big.img) { r.ui.zoomOpen = true; r.zoom = r.fi.big; }
     return r;
   };

@@ -2012,7 +2012,7 @@ PKCOUNTER
 <section aria-label="Prix par état" class="pkm-fi-box">
 <button type="button" onClick="{{ fi.toggleCond }}" aria-expanded="{{ fi.condOpen }}" class="pkm-fi-fold"><span>Prix par état</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
 <sc-if value="{{ fi.condOpen }}" hint-placeholder-val="{{ false }}">
-<sc-for list="{{ fi.conds }}" as="fic" hint-placeholder-count="3"><div class="pkm-fi-row"><sc-if value="{{ fic.hasIcon }}" hint-placeholder-val="{{ true }}"><img src="{{ fic.icon }}" alt="" width="26" height="26" class="pkm-fi-cico"></sc-if><span class="pkm-fi-row-l">{{ fic.label }}</span><span class="pkm-fi-note">{{ fic.pct }}</span><span class="pkm-fi-row-v">{{ fic.value }}</span></div></sc-for>
+<sc-for list="{{ fi.conds }}" as="fic" hint-placeholder-count="3"><div class="pkm-fi-row"><sc-if value="{{ fic.hasIcon }}" hint-placeholder-val="{{ true }}"><img src="{{ fic.icon }}" alt="" width="26" height="26" class="pkm-fi-cico"></sc-if><span class="pkm-fi-row-l">{{ fic.label }}</span><span class="pkm-fi-row-v">{{ fic.value }}</span></div></sc-for>
 <span class="pkm-fi-note">{{ fi.condNote }}</span>
 </sc-if>
 </section>
@@ -2021,8 +2021,8 @@ PKCOUNTER
 <h3 class="pkm-fi-h3">Prix gradés <span class="pkm-fi-chip">Estimation</span></h3>
 <sc-for list="{{ fi.graded.companies }}" as="fgc" hint-placeholder-count="3">
 <div role="group" aria-label="{{ fgc.aria }}" class="pkm-fg-co">
-<span class="pkm-fg-name">{{ fgc.name }}</span>
-<div class="pkm-fg-list"><sc-for list="{{ fgc.grades }}" as="fgg" hint-placeholder-count="5"><div class="pkm-fg-row" aria-label="{{ fgg.aria }}"><span class="pkm-fg-pill" style="background: {{ fgg.bg }}; color: {{ fgg.fg }}">{{ fgg.g }}</span><span class="pkm-fg-v">{{ fgg.value }}</span><span class="pkm-fg-est">estimation</span></div></sc-for></div>
+<span class="{{ fgc.nameCls }}"><img src="{{ fgc.mark }}" alt="{{ fgc.name }}" class="pkm-fg-logo"></span>
+<div class="pkm-fg-list"><sc-for list="{{ fgc.grades }}" as="fgg" hint-placeholder-count="6"><div class="pkm-fg-row" role="group" aria-label="{{ fgg.aria }}"><span class="{{ fgg.cls }}"><b>{{ fgg.g }}</b><sc-if value="{{ fgg.hasLabel }}" hint-placeholder-val="{{ false }}"><i>{{ fgg.label }}</i></sc-if></span><span class="pkm-fg-v">{{ fgg.value }}</span><span class="pkm-fg-est">estimation</span></div></sc-for></div>
 </div>
 </sc-for>
 <span class="pkm-fi-note">{{ fi.graded.note }}</span>

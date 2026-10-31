@@ -94,7 +94,9 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('fiche : sans Investi, Mes exemplaires, Marquer comme vendu, Voir la fiche complète', !/Investi|Mes exemplaires|Marquer comme vendu|Voir la fiche complète/.test(fiText));
   ok('fiche : pas de TCGplayer', !/TCGplayer/.test(fiText));
   await page.locator(FI + ' button[aria-expanded]', { hasText: 'Prix par état' }).click(); await page.waitForTimeout(300);
-  ok('prix par état : Near Mint, Excellent, Played', /Near Mint[\s\S]*100 %[\s\S]*Excellent[\s\S]*85 %[\s\S]*Played[\s\S]*55 %/.test(await page.locator(FI).innerText()));
+  // Pourcentages retirés de « Prix par état » (2026-11-01, porteur) : nom de l'état et valeur seulement.
+  const pe = await page.locator(FI + ' section[aria-label="Prix par état"]').innerText();
+  ok('prix par état : Near Mint, Excellent, Played, sans pourcentage', /Near Mint[\s\S]*99,00[\s\S]*Excellent[\s\S]*84,15[\s\S]*Played[\s\S]*54,45/.test(pe) && !/\d\s?%/.test(pe));
   ok('prix par état : bulle de couleur de chaque état', (await page.locator(FI + ' section[aria-label="Prix par état"] img.pkm-fi-cico').evaluateAll(im => im.map(i => i.getAttribute('src').split('/').pop()))).join(',') === 'mt.svg,nm.svg,ex.svg,gd.svg,pl.svg,po.svg');
   await page.locator(FI).evaluate(e => e.scrollTo(0, 0)); await page.waitForTimeout(200);
   await page.screenshot({ path: shot('binder-fiche.png') });

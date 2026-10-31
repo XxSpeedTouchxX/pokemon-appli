@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-11-01 — Prix gradés avec logos et notes 10 à 6, courbe qui glisse, Prix par état sans pourcentages
+
+- **Demandes du porteur** :
+  - « Prix par état » : retirer les pourcentages ;
+  - « Prix gradés » : le logo des 3 entreprises ; les notes de 6 à 10 pour chacune, une nuance par note (10 or, 9,5 vert très foncé, 9 vert foncé, 8 vert, 7 vert-jaune, 6 jaune-orangé) ; chez CCC, aussi le 10 Gold Label et le 10 Black Label ;
+  - la population des cartes gradées PSA, notes 6 à 10 ;
+  - « Historique du prix » : une transition plus agréable entre les périodes.
+- **Fait** (cache v98) :
+  - « Prix par état » : nom de l'état et valeur, sans pourcentage ;
+  - logos officiels : PCA (image du site pcagrade.com), CCC (logo SVG du site cccgrading.com), PSA (logo SVG de l'en-tête de psacard.com, en blanc sur le rouge de PSA) ; workflow « Logos des entreprises de gradation » (`tools/grading/fetch_logos.py`, `web/img/grading/`), PSA recopié à la main (le site refuse les machines de GitHub) ; marques déposées, même point d'attention que les logos des enseignes (H3) ;
+  - notes : PCA 10, 9,5, 9, 8, 7, 6 ; CCC 10 Black Label, 10 Gold Label, 10, 9,5, 9, 8, 7, 6 ; PSA 10, 9, 8, 7, 6 (PSA ne délivre pas de 9,5) ; 8,5 retiré ; toujours des estimations (cote Near Mint × coefficient) ;
+  - transition : la courbe et son aire glissent de l'ancienne forme à la nouvelle en 0,65 s, la ligne du prix d'achat et le point du jour suivent, l'axe, les dates et la variation réapparaissent en fondu ; rien ne bouge si le téléphone limite les animations.
+- **Non fait — population PSA** : PSA ne publie sa population qu'à travers son site (protégé, pas de scraping) et une API réservée aux comptes PSA, avec un quota très faible et un numéro « spec » PSA par carte, qu'aucune source ouverte ne relie aux cartes du catalogue. Aucun chiffre n'est inventé ; décision du porteur attendue (voir le bilan).
+- **Coefficients proposés, à valider** : PCA 10 ×2,6, 9,5 ×1,9, 9 ×1,45, 8 ×1,12, 7 ×0,85, 6 ×0,7 ; CCC 10 Black Label ×6, 10 Gold Label ×4, 10 ×2,8, 9,5 ×2, 9 ×1,5, 8 ×1,15, 7 ×0,9, 6 ×0,72 ; PSA 10 ×3,5, 9 ×1,6, 8 ×1,2, 7 ×0,9, 6 ×0,75.
+- **Tests GitHub** : « Tests de la démo » échouait depuis le 31 octobre à l'installation de Chromium (GitHub est passé à Ubuntu 26.04, que Playwright 1.56 ne gère pas) ; les tests navigateur tournent désormais sur Ubuntu 24.04.
+
 ## 2026-10-31 (suite 5) — Fiche d'une carte : historique du prix et prix gradés
 
 - **Demandes du porteur** (avec une photo d'un « Historique du prix » et une vidéo de « Prix gradés ») :

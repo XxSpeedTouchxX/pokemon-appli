@@ -4,7 +4,8 @@
 Chaque logo vient du site officiel de l'entreprise (un seul fichier par entreprise, pas d'aspiration de pages) :
 - PCA : image de la barre de navigation de pcagrade.com ;
 - CCC : logo SVG intégré à l'en-tête de cccgrading.com (couleurs de la page reportées dans le fichier) ;
-- PSA : logo de psacard.com (icône SVG du site, sinon image de partage hébergée par leur CDN Contentful).
+- PSA : logo SVG de l'en-tête de psacard.com, recopié dans web/img/grading/psa.svg le 2026-10-31 (le site répond
+  403 aux machines de GitHub) ; gardé tel quel s'il existe, sinon l'image de partage de leur CDN Contentful.
 Écrit web/img/grading/<pca|ccc|psa>.<ext> et web/img/grading/logos.json (source, date). Lancé par
 .github/workflows/grading-logos.yml : ces sites ne sont pas joignables depuis l'environnement de Claude Code.
 
@@ -24,8 +25,7 @@ BROWSER = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko
 
 PCA = ['https://pcagrade.com/images/other/logo-navbar@2x.png']
 CCC_PAGE = 'https://www.cccgrading.com/en'
-PSA = ['https://www.psacard.com/psa/images/brand/favicons/psa-favicon.svg',
-       'https://images.ctfassets.net/l40e281thfxr/6csiDTsdnOCtE97s4rmxLh/9a71ffc8f5e1de382d22b4cd71eac4da/PSA.png']
+PSA = ['https://images.ctfassets.net/l40e281thfxr/6csiDTsdnOCtE97s4rmxLh/9a71ffc8f5e1de382d22b4cd71eac4da/PSA.png']
 
 
 def fetch(url):
@@ -115,7 +115,13 @@ def ccc(done):
 def main():
     os.makedirs(OUT, exist_ok=True)
     done = {}
-    ok = [first('pca', PCA, done), ccc(done), first('psa', PSA, done)]
+    try:
+        with open(os.path.join(OUT, 'logos.json'), encoding='utf-8') as f:
+            done.update(json.load(f))
+    except (OSError, ValueError):
+        pass
+    psa_kept = os.path.exists(os.path.join(OUT, 'psa.svg'))
+    ok = [first('pca', PCA, done), ccc(done), psa_kept or first('psa', PSA, done)]
     with open(os.path.join(OUT, 'logos.json'), 'w', encoding='utf-8') as f:
         json.dump(done, f, ensure_ascii=False, indent=1)
     print('Logos :', ', '.join(done) or 'aucun')

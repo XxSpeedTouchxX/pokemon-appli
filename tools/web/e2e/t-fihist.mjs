@@ -2,7 +2,9 @@
 // - « Historique du prix » : archive quotidienne Dropicards de la cote (web/data/hist), valeur, variation sur la période,
 //   axe des montants, dates, ligne pointillée du prix d'achat, périodes 1S, 1M, 3M, 6M, 1A, MAX (MAX par défaut) ;
 //   repli sur les moyennes Cardmarket si l'archive manque ;
-// - « Prix gradés » : PCA, CCC, PSA (notes 10 à 8, sans 9,5 chez PSA), estimations signalées ; jamais pour le scellé.
+// - « Prix gradés » : logos PCA, CCC, PSA ; notes 10 à 6 en nuances (10 or, 9,5 vert très foncé … 6 jaune-orangé), sans
+//   9,5 chez PSA, 10 Black Label et 10 Gold Label chez CCC (2026-11-01) ; estimations signalées ; jamais pour le scellé ;
+// - changement de période : la courbe glisse de l'ancienne forme à la nouvelle (2026-11-01).
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -42,22 +44,30 @@ const open = async (w, h, route) => {
   ok('courbe lissée', /C/.test(await H.locator('path.pkm-fh-line').getAttribute('d')));
   ok('source et début de l’archive', /archivée chaque jour par Dropicards/.test(await H.innerText()) && /depuis le 3 oct\. 2026/.test(await H.innerText()));
   await H.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('fihist-1.png') });
-  await per.nth(0).click(); await page.waitForTimeout(300);
+  const before = await H.locator('path.pkm-fh-line').getAttribute('d');
+  await per.nth(0).click(); await page.waitForTimeout(120);
+  const mid = await H.locator('path.pkm-fh-line').getAttribute('d');
+  await page.waitForTimeout(900);
+  const after = await H.locator('path.pkm-fh-line').getAttribute('d');
+  ok('transition : la courbe glisse (tracé intermédiaire, puis tracé lissé exact)', /^M0\.0 [\d.]+ L/.test(mid) && mid.split(' L').length === 72 && mid !== before && mid !== after && /C/.test(after));
   const c1 = N(await H.locator('.pkm-fh-chg').innerText()), x1 = (await H.locator('.pkm-fh-x span').allInnerTexts()).map(N);
   ok('1S : « ' + c1 + ' », dates ' + x1.join(' | '), / · 1 semaine$/.test(c1) && (await per.nth(0).getAttribute('aria-pressed')) === 'true' && x1[0] !== '3 oct.' && !/depuis le 3 oct/.test(await H.innerText()));
   await page.screenshot({ path: shot('fihist-2.png') });
   // Prix gradés
   ok('prix gradés : la section est là', (await G.count()) === 1);
-  const co = (await G.locator('.pkm-fg-name').allInnerTexts()).map(N);
+  const co = await G.locator('.pkm-fg-name img').evaluateAll(im => im.map(i => i.alt));
   ok('entreprises : ' + co.join(', '), co.join(',') === 'PCA,CCC,PSA');
-  const grades = await G.locator('.pkm-fg-co').evaluateAll(cs => cs.map(c => [...c.querySelectorAll('.pkm-fg-pill')].map(p => p.textContent.trim()).join(' ')));
-  ok('notes : ' + grades.join(' / '), grades[0] === '10 9,5 9 8,5 8' && grades[1] === '10 9,5 9 8,5 8' && grades[2] === '10 9 8,5 8');
+  const grades = await G.locator('.pkm-fg-co').evaluateAll(cs => cs.map(c => [...c.querySelectorAll('.pkm-fg-pill')].map(p => p.querySelector('b').textContent + (p.querySelector('i') ? ' ' + p.querySelector('i').textContent : '')).join(' | ')));
+  ok('notes : ' + grades.join(' / '), grades[0] === '10 | 9,5 | 9 | 8 | 7 | 6' && grades[1] === '10 Black Label | 10 Gold Label | 10 | 9,5 | 9 | 8 | 7 | 6' && grades[2] === '10 | 9 | 8 | 7 | 6');
+  const logos = await G.locator('img.pkm-fg-logo').evaluateAll(im => im.map(i => i.getAttribute('src').split('/').pop() + ':' + (i.naturalWidth > 0)));
+  ok('logos : ' + logos.join(', '), logos.join(',') === 'pca.png:true,ccc.svg:true,psa.svg:true');
   const k = Number(cote.replace(/[^\d,]/g, '').replace(',', '.')), psa10 = N(await G.locator('.pkm-fg-co').nth(2).locator('.pkm-fg-v').first().innerText());
-  const want = '≈ ' + (Math.round(k * 3.5 * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/[  ]/g, ' ') + ' €';
+  const want = '≈ ' + (Math.round(k * 3.5 * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/[\u202f\u00a0]/g, ' ') + ' €';
   ok('PSA 10 « ' + psa10 + ' » = cote × 3,5 (' + want + ')', psa10 === want);
-  ok('chaque note est une estimation signalée', (await G.locator('.pkm-fg-est').count()) === 14 && /aucune vente réelle/.test(await G.innerText()));
-  const pill = await G.locator('.pkm-fg-pill').first().evaluate(e => getComputedStyle(e).backgroundColor);
-  ok('note 10 en or (' + pill + ')', pill === 'rgb(245, 197, 24)');
+  ok('chaque note est une estimation signalée', (await G.locator('.pkm-fg-est').count()) === 19 && /aucune vente réelle/.test(await G.innerText()));
+  const col = async sel => G.locator(sel).first().evaluate(e => { const c = getComputedStyle(e); return c.backgroundImage !== 'none' ? 'dégradé' : c.backgroundColor; });
+  const cols = [await col('.pkm-fg-g10'), await col('.pkm-fg-g95'), await col('.pkm-fg-g9'), await col('.pkm-fg-g8'), await col('.pkm-fg-g7'), await col('.pkm-fg-g6'), await col('.pkm-fg-black'), await col('.pkm-fg-gold')];
+  ok('nuances : ' + cols.join(' · '), cols.join('|') === 'dégradé|rgb(15, 77, 42)|rgb(21, 128, 61)|rgb(34, 197, 94)|rgb(163, 230, 53)|rgb(251, 168, 31)|rgb(5, 5, 5)|dégradé');
   await G.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('fihist-3.png') });
   await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
   // Scellé : historique, sans prix gradés.
