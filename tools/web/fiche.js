@@ -106,7 +106,7 @@
     const V = HomeCore.points(p, k, null, null, null, TODAY);
     return { pts: [30, 7, 1, 0].map((a, i) => ({ d: fiAgo(TODAY, a), v: V[i] })), src: 'Moyennes Cardmarket : 30 jours, 7 jours, veille, puis cote du jour' };
   };
-  const fiDay = d => { const t = new Date(Date.parse(d)); return t.getUTCDate() + ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][t.getUTCMonth()]; };
+  const fiDay = d => { const t = new Date(Date.parse(d)); return (t.getUTCDate() === 1 ? '1er' : t.getUTCDate()) + ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][t.getUTCMonth()]; };
   const fiMoney = v => (v >= 100 ? Math.round(v).toLocaleString('fr-FR') : (Math.round(v * 100) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })) + ' €';
   // Courbe lissée sans dépassement (monotone, Fritsch-Carlson) passant par chaque point : pentes, tracé et échantillons.
   const fiSlopes = P => {
@@ -141,14 +141,28 @@
     }
     return out;
   };
+  // Périodes pas encore couvertes : « 1M dès le 1 nov., 3M dès le 1 janv. 2027 … » (archive), sinon simple mention.
+  const fiSoon = (miss, start, since) => {
+    if (!miss.length) return '';
+    if (!since) return miss.map(q => q[0]).join(', ') + ' : pas encore assez d’historique pour cette carte.';
+    const y0 = since.slice(0, 4);
+    const when = q => { const d = fiAgo(start, -(q[1] - 1)); return q[0] + ' dès le ' + fiDay(d) + (d.slice(0, 4) !== y0 ? ' ' + d.slice(0, 4) : ''); };
+    return 'Archive Dropicards depuis le ' + fiDay(since) + ' ' + y0 + ' : ' + miss.map(when).join(', ') + '.';
+  };
   // Historique façon photo : valeur, variation sur la période, axe des montants, dates, ligne du prix d'achat.
   // f : coefficient de l'état des exemplaires possédés (la courbe suit alors la valeur affichée en haut de la fiche).
   fiProto.fiHistory = function (p, x, k, per, f, buy) {
     const H = this.fiPoints(p, x, k);
     if (H.loading) return { has: true, loading: true, periods: [] };
     if (H.pts.length < 2) return { has: false, periods: [] };
-    const P = FI_PER.find(q => q[0] === per) || FI_PER[FI_PER.length - 1];
-    const end = H.pts[H.pts.length - 1].d, cut = P[1] ? fiAgo(end, P[1]) : '';
+    // Périodes couvertes (2026-11-01, porteur : « des fois le prix ne bouge pas entre 1M et 6M ») : tant que l'historique
+    // ne couvre pas toute la période (archive commencée le 3 octobre 2026), elle est grisée avec sa date d'arrivée ;
+    // sinon 1M, 3M, 6M et 1A montreraient tous le même historique que MAX. Une période grisée choisie revient à MAX.
+    const start = H.pts[0].d, endD = H.pts[H.pts.length - 1].d, span = Math.round((Date.parse(endD) - Date.parse(start)) / 86400000);
+    const covered = q => !q[1] || q[1] - 1 <= span;
+    const P = FI_PER.find(q => q[0] === per && covered(q)) || FI_PER[FI_PER.length - 1];
+    per = P[0];
+    const end = endD, cut = P[1] ? fiAgo(end, P[1]) : '';
     let pts = H.pts.filter(q => !cut || q.d >= cut);
     if (pts.length < 2) pts = H.pts.slice(-2);
     const V = pts.map(q => q.v * f), first = V[0], last = V[V.length - 1], d = last - first, pct = first > 0 ? d / first * 100 : 0;
@@ -172,8 +186,12 @@
       buyLabel: showBuy ? '🛒 ' + x.mask(this.eur(buy)) : '',
       aria: 'Historique du prix, ' + P[2] + ' : de ' + x.mask(this.eur(first)) + ' à ' + x.mask(this.eur(last)),
       source: H.src + (f !== 1 ? ' · selon l’état de ta carte' : ''),
-      since: H.since && P[0] !== '1S' && P[0] !== '1M' && (!cut || cut < H.since) ? 'Archive Dropicards depuis le ' + fiDay(H.since) + ' ' + H.since.slice(0, 4) + ' : les périodes plus longues se complètent jour après jour.' : '',
-      periods: FI_PER.map(([v, lab]) => Object.assign({ label: v, aria: lab, on: per === v, pick: () => this.setState({ fiPer: v }) }, this.chip(per === v)))
+      since: fiSoon(FI_PER.filter(q => !covered(q)), start, H.since),
+      periods: FI_PER.map(q => {
+        const [v, , lab] = q, ok = covered(q), on = per === v;
+        return Object.assign({ label: v, aria: lab + (ok ? '' : ', pas encore assez d’historique'), on: on, dis: !ok,
+          cls: ok ? '' : 'pkm-fh-off', pick: () => { if (ok) this.setState({ fiPer: v }); } }, this.chip(on));
+      })
     };
   };
 

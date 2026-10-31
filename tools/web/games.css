@@ -348,6 +348,8 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fh-per { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
 .pkm-fh-per button { height: 34px; min-width: 0; padding: 0; border: 1px solid; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.15s; }
 .pkm-fh-per button:active { transform: scale(0.94); }
+.pkm-fh-per button.pkm-fh-off { opacity: 0.38; cursor: default; }
+.pkm-fh-per button.pkm-fh-off:active { transform: none; }
 @media (prefers-reduced-motion: reduce) { .pkm-fh-dot, .pkm-fh-buyl, .pkm-fh-per button { transition: none; } }
 /* Prix gradés (2026-10-31, vidéo du porteur) : PCA, CCC, PSA ; pastille de la note (10 or, 9,5 et 9 verts, 8,5 et 8
    bleus), estimation signalée. Noms en texte, sans logo des entreprises. */

@@ -32,7 +32,7 @@ const open = async (w, h, route) => {
   const cote = N(await FI.locator('.pkm-fi-cote').innerText());
   ok('historique : la section est là', (await H.count()) === 1);
   const per = H.locator('.pkm-fh-per button');
-  ok('périodes ' + (await per.allInnerTexts()).join(' '), (await per.allInnerTexts()).join(',') === '1S,1M,3M,6M,1A,MAX' && (await per.nth(5).getAttribute('aria-pressed')) === 'true');
+  ok('périodes ' + (await per.allInnerTexts()).join(' '), (await per.allInnerTexts()).join(',') === '1S,1M,3M,6M,1A,MAX' && (await per.nth(5).getAttribute('aria-pressed')) === 'true' && (await per.nth(1).getAttribute('aria-label')).startsWith('1 mois'));
   const v = N(await H.locator('.pkm-fi-big').innerText()), chg = N(await H.locator('.pkm-fh-chg').innerText());
   ok('valeur « ' + v + ' » = cote de la fiche', v === cote);
   ok('variation « ' + chg + ' »', /^[+−][\d ]+,\d\d € \([+−][\d,]+ %\) · max$/.test(chg));
@@ -51,7 +51,17 @@ const open = async (w, h, route) => {
   const after = await H.locator('path.pkm-fh-line').getAttribute('d');
   ok('transition : la courbe glisse (tracé intermédiaire, puis tracé lissé exact)', /^M0\.0 [\d.]+ L/.test(mid) && mid.split(' L').length === 72 && mid !== before && mid !== after && /C/.test(after));
   const c1 = N(await H.locator('.pkm-fh-chg').innerText()), x1 = (await H.locator('.pkm-fh-x span').allInnerTexts()).map(N);
-  ok('1S : « ' + c1 + ' », dates ' + x1.join(' | '), / · 1 semaine$/.test(c1) && (await per.nth(0).getAttribute('aria-pressed')) === 'true' && x1[0] !== '3 oct.' && !/depuis le 3 oct/.test(await H.innerText()));
+  ok('1S : « ' + c1 + ' », dates ' + x1.join(' | '), / · 1 semaine$/.test(c1) && (await per.nth(0).getAttribute('aria-pressed')) === 'true' && x1[0] !== '3 oct.');
+  // Périodes plus longues que l'archive grisées, avec leur date d'arrivée (2026-11-01, porteur : « le prix ne bouge pas
+  // entre 1M et 6M ») : attendu d'après l'archive publiée (data/hist/index.json).
+  const idx = await page.evaluate(() => fetch('data/hist/index.json').then(r => r.json()));
+  const span = Math.round((Date.parse(idx.days[idx.days.length - 1]) - Date.parse(idx.days[0])) / 86400000);
+  const wantOff = [['1S', 7], ['1M', 30], ['3M', 91], ['6M', 182], ['1A', 365], ['MAX', 0]].filter(q => q[1] && q[1] - 1 > span).map(q => q[0]);
+  const off = await per.evaluateAll(bs => bs.filter(b => b.getAttribute('aria-disabled') === 'true').map(b => b.textContent));
+  const note = N(await H.locator('.pkm-fi-note').last().innerText());
+  ok('périodes grisées : ' + (off.join(', ') || 'aucune') + ' (archive de ' + (span + 1) + ' jours) · « ' + note + ' »', off.join(',') === wantOff.join(',') && (!wantOff.length || wantOff.every(w => note.includes(w + ' dès le'))));
+  if (wantOff.length) { await per.filter({ hasText: wantOff[wantOff.length - 1] }).click({ force: true }); await page.waitForTimeout(300); }
+  ok('une période grisée ne se choisit pas', (await per.nth(0).getAttribute('aria-pressed')) === 'true');
   await page.screenshot({ path: shot('fihist-2.png') });
   // Prix gradés
   ok('prix gradés : la section est là', (await G.count()) === 1);

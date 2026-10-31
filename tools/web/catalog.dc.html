@@ -2003,7 +2003,7 @@ PKCOUNTER
 </div>
 </div>
 <div aria-hidden="true" class="pkm-fh-x"><sc-for list="{{ fi.hist.xl }}" as="fhx" hint-placeholder-count="3"><span style="left: {{ fhx.left }}; transform: {{ fhx.tx }}">{{ fhx.label }}</span></sc-for></div>
-<div role="group" aria-label="Période" class="pkm-fh-per"><sc-for list="{{ fi.hist.periods }}" as="fip" hint-placeholder-count="6"><button type="button" onClick="{{ fip.pick }}" aria-pressed="{{ fip.on }}" aria-label="{{ fip.aria }}" style="border-color: {{ fip.bc }}; background: {{ fip.bg }}; color: {{ fip.fg }}">{{ fip.label }}</button></sc-for></div>
+<div role="group" aria-label="Période" class="pkm-fh-per"><sc-for list="{{ fi.hist.periods }}" as="fip" hint-placeholder-count="6"><button type="button" onClick="{{ fip.pick }}" aria-pressed="{{ fip.on }}" aria-disabled="{{ fip.dis }}" aria-label="{{ fip.aria }}" class="{{ fip.cls }}" style="border-color: {{ fip.bc }}; background: {{ fip.bg }}; color: {{ fip.fg }}">{{ fip.label }}</button></sc-for></div>
 <span class="pkm-fi-note">{{ fi.hist.source }}</span>
 <sc-if value="{{ fi.hist.since }}" hint-placeholder-val="{{ false }}"><span class="pkm-fi-note">{{ fi.hist.since }}</span></sc-if>
 </sc-if>
