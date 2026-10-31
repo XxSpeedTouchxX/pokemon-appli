@@ -1,6 +1,6 @@
 // Dropicards (nom de code PKM-App) · démo : réseau d'abord (les mises à jour s'affichent), copie locale si le réseau manque.
 // Le catalogue et les prix du scellé sont gardés dès la première visite : l'app s'ouvre hors ligne avec les dernières cotes.
-const CACHE = 'pkm-demo-v92';
+const CACHE = 'pkm-demo-v93';
 const FILES = ['./', 'index.html', 'app.js', 'vendor/vue.runtime.global.prod.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'img/brand/dropicards-header.png', 'img/brand/pk.svg', 'data/cards-base.json', 'data/cards-prices.json', 'data/sealed.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

@@ -4,6 +4,8 @@
 // - bandeau « Arbre de Pokévolution », plus d'encadrés « Ton compagnon » ni « Pokémon sélectionné », plus de « C'est
 //   ton compagnon » ni de texte des PA en bas ; flèches « les évolutions » ; Pokédex agrandi ; « OK » qui bondit quand
 //   les PA suffisent pour l'évolution affichée ;
+// - 2026-10-31 (soir) : légende « OK : Sélectionner ou faire évoluer son Pokémon », bouton vert clair d'une seule couche,
+//   méga-évolutions animées, tailles nettement croissantes, encadré du Pokémon de hauteur fixe ;
 // - arbre d'évolution sans collision : au moins 6 px entre deux Pokémon voisins, pour les 156 et leurs méga-évolutions.
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
@@ -40,6 +42,25 @@ const scr = (await page.locator('.pkm-dex-screen').innerText()).replace(/\s+/g, 
 ok('« Arbre de Pokévolution », sans « Ton compagnon » ni « Pokémon sélectionné »', /Arbre de Pokévolution/i.test(scr) && !/Route d’évolution Touche|Ton compagnon|Pokémon sélectionné/.test(scr));
 const legend = await page.locator('.pkm-dex-legend').innerText();
 ok('flèches : « ' + legend.split('\n')[0] + ' »', /les évolutions/.test(legend) && !/la famille/.test(legend));
+// Lot du 2026-10-31 (soir) : légende du bouton « OK », bouton vert clair d'une seule couche (plus dessiné dans l'image).
+ok('légende : « OK : Sélectionner ou faire évoluer son Pokémon »', /OK : Sélectionner ou faire évoluer son Pokémon/.test(legend.replace(/\s+/g, ' ')));
+const okBtn = await page.evaluate(async () => {
+  const svg = await (await fetch('img/brand/pokedex-device.svg')).text(), bg = getComputedStyle(document.querySelector('.pkm-dex-k-a')).backgroundImage;
+  const m = /rgb\((\d+), (\d+), (\d+)\)/.exec(bg) || [];
+  return { drawn: /x="38" y="188"/.test(svg), light: Number(m[1]) > 180 && Number(m[2]) > 230, filter: getComputedStyle(document.querySelector('.pkm-dex-k-a')).filter };
+});
+ok('« OK » vert clair, une seule couche (' + JSON.stringify(okBtn) + ')', !okBtn.drawn && okBtn.light && okBtn.filter === 'none');
+// Méga-évolutions animées (2026-10-31, porteur : « Méga-Tortank et Méga-Dracaufeu Y sont immobiles »).
+const frames = await page.evaluate(async () => {
+  const out = {};
+  for (const n of [10033, 10035, 10036, 10038, 10039, 10040, 10041, 10042, 10071, 10073]) {
+    const b = new Uint8Array(await (await fetch('img/pokemon/' + n + '.gif')).arrayBuffer());
+    let k = 0; for (let i = 0; i + 2 < b.length; i++) if (b[i] === 0x21 && b[i + 1] === 0xF9 && b[i + 2] === 0x04) k++;
+    out[n] = k;
+  }
+  return out;
+});
+ok('méga-évolutions animées (images par GIF : ' + Object.values(frames).join(', ') + ')', Object.values(frames).every(k => k >= 6));
 ok('plus de texte des PA sous le Pokédex', (await page.locator('.pkm-dex-rules').count()) === 0);
 const dev = await page.evaluate(() => { const d = document.querySelector('.pkm-dex-device').getBoundingClientRect(), l = document.querySelector('.pkm-dex-lcd-l').getBoundingClientRect(), a = document.querySelector('.pkm-dex-k-a').getBoundingClientRect(), c = document.querySelector('.pkm-dex-cross').getBoundingClientRect(); return { d: Math.round(d.width), lcd: Math.round(l.width) + '×' + Math.round(l.height), ok: Math.round(a.width) + '×' + Math.round(a.height), cross: Math.round(c.width), img: document.querySelector('.pkm-dex-device-img').getAttribute('src') }; });
 ok('Pokédex agrandi (' + JSON.stringify(dev) + ')', dev.d >= 340 && parseInt(dev.lcd) >= 120 && parseInt(dev.ok) >= 58 && dev.cross >= 52 && /pokedex-device\.svg/.test(dev.img));
@@ -67,6 +88,14 @@ const touch = await page.evaluate(async () => {
   return bad;
 });
 ok('rendu : aucun Pokémon ne touche son voisin (' + (touch.join(', ') || 'aucun') + ')', touch.length === 0);
+// Tailles toujours croissantes et nettement différentes : Herbizarre au moins 20 % plus grand que Bulbizarre.
+await page.evaluate(() => window.__pkm.setState({ dexSel: 3 })); await page.waitForTimeout(400);
+const hs = await page.$$eval('.pkm-dex-node', ns => ns.map(n => [n.getAttribute('aria-label').split(',')[0], n.querySelector('img').getBoundingClientRect().height]));
+ok('Bulbizarre, Herbizarre, Florizarre, Méga : ' + hs.map(h => Math.round(h[1])).join(' < '), hs.length === 4 && hs[1][1] >= hs[0][1] * 1.2 && hs[2][1] > hs[1][1] && hs[3][1] > hs[2][1]);
+// Encadré du Pokémon de même hauteur pour toutes les fiches (le starter, possédé, avec sa description, n'est plus étiré).
+const showH = [];
+for (const n of [25, 26, 3]) { await page.evaluate(k => window.__pkm.setState({ dexSel: k }), n); await page.waitForTimeout(250); showH.push(await page.evaluate(() => Math.round(document.querySelector('.pkm-dex-show').getBoundingClientRect().height))); }
+ok('encadré du Pokémon : ' + showH.join(', ') + ' px', showH.every(h => h === showH[0]) && showH[0] >= 180);
 await page.evaluate(() => window.__pkm.setState({ dexSel: 9 })); await page.waitForTimeout(400);
 await page.locator('[aria-label="Route d’évolution"]').screenshot({ path: shot('dex-route-tortank.png') });
 // Par stade et par type ; un type ouvre la liste filtrée.

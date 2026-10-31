@@ -49,7 +49,7 @@ await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localS
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200); await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(600);
 await route.locator('button[aria-label^="Carabaffe,"]').click(); await page.waitForTimeout(300);
 ok('Pokédex : « Faire évoluer · 500 PA » sur Carabaffe', /^Faire évoluer · 500 PA$/.test((await act.innerText()).trim()));
-await act.click(); await page.waitForTimeout(3700);
+await act.click(); await page.waitForTimeout(7500); // évolution de 7,2 s (2026-10-31)
 const st2 = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy, pa: d.pa, own: d.pkOwn }; });
 ok('Pokédex : Carabaffe pour 500 PA (' + st2.pa + ' PA restants), nouveau compagnon', st2.evo.stage === 1 && st2.buddy === 8 && st2.pa === 20 && st2.own.indexOf(8) >= 0 && (await route.locator('.pkm-dex-lock').count()) === 2);
 ok('Pokédex : Carabaffe sans bouton (compagnon), Tortank à 1 500 PA', (await act.count()) === 0 && /^Tortank, 2ᵉ évolution, 1[\s\u202f\u00a0]500 PA$/.test(await route.locator('button[aria-label^="Tortank,"]').getAttribute('aria-label')));

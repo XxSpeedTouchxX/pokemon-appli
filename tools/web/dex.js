@@ -36,7 +36,7 @@
   // hauteur de sa taille réelle (fiche du Pokédex), le plus grand à DEX_PX px ; une méga-évolution est toujours un peu
   // plus grande que sa forme de base (au moins 10 %), même quand le Pokédex leur donne la même taille. Plancher de
   // DEX_PX_MIN px pour qu'un tout petit Pokémon reste visible (Magicarpe à côté de Léviator).
-  const DEX_PX = 84, DEX_PX_MIN = 20, DEX_CAPW = 140;
+  const DEX_PX = 84, DEX_PX_MIN = 26, DEX_CAPW = 140;
   // Fiche (2026-10-30, porteur) : le Pokémon touché est montré en grand, comme mis en avant, quelle que soit sa taille
   // sur la route (Salamèche y reste petit à côté de Dracaufeu) ; jamais plus large que 136 px.
   const DEX_PX_FOCUS = 120, DEX_CAPW_FOCUS = 136;
@@ -62,9 +62,16 @@
   // « gc » pour le GIF, « pc » pour l'image fixe) qui se pose au milieu du socle, pas le milieu de son cadre : la queue de
   // Reptincel ne le décale plus ; décalage limité à 22 % de la largeur. Depuis le 2026-10-30, ce centre est celui du corps
   // seul (queue, flamme et ailes effacées par érosion, tools/sprites/dex_boxes.py) : Reptincel était encore à gauche.
+  // Hauteur en px sur la route : proportionnelle à la taille, au moins DEX_PX_MIN ; et toujours au moins 25 % de plus que
+  // la forme précédente (2026-10-31, porteur : « Herbizarre est de la même taille que Bulbizarre », tous deux ramenés au
+  // minimum à côté de Méga-Florizarre).
+  const dexPx = (e, max, top, fit) => {
+    const p = Math.max(DEX_PX_MIN, Math.round(top * fit * dexH(e) / max)), prev = e.from && DEX[e.from] && DEX[e.from].fam === e.fam ? DEX[e.from] : null;
+    return prev ? Math.max(p, Math.round(dexPx(prev, max, top, fit) * 1.25)) : p;
+  };
   const dexShift = (px, w) => Math.round(Math.max(-0.22 * w, Math.min(0.22 * w, px)));
   const dexSize = (e, max, top, still, fit) => {
-    const p = Math.max(DEX_PX_MIN, Math.round(top * fit * dexH(e) / max));
+    const p = dexPx(e, max, top, fit);
     if (!still) {
       const w = p * e.gif[0] / Math.max(1, e.gif[1]);
       // Un Pokémon qui vole ou rebondit est posé d'après l'image médiane de son animation (« gb »).
@@ -237,7 +244,7 @@
 
   // Étendue horizontale du Pokémon dessiné (par rapport au centre de son socle), animé ou fixe, pour une taille donnée.
   const dexExt = (e, max, fit, still) => {
-    const p = Math.max(DEX_PX_MIN, Math.round(DEX_PX * fit * dexH(e) / max));
+    const p = dexPx(e, max, DEX_PX, fit);
     if (!still) { const w = p * e.gif[0] / Math.max(1, e.gif[1]), sh = dexShift((0.5 - (e.gc || 0.5)) * w, w); return [sh - w / 2, sh + w / 2]; }
     const [x0, y0, x1, y1] = e.box, H = Math.round(p * 96 / Math.max(1, y1 - y0)), bw = (x1 - x0) * H / 96, sh = dexShift((48 - (e.pc || 48)) * H / 96, bw);
     return [sh - H / 2 + x0 * H / 96, sh - H / 2 + x1 * H / 96];
@@ -302,7 +309,9 @@
     } else if (from && !dexOwn(s, from.n)) act = 'Débloque d’abord ' + from.name;
     else if (pa < price) act = 'Encore ' + dexNum(price - pa) + ' PA pour le débloquer';
     else if (s.paFx) act = 'Évolution en cours…';
-    else { act = (from ? (e.mega ? 'Méga-évoluer' : 'Faire évoluer') : 'Débloquer') + ' · ' + dexNum(price) + ' PA'; actOn = true; actEvo = true; actGo = () => (e.mega ? this.setState({ megaAsk: sel }) : this.dexUnlock(sel)); }
+    else { act = (from ? (e.mega ? 'Méga-évoluer' : 'Faire évoluer') : 'Débloquer') + ' · ' + dexNum(price) + ' PA'; actOn = true; actEvo = true; actGo = () => this.dexUnlock(sel); }
+    // Méga-évolution sans confirmation (2026-10-31, porteur : la confirmation s'ouvrait tout en bas de la fiche, hors de
+    // l'écran, d'où « je n'arrive pas à méga-évoluer » et « un bouton en trop ») : un seul bouton, comme une évolution.
     v.sel = {
       img: dexSprite(sel, still), sz: dexSize(e, dexH(e), DEX_PX_FOCUS, still, fitFocus), size: (e.h / 10).toLocaleString('fr-FR') + ' m', cls: 'pkm-dex-big' + (dexSeen(s, sel) ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
       secret: '🔒 Débloque-le avec tes PA pour découvrir sa description.',
@@ -355,9 +364,6 @@
         : 'Touche les flèches de la croix : ◀ ▶ pour ses évolutions, ▲ ▼ pour passer au Pokémon suivant du Pokédex.',
       tipBtn: tips ? 'Compris !' : 'Plus tard', tipOk: () => this.setState({ dexTips: 2 })
     };
-    const ask = DEX[s.megaAsk] && DEX[s.megaAsk].mega ? DEX[s.megaAsk] : null;
-    Object.assign(v, { ask: !!ask, askText: ask ? 'Faire méga-évoluer ' + paName(ask.from) + ' en ' + ask.name + ' pour ' + dexNum(PA_MEGA) + ' PA ?' : '',
-      askYes: () => ask && this.dexUnlock(ask.n), askNo: () => this.setState({ megaAsk: null }) });
     return v;
   };
 

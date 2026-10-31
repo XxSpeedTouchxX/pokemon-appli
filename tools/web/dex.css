@@ -86,7 +86,7 @@
 /* Pokémon centré sur son socle par la mise en page (flex), sans translateX(-50%) : Safari calcule le pourcentage d'une
    animation au moment où elle démarre, avant que le GIF soit chargé (largeur 0), et laissait l'image décalée d'une
    demi-largeur vers la droite, sur le nom (2026-10-29, capture du porteur sur iPhone). */
-.pkm-dex-show { position: relative; align-self: stretch; height: auto; min-height: 176px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 24px; box-sizing: border-box; border-radius: 12px;
+.pkm-dex-show { position: relative; align-self: start; height: 196px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 24px; box-sizing: border-box; border-radius: 12px;
   background: radial-gradient(70% 90% at 50% 100%, rgba(124, 245, 255, 0.32), rgba(124, 245, 255, 0.08) 55%, rgba(124, 245, 255, 0) 75%), linear-gradient(180deg, rgba(11, 17, 32, 0.55), rgba(11, 17, 32, 0.15)); box-shadow: inset 0 0 0 1px rgba(124, 245, 255, 0.35); }
 .pkm-dex-show .pkm-dex-ped { position: absolute; left: 0; right: 0; bottom: 8px; width: 118px; height: 30px; margin: 0 auto; transform: none; }
 .pkm-dex-big { position: relative; z-index: 1; flex: none; width: auto; height: 96px; object-fit: contain; object-position: center bottom; image-rendering: pixelated; animation: pkmDexBob2 2.4s ease-in-out infinite; }
@@ -132,19 +132,19 @@
 .pkm-dex-cross:has(.pkm-dex-k-down:active) { transform: perspective(160px) rotateX(-14deg); }
 .pkm-dex-cross:has(.pkm-dex-k-left:active) { transform: perspective(160px) rotateY(-14deg); }
 .pkm-dex-cross:has(.pkm-dex-k-right:active) { transform: perspective(160px) rotateY(14deg); }
-.pkm-dex-k-a { left: calc(38 * 100% / 400); top: calc(188 * 100% / 250); width: calc(70 * 100% / 400); height: calc(36 * 100% / 250); border-radius: 8px; border: 2px solid #3A0A0E; background: linear-gradient(180deg, #6BF0A6, #2DB86A 60%, #1E8E50); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 3px 0 #145C34, 0 4px 8px rgba(0, 0, 0, 0.4); color: #0B3A20; font: inherit; font-family: 'Sora', sans-serif; font-size: clamp(12px, 4vw, 17px); font-weight: 800; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; transition: transform 0.08s, box-shadow 0.08s, filter 0.2s; filter: saturate(0.55) brightness(0.85); }
-.pkm-dex-k-a:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 0 0 #145C34, 0 1px 3px rgba(0, 0, 0, 0.4); }
+.pkm-dex-k-a { left: calc(38 * 100% / 400); top: calc(188 * 100% / 250); width: calc(70 * 100% / 400); height: calc(36 * 100% / 250); border-radius: 9px; border: 2px solid #3A0A0E; background: linear-gradient(180deg, #DDFFE6 0%, #A6F7BB 45%, #74E893 100%); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -3px 0 rgba(36, 140, 70, 0.45), 0 2px 5px rgba(0, 0, 0, 0.35); color: #0B3A20; font: inherit; font-family: 'Sora', sans-serif; font-size: clamp(12px, 4vw, 17px); font-weight: 800; letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; transition: transform 0.08s, box-shadow 0.08s; }
+.pkm-dex-k-a:active { transform: translateY(1px); box-shadow: inset 0 2px 3px rgba(36, 140, 70, 0.5), 0 1px 2px rgba(0, 0, 0, 0.35); }
 .pkm-dex-k-a:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
-.pkm-dex-a-on { filter: none; animation: pkmDexAGlow 1.6s ease-in-out infinite; }
+.pkm-dex-a-on { animation: pkmDexAGlow 1.6s ease-in-out infinite; }
 /* Assez de PA pour débloquer ou faire évoluer le Pokémon affiché (2026-10-31, porteur) : « OK » bondit, brille et un
    reflet le traverse, pour donner envie d'appuyer. */
-.pkm-dex-a-go { filter: none; overflow: hidden; animation: pkmDexAGo 1.1s ease-in-out infinite; }
+.pkm-dex-a-go { overflow: hidden; animation: pkmDexAGo 1.1s ease-in-out infinite; }
 .pkm-dex-a-go::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: -60%; width: 40%; background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0)); transform: skewX(-18deg); animation: pkmDexShine 1.6s ease-in-out infinite; pointer-events: none; }
-@keyframes pkmDexAGo { 0%, 100% { transform: none; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 3px 0 #145C34, 0 0 8px 2px rgba(255, 214, 10, 0.5); }
-  40% { transform: translateY(-3px) scale(1.1); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6), 0 6px 0 #145C34, 0 0 22px 7px rgba(255, 214, 10, 0.95); }
-  60% { transform: translateY(0) scale(0.97); } }
+@keyframes pkmDexAGo { 0%, 100% { transform: none; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -3px 0 rgba(36, 140, 70, 0.45), 0 0 8px 2px rgba(166, 247, 187, 0.55); }
+  40% { transform: translateY(-2px) scale(1.06); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.9), inset 0 -3px 0 rgba(36, 140, 70, 0.45), 0 0 20px 6px rgba(166, 247, 187, 0.95); }
+  60% { transform: translateY(0) scale(0.98); } }
 @keyframes pkmDexShine { 0%, 30% { left: -60%; } 70%, 100% { left: 130%; } }
-@keyframes pkmDexAGlow { 50% { box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 3px 0 #145C34, 0 0 16px 4px rgba(61, 220, 132, 0.85); } }
+@keyframes pkmDexAGlow { 50% { box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -3px 0 rgba(36, 140, 70, 0.45), 0 0 16px 4px rgba(166, 247, 187, 0.9); } }
 /* Voyants : clignent à chaque touche (key change → l'animation repart). */
 .pkm-dex-leds i { position: absolute; top: calc(34 * 100% / 250); width: calc(12 * 100% / 400); aspect-ratio: 1; border-radius: 50%; opacity: 0; animation: pkmDexLed 0.45s ease-out; }
 .pkm-dex-leds i:nth-child(1) { left: calc(96 * 100% / 400); background: radial-gradient(circle, #FFFFFF, #FF3B3B 60%); }
@@ -163,7 +163,7 @@
 .pkm-dex-pad-tip0 .pkm-dex-k-up > i > b { animation-delay: 0s; } .pkm-dex-pad-tip0 .pkm-dex-k-right > i > b { animation-delay: 0.6s; }
 .pkm-dex-pad-tip0 .pkm-dex-k-down > i > b { animation-delay: 1.2s; } .pkm-dex-pad-tip0 .pkm-dex-k-left > i > b { animation-delay: 1.8s; }
 @keyframes pkmDexArrow { 0%, 20% { background: #FFD60A; } 25%, 100% { background: #E8ECF8; } }
-.pkm-dex-pad-tip1 .pkm-dex-k-a { filter: none; animation: pkmDexAGlow 1s ease-in-out infinite; }
+.pkm-dex-pad-tip1 .pkm-dex-k-a { animation: pkmDexAGlow 1s ease-in-out infinite; }
 .pkm-dex-hand { position: absolute; z-index: 2; pointer-events: none; color: #FFFFFF; }
 .pkm-dex-hand-cross { left: calc(162 * 100% / 400); top: calc(204 * 100% / 250); }
 .pkm-dex-hand-a { left: calc(86 * 100% / 400); top: calc(210 * 100% / 250); }
@@ -176,10 +176,10 @@
 .pkm-dex-tip button { grid-column: 2; grid-row: 1 / span 2; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: #FFD60A; color: #0B1120; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
 @keyframes pkmDexTipIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 /* Légende sous l'appareil : les deux commandes dessinées en petit. */
-.pkm-dex-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 0; padding: 0 6px; font-size: 12px; font-weight: 700; color: #C9D3EA; }
+.pkm-dex-legend { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0; padding: 0 6px; font-size: 12px; font-weight: 700; color: #C9D3EA; }
 .pkm-dex-legend > span { display: inline-flex; align-items: center; gap: 6px; }
 .pkm-dex-lg-cross { width: 16px; height: 16px; flex: none; background: linear-gradient(#E8ECF8, #E8ECF8) center / 100% 34% no-repeat, linear-gradient(#E8ECF8, #E8ECF8) center / 34% 100% no-repeat; }
-.pkm-dex-lg-a { flex: none; padding: 1px 6px; border-radius: 5px; background: #2DB86A; color: #0B3A20; font-style: normal; font-size: 10.5px; font-weight: 800; }
+.pkm-dex-lg-a { flex: none; padding: 1px 6px; border-radius: 5px; border: 1px solid #3A0A0E; background: linear-gradient(180deg, #DDFFE6, #74E893); color: #0B3A20; font-style: normal; font-size: 10.5px; font-weight: 800; }
 /* « Ses cartes » : mes cartes du Pokémon, ses cartes les plus chères, toutes ses cartes (2026-10-29). */
 .pkm-dex-tcg { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 10px; border: 1px solid rgba(124, 245, 255, 0.45); background: rgba(10, 14, 52, 0.6); }
 .pkm-dex-tcg h4 { margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: #7CF5FF; }
@@ -227,12 +227,6 @@
 .pkm-dex-secret { margin: 6px 0 0; padding: 8px 10px; border-radius: 8px; background: rgba(11, 17, 32, 0.6); font-size: 12.5px; font-weight: 700; color: #E2E6FF; }
 .pkm-dex-act-btn { min-height: 50px; border: 0; border-radius: 999px; background: #FFD60A; color: #0B1120; font: inherit; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.25), 0 6px 16px rgba(0, 0, 0, 0.35); }
 .pkm-dex-act-off { background: #3A3F78; color: #E2E6FF; box-shadow: none; cursor: default; }
-.pkm-dex-ask { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 10px; border: 2px solid #FFD60A; background: #1C1B6E; }
-.pkm-dex-ask p { margin: 0; font-size: 13.5px; font-weight: 800; }
-.pkm-dex-ask div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
-.pkm-dex-ask button { height: 44px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
-.pkm-dex-no-btn { border: 1px solid #8C7BFF; background: transparent; color: #FFFFFF; }
-.pkm-dex-yes-btn { border: 0; background: #FFD60A; color: #0B1120; }
 .pkm-dex-rules { margin: 0; padding: 0 4px; font-size: 12px; line-height: 1.45; color: #9AA8C3; }
 /* « Mon Pokédex » : liste complète */
 .pkm-dexl-wrap { position: absolute; inset: 0; z-index: 32; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.7); }

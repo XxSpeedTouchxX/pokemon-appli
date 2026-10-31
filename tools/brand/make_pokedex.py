@@ -10,7 +10,9 @@ Sortie : web/img/brand/pokedex.svg (400 × 250, icône et petits usages). Écran
 120 × 70), droit (232, 92, 140 × 38).
 Et web/img/brand/pokedex-device.svg (2026-10-31, porteur : « un plus gros écran, un OK et des flèches plus gros ») :
 le Pokédex de l'onglet Jeux, écran gauche agrandi (34, 89, 146 × 76), croix (128, 174, 62 × 62) et bouton vert « OK »
-(38, 188, 70 × 36) plus gros : mêmes valeurs en pourcentage dans tools/web/dex.css.
+(38, 188, 70 × 36) plus gros : mêmes valeurs en pourcentage dans tools/web/dex.css. Depuis le 2026-10-31 (porteur : « on
+dirait qu'il apparaît en double »), le bouton « OK » n'est plus dessiné ici : seul le vrai bouton de l'app (vert clair,
+tools/web/dex.css) occupe cette place.
 Usage : python3 tools/brand/make_pokedex.py
 """
 import re
@@ -86,7 +88,6 @@ def left_panel(big):
 <rect x="34" y="89" width="146" height="76" rx="5" fill="#0E1626" stroke="{INK}" stroke-width="3"/>
 <rect x="44" y="178" width="22" height="5" rx="2.5" fill="#FF5A5A" stroke="{INK}" stroke-width="1.5"/>
 <rect x="72" y="178" width="22" height="5" rx="2.5" fill="#4AA8FF" stroke="{INK}" stroke-width="1.5"/>
-<rect x="38" y="188" width="70" height="36" rx="6" fill="#3DDC84" stroke="{INK}" stroke-width="3"/>
 <path d="M149 174 h20 v21 h21 v20 h-21 v21 h-20 v-21 h-21 v-20 h21 Z" fill="#1C1C1C" stroke="{INK}" stroke-width="3" stroke-linejoin="round"/>
 '''
 

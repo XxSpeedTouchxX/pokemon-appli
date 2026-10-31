@@ -118,7 +118,7 @@ ok('Herbizarre : « ' + await act.innerText() + ' »', (await act.innerText()) =
 await act.click(); await page.waitForTimeout(500);
 ok('animation d’évolution : « ' + (await page.locator('.pkm-evo-fx').innerText().catch(() => '')) + ' »', (await page.locator('.pkm-evo-fx').count()) === 1 && /Bulbizarre évolue/.test(await page.locator('.pkm-evo-fx').innerText()));
 await page.screenshot({ path: shot('buddy-evolution.png') });
-await page.waitForTimeout(3300);
+await page.waitForTimeout(7300); // évolution de 7,2 s (2026-10-31)
 st = await saved();
 ok('Herbizarre débloqué : 50 PA, compagnon, toast', st.pa === 50 && st.buddy === 2 && (st.pkOwn || []).indexOf(2) >= 0 && (await page.locator('.pkm-evo-fx').count()) === 0 && (await page.locator('text=Félicitations ! Bulbizarre a évolué en Herbizarre · il te reste 50 PA').count()) === 1);
 ok('route mise à jour : ' + await nodes.nth(1).getAttribute('aria-label'), /^Herbizarre, 1ʳᵉ évolution, Compagnon$/.test(await nodes.nth(1).getAttribute('aria-label')) && /^Encore 1\s450 PA pour le débloquer$/.test(await (async () => { await nodes.nth(2).click(); await page.waitForTimeout(300); return act.innerText(); })()));

@@ -58,10 +58,11 @@ ok('route de Dracaufeu : 2 méga-évolutions au bout, en silhouette', (await meg
 await route.locator('button[aria-label^="Méga-Dracaufeu X"]').click(); await page.waitForTimeout(200);
 const act = dex.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-act-btn');
 ok('fiche : « ' + (await act.innerText()) + ' »', /Méga-évoluer · 2\s?500 PA/.test(await act.innerText()));
-await act.click(); await page.waitForTimeout(200);
-const ask = await text('section[aria-label="Fiche du Pokémon"] .pkm-dex-ask');
-ok('confirmation : « ' + ask + ' »', /Faire méga-évoluer Dracaufeu en Méga-Dracaufeu X pour 2\s?500 PA/.test(ask));
-await dex.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-yes-btn').click(); await page.waitForTimeout(3800);
+// Un seul bouton, sans confirmation (2026-10-31, porteur : la confirmation s'ouvrait hors de l'écran).
+await act.click(); await page.waitForTimeout(600);
+const fxTxt = (await page.locator('.pkm-evo-fx').innerText().catch(() => '')).replace(/\s+/g, ' ');
+ok('un seul bouton : méga-évolution lancée sans confirmation (« ' + fxTxt.slice(0, 40) + ' »)', (await page.locator('.pkm-dex-ask, .pkm-dex-yes-btn').count()) === 0 && /Dracaufeu méga-évolue/.test(fxTxt));
+await page.waitForTimeout(7100);
 const st2 = await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); return { megas: d.megas, buddy: d.buddy, pa: d.pa }; }, KEY);
 ok('Méga-Dracaufeu X débloquée et compagnon (' + JSON.stringify(st2) + ')', (st2.megas || []).indexOf(10034) >= 0 && st2.buddy === 10034 && st2.pa === 500);
 ok('fiche après méga-évolution : plus de bouton (« C’est ton compagnon » retiré le 2026-10-31)', (await act.count()) === 0);

@@ -17,6 +17,7 @@
   // (1) et Grand maître mondial Pokémon (5). Prix : PA_MEGA, à confirmer par le porteur.
   const PA_MEGA = 2500;
   HOME_MEGAS.forEach(([id, base, nom]) => { HOME_NAMES[id] = nom; });
+  const PA_MEGA_IDS = n => HOME_MEGAS.some(m => m[0] === n);
   const paMegas = s => (Array.isArray(s.megas) ? s.megas : []);
   const paStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('pkm-calm'); } catch (e) { return true; } };
 
@@ -134,14 +135,24 @@
   // Évolution et méga-évolution : depuis le 2026-10-28, chaque Pokémon se débloque dans le Pokédex (dex.js, dexUnlock),
   // avec la même animation d'évolution (paFx) quand sa forme précédente est déjà à toi.
   let paFxTimer = null;
+  const PA_FX_MS = 7200;
   paProto.paFxRun = function (from, to, done) {
     if (paStill()) { done(); return; }
     this.setState({ paFx: { from: from, to: to, n: Date.now() } });
-    // L'animation se joue au milieu du Pokédex : on l'amène au centre de l'écran, d'où que vienne l'appui (bouton de la
-    // fiche, bouton vert du Pokédex dessiné) ; plus besoin de remonter pour la voir (2026-10-29, porteur).
-    setTimeout(() => { const el = document.querySelector('.pkm-evo-fx .pkm-evo-to') || document.querySelector('.pkm-evo-fx'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 40);
+    // L'animation se joue en haut du Pokédex (calque de 520 px au plus) : l'écran y remonte dès l'appui, d'où qu'il
+    // vienne (bouton de la fiche, bouton vert du Pokédex dessiné) (2026-10-29, puis 2026-10-31, porteur : « l'écran ne
+    // remonte pas »). On attend que le calque soit affiché (quelques images au plus) avant de le centrer.
+    let tries = 0;
+    const focus = () => {
+      const el = document.querySelector('.pkm-evo-fx');
+      if (!el && ++tries < 30) { requestAnimationFrame(focus); return; }
+      if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+    requestAnimationFrame(focus);
+    // 7,2 s (2026-10-31, porteur : « au moins 3 s de plus, et 2 s de plus pour voir la nouvelle évolution ») : la
+    // nouvelle forme reste près de 3 s à l'écran avant la fin (games.css, pkmEvoTo).
     clearTimeout(paFxTimer);
-    paFxTimer = setTimeout(() => { this.setState({ paFx: null }); done(); }, 3200);
+    paFxTimer = setTimeout(() => { this.setState({ paFx: null }); done(); }, PA_FX_MS);
   };
   const paSprite = (n, still) => 'img/pokemon/' + n + (still ? '.png' : '.gif');
   // En-tête du Pokédex : solde de PA, série, choix du starter la première fois, animation d'évolution. La route
@@ -159,7 +170,8 @@
       // Écrans du Pokédex dessiné : ton compagnon à gauche, le solde de PA à droite.
       dexImg: paSprite(b, still), dexName: e ? paName(b) : 'Choisis ton starter',
       fx: !!s.paFx, fxFrom: s.paFx ? paSprite(s.paFx.from, still) : '', fxTo: s.paFx ? paSprite(s.paFx.to, still) : '',
-      fxKey: 'evo-' + (s.paFx ? s.paFx.n : 0), fxText: s.paFx ? paName(s.paFx.from) + ' évolue…' : ''
+      fxKey: 'evo-' + (s.paFx ? s.paFx.n : 0), fxText: s.paFx ? paName(s.paFx.from) + (PA_MEGA_IDS(s.paFx.to) ? ' méga-évolue…' : ' évolue…') : '',
+      fxDone: s.paFx ? 'Félicitations ! ' + paName(s.paFx.from) + (PA_MEGA_IDS(s.paFx.to) ? ' a méga-évolué en ' : ' a évolué en ') + paName(s.paFx.to) + ' !' : ''
     };
     if (!e) r.starters = PA_STARTERS.map(([line, n]) => ({ name: paName(n), img: paSprite(n, still), pick: () => this.paChoose(line), aria: 'Choisir ' + paName(n) + ' comme starter' }));
     return r;

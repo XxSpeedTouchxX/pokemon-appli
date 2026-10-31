@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-10-31 (suite) — Sigle de l'état, bouton « OK », méga-évolutions animées et réparées, évolution plus longue
+
+- **Validé par le porteur** : les 3 choix de l'entrée précédente (plus de « vu » ; récupération des PA d'abord ; « Tous les Pokémon » et la mention « Les PK ne s'achètent pas » gardés).
+- **Demandes du porteur** :
+  - classeur : le sigle de l'état (M, NM, Ex, GD, PL, PO) à côté de sa bulle et du prix, quitte à agrandir un peu la pastille ;
+  - Pokédex : « OK : Sélectionner ou faire évoluer son Pokémon » sous l'appareil ; bouton « OK » vert clair, qui ne paraisse plus en double ;
+  - Méga-Tortank, Méga-Dracaufeu Y et les autres méga-évolutions immobiles : les faire bouger, en pixel arcade ;
+  - Herbizarre aussi petit que Bulbizarre dans l'arbre ; fiche du starter trop allongée ;
+  - évolution : l'écran doit remonter sur l'animation, au moins 3 s de plus, dont 2 s de plus sur la nouvelle forme ;
+  - méga-évolution impossible malgré les PA, et un bouton en trop.
+- **Constat** : la méga-évolution fonctionnait, mais son appui ouvrait une confirmation tout en bas de la fiche, hors de l'écran (rien ne semblait se passer, puis deux boutons en descendant). Le bouton « OK » existait deux fois : dessiné dans l'image du Pokédex et posé par-dessus.
+- **Fait** (cache v93) :
+  - classeur : sigle coloré après la bulle ; si la cote et l'état ne tiennent pas sur une ligne (petit écran, grosse cote), l'état passe sur une 2ᵉ ligne et la pastille grandit un peu ; la cote n'est jamais coupée ;
+  - Pokédex : légende du « OK » ; bouton vert clair d'une seule couche (plus dessiné dans l'image) ; méga-évolution en un seul appui, sans confirmation ;
+  - 10 méga-évolutions sans animation (PokeAPI n'en a pas) animées à partir de leur image au pixel près : respiration, ou vol pour Méga-Roucarnage, Méga-Ectoplasma, Méga-Léviator et Méga-Ptéra ;
+  - arbre : chaque forme au moins 25 % plus grande que la précédente (Herbizarre 33 px contre 26 px pour Bulbizarre) ; encadré du Pokémon de même hauteur pour toutes les fiches ;
+  - évolution de 7,2 s (contre 3,2 s) : silhouettes qui alternent de plus en plus vite, éclat, puis la nouvelle forme près de 3 s avec « Félicitations ! » ; l'écran remonte dessus dès l'appui.
+- **À confirmer** : la fin du message du porteur était coupée (« laisse uniquement un seul bouton en mentionnant "3 ») ; le seul bouton gardé affiche « Méga-évoluer · 2 500 PA ».
+
 ## 2026-10-31 — Accueil, PK et PA, Pokédex, didacticiel, états des cartes : 20 retouches du porteur
 
 - **Demandes du porteur** (le serveur est mis de côté pour l'instant) :

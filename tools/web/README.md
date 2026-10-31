@@ -164,6 +164,14 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Contraste** : « Faible » du Territoire en `#FF8080` (4,9:1).
 - Tests : `e2e/t-dexseen.mjs` (réécrit), `t-tuto`, `t-pa`, `t-pk`, `t-legal`, `t-binder`, `t-buddy`, `t-games`, `t-grades`, `t-dexpad`, `t-sorties`.
 
+## Retouches du 2026-10-31, soir (porteur)
+
+- **Classeur** : pastille `.pkm-pill2` (games.css) : drapeau et cote (`.pkm-pill2-v`, `.pkm-pill2-p`), puis bulle et sigle de l’état (`.pkm-pill2-c`, `.pkm-cond-ab`, `HOME_COND_AB` dans home.js : M, NM, Ex, GD, PL, PO, couleurs lisibles sur fond sombre) ; `flex-wrap` : l’état passe sur une 2ᵉ ligne quand la place manque, la cote n’est jamais coupée (même pastille dans « Tout afficher »).
+- **Pokédex** : `pokedex-device.svg` sans bouton vert dessiné ; `.pkm-dex-k-a` vert clair (ombres internes, sans filtre ni ombre décalée) ; légende `.pkm-dex-legend` en colonne, avec « OK : Sélectionner ou faire évoluer son Pokémon ». Méga-évolution sans confirmation (`megaAsk`, `.pkm-dex-ask` retirés). Tailles : `dexPx` (au moins `DEX_PX_MIN` = 26 px, et 25 % de plus que la forme précédente). `.pkm-dex-show` de hauteur fixe (196 px).
+- **Évolution** (pa.js `paFxRun`, games.css) : 7,2 s (`PA_FX_MS`) ; calque `.pkm-evo-fx` en haut du Pokédex (520 px au plus), centré à l’écran dès qu’il est affiché ; silhouettes de l’ancienne et de la nouvelle forme qui alternent de plus en plus vite (`pkmEvoFrom`, `pkmEvoTo`), éclat, puis la nouvelle forme avec « Félicitations ! X a évolué en Y ! » (`fxDone`).
+- **Méga-évolutions animées** : `tools/sprites/fetch_megas.py` (`idle_gif`, option `--local`) puis `tools/sprites/dex_boxes.py`.
+- Tests : `e2e/t-dexseen.mjs`, `t-binder`, `t-grades`, `t-games`, `t-buddy`, `t-dexcards`, `t-contrast`.
+
 ## Notifications
 
 `tools/web/notif.js`, fragment `profile-notif` (2026-10-29, demande du porteur) :
