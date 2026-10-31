@@ -80,7 +80,8 @@
     const tile = e => {
       const p = e.p, k = homeCopy(s.purchases, p), q = e.q, l = this.look(p), G = e.gr;
       // Carte gradée : logo de l'entreprise et note sur la carte, à la place de la bulle de l'état.
-      const gb = G ? this.gradeBadge(G) : { graded: !!p.grade, grade: p.grade || '', gradeMark: '', gradeHasMark: false, gradeCls: 'pkm-gr-badge', gradeTone: 'pkm-gr-badge-g', gradeName: p.grade || '' };
+      const demoG = !G && p.grade ? gradeOf(String(p.grade).replace(/^(PCA|CCC|PSA)\s+(\d+(?:[,.]5)?).*$/, (m, c, n) => c + '-' + n.replace(',', '.'))) : null; // article de démo « PCA 9,5 »
+      const gb = G || demoG ? this.gradeBadge(G || demoG) : { graded: !!p.grade, grade: p.grade || '', gradeMark: '', gradeHasMark: false, gradeCls: 'pkm-gr-badge', gradeTone: 'pkm-gr-badge-g', gradeName: p.grade || '' };
       const cond = !G && homeCondIcon(k.cond);
       return Object.assign(l, gb, {
         name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(e), condColor: HOME_COND[k.cond] || HOME_COND.NM, condIcon: cond || '', hasCond: !!cond, noCond: !cond && !G, condAb: G ? '' : HOME_COND_AB[k.cond] || '',

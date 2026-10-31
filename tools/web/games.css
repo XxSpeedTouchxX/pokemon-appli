@@ -744,3 +744,5 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-gr-badge-g { padding: 0 5px; border-radius: 5px; font-size: 10.5px; font-weight: 800; line-height: 1.55; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pkm-fi-etat-gr img { width: 46px; height: 34px; padding: 4px; box-sizing: border-box; border-radius: 8px; background: #0B1120; object-fit: contain; }
 .pkm-fi-etat-gr-psa img { background: #FFFFFF; }
+.pkm-fi-etat-gr { cursor: default; }
+.pkm-fi-etat-gr .pkm-fi-etat-ed { display: none; }

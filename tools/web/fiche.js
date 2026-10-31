@@ -294,7 +294,7 @@
       // Langue et origine du visuel (carte en anglais, scan d'une autre version, réimpression) : comme la fiche complète.
       imgNote: it.imgNote || '', hasImgNote: !sealed && !!it.hasImgNote,
       cote: mine !== null ? this.eur(mine) : k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Pas encore de cote'),
-      coteSrc: adj ? 'Selon l’état · ' + this.eur(k) + ' en Near Mint (Cardmarket)' : k !== null ? 'Cardmarket' : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
+      coteSrc: adj ? (groups.some(g => gradeOf(g.gr)) ? (groups.every(g => gradeOf(g.gr)) ? 'Selon la note · ' : 'Selon l’état et la note · ') : 'Selon l’état · ') + this.eur(k) + ' en Near Mint (Cardmarket)' : k !== null ? 'Cardmarket' : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
       // « Déjà possédée ×2 » (2026-10-31, porteur) à la place de « ×2 dans ta collection ».
       owned: owned, ownedText: owned ? (sealed ? 'Déjà possédé ×' : 'Déjà possédée ×') + st.qty : '',
       etats: etats, hasEtats: etats.length > 0, etatPick: etatPick,
