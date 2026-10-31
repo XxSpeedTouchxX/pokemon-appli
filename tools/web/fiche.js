@@ -12,14 +12,51 @@
   // Ouvrir la fiche : l'article rejoint le catalogue de l'app s'il n'y est pas (comme openTcg).
   fiProto.fiOpen = function (id) {
     const ex = this.st().extra || [], p = this.catalog().find(q => q.id === id);
-    this.setState(Object.assign({ fiId: id, fiPer: '30', fiCond: false, fiCopies: false, fiZoom: false }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
+    this.setState(Object.assign({ fiId: id, fiPer: '30', fiCond: false, fiCopies: false, fiZoom: false, fiEtat: null }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
   };
-  fiProto.fiClose = function () { this.setState({ fiId: null, fiZoom: false }); };
+  fiProto.fiClose = function () { this.setState({ fiId: null, fiZoom: false, fiEtat: null }); };
+
+  // État de ma carte (2026-10-31, porteur : « si par erreur l'utilisateur avait mis Near Mint alors que c'est une Mint,
+  // il peut modifier l'état de sa carte à tout moment ») : les exemplaires de cette langue et de cet état passent au
+  // nouvel état ; la valeur (cote × coefficient de l'état) et la collection suivent. « Annuler » dans le message.
+  fiProto.fiSetCond = function (pid, lang, from, to) {
+    const s = this.st(), p = this.catalog().find(q => q.id === pid);
+    if (!p || from === to) { this.setState({ fiEtat: null }); return; }
+    const purchases = (s.purchases || []).map(a => {
+      let hit = false;
+      const lines = (a.lines || []).map(l => {
+        if (l.pid !== pid || (l.lang || 'FR') !== lang || (l.cond || copyDef(p)) !== from) return l;
+        hit = true;
+        return Object.assign({}, l, { cond: to });
+      });
+      return hit ? Object.assign({}, a, { lines: lines }) : a;
+    });
+    const msg = 'État modifié : ' + copyLabel(p, to) + ' · collection à ' + this.eur(this.snap(s, { purchases: purchases }).total);
+    this.setState({ purchases: purchases, fiEtat: null, toast: msg, edUndo: { msg: msg, purchases: s.purchases } });
+    if (this._tt) clearTimeout(this._tt);
+    this._tt = setTimeout(() => { this._tt = null; this.setState({ toast: null, edUndo: null }); }, ED_UNDO_MS);
+  };
+  // Exemplaires restants d'une carte, par langue et état (ventes déduites), du plus nombreux au moins nombreux.
+  const fiGroups = (s, p) => {
+    const g = new Map();
+    (valLeft(s)[p.id] || []).filter(c => c.left > 0).forEach(c => {
+      const k = (c.lang || 'FR') + '|' + (c.cond || copyDef(p));
+      g.set(k, (g.get(k) || 0) + c.left);
+    });
+    return [...g.entries()].map(([k, qty]) => { const [lang, cond] = k.split('|'); return { key: k, lang: lang, cond: cond, qty: qty }; })
+      .sort((a, b) => b.qty - a.qty);
+  };
 
   // Contexte de la dernière fiche calculée : la fiche du panneau reprend les mêmes calculs pour son article.
   let fiX = null;
   const fiBaseItem = fiProto.vItem;
-  fiProto.vItem = function (x) { fiX = x; return fiBaseItem.call(this, x); };
+  fiProto.vItem = function (x) {
+    fiX = x;
+    const r = fiBaseItem.call(this, x), m = r && /^×(\d+) dans ta collection$/.exec(r.ownedBadge || '');
+    // Page complète d'une carte : « Déjà possédée ×2 », comme la fiche du classeur (2026-10-31, porteur).
+    if (m) { const p = x.P && x.P[x.s.itemId]; r.ownedBadge = (p && p.type === 'sealed' ? 'Déjà possédé ×' : 'Déjà possédée ×') + m[1]; }
+    return r;
+  };
 
   // Courbe du prix : archive quotidienne (scellé réel, démo) découpée selon la période ; sinon les 4 points
   // Cardmarket d'une carte (moyenne 30 jours, 7 jours, veille, tendance).
@@ -79,6 +116,24 @@
     const known = st.qty - st.unk, lat = known > 0 ? (x.val(p) || 0) * known - st.cost : 0;
     const q = encodeURIComponent(p.name + (sealed || !p.numShort ? '' : ' ' + String(p.numShort).split('/')[0]));
     const last = (it.copies || [])[0];
+    // Carte possédée : le prix affiché est celui de ses exemplaires, selon leur état (comme la pastille du classeur) ;
+    // chaque état possédé a sa bulle, qui s'ouvre sur les 6 états pour le corriger (2026-10-31, porteur).
+    const mine = owned && !sealed && k !== null ? x.val(p) : null, adj = mine !== null && Math.abs(mine - k) > 0.004;
+    const groups = owned && !sealed ? fiGroups(s, p) : [];
+    const etats = groups.map(g => {
+      const coef = this.valOn() ? valCoef(g.lang, g.cond) : 1, label = copyLabel(p, g.cond), value = k !== null ? this.eur(k * coef) : '—', on = s.fiEtat === g.key;
+      return { icon: 'img/conds/' + g.cond.toLowerCase() + '.svg', label: label, ab: HOME_COND_AB[g.cond] || '', value: value, open: on,
+        sub: (groups.length > 1 || g.qty > 1 ? '×' + g.qty + ' · ' : '') + g.lang + ' · ' + Math.round(coef * 100) + ' % de la cote',
+        cls: 'pkm-fi-etat' + (on ? ' pkm-fi-etat-on' : ''), aria: 'État de ta carte : ' + label + ', ' + value + '. Modifier l’état',
+        toggle: () => this.setState({ fiEtat: on ? null : g.key }) };
+    });
+    const eg = groups.find(g => g.key === s.fiEtat);
+    const etatPick = eg ? {
+      open: true, title: 'Quel est l’état de ' + (eg.qty > 1 ? 'tes ' + eg.qty + ' exemplaires' : 'ta carte') + ' ?',
+      note: 'La valeur suit l’état : cote Cardmarket (Near Mint) × pourcentage.',
+      list: copyConds(p).map(c => Object.assign(copyChip(this, p, c, c[0] === eg.cond, () => this.fiSetCond(p.id, eg.lang, eg.cond, c[0])),
+        k !== null ? { pct: this.eur(k * (this.valOn() ? valCoef(eg.lang, c[0]) : 1)) } : {}))
+    } : { open: false, list: [] };
     return {
       open: true, close: () => this.fiClose(), isCard: !sealed, isSealed: sealed,
       title: p.name, num: sealed ? (it.sub || '').split(' · ')[0] : (p.numShort ? p.numShort : ''),
@@ -89,9 +144,11 @@
       big: { img: it.zoomImg || it.img || it.photo || '', name: p.name, sub: it.sub, label: (sealed ? 'Photo de ' : 'Carte ') + p.name + ' en grand',
         credit: (it.zoomCredit || '') + (it.zoomVersion ? ' · version ' + it.zoomVersion : ''), fallback: it.fallbackHi || '', close: () => this.setState({ fiZoom: false }) },
       rarity: sealed ? '' : (p.rarity || ''), hasRarity: !sealed && !!p.rarity,
-      cote: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Pas encore de cote'),
-      coteSrc: k !== null ? 'Cardmarket' : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
-      owned: owned, ownedText: owned ? '×' + st.qty + ' dans ta collection' : '',
+      cote: mine !== null ? this.eur(mine) : k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Pas encore de cote'),
+      coteSrc: adj ? 'Selon l’état · ' + this.eur(k) + ' en Near Mint (Cardmarket)' : k !== null ? 'Cardmarket' : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
+      // « Déjà possédée ×2 » (2026-10-31, porteur) à la place de « ×2 dans ta collection ».
+      owned: owned, ownedText: owned ? (sealed ? 'Déjà possédé ×' : 'Déjà possédée ×') + st.qty : '',
+      etats: etats, hasEtats: etats.length > 0, etatPick: etatPick,
       addLabel: sealed ? 'Ajouter à mes produits scellés' : (owned ? 'Ajouter un exemplaire' : 'Ajouter à ma collection'),
       add: () => this.openSheet('buy', p.id), canAdd: !p.release,
       sell: () => this.openSheet('sell', p.id),

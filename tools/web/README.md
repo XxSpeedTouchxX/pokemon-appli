@@ -172,6 +172,12 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - **Méga-évolutions animées** : `tools/sprites/fetch_megas.py` (`idle_gif`, option `--local`) puis `tools/sprites/dex_boxes.py`.
 - Tests : `e2e/t-dexseen.mjs`, `t-binder`, `t-grades`, `t-games`, `t-buddy`, `t-dexcards`, `t-contrast`.
 
+## Fiche d’une carte : état modifiable (2026-10-31, porteur)
+
+- `fiche.js` : « Déjà possédée ×N » (`ownedText`, et `ownedBadge` de la page complète, via `vItem`) ; `fiGroups` (exemplaires restants par langue et état, d’après `valLeft`) ; une bulle `.pkm-fi-etat` par groupe ; `fiEtat` ouvre `.pkm-fi-etat-pick` (les 6 boutons illustrés de `copyChip`, 4ᵉ liste de `condBtn` dans build.mjs, valeur en € à la place du pourcentage) ; `fiSetCond(pid, lang, de, vers)` réécrit l’état des lignes d’achat concernées, message avec « Annuler » (`edUndo`).
+- Prix de la fiche d’une carte possédée : `x.val(p)` (cote × coefficient moyen des exemplaires restants), avec la cote Near Mint en sous-titre quand ils diffèrent.
+- Test : `e2e/t-fietat.mjs`.
+
 ## Notifications
 
 `tools/web/notif.js`, fragment `profile-notif` (2026-10-29, demande du porteur) :

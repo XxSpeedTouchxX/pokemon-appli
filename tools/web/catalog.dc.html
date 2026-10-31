@@ -1950,6 +1950,20 @@ PKCOUNTER
 <span class="pkm-fi-src"><span class="pkm-fi-flag" style="background: {{ fi.flag }}"></span>{{ fi.coteSrc }}</span>
 <sc-if value="{{ fi.owned }}" hint-placeholder-val="{{ true }}"><span class="pkm-fi-owned">{{ fi.ownedText }}</span></sc-if>
 </div>
+<sc-if value="{{ fi.hasEtats }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="État de ma carte" class="pkm-fi-etats">
+<sc-for list="{{ fi.etats }}" as="fie" hint-placeholder-count="1"><button type="button" onClick="{{ fie.toggle }}" aria-expanded="{{ fie.open }}" aria-label="{{ fie.aria }}" class="{{ fie.cls }}"><img src="{{ fie.icon }}" alt="" width="34" height="34"><span class="pkm-fi-etat-t"><b>{{ fie.label }} <i>{{ fie.ab }}</i></b><span>{{ fie.sub }}</span></span><span class="pkm-fi-etat-v">{{ fie.value }}</span><svg class="pkm-fi-etat-ed" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16v4z M13.5 6.5l4 4"></path></svg></button></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ fi.etatPick.open }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-fi-etat-pick">
+<b>{{ fi.etatPick.title }}</b>
+<div role="group" aria-label="Choisir l’état de ma carte" class="pkm-fi-etat-grid">
+<sc-for list="{{ fi.etatPick.list }}" as="fiq" hint-placeholder-count="6"><button type="button"></button></sc-for>
+</div>
+<span class="pkm-fi-note">{{ fi.etatPick.note }}</span>
+</div>
+</sc-if>
 <sc-if value="{{ fi.canAdd }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ fi.add }}" class="pkm-fi-main"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>{{ fi.addLabel }}</button></sc-if>
 <sc-if value="{{ fi.owned }}" hint-placeholder-val="{{ true }}">
 <div class="pkm-fi-pair">

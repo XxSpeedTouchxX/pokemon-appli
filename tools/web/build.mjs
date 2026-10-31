@@ -570,8 +570,9 @@ ${langs}
 {
   const condBtn = v => `<button type="button" class="pkm-cond" onClick="{{ ${v}.pick }}" aria-pressed="{{ ${v}.on }}" aria-label="{{ ${v}.aria }}" style="min-height: 44px; padding: 8px 4px 7px; border-radius: 18px; border: 1px solid {{ ${v}.bc }}; box-shadow: {{ ${v}.ring }}; background: {{ ${v}.bg }}; color: {{ ${v}.fg }}; font: inherit; font-size: 13px; font-weight: 700; line-height: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer"><sc-if value="{{ ${v}.hasIcon }}" hint-placeholder-val="{{ true }}"><img src="{{ ${v}.icon }}" alt="" width="48" height="48" style="display: block; width: 48px; height: 48px"></sc-if><span>{{ ${v}.label }}</span><sc-if value="{{ ${v}.hasIcon }}" hint-placeholder-val="{{ true }}"><span style="font-size: 11.5px; font-weight: 600; color: #9AA8C3">{{ ${v}.pct }}</span></sc-if></button>`;
   let n = 0;
-  tpl = tpl.replace(/(<sc-for list="\{\{ (?:sh\.copyConds|bed\.conds|sr\.conds) \}\}" as="(\w+)"[^>]*>\s*)<button[\s\S]*?<\/button>/g, (m, head, v) => { n++; return head + condBtn(v); });
-  if (n !== 3) throw new Error('États des cartes : ' + n + ' listes trouvées sur 3');
+  tpl = tpl.replace(/(<sc-for list="\{\{ (?:sh\.copyConds|bed\.conds|sr\.conds|fi\.etatPick\.list) \}\}" as="(\w+)"[^>]*>\s*)<button[\s\S]*?<\/button>/g, (m, head, v) => { n++; return head + condBtn(v); });
+  // (4ᵉ liste : changer l'état d'une carte depuis sa fiche, 2026-10-31.)
+  if (n !== 4) throw new Error('États des cartes : ' + n + ' listes trouvées sur 4');
 }
 const SHOP_BODY = (o, named = true) => `<section aria-label="{{ ${o}.name }}" style="flex: none; display: flex; flex-direction: column; gap: 12px">
 <div style="display: flex; align-items: flex-start; gap: 12px">

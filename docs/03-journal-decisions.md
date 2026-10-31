@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-10-31 (suite 3) — Fiche d'une carte : « Déjà possédée ×N » et état modifiable
+
+- **Validé par le porteur** : un seul bouton « Méga-évoluer · 2 500 PA ».
+- **Demandes du porteur** : « Déjà possédée ×N » à la place de « ×N dans ta collection » quand on touche une carte du classeur ; l'état de la carte avec sa bulle de couleur, modifiable à tout moment (une Mint saisie par erreur en Near Mint), et le prix qui s'ajuste.
+- **Fait** (cache v95) :
+  - fiche du classeur et page complète d'une carte : « Déjà possédée ×N » (« Déjà possédé » pour le scellé) ;
+  - sous le prix, une bulle par état possédé (bulle illustrée, nom, sigle, langue, pourcentage, valeur) ; un appui ouvre les 6 états avec la valeur de la carte pour chacun ; le choix modifie les exemplaires enregistrés (même langue, même état), avec « Annuler » dans le message ;
+  - le grand prix de la fiche d'une carte possédée est désormais celui de la carte selon son état (comme la pastille du classeur), avec « Selon l'état · 99,00 € en Near Mint (Cardmarket) » quand il diffère de la cote.
+
 ## 2026-10-31 (suite 2) — Sigle de l'état en blanc, toujours sur une ligne
 
 - **Demande du porteur** : « NM » en blanc comme les autres sigles, et tout sur une seule ligne, comme sur la carte Dracaufeu.

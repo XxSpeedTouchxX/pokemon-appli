@@ -25,7 +25,7 @@ ok('« ' + all + ' »', /^Voir ses [\d\s ]+ cartes$/.test(all.trim()) && n > 100
 await sec.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('dexcards-fiche.png') });
 // Une de mes cartes ouvre sa fiche ; Retour revient au Pokédex.
 await sec.locator('.pkm-dex-mine-card').first().click(); await page.waitForTimeout(900);
-ok('ma carte ouvre sa fiche', /dans ta collection/.test(await page.locator('main').innerText()));
+ok('ma carte ouvre sa fiche', /Déjà possédée ×/.test(await page.locator('main').innerText()));
 await page.goBack().catch(() => {}); await page.waitForTimeout(300);
 await page.evaluate(() => { const b = document.querySelector('button[aria-label="Retour"]'); if (b) b.click(); }); await page.waitForTimeout(900);
 if (!(await sec.count())) { await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(900); }

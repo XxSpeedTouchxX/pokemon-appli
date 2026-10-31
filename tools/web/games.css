@@ -290,7 +290,23 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fi-cote { font-family: 'Sora', sans-serif; font-size: 34px; font-weight: 700; line-height: 1.15; color: #FFFFFF; font-variant-numeric: tabular-nums; padding: 0 0.1em 0.06em; }
 .pkm-fi-src { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: #C9D3EA; }
 .pkm-fi-flag { width: 16px; height: 11px; border-radius: 2px; }
-.pkm-fi-owned { font-size: 12.5px; color: #9AA8C3; }
+.pkm-fi-owned { font-size: 13px; font-weight: 700; color: #C9D3EA; }
+/* État de ma carte (2026-10-31, porteur) : une bulle par état possédé, qui s'ouvre sur les 6 états pour le corriger. */
+.pkm-fi-etats { display: flex; flex-direction: column; gap: 8px; }
+.pkm-fi-etat { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; border-radius: 16px; border: 1px solid #2A3A5C; background: #111A2C; color: #FFFFFF; font: inherit; text-align: left; cursor: pointer; }
+.pkm-fi-etat-on { border-color: var(--pkm-accent); box-shadow: 0 0 0 1px var(--pkm-accent); }
+.pkm-fi-etat img { flex: none; display: block; width: 34px; height: 34px; }
+.pkm-fi-etat-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pkm-fi-etat-t b { font-size: 15px; font-weight: 700; }
+.pkm-fi-etat-t i { font-style: normal; font-size: 12px; font-weight: 800; color: #C9D3EA; }
+.pkm-fi-etat-t span { font-size: 12px; color: #9AA8C3; }
+.pkm-fi-etat-v { flex: none; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.pkm-fi-etat-ed { flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.pkm-fi-etat-pick { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; border: 1px solid var(--pkm-accent); background: #0E1626; animation: pkmFiEtatIn 0.22s ease-out; }
+.pkm-fi-etat-pick > b { font-size: 14px; }
+.pkm-fi-etat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@keyframes pkmFiEtatIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-fi-etat-pick { animation: none; } }
 .pkm-fi-main { flex: none; height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
 .pkm-fi-pair { display: flex; justify-content: center; gap: 18px; }
 .pkm-fi-link { min-height: 36px; padding: 0 4px; border: 0; background: transparent; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
