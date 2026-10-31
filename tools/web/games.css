@@ -746,5 +746,17 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-gr-badge-g { padding: 0 5px; border-radius: 5px; font-size: 10.5px; font-weight: 800; line-height: 1.55; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pkm-fi-etat-gr img { width: 46px; height: 34px; padding: 4px; box-sizing: border-box; border-radius: 8px; background: #0B1120; object-fit: contain; }
 .pkm-fi-etat-gr-psa img { background: #FFFFFF; }
-.pkm-fi-etat-gr { cursor: default; }
-.pkm-fi-etat-gr .pkm-fi-etat-ed { display: none; }
+/* Grader une carte du classeur (2026-11-01, porteur) : bouton, choix de l'entreprise et de la note, logo et note sur
+   le visuel de la fiche. */
+.pkm-fi-gradebtn { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 14px; border-radius: 16px; border: 1px dashed #4A5B80; background: #111A2C; color: #FFFFFF; font: inherit; text-align: left; cursor: pointer; }
+.pkm-fi-gradebtn-ico { flex: none; width: 46px; height: 34px; border-radius: 8px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; }
+.pkm-fi-gradebtn-ico img { display: block; max-width: 38px; max-height: 24px; object-fit: contain; }
+.pkm-fi-gradebtn-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pkm-fi-gradebtn-t b { font-size: 15px; font-weight: 700; }
+.pkm-fi-gradebtn-t span { font-size: 12.5px; color: #9AA8C3; }
+.pkm-fi-gradepick { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 16px; border: 1px solid #2A3A5C; background: #0E1626; color: #FFFFFF; }
+.pkm-fi-gradepick > b { font-size: 16px; }
+.pkm-fi-gradesave { margin-top: 4px; }
+.pkm-fi-gbadge { top: 8px; right: 8px; padding: 3px 3px 3px 7px; border-radius: 9px; gap: 6px; }
+.pkm-fi-gbadge .pkm-gr-badge-logo { height: 18px; max-width: 48px; }
+.pkm-fi-gbadge .pkm-gr-badge-g { font-size: 14px; padding: 1px 7px; border-radius: 6px; }

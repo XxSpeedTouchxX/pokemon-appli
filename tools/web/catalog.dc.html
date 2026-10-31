@@ -1984,6 +1984,7 @@ PKCOUNTER
 <sc-if value="{{ fi.isCard }}" hint-placeholder-val="{{ true }}"><img src="{{ fi.img }}" srcset="{{ fi.srcset }}" alt="" class="pkm-fi-card"></sc-if>
 <sc-if value="{{ fi.hasPhoto }}" hint-placeholder-val="{{ false }}"><img src="{{ fi.photo }}" alt="" class="pkm-fi-photo"></sc-if>
 <sc-if value="{{ fi.sealedArt }}" hint-placeholder-val="{{ false }}"><span class="pkm-fi-art" style="background: {{ fi.bg }}"><img src="{{ fi.logo }}" alt=""></span></sc-if>
+<sc-if value="{{ fi.hasGradeBadge }}" hint-placeholder-val="{{ false }}"><span class="{{ fi.gb.gradeCls }}" aria-label="{{ fi.gb.gradeName }}"><img src="{{ fi.gb.gradeMark }}" alt="" class="pkm-gr-badge-logo"><b class="{{ fi.gb.gradeTone }}">{{ fi.gb.grade }}</b></span></sc-if>
 </button>
 <sc-if value="{{ fi.hasRarity }}" hint-placeholder-val="{{ true }}"><span class="pkm-fi-rarity">★ {{ fi.rarity }}</span></sc-if>
 <div class="pkm-fi-price">
@@ -2005,6 +2006,27 @@ PKCOUNTER
 </div>
 <span class="pkm-fi-note">{{ fi.etatPick.note }}</span>
 </div>
+</sc-if>
+<sc-if value="{{ fi.gradeBtn.show }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ fi.gradeBtn.go }}" class="pkm-fi-gradebtn"><span class="pkm-fi-gradebtn-ico" aria-hidden="true"><img src="img/grading/psa-color.png" alt=""></span><span class="pkm-fi-gradebtn-t"><b>{{ fi.gradeBtn.label }}</b><span>{{ fi.gradeBtn.sub }}</span></span></button></sc-if>
+<sc-if value="{{ fi.gradePick.open }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Grader ta carte" class="pkm-fi-gradepick">
+<b>{{ fi.gradePick.title }}</b>
+<span class="pkm-fi-note">{{ fi.gradePick.sub }}</span>
+<span class="pkm-gr-h">Entreprise de gradation</span>
+<div role="group" aria-label="Entreprise de gradation" class="pkm-gr-cos">
+<sc-for list="{{ fi.gradePick.cos }}" as="fgco" hint-placeholder-count="3"><button type="button" onClick="{{ fgco.pick }}" aria-pressed="{{ fgco.on }}" aria-label="{{ fgco.name }}" class="{{ fgco.cls }}"><img src="{{ fgco.mark }}" alt="" class="pkm-gr-co-logo"></button></sc-for>
+</div>
+<span class="pkm-gr-h">Note</span>
+<div role="group" aria-label="Note de la carte" class="pkm-gr-notes">
+<sc-for list="{{ fi.gradePick.notes }}" as="fgn" hint-placeholder-count="6"><button type="button" onClick="{{ fgn.pick }}" aria-pressed="{{ fgn.on }}" aria-label="{{ fgn.aria }}" class="{{ fgn.cls }}"><b>{{ fgn.g }}</b><sc-if value="{{ fgn.hasLabel }}" hint-placeholder-val="{{ false }}"><i>{{ fgn.label }}</i></sc-if></button></sc-for>
+</div>
+<p aria-live="polite" class="pkm-gr-note">{{ fi.gradePick.note }}</p>
+<button type="button" onClick="{{ fi.gradePick.save }}" class="pkm-fi-main pkm-fi-gradesave">{{ fi.gradePick.saveLabel }}</button>
+<div class="pkm-fi-pair">
+<sc-if value="{{ fi.gradePick.canRemove }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ fi.gradePick.remove }}" class="pkm-fi-link pkm-fi-del">Retirer la note</button></sc-if>
+<button type="button" onClick="{{ fi.gradePick.cancel }}" class="pkm-fi-link">Annuler</button>
+</div>
+</section>
 </sc-if>
 <sc-if value="{{ fi.canAdd }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ fi.add }}" class="pkm-fi-main"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>{{ fi.addLabel }}</button></sc-if>
 <sc-if value="{{ fi.owned }}" hint-placeholder-val="{{ true }}">

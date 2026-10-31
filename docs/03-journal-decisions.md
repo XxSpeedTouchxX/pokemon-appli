@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-01 (suite 5) — Grader une carte déjà dans le classeur
+
+- **Demande du porteur** : « lorsque l'on sélectionne sa carte dans son classeur, rajoute le bouton de gradation pour grader ta carte […] et je veux qu'il y ait le logo de l'entreprise de gradation sur la carte avec la note associée si notre carte est gradée ».
+- **Fait** (cache v108, `tools/web/graded.js`) :
+  - fiche d'une carte du classeur : bouton **« Grader ma carte »** (logo PSA) sous « État de ma carte » ;
+  - même choix qu'à l'ajout : entreprise (PCA, CCC, PSA, avec leur logo), note (10 à 6 ; CCC : 10 Black Label et 10 Gold Label ; PSA sans 9,5), PSA 10 proposé par défaut, « Enregistrer · CCC 9,5 », « Annuler » ;
+  - **un seul exemplaire est gradé** : si tu as 2 exemplaires, l'autre reste non gradé, avec son état ;
+  - valeur de l'exemplaire gradé = cote Cardmarket × coefficient de la note × langue (**estimations à valider**, comme à l'ajout) ; message « Carte gradée : CCC 9,5 · collection à X € », avec « Annuler » ;
+  - **logo de l'entreprise et note sur le visuel** de la fiche, comme sur la carte du classeur (ouverte depuis la carte gradée, ou quand tous les exemplaires ont la même note) ;
+  - ouverte depuis la carte gradée, la fiche affiche en grand **la valeur de cet exemplaire** (par exemple 441,98 € pour CCC 9,5), pas la moyenne avec l'exemplaire non gradé ;
+  - appui sur la ligne gradée de « État de ma carte » : **changer la note** ou **« Retirer la note »** (l'exemplaire redevient non gradé, en Near Mint ou dans son état d'avant).
+- **Tests** : `e2e/t-gradeedit.mjs` (nouveau, 16 contrôles) ; `t-graded`, `t-binder`, `t-fietat`, `t-fihist`, `t-dexcards`, `t-edit` repassés.
+
 ## 2026-11-01 (suite 4) — Pokédex retouché, sons de la pièce et de l'évolution
 
 - **Demandes du porteur** :

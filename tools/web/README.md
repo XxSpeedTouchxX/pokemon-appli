@@ -658,6 +658,12 @@ Le script `tools/web/build.mjs` :
   - classeur : `gradeEntries` (une carte par note), `gradeBadge` (logo et note) ; la fiche montre la note dans « État de ma carte ».
 - **Fiche en panneau** : Échap (`build.mjs`) et Retour du téléphone (`nav.js`) ferment d'abord l'agrandissement, puis la fiche ; note de langue et de visuel (`imgNote`).
 - Tests : `e2e/t-top.mjs`, `e2e/t-graded.mjs`.
+- **Grader une carte du classeur** (`graded.js`, 2026-11-01) :
+  - fiche : `gradeBtn` (« Grader ma carte », premier groupe non gradé, PSA 10 par défaut) et `gradePick` (entreprise, note, Enregistrer, Retirer la note, Annuler) ;
+  - `fiSetGrade(pid, key, to)` : coupe la ligne d'achat de l'exemplaire (`qty - 1` inchangé, plus une ligne `qty: 1` avec `gr`), ou retire `gr` ; toast avec Annuler (`edUndo`) ;
+  - `fiOpen(id, { gr })` (carte gradée du classeur, `home.js`) : `fiGrSel` choisit la note montrée sur le visuel (`hasGradeBadge`, `gb`, classe `pkm-fi-gbadge`) ; sans `gr`, la note est montrée si tous les exemplaires restants ont la même ; avec `gr` et d'autres exemplaires, le grand prix (`cote`, `coteSrc`) est celui de l'exemplaire gradé ;
+  - appui sur une ligne gradée de « État de ma carte » : changer ou retirer la note.
+- Tests : `e2e/t-gradeedit.mjs`.
 
 ## Pokédex et sons (2026-11-01, nuit, porteur)
 

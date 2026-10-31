@@ -88,7 +88,7 @@
         many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg,
         label: p.name + (gb.graded ? ', gradée ' + gb.gradeName : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
           + (G ? '' : copyLabel(p, k.cond) + ', ') + 'cote ' + (e.v ? x.mask(this.eur(e.v)) : 'inconnue') + '. Ouvrir la fiche',
-        open: () => this.fiOpen(p.id)
+        open: () => this.fiOpen(p.id, { gr: G ? G.key : '' })
       });
     };
     const isGraded = e => !!(e.gr || e.p.grade);
