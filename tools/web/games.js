@@ -65,6 +65,7 @@
     };
     this.setState({ games: Object.assign({}, g, { coinAt: at, cWin: win, cPhase: gmStill() ? 'done' : 'flip', cN: (g.cN || 0) + 1, hist: hist }) });
     if (gmStill()) { done(); return; }
+    this.sfxCoin(); // bruit de la pièce lancée, qui tourne et retombe (sfx.js, 2026-11-01)
     gmLater(done, 2900);
   };
 

@@ -199,6 +199,14 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - extensions : vignettes légères (2,6 Mo → 0,8 Mo au premier écran) ;
   - **carte gradée à l'ajout** (entreprise, note, valeur selon la note, logo et note sur la carte, `tools/web/graded.js` ; coefficients **à valider**) ;
   - scan : reconnaissance de l'illustration **proposée, à valider**.
+- **Pokédex et sons (2026-11-01, nuit, porteur) :**
+  - Dracaufeu et Herbizarre plus grands dans l'arbre ;
+  - silhouettes protégées de l'appui long (le Pokémon n'apparaît plus) ;
+  - cartes du Pokédex ouvertes dans la fiche en panneau ;
+  - voyants du haut fixes ;
+  - PK et PA en blanc ;
+  - son de la pièce lancée ;
+  - évolution : 5 sons et 4 musiques originaux (`tools/web/sfx.js`), **par défaut Cristal magique et Suspense et lumière, à confirmer par le porteur** (?sonevo=, ?musevo=).
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

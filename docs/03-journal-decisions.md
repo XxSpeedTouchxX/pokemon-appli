@@ -6,6 +6,32 @@
 
 ---
 
+## 2026-11-01 (suite 4) — Pokédex retouché, sons de la pièce et de l'évolution
+
+- **Demandes du porteur** :
+  - dans le Pokédex, Dracaufeu et Herbizarre un peu plus grands ;
+  - corriger le bug de la silhouette noire qui laisse voir le Pokémon quand on reste appuyé ;
+  - « Voir ses cartes » : une carte choisie s'ouvre dans la même fiche que les cartes des séries (état, carte gradée…) ;
+  - retirer l'animation des 3 voyants rouge, jaune et vert du haut du Pokédex ;
+  - un son quand on lance la pièce ;
+  - proposer plusieurs sons et une musique pour l'évolution ;
+  - « PK » et « PA » du solde en blanc.
+- **Fait** (cache v104) :
+  - **tailles** : Herbizarre 33 → 40 px, Dracaufeu 58 → 62 px dans l'arbre (+20 %, `DEX_BOOST`, `dex.js`). Leurs évolutions et méga-évolutions restent plus grandes ; la famille tient dans la largeur de l'écran. La fiche montre toujours chaque Pokémon à la même taille de mise en avant ;
+  - **silhouettes** : un appui long ouvrait l'aperçu de l'image d'origine, sans le filtre noir (iPhone), ou le menu « Ouvrir l'image » (Android). L'image d'une silhouette ne réagit plus au toucher et le menu est bloqué dans le Pokédex (`dex.css`, `dex.js`) ;
+  - **cartes du Pokédex** (Mes cartes, les 3 plus chères, « Voir ses cartes », Items) : ouvertes dans la fiche en panneau (`fiOpen`), avec l'ajout, l'état et la carte gradée ;
+  - **voyants** : plus de clignotement (dessinés sur l'appareil, immobiles) ;
+  - **PK et PA** du solde en blanc ;
+  - **sons** (`tools/web/sfx.js`, Web Audio, motifs originaux, aucun fichier) :
+    - pièce : pichenette, reflets à chaque demi-tour, choc sur la table, rebond, vibration finale, au rythme de l'animation ;
+    - évolution, **5 sons** : Cristal magique, Charge d'énergie, Rétro 8 bits, Souffle cosmique, Harpe féerique ;
+    - évolution, **4 musiques** : Fanfare héroïque, Suspense et lumière, Chiptune joyeuse, Boîte à musique ;
+    - tout est calé sur l'animation de 7,2 s : éclairs de 1,37 à 4,14 s, apparition de la nouvelle forme à 4,8 s ;
+    - volumes égalisés : sons à −24 dBFS de moyenne, musiques à −27 dBFS ; son et musique ensemble ne saturent pas ;
+    - **par défaut, proposés et à confirmer par le porteur : Cristal magique et Suspense et lumière**. ?sonevo=1 à 5 et ?musevo=1 à 4 (0 = aucun) pour en essayer d'autres sur le téléphone ; le son du didacticiel coupé les coupe aussi ;
+    - échantillons MP3 envoyés au porteur.
+- **Tests** : `e2e/t-dexsil.mjs`, `e2e/t-sfx.mjs` (nouveaux) ; `t-dexcards`, `t-fihist` adaptés.
+
 ## 2026-11-01 (suite 3) — Prix gradés sous 5 €, « Les plus chères » revue, visuels, extensions plus rapides, cartes gradées
 
 - **Demandes du porteur** :

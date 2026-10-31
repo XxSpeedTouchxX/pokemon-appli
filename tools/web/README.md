@@ -659,3 +659,21 @@ Le script `tools/web/build.mjs` :
 - **Fiche en panneau** : Échap (`build.mjs`) et Retour du téléphone (`nav.js`) ferment d'abord l'agrandissement, puis la fiche ; note de langue et de visuel (`imgNote`).
 - Tests : `e2e/t-top.mjs`, `e2e/t-graded.mjs`.
 
+## Pokédex et sons (2026-11-01, nuit, porteur)
+
+- **Pokédex** :
+  - `DEX_BOOST` (Herbizarre et Dracaufeu +20 % dans la route seulement, `dexPx0` garde la taille de référence pour les formes suivantes) ;
+  - silhouettes : `pointer-events: none` et `-webkit-touch-callout: none` sur l'image, `contextmenu` bloqué dans le Pokédex ;
+  - cartes (Mes cartes, plus chères, « Voir ses cartes », Items) ouvertes par `fiOpen` ;
+  - voyants `.pkm-dex-leds` retirés.
+- **PK et PA** : `.pkm-pk-unit`, `.pkm-pa-unit` en blanc.
+- **Sons** (`sfx.js`) :
+  - `sfxCoin` (games.js, `gmFlip`) et `sfxEvo` (pa.js, `paFxRun`) ;
+  - listes `SFX_EVO` (5) et `SFX_MUSIC` (4), défauts `SFX_EVO_DEFAULT`, `SFX_MUSIC_DEFAULT` ;
+  - volumes `SFX_GAIN` ;
+  - instants de l'animation `SFX_FLASH`, `SFX_REVEAL` ;
+  - essai : `?sonevo=` et `?musevo=` (numéro, identifiant ou 0), gardés sur l'appareil (`pkm-evo-sfx`, `pkm-evo-music`) ;
+  - rendu hors ligne `sfxRender` (tests, échantillons) ;
+  - coupé avec `pkm-tuto-sound = off`.
+- Tests : `e2e/t-dexsil.mjs`, `e2e/t-sfx.mjs`.
+
