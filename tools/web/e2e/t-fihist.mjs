@@ -24,9 +24,10 @@ const open = async (w, h, route) => {
 };
 {
   const [ctx, page] = await open(390, 844);
-  // En-tête : « PA » de la même couleur que « PK » (gris clair ; il était violet, puis sombre sur fond sombre).
+  // En-tête : « PA » de la même couleur que « PK » (il était violet, puis sombre sur fond sombre, puis gris clair).
   const units = await page.evaluate(() => [...document.querySelectorAll('span')].filter(s => /^(PK|PA)$/.test(s.textContent) && s.offsetParent).slice(0, 2).map(s => s.textContent + ':' + getComputedStyle(s).color));
-  ok('en-tête : ' + units.join(' · '), units.length === 2 && units[0].split(':')[1] === units[1].split(':')[1]);
+  // Depuis le 2026-11-01 (porteur) : « PK » et « PA » en blanc.
+  ok('en-tête : ' + units.join(' · '), units.length === 2 && units.every(u => u.split(':')[1] === 'rgb(255, 255, 255)'));
   await page.evaluate(id => window.__pkm.fiOpen(id), ID); await page.waitForTimeout(1500);
   const FI = page.locator('section.pkm-fi'), H = FI.locator('section[aria-label="Historique du prix"]'), G = FI.locator('section[aria-label="Prix gradés"]');
   const cote = N(await FI.locator('.pkm-fi-cote').innerText());

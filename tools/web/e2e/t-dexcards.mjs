@@ -24,11 +24,12 @@ const all = await sec.locator('.pkm-dex-tcg-all').innerText(), n = Number(all.re
 ok('« ' + all + ' »', /^Voir ses [\d\s ]+ cartes$/.test(all.trim()) && n > 100);
 await sec.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('dexcards-fiche.png') });
 // Une de mes cartes ouvre sa fiche ; Retour revient au Pokédex.
+// Depuis le 2026-11-01 (porteur) : la fiche en panneau, la même que dans les séries et le classeur (état, gradée…).
 await sec.locator('.pkm-dex-mine-card').first().click(); await page.waitForTimeout(900);
-ok('ma carte ouvre sa fiche', /Déjà possédée ×/.test(await page.locator('main').innerText()));
-await page.goBack().catch(() => {}); await page.waitForTimeout(300);
-await page.evaluate(() => { const b = document.querySelector('button[aria-label="Retour"]'); if (b) b.click(); }); await page.waitForTimeout(900);
-if (!(await sec.count())) { await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(900); }
+const FI = page.locator('section.pkm-fi');
+ok('ma carte ouvre la fiche en panneau, avec l’état de ma carte', (await FI.count()) === 1 && /Déjà possédée ×/.test(await FI.innerText()) && (await FI.locator('[aria-label="État de ma carte"]').count()) === 1);
+await FI.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(500);
+ok('fiche fermée : retour au Pokédex', (await FI.count()) === 0 && (await sec.count()) === 1);
 // « Voir ses N cartes » : la recherche montre exactement ces cartes.
 await sec.locator('.pkm-dex-tcg-all').click(); await page.waitForTimeout(1200);
 const main = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
@@ -43,6 +44,12 @@ await page.click('[aria-label="Filtre du marché"] button:has-text("Items")'); a
 ok('« Items » de Pikachu : « Pas d’items disponibles »', (await page.locator('main p:has-text("Pas d’items disponibles")').count()) === 1);
 await page.click('[aria-label="Filtre du marché"] button:has-text("Cartes")'); await page.waitForTimeout(400);
 await page.screenshot({ path: shot('dexcards-recherche.png') });
+// Une carte de la liste : fiche en panneau, puis l'ajout avec l'état ou la carte gradée.
+await page.locator('main .pkm-dark > button').filter({ hasText: /cote|sans prix/ }).first().click(); await page.waitForTimeout(900);
+ok('carte de la liste : fiche en panneau', (await FI.count()) === 1 && (await FI.locator('button.pkm-fi-main').count()) === 1);
+await FI.locator('button.pkm-fi-main').click(); await page.waitForTimeout(400);
+ok('ajout : langue, « Carte gradée » et état, comme dans les séries', (await page.locator('[aria-label="Langue de l’exemplaire"]').count()) === 1 && (await page.locator('[aria-label="Carte gradée"]').count()) === 1 && (await page.locator('[aria-label="État de l’exemplaire"]').count()) === 1);
+await page.keyboard.press('Escape'); await page.evaluate(() => window.__pkm && window.__pkm.setState({ sheet: null, fiId: null })).catch(() => {}); await page.waitForTimeout(300);
 // Pokédex dessiné : petit écran, croix et bouton vert.
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.click('button[aria-label^="Compagnon"]'); await page.waitForTimeout(1200);

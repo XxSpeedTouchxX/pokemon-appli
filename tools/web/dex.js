@@ -55,7 +55,7 @@
   // (tools/sprites/dex_boxes.py). Un sprite très large (Méga-Roucarnage) réduit toute sa famille d'autant : les
   // proportions restent justes et rien ne déborde de plus d'une colonne.
   const dexAsp = (e, still) => (still ? (e.box[2] - e.box[0]) / Math.max(1, e.box[3] - e.box[1]) : e.gif[0] / Math.max(1, e.gif[1]));
-  const dexFamFit = (n, max, top, cap, still) => Math.min(1, ...dexFam(n).map(e => cap / Math.max(1, top * dexH(e) / max * dexAsp(e, still))));
+  const dexFamFit = (n, max, top, cap, still) => Math.min(1, ...dexFam(n).map(e => cap * (DEX_BOOST[e.n] || 1) / Math.max(1, top * dexH(e) / max * dexAsp(e, still))));
   // Style de l'image : hauteur voulue du Pokémon ; image fixe agrandie d'après sa boîte, pieds recalés (décalage en px
   // par « translate », jamais en %). La fiche ne déborde pas de sa colonne de 128 px (DEX_CAPW_BIG).
   // Centrage (2026-10-29, porteur) : c'est le centre d'équilibre du Pokémon (corps et pieds, tools/sprites/dex_boxes.py :
@@ -65,10 +65,16 @@
   // Hauteur en px sur la route : proportionnelle à la taille, au moins DEX_PX_MIN ; et toujours au moins 25 % de plus que
   // la forme précédente (2026-10-31, porteur : « Herbizarre est de la même taille que Bulbizarre », tous deux ramenés au
   // minimum à côté de Méga-Florizarre).
-  const dexPx = (e, max, top, fit) => {
+  // Un peu plus grands (2026-11-01, porteur) : Herbizarre (2) et Dracaufeu (6), +20 % après la règle des 25 % ; leurs
+  // évolutions gardent leur taille ; la famille entière reste dans la largeur de l'écran.
+  const DEX_BOOST = { 2: 1.2, 6: 1.2 };
+  const dexPx0 = (e, max, top, fit) => {
     const p = Math.max(DEX_PX_MIN, Math.round(top * fit * dexH(e) / max)), prev = e.from && DEX[e.from] && DEX[e.from].fam === e.fam ? DEX[e.from] : null;
-    return prev ? Math.max(p, Math.round(dexPx(prev, max, top, fit) * 1.25)) : p;
+    return prev ? Math.max(p, Math.round(dexPx0(prev, max, top, fit) * 1.25)) : p;
   };
+  // Agrandissement à l'affichage seulement : les formes suivantes gardent leur taille (Méga-Dracaufeu reste plus grand).
+  // Route seulement (top = DEX_PX) : la fiche montre chaque Pokémon à la même taille de mise en avant.
+  const dexPx = (e, max, top, fit) => Math.round(dexPx0(e, max, top, fit) * (top === DEX_PX ? DEX_BOOST[e.n] || 1 : 1));
   const dexShift = (px, w) => Math.round(Math.max(-0.22 * w, Math.min(0.22 * w, px)));
   const dexSize = (e, max, top, still, fit) => {
     const p = dexPx(e, max, top, fit);
@@ -132,7 +138,9 @@
     const out = { name: name, loading: ids === null, ready: ids !== null, mine: [], hasMine: false, noMine: false, top: [], hasTop: false, all: () => {}, allLabel: '', hasAll: false };
     if (ids === null) { out.note = TCG.status === 'error' ? 'Catalogue des cartes indisponible pour le moment.' : 'Chargement des cartes…'; return out; }
     const c = this.compute(s), F = TCG.F;
-    const open = p => (p.tcg ? this.openTcg(p.id) : this.push('item', { itemId: p.id }));
+    // Une carte s'ouvre dans la fiche en panneau, la même que dans les séries et le classeur (2026-11-01, porteur) :
+    // état, carte gradée, prix gradés, historique.
+    const open = p => this.fiOpen(p.id);
     const mine = this.catalog().filter(p => p.type === 'card' && c.stock[p.id] && c.stock[p.id].qty > 0 && dexMatch(p.name).indexOf(n) >= 0)
       .map(p => ({ p: p, q: c.stock[p.id].qty, v: (this.unitVal(p, s.valuation) || 0) * c.stock[p.id].qty }))
       .sort((a, b) => b.v - a.v);
@@ -147,7 +155,7 @@
     out.top = top.map((x, i) => {
       const p = TCG.item(x.r[F.id]), k = this.cote(p);
       return Object.assign(this.look(p), { rank: String(i + 1), name: p.name, set: p.setName + ' · ' + p.numLabel, cote: k !== null ? this.eur(k) : '—',
-        aria: (i + 1) + 'ᵉ plus chère : ' + p.name + ', ' + p.setName + ', ' + (k !== null ? this.eur(k) : 'sans cote'), open: () => this.openTcg(p.id) });
+        aria: (i + 1) + 'ᵉ plus chère : ' + p.name + ', ' + p.setName + ', ' + (k !== null ? this.eur(k) : 'sans cote'), open: () => open(p) });
     });
     out.hasTop = out.top.length > 0;
     out.hasAll = ids.length > 0;
@@ -187,13 +195,13 @@
       });
     };
     if (items) {
-      r.list = its.map((p, i) => row(p, i, () => this.push('item', { itemId: p.id })));
+      r.list = its.map((p, i) => row(p, i, () => this.fiOpen(p.id)));
       r.count = its.length ? its.length + (its.length > 1 ? ' items liés à ' : ' item lié à ') + name : '';
       r.emptyText = 'Pas d’items disponibles';
     } else {
       // Cartes : ses cartes du catalogue seulement (la liste exacte du Pokédex), sans les produits.
       const res = TCG.pick(s.mIds, LIMIT);
-      r.list = res.items.map((p, i) => row(p, i, () => this.openTcg(p.id)));
+      r.list = res.items.map((p, i) => row(p, i, () => this.fiOpen(p.id)));
       r.count = res.total + (res.total > 1 ? ' cartes de ' : ' carte de ') + name + (res.total > LIMIT ? ' · les ' + LIMIT + ' premières' : '') + ' · catalogue TCGdex';
       r.emptyText = 'Aucune carte de ' + name + ' pour l’instant.';
     }
@@ -420,6 +428,14 @@
     this.dexBip(1);
     this.setState({ dexSel: n, megaAsk: null, dexDir: dir || 'none', dexTick: (Number(this.st().dexTick) || 0) + 1 });
   };
+  // Pas de menu d'image au toucher prolongé dans le Pokédex (Android : « Ouvrir l'image » montrait le Pokémon sous sa
+  // silhouette, 2026-11-01).
+  try {
+    document.addEventListener('contextmenu', ev => {
+      const t = ev.target;
+      if (t && t.closest && t.closest('section[aria-label="Pokédex"], section[aria-label="Mon Pokédex"], .pkm-dex-sil, .pkm-dex-lock')) ev.preventDefault();
+    });
+  } catch (e) { /* pas de document (tests) */ }
   // Petit bip de console à chaque touche (Web Audio, très court) ; coupé avec le son du didacticiel.
   let dexAc = null;
   dexProto.dexBip = function (kind) {

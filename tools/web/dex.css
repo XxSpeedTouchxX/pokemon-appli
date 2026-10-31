@@ -105,7 +105,7 @@
      bouton triangulaire (clip-path) : tout le carré se touche, la direction dépend de l'endroit ; la croix bascule
      du côté appuyé ;
    - bouton vert « OK » en relief, qui brille et pulse quand son action est possible ;
-   - voyants du haut qui clignotent à chaque touche, écran qui change en glissant dans le sens de la flèche. */
+   - écran qui change en glissant dans le sens de la flèche (les voyants du haut ne clignotent plus : 2026-11-01). */
 .pkm-dex-pad { position: absolute; inset: 0; pointer-events: none; }
 .pkm-dex-pad button { pointer-events: auto; -webkit-tap-highlight-color: transparent; }
 .pkm-dex-cross { position: absolute; left: calc(128 * 100% / 400); top: calc(174 * 100% / 250); width: calc(62 * 100% / 400); aspect-ratio: 1; transition: transform 0.12s; filter: drop-shadow(0 3px 0 #3A0A0E) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45)); }
@@ -146,11 +146,7 @@
 @keyframes pkmDexShine { 0%, 30% { left: -60%; } 70%, 100% { left: 130%; } }
 @keyframes pkmDexAGlow { 50% { box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -3px 0 rgba(36, 140, 70, 0.45), 0 0 16px 4px rgba(166, 247, 187, 0.9); } }
 /* Voyants : clignent à chaque touche (key change → l'animation repart). */
-.pkm-dex-leds i { position: absolute; top: calc(34 * 100% / 250); width: calc(12 * 100% / 400); aspect-ratio: 1; border-radius: 50%; opacity: 0; animation: pkmDexLed 0.45s ease-out; }
-.pkm-dex-leds i:nth-child(1) { left: calc(96 * 100% / 400); background: radial-gradient(circle, #FFFFFF, #FF3B3B 60%); }
-.pkm-dex-leds i:nth-child(2) { left: calc(114 * 100% / 400); background: radial-gradient(circle, #FFFFFF, #FFD60A 60%); animation-delay: 0.07s; }
-.pkm-dex-leds i:nth-child(3) { left: calc(132 * 100% / 400); background: radial-gradient(circle, #FFFFFF, #3DDC84 60%); animation-delay: 0.14s; }
-@keyframes pkmDexLed { 30% { opacity: 1; box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.8); } 100% { opacity: 0; } }
+/* Voyants rouge, jaune, vert du haut : dessinés sur l'appareil, sans clignotement (2026-11-01, porteur). */
 /* Écran : le Pokémon arrive du côté de la flèche, avec un petit grésillement. */
 /* (opacité et position seulement : un filtre trahirait la silhouette d'un Pokémon pas encore vu) */
 .pkm-dex-lcd-l img.pkm-lcd-in { animation: pkmLcdIn 0.3s ease-out, pkmDexBob 2.4s ease-in-out 0.3s infinite; }
@@ -253,6 +249,11 @@
 .pkm-dexl-can .pkm-dexl-st { color: #FFE27A; }
 .pkm-dexl-buddy { box-shadow: 0 0 0 2px #FFD60A, 0 0 14px rgba(255, 214, 10, 0.6); }
 .pkm-dexl-empty { margin: 0; text-align: center; font-size: 14px; }
-@media (prefers-reduced-motion: reduce) { .pkm-dex-device, .pkm-dex-lcd-l img, .pkm-dex-big, .pkm-dex-now .pkm-dex-ped, .pkm-dex-tag, .pkm-dexl, .pkm-dex-a-on, .pkm-dex-a-go, .pkm-dex-a-go::after, .pkm-dex-leds i, .pkm-dex-lcd-l img.pkm-lcd-in, .pkm-dex-pad-tip0 .pkm-dex-cross, .pkm-dex-pad-tip0 .pkm-dex-k > i > b, .pkm-dex-pad-tip1 .pkm-dex-k-a, .pkm-dex-finger, .pkm-dex-tip { animation: none; } .pkm-dex-cross { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-dex-device, .pkm-dex-lcd-l img, .pkm-dex-big, .pkm-dex-now .pkm-dex-ped, .pkm-dex-tag, .pkm-dexl, .pkm-dex-a-on, .pkm-dex-a-go, .pkm-dex-a-go::after, .pkm-dex-lcd-l img.pkm-lcd-in, .pkm-dex-pad-tip0 .pkm-dex-cross, .pkm-dex-pad-tip0 .pkm-dex-k > i > b, .pkm-dex-pad-tip1 .pkm-dex-k-a, .pkm-dex-finger, .pkm-dex-tip { animation: none; } .pkm-dex-cross { transition: none; } }
 /* Didacticiel : la place du compagnon reste vide tant que le starter présente l'app (home.js, tuto.js). */
 .pkm-buddy-away { visibility: hidden; }
+/* Silhouettes (2026-11-01, porteur : « en restant appuyé longtemps sur une silhouette noire, le Pokémon apparaît ») :
+   l'image ne réagit plus au toucher (pas d'aperçu d'image sur iPhone, pas de menu « Ouvrir l'image » sur Android, pas de
+   glisser-déposer) ; le bouton autour reste actif. */
+.pkm-dex-sil, .pkm-dex-lock img, .pkm-evo-lock img, .pkm-evo-sil img { pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+section[aria-label="Pokédex"] img, section[aria-label="Mon Pokédex"] img { -webkit-touch-callout: none; -webkit-user-drag: none; }

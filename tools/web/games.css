@@ -445,7 +445,9 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 
 /* PA (points d'Aura, 2026-10-25) : pastille sous le solde de PK, à la place des tickets. */
 /* « PA » en gris clair comme « PK » (2026-10-31, porteur) ; couleur fixe : la barre n'est pas une surface du thème. */
-.pkm-pa-unit { font-size: 10.5px; color: #BCC5D9; }
+/* « PK » et « PA » du solde en blanc (2026-11-01, porteur ; gris avant). */
+.pkm-pa-unit { font-size: 10.5px; color: #FFFFFF; }
+.pkm-pk-unit { font-size: 11px; color: #FFFFFF; }
 .pkm-pa-bar { gap: 4px !important; padding-left: 3px !important; border-color: #3B2A6B !important; }
 .pkm-pa-pulse { animation: pkmPaPulse 0.9s ease-in-out 3; }
 @keyframes pkmPaPulse { 50% { box-shadow: 0 0 0 3px rgba(178, 107, 255, 0.55), 0 0 18px rgba(178, 107, 255, 0.8); transform: scale(1.06); } }
