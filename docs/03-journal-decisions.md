@@ -10,7 +10,9 @@
 
 - **Demandes du porteur** : « le vrai logo PSA en rouge et bleu » ; « la population de toutes les cartes gradées PSA, notes 6 à 10 ».
 - **Fait** (cache v99) : logo PSA rouge et bleu (P et A bleus, S rouge), celui de l'article « Professional Sports Authenticator » de Wikipédia en anglais, téléchargé par le workflow « Logos des entreprises de gradation » (`web/img/grading/psa-color.png`), sur une pastille blanche dans « Prix gradés ». PSA indique dans sa politique de marques que ses logos ne peuvent pas être utilisés sans licence écrite : point d'attention H3, comme les autres logos.
-- **Non fait — population PSA** : PSA ne propose pas d'accès public à sa population (pas d'API publique pour ces chiffres ; son site est protégé et le scraping est exclu, décision du 2026-10-03). Seule voie repérée : un service tiers payant qui revend ces chiffres (PokemonPriceTracker : environ 49 $ par mois pour 5 000 appels PSA, conditions d'usage commercial à vérifier), avec une clé que le porteur devrait créer. Aucun chiffre inventé ; **décision du porteur attendue**.
+- **Non fait — population PSA** : PSA ne propose pas d'accès public à sa population (pas d'API publique pour ces chiffres ; son site est protégé et le scraping est exclu, décision du 2026-10-03). Voies repérées, toutes à décider par le porteur (aucun chiffre inventé) :
+  - PokemonPriceTracker (service payant) : la population n'est servie qu'aux offres « Business » et « Enterprise » (2 crédits par carte ; l'offre à 49 $ par mois ne la donne pas, correction du jour), cartes repérées par leur numéro TCGplayer (versions anglaises) ; prix et conditions d'usage commercial à vérifier ;
+  - PokéTracker (pokemontracker.com, proposé par le porteur) : site français de rapports de population ; aucune API ni licence trouvée, recopier ses pages serait du scraping (exclu) et ses chiffres viennent eux-mêmes de PSA ; seule voie propre : écrire à l'éditeur pour demander un accord ou un accès.
 
 ## 2026-11-01 — Prix gradés avec logos et notes 10 à 6, courbe qui glisse, Prix par état sans pourcentages
 
