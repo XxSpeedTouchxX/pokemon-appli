@@ -1,0 +1,40 @@
+# Logos des entreprises de gradation PCA, CCC et PSA (2026-11-01, demande du porteur), pour « Prix gradés » de la
+# fiche d'une carte. Télécharge un logo par entreprise depuis son site officiel (tools/grading/fetch_logos.py),
+# écrit web/img/grading/ et le commite s'il a changé. Lancé à la main, ou quand le script change.
+name: Logos des entreprises de gradation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/grading-logos.yml
+      - tools/grading/fetch_logos.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: grading-logos
+  cancel-in-progress: false
+
+jobs:
+  logos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Logos
+        run: pip install --quiet pillow && python tools/grading/fetch_logos.py
+      - name: Commit
+        run: |
+          git add web/img/grading
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Logos des entreprises de gradation PCA, CCC, PSA (sites officiels)"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
