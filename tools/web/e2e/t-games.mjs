@@ -84,7 +84,7 @@ await page.goto(E2E + '/?start=set&setId=2013bw', { waitUntil: 'load' }); await 
 const logo = await page.locator('main img[src="img/logo-mcdonalds.webp"]').count();
 ok('McDonald’s 2013 : logo McDonald’s (absent de TCGdex)', logo >= 1);
 await page.locator('main button[aria-label*="n°"]').first().click(); await page.waitForTimeout(800);
-const ebay = await page.locator('a:has-text("eBay · ventes réussies")').getAttribute('href');
+const ebay = await page.locator('section.pkm-fi a.pkm-fi-ebay').getAttribute('href');
 ok('fiche : lien eBay ventes réussies', /ebay\.fr\/sch\/.*LH_Sold=1&LH_Complete=1/.test(ebay || ''));
 await page.screenshot({ path: shot('games-item-ebay.png'), fullPage: false });
 

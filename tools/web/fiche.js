@@ -281,6 +281,8 @@
       big: { img: it.zoomImg || it.img || it.photo || '', name: p.name, sub: it.sub, label: (sealed ? 'Photo de ' : 'Carte ') + p.name + ' en grand',
         credit: (it.zoomCredit || '') + (it.zoomVersion ? ' · version ' + it.zoomVersion : ''), fallback: it.fallbackHi || '', close: () => this.setState({ fiZoom: false }) },
       rarity: sealed ? '' : (p.rarity || ''), hasRarity: !sealed && !!p.rarity,
+      // Langue et origine du visuel (carte en anglais, scan d'une autre version, réimpression) : comme la fiche complète.
+      imgNote: it.imgNote || '', hasImgNote: !sealed && !!it.hasImgNote,
       cote: mine !== null ? this.eur(mine) : k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Pas encore de cote'),
       coteSrc: adj ? 'Selon l’état · ' + this.eur(k) + ' en Near Mint (Cardmarket)' : k !== null ? 'Cardmarket' : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
       // « Déjà possédée ×2 » (2026-10-31, porteur) à la place de « ×2 dans ta collection ».

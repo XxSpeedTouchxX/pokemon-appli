@@ -898,7 +898,8 @@ ${code}
     t.src = src;
   }, true);
   // Échap ferme le zoom de la carte.
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && inst.st().zoom) inst.setState({ zoom: null }); });
+  // Échap ferme l'agrandissement ouvert : celui de la fiche complète, ou celui de la fiche en panneau (2026-11-01).
+  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; const s = inst.st(); if (s.zoom) inst.setState({ zoom: null }); else if (s.fiZoom) inst.setState({ fiZoom: false }); });
   // Catalogue complet et catalogue scellé : chargés après le premier affichage.
   // Catalogue : partie fixe (gardée par le navigateur) + prix du jour ; cards.json complet si elles ne vont pas ensemble.
   // En cas d'échec (réseau, serveur), nouvel essai automatique : après 5 s, 15 s puis 45 s, au retour du réseau et

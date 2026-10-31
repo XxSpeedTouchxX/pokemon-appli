@@ -56,8 +56,9 @@ ok('repli carte dessinée quand pokemontcg.io tombe : ' + after2.slice(0, 30), a
 page = await context(false);
 await page.goto(E2E + '/?start=set&setId=2019sm-fr', { waitUntil: 'load' });
 await page.waitForSelector('text=Série complète');
-await page.locator('main button[aria-label*=", n° "]').first().click();
-await page.click('button:has-text("+ Ajouter un exemplaire")'); await page.waitForTimeout(150);
+await page.locator('main button[aria-label*=", n° "]').first().click(); await page.waitForTimeout(300);
+// La carte s'ouvre en panneau (2026-11-01) : son bouton jaune ouvre l'ajout.
+await page.click('section.pkm-fi button.pkm-fi-main'); await page.waitForTimeout(150);
 // Ajout d'une carte comme celui du scellé (2026-10-22) : seul l'article choisi, sans « Vente », état ni prix payé.
 const SH = 'section[aria-label="Saisie"]', shTxt = await page.locator(SH).innerText();
 ok('ajout de la carte : seul l’article, sans « Vente », état ni prix payé ; langue, quantité, valeur Cardmarket',
@@ -85,7 +86,7 @@ const uPO = await unitOf();
 ok('valeur selon l’état : Mint ' + uMT + ' > Near Mint ' + uNM + ' > Poor ' + uPO, uMT > uNM && uNM > uPO && Math.abs(uMT - uNM * 1.15) < 0.011 && /Poor · 30 %/.test(await page.locator(SH).innerText()));
 await condBtns.nth(0).click(); await page.waitForTimeout(150);
 await page.screenshot({ path: shot('add-card-sheet.png') });
-await page.locator('button:has-text("Ajouter à ma collection")').last().click(); await page.waitForTimeout(600);
+await page.locator(SH + ' button:has-text("Ajouter à ma collection")').last().click(); await page.waitForTimeout(600);
 const saved = await page.evaluate(() => { const t = localStorage.getItem('pkm-collection-v1'); const d = JSON.parse(t); return { size: t.length, cards: Object.keys(d.cards), data: /data:image/.test(t) }; });
 ok('état enregistré : Mint', await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1')).purchases.slice(-1)[0].lines[0].cond) === 'MT');
 ok('enregistrement : ' + saved.size + ' caractères, ' + saved.cards.length + ' carte(s), sans image dessinée', saved.size < 20000 && !saved.data && saved.cards.length === 1);

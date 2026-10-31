@@ -35,14 +35,19 @@ ok('retour Accueil depuis le Compte : position gardée (' + await top() + ')', (
 await page.goto(E2E + '/?today=2026-10-09&start=set&setId=sv08', { waitUntil: 'load' }); await page.waitForTimeout(2500);
 await page.evaluate(() => { document.querySelector('#app main').scrollTop = 1200; }); await page.waitForTimeout(300);
 const kept = await top();
+// Depuis le 2026-11-01 (porteur), une carte d'une extension s'ouvre en panneau (comme dans le classeur) : l'extension
+// reste dessous, à sa place.
+const FI = page.locator('section.pkm-fi');
 await page.evaluate(() => document.elementFromPoint(195, 450).closest('button').click()); await page.waitForTimeout(800);
-ok('fiche ouverte en haut', (await top()) === 0);
-await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(900);
-ok('retour à l’extension : position gardée (' + kept + ' → ' + await top() + ')', kept > 600 && Math.abs((await top()) - kept) < 8);
+ok('fiche ouverte en panneau, au-dessus de l’extension', (await FI.count()) === 1 && await FI.isVisible());
+await FI.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
+ok('« Fermer » : retour à l’extension, position gardée (' + kept + ' → ' + await top() + ')', kept > 600 && (await FI.count()) === 0 && Math.abs((await top()) - kept) < 8);
 const setTitle = await page.locator('header h1').innerText();
 await page.evaluate(() => document.elementFromPoint(195, 450).closest('button').click()); await page.waitForTimeout(800);
 await page.goBack(); await page.waitForTimeout(900);
-ok('bouton Retour du téléphone : revient à l’extension, position gardée', (await page.locator('header h1').innerText()) === setTitle && Math.abs((await top()) - kept) < 8);
+ok('bouton Retour du téléphone : ferme la fiche, l’extension reste à sa place', (await FI.count()) === 0 && (await page.locator('header h1').innerText()) === setTitle && Math.abs((await top()) - kept) < 8);
+await page.goBack(); await page.waitForTimeout(900);
+ok('second retour : quitte l’extension', (await page.locator('text=Série complète').count()) === 0);
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();
