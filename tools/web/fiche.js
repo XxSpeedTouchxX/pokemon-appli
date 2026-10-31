@@ -183,11 +183,12 @@
   // (Near Mint) × coefficient de la note, signalée « ≈ … · estimation ». Coefficients proposés, à valider par le porteur.
   // 2026-11-01 (porteur) : logo de chaque entreprise ; notes 10 à 6, une nuance par note (10 or, 9,5 vert très foncé,
   // 9 vert foncé, 8 vert, 7 vert-jaune, 6 jaune-orangé) ; chez CCC, 10 Black Label (note parfaite) et 10 Gold Label
-  // (« Pristine », une imperfection), en plus du 10. PSA n'a pas de 9,5. Notes 8,5 retirées.
+  // (« Pristine », une imperfection), en plus du 10. PSA n'a pas de 9,5. Notes 8,5 retirées. Logo PSA rouge et bleu
+  // (Wikipédia, 2026-11-01).
   const FI_GRADERS = [
     ['PCA', 'img/grading/pca.png', [['10', 2.6], ['9.5', 1.9], ['9', 1.45], ['8', 1.12], ['7', 0.85], ['6', 0.7]]],
     ['CCC', 'img/grading/ccc.svg', [['10', 6, 'Black Label'], ['10', 4, 'Gold Label'], ['10', 2.8], ['9.5', 2.0], ['9', 1.5], ['8', 1.15], ['7', 0.9], ['6', 0.72]]],
-    ['PSA', 'img/grading/psa.svg', [['10', 3.5], ['9', 1.6], ['8', 1.2], ['7', 0.9], ['6', 0.75]]]
+    ['PSA', 'img/grading/psa-color.png', [['10', 3.5], ['9', 1.6], ['8', 1.2], ['7', 0.9], ['6', 0.75]]]
   ];
   const FI_GRADE_CLS = { '10': 'g10', '9.5': 'g95', '9': 'g9', '8': 'g8', '7': 'g7', '6': 'g6', 'Black Label': 'black', 'Gold Label': 'gold' };
   fiProto.fiGraded = function (p, x, k) {

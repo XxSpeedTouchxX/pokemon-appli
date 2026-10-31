@@ -60,7 +60,7 @@ const open = async (w, h, route) => {
   const grades = await G.locator('.pkm-fg-co').evaluateAll(cs => cs.map(c => [...c.querySelectorAll('.pkm-fg-pill')].map(p => p.querySelector('b').textContent + (p.querySelector('i') ? ' ' + p.querySelector('i').textContent : '')).join(' | ')));
   ok('notes : ' + grades.join(' / '), grades[0] === '10 | 9,5 | 9 | 8 | 7 | 6' && grades[1] === '10 Black Label | 10 Gold Label | 10 | 9,5 | 9 | 8 | 7 | 6' && grades[2] === '10 | 9 | 8 | 7 | 6');
   const logos = await G.locator('img.pkm-fg-logo').evaluateAll(im => im.map(i => i.getAttribute('src').split('/').pop() + ':' + (i.naturalWidth > 0)));
-  ok('logos : ' + logos.join(', '), logos.join(',') === 'pca.png:true,ccc.svg:true,psa.svg:true');
+  ok('logos : ' + logos.join(', '), logos.join(',') === 'pca.png:true,ccc.svg:true,psa-color.png:true');
   const k = Number(cote.replace(/[^\d,]/g, '').replace(',', '.')), psa10 = N(await G.locator('.pkm-fg-co').nth(2).locator('.pkm-fg-v').first().innerText());
   const want = '≈ ' + (Math.round(k * 3.5 * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/[\u202f\u00a0]/g, ' ') + ' €';
   ok('PSA 10 « ' + psa10 + ' » = cote × 3,5 (' + want + ')', psa10 === want);

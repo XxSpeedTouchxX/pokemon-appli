@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-01 (suite) — Logo PSA rouge et bleu ; population PSA toujours sans source
+
+- **Demandes du porteur** : « le vrai logo PSA en rouge et bleu » ; « la population de toutes les cartes gradées PSA, notes 6 à 10 ».
+- **Fait** (cache v99) : logo PSA rouge et bleu (P et A bleus, S rouge), celui de l'article « Professional Sports Authenticator » de Wikipédia en anglais, téléchargé par le workflow « Logos des entreprises de gradation » (`web/img/grading/psa-color.png`), sur une pastille blanche dans « Prix gradés ». PSA indique dans sa politique de marques que ses logos ne peuvent pas être utilisés sans licence écrite : point d'attention H3, comme les autres logos.
+- **Non fait — population PSA** : PSA ne propose pas d'accès public à sa population (pas d'API publique pour ces chiffres ; son site est protégé et le scraping est exclu, décision du 2026-10-03). Seule voie repérée : un service tiers payant qui revend ces chiffres (PokemonPriceTracker : environ 49 $ par mois pour 5 000 appels PSA, conditions d'usage commercial à vérifier), avec une clé que le porteur devrait créer. Aucun chiffre inventé ; **décision du porteur attendue**.
+
 ## 2026-11-01 — Prix gradés avec logos et notes 10 à 6, courbe qui glisse, Prix par état sans pourcentages
 
 - **Demandes du porteur** :

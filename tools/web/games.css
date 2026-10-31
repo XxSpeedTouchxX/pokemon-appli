@@ -354,8 +354,9 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fg-co { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid #1E2B45; }
 .pkm-fg-name { align-self: flex-start; display: flex; align-items: center; height: 34px; padding: 4px 10px; box-sizing: border-box; border-radius: 10px; border: 1px solid #2A3A5C; background: #0E1628; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; }
 .pkm-fg-logo { display: block; height: 24px; width: auto; max-width: 150px; object-fit: contain; }
-.pkm-fg-name-psa { background: #EE0403; border-color: #EE0403; }
-.pkm-fg-name-psa .pkm-fg-logo { height: 20px; }
+/* PSA : logo rouge et bleu (2026-11-01, porteur) sur une pastille blanche, le bleu ne ressortirait pas sur le fond sombre. */
+.pkm-fg-name-psa { background: #FFFFFF; border-color: #FFFFFF; }
+.pkm-fg-name-psa .pkm-fg-logo { height: 22px; }
 .pkm-fg-list { display: flex; flex-direction: column; }
 .pkm-fg-row { display: flex; align-items: center; gap: 10px; min-height: 36px; }
 .pkm-fg-pill { flex: none; min-width: 40px; height: 26px; padding: 0 9px; box-sizing: border-box; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
