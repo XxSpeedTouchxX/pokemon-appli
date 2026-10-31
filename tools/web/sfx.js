@@ -351,13 +351,77 @@
         sfxSparkle(ac, out, R + 0.3, t0 + 6.9, 10, 0.03, 3200);
       } }
   ];
+  // ——— PA du jour (2026-11-01, porteur : « un petit bruitage quand tu récupères tes PA tous les jours ») ———
+  // Calé sur l'animation « Récupérer mes PA » (pa.js, paFly) : éclat au toucher, gouttes qui s'éparpillent, puis une
+  // goutte arrive sur le solde toutes les 55 ms à partir de 1,27 s (n gouttes, 8 à 14) ; un petit son par goutte, de
+  // plus en plus aigu, puis une note finale quand le solde est plein. 5 propositions ; ?sonpa=… pour en essayer.
+  const sfxPaHits = n => Array.from({ length: n }, (_, i) => 1.27 + i * 0.055);
+  // Vol des gouttes (0,35 à 1,27 s) : léger souffle qui monte vers le solde (ou petite montée rétro pour « arcade »).
+  const sfxPaFlight = (ac, out, t0, retro) => {
+    if (retro) { for (let i = 0; i < 8; i++) sfxTone(ac, out, 'square', sfxHz(-2 + i), t0 + 0.4 + i * 0.1, 0.03, 0.012, 0.002); return; }
+    sfxHiss(ac, out, t0 + 0.35, 0.95, 0.03, 'bandpass', 1800, 6500, 2.5, 0.6);
+  };
+  const SFX_PA = [
+    { id: 'cristaux', name: 'Cristaux qui tintent', desc: 'Un éclat scintillant, puis un tintement de cristal par goutte, qui monte la gamme, et un petit accord brillant.',
+      play: (ac, out, t0, n) => {
+        sfxPaFlight(ac, out, t0, false);
+        sfxHiss(ac, out, t0, 0.35, 0.05, 'bandpass', 5000, 9000, 2, 0.01);
+        sfxBell(ac, out, sfxHz(15), t0 + 0.01, 0.6, 0.06, [1, 2.0, 3.01], [1, 0.3, 0.1]);
+        const sc = [3, 5, 7, 10, 12, 15, 17, 19, 22, 24, 27, 29, 31, 34];
+        sfxPaHits(n).forEach((t, i) => sfxBell(ac, out, sfxHz(sc[i % sc.length]), t0 + t, 0.45, 0.045, [1, 2.0, 3.01], [1, 0.25, 0.08]));
+        const end = t0 + sfxPaHits(n)[n - 1] + 0.12;
+        [15, 19, 22, 27].forEach((k, i) => sfxBell(ac, out, sfxHz(k), end + i * 0.04, 1.1, 0.05, [1, 2.0, 3.0], [1, 0.25, 0.1]));
+      } },
+    { id: 'gouttes', name: 'Gouttes d’aura', desc: 'Un « ploc » d’eau au toucher, puis de petites gouttes qui tombent une à une sur le solde, et un reflet d’eau à la fin.',
+      play: (ac, out, t0, n) => {
+        sfxPaFlight(ac, out, t0, false);
+        const drop = (f, t, v) => { sfxTone(ac, out, 'sine', f * 1.6, t, 0.09, v, 0.002, f * 0.7); sfxTone(ac, out, 'sine', f * 2.4, t + 0.012, 0.05, v * 0.3, 0.002, f * 1.2); };
+        drop(500, t0, 0.22);
+        sfxPaHits(n).forEach((t, i) => drop(700 + i * 55, t0 + t, 0.12));
+        const end = t0 + sfxPaHits(n)[n - 1] + 0.12;
+        [0, 0.07, 0.15].forEach((d, i) => drop(1400 + i * 300, end + d, 0.1));
+        sfxBell(ac, out, sfxHz(22), end + 0.15, 0.9, 0.035, [1, 2.0], [1, 0.2]);
+      } },
+    { id: 'bulles', name: 'Bulles douces', desc: 'Des bulles rondes qui éclosent une à une, comme la voix du didacticiel, puis une grappe de bulles à la fin.',
+      play: (ac, out, t0, n) => {
+        sfxPaFlight(ac, out, t0, false);
+        const bub = (f, t, v) => sfxTone(ac, out, 'sine', f, t, 0.07, v, 0.004, f * 2.6);
+        [0, 0.05, 0.11].forEach((d, i) => bub(300 + i * 90, t0 + d, 0.16));
+        const pent = [0, 2, 4, 7, 9];
+        sfxPaHits(n).forEach((t, i) => bub(sfxHz(-12 + 12 * Math.floor(i / 5) + pent[i % 5]), t0 + t, 0.13));
+        const end = t0 + sfxPaHits(n)[n - 1] + 0.12;
+        [0, 0.04, 0.08, 0.13, 0.19].forEach((d, i) => bub(sfxHz(7 + i * 2), end + d, 0.1));
+      } },
+    { id: 'arcade', name: 'Compteur arcade', desc: 'Un « bip » rétro par goutte, comme un compteur de points de jeu d’arcade qui défile, puis un petit jingle.',
+      play: (ac, out, t0, n) => {
+        sfxPaFlight(ac, out, t0, true);
+        sfxTone(ac, out, 'square', sfxHz(3), t0, 0.06, 0.04, 0.002, sfxHz(15));
+        sfxPaHits(n).forEach((t, i) => sfxTone(ac, out, 'square', sfxHz(10 + i), t0 + t, 0.035, 0.035, 0.002));
+        const end = t0 + sfxPaHits(n)[n - 1] + 0.12;
+        [[15, 0, 0.08], [19, 0.09, 0.08], [22, 0.18, 0.08], [27, 0.27, 0.35]].forEach(([k, d, l]) => { sfxTone(ac, out, 'square', sfxHz(k), end + d, l, 0.035, 0.003); sfxTone(ac, out, 'triangle', sfxHz(k - 24), end + d, l, 0.1, 0.003); });
+      } },
+    { id: 'aura', name: 'Souffle d’aura', desc: 'Un souffle feutré qui libère l’aura, de petits « fwip » qui filent vers le solde, puis une note chaude et douce.',
+      play: (ac, out, t0, n) => {
+        sfxPaFlight(ac, out, t0, false);
+        sfxHiss(ac, out, t0, 0.6, 0.12, 'bandpass', 400, 3500, 1.5, 0.05);
+        sfxPaHits(n).forEach((t, i) => { sfxHiss(ac, out, t0 + t - 0.05, 0.08, 0.06, 'bandpass', 1500 + i * 120, 4500 + i * 150, 3, 0.04); sfxBell(ac, out, sfxHz(3 + (i % 5) * 2), t0 + t, 0.35, 0.025, [1, 2.0], [1, 0.2]); });
+        const end = t0 + sfxPaHits(n)[n - 1] + 0.1;
+        sfxPad(ac, out, [-9, -5, -2, 3], end, 1.3, 0.03, 0.05);
+        sfxSparkle(ac, out, end + 0.1, end + 1.1, 6, 0.025, 3000);
+      } }
+  ];
+  // Proposé par défaut (à confirmer par le porteur) : « Cristaux qui tintent », dans l'esprit de la musique d'évolution.
+  const SFX_PA_DEFAULT = 'cristaux';
+
   // Choix du porteur (2026-11-01, « c'est ok pour 0-reference-suspense-et-lumiere ») : la musique « Suspense et
   // lumière » seule, sans son d'évolution par-dessus.
   const SFX_EVO_DEFAULT = null, SFX_MUSIC_DEFAULT = 'suspense';
   // Volume de chaque son, réglé sur son rendu : sons autour de −24 dBFS en moyenne, musiques autour de −27 dBFS (un peu
   // en dessous du son), crêtes sous −3 dBFS.
   const SFX_GAIN = { coin: 1, cristal: 1.23, energie: 1.07, retro: 3.2, cosmique: 1.03, harpe: 1.7, fanfare: 0.82, suspense: 1.23, chiptune: 1.84, boite: 1.82,
-    cordes: 1.4, piano: 1.24, choeur: 2.75, orchestre: 0.87, nuit: 1.55 };
+    cordes: 1.4, piano: 1.24, choeur: 2.75, orchestre: 0.87, nuit: 1.55,
+    // PA du jour : crête vers −6 dBFS (petit son de récompense, plus bref que l'évolution).
+    'pa-cristaux': 3.1, 'pa-gouttes': 2.7, 'pa-bulles': 2.6, 'pa-arcade': 3.1, 'pa-aura': 2.6 };
   const SFX_MUSIC_LEVEL = 0.75;
 
   // Choix en cours : celui du porteur ; ?sonevo= / ?musevo= (numéro dans la liste, identifiant, ou 0 pour aucun) pour un
@@ -388,11 +452,11 @@
     return g;
   };
   // Joue dans ac (temps réel ou hors ligne) : kind = 'coin', 'evo' ou 'music', id = identifiant de la liste.
-  function sfxSchedule(ac, dest, kind, id, t0) {
+  function sfxSchedule(ac, dest, kind, id, t0, n) {
     if (kind === 'coin') { sfxCoin(ac, sfxBus(ac, dest, SFX_GAIN.coin), t0); return true; }
-    const item = (kind === 'music' ? SFX_MUSIC : SFX_EVO).find(x => x.id === id);
+    const item = (kind === 'music' ? SFX_MUSIC : kind === 'pa' ? SFX_PA : SFX_EVO).find(x => x.id === id);
     if (!item) return false;
-    item.play(ac, sfxBus(ac, dest, (SFX_GAIN[id] || 1) * (kind === 'music' ? SFX_MUSIC_LEVEL : 1)), t0);
+    item.play(ac, sfxBus(ac, dest, (SFX_GAIN[kind === 'pa' ? 'pa-' + id : id] || 1) * (kind === 'music' ? SFX_MUSIC_LEVEL : 1)), t0, Math.max(1, Math.min(14, n || 12)));
     return true;
   }
   let sfxAc = null;
@@ -409,6 +473,14 @@
     try { if (sfxMuted()) return; const ac = sfxCtx(); if (ac) sfxSchedule(ac, ac.destination, 'coin', '', ac.currentTime + 0.02); } catch (e) { /* son indisponible */ }
   };
   // Évolution (pa.js, paFxRun) : le son et la musique choisis, ensemble.
+  // PA du jour (pa.js, paClaim) : n gouttes qui volent vers le solde ; appelé au toucher de « Récupérer mes PA ».
+  sfxProto.sfxPa = function (n) {
+    try {
+      if (sfxMuted()) return;
+      const ac = sfxCtx(), x = sfxPick('sonpa', '', SFX_PA, SFX_PA_DEFAULT);
+      if (ac && x) sfxSchedule(ac, ac.destination, 'pa', x.id, ac.currentTime + 0.02, n);
+    } catch (e) { /* son indisponible */ }
+  };
   sfxProto.sfxEvo = function () {
     try {
       if (sfxMuted()) return;
@@ -425,7 +497,7 @@
     const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext, rate = 44100;
     const ac = new OAC(1, Math.round(rate * (secs || SFX_END + 0.6)), rate);
     const dest = list.length > 1 ? sfxMaster(ac, ac.destination) : ac.destination;
-    list.forEach(([kind, id]) => sfxSchedule(ac, dest, kind, id, 0.05));
+    list.forEach(([kind, id, n]) => sfxSchedule(ac, dest, kind, id, 0.05, n));
     return ac.startRendering().then(buf => {
       const d = buf.getChannelData(0), pcm = new Int16Array(d.length);
       let peak = 0, sum = 0;
@@ -436,4 +508,5 @@
       return { rate: rate, b64: btoa(bin), peak: peak, rms: Math.sqrt(sum / d.length) };
     });
   };
-  sfxProto.sfxLists = function () { return { evo: SFX_EVO.map(x => ({ id: x.id, name: x.name, desc: x.desc })), music: SFX_MUSIC.map(x => ({ id: x.id, name: x.name, desc: x.desc })), evoDef: SFX_EVO_DEFAULT, musicDef: SFX_MUSIC_DEFAULT }; };
+  sfxProto.sfxLists = function () { return { evo: SFX_EVO.map(x => ({ id: x.id, name: x.name, desc: x.desc })), music: SFX_MUSIC.map(x => ({ id: x.id, name: x.name, desc: x.desc })), evoDef: SFX_EVO_DEFAULT, musicDef: SFX_MUSIC_DEFAULT,
+    pa: SFX_PA.map(x => ({ id: x.id, name: x.name, desc: x.desc })), paDef: SFX_PA_DEFAULT }; };

@@ -36,6 +36,11 @@ const open = async (q, muted) => {
   ok('niveaux (crête / moyenne, dBFS) : ' + lv.map(x => x.join(' ')).join(' · '), lv.every(([, p, m]) => p <= -1 && p >= -12 && m >= -36 && m <= -18));
   const both = await page.evaluate(() => window.__pkm.sfxRender([['evo', 'cristal'], ['music', 'suspense']], 7.8).then(x => x.peak));
   ok('son et musique ensemble : crête ' + db(both) + ' dBFS, sans saturation', db(both) <= -1);
+  // PA du jour (2026-11-01, porteur : « un petit bruitage quand tu récupères tes PA ») : 5 propositions.
+  ok('bruitages des PA : ' + L.pa.map(x => x.name).join(', ') + ' (proposé : ' + L.paDef + ')', L.pa.length === 5 && L.paDef === 'cristaux');
+  const pv = [];
+  for (const x of L.pa) { const r = await page.evaluate(id => window.__pkm.sfxRender([['pa', id, 10]], 3.6).then(v => v.peak), x.id); pv.push(x.id + ' ' + db(r)); }
+  ok('PA : crêtes ' + pv.join(' · ') + ' dBFS', pv.every(t => { const v = Number(t.split(' ')[1]); return v <= -5 && v >= -8; }));
   // Pièce : un son au lancer.
   const coin = page.locator('section[aria-label="Pile ou face"]');
   await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(400);
@@ -44,6 +49,11 @@ const open = async (q, muted) => {
   await page.evaluate(() => { window.__osc = 0; window.__pkm.paFxRun(1, 2, () => {}); }); await page.waitForTimeout(300);
   const nEvo = await page.evaluate(() => window.__osc);
   const want = await page.evaluate(() => { const A = window.OfflineAudioContext; let n = 0; const P = A.prototype.createOscillator; A.prototype.createOscillator = function () { n++; return P.call(this); }; return window.__pkm.sfxRender([['music', 'suspense']], 7.8).then(() => { A.prototype.createOscillator = P; return n; }); });
+  // Récupérer ses PA : le bruitage part avec les gouttes.
+  await page.evaluate(() => { window.__osc = 0; });
+  await page.locator('header .pkm-pa-head').first().click(); await page.waitForTimeout(500);
+  if (await page.locator('.pkm-pa-claim-btn').count()) { await page.locator('.pkm-pa-claim-btn').click(); await page.waitForTimeout(400); }
+  ok('PA du jour récupérés : bruitage joué (' + await page.evaluate(() => window.__osc) + ' notes)', (await page.evaluate(() => window.__osc)) > 10);
   ok('évolution : « Suspense et lumière » seule (' + nEvo + ' notes, comme le rendu de la musique : ' + want + ')', nEvo === want);
   await ctx.close();
 }

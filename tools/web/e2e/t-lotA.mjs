@@ -29,10 +29,11 @@ ok('fiche HD : ' + hi, /_hires\.png$/.test(hi));
 await page.click('button[aria-label^="Agrandir la carte"]');
 ok('crédit du zoom : ' + await page.locator('#pkm-zoom span span').last().innerText(), await page.locator('text=pokemontcg.io').count() > 0);
 await page.keyboard.press('Escape');
-// Cartes dessinées
-await page.goto(E2E + '/?start=set&setId=2019sm-fr', { waitUntil: 'load' });
+// Cartes dessinées (McDonald's 2024 : aucun scan publié ; McDonald's 2019 a reçu le 2026-11-01 les visuels de ses cartes
+// d'origine, imgFrom).
+await page.goto(E2E + '/?start=set&setId=2024sv', { waitUntil: 'load' });
 await page.waitForSelector('text=Série complète');
-ok('McDonald’s 2019 FR : ' + await page.locator('main p').first().innerText(), await page.locator('text=Dropicards les dessine').count() > 0);
+ok('McDonald’s 2024 : ' + await page.locator('main p').first().innerText(), await page.locator('text=Dropicards les dessine').count() > 0);
 const drawn = await page.locator('main button[aria-label*=", n° "] img').first().getAttribute('src');
 ok('vignette dessinée', drawn.startsWith('data:image/svg+xml'));
 await page.waitForTimeout(300); await page.screenshot({ path: shot('lotA-dessinees.png') });

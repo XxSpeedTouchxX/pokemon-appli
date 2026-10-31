@@ -88,6 +88,7 @@
     if (paStill() || !from || !to) { end(); return; }
     paFlyOn = true;
     const drops = Math.min(14, Math.max(8, Math.round(n.gain / 2)));
+    this.sfxPa(drops); // bruitage des PA du jour (sfx.js, 2026-11-01)
     paFly(from, to, drops, k => this.setState({ paCount: Math.round(old + n.gain * (k + 1) / drops) }), end);
   };
   const paFly = (fromEl, toEl, count, hit, done) => {

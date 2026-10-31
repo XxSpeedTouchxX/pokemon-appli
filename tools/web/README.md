@@ -668,7 +668,7 @@ Le script `tools/web/build.mjs` :
   - voyants `.pkm-dex-leds` retirés.
 - **PK et PA** : `.pkm-pk-unit`, `.pkm-pa-unit` en blanc.
 - **Sons** (`sfx.js`) :
-  - `sfxCoin` (games.js, `gmFlip`) et `sfxEvo` (pa.js, `paFxRun`) ;
+  - `sfxCoin` (games.js, `gmFlip`), `sfxEvo` (pa.js, `paFxRun`) et `sfxPa(n)` (pa.js, `paClaim` : n gouttes, `SFX_PA`, défaut `SFX_PA_DEFAULT`, essai `?sonpa=`) ;
   - listes `SFX_EVO` (5) et `SFX_MUSIC` (9 : 4 musiques, puis 5 variantes de « Suspense et lumière » sur la grille `SFX_PROG`), défauts `SFX_EVO_DEFAULT`, `SFX_MUSIC_DEFAULT` ;
   - timbres : `sfxPizz`, `sfxStrings`, `sfxPiano`, `sfxChoir`, `sfxBrass`, `sfxPad`, `sfxBell`, `sfxCymbal` ;
   - volumes `SFX_GAIN` ;
