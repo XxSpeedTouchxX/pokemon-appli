@@ -83,7 +83,8 @@ jobs:
       - name: Autres versions (visuels de repli)
         continue-on-error: true
         run: |
-          for lang in en de it es; do
+          # pt, pt-br, nl, pl (2026-11-01) : visuels de repli supplémentaires pour les promos et les cartes sans scan.
+          for lang in en de it es pt pt-br nl pl; do
             python3 tools/tcgdex/sync_tcgdex.py --lang "$lang" --skip-images --skip-details --workers 6 --out "data/tcgdex-$lang" || true
           done
 
@@ -119,7 +120,8 @@ jobs:
         continue-on-error: true
         run: |
           python3 tools/tcgdex/build_index.py --src data/tcgdex --en data/tcgdex-en \
-            --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --ptcg data/ptcg --cardmarket \
+            --alt de=data/tcgdex-de --alt it=data/tcgdex-it --alt es=data/tcgdex-es --alt pt=data/tcgdex-pt \
+            --alt pt-br=data/tcgdex-pt-br --alt nl=data/tcgdex-nl --alt pl=data/tcgdex-pl --ptcg data/ptcg --cardmarket \
             --out web/data/cards.json ${{ inputs.force && '--force' || '' }}
           python3 tools/tcgdex/split_catalog.py --src web/data/cards.json
 

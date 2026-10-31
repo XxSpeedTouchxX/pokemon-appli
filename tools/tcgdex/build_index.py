@@ -73,7 +73,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
 
-from ptcg import PTCG_IMG, PtcgData, compact_image, norm_number  # visuels anglais de dernier recours (pokemontcg.io)
+from ptcg import PTCG_IMG, PtcgData, compact_image, fold, norm_number  # visuels anglais de dernier recours (pokemontcg.io)
 from complete import en_extra, numbering_confirmed, ptcg_extra, ptcg_prices  # cartes manquantes en français (version anglaise, pokemontcg.io)
 import cmfiles  # prix Cardmarket des cartes que TCGdex ne relie pas (fichiers publics Cardmarket, 2026-10-18)
 
@@ -266,6 +266,33 @@ class Fallback:
             if k and (self.sets.get(k) or {}).get("logo"):
                 return self.sets[k]["logo"]
         return None
+
+
+def art_key(c):
+    """Signature de l'illustration d'une carte (2026-11-01, « il y a encore des cartes sans visuel ») : même nom,
+    même illustrateur, mêmes PV et mêmes attaques, talents ou effet. Deux cartes qui la partagent sont la même
+    carte réimprimée (kits du dresseur, McDonald's, promos tamponnées…), donc le même dessin. None si la carte
+    n'en dit pas assez (pas d'illustrateur, Énergie de base…)."""
+    artist, name = fold(c.get("illustrator")), fold(c.get("name"))
+    if not artist or not name:
+        return None
+    attacks = tuple(fold(a.get("name")) for a in c.get("attacks") or [] if isinstance(a, dict))
+    abilities = tuple(fold(a.get("name")) for a in c.get("abilities") or [] if isinstance(a, dict))
+    effect = fold(c.get("effect"))
+    if not (attacks or abilities or effect):
+        return None
+    return (name, artist, str(c.get("hp") or ""), attacks, abilities, effect)
+
+
+def reprint_images(known, pending):
+    """Visuels des cartes encore sans visuel, pris sur une réimpression du même dessin.
+    known : [(clé, image, id)] des cartes illustrées, dans l'ordre de préférence ; pending : [(clé, id)].
+    Renvoie {id sans visuel: (image, id de la carte d'origine)}."""
+    first = {}
+    for key, img, cid in known:
+        if key and img:
+            first.setdefault(key, (img, cid))
+    return {cid: first[key] for key, cid in pending if key and key in first and first[key][1] != cid}
 
 
 def probe_image(path):
@@ -467,6 +494,7 @@ def main():
     ptcg_found, ptcg_report = {}, []
 
     sets, cards, rarities, cm_ids = {}, [], {}, {}
+    art_known, art_pending = [], []  # (signature du dessin, ligne) des cartes illustrées / sans visuel
     stats = {"cards": 0, "cardsEn": 0, "cardsEnExtra": 0, "cardsPtcg": 0, "imgOwn": 0, "imgAlt": {}, "imgNone": 0, "noDetail": 0}
     # Extensions pokemontcg.io visées par plusieurs extensions TCGdex (Zarbi d'EX Forces Cachées) : pas de complément.
     ptcg_of = {sid: ptcg.map_set(sid, (en_sets.get(sid) or {}).get("name"), s.get("releaseDate")) for sid, s in fr_sets.items()} if ptcg else {}
@@ -559,6 +587,7 @@ def main():
             if idp:
                 cm_ids[cid] = idp
             cards.append(row(cid, r["name"], sid, str(r["local"]), rarity, short_img(img), prices(c, rate)))
+            (art_known if cards[-1][5] else art_pending).append((art_key(c), cards[-1]))
         if lang == "fr":
             complete_set(sid, s, rows)
 
@@ -589,6 +618,14 @@ def main():
         add_set(sid, s, "fr", src)
     for sid in en_only:
         add_set(sid, en_sets[sid], "en", en)
+    # Dernier repli : visuel d'une réimpression du même dessin (art_key), version française d'abord.
+    img_from = {}
+    found = reprint_images([(k, r[5], r[0]) for k, r in art_known], [(k, r[0]) for k, r in art_pending])
+    for k, r in art_pending:
+        if r[0] in found:
+            r[5], img_from[r[0]] = found[r[0]]
+            stats["imgNone"] -= 1
+            stats["imgAlt"]["reprint"] = stats["imgAlt"].get("reprint", 0) + 1
     stats["cards"] = len(cards)
     if args.cardmarket:
         try:
@@ -631,6 +668,8 @@ def main():
         "fields": FIELDS,
         "stats": stats,
         "rarities": dict(sorted(rarities.items(), key=lambda kv: -kv[1])),
+        # Cartes illustrées par une réimpression du même dessin : {id: id de la carte d'origine} (2026-11-01).
+        "imgFrom": dict(sorted(img_from.items())),
         "cards": cards,
     }
     errors, warnings = compare_catalog(load(Path(args.previous) if args.previous else out), doc)

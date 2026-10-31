@@ -36,7 +36,7 @@
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   };
   // Langue d'un visuel de repli (même dessin officiel, texte dans une autre langue).
-  const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole' };
+  const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole', PT: 'portugaise', 'PT-BR': 'brésilienne', NL: 'néerlandaise', PL: 'polonaise' };
   const PTCG = 'https://images.pokemontcg.io/', ASSETS = 'https://assets.tcgdex.net/';
   // Adresses d'un visuel selon sa source (chemin de cards.json).
   function visual(path) {
@@ -48,7 +48,7 @@
     }
     const b = /^https?:/.test(path) ? path : ((TCG.doc && TCG.doc.img) || ASSETS) + path;
     return { img: b + '/low.webp', hi: b + '/high.png', srcset: b + '/low.webp 245w, ' + b + '/high.webp 600w',
-      lang: (/^([a-z]{2})\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · qualité maximale (PNG 600 × 825)' };
+      lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · qualité maximale (PNG 600 × 825)' };
   }
   // Carte dessinée en attendant un scan officiel : nom, extension, numéro et rareté, aux couleurs PKM.
   const esc = t => String(t || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
@@ -182,7 +182,9 @@
       cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1 && !coteConfirmed(r, F),
       dup: !!(TCG.dup && TCG.dup.has(id)),
       // Réimpression : carte et extension d'origine (visuel et numéro repris).
-      reprintOf: ov ? orig : '', reprintSet: ov ? ov.set[0] : ''
+      reprintOf: ov ? orig : '', reprintSet: ov ? ov.set[0] : '',
+      // Visuel pris sur une réimpression du même dessin (catalogue, imgFrom, 2026-11-01).
+      imgFrom: !ov && r[F.img] && TCG.doc && TCG.doc.imgFrom && TCG.doc.imgFrom[id] || ''
     };
     if (ov && v) p.credit = 'Visuel de la carte d’origine (' + ov.set[0] + ', ' + numShort + ') via TCGdex';
     if (!v) { p.img = p.imgHi = drawnCard(p); p.fallback = p.fallbackHi = ''; }
@@ -478,7 +480,9 @@
       const notes = [];
       if (p.lang === 'EN') notes.push(String(setOf(p.set)[5] || 'fr') === 'en' ? 'Carte en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.'
         : 'Carte en anglais : absente de la version française du catalogue TCGdex, elle vient de la version anglaise.');
-      if (p.reprintOf) notes.push('Réimpression de la carte ' + p.reprintSet + ' n° ' + p.numShort + ' : visuel de la carte d’origine, même dessin. La réimpression porte en plus le logo des 30 ans.');
+      const fromRow = p.imgFrom && TCG.byId ? TCG.byId[p.imgFrom] : null;
+      if (fromRow) { const fs = setOf(fromRow.r[TCG.F.set]) || []; notes.push('Visuel de la carte d’origine (' + (fs[0] || 'autre extension') + ', n° ' + fromRow.r[TCG.F.num] + '), même dessin : le scan de cette réimpression n’est pas encore disponible.'); }
+      else if (p.reprintOf) notes.push('Réimpression de la carte ' + p.reprintSet + ' n° ' + p.numShort + ' : visuel de la carte d’origine, même dessin. La réimpression porte en plus le logo des 30 ans.');
       else if (!p.imgLang) notes.push('Pas encore de scan officiel pour cette carte : PKM affiche une carte dessinée en attendant.');
       else if (p.imgLang !== p.lang) notes.push('Visuel de la version ' + (VERSION[p.imgLang] || p.imgLang) + ' (même dessin officiel) : le scan ' + (p.lang === 'EN' ? 'anglais' : 'français') + ' de cette carte n’est pas encore disponible.');
       it.imgNote = notes.join(' ');

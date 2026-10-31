@@ -5,7 +5,7 @@ from datetime import date
 from unittest import mock
 
 import build_index
-from build_index import FIELDS, compare_catalog, coverage, prices, ptcg_alive, ptcg_row_prices, row
+from build_index import FIELDS, art_key, compare_catalog, coverage, prices, ptcg_alive, ptcg_row_prices, reprint_images, row
 
 
 def card(cm=None, tcp=None, variants=None):
@@ -167,6 +167,27 @@ class RealCatalogue(unittest.TestCase):
         src = Path(__file__).resolve().parents[2] / "web" / "data" / "cards.json"
         d = json.loads(src.read_text("utf-8"))
         self.assertEqual(compare_catalog(d, d), ([], []))
+
+
+
+class Reprints(unittest.TestCase):
+    """Visuel d'une réimpression du même dessin (2026-11-01, porteur : « il y a encore des cartes sans visuel »)."""
+    RAICHU = {"name": "Raichu", "illustrator": "Kagemaru Himeno", "hp": 90,
+              "attacks": [{"name": "Poing Éclair"}, {"name": "Tonnerre"}]}
+
+    def test_key(self):
+        self.assertEqual(art_key(self.RAICHU), ("raichu", "kagemaru himeno", "90", ("poing eclair", "tonnerre"), (), ""))
+        self.assertIsNone(art_key({"name": "Énergie Feu de base"}))  # ni illustrateur ni texte : pas de signature
+        self.assertIsNone(art_key({"name": "Raichu", "illustrator": "X"}))  # rien d'autre à comparer
+        trainer = {"name": "Potion", "illustrator": "Ryo Ueda", "effect": "Soignez 30 dégâts."}
+        self.assertEqual(art_key(trainer)[5], "soignez 30 degats")
+
+    def test_match(self):
+        k = art_key(self.RAICHU)
+        other = art_key(dict(self.RAICHU, hp=100))  # autres PV : autre carte, pas de visuel
+        known = [(k, "fr/hgss/hgss1/22", "hgss1-22"), (k, "fr/hgss/hgss2/5", "hgss2-5"), (None, "fr/x/y/1", "y-1")]
+        got = reprint_images(known, [(k, "tk-hs-r-12"), (other, "tk-hs-r-13"), (None, "tk-hs-r-14")])
+        self.assertEqual(got, {"tk-hs-r-12": ("fr/hgss/hgss1/22", "hgss1-22")})  # la première illustrée gagne
 
 
 if __name__ == "__main__":
