@@ -6,7 +6,7 @@
   //   L'état (Mint à Poor) ne se choisit plus : la note le remplace.
   // - La ligne d'achat garde la note (champ gr : « PSA-10 », « CCC-10BL »…), enregistrée sur l'appareil avec le reste.
   // - Valeur d'un exemplaire gradé : cote Cardmarket (Near Mint) × coefficient de la note (FI_GRADERS, estimations
-  //   Dropicards à valider par le porteur) × coefficient de la langue.
+  //   Dropicards, coefficients validés par le porteur le 2026-11-01) × coefficient de la langue.
   // - Classeur : chaque note a sa propre carte, avec le logo de l'entreprise et la note, à côté des exemplaires non
   //   gradés de la même carte ; « Tout afficher › Gradées » les retrouve.
   // Ce module partage la portée des autres : ses noms commencent par GRADE_ ou grade.

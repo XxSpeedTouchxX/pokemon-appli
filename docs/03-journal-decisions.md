@@ -18,6 +18,11 @@
   - ouverte depuis la carte gradée, la fiche affiche en grand **la valeur de cet exemplaire** (par exemple 441,98 € pour CCC 9,5), pas la moyenne avec l'exemplaire non gradé ;
   - appui sur la ligne gradée de « État de ma carte » : **changer la note** ou **« Retirer la note »** (l'exemplaire redevient non gradé, en Near Mint ou dans son état d'avant).
 - **Tests** : `e2e/t-gradeedit.mjs` (nouveau, 16 contrôles) ; `t-graded`, `t-binder`, `t-fietat`, `t-fihist`, `t-dexcards`, `t-edit` repassés.
+- **Puis, décision du porteur** : **coefficients des notes de gradation validés** (« oui », 2026-11-01). Valeur d'une carte gradée = cote Cardmarket (Near Mint) × coefficient de la note × langue, dans « Prix gradés », à l'ajout d'une carte gradée et pour « Grader ma carte » (`FI_GRADERS`, `fiche.js`) :
+  - PCA : 10 ×2,6 · 9,5 ×1,9 · 9 ×1,45 · 8 ×1,12 · 7 ×0,85 · 6 ×0,7 ;
+  - CCC : 10 Black Label ×6 · 10 Gold Label ×4 · 10 ×2,8 · 9,5 ×2 · 9 ×1,5 · 8 ×1,15 · 7 ×0,9 · 6 ×0,72 ;
+  - PSA : 10 ×3,5 · 9 ×1,6 · 8 ×1,2 · 7 ×0,9 · 6 ×0,75.
+  L'app garde le mot « estimation » (aucune vente réelle de carte gradée n'est relevée, principe 3), comme pour les coefficients des états validés le 2026-10-22. Aucun texte « à valider » n'était affiché dans l'app : seuls la documentation et deux commentaires du code changent.
 - **Puis, décision du porteur** (cache v109) : bruitage des PA du jour **« Gouttes d'aura »** (« pa-2-gouttes-d-aura, je prends celui-là ») : un « ploc » d'eau au toucher, des gouttes qui tombent une à une sur le solde, un reflet d'eau à la fin (`SFX_PA_DEFAULT = 'gouttes'`, `sfx.js`). Les 4 autres restent pour essai seulement (?sonpa=1 à 5).
 
 ## 2026-11-01 (suite 4) — Pokédex retouché, sons de la pièce et de l'évolution

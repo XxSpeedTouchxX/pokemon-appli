@@ -198,7 +198,7 @@
   // ——— Prix gradés (2026-10-31, porteur : « les côtes avec les entreprises de gradation selon chaque état », d'après sa
   // vidéo ; PCA, CCC et PSA uniquement) ———
   // Aucune source ouverte des ventes de cartes gradées : chaque note est une estimation Dropicards, cote Cardmarket
-  // (Near Mint) × coefficient de la note, signalée « ≈ … · estimation ». Coefficients proposés, à valider par le porteur.
+  // (Near Mint) × coefficient de la note, signalée « ≈ … · estimation ». Coefficients validés par le porteur (2026-11-01).
   // 2026-11-01 (porteur) : logo de chaque entreprise ; notes 10 à 6, une nuance par note (10 or, 9,5 vert très foncé,
   // 9 vert foncé, 8 vert, 7 vert-jaune, 6 jaune-orangé) ; chez CCC, 10 Black Label (note parfaite) et 10 Gold Label
   // (« Pristine », une imperfection), en plus du 10. PSA n'a pas de 9,5. Notes 8,5 retirées. Logo PSA rouge et bleu
