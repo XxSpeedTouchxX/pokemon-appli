@@ -64,7 +64,7 @@ ok('confirmation : « ' + ask + ' »', /Faire méga-évoluer Dracaufeu en Méga-
 await dex.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-yes-btn').click(); await page.waitForTimeout(3800);
 const st2 = await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); return { megas: d.megas, buddy: d.buddy, pa: d.pa }; }, KEY);
 ok('Méga-Dracaufeu X débloquée et compagnon (' + JSON.stringify(st2) + ')', (st2.megas || []).indexOf(10034) >= 0 && st2.buddy === 10034 && st2.pa === 500);
-ok('fiche après méga-évolution : « ' + (await act.innerText()) + ' »', /C’est ton compagnon/.test(await act.innerText()));
+ok('fiche après méga-évolution : plus de bouton (« C’est ton compagnon » retiré le 2026-10-31)', (await act.count()) === 0);
 await dex.screenshot({ path: shot('grades-mega.png') });
 await go('start=home');
 ok('compagnon de l’accueil : Méga-Dracaufeu X', (await page.locator('button[aria-label^="Compagnon : Méga-Dracaufeu X"]').count()) === 1);

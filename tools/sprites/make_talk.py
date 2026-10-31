@@ -39,7 +39,7 @@ MOUTH = {
 # Sourire (2026-10-30) : chaque œil est recouvert de la couleur de la peau (prise au point donné), puis un « ^ » est
 # tracé à l'encre : (cadre de l'œil x0, y0, x1, y1), (point de la peau), [pixels du « ^ »].
 HAPPY = {
-    1: [((42, 42, 46, 47), (41, 45), [(42, 46), (43, 45), (44, 44), (45, 44), (46, 45), (47, 46)]),
+    1: [((42, 42, 47, 47), (41, 45), [(42, 46), (43, 45), (44, 44), (45, 44), (46, 45), (47, 46)]),
         ((30, 42, 31, 47), (33, 45), [(30, 46), (31, 45), (32, 45), (33, 46)])],
     4: [((42, 36, 45, 41), (40, 38), [(41, 40), (42, 39), (43, 38), (44, 38), (45, 39), (46, 40)]),
         ((34, 36, 34, 40), (36, 38), [(34, 39), (35, 38), (36, 39)])],
@@ -50,6 +50,26 @@ HAPPY = {
 }
 
 
+def fill_eye(px, box):
+    """Efface l'œil (2026-10-31, porteur : « un carré autour de l'œil de Pikachu ») : les pixels du cadre dont la
+    couleur n'existe pas tout autour (pupille, reflet, contour de l'œil) sont repeints de proche en proche avec la
+    couleur la plus fréquente de leurs voisins déjà repeints : les nuances de la peau sont gardées, sans aplat carré."""
+    x0, y0, x1, y1 = box
+    ring = {px[x, y] for x in range(x0 - 1, x1 + 2) for y in (y0 - 1, y1 + 1)} | {px[x, y] for y in range(y0 - 1, y1 + 2) for x in (x0 - 1, x1 + 1)}
+    todo = {(x, y) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1) if px[x, y] not in ring}
+    while todo:
+        done = []
+        for x, y in sorted(todo):
+            near = [px[a, b] for a, b in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)) if (a, b) not in todo and px[a, b][3] > 0]
+            if near:
+                done.append(((x, y), max(set(near), key=near.count)))
+        if not done:
+            break
+        for (x, y), c in done:
+            px[x, y] = c
+            todo.discard((x, y))
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     for n, rows in MOUTH.items():
@@ -57,11 +77,8 @@ def main():
         im.crop(CROP).save(OUT / f"{n}-0.png", optimize=True)
         happy = im.copy()
         hp = happy.load()
-        for (x0, y0, x1, y1), (sx, sy), arc in HAPPY[n]:
-            skin = hp[sx, sy]
-            for x in range(x0, x1 + 1):
-                for y in range(y0, y1 + 1):
-                    hp[x, y] = skin
+        for box, _skin, arc in HAPPY[n]:
+            fill_eye(hp, box)
             for x, y in arc:
                 hp[x, y] = INK
         happy.crop(CROP).save(OUT / f"{n}-3.png", optimize=True)
@@ -70,14 +87,12 @@ def main():
             for x in range(x0, x1 + 1):
                 px[x, y] = c
         im.crop(CROP).save(OUT / f"{n}-1.png", optimize=True)
-        for (x0, y0, x1, y1), (sx, sy), arc in HAPPY[n]:
-            skin = px[sx, sy]
+        # Sourire bouche ouverte : les yeux du sourire (ci-dessus) et la bouche ouverte.
+        hp = happy.load()
+        for y, x0, x1, c in rows:
             for x in range(x0, x1 + 1):
-                for y in range(y0, y1 + 1):
-                    px[x, y] = skin
-            for x, y in arc:
-                px[x, y] = INK
-        im.crop(CROP).save(OUT / f"{n}-2.png", optimize=True)
+                hp[x, y] = c
+        happy.crop(CROP).save(OUT / f"{n}-2.png", optimize=True)
     print(f"{len(MOUTH)} mascottes : {OUT}")
 
 

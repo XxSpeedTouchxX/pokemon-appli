@@ -58,9 +58,10 @@
   const baseShowHome = proto.vHome;
   proto.vHome = function (x) {
     const r = baseShowHome.call(this, x), soon = SEALED.soon(), recent = SEALED.recent();
-    const feat = items => ({ show: true, items: items.map(p => this.featureCard(p, x.c.stock)), all: () => this.openReleases(), allLabel: 'Toutes les sorties' });
-    r.next = soon.length ? feat(soon) : EMPTY_FEATURE;
-    r.rel = recent.length ? feat(recent) : EMPTY_FEATURE;
+    // « Toutes les sorties » seulement à côté de « Prochaines sorties » (2026-10-31, porteur).
+    const feat = (items, all) => ({ show: true, items: items.map(p => this.featureCard(p, x.c.stock)), all: () => this.openReleases(), allLabel: all ? 'Toutes les sorties' : '' });
+    r.next = soon.length ? feat(soon, true) : EMPTY_FEATURE;
+    r.rel = recent.length ? feat(recent, false) : EMPTY_FEATURE;
     return r;
   };
 

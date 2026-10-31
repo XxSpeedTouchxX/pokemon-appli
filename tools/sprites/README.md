@@ -20,7 +20,7 @@ Sur l'accueil, un Pokémon animé accompagne la valeur de la collection. On le c
 
 ## Mascotte qui parle (2026-10-28)
 
-`make_talk.py` prépare la mascotte du didacticiel (`tools/web/tuto.js`) pour les quatre starters (Bulbizarre, Salamèche, Carapuce, Pikachu) : à partir de l'image fixe, deux images recadrées sur 52 × 54 px, **bouche fermée** (`web/img/pokemon/talk/{n}-0.png`, le sprite d'origine) et **bouche ouverte** (`{n}-1.png`, bouche redessinée au pixel près : intérieur sombre, langue) et **sourire** (`{n}-2.png` bouche ouverte, `{n}-3.png` bouche fermée, yeux fermés « ^ ^ », remerciement du premier écran, 2026-10-30). Le didacticiel les alterne pendant que le texte s'écrit, affichées à 2 × (pixels nets). Régénérer : `python3 tools/sprites/make_talk.py`.
+`make_talk.py` prépare la mascotte du didacticiel (`tools/web/tuto.js`) pour les quatre starters (Bulbizarre, Salamèche, Carapuce, Pikachu) : à partir de l'image fixe, deux images recadrées sur 52 × 54 px, **bouche fermée** (`web/img/pokemon/talk/{n}-0.png`, le sprite d'origine) et **bouche ouverte** (`{n}-1.png`, bouche redessinée au pixel près : intérieur sombre, langue) et **sourire** (`{n}-2.png` bouche ouverte, `{n}-3.png` bouche fermée, yeux fermés « ^ ^ », remerciement du premier écran, 2026-10-30 ; depuis le 2026-10-31, l’œil ouvert est repeint avec les couleurs de la peau autour (`fill_eye`) : plus de carré autour de l’œil de Pikachu, et `-2` reprend le même sourire que `-3`). Le didacticiel les alterne pendant que le texte s'écrit, affichées à 2 × (pixels nets). Régénérer : `python3 tools/sprites/make_talk.py`.
 
 ## Fiches du Pokédex (2026-10-28)
 

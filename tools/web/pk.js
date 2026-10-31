@@ -154,7 +154,10 @@
       shareText: s.pkShared ? 'Merci pour le partage ! Tes +' + PK_SHARE + ' PK sont reçus.' : '+' + PK_SHARE + ' PK la première fois que tu partages Dropicards sur un réseau social.',
       nets: PK_NETS.map(([name, href]) => ({ name: name, href: href, label: 'Partager Dropicards sur ' + name, go: () => this.pkShare(name) })),
       native: pkCanShare(), shareNative: () => this.pkShareNative(), copy: () => this.pkCopy(),
-      note: 'Les PK se gagnent dans l’app : ils ne s’achètent pas et n’ont aucune valeur en euros. Ils restent sur cet appareil, avec ta collection.'
+      note: 'Les PK se gagnent dans l’app : ils ne s’achètent pas et n’ont aucune valeur en euros. Ils restent sur cet appareil, avec ta collection.',
+      // Description (2026-10-31, porteur) : ce que sont les PK, comment les gagner (liste ci-dessus), à quoi ils servent.
+      what: 'Les PK sont la monnaie de Dropicards. Tu les gagnes gratuitement en jouant dans l’app.',
+      use: 'Dans le PK shop, ils t’offrent des tickets pour le tirage au sort d’un booster Pokémon et d’autres items. Les PK gagnés te font aussi monter en grade, pour profiter de plein d’avantages (boosters plus fréquents, plus de scans par jour…).'
     };
   };
   const pkBaseRender = proto.renderVals;

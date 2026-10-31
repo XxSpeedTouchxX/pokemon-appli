@@ -53,6 +53,8 @@
   // l'état sont ceux des exemplaires ajoutés (copies.js) ; un ajout sans langue prend celle de l'article.
   const HOME_BINDER = { cards: 9, sealed: 9 };
   const HOME_COND = { MT: 'var(--pkm-up)', NM: 'var(--pkm-up)', EX: 'var(--pkm-amber)', GD: 'var(--pkm-orange)', PL: 'var(--pkm-down)', PO: 'var(--pkm-down)', SO: 'var(--pkm-up)', AB: 'var(--pkm-amber)' };
+  // Cartes (2026-10-31, porteur) : la bulle illustrée de l'état (web/img/conds) à droite du prix, au lieu du point.
+  const homeCondIcon = c => (/^(MT|NM|EX|GD|PL|PO)$/.test(c) ? 'img/conds/' + c.toLowerCase() + '.svg' : '');
   const homeCopy = (purchases, p) => {
     const g = copiesOf(purchases, p)[0], set = (purchases || []).some(a => (a.lines || []).some(l => l.pid === p.id && l.lang));
     return { lang: set && g ? g.lang : p.lang || 'FR', cond: g ? g.cond : copyDef(p) };
@@ -74,7 +76,7 @@
     const tile = p => {
       const k = homeCopy(s.purchases, p), q = qty(p), l = this.look(p);
       return Object.assign(l, {
-        name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(p), condColor: HOME_COND[k.cond] || HOME_COND.NM,
+        name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(p), condColor: HOME_COND[k.cond] || HOME_COND.NM, condIcon: homeCondIcon(k.cond), hasCond: !!homeCondIcon(k.cond), noCond: !homeCondIcon(k.cond),
         many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg,
         label: p.name + (p.grade ? ', gradée ' + p.grade : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
           + copyLabel(p, k.cond) + ', cote ' + (unit(p) ? x.mask(this.eur(unit(p))) : 'inconnue') + '. Ouvrir la fiche',
@@ -208,6 +210,44 @@
       fit: Math.max(4, String(valueBig).length * 0.66).toFixed(2)
     };
   };
+  // Changement de période (2026-10-31, porteur : « la transition est trop brutale ») : la courbe glisse en douceur de
+  // l'ancienne forme à la nouvelle (560 ms), les deux rééchantillonnées sur 72 points ; graduations et montants de
+  // l'axe réapparaissent en fondu. Le tracé exact est posé à la fin ; rien ne bouge si les animations sont réduites.
+  const HV_N = 72, hvAnim = { last: '', cur: null, raf: 0 };
+  const hvPts = d => String(d).slice(1).split(' L').map(p => p.split(' ').map(Number));
+  const hvSample = pts => {
+    const out = [];
+    for (let i = 0, j = 0; i < HV_N; i++) {
+      const x = i / (HV_N - 1) * HV_W;
+      while (j < pts.length - 2 && pts[j + 1][0] < x) j++;
+      const a = pts[j], b = pts[Math.min(j + 1, pts.length - 1)], t = b[0] === a[0] ? 0 : Math.max(0, Math.min(1, (x - a[0]) / (b[0] - a[0])));
+      out.push([x, a[1] + (b[1] - a[1]) * t]);
+    }
+    return out;
+  };
+  const hvMorph = to => {
+    const line = document.querySelector('.pkm-hv-line'), area = document.querySelector('.pkm-hv-area');
+    const from = hvAnim.cur || (hvAnim.last ? hvSample(hvPts(hvAnim.last)) : null);
+    hvAnim.last = to;
+    cancelAnimationFrame(hvAnim.raf);
+    if (!line || !area || !from || homeStill()) { hvAnim.cur = null; return; }
+    const goal = hvSample(hvPts(to)), close = ' L' + HV_W + ' ' + HV_H + ' L0 ' + HV_H + ' Z', t0 = performance.now();
+    const step = now => {
+      const k = Math.min(1, (now - t0) / 560), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      if (k >= 1) { hvAnim.cur = null; line.setAttribute('d', to); area.setAttribute('d', to + close); return; }
+      const P = from.map((p, i) => [p[0], p[1] + (goal[i][1] - p[1]) * e]), d = 'M' + P.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L');
+      hvAnim.cur = P; line.setAttribute('d', d); area.setAttribute('d', d + close);
+      hvAnim.raf = requestAnimationFrame(step);
+    };
+    step(t0);
+    document.querySelectorAll('.pkm-hv-y, .pkm-hv-grid').forEach(el => { if (el.animate) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' }); });
+  };
+  // Appelé à chaque rendu : la courbe affichée change → glissement (après la mise à jour de la page, avant l'affichage).
+  proto.homeTrendFx = function (hv) {
+    if (!hv || !hv.line || hv.line === hvAnim.last) return;
+    const to = hv.line;
+    queueMicrotask(() => hvMorph(to));
+  };
   // Date (AAAA-MM-JJ) « ago » jours avant aujourd'hui.
   const hvDate2 = (today, ago) => new Date(Date.parse(today) - ago * 86400000).toISOString().slice(0, 10);
 
@@ -326,6 +366,7 @@
     const r = homeBaseRender.call(this), s = this.st();
     homeApplyTheme(s.buddy);
     r.hb = r.ui.isHome ? this.homeBuddy(s) : HOME_NO_BUDDY;
+    if (r.ui.isHome && r.home && r.home.hv) this.homeTrendFx(r.home.hv);
     // Écran « Tout afficher » du classeur (accueil seulement).
     r.hf = r.ui.isHome && r.home && r.home.hk && r.home.hk.full && r.home.hk.full.open ? r.home.hk.full : HOME_NO_FULL;
     return r;

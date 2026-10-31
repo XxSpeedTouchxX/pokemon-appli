@@ -22,7 +22,7 @@
   // Couleur selon la chance (2026-10-24, demande du porteur) : rouge sous 20 %, orange de 20 à 40 %, vert clair de
   // 40 à 60 %, vert foncé à partir de 60 %. Mêmes seuils pour les points de la carte, les listes et les fiches.
   const PROB = [[60, 'Forte', '#2BC06A', 'rgba(43, 192, 106, 0.18)'], [40, 'Bonne', '#9BE15D', 'rgba(155, 225, 93, 0.16)'],
-    [20, 'Moyenne', '#F5B14C', 'rgba(245, 177, 76, 0.16)'], [0, 'Faible', '#FF6B6B', 'rgba(255, 107, 107, 0.16)']];
+    [20, 'Moyenne', '#F5B14C', 'rgba(245, 177, 76, 0.16)'], [0, 'Faible', '#FF8080', 'rgba(255, 107, 107, 0.16)']];
   const LEVEL_COLOR = PROB.map(p => p[2]).reverse();
   proto.probLevel = function (n) { const p = PROB.find(q => n >= q[0]) || PROB[PROB.length - 1]; return { label: p[1], color: p[2], tint: p[3] }; };
   // Noms courts des régions pour le fil « France › région › département ».

@@ -151,6 +151,19 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - Centrage sur les socles : centre du corps seul (`tools/sprites/dex_boxes.py`), décalage limité à 22 % de la largeur.
 - Méga-évolutions en pixel, au style Noir et Blanc (`tools/sprites/fetch_megas.py`).
 
+## Retouches du 2026-10-31 (porteur)
+
+- **Accueil** : bouton du compagnon sans la bulle jaune à flèches ; changement de période de la courbe en morphing (`hvMorph`, home.js : 72 points, 560 ms, axe et grille en fondu) ; « Toutes les sorties » seulement sur « Prochaines sorties » (`feat`, showcase.js ; `allLabel` vide = pas de bouton dans `CAROUSEL`).
+- **Mes PK** (pk.js `what`, `use`) : « C’est quoi ? », « Comment les gagner ? », « À quoi servent-ils ? » ; « Compagnons à thème » et « Mon Pokédex » retirés ; bouton « Règles des PK et PA » (aussi dans le PK shop).
+- **Mes PA** (fragment `pa-sheet`, `pk.paSheet` dans pa.js) : sans PA à récupérer, le solde de PA ouvre cette fenêtre (solde, c’est quoi, série de jours, à quoi ils servent, paliers du Pokédex, « Ouvrir le Pokédex ») ; avec des PA à récupérer, la fenêtre de récupération reste prioritaire.
+- **Règles des PK et PA** (legal.js) : ouvertes depuis Mes PK, sans les onglets légaux (`legal.notPk`), sans l’encadré « Pas un jeu d’argent » ni le texte complet ; depuis À propos, 3 rubriques (Mentions légales, Confidentialité, Conditions).
+- **Pokédex** (dex.js, dex.css) : plus de « vus » (`dexSeen` = débloqué, filtre et textes retirés) ; « Ma progression » sur les 156 (`DEX_IDS`, sans les méga) ; appareil dessiné `img/brand/pokedex-device.svg` (`tools/brand/make_pokedex.py`, écran, croix et « OK » plus grands), pleine largeur ; légende « ◀ ▶ les évolutions » ; `.pkm-dex-a-go` (« OK » qui bondit avec un reflet) quand l’évolution affichée est payable ; encadré du Pokémon plus haut (`min-height: 176px`) ; bandeau « Arbre de Pokévolution » ; encadrés « Ton compagnon » et « Pokémon sélectionné », bouton « C’est ton compagnon » (`hasAct`) et texte des PA du bas retirés. Arbre sans collision : largeur de colonne selon le nombre de Pokémon (`DEX_ROUTE_W` 296, 72 à 100 px), réduction par 0,95 jusqu’à 6 px d’écart (`dexRouteFit`, `DEX_GAP`) ; `dexRouteGaps(n, still)` mesure les écarts (test : 203 paires, minimum 6 px).
+- **Didacticiel** (tuto.js) : étape des séries `sweep` (défilement de gauche à droite en 9 s), étape des PK `inner` + `pad: 3` (cadre sur la pastille seule) ; bouton « Étape précédente » (`.pkm-tt-prev`, `tutoPrev`, caché à la 1ʳᵉ étape).
+- **Mon profil** : « Revoir le didacticiel » avec une icône de livre.
+- **Classeur** : bulle illustrée de l’état à droite du prix (`homeCondIcon`, `img/conds/*.svg`, 19 px) à la place du point de couleur ; couleurs des 6 états refaites (`tools/conds/make_conds.py`) : Mint or, Near Mint vert foncé, Excellent vert clair, Good jaune-vert, Played jaune-orangé, Poor rouge-orangé.
+- **Contraste** : « Faible » du Territoire en `#FF8080` (4,9:1).
+- Tests : `e2e/t-dexseen.mjs` (réécrit), `t-tuto`, `t-pa`, `t-pk`, `t-legal`, `t-binder`, `t-buddy`, `t-games`, `t-grades`, `t-dexpad`, `t-sorties`.
+
 ## Notifications
 
 `tools/web/notif.js`, fragment `profile-notif` (2026-10-29, demande du porteur) :

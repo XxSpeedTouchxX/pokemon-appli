@@ -53,7 +53,8 @@ for (let k = 0; k < 14; k++) {
     const radar = kids.length > 2 ? (kids[1].getBoundingClientRect().bottom <= f.bottom + 1 && kids[2].getBoundingClientRect().bottom > f.bottom + 4 ? 'ok' : 'cadre ' + Math.round(f.bottom)) : '';
     const ico = document.querySelector('nav button[aria-label="PK shop"] svg').getBoundingClientRect();
     const off = Math.round(Math.hypot(f.left + f.width / 2 - ico.left - ico.width / 2, f.top + f.height / 2 - ico.top - ico.height / 2));
-    return { t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), fw: Math.round(f.width), clip: clip, radar: radar, off: off, top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
+    const paBar = document.querySelector('header .pkm-pa-bar'), paGap = paBar ? Math.round(paBar.getBoundingClientRect().top - f.bottom) : null;
+    return { paGap: paGap, prev: !document.querySelector('.pkm-tt-prev').hidden, t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), fw: Math.round(f.width), clip: clip, radar: radar, off: off, top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
       fresh: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-fresh'), nav: [...document.querySelectorAll('nav button[aria-current="page"]')].map(b => b.getAttribute('aria-label')).join('') };
   });
   if (!info) break;
@@ -66,6 +67,8 @@ ok(steps.length + ' étapes', steps.length === 12);
 ok('cadre jamais sous la bulle (' + steps.map(x => x.overlap).join(',') + ')', steps.every(x => x.overlap <= 2 && x.fh > 20));
 ok('valeur, classeur, scan, radar, séries', /valeur/.test(steps[0].t) && /Ici, tu pourras trouver ton classeur/.test(steps[1].t) && /Scan Dropicards/.test(steps[2].t) && /radar des boutiques/.test(steps[3].t) && /toutes les séries et leurs extensions/.test(steps[4].t));
 ok('Pokédex en 3 étapes (Pokédex, PA, arbre d’évolution), bulle en haut, « Nouveau »', [5, 6, 7].every(i => steps[i].top && steps[i].fresh && steps[i].nav === 'Jeux') && /Voici ton Pokédex : tu pourras y voir ton compagnon/.test(steps[5].t) && /points d’Aura/.test(steps[6].t) && /arbre d’évolution/.test(steps[7].t) && !steps.some(x => /Tous les Pokémon|Sa fiche/.test(x.t)));
+ok('bouton « Étape précédente » caché à la 1re étape, visible ensuite', !steps[0].prev && steps.slice(1).every(x => x.prev));
+ok('cadre du solde de PK sans mordre sur le solde de PA (' + steps[9].paGap + ' px)', steps[9].paGap >= 0);
 ok('solde de PA, puis solde de PK : « ' + steps[9].t + ' »', /récupérer tes PA/.test(steps[8].t) && /tes PK : ils te serviront à acheter des items/.test(steps[9].t));
 ok('PK shop (cadre ' + steps[10].fw + ' × ' + steps[10].fh + ', écart au centre de l’icône ' + steps[10].off + ' px)', /Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés/.test(steps[10].t) && steps[10].nav === 'Accueil' && steps[10].fw <= 60 && steps[10].fh <= 60 && steps[10].off <= 2);
 ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[11].t));
@@ -105,6 +108,13 @@ const iris = await p2.evaluate(() => ({ iris: document.querySelector('.pkm-tt-fr
 await p2.waitForTimeout(1500);
 const after = await p2.evaluate(() => ({ iris: document.querySelector('.pkm-tt-frame').classList.contains('pkm-tt-iris'), t: document.querySelector('.pkm-tt-full').textContent }));
 ok('radar → séries : le cadre se referme sans flash (' + JSON.stringify(iris) + ') puis se rouvre sur les séries', iris.iris && iris.op === '1' && !after.iris && /séries/.test(after.t));
+// Séries : la barre défile lentement de gauche à droite pendant que le compagnon parle.
+const sl = [];
+for (let k = 0; k < 3; k++) { sl.push(await p2.evaluate(() => document.querySelector('nav[aria-label="Aller à une série"]').scrollLeft)); await p2.waitForTimeout(1500); }
+ok('séries : défilement lent ' + sl.join(' → '), sl[2] > sl[1] && sl[1] > sl[0]);
+// « Étape précédente » : retour au radar.
+await p2.locator('.pkm-tt-prev').click(); await p2.waitForTimeout(1600);
+ok('« Étape précédente » ramène au radar', /radar des boutiques/.test(await p2.locator('.pkm-tt-full').textContent()));
 await ctx2.close();
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');

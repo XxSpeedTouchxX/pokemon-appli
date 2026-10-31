@@ -6,8 +6,11 @@ Pokédex ouvert, dessiné à plat : volet gauche avec l'objectif (la gemme des P
 trois voyants et l'écran ; charnière ; volet droit avec l'écran noir, le clavier bleu et les touches. Les écrans sont
 vides : l'app y pose le Pokémon et le solde de PA (tools/web/pa.js, dex.css).
 
-Sortie : web/img/brand/pokedex.svg (400 × 250). Écrans, en unités du dessin : gauche (45, 100, 120 × 70), droit
-(232, 92, 140 × 38) : mêmes valeurs en pourcentage dans tools/web/dex.css.
+Sortie : web/img/brand/pokedex.svg (400 × 250, icône et petits usages). Écrans, en unités du dessin : gauche (45, 100,
+120 × 70), droit (232, 92, 140 × 38).
+Et web/img/brand/pokedex-device.svg (2026-10-31, porteur : « un plus gros écran, un OK et des flèches plus gros ») :
+le Pokédex de l'onglet Jeux, écran gauche agrandi (34, 89, 146 × 76), croix (128, 174, 62 × 62) et bouton vert « OK »
+(38, 188, 70 × 36) plus gros : mêmes valeurs en pourcentage dans tools/web/dex.css.
 Usage : python3 tools/brand/make_pokedex.py
 """
 import re
@@ -26,7 +29,7 @@ def gem(cx, cy, size):
     return f'<g transform="translate({cx - size / 2:.1f} {cy - size / 2:.1f}) scale({k:.4f})">{inner}</g>'
 
 
-def main():
+def write(big):
     body = f'''<defs>
 <linearGradient id="rd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0333F"/><stop offset="1" stop-color="#B5121F"/></linearGradient>
 <linearGradient id="rd2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#D51E2C"/><stop offset="1" stop-color="#9E0F1B"/></linearGradient>
@@ -45,17 +48,7 @@ def main():
 <circle cx="102" cy="40" r="6" fill="#FF3B3B" stroke="{INK}" stroke-width="2.5"/><circle cx="100" cy="38" r="2" fill="#FFFFFF" opacity="0.8"/>
 <circle cx="120" cy="40" r="6" fill="#FFD60A" stroke="{INK}" stroke-width="2.5"/><circle cx="118" cy="38" r="2" fill="#FFFFFF" opacity="0.8"/>
 <circle cx="138" cy="40" r="6" fill="#3DDC84" stroke="{INK}" stroke-width="2.5"/><circle cx="136" cy="38" r="2" fill="#FFFFFF" opacity="0.8"/>
-<path d="M30 88 L180 88 L180 186 L48 186 L30 168 Z" fill="url(#bz)" stroke="{INK}" stroke-width="3.5" stroke-linejoin="round"/>
-<circle cx="94" cy="95" r="3" fill="#E2202F"/><circle cx="116" cy="95" r="3" fill="#E2202F"/>
-<rect x="45" y="100" width="120" height="70" rx="5" fill="#0E1626" stroke="{INK}" stroke-width="3"/>
-<circle cx="44" cy="176" r="0" fill="none"/>
-<path d="M150 176 h18 M150 180 h18 M150 172 h18" stroke="#6B6B6B" stroke-width="2" stroke-linecap="round"/>
-<circle cx="40" cy="210" r="11" fill="#1C1C1C" stroke="{INK}" stroke-width="3"/>
-<rect x="60" y="196" width="22" height="5" rx="2.5" fill="#FF5A5A" stroke="{INK}" stroke-width="1.5"/>
-<rect x="88" y="196" width="22" height="5" rx="2.5" fill="#4AA8FF" stroke="{INK}" stroke-width="1.5"/>
-<rect x="60" y="208" width="50" height="22" rx="4" fill="#3DDC84" stroke="{INK}" stroke-width="3"/>
-<path d="M150 196 h14 v14 h14 v14 h-14 v14 h-14 v-14 h-14 v-14 h14 Z" fill="#1C1C1C" stroke="{INK}" stroke-width="3" stroke-linejoin="round"/>
-<!-- charnière -->
+''' + left_panel(big) + f'''<!-- charnière -->
 <rect x="200" y="24" width="18" height="222" rx="9" fill="url(#hg)" stroke="{INK}" stroke-width="4"/>
 <path d="M200 60 h18 M200 210 h18" stroke="{INK}" stroke-width="3"/>
 <!-- volet droit -->
@@ -69,8 +62,38 @@ def main():
 <rect x="300" y="222" width="50" height="14" rx="3" fill="#123A2A" stroke="{INK}" stroke-width="3"/>
 '''
     svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" role="img" aria-label="Pokédex"><title>Pokédex</title>{body}</svg>\n'
-    OUT.write_text(svg, "utf-8")
-    print(OUT, len(svg), "octets")
+    out = OUT.with_name("pokedex-device.svg") if big else OUT
+    out.write_text(svg, "utf-8")
+    print(out, len(svg), "octets")
+
+
+def left_panel(big):
+    """Écran, boutons et croix du volet gauche ; plus grands pour l'appareil de l'onglet Jeux."""
+    if not big:
+        return f'''<path d="M30 88 L180 88 L180 186 L48 186 L30 168 Z" fill="url(#bz)" stroke="{INK}" stroke-width="3.5" stroke-linejoin="round"/>
+<circle cx="94" cy="95" r="3" fill="#E2202F"/><circle cx="116" cy="95" r="3" fill="#E2202F"/>
+<rect x="45" y="100" width="120" height="70" rx="5" fill="#0E1626" stroke="{INK}" stroke-width="3"/>
+<circle cx="44" cy="176" r="0" fill="none"/>
+<path d="M150 176 h18 M150 180 h18 M150 172 h18" stroke="#6B6B6B" stroke-width="2" stroke-linecap="round"/>
+<circle cx="40" cy="210" r="11" fill="#1C1C1C" stroke="{INK}" stroke-width="3"/>
+<rect x="60" y="196" width="22" height="5" rx="2.5" fill="#FF5A5A" stroke="{INK}" stroke-width="1.5"/>
+<rect x="88" y="196" width="22" height="5" rx="2.5" fill="#4AA8FF" stroke="{INK}" stroke-width="1.5"/>
+<rect x="60" y="208" width="50" height="22" rx="4" fill="#3DDC84" stroke="{INK}" stroke-width="3"/>
+<path d="M150 196 h14 v14 h14 v14 h-14 v14 h-14 v-14 h-14 v-14 h14 Z" fill="#1C1C1C" stroke="{INK}" stroke-width="3" stroke-linejoin="round"/>
+'''
+    return f'''<path d="M22 80 L192 80 L192 172 L40 172 L22 154 Z" fill="url(#bz)" stroke="{INK}" stroke-width="3.5" stroke-linejoin="round"/>
+<circle cx="96" cy="84.5" r="2.5" fill="#E2202F"/><circle cx="118" cy="84.5" r="2.5" fill="#E2202F"/>
+<rect x="34" y="89" width="146" height="76" rx="5" fill="#0E1626" stroke="{INK}" stroke-width="3"/>
+<rect x="44" y="178" width="22" height="5" rx="2.5" fill="#FF5A5A" stroke="{INK}" stroke-width="1.5"/>
+<rect x="72" y="178" width="22" height="5" rx="2.5" fill="#4AA8FF" stroke="{INK}" stroke-width="1.5"/>
+<rect x="38" y="188" width="70" height="36" rx="6" fill="#3DDC84" stroke="{INK}" stroke-width="3"/>
+<path d="M149 174 h20 v21 h21 v20 h-21 v21 h-20 v-21 h-21 v-20 h21 Z" fill="#1C1C1C" stroke="{INK}" stroke-width="3" stroke-linejoin="round"/>
+'''
+
+
+def main():
+    for big in (False, True):
+        write(big)
 
 
 if __name__ == "__main__":

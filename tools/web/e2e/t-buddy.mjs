@@ -45,7 +45,7 @@ const nodeAria = await nodes.evaluateAll(b => b.map(x => x.getAttribute('aria-la
 ok('route de Bulbizarre : ' + nodeAria.join(' ; '), nodeAria.length === 4 && /^Bulbizarre, Forme de base, Compagnon$/.test(nodeAria[0]) && /^Herbizarre, 1ʳᵉ évolution, 500 PA$/.test(nodeAria[1]) && /^Florizarre, 2ᵉ évolution, 1\s500 PA$/.test(nodeAria[2]) && /^Méga-Florizarre, méga-évolution, 2\s500 PA$/.test(nodeAria[3]));
 ok('formes verrouillées en silhouette', (await page.locator('div[aria-label="Route d’évolution"] button.pkm-dex-lock').count()) === 3);
 const act = page.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-act-btn');
-ok('fiche du compagnon : « ' + await act.innerText() + ' »', (await act.count()) === 1 && (await act.innerText()) === 'C’est ton compagnon');
+ok('fiche du compagnon : plus de « C’est ton compagnon » en bas (2026-10-31)', (await act.count()) === 0);
 ok('anciens boutons retirés (hexagones, grille des méga, lignée)', (await page.locator('div[role="group"][aria-label="Méga-évolutions"]').count()) === 0 && (await page.locator('text=Lignée de ton Pokémon').count()) === 0);
 await nodes.nth(1).click(); await page.waitForTimeout(300);
 ok('Herbizarre sans PA : « ' + await act.innerText() + ' »', /^Encore 500 PA pour le débloquer$/.test(await act.innerText()) && (await act.getAttribute('aria-disabled')) === 'true');
@@ -100,7 +100,7 @@ await tiles.first().click(); await page.waitForTimeout(700);
 ok('liste fermée, route de Groudon', (await list.count()) === 0 && /^Groudon, /.test(await nodes.first().getAttribute('aria-label')));
 ok('fiche : « ' + await act.innerText() + ' »', (await act.innerText()) === 'Choisir comme compagnon');
 await act.click(); await page.waitForTimeout(500);
-ok('Groudon choisi : toast et bouton', (await page.locator('text=Groudon t’accompagne').count()) === 1 && (await act.innerText()) === 'C’est ton compagnon' && (await saved()).buddy === 383);
+ok('Groudon choisi : toast, bouton retiré', (await page.locator('text=Groudon t’accompagne').count()) === 1 && (await act.count()) === 0 && (await saved()).buddy === 383);
 
 // 5. Débloquer avec des PA : forme de base (Chenipan, 100 PA), puis évolution animée (Herbizarre, 500 PA).
 await seed({ pa: 650, buddy: 1, paDay: '2026-10-04', paStreak: 1 }); await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1500);

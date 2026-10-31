@@ -39,7 +39,7 @@ const route = evo.locator('[aria-label="Route d’évolution"]'), act = evo.loca
 const nodes = await route.locator('button').evaluateAll(b => b.map(x => x.getAttribute('aria-label')));
 ok('Pokédex : route de la famille avec la méga au bout (' + nodes.join(' · ') + ')', nodes.length === 4 && /^Carapuce, /.test(nodes[0]) && /^Carabaffe, 1ʳᵉ évolution, 500 PA$/.test(nodes[1]) && /^Tortank, 2ᵉ évolution, 1[\s\u202f\u00a0]500 PA$/.test(nodes[2]) && /méga-évolution, 2[\s\u202f\u00a0]500 PA$/.test(nodes[3]));
 ok('Pokédex : Carabaffe, Tortank et la méga en silhouette (verrouillés)', (await route.locator('.pkm-dex-lock').count()) === 3);
-ok('Pokédex : fiche de Carapuce « C’est ton compagnon »', (await act.innerText()).trim() === 'C’est ton compagnon');
+ok('Pokédex : fiche de Carapuce sans « C’est ton compagnon » (retiré le 2026-10-31)', (await act.count()) === 0);
 ok('Pokédex : anciens boutons et listes retirés', (await evo.locator('[aria-label="Actions du Pokédex"], [aria-label="Lignée de ton Pokémon"], [role="group"][aria-label="Méga-évolutions"]').count()) === 0);
 await route.locator('button[aria-label^="Tortank,"]').click(); await page.waitForTimeout(300);
 ok('Pokédex : Tortank demande d’abord Carabaffe', /^Débloque d’abord Carabaffe$/.test((await act.innerText()).trim()));
@@ -52,7 +52,7 @@ ok('Pokédex : « Faire évoluer · 500 PA » sur Carabaffe', /^Faire évoluer �
 await act.click(); await page.waitForTimeout(3700);
 const st2 = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy, pa: d.pa, own: d.pkOwn }; });
 ok('Pokédex : Carabaffe pour 500 PA (' + st2.pa + ' PA restants), nouveau compagnon', st2.evo.stage === 1 && st2.buddy === 8 && st2.pa === 20 && st2.own.indexOf(8) >= 0 && (await route.locator('.pkm-dex-lock').count()) === 2);
-ok('Pokédex : Carabaffe « C’est ton compagnon », Tortank à 1 500 PA', (await act.innerText()).trim() === 'C’est ton compagnon' && /^Tortank, 2ᵉ évolution, 1[\s\u202f\u00a0]500 PA$/.test(await route.locator('button[aria-label^="Tortank,"]').getAttribute('aria-label')));
+ok('Pokédex : Carabaffe sans bouton (compagnon), Tortank à 1 500 PA', (await act.count()) === 0 && /^Tortank, 2ᵉ évolution, 1[\s\u202f\u00a0]500 PA$/.test(await route.locator('button[aria-label^="Tortank,"]').getAttribute('aria-label')));
 await evo.screenshot({ path: shot('games-evolution.png') });
 // PA dans l'en-tête, à la place des tickets ; PA du jour à récupérer (pastille « 1 » (« ! » jusqu’au 2026-10-29)), plus crédités à l'ouverture.
 const paPill = page.locator('header button[aria-label^="Mes points d’Aura"]').first();

@@ -38,8 +38,9 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   const vals = await page.$$eval(TILE, bs => bs.map(b => b.querySelector('span[style*="bottom: 6%"]').innerText.trim()));
   const num = t => parseFloat(t.replace(/[^\d,]/g, '').replace(',', '.'));
   ok('pastilles : ' + vals.join(' | '), vals.every((v, i) => !i || num(vals[i - 1]) >= num(v)) && /^448 €$/.test(vals[0].replace(/\s/g, ' ').replace(/ +/g, ' ').replace(/ /g, ' ')));
-  const pill = await page.locator(TILE).first().evaluate(b => { const p = b.querySelector('span[style*="bottom: 6%"]'), s = p.querySelectorAll(':scope > span'); return [getComputedStyle(s[0]).backgroundImage.slice(0, 40), getComputedStyle(s[2]).backgroundColor, p.scrollWidth <= p.clientWidth]; });
-  ok('pastille : drapeau, cote, point vert (Near Mint) : ' + pill.join(' · '), /linear-gradient/.test(pill[0]) && /rgb\(\d+, \d+, \d+\)/.test(pill[1]) && pill[2]);
+  // Bulle illustrée de l'état à droite du prix (2026-10-31, porteur), au lieu du point de couleur.
+  const pill = await page.locator(TILE).first().evaluate(b => { const p = b.querySelector('span[style*="bottom: 6%"]'), s = p.querySelectorAll(':scope > span'), ico = p.querySelector('img.pkm-cond-ico'); return [getComputedStyle(s[0]).backgroundImage.slice(0, 40), ico ? ico.getAttribute('src') : '', p.scrollWidth <= p.clientWidth]; });
+  ok('pastille : drapeau, cote, bulle de l’état : ' + pill.join(' · '), /linear-gradient/.test(pill[0]) && /^img\/conds\/(mt|nm|ex|gd|pl|po)\.svg$/.test(pill[1]) && pill[2]);
   ok('note de gradation sur Mewtwo : ' + await page.locator(TILE).first().locator('span', { hasText: 'PCA 9,5' }).count(), (await page.locator(TILE).first().locator('span', { hasText: 'PCA 9,5' }).count()) === 1);
   ok('6 cartes : une seule page, sans flèches', (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0);
   await page.locator(SEC).evaluate(e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(800);
@@ -123,14 +124,14 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   ok('page tournée : animation ' + anim + ', écran immobile (' + y0 + ' → ' + y1 + ')', /pkmTurnNext/.test(anim) && Math.abs(y1 - y0) < 1 && top1 === top0);
   ok('page 2 : 2 cartes et 7 pochettes vides', (await page.locator(TILE).count()) === 2 && (await page.locator(PANEL + ' .pkm-hk-pocket').count()) === 7 && (await page.locator(SEC + ' [aria-live="polite"]').innerText()) === 'Page 2 sur 2');
   // Libellés et points d'état des deux pages (l'ordre suit les cotes du jour).
-  const grab = () => page.$$eval(TILE, bs => bs.map(b => [b.getAttribute('aria-label'), getComputedStyle(b.querySelector('span[style*="bottom: 6%"] > span:last-child')).backgroundColor]));
+  const grab = () => page.$$eval(TILE, bs => bs.map(b => [b.getAttribute('aria-label'), (b.querySelector('span[style*="bottom: 6%"] img.pkm-cond-ico') || { getAttribute: () => '' }).getAttribute('src')]));
   const page2 = await grab();
   await page.click(SEC + ' button[aria-label="Page précédente"]'); await page.waitForTimeout(400);
   const dots = (await grab()).concat(page2), labels = dots.map(d => d[0]);
   const en = labels.find(l => /, EN, /.test(l)), pl = labels.find(l => /, Played, /.test(l)), two = labels.find(l => /2 exemplaires/.test(l));
   ok('langue, état et exemplaires repris des ajouts (EN, Played, ×2)', !!en && !!pl && !!two);
   const plDot = dots.find(d => /Played/.test(d[0]))[1], nmDot = dots.find(d => /Near Mint/.test(d[0]))[1];
-  ok('point de l’état : Played ' + plDot + ' ≠ Near Mint ' + nmDot, plDot !== nmDot);
+  ok('bulle de l’état : Played ' + plDot + ', Near Mint ' + nmDot, /pl\.svg$/.test(plDot) && /nm\.svg$/.test(nmDot));
   // « Tout afficher » (vidéo du porteur) : écran plein « Toutes mes cartes », classées par valeur, filtres, fiche au toucher.
   await page.locator(SEC + ' .pkm-hk-all').click(); await page.waitForTimeout(500);
   const HF = 'section.pkm-hf[role="dialog"]';

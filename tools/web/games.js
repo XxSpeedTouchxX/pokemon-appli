@@ -97,7 +97,7 @@
         button: !coinOpen ? '🔒 Au grade ' + this.perkGrade('coinH') : busyC ? 'La pièce tourne…' : cw > 0 ? 'Prochain lancer dans ' + gmLeft(cw) : 'Lancer la pièce',
         flip: () => this.gmFlip(), key: 'coin-' + (g.cN || 0)
       },
-      rules: 'Gratuit, sans achat : les PK n’ont aucune valeur en euros et ne s’échangent pas. Ton grade (' + P.name + ') : un booster toutes les ' + P.boosterH + ' h' + (coinOpen ? ', un lancer de pièce toutes les ' + P.coinH + ' h' : ', pièce au grade ' + this.perkGrade('coinH')) + ' ; plus ton grade monte, plus c’est souvent. Tirage au hasard sur ton appareil. Les PA (points d’Aura) se gagnent en ouvrant l’app chaque jour.',
+      rules: 'Gratuit, sans achat : les PK n’ont aucune valeur en euros et ne s’échangent pas. Ton grade (' + P.name + ') : un booster toutes les ' + P.boosterH + ' h' + (coinOpen ? ', un lancer de pièce toutes les ' + P.coinH + ' h' : ', pièce au grade ' + this.perkGrade('coinH')) + ' ; plus ton grade monte, plus c’est souvent. Tirage au hasard sur ton appareil.',
       hist: (g.hist || []).slice(0, 5).map(h => ({ text: (h.game === 'booster' ? 'Booster' : h.game === 'wheel' ? 'Roulette (retirée)' : 'Pile ou face') + ' · ' + this.d2(h.at.slice(0, 10)), pk: h.pk > 0 ? '+' + h.pk.toLocaleString('fr-FR') + ' PK' : h.pk < 0 ? '−' + Math.abs(h.pk).toLocaleString('fr-FR') + ' PK' : '0 PK', color: h.pk > 0 ? 'var(--pkm-accent)' : '#9AA8C3' })),
       hasHist: (g.hist || []).length > 0
     };

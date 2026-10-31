@@ -1,7 +1,7 @@
 // PA (points d'Aura, 2026-10-25) : gain une fois par jour, selon les jours d'affilée ; un jour manqué fait reprendre la
 // série à +15 PA. Depuis le 2026-10-28 (porteur), les PA ne sont plus crédités à l'ouverture : une pastille « 1 » (« ! » jusqu’au 2026-10-29) sur le
 // solde de l'en-tête prévient qu'ils attendent ; un appui ouvre « Tes PA du jour », « Récupérer mes PA » les crédite
-// (animation d'envol d'environ 1,6 s). Sans PA à récupérer, le solde ouvre le Pokédex. Dates simulées avec ?today=.
+// (animation d'envol d'environ 1,6 s). Sans PA à récupérer, le solde ouvre « Mes PA » (description, gains, usage ; 2026-10-31). Dates simulées avec ?today=.
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const KEY = 'pkm-collection-v1';
 const browser = await launch();
@@ -33,12 +33,15 @@ ok('appui sur le solde : « PA dispo aujourd’hui »', a.open);
 ok('1er jour récupéré : +10 PA (' + a.pa + ', série ' + a.streak + ')', a.pa === 10 && a.streak === 1 && a.day === '2026-11-01');
 ok('après récupération : fenêtre fermée, pastille retirée', a.closed && a.dotAfter === 0);
 const b = await day('2026-11-02'); ok('2e jour d’affilée : +15 PA (' + b.pa + ')', b.before.pa === 10 && b.dotOn && b.pa === 25 && b.streak === 2);
-// Même jour : plus de pastille, le solde ouvre le Pokédex (onglet Jeux).
+// Même jour : plus de pastille, le solde ouvre « Mes PA » (c'est quoi, comment les gagner, à quoi ils servent).
 await page.goto(E2E + '/?today=2026-11-02', { waitUntil: 'load' }); await page.waitForTimeout(900);
 const sameAria = await pill.getAttribute('aria-label');
-ok('même jour : pas de pastille, rien de plus (' + (await saved()).pa + ')', await dot.count() === 0 && (await saved()).pa === 25 && /Ouvrir le Pokédex/.test(sameAria || ''));
+ok('même jour : pas de pastille, rien de plus (' + (await saved()).pa + ')', await dot.count() === 0 && (await saved()).pa === 25 && /Ouvrir Mes PA/.test(sameAria || ''));
 await pill.click(); await page.waitForTimeout(1200);
-ok('sans PA à récupérer : le solde ouvre le Pokédex', !(await sheet.isVisible().catch(() => false)) && await page.locator('section[aria-label="Pokédex"]').first().isVisible().catch(() => false));
+const paSheet = page.locator('section[aria-label="Mes PA"]');
+const paTxt = (await paSheet.innerText().catch(() => '')).replace(/\s+/g, ' ');
+ok('sans PA à récupérer : le solde ouvre « Mes PA » (' + paTxt.slice(0, 60) + '…)', !(await sheet.isVisible().catch(() => false)) && /C’est quoi/.test(paTxt) && /Comment les gagner/.test(paTxt) && /À quoi servent-ils/.test(paTxt));
+await page.locator('section[aria-label="Mes PA"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
 const c = await day('2026-11-03'); ok('3e jour : +20 PA (' + c.pa + ')', c.pa === 45 && c.streak === 3);
 // Un jour sans récupérer (le 4) : la série reprend à +15 PA le 5.
 const d = await day('2026-11-05'); ok('un jour manqué : reprise à +15 PA (' + d.pa + ')', d.aria && /15 PA à récupérer/.test(d.aria) && d.pa === 60 && d.streak === 2);

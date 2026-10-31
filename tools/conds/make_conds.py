@@ -1,5 +1,7 @@
 """Icônes des 6 états des cartes (2026-10-25, demande du porteur) : une bulle par état, de la plus brillante (Mint,
-étoiles qui scintillent) à la plus usée (Poor, fissurée et entamée). Écrit web/img/conds/*.svg ; aucune dépendance."""
+étoiles qui scintillent) à la plus usée (Poor, fissurée et entamée). Écrit web/img/conds/*.svg ; aucune dépendance.
+Couleurs du porteur (2026-10-31) : Mint or, Near Mint vert foncé, Excellent vert clair, Good jaune-vert, Played
+jaune-orangé, Poor rouge-orangé."""
 import os
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'web', 'img', 'conds')
 STAR = lambda x, y, r: f'M{x} {y-r}Q{x+r*0.18} {y-r*0.18} {x+r} {y}Q{x+r*0.18} {y+r*0.18} {x} {y+r}Q{x-r*0.18} {y+r*0.18} {x-r} {y}Q{x-r*0.18} {y-r*0.18} {x} {y-r}Z'
@@ -41,28 +43,28 @@ svg('mt', defs, shape,
           '.st{transform-box:fill-box;transform-origin:center;animation:tw 1.6s ease-in-out infinite}.s1{animation-delay:-.4s}.s2{animation-delay:-.8s}.s3{animation-delay:-1.2s}'
           '@keyframes tw{0%,100%{transform:scale(.55) rotate(0);opacity:.55}50%{transform:scale(1.1) rotate(20deg);opacity:1}}')
 # Near Mint : argent bleuté, brillant, une étoile.
-defs, shape, g = bubble('#F4FAFF', '#A8C8FF', '#5F7FD6', 'strong')
-svg('nm', defs, shape, card('#FFFFFF', '#111111', '<rect x="25.5" y="20.5" width="13" height="10" rx="1.5" fill="#D6E6FF"/><path d="M26 35H38 M26 39H35" stroke="#111111" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>'), g,
-    outside=f'<path d="{STAR(55, 10, 4.2)}" fill="#E6F0FF" stroke="#111111" stroke-width="1"/>')
+defs, shape, g = bubble('#CDEFD9', '#1F9D57', '#0C5A30', 'strong')
+svg('nm', defs, shape, card('#FFFFFF', '#111111', '<rect x="25.5" y="20.5" width="13" height="10" rx="1.5" fill="#CFF0DC"/><path d="M26 35H38 M26 39H35" stroke="#111111" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>'), g,
+    outside=f'<path d="{STAR(55, 10, 4.2)}" fill="#D9F7E5" stroke="#111111" stroke-width="1"/>')
 # Excellent : vert, reflet léger, coins à peine blanchis.
-defs, shape, g = bubble('#DDFBE8', '#3DDC84', '#1C8F52', 'medium')
-svg('ex', defs, shape, card('#FFFFFF', '#111111', '<rect x="25.5" y="20.5" width="13" height="10" rx="1.5" fill="#CFF5DD"/><path d="M26 35H38 M26 39H35" stroke="#111111" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>'
+defs, shape, g = bubble('#EFFFE6', '#8EE07A', '#4CA83A', 'medium')
+svg('ex', defs, shape, card('#FFFFFF', '#111111', '<rect x="25.5" y="20.5" width="13" height="10" rx="1.5" fill="#E2F8D8"/><path d="M26 35H38 M26 39H35" stroke="#111111" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>'
     '<circle cx="24.4" cy="19.4" r="1.1" fill="#C9C9C9"/><circle cx="39.6" cy="42.6" r="1.1" fill="#C9C9C9"/>'), g)
 # Good : ambre mat, rayures.
-defs, shape, g = bubble('#FFEFC2', '#F5B14C', '#B8701A', 'light')
-svg('gd', defs, shape, card('#F7F3EA', '#111111', '<rect x="25.5" y="20.5" width="13" height="10" rx="1.5" fill="#F3DFB4"/><path d="M26 35H38 M26 39H35" stroke="#111111" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>'
+defs, shape, g = bubble('#F7FFD0', '#C9DD3A', '#8A9A16', 'light')
+svg('gd', defs, shape, card('#F7F3EA', '#111111', '<rect x="25.5" y="20.5" width="13" height="10" rx="1.5" fill="#EEF3C0"/><path d="M26 35H38 M26 39H35" stroke="#111111" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>'
     '<path d="M27 23L35 29 M30 33L37 37" stroke="#FFFFFF" stroke-width="1" opacity="0.9"/>')
-    + '<path d="M12 26L20 22 M44 46L52 41 M46 15L50 20" stroke="#7A4A10" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>', g)
+    + '<path d="M12 26L20 22 M44 46L52 41 M46 15L50 20" stroke="#5E6A10" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>', g)
 # Played : orange terne, ébréchée, carte pliée.
 pl_shape = '<path d="M32 7A25 25 0 1 1 9.5 21.5L14 22.5L12.8 17.6Z"/>'
-defs, shape, g = bubble('#F7C9AE', '#E07A45', '#9A4520', 'none', bubble_path=pl_shape)
+defs, shape, g = bubble('#FFF0C8', '#F5A623', '#B86E0A', 'none', bubble_path=pl_shape)
 svg('pl', defs, shape, '<path d="M23 18H41V41L37 44H23Z" fill="#EDE5D6" stroke="#111111" stroke-width="1.8" stroke-linejoin="round"/>'
     '<path d="M41 41L37 40.5L37 44" fill="#C9BFAE" stroke="#111111" stroke-width="1.4" stroke-linejoin="round"/>'
     '<path d="M24 34L40 24" stroke="#9A8B74" stroke-width="1.6"/><rect x="25.5" y="20.5" width="13" height="10" rx="1.5" fill="#E6CDB4" opacity="0.8"/>'
     '<path d="M13 30L22 27 M42 49L51 44 M45 14L49 19 M15 42L21 46" stroke="#5A2A10" stroke-width="1.3" stroke-linecap="round" opacity="0.75"/>', g)
 # Poor : gris-brun délavé, fissures, morceau manquant, carte déchirée et tachée.
 po_shape = '<path d="M32 7A25 25 0 0 1 57 32A25 25 0 0 1 47 52L44 47L40 51L37 46L33 50L31 57A25 25 0 0 1 7 32A25 25 0 0 1 32 7Z"/>'
-defs, shape, g = bubble('#D9D0C4', '#8E7D6C', '#54473B', 'none', bubble_path=po_shape)
+defs, shape, g = bubble('#FFD3C2', '#E8502A', '#A12A10', 'none', bubble_path=po_shape)
 svg('po', defs, shape, '<circle cx="18" cy="40" r="5" fill="#4A3E33" opacity="0.35"/><circle cx="45" cy="20" r="4" fill="#4A3E33" opacity="0.3"/>'
     '<path d="M23 19H41V31L38 33L41 36L37 39L39 43H23Z" fill="#D8CDBA" stroke="#111111" stroke-width="1.8" stroke-linejoin="round"/>'
     '<ellipse cx="30" cy="36" rx="5" ry="3.4" fill="#A8946F" opacity="0.7"/><path d="M24 26L33 31L28 41 M33 19L31 26" stroke="#6B5A45" stroke-width="1.4" fill="none"/>'

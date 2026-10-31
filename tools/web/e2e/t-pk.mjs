@@ -38,20 +38,24 @@ ok('lendemain : ' + await cText() + ', sans gain', await cText() === '100 PK' &&
 await counter.click(); await page.waitForTimeout(400);
 const sheet = page.locator('section[aria-label="Mes PK"]');
 const sheetText = (await sheet.innerText()).replace(/\s+/g, ' ');
-// Compagnons à thème (2026-10-28) : prix en PA, un appui ouvre le Pokédex.
-ok('panneau : solde, jeux, bienvenue, partage (sans +10), 3 compagnons à thème à 3 000 PA', /Ton solde 100 PK/.test(sheetText) && /Jeux booster PK/.test(sheetText) && !/\+10 /.test(sheetText) && /\+100 de bienvenue/.test(sheetText)
-  && (await sheet.locator('button[aria-label^="Voir "][aria-label$=" PA"]').count()) === 3 && /Kyogre Compagnon et thème Océan 3 000 PA/.test(sheetText) && /Groudon Compagnon et thème Volcan 3 000 PA/.test(sheetText));
+// 2026-10-31 (porteur) : « C’est quoi ? », « Comment les gagner ? », « À quoi servent-ils ? » ; plus de « Compagnons à
+// thème » ni de « Mon Pokédex » ; bouton « Règles des PK et PA ».
+ok('panneau : solde, c’est quoi, jeux, bienvenue, partage (sans +10), à quoi ils servent', /Ton solde 100 PK/.test(sheetText) && /C’est quoi \? Les PK sont la monnaie de Dropicards/.test(sheetText) && /Jeux booster PK/.test(sheetText) && !/\+10 /.test(sheetText) && /\+100 de bienvenue/.test(sheetText)
+  && /À quoi servent-ils \? Dans le PK shop/.test(sheetText));
+ok('panneau : plus de « Compagnons à thème » ni de « Mon Pokédex »', !/Compagnons à thème|Mon Pokédex|Kyogre/.test(sheetText) && (await sheet.locator('button[aria-label^="Voir "][aria-label$=" PA"]').count()) === 0);
+ok('panneau : bouton « Règles des PK et PA »', (await sheet.locator('button', { hasText: 'Règles des PK et PA' }).count()) === 1);
 const order = await sheet.locator('ul li span:first-child').allInnerTexts();
 ok('gains : ' + order.join(' / '), order.join() === 'Jeux,+100,+300');
 ok('panneau : les PK ne s’achètent pas', /ne s’achètent pas et n’ont aucune valeur en euros/.test(sheetText));
-ok('panneau : +300 partage, « Mon Pokédex · 152 Pokémon à débloquer avec tes PA »', /\+300 une fois, en partageant/.test(sheetText) && /Mon Pokédex 152 Pokémon à débloquer avec tes PA dans le Pokédex/.test(sheetText) && /Rayquaza Compagnon et thème Ouragan/.test(sheetText) && !/Tous les compagnons/.test(sheetText));
+ok('panneau : +300 partage', /\+300 une fois, en partageant/.test(sheetText) && !/Tous les compagnons/.test(sheetText));
 await page.screenshot({ path: shot('pk-panneau.png') });
-// 4. Kyogre depuis « Mes PK » : le Pokédex s'ouvre (onglet Jeux) ; sans starter, on le choisit d'abord.
-await sheet.locator('button[aria-label^="Voir Kyogre dans le Pokédex"]').click(); await page.waitForTimeout(1200);
+// 4. Pokédex (onglet Jeux) après fermeture de « Mes PK » ; sans starter, on le choisit d'abord.
+await page.locator('button[aria-label="Fermer Mes PK"]').click(); await page.waitForTimeout(400);
+await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(1200);
 const dex = page.locator('section[aria-label="Pokédex"]');
 // (l'onglet Jeux a aussi un encadré « Mes PK », sans rôle de dialogue)
 const k4 = [await page.locator('section[aria-label="Mes PK"][role="dialog"]').count(), await dex.count(), await page.locator('[role="alertdialog"]').count(), await page.locator('section[aria-label="Choisis ton compagnon"]').count()];
-ok('Kyogre : « Mes PK » fermé, onglet Jeux, Pokédex affiché, sans confirmation en PK ni ancien choix du compagnon (' + k4.join(', ') + ')', k4.join() === '0,1,0,0');
+ok('« Mes PK » fermé, onglet Jeux, Pokédex affiché, sans confirmation en PK ni ancien choix du compagnon (' + k4.join(', ') + ')', k4.join() === '0,1,0,0');
 const starters = await page.$$eval('[aria-label="Starters"] button', bs => bs.map(b => b.getAttribute('aria-label')));
 ok('sans starter : ' + starters.join(' ; '), starters.join() === 'Choisir Bulbizarre comme starter,Choisir Salamèche comme starter,Choisir Carapuce comme starter,Choisir Pikachu comme starter');
 await page.click('[aria-label="Starters"] button[aria-label="Choisir Pikachu comme starter"]'); await page.waitForTimeout(500);
@@ -171,16 +175,18 @@ await page.screenshot({ path: shot('pk-unlock.png') });
 await page.waitForTimeout(2800); // fin de l'animation de déblocage (3 s)
 ok('animation de déblocage terminée', (await page.locator('button.pkm-unl').count()) === 0);
 route = (await routeAria()).map(a => a.replace(/\s/g, ' '));
-ok('après déblocage : « ' + await actText() + ' », route ' + route.join(' ; '), await actText() === 'C’est ton compagnon' && route.join() === 'Kyogre, Forme de base, Compagnon');
+ok('après déblocage : plus de bouton (« C’est ton compagnon » retiré le 2026-10-31), route ' + route.join(' ; '), (await act.count()) === 0 && route.join() === 'Kyogre, Forme de base, Compagnon');
 await page.click('nav button[aria-label="Accueil"]'); await page.waitForTimeout(600);
 ok('accueil : « ' + await buddyBtn.getAttribute('aria-label') + ' »', (await buddyBtn.getAttribute('aria-label')) === 'Compagnon : Kyogre. Ouvrir le Pokédex');
 await page.screenshot({ path: shot('pk-kyogre.png'), clip: { x: 0, y: 0, width: 390, height: 420 } });
 await counter.click(); await page.waitForTimeout(400);
-const after = await page.$$eval('section[aria-label="Mes PK"] button[aria-label]', bs => bs.map(b => b.getAttribute('aria-label')).filter(a => /Kyogre|Groudon|Rayquaza/.test(a)));
-ok('après déblocage, « Mes PK » : ' + after.join(' ; '), after.length === 3 && after[0] === 'Kyogre est ton compagnon' && after.filter(a => /^Voir .* dans le Pokédex : 3\s000 PA$/.test(a)).length === 2);
-// « Mon Pokédex » (ex « Tous les compagnons ») ouvre la liste complète.
-await page.click('section[aria-label="Mes PK"] button:has-text("Mon Pokédex")'); await page.waitForTimeout(1000);
-ok('« Mon Pokédex » : liste ouverte, « ' + (await dexl.count() ? await dexCount() : '—') + ' »', (await dexl.count()) === 1 && await dexCount() === '5 / 156 débloqués · 120 PA');
+const after = await page.$$eval('section[aria-label="Mes PK"] button[aria-label]', bs => bs.map(b => b.getAttribute('aria-label')).filter(a => /Kyogre|Groudon|Rayquaza|Pokédex/.test(a)));
+ok('après déblocage, « Mes PK » sans compagnons ni Pokédex (' + (after.join(' ; ') || 'aucun') + ')', after.length === 0);
+await page.locator('button[aria-label="Fermer Mes PK"]').click(); await page.waitForTimeout(400);
+// La liste complète s'ouvre depuis le Pokédex (onglet Jeux, « Tous les Pokémon »).
+await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(800);
+await page.click('.pkm-dex-all'); await page.waitForTimeout(1000);
+ok('« Tous les Pokémon » : liste ouverte, « ' + (await dexl.count() ? await dexCount() : '—') + ' »', (await dexl.count()) === 1 && await dexCount() === '5 / 156 débloqués · 120 PA');
 await dexl.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
 await page.click('nav button[aria-label="Accueil"]'); await page.waitForTimeout(600);
 // 7. Migration : compagnon à thème choisi avant les PK, gardé ; compagnon payant non débloqué, retiré.

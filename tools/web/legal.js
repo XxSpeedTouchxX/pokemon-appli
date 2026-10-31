@@ -53,19 +53,21 @@
   };
   const LEGAL_TABS = ['mentions', 'privacy', 'terms', 'pk'];
 
-  proto.legalOpen = function (tab) { this.setState({ legal: LEGAL[tab] ? tab : 'mentions' }); };
+  // Les panneaux Mes PK et Mes PA se ferment : les règles s'affichent seules par-dessus l'app.
+  proto.legalOpen = function (tab) { this.setState({ legal: LEGAL[tab] ? tab : 'mentions', pkSheet: false, paSheet: false }); };
   const legalBaseRender = proto.renderVals;
   proto.renderVals = function () {
     const r = legalBaseRender.call(this), s = this.st(), cur = LEGAL[s.legal] ? s.legal : '';
     r.legal = {
       open: !!cur, close: () => this.setState({ legal: '' }),
       title: cur ? LEGAL[cur].label : '',
-      tabs: LEGAL_TABS.map(k => Object.assign({ label: LEGAL[k].label, on: k === cur, pick: () => this.setState({ legal: k }) }, this.chip(k === cur))),
+      // Les règles des PK et PA s'ouvrent seules (depuis Mes PK ou Mes PA), sans les bulles des informations légales.
+      tabs: LEGAL_TABS.filter(k => k !== 'pk').map(k => Object.assign({ label: LEGAL[k].label, on: k === cur, pick: () => this.setState({ legal: k }) }, this.chip(k === cur))),
       blocks: cur ? LEGAL[cur].blocks.map(([t, p]) => ({ title: t, text: p, todo: p.indexOf(LEGAL_TODO) >= 0 })) : [],
       openMentions: () => this.legalOpen('mentions'), openPk: () => this.legalOpen('pk'),
       isPk: cur === 'pk', notPk: cur !== 'pk', pk: cur === 'pk' ? this.vRules(s) : { grades: [], odds: [], streak: [], evo: [], shop: [], earn: [], free: [] }
     };
-    if (cur === 'pk') r.legal.title = 'Règles des PK et des jeux';
+    if (cur === 'pk') r.legal.title = 'Règles des PK et PA';
     return r;
   };
   // ——— Règles des PK et des jeux, en images (2026-10-28, demande du porteur) ———

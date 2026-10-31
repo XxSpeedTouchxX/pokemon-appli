@@ -180,6 +180,12 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - **Premier écran en 3 pages (2026-10-30, demande du porteur) :** « Créer mon compte » → e-mail et mot de passe (« Suivant ») → âge (4 tranches), pseudo et starter (bulles choisies bien visibles, description qui change en glissant, « Choisir X comme compagnon ») ; le starter remercie au milieu de l'écran en souriant, puis rejoint le didacticiel, qu'il présente ; retour par flèche et points, transition glissée façon iOS ; accueil revu depuis Mon profil : les 3 pages restent accessibles, préremplies ; toujours sur l'appareil seulement.
 - **Didacticiel en 12 étapes (2026-10-30, demande du porteur) :** textes du porteur (orthographe revue), encadré des PA dans le Pokédex et solde des PK ajoutés, « Tous les Pokémon » retiré du didacticiel ; valeur entière sur petit écran ; changement d'onglet « en iris » ; tout message en bas de l'écran s'efface seul.
 - **Mise à jour sur le téléphone (2026-10-30) :** dropicards.fr était à jour, le téléphone gardait l'ancienne app (nginx sans « no-cache ») ; service worker en « no-cache », `app.js?v=empreinte`, recherche de mise à jour à chaque ouverture et rechargement automatique une fois.
+- **Retouches du 2026-10-31 (demande du porteur, serveur mis de côté) :**
+  - accueil : bulle jaune sous le compagnon retirée, courbe qui change de période en douceur, « Toutes les sorties » seulement pour « Prochaines sorties » ;
+  - « Mes PK » et nouvelle fenêtre « Mes PA » : c'est quoi, comment les gagner, à quoi ils servent ; « Règles des PK et PA » sans bulles légales ni « Pas un jeu d'argent » ;
+  - Pokédex : « vus » retirés (le scan ne fait plus voir), « Débloqués » sur 156, appareil plus grand, « OK » animé quand les PA suffisent, « Arbre de Pokévolution », encadrés retirés, arbre sans collision ;
+  - didacticiel : œil de Pikachu corrigé, séries qui défilent, cadre des PK ajusté, bouton « étape précédente » ; icône de livre pour « Revoir le didacticiel » ;
+  - classeur : bulle de l'état à droite du prix, 6 couleurs (Mint or, Near Mint vert foncé, Excellent vert clair, Good jaune-vert, Played jaune-orangé, Poor rouge-orangé).
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

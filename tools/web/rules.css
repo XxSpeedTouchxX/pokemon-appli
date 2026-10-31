@@ -71,3 +71,21 @@
 .pkm-rules-full[open] { padding-bottom: 12px; }
 .pkm-rules-full > div { margin-top: 10px; }
 @media (prefers-reduced-motion: reduce) { .pkm-rules-pk, .pkm-rules-pa, .pkm-rules-spin { animation: none; } }
+/* Mes PK et Mes PA (2026-10-31, porteur) : c'est quoi, comment les gagner, à quoi ils servent. */
+.pkm-cur-what { flex: none; display: flex; flex-direction: column; gap: 4px; }
+.pkm-cur-what h3 { margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA; }
+.pkm-cur-what p { margin: 0; font-size: 14px; line-height: 1.45; color: #F3F6FC; }
+.pkm-pa-sheet { flex: none; max-height: 86%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; color: #F3F6FC; border-top: 1px solid #3B2A6B; border-radius: 28px 28px 0 0; padding: 8px 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+.pkm-pa-sheet-grip { flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C; }
+.pkm-pa-sheet-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-pa-sheet-head h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; }
+.pkm-pa-sheet-x { flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.pkm-pa-sheet-x svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.pkm-pa-sheet-bal { flex: none; display: flex; align-items: center; gap: 14px; }
+.pkm-pa-sheet-bal img { flex: none; display: block; }
+.pkm-pa-sheet-bal div { display: flex; flex-direction: column; }
+.pkm-pa-sheet-bal span { font-size: 13px; color: #9AA8C3; }
+.pkm-pa-sheet-bal b { font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; color: #E4CCFF; }
+.pkm-pa-sheet-note { margin: -6px 0 0; font-size: 12.5px; color: #9AA8C3; }
+.pkm-pa-sheet-go { flex: none; min-height: 50px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #A44BD6, #6A2A9E); color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.pkm-pa-sheet-rules { flex: none; align-self: flex-start; min-height: 44px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }

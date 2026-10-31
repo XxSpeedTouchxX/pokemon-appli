@@ -170,9 +170,20 @@
     const v = paBasePk.call(this, s), pa = Number(s.pa) || 0, shown = s.paCount !== null && s.paCount >= 0 ? s.paCount : pa, n = paPending(s);
     const openDex = () => { this.tab('market'); setTimeout(() => { const el = document.querySelector('section[aria-label="Pokédex"]'); if (el) el.scrollIntoView({ block: 'start', behavior: paStill() ? 'auto' : 'smooth' }); }, 520); };
     return Object.assign(v, { wrapCls: 'pkm-pk-tk', pa: Number(shown).toLocaleString('fr-FR'),
-      paAria: 'Mes points d’Aura : ' + pa + ' PA.' + (n ? ' ' + n.gain + ' PA à récupérer' : ' Ouvrir le Pokédex'),
+      paAria: 'Mes points d’Aura : ' + pa + ' PA.' + (n ? ' ' + n.gain + ' PA à récupérer' : ' Ouvrir Mes PA'),
       // Avec des PA à récupérer : « Tes PA du jour » ; sinon le solde ouvre le Pokédex, où les PA servent.
-      openPa: () => { if (n) { this.setState({ paClaim: true }); paDialogKeys(this); } else openDex(); }, paReady: !!n,
+      // Sans PA à récupérer, le solde ouvre « Mes PA » : ce que sont les PA, comment les gagner, à quoi ils servent
+      // (2026-10-31, porteur) ; le Pokédex s'ouvre depuis ce panneau.
+      openPa: () => { if (n) { this.setState({ paClaim: true }); paDialogKeys(this); } else this.setState({ paSheet: true }); }, paReady: !!n,
+      paSheet: (() => {
+        if (!s.paSheet) return { open: false, streak: [], evo: [] };
+        const R = this.vRules(s);
+        return { open: true, close: () => this.setState({ paSheet: false }), balance: Number(pa).toLocaleString('fr-FR'), logo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
+          what: 'Les PA sont tes points d’Aura : ils montrent le lien entre toi et ton compagnon. Ils sont gratuits, ne s’achètent pas et n’ont aucune valeur en euros.',
+          how: 'Connecte-toi chaque jour et touche ton solde de PA pour les récupérer. Plus tu reviens de jours d’affilée, plus tu gagnes de PA :',
+          use: 'Dans le Pokédex, tes PA débloquent les Pokémon et font évoluer ton compagnon :',
+          streak: R.streak, evo: R.evo, dex: () => { this.setState({ paSheet: false }); openDex(); } };
+      })(),
       paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') + (n ? ' pkm-pa-ready' : ''),
       claim: { open: !!(n && s.paClaim), gain: n ? '+' + n.gain + ' PA' : '', streak: n ? (n.streak > 1 ? n.streak + ' jours d’affilée' : 'Premier jour de ta série') : '',
         next: n ? 'Demain : +' + PaCore.tomorrow(n.streak) + ' PA si tu reviens' : '', drop: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',

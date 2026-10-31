@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-10-31 — Accueil, PK et PA, Pokédex, didacticiel, états des cartes : 20 retouches du porteur
+
+- **Demandes du porteur** (le serveur est mis de côté pour l'instant) :
+  - accueil : bulle jaune à flèches retirée sous le compagnon ; courbe de la valeur qui passe en douceur d'une période à l'autre ; « Toutes les sorties » seulement à côté de « Prochaines sorties » ;
+  - solde des PK : « Compagnons à thème » et « Mon Pokédex » retirés, « Règles des PK et PA » ; solde des PA : sa propre fenêtre ; pour chacun : c'est quoi, comment on les gagne, à quoi ils servent ;
+  - « Règles des PK et PA » : sans les bulles Mentions légales, Confidentialité, Conditions, sans l'encadré « Pas un jeu d'argent » ni « Lire le texte complet des règles » ;
+  - Pokédex : « vus » retirés, « Débloqués » sur 156 ; flèches « les évolutions » ; Pokédex, « OK » et croix plus grands ; « OK » animé quand les PA suffisent pour l'évolution affichée ; encadré du Pokémon plus haut ; « Arbre de Pokévolution » dans la police de « Pokédex » ; encadrés « Ton compagnon », « Pokémon sélectionné », « C'est ton compagnon » et texte des PA du bas retirés ; arbre sans Pokémon qui se touchent (Méga-Tortank et Tortank) ;
+  - didacticiel : œil de Pikachu sans carré au sourire ; séries qui défilent lentement de gauche à droite ; cadre du solde des PK qui ne mord plus sur les PA ; bouton pour revenir à l'étape précédente ;
+  - Mon profil : icône de livre pour « Revoir le didacticiel » ;
+  - classeur : la bulle de l'état de la carte à droite du prix, à la place du point vert ; couleurs des 6 états : Mint or, Near Mint vert foncé, Excellent vert clair, Good jaune-vert, Played jaune-orangé, Poor rouge-orangé.
+- **Fait** : tout ce qui précède (cache v92). Arbre vérifié sur les 156 Pokémon et leurs méga-évolutions : au moins 6 px entre deux voisins. Étiquette « Faible » du Territoire un peu éclaircie (contraste).
+- **Choix faits, à confirmer par le porteur** :
+  - le « vu » est retiré entièrement : un scan ne fait plus apparaître un Pokémon du Pokédex ;
+  - un appui sur le solde de PA ouvre d'abord la récupération quand des PA du jour attendent, sinon « Mes PA » ;
+  - le bouton « Tous les Pokémon » reste ; la mention « Les PK ne s'achètent pas et n'ont aucune valeur en euros » reste dans « Mes PK ».
+
 ## 2026-10-30 (suite 8) — Le didacticiel n'apparaissait pas à jour sur le téléphone
 
 - **Constat du porteur** : le didacticiel de l'app n'est pas à jour.

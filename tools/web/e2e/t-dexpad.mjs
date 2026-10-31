@@ -36,8 +36,8 @@ const img = await page.evaluate(() => document.querySelector('.pkm-dex-lcd-l img
 ok('▶ : ' + await lcd() + ' (écran : ' + img + ')', /Reptincel, #005/.test(await lcd()) && /pkm-lcd-right/.test(img) && /pkm-dex-sil/.test(img));
 ok('le doigt passe sur « OK » : « ' + (await tip.innerText()).split('\n')[0] + ' »', (await page.locator('.pkm-dex-hand-a').count()) === 1 && /Le bouton vert/.test(await tip.innerText()));
 await page.screenshot({ path: shot('dexpad-2-ok.png') });
-// « OK » brille quand l'action est possible (Reptincel, 500 PA sur 600).
-ok('« OK » allumé : ' + await page.locator('.pkm-dex-k-a').getAttribute('aria-label'), /pkm-dex-a-on/.test(await page.locator('.pkm-dex-k-a').getAttribute('class')) && /Faire évoluer · 500 PA/.test(await page.locator('.pkm-dex-k-a').getAttribute('aria-label')));
+// « OK » bondit et brille quand l'évolution est possible (Reptincel, 500 PA sur 600) (2026-10-31).
+ok('« OK » animé : ' + await page.locator('.pkm-dex-k-a').getAttribute('aria-label'), /pkm-dex-a-go/.test(await page.locator('.pkm-dex-k-a').getAttribute('class')) && /Faire évoluer · 500 PA/.test(await page.locator('.pkm-dex-k-a').getAttribute('aria-label')));
 // ▲ ▼ et clavier.
 await tap('down');
 ok('▼ : ' + await lcd(), /Dracaufeu, #006/.test(await lcd()));

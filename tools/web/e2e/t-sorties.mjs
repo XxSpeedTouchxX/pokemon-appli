@@ -42,7 +42,9 @@ await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(400);
 ok('retour vers l’accueil', (await page.locator('section[aria-label="Valeur de ma collection"]').count()) > 0);
 // Entrées.
 await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(1200);
-await page.click('section[aria-label="Sorties récentes"] button:has-text("Toutes les sorties")'); await page.waitForTimeout(400);
+// « Toutes les sorties » seulement à côté de « Prochaines sorties » (2026-10-31, porteur).
+ok('« Sorties récentes » sans « Toutes les sorties »', (await page.locator('section[aria-label="Sorties récentes"] button:has-text("Toutes les sorties")').count()) === 0);
+await page.click('section[aria-label="Prochaines sorties"] button:has-text("Toutes les sorties")'); await page.waitForTimeout(400);
 ok('Accueil → Sorties', (await page.locator('text=Invitations Amazon').count()) > 0);
 await page.goto(BASE + '?today=2026-10-04&start=search', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('button:has-text("Sorties · Pokémon 30 ans")'); await page.waitForTimeout(400);

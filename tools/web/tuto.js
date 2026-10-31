@@ -30,12 +30,12 @@
     { tab: 'home', sel: 'section[aria-label="Mon classeur"]', text: 'Ici, tu pourras trouver ton classeur : il servira à ranger toutes les cartes et tous les produits scellés de ta collection.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label^="Scanner"]', text: 'Ici, c’est le Scan Dropicards : grâce à lui, tu pourras scanner rapidement ta carte et connaître sa valeur sur le marché actuel.' },
     { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', kids: 2, text: 'Tu pourras retrouver ici le radar des boutiques : il te permettra de localiser précisément les boutiques qui vendent du Pokémon autour de toi, et la probabilité d’y trouver des items.' },
-    { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', text: 'Ici, tu pourras retrouver toutes les séries et leurs extensions. Touche une carte pour voir ses infos, et ajoute-la dans ton classeur si tu la possèdes déjà.' },
+    { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', sweep: true, text: 'Ici, tu pourras retrouver toutes les séries et leurs extensions. Touche une carte pour voir ses infos, et ajoute-la dans ton classeur si tu la possèdes déjà.' },
     { tab: 'market', sel: '.pkm-dex-device', top: true, fresh: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
     { tab: 'market', sel: '.pkm-dex-lcd-r', top: true, fresh: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
     { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, fresh: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
     { tab: 'market', sel: 'header .pkm-pa-bar', fresh: true, text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, puis jusqu’à +30 d’affilée !' },
-    { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
+    { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', inner: true, pad: 3, text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
   ];
@@ -97,13 +97,16 @@
       + '<p class="pkm-sr pkm-tt-full" aria-live="polite"></p>'
       + '<div class="pkm-tt-bar"><button type="button" class="pkm-tt-skip">Passer</button><span class="pkm-tt-dots" aria-hidden="true"></span><span class="pkm-sr pkm-tt-count"></span>'
       + '<button type="button" class="pkm-tt-snd" aria-label="Son du didacticiel"></button></div>'
-      + '<button type="button" class="pkm-tt-next"><span>Suivant</span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>';
+      // « Étape précédente » (2026-10-31, porteur) : pour revoir ce qu'on n'a pas bien compris.
+      + '<div class="pkm-tt-go"><button type="button" class="pkm-tt-prev" aria-label="Étape précédente"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>'
+      + '<button type="button" class="pkm-tt-next"><span>Suivant</span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button></div>';
     host.append(frame, ring, link, box);
     const q = s => box.querySelector(s);
     TUTO.el = { host: host, frame: frame, ring: ring, link: link, box: box, mon: q('.pkm-tt-mon'), m0: q('.pkm-tt-m0'), m1: q('.pkm-tt-m1'), typed: q('.pkm-tt-typed'),
-      full: q('.pkm-tt-full'), dots: q('.pkm-tt-dots'), count: q('.pkm-tt-count'), next: q('.pkm-tt-next'), nextLabel: q('.pkm-tt-next span'), skip: q('.pkm-tt-skip'), snd: q('.pkm-tt-snd'), last: '' };
+      full: q('.pkm-tt-full'), dots: q('.pkm-tt-dots'), count: q('.pkm-tt-count'), next: q('.pkm-tt-next'), prev: q('.pkm-tt-prev'), nextLabel: q('.pkm-tt-next span'), skip: q('.pkm-tt-skip'), snd: q('.pkm-tt-snd'), last: '' };
     TUTO.el.dots.innerHTML = TUTO_STEPS.map(() => '<i></i>').join('');
     TUTO.el.next.addEventListener('click', () => tutoNext());
+    TUTO.el.prev.addEventListener('click', () => tutoPrev());
     TUTO.el.skip.addEventListener('click', () => TUTO.comp && TUTO.comp.tutoEnd(false));
     TUTO.el.snd.addEventListener('click', () => {
       try { localStorage.setItem('pkm-tuto-sound', tutoMuted() ? 'on' : 'off'); } catch (e) { /* stockage indisponible */ }
@@ -157,6 +160,29 @@
     if (st.final) tutoFly();
     else if (TUTO.comp) TUTO.comp.tutoGo(TUTO.i + 1);
   };
+  // Retour à l'étape d'avant (sa page s'ouvre au besoin, la phrase s'écrit de nouveau).
+  const tutoPrev = () => {
+    if (!TUTO.el || TUTO.done || TUTO.i <= 0 || !TUTO.comp) return;
+    clearTimeout(TUTO.typing); voiceStop();
+    TUTO.comp.tutoGo(TUTO.i - 1);
+  };
+  // Étape des séries (2026-10-31, porteur) : pendant que le compagnon parle, la barre des séries défile lentement de
+  // gauche à droite (9 s), puis s'arrête ; rien si les animations sont réduites.
+  const tutoSweep = nav => {
+    cancelAnimationFrame(TUTO.sweep);
+    if (!nav || tutoStill()) return;
+    const max = nav.scrollWidth - nav.clientWidth;
+    if (max < 8) return;
+    nav.scrollLeft = 0;
+    let t0 = 0;
+    const step = now => {
+      if (!t0) t0 = now;
+      const k = Math.min(1, (now - t0) / 9000), e = 0.5 - Math.cos(Math.PI * k) / 2;
+      nav.scrollLeft = Math.round(max * e);
+      if (k < 1 && TUTO_STEPS[TUTO.i] && TUTO_STEPS[TUTO.i].sweep) TUTO.sweep = requestAnimationFrame(step);
+    };
+    TUTO.sweep = requestAnimationFrame(step);
+  };
   // Dessin d'une image (pixels non transparents), en coordonnées de l'écran, et la taille d'un pixel de l'image : le
   // starter de la bulle et le compagnon n'ont ni les mêmes marges ni la même boîte (object-fit: contain).
   const tutoInk = img => {
@@ -198,6 +224,9 @@
   // Rectangle encadré : l'élément, ses premiers enfants seulement (« kids » : le titre et la carte du radar, sans les
   // petites lignes en dessous) ou un carré centré sur son icône (« ico » : l'onglet PK shop).
   const tutoRect = (t, st) => {
+    // Solde des PK (2026-10-31, porteur) : le cadre suit la pastille elle-même, pas sa zone de toucher, pour ne plus
+    // mordre sur le solde de PA juste dessous.
+    if (st.inner && t.firstElementChild) return t.firstElementChild.getBoundingClientRect();
     if (st.fit && !st.kids) {
       const full = t.getBoundingClientRect(), bh = TUTO.el ? TUTO.el.box.offsetHeight : 260;
       if (full.height > window.innerHeight - bh - 230) st = Object.assign({}, st, { kids: st.fit });
@@ -263,7 +292,7 @@
       el.frame.style.opacity = t || TUTO.done ? '' : '0';
       if (!t) { el.link.style.opacity = '0'; el.last = ''; }
       if (t && !TUTO.done) {
-        const r = tutoRect(t, st), pad = 6, B = el.box.getBoundingClientRect(), top = el.box.classList.contains('pkm-tt-top');
+        const r = tutoRect(t, st), pad = st.pad != null ? st.pad : 6, B = el.box.getBoundingClientRect(), top = el.box.classList.contains('pkm-tt-top');
         const lo = top ? B.bottom - H.top + 8 : 4, hi = top ? H.height - 4 : B.top - H.top - 8;
         const y0 = Math.max(lo, r.top - H.top - pad), y1 = Math.min(hi, r.bottom - H.top + pad);
         const x = Math.max(4, r.left - H.left - pad), w = Math.min(H.width - 4, r.right - H.left + pad) - x, h = y1 - y0;
@@ -333,6 +362,7 @@
     [...el.dots.children].forEach((d, k) => { d.className = k < i ? 'pkm-tt-d-done' : k === i ? 'pkm-tt-d-on' : ''; });
     el.count.textContent = 'Étape ' + (i + 1) + ' / ' + TUTO_STEPS.length;
     el.nextLabel.textContent = st.final ? 'Terminer' : 'Suivant';
+    el.prev.hidden = i === 0;
     const navBtn = TUTO_STEPS[i].sel.indexOf(TUTO_NAV) === 0;
     TUTO.tab = st.tab === 'home' || navBtn ? null : document.querySelector(TUTO_NAV + 'button[aria-current="page"]');
     const text = tutoText(st);
@@ -342,6 +372,8 @@
     tutoType(text);
     tutoScroll(TUTO.target, st, top);
     tutoTrack();
+    cancelAnimationFrame(TUTO.sweep);
+    if (st.sweep) setTimeout(() => { if (TUTO.i === i) tutoSweep(TUTO.target); }, 600);
   };
   // Dernière étape : si le compagnon n'est pas la mascotte (didacticiel revu après un changement de compagnon), le
   // starter montre où retrouver le compagnon au lieu d'y sauter.
@@ -350,7 +382,7 @@
     return TUTO.comp.st().buddy === TUTO.mon ? st.text : 'Maintenant que tu connais toute l’appli, tu retrouveras ton compagnon ici !';
   };
   const tutoStop = () => {
-    clearTimeout(TUTO.typing); clearTimeout(TUTO.fly); clearTimeout(TUTO.hopT); clearTimeout(TUTO.sayT); cancelAnimationFrame(TUTO.raf);
+    clearTimeout(TUTO.typing); clearTimeout(TUTO.fly); clearTimeout(TUTO.hopT); clearTimeout(TUTO.sayT); cancelAnimationFrame(TUTO.raf); cancelAnimationFrame(TUTO.sweep);
     voiceStop();
     if (TUTO.el && TUTO.el.host) TUTO.el.host.innerHTML = '';
     TUTO.el = null; TUTO.tab = null; TUTO.target = null; TUTO.fr = null; TUTO.i = -1;

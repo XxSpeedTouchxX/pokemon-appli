@@ -312,10 +312,11 @@ patch('Pas de quêtes ni de saisons : les paliers suivent seulement la valeur de
 patch('<sc-if value="{{ ui.isProfile }}"', FRAG['grade-screen'] + '\n<sc-if value="{{ ui.isProfile }}"');
 // Panneau « Mes PK » (pk.js), ouvert par le compteur de l'en-tête.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pa-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Didacticiel (tuto.js, 2026-10-25) : question à la première installation, choix du starter, visite en 7 bulles.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['tuto'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Profil : « Revoir le didacticiel », sous « Revoir l'accueil ».
-patchRe(/(<span style="font-weight: 600">Retour à la page d’accueil<\/span>[\s\S]*?<\/button>)/, m => m + '\n<button type="button" onClick="{{ tu.replay }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer"><img src="img/brand/pa.svg" alt="" width="24" height="24" style="flex: none; display: block; width: 24px; height: 24px"><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Revoir le didacticiel</span><span style="font-size: 12.5px; color: #9AA8C3">45 secondes avec ton starter</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></button>');
+patchRe(/(<span style="font-weight: 600">Retour à la page d’accueil<\/span>[\s\S]*?<\/button>)/, m => m + '\n<button type="button" onClick="{{ tu.replay }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; display: block; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M12 6.5C10 5 7 4.6 3.5 5v13c3.5-.4 6.5 0 8.5 1.5 2-1.5 5-1.9 8.5-1.5V5C17 4.6 14 5 12 6.5z"></path><path d="M12 6.5v13"></path><path d="M6 9h3.5M6 12h3.5M14.5 9H18M14.5 12H18"></path></svg><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Revoir le didacticiel</span><span style="font-size: 12.5px; color: #9AA8C3">Ton compagnon te présente l’app</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></button>');
 // Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
@@ -419,7 +420,7 @@ const CAROUSEL = (root, label) => `<sc-if value="{{ ${root}.show }}" hint-placeh
 <section aria-label="${label}" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">${label}</h2>
-<button type="button" onClick="{{ ${root}.all }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ ${root}.allLabel }}</button>
+<sc-if value="{{ ${root}.allLabel }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ ${root}.all }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ ${root}.allLabel }}</button></sc-if>
 </div>
 <div style="display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px 4px; scroll-snap-type: x mandatory; scroll-padding-left: 16px">
 <sc-for list="{{ ${root}.items }}" as="fx" hint-placeholder-count="3">
@@ -629,7 +630,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 51) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 51'); // dont 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 52) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 52'); // dont 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
