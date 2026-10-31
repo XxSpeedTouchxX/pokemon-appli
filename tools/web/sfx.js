@@ -95,6 +95,57 @@
     }
   }
 
+  // Pizzicato (corde pincée d'orchestre) : dent de scie très filtrée, éteinte en un quart de seconde.
+  function sfxPizz(ac, out, f, at, vol) {
+    const o = ac.createOscillator(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    o.type = 'sawtooth'; o.frequency.value = f;
+    fl.type = 'lowpass'; fl.Q.value = 2; fl.frequency.setValueAtTime(Math.min(6000, f * 4), at); fl.frequency.exponentialRampToValueAtTime(Math.max(200, f * 1.2), at + 0.25);
+    sfxEnv(g, at, 0.004, vol, 0.3);
+    o.connect(fl); fl.connect(g); g.connect(out); o.start(at); o.stop(at + 0.35);
+  }
+  // Cordes tenues (violons, violoncelles) : deux dents de scie désaccordées, filtrées, vibrato ; trem > 0 : trémolo.
+  function sfxStrings(ac, out, notes, at, dur, vol, a, trem) {
+    notes.forEach(n => {
+      const f = sfxHz(n), fl = ac.createBiquadFilter(), g = ac.createGain(), lfo = ac.createOscillator(), dep = ac.createGain();
+      fl.type = 'lowpass'; fl.Q.value = 0.8; fl.frequency.value = Math.min(5200, f * 5);
+      lfo.frequency.value = 5.3; dep.gain.value = f * 0.005; lfo.connect(dep);
+      [0.997, 1.003].forEach(k => { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f * k; dep.connect(o.frequency); o.connect(fl); o.start(at); o.stop(at + dur + 0.05); });
+      g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + (a || 0.15));
+      g.gain.setValueAtTime(vol, at + Math.max((a || 0.15) + 0.01, dur - 0.35)); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      if (trem) {
+        const tr = ac.createGain(), tl = ac.createOscillator(), td = ac.createGain();
+        tr.gain.value = 0.7; tl.frequency.value = trem; td.gain.value = 0.3; tl.connect(td); td.connect(tr.gain);
+        fl.connect(tr); tr.connect(g); tl.start(at); tl.stop(at + dur + 0.05);
+      } else fl.connect(g);
+      g.connect(out); lfo.start(at); lfo.stop(at + dur + 0.05);
+    });
+  }
+  // Piano : partiels harmoniques qui s'éteignent vite, petit coup de marteau.
+  function sfxPiano(ac, out, f, at, dur, vol) {
+    [1, 2, 3, 4].forEach((k, i) => sfxTone(ac, out, 'sine', f * k * (1 + i * 0.0008), at, dur / (1 + i * 0.8), vol * [1, 0.42, 0.18, 0.08][i], 0.003));
+    sfxHiss(ac, out, at, 0.012, vol * 0.12, 'highpass', 2500, 0, 0.7, 0.001);
+  }
+  // Chœur « ah » : dents de scie désaccordées passées dans deux formants de la voyelle a.
+  function sfxChoir(ac, out, notes, at, dur, vol, a) {
+    notes.forEach(n => {
+      const f = sfxHz(n), g = ac.createGain(), f1 = ac.createBiquadFilter(), f2 = ac.createBiquadFilter(), g2 = ac.createGain(), lfo = ac.createOscillator(), dep = ac.createGain();
+      f1.type = 'bandpass'; f1.frequency.value = 730; f1.Q.value = 5;
+      f2.type = 'bandpass'; f2.frequency.value = 1090; f2.Q.value = 6; g2.gain.value = 0.6;
+      lfo.frequency.value = 4.8; dep.gain.value = f * 0.006; lfo.connect(dep);
+      [0.996, 1, 1.004].forEach(k => { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f * k; dep.connect(o.frequency); o.connect(f1); o.connect(f2); o.start(at); o.stop(at + dur + 0.05); });
+      f2.connect(g2); f1.connect(g); g2.connect(g);
+      g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + (a || 0.5));
+      g.gain.setValueAtTime(vol, at + Math.max((a || 0.5) + 0.01, dur - 0.5)); g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      g.connect(out); lfo.start(at); lfo.stop(at + dur + 0.05);
+    });
+  }
+  // Cymbale frappée : souffle aigu qui s'éteint lentement.
+  const sfxCymbal = (ac, out, at, vol) => sfxHiss(ac, out, at, 2.2, vol, 'highpass', 5200, 0, 0.6, 0.002);
+  // Grille commune aux variantes de « Suspense et lumière » (en temps de 0,48 s) : la mineur (4 temps), fa (2),
+  // sol (2), mi majeur (2, tension), puis la majeur au 11e temps, quand la nouvelle forme apparaît.
+  const SFX_PROG = [[0, 4, [-12, -9, -5]], [4, 2, [-16, -12, -9]], [6, 2, [-14, -10, -7]], [8, 2, [-17, -13, -10]]];
+  const SFX_A_MAJ = [-12, -8, -5];
+
   // ——— Pièce ———
   function sfxCoin(ac, out, t0) {
     // Pichenette : clic du pouce et tintement de la pièce.
@@ -227,13 +278,84 @@
         [[22, 0], [27, 1], [31, 2], [34, 3]].forEach(([n, b]) => box(n, R + b * B, 0.075));
         [3, 7, 10, 15].forEach(n => box(n - 12, R, 0.05));
         sfxSparkle(ac, out, R + 0.2, t0 + 6.9, 10, 0.03, 3400);
+      } },
+    // ——— Variantes de « Suspense et lumière » (2026-11-01, porteur : « propose-moi des sons dans le même thème ») ———
+    // Même déroulé : mystère en la mineur pendant les éclairs (la, fa, sol, mi), puis éclaircie en la majeur quand la
+    // nouvelle forme apparaît ; seul le timbre change.
+    { id: 'cordes', name: 'Suspense et lumière · cordes', desc: 'Des cordes pincées qui tournent en mineur sur un trémolo de violons qui enfle, puis un grand accord de cordes en majeur et une mélodie de violon.',
+      play: (ac, out, t0) => {
+        const B = SFX_BEAT, R = t0 + 10 * B;
+        SFX_PROG.forEach(([b, l, ch], k) => {
+          for (let i = 0; i < l * 2; i++) sfxPizz(ac, out, sfxHz(ch[i % 3] + (i % 6 >= 3 ? 12 : 0)), t0 + (b + i / 2) * B, 0.07 + 0.006 * (b * 2 + i));
+          sfxStrings(ac, out, ch.map(n => n - 12), t0 + b * B, l * B + 0.2, 0.012 + 0.007 * k, 0.35, 9);
+        });
+        sfxHiss(ac, out, t0 + 8 * B, 2 * B, 0.05, 'highpass', 1500, 7000, 0.8, 1.6 * B);
+        sfxStrings(ac, out, [-24].concat(SFX_A_MAJ, [0]), R, 2.4, 0.028, 0.1, 0);
+        [[12, 0, 1], [16, 1, 1], [19, 2, 1], [24, 3, 2]].forEach(([n, b, l]) => sfxStrings(ac, out, [n], R + b * B, l * B + 0.3, 0.035, 0.06, 0));
+        sfxThump(ac, out, R, 0.3, 80, 38, 0.8);
+      } },
+    { id: 'piano', name: 'Suspense et lumière · piano', desc: 'Un piano en mineur dont chaque note tombe sur un éclair, de plus en plus aiguë, puis un accord majeur égrené et une petite mélodie lumineuse.',
+      play: (ac, out, t0) => {
+        const B = SFX_BEAT, R = t0 + 10 * B;
+        SFX_PROG.forEach(([b, , ch]) => sfxPiano(ac, out, sfxHz(ch[0] - 12), t0 + b * B, 1.8, 0.09));
+        [0, 1, 2, 1].forEach((j, i) => sfxPiano(ac, out, sfxHz(SFX_PROG[0][2][j]), t0 + 0.05 + i * B * 0.66, 0.9, 0.06));
+        SFX_FLASH.forEach((t, i) => {
+          const beat = t / B, ch = (SFX_PROG.filter(p => p[0] <= beat).pop() || SFX_PROG[0])[2];
+          sfxPiano(ac, out, sfxHz(ch[i % 3] + 12 * Math.min(2, Math.floor(i / 6))), t0 + t, 0.9, 0.05 + 0.002 * i);
+        });
+        [-24, -12, -8, -5, 0, 4, 7, 12].forEach((n, i) => sfxPiano(ac, out, sfxHz(n), R + i * 0.04, 2.6, 0.06));
+        [[16, 1], [19, 1.5], [24, 2], [28, 3]].forEach(([n, b]) => { sfxPiano(ac, out, sfxHz(n), R + b * B, 1.4, 0.05); sfxBell(ac, out, sfxHz(n), R + b * B, 1.2, 0.025, [1, 2.0], [1, 0.2]); });
+      } },
+    { id: 'choeur', name: 'Suspense et lumière · chœur céleste', desc: 'Un chœur grave et mystérieux qui monte accord après accord sur des battements de cœur, puis s’envole en majeur, aigu et lumineux.',
+      play: (ac, out, t0) => {
+        const B = SFX_BEAT, R = t0 + 10 * B;
+        SFX_PROG.forEach(([b, l, ch], k) => sfxChoir(ac, out, ch, t0 + b * B, l * B + 0.45, 0.024 + 0.008 * k, 0.45));
+        for (let i = 0; i < 10; i++) sfxThump(ac, out, t0 + i * B, 0.04 + 0.008 * i, 70, 38, 0.2);
+        sfxHiss(ac, out, t0 + 8 * B, 2 * B, 0.05, 'highpass', 1500, 7000, 0.8, 1.6 * B);
+        sfxChoir(ac, out, SFX_A_MAJ.concat([0, 4, 7]), R, 2.4, 0.03, 0.2);
+        [12, 16, 19, 24].forEach((n, i) => sfxBell(ac, out, sfxHz(n), R + 0.1 + i * 0.12, 1.4, 0.04, [1, 2.0, 3.0], [1, 0.3, 0.1]));
+        sfxSparkle(ac, out, R + 0.5, t0 + 6.9, 8, 0.025, 3000);
+      } },
+    { id: 'orchestre', name: 'Suspense et lumière · orchestre', desc: 'Contrebasses obstinées, roulement de timbales qui s’accélère et cuivres en suspens, puis tout l’orchestre éclate en majeur avec une cymbale.',
+      play: (ac, out, t0) => {
+        const B = SFX_BEAT, R = t0 + 10 * B;
+        SFX_PROG.forEach(([b, l, ch]) => { for (let i = 0; i < l * 2; i++) sfxStrings(ac, out, [ch[0] - 12], t0 + (b + i / 2) * B, B * 0.42, 0.03 + 0.003 * (b * 2 + i), 0.02, 0); });
+        for (let i = 0; i < 8; i++) sfxThump(ac, out, t0 + i * B, 0.14 + 0.02 * i, 95, 50, 0.3);
+        for (let i = 0; i < 16; i++) sfxThump(ac, out, t0 + 8 * B + i * B / 8, 0.12 + 0.018 * i, 95, 50, 0.16);
+        SFX_PROG[3][2].forEach(n => sfxBrass(ac, out, sfxHz(n), t0 + 8 * B, 2 * B, 0.02));
+        [-24, -12, -8, -5].forEach(n => sfxBrass(ac, out, sfxHz(n), R, 2.2, 0.03));
+        sfxStrings(ac, out, SFX_A_MAJ.concat([0, 4]), R, 2.4, 0.016, 0.06, 0);
+        [[0, 0, 1], [4, 1, 1], [7, 2, 1], [12, 3, 2]].forEach(([n, b, l]) => sfxBrass(ac, out, sfxHz(n), R + b * B, l * B + 0.2, 0.045));
+        sfxThump(ac, out, R, 0.45, 110, 40, 0.9); sfxCymbal(ac, out, R, 0.08);
+      } },
+    { id: 'nuit', name: 'Suspense et lumière · nuit étoilée', desc: 'Un synthétiseur en arpège qui s’ouvre peu à peu dans la nuit, une basse profonde, puis un grand accord électronique brillant et des étoiles.',
+      play: (ac, out, t0) => {
+        const B = SFX_BEAT, R = t0 + 10 * B, fl = ac.createBiquadFilter();
+        fl.type = 'lowpass'; fl.Q.value = 7; fl.frequency.setValueAtTime(320, t0); fl.frequency.exponentialRampToValueAtTime(4200, R); fl.frequency.exponentialRampToValueAtTime(1800, R + 2.4);
+        fl.connect(out);
+        const pat = [0, 7, 12, 7];
+        SFX_PROG.forEach(([b, l, ch]) => {
+          for (let i = 0; i < l * 4; i++) sfxTone(ac, fl, 'square', sfxHz(ch[0] + pat[i % 4] + 12), t0 + (b + i / 4) * B, B * 0.22, 0.05, 0.003);
+          sfxTone(ac, out, 'sine', sfxHz(ch[0] - 12), t0 + b * B, l * B, 0.12, 0.05);
+        });
+        sfxHiss(ac, out, t0 + 8 * B, 2 * B, 0.05, 'highpass', 1500, 7000, 0.8, 1.6 * B);
+        SFX_A_MAJ.concat([0, 4]).forEach(n => [0.993, 1, 1.007].forEach(k => {
+          const o = ac.createOscillator(), g = ac.createGain(), lp = ac.createBiquadFilter();
+          o.type = 'sawtooth'; o.frequency.value = sfxHz(n) * k; lp.type = 'lowpass'; lp.frequency.value = 5000;
+          g.gain.setValueAtTime(0.0001, R); g.gain.exponentialRampToValueAtTime(0.01, R + 0.05); g.gain.setValueAtTime(0.01, R + 1.8); g.gain.exponentialRampToValueAtTime(0.0001, R + 2.4);
+          o.connect(lp); lp.connect(g); g.connect(out); o.start(R); o.stop(R + 2.45);
+        }));
+        for (let i = 0; i < 12; i++) sfxTone(ac, fl, 'square', sfxHz(SFX_A_MAJ[i % 3] + 24), R + i * B / 4, B * 0.2, 0.04 * (1 - i / 14), 0.003);
+        sfxThump(ac, out, R, 0.35, 90, 36, 0.8);
+        sfxSparkle(ac, out, R + 0.3, t0 + 6.9, 10, 0.03, 3200);
       } }
   ];
   // Choix par défaut proposés au porteur (à confirmer) : « Cristal magique » et « Suspense et lumière ».
   const SFX_EVO_DEFAULT = 'cristal', SFX_MUSIC_DEFAULT = 'suspense';
   // Volume de chaque son, réglé sur son rendu : sons autour de −24 dBFS en moyenne, musiques autour de −27 dBFS (un peu
   // en dessous du son), crêtes sous −3 dBFS.
-  const SFX_GAIN = { coin: 1, cristal: 1.23, energie: 1.07, retro: 3.2, cosmique: 1.03, harpe: 1.7, fanfare: 0.82, suspense: 1.23, chiptune: 1.84, boite: 1.82 };
+  const SFX_GAIN = { coin: 1, cristal: 1.23, energie: 1.07, retro: 3.2, cosmique: 1.03, harpe: 1.7, fanfare: 0.82, suspense: 1.23, chiptune: 1.84, boite: 1.82,
+    cordes: 1.4, piano: 1.24, choeur: 2.75, orchestre: 0.87, nuit: 1.55 };
   const SFX_MUSIC_LEVEL = 0.75;
 
   // Choix en cours : ?sonevo= / ?musevo= (numéro dans la liste, identifiant, ou 0 pour aucun), gardé sur l'appareil.

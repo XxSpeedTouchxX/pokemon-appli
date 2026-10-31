@@ -31,6 +31,9 @@
     - **par défaut, proposés et à confirmer par le porteur : Cristal magique et Suspense et lumière**. ?sonevo=1 à 5 et ?musevo=1 à 4 (0 = aucun) pour en essayer d'autres sur le téléphone ; le son du didacticiel coupé les coupe aussi ;
     - échantillons MP3 envoyés au porteur.
 - **Tests** : `e2e/t-dexsil.mjs`, `e2e/t-sfx.mjs` (nouveaux) ; `t-dexcards`, `t-fihist` adaptés.
+- **Puis (porteur)** :
+  - **son de la pièce validé** ;
+  - « propose-moi des sons dans le même thème que musique 2 Suspense et lumière » : **5 variantes** (musiques 5 à 9, cache v105), même déroulé (mystère en la mineur pendant les éclairs, éclaircie en la majeur à l'apparition), timbres différents : cordes, piano, chœur céleste, orchestre, nuit étoilée (synthétiseur). Volumes égalisés (−27 dBFS de moyenne), échantillons MP3 envoyés ; **choix attendu du porteur** (?musevo=5 à 9 pour essayer sur le téléphone).
 
 ## 2026-11-01 (suite 3) — Prix gradés sous 5 €, « Les plus chères » revue, visuels, extensions plus rapides, cartes gradées
 

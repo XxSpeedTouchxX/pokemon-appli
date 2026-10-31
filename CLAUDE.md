@@ -206,7 +206,8 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - voyants du haut fixes ;
   - PK et PA en blanc ;
   - son de la pièce lancée ;
-  - évolution : 5 sons et 4 musiques originaux (`tools/web/sfx.js`), **par défaut Cristal magique et Suspense et lumière, à confirmer par le porteur** (?sonevo=, ?musevo=).
+  - son de la pièce lancée **validé par le porteur** ;
+  - évolution : 5 sons et 9 musiques originaux (`tools/web/sfx.js`), dont 5 variantes de « Suspense et lumière » (cordes, piano, chœur, orchestre, nuit étoilée) demandées par le porteur ; **par défaut Cristal magique et Suspense et lumière, choix du porteur attendu** (?sonevo=, ?musevo=).
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

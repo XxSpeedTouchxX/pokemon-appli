@@ -1,4 +1,4 @@
-// Sons (2026-11-01, porteur) : bruit de la pièce lancée ; son et musique d'évolution au choix (5 sons, 4 musiques),
+// Sons (2026-11-01, porteur) : bruit de la pièce lancée (validé) ; son et musique d'évolution au choix (5 sons, 9 musiques dont 5 variantes de « Suspense et lumière »),
 // fabriqués dans le navigateur (Web Audio), coupés avec le son du didacticiel ; ?sonevo=… et ?musevo=… pour essayer.
 import { launch, BASE as E2E } from './helpers.mjs';
 const browser = await launch();
@@ -25,7 +25,8 @@ const open = async (q, muted) => {
   const [ctx, page] = await open();
   const L = await page.evaluate(() => window.__pkm.sfxLists());
   ok('sons d’évolution : ' + L.evo.map(x => x.name).join(', '), L.evo.length === 5);
-  ok('musiques d’évolution : ' + L.music.map(x => x.name).join(', '), L.music.length === 4);
+  // 4 musiques, puis 5 variantes de « Suspense et lumière » (2026-11-01, porteur : « des sons dans le même thème »).
+  ok('musiques d’évolution : ' + L.music.map(x => x.name).join(', '), L.music.length === 9 && L.music.filter(x => /^Suspense et lumière · /.test(x.name)).length === 5);
   ok('choix par défaut proposés : ' + L.evoDef + ' + ' + L.musicDef, L.evoDef === 'cristal' && L.musicDef === 'suspense');
   // Chaque son, rendu hors ligne : audible, sans saturation.
   const all = [['coin', '']].concat(L.evo.map(x => ['evo', x.id]), L.music.map(x => ['music', x.id]));
