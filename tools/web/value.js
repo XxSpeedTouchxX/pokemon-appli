@@ -23,7 +23,7 @@
     ev.forEach(e => {
       if (e.t === 0) {
         e.a.lines.forEach((l, k) => {
-          (out[l.pid] = out[l.pid] || []).push({ aid: e.a.id, k: k, date: e.a.date, where: e.a.where || '', lang: l.lang || 'FR', cond: l.cond || '', qty: l.qty, left: l.qty });
+          (out[l.pid] = out[l.pid] || []).push({ aid: e.a.id, k: k, date: e.a.date, where: e.a.where || '', lang: l.lang || 'FR', cond: l.cond || '', gr: l.gr || '', qty: l.qty, left: l.qty });
         });
         return;
       }
@@ -42,7 +42,7 @@
   };
   const valFactor = (s, pid) => {
     const list = (valLeft(s)[pid] || []).filter(g => g.left > 0), n = list.reduce((t, g) => t + g.left, 0);
-    return n ? list.reduce((t, g) => t + g.left * valCoef(g.lang, g.cond), 0) / n : 1;
+    return n ? list.reduce((t, g) => t + g.left * valCoefG(g.lang, g.cond, g.gr), 0) / n : 1; // note d'une carte gradée : graded.js
   };
   valProto.valOn = function () { return !this.state || this.state.valAdj !== false; };
 

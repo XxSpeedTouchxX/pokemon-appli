@@ -371,7 +371,7 @@
 <sc-if value="{{ hkc.real }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ hkc.open }}" aria-label="{{ hkc.label }}" style="position: relative; container-type: inline-size; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer">
 <img src="{{ hkc.img }}" srcset="{{ hkc.srcset }}" sizes="(max-width: 520px) 30vw, 118px" alt="" loading="lazy" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
-<sc-if value="{{ hkc.graded }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; right: 5px; padding: 1px 6px; border-radius: 6px; background: var(--pkm-white); color: var(--pkm-ink); font-size: 10.5px; font-weight: 800; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35)">{{ hkc.grade }}</span></sc-if>
+<sc-if value="{{ hkc.graded }}" hint-placeholder-val="{{ false }}"><span class="{{ hkc.gradeCls }}" aria-hidden="true"><sc-if value="{{ hkc.gradeHasMark }}" hint-placeholder-val="{{ true }}"><img src="{{ hkc.gradeMark }}" alt="" class="pkm-gr-badge-logo"></sc-if><b class="{{ hkc.gradeTone }}">{{ hkc.grade }}</b></span></sc-if>
 <sc-if value="{{ hkc.many }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; left: 5px; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: var(--pkm-white); font-size: 11px; font-weight: 700">{{ hkc.qty }}</span></sc-if>
 <span class="pkm-pill2" style="bottom: 6%">
 <span class="pkm-pill2-v"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hkc.flag }}"></span><span class="pkm-pill2-p">{{ hkc.cote }}</span></span>
@@ -1592,6 +1592,23 @@
 <button type="button" onClick="{{ cl.pick }}" aria-pressed="{{ cl.on }}" style="flex: 1; height: 44px; border-radius: 999px; border: 1px solid {{ cl.bc }}; background: {{ cl.bg }}; color: {{ cl.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ cl.label }}</button>
 </sc-for>
 </div>
+<sc-if value="{{ sh.showGrade }}" hint-placeholder-val="{{ true }}">
+<span class="pkm-gr-h">Carte gradée</span>
+<div role="group" aria-label="Carte gradée" class="pkm-gr-yn">
+<sc-for list="{{ sh.gradeYN }}" as="gy" hint-placeholder-count="2"><button type="button" onClick="{{ gy.pick }}" aria-pressed="{{ gy.on }}" class="{{ gy.cls }}">{{ gy.label }}</button></sc-for>
+</div>
+<sc-if value="{{ sh.gradeOn }}" hint-placeholder-val="{{ false }}">
+<span class="pkm-gr-h">Entreprise de gradation</span>
+<div role="group" aria-label="Entreprise de gradation" class="pkm-gr-cos">
+<sc-for list="{{ sh.gradeCos }}" as="gco" hint-placeholder-count="3"><button type="button" onClick="{{ gco.pick }}" aria-pressed="{{ gco.on }}" aria-label="{{ gco.name }}" class="{{ gco.cls }}"><img src="{{ gco.mark }}" alt="" class="pkm-gr-co-logo"></button></sc-for>
+</div>
+<span class="pkm-gr-h">Note</span>
+<div role="group" aria-label="Note de la carte" class="pkm-gr-notes">
+<sc-for list="{{ sh.gradeNotes }}" as="gn" hint-placeholder-count="6"><button type="button" onClick="{{ gn.pick }}" aria-pressed="{{ gn.on }}" aria-label="{{ gn.aria }}" class="{{ gn.cls }}"><b>{{ gn.g }}</b><sc-if value="{{ gn.hasLabel }}" hint-placeholder-val="{{ false }}"><i>{{ gn.label }}</i></sc-if></button></sc-for>
+</div>
+<p aria-live="polite" class="pkm-gr-note">{{ sh.gradeNote }}</p>
+</sc-if>
+</sc-if>
 <sc-if value="{{ sh.showCond }}" hint-placeholder-val="{{ true }}">
 <span style="font-size: 13px; font-weight: 600; color: #9AA8C3">État</span>
 <div role="group" aria-label="État de l’exemplaire" style="display: flex; gap: 8px">
@@ -2077,7 +2094,7 @@ PKCOUNTER
 <sc-if value="{{ hf.isCards }}" hint-placeholder-val="{{ true }}"><img src="{{ hfi.img }}" srcset="{{ hfi.srcset }}" sizes="30vw" alt="" loading="lazy" decoding="async" class="pkm-hf-card"></sc-if>
 <sc-if value="{{ hfi.hasPhoto }}" hint-placeholder-val="{{ false }}"><img src="{{ hfi.photo }}" alt="" loading="lazy" class="pkm-hf-photo"></sc-if>
 <sc-if value="{{ hfi.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ hfi.logo }}" alt="" loading="lazy" class="pkm-hf-photo"></sc-if>
-<sc-if value="{{ hfi.graded }}" hint-placeholder-val="{{ false }}"><span class="pkm-hf-grade">{{ hfi.grade }}</span></sc-if>
+<sc-if value="{{ hfi.graded }}" hint-placeholder-val="{{ false }}"><span class="{{ hfi.gradeCls }}" aria-hidden="true"><sc-if value="{{ hfi.gradeHasMark }}" hint-placeholder-val="{{ true }}"><img src="{{ hfi.gradeMark }}" alt="" class="pkm-gr-badge-logo"></sc-if><b class="{{ hfi.gradeTone }}">{{ hfi.grade }}</b></span></sc-if>
 <sc-if value="{{ hfi.many }}" hint-placeholder-val="{{ false }}"><span class="pkm-hf-qty">{{ hfi.qty }}</span></sc-if>
 <span class="pkm-hf-pill pkm-pill2"><span class="pkm-pill2-v"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hfi.flag }}"></span><span class="pkm-pill2-p">{{ hfi.cote }}</span></span><sc-if value="{{ hfi.hasCond }}" hint-placeholder-val="{{ true }}"><span class="pkm-pill2-c"><img src="{{ hfi.condIcon }}" alt="" width="16" height="16" class="pkm-cond-ico"><b class="pkm-cond-ab">{{ hfi.condAb }}</b></span></sc-if><sc-if value="{{ hfi.noCond }}" hint-placeholder-val="{{ false }}"><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hfi.condColor }}"></span></sc-if></span>
 </button>

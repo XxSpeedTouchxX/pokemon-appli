@@ -28,7 +28,7 @@
     const purchases = (s.purchases || []).map(a => {
       let hit = false;
       const lines = (a.lines || []).map(l => {
-        if (l.pid !== pid || (l.lang || 'FR') !== lang || (l.cond || copyDef(p)) !== from) return l;
+        if (l.pid !== pid || l.gr || (l.lang || 'FR') !== lang || (l.cond || copyDef(p)) !== from) return l; // exemplaires gradés : leur note ne change pas ici
         hit = true;
         return Object.assign({}, l, { cond: to });
       });
@@ -43,10 +43,10 @@
   const fiGroups = (s, p) => {
     const g = new Map();
     (valLeft(s)[p.id] || []).filter(c => c.left > 0).forEach(c => {
-      const k = (c.lang || 'FR') + '|' + (c.cond || copyDef(p));
+      const k = (c.lang || 'FR') + '|' + (c.cond || copyDef(p)) + '|' + (gradeOf(c.gr) ? c.gr : '');
       g.set(k, (g.get(k) || 0) + c.left);
     });
-    return [...g.entries()].map(([k, qty]) => { const [lang, cond] = k.split('|'); return { key: k, lang: lang, cond: cond, qty: qty }; })
+    return [...g.entries()].map(([k, qty]) => { const [lang, cond, gr] = k.split('|'); return { key: k, lang: lang, cond: cond, gr: gr, qty: qty }; })
       .sort((a, b) => b.qty - a.qty);
   };
 
@@ -257,6 +257,14 @@
     const mine = owned && !sealed && k !== null ? x.val(p) : null, adj = mine !== null && Math.abs(mine - k) > 0.004;
     const groups = owned && !sealed ? fiGroups(s, p) : [];
     const etats = groups.map(g => {
+      // Exemplaires gradés (graded.js) : logo de l'entreprise et note ; leur note ne se modifie pas ici.
+      const G = gradeOf(g.gr);
+      if (G) {
+        const gc = this.valOn() ? valCoefG(g.lang, g.cond, g.gr) : 1, gv = k !== null ? this.eur(k * gc) : '—';
+        return { icon: G.mark, label: gradeName(G), ab: '', value: gv, open: false,
+          sub: (groups.length > 1 || g.qty > 1 ? '×' + g.qty + ' · ' : '') + g.lang + ' · carte gradée, estimation',
+          cls: 'pkm-fi-etat pkm-fi-etat-gr pkm-fi-etat-gr-' + G.co.toLowerCase(), aria: 'Carte gradée ' + gradeName(G) + ', ' + gv, toggle: () => {} };
+      }
       const coef = this.valOn() ? valCoef(g.lang, g.cond) : 1, label = copyLabel(p, g.cond), value = k !== null ? this.eur(k * coef) : '—', on = s.fiEtat === g.key;
       return { icon: 'img/conds/' + g.cond.toLowerCase() + '.svg', label: label, ab: HOME_COND_AB[g.cond] || '', value: value, open: on,
         sub: (groups.length > 1 || g.qty > 1 ? '×' + g.qty + ' · ' : '') + g.lang + ' · ' + Math.round(coef * 100) + ' % de la cote',
@@ -366,8 +374,10 @@
       // Valeur selon l'état et la langue choisis (2026-10-22, demande du porteur) : cote Cardmarket (Near Mint) × coefficient,
       // comme dans la valeur de la collection ; cote brute si Réglages › « Selon l'état et la langue » est désactivé.
       const sealed = p.type === 'sealed', lang = f.lang || 'FR', cond = copyCode(p, f.cond), raw = this.rawVal(p, x.s.valuation);
-      const coef = this.valOn() ? valCoef(lang, cond) : 1, unit = raw ? raw * coef : 0, add = unit * (f.qty || 1);
-      const pct = Math.round(coef * 100) + ' %', tag = coef !== 1 ? ' (' + (sealed ? lang : copyLabel(p, cond) + (lang === 'JP' ? ', JP' : '')) + ', ' + pct + ')' : '';
+      // Carte gradée (graded.js) : la note remplace l'état dans la valeur.
+      const G = !sealed && f.grOn ? gradeOf(f.gr) : null;
+      const coef = this.valOn() ? valCoefG(lang, cond, G ? G.key : '') : 1, unit = raw ? raw * coef : 0, add = unit * (f.qty || 1);
+      const pct = Math.round(coef * 100) + ' %', tag = G ? ' (' + gradeName(G) + (lang === 'JP' ? ', JP' : '') + ')' : coef !== 1 ? ' (' + (sealed ? lang : copyLabel(p, cond) + (lang === 'JP' ? ', JP' : '')) + ', ' + pct + ')' : '';
       if (raw) {
         sh.big = this.signed(add);
         sh.products.forEach(po => { po.right = (String(po.right).match(/^×\d+ · /) || [''])[0] + this.eur(unit); });
@@ -376,7 +386,7 @@
         if (/^Cote Dropicards unitaire/.test(l.label)) { l.label = 'Valeur Cardmarket à l’unité' + tag; if (raw) l.value = this.eur(unit); }
         else if (l.label === 'Collection' && raw) l.value = this.eur(x.total) + ' → ' + this.eur(x.total + add);
       });
-      if (!sealed) {
+      if (!sealed && !G) {
         sh.hasCondNote = true;
         sh.condNote = copyLabel(p, cond) + ' · ' + Math.round(VAL_COND[cond] * 100) + ' % de la cote Near Mint. ' + COPY.notes[cond];
       }

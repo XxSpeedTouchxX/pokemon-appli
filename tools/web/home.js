@@ -66,26 +66,32 @@
     const unit = p => x.val(p) || 0, qty = p => x.c.stock[p.id].qty;
     // Du plus cher au moins cher (les bulles de tri et de filtre sont retirées le 2026-10-21).
     const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'fr');
-    const order = (a, b) => unit(b) - unit(a) || byName(a, b);
+    // Entrées du classeur (2026-11-01) : { p, gr, q, v } ; les exemplaires gradés d'une carte ont chacun la leur, par note
+    // (graded.js), à côté des exemplaires non gradés.
+    const order = (a, b) => b.v - a.v || byName(a.p, b.p);
     const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
-    const mine = sealed => all(sealed).sort(order);
+    const mine = sealed => all(sealed).flatMap(p => this.gradeEntries(s, p, unit(p), qty(p))).sort(order);
     const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, per = HOME_BINDER[tab];
     const pages = Math.max(1, Math.ceil(list.length / per)), page = Math.min(s[key], pages - 1);
-    const sum = l => l.reduce((t, p) => t + unit(p) * qty(p), 0), units = l => l.reduce((t, p) => t + qty(p), 0);
+    const sum = l => l.reduce((t, e) => t + e.v * e.q, 0), units = l => l.reduce((t, e) => t + e.q, 0);
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
     // Cote courte sur la pastille : à l'euro près dès 100 €, comme l'aperçu de PokéItem.
-    const cote = p => { const v = unit(p); return v ? x.mask(v >= 100 ? this.eur0(v) : this.eur(v)) : '—'; };
-    const tile = p => {
-      const k = homeCopy(s.purchases, p), q = qty(p), l = this.look(p);
-      return Object.assign(l, {
-        name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(p), condColor: HOME_COND[k.cond] || HOME_COND.NM, condIcon: homeCondIcon(k.cond), hasCond: !!homeCondIcon(k.cond), noCond: !homeCondIcon(k.cond), condAb: HOME_COND_AB[k.cond] || '',
+    const cote = e => { const v = e.v; return v ? x.mask(v >= 100 ? this.eur0(v) : this.eur(v)) : '—'; };
+    const tile = e => {
+      const p = e.p, k = homeCopy(s.purchases, p), q = e.q, l = this.look(p), G = e.gr;
+      // Carte gradée : logo de l'entreprise et note sur la carte, à la place de la bulle de l'état.
+      const gb = G ? this.gradeBadge(G) : { graded: !!p.grade, grade: p.grade || '', gradeMark: '', gradeHasMark: false, gradeCls: 'pkm-gr-badge', gradeTone: 'pkm-gr-badge-g', gradeName: p.grade || '' };
+      const cond = !G && homeCondIcon(k.cond);
+      return Object.assign(l, gb, {
+        name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(e), condColor: HOME_COND[k.cond] || HOME_COND.NM, condIcon: cond || '', hasCond: !!cond, noCond: !cond && !G, condAb: G ? '' : HOME_COND_AB[k.cond] || '',
         many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg,
-        label: p.name + (p.grade ? ', gradée ' + p.grade : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
-          + copyLabel(p, k.cond) + ', cote ' + (unit(p) ? x.mask(this.eur(unit(p))) : 'inconnue') + '. Ouvrir la fiche',
+        label: p.name + (gb.graded ? ', gradée ' + gb.gradeName : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
+          + (G ? '' : copyLabel(p, k.cond) + ', ') + 'cote ' + (e.v ? x.mask(this.eur(e.v)) : 'inconnue') + '. Ouvrir la fiche',
         open: () => this.fiOpen(p.id)
       });
     };
-    const graded = cards.filter(p => p.grade).length, extra = cards.reduce((t, p) => t + Math.max(0, qty(p) - 1), 0);
+    const isGraded = e => !!(e.gr || e.p.grade);
+    const graded = units(cards.filter(isGraded)), extra = cards.reduce((t, e) => t + Math.max(0, e.q - 1), 0);
     const shown = list.slice(page * per, page * per + per).map(tile).map(t => Object.assign(t, { real: true, pocket: false }));
     // Cartes sur plusieurs pages : pochettes vides jusqu'à 9, pour que la page garde sa hauteur quand on la tourne.
     const pockets = tab !== 'sealed' && pages > 1 ? Array.from({ length: per - shown.length }, () => ({ real: false, pocket: true })) : [];
@@ -107,7 +113,7 @@
       // « Tout afficher » (2026-10-21, vidéo du porteur) : écran plein « Toutes mes cartes » ou « Tous mes produits
       // scellés », classés par valeur, à faire défiler ; filtres Toutes, Loose, Gradées ; « Charger plus » par 30.
       all: { show: true, on: false, label: 'Tout afficher', toggle: () => this.setState({ hbFull: tab, hbFullF: 'all', hbFullN: HOME_FULL }) },
-      full: s.hbFull ? this.homeFull(s, s.hbFull === 'sealed' ? sealed : cards, s.hbFull === 'sealed', tile, l => x.mask(this.eur(sum(l))), units, plural) : HOME_NO_FULL,
+      full: s.hbFull ? this.homeFull(s, s.hbFull === 'sealed' ? sealed : cards, s.hbFull === 'sealed', tile, l => x.mask(this.eur(sum(l))), units, plural, isGraded) : HOME_NO_FULL,
       tabs: [['cards', 'Mes cartes'], ['sealed', 'Mes produits scellés']].map(([k, label]) =>
         Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k, hbTurn: null }) }, this.chip(tab === k))),
       tabLabel: tab === 'sealed' ? 'Mes produits scellés' : 'Mes cartes',
@@ -139,9 +145,9 @@
   };
   let homeSwipe = null;
   const HOME_FULL = 30, HOME_NO_FULL = { open: false };
-  proto.homeFull = function (s, list, sealed, tile, money, units, plural) {
+  proto.homeFull = function (s, list, sealed, tile, money, units, plural, isGraded) {
     const F = sealed ? 'all' : (['loose', 'graded'].indexOf(s.hbFullF) >= 0 ? s.hbFullF : 'all');
-    const kept = list.filter(p => F === 'all' || (F === 'graded') === !!p.grade);
+    const kept = list.filter(e => F === 'all' || (F === 'graded') === isGraded(e));
     const n = Math.max(HOME_FULL, s.hbFullN || HOME_FULL), shown = kept.slice(0, n), left = kept.length - shown.length;
     const count = l => (sealed ? plural(units(l), 'produit', 'produits') : plural(units(l), 'carte', 'cartes'));
     const chip = (k, label, l) => Object.assign({ label: label + ' (' + l.length + ')', on: F === k, pick: () => this.setState({ hbFullF: k, hbFullN: HOME_FULL }) }, this.chip(F === k));
@@ -149,7 +155,7 @@
       open: true, isCards: !sealed, isSealed: sealed, gridCls: 'pkm-hf-grid' + (sealed ? ' pkm-hf-grid-s' : ''),
       title: sealed ? 'Tous mes produits scellés' : 'Toutes mes cartes',
       sub: 'Classés par valeur · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
-      chips: sealed ? [] : [chip('all', 'Toutes', list), chip('loose', 'Loose', list.filter(p => !p.grade)), chip('graded', 'Gradées', list.filter(p => p.grade))],
+      chips: sealed ? [] : [chip('all', 'Toutes', list), chip('loose', 'Loose', list.filter(e => !isGraded(e))), chip('graded', 'Gradées', list.filter(isGraded))],
       hasChips: !sealed, items: shown.map(tile), empty: !kept.length,
       more: left > 0, moreLabel: 'Charger plus (' + Math.min(left, HOME_FULL) + ')', loadMore: () => this.setState({ hbFullN: n + HOME_FULL })
     };

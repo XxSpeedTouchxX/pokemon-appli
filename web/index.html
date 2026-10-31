@@ -893,6 +893,27 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pc-ver { margin: 0 0 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 12px; line-height: 1.4; color: var(--pkm-t3, #9AA8C3); text-align: center; user-select: none; }
 .pkm-pc-st-ok { color: var(--pkm-up, #3DDC84); font-weight: 700; }
 .pkm-pc-st-new { color: var(--pkm-amber, #F5B14C); font-weight: 700; }
+/* Carte gradée (2026-11-01, porteur) : à l'ajout, « Carte gradée » Non / Oui, entreprise (logos PCA, CCC, PSA) et note ;
+   sur la carte du classeur, pastille avec le logo de l'entreprise et la note, dans la nuance de la note. */
+.pkm-gr-h { font-size: 13px; font-weight: 600; color: #9AA8C3; }
+.pkm-gr-yn { display: flex; gap: 8px; }
+.pkm-gr-yn-b { flex: 1; height: 44px; border-radius: 999px; border: 1px solid #2A3A5C; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.pkm-gr-yn-b.pkm-gr-on { background: var(--pkm-accent); border-color: var(--pkm-accent); color: #0B1120; }
+.pkm-gr-cos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pkm-gr-co { height: 52px; padding: 6px 10px; border-radius: 14px; border: 1.5px solid #2A3A5C; background: #111A2C; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.pkm-gr-co-psa { background: #FFFFFF; border-color: #FFFFFF; }
+.pkm-gr-co-logo { display: block; max-width: 100%; max-height: 30px; object-fit: contain; }
+.pkm-gr-co.pkm-gr-on { border-color: var(--pkm-accent); box-shadow: 0 0 0 2px var(--pkm-accent); }
+.pkm-gr-notes { display: flex; flex-wrap: wrap; gap: 8px; }
+.pkm-gr-pill { height: 40px; min-width: 52px; padding: 0 12px; border: 0; font: inherit; font-size: 15px; cursor: pointer; opacity: 0.6; }
+.pkm-gr-pill.pkm-gr-on { opacity: 1; box-shadow: 0 0 0 3px var(--pkm-accent); }
+.pkm-gr-note { margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3; }
+.pkm-gr-badge { position: absolute; top: 5px; right: 5px; display: inline-flex; align-items: center; gap: 4px; max-width: calc(100% - 10px); box-sizing: border-box; padding: 2px 2px 2px 5px; border-radius: 7px; background: #0B1120; border: 1px solid rgba(255, 255, 255, 0.28); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45); }
+.pkm-gr-badge-psa { background: #FFFFFF; }
+.pkm-gr-badge-logo { display: block; flex: none; height: 13px; width: auto; max-width: 34px; object-fit: contain; }
+.pkm-gr-badge-g { padding: 0 5px; border-radius: 5px; font-size: 10.5px; font-weight: 800; line-height: 1.55; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pkm-fi-etat-gr img { width: 46px; height: 34px; padding: 4px; box-sizing: border-box; border-radius: 8px; background: #0B1120; object-fit: contain; }
+.pkm-fi-etat-gr-psa img { background: #FFFFFF; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -1399,6 +1420,6 @@ html.pkm-theme-storm:not(.pkm-classic) #app { background: #174D48; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=c75ab882"></script>
+<script src="app.js?v=7f90d477"></script>
 </body>
 </html>

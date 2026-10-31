@@ -41,10 +41,10 @@
     const g = new Map();
     (purchases || []).forEach(a => (a.lines || []).forEach(l => {
       if (l.pid !== p.id) return;
-      const k = (l.lang || 'FR') + '|' + (l.cond || copyDef(p));
+      const k = (l.lang || 'FR') + '|' + (l.cond || copyDef(p)) + '|' + (l.gr || '');
       g.set(k, (g.get(k) || 0) + (l.qty || 0));
     }));
-    return [...g.entries()].map(([k, qty]) => { const [lang, cond] = k.split('|'); return { lang: lang, cond: cond, label: copyLabel(p, cond), qty: qty }; })
+    return [...g.entries()].map(([k, qty]) => { const [lang, cond, gr] = k.split('|'), G = gradeOf(gr); return { lang: lang, cond: cond, gr: G ? gr : '', label: G ? gradeName(G) : copyLabel(p, cond), qty: qty }; })
       .sort((a, b) => b.qty - a.qty);
   }
   const copyProto = Component.prototype;
@@ -79,6 +79,7 @@
   copyProto.saveBuy = function () {
     const s = this.st(), f = s.f || {};
     this.__copy = { lang: f.lang || 'FR', cond: copyCode(copyItemOf(this, f.pid), f.cond) };
+    if (f.grOn && gradeOf(f.gr)) this.__copy.gr = f.gr; // carte gradée (graded.js) : note de l'exemplaire
     try { baseCopySaveBuy.call(this); } finally { this.__copy = null; }
   };
   const baseCopySeed = copyProto.formSeed;
