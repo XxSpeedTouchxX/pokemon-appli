@@ -564,6 +564,8 @@ ${langs}
 <button type="button" onClick="{{ sr.wrong }}" style="flex: none; height: 44px; margin-top: -6px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Pas la bonne carte ?</button>
 ` + tpl.slice(end);
 }
+// Message de la recherche vide : variable (« Pas d’items disponibles » pour les items d'un Pokémon, 2026-10-31, porteur).
+patch('<p style="margin: 0; padding: 24px 0; text-align: center; font-size: 14px; color: #9AA8C3">Aucun produit ne correspond.</p>', '<p style="margin: 0; padding: 24px 0; text-align: center; font-size: 14px; color: #9AA8C3">{{ mk.emptyText }}</p>');
 // États des cartes illustrés (2026-10-25, porteur) : une bulle par état (web/img/conds, tools/conds/make_conds.py),
 // le nom et le pourcentage de la cote ; le scellé garde ses deux états en texte. Même bouton dans « Ajouter un
 // exemplaire », « Modifier l'ajout » et la fiche du scan.
@@ -658,7 +660,7 @@ if (brokenMarks !== 52) throw new Error('Photos et logos repérés : ' + brokenM
     .replace(/\bPalier\b/g, 'Grade').replace(/\bpalier\b/g, 'grade');
   tpl = regrade(tpl); logic = regrade(logic);
 }
-const BRAND = 'Dropicards', REBRANDED = 50; // « Cote PKM » de la fiche du scan remplacée par « Valeur Cardmarket » (2026-10-25)
+const BRAND = 'Dropicards', REBRANDED = 52; // « Cote PKM » de la fiche du scan remplacée par « Valeur Cardmarket » (2026-10-25) ; +2 pour les items d'un Pokémon (dex.js, 2026-10-31)
 let rebranded = 0;
 const rebrand = t => t.replace(/PKM-App|\bPKM\b/g, () => { rebranded++; return BRAND; });
 tpl = rebrand(tpl);

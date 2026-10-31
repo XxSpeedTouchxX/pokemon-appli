@@ -31,10 +31,10 @@
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label^="Scanner"]', text: 'Ici, c’est le Scan Dropicards : grâce à lui, tu pourras scanner rapidement ta carte et connaître sa valeur sur le marché actuel.' },
     { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', kids: 2, text: 'Tu pourras retrouver ici le radar des boutiques : il te permettra de localiser précisément les boutiques qui vendent du Pokémon autour de toi, et la probabilité d’y trouver des items.' },
     { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', sweep: true, text: 'Ici, tu pourras retrouver toutes les séries et leurs extensions. Touche une carte pour voir ses infos, et ajoute-la dans ton classeur si tu la possèdes déjà.' },
-    { tab: 'market', sel: '.pkm-dex-device', top: true, fresh: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
-    { tab: 'market', sel: '.pkm-dex-lcd-r', top: true, fresh: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
-    { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, fresh: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
-    { tab: 'market', sel: 'header .pkm-pa-bar', fresh: true, text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, puis jusqu’à +30 d’affilée !' },
+    { tab: 'market', sel: '.pkm-dex-device', top: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
+    { tab: 'market', sel: '.pkm-dex-lcd-r', top: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
+    { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
+    { tab: 'market', sel: 'header .pkm-pa-bar', text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, puis jusqu’à +30 d’affilée !' },
     { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', inner: true, pad: 3, text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
@@ -93,7 +93,7 @@
       if (i < 0 || (ev.shiftKey && i === 0) || (!ev.shiftKey && i === els.length - 1)) { ev.preventDefault(); els[ev.shiftKey ? els.length - 1 : 0].focus(); }
     });
     box.innerHTML = '<div class="pkm-tt-row"><div class="pkm-tt-mon" aria-hidden="true"><img class="pkm-tt-m0" alt="" width="104" height="108"><img class="pkm-tt-m1" alt="" width="104" height="108"></div>'
-      + '<div class="pkm-tt-say"><span class="pkm-tt-new" aria-hidden="true">Nouveau</span><p class="pkm-tuto-text"><span class="pkm-tt-typed" aria-hidden="true"></span><span class="pkm-tt-caret" aria-hidden="true"></span></p></div></div>'
+      + '<div class="pkm-tt-say"><p class="pkm-tuto-text"><span class="pkm-tt-typed" aria-hidden="true"></span><span class="pkm-tt-caret" aria-hidden="true"></span></p></div></div>'
       + '<p class="pkm-sr pkm-tt-full" aria-live="polite"></p>'
       + '<div class="pkm-tt-bar"><button type="button" class="pkm-tt-skip">Passer</button><span class="pkm-tt-dots" aria-hidden="true"></span><span class="pkm-sr pkm-tt-count"></span>'
       + '<button type="button" class="pkm-tt-snd" aria-label="Son du didacticiel"></button></div>'
@@ -353,7 +353,7 @@
       if (r && r.width) TUTO.fr = [r.left - H.left + r.width / 2, r.top - H.top + r.height / 2, 0, 0];
       el.frame.classList.remove('pkm-tt-iris'); el.box.classList.remove('pkm-tt-switch');
     }
-    el.box.classList.toggle('pkm-tt-fresh', !!st.fresh);
+    // (étiquette violette « Nouveau » retirée le 2026-10-31, porteur)
     el.box.classList.remove('pkm-tt-ready');
     el.box.classList.remove('pkm-tt-hop'); void el.box.offsetWidth; el.box.classList.add('pkm-tt-hop');
     clearTimeout(TUTO.hopT); TUTO.hopT = setTimeout(() => el.box.classList.remove('pkm-tt-hop'), 600);

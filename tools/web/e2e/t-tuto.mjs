@@ -55,7 +55,7 @@ for (let k = 0; k < 14; k++) {
     const off = Math.round(Math.hypot(f.left + f.width / 2 - ico.left - ico.width / 2, f.top + f.height / 2 - ico.top - ico.height / 2));
     const paBar = document.querySelector('header .pkm-pa-bar'), paGap = paBar ? Math.round(paBar.getBoundingClientRect().top - f.bottom) : null;
     return { paGap: paGap, prev: !document.querySelector('.pkm-tt-prev').hidden, t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), fw: Math.round(f.width), clip: clip, radar: radar, off: off, top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
-      fresh: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-fresh'), nav: [...document.querySelectorAll('nav button[aria-current="page"]')].map(b => b.getAttribute('aria-label')).join('') };
+      fresh: /Nouveau/.test(document.querySelector('.pkm-tuto-bubble').innerText), nav: [...document.querySelectorAll('nav button[aria-current="page"]')].map(b => b.getAttribute('aria-label')).join('') };
   });
   if (!info) break;
   steps.push(info);
@@ -66,7 +66,7 @@ for (let k = 0; k < 14; k++) {
 ok(steps.length + ' étapes', steps.length === 12);
 ok('cadre jamais sous la bulle (' + steps.map(x => x.overlap).join(',') + ')', steps.every(x => x.overlap <= 2 && x.fh > 20));
 ok('valeur, classeur, scan, radar, séries', /valeur/.test(steps[0].t) && /Ici, tu pourras trouver ton classeur/.test(steps[1].t) && /Scan Dropicards/.test(steps[2].t) && /radar des boutiques/.test(steps[3].t) && /toutes les séries et leurs extensions/.test(steps[4].t));
-ok('Pokédex en 3 étapes (Pokédex, PA, arbre d’évolution), bulle en haut, « Nouveau »', [5, 6, 7].every(i => steps[i].top && steps[i].fresh && steps[i].nav === 'Jeux') && /Voici ton Pokédex : tu pourras y voir ton compagnon/.test(steps[5].t) && /points d’Aura/.test(steps[6].t) && /arbre d’évolution/.test(steps[7].t) && !steps.some(x => /Tous les Pokémon|Sa fiche/.test(x.t)));
+ok('Pokédex en 3 étapes (Pokédex, PA, arbre d’évolution), bulle en haut, sans étiquette « Nouveau » (retirée le 2026-10-31)', steps.every(x => !x.fresh) && [5, 6, 7].every(i => steps[i].top && steps[i].nav === 'Jeux') && /Voici ton Pokédex : tu pourras y voir ton compagnon/.test(steps[5].t) && /points d’Aura/.test(steps[6].t) && /arbre d’évolution/.test(steps[7].t) && !steps.some(x => /Tous les Pokémon|Sa fiche/.test(x.t)));
 ok('bouton « Étape précédente » caché à la 1re étape, visible ensuite', !steps[0].prev && steps.slice(1).every(x => x.prev));
 ok('cadre du solde de PK sans mordre sur le solde de PA (' + steps[9].paGap + ' px)', steps[9].paGap >= 0);
 ok('solde de PA, puis solde de PK : « ' + steps[9].t + ' »', /récupérer tes PA/.test(steps[8].t) && /tes PK : ils te serviront à acheter des items/.test(steps[9].t));

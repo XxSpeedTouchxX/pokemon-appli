@@ -153,8 +153,54 @@
     out.hasAll = ids.length > 0;
     out.allLabel = 'Voir ses ' + ids.length.toLocaleString('fr-FR') + (ids.length > 1 ? ' cartes' : ' carte');
     out.none = !ids.length; out.noneText = 'Aucune carte de ' + name + ' dans le catalogue pour l’instant.';
-    out.all = () => { this.setState({ mq: name, mIds: ids, mIdsQ: name, mfilter: 'trend' }); this.push('search'); };
+    out.all = () => { this.setState({ mq: name, mIds: ids, mIdsQ: name, mDex: n, mfilter: 'dexCards' }); this.push('search'); };
     return out;
+  };
+
+  // « Voir ses cartes » (2026-10-31, porteur) : la recherche ne montre que ce Pokémon, avec deux bulles à la place de
+  // Tendances, Hausses, Baisses et Sorties : « Cartes » (ses cartes seulement, sans les produits) et « Items » (les
+  // produits scellés et autres articles à son nom, reconnus comme ses cartes par dexMatch) ; sans item :
+  // « Pas d'items disponibles ». Dès que la recherche change, l'écran redevient la recherche normale.
+  const dexBaseMarket = dexProto.vMarket;
+  dexProto.vMarket = function (x) {
+    const s = x.s, q = String(s.mq || '').trim(), n = s.mDex;
+    const dexMode = !!(s.mIds && s.mIdsQ === q && DEX[n]);
+    if (!dexMode) {
+      const plain = /^dex/.test(s.mfilter || '') ? Object.assign({}, x, { s: Object.assign({}, s, { mfilter: 'trend' }) }) : x;
+      return Object.assign(dexBaseMarket.call(this, plain), { emptyText: 'Aucun produit ne correspond.' });
+    }
+    const name = DEX[n].name, items = s.mfilter === 'dexItems';
+    // Items : produits scellés et autres articles à son nom, ou à celui de ses méga-évolutions (« Boîte Méga-Dracaufeu »
+    // pour Dracaufeu) : les 61 produits scellés réels et les articles de l'app, sans doublon.
+    const want = [n].concat((DEX_MEGAS[n] || []).map(m => m.n)), seen = new Set();
+    const its = (typeof SEALED !== 'undefined' && SEALED.status === 'ready' ? SEALED.list() : []).concat(this.catalog())
+      .filter(p => p && p.type !== 'card' && !seen.has(p.id) && seen.add(p.id) && dexMatch(p.name).some(k => want.indexOf(k) >= 0));
+    const r = dexBaseMarket.call(this, Object.assign({}, x, { cat: [], s: Object.assign({}, s, { mfilter: 'trend' }) }));
+    const on = items ? 'dexItems' : 'dexCards';
+    r.filters = [['dexCards', 'Cartes'], ['dexItems', 'Items']].map(([k, label]) => Object.assign({ label: label, on: on === k, pick: () => this.setState({ mfilter: k }) }, this.chip(on === k)));
+    const row = (p, i, open) => {
+      const k = this.cote(p), st = x.c.stock[p.id];
+      return Object.assign(this.look(p), {
+        name: p.name, sub: p.sub, border: x.line(i), owned: !!(st && st.qty > 0),
+        cote: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : '—'), coteLabel: k !== null ? 'cote PKM' : 'sans prix',
+        right: p.release ? 'Sortie le ' + this.d2(p.release) : (k !== null ? 'cote PKM' : 'sans prix'), rightColor: p.release ? '#F5B14C' : 'var(--pkm-t3)', open: open
+      });
+    };
+    if (items) {
+      r.list = its.map((p, i) => row(p, i, () => this.push('item', { itemId: p.id })));
+      r.count = its.length ? its.length + (its.length > 1 ? ' items liés à ' : ' item lié à ') + name : '';
+      r.emptyText = 'Pas d’items disponibles';
+    } else {
+      // Cartes : ses cartes du catalogue seulement (la liste exacte du Pokédex), sans les produits.
+      const res = TCG.pick(s.mIds, LIMIT);
+      r.list = res.items.map((p, i) => row(p, i, () => this.openTcg(p.id)));
+      r.count = res.total + (res.total > 1 ? ' cartes de ' : ' carte de ') + name + (res.total > LIMIT ? ' · les ' + LIMIT + ' premières' : '') + ' · catalogue TCGdex';
+      r.emptyText = 'Aucune carte de ' + name + ' pour l’instant.';
+    }
+    r.empty = !r.list.length;
+    r.total = r.list.length;
+    r.browse = { show: false, fan: [], sub: '', open: null };
+    return r;
   };
 
   // ——— Vu, puis attrapé (2026-10-29) : retiré le 2026-10-31 ———
@@ -212,7 +258,8 @@
 
   // Route d'évolution de la famille de n : colonnes par stade, méga-évolutions dans la dernière colonne ; la première
   // branche suit la ligne du haut, les autres partent dessous. Mesures en px (nœud de 78 × 134 ; socle à 88 px du haut).
-  const DEX_COL = 72, DEX_TOP = 44, DEX_ROW = 148, DEX_PED = 88, DEX_ROUTE_W = 296, DEX_GAP = 6, DEX_ON = 1.08;
+  const DEX_TOP = 44, DEX_ROW = 148, DEX_PED = 88, DEX_GAP = 6, DEX_ON = 1.08;
+  const dexRouteW = () => Math.max(284, Math.min(380, (typeof innerWidth === 'number' && innerWidth > 0 ? Math.min(innerWidth, 560) : 390) - 76));
   const dexRoute = n => {
     const fam = DEX[n].fam, nodes = DEX_DATA.filter(e => e.fam === fam && (e.mega || DEX_IDS.indexOf(e.n) >= 0)).map(e => ({ e: e, n: e.n }));
     const by = {}; nodes.forEach(x => { by[x.n] = x; });
@@ -227,19 +274,9 @@
     };
     nodes.filter(x => !x.e.from || !by[x.e.from]).sort((a, b) => a.n - b.n).forEach((x, i) => place(x, i === 0 ? 0 : ++next));
     const cols = Math.max(...nodes.map(x => x.col)) + 1, rows = next + 1;
-    // Largeur de colonne (2026-10-31) : 72 px pour 4 colonnes, plus large (jusqu'à 100 px) quand la famille en a moins.
-    const colW = Math.max(DEX_COL, Math.min(100, Math.floor(DEX_ROUTE_W / cols)));
-    const cx = c => c * colW + colW / 2, ty = r => DEX_TOP + r * DEX_ROW;
-    let solid = '', dots = '';
-    nodes.forEach(x => {
-      const p = by[x.e.from];
-      if (!p) return;
-      if (p.row === x.row) solid += 'M' + cx(p.col) + ' ' + (ty(x.row) + DEX_PED) + 'H' + cx(x.col);
-      else dots += 'M' + cx(p.col) + ' ' + (ty(p.row) + DEX_PED + 12) + 'V' + (ty(x.row) + DEX_PED) + 'H' + (cx(x.col) - 32);
-    });
     const hasMega = nodes.some(x => x.e.mega);
-    return { nodes: nodes, cols: cols, rows: rows, solid: solid, dots: dots, w: cols * colW, h: DEX_TOP + rows * DEX_ROW + 4, colW: colW,
-      labels: Array.from({ length: cols }, (_, i) => (hasMega && i === cols - 1 ? 'Méga' : DEX_COLS[i] || 'Évolution ' + i)), cx: cx, ty: ty };
+    return { nodes: nodes, by: by, cols: cols, rows: rows, h: DEX_TOP + rows * DEX_ROW + 4, ty: r => DEX_TOP + r * DEX_ROW,
+      labels: Array.from({ length: cols }, (_, i) => (hasMega && i === cols - 1 ? 'Méga' : DEX_COLS[i] || 'Évolution ' + i)) };
   };
 
   // Étendue horizontale du Pokémon dessiné (par rapport au centre de son socle), animé ou fixe, pour une taille donnée.
@@ -249,32 +286,41 @@
     const [x0, y0, x1, y1] = e.box, H = Math.round(p * 96 / Math.max(1, y1 - y0)), bw = (x1 - x0) * H / 96, sh = dexShift((48 - (e.pc || 48)) * H / 96, bw);
     return [sh - H / 2 + x0 * H / 96, sh - H / 2 + x1 * H / 96];
   };
-  // Aucune collision dans la route (2026-10-31, porteur : « Méga-Tortank touche Tortank ») : toute la famille rapetisse
-  // ensemble jusqu'à laisser au moins 6 px entre deux Pokémon voisins, même agrandis quand ils sont touchés.
-  const dexRouteFit = (route, max, fit, still) => {
-    let f = fit;
-    for (let k = 0; k < 40; k++) {
-      const hit = route.nodes.some(a => route.nodes.some(b => {
-        if (a.row !== b.row || b.col !== a.col + 1) return false;
-        const ea = dexExt(a.e, max, f, still), eb = dexExt(b.e, max, f, still);
-        return route.colW + eb[0] * DEX_ON - ea[1] * DEX_ON < DEX_GAP;
-      }));
-      if (!hit) return f;
-      f *= 0.95;
-    }
-    return f;
+  // Mise en page de la route (2026-10-31, porteur : « Méga-Tortank touche Tortank », puis « Dracaufeu est trop petit ») :
+  // chaque colonne prend la largeur de ses Pokémon (au moins DEX_NAME_W pour le nom et le prix), les petites formes
+  // laissent la place aux grandes, sur toute la largeur de l'écran ; la famille ne rapetisse que si la somme dépasse
+  // l'écran. Deux Pokémon voisins restent à 6 px au moins l'un de l'autre, même agrandis quand ils sont touchés.
+  const DEX_NAME_W = 66;
+  const dexGeom = (route, max, fit0, still) => {
+    const W = Math.min(dexRouteW(), route.cols * 100);
+    const halves = f => Array.from({ length: route.cols }, (_, c) => Math.max(DEX_NAME_W / 2, ...route.nodes.filter(x => x.col === c)
+      .map(x => { const e = dexExt(x.e, max, f, still); return Math.max(-e[0], e[1]) * DEX_ON + DEX_GAP / 2; })));
+    let f = fit0, h = halves(f);
+    for (let k = 0; k < 80 && h.reduce((t, v) => t + 2 * v, 0) > W; k++) { f *= 0.97; h = halves(f); }
+    const extra = Math.max(0, (W - h.reduce((t, v) => t + 2 * v, 0)) / route.cols), ws = h.map(v => 2 * v + extra), xs = [];
+    let acc = 0;
+    ws.forEach(w => { xs.push(acc + w / 2); acc += w; });
+    const cx = c => xs[c], ty = route.ty;
+    let solid = '', dots = '';
+    route.nodes.forEach(x => {
+      const p = route.by[x.e.from];
+      if (!p) return;
+      if (p.row === x.row) solid += 'M' + cx(p.col) + ' ' + (ty(x.row) + DEX_PED) + 'H' + cx(x.col);
+      else dots += 'M' + cx(p.col) + ' ' + (ty(p.row) + DEX_PED + 12) + 'V' + (ty(x.row) + DEX_PED) + 'H' + (cx(x.col) - 32);
+    });
+    return { f: f, ws: ws, xs: xs, w: Math.round(acc), cx: cx, solid: solid, dots: dots };
   };
   dexProto.dexRouteGaps = function (n, still) {
-    const route = dexRoute(n), hmax = dexFamMax(n), fit = dexRouteFit(route, hmax, dexFamFit(n, hmax, DEX_PX, DEX_CAPW, !!still), !!still);
+    const route = dexRoute(n), hmax = dexFamMax(n), g = dexGeom(route, hmax, dexFamFit(n, hmax, DEX_PX, DEX_CAPW, !!still), !!still);
     return route.nodes.filter(a => route.nodes.some(b => b.row === a.row && b.col === a.col + 1)).map(a => {
       const b = route.nodes.find(x => x.row === a.row && x.col === a.col + 1);
-      return { a: a.n, b: b.n, gap: Math.round(route.colW + dexExt(b.e, hmax, fit, !!still)[0] * DEX_ON - dexExt(a.e, hmax, fit, !!still)[1] * DEX_ON) };
+      return { a: a.n, b: b.n, gap: Math.round(g.cx(b.col) - g.cx(a.col) + dexExt(b.e, hmax, g.f, !!still)[0] * DEX_ON - dexExt(a.e, hmax, g.f, !!still)[1] * DEX_ON) };
     });
   };
   dexProto.vDex = function (s) {
     const still = dexStill(), pa = Number(s.pa) || 0, b = DEX[s.buddy] ? s.buddy : 25;
     const sel = DEX[s.dexSel] ? s.dexSel : b, e = DEX[sel], route = dexRoute(sel), hmax = dexFamMax(sel);
-    const fit = dexRouteFit(route, hmax, dexFamFit(sel, hmax, DEX_PX, DEX_CAPW, still), still), fitFocus = Math.min(1, DEX_CAPW_FOCUS / Math.max(1, DEX_PX_FOCUS * dexAsp(e, still)));
+    const geo = dexGeom(route, hmax, dexFamFit(sel, hmax, DEX_PX, DEX_CAPW, still), still), fit = geo.f, fitFocus = Math.min(1, DEX_CAPW_FOCUS / Math.max(1, DEX_PX_FOCUS * dexAsp(e, still)));
     const owned = DEX_IDS.filter(k => dexOwn(s, k)).length;
     const status = x => {
       if (dexOwn(s, x.n)) return s.buddy === x.n ? 'Compagnon' : 'Débloqué';
@@ -284,15 +330,16 @@
     const v = {
       count: owned + ' / ' + DEX_IDS.length, all: () => { this.setState({ dexList: true, dexQ: '', dexF: 'all' }); dexListKeys(this); },
       allLabel: 'Tous les Pokémon',
-      routeW: route.w + 'px', routeH: route.h + 'px', routeBox: '0 0 ' + route.w + ' ' + route.h, solid: route.solid || 'M0 0', dots: route.dots || 'M0 0',
-      cols: route.labels.map((l, i) => ({ label: l, pos: 'left: ' + (i * route.colW + 5) + 'px; width: ' + (route.colW - 10) + 'px' })),
+      routeW: geo.w + 'px', routeH: route.h + 'px', routeBox: '0 0 ' + geo.w + ' ' + route.h, solid: geo.solid || 'M0 0', dots: geo.dots || 'M0 0',
+      // Étiquettes de colonne : « Évolution 1 » en entier si toutes les colonnes le permettent, sinon « Évol. 1 » partout.
+      cols: route.labels.map((l, i) => ({ label: geo.ws.some(w => w < 74) ? l.replace(/^Évolution /, 'Évol. ') : l, pos: 'left: ' + Math.round(geo.xs[i] - geo.ws[i] / 2 + 4) + 'px; width: ' + Math.round(geo.ws[i] - 8) + 'px' })),
       nodes: route.nodes.map(x => {
         const own = dexOwn(s, x.n), on = x.n === sel;
         return {
           img: dexSprite(x.n, still), sz: dexSize(x.e, hmax, DEX_PX, still, fit), name: dexShort(x.e), status: status(x), on: on, tag: on,
           sc: own ? '#9FF5C0' : can(x) ? '#FFE27A' : '#C9D3EA',
           cls: 'pkm-dex-node' + (own ? '' : ' pkm-dex-lock') + (!own && dexSeen(s, x.n) ? ' pkm-dex-seen' : '') + (x.row > 0 ? ' pkm-dex-alt' : '') + (s.buddy === x.n ? ' pkm-dex-now' : '') + (on ? ' pkm-dex-on' : '') + (still ? ' pkm-dex-still' : ''),
-          pos: 'left: ' + (route.cx(x.col) - route.colW / 2) + 'px; top: ' + route.ty(x.row) + 'px; width: ' + route.colW + 'px',
+          pos: 'left: ' + Math.round(geo.cx(x.col) - geo.ws[x.col] / 2) + 'px; top: ' + route.ty(x.row) + 'px; width: ' + Math.round(geo.ws[x.col]) + 'px',
           aria: x.e.name + ', ' + (x.e.mega ? 'méga-évolution' : DEX_FORMS[Math.min(dexStage(x.n), 2)]) + ', ' + status(x),
           pick: () => this.setState({ dexSel: x.n, megaAsk: null })
         };

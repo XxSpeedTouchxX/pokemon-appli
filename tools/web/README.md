@@ -178,6 +178,12 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - Prix de la fiche d’une carte possédée : `x.val(p)` (cote × coefficient moyen des exemplaires restants), avec la cote Near Mint en sous-titre quand ils diffèrent.
 - Test : `e2e/t-fietat.mjs`.
 
+## Pokédex : arbre et « Voir ses cartes » (2026-10-31, nuit, porteur)
+
+- **Arbre** (dex.js) : `dexRoute` ne place plus que les colonnes et les rangées ; `dexGeom` calcule la largeur de chaque colonne d'après ses Pokémon (demi-largeur la plus grande × `DEX_ON` + 3 px, au moins `DEX_NAME_W` = 66 px), sur la largeur de l'écran (`dexRouteW` : largeur de la fenêtre − 76 px, 284 à 380 px) ; la famille rapetisse (× 0,97) seulement si la somme dépasse ; le reste est réparti entre les colonnes. `dexRouteGaps` mesure les écarts avec ces centres.
+- **« Voir ses cartes »** : `mDex` (n° du Pokémon) avec `mIds` ; `vMarket` (dex.js) remplace les bulles par « Cartes » (`dexCards`, `TCG.pick(mIds)`) et « Items » (`dexItems` : `SEALED.list()` et le catalogue de l'app, hors cartes, dont le nom désigne le Pokémon ou une de ses méga-évolutions via `dexMatch`) ; message vide `mk.emptyText` (« Pas d’items disponibles »).
+- Didacticiel : étiquette « Nouveau » (`.pkm-tt-new`, option `fresh`) retirée.
+
 ## Notifications
 
 `tools/web/notif.js`, fragment `profile-notif` (2026-10-29, demande du porteur) :

@@ -32,9 +32,16 @@ if (!(await sec.count())) { await page.click('nav button[aria-label="Jeux"]'); a
 // « Voir ses N cartes » : la recherche montre exactement ces cartes.
 await sec.locator('.pkm-dex-tcg-all').click(); await page.waitForTimeout(1200);
 const main = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
-ok('recherche limitée à ses cartes : « ' + (/(\d+ premières cartes sur [\d\s ]+|\d+ cartes trouvées)/.exec(main) || ['?'])[0] + ' »', new RegExp('sur ' + n + '\\b|^' + n + ' cartes trouvées').test(main.replace(/[\s ](?=\d{3}\b)/g, '')) || main.indexOf('sur ' + n.toLocaleString('fr-FR')) >= 0);
+// 2026-10-31 (porteur) : seulement ses cartes, deux bulles « Cartes » et « Items » à la place de Tendances, Hausses…
+const chips = await page.locator('[aria-label="Filtre du marché"] button').allInnerTexts();
+ok('bulles « Cartes » et « Items » seulement : ' + chips.join(', '), chips.map(c => c.trim()).join() === 'Cartes,Items');
+const cnt = (/(\d[\d\s\u202f\u00a0]*) cartes de Pikachu/.exec(main) || [])[1];
+ok('recherche limitée à ses cartes : « ' + ((/\d[\d\s\u202f\u00a0]* cartes de Pikachu[^·]*/.exec(main) || ['?'])[0]) + ' »', Number(String(cnt || '').replace(/\D/g, '')) === n)
 const cardRows = await page.$$eval('main .pkm-dark > button', bs => bs.map(b => b.innerText.replace(/\s+/g, ' ')).filter(t => /cote|sans prix/.test(t)));
 ok('cartes de Pikachu seulement (' + cardRows.length + ' lignes : ' + cardRows.slice(0, 2).join(' / ').slice(0, 90) + '…)', cardRows.length === 40 && cardRows.every(t => /pikachu/i.test(t)));
+await page.click('[aria-label="Filtre du marché"] button:has-text("Items")'); await page.waitForTimeout(500);
+ok('« Items » de Pikachu : « Pas d’items disponibles »', (await page.locator('main p:has-text("Pas d’items disponibles")').count()) === 1);
+await page.click('[aria-label="Filtre du marché"] button:has-text("Cartes")'); await page.waitForTimeout(400);
 await page.screenshot({ path: shot('dexcards-recherche.png') });
 // Pokédex dessiné : petit écran, croix et bouton vert.
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1500);

@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-10-31 (suite 4) — Didacticiel sans « Nouveau », Dracaufeu plus grand, « Voir ses cartes » : Cartes ou Items
+
+- **Demandes du porteur** :
+  - didacticiel : retirer l'étiquette violette « Nouveau » ;
+  - arbre d'évolution : Dracaufeu trop petit ;
+  - « Voir ses cartes » d'un Pokémon : seulement ses cartes, sans produits ; deux bulles, « Cartes » et « Items » (tous les produits liés à ce Pokémon, sinon « Pas d'items disponibles ») ; retirer Tendances, Hausses, Baisses, etc.
+- **Fait** (cache v96) :
+  - étiquette « Nouveau » retirée ;
+  - arbre : l'arbre prend toute la largeur de l'écran et chaque colonne la largeur de ses Pokémon (66 px au moins pour le nom), les petites formes laissant la place aux grandes : Dracaufeu passe de 54 à 62 px sur un écran de 390 px (davantage sur un grand écran), toujours sans contact entre voisins ; étiquettes « Évol. 1 », « Évol. 2 » quand la place manque ;
+  - « Voir ses cartes » : bulles « Cartes » (ses cartes du catalogue seulement) et « Items » (produits scellés à son nom ou à celui de ses méga-évolutions, parmi les 61 produits réels et la collection) ; « Pas d'items disponibles » sinon (Pikachu, aujourd'hui) ; la recherche redevient normale dès qu'on change le texte.
+
 ## 2026-10-31 (suite 3) — Fiche d'une carte : « Déjà possédée ×N » et état modifiable
 
 - **Validé par le porteur** : un seul bouton « Méga-évoluer · 2 500 PA ».
