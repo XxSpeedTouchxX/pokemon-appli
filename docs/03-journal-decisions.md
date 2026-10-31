@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-10-31 (suite 2) — Sigle de l'état en blanc, toujours sur une ligne
+
+- **Demande du porteur** : « NM » en blanc comme les autres sigles, et tout sur une seule ligne, comme sur la carte Dracaufeu.
+- **Fait** (cache v94) : sigles en blanc ; la pastille ne passe plus jamais sur deux lignes : tout y est mesuré par rapport à la taille du texte, qui suit la largeur de la carte (11 px au plus, environ 8 px sur un écran de 320 px). Vérifié jusqu'à « 12 345 € · NM » sur une carte de 79 px, cote jamais coupée.
+
 ## 2026-10-31 (suite) — Sigle de l'état, bouton « OK », méga-évolutions animées et réparées, évolution plus longue
 
 - **Validé par le porteur** : les 3 choix de l'entrée précédente (plus de « vu » ; récupération des PA d'abord ; « Tous les Pokémon » et la mention « Les PK ne s'achètent pas » gardés).

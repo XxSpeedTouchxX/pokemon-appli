@@ -55,9 +55,8 @@
   const HOME_COND = { MT: 'var(--pkm-up)', NM: 'var(--pkm-up)', EX: 'var(--pkm-amber)', GD: 'var(--pkm-orange)', PL: 'var(--pkm-down)', PO: 'var(--pkm-down)', SO: 'var(--pkm-up)', AB: 'var(--pkm-amber)' };
   // Cartes (2026-10-31, porteur) : la bulle illustrée de l'état (web/img/conds) à droite du prix, au lieu du point.
   const homeCondIcon = c => (/^(MT|NM|EX|GD|PL|PO)$/.test(c) ? 'img/conds/' + c.toLowerCase() + '.svg' : '');
-  // Sigle de l'état à côté de sa bulle (2026-10-31, porteur) : M, NM, Ex, GD, PL, PO, dans la couleur de la bulle
-  // (éclaircie pour rester lisible sur la pastille sombre, contraste ≥ 6:1).
-  const HOME_COND_AB = { MT: ['M', '#FFD24A'], NM: ['NM', '#3DDC84'], EX: ['Ex', '#8EE07A'], GD: ['GD', '#C9DD3A'], PL: ['PL', '#F5A623'], PO: ['PO', '#FF7A55'] };
+  // Sigle de l'état à côté de sa bulle (2026-10-31, porteur) : M, NM, Ex, GD, PL, PO, en blanc.
+  const HOME_COND_AB = { MT: 'M', NM: 'NM', EX: 'Ex', GD: 'GD', PL: 'PL', PO: 'PO' };
   const homeCopy = (purchases, p) => {
     const g = copiesOf(purchases, p)[0], set = (purchases || []).some(a => (a.lines || []).some(l => l.pid === p.id && l.lang));
     return { lang: set && g ? g.lang : p.lang || 'FR', cond: g ? g.cond : copyDef(p) };
@@ -79,7 +78,7 @@
     const tile = p => {
       const k = homeCopy(s.purchases, p), q = qty(p), l = this.look(p);
       return Object.assign(l, {
-        name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(p), condColor: HOME_COND[k.cond] || HOME_COND.NM, condIcon: homeCondIcon(k.cond), hasCond: !!homeCondIcon(k.cond), noCond: !homeCondIcon(k.cond), condAb: (HOME_COND_AB[k.cond] || [''])[0], condAbStyle: 'color: ' + (HOME_COND_AB[k.cond] || ['', '#FFFFFF'])[1],
+        name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(p), condColor: HOME_COND[k.cond] || HOME_COND.NM, condIcon: homeCondIcon(k.cond), hasCond: !!homeCondIcon(k.cond), noCond: !homeCondIcon(k.cond), condAb: HOME_COND_AB[k.cond] || '',
         many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg,
         label: p.name + (p.grade ? ', gradée ' + p.grade : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
           + copyLabel(p, k.cond) + ', cote ' + (unit(p) ? x.mask(this.eur(unit(p))) : 'inconnue') + '. Ouvrir la fiche',

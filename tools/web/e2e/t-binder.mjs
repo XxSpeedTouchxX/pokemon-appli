@@ -39,9 +39,18 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   const num = t => parseFloat(t.replace(/[^\d,]/g, '').replace(',', '.'));
   ok('pastilles : ' + vals.join(' | '), vals.every((v, i) => !i || num(vals[i - 1]) >= num(v)) && /^448 €$/.test(vals[0].replace(/\s/g, ' ').replace(/ +/g, ' ').replace(/ /g, ' ')));
   // Bulle illustrée de l'état à droite du prix (2026-10-31, porteur), au lieu du point de couleur.
-  // Sigle de l'état à côté de sa bulle (2026-10-31, porteur) ; la cote n'est jamais coupée (l'état passe dessous au besoin).
-  const pill = await page.locator(TILE).first().evaluate(b => { const p = b.querySelector('span[style*="bottom: 6%"]'), f = p.querySelector('.pkm-pill2-v > span'), c = p.querySelector('.pkm-pill2-p'), ico = p.querySelector('img.pkm-cond-ico'), ab = p.querySelector('.pkm-cond-ab'); return [getComputedStyle(f).backgroundImage.slice(0, 40), ico ? ico.getAttribute('src') : '', ab ? ab.textContent : '', c.scrollWidth <= c.clientWidth, Math.round(p.getBoundingClientRect().width) <= Math.round(b.getBoundingClientRect().width)]; });
-  ok('pastille : drapeau, cote, bulle et sigle de l’état : ' + pill.join(' · '), /linear-gradient/.test(pill[0]) && /^img\/conds\/(mt|nm|ex|gd|pl|po)\.svg$/.test(pill[1]) && /^(M|NM|Ex|GD|PL|PO)$/.test(pill[2]) && pill[3] && pill[4]);
+  // Sigle blanc de l'état à côté de sa bulle, tout sur une seule ligne (2026-10-31, porteur) ; la cote n'est jamais coupée,
+  // même « 12 345 € » sur un écran de 320 px (la taille suit la largeur de la carte).
+  const pill = await page.locator(TILE).first().evaluate(b => { const p = b.querySelector('span[style*="bottom: 6%"]'), f = p.querySelector('.pkm-pill2-v > span'), c = p.querySelector('.pkm-pill2-p'), ico = p.querySelector('img.pkm-cond-ico'), ab = p.querySelector('.pkm-cond-ab'); return [getComputedStyle(f).backgroundImage.slice(0, 40), ico ? ico.getAttribute('src') : '', ab ? ab.textContent : '', getComputedStyle(ab).color, c.scrollWidth <= c.clientWidth, Math.round(p.getBoundingClientRect().width) <= Math.round(b.getBoundingClientRect().width), Math.round(p.getBoundingClientRect().height) <= Math.round(parseFloat(getComputedStyle(p).fontSize) * 2)]; });
+  ok('pastille : drapeau, cote, bulle et sigle blanc de l’état, une ligne : ' + pill.join(' · '), /linear-gradient/.test(pill[0]) && /^img\/conds\/(mt|nm|ex|gd|pl|po)\.svg$/.test(pill[1]) && /^(M|NM|Ex|GD|PL|PO)$/.test(pill[2]) && pill[3] === 'rgb(255, 255, 255)' && pill[4] && pill[5] && pill[6]);
+  const narrow = await page.evaluate(async () => {
+    const tile = document.querySelector('section[aria-label="Mon classeur"] .pkm-pill2').parentElement, keep = tile.style.width;
+    tile.style.width = '79px'; await new Promise(r => requestAnimationFrame(r));
+    const p = tile.querySelector('.pkm-pill2'), sp = p.querySelector('.pkm-pill2-p'), t = sp.textContent; sp.textContent = '12 345 €';
+    const fs = parseFloat(getComputedStyle(p).fontSize), r = p.getBoundingClientRect(), out = [Math.round(r.width), Math.round(r.height), sp.scrollWidth <= sp.clientWidth, r.height <= fs * 2];
+    sp.textContent = t; tile.style.width = keep; return out;
+  });
+  ok('carte de 79 px (écran de 320 px), « 12 345 € · NM » : ' + narrow.slice(0, 2).join(' × ') + ' px, une ligne, rien de coupé', narrow[0] <= 79 && narrow[2] && narrow[3]);
   ok('note de gradation sur Mewtwo : ' + await page.locator(TILE).first().locator('span', { hasText: 'PCA 9,5' }).count(), (await page.locator(TILE).first().locator('span', { hasText: 'PCA 9,5' }).count()) === 1);
   ok('6 cartes : une seule page, sans flèches', (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0);
   await page.locator(SEC).evaluate(e => e.scrollIntoView({ block: 'start' })); await page.waitForTimeout(800);

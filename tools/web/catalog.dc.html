@@ -369,13 +369,13 @@
 <div style="min-width: 0">
 <sc-if value="{{ hkc.pocket }}" hint-placeholder-val="{{ false }}"><span class="pkm-hk-pocket" aria-hidden="true"></span></sc-if>
 <sc-if value="{{ hkc.real }}" hint-placeholder-val="{{ true }}">
-<button type="button" onClick="{{ hkc.open }}" aria-label="{{ hkc.label }}" style="position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer">
+<button type="button" onClick="{{ hkc.open }}" aria-label="{{ hkc.label }}" style="position: relative; container-type: inline-size; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer">
 <img src="{{ hkc.img }}" srcset="{{ hkc.srcset }}" sizes="(max-width: 520px) 30vw, 118px" alt="" loading="lazy" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
 <sc-if value="{{ hkc.graded }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; right: 5px; padding: 1px 6px; border-radius: 6px; background: var(--pkm-white); color: var(--pkm-ink); font-size: 10.5px; font-weight: 800; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35)">{{ hkc.grade }}</span></sc-if>
 <sc-if value="{{ hkc.many }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; left: 5px; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: var(--pkm-white); font-size: 11px; font-weight: 700">{{ hkc.qty }}</span></sc-if>
 <span class="pkm-pill2" style="bottom: 6%">
 <span class="pkm-pill2-v"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hkc.flag }}"></span><span class="pkm-pill2-p">{{ hkc.cote }}</span></span>
-<sc-if value="{{ hkc.hasCond }}" hint-placeholder-val="{{ true }}"><span class="pkm-pill2-c"><img src="{{ hkc.condIcon }}" alt="" width="16" height="16" class="pkm-cond-ico"><b class="pkm-cond-ab" style="{{ hkc.condAbStyle }}">{{ hkc.condAb }}</b></span></sc-if><sc-if value="{{ hkc.noCond }}" hint-placeholder-val="{{ false }}"><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hkc.condColor }}"></span></sc-if>
+<sc-if value="{{ hkc.hasCond }}" hint-placeholder-val="{{ true }}"><span class="pkm-pill2-c"><img src="{{ hkc.condIcon }}" alt="" width="16" height="16" class="pkm-cond-ico"><b class="pkm-cond-ab">{{ hkc.condAb }}</b></span></sc-if><sc-if value="{{ hkc.noCond }}" hint-placeholder-val="{{ false }}"><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hkc.condColor }}"></span></sc-if>
 </span>
 </button>
 </sc-if>
@@ -2034,7 +2034,7 @@ PKCOUNTER
 <sc-if value="{{ hfi.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ hfi.logo }}" alt="" loading="lazy" class="pkm-hf-photo"></sc-if>
 <sc-if value="{{ hfi.graded }}" hint-placeholder-val="{{ false }}"><span class="pkm-hf-grade">{{ hfi.grade }}</span></sc-if>
 <sc-if value="{{ hfi.many }}" hint-placeholder-val="{{ false }}"><span class="pkm-hf-qty">{{ hfi.qty }}</span></sc-if>
-<span class="pkm-hf-pill pkm-pill2"><span class="pkm-pill2-v"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hfi.flag }}"></span><span class="pkm-pill2-p">{{ hfi.cote }}</span></span><sc-if value="{{ hfi.hasCond }}" hint-placeholder-val="{{ true }}"><span class="pkm-pill2-c"><img src="{{ hfi.condIcon }}" alt="" width="16" height="16" class="pkm-cond-ico"><b class="pkm-cond-ab" style="{{ hfi.condAbStyle }}">{{ hfi.condAb }}</b></span></sc-if><sc-if value="{{ hfi.noCond }}" hint-placeholder-val="{{ false }}"><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hfi.condColor }}"></span></sc-if></span>
+<span class="pkm-hf-pill pkm-pill2"><span class="pkm-pill2-v"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hfi.flag }}"></span><span class="pkm-pill2-p">{{ hfi.cote }}</span></span><sc-if value="{{ hfi.hasCond }}" hint-placeholder-val="{{ true }}"><span class="pkm-pill2-c"><img src="{{ hfi.condIcon }}" alt="" width="16" height="16" class="pkm-cond-ico"><b class="pkm-cond-ab">{{ hfi.condAb }}</b></span></sc-if><sc-if value="{{ hfi.noCond }}" hint-placeholder-val="{{ false }}"><span style="flex: none; width: 7px; height: 7px; border-radius: 4px; background: {{ hfi.condColor }}"></span></sc-if></span>
 </button>
 </sc-for>
 </div>
