@@ -839,7 +839,7 @@
 <button type="button" onClick="{{ pk.open }}" aria-label="{{ pk.aria }}" style="display: flex; align-items: center; height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer">
 <span style="display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 11px 0 4px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="26" height="26" style="flex: none; display: block; width: 26px; height: 26px">{{ pk.n }}<span style="font-size: 11px; color: #9AA8C3">PK</span></span>
 </button>
-<button type="button" onClick="{{ pk.openPa }}" aria-label="{{ pk.paAria }}" class="pkm-tk-head pkm-pa-head"><span class="{{ pk.paCls }}"><img src="img/brand/pa.svg" alt="" width="18" height="18" style="flex: none; display: block; width: 18px; height: 18px">{{ pk.pa }}<span style="font-size: 10.5px; color: #C7A6FF">PA</span><sc-if value="{{ pk.paReady }}" hint-placeholder-val="{{ false }}"><span class="pkm-pa-dot" aria-hidden="true">1</span></sc-if></span></button>
+<button type="button" onClick="{{ pk.openPa }}" aria-label="{{ pk.paAria }}" class="pkm-tk-head pkm-pa-head"><span class="{{ pk.paCls }}"><img src="img/brand/pa.svg" alt="" width="18" height="18" style="flex: none; display: block; width: 18px; height: 18px">{{ pk.pa }}<span class="pkm-pa-unit">PA</span><sc-if value="{{ pk.paReady }}" hint-placeholder-val="{{ false }}"><span class="pkm-pa-dot" aria-hidden="true">1</span></sc-if></span></button>
 <sc-if value="{{ pk.gain }}" hint-placeholder-val="{{ false }}">
 <span aria-hidden="true" class="pkm-gain" style="position: absolute; z-index: 5; right: 4px; top: 100%; margin-top: -6px; padding: 2px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12.5px; font-weight: 800; white-space: nowrap; pointer-events: none">{{ pk.gainText }} PK</span>
 </sc-if>
@@ -1967,7 +1967,6 @@ PKCOUNTER
 <sc-if value="{{ fi.canAdd }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ fi.add }}" class="pkm-fi-main"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>{{ fi.addLabel }}</button></sc-if>
 <sc-if value="{{ fi.owned }}" hint-placeholder-val="{{ true }}">
 <div class="pkm-fi-pair">
-<button type="button" onClick="{{ fi.sell }}" class="pkm-fi-link pkm-fi-sold">Marquer comme vendu</button>
 <sc-if value="{{ fi.canRemove }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ fi.remove }}" class="pkm-fi-link pkm-fi-del">Retirer de ma collection</button></sc-if>
 </div>
 </sc-if>
@@ -1985,43 +1984,50 @@ PKCOUNTER
 <a href="{{ fi.ebayUrl }}" target="_blank" rel="noopener" class="pkm-fi-ebay">Ventes réussies sur eBay ↗</a>
 </section>
 <sc-if value="{{ fi.hist.has }}" hint-placeholder-val="{{ true }}">
-<section aria-label="Historique du prix" class="pkm-fi-box">
-<h3 class="pkm-fi-h3">Historique du prix</h3>
-<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span class="pkm-fi-big">{{ fi.histValue }}</span><span style="font-size: 13px; font-weight: 700; color: {{ fi.hist.color }}">{{ fi.hist.change }}</span></div>
-<svg width="100%" height="96" viewBox="0 0 324 96" preserveAspectRatio="none" role="img" aria-label="Historique du prix" style="display: block; overflow: visible">
-<path d="{{ fi.hist.area }}" style="fill: {{ fi.hist.color }}; fill-opacity: 0.12; stroke: none"></path>
-<path d="{{ fi.hist.line }}" style="fill: none; stroke: {{ fi.hist.color }}; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke"></path>
+<section aria-label="Historique du prix" class="pkm-fi-box pkm-fh">
+<h3 class="pkm-fi-h3">Historique du prix <span class="pkm-fi-chip">Cardmarket</span><span class="pkm-fi-flag" style="background: {{ fi.flag }}"></span></h3>
+<sc-if value="{{ fi.hist.loading }}" hint-placeholder-val="{{ false }}"><span class="pkm-fi-note">Chargement de l’historique…</span></sc-if>
+<sc-if value="{{ fi.hist.ready }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-fh-top"><span class="pkm-fi-big">{{ fi.hist.value }}</span><span class="pkm-fh-chg" style="color: {{ fi.hist.color }}">{{ fi.hist.change }}</span></div>
+<div class="pkm-fh-plot">
+<div aria-hidden="true" class="pkm-fh-y"><sc-for list="{{ fi.hist.yl }}" as="fhy" hint-placeholder-count="3"><span style="top: {{ fhy.top }}">{{ fhy.label }}</span></sc-for></div>
+<div class="pkm-fh-box">
+<svg width="100%" height="120" viewBox="0 0 300 120" preserveAspectRatio="none" role="img" aria-label="{{ fi.hist.aria }}" class="pkm-fh-svg">
+<sc-for list="{{ fi.hist.grid }}" as="fhg" hint-placeholder-count="3"><path d="{{ fhg.d }}" class="pkm-fh-grid"></path></sc-for>
+<path d="{{ fi.hist.area }}" class="pkm-fh-area" style="fill: {{ fi.hist.color }}"></path>
+<sc-if value="{{ fi.hist.hasBuy }}" hint-placeholder-val="{{ false }}"><path d="{{ fi.hist.buyD }}" class="pkm-fh-buy"></path></sc-if>
+<path d="{{ fi.hist.line }}" class="pkm-fh-line" style="stroke: {{ fi.hist.color }}"></path>
 </svg>
-<div class="pkm-fi-axis"><span>{{ fi.hist.start }}</span><span>{{ fi.hist.end }}</span></div>
-<sc-if value="{{ fi.hist.periods }}" hint-placeholder-val="{{ false }}">
-<div role="group" aria-label="Période" style="display: flex; gap: 6px"><sc-for list="{{ fi.periods }}" as="fip" hint-placeholder-count="3"><button type="button" onClick="{{ fip.pick }}" aria-pressed="{{ fip.on }}" style="flex: 1; height: 34px; border-radius: 999px; border: 1px solid {{ fip.bc }}; background: {{ fip.bg }}; color: {{ fip.fg }}; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer">{{ fip.label }}</button></sc-for></div>
-</sc-if>
+<span aria-hidden="true" class="pkm-fh-dot" style="left: {{ fi.hist.dotX }}; top: {{ fi.hist.dotY }}; background: {{ fi.hist.color }}"></span>
+<sc-if value="{{ fi.hist.hasBuy }}" hint-placeholder-val="{{ false }}"><span class="pkm-fh-buyl" style="top: {{ fi.hist.buyTop }}">{{ fi.hist.buyLabel }}</span></sc-if>
+</div>
+</div>
+<div aria-hidden="true" class="pkm-fh-x"><sc-for list="{{ fi.hist.xl }}" as="fhx" hint-placeholder-count="3"><span style="left: {{ fhx.left }}; transform: {{ fhx.tx }}">{{ fhx.label }}</span></sc-for></div>
+<div role="group" aria-label="Période" class="pkm-fh-per"><sc-for list="{{ fi.hist.periods }}" as="fip" hint-placeholder-count="6"><button type="button" onClick="{{ fip.pick }}" aria-pressed="{{ fip.on }}" aria-label="{{ fip.aria }}" style="border-color: {{ fip.bc }}; background: {{ fip.bg }}; color: {{ fip.fg }}">{{ fip.label }}</button></sc-for></div>
 <span class="pkm-fi-note">{{ fi.hist.source }}</span>
-</section>
+<sc-if value="{{ fi.hist.since }}" hint-placeholder-val="{{ false }}"><span class="pkm-fi-note">{{ fi.hist.since }}</span></sc-if>
 </sc-if>
-<sc-if value="{{ fi.owned }}" hint-placeholder-val="{{ true }}">
-<section aria-label="Investi" class="pkm-fi-box">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><h3 class="pkm-fi-h3">Investi</h3><span class="pkm-fi-row-v" style="font-size: 17px">{{ fi.invested }}</span></div>
-<span class="pkm-fi-note">{{ fi.investSub }}</span>
-<sc-if value="{{ fi.hasLatent }}" hint-placeholder-val="{{ true }}"><div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px"><span style="color: #C9D3EA">Plus-value latente</span><span style="font-weight: 700; color: {{ fi.latentColor }}">{{ fi.latent }}</span></div></sc-if>
 </section>
 </sc-if>
 <section aria-label="Prix par état" class="pkm-fi-box">
 <button type="button" onClick="{{ fi.toggleCond }}" aria-expanded="{{ fi.condOpen }}" class="pkm-fi-fold"><span>Prix par état</span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
 <sc-if value="{{ fi.condOpen }}" hint-placeholder-val="{{ false }}">
-<sc-for list="{{ fi.conds }}" as="fic" hint-placeholder-count="3"><div class="pkm-fi-row"><span class="pkm-fi-row-l">{{ fic.label }}</span><span class="pkm-fi-note">{{ fic.pct }}</span><span class="pkm-fi-row-v">{{ fic.value }}</span></div></sc-for>
+<sc-for list="{{ fi.conds }}" as="fic" hint-placeholder-count="3"><div class="pkm-fi-row"><sc-if value="{{ fic.hasIcon }}" hint-placeholder-val="{{ true }}"><img src="{{ fic.icon }}" alt="" width="26" height="26" class="pkm-fi-cico"></sc-if><span class="pkm-fi-row-l">{{ fic.label }}</span><span class="pkm-fi-note">{{ fic.pct }}</span><span class="pkm-fi-row-v">{{ fic.value }}</span></div></sc-for>
 <span class="pkm-fi-note">{{ fi.condNote }}</span>
 </sc-if>
 </section>
-<sc-if value="{{ fi.hasCopies }}" hint-placeholder-val="{{ true }}">
-<section aria-label="Mes exemplaires" class="pkm-fi-box">
-<button type="button" onClick="{{ fi.toggleCopies }}" aria-expanded="{{ fi.copiesOpen }}" class="pkm-fi-fold"><span>{{ fi.copiesLabel }} <span class="pkm-fi-note">{{ fi.copiesCount }}</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
-<sc-if value="{{ fi.copiesOpen }}" hint-placeholder-val="{{ false }}">
-<sc-for list="{{ fi.copies }}" as="fik" hint-placeholder-count="2"><button type="button" onClick="{{ fik.edit }}" aria-label="{{ fik.editLabel }}" class="pkm-fi-copy"><span>{{ fik.meta }}</span><span class="pkm-fi-row-v">{{ fik.amount }}</span></button></sc-for>
-</sc-if>
+<sc-if value="{{ fi.graded.has }}" hint-placeholder-val="{{ true }}">
+<section aria-label="Prix gradés" class="pkm-fi-box pkm-fg">
+<h3 class="pkm-fi-h3">Prix gradés <span class="pkm-fi-chip">Estimation</span></h3>
+<sc-for list="{{ fi.graded.companies }}" as="fgc" hint-placeholder-count="3">
+<div role="group" aria-label="{{ fgc.aria }}" class="pkm-fg-co">
+<span class="pkm-fg-name">{{ fgc.name }}</span>
+<div class="pkm-fg-list"><sc-for list="{{ fgc.grades }}" as="fgg" hint-placeholder-count="5"><div class="pkm-fg-row" aria-label="{{ fgg.aria }}"><span class="pkm-fg-pill" style="background: {{ fgg.bg }}; color: {{ fgg.fg }}">{{ fgg.g }}</span><span class="pkm-fg-v">{{ fgg.value }}</span><span class="pkm-fg-est">estimation</span></div></sc-for></div>
+</div>
+</sc-for>
+<span class="pkm-fi-note">{{ fi.graded.note }}</span>
 </section>
 </sc-if>
-<button type="button" onClick="{{ fi.full }}" class="pkm-fi-full">Voir la fiche complète</button>
 </section>
 </div>
 </sc-if>

@@ -178,6 +178,13 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 - Prix de la fiche d’une carte possédée : `x.val(p)` (cote × coefficient moyen des exemplaires restants), avec la cote Near Mint en sous-titre quand ils diffèrent.
 - Test : `e2e/t-fietat.mjs`.
 
+## Fiche d’une carte : historique du prix et prix gradés (2026-10-31, nuit, porteur)
+
+- **Archive** : `web/data/hist/<extension>.json` (`{days, c: {id: [centimes | null, …]}}`) et `index.json`, écrits par `tools/tcgdex/history.py` (README de `tools/tcgdex`). Nom du fichier : identifiant de l’extension, caractères hors `[A-Za-z0-9._-]` remplacés par `_` (`fiFile`).
+- `fiche.js` : `fiHistDoc(set)` charge la fiche de l’extension à l’ouverture (cache `FI_HIST`, nouveau rendu par `fiHistTick`) ; `fiPoints` (démo, scellé réel `p.hist`, archive des cartes avec la cote du jour si l’archive est en retard, sinon les 4 points Cardmarket 30 j, 7 j, veille, jour) ; `fiHistory(p, x, k, période, coefficient de l’état, prix d’achat moyen)` : périodes `FI_PER` (1S, 1M, 3M, 6M, 1A, MAX, défaut MAX, `fiPer`), graduations `HomeCore.ticks`, courbe monotone (`fiSmooth`), dates `fiDay` (« 3 oct. »), ligne du prix d’achat si `st.cost` est connu, note « Archive Dropicards depuis le … » pour les périodes plus longues que l’archive.
+- `fiGraded` : `FI_GRADERS` (PCA, CCC, PSA ; PSA sans 9,5) × cote Near Mint ; couleurs des notes `FI_GRADE_COL` ; jamais pour le scellé. Coefficients **à valider par le porteur**.
+- Styles : `.pkm-fh-*` et `.pkm-fg-*` (`games.css`). Test : `e2e/t-fihist.mjs` (et `t-binder` pour les éléments retirés et les bulles de « Prix par état »).
+
 ## Pokédex : arbre et « Voir ses cartes » (2026-10-31, nuit, porteur)
 
 - **Arbre** (dex.js) : `dexRoute` ne place plus que les colonnes et les rangées ; `dexGeom` calcule la largeur de chaque colonne d'après ses Pokémon (demi-largeur la plus grande × `DEX_ON` + 3 px, au moins `DEX_NAME_W` = 66 px), sur la largeur de l'écran (`dexRouteW` : largeur de la fenêtre − 76 px, 284 à 380 px) ; la famille rapetisse (× 0,97) seulement si la somme dépasse ; le reste est réparti entre les colonnes. `dexRouteGaps` mesure les écarts avec ces centres.
@@ -343,11 +350,11 @@ Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande 
 - **Glisser** la grille vers la gauche ou la droite pour changer de page (les flèches restent).
 - **Fiche en panneau** (`tools/web/fiche.js`, fragment `fiche-sheet`, 2026-10-21, d'après la vidéo 1 du porteur) : panneau qui monte du bas, ouvert depuis le classeur (cartes et scellé) et depuis « Détails » du catalogue scellé :
   - nom, numéro, logo de l'extension, grand visuel (agrandissable), rareté, cote Cardmarket ;
-  - « Ajouter un exemplaire » (ou « Ajouter à mes produits scellés »), « Marquer comme vendu », « Retirer de ma collection » (ouvre la correction de l'ajout, avec « Supprimer ») ;
+  - « Ajouter un exemplaire » (ou « Ajouter à mes produits scellés »), « Retirer de ma collection » (ouvre la correction de l'ajout, avec « Supprimer ») ; « Marquer comme vendu » retiré le 2026-10-31 (porteur) ;
   - **Prix du marché** Cardmarket : tendance, moyennes 7 et 30 jours, veille, plus bas en vente (prix demandé), date ; « Acheter sur Cardmarket », « Ventes réussies sur eBay » (liens, sans chiffre) ;
-  - **Historique du prix** : archive quotidienne (scellé, démo) sur 7 jours, 1 mois ou tout ; cartes : moyennes Cardmarket 30 jours, 7 jours, veille, tendance ;
-  - **Investi** et plus-value latente ; **Prix par état** (coefficients de `value.js`) ; **Mes exemplaires** (un appui corrige l'ajout) ; « Voir la fiche complète ».
-  - Pas de prix des cartes gradées, de population PSA ni de dernière vente eBay (vidéo du porteur) : aucune source ouverte.
+  - **Historique du prix** (refait le 2026-10-31, ci-dessous) ;
+  - **Prix par état** (coefficients de `value.js`, bulle illustrée de chaque état) ; **Prix gradés** (estimations, ci-dessous) ; « Investi », « Mes exemplaires » et « Voir la fiche complète » retirés le 2026-10-31 (porteur).
+  - Pas de ventes réelles de cartes gradées, de population PSA ni de dernière vente eBay : aucune source ouverte.
 - **Ajouter une carte ou un produit scellé** (formulaire d'ajout, 2026-10-21 pour le scellé, 2026-10-22 pour les cartes, demandes du porteur) : seul l'article choisi, centré et agrandi, sans onglet « Vente » ni prix payé ; restent la langue, la quantité, l'état (cartes seulement) et la valeur Cardmarket ajoutée, qui suit l'état et la langue (`vSheet` dans `fiche.js`, classe `pkm-art-one` dans `games.css`). **États des cartes** (2026-10-22, `copies.js`) : Mint, Near Mint (par défaut), Excellent, Good, Played, Poor, avec une phrase qui décrit l'état choisi ; coefficients d'estimation (`VAL_COND`, `value.js`) 115, 100, 85, 70, 55 et 30 % de la cote Cardmarket ; mêmes états au scan, dans « Modifier l'ajout » et à l'import CSV (anciens « Joué » = Played). Le formulaire tient dans l'écran et défile jusqu'au bouton « Ajouter à ma collection » (il dépassait sous la barre du navigateur sur téléphone).
 
 ## Importer un tableur

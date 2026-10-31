@@ -2,17 +2,20 @@
   // Panneau qui monte du bas, ouvert depuis « Mon classeur » (cartes et scellé) et le catalogue du scellé :
   // grand visuel, nom, numéro et logo de l'extension, cote Cardmarket ; ajouter, vendre ou retirer ; prix du marché
   // Cardmarket (tendance, moyennes 7 et 30 jours, veille, plus bas demandé) ; acheter sur Cardmarket, ventes réussies
-  // eBay (lien) ; historique du prix ; investi et plus-value ; prix selon l'état ; mes exemplaires.
-  // Pas de prix des cartes gradées, de population PSA ni de dernière vente eBay : aucune source ouverte (2026-10-21).
+  // eBay (lien) ; historique du prix ; prix selon l'état ; prix gradés estimés (2026-10-31).
+  // Retirés le 2026-10-31 (porteur) : investi et plus-value, « Mes exemplaires », « Marquer comme vendu », « Voir la fiche
+  // complète ». Pas de ventes réelles de cartes gradées, de population PSA ni de dernière vente eBay : aucune source ouverte.
   // Les calculs viennent de la fiche complète (vItem) ; ce module ne fait que les présenter.
   // Ce module partage la portée des autres : ses noms commencent par FI_ ou fi.
   const fiProto = Component.prototype;
-  const FI_PERIODS = [['7', '7 j'], ['30', '1 mois'], ['all', 'Tout']];
+  // Périodes de l'historique (2026-10-31, photo du porteur) : 1S, 1M, 3M, 6M, 1A, MAX (MAX par défaut).
+  const FI_PER = [['1S', 7, '1 semaine'], ['1M', 30, '1 mois'], ['3M', 91, '3 mois'], ['6M', 182, '6 mois'], ['1A', 365, '1 an'], ['MAX', 0, 'max']];
+  const FI_W = 300, FI_H = 120;
 
   // Ouvrir la fiche : l'article rejoint le catalogue de l'app s'il n'y est pas (comme openTcg).
   fiProto.fiOpen = function (id) {
     const ex = this.st().extra || [], p = this.catalog().find(q => q.id === id);
-    this.setState(Object.assign({ fiId: id, fiPer: '30', fiCond: false, fiCopies: false, fiZoom: false, fiEtat: null }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
+    this.setState(Object.assign({ fiId: id, fiPer: 'MAX', fiCond: false, fiZoom: false, fiEtat: null }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
   };
   fiProto.fiClose = function () { this.setState({ fiId: null, fiZoom: false, fiEtat: null }); };
 
@@ -58,36 +61,123 @@
     return r;
   };
 
-  // Courbe du prix : archive quotidienne (scellé réel, démo) découpée selon la période ; sinon les 4 points
-  // Cardmarket d'une carte (moyenne 30 jours, 7 jours, veille, tendance).
-  fiProto.fiHistory = function (p, x, k, per) {
-    const days = SEALED.doc && SEALED.doc.days, demo = x.hist[p.id];
-    let V = null, labels = [], daily = false;
+  // ——— Historique du prix (2026-10-31, porteur : « une variation de prix de la carte depuis sa sortie », d'après sa photo) ———
+  // Aucune source ouverte ne donne l'historique depuis la sortie : Dropicards archive chaque jour la cote de chaque carte
+  // depuis le 3 octobre 2026 (web/data/hist, tools/tcgdex/history.py), une fiche par extension, chargée à l'ouverture.
+  const FI_HIST = {};
+  const fiFile = sid => 'data/hist/' + String(sid).replace(/[^A-Za-z0-9._-]/g, '_') + '.json';
+  fiProto.fiHistDoc = function (sid) {
+    if (FI_HIST[sid]) return FI_HIST[sid];
+    FI_HIST[sid] = { state: 'load' };
+    const done = doc => {
+      FI_HIST[sid] = doc && Array.isArray(doc.days) && doc.c ? { state: 'ok', doc: doc } : { state: 'none' };
+      if (this.st().fiId) this.setState({ fiHistTick: (this.st().fiHistTick || 0) + 1 });
+    };
+    try { fetch(fiFile(sid)).then(r => (r.ok ? r.json() : null)).catch(() => null).then(done); } catch (e) { done(null); }
+    return FI_HIST[sid];
+  };
+  const fiAgo = (d, n) => new Date(Date.parse(d) - n * 86400000).toISOString().slice(0, 10);
+  // Points quotidiens { d, v } de la cote (Near Mint), du plus ancien au plus récent, et leur source.
+  fiProto.fiPoints = function (p, x, k) {
+    const demo = x.hist[p.id], days = SEALED.doc && SEALED.doc.days;
     if (Array.isArray(demo) && demo.length > 1 && k) {
-      const n = demo.length, u = x.val(p) || k;
-      V = demo.map(v => v * u / k); daily = true;
-      labels = [this.d2(this.histDate(0, n)), this.d2(this.histDate(n - 1, n))];
-    } else if (p.real && Array.isArray(p.hist) && Array.isArray(days)) {
-      const pts = days.map((d, i) => [d, p.hist[i]]).filter(q => typeof q[1] === 'number' && q[1] > 0);
-      if (pts.length > 1) { V = pts.map(q => q[1]); daily = true; labels = pts.map(q => this.d2(q[0])); }
+      const n = demo.length;
+      return { pts: demo.map((v, i) => ({ d: this.histDate(i, n), v: v })), src: 'Cote archivée chaque jour (démo)' };
     }
-    if (daily) {
-      const cut = per === '7' ? 7 : per === '30' ? 30 : V.length;
-      const from = Math.max(0, V.length - cut);
-      V = V.slice(from);
-      labels = labels.length > 2 ? [labels[from], labels[labels.length - 1]] : labels;
-    } else if (p.tcg && k) {
-      V = HomeCore.points(p, k, null, null, null, TODAY);
-      labels = ['il y a 30 j', 'aujourd’hui'];
+    if (p.real && Array.isArray(p.hist) && Array.isArray(days)) {
+      const pts = days.map((d, i) => ({ d: d, v: p.hist[i] })).filter(q => typeof q.v === 'number' && q.v > 0);
+      if (pts.length > 1) return { pts: pts, src: 'Tendance Cardmarket archivée chaque jour par Dropicards', since: pts[0].d };
     }
-    if (!V || V.length < 2) return { has: false };
-    const first = V[0], last = V[V.length - 1], d = last - first, pct = first > 0 ? d / first * 100 : 0;
-    return Object.assign(HomeCore.chart(V, 324, 96, 10, 88), {
-      has: true, color: x.col(d), start: labels[0] || '', end: labels[labels.length - 1] || '',
-      change: x.mask(this.signed(d)) + ' (' + this.chg(pct) + ')', periods: daily && V.length > 2,
-      source: daily ? (p.real ? 'Tendance Cardmarket archivée chaque jour par Dropicards' : 'Cote archivée chaque jour')
-        : 'Moyennes Cardmarket : 30 jours, 7 jours, veille, puis tendance du jour'
-    });
+    if (!p.tcg) return { pts: [] };
+    if (p.set) {
+      const h = this.fiHistDoc(p.set);
+      if (h.state === 'load') return { loading: true, pts: [] };
+      const arr = h.state === 'ok' && h.doc.c[p.id];
+      if (Array.isArray(arr)) {
+        const pts = h.doc.days.map((d, i) => ({ d: d, v: typeof arr[i] === 'number' ? arr[i] / 100 : null })).filter(q => q.v > 0);
+        // Cote du jour, si l'archive n'a pas encore le jour du catalogue chargé.
+        const cat = TCG.doc && String(TCG.doc.generated || '').slice(0, 10);
+        if (k && /^\d{4}-\d{2}-\d{2}$/.test(cat || '') && (!pts.length || pts[pts.length - 1].d < cat)) pts.push({ d: cat, v: k });
+        if (pts.length > 1) return { pts: pts, src: 'Cote Cardmarket archivée chaque jour par Dropicards', since: h.doc.days[0] };
+      }
+    }
+    // Repli : les moyennes Cardmarket (30 jours, 7 jours, veille) puis la cote du jour.
+    if (!k) return { pts: [] };
+    const V = HomeCore.points(p, k, null, null, null, TODAY);
+    return { pts: [30, 7, 1, 0].map((a, i) => ({ d: fiAgo(TODAY, a), v: V[i] })), src: 'Moyennes Cardmarket : 30 jours, 7 jours, veille, puis cote du jour' };
+  };
+  const fiDay = d => { const t = new Date(Date.parse(d)); return t.getUTCDate() + ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][t.getUTCMonth()]; };
+  const fiMoney = v => (v >= 100 ? Math.round(v).toLocaleString('fr-FR') : (Math.round(v * 100) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })) + ' €';
+  // Courbe lissée sans dépassement (monotone, Fritsch-Carlson) passant par chaque point.
+  const fiSmooth = P => {
+    const n = P.length;
+    if (n < 3) return 'M' + P.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L');
+    const dx = [], m = [], t = [];
+    for (let i = 0; i < n - 1; i++) { dx[i] = P[i + 1][0] - P[i][0] || 1e-6; m[i] = (P[i + 1][1] - P[i][1]) / dx[i]; }
+    t[0] = m[0]; t[n - 1] = m[n - 2];
+    for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : 3 * (dx[i - 1] + dx[i]) / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+    let d = 'M' + P[0][0].toFixed(1) + ' ' + P[0][1].toFixed(1);
+    for (let i = 0; i < n - 1; i++) {
+      const h = dx[i] / 3;
+      d += ' C' + (P[i][0] + h).toFixed(1) + ' ' + (P[i][1] + t[i] * h).toFixed(1) + ' ' + (P[i + 1][0] - h).toFixed(1) + ' ' + (P[i + 1][1] - t[i + 1] * h).toFixed(1) + ' ' + P[i + 1][0].toFixed(1) + ' ' + P[i + 1][1].toFixed(1);
+    }
+    return d;
+  };
+  // Historique façon photo : valeur, variation sur la période, axe des montants, dates, ligne du prix d'achat.
+  // f : coefficient de l'état des exemplaires possédés (la courbe suit alors la valeur affichée en haut de la fiche).
+  fiProto.fiHistory = function (p, x, k, per, f, buy) {
+    const H = this.fiPoints(p, x, k);
+    if (H.loading) return { has: true, loading: true, periods: [] };
+    if (H.pts.length < 2) return { has: false, periods: [] };
+    const P = FI_PER.find(q => q[0] === per) || FI_PER[FI_PER.length - 1];
+    const end = H.pts[H.pts.length - 1].d, cut = P[1] ? fiAgo(end, P[1]) : '';
+    let pts = H.pts.filter(q => !cut || q.d >= cut);
+    if (pts.length < 2) pts = H.pts.slice(-2);
+    const V = pts.map(q => q.v * f), first = V[0], last = V[V.length - 1], d = last - first, pct = first > 0 ? d / first * 100 : 0;
+    const showBuy = buy > 0, T = HomeCore.ticks(Math.min(...V, showBuy ? buy : Infinity), Math.max(...V, showBuy ? buy : -Infinity));
+    const lo = T[0], hi = T[T.length - 1], y = v => FI_H - (v - lo) / (hi - lo || 1) * FI_H;
+    const t0 = Date.parse(pts[0].d), t1 = Date.parse(end), X = d2 => (t1 > t0 ? (Date.parse(d2) - t0) / (t1 - t0) : 1) * FI_W;
+    const XY = pts.map((q, i) => [X(q.d), y(V[i])]), line = fiSmooth(XY), col = x.col(d);
+    const mid = pts[Math.floor((pts.length - 1) / 2)].d;
+    const xl = [[pts[0].d, 0], [mid, X(mid) / FI_W * 100], [end, 100]].filter((q, i, all) => i !== 1 || (q[1] > 22 && q[1] < 78 && q[0] !== all[0][0]));
+    const label = x.mask(this.signed(d)) + ' (' + this.chg(pct) + ') · ' + P[2];
+    return {
+      has: true, loading: false, ready: true, line: line, area: line + ' L' + FI_W + ' ' + FI_H + ' L0 ' + FI_H + ' Z', color: col,
+      value: x.mask(this.eur(last)), change: label, w: FI_W, h: FI_H,
+      dotX: (XY[XY.length - 1][0] / FI_W * 100).toFixed(2) + '%', dotY: (XY[XY.length - 1][1] / FI_H * 100).toFixed(2) + '%',
+      yl: T.map(t => ({ label: x.s.masked ? '•••' : fiMoney(t), top: (y(t) / FI_H * 100).toFixed(2) + '%' })),
+      grid: T.map(t => ({ d: 'M0 ' + y(t).toFixed(1) + ' H' + FI_W })),
+      xl: xl.map(([dd, left], i, all) => ({ label: fiDay(dd), left: left.toFixed(1) + '%', tx: i === 0 ? 'none' : i === all.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)' })),
+      hasBuy: showBuy, buyD: showBuy ? 'M0 ' + y(buy).toFixed(1) + ' H' + FI_W : '', buyTop: showBuy ? (y(buy) / FI_H * 100).toFixed(2) + '%' : '0%',
+      buyLabel: showBuy ? '🛒 ' + x.mask(this.eur(buy)) : '',
+      aria: 'Historique du prix, ' + P[2] + ' : de ' + x.mask(this.eur(first)) + ' à ' + x.mask(this.eur(last)),
+      source: H.src + (f !== 1 ? ' · selon l’état de ta carte' : ''),
+      since: H.since && P[0] !== '1S' && P[0] !== '1M' && (!cut || cut < H.since) ? 'Archive Dropicards depuis le ' + fiDay(H.since) + ' ' + H.since.slice(0, 4) + ' : les périodes plus longues se complètent jour après jour.' : '',
+      periods: FI_PER.map(([v, lab]) => Object.assign({ label: v, aria: lab, on: per === v, pick: () => this.setState({ fiPer: v }) }, this.chip(per === v)))
+    };
+  };
+
+  // ——— Prix gradés (2026-10-31, porteur : « les côtes avec les entreprises de gradation selon chaque état », d'après sa
+  // vidéo ; PCA, CCC et PSA uniquement) ———
+  // Aucune source ouverte des ventes de cartes gradées : chaque note est une estimation Dropicards, cote Cardmarket
+  // (Near Mint) × coefficient de la note, signalée « ≈ … · estimation ». Coefficients proposés, à valider par le porteur.
+  const FI_GRADERS = [
+    ['PCA', [['10', 2.6], ['9.5', 1.9], ['9', 1.45], ['8.5', 1.25], ['8', 1.12]]],
+    ['CCC', [['10', 2.8], ['9.5', 2.0], ['9', 1.5], ['8.5', 1.28], ['8', 1.15]]],
+    ['PSA', [['10', 3.5], ['9', 1.6], ['8.5', 1.35], ['8', 1.2]]]
+  ];
+  const FI_GRADE_COL = { '10': ['#F5C518', '#1A1300'], '9.5': ['#22C55E', '#04210F'], '9': ['#16A34A', '#FFFFFF'], '8.5': ['#3B82F6', '#FFFFFF'], '8': ['#2563EB', '#FFFFFF'] };
+  fiProto.fiGraded = function (p, x, k) {
+    if (p.type === 'sealed' || !(k > 0)) return { has: false, companies: [] };
+    return {
+      has: true,
+      companies: FI_GRADERS.map(([name, grades]) => ({
+        name: name, aria: 'Prix estimés ' + name,
+        grades: grades.map(([g, c]) => ({ g: g.replace('.', ','), value: '≈ ' + x.mask(this.eur(k * c)), bg: FI_GRADE_COL[g][0], fg: FI_GRADE_COL[g][1],
+          aria: name + ' ' + g.replace('.', ',') + ' : environ ' + x.mask(this.eur(k * c)) + ', estimation' }))
+      })),
+      note: '≈ valeur estimée (modèle Dropicards : cote Cardmarket Near Mint × coefficient de la note) — aucune vente réelle enregistrée pour ces notes. Sous 10 €, une gradation coûte souvent plus que la carte.'
+    };
   };
 
   fiProto.fiView = function (s) {
@@ -109,11 +199,10 @@
       tagBg: r[2] === 'demandé' ? 'rgba(245, 177, 76, 0.16)' : r[2] === 'vendu' ? 'rgba(61, 220, 132, 0.14)' : 'rgba(168, 182, 255, 0.14)',
       tagFg: r[2] === 'demandé' ? 'var(--pkm-orange)' : r[2] === 'vendu' ? 'var(--pkm-up)' : 'var(--pkm-link)'
     }));
-    const per = FI_PERIODS.some(q => q[0] === s.fiPer) ? s.fiPer : '30';
-    const hist = this.fiHistory(p, x, k, per);
     // Prix selon l'état : cote × coefficient d'estimation (value.js), exemplaire FR ou EN.
-    const conds = copyConds(p).map(([c, label]) => ({ label: label, pct: Math.round((VAL_COND[c] || 1) * 100) + ' %', value: k ? eur(k * (VAL_COND[c] || 1)) : '—' }));
-    const known = st.qty - st.unk, lat = known > 0 ? (x.val(p) || 0) * known - st.cost : 0;
+    // Bulle illustrée de chaque état à côté de son nom (2026-10-31, porteur) ; le scellé garde ses deux états en texte.
+    const conds = copyConds(p).map(([c, label]) => ({ label: label, pct: Math.round((VAL_COND[c] || 1) * 100) + ' %', value: k ? eur(k * (VAL_COND[c] || 1)) : '—',
+      hasIcon: !sealed, icon: sealed ? '' : 'img/conds/' + c.toLowerCase() + '.svg' }));
     const q = encodeURIComponent(p.name + (sealed || !p.numShort ? '' : ' ' + String(p.numShort).split('/')[0]));
     const last = (it.copies || [])[0];
     // Carte possédée : le prix affiché est celui de ses exemplaires, selon leur état (comme la pastille du classeur) ;
@@ -127,6 +216,9 @@
         cls: 'pkm-fi-etat' + (on ? ' pkm-fi-etat-on' : ''), aria: 'État de ta carte : ' + label + ', ' + value + '. Modifier l’état',
         toggle: () => this.setState({ fiEtat: on ? null : g.key }) };
     });
+    // Courbe : valeur de mes exemplaires (selon leur état) ; ligne du prix d'achat moyen s'il est connu.
+    const per = FI_PER.some(q => q[0] === s.fiPer) ? s.fiPer : 'MAX', known = st.qty - st.unk;
+    const hist = this.fiHistory(p, x, k, per, adj ? mine / k : 1, owned && known > 0 && st.cost > 0 ? st.cost / known : 0);
     const eg = groups.find(g => g.key === s.fiEtat);
     const etatPick = eg ? {
       open: true, title: 'Quel est l’état de ' + (eg.qty > 1 ? 'tes ' + eg.qty + ' exemplaires' : 'ta carte') + ' ?',
@@ -151,23 +243,14 @@
       etats: etats, hasEtats: etats.length > 0, etatPick: etatPick,
       addLabel: sealed ? 'Ajouter à mes produits scellés' : (owned ? 'Ajouter un exemplaire' : 'Ajouter à ma collection'),
       add: () => this.openSheet('buy', p.id), canAdd: !p.release,
-      sell: () => this.openSheet('sell', p.id),
       remove: () => { if (last && last.edit) last.edit(); }, canRemove: owned && !!(last && last.edit),
       rows: rows, hasRows: rows.length > 0, marketDate: day ? 'Mis à jour le ' + this.d2(day) : '',
       cmUrl: 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + q,
       ebayUrl: it.ebayUrl || 'https://www.ebay.fr/sch/i.html?_nkw=' + q + '&LH_Sold=1&LH_Complete=1',
-      hist: hist, histValue: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : '—'),
-      periods: FI_PERIODS.map(([v, label]) => Object.assign({ label: label, on: per === v, pick: () => this.setState({ fiPer: v }) }, this.chip(per === v))),
-      invested: owned ? (known > 0 ? eur(st.cost) : 'Prix d’achat à compléter') : '',
-      investSub: owned ? (st.qty > 1 ? st.qty + ' exemplaires' : '1 exemplaire') + (known > 0 ? ' · coût moyen ' + eur(st.cost / known) : '') : '',
-      latent: owned && known > 0 ? x.mask(this.signed(lat)) + (st.cost > 0 ? ' (' + this.signedPct(lat / st.cost * 100) + ')' : '') : '',
-      latentColor: x.col(lat), hasLatent: owned && known > 0,
+      hist: hist,
       conds: conds, condOpen: !!s.fiCond, toggleCond: () => this.setState({ fiCond: !s.fiCond }),
       condNote: 'Estimation Dropicards : cote × coefficient de l’état (les cotes Cardmarket sont celles d’un exemplaire ' + (sealed ? 'scellé d’origine' : 'Near Mint') + ').',
-      copies: it.copies || [], hasCopies: !!(it.copies && it.copies.length), copiesOpen: !!s.fiCopies,
-      copiesLabel: 'Mes exemplaires', copiesCount: owned ? (st.qty > 1 ? st.qty + ' exemplaires' : '1 exemplaire') : '',
-      toggleCopies: () => this.setState({ fiCopies: !s.fiCopies }),
-      full: () => { this.setState({ fiId: null }); this.openTcg(p.id); }
+      graded: this.fiGraded(p, x, k)
     };
   };
 

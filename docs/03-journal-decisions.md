@@ -6,6 +6,23 @@
 
 ---
 
+## 2026-10-31 (suite 5) — Fiche d'une carte : historique du prix et prix gradés
+
+- **Demandes du porteur** (avec une photo d'un « Historique du prix » et une vidéo de « Prix gradés ») :
+  - solde des PA en blanc comme les PK ;
+  - fiche d'une carte du classeur : retirer « Investi », « Mes exemplaires », « Marquer comme vendu » et « Voir la fiche complète » ; bulles d'état en couleur dans « Prix par état » ;
+  - deux rubriques : la variation du prix de la carte depuis sa sortie, et la cote chez les entreprises de gradation selon chaque note, **PCA, CCC et PSA uniquement**.
+- **Fait** (cache v97) :
+  - « PA » de l'en-tête en gris clair comme « PK » (le nombre était déjà blanc) ;
+  - fiche : les quatre éléments retirés ; « Prix par état » montre la bulle illustrée de chaque état (Mint à Poor) ;
+  - **archive quotidienne de la cote** : `tools/tcgdex/history.py` garde chaque jour la cote de chaque carte (celle de l'app : médiane Cardmarket), une fiche par extension dans `web/data/hist/` ; reprise de l'historique git depuis le **3 octobre 2026** (29 jours, 20 652 cartes, 2,7 Mo) ; le workflow « Catalogue TCGdex » ajoute le jour publié ;
+  - **« Historique du prix »** façon photo : valeur, variation sur la période (« −96,05 € (−23,0 %) · max »), axe des montants, dates, courbe lissée, point du jour, ligne pointillée orange du prix d'achat (« 🛒 375,00 € », seulement si un prix payé est connu), périodes 1S, 1M, 3M, 6M, 1A, MAX (MAX par défaut) ; la courbe suit l'état de la carte possédée ; repli sur les moyennes Cardmarket si l'archive manque ;
+  - **« Prix gradés »** façon vidéo, cartes seulement : PCA et CCC (10, 9,5, 9, 8,5, 8), PSA (10, 9, 8,5, 8), pastille de couleur par note, « ≈ valeur · estimation », noms en texte sans logo.
+- **Limites (aucune source ouverte)** :
+  - pas d'historique avant le 3 octobre 2026 : « depuis sa sortie » se construit jour après jour (3M, 6M, 1A égalent MAX pour l'instant) ;
+  - pas de ventes réelles de cartes gradées : chaque note est une **estimation** (cote Near Mint × coefficient), coefficients **proposés, à valider par le porteur** : PCA 2,6 / 1,9 / 1,45 / 1,25 / 1,12 ; CCC 2,8 / 2,0 / 1,5 / 1,28 / 1,15 ; PSA 3,5 / 1,6 / 1,35 / 1,2 ;
+  - pas de points de ventes réelles sur la courbe ni de population PSA.
+
 ## 2026-10-31 (suite 4) — Didacticiel sans « Nouveau », Dracaufeu plus grand, « Voir ses cartes » : Cartes ou Items
 
 - **Demandes du porteur** :

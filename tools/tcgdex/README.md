@@ -89,6 +89,16 @@ Les cartes que TCGdex ne relie pas à Cardmarket (tout le 30ᵉ Anniversaire et 
 - Reconnaissance : `tools/cardmarket/recon_singles.py` (workflow manuel « Reconnaissance Cardmarket (cartes) ») ; le 2026-10-18, l'extension 6601 contient les 191 cartes du 30ᵉ (Dracaufeu 4/102 : tendance 173,99 €, moyenne 30 jours 172,61 €).
 - Tests : `test_cmfiles.py`.
 
+## Archive quotidienne de la cote (2026-10-31)
+
+Demande du porteur : « une variation de prix de la carte depuis sa sortie ». Aucune source ouverte ne donne cet historique : `history.py` garde chaque jour la cote de chaque carte, celle de l'app (médiane de la tendance et des moyennes 30 et 7 jours Cardmarket ; une cote recopiée sur plusieurs cartes d'une extension ne compte pas), en centimes.
+
+- Sortie : `web/data/hist/<extension>.json` (`{"days": [...], "c": {"<id>": [centimes | null, ...]}}`, la démo ne charge que l'extension de la carte ouverte) et `web/data/hist/index.json` (jours, nombre de cartes par extension). Une carte qui n'a jamais eu de cote n'est pas gardée.
+- `python3 tools/tcgdex/history.py --backfill` : reprend toutes les versions de `web/data/cards.json` dans l'historique git (la dernière de chaque jour). Lancé le 2026-10-31 : 29 jours (3 → 31 octobre 2026), 193 extensions, 20 652 cartes, 2,7 Mo.
+- `python3 tools/tcgdex/history.py` : ajoute (ou remplace) le jour du catalogue publié ; étape « Archiver la cote du jour » du workflow, après le contrôle des données, publiée avec le catalogue.
+- Taille : environ 100 Ko de plus par jour (≈ 35 Mo par an), à surveiller.
+- Tests : `test_history.py`.
+
 ## Accès réseau
 
 Le script appelle `api.tcgdex.net` et `assets.tcgdex.net`. Ces domaines sont bloqués dans l'environnement Claude Code actuel : c'est pourquoi la synchronisation passe par GitHub Actions. Pour lancer le script ailleurs, il suffit de Python 3.9 ou plus.

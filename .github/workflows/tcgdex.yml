@@ -33,6 +33,8 @@ on:
       - tools/tcgdex/test_split_catalog.py
       - tools/tcgdex/cmfiles.py
       - tools/tcgdex/test_cmfiles.py
+      - tools/tcgdex/history.py
+      - tools/tcgdex/test_history.py
 
 permissions:
   contents: write
@@ -127,10 +129,17 @@ jobs:
         continue-on-error: true
         run: python3 tools/check_data.py cards --revert ${{ inputs.force && '--force' || '' }}
 
+      # Archive quotidienne de la cote de chaque carte (2026-10-31, historique du prix de la fiche) : le jour du
+      # catalogue publié (après le contrôle, qui peut avoir gardé celui de la veille) est ajouté à web/data/hist/.
+      - name: Archiver la cote du jour
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: python3 tools/tcgdex/history.py
+
       - name: Publier sur la branche
         if: ${{ !cancelled() }}
         run: |
-          tools/publish_data.sh cards "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))" web/data/cards.json web/data/cards-base.json web/data/cards-prices.json web/data/status.json tools/tcgdex/ptcg_images.json
+          tools/publish_data.sh cards "Met à jour le catalogue TCGdex ($(date -u +%Y-%m-%d))" web/data/cards.json web/data/cards-base.json web/data/cards-prices.json web/data/status.json web/data/hist tools/tcgdex/ptcg_images.json
 
       - name: Échec signalé (échecs restants, catalogue refusé ou anomalie)
         if: ${{ !cancelled() && (steps.failures.outcome == 'failure' || steps.build.outcome == 'failure' || steps.check.outcome == 'failure') }}

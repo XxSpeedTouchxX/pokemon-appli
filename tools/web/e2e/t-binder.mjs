@@ -88,11 +88,14 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   const FI = 'section.pkm-fi[role="dialog"]';
   ok('un appui ouvre la fiche en panneau : ' + await page.locator(FI).getAttribute('aria-label'), (await page.locator(FI).getAttribute('aria-label')) === 'Pikachu ex' && (await page.locator(SEC).count()) === 1);
   const fiText = (await page.locator(FI).innerText()).replace(/[\u202f\u00a0]/g, ' ');
-  ok('fiche : cote, ajout, vendu, retirer, prix du marché, Cardmarket, eBay, historique, investi', /99,00 €/.test(fiText) && /Ajouter un exemplaire/.test(fiText) && /Marquer comme vendu/.test(fiText)
-    && /Retirer de ma collection/.test(fiText) && /Prix du marché/.test(fiText) && /Tendance/.test(fiText) && /Acheter sur Cardmarket/.test(fiText) && /eBay/.test(fiText) && /Historique du prix/.test(fiText) && /Investi/.test(fiText));
+  ok('fiche : cote, ajout, retirer, prix du marché, Cardmarket, eBay, historique, prix gradés', /99,00 €/.test(fiText) && /Ajouter un exemplaire/.test(fiText)
+    && /Retirer de ma collection/.test(fiText) && /Prix du marché/.test(fiText) && /Tendance/.test(fiText) && /Acheter sur Cardmarket/.test(fiText) && /eBay/.test(fiText) && /Historique du prix/.test(fiText) && /Prix gradés/.test(fiText));
+  // Retirés le 2026-10-31 (porteur) : « Investi », « Mes exemplaires », « Marquer comme vendu », « Voir la fiche complète ».
+  ok('fiche : sans Investi, Mes exemplaires, Marquer comme vendu, Voir la fiche complète', !/Investi|Mes exemplaires|Marquer comme vendu|Voir la fiche complète/.test(fiText));
   ok('fiche : pas de TCGplayer', !/TCGplayer/.test(fiText));
   await page.locator(FI + ' button[aria-expanded]', { hasText: 'Prix par état' }).click(); await page.waitForTimeout(300);
   ok('prix par état : Near Mint, Excellent, Played', /Near Mint[\s\S]*100 %[\s\S]*Excellent[\s\S]*85 %[\s\S]*Played[\s\S]*55 %/.test(await page.locator(FI).innerText()));
+  ok('prix par état : bulle de couleur de chaque état', (await page.locator(FI + ' section[aria-label="Prix par état"] img.pkm-fi-cico').evaluateAll(im => im.map(i => i.getAttribute('src').split('/').pop()))).join(',') === 'mt.svg,nm.svg,ex.svg,gd.svg,pl.svg,po.svg');
   await page.locator(FI).evaluate(e => e.scrollTo(0, 0)); await page.waitForTimeout(200);
   await page.screenshot({ path: shot('binder-fiche.png') });
   await page.locator(FI + ' button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
