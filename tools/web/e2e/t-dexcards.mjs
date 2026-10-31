@@ -71,6 +71,9 @@ await page.click('.pkm-dex-k-a'); await page.waitForTimeout(900);
 // Pokédex) : pas besoin de remonter pour la voir. Elle dure 7,2 s.
 const fxPos = await page.evaluate(() => { const el = document.querySelector('.pkm-evo-fx .pkm-evo-to'); if (!el) return null; const r = el.getBoundingClientRect(); return Math.round(r.top + r.height / 2 - innerHeight / 2); });
 ok('évolution centrée à l’écran (écart ' + fxPos + ' px)', fxPos !== null && Math.abs(fxPos) < 120);
+// Texte « Félicitations… a évolué en… » au-dessus de la barre du bas (2026-11-01, porteur : il passait sous le scan).
+const fxTxt = await page.evaluate(() => { const t = document.querySelector('.pkm-evo-fx .pkm-evo-text'), n = document.querySelector('nav[aria-label="Navigation principale"]'); return t && n ? [Math.round(t.getBoundingClientRect().bottom), Math.round(n.getBoundingClientRect().top)] : null; });
+ok('texte de l’évolution au-dessus de la barre du bas (' + (fxTxt || []).join(' < ') + ')', fxTxt && fxTxt[0] <= fxTxt[1] - 8);
 await page.waitForTimeout(6800);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { pa: d.pa, own: d.pkOwn, buddy: d.buddy }; });
 ok('Raichu débloqué au bouton vert (' + JSON.stringify(st) + ')', st.pa === 100 && st.own.indexOf(26) >= 0 && st.buddy === 26);

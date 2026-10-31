@@ -41,6 +41,9 @@ await pill.click(); await page.waitForTimeout(1200);
 const paSheet = page.locator('section[aria-label="Mes PA"]');
 const paTxt = (await paSheet.innerText().catch(() => '')).replace(/\s+/g, ' ');
 ok('sans PA à récupérer : le solde ouvre « Mes PA » (' + paTxt.slice(0, 60) + '…)', !(await sheet.isVisible().catch(() => false)) && /C’est quoi/.test(paTxt) && /Comment les gagner/.test(paTxt) && /À quoi servent-ils/.test(paTxt));
+// Solde de « Mes PA » en blanc (2026-11-01, porteur : « il est écrit encore en violet clair »).
+const balCol = await paSheet.locator('.pkm-pa-sheet-bal b').evaluate(b => getComputedStyle(b).color).catch(() => '');
+ok('Mes PA : solde en blanc (' + balCol + ')', balCol === 'rgb(255, 255, 255)');
 await page.locator('section[aria-label="Mes PA"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
 const c = await day('2026-11-03'); ok('3e jour : +20 PA (' + c.pa + ')', c.pa === 45 && c.streak === 3);
 // Un jour sans récupérer (le 4) : la série reprend à +15 PA le 5.

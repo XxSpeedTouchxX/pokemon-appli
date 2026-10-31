@@ -684,4 +684,6 @@ Le script `tools/web/build.mjs` :
   - rendu hors ligne `sfxRender` (tests, échantillons) ;
   - coupé avec `pkm-tuto-sound = off`.
 - Tests : `e2e/t-dexsil.mjs`, `e2e/t-sfx.mjs`.
+- **Évolution centrée** (`pa.js`, `paFxCenter`, 2026-11-01) : le calque `.pkm-evo-fx` est centré entre le haut du conteneur qui défile (`main`, sous l'en-tête fixe) et le haut de la barre du bas (`nav[aria-label="Navigation principale"]`) ; plus haut que la place libre, son bas (le texte) reste au-dessus de la barre. Test : `t-dexcards`.
+- **« Mes PA »** : solde `.pkm-pa-sheet-bal b` en blanc (`rules.css`). Test : `t-pa`.
 

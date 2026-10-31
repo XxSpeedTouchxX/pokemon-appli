@@ -210,6 +210,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - évolution : 5 sons et 9 musiques originaux (`tools/web/sfx.js`), dont 5 variantes de « Suspense et lumière » (cordes, piano, chœur, orchestre, nuit étoilée) demandées par le porteur ; **choix du porteur : la musique « Suspense et lumière » seule** (les autres pour essai : ?sonevo=, ?musevo=) ;
   - PA du jour : 5 bruitages proposés ; **choix du porteur : « Gouttes d'aura »** (les autres pour essai : ?sonpa=1 à 5).
 - **Grader une carte du classeur (2026-11-01, nuit, porteur) :** bouton « Grader ma carte » dans la fiche (entreprise, note, un seul exemplaire gradé, l'autre reste tel quel) ; logo de l'entreprise et note sur le visuel de la fiche et sur la carte du classeur ; changer la note ou « Retirer la note » depuis « État de ma carte » ; valeur selon la note (coefficients **validés par le porteur le 2026-11-01**).
+- **Évolution et Mes PA (2026-11-01, nuit, porteur) :** animation d'évolution centrée dans la partie visible, texte « Félicitations… » toujours au-dessus de la barre du bas ; solde de « Mes PA » en blanc.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

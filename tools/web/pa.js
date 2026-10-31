@@ -136,6 +136,21 @@
   // Évolution et méga-évolution : depuis le 2026-10-28, chaque Pokémon se débloque dans le Pokédex (dex.js, dexUnlock),
   // avec la même animation d'évolution (paFx) quand sa forme précédente est déjà à toi.
   let paFxTimer = null;
+  // Centre le calque d'évolution dans la partie visible de l'écran, au-dessus de la barre du bas (2026-11-01, porteur :
+  // « l'écriture "Félicitations… a évolué en…" est cachée par la barre de l'appli, au niveau du scan »). Avant, il était
+  // centré sur tout l'écran (scrollIntoView) : sur un téléphone de 667 à 740 px de haut, le texte passait sous la barre.
+  // Si le calque est plus haut que la place libre, son bas (le texte) reste au-dessus de la barre.
+  const paFxCenter = el => {
+    let box = el.parentElement;
+    while (box && box !== document.body) { const o = getComputedStyle(box).overflowY; if ((o === 'auto' || o === 'scroll') && box.scrollHeight > box.clientHeight) break; box = box.parentElement; }
+    if (!box || box === document.body) box = document.scrollingElement || document.documentElement;
+    const nav = document.querySelector('nav[aria-label="Navigation principale"]'), vh = window.innerHeight;
+    const navTop = nav && nav.getBoundingClientRect().height ? nav.getBoundingClientRect().top : vh;
+    const boxTop = box === document.scrollingElement || box === document.documentElement ? 0 : Math.max(0, box.getBoundingClientRect().top);
+    const top = boxTop + 8, bottom = Math.min(vh, navTop) - 8, r = el.getBoundingClientRect(), h = r.height;
+    const want = h <= bottom - top ? top + (bottom - top - h) / 2 : bottom - h;
+    box.scrollBy({ top: r.top - want, behavior: 'smooth' });
+  };
   const PA_FX_MS = 7200;
   paProto.paFxRun = function (from, to, done) {
     if (paStill()) { done(); return; }
@@ -148,7 +163,7 @@
     const focus = () => {
       const el = document.querySelector('.pkm-evo-fx');
       if (!el && ++tries < 30) { requestAnimationFrame(focus); return; }
-      if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (el) paFxCenter(el);
     };
     requestAnimationFrame(focus);
     // 7,2 s (2026-10-31, porteur : « au moins 3 s de plus, et 2 s de plus pour voir la nouvelle évolution ») : la

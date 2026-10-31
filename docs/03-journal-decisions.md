@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-01 (suite 6) — Évolution centrée au-dessus de la barre du bas, solde de « Mes PA » en blanc
+
+- **Demandes du porteur** :
+  - pendant l'évolution, « Félicitations… a évolué en… » est caché par la barre du bas de l'app (au niveau du scan) : bien centrer l'animation et descendre l'écran pour voir tout le texte ;
+  - le solde de PA (fenêtre « Mes PA », ouverte en touchant le solde) est encore écrit en violet clair : le mettre en blanc.
+- **Fait** (cache v110) :
+  - **évolution** : le calque était centré sur tout l'écran (`scrollIntoView`), alors que l'en-tête reste fixe en haut et que la barre du bas couvre ~80 px. Il est maintenant centré dans la **partie visible**, entre l'en-tête et la barre (`paFxCenter`, `pa.js`) ; si la place manque (petit téléphone), c'est le bas du calque, donc le texte, qui reste au-dessus de la barre. Mesures : 390 × 844, texte à 688 px pour une barre à 762 ; 360 × 740, 630 pour 658 (avant : 677, sous la barre) ; 375 × 667, 557 pour 585 (avant : 641, sous la barre) ;
+  - **« Mes PA »** : « Ton solde · X PA » en blanc (`rules.css`), comme les soldes de l'en-tête.
+- **Tests** : `t-dexcards` (texte de l'évolution au-dessus de la barre), `t-pa` (solde en blanc).
+
 ## 2026-11-01 (suite 5) — Grader une carte déjà dans le classeur
 
 - **Demande du porteur** : « lorsque l'on sélectionne sa carte dans son classeur, rajoute le bouton de gradation pour grader ta carte […] et je veux qu'il y ait le logo de l'entreprise de gradation sur la carte avec la note associée si notre carte est gradée ».
