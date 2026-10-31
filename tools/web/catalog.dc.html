@@ -133,7 +133,7 @@
 <div class="{{ ca.cls }}">
 <button type="button" onClick="{{ ca.open }}" aria-label="{{ ca.label }}" class="pkm-sv-open">
 <span class="pkm-sv-pic">
-<img src="{{ ca.img }}" srcset="{{ ca.srcset }}" sizes="(max-width: 520px) 30vw, 118px" alt="" loading="lazy" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
+<img src="{{ ca.img }}" srcset="{{ ca.srcset }}" sizes="{{ ca.sizes }}" alt="" loading="{{ ca.loading }}" fetchpriority="{{ ca.prio }}" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
 <span class="pkm-sv-num">{{ ca.num }}</span>
 <sc-if value="{{ ca.owned }}" hint-placeholder-val="{{ false }}"><span class="pkm-sv-qty">{{ ca.qty }}</span></sc-if>
 </span>

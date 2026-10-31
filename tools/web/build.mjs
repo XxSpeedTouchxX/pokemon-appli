@@ -1040,6 +1040,7 @@ const index = `<!doctype html>
 <meta name="apple-mobile-web-app-title" content="Dropicards">
 <title>Dropicards</title>
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://assets.tcgdex.net">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">

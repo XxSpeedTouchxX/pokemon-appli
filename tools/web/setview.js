@@ -21,6 +21,7 @@
   ];
   const svRar = name => { const m = SV_RAR.find(x => x[0].test(name || '')); return { glyph: m[1], cls: 'pkm-rar pkm-rar-' + m[2] }; };
   const SV_SIZES = [['s', 'Petit', 4], ['m', 'Moyen', 3], ['l', 'Grand', 2]];
+  const SV_EAGER = 12;
   const SV_SORTS = [['num', 'numéro'], ['cote', 'cote'], ['name', 'nom']];
   const SV_TABS = [['all', 'Toutes'], ['own', 'Possédées'], ['miss', 'Manquantes'], ['dup', 'Doublons']];
   const SV_UNDO_MS = 6000;
@@ -59,6 +60,7 @@
     const here = s.setKey === s.setId, q = here ? String(s.setQ || '') : '', rarOn = here && Array.isArray(s.setRar) ? s.setRar : [];
     const tab = SV_TABS.some(t => t[0] === s.setFilter) ? s.setFilter : 'all';
     const size = SV_SIZES.find(z => z[0] === s.setSize) || SV_SIZES[1];
+    const big = size[0] === 'l';
     const sort = SV_SORTS.find(z => z[0] === s.setSort) || (top ? SV_SORTS[1] : SV_SORTS[0]);
     const setHere = patch => this.setState(Object.assign({ setKey: s.setId }, here ? {} : { setQ: '', setRar: [] }, patch));
     const byTab = { all: all, own: mine, miss: all.filter(p => qty(p) === 0), dup: dups }[tab];
@@ -97,10 +99,14 @@
       count: plural(shown.length, 'carte', 'cartes') + ' · par ' + sort[1],
       empty: shown.length === 0,
       emptyText: words.length || rarOn.length ? 'Aucune carte ne correspond.' : tab === 'own' ? 'Aucune carte de cette extension dans ta collection.' : tab === 'dup' ? 'Aucun doublon dans cette extension.' : tab === 'miss' ? 'Tu as toutes les cartes de cette extension !' : 'Aucune carte.',
-      cards: shown.map(p => {
+      cards: shown.map((p, i) => {
         const k = this.cote(p), n = qty(p), setName = top ? (setOf(p.set) || [])[0] || '' : '';
         return {
-          img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name,
+          // Visuels affichés d'un coup (2026-11-01, porteur : 5,6 s d'attente) : en Petit et Moyen, la vignette TCGdex
+          // (low.webp, 245 px, ~15 Ko) au lieu du grand visuel (600 px, ~100 Ko) que les écrans très fins choisissaient ;
+          // le grand visuel reste pour « Grand » (2 par ligne), la fiche et le zoom. Les 12 premières cartes passent en tête.
+          img: p.img, srcset: big ? p.srcset : '', sizes: big ? '(max-width: 520px) 46vw, 180px' : '', loading: i < SV_EAGER ? 'eager' : 'lazy', prio: i < SV_EAGER ? 'high' : 'auto',
+          fallback: p.fallback || '', name: p.name,
           num: top ? '#' + (rank.get(p.id) + 1) : p.reprintOf ? p.numShort : p.numShort.split('/')[0], owned: n > 0, many: n > 1, qty: '×' + n,
           cls: 'pkm-sv-card' + (n > 0 ? '' : ' pkm-sv-miss'), flag: this.flag(p.lang === 'EN' ? 'EN' : 'FR'),
           cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), sub: setName,

@@ -42,8 +42,17 @@ await step('grille', async () => {
   const tiles = await page.locator('main button[aria-label*=", n° "]').count();
   ok('grille : ' + tiles + ' cartes', tiles > 200);
   await page.waitForTimeout(600); await shot('v6-grille');
-  const srcs = await page.evaluate(() => [...document.querySelectorAll('main img[srcset]')].slice(0, 3).map(i => i.currentSrc));
-  ok('grille en écran 3x → ' + srcs.map(u => u.split('/').slice(-2).join('/')).join(', '), srcs.length && srcs.every(u => /high\.webp$/.test(u)));
+  // Vignettes (low.webp, ~15 Ko) en Petit et Moyen, même sur un écran 3x : les visuels s'affichent d'un coup
+  // (2026-11-01, porteur : 5,6 s d'attente avec le grand visuel) ; le grand visuel (high.webp) en « Grand ».
+  const gridSrcs = () => page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img')].slice(0, 3).map(i => i.currentSrc));
+  const srcs = await gridSrcs();
+  ok('grille Moyen en écran 3x → ' + srcs.map(u => u.split('/').slice(-2).join('/')).join(', '), srcs.length === 3 && srcs.every(u => /low\.webp$/.test(u)));
+  const eager = await page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img')].map(i => i.loading + ':' + i.getAttribute('fetchpriority')));
+  ok('12 premières cartes chargées en tête, les autres au défilement', eager.slice(0, 12).every(x => x === 'eager:high') && eager.slice(12).every(x => x === 'lazy:auto'));
+  await page.click('button:has-text("Grand")'); await page.waitForTimeout(600);
+  const big = await gridSrcs();
+  ok('grille Grand → ' + big.map(u => u.split('/').slice(-2).join('/')).join(', '), big.length === 3 && big.every(u => /high\.webp$/.test(u)));
+  await page.click('button:has-text("Moyen")'); await page.waitForTimeout(300);
   // Tri par cote (2026-10-17 : bouton « Tri », qui passe de numéro à cote, puis nom).
   await page.click('button:has-text("Tri : numéro")');
   const first = await page.locator('main button[aria-label*=", n° "]').first().getAttribute('aria-label');
