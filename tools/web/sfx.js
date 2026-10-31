@@ -8,8 +8,9 @@
   // - Évolution : 5 sons et 4 musiques au choix, calés sur l'animation de 7,2 s (pkmEvoFrom et pkmEvoTo, games.css) :
   //   le Pokémon blanchit (0,72 s), les deux formes alternent de plus en plus vite (SFX_FLASH, 1,37 à 4,14 s), la
   //   nouvelle forme grandit (4,18 s) puis prend ses couleurs (4,8 s), et rebondit (5,3 à 6,2 s).
-  //   Choix par défaut proposés (SFX_EVO_DEFAULT, SFX_MUSIC_DEFAULT), à confirmer par le porteur ; ?sonevo=… et
-  //   ?musevo=… (numéro ou identifiant, 0 = aucun) pour en essayer d'autres, gardés sur l'appareil.
+  //   Choix du porteur (2026-11-01) : la musique « Suspense et lumière » seule, sans son par-dessus
+  //   (SFX_EVO_DEFAULT, SFX_MUSIC_DEFAULT). Les autres restent pour des essais : ?sonevo=… et ?musevo=… (numéro ou
+  //   identifiant, 0 = aucun), le temps de la page seulement.
   // - Son coupé avec celui du didacticiel (clé pkm-tuto-sound), et jamais avec « mouvements réduits » (pas d'animation).
   // Ce module partage la portée des autres : ses noms commencent par SFX_ ou sfx.
   const SFX_FLASH = [1.368, 1.761, 2.068, 2.307, 2.493, 2.639, 2.754, 2.869, 2.984, 3.1, 3.215, 3.33, 3.445, 3.56, 3.676, 3.791, 3.906, 4.021, 4.136];
@@ -350,21 +351,21 @@
         sfxSparkle(ac, out, R + 0.3, t0 + 6.9, 10, 0.03, 3200);
       } }
   ];
-  // Choix par défaut proposés au porteur (à confirmer) : « Cristal magique » et « Suspense et lumière ».
-  const SFX_EVO_DEFAULT = 'cristal', SFX_MUSIC_DEFAULT = 'suspense';
+  // Choix du porteur (2026-11-01, « c'est ok pour 0-reference-suspense-et-lumiere ») : la musique « Suspense et
+  // lumière » seule, sans son d'évolution par-dessus.
+  const SFX_EVO_DEFAULT = null, SFX_MUSIC_DEFAULT = 'suspense';
   // Volume de chaque son, réglé sur son rendu : sons autour de −24 dBFS en moyenne, musiques autour de −27 dBFS (un peu
   // en dessous du son), crêtes sous −3 dBFS.
   const SFX_GAIN = { coin: 1, cristal: 1.23, energie: 1.07, retro: 3.2, cosmique: 1.03, harpe: 1.7, fanfare: 0.82, suspense: 1.23, chiptune: 1.84, boite: 1.82,
     cordes: 1.4, piano: 1.24, choeur: 2.75, orchestre: 0.87, nuit: 1.55 };
   const SFX_MUSIC_LEVEL = 0.75;
 
-  // Choix en cours : ?sonevo= / ?musevo= (numéro dans la liste, identifiant, ou 0 pour aucun), gardé sur l'appareil.
+  // Choix en cours : celui du porteur ; ?sonevo= / ?musevo= (numéro dans la liste, identifiant, ou 0 pour aucun) pour un
+  // essai, le temps de la page. Les essais gardés sur l'appareil avant le choix du porteur sont effacés.
+  try { localStorage.removeItem('pkm-evo-sfx'); localStorage.removeItem('pkm-evo-music'); } catch (e) { /* stockage indisponible */ }
   const sfxPick = (param, key, list, def) => {
     let v = '';
-    try {
-      const m = new RegExp('[?&]' + param + '=([\\w-]+)').exec(location.search);
-      if (m) { v = m[1]; localStorage.setItem(key, v); } else v = localStorage.getItem(key) || '';
-    } catch (e) { v = ''; }
+    try { v = (new RegExp('[?&]' + param + '=([\\w-]+)').exec(location.search) || [])[1] || ''; } catch (e) { v = ''; }
     if (v === '0' || v === 'aucun') return null;
     if (/^\d+$/.test(v) && list[Number(v) - 1]) return list[Number(v) - 1];
     return list.find(x => x.id === v) || list.find(x => x.id === def) || null;

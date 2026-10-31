@@ -673,7 +673,8 @@ Le script `tools/web/build.mjs` :
   - timbres : `sfxPizz`, `sfxStrings`, `sfxPiano`, `sfxChoir`, `sfxBrass`, `sfxPad`, `sfxBell`, `sfxCymbal` ;
   - volumes `SFX_GAIN` ;
   - instants de l'animation `SFX_FLASH`, `SFX_REVEAL` ;
-  - essai : `?sonevo=` et `?musevo=` (numéro, identifiant ou 0), gardés sur l'appareil (`pkm-evo-sfx`, `pkm-evo-music`) ;
+  - choix du porteur : « Suspense et lumière » seule (`SFX_EVO_DEFAULT = null`, `SFX_MUSIC_DEFAULT = 'suspense'`) ;
+  - essai : `?sonevo=` et `?musevo=` (numéro, identifiant ou 0), le temps de la page seulement (anciennes clés `pkm-evo-sfx`, `pkm-evo-music` effacées) ;
   - rendu hors ligne `sfxRender` (tests, échantillons) ;
   - coupé avec `pkm-tuto-sound = off`.
 - Tests : `e2e/t-dexsil.mjs`, `e2e/t-sfx.mjs`.

@@ -33,7 +33,8 @@
 - **Tests** : `e2e/t-dexsil.mjs`, `e2e/t-sfx.mjs` (nouveaux) ; `t-dexcards`, `t-fihist` adaptés.
 - **Puis (porteur)** :
   - **son de la pièce validé** ;
-  - « propose-moi des sons dans le même thème que musique 2 Suspense et lumière » : **5 variantes** (musiques 5 à 9, cache v105), même déroulé (mystère en la mineur pendant les éclairs, éclaircie en la majeur à l'apparition), timbres différents : cordes, piano, chœur céleste, orchestre, nuit étoilée (synthétiseur). Volumes égalisés (−27 dBFS de moyenne), échantillons MP3 envoyés ; **choix attendu du porteur** (?musevo=5 à 9 pour essayer sur le téléphone).
+  - « propose-moi des sons dans le même thème que musique 2 Suspense et lumière » : **5 variantes** (musiques 5 à 9, cache v105), même déroulé (mystère en la mineur pendant les éclairs, éclaircie en la majeur à l'apparition), timbres différents : cordes, piano, chœur céleste, orchestre, nuit étoilée (synthétiseur). Volumes égalisés (−27 dBFS de moyenne), échantillons MP3 envoyés.
+- **Décision du porteur** (cache v106) : à l'évolution, **la musique « Suspense et lumière » seule** (« c'est ok pour 0-reference-suspense-et-lumiere »), sans son par-dessus (`SFX_EVO_DEFAULT = null`). Les autres sons et musiques restent dans le code, pour essai seulement (?sonevo=, ?musevo=, le temps de la page ; les essais gardés sur l'appareil sont effacés).
 
 ## 2026-11-01 (suite 3) — Prix gradés sous 5 €, « Les plus chères » revue, visuels, extensions plus rapides, cartes gradées
 
