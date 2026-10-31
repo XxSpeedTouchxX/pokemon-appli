@@ -156,9 +156,12 @@
     'bw3-101', 'dp4-106', 'xy5-106', 'neo4-106', 'ex10-108', 'swsh8-114', 'swsh9-123', 'swsh1-138', 'ecard2-149', 'sv02-203'];
   const reprintOf = id => { const m = /^30th-c-(\d{3})$/.exec(id); return m ? CLASSIC_30[Number(m[1]) - 1] || null : null; };
   function buildItem(id, r, F, set) {
-    const orig = reprintOf(id), ox = orig && !r[F.img] && TCG.byId ? TCG.byId[orig] : null;
+    // Collection Classique (30ᵉ) : la carte d'origine donne visuel, numéro et rareté, même si le catalogue a trouvé un
+    // visuel de réimpression (imgFrom, 2026-11-01) ; un vrai scan TCGdex de la réimpression passe avant.
+    const fromCat = !!(TCG.doc && TCG.doc.imgFrom && TCG.doc.imgFrom[id]);
+    const orig = reprintOf(id), ox = orig && (!r[F.img] || fromCat) && TCG.byId ? TCG.byId[orig] : null;
     const ov = ox ? { r: ox.r, set: setOf(ox.r[TCG.F.set]) } : null;
-    const v = visual(r[F.img] || (ov ? ov.r[TCG.F.img] : '') || ''), num = String(r[F.num] || ''), official = set[4] || '';
+    const v = visual((ov ? ov.r[TCG.F.img] : '') || r[F.img] || ''), num = String(r[F.num] || ''), official = set[4] || '';
     const rarity = ov && (!r[F.rarity] || r[F.rarity] === 'Sans Rareté') ? 'Collection Classique' : r[F.rarity] || '';
     // Carte en anglais : extension sans version française, ou carte ajoutée depuis la version anglaise (champ lang).
     const lang = F.lang !== undefined && r[F.lang] ? String(r[F.lang]).toUpperCase() : String(set[5] || 'fr').toUpperCase();

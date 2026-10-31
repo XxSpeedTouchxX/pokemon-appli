@@ -28,6 +28,14 @@ const li = labels.findIndex(l => l.startsWith('Latias et Latios GX,'));
 if (li >= 0) { await tiles.nth(li).scrollIntoViewIfNeeded(); await tiles.nth(li).click(); await page.waitForTimeout(900); }
 ok('fiche de Latias et Latios GX : pas de « Cote à confirmer »', (await page.locator('section.pkm-fi').count()) === 1 && !/Cote à confirmer/.test(await page.locator('section.pkm-fi').innerText()));
 await page.screenshot({ path: shot('top-latias.png') });
+await page.locator('section.pkm-fi button[aria-label="Fermer"]').click().catch(() => {}); await page.waitForTimeout(300);
+// Visuel d'une réimpression du même dessin (catalogue, imgFrom, 2026-11-01) : la fiche le dit.
+const from = await page.evaluate(() => fetch('data/cards-base.json').then(r => r.json()).then(d => Object.entries(d.imgFrom || {}).find(([k]) => /^tk-hs-/.test(k)) || null));
+if (from) {
+  await page.evaluate(id => window.__pkm.fiOpen(id), from[0]); await page.waitForTimeout(900);
+  const note = await page.locator('section.pkm-fi .pkm-fi-imgnote').innerText().catch(() => '');
+  ok('réimpression ' + from[0] + ' ← ' + from[1] + ' : « ' + note.slice(0, 90) + '… »', /^Visuel de la carte d’origine \(.+, n° .+\), même dessin/.test(note));
+} else ok('catalogue sans visuel de réimpression (imgFrom) : vérification sautée', true);
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

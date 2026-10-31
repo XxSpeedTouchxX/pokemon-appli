@@ -195,7 +195,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - **Gradées, « Les plus chères », visuels (2026-11-01, nuit, porteur) :**
   - prix gradés masqués sous 5 € ;
   - « Les plus chères » : groupe de prix Cardmarket des holos départagé par TCGplayer, et cotes douteuses confirmées par TCGplayer. TCGplayer sert d'arbitre seulement, **à valider** ; le Dracaufeu du Set de Base y entre (497 €). La **1re édition n'est pas distinguée** (Cardmarket ne la sépare pas) : **décision du porteur attendue** ;
-  - visuels manquants : langues TCGdex pt, pt-br, nl, pl et réimpression du même dessin ;
+  - visuels manquants : réimpression du même dessin (163 cartes illustrées ; 296 restent dessinées, sans source ouverte) ; langues TCGdex pt, pt-br, nl, pl sans effet pour l'instant ;
   - extensions : vignettes légères (2,6 Mo → 0,8 Mo au premier écran) ;
   - **carte gradée à l'ajout** (entreprise, note, valeur selon la note, logo et note sur la carte, `tools/web/graded.js` ; coefficients **à valider**) ;
   - scan : reconnaissance de l'illustration **proposée, à valider**.

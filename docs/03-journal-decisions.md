@@ -25,7 +25,8 @@
   - **1re édition** : **non distinguée**. Cardmarket (seule source de la cote) ne sépare pas la 1re édition de la carte illimitée ; TCGdex n'en fait qu'une variante sans prix. **Décision du porteur attendue** (voir la réponse du 2026-11-01).
   - **Visuels manquants** (459 cartes sans visuel, surtout des promos MEP et SVP, des cartes McDonald's, des kits du dresseur et des Énergies) :
     - versions TCGdex portugaise, brésilienne, néerlandaise et polonaise ajoutées aux visuels de repli ;
-    - visuel d'une **réimpression du même dessin** déjà dans le catalogue : même nom, même illustrateur, mêmes PV, attaques, talents ou effet (`art_key`). La fiche le dit : « Visuel de la carte d'origine (…), même dessin ».
+    - visuel d'une **réimpression du même dessin** déjà dans le catalogue : même nom, même illustrateur, mêmes PV, attaques, talents ou effet (`art_key`). La fiche le dit : « Visuel de la carte d'origine (…), même dessin » ;
+    - **résultat (catalogue du 31 oct. 2026, 22 h 40) : 163 cartes illustrées** par leur carte d'origine (McDonald's 2018 et 2019, kits du dresseur HS et DP, promos MEP et SVP…). Les nouvelles langues n'ont rien ajouté. **Restent 296 cartes dessinées par l'app** : MEP 76, My First Battle 34, Énergies SV 24, SVP 21, kits HS 40, McDonald's 2023 et 2024 30… Aucune source ouverte n'a leur scan aujourd'hui ; elles se rempliront à mesure que TCGdex les publie.
   - **Extensions plus rapides** : grilles Petit et Moyen en vignettes TCGdex (245 px) au lieu du grand visuel (600 px) ; 12 premières cartes en priorité ; connexion anticipée au serveur d'images. Données du premier écran d'une extension : 2,6 Mo → 0,8 Mo. Le grand visuel reste en « Grand », dans la fiche et le zoom.
   - **Cartes gradées à l'ajout** (`tools/web/graded.js`) :
     - « Carte gradée » Non / Oui, puis l'entreprise (PCA, CCC, PSA, avec leur logo) et la note (10 à 6 ; CCC : 10 Black Label et 10 Gold Label ; PSA sans 9,5) ;
