@@ -15,7 +15,7 @@
   - un scan meilleur et fiable ;
   - une passe sur « Les plus chères » (le Dracaufeu 1re édition n'y est pas) ;
   - à l'ajout d'une carte, indiquer qu'elle est gradée, l'entreprise et la note, avec un prix adapté et le logo et la note sur la carte.
-- **Fait** (cache v102) :
+- **Fait** (cache v103) :
   - **Prix gradés** masqués pour une carte cotée moins de 5 € (la gradation coûterait plus que la carte).
   - **« Les plus chères »** :
     - **groupe de prix Cardmarket des cartes « holo seulement »** : quand les deux groupes s'écartent de plus de 2 fois, le prix TCGplayer de la holo illimitée désigne le bon (`tools/tcgdex/build_index.py`, `holo_ref`). Exemple : Dracaufeu du Set de Base, 497,57 € au lieu de 123,63 € (TCGplayer 854,50 €). 605 cartes changent de groupe, surtout des holos WotC, ex et Neo. La règle du 2026-10-11 (Rayquaza ☆) reste quand TCGplayer ne dit rien ;
