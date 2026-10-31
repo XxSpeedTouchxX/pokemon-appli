@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-01 (suite 2) — Historique vérifié, cartes des séries en fiche, Mon profil complété
+
+- **Demandes du porteur** : vérifier l'historique de chaque carte (« des fois le prix ne bouge pas entre 1M et 6M ») ; retirer le cœur (favori) des cartes, garder le « + » ; une carte d'une série ouvre la même fiche que celle du Dracaufeu du classeur, sans « J'ai vendu » ; dans Mon profil : la version de l'app (non cliquable, « à jour »), une rubrique Communauté (Discord, App Store pour noter l'app, TikTok), « Nous contacter » (e-mail avec l'adresse de l'équipe en destinataire, adresse à créer), et tout en bas « Conditions générales d'utilisation » et « Politique de confidentialité ». Population PSA : laissée de côté (« nn c'est bon »).
+- **Fait** (cache v100) :
+  - historique : calcul vérifié (1S = 7 jours, 1M = 30 jours…) ; l'archive commence le 3 octobre 2026, donc 1M, 3M, 6M et 1A montraient le même historique que MAX ; ces périodes sont désormais grisées tant que l'archive ne les couvre pas, avec leur date d'arrivée (1M dès le 1er nov., 3M dès le 1er janv. 2027, 6M dès le 2 avr. 2027, 1A dès le 2 oct. 2027) ;
+  - écran d'une extension et « Les plus chères » : cœur retiré, « + » gardé ; un appui sur une carte ouvre la fiche en panneau (prix du marché, historique, prix par état, prix gradés, « Ajouter à ma collection »), sans « J'ai vendu » ; la page complète d'une carte, encore ouverte depuis la recherche, garde « J'ai vendu », seul accès à la vente d'un exemplaire ;
+  - Mon profil : Communauté (Discord, App Store, TikTok, icônes Simple Icons sous licence CC0, marques de leurs propriétaires ; « Bientôt » tant que les liens n'existent pas), « Écrire à l'équipe Dropicards » (contact@dropicards.fr, **adresse à créer et à confirmer**), « Conditions générales d'utilisation » et « Politique de confidentialité » (ouvrent l'onglet voulu des informations légales), mention de non-affiliation, puis « Dropicards · version v100 · à jour » (version publiée relue sur le serveur ; sinon « la vXX est disponible : ferme et rouvre l'app »).
+- **À fournir par le porteur** : les liens Discord, App Store et TikTok ; l'adresse e-mail de contact définitive.
+
 ## 2026-11-01 (suite) — Logo PSA rouge et bleu ; population PSA toujours sans source
 
 - **Demandes du porteur** : « le vrai logo PSA en rouge et bleu » ; « la population de toutes les cartes gradées PSA, notes 6 à 10 ».

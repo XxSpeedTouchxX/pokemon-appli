@@ -27,12 +27,7 @@
   const SV_EMPTY = { v2: false, dateText: '', setFlag: '', hasDate: false, progLabel: '', sortAria: '', hasProg: false, progText: '', pct: '', progW: '0%', tabs: [], sizes: [], q: '', onQ: null,
     sortLabel: '', sortNext: null, rars: [], hasRars: false, hasRarClear: false, rarClear: null, cols: 'repeat(3, minmax(0, 1fr))', gridCls: 'pkm-sv-grid pkm-sv-m', cards: [] };
 
-  svProto.svFavs = function () { const f = this.st().favs; return Array.isArray(f) ? f : []; };
-  svProto.svToggleFav = function (p) {
-    const f = this.svFavs(), on = f.indexOf(p.id) >= 0;
-    this.setState({ favs: on ? f.filter(id => id !== p.id) : f.concat([p.id]), toast: on ? p.name + ' retiré des favoris' : p.name + ' ajouté aux favoris' });
-    this.flash();
-  };
+  // Cœur (favori) retiré le 2026-11-01 (porteur) : seul le « + » reste sur chaque carte.
   // « + » : un exemplaire ajouté tout de suite, au prix de sa cote du jour (rien si la carte n'a pas encore de cote).
   // La carte entre d'abord au catalogue de l'app (extra), comme au scan.
   svProto.svQuickAdd = function (p) {
@@ -76,7 +71,7 @@
     const order = { num: (a, b) => rank.get(a.id) - rank.get(b.id), cote: (a, b) => (this.cote(b) || 0) - (this.cote(a) || 0) || rank.get(a.id) - rank.get(b.id),
       name: (a, b) => String(a.name).localeCompare(String(b.name), 'fr') || rank.get(a.id) - rank.get(b.id) }[sort[0]];
     shown.sort(order);
-    const favs = this.svFavs(), pct = all.length ? Math.round(mine.length / all.length * 100) : 0;
+    const pct = all.length ? Math.round(mine.length / all.length * 100) : 0;
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
     return Object.assign({}, base, {
       v2: true,
@@ -103,16 +98,16 @@
       empty: shown.length === 0,
       emptyText: words.length || rarOn.length ? 'Aucune carte ne correspond.' : tab === 'own' ? 'Aucune carte de cette extension dans ta collection.' : tab === 'dup' ? 'Aucun doublon dans cette extension.' : tab === 'miss' ? 'Tu as toutes les cartes de cette extension !' : 'Aucune carte.',
       cards: shown.map(p => {
-        const k = this.cote(p), n = qty(p), fav = favs.indexOf(p.id) >= 0, setName = top ? (setOf(p.set) || [])[0] || '' : '';
+        const k = this.cote(p), n = qty(p), setName = top ? (setOf(p.set) || [])[0] || '' : '';
         return {
           img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name,
           num: top ? '#' + (rank.get(p.id) + 1) : p.reprintOf ? p.numShort : p.numShort.split('/')[0], owned: n > 0, many: n > 1, qty: '×' + n,
           cls: 'pkm-sv-card' + (n > 0 ? '' : ' pkm-sv-miss'), flag: this.flag(p.lang === 'EN' ? 'EN' : 'FR'),
           cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), sub: setName,
           label: p.name + ', ' + (top ? setName + ' ' : '') + p.numLabel + (k !== null ? ', cote ' + this.eur(k) : ', sans prix') + (n ? ', ' + n + ' dans ta collection' : ', pas encore dans ta collection'),
-          open: () => this.openTcg(p.id),
-          favOn: fav, favCls: 'pkm-sv-fav' + (fav ? ' pkm-sv-fav-on' : ''), favLabel: fav ? 'Retirer ' + p.name + ' des favoris' : 'Ajouter ' + p.name + ' aux favoris',
-          fav: () => this.svToggleFav(p),
+          // Un appui ouvre la fiche en panneau, la même que dans « Mon classeur » (2026-11-01, porteur) ; le cœur (favori)
+          // est retiré, seul le « + » reste pour l'ajout immédiat.
+          open: () => this.fiOpen(p.id),
           addLabel: 'Ajouter un exemplaire de ' + p.name + ' à ma collection' + (k !== null ? ', au prix de sa cote, ' + this.eur(k) : ''), add: () => this.svQuickAdd(p)
         };
       })

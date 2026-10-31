@@ -311,3 +311,48 @@
   proto.parentOf = function (sc) { return sc === 'grade' ? 'tiers' : pfBaseParent.call(this, sc); };
   const pfBaseSection = proto.section;
   proto.section = function (s) { return s.screen === 'grade' ? pfBaseSection.call(this, Object.assign({}, s, { screen: 'tiers' })) : pfBaseSection.call(this, s); };
+
+  // ——— Mon profil : Communauté, Nous contacter, version de l'app (2026-11-01, porteur) ———
+  // Liens à remplir quand les comptes existeront (porteur) ; vides, la ligne affiche « Bientôt » et ne s'ouvre pas.
+  const PF_LINKS = [
+    ['discord', 'Rejoindre le Discord', 'Échange avec les autres collectionneurs', ''],
+    ['appstore', 'Noter Dropicards sur l’App Store', 'Ton avis aide l’app à grandir', ''],
+    ['tiktok', 'Suivre Dropicards sur TikTok', 'Nouveautés, sorties et coulisses', '']
+  ];
+  // Adresse de contact à créer par le porteur (domaine dropicards.fr) : ouvre l'application d'e-mail, adresse déjà remplie.
+  const PF_MAIL = 'contact@dropicards.fr';
+  // Version : celle de l'app chargée (ADM_VERSION, numéro du cache du service worker) comparée à celle publiée sur le
+  // serveur (sw.js relu sans cache), une fois par ouverture de Mon profil.
+  const PF_VER = { state: '', latest: '' };
+  const pfVersionCheck = cb => {
+    if (PF_VER.state) return;
+    PF_VER.state = 'load';
+    try {
+      fetch('sw.js', { cache: 'no-store' }).then(r => (r.ok ? r.text() : '')).catch(() => '').then(t => {
+        const m = /pkm-demo-v(\d+)/.exec(t || '');
+        PF_VER.state = m ? 'ok' : 'none'; PF_VER.latest = m ? 'v' + m[1] : '';
+        cb();
+      });
+    } catch (e) { PF_VER.state = 'none'; }
+  };
+  proto.vProfileMore = function () {
+    const cur = typeof ADM_VERSION === 'string' ? ADM_VERSION : '';
+    const num = v => Number(String(v).replace(/\D/g, '')) || 0;
+    let state = '', cls = 'pkm-pc-st';
+    if (PF_VER.state === 'load' || !PF_VER.state) state = 'vérification…';
+    else if (PF_VER.state === 'ok' && num(PF_VER.latest) > num(cur)) { state = 'la ' + PF_VER.latest + ' est disponible : ferme et rouvre l’app'; cls += ' pkm-pc-st-new'; }
+    else if (PF_VER.state === 'ok') { state = 'à jour'; cls += ' pkm-pc-st-ok'; }
+    return {
+      links: PF_LINKS.map(([k, title, sub, href]) => ({ title: title, sub: sub, href: href, on: !!href, off: !href,
+        icon: 'img/social/' + k + '.svg', icoCls: 'pkm-pc-ico pkm-pc-' + k, aria: title + ', bientôt disponible' })),
+      mail: PF_MAIL, mailto: 'mailto:' + PF_MAIL + '?subject=' + encodeURIComponent('Dropicards'),
+      version: cur, state: state, stateCls: cls, verAria: 'Version de l’app : ' + cur + (state ? ', ' + state : '')
+    };
+  };
+  const pfBaseRender2 = proto.renderVals;
+  proto.renderVals = function () {
+    const r = pfBaseRender2.call(this);
+    if (r.ui && r.ui.isProfile) pfVersionCheck(() => this.setState({ pfVerTick: Date.now() }));
+    r.pc = this.vProfileMore();
+    return r;
+  };

@@ -95,9 +95,15 @@ const toastAdd = (await page.locator('[role="status"]').allInnerTexts()).join(' 
 ok('« + » : ajoutée avec sa cote du jour : ' + toastAdd.replace(/\n/g, ' '), /ajouté · (cote \d|pas encore de cote)/.test(toastAdd));
 ok('« + » : ' + owned0 + ' → ' + owned1 + ', carte en couleur avec ×1', owned0 !== owned1 && (await page.locator('main .pkm-sv-card').first().getAttribute('class')).indexOf('pkm-sv-miss') < 0
   && /×1/.test(await page.locator('main .pkm-sv-card').first().innerText()));
-const fav = page.locator('main .pkm-sv-fav').first();
-await fav.click(); await page.waitForTimeout(300);
-ok('cœur : favori enregistré', (await fav.getAttribute('aria-pressed')) === 'true');
+// 2026-11-01 (porteur) : plus de cœur (favori), seul le « + » ; un appui sur une carte ouvre la fiche en panneau, la même
+// que dans « Mon classeur » (prix du marché, historique, prix par état, prix gradés), sans « J'ai vendu ».
+ok('pas de cœur, un « + » par carte', (await page.locator('main .pkm-sv-card button[aria-pressed]').count()) === 0 && (await page.locator('main .pkm-sv-add').count()) === (await page.locator('main .pkm-sv-card').count()));
+await page.locator('main .pkm-sv-card').nth(1).locator('.pkm-sv-open').click(); await page.waitForTimeout(1500);
+const fiSet = page.locator('section.pkm-fi[role="dialog"]');
+const fiSetTxt = (await fiSet.count()) ? await fiSet.innerText() : '';
+ok('un appui ouvre la fiche en panneau (« ' + ((await fiSet.count()) ? await fiSet.getAttribute('aria-label') : 'rien') + ' »)', (await fiSet.count()) === 1 && /Ajouter à ma collection|Ajouter un exemplaire/.test(fiSetTxt) && /Prix du marché/.test(fiSetTxt) && !/J’ai vendu|Marquer comme vendu/.test(fiSetTxt));
+await fiSet.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(500);
+ok('« Fermer » ramène à l’extension', (await fiSet.count()) === 0 && (await page.locator('main .pkm-sv-grid').count()) === 1);
 await page.getByRole('button', { name: 'Petit', exact: true }).click(); await page.waitForTimeout(300);
 ok('taille Petit : 4 cartes par ligne', await page.evaluate(() => getComputedStyle(document.querySelector('main .pkm-sv-grid')).gridTemplateColumns.split(' ').length === 4));
 await page.getByRole('button', { name: 'Moyen', exact: true }).click();

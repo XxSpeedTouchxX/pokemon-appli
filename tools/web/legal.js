@@ -65,6 +65,8 @@
       tabs: LEGAL_TABS.filter(k => k !== 'pk').map(k => Object.assign({ label: LEGAL[k].label, on: k === cur, pick: () => this.setState({ legal: k }) }, this.chip(k === cur))),
       blocks: cur ? LEGAL[cur].blocks.map(([t, p]) => ({ title: t, text: p, todo: p.indexOf(LEGAL_TODO) >= 0 })) : [],
       openMentions: () => this.legalOpen('mentions'), openPk: () => this.legalOpen('pk'),
+      // Mon profil (2026-11-01) : conditions générales d'utilisation et politique de confidentialité ouvertes directement.
+      openTerms: () => this.legalOpen('terms'), openPrivacy: () => this.legalOpen('privacy'),
       isPk: cur === 'pk', notPk: cur !== 'pk', pk: cur === 'pk' ? this.vRules(s) : { grades: [], odds: [], streak: [], evo: [], shop: [], earn: [], free: [] }
     };
     if (cur === 'pk') r.legal.title = 'Règles des PK et PA';

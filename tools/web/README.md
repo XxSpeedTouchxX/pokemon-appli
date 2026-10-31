@@ -630,3 +630,10 @@ Le script `tools/web/build.mjs` :
 | `sw.js` | Fonctionnement hors ligne : réseau d'abord, copie locale à défaut (fichiers du site seulement) |
 | `_headers` | En-têtes voulus (non-indexation, cache), au format Cloudflare : plus lu depuis le passage au serveur dédié, à reproduire dans le serveur web (voir « Hébergement ») |
 | `_redirects` | Redirection de l'ancienne adresse Cloudflare Pages vers https://dropicards.fr (lu par Cloudflare seulement) |
+
+## Séries et Mon profil (2026-11-01, soir, porteur)
+
+- Historique (`fiche.js`) : une période n'est proposée que si l'historique la couvre (`covered` : jours de la période − 1 ≤ jours d'archive) ; sinon bouton grisé (`aria-disabled`, `.pkm-fh-off`) et note `fiSoon` avec la date d'arrivée ; une période grisée choisie revient à MAX.
+- Écran d'une extension (`setview.js`, fragment `screens`) : cœur (favori) retiré ; `open` d'une carte = `fiOpen(p.id)` (fiche en panneau) au lieu de `openTcg` (page complète). La page complète reste ouverte depuis la recherche, avec « J'ai vendu ».
+- Mon profil : fragments `profile-more` (Communauté, Nous contacter, conditions générales, confidentialité) et `profile-ver` (version), insérés par build.mjs entre les raccourcis du profil et la mention de non-affiliation ; vue `pc` (`profile.js` : `PF_LINKS` à remplir avec les liens Discord, App Store, TikTok ; `PF_MAIL` ; `pfVersionCheck` relit `sw.js` sans cache et compare son numéro à `ADM_VERSION`) ; `legal.openTerms`, `legal.openPrivacy` (`legal.js`) ; styles `.pkm-pc-*` (variables du thème, lisibles sur le fond jaune) ; icônes `web/img/social/` (Simple Icons, CC0).
+- Tests : `e2e/t-profilmore.mjs`, `t-series` (pas de cœur, fiche en panneau), `t-fihist` (périodes grisées).

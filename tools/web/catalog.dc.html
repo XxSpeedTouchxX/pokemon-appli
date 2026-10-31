@@ -140,7 +140,7 @@
 <span class="pkm-sv-name">{{ ca.name }}</span>
 <span class="pkm-sv-meta"><span class="pkm-sv-flag" style="background: {{ ca.flag }}"></span><span>{{ ca.cote }}</span></span>
 </button>
-<button type="button" onClick="{{ ca.fav }}" aria-label="{{ ca.favLabel }}" aria-pressed="{{ ca.favOn }}" class="{{ ca.favCls }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></button>
+
 <button type="button" onClick="{{ ca.add }}" aria-label="{{ ca.addLabel }}" class="pkm-sv-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12 M6 12h12"></path></svg></button>
 </div>
 </sc-for>
@@ -1849,6 +1849,30 @@
 <sc-if value="{{ nt.ask }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ nt.askGo }}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: #0B1120; font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer">Autoriser les notifications</button></sc-if>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ nt.note }}</p>
 </section>
+
+<!-- fragment: profile-more -->
+<section aria-label="Communauté" class="pkm-pc">
+<h2 class="pkm-pc-h">Communauté</h2>
+<div class="pkm-pc-box pkm-dark">
+<sc-for list="{{ pc.links }}" as="pcl" hint-placeholder-count="3">
+<sc-if value="{{ pcl.on }}" hint-placeholder-val="{{ false }}"><a href="{{ pcl.href }}" target="_blank" rel="noopener" class="pkm-pc-row"><span class="{{ pcl.icoCls }}"><img src="{{ pcl.icon }}" alt="" width="20" height="20"></span><span class="pkm-pc-txt"><span class="pkm-pc-t">{{ pcl.title }}</span><span class="pkm-pc-s">{{ pcl.sub }}</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-pc-chev"><path d="M9 6l6 6-6 6"></path></svg></a></sc-if>
+<sc-if value="{{ pcl.off }}" hint-placeholder-val="{{ true }}"><div class="pkm-pc-row pkm-pc-off" aria-label="{{ pcl.aria }}"><span class="{{ pcl.icoCls }}"><img src="{{ pcl.icon }}" alt="" width="20" height="20"></span><span class="pkm-pc-txt"><span class="pkm-pc-t">{{ pcl.title }}</span><span class="pkm-pc-s">{{ pcl.sub }}</span></span><span class="pkm-pc-soon">Bientôt</span></div></sc-if>
+</sc-for>
+</div>
+</section>
+<section aria-label="Nous contacter" class="pkm-pc">
+<h2 class="pkm-pc-h">Nous contacter</h2>
+<div class="pkm-pc-box pkm-dark">
+<a href="{{ pc.mailto }}" class="pkm-pc-row"><span class="pkm-pc-ico pkm-pc-mail"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"></rect><path d="M4 7.5l8 6 8-6"></path></svg></span><span class="pkm-pc-txt"><span class="pkm-pc-t">Écrire à l’équipe Dropicards</span><span class="pkm-pc-s">{{ pc.mail }}</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-pc-chev"><path d="M9 6l6 6-6 6"></path></svg></a>
+</div>
+</section>
+<nav aria-label="Informations légales" class="pkm-pc-legal">
+<button type="button" onClick="{{ legal.openTerms }}">Conditions générales d’utilisation</button>
+<button type="button" onClick="{{ legal.openPrivacy }}">Politique de confidentialité</button>
+</nav>
+
+<!-- fragment: profile-ver -->
+<p aria-label="{{ pc.verAria }}" class="pkm-pc-ver"><span>Dropicards · version {{ pc.version }}</span><span class="{{ pc.stateCls }}">{{ pc.state }}</span></p>
 
 <!-- fragment: profile-grade -->
 <section aria-label="Grade actuel" class="pkm-dark pkm-gr-now" style="flex: none; padding: 18px 16px 16px; border-radius: 24px; border: 1px solid #2A3A5C; background: radial-gradient(100% 70% at 50% 0%, {{ pf.grade.glow }}, rgba(0, 0, 0, 0) 66%), #121C33; color: #F3F6FC; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center">

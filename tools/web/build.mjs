@@ -317,6 +317,15 @@ patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pa-sheet'] + '\n<sc-if value="{{
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['tuto'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Profil : « Revoir le didacticiel », sous « Revoir l'accueil ».
 patchRe(/(<span style="font-weight: 600">Retour à la page d’accueil<\/span>[\s\S]*?<\/button>)/, m => m + '\n<button type="button" onClick="{{ tu.replay }}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; display: block; fill: none; stroke: var(--pkm-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round"><path d="M12 6.5C10 5 7 4.6 3.5 5v13c3.5-.4 6.5 0 8.5 1.5 2-1.5 5-1.9 8.5-1.5V5C17 4.6 14 5 12 6.5z"></path><path d="M12 6.5v13"></path><path d="M6 9h3.5M6 12h3.5M14.5 9H18M14.5 12H18"></path></svg><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Revoir le didacticiel</span><span style="font-size: 12.5px; color: #9AA8C3">Ton compagnon te présente l’app</span></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg></button>');
+// Mon profil (2026-11-01, porteur) : Communauté (Discord, App Store, TikTok), Nous contacter (e-mail), conditions
+// générales et politique de confidentialité sous les raccourcis ; version de l'app tout en bas, sous la mention de
+// non-affiliation (profile.js, rubrique pc).
+{
+  const DISC = '<p style="margin: 0; font-size: 11.5px; line-height: 1.5; color: #7D8BA8; text-align: center">Application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>';
+  const a = tpl.indexOf('<nav aria-label="Raccourcis du profil"'), b = a < 0 ? -1 : tpl.indexOf('</nav>', a) + 6, c = b < 6 ? -1 : tpl.indexOf(DISC, b);
+  if (a < 0 || c < 0 || tpl.slice(b, c).trim()) throw new Error('Mon profil : fin de l’écran introuvable (raccourcis, mention de non-affiliation)');
+  tpl = tpl.slice(0, b) + '\n' + FRAG['profile-more'].trim() + '\n' + DISC + '\n' + FRAG['profile-ver'].trim() + tpl.slice(c + DISC.length);
+}
 // Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
