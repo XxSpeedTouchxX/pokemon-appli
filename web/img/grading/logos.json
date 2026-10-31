@@ -16,5 +16,11 @@
   "source": "https://www.psacard.com/ (logo SVG de l’en-tête, recopié en blanc)",
   "license": "marque déposée",
   "date": "2026-10-31"
+ },
+ "psa-color": {
+  "file": "psa-color.png",
+  "source": "https://upload.wikimedia.org/wikipedia/en/f/fc/Professional_Sports_Authenticator_Logo.png",
+  "license": "marque déposée",
+  "date": "2026-10-31"
  }
 }
