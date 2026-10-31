@@ -50,6 +50,9 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
      - **carte holo seulement** (ni normale ni reverse) : la cote vient du groupe `-holo`. Exemple : Rayquaza ☆ (ex8-107), 135,39 € au lieu de 32,35 € (groupe normal, autre produit mal rangé) ;
      - **carte qui a une reverse :** le groupe `-holo` est le prix de la reverse ; la cote reste celle du groupe normal, la reverse est donnée à part (`cmh`) ;
      - **sinon :** groupe normal s'il a une tendance, sinon groupe `-holo` (comme avant).
+     - **arbitrage par TCGplayer (2026-11-01, porteur : Dracaufeu du Set de Base absent de « Les plus chères ») :** pour une carte holo seulement dont les deux groupes s'écartent de plus de 2 fois, le prix TCGplayer de la holo illimitée (`holo_ref`, jamais la 1re édition ni la reverse) désigne le groupe le plus proche. Exemple : Dracaufeu base1-4, groupe holo 123,63 €, groupe normal 497,57 €, TCGplayer 854,50 € → groupe normal. La cote reste 100 % Cardmarket ; 605 cartes changent de groupe (`cardsHolo` 1 472 → 867).
+     - **repère `tcp` :** tirages illimités avant la 1re édition (ordre de `TCP_VARIANTS`).
+   - **Visuels de repli (2026-11-01) :** versions TCGdex pt, pt-br, nl et pl ajoutées (après en, de, it, es). Dernier repli : **réimpression du même dessin** déjà illustrée dans le catalogue (`art_key` : même nom, même illustrateur, mêmes PV et mêmes attaques, talents ou effet ; `reprint_images`), notée dans `imgFrom` ({id: id de la carte d'origine}) et dans `stats.imgAlt.reprint`.
    - **Champs ajoutés en fin de ligne (2026-10-11), après `lang` :**
 
      | Champ | Contenu |

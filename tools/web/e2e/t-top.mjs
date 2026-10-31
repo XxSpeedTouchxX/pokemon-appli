@@ -17,6 +17,9 @@ const labels = await tiles.evaluateAll(bs => bs.map(b => b.getAttribute('aria-la
 ok('« Les plus chères » : ' + labels.length + ' cartes', labels.length === 200);
 const has = name => labels.some(l => l.startsWith(name + ','));
 ok('Latias et Latios GX (cote confirmée par TCGplayer) : présente', has('Latias et Latios GX'));
+// Dracaufeu du Set de Base (base1-4) : groupe de prix normal choisi par le pipeline (2026-11-01), cote confirmée.
+const dra = labels.findIndex(l => /^Dracaufeu, Set de Base n° 4\//.test(l));
+ok('Dracaufeu du Set de Base : ' + (dra >= 0 ? 'n° ' + (dra + 1) + ' du classement (' + labels[dra].split(', cote ')[1].split(',')[0] + ' €)' : 'absent'), dra >= 0);
 ok('Ectoplasma de Skyridge (cote douteuse non confirmée) : absente', !labels.some(l => /^Gengar,/.test(l) && /cote 7/.test(l)));
 const cotes = labels.map(l => { const m = /cote ([^,]*,\d\d)/.exec(l); return m ? Number(m[1].replace(/\D/g, '')) / 100 : NaN; });
 ok('classées de la plus chère à la moins chère (' + cotes[0] + ' € … ' + cotes[cotes.length - 1] + ' €)', cotes.every(Number.isFinite) && cotes.every((c, i) => !i || c <= cotes[i - 1]));

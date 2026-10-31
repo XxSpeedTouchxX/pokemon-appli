@@ -6,6 +6,38 @@
 
 ---
 
+## 2026-11-01 (suite 3) — Prix gradés sous 5 €, « Les plus chères » revue, visuels, extensions plus rapides, cartes gradées
+
+- **Demandes du porteur** :
+  - pas de « Prix gradés » pour les cartes de moins de 5 € ;
+  - une passe sur toutes les cartes sans visuel ;
+  - les cartes d'une extension affichées d'un coup (5,6 s d'attente) ;
+  - un scan meilleur et fiable ;
+  - une passe sur « Les plus chères » (le Dracaufeu 1re édition n'y est pas) ;
+  - à l'ajout d'une carte, indiquer qu'elle est gradée, l'entreprise et la note, avec un prix adapté et le logo et la note sur la carte.
+- **Fait** (cache v102) :
+  - **Prix gradés** masqués pour une carte cotée moins de 5 € (la gradation coûterait plus que la carte).
+  - **« Les plus chères »** :
+    - **groupe de prix Cardmarket des cartes « holo seulement »** : quand les deux groupes s'écartent de plus de 2 fois, le prix TCGplayer de la holo illimitée désigne le bon (`tools/tcgdex/build_index.py`, `holo_ref`). Exemple : Dracaufeu du Set de Base, 497,57 € au lieu de 123,63 € (TCGplayer 854,50 €). 605 cartes changent de groupe, surtout des holos WotC, ex et Neo. La règle du 2026-10-11 (Rayquaza ☆) reste quand TCGplayer ne dit rien ;
+    - **cote « douteuse » confirmée** (marché mince, mais à moins de 2 fois du prix TCGplayer de la carte) : comptée dans « Les plus chères » et les cartes d'un Pokémon, sans « cote à confirmer ». Exemples : Latias et Latios GX 170/181 (2 525 €), Magicarpe et Wailord GX ;
+    - **TCGplayer ne sert que d'arbitre** : la cote reste 100 % Cardmarket (décision du 2026-10-18). **À valider par le porteur** ;
+    - le Dracaufeu du Set de Base y entre (85ᵉ, 497 €).
+  - **1re édition** : **non distinguée**. Cardmarket (seule source de la cote) ne sépare pas la 1re édition de la carte illimitée ; TCGdex n'en fait qu'une variante sans prix. **Décision du porteur attendue** (voir la réponse du 2026-11-01).
+  - **Visuels manquants** (459 cartes sans visuel, surtout des promos MEP et SVP, des cartes McDonald's, des kits du dresseur et des Énergies) :
+    - versions TCGdex portugaise, brésilienne, néerlandaise et polonaise ajoutées aux visuels de repli ;
+    - visuel d'une **réimpression du même dessin** déjà dans le catalogue : même nom, même illustrateur, mêmes PV, attaques, talents ou effet (`art_key`). La fiche le dit : « Visuel de la carte d'origine (…), même dessin ».
+  - **Extensions plus rapides** : grilles Petit et Moyen en vignettes TCGdex (245 px) au lieu du grand visuel (600 px) ; 12 premières cartes en priorité ; connexion anticipée au serveur d'images. Données du premier écran d'une extension : 2,6 Mo → 0,8 Mo. Le grand visuel reste en « Grand », dans la fiche et le zoom.
+  - **Cartes gradées à l'ajout** (`tools/web/graded.js`) :
+    - « Carte gradée » Non / Oui, puis l'entreprise (PCA, CCC, PSA, avec leur logo) et la note (10 à 6 ; CCC : 10 Black Label et 10 Gold Label ; PSA sans 9,5) ;
+    - la note remplace l'état ;
+    - valeur = cote Cardmarket × coefficient de la note × langue (**estimations à valider**, comme « Prix gradés ») ;
+    - dans le classeur, une carte à part par note, avec le logo et la note ; « Tout afficher › Gradées » ; la fiche montre la note dans « État de ma carte ».
+  - **Fiche en panneau depuis une extension** :
+    - Échap et le bouton Retour du téléphone la ferment ;
+    - « Carte en anglais » et la provenance du visuel y sont indiquées.
+- **Scan** : diagnostic fait, **proposition à valider** (reconnaissance de l'illustration, voir la réponse du 2026-11-01). Rien n'est codé sans « go ».
+- **Tests** : `e2e/t-top.mjs`, `e2e/t-graded.mjs` (nouveaux) ; `t-fihist`, `t-v6`, `t-nav`, `t-lotA`, `t-games` adaptés ; tests du pipeline (`test_build_index.py`, 58).
+
 ## 2026-11-01 (suite 2) — Historique vérifié, cartes des séries en fiche, Mon profil complété
 
 - **Demandes du porteur** : vérifier l'historique de chaque carte (« des fois le prix ne bouge pas entre 1M et 6M ») ; retirer le cœur (favori) des cartes, garder le « + » ; une carte d'une série ouvre la même fiche que celle du Dracaufeu du classeur, sans « J'ai vendu » ; dans Mon profil : la version de l'app (non cliquable, « à jour »), une rubrique Communauté (Discord, App Store pour noter l'app, TikTok), « Nous contacter » (e-mail avec l'adresse de l'équipe en destinataire, adresse à créer), et tout en bas « Conditions générales d'utilisation » et « Politique de confidentialité ». Population PSA : laissée de côté (« nn c'est bon »).

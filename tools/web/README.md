@@ -637,3 +637,25 @@ Le script `tools/web/build.mjs` :
 - Écran d'une extension (`setview.js`, fragment `screens`) : cœur (favori) retiré ; `open` d'une carte = `fiOpen(p.id)` (fiche en panneau) au lieu de `openTcg` (page complète). La page complète reste ouverte depuis la recherche, avec « J'ai vendu ».
 - Mon profil : fragments `profile-more` (Communauté, Nous contacter, conditions générales, confidentialité) et `profile-ver` (version), insérés par build.mjs entre les raccourcis du profil et la mention de non-affiliation ; vue `pc` (`profile.js` : `PF_LINKS` à remplir avec les liens Discord, App Store, TikTok ; `PF_MAIL` ; `pfVersionCheck` relit `sw.js` sans cache et compare son numéro à `ADM_VERSION`) ; `legal.openTerms`, `legal.openPrivacy` (`legal.js`) ; styles `.pkm-pc-*` (variables du thème, lisibles sur le fond jaune) ; icônes `web/img/social/` (Simple Icons, CC0).
 - Tests : `e2e/t-profilmore.mjs`, `t-series` (pas de cœur, fiche en panneau), `t-fihist` (périodes grisées).
+
+## Gradées, « Les plus chères », visuels (2026-11-01, nuit, porteur)
+
+- **Prix gradés** (fiche) : masqués pour une carte cotée moins de 5 € (`FI_GRADED_MIN`, `fiche.js`).
+- **« Les plus chères »** (`series.js`) et **cartes d'un Pokémon** (`dex.js`) :
+  - une cote « douteuse » ou à prix écartés compte si elle est confirmée par le prix TCGplayer de la carte (moins de 2 fois d'écart ; `coteConfirmed`, `coteRanked`, `catalog.js`). La fiche n'affiche alors pas « cote à confirmer » ;
+  - le choix du groupe de prix des holos est fait par le pipeline (voir `tools/tcgdex/README.md`).
+- **Visuels** :
+  - langues de repli PT, PT-BR, NL, PL reconnues (`VERSION`, `visual`) ;
+  - réimpression du même dessin (`imgFrom` du catalogue) signalée dans la fiche : « Visuel de la carte d'origine (…), même dessin ».
+- **Extension** (`setview.js`) :
+  - en Petit et Moyen, vignette `low.webp` seule (245 px) ; en Grand, `srcset` avec `high.webp` ;
+  - 12 premières cartes en `loading="eager"` et `fetchpriority="high"` ;
+  - `<link rel="preconnect" href="https://assets.tcgdex.net">` dans `index.html`.
+- **Carte gradée** (`graded.js`) :
+  - à l'ajout, « Carte gradée » Non / Oui, entreprise et note (`GRADE_LIST`, tiré de `FI_GRADERS`) ;
+  - la ligne d'achat garde `gr` (« PSA-10 », « CCC-10BL »…) ;
+  - valeur `valCoefG` (note × langue, à la place de l'état) ;
+  - classeur : `gradeEntries` (une carte par note), `gradeBadge` (logo et note) ; la fiche montre la note dans « État de ma carte ».
+- **Fiche en panneau** : Échap (`build.mjs`) et Retour du téléphone (`nav.js`) ferment d'abord l'agrandissement, puis la fiche ; note de langue et de visuel (`imgNote`).
+- Tests : `e2e/t-top.mjs`, `e2e/t-graded.mjs`.
+
