@@ -209,8 +209,10 @@
     ['PSA', 'img/grading/psa-color.png', [['10', 3.5], ['9', 1.6], ['8', 1.2], ['7', 0.9], ['6', 0.75]]]
   ];
   const FI_GRADE_CLS = { '10': 'g10', '9.5': 'g95', '9': 'g9', '8': 'g8', '7': 'g7', '6': 'g6', 'Black Label': 'black', 'Gold Label': 'gold' };
+  // Pas de prix gradés pour une carte cotée moins de 5 € (2026-11-01, porteur) : la gradation coûterait plus que la carte.
+  const FI_GRADED_MIN = 5;
   fiProto.fiGraded = function (p, x, k) {
-    if (p.type === 'sealed' || !(k > 0)) return { has: false, companies: [] };
+    if (p.type === 'sealed' || !(k >= FI_GRADED_MIN)) return { has: false, companies: [] };
     return {
       has: true,
       companies: FI_GRADERS.map(([name, logo, grades]) => ({
@@ -221,7 +223,7 @@
             aria: name + ' ' + t + (lab ? ' ' + lab : '') + ' : environ ' + v + ', estimation' };
         })
       })),
-      note: '≈ valeur estimée (modèle Dropicards : cote Cardmarket Near Mint × coefficient de la note) — aucune vente réelle enregistrée pour ces notes. Sous 10 €, une gradation coûte souvent plus que la carte.'
+      note: '≈ valeur estimée (modèle Dropicards : cote Cardmarket Near Mint × coefficient de la note) — aucune vente réelle enregistrée pour ces notes. Non affichés sous 5 € : la gradation coûterait plus que la carte.'
     };
   };
 

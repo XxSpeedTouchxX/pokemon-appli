@@ -143,7 +143,7 @@
     out.hasMine = mine.length > 0; out.noMine = !mine.length;
     out.mine = mine.slice(0, 6).map(m => Object.assign(this.look(m.p), { name: m.p.name, qty: '×' + m.q, aria: m.p.name + ', ' + m.q + (m.q > 1 ? ' exemplaires' : ' exemplaire') + ', ' + this.eur(m.v), open: () => open(m.p) }));
     out.more = mine.length > 6 ? '+ ' + (mine.length - 6) + ' autres' : ''; out.hasMore = mine.length > 6;
-    const top = ids.map(id => TCG.byId[id]).filter(x => x && coteOf(x.r, F) > 0 && coteSteady(x.r, F)).sort((a, b) => coteOf(b.r, F) - coteOf(a.r, F)).slice(0, 3);
+    const top = ids.map(id => TCG.byId[id]).filter(x => x && coteOf(x.r, F) > 0 && (coteSteady(x.r, F) || coteConfirmed(x.r, F))).sort((a, b) => coteOf(b.r, F) - coteOf(a.r, F)).slice(0, 3);
     out.top = top.map((x, i) => {
       const p = TCG.item(x.r[F.id]), k = this.cote(p);
       return Object.assign(this.look(p), { rank: String(i + 1), name: p.name, set: p.setName + ' · ' + p.numLabel, cote: k !== null ? this.eur(k) : '—',

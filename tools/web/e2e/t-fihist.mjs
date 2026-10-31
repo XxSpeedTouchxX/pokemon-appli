@@ -2,7 +2,7 @@
 // - « Historique du prix » : archive quotidienne Dropicards de la cote (web/data/hist), valeur, variation sur la période,
 //   axe des montants, dates, ligne pointillée du prix d'achat, périodes 1S, 1M, 3M, 6M, 1A, MAX (MAX par défaut) ;
 //   repli sur les moyennes Cardmarket si l'archive manque ;
-// - « Prix gradés » : logos PCA, CCC, PSA ; notes 10 à 6 en nuances (10 or, 9,5 vert très foncé … 6 jaune-orangé), sans
+// - « Prix gradés » (cartes cotées 5 € et plus, 2026-11-01) : logos PCA, CCC, PSA ; notes 10 à 6 en nuances (10 or, 9,5 vert très foncé … 6 jaune-orangé), sans
 //   9,5 chez PSA, 10 Black Label et 10 Gold Label chez CCC (2026-11-01) ; estimations signalées ; jamais pour le scellé ;
 // - changement de période : la courbe glisse de l'ancienne forme à la nouvelle (2026-11-01).
 import { launch, BASE as E2E, shot } from './helpers.mjs';
@@ -79,6 +79,11 @@ const open = async (w, h, route) => {
   const cols = [await col('.pkm-fg-g10'), await col('.pkm-fg-g95'), await col('.pkm-fg-g9'), await col('.pkm-fg-g8'), await col('.pkm-fg-g7'), await col('.pkm-fg-g6'), await col('.pkm-fg-black'), await col('.pkm-fg-gold')];
   ok('nuances : ' + cols.join(' · '), cols.join('|') === 'dégradé|rgb(15, 77, 42)|rgb(21, 128, 61)|rgb(34, 197, 94)|rgb(163, 230, 53)|rgb(251, 168, 31)|rgb(5, 5, 5)|dégradé');
   await G.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('fihist-3.png') });
+  await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
+  // Carte cotée moins de 5 € : pas de prix gradés (2026-11-01, porteur).
+  await page.evaluate(() => window.__pkm.fiOpen('sv08-001')); await page.waitForTimeout(1000);
+  const low = Number(N(await FI.locator('.pkm-fi-cote').innerText()).replace(/[^\d,]/g, '').replace(',', '.'));
+  ok('carte à ' + low + ' € : pas de prix gradés', low > 0 && low < 5 && (await G.count()) === 0 && (await H.count()) === 1);
   await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
   // Scellé : historique, sans prix gradés.
   await page.evaluate(id => window.__pkm.fiOpen(id), SEALED); await page.waitForTimeout(1200);

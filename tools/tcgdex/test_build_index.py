@@ -41,6 +41,23 @@ class Prices(unittest.TestCase):
         p = prices(card(RAYQUAZA, variants=variants(holo=True)), 0.9)
         self.assertEqual(p, (135.39, 10, 95.21, None, "2026-10-10", 146.29, 220, 32.35, "h", 0))
 
+    def test_holo_only_group_checked_with_tcgplayer(self):
+        # 2026-11-01 (porteur : Dracaufeu du Set de Base absent de « Les plus chères ») : groupes à plus de 2 fois
+        # d'écart, la holo illimitée TCGplayer (854,50 €) désigne le groupe normal (497,57 €), pas le groupe holo.
+        cm = {"trend": 497.57, "low": 150, "avg30": 480, "avg7": 505, "avg1": 520,
+              "trend-holo": 123.63, "low-holo": 60, "avg30-holo": 202.71, "avg7-holo": 129.55, "avg1-holo": 207.4}
+        tcp = {"holofoil": {"marketPrice": 949.44}, "1st-edition-holofoil": {"marketPrice": 12000}}
+        p = prices(card(cm, tcp, variants(holo=True)), 0.9)
+        self.assertEqual((p[0], p[2], p[5], p[7], p[8]), (497.57, 480, 505, 123.63, "n"))
+        self.assertEqual(p[3], 854.5)  # repère : tirage illimité avant la 1re édition
+        # Repère plus proche du groupe holo (Rayquaza ☆) : groupe holo gardé.
+        self.assertEqual(prices(card(RAYQUAZA, {"holofoil": {"marketPrice": 150}}, variants(holo=True)), 0.9)[8], "h")
+        # Groupes à moins de 2 fois d'écart : la règle du 2026-10-11 s'applique (groupe holo).
+        near = dict(cm, trend=200)
+        self.assertEqual(prices(card(near, tcp, variants(holo=True)), 0.9)[8], "h")
+        # Seulement un prix 1re édition chez TCGplayer : pas de repère, groupe holo.
+        self.assertEqual(prices(card(cm, {"1st-edition-holofoil": {"marketPrice": 12000}}, variants(holo=True)), 0.9)[8], "h")
+
     def test_holo_only_without_holo_bucket(self):
         # Carte holo seulement mais seul le groupe normal est coté (vieilles holos) : c'est son prix, pas un doute
         # (2026-10-11 : marquées douteuses avant, 2 858 cartes « cote à confirmer » sans raison).

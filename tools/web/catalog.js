@@ -100,6 +100,13 @@
   function coteOf(r, F) { return TCG.dup.has(r[F.id]) ? 0 : coteMed(r[F.cm], r[F.avg30], r[F.avg7]); }
   // Marché assez régulier pour figurer dans « Les plus chères ».
   const coteSteady = (r, F) => coteSpread(r[F.cm], r[F.avg30], r[F.avg7]) <= COTE_SPREAD;
+  // Cote confirmée (2026-11-01, porteur : « il en manque dans Les plus chères ») : marché mince (cote douteuse ou
+  // écart entre les prix), mais la cote Cardmarket est à moins de 2 fois du prix TCGplayer de la même carte. Ex. :
+  // Latias et Latios GX sm9-170, 2 525 € (TCGplayer 3 506 €). TCGplayer ne sert que de repère : la cote reste Cardmarket.
+  const COTE_CONFIRM = 2;
+  const coteConfirmed = (r, F) => { const k = coteOf(r, F), t = r[F.tcp]; return k > 0 && coteNum(t) && k <= COTE_CONFIRM * t && t <= COTE_CONFIRM * k; };
+  // Carte retenue dans les classements (« Les plus chères », cartes d'un Pokémon) : cote sûre, ou confirmée.
+  const coteRanked = (r, F) => (!(F.q !== undefined && r[F.q] === 1) && coteSteady(r, F)) || coteConfirmed(r, F);
 
   TCG.load = function (doc) {
     const F = {};
@@ -172,7 +179,7 @@
       avg7: typeof r[F.avg7] === 'number' ? r[F.avg7] : null, avg1: typeof r[F.avg1] === 'number' ? r[F.avg1] : null,
       // Cote selon la version (2026-10-11) : cmv = groupe de prix de cm (« n » normal, « h » holo), cmh = tendance de
       // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
-      cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1,
+      cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1 && !coteConfirmed(r, F),
       dup: !!(TCG.dup && TCG.dup.has(id)),
       // Réimpression : carte et extension d'origine (visuel et numéro repris).
       reprintOf: ov ? orig : '', reprintSet: ov ? ov.set[0] : ''

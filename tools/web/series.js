@@ -153,12 +153,13 @@
   // du catalogue, dans l'écran « Extension » (identifiant virtuel « *top »), de la plus chère à la moins chère.
   // Préclassement sur la ligne brute (coteOf), puis cote Dropicards exacte des 200 retenues. Les cotes douteuses
   // (champ q du catalogue, écart anormal entre les prix) sont écartées : elles faussaient le haut du classement.
+  // Sauf si le prix TCGplayer de la carte les confirme (coteRanked, 2026-11-01).
   const SER_TOP_ID = '*top', SER_TOP_N = 200;
   let serTopCache = { doc: null, ids: [] };
   const serTopIds = () => {
     if (serTopCache.doc === TCG.doc) return serTopCache.ids;
     const F = TCG.F;
-    const ids = TCG.rows.filter(x => !(F.q !== undefined && x.r[F.q] === 1) && coteSteady(x.r, F)).map(x => [x.r[F.id], coteOf(x.r, F)]).filter(a => a[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, SER_TOP_N).map(a => a[0]);
+    const ids = TCG.rows.filter(x => coteRanked(x.r, F)).map(x => [x.r[F.id], coteOf(x.r, F)]).filter(a => a[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, SER_TOP_N).map(a => a[0]);
     serTopCache = { doc: TCG.doc, ids: ids };
     return ids;
   };

@@ -64,6 +64,7 @@ avertissement à +10 %, échec à +25 %). --force accepte un changement vérifi�
 """
 import argparse
 import json
+import math
 import re
 import sys
 import time
@@ -85,7 +86,12 @@ SKIP_SERIES = {"tcgp"}  # Pokémon TCG Pocket : cartes numériques, hors collect
 FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q", "cmf"]
 Q_MIN_TREND = 1.0  # en dessous de 1 €, l'écart entre plus bas et tendance ne dit rien : pas de « cote douteuse »
 SOON_DAYS = 90  # extension récente sans cote Cardmarket : « cote à venir »
-TCP_VARIANTS = ["normal", "holofoil", "reverse-holofoil", "1st-edition-holofoil", "1st-edition", "unlimited-holofoil", "unlimited"]
+# Prix TCGplayer (tcp) : plus dans la cote depuis le 2026-10-18 (porteur), seulement un repère. Les tirages illimités
+# passent avant la 1re édition (2026-11-01) : le repère d'une carte WotC est celui de la carte courante.
+TCP_VARIANTS = ["normal", "holofoil", "reverse-holofoil", "unlimited-holofoil", "unlimited", "1st-edition-holofoil", "1st-edition"]
+# Repère d'une carte holo seulement : holo illimitée, jamais la 1re édition ni la reverse.
+TCP_HOLO_REF = ["holofoil", "unlimited-holofoil"]
+GROUP_GAP = 2.0  # deux groupes de prix Cardmarket à plus de 2 fois d'écart : le repère TCGplayer départage
 # Raretés des cartes en anglais, dites comme dans le catalogue français.
 RARITY_FR = {
     "common": "Commune", "uncommon": "Peu Commune", "rare": "Rare", "rare holo": "Rare Holo", "holo rare": "Holo Rare",
@@ -133,11 +139,26 @@ def doubtful(trend, low, avg1):
     return (low is not None and low < 0.05 * trend) or (avg1 is not None and (avg1 > 3 * trend or 3 * avg1 < trend))
 
 
+def holo_ref(tp, rate):
+    """Prix TCGplayer (en €) de la holo illimitée, repère pour choisir le groupe de prix Cardmarket ; None sinon."""
+    for v in TCP_HOLO_REF:
+        row = tp.get(v)
+        if isinstance(row, dict):
+            usd = first(row, "marketPrice", "midPrice")
+            if usd is not None and usd > 0:
+                return usd * rate
+    return None
+
+
 def prices(card, rate):
     """(cm, low, avg30, tcp, maj, avg7, avg1, cmh, cmv, q) d'une carte TCGdex.
     Cardmarket donne deux groupes de prix : champs normaux (trend, low…) et champs « -holo » (trend-holo…).
     - Carte holo seulement (variants : ni normale ni reverse ; ex. Rayquaza ☆ ex8-107) : le groupe holo est le
       sien, le groupe normal est un autre produit mal rangé : cote tirée du groupe holo.
+      Sauf (2026-11-01, Dracaufeu du Set de Base absent de « Les plus chères ») quand les deux groupes s'écartent de
+      plus de 2 fois et que le prix TCGplayer de la holo illimitée est nettement plus proche du groupe normal :
+      Dracaufeu base1-4, groupe holo 123,63 €, groupe normal 497,57 €, TCGplayer 854,50 € → groupe normal. Le prix
+      TCGplayer ne sert qu'à choisir le groupe Cardmarket : la cote reste 100 % Cardmarket.
     - Carte avec une version reverse : « -holo » est le prix de la reverse ; cote du groupe normal, reverse à part (cmh).
     - Sinon : groupe normal s'il a une tendance, sinon groupe holo."""
     pr = card.get("pricing") or {}
@@ -157,6 +178,11 @@ def prices(card, rate):
     holo_only = bool(variants.get("holo")) and not variants.get("normal") and not variants.get("reverse")
     if holo_only:
         sfx = "-holo" if has_h else ""
+        ref = holo_ref(tp, rate)
+        if has_n and has_h and ref:
+            tn, th = num(cm.get("trend")), num(cm.get("trend-holo"))
+            if max(tn, th) >= GROUP_GAP * min(tn, th) and abs(math.log(tn / ref)) < abs(math.log(th / ref)):
+                sfx = ""
     else:
         sfx = "" if has_n or not has_h else "-holo"
     trend, low, avg30, avg7, avg1 = (num(cm.get(k + sfx)) for k in ("trend", "low", "avg30", "avg7", "avg1"))
