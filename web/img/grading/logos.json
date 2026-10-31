@@ -1,0 +1,20 @@
+{
+ "pca": {
+  "file": "pca.png",
+  "source": "https://pcagrade.com/images/other/logo-navbar@2x.png",
+  "license": "marque déposée",
+  "date": "2026-10-31"
+ },
+ "ccc": {
+  "file": "ccc.svg",
+  "source": "https://www.cccgrading.com/en",
+  "license": "marque déposée",
+  "date": "2026-10-31"
+ },
+ "psa": {
+  "file": "psa.png",
+  "source": "https://images.ctfassets.net/l40e281thfxr/6csiDTsdnOCtE97s4rmxLh/9a71ffc8f5e1de382d22b4cd71eac4da/PSA.png",
+  "license": "marque déposée",
+  "date": "2026-10-31"
+ }
+}
