@@ -679,7 +679,7 @@ Le script `tools/web/build.mjs` :
   - timbres : `sfxPizz`, `sfxStrings`, `sfxPiano`, `sfxChoir`, `sfxBrass`, `sfxPad`, `sfxBell`, `sfxCymbal` ;
   - volumes `SFX_GAIN` ;
   - instants de l'animation `SFX_FLASH`, `SFX_REVEAL` ;
-  - choix du porteur : « Suspense et lumière » seule (`SFX_EVO_DEFAULT = null`, `SFX_MUSIC_DEFAULT = 'suspense'`) ;
+  - choix du porteur : « Suspense et lumière » seule (`SFX_EVO_DEFAULT = null`, `SFX_MUSIC_DEFAULT = 'suspense'`) ; PA du jour : « Gouttes d'aura » (`SFX_PA_DEFAULT = 'gouttes'`) ;
   - essai : `?sonevo=` et `?musevo=` (numéro, identifiant ou 0), le temps de la page seulement (anciennes clés `pkm-evo-sfx`, `pkm-evo-music` effacées) ;
   - rendu hors ligne `sfxRender` (tests, échantillons) ;
   - coupé avec `pkm-tuto-sound = off`.

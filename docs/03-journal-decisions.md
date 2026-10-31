@@ -18,6 +18,7 @@
   - ouverte depuis la carte gradée, la fiche affiche en grand **la valeur de cet exemplaire** (par exemple 441,98 € pour CCC 9,5), pas la moyenne avec l'exemplaire non gradé ;
   - appui sur la ligne gradée de « État de ma carte » : **changer la note** ou **« Retirer la note »** (l'exemplaire redevient non gradé, en Near Mint ou dans son état d'avant).
 - **Tests** : `e2e/t-gradeedit.mjs` (nouveau, 16 contrôles) ; `t-graded`, `t-binder`, `t-fietat`, `t-fihist`, `t-dexcards`, `t-edit` repassés.
+- **Puis, décision du porteur** (cache v109) : bruitage des PA du jour **« Gouttes d'aura »** (« pa-2-gouttes-d-aura, je prends celui-là ») : un « ploc » d'eau au toucher, des gouttes qui tombent une à une sur le solde, un reflet d'eau à la fin (`SFX_PA_DEFAULT = 'gouttes'`, `sfx.js`). Les 4 autres restent pour essai seulement (?sonpa=1 à 5).
 
 ## 2026-11-01 (suite 4) — Pokédex retouché, sons de la pièce et de l'évolution
 

@@ -410,8 +410,9 @@
         sfxSparkle(ac, out, end + 0.1, end + 1.1, 6, 0.025, 3000);
       } }
   ];
-  // Proposé par défaut (à confirmer par le porteur) : « Cristaux qui tintent », dans l'esprit de la musique d'évolution.
-  const SFX_PA_DEFAULT = 'cristaux';
+  // Choix du porteur (2026-11-01, « pa-2-gouttes-d-aura, je prends celui-là ») : « Gouttes d'aura ». Les autres restent
+  // pour essai seulement (?sonpa=1 à 5).
+  const SFX_PA_DEFAULT = 'gouttes';
 
   // Choix du porteur (2026-11-01, « c'est ok pour 0-reference-suspense-et-lumiere ») : la musique « Suspense et
   // lumière » seule, sans son d'évolution par-dessus.

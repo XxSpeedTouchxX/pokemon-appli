@@ -37,7 +37,7 @@ const open = async (q, muted) => {
   const both = await page.evaluate(() => window.__pkm.sfxRender([['evo', 'cristal'], ['music', 'suspense']], 7.8).then(x => x.peak));
   ok('son et musique ensemble : crête ' + db(both) + ' dBFS, sans saturation', db(both) <= -1);
   // PA du jour (2026-11-01, porteur : « un petit bruitage quand tu récupères tes PA ») : 5 propositions.
-  ok('bruitages des PA : ' + L.pa.map(x => x.name).join(', ') + ' (proposé : ' + L.paDef + ')', L.pa.length === 5 && L.paDef === 'cristaux');
+  ok('bruitages des PA : ' + L.pa.map(x => x.name).join(', ') + ' (choix du porteur : ' + L.paDef + ')', L.pa.length === 5 && L.paDef === 'gouttes');
   const pv = [];
   for (const x of L.pa) { const r = await page.evaluate(id => window.__pkm.sfxRender([['pa', id, 10]], 3.6).then(v => v.peak), x.id); pv.push(x.id + ' ' + db(r)); }
   ok('PA : crêtes ' + pv.join(' · ') + ' dBFS', pv.every(t => { const v = Number(t.split(' ')[1]); return v <= -5 && v >= -8; }));
