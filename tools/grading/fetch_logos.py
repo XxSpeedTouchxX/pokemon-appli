@@ -4,8 +4,10 @@
 Chaque logo vient du site officiel de l'entreprise (un seul fichier par entreprise, pas d'aspiration de pages) :
 - PCA : image de la barre de navigation de pcagrade.com ;
 - CCC : logo SVG intégré à l'en-tête de cccgrading.com (couleurs de la page reportées dans le fichier) ;
-- PSA : logo SVG de l'en-tête de psacard.com, recopié dans web/img/grading/psa.svg le 2026-10-31 (le site répond
-  403 aux machines de GitHub) ; gardé tel quel s'il existe, sinon l'image de partage de leur CDN Contentful.
+- PSA : logo rouge et bleu (2026-11-01, porteur : « le vrai logo PSA en rouge et bleu »), celui de l'article
+  « Professional Sports Authenticator » de Wikipédia en anglais (fichier hébergé par Wikipédia au titre de marque
+  déposée) → web/img/grading/psa-color.png. Le logo blanc de l'en-tête de psacard.com (psa.svg, recopié le 2026-10-31,
+  le site répond 403 aux machines de GitHub) reste en réserve.
 Écrit web/img/grading/<pca|ccc|psa>.<ext> et web/img/grading/logos.json (source, date). Lancé par
 .github/workflows/grading-logos.yml : ces sites ne sont pas joignables depuis l'environnement de Claude Code.
 
@@ -22,15 +24,19 @@ import urllib.request
 
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'web', 'img', 'grading')
 BROWSER = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36'
+# Wikimedia demande un agent qui se présente (règle d'accès de ses serveurs).
+WIKI_UA = 'DropicardsDemo/1.0 (https://github.com/XxSpeedTouchxX/pokemon-appli; demo app, grading company logos)'
 
 PCA = ['https://pcagrade.com/images/other/logo-navbar@2x.png']
 CCC_PAGE = 'https://www.cccgrading.com/en'
+PSA_COLOR = ['https://upload.wikimedia.org/wikipedia/en/f/fc/Professional_Sports_Authenticator_Logo.png']
 PSA = ['https://images.ctfassets.net/l40e281thfxr/6csiDTsdnOCtE97s4rmxLh/9a71ffc8f5e1de382d22b4cd71eac4da/PSA.png']
 
 
 def fetch(url):
+    ua = WIKI_UA if 'wikimedia.org' in url or 'wikipedia.org' in url else BROWSER
     for i in range(4):
-        req = urllib.request.Request(url, headers={'User-Agent': BROWSER, 'Accept': '*/*', 'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8'})
+        req = urllib.request.Request(url, headers={'User-Agent': ua, 'Accept': '*/*', 'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8'})
         try:
             with urllib.request.urlopen(req, timeout=40) as r:
                 return r.read(), r.headers.get('Content-Type', '')
@@ -121,12 +127,12 @@ def main():
     except (OSError, ValueError):
         pass
     psa_kept = os.path.exists(os.path.join(OUT, 'psa.svg'))
-    ok = [first('pca', PCA, done), ccc(done), psa_kept or first('psa', PSA, done)]
+    ok = [first('pca', PCA, done), ccc(done), psa_kept or first('psa', PSA, done), first('psa-color', PSA_COLOR, done)]
     with open(os.path.join(OUT, 'logos.json'), 'w', encoding='utf-8') as f:
         json.dump(done, f, ensure_ascii=False, indent=1)
     print('Logos :', ', '.join(done) or 'aucun')
     if not all(ok):
-        print('::warning::logo(s) manquant(s) : ' + ', '.join(n for n, o in zip(('pca', 'ccc', 'psa'), ok) if not o))
+        print('::warning::logo(s) manquant(s) : ' + ', '.join(n for n, o in zip(('pca', 'ccc', 'psa', 'psa-color'), ok) if not o))
     return 0
 
 
