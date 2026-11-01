@@ -932,6 +932,50 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-fi-gbadge .pkm-gr-badge-logo { height: 18px; max-width: 48px; }
 .pkm-fi-gbadge .pkm-gr-badge-g { font-size: 14px; padding: 1px 7px; border-radius: 6px; }
 
+/* PK shop : rubriques « Magasin » et « Recharger mes PA » (2026-11-01, porteur ; maquette docs/20). */
+.pkm-shop-tabs { flex: none; display: flex; gap: 8px; }
+.pkm-shop-tab { flex: 1; min-height: 44px; border: 0; border-radius: 999px; background: rgba(11, 17, 32, 0.08); color: #0B1120; font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+.pkm-shop-tab-on { background: #0B1120; color: #FFD60A; }
+.pkm-pas { flex: none; display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; background: #0F1828; color: #F3F6FC; }
+.pkm-pas-bal { display: flex; align-items: center; gap: 12px; }
+.pkm-pas-bal img { flex: none; display: block; }
+.pkm-pas-bal div { display: flex; flex-direction: column; }
+.pkm-pas-bal span { font-size: 13px; color: #9AA8C3; }
+.pkm-pas-bal b { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: #FFFFFF; }
+.pkm-pas-first { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; border: 1px dashed rgba(206, 150, 255, 0.7); background: linear-gradient(90deg, rgba(178, 107, 255, 0.2), rgba(178, 107, 255, 0.05)); }
+.pkm-pas-first img { flex: none; display: block; }
+.pkm-pas-first b { display: block; font-family: 'Sora', sans-serif; font-size: 15px; color: #FFD60A; }
+.pkm-pas-first span { font-size: 12.5px; color: #C9D3EA; }
+.pkm-pas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pkm-pas-pack { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 16px 10px 12px; border-radius: 18px; border: 1.5px solid #2E4270; background: #16233F; color: #FFFFFF; font: inherit; cursor: pointer; }
+.pkm-pas-hot { border-color: #FFD60A; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.18); }
+.pkm-pas-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); padding: 3px 10px; border-radius: 999px; background: #FFD60A; color: #0B1120; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.pkm-pas-tag-g { background: #2FD37A; }
+.pkm-pas-drops { height: 54px; display: flex; align-items: flex-end; justify-content: center; }
+.pkm-pas-drop { width: 34px; height: 34px; margin: 0 -6px; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45)); }
+.pkm-pas-drop-b { width: 44px; height: 44px; }
+.pkm-pas-qty { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 26px; line-height: 1.1; color: #FFFFFF; -webkit-text-stroke: 1px #000000; paint-order: stroke fill; white-space: nowrap; }
+.pkm-pas-qty small { font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 800; -webkit-text-stroke: 0; }
+.pkm-pas-bonus { font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; color: #5BE08F; }
+.pkm-pas-none { color: #9AA8C3; }
+.pkm-pas-price { align-self: stretch; margin-top: 8px; height: 38px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: #FFD60A; color: #0B1120; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 800; }
+.pkm-pas-uses { margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA; }
+.pkm-pas-legal { margin: 0; font-size: 11.5px; line-height: 1.45; color: #9AA8C3; }
+.pkm-pas-wrap { position: fixed; inset: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
+.pkm-pas-scrim { position: absolute; inset: 0; border: 0; padding: 0; background: rgba(3, 6, 14, 0.6); cursor: pointer; }
+.pkm-pas-sheet { position: relative; width: 100%; max-width: 480px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; padding: 20px 18px 28px; border-radius: 28px 28px 0 0; border-top: 1px solid #2A3A5E; background: #0E1730; color: #F3F6FC; }
+.pkm-pas-sheet h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 20px; }
+.pkm-pas-recap { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: #16233F; }
+.pkm-pas-recap img { flex: none; display: block; }
+.pkm-pas-recap div { display: flex; flex-direction: column; }
+.pkm-pas-lines { font-size: 14px; }
+.pkm-pas-lines div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #24355A; color: #C9D3EA; }
+.pkm-pas-lines b { color: #FFFFFF; }
+.pkm-pas-lines .pkm-pas-tot { border: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 800; color: #FFFFFF; }
+.pkm-pas-soon { margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(245, 177, 76, 0.12); font-size: 13px; line-height: 1.45; color: #F5D08C; }
+.pkm-pas-pay { height: 52px; border: 0; border-radius: 14px; background: #3A4767; color: #C9D3EA; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 800; cursor: not-allowed; }
+.pkm-pas-cancel { min-height: 44px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
    de PA sur celui de droite. Puis l'écran « Route d'évolution » d'après la « Digivolution Route » de Digimon World Dusk
@@ -1438,6 +1482,6 @@ html.pkm-theme-storm:not(.pkm-classic) #app { background: #174D48; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=7167fed4"></script>
+<script src="app.js?v=9ec2ae20"></script>
 </body>
 </html>

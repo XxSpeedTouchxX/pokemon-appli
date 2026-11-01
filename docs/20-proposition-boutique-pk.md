@@ -4,6 +4,8 @@
 
 Maquette : `docs/20-maquette-boutique-pk/index.html` (image : `maquette.png`).
 
+> **Mise à jour du 2026-11-01 (porteur) :** les PK payants sont **remplacés par des PA payants** (« une boutique de PA avec 4 tarifs »), dans le PK shop › « Recharger mes PA » : 500 PA 1,99 €, 1 500 PA 4,99 €, 3 500 PA 9,99 €, 8 000 PA 19,99 €. Le §4 (loterie) ne s'applique plus aux PA, qui ne servent pas aux tickets. Les §5 (prérequis) et §6 (effort, environ 45 h) restent valables.
+
 ---
 
 ## 1. En bref

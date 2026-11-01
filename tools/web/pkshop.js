@@ -36,6 +36,41 @@
       toast: (item.kind === 'ticket' ? 'Ticket ajouté · tu en as ' + tickets[id] : item.name + ' · échange enregistré') + ' · il te reste ' + left + ' PK' });
     this.flash();
   };
+  // Recharger mes PA (2026-11-01, demande du porteur : « une boutique de PA avec 4 tarifs », dans le PK shop, rubrique
+  // « Recharger mes PA » à côté de « Magasin », comme la maquette docs/20). Prix TTC proposés, à valider : base 250 PA
+  // pour 1 €, bonus sur les gros packs, 1ʳᵉ recharge doublée. Le paiement n'est pas encore branché (il faut les comptes
+  // Dropicards, le serveur et Stripe, docs/20) : le récapitulatif le dit, rien n'est débité ni crédité.
+  const SHOP_PA_PACKS = [
+    { pa: 500, eur: '1,99 €', bonus: 0, drops: 1 },
+    { pa: 1500, eur: '4,99 €', bonus: 20, drops: 2 },
+    { pa: 3500, eur: '9,99 €', bonus: 40, drops: 3, tag: 'Le plus choisi' },
+    { pa: 8000, eur: '19,99 €', bonus: 60, drops: 4, tag: 'Meilleure valeur', best: true }
+  ];
+  const shopNum = n => Number(n).toLocaleString('fr-FR').replace(/\s/g, '\u00a0');
+  const shopTabs = (self, s) => {
+    const onPa = s.shopTab === 'pa', pa = Number(s.pa) || 0, first = !s.paBought;
+    const ask = SHOP_PA_PACKS[s.shopPaAsk];
+    const tot = DEX_DATA.reduce((t, e) => t + (dexPrice(e.n) || 0), 0);
+    return {
+      isStore: !onPa, isPa: onPa, storeOn: String(!onPa), paOn: String(onPa),
+      storeCls: 'pkm-shop-tab' + (onPa ? '' : ' pkm-shop-tab-on'), paCls: 'pkm-shop-tab' + (onPa ? ' pkm-shop-tab-on' : ''),
+      goStore: () => self.setState({ shopTab: 'store', shopPaAsk: null }), goPa: () => self.setState({ shopTab: 'pa', shopAsk: null }),
+      paLogo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg', paBal: shopNum(pa), paTotal: shopNum(tot),
+      packs: SHOP_PA_PACKS.map((k, i) => ({
+        qty: shopNum(k.pa), price: k.eur, bonus: k.bonus ? '+' + k.bonus + ' % offerts' : 'Prix de base', bonusCls: 'pkm-pas-bonus' + (k.bonus ? '' : ' pkm-pas-none'),
+        hasTag: !!k.tag, tag: k.tag || '', tagCls: 'pkm-pas-tag' + (k.best ? ' pkm-pas-tag-g' : ''),
+        cls: 'pkm-pas-pack' + (k.tag && !k.best ? ' pkm-pas-hot' : ''), aria: shopNum(k.pa) + ' PA pour ' + k.eur + (k.bonus ? ', dont ' + k.bonus + ' % offerts' : ''),
+        drops: Array.from({ length: k.drops }, (_, j) => ({ cls: 'pkm-pas-drop' + (j % 2 ? ' pkm-pas-drop-b' : '') })),
+        pick: () => self.setState({ shopPaAsk: i })
+      })),
+      ask: ask ? {
+        open: true, qty: shopNum(ask.pa), bonus: ask.bonus ? 'dont ' + shopNum(Math.round(ask.pa * ask.bonus / (100 + ask.bonus) / 10) * 10) + ' PA offerts (+' + ask.bonus + ' %)' : 'Prix de base',
+        first: first ? '+ ' + shopNum(ask.pa) + ' PA' : 'déjà utilisée', get: shopNum(ask.pa * (first ? 2 : 1)) + ' PA', after: shopNum(pa + ask.pa * (first ? 2 : 1)) + ' PA', price: ask.eur,
+        soon: 'Le paiement n’est pas encore ouvert : il arrivera avec les comptes Dropicards. Rien n’est débité.', payLabel: 'Payer ' + ask.eur + ' · bientôt',
+        close: () => self.setState({ shopPaAsk: null })
+      } : { open: false }
+    };
+  };
   shopProto.vPkShop = function (s) {
     const pk = Number(s.pk) || 0, tickets = s.tickets || {};
     return {
@@ -54,6 +89,8 @@
           open: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => this.shopBuy(it.id)
         };
       }),
+      // Rubriques (2026-11-01, porteur) : « Magasin » (les articles) et « Recharger mes PA » (packs de PA en argent réel).
+      ...shopTabs(this, s),
       rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Le tirage sera fait par Dropicards selon un règlement publié avant le tirage. Tes tickets et tes lots sont gardés sur cet appareil, avec ta collection.',
       earn: () => this.tab('market'), openRules: () => this.legalOpen('pk')
     };

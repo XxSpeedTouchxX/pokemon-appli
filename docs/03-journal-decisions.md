@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-11-01 (suite 11) — PK shop : rubriques « Magasin » et « Recharger mes PA »
+
+- **Demandes du porteur** :
+  - « à la place de la boutique de PK, une boutique de PA avec 4 tarifs différents » : la proposition de PK payants (suite 9, `docs/20`) est **remplacée** ;
+  - l'intégrer dans l'onglet PK shop, avec en haut la rubrique « Magasin » (l'écran actuel) et, à côté, « Recharger mes PA », comme la maquette.
+- **Fait** (cache v114, `pkshop.js`, `games.css`) :
+  - deux rubriques en haut du PK shop ;
+  - « Recharger mes PA » :
+    - solde de PA ;
+    - « 1ʳᵉ recharge : PA doublés » ;
+    - **4 packs proposés, à valider** : 500 PA à 1,99 €, 1 500 PA (+20 %) à 4,99 €, 3 500 PA (+40 %, « le plus choisi ») à 9,99 €, 8 000 PA (+60 %, « meilleure valeur ») à 19,99 € ;
+    - récapitulatif au toucher (PA reçus, solde après l'achat, total TTC) ;
+    - mentions : TTC, 18 ans et plus, aucune valeur en euros.
+- **Paiement pas encore branché** : le récapitulatif l'indique (« il arrivera avec les comptes Dropicards »), le bouton est grisé, rien n'est débité ni crédité. Il faut d'abord les comptes, le serveur et Stripe (`docs/17`, `docs/20` §5).
+- **Pourquoi des PA plutôt que des PK** : les PA servent au Pokédex, sans tirage au sort. Le risque de loterie de `docs/20` §4 ne se pose donc plus.
+- **Point d'attention** : les grades comptent les compagnons débloqués. Des PA achetés aideraient donc à monter en grade.
+- **Tests** : `e2e/t-pashop.mjs` (nouveau, 10 contrôles) ; `t-pk` aux nouveaux prix du Pokédex.
+
 ## 2026-11-01 (suite 10) — Prix en PA fixés Pokémon par Pokémon
 
 - **Décision du porteur** : nouveaux prix pour les 171 Pokémon du Pokédex, fixés un par un (liste renvoyée par le porteur ; `docs/21-prix-pa-pokedex.csv`). Total pour tout débloquer : **15 120 PA** (avant : environ 81 000). Exemples :

@@ -1625,6 +1625,8 @@
 </sc-if>
 <!-- fragment: pkshop -->
 <sc-if value="{{ ui.isPkShop }}" hint-placeholder-val="{{ false }}">
+<div role="tablist" aria-label="PK shop" class="pkm-shop-tabs"><button type="button" role="tab" aria-selected="{{ pks.storeOn }}" onClick="{{ pks.goStore }}" class="{{ pks.storeCls }}">Magasin</button><button type="button" role="tab" aria-selected="{{ pks.paOn }}" onClick="{{ pks.goPa }}" class="{{ pks.paCls }}">Recharger mes PA</button></div>
+<sc-if value="{{ pks.isStore }}" hint-placeholder-val="{{ true }}">
 <section aria-label="Mon solde de PK" class="pkm-dark" style="flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 22px; border: 1px solid #24345C; background: #0F1828; color: #F3F6FC">
 <img src="img/brand/pk.svg" alt="" width="48" height="48" style="flex: none; display: block">
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 13px; color: #9AA8C3">Ton solde</span><span style="font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700">{{ pks.pk }} PK</span><sc-if value="{{ pk.hasTickets }}" hint-placeholder-val="{{ false }}"><span class="pkm-tk-bar"><span class="pkm-tk-mini" aria-hidden="true"></span>{{ pk.tickets }}</span></sc-if></span>
@@ -1659,6 +1661,27 @@
 </sc-for>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ pks.rules }}</p>
 <button type="button" onClick="{{ pks.openRules }}" style="flex: none; align-self: flex-start; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: var(--pkm-t1); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Règles des PK et PA</button>
+</sc-if>
+<sc-if value="{{ pks.isPa }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Recharger mes PA" class="pkm-dark pkm-pas">
+<div class="pkm-pas-bal"><img src="{{ pks.paLogo }}" alt="" width="52" height="52"><div><span>Ton solde</span><b>{{ pks.paBal }} PA</b></div></div>
+<div class="pkm-pas-first"><img src="img/brand/pa.svg" alt="" width="36" height="36"><div><b>1ʳᵉ recharge : PA doublés</b><span>Une seule fois, sur le pack de ton choix.</span></div></div>
+<div class="pkm-pas-grid"><sc-for list="{{ pks.packs }}" as="pp" hint-placeholder-count="4"><button type="button" onClick="{{ pp.pick }}" aria-label="{{ pp.aria }}" class="{{ pp.cls }}"><sc-if value="{{ pp.hasTag }}" hint-placeholder-val="{{ false }}"><span class="{{ pp.tagCls }}">{{ pp.tag }}</span></sc-if><span class="pkm-pas-drops"><sc-for list="{{ pp.drops }}" as="pd" hint-placeholder-count="2"><img src="img/brand/pa.svg" alt="" class="{{ pd.cls }}"></sc-for></span><span class="pkm-pas-qty">{{ pp.qty }} <small>PA</small></span><span class="{{ pp.bonusCls }}">{{ pp.bonus }}</span><span class="pkm-pas-price">{{ pp.price }}</span></button></sc-for></div>
+<p class="pkm-pas-uses">Avec tes PA, tu débloques les Pokémon du Pokédex et tu fais évoluer ton compagnon. Tout le Pokédex : {{ pks.paTotal }} PA.</p>
+<p class="pkm-pas-legal">Prix TTC · paiement sécurisé · réservé aux 18 ans et plus · les PA n’ont aucune valeur en euros, ne se revendent pas et ne s’échangent pas.</p>
+</section>
+<sc-if value="{{ pks.ask.open }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-pas-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.ask.close }}" class="pkm-pas-scrim"></button>
+<section aria-label="Ton achat de PA" role="dialog" aria-modal="true" class="pkm-dark pkm-pas-sheet">
+<h2>Ton achat</h2>
+<div class="pkm-pas-recap"><img src="img/brand/pa.svg" alt="" width="48" height="48"><div><span class="pkm-pas-qty">{{ pks.ask.qty }} <small>PA</small></span><span class="pkm-pas-bonus">{{ pks.ask.bonus }}</span></div></div>
+<div class="pkm-pas-lines"><div><span>1ʳᵉ recharge doublée</span><b>{{ pks.ask.first }}</b></div><div><span>Tu recevras</span><b>{{ pks.ask.get }}</b></div><div><span>Ton solde après l’achat</span><b>{{ pks.ask.after }}</b></div><div class="pkm-pas-tot"><span>Total TTC</span><span>{{ pks.ask.price }}</span></div></div>
+<p class="pkm-pas-soon" role="status">{{ pks.ask.soon }}</p>
+<button type="button" disabled class="pkm-pas-pay">{{ pks.ask.payLabel }}</button>
+<button type="button" onClick="{{ pks.ask.close }}" class="pkm-pas-cancel">Fermer</button>
+</section></div>
+</sc-if>
+</sc-if>
 </sc-if>
 
 <!-- fragment: pk-unlock -->
