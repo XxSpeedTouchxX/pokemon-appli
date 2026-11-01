@@ -21,6 +21,9 @@
   - anneau de l'onglet : son contour de 3 px restait hors de sa taille (6 px de trop à droite et en bas) ; corrigé (`box-sizing`), la manette est au centre ;
   - texte de l'étape des PA : « Chaque jour, touche ton solde de PA pour récupérer tes PA : tu peux en obtenir jusqu'à 30 quotidiennement ! ».
 - **Tests** : `t-onb`, `t-tuto`, `t-contrast`, `t-home`, `t-dexpad` repassés.
+- **Suite (même jour, porteur)** (cache v123) :
+  - premier écran : en changeant de starter, Pikachu, Salamèche et Carapuce sautaient de quelques pixels à la fin de l'animation (elle finissait au centre de l'image, puis le Pokémon revenait au centre de son corps) ; l'animation va désormais directement à sa place (`start.js`, `stFocusSwap`) ;
+  - didacticiel, étape de la valeur : cadre jaune agrandi (12 px de marge au lieu de 6) et page placée pour que le cadre entier tienne au-dessus de la bulle (`tuto.js`, `pad` pris en compte dans `tutoZone`).
 
 ## 2026-11-01 (suite 16) — Carte du Radar noire sur le téléphone : corrigée
 

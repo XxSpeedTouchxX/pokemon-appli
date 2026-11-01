@@ -48,7 +48,10 @@
     const img = el.querySelector('.pkm-onb-focus-show img'), id = el.querySelector('.pkm-onb-focus-id');
     if (!el.animate) return;
     el.animate([{ transform: 'scale(0.97)' }, { transform: 'none' }], { duration: 320, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1.2)' });
-    if (img) img.animate([{ opacity: 0, transform: 'translateX(' + dir * 40 + 'px) scale(0.55)' }, { opacity: 1, transform: 'none' }], { duration: 440, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1.25)' });
+    // L'image arrive à sa vraie place, centrée sur le corps (stBodyStyle) : avant, l'animation finissait au centre de
+    // l'image puis le Pokémon sautait d'un coup (2026-11-01, porteur : « léger décalage pour se replacer au milieu »).
+    const base = img && img.style.transform ? img.style.transform : '';
+    if (img) img.animate([{ opacity: 0, transform: (base + ' translateX(' + dir * 40 + 'px) scale(0.55)').trim() }, { opacity: 1, transform: base || 'none' }], { duration: 440, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1.25)' });
     if (id) id.animate([{ opacity: 0, transform: 'translateX(' + dir * 30 + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 360, delay: 70, easing: 'cubic-bezier(0.32, 0.72, 0, 1)', fill: 'backwards' });
   };
   const stBaseOnb = proto.vOnb;

@@ -24,9 +24,9 @@
   const TUTO_NAV = 'nav[aria-label="Navigation principale"] ';
   // Textes du porteur (2026-10-30), orthographe revue ; encadré des PA dans le Pokédex et solde des PK ajoutés,
   // « Tous les Pokémon » retiré. « fit » : sur un petit écran, seuls les premiers enfants sont encadrés (la valeur reste
-  // entière au-dessus de la bulle).
+  // entière au-dessus de la bulle). « pad » de 12 px sur la valeur (2026-11-01, porteur : des lettres touchaient le cadre).
   const TUTO_STEPS = [
-    { tab: 'home', sel: 'section[aria-label="Valeur de ma collection"]', fit: 2, text: 'Salut ! Ici, tu vois la valeur de toute ta collection : cartes et produits scellés, au prix du marché.' },
+    { tab: 'home', sel: 'section[aria-label="Valeur de ma collection"]', fit: 2, pad: 12, text: 'Salut ! Ici, tu vois la valeur de toute ta collection : cartes et produits scellés, au prix du marché.' },
     { tab: 'home', sel: 'section[aria-label="Mon classeur"]', text: 'Ici, tu pourras trouver ton classeur : il servira à ranger toutes les cartes et tous les produits scellés de ta collection.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label^="Scanner"]', text: 'Ici, c’est le Scan Dropicards : grâce à lui, tu pourras scanner rapidement ta carte et connaître sa valeur sur le marché actuel.' },
     { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', kids: 2, text: 'Tu pourras retrouver ici le radar des boutiques : il te permettra de localiser précisément les boutiques qui vendent du Pokémon autour de toi, et la probabilité d’y trouver des items.' },
@@ -236,7 +236,7 @@
     // Solde des PK (2026-10-31, porteur) : le cadre suit la pastille elle-même, pas sa zone de toucher, pour ne plus
     // mordre sur le solde de PA juste dessous.
     if (st.inner && t.firstElementChild) return t.firstElementChild.getBoundingClientRect();
-    if (st.fit && !st.kids && tutoRoom(t) < t.getBoundingClientRect().height + 12) st = Object.assign({}, st, { kids: st.fit });
+    if (st.fit && !st.kids && tutoRoom(t) < t.getBoundingClientRect().height + 2 * (st.pad != null ? st.pad : 6)) st = Object.assign({}, st, { kids: st.fit });
     if (st.ico) {
       const r = (t.querySelector('svg') || t).getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, h = st.ico / 2;
       return { left: cx - h, top: cy - h, right: cx + h, bottom: cy + h, width: st.ico, height: st.ico };
@@ -260,7 +260,8 @@
   const tutoZone = (t, st, top) => {
     const main = t.closest('main'), H = TUTO.el.host.getBoundingClientRect(), M = main.getBoundingClientRect(), r = tutoRect(t, st), bh = TUTO.el.box.offsetHeight;
     const lo = top ? Math.max(M.top + 8, H.top + 14 + bh + 14) : M.top + 8, hi = top ? tutoNavTop(H) - 8 : H.bottom - tutoBottom() - bh - 14;
-    const want = Math.max(lo, Math.min(top ? lo : M.top + 96, hi - r.height));
+    // La marge du cadre (pad) compte aussi : le cadre entier tient entre l'en-tête et la bulle (2026-11-01, porteur).
+    const pad = st.pad != null ? st.pad : 6, want = Math.max(lo + pad, Math.min(top ? lo + pad : M.top + 96, hi - pad - r.height));
     const d = Math.max(-main.scrollTop, Math.min(main.scrollHeight - main.clientHeight - main.scrollTop, r.top - want));
     return { d: d, seen: Math.min(hi, r.bottom - d) - Math.max(lo, r.top - d) };
   };
@@ -375,7 +376,7 @@
     tutoSize(text);
     // Étape « fit » (la valeur de la collection) : si l'encadré ne tient pas au-dessus de la bulle, la bulle descend
     // tout en bas, par-dessus la barre du bas, pour lui laisser la place.
-    el.box.classList.toggle('pkm-tt-low', !!(st.fit && TUTO.target && tutoRoom(TUTO.target, 92) < TUTO.target.getBoundingClientRect().height + 12));
+    el.box.classList.toggle('pkm-tt-low', !!(st.fit && TUTO.target && tutoRoom(TUTO.target, 92) < TUTO.target.getBoundingClientRect().height + 2 * (st.pad != null ? st.pad : 6)));
     const top = tutoPlace(TUTO.target, st);
     el.box.classList.toggle('pkm-tt-top', top);
     tutoType(text);
