@@ -355,6 +355,9 @@ patch('font-size: 17px; font-weight: 600">Historique d’achat</h2>\n', 'font-si
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['import-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Fonds animés et micro-animations (fx.js, fx.css) : calque décoratif en premier enfant de l'app ; choix dans Réglages.
 patchRe(/(<div class="pkm-root"[^>]*>)/, '$1\n<div id="pkm-fx" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>');
+// Décors des compagnons à thème (2026-11-01, soir, porteur) : volcan et lave (Groudon), pluie et vagues (Kyogre),
+// orage, éclairs et météores (Rayquaza) ; calque #pkm-scene (scene.html, styles dans fx.css), affiché avec le thème.
+patchRe(/(<div id="pkm-fx" aria-hidden="true">(?:<i><\/i>){8}<\/div>)/, '$1\n' + readFileSync(new URL('./scene.html', import.meta.url), 'utf8').trim().replace(/\$/g, '$$$$'));
 patch('<section aria-label="Sources de prix"', FRAG['fx-set'] + '<section aria-label="Sources de prix"');
 // Corriger ou supprimer un ajout (edit.js) : bouton « Modifier » sur chaque ligne de l'historique d'achat, panneau de
 // modification, « Annuler » dans le message qui suit.

@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-01 (suite 23) — Décors animés des compagnons à thème : volcan, pluie et vagues, orage et météores
+
+- **Demande du porteur** : Groudon « plus volcanique, avec des animations de lave ou un volcan en arrière-plan » ; Kyogre « pluie et vagues en arrière-fond » ; Rayquaza « accentue les orages, et des météores en arrière-plan ».
+- **Fait** (cache v129) : nouveau calque `#pkm-scene` (`tools/web/scene.html`, styles dans `fx.css`), derrière l'app, avec le thème du compagnon :
+  - **Groudon** : volcan au fond (cratère vers le milieu de l'écran) qui rougeoie, trois coulées de lave qui avancent, fumée qui monte, projections de lave en arc, lueur de chaleur ; braises (déjà là) ;
+  - **Kyogre** : deux rideaux de pluie, trois vagues qui roulent en bas de l'écran en sens contraires, ronds de pluie sur l'eau ; bulles (déjà là) ;
+  - **Rayquaza** : nuages sombres qui passent, pluie battante, trois éclairs qui frappent à des moments différents avec l'écran qui s'illumine, quatre météores qui traversent le ciel ;
+  - mêmes règles que les fonds animés : « Calmes » deux fois plus lent et plus discret, « Sans » les retire, arrêt quand l'app est cachée ou si le téléphone demande moins d'animations ; en-tête toujours net ; tout en CSS (aucun calcul en JavaScript).
+- **Tests** : `t-scene` (nouveau), `t-fx`, `t-themes`, `t-home`, `t-smoke`, `t-intro`. Vidéo envoyée au porteur.
+
 ## 2026-11-01 (suite 22) — Jeux : titres « Booster PK » et « Pile ou face » dans la police du Pokédex
 
 - **Demande du porteur** : même police que « Pokédex ».

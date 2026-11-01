@@ -79,7 +79,7 @@
     if (r.set) {
       r.set.fx = {
         modes: FX_MODES.map(([k, label]) => Object.assign({ label: label, on: mode === k, pick: () => this.setState({ bgFx: k }) }, this.chip(mode === k))),
-        help: { auto: 'Reflet holo sur l’accueil, gemmes dans le Marché, ondes radar dans Territoire ; bulles, braises ou orage avec Kyogre, Groudon et Rayquaza.', calm: 'Mêmes décors, deux fois plus lents et plus discrets.', off: 'Fond fixe, sans décor animé.' }[mode]
+        help: { auto: 'Reflet holo sur l’accueil, gemmes dans le Marché, ondes radar dans Territoire ; pluie et vagues avec Kyogre, volcan et lave avec Groudon, orage et météores avec Rayquaza.', calm: 'Mêmes décors, deux fois plus lents et plus discrets.', off: 'Fond fixe, sans décor animé.' }[mode]
           + ' Toujours arrêtés si ton téléphone demande moins d’animations.'
       };
     }
