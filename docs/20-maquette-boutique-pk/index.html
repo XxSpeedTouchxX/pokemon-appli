@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette · Boutique de PK (PKM-App, proposition)</title>
+<!-- Maquette statique de la proposition docs/20-proposition-boutique-pk.md : rien n'est branché dans l'app. -->
+<style>
+@font-face { font-family: 'Sora'; font-weight: 600; src: url(../../web/fonts/sora-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Sora'; font-weight: 700; src: url(../../web/fonts/sora-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Sora'; font-weight: 800; src: url(../../web/fonts/sora-latin-800-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 500; src: url(../../web/fonts/plus-jakarta-sans-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 700; src: url(../../web/fonts/plus-jakarta-sans-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Lucky'; src: url(../../web/fonts/luckiest-guy-latin-400-normal.woff2) format('woff2'); }
+:root { --bg: #FFD60A; --navy: #0B1120; --card: rgba(17, 26, 48, 0.94); --line: #2A3A5E; --soft: #9AA8C3; --yellow: #FFD60A; --green: #2FD37A; }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px; background: #E9EDF5; font-family: 'Jakarta', system-ui, sans-serif; color: #FFFFFF; }
+.row { display: flex; gap: 28px; align-items: flex-start; }
+.cap { width: 390px; margin: 0 0 10px; color: #0B1120; font: 700 15px 'Sora', sans-serif; }
+.phone { width: 390px; height: 844px; border-radius: 36px; overflow: hidden; position: relative; background: linear-gradient(180deg, #FFE45C 0, var(--bg) 220px, #F4C400 100%); box-shadow: 0 20px 50px rgba(11, 17, 32, 0.25); }
+.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 16px 6px; }
+.bal { display: flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px 0 6px; border-radius: 999px; background: var(--navy); font: 800 16px 'Sora', sans-serif; }
+.bal img { width: 28px; height: 28px; }
+.bal small { font-size: 12px; }
+h1 { margin: 6px 16px 10px; color: var(--navy); font: 800 34px 'Sora', sans-serif; letter-spacing: -0.5px; }
+.panel { margin: 0 12px; padding: 16px; border-radius: 24px; background: var(--card); border: 1px solid var(--line); }
+.tabs { display: flex; gap: 8px; margin: 0 12px 12px; }
+.tab { flex: 1; height: 40px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font: 700 14px 'Sora', sans-serif; color: var(--navy); background: rgba(11, 17, 32, 0.08); }
+.tab.on { background: var(--navy); color: var(--yellow); }
+.first { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding: 12px; border-radius: 16px; background: linear-gradient(90deg, rgba(255, 214, 10, 0.18), rgba(255, 214, 10, 0.04)); border: 1px dashed rgba(255, 214, 10, 0.6); }
+.first b { display: block; font: 800 15px 'Sora', sans-serif; color: var(--yellow); }
+.first span { font-size: 12.5px; color: #C9D3EA; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pack { position: relative; padding: 14px 10px 12px; border-radius: 18px; background: #16233F; border: 1.5px solid #2E4270; text-align: center; }
+.pack.wide { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; }
+.pack.hot { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.18); }
+.tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); padding: 3px 10px; border-radius: 999px; font: 800 11px 'Sora', sans-serif; white-space: nowrap; background: var(--yellow); color: var(--navy); }
+.tag.g { background: var(--green); }
+.pack.wide .tag { left: auto; right: 14px; transform: none; }
+.gems { height: 58px; display: flex; align-items: flex-end; justify-content: center; }
+.gems img { width: 34px; height: 34px; margin: 0 -7px; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4)); }
+.gems img.b { width: 44px; height: 44px; }
+.qty { white-space: nowrap; font: 400 26px 'Lucky', 'Sora', sans-serif; color: #FFFFFF; -webkit-text-stroke: 1px #000; paint-order: stroke fill; letter-spacing: 0.5px; }
+.qty small { font: 800 12px 'Sora', sans-serif; -webkit-text-stroke: 0; }
+.bonus { display: block; margin-top: 2px; font: 700 12px 'Sora', sans-serif; color: var(--green); }
+.bonus.none { color: var(--soft); }
+.price { margin-top: 8px; height: 38px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--yellow); color: var(--navy); font: 800 16px 'Sora', sans-serif; }
+.pack.wide .price { margin: 0 0 0 auto; width: 96px; flex: none; }
+.pack.wide .gems img { width: 26px; height: 26px; margin: 0 -6px; }
+.pack.wide .gems img.b { width: 32px; height: 32px; }
+.uses { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.uses h3 { margin: 0 0 8px; font: 700 14px 'Sora', sans-serif; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 6px 10px; border-radius: 999px; background: #1C2B4D; font-size: 12px; color: #DCE3F2; }
+.legal { margin: 12px 16px 0; font-size: 11px; line-height: 1.45; color: rgba(11, 17, 32, 0.78); }
+.nav { position: absolute; left: 12px; right: 12px; bottom: 14px; height: 66px; border-radius: 26px; background: var(--navy); display: flex; align-items: center; justify-content: space-around; color: #5A6B8C; font: 700 11px 'Sora', sans-serif; }
+.nav .on { color: var(--yellow); }
+/* Récapitulatif */
+.scrim { position: absolute; inset: 0; background: rgba(3, 6, 14, 0.6); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 18px 26px; border-radius: 28px 28px 0 0; background: #0E1730; border-top: 1px solid var(--line); }
+.grab { width: 44px; height: 5px; margin: 0 auto 14px; border-radius: 3px; background: #2E4270; }
+.sheet h2 { margin: 0 0 12px; font: 800 20px 'Sora', sans-serif; }
+.recap { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: #16233F; }
+.recap img { width: 52px; height: 52px; }
+.lines { margin: 12px 0; font-size: 14px; }
+.lines div { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed #24355A; color: #C9D3EA; }
+.lines div b { color: #FFFFFF; }
+.lines .tot { border: 0; font: 800 17px 'Sora', sans-serif; color: #FFFFFF; }
+.pay { height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; font: 800 16px 'Sora', sans-serif; }
+.pay.apple { background: #FFFFFF; color: #000000; }
+.pay.card { background: var(--yellow); color: var(--navy); }
+.check { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 4px; font-size: 12px; line-height: 1.45; color: #C9D3EA; }
+.box { flex: none; width: 20px; height: 20px; border-radius: 6px; background: var(--yellow); color: var(--navy); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+.secure { margin-top: 10px; text-align: center; font-size: 11.5px; color: var(--soft); }
+/* Merci */
+.thanks { position: absolute; left: 20px; right: 20px; top: 190px; padding: 26px 20px 20px; border-radius: 28px; background: #0E1730; border: 2px solid var(--yellow); text-align: center; }
+.thanks .big { width: 110px; height: 110px; margin: -84px auto 6px; display: block; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5)); }
+.thanks .gain { font: 400 46px 'Lucky', 'Sora', sans-serif; color: var(--yellow); -webkit-text-stroke: 1.5px #3A2A00; paint-order: stroke fill; }
+.thanks p { margin: 6px 0 14px; font-size: 14px; color: #C9D3EA; line-height: 1.5; }
+.thanks .btn { height: 52px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--yellow); color: var(--navy); font: 800 16px 'Sora', sans-serif; }
+.thanks .lnk { margin-top: 10px; font: 700 13px 'Sora', sans-serif; color: #B9C5FF; }
+.rain img { position: absolute; width: 26px; height: 26px; opacity: 0.9; }
+</style>
+</head>
+<body>
+<div class="row">
+<!-- 1. Boutique -->
+<div>
+<p class="cap">1 · PK shop › « Recharger mes PK » (page entière)</p>
+<div class="phone" style="height:auto;padding-bottom:96px">
+<div class="top"><span class="bal"><img src="../../web/img/brand/pk.svg" alt="">1 240 <small>PK</small></span><span class="bal" style="background:#2A1440">🎟 0</span></div>
+<h1>PK shop</h1>
+<div class="tabs"><span class="tab">Articles</span><span class="tab on">Recharger mes PK</span></div>
+<div class="panel">
+<div class="first"><img src="../../web/img/brand/pk.svg" alt="" width="40" height="40"><div><b>1ʳᵉ recharge : PK doublés</b><span>Une seule fois, sur le pack de ton choix.</span></div></div>
+<div class="grid">
+<div class="pack"><div class="gems"><img src="../../web/img/brand/pk.svg" alt=""></div><div class="qty">2 000 <small>PK</small></div><span class="bonus none">Prix de base</span><div class="price">1,99 €</div></div>
+<div class="pack"><div class="gems"><img src="../../web/img/brand/pk.svg" alt=""><img class="b" src="../../web/img/brand/pk.svg" alt=""></div><div class="qty">5 500 <small>PK</small></div><span class="bonus">+10 % offerts</span><div class="price">4,99 €</div></div>
+<div class="pack hot"><span class="tag">Le plus choisi</span><div class="gems"><img src="../../web/img/brand/pk.svg" alt=""><img class="b" src="../../web/img/brand/pk.svg" alt=""><img src="../../web/img/brand/pk.svg" alt=""></div><div class="qty">12 000 <small>PK</small></div><span class="bonus">+20 % offerts</span><div class="price">9,99 €</div></div>
+<div class="pack"><div class="gems"><img src="../../web/img/brand/pk.svg" alt=""><img class="b" src="../../web/img/brand/pk.svg" alt=""><img class="b" src="../../web/img/brand/pk.svg" alt=""><img src="../../web/img/brand/pk.svg" alt=""></div><div class="qty">26 000 <small>PK</small></div><span class="bonus">+30 % offerts</span><div class="price">19,99 €</div></div>
+<div class="pack wide"><span class="tag g">Meilleure valeur</span><div class="gems" style="height:50px"><img src="../../web/img/brand/pk.svg" alt=""><img class="b" src="../../web/img/brand/pk.svg" alt=""><img class="b" src="../../web/img/brand/pk.svg" alt=""><img src="../../web/img/brand/pk.svg" alt=""></div><div><div class="qty">70 000 <small>PK</small></div><span class="bonus">+40 % offerts</span></div><div class="price">49,99 €</div></div>
+</div>
+<div class="uses"><h3>Avec tes PK achetés</h3><div class="chips"><span class="chip">Thèmes de l'app</span><span class="chip">Cadres d'avatar</span><span class="chip">Fonds du classeur</span><span class="chip">Compagnons brillants</span></div></div>
+</div>
+<p class="legal">Prix TTC · paiement sécurisé · réservé aux 18 ans et plus · les PK n'ont aucune valeur en euros, ne se revendent pas et ne s'échangent pas · les PK achetés ne servent ni aux tickets ni aux lots et ne comptent pas pour les grades.</p>
+<div class="nav"><span>Accueil</span><span>Séries</span><span>Scan</span><span>Jeux</span><span class="on">PK shop</span></div>
+</div>
+</div>
+<!-- 2. Récapitulatif -->
+<div>
+<p class="cap">2 · Récapitulatif avant de payer</p>
+<div class="phone">
+<div class="top"><span class="bal"><img src="../../web/img/brand/pk.svg" alt="">1 240 <small>PK</small></span></div>
+<h1>PK shop</h1>
+<div class="scrim"></div>
+<div class="sheet">
+<div class="grab"></div>
+<h2>Ton achat</h2>
+<div class="recap"><img src="../../web/img/brand/pk.svg" alt=""><div><div class="qty" style="font-size:24px">12 000 <small>PK</small></div><span class="bonus">dont 2 000 PK offerts (+20 %)</span></div></div>
+<div class="lines">
+<div><span>1ʳᵉ recharge doublée</span><b>+ 12 000 PK</b></div>
+<div><span>Tu recevras</span><b>24 000 PK</b></div>
+<div><span>Ton solde après l'achat</span><b>25 240 PK</b></div>
+<div class="tot"><span>Total TTC</span><span>9,99 €</span></div>
+</div>
+<div class="check"><span class="box">✓</span><span>Je veux recevoir mes PK tout de suite et je renonce à mon droit de rétractation de 14 jours (contenu numérique). <u>CGV</u></span></div>
+<div class="pay apple"> Payer avec Apple Pay</div>
+<div class="pay card">Payer par carte · 9,99 €</div>
+<p class="secure">Paiement sécurisé par Stripe · Dropicards ne voit jamais ta carte · un reçu t'est envoyé par e-mail</p>
+</div>
+</div>
+</div>
+<!-- 3. Merci -->
+<div>
+<p class="cap">3 · PK reçus</p>
+<div class="phone">
+<div class="top"><span class="bal"><img src="../../web/img/brand/pk.svg" alt="">25 240 <small>PK</small></span></div>
+<h1>PK shop</h1>
+<div class="scrim" style="background:rgba(3,6,14,0.5)"></div>
+<div class="rain"><img src="../../web/img/brand/pk.svg" alt="" style="left:40px;top:120px"><img src="../../web/img/brand/pk.svg" alt="" style="left:300px;top:150px;transform:rotate(20deg)"><img src="../../web/img/brand/pk.svg" alt="" style="left:180px;top:90px;transform:rotate(-15deg)"><img src="../../web/img/brand/pk.svg" alt="" style="left:330px;top:620px"><img src="../../web/img/brand/pk.svg" alt="" style="left:30px;top:640px;transform:rotate(25deg)"></div>
+<div class="thanks">
+<img class="big" src="../../web/img/brand/pk.svg" alt="">
+<div class="gain">+24 000 PK</div>
+<p>Merci ! Tes PK sont sur ton compte Dropicards,<br>sur tous tes appareils.</p>
+<div class="btn">Voir les articles</div>
+<div class="lnk">Mes achats et reçus</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

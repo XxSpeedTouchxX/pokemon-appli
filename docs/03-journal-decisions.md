@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-11-01 (suite 9) — Boutique de PK en argent réel : proposition
+
+- **Demande du porteur** : « dans le PK shop, un magasin où on pourra acheter des PK avec de l'argent réel : propose-moi des tarifs et une interface ».
+- **Proposé, à valider, rien n'est codé** : `docs/20-proposition-boutique-pk.md` et maquette `docs/20-maquette-boutique-pk/` :
+  - onglet « Recharger mes PK » ;
+  - 5 packs : 2 000 PK à 1,99 €, 5 500 PK à 4,99 €, 12 000 PK à 9,99 €, 26 000 PK à 19,99 €, 70 000 PK à 49,99 € ; 1ʳᵉ recharge doublée ;
+  - paiement Stripe sur le site, puis achats intégrés dans les apps.
+- **Points à trancher** :
+  - changement de cap par rapport au 2026-10-08 (PK sans argent réel) ;
+  - tickets de tirage et lots à réserver aux PK gagnés (risque de loterie, avis juridique indispensable) ;
+  - grades sur les PK gagnés seulement ;
+  - articles de personnalisation à créer pour les PK achetés ;
+  - comptes et serveur d'abord ;
+  - achats à partir de 18 ans.
+- **Effort** : ≈ 45 h après les comptes et le serveur.
+
 ## 2026-11-01 (suite 8) — PA de nouveau chaque jour dès minuit
 
 - **Décision du porteur** (« non pardon, remets les PA dispo chaque jour à partir de minuit, et si l'utilisateur oublie de se connecter avant 24 h il redescend à 15 PA ») : la règle « toutes les 24 h » de la suite 7 est **annulée**.
