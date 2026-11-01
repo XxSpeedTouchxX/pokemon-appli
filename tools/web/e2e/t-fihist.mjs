@@ -40,7 +40,7 @@ const open = async (w, h, route) => {
   const yl = (await H.locator('.pkm-fh-y span').allInnerTexts()).map(N);
   ok('axe des montants : ' + yl.join(' | '), yl.length >= 3 && yl.every(t => /^[\d ]+(,\d+)? €$/.test(t)));
   const xl = (await H.locator('.pkm-fh-x span').allInnerTexts()).map(N);
-  ok('dates : ' + xl.join(' | '), xl[0] === '3 oct.' && /^\d+ (oct|nov|déc)\.$/.test(xl[xl.length - 1]));
+  ok('dates : ' + xl.join(' | '), xl[0] === '3 oct.' && /^\d+(er)? (oct|nov|déc)\.$/.test(xl[xl.length - 1]));
   ok('prix d’achat : « ' + N(await H.locator('.pkm-fh-buyl').innerText()) + ' » en pointillés', N(await H.locator('.pkm-fh-buyl').innerText()) === '🛒 375,00 €' && (await H.locator('path.pkm-fh-buy').count()) === 1);
   ok('courbe lissée', /C/.test(await H.locator('path.pkm-fh-line').getAttribute('d')));
   ok('source et début de l’archive', /archivée chaque jour par Dropicards/.test(await H.innerText()) && /depuis le 3 oct\. 2026/.test(await H.innerText()));

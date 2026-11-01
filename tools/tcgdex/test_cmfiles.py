@@ -101,7 +101,7 @@ class Verify(unittest.TestCase):
     FILES = cmfiles.CmFiles(
         [prod(1, "Rayquaza ex [Spiral Rush]", 200), prod(2, "Rayquaza Gold Star [Spiral Rush | Holy Star]", 200),
          prod(3, "Deoxys [Psychic]", 200), prod(4, "Pikachu [Gnaw]", 200)],
-        [guide(1, 65.18, 60.0, 62.0), guide(2, 6985.88, 4162.09, 5834.62, 5000.0), guide(3, 40.0, 38.0, 39.0), guide(4, 0.5, 0.4, 0.45)],
+        [guide(1, 65.18, 60.0, 62.0), guide(2, 6985.88, 4162.09, 5834.62, 5000.0, holo=3312.82), guide(3, 40.0, 38.0, 39.0), guide(4, 0.5, 0.4, 0.45)],
         "2026-11-01")
 
     def card(self, cid, name, cm, cmv="n"):

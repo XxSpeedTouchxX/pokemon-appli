@@ -409,15 +409,17 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
             idp = files.relink(cm_ids[cid], en)
             if idp is None:
                 continue
-            grp = c[f["cmv"]] or "n"
-            p = files.group(idp, grp) or (files.prices(idp)[:5] if idp != cm_ids[cid] and files.prices(idp) else None)
+            # Autre produit : ses prix au choix habituel (groupe normal s'il a une tendance) ; le groupe holo choisi pour
+            # le produit de TCGdex n'a plus de sens (Rayquaza ☆ : 6 985,88 € en normal, 3 312,82 € en holo).
+            moved = idp != cm_ids[cid]
+            full = files.prices(idp) if moved else None
+            grp = full[6] if full else (c[f["cmv"]] or "n")
+            p = full[:5] if full else (None if moved else files.group(idp, grp))
             if not p:
                 continue
             ours, theirs = c[f["cm"]] or c[f["avg30"]] or c[f["avg7"]], p[0] or p[2] or p[3]
             if idp == cm_ids[cid] and not (ours and theirs and max(ours, theirs) >= 5 and max(ours, theirs) > VERIFY_RATIO * min(ours, theirs)):
                 continue
-            if idp != cm_ids[cid] and files.group(idp, grp) is None:
-                grp = files.prices(idp)[6]
             c[f["cm"]], c[f["low"]], c[f["avg30"]], c[f["avg7"]], c[f["avg1"]] = p
             c[f["cmv"]], c[f["upd"]], c[f["cmf"]] = grp, files.created, 1
             c[f["q"]] = 1 if doubtful(p[0], p[1], p[4]) else 0

@@ -3,8 +3,6 @@
 // valeur Cardmarket, les 6 états illustrés et « Ajouter à ma collection », puis l'ajout arriver dans le classeur.
 import { writeFileSync, readFileSync } from 'node:fs';
 import { launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
-import { createRequire } from 'node:module';
-const { chromium } = createRequire(import.meta.url)('playwright');
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 // 1. Vidéo de la fausse caméra : la photo de test réduite au centre d'une image portrait 720 × 1280, en MJPEG.
 const OUT = ROOT + 'tools/web/e2e/out/', CAM = OUT + 'scan-cam.mjpeg';
@@ -22,8 +20,8 @@ const OUT = ROOT + 'tools/web/e2e/out/', CAM = OUT + 'scan-cam.mjpeg';
   await b.close();
 }
 // 2. L'app avec cette caméra.
-const exe = process.env.CHROMIUM || undefined;
-const browser = await chromium.launch({ executablePath: exe, args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--use-file-for-fake-video-capture=' + CAM] });
+// playwright-core par helpers.mjs (le paquet « playwright » n'est pas installé en CI, 2026-11-01).
+const browser = await launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--use-file-for-fake-video-capture=' + CAM] });
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, permissions: ['camera'] });
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|pokemontcg/, r => r.abort());
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
