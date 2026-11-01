@@ -33,6 +33,14 @@
   };
   // Bulle d'un starter choisi et fiche : couleur de son type (--st) ; texte sombre sur les couleurs claires.
   const stStarterColor = n => DEX_TYPE[DEX[n].types[0]] || '#2E6BD8';
+  // Starter centré sur son corps, pas sur son image (2026-11-01, porteur : « Pikachu est trop à gauche », Salamèche et
+  // Carapuce un peu aussi) : la queue élargit l'image d'un côté ; on décale l'image du centre de son cadre jusqu'au
+  // centre du corps (dex.json : « gc » pour le GIF, part de la largeur ; « pc » pour l'image fixe de 96 px).
+  const stBodyStyle = (n, h, still) => {
+    const e = DEX[n], w = still ? h : h * e.gif[0] / Math.max(1, e.gif[1]);
+    const dx = still ? (48 - (e.pc || 48)) * h / 96 : (0.5 - (e.gc || 0.5)) * w;
+    return 'height: ' + h + 'px; transform: translateX(' + (Math.round(dx * 10) / 10) + 'px)';
+  };
   const stStarterStyle = (n, on) => '--st: ' + stStarterColor(n) + (on ? '; color: ' + (dexLight(stStarterColor(n)) ? '#0B1120' : '#FFFFFF') : '');
   const stStarterIdx = line => PA_STARTERS.findIndex(x => x[0] === line);
   // Nouvelle description : le Pokémon arrive du côté de celui touché en grandissant, le texte glisse et apparaît.
@@ -115,7 +123,7 @@
       kid: kid, nick: s.obNick !== undefined ? s.obNick : (tr.name || ''), nickBad: /pseudo/.test(err) ? 'true' : 'false',
       onNick: e => this.setState({ obNick: String(e.target.value || '').slice(0, 24) }),
       starters: PA_STARTERS.map(([line, n]) => ({
-        name: DEX[n].name, img: 'img/pokemon/' + n + (still ? '.png' : '.gif'), h: still ? '72px' : Math.round(56 * Math.min(1.25, DEX[n].gif[1] / 44)) + 'px',
+        name: DEX[n].name, img: 'img/pokemon/' + n + (still ? '.png' : '.gif'), imgStyle: stBodyStyle(n, still ? 72 : Math.round(56 * Math.min(1.25, DEX[n].gif[1] / 44)), still),
         on: sel === line ? 'true' : 'false', aria: 'Découvrir ' + DEX[n].name, cls: 'pkm-onb-st' + (sel === line ? ' pkm-onb-st-on' : ''),
         style: stStarterStyle(n, sel === line),
         pick: () => {
@@ -130,7 +138,7 @@
         }
       })),
       hasSel: !!E, noSel: !E, selKey: 'st-' + sel, selName: name, selImg: E ? 'img/pokemon/' + selN + (still ? '.png' : '.gif') : '',
-      selH: E && !still ? Math.round(96 * Math.min(1.2, E.gif[1] / 46)) + 'px' : '104px',
+      selImgStyle: E ? stBodyStyle(selN, !still ? Math.round(96 * Math.min(1.2, E.gif[1] / 46)) : 104, still) : '',
       selTypes: E ? E.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })) : [],
       lead: acc ? 'Ton âge, ton pseudo et ton compagnon de voyage.' : 'Dernière étape avant l’aventure !',
       selDesc: ST_STARTER_TXT[sel] || '', go: 'Choisir ' + name + ' comme compagnon', selStyle: selN ? stStarterStyle(selN, false) : '',

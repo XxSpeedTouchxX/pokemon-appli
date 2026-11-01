@@ -34,7 +34,7 @@
     { tab: 'market', sel: '.pkm-dex-device', top: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
     { tab: 'market', sel: '.pkm-dex-lcd-r', top: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
     { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
-    { tab: 'market', sel: 'header .pkm-pa-bar', text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, puis jusqu’à +30 d’affilée !' },
+    { tab: 'market', sel: 'header .pkm-pa-bar', text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : tu peux en obtenir jusqu’à 30 quotidiennement !' }, // texte du porteur, 2026-11-01
     { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', inner: true, pad: 3, text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
@@ -221,16 +221,22 @@
     el.mon.style.transform = 'translate(' + tx.toFixed(1) + 'px, ' + ty.toFixed(1) + 'px) scale(' + k.toFixed(4) + ')';
     TUTO.fly = setTimeout(finish, 950);
   };
+  // Bulle en bas : au-dessus de la barre du bas (92 px), ou tout en bas, par-dessus la barre (« pkm-tt-low », 10 px),
+  // quand ce qui est présenté ne tient pas au-dessus d'elle (2026-11-01, porteur : « l'encadré est trop petit,
+  // agrandis-le pour voir tout l'encadré » : sur un petit écran, la bulle coupait la valeur de la collection).
+  const tutoBottom = () => (TUTO.el && TUTO.el.box.classList.contains('pkm-tt-low') ? 10 : 92);
+  // Place libre entre le haut de la zone qui défile et la bulle en bas.
+  const tutoRoom = (t, bottom) => {
+    const main = t.closest('main'), top = main ? main.getBoundingClientRect().top : 0, bh = TUTO.el ? TUTO.el.box.offsetHeight : 260;
+    return window.innerHeight - (bottom != null ? bottom : tutoBottom()) - bh - 14 - top - 8;
+  };
   // Rectangle encadré : l'élément, ses premiers enfants seulement (« kids » : le titre et la carte du radar, sans les
   // petites lignes en dessous) ou un carré centré sur son icône (« ico » : l'onglet PK shop).
   const tutoRect = (t, st) => {
     // Solde des PK (2026-10-31, porteur) : le cadre suit la pastille elle-même, pas sa zone de toucher, pour ne plus
     // mordre sur le solde de PA juste dessous.
     if (st.inner && t.firstElementChild) return t.firstElementChild.getBoundingClientRect();
-    if (st.fit && !st.kids) {
-      const full = t.getBoundingClientRect(), bh = TUTO.el ? TUTO.el.box.offsetHeight : 260;
-      if (full.height > window.innerHeight - bh - 230) st = Object.assign({}, st, { kids: st.fit });
-    }
+    if (st.fit && !st.kids && tutoRoom(t) < t.getBoundingClientRect().height + 12) st = Object.assign({}, st, { kids: st.fit });
     if (st.ico) {
       const r = (t.querySelector('svg') || t).getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, h = st.ico / 2;
       return { left: cx - h, top: cy - h, right: cx + h, bottom: cy + h, width: st.ico, height: st.ico };
@@ -253,7 +259,7 @@
   // (borné à ce que la page peut réellement défiler).
   const tutoZone = (t, st, top) => {
     const main = t.closest('main'), H = TUTO.el.host.getBoundingClientRect(), M = main.getBoundingClientRect(), r = tutoRect(t, st), bh = TUTO.el.box.offsetHeight;
-    const lo = top ? Math.max(M.top + 8, H.top + 14 + bh + 14) : M.top + 8, hi = top ? tutoNavTop(H) - 8 : H.bottom - 92 - bh - 14;
+    const lo = top ? Math.max(M.top + 8, H.top + 14 + bh + 14) : M.top + 8, hi = top ? tutoNavTop(H) - 8 : H.bottom - tutoBottom() - bh - 14;
     const want = Math.max(lo, Math.min(top ? lo : M.top + 96, hi - r.height));
     const d = Math.max(-main.scrollTop, Math.min(main.scrollHeight - main.clientHeight - main.scrollTop, r.top - want));
     return { d: d, seen: Math.min(hi, r.bottom - d) - Math.max(lo, r.top - d) };
@@ -321,7 +327,7 @@
       // Onglet de la barre du bas qui mène à cette partie : anneau jaune par-dessus l'assombrissement.
       const tb = TUTO.tab && !TUTO.done ? TUTO.tab.getBoundingClientRect() : null;
       el.ring.style.display = tb ? 'block' : 'none';
-      if (tb) Object.assign(el.ring.style, { transform: 'translate(' + Math.round(tb.left - H.left + 4) + 'px, ' + Math.round(tb.top - H.top + 6) + 'px)', width: Math.round(tb.width - 8) + 'px', height: Math.round(tb.height - 12) + 'px' });
+      if (tb) Object.assign(el.ring.style, { transform: 'translate(' + (tb.left - H.left + 4).toFixed(1) + 'px, ' + (tb.top - H.top + 6).toFixed(1) + 'px)', width: (tb.width - 8).toFixed(1) + 'px', height: (tb.height - 12).toFixed(1) + 'px' });
       TUTO.raf = requestAnimationFrame(loop);
     };
     TUTO.raf = requestAnimationFrame(loop);
@@ -367,6 +373,9 @@
     TUTO.tab = st.tab === 'home' || navBtn ? null : document.querySelector(TUTO_NAV + 'button[aria-current="page"]');
     const text = tutoText(st);
     tutoSize(text);
+    // Étape « fit » (la valeur de la collection) : si l'encadré ne tient pas au-dessus de la bulle, la bulle descend
+    // tout en bas, par-dessus la barre du bas, pour lui laisser la place.
+    el.box.classList.toggle('pkm-tt-low', !!(st.fit && TUTO.target && tutoRoom(TUTO.target, 92) < TUTO.target.getBoundingClientRect().height + 12));
     const top = tutoPlace(TUTO.target, st);
     el.box.classList.toggle('pkm-tt-top', top);
     tutoType(text);

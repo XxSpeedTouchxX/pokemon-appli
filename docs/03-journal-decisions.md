@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-11-01 (suite 17) — Premier écran et didacticiel : coches, starters, encadré, manette, texte des PA
+
+- **Demandes du porteur** (captures) :
+  - recentrer les deux coches vertes (âge et starter) : le « ✓ » était décalé en haut à droite de la pastille ;
+  - décaler Pikachu un peu vers la droite, Salamèche et Carapuce très légèrement ;
+  - didacticiel : « l'encadré est trop petit, agrandis-le pour voir tout l'encadré » (valeur de la collection coupée par la bulle sur un petit écran) ;
+  - recentrer la manette dans son anneau jaune (légèrement décalée à gauche) ;
+  - remplacer « +10, puis jusqu'à +30 d'affilée » par « tu peux en obtenir jusqu'à 30 quotidiennement ».
+- **Fait** (cache v122) :
+  - coche dessinée (SVG) et centrée dans la pastille verte (`games.css`, `.pkm-onb-ok`) ;
+  - starters centrés sur leur corps et non sur leur image (`start.js`, `stBodyStyle` : « gc » du GIF, « pc » de l'image fixe) : Pikachu +11 px, Carapuce +5 px, Salamèche +4 px, Bulbizarre +1 px ; de même dans le grand encadré du starter choisi ;
+  - didacticiel, étape de la valeur : quand l'encadré ne tient pas au-dessus de la bulle, la bulle descend tout en bas, par-dessus la barre du bas (`tuto.js`, `pkm-tt-low`) ; la valeur, ses articles et « Sur 1 mois » se voient en entier ;
+  - anneau de l'onglet : son contour de 3 px restait hors de sa taille (6 px de trop à droite et en bas) ; corrigé (`box-sizing`), la manette est au centre ;
+  - texte de l'étape des PA : « Chaque jour, touche ton solde de PA pour récupérer tes PA : tu peux en obtenir jusqu'à 30 quotidiennement ! ».
+- **Tests** : `t-onb`, `t-tuto`, `t-contrast`, `t-home`, `t-dexpad` repassés.
+
 ## 2026-11-01 (suite 16) — Carte du Radar noire sur le téléphone : corrigée
 
 - **Constat du porteur** (vidéo, version v120) : le Radar s'ouvre, mais la carte reste noire (ni fond, ni cercle, ni position, ni boutiques) et le bouton « Liste » a disparu ; la fiche du bas compte pourtant les boutiques (10 à 15 km, 28 à 30 km).
