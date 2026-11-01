@@ -213,7 +213,10 @@
 .pkm-dex-pbar i b { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #3DDC84, #9FF5C0); }
 .pkm-dex-pbar-seen i b { background: linear-gradient(90deg, #7CF5FF, #C9F9FF); }
 .pkm-dex-pbar strong { font-family: 'Sora', sans-serif; font-size: 13px; white-space: nowrap; }
-.pkm-dex-pbar-s { grid-template-columns: 130px minmax(0, 1fr) auto; }
+/* Barres alignées (2026-11-01, soir, porteur : « 56/56 n'est pas aligné avec les autres ») : colonne du compte de
+   largeur fixe, chiffres de même largeur, calés à droite ; les 5 barres commencent et finissent au même endroit. */
+.pkm-dex-pbar-s { grid-template-columns: 116px minmax(0, 1fr) 64px; }
+.pkm-dex-pbar-s strong { text-align: right; font-variant-numeric: tabular-nums; }
 .pkm-dex-prog-tip { margin: 0; font-size: 12px; color: #C9D3EA; }
 .pkm-dex-prog-more summary { cursor: pointer; font-size: 13px; font-weight: 800; color: #7CF5FF; min-height: 32px; display: flex; align-items: center; }
 .pkm-dex-prog-st { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 10px; }

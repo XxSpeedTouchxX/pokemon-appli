@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-01 (suite 21) — Pokédex : barres de « Par stade et par type » alignées
+
+- **Demande du porteur** : les 5 barres de progression n'étaient pas alignées (« 0 / 56 » plus large que « 4 / 74 », etc.).
+- **Fait** (cache v127, `dex.css`) : colonne du compte de largeur fixe (64 px), chiffres de même largeur calés à droite ; les 5 barres commencent et finissent au même pixel. Test : `t-dexseen`.
+
 ## 2026-11-01 (suite 20) — Recharger mes PA : détail des packs, 3 000 PA à 14,99 €
 
 - **Demande du porteur** : retirer « +X % offerts » (vert) ; écrire sous chaque pack « 1 000 + 500 offerts » (1 500 PA), « 1 500 + 1 500 offerts » (3 000 PA, **14,99 €** au lieu de 15,99 €), « 2 000 + 3 000 offerts » (5 000 PA).
