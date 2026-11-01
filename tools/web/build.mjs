@@ -1,6 +1,6 @@
 // Génère la démo web de Dropicards, nom de code PKM-App (dossier web/) à partir de la maquette du canevas Design.
 // Source : docs/12-maquette-v5/Main.dc.html (gabarit + logique). Usage : npm ci && npm run build
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync, rmSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
@@ -1096,8 +1096,18 @@ writeFileSync(OUT + 'index.html', brandVer(index).replace(/manifest\.webmanifest
 writeFileSync(ROOT + 'tools/web/artifact.html', artifact);
 copyFileSync(fileURLToPath(new URL('./node_modules/vue/dist/vue.runtime.global.prod.js', import.meta.url)), OUT + 'vendor/vue.runtime.global.prod.js');
 // MapLibre GL (licence BSD) pour le Radar : module ES chargé seulement à l'ouverture de l'écran.
+// Publiés en « .js » (2026-11-01) : sur le serveur nginx de dropicards.fr, les « .mjs » partaient sans type JavaScript,
+// le téléphone refusait alors de charger la carte (Radar tout noir, liste seule). Les renvois internes entre les trois
+// modules (« ./maplibre-gl-shared.mjs », worker « maplibre-gl-worker.mjs ») sont réécrits en « .js », rien d'autre.
 mkdirSync(OUT + 'vendor/maplibre', { recursive: true });
-['dist/maplibre-gl.mjs', 'dist/maplibre-gl-shared.mjs', 'dist/maplibre-gl-worker.mjs', 'dist/maplibre-gl.css', 'LICENSE.txt'].forEach(f =>
+for (const f of ['maplibre-gl.mjs', 'maplibre-gl-shared.mjs', 'maplibre-gl-worker.mjs']) {
+  const src = readFileSync(fileURLToPath(new URL('./node_modules/maplibre-gl/dist/' + f, import.meta.url)), 'utf8');
+  const out = src.split('maplibre-gl-shared.mjs').join('maplibre-gl-shared.js').split('maplibre-gl-worker.mjs').join('maplibre-gl-worker.js');
+  if (/maplibre-gl-(shared|worker)\.mjs/.test(out)) throw new Error('MapLibre : renvoi .mjs restant dans ' + f);
+  writeFileSync(OUT + 'vendor/maplibre/' + f.replace('.mjs', '.js'), out);
+  if (existsSync(OUT + 'vendor/maplibre/' + f)) rmSync(OUT + 'vendor/maplibre/' + f);
+}
+['dist/maplibre-gl.css', 'LICENSE.txt'].forEach(f =>
   copyFileSync(fileURLToPath(new URL('./node_modules/maplibre-gl/' + f, import.meta.url)), OUT + 'vendor/maplibre/' + f.replace('dist/', '')));
 // Tesseract.js 7 (licence Apache 2.0) pour le scan : chargé seulement à l'ouverture de l'écran, dans un dossier
 // versionné (cache long, web/_headers). Deux cœurs WebAssembly (avec et sans SIMD, choisi par scan-ocr.js) et le

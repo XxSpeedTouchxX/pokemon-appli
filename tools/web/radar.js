@@ -15,7 +15,8 @@
     nRegion: {}, nDept: {}, map: null, el: null, ml: null, loaded: false, gen: 0, sweepGen: 0, view: '', sel: '', markers: [],
     me: null, gl: null, cache: { key: '', rows: [] } };
   const STYLE_URL = 'https://tiles.openfreemap.org/styles/dark';
-  const ML_URL = 'vendor/maplibre/maplibre-gl.mjs', ML_CSS = 'vendor/maplibre/maplibre-gl.css';
+  // « .js » et non « .mjs » (2026-11-01) : le serveur nginx de dropicards.fr n'envoyait pas les « .mjs » comme du code.
+  const ML_URL = 'vendor/maplibre/maplibre-gl.js', ML_CSS = 'vendor/maplibre/maplibre-gl.css';
   const FRANCE_BOX = [-5.2, 41.3, 9.6, 51.1];
   const TURN = 4200; // durée d'un tour de faisceau (ms), assez lente pour lire les pop-ups des enseignes
   const KMS = ['5', '15', '30'];

@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-01 (suite 16) — Carte du Radar noire sur le téléphone : corrigée
+
+- **Constat du porteur** (vidéo, version v120) : le Radar s'ouvre, mais la carte reste noire (ni fond, ni cercle, ni position, ni boutiques) et le bouton « Liste » a disparu ; la fiche du bas compte pourtant les boutiques (10 à 15 km, 28 à 30 km).
+- **Cause** : depuis le passage sur le serveur dédié (nginx, 2026-10-29), les trois fichiers de la carte (MapLibre, en « .mjs ») partaient sans type JavaScript (`application/octet-stream`) ; le téléphone refusait de les charger et l'app basculait sur la liste seule. Le problème n'avait pas été vu : le Radar était réservé au grade Maître depuis le 2026-10-28, et le serveur des tests envoyait bien les « .mjs » comme du code.
+- **Reproduit** avec un serveur de test réglé comme nginx (carte noire, « Liste » absent), puis corrigé avec ce même serveur.
+- **Fait** (cache v121) : MapLibre publié en « .js » (`build.mjs` réécrit les renvois internes entre ses trois fichiers ; `radar.js` charge `maplibre-gl.js`) ; rien à changer sur le serveur.
+- **Tests** : le serveur des tests (`e2e/serve.mjs`) se comporte comme nginx (pas de type pour « .mjs », `nosniff`) ; `t-radar` exige la carte chargée dès que WebGL est présent et vérifie qu'aucun « .mjs » n'est demandé ; lancé aussi au grade Recrue.
+
 ## 2026-11-01 (suite 15) — Radar ouvert à tous, comme avant
 
 - **Demande du porteur** : « regarde le radar, il ne marche plus : quand on appuie dessus, on retombe sur le grade Pokémon ; refais-le fonctionner exactement comme avant ».

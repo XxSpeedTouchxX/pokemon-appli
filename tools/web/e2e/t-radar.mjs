@@ -7,6 +7,7 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, de
   geolocation: { latitude: 49.2583, longitude: 4.0317 }, permissions: ['geolocation'] }); // Reims : enseignes et indépendants
 await withFonts(ctx);
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+const mjsAsked = []; page.on('request', r => { if (/\.mjs(\?|$)/.test(r.url())) mjsAsked.push(r.url()); });
 await page.goto(E2E + '/?today=2026-10-24&debug#radar', { waitUntil: 'load' });
 await page.waitForSelector('button:has-text("Scanner ma zone")', { timeout: 20000 }); await page.waitForTimeout(2500);
 const prods = await page.locator('[aria-label="Produit recherché"] button').allInnerTexts();
@@ -42,7 +43,11 @@ if (mapOn) {
   ok('logos d’enseigne affichés : ' + [...seen].join(', '), seen.size > 0);
 }
 await page.waitForSelector('#pkm-radar-sheet button[aria-label*="indice"]', { timeout: 15000 });
-ok('carte : ' + (mapOn ? 'balayage avec pop-ups' : 'liste (sans WebGL)'), true);
+// La carte doit se charger dès que le navigateur a WebGL (2026-11-01 : sur le serveur nginx, les modules « .mjs » de
+// MapLibre étaient refusés et le Radar restait noir, liste seule ; e2e/serve.mjs sert désormais comme nginx).
+const hasGL = await page.evaluate(() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } });
+ok('carte : ' + (mapOn ? 'chargée, balayage avec pop-ups' : 'liste seule') + (hasGL ? ' (WebGL présent)' : ' (sans WebGL)'), mapOn || !hasGL);
+ok('MapLibre servi en « .js » (aucun module « .mjs » demandé)', !mjsAsked.length);
 const title = await page.locator('#pkm-radar-sheet h2').first().innerText();
 ok('zone : ' + title, /Ma zone · 15 km/.test(title));
 await page.waitForTimeout(2500);
