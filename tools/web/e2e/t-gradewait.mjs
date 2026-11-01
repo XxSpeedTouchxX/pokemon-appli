@@ -14,8 +14,8 @@ const spy = () => {
   class Spy extends A { createOscillator() { window.__osc++; return super.createOscillator(); } }
   window.AudioContext = Spy; window.webkitAudioContext = Spy;
 };
-// 14 compagnons (ces 10 et les Pokémon offerts) et 6 000 PK gagnés : grade Chasseur ; le 15e compagnon donne Collectionneur.
-const OWN = [4, 10, 13, 16, 19, 21, 23, 27, 29, 32];
+// 14 compagnons (ces 11 et les 4 starters offerts ; Triopikeur n'est plus offert depuis le 2026-11-01) et 6 000 PK gagnés : grade Chasseur ; le 15e compagnon donne Collectionneur.
+const OWN = [4, 10, 13, 16, 19, 21, 23, 27, 29, 32, 35];
 const open = async (q) => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
@@ -32,7 +32,7 @@ const gu = page => page.locator('.pkm-gu').count();
 {
   const [ctx, page] = await open();
   ok('départ : grade Chasseur (' + await page.evaluate(() => window.__pkm.tierOf().cur.name) + ')', (await page.evaluate(() => window.__pkm.tierOf().i)) === 1);
-  // Reptincel (évolution de Salamèche) : 15e compagnon → Collectionneur, pendant l'évolution de 7,2 s.
+  // Reptincel (évolution de Salamèche) : 15e compagnon → Collectionneur, pendant l'évolution de 8,2 s.
   const t0 = Date.now();
   await page.evaluate(() => { window.__osc = 0; window.__pkm.dexUnlock(5); });
   await page.waitForTimeout(600);
@@ -43,14 +43,14 @@ const gu = page => page.locator('.pkm-gu').count();
   await page.waitForTimeout(4400);
   ok('5 s : évolution toujours en cours, pas de passage de grade ; grade vu : ' + await seen(page), (await gu(page)) === 0 && (await page.locator('.pkm-evo-fx').count()) === 1 && (await seen(page)) === 1);
   await page.screenshot({ path: shot('gradewait-evo.png') });
-  // Fin de l'évolution à 7,2 s, puis 0,9 s de pause.
+  // Fin de l'évolution à 8,2 s, puis 0,9 s de pause.
   await page.waitForFunction(() => !window.__pkm.st().paFx, null, { timeout: 6000 });
   const tEnd = Date.now() - t0;
   await page.waitForTimeout(300);
-  ok('fin de l’évolution (' + (tEnd / 1000).toFixed(1) + ' s) : pause, toujours pas de passage de grade', (await gu(page)) === 0 && tEnd >= 7000);
+  ok('fin de l’évolution (' + (tEnd / 1000).toFixed(1) + ' s) : pause, toujours pas de passage de grade', (await gu(page)) === 0 && tEnd >= 8000);
   await page.waitForSelector('.pkm-gu', { timeout: 3000 });
   const tGu = Date.now() - t0;
-  ok('passage de grade après l’évolution, à ' + (tGu / 1000).toFixed(1) + ' s : « ' + (await page.locator('.pkm-gu-name').innerText()) + ' »', tGu >= 7900 && /Collectionneur/.test(await page.locator('.pkm-gu-name').innerText()));
+  ok('passage de grade après l’évolution, à ' + (tGu / 1000).toFixed(1) + ' s : « ' + (await page.locator('.pkm-gu-name').innerText()) + ' »', tGu >= 8900 && /Collectionneur/.test(await page.locator('.pkm-gu-name').innerText()));
   await page.waitForTimeout(3300);
   await page.screenshot({ path: shot('gradewait-grade.png') });
   ok('grade vu enregistré : ' + await seen(page), (await seen(page)) === 2);
@@ -60,14 +60,14 @@ const gu = page => page.locator('.pkm-gu').count();
   await ctx.close();
 }
 {
-  // Déblocage simple (sans évolution, 3 s d'animation) : le grade attend aussi.
+  // Déblocage simple (sans évolution, 4 s d'animation) : le grade attend aussi.
   const [ctx, page] = await open();
   const t0 = Date.now();
   await page.evaluate(() => window.__pkm.dexUnlock(43));
   await page.waitForTimeout(1500);
   ok('déblocage d’un Pokémon de base : pas de passage de grade pendant son animation', (await gu(page)) === 0 && (await page.evaluate(() => !!window.__pkm.st().pkUnlock)));
   await page.waitForSelector('.pkm-gu', { timeout: 6000 });
-  ok('puis le passage de grade, à ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s', Date.now() - t0 >= 3500);
+  ok('puis le passage de grade, à ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s', Date.now() - t0 >= 4500);
   await ctx.close();
 }
 {

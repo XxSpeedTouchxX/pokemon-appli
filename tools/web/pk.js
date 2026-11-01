@@ -109,21 +109,30 @@
   };
 
   let pkUnlockTimer = null;
+  const PK_UNL_BOX = 190;
+  // Durée de l'animation de déblocage : 4 s (2026-11-01, porteur : « 1 s de plus après le cadenas »), games.css.
+  const PK_UNL_MS = 4000;
   proto.vUnlock = function (s) {
     const k = s.pkUnlock;
     if (!k || !HOME_NAMES[k]) return { on: false };
-    return { on: true, key: 'unl-' + k, name: HOME_NAMES[k], src: 'img/pokemon/icon/' + k + '.png', title: HOME_NAMES[k] + ' débloqué !',
+    // Pokémon agrandi (2026-11-01, porteur : « il est trop petit ») : son corps (boîte de l'image fixe 96 × 96, dex.js)
+    // remplit un carré de 190 px, au plus 4 fois la taille d'origine, centré.
+    const e = typeof DEX !== 'undefined' && DEX[k], b = e && e.box ? e.box : [16, 16, 80, 80];
+    const sc = Math.min(4, PK_UNL_BOX / Math.max(1, b[2] - b[0], b[3] - b[1])), px = Math.round(96 * sc);
+    const imgStyle = 'width: ' + px + 'px; height: ' + px + 'px; left: ' + Math.round(PK_UNL_BOX / 2 - (b[0] + b[2]) / 2 * sc) + 'px; top: ' + Math.round(PK_UNL_BOX / 2 - (b[1] + b[3]) / 2 * sc) + 'px';
+    return { on: true, key: 'unl-' + k, name: HOME_NAMES[k], src: 'img/pokemon/' + k + '.png', imgStyle: imgStyle, title: HOME_NAMES[k] + ' débloqué !',
       sub: HOME_THEMES[k] ? 'Nouveau compagnon · ' + pkTheme(k) : 'Nouveau compagnon', close: () => this.setState({ pkUnlock: null }),
       // Confettis : 28 morceaux répartis sur la largeur, départs décalés, dérive et rotation variées (fixes : pas de hasard).
       confetti: Array.from({ length: 28 }, (_, i) => ({ cls: 'pkm-unl-conf pkm-unl-c' + (i % 5),
         style: 'left: ' + ((i * 37) % 100) + '%; --dx: ' + (((i * 53) % 120) - 60) + 'px; --r: ' + (((i * 97) % 720) - 360) + 'deg; animation-delay: ' + ((i % 7) * 0.05).toFixed(2) + 's' })) };
   };
   // Déblocage d'un compagnon : depuis le 2026-10-28, dans le Pokédex et avec des PA (dex.js, dexUnlock), avec
-  // l'animation de déblocage (pkUnlock, 3 s ; games.css) quand il n'y a pas d'évolution à montrer.
+  // l'animation de déblocage (pkUnlock, 4 s ; games.css) quand il n'y a pas d'évolution à montrer.
   proto.pkUnlockShow = function (k) {
     clearTimeout(pkUnlockTimer);
     this.setState({ pkUnlock: k });
-    pkUnlockTimer = setTimeout(() => { if (this.st().pkUnlock === k) this.setState({ pkUnlock: null }); }, 3000);
+    if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) this.sfxUnlock(); // bruit de déblocage (sfx.js, 2026-11-01)
+    pkUnlockTimer = setTimeout(() => { if (this.st().pkUnlock === k) this.setState({ pkUnlock: null }); }, PK_UNL_MS);
   };
   HOME_NO_BUDDY.ask = { on: false };
 

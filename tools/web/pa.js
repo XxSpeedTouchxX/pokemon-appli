@@ -176,7 +176,9 @@
     const want = h <= bottom - top ? top + (bottom - top - h) / 2 : bottom - h;
     box.scrollBy({ top: r.top - want, behavior: 'smooth' });
   };
-  const PA_FX_MS = 7200;
+  // 8,2 s depuis le 2026-11-01 (porteur : « 1 s de plus après les évolutions, on ne voit pas assez l'évolution ») :
+  // mêmes instants qu'avant, la nouvelle forme reste 1 s de plus à l'écran (games.css, pkmEvo*).
+  const PA_FX_MS = 8200;
   paProto.paFxRun = function (from, to, done) {
     if (paStill()) { done(); return; }
     this.setState({ paFx: { from: from, to: to, n: Date.now() } });

@@ -5,7 +5,7 @@
   // - Pièce : pichenette (clic et tintement métallique), petit reflet sonore à chaque demi-tour, de plus en plus
   //   espacé, puis la pièce touche la table (2,38 s), rebondit (2,64 s) et vibre en s'immobilisant (2,9 s), au rythme de
   //   l'animation pkmGmCoin (games.css).
-  // - Évolution : 5 sons et 4 musiques au choix, calés sur l'animation de 7,2 s (pkmEvoFrom et pkmEvoTo, games.css) :
+  // - Évolution : 5 sons et 4 musiques au choix, calés sur l'animation de 7,2 s (8,2 s depuis le 2026-11-01 : la nouvelle forme reste 1 s de plus ; pkmEvoFrom et pkmEvoTo, games.css) :
   //   le Pokémon blanchit (0,72 s), les deux formes alternent de plus en plus vite (SFX_FLASH, 1,37 à 4,14 s), la
   //   nouvelle forme grandit (4,18 s) puis prend ses couleurs (4,8 s), et rebondit (5,3 à 6,2 s).
   //   Choix du porteur (2026-11-01) : la musique « Suspense et lumière » seule, sans son par-dessus
@@ -527,6 +527,103 @@
   // Choix du porteur (2026-11-01, « garde-moi ce son pour le passage de grade : grade-4-impact-de-bande-annonce ») :
   // « Impact de bande-annonce ». Les autres restent pour essai seulement (?songrade=1 à 6, 0 = aucun).
   const SFX_GRADE_DEFAULT = 'trailer';
+  // ——— Ouverture du Booster PK (games.js, gmOpenBooster ; animation pkmGmShake, pkmGmCut, games.css) ———
+  // 2026-11-01, porteur : « propose-moi aussi des bruits lorsque l'on ouvre le booster, des bruits d'ouverture ».
+  // Calés sur l'animation : le booster tremble (0 à 0,7 s), les ciseaux arrivent (0,9 s) et coupent le haut,
+  // la déchirure avance (1,0 à 1,5 s), la bande s'envole (1,5 s), le booster tombe (1,65 à 2,15 s), puis
+  // le gain apparaît (2,15 s). n = rang du gain (1 = 10 PK … 5 = 1 000 PK) : l'air final grandit avec le gain.
+  // 3 propositions simples ; ?sonbooster=1 à 3 pour en essayer une (0 = aucun).
+  const SFX_BO_FLY = 1.5, SFX_BO_WIN = 2.15;
+  // Papier froissé (confettis du déblocage) : petits craquements « au hasard » (toujours les mêmes), de from à to.
+  function sfxCrinkle(ac, out, from, to, n, vol) {
+    for (let i = 0; i < n; i++) {
+      const u = ((i * 7919) % 97) / 97, w = ((i * 104729) % 89) / 89;
+      sfxHiss(ac, out, from + (to - from) * (i + u * 0.7) / n, 0.012 + 0.03 * w, vol * (0.4 + 0.6 * u), 'bandpass', 1500 + 2500 * w, 0, 1.4, 0.001);
+    }
+  }
+  // Version simple et douce (même jour, porteur : « trop agressif pour les oreilles, fais un bruit plus simple ») : plus de
+  // ciseaux qui claquent ni de froissement aigu ; tout reste sous 2 500 Hz, sauf une petite note claire au gain.
+  // Déchirure feutrée : souffle grave qui enfle et retombe, sans grésillement.
+  const sfxSoftTear = (ac, out, at, dur, vol) => sfxHiss(ac, out, at, dur, vol, 'bandpass', 500, 1400, 0.9, dur * 0.55);
+  // « Pop » rond : sinus qui descend vite, comme un bouchon.
+  const sfxPop = (ac, out, at, vol) => sfxTone(ac, out, 'sine', 420, at, 0.12, vol, 0.004, 160);
+  const SFX_BOOSTER = [
+    { id: 'doux', name: 'Déchirure douce', desc: 'Une déchirure feutrée pendant que les ciseaux coupent, un « pop » rond quand le gain apparaît, puis une ou plusieurs petites notes selon le gain.',
+      play: (ac, out, t0, n) => {
+        sfxSoftTear(ac, out, t0 + 1.0, 0.55, 0.12);
+        sfxPop(ac, out, t0 + SFX_BO_WIN, 0.35);
+        const k = Math.max(1, Math.min(5, n || 1));
+        [3, 7, 10, 15, 19].slice(0, Math.min(5, k + 1)).forEach((d, i) => sfxTone(ac, out, 'sine', sfxHz(d + 12), t0 + SFX_BO_WIN + 0.08 + i * 0.09, i === k ? 0.9 : 0.4, 0.06, 0.01));
+      } },
+    { id: 'pop', name: 'Simple pop', desc: 'Le plus discret : un léger souffle quand la bande s’envole, puis un « pop » et une seule note claire au gain.',
+      play: (ac, out, t0) => {
+        sfxHiss(ac, out, t0 + SFX_BO_FLY, 0.35, 0.06, 'lowpass', 1500, 600, 0.7, 0.15);
+        sfxPop(ac, out, t0 + SFX_BO_WIN, 0.35);
+        sfxTone(ac, out, 'sine', sfxHz(15), t0 + SFX_BO_WIN + 0.08, 0.7, 0.06, 0.01);
+      } },
+    { id: 'carillon', name: 'Petit carillon', desc: 'Une déchirure feutrée, puis un petit carillon de boîte à musique au gain, un peu plus long quand le gain est gros.',
+      play: (ac, out, t0, n) => {
+        sfxSoftTear(ac, out, t0 + 1.0, 0.55, 0.1);
+        const k = Math.max(1, Math.min(5, n || 1));
+        [3, 7, 10, 15, 19, 22].slice(0, k + 1).forEach((d, i) => sfxTone(ac, out, 'triangle', sfxHz(d), t0 + SFX_BO_WIN + i * 0.1, i === k ? 1.0 : 0.5, 0.08, 0.004));
+      } }
+  ];
+  // Pas encore de choix du porteur : « Déchirure douce » joué en attendant ; ?sonbooster=1 à 3 pour essayer.
+  const SFX_BOOSTER_DEFAULT = 'doux';
+  // ——— Premier déblocage d'un Pokémon (pk.js, pkUnlockShow ; animation pkmUnl*, games.css, 4 s) ———
+  // 2026-11-01, porteur : « lorsque l'on déverrouille pour la première fois un Pokémon, propose-moi un bruit ».
+  // Calés sur l'animation : le cadenas tremble (0 à 0,7 s), l'anse s'ouvre (0,7 à 1,3 s), le cadenas éclate (1,3 à
+  // 1,7 s) et le Pokémon jaillit (1,32 s, posé à 2 s), son nom apparaît (1,6 à 2 s). 5 propositions ; ?sondeblocage=1
+  // à 5 pour en essayer une (0 = aucun).
+  const SFX_UL_OPEN = 0.72, SFX_UL_CLICK = 1.29, SFX_UL_POP = 1.32, SFX_UL_NAME = 1.6;
+  // Cliquetis métalliques du cadenas qui tremble.
+  const sfxRattle = (ac, out, t0, vol) => [0.02, 0.13, 0.26, 0.39, 0.5, 0.62].forEach((t, i) => sfxBell(ac, out, 1800 + (i % 3) * 420, t0 + t, 0.08, vol * (1 - i * 0.08), [1, 1.7, 2.6], [1, 0.5, 0.3]));
+  // « Clac » de l'anse qui s'ouvre : clic sec et petit coup sourd.
+  const sfxClack = (ac, out, at, vol) => { sfxHiss(ac, out, at, 0.02, vol, 'highpass', 2500, 0, 0.8, 0.001); sfxThump(ac, out, at, vol * 0.8, 400, 160, 0.06); sfxBell(ac, out, 2600, at, 0.12, vol * 0.25, [1, 2.2], [1, 0.4]); };
+  const SFX_UNLOCK = [
+    { id: 'cadenas', name: 'Cadenas qui s’ouvre', desc: 'Le cadenas cliquette en tremblant, l’anse s’ouvre avec un « clac », il éclate, puis un petit air joyeux et des étincelles quand le Pokémon apparaît.',
+      play: (ac, out, t0) => {
+        sfxRattle(ac, out, t0, 0.05);
+        sfxClack(ac, out, t0 + SFX_UL_OPEN, 0.18); sfxClack(ac, out, t0 + SFX_UL_CLICK - 0.08, 0.22);
+        sfxHiss(ac, out, t0 + SFX_UL_POP, 0.35, 0.18, 'lowpass', 6000, 500, 0.7, 0.002);
+        [[3, 0], [7, 0.1], [10, 0.2], [15, 0.3]].forEach(([k, d], i) => sfxBell(ac, out, sfxHz(k + 12), t0 + SFX_UL_POP + 0.05 + d, i === 3 ? 1.2 : 0.4, 0.05, [1, 2.0, 3.0], [1, 0.3, 0.1]));
+        sfxSparkle(ac, out, t0 + 1.7, t0 + 3.0, 10, 0.025, 2800);
+      } },
+    { id: 'fanfare', name: 'Petite fanfare', desc: 'Cliquetis et « clac » du cadenas, un coup de cymbale à l’éclatement, puis une courte fanfare de trompettes quand le Pokémon jaillit.',
+      play: (ac, out, t0) => {
+        sfxRattle(ac, out, t0, 0.04);
+        sfxClack(ac, out, t0 + SFX_UL_CLICK - 0.08, 0.2);
+        sfxThump(ac, out, t0 + SFX_UL_POP, 0.5, 120, 50, 0.3); sfxCymbal(ac, out, t0 + SFX_UL_POP, 0.08);
+        [[-2, 0, 0.12], [-2, 0.14, 0.12], [3, 0.28, 0.12], [7, 0.42, 1.1]].forEach(([k, d, l]) => { sfxBrass(ac, out, sfxHz(k), t0 + SFX_UL_POP + 0.08 + d, l, 0.05); sfxBrass(ac, out, sfxHz(k - 7), t0 + SFX_UL_POP + 0.08 + d, l, 0.03); });
+        sfxThump(ac, out, t0 + SFX_UL_POP + 0.5, 0.35, 100, 50, 0.3);
+      } },
+    { id: 'magie', name: 'Éclat magique', desc: 'Un scintillement qui monte pendant que le cadenas tremble, un carillon à l’ouverture, un souffle lumineux à l’éclatement, puis une harpe et un accord doux.',
+      play: (ac, out, t0) => {
+        sfxRiser(ac, out, 440, 1320, t0, 1.25, 0.025, 1000, 6000);
+        sfxSparkle(ac, out, t0 + 0.1, t0 + 1.2, 8, 0.02, 3200);
+        sfxBell(ac, out, sfxHz(15), t0 + SFX_UL_CLICK - 0.05, 0.6, 0.05, [1, 2.0, 3.0], [1, 0.3, 0.1]);
+        sfxHiss(ac, out, t0 + SFX_UL_POP, 0.6, 0.1, 'highpass', 2000, 8000, 0.7, 0.05);
+        [3, 7, 10, 15, 19, 22].forEach((k, i) => sfxPluck(ac, out, sfxHz(k), t0 + SFX_UL_POP + 0.05 + i * 0.06, 1.0, 0.07));
+        sfxPad(ac, out, [-9, -5, -2, 3], t0 + SFX_UL_POP + 0.3, 2.0, 0.025, 0.25);
+      } },
+    { id: 'arcade', name: 'Objet obtenu (rétro)', desc: 'Version jeu vidéo rétro : petits bips quand le cadenas tremble, un « bip » d’ouverture, puis un jingle 8 bits de récompense.',
+      play: (ac, out, t0) => {
+        [0, 0.12, 0.24, 0.36, 0.48, 0.6].forEach((t, i) => sfxTone(ac, out, 'square', sfxHz(-3 + (i % 2) * 3), t0 + t, 0.04, 0.03, 0.002));
+        sfxTone(ac, out, 'square', sfxHz(5), t0 + SFX_UL_CLICK - 0.06, 0.06, 0.035, 0.002, sfxHz(17));
+        sfxHiss(ac, out, t0 + SFX_UL_POP, 0.2, 0.08, 'lowpass', 3000, 400, 0.7, 0.002);
+        [[7, 0, 0.1], [12, 0.11, 0.1], [11, 0.22, 0.1], [12, 0.33, 0.1], [16, 0.44, 0.1], [19, 0.55, 0.7]].forEach(([k, d, l]) => { sfxTone(ac, out, 'square', sfxHz(k), t0 + SFX_UL_POP + 0.1 + d, l, 0.035, 0.003); sfxTone(ac, out, 'triangle', sfxHz(k - 24), t0 + SFX_UL_POP + 0.1 + d, l, 0.1, 0.003); });
+      } },
+    { id: 'confettis', name: 'Fête et confettis', desc: 'Le cadenas cliquette, puis un « pop » de canon à confettis à l’éclatement, les confettis qui retombent en froissant, et un xylophone joyeux.',
+      play: (ac, out, t0) => {
+        sfxRattle(ac, out, t0, 0.045);
+        sfxClack(ac, out, t0 + SFX_UL_CLICK - 0.08, 0.18);
+        sfxThump(ac, out, t0 + SFX_UL_POP, 0.6, 220, 60, 0.12); sfxHiss(ac, out, t0 + SFX_UL_POP, 0.12, 0.4, 'bandpass', 1500, 500, 0.8, 0.001);
+        sfxCrinkle(ac, out, t0 + SFX_UL_POP + 0.1, t0 + 3.2, 30, 0.07);
+        [[3, 0], [7, 0.09], [10, 0.18], [15, 0.27], [10, 0.4], [15, 0.49], [19, 0.58]].forEach(([k, d]) => sfxBell(ac, out, sfxHz(k + 12), t0 + SFX_UL_POP + 0.15 + d, 0.35, 0.05, [1, 3.9, 9.2], [1, 0.25, 0.08]));
+      } }
+  ];
+  // Pas encore de choix du porteur : « Cadenas qui s'ouvre » joué en attendant ; ?sondeblocage=1 à 5 pour essayer.
+  const SFX_UNLOCK_DEFAULT = 'cadenas';
   // Choix du porteur (2026-11-01, « pa-2-gouttes-d-aura, je prends celui-là ») : « Gouttes d'aura ». Les autres restent
   // pour essai seulement (?sonpa=1 à 5).
   const SFX_PA_DEFAULT = 'gouttes';
@@ -541,6 +638,8 @@
     // PA du jour : crête vers −6 dBFS (petit son de récompense, plus bref que l'évolution).
     'pa-cristaux': 3.1, 'pa-gouttes': 2.7, 'pa-bulles': 2.6, 'pa-arcade': 3.1, 'pa-aura': 2.6,
     // Passage de grade : crête vers −3 dBFS (moment fort, plus présent que les autres sons).
+    'bo-doux': 1.1, 'bo-pop': 1.1, 'bo-carillon': 2.6,
+    'ul-cadenas': 1.6, 'ul-fanfare': 0.7, 'ul-magie': 1, 'ul-arcade': 3, 'ul-confettis': 0.75,
     'gr-origine': 0.55, 'gr-couronnement': 0.45, 'gr-celeste': 0.5, 'gr-trailer': 0.45, 'gr-arcade': 1.5, 'gr-tonnerre': 0.45 };
   const SFX_MUSIC_LEVEL = 0.75;
 
@@ -574,9 +673,9 @@
   // Joue dans ac (temps réel ou hors ligne) : kind = 'coin', 'evo' ou 'music', id = identifiant de la liste.
   function sfxSchedule(ac, dest, kind, id, t0, n) {
     if (kind === 'coin') { sfxCoin(ac, sfxBus(ac, dest, SFX_GAIN.coin), t0); return true; }
-    const item = (kind === 'music' ? SFX_MUSIC : kind === 'pa' ? SFX_PA : kind === 'grade' ? SFX_GRADE : SFX_EVO).find(x => x.id === id);
+    const item = (kind === 'music' ? SFX_MUSIC : kind === 'pa' ? SFX_PA : kind === 'grade' ? SFX_GRADE : kind === 'booster' ? SFX_BOOSTER : kind === 'unlock' ? SFX_UNLOCK : SFX_EVO).find(x => x.id === id);
     if (!item) return false;
-    item.play(ac, sfxBus(ac, dest, (SFX_GAIN[kind === 'pa' ? 'pa-' + id : kind === 'grade' ? 'gr-' + id : id] || 1) * (kind === 'music' ? SFX_MUSIC_LEVEL : 1)), t0, Math.max(1, Math.min(14, n || 12)));
+    item.play(ac, sfxBus(ac, dest, (SFX_GAIN[kind === 'pa' ? 'pa-' + id : kind === 'grade' ? 'gr-' + id : kind === 'booster' ? 'bo-' + id : kind === 'unlock' ? 'ul-' + id : id] || 1) * (kind === 'music' ? SFX_MUSIC_LEVEL : 1)), t0, Math.max(1, Math.min(14, n || 12)));
     return true;
   }
   let sfxAc = null;
@@ -599,6 +698,22 @@
       if (sfxMuted()) return;
       const ac = sfxCtx(), x = sfxPick('sonpa', '', SFX_PA, SFX_PA_DEFAULT);
       if (ac && x) sfxSchedule(ac, ac.destination, 'pa', x.id, ac.currentTime + 0.02, n);
+    } catch (e) { /* son indisponible */ }
+  };
+  // Ouverture du Booster PK (games.js, gmOpenBooster) : n = rang du gain (1 à 5) ; appelé au toucher.
+  sfxProto.sfxBooster = function (n) {
+    try {
+      if (sfxMuted()) return;
+      const ac = sfxCtx(), x = sfxPick('sonbooster', '', SFX_BOOSTER, SFX_BOOSTER_DEFAULT);
+      if (ac && x) sfxSchedule(ac, ac.destination, 'booster', x.id, ac.currentTime + 0.02, n);
+    } catch (e) { /* son indisponible */ }
+  };
+  // Premier déblocage d'un Pokémon (pk.js, pkUnlockShow) : appelé au toucher (bouton du Pokédex).
+  sfxProto.sfxUnlock = function () {
+    try {
+      if (sfxMuted()) return;
+      const ac = sfxCtx(), x = sfxPick('sondeblocage', '', SFX_UNLOCK, SFX_UNLOCK_DEFAULT);
+      if (ac && x) sfxSchedule(ac, ac.destination, 'unlock', x.id, ac.currentTime + 0.02);
     } catch (e) { /* son indisponible */ }
   };
   // Passage de grade (profile.js, pfGradeShow) : le son choisi, au début de l'animation.
@@ -638,4 +753,6 @@
   };
   sfxProto.sfxLists = function () { return { evo: SFX_EVO.map(x => ({ id: x.id, name: x.name, desc: x.desc })), music: SFX_MUSIC.map(x => ({ id: x.id, name: x.name, desc: x.desc })), evoDef: SFX_EVO_DEFAULT, musicDef: SFX_MUSIC_DEFAULT,
     pa: SFX_PA.map(x => ({ id: x.id, name: x.name, desc: x.desc })), paDef: SFX_PA_DEFAULT,
-    grade: SFX_GRADE.map(x => ({ id: x.id, name: x.name, desc: x.desc })), gradeDef: SFX_GRADE_DEFAULT }; };
+    grade: SFX_GRADE.map(x => ({ id: x.id, name: x.name, desc: x.desc })), gradeDef: SFX_GRADE_DEFAULT,
+    booster: SFX_BOOSTER.map(x => ({ id: x.id, name: x.name, desc: x.desc })), boosterDef: SFX_BOOSTER_DEFAULT,
+    unlock: SFX_UNLOCK.map(x => ({ id: x.id, name: x.name, desc: x.desc })), unlockDef: SFX_UNLOCK_DEFAULT }; };

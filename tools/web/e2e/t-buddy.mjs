@@ -91,7 +91,7 @@ await search('');
 // Filtres : 4 offerts + Kyogre, Groudon, Rayquaza débloqués.
 const filt = async l => { await list.locator('[aria-label="Filtrer le Pokédex"] button', { hasText: l }).first().click(); await page.waitForTimeout(300); return tiles.count(); };
 const fOwn = await filt('Débloqués'), fLock = await filt('À débloquer'), fLeg = await filt('Légendaires'), fAll = await filt('Tous');
-ok('filtres : ' + fOwn + ' débloqués, ' + fLock + ' à débloquer, ' + fLeg + ' légendaires, ' + fAll + ' en tout', fOwn === 8 && fLock === 148 && fLeg >= 5 && fAll === 156);
+ok('filtres : ' + fOwn + ' débloqués, ' + fLock + ' à débloquer, ' + fLeg + ' légendaires, ' + fAll + ' en tout', fOwn === 7 && fLock === 149 && fLeg >= 5 && fAll === 156);
 
 // 4. Choisir un compagnon déjà débloqué (Groudon, thème).
 await search('groudon');
@@ -118,7 +118,7 @@ ok('Herbizarre : « ' + await act.innerText() + ' »', (await act.innerText()) =
 await act.click(); await page.waitForTimeout(500);
 ok('animation d’évolution : « ' + (await page.locator('.pkm-evo-fx').innerText().catch(() => '')) + ' »', (await page.locator('.pkm-evo-fx').count()) === 1 && /Bulbizarre évolue/.test(await page.locator('.pkm-evo-fx').innerText()));
 await page.screenshot({ path: shot('buddy-evolution.png') });
-await page.waitForTimeout(7300); // évolution de 7,2 s (2026-10-31)
+await page.waitForTimeout(8300); // évolution de 8,2 s (2026-11-01)
 st = await saved();
 ok('Herbizarre débloqué : 585 PA, compagnon, toast', st.pa === 585 && st.buddy === 2 && (st.pkOwn || []).indexOf(2) >= 0 && (await page.locator('.pkm-evo-fx').count()) === 0 && (await page.locator('text=Félicitations ! Bulbizarre a évolué en Herbizarre · il te reste 585 PA').count()) === 1);
 ok('route mise à jour : ' + await nodes.nth(1).getAttribute('aria-label'), /^Herbizarre, 1ʳᵉ évolution, Compagnon$/.test(await nodes.nth(1).getAttribute('aria-label')) && /^Faire évoluer · 200 PA$/.test(await (async () => { await nodes.nth(2).click(); await page.waitForTimeout(300); return act.innerText(); })()));

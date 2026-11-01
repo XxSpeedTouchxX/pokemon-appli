@@ -46,6 +46,7 @@
     // Enregistré tout de suite (une fermeture pendant l'animation ne rejoue pas le booster), crédité à la révélation.
     this.setState({ games: Object.assign({}, g, { boosterAt: at, bWin: i, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
     if (gmStill()) { credit(); return; }
+    this.sfxBooster(i + 1); // bruit d'ouverture (sfx.js, 2026-11-01), l'air final selon le gain
     gmLater(() => this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'tear' }) }), 700);
     // Des ciseaux coupent le haut (1,15 s), le booster tombe, puis le gain apparaît.
     gmLater(() => { this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'reveal' }) }); credit(); }, 2150);

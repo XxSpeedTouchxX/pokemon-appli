@@ -68,13 +68,13 @@ ok('silhouette sur l’écran tant que le Pokémon est à débloquer', silOk && 
 ok('bouton vert : « ' + await page.locator('.pkm-dex-k-a').getAttribute('aria-label') + ' »', /Faire évoluer · 150 PA/.test(await page.locator('.pkm-dex-k-a').getAttribute('aria-label')));
 await page.click('.pkm-dex-k-a'); await page.waitForTimeout(900);
 // L'évolution est amenée au centre de l'écran (2026-10-29, puis 2026-10-31 : l'écran remonte sur le calque en haut du
-// Pokédex) : pas besoin de remonter pour la voir. Elle dure 7,2 s.
+// Pokédex) : pas besoin de remonter pour la voir. Elle dure 8,2 s.
 const fxPos = await page.evaluate(() => { const el = document.querySelector('.pkm-evo-fx .pkm-evo-to'); if (!el) return null; const r = el.getBoundingClientRect(); return Math.round(r.top + r.height / 2 - innerHeight / 2); });
 ok('évolution centrée à l’écran (écart ' + fxPos + ' px)', fxPos !== null && Math.abs(fxPos) < 120);
 // Texte « Félicitations… a évolué en… » au-dessus de la barre du bas (2026-11-01, porteur : il passait sous le scan).
 const fxTxt = await page.evaluate(() => { const t = document.querySelector('.pkm-evo-fx .pkm-evo-text'), n = document.querySelector('nav[aria-label="Navigation principale"]'); return t && n ? [Math.round(t.getBoundingClientRect().bottom), Math.round(n.getBoundingClientRect().top)] : null; });
 ok('texte de l’évolution au-dessus de la barre du bas (' + (fxTxt || []).join(' < ') + ')', fxTxt && fxTxt[0] <= fxTxt[1] - 8);
-await page.waitForTimeout(6800);
+await page.waitForTimeout(7800); // évolution de 8,2 s (2026-11-01)
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { pa: d.pa, own: d.pkOwn, buddy: d.buddy }; });
 ok('Raichu débloqué au bouton vert (' + JSON.stringify(st) + ')', st.pa === 450 && st.own.indexOf(26) >= 0 && st.buddy === 26);
 // Forme précédente pas encore débloquée : le bouton vert dit pourquoi (Sablaireau, #028).

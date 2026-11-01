@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-11-01 (suite 14) — Déblocage plus grand et plus long, évolution +1 s, bruits du booster et du déblocage
+
+- **Demandes du porteur** :
+  - « propose-moi des bruits d'ouverture du booster », puis « trop agressif pour les oreilles, fais un bruit plus simple » ;
+  - au premier déblocage d'un Pokémon : « propose-moi un bruit », Pokémon plus grand (« il est trop petit »), 1 s de plus après le cadenas ;
+  - 1 s de plus après les évolutions (« on ne voit pas assez l'évolution »).
+- **Fait** (cache v118) :
+  - **déblocage** (`pk.js`, `games.css`) : animation de 4 s au lieu de 3 (mêmes instants jusqu'à l'éclatement du cadenas, puis 1 s de plus) ; Pokémon agrandi d'après son corps (carré de 190 px, au plus 4 fois l'image d'origine) ;
+  - **évolution** (`pa.js`, `games.css`) : 8,2 s au lieu de 7,2 ; la nouvelle forme reste 1 s de plus à l'écran ; le passage de grade attend toujours la fin ;
+  - **bruits du booster** (`sfx.js`, `games.js`) : 3 propositions simples et douces, tout sous 2 500 Hz sauf une petite note au gain : Déchirure douce, Simple pop, Petit carillon ; les 5 premières propositions (ciseaux, aluminium…) sont retirées ; « Déchirure douce » joué en attendant le choix (`?sonbooster=1` à `3`) ;
+  - **bruits du déblocage** (`sfx.js`) : 5 propositions : Cadenas qui s'ouvre, Petite fanfare, Éclat magique, Objet obtenu (rétro), Fête et confettis ; « Cadenas qui s'ouvre » joué en attendant le choix (`?sondeblocage=1` à `5`).
+- **Choix du porteur attendus** : le bruit du booster et celui du déblocage.
+- **Tests** : `t-unlocksfx` (nouveau), `t-pk`, `t-buddy`, `t-games`, `t-gradewait` (nouvelles durées).
+
 ## 2026-11-01 (suite 13) — Passage de grade après l'évolution, son « Impact de bande-annonce », Triopikeur à 30 PA, boutique de PA sans reflet
 
 - **Demandes du porteur** :

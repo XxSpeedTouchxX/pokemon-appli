@@ -172,7 +172,7 @@ ok('thème océan appliqué', await page.evaluate(() => document.documentElement
 ok('compteur : ' + await cText() + ' (PK inchangés)', await cText() === '100 PK');
 ok('animation de déblocage affichée', (await page.locator('button.pkm-unl').count()) === 1);
 await page.screenshot({ path: shot('pk-unlock.png') });
-await page.waitForTimeout(2800); // fin de l'animation de déblocage (3 s)
+await page.waitForTimeout(3800); // fin de l'animation de déblocage (4 s depuis le 2026-11-01)
 ok('animation de déblocage terminée', (await page.locator('button.pkm-unl').count()) === 0);
 route = (await routeAria()).map(a => a.replace(/\s/g, ' '));
 ok('après déblocage : plus de bouton (« C’est ton compagnon » retiré le 2026-10-31), route ' + route.join(' ; '), (await act.count()) === 0 && route.join() === 'Kyogre, Forme de base, Compagnon');
