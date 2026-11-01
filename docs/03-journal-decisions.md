@@ -17,7 +17,7 @@
   - **évolution** (`pa.js`, `games.css`) : 8,2 s au lieu de 7,2 ; la nouvelle forme reste 1 s de plus à l'écran ; le passage de grade attend toujours la fin ;
   - **bruits du booster** (`sfx.js`, `games.js`) : 3 propositions simples et douces, tout sous 2 500 Hz sauf une petite note au gain : Déchirure douce, Simple pop, Petit carillon ; les 5 premières propositions (ciseaux, aluminium…) sont retirées ; « Déchirure douce » joué en attendant le choix (`?sonbooster=1` à `3`) ;
   - **bruits du déblocage** (`sfx.js`) : 5 propositions : Cadenas qui s'ouvre, Petite fanfare, Éclat magique, Objet obtenu (rétro), Fête et confettis ; « Cadenas qui s'ouvre » joué en attendant le choix (`?sondeblocage=1` à `5`).
-- **Choix du porteur attendus** : le bruit du booster et celui du déblocage.
+- **Choix du porteur (même jour)** : booster « Déchirure douce » ; pour le déblocage, « propose-moi dans ce thème-là » : les 5 premiers bruits (cadenas, fanfare, magie, rétro, confettis) sont remplacés par 5 bruits doux dans l'esprit de « Déchirure douce » (clic et « pop » feutrés, petites notes) : Clic doux, Souffle et pop, Petit carillon, Bulle qui éclate, Clochette ; puis **choix du porteur : « Clochette »** (les autres pour essai : `?sondeblocage=1` à `5`).
 - **Tests** : `t-unlocksfx` (nouveau), `t-pk`, `t-buddy`, `t-games`, `t-gradewait` (nouvelles durées).
 
 ## 2026-11-01 (suite 13) — Passage de grade après l'évolution, son « Impact de bande-annonce », Triopikeur à 30 PA, boutique de PA sans reflet

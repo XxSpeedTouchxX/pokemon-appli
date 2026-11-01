@@ -1,6 +1,6 @@
-// Déblocage, booster et évolution (2026-11-01, porteur) : bruit au premier déblocage d'un Pokémon (5 propositions,
-// ?sondeblocage=), Pokémon débloqué agrandi, animation de 4 s (1 s de plus après le cadenas), évolution de 8,2 s (1 s de
-// plus sur la nouvelle forme) ; bruit d'ouverture du Booster PK, simple et doux (3 propositions, ?sonbooster=).
+// Déblocage, booster et évolution (2026-11-01, porteur) : bruit au premier déblocage d'un Pokémon (5 propositions douces,
+// dans l'esprit de « Déchirure douce », ?sondeblocage=), Pokémon débloqué agrandi, animation de 4 s (1 s de plus après le cadenas), évolution de 8,2 s (1 s de
+// plus sur la nouvelle forme) ; bruit d'ouverture du Booster PK, simple et doux (3 propositions, ?sonbooster= ; choix du porteur : « Déchirure douce »).
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -27,18 +27,16 @@ const open = async (q) => {
 {
   const [ctx, page] = await open();
   const L = await page.evaluate(() => window.__pkm.sfxLists());
-  ok('bruits de déblocage : ' + L.unlock.map(x => x.name).join(', ') + ' (joué : ' + L.unlockDef + ')', L.unlock.length === 5 && L.unlockDef === 'cadenas');
-  ok('bruits du booster, version douce : ' + L.booster.map(x => x.name).join(', ') + ' (joué : ' + L.boosterDef + ')', L.booster.length === 3 && L.boosterDef === 'doux');
+  ok('bruits de déblocage : ' + L.unlock.map(x => x.name).join(', ') + ' (choix du porteur : ' + L.unlockDef + ')', L.unlock.length === 5 && L.unlockDef === 'clochette');
+  ok('bruits du booster, version douce : ' + L.booster.map(x => x.name).join(', ') + ' (choix du porteur : ' + L.boosterDef + ')', L.booster.length === 3 && L.boosterDef === 'doux');
   const lv = [];
   for (const x of L.unlock) { const r = await page.evaluate(id => window.__pkm.sfxRender([['unlock', id]], 4.2).then(v => ({ peak: v.peak, rms: v.rms })), x.id); lv.push(['déblocage ' + x.id, db(r.peak), db(r.rms)]); }
   for (const x of L.booster) for (const n of [1, 5]) { const r = await page.evaluate(([id, n]) => window.__pkm.sfxRender([['booster', id, n]], 4.4).then(v => ({ peak: v.peak, rms: v.rms })), [x.id, n]); lv.push(['booster ' + x.id + ' ' + n, db(r.peak), db(r.rms)]); }
-  ok('niveaux (crête / moyenne, dBFS) : ' + lv.map(x => x.join(' ')).join(' · '), lv.every(([, p, m]) => p <= -4 && p >= -12 && m >= -40 && m <= -26));
-  // Booster plus doux : au plus −6 dBFS en crête.
-  ok('booster : crêtes sous −6 dBFS', lv.filter(x => /^booster/.test(x[0])).every(([, p]) => p <= -6));
-  // Déblocage d'un Pokémon de base (Taupiqueur) : bruit, animation de 4 s, Pokémon agrandi.
+  ok('niveaux (crête / moyenne, dBFS) : ' + lv.map(x => x.join(' ')).join(' · '), lv.every(([, p, m]) => p <= -6 && p >= -12 && m >= -40 && m <= -26));
+    // Déblocage d'un Pokémon de base (Taupiqueur) : bruit, animation de 4 s, Pokémon agrandi.
   await page.evaluate(() => { window.__osc = 0; window.__pkm.dexUnlock(50); });
   await page.waitForTimeout(300);
-  ok('déblocage : bruit joué (' + await page.evaluate(() => window.__osc) + ' notes)', (await page.evaluate(() => window.__osc)) > 5);
+  ok('déblocage : bruit joué (' + await page.evaluate(() => window.__osc) + ' notes)', (await page.evaluate(() => window.__osc)) >= 3);
   await page.waitForTimeout(1900);
   const box = await page.locator('.pkm-unl-mon').boundingBox(), ib = await page.locator('.pkm-unl-mon img').boundingBox();
   ok('Pokémon débloqué agrandi : cadre ' + Math.round(box.width) + ' px, image ' + Math.round(ib.width) + ' px', box.width >= 185 && ib.width >= 200);
