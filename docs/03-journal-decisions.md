@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-01 (suite 15) — Radar ouvert à tous, comme avant
+
+- **Demande du porteur** : « regarde le radar, il ne marche plus : quand on appuie dessus, on retombe sur le grade Pokémon ; refais-le fonctionner exactement comme avant ».
+- **Cause** : depuis le 2026-10-28, le Radar des boutiques était réservé au grade Maître Pokémon ; en dessous, un appui ouvrait la fiche de ce grade au lieu du Radar. Les tests automatiques jouent au grade maximal, d'où le problème passé inaperçu.
+- **Fait** (cache v120) : verrou retiré (`radar.js`) ; le Radar s'ouvre pour tout le monde depuis l'accueil, Territoire et le lien direct ; la ligne « Radar des boutiques Pokémon de France » est retirée des avantages du grade Maître Pokémon (`profile.js`).
+- **Tests** : `t-grades` (Radar ouvert à la Recrue, plus d'avantage Radar), `t-radar` lancé aussi au grade Recrue.
+
 ## 2026-11-01 (suite 14) — Déblocage plus grand et plus long, évolution +1 s, bruits du booster et du déblocage
 
 - **Demandes du porteur** :

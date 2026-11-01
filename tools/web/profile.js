@@ -107,7 +107,8 @@
   //   Grand maître mondial Pokémon : 50 000 PK + 151 compagnons + 5 méga-évolutions.
   // Avantages appliqués sur l'appareil (falsifiables tant qu'il n'y a pas de serveur) : scans par jour (scan.js), délai
   // du Booster PK et de la pièce (games.js ; pièce fermée à la Recrue), ticket du tirage, booster et item Deluxe du
-  // PK shop (pkshop.js), carte de France du Radar (radar.js). Chaque grade garde ce que donnent les précédents.
+  // PK shop (pkshop.js). Chaque grade garde ce que donnent les précédents. Le Radar (radar.js) est ouvert à tous depuis
+  // le 2026-11-01 (porteur) : il n'est plus un avantage du grade Maître Pokémon.
   // Grade forcé : mode Admin, ou la clé « pkm-grade-force » de l'appareil (1 à 6, utilisée par les tests).
   // Le champ sym d'un grade porte le chemin de son emblème (build.mjs remplace les hexagones de la maquette).
   const PF_BASE = ['Accès à la valeur de toute ta collection', 'Accès à ton classeur de cartes et d’items scellés', 'Accès à toutes les séries Pokémon et à leurs extensions', 'Accès au Pokédex d’évolution pour choisir ton compagnon'];
@@ -126,8 +127,7 @@
     ], g.coinH ? ['Jeu de la pièce toutes les ' + g.coinH + ' h'] : [], i ? ['Emblème ' + g.name + ' sur ton profil'] : [],
     g.ticket ? ['Possibilité d’acheter un ticket pour participer au tirage au sort'] : [],
     g.shopBooster ? ['Possibilité d’acheter un booster au PK shop'] : [],
-    g.deluxe ? ['Possibilité d’acheter un item « Deluxe » au PK shop'] : [],
-    g.radar ? ['Radar des boutiques Pokémon de France'] : []);
+    g.deluxe ? ['Possibilité d’acheter un item « Deluxe » au PK shop'] : []);
   });
   const pfNum = n => Number(n || 0).toLocaleString('fr-FR');
   const pfCond = g => g.pk === 0 ? 'Dès l’inscription' : [pfNum(g.pk) + ' PK gagnés'].concat(g.comp ? [g.comp + ' compagnons débloqués'] : [], g.mega ? [g.mega + (g.mega > 1 ? ' méga-évolutions débloquées' : ' méga-évolution débloquée')] : []).join(' + ');

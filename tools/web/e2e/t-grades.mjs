@@ -1,6 +1,6 @@
 // Grades (2026-10-28, porteur) : conditions (PK gagnés, compagnons, méga-évolutions) et avantages appliqués sur
 // l'appareil : jeu de la pièce fermé à la Recrue, délais du Booster et de la pièce, scans par jour, ticket, booster et
-// item Deluxe du PK shop, carte de France du Radar ; méga-évolutions débloquées avec des PA dans le Pokédex (route d’évolution et fiche). Le vrai grade est
+// item Deluxe du PK shop (Radar ouvert à tous depuis le 2026-11-01) ; méga-évolutions débloquées avec des PA dans le Pokédex (route d’évolution et fiche). Le vrai grade est
 // gardé (E2E_GRADE=0) : l'état est préparé dans le stockage de l'appareil.
 process.env.E2E_GRADE = '0';
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -31,10 +31,13 @@ ok('Recrue : ticket réservé au Collectionneur', /Réservé au grade Collection
 ok('Recrue : booster réservé au Dresseur Pokémon', /Réservé au grade Dresseur Pokémon/.test(shop));
 ok('item Deluxe réservé au Grand maître mondial Pokémon', (await page.locator('section[aria-label="Item Deluxe"]').count()) === 1 && /Réservé au grade Grand maître mondial Pokémon/.test(shop));
 await page.screenshot({ path: shot('grades-recrue-shop.png'), fullPage: true });
+// Radar ouvert à tous depuis le 2026-11-01 (porteur : « refais-le fonctionner exactement comme avant ») : plus de verrou au grade Maître.
 await go('start=radar');
-ok('Recrue : la carte de France ouvre la fiche du grade Maître Pokémon', (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 1 && (await page.locator('#pkm-radar-map').count()) === 0);
+ok('Recrue : la carte du Radar s’ouvre (plus réservée au grade Maître Pokémon)', (await page.locator('#pkm-radar-map').count()) === 1 && (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 0);
+await go('debug&start=home');
+await page.evaluate(() => window.__pkm.push('grade', { gradeIx: 4 })); await page.waitForTimeout(700);
 const gs = await text('main');
-ok('fiche du grade : conditions et avantages du porteur', /20[   ]000 PK gagnés \+ 100 compagnons débloqués \+ 1 méga-évolution débloquée/.test(gs) && /100 scans disponibles par jour/.test(gs) && /Booster PK toutes les 6 h/.test(gs) && /Radar des boutiques Pokémon de France/.test(gs) && /Pokédex d’évolution/.test(gs));
+ok('fiche du grade : conditions et avantages du porteur, sans le Radar', /20[   ]000 PK gagnés \+ 100 compagnons débloqués \+ 1 méga-évolution débloquée/.test(gs) && /100 scans disponibles par jour/.test(gs) && /Booster PK toutes les 6 h/.test(gs) && !/Radar des boutiques Pokémon de France/.test(gs) && /Pokédex d’évolution/.test(gs));
 await page.screenshot({ path: shot('grades-fiche-maitre.png'), fullPage: true });
 await seed({ scanDay: DAY, scanN: 5 });
 await go('start=scan');
@@ -70,7 +73,7 @@ await dex.screenshot({ path: shot('grades-mega.png') });
 await go('start=home');
 ok('compagnon de l’accueil : Méga-Dracaufeu X', (await page.locator('button[aria-label^="Compagnon : Méga-Dracaufeu X"]').count()) === 1);
 
-// 4. Maître Pokémon : 20 000 PK, 100 compagnons, 1 méga-évolution → Radar ouvert, 100 scans
+// 4. Maître Pokémon : 20 000 PK, 100 compagnons, 1 méga-évolution → 100 scans (Radar ouvert à tous)
 await seed({ pkEarned: 20000, pkOwn: PAID.slice(0, 96) });
 await go('start=radar');
 ok('Maître Pokémon : carte de France ouverte', (await page.locator('#pkm-radar-map').count()) === 1 && (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 0);
