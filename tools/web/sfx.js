@@ -524,8 +524,9 @@
         sfxSparkle(ac, out, t0 + 3.4, t0 + 4.8, 8, 0.03, 2800);
       } }
   ];
-  // Pas encore de choix du porteur : le son d'origine reste joué ; ?songrade=1 à 6 (ou l'identifiant) pour essayer.
-  const SFX_GRADE_DEFAULT = 'origine';
+  // Choix du porteur (2026-11-01, « garde-moi ce son pour le passage de grade : grade-4-impact-de-bande-annonce ») :
+  // « Impact de bande-annonce ». Les autres restent pour essai seulement (?songrade=1 à 6, 0 = aucun).
+  const SFX_GRADE_DEFAULT = 'trailer';
   // Choix du porteur (2026-11-01, « pa-2-gouttes-d-aura, je prends celui-là ») : « Gouttes d'aura ». Les autres restent
   // pour essai seulement (?sonpa=1 à 5).
   const SFX_PA_DEFAULT = 'gouttes';

@@ -86,12 +86,12 @@ const dexl = page.locator('section[aria-label="Mon Pokédex"]');
 const tilesAria = await page.$$eval('[aria-label="Tous les Pokémon"] button', bs => bs.map(b => b.getAttribute('aria-label')));
 const locked = tilesAria.filter(a => /à débloquer/.test(a)), free = tilesAria.filter(a => !/à débloquer/.test(a)).map(a => a.split(',')[0]);
 const price = n => (tilesAria.find(a => a.startsWith(n + ',')) || '').replace(/.* pour /, '');
-ok('151 verrouillés, 5 offerts (Triopikeur offert depuis le 2026-11-01) : ' + free.join(', '), locked.length === 151 && free.join() === 'Bulbizarre,Salamèche,Carapuce,Pikachu,Triopikeur' && tilesAria.length === 156);
+ok('152 verrouillés, 4 offerts (Triopikeur à 30 PA, porteur, 2026-11-01) : ' + free.join(', '), locked.length === 152 && free.join() === 'Bulbizarre,Salamèche,Carapuce,Pikachu' && tilesAria.length === 156 && price('Triopikeur') === '30 PA');
 ok('prix : Herbizarre ' + price('Herbizarre') + ', Florizarre ' + price('Florizarre') + ', Évoli ' + price('Évoli') + ', Mewtwo ' + price('Mewtwo') + ', Latias ' + price('Latias') + ', Kyogre ' + price('Kyogre'),
   price('Herbizarre') === '50 PA' && price('Florizarre') === '200 PA' && price('Évoli') === '30 PA' && price('Mewtwo') === '500 PA' && price('Latias') === '300 PA' && price('Kyogre') === '1000 PA'
   && price('Dracolosse') === '200 PA' && price('Raichu') === '150 PA' && price('Kabutops') === '30 PA' && price('Ptéra') === '50 PA' && price('Ronflex') === '50 PA');
 const dexCount = async () => (await dexl.locator('.pkm-dexl-head > span > span').innerText()).replace(/\s/g, ' ').trim();
-ok('compte : « ' + await dexCount() + ' »', await dexCount() === '5 / 156 débloqués · 0 PA');
+ok('compte : « ' + await dexCount() + ' »', await dexCount() === '4 / 156 débloqués · 0 PA');
 const nTiles = () => page.locator('[aria-label="Tous les Pokémon"] button').count();
 await dexl.locator('button:has-text("À débloquer")').click(); await page.waitForTimeout(200);
 const nLock = await nTiles();
@@ -101,7 +101,7 @@ await dexl.locator('button:has-text("Légendaires")').click(); await page.waitFo
 const legs = await page.$$eval('[aria-label="Tous les Pokémon"] button', bs => bs.map(b => b.getAttribute('aria-label').split(',')[0]));
 await dexl.locator('button:has-text("Tous")').first().click(); await page.waitForTimeout(200);
 ok('filtres : ' + nLock + ' à débloquer, ' + nOwn + ' débloqués, ' + legs.length + ' légendaires (' + legs.slice(0, 4).join(', ') + '…), ' + await nTiles() + ' en tout',
-  nLock === 151 && nOwn === 5 && legs.includes('Mewtwo') && legs.includes('Kyogre') && !legs.includes('Pikachu') && await nTiles() === 156);
+  nLock === 152 && nOwn === 4 && legs.includes('Mewtwo') && legs.includes('Kyogre') && !legs.includes('Pikachu') && await nTiles() === 156);
 await page.screenshot({ path: shot('pk-choix.png') });
 // Groudon verrouillé : sa fiche s'ouvre, rien ne change.
 await page.fill('input[aria-label="Chercher un Pokémon"]', 'groudon'); await page.waitForTimeout(300);
@@ -186,7 +186,7 @@ await page.locator('button[aria-label="Fermer Mes PK"]').click(); await page.wai
 // La liste complète s'ouvre depuis le Pokédex (onglet Jeux, « Tous les Pokémon »).
 await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(800);
 await page.click('.pkm-dex-all'); await page.waitForTimeout(1000);
-ok('« Tous les Pokémon » : liste ouverte, « ' + (await dexl.count() ? await dexCount() : '—') + ' »', (await dexl.count()) === 1 && await dexCount() === '6 / 156 débloqués · 2 120 PA');
+ok('« Tous les Pokémon » : liste ouverte, « ' + (await dexl.count() ? await dexCount() : '—') + ' »', (await dexl.count()) === 1 && await dexCount() === '5 / 156 débloqués · 2 120 PA');
 await dexl.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
 await page.click('nav button[aria-label="Accueil"]'); await page.waitForTimeout(600);
 // 7. Migration : compagnon à thème choisi avant les PK, gardé ; compagnon payant non débloqué, retiré.

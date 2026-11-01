@@ -809,12 +809,6 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
    flottent et étincelle qui scintille (2026-11-01, porteur : « que ça donne envie d'acheter les PA »). */
 .pkm-pas-pack { isolation: isolate; }
 .pkm-pas-tag { z-index: 3; }
-.pkm-pas-shine { position: absolute; inset: 0; z-index: 1; border-radius: inherit; overflow: hidden; pointer-events: none; }
-.pkm-pas-shine::before { content: ''; position: absolute; top: -20%; bottom: -20%; left: -60%; width: 45%; background: linear-gradient(105deg, transparent 0, rgba(255, 255, 255, 0) 20%, rgba(255, 240, 255, 0.55) 50%, rgba(255, 255, 255, 0) 80%, transparent 100%); transform: skewX(-18deg); animation: pkmPasShine 2.6s ease-in-out infinite; }
-.pkm-pas-p1 .pkm-pas-shine::before { animation-delay: 0.35s; }
-.pkm-pas-p2 .pkm-pas-shine::before { animation-delay: 0.7s; }
-.pkm-pas-p3 .pkm-pas-shine::before { animation-delay: 1.05s; }
-@keyframes pkmPasShine { 0% { left: -60%; } 45% { left: 130%; } 100% { left: 130%; } }
 .pkm-pas-drops { position: relative; }
 .pkm-pas-drop { animation: pkmPasFloat 2.6s ease-in-out infinite; }
 .pkm-pas-drop:nth-child(2) { animation-delay: 0.3s; }
@@ -826,6 +820,6 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pas-price { position: relative; z-index: 2; }
 .pkm-pas-hot .pkm-pas-price, .pkm-pas-p3 .pkm-pas-price { animation: pkmPasPulse 2.6s ease-in-out infinite; }
 @keyframes pkmPasPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0); } 50% { box-shadow: 0 0 0 5px rgba(255, 214, 10, 0.28); } }
-@media (prefers-reduced-motion: reduce) { .pkm-pas-shine, .pkm-pas-spark { display: none; } .pkm-pas-drop, .pkm-pas-price { animation: none !important; } }
-html.pkm-calm .pkm-pas-shine, html.pkm-calm .pkm-pas-spark { display: none; }
+@media (prefers-reduced-motion: reduce) { .pkm-pas-spark { display: none; } .pkm-pas-drop, .pkm-pas-price { animation: none !important; } }
+html.pkm-calm .pkm-pas-spark { display: none; }
 html.pkm-calm .pkm-pas-drop, html.pkm-calm .pkm-pas-price { animation: none !important; }

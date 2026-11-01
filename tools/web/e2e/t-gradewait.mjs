@@ -1,6 +1,6 @@
 // Passage de grade après une évolution (2026-11-01, porteur) : « je veux que l'évolution se termine et ensuite on passe
 // au nouveau grade une fois l'évolution effectuée ». Et 6 sons de grade au choix (le son d'origine et 5 plus épiques),
-// ?songrade=1 à 6 pour en essayer un.
+// ?songrade=1 à 6 pour en essayer un. Choix du porteur : « Impact de bande-annonce » (n° 4).
 process.env.E2E_GRADE = '0';
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
@@ -74,17 +74,17 @@ const gu = page => page.locator('.pkm-gu').count();
   // Sons du passage de grade : 6 propositions, rendus sans saturation ; le son d'origine reste en attendant le choix.
   const [ctx, page] = await open();
   const L = await page.evaluate(() => window.__pkm.sfxLists());
-  ok('sons de grade : ' + L.grade.map(x => x.name).join(', ') + ' (joué : ' + L.gradeDef + ')', L.grade.length === 6 && L.gradeDef === 'origine');
+  ok('sons de grade : ' + L.grade.map(x => x.name).join(', ') + ' (choix du porteur : ' + L.gradeDef + ')', L.grade.length === 6 && L.gradeDef === 'trailer');
   const lv = [];
   for (const x of L.grade) { const r = await page.evaluate(id => window.__pkm.sfxRender([['grade', id]], 6.2).then(v => ({ peak: v.peak, rms: v.rms })), x.id); lv.push([x.id, db(r.peak), db(r.rms)]); }
   ok('niveaux (crête / moyenne, dBFS) : ' + lv.map(x => x.join(' ')).join(' · '), lv.every(([, p, m]) => p <= -1 && p >= -6 && m >= -32 && m <= -20));
   await page.evaluate(() => { window.__osc = 0; window.__pkm.sfxGrade(); }); await page.waitForTimeout(200);
   const nDef = await page.evaluate(() => window.__osc);
   await ctx.close();
-  const [ctx2, page2] = await open('&songrade=2');
+  const [ctx2, page2] = await open('&songrade=1');
   await page2.evaluate(() => { window.__osc = 0; window.__pkm.sfxGrade(); }); await page2.waitForTimeout(200);
   const n2 = await page2.evaluate(() => window.__osc);
-  ok('?songrade=2 : « Couronnement royal » joué (' + n2 + ' notes, contre ' + nDef + ' pour le son d’origine)', n2 > nDef && nDef > 0);
+  ok('par défaut « Impact de bande-annonce » (' + nDef + ' notes) ; ?songrade=1 : le son d’origine (' + n2 + ' notes)', nDef > n2 && n2 > 0);
   await ctx2.close();
   const [ctx3, page3] = await open('&songrade=0');
   await page3.evaluate(() => { window.__osc = 0; window.__pkm.sfxGrade(); }); await page3.waitForTimeout(200);

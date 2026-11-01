@@ -6,7 +6,7 @@
 
 ---
 
-## 2026-11-01 (suite 13) — Passage de grade après l'évolution, sons de grade plus épiques
+## 2026-11-01 (suite 13) — Passage de grade après l'évolution, son « Impact de bande-annonce », Triopikeur à 30 PA, boutique de PA sans reflet
 
 - **Demandes du porteur** :
   - « quand je passe de grade grâce à une évolution, je veux que l'évolution se termine et ensuite on passe au nouveau grade » : jusqu'ici, les deux animations se jouaient en même temps ;
@@ -21,8 +21,10 @@
     4. Impact de bande-annonce : tension de film, énorme impact grave, cuivres héroïques ;
     5. Victoire arcade épique : arpèges 8 bits, explosion rétro, fanfare de jeu vidéo ;
     6. Tonnerre et gloire : orage et battements de cœur, tonnerre et gong, cuivres, cordes et chœur.
-  - **choix du porteur attendu** : le son d'origine reste joué en attendant ; `?songrade=1` à `6` pour essayer un son dans l'app (`?songrade=0` : aucun son).
-- **Tests** : `t-gradewait` (pas de passage de grade pendant l'évolution ni pendant le déblocage, puis le passage de grade ; 6 sons rendus sans saturation ; `?songrade=`).
+  - **choix du porteur (même jour)** : « Impact de bande-annonce » (n° 4) ; les autres restent pour essai : `?songrade=1` à `6` (`?songrade=0` : aucun son).
+- **Boutique de PA** (porteur, même jour : « enlève-moi uniquement l'effet de voile sur les PA à acheter, le reste est OK ») : le reflet qui traversait les packs est retiré ; gouttes qui flottent, étincelle et prix qui pulsent restent (`games.css`, `catalog.dc.html`).
+- **Triopikeur à 30 PA** (porteur, même jour ; il était offert, à 0 PA, depuis la suite 10) : total pour tout débloquer **15 150 PA** (≈ 507 jours de PA du jour) ; `PA_PRICES` (`pk.js`), `docs/21-prix-pa-pokedex.csv` et `.xlsx`.
+- **Tests** : `t-pk` (4 Pokémon offerts), `t-pashop` (plus de reflet), `t-gradewait` (pas de passage de grade pendant l'évolution ni pendant le déblocage, puis le passage de grade ; 6 sons rendus sans saturation ; `?songrade=`).
 
 ## 2026-11-01 (suite 12) — Prix des Pokémon avec le logo des PA, boutique de PA qui brille
 

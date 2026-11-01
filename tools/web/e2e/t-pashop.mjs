@@ -20,9 +20,10 @@ ok('Recharger mes PA ouvert, Magasin caché', (await sec.count()) === 1 && (awai
 const packs = (await sec.locator('.pkm-pas-pack').evaluateAll(b => b.map(x => x.getAttribute('aria-label'))));
 ok('4 packs : ' + packs.join(' ; '), packs.length === 4 && /^500 PA pour 1,99 €$/.test(N(packs[0])) && /^8 000 PA pour 19,99 €, dont 60 % offerts$/.test(N(packs[3])));
 ok('solde : ' + N(await sec.locator('.pkm-pas-bal b').innerText()), N(await sec.locator('.pkm-pas-bal b').innerText()) === '120 PA');
-// Effet brillant (2026-11-01, porteur) : un reflet par pack, qui repasse toutes les 2,6 s, gouttes qui flottent.
-const fx = await sec.evaluate(el => [...el.querySelectorAll('.pkm-pas-shine')].map(x => { const c = getComputedStyle(x, '::before'); return c.animationName + ' ' + c.animationDuration + ' ' + c.animationIterationCount; }));
-ok('reflet sur les 4 packs : ' + fx[0], fx.length === 4 && fx.every(t => t === 'pkmPasShine 2.6s infinite'));
+// Effet brillant (2026-11-01, porteur) : gouttes qui flottent, étincelle, prix qui pulsent ; le reflet (« voile ») qui
+// traversait les packs est retiré à la demande du porteur (même jour : « enlève-moi uniquement l'effet de voile »).
+const fx = await sec.evaluate(el => ({ shine: el.querySelectorAll('.pkm-pas-shine').length, drops: [...el.querySelectorAll('.pkm-pas-drop')].filter(x => getComputedStyle(x).animationName !== 'none').length, spark: el.querySelectorAll('.pkm-pas-spark').length }));
+ok('plus de reflet sur les packs ; gouttes animées : ' + fx.drops + ', étincelles : ' + fx.spark, fx.shine === 0 && fx.drops >= 4 && fx.spark >= 1);
 await page.waitForTimeout(900); await sec.screenshot({ path: shot('pashop.png') });
 await page.screenshot({ path: shot('pashop-page.png') });
 await sec.locator('.pkm-pas-pack').nth(2).click(); await page.waitForTimeout(400);
