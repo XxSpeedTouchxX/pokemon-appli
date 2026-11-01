@@ -36,8 +36,10 @@ def fold(t):
 
 
 def star(name):
-    """Cartes « étoile » : TCGdex écrit « Rayquaza ☆ », Cardmarket « Rayquaza Gold Star » (2026-11-01)."""
-    return re.sub(r"\s*☆", " Gold Star", str(name or ""))
+    """Noms TCGdex écrits comme Cardmarket (2026-11-01) : « Rayquaza ☆ » → « Rayquaza Gold Star », « Raichu δ » →
+    « Raichu Delta Species » (Cardmarket : « Raichu δ Delta Species », δ effacé par fold)."""
+    t = re.sub(r"\s*☆", " Gold Star", str(name or ""))
+    return re.sub(r"\s*δ(\s+Delta Species)?", " Delta Species", t)
 
 
 def base_name(name):
@@ -151,15 +153,16 @@ class CmFiles:
         return out if out[0] is not None or out[2] is not None or out[3] is not None else None
 
     def relink(self, idp, en):
-        """Produit Cardmarket d'une carte que TCGdex relie à idp : idp si son nom Cardmarket est celui de la carte
-        (nom anglais), sinon le seul produit de la même extension qui porte ce nom (Rayquaza ☆ relié à un autre
-        produit, 2026-11-01) ; None si le nom ne permet pas de trancher."""
+        """Produit Cardmarket d'une carte « étoile » que TCGdex relie à un autre produit (Rayquaza ☆ relié au Rayquaza
+        ordinaire, 2026-11-01) : le seul produit de la même extension qui porte son nom (« … Gold Star »). Toute autre
+        carte garde le produit de TCGdex : les noms diffèrent trop souvent pour de bonnes raisons (δ, Niv., RC5…), et un
+        rapprochement par le nom seul les reliait à la version ordinaire (Tortank δ 269 € → 6 €, premier passage)."""
         name = fold(star(en)) if en else ""
         have = self.name_of.get(idp)
-        if not name or have is None or have == name or have.replace(" ", "") == name.replace(" ", ""):
+        if "gold star" not in name or have is None or "gold star" in have:
             return idp
         same = [p["idProduct"] for p in self.by_exp.get(self.exp_of.get(idp), []) if base_name(p.get("name")) == name]
-        return same[0] if len(same) == 1 else None
+        return same[0] if len(same) == 1 else idp
 
 
 def en_names(sid, opener=None):

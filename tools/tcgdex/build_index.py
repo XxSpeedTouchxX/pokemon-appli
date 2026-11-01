@@ -417,7 +417,11 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
             p = full[:5] if full else (None if moved else files.group(idp, grp))
             if not p:
                 continue
-            ours, theirs = c[f["cm"]] or c[f["avg30"]] or c[f["avg7"]], p[0] or p[2] or p[3]
+            # Écart jugé sur la cote de l'app (médiane de la tendance et des moyennes 7 et 30 jours), pas sur la tendance
+            # seule, trop instable (Lugia de Neo Genesis : tendance 348 → 1 329 €, médiane 461 → 914 €).
+            mid = lambda v: sorted(x for x in v if x)[len([x for x in v if x]) // 2] if any(v) else None
+            ours = mid([c[f["cm"]], c[f["avg30"]], c[f["avg7"]]])
+            theirs = mid([p[0], p[2], p[3]])
             if idp == cm_ids[cid] and not (ours and theirs and max(ours, theirs) >= 5 and max(ours, theirs) > VERIFY_RATIO * min(ours, theirs)):
                 continue
             c[f["cm"]], c[f["low"]], c[f["avg30"]], c[f["avg7"]], c[f["avg1"]] = p

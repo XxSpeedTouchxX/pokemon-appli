@@ -122,6 +122,25 @@ class Verify(unittest.TestCase):
         self.assertEqual((n, cards[0][f["cm"]], cards[0][f["cmf"]]), (1, 40.0, 1))
         self.assertEqual((cards[1][f["cm"]], cards[1][f["cmf"]]), (0.1, 0))  # moins de 5 € : écart ignoré
 
+    def test_delta_card_not_moved_to_the_plain_pokemon(self):
+        f = {k: i for i, k in enumerate(FIELDS)}
+        files = cmfiles.CmFiles([prod(5, "Raichu δ Delta Species [Zzzap]", 201), prod(6, "Raichu [Thunder]", 201)],
+                                [guide(5, None, None, None, holo=59.0), guide(6, 1.3, 2.3, 2.2)], "2026-11-01")
+        cards = [self.card("ex13-15", "Raichu δ", 59.26, "h")]
+        n, _ = fill_cardmarket(cards, {"ex8": ["Holon", "", "", "", "", "en"]}, {}, {"ex13-15": 5}, files, en_fetch=lambda sid: {})
+        self.assertEqual((n, cards[0][f["cm"]], cards[0][f["cmf"]]), (0, 59.26, 0))
+
+    def test_volatile_trend_alone_is_not_enough(self):
+        f = {k: i for i, k in enumerate(FIELDS)}
+        files = cmfiles.CmFiles([prod(7, "Lugia [Aeroblast]", 202)], [guide(7, 1328.93, 825.5, 913.69)], "2026-11-01")
+        cards = [row("neo1-9", "Lugia", "ex8", "9", "", "", (348.39, None, 699.55, None, "2026-10-31", 461.27, None, None, "n", 0))]
+        n, _ = fill_cardmarket(cards, {"ex8": ["Neo", "", "", "", "", "en"]}, {}, {"neo1-9": 7}, files, en_fetch=lambda sid: {})
+        self.assertEqual((n, cards[0][f["cm"]]), (0, 348.39))
+
+    def test_delta_names_matched(self):
+        files = cmfiles.CmFiles([prod(8, "Pikachu δ Delta Species [Zzzap]", 203), prod(9, "Pikachu [Gnaw]", 203)], [])
+        self.assertEqual(files.match([("x-1", "Pikachu δ"), ("x-2", "Pikachu")], [203]), {"x-1": 8, "x-2": 9})
+
     def test_close_price_kept(self):
         f = {k: i for i, k in enumerate(FIELDS)}
         cards = [self.card("ex8-3", "Deoxys", 30.0)]
