@@ -12,6 +12,7 @@
 - **Cause** : depuis le 2026-10-28, le Radar des boutiques était réservé au grade Maître Pokémon ; en dessous, un appui ouvrait la fiche de ce grade au lieu du Radar. Les tests automatiques jouent au grade maximal, d'où le problème passé inaperçu.
 - **Fait** (cache v120) : verrou retiré (`radar.js`) ; le Radar s'ouvre pour tout le monde depuis l'accueil, Territoire et le lien direct ; la ligne « Radar des boutiques Pokémon de France » est retirée des avantages du grade Maître Pokémon (`profile.js`).
 - **Tests** : `t-grades` (Radar ouvert à la Recrue, plus d'avantage Radar), `t-radar` lancé aussi au grade Recrue.
+- **Suite (même jour, porteur : « la carte de France ne s'ouvre plus »)** : vérifié au grade Recrue avec la version v120 : la carte de France, les régions, les boutiques, les logos des enseignes, les probabilités et la fiche aux 4 bulles fonctionnent ; le téléphone affichait sans doute encore la version précédente (le site se met à jour toutes les 5 minutes). Ouverture de la carte de France ajoutée à `t-grades`.
 
 ## 2026-11-01 (suite 14) — Déblocage plus grand et plus long, évolution +1 s, bruits du booster et du déblocage
 

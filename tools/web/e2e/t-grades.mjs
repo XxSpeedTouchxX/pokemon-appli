@@ -34,6 +34,8 @@ await page.screenshot({ path: shot('grades-recrue-shop.png'), fullPage: true });
 // Radar ouvert à tous depuis le 2026-11-01 (porteur : « refais-le fonctionner exactement comme avant ») : plus de verrou au grade Maître.
 await go('start=radar');
 ok('Recrue : la carte du Radar s’ouvre (plus réservée au grade Maître Pokémon)', (await page.locator('#pkm-radar-map').count()) === 1 && (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 0);
+await page.locator('#pkm-radar-map').waitFor(); await page.locator('text=France').first().click(); await page.waitForTimeout(1500);
+ok('Recrue : la carte de France s’ouvre (régions et boutiques)', /France métropolitaine/.test(await page.locator('body').innerText()) && /boutiques réelles/.test(await page.locator('body').innerText()) && (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 0);
 await go('debug&start=home');
 await page.evaluate(() => window.__pkm.push('grade', { gradeIx: 4 })); await page.waitForTimeout(700);
 const gs = await text('main');
