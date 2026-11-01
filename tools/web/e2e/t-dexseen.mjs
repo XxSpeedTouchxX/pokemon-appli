@@ -102,7 +102,7 @@ await page.locator('[aria-label="Route d’évolution"]').screenshot({ path: sho
 await page.click('.pkm-dex-prog-more summary'); await page.waitForTimeout(300);
 const stages = await page.locator('.pkm-dex-prog-st em').allInnerTexts();
 const types = await page.locator('.pkm-dex-prog-ty button').allInnerTexts();
-ok('par stade : ' + stages.join(', '), stages.join() === 'Forme de base,1ʳᵉ évolution,2ᵉ évolution,Légendaires et fabuleux');
+ok('par stade : ' + stages.join(', '), stages.join() === 'Forme de base,1ʳᵉ évolution,2ᵉ évolution,Méga-évolution,Légendaire');
 ok(types.length + ' types : ' + types.slice(0, 4).join(', ') + '…', types.length >= 15 && types.every(t => /\d+\/\d+$/.test(t.trim())));
 const feu = page.locator('.pkm-dex-prog-ty button', { hasText: 'Feu' });
 const feuN = Number(/\/(\d+)/.exec(await feu.innerText())[1]);

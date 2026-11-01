@@ -531,7 +531,7 @@
   // 2026-11-01, porteur : « propose-moi aussi des bruits lorsque l'on ouvre le booster, des bruits d'ouverture ».
   // Calés sur l'animation : le booster tremble (0 à 0,7 s), les ciseaux arrivent (0,9 s) et coupent le haut,
   // la déchirure avance (1,0 à 1,5 s), la bande s'envole (1,5 s), le booster tombe (1,65 à 2,15 s), puis
-  // le gain apparaît (2,15 s). n = rang du gain (1 = 10 PK … 5 = 1 000 PK) : l'air final grandit avec le gain.
+  // le gain apparaît (2,15 s). n = rang du gain (1 = 30 PK … 5 = 500 PK, depuis le 2026-11-01 au soir) : l'air final grandit avec le gain.
   // 3 propositions simples ; ?sonbooster=1 à 3 pour en essayer une (0 = aucun).
   const SFX_BO_FLY = 1.5, SFX_BO_WIN = 2.15;
   // Version simple et douce (même jour, porteur : « trop agressif pour les oreilles, fais un bruit plus simple ») : plus de

@@ -12,7 +12,7 @@ const boost = page.locator('section[aria-label="Booster PK"]'), coin = page.loca
 ok('booster et pile ou face affichés', (await boost.count()) === 1 && (await coin.count()) === 1);
 const odds = (await boost.textContent()).replace(/[\u202f\u00a0]/g, ' ');
 ok('flèche sur « Contenu possible et chances »', (await boost.locator('summary .pkm-gm-chev svg').count()) === 1);
-ok('taux affichés (1 000 PK · 1 %)', /1 000 PK/.test(odds) && /1 %/.test(odds) && /60 %/.test(odds));
+ok('taux affichés (30 PK 50 % … 500 PK 5 %)', /500 PK/.test(odds) && /5 %/.test(odds) && /50 %/.test(odds) && !/1 000 PK/.test(odds));
 const pk0 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(1300);
 await page.screenshot({ path: shot('games-scissors.png') });
@@ -24,7 +24,7 @@ ok('booster suivant dans 4 h', /Prochain booster dans [34] h/.test(await boost.i
 await page.screenshot({ path: shot('games-booster.png') });
 await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(3400);
 const pk2 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
-ok('pièce lancée : 0 ou 30 PK (' + (pk2 - pk1) + ')', pk2 - pk1 === 0 || pk2 - pk1 === 30);
+ok('pièce lancée : 0 ou 50 PK (' + (pk2 - pk1) + ')', pk2 - pk1 === 0 || pk2 - pk1 === 50);
 ok('lancer suivant dans 4 h', /Prochain lancer dans [34] h/.test(await coin.innerText()));
 await page.screenshot({ path: shot('games-coin.png') });
 // Roulette retirée (2026-10-25) : Pokédex avec les PA (points d'Aura) ; déblocage des Pokémon en PA (2026-10-28).

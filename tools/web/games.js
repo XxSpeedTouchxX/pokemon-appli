@@ -1,9 +1,9 @@
   // ——— Jeux : gagner des PK (2026-10-11, demande du porteur) ———
   // L'onglet « Marché » devient « Jeux » (manette) : deux mini-jeux gratuits pour gagner des PK. La recherche de
   // l'ancien Marché reste accessible depuis l'accueil (« Voir les N résultats ») et le scan : écran « search ».
-  // - Booster PK : un booster offert, délai selon le grade (ci-dessous) ; il tremble, des ciseaux coupent le haut, puis le gain apparaît ; il contient 10 PK (60 %), 30 PK (20 %), 50 PK (15 %),
-  //   100 PK (4 %) ou 1 000 PK (1 %). Taux fixés par le porteur, affichés dans l'app.
-  // - Pile ou face : un lancer, délai selon le grade ; face « gemme PK » (gagnante) : +30 PK, une chance sur deux ; face
+  // - Booster PK : un booster offert, délai selon le grade (ci-dessous) ; il tremble, des ciseaux coupent le haut, puis le gain apparaît ; il contient 30 PK (50 %), 50 PK (20 %), 100 PK (15 %),
+  //   200 PK (10 %) ou 500 PK (5 %) depuis le 2026-11-01 au soir. Taux fixés par le porteur, affichés dans l'app.
+  // - Pile ou face : un lancer, délai selon le grade ; face « gemme PK » (gagnante) : +50 PK (30 avant le 2026-11-01 au soir), une chance sur deux ; face
   //   « cristal éteint » : rien.
   // La roulette (2026-10-12) est retirée le 2026-10-25 (porteur) : le jeu d'évolution (pa.js) prend sa place.
   // Les PK restent sans valeur en euros et ne s'achètent pas : ces jeux ne demandent aucun paiement (règles des PK).
@@ -11,10 +11,11 @@
   // Ce module partage la portée des autres : ses noms commencent par GM_ ou gm.
   // Délais selon le grade (2026-10-28, porteur ; profile.js) : Booster PK toutes les 24 h (Recrue, Chasseur), 10 h,
   // 8 h, 6 h puis 4 h ; pièce fermée à la Recrue, puis toutes les 24 h, 10 h, 8 h, 6 h et 4 h.
-  const GM_COIN_WIN = 30;
+  const GM_COIN_WIN = 50; // 0 ou 50 PK, une chance sur deux (2026-11-01 au soir, porteur ; 30 PK avant)
   const gmBoosterMs = self => self.perks().boosterH * 3600000;
   const gmCoinMs = self => (self.perks().coinH || 24) * 3600000;
-  const GM_TABLE = [[10, 60, 'Commun', '#9AA8C3'], [30, 20, 'Peu commun', '#5EE0CF'], [50, 15, 'Rare', '#A8B6FF'], [100, 4, 'Ultra rare', '#FFD60A'], [1000, 1, 'Jackpot !', '#FF7AD9']];
+  // Chances revues le 2026-11-01 au soir (porteur) : 30 PK 50 %, 50 PK 20 %, 100 PK 15 %, 200 PK 10 %, 500 PK 5 %.
+  const GM_TABLE = [[30, 50, 'Commun', '#9AA8C3'], [50, 20, 'Peu commun', '#5EE0CF'], [100, 15, 'Rare', '#A8B6FF'], [200, 10, 'Ultra rare', '#FFD60A'], [500, 5, 'Jackpot !', '#FF7AD9']];
   const gmRand = () => {
     try { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; } catch (e) { return Math.random(); }
   };

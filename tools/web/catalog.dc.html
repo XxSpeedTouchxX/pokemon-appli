@@ -1749,7 +1749,7 @@
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Pile ou face</h2>
 <span style="font-size: 12.5px; color: #9AA8C3">{{ gm.c.every }}</span>
 </div>
-<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">Gemme PK : tu gagnes 30 PK. Cristal éteint : rien cette fois. Une chance sur deux.</p>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">Gemme PK : tu gagnes 50 PK. Cristal éteint : rien cette fois. Une chance sur deux.</p>
 <div style="height: 190px; display: flex; align-items: center; justify-content: center; perspective: 900px">
 <sc-if value="{{ gm.c.flipping }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-gm-coin pkm-gm-flip" aria-hidden="true" style="--end: {{ gm.c.angle }}">
@@ -1766,7 +1766,7 @@
 </div>
 <sc-if value="{{ gm.c.resultDone }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: -4px 0 0; text-align: center; font-size: 15px; font-weight: 800; color: {{ gm.c.resultColor }}">{{ gm.c.resultText }}</p></sc-if>
 <div aria-hidden="true" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; font-size: 12.5px; color: #C9D3EA">
-<span style="display: flex; align-items: center; gap: 8px"><img src="img/brand/pk.svg" alt="" width="22" height="22">Gagnant : +30 PK</span>
+<span style="display: flex; align-items: center; gap: 8px"><img src="img/brand/pk.svg" alt="" width="22" height="22">Gagnant : +50 PK</span>
 <span style="display: flex; align-items: center; gap: 8px"><span class="pkm-gm-dead" style="width: 18px; height: 18px"></span>Perdant</span>
 </div>
 <button type="button" onClick="{{ gm.c.flip }}" aria-disabled="{{ gm.c.flipping }}" style="height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; opacity: {{ gm.c.op }}">{{ gm.c.button }}</button>

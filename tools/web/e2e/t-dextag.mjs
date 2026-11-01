@@ -35,8 +35,8 @@ ok('étiquette verte au-dessus de la tête des ' + rows.length + ' Pokémon (4 p
 const cut = rows.filter(r => r.inTop < 0 || r.lab < 2 || r.clear < 2);
 ok('étiquette jamais coupée, sous les étapes, sous la ligne du dessus' + (cut.length ? ' — ' + cut.map(r => r.name).join(', ') : ''), !cut.length);
 const R = n => rows.find(r => r.n === n);
-ok('Roucoups ' + R(17).h + ' px entre Roucool ' + R(16).h + ' et Roucarnage ' + R(18).h + ' (43 avant)', R(17).h >= 52 && R(16).h < R(17).h && R(17).h < R(18).h);
-ok('Rattatac ' + R(20).h + ', Mélodelfe ' + R(36).h + ', Triopikeur ' + R(51).h + ' px (91 avant)', [20, 36, 51].every(n => R(n).h <= 80 && R(n).h > R(n - 1).h));
+ok('Roucoups ' + R(17).h + ' px (43, puis 56 avant), Roucool ' + R(16).h + ', Roucarnage ' + R(18).h, R(17).h >= 58 && R(16).h < R(17).h);
+ok('Rattatac ' + R(20).h + ', Mélodelfe ' + R(36).h + ', Triopikeur ' + R(51).h + ' px (91, puis 75 pour Triopikeur)', [20, 36, 51].every(n => R(n).h <= 80 && R(n).h > R(n - 1).h) && R(51).h <= 66);
 ok('Nosferalto centré sur son socle dans la route (' + R(42).dx + ' px ; −17 avant)', Math.abs(R(42).dx) <= 4);
 await page.evaluate(() => window.__pkm.setState({ pkOwn: Array.from(new Set((window.__pkm.st().pkOwn || []).concat([41, 42]))), dexSel: 42 })); await page.waitForTimeout(500);
 const fdx = await page.evaluate(() => { const f = document.querySelector('section[aria-label="Fiche du Pokémon"] .pkm-dex-show'), i = f.querySelector('img').getBoundingClientRect(), p = f.querySelector('.pkm-dex-ped').getBoundingClientRect(); return Math.round(i.left + i.width / 2 - (p.left + p.width / 2)); });

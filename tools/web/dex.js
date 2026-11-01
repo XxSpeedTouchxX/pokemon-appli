@@ -74,7 +74,8 @@
   // évolutions gardent leur taille ; la famille entière reste dans la largeur de l'écran.
   // Puis (2026-11-01, soir, porteur) : Roucoups plus grand (entre Roucool et Roucarnage ; son GIF qui vole le montrait
   // petit), Rattatac, Mélodelfe et Triopikeur un peu plus petits (seuls à leur stade, ils prenaient toute la hauteur).
-  const DEX_BOOST = { 2: 1.2, 6: 1.2, 17: 1.3, 20: 0.85, 36: 0.85, 51: 0.82 };
+  // Encore (même soir, porteur) : Triopikeur plus petit (0,82 → 0,7), Roucoups un peu plus grand (1,3 → 1,36).
+  const DEX_BOOST = { 2: 1.2, 6: 1.2, 17: 1.36, 20: 0.85, 36: 0.85, 51: 0.7 };
   const dexPx0 = (e, max, top, fit) => {
     const p = Math.max(DEX_PX_MIN, Math.round(top * fit * dexH(e) / max)), prev = e.from && DEX[e.from] && DEX[e.from].fam === e.fam ? DEX[e.from] : null;
     return prev ? Math.max(p, Math.round(dexPx0(prev, max, top, fit) * 1.25)) : p;
@@ -232,7 +233,9 @@
   // Débloqués sur les 156 Pokémon (sans les méga-évolutions, 2026-10-31), par stade, et par type sur les 156 de « Tous les
   // Pokémon » (un Pokémon à deux types compte dans les deux) ; un type ouvre cette liste filtrée sur lui.
   const DEX_STAGES = [['Forme de base', e => !e.mega && !e.leg && dexStage(e.n) === 0], ['1ʳᵉ évolution', e => !e.mega && !e.leg && dexStage(e.n) === 1],
-    ['2ᵉ évolution', e => !e.mega && !e.leg && dexStage(e.n) >= 2], ['Légendaires et fabuleux', e => !e.mega && !!e.leg]];
+    ['2ᵉ évolution', e => !e.mega && !e.leg && dexStage(e.n) >= 2], ['Méga-évolution', e => !!e.mega], ['Légendaire', e => !e.mega && !!e.leg]];
+  // « Par stade et par type » (2026-11-01, soir, porteur) : Forme de base, 1ʳᵉ évolution, 2ᵉ évolution, Méga-évolution
+  // (les 15 méga-évolutions, à part du total des 156), Légendaire.
   const dexPct = (a, b) => 'width: ' + (b ? Math.round(a / b * 100) : 0) + '%';
   dexProto.vDexProgress = function (s) {
     // Débloqués sur les 156 Pokémon, sans les méga-évolutions ; plus de « vus » (2026-10-31, porteur).
@@ -244,7 +247,7 @@
     }).filter(x => x.total > 0);
     return {
       own: own + ' / ' + N, ownW: dexPct(own, N), pct: Math.round(own / N * 100) + ' % débloqués',
-      stages: DEX_STAGES.map(([l, f]) => { const list = all.filter(f), got = list.filter(e => dexOwn(s, e.n)).length; return { label: l, n: got + ' / ' + list.length, w: dexPct(got, list.length) }; }),
+      stages: DEX_STAGES.map(([l, f]) => { const list = DEX_DATA.filter(e => e.mega || DEX_IDS.indexOf(e.n) >= 0).filter(f), got = list.filter(e => dexOwn(s, e.n)).length; return { label: l, n: got + ' / ' + list.length, w: dexPct(got, list.length) }; }),
       types: types, tip: 'Débloque les Pokémon avec tes PA, en suivant leurs évolutions.'
     };
   };

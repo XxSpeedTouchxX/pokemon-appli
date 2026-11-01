@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-01 (suite 19) — Booster PK et pièce : nouvelles chances ; Pokédex : Triopikeur, Roucoups, « Par stade et par type »
+
+- **Demandes du porteur** : Triopikeur plus petit, Roucoups un peu plus grand ; « Par stade et par type » : forme de base, 1ʳᵉ évolution, 2ᵉ évolution, méga-évolution, légendaire ; Booster PK : 30 PK 50 %, 50 PK 20 %, 100 PK 15 %, 200 PK 10 %, 500 PK 5 % ; pièce : 0 ou 50 PK ; temps pour atteindre 50 000 PK selon le grade.
+- **Fait** (cache v125) :
+  - Triopikeur ×0,7 (75 → 59 px), Roucoups ×1,36 (56 → 58 px, la taille de Roucarnage ; son GIF qui vole le fait paraître plus petit) ;
+  - « Par stade et par type » : Forme de base, 1ʳᵉ évolution, 2ᵉ évolution, Méga-évolution (les 15, à part des 156), Légendaire ;
+  - Booster PK : 30 PK (50 %), 50 PK (20 %), 100 PK (15 %), 200 PK (10 %), 500 PK (5 %) : 85 PK en moyenne par booster (10 et 1 000 PK retirés) ; pièce : 50 PK une fois sur deux (25 PK en moyenne par lancer) ; texte des règles mis à jour (et prix des PA par Pokémon au lieu de l'ancien barème) ;
+  - **temps pour 50 000 PK gagnés** (simulation de 2 000 joueurs ; départ 400 PK : bienvenue et partage ; délais des grades actuels ; conditions en compagnons et méga-évolutions supposées remplies) :
+    - joueur qui ouvre tout dès que c'est possible, nuit comprise : Chasseur ≈ 13 j, Collectionneur ≈ 45 j, Dresseur ≈ 64 j, Maître ≈ 95 j, 50 000 PK ≈ **163 j** (151 à 175 j pour 8 joueurs sur 10) ;
+    - 2 fois par jour au plus : ≈ 13, 45, 68, 113 j, 50 000 PK ≈ **250 j** ;
+    - 1 fois par jour : ≈ 13, 45, 90, 181 j, 50 000 PK ≈ **454 j**.
+- **Tests** : `t-games`, `t-dextag`, `t-dexseen` mis à jour.
+
 ## 2026-11-01 (suite 18) — Pokédex : étiquettes, tailles, méga-évolutions ; cartes Mewtwo X/Y ; cote de Rayquaza ☆ ; prix des PA
 
 - **Demandes du porteur** :
