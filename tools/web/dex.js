@@ -13,6 +13,11 @@
   // Ce module partage la portée des autres : ses noms commencent par DEX_ ou dex.
   const DEX = {};
   DEX_DATA.forEach(e => { DEX[e.n] = e; });
+  // Centre du corps corrigé à la main (2026-11-01, porteur : « Nosferalto est décalé par rapport à son socle ») : le
+  // calcul automatique (dex_boxes.py) prenait l'aile droite pour le corps ; 0,48 = colonnes opaques sur 80 % des images
+  // du GIF. Vaut partout (route, fiche, compagnon, évolution).
+  const DEX_GC_FIX = { 42: 0.48 };
+  Object.keys(DEX_GC_FIX).forEach(n => { if (DEX[n]) DEX[n].gc = DEX_GC_FIX[n]; });
   const DEX_IDS = HOME_BUDDIES.map(([n]) => n);
   const DEX_NUMS = DEX_IDS.slice().sort((a, b) => a - b);
   const DEX_FORMS = ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution'];
@@ -67,7 +72,9 @@
   // minimum à côté de Méga-Florizarre).
   // Un peu plus grands (2026-11-01, porteur) : Herbizarre (2) et Dracaufeu (6), +20 % après la règle des 25 % ; leurs
   // évolutions gardent leur taille ; la famille entière reste dans la largeur de l'écran.
-  const DEX_BOOST = { 2: 1.2, 6: 1.2 };
+  // Puis (2026-11-01, soir, porteur) : Roucoups plus grand (entre Roucool et Roucarnage ; son GIF qui vole le montrait
+  // petit), Rattatac, Mélodelfe et Triopikeur un peu plus petits (seuls à leur stade, ils prenaient toute la hauteur).
+  const DEX_BOOST = { 2: 1.2, 6: 1.2, 17: 1.3, 20: 0.85, 36: 0.85, 51: 0.82 };
   const dexPx0 = (e, max, top, fit) => {
     const p = Math.max(DEX_PX_MIN, Math.round(top * fit * dexH(e) / max)), prev = e.from && DEX[e.from] && DEX[e.from].fam === e.fam ? DEX[e.from] : null;
     return prev ? Math.max(p, Math.round(dexPx0(prev, max, top, fit) * 1.25)) : p;
@@ -121,12 +128,18 @@
     }
     return out.filter((n, k) => out.indexOf(n) === k);
   };
+  // Cartes « M-… EX » de l'époque XY, dont le nom ne dit pas X ou Y (2026-11-01, porteur : « Méga-Mewtwo X et Y ont
+  // exactement les mêmes cartes ») : forme d'après le type et l'illustration de la carte. BREAKthrough : 63 et 159 Psy
+  // (Méga-Mewtwo Y), 64 et 160 Combat (Méga-Mewtwo X). Étincelles : 13 et 107 Feu (Méga-Dracaufeu Y), 69 et 108 Dragon
+  // (Méga-Dracaufeu X) ; Évolutions 13 et 101 reprennent la carte Feu (Y). Les autres restent dans les deux formes.
+  const DEX_MEGA_CARD = { 'xy8-63': 'Y', 'xy8-159': 'Y', 'xy8-64': 'X', 'xy8-160': 'X', 'xy2-13': 'Y', 'xy2-107': 'Y', 'xy2-69': 'X', 'xy2-108': 'X', 'xy12-13': 'Y', 'xy12-101': 'Y' };
+  const dexMegaPick = (id, k) => { const xy = DEX_MEGA_CARD[id], e = DEX[k]; return !xy || !e || !e.mega || !/ [XY]$/.test(e.name) || e.name.slice(-1) === xy; };
   const DEX_CARDS = { doc: null, by: {} };
   const dexCardIds = n => {
     if (TCG.status !== 'ready') return null;
     if (DEX_CARDS.doc !== TCG.doc) {
       const F = TCG.F, by = {};
-      TCG.rows.forEach(x => dexMatch(x.r[F.name]).forEach(k => { (by[k] = by[k] || []).push(x.r[F.id]); }));
+      TCG.rows.forEach(x => dexMatch(x.r[F.name]).filter(k => dexMegaPick(x.r[F.id], k)).forEach(k => { (by[k] = by[k] || []).push(x.r[F.id]); }));
       DEX_CARDS.doc = TCG.doc; DEX_CARDS.by = by;
     }
     return DEX_CARDS.by[n] || [];
@@ -294,6 +307,15 @@
     const [x0, y0, x1, y1] = e.box, H = Math.round(p * 96 / Math.max(1, y1 - y0)), bw = (x1 - x0) * H / 96, sh = dexShift((48 - (e.pc || 48)) * H / 96, bw);
     return [sh - H / 2 + x0 * H / 96, sh - H / 2 + x1 * H / 96];
   };
+  // Haut de la tête du Pokémon touché (agrandi de DEX_ON autour de son centre, posé à 46 px du bas du nœud de 134 px),
+  // par rapport au haut du nœud. Étiquette : DEX_TAG_H px de haut.
+  const DEX_TAG_H = 20, DEX_TAG_GAP = 5;
+  const dexHead = (e, max, fit, still) => {
+    const p = dexPx(e, max, DEX_PX, fit);
+    if (!still) return 88 + Math.round((e.gb || 0) * p) - p - (DEX_ON - 1) / 2 * p;
+    const [, y0, , y1] = e.box, H = Math.round(p * 96 / Math.max(1, y1 - y0));
+    return 88 + Math.round((96 - y1) * H / 96) - H - (DEX_ON - 1) / 2 * H + y0 * H / 96 * DEX_ON;
+  };
   // Mise en page de la route (2026-10-31, porteur : « Méga-Tortank touche Tortank », puis « Dracaufeu est trop petit ») :
   // chaque colonne prend la largeur de ses Pokémon (au moins DEX_NAME_W pour le nom et le prix), les petites formes
   // laissent la place aux grandes, sur toute la largeur de l'écran ; la famille ne rapetisse que si la somme dépasse
@@ -308,6 +330,14 @@
     const extra = Math.max(0, (W - h.reduce((t, v) => t + 2 * v, 0)) / route.cols), ws = h.map(v => 2 * v + extra), xs = [];
     let acc = 0;
     ws.forEach(w => { xs.push(acc + w / 2); acc += w; });
+    // Étiquette verte au-dessus de la tête (2026-11-01, soir, porteur : « l'encadré avec son nom cache le visage de
+    // Nidoqueen », puis Nidoking, Mélodelfe, Feunard…) : l'étiquette du Pokémon touché monte au-dessus de sa tête, à
+    // DEX_TAG_GAP px au moins ; la route se donne la place nécessaire (en haut sous les étapes, et entre deux lignes),
+    // la même quel que soit le Pokémon touché. Le Pokémon touché ne remonte plus (seulement agrandi).
+    route.nodes.forEach(x => { x.tagTop = Math.min(-6, Math.floor(dexHead(x.e, max, f, still) - DEX_TAG_GAP - DEX_TAG_H)); });
+    const need = r => Math.max(6, ...route.nodes.filter(x => x.row === r).map(x => -x.tagTop)), tops = [];
+    for (let r = 0; r < route.rows; r++) tops.push(r ? Math.max(tops[r - 1] + DEX_ROW, tops[r - 1] + 136 + need(r)) : Math.max(DEX_TOP, 30 + need(0)));
+    route.ty = r => tops[r]; route.h = tops[route.rows - 1] + DEX_ROW + 4;
     const cx = c => xs[c], ty = route.ty;
     let solid = '', dots = '';
     route.nodes.forEach(x => {
@@ -344,7 +374,7 @@
       nodes: route.nodes.map(x => {
         const own = dexOwn(s, x.n), on = x.n === sel;
         return {
-          img: dexSprite(x.n, still), sz: dexSize(x.e, hmax, DEX_PX, still, fit), name: dexShort(x.e), status: status(x), on: on, tag: on,
+          img: dexSprite(x.n, still), sz: dexSize(x.e, hmax, DEX_PX, still, fit), name: dexShort(x.e), status: status(x), on: on, tag: on, tagPos: 'top: ' + x.tagTop + 'px',
           sc: own ? '#9FF5C0' : can(x) ? '#FFE27A' : '#C9D3EA',
           cls: 'pkm-dex-node' + (own ? '' : ' pkm-dex-lock') + (!own && dexSeen(s, x.n) ? ' pkm-dex-seen' : '') + (x.row > 0 ? ' pkm-dex-alt' : '') + (s.buddy === x.n ? ' pkm-dex-now' : '') + (on ? ' pkm-dex-on' : '') + (still ? ' pkm-dex-still' : ''),
           pos: 'left: ' + Math.round(geo.cx(x.col) - geo.ws[x.col] / 2) + 'px; top: ' + route.ty(x.row) + 'px; width: ' + Math.round(geo.ws[x.col]) + 'px',

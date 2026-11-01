@@ -60,7 +60,7 @@ const frames = await page.evaluate(async () => {
   }
   return out;
 });
-ok('méga-évolutions animées (images par GIF : ' + Object.values(frames).join(', ') + ')', Object.values(frames).every(k => k >= 6));
+ok('méga-évolutions animées (images par GIF : ' + Object.values(frames).join(', ') + ')', Object.values(frames).every(k => k >= 5)); // 12 pas, images identiques fusionnées (respiration du 2026-11-01)
 ok('plus de texte des PA sous le Pokédex', (await page.locator('.pkm-dex-rules').count()) === 0);
 const dev = await page.evaluate(() => { const d = document.querySelector('.pkm-dex-device').getBoundingClientRect(), l = document.querySelector('.pkm-dex-lcd-l').getBoundingClientRect(), a = document.querySelector('.pkm-dex-k-a').getBoundingClientRect(), c = document.querySelector('.pkm-dex-cross').getBoundingClientRect(); return { d: Math.round(d.width), lcd: Math.round(l.width) + '×' + Math.round(l.height), ok: Math.round(a.width) + '×' + Math.round(a.height), cross: Math.round(c.width), img: document.querySelector('.pkm-dex-device-img').getAttribute('src') }; });
 ok('Pokédex agrandi (' + JSON.stringify(dev) + ')', dev.d >= 340 && parseInt(dev.lcd) >= 120 && parseInt(dev.ok) >= 58 && dev.cross >= 52 && /pokedex-device\.svg/.test(dev.img));

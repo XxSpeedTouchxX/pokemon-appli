@@ -6,6 +6,29 @@
 
 ---
 
+## 2026-11-01 (suite 18) — Pokédex : étiquettes, tailles, méga-évolutions ; cartes Mewtwo X/Y ; cote de Rayquaza ☆ ; prix des PA
+
+- **Demandes du porteur** :
+  - méga-évolutions : « on a l'impression qu'elles grandissent et rapetissent, rends-les plus naturelles comme les évolutions des starters » ;
+  - l'étiquette verte du nom cachait ou touchait la tête du Pokémon touché (Nidoqueen, Nidoking, Mélodelfe, Feunard, Rafflesia, Parasect, Persian, Triopikeur, Akwakwak, Férosinge, Arcanin, Tartard, Mackogneur, Empiflor, Grolem, Galopa, Méga-Flagadoss, Magnéton, Canarticho, Dodrio, Crustabri) ; « décale légèrement le Pokémon vers le bas » ;
+  - Roucoups plus grand (entre Roucool et Roucarnage) ; Rattatac, Mélodelfe et Triopikeur plus petits ; Nosferalto décalé de son socle (route et fiche) ;
+  - pas d'animation en méga-évoluant Flagadoss ;
+  - Méga-Mewtwo X et Y montraient les mêmes cartes ;
+  - Rayquaza ☆ (EX Deoxys) à environ 500 € alors qu'elle vaut bien plus ;
+  - prix des PA : 500 PA 4,99 €, 1 500 PA 9,99 €, 3 000 PA 15,99 € (le plus populaire), 5 000 PA 19,99 € ;
+  - retirer « compagnon avec thème ».
+- **Fait** (cache v124) :
+  - **méga-évolutions** : les 6 animations fabriquées qui « respiraient » (Florizarre, Dracaufeu Y, Tortank, Flagadoss, Kangourex, Scarabrute) étiraient le haut du corps de 4 pixels, d'où l'effet de taille qui change. Désormais le corps descend d'un bloc de 1 à 2 pixels en pliant les jambes, pieds fixes, sans jamais changer de taille (12 pas de 110 ms) ; les 4 qui volent montent et descendent plus doucement (`tools/sprites/fetch_megas.py`, `--local`, puis `dex_boxes.py`) ;
+  - **étiquette verte** : placée au-dessus de la tête de chaque Pokémon touché (5 px d'écart au moins sur les 171), la route se donne la place nécessaire ; le Pokémon touché ne remonte plus (`dex.js`, `dexHead`) ;
+  - **tailles** : Roucoups ×1,3 (43 → 56 px ; Roucarnage 58 px), Rattatac et Mélodelfe ×0,85, Triopikeur ×0,82 (91 → 77, 77, 75 px) ;
+  - **Nosferalto** : centre du corps corrigé (0,668 → 0,48, aile droite prise pour le corps), centré dans la route et la fiche ;
+  - **Méga-Flagadoss** : l'animation se lance bien dans les tests ; sécurité ajoutée, une animation de grade encore ouverte se ferme quand une évolution commence. **Si le problème revient, dire au porteur de décrire ce qu'il faisait juste avant** ;
+  - **cartes Méga-Mewtwo X et Y** : les « M-Mewtwo EX » de BREAKthrough ne disent pas X ou Y ; 63 et 159 (type Psy) vont à Méga-Mewtwo Y, 64 et 160 (Combat) à Méga-Mewtwo X. Même règle pour les « M-Dracaufeu EX » d'Étincelles (13 et 107 Feu → Y ; 69 et 108 Dragon → X) et d'Évolutions (13, 101 → Y) ; celle de Générations reste dans les deux (forme non vérifiée) ;
+  - **Rayquaza ☆** : Cardmarket affiche environ 6 986 € de tendance (moyenne 30 jours 4 162 €), TCGdex donnait 505 € (30 jours 216 €). Le pipeline compare désormais chaque cote TCGdex aux fichiers publics de Cardmarket : produit au nom d'une autre carte, ou cote du même groupe écartée de plus de 3 fois (au-delà de 5 €), alors les prix des fichiers Cardmarket sont pris (`build_index.py`, `cmfiles.relink`, `cmfiles.group` ; « ☆ » lu « Gold Star »). La cote reste 100 % Cardmarket. **Le résultat réel sera visible après la mise à jour du catalogue sur GitHub** ;
+  - **prix des PA** : 500 PA 4,99 €, 1 500 PA 9,99 € (+50 %), 3 000 PA 15,99 € (+87 %, « Le plus populaire »), 5 000 PA 19,99 € (+150 %, « Meilleure valeur ») ; bonus calculés face au pack de 500 PA ; 1ʳᵉ recharge doublée toujours à valider ; paiement pas encore branché (`pkshop.js`) ;
+  - **« Avec thème »** retiré des « Règles des PK et PA » (Kyogre, Groudon et Rayquaza sont comptés parmi les légendaires) ; « Compagnon et thème … » et « Nouveau compagnon · thème … » deviennent « Compagnon » et « Nouveau compagnon ».
+- **Tests** : `t-dextag` (nouveau), `t-pashop`, `t-dexseen` mis à jour ; tests Python du pipeline (61).
+
 ## 2026-11-01 (suite 17) — Premier écran et didacticiel : coches, starters, encadré, manette, texte des PA
 
 - **Demandes du porteur** (captures) :

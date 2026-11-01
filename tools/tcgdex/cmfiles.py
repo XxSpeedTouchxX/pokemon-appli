@@ -35,6 +35,11 @@ def fold(t):
     return re.sub(r"[^a-z0-9]+", " ", t).strip()
 
 
+def star(name):
+    """Cartes « étoile » : TCGdex écrit « Rayquaza ☆ », Cardmarket « Rayquaza Gold Star » (2026-11-01)."""
+    return re.sub(r"\s*☆", " Gold Star", str(name or ""))
+
+
 def base_name(name):
     """Nom Cardmarket sans les attaques : « Charizard [Energy Burn | Fire Spin] » → « charizard »."""
     return fold(str(name or "").split(" [")[0])
@@ -56,8 +61,10 @@ class CmFiles:
     def __init__(self, products, guides, created=None):
         self.created = created
         self.exp_of, self.by_exp = {}, {}
+        self.name_of = {}
         for p in products:
             self.exp_of[p["idProduct"]] = p.get("idExpansion")
+            self.name_of[p["idProduct"]] = base_name(p.get("name"))
             self.by_exp.setdefault(p.get("idExpansion"), []).append(p)
         for lst in self.by_exp.values():
             lst.sort(key=lambda p: p["idProduct"])
@@ -102,7 +109,7 @@ class CmFiles:
         ours = {}
         for key, en in cards:
             if en:
-                ours.setdefault(fold(en), []).append(key)
+                ours.setdefault(fold(star(en)), []).append(key)
         out = {}
         for name, keys in ours.items():
             ids = prods.get(name)
@@ -131,6 +138,28 @@ class CmFiles:
             return None
         other = num(g.get("trend" + ("" if sfx else "-holo")))
         return trend, low, avg30, avg7, avg1, other, "h" if sfx else "n"
+
+    def group(self, idp, grp):
+        """Prix d'un groupe précis (« n » normal, « h » holo) : (tendance, plus bas, moyenne 30 j, moyenne 7 j,
+        moyenne 1 j) ; None sans tendance ni moyenne."""
+        g = self.guide.get(idp)
+        if not g:
+            return None
+        num = lambda v: round(float(v), 2) if isinstance(v, (int, float)) and v > 0 else None
+        sfx = "-holo" if grp == "h" else ""
+        out = tuple(num(g.get(k + sfx)) for k in ("trend", "low", "avg30", "avg7", "avg1"))
+        return out if out[0] is not None or out[2] is not None or out[3] is not None else None
+
+    def relink(self, idp, en):
+        """Produit Cardmarket d'une carte que TCGdex relie à idp : idp si son nom Cardmarket est celui de la carte
+        (nom anglais), sinon le seul produit de la même extension qui porte ce nom (Rayquaza ☆ relié à un autre
+        produit, 2026-11-01) ; None si le nom ne permet pas de trancher."""
+        name = fold(star(en)) if en else ""
+        have = self.name_of.get(idp)
+        if not name or have is None or have == name or have.replace(" ", "") == name.replace(" ", ""):
+            return idp
+        same = [p["idProduct"] for p in self.by_exp.get(self.exp_of.get(idp), []) if base_name(p.get("name")) == name]
+        return same[0] if len(same) == 1 else None
 
 
 def en_names(sid, opener=None):

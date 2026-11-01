@@ -78,10 +78,11 @@
   // Chiffres lus dans les modules qui les appliquent (profile.js, games.js, pa.js, pkshop.js) : jamais recopiés.
   const legalNum = n => Number(n).toLocaleString('fr-FR');
   const legalEvoRows = () => {
-    const cat = e => (e.mega ? 'Méga' : HOME_THEMES[e.n] ? 'Avec thème' : e.leg ? 'Légendaire' : ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution'][Math.min(pkStage(e.n), 2)]);
+    // « Avec thème » retiré (2026-11-01, porteur) : Kyogre, Groudon et Rayquaza comptent parmi les légendaires.
+    const cat = e => (e.mega ? 'Méga' : e.leg ? 'Légendaire' : ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution'][Math.min(pkStage(e.n), 2)]);
     const rng = {};
     DEX_DATA.forEach(e => { const p = dexPrice(e.n); if (!p) return; const k = cat(e); rng[k] = rng[k] ? [Math.min(rng[k][0], p), Math.max(rng[k][1], p)] : [p, p]; });
-    return ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution', 'Légendaire', 'Avec thème', 'Méga'].filter(k => rng[k])
+    return ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution', 'Légendaire', 'Méga'].filter(k => rng[k])
       .map(k => ({ label: k, pa: (rng[k][0] === rng[k][1] ? legalNum(rng[k][0]) : legalNum(rng[k][0]) + ' à ' + legalNum(rng[k][1])) + ' PA' }));
   };
   proto.vRules = function (s) {

@@ -37,15 +37,18 @@
     this.flash();
   };
   // Recharger mes PA (2026-11-01, demande du porteur : « une boutique de PA avec 4 tarifs », dans le PK shop, rubrique
-  // « Recharger mes PA » à côté de « Magasin », comme la maquette docs/20). Prix TTC proposés, à valider : base 250 PA
-  // pour 1 €, bonus sur les gros packs, 1ʳᵉ recharge doublée. Le paiement n'est pas encore branché (il faut les comptes
-  // Dropicards, le serveur et Stripe, docs/20) : le récapitulatif le dit, rien n'est débité ni crédité.
+  // « Recharger mes PA » à côté de « Magasin », comme la maquette docs/20). Prix TTC fixés par le porteur le
+  // 2026-11-01 au soir : 500 PA 4,99 €, 1 500 PA 9,99 €, 3 000 PA 15,99 € (le plus populaire), 5 000 PA 19,99 €.
+  // Bonus affiché : PA en plus face au prix du pack de 500 PA (100 PA par euro), arrondi.
+  // 1ʳᵉ recharge doublée : toujours à valider. Le paiement n'est pas encore branché (il faut les comptes Dropicards, le
+  // serveur et Stripe, docs/20) : le récapitulatif le dit, rien n'est débité ni crédité.
+  const SHOP_PA_BASE = 500 / 4.99;
   const SHOP_PA_PACKS = [
-    { pa: 500, eur: '1,99 €', bonus: 0, drops: 1 },
-    { pa: 1500, eur: '4,99 €', bonus: 20, drops: 2 },
-    { pa: 3500, eur: '9,99 €', bonus: 40, drops: 3, tag: 'Le plus choisi' },
-    { pa: 8000, eur: '19,99 €', bonus: 60, drops: 4, tag: 'Meilleure valeur', best: true }
-  ];
+    { pa: 500, cents: 499, drops: 1 },
+    { pa: 1500, cents: 999, drops: 2 },
+    { pa: 3000, cents: 1599, drops: 3, tag: 'Le plus populaire' },
+    { pa: 5000, cents: 1999, drops: 4, tag: 'Meilleure valeur', best: true }
+  ].map(k => Object.assign(k, { eur: (k.cents / 100).toFixed(2).replace('.', ',') + ' €', bonus: Math.max(0, Math.round((k.pa / (SHOP_PA_BASE * k.cents / 100) - 1) * 100)) }));
   const shopNum = n => Number(n).toLocaleString('fr-FR').replace(/\s/g, '\u00a0');
   const shopTabs = (self, s) => {
     const onPa = s.shopTab === 'pa', pa = Number(s.pa) || 0, first = !s.paBought;

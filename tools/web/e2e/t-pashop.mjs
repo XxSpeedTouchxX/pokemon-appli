@@ -18,7 +18,7 @@ await tabs.nth(1).click(); await page.waitForTimeout(400);
 const sec = page.locator('section[aria-label="Recharger mes PA"]');
 ok('Recharger mes PA ouvert, Magasin caché', (await sec.count()) === 1 && (await page.locator('section.pkm-shop-item').count()) === 0 && (await tabs.nth(1).getAttribute('aria-selected')) === 'true');
 const packs = (await sec.locator('.pkm-pas-pack').evaluateAll(b => b.map(x => x.getAttribute('aria-label'))));
-ok('4 packs : ' + packs.join(' ; '), packs.length === 4 && /^500 PA pour 1,99 €$/.test(N(packs[0])) && /^8 000 PA pour 19,99 €, dont 60 % offerts$/.test(N(packs[3])));
+ok('4 packs : ' + packs.join(' ; '), packs.length === 4 && /^500 PA pour 4,99 €$/.test(N(packs[0])) && /^3 000 PA pour 15,99 €, dont 87 % offerts$/.test(N(packs[2])) && /^5 000 PA pour 19,99 €, dont 150 % offerts$/.test(N(packs[3])));
 ok('solde : ' + N(await sec.locator('.pkm-pas-bal b').innerText()), N(await sec.locator('.pkm-pas-bal b').innerText()) === '120 PA');
 // Effet brillant (2026-11-01, porteur) : gouttes qui flottent, étincelle, prix qui pulsent ; le reflet (« voile ») qui
 // traversait les packs est retiré à la demande du porteur (même jour : « enlève-moi uniquement l'effet de voile »).
@@ -29,7 +29,7 @@ await page.screenshot({ path: shot('pashop-page.png') });
 await sec.locator('.pkm-pas-pack').nth(2).click(); await page.waitForTimeout(400);
 const dlg = page.locator('section[aria-label="Ton achat de PA"]');
 const lines = N(await dlg.locator('.pkm-pas-lines').innerText());
-ok('récapitulatif : ' + lines, /Tu recevras 7 000 PA/.test(lines) && /Ton solde après l’achat 7 120 PA/.test(lines) && /Total TTC 9,99 €/.test(lines));
+ok('récapitulatif : ' + lines, /Tu recevras 6 000 PA/.test(lines) && /Ton solde après l’achat 6 120 PA/.test(lines) && /Total TTC 15,99 €/.test(lines));
 ok('paiement pas encore ouvert, bouton désactivé', /pas encore ouvert/.test(await dlg.innerText()) && (await dlg.locator('.pkm-pas-pay').isDisabled()));
 await page.screenshot({ path: shot('pashop-recap.png') });
 await dlg.locator('button:has-text("Fermer")').click(); await page.waitForTimeout(300);

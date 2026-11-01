@@ -8,8 +8,9 @@ sprites au style Noir et Blanc de PokeAPI (sprites/pokemon/versions/generation-v
 pour les Pokémon apparus après la 5e génération :
 - animé : black-white/animated/<id>.gif quand il existe (Méga-Dracaufeu X, Méga-Dardargnan, Méga-Alakazam, Méga-Mewtwo X et Y),
   sinon une animation au pixel près fabriquée à partir de l'image fixe (2026-10-31, porteur : « Méga-Tortank et
-  Méga-Dracaufeu Y sont immobiles, fais-les bouger comme les autres ») : respiration (le haut du corps s'étire d'un à
-  quatre pixels, pieds fixes, en 10 images) ou vol (le Pokémon monte et descend de 4 pixels) pour ceux qui flottent ;
+  Méga-Dracaufeu Y sont immobiles, fais-les bouger comme les autres ») : respiration (depuis le 2026-11-01 au soir, le
+  haut du corps descend d'un ou deux pixels sans s'étirer, jambes qui se tassent, pieds fixes, en 12 images) ou vol
+  (le Pokémon monte et descend de 4 pixels) pour ceux qui flottent ;
   pixels nets, aucune couleur ajoutée ;
 - fixe : black-white/<id>.png, 96 px ;
 - icône du choix du compagnon : sprite fixe recadré au plus près et centré dans 96 px, comme make_icons.py.
@@ -69,19 +70,27 @@ def get(url, optional=False):
 # Méga-évolutions qui flottent ou volent : elles montent et descendent au lieu de respirer.
 FLOAT = {10073, 10038, 10041, 10042}
 IDLE_MARK = b"Dropicards idle"
-# Respiration : pixels ajoutés au haut du corps à chaque image ; vol : décalage vers le haut. 10 images de 120 ms.
-BREATH = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0]
-FLY = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0]
+# Respiration naturelle (2026-11-01, soir, porteur : « on a l'impression qu'il grandit et rapetisse, rends-la plus
+# naturelle comme les évolutions des starters ») : le haut du corps ne s'étire plus ; il descend d'un ou deux pixels
+# d'un bloc en pliant les jambes (le bas du ventre et les cuisses se tassent), pieds fixes, comme les sprites animés
+# du style Noir et Blanc. Vol : montée et descente de 4 pixels en douceur. 12 images de 110 ms (1,3 s par cycle).
+BREATH = [0, 0, 1, 1, 2, 2, 2, 2, 1, 1, 0, 0]
+FLY = [0, 1, 2, 3, 4, 4, 4, 3, 2, 1, 0, 0]
+FRAME_MS = 110
 
 
-def _stretch(im, d):
-    """Étire de d pixels le haut du corps (72 % supérieurs), au plus proche voisin : les pieds ne bougent pas."""
+def _sink(im, d):
+    """Fait descendre de d pixels le haut du corps (au-dessus de 45 % de la hauteur), sans le déformer : la bande des
+    jambes (45 à 85 %) se tasse de d pixels au plus proche voisin, les pieds (15 % du bas) ne bougent pas. Même hauteur
+    d'image à chaque pas : le Pokémon ne change jamais de taille."""
     w, h = im.size
-    split = int(h * 0.72)
-    top = im.crop((0, 0, w, split)).resize((w, split + d), Image.NEAREST)
-    out = Image.new("RGBA", (w, h + d), (0, 0, 0, 0))
-    out.paste(top, (0, 0))
-    out.paste(im.crop((0, split, w, h)), (0, split + d))
+    if d <= 0:
+        return im.copy()
+    a, b = int(h * 0.45), int(h * 0.85)
+    out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    out.paste(im.crop((0, 0, w, a)), (0, d))
+    out.paste(im.crop((0, a, w, b)).resize((w, b - a - d), Image.NEAREST), (0, a + d))
+    out.paste(im.crop((0, b, w, h)), (0, b))
     return out
 
 
@@ -91,15 +100,14 @@ def idle_gif(png, n):
     im = Image.open(io.BytesIO(png)).convert("RGBA")
     im = im.crop(im.getchannel("A").getbbox())
     w, h = im.size
-    pad = max(BREATH + FLY)
+    pad = max(FLY) if n in FLOAT else 0
     frames = []
     for k in range(len(BREATH)):
         canvas = Image.new("RGBA", (w, h + pad), (0, 0, 0, 0))
         if n in FLOAT:
             canvas.paste(im, (0, pad - FLY[k]))
         else:
-            body = _stretch(im, BREATH[k])
-            canvas.paste(body, (0, h + pad - body.height))
+            canvas.paste(_sink(im, BREATH[k]), (0, pad))
         frames.append(canvas)
     # Palette commune (couleurs du sprite d'origine), index 255 transparent.
     sheet = Image.new("RGBA", (w * len(frames), h + pad), (0, 0, 0, 0))
@@ -112,7 +120,7 @@ def idle_gif(png, n):
         q.paste(255, mask=f.getchannel("A").point(lambda v: 255 if v <= 128 else 0))
         out.append(q)
     buf = io.BytesIO()
-    out[0].save(buf, "GIF", save_all=True, append_images=out[1:], duration=120, loop=0, disposal=2, transparency=255,
+    out[0].save(buf, "GIF", save_all=True, append_images=out[1:], duration=FRAME_MS, loop=0, disposal=2, transparency=255,
                 comment=IDLE_MARK)
     return buf.getvalue()
 

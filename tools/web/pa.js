@@ -181,7 +181,9 @@
   const PA_FX_MS = 8200;
   paProto.paFxRun = function (from, to, done) {
     if (paStill()) { done(); return; }
-    this.setState({ paFx: { from: from, to: to, n: Date.now() } });
+    // Une animation de passage de grade encore ouverte passait par-dessus l'évolution (2026-11-01, soir, porteur : « pas
+    // d'animation de méga-évolution pour Méga-Flagadoss ») : elle se ferme, l'évolution se voit en entier.
+    this.setState(Object.assign({ paFx: { from: from, to: to, n: Date.now() } }, this.st().gradeUp ? { gradeUp: null } : {}));
     this.sfxEvo(); // son et musique d'évolution choisis (sfx.js, 2026-11-01)
     // L'animation se joue en haut du Pokédex (calque de 520 px au plus) : l'écran y remonte dès l'appui, d'où qu'il
     // vienne (bouton de la fiche, bouton vert du Pokédex dessiné) (2026-10-29, puis 2026-10-31, porteur : « l'écran ne

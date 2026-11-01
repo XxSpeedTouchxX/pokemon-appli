@@ -121,7 +121,7 @@
     const sc = Math.min(4, PK_UNL_BOX / Math.max(1, b[2] - b[0], b[3] - b[1])), px = Math.round(96 * sc);
     const imgStyle = 'width: ' + px + 'px; height: ' + px + 'px; left: ' + Math.round(PK_UNL_BOX / 2 - (b[0] + b[2]) / 2 * sc) + 'px; top: ' + Math.round(PK_UNL_BOX / 2 - (b[1] + b[3]) / 2 * sc) + 'px';
     return { on: true, key: 'unl-' + k, name: HOME_NAMES[k], src: 'img/pokemon/' + k + '.png', imgStyle: imgStyle, title: HOME_NAMES[k] + ' débloqué !',
-      sub: HOME_THEMES[k] ? 'Nouveau compagnon · ' + pkTheme(k) : 'Nouveau compagnon', close: () => this.setState({ pkUnlock: null }),
+      sub: 'Nouveau compagnon', close: () => this.setState({ pkUnlock: null }), // sans « thème … » (2026-11-01, porteur)
       // Confettis : 28 morceaux répartis sur la largeur, départs décalés, dérive et rotation variées (fixes : pas de hasard).
       confetti: Array.from({ length: 28 }, (_, i) => ({ cls: 'pkm-unl-conf pkm-unl-c' + (i % 5),
         style: 'left: ' + ((i * 37) % 100) + '%; --dx: ' + (((i * 53) % 120) - 60) + 'px; --r: ' + (((i * 97) % 720) - 360) + 'deg; animation-delay: ' + ((i % 7) * 0.05).toFixed(2) + 's' })) };
@@ -141,7 +141,7 @@
     const shop = Object.keys(HOME_THEMES).map(Number).map(k => {
       const own = pkOwns(s, k), name = HOME_NAMES[k], price = PK_SHOP[k], cur = s.buddy === k;
       return {
-        name: name, src: 'img/pokemon/icon/' + k + '.png', theme: HOME_THEMES[k] ? 'Compagnon et ' + pkTheme(k) : 'Compagnon',
+        name: name, src: 'img/pokemon/icon/' + k + '.png', theme: 'Compagnon', // sans « Compagnon et thème … » (2026-11-01, porteur)
         owned: own, locked: !own, price: pkNum(price),
         action: own ? (cur ? 'Ton compagnon' : 'Choisir') : pkNum(price) + ' PA',
         aria: own ? (cur ? name + ' est ton compagnon' : 'Choisir ' + name + ' comme compagnon') : 'Voir ' + name + ' dans le Pokédex : ' + pkNum(price) + ' PA',

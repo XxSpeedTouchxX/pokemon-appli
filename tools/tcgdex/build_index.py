@@ -344,6 +344,9 @@ def coverage(cards, sets, today=None):
             "setsNoCm": dict(sorted(no_cm.items(), key=lambda kv: (-kv[1], kv[0]))), "setsPriceSoon": soon}
 
 
+VERIFY_RATIO = 3
+
+
 def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cmfiles.en_names):
     """Cartes sans aucun prix Cardmarket dans TCGdex : prix des fichiers publics de Cardmarket (cmfiles.py), cmf = 1.
     Le rapprochement porte sur toutes les cartes de l'extension (noms anglais, ordre TCGdex) ; seules les cartes sans
@@ -391,6 +394,37 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
             got += 1
         n += got
         report.append(f"{sid} {got}/{sum(1 for c in rows if no_cm(c) or c[f['cmf']] == 1)}")
+    # Vérification des cotes TCGdex (2026-11-01, porteur : « Rayquaza ☆ coûte très cher et n'est qu'à 500 € ») :
+    # Cardmarket affichait 6 985 € de tendance, TCGdex 505 €. Chaque carte reliée par TCGdex est comparée aux fichiers
+    # publics de Cardmarket : produit au nom d'une autre carte (relink) ou cote du même groupe écartée de plus de
+    # VERIFY_RATIO fois → prix des fichiers Cardmarket (cmf = 1). La cote reste 100 % Cardmarket.
+    if files:
+        fixed = []
+        for c in cards:
+            cid = c[f["id"]]
+            if c[f["cmf"]] == 1 or cid not in cm_ids or no_cm(c):
+                continue
+            english = (sets.get(c[f["set"]]) or [""] * 6)[5] == "en" or c[f["lang"]] == "en"
+            en = en_names.get(cid) or (c[f["name"]] if english else None)
+            idp = files.relink(cm_ids[cid], en)
+            if idp is None:
+                continue
+            grp = c[f["cmv"]] or "n"
+            p = files.group(idp, grp) or (files.prices(idp)[:5] if idp != cm_ids[cid] and files.prices(idp) else None)
+            if not p:
+                continue
+            ours, theirs = c[f["cm"]] or c[f["avg30"]] or c[f["avg7"]], p[0] or p[2] or p[3]
+            if idp == cm_ids[cid] and not (ours and theirs and max(ours, theirs) >= 5 and max(ours, theirs) > VERIFY_RATIO * min(ours, theirs)):
+                continue
+            if idp != cm_ids[cid] and files.group(idp, grp) is None:
+                grp = files.prices(idp)[6]
+            c[f["cm"]], c[f["low"]], c[f["avg30"]], c[f["avg7"]], c[f["avg1"]] = p
+            c[f["cmv"]], c[f["upd"]], c[f["cmf"]] = grp, files.created, 1
+            c[f["q"]] = 1 if doubtful(p[0], p[1], p[4]) else 0
+            fixed.append(f"{cid} {ours}→{p[0]}" + (" (autre produit)" if idp != cm_ids[cid] else ""))
+        n += len(fixed)
+        if fixed:
+            report.append(f"cotes TCGdex corrigées {len(fixed)} : " + ", ".join(fixed[:30]) + (" …" if len(fixed) > 30 else ""))
     # Repli : prix des fichiers Cardmarket de la veille pour les cartes restées sans prix.
     if prev and prev.get("cards") and "cmf" in (prev.get("fields") or []):
         pf = {k: i for i, k in enumerate(prev["fields"])}
@@ -398,7 +432,7 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
         kept = 0
         for c in cards:
             o = old.get(c[f["id"]])
-            if o and no_cm(c):
+            if o and (no_cm(c) or (not files and c[f["id"]] in cm_ids)):
                 for k in ("cm", "low", "avg30", "avg7", "avg1", "cmh", "cmv", "upd", "q", "cmf"):
                     c[f[k]] = o[pf[k]]
                 kept += 1
