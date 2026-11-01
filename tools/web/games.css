@@ -797,6 +797,9 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pas-qty small { font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 800; -webkit-text-stroke: 0; }
 .pkm-pas-bonus { font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; color: #5BE08F; }
 .pkm-pas-none { color: #9AA8C3; }
+/* Détail du pack (2026-11-01, soir, porteur) : « 1 000 + 500 offerts » à la place de « +50 % offerts ». */
+.pkm-pas-split { font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 700; color: #E2E6FF; white-space: nowrap; }
+.pkm-pas-split b { font-weight: 800; color: #5BE08F; }
 .pkm-pas-price { align-self: stretch; margin-top: 8px; height: 38px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: #FFD60A; color: #0B1120; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 800; }
 .pkm-pas-uses { margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA; }
 .pkm-pas-legal { margin: 0; font-size: 11.5px; line-height: 1.45; color: #9AA8C3; }

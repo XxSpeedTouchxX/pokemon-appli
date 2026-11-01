@@ -37,18 +37,17 @@
     this.flash();
   };
   // Recharger mes PA (2026-11-01, demande du porteur : « une boutique de PA avec 4 tarifs », dans le PK shop, rubrique
-  // « Recharger mes PA » à côté de « Magasin », comme la maquette docs/20). Prix TTC fixés par le porteur le
-  // 2026-11-01 au soir : 500 PA 4,99 €, 1 500 PA 9,99 €, 3 000 PA 15,99 € (le plus populaire), 5 000 PA 19,99 €.
-  // Bonus affiché : PA en plus face au prix du pack de 500 PA (100 PA par euro), arrondi.
+  // « Recharger mes PA » à côté de « Magasin », comme la maquette docs/20). Prix TTC et détail fixés par le porteur le
+  // 2026-11-01 au soir : 500 PA 4,99 € ; 1 500 PA 9,99 € (1 000 + 500 offerts) ; 3 000 PA 14,99 € (1 500 + 1 500
+  // offerts, le plus populaire) ; 5 000 PA 19,99 € (2 000 + 3 000 offerts). Le « +X % offerts » est remplacé par ce détail.
   // 1ʳᵉ recharge doublée : toujours à valider. Le paiement n'est pas encore branché (il faut les comptes Dropicards, le
   // serveur et Stripe, docs/20) : le récapitulatif le dit, rien n'est débité ni crédité.
-  const SHOP_PA_BASE = 500 / 4.99;
   const SHOP_PA_PACKS = [
-    { pa: 500, cents: 499, drops: 1 },
-    { pa: 1500, cents: 999, drops: 2 },
-    { pa: 3000, cents: 1599, drops: 3, tag: 'Le plus populaire' },
-    { pa: 5000, cents: 1999, drops: 4, tag: 'Meilleure valeur', best: true }
-  ].map(k => Object.assign(k, { eur: (k.cents / 100).toFixed(2).replace('.', ',') + ' €', bonus: Math.max(0, Math.round((k.pa / (SHOP_PA_BASE * k.cents / 100) - 1) * 100)) }));
+    { pa: 500, cents: 499, base: 500, gift: 0, drops: 1 },
+    { pa: 1500, cents: 999, base: 1000, gift: 500, drops: 2 },
+    { pa: 3000, cents: 1499, base: 1500, gift: 1500, drops: 3, tag: 'Le plus populaire' },
+    { pa: 5000, cents: 1999, base: 2000, gift: 3000, drops: 4, tag: 'Meilleure valeur', best: true }
+  ].map(k => Object.assign(k, { eur: (k.cents / 100).toFixed(2).replace('.', ',') + ' €' }));
   const shopNum = n => Number(n).toLocaleString('fr-FR').replace(/\s/g, '\u00a0');
   const shopTabs = (self, s) => {
     const onPa = s.shopTab === 'pa', pa = Number(s.pa) || 0, first = !s.paBought;
@@ -60,14 +59,14 @@
       goStore: () => self.setState({ shopTab: 'store', shopPaAsk: null }), goPa: () => self.setState({ shopTab: 'pa', shopAsk: null }),
       paLogo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg', paBal: shopNum(pa), paTotal: shopNum(tot),
       packs: SHOP_PA_PACKS.map((k, i) => ({
-        qty: shopNum(k.pa), price: k.eur, bonus: k.bonus ? '+' + k.bonus + ' % offerts' : 'Prix de base', bonusCls: 'pkm-pas-bonus' + (k.bonus ? '' : ' pkm-pas-none'),
+        qty: shopNum(k.pa), price: k.eur, hasGift: !!k.gift, noGift: !k.gift, base: shopNum(k.base), gift: '+ ' + shopNum(k.gift) + ' offerts',
         hasTag: !!k.tag, tag: k.tag || '', tagCls: 'pkm-pas-tag' + (k.best ? ' pkm-pas-tag-g' : ''),
-        cls: 'pkm-pas-pack pkm-pas-p' + i + (k.tag && !k.best ? ' pkm-pas-hot' : ''), aria: shopNum(k.pa) + ' PA pour ' + k.eur + (k.bonus ? ', dont ' + k.bonus + ' % offerts' : ''),
+        cls: 'pkm-pas-pack pkm-pas-p' + i + (k.tag && !k.best ? ' pkm-pas-hot' : ''), aria: shopNum(k.pa) + ' PA pour ' + k.eur + (k.gift ? ' : ' + shopNum(k.base) + ' PA et ' + shopNum(k.gift) + ' PA offerts' : ''),
         drops: Array.from({ length: k.drops }, (_, j) => ({ cls: 'pkm-pas-drop' + (j % 2 ? ' pkm-pas-drop-b' : '') })),
         pick: () => self.setState({ shopPaAsk: i })
       })),
       ask: ask ? {
-        open: true, qty: shopNum(ask.pa), bonus: ask.bonus ? 'dont ' + shopNum(Math.round(ask.pa * ask.bonus / (100 + ask.bonus) / 10) * 10) + ' PA offerts (+' + ask.bonus + ' %)' : 'Prix de base',
+        open: true, qty: shopNum(ask.pa), bonus: ask.gift ? shopNum(ask.base) + ' + ' + shopNum(ask.gift) + ' offerts' : 'Prix de base',
         first: first ? '+ ' + shopNum(ask.pa) + ' PA' : 'déjà utilisée', get: shopNum(ask.pa * (first ? 2 : 1)) + ' PA', after: shopNum(pa + ask.pa * (first ? 2 : 1)) + ' PA', price: ask.eur,
         soon: 'Le paiement n’est pas encore ouvert : il arrivera avec les comptes Dropicards. Rien n’est débité.', payLabel: 'Payer ' + ask.eur + ' · bientôt',
         close: () => self.setState({ shopPaAsk: null })

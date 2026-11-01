@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-01 (suite 20) — Recharger mes PA : détail des packs, 3 000 PA à 14,99 €
+
+- **Demande du porteur** : retirer « +X % offerts » (vert) ; écrire sous chaque pack « 1 000 + 500 offerts » (1 500 PA), « 1 500 + 1 500 offerts » (3 000 PA, **14,99 €** au lieu de 15,99 €), « 2 000 + 3 000 offerts » (5 000 PA).
+- **Fait** (cache v126, `pkshop.js`) : chaque pack porte sa part de base et sa part offerte (« + … offerts » en vert) ; 500 PA garde « Prix de base » ; récapitulatif et lecture vocale suivent ; 1ʳᵉ recharge doublée toujours à valider, paiement non branché. Test : `t-pashop`.
+
 ## 2026-11-01 (suite 19) — Booster PK et pièce : nouvelles chances ; Pokédex : Triopikeur, Roucoups, « Par stade et par type »
 
 - **Demandes du porteur** : Triopikeur plus petit, Roucoups un peu plus grand ; « Par stade et par type » : forme de base, 1ʳᵉ évolution, 2ᵉ évolution, méga-évolution, légendaire ; Booster PK : 30 PK 50 %, 50 PK 20 %, 100 PK 15 %, 200 PK 10 %, 500 PK 5 % ; pièce : 0 ou 50 PK ; temps pour atteindre 50 000 PK selon le grade.
