@@ -805,3 +805,27 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pas-soon { margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(245, 177, 76, 0.12); font-size: 13px; line-height: 1.45; color: #F5D08C; }
 .pkm-pas-pay { height: 52px; border: 0; border-radius: 14px; background: #3A4767; color: #C9D3EA; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 800; cursor: not-allowed; }
 .pkm-pas-cancel { min-height: 44px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+/* Recharger mes PA : reflet qui traverse chaque pack toutes les 2,6 s (décalé d'un pack à l'autre), gouttes qui
+   flottent et étincelle qui scintille (2026-11-01, porteur : « que ça donne envie d'acheter les PA »). */
+.pkm-pas-pack { isolation: isolate; }
+.pkm-pas-tag { z-index: 3; }
+.pkm-pas-shine { position: absolute; inset: 0; z-index: 1; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.pkm-pas-shine::before { content: ''; position: absolute; top: -20%; bottom: -20%; left: -60%; width: 45%; background: linear-gradient(105deg, transparent 0, rgba(255, 255, 255, 0) 20%, rgba(255, 240, 255, 0.55) 50%, rgba(255, 255, 255, 0) 80%, transparent 100%); transform: skewX(-18deg); animation: pkmPasShine 2.6s ease-in-out infinite; }
+.pkm-pas-p1 .pkm-pas-shine::before { animation-delay: 0.35s; }
+.pkm-pas-p2 .pkm-pas-shine::before { animation-delay: 0.7s; }
+.pkm-pas-p3 .pkm-pas-shine::before { animation-delay: 1.05s; }
+@keyframes pkmPasShine { 0% { left: -60%; } 45% { left: 130%; } 100% { left: 130%; } }
+.pkm-pas-drops { position: relative; }
+.pkm-pas-drop { animation: pkmPasFloat 2.6s ease-in-out infinite; }
+.pkm-pas-drop:nth-child(2) { animation-delay: 0.3s; }
+.pkm-pas-drop:nth-child(3) { animation-delay: 0.6s; }
+.pkm-pas-drop:nth-child(4) { animation-delay: 0.9s; }
+@keyframes pkmPasFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.pkm-pas-spark { position: absolute; top: 2px; right: 18%; width: 14px; height: 14px; pointer-events: none; background: radial-gradient(circle, #FFFFFF 0 18%, rgba(255, 255, 255, 0) 60%); clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); opacity: 0; animation: pkmPasSpark 2.6s ease-in-out infinite; }
+@keyframes pkmPasSpark { 0%, 30% { opacity: 0; transform: scale(0.3) rotate(0deg); } 42% { opacity: 1; transform: scale(1.2) rotate(45deg); } 58%, 100% { opacity: 0; transform: scale(0.3) rotate(90deg); } }
+.pkm-pas-price { position: relative; z-index: 2; }
+.pkm-pas-hot .pkm-pas-price, .pkm-pas-p3 .pkm-pas-price { animation: pkmPasPulse 2.6s ease-in-out infinite; }
+@keyframes pkmPasPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0); } 50% { box-shadow: 0 0 0 5px rgba(255, 214, 10, 0.28); } }
+@media (prefers-reduced-motion: reduce) { .pkm-pas-shine, .pkm-pas-spark { display: none; } .pkm-pas-drop, .pkm-pas-price { animation: none !important; } }
+html.pkm-calm .pkm-pas-shine, html.pkm-calm .pkm-pas-spark { display: none; }
+html.pkm-calm .pkm-pas-drop, html.pkm-calm .pkm-pas-price { animation: none !important; }

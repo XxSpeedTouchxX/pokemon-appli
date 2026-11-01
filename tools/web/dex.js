@@ -486,6 +486,8 @@
       const own = dexOwn(s, e.n), price = dexPrice(e.n), ok = !own && (!e.from || dexOwn(s, e.from)) && pa >= price;
       return { no: '#' + String(e.n).padStart(3, '0'), name: e.name, img: 'img/pokemon/icon/' + e.n + '.png', imgCls: dexSeen(s, e.n) ? '' : 'pkm-dex-sil',
         status: own ? (s.buddy === e.n ? 'Compagnon' : 'Débloqué') : (price ? dexNum(price) + ' PA' : 'Offert'),
+        // Prix avec le logo des PA (2026-11-01, porteur : « que le logo PA apparaisse avec la somme à côté »).
+        hasPrice: !own && price > 0, noPrice: own || !price, amount: dexNum(price),
         cls: 'pkm-dexl-item' + (own ? ' pkm-dexl-own' : '') + (ok ? ' pkm-dexl-can' : '') + (s.buddy === e.n ? ' pkm-dexl-buddy' : ''),
         aria: e.name + ', n° ' + e.n + ', ' + (own ? 'débloqué' : 'à débloquer pour ' + price + ' PA'),
         go: () => { if (this.st().screen !== 'market') this.tab('market'); this.setState({ dexList: false, dexSel: e.n }); setTimeout(() => { const el = document.querySelector('[aria-label="Route d’évolution"]'); if (el) el.scrollIntoView({ block: 'start', behavior: dexStill() ? 'auto' : 'smooth' }); }, 80); } };

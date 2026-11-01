@@ -59,7 +59,7 @@
       packs: SHOP_PA_PACKS.map((k, i) => ({
         qty: shopNum(k.pa), price: k.eur, bonus: k.bonus ? '+' + k.bonus + ' % offerts' : 'Prix de base', bonusCls: 'pkm-pas-bonus' + (k.bonus ? '' : ' pkm-pas-none'),
         hasTag: !!k.tag, tag: k.tag || '', tagCls: 'pkm-pas-tag' + (k.best ? ' pkm-pas-tag-g' : ''),
-        cls: 'pkm-pas-pack' + (k.tag && !k.best ? ' pkm-pas-hot' : ''), aria: shopNum(k.pa) + ' PA pour ' + k.eur + (k.bonus ? ', dont ' + k.bonus + ' % offerts' : ''),
+        cls: 'pkm-pas-pack pkm-pas-p' + i + (k.tag && !k.best ? ' pkm-pas-hot' : ''), aria: shopNum(k.pa) + ' PA pour ' + k.eur + (k.bonus ? ', dont ' + k.bonus + ' % offerts' : ''),
         drops: Array.from({ length: k.drops }, (_, j) => ({ cls: 'pkm-pas-drop' + (j % 2 ? ' pkm-pas-drop-b' : '') })),
         pick: () => self.setState({ shopPaAsk: i })
       })),

@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-11-01 (suite 12) — Prix des Pokémon avec le logo des PA, boutique de PA qui brille
+
+- **Demandes du porteur** :
+  - dans « Tous les Pokémon », un prix plus explicite et plus esthétique, avec le logo des PA à côté de la somme ;
+  - dans « Recharger mes PA », une animation ou un effet brillant qui revienne toutes les 2 à 3 secondes, pour donner envie d'acheter.
+- **Fait** (cache v115) :
+  - **prix dans le Pokédex** : pastille violette avec la goutte des PA, la somme en gras et « PA » (`dex.js`, `dex.css`) ; jaune quand on a assez de PA ; tuiles un peu plus hautes (148 px) pour que le nom reste visible ;
+  - **boutique de PA** (`games.css`) :
+    - un reflet de lumière traverse chaque pack toutes les 2,6 s, décalé d'un pack à l'autre (vague) ;
+    - les gouttes flottent doucement et une étincelle scintille ;
+    - les prix des packs « le plus choisi » et « meilleure valeur » pulsent ;
+    - tout s'arrête avec « Animations réduites » ou les fonds calmes.
+- **Tests** : `t-pashop` (reflet sur les 4 packs, logo des PA dans le Pokédex).
+
 ## 2026-11-01 (suite 11) — PK shop : rubriques « Magasin » et « Recharger mes PA »
 
 - **Demandes du porteur** :
