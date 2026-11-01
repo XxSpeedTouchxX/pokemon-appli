@@ -6,6 +6,23 @@
 
 ---
 
+## 2026-11-01 (suite 7) — PA toutes les 24 h, Admin +10 000 PA et « PA à volonté », descriptions des méga-évolutions
+
+- **Demandes du porteur** :
+  - mode Admin : débloquer 10 000 PA d'un coup au lieu de 500, et un mode qui redonne les PA à chaque appui sur le solde ;
+  - « l'obtention des PA se gagne toutes les 24 h au lieu de chaque jour, mais il faut se connecter au moins une fois 24 h après avoir récupéré ses PA, sinon on redescend à 15 PA » ;
+  - descriptions des méga-évolutions dans la fiche du Pokédex : « cherche encore ».
+- **Fait** (cache v111) :
+  - **PA toutes les 24 h** (`pa-core.js`, `pa.js`), lu ainsi (**à confirmer par le porteur**) :
+    - les PA suivants sont prêts **24 h après la dernière récupération** (à l'heure près, plus au changement de jour) ;
+    - une fois prêts, ils **attendent 24 h** : récupérés dans ce délai, la série continue (+10, +15, +20, +25, puis +30) ; sinon elle reprend à +15 PA ;
+    - « Récupérer mes PA » dit jusqu'à quand les récupérer (« À récupérer avant jeudi 12 novembre à 20 h 00 pour garder ta série ») et « Dans 24 h : +30 PA si tu reviens à temps » ; « Mes PA » dit dans combien de temps arrivent les prochains (« Prochains PA dans 12 h 00 : +25 PA ») ;
+    - textes revus : Mes PA, règles des PK et PA, didacticiel (« Toutes les 24 h, touche ton solde… »), Notifications (« PA à récupérer », rappel une fois par récupération) ;
+    - instant de la dernière récupération gardé sur l'appareil (`paAt`) ; une récupération faite avant cette version compte pour minuit ce jour-là ;
+  - **mode Admin** (`admin.js`) : « +10 000 PA (Pokédex) » ; interrupteur **« PA à volonté »** : chaque appui sur le solde ouvre « Récupérer mes PA », sans attendre 24 h (série qui continue) ; désactivé, retour à la règle des 24 h ;
+  - **descriptions des 15 méga-évolutions** : PokeAPI n'en a aucune. Texte officiel du Pokédex de **Légendes Pokémon : Z-A** (2025, le jeu le plus récent, comme pour les autres Pokémon), en français, lu dans un relevé public des textes du jeu sur GitHub (`CPokemon/plza-text`), chaque forme vérifiée par son nom dans le jeu, recoupé avec un second relevé indépendant (`abcboy101/poke-corpus`, version 2.0.1 du jeu) : identique. Script `tools/sprites/fetch_megatext.py` → `megas_text.json`, repris par `fetch_dex.py`. Pokébip, d'abord essayé, est bloqué par le réseau de la session.
+- **Tests** : `test_pa.mjs` (8, à l'heure près), `e2e/t-pa24.mjs` (nouveau, 16 contrôles : 24 h, délai de 24 h, reprise à +15, Admin +10 000 PA et PA à volonté), `t-dexsil` (descriptions des méga), `t-notif` adapté.
+
 ## 2026-11-01 (suite 6) — Évolution centrée au-dessus de la barre du bas, solde de « Mes PA » en blanc
 
 - **Demandes du porteur** :

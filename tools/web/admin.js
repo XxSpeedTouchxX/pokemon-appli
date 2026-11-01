@@ -12,7 +12,7 @@
   const ADM_TAPS = 7, ADM_TAP_MS = 3000;
   const ADM_FLAGS = [['scan', 'Bouton Scan'], ['territory', 'Onglet Territoire'], ['pk', 'Monnaie PK'], ['partners', 'Partenaires fictifs (Territoire)'], ['motion', 'Animations']];
   const ADM_CATS = [['', 'Auto'], ['novice', 'Novice'], ['regular', 'Régulier'], ['passion', 'Passionné']];
-  const admDefault = () => ({ on: false, hash: '', salt: '', today: '', cat: '', tier: -1, prices: {}, flags: { scan: true, territory: true, pk: true, partners: true, motion: true } });
+  const admDefault = () => ({ on: false, hash: '', salt: '', today: '', cat: '', tier: -1, paFree: false, prices: {}, flags: { scan: true, territory: true, pk: true, partners: true, motion: true } });
   const admOf = s => {
     const a = s.admin || {}, d = admDefault();
     return Object.assign(d, a, { flags: Object.assign(d.flags, a.flags || {}), prices: Object.assign({}, a.prices || {}) });
@@ -111,7 +111,10 @@
       ['Tout débloquer', () => { this.setState({ pkOwn: HOME_BUDDIES.map(([k]) => k), toast: 'Tous les compagnons sont débloqués' }); this.flash(); }],
       ['Tout reverrouiller', () => { this.setState({ pkOwn: [], buddy: 25, toast: 'Compagnons reverrouillés (Pikachu remis)' }); this.flash(); }],
       ['Rejouer les jeux (booster, pile ou face)', () => { this.setState({ games: Object.assign({}, s.games || {}, { boosterAt: '', coinAt: '', bPhase: 'idle', cPhase: '' }), toast: 'Booster et pile ou face de nouveau disponibles' }); this.flash(); }],
-      ['+500 PA (Pokédex)', () => { this.setState({ pa: (Number(s.pa) || 0) + 500, toast: '+500 PA' }); this.flash(); }],
+      // +10 000 PA d'un coup (2026-11-01, porteur ; +500 avant) pour débloquer le Pokédex sans attendre.
+      ['+10 000 PA (Pokédex)', () => { this.setState({ pa: (Number(s.pa) || 0) + 10000, toast: '+10 000 PA' }); this.flash(); }],
+      // PA à volonté (2026-11-01, porteur) : chaque appui sur le solde de PA ouvre « Récupérer mes PA », sans attendre 24 h.
+      [a.paFree ? 'PA à volonté : activé (désactiver)' : 'PA à volonté : désactivé (activer)', () => { this.setAdmin({ paFree: !a.paFree }); this.setState({ toast: a.paFree ? 'PA à volonté désactivé : de nouveau toutes les 24 h' : 'PA à volonté : touche ton solde de PA pour les récupérer autant de fois que tu veux' }); this.flash(); }],
       ['Rejouer bonus du jour et partage', () => { this.setState({ pkDay: '2000-01-01', pkShared: '', toast: 'Bonus du jour au prochain lancement ; partage de nouveau récompensé' }); this.flash(); }]
     ].map(([label, go]) => ({ label: label, go: go }));
     // Prix des compagnons : recherche, puis prix modifiable (vide = règle des stades).

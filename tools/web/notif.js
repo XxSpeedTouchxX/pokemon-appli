@@ -5,13 +5,13 @@
   // - sorties et boutiques suivies (alertes de start.js, déjà calculées à l'ouverture de l'app).
   // Les rappels sont calculés sur l'appareil : à l'ouverture de l'app, puis chaque minute tant qu'elle est ouverte ou en
   // arrière-plan, et au retour dessus. Chaque rappel n'est montré qu'une fois par cycle (« notifDone », enregistré) :
-  // une fois par jour pour les PA, une fois par booster ou lancer pour les jeux. Notification du téléphone si
+  // une fois par récupération pour les PA (toutes les 24 h), une fois par booster ou lancer pour les jeux. Notification du téléphone si
   // l'utilisateur l'a autorisée (bouton dans la rubrique), par le service worker quand il est là (iPhone : app ajoutée
   // à l'écran d'accueil, iOS 16.4 et plus), et pastille avec le nombre de rappels sur l'icône de l'app (Badging API).
   // App fermée, rien ne peut prévenir sans serveur : ce sera l'envoi « Web Push » des comptes Dropicards.
   // Ce module partage la portée des autres : ses noms commencent par NT_ ou nt.
   const NT_KINDS = [
-    { k: 'pa', label: 'PA du jour à récupérer', sub: 'Chaque jour, quand tes points d’Aura t’attendent' },
+    { k: 'pa', label: 'PA à récupérer', sub: 'Toutes les 24 h, quand tes points d’Aura t’attendent' },
     { k: 'booster', label: 'Booster PK prêt', sub: 'Quand ton Booster PK gratuit peut être ouvert' },
     { k: 'coin', label: 'Pièce prête', sub: 'Quand tu peux relancer la pièce pour gagner des PK' },
     { k: 'alerts', label: 'Sorties et boutiques suivies', sub: 'Le jour d’une sortie que tu suis, la veille pour tes boutiques' }
@@ -25,7 +25,7 @@
     const out = [];
     if (ntOn(s, 'pa')) {
       const n = paPending(s);
-      if (n) out.push({ key: 'pa', cycle: realToday(), title: 'PA dispo aujourd’hui', text: '+' + n.gain + ' PA à récupérer dans Dropicards' });
+      if (n) out.push({ key: 'pa', cycle: String(paLastAt(s) || 'first'), title: 'PA dispo aujourd’hui', text: '+' + n.gain + ' PA à récupérer dans Dropicards' });
     }
     const g = s.games || {}, P = this.perks();
     if (ntOn(s, 'booster') && g.boosterAt && gmWait(g.boosterAt, gmBoosterMs(this)) === 0)

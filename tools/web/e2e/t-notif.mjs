@@ -47,7 +47,7 @@ await sec.scrollIntoViewIfNeeded();
 const sw = sec.locator('button[role="switch"]');
 const labels = (await sw.allInnerTexts()).map(t => t.split('\n')[0]);
 const checked = await sw.evaluateAll(bs => bs.map(b => b.getAttribute('aria-checked')).join(','));
-ok('rubrique Notifications : ' + labels.join(' / ') + ' (' + checked + ')', labels.length === 4 && /PA du jour/.test(labels[0]) && /Booster PK/.test(labels[1]) && /Pièce/.test(labels[2]) && /Sorties/.test(labels[3]) && checked === 'true,true,true,true');
+ok('rubrique Notifications : ' + labels.join(' / ') + ' (' + checked + ')', labels.length === 4 && /^PA à récupérer$/.test(labels[0]) && /Booster PK/.test(labels[1]) && /Pièce/.test(labels[2]) && /Sorties/.test(labels[3]) && checked === 'true,true,true,true');
 ok('état : « ' + (await sec.innerText()).split('\n').find(l => /autorisées|bloquées|Autorise/.test(l)) + ' »', /Notifications du téléphone autorisées/.test(await sec.innerText()) && /compte Dropicards/.test(await sec.innerText()));
 await sec.screenshot({ path: shot('notif-profil.png') });
 // Décocher les PA : enregistré, plus de rappel de PA.

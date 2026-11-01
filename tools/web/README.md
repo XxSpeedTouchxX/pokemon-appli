@@ -273,6 +273,9 @@ Depuis le 2026-10-26 (`tools/web/pa-core.js`, testé par `node --test tools/web/
   - **un seul bouton** selon le cas : « Débloquer · 100 PA », « Faire évoluer · 500 PA » (animation d'évolution, amenée au centre de l'écran dès l'appui depuis le 2026-10-29), « Méga-évoluer · 2 500 PA » (avec confirmation), « Choisir comme compagnon » (il apparaît alors en haut à droite de « Valeur de toute ma collection »), « Encore N PA », « Débloque d'abord … » ; les boutons hexagonaux et la grille des méga-évolutions sont retirés ;
   - choix du starter la première fois (Bulbizarre, Salamèche, Carapuce, Pikachu).
 - **Données** : `tools/sprites/dex.json` (`fetch_dex.py`, fichiers CSV publics de PokeAPI, figés), injectées par le build (`DEX_DATA`, 171 fiches vérifiées).
+- **PA toutes les 24 h** (2026-11-01, porteur ; `PaCore.next(lastAt, streak, now)`) : prêts 24 h après la dernière récupération (`paAt`, en ms ; `paDay` gardé, une récupération plus ancienne compte pour minuit ce jour-là, `paLastAt`), puis 24 h pour les récupérer (`PaCore.keepUntil`), sinon reprise à +15 PA. Heure : `paNow()` (date simulée `?today=` ou de l'Admin avec l'heure réelle ; `?now=AAAA-MM-JJTHH:MM` pour les tests). Textes : `PA_RULES`, `paNextText` (« Prochains PA dans… »), `paKeepText` (« À récupérer avant… »). Notifications : un rappel par récupération (`cycle` = `paLastAt`). Tests : `test_pa.mjs`, `e2e/t-pa24.mjs`.
+- **Admin** (`admin.js`) : « +10 000 PA (Pokédex) » ; « PA à volonté » (`admin.paFree`, lu par `paFree` dans `pa.js`) : les PA se récupèrent à chaque appui.
+- **Descriptions des méga-évolutions** : `tools/sprites/megas_text.json` (`fetch_megatext.py`, Pokédex de Légendes Z-A), copiées dans `dex.json` (`text`) ; test `t-dexsil`.
 - **Enregistrement** : `pa`, `paDay`, `paStreak`, `evo` (lignée du starter et stade), `pkOwn`, `megas` avec la collection. Mode Admin : « +500 PA », prix en PA.
 
 ## Didacticiel

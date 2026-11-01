@@ -16,6 +16,8 @@
   // Pokémon de base comme compagnon ; elle devient alors un compagnon. Elles comptent pour les grades Maître Pokémon
   // (1) et Grand maître mondial Pokémon (5). Prix : PA_MEGA, à confirmer par le porteur.
   const PA_MEGA = 2500;
+  // Règle des PA, écrite une fois (2026-11-01, porteur : toutes les 24 h, et 24 h pour les récupérer).
+  const PA_RULES = 'Toutes les 24 h, touche ton solde de PA pour récupérer tes PA : +10, +15, +20, +25, puis +30 PA d’affilée. Une fois prêts, ils t’attendent 24 h : passé ce délai, la série reprend à +15 PA.';
   HOME_MEGAS.forEach(([id, base, nom]) => { HOME_NAMES[id] = nom; });
   const PA_MEGA_IDS = n => HOME_MEGAS.some(m => m[0] === n);
   const paMegas = s => (Array.isArray(s.megas) ? s.megas : []);
@@ -26,6 +28,7 @@
     const d = paBaseSt.call(this);
     if (!(d.pa >= 0)) d.pa = 0;
     if (typeof d.paDay !== 'string') d.paDay = '';
+    if (!(d.paAt >= 0)) d.paAt = 0;
     if (!(d.paStreak >= 0)) d.paStreak = 0;
     if (!d.evo || !PA_LINES[d.evo.line]) d.evo = null;
     if (!Array.isArray(d.megas)) d.megas = [];
@@ -34,7 +37,32 @@
   // PA du jour à récupérer (2026-10-28, demande du porteur) : ils ne sont plus crédités à l'ouverture. Une pastille
   // « ! » sur le solde de PA prévient qu'ils attendent ; un appui ouvre « Tes PA du jour » et son bouton « Récupérer
   // mes PA ». La série suit les jours où les PA sont récupérés (un jour manqué : reprise à +15, PaCore).
-  const paPending = s => PaCore.next(s.paDay || '', s.paStreak || 0, realToday());
+  // Depuis le 2026-11-01 (porteur) : toutes les 24 h, à l'heure près (PaCore). « paAt » garde l'instant de la dernière
+  // récupération ; avant cette date, seul le jour (« paDay ») était gardé : il compte alors pour minuit ce jour-là.
+  // L'heure suit la date simulée (?today=, date de l'Admin) en gardant l'heure réelle ; ?now= (date et heure) pour les tests.
+  const paNow = () => {
+    try { const q = new URLSearchParams(location.search).get('now'), t = q ? Date.parse(q) : NaN; if (t > 0) return t; } catch (e) { /* adresse sans paramètres */ }
+    const d = new Date(), t = realToday(), m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+    const real = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    return !m || t === real ? d.getTime() : new Date(+m[1], +m[2] - 1, +m[3], d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()).getTime();
+  };
+  const paLastAt = s => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s.paDay || '');
+    return m ? Math.max(Number(s.paAt) || 0, new Date(+m[1], +m[2] - 1, +m[3]).getTime()) : 0;
+  };
+  // Mode Admin « PA à volonté » (2026-11-01, porteur) : les PA se récupèrent à chaque appui sur le solde.
+  const paFree = s => !!(s.admin && s.admin.on && s.admin.paFree);
+  const paPending = s => {
+    const at = paLastAt(s), n = PaCore.next(at, s.paStreak || 0, paNow());
+    return n || !paFree(s) ? n : PaCore.next(at, s.paStreak || 0, at + PaCore.H24);
+  };
+  // Temps restant, lisible : « 5 h 12 min », « 12 min », « moins d'une minute ».
+  const paLeft = ms => { const m = Math.max(0, Math.ceil(ms / 60000)), h = Math.floor(m / 60); return m < 1 ? 'moins d’une minute' : h ? h + ' h ' + String(m % 60).padStart(2, '0') : m + ' min'; };
+  const paWhen = t => { const d = new Date(t); return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' à ' + d.getHours() + ' h ' + String(d.getMinutes()).padStart(2, '0'); };
+  // Prochains PA (rien à récupérer) : dans combien de temps, et combien.
+  const paNextText = s => { const at = paLastAt(s); return at ? 'Prochains PA dans ' + paLeft(PaCore.readyAt(at) - paNow()) + ' : +' + PaCore.tomorrow(s.paStreak) + ' PA' : ''; };
+  // PA qui attendent : jusqu'à quand les récupérer sans perdre la série.
+  const paKeepText = s => { const at = paLastAt(s), n = paPending(s); return at && n && n.streak > 1 && !paFree(s) && paNow() < PaCore.keepUntil(at) ? 'À récupérer avant ' + paWhen(PaCore.keepUntil(at)) + ' pour garder ta série' : ''; };
   // Série affichée : celle qui sera comptée en récupérant les PA du jour, sinon la série en cours.
   const paStreakNow = s => { const n = paPending(s); return n ? n.streak : (Number(s.paStreak) || 0); };
   const paStreakText = s => { const k = paStreakNow(s), n = paPending(s); return (k > 1 ? k + ' jours d’affilée' : k === 1 ? '1er jour' : '—') + (n ? ' (à récupérer)' : ''); };
@@ -81,7 +109,7 @@
     if (!n || paFlyOn) return;
     const from = document.querySelector('.pkm-pa-claim-btn'), to = document.querySelector('header .pkm-pa-bar') || document.querySelector('.pkm-pa-bar');
     const old = Number(s.pa) || 0, total = old + n.gain;
-    this.setState({ pa: total, paDay: realToday(), paStreak: n.streak, paClaim: false, paCount: paStill() || !from || !to ? null : old,
+    this.setState({ pa: total, paDay: realToday(), paAt: paNow(), paStreak: n.streak, paClaim: false, paCount: paStill() || !from || !to ? null : old,
       toast: null });
     this.saveNow();
     const end = () => { paFlyOn = false; this.setState({ paCount: null, paGain: n.gain, toast: '+' + n.gain + ' PA · ' + (n.streak > 1 ? n.streak + ' jours d’affilée' : 'premier jour') }); this.flash(); setTimeout(() => { if (this.st().paGain) this.setState({ paGain: 0 }); }, 2200); };
@@ -181,8 +209,8 @@
       paLogo: still ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
       // Série et gain : d'après les PA en attente s'il y en a (une série cassée n'est plus affichée comme en cours).
       pa: pa.toLocaleString('fr-FR'), streak: paStreakText(s),
-      tomorrow: paPending(s) ? 'Récupère tes PA du jour : +' + paPending(s).gain + ' PA, puis +' + PaCore.tomorrow(paPending(s).streak) + ' PA demain' : 'Reviens demain : +' + PaCore.tomorrow(s.paStreak) + ' PA',
-      rules: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : +10, +15, +20, +25, puis +30 PA par jour d’affilée. Un jour manqué : la série reprend à +15 PA.',
+      tomorrow: paPending(s) ? 'Récupère tes PA : +' + paPending(s).gain + ' PA, puis +' + PaCore.tomorrow(paPending(s).streak) + ' PA 24 h plus tard' : paNextText(s),
+      rules: PA_RULES,
       choosing: !e, chosen: !!e, starters: [],
       // Écrans du Pokédex dessiné : ton compagnon à gauche, le solde de PA à droite.
       dexImg: paSprite(b, still), dexName: e ? paName(b) : 'Choisis ton starter',
@@ -205,17 +233,18 @@
       // (2026-10-31, porteur) ; le Pokédex s'ouvre depuis ce panneau.
       openPa: () => { if (n) { this.setState({ paClaim: true }); paDialogKeys(this); } else this.setState({ paSheet: true }); }, paReady: !!n,
       paSheet: (() => {
-        if (!s.paSheet) return { open: false, streak: [], evo: [] };
+        if (!s.paSheet) return { open: false, streak: [], evo: [], note: '' };
         const R = this.vRules(s);
         return { open: true, close: () => this.setState({ paSheet: false }), balance: Number(pa).toLocaleString('fr-FR'), logo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
           what: 'Les PA sont tes points d’Aura : ils montrent le lien entre toi et ton compagnon. Ils sont gratuits, ne s’achètent pas et n’ont aucune valeur en euros.',
-          how: 'Connecte-toi chaque jour et touche ton solde de PA pour les récupérer. Plus tu reviens de jours d’affilée, plus tu gagnes de PA :',
+          how: 'Toutes les 24 h, touche ton solde de PA pour les récupérer. Plus tu les récupères d’affilée, plus tu gagnes de PA :',
+          note: (n ? '' : paNextText(s) + '. ') + 'Une fois prêts, tes PA t’attendent 24 h : passé ce délai, la série reprend à +15 PA.',
           use: 'Dans le Pokédex, tes PA débloquent les Pokémon et font évoluer ton compagnon :',
           streak: R.streak, evo: R.evo, dex: () => { this.setState({ paSheet: false }); openDex(); } };
       })(),
       paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') + (n ? ' pkm-pa-ready' : ''),
       claim: { open: !!(n && s.paClaim), gain: n ? '+' + n.gain + ' PA' : '', streak: n ? (n.streak > 1 ? n.streak + ' jours d’affilée' : 'Premier jour de ta série') : '',
-        next: n ? 'Demain : +' + PaCore.tomorrow(n.streak) + ' PA si tu reviens' : '', drop: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
+        next: n ? 'Dans 24 h : +' + PaCore.tomorrow(n.streak) + ' PA si tu reviens à temps' : '', keep: n ? paKeepText(s) : '', hasKeep: !!(n && paKeepText(s)), drop: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
         go: () => this.paClaim(), close: () => this.setState({ paClaim: false }), dex: () => { this.setState({ paClaim: false }); openDex(); } } });
   };
   const paBaseRender = paProto.renderVals;

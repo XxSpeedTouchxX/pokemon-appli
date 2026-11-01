@@ -5,7 +5,7 @@ fetch_dex.py : fiches du Pokédex de Dropicards (2026-10-28, demande du porteur)
 Pour les 156 compagnons (les 151 de Kanto, Latias, Latios, Kyogre, Groudon, Rayquaza) et les 15 méga-évolutions de
 megas.json : nom, catégorie, types, taille, poids, statistiques de base, talents, habitat, taux de capture, légendaire
 ou fabuleux, forme précédente et façon d'évoluer, description du Pokédex en français (texte des jeux le plus récent),
-tous en français quand la donnée existe.
+tous en français quand la donnée existe. Méga-évolutions : description de Légendes Z-A (megas_text.json, fetch_megatext.py).
 
 Source : fichiers CSV publics de PokeAPI (PokeAPI/pokeapi, data/v2/csv), lus une fois ; les données sont figées dans
 tools/sprites/dex.json, que le build injecte dans l'app (DEX_DATA). Textes et noms © The Pokémon Company : décision
@@ -44,6 +44,9 @@ def clean(t):
 
 def main():
     megas = json.loads((HERE / "megas.json").read_text("utf-8"))["megas"]
+    # Descriptions des méga-évolutions : PokeAPI n'en a pas ; textes de Légendes Z-A (fetch_megatext.py, 2026-11-01).
+    mtext_file = HERE / "megas_text.json"
+    megatext = json.loads(mtext_file.read_text("utf-8"))["texts"] if mtext_file.exists() else {}
     sp = {int(r["id"]): r for r in table("pokemon_species")}
     snames = table("pokemon_species_names")
     names = {int(r["pokemon_species_id"]): r for r in snames if r["local_language_id"] == FR}
@@ -110,7 +113,7 @@ def main():
         out.append(e)
     for mid, base, mname, *_ in megas:
         e = {"n": mid, "name": mname, "genus": names[base]["genus"], **card(mid, sp[base]),
-             "hab": "", "cap": 0, "leg": 0, "from": base, "how": "Méga-évolution", "fam": int(sp[base]["evolution_chain_id"]), "text": "", "mega": 1}
+             "hab": "", "cap": 0, "leg": 0, "from": base, "how": "Méga-évolution", "fam": int(sp[base]["evolution_chain_id"]), "text": megatext.get(str(mid), ""), "mega": 1}
         out.append(e)
     OUT.write_text(json.dumps({"fetched": time.strftime("%Y-%m-%d"), "source": "PokeAPI/pokeapi data/v2/csv",
                                "dex": out}, ensure_ascii=False, separators=(",", ":")), "utf-8")
