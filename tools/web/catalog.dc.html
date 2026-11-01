@@ -1204,7 +1204,7 @@
 <div class="pkm-rules">
 <div class="pkm-rules-hero">
 <div class="pkm-rules-logos" aria-hidden="true"><img src="img/brand/pk.svg" alt="" width="72" height="72" class="pkm-rules-pk"><img src="img/brand/pa-anim.svg" alt="" width="72" height="72" class="pkm-rules-pa"></div>
-<p class="pkm-rules-lead">Les PK se gagnent en jouant, les PA en les récupérant toutes les 24 h : c’est gratuit. Ils ne s’achètent pas, ne se vendent pas, ne s’échangent pas et n’ont aucune valeur en euros.</p>
+<p class="pkm-rules-lead">Les PK se gagnent en jouant, les PA en les récupérant chaque jour : c’est gratuit. Ils ne s’achètent pas, ne se vendent pas, ne s’échangent pas et n’ont aucune valeur en euros.</p>
 <div class="pkm-rules-me-bar"><img src="{{ legal.pk.emblem }}" alt="" width="36" height="36"><span><b>{{ legal.pk.grade }}</b><span>{{ legal.pk.pk }} PK · {{ legal.pk.pa }} PA</span></span></div>
 </div>
 <section aria-label="Gagner des PK" class="pkm-rules-card">
@@ -1236,9 +1236,9 @@
 </section>
 <section aria-label="Points d’Aura" class="pkm-rules-card pkm-rules-aura">
 <h3><img src="img/brand/pa.svg" alt="" width="22" height="22">Points d’Aura (PA)</h3>
-<p class="pkm-rules-note">Toutes les 24 h, touche ton solde de PA pour récupérer tes PA : ils montent à chaque récupération d’affilée.</p>
+<p class="pkm-rules-note">Chaque jour dès minuit, touche ton solde de PA pour récupérer tes PA : ils montent avec les jours d’affilée.</p>
 <div class="pkm-rules-streak"><sc-for list="{{ legal.pk.streak }}" as="lrs" hint-placeholder-count="5"><div class="{{ lrs.cls }}"><b>{{ lrs.pa }}</b><span>{{ lrs.day }}</span></div></sc-for></div>
-<p class="pkm-rules-note">Une fois prêts, tes PA t’attendent 24 h : passé ce délai, la série reprend à +15 PA. Les PA débloquent les Pokémon du Pokédex :</p>
+<p class="pkm-rules-note">Un jour sans les récupérer : la série reprend à +15 PA. Les PA débloquent les Pokémon du Pokédex :</p>
 <div class="pkm-rules-evo"><sc-for list="{{ legal.pk.evo }}" as="lrv" hint-placeholder-count="3"><div><span>{{ lrv.label }}</span><b>{{ lrv.pa }}</b></div></sc-for></div>
 </section>
 <section aria-label="PK shop" class="pkm-rules-card">

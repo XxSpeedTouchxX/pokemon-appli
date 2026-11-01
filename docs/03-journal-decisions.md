@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-01 (suite 8) — PA de nouveau chaque jour dès minuit
+
+- **Décision du porteur** (« non pardon, remets les PA dispo chaque jour à partir de minuit, et si l'utilisateur oublie de se connecter avant 24 h il redescend à 15 PA ») : la règle « toutes les 24 h » de la suite 7 est **annulée**.
+- **Fait** (cache v112) : PA disponibles **chaque jour dès minuit** (jour du téléphone) ; récupérés chaque jour, la série monte (+10, +15, +20, +25, puis +30) ; **un jour entier sans les récupérer : la série reprend à +15 PA** (`pa-core.js`, retour au calcul par jour). Gardés de la suite 7 : « Prochains PA à minuit (dans 4 h 00) : +25 PA » dans « Mes PA », « À récupérer avant ce soir minuit (dans 23 h 55) pour garder ta série » dans « Récupérer mes PA » (seulement si la série est en cours), heure simulée `?now=`, mode Admin (+10 000 PA, « PA à volonté »). Textes revenus à « Chaque jour dès minuit » (Mes PA, règles, didacticiel, notifications).
+- **Tests** : `test_pa.mjs` (6), `e2e/t-paday.mjs` (remplace `t-pa24`, 16 contrôles), `t-pa`, `t-notif`.
+
 ## 2026-11-01 (suite 7) — PA toutes les 24 h, Admin +10 000 PA et « PA à volonté », descriptions des méga-évolutions
 
 - **Demandes du porteur** :
