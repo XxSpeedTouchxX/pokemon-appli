@@ -64,8 +64,8 @@ ok('la fiche suit la croix', /Pikachu/.test(await page.locator('section[aria-lab
 const silOk = await page.evaluate(() => !document.querySelector('.pkm-dex-lcd-l img').classList.contains('pkm-dex-sil'));
 await pad('right');
 ok('silhouette sur l’écran tant que le Pokémon est à débloquer', silOk && await page.evaluate(() => document.querySelector('.pkm-dex-lcd-l img').classList.contains('pkm-dex-sil')));
-// Bouton vert : Raichu (500 PA) se débloque.
-ok('bouton vert : « ' + await page.locator('.pkm-dex-k-a').getAttribute('aria-label') + ' »', /Faire évoluer · 500 PA/.test(await page.locator('.pkm-dex-k-a').getAttribute('aria-label')));
+// Bouton vert : Raichu (150 PA depuis le 2026-11-01) se débloque.
+ok('bouton vert : « ' + await page.locator('.pkm-dex-k-a').getAttribute('aria-label') + ' »', /Faire évoluer · 150 PA/.test(await page.locator('.pkm-dex-k-a').getAttribute('aria-label')));
 await page.click('.pkm-dex-k-a'); await page.waitForTimeout(900);
 // L'évolution est amenée au centre de l'écran (2026-10-29, puis 2026-10-31 : l'écran remonte sur le calque en haut du
 // Pokédex) : pas besoin de remonter pour la voir. Elle dure 7,2 s.
@@ -76,7 +76,7 @@ const fxTxt = await page.evaluate(() => { const t = document.querySelector('.pkm
 ok('texte de l’évolution au-dessus de la barre du bas (' + (fxTxt || []).join(' < ') + ')', fxTxt && fxTxt[0] <= fxTxt[1] - 8);
 await page.waitForTimeout(6800);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { pa: d.pa, own: d.pkOwn, buddy: d.buddy }; });
-ok('Raichu débloqué au bouton vert (' + JSON.stringify(st) + ')', st.pa === 100 && st.own.indexOf(26) >= 0 && st.buddy === 26);
+ok('Raichu débloqué au bouton vert (' + JSON.stringify(st) + ')', st.pa === 450 && st.own.indexOf(26) >= 0 && st.buddy === 26);
 // Forme précédente pas encore débloquée : le bouton vert dit pourquoi (Sablaireau, #028).
 await pad('down'); await pad('down');
 await page.click('.pkm-dex-k-a'); await page.waitForTimeout(400);

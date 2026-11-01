@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-01 (suite 10) — Prix en PA fixés Pokémon par Pokémon
+
+- **Décision du porteur** : nouveaux prix pour les 171 Pokémon du Pokédex, fixés un par un (liste renvoyée par le porteur ; `docs/21-prix-pa-pokedex.csv`). Total pour tout débloquer : **15 120 PA** (avant : environ 81 000). Exemples :
+  - formes de base 15 PA, évolutions 30 à 200 PA ;
+  - Dracaufeu 200 PA, méga-évolutions 50 à 500 PA ;
+  - Artikodin, Électhor, Sulfura, Latias et Latios 300 PA ; Mewtwo et Mew 500 PA ;
+  - Kyogre, Groudon et Rayquaza 1 000 PA ;
+  - starters offerts, **Triopikeur à 0 (offert, à confirmer)**.
+- **Fait** (cache v113) : `PA_PRICES` (`pk.js`) remplace la règle des stades (gardée en repli) ; méga-évolutions comprises (`dexPrice`, `dex.js`) ; « Règles des PK et PA » montre une fourchette par catégorie (`legal.js`) ; le mode Admin peut toujours fixer un prix sur l'appareil.
+- **Temps pour tout débloquer** avec les seuls PA du jour (+10 à +30 PA par jour) : environ 506 jours en les récupérant chaque jour (≈ 16 mois et demi) ; environ 706 jours en manquant un jour par semaine ; environ 5 ans et demi en venant un jour sur deux.
+- **Tests** : `t-buddy`, `t-games`, `t-dexcards`, `t-dexpad`, `t-grades` aux nouveaux prix.
+
 ## 2026-11-01 (suite 9) — Boutique de PK en argent réel : proposition
 
 - **Demande du porteur** : « dans le PK shop, un magasin où on pourra acheter des PK avec de l'argent réel : propose-moi des tarifs et une interface ».

@@ -27,7 +27,7 @@
   const dexNo = e => '#' + String(e.mega ? e.from : e.n).padStart(3, '0') + (e.mega ? ' Méga' : '');
   const dexStage = n => { let k = 0, e = DEX[n]; while (e && !e.mega && e.from && k < 3) { k++; e = DEX[e.from]; } return k; };
   const dexOwn = (s, n) => (DEX[n] && DEX[n].mega ? (Array.isArray(s.megas) ? s.megas : []).indexOf(n) >= 0 : pkOwns(s, n));
-  const dexPrice = n => (DEX[n] && DEX[n].mega ? PA_MEGA : (PK_SHOP[n] || 0));
+  const dexPrice = n => (DEX[n] && DEX[n].mega ? (PK_SHOP[n] !== undefined ? PK_SHOP[n] : PA_PRICES[n] !== undefined ? PA_PRICES[n] : PA_MEGA) : (PK_SHOP[n] || 0));
   const dexStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return true; } };
   const dexSprite = (n, still) => 'img/pokemon/' + n + (still ? '.png' : '.gif');
   const dexNum = n => Number(n).toLocaleString('fr-FR');

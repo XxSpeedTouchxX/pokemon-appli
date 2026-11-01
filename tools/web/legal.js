@@ -77,6 +77,13 @@
   // face, délais selon le grade (ligne du grade actuel en avant), PA et Pokédex, PK shop, « pas un jeu d'argent ».
   // Chiffres lus dans les modules qui les appliquent (profile.js, games.js, pa.js, pkshop.js) : jamais recopiés.
   const legalNum = n => Number(n).toLocaleString('fr-FR');
+  const legalEvoRows = () => {
+    const cat = e => (e.mega ? 'Méga' : HOME_THEMES[e.n] ? 'Avec thème' : e.leg ? 'Légendaire' : ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution'][Math.min(pkStage(e.n), 2)]);
+    const rng = {};
+    DEX_DATA.forEach(e => { const p = dexPrice(e.n); if (!p) return; const k = cat(e); rng[k] = rng[k] ? [Math.min(rng[k][0], p), Math.max(rng[k][1], p)] : [p, p]; });
+    return ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution', 'Légendaire', 'Avec thème', 'Méga'].filter(k => rng[k])
+      .map(k => ({ label: k, pa: (rng[k][0] === rng[k][1] ? legalNum(rng[k][0]) : legalNum(rng[k][0]) + ' à ' + legalNum(rng[k][1])) + ' PA' }));
+  };
   proto.vRules = function (s) {
     const t = this.tierOf ? this.tierOf() : { i: 0 }, gi = t.i || 0, streak = (() => { const n = paPending(s); return n ? n.streak : (Number(s.paStreak) || 0); })();
     const shopPerk = { ticket: 'Collectionneur', shopBooster: 'Dresseur Pokémon', deluxe: 'Grand maître mondial Pokémon' };
@@ -92,7 +99,8 @@
       grades: PF_GRADES.map((g, i) => ({ name: g.name, img: 'img/grades/grade-' + (i + 1) + '.svg', booster: g.boosterH + ' h', coin: g.coinH ? g.coinH + ' h' : '—', scans: legalNum(g.scans),
         cls: 'pkm-rules-row' + (i === gi ? ' pkm-rules-me' : ''), aria: g.name + (i === gi ? ', ton grade' : '') + ' : booster toutes les ' + g.boosterH + ' h, ' + (g.coinH ? 'pièce toutes les ' + g.coinH + ' h' : 'pièce fermée') + ', ' + g.scans + ' scans par jour' })),
       streak: [10, 15, 20, 25, 30].map((v, i) => ({ day: i === 4 ? 'J5 et +' : 'J' + (i + 1), pa: '+' + v, cls: 'pkm-rules-day' + (Math.min(streak, 5) === i + 1 ? ' pkm-rules-today' : '') + (i < Math.min(streak, 5) ? ' pkm-rules-done' : '') })),
-      evo: [['Forme de base', 100], ['1ʳᵉ évolution', 500], ['2ᵉ évolution', 1500], ['Légendaire', 2000], ['Avec thème', 3000], ['Méga', PA_MEGA]].map(([l, v]) => ({ label: l, pa: legalNum(v) + ' PA' })),
+      // Prix fixés Pokémon par Pokémon par le porteur (2026-11-01, PA_PRICES) : fourchette par catégorie, lue dans les prix.
+      evo: legalEvoRows(),
       shop: SHOP_ITEMS.map(x => ({ name: x.name, price: x.soon ? 'Bientôt' : legalNum(x.price) + ' PK', grade: x.perk ? 'Dès le grade ' + shopPerk[x.perk] : '', img: x.img || 'img/brand/pk.svg' })),
       free: [['0 €', 'de mise'], ['0 €', 'à gagner en argent'], ['0', 'achat possible']].map(([a, b]) => ({ big: a, label: b }))
     };

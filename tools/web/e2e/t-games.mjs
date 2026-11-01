@@ -37,26 +37,26 @@ ok('Pokédex : Carapuce choisi, débloqué et devenu le compagnon', st.evo && st
 // Route d'évolution de la famille : Carapuce, Carabaffe, Tortank, puis Méga-Tortank au bout de la ligne.
 const route = evo.locator('[aria-label="Route d’évolution"]'), act = evo.locator('section[aria-label="Fiche du Pokémon"] button.pkm-dex-act-btn');
 const nodes = await route.locator('button').evaluateAll(b => b.map(x => x.getAttribute('aria-label')));
-ok('Pokédex : route de la famille avec la méga au bout (' + nodes.join(' · ') + ')', nodes.length === 4 && /^Carapuce, /.test(nodes[0]) && /^Carabaffe, 1ʳᵉ évolution, 500 PA$/.test(nodes[1]) && /^Tortank, 2ᵉ évolution, 1[\s\u202f\u00a0]500 PA$/.test(nodes[2]) && /méga-évolution, 2[\s\u202f\u00a0]500 PA$/.test(nodes[3]));
+ok('Pokédex : route de la famille avec la méga au bout (' + nodes.join(' · ') + ')', nodes.length === 4 && /^Carapuce, /.test(nodes[0]) && /^Carabaffe, 1ʳᵉ évolution, 50 PA$/.test(nodes[1]) && /^Tortank, 2ᵉ évolution, 200 PA$/.test(nodes[2]) && /méga-évolution, 500 PA$/.test(nodes[3]));
 ok('Pokédex : Carabaffe, Tortank et la méga en silhouette (verrouillés)', (await route.locator('.pkm-dex-lock').count()) === 3);
 ok('Pokédex : fiche de Carapuce sans « C’est ton compagnon » (retiré le 2026-10-31)', (await act.count()) === 0);
 ok('Pokédex : anciens boutons et listes retirés', (await evo.locator('[aria-label="Actions du Pokédex"], [aria-label="Lignée de ton Pokémon"], [role="group"][aria-label="Méga-évolutions"]').count()) === 0);
 await route.locator('button[aria-label^="Tortank,"]').click(); await page.waitForTimeout(300);
 ok('Pokédex : Tortank demande d’abord Carabaffe', /^Débloque d’abord Carabaffe$/.test((await act.innerText()).trim()));
 await route.locator('button[aria-label^="Carabaffe,"]').click(); await page.waitForTimeout(300);
-ok('Pokédex : bouton bloqué sans assez de PA (' + (await act.innerText()).trim() + ')', /^Encore 500 PA pour le débloquer$/.test((await act.innerText()).trim()) && (await act.getAttribute('aria-disabled')) === 'true');
+ok('Pokédex : bouton bloqué sans assez de PA (' + (await act.innerText()).trim() + ')', /^Encore 50 PA pour le débloquer$/.test((await act.innerText()).trim()) && (await act.getAttribute('aria-disabled')) === 'true');
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pa = 520; localStorage.setItem(k, JSON.stringify(d)); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200); await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(600);
 await route.locator('button[aria-label^="Carabaffe,"]').click(); await page.waitForTimeout(300);
-ok('Pokédex : « Faire évoluer · 500 PA » sur Carabaffe', /^Faire évoluer · 500 PA$/.test((await act.innerText()).trim()));
+ok('Pokédex : « Faire évoluer · 50 PA » sur Carabaffe', /^Faire évoluer · 50 PA$/.test((await act.innerText()).trim()));
 await act.click(); await page.waitForTimeout(7500); // évolution de 7,2 s (2026-10-31)
 const st2 = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy, pa: d.pa, own: d.pkOwn }; });
-ok('Pokédex : Carabaffe pour 500 PA (' + st2.pa + ' PA restants), nouveau compagnon', st2.evo.stage === 1 && st2.buddy === 8 && st2.pa === 20 && st2.own.indexOf(8) >= 0 && (await route.locator('.pkm-dex-lock').count()) === 2);
-ok('Pokédex : Carabaffe sans bouton (compagnon), Tortank à 1 500 PA', (await act.count()) === 0 && /^Tortank, 2ᵉ évolution, 1[\s\u202f\u00a0]500 PA$/.test(await route.locator('button[aria-label^="Tortank,"]').getAttribute('aria-label')));
+ok('Pokédex : Carabaffe pour 50 PA (' + st2.pa + ' PA restants), nouveau compagnon', st2.evo.stage === 1 && st2.buddy === 8 && st2.pa === 470 && st2.own.indexOf(8) >= 0 && (await route.locator('.pkm-dex-lock').count()) === 2);
+ok('Pokédex : Carabaffe sans bouton (compagnon), Tortank à 200 PA', (await act.count()) === 0 && /^Tortank, 2ᵉ évolution, 200 PA$/.test(await route.locator('button[aria-label^="Tortank,"]').getAttribute('aria-label')));
 await evo.screenshot({ path: shot('games-evolution.png') });
 // PA dans l'en-tête, à la place des tickets ; PA du jour à récupérer (pastille « 1 » (« ! » jusqu’au 2026-10-29)), plus crédités à l'ouverture.
 const paPill = page.locator('header button[aria-label^="Mes points d’Aura"]').first();
-ok('en-tête : PA sous le solde de PK', /20\s*PA/.test(await paPill.innerText()));
+ok('en-tête : PA sous le solde de PK', /470\s*PA/.test(await paPill.innerText()));
 ok('en-tête : PA du jour à récupérer (« 1 »)', (await paPill.locator('.pkm-pa-dot').count()) === 1 && /PA à récupérer/.test(await paPill.getAttribute('aria-label')));
 // PK shop (2026-10-12) : 4ᵉ onglet, ticket du tirage au sort.
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);

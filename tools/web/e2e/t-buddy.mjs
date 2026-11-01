@@ -42,13 +42,13 @@ await page.screenshot({ path: shot('buddy-pokedex.png') });
 // 2. Route d'évolution de la famille, méga-évolution au bout ; fiche à un seul bouton.
 const nodes = page.locator('div[aria-label="Route d’évolution"] button');
 const nodeAria = await nodes.evaluateAll(b => b.map(x => x.getAttribute('aria-label')));
-ok('route de Bulbizarre : ' + nodeAria.join(' ; '), nodeAria.length === 4 && /^Bulbizarre, Forme de base, Compagnon$/.test(nodeAria[0]) && /^Herbizarre, 1ʳᵉ évolution, 500 PA$/.test(nodeAria[1]) && /^Florizarre, 2ᵉ évolution, 1\s500 PA$/.test(nodeAria[2]) && /^Méga-Florizarre, méga-évolution, 2\s500 PA$/.test(nodeAria[3]));
+ok('route de Bulbizarre : ' + nodeAria.join(' ; '), nodeAria.length === 4 && /^Bulbizarre, Forme de base, Compagnon$/.test(nodeAria[0]) && /^Herbizarre, 1ʳᵉ évolution, 50 PA$/.test(nodeAria[1]) && /^Florizarre, 2ᵉ évolution, 200 PA$/.test(nodeAria[2]) && /^Méga-Florizarre, méga-évolution, 500 PA$/.test(nodeAria[3]));
 ok('formes verrouillées en silhouette', (await page.locator('div[aria-label="Route d’évolution"] button.pkm-dex-lock').count()) === 3);
 const act = page.locator('section[aria-label="Fiche du Pokémon"] .pkm-dex-act-btn');
 ok('fiche du compagnon : plus de « C’est ton compagnon » en bas (2026-10-31)', (await act.count()) === 0);
 ok('anciens boutons retirés (hexagones, grille des méga, lignée)', (await page.locator('div[role="group"][aria-label="Méga-évolutions"]').count()) === 0 && (await page.locator('text=Lignée de ton Pokémon').count()) === 0);
 await nodes.nth(1).click(); await page.waitForTimeout(300);
-ok('Herbizarre sans PA : « ' + await act.innerText() + ' »', /^Encore 500 PA pour le débloquer$/.test(await act.innerText()) && (await act.getAttribute('aria-disabled')) === 'true');
+ok('Herbizarre sans PA : « ' + await act.innerText() + ' »', /^Encore 50 PA pour le débloquer$/.test(await act.innerText()) && (await act.getAttribute('aria-disabled')) === 'true');
 await nodes.nth(2).click(); await page.waitForTimeout(300);
 ok('Florizarre : « ' + await act.innerText() + ' »', (await act.innerText()) === 'Débloque d’abord Herbizarre');
 
@@ -62,7 +62,7 @@ ok('3 Pokémon par ligne', cols === 3);
 const sheetBg = await list.evaluate(e => getComputedStyle(e).backgroundColor);
 ok('panneau opaque (rien de l’accueil derrière) : ' + sheetBg, /^rgb\(/.test(sheetBg));
 ok('compagnon marqué dans la liste', /^Bulbizarre, n° 1, débloqué$/.test(await tiles.first().getAttribute('aria-label')) && /Compagnon/.test(await tiles.first().innerText()));
-ok('prix en PA : ' + await tiles.nth(1).getAttribute('aria-label'), (await tiles.nth(1).getAttribute('aria-label')) === 'Herbizarre, n° 2, à débloquer pour 500 PA');
+ok('prix en PA : ' + await tiles.nth(1).getAttribute('aria-label'), (await tiles.nth(1).getAttribute('aria-label')) === 'Herbizarre, n° 2, à débloquer pour 50 PA');
 const icons = await list.locator('img[src^="img/pokemon/icon"]').evaluateAll(is => is.slice(0, 9).map(i => [i.getAttribute('src'), i.complete && i.naturalWidth, Math.round(i.getBoundingClientRect().width), getComputedStyle(i).imageRendering]));
 ok('icônes jamais agrandies (96 px d’origine, affichées ≤ 96 px, pixels nets) : ' + icons.slice(0, 3).map(i => i.join(' ')).join(' ; '), icons.length === 9 && icons.every(([src, nw, w, r]) => /^img\/pokemon\/icon\/\d+\.png$/.test(src) && nw === 96 && w > 0 && w <= 96 && r === 'pixelated'));
 // Taille d'origine : la partie visible de Bulbizarre (petit) reste plus petite que celle de Florizarre (grand).
@@ -91,7 +91,7 @@ await search('');
 // Filtres : 4 offerts + Kyogre, Groudon, Rayquaza débloqués.
 const filt = async l => { await list.locator('[aria-label="Filtrer le Pokédex"] button', { hasText: l }).first().click(); await page.waitForTimeout(300); return tiles.count(); };
 const fOwn = await filt('Débloqués'), fLock = await filt('À débloquer'), fLeg = await filt('Légendaires'), fAll = await filt('Tous');
-ok('filtres : ' + fOwn + ' débloqués, ' + fLock + ' à débloquer, ' + fLeg + ' légendaires, ' + fAll + ' en tout', fOwn === 7 && fLock === 149 && fLeg >= 5 && fAll === 156);
+ok('filtres : ' + fOwn + ' débloqués, ' + fLock + ' à débloquer, ' + fLeg + ' légendaires, ' + fAll + ' en tout', fOwn === 8 && fLock === 148 && fLeg >= 5 && fAll === 156);
 
 // 4. Choisir un compagnon déjà débloqué (Groudon, thème).
 await search('groudon');
@@ -102,26 +102,26 @@ ok('fiche : « ' + await act.innerText() + ' »', (await act.innerText()) === 'C
 await act.click(); await page.waitForTimeout(500);
 ok('Groudon choisi : toast, bouton retiré', (await page.locator('text=Groudon t’accompagne').count()) === 1 && (await act.count()) === 0 && (await saved()).buddy === 383);
 
-// 5. Débloquer avec des PA : forme de base (Chenipan, 100 PA), puis évolution animée (Herbizarre, 500 PA).
+// 5. Débloquer avec des PA : forme de base (Chenipan, 15 PA), puis évolution animée (Herbizarre, 50 PA ; prix du 2026-11-01).
 await seed({ pa: 650, buddy: 1, paDay: '2026-10-04', paStreak: 1 }); await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(800);
 await page.click('.pkm-dex-all'); await page.waitForTimeout(400);
 await search('chenipan'); await tiles.first().click(); await page.waitForTimeout(600);
-ok('Chenipan : « ' + await act.innerText() + ' »', (await act.innerText()) === 'Débloquer · 100 PA');
+ok('Chenipan : « ' + await act.innerText() + ' »', (await act.innerText()) === 'Débloquer · 15 PA');
 await act.click(); await page.waitForTimeout(600);
 let st = await saved();
-ok('Chenipan débloqué : 550 PA, compagnon, toast', st.pa === 550 && st.buddy === 10 && (st.pkOwn || []).indexOf(10) >= 0 && (await page.locator('text=Chenipan rejoint ton Pokédex · il te reste 550 PA').count()) === 1);
+ok('Chenipan débloqué : 635 PA, compagnon, toast', st.pa === 635 && st.buddy === 10 && (st.pkOwn || []).indexOf(10) >= 0 && (await page.locator('text=Chenipan rejoint ton Pokédex · il te reste 635 PA').count()) === 1);
 await page.waitForTimeout(3100);
 await page.click('.pkm-dex-all'); await page.waitForTimeout(400);
 await search('herbi'); await tiles.first().click(); await page.waitForTimeout(600);
-ok('Herbizarre : « ' + await act.innerText() + ' »', (await act.innerText()) === 'Faire évoluer · 500 PA');
+ok('Herbizarre : « ' + await act.innerText() + ' »', (await act.innerText()) === 'Faire évoluer · 50 PA');
 await act.click(); await page.waitForTimeout(500);
 ok('animation d’évolution : « ' + (await page.locator('.pkm-evo-fx').innerText().catch(() => '')) + ' »', (await page.locator('.pkm-evo-fx').count()) === 1 && /Bulbizarre évolue/.test(await page.locator('.pkm-evo-fx').innerText()));
 await page.screenshot({ path: shot('buddy-evolution.png') });
 await page.waitForTimeout(7300); // évolution de 7,2 s (2026-10-31)
 st = await saved();
-ok('Herbizarre débloqué : 50 PA, compagnon, toast', st.pa === 50 && st.buddy === 2 && (st.pkOwn || []).indexOf(2) >= 0 && (await page.locator('.pkm-evo-fx').count()) === 0 && (await page.locator('text=Félicitations ! Bulbizarre a évolué en Herbizarre · il te reste 50 PA').count()) === 1);
-ok('route mise à jour : ' + await nodes.nth(1).getAttribute('aria-label'), /^Herbizarre, 1ʳᵉ évolution, Compagnon$/.test(await nodes.nth(1).getAttribute('aria-label')) && /^Encore 1\s450 PA pour le débloquer$/.test(await (async () => { await nodes.nth(2).click(); await page.waitForTimeout(300); return act.innerText(); })()));
+ok('Herbizarre débloqué : 585 PA, compagnon, toast', st.pa === 585 && st.buddy === 2 && (st.pkOwn || []).indexOf(2) >= 0 && (await page.locator('.pkm-evo-fx').count()) === 0 && (await page.locator('text=Félicitations ! Bulbizarre a évolué en Herbizarre · il te reste 585 PA').count()) === 1);
+ok('route mise à jour : ' + await nodes.nth(1).getAttribute('aria-label'), /^Herbizarre, 1ʳᵉ évolution, Compagnon$/.test(await nodes.nth(1).getAttribute('aria-label')) && /^Faire évoluer · 200 PA$/.test(await (async () => { await nodes.nth(2).click(); await page.waitForTimeout(300); return act.innerText(); })()));
 
 // 6. Retour à l'accueil : sprite changé ; choix gardé après rechargement.
 await page.click('nav button[aria-label="Accueil"]'); await page.waitForTimeout(900);
