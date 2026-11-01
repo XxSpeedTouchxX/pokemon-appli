@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-01 (suite 22) — Jeux : titres « Booster PK » et « Pile ou face » dans la police du Pokédex
+
+- **Demande du porteur** : même police que « Pokédex ».
+- **Fait** (cache v128) : Luckiest Guy jaune à contour sombre, 26 px, comme le titre du Pokédex (`.pkm-gm-title`, `games.css`). Tests : `t-games`, `t-contrast`.
+
 ## 2026-11-01 (suite 21) — Pokédex : barres de « Par stade et par type » alignées
 
 - **Demande du porteur** : les 5 barres de progression n'étaient pas alignées (« 0 / 56 » plus large que « 4 / 74 », etc.).
