@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-11-01 (suite 13) — Passage de grade après l'évolution, sons de grade plus épiques
+
+- **Demandes du porteur** :
+  - « quand je passe de grade grâce à une évolution, je veux que l'évolution se termine et ensuite on passe au nouveau grade » : jusqu'ici, les deux animations se jouaient en même temps ;
+  - « propose-moi des sons pour le changement de grade, je veux des sons plus épiques ».
+- **Fait** (cache v116) :
+  - **le grade attend** (`profile.js`) : tant qu'une évolution (7,2 s) ou l'animation de déblocage d'un Pokémon (3 s) est à l'écran, le passage de grade reste en attente ; il se lance 0,9 s après, le temps de voir le nouveau Pokémon et son message ; le grade « vu » n'est enregistré qu'à ce moment (si l'app est fermée avant, l'animation viendra plus tard) ;
+  - l'emblème sur l'avatar (en-tête) garde aussi l'ancien grade jusqu'au passage de grade ;
+  - **6 sons de grade à écouter** (`sfx.js`, Web Audio, motifs originaux, calés sur l'animation : charge, éclatement à 2,35 s, nouvel emblème à 2,5 s) :
+    1. Son d'origine (celui d'aujourd'hui) ;
+    2. Couronnement royal : roulement de timbales, cordes, cymbale, fanfare de cuivres et chœur ;
+    3. Ascension céleste : chœur qui s'élève, grande cloche, harpe, accord lumineux ;
+    4. Impact de bande-annonce : tension de film, énorme impact grave, cuivres héroïques ;
+    5. Victoire arcade épique : arpèges 8 bits, explosion rétro, fanfare de jeu vidéo ;
+    6. Tonnerre et gloire : orage et battements de cœur, tonnerre et gong, cuivres, cordes et chœur.
+  - **choix du porteur attendu** : le son d'origine reste joué en attendant ; `?songrade=1` à `6` pour essayer un son dans l'app (`?songrade=0` : aucun son).
+- **Tests** : `t-gradewait` (pas de passage de grade pendant l'évolution ni pendant le déblocage, puis le passage de grade ; 6 sons rendus sans saturation ; `?songrade=`).
+
 ## 2026-11-01 (suite 12) — Prix des Pokémon avec le logo des PA, boutique de PA qui brille
 
 - **Demandes du porteur** :

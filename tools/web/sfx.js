@@ -410,6 +410,122 @@
         sfxSparkle(ac, out, end + 0.1, end + 1.1, 6, 0.025, 3000);
       } }
   ];
+  // ——— Passage de grade (profile.js, pfGradeShow ; animation pkmGu*, games.css) ———
+  // 2026-11-01, porteur : « propose-moi des sons pour le changement de grade, je veux des sons plus épiques ».
+  // Calés sur l'animation : l'ancien emblème se charge (0 à 2,35 s), éclate (2,35 s, éclair blanc), le nouvel emblème
+  // surgit (2,5 s), puis « Nouveau grade » et son nom (3,05 à 3,5 s), et l'emblème brille en boucle (3,9 s).
+  // 6 propositions : le son d'origine (2026-10-22) et 5 plus épiques ; ?songrade=1 à 6 pour en essayer un.
+  const SFX_GU_HIT = 2.35, SFX_GU_NEW = 2.5, SFX_GU_NAME = 3.05;
+  // Montée filtrée (dent de scie qui s'ouvre et enfle jusqu'à at + dur, puis s'arrête net).
+  function sfxRiser(ac, out, f0, f1, at, dur, vol, fc0, fc1) {
+    const o = ac.createOscillator(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(f0, at); o.frequency.exponentialRampToValueAtTime(f1, at + dur);
+    fl.type = 'lowpass'; fl.Q.value = 2; fl.frequency.setValueAtTime(fc0 || 300, at); fl.frequency.exponentialRampToValueAtTime(fc1 || 4000, at + dur);
+    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + dur - 0.02); g.gain.exponentialRampToValueAtTime(0.0001, at + dur + 0.06);
+    o.connect(fl); fl.connect(g); g.connect(out); o.start(at); o.stop(at + dur + 0.1);
+  }
+  // Roulement de timbale qui accélère et enfle de from à to.
+  function sfxRoll(ac, out, from, to, f, vol) {
+    let t = from, i = 0;
+    while (t < to) { const u = (t - from) / (to - from); sfxThump(ac, out, t, vol * (0.25 + 0.75 * u * u), f * 1.4, f * 0.8, 0.18); t += 0.22 - 0.18 * u; i++; }
+    return i;
+  }
+  // Grand impact : coup très grave, souffle qui retombe, cymbale.
+  function sfxImpact(ac, out, at, vol) {
+    sfxThump(ac, out, at, vol, 90, 28, 1.1);
+    sfxHiss(ac, out, at, 0.9, vol * 0.55, 'lowpass', 7000, 250, 0.7, 0.002);
+    sfxCymbal(ac, out, at, vol * 0.22);
+  }
+  // Gong : partiels graves non harmoniques, longue résonance.
+  const sfxGong = (ac, out, f, at, dur, vol) => sfxBell(ac, out, f, at, dur, vol, [1, 1.48, 2.0, 2.67, 3.52, 4.6], [1, 0.7, 0.5, 0.35, 0.22, 0.12]);
+  const SFX_GRADE = [
+    { id: 'origine', name: 'Son d’origine', desc: 'Le son actuel : une charge qui monte, un souffle à l’éclatement, puis un petit accord et des scintillements.',
+      play: (ac, out, t0) => {
+        sfxRiser(ac, out, 110, 440, t0, 2.3, 0.18, 400, 3200); sfxRiser(ac, out, 165, 660, t0, 2.3, 0.12, 400, 3200);
+        sfxHiss(ac, out, t0 + SFX_GU_HIT, 0.6, 0.7, 'lowpass', 6000, 300, 0.7, 0.002);
+        sfxThump(ac, out, t0 + SFX_GU_HIT, 0.9, 120, 45, 0.5);
+        [[3, 0], [7, 0.09], [10, 0.18], [15, 0.27]].forEach(([k, dt]) => { sfxTone(ac, out, 'triangle', sfxHz(k), t0 + 2.55 + dt, 1.6 - dt, 0.22, 0.04); sfxTone(ac, out, 'sine', sfxHz(k + 12), t0 + 2.55 + dt, 0.9 - dt / 2, 0.06, 0.03); });
+        [2093, 2637, 3136, 2349, 2794].forEach((f, i) => sfxTone(ac, out, 'sine', f, t0 + 3.3 + i * 0.11, 0.35, 0.05, 0.02));
+      } },
+    { id: 'couronnement', name: 'Couronnement royal', desc: 'Roulement de timbales et cordes en trémolo qui montent, coup de cymbale à l’éclatement, puis une fanfare de cuivres et un chœur, comme un sacre.',
+      play: (ac, out, t0) => {
+        sfxRoll(ac, out, t0, t0 + SFX_GU_HIT - 0.04, 70, 0.55);
+        sfxStrings(ac, out, [-21, -14, -9], t0, SFX_GU_HIT + 0.05, 0.05, 2.2, 13);
+        sfxRiser(ac, out, 147, 587, t0 + 0.6, 1.75, 0.07, 500, 5000);
+        sfxImpact(ac, out, t0 + SFX_GU_HIT, 0.9);
+        // Fanfare (motif original) : deux appels brefs, puis l'accord de ré majeur tenu, basse et chœur.
+        [[0, 0.16, [-7, 0]], [0.2, 0.16, [-7, 0]], [0.42, 2.4, [-7, -3, 0, 5, 9]]].forEach(([d, l, ch]) => {
+          ch.forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_GU_NEW + d, l, 0.055));
+          sfxThump(ac, out, t0 + SFX_GU_NEW + d, 0.5, 98, 50, 0.3);
+        });
+        sfxBrass(ac, out, sfxHz(-19), t0 + SFX_GU_NEW + 0.42, 2.4, 0.07);
+        sfxChoir(ac, out, [-7, -3, 0, 5], t0 + SFX_GU_NEW + 0.42, 2.8, 0.035, 0.3);
+        sfxCymbal(ac, out, t0 + SFX_GU_NEW + 0.42, 0.12);
+        sfxSparkle(ac, out, t0 + 3.2, t0 + 4.6, 9, 0.03, 2600);
+      } },
+    { id: 'celeste', name: 'Ascension céleste', desc: 'Un chœur qui s’élève et des clochettes qui accélèrent, un grand coup de cloche à l’éclatement, puis une harpe qui monte vers un accord lumineux.',
+      play: (ac, out, t0) => {
+        sfxChoir(ac, out, [-12, -5, 0], t0, SFX_GU_HIT + 0.05, 0.05, 2.0);
+        [0, 7, 12].forEach((k, i) => sfxRiser(ac, out, sfxHz(k - 24), sfxHz(k - 12), t0 + 0.3 + i * 0.15, 2.0 - i * 0.15, 0.03, 600, 6000));
+        for (let i = 0, t = 0.2; t < SFX_GU_HIT - 0.05; i++) { sfxBell(ac, out, sfxHz(15 + (i % 4) * 3), t0 + t, 0.3, 0.02 + 0.02 * t / SFX_GU_HIT, [1, 2.0], [1, 0.3]); t += 0.3 - 0.24 * t / SFX_GU_HIT; }
+        sfxHiss(ac, out, t0 + SFX_GU_HIT - 0.6, 0.62, 0.08, 'highpass', 1500, 9000, 0.7, 0.55);
+        sfxThump(ac, out, t0 + SFX_GU_HIT, 0.85, 80, 30, 1.0);
+        sfxBell(ac, out, sfxHz(-9), t0 + SFX_GU_HIT, 3.6, 0.22, [1, 2.0, 3.0, 4.2, 5.4], [1, 0.6, 0.4, 0.22, 0.12]);
+        sfxHiss(ac, out, t0 + SFX_GU_HIT, 0.7, 0.35, 'lowpass', 8000, 400, 0.7, 0.002);
+        [3, 7, 10, 15, 19, 22, 27, 31].forEach((k, i) => sfxPluck(ac, out, sfxHz(k), t0 + SFX_GU_NEW + i * 0.06, 1.2, 0.07));
+        sfxChoir(ac, out, [-9, -5, -2, 3], t0 + SFX_GU_NEW + 0.3, 3.0, 0.04, 0.35);
+        sfxPad(ac, out, [-21, -9, -2, 7], t0 + SFX_GU_NEW + 0.3, 3.0, 0.03, 0.3);
+        sfxSparkle(ac, out, t0 + 3.0, t0 + 4.8, 12, 0.03, 3000);
+      } },
+    { id: 'trailer', name: 'Impact de bande-annonce', desc: 'Une tension de film qui monte en sifflant avec des tic-tac de plus en plus rapides, un silence, un énorme impact grave, puis des cuivres héroïques.',
+      play: (ac, out, t0) => {
+        sfxHiss(ac, out, t0, SFX_GU_HIT - 0.12, 0.16, 'bandpass', 200, 7000, 3, SFX_GU_HIT - 0.2);
+        sfxRiser(ac, out, 55, 440, t0, SFX_GU_HIT - 0.12, 0.12, 200, 6000);
+        sfxRiser(ac, out, 82, 660, t0 + 0.4, SFX_GU_HIT - 0.52, 0.07, 200, 6000);
+        for (let t = 0.1; t < SFX_GU_HIT - 0.15;) { const u = t / SFX_GU_HIT; sfxHiss(ac, out, t0 + t, 0.025, 0.05 + 0.15 * u, 'highpass', 3500, 0, 1, 0.001); sfxThump(ac, out, t0 + t, 0.08 + 0.3 * u, 60, 40, 0.1); t += 0.3 - 0.25 * u; }
+        sfxImpact(ac, out, t0 + SFX_GU_HIT, 1);
+        sfxThump(ac, out, t0 + SFX_GU_HIT + 0.02, 0.6, 50, 22, 1.6);
+        // « Braam » : grappe de cuivres graves qui gronde, puis l'appel héroïque (motif original) qui monte.
+        [-33, -26, -21, -14].forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_GU_HIT, 2.0, 0.06));
+        [[-2, 0, 0.14], [3, 0.16, 0.14], [5, 0.32, 0.14], [10, 0.5, 1.8]].forEach(([k, d, l]) => { sfxBrass(ac, out, sfxHz(k), t0 + SFX_GU_NAME - 0.1 + d, l, 0.06); sfxBrass(ac, out, sfxHz(k - 12), t0 + SFX_GU_NAME - 0.1 + d, l, 0.04); });
+        sfxStrings(ac, out, [-14, -2, 2, 5], t0 + SFX_GU_NAME + 0.4, 2.0, 0.035, 0.3);
+        sfxThump(ac, out, t0 + SFX_GU_NAME + 0.4, 0.6, 90, 40, 0.5);
+        sfxCymbal(ac, out, t0 + SFX_GU_NAME + 0.4, 0.15);
+      } },
+    { id: 'arcade', name: 'Victoire arcade épique', desc: 'Des arpèges 8 bits qui montent de plus en plus vite, une explosion rétro, puis une fanfare de jeu vidéo avec basse et batterie.',
+      play: (ac, out, t0) => {
+        const arp = [0, 4, 7, 12];
+        for (let i = 0, t = 0; t < SFX_GU_HIT - 0.05; i++) { const u = t / SFX_GU_HIT; sfxTone(ac, out, 'square', sfxHz(-12 + Math.floor(u * 18) + arp[i % 4]), t0 + t, 0.05, 0.02 + 0.025 * u, 0.002); t += 0.11 - 0.07 * u; }
+        sfxRiser(ac, out, sfxHz(-36), sfxHz(-24), t0, SFX_GU_HIT - 0.05, 0.08, 200, 1200);
+        for (let i = 0; i < 6; i++) sfxHiss(ac, out, t0 + SFX_GU_HIT + i * 0.07, 0.09, 0.5 - i * 0.07, 'lowpass', 3000 - i * 400, 300, 0.7, 0.002);
+        sfxTone(ac, out, 'square', 220, t0 + SFX_GU_HIT, 0.5, 0.06, 0.002, 40);
+        // Fanfare 8 bits (motif original) : mélodie en carré, basse en triangle, caisse claire en souffle.
+        const mel = [[7, 0, 0.12], [7, 0.13, 0.12], [7, 0.26, 0.12], [12, 0.39, 0.35], [10, 0.78, 0.12], [12, 0.91, 0.12], [16, 1.04, 0.12], [19, 1.17, 1.0]];
+        mel.forEach(([k, d, l]) => { sfxTone(ac, out, 'square', sfxHz(k), t0 + SFX_GU_NEW + d, l, 0.05, 0.003); sfxTone(ac, out, 'square', sfxHz(k - 5), t0 + SFX_GU_NEW + d, l, 0.025, 0.003); });
+        [[-24, 0], [-24, 0.39], [-26, 0.78], [-17, 1.17]].forEach(([k, d], i) => sfxTone(ac, out, 'triangle', sfxHz(k), t0 + SFX_GU_NEW + d, i === 3 ? 1.0 : 0.36, 0.2, 0.003));
+        [0, 0.39, 0.78, 1.04, 1.17].forEach(d => sfxHiss(ac, out, t0 + SFX_GU_NEW + d, 0.08, 0.12, 'highpass', 2000, 0, 0.8, 0.001));
+        for (let i = 0; i < 12; i++) sfxTone(ac, out, 'square', sfxHz(19 + [0, 4, 7, 12][i % 4]), t0 + SFX_GU_NEW + 1.2 + i * 0.06, 0.05, 0.015, 0.002);
+      } },
+    { id: 'tonnerre', name: 'Tonnerre et gloire', desc: 'Un orage qui gronde et un cœur qui bat de plus en plus vite, un coup de tonnerre et de gong à l’éclatement, puis cuivres, cordes et chœur ensemble.',
+      play: (ac, out, t0) => {
+        sfxHiss(ac, out, t0, SFX_GU_HIT, 0.7, 'lowpass', 140, 320, 1, 1.4);
+        sfxHiss(ac, out, t0 + 0.9, 1.0, 0.35, 'lowpass', 300, 120, 0.8, 0.08);
+        for (let t = 0.15; t < SFX_GU_HIT - 0.1;) { const u = t / SFX_GU_HIT; sfxThump(ac, out, t0 + t, 0.25 + 0.4 * u, 75, 40, 0.16); sfxThump(ac, out, t0 + t + 0.14 - 0.06 * u, 0.15 + 0.3 * u, 70, 40, 0.14); t += 0.62 - 0.42 * u; }
+        sfxStrings(ac, out, [-22, -21], t0 + 0.5, SFX_GU_HIT - 0.45, 0.04, 1.6, 14);
+        // Éclair : craquement sec et aigu, puis le tonnerre qui roule.
+        sfxHiss(ac, out, t0 + SFX_GU_HIT, 0.12, 0.8, 'highpass', 2500, 0, 0.7, 0.001);
+        sfxHiss(ac, out, t0 + SFX_GU_HIT + 0.05, 1.6, 0.5, 'lowpass', 2500, 90, 0.8, 0.01);
+        sfxThump(ac, out, t0 + SFX_GU_HIT, 0.9, 80, 26, 1.3);
+        sfxGong(ac, out, 98, t0 + SFX_GU_HIT, 3.8, 0.14);
+        [-17, -10, -5, -1, 2].forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_GU_NEW + 0.1, 2.6, 0.05));
+        sfxStrings(ac, out, [-5, -1, 2, 7], t0 + SFX_GU_NEW + 0.1, 2.8, 0.03, 0.25);
+        sfxChoir(ac, out, [-5, -1, 2], t0 + SFX_GU_NEW + 0.3, 2.6, 0.035, 0.4);
+        [0, 0.25, 0.5].forEach(d => sfxThump(ac, out, t0 + SFX_GU_NEW + 0.1 + d, 0.55, 100, 50, 0.35));
+        sfxSparkle(ac, out, t0 + 3.4, t0 + 4.8, 8, 0.03, 2800);
+      } }
+  ];
+  // Pas encore de choix du porteur : le son d'origine reste joué ; ?songrade=1 à 6 (ou l'identifiant) pour essayer.
+  const SFX_GRADE_DEFAULT = 'origine';
   // Choix du porteur (2026-11-01, « pa-2-gouttes-d-aura, je prends celui-là ») : « Gouttes d'aura ». Les autres restent
   // pour essai seulement (?sonpa=1 à 5).
   const SFX_PA_DEFAULT = 'gouttes';
@@ -422,7 +538,9 @@
   const SFX_GAIN = { coin: 1, cristal: 1.23, energie: 1.07, retro: 3.2, cosmique: 1.03, harpe: 1.7, fanfare: 0.82, suspense: 1.23, chiptune: 1.84, boite: 1.82,
     cordes: 1.4, piano: 1.24, choeur: 2.75, orchestre: 0.87, nuit: 1.55,
     // PA du jour : crête vers −6 dBFS (petit son de récompense, plus bref que l'évolution).
-    'pa-cristaux': 3.1, 'pa-gouttes': 2.7, 'pa-bulles': 2.6, 'pa-arcade': 3.1, 'pa-aura': 2.6 };
+    'pa-cristaux': 3.1, 'pa-gouttes': 2.7, 'pa-bulles': 2.6, 'pa-arcade': 3.1, 'pa-aura': 2.6,
+    // Passage de grade : crête vers −3 dBFS (moment fort, plus présent que les autres sons).
+    'gr-origine': 0.55, 'gr-couronnement': 0.45, 'gr-celeste': 0.5, 'gr-trailer': 0.45, 'gr-arcade': 1.5, 'gr-tonnerre': 0.45 };
   const SFX_MUSIC_LEVEL = 0.75;
 
   // Choix en cours : celui du porteur ; ?sonevo= / ?musevo= (numéro dans la liste, identifiant, ou 0 pour aucun) pour un
@@ -455,9 +573,9 @@
   // Joue dans ac (temps réel ou hors ligne) : kind = 'coin', 'evo' ou 'music', id = identifiant de la liste.
   function sfxSchedule(ac, dest, kind, id, t0, n) {
     if (kind === 'coin') { sfxCoin(ac, sfxBus(ac, dest, SFX_GAIN.coin), t0); return true; }
-    const item = (kind === 'music' ? SFX_MUSIC : kind === 'pa' ? SFX_PA : SFX_EVO).find(x => x.id === id);
+    const item = (kind === 'music' ? SFX_MUSIC : kind === 'pa' ? SFX_PA : kind === 'grade' ? SFX_GRADE : SFX_EVO).find(x => x.id === id);
     if (!item) return false;
-    item.play(ac, sfxBus(ac, dest, (SFX_GAIN[kind === 'pa' ? 'pa-' + id : id] || 1) * (kind === 'music' ? SFX_MUSIC_LEVEL : 1)), t0, Math.max(1, Math.min(14, n || 12)));
+    item.play(ac, sfxBus(ac, dest, (SFX_GAIN[kind === 'pa' ? 'pa-' + id : kind === 'grade' ? 'gr-' + id : id] || 1) * (kind === 'music' ? SFX_MUSIC_LEVEL : 1)), t0, Math.max(1, Math.min(14, n || 12)));
     return true;
   }
   let sfxAc = null;
@@ -480,6 +598,14 @@
       if (sfxMuted()) return;
       const ac = sfxCtx(), x = sfxPick('sonpa', '', SFX_PA, SFX_PA_DEFAULT);
       if (ac && x) sfxSchedule(ac, ac.destination, 'pa', x.id, ac.currentTime + 0.02, n);
+    } catch (e) { /* son indisponible */ }
+  };
+  // Passage de grade (profile.js, pfGradeShow) : le son choisi, au début de l'animation.
+  sfxProto.sfxGrade = function () {
+    try {
+      if (sfxMuted()) return;
+      const ac = sfxCtx(), x = sfxPick('songrade', '', SFX_GRADE, SFX_GRADE_DEFAULT);
+      if (ac && x) sfxSchedule(ac, ac.destination, 'grade', x.id, ac.currentTime + 0.05);
     } catch (e) { /* son indisponible */ }
   };
   sfxProto.sfxEvo = function () {
@@ -510,4 +636,5 @@
     });
   };
   sfxProto.sfxLists = function () { return { evo: SFX_EVO.map(x => ({ id: x.id, name: x.name, desc: x.desc })), music: SFX_MUSIC.map(x => ({ id: x.id, name: x.name, desc: x.desc })), evoDef: SFX_EVO_DEFAULT, musicDef: SFX_MUSIC_DEFAULT,
-    pa: SFX_PA.map(x => ({ id: x.id, name: x.name, desc: x.desc })), paDef: SFX_PA_DEFAULT }; };
+    pa: SFX_PA.map(x => ({ id: x.id, name: x.name, desc: x.desc })), paDef: SFX_PA_DEFAULT,
+    grade: SFX_GRADE.map(x => ({ id: x.id, name: x.name, desc: x.desc })), gradeDef: SFX_GRADE_DEFAULT }; };
