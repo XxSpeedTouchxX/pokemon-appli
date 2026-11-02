@@ -1,20 +1,20 @@
 {
  "note": "Meilleurs comptes connus de stores.json (sync_stores.py) : boutiques au total et par région (code INSEE), éléments Overpass par tuile. Relevés seulement après une liste acceptée ; --reset-reference pour repartir à zéro.",
- "date": "2026-10-24",
- "total": 4241,
+ "date": "2026-11-02",
+ "total": 4257,
  "regions": {
   "11": 612,
   "24": 177,
   "27": 213,
-  "28": 243,
-  "32": 343,
+  "28": 244,
+  "32": 344,
   "44": 368,
   "52": 267,
   "53": 278,
-  "75": 458,
-  "76": 405,
-  "84": 522,
-  "93": 324,
+  "75": 459,
+  "76": 412,
+  "84": 523,
+  "93": 335,
   "94": 36
  },
  "tiles": {
@@ -22,7 +22,7 @@
   "41.3,2.2,44.6,9.7": 1093,
   "44.6,-5.3,47.9,2.2": 1279,
   "44.6,2.2,47.9,9.7": 2026,
-  "47.9,-5.3,51.2,2.2": 1587,
+  "47.9,-5.3,51.2,2.2": 1590,
   "47.9,2.2,51.2,9.7": 3223
  }
 }
