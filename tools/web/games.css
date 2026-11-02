@@ -773,8 +773,8 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 
 /* PK shop : rubriques « Magasin » et « Recharger mes PA » (2026-11-01, porteur ; maquette docs/20). */
 .pkm-shop-tabs { flex: none; display: flex; gap: 8px; }
-.pkm-shop-tab { flex: 1; min-height: 44px; border: 0; border-radius: 999px; background: rgba(11, 17, 32, 0.08); color: #0B1120; font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 700; cursor: pointer; }
-.pkm-shop-tab-on { background: #0B1120; color: #FFD60A; }
+.pkm-shop-tab { flex: 1; min-height: 44px; border: 0; border-radius: 999px; background: var(--pkm-off-bg); color: var(--pkm-t1); font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+.pkm-shop-tab-on { background: var(--pkm-chip-on-bg); color: var(--pkm-chip-on-fg); } /* variables : lisible en clair, en sombre et avec un compagnon à thème (2026-11-02) */
 .pkm-pas { flex: none; display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; background: #0F1828; color: #F3F6FC; }
 .pkm-pas-bal { display: flex; align-items: center; gap: 12px; }
 .pkm-pas-bal img { flex: none; display: block; }
@@ -839,3 +839,4 @@ html.pkm-calm .pkm-pas-drop, html.pkm-calm .pkm-pas-price { animation: none !imp
 /* Titres « Booster PK » et « Pile ou face » dans la police du titre « Pokédex » (2026-11-01, soir, porteur) :
    Luckiest Guy jaune à contour sombre, comme .pkm-dex-title h2 (dex.css). */
 .pkm-gm-title { margin: 0; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 26px; font-weight: 400; letter-spacing: 0.5px; color: #FFD60A; -webkit-text-stroke: 1.5px #3A0A0E; paint-order: stroke fill; text-shadow: 0 3px 0 #3A0A0E; }
+.pkm-shop-tk { margin: 0; display: flex; } .pkm-shop-tk .pkm-tk-bar { margin-top: 0; height: 28px; font-size: 13px; } /* tickets du PK shop, sans le solde (2026-11-02) */

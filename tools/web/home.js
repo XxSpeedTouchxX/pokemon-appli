@@ -360,9 +360,14 @@
   const HOME_NO_BUDDY = { picking: false, list: [] };
   // Thème du compagnon (2026-10-07) : Kyogre (océan), Groudon (volcan) et Rayquaza (ouragan) changent le fond de
   // l'app : classe pkm-theme-… sur <html> (variables dans theme.mjs) et couleur de la barre du navigateur.
-  let homeTheme = null;
-  const homeApplyTheme = n => {
-    const t = HOME_THEMES[n] || null, key = t ? t.key : '', html = document.documentElement;
+  // Mode sombre (Réglages › Apparence, 2026-11-02) : sans compagnon à thème, fond « nuit » (HOME_NIGHT) ; un
+  // compagnon à thème garde son fond, déjà sombre. ?look=dark ou ?look=light force le mode (essais, tests).
+  // Classe déjà posée avant le premier affichage (script du <head>, build.mjs) : reprise ici pour pouvoir la retirer.
+  let homeTheme = ([...document.documentElement.classList].find(c => c.indexOf('pkm-theme-') === 0) || '').slice(10) || null;
+  const homeLookQ = (location.search.match(/[?&]look=(dark|light)(&|$)/) || [])[1] || '';
+  const homeLook = s => homeLookQ || (s.look === 'dark' ? 'dark' : 'light');
+  const homeApplyTheme = (n, look) => {
+    const t = HOME_THEMES[n] || (look === 'dark' ? HOME_NIGHT : null), key = t ? t.key : '', html = document.documentElement;
     if (key === homeTheme) return;
     if (homeTheme) html.classList.remove('pkm-theme-' + homeTheme);
     if (key) html.classList.add('pkm-theme-' + key);
@@ -373,7 +378,7 @@
   const homeBaseRender = proto.renderVals;
   proto.renderVals = function () {
     const r = homeBaseRender.call(this), s = this.st();
-    homeApplyTheme(s.buddy);
+    homeApplyTheme(s.buddy, homeLook(s));
     r.hb = r.ui.isHome ? this.homeBuddy(s) : HOME_NO_BUDDY;
     if (r.ui.isHome && r.home && r.home.hv) this.homeTrendFx(r.home.hv);
     // Écran « Tout afficher » du classeur (accueil seulement).

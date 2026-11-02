@@ -111,6 +111,8 @@ De haut en bas (`tools/web/home.js`, calculs purs dans `tools/web/home-core.js`,
 ## Fonds animés et micro-animations
 
 - **Fonds animés** (`tools/web/fx.css`, `tools/web/fx.js`, 2026-10-09, K2) : calque décoratif derrière l'app, en CSS seulement. Accueil : reflet holo et étincelles ; Marché et fiches : gemmes qui montent ; Territoire : ondes radar ; Kyogre : bulles ; Groudon : braises ; Rayquaza : pluie et éclairs. Scan : aucun décor.
+- **Réglages › Apparence** (2026-11-02, porteur ; `theme.mjs` `NIGHT_THEME`, `home.js`, `fx.js`) : « Clair » (fond jaune, par défaut) ou « Sombre » (fond nuit : classe `pkm-theme-night` sur `<html>`, mêmes variables que les thèmes des compagnons). Choix enregistré (`look`) et posé dès le `<head>` (script `NIGHT_EARLY` de `build.mjs`) ; un compagnon à thème garde son fond. `?look=dark` ou `?look=light` force le mode (essais, `QS=look=dark` pour `t-contrast`). Test : `e2e/t-look.mjs`.
+- **PK shop sans solde de PK** (2026-11-02, porteur) : le compteur de l'en-tête suffit ; les tickets du tirage restent en haut du Magasin (`.pkm-shop-tk`).
 - **Réglages › Fonds animés :** Animés (par défaut), Calmes (deux fois plus lents, plus discrets), Sans. Pause quand l'app est cachée ; rien si le téléphone demande moins d'animations ou si l'Admin coupe les animations.
 - **Micro-animations** (K3) : cartes qui jaillissent à chaque ajout, pluie de gemmes depuis le compteur quand des PK sont gagnés, étoiles et halo du message pour un nouveau palier ou un compagnon débloqué.
 

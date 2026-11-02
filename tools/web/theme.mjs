@@ -364,6 +364,16 @@ export const BUDDY_THEMES = [
     gold: '#FFE9AD', sand: '#FFE6BE', 'sand-2': '#FBEDD5', gray: '#D0EFE4', off: '#C4E8DC', regular: '#DCE2FF', iris: '#DCE2FF'
   }) }
 ];
+// Mode sombre (2026-11-02, porteur : « propose dans les réglages un mode sombre / clair ») : le fond jaune devient
+// une nuit bleu ardoise avec une lueur jaune discrète en haut à gauche ; textes clairs, accent jaune gardé. Les cartes
+// restent en verre bleu nuit (ton sombre), plus claires que le fond. Un compagnon à thème (Kyogre, Groudon,
+// Rayquaza) garde son propre fond, déjà sombre. Contraste vérifié comme les autres thèmes (t-contrast, QS=look=dark).
+export const NIGHT_THEME = { key: 'night', name: 'Sombre', bar: '#10131F', dark: true, tokens: Object.assign({}, ON_DEEP, {
+  app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 214, 10, 0.1), rgba(255, 214, 10, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0) 70%), linear-gradient(165deg, #1C2133 0%, #10131F 45%, #06070D 100%)',
+  t1: '#FFFFFF', t2: '#E6E9F2', t3: '#CDD3E1', t4: '#BCC4D6', t5: '#BCC4D6', 'chip-fg': '#E6E9F2', 'glow-rgb': '10, 14, 30', 'shadow-rgb': '0, 0, 0',
+  green: '#8DF5BC', up: '#8DF5BC', down: '#FFC2BA', red: '#FFC2BA', orange: '#FFDE96', amber: '#FFDE96', teal: '#9CF7EA',
+  gold: '#FFE7A3', sand: '#FFE3B5', 'sand-2': '#F8E8C8', gray: '#BCC4D6', off: '#B4BCCF', regular: '#D5DCFF', iris: '#D5DCFF'
+}) };
 // Flou réel seulement sur ce qui passe au-dessus d'un contenu qui défile (au plus 5 éléments par écran) ;
 // sans flou possible, fond opaque. Le choix du compagnon, sa confirmation de déblocage et « Mes PK » sont toujours
 // opaques : rien de l'accueil ni de la grille ne doit se voir derrière.
@@ -387,7 +397,7 @@ export function v6Css() {
   return 'html:not(.pkm-classic) .pkm-root { ' + decl(k => (k in V6_LIGHT ? V6_LIGHT[k] : k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n'
     + 'html:not(.pkm-classic) .pkm-dark { ' + decl(k => (k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n' + V6_EXTRA
     // Thème d'un compagnon : variables du fond (ton sombre ou clair, puis celles du thème) ; fond derrière l'app.
-    + BUDDY_THEMES.map(t => '\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) .pkm-root { '
+    + BUDDY_THEMES.concat([NIGHT_THEME]).map(t => '\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) .pkm-root { '
       + decl(k => (k in t.tokens ? t.tokens[k] : t.dark ? (k in V6_DARK ? V6_DARK[k] : TOKENS[k]) : k in V6_LIGHT ? V6_LIGHT[k] : k in V6_DARK ? V6_DARK[k] : TOKENS[k]))
       + ' }\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) #app { background: ' + t.bar + '; }').join('');
 }

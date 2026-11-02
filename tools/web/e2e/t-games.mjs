@@ -71,7 +71,7 @@ await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(
 await ticket.locator('button:has-text("Acheter un ticket")').click(); await ticket.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(500);
 const sd = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'));
 ok('ticket acheté : 1 ticket, 700 PK', sd.pk === 700 && sd.tickets && sd.tickets['ticket-booster'] === 1 && /Tu as 1 ticket/.test(await ticket.innerText()));
-ok('tickets affichés dans le PK shop (« 1 ticket » sous le solde)', /1 ticket/.test(await page.locator('section[aria-label="Mon solde de PK"]').innerText()));
+ok("tickets affichés dans le PK shop (« 1 ticket », sans le solde de PK depuis le 2026-11-02)", /1 ticket/.test(await page.locator('p[aria-label="Mes tickets du tirage au sort"]').innerText()) && (await page.locator('section[aria-label="Mon solde de PK"]').count()) === 0);
 await page.screenshot({ path: shot('pkshop.png') });
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 ok('délais gardés après rechargement', /Prochain booster/.test(await boost.innerText()) && /Prochain lancer/.test(await coin.innerText()));

@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-02 (suite 1) — PK shop sans le solde de PK ; mode clair ou sombre dans les Réglages
+
+- **Demande du porteur** : « enlève le solde de PK quand on clique sur le PK shop, laisse uniquement le solde PK en haut à gauche de l'appli » ; « propose aussi dans les réglages de l'appli un mode sombre / clair ».
+- **Fait** (cache v131) :
+  - PK shop › Magasin : bloc « Ton solde » et bouton « Gagner des PK » retirés ; le compteur de PK de l'en-tête reste. Les tickets du tirage au sort restent affichés en haut du Magasin quand on en a (ils n'apparaissent nulle part ailleurs) ;
+  - Réglages › **Apparence** : « Clair » (fond jaune, par défaut) ou « Sombre » (fond nuit bleu ardoise, lueur jaune discrète, textes clairs, accent jaune) ; choix gardé sur l'appareil (`look`) et posé avant le premier affichage (pas d'éclair jaune au démarrage) ; un compagnon à thème (Kyogre, Groudon, Rayquaza) garde son fond, déjà sombre ;
+  - onglets du PK shop en variables de thème (le « Recharger mes PA » non choisi était illisible sur fond sombre).
+- **Vérifié** : contraste de tous les écrans en mode sombre (`QS=look=dark` sur `t-contrast`) : 0 texte sous le seuil ; nouveau test `e2e/t-look.mjs`.
+- **Non touché** : le bloc « Ton solde » de l'onglet Jeux (la demande portait sur le PK shop).
+
 ## 2026-11-02 — Nouveaux gains de PA du jour (+20 à +70) et temps pour tout débloquer
 
 - **Demande du porteur** : « J1 : +20, J2 : +30, J3 : +40, J4 : +50, J5 : +70 ; si on loupe une journée, on redescend au palier J2 », et le temps pour débloquer tout le Pokédex avec ces gains.

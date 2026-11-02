@@ -1376,6 +1376,13 @@
 </sc-if>
 
 <!-- fragment: fx-set -->
+<section aria-label="Apparence" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Apparence</h2>
+<div role="group" aria-label="Apparence" style="display: flex; gap: 8px">
+<sc-for list="{{ set.look.modes }}" as="lkm" hint-placeholder-count="2"><button type="button" onClick="{{ lkm.pick }}" aria-pressed="{{ lkm.on }}" style="flex: 1; min-height: 44px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ lkm.bc }}; background: {{ lkm.bg }}; color: {{ lkm.fg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ lkm.label }}</button></sc-for>
+</div>
+<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ set.look.help }}</span>
+</section>
 <section aria-label="Fonds animés" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 10px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Fonds animés</h2>
 <div role="group" aria-label="Fonds animés" style="display: flex; gap: 8px">
@@ -1627,11 +1634,7 @@
 <sc-if value="{{ ui.isPkShop }}" hint-placeholder-val="{{ false }}">
 <div role="tablist" aria-label="PK shop" class="pkm-shop-tabs"><button type="button" role="tab" aria-selected="{{ pks.storeOn }}" onClick="{{ pks.goStore }}" class="{{ pks.storeCls }}">Magasin</button><button type="button" role="tab" aria-selected="{{ pks.paOn }}" onClick="{{ pks.goPa }}" class="{{ pks.paCls }}">Recharger mes PA</button></div>
 <sc-if value="{{ pks.isStore }}" hint-placeholder-val="{{ true }}">
-<section aria-label="Mon solde de PK" class="pkm-dark" style="flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 22px; border: 1px solid #24345C; background: #0F1828; color: #F3F6FC">
-<img src="img/brand/pk.svg" alt="" width="48" height="48" style="flex: none; display: block">
-<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 13px; color: #9AA8C3">Ton solde</span><span style="font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700">{{ pks.pk }} PK</span><sc-if value="{{ pk.hasTickets }}" hint-placeholder-val="{{ false }}"><span class="pkm-tk-bar"><span class="pkm-tk-mini" aria-hidden="true"></span>{{ pk.tickets }}</span></sc-if></span>
-<button type="button" onClick="{{ pks.earn }}" style="flex: none; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Gagner des PK</button>
-</section>
+<sc-if value="{{ pk.hasTickets }}" hint-placeholder-val="{{ false }}"><p aria-label="Mes tickets du tirage au sort" class="pkm-shop-tk"><span class="pkm-tk-bar"><span class="pkm-tk-mini" aria-hidden="true"></span>{{ pk.tickets }}</span></p></sc-if>
 <sc-for list="{{ pks.items }}" as="si" hint-placeholder-count="1">
 <section aria-label="{{ si.name }}" class="pkm-dark pkm-shop-item" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; color: #F3F6FC">
 <div style="display: flex; align-items: center; gap: 14px">

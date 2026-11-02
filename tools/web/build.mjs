@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
 import { transformSync } from 'esbuild';
 import { applyMarginPatches } from './margin-patch.mjs';
-import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens, BUDDY_THEMES } from './theme.mjs';
+import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens, BUDDY_THEMES, NIGHT_THEME } from './theme.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const SRC = ROOT + 'docs/12-maquette-v5/Main.dc.html';
@@ -764,7 +764,9 @@ const buddiesJs = '  const HOME_BUDDIES = ' + JSON.stringify(buddies) + ';\n'
   // Fiches du Pokédex (2026-10-28, tools/sprites/dex.json) : 156 compagnons et 15 méga-évolutions.
   + '  const DEX_DATA = ' + JSON.stringify(dexData) + ';\n'
   // Thèmes des compagnons (theme.mjs) : n° du Pokémon → classe, nom et couleur de la barre du navigateur.
-  + '  const HOME_THEMES = ' + JSON.stringify(Object.fromEntries(BUDDY_THEMES.map(t => [t.buddy, { key: t.key, name: t.name, bar: t.bar }]))) + ';\n';
+  + '  const HOME_THEMES = ' + JSON.stringify(Object.fromEntries(BUDDY_THEMES.map(t => [t.buddy, { key: t.key, name: t.name, bar: t.bar }]))) + ';\n'
+  // Mode sombre (Réglages, 2026-11-02) : classe, nom et couleur de la barre du navigateur.
+  + '  const HOME_NIGHT = ' + JSON.stringify({ key: NIGHT_THEME.key, name: NIGHT_THEME.name, bar: NIGHT_THEME.bar }) + ';\n';
 for (const t of BUDDY_THEMES) if (!buddies.some(([n]) => n === t.buddy)) throw new Error('Thème sans compagnon : ' + t.key);
 if (rebranded !== REBRANDED) throw new Error('Libellés « PKM » renommés : ' + rebranded + ' au lieu de ' + REBRANDED);
 
@@ -1022,6 +1024,9 @@ const VUE_LOCAL = 'vendor/vue.runtime.global.prod.js';
 const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global.prod.js';
 // Thème : jaune et verre par défaut ; ?theme=classic garde l'ancien thème (comparaison, retour arrière).
 const THEME_SWITCH = '<script>try { if (/[?&]theme=classic(&|$)/.test(location.search)) { document.documentElement.classList.add(\'pkm-classic\'); var m = document.querySelector(\'meta[name="theme-color"]\'); if (m) m.content = \'#0B1120\'; } } catch (e) {}</script>';
+// Mode sombre (Réglages › Apparence, 2026-11-02) : posé avant le premier affichage pour éviter un éclair jaune au
+// démarrage (sauf avec un compagnon à thème, qui garde son fond) ; home.js reprend ensuite la main.
+const NIGHT_EARLY = '<script>try { var q = (location.search.match(/[?&]look=(dark|light)(&|$)/) || [])[1], d = JSON.parse(localStorage.getItem(\'pkm-collection-v1\') || \'{}\'); if ((q || d.look) === \'dark\' && ' + JSON.stringify(BUDDY_THEMES.map(t => t.buddy)) + '.indexOf(d.buddy) < 0 && !document.documentElement.classList.contains(\'pkm-classic\')) { document.documentElement.classList.add(\'pkm-theme-' + NIGHT_THEME.key + '\'); var mm = document.querySelector(\'meta[name="theme-color"]\'); if (mm) mm.content = \'' + NIGHT_THEME.bar + '\'; } } catch (e) {}</script>';
 // Animation d'entrée « Ouverture de booster » (tools/web/intro.html) : démo hébergée seulement.
 const INTRO = readFileSync(fileURLToPath(new URL('./intro.html', import.meta.url)), 'utf8').trim();
 const body = vue => `<div id="shell">
@@ -1048,6 +1053,7 @@ const index = `<!doctype html>
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 ${THEME_SWITCH}
+${NIGHT_EARLY}
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 ${localFonts}

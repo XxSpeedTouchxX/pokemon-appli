@@ -94,7 +94,7 @@
       // Rubriques (2026-11-01, porteur) : « Magasin » (les articles) et « Recharger mes PA » (packs de PA en argent réel).
       ...shopTabs(this, s),
       rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Le tirage sera fait par Dropicards selon un règlement publié avant le tirage. Tes tickets et tes lots sont gardés sur cet appareil, avec ta collection.',
-      earn: () => this.tab('market'), openRules: () => this.legalOpen('pk')
+      openRules: () => this.legalOpen('pk')
     };
   };
   // Barre des tickets sous le compteur de PK (seulement si on en a) ; elle ouvre le PK shop.

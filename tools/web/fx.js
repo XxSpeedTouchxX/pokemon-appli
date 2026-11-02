@@ -77,6 +77,13 @@
     const scene = s.screen === 'scan' ? '' : theme || (s.screen in FX_SCREEN ? FX_SCREEN[s.screen] : 'holo');
     fxSet(mode === 'off' || !scene ? '' : 'pkm-fx-on pkm-fx-' + scene + (mode === 'calm' ? ' pkm-fx-calm' : ''));
     if (r.set) {
+      // Apparence (2026-11-02, porteur) : mode clair (fond jaune) ou sombre (fond nuit) ; classe posée par home.js.
+      const look = s.look === 'dark' ? 'dark' : 'light', themed = !!HOME_THEMES[s.buddy];
+      r.set.look = {
+        modes: [['light', 'Clair'], ['dark', 'Sombre']].map(([k, label]) => Object.assign({ label: label, on: look === k, pick: () => this.setState({ look: k }) }, this.chip(look === k))),
+        help: (look === 'dark' ? 'Fond nuit, textes clairs, accent jaune.' : 'Fond jaune Dropicards, textes bleu nuit.')
+          + (themed ? ' Ton compagnon garde son thème « ' + HOME_THEMES[s.buddy].name + ' » tant qu’il t’accompagne.' : '')
+      };
       r.set.fx = {
         modes: FX_MODES.map(([k, label]) => Object.assign({ label: label, on: mode === k, pick: () => this.setState({ bgFx: k }) }, this.chip(mode === k))),
         help: { auto: 'Reflet holo sur l’accueil, gemmes dans le Marché, ondes radar dans Territoire ; pluie et vagues avec Kyogre, volcan et lave avec Groudon, orage et météores avec Rayquaza.', calm: 'Mêmes décors, deux fois plus lents et plus discrets.', off: 'Fond fixe, sans décor animé.' }[mode]
