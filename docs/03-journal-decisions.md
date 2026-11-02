@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-02 — Nouveaux gains de PA du jour (+20 à +70) et temps pour tout débloquer
+
+- **Demande du porteur** : « J1 : +20, J2 : +30, J3 : +40, J4 : +50, J5 : +70 ; si on loupe une journée, on redescend au palier J2 », et le temps pour débloquer tout le Pokédex avec ces gains.
+- **Fait** (cache v130) : barème `[20, 30, 40, 50, 70]` (`pa-core.js`), +70 PA chaque jour à partir du 5ᵉ jour d'affilée ; un jour sans récupérer ses PA : reprise au palier J2 (+30 PA). Textes mis à jour : règle des PA (« Mes PA », « PA dispo aujourd'hui »), « Règles des PK et PA » (barème J1 à J5 lu dans `PaCore.GAIN`), didacticiel (« jusqu'à 70 quotidiennement »).
+- **Temps pour tout débloquer** (15 150 PA, 171 Pokémon dont les 15 méga-évolutions ; starters offerts) :
+  - PA récupérés chaque jour : 20 + 30 + 40 + 50 = 140 PA en 4 jours, puis 70 par jour → **219 jours (≈ 7 mois)**, contre 507 jours avec l'ancien barème ;
+  - sans les méga-évolutions (10 800 PA) : 157 jours (≈ 5 mois) ;
+  - un oubli par semaine (7 jours récupérés, 1 oublié) : ≈ 303 jours (≈ 10 mois) ;
+  - un jour sur deux (toujours +30 PA) : ≈ 1 012 jours (≈ 2 ans et 9 mois).
+- **Tests** : `test_pa.mjs`, `e2e/t-pa.mjs`, `e2e/t-paday.mjs` mis au nouveau barème.
+
 ## 2026-11-01 (suite 23) — Décors animés des compagnons à thème : volcan, pluie et vagues, orage et météores
 
 - **Demande du porteur** : Groudon « plus volcanique, avec des animations de lave ou un volcan en arrière-plan » ; Kyogre « pluie et vagues en arrière-fond » ; Rayquaza « accentue les orages, et des météores en arrière-plan ».

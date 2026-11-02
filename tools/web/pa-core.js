@@ -1,9 +1,9 @@
   // ——— PA (points d'Aura) : calcul pur du gain du jour (testé par tools/web/test_pa.mjs) ———
   // Règle du porteur (confirmée le 2026-11-01, après un essai « toutes les 24 h » le même jour) : les PA sont
-  // disponibles chaque jour dès minuit ; récupérés chaque jour, la série monte (+10, +15, +20, +25, puis +30) ; un jour
-  // entier sans les récupérer, la série reprend à +15 PA (2e palier).
+  // disponibles chaque jour dès minuit ; récupérés chaque jour, la série monte (+20, +30, +40, +50, puis +70 ; gains du
+  // 2026-11-02) ; un jour entier sans les récupérer, la série reprend à +30 PA (palier J2).
   const PaCore = (function () {
-    const GAIN = [10, 15, 20, 25, 30];
+    const GAIN = [20, 30, 40, 50, 70];
     const DAY = 86400000;
     const gainOf = s => GAIN[Math.min(s, GAIN.length) - 1];
     // Gain du jour : null si déjà récupéré aujourd'hui ; sinon la nouvelle série et le gain.

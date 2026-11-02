@@ -1,6 +1,6 @@
   // ——— PA (points d'Aura) et jeu d'évolution (2026-10-25, demande du porteur) ———
-  // Les PA se gagnent en ouvrant l'app, une fois par jour, selon les jours d'affilée (choix du porteur) : 1er jour +10,
-  // 2e +15, 3e +20, 4e +25, puis +30 chaque jour. Un jour sans ouvrir l'app : la série reprend à +15 (2e palier).
+  // Les PA se gagnent en ouvrant l'app, une fois par jour, selon les jours d'affilée (choix du porteur) : 1er jour +20,
+  // 2e +30, 3e +40, 4e +50, puis +70 chaque jour (2026-11-02). Un jour sans les récupérer : la série reprend à +30 (palier J2).
   // Ils servent au jeu d'évolution (onglet Jeux, à la place de la roulette) : le starter choisi (Bulbizarre, Salamèche,
   // Carapuce ou Pikachu, un seul choix avec le didacticiel et le compagnon) évolue pour 500 PA, puis 1 500 PA ; ses
   // évolutions sont en silhouette noire tant qu'elles ne sont pas débloquées, et deviennent des compagnons.
@@ -16,8 +16,8 @@
   // Pokémon de base comme compagnon ; elle devient alors un compagnon. Elles comptent pour les grades Maître Pokémon
   // (1) et Grand maître mondial Pokémon (5). Prix : PA_PRICES (pk.js, 2026-11-01, porteur) ; PA_MEGA en repli.
   const PA_MEGA = 2500;
-  // Règle des PA, écrite une fois (2026-11-01, porteur : chaque jour dès minuit, un jour manqué → +15).
-  const PA_RULES = 'Chaque jour dès minuit, touche ton solde de PA pour récupérer tes PA : +10, +15, +20, +25, puis +30 PA par jour d’affilée. Un jour sans les récupérer : la série reprend à +15 PA.';
+  // Règle des PA, écrite une fois (2026-11-01, porteur : chaque jour dès minuit, un jour manqué → palier J2 ; gains du 2026-11-02).
+  const PA_RULES = 'Chaque jour dès minuit, touche ton solde de PA pour récupérer tes PA : +20, +30, +40, +50, puis +70 PA par jour d’affilée. Un jour sans les récupérer : la série reprend à +30 PA.';
   HOME_MEGAS.forEach(([id, base, nom]) => { HOME_NAMES[id] = nom; });
   const PA_MEGA_IDS = n => HOME_MEGAS.some(m => m[0] === n);
   const paMegas = s => (Array.isArray(s.megas) ? s.megas : []);
@@ -36,10 +36,10 @@
   };
   // PA du jour à récupérer (2026-10-28, demande du porteur) : ils ne sont plus crédités à l'ouverture. Une pastille
   // « ! » sur le solde de PA prévient qu'ils attendent ; un appui ouvre « Tes PA du jour » et son bouton « Récupérer
-  // mes PA ». La série suit les jours où les PA sont récupérés (un jour manqué : reprise à +15, PaCore).
+  // mes PA ». La série suit les jours où les PA sont récupérés (un jour manqué : reprise à +30, PaCore).
   // Règle du porteur (2026-11-01, après un essai « toutes les 24 h ») : PA disponibles chaque jour dès minuit (jour de
   // l'appareil, ou date simulée ?today= / Admin ; ?now=AAAA-MM-JJTHH:MM pour les tests) ; un jour entier sans les
-  // récupérer : la série reprend à +15 PA. « paAt » garde en plus l'heure de la récupération (informatif).
+  // récupérer : la série reprend à +30 PA. « paAt » garde en plus l'heure de la récupération (informatif).
   const paNow = () => {
     try { const q = new URLSearchParams(location.search).get('now'), t = q ? Date.parse(q) : NaN; if (t > 0) return t; } catch (e) { /* adresse sans paramètres */ }
     const d = new Date(), t = realToday(), m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
@@ -239,7 +239,7 @@
         return { open: true, close: () => this.setState({ paSheet: false }), balance: Number(pa).toLocaleString('fr-FR'), logo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
           what: 'Les PA sont tes points d’Aura : ils montrent le lien entre toi et ton compagnon. Ils sont gratuits, ne s’achètent pas et n’ont aucune valeur en euros.',
           how: 'Chaque jour dès minuit, touche ton solde de PA pour les récupérer. Plus tu les récupères de jours d’affilée, plus tu gagnes de PA :',
-          note: (n ? '' : paNextText(s) + '. ') + 'Un jour sans les récupérer : la série reprend à +15 PA.',
+          note: (n ? '' : paNextText(s) + '. ') + 'Un jour sans les récupérer : la série reprend à +30 PA.',
           use: 'Dans le Pokédex, tes PA débloquent les Pokémon et font évoluer ton compagnon :',
           streak: R.streak, evo: R.evo, dex: () => { this.setState({ paSheet: false }); openDex(); } };
       })(),

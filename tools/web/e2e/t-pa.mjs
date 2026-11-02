@@ -1,5 +1,5 @@
 // PA (points d'Aura, 2026-10-25) : gain une fois par jour, selon les jours d'affilée ; un jour manqué fait reprendre la
-// série à +15 PA. Depuis le 2026-10-28 (porteur), les PA ne sont plus crédités à l'ouverture : une pastille « 1 » (« ! » jusqu’au 2026-10-29) sur le
+// série à +30 PA (gains +20, +30, +40, +50, +70 depuis le 2026-11-02). Depuis le 2026-10-28 (porteur), les PA ne sont plus crédités à l'ouverture : une pastille « 1 » (« ! » jusqu’au 2026-10-29) sur le
 // solde de l'en-tête prévient qu'ils attendent ; un appui ouvre « Tes PA du jour », « Récupérer mes PA » les crédite
 // (animation d'envol d'environ 1,6 s). Sans PA à récupérer, le solde ouvre « Mes PA » (description, gains, usage ; 2026-10-31). Dates simulées avec ?today=.
 import { launch, BASE as E2E, shot } from './helpers.mjs';
@@ -28,15 +28,15 @@ const day = async d => {
 };
 const a = await day('2026-11-01');
 ok('ouverture : rien de crédité, pastille « 1 » (« ! » jusqu’au 2026-10-29) (' + a.before.pa + ' PA)', a.before.pa === 0 && a.dotOn);
-ok('en-tête : « 10 PA à récupérer » (' + a.aria + ')', /10 PA à récupérer/.test(a.aria || ''));
+ok('en-tête : « 20 PA à récupérer » (' + a.aria + ')', /20 PA à récupérer/.test(a.aria || ''));
 ok('appui sur le solde : « PA dispo aujourd’hui »', a.open);
-ok('1er jour récupéré : +10 PA (' + a.pa + ', série ' + a.streak + ')', a.pa === 10 && a.streak === 1 && a.day === '2026-11-01');
+ok('1er jour récupéré : +20 PA (' + a.pa + ', série ' + a.streak + ')', a.pa === 20 && a.streak === 1 && a.day === '2026-11-01');
 ok('après récupération : fenêtre fermée, pastille retirée', a.closed && a.dotAfter === 0);
-const b = await day('2026-11-02'); ok('2e jour d’affilée : +15 PA (' + b.pa + ')', b.before.pa === 10 && b.dotOn && b.pa === 25 && b.streak === 2);
+const b = await day('2026-11-02'); ok('2e jour d’affilée : +30 PA (' + b.pa + ')', b.before.pa === 20 && b.dotOn && b.pa === 50 && b.streak === 2);
 // Même jour : plus de pastille, le solde ouvre « Mes PA » (c'est quoi, comment les gagner, à quoi ils servent).
 await page.goto(E2E + '/?today=2026-11-02', { waitUntil: 'load' }); await page.waitForTimeout(900);
 const sameAria = await pill.getAttribute('aria-label');
-ok('même jour : pas de pastille, rien de plus (' + (await saved()).pa + ')', await dot.count() === 0 && (await saved()).pa === 25 && /Ouvrir Mes PA/.test(sameAria || ''));
+ok('même jour : pas de pastille, rien de plus (' + (await saved()).pa + ')', await dot.count() === 0 && (await saved()).pa === 50 && /Ouvrir Mes PA/.test(sameAria || ''));
 await pill.click(); await page.waitForTimeout(1200);
 const paSheet = page.locator('section[aria-label="Mes PA"]');
 const paTxt = (await paSheet.innerText().catch(() => '')).replace(/\s+/g, ' ');
@@ -45,16 +45,16 @@ ok('sans PA à récupérer : le solde ouvre « Mes PA » (' + paTxt.slice(0, 60)
 const balCol = await paSheet.locator('.pkm-pa-sheet-bal b').evaluate(b => getComputedStyle(b).color).catch(() => '');
 ok('Mes PA : solde en blanc (' + balCol + ')', balCol === 'rgb(255, 255, 255)');
 await page.locator('section[aria-label="Mes PA"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
-const c = await day('2026-11-03'); ok('3e jour : +20 PA (' + c.pa + ')', c.pa === 45 && c.streak === 3);
-// Un jour sans récupérer (le 4) : la série reprend à +15 PA le 5.
-const d = await day('2026-11-05'); ok('un jour manqué : reprise à +15 PA (' + d.pa + ')', d.aria && /15 PA à récupérer/.test(d.aria) && d.pa === 60 && d.streak === 2);
+const c = await day('2026-11-03'); ok('3e jour : +40 PA (' + c.pa + ')', c.pa === 90 && c.streak === 3);
+// Un jour sans récupérer (le 4) : la série reprend à +30 PA le 5.
+const d = await day('2026-11-05'); ok('un jour manqué : reprise à +30 PA (' + d.pa + ')', d.aria && /30 PA à récupérer/.test(d.aria) && d.pa === 120 && d.streak === 2);
 // Ouvrir sans récupérer : rien n'est crédité, les PA attendent le lendemain d'ouverture.
 await page.goto(E2E + '/?today=2026-11-06', { waitUntil: 'load' }); await page.waitForTimeout(900);
 await pill.click(); await page.waitForTimeout(400);
 await page.screenshot({ path: shot('pa-du-jour.png') });
 await sheet.locator('xpath=..').locator('button[aria-label="Fermer"]').first().click({ position: { x: 10, y: 10 } }); await page.waitForTimeout(300);
-ok('fermer sans récupérer : rien de crédité, pastille gardée', (await saved()).pa === 60 && !(await sheet.isVisible().catch(() => false)) && await dot.count() > 0);
-ok('PA dans l’en-tête : ' + (await pill.innerText()).replace(/\s+/g, ' '), /60\s*PA/.test(await pill.innerText()));
+ok('fermer sans récupérer : rien de crédité, pastille gardée', (await saved()).pa === 120 && !(await sheet.isVisible().catch(() => false)) && await dot.count() > 0);
+ok('PA dans l’en-tête : ' + (await pill.innerText()).replace(/\s+/g, ' '), /120\s*PA/.test(await pill.innerText()));
 await page.screenshot({ path: shot('pa-entete.png'), clip: { x: 0, y: 0, width: 390, height: 120 } });
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
