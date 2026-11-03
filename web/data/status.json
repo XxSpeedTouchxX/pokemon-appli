@@ -1,6 +1,6 @@
 {"v":1,"note":"Contrôle des données publiées (tools/check_data.py) : une source par ligne.",
 
-"cards":{"checked":"2026-11-02T13:06:40Z","ok":true,"upstream":"2026-11-02","count":21365,"previous":21365,"delta":0,"warnings":[],"errors":[],"details":{"cardsCm":20837,"cardsPriced":21092,"cardsEn":1211,"imgNone":269,"cardsDoubt":2133,"sets":208}},
+"cards":{"checked":"2026-11-03T12:38:54Z","ok":true,"upstream":"2026-11-03","count":21365,"previous":21365,"delta":0,"warnings":[],"errors":[],"details":{"cardsCm":20837,"cardsPriced":21095,"cardsEn":1211,"imgNone":269,"cardsDoubt":2130,"sets":208}},
 
 "sealed":{"checked":"2026-11-03T11:54:53Z","ok":true,"upstream":"2026-11-03T02:49:42+0100","count":61,"previous":61,"delta":0,"warnings":[],"errors":[],"details":{"priced":58,"pricedBefore":58,"days":31}},
 
