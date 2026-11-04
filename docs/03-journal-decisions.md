@@ -13,6 +13,7 @@
 - **Livré** : `docs/22-guide-changement-de-compte-et-claude-serveur.md` (passation vers le nouveau compte avec un premier message à coller, transfert du dépôt, Claude sur le serveur dans un utilisateur sans droits d'administrateur, clé de déploiement limitée au dépôt, Remote Control dans tmux, plusieurs sessions et plusieurs comptes, risques, décisions en attente).
 - **Proposé, à valider** : Claude en écriture sur sa copie du projet et sur GitHub seulement (jamais sur le serveur) ; écart avec `docs/18`/`docs/19` (« agents d'IA en lecture seule ») signalé ; audit, sauvegarde OVH et console de secours avant toute installation.
 - **Rien n'est fait sur le serveur ni sur GitHub** sans le « go » du porteur.
+- **Réponses du porteur (même jour)** : les deux changements de compte (Claude et GitHub), serveur à lui seul, plusieurs comptes Claude sur le serveur, « go » pour l'audit et la sauvegarde. Ajouts au guide : §6.1 (un utilisateur du serveur par compte Claude, pas à pas ; règles de travail en parallèle, aussi dans `CLAUDE.md` §6) et §11 (ordre retenu : audit, sauvegarde, transfert GitHub, nouveaux comptes, Claude sur le serveur ; commandes de l'audit et de la copie de sauvegarde). Script d'audit relu et lancé à blanc (syntaxe et résumé corrects).
 
 ## 2026-11-02 (suite 1) — PK shop sans le solde de PK ; mode clair ou sombre dans les Réglages
 

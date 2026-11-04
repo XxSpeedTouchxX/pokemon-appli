@@ -181,6 +181,24 @@ Durée de mon côté : ≈ 1 h à plein régime, ≈ 1 h 30 au rythme réel (ave
 
 Ma recommandation pour commencer : **un seul utilisateur `claude`, une seule session**, puis une deuxième quand la première fonctionne bien.
 
+### 6.1 Ajouter un compte Claude sur le serveur, pas à pas (≈ 25 min par compte)
+
+Chaque compte Claude a **son propre abonnement** (Pro ou Max) et sa propre adresse e-mail. Pour le 2ᵉ compte, remplace `claude2` par `claude3`, etc. pour les suivants.
+
+1. **Sur le web d'abord** : connecte-toi à claude.ai avec ce compte, puis refais le §3 (claude.ai/code, connexion au compte GitHub qui possède le dépôt, premier message). Plusieurs comptes Claude peuvent se brancher sur le même compte GitHub.
+2. **Sur le serveur**, en SSH avec ton utilisateur habituel :
+   - `sudo adduser --disabled-password --gecos "" claude2`
+   - `sudo -iu claude2`
+3. Refais le §5.4 (installation, puis connexion avec **ce** compte Claude).
+4. Refais le §5.5 avec un titre de clé différent sur GitHub (`Claude serveur 2`) et `git config user.name "Claude 2 (serveur Dropicards)"`.
+5. Refais le §5.6 avec un autre nom : `tmux new -s claude2`, puis `claude remote-control --name "Serveur Dropicards 2"`.
+6. Dans l'app Claude de **ce** compte, la session « Serveur Dropicards 2 » apparaît. Chaque compte ne voit que sa propre session.
+
+**Les règles pour que plusieurs Claude travaillent ensemble sans se gêner** (écrites dans `CLAUDE.md` §6, que chaque Claude lit) :
+- une tâche différente par Claude : dis à chacun sur quoi il travaille (par exemple : « toi le Pokédex », « toi le scan ») ;
+- chacun récupère le travail des autres juste avant d'envoyer le sien ;
+- les fichiers fabriqués automatiquement (`web/app.js`, `web/index.html`, `web/sw.js`) changent à chaque modification : en cas de conflit, le Claude reprend la version de GitHub, refabrique l'app, relance les tests, puis envoie.
+
 ---
 
 ## 7. Les risques, sans détour
@@ -220,3 +238,38 @@ Elles sont aussi dans `CLAUDE.md` ; les voici réunies :
 - reconnaissance de l'illustration au scan, proposée ;
 - liens Communauté et adresse contact@dropicards.fr à fournir ; identité de l'éditeur pour les mentions légales ;
 - Règle d'or de `CLAUDE.md` à reformuler ; `docs/06` et `docs/08` encore écrits pour les revendeurs de scellé.
+
+---
+
+## 11. Réponses du porteur (2026-11-04) et ordre retenu
+
+**Réponses :**
+1. Changer **de compte Claude et de compte GitHub** : les deux (§3 et §4).
+2. Le serveur est **à lui seul** : aucun autre projet ni personne à ménager.
+3. **Plusieurs comptes Claude** sur le serveur : §6.1.
+4. Question « écriture ou lecture seule » : expliquée de nouveau, réponse attendue (voir ci-dessous).
+5. **« Go » pour l'audit et la sauvegarde.**
+
+**La question 4, en clair.** Quand Claude sera installé sur ton serveur, il peut :
+- **A. Modifier l'app** (comme aujourd'hui sur claude.ai) : il change le code dans sa copie, l'envoie sur GitHub, et le site se met à jour tout seul. Il ne peut pas toucher aux réglages du serveur (sécurité, nginx). **Proposé.**
+- **B. Seulement regarder** : lire et vérifier (sécurité, erreurs), sans rien pouvoir modifier ni envoyer.
+
+**Ordre retenu** (le transfert GitHub vient après le serveur, pour que les adresses des scripts restent valables pendant l'audit) :
+
+| # | Étape | Qui | Ton temps |
+|---|---|---|---|
+| 1 | Audit du serveur (lecture seule), résumé collé à Claude | Toi, puis moi | 10 min |
+| 2 | Copie de sauvegarde de la configuration du serveur ; vérification de la console de secours OVH | Toi | 10 min |
+| 3 | Mise à jour automatique du site, si l'audit dit qu'elle manque (`docs/18` §4.3) ; corrections urgentes de l'audit | Toi, guidé | 15 à 45 min |
+| 4 | Transfert du dépôt vers le nouveau compte GitHub (§4) ; mise à jour des liens par Claude ; une commande sur le serveur | Toi, puis Claude | 20 min |
+| 5 | Nouveaux comptes Claude branchés sur le nouveau GitHub (§3, pour chaque compte) | Toi | 10 min par compte |
+| 6 | Claude sur le serveur : 1ᵉʳ compte (§5.3 à 5.7), puis les suivants (§6.1) | Toi, puis Claude | 1 h 30, puis 25 min par compte |
+
+**Étape 1, les commandes** (en SSH, `docs/18` §4.2) :
+1. `curl -fsSL https://raw.githubusercontent.com/XxSpeedTouchxX/pokemon-appli/claude/pokemon-app-mockup-1mxt7p/tools/server/audit.sh -o audit.sh`
+2. `sudo bash audit.sh | tee ~/audit-dropicards.txt`
+3. Copier tout ce qui suit la ligne `RÉSUMÉ` (adresses IP et e-mails déjà masqués) et le coller à Claude.
+
+**Étape 2, les commandes :**
+1. `sudo tar -czf /root/sauvegarde-config-$(date +%Y%m%d).tar.gz /etc /opt/dropicards /var/www 2>/dev/null; sudo ls -lh /root/ | grep sauvegarde-config` : une ligne avec une taille s'affiche ; la copie reste sur le serveur, lisible seulement par l'administrateur.
+2. Espace client OVH › Bare Metal Cloud › Serveurs dédiés › ton serveur : chercher **IPMI** ou **KVM**, ouvrir la console « depuis le navigateur » ; un écran noir avec du texte doit s'afficher. Puis la fermer. C'est la porte de secours si un réglage coupe l'accès SSH.
