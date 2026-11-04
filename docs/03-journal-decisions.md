@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-04 — Changement de compte Claude, dépôt GitHub et Claude sur le serveur : guide, rien d'installé
+
+- **Demande du porteur** : passer sur un autre compte Claude, avoir tout sur GitHub pour pouvoir aussi déplacer le dépôt vers un autre compte GitHub, installer Claude (éventuellement plusieurs) sur le serveur dédié ; un guide de A à Z, de son côté et du mien, **avant toute action**.
+- **Vérifié** : tout le travail est sur `XxSpeedTouchxX/pokemon-appli` (public), branche `claude/pokemon-app-mockup-1mxt7p` (seule branche, publiée par le serveur) ; les workflows n'utilisent aucun secret.
+- **Livré** : `docs/22-guide-changement-de-compte-et-claude-serveur.md` (passation vers le nouveau compte avec un premier message à coller, transfert du dépôt, Claude sur le serveur dans un utilisateur sans droits d'administrateur, clé de déploiement limitée au dépôt, Remote Control dans tmux, plusieurs sessions et plusieurs comptes, risques, décisions en attente).
+- **Proposé, à valider** : Claude en écriture sur sa copie du projet et sur GitHub seulement (jamais sur le serveur) ; écart avec `docs/18`/`docs/19` (« agents d'IA en lecture seule ») signalé ; audit, sauvegarde OVH et console de secours avant toute installation.
+- **Rien n'est fait sur le serveur ni sur GitHub** sans le « go » du porteur.
+
 ## 2026-11-02 (suite 1) — PK shop sans le solde de PK ; mode clair ou sombre dans les Réglages
 
 - **Demande du porteur** : « enlève le solde de PK quand on clique sur le PK shop, laisse uniquement le solde PK en haut à gauche de l'appli » ; « propose aussi dans les réglages de l'appli un mode sombre / clair ».

@@ -226,6 +226,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - **Décors des compagnons à thème (2026-11-01, soir, porteur) :** Groudon : volcan, coulées de lave, fumée, projections ; Kyogre : pluie et vagues ; Rayquaza : orage renforcé (éclairs, nuages, pluie battante) et météores (`scene.html`, `fx.css`, cache v129) ; titres « Booster PK » et « Pile ou face » dans la police du Pokédex (v128).
 - **Gains des PA du jour (2026-11-02, porteur) :** J1 +20, J2 +30, J3 +40, J4 +50, puis +70 chaque jour ; un jour sans récupérer : retour au palier J2 (+30) ; tout le Pokédex (15 150 PA) en 219 jours (≈ 7 mois) sans oubli, ≈ 303 jours avec un oubli par semaine (cache v130).
 - **PK shop et apparence (2026-11-02, porteur) :** solde de PK retiré du PK shop (le compteur de l'en-tête suffit ; tickets gardés) ; Réglages › Apparence : « Clair » (jaune, par défaut) ou « Sombre » (fond nuit), gardé sur l'appareil ; un compagnon à thème garde son fond (cache v131).
+- **Changement de compte et Claude sur le serveur (2026-11-04, porteur) :** guide `docs/22-guide-changement-de-compte-et-claude-serveur.md` ; passage sur un nouveau compte Claude (même GitHub) ; transfert du dépôt optionnel ; Claude sur le serveur dans un utilisateur `claude` sans `sudo`, sur sa copie du projet, envoi par clé de déploiement, Remote Control ; plusieurs sessions ou comptes possibles ; **rien d'installé sans « go »** (audit et sauvegarde OVH d'abord).
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
@@ -269,6 +270,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - Utiliser le **Plan Mode** pour toute proposition d'architecture ; ne modifier des fichiers qu'après validation.
 - Une fois en phase de code : petits incréments testables, tests automatisés sur le calcul de marge (c'est le cœur métier), aucun secret dans le dépôt (`.env` ignoré), commits courts et lisibles.
 - Estimer le coût mensuel (hébergement, données) de toute option et le comparer au budget.
+- **Branche publiée :** `claude/pokemon-app-mockup-1mxt7p` (seule branche du dépôt, téléchargée par le serveur de dropicards.fr toutes les 5 minutes). Toute session, quel que soit le compte Claude, travaille et pousse sur cette branche, avec l'accord du porteur (`docs/22` §3).
 
 ## 7. Conventions de nommage des documents (kit v5)
 - Figé : `[Document] vN (PKM-App, figé)` · Vivant : `[Document] (PKM-App, vivant)`.
