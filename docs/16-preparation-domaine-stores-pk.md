@@ -34,6 +34,8 @@
 
 ## 3. Apps iOS et Android
 
+> **Mis à jour le 2026-11-04 :** le guide pas à pas à jour est `docs/23-guide-publication-app-store-play-store.md` (après le serveur OVH et les packs de PA).
+
 ### Méthode : Capacitor
 
 Le même code web (`web/`) devient une app iOS et une app Android.

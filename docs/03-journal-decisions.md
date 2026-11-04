@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-04 (suite 1) — Publication sur l'App Store et le Play Store : guide, rien de lancé
+
+- **Demande du porteur** : « la manipulation à faire pour sortir l'application sur l'App Store et le Play Store » ; serveur et changement de compte (`docs/22`) mis de côté par lui.
+- **Livré** : `docs/23-guide-publication-app-store-play-store.md` (met à jour `docs/16` §3, §4, §6) : méthode Capacitor + Codemagic (sans Mac) ; changements de l'app pour les stores (« Recharger mes PA » masqué tant que l'achat intégré n'est pas branché, « Supprimer mon compte », pages publiques de confidentialité et d'assistance, fonctions natives, règlement du tirage au sort) ; étapes du porteur (comptes Apple 99 $/an et Google 25 $, e-mail de contact, 12 testeurs Android pendant 14 jours, Codemagic, fiches, tests, publication) ; mes travaux ≈ 30 h (4 jours à plein régime, 10 au rythme réel) ; 3 à 5 semaines au total.
+- **Risques signalés** : droits Pokémon (sprites des jeux, nom « Pokédex », Poké Ball des grades : partie la plus exposée ; avis d'un avocat conseillé avant la soumission), paiement des PA par achat intégré seulement, jeux de hasard gratuits et classification d'âge, règlement du tirage, nom « Dropicards » non vérifié, nom du porteur affiché, adresse publique (DSA) le jour où l'app vend.
+- **Décisions attendues** : compte personnel (proposé), 1ʳᵉ version sans vente de PA (proposé), avis d'avocat avant soumission (proposé), Pokédex et compagnons gardés selon cet avis (proposé) ; puis « go » pour les travaux.
+
 ## 2026-11-04 — Changement de compte Claude, dépôt GitHub et Claude sur le serveur : guide, rien d'installé
 
 - **Demande du porteur** : passer sur un autre compte Claude, avoir tout sur GitHub pour pouvoir aussi déplacer le dépôt vers un autre compte GitHub, installer Claude (éventuellement plusieurs) sur le serveur dédié ; un guide de A à Z, de son côté et du mien, **avant toute action**.
