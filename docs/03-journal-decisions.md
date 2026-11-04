@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-04 (suite 3) — Le serveur tourne avec Coolify (Axicall Pilot) : nouvelle option pour les comptes
+
+- **Information du porteur** : « j'ai déjà mon serveur sur Coolify pour Axicall Pilot ».
+- **Conséquences** :
+  - `docs/24` §4.1 : nouvelle option **C′**, Supabase installé par Coolify sur le serveur (modèle en un clic, sauvegardes PostgreSQL planifiées vers un stockage S3) ; ≈ 98 h, 0 € d'abonnement ; **recommandée désormais**, sous conditions (mémoire libre suffisante à côté d'Axicall Pilot, sauvegardes hors serveur et restauration testée, tableau de bord Coolify et outil d'administration de Supabase protégés) ; A (Supabase en ligne) en repli ;
+  - `docs/22` §11 : ne pas lancer le script de mise à jour automatique (`tools/server/install-autoupdate.sh`) si Coolify met déjà dropicards.fr en ligne ;
+  - Axicall Pilot partage le serveur : aucune action qui puisse le gêner.
+- **Questions au porteur** : dropicards.fr est-il mis en ligne par Coolify ? Mémoire du serveur ? Choix C′, A ou C.
+
 ## 2026-11-04 (suite 2) — Espace admin et comptes utilisateurs : proposition, rien de codé
 
 - **Demande du porteur** : une interface admin interne, ouverte par des identifiants, avec tous les outils admin ; une interface utilisateur pour les autres, avec l'inscription par e-mail.

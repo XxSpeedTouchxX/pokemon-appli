@@ -75,6 +75,26 @@ Le mode Admin actuel (7 appuis et code) disparaît : ses outils passent dans « 
 
 **Ma recommandation : A pour démarrer.** Le site reste sur ton serveur OVH ; seuls les comptes et la base sont chez Supabase. Tu gardes la possibilité de tout rapatrier sur ton serveur quand le projet aura grandi.
 
+### 4.1 Mise à jour du 2026-11-04 : ton serveur tourne déjà avec Coolify
+
+Le porteur précise : « j'ai déjà mon serveur sur Coolify pour Axicall Pilot ». **Coolify** est un tableau de bord installé sur le serveur, qui y installe et fait tourner des applications. Cela change la comparaison :
+- Coolify installe **Supabase en un clic** (modèle « Supabase » de ses services) : on garde tous les avantages du chemin A (comptes, codes par e-mail, rôles, double authentification, même logiciel que le service géré), **sur ton serveur**, sans abonnement ;
+- Coolify sait **sauvegarder les bases PostgreSQL automatiquement**, selon un horaire, vers un stockage externe compatible « S3 » (par exemple OVH Object Storage) ;
+- il gère déjà le HTTPS et les mises en ligne depuis GitHub.
+
+| | **C′. Supabase installé par Coolify sur ton serveur (proposé désormais)** |
+|---|---|
+| Mon travail | ≈ 98 h : les ≈ 90 h du §5, plus ≈ 8 h de mise en place (service Supabase, adresse `api.dropicards.fr`, envoi des e-mails par Brevo, sauvegardes externes et **restauration testée**, accès à l'outil d'administration de Supabase réservé) ; ≈ 12 jours à plein régime, ≈ 33 jours au rythme réel |
+| Coût | 0 € d'abonnement ; stockage des sauvegardes ≈ 1 € par mois ; Brevo gratuit jusqu'à 300 e-mails par jour |
+| Ce que tu dois surveiller | Les mises à jour proposées par Coolify (Supabase compris), l'espace disque, les e-mails d'alerte des sauvegardes |
+| Conditions avant les vrais utilisateurs | Sauvegardes **hors du serveur** et une restauration réussie ; tableau de bord Coolify protégé (mot de passe fort, double authentification si ta version la propose, adresse non publique de préférence) ; outil d'administration de Supabase jamais ouvert à tous |
+| Point d'attention | **Axicall Pilot est sur le même serveur** : Supabase prend ≈ 2 à 4 Go de mémoire ; une panne du serveur touche les deux projets |
+| Plus tard | Même logiciel que le service géré : déménagement possible vers Supabase en ligne, ou l'inverse |
+
+**Nouvelle recommandation : C′**, à condition que la mémoire libre du serveur suffise (à vérifier dans Coolify ou dans l'audit) et que les sauvegardes externes soient en place avant d'ouvrir les inscriptions. Sinon, A reste la solution de repli.
+
+**À vérifier avant :** si dropicards.fr est déjà mis en ligne par Coolify, le script de mise à jour automatique (`docs/18` §4.3, `docs/22` §11 étape 3) **ne doit pas être lancé** : Coolify s'en charge déjà.
+
 **Décalage à trancher :** `docs/16` §5 recommandait Cloudflare (Workers et D1), `docs/17` ton serveur OVH, `docs/18` un service géré (chemin A). Cette proposition retient Supabase pour A, parce qu'il fournit d'origine les comptes, les codes par e-mail, les rôles et la double authentification.
 
 ---
@@ -116,9 +136,10 @@ Ce qui vient plus tard (pas compté) : Face ID, réglages du PK shop et des jeux
 
 | # | Question | Proposé |
 |---|---|---|
-| 1 | Hébergement des comptes : **A (Supabase)** ou **C (ton serveur OVH)** ? | A pour démarrer |
+| 1 | Hébergement des comptes : **C′ (Supabase installé par Coolify sur ton serveur)**, **A (Supabase en ligne)** ou **C (tout fait à la main sur ton serveur)** ? | C′ (§4.1), A en repli |
 | 2 | Combien d'admins, et faut-il deux niveaux (« admin complet » et « modérateur » qui ne touche ni aux PK ni aux admins) ? | Toi en admin complet ; modérateur plus tard si besoin |
 | 3 | Les outils du §3.1 te conviennent ? Un outil à ajouter ou à retirer ? | Tous, dans l'ordre de l'étape 4 |
 | 4 | Commencer par la **maquette cliquable** (étape 0) ? | Oui |
 | 5 | Double authentification obligatoire pour les admins ? | Oui |
 | 6 | « Go » étape par étape (0, puis 1, puis 2…) ? | Oui |
+| 7 | dropicards.fr est-il mis en ligne par Coolify ? Quelle mémoire a le serveur (Coolify › Servers, ou espace OVH) ? | À me dire |

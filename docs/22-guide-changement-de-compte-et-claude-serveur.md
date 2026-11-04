@@ -260,7 +260,7 @@ Elles sont aussi dans `CLAUDE.md` ; les voici réunies :
 |---|---|---|---|
 | 1 | Audit du serveur (lecture seule), résumé collé à Claude | Toi, puis moi | 10 min |
 | 2 | Copie de sauvegarde de la configuration du serveur ; vérification de la console de secours OVH | Toi | 10 min |
-| 3 | Mise à jour automatique du site, si l'audit dit qu'elle manque (`docs/18` §4.3) ; corrections urgentes de l'audit | Toi, guidé | 15 à 45 min |
+| 3 | Mise à jour automatique du site, si l'audit dit qu'elle manque (`docs/18` §4.3) ; corrections urgentes de l'audit. **Le serveur tourne avec Coolify (porteur, 2026-11-04) : si Coolify met déjà dropicards.fr en ligne, ne pas lancer le script de mise à jour** | Toi, guidé | 15 à 45 min |
 | 4 | Transfert du dépôt vers le nouveau compte GitHub (§4) ; mise à jour des liens par Claude ; une commande sur le serveur | Toi, puis Claude | 20 min |
 | 5 | Nouveaux comptes Claude branchés sur le nouveau GitHub (§3, pour chaque compte) | Toi | 10 min par compte |
 | 6 | Claude sur le serveur : 1ᵉʳ compte (§5.3 à 5.7), puis les suivants (§6.1) | Toi, puis Claude | 1 h 30, puis 25 min par compte |
