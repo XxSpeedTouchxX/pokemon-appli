@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-04 (suite 2) — Espace admin et comptes utilisateurs : proposition, rien de codé
+
+- **Demande du porteur** : une interface admin interne, ouverte par des identifiants, avec tous les outils admin ; une interface utilisateur pour les autres, avec l'inscription par e-mail.
+- **Livré** : `docs/24-proposition-espace-admin-et-comptes.md` (complète `docs/17`) : connexion unique, rôle admin vérifié sur un serveur (le code de l'app est public : un mot de passe vérifié sur le téléphone se contourne), double authentification des admins, outils de l'espace admin (tableau de bord, utilisateurs, PK et PA avec motif, tirage au sort, PK shop, jeux, données, annonces, admins, journal, outils de test repris du mode Admin actuel), règles de sécurité.
+- **Proposé, à valider** : hébergement des comptes chez **Supabase** (chemin A, en Europe, ≈ 90 h, 0 € puis ≈ 25 $/mois) plutôt que sur le serveur OVH (chemin C, ≈ 165 h) ; maquette cliquable d'abord ; un « go » par étape. Décalage signalé entre `docs/16` §5 (Cloudflare), `docs/17` (serveur OVH) et `docs/18` (service géré).
+
 ## 2026-11-04 (suite 1) — Publication sur l'App Store et le Play Store : guide, rien de lancé
 
 - **Demande du porteur** : « la manipulation à faire pour sortir l'application sur l'App Store et le Play Store » ; serveur et changement de compte (`docs/22`) mis de côté par lui.
