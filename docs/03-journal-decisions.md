@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-05 — Audit du serveur (lecture seule) lancé par le porteur depuis le terminal de Coolify
+
+- **Fait par le porteur** (terminal de Coolify v4.6.0, serveur « localhost » où tourne Coolify, qui héberge aussi Axicall Pilot) : `free -h`, `df -h /`, puis `tools/server/audit.sh` (résumé seul).
+- **Capacité** : 62 Go de mémoire (58 Go disponibles), disque de 467 Go (382 Go libres) : largement de quoi installer Supabase (option C′ de `docs/24` §4.1).
+- **OK** : mises à jour de sécurité automatiques, aucune en attente ; SSH par clés seulement ; pare-feu actif (refus par défaut) ; fail2ban ou CrowdSec ; heure synchronisée ; une sauvegarde semble programmée.
+- **À voir** :
+  - ports ouverts au-delà de 22, 80 et 443 : 6001, 6002, 8000 (tableau de bord de Coolify par l'adresse IP, temps réel, terminal), 8080 et deux ports inconnus (53435, 54070) ; Docker peut contourner le pare-feu : identification demandée avant toute fermeture ; d'après la documentation de Coolify, 8000, 6001 et 6002 se ferment une fois le tableau de bord servi par un nom de domaine en https ;
+  - connexion SSH de root par clé : **à garder**, Coolify s'en sert pour piloter le serveur ;
+  - sudo sans mot de passe, disque non chiffré (chiffrement impossible sans réinstallation : sauvegardes chiffrées à la place) ;
+  - en-têtes de sécurité absents sur dropicards.fr (HSTS, Content-Security-Policy, X-Content-Type-Options) : à régler dans Coolify ;
+  - sauvegarde : à identifier, restauration à tester.
+- **Rien n'a été modifié.** Prochaine étape : identifier les ports et la façon dont dropicards.fr est publié par Coolify.
+
 ## 2026-11-04 (suite 3) — Le serveur tourne avec Coolify (Axicall Pilot) : nouvelle option pour les comptes
 
 - **Information du porteur** : « j'ai déjà mon serveur sur Coolify pour Axicall Pilot ».
