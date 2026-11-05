@@ -562,6 +562,8 @@ Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande 
 
 L'app est servie par le **serveur dédié du porteur** (OVHcloud, Rise-S), à l'adresse **https://dropicards.fr** ; le serveur sert le dossier `web/`. **Constat du 2026-10-30 : il ne récupérait pas la branche publiée** (site resté sur une ancienne version) ; `tools/server/install-autoupdate.sh`, à lancer une fois sur le serveur, la récupère toutes les 5 minutes (voir `tools/server/README.md`). Cloudflare Pages (`pokemon-appli.pages.dev`) est débranché.
 
+**Depuis le 2026-11-05 :** le site est publié par Coolify (build « Static », nginx) ; la configuration nginx à coller dans Coolify est `tools/server/coolify-nginx.conf` (voir `tools/server/README.md`).
+
 **En-têtes à garder** (ceux de `_headers`, que seul Cloudflare lisait), par exemple avec nginx :
 
 ```nginx

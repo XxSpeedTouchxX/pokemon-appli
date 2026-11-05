@@ -1,5 +1,11 @@
 # Outils du serveur dédié
 
+> **2026-11-05 :** dropicards.fr est publié par **Coolify** (projet « PKM », ressource « dropicards », Build strategy « Static », nginx:alpine, dossier `/web`), redéployé à chaque envoi sur la branche. `install-autoupdate.sh` ne doit **pas** être lancé sur ce serveur.
+
+## Configuration nginx dans Coolify (`coolify-nginx.conf`, 2026-11-05)
+
+À coller dans la ressource › Configuration › General › Build & deploy › « Custom Nginx configuration », puis Save et Redeploy. Reprend la configuration par défaut de Coolify v4.6.0 et ajoute : HSTS, `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` (caméra et position pour le site seulement), non-indexation, compression gzip, `no-cache` pour `/`, `index.html`, `app.js`, `sw.js`, le manifeste et `/data/`, cache d'un an pour `/vendor/tesseract/`, manifeste en `application/manifest+json`, `_headers` et `_redirects` jamais servis. Vérifiée avec nginx (`nginx -t`) et le test navigateur `t-look` derrière cette configuration. Pas encore de Content-Security-Policy. Retour en arrière : vider le champ, Save, Redeploy.
+
 ## Mise à jour automatique du site (`install-autoupdate.sh`, 2026-10-30)
 
 Depuis le passage sur le serveur OVH (2026-10-29), le site ne se mettait plus à jour. À lancer **une fois**, avec sudo :

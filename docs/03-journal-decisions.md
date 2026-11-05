@@ -25,6 +25,7 @@
   - bases de données (Coolify, Axicall) non publiées : bien.
 - **dropicards.fr est publié par Coolify** (projet « PKM », 1 ressource, redéployée à chaque envoi sur la branche) : `tools/server/install-autoupdate.sh` ne doit **pas** être lancé. En-têtes de sécurité à ajouter dans la configuration nginx du site, dans Coolify (Content-Security-Policy plus tard, d'abord en mode « rapport seulement »).
 - **Plus tard, sur « go »** : fermer 8000, 6001 et 6002 au public avec des règles adaptées à Docker (accès à Coolify par le domaine ou par Tailscale).
+- **Configuration nginx préparée** (`tools/server/coolify-nginx.conf`) : à partir de la configuration par défaut générée par Coolify (ressource en « Static », nginx:alpine, `/web`), ajout des en-têtes de sécurité (HSTS, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy), de la non-indexation, de la compression et des règles de cache (`no-cache` pour la page, `app.js`, `sw.js`, le manifeste et les données ; un an pour Tesseract) ; vérifiée avec nginx et un test navigateur ; à coller par le porteur, puis Save et Redeploy.
 
 ## 2026-11-04 (suite 3) — Le serveur tourne avec Coolify (Axicall Pilot) : nouvelle option pour les comptes
 
