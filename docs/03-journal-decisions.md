@@ -18,6 +18,13 @@
   - en-têtes de sécurité absents sur dropicards.fr (HSTS, Content-Security-Policy, X-Content-Type-Options) : à régler dans Coolify ;
   - sauvegarde : à identifier, restauration à tester.
 - **Rien n'a été modifié.** Prochaine étape : identifier les ports et la façon dont dropicards.fr est publié par Coolify.
+- **Ports identifiés (même jour, lecture seule)** :
+  - 53435 et 54070 : **Tailscale** (réseau privé), joignables seulement par ce réseau : à garder ;
+  - 8000, 6001, 6002 : tableau de bord, temps réel et terminal de Coolify, publiés par Docker sur toutes les adresses (le pare-feu ne les bloque pas forcément) ; le porteur ouvre Coolify **par le domaine et par l'adresse IP** : n'utiliser que le domaine en https ;
+  - 8080 : proxy Traefik de Coolify ; sans danger si `--api.insecure` est à `false` (à vérifier dans Servers › localhost › Proxy › Configuration) ;
+  - bases de données (Coolify, Axicall) non publiées : bien.
+- **dropicards.fr est publié par Coolify** (projet « PKM », 1 ressource, redéployée à chaque envoi sur la branche) : `tools/server/install-autoupdate.sh` ne doit **pas** être lancé. En-têtes de sécurité à ajouter dans la configuration nginx du site, dans Coolify (Content-Security-Policy plus tard, d'abord en mode « rapport seulement »).
+- **Plus tard, sur « go »** : fermer 8000, 6001 et 6002 au public avec des règles adaptées à Docker (accès à Coolify par le domaine ou par Tailscale).
 
 ## 2026-11-04 (suite 3) — Le serveur tourne avec Coolify (Axicall Pilot) : nouvelle option pour les comptes
 
