@@ -143,3 +143,30 @@ Ce qui vient plus tard (pas compté) : Face ID, réglages du PK shop et des jeux
 | 5 | Double authentification obligatoire pour les admins ? | Oui |
 | 6 | « Go » étape par étape (0, puis 1, puis 2…) ? | Oui |
 | 7 | dropicards.fr est-il mis en ligne par Coolify ? Quelle mémoire a le serveur (Coolify › Servers, ou espace OVH) ? | À me dire |
+
+---
+
+## 8. Plan de la base de données (ajout du 2026-11-06, demande du porteur)
+
+Le porteur demande « une base de données claire, avec un compte admin et des comptes utilisateurs, où l'on récolte toutes les adresses e-mail ». Plan proposé pour l'option C′ (Supabase installé par Coolify ; identique avec A) :
+
+| Table | Contenu | Qui la lit, qui l'écrit |
+|---|---|---|
+| `auth.users` (gérée par Supabase) | Adresse e-mail, mot de passe **chiffré** (jamais lisible), e-mail vérifié ou non, dates d'inscription et de dernière connexion, double authentification | Personne directement ; les admins voient l'e-mail dans l'espace admin |
+| `profiles` | Pseudo, tranche d'âge, starter et compagnon, date d'inscription, **rôle** (`user` ou `admin`), statut (actif ou suspendu), **accord pour les e-mails de nouveautés** (oui ou non, avec la date) | L'utilisateur : son profil seulement, sans pouvoir changer son rôle ; les admins : tous |
+| `collection_items` | Chaque carte ou produit scellé possédé : article, quantité, état, langue, note de gradation, prix payé, date d'ajout | L'utilisateur : ses lignes seulement ; les admins : lecture |
+| `wallets` | PK, PA, PK gagnés au total, série des PA du jour, dates des derniers jeux | Lecture par l'utilisateur ; **écriture par le serveur seulement** (sinon chacun pourrait se donner des PK) |
+| `dex_unlocks` | Pokémon débloqués, méga-évolutions | Lecture par l'utilisateur ; écriture par le serveur seulement |
+| `tickets` | Tickets du tirage au sort (date, prix payé en PK) | Lecture par l'utilisateur ; écriture par le serveur ; les admins font le tirage |
+| `admin_log` | Chaque action d'un admin : qui, quoi, sur quel compte, quand, motif | Ajout seulement, jamais modifié ni effacé ; lecture par les admins |
+
+**Les règles qui rendent la base sûre :**
+- chaque table est protégée par des **règles d'accès ligne par ligne** : un utilisateur ne voit jamais les données d'un autre, même en modifiant l'app ;
+- le **rôle admin** n'est donné qu'à la main, une fois, dans la base (toi), puis par l'espace admin ; personne ne peut se le donner ;
+- les **gains** (PA du jour, Booster PK, pile ou face, déblocages) sont calculés **par le serveur**. Aujourd'hui ils sont calculés sur le téléphone, donc modifiables par n'importe qui : c'est la partie la plus longue du travail (dans l'étape 3) ;
+- les **adresses e-mail** servent au compte (vérification, mot de passe oublié). Pour envoyer des nouveautés, il faut l'**accord** de la personne (case non cochée par défaut), et chaque e-mail doit permettre de se désinscrire (RGPD) ;
+- **sauvegardes** chiffrées de la base, chaque nuit, hors du serveur, avec une restauration testée avant les vrais utilisateurs.
+
+**Où vous verrez les comptes :** dans l'espace admin (liste, recherche, fiche, export des adresses des personnes qui ont accepté les nouveautés). L'outil d'administration de Supabase reste réservé aux réglages techniques.
+
+**Première étape proposée (« go » attendu) :** installer Supabase par Coolify, créer ces tables et leurs règles, créer ton compte admin et tester une inscription avec ton adresse ; l'app n'est pas encore modifiée. ≈ 16 h de mon travail (2 jours à plein régime, 5 à 6 jours au rythme réel) ; de ton côté ≈ 1 h (créer le service dans Coolify, ajouter une adresse `api.dropicards.fr` chez ton fournisseur de domaine, créer un compte Brevo pour les e-mails, un stockage pour les sauvegardes).

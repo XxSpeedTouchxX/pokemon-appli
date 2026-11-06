@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-06 — Base de données des comptes : plan proposé, rien de créé
+
+- **Demande du porteur** : « une base de données claire, avec un compte admin et des comptes utilisateurs, où l'on récolte toutes les adresses e-mail ».
+- **Proposé** (`docs/24` §8) : Supabase installé par Coolify (option C′) ; tables `auth.users` (gérée par Supabase), `profiles` (rôle `user` ou `admin`, accord pour les nouveautés), `collection_items`, `wallets`, `dex_unlocks`, `tickets`, `admin_log` ; règles d'accès ligne par ligne ; rôle admin donné à la main ; gains calculés par le serveur (anti-triche) ; e-mails de nouveautés seulement avec accord (RGPD).
+- **Première étape proposée, « go » attendu** : installer Supabase, créer les tables et le compte admin, tester une inscription, sans toucher à l'app (≈ 16 h ; ≈ 1 h pour le porteur).
+
 ## 2026-11-05 — Audit du serveur (lecture seule) lancé par le porteur depuis le terminal de Coolify
 
 - **Fait par le porteur** (terminal de Coolify v4.6.0, serveur « localhost » où tourne Coolify, qui héberge aussi Axicall Pilot) : `free -h`, `df -h /`, puis `tools/server/audit.sh` (résumé seul).
