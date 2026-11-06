@@ -13,6 +13,7 @@
 - **E-mails** : 5 modèles en français aux couleurs de Dropicards (`web/email/`, `tools/supabase/emails.mjs`), avec le code en grand.
 - **Trouvé en lisant le modèle Supabase de Coolify** : `API_EXTERNAL_URL` vaut par défaut une adresse interne (`http://supabase-kong:8000`) : les liens des e-mails ne marcheraient pas ; à mettre à `https://api.dropicards.fr`. Inscription par SMS active par défaut : à couper.
 - **Reste au porteur** (guide `tools/supabase/README.md`) : lancer `003`, régler les variables, donner la clé « anon » (publique), essai sur le téléphone ; puis sauvegardes chaque nuit hors du serveur.
+- **Suite du même jour** : clé « anon » donnée par le porteur et mise dans l'app (cache v133) ; les tests automatiques ne touchent jamais le vrai serveur (`navigator.webdriver`).
 
 ## 2026-11-06 — E-mails par Brevo : domaine authentifié ; alerte de sécurité de Studio corrigée
 

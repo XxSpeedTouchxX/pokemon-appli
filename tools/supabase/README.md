@@ -57,7 +57,7 @@ L'app (`tools/web/cloud.js`) parle directement au service de comptes (`/auth/v1/
 - mot de passe jamais enregistré par l'app ; session (jetons) dans le stockage du navigateur (`pkm-cloud-session`) ;
 - la collection, les PK et les PA restent sur l'appareil (étape suivante : `docs/24` §8, étape 3).
 
-Clé : `CLOUD_KEY` dans `tools/web/cloud.js` = valeur de `SERVICE_SUPABASEANON_KEY` (clé « anon », publique par nature : elle est dans chaque navigateur ; la protection vient des règles de la base). Tant qu'elle est vide, l'app garde le compte sur l'appareil. Jamais `SERVICE_SUPABASESERVICE_KEY` ni `SERVICE_PASSWORD_*` dans le dépôt.
+Clé : `CLOUD_KEY` dans `tools/web/cloud.js` = valeur de `SERVICE_SUPABASEANON_KEY` (clé « anon », publique par nature : elle est dans chaque navigateur ; la protection vient des règles de la base). Mise le 2026-11-06 (cache v133). Vide, l'app garderait le compte sur l'appareil. Navigateur piloté par les tests (`navigator.webdriver`) : jamais le vrai serveur, sauf `?cloud=http://127.0.0.1:…`. Jamais `SERVICE_SUPABASESERVICE_KEY` ni `SERVICE_PASSWORD_*` dans le dépôt.
 
 Tests : `tools/web/e2e/t-cloud.mjs` (serveur imité : inscription, mauvais code, renvoi, connexion sur un autre appareil, profil modifié, mot de passe oublié, adresse déjà inscrite, réseau coupé, déconnexion).
 

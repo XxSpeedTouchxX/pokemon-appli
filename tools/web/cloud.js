@@ -7,7 +7,8 @@
   // Sans clé (CLOUD_KEY vide) ou sans réseau, l'app garde le compte sur l'appareil comme avant.
   // La collection reste sur l'appareil pour l'instant (étape suivante de docs/24 §8).
   const CLOUD_URL = 'https://api.dropicards.fr';
-  const CLOUD_KEY = '';
+  // Clé « anon » de Supabase (SERVICE_SUPABASEANON_KEY dans Coolify, rôle « anon », donnée par le porteur le 2026-11-06).
+  const CLOUD_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc5Mzk1OTI2MCwiZXhwIjo0OTQ5NjMyODYwLCJyb2xlIjoiYW5vbiJ9.MHlBLPLkoVqE9-SnparqMbxnkG7cQpRngeSHC5HmZss';
   const CLOUD_LS = 'pkm-cloud-session';
   const CLOUD_ERR = {
     network: 'Impossible de joindre Dropicards. Vérifie ta connexion, puis réessaie.',
@@ -143,4 +144,6 @@
   try {
     const q = new URLSearchParams(location.search);
     if (q.get('cloud') && /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(q.get('cloud'))) { Cloud.url = q.get('cloud'); Cloud.key = q.get('cloudkey') || 'test'; }
+    // Navigateur piloté par les tests (navigator.webdriver) : jamais le vrai serveur, aucun compte créé par erreur.
+    else if (navigator.webdriver) Cloud.key = '';
   } catch (e) { /* hors navigateur */ }
