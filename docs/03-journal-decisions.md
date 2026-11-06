@@ -8,7 +8,7 @@
 
 ## 2026-11-06 — E-mails par Brevo : domaine authentifié ; alerte de sécurité de Studio corrigée
 
-- **Brevo** : domaine dropicards.fr authentifié (code Brevo, DKIM 1 et 2, DMARC `p=none` dans la zone DNS OVH de dropicards.fr, aucune ligne SPF demandée) ; expéditeur `Dropicards <noreply@dropicards.fr>` vérifié. Reste : clé SMTP dans les variables du service Supabase (Coolify), redémarrage, essai « Send password recovery ».
+- **Brevo** : domaine dropicards.fr authentifié (code Brevo, DKIM 1 et 2, DMARC `p=none` dans la zone DNS OVH de dropicards.fr, aucune ligne SPF demandée) ; expéditeur `Dropicards <noreply@dropicards.fr>` vérifié. Clé SMTP mise dans les variables du service Supabase (Coolify), service redémarré ; essai « Send password recovery » réussi : e-mail « Réinitialise ton mot de passe Dropicards » reçu, mais classé en spam par Gmail (domaine neuf, texte anglais par défaut de Supabase). Prochaine étape proposée : modèles d'e-mails en français.
 - **Studio** signalait 3 fonctions « role mutable search_path » : `tools/supabase/002_search_path.sql` fige leur chemin de recherche (comportement inchangé, 25 tests de sécurité toujours réussis) ; `001_comptes.sql` corrigé pour une nouvelle installation.
 
 ## 2026-11-06 — Base de données des comptes : plan proposé, rien de créé
