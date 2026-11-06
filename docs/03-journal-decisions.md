@@ -6,6 +6,28 @@
 
 ---
 
+## 2026-11-06 — PK shop par grades, rythme des tirages, abonnement Premium proposé (demandes du porteur)
+
+- **Tirages** le dimanche à 20 h :
+  - Bronze toutes les 2 semaines (dès le 22 novembre 2026) ;
+  - Argent chaque mois, le dernier dimanche (dès le 29 novembre 2026) ;
+  - Or tous les 2 mois, le dernier dimanche de novembre, janvier, mars, mai, juillet et septembre. Le choix du dernier dimanche est un défaut, à confirmer.
+- **Prix** : item rare au choix 25 000 PK, ETB 30 ans 50 000 PK (booster 7 500 PK et tickets inchangés).
+- **Grades** :
+  - Recrue et plus : ticket Bronze et booster ;
+  - Collectionneur et plus : ticket Argent et items rares (coffrets, classeurs…) ;
+  - Maître Pokémon et plus : ticket Or et ETB.
+  - Sinon : « Déverrouillé au grade … » avec l'emblème ; un appui ouvre la fenêtre « Tu dois d'abord déverrouiller le grade … pour avoir accès à cette loterie / à cet item ».
+- **PK shop** : les 3 tickets dans une seule rubrique ; un appui ouvre la fiche du ticket (lot, valeur, rythme, prochain tirage, à quoi il sert, achat).
+- **6ᵉ grade renommé** « Grand maître Pokémon ».
+- **Premium proposé** (`docs/27-proposition-abonnement-premium.md`) : bannière et écran de l'offre dans l'app (4,90 € par mois, 49,90 € par an, renouvellement automatique, arrêt à tout moment, période commencée due). Paiement et avantages pas encore activés ; 6 décisions attendues (P1 à P6).
+- **Coût des lots** (`docs/27` §5) :
+  - tirages ≈ 940 € par an (730 à 2 310 € selon les lots) ;
+  - achats directs ≈ 105 € par an et par joueur régulier (2 fois par jour) qui dépense tout ;
+  - un abonné Premium avec les PK doublés coûte ≈ 210 € de lots par an pour 49,90 à 58,80 € payés : double XP proposé sur les PA seulement.
+- **Fichiers** : `tools/supabase/008_shop_grades.sql` (25 tests, 160 en tout), `tools/web/pkshop.js`, `premium.js`, `premium.css` ; tests `e2e/t-premium.mjs`, `t-games.mjs`, `t-grades.mjs`, `t-cloud.mjs` ; cache v139.
+- **À faire par le porteur** : lancer `008` dans Studio.
+
 ## 2026-11-06 — Mot de passe des admins, nouveau PK shop, Réglages allégés, accueil à glisser (demandes du porteur)
 
 - **Face ID / empreinte mis de côté** : caché dans l'app (code et serveur gardés, `?passkey=1` pour un essai).

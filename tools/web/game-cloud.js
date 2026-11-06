@@ -40,7 +40,7 @@
         pkShared: g.shared ? (s.pkShared || 'serveur') : '', tickets: g.shop_draw || g.shop || {},
         pkOwn: un.filter(n => !(DEX[n] && DEX[n].mega)), megas: un.filter(n => DEX[n] && DEX[n].mega),
         games: Object.assign({}, s.games || {}, { boosterAt: g.booster_last || '', coinAt: g.coin_last || '' }),
-        cloudGame: { at: Date.now(), today: g.today, shopOpenAt: g.shop_open_at || '', grade: g.grade | 0, nextDraw: g.next_draw || '',
+        cloudGame: { at: Date.now(), today: g.today, shopOpenAt: g.shop_open_at || '', grade: g.grade | 0, nextDraw: g.next_draw || '', draws: g.draws || null,
           unlimited: !!g.unlimited, adminUntil: g.admin_until || '', realPk: g.pk | 0, realPa: g.pa | 0 }
       };
       // Admin déverrouillé (007) : PK et PA illimités sur le serveur ; l'app affiche « ∞ » et ne bloque plus rien.

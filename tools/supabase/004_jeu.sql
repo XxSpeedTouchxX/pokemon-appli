@@ -214,7 +214,7 @@ insert into public.game_grades (i, name, pk_earned, comp, mega, booster_h, coin_
   (2, 'Collectionneur', 5000, 15, 0, 10, 10, true, false),
   (3, 'Dresseur Pokémon', 10000, 30, 0, 8, 8, true, true),
   (4, 'Maître Pokémon', 20000, 100, 1, 6, 6, true, true),
-  (5, 'Grand maître mondial Pokémon', 50000, 151, 5, 4, 4, true, true)
+  (5, 'Grand maître Pokémon', 50000, 151, 5, 4, 4, true, true)
 on conflict (i) do update set name = excluded.name, pk_earned = excluded.pk_earned, comp = excluded.comp, mega = excluded.mega,
   booster_h = excluded.booster_h, coin_h = excluded.coin_h, ticket = excluded.ticket, shop_booster = excluded.shop_booster;
 

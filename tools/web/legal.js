@@ -87,7 +87,6 @@
   };
   proto.vRules = function (s) {
     const t = this.tierOf ? this.tierOf() : { i: 0 }, gi = t.i || 0, streak = (() => { const n = paPending(s); return n ? n.streak : (Number(s.paStreak) || 0); })();
-    const shopPerk = { ticket: 'Collectionneur', shopBooster: 'Dresseur Pokémon', deluxe: 'Grand maître mondial Pokémon' };
     return {
       pk: legalNum(Number(s.pk) || 0), pa: legalNum(Number(s.pa) || 0), grade: PF_GRADES[gi].name, emblem: 'img/grades/grade-' + (gi + 1) + '.svg',
       earn: [
@@ -102,7 +101,7 @@
       streak: PaCore.GAIN.map((v, i) => ({ day: i === 4 ? 'J5 et +' : 'J' + (i + 1), pa: '+' + v, cls: 'pkm-rules-day' + (Math.min(streak, 5) === i + 1 ? ' pkm-rules-today' : '') + (i < Math.min(streak, 5) ? ' pkm-rules-done' : '') })),
       // Prix fixés Pokémon par Pokémon par le porteur (2026-11-01, PA_PRICES) : fourchette par catégorie, lue dans les prix.
       evo: legalEvoRows(),
-      shop: SHOP_ITEMS.map(x => ({ name: x.name, price: x.soon ? 'Bientôt' : legalNum(x.price) + ' PK', grade: x.perk ? 'Dès le grade ' + shopPerk[x.perk] : '', img: x.img || 'img/brand/pk.svg' })),
+      shop: SHOP_ITEMS.map(x => ({ name: x.name, price: x.soon ? 'Bientôt' : legalNum(x.price) + ' PK', grade: x.minGrade ? 'Dès le grade ' + PF_GRADES[x.minGrade].name : '', img: x.img || 'img/brand/pk.svg' })),
       free: [['0 €', 'de mise'], ['0 €', 'à gagner en argent'], ['0', 'achat possible']].map(([a, b]) => ({ big: a, label: b }))
     };
   };

@@ -14,7 +14,7 @@
   // Méga-évolutions (2026-10-28, porteur) : les 15 méga-évolutions des Pokémon de Kanto (HOME_MEGAS, injecté par le
   // build depuis tools/sprites/megas.json : id, n° de base, nom). Chacune se débloque avec des PA quand on possède son
   // Pokémon de base comme compagnon ; elle devient alors un compagnon. Elles comptent pour les grades Maître Pokémon
-  // (1) et Grand maître mondial Pokémon (5). Prix : PA_PRICES (pk.js, 2026-11-01, porteur) ; PA_MEGA en repli.
+  // (1) et Grand maître Pokémon (5). Prix : PA_PRICES (pk.js, 2026-11-01, porteur) ; PA_MEGA en repli.
   const PA_MEGA = 2500;
   // Règle des PA, écrite une fois (2026-11-01, porteur : chaque jour dès minuit, un jour manqué → palier J2 ; gains du 2026-11-02).
   const PA_RULES = 'Chaque jour dès minuit, touche ton solde de PA pour récupérer tes PA : +20, +30, +40, +50, puis +70 PA par jour d’affilée. Un jour sans les récupérer : la série reprend à +30 PA.';

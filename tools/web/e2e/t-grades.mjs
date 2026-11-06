@@ -27,9 +27,11 @@ await page.screenshot({ path: shot('grades-recrue-jeux.png'), fullPage: true });
 const toShop = async () => { await go('start=market'); await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700); };
 await toShop();
 const shop = await text('main');
-// Nouveau PK shop (2026-11-06, porteur) : tickets et achats directs sans grade demandé (le prix suffit).
-ok('Recrue : tickets et achats directs sans grade demandé', (await page.locator('section[aria-label="Ticket Bronze"]').count()) === 1 && (await page.locator('section[aria-label="ETB 30 ans"]').count()) === 1 && !/Réservé au grade (Collectionneur|Dresseur)/.test(shop));
-ok('item Deluxe réservé au Grand maître mondial Pokémon', (await page.locator('section[aria-label="Item Deluxe"]').count()) === 1 && /Réservé au grade Grand maître mondial Pokémon/.test(shop));
+// PK shop par grades (2026-11-06, porteur) : Recrue → ticket Bronze et booster ; Argent et item rare dès Collectionneur ;
+// Or et ETB dès Maître Pokémon.
+ok('Recrue : booster achetable, item rare et ETB « Déverrouillé au grade … »', !/Déverrouillé/.test(await text('section[aria-label="Booster de la série du moment"]'))
+  && /Déverrouillé au grade Collectionneur/.test(await text('section[aria-label="Item rare au choix"]')) && /Déverrouillé au grade Maître Pokémon/.test(await text('section[aria-label="ETB 30 ans"]')));
+ok('item Deluxe réservé au Grand maître Pokémon', (await page.locator('section[aria-label="Item Deluxe"]').count()) === 1 && /Déverrouillé au grade Grand maître Pokémon/.test(shop));
 await page.screenshot({ path: shot('grades-recrue-shop.png'), fullPage: true });
 // Radar ouvert à tous depuis le 2026-11-01 (porteur : « refais-le fonctionner exactement comme avant ») : plus de verrou au grade Maître.
 await go('start=radar');
@@ -50,7 +52,7 @@ await seed({ pkEarned: 5000, pk: 2500, pkOwn: PAID.slice(0, 11), scanN: 0 });
 await go('start=market');
 ok('Collectionneur : booster et pièce toutes les 10 h', /1 offert toutes les 10 h/.test(await text('section[aria-label="Booster PK"]')) && /1 lancer toutes les 10 h/.test(await text('section[aria-label="Pile ou face"]')));
 await toShop();
-ok('Collectionneur : ticket Bronze achetable', (await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Acheter un ticket")').count()) === 1);
+ok('Collectionneur : item rare ouvert, ETB toujours verrouillée', !/Déverrouillé/.test(await text('section[aria-label="Item rare au choix"]')) && /Déverrouillé au grade Maître Pokémon/.test(await text('section[aria-label="ETB 30 ans"]')));
 ok('emblème Collectionneur dans l’en-tête', (await page.locator('header img[src="img/grades/grade-3.svg"]').count()) > 0);
 
 // 3. Méga-évolution avec des PA, dans le Pokédex (2026-10-28) : route d'évolution de la famille, méga au bout

@@ -117,7 +117,7 @@
   // part) et méga-évolutions débloquées avec des PA (pa.js). Les parrainages ne comptent plus (en attente).
   //   Recrue : dès l'inscription · Chasseur : 1 500 PK · Collectionneur : 5 000 PK + 15 compagnons ·
   //   Dresseur Pokémon : 10 000 PK + 30 compagnons · Maître Pokémon : 20 000 PK + 100 compagnons + 1 méga-évolution ·
-  //   Grand maître mondial Pokémon : 50 000 PK + 151 compagnons + 5 méga-évolutions.
+  //   Grand maître Pokémon : 50 000 PK + 151 compagnons + 5 méga-évolutions.
   // Avantages appliqués sur l'appareil (falsifiables tant qu'il n'y a pas de serveur) : scans par jour (scan.js), délai
   // du Booster PK et de la pièce (games.js ; pièce fermée à la Recrue), ticket du tirage, booster et item Deluxe du
   // PK shop (pkshop.js). Chaque grade garde ce que donnent les précédents. Le Radar (radar.js) est ouvert à tous depuis
@@ -131,14 +131,17 @@
     { name: 'Collectionneur', pk: 5000, comp: 15, mega: 0, scans: 20, boosterH: 10, coinH: 10, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
     { name: 'Dresseur Pokémon', pk: 10000, comp: 30, mega: 0, scans: 50, boosterH: 8, coinH: 8, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
     { name: 'Maître Pokémon', pk: 20000, comp: 100, mega: 1, scans: 100, boosterH: 6, coinH: 6, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
-    { name: 'Grand maître mondial Pokémon', pk: 50000, comp: 151, mega: 5, scans: 500, boosterH: 4, coinH: 4, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
+    { name: 'Grand maître Pokémon', pk: 50000, comp: 151, mega: 5, scans: 500, boosterH: 4, coinH: 4, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
   ];
   PF_GRADES.forEach((g, i) => {
     g.perks = PF_BASE.concat([
       g.scans + ' scans disponibles par jour',
       'Booster PK toutes les ' + g.boosterH + ' h'
     ], g.coinH ? ['Jeu de la pièce toutes les ' + g.coinH + ' h'] : [], i ? ['Emblème ' + g.name + ' sur ton profil'] : [],
-    // Tickets et achats du PK shop ouverts à tous les grades depuis le 2026-11-06 (porteur : nouveau magasin).
+    // PK shop par grades (2026-11-06, porteur ; pkshop.js, 008_shop_grades.sql).
+    ['Ticket Bronze et achat d’un booster au PK shop'],
+    i >= 2 ? ['Ticket Argent et items rares (coffrets, classeurs…) au PK shop'] : [],
+    i >= 4 ? ['Ticket Or et ETB au PK shop'] : [],
     g.deluxe ? ['Possibilité d’acheter un item « Deluxe » au PK shop'] : []);
   });
   const pfNum = n => Number(n || 0).toLocaleString('fr-FR');

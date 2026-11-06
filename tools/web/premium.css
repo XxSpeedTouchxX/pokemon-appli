@@ -1,0 +1,37 @@
+/* Abonnement Premium (2026-11-06, porteur) : bannière dorée qui brille et écran de l'offre. */
+.pkm-prem-banner { position: relative; flex: none; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; border: 0; border-radius: 22px; overflow: hidden; background: linear-gradient(120deg, #2B124C 0%, #5B2BD6 45%, #B26BFF 70%, #FFD60A 120%); color: #FFFFFF; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 10px 28px rgba(91, 43, 214, 0.45), inset 0 0 0 1px rgba(255, 230, 120, 0.55); }
+.pkm-prem-banner:active { transform: scale(0.985); }
+.pkm-prem-shine { position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0)); transform: skewX(-18deg); animation: pkmPremShine 3.2s ease-in-out infinite; pointer-events: none; }
+@keyframes pkmPremShine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+.pkm-prem-crown { position: relative; flex: none; width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; background: radial-gradient(circle at 50% 35%, #FFF3A6, #FFD60A 55%, #E09A00); box-shadow: 0 0 18px rgba(255, 214, 10, 0.7); animation: pkmPremPulse 2.4s ease-in-out infinite; }
+@keyframes pkmPremPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+.pkm-prem-btxt { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-prem-btxt b { font-family: 'Sora', sans-serif; font-size: 16.5px; letter-spacing: -0.01em; }
+.pkm-prem-btxt span { font-size: 12.5px; line-height: 1.35; color: #EDE3FF; }
+.pkm-prem-btxt i { font-style: normal; font-size: 12.5px; font-weight: 800; color: #FFE46B; }
+.pkm-prem-go { position: relative; flex: none; width: 34px; height: 34px; border-radius: 17px; display: flex; align-items: center; justify-content: center; background: #FFD60A; color: #2B124C; font-size: 24px; font-weight: 800; line-height: 1; }
+.pkm-prem-sheet { position: relative; width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; padding: 0 16px 24px; border-radius: 28px 28px 0 0; border-top: 1px solid rgba(255, 230, 120, 0.5); background: #120B24; color: #F3F6FC; }
+.pkm-prem-hero { position: relative; margin: 0 -16px; padding: 24px 16px 18px; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; background: radial-gradient(120% 100% at 50% 0%, #7B3FF2 0%, #3A1A78 55%, #120B24 100%); }
+.pkm-prem-crown-xl { width: 72px; height: 72px; border-radius: 24px; font-size: 42px; }
+.pkm-prem-hero h2 { margin: 6px 0 0; font-family: 'Sora', sans-serif; font-size: 24px; }
+.pkm-prem-hero h2 em { font-style: normal; background: linear-gradient(90deg, #FFE46B, #FFD60A, #FFB000); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pkm-prem-hero p { margin: 0; font-size: 14px; color: #E2D6FF; }
+.pkm-prem-perks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.pkm-prem-perks li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: rgba(178, 107, 255, 0.1); border: 1px solid rgba(178, 107, 255, 0.25); }
+.pkm-prem-ico { flex: none; width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(255, 214, 10, 0.16); }
+.pkm-prem-perks b { display: block; font-size: 14.5px; }
+.pkm-prem-perks small { display: block; font-size: 12.5px; line-height: 1.35; color: #BDB0DA; }
+.pkm-prem-plans { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 4px; }
+.pkm-prem-plan { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 22px 8px 14px; border-radius: 20px; border: 2px solid #3A2B5E; background: #1B1233; color: #F3F6FC; font: inherit; cursor: pointer; }
+.pkm-prem-plan-on { border-color: #FFD60A; background: linear-gradient(180deg, rgba(255, 214, 10, 0.16), rgba(255, 214, 10, 0.02)), #1B1233; box-shadow: 0 0 22px rgba(255, 214, 10, 0.28); }
+.pkm-prem-tag { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 3px 10px; border-radius: 999px; background: #FFD60A; color: #2B124C; font-size: 11px; font-weight: 800; }
+.pkm-prem-pname { font-size: 13.5px; font-weight: 700; color: #CFC3EE; }
+.pkm-prem-price { font-family: 'Sora', sans-serif; font-size: 24px; }
+.pkm-prem-per { font-size: 12.5px; color: #BDB0DA; }
+.pkm-prem-sub { font-size: 12px; color: #9F92C2; }
+.pkm-prem-save { margin-top: 4px; font-size: 11.5px; font-weight: 800; color: #5EE0CF; }
+.pkm-prem-cta { min-height: 54px; border: 0; border-radius: 999px; background: linear-gradient(90deg, #FFE46B, #FFD60A, #FFB000); color: #2B124C; font: inherit; font-size: 16px; font-weight: 800; box-shadow: 0 8px 22px rgba(255, 190, 0, 0.35); }
+.pkm-prem-cta:disabled { opacity: 0.75; cursor: default; }
+.pkm-prem-terms { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; line-height: 1.45; color: #A99DC8; }
+@media (prefers-reduced-motion: reduce) { .pkm-prem-shine, .pkm-prem-crown { animation: none; } }
+.pkm-prem-sheet > * { flex: none; }

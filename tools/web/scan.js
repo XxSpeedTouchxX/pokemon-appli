@@ -291,7 +291,7 @@
     return id && (s.extra || []).indexOf(id) >= 0 && TCG.item(id) ? id : baseScanTarget.call(this, s);
   };
   // Scans par jour selon le grade (2026-10-28, porteur ; profile.js) : Recrue 5, Chasseur 10, Collectionneur 20,
-  // Dresseur Pokémon 50, Maître et Grand maître mondial 100. Un scan = une carte reconnue (fiche ou propositions), à la
+  // Dresseur Pokémon 50, Maître et Grand maître 100. Un scan = une carte reconnue (fiche ou propositions), à la
   // caméra ou sur une photo ; la recherche à la main et l'onglet Scellé ne comptent pas. Remis à zéro chaque jour.
   scanProto.scanQuota = function () {
     const s = this.st(), P = this.perks(), used = s.scanDay === realToday() ? Number(s.scanN) || 0 : 0, left = Math.max(0, P.scans - used);

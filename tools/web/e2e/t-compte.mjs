@@ -35,7 +35,7 @@ ok('fiche du grade : emblème, condition, état', (await gs.locator('img[src="im
 ok('fiche du grade : avantages listés', (await page.locator('section[aria-label="Avantages du grade"] li').count()) >= 3);
 await page.screenshot({ path: shot('grade-fiche.png') });
 await page.click('button:has-text("Grade suivant")'); await page.waitForTimeout(500);
-ok('grade suivant : Grand maître mondial Pokémon', (await page.locator('section[aria-label="Grade Grand maître mondial Pokémon"]').count()) === 1);
+ok('grade suivant : Grand maître Pokémon', (await page.locator('section[aria-label="Grade Grand maître Pokémon"]').count()) === 1);
 await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(600);
 ok('retour : Information sur les grades', /Information sur les grades/.test(await page.locator('header').innerText()));
 // Passage de grade : 1 500 PK gagnés → Chasseur, animation.

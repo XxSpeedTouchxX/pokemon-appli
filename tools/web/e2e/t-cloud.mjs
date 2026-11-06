@@ -246,10 +246,12 @@ await page.locator('section[aria-label="Panneau Admin"] button[aria-label="Ferme
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
 ok('en-tête : PK et PA « ∞ »', ((await page.locator('header').first().innerText()).match(/∞/g) || []).length >= 2);
 await page.screenshot({ path: shot('cloud-admin-infini.png') });
+await page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk').nth(2).click(); await page.waitForTimeout(400);
 const tOr = page.locator('section[aria-label="Ticket Or"]');
 await tOr.locator('button:has-text("Acheter un ticket")').click(); await page.waitForTimeout(300);
 await tOr.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
-ok('admin : ticket Or acheté sans rien débiter', calls.some(c => c.startsWith('RPC buy_item') && c.includes('ticket-or')) && /rien débité/.test(await page.locator('body').innerText()));
+ok('admin : ticket Or acheté sans rien débiter (aucun grade demandé)', calls.some(c => c.startsWith('RPC buy_item') && c.includes('ticket-or')) && /rien débité/.test(await page.locator('body').innerText()));
+await tOr.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
 const rare = page.locator('section[aria-label="Item rare au choix"]');
 await rare.locator('button:has-text("Acheter")').click(); await page.waitForTimeout(300);
 await rare.locator('button:has-text("Confirmer")').click({ force: true }); await page.waitForTimeout(400);
@@ -279,9 +281,11 @@ gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
 ok('booster : gain tiré par le serveur (+200), animation jouée : ' + gs.pk + ' PK', gs.pk === 300 && calls.some(c => c.startsWith('RPC open_booster')) && /\+200 PK/.test(await boost.innerText()));
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
 const shopTxt = await page.locator('main').innerText();
-ok('PK shop : tickets Bronze 500, Argent 1 500, Or 5 000 PK ; achats 7 500, 10 000, 15 000 PK', ['Ticket Bronze', 'Ticket Argent', 'Ticket Or', 'Booster de la série du moment', 'Item rare au choix', 'ETB 30 ans'].every(t => shopTxt.includes(t))
-  && ['500 PK', '1 500 PK', '5 000 PK', '7 500 PK', '10 000 PK', '15 000 PK'].every(t => shopTxt.replace(/\u202f|\u00a0/g, ' ').includes(t)) && /dimanche 22 novembre à 20 h/.test(shopTxt));
-ok('compte à 300 PK : « Il te manque 200 PK » pour le ticket Bronze', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
+ok('PK shop : 3 tickets (500, 1 500, 5 000 PK) ; achats 7 500, 25 000, 50 000 PK', ['Booster de la série du moment', 'Item rare au choix', 'ETB 30 ans'].every(t => shopTxt.includes(t))
+  && ['500 PK', '1 500 PK', '5 000 PK', '7 500 PK', '25 000 PK', '50 000 PK'].every(t => shopTxt.replace(/\u202f|\u00a0/g, ' ').includes(t)));
+await page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk').nth(0).click(); await page.waitForTimeout(400);
+ok('compte à 300 PK : fiche du ticket Bronze, « Il te manque 200 PK », tirage du dimanche 22 novembre', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()) && /dimanche 22 novembre à 20 h/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
+await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
 await page.screenshot({ path: shot('cloud-shop.png'), fullPage: false });
 await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 ok('règles : « tirage fait par le serveur »', /fait par le serveur Dropicards/.test(await page.locator('main').innerText()));

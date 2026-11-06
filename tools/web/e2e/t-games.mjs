@@ -19,7 +19,7 @@ await page.screenshot({ path: shot('games-scissors.png') });
 await page.waitForTimeout(1300);
 const pk1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('booster ouvert : PK crédités (' + pk0 + ' → ' + pk1 + ')', [10, 30, 50, 100, 1000].indexOf(pk1 - pk0) >= 0);
-// Grade forcé à Grand maître mondial (helpers.mjs) : booster et pièce toutes les 4 h (2026-10-28).
+// Grade forcé à Grand maître (helpers.mjs) : booster et pièce toutes les 4 h (2026-10-28).
 ok('booster suivant dans 4 h', /Prochain booster dans [34] h/.test(await boost.innerText()));
 await page.screenshot({ path: shot('games-booster.png') });
 await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(3400);
@@ -58,25 +58,43 @@ await evo.screenshot({ path: shot('games-evolution.png') });
 const paPill = page.locator('header button[aria-label^="Mes points d’Aura"]').first();
 ok('en-tête : PA sous le solde de PK', /470\s*PA/.test(await paPill.innerText()));
 ok('en-tête : PA du jour à récupérer (« 1 »)', (await paPill.locator('.pkm-pa-dot').count()) === 1 && /PA à récupérer/.test(await paPill.getAttribute('aria-label')));
-// PK shop (2026-10-12) : 4ᵉ onglet, ticket du tirage au sort.
+// PK shop (2026-10-12) : 4ᵉ onglet, ticket du tirage au sort. Au grade Recrue pour voir les verrous (2026-11-06).
+await page.evaluate(() => localStorage.setItem('pkm-grade-force', '1'));
+await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
-// Nouveau magasin (2026-11-06, porteur) : tickets Bronze 500, Argent 1 500, Or 5 000 PK ; achats directs 7 500,
-// 10 000 (item rare au choix), 15 000 PK ; plus de grade demandé.
-const ticket = page.locator('section[aria-label="Ticket Bronze"]');
-ok('PK shop : ticket Bronze à 500 PK (booster, 5 à 15 €)', (await ticket.count()) === 1 && /500 PK/.test(await ticket.innerText()) && /5 à 15 €/.test(await ticket.innerText()));
-ok('PK shop : tickets Argent (1 500 PK) et Or (5 000 PK)', /1[\s\u202f\u00a0]500 PK/.test(await page.locator('section[aria-label="Ticket Argent"]').innerText()) && /5[\s\u202f\u00a0]000 PK/.test(await page.locator('section[aria-label="Ticket Or"]').innerText()));
+// PK shop par grades (2026-11-06, porteur) : les 3 tickets dans une rubrique (Bronze 500, toutes les 2 semaines ;
+// Argent 1 500, chaque mois ; Or 5 000, tous les 2 mois), fiche du ticket au toucher ; achats directs booster 7 500,
+// item rare 25 000 (Collectionneur), ETB 30 ans 50 000 (Maître Pokémon) ; « Déverrouillé au grade … » et fenêtre.
+const tks = page.locator('section[aria-label="Tickets du tirage au sort"]');
+const tkTxt = (await tks.innerText()).replace(/[\u202f\u00a0]/g, ' ');
+ok('3 tickets dans une seule rubrique : Bronze 500, Argent 1 500, Or 5 000 PK', (await tks.locator('.pkm-shop-tk').count()) === 3 && ['500 PK', '1 500 PK', '5 000 PK', 'toutes les 2 sem.', 'chaque mois', 'tous les 2 mois'].every(t => tkTxt.includes(t)));
+ok('Recrue : Argent et Or « Collectionneur » et « Maître Pokémon » avec leur emblème', /Collectionneur/.test(tkTxt) && /Maître Pokémon/.test(tkTxt) && (await tks.locator('img[src="img/grades/grade-3.svg"]').count()) === 1 && (await tks.locator('img[src="img/grades/grade-5.svg"]').count()) === 1);
 const lot = page.locator('section[aria-label="ETB 30 ans"]');
-ok('PK shop : achats directs booster 7 500, item rare 10 000, ETB 30 ans 15 000 PK, avec visuels', /7[\s\u202f\u00a0]500 PK/.test(await page.locator('section[aria-label="Booster de la série du moment"]').innerText())
-  && /10[\s\u202f\u00a0]000 PK/.test(await page.locator('section[aria-label="Item rare au choix"]').innerText())
-  && (await lot.count()) === 1 && /15[\s\u202f\u00a0]000 PK/.test(await lot.innerText()) && (await lot.locator('img[src="img/products/30th-celebration-elite-trainer-box.webp"]').count()) === 1);
-ok('tirage toutes les 2 semaines, date du prochain affichée', /toutes les 2 semaines/.test(await page.locator('main').innerText()) && /Prochain tirage : [a-z]+ \d+ [a-zéû]+ à 20 h/.test(await page.locator('main').innerText()));
+const shopTxt = (await page.locator('main').innerText()).replace(/[\u202f\u00a0]/g, ' ');
+ok('achats directs : booster 7 500, item rare 25 000, ETB 30 ans 50 000 PK, avec visuels', ['7 500 PK', '25 000 PK', '50 000 PK'].every(t => shopTxt.includes(t)) && (await lot.locator('img[src="img/products/30th-celebration-elite-trainer-box.webp"]').count()) === 1);
+ok('Recrue : ETB « Déverrouillé au grade Maître Pokémon »', /Déverrouillé au grade Maître Pokémon/.test(await lot.innerText()));
+await lot.locator('button:has-text("Déverrouillé au grade")').click(); await page.waitForTimeout(500);
+const lw = page.locator('section[aria-label="Grade requis"]');
+ok('fenêtre « Tu dois d’abord déverrouiller le grade Maître Pokémon pour avoir accès à cet item »', /Tu dois d’abord déverrouiller le grade Maître Pokémon pour avoir accès à cet item/.test(await lw.innerText()));
+await page.screenshot({ path: shot('pkshop-verrou.png') });
+await lw.locator('button:has-text("Compris")').click(); await page.waitForTimeout(300);
+await tks.locator('.pkm-shop-tk').nth(1).click(); await page.waitForTimeout(500);
+const sheet = page.locator('section[aria-label="Ticket Argent"]');
+ok('fiche du ticket Argent : lot, valeur, chaque mois, prochain tirage, à quoi il sert', /Un item rare/.test(await sheet.innerText()) && /20 à 60 €/.test(await sheet.innerText()) && /Chaque mois/.test(await sheet.innerText()) && /dimanche \d+ [a-zéû]+ à 20 h/.test(await sheet.innerText()) && /À quoi sert ce ticket/.test(await sheet.innerText()));
+await sheet.locator('button:has-text("Déverrouillé au grade")').click(); await page.waitForTimeout(500);
+ok('ticket verrouillé : « pour avoir accès à cette loterie »', /grade Collectionneur pour avoir accès à cette loterie/.test(await lw.innerText()));
+await lw.locator('button:has-text("Compris")').click(); await sheet.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
 ok('en-tête : plus de barre de tickets, les PA à la place (2026-10-25)', (await page.locator('header button[aria-label^="Mes tickets"]').count()) === 0 && (await page.locator('header button[aria-label^="Mes points d’Aura"]').count()) >= 1);
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pk = 700; localStorage.setItem(k, JSON.stringify(d)); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
+await tks.locator('.pkm-shop-tk').nth(0).click(); await page.waitForTimeout(400);
+const ticket = page.locator('section[aria-label="Ticket Bronze"]');
 await ticket.locator('button:has-text("Acheter un ticket")').click(); await ticket.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(500);
 const sd = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'));
-ok('ticket Bronze acheté (Recrue, sans grade demandé) : 1 ticket, 200 PK', sd.pk === 200 && sd.tickets && sd.tickets['ticket-bronze'] === 1 && /Tu as 1 ticket/.test(await ticket.innerText()));
+ok('ticket Bronze acheté depuis sa fiche (Recrue) : 1 ticket, 200 PK', sd.pk === 200 && sd.tickets && sd.tickets['ticket-bronze'] === 1 && /Tu as 1 ticket/.test(await ticket.innerText()));
+await ticket.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
+await page.evaluate(() => localStorage.setItem('pkm-grade-force', '6'));
 ok("tickets affichés dans le PK shop (« 1 ticket », sans le solde de PK depuis le 2026-11-02)", /1 ticket/.test(await page.locator('p[aria-label="Mes tickets du tirage au sort"]').innerText()) && (await page.locator('section[aria-label="Mon solde de PK"]').count()) === 0);
 await page.screenshot({ path: shot('pkshop.png') });
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);

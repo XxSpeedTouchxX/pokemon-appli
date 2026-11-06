@@ -7,51 +7,80 @@
   // Prix (2026-10-12, porteur) : ticket 2 000 PK ; lot « Booster 30 ans Pokémon » 15 000 PK (visuel officiel du booster).
   // Le lot s'échange directement (pas de tirage) ; son envoi demande un compte et une adresse : l'app l'enregistre sur
   // l'appareil et l'annonce, sans rien expédier pour l'instant.
-  // Nouveau magasin (2026-11-06, porteur ; serveur : tools/supabase/007_admin_boutique.sql) :
-  // - 3 tickets, chacun pour un tirage au sort toutes les 2 semaines (dimanche 20 h, heure de Paris, dès le 22 novembre
-  //   2026) : Bronze 500 PK (un booster, 5 à 15 €), Argent 1 500 PK (un item rare, 20 à 60 €), Or 5 000 PK (l'ETB de
-  //   la série du moment, 60 à 200 €) ; lots du moment susceptibles de changer avec les sorties ;
-  // - 3 achats directs : booster de la série du moment 7 500 PK, item rare au choix 10 000 PK, ETB 30 ans 15 000 PK ;
-  // - plus de grade demandé (le prix suffit) ; toujours 7 jours après la confirmation de l'adresse, pièce d'identité du
-  //   gagnant ou de l'acheteur vérifiée avant l'envoi. Les anciens articles (ticket 2 000 PK, lot 15 000 PK) sont retirés.
+  // Nouveau magasin (2026-11-06, porteur ; serveur : tools/supabase/007_admin_boutique.sql puis 008_shop_grades.sql) :
+  // - 3 tickets, chacun pour son tirage au sort, le dimanche à 20 h (heure de Paris) : Bronze 500 PK (un booster, 5 à
+  //   15 €) toutes les 2 semaines dès le 22 novembre 2026 ; Argent 1 500 PK (un item rare, 20 à 60 €) chaque mois, le
+  //   dernier dimanche ; Or 5 000 PK (l'ETB de la série du moment, 60 à 200 €) tous les 2 mois, le dernier dimanche de
+  //   novembre, janvier, mars… ; lots du moment susceptibles de changer avec les sorties ;
+  // - 3 achats directs : booster de la série du moment 7 500 PK, item rare au choix 25 000 PK, ETB 30 ans 50 000 PK ;
+  // - grade demandé (porteur, 2026-11-06) : Recrue et plus → ticket Bronze et booster ; Collectionneur et plus → ticket
+  //   Argent et item rare ; Maître Pokémon et plus → ticket Or et ETB. Sinon « Déverrouillé au grade … » et son emblème,
+  //   et un appui ouvre la fenêtre « Tu dois d'abord déverrouiller le grade … » ;
+  // - 7 jours après la confirmation de l'adresse, pièce d'identité vérifiée avant tout envoi.
+  // Les 3 tickets sont réunis dans une seule rubrique ; un appui ouvre la fiche du ticket (lot, valeur, rythme, prochain
+  // tirage, à quoi il sert) et l'achat.
   const SHOP_RARE = ['Coffret classeur', 'Poster', 'Coffret thématique', 'Collection', 'Pokébox', 'Mini tin', 'Bundle'];
   const SHOP_ITEMS = [
-    { id: 'ticket-bronze', kind: 'ticket', tier: 'bronze', tag: 'BRONZE', name: 'Ticket Bronze', prize: 'Tirage d’un booster Pokémon', value: 'Valeur du lot : 5 à 15 €', price: 500,
-      note: 'Lot du moment : un booster 30 ans. Il peut changer avec les sorties.', head: 'Tickets du tirage au sort', headSub: 'Un tirage toutes les 2 semaines, pour chaque ticket. Un ticket = une chance : plus tu en as, plus tu as de chances.' },
-    { id: 'ticket-argent', kind: 'ticket', tier: 'argent', tag: 'ARGENT', name: 'Ticket Argent', prize: 'Tirage d’un item rare', value: 'Valeur du lot : 20 à 60 €', price: 1500,
-      note: 'Coffret classeur, poster, coffret thématique, collection, Pokébox, mini tin ou bundle, selon la série du moment.' },
-    { id: 'ticket-or', kind: 'ticket', tier: 'or', tag: 'OR', name: 'Ticket Or', prize: 'Tirage de l’ETB de la série du moment', value: 'Valeur du lot : 60 à 200 €', price: 5000,
-      note: 'Ultra rare : le Coffret Dresseur d’élite (ETB) de la série du moment.' },
-    { id: 'achat-booster', kind: 'lot', name: 'Booster de la série du moment', prize: 'Booster 30 ans, envoyé chez toi', value: 'Valeur : 5 à 15 €', price: 7500,
+    { id: 'ticket-bronze', kind: 'ticket', tier: 'bronze', tag: 'BRONZE', name: 'Ticket Bronze', prize: 'Un booster Pokémon', lot: 'un booster Pokémon', value: '5 à 15 €', price: 500, minGrade: 0, cycle: '2w',
+      every: 'Toutes les 2 semaines', everyShort: 'toutes les 2 sem.', note: 'Lot du moment : un booster 30 ans. Il peut changer avec les sorties.' },
+    { id: 'ticket-argent', kind: 'ticket', tier: 'argent', tag: 'ARGENT', name: 'Ticket Argent', prize: 'Un item rare', lot: 'un item rare', value: '20 à 60 €', price: 1500, minGrade: 2, cycle: '1m',
+      every: 'Chaque mois, le dernier dimanche', everyShort: 'chaque mois', note: 'Coffret classeur, poster, coffret thématique, collection, Pokébox, mini tin ou bundle, selon la série du moment.' },
+    { id: 'ticket-or', kind: 'ticket', tier: 'or', tag: 'OR', name: 'Ticket Or', prize: 'L’ETB de la série du moment', lot: 'l’ETB de la série du moment', value: '60 à 200 €', price: 5000, minGrade: 4, cycle: '2m',
+      every: 'Tous les 2 mois, le dernier dimanche', everyShort: 'tous les 2 mois', note: 'Ultra rare : le Coffret Dresseur d’élite (ETB) de la série du moment.' },
+    { id: 'achat-booster', kind: 'lot', name: 'Booster de la série du moment', prize: 'Booster 30 ans, envoyé chez toi', value: 'Valeur : 5 à 15 €', price: 7500, minGrade: 0,
       img: 'img/shop-booster-30-anniversaire.webp', imgAlt: 'Booster du 30ᵉ anniversaire Pokémon',
       note: 'Achat direct, sans tirage.', head: 'Achat direct', headSub: 'Sans tirage : l’article est pour toi. Envoi après vérification de ton identité.' },
-    { id: 'achat-rare', kind: 'lot', name: 'Item rare au choix', prize: 'Un item rare de la série du moment, envoyé chez toi', value: 'Valeur : 20 à 60 €', price: 10000,
-      img: 'img/products/30th-poster-collection.webp', imgAlt: 'Collection poster 30ᵉ anniversaire Pokémon', wide: true, choices: SHOP_RARE,
+    { id: 'achat-rare', kind: 'lot', name: 'Item rare au choix', prize: 'Coffret, classeur… de la série du moment, envoyé chez toi', value: 'Valeur : 20 à 60 €', price: 25000, minGrade: 2,
+      img: 'img/products/30th-celebration-binder-collection.webp', imgAlt: 'Coffret classeur 30ᵉ anniversaire Pokémon', wide: true, choices: SHOP_RARE,
       note: 'Tu choisis le type d’item à l’achat ; le modèle dépend de la série du moment.' },
-    { id: 'achat-etb-30', kind: 'lot', name: 'ETB 30 ans', prize: 'Coffret Dresseur d’élite 30ᵉ anniversaire, envoyé chez toi', value: 'Valeur : 60 à 200 €', price: 15000,
+    { id: 'achat-etb-30', kind: 'lot', name: 'ETB 30 ans', prize: 'Coffret Dresseur d’élite 30ᵉ anniversaire, envoyé chez toi', value: 'Valeur : 60 à 200 €', price: 50000, minGrade: 4,
       img: 'img/products/30th-celebration-elite-trainer-box.webp', imgAlt: 'Coffret Dresseur d’élite 30ᵉ anniversaire', wide: true,
       note: 'Achat direct, sans tirage.' },
-    // Item « Deluxe » (2026-10-28, porteur) : réservé au Grand maître mondial Pokémon ; article et prix à définir.
-    { id: 'item-deluxe', kind: 'deluxe', name: 'Item Deluxe', prize: 'Un article d’exception, bientôt', price: 0, soon: true,
-      note: 'Article et prix annoncés ici prochainement.', perk: 'deluxe', head: 'Bientôt' }
+    // Item « Deluxe » (2026-10-28, porteur) : réservé au Grand maître Pokémon ; article et prix à définir.
+    { id: 'item-deluxe', kind: 'deluxe', name: 'Item Deluxe', prize: 'Un article d’exception, bientôt', price: 0, soon: true, minGrade: 5,
+      note: 'Article et prix annoncés ici prochainement.', head: 'Bientôt' }
   ];
-  // Prochain tirage : un dimanche sur deux à 20 h, heure de Paris, à partir du 22 novembre 2026 (même calcul que le serveur).
+  // Prochain tirage, même calcul que le serveur (008) ; avec le serveur, ses dates font foi (cloudGame.draws).
   const SHOP_DRAW0 = Date.parse('2026-11-22T19:00:00Z'), SHOP_DRAW_EVERY = 14 * 86400000;
   const shopNextDraw = now => {
     const k = Math.max(0, Math.ceil((now - SHOP_DRAW0) / SHOP_DRAW_EVERY));
     return new Date(SHOP_DRAW0 + k * SHOP_DRAW_EVERY);
   };
+  const shopDrawOf = (cyc, now) => {
+    if (cyc === '2w') return shopNextDraw(now);
+    const n = new Date(now);
+    let y = 2026, m = 11;
+    if (n.getUTCFullYear() * 12 + n.getUTCMonth() + 1 > y * 12 + m) { y = n.getUTCFullYear(); m = n.getUTCMonth() + 1; }
+    for (let k = 0; k < 30; k++) {
+      if (cyc === '1m' || ((y * 12 + m) - (2026 * 12 + 11)) % 2 === 0) {
+        const last = new Date(Date.UTC(y, m, 0, 19)); // dernier jour du mois m, puis le dimanche d'avant
+        last.setUTCDate(last.getUTCDate() - last.getUTCDay());
+        if (last.getTime() >= now) return last;
+      }
+      m++; if (m > 12) { m = 1; y++; }
+    }
+    return shopNextDraw(now);
+  };
   const shopDrawText = d => {
     try { return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }) + ' à 20 h'; } catch (e) { return ''; }
   };
   const shopProto = Component.prototype;
+  // Grade de l'appareil (recopié du serveur) ; un admin déverrouillé (007) passe toujours.
+  shopProto.shopGrade = function () {
+    const s = this.st();
+    if (s.cloudGame && s.cloudGame.unlimited && Cloud.on()) return 5;
+    return this.tierOf().i;
+  };
+  const shopGradeName = i => (PF_GRADES[i] || PF_GRADES[0]).name;
+  // Fenêtre « Tu dois d'abord déverrouiller le grade … ».
+  shopProto.shopLockOpen = function (it) { this.setState({ shopLock: { g: it.minGrade, kind: it.kind } }); };
   // Tickets possédés pour le prochain tirage (tous articles « ticket »), pour la barre sous le solde de PK.
   const shopTickets = s => SHOP_ITEMS.filter(x => x.kind === 'ticket').reduce((n, x) => n + ((s.tickets || {})[x.id] || 0), 0);
   const shopUnit = (it, n) => it.kind === 'ticket' ? (n > 1 ? n + ' tickets pour le prochain tirage' : n + ' ticket pour le prochain tirage') : (n > 1 ? n + ' achats' : n + ' achat');
 
   shopProto.shopBuy = function (id, choice) {
     const s = this.st(), item = SHOP_ITEMS.find(x => x.id === id), pk = Number(s.pk) || 0;
-    if (!item || item.soon || pk < item.price || (item.perk && !this.perks()[item.perk]) || (item.choices && item.choices.indexOf(choice) < 0)) return;
+    if (!item || item.soon || pk < item.price || this.shopGrade() < (item.minGrade || 0) || (item.choices && item.choices.indexOf(choice) < 0)) return;
     const tickets = Object.assign({}, s.tickets || {});
     tickets[id] = (tickets[id] || 0) + 1;
     const left = (pk - item.price).toLocaleString('fr-FR');
@@ -97,26 +126,64 @@
     };
   };
   shopProto.vPkShop = function (s) {
-    const pk = Number(s.pk) || 0, tickets = s.tickets || {}, cg = s.cloudGame || {};
-    const draw = shopDrawText(cg.nextDraw ? new Date(cg.nextDraw) : shopNextDraw(Date.now()));
+    const pk = Number(s.pk) || 0, tickets = s.tickets || {}, cg = s.cloudGame || {}, gi = this.shopGrade();
+    const drawOf = it => (cg.draws && cg.draws[it.id] ? new Date(cg.draws[it.id]) : shopDrawOf(it.cycle, Date.now()));
+    const emblem = i => 'img/grades/grade-' + (i + 1) + '.svg';
+    const lockLabel = it => 'Déverrouillé au grade ' + shopGradeName(it.minGrade);
+    const tks = SHOP_ITEMS.filter(it => it.kind === 'ticket');
+    const cur = tks.find(it => it.id === s.shopTk);
+    // Fiche d'un ticket (appui sur un ticket).
+    const sheet = (() => {
+      if (!cur) return { open: false };
+      const it = cur, n = tickets[it.id] || 0, open = gi >= it.minGrade, can = open && pk >= it.price, ask = can && s.shopAsk === it.id;
+      const price = it.price.toLocaleString('fr-FR') + ' PK', draw = shopDrawText(drawOf(it));
+      return {
+        open: true, name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier, prize: it.prize, value: it.value,
+        every: it.every, draw: draw, price: price, note: it.note,
+        use: 'Ce ticket te donne une chance de gagner ' + it.lot + ' au tirage du ' + draw + '. Plus tu as de tickets, plus tu as de chances. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit son lot chez lui, après vérification de son identité.',
+        owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n), locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade),
+        can: can, miss: open && !can, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
+        ask: ask, idle: !ask, buyLabel: 'Acheter un ticket · ' + price, confirmText: 'Échanger ' + price + ' contre 1 ' + it.name.toLowerCase() + ' ?',
+        buyOpen: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => this.shopBuy(it.id),
+        lock: () => this.shopLockOpen(it), close: () => this.setState({ shopTk: null, shopAsk: null })
+      };
+    })();
+    const lk = s.shopLock;
     return {
       pk: pk.toLocaleString('fr-FR'),
-      items: SHOP_ITEMS.map(it => {
-        const n = tickets[it.id] || 0, open = !it.perk || !!this.perks()[it.perk], can = open && !it.soon && pk >= it.price, ask = can && s.shopAsk === it.id;
-        const price = it.soon ? 'Prix à venir' : it.price.toLocaleString('fr-FR') + ' PK', g = it.perk ? this.tiers().find(t => t[it.perk]) : null;
+      ticketsHead: 'Tickets du tirage au sort', ticketsSub: 'Chaque ticket a son tirage, le dimanche à 20 h. Touche un ticket pour voir son lot et à quoi il sert.',
+      tickets: tks.map(it => {
+        const n = tickets[it.id] || 0, open = gi >= it.minGrade;
+        return {
+          name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-t-' + it.tier, price: it.price.toLocaleString('fr-FR') + ' PK', every: it.everyShort,
+          locked: !open, lockName: shopGradeName(it.minGrade), lockImg: emblem(it.minGrade), owned: n > 0, ownedText: '×' + n,
+          cls: 'pkm-shop-tk' + (open ? '' : ' pkm-shop-tk-off'), aria: it.name + ', ' + it.price + ' PK, tirage ' + it.everyShort + (open ? '' : ', déverrouillé au grade ' + shopGradeName(it.minGrade)) + '. Voir le ticket',
+          pick: () => this.setState({ shopTk: it.id, shopAsk: null })
+        };
+      }),
+      sheet: sheet,
+      lockWin: lk ? {
+        open: true, img: emblem(lk.g), grade: shopGradeName(lk.g),
+        text: 'Tu dois d’abord déverrouiller le grade ' + shopGradeName(lk.g) + ' pour avoir accès à ' + (lk.kind === 'ticket' ? 'cette loterie.' : 'cet item.'),
+        cond: 'Condition : ' + (this.tiers()[lk.g] || {}).cond + '.',
+        close: () => this.setState({ shopLock: null }),
+        grades: () => { this.setState({ shopLock: null, shopTk: null }); this.push('grade', { gradeIx: lk.g }); }
+      } : { open: false },
+      items: SHOP_ITEMS.filter(it => it.kind !== 'ticket').map(it => {
+        const n = tickets[it.id] || 0, open = gi >= (it.minGrade || 0), can = open && !it.soon && pk >= it.price, ask = can && s.shopAsk === it.id;
+        const price = it.soon ? 'Prix à venir' : it.price.toLocaleString('fr-FR') + ' PK';
         const choice = ask && it.choices && it.choices.indexOf(s.shopChoice) >= 0 ? s.shopChoice : '';
         return {
           name: it.name, prize: it.prize, price: price, note: it.note, value: it.value || '', hasValue: !!it.value,
-          hasHead: !!it.head, head: it.head || '', headSub: it.head === 'Tickets du tirage au sort' ? it.headSub + ' Prochain tirage : ' + draw + '.' : it.headSub || '', hasHeadSub: !!it.headSub,
-          isTicket: it.kind === 'ticket', isDeluxe: it.kind === 'deluxe', ticketCls: 'pkm-shop-ticket pkm-shop-t-' + (it.tier || 'gold'), tag: it.tag || 'TICKET',
+          hasHead: !!it.head, head: it.head || '', headSub: it.headSub || '', hasHeadSub: !!it.headSub,
+          isTicket: false, isDeluxe: it.kind === 'deluxe', ticketCls: 'pkm-shop-ticket', tag: 'TICKET',
           hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '', imgCls: it.wide ? 'pkm-shop-img pkm-shop-img-wide' : 'pkm-shop-img',
           owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n),
-          can: can, cannot: !can,
-          missText: !open ? '🔒 Réservé au grade ' + (g ? g.name + ' (' + g.cond + ')' : '') : it.soon ? 'Bientôt disponible' : 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
-          ask: ask, idle: !ask, buyLabel: (it.kind === 'ticket' ? 'Acheter un ticket · ' : 'Acheter · ') + price,
+          can: can, cannot: !can && open, locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade || 0), lock: () => this.shopLockOpen(it),
+          missText: it.soon ? 'Bientôt disponible' : 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
+          ask: ask, idle: !ask, buyLabel: 'Acheter · ' + price,
           hasChoices: ask && !!it.choices, choices: (it.choices || []).map(c => ({ label: c, on: String(c === choice), cls: 'pkm-shop-choice' + (c === choice ? ' pkm-shop-choice-on' : ''), pick: () => this.setState({ shopChoice: c }) })),
-          confirmText: it.choices && !choice ? 'Choisis ton item, puis confirme (' + price + ').'
-            : 'Échanger ' + price + ' contre ' + (it.kind === 'ticket' ? '1 ' + it.name.toLowerCase() + ' (tirage du ' + draw + ')' : '« ' + it.name + (choice ? ' : ' + choice : '') + ' »') + ' ?',
+          confirmText: it.choices && !choice ? 'Choisis ton item, puis confirme (' + price + ').' : 'Échanger ' + price + ' contre « ' + it.name + (choice ? ' : ' + choice : '') + ' » ?',
           confirmOff: String(!!it.choices && !choice),
           open: () => this.setState({ shopAsk: it.id, shopChoice: null }), cancel: () => this.setState({ shopAsk: null, shopChoice: null }),
           buy: () => { if (it.choices && !choice) return; this.shopBuy(it.id, choice || undefined); }
@@ -124,7 +191,7 @@
       }),
       // Rubriques (2026-11-01, porteur) : « Magasin » (les articles) et « Recharger mes PA » (packs de PA en argent réel).
       ...shopTabs(this, s),
-      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Tirage au sort toutes les 2 semaines, le dimanche à 20 h, fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi.',
+      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Tirages au sort le dimanche à 20 h (Bronze toutes les 2 semaines, Argent chaque mois, Or tous les 2 mois), fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi.',
       openRules: () => this.legalOpen('pk')
     };
   };
