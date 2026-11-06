@@ -47,6 +47,8 @@
     on() { return !!this.key; },
     session() { return cloudLs.get(); },
     signedIn() { return !!cloudLs.get(); },
+    // Rôle lu dans la table profiles (jamais choisi par l'app) : seul un compte « admin » ouvre le mode Admin.
+    isAdmin() { const s = cloudLs.get(); return !!(s && s.role === 'admin'); },
     async req(path, o) {
       o = o || {};
       const h = { apikey: this.key, 'Content-Type': 'application/json' };
@@ -69,7 +71,9 @@
     keep(j) {
       if (!j || !j.access_token || !j.refresh_token) return null;
       const u = j.user || {};
+      const prev = cloudLs.get();
       const v = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + (Number(j.expires_in) || 3600) * 1000, uid: u.id || '', email: u.email || '' };
+      if (prev && prev.uid && prev.uid === v.uid && prev.role) v.role = prev.role;
       cloudLs.set(v);
       return v;
     },
@@ -114,8 +118,11 @@
     async profile() {
       const s = cloudLs.get(), tk = await this.token();
       if (!s || !tk) return null;
-      const rows = await this.req('/rest/v1/profiles?select=pseudo,age_range,starter,buddy,news_optin,role,created_at&id=eq.' + encodeURIComponent(s.uid), { token: tk });
-      return Array.isArray(rows) ? rows[0] || null : null;
+      const rows = await this.req('/rest/v1/profiles?select=pseudo,age_range,starter,buddy,news_optin,role,status,created_at&id=eq.' + encodeURIComponent(s.uid), { token: tk });
+      const pr = Array.isArray(rows) ? rows[0] || null : null;
+      const cur = cloudLs.get();
+      if (cur && cur.uid === s.uid) { cur.role = pr && pr.role === 'admin' && pr.status !== 'suspended' ? 'admin' : 'user'; cloudLs.set(cur); }
+      return pr;
     },
     async saveProfile(f) {
       const s = cloudLs.get(), tk = await this.token();
@@ -147,3 +154,7 @@
     // Navigateur piloté par les tests (navigator.webdriver) : jamais le vrai serveur, aucun compte créé par erreur.
     else if (navigator.webdriver) Cloud.key = '';
   } catch (e) { /* hors navigateur */ }
+  // Mode Admin (admin.js) : avec le serveur, réservé aux comptes dont le rôle est « admin » dans la base (2026-11-06,
+  // porteur : « même avec une nouvelle adresse, j'ai accès au panneau admin, ce n'est pas normal ») ; sans serveur
+  // (tests automatiques), comme avant.
+  const admAllowed = () => !Cloud.on() || Cloud.isAdmin();

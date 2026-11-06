@@ -361,9 +361,15 @@
 
   // Lien d'un e-mail de Dropicards ouvert dans le navigateur (cloud.js) : session gardée, message à la première page.
   let stLinked = Cloud.on() ? Cloud.fromLink() : null;
+  // Rôle du compte relu à chaque ouverture (un admin retiré perd aussitôt le mode Admin, admAllowed).
+  let stRoleChecked = false;
   const stBaseHome = proto.vHome;
   proto.vHome = function (x) {
     const r = stBaseHome.call(this, x);
+    if (!stRoleChecked && Cloud.on() && Cloud.signedIn()) {
+      stRoleChecked = true;
+      Cloud.profile().then(() => this.setState({ cloudChecked: Date.now() })).catch(() => {});
+    }
     if (stLinked) {
       const L = stLinked, a = x.s.account;
       stLinked = null;

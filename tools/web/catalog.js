@@ -26,6 +26,9 @@
   const ADMIN_TODAY = (function () {
     try {
       const a = (JSON.parse(window.localStorage.getItem('pkm-collection-v1') || '{}') || {}).admin || {};
+      // Avec le serveur, seul un compte admin garde sa date simulée (cloud.js, admAllowed ; tests automatiques : comme avant).
+      const ses = JSON.parse(window.localStorage.getItem('pkm-cloud-session') || 'null');
+      if (!navigator.webdriver && !(ses && ses.role === 'admin')) return '';
       return a.on && /^\d{4}-\d{2}-\d{2}$/.test(a.today || '') ? a.today : '';
     } catch (e) { return ''; }
   })();

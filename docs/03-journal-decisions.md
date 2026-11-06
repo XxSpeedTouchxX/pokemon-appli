@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-06 — Mode Admin réservé aux comptes admin de la base (porteur : « même avec une nouvelle adresse, j'ai accès au panneau admin, ce n'est pas normal »)
+
+- Le mode Admin (code à 6 chiffres choisi sur l'appareil) restait ouvert à tout le monde. Désormais, avec le serveur, il n'apparaît que pour un compte connecté dont le rôle est `admin` dans la table `profiles` (lu à la connexion et à chaque ouverture de l'app ; jamais choisi par l'app) ; sinon : bouton retiré des Réglages, 7 appuis sur « Version » refusés, réglages Admin enregistrés sur l'appareil ignorés (PA à volonté, date simulée, prix). Mon profil affiche « · admin » (cache v134, `admAllowed` dans `cloud.js`).
+- Limite connue : PK, PA et collection sont encore sur l'appareil ; la vraie protection contre la triche viendra quand ils passeront sur le serveur (`docs/24` §8, étape 3).
+
 ## 2026-11-06 — Inscription de l'app branchée sur la base (« go » du porteur : « tout faire pour que la base de données soit fonctionnelle »)
 
 - **App** (`tools/web/cloud.js`, `start.js`, cache v132) : à la fin de l'accueil, le compte est créé sur api.dropicards.fr avec le profil (pseudo, âge, starter, nouveautés) ; code à 6 chiffres reçu par e-mail ; « J'ai déjà un compte » (connexion sur un autre appareil, profil prérempli) ; « Mot de passe oublié ? » ; Mon profil : connecté ou non, déconnexion. Sans réseau ou sans clé : compte sur l'appareil, comme avant. La collection, les PK et les PA restent sur l'appareil (étape 3 de `docs/24` §8, plus tard).

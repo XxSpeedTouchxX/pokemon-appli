@@ -99,7 +99,7 @@
     if (Cloud.on()) {
       const ses = Cloud.session();
       r.trainer.cloudOn = true;
-      r.trainer.cloudState = ses ? 'Connecté · ' + (ses.email || (s.account && s.account.email) || '') : 'Non connecté';
+      r.trainer.cloudState = ses ? 'Connecté · ' + (ses.email || (s.account && s.account.email) || '') + (ses.role === 'admin' ? ' · admin' : '') : 'Non connecté';
       r.trainer.cloudLabel = ses ? 'Me déconnecter' : (s.account && s.account.server ? 'Me reconnecter' : 'Enregistrer mon compte');
       r.trainer.cloudAct = ses
         ? async () => { await Cloud.signOut(); this.setState({ toast: 'Tu es déconnecté · ta collection reste sur cet appareil' }); }

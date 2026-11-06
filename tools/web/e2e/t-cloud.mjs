@@ -51,7 +51,7 @@ async function fake(route) {
     const u = Object.values(users).find(x => url.searchParams.get('id') === 'eq.' + x.id);
     if (!u) return send(200, []);
     if (req.method() === 'PATCH') { u.meta = Object.assign({}, u.meta, body); return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } }); }
-    return send(200, [{ pseudo: u.meta.pseudo, age_range: u.meta.age_range, starter: u.meta.starter, news_optin: !!u.meta.news_optin, role: 'user' }]);
+    return send(200, [{ pseudo: u.meta.pseudo, age_range: u.meta.age_range, starter: u.meta.starter, news_optin: !!u.meta.news_optin, role: u.role || 'user', status: 'active' }]);
   }
   return send(404, {});
 }
@@ -163,6 +163,42 @@ st = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
 ok('« Continuer sans compte » : compte sur l’appareil seulement', st.account && st.account.server === false && st.trainer.name === 'Pierre');
 down = false;
 await ctx.close();
+
+// 5. Mode Admin réservé aux comptes « admin » de la base (2026-11-06, porteur).
+const Q = '&cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test';
+const admIn = async (page, email, pwd) => {
+  await page.click('button:has-text("Créer mon compte")'); await page.waitForTimeout(500);
+  await page.click('button:has-text("J’ai déjà un compte")'); await page.waitForTimeout(300);
+  const f = page.locator('form[aria-label="Connecte-toi"]');
+  await f.locator('input[name=email]').fill(email); await f.locator('input[name=password]').fill(pwd);
+  await f.locator('button[type=submit]').click(); await page.waitForTimeout(900);
+};
+({ ctx, page } = await fresh());
+// Appareil où le mode Admin était allumé (avec PA à volonté) avant les comptes.
+await admIn(page, 'pierre@exemple.fr', 'encore-un-mot-de-passe').catch(() => {});
+users['pierre@exemple.fr'] = users['pierre@exemple.fr'] || { id: 'u-p', email: 'pierre@exemple.fr', pwd: 'x', meta: {}, confirmed: true };
+await ctx.close();
+users['sacha@exemple.fr'] = { id: 'u-adm', email: 'sacha@exemple.fr', pwd: 'mot-de-passe-admin-42', meta: { pseudo: 'Sacha', age_range: '25-35', starter: 25 }, confirmed: true, role: 'admin' };
+users['ondine@exemple.fr'].role = 'user';
+for (const [who, pwd, admin] of [['ondine@exemple.fr', 'nouveau-mot-de-passe-99', false], ['sacha@exemple.fr', 'mot-de-passe-admin-42', true]]) {
+  ({ ctx, page } = await fresh());
+  await admIn(page, who, pwd);
+  await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); d.onb = 0; d.tuto = 'done'; d.admin = { on: true, hash: 'x', salt: 'y', paFree: true, flags: {}, prices: {} }; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
+  await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
+  const menu = await page.locator('button:has-text("Mode Admin"), button:has-text("Panneau Admin")').count();
+  const role = await page.evaluate(() => (JSON.parse(localStorage.getItem('pkm-cloud-session') || '{}') || {}).role);
+  if (!admin) {
+    ok('compte non admin : rôle « ' + role + ' », aucun bouton Admin dans les Réglages', role === 'user' && menu === 0);
+    ok('compte non admin : mode Admin enregistré sur l’appareil ignoré (pas d’en-tête Admin)', (await page.locator('header button:has-text("Admin")').count()) === 0);
+    const ver = page.locator('button[aria-label^="Version"]');
+    for (let i = 0; i < 7; i++) await ver.click({ delay: 10 });
+    await page.waitForTimeout(400);
+    ok('compte non admin : 7 appuis sur « Version » refusés', (await page.locator('input[inputmode="numeric"][maxlength="6"]').count()) === 0 && /réservé aux comptes admin/.test(await page.locator('body').innerText()));
+  } else {
+    ok('compte admin : rôle « ' + role + ' », « Panneau Admin » dans les Réglages', role === 'admin' && menu === 1);
+  }
+  await ctx.close();
+}
 
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);

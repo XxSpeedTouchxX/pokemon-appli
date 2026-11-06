@@ -13,8 +13,10 @@
   const ADM_FLAGS = [['scan', 'Bouton Scan'], ['territory', 'Onglet Territoire'], ['pk', 'Monnaie PK'], ['partners', 'Partenaires fictifs (Territoire)'], ['motion', 'Animations']];
   const ADM_CATS = [['', 'Auto'], ['novice', 'Novice'], ['regular', 'Régulier'], ['passion', 'Passionné']];
   const admDefault = () => ({ on: false, hash: '', salt: '', today: '', cat: '', tier: -1, paFree: false, prices: {}, flags: { scan: true, territory: true, pk: true, partners: true, motion: true } });
+  // Compte non admin (admAllowed, cloud.js) : réglages enregistrés ignorés, mode Admin éteint.
   const admOf = s => {
     const a = s.admin || {}, d = admDefault();
+    if (!admAllowed()) return d;
     return Object.assign(d, a, { flags: Object.assign(d.flags, a.flags || {}), prices: Object.assign({}, a.prices || {}) });
   };
   // Empreinte du code (FNV-1a sur sel + code) : évite de garder le code en clair sur l'appareil.
@@ -60,11 +62,13 @@
     admTaps = admTaps.filter(t => now - t < ADM_TAP_MS).concat([now]);
     if (admTaps.length < ADM_TAPS) return;
     admTaps = [];
+    if (!admAllowed()) { this.setState({ toast: 'Mode Admin réservé aux comptes admin de Dropicards' }); return; }
     const a = admOf(this.st());
     if (a.on) { this.setState({ admSheet: true }); return; }
     this.setState({ admLock: a.hash ? 'enter' : 'create', admCode: '', admCode1: '', admMsg: '' });
   };
   proto.admSubmit = function () {
+    if (!admAllowed()) { this.setState({ admLock: '', admCode: '', admCode1: '' }); return; }
     const s = this.st(), a = admOf(s), code = String(s.admCode || '').trim();
     if (!/^\d{6}$/.test(code)) { this.setState({ admMsg: 'Le code fait 6 chiffres.' }); return; }
     if (s.admLock === 'create') {
@@ -86,7 +90,7 @@
     const a = admOf(s), self = this;
     const chip = (on, extra) => Object.assign({ on: on }, this.chip(on), extra);
     const r = {
-      on: a.on, version: ADM_VERSION, versionLabel: 'Version ' + ADM_VERSION, tapVersion: () => this.admTap(),
+      on: a.on, can: admAllowed(), version: ADM_VERSION, versionLabel: 'Version ' + ADM_VERSION, tapVersion: () => this.admTap(),
       open: () => this.setState({ admSheet: true }),
       // Entrée « Mode Admin · paramétrage » des Réglages (2026-10-11, demande du porteur) : code, puis panneau
       // (solde de PK en premier). Les 7 appuis sur « Version » restent possibles.
