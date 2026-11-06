@@ -95,6 +95,19 @@
       })),
       note: 'Les comptes Dropicards n’existent pas encore : ton pseudo et ton adresse restent sur cet appareil, avec ta collection. Rien n’est envoyé ni publié.'
     };
+    // Compte sur le serveur (2026-11-06, cloud.js) : état, connexion ou déconnexion.
+    if (Cloud.on()) {
+      const ses = Cloud.session();
+      r.trainer.cloudOn = true;
+      r.trainer.cloudState = ses ? 'Connecté · ' + (ses.email || (s.account && s.account.email) || '') : 'Non connecté';
+      r.trainer.cloudLabel = ses ? 'Me déconnecter' : (s.account && s.account.server ? 'Me reconnecter' : 'Enregistrer mon compte');
+      r.trainer.cloudAct = ses
+        ? async () => { await Cloud.signOut(); this.setState({ toast: 'Tu es déconnecté · ta collection reste sur cet appareil' }); }
+        : () => this.setState({ onb: 2, obMode: s.account && s.account.server ? 'login' : 'signup', obErr: '', obNote: '' });
+      r.trainer.note = ses
+        ? 'Ton compte Dropicards (adresse, pseudo, âge, compagnon) est enregistré sur notre serveur. Ta collection reste sur cet appareil pour l’instant.'
+        : 'Connecte-toi pour enregistrer ton compte Dropicards. En attendant, ton pseudo et ta collection restent sur cet appareil.';
+    } else r.trainer.cloudOn = false;
     return r;
   };
 

@@ -72,48 +72,142 @@
     // « Suivant » ; 3. âge, pseudo de dresseur et choix du compagnon de voyage parmi les quatre starters (un appui le met
     // en avant avec une brève description et « Choisir … comme compagnon ») ; ce starter fait ensuite le didacticiel.
     // Retour possible à tout moment (flèche, points), transitions glissées comme entre les pages de l'app.
-    // Les comptes Dropicards n'existent pas encore côté serveur (docs/17, en attente de « go ») : l'adresse, l'âge, le
-    // choix des nouveautés et le pseudo sont gardés sur l'appareil (account, trainer) ; le mot de passe ne reste qu'en
-    // mémoire le temps des pages et n'est jamais enregistré par l'app (le trousseau du téléphone peut le garder).
+    // Comptes sur le serveur (2026-11-06, « go » du porteur, cloud.js) : à la fin de la page 3, le compte est créé sur
+    // api.dropicards.fr avec le profil ; page 4 : le code à 6 chiffres reçu par e-mail. Page 2 : aussi « J'ai déjà un
+    // compte » (connexion) et « Mot de passe oublié ? » (code par e-mail, nouveau mot de passe). Le mot de passe ne
+    // reste qu'en mémoire le temps des pages, jamais enregistré par l'app (le trousseau du téléphone peut le garder).
+    // Sans serveur (pas de clé, pas de réseau) : compte gardé sur l'appareil, comme avant (server: false).
     const s = x.s, acc = s.account && s.account.email ? s.account : null, tr = s.trainer || {}, page = s.onb || 1;
     const ST_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    const go = n => this.setState({ onb: n, obErr: '' });
+    const go = n => this.setState({ onb: n, obErr: '', obNote: '' });
+    const cloud = Cloud.on(), signed = cloud && Cloud.signedIn(), busy = !!s.obBusy;
+    const mode = cloud && (s.obMode === 'login' || s.obMode === 'reset') ? s.obMode : 'signup';
+    const fail = (e, more) => this.setState(Object.assign({ obBusy: false, obErr: (e && e.message) || CLOUD_ERR.other, obNote: '' }, more || {}));
+    // Après une connexion : le profil du serveur préremplit la page 3 (âge, pseudo, starter), à vérifier puis valider.
+    const fromProfile = pr => {
+      const line = pr && pr.starter ? (PA_STARTERS.find(st => st[1] === pr.starter) || [''])[0] : '';
+      this.setState({ obBusy: false, obErr: '', obNote: '', obPwd: '', obMode: 'signup', onb: 3,
+        obNick: pr && pr.pseudo ? pr.pseudo : undefined, obAge: pr && pr.age_range ? pr.age_range : '', obStarter: line, obNews: pr ? !!pr.news_optin : undefined });
+    };
     // Compte déjà créé (accueil revu depuis Mon profil, 2026-10-30, porteur) : les trois pages restent accessibles,
     // préremplies ; « Passer » ramène à l'app à tout moment.
     r.cta = acc ? 'Continuer' : 'Créer mon compte';
     r.next1 = () => go(2);
     r.canSkip = !!acc;
+    r.is4 = page === 4;
     r.canBack = page > 1;
-    r.back = () => go(Math.max(1, page - 1));
+    r.back = () => go(page === 4 ? 3 : Math.max(1, page - 1));
+    const dp = Math.min(page, 3);
     r.dots = [1, 2, 3].map(n => ({
-      cls: 'pkm-onb-dot' + (n === page ? ' pkm-onb-dot-on' : n < page ? ' pkm-onb-dot-done' : ''), cur: n === page ? 'step' : 'false',
-      off: n > page ? 'true' : 'false', label: ['Présentation', 'Compte', 'Profil de dresseur'][n - 1] + ' (page ' + n + ' sur 3)',
-      go: () => { if (n < page) go(n); }
+      cls: 'pkm-onb-dot' + (n === dp ? ' pkm-onb-dot-on' : n < dp ? ' pkm-onb-dot-done' : ''), cur: n === dp ? 'step' : 'false',
+      off: n > dp ? 'true' : 'false', label: ['Présentation', 'Compte', 'Profil de dresseur'][n - 1] + ' (page ' + n + ' sur 3)',
+      go: () => { if (n < dp) go(n); }
     }));
-    const err = s.obErr || '';
+    const err = s.obErr || '', note = s.obNote || '';
+    const needPwd = !(acc && (!cloud || signed));
+    const resetSent = mode === 'reset' && !!s.obResetSent;
+    const T = {
+      signup: [acc ? 'Ton compte Dropicards' : 'Crée ton compte Dropicards', acc ? (signed ? 'Ton compte est enregistré : vérifie ton adresse, puis « Suivant ».' : 'Choisis un mot de passe pour enregistrer ton compte sur Dropicards.') : 'Pour retrouver ta collection et te connecter chaque jour.', 'Suivant'],
+      login: ['Connecte-toi', 'Avec l’adresse et le mot de passe de ton compte Dropicards.', 'Me connecter'],
+      reset: resetSent ? ['Nouveau mot de passe', 'Entre le code reçu à ' + (s.obEmail || 'ton adresse') + ', puis ton nouveau mot de passe.', 'Changer mon mot de passe'] : ['Mot de passe oublié', 'Entre ton adresse : tu vas recevoir un code par e-mail.', 'Recevoir un code']
+    }[mode];
     r.acc = {
       email: s.obEmail !== undefined ? s.obEmail : (tr.email || (acc && acc.email) || ''), pwd: s.obPwd || '', news: s.obNews !== undefined ? !!s.obNews : !!(acc && acc.news),
-      title: acc ? 'Ton compte Dropicards' : 'Crée ton compte Dropicards',
-      lead: acc ? 'Ton compte est déjà créé sur ce téléphone : vérifie ton adresse, puis « Suivant ».' : 'Pour retrouver ta collection et te connecter chaque jour.',
-      pwHold: acc ? 'Déjà choisi (facultatif)' : '12 caractères au moins',
-      pwHint: acc ? 'Laisse vide pour garder ton mot de passe actuel.' : '12 caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.',
+      title: T[0], lead: T[1], go: busy ? 'Un instant…' : T[2], busy: busy ? 'true' : 'false',
+      isSignup: mode === 'signup', isLogin: mode === 'login', isReset: mode === 'reset', showPwd: mode !== 'reset' || resetSent, showCode: resetSent,
+      pwLabel: resetSent ? 'Nouveau mot de passe' : 'Mot de passe', pwAuto: mode === 'login' ? 'current-password' : 'new-password',
+      pwHold: mode === 'login' ? 'Ton mot de passe' : needPwd ? '12 caractères au moins' : 'Déjà choisi (facultatif)',
+      pwHint: mode === 'login' ? '' : needPwd ? '12 caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.' : 'Laisse vide pour garder ton mot de passe actuel.',
+      hasHint: mode !== 'login',
+      code: s.obCode || '', onCode: e => this.setState({ obCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 6) }),
       shown: s.obShow ? 'true' : 'false', pwType: s.obShow ? 'text' : 'password', eye: s.obShow ? 'Masquer' : 'Afficher',
-      emailBad: /e-mail/.test(err) ? 'true' : 'false', pwdBad: /mot de passe/.test(err) ? 'true' : 'false',
-      err: err, hasErr: !!err && page === 2,
+      emailBad: /e-mail|adresse/i.test(err) ? 'true' : 'false', pwdBad: /mot de passe/.test(err) ? 'true' : 'false',
+      err: err, hasErr: !!err && page === 2, notice: note, hasNotice: !!note && !err && page === 2,
       note: 'Ton adresse sert à te connecter et, seulement si tu le coches, à recevoir nos nouveautés. Tu peux te désinscrire à tout moment.',
+      links: cloud && !busy, toLogin: () => this.setState({ obMode: 'login', obErr: '', obNote: '' }),
+      toSignup: () => this.setState({ obMode: 'signup', obErr: '', obNote: '', obResetSent: false }),
+      toReset: () => this.setState({ obMode: 'reset', obErr: '', obNote: '', obResetSent: false, obCode: '' }),
       onEmail: e => this.setState({ obEmail: String(e.target.value || '').trim() }),
       onPwd: e => this.setState({ obPwd: String(e.target.value || '') }),
       onNews: e => this.setState({ obNews: !!e.target.checked }),
       toggle: () => this.setState({ obShow: !this.st().obShow }),
-      submit: e => {
+      submit: async e => {
         if (e && e.preventDefault) e.preventDefault();
         const f = e && e.target && e.target.elements, t = this.st();
+        if (t.obBusy) return;
         const email = String(f && f.email ? f.email.value : t.obEmail || '').trim().toLowerCase(), pwd = String(f && f.password ? f.password.value : t.obPwd || '');
-        const news = f && f.news ? !!f.news.checked : t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news);
         if (!ST_MAIL.test(email)) { this.setState({ obEmail: email, obErr: 'Adresse e-mail invalide : vérifie-la (exemple : sacha@exemple.fr).' }); return; }
-        if (pwd.length < 12 && !(acc && !pwd)) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
+        if (mode === 'login') {
+          if (!pwd) { this.setState({ obEmail: email, obErr: 'Entre ton mot de passe.' }); return; }
+          this.setState({ obEmail: email, obBusy: true, obErr: '' });
+          try { await Cloud.signIn(email, pwd); fromProfile(await Cloud.profile()); } catch (e2) {
+            if (e2.code === 'email_not_confirmed') {
+              try { await Cloud.resend(email); } catch (e3) { /* code déjà envoyé */ }
+              this.setState({ obBusy: false, obErr: '', obPwd: pwd, obAfter: 'login', obCode: '', onb: 4 });
+            } else fail(e2, { obPwd: '' });
+          }
+          return;
+        }
+        if (mode === 'reset') {
+          if (!resetSent) {
+            this.setState({ obEmail: email, obBusy: true, obErr: '' });
+            try { await Cloud.recover(email); this.setState({ obBusy: false, obResetSent: true, obCode: '', obNote: 'Code envoyé à ' + email + ' (regarde aussi dans les spams).' }); } catch (e2) { fail(e2); }
+            return;
+          }
+          const code = String(f && f.code ? f.code.value : t.obCode || '').replace(/\D/g, '');
+          if (code.length !== 6) { this.setState({ obErr: 'Le code fait 6 chiffres : vérifie l’e-mail reçu.' }); return; }
+          if (pwd.length < 12) { this.setState({ obPwd: '', obErr: 'Ton nouveau mot de passe doit faire au moins 12 caractères.' }); return; }
+          this.setState({ obBusy: true, obErr: '' });
+          try { await Cloud.verify(email, code, 'recovery'); await Cloud.setPassword(pwd); fromProfile(await Cloud.profile()); this.setState({ toast: 'Mot de passe changé : tu es connecté' }); } catch (e2) { fail(e2); }
+          return;
+        }
+        const news = f && f.news ? !!f.news.checked : t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news);
+        if (pwd.length < 12 && !(!needPwd && !pwd)) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
         // Le mot de passe reste en mémoire (jamais enregistré) pour pouvoir revenir à cette page.
-        this.setState({ obEmail: email, obPwd: pwd, obNews: news, obErr: '', onb: 3 });
+        this.setState({ obEmail: email, obPwd: pwd, obNews: news, obErr: '', obNote: '', onb: 3 });
+      }
+    };
+    // Fin de l'accueil : le starter remercie au milieu de l'écran (calque de tuto.js), puis présente l'app.
+    const done = (t, nick, obAge, line, server) => {
+      const under = obAge === 'u15', ses = Cloud.session();
+      const sec = document.querySelector('section[aria-label^="Bienvenue"]');
+      // Même starter qu'avant : son évolution et le compagnon actuel sont gardés.
+      this.tutoThanks(line, sec, line === curLine);
+      const email = (server && ses && ses.email) || t.obEmail || (acc && acc.email);
+      this.setState({
+        account: { email: email, news: (t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news)) && !under, age: obAge, at: (acc && acc.at) || realToday(), server: !!server, uid: server && ses ? ses.uid : '' },
+        trainer: Object.assign({}, t.trainer || {}, { email: email, name: nick }),
+        obEmail: undefined, obPwd: '', obShow: false, obNews: undefined, obNick: undefined, obAge: '', obStarter: '', obErr: '', obNote: '',
+        obBusy: false, obCode: '', obMode: 'signup', obResetSent: false, obAfter: '', obPending: null, obLocal: false
+      });
+      setTimeout(() => this.finishOnb(false), 320);
+    };
+    // Page 4 : le code à 6 chiffres reçu par e-mail (lien de l'e-mail aussi accepté, cloud.js fromLink).
+    r.p4 = {
+      email: s.obEmail || '', code: s.obCode || '', busy: busy ? 'true' : 'false', go: busy ? 'Un instant…' : 'Valider mon code',
+      err: err, hasErr: !!err && page === 4, notice: note, hasNotice: !!note && !err && page === 4,
+      onCode: e => this.setState({ obCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 6) }),
+      change: () => this.setState({ onb: 2, obMode: 'signup', obErr: '', obNote: '' }),
+      resend: async () => {
+        const t = this.st();
+        if (t.obBusy) return;
+        this.setState({ obBusy: true, obErr: '' });
+        try { await Cloud.resend(t.obEmail); this.setState({ obBusy: false, obNote: 'Nouveau code envoyé (regarde aussi dans les spams).' }); } catch (e2) { fail(e2); }
+      },
+      submit: async e => {
+        if (e && e.preventDefault) e.preventDefault();
+        const f = e && e.target && e.target.elements, t = this.st();
+        if (t.obBusy) return;
+        const code = String(f && f.code ? f.code.value : t.obCode || '').replace(/\D/g, '');
+        if (code.length !== 6) { this.setState({ obCode: code, obErr: 'Le code fait 6 chiffres : vérifie l’e-mail reçu.' }); return; }
+        this.setState({ obBusy: true, obErr: '', obCode: code });
+        try {
+          await Cloud.verify(t.obEmail, code, 'signup');
+          if (t.obAfter === 'login' || !t.obPending) { fromProfile(await Cloud.profile()); return; }
+          const P = t.obPending;
+          done(t, P.nick, P.age, P.line, true);
+          this.setState({ toast: 'Bienvenue ' + P.nick + ' : ton compte Dropicards est créé' });
+        } catch (e2) { fail(e2); }
       }
     };
     const still = (() => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e2) { return false; } })();
@@ -144,27 +238,41 @@
       selImgStyle: E ? stBodyStyle(selN, !still ? Math.round(96 * Math.min(1.2, E.gif[1] / 46)) : 104, still) : '',
       selTypes: E ? E.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })) : [],
       lead: acc ? 'Ton âge, ton pseudo et ton compagnon de voyage.' : 'Dernière étape avant l’aventure !',
-      selDesc: ST_STARTER_TXT[sel] || '', go: 'Choisir ' + name + ' comme compagnon', selStyle: selN ? stStarterStyle(selN, false) : '',
+      selDesc: ST_STARTER_TXT[sel] || '', go: s.obBusy ? 'Un instant…' : 'Choisir ' + name + ' comme compagnon', selStyle: selN ? stStarterStyle(selN, false) : '',
       err: err, hasErr: !!err && page === 3,
-      submit: e => {
+      canLocal: !!s.obLocal && page === 3, local: () => {
+        const t = this.st(), line = t.obStarter || curLine, nick = String(t.obNick || '').trim();
+        if (line && nick.length >= 2 && (t.obAge || accAge)) done(t, nick, t.obAge || accAge, line, false);
+      },
+      busy: busy ? 'true' : 'false',
+      submit: async e => {
         if (e && e.preventDefault) e.preventDefault();
         const f = e && e.target && e.target.elements, t = this.st();
+        if (t.obBusy) return;
         const nick = String(f && f.nickname ? f.nickname.value : t.obNick || '').replace(/\s+/g, ' ').trim().slice(0, 24);
         const obAge = t.obAge || accAge, obStarter = t.obStarter || curLine;
         if (!obAge) { this.setState({ obNick: nick, obErr: 'Indique ton âge.' }); return; }
         if (nick.length < 2) { this.setState({ obNick: nick, obErr: 'Choisis un pseudo de 2 à 24 caractères.' }); return; }
         if (!obStarter || !PA_LINES[obStarter]) { this.setState({ obNick: nick, obErr: 'Choisis ton compagnon de voyage.' }); return; }
-        const line = obStarter, under = obAge === 'u15';
-        // Le starter remercie au milieu de l'écran (calque de tuto.js), puis présente l'app : le didacticiel commence.
-        const sec = document.querySelector('section[aria-label^="Bienvenue"]');
-        // Même starter qu'avant : son évolution et le compagnon actuel sont gardés.
-        this.tutoThanks(line, sec, line === curLine);
-        this.setState({
-          account: { email: t.obEmail || (acc && acc.email), news: (t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news)) && !under, age: obAge, at: (acc && acc.at) || realToday(), server: false },
-          trainer: Object.assign({}, t.trainer || {}, { email: t.obEmail || (acc && acc.email), name: nick }),
-          obEmail: undefined, obPwd: '', obShow: false, obNews: undefined, obNick: undefined, obAge: '', obStarter: '', obErr: ''
-        });
-        setTimeout(() => this.finishOnb(false), 320);
+        const line = obStarter, num = PA_LINES[line][0];
+        const news = (t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news)) && obAge !== 'u15';
+        if (!Cloud.on()) { done(t, nick, obAge, line, false); return; }
+        this.setState({ obNick: nick, obBusy: true, obErr: '', obLocal: false });
+        try {
+          if (Cloud.signedIn()) {
+            await Cloud.saveProfile({ pseudo: nick, age_range: obAge, starter: num, buddy: num, news_optin: news });
+            done(t, nick, obAge, line, true);
+            return;
+          }
+          const email = t.obEmail || (acc && acc.email) || '', pwd = t.obPwd || '';
+          if (!ST_MAIL.test(email) || pwd.length < 12) { this.setState({ obBusy: false, onb: 2, obMode: 'signup', obErr: 'Choisis ton mot de passe (12 caractères au moins) pour créer ton compte.' }); return; }
+          const res = await Cloud.signUp(email, pwd, { pseudo: nick, age_range: obAge, starter: num, news_optin: news });
+          if (res.exists) { this.setState({ obBusy: false, onb: 2, obMode: 'login', obPwd: '', obErr: 'Un compte existe déjà avec cette adresse : connecte-toi.' }); return; }
+          if (res.session) { done(t, nick, obAge, line, true); return; }
+          this.setState({ obBusy: false, onb: 4, obCode: '', obAfter: '', obPending: { nick: nick, age: obAge, line: line }, obNote: 'Code envoyé à ' + email + ' (regarde aussi dans les spams).' });
+        } catch (e2) {
+          fail(e2, { obLocal: e2.code === 'network' });
+        }
       }
     };
     return r;
@@ -251,9 +359,18 @@
     };
   }
 
+  // Lien d'un e-mail de Dropicards ouvert dans le navigateur (cloud.js) : session gardée, message à la première page.
+  let stLinked = Cloud.on() ? Cloud.fromLink() : null;
   const stBaseHome = proto.vHome;
   proto.vHome = function (x) {
     const r = stBaseHome.call(this, x);
+    if (stLinked) {
+      const L = stLinked, a = x.s.account;
+      stLinked = null;
+      setTimeout(() => this.setState(L.session
+        ? Object.assign({ toast: 'Adresse confirmée : ton compte Dropicards est actif' }, a && a.email ? { account: Object.assign({}, a, { server: true, uid: L.session.uid }) } : {})
+        : { toast: 'Ce lien n’est plus valable : demande un nouveau code depuis l’app' }), 0);
+    }
     if (x.s.screen !== 'home') return r;
     const due = this.alertsDue(x.s);
     // Mon profil › Notifications (notif.js) : « Sorties et boutiques suivies » décoché, l'encadré reste sur l'accueil.

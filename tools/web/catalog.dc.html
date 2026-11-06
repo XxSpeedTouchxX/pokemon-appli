@@ -1878,7 +1878,9 @@
 </sc-for>
 <div class="pkm-tr-row"><span class="pkm-tr-k">Membre depuis</span><span class="pkm-tr-v">{{ pf.trainer.since }}</span></div>
 <div class="pkm-tr-row"><span class="pkm-tr-k">Grade</span><span class="pkm-tr-v" style="display: flex; align-items: center; gap: 8px; color: {{ pf.trainer.gradeColor }}"><img src="{{ pf.trainer.gradeBadge }}" alt="" width="28" height="28" style="display: block">{{ pf.trainer.grade }}</span></div>
+<sc-if value="{{ pf.trainer.cloudOn }}" hint-placeholder-val="{{ false }}"><div class="pkm-tr-row"><span class="pkm-tr-k">Compte</span><span class="pkm-tr-v">{{ pf.trainer.cloudState }}</span></div></sc-if>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ pf.trainer.note }}</p>
+<sc-if value="{{ pf.trainer.cloudOn }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.trainer.cloudAct }}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ pf.trainer.cloudLabel }}</button></sc-if>
 <sc-if value="{{ pf.photo.has }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.photo.remove }}" style="align-self: flex-start; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Retirer ma photo de profil</button></sc-if>
 </section>
 
@@ -2161,14 +2163,37 @@ PKCOUNTER
 <label class="pkm-acc-l">Adresse e-mail
 <input class="pkm-tr-in" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="Ex. : sacha@exemple.fr" value="{{ ob.acc.email }}" onChange="{{ ob.acc.onEmail }}" aria-invalid="{{ ob.acc.emailBad }}">
 </label>
-<label class="pkm-acc-l">Mot de passe
-<span class="pkm-acc-pw"><input class="pkm-tr-in" type="{{ ob.acc.pwType }}" name="password" autocomplete="new-password" placeholder="{{ ob.acc.pwHold }}" value="{{ ob.acc.pwd }}" onChange="{{ ob.acc.onPwd }}" aria-invalid="{{ ob.acc.pwdBad }}"><button type="button" class="pkm-acc-eye" onClick="{{ ob.acc.toggle }}" aria-pressed="{{ ob.acc.shown }}">{{ ob.acc.eye }}</button></span>
+<sc-if value="{{ ob.acc.showCode }}" hint-placeholder-val="{{ false }}"><label class="pkm-acc-l">Code reçu par e-mail
+<input class="pkm-tr-in pkm-acc-code" type="text" name="code" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="6 chiffres" value="{{ ob.acc.code }}" onChange="{{ ob.acc.onCode }}">
+</label></sc-if>
+<sc-if value="{{ ob.acc.showPwd }}" hint-placeholder-val="{{ true }}"><label class="pkm-acc-l">{{ ob.acc.pwLabel }}
+<span class="pkm-acc-pw"><input class="pkm-tr-in" type="{{ ob.acc.pwType }}" name="password" autocomplete="{{ ob.acc.pwAuto }}" placeholder="{{ ob.acc.pwHold }}" value="{{ ob.acc.pwd }}" onChange="{{ ob.acc.onPwd }}" aria-invalid="{{ ob.acc.pwdBad }}"><button type="button" class="pkm-acc-eye" onClick="{{ ob.acc.toggle }}" aria-pressed="{{ ob.acc.shown }}">{{ ob.acc.eye }}</button></span>
 </label>
-<span class="pkm-acc-hint">{{ ob.acc.pwHint }}</span>
-<label class="pkm-acc-news"><input type="checkbox" name="news" checked="{{ ob.acc.news }}" onChange="{{ ob.acc.onNews }}"><span>Recevoir les nouveautés et bons plans Dropicards par e-mail (facultatif)</span></label>
+<sc-if value="{{ ob.acc.hasHint }}" hint-placeholder-val="{{ true }}"><span class="pkm-acc-hint">{{ ob.acc.pwHint }}</span></sc-if></sc-if>
+<sc-if value="{{ ob.acc.isSignup }}" hint-placeholder-val="{{ true }}"><label class="pkm-acc-news"><input type="checkbox" name="news" checked="{{ ob.acc.news }}" onChange="{{ ob.acc.onNews }}"><span>Recevoir les nouveautés et bons plans Dropicards par e-mail (facultatif)</span></label></sc-if>
+<sc-if value="{{ ob.acc.hasNotice }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-acc-ok">{{ ob.acc.notice }}</p></sc-if>
 <sc-if value="{{ ob.acc.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.acc.err }}</p></sc-if>
-<button type="submit" class="pkm-acc-go">Suivant</button>
-<p class="pkm-acc-note">{{ ob.acc.note }}</p>
+<button type="submit" class="pkm-acc-go" aria-busy="{{ ob.acc.busy }}">{{ ob.acc.go }}</button>
+<sc-if value="{{ ob.acc.links }}" hint-placeholder-val="{{ false }}"><div class="pkm-acc-links">
+<sc-if value="{{ ob.acc.isSignup }}" hint-placeholder-val="{{ true }}"><button type="button" class="pkm-acc-link" onClick="{{ ob.acc.toLogin }}">J’ai déjà un compte : me connecter</button></sc-if>
+<sc-if value="{{ ob.acc.isLogin }}" hint-placeholder-val="{{ false }}"><button type="button" class="pkm-acc-link" onClick="{{ ob.acc.toReset }}">Mot de passe oublié ?</button><button type="button" class="pkm-acc-link" onClick="{{ ob.acc.toSignup }}">Créer un compte</button></sc-if>
+<sc-if value="{{ ob.acc.isReset }}" hint-placeholder-val="{{ false }}"><button type="button" class="pkm-acc-link" onClick="{{ ob.acc.toLogin }}">Retour à la connexion</button></sc-if>
+</div></sc-if>
+<sc-if value="{{ ob.acc.isSignup }}" hint-placeholder-val="{{ true }}"><p class="pkm-acc-note">{{ ob.acc.note }}</p></sc-if>
+</form>
+</sc-if>
+<sc-if value="{{ ob.is4 }}" hint-placeholder-val="{{ false }}">
+<form class="pkm-acc pkm-onb-page" aria-label="Confirme ton adresse" onSubmit="{{ ob.p4.submit }}" novalidate="novalidate">
+<h1 class="pkm-acc-h">Confirme ton adresse</h1>
+<p class="pkm-acc-p">Un code à 6 chiffres vient d’être envoyé à <b>{{ ob.p4.email }}</b>. Entre-le ici (ou touche le bouton de l’e-mail).</p>
+<label class="pkm-acc-l">Code reçu par e-mail
+<input class="pkm-tr-in pkm-acc-code" type="text" name="code" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="6 chiffres" value="{{ ob.p4.code }}" onChange="{{ ob.p4.onCode }}">
+</label>
+<sc-if value="{{ ob.p4.hasNotice }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-acc-ok">{{ ob.p4.notice }}</p></sc-if>
+<sc-if value="{{ ob.p4.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.p4.err }}</p></sc-if>
+<button type="submit" class="pkm-acc-go" aria-busy="{{ ob.p4.busy }}">{{ ob.p4.go }}</button>
+<div class="pkm-acc-links"><button type="button" class="pkm-acc-link" onClick="{{ ob.p4.resend }}">Renvoyer le code</button><button type="button" class="pkm-acc-link" onClick="{{ ob.p4.change }}">Changer d’adresse</button></div>
+<p class="pkm-acc-note">Rien reçu ? Regarde dans les spams ou les promotions. Le code arrive en général en moins d’une minute.</p>
 </form>
 </sc-if>
 <sc-if value="{{ ob.is3 }}" hint-placeholder-val="{{ false }}">
@@ -2192,7 +2217,8 @@ PKCOUNTER
 <div class="pkm-onb-focus-id"><b>{{ ob.p3.selName }}</b><span class="pkm-dex-types"><sc-for list="{{ ob.p3.selTypes }}" as="ost" hint-placeholder-count="2"><b style="{{ ost.style }}">{{ ost.t }}</b></sc-for></span><p>{{ ob.p3.selDesc }}</p></div>
 </div>
 <sc-if value="{{ ob.p3.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.p3.err }}</p></sc-if>
-<button type="submit" class="pkm-acc-go">{{ ob.p3.go }}</button>
+<button type="submit" class="pkm-acc-go" aria-busy="{{ ob.p3.busy }}">{{ ob.p3.go }}</button>
+<sc-if value="{{ ob.p3.canLocal }}" hint-placeholder-val="{{ false }}"><button type="button" class="pkm-acc-link" onClick="{{ ob.p3.local }}">Continuer sans compte pour l’instant</button></sc-if>
 </section>
 </sc-if>
 <sc-if value="{{ ob.p3.noSel }}" hint-placeholder-val="{{ true }}"><p class="pkm-acc-hint">Touche un Pokémon pour le découvrir.</p></sc-if>

@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-06 — Inscription de l'app branchée sur la base (« go » du porteur : « tout faire pour que la base de données soit fonctionnelle »)
+
+- **App** (`tools/web/cloud.js`, `start.js`, cache v132) : à la fin de l'accueil, le compte est créé sur api.dropicards.fr avec le profil (pseudo, âge, starter, nouveautés) ; code à 6 chiffres reçu par e-mail ; « J'ai déjà un compte » (connexion sur un autre appareil, profil prérempli) ; « Mot de passe oublié ? » ; Mon profil : connecté ou non, déconnexion. Sans réseau ou sans clé : compte sur l'appareil, comme avant. La collection, les PK et les PA restent sur l'appareil (étape 3 de `docs/24` §8, plus tard).
+- **Base** : `tools/supabase/003_inscription.sql` (profil rempli à l'inscription, valeurs vérifiées, rôle jamais lu) ; 30 tests de sécurité réussis.
+- **E-mails** : 5 modèles en français aux couleurs de Dropicards (`web/email/`, `tools/supabase/emails.mjs`), avec le code en grand.
+- **Trouvé en lisant le modèle Supabase de Coolify** : `API_EXTERNAL_URL` vaut par défaut une adresse interne (`http://supabase-kong:8000`) : les liens des e-mails ne marcheraient pas ; à mettre à `https://api.dropicards.fr`. Inscription par SMS active par défaut : à couper.
+- **Reste au porteur** (guide `tools/supabase/README.md`) : lancer `003`, régler les variables, donner la clé « anon » (publique), essai sur le téléphone ; puis sauvegardes chaque nuit hors du serveur.
+
 ## 2026-11-06 — E-mails par Brevo : domaine authentifié ; alerte de sécurité de Studio corrigée
 
 - **Brevo** : domaine dropicards.fr authentifié (code Brevo, DKIM 1 et 2, DMARC `p=none` dans la zone DNS OVH de dropicards.fr, aucune ligne SPF demandée) ; expéditeur `Dropicards <noreply@dropicards.fr>` vérifié. Clé SMTP mise dans les variables du service Supabase (Coolify), service redémarré ; essai « Send password recovery » réussi : e-mail « Réinitialise ton mot de passe Dropicards » reçu, mais classé en spam par Gmail (domaine neuf, texte anglais par défaut de Supabase). Prochaine étape proposée : modèles d'e-mails en français.
