@@ -35,6 +35,8 @@
 3. Vérifier dans **Logs** du conteneur `supabase-auth` : pas de ligne « WebAuthn configuration is invalid ».
 4. Sur le téléphone : ouvrir l'app (cache v137), se connecter, accepter « Activer Face ID / mon empreinte ». Puis Mon profil › Me déconnecter › Me reconnecter › « Face ID / empreinte ».
 
+**Fait le 2026-11-06 (porteur)** : sauvegarde manuelle réussie (408 Ko), Supabase Auth 2.197.0 lancé, migrations appliquées (dont `add_passkeys`), aucune erreur de réglage. Coolify refusait d'enregistrer le fichier tant que le champ « Database Name » de la page General était vide (variable `POSTGRES_DB`) : il a été rempli avec `postgres`, la valeur que Supabase utilisait déjà.
+
 **Retour en arrière** : remettre `v2.186.0` et retirer les 4 lignes, Save, Restart. Les comptes et les mots de passe ne changent pas.
 
 ## 4. Côté app
