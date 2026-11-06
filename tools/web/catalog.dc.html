@@ -1654,7 +1654,7 @@
 <div class="pkm-shop-tkrow"><sc-for list="{{ pks.tickets }}" as="stk" hint-placeholder-count="3"><button type="button" onClick="{{ stk.pick }}" aria-label="{{ stk.aria }}" class="{{ stk.cls }}">
 <span class="{{ stk.ticketCls }}" aria-hidden="true"><span class="pkm-shop-ticket-in">{{ stk.tag }}</span></span>
 <sc-if value="{{ stk.owned }}" hint-placeholder-val="{{ false }}"><span class="pkm-shop-tk-n">{{ stk.ownedText }}</span></sc-if>
-<b class="pkm-shop-tk-price">{{ stk.price }}</b>
+<b class="pkm-shop-price pkm-shop-price-sm"><img src="img/brand/pk.svg" alt="" width="20" height="20">{{ stk.priceN }}<small>PK</small></b>
 <span class="pkm-shop-tk-every">{{ stk.every }}</span>
 <sc-if value="{{ stk.locked }}" hint-placeholder-val="{{ false }}"><span class="pkm-shop-tk-lock"><img src="{{ stk.lockImg }}" alt="" width="22" height="22">{{ stk.lockName }}</span></sc-if>
 </button></sc-for></div>
@@ -1670,7 +1670,7 @@
 <span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">{{ si.name }}</span>
 <span style="font-size: 14px; font-weight: 700; color: var(--pkm-accent)">{{ si.prize }}</span>
 <sc-if value="{{ si.hasValue }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12.5px; color: #9AA8C3">{{ si.value }}</span></sc-if>
-<span style="font-size: 13px; font-weight: 700; color: #C9D3EA">{{ si.price }}</span>
+<span class="pkm-shop-price"><img src="img/brand/pk.svg" alt="" width="24" height="24">{{ si.priceN }}<small>PK</small></span>
 </span>
 </div>
 <sc-if value="{{ si.owned }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13.5px; font-weight: 700; color: #5EE0CF">{{ si.ownedText }}</p></sc-if>
@@ -1695,7 +1695,7 @@
 <sc-if value="{{ pks.sheet.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-pas-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.sheet.close }}" class="pkm-pas-scrim"></button>
 <section aria-label="{{ pks.sheet.name }}" role="dialog" aria-modal="true" class="pkm-dark pkm-pas-sheet pkm-tks-sheet">
-<div class="pkm-tks-top"><span class="{{ pks.sheet.ticketCls }}" aria-hidden="true"><span class="pkm-shop-ticket-in">{{ pks.sheet.tag }}</span></span><div><h2>{{ pks.sheet.name }}</h2><b class="pkm-tks-price">{{ pks.sheet.price }}</b></div></div>
+<div class="pkm-tks-top"><span class="{{ pks.sheet.ticketCls }}" aria-hidden="true"><span class="pkm-shop-ticket-in">{{ pks.sheet.tag }}</span></span><div><h2>{{ pks.sheet.name }}</h2><b class="pkm-shop-price"><img src="img/brand/pk.svg" alt="" width="24" height="24">{{ pks.sheet.priceN }}<small>PK</small></b></div></div>
 <div class="pkm-tks-lines"><div><span>Lot à gagner</span><b>{{ pks.sheet.prize }}</b></div><div><span>Valeur</span><b>{{ pks.sheet.value }}</b></div><div><span>Tirage</span><b>{{ pks.sheet.every }}</b></div><div><span>Prochain tirage</span><b>{{ pks.sheet.draw }}</b></div></div>
 <h3 class="pkm-tks-h">À quoi sert ce ticket ?</h3>
 <p class="pkm-tks-p">{{ pks.sheet.use }}</p>
@@ -2298,8 +2298,8 @@ PKCOUNTER
 <!-- fragment: premium-banner -->
 <button type="button" onClick="{{ prem.banner.open }}" aria-label="Découvrir Dropicards Premium" class="pkm-prem-banner">
 <span class="pkm-prem-shine" aria-hidden="true"></span>
-<span class="pkm-prem-crown" aria-hidden="true">👑</span>
-<span class="pkm-prem-btxt"><b>{{ prem.banner.title }}</b><span>{{ prem.banner.text }}</span><i>{{ prem.banner.price }}</i></span>
+<span class="pkm-prem-crown" aria-hidden="true"><svg viewBox="0 0 64 64" aria-hidden="true" class="pkm-prem-crown-svg"><path d="M8 22l12 12 12-20 12 20 12-12-5 28H13z" fill="#FFD60A" stroke="#7A4A00" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="50" width="38" height="7" rx="2" fill="#FFB000" stroke="#7A4A00" stroke-width="3"></rect><circle cx="8" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="11" r="4.5" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="56" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="38" r="4" fill="#E5484D"></circle></svg></span>
+<span class="pkm-prem-btxt"><b>{{ prem.banner.title }}</b><span>{{ prem.banner.text }}</span></span>
 <span class="pkm-prem-go" aria-hidden="true">›</span>
 </button>
 
@@ -2307,8 +2307,8 @@ PKCOUNTER
 <sc-if value="{{ prem.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-pas-wrap"><button type="button" aria-label="Fermer" onClick="{{ prem.close }}" class="pkm-pas-scrim"></button>
 <section aria-label="Dropicards Premium" role="dialog" aria-modal="true" class="pkm-dark pkm-prem-sheet">
-<div class="pkm-prem-hero"><span class="pkm-prem-shine" aria-hidden="true"></span><span class="pkm-prem-crown pkm-prem-crown-xl" aria-hidden="true">👑</span><h2>Dropicards <em>Premium</em></h2><p>Tout Dropicards, sans limite.</p></div>
-<ul class="pkm-prem-perks"><sc-for list="{{ prem.perks }}" as="pp2" hint-placeholder-count="5"><li><span class="pkm-prem-ico" aria-hidden="true">{{ pp2.ico }}</span><span><b>{{ pp2.title }}</b><small>{{ pp2.text }}</small></span></li></sc-for></ul>
+<div class="pkm-prem-hero"><span class="pkm-prem-shine" aria-hidden="true"></span><span class="pkm-prem-crown pkm-prem-crown-xl" aria-hidden="true"><svg viewBox="0 0 64 64" aria-hidden="true" class="pkm-prem-crown-svg"><path d="M8 22l12 12 12-20 12 20 12-12-5 28H13z" fill="#FFD60A" stroke="#7A4A00" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="50" width="38" height="7" rx="2" fill="#FFB000" stroke="#7A4A00" stroke-width="3"></rect><circle cx="8" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="11" r="4.5" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="56" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="38" r="4" fill="#E5484D"></circle></svg></span><h2>Dropicards <em>Premium</em></h2><p>Tout Dropicards, sans limite.</p></div>
+<ul class="pkm-prem-perks"><sc-for list="{{ prem.perks }}" as="pp2" hint-placeholder-count="5"><li><span class="pkm-prem-ico" aria-hidden="true"><sc-if value="{{ pp2.isScan }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 32 32" class="pkm-prem-scan"><path d="M4 11V6a2 2 0 0 1 2-2h5M21 4h5a2 2 0 0 1 2 2v5M28 21v5a2 2 0 0 1-2 2h-5M11 28H6a2 2 0 0 1-2-2v-5"></path><rect x="10" y="8" width="12" height="16" rx="1.5" class="pkm-prem-scan-card"></rect><line x1="5" y1="16" x2="27" y2="16" class="pkm-prem-scan-laser"></line></svg></sc-if><sc-if value="{{ pp2.isRadar }}" hint-placeholder-val="{{ false }}"><span class="pkm-prem-radar"><i class="pkm-prem-radar-r1"></i><i class="pkm-prem-radar-r2"></i><i class="pkm-anim pkm-prem-radar-sweep"></i><i class="pkm-prem-radar-dot"></i></span></sc-if><sc-if value="{{ pp2.isXp }}" hint-placeholder-val="{{ false }}"><b class="pkm-prem-2xp">2XP</b></sc-if><sc-if value="{{ pp2.isEmoji }}" hint-placeholder-val="{{ false }}">{{ pp2.ico }}</sc-if></span><span><b>{{ pp2.title }}</b><small>{{ pp2.text }}</small></span></li></sc-for></ul>
 <div role="radiogroup" aria-label="Formule" class="pkm-prem-plans"><sc-for list="{{ prem.plans }}" as="ppl" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ ppl.on }}" onClick="{{ ppl.pick }}" class="{{ ppl.cls }}">
 <sc-if value="{{ ppl.hasTag }}" hint-placeholder-val="{{ false }}"><span class="pkm-prem-tag">{{ ppl.tag }}</span></sc-if>
 <span class="pkm-prem-pname">{{ ppl.name }}</span><b class="pkm-prem-price">{{ ppl.price }}</b><span class="pkm-prem-per">{{ ppl.per }}</span><span class="pkm-prem-sub">{{ ppl.sub }}</span>

@@ -10,10 +10,13 @@ const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.messag
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(800);
 const banner = page.locator('button[aria-label="Découvrir Dropicards Premium"]');
-ok('PK shop : bannière « Dropicards Premium · Dès 4,16 € par mois »', (await banner.count()) === 1 && /Dès 4,16 € par mois/.test(await banner.innerText()));
+ok('PK shop : bannière « Dropicards Premium » (sans « Dès 4,16 € par mois »), couronne dessinée', (await banner.count()) === 1 && !/4,16/.test(await banner.innerText()) && (await banner.locator('svg.pkm-prem-crown-svg').count()) === 1);
 await banner.click(); await page.waitForTimeout(600);
 const sh = page.locator('section[aria-label="Dropicards Premium"]');
 const t = await sh.innerText();
+ok('icônes : scanner, radar de l’accueil, « 2XP »', (await sh.locator('svg.pkm-prem-scan').count()) === 1 && (await sh.locator('.pkm-prem-radar').count()) === 1 && (await sh.locator('.pkm-prem-2xp').innerText()) === '2XP');
+const top = await sh.locator('.pkm-prem-crown-xl').evaluate(e => e.getBoundingClientRect().top);
+ok('couronne entière, sous le haut de l’écran (' + Math.round(top) + ' px)', top > 0);
 ok('5 avantages', ['Scans illimités', 'Cartes et items scellés illimités', 'Radar des boutiques débloqué', 'Double XP permanent', 'Historique des prix complet'].every(x => t.includes(x)));
 ok('formules : Annuel 49,90 € par an (choisie, meilleure offre) et Mensuel 4,90 € par mois', /49,90 €/.test(t) && /4,90 €/.test(t) && (await sh.locator('button[role=radio][aria-checked=true]').innerText()).includes('Annuel') && /Meilleure offre/.test(t));
 ok('règles : renouvellement automatique, arrêt à tout moment, période commencée due', /Renouvellement automatique chaque année/.test(t) && /arrêter à tout moment/.test(t) && /période déjà commencée reste due/.test(t));

@@ -142,7 +142,7 @@
     ['Ticket Bronze et achat d’un booster au PK shop'],
     i >= 2 ? ['Ticket Argent et items rares (coffrets, classeurs…) au PK shop'] : [],
     i >= 4 ? ['Ticket Or et ETB au PK shop'] : [],
-    g.deluxe ? ['Possibilité d’acheter un item « Deluxe » au PK shop'] : []);
+    []); // item « Deluxe » retiré du PK shop le 2026-11-06 (porteur)
   });
   const pfNum = n => Number(n || 0).toLocaleString('fr-FR');
   const pfCond = g => g.pk === 0 ? 'Dès l’inscription' : [pfNum(g.pk) + ' PK gagnés'].concat(g.comp ? [g.comp + ' compagnons débloqués'] : [], g.mega ? [g.mega + (g.mega > 1 ? ' méga-évolutions débloquées' : ' méga-évolution débloquée')] : []).join(' + ');

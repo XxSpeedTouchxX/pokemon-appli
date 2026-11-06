@@ -17,7 +17,7 @@
 
 ## 2. Ce qui est déjà dans l'app (cache v139)
 
-- **Bannière Premium** dorée et violette, avec un reflet qui passe et une couronne qui pulse :
+- **Bannière Premium** dorée et violette, avec un reflet qui passe et une couronne dessinée qui pulse (sans prix, à la demande du porteur) :
   - en haut du PK shop (rubrique « Magasin ») ;
   - en haut de Mon profil.
 - **Écran de l'offre** :

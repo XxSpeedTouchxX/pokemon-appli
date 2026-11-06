@@ -282,7 +282,7 @@ ok('booster : gain tiré par le serveur (+200), animation jouée : ' + gs.pk + '
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
 const shopTxt = await page.locator('main').innerText();
 ok('PK shop : 3 tickets (500, 1 500, 5 000 PK) ; achats 7 500, 25 000, 50 000 PK', ['Booster de la série du moment', 'Item rare au choix', 'ETB 30 ans'].every(t => shopTxt.includes(t))
-  && ['500 PK', '1 500 PK', '5 000 PK', '7 500 PK', '25 000 PK', '50 000 PK'].every(t => shopTxt.replace(/\u202f|\u00a0/g, ' ').includes(t)));
+  && ['500PK', '1500PK', '5000PK', '7500PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)));
 await page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk').nth(0).click(); await page.waitForTimeout(400);
 ok('compte à 300 PK : fiche du ticket Bronze, « Il te manque 200 PK », tirage du dimanche 22 novembre', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()) && /dimanche 22 novembre à 20 h/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);

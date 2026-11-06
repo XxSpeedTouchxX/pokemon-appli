@@ -895,13 +895,12 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-shop-tk-n { position: absolute; top: 6px; right: 8px; padding: 1px 7px; border-radius: 999px; background: #5EE0CF; color: #0B1120; font-size: 11.5px; font-weight: 800; }
 .pkm-shop-tk-lock { display: flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 8px 2px 3px; border-radius: 999px; background: rgba(255, 107, 107, 0.16); color: #FFB3B3; font-size: 10.5px; font-weight: 800; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pkm-shop-tk-lock img { flex: none; }
-.pkm-shop-tk-off { border-color: rgba(255, 107, 107, 0.35); background: #111A2C; }
-.pkm-shop-tk-off .pkm-shop-ticket { filter: grayscale(0.85) brightness(0.75); }
-.pkm-shop-tk-off .pkm-shop-tk-price, .pkm-shop-tk-off .pkm-shop-tk-every { opacity: 0.6; }
+/* Ticket pas encore débloqué (2026-11-06, porteur) : toujours dans sa couleur officielle, seul le cadre change. */
+.pkm-shop-tk-off { border-color: rgba(255, 107, 107, 0.35); }
 .pkm-shop-lockbtn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 4px 16px; border-radius: 999px; border: 1px dashed rgba(255, 138, 138, 0.6); background: rgba(255, 107, 107, 0.1); color: #FFC2C2; font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer; }
 .pkm-shop-lockbtn img { flex: none; }
 /* Fiche d'un ticket. */
-.pkm-tks-sheet { max-height: 88vh; overflow-y: auto; }
+.pkm-tks-sheet { max-height: 88vh; max-height: calc(100dvh - 24px); overflow-y: auto; }
 .pkm-tks-top { display: flex; align-items: center; gap: 18px; padding: 6px 4px 4px 10px; }
 .pkm-shop-ticket-xl { width: 104px; height: 70px; }
 .pkm-shop-ticket-xl .pkm-shop-ticket-in { font-size: 16px; }
@@ -934,3 +933,10 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-lockw .pkm-pas-cancel { width: 100%; }
 @keyframes pkmLockShake { 0% { transform: translateX(0) scale(0.92); opacity: 0; } 30% { transform: translateX(-8px) scale(1); opacity: 1; } 50% { transform: translateX(7px); } 70% { transform: translateX(-4px); } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .pkm-lockw { animation: none; } }
+
+/* Prix en PK mis en avant (2026-11-06, porteur) : gemme des PK et nombre en grand. */
+.pkm-shop-price { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; margin-top: 2px; padding: 4px 12px 4px 6px; border-radius: 999px; background: rgba(255, 214, 10, 0.14); border: 1px solid rgba(255, 214, 10, 0.55); color: #FFD60A; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+.pkm-shop-price small { font-size: 12.5px; font-weight: 800; color: #FFE46B; }
+.pkm-shop-price img { flex: none; }
+.pkm-shop-price-sm { align-self: center; gap: 4px; padding: 3px 9px 3px 4px; font-size: 16px; }
+.pkm-shop-price-sm small { font-size: 11px; }

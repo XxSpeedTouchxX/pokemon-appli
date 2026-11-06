@@ -18,7 +18,7 @@ await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page
 await page.screenshot({ path: shot('games-scissors.png') });
 await page.waitForTimeout(1300);
 const pk1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
-ok('booster ouvert : PK crédités (' + pk0 + ' → ' + pk1 + ')', [10, 30, 50, 100, 1000].indexOf(pk1 - pk0) >= 0);
+ok('booster ouvert : PK crédités (' + pk0 + ' → ' + pk1 + ')', [30, 50, 100, 200, 500].indexOf(pk1 - pk0) >= 0);
 // Grade forcé à Grand maître (helpers.mjs) : booster et pièce toutes les 4 h (2026-10-28).
 ok('booster suivant dans 4 h', /Prochain booster dans [34] h/.test(await boost.innerText()));
 await page.screenshot({ path: shot('games-booster.png') });
@@ -67,11 +67,13 @@ await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(
 // item rare 25 000 (Collectionneur), ETB 30 ans 50 000 (Maître Pokémon) ; « Déverrouillé au grade … » et fenêtre.
 const tks = page.locator('section[aria-label="Tickets du tirage au sort"]');
 const tkTxt = (await tks.innerText()).replace(/[\u202f\u00a0]/g, ' ');
-ok('3 tickets dans une seule rubrique : Bronze 500, Argent 1 500, Or 5 000 PK', (await tks.locator('.pkm-shop-tk').count()) === 3 && ['500 PK', '1 500 PK', '5 000 PK', 'toutes les 2 sem.', 'chaque mois', 'tous les 2 mois'].every(t => tkTxt.includes(t)));
+ok('3 tickets dans une seule rubrique : Bronze 500, Argent 1 500, Or 5 000 PK', (await tks.locator('.pkm-shop-tk').count()) === 3 && ['500PK', '1500PK', '5000PK'].every(t => tkTxt.replace(/\s/g, '').includes(t)) && ['toutes les 2 sem.', 'chaque mois', 'tous les 2 mois'].every(t => tkTxt.includes(t)));
+const orF = await tks.locator('.pkm-shop-tk').nth(2).locator('.pkm-shop-ticket').evaluate(e => getComputedStyle(e).filter);
+ok('ticket Or verrouillé, toujours dans sa couleur (filtre : ' + orF + ')', orF === 'none');
 ok('Recrue : Argent et Or « Collectionneur » et « Maître Pokémon » avec leur emblème', /Collectionneur/.test(tkTxt) && /Maître Pokémon/.test(tkTxt) && (await tks.locator('img[src="img/grades/grade-3.svg"]').count()) === 1 && (await tks.locator('img[src="img/grades/grade-5.svg"]').count()) === 1);
 const lot = page.locator('section[aria-label="ETB 30 ans"]');
 const shopTxt = (await page.locator('main').innerText()).replace(/[\u202f\u00a0]/g, ' ');
-ok('achats directs : booster 7 500, item rare 25 000, ETB 30 ans 50 000 PK, avec visuels', ['7 500 PK', '25 000 PK', '50 000 PK'].every(t => shopTxt.includes(t)) && (await lot.locator('img[src="img/products/30th-celebration-elite-trainer-box.webp"]').count()) === 1);
+ok('achats directs : booster 7 500, item rare 25 000, ETB 30 ans 50 000 PK, avec visuels', ['7500PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)) && (await lot.locator('img[src="img/products/30th-celebration-elite-trainer-box.webp"]').count()) === 1);
 ok('Recrue : ETB « Déverrouillé au grade Maître Pokémon »', /Déverrouillé au grade Maître Pokémon/.test(await lot.innerText()));
 await lot.locator('button:has-text("Déverrouillé au grade")').click(); await page.waitForTimeout(500);
 const lw = page.locator('section[aria-label="Grade requis"]');

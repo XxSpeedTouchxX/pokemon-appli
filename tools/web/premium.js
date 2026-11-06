@@ -6,10 +6,10 @@
   // Ce module partage la portée des autres : ses noms commencent par PREM_ ou prem.
   const premProto = Component.prototype;
   const PREM_PERKS = [
-    { ico: '📷', title: 'Scans illimités', text: 'Scanne autant de cartes que tu veux, chaque jour.' },
+    { kind: 'scan', ico: '', title: 'Scans illimités', text: 'Scanne autant de cartes que tu veux, chaque jour.' },
     { ico: '🗂️', title: 'Cartes et items scellés illimités', text: 'Ton classeur sans aucune limite.' },
-    { ico: '📡', title: 'Radar des boutiques débloqué', text: 'Toutes les boutiques et leurs chances d’arrivage.' },
-    { ico: '⚡', title: 'Double XP permanent', text: 'Tes PK et tes PA comptent double, tous les jours.' },
+    { kind: 'radar', ico: '', title: 'Radar des boutiques débloqué', text: 'Toutes les boutiques et leurs chances d’arrivage.' },
+    { kind: 'xp', ico: '', title: 'Double XP permanent', text: 'Tes PK et tes PA comptent double, tous les jours.' },
     { ico: '📈', title: 'Historique des prix complet', text: 'Toute l’évolution de la cote de chaque carte.' }
   ];
   const PREM_PLANS = [
@@ -22,9 +22,9 @@
     const r = premBaseRender.call(this), s = this.st(), plan = s.premPlan === 'month' ? 'month' : 'year';
     const P = PREM_PLANS.find(p => p.id === plan);
     r.prem = {
-      banner: { title: 'Dropicards Premium', text: 'Scans illimités, double XP sur tes PK et PA, Radar et historique complet.', price: 'Dès 4,16 € par mois', open: () => this.premOpen() },
+      banner: { title: 'Dropicards Premium', text: 'Scans illimités, double XP sur tes PK et PA, Radar et historique complet.', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.setState({ premOpen: false }),
-      perks: PREM_PERKS,
+      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isXp: p.kind === 'xp', isEmoji: !p.kind })),
       plans: PREM_PLANS.map(p => ({
         name: p.name, price: p.price, per: p.per, sub: p.sub, hasTag: !!p.tag, tag: p.tag, hasSave: !!p.save, save: p.save,
         on: String(p.id === plan), cls: 'pkm-prem-plan' + (p.id === plan ? ' pkm-prem-plan-on' : ''),

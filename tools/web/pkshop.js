@@ -36,9 +36,7 @@
     { id: 'achat-etb-30', kind: 'lot', name: 'ETB 30 ans', prize: 'Coffret Dresseur d’élite 30ᵉ anniversaire, envoyé chez toi', value: 'Valeur : 60 à 200 €', price: 50000, minGrade: 4,
       img: 'img/products/30th-celebration-elite-trainer-box.webp', imgAlt: 'Coffret Dresseur d’élite 30ᵉ anniversaire', wide: true,
       note: 'Achat direct, sans tirage.' },
-    // Item « Deluxe » (2026-10-28, porteur) : réservé au Grand maître Pokémon ; article et prix à définir.
-    { id: 'item-deluxe', kind: 'deluxe', name: 'Item Deluxe', prize: 'Un article d’exception, bientôt', price: 0, soon: true, minGrade: 5,
-      note: 'Article et prix annoncés ici prochainement.', head: 'Bientôt' }
+    // Item « Deluxe » retiré du shop le 2026-11-06 (porteur).
   ];
   // Prochain tirage, même calcul que le serveur (008) ; avec le serveur, ses dates font foi (cloudGame.draws).
   const SHOP_DRAW0 = Date.parse('2026-11-22T19:00:00Z'), SHOP_DRAW_EVERY = 14 * 86400000;
@@ -139,7 +137,7 @@
       const price = it.price.toLocaleString('fr-FR') + ' PK', draw = shopDrawText(drawOf(it));
       return {
         open: true, name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier, prize: it.prize, value: it.value,
-        every: it.every, draw: draw, price: price, note: it.note,
+        every: it.every, draw: draw, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note,
         use: 'Ce ticket te donne une chance de gagner ' + it.lot + ' au tirage du ' + draw + '. Plus tu as de tickets, plus tu as de chances. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit son lot chez lui, après vérification de son identité.',
         owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n), locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade),
         can: can, miss: open && !can, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
@@ -155,7 +153,7 @@
       tickets: tks.map(it => {
         const n = tickets[it.id] || 0, open = gi >= it.minGrade;
         return {
-          name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-t-' + it.tier, price: it.price.toLocaleString('fr-FR') + ' PK', every: it.everyShort,
+          name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-t-' + it.tier, price: it.price.toLocaleString('fr-FR') + ' PK', priceN: it.price.toLocaleString('fr-FR'), every: it.everyShort,
           locked: !open, lockName: shopGradeName(it.minGrade), lockImg: emblem(it.minGrade), owned: n > 0, ownedText: '×' + n,
           cls: 'pkm-shop-tk' + (open ? '' : ' pkm-shop-tk-off'), aria: it.name + ', ' + it.price + ' PK, tirage ' + it.everyShort + (open ? '' : ', déverrouillé au grade ' + shopGradeName(it.minGrade)) + '. Voir le ticket',
           pick: () => this.setState({ shopTk: it.id, shopAsk: null })
@@ -171,12 +169,12 @@
       } : { open: false },
       items: SHOP_ITEMS.filter(it => it.kind !== 'ticket').map(it => {
         const n = tickets[it.id] || 0, open = gi >= (it.minGrade || 0), can = open && !it.soon && pk >= it.price, ask = can && s.shopAsk === it.id;
-        const price = it.soon ? 'Prix à venir' : it.price.toLocaleString('fr-FR') + ' PK';
+        const price = it.price.toLocaleString('fr-FR') + ' PK';
         const choice = ask && it.choices && it.choices.indexOf(s.shopChoice) >= 0 ? s.shopChoice : '';
         return {
-          name: it.name, prize: it.prize, price: price, note: it.note, value: it.value || '', hasValue: !!it.value,
+          name: it.name, prize: it.prize, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note, value: it.value || '', hasValue: !!it.value,
           hasHead: !!it.head, head: it.head || '', headSub: it.headSub || '', hasHeadSub: !!it.headSub,
-          isTicket: false, isDeluxe: it.kind === 'deluxe', ticketCls: 'pkm-shop-ticket', tag: 'TICKET',
+          isTicket: false, isDeluxe: false, ticketCls: 'pkm-shop-ticket', tag: 'TICKET',
           hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '', imgCls: it.wide ? 'pkm-shop-img pkm-shop-img-wide' : 'pkm-shop-img',
           owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n),
           can: can, cannot: !can && open, locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade || 0), lock: () => this.shopLockOpen(it),

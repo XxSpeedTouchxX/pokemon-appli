@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-06 — Retouches du PK shop et de Premium (demande du porteur)
+
+- **Item « Deluxe »** retiré du PK shop (et de la liste des avantages du grade Grand maître Pokémon).
+- **Prix en PK mis en avant** : gemme des PK et nombre en grand, sur chaque ticket, dans sa fiche et sur chaque achat direct.
+- **Tickets pas encore débloqués** : toujours dans leur couleur officielle (bronze, argent, or) ; seuls le cadre rouge et l'emblème du grade signalent le verrou.
+- **Premium** :
+  - « Dès 4,16 € par mois » retiré de la bannière ;
+  - couronne dessinée à la place de l'emoji ;
+  - fenêtre limitée à la hauteur visible du téléphone, pour que la couronne ne soit plus coupée en haut ;
+  - icônes : un scanner (cadre et trait laser) au lieu de l'appareil photo, le radar de l'accueil, un badge « 2XP » au lieu de l'éclair.
+- Cache v140.
+
 ## 2026-11-06 — PK shop par grades, rythme des tirages, abonnement Premium proposé (demandes du porteur)
 
 - **Tirages** le dimanche à 20 h :

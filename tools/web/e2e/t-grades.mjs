@@ -31,7 +31,7 @@ const shop = await text('main');
 // Or et ETB dès Maître Pokémon.
 ok('Recrue : booster achetable, item rare et ETB « Déverrouillé au grade … »', !/Déverrouillé/.test(await text('section[aria-label="Booster de la série du moment"]'))
   && /Déverrouillé au grade Collectionneur/.test(await text('section[aria-label="Item rare au choix"]')) && /Déverrouillé au grade Maître Pokémon/.test(await text('section[aria-label="ETB 30 ans"]')));
-ok('item Deluxe réservé au Grand maître Pokémon', (await page.locator('section[aria-label="Item Deluxe"]').count()) === 1 && /Déverrouillé au grade Grand maître Pokémon/.test(shop));
+ok('item Deluxe retiré du shop (2026-11-06)', (await page.locator('section[aria-label="Item Deluxe"]').count()) === 0);
 await page.screenshot({ path: shot('grades-recrue-shop.png'), fullPage: true });
 // Radar ouvert à tous depuis le 2026-11-01 (porteur : « refais-le fonctionner exactement comme avant ») : plus de verrou au grade Maître.
 await go('start=radar');
