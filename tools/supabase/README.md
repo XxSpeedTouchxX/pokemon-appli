@@ -5,6 +5,7 @@ Proposition et plan : `docs/24-proposition-espace-admin-et-comptes.md` §4.1 et 
 ## Fichiers
 
 - `001_comptes.sql` : tables (`profiles`, `collection_items`, `wallets`, `dex_unlocks`, `tickets`, `admin_log`), règles d'accès ligne par ligne, profil et porte-monnaie créés à l'inscription (100 PK de bienvenue), accord pour les nouveautés daté (jamais pour les moins de 15 ans), outils admin avec motif et journal (`admin_adjust_wallet`, `admin_set_status`, `admin_set_role`, `admin_list_users`, `admin_news_emails`), journal impossible à modifier ou effacer. Rejouable.
+- `002_search_path.sql` : chemin de recherche figé pour `admin_log_readonly`, `touch_updated_at` et `profiles_news_rules` (alerte « role mutable search_path » de Studio, 2026-11-06) ; à lancer une fois sur une base installée avant cette date (déjà inclus dans `001`). Rejouable.
 - `tests/mock_supabase.sql` et `tests/test_001.sql` : 25 vérifications de sécurité sur un PostgreSQL ordinaire (un compte ne voit que ses données, ne peut pas se donner le rôle admin ni des PK, ne touche pas la collection d'un autre ; l'admin voit tout, avec un motif obligatoire ; journal intouchable ; visiteur non connecté refusé).
 
 Lancer les tests (PostgreSQL 16, base vide) :
@@ -12,6 +13,7 @@ Lancer les tests (PostgreSQL 16, base vide) :
 ```sh
 psql -d test -f tools/supabase/tests/mock_supabase.sql
 psql -d test -f tools/supabase/001_comptes.sql
+psql -d test -f tools/supabase/002_search_path.sql
 psql -d test -f tools/supabase/tests/test_001.sql   # chaque ligne commence par « OK »
 ```
 

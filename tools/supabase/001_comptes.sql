@@ -83,7 +83,7 @@ create table if not exists public.admin_log (
 );
 
 -- Le journal ne se modifie ni ne s'efface (même par le compte technique de Supabase).
-create or replace function public.admin_log_readonly() returns trigger language plpgsql as $$
+create or replace function public.admin_log_readonly() returns trigger language plpgsql set search_path = '' as $$
 begin
   raise exception 'Le journal des admins ne peut être ni modifié ni effacé';
 end; $$;
@@ -92,7 +92,7 @@ create trigger admin_log_no_change before update or delete on public.admin_log
   for each row execute function public.admin_log_readonly();
 
 -- Date de mise à jour automatique.
-create or replace function public.touch_updated_at() returns trigger language plpgsql as $$
+create or replace function public.touch_updated_at() returns trigger language plpgsql set search_path = '' as $$
 begin
   new.updated_at := now();
   return new;
@@ -103,7 +103,7 @@ drop trigger if exists collection_touch on public.collection_items;
 create trigger collection_touch before update on public.collection_items for each row execute function public.touch_updated_at();
 
 -- Accord pour les nouveautés : date enregistrée à chaque changement ; jamais pour les moins de 15 ans.
-create or replace function public.profiles_news_rules() returns trigger language plpgsql as $$
+create or replace function public.profiles_news_rules() returns trigger language plpgsql set search_path = '' as $$
 begin
   if new.age_range = 'u15' then
     new.news_optin := false;
