@@ -25,3 +25,14 @@ psql -d test -f tools/supabase/tests/test_001.sql   # chaque ligne commence par 
 6. Avant les vrais utilisateurs : envoi des e-mails (Brevo), sauvegardes chiffrées hors serveur et restauration testée, tableau de bord de Supabase réservé (Tailscale ou adresses autorisées).
 
 Secrets : la clé `anon` pourra être mise dans l'app ; la clé `service_role`, les mots de passe et la clé JWT ne sortent jamais de Coolify.
+
+## Envoi des e-mails avec Brevo (2026-11-06)
+
+Noms vérifiés dans le modèle Supabase de Coolify (`templates/compose/supabase.yaml` de coollabsio/coolify) : `SMTP_HOST`, `SMTP_PORT` (587 par défaut), `SMTP_USER`, `SMTP_PASS`, `SMTP_ADMIN_EMAIL`, `SMTP_SENDER_NAME`, `ENABLE_EMAIL_AUTOCONFIRM` (false par défaut), `GOTRUE_SITE_URL` (par défaut l'adresse de Supabase Kong), `ADDITIONAL_REDIRECT_URLS`, `MAILER_SUBJECTS_*` (objets des e-mails), `MAILER_TEMPLATES_*` (adresses de modèles HTML).
+
+1. Compte Brevo gratuit (300 e-mails par jour), double authentification.
+2. Brevo › Expéditeurs, domaines et IP dédiées › Domaines : ajouter `dropicards.fr`, recopier ses entrées (TXT `brevo-code`, DKIM, DMARC) dans la zone DNS OVH de dropicards.fr, puis authentifier. Une seule entrée SPF par domaine : la fusionner si elle existe déjà.
+3. Expéditeur : `Dropicards <noreply@dropicards.fr>`.
+4. Brevo › SMTP et API › SMTP : générer une clé (identifiant `…@smtp-brevo.com` et clé, gardés dans le gestionnaire de mots de passe).
+5. Coolify › service Supabase › Environment Variables : `SMTP_HOST=smtp-relay.brevo.com`, `SMTP_PORT=587`, `SMTP_USER`, `SMTP_PASS`, `SMTP_ADMIN_EMAIL=noreply@dropicards.fr`, `SMTP_SENDER_NAME=Dropicards`, `ENABLE_EMAIL_AUTOCONFIRM=false`, `GOTRUE_SITE_URL=https://dropicards.fr` ; objets en français : `MAILER_SUBJECTS_CONFIRMATION`, `MAILER_SUBJECTS_RECOVERY`, `MAILER_SUBJECTS_MAGIC_LINK`, `MAILER_SUBJECTS_EMAIL_CHANGE`, `MAILER_SUBJECTS_INVITE` ; Save, Restart.
+6. Test : Authentication › Users › un compte › « Send password recovery » ; l'e-mail doit arriver en moins d'une minute.
