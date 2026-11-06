@@ -138,8 +138,7 @@
       g.scans + ' scans disponibles par jour',
       'Booster PK toutes les ' + g.boosterH + ' h'
     ], g.coinH ? ['Jeu de la pièce toutes les ' + g.coinH + ' h'] : [], i ? ['Emblème ' + g.name + ' sur ton profil'] : [],
-    g.ticket ? ['Possibilité d’acheter un ticket pour participer au tirage au sort'] : [],
-    g.shopBooster ? ['Possibilité d’acheter un booster au PK shop'] : [],
+    // Tickets et achats du PK shop ouverts à tous les grades depuis le 2026-11-06 (porteur : nouveau magasin).
     g.deluxe ? ['Possibilité d’acheter un item « Deluxe » au PK shop'] : []);
   });
   const pfNum = n => Number(n || 0).toLocaleString('fr-FR');

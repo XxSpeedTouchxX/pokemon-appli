@@ -8,6 +8,9 @@
   // Ce module partage la portée des autres : ses noms commencent par GC_ ou gc.
   const gcProto = Component.prototype;
   const gcOn = () => Cloud.on();
+  const GC_INF = 999999; // solde affiché « ∞ » pour un admin déverrouillé
+  const gcFree = s => !!(s && s.cloudGame && s.cloudGame.unlimited && gcOn());
+  const gcPk = (s, v) => (gcFree(s) ? GC_INF : v), gcPa = (s, v) => (gcFree(s) ? GC_INF : v);
   const GC_LOGIN = 'Connecte-toi à ton compte Dropicards pour jouer (Mon profil › Me reconnecter).';
   const GC_NET = 'Connexion internet nécessaire pour jouer : réessaie quand tu es connecté.';
   const gcMsg = e => (e && e.code === 'network' ? GC_NET : e && e.code === 'login' ? GC_LOGIN : (e && e.message) || CLOUD_ERR.other);
@@ -34,11 +37,14 @@
       const s = this.st(), un = Array.isArray(g.unlocked) ? g.unlocked : [];
       const patch = {
         pk: g.pk | 0, pa: g.pa | 0, pkEarned: g.pk_earned | 0, paDay: g.pa_day || '', paStreak: g.pa_streak | 0,
-        pkShared: g.shared ? (s.pkShared || 'serveur') : '', tickets: g.shop || {},
+        pkShared: g.shared ? (s.pkShared || 'serveur') : '', tickets: g.shop_draw || g.shop || {},
         pkOwn: un.filter(n => !(DEX[n] && DEX[n].mega)), megas: un.filter(n => DEX[n] && DEX[n].mega),
         games: Object.assign({}, s.games || {}, { boosterAt: g.booster_last || '', coinAt: g.coin_last || '' }),
-        cloudGame: { at: Date.now(), today: g.today, shopOpenAt: g.shop_open_at || '', grade: g.grade | 0 }
+        cloudGame: { at: Date.now(), today: g.today, shopOpenAt: g.shop_open_at || '', grade: g.grade | 0, nextDraw: g.next_draw || '',
+          unlimited: !!g.unlimited, adminUntil: g.admin_until || '', realPk: g.pk | 0, realPa: g.pa | 0 }
       };
+      // Admin déverrouillé (007) : PK et PA illimités sur le serveur ; l'app affiche « ∞ » et ne bloque plus rien.
+      if (g.unlimited) { patch.pk = GC_INF; patch.pa = GC_INF; }
       if (g.buddy && (dexOwn(Object.assign({}, s, patch), g.buddy))) patch.buddy = g.buddy;
       this.setState(patch);
       return g;
@@ -70,7 +76,7 @@
       // Animation d'origine, avec le gain et la série donnés par le serveur : la veille et la série d'avant sont posées
       // pour que le calcul de l'appareil (PaCore) retombe exactement sur la réponse du serveur.
       const yday = new Date(Date.parse(paToday()) - 86400000).toISOString().slice(0, 10);
-      this.setState({ pa: (r.pa | 0) - (r.gain | 0), paDay: r.streak > 1 ? yday : '', paStreak: Math.max(0, r.streak - 1) });
+      this.setState({ pa: gcPa(this.st(), (r.pa | 0) - (r.gain | 0)), paDay: r.streak > 1 ? yday : '', paStreak: Math.max(0, r.streak - 1) });
       gcBasePaClaim.call(this);
       setTimeout(() => this.gcSync(), 2500);
     }, e => { gcPaBusy = false; this.gcFail(e, { paClaim: false }); });
@@ -89,7 +95,7 @@
         const t = this.st(), gg = t.games || {};
         const hist = [{ at: at, game: 'booster', pk: win }].concat(gg.hist || []).slice(0, 20);
         const credit = () => {
-          this.setState({ pk: r.pk, pkEarned: r.pk_earned, pkGain: win, toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' });
+          this.setState({ pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, pkGain: win, toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' });
           this.pkGainEnd(); this.flash();
         };
         this.setState({ games: Object.assign({}, gg, { boosterAt: at, bWin: i, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
@@ -114,7 +120,7 @@
         const win = !!r.win, at = new Date().toISOString(), gg = this.st().games || {};
         const hist = [{ at: at, game: 'coin', pk: win ? GM_COIN_WIN : 0 }].concat(gg.hist || []).slice(0, 20);
         const done = () => {
-          const patch = { pk: r.pk, pkEarned: r.pk_earned, games: Object.assign({}, this.st().games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + GM_COIN_WIN + ' PK' : 'Cristal éteint : pas de PK cette fois' };
+          const patch = { pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, games: Object.assign({}, this.st().games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + GM_COIN_WIN + ' PK' : 'Cristal éteint : pas de PK cette fois' };
           if (win) patch.pkGain = GM_COIN_WIN;
           this.setState(patch);
           if (win) this.pkGainEnd();
@@ -135,7 +141,7 @@
       if (!gcOn()) return base.call(this, via);
       if (this.st().pkShared || this.gcNeed()) return;
       Cloud.rpc('claim_share', { req: Cloud.reqId(), via: String(via || '') }).then(r => {
-        this.setState({ pk: r.pk, pkEarned: r.pk_earned, pkShared: via || 'oui', pkGain: PK_SHARE, toast: 'Merci pour le partage ! +' + PK_SHARE + ' PK' });
+        this.setState({ pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, pkShared: via || 'oui', pkGain: PK_SHARE, toast: 'Merci pour le partage ! +' + PK_SHARE + ' PK' });
         this.pkGainEnd(); this.flash();
       }, e => this.gcFail(e));
     };
@@ -153,9 +159,9 @@
       Cloud.rpc('unlock_pokemon', { num: n, req: Cloud.reqId() }).then(r => {
         busy = false;
         // Solde avant le déblocage, puis déblocage d'origine (animation, compagnon, lignée du starter).
-        this.setState({ pa: (r.pa | 0) + (r.price | 0) });
+        this.setState({ pa: gcPa(this.st(), (r.pa | 0) + (r.price | 0)) });
         base.call(this, n);
-        this.setState({ pa: r.pa | 0 });
+        this.setState({ pa: gcPa(this.st(), r.pa | 0) });
         setTimeout(() => this.gcSync(), 1500);
       }, err => { busy = false; this.gcFail(err); });
     };
@@ -168,20 +174,24 @@
     };
   })(gcProto.dexChoose);
 
-  // PK shop : ticket et lot vérifiés par le serveur (grade, 7 jours, solde).
+  // PK shop (007, 2026-11-06) : tickets Bronze, Argent, Or et achats directs vérifiés par le serveur (7 jours, solde,
+  // choix de l'item rare) ; un ticket vise le prochain tirage.
   gcProto.shopBuy = (function (base) {
     let busy = false;
-    return function (id) {
-      if (!gcOn()) return base.call(this, id);
+    return function (id, choice) {
+      if (!gcOn()) return base.call(this, id, choice);
       if (busy || this.gcNeed()) return;
       busy = true;
-      Cloud.rpc('buy_item', { item_id: id, req: Cloud.reqId() }).then(r => {
+      Cloud.rpc('buy_item', { item_id: id, req: Cloud.reqId(), choice: choice || null }).then(r => {
         busy = false;
-        const tickets = Object.assign({}, this.st().tickets || {}, { [id]: r.count | 0 });
-        this.setState({ pk: r.pk, tickets: tickets, shopAsk: null,
-          toast: (id.indexOf('ticket') === 0 ? 'Ticket ajouté · tu en as ' + (r.count | 0) : 'Lot réservé · envoi après vérification de ton identité') + ' · il te reste ' + Number(r.pk).toLocaleString('fr-FR') + ' PK' });
+        const tickets = Object.assign({}, this.st().tickets || {}, { [id]: r.count | 0 }), free = gcFree(this.st());
+        const it = SHOP_ITEMS.find(x => x.id === id) || { name: 'Article' };
+        this.setState({ pk: free ? GC_INF : r.pk, tickets: tickets, shopAsk: null, shopChoice: null,
+          toast: (id.indexOf('ticket') === 0 ? it.name + ' ajouté · tu en as ' + (r.count | 0) + ' pour le prochain tirage'
+            : it.name + (r.choice ? ' (' + r.choice + ')' : '') + ' · achat réservé, envoi après vérification de ton identité')
+            + (free ? ' · mode Admin, rien débité' : ' · il te reste ' + Number(r.pk).toLocaleString('fr-FR') + ' PK') });
         this.flash();
-      }, e => { busy = false; this.gcFail(e, { shopAsk: null }); });
+      }, e => { busy = false; this.gcFail(e, { shopAsk: null, shopChoice: null }); });
     };
   })(gcProto.shopBuy);
 
@@ -219,24 +229,17 @@
     };
   })(gcProto.vGames);
 
-  // Double authentification des admins (2026-11-06, « go » du porteur, docs/25 étape D ; 006_admin_2fa.sql) : avec le
-  // serveur, le code local du mode Admin est remplacé par le code à 6 chiffres d'une application d'authentification
-  // (Google Authenticator, Microsoft Authenticator, l'app Mots de passe de l'iPhone…). Première fois : QR code à scanner,
-  // puis le code ; ensuite : le code à chaque nouvelle connexion. Sans lui, la base refuse tout outil admin.
-  // QR code de Supabase : SVG brut après « data:image/svg+xml;utf-8, » ; réencodé pour l'image (un « # » couperait l'adresse).
-  const gcQr = q => {
-    const m = /^data:image\/svg\+xml;utf-?8,([\s\S]*)$/i.exec(q || '');
-    return m ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(m[1]) : (q || '');
+  // Mot de passe des admins (2026-11-06, porteur ; remplace la double authentification ; 007_admin_boutique.sql) :
+  // 7 appuis sur « Version » (comptes admin seulement), puis le mot de passe connu des admins ; le serveur le vérifie,
+  // ouvre le mode Admin pour 24 h et rend les PK et les PA illimités (rien n'est débité, aucun délai). « Quitter le
+  // mode Admin » le referme aussi sur le serveur.
+  const gcAdminOpen = s => {
+    const cg = (s && s.cloudGame) || {};
+    return !!(cg.adminUntil && Date.parse(cg.adminUntil) > Date.now());
   };
-  gcProto.gcMfaStart = function () {
-    if (Cloud.aal() === 'aal2') { this.setAdmin({ on: true }, { admLock: '', admSheet: true, toast: 'Mode Admin activé' }); return; }
-    this.setState({ admLock: 'mfa', admCode: '', admMsg: 'Un instant…', admMfa: null });
-    Cloud.mfaFactors().then(list => {
-      const f = list.find(x => x.status === 'verified');
-      if (f) return Cloud.mfaChallenge(f.id).then(c => this.setState({ admMfa: { fid: f.id, cid: c.id, isNew: false }, admMsg: '' }));
-      return Cloud.mfaEnroll().then(e => Cloud.mfaChallenge(e.id).then(c => this.setState({
-        admMfa: { fid: e.id, cid: c.id, isNew: true, qr: gcQr(e.totp && e.totp.qr_code), secret: e.totp && e.totp.secret || '' }, admMsg: '' })));
-    }).catch(e => this.setState({ admMsg: gcMsg(e) }));
+  gcProto.gcAdminStart = function () {
+    if (gcAdminOpen(this.st())) { this.setAdmin({ on: true }, { admLock: '', admSheet: true, toast: 'Mode Admin activé' }); return; }
+    this.setState({ admLock: 'pw', admCode: '', admMsg: '' });
   };
   gcProto.admTap = (function (base) {
     let taps = [];
@@ -247,41 +250,63 @@
       if (taps.length < 7) return;
       taps = [];
       if (!admAllowed()) { this.setState({ toast: 'Mode Admin réservé aux comptes admin de Dropicards' }); return; }
-      this.gcMfaStart();
+      this.gcAdminStart();
     };
   })(gcProto.admTap);
   gcProto.admSubmit = (function (base) {
+    let busy = false;
     return function () {
       const s = this.st();
-      if (!gcOn() || s.admLock !== 'mfa') return base.call(this);
-      const m = s.admMfa, code = String(s.admCode || '').trim();
-      if (!m) return;
-      if (!/^\d{6}$/.test(code)) { this.setState({ admMsg: 'Le code fait 6 chiffres.' }); return; }
+      if (!gcOn() || s.admLock !== 'pw') return base.call(this);
+      const pw = String(s.admCode || '');
+      if (busy) return;
+      if (!pw) { this.setState({ admMsg: 'Tape le mot de passe admin.' }); return; }
+      busy = true;
       this.setState({ admMsg: 'Vérification…' });
-      Cloud.mfaVerify(m.fid, m.cid, code).then(() => Cloud.profile()).then(() => {
-        this.setAdmin({ on: true }, { admLock: '', admCode: '', admMfa: null, admMsg: '', admSheet: true, toast: m.isNew ? 'Double authentification activée · mode Admin ouvert' : 'Mode Admin activé' });
-        this.flash();
-      }, e => {
-        // Code faux ou expiré : nouveau challenge, nouvel essai.
-        Cloud.mfaChallenge(m.fid).then(c => this.setState({ admMfa: Object.assign({}, m, { cid: c.id }) })).catch(() => {});
-        this.setState({ admCode: '', admMsg: e && e.code === 'network' ? GC_NET : 'Code incorrect ou expiré : tape le nouveau code affiché par ton application.' });
-      });
+      Cloud.rpc('admin_unlock', { pw: pw }).then(r => {
+        busy = false;
+        if (!r || !r.ok) { this.setState({ admCode: '', admMsg: (r && r.msg) || 'Mot de passe incorrect.' }); return; }
+        const cg = Object.assign({}, this.st().cloudGame || {}, { adminUntil: r.until, unlimited: true });
+        this.setState({ cloudGame: cg });
+        this.setAdmin({ on: true }, { admLock: '', admCode: '', admMsg: '', admSheet: true, toast: 'Mode Admin ouvert pour 24 h · PK et PA illimités' });
+        this.flash(); this.gcSync();
+      }, e => { busy = false; this.setState({ admCode: '', admMsg: e && e.code === 'network' ? GC_NET : (e && e.message) || CLOUD_ERR.other }); });
     };
   })(gcProto.admSubmit);
   gcProto.admView = (function (base) {
     return function (s) {
       const r = base.call(this, s);
       if (!gcOn()) return r;
-      const m = s.admMfa;
-      r.menu = () => (admOf(s).on ? this.setState({ admSheet: true }) : this.gcMfaStart());
-      if (s.admLock === 'mfa') {
-        r.lockTitle = m && m.isNew ? 'Active la double authentification' : 'Double authentification';
-        r.lockText = m && m.isNew
-          ? 'Compte admin : scanne ce QR code avec une application d’authentification (Google Authenticator, Microsoft Authenticator, Mots de passe de l’iPhone…), puis tape le code à 6 chiffres qu’elle affiche.'
-          : 'Tape le code à 6 chiffres affiché par ton application d’authentification.';
-        r.hasQr = !!(m && m.isNew && m.qr); r.qr = m && m.qr || ''; r.secret = m && m.secret ? 'Ou saisis cette clé : ' + m.secret : '';
-        r.cancel = () => this.setState({ admLock: '', admCode: '', admMsg: '', admMfa: null });
-      } else r.hasQr = false;
+      r.menu = () => (admOf(s).on ? this.setState({ admSheet: true }) : this.gcAdminStart());
+      if (s.admLock === 'pw') {
+        r.lockTitle = 'Mot de passe admin';
+        r.lockText = 'Tape le mot de passe connu des admins. Le mode Admin s’ouvre pour 24 h, avec les PK et les PA illimités.';
+        r.codeMode = 'text'; r.codeAuto = 'current-password'; r.codeMax = '200'; r.codeLabel = 'Mot de passe admin';
+        r.onCode = e => this.setState({ admCode: String(e.target.value || '').slice(0, 200) });
+        r.cancel = () => this.setState({ admLock: '', admCode: '', admMsg: '' });
+      }
+      if (r.sheet) {
+        const until = (s.cloudGame || {}).adminUntil;
+        r.pkText = 'PK et PA illimités jusqu’au ' + (until ? new Date(until).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : '…') + ' : rien n’est débité, aucun délai.';
+      }
+      const quit = r.quit;
+      r.quit = () => {
+        Cloud.rpc('admin_lock').catch(() => {}).then(() => this.gcSync());
+        this.setState({ cloudGame: Object.assign({}, s.cloudGame || {}, { adminUntil: '', unlimited: false }) });
+        quit();
+      };
       return r;
     };
   })(gcProto.admView);
+  // Soldes « ∞ » partout (en-tête, Mes PK, Mes PA, PK shop) tant que le mode Admin est ouvert.
+  const gcInfRender = gcProto.renderVals;
+  gcProto.renderVals = function () {
+    const r = gcInfRender.call(this), s = this.st();
+    if (!gcFree(s)) return r;
+    if (r.pk) {
+      Object.assign(r.pk, { n: '∞', pa: '∞', balance: '∞' });
+      if (r.pk.paSheet && r.pk.paSheet.open) r.pk.paSheet.balance = '∞';
+    }
+    if (r.pks && r.pks.pk !== undefined) Object.assign(r.pks, { pk: '∞', paBal: '∞' });
+    return r;
+  };

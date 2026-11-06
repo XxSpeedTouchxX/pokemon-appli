@@ -47,17 +47,6 @@ async function fake(route) {
     u.pwd = body.password; return send(200, { id: u.id });
   }
   if (p === '/auth/v1/logout') return send(204, {});
-  // Double authentification (TOTP) imitée : code 246810.
-  const tokSub = (() => { try { return JSON.parse(Buffer.from((req.headers().authorization || '').split('.')[1] || '', 'base64url').toString()).sub; } catch (e) { return ''; } })();
-  const me = Object.values(users).find(x => x.id === tokSub);
-  if (p === '/auth/v1/user' && req.method() === 'GET') return send(200, { id: me && me.id, factors: (me && me.factors) || [] });
-  if (p === '/auth/v1/factors' && req.method() === 'POST') { me.factors = [{ id: 'f1', factor_type: 'totp', status: 'unverified' }]; return send(200, { id: 'f1', type: 'totp', totp: { qr_code: 'data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>', secret: 'JBSWY3DPEHPK3PXP' } }); }
-  if (/^\/auth\/v1\/factors\/f1\/challenge$/.test(p)) return send(200, { id: 'c' + Date.now() });
-  if (/^\/auth\/v1\/factors\/f1\/verify$/.test(p)) {
-    if (body.code !== '246810') return send(422, { code: 422, error_code: 'mfa_verification_failed', msg: 'Invalid TOTP code entered' });
-    me.factors = [{ id: 'f1', factor_type: 'totp', status: 'verified' }];
-    return send(200, { access_token: jwt(me.id, me.email, 'aal2'), refresh_token: 'r2-' + me.id, expires_in: 3600, user: { id: me.id, email: me.email } });
-  }
   if (p.startsWith('/rest/v1/rpc/')) {
     const u = Object.values(users).find(x => (req.headers().authorization || '').includes(jwt(x.id, x.email)));
     if (!u) return send(401, { message: 'JWT expired' });
@@ -65,12 +54,25 @@ async function fake(route) {
     const fn = p.slice('/rest/v1/rpc/'.length);
     const err = m => send(400, { code: 'P0001', message: m });
     calls.push('RPC ' + fn + ' ' + JSON.stringify(body));
-    if (fn === 'game_state') return send(200, { pk: G.pk, pa: G.pa, pk_earned: G.earned, pa_day: G.day, pa_streak: G.streak, today: '2026-11-06', grade: 0, booster_last: G.boosterAt, coin_last: null, shared: G.shared, unlocked: G.unlocked, shop: G.shop, buddy: 7 });
+    if (fn === 'game_state') return send(200, { unlimited: !!(u.until && Date.parse(u.until) > Date.now()), admin_until: u.until && Date.parse(u.until) > Date.now() ? u.until : null, next_draw: '2026-11-22T19:00:00Z', shop_draw: G.shop, pk: G.pk, pa: G.pa, pk_earned: G.earned, pa_day: G.day, pa_streak: G.streak, today: '2026-11-06', grade: 0, booster_last: G.boosterAt, coin_last: null, shared: G.shared, unlocked: G.unlocked, shop: G.shop, buddy: 7 });
     if (fn === 'claim_daily_pa') { if (G.day === '2026-11-06') return err('PA du jour déjà récupérés'); G.day = '2026-11-06'; G.streak = 1; G.pa += 20; return send(200, { gain: 20, streak: 1, pa: G.pa, pk: G.pk, pk_earned: G.earned }); }
     if (fn === 'open_booster') { if (G.boosterAt) return err('Booster pas encore prêt'); G.boosterAt = new Date().toISOString(); G.pk += 200; G.earned += 200; return send(200, { won: 200, pk: G.pk, pa: G.pa, pk_earned: G.earned }); }
     if (fn === 'flip_coin') return err('Pièce réservée au grade Chasseur et plus');
     if (fn === 'unlock_pokemon') { if (G.pa < 50) return err('Pas assez de PA'); G.pa -= 50; G.unlocked.push(body.num); return send(200, { n: body.num, price: 50, pa: G.pa, pk: G.pk, pk_earned: G.earned }); }
-    if (fn === 'buy_item') return err('Disponible 7 jours après la création de ton compte');
+    // Mot de passe des admins imité (007) : « mot-de-passe-des-admins », comptes « admin » seulement.
+    if (fn === 'admin_unlock') {
+      if (u.role !== 'admin') return send(403, { code: '42501', message: 'Réservé aux comptes admin' });
+      if (body.pw !== 'mot-de-passe-des-admins') return send(200, { ok: false, msg: 'Mot de passe incorrect.' });
+      u.until = new Date(Date.now() + 86400e3).toISOString(); return send(200, { ok: true, until: u.until });
+    }
+    if (fn === 'admin_lock') { u.until = null; return send(200, null); }
+    if (fn === 'buy_item') {
+      const free = u.until && Date.parse(u.until) > Date.now();
+      if (!free) return err('Disponible 7 jours après la création de ton compte');
+      if (body.item_id === 'achat-rare' && !body.choice) return err('Choisis ton item');
+      G.shop[body.item_id] = (G.shop[body.item_id] || 0) + 1;
+      return send(200, { item: body.item_id, count: G.shop[body.item_id], choice: body.choice || null, pk: G.pk, pa: G.pa, pk_earned: G.earned, draw_at: '2026-11-22T19:00:00Z' });
+    }
     return send(404, {});
   }
   if (p === '/rest/v1/profiles') {
@@ -226,20 +228,41 @@ for (const [who, pwd, admin] of [['ondine@exemple.fr', 'nouveau-mot-de-passe-99'
   await ctx.close();
 }
 
-// 5 bis. Double authentification des admins : QR code, code faux refusé, bon code, panneau ouvert, outils par le serveur.
+// 5 bis. Mot de passe des admins (2026-11-06, porteur ; 007) : mot de passe faux refusé, bon mot de passe, panneau
+// ouvert, PK et PA « ∞ », achats sans rien débiter, mode refermé sur le serveur.
 ({ ctx, page } = await fresh());
 await admIn(page, 'sacha@exemple.fr', 'mot-de-passe-admin-42');
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); d.onb = 0; d.tuto = 'done'; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
 await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.locator('button:has-text("Mode Admin")').first().click(); await page.waitForTimeout(800);
 const lock = page.locator('section[aria-label="Code Admin"]');
-ok('admin, 1ʳᵉ fois : « Active la double authentification » avec QR code et clé', /Active la double authentification/.test(await lock.innerText()) && (await lock.locator('img[alt^="QR code"]').count()) === 1 && /JBSWY3DPEHPK3PXP/.test(await lock.innerText()));
-await page.screenshot({ path: shot('cloud-2fa.png') });
-await lock.locator('input').fill('111111'); await lock.locator('button:has-text("Valider")').click(); await page.waitForTimeout(700);
-ok('code faux refusé', /Code incorrect ou expiré/.test(await lock.innerText()) && (await page.locator('section[aria-label="Panneau Admin"]').count()) === 0);
-await lock.locator('input').fill('246810'); await lock.locator('button:has-text("Valider")').click(); await page.waitForTimeout(1200);
-const aal = await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('pkm-cloud-session')); return JSON.parse(atob(s.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).aal; });
-ok('bon code : session « aal2 », panneau Admin ouvert', aal === 'aal2' && (await lock.count()) === 0 && /Double authentification activée/.test(await page.locator('body').innerText()));
+ok('admin : « Mot de passe admin » demandé (champ texte masqué, plus de QR code ni de code à 6 chiffres)', /Mot de passe admin/.test(await lock.innerText()) && (await lock.locator('input[type=password][aria-label="Mot de passe admin"]').count()) === 1 && (await lock.locator('img').count()) === 0);
+await page.screenshot({ path: shot('cloud-admin-mdp.png') });
+await lock.locator('input').fill('pas-le-bon'); await lock.locator('button:has-text("Valider")').click(); await page.waitForTimeout(700);
+ok('mot de passe faux refusé', /Mot de passe incorrect/.test(await lock.innerText()) && (await page.locator('section[aria-label="Panneau Admin"]').count()) === 0);
+await lock.locator('input').fill('mot-de-passe-des-admins'); await lock.locator('button:has-text("Valider")').click(); await page.waitForTimeout(1500);
+ok('bon mot de passe : panneau Admin ouvert, « PK et PA illimités »', (await lock.count()) === 0 && /PK et PA illimités/.test(await page.locator('section[aria-label="Panneau Admin"]').innerText()) && calls.some(c => c.startsWith('RPC admin_unlock')));
+await page.locator('section[aria-label="Panneau Admin"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
+await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
+ok('en-tête : PK et PA « ∞ »', ((await page.locator('header').first().innerText()).match(/∞/g) || []).length >= 2);
+await page.screenshot({ path: shot('cloud-admin-infini.png') });
+const tOr = page.locator('section[aria-label="Ticket Or"]');
+await tOr.locator('button:has-text("Acheter un ticket")').click(); await page.waitForTimeout(300);
+await tOr.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
+ok('admin : ticket Or acheté sans rien débiter', calls.some(c => c.startsWith('RPC buy_item') && c.includes('ticket-or')) && /rien débité/.test(await page.locator('body').innerText()));
+const rare = page.locator('section[aria-label="Item rare au choix"]');
+await rare.locator('button:has-text("Acheter")').click(); await page.waitForTimeout(300);
+await rare.locator('button:has-text("Confirmer")').click({ force: true }); await page.waitForTimeout(400);
+ok('item rare : « Confirmer » grisé sans choix, ne fait rien', !calls.some(c => c.includes('achat-rare')));
+await rare.locator('button:has-text("Poster")').click(); await page.waitForTimeout(200);
+await page.screenshot({ path: shot('cloud-shop-rare.png') });
+await rare.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
+ok('item rare au choix : « Poster » envoyé au serveur', calls.some(c => c.startsWith('RPC buy_item') && c.includes('achat-rare') && c.includes('Poster')));
+await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
+await page.locator('button:has-text("Panneau Admin")').first().click(); await page.waitForTimeout(600);
+await page.locator('section[aria-label="Panneau Admin"] button:has-text("Quitter le mode Admin")').click(); await page.waitForTimeout(1200);
+await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
+ok('« Quitter le mode Admin » : refermé sur le serveur, soldes réels de retour', calls.some(c => c.startsWith('RPC admin_lock')) && !/∞/.test(await page.locator('header').first().innerText()));
 await ctx.close();
 
 // 6. PK et PA tenus par le serveur : soldes recopiés, triche locale effacée, jeux demandés au serveur.
@@ -254,6 +277,13 @@ const boost = page.locator('section[aria-label="Booster PK"]');
 await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(3000);
 gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
 ok('booster : gain tiré par le serveur (+200), animation jouée : ' + gs.pk + ' PK', gs.pk === 300 && calls.some(c => c.startsWith('RPC open_booster')) && /\+200 PK/.test(await boost.innerText()));
+await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
+const shopTxt = await page.locator('main').innerText();
+ok('PK shop : tickets Bronze 500, Argent 1 500, Or 5 000 PK ; achats 7 500, 10 000, 15 000 PK', ['Ticket Bronze', 'Ticket Argent', 'Ticket Or', 'Booster de la série du moment', 'Item rare au choix', 'ETB 30 ans'].every(t => shopTxt.includes(t))
+  && ['500 PK', '1 500 PK', '5 000 PK', '7 500 PK', '10 000 PK', '15 000 PK'].every(t => shopTxt.replace(/\u202f|\u00a0/g, ' ').includes(t)) && /dimanche 22 novembre à 20 h/.test(shopTxt));
+ok('compte à 300 PK : « Il te manque 200 PK » pour le ticket Bronze', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
+await page.screenshot({ path: shot('cloud-shop.png'), fullPage: false });
+await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 ok('règles : « tirage fait par le serveur »', /fait par le serveur Dropicards/.test(await page.locator('main').innerText()));
 const coin = page.locator('section[aria-label="Pile ou face"]');
 await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(700);

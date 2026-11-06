@@ -7,33 +7,56 @@
   // Prix (2026-10-12, porteur) : ticket 2 000 PK ; lot « Booster 30 ans Pokémon » 15 000 PK (visuel officiel du booster).
   // Le lot s'échange directement (pas de tirage) ; son envoi demande un compte et une adresse : l'app l'enregistre sur
   // l'appareil et l'annonce, sans rien expédier pour l'instant.
-  const SHOP_TICKET_PRICE = 2000;
-  const SHOP_DRAW = 'Prochain tirage : date annoncée ici avec le règlement du jeu. Un ticket = une chance ; plus tu en as, plus tu as de chances.';
+  // Nouveau magasin (2026-11-06, porteur ; serveur : tools/supabase/007_admin_boutique.sql) :
+  // - 3 tickets, chacun pour un tirage au sort toutes les 2 semaines (dimanche 20 h, heure de Paris, dès le 22 novembre
+  //   2026) : Bronze 500 PK (un booster, 5 à 15 €), Argent 1 500 PK (un item rare, 20 à 60 €), Or 5 000 PK (l'ETB de
+  //   la série du moment, 60 à 200 €) ; lots du moment susceptibles de changer avec les sorties ;
+  // - 3 achats directs : booster de la série du moment 7 500 PK, item rare au choix 10 000 PK, ETB 30 ans 15 000 PK ;
+  // - plus de grade demandé (le prix suffit) ; toujours 7 jours après la confirmation de l'adresse, pièce d'identité du
+  //   gagnant ou de l'acheteur vérifiée avant l'envoi. Les anciens articles (ticket 2 000 PK, lot 15 000 PK) sont retirés.
+  const SHOP_RARE = ['Coffret classeur', 'Poster', 'Coffret thématique', 'Collection', 'Pokébox', 'Mini tin', 'Bundle'];
   const SHOP_ITEMS = [
-    { id: 'ticket-booster', kind: 'ticket', name: 'Ticket · tirage au sort', prize: '1 booster Pokémon à gagner', price: SHOP_TICKET_PRICE, note: SHOP_DRAW },
-    { id: 'lot-booster-30', kind: 'lot', name: 'Booster 30 ans Pokémon', prize: 'Le booster, à recevoir chez toi', price: 15000,
+    { id: 'ticket-bronze', kind: 'ticket', tier: 'bronze', tag: 'BRONZE', name: 'Ticket Bronze', prize: 'Tirage d’un booster Pokémon', value: 'Valeur du lot : 5 à 15 €', price: 500,
+      note: 'Lot du moment : un booster 30 ans. Il peut changer avec les sorties.', head: 'Tickets du tirage au sort', headSub: 'Un tirage toutes les 2 semaines, pour chaque ticket. Un ticket = une chance : plus tu en as, plus tu as de chances.' },
+    { id: 'ticket-argent', kind: 'ticket', tier: 'argent', tag: 'ARGENT', name: 'Ticket Argent', prize: 'Tirage d’un item rare', value: 'Valeur du lot : 20 à 60 €', price: 1500,
+      note: 'Coffret classeur, poster, coffret thématique, collection, Pokébox, mini tin ou bundle, selon la série du moment.' },
+    { id: 'ticket-or', kind: 'ticket', tier: 'or', tag: 'OR', name: 'Ticket Or', prize: 'Tirage de l’ETB de la série du moment', value: 'Valeur du lot : 60 à 200 €', price: 5000,
+      note: 'Ultra rare : le Coffret Dresseur d’élite (ETB) de la série du moment.' },
+    { id: 'achat-booster', kind: 'lot', name: 'Booster de la série du moment', prize: 'Booster 30 ans, envoyé chez toi', value: 'Valeur : 5 à 15 €', price: 7500,
       img: 'img/shop-booster-30-anniversaire.webp', imgAlt: 'Booster du 30ᵉ anniversaire Pokémon',
-      note: 'Échange direct, sans tirage. L’envoi se fera quand les comptes Dropicards existeront : ton lot est gardé sur cet appareil d’ici là.', perk: 'shopBooster' },
+      note: 'Achat direct, sans tirage.', head: 'Achat direct', headSub: 'Sans tirage : l’article est pour toi. Envoi après vérification de ton identité.' },
+    { id: 'achat-rare', kind: 'lot', name: 'Item rare au choix', prize: 'Un item rare de la série du moment, envoyé chez toi', value: 'Valeur : 20 à 60 €', price: 10000,
+      img: 'img/products/30th-poster-collection.webp', imgAlt: 'Collection poster 30ᵉ anniversaire Pokémon', wide: true, choices: SHOP_RARE,
+      note: 'Tu choisis le type d’item à l’achat ; le modèle dépend de la série du moment.' },
+    { id: 'achat-etb-30', kind: 'lot', name: 'ETB 30 ans', prize: 'Coffret Dresseur d’élite 30ᵉ anniversaire, envoyé chez toi', value: 'Valeur : 60 à 200 €', price: 15000,
+      img: 'img/products/30th-celebration-elite-trainer-box.webp', imgAlt: 'Coffret Dresseur d’élite 30ᵉ anniversaire', wide: true,
+      note: 'Achat direct, sans tirage.' },
     // Item « Deluxe » (2026-10-28, porteur) : réservé au Grand maître mondial Pokémon ; article et prix à définir.
     { id: 'item-deluxe', kind: 'deluxe', name: 'Item Deluxe', prize: 'Un article d’exception, bientôt', price: 0, soon: true,
-      note: 'Article et prix annoncés ici prochainement.', perk: 'deluxe' }
+      note: 'Article et prix annoncés ici prochainement.', perk: 'deluxe', head: 'Bientôt' }
   ];
-  // Grade demandé par chaque article (2026-10-28, porteur ; profile.js) : ticket dès Collectionneur, booster dès
-  // Dresseur Pokémon, item Deluxe au Grand maître mondial Pokémon.
-  SHOP_ITEMS[0].perk = 'ticket';
+  // Prochain tirage : un dimanche sur deux à 20 h, heure de Paris, à partir du 22 novembre 2026 (même calcul que le serveur).
+  const SHOP_DRAW0 = Date.parse('2026-11-22T19:00:00Z'), SHOP_DRAW_EVERY = 14 * 86400000;
+  const shopNextDraw = now => {
+    const k = Math.max(0, Math.ceil((now - SHOP_DRAW0) / SHOP_DRAW_EVERY));
+    return new Date(SHOP_DRAW0 + k * SHOP_DRAW_EVERY);
+  };
+  const shopDrawText = d => {
+    try { return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }) + ' à 20 h'; } catch (e) { return ''; }
+  };
   const shopProto = Component.prototype;
-  // Tickets possédés (tous articles « ticket »), pour la barre sous le solde de PK.
+  // Tickets possédés pour le prochain tirage (tous articles « ticket »), pour la barre sous le solde de PK.
   const shopTickets = s => SHOP_ITEMS.filter(x => x.kind === 'ticket').reduce((n, x) => n + ((s.tickets || {})[x.id] || 0), 0);
-  const shopUnit = (it, n) => it.kind === 'ticket' ? (n > 1 ? n + ' tickets' : n + ' ticket') : (n > 1 ? n + ' lots' : n + ' lot');
+  const shopUnit = (it, n) => it.kind === 'ticket' ? (n > 1 ? n + ' tickets pour le prochain tirage' : n + ' ticket pour le prochain tirage') : (n > 1 ? n + ' achats' : n + ' achat');
 
-  shopProto.shopBuy = function (id) {
+  shopProto.shopBuy = function (id, choice) {
     const s = this.st(), item = SHOP_ITEMS.find(x => x.id === id), pk = Number(s.pk) || 0;
-    if (!item || item.soon || pk < item.price || !this.perks()[item.perk]) return;
+    if (!item || item.soon || pk < item.price || (item.perk && !this.perks()[item.perk]) || (item.choices && item.choices.indexOf(choice) < 0)) return;
     const tickets = Object.assign({}, s.tickets || {});
     tickets[id] = (tickets[id] || 0) + 1;
     const left = (pk - item.price).toLocaleString('fr-FR');
-    this.setState({ pk: pk - item.price, tickets: tickets, shopAsk: null,
-      toast: (item.kind === 'ticket' ? 'Ticket ajouté · tu en as ' + tickets[id] : item.name + ' · échange enregistré') + ' · il te reste ' + left + ' PK' });
+    this.setState({ pk: pk - item.price, tickets: tickets, shopAsk: null, shopChoice: null,
+      toast: (item.kind === 'ticket' ? item.name + ' ajouté · tu en as ' + tickets[id] : item.name + (choice ? ' (' + choice + ')' : '') + ' · achat enregistré') + ' · il te reste ' + left + ' PK' });
     this.flash();
   };
   // Recharger mes PA (2026-11-01, demande du porteur : « une boutique de PA avec 4 tarifs », dans le PK shop, rubrique
@@ -74,26 +97,34 @@
     };
   };
   shopProto.vPkShop = function (s) {
-    const pk = Number(s.pk) || 0, tickets = s.tickets || {};
+    const pk = Number(s.pk) || 0, tickets = s.tickets || {}, cg = s.cloudGame || {};
+    const draw = shopDrawText(cg.nextDraw ? new Date(cg.nextDraw) : shopNextDraw(Date.now()));
     return {
       pk: pk.toLocaleString('fr-FR'),
       items: SHOP_ITEMS.map(it => {
-        const n = tickets[it.id] || 0, open = !!this.perks()[it.perk], can = open && !it.soon && pk >= it.price, ask = can && s.shopAsk === it.id;
-        const price = it.soon ? 'Prix à venir' : it.price.toLocaleString('fr-FR') + ' PK', g = this.tiers().find(t => t[it.perk]);
+        const n = tickets[it.id] || 0, open = !it.perk || !!this.perks()[it.perk], can = open && !it.soon && pk >= it.price, ask = can && s.shopAsk === it.id;
+        const price = it.soon ? 'Prix à venir' : it.price.toLocaleString('fr-FR') + ' PK', g = it.perk ? this.tiers().find(t => t[it.perk]) : null;
+        const choice = ask && it.choices && it.choices.indexOf(s.shopChoice) >= 0 ? s.shopChoice : '';
         return {
-          name: it.name, prize: it.prize, price: price, note: it.note,
-          isTicket: it.kind === 'ticket', isDeluxe: it.kind === 'deluxe', hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '',
+          name: it.name, prize: it.prize, price: price, note: it.note, value: it.value || '', hasValue: !!it.value,
+          hasHead: !!it.head, head: it.head || '', headSub: it.head === 'Tickets du tirage au sort' ? it.headSub + ' Prochain tirage : ' + draw + '.' : it.headSub || '', hasHeadSub: !!it.headSub,
+          isTicket: it.kind === 'ticket', isDeluxe: it.kind === 'deluxe', ticketCls: 'pkm-shop-ticket pkm-shop-t-' + (it.tier || 'gold'), tag: it.tag || 'TICKET',
+          hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '', imgCls: it.wide ? 'pkm-shop-img pkm-shop-img-wide' : 'pkm-shop-img',
           owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n),
           can: can, cannot: !can,
           missText: !open ? '🔒 Réservé au grade ' + (g ? g.name + ' (' + g.cond + ')' : '') : it.soon ? 'Bientôt disponible' : 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
-          ask: ask, idle: !ask, buyLabel: (it.kind === 'ticket' ? 'Acheter un ticket · ' : 'Échanger · ') + price,
-          confirmText: 'Échanger ' + price + ' contre ' + (it.kind === 'ticket' ? '1 ticket' : 'le lot « ' + it.name + ' »') + ' ?',
-          open: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => this.shopBuy(it.id)
+          ask: ask, idle: !ask, buyLabel: (it.kind === 'ticket' ? 'Acheter un ticket · ' : 'Acheter · ') + price,
+          hasChoices: ask && !!it.choices, choices: (it.choices || []).map(c => ({ label: c, on: String(c === choice), cls: 'pkm-shop-choice' + (c === choice ? ' pkm-shop-choice-on' : ''), pick: () => this.setState({ shopChoice: c }) })),
+          confirmText: it.choices && !choice ? 'Choisis ton item, puis confirme (' + price + ').'
+            : 'Échanger ' + price + ' contre ' + (it.kind === 'ticket' ? '1 ' + it.name.toLowerCase() + ' (tirage du ' + draw + ')' : '« ' + it.name + (choice ? ' : ' + choice : '') + ' »') + ' ?',
+          confirmOff: String(!!it.choices && !choice),
+          open: () => this.setState({ shopAsk: it.id, shopChoice: null }), cancel: () => this.setState({ shopAsk: null, shopChoice: null }),
+          buy: () => { if (it.choices && !choice) return; this.shopBuy(it.id, choice || undefined); }
         };
       }),
       // Rubriques (2026-11-01, porteur) : « Magasin » (les articles) et « Recharger mes PA » (packs de PA en argent réel).
       ...shopTabs(this, s),
-      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Le tirage sera fait par Dropicards selon un règlement publié avant le tirage. Tes tickets et tes lots sont gardés sur cet appareil, avec ta collection.',
+      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Tirage au sort toutes les 2 semaines, le dimanche à 20 h, fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi.',
       openRules: () => this.legalOpen('pk')
     };
   };

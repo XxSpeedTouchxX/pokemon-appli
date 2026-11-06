@@ -134,7 +134,8 @@
   // Rappel de sauvegarde sur l'accueil.
   proto.bkReminder = function (s) {
     const today = realToday(), n = (s.purchases || []).length;
-    if (!DEVICE.enabled || n < BK_MIN) return null;
+    // Compte connecté (2026-11-06, porteur) : plus de rappel de sauvegarde.
+    if (!DEVICE.enabled || n < BK_MIN || (Cloud.on() && Cloud.signedIn())) return null;
     if (s.backupSnooze && bkDays(s.backupSnooze, today) < 0) return null;
     const since = s.backupAt || s.since || today, days = bkDays(since, today);
     if (s.backupAt ? days < BK_DAYS : days < BK_SNOOZE) return null;

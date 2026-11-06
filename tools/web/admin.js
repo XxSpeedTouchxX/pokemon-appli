@@ -17,8 +17,9 @@
   const admOf = s => {
     const a = s.admin || {}, d = admDefault();
     if (!admAllowed()) return d;
-    // Avec le serveur : mode Admin actif seulement après la double authentification (aal2, game-cloud.js).
-    if (Cloud.on() && Cloud.aal() !== 'aal2') return Object.assign(d, { hash: a.hash || '', salt: a.salt || '' });
+    // Avec le serveur : mode Admin actif seulement après le mot de passe des admins, pour 24 h (007, game-cloud.js).
+    const cg = s.cloudGame || {};
+    if (Cloud.on() && !(cg.adminUntil && Date.parse(cg.adminUntil) > Date.now())) return Object.assign(d, { hash: a.hash || '', salt: a.salt || '' });
     return Object.assign(d, a, { flags: Object.assign(d.flags, a.flags || {}), prices: Object.assign({}, a.prices || {}) });
   };
   // Empreinte du code (FNV-1a sur sel + code) : évite de garder le code en clair sur l'appareil.
@@ -103,7 +104,8 @@
       lockText: s.admLock === 'create' ? 'Un code à 6 chiffres, gardé sur cet appareil seulement. Il te sera demandé pour rouvrir le panneau.' : 'Tape ton code à 6 chiffres.',
       code: s.admCode || '', onCode: e => this.setState({ admCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 6) }),
       submit: () => this.admSubmit(), cancel: () => this.setState({ admLock: '', admCode: '', admCode1: '', admMsg: '' }),
-      hasMsg: !!s.admMsg, msg: s.admMsg || ''
+      hasMsg: !!s.admMsg, msg: s.admMsg || '',
+      codeMode: 'numeric', codeAuto: 'one-time-code', codeMax: '6', codeLabel: 'Code à 6 chiffres'
     };
     if (!r.sheet) return r;
     // PK et compagnons.
@@ -172,6 +174,8 @@
       ['Collection Novice', () => ({ purchases: this.purchasesSeed('novice'), sales: this.salesSeed('novice'), extra: [] })],
       ['Collection complète', () => ({ purchases: this.purchasesSeed('full'), sales: this.salesSeed('full'), extra: [] })]
     ].map(([label, mk]) => ({ label: label, go: () => { this.setState(Object.assign(mk(), { toast: label + ' chargée' })); this.flash(); } }));
+    // Sauvegarde de la collection (rubrique retirée des Réglages le 2026-11-06, porteur).
+    r.demos.push({ label: 'Sauvegarder ou restaurer', go: () => { this.setState({ admSheet: false }); this.push('io'); } });
     r.replayOnb = () => this.setState({ admSheet: false, onb: 1 });
     r.replayIntro = () => { try { window.localStorage.removeItem('pkm-intro'); } catch (e) { /* stockage indisponible */ } location.href = location.pathname + '?intro=1'; };
     // Diagnostic.

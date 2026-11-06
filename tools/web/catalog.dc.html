@@ -1054,8 +1054,7 @@
 <section aria-label="Code Admin" role="dialog" aria-modal="true" style="width: 100%; max-width: 340px; box-sizing: border-box; padding: 18px; border-radius: 24px; border: 1px solid #24345C; background: #0F1828; display: flex; flex-direction: column; gap: 12px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">{{ adm.lockTitle }}</h2>
 <p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">{{ adm.lockText }}</p>
-<sc-if value="{{ adm.hasQr }}" hint-placeholder-val="{{ false }}"><img src="{{ adm.qr }}" alt="QR code de la double authentification" width="180" height="180" style="align-self: center; width: 180px; height: 180px; padding: 8px; border-radius: 12px; background: #FFFFFF"><p style="margin: 0; font-size: 12px; line-height: 1.4; color: #9AA8C3; word-break: break-all; user-select: all">{{ adm.secret }}</p></sc-if>
-<input type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="Code à 6 chiffres" value="{{ adm.code }}" onChange="{{ adm.onCode }}" style="height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid #1E2B45; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; text-align: center; letter-spacing: 0.4em; font-size: 20px">
+<input type="password" inputmode="{{ adm.codeMode }}" autocomplete="{{ adm.codeAuto }}" maxlength="{{ adm.codeMax }}" aria-label="{{ adm.codeLabel }}" value="{{ adm.code }}" onChange="{{ adm.onCode }}" style="height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid #1E2B45; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; text-align: center; letter-spacing: 0.4em; font-size: 20px">
 <sc-if value="{{ adm.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13px; color: #F7C77E">{{ adm.msg }}</p></sc-if>
 <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px">
 <button type="button" onClick="{{ adm.cancel }}" style="display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Annuler</button>
@@ -1651,15 +1650,17 @@
 <sc-if value="{{ pks.isStore }}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{ pk.hasTickets }}" hint-placeholder-val="{{ false }}"><p aria-label="Mes tickets du tirage au sort" class="pkm-shop-tk"><span class="pkm-tk-bar"><span class="pkm-tk-mini" aria-hidden="true"></span>{{ pk.tickets }}</span></p></sc-if>
 <sc-for list="{{ pks.items }}" as="si" hint-placeholder-count="1">
+<sc-if value="{{ si.hasHead }}" hint-placeholder-val="{{ false }}"><div class="pkm-shop-head"><h2>{{ si.head }}</h2><sc-if value="{{ si.hasHeadSub }}" hint-placeholder-val="{{ false }}"><p>{{ si.headSub }}</p></sc-if></div></sc-if>
 <section aria-label="{{ si.name }}" class="pkm-dark pkm-shop-item" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; color: #F3F6FC">
 <div style="display: flex; align-items: center; gap: 14px">
-<sc-if value="{{ si.isTicket }}" hint-placeholder-val="{{ true }}"><span class="pkm-shop-ticket" aria-hidden="true"><span class="pkm-shop-ticket-in">TICKET</span></span></sc-if>
+<sc-if value="{{ si.isTicket }}" hint-placeholder-val="{{ true }}"><span class="{{ si.ticketCls }}" aria-hidden="true"><span class="pkm-shop-ticket-in">{{ si.tag }}</span></span></sc-if>
 <sc-if value="{{ si.isDeluxe }}" hint-placeholder-val="{{ false }}"><span class="pkm-shop-ticket pkm-shop-deluxe" aria-hidden="true"><span class="pkm-shop-ticket-in">DELUXE</span></span></sc-if>
-<sc-if value="{{ si.hasImg }}" hint-placeholder-val="{{ false }}"><img src="{{ si.img }}" alt="{{ si.imgAlt }}" width="284" height="520" class="pkm-shop-img"></sc-if>
+<sc-if value="{{ si.hasImg }}" hint-placeholder-val="{{ false }}"><img src="{{ si.img }}" alt="{{ si.imgAlt }}" loading="lazy" class="{{ si.imgCls }}"></sc-if>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
 <span style="font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">{{ si.name }}</span>
 <span style="font-size: 14px; font-weight: 700; color: var(--pkm-accent)">{{ si.prize }}</span>
-<span style="font-size: 13px; color: #C9D3EA">{{ si.price }}</span>
+<sc-if value="{{ si.hasValue }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12.5px; color: #9AA8C3">{{ si.value }}</span></sc-if>
+<span style="font-size: 13px; font-weight: 700; color: #C9D3EA">{{ si.price }}</span>
 </span>
 </div>
 <sc-if value="{{ si.owned }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; font-size: 13.5px; font-weight: 700; color: #5EE0CF">{{ si.ownedText }}</p></sc-if>
@@ -1668,10 +1669,11 @@
 <sc-if value="{{ si.cannot }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 13.5px; font-weight: 700; color: #F5B14C">{{ si.missText }}</p></sc-if>
 </sc-if>
 <sc-if value="{{ si.ask }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ si.hasChoices }}" hint-placeholder-val="{{ false }}"><div role="group" aria-label="Choisis ton item" class="pkm-shop-choices"><sc-for list="{{ si.choices }}" as="sch" hint-placeholder-count="3"><button type="button" onClick="{{ sch.pick }}" aria-pressed="{{ sch.on }}" class="{{ sch.cls }}">{{ sch.label }}</button></sc-for></div></sc-if>
 <p style="margin: 0; font-size: 14px; font-weight: 700">{{ si.confirmText }}</p>
 <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
 <button type="button" onClick="{{ si.cancel }}" style="height: 48px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Annuler</button>
-<button type="button" onClick="{{ si.buy }}" style="height: 48px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Confirmer</button>
+<button type="button" onClick="{{ si.buy }}" aria-disabled="{{ si.confirmOff }}" class="pkm-shop-ok" style="height: 48px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Confirmer</button>
 </div>
 </sc-if>
 <p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ si.note }}</p>
@@ -2241,6 +2243,7 @@ PKCOUNTER
 </section>
 </sc-if>
 <sc-if value="{{ ob.p3.noSel }}" hint-placeholder-val="{{ true }}"><p class="pkm-acc-hint">Touche un Pokémon pour le découvrir.</p></sc-if>
+<sc-if value="{{ ob.p3.errNoSel }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.p3.err }}</p></sc-if>
 </form>
 </sc-if>
 

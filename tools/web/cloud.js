@@ -25,7 +25,6 @@
     webauthn_challenge_expired: 'Trop de temps s’est écoulé : réessaie.',
     webauthn_challenge_not_found: 'Trop de temps s’est écoulé : réessaie.',
     too_many_passkeys: 'Tu as déjà enregistré 10 appareils : retires-en un dans Mon profil.',
-    insufficient_aal: 'Compte admin : ouvre d’abord le mode Admin avec ton code à 6 chiffres, puis réessaie.',
     webauthn_credential_not_found: 'Aucun Face ID ni empreinte enregistré pour ce compte : connecte-toi avec ton mot de passe, puis active-le dans Mon profil.',
     user_banned: 'Ce compte est suspendu. Écris-nous à contact@dropicards.fr.',
     same_password: 'Choisis un mot de passe différent de l’ancien.',
@@ -73,28 +72,7 @@
     signedIn() { return !!cloudLs.get(); },
     // Rôle lu dans la table profiles (jamais choisi par l'app) : seul un compte « admin » ouvre le mode Admin.
     isAdmin() { const s = cloudLs.get(); return !!(s && s.role === 'admin'); },
-    // Niveau de connexion du jeton : « aal2 » après le code de l'application d'authentification (006_admin_2fa.sql).
-    aal() {
-      const s = cloudLs.get();
-      try { return JSON.parse(atob(s.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).aal || 'aal1'; } catch (e) { return ''; }
-    },
-    // Double authentification (TOTP) des admins : facteurs du compte, inscription (QR code), challenge, vérification.
-    async mfaFactors() {
-      const u = await this.req('/auth/v1/user', { token: await this.token() });
-      return (u && Array.isArray(u.factors) ? u.factors : []).filter(f => f.factor_type === 'totp');
-    },
-    async mfaEnroll() {
-      const tk = await this.token();
-      for (const f of await this.mfaFactors()) if (f.status !== 'verified') { try { await this.req('/auth/v1/factors/' + f.id, { method: 'DELETE', token: tk }); } catch (e) { /* déjà retiré */ } }
-      return this.req('/auth/v1/factors', { method: 'POST', token: tk, body: { factor_type: 'totp', friendly_name: 'Dropicards admin ' + new Date().toISOString().slice(0, 16) } });
-    },
-    async mfaChallenge(fid) { return this.req('/auth/v1/factors/' + fid + '/challenge', { method: 'POST', token: await this.token(), body: {} }); },
-    async mfaVerify(fid, cid, code) {
-      const j = await this.req('/auth/v1/factors/' + fid + '/verify', { method: 'POST', token: await this.token(), body: { challenge_id: cid, code: String(code || '').replace(/\D/g, '') } });
-      const v = this.keep(j);
-      if (!v) throw cloudErr(400, { error_code: 'otp_expired' });
-      return v;
-    },
+    // (Double authentification des admins retirée le 2026-11-06, porteur : remplacée par le mot de passe des admins, 007.)
     async req(path, o) {
       o = o || {};
       const h = { apikey: this.key, 'Content-Type': 'application/json' };
@@ -185,7 +163,9 @@
     // Clés d'accès (Face ID, Touch ID, empreinte) : Supabase Auth 2.197 et plus, GOTRUE_PASSKEY_ENABLED
     // (docs/26). La clé reste dans le téléphone (trousseau iCloud, gestionnaire de mots de passe Google) ; le serveur ne
     // garde que sa partie publique. Connexion sans adresse ni mot de passe ; le mot de passe reste en secours.
+    // Face ID / empreinte mis de côté par le porteur (2026-11-06) : caché partout ; ?passkey=1 le remet (tests, essais).
     passkeyOk() {
+      try { if (!/[?&]passkey=1\b/.test(location.search)) return false; } catch (e) { return false; }
       try { return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create && navigator.credentials.get); } catch (e) { return false; }
     },
     async passkeyRegister() {

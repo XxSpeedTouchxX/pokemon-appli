@@ -240,6 +240,8 @@ patch('<p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">
 patch('onClick="{{ tabMarket }}" aria-label="Marché"', 'onClick="{{ tabMarket }}" aria-label="Jeux"');
 patch('<svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M4 19.5h16"></path><path d="M5 15.5l4.5-4.5 3.5 3 6-6.5"></path><path d="M15 7.5h4v4"></path></svg>',
   '<svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M7 7.5h10a5 5 0 0 1 4.8 6.4l-1.1 3.7a2.3 2.3 0 0 1-3.9.9L14.5 16h-5l-2.3 2.5a2.3 2.3 0 0 1-3.9-.9l-1.1-3.7A5 5 0 0 1 7 7.5z"></path><path d="M7.5 10.5v3 M6 12h3"></path><circle cx="15.5" cy="11" r="0.6" style="fill: currentColor"></circle><circle cx="17.5" cy="13" r="0.6" style="fill: currentColor"></circle></svg>');
+// Mode avancé retiré (2026-11-06, porteur) : toujours éteint, même avec ?adv=1.
+patchJs('adv: yes(p.adv),', 'adv: false,');
 patchJs("market: 'Marché', territory: 'Territoire', profile: 'Profil'", "market: 'Jeux', territory: 'Territoire', profile: 'Profil'");
 // Marché : entrée « Toutes les cartes » ; écrans « Toutes les cartes » et « Extension ».
 patch('<div role="group" aria-label="Filtre du marché"', FRAG['market-browse'] + '<div role="group" aria-label="Filtre du marché"');
@@ -382,8 +384,14 @@ patch('</section>\n</sc-if>\n\n<sc-if value="{{ ui.isStore }}"', '</section>\n</
 patchRe(/<img src="\{\{ ci\.img \}\}" alt="" style="position: absolute; left: 50%; top: 14px;[^"]*">/,
   '<img src="{{ ci.img }}" srcset="{{ ci.srcset }}" sizes="114px" alt="" loading="lazy" style="position: absolute; left: 50%; top: 10px; width: 114px; height: 157px; margin-left: -57px; border-radius: 5% / 3.6%; object-fit: cover; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45)">');
 patch('>Rien ne correspond à ta recherche.<', '>{{ coll.emptyText }}<');
-// Réglages : collection enregistrée sur l'appareil.
-patch('<section aria-label="À propos"', FRAG['settings-device'] + '\n<section aria-label="À propos"');
+// Réglages (2026-11-06, porteur) : « Mode avancé » retiré complètement (encart, outils avancés, pastille, sous-titre
+// du menu du profil ; le mode reste éteint) ; « Ma collection sur cet appareil » retirée des Réglages : vider la
+// collection, remettre la démo et sauvegarder passent dans le panneau Admin. L'encart reste affiché pour les tests
+// automatiques seulement (set.devShow), qui s'en servent pour préparer une collection.
+patchRe(/<section aria-label="Mode avancé"[\s\S]*?<\/section>\n\n<sc-if value="\{\{ ui\.adv \}\}" hint-placeholder-val="\{\{ false \}\}">\n<section aria-label="Frais par plateforme"[\s\S]*?<\/sc-if>\n\n(?=<section aria-label="À propos")/, '');
+patch('<sc-if value="{{ ui.adv }}" hint-placeholder-val="{{ false }}">\n<span style="flex: none; padding: 3px 10px; border-radius: 999px; background: rgba(168, 182, 255, 0.14); color: #B9C5FF; font-size: 12px; font-weight: 700">Mode avancé</span>\n</sc-if>\n', '');
+patch('<span style="font-size: 12.5px; color: #9AA8C3">Cote, sources, mode avancé</span>', '<span style="font-size: 12.5px; color: #9AA8C3">Cote, sources, apparence</span>');
+patch('<section aria-label="À propos"', '<sc-if value="{{ set.devShow }}" hint-placeholder-val="{{ false }}">\n' + FRAG['settings-device'] + '\n</sc-if>\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs');
 patch('partenaires de Territoire fictifs</p>', 'partenaires de Territoire fictifs</p>\n<button type="button" onClick="{{ adm.tapVersion }}" aria-label="{{ adm.versionLabel }}" style="align-self: flex-start; min-height: 32px; padding: 0; border: 0; background: transparent; color: #7D8BA8; font: inherit; font-size: 12px; cursor: default">{{ adm.versionLabel }}</button>\n<button type="button" onClick="{{ legal.openMentions }}" style="height: 44px; margin-top: 4px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Informations légales et confidentialité</button>\n<sc-if value="{{ adm.can }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ adm.menu }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ adm.menuLabel }}</button></sc-if>');
 // Articles mis en avant (tools/web/showcase.js).

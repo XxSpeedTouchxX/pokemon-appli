@@ -60,17 +60,23 @@ ok('en-tête : PA sous le solde de PK', /470\s*PA/.test(await paPill.innerText()
 ok('en-tête : PA du jour à récupérer (« 1 »)', (await paPill.locator('.pkm-pa-dot').count()) === 1 && /PA à récupérer/.test(await paPill.getAttribute('aria-label')));
 // PK shop (2026-10-12) : 4ᵉ onglet, ticket du tirage au sort.
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
-const ticket = page.locator('section[aria-label="Ticket · tirage au sort"]');
-ok('PK shop : ticket à 2 000 PK', (await ticket.count()) === 1 && /2[\s\u202f\u00a0]000 PK/.test(await ticket.innerText()));
-const lot = page.locator('section[aria-label="Booster 30 ans Pokémon"]');
-ok('PK shop : lot Booster 30 ans à 15 000 PK, avec son visuel', (await lot.count()) === 1 && /15[\s\u202f\u00a0]000 PK/.test(await lot.innerText()) && (await lot.locator('img[src="img/shop-booster-30-anniversaire.webp"]').count()) === 1);
+// Nouveau magasin (2026-11-06, porteur) : tickets Bronze 500, Argent 1 500, Or 5 000 PK ; achats directs 7 500,
+// 10 000 (item rare au choix), 15 000 PK ; plus de grade demandé.
+const ticket = page.locator('section[aria-label="Ticket Bronze"]');
+ok('PK shop : ticket Bronze à 500 PK (booster, 5 à 15 €)', (await ticket.count()) === 1 && /500 PK/.test(await ticket.innerText()) && /5 à 15 €/.test(await ticket.innerText()));
+ok('PK shop : tickets Argent (1 500 PK) et Or (5 000 PK)', /1[\s\u202f\u00a0]500 PK/.test(await page.locator('section[aria-label="Ticket Argent"]').innerText()) && /5[\s\u202f\u00a0]000 PK/.test(await page.locator('section[aria-label="Ticket Or"]').innerText()));
+const lot = page.locator('section[aria-label="ETB 30 ans"]');
+ok('PK shop : achats directs booster 7 500, item rare 10 000, ETB 30 ans 15 000 PK, avec visuels', /7[\s\u202f\u00a0]500 PK/.test(await page.locator('section[aria-label="Booster de la série du moment"]').innerText())
+  && /10[\s\u202f\u00a0]000 PK/.test(await page.locator('section[aria-label="Item rare au choix"]').innerText())
+  && (await lot.count()) === 1 && /15[\s\u202f\u00a0]000 PK/.test(await lot.innerText()) && (await lot.locator('img[src="img/products/30th-celebration-elite-trainer-box.webp"]').count()) === 1);
+ok('tirage toutes les 2 semaines, date du prochain affichée', /toutes les 2 semaines/.test(await page.locator('main').innerText()) && /Prochain tirage : [a-z]+ \d+ [a-zéû]+ à 20 h/.test(await page.locator('main').innerText()));
 ok('en-tête : plus de barre de tickets, les PA à la place (2026-10-25)', (await page.locator('header button[aria-label^="Mes tickets"]').count()) === 0 && (await page.locator('header button[aria-label^="Mes points d’Aura"]').count()) >= 1);
-await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pk = 2700; localStorage.setItem(k, JSON.stringify(d)); });
+await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pk = 700; localStorage.setItem(k, JSON.stringify(d)); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
 await ticket.locator('button:has-text("Acheter un ticket")').click(); await ticket.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(500);
 const sd = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'));
-ok('ticket acheté : 1 ticket, 700 PK', sd.pk === 700 && sd.tickets && sd.tickets['ticket-booster'] === 1 && /Tu as 1 ticket/.test(await ticket.innerText()));
+ok('ticket Bronze acheté (Recrue, sans grade demandé) : 1 ticket, 200 PK', sd.pk === 200 && sd.tickets && sd.tickets['ticket-bronze'] === 1 && /Tu as 1 ticket/.test(await ticket.innerText()));
 ok("tickets affichés dans le PK shop (« 1 ticket », sans le solde de PK depuis le 2026-11-02)", /1 ticket/.test(await page.locator('p[aria-label="Mes tickets du tirage au sort"]').innerText()) && (await page.locator('section[aria-label="Mon solde de PK"]').count()) === 0);
 await page.screenshot({ path: shot('pkshop.png') });
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);

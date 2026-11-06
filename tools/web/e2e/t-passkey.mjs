@@ -6,7 +6,7 @@ const FAKE = 'http://127.0.0.1:59998';
 const BASE = E2E.replace('127.0.0.1', 'localhost'); // une clé d'accès demande un nom de domaine (localhost), pas une adresse IP
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
-const KEY = 'pkm-collection-v1', Q = '&cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test';
+const KEY = 'pkm-collection-v1', Q = '&passkey=1&cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test';
 const b64u = s => Buffer.from(s).toString('base64url');
 const U = { id: 'u-sacha', email: 'sacha@exemple.fr' };
 const jwt = () => 'h.' + b64u(JSON.stringify({ sub: U.id, email: U.email, aal: 'aal1' })) + '.s';

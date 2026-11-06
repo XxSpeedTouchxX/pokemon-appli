@@ -2,6 +2,8 @@
 
 *Créé le 2026-11-06 · « go » du porteur le même jour (« on passe uniquement sur le Face ID et les empreintes »).*
 
+> **Mis de côté par le porteur le 2026-11-06** : la connexion avec Face ID ou l'empreinte est cachée dans l'app (cache v138). Le code et le réglage du serveur restent en place ; `?passkey=1` dans l'adresse la remet pour un essai.
+
 ## 1. Ce que ça fait
 
 - Après la création du compte, l'accueil propose une fois « **Activer Face ID / mon empreinte** ». C'est aussi possible à tout moment dans Mon profil › Informations du dresseur.

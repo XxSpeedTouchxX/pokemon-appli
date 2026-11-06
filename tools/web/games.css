@@ -92,6 +92,19 @@
 /* Item Deluxe (2026-10-28) : même étiquette, en violet et or. */
 .pkm-shop-deluxe { background: linear-gradient(135deg, #F0C8FF, #B26BFF 50%, #5B2BD6); transform: rotate(6deg); }
 .pkm-shop-deluxe .pkm-shop-ticket-in { color: #FFFFFF; border-color: #FFE46B; font-size: 13px; }
+/* Tickets Bronze, Argent et Or (2026-11-06, porteur) ; titres des rubriques, choix de l'item rare. */
+.pkm-shop-t-bronze { background: linear-gradient(135deg, #F6C7A0, #D9894C 50%, #9C5420); }
+.pkm-shop-t-argent { background: linear-gradient(135deg, #FFFFFF, #CBD3E1 50%, #8C97AB); transform: rotate(4deg); }
+.pkm-shop-t-or { background: linear-gradient(135deg, #FFF3A6, #FFD60A 45%, #E09A00); transform: rotate(-3deg); box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.25), 0 6px 18px rgba(255, 190, 0, 0.45); }
+.pkm-shop-t-bronze .pkm-shop-ticket-in, .pkm-shop-t-argent .pkm-shop-ticket-in { font-size: 13px; }
+.pkm-shop-head { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.pkm-shop-head h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: var(--pkm-t1); }
+.pkm-shop-head p { margin: 0; font-size: 13px; line-height: 1.45; color: var(--pkm-t3); }
+.pkm-shop-img-wide { width: 104px; transform: rotate(-3deg); }
+.pkm-shop-choices { display: flex; flex-wrap: wrap; gap: 6px; }
+.pkm-shop-choice { min-height: 40px; padding: 0 13px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.pkm-shop-choice-on { border-color: #FFD60A; background: rgba(255, 214, 10, 0.16); color: #FFE46B; }
+.pkm-shop-ok[aria-disabled="true"] { opacity: 0.45; cursor: default; }
 .pkm-shop-ticket-in { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 15px; letter-spacing: 0.06em; color: #111111; border-top: 2px dashed #111111; border-bottom: 2px dashed #111111; padding: 2px 4px; }
 
 /* PK shop (2026-10-12) : visuel d'un lot (booster 30 ans) ; barre des tickets sous le solde de PK (en-tête et boutique),
@@ -862,3 +875,9 @@ html.pkm-calm .pkm-pas-drop, html.pkm-calm .pkm-pas-price { animation: none !imp
    Luckiest Guy jaune à contour sombre, comme .pkm-dex-title h2 (dex.css). */
 .pkm-gm-title { margin: 0; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 26px; font-weight: 400; letter-spacing: 0.5px; color: #FFD60A; -webkit-text-stroke: 1.5px #3A0A0E; paint-order: stroke fill; text-shadow: 0 3px 0 #3A0A0E; }
 .pkm-shop-tk { margin: 0; display: flex; } .pkm-shop-tk .pkm-tk-bar { margin-top: 0; height: 28px; font-size: 13px; } /* tickets du PK shop, sans le solde (2026-11-02) */
+
+/* Accueil en 3 pages : glisser à gauche ou à droite (2026-11-06, porteur). Le navigateur ne doit ni défiler de côté ni
+   revenir à la page précédente de l'historique pendant le geste ; le défilement vertical reste libre. */
+html, body { overscroll-behavior-x: none; }
+section[aria-label^="Bienvenue"] { touch-action: pan-y; }
+section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: none; }

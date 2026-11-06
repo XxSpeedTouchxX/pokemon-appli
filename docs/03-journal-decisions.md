@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-06 — Mot de passe des admins, nouveau PK shop, Réglages allégés, accueil à glisser (demandes du porteur)
+
+- **Face ID / empreinte mis de côté** : caché dans l'app (code et serveur gardés, `?passkey=1` pour un essai).
+- **Réglages** : « Mode avancé » retiré complètement (lots, associés, frais par plateforme, pastille) ; « Ma collection sur cet appareil » retirée (vider, remettre la démo et sauvegarder passent dans le panneau Admin) ; plus de rappel « fais-en une sauvegarde » quand un compte est connecté.
+- **Mode Admin** : la double authentification est retirée ; un **mot de passe connu des admins** (empreinte seulement sur le serveur, choisi dans Studio) ouvre le mode Admin pour 24 h, avec **PK et PA illimités** (rien débité, aucun délai) ; 5 essais faux : 15 minutes de blocage ; chaque essai au journal. Protection plus faible que la double authentification (accepté par le porteur) : à changer dès qu'un admin s'en va.
+- **Accueil** : on peut **glisser vers la gauche** pour passer à la page suivante si la page est complète (sinon un rebond et ce qui manque), vers la droite pour revenir ; la création du compte reste un appui sur « Choisir … comme compagnon ».
+- **PK shop** : tickets **Bronze 500 PK** (booster, 5-15 €), **Argent 1 500 PK** (item rare, 20-60 €), **Or 5 000 PK** (ETB de la série du moment, 60-200 €), chacun pour un **tirage toutes les 2 semaines** (choix par défaut : le dimanche à 20 h, dès le 22 novembre 2026) ; **achats directs** : booster 7 500, item rare au choix 10 000, ETB 30 ans 15 000 PK. Choix par défaut, à confirmer : plus de grade demandé (le prix suffit), 7 jours après la confirmation de l'adresse et pièce d'identité vérifiée gardés. Anciens articles (2 000 et 15 000 PK) retirés.
+- **Fichiers** : `tools/supabase/007_admin_boutique.sql` (49 tests, 135 en tout) ; app : `game-cloud.js`, `pkshop.js`, `start.js`, `admin.js`, `persist.js`, `backup.js`, `cloud.js`, `build.mjs` ; tests `e2e/t-swipe.mjs`, `t-cloud.mjs`, `t-games.mjs` ; cache v138.
+- **À faire par le porteur** : lancer `007` dans Studio, puis choisir le mot de passe (`tools/supabase/README.md`).
+- **Point d'attention** : coût réel des lots. Tirages : environ 85 à 275 € toutes les 2 semaines (un gagnant par ticket), soit 2 200 à 7 100 € par an. Achats directs : un joueur régulier (2 fois par jour) peut obtenir une ETB 30 ans tous les 2 mois et demi environ ; le coût grandit avec le nombre de joueurs. À comparer au budget (500 à 5 000 €) avant l'ouverture.
+
 ## 2026-11-06 — Connexion avec Face ID, Touch ID ou l'empreinte (« go » du porteur)
 
 - **Choix** : clés d'accès (passkeys) de Supabase Auth, la méthode standard des grandes applications ; le mot de passe reste en secours (`docs/26-guide-face-id-cles-d-acces.md`).

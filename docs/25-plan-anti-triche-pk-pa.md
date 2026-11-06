@@ -33,7 +33,7 @@ Fichiers : `tools/supabase/004_jeu.sql` (produit par `gen_game.mjs` depuis `004_
 - **Tables de référence**, en lecture seule pour les comptes :
   - `game_pokemon` : 171 Pokémon, forme précédente, méga-évolution, prix en PA (15 150 PA au total) ;
   - `game_grades` : 6 grades, conditions, délais du booster et de la pièce, ticket, lot ;
-  - `game_items` : ticket à 2 000 PK, lot « Booster 30 ans » à 15 000 PK.
+  - `game_items` : ticket à 2 000 PK, lot « Booster 30 ans » à 15 000 PK (remplacés le 2026-11-06 par le nouveau PK shop de `007` : tickets Bronze, Argent, Or et 3 achats directs).
 - **Journal `ledger`** :
   - chaque mouvement de PK et de PA y est inscrit : qui, quoi, combien, solde après, numéro de demande, heure ;
   - il est ineffaçable et ne peut pas être modifié, même par le compte technique ;
@@ -94,7 +94,14 @@ Fichier : `tools/web/game-cloud.js`.
 
 ### Étape D : admins et serveur (lancée le 2026-11-06, « go » du porteur)
 
-**D1. Double authentification des admins : faite (cache v136).**
+**D1 bis. Mot de passe des admins (2026-11-06, demande du porteur, cache v138) : remplace la double authentification.**
+- `tools/supabase/007_admin_boutique.sql` : un compte « admin » n'a ses droits qu'après avoir tapé le mot de passe connu des admins, pour 24 h. La base n'en garde que l'empreinte (bcrypt) ; il se choisit dans Studio, jamais depuis l'app ni dans le dépôt.
+- Pendant ces 24 h : **PK et PA illimités** (rien n'est débité, ni délai ni grade ni règle des 7 jours) ; chaque mouvement reste au journal, à 0, avec la mention « admin illimité ».
+- 5 essais faux en 15 minutes : 15 minutes de blocage ; chaque essai est inscrit au journal des admins. Un compte ordinaire qui connaîtrait le mot de passe n'obtient rien.
+- Moins sûr que la double authentification : un mot de passe partagé peut fuiter, et quiconque a aussi accès à un compte admin en profite. Le changer dès qu'un admin quitte l'équipe (`admin_set_password`).
+- Tests : `test_007.sql` (49 vérifications avec le nouveau PK shop) et `e2e/t-cloud.mjs` partie 5 bis.
+
+**D1. Double authentification des admins : faite (cache v136), retirée le 2026-11-06 (porteur), remplacée par D1 bis.**
 - `tools/supabase/006_admin_2fa.sql` : un compte admin n'a ses droits que connecté avec le code à 6 chiffres d'une application d'authentification (niveau « aal2 »). Un mot de passe volé ne suffit plus.
 - L'app : avec le serveur, le code local du mode Admin est remplacé.
   - La première fois : un QR code à scanner avec Google Authenticator, Microsoft Authenticator ou Mots de passe (iPhone), puis le code affiché.

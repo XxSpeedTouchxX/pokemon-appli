@@ -9,7 +9,8 @@ Proposition et plan : `docs/24-proposition-espace-admin-et-comptes.md` §4.1 et 
 - `003_inscription.sql` : à l'inscription depuis l'app, le profil est rempli avec le pseudo, la tranche d'âge, le starter (1, 4, 7 ou 25) et l'accord pour les nouveautés envoyés par l'app ; chaque valeur est vérifiée et mise de côté si elle n'est pas valable (l'inscription n'échoue jamais pour elles) ; rôle, statut et PK jamais lus. Rejouable.
 - `004_jeu.sql` (produit par `gen_game.mjs` depuis `004_jeu.template.sql`) : règles du jeu sur le serveur (PA du jour, booster, pièce, partage, Pokédex, PK shop, grades), journal `ledger` ineffaçable, limite de 30 actions par minute, reprise à 100 PK ; voir `docs/25-plan-anti-triche-pk-pa.md`. Rejouable.
 - `005_jetables.sql` (produit par `gen_disposable.mjs` depuis `disposable_domains.txt`, liste CC0 de 10 143 domaines) : adresses e-mail jetables refusées. Rejouable.
-- `006_admin_2fa.sql` : droits d'admin seulement avec la double authentification (niveau « aal2 ») ; tests `tests/test_006.sql`. Retour en arrière : relancer `is_admin()` de `001_comptes.sql`.
+- `006_admin_2fa.sql` : droits d'admin seulement avec la double authentification (niveau « aal2 ») ; tests `tests/test_006.sql`. **Remplacé par `007`** (le porteur a demandé de retirer la double authentification, 2026-11-06).
+- `007_admin_boutique.sql` (2026-11-06, porteur) : **mot de passe des admins** (empreinte bcrypt seulement, choisi dans Studio, jamais dans le dépôt ; un compte « admin » qui le tape a ses droits pendant 24 h, avec les PK et les PA illimités ; 5 essais faux en 15 minutes : 15 minutes de blocage ; chaque essai au journal des admins) et **nouveau PK shop** (tickets Bronze 500, Argent 1 500, Or 5 000 PK pour un tirage tous les 15 jours le dimanche à 20 h dès le 22 novembre 2026 ; achats directs 7 500, 10 000 avec choix de l'item, 15 000 PK ; plus de grade demandé ; 7 jours après la confirmation de l'adresse ; `admin_draw_entries()` liste les participants). Tests `tests/test_007.sql` (49 vérifications). Rejouable.
 - `emails.mjs` : modèles des e-mails en français (`web/email/*.html`, publiés sur dropicards.fr) ; `node tools/supabase/emails.mjs` après une modification.
 - `tests/mock_supabase.sql` et `tests/test_001.sql` : 25 vérifications de sécurité sur un PostgreSQL ordinaire (un compte ne voit que ses données, ne peut pas se donner le rôle admin ni des PK, ne touche pas la collection d'un autre ; l'admin voit tout, avec un motif obligatoire ; journal intouchable ; visiteur non connecté refusé).
 
@@ -27,7 +28,18 @@ psql -d test -f tools/supabase/005_jetables.sql
 psql -d test -f tools/supabase/tests/test_004.sql   # 50 tests de triche (80 en tout)
 psql -d test -f tools/supabase/006_admin_2fa.sql
 psql -d test -f tools/supabase/tests/test_006.sql   # 8 de plus (86 en tout)
+psql -d test -f tools/supabase/007_admin_boutique.sql
+psql -d test -f tools/supabase/tests/test_007.sql   # 49 de plus (135 en tout)
 ```
+
+## Mot de passe des admins et nouveau PK shop (007, 2026-11-06)
+
+1. Studio › SQL Editor › New query : coller tout `007_admin_boutique.sql`, Run (« Success »).
+2. Nouvelle requête, une seule ligne, avec le mot de passe choisi (12 caractères au moins, connu des admins seulement) :
+   `select public.admin_set_password('…');`
+   Run, puis **effacer la requête** (l'historique de Studio la garderait). Pour le changer plus tard : la même ligne ; les admins devront le retaper.
+3. Dans l'app (compte admin connecté) : Réglages › 7 appuis sur « Version » (ou « Mode Admin · paramétrage »), puis le mot de passe. Le mode Admin dure 24 h ; « Quitter le mode Admin » le referme.
+4. Participants d'un tirage (SQL Editor, compte admin) : `select * from public.admin_draw_entries();` (prochain tirage) ; un ticket = une chance. Le tirage lui-même se fait hors de l'app, selon le règlement.
 
 ## Mise en place sur le serveur (porteur, guidé)
 

@@ -248,7 +248,7 @@
       selTypes: E ? E.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })) : [],
       lead: acc ? 'Ton âge, ton pseudo et ton compagnon de voyage.' : 'Dernière étape avant l’aventure !',
       selDesc: ST_STARTER_TXT[sel] || '', go: s.obBusy ? 'Un instant…' : 'Choisir ' + name + ' comme compagnon', selStyle: selN ? stStarterStyle(selN, false) : '',
-      err: err, hasErr: !!err && page === 3,
+      err: err, hasErr: !!err && page === 3, errNoSel: !!err && page === 3 && !E, // message visible aussi sans starter choisi (glissement)
       canLocal: !!s.obLocal && page === 3, local: () => {
         const t = this.st(), line = t.obStarter || curLine, nick = String(t.obNick || '').trim();
         if (line && nick.length >= 2 && (t.obAge || accAge)) done(t, nick, t.obAge || accAge, line, false);
@@ -284,7 +284,61 @@
         }
       }
     };
+    // Glisser (2026-11-06, porteur) : vers la gauche, page suivante si celle-ci est complète (sinon un léger rebond et
+    // ce qui manque) ; vers la droite, page précédente. Page 2 : seulement à la création du compte (pas à la connexion,
+    // qui demande le serveur) ; page 3 : la création du compte reste un appui sur « Choisir … comme compagnon ».
+    stSwipeInstall(this);
+    this._obSwipe = dir => {
+      const t = this.st();
+      if (t.obBusy || !t.onb) return;
+      if (dir < 0) { if (page > 1) { r.back(); return true; } return false; }
+      if (page === 1) { r.next1(); return true; }
+      if (page === 2) {
+        const form = document.querySelector('form.pkm-acc'), el = form && form.elements;
+        const email = String(el && el.email ? el.email.value : t.obEmail || '').trim(), pwd = String(el && el.password ? el.password.value : t.obPwd || '');
+        if (mode !== 'signup') return false;
+        if (!ST_MAIL.test(email) || (pwd.length < 12 && !(!needPwd && !pwd))) {
+          this.setState({ obEmail: email, obPwd: pwd, obErr: !ST_MAIL.test(email) ? 'Pour passer à la suite, entre ton adresse e-mail.' : 'Pour passer à la suite, choisis ton mot de passe (12 caractères au moins).' });
+          return false;
+        }
+        r.acc.submit(el ? { target: { elements: el } } : null);
+        return true;
+      }
+      if (page === 3) {
+        const form = document.querySelector('form[aria-label="Ton profil de dresseur"]'), el = form && form.elements;
+        const nick = String(el && el.nickname ? el.nickname.value : t.obNick || '').trim();
+        const miss = !(t.obAge || accAge) ? 'ton âge' : nick.length < 2 ? 'ton pseudo' : !(t.obStarter || curLine) ? 'ton compagnon' : '';
+        this.setState({ obNick: nick, obErr: miss ? 'Il manque ' + miss + ' : complète la page de haut en bas.' : 'Tout est prêt : touche « ' + r.p3.go + ' » pour créer ton compte.' });
+        return false;
+      }
+      return false;
+    };
     return r;
+  };
+  // Gestes de l'accueil : un glissement horizontal net (au moins 60 px, plus horizontal que vertical, en moins de
+  // 0,8 s) sur les pages ; jamais depuis un champ de saisie. Doigt (tactile) ou souris (ordinateur, tests).
+  let stSwipeOn = false;
+  const stSwipeInstall = self => {
+    if (stSwipeOn) return;
+    stSwipeOn = true;
+    let g = null;
+    const inOnb = el => !!(el && el.closest && el.closest('section[aria-label^="Bienvenue"]'));
+    const start = (x, y, el) => { g = inOnb(el) && !(el.closest && el.closest('input, textarea, select')) ? { x: x, y: y, t: Date.now() } : null; };
+    const end = (x, y) => {
+      const a = g; g = null;
+      if (!a) return;
+      const dx = x - a.x, dy = y - a.y;
+      if (Math.abs(dx) < 60 || Math.abs(dx) < 1.5 * Math.abs(dy) || Date.now() - a.t > 800 || !self._obSwipe) return;
+      const okSwipe = self._obSwipe(dx < 0 ? 1 : -1);
+      if (okSwipe === false) {
+        const el = document.querySelector('section[aria-label^="Bienvenue"] .pkm-onb-page');
+        try { if (el && el.animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) el.animate([{ transform: 'none' }, { transform: 'translateX(' + (dx < 0 ? -18 : 18) + 'px)' }, { transform: 'none' }], { duration: 320, easing: 'ease-out' }); } catch (e) { /* rien */ }
+      }
+    };
+    document.addEventListener('touchstart', e => { const t = e.touches[0]; if (e.touches.length === 1) start(t.clientX, t.clientY, e.target); else g = null; }, { passive: true });
+    document.addEventListener('touchend', e => { const t = e.changedTouches[0]; if (t) end(t.clientX, t.clientY); }, { passive: true });
+    document.addEventListener('mousedown', e => start(e.clientX, e.clientY, e.target));
+    document.addEventListener('mouseup', e => end(e.clientX, e.clientY));
   };
 
   // Transition entre les pages de l'accueil (2026-10-30, porteur : « les mêmes transitions que l'app ») : la nouvelle
