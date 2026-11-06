@@ -14,7 +14,8 @@ ok('PK shop : bannière « Dropicards Premium » (sans « Dès 4,16 € par mois
 await banner.click(); await page.waitForTimeout(600);
 const sh = page.locator('section[aria-label="Dropicards Premium"]');
 const t = await sh.innerText();
-ok('icônes : scanner, radar de l’accueil, « 2XP »', (await sh.locator('svg.pkm-prem-scan').count()) === 1 && (await sh.locator('.pkm-prem-radar').count()) === 1 && (await sh.locator('.pkm-prem-2xp').innerText()) === '2XP');
+ok('icônes : scanner, radar de l’accueil, « 2XP » avec la goutte des PA', (await sh.locator('svg.pkm-prem-scan').count()) === 1 && (await sh.locator('.pkm-prem-radar').count()) === 1 && (await sh.locator('.pkm-prem-2xp').innerText()) === '2XP' && (await sh.locator('img.pkm-prem-pa[src="img/brand/pa.svg"]').count()) === 1);
+ok('double XP sur les PA seulement', /Double XP permanent sur tes PA/.test(await sh.innerText()) && !/PK et tes PA/.test(await sh.innerText()));
 const top = await sh.locator('.pkm-prem-crown-xl').evaluate(e => e.getBoundingClientRect().top);
 ok('couronne entière, sous le haut de l’écran (' + Math.round(top) + ' px)', top > 0);
 ok('5 avantages', ['Scans illimités', 'Cartes et items scellés illimités', 'Radar des boutiques débloqué', 'Double XP permanent', 'Historique des prix complet'].every(x => t.includes(x)));

@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-06 — Premium : double XP sur les PA seulement (« go » du porteur)
+
+- **Décision P5** de `docs/27` : le double XP de l'abonnement Premium s'applique **aux PA seulement**, pas aux PK. C'était ma recommandation : avec les PK doublés, un abonné aurait coûté ≈ 210 € de lots par an.
+- **Dans l'offre** : « Double XP permanent sur tes PA », avec le badge « 2XP » et la goutte des PA côte à côte ; bannière « double XP sur tes PA ». Cache v142.
+- **Reste en attente** : P1 à P4 et P6 (`docs/27` §3).
+
 ## 2026-11-06 — Retouches du PK shop et de Premium (demande du porteur)
 
 - **Item « Deluxe »** retiré du PK shop (et de la liste des avantages du grade Grand maître Pokémon).
