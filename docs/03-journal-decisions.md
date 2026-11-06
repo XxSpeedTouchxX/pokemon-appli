@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-06 — Connexion avec Face ID, Touch ID ou l'empreinte (« go » du porteur)
+
+- **Choix** : clés d'accès (passkeys) de Supabase Auth, la méthode standard des grandes applications ; le mot de passe reste en secours (`docs/26-guide-face-id-cles-d-acces.md`).
+- **Fait** : app (cache v137) : connexion « Face ID / empreinte », proposition unique à l'accueil, appareils listés et retirables dans Mon profil ; test avec un lecteur d'empreinte imité par Chrome (10 vérifications).
+- **À faire par le porteur** : Supabase Auth 2.186 → 2.197.0 et 4 réglages dans Coolify (guidé), après une sauvegarde manuelle.
+
 ## 2026-11-06 — Étape D lancée : double authentification des admins, sauvegardes, ports (« go » du porteur)
 
 - **Fait** : droits d'admin seulement avec le code à 6 chiffres d'une application d'authentification (`tools/supabase/006_admin_2fa.sql`, 8 tests ; app : QR code la première fois, puis le code, cache v136).

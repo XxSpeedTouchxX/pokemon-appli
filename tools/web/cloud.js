@@ -20,6 +20,13 @@
     over_request_rate_limit: 'Trop d’essais : attends quelques minutes, puis réessaie.',
     email_address_invalid: 'Cette adresse e-mail n’est pas acceptée (les adresses jetables sont refusées) : utilise ton adresse habituelle.',
     signup_disabled: 'Les inscriptions sont fermées pour le moment.',
+    passkey_disabled: 'La connexion avec Face ID ou l’empreinte n’est pas encore activée sur le serveur de Dropicards.',
+    webauthn_verification_failed: 'Face ID ou l’empreinte n’a pas pu être vérifié. Réessaie, ou connecte-toi avec ton mot de passe.',
+    webauthn_challenge_expired: 'Trop de temps s’est écoulé : réessaie.',
+    webauthn_challenge_not_found: 'Trop de temps s’est écoulé : réessaie.',
+    too_many_passkeys: 'Tu as déjà enregistré 10 appareils : retires-en un dans Mon profil.',
+    insufficient_aal: 'Compte admin : ouvre d’abord le mode Admin avec ton code à 6 chiffres, puis réessaie.',
+    webauthn_credential_not_found: 'Aucun Face ID ni empreinte enregistré pour ce compte : connecte-toi avec ton mot de passe, puis active-le dans Mon profil.',
     user_banned: 'Ce compte est suspendu. Écris-nous à contact@dropicards.fr.',
     same_password: 'Choisis un mot de passe différent de l’ancien.',
     other: 'Une erreur est survenue. Réessaie dans un instant.'
@@ -46,6 +53,17 @@
     const e = new Error(CLOUD_ERR[k || 'other']);
     e.code = k || 'other'; e.status = status;
     return e;
+  };
+  // Clés d'accès : conversions base64url ↔ octets, et demande au téléphone (Face ID, empreinte) avec ses refus.
+  const pkyBuf = b => { const s = atob(String(b || '').replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((String(b || '').length + 3) % 4)); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u.buffer; };
+  const pkyB64 = buf => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const pkyAsk = async f => {
+    try { const c = await f(); if (!c) throw new Error('vide'); return c; } catch (e) {
+      const n = new Error(e && e.name === 'NotAllowedError' ? 'Face ID ou l’empreinte n’a pas été validé (annulé ou délai dépassé). Réessaie.'
+        : e && e.name === 'InvalidStateError' ? 'Ce téléphone est déjà enregistré pour Face ID ou l’empreinte.'
+        : 'Ce téléphone ne permet pas d’utiliser Face ID ou l’empreinte ici.');
+      n.code = 'passkey_device'; throw n;
+    }
   };
   const Cloud = {
     // Adresse du serveur modifiable pour les tests (?cloud=http://127.0.0.1:…, avec ?cloudkey=…).
@@ -164,6 +182,40 @@
       const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
       return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
     },
+    // Clés d'accès (Face ID, Touch ID, empreinte) : Supabase Auth 2.197 et plus, GOTRUE_PASSKEY_ENABLED
+    // (docs/26). La clé reste dans le téléphone (trousseau iCloud, gestionnaire de mots de passe Google) ; le serveur ne
+    // garde que sa partie publique. Connexion sans adresse ni mot de passe ; le mot de passe reste en secours.
+    passkeyOk() {
+      try { return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create && navigator.credentials.get); } catch (e) { return false; }
+    },
+    async passkeyRegister() {
+      const tk = await this.token();
+      const o = await this.req('/auth/v1/passkeys/registration/options', { method: 'POST', token: tk, body: {} });
+      const pk = Object.assign({}, o.options, { challenge: pkyBuf(o.options.challenge), user: Object.assign({}, o.options.user, { id: pkyBuf(o.options.user.id) }) });
+      if (Array.isArray(pk.excludeCredentials)) pk.excludeCredentials = pk.excludeCredentials.map(c => Object.assign({}, c, { id: pkyBuf(c.id) }));
+      const cred = await pkyAsk(() => navigator.credentials.create({ publicKey: pk }));
+      const r = cred.response;
+      return this.req('/auth/v1/passkeys/registration/verify', { method: 'POST', token: await this.token(), body: { challenge_id: o.challenge_id, credential: {
+        id: cred.id, rawId: pkyB64(cred.rawId), type: cred.type, authenticatorAttachment: cred.authenticatorAttachment || undefined,
+        clientExtensionResults: cred.getClientExtensionResults ? cred.getClientExtensionResults() : {},
+        response: { clientDataJSON: pkyB64(r.clientDataJSON), attestationObject: pkyB64(r.attestationObject), transports: r.getTransports ? r.getTransports() : undefined } } } });
+    },
+    async passkeyLogin() {
+      const o = await this.req('/auth/v1/passkeys/authentication/options', { method: 'POST', body: {} });
+      const pk = Object.assign({}, o.options, { challenge: pkyBuf(o.options.challenge) });
+      if (Array.isArray(pk.allowCredentials)) pk.allowCredentials = pk.allowCredentials.map(c => Object.assign({}, c, { id: pkyBuf(c.id) }));
+      const cred = await pkyAsk(() => navigator.credentials.get({ publicKey: pk }));
+      const r = cred.response;
+      const j = await this.req('/auth/v1/passkeys/authentication/verify', { method: 'POST', body: { challenge_id: o.challenge_id, credential: {
+        id: cred.id, rawId: pkyB64(cred.rawId), type: cred.type, authenticatorAttachment: cred.authenticatorAttachment || undefined,
+        clientExtensionResults: cred.getClientExtensionResults ? cred.getClientExtensionResults() : {},
+        response: { clientDataJSON: pkyB64(r.clientDataJSON), authenticatorData: pkyB64(r.authenticatorData), signature: pkyB64(r.signature), userHandle: r.userHandle ? pkyB64(r.userHandle) : undefined } } } });
+      const v = this.keep(j);
+      if (!v) throw cloudErr(400, { error_code: 'webauthn_verification_failed' });
+      return v;
+    },
+    async passkeyList() { const l = await this.req('/auth/v1/passkeys', { token: await this.token() }); return Array.isArray(l) ? l : (l && Array.isArray(l.passkeys) ? l.passkeys : []); },
+    async passkeyDelete(id) { return this.req('/auth/v1/passkeys/' + encodeURIComponent(id), { method: 'DELETE', token: await this.token() }); },
     async saveProfile(f) {
       const s = cloudLs.get(), tk = await this.token();
       if (!s || !tk) return null;

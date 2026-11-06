@@ -124,6 +124,13 @@
       emailBad: /e-mail|adresse/i.test(err) ? 'true' : 'false', pwdBad: /mot de passe/.test(err) ? 'true' : 'false',
       err: err, hasErr: !!err && page === 2, notice: note, hasNotice: !!note && !err && page === 2,
       note: 'Ton adresse sert à te connecter et, seulement si tu le coches, à recevoir nos nouveautés. Tu peux te désinscrire à tout moment.',
+      // Connexion avec Face ID, Touch ID ou l'empreinte (clés d'accès, cloud.js, 2026-11-06, « go » du porteur).
+      pkyOk: cloud && mode === 'login' && Cloud.passkeyOk(), pkyLabel: busy ? 'Un instant…' : 'Face ID / empreinte',
+      pkyLogin: async () => {
+        if (this.st().obBusy) return;
+        this.setState({ obBusy: true, obErr: '' });
+        try { await Cloud.passkeyLogin(); fromProfile(await Cloud.profile()); } catch (e2) { fail(e2); }
+      },
       links: cloud && !busy, toLogin: () => this.setState({ obMode: 'login', obErr: '', obNote: '' }),
       toSignup: () => this.setState({ obMode: 'signup', obErr: '', obNote: '', obResetSent: false }),
       toReset: () => this.setState({ obMode: 'reset', obErr: '', obNote: '', obResetSent: false, obCode: '' }),
