@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-06 — Étape D lancée : double authentification des admins, sauvegardes, ports (« go » du porteur)
+
+- **Fait** : droits d'admin seulement avec le code à 6 chiffres d'une application d'authentification (`tools/supabase/006_admin_2fa.sql`, 8 tests ; app : QR code la première fois, puis le code, cache v136).
+- **Guidé (porteur)** : sauvegarde chaque nuit vers OVH Object Storage (Coolify › S3 Storages et Backups) ; ports 8000, 6001, 6002 fermés au public (`tools/server/close-ports.sh`).
+- **Reste** : essai de restauration ; Studio réservé à Tailscale (proposition à venir) ; étape C (comptes multiples).
+
 ## 2026-11-06 — PK et PA tenus par le serveur, anti-triche (« go » du porteur)
 
 - **Demande** : « aucune triche possible sur les PK et les PA, protection au maximum ». **Principe retenu** : le téléphone ne décide jamais rien, le serveur décide de tout (`docs/25-plan-anti-triche-pk-pa.md`).

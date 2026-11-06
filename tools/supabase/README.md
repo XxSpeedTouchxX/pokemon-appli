@@ -9,6 +9,7 @@ Proposition et plan : `docs/24-proposition-espace-admin-et-comptes.md` §4.1 et 
 - `003_inscription.sql` : à l'inscription depuis l'app, le profil est rempli avec le pseudo, la tranche d'âge, le starter (1, 4, 7 ou 25) et l'accord pour les nouveautés envoyés par l'app ; chaque valeur est vérifiée et mise de côté si elle n'est pas valable (l'inscription n'échoue jamais pour elles) ; rôle, statut et PK jamais lus. Rejouable.
 - `004_jeu.sql` (produit par `gen_game.mjs` depuis `004_jeu.template.sql`) : règles du jeu sur le serveur (PA du jour, booster, pièce, partage, Pokédex, PK shop, grades), journal `ledger` ineffaçable, limite de 30 actions par minute, reprise à 100 PK ; voir `docs/25-plan-anti-triche-pk-pa.md`. Rejouable.
 - `005_jetables.sql` (produit par `gen_disposable.mjs` depuis `disposable_domains.txt`, liste CC0 de 10 143 domaines) : adresses e-mail jetables refusées. Rejouable.
+- `006_admin_2fa.sql` : droits d'admin seulement avec la double authentification (niveau « aal2 ») ; tests `tests/test_006.sql`. Retour en arrière : relancer `is_admin()` de `001_comptes.sql`.
 - `emails.mjs` : modèles des e-mails en français (`web/email/*.html`, publiés sur dropicards.fr) ; `node tools/supabase/emails.mjs` après une modification.
 - `tests/mock_supabase.sql` et `tests/test_001.sql` : 25 vérifications de sécurité sur un PostgreSQL ordinaire (un compte ne voit que ses données, ne peut pas se donner le rôle admin ni des PK, ne touche pas la collection d'un autre ; l'admin voit tout, avec un motif obligatoire ; journal intouchable ; visiteur non connecté refusé).
 
@@ -24,6 +25,8 @@ psql -d test -f tools/supabase/tests/test_003.sql   # 5 vérifications de plus (
 psql -d test -f tools/supabase/004_jeu.sql
 psql -d test -f tools/supabase/005_jetables.sql
 psql -d test -f tools/supabase/tests/test_004.sql   # 50 tests de triche (80 en tout)
+psql -d test -f tools/supabase/006_admin_2fa.sql
+psql -d test -f tools/supabase/tests/test_006.sql   # 8 de plus (86 en tout)
 ```
 
 ## Mise en place sur le serveur (porteur, guidé)

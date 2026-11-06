@@ -92,12 +92,37 @@ Fichier : `tools/web/game-cloud.js`.
 - Vue « Comptes suspects » dans l'espace admin. Un compte n'est jamais bloqué automatiquement : un admin décide, avec un motif.
 - Tirage au sort et lots : contrôle de la pièce d'identité du gagnant (hors de l'app au début), un lot par personne réelle.
 
-### Étape D : admins et serveur (à faire, ≈ 10 h)
+### Étape D : admins et serveur (lancée le 2026-11-06, « go » du porteur)
 
-- Double authentification obligatoire pour les comptes admin. Les fonctions admin exigent une connexion à deux facteurs.
-- Tableau de bord Supabase seulement par Tailscale.
-- Ports 8000, 6001 et 6002 fermés au public.
-- Sauvegarde chiffrée de la base chaque nuit, hors du serveur, avec un essai de restauration.
+**D1. Double authentification des admins : faite (cache v136).**
+- `tools/supabase/006_admin_2fa.sql` : un compte admin n'a ses droits que connecté avec le code à 6 chiffres d'une application d'authentification (niveau « aal2 »). Un mot de passe volé ne suffit plus.
+- L'app : avec le serveur, le code local du mode Admin est remplacé.
+  - La première fois : un QR code à scanner avec Google Authenticator, Microsoft Authenticator ou Mots de passe (iPhone), puis le code affiché.
+  - Ensuite : le code à chaque nouvelle connexion.
+- Tests : `test_006.sql` (8 vérifications) et `e2e/t-cloud.mjs` partie 5 bis.
+- Retour en arrière si besoin (Studio › SQL Editor) : relancer la fonction `is_admin()` de `001_comptes.sql`.
+
+**D2. Sauvegarde chaque nuit, hors du serveur.** Guidée pas à pas :
+1. OVH › Public Cloud :
+   - un projet (« dropicards ») ;
+   - Object Storage › un conteneur S3 « Standard », région Gravelines (GRA), nommé `dropicards-sauvegardes` ;
+   - un utilisateur S3 et sa clé.
+   - Coût : quelques centimes par mois.
+2. Coolify › S3 Storages › Add :
+   - point d'accès `https://s3.gra.io.cloud.ovh.net`, région `gra`, nom du conteneur, clés ;
+   - « Validate Connection ».
+3. Coolify › service Supabase › Backups :
+   - chaque nuit à 3 h (`0 3 * * *`), envoi vers le stockage S3 ;
+   - 7 sauvegardes gardées sur le serveur, 30 dans OVH ;
+   - « Backup Now » pour un premier essai.
+4. Essai de restauration sur une base de test (à faire une fois, puis chaque trimestre).
+
+**D3. Ports 8000, 6001 et 6002 fermés au public.**
+- `tools/server/close-ports.sh`, lancé une fois dans le terminal de Coolify : `install`, retour en arrière `remove`.
+- La règle est posée dans la chaîne DOCKER-USER (Docker contourne le pare-feu) et reposée à chaque redémarrage.
+- Coolify reste ouvert par son domaine et par Tailscale.
+
+**D4. Tableau de bord Supabase (Studio)** : protégé aujourd'hui par son identifiant et son mot de passe (générés par Coolify). Le réserver à Tailscale demande de séparer son adresse de celle de l'app (api.dropicards.fr reste publique pour l'app). Proposition à venir, sans urgence après D1 à D3.
 
 ### Plus tard
 
@@ -115,5 +140,5 @@ Fichier : `tools/web/game-cloud.js`.
 ## 6. Effort et coût
 
 - A et B : ≈ 55 h prévues, faites le 2026-11-06.
-- C et D : ≈ 25 h, soit environ 3 jours à plein régime (8 h/j) ou 8 jours au rythme réel (3 h/j).
+- D1 fait le 2026-11-06 ; D2 et D3 guidés (≈ 1 h pour le porteur) ; C et D4 : ≈ 18 h, soit environ 2 jours à plein régime (8 h/j) ou 6 jours au rythme réel (3 h/j).
 - Coût mensuel supplémentaire : 0 € (même serveur, même base).

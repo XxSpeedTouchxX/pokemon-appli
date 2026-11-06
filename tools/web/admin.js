@@ -17,6 +17,8 @@
   const admOf = s => {
     const a = s.admin || {}, d = admDefault();
     if (!admAllowed()) return d;
+    // Avec le serveur : mode Admin actif seulement après la double authentification (aal2, game-cloud.js).
+    if (Cloud.on() && Cloud.aal() !== 'aal2') return Object.assign(d, { hash: a.hash || '', salt: a.salt || '' });
     return Object.assign(d, a, { flags: Object.assign(d.flags, a.flags || {}), prices: Object.assign({}, a.prices || {}) });
   };
   // Empreinte du code (FNV-1a sur sel + code) : évite de garder le code en clair sur l'appareil.

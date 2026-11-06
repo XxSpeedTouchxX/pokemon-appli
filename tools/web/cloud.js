@@ -55,6 +55,28 @@
     signedIn() { return !!cloudLs.get(); },
     // Rôle lu dans la table profiles (jamais choisi par l'app) : seul un compte « admin » ouvre le mode Admin.
     isAdmin() { const s = cloudLs.get(); return !!(s && s.role === 'admin'); },
+    // Niveau de connexion du jeton : « aal2 » après le code de l'application d'authentification (006_admin_2fa.sql).
+    aal() {
+      const s = cloudLs.get();
+      try { return JSON.parse(atob(s.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).aal || 'aal1'; } catch (e) { return ''; }
+    },
+    // Double authentification (TOTP) des admins : facteurs du compte, inscription (QR code), challenge, vérification.
+    async mfaFactors() {
+      const u = await this.req('/auth/v1/user', { token: await this.token() });
+      return (u && Array.isArray(u.factors) ? u.factors : []).filter(f => f.factor_type === 'totp');
+    },
+    async mfaEnroll() {
+      const tk = await this.token();
+      for (const f of await this.mfaFactors()) if (f.status !== 'verified') { try { await this.req('/auth/v1/factors/' + f.id, { method: 'DELETE', token: tk }); } catch (e) { /* déjà retiré */ } }
+      return this.req('/auth/v1/factors', { method: 'POST', token: tk, body: { factor_type: 'totp', friendly_name: 'Dropicards admin ' + new Date().toISOString().slice(0, 16) } });
+    },
+    async mfaChallenge(fid) { return this.req('/auth/v1/factors/' + fid + '/challenge', { method: 'POST', token: await this.token(), body: {} }); },
+    async mfaVerify(fid, cid, code) {
+      const j = await this.req('/auth/v1/factors/' + fid + '/verify', { method: 'POST', token: await this.token(), body: { challenge_id: cid, code: String(code || '').replace(/\D/g, '') } });
+      const v = this.keep(j);
+      if (!v) throw cloudErr(400, { error_code: 'otp_expired' });
+      return v;
+    },
     async req(path, o) {
       o = o || {};
       const h = { apikey: this.key, 'Content-Type': 'application/json' };

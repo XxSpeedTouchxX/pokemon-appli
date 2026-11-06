@@ -57,3 +57,12 @@ Ce qui est vérifié, puis résumé à la fin (OK, À VOIR, RISQUE) :
 11. traces de sauvegarde.
 
 Le résumé couvre les erreurs les plus courantes ; il ne remplace pas un audit complet (vague 12 des propositions v5).
+
+## Ports 8000, 6001 et 6002 fermés au public (2026-11-06, `docs/25` étape D3)
+
+`close-ports.sh` : règle dans la chaîne DOCKER-USER (Docker ouvre ses ports en passant à côté du pare-feu), sur la carte réseau publique seulement (Tailscale et le serveur gardent l'accès ; Coolify reste ouvert par son domaine), reposée à chaque redémarrage par le service `dropicards-ports`. Dans le terminal de Coolify :
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/XxSpeedTouchxX/pokemon-appli/claude/pokemon-app-mockup-1mxt7p/tools/server/close-ports.sh -o /root/close-ports.sh
+sh /root/close-ports.sh install     # retour en arrière : sh /root/close-ports.sh remove
+```

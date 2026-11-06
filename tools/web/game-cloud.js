@@ -218,3 +218,70 @@
       return r;
     };
   })(gcProto.vGames);
+
+  // Double authentification des admins (2026-11-06, « go » du porteur, docs/25 étape D ; 006_admin_2fa.sql) : avec le
+  // serveur, le code local du mode Admin est remplacé par le code à 6 chiffres d'une application d'authentification
+  // (Google Authenticator, Microsoft Authenticator, l'app Mots de passe de l'iPhone…). Première fois : QR code à scanner,
+  // puis le code ; ensuite : le code à chaque nouvelle connexion. Sans lui, la base refuse tout outil admin.
+  // QR code de Supabase : SVG brut après « data:image/svg+xml;utf-8, » ; réencodé pour l'image (un « # » couperait l'adresse).
+  const gcQr = q => {
+    const m = /^data:image\/svg\+xml;utf-?8,([\s\S]*)$/i.exec(q || '');
+    return m ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(m[1]) : (q || '');
+  };
+  gcProto.gcMfaStart = function () {
+    if (Cloud.aal() === 'aal2') { this.setAdmin({ on: true }, { admLock: '', admSheet: true, toast: 'Mode Admin activé' }); return; }
+    this.setState({ admLock: 'mfa', admCode: '', admMsg: 'Un instant…', admMfa: null });
+    Cloud.mfaFactors().then(list => {
+      const f = list.find(x => x.status === 'verified');
+      if (f) return Cloud.mfaChallenge(f.id).then(c => this.setState({ admMfa: { fid: f.id, cid: c.id, isNew: false }, admMsg: '' }));
+      return Cloud.mfaEnroll().then(e => Cloud.mfaChallenge(e.id).then(c => this.setState({
+        admMfa: { fid: e.id, cid: c.id, isNew: true, qr: gcQr(e.totp && e.totp.qr_code), secret: e.totp && e.totp.secret || '' }, admMsg: '' })));
+    }).catch(e => this.setState({ admMsg: gcMsg(e) }));
+  };
+  gcProto.admTap = (function (base) {
+    let taps = [];
+    return function () {
+      if (!gcOn()) return base.call(this);
+      const now = Date.now();
+      taps = taps.filter(t => now - t < 3000).concat([now]);
+      if (taps.length < 7) return;
+      taps = [];
+      if (!admAllowed()) { this.setState({ toast: 'Mode Admin réservé aux comptes admin de Dropicards' }); return; }
+      this.gcMfaStart();
+    };
+  })(gcProto.admTap);
+  gcProto.admSubmit = (function (base) {
+    return function () {
+      const s = this.st();
+      if (!gcOn() || s.admLock !== 'mfa') return base.call(this);
+      const m = s.admMfa, code = String(s.admCode || '').trim();
+      if (!m) return;
+      if (!/^\d{6}$/.test(code)) { this.setState({ admMsg: 'Le code fait 6 chiffres.' }); return; }
+      this.setState({ admMsg: 'Vérification…' });
+      Cloud.mfaVerify(m.fid, m.cid, code).then(() => Cloud.profile()).then(() => {
+        this.setAdmin({ on: true }, { admLock: '', admCode: '', admMfa: null, admMsg: '', admSheet: true, toast: m.isNew ? 'Double authentification activée · mode Admin ouvert' : 'Mode Admin activé' });
+        this.flash();
+      }, e => {
+        // Code faux ou expiré : nouveau challenge, nouvel essai.
+        Cloud.mfaChallenge(m.fid).then(c => this.setState({ admMfa: Object.assign({}, m, { cid: c.id }) })).catch(() => {});
+        this.setState({ admCode: '', admMsg: e && e.code === 'network' ? GC_NET : 'Code incorrect ou expiré : tape le nouveau code affiché par ton application.' });
+      });
+    };
+  })(gcProto.admSubmit);
+  gcProto.admView = (function (base) {
+    return function (s) {
+      const r = base.call(this, s);
+      if (!gcOn()) return r;
+      const m = s.admMfa;
+      r.menu = () => (admOf(s).on ? this.setState({ admSheet: true }) : this.gcMfaStart());
+      if (s.admLock === 'mfa') {
+        r.lockTitle = m && m.isNew ? 'Active la double authentification' : 'Double authentification';
+        r.lockText = m && m.isNew
+          ? 'Compte admin : scanne ce QR code avec une application d’authentification (Google Authenticator, Microsoft Authenticator, Mots de passe de l’iPhone…), puis tape le code à 6 chiffres qu’elle affiche.'
+          : 'Tape le code à 6 chiffres affiché par ton application d’authentification.';
+        r.hasQr = !!(m && m.isNew && m.qr); r.qr = m && m.qr || ''; r.secret = m && m.secret ? 'Ou saisis cette clé : ' + m.secret : '';
+        r.cancel = () => this.setState({ admLock: '', admCode: '', admMsg: '', admMfa: null });
+      } else r.hasQr = false;
+      return r;
+    };
+  })(gcProto.admView);

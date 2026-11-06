@@ -9,7 +9,7 @@ const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const 
 const KEY = 'pkm-collection-v1';
 // Faux serveur : comptes en mémoire.
 const users = {}; const calls = []; let down = false; const CODE = '482915';
-const jwt = (uid, email) => 'h.' + Buffer.from(JSON.stringify({ sub: uid, email: email })).toString('base64url') + '.s';
+const jwt = (uid, email, aal) => 'h.' + Buffer.from(JSON.stringify({ sub: uid, email: email, aal: aal || 'aal1' })).toString('base64url') + '.s';
 const sess = u => ({ access_token: jwt(u.id, u.email), refresh_token: 'r-' + u.id, expires_in: 3600, user: { id: u.id, email: u.email } });
 async function fake(route) {
   const req = route.request(), url = new URL(req.url()), body = req.postData() ? JSON.parse(req.postData()) : {};
@@ -47,6 +47,17 @@ async function fake(route) {
     u.pwd = body.password; return send(200, { id: u.id });
   }
   if (p === '/auth/v1/logout') return send(204, {});
+  // Double authentification (TOTP) imitée : code 246810.
+  const tokSub = (() => { try { return JSON.parse(Buffer.from((req.headers().authorization || '').split('.')[1] || '', 'base64url').toString()).sub; } catch (e) { return ''; } })();
+  const me = Object.values(users).find(x => x.id === tokSub);
+  if (p === '/auth/v1/user' && req.method() === 'GET') return send(200, { id: me && me.id, factors: (me && me.factors) || [] });
+  if (p === '/auth/v1/factors' && req.method() === 'POST') { me.factors = [{ id: 'f1', factor_type: 'totp', status: 'unverified' }]; return send(200, { id: 'f1', type: 'totp', totp: { qr_code: 'data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>', secret: 'JBSWY3DPEHPK3PXP' } }); }
+  if (/^\/auth\/v1\/factors\/f1\/challenge$/.test(p)) return send(200, { id: 'c' + Date.now() });
+  if (/^\/auth\/v1\/factors\/f1\/verify$/.test(p)) {
+    if (body.code !== '246810') return send(422, { code: 422, error_code: 'mfa_verification_failed', msg: 'Invalid TOTP code entered' });
+    me.factors = [{ id: 'f1', factor_type: 'totp', status: 'verified' }];
+    return send(200, { access_token: jwt(me.id, me.email, 'aal2'), refresh_token: 'r2-' + me.id, expires_in: 3600, user: { id: me.id, email: me.email } });
+  }
   if (p.startsWith('/rest/v1/rpc/')) {
     const u = Object.values(users).find(x => (req.headers().authorization || '').includes(jwt(x.id, x.email)));
     if (!u) return send(401, { message: 'JWT expired' });
@@ -214,6 +225,22 @@ for (const [who, pwd, admin] of [['ondine@exemple.fr', 'nouveau-mot-de-passe-99'
   }
   await ctx.close();
 }
+
+// 5 bis. Double authentification des admins : QR code, code faux refusé, bon code, panneau ouvert, outils par le serveur.
+({ ctx, page } = await fresh());
+await admIn(page, 'sacha@exemple.fr', 'mot-de-passe-admin-42');
+await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); d.onb = 0; d.tuto = 'done'; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
+await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
+await page.locator('button:has-text("Mode Admin")').first().click(); await page.waitForTimeout(800);
+const lock = page.locator('section[aria-label="Code Admin"]');
+ok('admin, 1ʳᵉ fois : « Active la double authentification » avec QR code et clé', /Active la double authentification/.test(await lock.innerText()) && (await lock.locator('img[alt^="QR code"]').count()) === 1 && /JBSWY3DPEHPK3PXP/.test(await lock.innerText()));
+await page.screenshot({ path: shot('cloud-2fa.png') });
+await lock.locator('input').fill('111111'); await lock.locator('button:has-text("Valider")').click(); await page.waitForTimeout(700);
+ok('code faux refusé', /Code incorrect ou expiré/.test(await lock.innerText()) && (await page.locator('section[aria-label="Panneau Admin"]').count()) === 0);
+await lock.locator('input').fill('246810'); await lock.locator('button:has-text("Valider")').click(); await page.waitForTimeout(1200);
+const aal = await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('pkm-cloud-session')); return JSON.parse(atob(s.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).aal; });
+ok('bon code : session « aal2 », panneau Admin ouvert', aal === 'aal2' && (await lock.count()) === 0 && /Double authentification activée/.test(await page.locator('body').innerText()));
+await ctx.close();
 
 // 6. PK et PA tenus par le serveur : soldes recopiés, triche locale effacée, jeux demandés au serveur.
 users['ondine@exemple.fr'].game = null;
