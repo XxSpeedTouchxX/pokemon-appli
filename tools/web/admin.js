@@ -32,7 +32,8 @@
 
   // Effets du mode Admin hors rendu : prix des PK, animations calmes.
   const admApply = a => {
-    pkApplyPrices(a.on ? a.prices : null, a.on && !a.flags.pk);
+    // Avec le serveur, les prix sont ceux du serveur (game_pokemon) : pas de prix modifiés ni de PK désactivés.
+    pkApplyPrices(a.on && !Cloud.on() ? a.prices : null, a.on && !a.flags.pk && !Cloud.on());
     try { document.documentElement.classList.toggle('pkm-calm', a.on && !a.flags.motion); } catch (e) { /* pas de document */ }
   };
   proto.setAdmin = function (patch, extra) {

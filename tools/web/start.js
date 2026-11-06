@@ -181,6 +181,8 @@
         obBusy: false, obCode: '', obMode: 'signup', obResetSent: false, obAfter: '', obPending: null, obLocal: false
       });
       setTimeout(() => this.finishOnb(false), 320);
+      // PK, PA et Pokédex du compte relus sur le serveur (game-cloud.js).
+      if (server) setTimeout(() => this.gcSync(), 400);
     };
     // Page 4 : le code à 6 chiffres reçu par e-mail (lien de l'e-mail aussi accepté, cloud.js fromLink).
     r.p4 = {

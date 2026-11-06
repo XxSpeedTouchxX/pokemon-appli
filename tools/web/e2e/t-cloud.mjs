@@ -47,6 +47,21 @@ async function fake(route) {
     u.pwd = body.password; return send(200, { id: u.id });
   }
   if (p === '/auth/v1/logout') return send(204, {});
+  if (p.startsWith('/rest/v1/rpc/')) {
+    const u = Object.values(users).find(x => (req.headers().authorization || '').includes(jwt(x.id, x.email)));
+    if (!u) return send(401, { message: 'JWT expired' });
+    const G = u.game = u.game || { pk: 100, pa: 0, earned: 100, day: null, streak: 0, unlocked: [], shared: false, boosterAt: null, shop: {} };
+    const fn = p.slice('/rest/v1/rpc/'.length);
+    const err = m => send(400, { code: 'P0001', message: m });
+    calls.push('RPC ' + fn + ' ' + JSON.stringify(body));
+    if (fn === 'game_state') return send(200, { pk: G.pk, pa: G.pa, pk_earned: G.earned, pa_day: G.day, pa_streak: G.streak, today: '2026-11-06', grade: 0, booster_last: G.boosterAt, coin_last: null, shared: G.shared, unlocked: G.unlocked, shop: G.shop, buddy: 7 });
+    if (fn === 'claim_daily_pa') { if (G.day === '2026-11-06') return err('PA du jour déjà récupérés'); G.day = '2026-11-06'; G.streak = 1; G.pa += 20; return send(200, { gain: 20, streak: 1, pa: G.pa, pk: G.pk, pk_earned: G.earned }); }
+    if (fn === 'open_booster') { if (G.boosterAt) return err('Booster pas encore prêt'); G.boosterAt = new Date().toISOString(); G.pk += 200; G.earned += 200; return send(200, { won: 200, pk: G.pk, pa: G.pa, pk_earned: G.earned }); }
+    if (fn === 'flip_coin') return err('Pièce réservée au grade Chasseur et plus');
+    if (fn === 'unlock_pokemon') { if (G.pa < 50) return err('Pas assez de PA'); G.pa -= 50; G.unlocked.push(body.num); return send(200, { n: body.num, price: 50, pa: G.pa, pk: G.pk, pk_earned: G.earned }); }
+    if (fn === 'buy_item') return err('Disponible 7 jours après la création de ton compte');
+    return send(404, {});
+  }
   if (p === '/rest/v1/profiles') {
     const u = Object.values(users).find(x => url.searchParams.get('id') === 'eq.' + x.id);
     if (!u) return send(200, []);
@@ -199,6 +214,40 @@ for (const [who, pwd, admin] of [['ondine@exemple.fr', 'nouveau-mot-de-passe-99'
   }
   await ctx.close();
 }
+
+// 6. PK et PA tenus par le serveur : soldes recopiés, triche locale effacée, jeux demandés au serveur.
+users['ondine@exemple.fr'].game = null;
+({ ctx, page } = await fresh());
+await admIn(page, 'ondine@exemple.fr', 'nouveau-mot-de-passe-99');
+await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); d.onb = 0; d.tuto = 'done'; d.pk = 999999; d.pa = 999999; d.pkOwn = [150, 151]; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
+await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2000);
+let gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
+ok('triche sur l’appareil (999 999 PK et PA, Mewtwo) effacée par le serveur : ' + gs.pk + ' PK, ' + gs.pa + ' PA', gs.pk === 100 && gs.pa === 0 && (gs.pkOwn || []).length === 0);
+const boost = page.locator('section[aria-label="Booster PK"]');
+await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(3000);
+gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
+ok('booster : gain tiré par le serveur (+200), animation jouée : ' + gs.pk + ' PK', gs.pk === 300 && calls.some(c => c.startsWith('RPC open_booster')) && /\+200 PK/.test(await boost.innerText()));
+ok('règles : « tirage fait par le serveur »', /fait par le serveur Dropicards/.test(await page.locator('main').innerText()));
+const coin = page.locator('section[aria-label="Pile ou face"]');
+await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(700);
+ok('pièce : refus du serveur affiché (« ' + (await page.locator('body').innerText()).match(/Pièce réservée[^\n]*/) + ' »)', /Pièce réservée au grade Chasseur/.test(await page.locator('body').innerText()));
+// PA du jour.
+const pill = page.locator('header button[aria-label^="Mes points d’Aura"]').first();
+await pill.click(); await page.waitForTimeout(500);
+await page.locator('.pkm-pa-claim-btn').click(); await page.waitForTimeout(3500);
+gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
+ok('PA du jour demandés au serveur : +20 PA (' + gs.pa + ')', gs.pa === 20 && calls.some(c => c.startsWith('RPC claim_daily_pa')));
+// Coupure réseau : message clair, rien de crédité.
+down = true;
+await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.games = Object.assign({}, d.games, { boosterAt: '' }); localStorage.setItem(k, JSON.stringify(d)); }, KEY);
+await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }).catch(() => {}); await page.waitForTimeout(1500);
+down = false;
+await page.unroute(FAKE + '/**').catch(() => {});
+await ctx.route(FAKE + '/**', r => r.abort());
+await page.locator('section[aria-label="Booster PK"] button:has-text("booster")').first().click().catch(() => {}); await page.waitForTimeout(1200);
+gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
+ok('sans internet : « Connexion internet nécessaire », aucun PK ajouté (' + gs.pk + ')', gs.pk === 300 && /Connexion internet nécessaire/.test(await page.locator('body').innerText()));
+await ctx.close();
 
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);

@@ -48,7 +48,7 @@
   };
   const paToday = () => { const d = new Date(paNow()); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   // Mode Admin « PA à volonté » (2026-11-01, porteur) : les PA se récupèrent à chaque appui sur le solde.
-  const paFree = s => !!(s.admin && s.admin.on && s.admin.paFree && admAllowed());
+  const paFree = s => !!(s.admin && s.admin.on && s.admin.paFree && admAllowed() && !Cloud.on());
   const paPending = s => {
     const n = PaCore.next(s.paDay || '', s.paStreak || 0, paToday());
     return n || !paFree(s) ? n : PaCore.next(s.paDay, s.paStreak || 0, PaCore.nextDay(s.paDay));

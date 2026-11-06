@@ -18,7 +18,7 @@
     weak_password: 'Ce mot de passe est trop simple : choisis-en un plus long, avec des lettres et des chiffres.',
     over_email_send_rate_limit: 'Trop d’e-mails envoyés : attends quelques minutes avant de redemander un code.',
     over_request_rate_limit: 'Trop d’essais : attends quelques minutes, puis réessaie.',
-    email_address_invalid: 'Cette adresse e-mail n’est pas acceptée : vérifie-la.',
+    email_address_invalid: 'Cette adresse e-mail n’est pas acceptée (les adresses jetables sont refusées) : utilise ton adresse habituelle.',
     signup_disabled: 'Les inscriptions sont fermées pour le moment.',
     user_banned: 'Ce compte est suspendu. Écris-nous à contact@dropicards.fr.',
     same_password: 'Choisis un mot de passe différent de l’ancien.',
@@ -37,6 +37,12 @@
     if (!k && /not confirmed/i.test(msg)) k = 'email_not_confirmed';
     if (!k && /expired|invalid.*(otp|token)|token.*(invalid|expired)/i.test(msg)) k = 'otp_expired';
     if (!k && status === 429) k = 'over_request_rate_limit';
+    // Adresse jetable refusée par la base (tools/supabase/005_jetables.sql) : GoTrue répond « Database error ».
+    if (!k && /database error saving new user|jetable/i.test(msg)) k = 'email_address_invalid';
+    // Règles du jeu (tools/supabase/004_jeu.sql) : leur message, déjà en français, est montré tel quel.
+    if (!k && /^(P0001|42501|53400|28000)$/.test(String(code)) && msg && !/^permission denied/i.test(msg)) {
+      const g = new Error(msg); g.code = 'game'; g.status = status; return g;
+    }
     const e = new Error(CLOUD_ERR[k || 'other']);
     e.code = k || 'other'; e.status = status;
     return e;
@@ -123,6 +129,18 @@
       const cur = cloudLs.get();
       if (cur && cur.uid === s.uid) { cur.role = pr && pr.role === 'admin' && pr.status !== 'suspended' ? 'admin' : 'user'; cloudLs.set(cur); }
       return pr;
+    },
+    // Règle du jeu sur le serveur (tools/supabase/004_jeu.sql) : PA du jour, booster, pièce, partage, Pokédex, PK shop.
+    async rpc(fn, args) {
+      const tk = await this.token();
+      if (!tk) { const e = new Error('Connecte-toi à ton compte Dropicards pour jouer.'); e.code = 'login'; throw e; }
+      return this.req('/rest/v1/rpc/' + fn, { method: 'POST', token: tk, body: args || {} });
+    },
+    reqId() {
+      try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* ancien navigateur */ }
+      const b = new Uint8Array(16); crypto.getRandomValues(b); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+      const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+      return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
     },
     async saveProfile(f) {
       const s = cloudLs.get(), tk = await this.token();
