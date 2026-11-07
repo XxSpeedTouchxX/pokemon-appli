@@ -1,6 +1,6 @@
 // Abonnement Premium (2026-11-06, demande du porteur ; docs/27) : bannière dans le PK shop et dans Mon profil, écran de
 // l'offre (5 avantages, Annuel 49,90 € choisi par défaut, Mensuel 4,90 €), règles de renouvellement et d'arrêt,
-// paiement pas encore ouvert (bouton désactivé, rien n'est débité).
+// paiement par Stripe (sans compte connecté : message de connexion ; le parcours payé est dans t-premium-pay.mjs).
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -28,7 +28,9 @@ ok('règles : renouvellement automatique, arrêt à tout moment, période commen
 await page.screenshot({ path: shot('premium.png') });
 await sh.locator('button[role=radio]:has-text("Mensuel")').click(); await page.waitForTimeout(300);
 ok('Mensuel choisi : « Devenir Premium · 4,90 € par mois », « chaque mois »', /Devenir Premium · 4,90 € par mois/.test(await sh.innerText()) && /Renouvellement automatique chaque mois/.test(await sh.innerText()));
-ok('paiement pas encore ouvert : bouton désactivé, « Rien n’est débité »', (await sh.locator('button.pkm-prem-cta').isDisabled()) && /Rien n’est débité/.test(await sh.innerText()));
+ok('paiement sécurisé par Stripe annoncé, bouton actif', !(await sh.locator('button.pkm-prem-cta').isDisabled()) && /Paiement sécurisé par Stripe/.test(await sh.innerText()));
+await sh.locator('button.pkm-prem-cta').click(); await page.waitForTimeout(500);
+ok('sans serveur (tests) : le paiement explique qu’il n’est pas disponible, rien n’est ouvert', /pas disponible/.test(await sh.locator('.pkm-prem-err').innerText().catch(() => '')) && page.url().startsWith(E2E));
 const scroll = await sh.evaluate(e => { const c = getComputedStyle(e); return c.overscrollBehaviorY + ' ' + c.touchAction; });
 ok('défilement de l’offre : sans entraîner la page derrière (' + scroll + ')', /contain/.test(scroll) && /pan-y/.test(scroll));
 // « 2XP » centré dans sa bulle : mesuré sur les lettres elles-mêmes (pixels sombres), bulle à plat et immobile.

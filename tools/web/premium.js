@@ -1,8 +1,12 @@
-  // ——— Abonnement « Premium » (2026-11-06, demande du porteur ; proposition docs/27, à valider) ———
+  // ——— Abonnement « Premium » (2026-11-06, demande du porteur ; docs/27) ———
   // Bannière qui donne envie (PK shop › Magasin et Mon profil) et écran de l'offre : avantages, formules mensuelle
   // (4,90 €/mois) et annuelle (49,90 €/an), renouvellement automatique, arrêt à tout moment (la période commencée
-  // reste due, l'abonnement s'arrête juste avant la suivante). Le paiement n'est pas encore branché (comptes, serveur,
-  // Stripe ou achats intégrés des stores d'abord) : rien n'est débité et aucun avantage n'est encore activé.
+  // reste due, l'abonnement s'arrête juste avant la suivante).
+  // Paiement branché (2026-11-07, « go » du porteur ; guide docs/28) : « Devenir Premium » demande au serveur
+  // (fonction « stripe », tools/supabase/functions/stripe/index.ts) une page de paiement Stripe et y envoie le joueur ;
+  // Stripe prévient le serveur (message signé), qui range l'abonnement (tools/supabase/010_premium.sql) ; l'app relit
+  // l'état du compte (game_state › premium) et ouvre les avantages : scans et classeur illimités, Radar, double XP sur
+  // les PA (doublés par le serveur). « Gérer ou arrêter mon abonnement » ouvre la page client de Stripe.
   // Ce module partage la portée des autres : ses noms commencent par PREM_ ou prem.
   const premProto = Component.prototype;
   const PREM_PERKS = [
@@ -41,21 +45,107 @@
     const done = () => { if (!premClosing) return; premClosing = false; this.setState({ premOpen: false }); };
     a.onfinish = done; setTimeout(done, PREM_MS + 120);
   };
+  // Abonné Premium ? Lu dans l'état du compte (serveur). Pour les tests automatiques seulement : pkm-premium-force.
+  const premForced = () => { try { return localStorage.getItem('pkm-premium-force') === '1' && (navigator.webdriver || /[?&]debug/.test(location.search)); } catch (e) { return false; } };
+  const premInfo = s => (s && s.cloudGame && s.cloudGame.premium) || null;
+  premProto.premOn = function () { const p = premInfo(this.st()); return !!(p && p.on) || premForced(); };
+  const premDate = v => { try { return new Date(v).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
+  // Appel de la fonction « stripe » du serveur avec le jeton du joueur ; ses messages d'erreur (en français) sont gardés.
+  const PREM_NET = 'Impossible de joindre Dropicards. Vérifie ta connexion, puis réessaie.';
+  const PREM_LOGIN = 'Connecte-toi à ton compte Dropicards pour devenir Premium (Mon profil › Me reconnecter).';
+  premProto.premCall = async function (route, body) {
+    if (!Cloud.on()) { const e = new Error('Le paiement n’est pas disponible sur cette version de l’app.'); e.code = 'off'; throw e; }
+    let t = null;
+    try { t = await Cloud.token(); } catch (e) { if (e && e.code === 'network') throw e; }
+    if (!t) { const e = new Error(PREM_LOGIN); e.code = 'login'; throw e; }
+    const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = ctl ? setTimeout(() => ctl.abort(), 20000) : 0;
+    let res, j = null;
+    try {
+      res = await fetch(Cloud.url + '/functions/v1/stripe/' + route, { method: 'POST', headers: { apikey: Cloud.key, Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), signal: ctl ? ctl.signal : undefined, cache: 'no-store' });
+      j = await res.json().catch(() => null);
+    } catch (e) { const n = new Error(PREM_NET); n.code = 'network'; throw n; } finally { if (timer) clearTimeout(timer); }
+    if (!res.ok || !j || !j.url) { const e = new Error((j && j.error) || 'Le paiement n’est pas encore ouvert. Réessaie plus tard.'); e.code = 'server'; e.status = res.status; throw e; }
+    if (!/^https:\/\/(checkout|billing)\.stripe\.com\//.test(j.url) && !(navigator.webdriver && /^http:\/\/(127\.0\.0\.1|localhost):\d+\//.test(j.url))) { const e = new Error('Adresse de paiement inattendue.'); e.code = 'server'; throw e; }
+    return j.url;
+  };
+  // Vers la page de paiement de Stripe, ou vers sa page client (gérer, changer de carte, arrêter).
+  premProto.premGo = function (route) {
+    const s = this.st();
+    if (s.premBusy) return;
+    const plan = s.premPlan === 'month' ? 'month' : 'year';
+    this.setState({ premBusy: route, premErr: '' });
+    this.premCall(route, route === 'checkout' ? { plan: plan } : {}).then(url => {
+      try { sessionStorage.setItem('pkm-premium-wait', route === 'checkout' ? String(Date.now()) : ''); } catch (e) { /* stockage indisponible */ }
+      location.assign(url);
+    }, e => { this.setState({ premBusy: '', premErr: e.message }); if (e.status === 409) this.gcSync && this.gcSync(); });
+  };
+  // Retour de Stripe (?premium=merci | annule | retour) : message, état du compte relu (le message de Stripe peut
+  // arriver au serveur quelques secondes après le retour), adresse nettoyée.
+  let premBack = false;
+  premProto.premReturn = function () {
+    if (premBack) return;
+    premBack = true;
+    let q = '';
+    try { q = new URLSearchParams(location.search).get('premium') || ''; } catch (e) { q = ''; }
+    if (!/^(merci|annule|retour)$/.test(q)) return;
+    try { const u = new URL(location.href); u.searchParams.delete('premium'); history.replaceState(history.state, '', u.pathname + (u.search || '') + u.hash); } catch (e) { /* adresse gardée */ }
+    if (q === 'annule') { setTimeout(() => { this.setState({ toast: 'Paiement annulé : rien n’a été débité.' }); this.flash(); }, 400); return; }
+    const sync = () => (this.gcSync ? this.gcSync() : Promise.resolve(null));
+    if (q === 'retour') { setTimeout(sync, 300); return; }
+    setTimeout(() => { this.setState({ toast: 'Merci ! Ton abonnement Premium s’active…' }); this.flash(); }, 400);
+    let n = 0;
+    const poll = () => sync().then(() => {
+      if (this.premOn()) { this.setState({ toast: 'Bienvenue dans Dropicards Premium !' }); this.flash(); return; }
+      if (++n < 8) setTimeout(poll, 2500);
+      else { this.setState({ toast: 'Paiement reçu par Stripe : ton Premium s’activera dans quelques minutes. Rouvre l’app si besoin.' }); this.flash(); }
+    });
+    setTimeout(poll, 1200);
+  };
+
+  // Avantages Premium appliqués dans l'app (le serveur double déjà les PA du jour).
+  const premBaseQuota = premProto.scanQuota;
+  premProto.scanQuota = function () {
+    if (!this.premOn()) return premBaseQuota.call(this);
+    const s = this.st(), used = s.scanDay === realToday() ? Number(s.scanN) || 0 : 0;
+    return { max: Infinity, used: used, left: Infinity, text: 'Scans illimités avec Premium', over: '' };
+  };
+  const premBaseRoom = premProto.binderRoom;
+  premProto.binderRoom = function (s, pid, qty) { return this.premOn() ? null : premBaseRoom.call(this, s, pid, qty); };
+  const premBaseRadar = premProto.radarLocked;
+  premProto.radarLocked = function () { return this.premOn() ? false : premBaseRadar.call(this); };
+
   const premBaseRender = premProto.renderVals;
   premProto.renderVals = function () {
     const r = premBaseRender.call(this), s = this.st(), plan = s.premPlan === 'month' ? 'month' : 'year';
-    const P = PREM_PLANS.find(p => p.id === plan);
+    if (!premBack) setTimeout(() => this.premReturn(), 0);
+    const P = PREM_PLANS.find(p => p.id === plan), info = premInfo(s), on = this.premOn(), busy = s.premBusy || '';
+    let mineTitle = 'Tu es Premium', mineText = 'Merci de soutenir Dropicards !';
+    if (info && info.on) {
+      const formule = info.plan === 'month' ? 'Formule mensuelle' : 'Formule annuelle';
+      if (info.status === 'past_due') { mineTitle = 'Paiement à mettre à jour'; mineText = 'Le renouvellement n’est pas passé : mets à jour ta carte dans « Gérer mon abonnement » pour garder Premium.'; }
+      else if (info.cancel) mineText = formule + ' · s’arrête le ' + premDate(info.until) + '. Tu gardes tous les avantages jusque-là.';
+      else mineText = formule + ' · renouvelée automatiquement le ' + premDate(info.until) + '.';
+    }
     r.prem = {
-      banner: { title: 'Dropicards Premium', text: 'Scans illimités, double XP sur tes PA, Radar et historique complet.', open: () => this.premOpen() },
+      banner: { title: 'Dropicards Premium', text: on ? 'Premium actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP sur tes PA, Radar et historique complet.', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.premClose(),
       perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isXp: p.kind === 'xp', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
+      buy: !on, isOn: on,
+      mine: { title: mineTitle, text: mineText },
+      manage: () => this.premGo('portal'),
+      manageLabel: busy === 'portal' ? 'Ouverture…' : 'Gérer ou arrêter mon abonnement',
       plans: PREM_PLANS.map(p => ({
         name: p.name, price: p.price, per: p.per, sub: p.sub, hasTag: !!p.tag, tag: p.tag, hasSave: !!p.save, save: p.save,
         on: String(p.id === plan), cls: 'pkm-prem-plan' + (p.id === plan ? ' pkm-prem-plan-on' : ''),
-        pick: () => this.setState({ premPlan: p.id })
+        pick: () => this.setState({ premPlan: p.id, premErr: '' })
       })),
-      cta: 'Devenir Premium · ' + P.price + ' ' + P.per,
-      soon: 'Le paiement n’est pas encore ouvert : il arrivera avec les comptes Dropicards. Rien n’est débité.',
+      cta: busy === 'checkout' ? 'Ouverture du paiement sécurisé…' : 'Devenir Premium · ' + P.price + ' ' + P.per,
+      buyNow: () => this.premGo('checkout'),
+      busyAttr: String(!!busy),
+      hasErr: !!s.premErr, err: s.premErr || '',
+      soon: 'Paiement sécurisé par Stripe (carte, Apple Pay, Google Pay). Dropicards ne voit jamais ta carte.',
+      later: on ? 'Fermer' : 'Plus tard',
       terms: [
         'Renouvellement automatique ' + (plan === 'year' ? 'chaque année' : 'chaque mois') + ', tant que tu n’arrêtes pas ton abonnement.',
         'Tu peux l’arrêter à tout moment, en quelques secondes, depuis Mon profil.',

@@ -41,7 +41,7 @@
         pkOwn: un.filter(n => !(DEX[n] && DEX[n].mega)), megas: un.filter(n => DEX[n] && DEX[n].mega),
         games: Object.assign({}, s.games || {}, { boosterAt: g.booster_last || '', coinAt: g.coin_last || '' }),
         cloudGame: { at: Date.now(), today: g.today, shopOpenAt: g.shop_open_at || '', grade: g.grade | 0, nextDraw: g.next_draw || '', draws: g.draws || null,
-          unlimited: !!g.unlimited, adminUntil: g.admin_until || '', realPk: g.pk | 0, realPa: g.pa | 0 }
+          unlimited: !!g.unlimited, adminUntil: g.admin_until || '', realPk: g.pk | 0, realPa: g.pa | 0, premium: g.premium || null }
       };
       // Admin déverrouillé (007) : PK et PA illimités sur le serveur ; l'app affiche « ∞ » et ne bloque plus rien.
       if (g.unlimited) { patch.pk = GC_INF; patch.pa = GC_INF; }

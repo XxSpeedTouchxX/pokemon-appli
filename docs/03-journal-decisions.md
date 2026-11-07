@@ -6,6 +6,28 @@
 
 ---
 
+## 2026-11-07 — Paiement Premium branché avec Stripe (« go » du porteur)
+
+- **Décision P6 (`docs/27`)** : Stripe sur le site, dans le compte Stripe « DROPICARDS » du porteur, rattaché à sa micro-entreprise ; Stripe Tax ignoré (franchise de TVA, à confirmer avec un comptable).
+- **Serveur** : `tools/supabase/010_premium.sql`.
+  - Tables `premium` (abonnés), `premium_payments` (paiements) et `stripe_events` (journal), écrites seulement par la fonction du serveur.
+  - PA du jour doublés pour un abonné.
+  - État Premium dans `game_state`.
+  - 28 vérifications, 191 en tout.
+- **Fonction « stripe »** (`tools/supabase/functions/stripe/index.ts`, Edge Functions de Supabase) :
+  - page de paiement et page client (gérer, arrêter) ;
+  - messages de Stripe dont la signature est vérifiée, abonnement relu chez Stripe ;
+  - aucune bibliothèque, clés seulement dans Coolify ;
+  - 30 vérifications avec un faux Stripe.
+- **App** (`premium.js`) :
+  - bouton « Devenir Premium », retour « Merci ! … s'active », puis « Bienvenue » ;
+  - « Tu es Premium », « Gérer ou arrêter mon abonnement » ;
+  - avantages ouverts : scans et classeur illimités, Radar ;
+  - 20 vérifications.
+- **Guide du porteur** : `docs/28-guide-paiement-premium-stripe.md` (mode test d'abord, puis production avec les pages légales).
+- P4 (historique des prix sans Premium) toujours en attente, défaut proposé : 1 mois.
+- Cache v146.
+
 ## 2026-11-07 — Retouches du Premium (2) et du solde de « Jeux » (demande du porteur)
 
 - **Icône du classeur** : remontée un peu, pour être bien centrée dans sa case.

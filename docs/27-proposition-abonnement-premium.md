@@ -1,6 +1,6 @@
 # Abonnement Premium et coût des lots du PK shop (PKM-App, vivant)
 
-*Créé le 2026-11-06 · demande du porteur le même jour · proposition à valider : l'écran de l'offre est en place dans l'app (cache v139), le paiement et les avantages ne sont pas encore activés.*
+*Créé le 2026-11-06 · demande du porteur le même jour. **Mise à jour du 2026-11-07 : « go » du porteur, paiement Stripe et avantages branchés (cache v146), à régler en mode test par le porteur : `docs/28-guide-paiement-premium-stripe.md`.***
 
 ## 1. La demande
 
@@ -36,7 +36,7 @@
 | P3 | Radar | **Décidé (2026-11-07) : dès le grade Maître Pokémon** ; Premium : débloqué à tout grade |
 | P4 | Historique des prix sans Premium | 1 mois ; Premium : tout l'historique (archive depuis le 3 octobre 2026) |
 | P5 | Double XP | **Décidé le 2026-11-06 (porteur) : sur les PA seulement**, badge « 2XP » et goutte des PA dans l'offre |
-| P6 | Paiement | Sur le site : Stripe ; dans les apps des stores : achats intégrés d'Apple et de Google (obligatoires pour un abonnement numérique) |
+| P6 | Paiement | **Décidé (2026-11-07) : Stripe sur le site**, compte « DROPICARDS » de la micro-entreprise du porteur (mode test d'abord, `docs/28`) ; dans les apps des stores : achats intégrés d'Apple et de Google, plus tard |
 
 ## 4. Points légaux (France), à faire relire
 

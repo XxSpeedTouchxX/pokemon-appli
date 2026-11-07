@@ -13,6 +13,8 @@ Proposition et plan : `docs/24-proposition-espace-admin-et-comptes.md` §4.1 et 
 - `007_admin_boutique.sql` (2026-11-06, porteur) : **mot de passe des admins** (empreinte bcrypt seulement, choisi dans Studio, jamais dans le dépôt ; un compte « admin » qui le tape a ses droits pendant 24 h, avec les PK et les PA illimités ; 5 essais faux en 15 minutes : 15 minutes de blocage ; chaque essai au journal des admins) et **nouveau PK shop** (tickets Bronze 500, Argent 1 500, Or 5 000 PK pour un tirage tous les 15 jours le dimanche à 20 h dès le 22 novembre 2026 ; achats directs 7 500, 10 000 avec choix de l'item, 15 000 PK ; plus de grade demandé ; 7 jours après la confirmation de l'adresse ; `admin_draw_entries()` liste les participants). Tests `tests/test_007.sql` (49 vérifications). Rejouable.
 - `008_shop_grades.sql` (2026-11-06, porteur) : grade demandé par article (Recrue : ticket Bronze et booster ; Collectionneur : ticket Argent et item rare ; Maître Pokémon : ticket Or et ETB), rythme de chaque tirage (Bronze toutes les 2 semaines, Argent chaque mois et Or tous les 2 mois, le dernier dimanche à 20 h), item rare 25 000 PK et ETB 50 000 PK, 6ᵉ grade « Grand maître Pokémon », `game_state` avec la date de chaque tirage, `admin_draw_entries()` sur tous les tirages à venir. Tests `tests/test_008.sql` (25 vérifications). Rejouable.
 - `009_grades_v3.sql` (2026-11-07, porteur) : délais du Booster PK (24, 20, 12, 8, 6, 4 h) et de la pièce (fermée, puis 24, 12, 8, 6, 4 h) selon le grade. Tests `tests/test_009.sql`. Rejouable.
+- `010_premium.sql` (2026-11-07, « go » du porteur) : **abonnement Premium payé avec Stripe** : tables `premium` (un abonné par ligne : formule, statut donné par Stripe, fin de la période payée, arrêt demandé), `premium_payments` (chaque paiement reçu) et `stripe_events` (journal des messages de Stripe), écrites seulement par la fonction « stripe » (clé service_role) ; un joueur lit seulement sa ligne ; PA du jour doublés pour un abonné ; `game_state` avec l'état Premium. Tests `tests/test_010.sql` (28 vérifications). Rejouable. Guide : `docs/28-guide-paiement-premium-stripe.md`.
+- `functions/stripe/index.ts` : fonction du serveur (Edge Functions de Supabase) : page de paiement Stripe, page client (gérer ou arrêter), messages signés de Stripe (signature vérifiée, abonnement relu chez Stripe). Sans bibliothèque. Tests `functions/stripe/test.mjs` (30 vérifications, faux Stripe et base locale : `node tools/supabase/functions/stripe/test.mjs`). Installation : `functions/install-stripe.sh` (docs/28 §6).
 - `emails.mjs` : modèles des e-mails en français (`web/email/*.html`, publiés sur dropicards.fr) ; `node tools/supabase/emails.mjs` après une modification.
 - `tests/mock_supabase.sql` et `tests/test_001.sql` : 25 vérifications de sécurité sur un PostgreSQL ordinaire (un compte ne voit que ses données, ne peut pas se donner le rôle admin ni des PK, ne touche pas la collection d'un autre ; l'admin voit tout, avec un motif obligatoire ; journal intouchable ; visiteur non connecté refusé).
 
@@ -36,7 +38,14 @@ psql -d test -f tools/supabase/008_shop_grades.sql
 psql -d test -f tools/supabase/tests/test_008.sql   # 25 de plus (160 en tout)
 psql -d test -f tools/supabase/009_grades_v3.sql
 psql -d test -f tools/supabase/tests/test_009.sql   # 3 de plus (163 en tout)
+psql -d test -f tools/supabase/010_premium.sql
+psql -d test -f tools/supabase/tests/test_010.sql   # 28 de plus (191 en tout)
+node tools/supabase/functions/stripe/test.mjs        # fonction « stripe » : 30 vérifications (base « t7 », port 5499 par défaut)
 ```
+
+## Abonnement Premium avec Stripe (010, 2026-11-07)
+
+Tout est expliqué pas à pas dans `docs/28-guide-paiement-premium-stripe.md` : 010 dans Studio, réglages de Stripe (produit, portail client, clé restreinte, point de terminaison), deux variables dans Coolify, installation de la fonction, essai avec une fausse carte.
 
 ## Délais des jeux par grade (009, 2026-11-07)
 

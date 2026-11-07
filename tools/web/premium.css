@@ -81,3 +81,10 @@
 @keyframes pkmPremSpark { 0%, 40%, 100% { opacity: 0; transform: scale(0.4); } 60% { opacity: 1; transform: scale(1.2) rotate(45deg); } }
 .pkm-prem-ico { overflow: visible; }
 @media (prefers-reduced-motion: reduce) { .pkm-prem-bind-card, .pkm-prem-hist-line, .pkm-prem-xp-drop, .pkm-prem-xp-tag, .pkm-prem-xp-spark, .pkm-prem-banner, .pkm-prem-banner::after { animation: none; } .pkm-prem-hist-line { stroke-dashoffset: 0; } }
+/* Paiement branché (2026-11-07) : abonné Premium, erreur, bouton occupé, paiement sécurisé. */
+.pkm-prem-cta[aria-disabled="true"] { opacity: 0.75; cursor: progress; }
+.pkm-prem-mine { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 18px; border: 2px solid #FFD60A; background: linear-gradient(180deg, rgba(255, 214, 10, 0.16), rgba(255, 214, 10, 0.03)), #1B1233; }
+.pkm-prem-mine b { font-size: 17px; color: #FFE46B; }
+.pkm-prem-mine span { font-size: 14px; line-height: 1.45; color: #E7E2F5; }
+.pkm-prem-err { margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(255, 99, 99, 0.14); color: #FFB4B4; font-size: 13.5px; line-height: 1.45; }
+.pkm-prem-secure { background: rgba(94, 224, 207, 0.1); color: #BFEFE8; }
