@@ -12,6 +12,7 @@ Proposition et plan : `docs/24-proposition-espace-admin-et-comptes.md` §4.1 et 
 - `006_admin_2fa.sql` : droits d'admin seulement avec la double authentification (niveau « aal2 ») ; tests `tests/test_006.sql`. **Remplacé par `007`** (le porteur a demandé de retirer la double authentification, 2026-11-06).
 - `007_admin_boutique.sql` (2026-11-06, porteur) : **mot de passe des admins** (empreinte bcrypt seulement, choisi dans Studio, jamais dans le dépôt ; un compte « admin » qui le tape a ses droits pendant 24 h, avec les PK et les PA illimités ; 5 essais faux en 15 minutes : 15 minutes de blocage ; chaque essai au journal des admins) et **nouveau PK shop** (tickets Bronze 500, Argent 1 500, Or 5 000 PK pour un tirage tous les 15 jours le dimanche à 20 h dès le 22 novembre 2026 ; achats directs 7 500, 10 000 avec choix de l'item, 15 000 PK ; plus de grade demandé ; 7 jours après la confirmation de l'adresse ; `admin_draw_entries()` liste les participants). Tests `tests/test_007.sql` (49 vérifications). Rejouable.
 - `008_shop_grades.sql` (2026-11-06, porteur) : grade demandé par article (Recrue : ticket Bronze et booster ; Collectionneur : ticket Argent et item rare ; Maître Pokémon : ticket Or et ETB), rythme de chaque tirage (Bronze toutes les 2 semaines, Argent chaque mois et Or tous les 2 mois, le dernier dimanche à 20 h), item rare 25 000 PK et ETB 50 000 PK, 6ᵉ grade « Grand maître Pokémon », `game_state` avec la date de chaque tirage, `admin_draw_entries()` sur tous les tirages à venir. Tests `tests/test_008.sql` (25 vérifications). Rejouable.
+- `009_grades_v3.sql` (2026-11-07, porteur) : délais du Booster PK (24, 20, 12, 8, 6, 4 h) et de la pièce (fermée, puis 24, 12, 8, 6, 4 h) selon le grade. Tests `tests/test_009.sql`. Rejouable.
 - `emails.mjs` : modèles des e-mails en français (`web/email/*.html`, publiés sur dropicards.fr) ; `node tools/supabase/emails.mjs` après une modification.
 - `tests/mock_supabase.sql` et `tests/test_001.sql` : 25 vérifications de sécurité sur un PostgreSQL ordinaire (un compte ne voit que ses données, ne peut pas se donner le rôle admin ni des PK, ne touche pas la collection d'un autre ; l'admin voit tout, avec un motif obligatoire ; journal intouchable ; visiteur non connecté refusé).
 
@@ -33,7 +34,13 @@ psql -d test -f tools/supabase/007_admin_boutique.sql
 psql -d test -f tools/supabase/tests/test_007.sql   # 49 de plus (135 en tout)
 psql -d test -f tools/supabase/008_shop_grades.sql
 psql -d test -f tools/supabase/tests/test_008.sql   # 25 de plus (160 en tout)
+psql -d test -f tools/supabase/009_grades_v3.sql
+psql -d test -f tools/supabase/tests/test_009.sql   # 3 de plus (163 en tout)
 ```
+
+## Délais des jeux par grade (009, 2026-11-07)
+
+Studio › SQL Editor › New query : coller `009_grades_v3.sql`, Run (« Success »).
 
 ## PK shop par grades (008, 2026-11-06)
 

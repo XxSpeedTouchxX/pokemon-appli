@@ -33,15 +33,24 @@ ok('Recrue : booster achetable, item rare et ETB « Déverrouillé au grade … 
   && /Déverrouillé au grade Collectionneur/.test(await text('section[aria-label="Item rare au choix"]')) && /Déverrouillé au grade Maître Pokémon/.test(await text('section[aria-label="ETB 30 ans"]')));
 ok('item Deluxe retiré du shop (2026-11-06)', (await page.locator('section[aria-label="Item Deluxe"]').count()) === 0);
 await page.screenshot({ path: shot('grades-recrue-shop.png'), fullPage: true });
-// Radar ouvert à tous depuis le 2026-11-01 (porteur : « refais-le fonctionner exactement comme avant ») : plus de verrou au grade Maître.
-await go('start=radar');
-ok('Recrue : la carte du Radar s’ouvre (plus réservée au grade Maître Pokémon)', (await page.locator('#pkm-radar-map').count()) === 1 && (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 0);
-await page.locator('#pkm-radar-map').waitFor(); await page.locator('text=France').first().click(); await page.waitForTimeout(1500);
-ok('Recrue : la carte de France s’ouvre (régions et boutiques)', /France métropolitaine/.test(await page.locator('body').innerText()) && /boutiques réelles/.test(await page.locator('body').innerText()) && (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 0);
+// Radar dès Maître Pokémon (2026-11-07, avantages des grades du porteur) : en dessous, la fenêtre « Accès verrouillé ».
+await go('debug&start=home');
+await page.evaluate(() => window.__pkm.openRadar()); await page.waitForTimeout(600);
+ok('Recrue : Radar verrouillé, « Tu dois d’abord déverrouiller le grade Maître Pokémon pour avoir accès au Radar »', /grade Maître Pokémon pour avoir accès au Radar des boutiques/.test(await text('section[aria-label="Grade requis"]')) && (await page.locator('#pkm-radar-map').count()) === 0);
+await page.screenshot({ path: shot('grades-radar-verrou.png') });
+await page.locator('section[aria-label="Grade requis"] button:has-text("Compris")').click(); await page.waitForTimeout(300);
+// Classeur limité (2026-11-07) : Recrue 36 cartes et 9 items scellés ; la démo en a 15 : un item de plus est refusé.
+const before = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}').purchases.length, KEY);
+await page.evaluate(() => { const c = window.__pkm, s = c.st(), p = c.catalog().find(x => x.type === 'sealed'); const r = c.addRecord(s, p.id, 1, 0, 'Test', 'toi'); window.__blocked = !!r.blocked; });
+await page.waitForTimeout(500);
+ok('Recrue : classeur plein (9 items scellés), ajout refusé et fenêtre « Ton classeur est plein »', await page.evaluate(() => window.__blocked) && /Ton classeur est plein : 9 items scellés au maximum au grade Recrue/.test(await text('section[aria-label="Grade requis"]')));
+await page.screenshot({ path: shot('grades-classeur-plein.png') });
+await page.locator('section[aria-label="Grade requis"] button:has-text("Compris")').click(); await page.waitForTimeout(300);
+ok('collection gardée telle quelle', (await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}').purchases.length, KEY)) === before);
 await go('debug&start=home');
 await page.evaluate(() => window.__pkm.push('grade', { gradeIx: 4 })); await page.waitForTimeout(700);
 const gs = await text('main');
-ok('fiche du grade : conditions et avantages du porteur, sans le Radar', /20[   ]000 PK gagnés \+ 100 compagnons débloqués \+ 1 méga-évolution débloquée/.test(gs) && /100 scans disponibles par jour/.test(gs) && /Booster PK toutes les 6 h/.test(gs) && !/Radar des boutiques Pokémon de France/.test(gs) && /Pokédex d’évolution/.test(gs));
+ok('fiche du grade : conditions et avantages du porteur (classeur illimité, Radar)', /20[   ]000 PK gagnés \+ 100 compagnons débloqués \+ 1 méga-évolution débloquée/.test(gs) && /100 scans disponibles par jour/.test(gs) && /« Booster PK » toutes les 6 h/.test(gs) && /Accès illimité à ton classeur/.test(gs) && /Radar de boutiques disponible/.test(gs));
 await page.screenshot({ path: shot('grades-fiche-maitre.png'), fullPage: true });
 await seed({ scanDay: DAY, scanN: 5 });
 await go('start=scan');
@@ -50,7 +59,7 @@ ok('Recrue : 5 scans par jour, épuisés', /Tes 5 scans du jour sont utilisés\.
 // 2. Collectionneur : 5 000 PK gagnés et 15 compagnons (4 offerts + 11 débloqués)
 await seed({ pkEarned: 5000, pk: 2500, pkOwn: PAID.slice(0, 11), scanN: 0 });
 await go('start=market');
-ok('Collectionneur : booster et pièce toutes les 10 h', /1 offert toutes les 10 h/.test(await text('section[aria-label="Booster PK"]')) && /1 lancer toutes les 10 h/.test(await text('section[aria-label="Pile ou face"]')));
+ok('Collectionneur : booster et pièce toutes les 12 h', /1 offert toutes les 12 h/.test(await text('section[aria-label="Booster PK"]')) && /1 lancer toutes les 12 h/.test(await text('section[aria-label="Pile ou face"]')));
 await toShop();
 ok('Collectionneur : item rare ouvert, ETB toujours verrouillée', !/Déverrouillé/.test(await text('section[aria-label="Item rare au choix"]')) && /Déverrouillé au grade Maître Pokémon/.test(await text('section[aria-label="ETB 30 ans"]')));
 ok('emblème Collectionneur dans l’en-tête', (await page.locator('header img[src="img/grades/grade-3.svg"]').count()) > 0);

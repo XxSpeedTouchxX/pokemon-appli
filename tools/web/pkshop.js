@@ -72,6 +72,42 @@
   const shopGradeName = i => (PF_GRADES[i] || PF_GRADES[0]).name;
   // Fenêtre « Tu dois d'abord déverrouiller le grade … ».
   shopProto.shopLockOpen = function (it) { this.setState({ shopLock: { g: it.minGrade, kind: it.kind } }); };
+  // Fenêtre « Accès verrouillé », pour tout l'app (PK shop, Radar, classeur plein ; 2026-11-07).
+  const shopLockText = lk => {
+    const g = shopGradeName(lk.g);
+    if (lk.kind === 'radar') return 'Tu dois d’abord déverrouiller le grade ' + g + ' pour avoir accès au Radar des boutiques.';
+    if (lk.kind === 'binder') return 'Ton classeur est plein : ' + lk.lim + ' ' + lk.what + ' au maximum au grade ' + shopGradeName(lk.cur) + '. Tu dois d’abord déverrouiller le grade ' + g + ' pour en ajouter plus.';
+    return 'Tu dois d’abord déverrouiller le grade ' + g + ' pour avoir accès à ' + (lk.kind === 'ticket' ? 'cette loterie.' : 'cet item.');
+  };
+  // Classeur limité selon le grade (2026-11-07, porteur) : cartes et items scellés comptés à part (exemplaires
+  // possédés, ventes déduites) ; illimité dès Maître Pokémon et pour un admin déverrouillé. Un ajout de trop n'est pas
+  // enregistré : la fenêtre « Accès verrouillé » s'ouvre. La collection déjà là n'est jamais retirée.
+  shopProto.binderCounts = function (s) {
+    const c = this.compute(s);
+    let cards = 0, sealed = 0;
+    this.catalog().forEach(p => { const q = c.stock[p.id] ? c.stock[p.id].qty : 0; if (q > 0) { if (p.type === 'sealed') sealed += q; else cards += q; } });
+    return { cards: cards, sealed: sealed };
+  };
+  shopProto.binderRoom = function (s, pid, qty) {
+    const gi = this.shopGrade(), g = PF_GRADES[gi];
+    if (!g || !g.cards) return null;
+    const p = this.catalog().find(x => x.id === pid);
+    if (!p) return null;
+    const sealed = p.type === 'sealed', lim = sealed ? g.sealed : g.cards, n = this.binderCounts(s), have = sealed ? n.sealed : n.cards;
+    if (have + (qty || 1) <= lim) return null;
+    const to = PF_GRADES.findIndex((x, i) => i > gi && (!x.cards || (sealed ? x.sealed : x.cards) >= have + (qty || 1)));
+    return { g: to < 0 ? PF_GRADES.length - 1 : to, cur: gi, kind: 'binder', lim: lim, what: sealed ? 'items scellés' : 'cartes' };
+  };
+  const shopBaseRecord = shopProto.addRecord;
+  shopProto.addRecord = function (s, pid, qty, price, where, by) {
+    const room = this.binderRoom(s, pid, qty);
+    this.__binderBlocked = !!room;
+    if (room) {
+      setTimeout(() => this.setState({ shopLock: room, toast: null }), 0);
+      return { purchases: s.purchases, msg: 'Classeur plein au grade ' + shopGradeName(room.cur), blocked: true };
+    }
+    return shopBaseRecord.call(this, s, pid, qty, price, where, by);
+  };
   // Tickets possédés pour le prochain tirage (tous articles « ticket »), pour la barre sous le solde de PK.
   const shopTickets = s => SHOP_ITEMS.filter(x => x.kind === 'ticket').reduce((n, x) => n + ((s.tickets || {})[x.id] || 0), 0);
   const shopUnit = (it, n) => it.kind === 'ticket' ? (n > 1 ? n + ' tickets pour le prochain tirage' : n + ' ticket pour le prochain tirage') : (n > 1 ? n + ' achats' : n + ' achat');
@@ -146,7 +182,6 @@
         lock: () => this.shopLockOpen(it), close: () => this.setState({ shopTk: null, shopAsk: null })
       };
     })();
-    const lk = s.shopLock;
     return {
       pk: pk.toLocaleString('fr-FR'),
       ticketsHead: 'Tickets du tirage au sort', ticketsSub: 'Chaque ticket a son tirage, le dimanche à 20 h. Touche un ticket pour voir son lot et à quoi il sert.',
@@ -160,13 +195,6 @@
         };
       }),
       sheet: sheet,
-      lockWin: lk ? {
-        open: true, img: emblem(lk.g), grade: shopGradeName(lk.g),
-        text: 'Tu dois d’abord déverrouiller le grade ' + shopGradeName(lk.g) + ' pour avoir accès à ' + (lk.kind === 'ticket' ? 'cette loterie.' : 'cet item.'),
-        cond: 'Condition : ' + (this.tiers()[lk.g] || {}).cond + '.',
-        close: () => this.setState({ shopLock: null }),
-        grades: () => { this.setState({ shopLock: null, shopTk: null }); this.push('grade', { gradeIx: lk.g }); }
-      } : { open: false },
       items: SHOP_ITEMS.filter(it => it.kind !== 'ticket').map(it => {
         const n = tickets[it.id] || 0, open = gi >= (it.minGrade || 0), can = open && !it.soon && pk >= it.price, ask = can && s.shopAsk === it.id;
         const price = it.price.toLocaleString('fr-FR') + ' PK';
@@ -212,6 +240,13 @@
     // Territoire n'est plus un onglet : écran de détail ouvert depuis l'accueil, avec Retour.
     if (ui.isTerritory) Object.assign(ui, { headerBig: false, headerDetail: true });
     r.tabShop = () => this.tab('pkshop');
+    const lk = s.shopLock;
+    r.lockw = lk ? {
+      open: true, img: 'img/grades/grade-' + (lk.g + 1) + '.svg', grade: shopGradeName(lk.g), text: shopLockText(lk),
+      cond: 'Condition : ' + (this.tiers()[lk.g] || {}).cond + '.',
+      close: () => this.setState({ shopLock: null }),
+      grades: () => { this.setState({ shopLock: null, shopTk: null }); this.push('grade', { gradeIx: lk.g }); }
+    } : { open: false };
     return r;
   };
   const shopBaseSection = shopProto.section;

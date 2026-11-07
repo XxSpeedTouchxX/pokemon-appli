@@ -940,3 +940,5 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-shop-price img { flex: none; }
 .pkm-shop-price-sm { align-self: center; gap: 4px; padding: 3px 9px 3px 4px; font-size: 16px; }
 .pkm-shop-price-sm small { font-size: 11px; }
+/* Ticket Or (2026-11-07, porteur) : autant de pointillés que Bronze et Argent (bande de même largeur, texte centré). */
+.pkm-shop-ticket .pkm-shop-ticket-in { width: 74%; box-sizing: border-box; text-align: center; white-space: nowrap; }

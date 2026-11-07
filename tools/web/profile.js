@@ -124,25 +124,29 @@
   // le 2026-11-01 (porteur) : il n'est plus un avantage du grade Maître Pokémon.
   // Grade forcé : mode Admin, ou la clé « pkm-grade-force » de l'appareil (1 à 6, utilisée par les tests).
   // Le champ sym d'un grade porte le chemin de son emblème (build.mjs remplace les hexagones de la maquette).
-  const PF_BASE = ['Accès à la valeur de toute ta collection', 'Accès à ton classeur de cartes et d’items scellés', 'Accès à toutes les séries Pokémon et à leurs extensions', 'Accès au Pokédex d’évolution pour choisir ton compagnon'];
   const PF_GRADES = [
-    { name: 'Recrue', pk: 0, comp: 0, mega: 0, scans: 5, boosterH: 24, coinH: 0, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)' },
-    { name: 'Chasseur', pk: 1500, comp: 0, mega: 0, scans: 10, boosterH: 24, coinH: 24, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)' },
-    { name: 'Collectionneur', pk: 5000, comp: 15, mega: 0, scans: 20, boosterH: 10, coinH: 10, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
-    { name: 'Dresseur Pokémon', pk: 10000, comp: 30, mega: 0, scans: 50, boosterH: 8, coinH: 8, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
-    { name: 'Maître Pokémon', pk: 20000, comp: 100, mega: 1, scans: 100, boosterH: 6, coinH: 6, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
-    { name: 'Grand maître Pokémon', pk: 50000, comp: 151, mega: 5, scans: 500, boosterH: 4, coinH: 4, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
+    { name: 'Recrue', pk: 0, comp: 0, mega: 0, scans: 5, boosterH: 24, coinH: 0, cards: 36, sealed: 9, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)' },
+    { name: 'Chasseur', pk: 1500, comp: 0, mega: 0, scans: 10, boosterH: 20, coinH: 24, cards: 72, sealed: 27, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)' },
+    { name: 'Collectionneur', pk: 5000, comp: 15, mega: 0, scans: 20, boosterH: 12, coinH: 12, cards: 144, sealed: 54, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
+    { name: 'Dresseur Pokémon', pk: 10000, comp: 30, mega: 0, scans: 50, boosterH: 8, coinH: 8, cards: 288, sealed: 108, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
+    { name: 'Maître Pokémon', pk: 20000, comp: 100, mega: 1, scans: 100, boosterH: 6, coinH: 6, cards: 0, sealed: 0, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
+    { name: 'Grand maître Pokémon', pk: 50000, comp: 151, mega: 5, scans: 200, boosterH: 4, coinH: 4, cards: 0, sealed: 0, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
   ];
+  // Avantages de chaque grade (2026-11-07, listes du porteur, mot pour mot) : classeur limité (cartes et items scellés,
+  // illimité dès Maître Pokémon), scans par jour, délais du Booster PK et de la pièce, PK shop, emblème (dès
+  // Collectionneur), Radar des boutiques (dès Maître Pokémon). Délais aussi sur le serveur (009_grades_v3.sql).
+  const pfN = n => Number(n).toLocaleString('fr-FR');
   PF_GRADES.forEach((g, i) => {
-    g.perks = PF_BASE.concat([
-      g.scans + ' scans disponibles par jour',
-      'Booster PK toutes les ' + g.boosterH + ' h'
-    ], g.coinH ? ['Jeu de la pièce toutes les ' + g.coinH + ' h'] : [], i ? ['Emblème ' + g.name + ' sur ton profil'] : [],
-    // PK shop par grades (2026-11-06, porteur ; pkshop.js, 008_shop_grades.sql).
-    ['Ticket Bronze et achat d’un booster au PK shop'],
-    i >= 2 ? ['Ticket Argent et items rares (coffrets, classeurs…) au PK shop'] : [],
-    i >= 4 ? ['Ticket Or et ETB au PK shop'] : [],
-    []); // item « Deluxe » retiré du PK shop le 2026-11-06 (porteur)
+    g.perks = [
+      'Accès à la valeur de toute ta collection',
+      g.cards ? 'Accès à ton classeur de cartes et d’items scellés (' + pfN(g.cards) + ' cartes et ' + pfN(g.sealed) + ' items scellés au maximum)' : 'Accès illimité à ton classeur de cartes et d’items scellés',
+      'Accès à toutes les séries Pokémon et à leurs extensions',
+      pfN(g.scans) + ' scans disponibles par jour',
+      '« Booster PK » toutes les ' + g.boosterH + ' h'
+    ].concat(g.coinH ? ['« Pile ou face » toutes les ' + g.coinH + ' h'] : [],
+      [i >= 4 ? 'Ticket Or + achat « ETB » au PK shop' : i >= 2 ? 'Ticket Argent + achat « item rare » au PK shop' : 'Ticket Bronze + achat de « booster » au PK shop'],
+      i >= 2 ? ['Emblème du grade disponible sur ton profil'] : [],
+      g.radar ? ['Radar de boutiques disponible'] : []);
   });
   const pfNum = n => Number(n || 0).toLocaleString('fr-FR');
   const pfCond = g => g.pk === 0 ? 'Dès l’inscription' : [pfNum(g.pk) + ' PK gagnés'].concat(g.comp ? [g.comp + ' compagnons débloqués'] : [], g.mega ? [g.mega + (g.mega > 1 ? ' méga-évolutions débloquées' : ' méga-évolution débloquée')] : []).join(' + ');

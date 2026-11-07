@@ -770,7 +770,7 @@
 <input type="search" value="{{ dexl.q }}" onInput="{{ dexl.onQ }}" placeholder="Nom ou n° d’un Pokémon" aria-label="Chercher un Pokémon" class="pkm-dexl-q">
 <div role="group" aria-label="Filtrer le Pokédex" class="pkm-dexl-filters"><sc-for list="{{ dexl.filters }}" as="dlf" hint-placeholder-count="4"><button type="button" onClick="{{ dlf.pick }}" aria-pressed="{{ dlf.on }}" style="border-color: {{ dlf.bc }}; background: {{ dlf.bg }}; color: {{ dlf.fg }}">{{ dlf.label }}</button></sc-for></div>
 <div role="group" aria-label="Tous les Pokémon" class="pkm-dexl-grid">
-<sc-for list="{{ dexl.items }}" as="dli" hint-placeholder-count="6"><button type="button" onClick="{{ dli.go }}" aria-label="{{ dli.aria }}" class="{{ dli.cls }}"><span class="pkm-dexl-no">{{ dli.no }}</span><img src="{{ dli.img }}" alt="" width="72" height="72" loading="lazy" class="{{ dli.imgCls }}"><b>{{ dli.name }}</b><sc-if value="{{ dli.hasPrice }}" hint-placeholder-val="{{ true }}"><span class="pkm-dexl-price"><img src="img/brand/pa.svg" alt="" width="20" height="20"><b>{{ dli.amount }}</b><small>PA</small></span></sc-if><sc-if value="{{ dli.noPrice }}" hint-placeholder-val="{{ false }}"><span class="pkm-dexl-st">{{ dli.status }}</span></sc-if></button></sc-for>
+<sc-for list="{{ dexl.items }}" as="dli" hint-placeholder-count="6"><button type="button" onClick="{{ dli.go }}" aria-label="{{ dli.aria }}" class="{{ dli.cls }}"><span class="pkm-dexl-no">{{ dli.no }}</span><img src="{{ dli.img }}" alt="" width="72" height="72" loading="lazy" class="{{ dli.imgCls }}"><sc-if value="{{ dli.isTheme }}" hint-placeholder-val="{{ false }}"><span class="pkm-dex-newtheme">Nouveau thème</span></sc-if><b>{{ dli.name }}</b><sc-if value="{{ dli.hasPrice }}" hint-placeholder-val="{{ true }}"><span class="pkm-dexl-price"><img src="img/brand/pa.svg" alt="" width="20" height="20"><b>{{ dli.amount }}</b><small>PA</small></span></sc-if><sc-if value="{{ dli.noPrice }}" hint-placeholder-val="{{ false }}"><span class="pkm-dexl-st">{{ dli.status }}</span></sc-if></button></sc-for>
 </div>
 <sc-if value="{{ dexl.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-dexl-empty">Aucun Pokémon ne correspond.</p></sc-if>
 </section>
@@ -1711,18 +1711,6 @@
 </section>
 </div>
 </sc-if>
-<sc-if value="{{ pks.lockWin.open }}" hint-placeholder-val="{{ false }}">
-<div class="pkm-lockw-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.lockWin.close }}" class="pkm-pas-scrim"></button>
-<section aria-label="Grade requis" role="alertdialog" aria-modal="true" class="pkm-dark pkm-lockw">
-<span class="pkm-lockw-ico" aria-hidden="true"><img src="{{ pks.lockWin.img }}" alt="" width="84" height="84"><i class="pkm-lockw-pad"></i></span>
-<h2>Accès verrouillé</h2>
-<p class="pkm-lockw-p">{{ pks.lockWin.text }}</p>
-<p class="pkm-lockw-cond">{{ pks.lockWin.cond }}</p>
-<button type="button" onClick="{{ pks.lockWin.grades }}" class="pkm-lockw-go">Voir le grade {{ pks.lockWin.grade }}</button>
-<button type="button" onClick="{{ pks.lockWin.close }}" class="pkm-pas-cancel">Compris</button>
-</section>
-</div>
-</sc-if>
 </sc-if>
 <sc-if value="{{ pks.isPa }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Recharger mes PA" class="pkm-dark pkm-pas">
@@ -1891,7 +1879,7 @@
 <section aria-label="Fiche du Pokémon" class="pkm-dex-fiche">
 <div class="pkm-dex-fiche-top">
 <div class="pkm-dex-show"><img src="{{ evo.sel.img }}" alt="" class="{{ evo.sel.cls }}" style="{{ evo.sel.sz }}"><i class="pkm-dex-ped" aria-hidden="true"></i></div>
-<div class="pkm-dex-id"><span class="pkm-dex-no">{{ evo.sel.no }}</span><h3>{{ evo.sel.name }}</h3><span class="pkm-dex-genus">{{ evo.sel.genus }}</span><span class="pkm-dex-types"><sc-for list="{{ evo.sel.types }}" as="edt" hint-placeholder-count="2"><b style="{{ edt.style }}">{{ edt.t }}</b></sc-for></span>
+<div class="pkm-dex-id"><span class="pkm-dex-no">{{ evo.sel.no }}</span><h3>{{ evo.sel.name }}</h3><sc-if value="{{ evo.sel.isTheme }}" hint-placeholder-val="{{ false }}"><span class="pkm-dex-newtheme pkm-dex-newtheme-f">Nouveau thème</span></sc-if><span class="pkm-dex-genus">{{ evo.sel.genus }}</span><span class="pkm-dex-types"><sc-for list="{{ evo.sel.types }}" as="edt" hint-placeholder-count="2"><b style="{{ edt.style }}">{{ edt.t }}</b></sc-for></span>
 <sc-if value="{{ evo.sel.own }}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{ evo.sel.hasText }}" hint-placeholder-val="{{ true }}"><p class="pkm-dex-text">{{ evo.sel.text }}</p></sc-if>
 </sc-if>
@@ -2300,15 +2288,29 @@ PKCOUNTER
 <span class="pkm-prem-shine" aria-hidden="true"></span>
 <span class="pkm-prem-crown" aria-hidden="true"><svg viewBox="0 0 64 64" aria-hidden="true" class="pkm-prem-crown-svg"><path d="M8 22l12 12 12-20 12 20 12-12-5 28H13z" fill="#FFD60A" stroke="#7A4A00" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="50" width="38" height="7" rx="2" fill="#FFB000" stroke="#7A4A00" stroke-width="3"></rect><circle cx="8" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="11" r="4.5" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="56" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="38" r="4" fill="#E5484D"></circle></svg></span>
 <span class="pkm-prem-btxt"><b>{{ prem.banner.title }}</b><span>{{ prem.banner.text }}</span></span>
-<span class="pkm-prem-go" aria-hidden="true">›</span>
+<span class="pkm-prem-go" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
 </button>
+
+<!-- fragment: grade-lock -->
+<sc-if value="{{ lockw.open }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-lockw-wrap"><button type="button" aria-label="Fermer" onClick="{{ lockw.close }}" class="pkm-pas-scrim"></button>
+<section aria-label="Grade requis" role="alertdialog" aria-modal="true" class="pkm-dark pkm-lockw">
+<span class="pkm-lockw-ico" aria-hidden="true"><img src="{{ lockw.img }}" alt="" width="84" height="84"><i class="pkm-lockw-pad"></i></span>
+<h2>Accès verrouillé</h2>
+<p class="pkm-lockw-p">{{ lockw.text }}</p>
+<p class="pkm-lockw-cond">{{ lockw.cond }}</p>
+<button type="button" onClick="{{ lockw.grades }}" class="pkm-lockw-go">Voir le grade {{ lockw.grade }}</button>
+<button type="button" onClick="{{ lockw.close }}" class="pkm-pas-cancel">Compris</button>
+</section>
+</div>
+</sc-if>
 
 <!-- fragment: premium-sheet -->
 <sc-if value="{{ prem.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-pas-wrap"><button type="button" aria-label="Fermer" onClick="{{ prem.close }}" class="pkm-pas-scrim"></button>
 <section aria-label="Dropicards Premium" role="dialog" aria-modal="true" class="pkm-dark pkm-prem-sheet">
-<div class="pkm-prem-hero"><span class="pkm-prem-shine" aria-hidden="true"></span><span class="pkm-prem-crown pkm-prem-crown-xl" aria-hidden="true"><svg viewBox="0 0 64 64" aria-hidden="true" class="pkm-prem-crown-svg"><path d="M8 22l12 12 12-20 12 20 12-12-5 28H13z" fill="#FFD60A" stroke="#7A4A00" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="50" width="38" height="7" rx="2" fill="#FFB000" stroke="#7A4A00" stroke-width="3"></rect><circle cx="8" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="11" r="4.5" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="56" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="38" r="4" fill="#E5484D"></circle></svg></span><h2>Dropicards <em>Premium</em></h2><p>Tout Dropicards, sans limite.</p></div>
-<ul class="pkm-prem-perks"><sc-for list="{{ prem.perks }}" as="pp2" hint-placeholder-count="5"><li><span class="{{ pp2.icoCls }}" aria-hidden="true"><sc-if value="{{ pp2.isScan }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 32 32" class="pkm-prem-scan"><path d="M4 11V6a2 2 0 0 1 2-2h5M21 4h5a2 2 0 0 1 2 2v5M28 21v5a2 2 0 0 1-2 2h-5M11 28H6a2 2 0 0 1-2-2v-5"></path><rect x="10" y="8" width="12" height="16" rx="1.5" class="pkm-prem-scan-card"></rect><line x1="5" y1="16" x2="27" y2="16" class="pkm-prem-scan-laser"></line></svg></sc-if><sc-if value="{{ pp2.isRadar }}" hint-placeholder-val="{{ false }}"><span class="pkm-prem-radar"><i class="pkm-prem-radar-r1"></i><i class="pkm-prem-radar-r2"></i><i class="pkm-anim pkm-prem-radar-sweep"></i><i class="pkm-prem-radar-dot"></i></span></sc-if><sc-if value="{{ pp2.isXp }}" hint-placeholder-val="{{ false }}"><b class="pkm-prem-2xp">2XP</b></sc-if><sc-if value="{{ pp2.isEmoji }}" hint-placeholder-val="{{ false }}">{{ pp2.ico }}</sc-if></span><sc-if value="{{ pp2.isXp }}" hint-placeholder-val="{{ false }}"><img src="img/brand/pa.svg" alt="" width="34" height="34" class="pkm-prem-pa"></sc-if><span><b>{{ pp2.title }}</b><small>{{ pp2.text }}</small></span></li></sc-for></ul>
+<div class="pkm-prem-hero"><button type="button" onClick="{{ prem.close }}" aria-label="Retour au PK shop" class="pkm-prem-back"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M14.5 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><span class="pkm-prem-shine" aria-hidden="true"></span><span class="pkm-prem-crown pkm-prem-crown-xl" aria-hidden="true"><svg viewBox="0 0 64 64" aria-hidden="true" class="pkm-prem-crown-svg"><path d="M8 22l12 12 12-20 12 20 12-12-5 28H13z" fill="#FFD60A" stroke="#7A4A00" stroke-width="3" stroke-linejoin="round"></path><rect x="13" y="50" width="38" height="7" rx="2" fill="#FFB000" stroke="#7A4A00" stroke-width="3"></rect><circle cx="8" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="11" r="4.5" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="56" cy="20" r="4" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"></circle><circle cx="32" cy="38" r="4" fill="#E5484D"></circle></svg></span><h2>Dropicards <em>Premium</em></h2><p>Tout Dropicards, sans limite.</p></div>
+<ul class="pkm-prem-perks"><sc-for list="{{ prem.perks }}" as="pp2" hint-placeholder-count="5"><li><span class="{{ pp2.icoCls }}" aria-hidden="true"><sc-if value="{{ pp2.isScan }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 32 32" class="pkm-prem-scan"><path d="M4 11V6a2 2 0 0 1 2-2h5M21 4h5a2 2 0 0 1 2 2v5M28 21v5a2 2 0 0 1-2 2h-5M11 28H6a2 2 0 0 1-2-2v-5"></path><rect x="10" y="8" width="12" height="16" rx="1.5" class="pkm-prem-scan-card"></rect><line x1="5" y1="16" x2="27" y2="16" class="pkm-prem-scan-laser"></line></svg></sc-if><sc-if value="{{ pp2.isRadar }}" hint-placeholder-val="{{ false }}"><span class="pkm-prem-radar"><i class="pkm-prem-radar-r1"></i><i class="pkm-prem-radar-r2"></i><i class="pkm-anim pkm-prem-radar-sweep"></i><i class="pkm-prem-radar-dot"></i></span></sc-if><sc-if value="{{ pp2.isXp }}" hint-placeholder-val="{{ false }}"><span class="pkm-prem-xp"><img src="img/brand/pa.svg" alt="" width="28" height="28" class="pkm-prem-xp-drop"><b class="pkm-prem-xp-tag">2XP</b><i class="pkm-prem-xp-spark"></i></span></sc-if><sc-if value="{{ pp2.isBinder }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 32 32" class="pkm-prem-bind"><rect x="9" y="9" width="12" height="16" rx="1.6" class="pkm-prem-bind-card"></rect><path d="M5 12h22v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" class="pkm-prem-bind-body"></path><path d="M9 16h14" class="pkm-prem-bind-line"></path><circle cx="16" cy="21" r="2.4" class="pkm-prem-bind-gem"></circle></svg></sc-if><sc-if value="{{ pp2.isHist }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 32 32" class="pkm-prem-hist"><path d="M5 27h23M5 27V6" class="pkm-prem-hist-axis"></path><polyline points="6,22 11,17 15,20 20,11 26,14" class="pkm-prem-hist-line"></polyline><g class="pkm-prem-hist-arrow"><path d="M23 9l4-4M27 5h-3.2M27 5v3.2"></path></g></svg></sc-if><sc-if value="{{ pp2.isEmoji }}" hint-placeholder-val="{{ false }}">{{ pp2.ico }}</sc-if></span><span><b>{{ pp2.title }}</b><small>{{ pp2.text }}</small></span></li></sc-for></ul>
 <div role="radiogroup" aria-label="Formule" class="pkm-prem-plans"><sc-for list="{{ prem.plans }}" as="ppl" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ ppl.on }}" onClick="{{ ppl.pick }}" class="{{ ppl.cls }}">
 <sc-if value="{{ ppl.hasTag }}" hint-placeholder-val="{{ false }}"><span class="pkm-prem-tag">{{ ppl.tag }}</span></sc-if>
 <span class="pkm-prem-pname">{{ ppl.name }}</span><b class="pkm-prem-price">{{ ppl.price }}</b><span class="pkm-prem-per">{{ ppl.per }}</span><span class="pkm-prem-sub">{{ ppl.sub }}</span>

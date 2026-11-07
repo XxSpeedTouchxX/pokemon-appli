@@ -189,11 +189,17 @@ html.pkm-fx-paused #pkm-scene *, html.pkm-fx-paused #pkm-scene { animation-play-
 @keyframes pkmScHeat { 50% { opacity: 0.6; } }
 .pkm-sc-volcano { left: 50%; bottom: 0; width: 900px; height: 390px; margin-left: -450px; opacity: 0.95; }
 .pkm-sc-crater { animation: pkmScHeat calc(var(--sck) * 2.2s) ease-in-out infinite; }
-.pkm-sc-flow { fill: none; stroke: #FF7A1A; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 26 18; opacity: 0.85;
-  filter: drop-shadow(0 0 4px rgba(255, 120, 30, 0.9)); animation: pkmScFlow calc(var(--sck) * 3.2s) linear infinite; }
-.pkm-sc-flow2 { animation-duration: calc(var(--sck) * 4.1s); stroke-width: 4; }
-.pkm-sc-flow3 { animation-duration: calc(var(--sck) * 5s); stroke-width: 3; stroke: #FFB347; }
-@keyframes pkmScFlow { to { stroke-dashoffset: -88; } }
+/* Coulées de lave refaites (2026-11-07, porteur : « pas assez réaliste ») : chaque coulée s'élargit en descendant,
+   halo rougeoyant qui respire, corps incandescent (bords sombres, cœur orange), traînées jaunes qui descendent et
+   croûtes sombres qui dérivent plus lentement ; flaque de lave au pied du volcan. */
+.pkm-sc-lglow { fill: #FF5A14; opacity: 0.55; filter: blur(5px); animation: pkmScHeat calc(var(--sck) * 2.6s) ease-in-out infinite; }
+.pkm-sc-lbody { fill: url(#pkmScLavaBody); }
+.pkm-sc-lhot { fill: none; stroke: #FFE38A; stroke-linecap: round; filter: blur(0.6px); }
+.pkm-sc-lhot1 { stroke-width: 2.6; stroke-dasharray: 34 14 9 41 18 26; animation: pkmScLava calc(var(--sck) * 8s) linear infinite; }
+.pkm-sc-lhot2 { stroke-width: 1.4; stroke: #FFF6C8; stroke-dasharray: 6 31 13 22 4 36; stroke-dashoffset: 18; animation: pkmScLava calc(var(--sck) * 6s) linear infinite; }
+.pkm-sc-lcrust { fill: none; stroke: #2A0603; stroke-width: 5; stroke-linecap: butt; stroke-dasharray: 2 23 7 17 3 37 5 29; opacity: 0.38; filter: blur(0.8px); animation: pkmScLava calc(var(--sck) * 15s) linear infinite; }
+@keyframes pkmScLava { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -280; } }
+.pkm-sc-lpool { fill: #FF6A1A; opacity: 0.35; filter: blur(8px); animation: pkmScHeat calc(var(--sck) * 3s) ease-in-out infinite; }
 .pkm-sc-smoke { left: 50%; bottom: 286px; width: 120px; height: 120px; margin-left: -60px; border-radius: 50%; opacity: 0;
   background: radial-gradient(circle, rgba(70, 30, 28, 0.75), rgba(40, 14, 12, 0.35) 55%, rgba(40, 14, 12, 0) 72%);
   animation: pkmScSmoke calc(var(--sck) * 7s) ease-out infinite; }
@@ -228,8 +234,8 @@ html.pkm-fx-paused #pkm-scene *, html.pkm-fx-paused #pkm-scene { animation-play-
 .pkm-sc-cloud { top: 150px; width: 340px; height: 160px; border-radius: 50%; background: radial-gradient(closest-side, rgba(4, 18, 20, 0.7), rgba(4, 18, 20, 0)); animation: pkmScCloud calc(var(--sck) * 40s) linear infinite; left: -40%; }
 .pkm-sc-c2 { top: 210px; width: 420px; animation-duration: calc(var(--sck) * 55s); animation-delay: calc(var(--sck) * -24s); }
 @keyframes pkmScCloud { to { transform: translateX(160vw); } }
-.pkm-sc-storm .pkm-sc-rain { opacity: 0.7; transform: rotate(18deg); animation-duration: calc(var(--sck) * 0.45s); }
-.pkm-sc-storm .pkm-sc-rain2 { opacity: 0.45; animation-duration: calc(var(--sck) * 0.7s); }
+.pkm-sc-storm .pkm-sc-rain { opacity: 0.5; transform: rotate(18deg); animation-duration: calc(var(--sck) * 0.5s); } /* un peu moins de pluie (2026-11-07, porteur) */
+.pkm-sc-storm .pkm-sc-rain2 { opacity: 0.3; animation-duration: calc(var(--sck) * 0.75s); }
 .pkm-sc-bolt { top: 170px; width: 110px; height: 400px; opacity: 0; filter: drop-shadow(0 0 10px rgba(200, 255, 240, 0.95)) drop-shadow(0 0 22px rgba(120, 255, 210, 0.7));
   animation: pkmScBolt calc(var(--sck) * 6s) linear infinite; left: 12%; }
 .pkm-sc-bolt path { fill: #F2FFF9; }
@@ -1191,6 +1197,8 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-shop-price img { flex: none; }
 .pkm-shop-price-sm { align-self: center; gap: 4px; padding: 3px 9px 3px 4px; font-size: 16px; }
 .pkm-shop-price-sm small { font-size: 11px; }
+/* Ticket Or (2026-11-07, porteur) : autant de pointillés que Bronze et Argent (bande de même largeur, texte centré). */
+.pkm-shop-ticket .pkm-shop-ticket-in { width: 74%; box-sizing: border-box; text-align: center; white-space: nowrap; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -1462,6 +1470,12 @@ section[aria-label="Pokédex"] img, section[aria-label="Mon Pokédex"] img { -we
 .pkm-dexl-price small { font-size: 9.5px; font-weight: 800; color: #E4CCFF; }
 .pkm-dexl-can .pkm-dexl-price { background: rgba(255, 214, 10, 0.18); border-color: #FFD60A; }
 .pkm-dexl-can .pkm-dexl-price small { color: #FFE27A; }
+/* « Nouveau thème » sur Kyogre, Groudon et Rayquaza (2026-11-07, porteur) : les débloquer change le fond de l'app. */
+.pkm-dex-newtheme { position: absolute; top: 4px; right: 4px; z-index: 2; padding: 2px 6px; border-radius: 999px; background: linear-gradient(90deg, #7B3FF2, #E5484D, #FFB000); color: #FFFFFF; font-size: 9.5px; font-weight: 800; line-height: 1.3; letter-spacing: 0.01em; white-space: nowrap; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35); animation: pkmNewTheme 2.4s ease-in-out infinite; }
+.pkm-dex-newtheme::before { content: '✦ '; }
+.pkm-dex-newtheme-f { position: static; display: inline-block; align-self: flex-start; margin: 2px 0; font-size: 11px; }
+@keyframes pkmNewTheme { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.25); } }
+@media (prefers-reduced-motion: reduce) { .pkm-dex-newtheme { animation: none; } }
 
 /* Règles des PK et des jeux, en images (2026-10-28, demande du porteur) : rubrique « PK et jeux » des informations
    légales (legal.js). Cartes sombres à liseré, chiffres en grand, barre des chances du Booster PK, tableau des grades
@@ -1556,17 +1570,19 @@ section[aria-label="Pokédex"] img, section[aria-label="Mon Pokédex"] img { -we
 .pkm-pa-sheet-rules { flex: none; align-self: flex-start; min-height: 44px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
 
 /* Abonnement Premium (2026-11-06, porteur) : bannière dorée qui brille et écran de l'offre. */
-.pkm-prem-banner { position: relative; flex: none; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; border: 0; border-radius: 22px; overflow: hidden; background: linear-gradient(120deg, #2B124C 0%, #4A22B0 50%, #6A30D8 100%); color: #FFFFFF; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 10px 28px rgba(91, 43, 214, 0.45), inset 0 0 0 1px rgba(255, 230, 120, 0.55); }
+.pkm-prem-banner { position: relative; flex: none; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; border: 2px solid #FFD60A; border-radius: 22px; overflow: hidden; background: linear-gradient(115deg, #E9EDF3 0%, #C3CBD8 22%, #FFFFFF 42%, #B4BDCB 62%, #EEF1F6 82%, #CDD4DF 100%); color: #141A26; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.35), 0 0 22px rgba(255, 200, 0, 0.55), 0 10px 26px rgba(20, 26, 38, 0.35); animation: pkmPremGold 2.8s ease-in-out infinite; }
+@keyframes pkmPremGold { 0%, 100% { box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.35), 0 0 18px rgba(255, 200, 0, 0.45), 0 10px 26px rgba(20, 26, 38, 0.35); } 50% { box-shadow: 0 0 0 4px rgba(255, 214, 10, 0.6), 0 0 30px rgba(255, 200, 0, 0.8), 0 10px 26px rgba(20, 26, 38, 0.35); } }
 .pkm-prem-banner:active { transform: scale(0.985); }
-.pkm-prem-shine { position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0)); transform: skewX(-18deg); animation: pkmPremShine 3.2s ease-in-out infinite; pointer-events: none; }
+.pkm-prem-shine { position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0)); transform: skewX(-18deg); animation: pkmPremShine 3.2s ease-in-out infinite; pointer-events: none; }
 @keyframes pkmPremShine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
 .pkm-prem-crown { position: relative; flex: none; width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 35%, #FFF3A6, #FFD60A 55%, #E09A00); box-shadow: 0 0 18px rgba(255, 214, 10, 0.7); animation: pkmPremPulse 2.4s ease-in-out infinite; }
 @keyframes pkmPremPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
 .pkm-prem-btxt { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.pkm-prem-btxt b { font-family: 'Sora', sans-serif; font-size: 16.5px; letter-spacing: -0.01em; }
-.pkm-prem-btxt span { font-size: 12.5px; line-height: 1.35; color: #EDE3FF; }
+.pkm-prem-btxt b { font-family: 'Sora', sans-serif; font-size: 16.5px; letter-spacing: -0.01em; color: #10151F; }
+.pkm-prem-btxt span { font-size: 12.5px; line-height: 1.35; color: #2E3646; }
 .pkm-prem-btxt i { font-style: normal; font-size: 12.5px; font-weight: 800; color: #FFE46B; }
-.pkm-prem-go { position: relative; flex: none; width: 34px; height: 34px; border-radius: 17px; display: flex; align-items: center; justify-content: center; background: #FFD60A; color: #2B124C; font-size: 24px; font-weight: 800; line-height: 1; }
+.pkm-prem-go { position: relative; flex: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; background: #FFD60A; color: #2B124C; box-shadow: 0 0 0 2px #B8860B; }
+.pkm-prem-go svg { display: block; margin-left: 2px; }
 .pkm-prem-sheet { position: relative; width: 100%; max-width: 480px; max-height: 92vh; max-height: calc(100dvh - 24px); overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; padding: 0 16px 24px; border-radius: 28px 28px 0 0; border-top: 1px solid rgba(255, 230, 120, 0.5); background: #120B24; color: #F3F6FC; }
 .pkm-prem-hero { position: relative; margin: 0 -16px; padding: 30px 16px 18px; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; background: radial-gradient(120% 100% at 50% 0%, #7B3FF2 0%, #3A1A78 55%, #120B24 100%); }
 .pkm-prem-crown-xl { width: 76px; height: 76px; border-radius: 24px; }
@@ -1606,11 +1622,34 @@ section[aria-label="Pokédex"] img, section[aria-label="Mon Pokédex"] img { -we
 .pkm-prem-radar-r2 { inset: 11px; box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.3); }
 .pkm-prem-radar-sweep { inset: 0; background: conic-gradient(from 0deg, rgba(94, 224, 207, 0) 0deg, rgba(94, 224, 207, 0) 270deg, rgba(94, 224, 207, 0.6) 360deg); animation: pkmSpin 3s linear infinite; }
 .pkm-prem-radar-dot { left: 13px; top: 13px; width: 6px; height: 6px; background: #5EE0CF; }
-.pkm-prem-2xp { display: flex; align-items: center; justify-content: center; width: 32px; height: 22px; border-radius: 7px; background: linear-gradient(180deg, #FFE46B, #FFB000); color: #2B124C; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 11.5px; font-weight: 900; letter-spacing: 0.02em; box-shadow: 0 0 10px rgba(255, 214, 10, 0.5); transform: rotate(-6deg); }
 @media (prefers-reduced-motion: reduce) { .pkm-prem-scan-laser, .pkm-prem-radar-sweep { animation: none; } }
-/* Double XP sur les PA seulement (2026-11-06, « go » du porteur) : badge « 2XP » et goutte des PA côte à côte. */
-.pkm-prem-ico-xp { width: auto; padding: 0 4px; background: rgba(178, 107, 255, 0.18); }
-.pkm-prem-pa { flex: none; margin-left: -6px; filter: drop-shadow(0 0 6px rgba(178, 107, 255, 0.6)); }
+
+/* Retour au PK shop (2026-11-07, porteur). */
+.pkm-prem-back { position: absolute; z-index: 2; left: 12px; top: 12px; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 22px; background: rgba(18, 11, 36, 0.55); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.pkm-prem-back svg { display: block; margin-left: -2px; }
+/* Icônes animées des avantages (2026-11-07, porteur) : classeur d'où une carte sort et rentre, double XP des PA,
+   graphique avec une flèche qui fluctue. Toutes dans la même case de 38 px, alignées. */
+.pkm-prem-bind, .pkm-prem-hist { width: 28px; height: 28px; overflow: visible; }
+.pkm-prem-bind-body { fill: #FFD60A; stroke: #7A4A00; stroke-width: 1.6; stroke-linejoin: round; }
+.pkm-prem-bind-line { stroke: #7A4A00; stroke-width: 1.4; }
+.pkm-prem-bind-gem { fill: #FFF3A6; stroke: #7A4A00; stroke-width: 1.2; }
+.pkm-prem-bind-card { fill: #E2D6FF; stroke: #5B2BD6; stroke-width: 1.4; animation: pkmPremCard 2.6s ease-in-out infinite; }
+@keyframes pkmPremCard { 0%, 15% { transform: translateY(4px); } 45%, 60% { transform: translateY(-6px) rotate(-6deg); } 90%, 100% { transform: translateY(4px); } }
+.pkm-prem-hist-axis { fill: none; stroke: #8E82B3; stroke-width: 1.6; stroke-linecap: round; }
+.pkm-prem-hist-line { fill: none; stroke: #5EE0CF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: pkmPremDraw 3s ease-in-out infinite; }
+@keyframes pkmPremDraw { 0% { stroke-dashoffset: 40; } 45%, 80% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -40; } }
+.pkm-prem-hist-arrow path { fill: none; stroke: #FFD60A; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-prem-hist-arrow { animation: pkmPremFluct 1.6s ease-in-out infinite; }
+@keyframes pkmPremFluct { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(-3px); } 50% { transform: translateY(2px); } 75% { transform: translateY(-1px); } }
+.pkm-prem-xp { position: relative; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+.pkm-prem-xp-drop { display: block; filter: drop-shadow(0 0 6px rgba(178, 107, 255, 0.85)); animation: pkmPremBob 2s ease-in-out infinite; }
+@keyframes pkmPremBob { 0%, 100% { transform: translateY(-2px) scale(1); } 50% { transform: translateY(1px) scale(1.08); } }
+.pkm-prem-perks .pkm-prem-xp-tag { display: block; position: absolute; right: -2px; bottom: 0; padding: 0 3px; border-radius: 5px; background: linear-gradient(180deg, #FFE46B, #FFB000); color: #2B124C; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 8.5px; line-height: 1.35; font-weight: 900; box-shadow: 0 0 0 1.2px #7A4A00; animation: pkmPremTag 2s ease-in-out infinite; }
+@keyframes pkmPremTag { 0%, 70%, 100% { transform: scale(1) rotate(-6deg); } 80% { transform: scale(1.25) rotate(4deg); } 90% { transform: scale(0.95) rotate(-8deg); } }
+.pkm-prem-xp-spark { position: absolute; left: 4px; top: 3px; width: 7px; height: 7px; background: #FFFFFF; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: pkmPremSpark 2s ease-in-out infinite; }
+@keyframes pkmPremSpark { 0%, 40%, 100% { opacity: 0; transform: scale(0.4); } 60% { opacity: 1; transform: scale(1.2) rotate(45deg); } }
+.pkm-prem-ico { overflow: visible; }
+@media (prefers-reduced-motion: reduce) { .pkm-prem-bind-card, .pkm-prem-hist-line, .pkm-prem-hist-arrow, .pkm-prem-xp-drop, .pkm-prem-xp-tag, .pkm-prem-xp-spark, .pkm-prem-banner { animation: none; } .pkm-prem-hist-line { stroke-dashoffset: 0; } }
 
 :root { --pkm-app: #0B1120; --pkm-field: #0B1120; --pkm-card: #111A2C; --pkm-card-hi: #121C33; --pkm-card-2: #0F1828; --pkm-card-teal: #0F1D2B; --pkm-img-bg: #16213A; --pkm-toast: #16223A; --pkm-track: #24345C; --pkm-photo-mat: #FFFFFF; --pkm-pearl: #E8ECFF; --pkm-line: #1E2B45; --pkm-line-2: #2A3A5C; --pkm-line-3: #24345C; --pkm-line-4: #3A4A75; --pkm-line-teal: #1F5A55; --pkm-t1: #F3F6FC; --pkm-t2: #C9D3EA; --pkm-t3: #9AA8C3; --pkm-t4: #7D8BA8; --pkm-t5: #5A6B8C; --pkm-link: #B9C5FF; --pkm-ink: #0B1120; --pkm-white: #FFFFFF; --pkm-accent: #A8B6FF; --pkm-on-accent: #0B1120; --pkm-brand: #3D63FF; --pkm-scan-1: #5B7BFF; --pkm-scan-2: #2F4FE0; --pkm-scan-3: #3D63FF; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #FFFFFF; --pkm-iris: #6C84F2; --pkm-regular: #A8B6FF; --pkm-green: #3DDC84; --pkm-up: #3DDC84; --pkm-down: #FF6B6B; --pkm-red: #FF8A8A; --pkm-orange: #F5B14C; --pkm-amber: #FFB547; --pkm-teal: #5EE0CF; --pkm-logo: #FFD60A; --pkm-gold: #FFD66B; --pkm-sand: #F7C77E; --pkm-sand-2: #F3D9AE; --pkm-gray: #9AA8C3; --pkm-off: #56648A; --pkm-peach: #FFC9A8; --pkm-bar-cost: #34415F; --pkm-bar-edge: #56648A; --pkm-bar-fees: #D5763A; --pkm-bar-margin: #6C84F2; --pkm-chip-bg: transparent; --pkm-chip-bc: #2A3A5C; --pkm-chip-fg: #C9D3EA; --pkm-chip-on-bg: #26345A; --pkm-chip-on-bc: #3A4A75; --pkm-chip-on-fg: #FFFFFF; --pkm-choice-bg: #111A2C; --pkm-choice-bc: #24345C; --pkm-choice-on-bg: #1A2645; --pkm-choice-on-bc: #A8B6FF; --pkm-nav-on: #FFFFFF; --pkm-nav-off: #7D8BA8; --pkm-nav-dot: #A8B6FF; --pkm-dim: 0.6; --pkm-off-bg: #26345A; --pkm-glow-rgb: 98, 122, 255; --pkm-accent-rgb: 168, 182, 255; --pkm-regular-rgb: 168, 182, 255; --pkm-ink-rgb: 8, 13, 26; --pkm-app-rgb: 11, 17, 32; --pkm-deep-rgb: 5, 8, 15; --pkm-scrim-rgb: 3, 6, 14; --pkm-hl-rgb: 255, 255, 255; --pkm-shadow-rgb: 0, 0, 0; --pkm-orange-rgb: 245, 177, 76; --pkm-teal-rgb: 94, 224, 207; --pkm-green-rgb: 61, 220, 132; --pkm-amber-rgb: 255, 181, 71; --pkm-gold-rgb: 255, 214, 107; --pkm-iris-rgb: 108, 132, 242; --pkm-blue-rgb: 61, 99, 255; --pkm-gray-rgb: 154, 168, 195; }
 html:not(.pkm-classic) .pkm-root { --pkm-app: radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFD60A 45%, #FFB703 100%); --pkm-t1: #0B1120; --pkm-t2: #1F2433; --pkm-t3: #33363F; --pkm-t4: #41434A; --pkm-t5: #41434A; --pkm-link: #0A2A88; --pkm-ink: #0B1120; --pkm-logo: #0B1120; --pkm-accent: #0B1120; --pkm-on-accent: #FFD84D; --pkm-accent-rgb: 11, 17, 32; --pkm-glow-rgb: 255, 255, 255; --pkm-brand: #0B1120; --pkm-line: rgba(11, 17, 32, 0.16); --pkm-line-2: rgba(11, 17, 32, 0.22); --pkm-line-3: rgba(11, 17, 32, 0.2); --pkm-line-4: rgba(11, 17, 32, 0.32); --pkm-track: rgba(11, 17, 32, 0.16); --pkm-chip-bg: rgba(255, 255, 255, 0.45); --pkm-chip-bc: rgba(11, 17, 32, 0.18); --pkm-chip-fg: #1F2433; --pkm-chip-on-bg: #0B1120; --pkm-chip-on-bc: #0B1120; --pkm-chip-on-fg: #FFD84D; --pkm-choice-bg: rgba(255, 255, 255, 0.45); --pkm-choice-bc: rgba(11, 17, 32, 0.18); --pkm-choice-on-bg: rgba(255, 255, 255, 0.85); --pkm-choice-on-bc: #0B1120; --pkm-green: #054A24; --pkm-up: #054A24; --pkm-down: #8F1414; --pkm-red: #8F1414; --pkm-orange: #6B3500; --pkm-amber: #6B3500; --pkm-teal: #04463F; --pkm-gold: #5C4400; --pkm-sand: #5C3D00; --pkm-sand-2: #4D3810; --pkm-gray: #41434A; --pkm-off: #4D4F57; --pkm-regular: #22348F; --pkm-iris: #22348F; --pkm-shadow-rgb: 70, 45, 0; --pkm-off-bg: rgba(11, 17, 32, 0.08); --pkm-card: rgba(10, 17, 48, 0.9); --pkm-card-hi: rgba(12, 22, 66, 0.94); --pkm-card-2: rgba(8, 14, 40, 0.92); --pkm-card-teal: rgba(4, 32, 44, 0.9); --pkm-field: rgba(0, 4, 18, 0.55); --pkm-toast: rgba(10, 17, 48, 0.86); --pkm-nav-on: #FFD60A; --pkm-nav-off: #BCC5D9; --pkm-nav-dot: #FFD60A; --pkm-scan-1: #FFE45C; --pkm-scan-2: #F2A900; --pkm-scan-3: #FFD60A; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #0B1120; --pkm-blue-rgb: 255, 214, 10; --pkm-dim: 0.8; }
@@ -1768,6 +1807,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=dfd82d78"></script>
+<script src="app.js?v=4d2fbc85"></script>
 </body>
 </html>

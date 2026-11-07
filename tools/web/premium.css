@@ -1,15 +1,17 @@
 /* Abonnement Premium (2026-11-06, porteur) : bannière dorée qui brille et écran de l'offre. */
-.pkm-prem-banner { position: relative; flex: none; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; border: 0; border-radius: 22px; overflow: hidden; background: linear-gradient(120deg, #2B124C 0%, #4A22B0 50%, #6A30D8 100%); color: #FFFFFF; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 10px 28px rgba(91, 43, 214, 0.45), inset 0 0 0 1px rgba(255, 230, 120, 0.55); }
+.pkm-prem-banner { position: relative; flex: none; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; border: 2px solid #FFD60A; border-radius: 22px; overflow: hidden; background: linear-gradient(115deg, #E9EDF3 0%, #C3CBD8 22%, #FFFFFF 42%, #B4BDCB 62%, #EEF1F6 82%, #CDD4DF 100%); color: #141A26; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.35), 0 0 22px rgba(255, 200, 0, 0.55), 0 10px 26px rgba(20, 26, 38, 0.35); animation: pkmPremGold 2.8s ease-in-out infinite; }
+@keyframes pkmPremGold { 0%, 100% { box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.35), 0 0 18px rgba(255, 200, 0, 0.45), 0 10px 26px rgba(20, 26, 38, 0.35); } 50% { box-shadow: 0 0 0 4px rgba(255, 214, 10, 0.6), 0 0 30px rgba(255, 200, 0, 0.8), 0 10px 26px rgba(20, 26, 38, 0.35); } }
 .pkm-prem-banner:active { transform: scale(0.985); }
-.pkm-prem-shine { position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0)); transform: skewX(-18deg); animation: pkmPremShine 3.2s ease-in-out infinite; pointer-events: none; }
+.pkm-prem-shine { position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0)); transform: skewX(-18deg); animation: pkmPremShine 3.2s ease-in-out infinite; pointer-events: none; }
 @keyframes pkmPremShine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
 .pkm-prem-crown { position: relative; flex: none; width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 35%, #FFF3A6, #FFD60A 55%, #E09A00); box-shadow: 0 0 18px rgba(255, 214, 10, 0.7); animation: pkmPremPulse 2.4s ease-in-out infinite; }
 @keyframes pkmPremPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
 .pkm-prem-btxt { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.pkm-prem-btxt b { font-family: 'Sora', sans-serif; font-size: 16.5px; letter-spacing: -0.01em; }
-.pkm-prem-btxt span { font-size: 12.5px; line-height: 1.35; color: #EDE3FF; }
+.pkm-prem-btxt b { font-family: 'Sora', sans-serif; font-size: 16.5px; letter-spacing: -0.01em; color: #10151F; }
+.pkm-prem-btxt span { font-size: 12.5px; line-height: 1.35; color: #2E3646; }
 .pkm-prem-btxt i { font-style: normal; font-size: 12.5px; font-weight: 800; color: #FFE46B; }
-.pkm-prem-go { position: relative; flex: none; width: 34px; height: 34px; border-radius: 17px; display: flex; align-items: center; justify-content: center; background: #FFD60A; color: #2B124C; font-size: 24px; font-weight: 800; line-height: 1; }
+.pkm-prem-go { position: relative; flex: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; background: #FFD60A; color: #2B124C; box-shadow: 0 0 0 2px #B8860B; }
+.pkm-prem-go svg { display: block; margin-left: 2px; }
 .pkm-prem-sheet { position: relative; width: 100%; max-width: 480px; max-height: 92vh; max-height: calc(100dvh - 24px); overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; padding: 0 16px 24px; border-radius: 28px 28px 0 0; border-top: 1px solid rgba(255, 230, 120, 0.5); background: #120B24; color: #F3F6FC; }
 .pkm-prem-hero { position: relative; margin: 0 -16px; padding: 30px 16px 18px; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; background: radial-gradient(120% 100% at 50% 0%, #7B3FF2 0%, #3A1A78 55%, #120B24 100%); }
 .pkm-prem-crown-xl { width: 76px; height: 76px; border-radius: 24px; }
@@ -49,8 +51,31 @@
 .pkm-prem-radar-r2 { inset: 11px; box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.3); }
 .pkm-prem-radar-sweep { inset: 0; background: conic-gradient(from 0deg, rgba(94, 224, 207, 0) 0deg, rgba(94, 224, 207, 0) 270deg, rgba(94, 224, 207, 0.6) 360deg); animation: pkmSpin 3s linear infinite; }
 .pkm-prem-radar-dot { left: 13px; top: 13px; width: 6px; height: 6px; background: #5EE0CF; }
-.pkm-prem-2xp { display: flex; align-items: center; justify-content: center; width: 32px; height: 22px; border-radius: 7px; background: linear-gradient(180deg, #FFE46B, #FFB000); color: #2B124C; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 11.5px; font-weight: 900; letter-spacing: 0.02em; box-shadow: 0 0 10px rgba(255, 214, 10, 0.5); transform: rotate(-6deg); }
 @media (prefers-reduced-motion: reduce) { .pkm-prem-scan-laser, .pkm-prem-radar-sweep { animation: none; } }
-/* Double XP sur les PA seulement (2026-11-06, « go » du porteur) : badge « 2XP » et goutte des PA côte à côte. */
-.pkm-prem-ico-xp { width: auto; padding: 0 4px; background: rgba(178, 107, 255, 0.18); }
-.pkm-prem-pa { flex: none; margin-left: -6px; filter: drop-shadow(0 0 6px rgba(178, 107, 255, 0.6)); }
+
+/* Retour au PK shop (2026-11-07, porteur). */
+.pkm-prem-back { position: absolute; z-index: 2; left: 12px; top: 12px; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 22px; background: rgba(18, 11, 36, 0.55); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.pkm-prem-back svg { display: block; margin-left: -2px; }
+/* Icônes animées des avantages (2026-11-07, porteur) : classeur d'où une carte sort et rentre, double XP des PA,
+   graphique avec une flèche qui fluctue. Toutes dans la même case de 38 px, alignées. */
+.pkm-prem-bind, .pkm-prem-hist { width: 28px; height: 28px; overflow: visible; }
+.pkm-prem-bind-body { fill: #FFD60A; stroke: #7A4A00; stroke-width: 1.6; stroke-linejoin: round; }
+.pkm-prem-bind-line { stroke: #7A4A00; stroke-width: 1.4; }
+.pkm-prem-bind-gem { fill: #FFF3A6; stroke: #7A4A00; stroke-width: 1.2; }
+.pkm-prem-bind-card { fill: #E2D6FF; stroke: #5B2BD6; stroke-width: 1.4; animation: pkmPremCard 2.6s ease-in-out infinite; }
+@keyframes pkmPremCard { 0%, 15% { transform: translateY(4px); } 45%, 60% { transform: translateY(-6px) rotate(-6deg); } 90%, 100% { transform: translateY(4px); } }
+.pkm-prem-hist-axis { fill: none; stroke: #8E82B3; stroke-width: 1.6; stroke-linecap: round; }
+.pkm-prem-hist-line { fill: none; stroke: #5EE0CF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: pkmPremDraw 3s ease-in-out infinite; }
+@keyframes pkmPremDraw { 0% { stroke-dashoffset: 40; } 45%, 80% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -40; } }
+.pkm-prem-hist-arrow path { fill: none; stroke: #FFD60A; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-prem-hist-arrow { animation: pkmPremFluct 1.6s ease-in-out infinite; }
+@keyframes pkmPremFluct { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(-3px); } 50% { transform: translateY(2px); } 75% { transform: translateY(-1px); } }
+.pkm-prem-xp { position: relative; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+.pkm-prem-xp-drop { display: block; filter: drop-shadow(0 0 6px rgba(178, 107, 255, 0.85)); animation: pkmPremBob 2s ease-in-out infinite; }
+@keyframes pkmPremBob { 0%, 100% { transform: translateY(-2px) scale(1); } 50% { transform: translateY(1px) scale(1.08); } }
+.pkm-prem-perks .pkm-prem-xp-tag { display: block; position: absolute; right: -2px; bottom: 0; padding: 0 3px; border-radius: 5px; background: linear-gradient(180deg, #FFE46B, #FFB000); color: #2B124C; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 8.5px; line-height: 1.35; font-weight: 900; box-shadow: 0 0 0 1.2px #7A4A00; animation: pkmPremTag 2s ease-in-out infinite; }
+@keyframes pkmPremTag { 0%, 70%, 100% { transform: scale(1) rotate(-6deg); } 80% { transform: scale(1.25) rotate(4deg); } 90% { transform: scale(0.95) rotate(-8deg); } }
+.pkm-prem-xp-spark { position: absolute; left: 4px; top: 3px; width: 7px; height: 7px; background: #FFFFFF; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: pkmPremSpark 2s ease-in-out infinite; }
+@keyframes pkmPremSpark { 0%, 40%, 100% { opacity: 0; transform: scale(0.4); } 60% { opacity: 1; transform: scale(1.2) rotate(45deg); } }
+.pkm-prem-ico { overflow: visible; }
+@media (prefers-reduced-motion: reduce) { .pkm-prem-bind-card, .pkm-prem-hist-line, .pkm-prem-hist-arrow, .pkm-prem-xp-drop, .pkm-prem-xp-tag, .pkm-prem-xp-spark, .pkm-prem-banner { animation: none; } .pkm-prem-hist-line { stroke-dashoffset: 0; } }

@@ -6,6 +6,41 @@
 
 ---
 
+## 2026-11-07 — Avantages des grades refaits, Premium v2, décors (demandes du porteur)
+
+- **Avantages des grades** (listes du porteur, mot pour mot) :
+
+| Grade | Classeur (cartes / items scellés) | Scans par jour | Booster PK | Pile ou face | PK shop | En plus |
+|---|---|---|---|---|---|---|
+| Recrue | 36 / 9 | 5 | 24 h | — | Bronze + booster | |
+| Chasseur | 72 / 27 | 10 | 20 h | 24 h | Bronze + booster | |
+| Collectionneur | 144 / 54 | 20 | 12 h | 12 h | Argent + item rare | Emblème |
+| Dresseur Pokémon | 288 / 108 | 50 | 8 h | 8 h | Argent + item rare | Emblème |
+| Maître Pokémon | illimité | 100 | 6 h | 6 h | Or + ETB | Emblème, Radar |
+| Grand maître Pokémon | illimité | 200 | 4 h | 4 h | Or + ETB | Emblème, Radar |
+
+- **Le Radar des boutiques redevient réservé au grade Maître Pokémon.**
+  - Plus bas, la fenêtre « Accès verrouillé » s'ouvre : « Tu dois d'abord déverrouiller le grade Maître Pokémon… ». Ce n'est plus la fiche du grade, qui avait fait croire à une panne le 2026-11-01.
+  - Le petit radar et la liste des boutiques de l'accueil restent ouverts à tous.
+- **Classeur limité** : un ajout de trop n'est pas enregistré et la même fenêtre explique quel grade débloquer. La collection déjà enregistrée n'est jamais retirée.
+- **Serveur** : délais du Booster PK et de la pièce dans `tools/supabase/009_grades_v3.sql` (3 tests, 163 en tout), à installer par le porteur.
+- **Ces règles répondent aussi à P1 à P3 de `docs/27`** : scans par grade, classeur limité par grade, Radar dès Maître Pokémon. Premium lèvera ces limites. Reste P4 (historique des prix sans Premium) et P6 (paiement).
+- **Premium v2** :
+  - bannière argentée, brillante, bordée d'or qui pulse ;
+  - flèche bien centrée dans sa bulle ;
+  - flèche « Retour au PK shop » en haut à gauche de l'offre ;
+  - icônes animées toutes alignées : classeur d'où une carte sort et rentre, goutte des PA qui flotte avec le badge « 2XP » et une étincelle, graphique avec une flèche qui fluctue. Scanner et radar sont inchangés.
+- **Ticket Or** : autant de pointillés que Bronze et Argent.
+- **Pokédex** : badge « Nouveau thème » sur Kyogre, Groudon et Rayquaza (liste et fiche).
+- **Groudon** : coulées de lave refaites :
+  - elles s'élargissent en descendant ;
+  - halo qui respire ;
+  - cœur incandescent ;
+  - traînées qui descendent et croûtes qui dérivent ;
+  - flaque au pied du volcan.
+- **Rayquaza** : pluie un peu moins forte.
+- Cache v143.
+
 ## 2026-11-06 — Premium : double XP sur les PA seulement (« go » du porteur)
 
 - **Décision P5** de `docs/27` : le double XP de l'abonnement Premium s'applique **aux PA seulement**, pas aux PK. C'était ma recommandation : avec les PK doublés, un abonné aurait coûté ≈ 210 € de lots par an.

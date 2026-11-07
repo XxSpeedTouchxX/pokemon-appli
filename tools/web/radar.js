@@ -539,8 +539,15 @@
   const radarProto = proto;
   // Radar ouvert à tous (2026-11-01, porteur : « le radar ne marche plus, quand on appuie dessus on retombe sur le
   // grade, refais-le fonctionner exactement comme avant ») : il n'est plus réservé au grade Maître Pokémon (verrou du
-  // 2026-10-28 retiré). radarLocked reste pour les appels existants et ne bloque plus rien.
-  radarProto.radarLocked = function () { return false; };
+  // 2026-10-28 retiré). Puis (2026-11-07, nouveaux avantages des grades du porteur) : « Radar de boutiques disponible »
+  // dès Maître Pokémon. Plus bas, un appui ouvre la fenêtre « Accès verrouillé » (pas la fiche du grade, qui avait fait
+  // croire à une panne le 2026-11-01). Le petit radar de l'accueil et la liste des boutiques restent ouverts à tous.
+  radarProto.radarLocked = function () {
+    const i = this.shopGrade ? this.shopGrade() : 5, min = PF_GRADES.findIndex(g => g.radar);
+    if (min < 0 || i >= min) return false;
+    this.setState({ shopLock: { g: min, kind: 'radar' } });
+    return true;
+  };
   radarProto.openRadar = function () {
     if (this.radarLocked()) return;
     // Ouverture sur « Ma zone » à 5 km (2026-10-24, demande du porteur), autour de la dernière position connue.

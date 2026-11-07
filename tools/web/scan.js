@@ -423,8 +423,9 @@
   const baseSaveScan = scanProto.saveScan;
   scanProto.saveScan = function () {
     const s = this.st(), pid = s.scanPid && this.scanTarget(s) === s.scanPid ? s.scanPid : null;
+    this.__binderBlocked = false;
     baseSaveScan.call(this);
-    if (!pid) return;
+    if (!pid || this.__binderBlocked) return;
     SCAN.cool.set(pid, Date.now() + 8000);
     SCAN.coolMsg = 'Carte ajoutée : place la suivante dans le cadre';
     SCAN.frames = []; SCAN.ev = {}; SCAN.since = Date.now();

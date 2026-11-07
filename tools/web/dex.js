@@ -401,6 +401,7 @@
     // Méga-évolution sans confirmation (2026-10-31, porteur : la confirmation s'ouvrait tout en bas de la fiche, hors de
     // l'écran, d'où « je n'arrive pas à méga-évoluer » et « un bouton en trop ») : un seul bouton, comme une évolution.
     v.sel = {
+      isTheme: [382, 383, 384].indexOf(sel) >= 0,
       img: dexSprite(sel, still), sz: dexSize(e, dexH(e), DEX_PX_FOCUS, still, fitFocus), size: (e.h / 10).toLocaleString('fr-FR') + ' m', cls: 'pkm-dex-big' + (dexSeen(s, sel) ? '' : ' pkm-dex-sil'), name: e.name, no: dexNo(e), genus: e.genus, own: own, lock: !own,
       secret: '🔒 Débloque-le avec tes PA pour découvrir sa description.',
       types: e.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })),
@@ -504,6 +505,8 @@
     document.addEventListener('keydown', key);
   };
   // Liste complète : recherche par nom ou n°, filtres, grille de 3 ; un appui ouvre la route et la fiche.
+  // Kyogre, Groudon et Rayquaza changent le fond de l'app quand on les choisit : badge « Nouveau thème » (2026-11-07, porteur).
+  const DEX_THEMED = [382, 383, 384];
   const DEX_FILTERS = [['all', 'Tous'], ['own', 'Débloqués'], ['lock', 'À débloquer'], ['leg', 'Légendaires']];
   dexProto.vDexList = function (s) {
     if (!s.dexList) return { open: false, items: [], filters: [] };
@@ -517,7 +520,7 @@
       return !q || fold(e.name).indexOf(q) >= 0 || (qn !== '' && String(e.n) === qn);
     }).map(e => {
       const own = dexOwn(s, e.n), price = dexPrice(e.n), ok = !own && (!e.from || dexOwn(s, e.from)) && pa >= price;
-      return { no: '#' + String(e.n).padStart(3, '0'), name: e.name, img: 'img/pokemon/icon/' + e.n + '.png', imgCls: dexSeen(s, e.n) ? '' : 'pkm-dex-sil',
+      return { no: '#' + String(e.n).padStart(3, '0'), name: e.name, isTheme: DEX_THEMED.indexOf(e.n) >= 0, img: 'img/pokemon/icon/' + e.n + '.png', imgCls: dexSeen(s, e.n) ? '' : 'pkm-dex-sil',
         status: own ? (s.buddy === e.n ? 'Compagnon' : 'Débloqué') : (price ? dexNum(price) + ' PA' : 'Offert'),
         // Prix avec le logo des PA (2026-11-01, porteur : « que le logo PA apparaisse avec la somme à côté »).
         hasPrice: !own && price > 0, noPrice: own || !price, amount: dexNum(price),
