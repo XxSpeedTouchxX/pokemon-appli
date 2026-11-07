@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-07 — Prompt de reprise pour une nouvelle conversation (demande du porteur)
+
+- `docs/29-prompt-nouvelle-conversation.md` : tout ce qu'une nouvelle conversation Claude doit savoir (dépôt et branche, serveur OVH avec Coolify et Axicall Pilot, Supabase sur api.dropicards.fr, fonction Stripe, construction et tests, ce qui marche, ce qui reste ouvert, règles de sécurité). Sans aucun secret.
+
+---
+
 ## 2026-11-07 — Connexion obligatoire pour utiliser l'app (demande du porteur)
 
 - Avec le serveur, **aucun accès à l'app sans être connecté** : sans session sur l'appareil, l'app reste sur les pages d'accueil (création du compte ; connexion pour un compte déjà connu, adresse préremplie, trousseau, Face ID / empreinte). « Passer » n'apparaît plus pour un compte déconnecté ; « Continuer sans compte pour l'instant » (réseau coupé) est retiré ; une adresse de page (#sorties…) ne contourne pas l'écran ; « Me déconnecter » ramène aussitôt à la connexion.
