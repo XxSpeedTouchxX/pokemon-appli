@@ -1,0 +1,91 @@
+# Fabrication des apps iOS et Android de Dropicards par Codemagic (docs/23, étape F).
+# Le code de l'app est le site (web/), emballé par Capacitor (mobile/).
+#
+# Aucune clé ici : tout se règle dans l'interface de Codemagic.
+#   - iOS     : Team settings › Integrations › Developer Portal › clé d'API App Store Connect
+#               nommée exactement « dropicards_asc » (rôle App Manager).
+#               Certificat « Apple Distribution » et profil App Store de com.dropicards.app :
+#               codemagic.yaml settings › Code signing identities (générés depuis la clé ci-dessus).
+#   - Android : codemagic.yaml settings › Code signing identities › Android keystores,
+#               clé de signature nommée exactement « dropicards_keystore ».
+#               Variable secrète GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS dans le groupe « google_play »
+#               (fichier JSON du compte de service Google Play Console).
+#
+# Lancement à la main (« Start new build ») : aucune fabrication automatique, pour rester
+# sous les 500 minutes gratuites par mois.
+
+workflows:
+  ios-testflight:
+    name: iOS · TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    working_directory: mobile
+    integrations:
+      app_store_connect: dropicards_asc
+    environment:
+      node: 22
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.dropicards.app
+    scripts:
+      - name: Dépendances Capacitor
+        script: npm ci
+      - name: Copie du site web/ dans le projet iOS
+        script: npx cap sync ios
+      - name: Signature (certificat et profil de Codemagic)
+        script: xcode-project use-profiles --project ios/App/App.xcodeproj
+      - name: Numéro de fabrication
+        script: |
+          # Numéro de fabrication = compteur de Codemagic pour ce workflow (toujours croissant).
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/" ios/App/App.xcodeproj/project.pbxproj
+      - name: Fabrication de l'IPA
+        script: |
+          xcode-project build-ipa \
+            --project ios/App/App.xcodeproj \
+            --scheme App
+    artifacts:
+      - $CM_BUILD_DIR/mobile/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Testeurs internes (toi) seulement : pas de vérification d'Apple pour TestFlight interne.
+        submit_to_testflight: false
+        submit_to_app_store: false
+
+  android-test-ferme:
+    name: Android · Test fermé
+    max_build_duration: 60
+    instance_type: linux_x2
+    working_directory: mobile
+    environment:
+      node: 22
+      java: 21
+      android_signing:
+        - dropicards_keystore
+      groups:
+        - google_play
+    scripts:
+      - name: Emplacement du SDK Android
+        script: echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+      - name: Dépendances Capacitor
+        script: npm ci
+      - name: Copie du site web/ dans le projet Android
+        script: npx cap sync android
+      - name: Fabrication de l'AAB signé
+        script: |
+          cd android
+          ./gradlew bundleRelease \
+            -PversionCode=$BUILD_NUMBER \
+            -PversionName=1.0.$BUILD_NUMBER
+    artifacts:
+      - $CM_BUILD_DIR/mobile/android/app/build/outputs/**/*.aab
+    publishing:
+      # Google Play refuse l'envoi automatique tant que la toute première version n'a pas été
+      # déposée à la main dans la Play Console : télécharge l'AAB de la 1re fabrication (Artifacts)
+      # et dépose-le dans Test fermé. Les suivantes partiront seules sur ce même canal.
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
+        track: alpha
+        submit_as_draft: true

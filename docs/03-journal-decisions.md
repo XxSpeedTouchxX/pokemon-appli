@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-07 — Apps iOS et Android avec Capacitor (« go » du porteur, `docs/23`)
+
+- **Expo et EAS écartés** : l'app est un site (Vue 3, `web/`), pas un projet React Native ; le porteur choisit la méthode de `docs/23` (Capacitor + Codemagic).
+- **Identifiant `com.dropicards.app`** pour iOS et Android (porteur), à la place de `fr.dropicards.app` écrit dans `docs/23` §3, étape G.
+- **Projet Capacitor 8.5.3** dans `mobile/` (`mobile/README.md`) : iPhone seulement, portrait, textes des autorisations (appareil photo, position, photothèque) ; `codemagic.yaml` à la racine (TestFlight interne, test fermé Google Play).
+- **Branche `claude/capacitor-stores`**, séparée de la branche publiée : dropicards.fr n'est pas touché.
+- **Pas encore fait** : travaux 2 à 4 de `docs/23` §4 (dont Premium et « Recharger mes PA » à masquer dans l'app avant toute soumission).
+
 ## 2026-11-07 — Paiement Premium branché avec Stripe (« go » du porteur)
 
 - **Décision P6 (`docs/27`)** : Stripe sur le site, dans le compte Stripe « DROPICARDS » du porteur, rattaché à sa micro-entreprise ; Stripe Tax ignoré (franchise de TVA, à confirmer avec un comptable).
