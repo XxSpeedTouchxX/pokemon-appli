@@ -1171,6 +1171,14 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 /* Hauteur limitée à la plus petite hauteur visible (100svh : barres de Safari affichées), sinon le haut de la fiche
    (le ticket) passait au-dessus de l'écran sur iPhone (2026-11-07, porteur). La fiche s'ouvre toujours en haut (pkshop.js). */
 .pkm-tks-sheet { max-height: 86vh; max-height: calc(100svh - 56px - env(safe-area-inset-top, 0px)); overflow-y: auto; overscroll-behavior: contain; }
+/* Rien ne rétrécit dans la fiche quand elle est moins haute que son contenu (2026-11-07, porteur : sur un écran peu haut,
+   l'encadré « Lot à gagner, Valeur, Tirage » se réduisait à un trait) : la fiche défile à la place. */
+.pkm-tks-sheet > * { flex-shrink: 0; }
+/* Ouverture par le bas et fermeture vers le bas, comme « Mon Pokédex » (2026-11-07, porteur). */
+.pkm-tks-sheet { animation: pkmDexlUp 0.48s cubic-bezier(0.32, 0.72, 0, 1) both; }
+.pkm-tks-wrap .pkm-pas-scrim { animation: pkmTksFade 0.32s ease-out both; }
+@keyframes pkmTksFade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pkm-tks-sheet, .pkm-tks-wrap .pkm-pas-scrim { animation: none; } }
 .pkm-tks-top { display: flex; align-items: center; gap: 18px; padding: 6px 4px 4px 10px; }
 .pkm-shop-ticket-xl { width: 104px; height: 70px; }
 .pkm-shop-ticket-xl .pkm-shop-ticket-in { font-size: 16px; }
@@ -1254,6 +1262,53 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-gr-row > i > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #FFD60A, #3DDC84); }
 .pkm-gr-prog small { font-size: 11.5px; line-height: 1.4; color: #AEB9D0; }
 .pkm-gr-new { display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: #3DDC84; color: #062012; font-size: 10.5px; font-weight: 900; letter-spacing: 0.02em; vertical-align: 1px; }
+
+/* Ticket acheté (2026-11-07, porteur) : ticket + « +1 », trois propositions (pkshop.js, ?anitk=1, 2 ou 3). */
+.pkm-tkfx { position: fixed; inset: 0; z-index: 66; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.pkm-tkfx-box { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.pkm-tkfx-tk { position: relative; display: block; transform: scale(1.7); filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5)); }
+.pkm-tkfx-tk .pkm-shop-ticket { display: flex; }
+.pkm-tkfx-plus { position: absolute; top: -34px; right: -44px; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 46px; color: #FFD60A; -webkit-text-stroke: 2px #2A1300; paint-order: stroke fill; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); opacity: 0; }
+.pkm-tkfx-cap { margin-top: 64px; padding: 6px 14px; border-radius: 999px; background: rgba(8, 12, 24, 0.82); color: #FFFFFF; font-size: 14px; font-weight: 800; opacity: 0; }
+.pkm-tkfx-v0 .pkm-tkfx-box { animation: pkmTkFade 1.5s ease both; }
+.pkm-tkfx-v0 .pkm-tkfx-plus, .pkm-tkfx-v0 .pkm-tkfx-cap { opacity: 1; }
+@keyframes pkmTkFade { 0% { opacity: 0; } 15%, 80% { opacity: 1; } 100% { opacity: 0; } }
+/* 1. Envol */
+.pkm-tkfx-v1 .pkm-tkfx-tk { animation: pkmTkPop 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.pkm-tkfx-v1 .pkm-tkfx-plus { animation: pkmTkPlus 1.6s ease-out 0.35s both; }
+.pkm-tkfx-v1 .pkm-tkfx-cap, .pkm-tkfx-v2 .pkm-tkfx-cap, .pkm-tkfx-v3 .pkm-tkfx-cap { animation: pkmTkCap 2.3s ease 0.3s both; }
+@keyframes pkmTkPop { 0% { transform: scale(0.2) rotate(-14deg); opacity: 0; } 60% { transform: scale(1.95) rotate(4deg); opacity: 1; } 100% { transform: scale(1.7) rotate(0); opacity: 1; } }
+@keyframes pkmTkPlus { 0% { opacity: 0; transform: translateY(18px) scale(0.4); } 25% { opacity: 1; transform: translateY(0) scale(1.25); } 40% { transform: translateY(-4px) scale(1); } 85% { opacity: 1; transform: translateY(-26px); } 100% { opacity: 0; transform: translateY(-40px); } }
+@keyframes pkmTkCap { 0% { opacity: 0; transform: translateY(8px); } 15%, 82% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+/* 2. Tampon */
+.pkm-tkfx-v2 .pkm-tkfx-tk { animation: pkmTkPop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both, pkmTkShake 0.32s ease-out 0.55s; }
+.pkm-tkfx-stamp { position: absolute; left: 50%; top: 50%; padding: 2px 8px; border: 3px solid #E5484D; border-radius: 8px; color: #E5484D; background: rgba(255, 255, 255, 0.85); font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 0.08em; transform: translate(-50%, -50%) rotate(-14deg) scale(3); opacity: 0; animation: pkmTkStamp 0.32s cubic-bezier(0.5, 0, 0.9, 0.6) 0.45s forwards; }
+@keyframes pkmTkStamp { to { opacity: 1; transform: translate(-50%, -50%) rotate(-14deg) scale(0.8); } }
+@keyframes pkmTkShake { 0%, 100% { translate: 0 0; } 25% { translate: -4px 2px; } 50% { translate: 4px -2px; } 75% { translate: -2px 1px; } }
+.pkm-tkfx-v2 .pkm-tkfx-plus { animation: pkmTkPlus 1.5s ease-out 0.75s both; }
+/* 3. Brillance */
+.pkm-tkfx-v3 .pkm-tkfx-tk { animation: pkmTkFlip 1.1s cubic-bezier(0.3, 0.7, 0.3, 1) both; }
+@keyframes pkmTkFlip { 0% { transform: scale(0.3) rotateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: scale(1.7) rotateY(720deg); opacity: 1; } }
+.pkm-tkfx-shine { position: absolute; inset: 0; border-radius: 10px; overflow: hidden; }
+.pkm-tkfx-shine::after { content: ''; position: absolute; top: -20%; bottom: -20%; width: 40%; left: -60%; background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0)); animation: pkmTkShine 0.8s ease-in-out 1.05s both; }
+@keyframes pkmTkShine { to { left: 120%; } }
+.pkm-tkfx-v3 .pkm-tkfx-plus { animation: pkmTkPlus 1.4s ease-out 1s both; }
+.pkm-tkfx-sp { position: absolute; left: 50%; top: 38%; width: 7px; height: 7px; border-radius: 50%; background: #FFD60A; box-shadow: 0 0 8px #FFD60A; opacity: 0; animation: pkmFwSpark 0.9s cubic-bezier(0.15, 0.7, 0.3, 1) forwards; }
+
+/* Achat direct confirmé (2026-11-07, porteur) : l'article, « Bravo ! », le message, confettis et feu d'artifice. */
+.pkm-lotfx { position: fixed; inset: 0; z-index: 65; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(3, 6, 14, 0.72); animation: pkmTksFade 0.3s ease-out both; }
+.pkm-lotfx-card { position: relative; width: 100%; max-width: 340px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 18px 18px; border-radius: 26px; border: 1px solid #FFD60A; background: radial-gradient(120% 80% at 50% 0%, rgba(255, 214, 10, 0.25), rgba(255, 214, 10, 0) 65%), #111A2C; color: #F3F6FC; text-align: center; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55); animation: pkmLotIn 0.6s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+@keyframes pkmLotIn { from { transform: translateY(60px) scale(0.85); opacity: 0; } to { transform: none; opacity: 1; } }
+.pkm-lotfx-glow { position: absolute; top: 18px; left: 50%; width: 220px; height: 220px; margin-left: -110px; border-radius: 50%; background: conic-gradient(from 0deg, rgba(255, 214, 10, 0.35), rgba(255, 214, 10, 0) 25%, rgba(255, 214, 10, 0.35) 50%, rgba(255, 214, 10, 0) 75%, rgba(255, 214, 10, 0.35)); animation: pkmSpin 6s linear infinite; pointer-events: none; }
+.pkm-lotfx-img { position: relative; height: 170px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.55)); animation: pkmLotItem 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) 0.15s both; }
+.pkm-lotfx-wide { height: 140px; }
+@keyframes pkmLotItem { 0% { transform: scale(0.3) rotate(-10deg); opacity: 0; } 70% { transform: scale(1.08) rotate(2deg); opacity: 1; } 100% { transform: none; opacity: 1; } }
+.pkm-lotfx-card h2 { position: relative; margin: 2px 0 0; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 32px; color: #FFD60A; -webkit-text-stroke: 1.4px #2A1300; paint-order: stroke fill; }
+.pkm-lotfx-card p { position: relative; margin: 0; font-size: 14.5px; line-height: 1.5; color: #E2E8F5; }
+.pkm-lotfx-ok { position: relative; width: 100%; min-height: 48px; margin-top: 4px; border: 0; border-radius: 999px; background: #FFD60A; color: #0B1120; font: inherit; font-size: 15px; font-weight: 900; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .pkm-lotfx, .pkm-lotfx-card, .pkm-lotfx-img, .pkm-lotfx-glow { animation: none; } }
+.pkm-tkfx::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(3, 6, 14, 0.62), rgba(3, 6, 14, 0.3) 70%); animation: pkmTkFade 2.4s ease both; }
+.pkm-tkfx-v0::before { animation-duration: 1.5s; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -1885,6 +1940,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=bfce0c32"></script>
+<script src="app.js?v=689e1708"></script>
 </body>
 </html>

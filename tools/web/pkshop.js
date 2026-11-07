@@ -119,8 +119,70 @@
     tickets[id] = (tickets[id] || 0) + 1;
     const left = (pk - item.price).toLocaleString('fr-FR');
     this.setState({ pk: pk - item.price, tickets: tickets, shopAsk: null, shopChoice: null,
-      toast: (item.kind === 'ticket' ? item.name + ' ajouté · tu en as ' + tickets[id] : item.name + (choice ? ' (' + choice + ')' : '') + ' · achat enregistré') + ' · il te reste ' + left + ' PK' });
+      toast: item.kind === 'ticket' ? item.name + ' ajouté · tu en as ' + tickets[id] + ' · il te reste ' + left + ' PK' : null });
     this.flash();
+    this.shopDone(id, choice, tickets[id]);
+  };
+  // ——— Après un achat (2026-11-07, porteur) ———
+  // Série du moment, citée dans le message des achats directs (à changer avec les sorties).
+  const SHOP_SERIES = '30ᵉ anniversaire';
+  // Ticket acheté : le ticket apparaît avec un « +1 ». Trois propositions, à choisir par le porteur (?anitk=1, 2 ou 3) :
+  //   1. Envol : le ticket surgit au centre, rebondit, « +1 » monte, puis il s'envole vers le ticket de la fiche ;
+  //   2. Tampon : le ticket surgit, un tampon « VALIDÉ » s'abat (secousse), « +1 » rebondit, quelques étincelles ;
+  //   3. Brillance : le ticket tourne sur lui-même (recto, verso), un reflet le traverse, « +1 » et une gerbe d'étoiles.
+  const SHOP_TKFX = (() => { try { const m = /[?&]anitk=([123])\b/.exec(location.search); return m ? Number(m[1]) : 1; } catch (e) { return 1; } })();
+  const shopStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return true; } };
+  const shopEsc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const shopTicketFx = (it, n) => {
+    const v = shopStill() ? 0 : SHOP_TKFX, ov = document.createElement('div');
+    ov.className = 'pkm-tkfx pkm-tkfx-v' + v; ov.setAttribute('aria-hidden', 'true');
+    let sparks = '';
+    if (v >= 2) for (let k = 0; k < 12; k++) sparks += '<i class="pkm-tkfx-sp" style="--a: ' + (k * 30) + 'deg; animation-delay: ' + (v === 2 ? 0.55 : 0.9) + 's"></i>';
+    ov.innerHTML = '<div class="pkm-tkfx-box"><span class="pkm-tkfx-tk"><span class="pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier + '"><span class="pkm-shop-ticket-in">' + shopEsc(it.tag) + '</span></span>'
+      + (v === 3 ? '<i class="pkm-tkfx-shine"></i>' : '') + (v === 2 ? '<b class="pkm-tkfx-stamp">VALIDÉ</b>' : '') + '</span>'
+      + '<b class="pkm-tkfx-plus">+1</b>' + sparks + '<span class="pkm-tkfx-cap">' + shopEsc(it.name) + ' · tu en as ' + (n || 1) + '</span></div>';
+    document.body.appendChild(ov);
+    if (v === 1) {
+      // Vers le ticket de la fiche ouverte (ou vers le haut de l'écran) à la fin.
+      setTimeout(() => {
+        const box = ov.querySelector('.pkm-tkfx-tk'), to = document.querySelector('.pkm-tks-top .pkm-shop-ticket-xl');
+        if (!box || !box.animate) return;
+        const a = box.getBoundingClientRect(), b = to ? to.getBoundingClientRect() : { left: a.left, top: 40, width: a.width, height: a.height };
+        const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+        box.animate([{ transform: 'translate(0, 0) scale(1.7)', opacity: 1 }, { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(0.6)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(0.55, 0, 0.7, 0.4)', fill: 'forwards' });
+      }, 1350);
+    }
+    setTimeout(() => ov.remove(), v === 0 ? 1600 : 2500);
+  };
+  // Achat direct : l'article apparaît, confettis et feu d'artifice (comme le Booster PK à 500 PK), et le message du porteur.
+  const shopLotText = (it, choice) => {
+    const mail = ' Tu vas recevoir très prochainement un e-mail t’indiquant la démarche à suivre pour réceptionner ';
+    if (it.id === 'achat-booster') return 'Tu viens d’acheter un booster Pokémon ' + SHOP_SERIES + '.' + mail + 'ton booster directement à ton domicile.';
+    if (it.id === 'achat-rare') return 'Tu viens d’acheter un item rare' + (choice ? ' : ' + choice : '') + ' de la série ' + SHOP_SERIES + '.' + mail + 'ton item directement à ton domicile.';
+    if (it.id === 'achat-etb-30') return 'Tu viens d’acheter l’ETB ' + SHOP_SERIES + ' (Coffret Dresseur d’élite).' + mail + 'ton ETB directement à ton domicile.';
+    return 'Tu viens d’acheter ' + it.name + '.' + mail + 'ton article directement à ton domicile.';
+  };
+  const shopLotFx = (it, choice) => {
+    const ov = document.createElement('div');
+    ov.className = 'pkm-lotfx'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Achat confirmé');
+    ov.innerHTML = '<div class="pkm-lotfx-card pkm-dark"><span class="pkm-lotfx-glow" aria-hidden="true"></span>'
+      + (it.img ? '<img class="pkm-lotfx-img' + (it.wide ? ' pkm-lotfx-wide' : '') + '" src="' + shopEsc(it.img) + '" alt="' + shopEsc(it.imgAlt || it.name) + '">' : '')
+      + '<h2>Bravo !</h2><p>' + shopEsc(shopLotText(it, choice)) + '</p><button type="button" class="pkm-lotfx-ok">Super !</button></div>';
+    const close = () => {
+      const card = ov.querySelector('.pkm-lotfx-card');
+      if (card && card.animate && !shopStill()) { card.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(40px) scale(0.96)', opacity: 0 }], { duration: 260, easing: 'ease-in', fill: 'forwards' }); ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 280, fill: 'forwards' }); setTimeout(() => ov.remove(), 280); }
+      else ov.remove();
+    };
+    ov.addEventListener('click', e => { if (e.target === ov || (e.target.closest && e.target.closest('.pkm-lotfx-ok'))) close(); });
+    document.body.appendChild(ov);
+    setTimeout(() => { const b = ov.querySelector('.pkm-lotfx-ok'); if (b) b.focus({ preventScroll: true }); }, 50);
+    if (typeof gmParty === 'function') setTimeout(() => gmParty(500), 250);
+  };
+  shopProto.shopDone = function (id, choice, count) {
+    const it = SHOP_ITEMS.find(x => x.id === id);
+    if (!it) return;
+    if (it.kind === 'ticket') shopTicketFx(it, count); else shopLotFx(it, choice);
+    if (typeof this.shopNotify === 'function') this.shopNotify();
   };
   // Recharger mes PA (2026-11-01, demande du porteur : « une boutique de PA avec 4 tarifs », dans le PK shop, rubrique
   // « Recharger mes PA » à côté de « Magasin », comme la maquette docs/20). Prix TTC et détail fixés par le porteur le
@@ -177,6 +239,18 @@
     const bar = box.querySelector('.pkm-tks-cd-bar i');
     if (bar && cyc) bar.style.width = Math.min(100, Math.max(0, (1 - c.ms / cyc) * 100)).toFixed(2) + '%';
   };
+  // Fermeture de la fiche d'un ticket : elle descend et le voile s'efface, puis elle se ferme (comme « Mon Pokédex »).
+  let shopSheetClosing = false;
+  const shopSheetSlide = done => {
+    const sheet = document.querySelector('.pkm-tks-sheet'), scrim = document.querySelector('.pkm-tks-wrap .pkm-pas-scrim');
+    let still = false; try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { still = true; }
+    if (shopSheetClosing) return;
+    if (!sheet || !sheet.animate || still) { done(); return; }
+    shopSheetClosing = true;
+    sheet.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(105%)' }], { duration: 380, easing: 'cubic-bezier(0.32, 0.72, 0, 1)', fill: 'forwards' });
+    if (scrim) scrim.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease-out', fill: 'forwards' });
+    setTimeout(() => { shopSheetClosing = false; done(); }, 360);
+  };
   shopProto.vPkShop = function (s) {
     const pk = Number(s.pk) || 0, tickets = s.tickets || {}, cg = s.cloudGame || {}, gi = this.shopGrade();
     const drawOf = it => (cg.draws && cg.draws[it.id] ? new Date(cg.draws[it.id]) : shopDrawOf(it.cycle, Date.now()));
@@ -202,7 +276,7 @@
         can: can, miss: open && !can, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
         ask: ask, idle: !ask, buyLabel: 'Acheter un ticket · ' + price, confirmText: 'Échanger ' + price + ' contre 1 ' + it.name.toLowerCase() + ' ?',
         buyOpen: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => this.shopBuy(it.id),
-        lock: () => this.shopLockOpen(it), close: () => this.setState({ shopTk: null, shopAsk: null })
+        lock: () => this.shopLockOpen(it), close: () => shopSheetSlide(() => this.setState({ shopTk: null, shopAsk: null }))
       };
     })();
     return {

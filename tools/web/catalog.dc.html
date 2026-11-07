@@ -1695,7 +1695,7 @@
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ pks.rules }}</p>
 <button type="button" onClick="{{ pks.openRules }}" style="flex: none; align-self: flex-start; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: var(--pkm-t1); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Règles des PK et PA</button>
 <sc-if value="{{ pks.sheet.open }}" hint-placeholder-val="{{ false }}">
-<div class="pkm-pas-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.sheet.close }}" class="pkm-pas-scrim"></button>
+<div class="pkm-pas-wrap pkm-tks-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.sheet.close }}" class="pkm-pas-scrim"></button>
 <section aria-label="{{ pks.sheet.name }}" role="dialog" aria-modal="true" class="pkm-dark pkm-pas-sheet pkm-tks-sheet">
 <div class="pkm-tks-top"><span class="{{ pks.sheet.ticketCls }}" aria-hidden="true"><span class="pkm-shop-ticket-in">{{ pks.sheet.tag }}</span></span><div><h2>{{ pks.sheet.name }}</h2><b class="pkm-shop-price"><img src="img/brand/pk.svg" alt="" width="24" height="24">{{ pks.sheet.priceN }}<small>PK</small></b></div></div>
 <div class="{{ pks.sheet.cdCls }}" data-end="{{ pks.sheet.cdEnd }}" data-cycle="{{ pks.sheet.cdCycle }}" role="timer" aria-label="{{ pks.sheet.cdAria }}">

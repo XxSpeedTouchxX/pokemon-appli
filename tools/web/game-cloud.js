@@ -187,14 +187,25 @@
         busy = false;
         const tickets = Object.assign({}, this.st().tickets || {}, { [id]: r.count | 0 }), free = gcFree(this.st());
         const it = SHOP_ITEMS.find(x => x.id === id) || { name: 'Article' };
+        // Achat direct : l'écran « Bravo » remplace le message du bas (2026-11-07, porteur).
         this.setState({ pk: free ? GC_INF : r.pk, tickets: tickets, shopAsk: null, shopChoice: null,
-          toast: (id.indexOf('ticket') === 0 ? it.name + ' ajouté · tu en as ' + (r.count | 0) + ' pour le prochain tirage'
-            : it.name + (r.choice ? ' (' + r.choice + ')' : '') + ' · achat réservé, envoi après vérification de ton identité')
-            + (free ? ' · mode Admin, rien débité' : ' · il te reste ' + Number(r.pk).toLocaleString('fr-FR') + ' PK') });
+          toast: id.indexOf('ticket') === 0 ? it.name + ' ajouté · tu en as ' + (r.count | 0) + ' pour le prochain tirage'
+            + (free ? ' · mode Admin, rien débité' : ' · il te reste ' + Number(r.pk).toLocaleString('fr-FR') + ' PK') : null });
         this.flash();
+        this.shopDone(id, r.choice, r.count | 0);
       }, e => { busy = false; this.gcFail(e, { shopAsk: null, shopChoice: null }); });
     };
   })(gcProto.shopBuy);
+
+  // E-mail de chaque achat (2026-11-07, porteur) : la fonction « notify » du serveur envoie à Dropicards (contact@)
+  // les achats pas encore signalés (tickets et achats directs), lus dans la base : l'app ne fait que la réveiller.
+  gcProto.shopNotify = function () {
+    if (!gcOn()) return;
+    Promise.resolve(Cloud.token()).then(t => {
+      if (!t) return;
+      return fetch(Cloud.url + '/functions/v1/notify/shop', { method: 'POST', headers: { apikey: Cloud.key, Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: '{}', cache: 'no-store', keepalive: true });
+    }).catch(() => { /* réessayé au prochain achat */ });
+  };
 
   // Mode Admin (réservé aux comptes admin, admAllowed) : PK et PA ajustés sur le serveur, avec un motif, dans le
   // journal (admin_adjust_wallet) ; « PA à volonté », prix modifiés et PK désactivés n'ont plus cours avec le serveur.

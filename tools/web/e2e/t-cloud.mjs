@@ -262,7 +262,9 @@ const tOr = page.locator('section[aria-label="Ticket Or"]');
 await tOr.locator('button:has-text("Acheter un ticket")').click(); await page.waitForTimeout(300);
 await tOr.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
 ok('admin : ticket Or acheté sans rien débiter (aucun grade demandé)', calls.some(c => c.startsWith('RPC buy_item') && c.includes('ticket-or')) && /rien débité/.test(await page.locator('body').innerText()));
-await tOr.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
+ok('achat : la fonction « notify » du serveur est réveillée (e-mail à Dropicards)', calls.some(c => c.startsWith('POST /functions/v1/notify/shop')));
+await page.waitForTimeout(1800);
+await tOr.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(700);
 const rare = page.locator('section[aria-label="Item rare au choix"]');
 await rare.locator('button:has-text("Acheter")').click(); await page.waitForTimeout(300);
 await rare.locator('button:has-text("Confirmer")').click({ force: true }); await page.waitForTimeout(400);
@@ -271,6 +273,7 @@ await rare.locator('button:has-text("Poster")').click(); await page.waitForTimeo
 await page.screenshot({ path: shot('cloud-shop-rare.png') });
 await rare.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
 ok('item rare au choix : « Poster » envoyé au serveur', calls.some(c => c.startsWith('RPC buy_item') && c.includes('achat-rare') && c.includes('Poster')));
+ok('item rare acheté : « Bravo ! … un item rare : Poster de la série 30ᵉ anniversaire »', /Tu viens d’acheter un item rare : Poster de la série 30ᵉ anniversaire/.test(await page.locator('.pkm-lotfx').innerText().catch(() => '')));
 await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.locator('button:has-text("Panneau Admin")').first().click(); await page.waitForTimeout(600);
 await page.locator('section[aria-label="Panneau Admin"] button:has-text("Quitter le mode Admin")').click(); await page.waitForTimeout(1200);

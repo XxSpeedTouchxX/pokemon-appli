@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-07 — PK shop : fiche glissée, animations d'achat, e-mail de chaque achat (demande du porteur)
+
+- **Fiche d'un ticket** : monte du bas à l'ouverture et redescend à la fermeture, comme « Mon Pokédex » ; l'encadré « Lot à gagner, Valeur, Tirage » ne rétrécit plus sur un écran peu haut (il se réduisait à un trait).
+- **Ticket acheté** : le ticket apparaît avec « +1 » ; 3 propositions à choisir (`?anitk=1` Envol, par défaut ; `2` Tampon « VALIDÉ » ; `3` Brillance qui tourne). **Choix du porteur attendu.**
+- **Achat direct** (booster, item rare, ETB) : écran « Bravo ! » avec l'article, confettis et feu d'artifice, et le message du porteur (« Tu viens d'acheter un booster Pokémon 30ᵉ anniversaire. Tu vas recevoir très prochainement un e-mail… à ton domicile ») ; la série du moment est une constante (`SHOP_SERIES`, `pkshop.js`).
+- **E-mail à Dropicards pour chaque achat** (contact@dropicards.fr, choix du porteur) : `tools/supabase/012_shop_notices.sql` (achats déjà signalés, 12 tests) et fonction du serveur `tools/supabase/functions/notify` (Brevo, 12 tests, `install-notify.sh`) ; guide `docs/30-guide-email-achats-pk-shop.md` ; **à installer par le porteur** (012, clé d'API Brevo dans Coolify, fonction).
+- **Tickets après le tirage (décision du porteur)** : chaque ticket vaut une chance pour le prochain tirage de sa couleur ; une fois ce tirage passé, tous ses tickets sont utilisés et sortent du solde (déjà le cas sur le serveur). Cache v155.
+
+---
+
 ## 2026-11-07 — Retouches : grades (PK gagnés au total, « Nouveau »), tickets, scanner, « Nouveau thème » (demande du porteur)
 
 - **Fiche de chaque grade** : « PK gagnés au total » (tous les PK gagnés depuis l'inscription, achats au PK shop non déduits : 5 000 gagnés et 2 000 dépensés = toujours 5 000), progression vers le grade (PK, compagnons, méga-évolutions) ; « Nouveau » au bout de chaque avantage absent du grade précédent (fiche du grade et Mon profil).

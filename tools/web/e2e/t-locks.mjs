@@ -60,6 +60,32 @@ await page.screenshot({ path: shot('locks-booster-500.png') });
 await page.evaluate(() => { window.__hiRand = false; });
 // 6. Ticket : compte à rebours.
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
+await page.evaluate(() => window.__pkm.setState({ pk: 20000 }));
+await page.locator('button[aria-label^="Ticket Bronze"]').first().click(); await page.waitForTimeout(120);
+const tkT = await page.evaluate(() => getComputedStyle(document.querySelector('.pkm-tks-sheet')).transform);
+ok('fiche du ticket : arrive du bas (en cours : ' + tkT + ')', tkT !== 'none' && tkT !== 'matrix(1, 0, 0, 1, 0, 0)');
+await page.waitForTimeout(600);
+// Achat d'un ticket : ticket + « +1 » (proposition 1, « Envol », par défaut).
+await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Acheter un ticket")').click(); await page.waitForTimeout(250);
+await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Confirmer")').click(); await page.waitForTimeout(700);
+ok('ticket acheté : animation du ticket Bronze avec « +1 » (Envol)', (await page.locator('.pkm-tkfx.pkm-tkfx-v1 .pkm-shop-t-bronze').count()) === 1 && (await page.locator('.pkm-tkfx-plus').innerText()) === '+1' && /Ticket Bronze · tu en as 1/.test(await page.locator('.pkm-tkfx-cap').innerText()));
+await page.screenshot({ path: shot('locks-ticket-plus1.png') });
+await page.waitForTimeout(2200);
+ok('animation retirée ensuite', (await page.locator('.pkm-tkfx').count()) === 0);
+await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(150);
+ok('fermeture de la fiche : elle descend avant de se fermer', (await page.locator('section[aria-label="Ticket Bronze"]').count()) === 1);
+await page.waitForTimeout(500);
+ok('fiche fermée', (await page.locator('section[aria-label="Ticket Bronze"]').count()) === 0);
+// Achat direct du booster : « Bravo ! », booster, confettis et feu d'artifice, message du porteur.
+const bst = page.locator('section[aria-label="Booster de la série du moment"]');
+await bst.locator('button:has-text("Acheter")').click(); await page.waitForTimeout(300);
+await bst.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(1200);
+const lot = await page.locator('.pkm-lotfx').innerText().catch(() => '');
+ok('booster acheté : « Bravo ! Tu viens d’acheter un booster Pokémon 30ᵉ anniversaire… à ton domicile »', /Bravo !/.test(lot) && /Tu viens d’acheter un booster Pokémon 30ᵉ anniversaire\. Tu vas recevoir très prochainement un e-mail t’indiquant la démarche à suivre pour réceptionner ton booster directement à ton domicile\./.test(lot) && (await page.locator('.pkm-lotfx img').count()) === 1);
+ok('booster acheté : confettis et feu d’artifice', (await page.locator('.pkm-party .pkm-fw').count()) >= 5);
+await page.screenshot({ path: shot('locks-achat-booster.png') });
+await page.locator('.pkm-lotfx button:has-text("Super !")').click(); await page.waitForTimeout(500);
+ok('« Super ! » ferme l’écran', (await page.locator('.pkm-lotfx').count()) === 0);
 await page.locator('button[aria-label^="Ticket Bronze"]').first().click(); await page.waitForTimeout(600);
 const cd = page.locator('.pkm-tks-cd');
 const s1 = await cd.locator('[data-u="s"]').innerText().catch(() => '');
@@ -68,6 +94,7 @@ await page.waitForFunction(v => { const e = document.querySelector('.pkm-tks-cd 
 const s2 = await cd.locator('[data-u="s"]').innerText().catch(() => '');
 ok('les secondes défilent (' + s1 + ' → ' + s2 + ')', s1 !== s2);
 await page.screenshot({ path: shot('locks-ticket-decompte.png') });
+ok('fiche du ticket : « Lot à gagner », « Valeur », « Tirage »', /Lot à gagner/.test(await page.locator('.pkm-tks-lines').innerText()) && /Valeur/.test(await page.locator('.pkm-tks-lines').innerText()) && /Tirage/.test(await page.locator('.pkm-tks-lines').innerText()));
 ok('fiche du ticket : plus de ligne « Prochain tirage » (le compte à rebours suffit)', !/Prochain tirage\n/.test(await page.locator('.pkm-tks-lines').innerText()) && !/Prochain tirage/.test(await page.locator('.pkm-tks-lines').innerText()));
 // Petit écran (barres de Safari) : le ticket reste entier en haut de la fiche.
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
@@ -75,6 +102,8 @@ await page.setViewportSize({ width: 375, height: 600 }); await page.waitForTimeo
 await page.locator('button[aria-label^="Ticket Or"]').first().click(); await page.waitForTimeout(700);
 const tkTop = await page.evaluate(() => { const t = document.querySelector('.pkm-tks-sheet .pkm-shop-ticket-xl').getBoundingClientRect(), sh = document.querySelector('.pkm-tks-sheet'); return { top: Math.round(t.top), scroll: sh.scrollTop }; });
 ok('petit écran : ticket entier en haut de la fiche (haut à ' + tkTop.top + ' px, défilement ' + tkTop.scroll + ')', tkTop.top >= 0 && tkTop.scroll === 0);
+const linesH = await page.locator('.pkm-tks-lines').evaluate(e => Math.round(e.getBoundingClientRect().height));
+ok('petit écran : l’encadré des 3 lignes garde sa hauteur (' + linesH + ' px)', linesH > 90);
 await page.screenshot({ path: shot('locks-ticket-petit-ecran.png') });
 await page.setViewportSize({ width: 390, height: 844 });
 // Laser du scanner de la barre en noir.
