@@ -80,7 +80,7 @@ await page.screenshot({ path: shot('passkey-connexion.png') });
 await fl.locator('button[aria-label="Me connecter avec Face ID ou mon empreinte"]').click(); await page.waitForTimeout(1500);
 const ses = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-cloud-session') || 'null'));
 ok('connecté sans adresse ni mot de passe : session ' + (ses && ses.uid), ses && ses.uid === U.id && calls.includes('POST /auth/v1/passkeys/authentication/verify'));
-ok('profil du serveur prérempli (pseudo Sacha)', (await page.locator('form[aria-label="Ton profil de dresseur"] input[name=nickname]').inputValue().catch(() => '')) === 'Sacha');
+ok('directement dans l’app (pas de page 3), « Content de te revoir, Sacha ! »', (await page.locator('form[aria-label="Ton profil de dresseur"]').count()) === 0 && /Content de te revoir, Sacha/.test(await page.locator('body').innerText()));
 
 // 3. Retrait de l'appareil.
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.onb = 0; d.tuto = 'done'; localStorage.setItem(k, JSON.stringify(d)); }, KEY);

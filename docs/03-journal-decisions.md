@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-07 — Connexion directe, sans rechoisir son Pokémon (demande du porteur)
+
+- **Au lancement**, un compte Dropicards déjà créé sur l'appareil mais déconnecté ouvre d'elle-même la page de connexion : adresse préremplie, mot de passe proposé par le trousseau du téléphone (champ « username »), bouton Face ID / empreinte ; « Passer » garde l'app sans compte.
+- **Après la connexion** (mot de passe, Face ID, code de mot de passe oublié) : entrée directe dans l'app, « Content de te revoir, … ! » ; plus de page « Ton profil de dresseur » (âge, pseudo, starter) quand le profil du serveur est complet. Nouvel appareil : le starter du compte devient le compagnon, didacticiel passé (toujours dans Mon profil). Profil incomplet : la page 3 reste, préremplie.
+- **Déconnexions involontaires** : un seul renouvellement de session à la fois (plusieurs appels simultanés à l'ouverture pouvaient faire refuser le jeton et déconnecter le compte). Cache v150.
+
+---
+
 ## 2026-11-07 — Face ID / empreinte remis pour tout le monde (« go » du porteur)
 
 - La connexion par clé d'accès (Face ID, Touch ID, empreinte), cachée le 2026-11-06, est de nouveau visible pour tous (plus besoin de `?passkey=1`) : connexion, Mon profil, proposition après la connexion. Code et serveur (Supabase Auth 2.197) inchangés. **Essai sur un vrai téléphone à faire** (compte connecté d'abord). Cache v149.

@@ -83,8 +83,31 @@
     const cloud = Cloud.on(), signed = cloud && Cloud.signedIn(), busy = !!s.obBusy;
     const mode = cloud && (s.obMode === 'login' || s.obMode === 'reset') ? s.obMode : 'signup';
     const fail = (e, more) => this.setState(Object.assign({ obBusy: false, obErr: (e && e.message) || CLOUD_ERR.other, obNote: '' }, more || {}));
-    // Après une connexion : le profil du serveur préremplit la page 3 (âge, pseudo, starter), à vérifier puis valider.
+    // Après une connexion (2026-11-07, porteur : « qu'il ne me demande pas de rechoisir quel Pokémon je souhaite avoir à
+    // chaque fois ») : profil du serveur complet (pseudo, âge, starter) → entrée directe dans l'app, sans la page 3 ni
+    // le remerciement du starter ; sur un nouvel appareil, le starter du compte redevient le compagnon et le didacticiel
+    // est passé (il reste dans Mon profil). Profil incomplet (ancien compte) : la page 3 préremplie, à compléter.
     const fromProfile = pr => {
+      const line = pr && pr.starter ? (PA_STARTERS.find(st => st[1] === pr.starter) || [''])[0] : '';
+      const nick = pr && pr.pseudo ? String(pr.pseudo).trim() : '';
+      if (line && PA_LINES[line] && nick.length >= 2 && pr.age_range && ST_AGES.some(a => a[0] === pr.age_range)) { enter(pr, line, nick); return; }
+      toPage3(pr);
+    };
+    const enter = (pr, line, nick) => {
+      const t = this.st(), ses = Cloud.session(), a = t.account && t.account.email ? t.account : null;
+      const email = (ses && ses.email) || t.obEmail || (a && a.email) || '';
+      if (!t.evo || !PA_LINES[t.evo.line]) { this.paChoose(line, true); this.setState({ tuto: 'done', tutoStep: -2 }); }
+      this.setState({
+        account: { email: email, news: !!pr.news_optin && pr.age_range !== 'u15', age: pr.age_range, at: (a && a.at) || realToday(), server: true, uid: ses ? ses.uid : '' },
+        trainer: Object.assign({}, t.trainer || {}, { email: email, name: nick }),
+        obEmail: undefined, obPwd: '', obShow: false, obNews: undefined, obNick: undefined, obAge: '', obStarter: '', obErr: '', obNote: '',
+        obBusy: false, obCode: '', obMode: 'signup', obResetSent: false, obAfter: '', obPending: null, obLocal: false,
+        toast: 'Content de te revoir, ' + nick + ' !'
+      });
+      this.finishOnb(false);
+      setTimeout(() => this.gcSync(), 300);
+    };
+    const toPage3 = pr => {
       const line = pr && pr.starter ? (PA_STARTERS.find(st => st[1] === pr.starter) || [''])[0] : '';
       this.setState({ obBusy: false, obErr: '', obNote: '', obPwd: '', obMode: 'signup', onb: 3,
         obNick: pr && pr.pseudo ? pr.pseudo : undefined, obAge: pr && pr.age_range ? pr.age_range : '', obStarter: line, obNews: pr ? !!pr.news_optin : undefined });
@@ -115,7 +138,7 @@
       email: s.obEmail !== undefined ? s.obEmail : (tr.email || (acc && acc.email) || ''), pwd: s.obPwd || '', news: s.obNews !== undefined ? !!s.obNews : !!(acc && acc.news),
       title: T[0], lead: T[1], go: busy ? 'Un instant…' : T[2], busy: busy ? 'true' : 'false',
       isSignup: mode === 'signup', isLogin: mode === 'login', isReset: mode === 'reset', showPwd: mode !== 'reset' || resetSent, showCode: resetSent,
-      pwLabel: resetSent ? 'Nouveau mot de passe' : 'Mot de passe', pwAuto: mode === 'login' ? 'current-password' : 'new-password',
+      pwLabel: resetSent ? 'Nouveau mot de passe' : 'Mot de passe', pwAuto: mode === 'login' ? 'current-password' : 'new-password', emailAuto: mode === 'login' ? 'username' : 'email',
       pwHold: mode === 'login' ? 'Ton mot de passe' : needPwd ? '12 caractères au moins' : 'Déjà choisi (facultatif)',
       pwHint: mode === 'login' ? '' : needPwd ? '12 caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.' : 'Laisse vide pour garder ton mot de passe actuel.',
       hasHint: mode !== 'login',
@@ -426,9 +449,19 @@
   let stLinked = Cloud.on() ? Cloud.fromLink() : null;
   // Rôle du compte relu à chaque ouverture (un admin retiré perd aussitôt le mode Admin, admAllowed).
   let stRoleChecked = false;
+  // Écran de connexion au lancement (2026-11-07, porteur) : un compte Dropicards déjà créé sur cet appareil mais
+  // déconnecté → la page de connexion s'ouvre d'elle-même (adresse préremplie, mot de passe proposé par le trousseau du
+  // téléphone, Face ID / empreinte) ; « Passer » garde l'app sans compte. Une fois par ouverture de l'app.
+  let stLoginAsked = false;
   const stBaseHome = proto.vHome;
   proto.vHome = function (x) {
     const r = stBaseHome.call(this, x);
+    if (!stLoginAsked) {
+      stLoginAsked = true;
+      const a = x.s.account;
+      if (Cloud.on() && !Cloud.signedIn() && a && a.server && a.email && !x.s.onb && x.s.tuto === 'done' && !stLinked)
+        setTimeout(() => { const t = this.st(); if (!t.onb && !Cloud.signedIn()) this.setState({ onb: 2, obMode: 'login', obEmail: undefined, obPwd: '', obErr: '', obNote: '' }); }, 0);
+    }
     if (!stRoleChecked && Cloud.on() && Cloud.signedIn()) {
       stRoleChecked = true;
       Cloud.profile().then(() => this.setState({ cloudChecked: Date.now() })).catch(() => {});

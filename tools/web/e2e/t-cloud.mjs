@@ -146,13 +146,25 @@ await fl.locator('button[type=submit]').click(); await page.waitForTimeout(600);
 ok('mauvais mot de passe refusé', /Adresse ou mot de passe incorrect/.test(await page.locator('.pkm-acc-err').innerText().catch(() => '')));
 await page.screenshot({ path: shot('cloud-connexion.png') });
 await fl.locator('input[name=password]').fill('mot-de-passe-solide-42'); await fl.locator('button[type=submit]').click(); await page.waitForTimeout(900);
-const f3 = page.locator('form[aria-label="Ton profil de dresseur"]');
-ok('connecté : profil du serveur prérempli (pseudo, âge, Carapuce)', (await f3.count()) === 1 && (await f3.locator('input[name=nickname]').inputValue()) === 'Ondine' && await f3.locator('button:has-text("Entre 25 et 35 ans")').getAttribute('aria-pressed') === 'true' && (await page.locator('button:has-text("Choisir Carapuce comme compagnon")').count()) === 1);
-await f3.locator('input[name=nickname]').fill('Ondine d’Azuria');
-await page.click('button:has-text("Choisir Carapuce comme compagnon")'); await page.waitForTimeout(1500);
-ok('profil changé enregistré sur le serveur : ' + users['ondine@exemple.fr'].meta.pseudo, users['ondine@exemple.fr'].meta.pseudo === 'Ondine d’Azuria' && calls.some(c => c.startsWith('PATCH /rest/v1/profiles')));
+ok('connecté : entrée directe dans l’app, sans rechoisir le Pokémon (pas de page 3)', (await page.locator('form[aria-label="Ton profil de dresseur"]').count()) === 0 && (await page.locator('section[aria-label^="Bienvenue"]').count()) === 0);
+ok('« Content de te revoir, Ondine ! »', /Content de te revoir, Ondine/.test(await page.locator('body').innerText()));
 st = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
-ok('compte « serveur » sur ce nouvel appareil', st.account && st.account.server === true && st.trainer.name === 'Ondine d’Azuria');
+ok('compte « serveur » sur ce nouvel appareil, starter du compte (Carapuce) en compagnon, didacticiel passé', st.account && st.account.server === true && st.trainer.name === 'Ondine' && st.evo && st.evo.line === 'cara' && st.tuto === 'done' && !st.onb);
+ok('aucun profil réécrit sur le serveur', !calls.some(c => c.startsWith('PATCH /rest/v1/profiles')));
+// Relancement de l'app déconnecté : la page de connexion s'ouvre d'elle-même, adresse préremplie.
+await page.evaluate(() => localStorage.removeItem('pkm-cloud-session'));
+await page.goto(E2E + '/?cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+fl = page.locator('form[aria-label="Connecte-toi"]');
+ok('relancement déconnecté : page de connexion ouverte, adresse préremplie (trousseau : « username »)', (await fl.count()) === 1 && (await fl.locator('input[name=email]').inputValue()) === 'ondine@exemple.fr' && await fl.locator('input[name=email]').getAttribute('autocomplete') === 'username');
+await page.screenshot({ path: shot('cloud-relance.png') });
+await fl.locator('input[name=password]').fill('mot-de-passe-solide-42'); await fl.locator('button[type=submit]').click(); await page.waitForTimeout(900);
+ok('connecté en un appui, directement dans l’app', (await page.locator('section[aria-label^="Bienvenue"]').count()) === 0 && (await page.evaluate(() => !!localStorage.getItem('pkm-cloud-session'))));
+await page.goto(E2E + '/?cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+ok('relancement connecté : pas de page de connexion', (await page.locator('form[aria-label="Connecte-toi"]').count()) === 0);
+await page.evaluate(() => localStorage.removeItem('pkm-cloud-session'));
+await page.goto(E2E + '/?cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+await page.click('button:has-text("Passer")'); await page.waitForTimeout(700);
+ok('« Passer » : l’app sans compte', (await page.locator('section[aria-label^="Bienvenue"]').count()) === 0);
 await ctx.close();
 
 // 3. Mot de passe oublié.
@@ -167,7 +179,7 @@ ok('code envoyé, champs code et nouveau mot de passe', (await fr.count()) === 1
 await fr.locator('input[name=code]').fill(CODE); await fr.locator('input[name=password]').fill('nouveau-mot-de-passe-99');
 await page.screenshot({ path: shot('cloud-oubli.png') });
 await fr.locator('button[type=submit]').click(); await page.waitForTimeout(900);
-ok('mot de passe changé, connecté, profil prérempli', users['ondine@exemple.fr'].pwd === 'nouveau-mot-de-passe-99' && (await page.locator('form[aria-label="Ton profil de dresseur"]').count()) === 1);
+ok('mot de passe changé, connecté, directement dans l’app', users['ondine@exemple.fr'].pwd === 'nouveau-mot-de-passe-99' && (await page.locator('form[aria-label="Ton profil de dresseur"]').count()) === 0 && !!(await page.evaluate(() => localStorage.getItem('pkm-cloud-session'))));
 await ctx.close();
 
 // 4. Adresse déjà inscrite, puis réseau coupé.

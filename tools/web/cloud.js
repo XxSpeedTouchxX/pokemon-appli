@@ -9,6 +9,7 @@
   const CLOUD_URL = 'https://api.dropicards.fr';
   // Clé « anon » de Supabase (SERVICE_SUPABASEANON_KEY dans Coolify, rôle « anon », donnée par le porteur le 2026-11-06).
   const CLOUD_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc5Mzk1OTI2MCwiZXhwIjo0OTQ5NjMyODYwLCJyb2xlIjoiYW5vbiJ9.MHlBLPLkoVqE9-SnparqMbxnkG7cQpRngeSHC5HmZss';
+  let cloudRefreshing = null;
   const CLOUD_LS = 'pkm-cloud-session';
   const CLOUD_ERR = {
     network: 'Impossible de joindre Dropicards. Vérifie ta connexion, puis réessaie.',
@@ -106,14 +107,22 @@
       const s = cloudLs.get();
       if (!s) return null;
       if (s.expires_at - Date.now() > 60000) return s.access_token;
-      try {
-        const j = await this.req('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: s.refresh_token } });
-        const v = this.keep(j);
-        return v ? v.access_token : null;
-      } catch (e) {
-        if (e.code !== 'network') cloudLs.set(null);
-        throw e;
-      }
+      // Un seul renouvellement à la fois (2026-11-07) : à l'ouverture, plusieurs appels (jeu, profil, Premium) partaient
+      // ensemble avec le même jeton de renouvellement ; le serveur n'en accepte qu'un, et l'échec des autres
+      // déconnectait le compte. Si un autre onglet a déjà renouvelé la session, sa session est gardée.
+      if (!cloudRefreshing) cloudRefreshing = (async () => {
+        try {
+          const j = await this.req('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: s.refresh_token } });
+          const v = this.keep(j);
+          return v ? v.access_token : null;
+        } catch (e) {
+          const now = cloudLs.get();
+          if (now && now.refresh_token !== s.refresh_token && now.expires_at - Date.now() > 60000) return now.access_token;
+          if (e.code !== 'network') cloudLs.set(null);
+          throw e;
+        } finally { cloudRefreshing = null; }
+      })();
+      return cloudRefreshing;
     },
     // Inscription : le profil (pseudo, âge, starter, nouveautés) part avec le compte ; tools/supabase/003_inscription.sql
     // le vérifie et le range. Réponse sans « identities » : l'adresse a déjà un compte.

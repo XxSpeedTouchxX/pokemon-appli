@@ -2211,7 +2211,7 @@ PKCOUNTER
 <h1 class="pkm-acc-h">{{ ob.acc.title }}</h1>
 <p class="pkm-acc-p">{{ ob.acc.lead }}</p>
 <label class="pkm-acc-l">Adresse e-mail
-<input class="pkm-tr-in" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="Ex. : sacha@exemple.fr" value="{{ ob.acc.email }}" onChange="{{ ob.acc.onEmail }}" aria-invalid="{{ ob.acc.emailBad }}">
+<input class="pkm-tr-in" type="email" name="email" autocomplete="{{ ob.acc.emailAuto }}" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="Ex. : sacha@exemple.fr" value="{{ ob.acc.email }}" onChange="{{ ob.acc.onEmail }}" aria-invalid="{{ ob.acc.emailBad }}">
 </label>
 <sc-if value="{{ ob.acc.showCode }}" hint-placeholder-val="{{ false }}"><label class="pkm-acc-l">Code reçu par e-mail
 <input class="pkm-tr-in pkm-acc-code" type="text" name="code" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="6 chiffres" value="{{ ob.acc.code }}" onChange="{{ ob.acc.onCode }}">
