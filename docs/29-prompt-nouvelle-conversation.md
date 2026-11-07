@@ -75,6 +75,18 @@ Tu reprends le projet **Dropicards** (nom de code PKM-App), une app pour les col
   - réserver Studio à Tailscale ;
   - vérifier la fermeture des ports 8000, 6001 et 6002 (`tools/server/close-ports.sh`).
 - **Collection sur le serveur**, liens de la Communauté (`PF_LINKS` dans `tools/web/profile.js`) : à venir.
+- **« Recharger mes PA »** (PK shop) : les 4 packs payants (4,99 € à 19,99 €) **s'affichent mais ne sont pas payables** ; le paiement des packs n'est pas branché (seul le Premium l'est). La « 1ʳᵉ recharge doublée » est à valider.
+- **Tirages au sort du PK shop** : l'app vend les tickets, mais **le tirage n'est pas fait par l'app**. Il reste à prévoir le règlement, l'organisateur et la remise du lot (7 jours après confirmation, pièce d'identité du gagnant vérifiée). Le coût réel des lots est à comparer au budget.
+- **E-mails Brevo** : le premier e-mail reçu est arrivé en spam chez Gmail (à surveiller).
+
+### 3 bis. Détails techniques utiles
+
+- **Webhook Stripe** : `https://api.dropicards.fr/functions/v1/stripe/webhook`. Événements écoutés : `checkout.session.completed`, `customer.subscription.*`, `invoice.paid` et `invoice.payment_failed`. Stripe Tax n'est pas activé (franchise de TVA). En cas de souci, regarder : Stripe › Webhooks › la destination › onglet des événements (une ligne rouge donne la raison).
+- **Fonctions du serveur** : `VERIFY_JWT=false` (la fonction vérifie elle-même la connexion par `/auth/v1/user`, et les messages de Stripe par leur signature).
+- **Comptes admin** : 2 comptes ont le rôle `admin` dans la table `profiles`.
+- **Sauvegardes** : une sauvegarde OVH chaque nuit, et une sauvegarde quotidienne de la base sur le serveur. **Aucun essai de restauration n'a encore été fait.**
+- **Tests SQL** : ils demandent un Postgres 16 local, à installer dans la machine de travail de la conversation (jamais le vrai serveur). Ils rejouent `001` à `010`, puis les fichiers de `tools/supabase/tests/`.
+- **Prompt d'exploitation du serveur** pour l'assistant « Axicall Control » : `docs/19`.
 
 ### 5. Règles à ne jamais enfreindre
 
