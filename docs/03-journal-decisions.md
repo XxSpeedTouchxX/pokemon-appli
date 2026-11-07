@@ -26,7 +26,7 @@
   - 20 vérifications.
 - **Guide du porteur** : `docs/28-guide-paiement-premium-stripe.md` (mode test d'abord, puis production avec les pages légales).
 - P4 (historique des prix sans Premium) mise en attente par le porteur (tout le monde garde tout l'historique pour l'instant).
-- Installation sur le serveur (même jour, porteur) : 007, mot de passe des admins, 008, 009 et 010 dans Studio, vérifiés (4 × « true »). Suite : réglages de Stripe en mode test (`docs/28` §4).
+- Installation sur le serveur (même jour, porteur) : 007, mot de passe des admins, 008, 009 et 010 dans Studio, vérifiés (4 × « true »). Puis, en mode test (porteur) : produit et 2 prix avec leurs clés de recherche, portail client, clé restreinte (5 droits), destination « Dropicards serveur » (6 événements, charge « instantanée »), 2 variables dans Coolify, fonction installée (3 × OK), **paiement de test réussi, Premium actif dans l'app**. Suite : passage en paiements réels (activation du compte, réglages refaits sur le vrai compte, pages légales).
 - Cache v146.
 
 ## 2026-11-07 — Retouches du Premium (2) et du solde de « Jeux » (demande du porteur)
