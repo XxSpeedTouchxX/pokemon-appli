@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
@@ -48,4 +49,8 @@
     <!-- L'app reste installable sans appareil photo ni GPS (recherche et import restent possibles) -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+
+    <!-- Rappels (PA à minuit, Booster PK, pièce) : alarmes ordinaires, pas d'alarme exacte (permission réservée par
+         Google Play aux réveils et agendas) ; le module de notifications la déclare, elle est retirée ici. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove" />
 </manifest>

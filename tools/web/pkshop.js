@@ -217,8 +217,8 @@
       }),
       // Rubriques (2026-11-01, porteur) : « Magasin » (les articles) et « Recharger mes PA » (packs de PA en argent réel).
       ...shopTabs(this, s),
-      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Tirages au sort le dimanche à 20 h (Bronze toutes les 2 semaines, Argent chaque mois, Or tous les 2 mois), fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi.',
-      openRules: () => this.legalOpen('pk')
+      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Tirages au sort le dimanche à 20 h (Bronze toutes les 2 semaines, Argent chaque mois, Or tous les 2 mois), selon le règlement officiel ci-dessous ; le gagnant est prévenu par e-mail. Apple et Google ne sont ni organisateurs ni partenaires des tirages. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi.',
+      openRules: () => this.legalOpen('pk'), openReglement: () => this.legalOpen('reglement')
     };
   };
   // Barre des tickets sous le compteur de PK (seulement si on en a) ; elle ouvre le PK shop.

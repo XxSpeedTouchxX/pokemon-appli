@@ -1,7 +1,7 @@
 {
   "appId": "com.dropicards.app",
   "appName": "Dropicards",
-  "webDir": "../web",
+  "webDir": "www",
   "backgroundColor": "#FFD60A",
   "ios": {
     "contentInset": "never",
@@ -9,5 +9,17 @@
   },
   "android": {
     "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 500,
+      "launchAutoHide": true,
+      "backgroundColor": "#FFD60A",
+      "showSpinner": false
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_dropicards",
+      "iconColor": "#FFD60A"
+    }
   }
 }

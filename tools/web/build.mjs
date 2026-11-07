@@ -1,17 +1,43 @@
 // Génère la démo web de Dropicards, nom de code PKM-App (dossier web/) à partir de la maquette du canevas Design.
 // Source : docs/12-maquette-v5/Main.dc.html (gabarit + logique). Usage : npm ci && npm run build
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync, rmSync, cpSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { relative } from 'node:path';
 import { compile } from '@vue/compiler-dom';
 import { transformSync } from 'esbuild';
 import { applyMarginPatches } from './margin-patch.mjs';
+import { legalTexts, LEGAL_PAGES } from './legal-texts.mjs';
 import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens, BUDDY_THEMES, NIGHT_THEME } from './theme.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const SRC = ROOT + 'docs/12-maquette-v5/Main.dc.html';
-const OUT = ROOT + 'web/';
+// Mode « app » (DROPI_APP=1, 2026-11-07, « go » du porteur ; docs/23 et docs/29) : la même app, fabriquée pour les
+// apps iOS et Android (Capacitor, mobile/) dans mobile/www au lieu de web/. Le site dropicards.fr ne change pas.
+// Différences (app.js : constante DROPI_APP ; tools/web/native.js) :
+// - masqués : Premium, « Recharger mes PA », mode Admin, partenaires fictifs et mentions « démo », gain du partage ;
+// - éléments originaux à la place des contenus des jeux vidéo Pokémon : les images de web/img/pokemon/ sont
+//   remplacées par celles de mobile/overlay/img/pokemon/ (tools/brand/app/make_aura.py), le nom « Pokédex » par
+//   APP_DEX_NAME, la Poké Ball des emblèmes de grade par la gemme des PK (mobile/overlay/img/grades/) ;
+// - pas de service worker (le code est dans l'app) ; fonctions du téléphone (notifications, partage, vibrations).
+const APP = process.env.DROPI_APP === '1';
+const OUT = ROOT + (APP ? 'mobile/www/' : 'web/');
 const IMG_SRC = ROOT + 'docs/12-maquette-v5/img/';
+const APP_DEX_NAME = 'Bestiaire';
+// Appareil du Bestiaire (app) : les rouges de dex.css (boutons, contours) passent aux prunes de l'Aura, comme le dessin
+// (tools/brand/app/make_app_brand.py, même palette).
+const APP_DEX_PALETTE = { '#FF5A5A': '#E59BD6', '#FF3B3B': '#D77BC6', '#F25562': '#D77BC6', '#F0333F': '#B95AAB', '#E2202F': '#9B3C8F',
+  '#D51E2C': '#8E3384', '#B5121F': '#7A2A71', '#9E0F1B': '#68235F', '#8E0D18': '#5C1F55', '#7E0A14': '#4C1946', '#3A0A0E': '#1E061E' };
+const appDexCss = css => Object.entries(APP_DEX_PALETTE).reduce((t, [a, b]) => t.split(a).join(b).split(a.toLowerCase()).join(b), css);
+if (APP) {
+  // Copie de web/ (données, images, polices…), sans ce qui sert seulement au site ni les sprites des jeux, puis les
+  // fichiers propres à l'app (mobile/overlay) par-dessus. app.js et index.html sont refaits plus bas.
+  // Les pages publiques (version site, avec Premium) ne vont pas dans l'app : elle a son panneau légal (variante app).
+  const SKIP = new Set(['sw.js', '_headers', '_redirects', 'email', 'img/pokemon', 'app.js', 'index.html', ...Object.values(LEGAL_PAGES)]);
+  rmSync(OUT, { recursive: true, force: true });
+  cpSync(ROOT + 'web', OUT, { recursive: true, filter: p => !SKIP.has(relative(ROOT + 'web', p).split('\\').join('/')) });
+  cpSync(ROOT + 'mobile/overlay', OUT, { recursive: true });
+}
 
 const src = readFileSync(SRC, 'utf8');
 const dc = src.split('<x-dc>')[1].split('</x-dc>')[0];
@@ -100,6 +126,19 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
   if (!FRAG[name] || ALIAS[name] === undefined) throw new Error('Fragment réutilisé inconnu : ' + name);
   return ALIAS[name] ? FRAG[name].trim().split(ALIAS[name] + '.').join(o + '.') : FRAG[name].trim();
 });
+// App (DROPI_APP) : Premium et « Recharger mes PA » absents des écrans (règles d'Apple 3.1.1 et de Google Play sur les
+// achats numériques ; aucune mention du paiement sur le site, décision du porteur du 2026-11-07).
+if (APP) {
+  FRAG['premium-banner'] = '';
+  FRAG['premium-sheet'] = '';
+  const fragCut = (k, re, label) => {
+    if (!re.test(FRAG[k])) throw new Error('App : ' + label + ' introuvable');
+    FRAG[k] = FRAG[k].replace(re, '');
+  };
+  fragCut('pkshop', /<div role="tablist" aria-label="PK shop" class="pkm-shop-tabs">[\s\S]*?<\/div>\n/, 'rubriques du PK shop');
+  // La rubrique et sa fenêtre « Ton achat de PA », jusqu'à la fin de l'écran des PA (pks.isPa).
+  fragCut('pkshop', /<sc-if value="\{\{ pks\.isPa \}\}" hint-placeholder-val="\{\{ false \}\}">\n<section aria-label="Recharger mes PA"[\s\S]*?<section aria-label="Ton achat de PA"[\s\S]*?<\/section><\/div>\n<\/sc-if>\n<\/sc-if>\n/, 'rubrique « Recharger mes PA »');
+}
 // Compteur de PK (fragment pk-counter) à gauche de l'avatar : accueil et grands titres (Collection, Marché, Territoire).
 {
   const avatar = '<button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" style="';
@@ -329,7 +368,7 @@ patchRe(/(<span style="font-weight: 600">Retour à la page d’accueil<\/span>[\
   tpl = tpl.slice(0, b) + '\n' + FRAG['profile-more'].trim() + '\n' + DISC + '\n' + FRAG['profile-ver'].trim() + tpl.slice(c + DISC.length);
 }
 // Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
-patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + FRAG['passkey-offer'] + FRAG['premium-sheet'] + FRAG['grade-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + FRAG['passkey-offer'] + FRAG['premium-sheet'] + FRAG['grade-lock'] + FRAG['account-delete'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Abonnement Premium (premium.js, 2026-11-06, porteur) : bannière en haut du PK shop (Magasin) et de Mon profil.
 patch('<section aria-label="Tickets du tirage au sort" class="pkm-shop-tks">', FRAG['premium-banner'] + '<section aria-label="Tickets du tirage au sort" class="pkm-shop-tks">');
 patch(FRAG['profile-trainer'] + '\n' + FRAG['profile-notif'], FRAG['premium-banner'] + FRAG['profile-trainer'] + '\n' + FRAG['profile-notif']);
@@ -750,7 +789,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js').replace('__BUILD_VERSION__', 'v' + (/pkm-demo-v(\d+)/.exec(readFileSync(ROOT + 'web/sw.js', 'utf8')) || [0, '?'])[1]), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), cloudJs = mod('cloud.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), notifJs = mod('notif.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), gradedJs = mod('graded.js'), sfxJs = mod('sfx.js'), gameCloudJs = mod('game-cloud.js'), passkeyJs = mod('passkey.js'), premiumJs = mod('premium.js'), navJs = mod('nav.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js').replace('__BUILD_VERSION__', 'v' + (/pkm-demo-v(\d+)/.exec(readFileSync(ROOT + 'web/sw.js', 'utf8')) || [0, '?'])[1]), backupJs = mod('backup.js'), legalJs = '  const LEGAL_DATA = ' + JSON.stringify(legalTexts({ app: APP })) + ';\n' + mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), cloudJs = mod('cloud.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), notifJs = mod('notif.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), gradedJs = mod('graded.js'), sfxJs = mod('sfx.js'), gameCloudJs = mod('game-cloud.js'), passkeyJs = mod('passkey.js'), premiumJs = mod(APP ? 'premium-app.js' : 'premium.js'), navJs = mod('nav.js'), nativeJs = mod('native.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -793,13 +832,15 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + cloudJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + notifJs + dexJs + voiceJs + tutoJs + ficheJs + gradedJs + sfxJs + gameCloudJs + passkeyJs + premiumJs + navJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + cloudJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + notifJs + dexJs + voiceJs + tutoJs + ficheJs + gradedJs + sfxJs + gameCloudJs + passkeyJs + premiumJs + navJs + nativeJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
    docs/12-maquette-v5/Main.dc.html : ne pas le modifier à la main. Catalogue réel (web/data/cards.json), collection de démo fictive. */
 (function () {
   'use strict';
+  // App iOS et Android (build DROPI_APP=1, mobile/www) ou site (web/) : voir tools/web/native.js.
+  const DROPI_APP = ${APP};
   // Socle minimal attendu par la logique de la maquette : état local et nouveau rendu à chaque changement.
   class DCLogic {
     constructor(props) { this.props = props || {}; }
@@ -813,7 +854,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${cloudJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${notifJs}${dexJs}${voiceJs}${tutoJs}${ficheJs}${gradedJs}${sfxJs}${gameCloudJs}${passkeyJs}${premiumJs}${navJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${cloudJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${notifJs}${dexJs}${voiceJs}${tutoJs}${ficheJs}${gradedJs}${sfxJs}${gameCloudJs}${passkeyJs}${premiumJs}${navJs}${nativeJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -942,7 +983,7 @@ ${code}
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') inst.saveFlush(); else retryNow(); });
   window.addEventListener('pagehide', () => inst.saveFlush());
   // Hors ligne et installation (hébergement uniquement ; refusé dans les pages claude.ai).
-  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  if (!DROPI_APP && 'serviceWorker' in navigator && location.protocol === 'https:') {
     // Mise à jour (2026-10-30, porteur : « le didacticiel n'est pas à jour sur l'appli ») : la nouvelle version est
     // cherchée à chaque ouverture et à chaque retour sur l'app ; dès qu'elle est installée, l'app se recharge une fois,
     // de préférence quand elle passe en arrière-plan (collection déjà enregistrée), sinon au prochain retour.
@@ -1017,7 +1058,7 @@ nav[aria-label="Aller à une série"] { background: rgba(10, 17, 48, 0.88); back
 @keyframes pkmScanLine { from { top: 4%; } to { top: 94%; } }
 ${readFileSync(new URL('./fx.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./games.css', import.meta.url), 'utf8')}
-${readFileSync(new URL('./dex.css', import.meta.url), 'utf8')}
+${APP ? appDexCss(readFileSync(new URL('./dex.css', import.meta.url), 'utf8')) : readFileSync(new URL('./dex.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./rules.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./premium.css', import.meta.url), 'utf8')}
 ${cssVars()}
@@ -1099,8 +1140,22 @@ for (const [pkg, , weights] of FONT_FILES) {
 mkdirSync(OUT + 'img', { recursive: true });
 // Démo hébergée : app.js minifié (esbuild, version figée, sortie identique d'une machine à l'autre) ; environ 40 %
 // de moins une fois compressé. Les sources lisibles restent dans tools/web ; tools/web/artifact.html n'est pas minifié.
+// App (DROPI_APP) : libellés propres à l'app, comptés (un libellé disparu ou en trop fait échouer le build).
+// « Pokédex » devient APP_DEX_NAME (nom original, 2026-11-07, porteur : « remplace le nom Pokédex ») ; la mention du
+// pied de page n'annonce plus une démo.
+const APP_TEXTS = [
+  ['Arbre de Pokévolution', 'Arbre d’évolution'],
+  ['Pokévolution', 'évolution'],
+  ['POKÉDEX', APP_DEX_NAME.toUpperCase()],
+  ['Pokédex', APP_DEX_NAME],
+  ['pokédex', APP_DEX_NAME.toLowerCase()],
+  ['Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante', 'Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) · application indépendante']
+];
+const appText = t => APP_TEXTS.reduce((acc, [from, to]) => acc.split(from).join(to), t);
+const appSrc = APP ? appText(app) : app, indexSrc = APP ? appText(index) : index;
+if (APP && (/Pokédex|POKÉDEX|pokédex|Pokévolution/.test(appSrc + indexSrc) || indexSrc.indexOf('Démo Dropicards · ') >= 0 || indexSrc.indexOf(APP_TEXTS[5][1]) < 0)) throw new Error('App : libellé « Pokédex » ou mention « Démo » restants');
 const appMin = '/* Dropicards · démo web générée par tools/web/build.mjs (sources : tools/web, docs/12-maquette-v5). */\n'
-  + transformSync(app, { minify: true, charset: 'utf8', legalComments: 'none' }).code;
+  + transformSync(appSrc, { minify: true, charset: 'utf8', legalComments: 'none' }).code;
 // Logo et icônes : chaque adresse porte l'empreinte du fichier (?v=…), pour que téléphones et navigateurs reprennent
 // le nouveau dessin dès qu'il change, au lieu de garder l'ancien en cache sous le même nom (2026-10-29, porteur :
 // « au lancement, toujours l'ancien logo »). Manifeste compris (icônes de l'app installée).
@@ -1113,8 +1168,54 @@ const appOut = brandVer(appMin);
 writeFileSync(OUT + 'app.js', appOut);
 // app.js porte aussi son empreinte (2026-10-30) : une nouvelle version n'est jamais confondue avec l'ancienne en cache.
 const appVer = 'app.js?v=' + createHash('sha256').update(appOut).digest('hex').slice(0, 8);
-writeFileSync(OUT + 'index.html', brandVer(index).replace(/manifest\.webmanifest(\?v=[0-9a-f]+)?"/, manifestVer + '"').replace('<script src="app.js"></script>', '<script src="' + appVer + '"></script>'));
-writeFileSync(ROOT + 'tools/web/artifact.html', artifact);
+writeFileSync(OUT + 'index.html', brandVer(indexSrc).replace(/manifest\.webmanifest(\?v=[0-9a-f]+)?"/, manifestVer + '"').replace('<script src="app.js"></script>', '<script src="' + appVer + '"></script>'));
+if (!APP) writeFileSync(ROOT + 'tools/web/artifact.html', artifact);
+// Pages publiques (2026-11-07 ; docs/23 §2 point 3) : confidentialité, conditions, règlement des tirages, assistance et
+// mentions légales, demandées par l'App Store et le Play Store (adresses dropicards.fr/confidentialite, etc.). Mêmes textes
+// que le panneau de l'app (legal-texts.mjs, variante site), en pages simples sans script. Site seulement.
+if (!APP) {
+  const L = legalTexts({ app: false }), esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const ORDER = ['privacy', 'terms', 'reglement', 'help', 'mentions'];
+  const TITLE = { privacy: 'Politique de confidentialité', terms: 'Conditions générales d’utilisation', reglement: 'Règlement des tirages au sort', help: 'Assistance', mentions: 'Mentions légales' };
+  for (const k of ORDER) {
+    const nav = ORDER.map(x => x === k ? '<b>' + esc(TITLE[x]) + '</b>' : '<a href="/' + LEGAL_PAGES[x] + '">' + esc(TITLE[x]) + '</a>').join(' · ');
+    const blocks = L.sections[k].blocks.map(([t, p]) => '<section><h2>' + esc(t) + '</h2><p>' + esc(p).replace(/contact@dropicards\.fr/g, '<a href="mailto:contact@dropicards.fr">contact@dropicards.fr</a>') + '</p></section>').join('\n');
+    const page = `<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(TITLE[k])} · Dropicards</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<style>
+:root { color-scheme: dark; }
+body { margin: 0; background: #0B1120; color: #F3F6FC; font: 16px/1.6 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+header a { color: #FFD60A; font-weight: 800; font-size: 20px; text-decoration: none; }
+nav { font-size: 14px; color: #9AA8C3; margin-bottom: 24px; }
+nav a, p a { color: #A8B6FF; }
+h1 { font-size: 26px; line-height: 1.25; margin: 16px 0 8px; }
+h2 { font-size: 17px; margin: 22px 0 6px; color: #FFD60A; }
+p { margin: 0; color: #C9D3EA; }
+footer { margin-top: 32px; font-size: 13px; color: #7D8BA8; }
+</style>
+</head>
+<body>
+<main>
+<header><a href="/">Dropicards</a></header>
+<nav>${nav}</nav>
+<h1>${esc(TITLE[k])}</h1>
+${blocks}
+<footer>Mis à jour le ${esc(L.updated)} · Dropicards, application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</footer>
+</main>
+</body>
+</html>
+`;
+    mkdirSync(OUT + LEGAL_PAGES[k], { recursive: true });
+    writeFileSync(OUT + LEGAL_PAGES[k] + '/index.html', page);
+  }
+}
 copyFileSync(fileURLToPath(new URL('./node_modules/vue/dist/vue.runtime.global.prod.js', import.meta.url)), OUT + 'vendor/vue.runtime.global.prod.js');
 // MapLibre GL (licence BSD) pour le Radar : module ES chargé seulement à l'ouverture de l'écran.
 // Publiés en « .js » (2026-11-01) : sur le serveur nginx de dropicards.fr, les « .mjs » partaient sans type JavaScript,
@@ -1144,5 +1245,5 @@ mkdirSync(TESS + 'lang', { recursive: true });
 ].forEach(([from, to]) => copyFileSync(fileURLToPath(new URL('./node_modules/' + from, import.meta.url)), TESS + to));
 const imgs = readdirSync(IMG_SRC).filter(f => f.endsWith('.webp'));
 imgs.forEach(f => copyFileSync(IMG_SRC + f, OUT + 'img/' + f));
-console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères, ' + appMin.length + ' minifié), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli, thème : '
+console.log((APP ? 'App générée : mobile/www/index.html, mobile/www/app.js (' : 'Démo générée : web/index.html, web/app.js (') + app.length + ' caractères, ' + appMin.length + ' minifié), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli, thème : '
   + themed.replaced + ' couleurs du gabarit et ' + themedJs.replaced + ' de la logique en variables, ' + themed.surfaces + ' surfaces sombres.');

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icône des notifications Android (barre d'état) : gemme des PK, blanche, éclair découpé. Dessin original Dropicards. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M12,1.5L21.1,6.75L21.1,17.25L12,22.5L2.9,17.25L2.9,6.75Z M13.4,5.2L8.6,13.1L11.5,13.1L10,18.8L15.6,10.4L12.7,10.4L14.9,5.2Z" />
+</vector>

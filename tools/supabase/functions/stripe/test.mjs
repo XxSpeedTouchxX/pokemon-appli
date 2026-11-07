@@ -7,9 +7,9 @@ import { makeHandler, verifySignature } from './index.ts';
 
 const R = String(process.pid) + 'r' + Math.floor(Math.random() * 1e6); // identifiants Stripe uniques à chaque passage
 const SUB = 'sub_F' + R, INV = 'in_F' + R;
-const PORT = process.env.PGPORT || '5499', DB = process.env.PGDB || 't7';
+const PORT = process.env.PGPORT || '5499', DB = process.env.PGDB || 't7', HOST = process.env.PGHOST || '/tmp';
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l);
-const sql = (q, role) => execFileSync('runuser', ['-u', 'postgres', '--', 'psql', '-h', '/tmp', '-p', PORT, '-d', DB, '-tAq', '-v', 'ON_ERROR_STOP=1',
+const sql = (q, role) => execFileSync('runuser', ['-u', 'postgres', '--', 'psql', '-h', HOST, '-p', PORT, '-d', DB, '-tAq', '-v', 'ON_ERROR_STOP=1',
   '-c', (role ? 'set role ' + role + '; ' : '') + q], { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim();
 const lit = v => v === null || v === undefined ? 'null' : typeof v === 'boolean' || typeof v === 'number' ? String(v) : "'" + String(v).replace(/'/g, "''") + "'";
 const out = t => t === '' ? null : t === 't' ? true : t === 'f' ? false : /^[{[]/.test(t) ? JSON.parse(t) : t;
@@ -18,6 +18,11 @@ const out = t => t === '' ? null : t === 't' ? true : t === 'f' ? false : /^[{[]
 const email = 'stripe-' + process.pid + '-' + Math.floor(Math.random() * 1e6) + '@test.fr';
 const UID = sql("insert into auth.users (email, email_confirmed_at) values (" + lit(email) + ", now() - interval '8 days') returning id");
 const tokens = { 'tok-ok': { id: UID, email: email } };
+// Comptes à supprimer (route delete_account, 011) : un abonné Premium (DEL1) et un joueur sans Stripe (DEL2).
+const email1 = 'del1-' + R + '@test.fr', email2 = 'del2-' + R + '@test.fr';
+const DEL1 = sql("insert into auth.users (email, email_confirmed_at) values (" + lit(email1) + ", now()) returning id");
+const DEL2 = sql("insert into auth.users (email, email_confirmed_at) values (" + lit(email2) + ", now()) returning id");
+tokens['tok-del1'] = { id: DEL1, email: email1 }; tokens['tok-del2'] = { id: DEL2, email: email2 };
 
 // ——— Faux Stripe ———
 const KEY = 'sk_test_faux', WH = 'whsec_faux_secret';
@@ -38,7 +43,9 @@ async function fakeFetch(url, init = {}) {
     }
     if (u.pathname === '/v1/checkout/sessions') { S.sessions.push(p); return reply(200, { id: 'cs_F' + S.sessions.length, url: 'https://checkout.stripe.com/c/pay/cs_F' + S.sessions.length }); }
     if (u.pathname === '/v1/billing_portal/sessions') { S.portal++; return reply(200, { url: 'https://billing.stripe.com/p/session/F' + S.portal, customer: p.get('customer') }); }
+    if (u.pathname === '/v1/subscriptions' && init.method === 'GET') return reply(200, { data: Object.values(S.subs).filter(x => x.customer === p.get('customer')) });
     const m = u.pathname.match(/^\/v1\/subscriptions\/(sub_\w+)$/);
+    if (m && S.subs[m[1]] && init.method === 'DELETE') { S.subs[m[1]].status = 'canceled'; return reply(200, S.subs[m[1]]); }
     if (m && S.subs[m[1]]) return reply(200, S.subs[m[1]]);
     return reply(404, { error: { message: 'inconnu ' + u.pathname } });
   }
@@ -124,6 +131,18 @@ ok('message inconnu : accepté sans rien changer (200)', (await hook({ id: 'evt_
 const noKey = makeHandler(k => (k === 'STRIPE_SECRET_KEY' ? '' : env[k]), fakeFetch);
 const nk = await noKey(new Request('http://edge/stripe/checkout', { method: 'POST', headers: { Authorization: 'Bearer tok-ok' }, body: '{"plan":"year"}' }));
 ok('clé Stripe absente sur le serveur : « pas encore configuré » (503)', nk.status === 503 && /pas encore configuré/.test((await nk.json()).error));
+// 5. Supprimer mon compte (011).
+const SUBD = 'sub_D' + R, CUSD = 'cus_D' + R;
+sql('select public.premium_set_customer(' + lit(DEL1) + ', ' + lit(CUSD) + ')', 'service_role');
+S.subs[SUBD] = { id: SUBD, customer: CUSD, status: 'active', livemode: false, cancel_at_period_end: false, metadata: { user_id: DEL1 }, items: { data: [{ current_period_end: end, price: prices[0] }] } };
+sql("select public.premium_apply(" + lit(DEL1) + ", " + lit(CUSD) + ", " + lit(SUBD) + ", 'month', 'active', now() + interval '20 days', false, false)", 'service_role');
+ok('supprimer sans être connecté : refusé (401)', (await call('delete_account', {})).status === 401);
+const d1 = await call('delete_account', {}, 'tok-del1');
+ok('abonné Premium supprime son compte (' + d1.status + ')', d1.status === 200 && d1.j.deleted === true);
+ok('son abonnement Stripe est arrêté tout de suite', S.subs[SUBD].status === 'canceled' && S.calls.some(c => c.method === 'DELETE' && c.path === '/v1/subscriptions/' + SUBD));
+ok('son compte est effacé de la base', sql('select count(*) from auth.users where id = ' + lit(DEL1)) === '0' && sql('select count(*) from public.premium where user_id = ' + lit(DEL1)) === '0');
+const d2 = await call('delete_account', {}, 'tok-del2');
+ok('joueur sans abonnement : compte effacé, aucun appel à Stripe pour lui', d2.status === 200 && sql('select count(*) from auth.users where id = ' + lit(DEL2)) === '0' && !S.calls.some(c => (c.p.get('customer') || '') === '' && c.path === '/v1/subscriptions' && c.method === 'GET'));
 ok('aucune clé secrète dans les réponses ni dans les appels à la base', !JSON.stringify(res).includes(KEY));
 
 console.log(res.join('\n'));

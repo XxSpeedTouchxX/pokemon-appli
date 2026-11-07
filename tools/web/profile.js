@@ -108,7 +108,42 @@
         ? 'Ton compte Dropicards (adresse, pseudo, âge, compagnon) est enregistré sur notre serveur. Ta collection reste sur cet appareil pour l’instant.'
         : 'Connecte-toi pour enregistrer ton compte Dropicards. En attendant, ton pseudo et ta collection restent sur cet appareil.';
     } else r.trainer.cloudOn = false;
+    // Supprimer mon compte (2026-11-07, « go » du porteur ; docs/23 §2 point 2, règle d'Apple 5.1.1(v), RGPD) :
+    // le compte sur le serveur (s'il existe) puis tout ce qui est sur cet appareil ; l'app repart de zéro.
+    const ses2 = Cloud.on() ? Cloud.session() : null, busy = !!s.delBusy;
+    r.del = {
+      open: () => this.setState({ delOpen: true, delErr: '' }), close: () => { if (!busy) this.setState({ delOpen: false, delErr: '' }); },
+      isOpen: !!s.delOpen, busyAttr: String(busy),
+      go: () => this.pfDeleteAccount(),
+      goLabel: busy ? 'Suppression…' : 'Supprimer définitivement',
+      text: ses2
+        ? 'Ton compte Dropicards (' + (ses2.email || 'adresse') + ') sera effacé de notre serveur, avec ton pseudo, tes PK, tes PA, ton Bestiaire, tes tickets et tout abonnement lié au compte, qui sera arrêté. Puis tout ce qui est sur ce téléphone : collection, photo, réglages.'
+        : 'Tout ce qui est sur ce téléphone sera effacé : ton profil, ta collection, ta photo, tes PK, tes PA et tes réglages.',
+      warn: 'C’est définitif : rien ne pourra être récupéré.',
+      hasErr: !!s.delErr, err: s.delErr || ''
+    };
     return r;
+  };
+  // Efface tout ce que l'app garde sur l'appareil, puis recharge : premier écran, comme à l'installation.
+  proto.pfWipeDevice = function () {
+    this.saveNow = this.saveFlush = () => {};
+    try { Object.keys(localStorage).filter(k => /^pkm-/.test(k)).forEach(k => localStorage.removeItem(k)); } catch (e) { /* stockage indisponible */ }
+    try { sessionStorage.clear(); } catch (e) { /* rien */ }
+    location.replace(location.pathname);
+  };
+  proto.pfDeleteAccount = async function () {
+    if (this.st().delBusy) return;
+    this.setState({ delBusy: true, delErr: '' });
+    try {
+      if (Cloud.on() && Cloud.session()) await Cloud.deleteAccount();
+      this.pfWipeDevice();
+    } catch (e) {
+      const msg = e && e.message === 'premium_actif' ? 'Ton abonnement n’a pas pu être arrêté pour l’instant. Réessaie dans quelques minutes, ou écris-nous à contact@dropicards.fr.'
+        : e && e.code === 'network' ? 'Impossible de joindre Dropicards. Vérifie ta connexion, puis réessaie.'
+        : e && e.status === 401 ? 'Ta session a expiré : reconnecte-toi (Mon profil › Me reconnecter), puis recommence.'
+        : 'La suppression n’a pas abouti. Réessaie, ou écris-nous à contact@dropicards.fr.';
+      this.setState({ delBusy: false, delErr: msg });
+    }
   };
 
   // ——— Grades (2026-10-14 ; conditions et avantages du 2026-10-28, demande du porteur) ———

@@ -165,6 +165,25 @@ export function makeHandler(env, fetchImpl = fetch) {
     return json(200, { url: s.url });
   }
 
+  // Suppression du compte (2026-11-07, 011_suppression_compte.sql ; règle d'Apple 5.1.1(v), RGPD) : tout abonnement
+  // Stripe du joueur encore en cours est arrêté tout de suite (plus aucun prélèvement), puis le compte est effacé par
+  // account_delete (journaux gardés, anonymisés). Les factures déjà payées restent chez Stripe (comptabilité).
+  async function deleteAccount(req) {
+    const u = await userOf(req);
+    if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards pour le supprimer.');
+    const cust = await rpc('premium_customer', { uid: u.id });
+    if (cust) {
+      const list = await stripe('GET', '/subscriptions', { customer: cust, status: 'all', limit: 20 });
+      for (const sub of (list && list.data) || []) {
+        if (['active', 'trialing', 'past_due', 'unpaid', 'incomplete', 'paused'].includes(sub.status)) {
+          await stripe('DELETE', '/subscriptions/' + encodeURIComponent(sub.id), null, 'dropicards-delete-' + sub.id);
+        }
+      }
+    }
+    await rpc('account_delete', { uid: u.id });
+    return json(200, { deleted: true });
+  }
+
   // Abonnement relu chez Stripe (source de vérité, quel que soit l'ordre d'arrivée des messages), puis rangé.
   async function syncSubscription(subId, hintUid, live) {
     const sub = await stripe('GET', '/subscriptions/' + encodeURIComponent(subId));
@@ -246,6 +265,7 @@ export function makeHandler(env, fetchImpl = fetch) {
       if (route === 'checkout') return await checkout(req);
       if (route === 'portal') return await portal(req);
       if (route === 'webhook') return await webhook(req);
+      if (route === 'delete_account') return await deleteAccount(req);
       return fail(404, 'Chemin inconnu');
     } catch (e) {
       console.error(route, e && e.message);

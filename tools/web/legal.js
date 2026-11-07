@@ -4,54 +4,11 @@
   // « à compléter » : ils dépendent du porteur (nom ou société, adresse, contact) et ne sont jamais inventés.
   // Textes à faire relire avant toute sortie publique (docs/14-verifications-avant-publication.md).
   // Ce module partage la portée des autres : ses noms commencent par LEGAL_ ou legal.
-  const LEGAL_TODO = '[à compléter par l’éditeur avant publication]';
-  const LEGAL_UPDATED = '11 octobre 2026';
-  // Refonte du 2026-10-11 (demande du porteur) : mentions conformes à l'article 6-III de la loi pour la confiance dans
-  // l'économie numérique (LCEN), confidentialité (RGPD, stockage local sans cookie), sources et licences, jeux et PK.
-  const LEGAL = {
-    mentions: { label: 'Mentions légales', blocks: [
-      ['Éditeur', 'Personne physique : nom et prénom, adresse, téléphone et adresse électronique. Société : dénomination, forme, capital, siège, numéro RCS ou SIRET et, le cas échéant, numéro de TVA. ' + LEGAL_TODO],
-      ['Directeur de la publication', LEGAL_TODO],
-      ['Contact', 'Adresse électronique de contact : ' + LEGAL_TODO + '. Elle sert aussi aux demandes sur tes données et aux signalements de contenu.'],
-      ['Hébergeur', 'OVH SAS (OVHcloud), 2 rue Kellermann, 59100 Roubaix, France · www.ovhcloud.com · serveur dédié situé dans l’Union européenne.'],
-      ['Indépendance', 'Dropicards est une application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company, ni à Cardmarket, eBay ou aux enseignes citées. Pokémon et les noms, illustrations et marques associés appartiennent à leurs propriétaires respectifs ; ils sont affichés seulement pour identifier les cartes et les produits de ta collection.'],
-      ['Propriété intellectuelle', 'Le nom Dropicards, son logo, ses textes et son code appartiennent à l’éditeur, sauf les éléments de tiers cités dans « Sources et licences ». Toute reproduction sans accord est interdite.'],
-      ['Sources et licences', 'Catalogue, visuels et prix des cartes : TCGdex (projet communautaire) et, pour certains visuels, pokemontcg.io. Logos de séries absents de TCGdex : collection ptcg-assets (GitHub). Cotes : Cardmarket uniquement, via TCGdex et les fichiers publics de Cardmarket. Boutiques : © les contributeurs d’OpenStreetMap, données sous licence ODbL. Logos des enseignes (Radar) : Wikimedia Commons et Wikipédia ; ce sont des marques de leurs propriétaires, affichées seulement pour identifier les boutiques. Fond de carte : OpenFreeMap (données OpenStreetMap). Compagnons : sprites Pokémon via PokeAPI. Lecture du scan : Tesseract.js (Apache 2.0). Carte : MapLibre GL JS (BSD-3). Interface : Vue.js (MIT). Polices : Luckiest Guy (Apache 2.0), Sora et Plus Jakarta Sans (SIL Open Font License).'],
-      ['Liens sortants', 'Les liens vers Amazon, eBay, Fnac, Cultura, Micromania ou d’autres sites sont fournis pour information, sans affiliation ni commission. L’éditeur n’est pas responsable du contenu de ces sites.'],
-      ['Droit applicable', 'Ces mentions et l’app sont soumises au droit français. Mises à jour le ' + LEGAL_UPDATED + '.']
-    ] },
-    privacy: { label: 'Confidentialité', blocks: [
-      ['En bref', 'Dropicards n’a ni compte ni serveur pour tes données : ta collection, tes ventes, tes réglages, tes PK et tes alertes restent dans ce navigateur, sur ton appareil. L’éditeur n’y a pas accès et ne les reçoit jamais.'],
-      ['Stockage sur l’appareil', 'L’app utilise le stockage local du navigateur (pas de cookie) pour garder ta collection et tes réglages, et une copie hors ligne de l’app et du catalogue. Ce stockage est strictement nécessaire au service que tu demandes : il ne demande pas de consentement et ne sert à aucun suivi.'],
-      ['Position', 'Ta position n’est demandée que si tu touches « Me localiser ». Elle est arrondie à environ 100 m, utilisée sur l’appareil pour trouver les boutiques proches, et n’est ni enregistrée ni envoyée.'],
-      ['Appareil photo', 'Le scan lit le numéro et le nom de la carte directement sur ton téléphone. Aucune image n’est envoyée ni gardée.'],
-      ['Notifications', 'L’app ne demande l’autorisation d’afficher des notifications que lorsque tu crées une alerte ou que tu touches « Autoriser les notifications » (Mon profil › Notifications, où tu choisis aussi lesquelles tu reçois). Les rappels sont calculés sur ton appareil, quand l’app est ouverte ou en arrière-plan : aucun serveur ne t’envoie de message. Tu peux retirer l’autorisation dans les réglages du navigateur.'],
-      ['Fichiers', 'Une sauvegarde restaurée ou un tableur importé est lu sur ton appareil. Il n’est envoyé nulle part.'],
-      ['Services contactés', 'Pour fonctionner, ton navigateur télécharge des fichiers depuis : le serveur de Dropicards (dropicards.fr, hébergé par OVHcloud : l’app et ses données), assets.tcgdex.net et images.pokemontcg.io (visuels de certaines cartes), tiles.openfreemap.org (fond de carte du Radar). Comme toute page web, ces services voient l’adresse IP de ton appareil et peuvent la journaliser selon leurs propres règles ; Dropicards ne leur transmet aucune donnée de ta collection.'],
-      ['Mesure d’audience', 'Aucune mesure d’audience et aucune publicité. Si une mesure est ajoutée, elle sera sans cookie et décrite ici avant sa mise en service.'],
-      ['Tes droits', 'Tes données sont sur ton appareil : tu peux les exporter (Réglages › « Sauvegarder ou restaurer ») et les effacer à tout moment (Réglages › « Vider ma collection », ou en effaçant les données du site). Pour toute question : ' + LEGAL_TODO + '. Tu peux aussi saisir la CNIL (www.cnil.fr).']
-    ] },
-    terms: { label: 'Conditions', blocks: [
-      ['Objet', 'Dropicards t’aide à suivre la valeur de tes cartes et produits Pokémon TCG. Ce n’est pas une plateforme de vente : l’app ne vend rien, n’achète rien et ne sert pas d’intermédiaire.'],
-      ['Accès', 'L’app est gratuite et sans compte. Elle peut être modifiée, suspendue ou arrêtée à tout moment, sans préavis, notamment pendant la démonstration.'],
-      ['Cotes', 'Les cotes sont calculées à partir de prix publics de plusieurs sources, avec leur date. Ce sont des estimations, pas des offres d’achat ni des conseils financiers ou fiscaux. Une cote peut être fausse ou absente : « cote à confirmer » et « cote à venir » le signalent. Les ventes réussies eBay ne sont pas chiffrées dans l’app : le lien ouvre la recherche eBay. L’éditeur ne garantit ni l’exactitude ni la disponibilité des prix.'],
-      ['Boutiques et alertes', 'Les boutiques viennent d’OpenStreetMap et peuvent être fermées ou mal placées. L’indice de chance est une estimation, jamais une information de stock. Les boutiques « partenaires » de l’encadré Démo de Territoire sont fictives ; aucune vraie boutique n’a d’accord avec Dropicards.'],
-      ['Tes données', 'Elles restent sur ton appareil. Tu es responsable de leur sauvegarde (Réglages › « Sauvegarder ou restaurer »).'],
-      ['Bon usage', 'N’utilise pas l’app pour perturber les services cités ni pour en extraire les données en masse.'],
-      ['Contact', LEGAL_TODO]
-    ] },
-    pk: { label: 'PK et jeux', blocks: [
-      ['Ce que sont les PK', 'Les PK sont une monnaie virtuelle de l’app. Ils servent, dans le PK shop, à obtenir des tickets du tirage au sort ou des lots offerts par l’éditeur. Les compagnons et leurs thèmes se débloquent avec des PA, dans le Pokédex.'],
-      ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas entre joueurs et ne se convertissent pas en argent. Ils n’ont aucune valeur en euros.'],
-      ['Gains', '+100 de bienvenue ; +300 une fois pour un partage de l’app ; les jeux de l’onglet Jeux. Ajouter des cartes ou ouvrir l’app ne rapporte pas de PK.'],
-      ['Jeux', 'Booster PK : un booster gratuit toutes les 24 h, puis plus souvent selon ton grade (10 h, 8 h, 6 h, jusqu’à 4 h), qui contient 30 PK (50 %), 50 PK (20 %), 100 PK (15 %), 200 PK (10 %) ou 500 PK (5 %). Pile ou face : à partir du grade Chasseur, un lancer gratuit toutes les 24 h, puis plus souvent selon ton grade (jusqu’à 4 h) ; la face « gemme PK » rapporte 50 PK (une chance sur deux), la face « cristal éteint » rien. Les tirages sont faits au hasard sur ton appareil. Pokédex : les PA (points d’Aura) se récupèrent une fois par jour en touchant le solde de PA, selon les jours d’affilée : +10, +15, +20, +25, puis +30 PA par jour ; un jour manqué, la série reprend à +15 PA. Ils débloquent les Pokémon du Pokédex, chacun à son prix affiché dans le Pokédex (une évolution une fois la forme précédente débloquée) ; Bulbizarre, Salamèche, Carapuce et Pikachu sont offerts. Les PA n’ont aucune valeur en euros et ne s’achètent pas.'],
-      ['PK shop et tirage au sort', 'Le PK shop échange des PK contre des tickets de participation au tirage au sort d’un booster Pokémon (2 000 PK le ticket) ou contre un lot direct, le booster 30 ans Pokémon (15 000 PK). La participation est gratuite : les PK se gagnent sans achat. Le tirage sera organisé par l’éditeur selon un règlement publié avant le tirage (date, modalités, désignation et contact du gagnant, remise du lot). L’envoi des lots demande un compte et une adresse, pas encore disponibles. Tes tickets et tes lots sont gardés sur cet appareil.'],
-      ['Pas un jeu d’argent', 'Les jeux sont gratuits : aucune mise, aucun achat, aucune participation en argent, et les gains (des PK) n’ont aucune valeur en euros. Ce ne sont ni des loteries ni des jeux d’argent.'],
-      ['Sur ton appareil', 'Ton solde est enregistré avec ta collection, sur cet appareil. Il est inclus dans la sauvegarde. Il peut être perdu si les données du site sont effacées.'],
-      ['Évolution', 'Les montants, les taux, les prix des compagnons et ces règles peuvent évoluer, et les PK peuvent être remis à zéro pendant la démonstration.']
-    ] }
-  };
-  const LEGAL_TABS = ['mentions', 'privacy', 'terms', 'pk'];
+  // Textes (2026-11-07) : tools/web/legal-texts.mjs, une seule source pour ce panneau et les pages publiques de
+  // dropicards.fr ; le build les injecte (LEGAL_DATA), en variante site ou app (DROPI_APP).
+  const LEGAL_TODO = LEGAL_DATA.todo;
+  const LEGAL = LEGAL_DATA.sections;
+  const LEGAL_TABS = ['mentions', 'privacy', 'terms', 'reglement', 'help', 'pk'];
 
   // Les panneaux Mes PK et Mes PA se ferment : les règles s'affichent seules par-dessus l'app.
   proto.legalOpen = function (tab) { this.setState({ legal: LEGAL[tab] ? tab : 'mentions', pkSheet: false, paSheet: false }); };
@@ -67,6 +24,8 @@
       openMentions: () => this.legalOpen('mentions'), openPk: () => this.legalOpen('pk'),
       // Mon profil (2026-11-01) : conditions générales d'utilisation et politique de confidentialité ouvertes directement.
       openTerms: () => this.legalOpen('terms'), openPrivacy: () => this.legalOpen('privacy'),
+      // Règlement des tirages au sort et assistance (2026-11-07 ; règle d'Apple 5.3, docs/23 §2 point 8).
+      openReglement: () => this.legalOpen('reglement'), openHelp: () => this.legalOpen('help'),
       isPk: cur === 'pk', notPk: cur !== 'pk', pk: cur === 'pk' ? this.vRules(s) : { grades: [], odds: [], streak: [], evo: [], shop: [], earn: [], free: [] }
     };
     if (cur === 'pk') r.legal.title = 'Règles des PK et PA';
@@ -91,7 +50,8 @@
       pk: legalNum(Number(s.pk) || 0), pa: legalNum(Number(s.pa) || 0), grade: PF_GRADES[gi].name, emblem: 'img/grades/grade-' + (gi + 1) + '.svg',
       earn: [
         { big: '+100', label: 'Bienvenue', note: 'Une fois, à l’arrivée', icon: 'img/brand/pk.svg' },
-        { big: '+300', label: 'Partage', note: 'Une fois, en partageant l’app', icon: 'img/brand/pk.svg' },
+        // Pas de PK pour un partage dans l'app (règle d'Apple 3.2.2, native.js).
+        ...(DROPI_APP ? [] : [{ big: '+300', label: 'Partage', note: 'Une fois, en partageant l’app', icon: 'img/brand/pk.svg' }]),
         { big: 'Jeux', label: 'Booster et pièce', note: 'Dans l’onglet Jeux', icon: 'img/brand/pk.svg' }
       ],
       odds: GM_TABLE.map(([pk, pct, label, color]) => ({ pk: legalNum(pk) + ' PK', pct: pct + ' %', label: label, w: 'flex: ' + pct + ' 1 0; min-width: 4px', color: color })),
@@ -102,6 +62,6 @@
       // Prix fixés Pokémon par Pokémon par le porteur (2026-11-01, PA_PRICES) : fourchette par catégorie, lue dans les prix.
       evo: legalEvoRows(),
       shop: SHOP_ITEMS.map(x => ({ name: x.name, price: x.soon ? 'Bientôt' : legalNum(x.price) + ' PK', grade: x.minGrade ? 'Dès le grade ' + PF_GRADES[x.minGrade].name : '', img: x.img || 'img/brand/pk.svg' })),
-      free: [['0 €', 'de mise'], ['0 €', 'à gagner en argent'], ['0', 'achat possible']].map(([a, b]) => ({ big: a, label: b }))
+      free: [['0 €', 'de mise'], ['0 €', 'à gagner en argent'], ['0 €', 'pour jouer']].map(([a, b]) => ({ big: a, label: b }))
     };
   };

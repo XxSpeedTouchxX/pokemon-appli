@@ -201,6 +201,23 @@
       if (!s || !tk) return null;
       return this.req('/rest/v1/profiles?id=eq.' + encodeURIComponent(s.uid), { method: 'PATCH', token: tk, headers: { Prefer: 'return=minimal' }, body: f });
     },
+    // Supprimer mon compte (2026-11-07 ; tools/supabase/011_suppression_compte.sql) : la fonction « stripe » du serveur
+    // arrête d'abord tout abonnement en cours, puis efface le compte. Si elle n'a pas encore la route delete_account
+    // (fonction pas mise à jour : 404), repli sur la fonction SQL delete_my_account, qui refuse tant qu'un abonnement se
+    // renouvelle (« premium_actif »). La session est oubliée dès que le compte est effacé.
+    async deleteAccount() {
+      const tk = await this.token();
+      if (!tk) throw cloudErr(401, {});
+      let res = null;
+      try {
+        res = await fetch(this.url + '/functions/v1/stripe/delete_account', { method: 'POST', headers: { apikey: this.key, Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json' }, body: '{}' });
+      } catch (e) { res = null; }
+      if (res && res.ok) { cloudLs.set(null); return true; }
+      if (res && res.status === 401) throw cloudErr(401, {});
+      await this.rpc('delete_my_account', {});
+      cloudLs.set(null);
+      return true;
+    },
     async signOut() {
       const s = cloudLs.get();
       cloudLs.set(null);
@@ -229,4 +246,6 @@
   // Mode Admin (admin.js) : avec le serveur, réservé aux comptes dont le rôle est « admin » dans la base (2026-11-06,
   // porteur : « même avec une nouvelle adresse, j'ai accès au panneau admin, ce n'est pas normal ») ; sans serveur
   // (tests automatiques), comme avant.
-  const admAllowed = () => !Cloud.on() || Cloud.isAdmin();
+  // App iOS et Android (DROPI_APP, native.js) : jamais de mode Admin (règle d'Apple 2.3.1 sur les fonctions cachées,
+  // décision du porteur du 2026-11-07) ; l'Admin reste sur le site.
+  const admAllowed = () => !DROPI_APP && (!Cloud.on() || Cloud.isAdmin());

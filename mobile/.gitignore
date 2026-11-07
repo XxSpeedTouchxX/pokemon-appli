@@ -1,1 +1,3 @@
 node_modules/
+# Copie de l'app fabriquée par tools/web/build.mjs (DROPI_APP=1), refaite à chaque fabrication
+www/

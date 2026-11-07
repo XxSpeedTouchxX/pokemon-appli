@@ -18,8 +18,10 @@
   ];
   const ntProto = Component.prototype;
   const ntOn = (s, k) => !(s.notif && s.notif[k] === false);
-  const ntCan = () => typeof Notification !== 'undefined';
-  const ntPerm = () => { try { return ntCan() ? Notification.permission : 'unsupported'; } catch (e) { return 'unsupported'; } };
+  // App iOS et Android (DROPI_APP) : notifications du téléphone par Capacitor (native.js : nvNotifPerm, nvNotifNow,
+  // nvNotifAsk), et rappels programmés à l'avance, qui arrivent même app fermée (nvNotifPlan).
+  const ntCan = () => (DROPI_APP ? nvNotifPerm() !== 'unsupported' : typeof Notification !== 'undefined');
+  const ntPerm = () => { if (DROPI_APP) return nvNotifPerm(); try { return ntCan() ? Notification.permission : 'unsupported'; } catch (e) { return 'unsupported'; } };
   // Rappels prêts maintenant : [{ key, cycle, title, text }] ; « cycle » change à chaque nouveau rappel.
   ntProto.notifDue = function (s) {
     const out = [];
@@ -36,6 +38,7 @@
   };
   const ntShow = (title, body, tag) => {
     const opt = { body: body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: tag };
+    if (DROPI_APP) { nvNotifNow(title, body, tag); return; }
     try {
       if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
         navigator.serviceWorker.getRegistration().then(reg => { if (reg && reg.showNotification) reg.showNotification(title, opt); else new Notification(title, opt); })
@@ -73,6 +76,7 @@
     this.setState({ notif: n, notifDone: done, toast: (on ? 'Activé : ' : 'Désactivé : ') + NT_KINDS.find(x => x.k === k).label });
   };
   ntProto.notifAsk = function () {
+    if (DROPI_APP) { nvNotifAsk(this); return; }
     if (!ntCan()) return;
     try {
       Promise.resolve(Notification.requestPermission()).then(p => {
@@ -83,6 +87,7 @@
   };
   ntProto.vNotif = function (s) {
     const perm = ntPerm();
+    if (DROPI_APP) return nvNotifView(this, s, perm);
     return {
       items: NT_KINDS.map(x => {
         const on = ntOn(s, x.k);

@@ -1,5 +1,6 @@
 # Fabrication des apps iOS et Android de Dropicards par Codemagic (docs/23, étape F).
-# Le code de l'app est le site (web/), emballé par Capacitor (mobile/).
+# Le code de l'app est celui du site (web/), refait pour l'app par tools/web/build.mjs (DROPI_APP=1, mobile/www)
+# et emballé par Capacitor (mobile/).
 #
 # Aucune clé ici : tout se règle dans l'interface de Codemagic.
 #   - iOS     : Team settings › Integrations › Developer Portal › clé d'API App Store Connect
@@ -29,9 +30,11 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.dropicards.app
     scripts:
+      - name: Fabrication de l'app (web/ avec les différences de l'app, dans mobile/www)
+        script: cd ../tools/web && npm ci && DROPI_APP=1 node build.mjs
       - name: Dépendances Capacitor
         script: npm ci
-      - name: Copie du site web/ dans le projet iOS
+      - name: Copie de l'app dans le projet iOS
         script: npx cap sync ios
       - name: Signature (certificat et profil de Codemagic)
         script: xcode-project use-profiles --project ios/App/App.xcodeproj
@@ -69,9 +72,11 @@ workflows:
     scripts:
       - name: Emplacement du SDK Android
         script: echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+      - name: Fabrication de l'app (web/ avec les différences de l'app, dans mobile/www)
+        script: cd ../tools/web && npm ci && DROPI_APP=1 node build.mjs
       - name: Dépendances Capacitor
         script: npm ci
-      - name: Copie du site web/ dans le projet Android
+      - name: Copie de l'app dans le projet Android
         script: npx cap sync android
       - name: Fabrication de l'AAB signé
         script: |

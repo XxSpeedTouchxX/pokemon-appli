@@ -1691,7 +1691,7 @@
 </section>
 </sc-for>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ pks.rules }}</p>
-<button type="button" onClick="{{ pks.openRules }}" style="flex: none; align-self: flex-start; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: var(--pkm-t1); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Règles des PK et PA</button>
+<span style="display: flex; flex-wrap: wrap; gap: 8px"><button type="button" onClick="{{ pks.openReglement }}" style="flex: none; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: var(--pkm-t1); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Règlement des tirages</button><button type="button" onClick="{{ pks.openRules }}" style="flex: none; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: var(--pkm-t1); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Règles des PK et PA</button></span>
 <sc-if value="{{ pks.sheet.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-pas-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.sheet.close }}" class="pkm-pas-scrim"></button>
 <section aria-label="{{ pks.sheet.name }}" role="dialog" aria-modal="true" class="pkm-dark pkm-pas-sheet pkm-tks-sheet">
@@ -1931,6 +1931,7 @@
 <button type="button" class="pkm-pky-add" onClick="{{ pf.trainer.pkyAdd }}">{{ pf.trainer.pkyAddLabel }}</button></sc-if>
 <sc-if value="{{ pf.trainer.cloudOn }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.trainer.cloudAct }}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ pf.trainer.cloudLabel }}</button></sc-if>
 <sc-if value="{{ pf.photo.has }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.photo.remove }}" style="align-self: flex-start; min-height: 40px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Retirer ma photo de profil</button></sc-if>
+<button type="button" onClick="{{ pf.del.open }}" class="pkm-del-open">Supprimer mon compte</button>
 </section>
 
 <!-- fragment: profile-notif -->
@@ -1964,6 +1965,8 @@
 <nav aria-label="Informations légales" class="pkm-pc-legal">
 <button type="button" onClick="{{ legal.openTerms }}">Conditions générales d’utilisation</button>
 <button type="button" onClick="{{ legal.openPrivacy }}">Politique de confidentialité</button>
+<button type="button" onClick="{{ legal.openReglement }}">Règlement des tirages au sort</button>
+<button type="button" onClick="{{ legal.openHelp }}">Assistance</button>
 </nav>
 
 <!-- fragment: profile-ver -->
@@ -2289,6 +2292,19 @@ PKCOUNTER
 <span class="pkm-prem-btxt"><b>{{ prem.banner.title }}</b><span>{{ prem.banner.text }}</span></span>
 <span class="pkm-prem-go" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
 </button>
+
+<!-- fragment: account-delete -->
+<sc-if value="{{ pf.del.isOpen }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-lockw-wrap"><button type="button" aria-label="Fermer" onClick="{{ pf.del.close }}" class="pkm-pas-scrim"></button>
+<section aria-label="Supprimer mon compte" role="alertdialog" aria-modal="true" class="pkm-dark pkm-lockw pkm-del-sheet">
+<h2>Supprimer ton compte ?</h2>
+<p class="pkm-lockw-p">{{ pf.del.text }}</p>
+<p class="pkm-del-warn">{{ pf.del.warn }}</p>
+<sc-if value="{{ pf.del.hasErr }}" hint-placeholder-val="{{ false }}"><p class="pkm-del-err" role="alert">{{ pf.del.err }}</p></sc-if>
+<button type="button" onClick="{{ pf.del.go }}" aria-disabled="{{ pf.del.busyAttr }}" class="pkm-del-go">{{ pf.del.goLabel }}</button>
+<button type="button" onClick="{{ pf.del.close }}" class="pkm-pas-cancel">Annuler</button>
+</section></div>
+</sc-if>
 
 <!-- fragment: grade-lock -->
 <sc-if value="{{ lockw.open }}" hint-placeholder-val="{{ false }}">

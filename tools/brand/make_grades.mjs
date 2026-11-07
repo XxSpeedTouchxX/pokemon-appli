@@ -5,9 +5,13 @@
 // cristal), Grand maître Pokémon (rouge, couronne).
 // Dessin original (aucun emblème de jeu repris tel quel). Sortie : web/img/grades/grade-1.svg … grade-6.svg.
 // Usage : node tools/brand/make_grades.mjs
+// App iOS et Android (2026-11-07, porteur : « remplace la Poké Ball des emblèmes par des éléments originaux ») :
+// node tools/brand/make_grades.mjs --app écrit dans mobile/overlay/img/grades/ les mêmes emblèmes, avec au centre la
+// gemme des PK (hexagone à facettes, éclair, aux couleurs du grade) à la place de la Poké Ball. Le site garde la balle.
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-const OUT = fileURLToPath(new URL('../../web/img/grades/', import.meta.url));
+const APP = process.argv.includes('--app');
+const OUT = fileURLToPath(new URL(APP ? '../../mobile/overlay/img/grades/' : '../../web/img/grades/', import.meta.url));
 mkdirSync(OUT, { recursive: true });
 const INK = '#111111', Y = '#FFD60A';
 const CX = 60, CY = 66;
@@ -36,6 +40,18 @@ const ball = (top, r = 16) => `<g>
 <circle cx="${CX}" cy="${CY}" r="${r * 0.14}" fill="${Y}"/>
 <path d="M${CX - r * 0.62} ${CY - r * 0.42} Q${CX - r * 0.35} ${CY - r * 0.72} ${CX} ${CY - r * 0.75}" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="2.2" stroke-linecap="round"/>
 </g>`;
+// Gemme des PK (app) : hexagone à six facettes aux couleurs du grade (éclaircies en haut, assombries en bas),
+// contour noir, éclair jaune de la marque au centre.
+const gem = (top, r = 17) => {
+  const P = [0, 1, 2, 3, 4, 5].map(i => { const a = (-90 + 60 * i) * Math.PI / 180; return [CX + r * Math.cos(a), CY + r * Math.sin(a)]; });
+  const shade = ['#FFFFFF', '#FFFFFF', '#000000', '#000000', '#000000', '#FFFFFF'], op = [0.45, 0.2, 0.12, 0.3, 0.12, 0.2];
+  const facets = P.map((p, i) => { const q = P[(i + 1) % 6]; return `<path d="M${CX} ${CY} L${f(p[0])} ${f(p[1])} L${f(q[0])} ${f(q[1])} Z" fill="${shade[i]}" fill-opacity="${op[i]}"/>`; }).join('');
+  const hex = 'M' + P.map(p => f(p[0]) + ' ' + f(p[1])).join(' L') + ' Z';
+  const k = r / 17;
+  const bolt = `M${f(CX + 2.2 * k)} ${f(CY - 10 * k)} L${f(CX - 5 * k)} ${f(CY + 2 * k)} L${f(CX - 0.6 * k)} ${f(CY + 2 * k)} L${f(CX - 3 * k)} ${f(CY + 11 * k)} L${f(CX + 5.4 * k)} ${f(CY - 2.4 * k)} L${f(CX + 1.2 * k)} ${f(CY - 2.4 * k)} L${f(CX + 4.6 * k)} ${f(CY - 10 * k)} Z`;
+  return `<g><path d="${hex}" fill="${top}"/>${facets}<path d="${hex}" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/><path d="${bolt}" fill="${Y}" stroke="${INK}" stroke-width="2.2" stroke-linejoin="round" paint-order="stroke"/></g>`;
+};
+const center = top => (APP ? gem(top) : ball(top));
 const banner = `<path d="M36 10 H84 V110 L60 97 L36 110 Z" fill="#1B2233" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M40 14 H80 V103 L60 92 L40 103 Z" fill="none" stroke="${Y}" stroke-opacity="0.55" stroke-width="1.6"/>`;
 const svg = (title, defs, body, n) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><title>${title}</title><defs>${defs}</defs>${body}</svg>\n`;
@@ -57,27 +73,27 @@ const G = [];
 // or et cristal (6, sans couronne), rouge Pokémon (5) avec la couronne.
 // 1. Recrue : bronze brillant, une plume par aile.
 G.push(svg('Grade Recrue', grad('m', [[0, '#FFE2BC'], [0.4, '#F0A055'], [0.75, '#C06A24'], [1, '#7A3A0E']]) + grad('t', [[0, '#FFC48A'], [1, '#C8702C']]),
-  `${banner}${wings([[16, 36, 10, 5]], 'm')}${chin(8, 7, 'url(#m)')}${crest('url(#m)', 0)}${ball('url(#t)')}`));
+  `${banner}${wings([[16, 36, 10, 5]], 'm')}${chin(8, 7, 'url(#m)')}${crest('url(#m)', 0)}${center('url(#t)')}`));
 // 2. Chasseur : argent, deux plumes par aile, pointe en haut.
 G.push(svg('Grade Chasseur', grad('m', [[0, '#FFFFFF'], [0.45, '#C3CCDA'], [1, '#5E6B80']]) + grad('t', [[0, '#E8EDF5'], [1, '#8C98AC']]),
-  `${banner}${spike(16, 6, 'url(#m)')}${wings([[30, 38, 10, 6], [6, 40, 10, 3]], 'm')}${chin(10, 7, 'url(#m)')}${crest('url(#m)', 3)}${ball('url(#t)')}`));
+  `${banner}${spike(16, 6, 'url(#m)')}${wings([[30, 38, 10, 6], [6, 40, 10, 3]], 'm')}${chin(10, 7, 'url(#m)')}${crest('url(#m)', 3)}${center('url(#t)')}`));
 // 3. Collectionneur : or, trois plumes par aile, sans éclats autour.
 G.push(svg('Grade Collectionneur', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
-  `${banner}${spike(20, 7, 'url(#m)')}${wings([[46, 36, 9, 7], [24, 43, 10, 5], [2, 42, 10, 3]], 'm')}${chin(13, 8, 'url(#m)')}${crest('url(#m)', 6)}${ball('url(#t)')}`));
+  `${banner}${spike(20, 7, 'url(#m)')}${wings([[46, 36, 9, 7], [24, 43, 10, 5], [2, 42, 10, 3]], 'm')}${chin(13, 8, 'url(#m)')}${crest('url(#m)', 6)}${center('url(#t)')}`));
 // 4. Dresseur Pokémon : or avec des notes de vert émeraude (pointe, plume intérieure, plaque, menton), quatre plumes, deux éclats.
 G.push(svg('Grade Dresseur Pokémon', grad('m', [[0, '#FFF6C2'], [0.45, '#FFC93C'], [1, '#9C6500']]) + grad('i', [[0, '#C8FFD9'], [0.5, '#2FD37A'], [1, '#0B7A44']]) + grad('t', [[0, '#FFE46B'], [1, '#F2A900']]),
-  `${banner}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${spike(22, 6.5, 'url(#i)')}${chin(15, 8, 'url(#i)')}${crest('url(#i)', 9)}${ball('url(#t)')}
+  `${banner}${wings([[56, 34, 8, 8], [36, 43, 9, 6], [14, 46, 10, 4], [-8, 38, 9, 2]], 'm', 'i')}${spike(22, 6.5, 'url(#i)')}${chin(15, 8, 'url(#i)')}${crest('url(#i)', 9)}${center('url(#t)')}
 ${sparkle(22, 22, 5, '#C8FFD9')}${sparkle(98, 22, 5, '#C8FFD9')}`));
 // 5. Maître Pokémon : or et cristal, cinq plumes par aile (la plus haute, qui cachait la pointe bleue, est retirée),
 // trois éclats, sans couronne.
 G.push(svg('Grade Maître Pokémon', grad('m', [[0, '#FFF6C2'], [0.4, '#FFD60A'], [1, '#A86E00']]) + grad('i', [[0, '#D8FDFF'], [0.5, '#5EE0CF'], [1, '#2F6BFF']]) + grad('t', [[0, '#7CF5FF'], [1, '#2F6BFF']]),
-  `${banner}${spike(26, 8, 'url(#i)')}${wings([[60, 32, 8, 7], [44, 40, 9, 6], [26, 45, 10, 5], [6, 45, 10, 3], [-14, 35, 9, 1]], 'm', 'i')}${chin(18, 9, 'url(#i)')}${crest('url(#i)', 12)}${ball('url(#t)')}
+  `${banner}${spike(26, 8, 'url(#i)')}${wings([[60, 32, 8, 7], [44, 40, 9, 6], [26, 45, 10, 5], [6, 45, 10, 3], [-14, 35, 9, 1]], 'm', 'i')}${chin(18, 9, 'url(#i)')}${crest('url(#i)', 12)}${center('url(#t)')}
 ${sparkle(18, 20, 5)}${sparkle(103, 22, 5)}${sparkle(100, 94, 5)}`));
 // 6. Grand maître Pokémon : rouge Pokémon, cinq plumes par aile, plume intérieure blanche rosée, couronne.
 G.push(svg('Grade Grand maître Pokémon', grad('m', [[0, '#FF9A8A'], [0.45, '#E3350D'], [1, '#7E1003']]) + grad('i', [[0, '#FFFFFF'], [1, '#FFB4A6']]) + grad('t', [[0, '#FF5A3C'], [1, '#B81E08']]) + grad('c', [[0, '#FFF1A6'], [1, '#F2A900']]),
-  `${banner}${wings([[66, 28, 7, 8], [50, 36, 8, 7], [32, 43, 9, 6], [12, 46, 10, 4], [-10, 38, 9, 2]], 'm', 'i')}${chin(16, 8, 'url(#m)')}${crest('url(#i)', 11)}${ball('url(#t)')}
+  `${banner}${wings([[66, 28, 7, 8], [50, 36, 8, 7], [32, 43, 9, 6], [12, 46, 10, 4], [-10, 38, 9, 2]], 'm', 'i')}${chin(16, 8, 'url(#m)')}${crest('url(#i)', 11)}${center('url(#t)')}
 <path d="M42 44 L43 24 L51 34 L60 18 L69 34 L77 24 L78 44 Z" fill="url(#c)" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
 <circle cx="60" cy="33" r="3.2" fill="#FF7AD9" stroke="${INK}" stroke-width="1.4"/><circle cx="49" cy="39" r="2" fill="#5EE0CF" stroke="${INK}" stroke-width="1.2"/><circle cx="71" cy="39" r="2" fill="#5EE0CF" stroke="${INK}" stroke-width="1.2"/>
 ${sparkle(20, 22, 5)}${sparkle(100, 24, 5)}${sparkle(98, 92, 5)}${sparkle(22, 94, 5)}`));
 G.forEach((s, i) => writeFileSync(OUT + 'grade-' + (i + 1) + '.svg', s.replace(/id="(\w)"/g, 'id="$1' + (i + 1) + '"').replace(/url\(#(\w)\)/g, 'url(#$1' + (i + 1) + ')')));
-console.log('Grades : ' + G.length + ' logos dans web/img/grades/');
+console.log('Grades : ' + G.length + ' logos dans ' + (APP ? 'mobile/overlay/img/grades/ (app, gemme des PK)' : 'web/img/grades/'));
