@@ -2,7 +2,7 @@
 
 *Créé le 2026-11-06 · « go » du porteur le même jour (« on passe uniquement sur le Face ID et les empreintes »).*
 
-> **Mis de côté par le porteur le 2026-11-06** : la connexion avec Face ID ou l'empreinte est cachée dans l'app (cache v138). Le code et le réglage du serveur restent en place ; `?passkey=1` dans l'adresse la remet pour un essai.
+> **Mis de côté par le porteur le 2026-11-06** (cache v138), **remis pour tout le monde le 2026-11-07** (« go » du porteur, cache v149) : le bouton Face ID / empreinte s'affiche dès que le téléphone sait le faire. Essai sur un vrai téléphone encore à faire.
 
 ## 1. Ce que ça fait
 

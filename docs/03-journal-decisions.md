@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-07 — Face ID / empreinte remis pour tout le monde (« go » du porteur)
+
+- La connexion par clé d'accès (Face ID, Touch ID, empreinte), cachée le 2026-11-06, est de nouveau visible pour tous (plus besoin de `?passkey=1`) : connexion, Mon profil, proposition après la connexion. Code et serveur (Supabase Auth 2.197) inchangés. **Essai sur un vrai téléphone à faire** (compte connecté d'abord). Cache v149.
+
+---
+
 ## 2026-11-07 — Mentions légales, confidentialité, CGU et conditions de vente du Premium (demande du porteur)
 
 - **Éditeur renseigné** (identité de la micro-entreprise déclarée dans Stripe) : Nicolas Bouit, entrepreneur individuel, nom commercial Dropicards, adresse à Fos-sur-Mer, téléphone, contact@dropicards.fr, « TVA non applicable, art. 293 B du CGI ».

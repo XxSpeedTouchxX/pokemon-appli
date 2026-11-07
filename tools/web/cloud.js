@@ -163,9 +163,8 @@
     // Clés d'accès (Face ID, Touch ID, empreinte) : Supabase Auth 2.197 et plus, GOTRUE_PASSKEY_ENABLED
     // (docs/26). La clé reste dans le téléphone (trousseau iCloud, gestionnaire de mots de passe Google) ; le serveur ne
     // garde que sa partie publique. Connexion sans adresse ni mot de passe ; le mot de passe reste en secours.
-    // Face ID / empreinte mis de côté par le porteur (2026-11-06) : caché partout ; ?passkey=1 le remet (tests, essais).
+    // Mis de côté le 2026-11-06, remis pour tout le monde le 2026-11-07 (porteur) : visible dès que le téléphone sait le faire.
     passkeyOk() {
-      try { if (!/[?&]passkey=1\b/.test(location.search)) return false; } catch (e) { return false; }
       try { return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create && navigator.credentials.get); } catch (e) { return false; }
     },
     async passkeyRegister() {
