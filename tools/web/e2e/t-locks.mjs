@@ -22,13 +22,13 @@ const lw = page.locator('section[aria-label="Grade requis"]');
 const lwt = await lw.innerText().catch(() => '');
 ok('fenêtre : « Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon » »', /Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon »/.test(lwt));
 ok('fenêtre : Premium proposé, bouton « Découvrir Premium »', /abonnement Premium/.test(lwt) && (await lw.locator('button:has-text("Découvrir Premium")').count()) === 1);
-ok('fenêtre : condition 30 000 PK + 100 compagnons', /30\s000 PK gagnés \+ 100 compagnons débloqués/.test(lwt.replace(/[  ]/g, ' ')));
+ok('fenêtre : condition 30 000 PK + 100 compagnons + 5 méga-évolutions', /30\s000 PK gagnés \+ 100 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(lwt.replace(/[  ]/g, ' ')));
 await page.screenshot({ path: shot('locks-radar-fenetre.png') });
 await lw.locator('button:has-text("Découvrir Premium")').click(); await page.waitForTimeout(800);
 ok('« Découvrir Premium » ouvre l’offre Premium', (await page.locator('section[aria-label="Dropicards Premium"]').count()) === 1 && (await lw.count()) === 0);
 // 2. Grades.
 const tiers = await page.evaluate(() => window.__pkm.tiers().map(t => t.cond));
-ok('conditions des grades : ' + tiers.slice(2).join(' | '), /7.500 PK gagnés \+ 30 compagnons/.test(tiers[2]) && /15.000 PK gagnés \+ 50 compagnons/.test(tiers[3]) && /30.000 PK gagnés \+ 100 compagnons/.test(tiers[4]) && /100.000 PK gagnés \+ tout le Pokédex débloqué \(171 Pokémon\)/.test(tiers[5]));
+ok('conditions des grades : ' + tiers.slice(2).join(' | '), /7.500 PK gagnés \+ 30 compagnons/.test(tiers[2]) && /15.000 PK gagnés \+ 50 compagnons/.test(tiers[3]) && /30.000 PK gagnés \+ 100 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(tiers[4]) && /100.000 PK gagnés \+ tout le Pokédex débloqué \(171 Pokémon\)/.test(tiers[5]));
 // 3. Barre du bas : scanner animé.
 ok('bouton du scan : scanner animé (laser) à la place de l’appareil photo', (await page.locator('button[aria-label="Scanner une carte ou un produit"] svg.pkm-navscan .pkm-prem-scan-laser').count()) === 1);
 // 4. Pokédex : 171, liste qui monte, Nouveau thème sous le prix, fermeture glissée.

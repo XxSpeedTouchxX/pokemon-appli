@@ -50,7 +50,7 @@ ok('collection gardée telle quelle', (await page.evaluate(k => JSON.parse(local
 await go('debug&start=home');
 await page.evaluate(() => window.__pkm.push('grade', { gradeIx: 4 })); await page.waitForTimeout(700);
 const gs = await text('main');
-ok('fiche du grade : conditions et avantages du porteur (classeur illimité, Radar)', /30[   ]000 PK gagnés \+ 100 compagnons débloqués/.test(gs) && /100 scans disponibles par jour/.test(gs) && /« Booster PK » toutes les 6 h/.test(gs) && /Accès illimité à ton classeur/.test(gs) && /Radar de boutiques disponible/.test(gs));
+ok('fiche du grade : conditions et avantages du porteur (classeur illimité, Radar)', /30[   ]000 PK gagnés \+ 100 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(gs) && /100 scans disponibles par jour/.test(gs) && /« Booster PK » toutes les 6 h/.test(gs) && /Accès illimité à ton classeur/.test(gs) && /Radar de boutiques disponible/.test(gs));
 await page.screenshot({ path: shot('grades-fiche-maitre.png'), fullPage: true });
 await seed({ scanDay: DAY, scanN: 5 });
 await go('start=scan');
@@ -86,8 +86,8 @@ await dex.screenshot({ path: shot('grades-mega.png') });
 await go('start=home');
 ok('compagnon de l’accueil : Méga-Dracaufeu X', (await page.locator('button[aria-label^="Compagnon : Méga-Dracaufeu X"]').count()) === 1);
 
-// 4. Maître Pokémon : 30 000 PK et 100 compagnons (méga-évolutions comprises, 2026-11-07) → Radar ouvert
-await seed({ pkEarned: 30000, pkOwn: PAID.slice(0, 96) });
+// 4. Maître Pokémon : 30 000 PK, 100 compagnons et 5 méga-évolutions (2026-11-07) → Radar ouvert
+await seed({ pkEarned: 30000, pkOwn: PAID.slice(0, 96), megas: [10034, 10035, 10036, 10037, 10038] });
 await go('start=radar');
 ok('Maître Pokémon : carte de France ouverte', (await page.locator('#pkm-radar-map').count()) === 1 && (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 0);
 await go('start=market');

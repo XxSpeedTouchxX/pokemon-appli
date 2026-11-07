@@ -31,7 +31,7 @@ ok('6 grades cliquables avec leurs conditions', (await rows.count()) === 6 && /D
 await page.screenshot({ path: shot('grades-liste.png'), fullPage: true });
 await page.click('button[aria-label="Voir le grade Maître Pokémon et ses avantages"]'); await page.waitForTimeout(800);
 const gs = page.locator('section[aria-label="Grade Maître Pokémon"]');
-ok('fiche du grade : emblème, condition, état', (await gs.locator('img[src="img/grades/grade-5.svg"]').count()) === 1 && /30[   ]000 PK gagnés \+ 100 compagnons débloqués/.test(await gs.innerText()) && /À débloquer/.test(await gs.innerText()));
+ok('fiche du grade : emblème, condition, état', (await gs.locator('img[src="img/grades/grade-5.svg"]').count()) === 1 && /30[   ]000 PK gagnés \+ 100 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(await gs.innerText()) && /À débloquer/.test(await gs.innerText()));
 ok('fiche du grade : avantages listés', (await page.locator('section[aria-label="Avantages du grade"] li').count()) >= 3);
 await page.screenshot({ path: shot('grade-fiche.png') });
 await page.click('button:has-text("Grade suivant")'); await page.waitForTimeout(500);

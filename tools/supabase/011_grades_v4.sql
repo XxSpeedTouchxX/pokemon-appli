@@ -3,15 +3,15 @@
 --   Recrue : dès l'inscription · Chasseur : 1 500 PK (inchangé)
 --   Collectionneur : 7 500 PK + 30 compagnons débloqués
 --   Dresseur Pokémon : 15 000 PK + 50 compagnons débloqués
---   Maître Pokémon : 30 000 PK + 100 compagnons débloqués
+--   Maître Pokémon : 30 000 PK + 100 compagnons débloqués + 5 méga-évolutions (ajouté le même jour par le porteur)
 --   Grand maître Pokémon : 100 000 PK + tout le Pokédex débloqué (171 Pokémon, méga-évolutions comprises)
 -- « Compagnons débloqués » compte désormais tout le Pokédex : les 156 Pokémon et les 15 méga-évolutions (171).
--- Plus de condition de méga-évolution à part.
+-- Condition de méga-évolutions à part : seulement Maître Pokémon (5).
 -- Booster PK : 30 PK 40 %, 50 PK 30 %, 100 PK 15 %, 200 PK 10 %, 500 PK 5 % (avant : 30 PK 50 %, 50 PK 20 %).
 
-update public.game_grades g set pk_earned = v.pk, comp = v.comp, mega = 0
-from (values (0, 0, 0), (1, 1500, 0), (2, 7500, 30), (3, 15000, 50), (4, 30000, 100),
-             (5, 100000, (select count(*)::int from public.game_pokemon))) as v(i, pk, comp)
+update public.game_grades g set pk_earned = v.pk, comp = v.comp, mega = v.mega
+from (values (0, 0, 0, 0), (1, 1500, 0, 0), (2, 7500, 30, 0), (3, 15000, 50, 0), (4, 30000, 100, 5),
+             (5, 100000, (select count(*)::int from public.game_pokemon), 0)) as v(i, pk, comp, mega)
 where g.i = v.i;
 
 -- Grade : le plus haut dont les conditions sont remplies (PK gagnés au total, Pokémon débloqués dans tout le Pokédex).
