@@ -1,6 +1,6 @@
 // Comptes sur le serveur (2026-11-06, « go » du porteur, cloud.js) : inscription avec le profil, code à 6 chiffres reçu
 // par e-mail, connexion sur un autre appareil (profil prérempli), mot de passe oublié, adresse déjà inscrite,
-// réseau coupé (« Continuer sans compte »), Mon profil › déconnexion. Le serveur Supabase est imité (page.route) :
+// réseau coupé (connexion obligatoire), Mon profil › déconnexion. Le serveur Supabase est imité (page.route) :
 // jamais le vrai serveur dans les tests. Le mot de passe n'est jamais enregistré par l'app.
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const FAKE = 'http://127.0.0.1:59999';
@@ -131,8 +131,8 @@ const tr = page.locator('section[aria-label="Informations du dresseur"]');
 ok('Mon profil : « Connecté · ondine@exemple.fr »', /Connecté · ondine@exemple\.fr/.test(await tr.innerText()));
 await tr.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('cloud-profil.png') });
 await tr.locator('button:has-text("Me déconnecter")').click(); await page.waitForTimeout(600);
-ok('déconnexion : session effacée, collection gardée', (await page.evaluate(() => localStorage.getItem('pkm-cloud-session'))) === null && /Non connecté/.test(await tr.innerText()) && (await page.evaluate(k => !!JSON.parse(localStorage.getItem(k)).account, KEY)));
-ok('bouton « Me reconnecter »', (await tr.locator('button:has-text("Me reconnecter")').count()) === 1);
+ok('déconnexion : session effacée, collection gardée', (await page.evaluate(() => localStorage.getItem('pkm-cloud-session'))) === null && (await page.evaluate(k => !!JSON.parse(localStorage.getItem(k)).account, KEY)));
+ok('déconnexion : page de connexion aussitôt, sans « Passer » (connexion obligatoire)', (await page.locator('form[aria-label="Connecte-toi"]').count()) === 1 && (await page.locator('button:has-text("Passer")').count()) === 0);
 await ctx.close();
 
 // 2. Autre appareil : connexion, profil prérempli.
@@ -163,8 +163,9 @@ await page.goto(E2E + '/?cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test', 
 ok('relancement connecté : pas de page de connexion', (await page.locator('form[aria-label="Connecte-toi"]').count()) === 0);
 await page.evaluate(() => localStorage.removeItem('pkm-cloud-session'));
 await page.goto(E2E + '/?cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test', { waitUntil: 'load' }); await page.waitForTimeout(1500);
-await page.click('button:has-text("Passer")'); await page.waitForTimeout(700);
-ok('« Passer » : l’app sans compte', (await page.locator('section[aria-label^="Bienvenue"]').count()) === 0);
+ok('déconnecté : pas de « Passer », l’app reste fermée', (await page.locator('button:has-text("Passer")').count()) === 0 && (await page.locator('form[aria-label="Connecte-toi"]').count()) === 1);
+await page.evaluate(() => { location.hash = '#sorties'; }); await page.waitForTimeout(800);
+ok('déconnecté : une adresse de page de l’app ne l’ouvre pas', (await page.locator('form[aria-label="Connecte-toi"]').count()) === 1);
 await ctx.close();
 
 // 3. Mot de passe oublié.
@@ -198,9 +199,7 @@ down = true;
 await profilePage(page, 'Pikachu', 'Pierre', 'Entre 15 et 25 ans'); await page.waitForTimeout(800);
 ok('réseau coupé : message clair', /Impossible de joindre Dropicards/.test(await page.locator('.pkm-acc-err').innerText().catch(() => '')));
 await page.screenshot({ path: shot('cloud-horsligne.png') });
-await page.click('button:has-text("Continuer sans compte pour l’instant")'); await page.waitForTimeout(1500);
-st = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
-ok('« Continuer sans compte » : compte sur l’appareil seulement', st.account && st.account.server === false && st.trainer.name === 'Pierre');
+ok('réseau coupé : pas de « Continuer sans compte » (connexion obligatoire)', (await page.locator('button:has-text("Continuer sans compte")').count()) === 0 && (await page.locator('section[aria-label^="Bienvenue"]').count()) === 1);
 down = false;
 await ctx.close();
 

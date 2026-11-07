@@ -73,7 +73,7 @@ await tr.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('passkey-p
 // 2. Déconnexion, puis connexion sans mot de passe.
 await tr.locator('button:has-text("Me déconnecter")').click(); await page.waitForTimeout(800);
 ok('déconnecté', (await page.evaluate(() => localStorage.getItem('pkm-cloud-session'))) === null);
-await tr.locator('button:has-text("Me reconnecter")').click(); await page.waitForTimeout(900);
+await page.waitForTimeout(400); // connexion obligatoire : la page de connexion s'ouvre d'elle-même
 const fl = page.locator('form[aria-label="Connecte-toi"]');
 ok('page de connexion : « Me connecter avec Face ID / mon empreinte »', (await fl.locator('button[aria-label="Me connecter avec Face ID ou mon empreinte"]').count()) === 1);
 await page.screenshot({ path: shot('passkey-connexion.png') });

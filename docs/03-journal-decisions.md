@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-07 — Connexion obligatoire pour utiliser l'app (demande du porteur)
+
+- Avec le serveur, **aucun accès à l'app sans être connecté** : sans session sur l'appareil, l'app reste sur les pages d'accueil (création du compte ; connexion pour un compte déjà connu, adresse préremplie, trousseau, Face ID / empreinte). « Passer » n'apparaît plus pour un compte déconnecté ; « Continuer sans compte pour l'instant » (réseau coupé) est retiré ; une adresse de page (#sorties…) ne contourne pas l'écran ; « Me déconnecter » ramène aussitôt à la connexion.
+- Une session déjà gardée sur l'appareil suffit hors réseau (l'app ne se ferme pas faute de connexion internet). Sans réseau, un nouvel utilisateur ne peut pas créer son compte : message « Impossible de joindre Dropicards ». Cache v151.
+
+---
+
 ## 2026-11-07 — Connexion directe, sans rechoisir son Pokémon (demande du porteur)
 
 - **Au lancement**, un compte Dropicards déjà créé sur l'appareil mais déconnecté ouvre d'elle-même la page de connexion : adresse préremplie, mot de passe proposé par le trousseau du téléphone (champ « username »), bouton Face ID / empreinte ; « Passer » garde l'app sans compte.

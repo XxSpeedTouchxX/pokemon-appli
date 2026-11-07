@@ -116,7 +116,9 @@
     // préremplies ; « Passer » ramène à l'app à tout moment.
     r.cta = acc ? 'Continuer' : 'Créer mon compte';
     r.next1 = () => go(2);
-    r.canSkip = !!acc;
+    // Connexion obligatoire (2026-11-07, porteur : « qu'un utilisateur ne puisse pas avoir accès à l'application sans
+    // pouvoir se connecter ») : avec le serveur, « Passer » n'apparaît que pour un compte connecté.
+    r.canSkip = !!acc && !(cloud && !signed);
     r.is4 = page === 4;
     r.canBack = page > 1;
     r.back = () => go(page === 4 ? 3 : Math.max(1, page - 1));
@@ -272,7 +274,7 @@
       lead: acc ? 'Ton âge, ton pseudo et ton compagnon de voyage.' : 'Dernière étape avant l’aventure !',
       selDesc: ST_STARTER_TXT[sel] || '', go: s.obBusy ? 'Un instant…' : 'Choisir ' + name + ' comme compagnon', selStyle: selN ? stStarterStyle(selN, false) : '',
       err: err, hasErr: !!err && page === 3, errNoSel: !!err && page === 3 && !E, // message visible aussi sans starter choisi (glissement)
-      canLocal: !!s.obLocal && page === 3, local: () => {
+      canLocal: !!s.obLocal && page === 3 && !cloud, local: () => {
         const t = this.st(), line = t.obStarter || curLine, nick = String(t.obNick || '').trim();
         if (line && nick.length >= 2 && (t.obAge || accAge)) done(t, nick, t.obAge || accAge, line, false);
       },
@@ -378,8 +380,23 @@
       { duration: 420, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
   };
   const stBaseRender = proto.renderVals;
+  // Connexion obligatoire (2026-11-07, porteur) : avec le serveur, sans session sur l'appareil, l'app reste sur les pages
+  // d'accueil (création du compte, ou connexion pour un compte déjà connu : adresse préremplie, trousseau du téléphone,
+  // Face ID / empreinte). Une session gardée sur l'appareil suffit hors réseau ; « Me déconnecter » ramène ici.
+  let stGate = false;
+  const stNeedLogin = s => Cloud.on() && !Cloud.signedIn() && !(s.onb > 0) && !stLinked;
   proto.renderVals = function () {
-    const r = stBaseRender.call(this), p = this.st().onb || 0;
+    const r = stBaseRender.call(this), s0 = this.st(), p = s0.onb || 0;
+    if (!stGate && stNeedLogin(s0)) {
+      stGate = true;
+      setTimeout(() => {
+        stGate = false;
+        const t = this.st();
+        if (!stNeedLogin(t)) return;
+        const known = !!(t.account && t.account.server && t.account.email);
+        this.setState({ onb: known ? 2 : 1, obMode: known ? 'login' : 'signup', obEmail: undefined, obPwd: '', obErr: '', obNote: '', sheet: null, scanSheet: false });
+      }, 0);
+    }
     if (p !== stOnbPage) {
       const from = stOnbPage;
       stOnbPage = p;
@@ -449,19 +466,9 @@
   let stLinked = Cloud.on() ? Cloud.fromLink() : null;
   // Rôle du compte relu à chaque ouverture (un admin retiré perd aussitôt le mode Admin, admAllowed).
   let stRoleChecked = false;
-  // Écran de connexion au lancement (2026-11-07, porteur) : un compte Dropicards déjà créé sur cet appareil mais
-  // déconnecté → la page de connexion s'ouvre d'elle-même (adresse préremplie, mot de passe proposé par le trousseau du
-  // téléphone, Face ID / empreinte) ; « Passer » garde l'app sans compte. Une fois par ouverture de l'app.
-  let stLoginAsked = false;
   const stBaseHome = proto.vHome;
   proto.vHome = function (x) {
     const r = stBaseHome.call(this, x);
-    if (!stLoginAsked) {
-      stLoginAsked = true;
-      const a = x.s.account;
-      if (Cloud.on() && !Cloud.signedIn() && a && a.server && a.email && !x.s.onb && x.s.tuto === 'done' && !stLinked)
-        setTimeout(() => { const t = this.st(); if (!t.onb && !Cloud.signedIn()) this.setState({ onb: 2, obMode: 'login', obEmail: undefined, obPwd: '', obErr: '', obNote: '' }); }, 0);
-    }
     if (!stRoleChecked && Cloud.on() && Cloud.signedIn()) {
       stRoleChecked = true;
       Cloud.profile().then(() => this.setState({ cloudChecked: Date.now() })).catch(() => {});
