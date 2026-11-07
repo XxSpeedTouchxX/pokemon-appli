@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-07 — Radar verrouillé avec Premium, grades v4, Pokédex sur 171, booster en fête (demande du porteur)
+
+- **Radar** réservé au grade Maître Pokémon : badge rouge « Déverrouillé au grade Maître Pokémon » avec un petit cadenas qui tremble (accueil, Territoire ; le même cadenas sur les badges du PK shop) ; fenêtre « Tu ne peux pas accéder au Radar tant que tu n'as pas atteint le grade « Maître Pokémon » », condition, Premium proposé et bouton « Découvrir Premium » vers l'offre. Un abonné Premium y a accès.
+- **Grades** : Collectionneur 7 500 PK + 30 compagnons, Dresseur Pokémon 15 000 + 50, Maître Pokémon 30 000 + 100, Grand maître Pokémon 100 000 + tout le Pokédex (171) ; Recrue et Chasseur inchangés ; les méga-évolutions comptent comme compagnons, plus de condition à part. Sur le serveur : `tools/supabase/011_grades_v4.sql` (**à installer par le porteur**, 10 tests).
+- **Pokédex** : compteurs et « Mon Pokédex » sur 171 (les 15 méga-évolutions ajoutées à la liste) ; texte « Gratuit, sans achat… » retiré sous le Pokédex ; « Nouveau thème » (Kyogre, Groudon, Rayquaza) sous le prix, il ne cache plus le numéro ; « Mon Pokédex » monte du bas à l'ouverture et redescend à la fermeture.
+- **Scan** : le scanner animé de l'offre Premium remplace l'appareil photo dans la barre du bas.
+- **Tickets** : compte à rebours dans la fiche (jours, heures, minutes, secondes aux couleurs du ticket, date du tirage, barre du cycle, « Dernière ligne droite » le dernier jour) — proposition à valider.
+- **Booster PK** : 30 PK 40 %, 50 PK 30 % (100, 200, 500 PK inchangés ; 87 PK en moyenne, aussi dans 011) ; confettis dès 200 PK, confettis et feu d'artifice à 500 PK. **Pile ou face** : « Lance la pièce : si tu obtiens la face PK, tu gagnes 50 PK ; si tu obtiens l'autre face, tu n'obtiens rien. » Cache v152.
+
+---
+
 ## 2026-11-07 — Prompt de reprise pour une nouvelle conversation (demande du porteur)
 
 - `docs/29-prompt-nouvelle-conversation.md` : tout ce qu'une nouvelle conversation Claude doit savoir (dépôt et branche, serveur OVH avec Coolify et Axicall Pilot, Supabase sur api.dropicards.fr, fonction Stripe, construction et tests, ce qui marche, ce qui reste ouvert, règles de sécurité). Sans aucun secret.

@@ -36,7 +36,7 @@ await page.screenshot({ path: shot('grades-recrue-shop.png'), fullPage: true });
 // Radar dès Maître Pokémon (2026-11-07, avantages des grades du porteur) : en dessous, la fenêtre « Accès verrouillé ».
 await go('debug&start=home');
 await page.evaluate(() => window.__pkm.openRadar()); await page.waitForTimeout(600);
-ok('Recrue : Radar verrouillé, « Tu dois d’abord déverrouiller le grade Maître Pokémon pour avoir accès au Radar »', /grade Maître Pokémon pour avoir accès au Radar des boutiques/.test(await text('section[aria-label="Grade requis"]')) && (await page.locator('#pkm-radar-map').count()) === 0);
+ok('Recrue : Radar verrouillé, « Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon » »', /Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon »/.test(await text('section[aria-label="Grade requis"]')) && (await page.locator('#pkm-radar-map').count()) === 0);
 await page.screenshot({ path: shot('grades-radar-verrou.png') });
 await page.locator('section[aria-label="Grade requis"] button:has-text("Compris")').click(); await page.waitForTimeout(300);
 // Classeur limité (2026-11-07) : Recrue 36 cartes et 9 items scellés ; la démo en a 15 : un item de plus est refusé.
@@ -50,14 +50,14 @@ ok('collection gardée telle quelle', (await page.evaluate(k => JSON.parse(local
 await go('debug&start=home');
 await page.evaluate(() => window.__pkm.push('grade', { gradeIx: 4 })); await page.waitForTimeout(700);
 const gs = await text('main');
-ok('fiche du grade : conditions et avantages du porteur (classeur illimité, Radar)', /20[   ]000 PK gagnés \+ 100 compagnons débloqués \+ 1 méga-évolution débloquée/.test(gs) && /100 scans disponibles par jour/.test(gs) && /« Booster PK » toutes les 6 h/.test(gs) && /Accès illimité à ton classeur/.test(gs) && /Radar de boutiques disponible/.test(gs));
+ok('fiche du grade : conditions et avantages du porteur (classeur illimité, Radar)', /30[   ]000 PK gagnés \+ 100 compagnons débloqués/.test(gs) && /100 scans disponibles par jour/.test(gs) && /« Booster PK » toutes les 6 h/.test(gs) && /Accès illimité à ton classeur/.test(gs) && /Radar de boutiques disponible/.test(gs));
 await page.screenshot({ path: shot('grades-fiche-maitre.png'), fullPage: true });
 await seed({ scanDay: DAY, scanN: 5 });
 await go('start=scan');
 ok('Recrue : 5 scans par jour, épuisés', /Tes 5 scans du jour sont utilisés\. Reviens demain, ou passe Chasseur pour 10 par jour/.test(await text('body')));
 
-// 2. Collectionneur : 5 000 PK gagnés et 15 compagnons (4 offerts + 11 débloqués)
-await seed({ pkEarned: 5000, pk: 2500, pkOwn: PAID.slice(0, 11), scanN: 0 });
+// 2. Collectionneur : 7 500 PK gagnés et 30 compagnons (4 offerts + 26 débloqués ; conditions du 2026-11-07)
+await seed({ pkEarned: 7500, pk: 2500, pkOwn: PAID.slice(0, 26), scanN: 0 });
 await go('start=market');
 ok('Collectionneur : booster et pièce toutes les 12 h', /1 offert toutes les 12 h/.test(await text('section[aria-label="Booster PK"]')) && /1 lancer toutes les 12 h/.test(await text('section[aria-label="Pile ou face"]')));
 await toShop();
@@ -86,8 +86,8 @@ await dex.screenshot({ path: shot('grades-mega.png') });
 await go('start=home');
 ok('compagnon de l’accueil : Méga-Dracaufeu X', (await page.locator('button[aria-label^="Compagnon : Méga-Dracaufeu X"]').count()) === 1);
 
-// 4. Maître Pokémon : 20 000 PK, 100 compagnons, 1 méga-évolution → 100 scans (Radar ouvert à tous)
-await seed({ pkEarned: 20000, pkOwn: PAID.slice(0, 96) });
+// 4. Maître Pokémon : 30 000 PK et 100 compagnons (méga-évolutions comprises, 2026-11-07) → Radar ouvert
+await seed({ pkEarned: 30000, pkOwn: PAID.slice(0, 96) });
 await go('start=radar');
 ok('Maître Pokémon : carte de France ouverte', (await page.locator('#pkm-radar-map').count()) === 1 && (await page.locator('section[aria-label="Grade Maître Pokémon"]').count()) === 0);
 await go('start=market');

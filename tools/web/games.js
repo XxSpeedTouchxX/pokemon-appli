@@ -1,7 +1,7 @@
   // ——— Jeux : gagner des PK (2026-10-11, demande du porteur) ———
   // L'onglet « Marché » devient « Jeux » (manette) : deux mini-jeux gratuits pour gagner des PK. La recherche de
   // l'ancien Marché reste accessible depuis l'accueil (« Voir les N résultats ») et le scan : écran « search ».
-  // - Booster PK : un booster offert, délai selon le grade (ci-dessous) ; il tremble, des ciseaux coupent le haut, puis le gain apparaît ; il contient 30 PK (50 %), 50 PK (20 %), 100 PK (15 %),
+  // - Booster PK : un booster offert, délai selon le grade (ci-dessous) ; il tremble, des ciseaux coupent le haut, puis le gain apparaît ; il contient 30 PK (40 %), 50 PK (30 %), 100 PK (15 %),
   //   200 PK (10 %) ou 500 PK (5 %) depuis le 2026-11-01 au soir. Taux fixés par le porteur, affichés dans l'app.
   // - Pile ou face : un lancer, délai selon le grade ; face « gemme PK » (gagnante) : +50 PK (30 avant le 2026-11-01 au soir), une chance sur deux ; face
   //   « cristal éteint » : rien.
@@ -14,8 +14,9 @@
   const GM_COIN_WIN = 50; // 0 ou 50 PK, une chance sur deux (2026-11-01 au soir, porteur ; 30 PK avant)
   const gmBoosterMs = self => self.perks().boosterH * 3600000;
   const gmCoinMs = self => (self.perks().coinH || 24) * 3600000;
-  // Chances revues le 2026-11-01 au soir (porteur) : 30 PK 50 %, 50 PK 20 %, 100 PK 15 %, 200 PK 10 %, 500 PK 5 %.
-  const GM_TABLE = [[30, 50, 'Commun', '#9AA8C3'], [50, 20, 'Peu commun', '#5EE0CF'], [100, 15, 'Rare', '#A8B6FF'], [200, 10, 'Ultra rare', '#FFD60A'], [500, 5, 'Jackpot !', '#FF7AD9']];
+  // Chances revues le 2026-11-01 au soir (porteur), puis le 2026-11-07 (porteur) : 30 PK 40 %, 50 PK 30 %, 100 PK 15 %,
+  // 200 PK 10 %, 500 PK 5 % (87 PK en moyenne). Les mêmes sur le serveur (011_grades_v4.sql).
+  const GM_TABLE = [[30, 40, 'Commun', '#9AA8C3'], [50, 30, 'Peu commun', '#5EE0CF'], [100, 15, 'Rare', '#A8B6FF'], [200, 10, 'Ultra rare', '#FFD60A'], [500, 5, 'Jackpot !', '#FF7AD9']];
   const gmRand = () => {
     try { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; } catch (e) { return Math.random(); }
   };
@@ -25,6 +26,32 @@
   const gmLeft = ms => {
     const h = Math.floor(ms / 3600000), m = Math.max(1, Math.ceil((ms % 3600000) / 60000));
     return h ? h + ' h ' + String(m === 60 ? 59 : m).padStart(2, '0') : m + ' min';
+  };
+  // Fête du gain (2026-11-07, porteur) : confettis dès 200 PK ; à 500 PK, confettis et feu d'artifice. Calque posé
+  // sur toute la page, sans toucher (pointer-events: none), retiré à la fin ; rien si les animations sont limitées.
+  const gmParty = win => {
+    if (win < 200 || gmStill()) return;
+    const big = win >= 500, cols = ['#FFD60A', '#FF5A5A', '#5EE0CF', '#A8B6FF', '#FF7AD9', '#7CF5FF', '#FFFFFF'];
+    const pick = a => a[Math.floor(Math.random() * a.length)], rnd = (a, b) => a + Math.random() * (b - a);
+    let html = '';
+    for (let i = 0; i < (big ? 110 : 70); i++) {
+      html += '<i class="pkm-party-c' + (i % 3 === 0 ? ' pkm-party-r' : '') + '" style="left: ' + rnd(0, 100).toFixed(1) + '%; background: ' + pick(cols)
+        + '; --x: ' + Math.round(rnd(-90, 90)) + 'px; --r: ' + Math.round(rnd(-720, 720)) + 'deg; animation-delay: ' + rnd(0, big ? 1.1 : 0.6).toFixed(2)
+        + 's; animation-duration: ' + rnd(2.2, 3.4).toFixed(2) + 's"></i>';
+    }
+    if (big) {
+      const spots = [[22, 24], [74, 18], [50, 34], [28, 46], [70, 44], [50, 14]];
+      spots.forEach(([x, y], k) => {
+        const c = pick(cols);
+        html += '<span class="pkm-fw" style="left: ' + x + '%; top: ' + y + '%; animation-delay: ' + (0.25 + k * 0.42).toFixed(2) + 's; color: ' + c + '"><b></b>';
+        for (let j = 0; j < 16; j++) html += '<i style="--a: ' + (j * 22.5) + 'deg"></i>';
+        html += '</span>';
+      });
+    }
+    const ov = document.createElement('div');
+    ov.className = 'pkm-party'; ov.setAttribute('aria-hidden', 'true'); ov.innerHTML = html;
+    document.body.appendChild(ov);
+    setTimeout(() => ov.remove(), big ? 5200 : 4000);
   };
   const gmProto = Component.prototype;
   // Prochain moment où le jeu est disponible (0 : maintenant).
@@ -43,6 +70,7 @@
       this.setState({ pk: t.pk + win, pkGain: win,
         toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' });
       this.pkGainEnd(); this.flash();
+      gmParty(win);
     };
     // Enregistré tout de suite (une fermeture pendant l'animation ne rejoue pas le booster), crédité à la révélation.
     this.setState({ games: Object.assign({}, g, { boosterAt: at, bWin: i, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });

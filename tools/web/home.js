@@ -268,10 +268,10 @@
   const HOME_BLIPS = [['70%', '28%', '-2.4s'], ['30%', '66%', '-1.2s'], ['74%', '72%', '-0.4s']];
   proto.homeRadar = function (s) {
     const pos = s.tpos || s.raround || null;
-    const r = {
+    const r = Object.assign({
       main: null, mainLabel: '', title: '', sub: '', blips: [], hasMsg: false, msg: '', hasNear: false, near: [], status: '',
       france: () => this.openRadar()
-    };
+    }, this.radarLockView());
     if (!pos) return Object.assign(r, {
       main: () => this.terLocate(false), mainLabel: 'Radar des boutiques : activer ma position',
       title: 'Repère les boutiques autour de toi', sub: 'Touche pour activer ta position : elle reste sur ton téléphone.',

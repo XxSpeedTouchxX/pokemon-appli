@@ -97,6 +97,7 @@
         const credit = () => {
           this.setState({ pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, pkGain: win, toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' });
           this.pkGainEnd(); this.flash();
+          gmParty(win);
         };
         this.setState({ games: Object.assign({}, gg, { boosterAt: at, bWin: i, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
         if (gmStill()) { credit(); return; }

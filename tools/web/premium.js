@@ -112,8 +112,7 @@
   };
   const premBaseRoom = premProto.binderRoom;
   premProto.binderRoom = function (s, pid, qty) { return this.premOn() ? null : premBaseRoom.call(this, s, pid, qty); };
-  const premBaseRadar = premProto.radarLocked;
-  premProto.radarLocked = function () { return this.premOn() ? false : premBaseRadar.call(this); };
+  // Radar ouvert aux abonnés : radarLockMin (radar.js) renvoie -1 quand premOn() est vrai.
 
   const premBaseRender = premProto.renderVals;
   premProto.renderVals = function () {

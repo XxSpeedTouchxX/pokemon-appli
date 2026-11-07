@@ -75,7 +75,7 @@
   // Fenêtre « Accès verrouillé », pour tout l'app (PK shop, Radar, classeur plein ; 2026-11-07).
   const shopLockText = lk => {
     const g = shopGradeName(lk.g);
-    if (lk.kind === 'radar') return 'Tu dois d’abord déverrouiller le grade ' + g + ' pour avoir accès au Radar des boutiques.';
+    if (lk.kind === 'radar') return 'Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « ' + g + ' ».';
     if (lk.kind === 'binder') return 'Ton classeur est plein : ' + lk.lim + ' ' + lk.what + ' au maximum au grade ' + shopGradeName(lk.cur) + '. Tu dois d’abord déverrouiller le grade ' + g + ' pour en ajouter plus.';
     return 'Tu dois d’abord déverrouiller le grade ' + g + ' pour avoir accès à ' + (lk.kind === 'ticket' ? 'cette loterie.' : 'cet item.');
   };
@@ -159,6 +159,24 @@
       } : { open: false }
     };
   };
+  // Compte à rebours de la fiche d'un ticket (2026-11-07, porteur : « une sorte de décompte avec le temps restant et la
+  // date finale à côté ») : jours, heures, minutes, secondes aux couleurs du ticket, date du tirage, barre du cycle
+  // écoulé (2 semaines, 1 mois, 2 mois) et « Dernière ligne droite » le dernier jour. Les chiffres sont mis à jour chaque
+  // seconde directement dans la page (pas de nouveau rendu de l'app).
+  const SHOP_CYCLE_MS = { '2w': 14 * 86400000, '1m': 30 * 86400000, '2m': 61 * 86400000 };
+  const shopCd = end => {
+    const ms = Math.max(0, end - Date.now()), d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24, m = Math.floor(ms / 60000) % 60, sec = Math.floor(ms / 1000) % 60;
+    return { ms: ms, d: String(d), h: String(h).padStart(2, '0'), m: String(m).padStart(2, '0'), s: String(sec).padStart(2, '0') };
+  };
+  let shopCdTimer = null;
+  const shopCdTick = () => {
+    const box = document.querySelector('.pkm-tks-cd');
+    if (!box) { clearInterval(shopCdTimer); shopCdTimer = null; return; }
+    const end = Number(box.getAttribute('data-end')), cyc = Number(box.getAttribute('data-cycle')), c = shopCd(end);
+    ['d', 'h', 'm', 's'].forEach(k => { const el = box.querySelector('[data-u="' + k + '"]'); if (el && el.textContent !== c[k]) el.textContent = c[k]; });
+    const bar = box.querySelector('.pkm-tks-cd-bar i');
+    if (bar && cyc) bar.style.width = Math.min(100, Math.max(0, (1 - c.ms / cyc) * 100)).toFixed(2) + '%';
+  };
   shopProto.vPkShop = function (s) {
     const pk = Number(s.pk) || 0, tickets = s.tickets || {}, cg = s.cloudGame || {}, gi = this.shopGrade();
     const drawOf = it => (cg.draws && cg.draws[it.id] ? new Date(cg.draws[it.id]) : shopDrawOf(it.cycle, Date.now()));
@@ -170,8 +188,13 @@
     const sheet = (() => {
       if (!cur) return { open: false };
       const it = cur, n = tickets[it.id] || 0, open = gi >= it.minGrade, can = open && pk >= it.price, ask = can && s.shopAsk === it.id;
-      const price = it.price.toLocaleString('fr-FR') + ' PK', draw = shopDrawText(drawOf(it));
+      const price = it.price.toLocaleString('fr-FR') + ' PK', drawAt = drawOf(it), draw = shopDrawText(drawAt);
+      const end = drawAt.getTime(), cyc = SHOP_CYCLE_MS[it.cycle] || SHOP_CYCLE_MS['2w'], cd = shopCd(end);
+      if (!shopCdTimer) shopCdTimer = setInterval(shopCdTick, 1000);
       return {
+        cdEnd: String(end), cdCycle: String(cyc), cdD: cd.d, cdH: cd.h, cdM: cd.m, cdS: cd.s, cdCls: 'pkm-tks-cd pkm-tks-cd-' + it.tier,
+        cdW: 'width: ' + Math.min(100, Math.max(0, (1 - cd.ms / cyc) * 100)).toFixed(2) + '%', cdDate: 'Tirage le ' + draw,
+        cdLast: cd.ms < 86400000, cdAria: 'Temps restant avant le tirage : ' + cd.d + ' jours, ' + Number(cd.h) + ' heures et ' + Number(cd.m) + ' minutes. Tirage le ' + draw + '.',
         open: true, name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier, prize: it.prize, value: it.value,
         every: it.every, draw: draw, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note,
         use: 'Ce ticket te donne une chance de gagner ' + it.lot + ' au tirage du ' + draw + '. Plus tu as de tickets, plus tu as de chances. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit son lot chez lui, après vérification de son identité.',
@@ -245,6 +268,10 @@
       open: true, img: 'img/grades/grade-' + (lk.g + 1) + '.svg', grade: shopGradeName(lk.g), text: shopLockText(lk),
       cond: 'Condition : ' + (this.tiers()[lk.g] || {}).cond + '.',
       close: () => this.setState({ shopLock: null }),
+      // Radar (2026-11-07, porteur) : aussi inclus dans l'abonnement Premium, bouton vers l'offre.
+      prem: lk.kind === 'radar' && typeof this.premOpen === 'function',
+      premText: 'Tu peux aussi l’avoir tout de suite en prenant l’abonnement Premium : le Radar des boutiques y est inclus.',
+      premGo: () => { this.setState({ shopLock: null }); this.premOpen(); },
       grades: () => { this.setState({ shopLock: null, shopTk: null }); this.push('grade', { gradeIx: lk.g }); }
     } : { open: false };
     return r;

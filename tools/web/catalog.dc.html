@@ -439,6 +439,7 @@
 <span style="font-size: 12px; font-weight: 700; color: #5EE0CF">Radar des boutiques</span>
 <span style="font-size: 15.5px; font-weight: 700; line-height: 1.3">{{ home.hr.title }}</span>
 <span style="font-size: 12.5px; line-height: 1.4; color: #9AA8C3">{{ home.hr.sub }}</span>
+<sc-if value="{{ home.hr.locked }}" hint-placeholder-val="{{ false }}"><span class="pkm-shop-lockbtn pkm-lockchip"><img src="{{ home.hr.lockImg }}" alt="" width="26" height="26"><span>{{ home.hr.lockLabel }}</span><i class="pkm-lock-pad" aria-hidden="true"></i></span></sc-if>
 </span>
 <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
 </button>
@@ -500,6 +501,7 @@
 <span style="font-size: 12px; font-weight: 700; color: #5EE0CF">Nouveau · carte de France</span>
 <span style="font-size: 15px; font-weight: 700">Radar des boutiques</span>
 <span style="font-size: 12px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ ter.radarSub }}</span>
+<sc-if value="{{ ter.rl.locked }}" hint-placeholder-val="{{ false }}"><span class="pkm-shop-lockbtn pkm-lockchip"><img src="{{ ter.rl.lockImg }}" alt="" width="26" height="26"><span>{{ ter.rl.lockLabel }}</span><i class="pkm-lock-pad" aria-hidden="true"></i></span></sc-if>
 </span>
 <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>
 </button>
@@ -1677,7 +1679,7 @@
 <sc-if value="{{ si.idle }}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{ si.can }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ si.open }}" style="height: 50px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15.5px; font-weight: 800; cursor: pointer">{{ si.buyLabel }}</button></sc-if>
 <sc-if value="{{ si.cannot }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 13.5px; font-weight: 700; color: #F5B14C">{{ si.missText }}</p></sc-if>
-<sc-if value="{{ si.locked }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ si.lock }}" class="pkm-shop-lockbtn"><img src="{{ si.lockImg }}" alt="" width="30" height="30"><span>{{ si.lockLabel }}</span></button></sc-if>
+<sc-if value="{{ si.locked }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ si.lock }}" class="pkm-shop-lockbtn"><img src="{{ si.lockImg }}" alt="" width="30" height="30"><span>{{ si.lockLabel }}</span><i class="pkm-lock-pad" aria-hidden="true"></i></button></sc-if>
 </sc-if>
 <sc-if value="{{ si.ask }}" hint-placeholder-val="{{ false }}">
 <sc-if value="{{ si.hasChoices }}" hint-placeholder-val="{{ false }}"><div role="group" aria-label="Choisis ton item" class="pkm-shop-choices"><sc-for list="{{ si.choices }}" as="sch" hint-placeholder-count="3"><button type="button" onClick="{{ sch.pick }}" aria-pressed="{{ sch.on }}" class="{{ sch.cls }}">{{ sch.label }}</button></sc-for></div></sc-if>
@@ -1696,12 +1698,19 @@
 <div class="pkm-pas-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.sheet.close }}" class="pkm-pas-scrim"></button>
 <section aria-label="{{ pks.sheet.name }}" role="dialog" aria-modal="true" class="pkm-dark pkm-pas-sheet pkm-tks-sheet">
 <div class="pkm-tks-top"><span class="{{ pks.sheet.ticketCls }}" aria-hidden="true"><span class="pkm-shop-ticket-in">{{ pks.sheet.tag }}</span></span><div><h2>{{ pks.sheet.name }}</h2><b class="pkm-shop-price"><img src="img/brand/pk.svg" alt="" width="24" height="24">{{ pks.sheet.priceN }}<small>PK</small></b></div></div>
+<div class="{{ pks.sheet.cdCls }}" data-end="{{ pks.sheet.cdEnd }}" data-cycle="{{ pks.sheet.cdCycle }}" role="timer" aria-label="{{ pks.sheet.cdAria }}">
+<span class="pkm-tks-cd-h">Prochain tirage dans</span>
+<div class="pkm-tks-cd-row" aria-hidden="true"><span><b data-u="d">{{ pks.sheet.cdD }}</b><small>jours</small></span><i>:</i><span><b data-u="h">{{ pks.sheet.cdH }}</b><small>heures</small></span><i>:</i><span><b data-u="m">{{ pks.sheet.cdM }}</b><small>min</small></span><i>:</i><span><b data-u="s">{{ pks.sheet.cdS }}</b><small>s</small></span></div>
+<div class="pkm-tks-cd-bar" aria-hidden="true"><i style="{{ pks.sheet.cdW }}"></i></div>
+<span class="pkm-tks-cd-date"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>{{ pks.sheet.cdDate }}</span>
+<sc-if value="{{ pks.sheet.cdLast }}" hint-placeholder-val="{{ false }}"><span class="pkm-tks-cd-last">Dernière ligne droite : le tirage a lieu dans moins de 24 h !</span></sc-if>
+</div>
 <div class="pkm-tks-lines"><div><span>Lot à gagner</span><b>{{ pks.sheet.prize }}</b></div><div><span>Valeur</span><b>{{ pks.sheet.value }}</b></div><div><span>Tirage</span><b>{{ pks.sheet.every }}</b></div><div><span>Prochain tirage</span><b>{{ pks.sheet.draw }}</b></div></div>
 <h3 class="pkm-tks-h">À quoi sert ce ticket ?</h3>
 <p class="pkm-tks-p">{{ pks.sheet.use }}</p>
 <p class="pkm-tks-note">{{ pks.sheet.note }}</p>
 <sc-if value="{{ pks.sheet.owned }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-tks-owned">{{ pks.sheet.ownedText }}</p></sc-if>
-<sc-if value="{{ pks.sheet.locked }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pks.sheet.lock }}" class="pkm-shop-lockbtn"><img src="{{ pks.sheet.lockImg }}" alt="" width="30" height="30"><span>{{ pks.sheet.lockLabel }}</span></button></sc-if>
+<sc-if value="{{ pks.sheet.locked }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pks.sheet.lock }}" class="pkm-shop-lockbtn"><img src="{{ pks.sheet.lockImg }}" alt="" width="30" height="30"><span>{{ pks.sheet.lockLabel }}</span><i class="pkm-lock-pad" aria-hidden="true"></i></button></sc-if>
 <sc-if value="{{ pks.sheet.miss }}" hint-placeholder-val="{{ false }}"><p class="pkm-tks-miss">{{ pks.sheet.missText }}</p></sc-if>
 <sc-if value="{{ pks.sheet.can }}" hint-placeholder-val="{{ false }}">
 <sc-if value="{{ pks.sheet.idle }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ pks.sheet.buyOpen }}" class="pkm-tks-buy">{{ pks.sheet.buyLabel }}</button></sc-if>
@@ -1798,7 +1807,7 @@
 <h2 class="pkm-gm-title">Pile ou face</h2>
 <span style="font-size: 12.5px; color: #9AA8C3">{{ gm.c.every }}</span>
 </div>
-<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">Gemme PK : tu gagnes 50 PK. Cristal éteint : rien cette fois. Une chance sur deux.</p>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">Lance la pièce : si tu obtiens la face PK, tu gagnes 50 PK ; si tu obtiens l’autre face, tu n’obtiens rien.</p>
 <div style="height: 190px; display: flex; align-items: center; justify-content: center; perspective: 900px">
 <sc-if value="{{ gm.c.flipping }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-gm-coin pkm-gm-flip" aria-hidden="true" style="--end: {{ gm.c.angle }}">
@@ -1911,7 +1920,6 @@
 <sc-for list="{{ gm.hist }}" as="gmh" hint-placeholder-count="3"><span style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span style="color: #C9D3EA">{{ gmh.text }}</span><span style="font-weight: 800; color: {{ gmh.color }}">{{ gmh.pk }}</span></span></sc-for>
 </section>
 </sc-if>
-<p style="flex: none; margin: 0; font-size: 12px; line-height: 1.5; color: #7D8BA8">{{ gm.rules }}</p>
 </sc-if>
 
 <!-- fragment: profile-trainer -->
@@ -2299,6 +2307,7 @@ PKCOUNTER
 <h2>Accès verrouillé</h2>
 <p class="pkm-lockw-p">{{ lockw.text }}</p>
 <p class="pkm-lockw-cond">{{ lockw.cond }}</p>
+<sc-if value="{{ lockw.prem }}" hint-placeholder-val="{{ false }}"><p class="pkm-lockw-prem">{{ lockw.premText }}</p><button type="button" onClick="{{ lockw.premGo }}" class="pkm-lockw-premgo"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg>Découvrir Premium</button></sc-if>
 <button type="button" onClick="{{ lockw.grades }}" class="pkm-lockw-go">Voir le grade {{ lockw.grade }}</button>
 <button type="button" onClick="{{ lockw.close }}" class="pkm-pas-cancel">Compris</button>
 </section>

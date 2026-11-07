@@ -127,10 +127,10 @@
   const PF_GRADES = [
     { name: 'Recrue', pk: 0, comp: 0, mega: 0, scans: 5, boosterH: 24, coinH: 0, cards: 36, sealed: 9, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)' },
     { name: 'Chasseur', pk: 1500, comp: 0, mega: 0, scans: 10, boosterH: 20, coinH: 24, cards: 72, sealed: 27, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)' },
-    { name: 'Collectionneur', pk: 5000, comp: 15, mega: 0, scans: 20, boosterH: 12, coinH: 12, cards: 144, sealed: 54, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
-    { name: 'Dresseur Pokémon', pk: 10000, comp: 30, mega: 0, scans: 50, boosterH: 8, coinH: 8, cards: 288, sealed: 108, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
-    { name: 'Maître Pokémon', pk: 20000, comp: 100, mega: 1, scans: 100, boosterH: 6, coinH: 6, cards: 0, sealed: 0, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
-    { name: 'Grand maître Pokémon', pk: 50000, comp: 151, mega: 5, scans: 200, boosterH: 4, coinH: 4, cards: 0, sealed: 0, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
+    { name: 'Collectionneur', pk: 7500, comp: 30, mega: 0, scans: 20, boosterH: 12, coinH: 12, cards: 144, sealed: 54, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
+    { name: 'Dresseur Pokémon', pk: 15000, comp: 50, mega: 0, scans: 50, boosterH: 8, coinH: 8, cards: 288, sealed: 108, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
+    { name: 'Maître Pokémon', pk: 30000, comp: 100, mega: 0, scans: 100, boosterH: 6, coinH: 6, cards: 0, sealed: 0, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
+    { name: 'Grand maître Pokémon', pk: 100000, comp: 171, all: true, mega: 0, scans: 200, boosterH: 4, coinH: 4, cards: 0, sealed: 0, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
   ];
   // Avantages de chaque grade (2026-11-07, listes du porteur, mot pour mot) : classeur limité (cartes et items scellés,
   // illimité dès Maître Pokémon), scans par jour, délais du Booster PK et de la pièce, PK shop, emblème (dès
@@ -149,12 +149,15 @@
       g.radar ? ['Radar de boutiques disponible'] : []);
   });
   const pfNum = n => Number(n || 0).toLocaleString('fr-FR');
-  const pfCond = g => g.pk === 0 ? 'Dès l’inscription' : [pfNum(g.pk) + ' PK gagnés'].concat(g.comp ? [g.comp + ' compagnons débloqués'] : [], g.mega ? [g.mega + (g.mega > 1 ? ' méga-évolutions débloquées' : ' méga-évolution débloquée')] : []).join(' + ');
+  // Conditions du 2026-11-07 (porteur) : Collectionneur 7 500 PK + 30 compagnons, Dresseur Pokémon 15 000 + 50, Maître
+  // Pokémon 30 000 + 100, Grand maître Pokémon 100 000 + tout le Pokédex (171 Pokémon, méga-évolutions comprises).
+  // Les compagnons débloqués comptent tout le Pokédex (156 Pokémon + 15 méga-évolutions). Aussi sur le serveur (011).
+  const pfCond = g => g.pk === 0 ? 'Dès l’inscription' : [pfNum(g.pk) + ' PK gagnés'].concat(g.all ? ['tout le Pokédex débloqué (' + g.comp + ' Pokémon)'] : g.comp ? [g.comp + ' compagnons débloqués'] : [], g.mega ? [g.mega + (g.mega > 1 ? ' méga-évolutions débloquées' : ' méga-évolution débloquée')] : []).join(' + ');
   proto.tiers = function () {
     return PF_GRADES.map((g, i) => Object.assign({}, g, { min: g.pk, sym: 'img/grades/grade-' + (i + 1) + '.svg', cond: pfCond(g) }));
   };
   const pfEarned = s => Math.max(Number(s.pkEarned) || 0, 0);
-  const pfComp = s => HOME_BUDDIES.filter(([k]) => pkOwns(s, k)).length;
+  const pfComp = s => HOME_BUDDIES.filter(([k]) => pkOwns(s, k)).length + (Array.isArray(s.megas) ? s.megas.length : 0);
   const pfMega = s => (Array.isArray(s.megas) ? s.megas : []).length;
   const pfForced = () => { try { const v = Number(localStorage.getItem('pkm-grade-force')); return v >= 1 && v <= PF_GRADES.length ? v - 1 : -1; } catch (e) { return -1; } };
   // Grade obtenu : le plus haut dont les trois conditions sont remplies.

@@ -231,7 +231,11 @@
 /* « Mon Pokédex » : liste complète */
 .pkm-dexl-wrap { position: absolute; inset: 0; z-index: 32; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.7); }
 .pkm-dexl { flex: 1; min-height: 0; margin-top: 28px; display: flex; flex-direction: column; gap: 10px; padding: 12px 12px 0; border-radius: 26px 26px 0 0; border: 3px solid #FF3FD8; border-bottom: 0; color: #FFFFFF;
-  background: linear-gradient(rgba(96, 120, 255, 0.14) 1px, transparent 1px) 0 0 / 12px 12px, linear-gradient(90deg, rgba(96, 120, 255, 0.14) 1px, transparent 1px) 0 0 / 12px 12px, #15166A; animation: pkmTutoIn 0.3s ease-out both; }
+  background: linear-gradient(rgba(96, 120, 255, 0.14) 1px, transparent 1px) 0 0 / 12px 12px, linear-gradient(90deg, rgba(96, 120, 255, 0.14) 1px, transparent 1px) 0 0 / 12px 12px, #15166A; animation: pkmDexlUp 0.48s cubic-bezier(0.32, 0.72, 0, 1) both; }
+.pkm-dexl-wrap { animation: pkmDexlFade 0.32s ease-out both; }
+@keyframes pkmDexlUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes pkmDexlFade { from { background-color: rgba(3, 6, 14, 0); } to { background-color: rgba(3, 6, 14, 0.7); } }
+@media (prefers-reduced-motion: reduce) { .pkm-dexl, .pkm-dexl-wrap { animation: none; } }
 .pkm-dexl-head { display: flex; align-items: center; gap: 10px; }
 .pkm-dexl-head img { flex: none; width: 56px; height: 35px; }
 .pkm-dexl-head > span { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 12.5px; color: #E2E6FF; }
@@ -272,5 +276,9 @@ section[aria-label="Pokédex"] img, section[aria-label="Mon Pokédex"] img { -we
 .pkm-dex-newtheme { position: absolute; top: 4px; right: 4px; z-index: 2; padding: 2px 6px; border-radius: 999px; background: linear-gradient(90deg, #6A30D8, #C2185B); border: 1px solid #FFD60A; color: #FFFFFF; font-size: 9.5px; font-weight: 800; line-height: 1.3; letter-spacing: 0.01em; white-space: nowrap; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35); animation: pkmNewTheme 2.4s ease-in-out infinite; }
 .pkm-dex-newtheme::before { content: '✦ '; }
 .pkm-dex-newtheme-f { position: static; display: inline-block; align-self: flex-start; margin: 2px 0; font-size: 11px; }
+/* Dans la liste, l'étiquette passe sous le prix (2026-11-07, porteur : elle cachait le numéro du Pokémon). */
+.pkm-dexl-theme { padding-top: 16px; gap: 1px; }
+.pkm-dexl-theme > img { width: 56px; height: 56px; }
+.pkm-dexl-item .pkm-dex-newtheme { position: static; margin-top: 2px; padding: 1px 6px; font-size: 9px; }
 @keyframes pkmNewTheme { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.25); } }
 @media (prefers-reduced-motion: reduce) { .pkm-dex-newtheme { animation: none; } }

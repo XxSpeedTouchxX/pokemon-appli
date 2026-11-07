@@ -299,7 +299,7 @@ ok('compte à 300 PK : fiche du ticket Bronze, « Il te manque 200 PK », tirage
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
 await page.screenshot({ path: shot('cloud-shop.png'), fullPage: false });
 await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-ok('règles : « tirage fait par le serveur »', /fait par le serveur Dropicards/.test(await page.locator('main').innerText()));
+ok('plus de « Gratuit, sans achat… » sous le Pokédex', !/Gratuit, sans achat/.test(await page.locator('main').innerText()));
 const coin = page.locator('section[aria-label="Pile ou face"]');
 await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(700);
 ok('pièce : refus du serveur affiché (« ' + (await page.locator('body').innerText()).match(/Pièce réservée[^\n]*/) + ' »)', /Pièce réservée au grade Chasseur/.test(await page.locator('body').innerText()));

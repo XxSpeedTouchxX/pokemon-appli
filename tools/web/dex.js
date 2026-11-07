@@ -19,6 +19,9 @@
   const DEX_GC_FIX = { 42: 0.48 };
   Object.keys(DEX_GC_FIX).forEach(n => { if (DEX[n]) DEX[n].gc = DEX_GC_FIX[n]; });
   const DEX_IDS = HOME_BUDDIES.map(([n]) => n);
+  // Tout le Pokédex (2026-11-07, porteur : « 171 Pokémon en tout ») : les 156 Pokémon et les 15 méga-évolutions, pour
+  // les compteurs « débloqués » (avant : sur 156, sans les méga-évolutions).
+  const dexAllIds = () => DEX_IDS.concat(DEX_DATA.filter(e => e.mega).map(e => e.n));
   const DEX_NUMS = DEX_IDS.slice().sort((a, b) => a - b);
   const DEX_FORMS = ['Forme de base', '1ʳᵉ évolution', '2ᵉ évolution'];
   const DEX_COLS = ['Base', 'Évolution 1', 'Évolution 2'];
@@ -238,10 +241,10 @@
   // (les 15 méga-évolutions, à part du total des 156), Légendaire.
   const dexPct = (a, b) => 'width: ' + (b ? Math.round(a / b * 100) : 0) + '%';
   dexProto.vDexProgress = function (s) {
-    // Débloqués sur les 156 Pokémon, sans les méga-évolutions ; plus de « vus » (2026-10-31, porteur).
-    const all = DEX_IDS.map(n => DEX[n]), own = all.filter(e => dexOwn(s, e.n)).length, N = all.length;
+    // Débloqués sur les 171 (156 Pokémon et 15 méga-évolutions, 2026-11-07, porteur) ; plus de « vus » (2026-10-31).
+    const all = dexAllIds().map(n => DEX[n]).filter(Boolean), own = all.filter(e => dexOwn(s, e.n)).length, N = all.length;
     const types = Object.keys(DEX_TYPE).map(t => {
-      const list = DEX_IDS.map(n => DEX[n]).filter(e => e.types.indexOf(t) >= 0), got = list.filter(e => dexOwn(s, e.n)).length, c = DEX_TYPE[t];
+      const list = dexAllIds().map(n => DEX[n]).filter(e => e && e.types.indexOf(t) >= 0), got = list.filter(e => dexOwn(s, e.n)).length, c = DEX_TYPE[t];
       return { t: t, n: got + '/' + list.length, total: list.length, style: 'background: ' + c + '; color: ' + (dexLight(c) ? '#0B1120' : '#FFFFFF'),
         aria: t + ' : ' + got + ' débloqués sur ' + list.length + ', voir la liste', go: () => { this.setState({ dexList: true, dexQ: '', dexF: 'type:' + t }); dexListKeys(this); } };
     }).filter(x => x.total > 0);
@@ -362,14 +365,14 @@
     const still = dexStill(), pa = Number(s.pa) || 0, b = DEX[s.buddy] ? s.buddy : 25;
     const sel = DEX[s.dexSel] ? s.dexSel : b, e = DEX[sel], route = dexRoute(sel), hmax = dexFamMax(sel);
     const geo = dexGeom(route, hmax, dexFamFit(sel, hmax, DEX_PX, DEX_CAPW, still), still), fit = geo.f, fitFocus = Math.min(1, DEX_CAPW_FOCUS / Math.max(1, DEX_PX_FOCUS * dexAsp(e, still)));
-    const owned = DEX_IDS.filter(k => dexOwn(s, k)).length;
+    const owned = dexAllIds().filter(k => dexOwn(s, k)).length;
     const status = x => {
       if (dexOwn(s, x.n)) return s.buddy === x.n ? 'Compagnon' : 'Débloqué';
       return dexPrice(x.n) ? dexNum(dexPrice(x.n)) + ' PA' : 'Offert';
     };
     const can = x => !dexOwn(s, x.n) && (!x.e.from || dexOwn(s, x.e.from)) && pa >= dexPrice(x.n);
     const v = {
-      count: owned + ' / ' + DEX_IDS.length, all: () => { this.setState({ dexList: true, dexQ: '', dexF: 'all' }); dexListKeys(this); },
+      count: owned + ' / ' + dexAllIds().length, all: () => { this.setState({ dexList: true, dexQ: '', dexF: 'all' }); dexListKeys(this); },
       allLabel: 'Tous les Pokémon',
       routeW: geo.w + 'px', routeH: route.h + 'px', routeBox: '0 0 ' + geo.w + ' ' + route.h, solid: geo.solid || 'M0 0', dots: geo.dots || 'M0 0',
       // Étiquettes de colonne : « Évolution 1 » en entier si toutes les colonnes le permettent, sinon « Évol. 1 » partout.
@@ -507,11 +510,25 @@
   // Liste complète : recherche par nom ou n°, filtres, grille de 3 ; un appui ouvre la route et la fiche.
   // Kyogre, Groudon et Rayquaza changent le fond de l'app quand on les choisit : badge « Nouveau thème » (2026-11-07, porteur).
   const DEX_THEMED = [382, 383, 384];
+  // Fermeture de « Mon Pokédex » (2026-11-07, porteur : « qu'il se ferme de manière satisfaisante, vers le bas ») : la
+  // feuille descend et le voile s'efface, puis la liste se ferme. L'ouverture la fait monter du bas (dex.css).
+  let dexListClosing = false;
+  const dexListSlide = done => {
+    const sheet = document.querySelector('.pkm-dexl'), wrap = document.querySelector('.pkm-dexl-wrap');
+    if (dexListClosing) return;
+    if (!sheet || !sheet.animate || dexStill()) { done(); return; }
+    dexListClosing = true;
+    const ease = 'cubic-bezier(0.32, 0.72, 0, 1)';
+    sheet.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(105%)' }], { duration: 380, easing: ease, fill: 'forwards' });
+    if (wrap) wrap.animate([{ backgroundColor: 'rgba(3, 6, 14, 0.7)' }, { backgroundColor: 'rgba(3, 6, 14, 0)' }], { duration: 380, easing: 'ease-out', fill: 'forwards' });
+    setTimeout(() => { dexListClosing = false; done(); }, 360);
+  };
   const DEX_FILTERS = [['all', 'Tous'], ['own', 'Débloqués'], ['lock', 'À débloquer'], ['leg', 'Légendaires']];
   dexProto.vDexList = function (s) {
     if (!s.dexList) return { open: false, items: [], filters: [] };
     const f = s.dexF || 'all', q = fold(String(s.dexQ || '').trim()), qn = q.replace(/^(n°|no|#)?\s*0*/, ''), pa = Number(s.pa) || 0;
-    const items = DEX_IDS.map(n => DEX[n]).filter(e => {
+    // Les 171 : les 156 Pokémon, puis les 15 méga-évolutions (2026-11-07, porteur).
+    const items = dexAllIds().map(n => DEX[n]).filter(Boolean).filter(e => {
       const own = dexOwn(s, e.n);
       if (f === 'own' && !own) return false;
       if (f === 'lock' && own) return false;
@@ -520,17 +537,17 @@
       return !q || fold(e.name).indexOf(q) >= 0 || (qn !== '' && String(e.n) === qn);
     }).map(e => {
       const own = dexOwn(s, e.n), price = dexPrice(e.n), ok = !own && (!e.from || dexOwn(s, e.from)) && pa >= price;
-      return { no: '#' + String(e.n).padStart(3, '0'), name: e.name, isTheme: DEX_THEMED.indexOf(e.n) >= 0, img: 'img/pokemon/icon/' + e.n + '.png', imgCls: dexSeen(s, e.n) ? '' : 'pkm-dex-sil',
+      return { no: e.mega ? dexNo(e) : '#' + String(e.n).padStart(3, '0'), name: e.name, isTheme: DEX_THEMED.indexOf(e.n) >= 0, img: 'img/pokemon/icon/' + e.n + '.png', imgCls: dexSeen(s, e.n) ? '' : 'pkm-dex-sil',
         status: own ? (s.buddy === e.n ? 'Compagnon' : 'Débloqué') : (price ? dexNum(price) + ' PA' : 'Offert'),
         // Prix avec le logo des PA (2026-11-01, porteur : « que le logo PA apparaisse avec la somme à côté »).
         hasPrice: !own && price > 0, noPrice: own || !price, amount: dexNum(price),
-        cls: 'pkm-dexl-item' + (own ? ' pkm-dexl-own' : '') + (ok ? ' pkm-dexl-can' : '') + (s.buddy === e.n ? ' pkm-dexl-buddy' : ''),
+        cls: 'pkm-dexl-item' + (own ? ' pkm-dexl-own' : '') + (ok ? ' pkm-dexl-can' : '') + (s.buddy === e.n ? ' pkm-dexl-buddy' : '') + (DEX_THEMED.indexOf(e.n) >= 0 ? ' pkm-dexl-theme' : ''),
         aria: e.name + ', n° ' + e.n + ', ' + (own ? 'débloqué' : 'à débloquer pour ' + price + ' PA'),
-        go: () => { if (this.st().screen !== 'market') this.tab('market'); this.setState({ dexList: false, dexSel: e.n }); setTimeout(() => { const el = document.querySelector('[aria-label="Route d’évolution"]'); if (el) el.scrollIntoView({ block: 'start', behavior: dexStill() ? 'auto' : 'smooth' }); }, 80); } };
+        go: () => dexListSlide(() => { if (this.st().screen !== 'market') this.tab('market'); this.setState({ dexList: false, dexSel: e.n }); setTimeout(() => { const el = document.querySelector('[aria-label="Route d’évolution"]'); if (el) el.scrollIntoView({ block: 'start', behavior: dexStill() ? 'auto' : 'smooth' }); }, 80); }) };
     });
     return {
-      open: true, close: () => { this.setState({ dexList: false }); setTimeout(() => { const b = document.querySelector('.pkm-dex-all'); if (b) b.focus({ preventScroll: true }); }, 60); }, q: s.dexQ || '', onQ: ev => this.setState({ dexQ: ev.target.value }),
-      count: DEX_IDS.filter(k => dexOwn(s, k)).length + ' / ' + DEX_IDS.length + ' débloqués · ' + dexNum(pa) + ' PA',
+      open: true, close: () => dexListSlide(() => { this.setState({ dexList: false }); setTimeout(() => { const b = document.querySelector('.pkm-dex-all'); if (b) b.focus({ preventScroll: true }); }, 60); }), q: s.dexQ || '', onQ: ev => this.setState({ dexQ: ev.target.value }),
+      count: dexAllIds().filter(k => dexOwn(s, k)).length + ' / ' + dexAllIds().length + ' débloqués · ' + dexNum(pa) + ' PA',
       // Filtre d'un type (depuis « Ma progression ») : une bulle de plus, qui le retire au toucher.
       filters: DEX_FILTERS.map(([k, l]) => Object.assign({ label: l, on: f === k, pick: () => this.setState({ dexF: k }) }, this.chip(f === k)))
         .concat(f.indexOf('type:') === 0 ? [Object.assign({ label: f.slice(5) + ' ✕', on: true, pick: () => this.setState({ dexF: 'all' }) }, this.chip(true))] : []),

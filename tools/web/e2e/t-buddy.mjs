@@ -56,7 +56,7 @@ ok('Florizarre : « ' + await act.innerText() + ' »', (await act.innerText()) =
 await page.click('.pkm-dex-all'); await page.waitForTimeout(500);
 const list = page.locator('section[aria-label="Mon Pokédex"]');
 const tiles = list.locator('div[aria-label="Tous les Pokémon"] button');
-ok('liste : ' + await tiles.count() + ' Pokémon', (await list.count()) === 1 && (await tiles.count()) === 156);
+ok('liste : ' + await tiles.count() + ' Pokémon', (await list.count()) === 1 && (await tiles.count()) === 171);
 const cols = await page.evaluate(() => getComputedStyle(document.querySelector('section[aria-label="Mon Pokédex"] div[aria-label="Tous les Pokémon"]')).gridTemplateColumns.split(' ').length);
 ok('3 Pokémon par ligne', cols === 3);
 const sheetBg = await list.evaluate(e => getComputedStyle(e).backgroundColor);
@@ -76,7 +76,7 @@ const ink = await page.evaluate(() => Promise.all([1, 3, 10, 6].map(n => new Pro
 }))));
 ok('petits Pokémon pas agrandis : Bulbizarre ' + ink[0] + ' px < Florizarre ' + ink[1] + ' px ; Chenipan ' + ink[2] + ' px < Dracaufeu ' + ink[3] + ' px', ink[0] < ink[1] && ink[2] < ink[3] && ink[0] <= 50 && ink[2] <= 40);
 const all = await list.locator('img[src^="img/pokemon/icon"]').evaluateAll(is => Promise.all(is.map(i => fetch(i.getAttribute('src')).then(r => r.ok))));
-ok('les 156 icônes sont servies', all.length === 156 && all.every(Boolean));
+ok('les 171 icônes sont servies (méga-évolutions comprises)', all.length === 171 && all.every(Boolean));
 await page.screenshot({ path: shot('buddy-choix.png') });
 // Recherche par nom et par numéro (les trois légendaires d'Hoenn aussi).
 const search = async (q, wait = 300) => { await page.fill('section[aria-label="Mon Pokédex"] input[aria-label="Chercher un Pokémon"]', q); await page.waitForTimeout(wait); return (await tiles.allInnerTexts()).map(t => t.split('\n').find(x => !/^#/.test(x))); };
@@ -91,7 +91,7 @@ await search('');
 // Filtres : 4 offerts + Kyogre, Groudon, Rayquaza débloqués.
 const filt = async l => { await list.locator('[aria-label="Filtrer le Pokédex"] button', { hasText: l }).first().click(); await page.waitForTimeout(300); return tiles.count(); };
 const fOwn = await filt('Débloqués'), fLock = await filt('À débloquer'), fLeg = await filt('Légendaires'), fAll = await filt('Tous');
-ok('filtres : ' + fOwn + ' débloqués, ' + fLock + ' à débloquer, ' + fLeg + ' légendaires, ' + fAll + ' en tout', fOwn === 7 && fLock === 149 && fLeg >= 5 && fAll === 156);
+ok('filtres : ' + fOwn + ' débloqués, ' + fLock + ' à débloquer, ' + fLeg + ' légendaires, ' + fAll + ' en tout', fOwn === 7 && fLock === 164 && fLeg >= 5 && fAll === 171);
 
 // 4. Choisir un compagnon déjà débloqué (Groudon, thème).
 await search('groudon');
@@ -132,7 +132,7 @@ await page.screenshot({ path: shot('buddy-groudon-accueil.png'), clip: { x: 0, y
 // Fermeture de la liste par son bouton.
 await buddy.click(); await page.waitForTimeout(1300);
 await page.click('.pkm-dex-all'); await page.waitForTimeout(400);
-await list.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
+await list.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
 ok('fermeture de la liste', (await list.count()) === 0);
 ok('pas de défilement horizontal', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
 await ctx.close();

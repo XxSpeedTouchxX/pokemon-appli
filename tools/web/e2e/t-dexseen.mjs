@@ -27,8 +27,8 @@ const pick = async name => {
 };
 await openDex();
 const p0 = await prog();
-const own0 = Number((/Débloqués (\d+) \/ 156/.exec(p0) || [])[1]);
-ok('progression : ' + p0.slice(0, 70), own0 >= 1 && /% débloqués/.test(p0) && !/Vus|Attrapés|171/.test(p0));
+const own0 = Number((/Débloqués (\d+) \/ 171/.exec(p0) || [])[1]);
+ok('progression : ' + p0.slice(0, 70), own0 >= 1 && /% débloqués/.test(p0) && !/Vus|Attrapés/.test(p0) && /\/\s*171/.test(p0));
 // Dracaufeu à débloquer : silhouette ; un scan de ses cartes ne change rien.
 await pick('Dracaufeu');
 const fiche = page.locator('section[aria-label="Fiche du Pokémon"]');

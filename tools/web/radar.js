@@ -542,9 +542,21 @@
   // 2026-10-28 retiré). Puis (2026-11-07, nouveaux avantages des grades du porteur) : « Radar de boutiques disponible »
   // dès Maître Pokémon. Plus bas, un appui ouvre la fenêtre « Accès verrouillé » (pas la fiche du grade, qui avait fait
   // croire à une panne le 2026-11-01). Le petit radar de l'accueil et la liste des boutiques restent ouverts à tous.
-  radarProto.radarLocked = function () {
+  // Grade qui ouvre le Radar si celui du joueur ne suffit pas (Premium : toujours ouvert), sinon -1. Sans effet.
+  radarProto.radarLockMin = function () {
+    if (this.premOn && this.premOn()) return -1;
     const i = this.shopGrade ? this.shopGrade() : 5, min = PF_GRADES.findIndex(g => g.radar);
-    if (min < 0 || i >= min) return false;
+    return min < 0 || i >= min ? -1 : min;
+  };
+  // Badge « Déverrouillé au grade … » des entrées du Radar (accueil, Territoire), comme au PK shop (2026-11-07, porteur).
+  radarProto.radarLockView = function () {
+    const min = this.radarLockMin();
+    return min < 0 ? { locked: false, lockLabel: '', lockImg: '' }
+      : { locked: true, lockLabel: 'Déverrouillé au grade ' + PF_GRADES[min].name, lockImg: 'img/grades/grade-' + (min + 1) + '.svg' };
+  };
+  radarProto.radarLocked = function () {
+    const min = this.radarLockMin();
+    if (min < 0) return false;
     this.setState({ shopLock: { g: min, kind: 'radar' } });
     return true;
   };
@@ -702,6 +714,7 @@
     const r = radarTerritory.call(this, x);
     r.radar = () => this.openRadar();
     r.radarSub = (RADAR.status === 'ready' ? fmt(RADAR.stores.length) + ' boutiques réelles' : 'Boutiques réelles') + ' · balaie une zone pour estimer tes chances';
+    r.rl = this.radarLockView();
     return r;
   };
 

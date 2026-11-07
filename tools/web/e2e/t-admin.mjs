@@ -60,9 +60,9 @@ const starter = page.locator('[aria-label="Starters"] button[aria-label="Choisir
 if (await starter.count()) { await starter.click(); await page.waitForTimeout(800); }
 await page.locator('.pkm-dex-all').click(); await page.waitForTimeout(500);
 const dexl = page.locator('section[aria-label="Mon Pokédex"]');
-const lockedNonMega = await dexl.locator('button[aria-label*="à débloquer"]').evaluateAll(b => b.map(x => x.getAttribute('aria-label')));
+const lockedNonMega = await dexl.locator('button[aria-label*="à débloquer"]').evaluateAll(b => b.map(x => x.getAttribute('aria-label')).filter(l => !/^Méga-/.test(l)));
 ok('PK masqués : aucun compagnon verrouillé dans Mon Pokédex (' + (await dexl.locator('button[aria-label*=", n° "]').count()) + ' Pokémon' + (lockedNonMega.length ? ' ; ' + lockedNonMega.slice(0, 3).join(' | ') : '') + ')',
-  (await dexl.locator('button[aria-label*=", n° "]').count()) === 156 && lockedNonMega.length === 0);
+  (await dexl.locator('button[aria-label*=", n° "]').count()) === 171 && lockedNonMega.length === 0);
 await page.keyboard.press('Escape'); await page.waitForTimeout(200);
 await page.goto(BASE + 'start=profile', { waitUntil: 'load' }); await page.waitForTimeout(1000);
 const idt = await page.locator('section[aria-label="Identité"]').innerText(), cat = await page.locator('section[aria-label="Grade actuel"]').innerText();

@@ -27,11 +27,11 @@ ok('titre « Information sur les grades »', /Information sur les grades/.test(a
 ok('succès retirés', (await page.locator('section[aria-label="Succès"]').count()) === 0 && (await page.locator('section[aria-label="Série en cours"]').count()) === 0);
 const rows = page.locator('button[aria-label^="Voir le grade"]');
 const rtxt = (await page.locator('main').innerText()).replace(/\s+/g, ' ');
-ok('6 grades cliquables avec leurs conditions', (await rows.count()) === 6 && /Dès l’inscription/.test(rtxt) && /1[   ]500 PK gagnés/.test(rtxt) && /10[   ]000 PK gagnés \+ 30 compagnons débloqués/.test(rtxt) && /50[   ]000 PK gagnés \+ 151 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(rtxt));
+ok('6 grades cliquables avec leurs conditions', (await rows.count()) === 6 && /Dès l’inscription/.test(rtxt) && /1[   ]500 PK gagnés/.test(rtxt) && /15[   ]000 PK gagnés \+ 50 compagnons débloqués/.test(rtxt) && /100[   ]000 PK gagnés \+ tout le Pokédex débloqué \(171 Pokémon\)/.test(rtxt));
 await page.screenshot({ path: shot('grades-liste.png'), fullPage: true });
 await page.click('button[aria-label="Voir le grade Maître Pokémon et ses avantages"]'); await page.waitForTimeout(800);
 const gs = page.locator('section[aria-label="Grade Maître Pokémon"]');
-ok('fiche du grade : emblème, condition, état', (await gs.locator('img[src="img/grades/grade-5.svg"]').count()) === 1 && /20[   ]000 PK gagnés \+ 100 compagnons débloqués \+ 1 méga-évolution débloquée/.test(await gs.innerText()) && /À débloquer/.test(await gs.innerText()));
+ok('fiche du grade : emblème, condition, état', (await gs.locator('img[src="img/grades/grade-5.svg"]').count()) === 1 && /30[   ]000 PK gagnés \+ 100 compagnons débloqués/.test(await gs.innerText()) && /À débloquer/.test(await gs.innerText()));
 ok('fiche du grade : avantages listés', (await page.locator('section[aria-label="Avantages du grade"] li').count()) >= 3);
 await page.screenshot({ path: shot('grade-fiche.png') });
 await page.click('button:has-text("Grade suivant")'); await page.waitForTimeout(500);

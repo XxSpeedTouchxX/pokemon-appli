@@ -14,8 +14,9 @@ const spy = () => {
   class Spy extends A { createOscillator() { window.__osc++; return super.createOscillator(); } }
   window.AudioContext = Spy; window.webkitAudioContext = Spy;
 };
-// 14 compagnons (ces 11 et les 4 starters offerts ; Triopikeur n'est plus offert depuis le 2026-11-01) et 6 000 PK gagnés : grade Chasseur ; le 15e compagnon donne Collectionneur.
-const OWN = [4, 10, 13, 16, 19, 21, 23, 27, 29, 32, 35];
+// 29 compagnons (ces 26 dont Salamèche, et les 3 autres starters offerts) et 8 000 PK gagnés : grade Chasseur ; le 30e
+// compagnon donne Collectionneur (conditions du 2026-11-07 : 7 500 PK + 30 compagnons).
+const OWN = [4, 10, 13, 16, 19, 21, 23, 27, 29, 32, 35, 37, 39, 41, 46, 48, 50, 52, 54, 56, 58, 60, 63, 66, 69, 72];
 const open = async (q) => {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
@@ -23,7 +24,7 @@ const open = async (q) => {
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
   const url = E2E + '/?today=2026-11-01&debug&start=market' + (q || '');
   await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(1200);
-  await page.evaluate(([k, own]) => { const d = JSON.parse(localStorage.getItem(k) || '{}'); Object.assign(d, { tuto: 'done', evo: { line: 'sala', stage: 0 }, buddy: 4, pkOwn: own, pa: 20000, pk: 6000, pkEarned: 6000, gradeSeen: 1, megas: [] }); delete d.dexTips; localStorage.setItem(k, JSON.stringify(d)); }, [KEY, OWN]);
+  await page.evaluate(([k, own]) => { const d = JSON.parse(localStorage.getItem(k) || '{}'); Object.assign(d, { tuto: 'done', evo: { line: 'sala', stage: 0 }, buddy: 4, pkOwn: own, pa: 20000, pk: 8000, pkEarned: 8000, gradeSeen: 1, megas: [] }); delete d.dexTips; localStorage.setItem(k, JSON.stringify(d)); }, [KEY, OWN]);
   await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(2000);
   return [ctx, page];
 };
@@ -32,7 +33,7 @@ const gu = page => page.locator('.pkm-gu').count();
 {
   const [ctx, page] = await open();
   ok('départ : grade Chasseur (' + await page.evaluate(() => window.__pkm.tierOf().cur.name) + ')', (await page.evaluate(() => window.__pkm.tierOf().i)) === 1);
-  // Reptincel (évolution de Salamèche) : 15e compagnon → Collectionneur, pendant l'évolution de 8,2 s.
+  // Reptincel (évolution de Salamèche) : 30e compagnon → Collectionneur, pendant l'évolution de 8,2 s.
   const t0 = Date.now();
   await page.evaluate(() => { window.__osc = 0; window.__pkm.dexUnlock(5); });
   await page.waitForTimeout(600);
