@@ -10,7 +10,7 @@ const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.messag
 await page.goto(E2E + '/?today=2026-10-31&debug', { waitUntil: 'load' }); await page.waitForTimeout(2200);
 const shown = () => page.evaluate(() => ['lava', 'sea', 'storm'].filter(k => { const el = document.querySelector('#pkm-scene .pkm-sc-' + k); return el && el.offsetParent !== null; }));
 ok('Pikachu : aucun décor de thème', (await shown()).length === 0);
-for (const [n, key, parts] of [[383, 'lava', ['.pkm-sc-crater', '.pkm-sc-flow', '.pkm-sc-smoke', '.pkm-sc-bomb']], [382, 'sea', ['.pkm-sc-wave', '.pkm-sc-rain', '.pkm-sc-ripple']], [384, 'storm', ['.pkm-sc-bolt', '.pkm-sc-meteor', '.pkm-sc-rain', '.pkm-sc-cloud', '.pkm-sc-flash']]]) {
+for (const [n, key, parts] of [[383, 'lava', ['.pkm-sc-crater', '.pkm-sc-lhot', '.pkm-sc-smoke', '.pkm-sc-bomb']], [382, 'sea', ['.pkm-sc-wave', '.pkm-sc-rain', '.pkm-sc-ripple']], [384, 'storm', ['.pkm-sc-bolt', '.pkm-sc-meteor', '.pkm-sc-rain', '.pkm-sc-cloud', '.pkm-sc-flash']]]) {
   await page.evaluate(n => { const s = window.__pkm.st(); window.__pkm.setState({ pkOwn: Array.from(new Set((s.pkOwn || []).concat([n]))), buddy: n, bgFx: 'auto' }); }, n);
   await page.waitForTimeout(500);
   const anim = await page.evaluate(([k, ps]) => ps.map(sel => { const el = document.querySelector('#pkm-scene .pkm-sc-' + k + ' ' + sel); return el ? getComputedStyle(el).animationName : 'absent'; }), [key, parts]);

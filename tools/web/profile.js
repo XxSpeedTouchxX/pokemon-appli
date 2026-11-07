@@ -303,7 +303,9 @@
     // Emblème du grade sur l'avatar (en-tête) : l'ancien grade tant que le passage de grade attend la fin d'une
     // évolution (2026-11-01, porteur : le nouveau grade seulement une fois l'évolution effectuée).
     const ht = (pfGradePend && this.tiers()[pfGradePend.from]) || this.tierOf().cur;
-    r.hh = { badge: ht.sym, grade: ht.name };
+    // Pas d'emblème aux grades Recrue et Chasseur (2026-11-07, porteur ; « Emblème du grade » dès Collectionneur).
+    const hi = pfGradePend && this.tiers()[pfGradePend.from] ? pfGradePend.from : this.tierOf().i;
+    r.hh = { badge: ht.sym, grade: ht.name, show: hi >= 2 };
     r.gr = ui.isGrade ? this.vGrade(s) : { perks: [] };
     if (ui.isGrade) Object.assign(ui, { title: r.gr.name, subtitle: '', hasSubtitle: false, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
     r.gu = this.vGradeUp(s);

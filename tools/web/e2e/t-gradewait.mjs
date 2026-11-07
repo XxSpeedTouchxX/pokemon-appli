@@ -39,7 +39,7 @@ const gu = page => page.locator('.pkm-gu').count();
   ok('grade atteint pendant l’évolution (' + await page.evaluate(() => window.__pkm.tierOf().cur.name) + '), animation d’évolution à l’écran', (await page.evaluate(() => window.__pkm.tierOf().i)) === 2 && (await page.locator('.pkm-evo-fx').count()) === 1);
   ok('0,6 s : pas encore de passage de grade', (await gu(page)) === 0);
   const badge = () => page.locator('img.pkm-hh-grade').first().getAttribute('src');
-  ok('pendant l’évolution, l’avatar garde l’emblème de l’ancien grade (' + await badge() + ')', /grade-2\.svg/.test(await badge()));
+  ok('pendant l’évolution, l’avatar garde l’ancien grade : Chasseur, donc pas d’emblème (2026-11-07)', (await page.locator('img.pkm-hh-grade').count()) === 0);
   await page.waitForTimeout(4400);
   ok('5 s : évolution toujours en cours, pas de passage de grade ; grade vu : ' + await seen(page), (await gu(page)) === 0 && (await page.locator('.pkm-evo-fx').count()) === 1 && (await seen(page)) === 1);
   await page.screenshot({ path: shot('gradewait-evo.png') });

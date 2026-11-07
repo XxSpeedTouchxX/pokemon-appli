@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-07 — Retouches du Premium et de l'emblème (demande du porteur)
+
+- **Icône « Cartes et items scellés illimités »** : un classeur plus rectangulaire (debout, anneaux, tranche, étiquette avec la gemme). La carte en sort puis y rentre.
+- **« 2XP »** : centré dans sa bulle (vérifié par un test à moins de 1,5 px près).
+- **Défilement de l'offre Premium** :
+  - la hauteur ne bouge plus quand la barre du navigateur apparaît ou disparaît ;
+  - le défilement n'entraîne plus la page derrière ;
+  - les animations sont plus légères (reflets et halo doré sans recalcul de la mise en page).
+- **Ouverture et retour du Premium** : l'offre glisse depuis la droite et repart vers la droite, avec la même courbe que les pages de l'app ; le fond s'éclaircit en douceur.
+- **Emblème du grade sur l'avatar** : caché aux grades Recrue et Chasseur, affiché dès Collectionneur.
+- **Badge « Nouveau thème »** : couleurs plus sombres sous le texte blanc (contraste 4,5:1).
+- Cache v144.
+
 ## 2026-11-07 — Avantages des grades refaits, Premium v2, décors (demandes du porteur)
 
 - **Avantages des grades** (listes du porteur, mot pour mot) :
