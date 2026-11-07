@@ -1,0 +1,13 @@
+{
+  "appId": "com.dropicards.app",
+  "appName": "Dropicards",
+  "webDir": "../web",
+  "backgroundColor": "#FFD60A",
+  "ios": {
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
