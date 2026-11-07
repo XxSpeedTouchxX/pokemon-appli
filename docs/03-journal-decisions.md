@@ -6,10 +6,16 @@
 
 ---
 
+## 2026-11-07 — Animation du ticket acheté : choix du porteur
+
+- Le porteur a choisi la proposition 2 (tampon « VALIDÉ », secousse, « +1 », étincelles), terminée par l'envol de la proposition 1 : le ticket file vers celui de la fiche et disparaît. C'est l'animation par défaut ; `?anitk=1` (Envol seul) et `?anitk=3` (Brillance) restent pour essai. Cache v156.
+
+---
+
 ## 2026-11-07 — PK shop : fiche glissée, animations d'achat, e-mail de chaque achat (demande du porteur)
 
 - **Fiche d'un ticket** : monte du bas à l'ouverture et redescend à la fermeture, comme « Mon Pokédex » ; l'encadré « Lot à gagner, Valeur, Tirage » ne rétrécit plus sur un écran peu haut (il se réduisait à un trait).
-- **Ticket acheté** : le ticket apparaît avec « +1 » ; 3 propositions à choisir (`?anitk=1` Envol, par défaut ; `2` Tampon « VALIDÉ » ; `3` Brillance qui tourne). **Choix du porteur attendu.**
+- **Ticket acheté** : le ticket apparaît avec « +1 » ; 3 propositions à choisir (`?anitk=1` Envol, par défaut ; `2` Tampon « VALIDÉ » ; `3` Brillance qui tourne). **Choix du porteur (même jour) : la 2 avec l'envol de la 1** (entrée ci-dessus).**
 - **Achat direct** (booster, item rare, ETB) : écran « Bravo ! » avec l'article, confettis et feu d'artifice, et le message du porteur (« Tu viens d'acheter un booster Pokémon 30ᵉ anniversaire. Tu vas recevoir très prochainement un e-mail… à ton domicile ») ; la série du moment est une constante (`SHOP_SERIES`, `pkshop.js`).
 - **E-mail à Dropicards pour chaque achat** (contact@dropicards.fr, choix du porteur) : `tools/supabase/012_shop_notices.sql` (achats déjà signalés, 12 tests) et fonction du serveur `tools/supabase/functions/notify` (Brevo, 12 tests, `install-notify.sh`) ; guide `docs/30-guide-email-achats-pk-shop.md` ; **à installer par le porteur** (012, clé d'API Brevo dans Coolify, fonction).
 - **Tickets après le tirage (décision du porteur)** : chaque ticket vaut une chance pour le prochain tirage de sa couleur ; une fois ce tirage passé, tous ses tickets sont utilisés et sortent du solde (déjà le cas sur le serveur). Cache v155.

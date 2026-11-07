@@ -65,12 +65,16 @@ await page.locator('button[aria-label^="Ticket Bronze"]').first().click(); await
 const tkT = await page.evaluate(() => getComputedStyle(document.querySelector('.pkm-tks-sheet')).transform);
 ok('fiche du ticket : arrive du bas (en cours : ' + tkT + ')', tkT !== 'none' && tkT !== 'matrix(1, 0, 0, 1, 0, 0)');
 await page.waitForTimeout(600);
-// Achat d'un ticket : ticket + « +1 » (proposition 1, « Envol », par défaut).
+// Achat d'un ticket : tampon « VALIDÉ » et « +1 » (proposition 2), puis envol de la proposition 1 (choix du porteur).
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Acheter un ticket")').click(); await page.waitForTimeout(250);
+await page.evaluate(() => { const an = Element.prototype.animate; window.__tkFly = []; Element.prototype.animate = function (k, o) { if (this.classList && this.classList.contains('pkm-tkfx-tk')) window.__tkFly.push(JSON.stringify(k)); return an.call(this, k, o); }; });
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Confirmer")').click(); await page.waitForTimeout(700);
-ok('ticket acheté : animation du ticket Bronze avec « +1 » (Envol)', (await page.locator('.pkm-tkfx.pkm-tkfx-v1 .pkm-shop-t-bronze').count()) === 1 && (await page.locator('.pkm-tkfx-plus').innerText()) === '+1' && /Ticket Bronze · tu en as 1/.test(await page.locator('.pkm-tkfx-cap').innerText()));
+ok('ticket acheté : ticket Bronze, tampon « VALIDÉ » et « +1 » (choix du porteur)', (await page.locator('.pkm-tkfx.pkm-tkfx-v2 .pkm-shop-t-bronze').count()) === 1 && (await page.locator('.pkm-tkfx-stamp').innerText()) === 'VALIDÉ' && (await page.locator('.pkm-tkfx-plus').innerText()) === '+1' && /Ticket Bronze · tu en as 1/.test(await page.locator('.pkm-tkfx-cap').innerText()));
 await page.screenshot({ path: shot('locks-ticket-plus1.png') });
-await page.waitForTimeout(2200);
+await page.waitForTimeout(1250);
+const fly = await page.evaluate(() => (window.__tkFly || []).some(t => /translate\(/.test(t)));
+ok('puis le ticket s’envole vers celui de la fiche (envol de la proposition 1)', fly);
+await page.waitForTimeout(1000);
 ok('animation retirée ensuite', (await page.locator('.pkm-tkfx').count()) === 0);
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(150);
 ok('fermeture de la fiche : elle descend avant de se fermer', (await page.locator('section[aria-label="Ticket Bronze"]').count()) === 1);

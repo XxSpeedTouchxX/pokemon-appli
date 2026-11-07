@@ -128,9 +128,11 @@
   const SHOP_SERIES = '30ᵉ anniversaire';
   // Ticket acheté : le ticket apparaît avec un « +1 ». Trois propositions, à choisir par le porteur (?anitk=1, 2 ou 3) :
   //   1. Envol : le ticket surgit au centre, rebondit, « +1 » monte, puis il s'envole vers le ticket de la fiche ;
-  //   2. Tampon : le ticket surgit, un tampon « VALIDÉ » s'abat (secousse), « +1 » rebondit, quelques étincelles ;
+  //   2. Tampon : le ticket surgit, un tampon « VALIDÉ » s'abat (secousse), « +1 » rebondit, quelques étincelles, puis il
+  //      s'envole vers le ticket de la fiche comme dans la 1 (choix du porteur, par défaut) ;
   //   3. Brillance : le ticket tourne sur lui-même (recto, verso), un reflet le traverse, « +1 » et une gerbe d'étoiles.
-  const SHOP_TKFX = (() => { try { const m = /[?&]anitk=([123])\b/.exec(location.search); return m ? Number(m[1]) : 1; } catch (e) { return 1; } })();
+  // Choix du porteur (2026-11-07) : le tampon (2), avec l'envol final de la proposition 1. Les autres restent pour essai.
+  const SHOP_TKFX = (() => { try { const m = /[?&]anitk=([123])\b/.exec(location.search); return m ? Number(m[1]) : 2; } catch (e) { return 2; } })();
   const shopStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return true; } };
   const shopEsc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const shopTicketFx = (it, n) => {
@@ -142,7 +144,7 @@
       + (v === 3 ? '<i class="pkm-tkfx-shine"></i>' : '') + (v === 2 ? '<b class="pkm-tkfx-stamp">VALIDÉ</b>' : '') + '</span>'
       + '<b class="pkm-tkfx-plus">+1</b>' + sparks + '<span class="pkm-tkfx-cap">' + shopEsc(it.name) + ' · tu en as ' + (n || 1) + '</span></div>';
     document.body.appendChild(ov);
-    if (v === 1) {
+    if (v === 1 || v === 2) {
       // Vers le ticket de la fiche ouverte (ou vers le haut de l'écran) à la fin.
       setTimeout(() => {
         const box = ov.querySelector('.pkm-tkfx-tk'), to = document.querySelector('.pkm-tks-top .pkm-shop-ticket-xl');
@@ -150,7 +152,7 @@
         const a = box.getBoundingClientRect(), b = to ? to.getBoundingClientRect() : { left: a.left, top: 40, width: a.width, height: a.height };
         const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
         box.animate([{ transform: 'translate(0, 0) scale(1.7)', opacity: 1 }, { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(0.6)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(0.55, 0, 0.7, 0.4)', fill: 'forwards' });
-      }, 1350);
+      }, v === 2 ? 1600 : 1350);
     }
     setTimeout(() => ov.remove(), v === 0 ? 1600 : 2500);
   };
