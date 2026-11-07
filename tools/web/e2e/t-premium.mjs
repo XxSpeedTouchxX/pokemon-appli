@@ -48,6 +48,10 @@ ok('graphique de l’historique sans flèche jaune', (await sh.locator('.pkm-pre
 const mh = await sh.evaluate(e => getComputedStyle(e).maxHeight);
 const backTop = await sh.locator('button[aria-label="Retour au PK shop"]').evaluate(e => e.getBoundingClientRect().top);
 ok('haut de l’offre dégagé : flèche « précédent » entière (' + Math.round(backTop) + ' px du haut, hauteur ' + mh + ')', backTop >= 40 && /env|px/.test(mh));
+await sh.locator('button.pkm-prem-cgv').click(); await page.waitForTimeout(400);
+ok('lien « Conditions générales de vente » de l’offre', (await page.locator('section[aria-label="Informations légales"] h2').innerText()) === 'Conditions générales de vente');
+await page.locator('section[aria-label="Informations légales"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
+await page.click('button[aria-label="Découvrir Dropicards Premium"]'); await page.waitForTimeout(700);
 await sh.locator('button[aria-label="Retour au PK shop"]').click(); await page.waitForTimeout(150);
 const mid = await page.locator('.pkm-prem-sheet').evaluate(e => getComputedStyle(e).transform).catch(() => 'none');
 ok('retour animé : l’offre glisse vers la droite (' + mid + ')', /matrix/.test(mid) && mid !== 'none');

@@ -1142,6 +1142,40 @@ mkdirSync(TESS + 'lang', { recursive: true });
   ['tesseract.js-core/tesseract-core-lstm.wasm.js', 'tesseract-core-lstm.wasm.js'],
   ['@tesseract.js-data/fra/4.0.0_best_int/fra.traineddata.gz', 'lang/fra.traineddata.gz']
 ].forEach(([from, to]) => copyFileSync(fileURLToPath(new URL('./node_modules/' + from, import.meta.url)), TESS + to));
+// Pages légales publiques (2026-11-07) : les mêmes textes que dans l'app (legal.js, entre @legal-data-start et
+// @legal-data-end), publiés en pages simples pour Stripe, Google Play et l'App Store, qui demandent une adresse web.
+{
+  const src = readFileSync(fileURLToPath(new URL('./legal.js', import.meta.url)), 'utf8');
+  const block = src.slice(src.indexOf('// @legal-data-start'), src.indexOf('// @legal-data-end'));
+  const { LEGAL, LEGAL_TODO, LEGAL_UPDATED } = new Function(block + '\nreturn { LEGAL, LEGAL_TODO, LEGAL_UPDATED };')();
+  const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const todo = esc(LEGAL_TODO);
+  const PAGES = [['mentions', 'mentions-legales.html'], ['privacy', 'confidentialite.html'], ['terms', 'cgu.html'], ['sales', 'cgv.html']];
+  for (const [k, f] of PAGES) {
+    const L = LEGAL[k];
+    const nav = PAGES.map(([k2, f2]) => (k2 === k ? '<b>' + esc(LEGAL[k2].label) + '</b>' : '<a href="' + f2 + '">' + esc(LEGAL[k2].label) + '</a>')).join('');
+    const body = L.blocks.map(([t, p]) => '<section><h2>' + esc(t) + '</h2><p>' + esc(p).split(todo).join('<mark>' + todo + '</mark>') + '</p></section>').join('\n');
+    writeFileSync(OUT + f, `<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(L.label)} · Dropicards</title><meta name="description" content="${esc(L.label)} de Dropicards, application indépendante de suivi de collection Pokémon TCG.">
+<link rel="icon" type="image/png" href="icons/favicon-32.png"><style>
+:root{color-scheme:light dark;--bg:#FFFBEA;--fg:#141A26;--mute:#5A6478;--line:#E8DFB8;--acc:#7A5A00;--mark:#FFE58A}
+@media (prefers-color-scheme:dark){:root{--bg:#0E1424;--fg:#F3F6FC;--mute:#A6B2C8;--line:#24345C;--acc:#FFD60A;--mark:#5A4600}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:28px 18px 64px}a{color:var(--acc)}h1{font-size:28px;line-height:1.25;margin:8px 0 6px}
+nav{display:flex;flex-wrap:wrap;gap:8px 18px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}nav b{font-weight:700}
+section{padding:14px 0;border-bottom:1px solid var(--line)}h2{font-size:17px;margin:0 0 4px}p{margin:0}mark{background:var(--mark);color:inherit;padding:0 3px;border-radius:3px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px}.date{color:var(--mute);font-size:14px;margin-top:18px}
+</style></head><body><main>
+<div class="top"><a href="./">← Ouvrir Dropicards</a><span>dropicards.fr</span></div>
+<h1>${esc(L.label)}</h1>
+<nav aria-label="Pages légales">${nav}</nav>
+${body}
+<p class="date">Dernière mise à jour : ${esc(LEGAL_UPDATED)}. Dropicards est une application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
+</main></body></html>
+`);
+  }
+}
 const imgs = readdirSync(IMG_SRC).filter(f => f.endsWith('.webp'));
 imgs.forEach(f => copyFileSync(IMG_SRC + f, OUT + 'img/' + f));
 console.log('Démo générée : web/index.html, web/app.js (' + app.length + ' caractères, ' + appMin.length + ' minifié), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli, thème : '

@@ -88,3 +88,4 @@
 .pkm-prem-mine span { font-size: 14px; line-height: 1.45; color: #E7E2F5; }
 .pkm-prem-err { margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(255, 99, 99, 0.14); color: #FFB4B4; font-size: 13.5px; line-height: 1.45; }
 .pkm-prem-secure { background: rgba(94, 224, 207, 0.1); color: #BFEFE8; }
+.pkm-prem-cgv { align-self: center; min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: #CFC4F5; font: inherit; font-size: 13.5px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

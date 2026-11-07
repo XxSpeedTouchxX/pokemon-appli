@@ -11,13 +11,13 @@ await page.click('button:has-text("Informations légales et confidentialité")')
 const sh = page.locator('section[aria-label="Informations légales"]');
 ok('panneau ouvert : ' + await sh.locator('h2').innerText(), (await sh.locator('h2').innerText()) === 'Mentions légales');
 const t1 = await sh.innerText();
-ok('mentions : hébergeur, non-affiliation, éditeur à compléter', /OVH SAS/.test(t1) && !/Cloudflare/.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /à compléter par l’éditeur/.test(t1));
+ok('mentions : éditeur (micro-entreprise, adresse, téléphone), hébergeur, non-affiliation, SIRET à compléter', /Nicolas Bouit, entrepreneur individuel/.test(t1) && /Fos-sur-Mer/.test(t1) && /\+33 7 83 55 66 09/.test(t1) && /contact@dropicards\.fr/.test(t1) && /293 B/.test(t1) && /OVH SAS/.test(t1) && !/Cloudflare/.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /SIRET : \[à compléter par l’éditeur/.test(t1));
 await page.screenshot({ path: shot('legal-mentions.png') });
 const tabs = await sh.locator('[aria-label="Rubriques"] button').allInnerTexts();
-ok('3 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Conditions');
-for (const [tab, re] of [['Confidentialité', /arrondie à environ 100 m/], ['Conditions', /pas une plateforme de vente/]]) {
+ok('4 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Utilisation,Vente (Premium)');
+for (const [tab, title, re] of [['Confidentialité', 'Politique de confidentialité', /Brevo[\s\S]*Stripe[\s\S]*arrondie à environ 100 m[\s\S]*CNIL/], ['Utilisation', 'Conditions générales d’utilisation', /pas une plateforme de vente/], ['Vente (Premium)', 'Conditions générales de vente', /4,90 € par mois[\s\S]*49,90 € par an[\s\S]*renouvelé automatiquement[\s\S]*14 jours[\s\S]*médiateur/]]) {
   await sh.locator('[aria-label="Rubriques"] button:has-text("' + tab + '")').click(); await page.waitForTimeout(250);
-  ok(tab + ' : texte attendu', re.test(await sh.innerText()) && (await sh.locator('h2').innerText()) === tab);
+  ok(tab + ' : « ' + title + ' », texte attendu', re.test(await sh.innerText()) && (await sh.locator('h2').innerText()) === title);
 }
 await page.screenshot({ path: shot('legal-pk.png') });
 await sh.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
@@ -32,6 +32,12 @@ const cards = await rk.locator('.pkm-rules-card').evaluateAll(els => els.map(e =
 ok('règles en images : ' + cards, cards === 'Gagner des PK|Booster PK|Pile ou face|Délais selon le grade|Points d’Aura|PK shop' && (await rk.locator('.pkm-rules-row:not(.pkm-rules-th)').count()) === 6 && (await rk.locator('.pkm-rules-odds i').count()) === 5);
 ok('plus de « Pas un jeu d’argent » ni de texte complet', (await rk.locator('details').count()) === 0 && !/Pas un jeu d’argent|Lire le texte complet/.test(await rk.innerText()));
 await rk.screenshot({ path: shot('legal-regles.png') });
+// Pages publiques (Stripe, Google Play, App Store) : mêmes textes que l'app.
+for (const [f, re] of [['mentions-legales.html', /Nicolas Bouit, entrepreneur individuel[\s\S]*OVH SAS/], ['confidentialite.html', /Brevo[\s\S]*Stripe[\s\S]*CNIL/], ['cgu.html', /pas une plateforme de vente/], ['cgv.html', /49,90 € par an[\s\S]*Droit de rétractation/]]) {
+  const r = await page.goto(E2E + '/' + f, { waitUntil: 'load' });
+  ok('page publique ' + f + ' (' + r.status() + ')', r.status() === 200 && re.test(await page.locator('main').innerText()) && (await page.locator('nav[aria-label="Pages légales"] a').count()) === 3);
+}
+await page.goto(E2E + '/cgv.html'); await page.screenshot({ path: shot('legal-cgv-page.png'), fullPage: true });
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

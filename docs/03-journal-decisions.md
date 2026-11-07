@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-07 — Mentions légales, confidentialité, CGU et conditions de vente du Premium (demande du porteur)
+
+- **Éditeur renseigné** (identité de la micro-entreprise déclarée dans Stripe) : Nicolas Bouit, entrepreneur individuel, nom commercial Dropicards, adresse à Fos-sur-Mer, téléphone, contact@dropicards.fr, « TVA non applicable, art. 293 B du CGI ».
+- **Restent « à compléter »** (jamais inventés) : le **SIRET** et le **médiateur de la consommation** (obligatoire pour vendre à des particuliers).
+- **Politique de confidentialité refaite** pour les comptes sur le serveur, l'abonnement Premium, Stripe et Brevo : données gardées, pourquoi, qui y a accès, combien de temps, droits, mineurs.
+- **Conditions d'utilisation** à jour : compte, PK et PA, PK shop, bon usage.
+- **Nouvelles conditions générales de vente du Premium** : prix TTC, renouvellement automatique, arrêt à tout moment avec effet en fin de période, rétractation de 14 jours au prorata, paiement refusé (3 jours de grâce), réclamations.
+- Accès dans l'app : Réglages › Informations légales (rubrique « Vente (Premium) »), Mon profil (« Conditions générales de vente ») et l'écran Premium.
+- **Pages publiques** générées à chaque construction à partir des mêmes textes, pour Stripe, Google Play et l'App Store : `dropicards.fr/mentions-legales.html`, `confidentialite.html`, `cgu.html` et `cgv.html`.
+- À faire par le porteur : créer l'adresse contact@dropicards.fr, donner le SIRET et choisir un médiateur, renseigner les adresses des pages dans Stripe, activer l'e-mail de rappel avant le renouvellement annuel. Textes à faire relire par un juriste avant une large diffusion.
+- Cache v147.
+
 ## 2026-11-07 — Paiement Premium branché avec Stripe (« go » du porteur)
 
 - **Décision P6 (`docs/27`)** : Stripe sur le site, dans le compte Stripe « DROPICARDS » du porteur, rattaché à sa micro-entreprise ; Stripe Tax ignoré (franchise de TVA, à confirmer avec un comptable).

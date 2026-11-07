@@ -1964,6 +1964,7 @@
 <nav aria-label="Informations légales" class="pkm-pc-legal">
 <button type="button" onClick="{{ legal.openTerms }}">Conditions générales d’utilisation</button>
 <button type="button" onClick="{{ legal.openPrivacy }}">Politique de confidentialité</button>
+<button type="button" onClick="{{ legal.openSales }}">Conditions générales de vente</button>
 </nav>
 
 <!-- fragment: profile-ver -->
@@ -2321,6 +2322,7 @@ PKCOUNTER
 <sc-if value="{{ prem.hasErr }}" hint-placeholder-val="{{ false }}"><p class="pkm-prem-err" role="alert">{{ prem.err }}</p></sc-if>
 <p class="pkm-pas-soon pkm-prem-secure">{{ prem.soon }}</p>
 <ul class="pkm-prem-terms"><sc-for list="{{ prem.terms }}" as="pt" hint-placeholder-count="4"><li>{{ pt.text }}</li></sc-for></ul>
+<button type="button" onClick="{{ legal.openSales }}" class="pkm-prem-cgv">Conditions générales de vente</button>
 <button type="button" onClick="{{ prem.close }}" class="pkm-pas-cancel">{{ prem.later }}</button>
 </section>
 </div>
