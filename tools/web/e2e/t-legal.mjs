@@ -11,7 +11,7 @@ await page.click('button:has-text("Informations légales et confidentialité")')
 const sh = page.locator('section[aria-label="Informations légales"]');
 ok('panneau ouvert : ' + await sh.locator('h2').innerText(), (await sh.locator('h2').innerText()) === 'Mentions légales');
 const t1 = await sh.innerText();
-ok('mentions : éditeur (micro-entreprise, adresse, téléphone), hébergeur, non-affiliation, SIRET à compléter', /Nicolas Bouit, entrepreneur individuel/.test(t1) && /Fos-sur-Mer/.test(t1) && /\+33 7 83 55 66 09/.test(t1) && /contact@dropicards\.fr/.test(t1) && /293 B/.test(t1) && /OVH SAS/.test(t1) && !/Cloudflare/.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /SIRET : \[à compléter par l’éditeur/.test(t1));
+ok('mentions : éditeur (micro-entreprise, adresse, téléphone), hébergeur, non-affiliation, SIRET 883 722 993 00051', /Nicolas Bouit, entrepreneur individuel/.test(t1) && /Fos-sur-Mer/.test(t1) && /\+33 7 83 55 66 09/.test(t1) && /contact@dropicards\.fr/.test(t1) && /293 B/.test(t1) && /OVH SAS/.test(t1) && !/Cloudflare/.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /SIRET : 883 722 993 00051/.test(t1) && !/à compléter/.test(t1));
 await page.screenshot({ path: shot('legal-mentions.png') });
 const tabs = await sh.locator('[aria-label="Rubriques"] button').allInnerTexts();
 ok('4 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Utilisation,Vente (Premium)');

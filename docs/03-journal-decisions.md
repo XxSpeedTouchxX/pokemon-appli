@@ -9,7 +9,7 @@
 ## 2026-11-07 — Mentions légales, confidentialité, CGU et conditions de vente du Premium (demande du porteur)
 
 - **Éditeur renseigné** (identité de la micro-entreprise déclarée dans Stripe) : Nicolas Bouit, entrepreneur individuel, nom commercial Dropicards, adresse à Fos-sur-Mer, téléphone, contact@dropicards.fr, « TVA non applicable, art. 293 B du CGI ».
-- **Restent « à compléter »** (jamais inventés) : le **SIRET** et le **médiateur de la consommation** (obligatoire pour vendre à des particuliers).
+- **SIRET** 883 722 993 00051 (entrepreneur individuel inscrit au RNE depuis le 23 mai 2020), donné par le porteur le même jour (cache v148). **Reste « à compléter »** : le **médiateur de la consommation** (obligatoire pour vendre à des particuliers).
 - **Politique de confidentialité refaite** pour les comptes sur le serveur, l'abonnement Premium, Stripe et Brevo : données gardées, pourquoi, qui y a accès, combien de temps, droits, mineurs.
 - **Conditions d'utilisation** à jour : compte, PK et PA, PK shop, bon usage.
 - **Nouvelles conditions générales de vente du Premium** : prix TTC, renouvellement automatique, arrêt à tout moment avec effet en fin de période, rétractation de 14 jours au prorata, paiement refusé (3 jours de grâce), réclamations.

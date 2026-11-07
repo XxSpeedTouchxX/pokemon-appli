@@ -10,11 +10,11 @@
   const LEGAL_UPDATED = '7 novembre 2026';
   const LEGAL_MAIL = 'contact@dropicards.fr';
   // Éditeur (2026-11-07, porteur : « mets-le dans les mentions légales ») : identité et adresse de la micro-entreprise
-  // telles que déclarées dans son compte Stripe. SIRET et médiateur de la consommation : à donner par le porteur.
+  // telles que déclarées dans son compte Stripe ; SIRET donné par le porteur le 2026-11-07. Médiateur de la consommation : à donner.
   const LEGAL_WHO = 'Nicolas Bouit, entrepreneur individuel (micro-entreprise), exerçant sous le nom commercial Dropicards';
   const LEGAL_ADDR = '175 impasse du Pré Fleuri, 13270 Fos-sur-Mer, France';
   const LEGAL_PHONE = '+33 7 83 55 66 09';
-  const LEGAL_SIRET = 'SIRET : ' + LEGAL_TODO;
+  const LEGAL_SIRET = 'SIRET : 883 722 993 00051 (SIREN 883 722 993), inscrit au Registre national des entreprises depuis le 23 mai 2020';
   // Refonte du 2026-10-11 (LCEN art. 6-III, RGPD), puis du 2026-11-07 : comptes sur le serveur de Dropicards,
   // abonnement Premium payé avec Stripe (conditions générales de vente), e-mails par Brevo, règles des PK à jour.
   const LEGAL = {
