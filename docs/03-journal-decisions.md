@@ -25,7 +25,8 @@
   - avantages ouverts : scans et classeur illimités, Radar ;
   - 20 vérifications.
 - **Guide du porteur** : `docs/28-guide-paiement-premium-stripe.md` (mode test d'abord, puis production avec les pages légales).
-- P4 (historique des prix sans Premium) toujours en attente, défaut proposé : 1 mois.
+- P4 (historique des prix sans Premium) mise en attente par le porteur (tout le monde garde tout l'historique pour l'instant).
+- Installation sur le serveur (même jour, porteur) : 007, mot de passe des admins, 008, 009 et 010 dans Studio, vérifiés (4 × « true »). Suite : réglages de Stripe en mode test (`docs/28` §4).
 - Cache v146.
 
 ## 2026-11-07 — Retouches du Premium (2) et du solde de « Jeux » (demande du porteur)
