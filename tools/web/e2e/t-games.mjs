@@ -10,6 +10,8 @@ await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitF
 ok('onglet « Jeux » dans la barre du bas', (await page.locator('nav button[aria-label="Jeux"]').count()) === 1);
 const boost = page.locator('section[aria-label="Booster PK"]'), coin = page.locator('section[aria-label="Pile ou face"]');
 ok('booster et pile ou face affichés', (await boost.count()) === 1 && (await coin.count()) === 1);
+const solde = await page.locator('section[aria-label="Mes PK"]').innerText();
+ok('« Ton solde » sans « Pour le PK shop »', /Ton solde/.test(solde) && !/Pour le/.test(solde));
 const odds = (await boost.textContent()).replace(/[\u202f\u00a0]/g, ' ');
 ok('flèche sur « Contenu possible et chances »', (await boost.locator('summary .pkm-gm-chev svg').count()) === 1);
 ok('taux affichés (30 PK 50 % … 500 PK 5 %)', /500 PK/.test(odds) && /5 %/.test(odds) && /50 %/.test(odds) && !/1 000 PK/.test(odds));

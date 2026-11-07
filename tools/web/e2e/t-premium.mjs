@@ -31,8 +31,21 @@ ok('Mensuel choisi : « Devenir Premium · 4,90 € par mois », « chaque mois 
 ok('paiement pas encore ouvert : bouton désactivé, « Rien n’est débité »', (await sh.locator('button.pkm-prem-cta').isDisabled()) && /Rien n’est débité/.test(await sh.innerText()));
 const scroll = await sh.evaluate(e => { const c = getComputedStyle(e); return c.overscrollBehaviorY + ' ' + c.touchAction; });
 ok('défilement de l’offre : sans entraîner la page derrière (' + scroll + ')', /contain/.test(scroll) && /pan-y/.test(scroll));
-const tag = await sh.locator('.pkm-prem-xp-tag').evaluate(e => { const b = e.getBoundingClientRect(), r = document.createRange(); r.selectNodeContents(e); const t = r.getBoundingClientRect(); return [Math.abs((b.left + b.right) / 2 - (t.left + t.right) / 2), Math.abs((b.top + b.bottom) / 2 - (t.top + t.bottom) / 2)]; });
-ok('« 2XP » centré dans sa bulle (écart ' + tag.map(v => v.toFixed(1)).join(' et ') + ' px)', tag[0] < 1.5 && tag[1] < 1.5);
+// « 2XP » centré dans sa bulle : mesuré sur les lettres elles-mêmes (pixels sombres), bulle à plat et immobile.
+await page.addStyleTag({ content: '.pkm-prem-xp-tag { animation: none !important; transform: none !important; }' }); await page.waitForTimeout(100);
+const tagPng = await sh.locator('.pkm-prem-xp-tag').screenshot();
+const tag = await page.evaluate(async b64 => {
+  const bm = await createImageBitmap(await (await fetch('data:image/png;base64,' + b64)).blob());
+  const c = new OffscreenCanvas(bm.width, bm.height), x = c.getContext('2d'); x.drawImage(bm, 0, 0);
+  const d = x.getImageData(0, 0, bm.width, bm.height).data, m = 3; let t = -1, bt = -1, l = 1e9, r = -1;
+  for (let y = m; y < bm.height - m; y++) for (let xx = m; xx < bm.width - m; xx++) { const i = (y * bm.width + xx) * 4; if (d[i] < 110 && d[i + 1] < 80) { if (t < 0) t = y; bt = y; l = Math.min(l, xx); r = Math.max(r, xx); } }
+  const k = bm.height / 13; return [Math.abs(l - (bm.width - 1 - r)) / 2 / k, Math.abs(t - (bm.height - 1 - bt)) / 2 / k];
+}, tagPng.toString('base64'));
+ok('« 2XP » centré dans sa bulle (écart ' + tag.map(v => v.toFixed(1)).join(' et ') + ' px)', tag[0] < 0.75 && tag[1] < 0.5);
+ok('graphique de l’historique sans flèche jaune', (await sh.locator('.pkm-prem-hist g, .pkm-prem-hist-arrow').count()) === 0);
+const mh = await sh.evaluate(e => getComputedStyle(e).maxHeight);
+const backTop = await sh.locator('button[aria-label="Retour au PK shop"]').evaluate(e => e.getBoundingClientRect().top);
+ok('haut de l’offre dégagé : flèche « précédent » entière (' + Math.round(backTop) + ' px du haut, hauteur ' + mh + ')', backTop >= 40 && /env|px/.test(mh));
 await sh.locator('button[aria-label="Retour au PK shop"]').click(); await page.waitForTimeout(150);
 const mid = await page.locator('.pkm-prem-sheet').evaluate(e => getComputedStyle(e).transform).catch(() => 'none');
 ok('retour animé : l’offre glisse vers la droite (' + mid + ')', /matrix/.test(mid) && mid !== 'none');

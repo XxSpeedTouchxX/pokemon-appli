@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-07 — Retouches du Premium (2) et du solde de « Jeux » (demande du porteur)
+
+- **Icône du classeur** : remontée un peu, pour être bien centrée dans sa case.
+- **« 2XP »** : descendu légèrement. Les lettres ont maintenant la même marge en haut et en bas de leur bulle (mesuré au pixel près par un test).
+- **Historique des prix** : la flèche jaune au bout du graphique est retirée ; la courbe se dessine toujours.
+- **Haut de l'écran Premium** : l'offre s'arrête plus bas que le haut de l'écran (en tenant compte de l'encoche du téléphone), et la flèche « précédent » est un peu descendue : elle se voit en entier.
+- **Jeux › « Ton solde »** : « Pour le PK shop » retiré.
+- Cache v145.
+
 ## 2026-11-07 — Retouches du Premium et de l'emblème (demande du porteur)
 
 - **Icône « Cartes et items scellés illimités »** : un classeur plus rectangulaire (debout, anneaux, tranche, étiquette avec la gemme). La carte en sort puis y rentre.
