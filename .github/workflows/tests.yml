@@ -18,6 +18,7 @@ on:
       - tools/check_data.py
       - tools/test_check_data.py
       - tools/sprites/companions.json
+      - mobile/overlay/**
       - web/app.js
       - web/index.html
       - web/sw.js
@@ -79,6 +80,9 @@ jobs:
       - name: Chromium
         working-directory: tools/web
         run: npx playwright-core install --with-deps chromium
+      - name: Copie de l'app iOS et Android (mobile/www, pour le test « app »)
+        working-directory: tools/web
+        run: DROPI_APP=1 node build.mjs
       - name: Tests navigateur
         working-directory: tools/web
         run: npm run e2e

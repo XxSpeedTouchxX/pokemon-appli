@@ -1149,11 +1149,18 @@ const APP_TEXTS = [
   ['POKÉDEX', APP_DEX_NAME.toUpperCase()],
   ['Pokédex', APP_DEX_NAME],
   ['pokédex', APP_DEX_NAME.toLowerCase()],
-  ['Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante', 'Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) · application indépendante']
+  ['Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante', 'Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) · application indépendante'],
+  ['Prix réels du marché ; collection de démonstration.', 'Prix réels du marché.'],
+  ['Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs', 'Catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap)'],
+  // Collection d'exemple (tests automatiques et captures des stores seulement : un vrai joueur ne peut pas la charger
+  // dans l'app) : pas de mention « démo ».
+  ['Article de la collection de démo · prix d’exemple', 'Article de ta collection · prix d’exemple'],
+  [' de la collection de démo : prix d’exemple.', ' de la collection d’exemple : prix d’exemple.'],
+  ['Cote archivée chaque jour (démo)', 'Cote archivée chaque jour']
 ];
 const appText = t => APP_TEXTS.reduce((acc, [from, to]) => acc.split(from).join(to), t);
 const appSrc = APP ? appText(app) : app, indexSrc = APP ? appText(index) : index;
-if (APP && (/Pokédex|POKÉDEX|pokédex|Pokévolution/.test(appSrc + indexSrc) || indexSrc.indexOf('Démo Dropicards · ') >= 0 || indexSrc.indexOf(APP_TEXTS[5][1]) < 0)) throw new Error('App : libellé « Pokédex » ou mention « Démo » restants');
+if (APP && (/Pokédex|POKÉDEX|pokédex|Pokévolution/.test(appSrc + indexSrc) || indexSrc.indexOf('Démo Dropicards · ') >= 0 || APP_TEXTS.slice(6).some(([f]) => appSrc.indexOf(f) >= 0) || indexSrc.indexOf(APP_TEXTS[5][1]) < 0)) throw new Error('App : libellé « Pokédex » ou mention « Démo » restants');
 const appMin = '/* Dropicards · démo web générée par tools/web/build.mjs (sources : tools/web, docs/12-maquette-v5). */\n'
   + transformSync(appSrc, { minify: true, charset: 'utf8', legalComments: 'none' }).code;
 // Logo et icônes : chaque adresse porte l'empreinte du fichier (?v=…), pour que téléphones et navigateurs reprennent
@@ -1245,5 +1252,7 @@ mkdirSync(TESS + 'lang', { recursive: true });
 ].forEach(([from, to]) => copyFileSync(fileURLToPath(new URL('./node_modules/' + from, import.meta.url)), TESS + to));
 const imgs = readdirSync(IMG_SRC).filter(f => f.endsWith('.webp'));
 imgs.forEach(f => copyFileSync(IMG_SRC + f, OUT + 'img/' + f));
+// App : ses fichiers propres (mobile/overlay) gardent le dernier mot sur les images de la maquette (avatar par défaut).
+if (APP) cpSync(ROOT + 'mobile/overlay', OUT, { recursive: true });
 console.log((APP ? 'App générée : mobile/www/index.html, mobile/www/app.js (' : 'Démo générée : web/index.html, web/app.js (') + app.length + ' caractères, ' + appMin.length + ' minifié), ' + imgs.length + ' images, ' + brokenMarks + ' photos et logos avec repli, thème : '
   + themed.replaced + ' couleurs du gabarit et ' + themedJs.replaced + ' de la logique en variables, ' + themed.surfaces + ' surfaces sombres.');

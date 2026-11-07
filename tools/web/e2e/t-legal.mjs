@@ -14,8 +14,9 @@ const t1 = await sh.innerText();
 ok('mentions : hébergeur, non-affiliation, éditeur à compléter', /OVH SAS/.test(t1) && !/Cloudflare/.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /à compléter par l’éditeur/.test(t1));
 await page.screenshot({ path: shot('legal-mentions.png') });
 const tabs = await sh.locator('[aria-label="Rubriques"] button').allInnerTexts();
-ok('3 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Conditions');
-for (const [tab, re] of [['Confidentialité', /arrondie à environ 100 m/], ['Conditions', /pas une plateforme de vente/]]) {
+// 2026-11-07 : règlement des tirages au sort et assistance en plus (docs/23 §2, legal-texts.mjs).
+ok('5 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Conditions,Règlement des tirages,Assistance');
+for (const [tab, re] of [['Confidentialité', /Ta position n’est demandée que pour le Radar/], ['Conditions', /pas une plateforme de vente/], ['Règlement des tirages', /Apple Inc\. et Google LLC ne sont ni organisateurs, ni parrains, ni partenaires/], ['Assistance', /contact@dropicards\.fr/]]) {
   await sh.locator('[aria-label="Rubriques"] button:has-text("' + tab + '")').click(); await page.waitForTimeout(250);
   ok(tab + ' : texte attendu', re.test(await sh.innerText()) && (await sh.locator('h2').innerText()) === tab);
 }

@@ -1,3 +1,9 @@
 node_modules/
 # Copie de l'app fabriquée par tools/web/build.mjs (DROPI_APP=1), refaite à chaque fabrication
 www/
+# Clés de signature : jamais dans le dépôt (Codemagic les garde)
+*.keystore
+*.jks
+*.p12
+*.p8
+*.mobileprovision

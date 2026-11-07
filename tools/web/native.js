@@ -123,6 +123,8 @@
     if (!DROPI_APP) return r;
     // Territoire : jamais l'encadré des partenaires fictifs (« Démo »).
     if (r.tx) r.tx.demoAllowed = false;
+    // Réglages : jamais la rubrique de test « Ma collection sur cet appareil » (vider, remettre la démo).
+    if (r.set) r.set.devShow = false;
     // PK shop : seulement le Magasin.
     if (r.pks) Object.assign(r.pks, { isStore: true, isPa: false });
     return r;

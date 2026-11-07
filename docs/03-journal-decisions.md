@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-07 — Apps des stores : contenus masqués, éléments originaux, suppression du compte, règlement (« go » du porteur)
+
+- **Décisions du porteur** : Premium et « Recharger mes PA » masqués dans l'app, sans aucune mention du paiement sur le site ; récompense du partage, mode Admin et contenu « Démo » retirés de l'app ; « go » pour les travaux 2 à 4 et 6 à 7 de `docs/23` ; dans l'app seulement, sprites des jeux, nom « Pokédex » et Poké Ball des emblèmes remplacés par des éléments originaux ; règlement officiel des tirages ; clé d'envoi Android générée.
+- **Build de l'app** : `DROPI_APP=1 node build.mjs` → `mobile/www` (`native.js`, `premium-app.js`, `mobile/overlay/`) ; le site ne change pas, sauf ajouts communs (suppression du compte, textes légaux, pages publiques). Premium masqué **aussi sur Android** (règle de Google Play) : choix par défaut, à confirmer.
+- **Éléments originaux** : cristaux d'Aura (`tools/brand/app/make_aura.py`), nom **« Bestiaire »** (défaut à confirmer), gemme des PK au centre des emblèmes, appareil aux couleurs de l'Aura, avatar par défaut original.
+- **Supprimer mon compte** : `011_suppression_compte.sql` (journaux anonymisés au lieu d'empêcher la suppression), route `delete_account` de la fonction « stripe », bouton dans Mon profil (site et app). **À installer par le porteur.**
+- **Textes légaux refaits** (`tools/web/legal-texts.mjs`, ils dataient d'avant les comptes) et **règlement des tirages** (14 articles ; organisateur, médiateur et choix par défaut à compléter ou confirmer) ; pages publiques dropicards.fr/confidentialite, /conditions, /reglement, /assistance, /mentions-legales.
+- **Risque signalé** : les grades (tickets Argent et Or, délais du Booster PK) dépendent des PA, que Premium double : un achat augmente indirectement les chances au tirage. Avis juridique à demander (`docs/29` §7).
+- Guide `docs/29-guide-fiches-stores-et-soumission.md` (fiches, questionnaires, notes pour Apple, étapes du porteur) ; cache v147.
+
 ## 2026-11-07 — Apps iOS et Android avec Capacitor (« go » du porteur, `docs/23`)
 
 - **Expo et EAS écartés** : l'app est un site (Vue 3, `web/`), pas un projet React Native ; le porteur choisit la méthode de `docs/23` (Capacitor + Codemagic).

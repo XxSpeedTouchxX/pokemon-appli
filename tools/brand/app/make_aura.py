@@ -258,7 +258,19 @@ def main():
     for n in TALK:
         for face, name in ((0, 0), (1, 1), (2, 2), (3, 3)):
             talk(BY_N[n], face).save(os.path.join(OUT, 'talk', '%d-%d.png' % (n, name)), optimize=True)
-    print('Cristaux d’Aura : %d compagnons (GIF, image fixe, icône), mascotte des %d starters' % (len(DEX), len(TALK)))
+    # Avatar par défaut de l'en-tête (à la place de l'illustration de Jirachi de web/img/avatar-jirachi.webp, même nom) :
+    # la mascotte (orbe de Pikachu) sur un disque aux couleurs de l'Aura.
+    av = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+    disc = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+    dd = ImageDraw.Draw(disc)
+    for r in range(128, 0, -1):
+        t = r / 128
+        dd.ellipse([128 - r, 128 - r, 128 + r, 128 + r], fill=mix((255, 214, 10), (155, 60, 143), t) + (255,))
+    av.alpha_composite(disc)
+    face = talk(BY_N[25], 0).resize((52 * 4, 54 * 4), Image.NEAREST)
+    av.alpha_composite(face, (128 - 104, 128 - 104 + 6))
+    av.save(os.path.join(os.path.dirname(OUT), 'avatar-jirachi.webp'), 'WEBP', quality=90)
+    print('Cristaux d’Aura : %d compagnons (GIF, image fixe, icône), mascotte des %d starters, avatar par défaut' % (len(DEX), len(TALK)))
 
 
 if __name__ == '__main__':
