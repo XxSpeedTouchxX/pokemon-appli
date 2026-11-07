@@ -260,15 +260,23 @@
     });
     return r;
   };
+  const pfPerks = (T, i) => (T[i].perks || []).map(p => ({ text: p, isNew: i > 0 && (T[i - 1].perks || []).indexOf(p) < 0 }));
   // Fiche d'un grade : emblème en grand, condition, avantages, état (obtenu, en cours, à venir).
   proto.vGrade = function (s) {
     const T = this.tiers(), i = Math.max(0, Math.min(T.length - 1, Number(s.gradeIx) || 0)), g = T[i], cur = this.tierOf().i;
+    const pk = pfEarned(s), comp = pfComp(s), mega = pfMega(s);
     return {
       name: g.name, aria: 'Grade ' + g.name, alt: 'Emblème ' + g.name, badge: g.sym, color: g.color, glow: g.glow, cond: g.cond,
       state: i < cur ? 'Grade obtenu' : i === cur ? 'Ton grade actuel' : 'À débloquer',
       stateColor: i <= cur ? '#3DDC84' : '#C9D3EA',
-      perks: g.perks.map(t => ({ text: t })),
+      // « Nouveau » au bout de chaque avantage absent du grade précédent (2026-11-07, porteur).
+      perks: pfPerks(T, i),
       note: 'Avantages actifs dès que tu atteins ce grade, sur cet appareil.',
+      // PK gagnés au total depuis l'inscription, achats non déduits (2026-11-07, porteur), et progression vers ce grade.
+      pkTotal: pfNum(pk) + ' PK', pkNote: 'Tous les PK gagnés depuis ton inscription, même ceux déjà dépensés au PK shop.',
+      prog: [['Objectif du grade', pk, g.pk, ' PK']].concat(g.comp ? [['Compagnons débloqués', comp, g.comp, '']] : [], g.mega ? [['Méga-évolutions', mega, g.mega, '']] : [])
+        .filter(r => r[2] > 0).map(([label, have, need, unit]) => ({ label: label, val: pfNum(Math.min(have, need)) + ' / ' + pfNum(need) + unit + (have >= need ? ' ✓' : ''),
+          cls: have >= need ? 'pkm-gr-ok' : '', w: 'width: ' + Math.round(Math.min(1, have / need) * 100) + '%' })),
       prev: i > 0 ? () => this.setState({ gradeIx: i - 1 }) : null, hasPrev: i > 0,
       next: i < T.length - 1 ? () => this.setState({ gradeIx: i + 1 }) : null, hasNext: i < T.length - 1
     };
@@ -278,7 +286,7 @@
     const t = x.tier, v = this.tierView(x);
     return {
       name: t.cur.name, aria: 'Voir les avantages du grade ' + t.cur.name, badge: t.cur.sym, color: t.cur.color, glow: t.cur.glow, barW: v.barW, nextColor: v.nextColor, next: v.next,
-      perks: (t.cur.perks || []).map(p => ({ text: p })), open: () => this.push('grade', { gradeIx: t.i }), all: () => this.push('tiers')
+      perks: pfPerks(this.tiers(), t.i), open: () => this.push('grade', { gradeIx: t.i }), all: () => this.push('tiers')
     };
   };
   // Écran « grade » (fiche d'un grade), grade actuel du profil, animation de passage de grade.

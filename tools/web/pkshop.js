@@ -214,7 +214,7 @@
           name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-t-' + it.tier, price: it.price.toLocaleString('fr-FR') + ' PK', priceN: it.price.toLocaleString('fr-FR'), every: it.everyShort,
           locked: !open, lockName: shopGradeName(it.minGrade), lockImg: emblem(it.minGrade), owned: n > 0, ownedText: '×' + n,
           cls: 'pkm-shop-tk' + (open ? '' : ' pkm-shop-tk-off'), aria: it.name + ', ' + it.price + ' PK, tirage ' + it.everyShort + (open ? '' : ', déverrouillé au grade ' + shopGradeName(it.minGrade)) + '. Voir le ticket',
-          pick: () => this.setState({ shopTk: it.id, shopAsk: null })
+          pick: () => { this.setState({ shopTk: it.id, shopAsk: null }); requestAnimationFrame(() => requestAnimationFrame(() => { const sh = document.querySelector('.pkm-tks-sheet'); if (sh) sh.scrollTop = 0; })); }
         };
       }),
       sheet: sheet,

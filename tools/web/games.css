@@ -911,7 +911,9 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-lockw-premgo svg { fill: #C8930E; }
 @media (prefers-reduced-motion: reduce) { .pkm-lock-pad, .pkm-lockw-pad { animation: none; } }
 /* Fiche d'un ticket. */
-.pkm-tks-sheet { max-height: 88vh; max-height: calc(100dvh - 24px); overflow-y: auto; }
+/* Hauteur limitée à la plus petite hauteur visible (100svh : barres de Safari affichées), sinon le haut de la fiche
+   (le ticket) passait au-dessus de l'écran sur iPhone (2026-11-07, porteur). La fiche s'ouvre toujours en haut (pkshop.js). */
+.pkm-tks-sheet { max-height: 86vh; max-height: calc(100svh - 56px - env(safe-area-inset-top, 0px)); overflow-y: auto; overscroll-behavior: contain; }
 .pkm-tks-top { display: flex; align-items: center; gap: 18px; padding: 6px 4px 4px 10px; }
 .pkm-shop-ticket-xl { width: 104px; height: 70px; }
 .pkm-shop-ticket-xl .pkm-shop-ticket-in { font-size: 16px; }
@@ -982,3 +984,16 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-tks-cd-date svg { fill: none; stroke: var(--cd); stroke-width: 2; stroke-linecap: round; }
 .pkm-tks-cd-last { font-size: 12.5px; font-weight: 800; color: #FF9A9A; animation: pkmNewTheme 1.6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pkm-tks-cd-row > i, .pkm-tks-cd-last { animation: none; } .pkm-tks-cd-bar i { transition: none; } }
+
+/* Fiche d'un grade (2026-11-07, porteur) : PK gagnés au total (achats non déduits), progression, « Nouveau ». */
+.pkm-gr-prog { width: 100%; box-sizing: border-box; margin-top: 6px; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(255, 255, 255, 0.08); text-align: left; }
+.pkm-gr-total { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #C9D3EA; }
+.pkm-gr-total span { flex: 1; }
+.pkm-gr-total b { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800; color: #FFFFFF; }
+.pkm-gr-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 12.5px; color: #9AA8C3; }
+.pkm-gr-row b { font-weight: 800; color: #F3F6FC; }
+.pkm-gr-row b.pkm-gr-ok { color: #3DDC84; }
+.pkm-gr-row > i { grid-column: 1 / -1; height: 5px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.pkm-gr-row > i > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #FFD60A, #3DDC84); }
+.pkm-gr-prog small { font-size: 11.5px; line-height: 1.4; color: #AEB9D0; }
+.pkm-gr-new { display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: #3DDC84; color: #062012; font-size: 10.5px; font-weight: 900; letter-spacing: 0.02em; vertical-align: 1px; }

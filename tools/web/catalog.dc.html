@@ -1705,7 +1705,7 @@
 <span class="pkm-tks-cd-date"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>{{ pks.sheet.cdDate }}</span>
 <sc-if value="{{ pks.sheet.cdLast }}" hint-placeholder-val="{{ false }}"><span class="pkm-tks-cd-last">Dernière ligne droite : le tirage a lieu dans moins de 24 h !</span></sc-if>
 </div>
-<div class="pkm-tks-lines"><div><span>Lot à gagner</span><b>{{ pks.sheet.prize }}</b></div><div><span>Valeur</span><b>{{ pks.sheet.value }}</b></div><div><span>Tirage</span><b>{{ pks.sheet.every }}</b></div><div><span>Prochain tirage</span><b>{{ pks.sheet.draw }}</b></div></div>
+<div class="pkm-tks-lines"><div><span>Lot à gagner</span><b>{{ pks.sheet.prize }}</b></div><div><span>Valeur</span><b>{{ pks.sheet.value }}</b></div><div><span>Tirage</span><b>{{ pks.sheet.every }}</b></div></div>
 <h3 class="pkm-tks-h">À quoi sert ce ticket ?</h3>
 <p class="pkm-tks-p">{{ pks.sheet.use }}</p>
 <p class="pkm-tks-note">{{ pks.sheet.note }}</p>
@@ -1987,7 +1987,7 @@
 <span style="font-size: 12.5px; font-weight: 600; color: #C9D3EA">{{ pf.grade.next }}</span>
 <h3 style="margin: 6px 0 0; align-self: flex-start; font-size: 14px; font-weight: 700">Tes avantages</h3>
 <ul style="align-self: stretch; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; text-align: left">
-<sc-for list="{{ pf.grade.perks }}" as="gp" hint-placeholder-count="3"><li class="pkm-gr-perk"><span class="pkm-gr-tick" aria-hidden="true"></span><span>{{ gp.text }}</span></li></sc-for>
+<sc-for list="{{ pf.grade.perks }}" as="gp" hint-placeholder-count="3"><li class="pkm-gr-perk"><span class="pkm-gr-tick" aria-hidden="true"></span><span>{{ gp.text }}<sc-if value="{{ gp.isNew }}" hint-placeholder-val="{{ false }}"> <b class="pkm-gr-new">Nouveau</b></sc-if></span></li></sc-for>
 </ul>
 <button type="button" onClick="{{ pf.grade.all }}" style="align-self: stretch; margin-top: 4px; min-height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Information sur les grades</button>
 </section>
@@ -1999,11 +1999,16 @@
 <span style="font-family: 'Sora', sans-serif; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -0.02em; color: {{ gr.color }}">{{ gr.name }}</span>
 <span style="font-size: 14px; color: #C9D3EA">{{ gr.cond }}</span>
 <span style="font-size: 13px; font-weight: 700; color: {{ gr.stateColor }}">{{ gr.state }}</span>
+<div class="pkm-gr-prog" role="group" aria-label="Ta progression vers ce grade">
+<span class="pkm-gr-total"><img src="img/brand/pk.svg" alt="" width="22" height="22"><span>PK gagnés au total</span><b>{{ gr.pkTotal }}</b></span>
+<sc-for list="{{ gr.prog }}" as="grg" hint-placeholder-count="2"><div class="pkm-gr-row"><span>{{ grg.label }}</span><b class="{{ grg.cls }}">{{ grg.val }}</b><i aria-hidden="true"><i style="{{ grg.w }}"></i></i></div></sc-for>
+<small>{{ gr.pkNote }}</small>
+</div>
 </section>
 <section aria-label="Avantages du grade" class="pkm-dark" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; display: flex; flex-direction: column; gap: 10px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Avantages</h2>
 <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px">
-<sc-for list="{{ gr.perks }}" as="grp" hint-placeholder-count="3"><li class="pkm-gr-perk"><span class="pkm-gr-tick" aria-hidden="true"></span><span>{{ grp.text }}</span></li></sc-for>
+<sc-for list="{{ gr.perks }}" as="grp" hint-placeholder-count="3"><li class="pkm-gr-perk"><span class="pkm-gr-tick" aria-hidden="true"></span><span>{{ grp.text }}<sc-if value="{{ grp.isNew }}" hint-placeholder-val="{{ false }}"> <b class="pkm-gr-new">Nouveau</b></sc-if></span></li></sc-for>
 </ul>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ gr.note }}</p>
 </section>

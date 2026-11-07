@@ -49,7 +49,7 @@
 /* Le même scanner dans le bouton du scan de la barre du bas (couleur du bouton). */
 .pkm-navscan { width: 32px; height: 32px; stroke: currentColor; stroke-width: 2.6; }
 .pkm-navscan .pkm-prem-scan-card { stroke: currentColor; stroke-width: 2; opacity: 0.85; }
-.pkm-navscan .pkm-prem-scan-laser { stroke: #E5484D; stroke-width: 2.6; }
+.pkm-navscan .pkm-prem-scan-laser { stroke: #0B1120; stroke-width: 2.6; }
 @keyframes pkmPremLaser { from { transform: translateY(-7px); } to { transform: translateY(7px); } }
 .pkm-prem-radar { position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: radial-gradient(circle, rgba(94, 224, 207, 0.22), rgba(94, 224, 207, 0.04) 70%); box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.45); }
 .pkm-prem-radar i { position: absolute; border-radius: 50%; }

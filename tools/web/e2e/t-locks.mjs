@@ -68,6 +68,28 @@ await page.waitForFunction(v => { const e = document.querySelector('.pkm-tks-cd 
 const s2 = await cd.locator('[data-u="s"]').innerText().catch(() => '');
 ok('les secondes défilent (' + s1 + ' → ' + s2 + ')', s1 !== s2);
 await page.screenshot({ path: shot('locks-ticket-decompte.png') });
+ok('fiche du ticket : plus de ligne « Prochain tirage » (le compte à rebours suffit)', !/Prochain tirage\n/.test(await page.locator('.pkm-tks-lines').innerText()) && !/Prochain tirage/.test(await page.locator('.pkm-tks-lines').innerText()));
+// Petit écran (barres de Safari) : le ticket reste entier en haut de la fiche.
+await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
+await page.setViewportSize({ width: 375, height: 600 }); await page.waitForTimeout(300);
+await page.locator('button[aria-label^="Ticket Or"]').first().click(); await page.waitForTimeout(700);
+const tkTop = await page.evaluate(() => { const t = document.querySelector('.pkm-tks-sheet .pkm-shop-ticket-xl').getBoundingClientRect(), sh = document.querySelector('.pkm-tks-sheet'); return { top: Math.round(t.top), scroll: sh.scrollTop }; });
+ok('petit écran : ticket entier en haut de la fiche (haut à ' + tkTop.top + ' px, défilement ' + tkTop.scroll + ')', tkTop.top >= 0 && tkTop.scroll === 0);
+await page.screenshot({ path: shot('locks-ticket-petit-ecran.png') });
+await page.setViewportSize({ width: 390, height: 844 });
+// Laser du scanner de la barre en noir.
+ok('laser du scanner de la barre : noir', /rgb\(11, 17, 32\)/.test(await page.locator('button[aria-label="Scanner une carte ou un produit"] .pkm-prem-scan-laser').evaluate(e => getComputedStyle(e).stroke)));
+// Fiche d'un grade : PK gagnés au total (achats non déduits) et « Nouveau » sur les avantages nouveaux.
+await page.evaluate(() => { const c = window.__pkm; c.setState({ pkEarned: 5000, pk: 1200, shopTk: null, gradeSeen: 5 }); c.push('grade', { gradeIx: 2 }); }); await page.waitForTimeout(800);
+const gtxt = (await page.locator('main').innerText()).replace(/[\u202f\u00a0]/g, ' ');
+ok('fiche du grade : « PK gagnés au total 5 000 PK » (1 200 PK en poche) et 5 000 / 7 500 PK', /PK gagnés au total\s*5 000 PK/.test(gtxt) && /5 000 \/ 7 500 PK/.test(gtxt) && /même ceux déjà dépensés/.test(gtxt));
+const news = await page.locator('section[aria-label="Avantages du grade"] li').evaluateAll(l => l.filter(x => x.querySelector('.pkm-gr-new')).map(x => x.textContent.replace('Nouveau', '').trim()));
+ok('Collectionneur : « Nouveau » sur ' + news.length + ' avantages (' + news.slice(0, 3).join(' | ') + '…)', news.length >= 4 && news.some(t => /20 scans/.test(t)) && !news.some(t => /valeur de toute ta collection/.test(t)));
+await page.locator('.pkm-gu button:has-text("Continuer")').click({ timeout: 6000 }).catch(() => {});
+await page.waitForSelector('.pkm-gu', { state: 'detached', timeout: 6000 }).catch(() => {});
+await page.screenshot({ path: shot('locks-grade-fiche.png'), fullPage: true });
+await page.evaluate(() => window.__pkm.setState({ gradeIx: 0 })); await page.waitForTimeout(400);
+ok('Recrue : aucun « Nouveau » (premier grade)', (await page.locator('section[aria-label="Avantages du grade"] .pkm-gr-new').count()) === 0);
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

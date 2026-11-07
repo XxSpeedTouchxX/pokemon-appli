@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-07 — Retouches : grades (PK gagnés au total, « Nouveau »), tickets, scanner, « Nouveau thème » (demande du porteur)
+
+- **Fiche de chaque grade** : « PK gagnés au total » (tous les PK gagnés depuis l'inscription, achats au PK shop non déduits : 5 000 gagnés et 2 000 dépensés = toujours 5 000), progression vers le grade (PK, compagnons, méga-évolutions) ; « Nouveau » au bout de chaque avantage absent du grade précédent (fiche du grade et Mon profil).
+- **Tickets** : la fiche s'ouvre en haut, le ticket entier même avec les barres de Safari (hauteur limitée à la plus petite hauteur visible) ; ligne « Prochain tirage » retirée (le compte à rebours suffit).
+- **Scanner de la barre** : laser noir. **« Nouveau thème »** : texte et étoile centrés au pixel près. Cache v154.
+
+---
+
 ## 2026-11-07 — Radar verrouillé avec Premium, grades v4, Pokédex sur 171, booster en fête (demande du porteur)
 
 - **Radar** réservé au grade Maître Pokémon : badge rouge « Déverrouillé au grade Maître Pokémon » avec un petit cadenas qui tremble (accueil, Territoire ; le même cadenas sur les badges du PK shop) ; fenêtre « Tu ne peux pas accéder au Radar tant que tu n'as pas atteint le grade « Maître Pokémon » », condition, Premium proposé et bouton « Découvrir Premium » vers l'offre. Un abonné Premium y a accès.

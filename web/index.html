@@ -1168,7 +1168,9 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-lockw-premgo svg { fill: #C8930E; }
 @media (prefers-reduced-motion: reduce) { .pkm-lock-pad, .pkm-lockw-pad { animation: none; } }
 /* Fiche d'un ticket. */
-.pkm-tks-sheet { max-height: 88vh; max-height: calc(100dvh - 24px); overflow-y: auto; }
+/* Hauteur limitée à la plus petite hauteur visible (100svh : barres de Safari affichées), sinon le haut de la fiche
+   (le ticket) passait au-dessus de l'écran sur iPhone (2026-11-07, porteur). La fiche s'ouvre toujours en haut (pkshop.js). */
+.pkm-tks-sheet { max-height: 86vh; max-height: calc(100svh - 56px - env(safe-area-inset-top, 0px)); overflow-y: auto; overscroll-behavior: contain; }
 .pkm-tks-top { display: flex; align-items: center; gap: 18px; padding: 6px 4px 4px 10px; }
 .pkm-shop-ticket-xl { width: 104px; height: 70px; }
 .pkm-shop-ticket-xl .pkm-shop-ticket-in { font-size: 16px; }
@@ -1239,6 +1241,19 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-tks-cd-date svg { fill: none; stroke: var(--cd); stroke-width: 2; stroke-linecap: round; }
 .pkm-tks-cd-last { font-size: 12.5px; font-weight: 800; color: #FF9A9A; animation: pkmNewTheme 1.6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pkm-tks-cd-row > i, .pkm-tks-cd-last { animation: none; } .pkm-tks-cd-bar i { transition: none; } }
+
+/* Fiche d'un grade (2026-11-07, porteur) : PK gagnés au total (achats non déduits), progression, « Nouveau ». */
+.pkm-gr-prog { width: 100%; box-sizing: border-box; margin-top: 6px; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(255, 255, 255, 0.08); text-align: left; }
+.pkm-gr-total { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #C9D3EA; }
+.pkm-gr-total span { flex: 1; }
+.pkm-gr-total b { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800; color: #FFFFFF; }
+.pkm-gr-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 12.5px; color: #9AA8C3; }
+.pkm-gr-row b { font-weight: 800; color: #F3F6FC; }
+.pkm-gr-row b.pkm-gr-ok { color: #3DDC84; }
+.pkm-gr-row > i { grid-column: 1 / -1; height: 5px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.pkm-gr-row > i > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #FFD60A, #3DDC84); }
+.pkm-gr-prog small { font-size: 11.5px; line-height: 1.4; color: #AEB9D0; }
+.pkm-gr-new { display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: #3DDC84; color: #062012; font-size: 10.5px; font-weight: 900; letter-spacing: 0.02em; vertical-align: 1px; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -1516,12 +1531,13 @@ section[aria-label="Pokédex"] img, section[aria-label="Mon Pokédex"] img { -we
 .pkm-dexl-can .pkm-dexl-price small { color: #FFE27A; }
 /* « Nouveau thème » sur Kyogre, Groudon et Rayquaza (2026-11-07, porteur) : les débloquer change le fond de l'app. */
 .pkm-dex-newtheme { position: absolute; top: 4px; right: 4px; z-index: 2; padding: 2px 6px; border-radius: 999px; background: linear-gradient(90deg, #6A30D8, #C2185B); border: 1px solid #FFD60A; color: #FFFFFF; font-size: 9.5px; font-weight: 800; line-height: 1.3; letter-spacing: 0.01em; white-space: nowrap; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35); animation: pkmNewTheme 2.4s ease-in-out infinite; }
-.pkm-dex-newtheme::before { content: '✦ '; }
-.pkm-dex-newtheme-f { position: static; display: inline-block; align-self: flex-start; margin: 2px 0; font-size: 11px; }
+.pkm-dex-newtheme { display: inline-flex; align-items: center; justify-content: center; gap: 3px; line-height: 1; padding-top: 3px; padding-bottom: 3px; }
+.pkm-dex-newtheme::before { content: '✦'; display: block; line-height: 1; font-size: 0.95em; transform: translateY(0.085em); }
+.pkm-dex-newtheme-f { position: static; display: inline-flex; align-self: flex-start; margin: 2px 0; font-size: 11px; }
 /* Dans la liste, l'étiquette passe sous le prix (2026-11-07, porteur : elle cachait le numéro du Pokémon). */
 .pkm-dexl-theme { padding-top: 16px; gap: 1px; }
 .pkm-dexl-theme > img { width: 56px; height: 56px; }
-.pkm-dexl-item .pkm-dex-newtheme { position: static; margin-top: 2px; padding: 1px 6px; font-size: 9px; }
+.pkm-dexl-item .pkm-dex-newtheme { position: static; margin-top: 2px; padding: 3px 7px; font-size: 9px; }
 @keyframes pkmNewTheme { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.25); } }
 @media (prefers-reduced-motion: reduce) { .pkm-dex-newtheme { animation: none; } }
 
@@ -1668,7 +1684,7 @@ section[aria-label="Pokédex"] img, section[aria-label="Mon Pokédex"] img { -we
 /* Le même scanner dans le bouton du scan de la barre du bas (couleur du bouton). */
 .pkm-navscan { width: 32px; height: 32px; stroke: currentColor; stroke-width: 2.6; }
 .pkm-navscan .pkm-prem-scan-card { stroke: currentColor; stroke-width: 2; opacity: 0.85; }
-.pkm-navscan .pkm-prem-scan-laser { stroke: #E5484D; stroke-width: 2.6; }
+.pkm-navscan .pkm-prem-scan-laser { stroke: #0B1120; stroke-width: 2.6; }
 @keyframes pkmPremLaser { from { transform: translateY(-7px); } to { transform: translateY(7px); } }
 .pkm-prem-radar { position: relative; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: radial-gradient(circle, rgba(94, 224, 207, 0.22), rgba(94, 224, 207, 0.04) 70%); box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.45); }
 .pkm-prem-radar i { position: absolute; border-radius: 50%; }
@@ -1869,6 +1885,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=84fbdc9b"></script>
+<script src="app.js?v=bfce0c32"></script>
 </body>
 </html>
