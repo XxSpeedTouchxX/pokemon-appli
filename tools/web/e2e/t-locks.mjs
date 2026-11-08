@@ -24,6 +24,11 @@ ok('fenêtre : « Tu ne peux pas accéder au Radar tant que tu n’as pas attein
 ok('fenêtre : Premium proposé, bouton « Découvrir Premium »', /abonnement Premium/.test(lwt) && (await lw.locator('button:has-text("Découvrir Premium")').count()) === 1);
 ok('fenêtre : condition 30 000 PK + 100 compagnons + 5 méga-évolutions', /30\s000 PK gagnés \+ 100 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(lwt.replace(/[  ]/g, ' ')));
 await page.screenshot({ path: shot('locks-radar-fenetre.png') });
+// Fenêtre bloquante (2026-11-08) : le fond ne la ferme pas, la page derrière ne défile pas.
+const y0 = await page.evaluate(() => { const m = document.scrollingElement; return m.scrollTop; });
+await page.mouse.move(20, 300); await page.mouse.wheel(0, 900); await page.waitForTimeout(300);
+await page.mouse.click(12, 12); await page.waitForTimeout(300);
+ok('fenêtre bloquante : le fond ne la ferme pas et la page ne défile pas', (await lw.count()) === 1 && (await page.evaluate(() => document.scrollingElement.scrollTop)) === y0);
 await lw.locator('button:has-text("Découvrir Premium")').click(); await page.waitForTimeout(800);
 ok('« Découvrir Premium » ouvre l’offre Premium', (await page.locator('section[aria-label="Dropicards Premium"]').count()) === 1 && (await lw.count()) === 0);
 // 2. Grades.

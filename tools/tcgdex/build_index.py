@@ -68,7 +68,7 @@ import math
 import re
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
@@ -345,6 +345,7 @@ def coverage(cards, sets, today=None):
 
 
 VERIFY_RATIO = 3
+PREV_DAYS = 7  # prix des fichiers Cardmarket de la veille gardés au plus 7 jours (fill_cardmarket)
 
 
 def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cmfiles.en_names):
@@ -434,7 +435,11 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
     # Repli : prix des fichiers Cardmarket de la veille pour les cartes restées sans prix.
     if prev and prev.get("cards") and "cmf" in (prev.get("fields") or []):
         pf = {k: i for i, k in enumerate(prev["fields"])}
-        old = {c[pf["id"]]: c for c in prev["cards"] if c[pf["cmf"]] == 1}
+        # Pas plus de PREV_DAYS jours : le Palkia de la Collection Classique gardait ainsi le prix d'un autre Palkia,
+        # repris jour après jour depuis le 17 octobre (2026-11-08).
+        today = (files.created if files else None) or date.today().isoformat()
+        fresh = lambda u: bool(u) and (date.fromisoformat(today[:10]) - date.fromisoformat(str(u)[:10])).days <= PREV_DAYS
+        old = {c[pf["id"]]: c for c in prev["cards"] if c[pf["cmf"]] == 1 and fresh(c[pf["upd"]])}
         kept = 0
         for c in cards:
             o = old.get(c[f["id"]])

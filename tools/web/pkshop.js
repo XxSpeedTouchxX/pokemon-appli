@@ -70,6 +70,22 @@
     return this.tierOf().i;
   };
   const shopGradeName = i => (PF_GRADES[i] || PF_GRADES[0]).name;
+  // Fenêtre « Accès verrouillé » bloquante (2026-11-08, porteur : « l'utilisateur ne doit pas pouvoir faire bouger l'écran
+  // de derrière ; il doit d'abord répondre à la fenêtre ») : tant qu'elle est ouverte, aucun geste hors de la fenêtre
+  // (défilement, glissement entre pages, retour par le bord) et le fond ne la ferme plus ; seuls ses boutons répondent.
+  if (typeof window !== 'undefined' && !window.__pkmLockGuard) {
+    window.__pkmLockGuard = true;
+    const inWin = t => { const w = document.querySelector('.pkm-lockw'); return !!(w && t && t.nodeType === 1 && w.contains(t)); };
+    const scrollsInside = t => { for (let n = t; n && n.nodeType === 1 && !n.classList.contains('pkm-lockw-wrap'); n = n.parentElement) { if (n.scrollHeight > n.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(n).overflowY)) return true; } return false; };
+    const guard = e => {
+      if (!document.querySelector('.pkm-lockw-wrap')) return;
+      const t = e.target;
+      if (inWin(t) && (e.type !== 'touchmove' && e.type !== 'wheel' || scrollsInside(t))) return;
+      e.stopPropagation();
+      if (e.cancelable && (e.type === 'touchmove' || e.type === 'wheel' || !inWin(t))) e.preventDefault();
+    };
+    ['touchstart', 'touchmove', 'pointerdown', 'pointermove', 'wheel', 'mousedown', 'click'].forEach(k => window.addEventListener(k, guard, { capture: true, passive: false }));
+  }
   // Fenêtre « Tu dois d'abord déverrouiller le grade … ».
   shopProto.shopLockOpen = function (it) { this.setState({ shopLock: { g: it.minGrade, kind: it.kind } }); };
   // Fenêtre « Accès verrouillé », pour tout l'app (PK shop, Radar, classeur plein ; 2026-11-07).

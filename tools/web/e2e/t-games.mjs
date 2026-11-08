@@ -24,12 +24,12 @@ await page.waitForTimeout(1300);
 const pk1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('booster ouvert : PK crédités (' + pk0 + ' → ' + pk1 + ')', [30, 50, 100, 200, 500].indexOf(pk1 - pk0) >= 0);
 // Grade forcé à Grand maître (helpers.mjs) : booster et pièce toutes les 4 h (2026-10-28).
-ok('booster suivant dans 4 h', /Prochain booster dans [34] h/.test(await boost.innerText()));
+ok('booster suivant dans 4 h', /Tu dois attendre [34] h \d* ?(min )?pour rejouer|Tu dois attendre [34] h pour rejouer/.test(await boost.innerText()));
 await page.screenshot({ path: shot('games-booster.png') });
 await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(3400);
 const pk2 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('pièce lancée : 0 ou 50 PK (' + (pk2 - pk1) + ')', pk2 - pk1 === 0 || pk2 - pk1 === 50);
-ok('lancer suivant dans 4 h', /Prochain lancer dans [34] h/.test(await coin.innerText()));
+ok('lancer suivant dans 4 h', /Tu dois attendre [34] h \d* ?(min )?pour rejouer|Tu dois attendre [34] h pour rejouer/.test(await coin.innerText()));
 await page.screenshot({ path: shot('games-coin.png') });
 // Roulette retirée (2026-10-25) : Pokédex avec les PA (points d'Aura) ; déblocage des Pokémon en PA (2026-10-28).
 ok('roulette retirée', (await page.locator('section[aria-label="Roulette"]').count()) === 0);
@@ -104,7 +104,7 @@ await page.evaluate(() => localStorage.setItem('pkm-grade-force', '6'));
 ok("tickets affichés dans le PK shop (« 1 ticket », sans le solde de PK depuis le 2026-11-02)", /1 ticket/.test(await page.locator('p[aria-label="Mes tickets du tirage au sort"]').innerText()) && (await page.locator('section[aria-label="Mon solde de PK"]').count()) === 0);
 await page.screenshot({ path: shot('pkshop.png') });
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);
-ok('délais gardés après rechargement', /Prochain booster/.test(await boost.innerText()) && /Prochain lancer/.test(await coin.innerText()));
+ok('délais gardés après rechargement', /Tu dois attendre/.test(await boost.innerText()) && /Tu dois attendre/.test(await coin.innerText()));
 
 await page.goto(E2E + '/?start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('button:has-text("Mode Admin · paramétrage")'); await page.waitForTimeout(300);

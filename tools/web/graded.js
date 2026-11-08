@@ -78,7 +78,7 @@
   //   note quand tous les exemplaires restants sont gradés de la même façon).
   const gradeBaseOpen = gradeProto.fiOpen;
   gradeProto.fiOpen = function (id, opts) {
-    gradeBaseOpen.call(this, id);
+    gradeBaseOpen.call(this, id, opts);
     this.setState({ fiGr: null, fiGrSel: opts && gradeOf(opts.gr) ? opts.gr : '' });
   };
   const gradeBaseClose = gradeProto.fiClose;
@@ -122,8 +122,13 @@
     if (shown) gb.gradeCls += ' pkm-fi-gbadge';
     Object.assign(v, { hasGradeBadge: !!shown, gb: gb });
     // Ouverte depuis la carte gradée du classeur : le grand prix est celui de cet exemplaire (pas la moyenne avec les autres).
-    const sel = s.fiGrSel && groups.length > 1 && graded.find(g => g.gr === s.fiGrSel);
-    if (sel && raw && this.valOn()) Object.assign(v, { cote: this.eur(raw * valCoefG(sel.lang, sel.cond, sel.gr)), coteSrc: 'Selon la note · ' + this.eur(raw) + ' en Near Mint (Cardmarket)' });
+    // Ouverte depuis les exemplaires non gradés d'une carte qui en a aussi de gradés : leur valeur seule (comme la pastille).
+    const fromBinder = s.fiFrom === 'binder', sel = fromBinder && s.fiGrSel && groups.length > 1 && graded.find(g => g.gr === s.fiGrSel);
+    if (sel && raw && this.valOn()) Object.assign(v, { cote: this.coteTxt(raw * valCoefG(sel.lang, sel.cond, sel.gr)), coteSrc: 'Selon la note · ' + this.coteTxt(raw) + ' en Near Mint (Cardmarket)' });
+    else if (fromBinder && !s.fiGrSel && plain.length && graded.length && raw && this.valOn()) {
+      const n = plain.reduce((t, g) => t + g.qty, 0), w = plain.reduce((t, g) => t + g.qty * valCoef(g.lang, g.cond), 0);
+      Object.assign(v, { cote: this.coteTxt(raw * w / n), coteSrc: 'Selon l’état · ' + this.coteTxt(raw) + ' en Near Mint (Cardmarket)' });
+    }
     // Lignes gradées de « État de ma carte » : un appui ouvre le changement de note.
     v.etats.forEach((e, i) => {
       const g = groups[i];

@@ -182,7 +182,7 @@
         const k = this.cote(p), q = qty(p), set = (setOf(p.set) || [])[0] || '';
         return {
           img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: '#' + (i + 1) + ' · ' + set, owned: q > 0, qty: '×' + q,
-          cote: k >= 100 ? this.eur0(k) : this.eur(k), coteColor: 'var(--pkm-t1)',
+          cote: this.coteTxt(k), coteColor: 'var(--pkm-t1)',
           label: (i + 1) + 'e, ' + p.name + ', ' + set + ' ' + p.numLabel + ', cote ' + this.eur(k) + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
         };

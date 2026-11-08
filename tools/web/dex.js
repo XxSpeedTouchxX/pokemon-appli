@@ -171,7 +171,7 @@
     const top = ids.map(id => TCG.byId[id]).filter(x => x && coteOf(x.r, F) > 0 && (coteSteady(x.r, F) || coteConfirmed(x.r, F))).sort((a, b) => coteOf(b.r, F) - coteOf(a.r, F)).slice(0, 3);
     out.top = top.map((x, i) => {
       const p = TCG.item(x.r[F.id]), k = this.cote(p);
-      return Object.assign(this.look(p), { rank: String(i + 1), name: p.name, set: p.setName + ' · ' + p.numLabel, cote: k !== null ? this.eur(k) : '—',
+      return Object.assign(this.look(p), { rank: String(i + 1), name: p.name, set: p.setName + ' · ' + p.numLabel, cote: k !== null ? this.coteTxt(k) : '—',
         aria: (i + 1) + 'ᵉ plus chère : ' + p.name + ', ' + p.setName + ', ' + (k !== null ? this.eur(k) : 'sans cote'), open: () => open(p) });
     });
     out.hasTop = out.top.length > 0;
@@ -207,7 +207,7 @@
       const k = this.cote(p), st = x.c.stock[p.id];
       return Object.assign(this.look(p), {
         name: p.name, sub: p.sub, border: x.line(i), owned: !!(st && st.qty > 0),
-        cote: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : '—'), coteLabel: k !== null ? 'cote PKM' : 'sans prix',
+        cote: k !== null ? this.coteTxt(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : '—'), coteLabel: k !== null ? 'cote PKM' : 'sans prix',
         right: p.release ? 'Sortie le ' + this.d2(p.release) : (k !== null ? 'cote PKM' : 'sans prix'), rightColor: p.release ? '#F5B14C' : 'var(--pkm-t3)', open: open
       });
     };

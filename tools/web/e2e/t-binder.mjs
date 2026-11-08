@@ -37,7 +37,7 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('6 cartes, de la plus chère à la moins chère : ' + cards.map(c => c.split(',')[0]).join(', '), cards.length === 6 && /^Mewtwo ex, gradée PCA 9,5/.test(cards[0]));
   const vals = await page.$$eval(TILE, bs => bs.map(b => b.querySelector('span[style*="bottom: 6%"] .pkm-pill2-p').innerText.trim()));
   const num = t => parseFloat(t.replace(/[^\d,]/g, '').replace(',', '.'));
-  ok('pastilles : ' + vals.join(' | '), vals.every((v, i) => !i || num(vals[i - 1]) >= num(v)) && /^448 €$/.test(vals[0].replace(/\s/g, ' ').replace(/ +/g, ' ').replace(/ /g, ' ')));
+  ok('pastilles : ' + vals.join(' | '), vals.every((v, i) => !i || num(vals[i - 1]) >= num(v)) && /^447,50 €$/.test(vals[0].replace(/\s/g, ' ').replace(/ +/g, ' ').replace(/ /g, ' ')));
   // Bulle illustrée de l'état à droite du prix (2026-10-31, porteur), au lieu du point de couleur.
   // Sigle blanc de l'état à côté de sa bulle, tout sur une seule ligne (2026-10-31, porteur) ; la cote n'est jamais coupée,
   // même « 12 345 € » sur un écran de 320 px (la taille suit la largeur de la carte).

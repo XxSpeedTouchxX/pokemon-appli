@@ -110,8 +110,8 @@
           fallback: p.fallback || '', name: p.name,
           num: top ? '#' + (rank.get(p.id) + 1) : p.reprintOf ? p.numShort : p.numShort.split('/')[0], owned: n > 0, many: n > 1, qty: '×' + n,
           cls: 'pkm-sv-card' + (n > 0 ? '' : ' pkm-sv-miss'), flag: this.flag(p.lang === 'EN' ? 'EN' : 'FR'),
-          cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), sub: setName,
-          label: p.name + ', ' + (top ? setName + ' ' : '') + p.numLabel + (k !== null ? ', cote ' + this.eur(k) : ', sans prix') + (n ? ', ' + n + ' dans ta collection' : ', pas encore dans ta collection'),
+          cote: k === null ? '—' : this.coteTxt(k), sub: setName,
+          label: p.name + ', ' + (top ? setName + ' ' : '') + p.numLabel + (k !== null ? ', prix du marché Near Mint ' + this.coteTxt(k) : ', sans prix') + (n ? ', ' + n + ' dans ta collection' : ', pas encore dans ta collection'),
           // Un appui ouvre la fiche en panneau, la même que dans « Mon classeur » (2026-11-01, porteur) ; le cœur (favori)
           // est retiré, seul le « + » reste pour l'ajout immédiat.
           open: () => this.fiOpen(p.id),

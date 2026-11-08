@@ -20,7 +20,7 @@ await page.locator(TILE).click(); await page.waitForTimeout(800);
 const fi = page.locator('section.pkm-fi');
 const price = async () => (await fi.locator('.pkm-fi-price').innerText()).replace(/\s+/g, ' ').replace(/[  ]/g, ' ').trim();
 const t0 = await price();
-ok('fiche : « ' + t0 + ' »', /^99,00 € Cardmarket Déjà possédée ×1$/.test(t0) && !/dans ta collection/.test(await fi.innerText()));
+ok('fiche : « ' + t0 + ' »', /^99,00 € Prix du marché en Near Mint · Cardmarket Déjà possédée ×1$/.test(t0) && !/dans ta collection/.test(await fi.innerText()));
 const chip = fi.locator('.pkm-fi-etat').first();
 const c0 = (await chip.innerText()).replace(/\s+/g, ' ').replace(/[  ]/g, ' ').trim();
 ok('état : bulle Near Mint et sa valeur (« ' + c0 + ' »)', /Near Mint NM/.test(c0) && /99,00 €/.test(c0) && /nm\.svg$/.test(await chip.locator('img').getAttribute('src')));
@@ -37,16 +37,16 @@ ok('bulle Mint', /mt\.svg$/.test(await fi.locator('.pkm-fi-etat img').first().ge
 ok('message « État modifié : Mint » avec « Annuler »', /État modifié : Mint/.test(await page.locator('div[role="status"]').first().innerText()) && /Annuler/.test(await page.locator('div[role="status"]').first().innerText()));
 await page.screenshot({ path: shot('fietat-3.png') });
 await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(500);
-ok('classeur : « ' + await pill() + ' »', /^114 € M$/.test((await pill()).replace(/[  ]/g, ' ')));
+ok('classeur : « ' + await pill() + ' »', /^113,85 € M$/.test((await pill()).replace(/[  ]/g, ' ')));
 await page.waitForTimeout(1200);
 await page.goto(URL, { waitUntil: 'load' }); await page.waitForTimeout(3000);
 const saved = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return d.purchases.flatMap(a => a.lines).map(l => l.cond).filter(Boolean); });
-ok('gardé après rechargement : « ' + await pill() + ' »', /^114 € M$/.test((await pill()).replace(/[  ]/g, ' ')) && saved.indexOf('MT') >= 0);
+ok('gardé après rechargement : « ' + await pill() + ' »', /^113,85 € M$/.test((await pill()).replace(/[  ]/g, ' ')) && saved.indexOf('MT') >= 0);
 // Annuler : retour à Near Mint.
 await page.locator(TILE).click(); await page.waitForTimeout(600);
 await fi.locator('.pkm-fi-etat').first().click(); await page.waitForTimeout(300);
 await fi.locator('.pkm-fi-etat-grid button[aria-label^="Near Mint"]').click(); await page.waitForTimeout(400);
-ok('retour à Near Mint : « ' + await price() + ' »', /^99,00 € Cardmarket Déjà possédée ×1$/.test(await price()));
+ok('retour à Near Mint : « ' + await price() + ' »', /^99,00 € Prix du marché en Near Mint · Cardmarket Déjà possédée ×1$/.test(await price()));
 await page.locator('div[role="status"] button:has-text("Annuler")').click(); await page.waitForTimeout(400);
 ok('« Annuler » rend Mint : « ' + await price() + ' »', /^113,85 €/.test(await price()));
 console.log(res.join('\n'));

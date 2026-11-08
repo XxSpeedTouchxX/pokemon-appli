@@ -1,6 +1,7 @@
 """Tests des prix Cardmarket des fichiers publics (cmfiles.py, fill_cardmarket). Lancer :
 python3 -m unittest discover -s tools/tcgdex -p 'test_*.py'"""
 import unittest
+from datetime import date, timedelta
 
 import cmfiles
 from build_index import FIELDS, fill_cardmarket, row
@@ -43,6 +44,14 @@ class Matching(unittest.TestCase):
         self.assertEqual(m["30th-c-022"], 23)
         self.assertEqual(FILES.prices(23), (9.5, None, None, None, None, None, "h"))
         self.assertEqual(FILES.match([("30th-c-023", "M Gardevoir EX")], [6601]), {"30th-c-023": 24})
+
+    def test_same_name_plus_longer_name(self):
+        # 2026-11-08 : Palkia du 30ᵉ (0,07 €) et Palkia LV.X de la Collection Classique (12,21 €).
+        files = cmfiles.CmFiles([prod(30, "Palkia [Wormhole | 30]"), prod(31, "Palkia LV.X [Restructure | Hydro Reflect]")], [])
+        m = files.match([("30th-020", "Palkia"), ("30th-c-022", "Palkia")], [6601])
+        self.assertEqual((m["30th-020"], m["30th-c-022"]), (30, 31))
+        # Le compte ne tombe pas juste : rien plutôt qu'un mauvais produit.
+        self.assertEqual(files.match([("a", "Palkia"), ("b", "Palkia"), ("c", "Palkia")], [6601]), {})
 
     def test_expansions(self):
         self.assertEqual(FILES.expansions_for("30th", []), [6601])
@@ -91,9 +100,18 @@ class Fill(unittest.TestCase):
         f = {k: i for i, k in enumerate(FIELDS)}
         cards = [row("30th-c-001", "Dracaufeu", "30th-c", "001", "", "", NONE)]
         old = list(cards[0])
-        old[f["cm"]], old[f["cmf"]] = 170.0, 1
+        old[f["cm"]], old[f["cmf"]], old[f["upd"]] = 170.0, 1, date.today().isoformat()
         n, _ = fill_cardmarket(cards, {}, {}, {}, None, {"fields": FIELDS, "cards": [old]})
         self.assertEqual((n, cards[0][f["cm"]], cards[0][f["cmf"]]), (1, 170.0, 1))
+
+    def test_old_yesterday_dropped(self):
+        # Prix repris plus de 7 jours (Palkia de la Classique, repris du 17 octobre au 7 novembre 2026) : abandonné.
+        f = {k: i for i, k in enumerate(FIELDS)}
+        cards = [row("30th-c-022", "Palkia", "30th-c", "022", "", "", NONE)]
+        old = list(cards[0])
+        old[f["cm"]], old[f["cmf"]], old[f["upd"]] = 0.06, 1, (date.today() - timedelta(days=8)).isoformat()
+        n, _ = fill_cardmarket(cards, {}, {}, {}, None, {"fields": FIELDS, "cards": [old]})
+        self.assertEqual((n, cards[0][f["cm"]]), (0, None))
 
 
 class Verify(unittest.TestCase):

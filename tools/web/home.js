@@ -75,8 +75,8 @@
     const pages = Math.max(1, Math.ceil(list.length / per)), page = Math.min(s[key], pages - 1);
     const sum = l => l.reduce((t, e) => t + e.v * e.q, 0), units = l => l.reduce((t, e) => t + e.q, 0);
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
-    // Cote courte sur la pastille : à l'euro près dès 100 €, comme l'aperçu de PokéItem.
-    const cote = e => { const v = e.v; return v ? x.mask(v >= 100 ? this.eur0(v) : this.eur(v)) : '—'; };
+    // Valeur de mon exemplaire sur la pastille (selon son état) : même format que la fiche qui s'ouvre (coteTxt).
+    const cote = e => { const v = e.v; return v ? x.mask(this.coteTxt(v)) : '—'; };
     const tile = e => {
       const p = e.p, k = homeCopy(s.purchases, p), q = e.q, l = this.look(p), G = e.gr;
       // Carte gradée : logo de l'entreprise et note sur la carte, à la place de la bulle de l'état.
@@ -88,7 +88,7 @@
         many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg,
         label: p.name + (gb.graded ? ', gradée ' + gb.gradeName : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
           + (G ? '' : copyLabel(p, k.cond) + ', ') + 'cote ' + (e.v ? x.mask(this.eur(e.v)) : 'inconnue') + '. Ouvrir la fiche',
-        open: () => this.fiOpen(p.id, { gr: G ? G.key : '' })
+        open: () => this.fiOpen(p.id, { gr: G ? G.key : '', from: 'binder' })
       });
     };
     const isGraded = e => !!(e.gr || e.p.grade);

@@ -63,17 +63,19 @@
     const s = this.st(), g = s.games || {};
     if (g.bPhase && g.bPhase !== 'done' && g.bPhase !== 'idle') return;
     if (gmWait(g.boosterAt, gmBoosterMs(this)) > 0) return;
-    const i = gmDraw(gmRand()), win = GM_TABLE[i][0], at = new Date().toISOString();
+    // 2XP PK (xppk.js, 2026-11-08) : gain doublé pendant la durée achetée.
+    const mul = typeof this.xpMul === 'function' ? this.xpMul() : 1;
+    const i = gmDraw(gmRand()), win = GM_TABLE[i][0] * mul, at = new Date().toISOString();
     const hist = [{ at: at, game: 'booster', pk: win }].concat(g.hist || []).slice(0, 20);
     const credit = () => {
       const t = this.st();
       this.setState({ pk: t.pk + win, pkGain: win,
-        toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' });
+        toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' + (mul > 1 ? ' (2XP PK)' : '') });
       this.pkGainEnd(); this.flash();
       gmParty(win);
     };
     // Enregistré tout de suite (une fermeture pendant l'animation ne rejoue pas le booster), crédité à la révélation.
-    this.setState({ games: Object.assign({}, g, { boosterAt: at, bWin: i, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
+    this.setState({ games: Object.assign({}, g, { boosterAt: at, bWin: i, bMul: mul, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
     if (gmStill()) { credit(); return; }
     this.sfxBooster(i + 1); // bruit d'ouverture (sfx.js, 2026-11-01), l'air final selon le gain
     gmLater(() => this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'tear' }) }), 700);
@@ -84,21 +86,31 @@
     const s = this.st(), g = s.games || {};
     if (g.cPhase === 'flip') return;
     if (!this.perks().coinH || gmWait(g.coinAt, gmCoinMs(this)) > 0) return;
-    const win = gmRand() < 0.5, at = new Date().toISOString();
-    const hist = [{ at: at, game: 'coin', pk: win ? GM_COIN_WIN : 0 }].concat(g.hist || []).slice(0, 20);
+    const win = gmRand() < 0.5, at = new Date().toISOString(), mul = typeof this.xpMul === 'function' ? this.xpMul() : 1, gain = GM_COIN_WIN * mul;
+    const hist = [{ at: at, game: 'coin', pk: win ? gain : 0 }].concat(g.hist || []).slice(0, 20);
     const done = () => {
-      const t = this.st(), patch = { games: Object.assign({}, t.games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + GM_COIN_WIN + ' PK' : 'Cristal éteint : pas de PK cette fois' };
-      if (win) Object.assign(patch, { pk: t.pk + GM_COIN_WIN, pkGain: GM_COIN_WIN });
+      const t = this.st(), patch = { games: Object.assign({}, t.games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + gain + ' PK' + (mul > 1 ? ' (2XP PK)' : '') : 'Cristal éteint : pas de PK cette fois' };
+      if (win) Object.assign(patch, { pk: t.pk + gain, pkGain: gain });
       this.setState(patch);
       if (win) this.pkGainEnd();
       this.flash();
     };
-    this.setState({ games: Object.assign({}, g, { coinAt: at, cWin: win, cPhase: gmStill() ? 'done' : 'flip', cN: (g.cN || 0) + 1, hist: hist }) });
+    this.setState({ games: Object.assign({}, g, { coinAt: at, cWin: win, cMul: mul, cPhase: gmStill() ? 'done' : 'flip', cN: (g.cN || 0) + 1, hist: hist }) });
     if (gmStill()) { done(); return; }
     this.sfxCoin(); // bruit de la pièce lancée, qui tourne et retombe (sfx.js, 2026-11-01)
     gmLater(done, 2900);
   };
 
+  // Jeu pas encore prêt (2026-11-08, porteur) : bouton « négatif » (sombre, sablier) qui dit combien de temps attendre,
+  // selon le grade ; un appui le fait trembler et rappelle la règle du grade.
+  gmProto.gmNo = function (which, ms, every) {
+    try { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); } catch (e) { /* pas de vibreur */ }
+    const P = this.perks();
+    this.setState({ gmNoAt: Date.now(), gmNoWhich: which,
+      toast: 'Tu dois attendre ' + gmLeft(ms) + ' pour rejouer · grade ' + P.name + ' : ' + every + (P.name === 'Grand maître Pokémon' ? '' : ' (plus ton grade monte, plus c’est souvent)') });
+    this.flash();
+    setTimeout(() => { if (this.st().gmNoWhich === which) this.setState({ gmNoWhich: '' }); }, 600);
+  };
   gmProto.vGames = function (s) {
     const g = s.games || {}, P = this.perks(), bw = gmWait(g.boosterAt, gmBoosterMs(this)), cw = gmWait(g.coinAt, gmCoinMs(this));
     const coinOpen = !!P.coinH;
@@ -111,22 +123,27 @@
       b: {
         idle: bPhase === 'idle' || bPhase === 'done', shake: bPhase === 'shake', tear: bPhase === 'tear', reveal: bPhase === 'reveal',
         showPack: bPhase !== 'reveal', packClass: bPhase === 'shake' ? 'pkm-gm-shake' : bPhase === 'tear' ? 'pkm-gm-tear' : 'pkm-gm-float',
-        prizePk: '+' + prize[0].toLocaleString('fr-FR') + ' PK', prizeName: prize[2], prizeColor: prize[3],
+        prizePk: '+' + (prize[0] * (g.bMul || 1)).toLocaleString('fr-FR') + ' PK', prizeXp: (g.bMul || 1) > 1, prizeName: prize[2], prizeColor: prize[3],
         prizeGlow: '0 0 0 2px ' + prize[3] + ', 0 0 34px ' + prize[3], jackpot: (g.bWin || 0) >= 3,
-        ready: bw === 0 && !busyB, wait: bw > 0, every: '1 offert toutes les ' + P.boosterH + ' h',
-        button: busyB ? 'Ouverture…' : bw > 0 ? 'Prochain booster dans ' + gmLeft(bw) : bPhase === 'reveal' ? 'Ouvrir un autre booster' : 'Ouvrir mon booster',
-        open: () => { if (bPhase === 'reveal') this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'idle' }) }); this.gmOpenBooster(); },
+        ready: bw === 0 && !busyB, wait: bw > 0, dis: busyB, every: '1 offert toutes les ' + P.boosterH + ' h',
+        button: busyB ? 'Ouverture…' : bw > 0 ? 'Tu dois attendre ' + gmLeft(bw) + ' pour rejouer' : bPhase === 'reveal' ? 'Ouvrir un autre booster' : 'Ouvrir mon booster',
+        btnCls: 'pkm-gm-go' + (bw > 0 && !busyB ? ' pkm-gm-go-no' + (s.gmNoWhich === 'b' ? ' pkm-gm-go-shake' : '') : ''), noIco: bw > 0 && !busyB,
+        open: () => {
+          if (bw > 0 && !busyB) { this.gmNo('b', bw, '1 booster toutes les ' + P.boosterH + ' h'); return; }
+          if (bPhase === 'reveal') this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'idle' }) }); this.gmOpenBooster();
+        },
         again: () => this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'idle' }) }),
         odds: GM_TABLE.map(([pk, pct, name, color]) => ({ pk: pk.toLocaleString('fr-FR') + ' PK', pct: pct + ' %', name: name, color: color }))
       },
       c: {
         flipping: busyC, still: !busyC, faceClass: busyC ? 'pkm-gm-flip' : '', angle: g.cPhase === 'flip' || g.cPhase === 'done' ? (turns * 180) + 'deg' : '0deg',
-        resultDone: g.cPhase === 'done', resultText: g.cWin ? 'Gemme PK : +' + GM_COIN_WIN + ' PK !' : 'Cristal éteint : pas de PK cette fois.',
+        resultDone: g.cPhase === 'done', resultText: g.cWin ? 'Gemme PK : +' + GM_COIN_WIN * (g.cMul || 1) + ' PK !' + ((g.cMul || 1) > 1 ? ' (2XP PK)' : '') : 'Cristal éteint : pas de PK cette fois.',
         resultColor: g.cWin ? 'var(--pkm-accent)' : '#9AA8C3', ready: coinOpen && cw === 0 && !busyC, locked: !coinOpen, op: coinOpen ? '1' : '0.55',
         every: coinOpen ? '1 lancer toutes les ' + P.coinH + ' h' : 'Au grade ' + this.perkGrade('coinH'),
         lockText: 'Le jeu de la pièce se débloque au grade ' + this.perkGrade('coinH') + ' (1 500 PK gagnés).',
-        button: !coinOpen ? '🔒 Au grade ' + this.perkGrade('coinH') : busyC ? 'La pièce tourne…' : cw > 0 ? 'Prochain lancer dans ' + gmLeft(cw) : 'Lancer la pièce',
-        flip: () => this.gmFlip(), key: 'coin-' + (g.cN || 0)
+        button: !coinOpen ? '🔒 Au grade ' + this.perkGrade('coinH') : busyC ? 'La pièce tourne…' : cw > 0 ? 'Tu dois attendre ' + gmLeft(cw) + ' pour rejouer' : 'Lancer la pièce',
+        btnCls: 'pkm-gm-go' + (coinOpen && cw > 0 && !busyC ? ' pkm-gm-go-no' + (s.gmNoWhich === 'c' ? ' pkm-gm-go-shake' : '') : '') + (!coinOpen ? ' pkm-gm-go-lock' : ''), noIco: coinOpen && cw > 0 && !busyC,
+        flip: () => { if (coinOpen && cw > 0 && !busyC) { this.gmNo('c', cw, '1 lancer toutes les ' + P.coinH + ' h'); return; } this.gmFlip(); }, key: 'coin-' + (g.cN || 0)
       },
       rules: 'Gratuit, sans achat : les PK n’ont aucune valeur en euros et ne s’échangent pas. Ton grade (' + P.name + ') : un booster toutes les ' + P.boosterH + ' h' + (coinOpen ? ', un lancer de pièce toutes les ' + P.coinH + ' h' : ', pièce au grade ' + this.perkGrade('coinH')) + ' ; plus ton grade monte, plus c’est souvent. Tirage au hasard sur ton appareil.',
       hist: (g.hist || []).slice(0, 5).map(h => ({ text: (h.game === 'booster' ? 'Booster' : h.game === 'wheel' ? 'Roulette (retirée)' : 'Pile ou face') + ' · ' + this.d2(h.at.slice(0, 10)), pk: h.pk > 0 ? '+' + h.pk.toLocaleString('fr-FR') + ' PK' : h.pk < 0 ? '−' + Math.abs(h.pk).toLocaleString('fr-FR') + ' PK' : '0 PK', color: h.pk > 0 ? 'var(--pkm-accent)' : '#9AA8C3' })),

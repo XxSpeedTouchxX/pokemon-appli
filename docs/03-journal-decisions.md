@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-08 — Prix de base en Near Mint, Palkia 30 ans, attente des jeux, 2XP PK, fenêtre bloquante (demande du porteur)
+
+- **Prix identiques entre la carte et sa fiche** : sous chaque carte d'une extension (et dans le Pokédex, la recherche, « Les plus chères »), le prix de base est le **prix du marché Cardmarket en Near Mint** ; la fiche ouverte depuis cette carte affiche le même montant, au même format (au centime près, à l'euro près dès 1 000 €), avec « Prix du marché en Near Mint · Cardmarket ». Depuis « Mon classeur », la pastille et la fiche montrent toutes les deux la valeur de mon exemplaire selon son état (Dracaufeu 30 ans en Mint : 178,34 € = 155,08 € × 115 %). La valeur de chaque état reste dans « État de ma carte » et « Prix par état ».
+- **Palkia 30 ans** : la réimpression de la Collection Classique (Palkia LV.X) recevait depuis le 17 octobre le prix du Palkia du set principal (0,06 €), repris jour après jour. Rapprochement corrigé (`cmfiles.py` : nom exact puis le seul nom qui le prolonge, « Palkia » → « Palkia LV.X ») et prix repris de la veille limités à 7 jours (`build_index.py`) ; tendance Cardmarket attendue ≈ 12 € (fichiers du 7 novembre). Données refaites par la mise à jour quotidienne.
+- **Jeux** : booster déjà ouvert ou pièce déjà lancée : bouton rouge avec sablier « Tu dois attendre 3 h 59 pour rejouer » ; un appui secoue le bouton et rappelle le délai du grade (« grade Recrue : 1 booster toutes les 24 h, plus ton grade monte, plus c'est souvent »).
+- **2XP PK** (PK shop › Magasin) : 7 jours 400 PA, 14 jours 700 PA, 30 jours 1 000 PA (tarif du porteur) ; PK doublés au Booster PK et à pile ou face pendant la durée ; un nouvel achat ajoute ses jours. Serveur : `tools/supabase/016_xp_pk.sql` (**à installer**, 20 tests) ; app `tools/web/xppk.js`. **3 visuels proposés, choix du porteur attendu** : 1 Gemme rayonnante (par défaut), 2 Sablier de gemmes, 3 Double gemme (`?xpvis=1|2|3`) ; une couleur par durée (turquoise, violet, or).
+- **Fenêtre « Accès verrouillé » bloquante** : tant qu'elle est ouverte, l'écran derrière ne bouge plus (défilement, glissement, retour par le bord) et le fond ne la ferme plus ; il faut répondre avec un de ses boutons (Découvrir Premium, Voir le grade, Compris).
+- Cache v166.
+
 ## 2026-11-08 — Vérification de l'adresse facultative (décision du porteur, remplace la précédente)
 
 - « Je ne veux pas que le fait de valider son adresse mail soit obligatoire à l'utilisation de l'application » : jeux, Pokédex, avatar, classement ouverts dès la création du compte (`tools/supabase/015_sans_verification.sql`, **à installer**, 7 tests SQL, 260 au total).

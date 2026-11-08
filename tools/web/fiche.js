@@ -13,9 +13,10 @@
   const FI_W = 300, FI_H = 120;
 
   // Ouvrir la fiche : l'article rejoint le catalogue de l'app s'il n'y est pas (comme openTcg).
-  fiProto.fiOpen = function (id) {
+  // opts.from === 'binder' : ouverte depuis « Mon classeur », dont la pastille montre la valeur de mon exemplaire.
+  fiProto.fiOpen = function (id, opts) {
     const ex = this.st().extra || [], p = this.catalog().find(q => q.id === id);
-    this.setState(Object.assign({ fiId: id, fiPer: 'MAX', fiCond: false, fiZoom: false, fiEtat: null }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
+    this.setState(Object.assign({ fiId: id, fiPer: 'MAX', fiCond: false, fiZoom: false, fiEtat: null, fiFrom: opts && opts.from || '' }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
   };
   fiProto.fiClose = function () { this.setState({ fiId: null, fiZoom: false, fiEtat: null }); };
 
@@ -252,9 +253,12 @@
       hasIcon: !sealed, icon: sealed ? '' : 'img/conds/' + c.toLowerCase() + '.svg' }));
     const q = encodeURIComponent(p.name + (sealed || !p.numShort ? '' : ' ' + String(p.numShort).split('/')[0]));
     const last = (it.copies || [])[0];
-    // Carte possédée : le prix affiché est celui de ses exemplaires, selon leur état (comme la pastille du classeur) ;
-    // chaque état possédé a sa bulle, qui s'ouvre sur les 6 états pour le corriger (2026-10-31, porteur).
-    const mine = owned && !sealed && k !== null ? x.val(p) : null, adj = mine !== null && Math.abs(mine - k) > 0.004;
+    // Grand prix de la fiche = celui de la carte touchée (2026-11-08, porteur : « le prix de base affiché sur toutes les
+    // cartes de l'extension = le prix du marché en Near Mint », sans différence avec la fiche) : depuis une extension,
+    // le Pokédex ou une recherche, la cote Cardmarket Near Mint ; depuis « Mon classeur », la valeur de mes exemplaires
+    // selon leur état (comme sa pastille). Chaque état possédé garde sa bulle et sa valeur (2026-10-31, porteur).
+    const fromBinder = s.fiFrom === 'binder';
+    const mine = fromBinder && owned && !sealed && k !== null ? x.val(p) : null, adj = mine !== null && Math.abs(mine - k) > 0.004;
     const groups = owned && !sealed ? fiGroups(s, p) : [];
     const etats = groups.map(g => {
       // Exemplaires gradés (graded.js) : logo de l'entreprise et note ; leur note ne se modifie pas ici.
@@ -293,8 +297,8 @@
       rarity: sealed ? '' : (p.rarity || ''), hasRarity: !sealed && !!p.rarity,
       // Langue et origine du visuel (carte en anglais, scan d'une autre version, réimpression) : comme la fiche complète.
       imgNote: it.imgNote || '', hasImgNote: !sealed && !!it.hasImgNote,
-      cote: mine !== null ? this.eur(mine) : k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Pas encore de cote'),
-      coteSrc: adj ? (groups.some(g => gradeOf(g.gr)) ? (groups.every(g => gradeOf(g.gr)) ? 'Selon la note · ' : 'Selon l’état et la note · ') : 'Selon l’état · ') + this.eur(k) + ' en Near Mint (Cardmarket)' : k !== null ? 'Cardmarket' : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
+      cote: mine !== null ? this.coteTxt(mine) : k !== null ? this.coteTxt(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Pas encore de cote'),
+      coteSrc: adj ? (groups.some(g => gradeOf(g.gr)) ? (groups.every(g => gradeOf(g.gr)) ? 'Selon la note · ' : 'Selon l’état et la note · ') : 'Selon l’état · ') + this.coteTxt(k) + ' en Near Mint (Cardmarket)' : k !== null ? (sealed ? 'Prix du marché · Cardmarket' : 'Prix du marché en Near Mint · Cardmarket') : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
       // « Déjà possédée ×2 » (2026-10-31, porteur) à la place de « ×2 dans ta collection ».
       owned: owned, ownedText: owned ? (sealed ? 'Déjà possédé ×' : 'Déjà possédée ×') + st.qty : '',
       etats: etats, hasEtats: etats.length > 0, etatPick: etatPick,

@@ -1197,7 +1197,10 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-tks-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .pkm-tks-buy { min-height: 50px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
 /* Fenêtre « Accès verrouillé ». */
-.pkm-lockw-wrap { position: fixed; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.pkm-lockw-wrap { position: fixed; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; padding: 16px; touch-action: none; overscroll-behavior: contain; }
+.pkm-lockw-scrim { cursor: default; }
+/* Fenêtre bloquante : la page derrière ne défile plus (2026-11-08). */
+html:has(.pkm-lockw-wrap), html:has(.pkm-lockw-wrap) body { overflow: hidden; overscroll-behavior: none; }
 .pkm-lockw { position: relative; width: 100%; max-width: 340px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 18px 18px; border-radius: 26px; border: 1px solid rgba(255, 107, 107, 0.55); background: radial-gradient(120% 80% at 50% 0%, rgba(255, 70, 70, 0.28), rgba(255, 70, 70, 0) 65%), #1A0F17; color: #F3F6FC; text-align: center; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(255, 70, 70, 0.08); animation: pkmLockShake 0.45s ease-out; }
 .pkm-lockw h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; color: #FF9A9A; }
 .pkm-lockw-ico { position: relative; width: 84px; height: 84px; }
@@ -1309,6 +1312,74 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 @media (prefers-reduced-motion: reduce) { .pkm-lotfx, .pkm-lotfx-card, .pkm-lotfx-img, .pkm-lotfx-glow { animation: none; } }
 .pkm-tkfx::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(3, 6, 14, 0.62), rgba(3, 6, 14, 0.3) 70%); animation: pkmTkFade 2.4s ease both; }
 .pkm-tkfx-v0::before { animation-duration: 1.5s; }
+
+/* Boutons des jeux (2026-11-08, porteur) : prêt (jaune) ; pas encore prêt : « négatif », sombre bordé de rouge, sablier,
+   temps à attendre ; un appui le fait trembler. Fermé au grade : grisé. */
+.pkm-gm-go { height: 52px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease; }
+.pkm-gm-go-no { background: #1A1424; color: #FF8A8A; box-shadow: inset 0 0 0 2px rgba(255, 92, 92, 0.75); font-size: 14.5px; cursor: not-allowed; }
+.pkm-gm-go-lock { opacity: 0.55; }
+.pkm-gm-hg { flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; animation: pkmGmHg 2.4s ease-in-out infinite; }
+@keyframes pkmGmHg { 0%, 70% { transform: rotate(0deg); } 85%, 100% { transform: rotate(180deg); } }
+.pkm-gm-go-shake { animation: pkmGmNo 0.5s ease; }
+@keyframes pkmGmNo { 0%, 100% { transform: translateX(0); } 15% { transform: translateX(-8px); } 30% { transform: translateX(7px); } 45% { transform: translateX(-5px); } 60% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+@media (prefers-reduced-motion: reduce) { .pkm-gm-hg, .pkm-gm-go-shake { animation: none; } }
+
+/* ——— 2XP PK (xppk.js, 2026-11-08) : 3 visuels proposés (?xpvis=1, 2, 3), une couleur par durée ——— */
+.pkm-xp-sec { flex: none; display: flex; flex-direction: column; gap: 10px; }
+.pkm-xp-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding-top: 8px; }
+.pkm-xp-offer { --xc: #5EE0CF; --xd: #0E5C55; position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 14px 6px 12px; border-radius: 20px; border: 1.5px solid color-mix(in srgb, var(--xc) 55%, transparent); background: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--xc) 26%, transparent), transparent 70%), #111A2C; color: #F3F6FC; font: inherit; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.2s ease; }
+.pkm-xp-offer:active { transform: scale(0.97); }
+.pkm-xp-offer-b { --xc: #B18CFF; --xd: #3E2380; }
+.pkm-xp-offer-c { --xc: #FFD60A; --xd: #7A5A00; }
+.pkm-xp-offer-on { box-shadow: 0 0 0 3px var(--xc), 0 0 26px color-mix(in srgb, var(--xc) 55%, transparent); }
+.pkm-xp-offer-short .pkm-shop-price { opacity: 0.55; }
+.pkm-xp-ribbon { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); padding: 2px 8px; border-radius: 999px; background: var(--xc); color: #0B1120; font-size: 9.5px; font-weight: 800; white-space: nowrap; letter-spacing: 0.01em; }
+.pkm-xp-title { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; }
+.pkm-xp { position: relative; display: block; width: 84px; height: 84px; }
+.pkm-xp-gem { position: absolute; left: 50%; top: 46%; width: 50px; height: 50px; transform: translate(-50%, -50%); filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
+.pkm-xp-tag { position: absolute; right: -4px; top: 2px; padding: 1px 6px; border-radius: 8px; background: #0B1120; border: 2px solid var(--xc); color: var(--xc); font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 17px; line-height: 1.15; transform: rotate(8deg); }
+.pkm-xp-days { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 1px 9px; border-radius: 6px; background: var(--xc); color: #0B1120; font-size: 11px; font-weight: 800; white-space: nowrap; box-shadow: 0 2px 0 var(--xd); }
+.pkm-xp-rays, .pkm-xp-halo { position: absolute; inset: 0; border-radius: 50%; display: none; }
+/* 1. Gemme rayonnante */
+.pkm-xp-v1 .pkm-xp-rays { display: block; inset: 2px; background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--xc) 60%, transparent) 0deg 10deg, transparent 10deg 30deg); -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%); mask: radial-gradient(circle, #000 30%, transparent 70%); animation: pkmXpSpin 9s linear infinite; }
+.pkm-xp-v1 .pkm-xp-gem { animation: pkmXpBob 2.4s ease-in-out infinite; }
+/* 2. Sablier de gemmes */
+.pkm-xp-v2 .pkm-xp-gem { display: none; }
+.pkm-xp-hg { position: absolute; left: 50%; top: 42%; width: 48px; height: 60px; transform: translate(-50%, -50%); overflow: visible; }
+.pkm-xp-hg-cap { stroke: var(--xc); stroke-width: 5; stroke-linecap: round; fill: none; }
+.pkm-xp-hg-glass { stroke: #DCE6FA; stroke-width: 2.6; fill: rgba(220, 230, 250, 0.08); stroke-linejoin: round; }
+.pkm-xp-hg-top, .pkm-xp-hg-bot { fill: var(--xc); opacity: 0.9; }
+.pkm-xp-hg-top { animation: pkmXpSandTop 3s ease-in infinite; transform-origin: 32px 14px; }
+.pkm-xp-hg-bot { animation: pkmXpSandBot 3s ease-out infinite; transform-origin: 32px 70px; }
+.pkm-xp-hg-flow { stroke: var(--xc); stroke-width: 2; stroke-dasharray: 3 4; animation: pkmXpFlow 0.6s linear infinite; }
+.pkm-xp-fall { position: absolute; left: 50%; top: 30%; width: 13px; height: 13px; margin-left: -6.5px; animation: pkmXpFall 1.5s ease-in infinite; }
+.pkm-xp-fall-2 { animation-delay: 0.75s; }
+.pkm-xp-v2 .pkm-xp-tag { content: ''; }
+/* 3. Double gemme */
+.pkm-xp-v3 .pkm-xp-halo { display: block; inset: 10px; background: radial-gradient(circle, color-mix(in srgb, var(--xc) 55%, transparent), transparent 70%); animation: pkmXpPulse 1.8s ease-in-out infinite; }
+.pkm-xp-v3 .pkm-xp-gem { left: 42%; animation: pkmXpTwinL 2.6s ease-in-out infinite; }
+.pkm-xp-v3 .pkm-xp-gem2 { left: 58%; top: 50%; opacity: 0.85; filter: drop-shadow(0 0 8px var(--xc)); animation: pkmXpTwinR 2.6s ease-in-out infinite; }
+.pkm-xp-v3 .pkm-xp-tag { color: #FFFFFF; text-shadow: 0 0 6px var(--xc), 0 0 12px var(--xc); }
+.pkm-xp-orbit { position: absolute; inset: 4px; animation: pkmXpSpin 4s linear infinite; }
+.pkm-xp-orbit b { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 8px var(--xc); }
+.pkm-xp-orbit b:nth-child(1) { left: 50%; top: 0; } .pkm-xp-orbit b:nth-child(2) { left: 6%; bottom: 18%; } .pkm-xp-orbit b:nth-child(3) { right: 6%; bottom: 18%; }
+.pkm-xp-live { margin: 0; padding: 10px 14px; border-radius: 16px; border: 1px solid rgba(255, 214, 10, 0.55); background: linear-gradient(90deg, rgba(255, 214, 10, 0.18), rgba(255, 214, 10, 0.04)); color: #F3F6FC; font-size: 13.5px; line-height: 1.4; }
+.pkm-xp-live b { color: #FFD60A; }
+.pkm-xp-live-gm { flex: none; }
+.pkm-xp-ask { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 18px; border: 1px solid #24345C; background: #111A2C; color: #F3F6FC; }
+.pkm-xp-ask p { margin: 0; font-size: 14px; font-weight: 700; }
+.pkm-xp-ask .pkm-xp-miss { color: #F5B14C; font-size: 13px; }
+.pkm-xp-won { position: relative; padding: 2px 10px; border-radius: 8px; background: #0B1120; border: 2px solid #FFD60A; color: #FFD60A; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 15px; }
+@keyframes pkmXpSpin { to { transform: rotate(360deg); } }
+@keyframes pkmXpBob { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -56%) scale(1.06); } }
+@keyframes pkmXpPulse { 0%, 100% { opacity: 0.55; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1.08); } }
+@keyframes pkmXpTwinL { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-62%, -54%) rotate(-6deg); } }
+@keyframes pkmXpTwinR { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-38%, -46%) rotate(6deg); } }
+@keyframes pkmXpSandTop { 0% { transform: scaleY(1); } 90%, 100% { transform: scaleY(0.15); } }
+@keyframes pkmXpSandBot { 0% { transform: scaleY(0.2); } 90%, 100% { transform: scaleY(1); } }
+@keyframes pkmXpFlow { to { stroke-dashoffset: -7; } }
+@keyframes pkmXpFall { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(26px) scale(1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .pkm-xp *, .pkm-xp { animation: none !important; } }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -2139,6 +2210,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=8cd1791e"></script>
+<script src="app.js?v=f000bbe7"></script>
 </body>
 </html>

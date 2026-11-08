@@ -44,7 +44,9 @@ await gt.click(); await page.waitForTimeout(800);
 const vb = FI.locator('.pkm-fi-visual .pkm-fi-gbadge');
 ok('fiche : logo et note sur le visuel (« ' + N(await vb.locator('b').innerText().catch(() => '')) + ' »)', (await vb.count()) === 1 && N(await vb.locator('b').innerText()) === '9,5' && (await vb.locator('img').evaluate(i => i.naturalWidth > 0)));
 const big = N(await FI.locator('.pkm-fi-cote').first().innerText().catch(() => ''));
-ok('fiche ouverte depuis la carte gradée : prix de cet exemplaire (« ' + big + ' »)', big === '441,98 €' && /Selon la note · 220,99 € en Near Mint/.test(N(await FI.locator('.pkm-fi-src').first().innerText())));
+const srcT = N(await FI.locator('.pkm-fi-src').first().innerText()), nm = (/Selon la note · ([\d ,]+) € en Near Mint/.exec(srcT) || [])[1];
+const eu = t => parseFloat(String(t).replace(/[^\d,]/g, '').replace(',', '.'));
+ok('fiche ouverte depuis la carte gradée : prix de cet exemplaire (« ' + big + ' », ' + srcT + ')', !!nm && Math.abs(eu(big) - 2 * eu(nm)) < 0.02);
 await FI.locator('.pkm-fi-visual').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('gradeedit-fiche.png') });
 // Changer la note : appui sur la ligne gradée → PSA 9.
 await FI.locator('.pkm-fi-etat-gr').click(); await page.waitForTimeout(300);

@@ -91,15 +91,16 @@
       if (this.gcNeed()) return;
       this.setState({ games: Object.assign({}, g, { bPhase: 'shake' }) });
       Cloud.rpc('open_booster', { req: Cloud.reqId() }).then(r => {
-        const i = Math.max(0, GM_TABLE.findIndex(row => row[0] === r.won)), win = GM_TABLE[i][0], at = new Date().toISOString();
+        // 2XP PK (016) : r.base est le gain du tirage, r.won le gain crédité (doublé pendant un 2XP).
+        const i = Math.max(0, GM_TABLE.findIndex(row => row[0] === (r.base || r.won))), mul = r.boost ? 2 : 1, win = r.won || GM_TABLE[i][0], at = new Date().toISOString();
         const t = this.st(), gg = t.games || {};
         const hist = [{ at: at, game: 'booster', pk: win }].concat(gg.hist || []).slice(0, 20);
         const credit = () => {
-          this.setState({ pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, pkGain: win, toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' });
+          this.setState({ pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, pkGain: win, toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' + (mul > 1 ? ' (2XP PK)' : '') });
           this.pkGainEnd(); this.flash();
           gmParty(win);
         };
-        this.setState({ games: Object.assign({}, gg, { boosterAt: at, bWin: i, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
+        this.setState({ games: Object.assign({}, gg, { boosterAt: at, bWin: i, bMul: mul, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
         if (gmStill()) { credit(); return; }
         this.sfxBooster(i + 1);
         gmLater(() => this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'tear' }) }), 700);
@@ -118,17 +119,17 @@
       gcCoinBusy = true;
       Cloud.rpc('flip_coin', { req: Cloud.reqId() }).then(r => {
         gcCoinBusy = false;
-        const win = !!r.win, at = new Date().toISOString(), gg = this.st().games || {};
-        const hist = [{ at: at, game: 'coin', pk: win ? GM_COIN_WIN : 0 }].concat(gg.hist || []).slice(0, 20);
+        const win = !!r.win, at = new Date().toISOString(), gg = this.st().games || {}, mul = r.boost ? 2 : 1, gain = r.won || GM_COIN_WIN;
+        const hist = [{ at: at, game: 'coin', pk: win ? gain : 0 }].concat(gg.hist || []).slice(0, 20);
         const done = () => {
-          const patch = { pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, games: Object.assign({}, this.st().games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + GM_COIN_WIN + ' PK' : 'Cristal éteint : pas de PK cette fois' };
-          if (win) patch.pkGain = GM_COIN_WIN;
+          const patch = { pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, games: Object.assign({}, this.st().games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + gain + ' PK' + (mul > 1 ? ' (2XP PK)' : '') : 'Cristal éteint : pas de PK cette fois' };
+          if (win) patch.pkGain = gain;
           this.setState(patch);
           if (win) this.pkGainEnd();
           this.flash();
         };
         // Nouveau lancer avec le bon résultat (le nombre de demi-tours dépend de cWin).
-        this.setState({ games: Object.assign({}, gg, { coinAt: at, cWin: win, cPhase: gmStill() ? 'done' : 'flip', cN: (gg.cN || 0) + 1, hist: hist }) });
+        this.setState({ games: Object.assign({}, gg, { coinAt: at, cWin: win, cMul: mul, cPhase: gmStill() ? 'done' : 'flip', cN: (gg.cN || 0) + 1, hist: hist }) });
         if (gmStill()) { done(); return; }
         this.sfxCoin();
         gmLater(done, 2900);

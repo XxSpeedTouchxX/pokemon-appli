@@ -293,6 +293,10 @@
   // Date du jour (2026-10-11) : la logique de la maquette comptait depuis le 3 octobre 2026 (today() figé), d'où des
   // périodes de ventes, une marge sur 30 jours, des semaines actives et des comptes à rebours faux. Date réelle
   // désormais (?today= et la date simulée de l'Admin compris) ; les liens de démonstration gardent celle de la maquette.
+  // Prix affiché d'une carte (2026-11-08, porteur : « pas de différence entre la somme en bas de la carte et celle qui
+  // sort quand on clique dessus ») : un seul format partout (vignettes d'extension, classeur, fiche) ; au centime près,
+  // à l'euro près dès 1 000 € (place sur les petites vignettes).
+  proto.coteTxt = function (v) { return v >= 1000 ? this.eur0(v) : this.eur(v); };
   const baseToday = proto.today;
   proto.today = function () { return (this.props || {}).demo ? baseToday.call(this) : realToday(); };
   // Historique simulé des articles de démo : ses jours vont jusqu'à aujourd'hui.
@@ -444,7 +448,7 @@
         const k = this.cote(p), q = qty(p);
         return {
           img: p.img, srcset: p.srcset, fallback: p.fallback || '', name: p.name, num: (p.set !== e.id ? 'CC ' : '') + p.numShort, owned: q > 0, qty: '×' + q,
-          cote: k === null ? '—' : k >= 100 ? this.eur0(k) : this.eur(k), coteColor: k === null ? 'var(--pkm-t4)' : 'var(--pkm-t1)',
+          cote: k === null ? '—' : this.coteTxt(k), coteColor: k === null ? 'var(--pkm-t4)' : 'var(--pkm-t1)',
           label: p.name + ', ' + p.numLabel + (k !== null ? ', cote ' + this.eur(k) : ', sans prix') + (q ? ', ' + q + ' dans ta collection' : ''),
           open: () => this.openTcg(p.id)
         };

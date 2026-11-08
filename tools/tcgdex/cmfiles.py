@@ -123,6 +123,14 @@ class CmFiles:
                 # « Palkia » ↔ « Palkia LV.X », « Metagross δ » ↔ « Metagross » : un seul candidat qui commence pareil.
                 near = [n for n in prods if n.startswith(name + " ") or name.startswith(n + " ")]
                 ids = prods[near[0]] if len(near) == 1 else None
+            elif len(ids) < len(keys):
+                # Deux « Palkia » chez nous (30ᵉ et sa Collection Classique), « Palkia » et « Palkia LV.X » chez Cardmarket
+                # (2026-11-08, porteur : « le prix du Palkia 30 ans est faux ») : les produits au nom exact d'abord, puis le
+                # seul autre nom qui le prolonge, si le compte tombe juste (l'extension principale vient avant la Classique).
+                near = [n for n in prods if n.startswith(name + " ")]
+                if len(near) == 1 and len(ids) + len(prods[near[0]]) == len(keys):
+                    out.update(zip(keys, sorted(ids) + sorted(prods[near[0]])))
+                    continue
             if ids and len(ids) == len(keys):
                 out.update(zip(keys, sorted(ids)))
         return out
