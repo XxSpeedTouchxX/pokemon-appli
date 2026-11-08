@@ -1,0 +1,28 @@
+# Contrôle des prix Cardmarket (lecture seule, 2026-11-08) : produits de l'extension 6601 (30ᵉ Anniversaire) dont le
+# nom contient les mots donnés, avec leurs prix du jour, et nos cartes du même nom. À la demande, ou quand le script change.
+name: Contrôle des prix Cardmarket
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - tools/cardmarket/check_6601.py
+      - .github/workflows/cm-check.yml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Contrôle
+        run: python tools/cardmarket/check_6601.py palkia charizard
