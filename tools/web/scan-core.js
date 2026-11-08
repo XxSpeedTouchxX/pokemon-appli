@@ -360,6 +360,19 @@
       return { state: 'wait', ids: order.slice(0, 3) };
     }
 
+    // ——— Dessin seul : quand ouvrir sans attendre le texte (2026-11-08, porteur : résultat instantané) ———
+    // frames : résultats successifs de ScanPrint.nearest ({ id, d } triés), le plus récent en dernier. La carte en tête
+    // doit être très proche (distance d1) et nettement devant la suivante (écart) : une réimpression au même dessin est
+    // aussi proche, l'écart manque, et c'est le texte qui tranche. Une image très nette suffit ; sinon deux de suite.
+    // Banc d'essai (384 photos simulées) : 0 erreur jusqu'à d1 ≤ 20 et écart ≥ 6 ; règles prises avec de la marge.
+    function visSure(frames) {
+      const f = frames[frames.length - 1], p = frames[frames.length - 2];
+      const ok = (x, d, gap) => x && x[0] && x[0].d <= d && (!x[1] || x[1].d - x[0].d >= gap);
+      if (ok(f, 12, 12) || ok(f, 16, 18)) return f[0].id;
+      if (ok(f, 18, 10) && ok(p, 18, 10) && p[0].id === f[0].id) return f[0].id;
+      return null;
+    }
+
     // ——— Géométrie ———
     // Cadre affiché (r, relatif à la vidéo à l'écran el) → rectangle dans les pixels de la vidéo v,
     // pour une vidéo affichée en « object-fit: cover ».
@@ -413,5 +426,5 @@
     }
 
     return { BANDS: BANDS, fold: fold, skel: skel, lev: lev, index: index, parseNumber: parseNumber, parseName: parseName,
-      match: match, decide: decide, coverMap: coverMap, bandRect: bandRect, prep: prep };
+      match: match, decide: decide, visSure: visSure, coverMap: coverMap, bandRect: bandRect, prep: prep };
   })();

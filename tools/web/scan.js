@@ -10,7 +10,7 @@
   const SCAN = {
     gen: 0, on: false, stream: null, video: null, starting: false, idx: null, frames: [], timer: 0, since: 0,
     miss: 0, inv: false, cool: new Map(), coolMsg: '', hasTorch: false, fine: false, back: null, ev: {}, stopWorker: 0,
-    thumb: null, cvLoop: null, cvShot: null, debug: false, inst: null
+    thumb: null, cvLoop: null, cvShot: null, debug: false, inst: null, visFrames: [], visTimer: 0, visSeen: 0
   };
   try { SCAN.debug = /[?&]debug=scan(&|$)/.test(location.search); } catch (e) { /* adresse sans paramètres */ }
   // Banc d'essai du scan (tools/web/e2e/bench-scan.mjs) : fonctions accessibles avec ?debug.
@@ -25,7 +25,7 @@
   // Arrêt de la caméra : pistes coupées (le voyant s'éteint), vidéo retirée, lecture arrêtée.
   SCAN.stopCam = function () {
     SCAN.gen++;
-    clearTimeout(SCAN.timer); SCAN.timer = 0;
+    clearTimeout(SCAN.timer); SCAN.timer = 0; clearTimeout(SCAN.visTimer); SCAN.visTimer = 0; SCAN.visFrames = [];
     if (SCAN.stream) SCAN.stream.getTracks().forEach(t => { try { t.stop(); } catch (e) { /* déjà arrêtée */ } });
     SCAN.stream = null; SCAN.starting = false; SCAN.hasTorch = false;
     if (SCAN.video) { try { SCAN.video.srcObject = null; } catch (e) { /* rien */ } SCAN.video.remove(); SCAN.video = null; }
@@ -101,17 +101,67 @@
     let last = -5;
     // Au retour dans l'app, la caméra se rallume sans toucher aux propositions affichées.
     if (inst.st().scanPhase === 'idle') inst.setState({ scanPhase: 'loading', scanProg: 0 });
+    // Deux départs (2026-11-08, porteur : résultat instantané) : la reconnaissance du dessin démarre dès que le
+    // catalogue et les empreintes sont là (sans attendre le moteur de lecture du texte, 1 à 3 s sur un téléphone) ;
+    // la lecture du texte la rejoint quand son moteur est prêt.
+    const live = () => {
+      if (gen !== SCAN.gen) return;
+      if (!SCAN.since) { SCAN.frames = []; SCAN.visFrames = []; SCAN.since = Date.now(); SCAN.miss = 0; }
+      if (inst.st().scanPhase === 'loading') inst.setState({ scanPhase: 'live', scanMsg: '' });
+    };
+    SCAN.since = 0;
+    const vision = Promise.all([SCAN.catalog(), SCAN.prints()]).then(([, p]) => {
+      if (gen !== SCAN.gen || !p) return false;
+      live(); SCAN.visLoop(inst, gen);
+      return true;
+    }, () => false);
     ScanOcr.start((status, p) => {
       const k = /core/.test(status) ? 0.6 * p : /language|traineddata/.test(status) ? 0.6 + 0.3 * p : /initializ/.test(status) ? 0.9 + 0.1 * p : null;
       if (k === null || gen !== SCAN.gen) return;
       const pct = Math.round(k * 100);
       if (pct >= last + 5) { last = pct; inst.setState({ scanProg: pct }); }
-    }).then(() => Promise.all([SCAN.catalog(), SCAN.prints()])).then(() => {
+    }).then(() => SCAN.catalog()).then(() => {
       if (gen !== SCAN.gen) return;
-      SCAN.frames = []; SCAN.since = Date.now(); SCAN.miss = 0;
-      if (inst.st().scanPhase === 'loading') inst.setState({ scanPhase: 'live', scanMsg: '' });
+      live();
       SCAN.loop(inst, gen);
-    }).catch(() => { if (gen === SCAN.gen) { SCAN.stopCam(); inst.setState({ scanPhase: 'error' }); } });
+    }).catch(() => vision.then(ok => { if (!ok && gen === SCAN.gen) { SCAN.stopCam(); inst.setState({ scanPhase: 'error' }); } }));
+  };
+  // Reconnaissance du dessin seule, toutes les 120 ms environ (≈ 10 ms de calcul) : une carte au dessin sans
+  // ambiguïté s'ouvre sans attendre la lecture du texte (ScanCore.visSure). Sinon, ses indices s'ajoutent à la lecture.
+  SCAN.visLoop = function (inst, gen) {
+    clearTimeout(SCAN.visTimer);
+    const step = () => {
+      if (gen !== SCAN.gen) return;
+      const s = inst.st();
+      if (s.screen !== 'scan' || s.scanPhase !== 'live' || s.scanSheet || s.sheet || document.hidden || SCAN.fine || !SCAN.pidx) { SCAN.visTimer = setTimeout(step, 300); return; }
+      const shot = SCAN.grab('cvVis');
+      if (shot) {
+        const look = SCAN.look(shot.canvas, shot.rect);
+        if (look.vis) {
+          // Temps de reconnaissance : depuis la première image où un dessin proche apparaît.
+          if (!SCAN.visSeen && look.vis[0] && look.vis[0].d <= 30) SCAN.visSeen = Date.now();
+          SCAN.visFrames.push(look.vis);
+          if (SCAN.visFrames.length > 4) SCAN.visFrames.shift();
+          const id = ScanCore.visSure(SCAN.visFrames), now = Date.now();
+          if (id && !(SCAN.cool.get(id) > now) && SCAN.visOpen(inst, id, look.vis)) return SCAN.visLoop(inst, gen);
+        }
+      }
+      // Dessin déjà proche : l'image suivante tout de suite (confirmation en deux images).
+      const lv = SCAN.visFrames[SCAN.visFrames.length - 1];
+      SCAN.visTimer = setTimeout(step, lv && lv[0] && lv[0].d <= 20 ? 30 : 110);
+    };
+    SCAN.visTimer = setTimeout(step, 0);
+  };
+  // Carte reconnue par son dessin : sa fiche s'ouvre (même parcours qu'une lecture sûre).
+  SCAN.visOpen = function (inst, id, vis) {
+    const q = inst.scanQuota();
+    if (q.left <= 0) { SCAN.say(inst, q.over); return false; }
+    if (!SCAN.idx || !SCAN.idx.byId.has(id)) return false;
+    const ids = [id].concat(vis.map(v => v.id).filter(x => x !== id && SCAN.idx.byId.has(x))).slice(0, 3);
+    SCAN.visFrames = []; SCAN.frames = [];
+    SCAN.lastMs = SCAN.visSeen ? Date.now() - SCAN.visSeen : 0; SCAN.visSeen = 0;
+    SCAN.open(inst, ids, true);
+    return true;
   };
 
   // Copie de la zone du cadre (en pixels de la vidéo) dans un canevas : la lecture travaille sur cette copie.
@@ -191,20 +241,24 @@
     const d = fine ? (ScanCore.decide([cands]).state === 'auto' ? { state: 'auto', ids: cands.map(c => c.id) } : { state: cands.length ? 'ask' : 'wait', ids: cands.map(c => c.id) }) : ScanCore.decide(SCAN.frames);
     if (d.state !== 'wait' && d.ids.length) {
       const ids = d.ids.concat(cands.map(c => c.id).filter(id => d.ids.indexOf(id) < 0)).slice(0, 3);
-      SCAN.frames = [];
-      try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) { /* pas de vibreur */ }
-      // Carte reconnue sans doute possible (2026-10-25) : sa fiche s'ouvre tout de suite (carte, cote, état, ajout) ;
-      // les 3 propositions restent derrière « Pas la bonne carte ? ». Sinon, on propose les 3.
+      SCAN.frames = []; SCAN.visFrames = [];
       SCAN.lastMs = SCAN.seen ? Date.now() - SCAN.seen : 0; SCAN.seen = 0;
-      inst.scanCount();
-      inst.setState({ scanPhase: 'pick', scanCands: ids, scanEv: Object.assign({}, SCAN.ev), scanMsg: '', scanMs: SCAN.lastMs });
-      if (d.state === 'auto') inst.scanPick(ids[0]);
+      SCAN.open(inst, ids, d.state === 'auto');
       return true;
     }
 
     const parts = [m.ev.num ? 'n° ' + m.ev.num : '', m.ev.name || ''].filter(Boolean);
     SCAN.say(inst, parts.length ? 'Lu : ' + parts.join(' · ') : now - SCAN.since > 12000 ? 'Toujours rien : rapproche la carte, ou appuie sur le déclencheur' : 'Lecture en cours…');
     return false;
+  };
+  // Carte reconnue sans doute possible (2026-10-25) : sa fiche s'ouvre tout de suite (carte, cote, état, ajout) ;
+  // les 3 propositions restent derrière « Pas la bonne carte ? ». Sinon, on propose les 3.
+  SCAN.open = function (inst, ids, auto) {
+    try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) { /* pas de vibreur */ }
+    SCAN.seen = 0;
+    inst.scanCount();
+    inst.setState({ scanPhase: 'pick', scanCands: ids, scanEv: Object.assign({}, SCAN.ev), scanMsg: '', scanMs: SCAN.lastMs });
+    if (auto) inst.scanPick(ids[0]);
   };
   SCAN.say = function (inst, msg) { if (inst.st().scanMsg !== msg) inst.setState({ scanMsg: msg }); };
   // Déclencheur : lecture fine de l'image en cours (deux polarités pour le numéro), propositions même si la carte

@@ -26,10 +26,10 @@ const boot = await page.evaluate(async () => {
   return { ocr: Math.round(t1 - t0), index: Math.round(t2 - t1), prints: p ? Math.round(t3 - t2) : -1 };
 });
 console.log('démarrage : moteur ' + boot.ocr + ' ms, index du catalogue ' + boot.index + ' ms, empreintes ' + boot.prints + ' ms');
-const NOVIS = process.argv.includes('--novis');
+const NOVIS = process.argv.includes('--novis'), VISONLY = process.argv.includes('--vis');
 const vars = QUICK ? VARS.slice(0, 4) : VARS;
 console.log(CARDS.length + ' cartes × ' + vars.length + ' prises de vue');
-const out = await page.evaluate(async ({ cards, vars, novis }) => {
+const out = await page.evaluate(async ({ cards, vars, novis, visonly }) => {
   // Image de la caméra : le cadre (W × H) et 12 % de marge autour, comme SCAN.grab.
   const S = window.__pkmScan, idx = S.SCAN.idx, W = 760, H = Math.round(760 / 0.716), MX = Math.round(W * 0.12), MY = Math.round(H * 0.12), res = [];
   if (novis) S.SCAN.pidx = null;
@@ -49,6 +49,14 @@ const out = await page.evaluate(async ({ cards, vars, novis }) => {
       const jpg = new Image(); jpg.src = c.toDataURL('image/jpeg', 0.75); await jpg.decode();
       const c2 = document.createElement('canvas'); c2.width = CW; c2.height = CH; c2.getContext('2d').drawImage(jpg, 0, 0);
       const t0 = performance.now(), look = S.SCAN.look(c2, { sx: MX, sy: MY, sw: W, sh: H }), tl = performance.now();
+      if (visonly) {
+        // Temps détaillé : bords, empreintes, comparaison.
+        const f = { sx: MX, sy: MY, sw: W, sh: H }, a = performance.now(), l = S.ScanPrint.locate(c2, f), b = performance.now();
+        const ps = S.ScanPrint.jitter(l.found ? l : f).map(x => S.ScanPrint.print(c2, x)), c = performance.now();
+        S.ScanPrint.nearest(S.SCAN.pidx, ps, 12); const e = performance.now();
+        res.push({ want: want, v: vn, vis: (look.vis || []).slice(0, 4), found: look.found, t: [b - a, c - b, e - c] });
+        continue;
+      }
       const read = await S.ScanOcr.read(c2, look.rect, {}), m = S.ScanCore.match(idx, read, look.vis), ms = Math.round(performance.now() - t0);
       const vr = (look.vis || []).findIndex(v => v.id === want), vd = (look.vis || [])[0];
       const top = m.cands[0];
@@ -58,7 +66,27 @@ const out = await page.evaluate(async ({ cards, vars, novis }) => {
     }
   }
   return res;
-}, { cards: CARDS, vars, novis: NOVIS });
+}, { cards: CARDS, vars, novis: NOVIS, visonly: VISONLY });
+if (VISONLY) {
+  // Règle « dessin seul » : distance d1 de la 1re carte, écart avec la 2e (autre carte). Bonnes et mauvaises ouvertures.
+  const n = out.length, avg = k => (out.reduce((a, r) => a + r.t[k], 0) / n).toFixed(1);
+  console.log('temps moyen : bords ' + avg(0) + ' ms · empreintes ' + avg(1) + ' ms · comparaison ' + avg(2) + ' ms');
+  const { writeFileSync } = await import('node:fs');
+  writeFileSync(new URL('./bench-vis.json', import.meta.url), JSON.stringify(out));
+  // Règle de l'app (ScanCore.visSure), sur une seule image puis sur deux images identiques.
+  const code = (await import('node:fs')).readFileSync(new URL('../scan-core.js', import.meta.url), 'utf8'), SC = new Function(code + '\nreturn ScanCore;')();
+  for (const k of [1, 2]) {
+    let good = 0, bad = 0; const badL = [];
+    out.forEach(r => { const id = SC.visSure(Array.from({ length: k }, () => r.vis)); if (id) { if (id === r.want) good++; else { bad++; badL.push(r.want + '→' + id + ' (' + r.v + ')'); } } });
+    console.log('règle de l\'app, ' + k + ' image(s) : fiche instantanée ' + good + '/' + n + ' (' + Math.round(100 * good / n) + ' %), mauvaise carte ' + bad + (badL.length ? ' : ' + badL.join(', ') : ''));
+  }
+  for (const T of [8, 10, 12, 14, 16, 18, 20]) for (const M of [6, 8, 10, 12, 16]) {
+    let good = 0, bad = 0;
+    out.forEach(r => { const a = r.vis[0], b = r.vis[1]; if (a && a.d <= T && (!b || b.d - a.d >= M)) { if (a.id === r.want) good++; else bad++; } });
+    console.log('d1 ≤ ' + T + ', écart ≥ ' + M + ' : ' + good + ' bonnes, ' + bad + ' mauvaises');
+  }
+  await b.close(); process.exit(0);
+}
 let ok = 0, in3 = 0, auto = 0, ms = 0, loc = 0, vis1 = 0, lms = 0;
 for (const r of out) { loc += r.found; vis1 += r.visRank === 0; lms += r.lookMs; }
 for (const r of out) { ok += r.ok; in3 += r.in3; auto += r.ok && r.auto; ms += r.ms; console.log((r.ok ? '✓' : r.in3 ? '~' : '✗') + ' ' + r.file.padEnd(24) + r.v.padEnd(10) + ' attendu ' + r.want.padEnd(12) + ' lu ' + (r.got || '—').padEnd(12) + ' ' + r.ms + ' ms  loc=' + (r.found ? 'o' : 'n') + ' vis#' + r.visRank + ' ' + r.visTop + ' [' + r.num + '] [' + r.name + ']'); }

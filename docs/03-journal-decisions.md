@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-08 — Scan instantané (demande du porteur)
+
+- Le dessin de la carte est comparé à part de la lecture du texte, toutes les 110 ms environ (≈ 10 ms de calcul), et démarre dès l'allumage de la caméra, sans attendre le moteur de lecture (1 à 3 s sur un téléphone).
+- Une carte au dessin sans ambiguïté ouvre sa fiche aussitôt ; une réimpression au même dessin attend le numéro ou le nom (pas d'erreur possible entre deux cartes au même dessin).
+- **Mesure** : banc d'essai, **77 % des photos ouvrent leur fiche instantanément, 0 erreur** ; vraie carte filmée (test `t-scan`) : fiche **0,28 s** après l'allumage de la caméra, **0,41 s** après l'appui sur Scan. Sur téléphone, compter un peu plus (processeur plus lent, mise au point de la caméra). Cache v162.
+
 ## 2026-11-08 — Scan plus rapide et beaucoup plus précis (demande du porteur)
 
 - **Précision : le scan reconnaît maintenant le dessin de la carte**, pas seulement le texte. Chaque carte du catalogue (20 941) a une « empreinte » de son dessin, calculée chaque semaine par GitHub (`web/data/scan-prints.json`, 0,4 Mo). Au scan, l'app trouve les quatre bords de la carte dans l'image, compare son dessin à toutes les cartes (≈ 20 ms, sur le téléphone, aucune image envoyée), et le numéro et le nom départagent les réimpressions au même dessin.

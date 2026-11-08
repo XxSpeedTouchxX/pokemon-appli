@@ -95,6 +95,18 @@ test('dessin : la carte au dessin proche entre en tête ; dessin + nom = carte s
   assert.equal(ids(re)[0], 'sv08-123');
 });
 
+test('dessin seul : ouverture sans attendre le texte seulement sans ambiguïté', () => {
+  const v = (d1, d2) => [{ id: 'a', d: d1 }, { id: 'b', d: d2 }];
+  assert.equal(S.visSure([v(8, 30)]), 'a', 'très net, loin devant');
+  assert.equal(S.visSure([v(8, 12)]), null, 'réimpression au même dessin : le texte tranche');
+  assert.equal(S.visSure([v(16, 30)]), null, 'assez net mais peu d\'avance : une image ne suffit pas');
+  assert.equal(S.visSure([v(16, 40)]), 'a', 'assez net et très loin devant');
+  assert.equal(S.visSure([v(16, 40), v(17, 35)]), 'a', 'deux images de suite');
+  assert.equal(S.visSure([[{ id: 'b', d: 15 }, { id: 'a', d: 40 }], v(17, 35)]), null, 'deux cartes différentes');
+  assert.equal(S.visSure([v(25, 60)]), null, 'trop loin');
+  assert.equal(S.visSure([[{ id: 'a', d: 9 }]]), 'a', 'seule carte proche');
+});
+
 test('rapprochement : total partagé par deux extensions, sans nom → les deux', () => {
   const r = S.match(idx, { num: '182/182', name: '' });
   assert.deepEqual(ids(r).slice().sort(), ['sv04-182', 'sv10-182']);

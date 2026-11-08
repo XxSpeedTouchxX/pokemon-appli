@@ -38,6 +38,7 @@ while (Date.now() - t0 < 90000) {
 const tRes = Date.now(), sheet = page.locator('section[aria-label="Résultat du scan"]');
 const ms = tLive ? tRes - tLive : -1;
 ok('carte reconnue en ' + ms + ' ms après le démarrage de la lecture (objectif 1 500 ms sur téléphone)', (await sheet.count()) === 1 && ms > 0 && ms <= 1500);
+console.log('écran Scan ouvert → fiche : ' + (tRes - t0) + ' ms (dont chargement de la page et de la caméra)');
 const txt = (await sheet.innerText()).replace(/\s+/g, ' ');
 ok('fiche directe : ' + txt.slice(0, 90) + '…', /Zekrom/.test(txt) && /TG05/.test(txt) && (await page.locator('section[aria-label="C’est laquelle ?"]').count()) === 0);
 ok('carte affichée en grand', await sheet.locator('.pkm-scan-card img').evaluate(i => i.getBoundingClientRect().width >= 150));
@@ -56,6 +57,37 @@ ok('ajout enregistré : ' + saved.pid + ' · ' + saved.cond, /tg05/i.test(saved.
 ok('retour à la caméra pour la carte suivante', (await page.locator('section[aria-label="Résultat du scan"]').count()) === 0);
 await page.goto(E2E + '/?start=home&today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 ok('la carte scannée est dans « Mon classeur »', (await page.locator('section[aria-label="Mon classeur"] button[aria-label^="Zekrom"]').count()) > 0);
+await browser.close();
+// 3. Vraie carte (scan TCGdex du banc d'essai, Pikachu-ex de Étincelles Déferlantes) filmée un peu de travers : reconnue par son dessin,
+// sans attendre la lecture du texte (2026-11-08, porteur : résultat instantané).
+{
+  const CAM2 = OUT + 'scan-cam-real.mjpeg';
+  const b0 = await launch(), p0 = await b0.newPage();
+  const jpg = await p0.evaluate(async src => {
+    const img = new Image(); img.src = src; await img.decode();
+    const c = document.createElement('canvas'); c.width = 720; c.height = 1280;
+    const g = c.getContext('2d'); g.fillStyle = '#3A4048'; g.fillRect(0, 0, 720, 1280);
+    g.translate(360, 555); g.rotate(-2 * Math.PI / 180);
+    const w = 440, h = w * img.naturalHeight / img.naturalWidth; g.drawImage(img, -w / 2, -h / 2, w, h);
+    return c.toDataURL('image/jpeg', 0.85).split(',')[1];
+  }, 'data:image/jpeg;base64,' + readFileSync(ROOT + 'tools/web/e2e/files/bench/sv08-238.jpg').toString('base64'));
+  writeFileSync(CAM2, Buffer.concat(Array.from({ length: 10 }, () => Buffer.from(jpg, 'base64'))));
+  await b0.close();
+  const b2 = await launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--use-file-for-fake-video-capture=' + CAM2] });
+  const c2 = await b2.newContext({ viewport: { width: 390, height: 844 }, permissions: ['camera'] });
+  await c2.route(/fonts\.(googleapis|gstatic)|openfreemap|pokemontcg|tcgdex/, r => r.abort());
+  const p2 = await c2.newPage(); p2.on('pageerror', e => errors.push(e.message));
+  await p2.goto(E2E + '/?start=scan&today=2026-10-04', { waitUntil: 'load' });
+  const s0 = Date.now(); let sLive = 0, done = false;
+  while (Date.now() - s0 < 60000) {
+    const st = await p2.evaluate(() => ({ sheet: !!document.querySelector('section[aria-label="Résultat du scan"]'), txt: document.body.innerText }));
+    if (!sLive && /Place la carte dans le cadre/.test(st.txt) && !/Préparation de la lecture|Ouverture de la caméra/.test(st.txt)) sLive = Date.now();
+    if (st.sheet) { done = true; break; }
+    await p2.waitForTimeout(20);
+  }
+  const s1 = Date.now(), t2 = done ? (await p2.locator('section[aria-label="Résultat du scan"]').innerText()).replace(/\s+/g, ' ') : '';
+  ok('vraie carte reconnue par son dessin en ' + (sLive ? s1 - sLive : -1) + ' ms après l’allumage de la caméra (' + (s1 - s0) + ' ms depuis l’ouverture du scan) : ' + t2.slice(0, 60), done && /Pikachu/.test(t2) && sLive && s1 - sLive <= 800);
+  await b2.close();
+}
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
-await browser.close();
