@@ -4,7 +4,7 @@
   // - Pendant la durée achetée, les PK gagnés au Booster PK et à pile ou face sont doublés ; un nouvel achat prolonge la
   //   fin (les jours s'ajoutent). Compte connecté : le serveur décide (016_xp_pk.sql, buy_pk_boost, PA débités par lui) ;
   //   sinon, sur l'appareil (démo, tests).
-  // - Visuels : 3 propositions à choisir par le porteur (?xpvis=1, 2 ou 3) ; 1 par défaut en attendant son choix.
+  // - Visuels : 3 propositions (?xpvis=1, 2 ou 3) ; choix du porteur (2026-11-08) : la double gemme (3), par défaut.
   //   1. Gemme rayonnante : la gemme des PK devant des rayons qui tournent, « 2XP » en grand, la durée sur un ruban ;
   //   2. Sablier : un sablier dont le sable est fait de gemmes PK qui coulent, « ×2 » qui pulse ;
   //   3. Double gemme : deux gemmes PK qui se dédoublent, éclats en orbite, « 2XP » en néon.
@@ -15,7 +15,7 @@
     { id: 'xp-14', days: 14, pa: 700, tone: 'b', tag: 'Le plus populaire' },
     { id: 'xp-30', days: 30, pa: 1000, tone: 'c', tag: 'Meilleure valeur' }
   ];
-  const XP_VIS = (() => { try { const m = /[?&]xpvis=([123])\b/.exec(location.search); return m ? Number(m[1]) : 1; } catch (e) { return 1; } })();
+  const XP_VIS = (() => { try { const m = /[?&]xpvis=([123])\b/.exec(location.search); return m ? Number(m[1]) : 3; } catch (e) { return 3; } })();
   const xpProto = Component.prototype;
   const xpNum = n => Number(n).toLocaleString('fr-FR').replace(/\s/g, ' ');
   const xpCloud = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();

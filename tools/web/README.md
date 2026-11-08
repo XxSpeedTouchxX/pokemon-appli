@@ -22,8 +22,8 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 ## Prix de base, attente des jeux et 2XP PK (2026-11-08, porteur)
 
 - Prix sous les cartes (extensions, Pokédex, recherche) = prix du marché Cardmarket en Near Mint, le même que la fiche ouverte depuis cette carte ; un seul format (`coteTxt`, `catalog.js`) : au centime près, à l'euro près dès 1 000 €. Depuis « Mon classeur » (`fiOpen(id, { from: 'binder' })`), pastille et fiche montrent la valeur de mon exemplaire selon son état.
-- Jeux : booster ouvert ou pièce lancée → bouton rouge à sablier « Tu dois attendre … pour rejouer » ; un appui le secoue et rappelle le délai du grade (`gmNo`, `games.js`).
-- 2XP PK (`xppk.js`) : rubrique du PK shop, 3 offres en PA, gains doublés au Booster PK et à pile ou face (serveur : `016_xp_pk.sql`) ; 3 visuels proposés : `?xpvis=1` (gemme rayonnante, par défaut), `2` (sablier), `3` (double gemme). Test `e2e/t-xppk.mjs`.
+- Jeux : booster ouvert ou pièce lancée → bouton rouge à sablier « Tu dois attendre … pour rejouer » ; un appui le secoue et vibre (`gmNo`, `games.js`).
+- 2XP PK (`xppk.js`) : rubrique du PK shop, 3 offres en PA, gains doublés au Booster PK et à pile ou face (serveur : `016_xp_pk.sql`) ; 3 visuels : `?xpvis=1` (gemme rayonnante), `2` (sablier), `3` (double gemme, choix du porteur, par défaut). Bouton d'attente des jeux : un appui le fait vibrer, sans message. Test `e2e/t-xppk.mjs`.
 - Fenêtre « Accès verrouillé » bloquante : aucun geste hors de la fenêtre tant qu'elle est ouverte (`pkshop.js`), fond qui ne la ferme plus.
 
 ## Identité Dropicards

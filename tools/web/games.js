@@ -102,13 +102,10 @@
   };
 
   // Jeu pas encore prêt (2026-11-08, porteur) : bouton « négatif » (sombre, sablier) qui dit combien de temps attendre,
-  // selon le grade ; un appui le fait trembler et rappelle la règle du grade.
-  gmProto.gmNo = function (which, ms, every) {
+  // selon le grade ; un appui le fait seulement trembler (2026-11-08, porteur : pas de message en dessous).
+  gmProto.gmNo = function (which) {
     try { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); } catch (e) { /* pas de vibreur */ }
-    const P = this.perks();
-    this.setState({ gmNoAt: Date.now(), gmNoWhich: which,
-      toast: 'Tu dois attendre ' + gmLeft(ms) + ' pour rejouer · grade ' + P.name + ' : ' + every + (P.name === 'Grand maître Pokémon' ? '' : ' (plus ton grade monte, plus c’est souvent)') });
-    this.flash();
+    this.setState({ gmNoAt: Date.now(), gmNoWhich: which });
     setTimeout(() => { if (this.st().gmNoWhich === which) this.setState({ gmNoWhich: '' }); }, 600);
   };
   gmProto.vGames = function (s) {
@@ -129,7 +126,7 @@
         button: busyB ? 'Ouverture…' : bw > 0 ? 'Tu dois attendre ' + gmLeft(bw) + ' pour rejouer' : bPhase === 'reveal' ? 'Ouvrir un autre booster' : 'Ouvrir mon booster',
         btnCls: 'pkm-gm-go' + (bw > 0 && !busyB ? ' pkm-gm-go-no' + (s.gmNoWhich === 'b' ? ' pkm-gm-go-shake' : '') : ''), noIco: bw > 0 && !busyB,
         open: () => {
-          if (bw > 0 && !busyB) { this.gmNo('b', bw, '1 booster toutes les ' + P.boosterH + ' h'); return; }
+          if (bw > 0 && !busyB) { this.gmNo('b'); return; }
           if (bPhase === 'reveal') this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'idle' }) }); this.gmOpenBooster();
         },
         again: () => this.setState({ games: Object.assign({}, this.st().games, { bPhase: 'idle' }) }),
@@ -143,7 +140,7 @@
         lockText: 'Le jeu de la pièce se débloque au grade ' + this.perkGrade('coinH') + ' (1 500 PK gagnés).',
         button: !coinOpen ? '🔒 Au grade ' + this.perkGrade('coinH') : busyC ? 'La pièce tourne…' : cw > 0 ? 'Tu dois attendre ' + gmLeft(cw) + ' pour rejouer' : 'Lancer la pièce',
         btnCls: 'pkm-gm-go' + (coinOpen && cw > 0 && !busyC ? ' pkm-gm-go-no' + (s.gmNoWhich === 'c' ? ' pkm-gm-go-shake' : '') : '') + (!coinOpen ? ' pkm-gm-go-lock' : ''), noIco: coinOpen && cw > 0 && !busyC,
-        flip: () => { if (coinOpen && cw > 0 && !busyC) { this.gmNo('c', cw, '1 lancer toutes les ' + P.coinH + ' h'); return; } this.gmFlip(); }, key: 'coin-' + (g.cN || 0)
+        flip: () => { if (coinOpen && cw > 0 && !busyC) { this.gmNo('c'); return; } this.gmFlip(); }, key: 'coin-' + (g.cN || 0)
       },
       rules: 'Gratuit, sans achat : les PK n’ont aucune valeur en euros et ne s’échangent pas. Ton grade (' + P.name + ') : un booster toutes les ' + P.boosterH + ' h' + (coinOpen ? ', un lancer de pièce toutes les ' + P.coinH + ' h' : ', pièce au grade ' + this.perkGrade('coinH')) + ' ; plus ton grade monte, plus c’est souvent. Tirage au hasard sur ton appareil.',
       hist: (g.hist || []).slice(0, 5).map(h => ({ text: (h.game === 'booster' ? 'Booster' : h.game === 'wheel' ? 'Roulette (retirée)' : 'Pile ou face') + ' · ' + this.d2(h.at.slice(0, 10)), pk: h.pk > 0 ? '+' + h.pk.toLocaleString('fr-FR') + ' PK' : h.pk < 0 ? '−' + Math.abs(h.pk).toLocaleString('fr-FR') + ' PK' : '0 PK', color: h.pk > 0 ? 'var(--pkm-accent)' : '#9AA8C3' })),

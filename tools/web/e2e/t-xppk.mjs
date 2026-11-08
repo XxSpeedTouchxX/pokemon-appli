@@ -4,7 +4,7 @@ import { withFonts, launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 const N = t => String(t).replace(/[\s  ]+/g, ' ').trim();
-for (const v of [2, 3]) {
+for (const v of [1, 2]) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); await withFonts(ctx);
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
   await page.goto(E2E + '/?debug&xpvis=' + v, { waitUntil: 'load' }); await page.waitForTimeout(1200);
@@ -18,7 +18,10 @@ await page.goto(E2E + '/?debug', { waitUntil: 'load' }); await page.waitForTimeo
 await page.evaluate(() => { window.__pkm.setState({ pa: 1500, pk: 0 }); window.__pkm.tab('pkshop'); }); await page.waitForTimeout(700);
 const sec = page.locator('section[aria-label="2XP PK"]');
 const offers = (await sec.locator('.pkm-xp-offer').allInnerTexts()).map(N);
-ok('3 offres : ' + offers.join(' | '), offers.length === 3 && /7 jours 400 PA/.test(offers[0]) && /14 jours 700 PA/.test(offers[1]) && /30 jours 1 000 PA/.test(offers[2]) && (await sec.locator('.pkm-xp-v1').count()) === 3);
+ok('3 offres : ' + offers.join(' | '), offers.length === 3 && /7 jours 400 PA/.test(offers[0]) && /14 jours 700 PA/.test(offers[1]) && /30 jours 1 000 PA/.test(offers[2]) && (await sec.locator('.pkm-xp-v3').count()) === 3);
+// « 2XP » centré dans son encadré (2026-11-08, porteur) : centre du texte et centre de l'encadré à moins de 1,5 px.
+const gap = await sec.locator('.pkm-xp-tag').first().evaluate(t => { const r = document.createRange(); r.selectNodeContents(t); const a = r.getBoundingClientRect(), b = t.getBoundingClientRect(); return Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2); });
+ok('double gemme par défaut, « 2XP » centré dans son encadré (écart ' + gap.toFixed(1) + ' px)', gap < 1.5);
 await sec.locator('.pkm-xp-offer').first().click(); await page.waitForTimeout(300);
 ok('confirmation : « Activer 7 jours de 2XP PK pour 400 PA ? »', /Activer 7 jours de 2XP PK pour 400 PA/.test(N(await sec.innerText())));
 await sec.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(600);
@@ -44,8 +47,11 @@ ok('booster pendant le 2XP : gain doublé (' + g.pk + ' PK)', g.mul === 2 && [60
 // Bouton d'attente : « Tu dois attendre … pour rejouer », message du grade.
 const btn = boost.locator('button.pkm-gm-go-no');
 ok('bouton d’attente rouge avec sablier', (await btn.count()) === 1 && (await btn.locator('.pkm-gm-hg').count()) === 1 && /Tu dois attendre \d+ h \d+ pour rejouer/.test(N(await btn.innerText())));
-await btn.click(); await page.waitForTimeout(250);
-ok('appui : message du délai selon le grade', /Tu dois attendre .* pour rejouer · grade .* : 1 booster toutes les \d+ h/.test(N(await page.locator('div[role="status"]').first().innerText())));
+await page.evaluate(() => window.__pkm.setState({ toast: null })); await page.waitForTimeout(200);
+await btn.click(); await page.waitForTimeout(150);
+const shake = await btn.evaluate(b => b.classList.contains('pkm-gm-go-shake'));
+const said = await page.locator('div[role="status"]').allInnerTexts();
+ok('appui : le bouton vibre, sans message en dessous', shake && !said.some(t => /Tu dois attendre/.test(t)));
 await page.screenshot({ path: shot('xppk-games.png') });
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);

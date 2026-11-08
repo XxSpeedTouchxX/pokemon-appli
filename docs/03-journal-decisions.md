@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-08 — 2XP PK : double gemme choisie ; bouton d'attente sans message (porteur)
+
+- Visuel des 2XP PK : **la double gemme (3), choix du porteur**, par défaut ; « 2XP » centré dans son encadré (les autres pour essai : `?xpvis=1|2`).
+- Jeux : un appui sur le bouton rouge « Tu dois attendre … pour rejouer » le fait seulement vibrer, sans message en dessous.
+- Cache v167.
+
 ## 2026-11-08 — Prix de base en Near Mint, Palkia 30 ans, attente des jeux, 2XP PK, fenêtre bloquante (demande du porteur)
 
 - **Prix identiques entre la carte et sa fiche** : sous chaque carte d'une extension (et dans le Pokédex, la recherche, « Les plus chères »), le prix de base est le **prix du marché Cardmarket en Near Mint** ; la fiche ouverte depuis cette carte affiche le même montant, au même format (au centime près, à l'euro près dès 1 000 €), avec « Prix du marché en Near Mint · Cardmarket ». Depuis « Mon classeur », la pastille et la fiche montrent toutes les deux la valeur de mon exemplaire selon son état (Dracaufeu 30 ans en Mint : 178,34 € = 155,08 € × 115 %). La valeur de chaque état reste dans « État de ma carte » et « Prix par état ».
