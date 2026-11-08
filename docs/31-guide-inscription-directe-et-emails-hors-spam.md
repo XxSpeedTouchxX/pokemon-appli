@@ -21,7 +21,7 @@ Tant que **A** n'est pas fait, l'app fonctionne quand même : elle demande d'abo
 
 Ce réglage dit au serveur des comptes (Supabase Auth) : « laisse entrer quelqu'un qui n'a pas encore cliqué sur le lien de l'e-mail ». Le lien reste envoyé et l'adresse reste à vérifier.
 
-**À savoir :** les jeux et le PK shop restent fermés tant que l'adresse n'est pas vérifiée (règle du serveur, `004_jeu.sql`, contre les faux comptes). Le joueur voit le message « Vérifie d'abord ton adresse e-mail pour jouer » avec le chemin à suivre. Si tu veux ouvrir les jeux sans vérification, dis-le-moi : c'est une décision à prendre, car cela facilite la triche avec plusieurs comptes.
+**À savoir :** les jeux et le PK shop restent fermés tant que l'adresse n'est pas vérifiée (règle du serveur, `004_jeu.sql`, contre les faux comptes). Le joueur voit le message « Vérifie d'abord ton adresse e-mail pour jouer » avec le chemin à suivre. Décision du porteur (2026-11-08) : l'adresse vérifiée valide le compte ; les jeux et le PK shop attendent cette vérification.
 
 1. Ouvre Coolify, puis le projet où est installé Supabase.
 2. Ouvre le service Supabase, puis le bouton **« Edit Compose File »** (modifier le fichier de configuration).
