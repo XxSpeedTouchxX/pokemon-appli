@@ -13,6 +13,8 @@
     thumb: null, cvLoop: null, cvShot: null, debug: false, inst: null
   };
   try { SCAN.debug = /[?&]debug=scan(&|$)/.test(location.search); } catch (e) { /* adresse sans paramètres */ }
+  // Banc d'essai du scan (tools/web/e2e/bench-scan.mjs) : fonctions accessibles avec ?debug.
+  try { if (/[?&]debug\b/.test(location.search)) window.__pkmScan = { SCAN: SCAN, ScanOcr: ScanOcr, ScanCore: ScanCore, ScanPrint: ScanPrint, TCG: TCG }; } catch (e) { /* adresse sans paramètres */ }
   const SCAN_PANELS = {
     denied: ['Caméra refusée', 'Autorise la caméra pour ce site dans les réglages du navigateur, puis réessaie. Tu peux aussi prendre une photo de la carte.', true],
     nocam: ['Pas de caméra disponible', 'Ce navigateur ne donne pas accès à la caméra (ordinateur, ou navigateur intégré d’une app). Prends une photo de la carte ou importe-la.', false],
@@ -77,6 +79,23 @@
       wait();
     });
   };
+  // Empreintes visuelles de tout le catalogue (web/data/scan-prints.json, ≈ 0,6 Mo, gardé par le navigateur) ;
+  // sans elles, le scan lit seulement le texte.
+  SCAN.prints = function () {
+    if (SCAN.pReady) return SCAN.pReady;
+    SCAN.pReady = fetch('data/scan-prints.json').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(doc => (SCAN.pidx = ScanPrint.load(doc)))
+      .catch(() => { SCAN.pReady = null; return null; });
+    return SCAN.pReady;
+  };
+  // Carte trouvée dans l'image (ses bords), puis cartes au dessin le plus proche (7 cadrages autour d'elle).
+  SCAN.look = function (src, rect) {
+    let r = rect, found = false;
+    try { const l = ScanPrint.locate(src, rect); if (l.found) { r = { sx: l.sx, sy: l.sy, sw: l.sw, sh: l.sh }; found = true; } } catch (e) { /* cadre gardé */ }
+    let vis = null;
+    if (SCAN.pidx) { try { vis = ScanPrint.nearest(SCAN.pidx, ScanPrint.jitter(r).map(x => ScanPrint.print(src, x)), 12); } catch (e) { vis = null; } }
+    return { rect: r, found: found, vis: vis };
+  };
   // Moteur de lecture prêt (progression affichée la première fois), puis lecture continue.
   SCAN.ready = function (inst, gen) {
     let last = -5;
@@ -87,7 +106,7 @@
       if (k === null || gen !== SCAN.gen) return;
       const pct = Math.round(k * 100);
       if (pct >= last + 5) { last = pct; inst.setState({ scanProg: pct }); }
-    }).then(() => SCAN.catalog()).then(() => {
+    }).then(() => Promise.all([SCAN.catalog(), SCAN.prints()])).then(() => {
       if (gen !== SCAN.gen) return;
       SCAN.frames = []; SCAN.since = Date.now(); SCAN.miss = 0;
       if (inst.st().scanPhase === 'loading') inst.setState({ scanPhase: 'live', scanMsg: '' });
@@ -96,24 +115,27 @@
   };
 
   // Copie de la zone du cadre (en pixels de la vidéo) dans un canevas : la lecture travaille sur cette copie.
+  // Marge de 12 % autour du cadre (2026-11-08) : la carte qui déborde un peu du cadre est retrouvée par ses bords.
   SCAN.grab = function (which) {
     const v = SCAN.video, cam = document.getElementById('pkm-scan-cam'), fr = document.getElementById('pkm-scan-frame');
     if (!v || !cam || !fr || v.readyState < 2 || !v.videoWidth || !v.videoHeight) return null;
     const a = cam.getBoundingClientRect(), b = fr.getBoundingClientRect();
     const m = ScanCore.coverMap({ w: a.width, h: a.height }, { w: v.videoWidth, h: v.videoHeight }, { x: b.left - a.left, y: b.top - a.top, w: b.width, h: b.height });
     if (m.sw < 40 || m.sh < 40) return null;
+    const x0 = Math.max(0, m.sx - m.sw * 0.12), y0 = Math.max(0, m.sy - m.sh * 0.12);
+    const x1 = Math.min(v.videoWidth, m.sx + m.sw * 1.12), y1 = Math.min(v.videoHeight, m.sy + m.sh * 1.12);
     const c = SCAN[which] || (SCAN[which] = document.createElement('canvas'));
-    c.width = Math.round(m.sw); c.height = Math.round(m.sh);
-    c.getContext('2d', { willReadFrequently: true }).drawImage(v, m.sx, m.sy, m.sw, m.sh, 0, 0, c.width, c.height);
-    return { canvas: c, rect: { sx: 0, sy: 0, sw: c.width, sh: c.height } };
+    c.width = Math.round(x1 - x0); c.height = Math.round(y1 - y0);
+    c.getContext('2d', { willReadFrequently: true }).drawImage(v, x0, y0, x1 - x0, y1 - y0, 0, 0, c.width, c.height);
+    return { canvas: c, rect: { sx: m.sx - x0, sy: m.sy - y0, sw: m.sw, sh: m.sh } };
   };
   // Image à ne pas lire : carte en mouvement, ou grand reflet sur le bas de la carte (là où est le numéro).
   // Le cadre ne bouge jamais à l'écran (hauteur du message d'état réservée) : un écart vient donc de la caméra.
   SCAN.gate = function (shot) {
-    const c = shot.canvas, w = 120, h = 24, t = SCAN.thumb || (SCAN.thumb = document.createElement('canvas'));
+    const c = shot.canvas, r = shot.rect, w = 120, h = 24, t = SCAN.thumb || (SCAN.thumb = document.createElement('canvas'));
     t.width = w; t.height = h;
     const g = t.getContext('2d', { willReadFrequently: true });
-    g.drawImage(c, 0, c.height * 0.86, c.width, c.height * 0.14, 0, 0, w, h);
+    g.drawImage(c, r.sx, r.sy + r.sh * 0.86, r.sw, r.sh * 0.14, 0, 0, w, h);
     const d = g.getImageData(0, 0, w, h).data, cur = new Uint8Array(w * h);
     let bright = 0, diff = 0;
     for (let i = 0, j = 0; i < w * h; i++, j += 4) { const y = (299 * d[j] + 587 * d[j + 1] + 114 * d[j + 2]) / 1000 | 0; cur[i] = y; if (y >= 250) bright++; }
@@ -138,8 +160,10 @@
       if (hint) { SCAN.say(inst, hint); SCAN.timer = setTimeout(step, 350); return; }
       // Polarité : celle choisie par l'image, puis l'inverse une fois sur deux tant que rien n'est lu.
       const invert = SCAN.miss % 2 === 1 ? !SCAN.inv : undefined;
-      ScanOcr.read(shot.canvas, shot.rect, { invert: invert, debug: SCAN.debug }).then(read => {
+      const look = SCAN.look(shot.canvas, shot.rect);
+      ScanOcr.read(shot.canvas, look.rect, { invert: invert, debug: SCAN.debug }).then(read => {
         if (gen !== SCAN.gen) return;
+        read.vis = look.vis; read.found = look.found;
         if (inst.st().scanPhase === 'live') SCAN.consider(inst, read, false);
         SCAN.timer = setTimeout(step, Math.max(30, 250 - (Date.now() - t0)));
       }).catch(() => { if (gen === SCAN.gen) SCAN.timer = setTimeout(step, 1000); });
@@ -151,7 +175,7 @@
     // Scans du jour épuisés (selon le grade) : on n'ouvre plus de fiche.
     const q = inst.scanQuota();
     if (q.left <= 0) { SCAN.frames = []; SCAN.say(inst, q.over); return false; }
-    const m = ScanCore.match(SCAN.idx, read), now = Date.now();
+    const m = ScanCore.match(SCAN.idx, read, read.vis), now = Date.now();
     if (!fine) { SCAN.inv = read.inverted; SCAN.miss = m.ev.num ? 0 : SCAN.miss + 1; }
     // La carte vue en tête vient d'être ajoutée (ou écartée) : rien à proposer tant qu'elle reste devant la caméra,
     // pendant quelques secondes (ses voisines du même numéro ne prennent pas sa place).
@@ -191,8 +215,10 @@
     if (!shot) return;
     SCAN.fine = true;
     SCAN.say(inst, 'Lecture fine…');
-    ScanOcr.read(shot.canvas, shot.rect, { fine: true, debug: SCAN.debug }).then(read => {
+    const look = SCAN.look(shot.canvas, shot.rect);
+    ScanOcr.read(shot.canvas, look.rect, { fine: true, debug: SCAN.debug }).then(read => {
       SCAN.fine = false;
+      read.vis = look.vis;
       if (inst.st().scanPhase === 'live' && !SCAN.consider(inst, read, true)) SCAN.say(inst, 'Rien de lisible : rapproche la carte, évite les reflets, ou prends une photo');
     }).catch(() => { SCAN.fine = false; });
   };
@@ -208,9 +234,10 @@
     img.onload = () => {
       const W = img.naturalWidth, H = img.naturalHeight, k = Math.min(W * 0.92 / 0.716, H * 0.92);
       const center = { sx: (W - k * 0.716) / 2, sy: (H - k) / 2, sw: k * 0.716, sh: k };
-      Promise.all([ScanOcr.start(), SCAN.catalog()])
-        .then(() => ScanOcr.read(img, center, { fine: true, debug: SCAN.debug }))
-        .then(a => ScanOcr.read(img, { sx: 0, sy: 0, sw: W, sh: H }, { fine: true }).then(b => ({ num: a.num + '\n' + b.num, name: a.name + '\n' + b.name, inverted: a.inverted, ms: a.ms, bands: a.bands })))
+      let look = null;
+      Promise.all([ScanOcr.start(), SCAN.catalog(), SCAN.prints()])
+        .then(() => { look = SCAN.look(img, center); return ScanOcr.read(img, look.rect, { fine: true, debug: SCAN.debug }); })
+        .then(a => ScanOcr.read(img, { sx: 0, sy: 0, sw: W, sh: H }, { fine: true }).then(b => ({ num: a.num + '\n' + b.num, name: a.name + '\n' + b.name, inverted: a.inverted, ms: a.ms, bands: a.bands, vis: look && look.vis })))
         .then(read => {
           URL.revokeObjectURL(url);
           SCAN.ev = {};
@@ -239,6 +266,7 @@
       cam.appendChild(box);
     }
     box.textContent = 'numéro : ' + JSON.stringify(read.num.trim()) + '\nnom : ' + JSON.stringify(read.name.trim()) + '\ntemps : ' + read.ms.num + ' + ' + read.ms.name + ' ms · inversé : ' + read.inverted
+      + '\ncarte trouvée : ' + (read.found ? 'oui' : 'non (cadre)') + ' · dessin : ' + ((read.vis || []).slice(0, 3).map(v => v.id + ' ' + v.d).join(' | ') || '—')
       + '\n→ ' + (m.cands.slice(0, 3).map(c => c.id + ' ' + c.score).join(' | ') || 'rien');
     (read.bands || []).forEach(c => { c.style.cssText = 'display: block; max-width: 100%; margin-top: 4px; background: #FFFFFF'; box.appendChild(c); });
   };
@@ -252,14 +280,19 @@
         SCAN.on = false;
         SCAN.stopCam();
         SCAN.frames = []; SCAN.ev = {};
-        // Moteur de lecture libéré deux minutes après la sortie de l'écran.
+        // Moteur de lecture libéré dix minutes après la sortie de l'écran (deux minutes avant le 2026-11-08 : chaque
+        // retour au scan rechargeait le moteur).
         clearTimeout(SCAN.stopWorker);
-        SCAN.stopWorker = setTimeout(() => { if (!SCAN.on) ScanOcr.stop(); }, 120000);
+        SCAN.stopWorker = setTimeout(() => { if (!SCAN.on) ScanOcr.stop(); }, 600000);
         if (s.scanPhase !== 'idle' || s.scanPid) inst.setState({ scanPhase: 'idle', scanCands: [], scanPid: null, scanEv: null, scanMsg: '' });
       }
       return;
     }
-    if (!SCAN.on) { SCAN.on = true; clearTimeout(SCAN.stopWorker); }
+    if (!SCAN.on) {
+      SCAN.on = true; clearTimeout(SCAN.stopWorker);
+      // Moteur et index du catalogue lancés tout de suite, pendant que la caméra s'allume (2026-11-08, porteur).
+      if (s.scanMode !== 'sealed') { ScanOcr.start().catch(() => {}); SCAN.catalog().catch(() => {}); SCAN.prints(); }
+    }
     // Pas de caméra pour l'onglet Scellé, ni sur un panneau (refus, absence…), ni pendant la lecture d'une photo
     // importée depuis un panneau et ses propositions.
     const fromPanel = !!SCAN_PANELS[SCAN.back] && (s.scanPhase === 'photo' || s.scanPhase === 'pick');
@@ -268,6 +301,10 @@
     else if (!want && (SCAN.stream || SCAN.starting)) SCAN.stopCam();
     SCAN.attach();
   };
+  // Préchargement du moteur de lecture et des empreintes, 8 s après l'ouverture de l'app (au repos ; rien si le
+  // téléphone économise les données).
+  const scanSave = () => { try { const c = navigator.connection; return !!(c && (c.saveData || /2g/.test(c.effectiveType || ''))); } catch (e) { return false; } };
+  try { window.addEventListener('load', () => setTimeout(() => { const go = () => { ScanOcr.prefetch(); if (!scanSave()) SCAN.prints(); }; if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 4000 }); else go(); }, 8000)); } catch (e) { /* pas de fenêtre */ }
   document.addEventListener('visibilitychange', () => {
     if (!SCAN.inst || !SCAN.on) return;
     if (document.hidden) SCAN.stopCam(); else SCAN.sync(SCAN.inst);

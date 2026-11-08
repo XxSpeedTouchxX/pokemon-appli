@@ -32,10 +32,12 @@
     });
     // Première lecture à vide : le moteur compile et charge son modèle avant la vraie carte.
     const warm = w => { const c = document.createElement('canvas'); c.width = 64; c.height = 24; const g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, 64, 24); return w.recognize(c).then(() => w, () => w); };
+    // progress : suivi du chargement, remplaçable (le moteur peut être lancé avant l'affichage de sa progression).
     function start(progress) {
+      if (progress) st.onProg = progress;
       if (st.ready) return st.ready;
       if (st.simd === null) st.simd = simd();
-      const logger = m => { if (progress && m && typeof m.progress === 'number') progress(m.status, m.progress); };
+      const logger = m => { if (st.onProg && m && typeof m.progress === 'number') st.onProg(m.status, m.progress); };
       st.ready = (window.Tesseract ? Promise.resolve() : script(url('tesseract.min.js')))
         .then(() => make(logger))
         .then(warm)
@@ -111,5 +113,19 @@
       if (w) w.terminate().catch(() => {});
       if (w2) w2.terminate().catch(() => {});
     }
-    return { start: start, read: read, band: band, stop: stop, simd: () => (st.simd === null ? (st.simd = simd()) : st.simd) };
+    // Préchargement discret des fichiers du moteur (2026-11-08, porteur : scan plus rapide) : une fois l'app au repos,
+    // les fichiers (4,7 Mo, une seule fois) passent dans le cache du téléphone (sw.js) ; le premier scan démarre alors
+    // sans téléchargement. Rien si le téléphone économise les données, ou si c'est déjà fait.
+    function prefetch() {
+      try {
+        if (st.prefetched || st.ready || !('caches' in window) || !navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+        const c = navigator.connection;
+        if (c && (c.saveData || /2g/.test(c.effectiveType || ''))) return;
+        st.prefetched = true;
+        if (st.simd === null) st.simd = simd();
+        const files = ['tesseract.min.js', 'worker.min.js', st.simd ? 'tesseract-core-simd-lstm.wasm.js' : 'tesseract-core-lstm.wasm.js', 'lang/fra.traineddata.gz'];
+        caches.open('pkm-scan-tesseract-7.0.0').then(cache => files.reduce((p, f) => p.then(() => cache.match(url(f)).then(hit => hit || fetch(url(f)).catch(() => null))), Promise.resolve())).catch(() => {});
+      } catch (e) { /* préchargement facultatif */ }
+    }
+    return { start: start, read: read, band: band, stop: stop, prefetch: prefetch, simd: () => (st.simd === null ? (st.simd = simd()) : st.simd) };
   })();

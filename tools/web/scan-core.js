@@ -17,6 +17,8 @@
     const DIGIT = { O: '0', Q: '0', D: '0', U: '0', I: '1', L: '1', '|': '1', '!': '1', J: '1', Z: '2', S: '5', $: '5', G: '6', B: '8', T: '7' };
     const LETTER = { 0: 'O', 1: 'I', 2: 'Z', 5: 'S', 6: 'G', 7: 'T', 8: 'B' };
     const LANGS = ['FR', 'EN', 'DE', 'IT', 'ES', 'PT'];
+    // Chiffres que l'OCR confond (petits caractères, flou) : essayés pour une paire inconnue du catalogue.
+    const CONFUSE = { 0: '869', 1: '74', 2: '7', 3: '85', 4: '1', 5: '63', 6: '085', 7: '12', 8: '0369', 9: '08' };
 
     // Sans accents ni casse ni ponctuation ; décorations retirées (★ ◇ δ).
     const fold = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -89,9 +91,10 @@
         add(setsByTotal, pre + '|' + T, set);
         totals.add(pre + '|' + T);
       });
-      const date = {};
+      const date = {}, byId = new Map();
       Object.keys(sets).forEach(s => { date[s] = sets[s][2] || ''; });
-      return { F: F, rows: rows, sets: sets, date: date, byKey: byKey, byPromo: byPromo, byNum: byNum, setsByTotal: setsByTotal,
+      rows.forEach((r, i) => byId.set(r[F.id], i));
+      return { F: F, rows: rows, sets: sets, date: date, byId: byId, byKey: byKey, byPromo: byPromo, byNum: byNum, setsByTotal: setsByTotal,
         totals: totals, bySet: bySet, names: names, rowName: rowName, rowN: rowN, rowT: rowT, tri: tri, prefixes: prefixes };
     }
 
@@ -221,7 +224,11 @@
     // ——— Rapprochement ———
     // read : { num, name } (texte des deux bandes). Résultat : indices lus et cartes classées (5 au plus).
     // Score : numéro et nom à parts égales ; nom seul plafonné à 0,5 (jamais d'arrêt automatique).
-    function match(idx, read) {
+    // vis (2026-11-08) : cartes au dessin le plus proche (ScanPrint.nearest : { id, d }, distance de 0 à 128).
+    // Indice visuel visEv : 1 jusqu'à 14, 0 à partir de 40 (même carte photographiée : 2 à 20 ; autre carte : 38 et
+    // plus). Le dessin désigne la carte ; le numéro et le nom départagent les réimpressions au même dessin.
+    const visOf = d => Math.max(0, Math.min(1, (40 - d) / 26));
+    function match(idx, read, vis) {
       const num = parseNumber(read && read.num, idx);
       const W = parseName(read && read.name).map(w => ({ t: w.t, s: skel(w.t), b: skel(base(w.t)), pen: Math.min(0.12, 0.04 * (w.K - w.k)) }));
       const simName = n => { let best = 0; for (const w of W) best = Math.max(best, simTo(w.s, w.b, n) - w.pen); return Math.max(0, best); };
@@ -235,6 +242,19 @@
           num.totals.push({ pre: p.pre, T: p.T, q: p.q * 0.5 });
           num.nums.push({ pre: p.pre, n: p.n, q: p.q * 0.5, pad: p.pad });
         }
+      });
+      // Paire inconnue du catalogue : un chiffre souvent confondu par l'OCR (1 et 7, 0 et 8…) est essayé à chaque
+      // place du numéro et du total ; les paires qui existent deviennent des indices un peu moins sûrs (2026-11-08).
+      num.pairs.forEach(p => {
+        if (p.from !== 'slash' || idx.byKey.has(p.pre + '|' + p.n + '|' + p.T)) return;
+        const tries = [];
+        [[p.s, 'n'], [p.ts, 't']].forEach(([str, which]) => {
+          for (let k = 0; k < str.length; k++) (CONFUSE[str[k]] || '').split('').forEach(c => {
+            const v = +(str.slice(0, k) + c + str.slice(k + 1));
+            tries.push(which === 'n' ? [v, p.T] : [p.n, v]);
+          });
+        });
+        tries.forEach(([n, T]) => { const rows = idx.byKey.get(p.pre + '|' + n + '|' + T); if (rows) rows.forEach(i => put(i, 0.8 * p.q, p.pad)); });
       });
       num.promos.forEach(p => {
         const rows = idx.byPromo.get(p.pre + '|' + p.n);
@@ -271,6 +291,15 @@
         if (qn) c.numEv = Math.max(c.numEv, 0.6 * qn);
         else if (qt) c.numEv = Math.max(c.numEv, 0.5 * qt);
       });
+      // Dessin : les cartes proches entrent dans la liste (même sans rien de lu).
+      const visEv = new Map();
+      (vis || []).forEach(v => {
+        const i = idx.byId ? idx.byId.get(v.id) : undefined, e = visOf(v.d);
+        if (i === undefined || e <= 0) return;
+        if (!(visEv.get(i) >= e)) visEv.set(i, e);
+        if (!cand.has(i)) cand.set(i, { i: i, numEv: 0, pad: null });
+      });
+      // Nom lu sans numéro : les cartes retenues par le dessin reçoivent aussi l'indice du nom.
       const F = idx.F, list = [];
       cand.forEach(c => {
         const r = idx.rows[c.i], set = r[F.set], d = idx.date[set] || '';
@@ -283,7 +312,13 @@
           const rec = Math.max(0, Math.min(1, ((+d.slice(0, 4) || 1999) - 1999) / 27));
           score = Math.min(0.5, 0.45 * nameEv + 0.05 * rec);
         }
-        list.push({ i: c.i, id: r[F.id], score: Math.round(score * 1000) / 1000, numEv: c.numEv, nameEv: Math.round(nameEv * 1000) / 1000, date: d });
+        // Dessin : il compte pour moitié ; dessin et texte qui concordent font une carte sûre.
+        const ve = visEv.get(c.i) || 0;
+        if (ve > 0) {
+          const agree = ve >= 0.8 && (c.numEv >= 0.6 || nameEv >= 0.7) ? 0.12 : 0;
+          score = Math.max(score, 0.5 * ve + 0.25 * c.numEv + 0.25 * nameEv + agree);
+        }
+        list.push({ i: c.i, id: r[F.id], score: Math.round(score * 1000) / 1000, numEv: c.numEv, nameEv: Math.round(nameEv * 1000) / 1000, visEv: Math.round(ve * 1000) / 1000, date: d });
       });
       list.sort((a, b) => b.score - a.score || b.numEv - a.numEv || (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
       const top = [], ids = new Set();
@@ -292,7 +327,7 @@
       if (top.length && top.length < 3 && top[0].nameEv >= 0.7) {
         idx.names[idx.rowName[top[0].i]].rows.map(i => ({ i: i, id: idx.rows[i][F.id], date: idx.date[idx.rows[i][F.set]] || '' }))
           .filter(c => !ids.has(c.id)).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 3 - top.length)
-          .forEach(c => { ids.add(c.id); top.push({ i: c.i, id: c.id, score: Math.round(top[0].score * 500) / 1000, numEv: 0, nameEv: top[0].nameEv, date: c.date }); });
+          .forEach(c => { ids.add(c.id); top.push({ i: c.i, id: c.id, score: Math.round(top[0].score * 500) / 1000, numEv: 0, nameEv: top[0].nameEv, visEv: 0, date: c.date }); });
       }
       // Indices affichés : numéro reconnu, nom de la carte en tête s'il a bien été lu, langue imprimée.
       const name = top.length && top[0].nameEv >= 0.6 ? idx.rows[top[0].i][F.name] : null;
@@ -313,8 +348,11 @@
       const prev = frames.length > 1 ? frames[frames.length - 2][0] : null;
       // Une seule lecture suffit (2026-10-25, objectif 1,5 s) quand le numéro est sûr, que le nom concorde et que la
       // suivante est loin derrière ; sinon deux lectures de suite sur la même carte.
-      const sure = top && top.numEv >= 0.95 && top.nameEv >= 0.7 && top.score >= 0.86 && (!second || top.score - second.score >= 0.15);
-      if (top && top.score >= 0.85 && top.numEv >= 0.85 && top.nameEv >= 0.7 && (!second || top.score - second.score >= 0.12)
+      // Dessin reconnu (2026-11-08) : il remplace le numéro ou le nom, si l'autre concorde.
+      const gap = !second || top.score - second.score >= 0.12;
+      const text = top && top.numEv >= 0.85 && top.nameEv >= 0.7, vis = top && (top.visEv || 0) >= 0.8 && (top.numEv >= 0.85 || top.nameEv >= 0.7);
+      const sure = top && (text || vis) && top.score >= 0.86 && (!second || top.score - second.score >= 0.15) && (top.numEv >= 0.95 || (top.visEv || 0) >= 0.9);
+      if (top && top.score >= 0.85 && (text || vis) && gap
         && ((prev && prev.id === top.id) || top.score >= 0.93 || sure)) {
         return { state: 'auto', ids: [top.id].concat(order.filter(id => id !== top.id)).slice(0, 3) };
       }

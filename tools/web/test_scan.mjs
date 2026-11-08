@@ -76,6 +76,25 @@ test('rapprochement : total mal lu, nom sûr → la bonne carte reste proposée'
   assert.ok(ids(r).slice(0, 3).includes('sv08-123'), ids(r).join(', '));
 });
 
+test('rapprochement : chiffre confondu (1 lu 7) corrigé, nom sûr → la bonne carte en tête', () => {
+  const r = S.match(idx, { num: '123/797', name: 'Triopikeur d Alola' });
+  assert.equal(ids(r)[0], 'sv08-123');
+  assert.ok(r.cands[0].numEv < 0.85, 'pas assez sûr pour s\'ouvrir seul sur le numéro');
+});
+
+test('dessin : la carte au dessin proche entre en tête ; dessin + nom = carte sûre', () => {
+  const v = S.match(idx, { num: '', name: '' }, [{ id: 'sv08-123', d: 8 }, { id: 'sv08-1', d: 46 }]);
+  assert.equal(ids(v)[0], 'sv08-123');
+  assert.equal(v.cands.length, 1, 'distance 46 : trop loin');
+  assert.notEqual(S.decide([v.cands]).state, 'auto', 'dessin seul : jamais d\'ouverture directe');
+  const vn = S.match(idx, { num: '', name: 'Triopikeur d Alola' }, [{ id: 'sv08-123', d: 8 }]);
+  assert.equal(ids(vn)[0], 'sv08-123');
+  assert.equal(S.decide([vn.cands]).state, 'auto', 'dessin + nom');
+  // Réimpression au même dessin : le numéro lu départage.
+  const re = S.match(idx, { num: '123/191', name: '' }, [{ id: 'sv08-1', d: 6 }, { id: 'sv08-123', d: 7 }]);
+  assert.equal(ids(re)[0], 'sv08-123');
+});
+
 test('rapprochement : total partagé par deux extensions, sans nom → les deux', () => {
   const r = S.match(idx, { num: '182/182', name: '' });
   assert.deepEqual(ids(r).slice().sort(), ['sv04-182', 'sv10-182']);

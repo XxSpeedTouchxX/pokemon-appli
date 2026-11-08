@@ -317,23 +317,31 @@ Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande 
 - **Lecture (OCR) :**
   - Tesseract.js 7 et son modèle français « best_int » (licence Apache 2.0), servis par le site depuis `web/vendor/tesseract/7.0.0/` (cache long) ;
   - chargés à la première ouverture du scan (environ 4,7 Mo, une seule fois) ; cœur WebAssembly avec SIMD si le téléphone le gère, sinon cœur simple ;
+  - **démarrage plus rapide (2026-11-08, porteur)** : fichiers du moteur gardés dans un cache à part (`pkm-scan-tesseract-7.0.0` dans `sw.js`), servis sans redemander au serveur et gardés d'une version de l'app à l'autre ; préchargés 8 s après l'ouverture de l'app, au repos (`ScanOcr.prefetch`, rien si le téléphone économise les données) ; moteur, index du catalogue et empreintes lancés dès l'arrivée sur l'écran Scan, pendant que la caméra s'allume ; moteur gardé 10 min après la sortie du scan (2 min avant) ;
   - deux bandes de la carte : le **bas** (numéro « 123/191 », code d'extension et langue des cartes récentes), signal principal ; le **haut** (nom), qui confirme. Chaque bande est agrandie, contrastée et inversée si le texte est clair sur fond sombre.
+- **Reconnaissance du dessin (2026-11-08, porteur : scan beaucoup plus précis)** :
+  - `tools/web/scan-print.js` : chaque carte du catalogue a une **empreinte** de 16 octets (deux hachages perceptifs : la carte entière et l'illustration), calculée chaque semaine par GitHub Actions (workflow « Empreintes des cartes », `tools/scan/prints.mjs`, sur les petits visuels TCGdex) dans `web/data/scan-prints.json` (20 941 cartes, 0,4 Mo compressé) ;
+  - au scan, l'app **trouve la carte dans l'image** (ses quatre bords, au format 63 × 88 mm, dans le cadre et 12 % autour), calcule l'empreinte de 7 cadrages et la compare à toutes les cartes (≈ 20 ms) ; les cartes au dessin le plus proche entrent dans les propositions ;
+  - le dessin compte pour moitié ; le numéro et le nom départagent les réimpressions au même dessin. Ouverture directe de la fiche si le dessin et le numéro, ou le dessin et le nom, concordent ; jamais sur le dessin seul ;
+  - lecture du texte sur la carte trouvée (et non plus sur le cadre) : bandes du numéro et du nom bien placées même si la carte est petite ou décalée.
 - **Rapprochement** avec `cards.json` :
   - numéro et total imprimé, sous-séries (TG, GG, SV, RC, H), promos (SWSH, SM, XY, BW, HGSS, DP, SVP, MEP) ;
-  - confusions courantes corrigées : O/0, I/1, S/5, B/8, mots collés (« SSPFR123/191 »), barre lue « 1 » ou perdue ;
+  - confusions courantes corrigées : O/0, I/1, S/5, B/8, mots collés (« SSPFR123/191 »), barre lue « 1 » ou perdue ; un chiffre souvent confondu (1 et 7, 0 et 8…) dans une paire inconnue du catalogue (2026-11-08) ;
   - nom comparé sans accents, avec « ex », « V », « VMAX », « GX »… ;
   - les indices s'additionnent d'une image à l'autre : les propositions s'affichent dès qu'une carte domine.
 - **Sans caméra** (refus, absence, caméra occupée, moteur indisponible) : un panneau propose « Prendre une photo », « Importer une photo », « Rechercher une carte » et, selon le cas, « Réessayer ». Une photo est lue au centre (format carte), puis en entier.
 - **Onglet Scellé :** recherche parmi les vrais produits scellés, qui ouvre la même fiche. Nos données n'ont pas de code-barres.
-- **Confidentialité :** la lecture se fait sur l'appareil ; aucune image n'est envoyée ni gardée. La caméra s'arrête dès qu'on quitte l'écran ou l'app ; le moteur de lecture est libéré deux minutes après.
-- **Diagnostic :** `?debug=scan` affiche les bandes lues, le texte reconnu, les temps et les cartes trouvées. Il sert à régler la lecture sur un vrai téléphone.
+- **Confidentialité :** la lecture et la comparaison des dessins se font sur l'appareil ; aucune image n'est envoyée ni gardée. La caméra s'arrête dès qu'on quitte l'écran ou l'app ; le moteur de lecture est libéré dix minutes après.
+- **Diagnostic :** `?debug=scan` affiche les bandes lues, le texte reconnu, les temps, la carte trouvée (ou non) dans l'image, les dessins les plus proches et les cartes proposées. Il sert à régler la lecture sur un vrai téléphone.
+- **Banc d'essai** (`tools/web/e2e/bench-scan.mjs`, 2026-11-08) : 48 scans HD de toutes les époques (`e2e/files/bench/`, workflow « Banc d'essai du scan ») « photographiés » de 8 façons (nette, petite, inclinée, floue, sombre, reflet, loin, décalée), puis la vraie lecture et le vrai rapprochement. `--quick` (4 prises), `--only=<id>`, `--novis` (sans le dessin).
 - **Limites :**
-  - lecture réglée sur des cartes de test dessinées et dégradées comme une vidéo : le bac à sable n'accède pas aux scans officiels. La vraie mesure se fait sur téléphone ;
+  - réglé sur des photos simulées (banc d'essai) : la vraie mesure se fait sur téléphone ;
   - le numéro est petit : il faut une carte proche, nette et sans reflet. Sinon : lecture fine, ou « Prendre une photo » (pleine résolution) ;
   - non reconnues : cartes japonaises, cartes horizontales (BREAK, LEGEND, V-UNION), souvent les cartes dorées. Le scan ne distingue pas les versions reverse ni les premières éditions ;
   - les cartes anglaises d'extensions sorties en France sont reconnues par le numéro ; leur nom anglais n'est pas dans le catalogue.
 - **Code :**
   - `tools/web/scan-core.js` : calculs purs (lecture du numéro et du nom, index du catalogue, classement, règle d'arrêt, géométrie, préparation des bandes). Tests : `node --test tools/web/test_scan.mjs` ;
+  - `tools/web/scan-print.js` : empreintes, recherche des bords de la carte, cartes au dessin le plus proche ;
   - `tools/web/scan-ocr.js` : Tesseract.js, découpe et lecture des bandes ;
   - `tools/web/scan.js` : écran, caméra, lecture continue, propositions, photo, onglet Scellé ; fragment `scan` de `tools/web/catalog.dc.html`. Le build remplace le viseur simulé de la maquette.
 
