@@ -47,8 +47,8 @@
     // Adresse jetable refusée par la base (tools/supabase/005_jetables.sql) : GoTrue répond « Database error ».
     if (!k && /database error saving new user|jetable/i.test(msg)) k = 'email_address_invalid';
     // Règles du jeu (tools/supabase/004_jeu.sql) : leur message, déjà en français, est montré tel quel.
-    // Compte créé sans attendre la vérification de l'adresse (2026-11-08) : les jeux et le PK shop l'attendent.
-    if (!k && /adresse e-mail à confirmer/i.test(msg)) { const g = new Error('Vérifie d’abord ton adresse e-mail pour jouer : touche le lien de l’e-mail reçu (Mon profil › « Renvoyer l’e-mail »).'); g.code = 'unconfirmed'; g.status = status; return g; }
+    // Serveur d'avant 015 : les jeux attendaient la vérification de l'adresse (depuis 015, seul le PK shop l'attend).
+    if (!k && /adresse e-mail à confirmer/i.test(msg)) { const g = new Error('Vérifie d’abord ton adresse e-mail : touche le bouton de l’e-mail reçu (Mon profil › « Renvoyer l’e-mail »).'); g.code = 'unconfirmed'; g.status = status; return g; }
     if (!k && /^(P0001|42501|53400|28000)$/.test(String(code)) && msg && !/^permission denied/i.test(msg)) {
       const g = new Error(msg); g.code = 'game'; g.status = status; return g;
     }

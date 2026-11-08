@@ -109,7 +109,7 @@
       // Adresse pas encore vérifiée (compte créé sans attendre, 2026-11-08) : rappel et nouvel e-mail.
       r.trainer.mailOn = !!(ses && ses.confirmed === false);
       if (r.trainer.mailOn) pfMailCheck(this);
-      r.trainer.mailText = 'Adresse à vérifier : touche le lien de l’e-mail reçu (regarde aussi dans les spams). Les jeux et le PK shop s’ouvrent ensuite.';
+      r.trainer.mailText = 'Adresse à vérifier : touche le bouton de l’e-mail reçu (regarde aussi dans les spams). Tout le reste marche déjà ; il faut seulement une adresse vérifiée pour les tickets et les lots du PK shop, pour pouvoir te joindre si tu gagnes.';
       r.trainer.mailAct = async () => {
         try { await Cloud.resend(ses.email); this.setState({ toast: 'E-mail de vérification renvoyé à ' + ses.email }); } catch (e) { this.setState({ toast: (e && e.message) || CLOUD_ERR.other }); }
         this.flash();

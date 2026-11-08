@@ -38,14 +38,14 @@ Dropicards est une application indépendante, non affiliée à Nintendo, GAME FR
 const p = t => `<p style="margin:0 0 16px;font-size:15px;line-height:1.55;color:#3A4560;">${t}</p>`;
 
 const MAILS = {
-  // Bienvenue (2026-11-08, texte demandé par le porteur) : pseudo choisi dans l'app ({{ .Data.pseudo }}, gardé par
+  // Bienvenue (2026-11-08, texte du porteur, adapté le même jour : la validation n'est plus obligatoire pour l'app) : pseudo choisi dans l'app ({{ .Data.pseudo }}, gardé par
   // Supabase avec le compte), bouton de validation, avantages du grade Recrue ; code en secours (app sans le réglage
   // « connexion avant vérification », docs/31 A).
   confirmation: page('Bienvenue sur Dropicards !',
     p('Merci {{ if .Data.pseudo }}<b>{{ .Data.pseudo }}</b>{{ else }}à toi{{ end }} d’avoir créé ton compte sur Dropicards&nbsp;!') +
-    p('La dernière étape avant de commencer à utiliser Dropicards est de valider ton adresse e-mail en touchant ce bouton&nbsp;:') +
+    p('Dernière petite étape&nbsp;: valide ton adresse e-mail en touchant ce bouton.') +
     button('Valider mon adresse e-mail') +
-    p('Ensuite, l’app est à toi&nbsp;: tu commences au grade <b>Recrue</b>, avec 5 scans par jour, un Booster PK toutes les 24&nbsp;h, un classeur de 36 cartes et 9 produits scellés, et le ticket Bronze et le booster du PK shop.') +
+    p('Tu peux déjà utiliser l’app sans attendre&nbsp;: tu commences au grade <b>Recrue</b>, avec 5 scans par jour, un Booster PK toutes les 24&nbsp;h et un classeur de 36 cartes et 9 produits scellés. Ton adresse validée te permettra aussi de participer aux tirages du PK shop et de recevoir tes lots.') +
     `<p style="margin:0 0 6px;font-size:13px;line-height:1.5;color:#6B7590;">Le bouton ne marche pas&nbsp;? Tape ce code dans l’app&nbsp;:</p>
 <p style="margin:0 0 20px;"><span style="display:inline-block;padding:8px 14px;background:#0B1120;color:#FFD84D;border-radius:10px;font-size:20px;font-weight:800;letter-spacing:5px;font-family:Menlo,Consolas,monospace;">{{ .Token }}</span></p>`),
   recovery: page('Ton nouveau mot de passe',

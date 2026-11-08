@@ -21,7 +21,7 @@ Tant que **A** n'est pas fait, l'app fonctionne quand même : elle demande d'abo
 
 Ce réglage dit au serveur des comptes (Supabase Auth) : « laisse entrer quelqu'un qui n'a pas encore cliqué sur le lien de l'e-mail ». Le lien reste envoyé et l'adresse reste à vérifier.
 
-**À savoir :** les jeux et le PK shop restent fermés tant que l'adresse n'est pas vérifiée (règle du serveur, `004_jeu.sql`, contre les faux comptes). Le joueur voit le message « Vérifie d'abord ton adresse e-mail pour jouer » avec le chemin à suivre. Décision du porteur (2026-11-08) : l'adresse vérifiée valide le compte ; les jeux et le PK shop attendent cette vérification.
+**À savoir :** depuis `015`, tout s'utilise sans vérification, sauf les tickets et les lots du PK shop. Décision du porteur (2026-11-08, mise à jour) : la vérification de l'adresse n'est **pas obligatoire** pour utiliser l'app. Seuls les tickets et les lots du PK shop la demandent (pour pouvoir joindre le gagnant). Script serveur à installer : `tools/supabase/015_sans_verification.sql` (étape A2 ci-dessous).
 
 1. Ouvre Coolify, puis le projet où est installé Supabase.
 2. Ouvre le service Supabase, puis le bouton **« Edit Compose File »** (modifier le fichier de configuration).
@@ -35,6 +35,14 @@ Ce réglage dit au serveur des comptes (Supabase Auth) : « laisse entrer quelqu
    Ne touche pas à `GOTRUE_MAILER_AUTOCONFIRM` : il doit rester à `false`, sinon plus aucun e-mail de vérification ne partirait.
 5. **Save**, puis **Restart** (redémarrer) le service Supabase.
 6. Essai : sur ton téléphone, crée un compte avec une nouvelle adresse. Tu dois arriver directement sur la page « âge, pseudo, compagnon », avec la question Face ID / Touch ID, sans code à taper.
+
+### A2. Installer le script 015 (Supabase Studio, 2 minutes)
+
+1. Ouvre Supabase Studio › **SQL Editor** › **New query**.
+2. Colle tout le contenu de `tools/supabase/015_sans_verification.sql` (sur GitHub : bouton « Copy raw file »).
+3. **Run** : « Success. No rows returned ».
+
+Avant ce script, le serveur refuse encore les jeux aux adresses non vérifiées (« Vérifie d'abord ton adresse e-mail »).
 
 ---
 
@@ -85,8 +93,8 @@ Brevo peut remplacer les liens des e-mails par ses propres liens de suivi : Gmai
 
 Depuis la version v164, l'e-mail reçu à la création du compte dit :
 
-> Merci **Sacha** d'avoir créé ton compte sur Dropicards ! La dernière étape avant de commencer à utiliser Dropicards est de valider ton adresse e-mail en touchant ce bouton : **[Valider mon adresse e-mail]**
-> Ensuite, l'app est à toi : tu commences au grade **Recrue** (5 scans par jour, Booster PK toutes les 24 h, classeur de 36 cartes et 9 produits scellés, ticket Bronze et booster du PK shop).
+> Merci **Sacha** d'avoir créé ton compte sur Dropicards ! Dernière petite étape : valide ton adresse e-mail en touchant ce bouton. **[Valider mon adresse e-mail]**
+> Tu peux déjà utiliser l'app sans attendre : tu commences au grade **Recrue** (5 scans par jour, Booster PK toutes les 24 h, classeur de 36 cartes et 9 produits scellés). Ton adresse validée te permettra aussi de participer aux tirages du PK shop et de recevoir tes lots.
 
 Le pseudo est demandé avec l'adresse et le mot de passe (même page), pour que l'e-mail puisse l'utiliser. Le modèle est sur dropicards.fr (`web/email/confirmation.html`) : Supabase le relit tout seul (en moins de 10 minutes). Le code à 6 chiffres reste en petit en bas, en secours.
 
@@ -112,7 +120,7 @@ C'est l'outil gratuit de Google qui montre la réputation de ton domaine chez Gm
 1. Il tape son adresse et un mot de passe : le compte est créé.
 2. « Compte créé ! Utiliser Face ID / Touch ID ? » : **Oui** ou **Non, plus tard**.
 3. Âge, pseudo, compagnon, puis l'app.
-4. Plus tard, il touche le lien de l'e-mail reçu pour vérifier son adresse (Mon profil le rappelle tant que ce n'est pas fait). Les jeux et le PK shop s'ouvrent alors.
+4. Il utilise tout de suite toute l'app. Quand il veut, il touche le bouton de l'e-mail pour vérifier son adresse (Mon profil le rappelle) : elle est demandée seulement pour les tickets et les lots du PK shop.
 5. S'il est un jour déconnecté (session perdue, nouvel appareil où Face ID est déjà activé), Face ID est demandé tout de suite à l'ouverture, sans mot de passe. Après un « Me déconnecter » volontaire, Face ID n'est pas redemandé tout seul : le bouton « Me connecter avec Face ID / Touch ID » reste en tête.
 
 Limite : un site web ne peut pas savoir si un iPhone a Face ID ou Touch ID. L'app écrit donc « Face ID / Touch ID » sur iPhone et Mac, et « mon empreinte » sur Android.

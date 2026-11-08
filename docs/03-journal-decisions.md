@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-08 — Vérification de l'adresse facultative (décision du porteur, remplace la précédente)
+
+- « Je ne veux pas que le fait de valider son adresse mail soit obligatoire à l'utilisation de l'application » : jeux, Pokédex, avatar, classement ouverts dès la création du compte (`tools/supabase/015_sans_verification.sql`, **à installer**, 7 tests SQL, 260 au total).
+- Choix par défaut, **à confirmer** : les tickets et les lots du PK shop demandent toujours une adresse vérifiée (vrais objets envoyés : il faut pouvoir joindre le gagnant), toujours 7 jours après la vérification.
+- E-mail de bienvenue adapté : « Dernière petite étape : valide ton adresse… Tu peux déjà utiliser l'app sans attendre… ». Mon profil : rappel sans blocage. Cache v165.
+
 ## 2026-11-08 — E-mail de bienvenue avec le pseudo et validation du compte (demande du porteur)
 
 - L'adresse vérifiée valide le compte (décision du porteur) : jeux et PK shop ouverts ensuite, au grade Recrue.
