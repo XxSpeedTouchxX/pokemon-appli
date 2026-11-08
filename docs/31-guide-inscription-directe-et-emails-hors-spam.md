@@ -72,16 +72,25 @@ Brevo peut remplacer les liens des e-mails par ses propres liens de suivi : Gmai
 2. Dans **Suivi** (Tracking) : désactive le **suivi des clics** et le **suivi des ouvertures**.
 3. Enregistre.
 
-### B3. Nom de l'expéditeur et adresse de réponse (Coolify, 2 minutes)
+### B3. Nom de l'expéditeur et objet de l'e-mail de bienvenue (Coolify, 3 minutes)
 
-Dans le même fichier de configuration que l'étape A (bloc `supabase-auth:` › `environment:`), vérifie ces deux lignes :
+1. Coolify › projet PKM › service Supabase › onglet **Environment Variables**.
+2. Cherche chaque nom ci-dessous ; s'il existe, clique dessus et change la valeur ; sinon, ajoute-le. Puis **Save** :
+   - `SMTP_SENDER_NAME` = `Dropicards` (l'expéditeur affiché sera « Dropicards », pas une adresse seule) ;
+   - `SMTP_ADMIN_EMAIL` = `noreply@dropicards.fr` (normalement déjà réglé) ;
+   - `MAILER_SUBJECTS_CONFIRMATION` = `Valide ton adresse pour commencer sur Dropicards` (objet de l'e-mail de bienvenue).
+3. **Restart** le service Supabase.
 
-```
-GOTRUE_SMTP_ADMIN_EMAIL: "noreply@dropicards.fr"
-GOTRUE_SMTP_SENDER_NAME: "Dropicards"
-```
+### Nouvel e-mail de bienvenue (rien à faire, automatique)
 
-L'expéditeur affiché sera alors « Dropicards », et non une adresse seule. Save, puis Restart.
+Depuis la version v164, l'e-mail reçu à la création du compte dit :
+
+> Merci **Sacha** d'avoir créé ton compte sur Dropicards ! La dernière étape avant de commencer à utiliser Dropicards est de valider ton adresse e-mail en touchant ce bouton : **[Valider mon adresse e-mail]**
+> Ensuite, l'app est à toi : tu commences au grade **Recrue** (5 scans par jour, Booster PK toutes les 24 h, classeur de 36 cartes et 9 produits scellés, ticket Bronze et booster du PK shop).
+
+Le pseudo est demandé avec l'adresse et le mot de passe (même page), pour que l'e-mail puisse l'utiliser. Le modèle est sur dropicards.fr (`web/email/confirmation.html`) : Supabase le relit tout seul (en moins de 10 minutes). Le code à 6 chiffres reste en petit en bas, en secours.
+
+Le bouton ouvre dropicards.fr : l'adresse est validée, le compte est actif au grade Recrue (« Adresse validée : bienvenue sur Dropicards ! »). Si l'app était déjà ouverte sur le téléphone, elle le voit dès qu'on y revient.
 
 ### B4. Gmail Postmaster Tools (10 minutes, facultatif mais conseillé)
 

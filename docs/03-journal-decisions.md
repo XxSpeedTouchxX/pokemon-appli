@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-08 — E-mail de bienvenue avec le pseudo et validation du compte (demande du porteur)
+
+- L'adresse vérifiée valide le compte (décision du porteur) : jeux et PK shop ouverts ensuite, au grade Recrue.
+- E-mail de bienvenue au texte du porteur : « Merci [pseudo] d'avoir créé ton compte sur Dropicards ! La dernière étape… », bouton « Valider mon adresse e-mail », avantages du grade Recrue, code en secours (`tools/supabase/emails.mjs`, `web/email/confirmation.html`).
+- Pour que l'e-mail connaisse le pseudo, il est demandé sur la même page que l'adresse et le mot de passe (envoyé avec le compte) ; la page suivante ne demande plus que l'âge et le compagnon (« Enchanté, Sacha ! »).
+- Lien de l'e-mail : « Adresse validée : bienvenue sur Dropicards ! Tu commences au grade Recrue » ; app déjà ouverte : validation vue au retour dans l'app (relue sur le serveur).
+- Objet de l'e-mail et nom de l'expéditeur à régler dans Coolify (`docs/31` B3). Cache v164.
+
 ## 2026-11-08 — Scan, 30 ans dorés, inscription directe avec Face ID, e-mails (demande du porteur)
 
 - **Scan** : onglet « Scellé » retiré, remplacé par le nombre de scans restants du jour (« Illimité » avec Premium) ; lampe allumée d'office à l'ouverture (Android ; l'iPhone ne le permet pas à un site web) ; carte tenue de travers redressée (d'après la photo du porteur, Cizayox ex 30 ans sous pochette) ; banc d'essai inchangé à 93 % de bonne carte en tête, 99 % dans les 3 propositions.

@@ -216,6 +216,17 @@
       cloudLs.set(null);
       if (s) { try { await this.req('/auth/v1/logout', { method: 'POST', token: s.access_token }); } catch (e) { /* déjà déconnecté */ } }
     },
+    // Adresse vérifiée depuis (lien de l'e-mail ouvert ailleurs) : relue sur le serveur ; true si elle vient de l'être.
+    async checkConfirmed() {
+      const s = cloudLs.get();
+      if (!s || s.confirmed !== false) return false;
+      const tk = await this.token();
+      const u = await this.req('/auth/v1/user', { token: tk });
+      if (!(u && (u.email_confirmed_at || u.confirmed_at))) return false;
+      const now = cloudLs.get();
+      if (now) cloudLs.set(Object.assign({}, now, { confirmed: true }));
+      return true;
+    },
     // Lien d'un e-mail ouvert dans le navigateur (…#access_token=…&type=signup) : la session est gardée, l'adresse nettoyée.
     fromLink() {
       try {
@@ -226,6 +237,8 @@
         if (!q.get('access_token')) return { error: q.get('error_description') || 'Lien expiré' };
         const v = { access_token: q.get('access_token'), refresh_token: q.get('refresh_token'), expires_in: q.get('expires_in'), user: {} };
         try { const p = JSON.parse(atob(v.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); v.user = { id: p.sub, email: p.email }; } catch (e) { /* jeton illisible */ }
+        // Lien de vérification de l'adresse : l'adresse est donc vérifiée.
+        if (/signup|email/.test(q.get('type') || '')) v.user.email_confirmed_at = new Date().toISOString();
         return { session: this.keep(v), type: q.get('type') || '' };
       } catch (e) { return null; }
     }

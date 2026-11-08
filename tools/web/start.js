@@ -101,7 +101,7 @@
         account: { email: email, news: !!pr.news_optin && pr.age_range !== 'u15', age: pr.age_range, at: (a && a.at) || realToday(), server: true, uid: ses ? ses.uid : '' },
         trainer: Object.assign({}, t.trainer || {}, { email: email, name: nick }),
         obEmail: undefined, obPwd: '', obShow: false, obNews: undefined, obNick: undefined, obAge: '', obStarter: '', obErr: '', obNote: '',
-        obBusy: false, obCode: '', obMode: 'signup', obResetSent: false, obAfter: '', obPending: null, obLocal: false,
+        obBusy: false, obCode: '', obMode: 'signup', obResetSent: false, obAfter: '', obPending: null, obLocal: false, obNickSet: false,
         toast: 'Content de te revoir, ' + nick + ' !'
       });
       this.finishOnb(false);
@@ -143,7 +143,9 @@
       setTimeout(() => { const t = this.st(); if (t.onb === 2 && t.obMode === 'login' && !t.obBusy && this._obAcc) this._obAcc.pkyLogin(true); }, 500);
     }
     r.acc = this._obAcc = {
-      email: s.obEmail !== undefined ? s.obEmail : (tr.email || (acc && acc.email) || ''), pwd: s.obPwd || '', news: s.obNews !== undefined ? !!s.obNews : !!(acc && acc.news),
+      email: s.obEmail !== undefined ? s.obEmail : (tr.email || (acc && acc.email) || ''), pwd: s.obPwd || '',
+      askNick: cloud && !signed && mode === 'signup', nick: s.obNick !== undefined ? s.obNick : (tr.name || ''), onNick: e => this.setState({ obNick: String(e.target.value || '').slice(0, 24) }),
+      nickBad: /pseudo/.test(s.obErr || '') ? 'true' : 'false', news: s.obNews !== undefined ? !!s.obNews : !!(acc && acc.news),
       title: T[0], lead: T[1], go: busy ? 'Un instant…' : T[2], busy: busy ? 'true' : 'false',
       isSignup: mode === 'signup', isLogin: mode === 'login', isReset: mode === 'reset', showPwd: mode !== 'reset' || resetSent, showCode: resetSent,
       pwLabel: resetSent ? 'Nouveau mot de passe' : 'Mot de passe', pwAuto: mode === 'login' ? 'current-password' : 'new-password', emailAuto: mode === 'login' ? 'username' : 'email',
@@ -204,19 +206,22 @@
         }
         const news = f && f.news ? !!f.news.checked : t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news);
         if (pwd.length < 12 && !(!needPwd && !pwd)) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
+        // Pseudo demandé avec l'adresse (2026-11-08, porteur) : l'e-mail de bienvenue s'adresse au joueur par son pseudo.
+        const nick0 = String(f && f.nickname ? f.nickname.value : t.obNick || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+        if (cloud && !signed && nick0.length < 2) { this.setState({ obEmail: email, obPwd: pwd, obNick: nick0, obErr: 'Choisis un pseudo de dresseur de 2 à 24 caractères.' }); return; }
         // Compte créé tout de suite sur le serveur (2026-11-08, porteur : « l'adresse mail est directement enregistrée
         // dans notre serveur »), puis connexion sans attendre la vérification de l'adresse (lien ou code reçu par e-mail,
         // à faire plus tard) et proposition de Face ID / Touch ID / empreinte. Si le serveur exige encore la vérification
         // avant la première connexion, le code à 6 chiffres est demandé d'abord (page 4), puis la suite.
         if (cloud && !signed) {
-          this.setState({ obEmail: email, obNews: news, obBusy: true, obErr: '', obNote: '' });
+          this.setState({ obEmail: email, obNews: news, obNick: nick0, obBusy: true, obErr: '', obNote: '' });
           try {
-            const res = await Cloud.signUp(email, pwd, { news_optin: news });
+            const res = await Cloud.signUp(email, pwd, { pseudo: nick0, news_optin: news });
             if (res.exists) { this.setState({ obBusy: false, obMode: 'login', obPwd: '', obErr: 'Un compte existe déjà avec cette adresse : connecte-toi.' }); return; }
             let ok = !!res.session;
             if (!ok) { try { await Cloud.signIn(email, pwd); ok = true; } catch (e3) { if (e3.code !== 'email_not_confirmed') throw e3; } }
             if (!ok) { this.setState({ obBusy: false, obPwd: pwd, onb: 4, obCode: '', obAfter: 'p3', obNote: 'Code envoyé à ' + email + ' (regarde aussi dans les spams).' }); return; }
-            this.setState({ obBusy: false, obPwd: '', onb: 3, obErr: '', obNote: '' });
+            this.setState({ obBusy: false, obPwd: '', onb: 3, obErr: '', obNote: '', obNickSet: true });
             this.pkyOfferNow();
           } catch (e2) { fail(e2); }
           return;
@@ -236,7 +241,7 @@
         account: { email: email, news: (t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news)) && !under, age: obAge, at: (acc && acc.at) || realToday(), server: !!server, uid: server && ses ? ses.uid : '' },
         trainer: Object.assign({}, t.trainer || {}, { email: email, name: nick }),
         obEmail: undefined, obPwd: '', obShow: false, obNews: undefined, obNick: undefined, obAge: '', obStarter: '', obErr: '', obNote: '',
-        obBusy: false, obCode: '', obMode: 'signup', obResetSent: false, obAfter: '', obPending: null, obLocal: false
+        obBusy: false, obCode: '', obMode: 'signup', obResetSent: false, obAfter: '', obPending: null, obLocal: false, obNickSet: false
       });
       setTimeout(() => this.finishOnb(false), 320);
       // PK, PA et Pokédex du compte relus sur le serveur (game-cloud.js).
@@ -263,7 +268,7 @@
         this.setState({ obBusy: true, obErr: '', obCode: code });
         try {
           await Cloud.verify(t.obEmail, code, 'signup');
-          if (t.obAfter === 'p3') { this.setState({ obBusy: false, obPwd: '', onb: 3, obErr: '', obNote: '', obCode: '', obAfter: '' }); this.pkyOfferNow(); return; }
+          if (t.obAfter === 'p3') { this.setState({ obBusy: false, obPwd: '', onb: 3, obErr: '', obNote: '', obCode: '', obAfter: '', obNickSet: true }); this.pkyOfferNow(); return; }
           if (t.obAfter === 'login' || !t.obPending) { fromProfile(await Cloud.profile()); return; }
           const P = t.obPending;
           done(t, P.nick, P.age, P.line, true);
@@ -279,6 +284,8 @@
     r.p3 = {
       ages: ST_AGES.map(([k, label]) => ({ label: label, on: age === k ? 'true' : 'false', cls: 'pkm-onb-chip' + (age === k ? ' pkm-onb-chip-on' : ''), pick: () => this.setState({ obAge: k, obErr: '' }) })),
       kid: kid, nick: s.obNick !== undefined ? s.obNick : (tr.name || ''), nickBad: /pseudo/.test(err) ? 'true' : 'false',
+      // Pseudo déjà choisi avec l'adresse (page 2) : pas redemandé ici.
+      askNick: !(s.obNickSet && s.obNick && String(s.obNick).trim().length >= 2),
       onNick: e => this.setState({ obNick: String(e.target.value || '').slice(0, 24) }),
       starters: PA_STARTERS.map(([line, n]) => ({
         name: DEX[n].name, img: 'img/pokemon/' + n + (still ? '.png' : '.gif'), imgStyle: stBodyStyle(n, still ? 72 : Math.round(56 * Math.min(1.25, DEX[n].gif[1] / 44)), still),
@@ -298,7 +305,7 @@
       hasSel: !!E, noSel: !E, selKey: 'st-' + sel, selName: name, selImg: E ? 'img/pokemon/' + selN + (still ? '.png' : '.gif') : '',
       selImgStyle: E ? stBodyStyle(selN, !still ? Math.round(96 * Math.min(1.2, E.gif[1] / 46)) : 104, still) : '',
       selTypes: E ? E.types.map(t => ({ t: t, style: 'background: ' + (DEX_TYPE[t] || '#5A6B8C') + '; color: ' + (dexLight(DEX_TYPE[t] || '#5A6B8C') ? '#0B1120' : '#FFFFFF') })) : [],
-      lead: acc ? 'Ton âge, ton pseudo et ton compagnon de voyage.' : 'Dernière étape avant l’aventure !',
+      lead: acc ? 'Ton âge, ton pseudo et ton compagnon de voyage.' : s.obNickSet && s.obNick ? 'Enchanté, ' + s.obNick + ' ! Dernière étape avant l’aventure.' : 'Dernière étape avant l’aventure !',
       selDesc: ST_STARTER_TXT[sel] || '', go: s.obBusy ? 'Un instant…' : 'Choisir ' + name + ' comme compagnon', selStyle: selN ? stStarterStyle(selN, false) : '',
       err: err, hasErr: !!err && page === 3, errNoSel: !!err && page === 3 && !E, // message visible aussi sans starter choisi (glissement)
       canLocal: !!s.obLocal && page === 3 && !cloud, local: () => {
@@ -504,7 +511,7 @@
       const L = stLinked, a = x.s.account;
       stLinked = null;
       setTimeout(() => this.setState(L.session
-        ? Object.assign({ toast: 'Adresse confirmée : ton compte Dropicards est actif' }, a && a.email ? { account: Object.assign({}, a, { server: true, uid: L.session.uid }) } : {})
+        ? Object.assign({ toast: 'Adresse validée : bienvenue sur Dropicards ! Tu commences au grade Recrue' }, a && a.email ? { account: Object.assign({}, a, { server: true, uid: L.session.uid }) } : {})
         : { toast: 'Ce lien n’est plus valable : demande un nouveau code depuis l’app' }), 0);
     }
     if (x.s.screen !== 'home') return r;

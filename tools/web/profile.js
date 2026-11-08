@@ -108,6 +108,7 @@
         : 'Connecte-toi pour enregistrer ton compte Dropicards. En attendant, ton pseudo et ta collection restent sur cet appareil.';
       // Adresse pas encore vérifiée (compte créé sans attendre, 2026-11-08) : rappel et nouvel e-mail.
       r.trainer.mailOn = !!(ses && ses.confirmed === false);
+      if (r.trainer.mailOn) pfMailCheck(this);
       r.trainer.mailText = 'Adresse à vérifier : touche le lien de l’e-mail reçu (regarde aussi dans les spams). Les jeux et le PK shop s’ouvrent ensuite.';
       r.trainer.mailAct = async () => {
         try { await Cloud.resend(ses.email); this.setState({ toast: 'E-mail de vérification renvoyé à ' + ses.email }); } catch (e) { this.setState({ toast: (e && e.message) || CLOUD_ERR.other }); }
@@ -182,7 +183,16 @@
       compMissing: next ? Math.max(0, next.comp - comp) : 0, megaMissing: next ? Math.max(0, next.mega - mega) : 0 };
   };
   // Avantages du grade actuel, et grade qui débloque un avantage (pour les messages « au grade … »).
-  proto.perks = function () { return PF_GRADES[this.tierOf().i]; };
+  // Adresse vérifiée ailleurs (lien de l'e-mail ouvert dans le navigateur) : relue au plus une fois toutes les 20 s,
+  // et à chaque retour dans l'app ; le compte est alors validé (jeux et PK shop ouverts, grade Recrue).
+  let pfMailAt = 0;
+  const pfMailCheck = inst => {
+    if (Date.now() - pfMailAt < 20000) return;
+    pfMailAt = Date.now();
+    Cloud.checkConfirmed().then(ok => { if (ok) { inst.setState({ toast: 'Adresse validée : ton compte est actif, bienvenue au grade Recrue !' }); inst.flash(); if (inst.gcSync) inst.gcSync(); } }, () => {});
+  };
+  try { document.addEventListener('visibilitychange', () => { const s = Cloud.on() && Cloud.session(); if (document.visibilityState === 'visible' && s && s.confirmed === false && Component.prototype._pfInst) { pfMailAt = 0; pfMailCheck(Component.prototype._pfInst); } }); } catch (e) { /* rien */ }
+  proto.perks = function () { Component.prototype._pfInst = this; return PF_GRADES[this.tierOf().i]; };
   proto.perkGrade = function (key) { const g = PF_GRADES.find(x => x[key]); return g ? g.name : ''; };
   const pfBaseTierView = proto.tierView;
   proto.tierView = function (x) {

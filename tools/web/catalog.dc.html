@@ -2236,6 +2236,9 @@ PKCOUNTER
 <label class="pkm-acc-l">Adresse e-mail
 <input class="pkm-tr-in" type="email" name="email" autocomplete="{{ ob.acc.emailAuto }}" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="Ex. : sacha@exemple.fr" value="{{ ob.acc.email }}" onChange="{{ ob.acc.onEmail }}" aria-invalid="{{ ob.acc.emailBad }}">
 </label>
+<sc-if value="{{ ob.acc.askNick }}" hint-placeholder-val="{{ false }}"><label class="pkm-acc-l">Pseudo de dresseur
+<input class="pkm-tr-in" type="text" name="nickname" autocomplete="nickname" maxlength="24" placeholder="Ex. : Sacha du Bourg" value="{{ ob.acc.nick }}" onChange="{{ ob.acc.onNick }}" aria-invalid="{{ ob.acc.nickBad }}">
+</label></sc-if>
 <sc-if value="{{ ob.acc.showCode }}" hint-placeholder-val="{{ false }}"><label class="pkm-acc-l">Code reçu par e-mail
 <input class="pkm-tr-in pkm-acc-code" type="text" name="code" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="6 chiffres" value="{{ ob.acc.code }}" onChange="{{ ob.acc.onCode }}">
 </label></sc-if>
@@ -2278,9 +2281,9 @@ PKCOUNTER
 <div class="pkm-onb-ages"><sc-for list="{{ ob.p3.ages }}" as="oa" hint-placeholder-count="4"><button type="button" class="{{ oa.cls }}" aria-pressed="{{ oa.on }}" onClick="{{ oa.pick }}">{{ oa.label }}<i class="pkm-onb-ok" aria-hidden="true">✓</i></button></sc-for></div>
 <sc-if value="{{ ob.p3.kid }}" hint-placeholder-val="{{ false }}"><span class="pkm-acc-hint">Avant 15 ans, les nouveautés par e-mail demandent l’accord d’un parent : elles restent désactivées.</span></sc-if>
 </fieldset>
-<label class="pkm-acc-l">Pseudo de dresseur
+<sc-if value="{{ ob.p3.askNick }}" hint-placeholder-val="{{ true }}"><label class="pkm-acc-l">Pseudo de dresseur
 <input class="pkm-tr-in" type="text" name="nickname" autocomplete="nickname" maxlength="24" placeholder="Ex. : Sacha du Bourg" value="{{ ob.p3.nick }}" onChange="{{ ob.p3.onNick }}" aria-invalid="{{ ob.p3.nickBad }}">
-</label>
+</label></sc-if>
 <fieldset class="pkm-onb-set"><legend class="pkm-acc-l">Choisis ton compagnon de voyage</legend>
 <div class="pkm-onb-starters"><sc-for list="{{ ob.p3.starters }}" as="os" hint-placeholder-count="4"><button type="button" class="{{ os.cls }}" style="{{ os.style }}" aria-pressed="{{ os.on }}" aria-label="{{ os.aria }}" onClick="{{ os.pick }}"><img src="{{ os.img }}" alt="" style="{{ os.imgStyle }}"><span>{{ os.name }}</span><i class="pkm-onb-ok" aria-hidden="true">✓</i></button></sc-for></div>
 </fieldset>

@@ -1,7 +1,8 @@
 // Modèles des e-mails de Supabase en français, aux couleurs de Dropicards (2026-11-06).
 // node tools/supabase/emails.mjs → web/email/*.html, publiés sur https://dropicards.fr/email/…
 // Supabase (GoTrue) lit chaque modèle à l'adresse donnée par MAILER_TEMPLATES_* (variables du service dans Coolify).
-// Variables remplacées par Supabase : {{ .Token }} (code à 6 chiffres), {{ .ConfirmationURL }} (lien), {{ .Email }}.
+// Variables remplacées par Supabase : {{ .Token }} (code à 6 chiffres), {{ .ConfirmationURL }} (lien), {{ .Email }},
+// {{ .Data.pseudo }} (pseudo donné à l'inscription, données du compte).
 // HTML d'e-mail : tableaux et styles en ligne seulement (Gmail, Outlook), aucune police ni script extérieurs.
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -37,9 +38,16 @@ Dropicards est une application indépendante, non affiliée à Nintendo, GAME FR
 const p = t => `<p style="margin:0 0 16px;font-size:15px;line-height:1.55;color:#3A4560;">${t}</p>`;
 
 const MAILS = {
+  // Bienvenue (2026-11-08, texte demandé par le porteur) : pseudo choisi dans l'app ({{ .Data.pseudo }}, gardé par
+  // Supabase avec le compte), bouton de validation, avantages du grade Recrue ; code en secours (app sans le réglage
+  // « connexion avant vérification », docs/31 A).
   confirmation: page('Bienvenue sur Dropicards !',
-    p('Pour terminer la création de ton compte, entre ce code dans l’app.') + code() +
-    p('Ou touche ce bouton depuis ton téléphone&nbsp;:') + button('Confirmer mon adresse')),
+    p('Merci {{ if .Data.pseudo }}<b>{{ .Data.pseudo }}</b>{{ else }}à toi{{ end }} d’avoir créé ton compte sur Dropicards&nbsp;!') +
+    p('La dernière étape avant de commencer à utiliser Dropicards est de valider ton adresse e-mail en touchant ce bouton&nbsp;:') +
+    button('Valider mon adresse e-mail') +
+    p('Ensuite, l’app est à toi&nbsp;: tu commences au grade <b>Recrue</b>, avec 5 scans par jour, un Booster PK toutes les 24&nbsp;h, un classeur de 36 cartes et 9 produits scellés, et le ticket Bronze et le booster du PK shop.') +
+    `<p style="margin:0 0 6px;font-size:13px;line-height:1.5;color:#6B7590;">Le bouton ne marche pas&nbsp;? Tape ce code dans l’app&nbsp;:</p>
+<p style="margin:0 0 20px;"><span style="display:inline-block;padding:8px 14px;background:#0B1120;color:#FFD84D;border-radius:10px;font-size:20px;font-weight:800;letter-spacing:5px;font-family:Menlo,Consolas,monospace;">{{ .Token }}</span></p>`),
   recovery: page('Ton nouveau mot de passe',
     p('Tu as demandé à changer le mot de passe de ton compte Dropicards ({{ .Email }}). Entre ce code dans l’app, puis choisis ton nouveau mot de passe.') + code()),
   magic_link: page('Ton code de connexion',
