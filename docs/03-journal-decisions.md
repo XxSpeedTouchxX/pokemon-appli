@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-08 — Scan plus rapide et beaucoup plus précis (demande du porteur)
+
+- **Précision : le scan reconnaît maintenant le dessin de la carte**, pas seulement le texte. Chaque carte du catalogue (20 941) a une « empreinte » de son dessin, calculée chaque semaine par GitHub (`web/data/scan-prints.json`, 0,4 Mo). Au scan, l'app trouve les quatre bords de la carte dans l'image, compare son dessin à toutes les cartes (≈ 20 ms, sur le téléphone, aucune image envoyée), et le numéro et le nom départagent les réimpressions au même dessin.
+- Le texte est lu sur la carte trouvée (et non plus sur le cadre) ; un chiffre souvent confondu (1 et 7, 0 et 8…) est corrigé quand le numéro lu n'existe pas.
+- **Mesure (banc d'essai : 48 vraies cartes de toutes les époques, 8 prises de vue simulées chacune, 384 photos)** : bonne carte en tête **27 % → 93 %** ; dans les 3 propositions **33 % → 98 %** ; fiche ouverte directement **10 % → 40 %**. Par prise de vue : petite 4 → 42 sur 48, loin 7 → 44, décalée 12 → 44, sombre 7 → 45.
+- **Vitesse** : moteur de lecture gardé dans un cache à part sur le téléphone (plus jamais retéléchargé ni revérifié), préchargé 8 s après l'ouverture de l'app, lancé dès l'arrivée sur le scan pendant que la caméra s'allume, gardé 10 min après la sortie du scan (2 min avant).
+- Sécurité : la fiche ne s'ouvre jamais sur le dessin seul (il faut aussi le numéro ou le nom).
+- À faire par le porteur : essai sur téléphone (`?debug=scan` affiche ce qui est trouvé). Cache v161.
+
 ## 2026-11-08 — Retouches : tickets des règles, entrée de « Ma progression » (demande du porteur)
 
 - Règles des PK et PA : les 3 tickets du PK shop sont dans la même colonne que les photos des items, textes alignés (la boîte du ticket prenait la moitié de la ligne).

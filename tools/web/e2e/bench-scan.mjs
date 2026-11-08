@@ -64,6 +64,7 @@ for (const r of out) { loc += r.found; vis1 += r.visRank === 0; lms += r.lookMs;
 for (const r of out) { ok += r.ok; in3 += r.in3; auto += r.ok && r.auto; ms += r.ms; console.log((r.ok ? '✓' : r.in3 ? '~' : '✗') + ' ' + r.file.padEnd(24) + r.v.padEnd(10) + ' attendu ' + r.want.padEnd(12) + ' lu ' + (r.got || '—').padEnd(12) + ' ' + r.ms + ' ms  loc=' + (r.found ? 'o' : 'n') + ' vis#' + r.visRank + ' ' + r.visTop + ' [' + r.num + '] [' + r.name + ']'); }
 const n = out.length;
 console.log('\nBonne carte en tête : ' + ok + '/' + n + ' (' + Math.round(100 * ok / n) + ' %) · dans les 3 propositions : ' + in3 + '/' + n + ' · reconnue sans question : ' + auto + '/' + n + ' · lecture moyenne ' + Math.round(ms / n) + ' ms');
+console.log('fiche ouverte sur une mauvaise carte : ' + out.filter(r => r.auto && !r.ok).length + '/' + out.length + (out.filter(r => r.auto && !r.ok).map(r => ' ' + r.want + '→' + r.got + ' (' + r.v + ')').join('')));
 console.log('carte localisée : ' + loc + '/' + out.length + ' · dessin seul en tête : ' + vis1 + '/' + out.length + ' · localisation + empreintes ' + Math.round(lms / out.length) + ' ms');
 const byV = {}; out.forEach(r => { const o = byV[r.v] || (byV[r.v] = [0, 0]); o[0] += r.ok; o[1]++; });
 console.log('par prise de vue : ' + Object.entries(byV).map(([k, [a, n2]]) => k + ' ' + a + '/' + n2).join(' · '));
