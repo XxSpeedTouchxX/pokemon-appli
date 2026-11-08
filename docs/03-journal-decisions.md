@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-11-08 — « Ma progression » : saisons et classement (demande du porteur)
+
+- **Nouvelle rubrique « Ma progression »**, ouverte depuis l'onglet Jeux (bannière sous le solde) : saison en cours et temps restant ; carte du joueur (avatar, pseudo, emblème du grade, PK de la saison, PK gagnés au total, place sur le nombre de joueurs) ; classement général avec podium du top 3 (coupe à couronne, médailles d'argent et de bronze, dessinées pour l'app) et le grade à côté de chaque pseudo ; lots de la saison.
+- **Saisons de 60 jours** : saison 1 du 8 novembre 2026 au 6 janvier 2027, puis la suivante aussitôt.
+- **Choix par défaut, à confirmer par le porteur** :
+  - classement selon les **PK gagnés pendant la saison** (pas le total depuis l'inscription, sinon les mêmes joueurs gagneraient chaque saison) ; le total reste affiché sur la carte ;
+  - comptent : Booster PK, pièce, bienvenue, partage ; les achats au PK shop ne font pas baisser le score ; les dons d'admin ne comptent pas ;
+  - comptes admin non classés ; égalité = même place ;
+  - lots : top 10 « à définir », 11ᵉ à 30ᵉ place « Premium offert » (durée à fixer, 1 mois proposé) ; remis à la main après la saison (`season_winners`).
+- **Serveur** : `tools/supabase/013_saisons.sql` (19 tests), **à installer par le porteur**. Le pseudo, le grade et les PK de la saison deviennent visibles des autres joueurs : politique de confidentialité et CGU complétées. Un règlement des lots reste à écrire avant la fin de la saison 1 (point juridique : concours avec lots).
+- « Ma progression » du Pokédex devient « Progression du Pokédex » (plus de doublon).
+- Cache v158.
+
+---
+
 ## 2026-11-08 — Sons, fenêtres glissées, règles des PK et PA, grades, Règne Delta (demande du porteur)
 
 - **Sons muets** : depuis que les jeux passent par le serveur, le son partait à la réponse du serveur, hors du toucher, et Safari (iPhone) le laissait muet. L'audio s'ouvre désormais à chaque toucher. De plus, le bouton « son » du didacticiel coupait tous les bruits sans moyen de les rallumer : nouveau réglage **Réglages › Sons** (Activés / Coupés). Sur iPhone, le bouton silencieux sur le côté coupe aussi les sons.

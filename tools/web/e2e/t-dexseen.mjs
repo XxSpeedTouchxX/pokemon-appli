@@ -1,6 +1,6 @@
 // Pokédex (2026-10-31, demande du porteur) :
 // - plus de Pokémon « vus » : silhouette tant qu'il n'est pas débloqué, le scan ne change plus le Pokédex ;
-// - « Ma progression » : débloqués sur 156 (sans les méga-évolutions), par stade et par type ; un type ouvre la liste ;
+// - « Progression du Pokédex » (ex-« Ma progression ») : débloqués sur 156 (sans les méga-évolutions), par stade et par type ; un type ouvre la liste ;
 // - bandeau « Arbre de Pokévolution », plus d'encadrés « Ton compagnon » ni « Pokémon sélectionné », plus de « C'est
 //   ton compagnon » ni de texte des PA en bas ; flèches « les évolutions » ; Pokédex agrandi ; « OK » qui bondit quand
 //   les PA suffisent pour l'évolution affichée ;
@@ -18,7 +18,7 @@ await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k) || '{}'); d.tuto = 'done'; d.dexTips = 2; d.evo = { line: 'pika', stage: 0 }; d.buddy = 25; d.pkOwn = [25]; d.pa = 0; delete d.dexSeen; localStorage.setItem(k, JSON.stringify(d)); });
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 const openDex = async () => { await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(900); };
-const prog = async () => (await page.locator('section[aria-label="Ma progression"]').innerText()).replace(/\s+/g, ' ');
+const prog = async () => (await page.locator('section[aria-label="Progression du Pokédex"]').innerText()).replace(/\s+/g, ' ');
 const pick = async name => {
   await page.click('.pkm-dex-all'); await page.waitForTimeout(300);
   await page.fill('input[aria-label="Chercher un Pokémon"]', name);
@@ -116,7 +116,7 @@ ok('« Feu » ouvre la liste filtrée (' + fl + ' Pokémon, bulle « Feu ✕ »)
 const filters = await page.locator('[aria-label="Filtrer le Pokédex"] button').allInnerTexts();
 ok('filtres sans « Vus » : ' + filters.join(', '), !filters.some(f => /^Vus/.test(f.trim())));
 await page.keyboard.press('Escape'); await page.waitForTimeout(300);
-await page.locator('section[aria-label="Ma progression"]').screenshot({ path: shot('dexseen-progression.png') });
+await page.locator('section[aria-label="Progression du Pokédex"]').screenshot({ path: shot('dexseen-progression.png') });
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
 await browser.close();

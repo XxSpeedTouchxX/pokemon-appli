@@ -1,0 +1,79 @@
+/* « Ma progression » (2026-11-08, porteur) : saison, carte du joueur, podium, classement, lots. */
+.pkm-pg-banner { flex: none; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 22px; border: 1px solid #5B4A12; background: linear-gradient(120deg, rgba(255, 214, 10, 0.22), rgba(255, 214, 10, 0) 55%), #121C33; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; }
+.pkm-pg-banner > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-pg-banner b { font-family: 'Sora', sans-serif; font-size: 17px; }
+.pkm-pg-banner small { font-size: 12.5px; color: #C9D3EA; }
+.pkm-pg-banner svg { flex: none; fill: none; stroke: #FFD60A; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-pg-banner-cup { flex: none; filter: drop-shadow(0 4px 8px rgba(255, 190, 0, 0.35)); animation: pkmPgBob 2.6s ease-in-out infinite; }
+@keyframes pkmPgBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-3px) rotate(4deg); } }
+
+.pkm-pg-season { flex: none; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 12px; padding: 14px 16px; border-radius: 22px; border: 1px solid #5B4A12; background: radial-gradient(120% 90% at 0% 0%, rgba(255, 214, 10, 0.25), rgba(255, 214, 10, 0) 60%), #121C33; color: #F3F6FC; }
+.pkm-pg-sbadge { display: flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-radius: 999px; background: #FFD60A; color: #0B1120; }
+.pkm-pg-sbadge b { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 19px; letter-spacing: 0.04em; line-height: 1; padding-top: 3px; }
+.pkm-pg-stext { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-pg-stext b { font-size: 14.5px; }
+.pkm-pg-stext span { font-size: 12px; color: #C9D3EA; }
+.pkm-pg-sbar { grid-column: 1 / -1; display: block; height: 8px; border-radius: 4px; background: #24345C; overflow: hidden; }
+.pkm-pg-sbar > i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #FFD60A, #FF9F1C); }
+
+.pkm-pg-card { flex: none; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 18px 16px 16px; border-radius: 26px; border: 1px solid #3B4F86; background: linear-gradient(150deg, #1C2C57, #0F1830 60%, #241650); color: #F3F6FC; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35); }
+.pkm-pg-card::before { content: ''; position: absolute; inset: -40% -20% auto auto; width: 70%; height: 120%; background: radial-gradient(closest-side, rgba(255, 214, 10, 0.18), rgba(255, 214, 10, 0)); pointer-events: none; }
+.pkm-pg-card-top { position: relative; display: flex; align-items: center; gap: 12px; }
+.pkm-pg-ava { flex: none; position: relative; width: 84px; height: 84px; }
+.pkm-pg-ava > img:first-child { width: 84px; height: 84px; border-radius: 26px; object-fit: cover; border: 3px solid #FFD60A; box-sizing: border-box; background: #0B1120; }
+.pkm-pg-ava-g { position: absolute; right: -10px; bottom: -8px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)); }
+.pkm-pg-id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pkm-pg-pseudo { font-family: 'Sora', sans-serif; font-size: 20px; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-pg-grade { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; }
+.pkm-pg-rank { flex: none; display: flex; flex-direction: column; align-items: center; min-width: 74px; padding: 8px 10px; border-radius: 18px; background: rgba(255, 214, 10, 0.14); border: 1px solid rgba(255, 214, 10, 0.5); }
+.pkm-pg-rank small { font-size: 10.5px; color: #C9D3EA; white-space: nowrap; }
+.pkm-pg-rank b { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 28px; line-height: 1.1; color: #FFD60A; padding-top: 2px; }
+.pkm-pg-stats { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pkm-pg-stats > span { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 16px; background: rgba(11, 17, 32, 0.6); border: 1px solid #2A3A5C; }
+.pkm-pg-stats small { font-size: 11.5px; color: #C9D3EA; }
+.pkm-pg-stats b { display: flex; align-items: center; gap: 6px; font-family: 'Sora', sans-serif; font-size: 19px; color: #FFFFFF; }
+.pkm-pg-prize { position: relative; margin: 0; padding: 8px 12px; border-radius: 14px; background: rgba(255, 214, 10, 0.12); color: #FFE46B; font-size: 13px; font-weight: 700; }
+.pkm-pg-note { margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3; }
+
+.pkm-pg-board, .pkm-pg-rewards { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; }
+.pkm-pg-board h2, .pkm-pg-rewards h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; }
+.pkm-pg-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-pg-refresh { flex: none; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 20px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; cursor: pointer; }
+.pkm-pg-refresh svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-pg-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 8px; padding-top: 6px; }
+.pkm-pg-pod { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; }
+.pkm-pg-medal { filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45)); }
+.pkm-pg-pod-1 .pkm-pg-medal { width: 64px; height: 64px; animation: pkmPgBob 2.6s ease-in-out infinite; }
+.pkm-pg-ppseudo { max-width: 100%; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-pg-pgrade { display: flex; flex-direction: column; align-items: center; gap: 1px; max-width: 100%; font-size: 10.5px; line-height: 1.15; font-weight: 800; }
+.pkm-pg-pgrade img { width: 24px; height: 24px; }
+.pkm-pg-ppk { font-size: 12.5px; font-weight: 800; color: #FFD60A; }
+.pkm-pg-step { align-self: stretch; display: flex; align-items: flex-start; justify-content: center; margin-top: 4px; border-radius: 14px 14px 6px 6px; border: 1px solid #2A3A5C; }
+.pkm-pg-step b { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 24px; padding-top: 8px; color: #0B1120; }
+.pkm-pg-pod-1 .pkm-pg-step { height: 74px; background: linear-gradient(180deg, #FFE46B, #F2A900); }
+.pkm-pg-pod-2 .pkm-pg-step { height: 54px; background: linear-gradient(180deg, #FFFFFF, #8C97AB); }
+.pkm-pg-pod-3 .pkm-pg-step { height: 40px; background: linear-gradient(180deg, #F6C7A0, #9C5420); }
+.pkm-pg-pod-me .pkm-pg-ppseudo { color: #FFD60A; }
+.pkm-pg-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.pkm-pg-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 14px; background: #0B1120; border: 1px solid #1E2B45; }
+.pkm-pg-n { flex: none; width: 30px; text-align: center; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: #C9D3EA; }
+.pkm-pg-row > img { flex: none; }
+.pkm-pg-who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pkm-pg-who b { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-pg-who small { font-size: 11.5px; font-weight: 700; }
+.pkm-pg-pk { flex: none; font-size: 13.5px; font-weight: 800; color: #FFD60A; }
+.pkm-pg-top10 { border-color: rgba(255, 214, 10, 0.35); }
+.pkm-pg-me { background: rgba(255, 214, 10, 0.14); border-color: #FFD60A; box-shadow: inset 0 0 0 1px #FFD60A; }
+.pkm-pg-gap { text-align: center; color: #5A6B8C; letter-spacing: 4px; font-size: 12px; }
+.pkm-pg-rw { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: #0B1120; border: 1px solid #24345C; }
+.pkm-pg-rw-top { border-color: rgba(255, 214, 10, 0.55); background: linear-gradient(120deg, rgba(255, 214, 10, 0.16), rgba(255, 214, 10, 0) 60%), #0B1120; }
+.pkm-pg-rw-prem { border-color: #C9A227; background: linear-gradient(120deg, rgba(201, 211, 230, 0.16), rgba(201, 211, 230, 0) 60%), #0B1120; }
+.pkm-pg-rwico { flex: none; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+.pkm-pg-crown { fill: #FFD60A; stroke: #0B1120; stroke-width: 1.4; stroke-linejoin: round; }
+.pkm-pg-rwt { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pkm-pg-rwt b { font-size: 14px; }
+.pkm-pg-rwt span { font-size: 13px; color: #E6ECFA; }
+.pkm-pg-rwt small { font-size: 11.5px; color: #9AA8C3; }
+.pkm-pg-rules { margin: 0; font-size: 12px; line-height: 1.5; color: #9AA8C3; }
+@media (prefers-reduced-motion: reduce) { .pkm-pg-banner-cup, .pkm-pg-pod-1 .pkm-pg-medal { animation: none; } }
+html.pkm-calm .pkm-pg-banner-cup, html.pkm-calm .pkm-pg-pod-1 .pkm-pg-medal { animation: none; }

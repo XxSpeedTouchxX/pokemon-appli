@@ -15,6 +15,7 @@ Proposition et plan : `docs/24-proposition-espace-admin-et-comptes.md` §4.1 et 
 - `009_grades_v3.sql` (2026-11-07, porteur) : délais du Booster PK (24, 20, 12, 8, 6, 4 h) et de la pièce (fermée, puis 24, 12, 8, 6, 4 h) selon le grade. Tests `tests/test_009.sql`. Rejouable.
 - `010_premium.sql` (2026-11-07, « go » du porteur) : **abonnement Premium payé avec Stripe** : tables `premium` (un abonné par ligne : formule, statut donné par Stripe, fin de la période payée, arrêt demandé), `premium_payments` (chaque paiement reçu) et `stripe_events` (journal des messages de Stripe), écrites seulement par la fonction « stripe » (clé service_role) ; un joueur lit seulement sa ligne ; PA du jour doublés pour un abonné ; `game_state` avec l'état Premium. Tests `tests/test_010.sql` (28 vérifications). Rejouable. Guide : `docs/28-guide-paiement-premium-stripe.md`.
 - `011_grades_v4.sql` (2026-11-07, demande du porteur, **à installer par le porteur**) : nouvelles conditions des grades (Collectionneur 7 500 PK + 30 compagnons, Dresseur Pokémon 15 000 + 50, Maître Pokémon 30 000 + 100 + 5 méga-évolutions, Grand maître Pokémon 100 000 + tout le Pokédex, soit 171 avec les méga-évolutions ; les méga-évolutions comptent aussi comme compagnons) et nouvelles chances du Booster PK (30 PK 40 %, 50 PK 30 %, 100 PK 15 %, 200 PK 10 %, 500 PK 5 %). Tests `tests/test_011.sql` (11 vérifications). Rejouable.
+- `013_saisons.sql` (2026-11-08, demande du porteur, **à installer par le porteur**) : « Ma progression » ; saisons de 60 jours (table `game_season`, saison 1 dès le 8 novembre 2026 à minuit, heure de Paris), classement par PK gagnés pendant la saison (Booster PK, pièce, bienvenue, partage ; achats non déduits ; dons d'admin exclus), comptes admin non classés ; `season_board` (joueur connecté : saison, top 50 avec pseudo, grade et PK, sa place ; jamais d'e-mail) ; `season_winners(n)` (Studio seulement : les 30 premiers avec e-mail et lot). Tests `tests/test_013.sql` (19).
 - `012_shop_notices.sql` (2026-11-07, demande du porteur, **à installer par le porteur**) : e-mail à Dropicards pour chaque achat du PK shop ; table `shop_notices` (achats déjà signalés), `shop_pending` et `shop_mark_sent` réservées au serveur ; seuls les achats faits après l'installation sont signalés. Fonction du serveur `functions/notify` (Brevo ; `install-notify.sh` ; tests `functions/notify/test.mjs`, 12). Tests `tests/test_012.sql` (12). Guide : `docs/30-guide-email-achats-pk-shop.md`.
 - `functions/stripe/index.ts` : fonction du serveur (Edge Functions de Supabase) : page de paiement Stripe, page client (gérer ou arrêter), messages signés de Stripe (signature vérifiée, abonnement relu chez Stripe). Sans bibliothèque. Tests `functions/stripe/test.mjs` (30 vérifications, faux Stripe et base locale : `node tools/supabase/functions/stripe/test.mjs`). Installation : `functions/install-stripe.sh` (docs/28 §6).
 - `emails.mjs` : modèles des e-mails en français (`web/email/*.html`, publiés sur dropicards.fr) ; `node tools/supabase/emails.mjs` après une modification.
@@ -46,9 +47,15 @@ psql -d test -f tools/supabase/011_grades_v4.sql
 psql -d test -f tools/supabase/tests/test_011.sql   # 11 de plus (202 en tout)
 psql -d test -f tools/supabase/012_shop_notices.sql
 psql -d test -f tools/supabase/tests/test_012.sql   # 12 de plus (214 en tout)
+psql -d test -f tools/supabase/013_saisons.sql
+psql -d test -f tools/supabase/tests/test_013.sql   # 19 de plus (233 en tout)
 node tools/supabase/functions/notify/test.mjs        # fonction « notify » : 12 vérifications
 node tools/supabase/functions/stripe/test.mjs        # fonction « stripe » : 30 vérifications (base « t7 », port 5499 par défaut)
 ```
+
+## Classement des saisons (013, 2026-11-08)
+
+Studio › SQL Editor › New query : coller `013_saisons.sql`, Run (« Success »). Rien d'autre à régler. Pour changer la date de départ ou la durée : `update public.game_season set start_at = '…', days = 60;`. À la fin d'une saison, la liste des gagnants (avec leur e-mail) : `select * from public.season_winners(1);`.
 
 ## Abonnement Premium avec Stripe (010, 2026-11-07)
 

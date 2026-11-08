@@ -548,7 +548,7 @@
     return {
       open: true, close: () => dexListSlide(() => { this.setState({ dexList: false }); setTimeout(() => { const b = document.querySelector('.pkm-dex-all'); if (b) b.focus({ preventScroll: true }); }, 60); }), q: s.dexQ || '', onQ: ev => this.setState({ dexQ: ev.target.value }),
       count: dexAllIds().filter(k => dexOwn(s, k)).length + ' / ' + dexAllIds().length + ' débloqués · ' + dexNum(pa) + ' PA',
-      // Filtre d'un type (depuis « Ma progression ») : une bulle de plus, qui le retire au toucher.
+      // Filtre d'un type (depuis « Progression du Pokédex ») : une bulle de plus, qui le retire au toucher.
       filters: DEX_FILTERS.map(([k, l]) => Object.assign({ label: l, on: f === k, pick: () => this.setState({ dexF: k }) }, this.chip(f === k)))
         .concat(f.indexOf('type:') === 0 ? [Object.assign({ label: f.slice(5) + ' ✕', on: true, pick: () => this.setState({ dexF: 'all' }) }, this.chip(true))] : []),
       items: items, empty: !items.length

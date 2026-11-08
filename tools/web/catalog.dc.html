@@ -1770,6 +1770,8 @@
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 12.5px; color: #9AA8C3">Ton solde</span><span style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">{{ gm.pk }} PK</span></span>
 </section>
 
+<button type="button" onClick="{{ pgb.open }}" class="pkm-pg-banner pkm-dark" aria-label="{{ pgb.aria }}"><img src="img/rank/1.svg" alt="" width="46" height="46" class="pkm-pg-banner-cup"><span><b>{{ pgb.title }}</b><small>{{ pgb.sub }}</small></span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+
 <section aria-label="Booster PK" class="pkm-gm-boost pkm-dark" style="color: #F3F6FC; flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
 <h2 class="pkm-gm-title">Booster PK</h2>
@@ -1865,8 +1867,8 @@
 <sc-if value="{{ evo.chosen }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ evo.all }}" class="pkm-dex-all"><img src="img/brand/pokedex.svg" alt="" width="40" height="25"><span><b>{{ evo.allLabel }}</b><span>{{ evo.count }} débloqués · avec tes PA</span></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
 
-<section aria-label="Ma progression" class="pkm-dex-prog">
-<div class="pkm-dex-prog-h"><b>Ma progression</b><span>{{ evo.prog.pct }}</span></div>
+<section aria-label="Progression du Pokédex" class="pkm-dex-prog">
+<div class="pkm-dex-prog-h"><b>Progression du Pokédex</b><span>{{ evo.prog.pct }}</span></div>
 <span class="pkm-dex-pbar"><em>Débloqués</em><i aria-hidden="true"><b style="{{ evo.prog.ownW }}"></b></i><strong>{{ evo.prog.own }}</strong></span>
 <p class="pkm-dex-prog-tip">{{ evo.prog.tip }}</p>
 <details class="pkm-dex-prog-more"><summary>Par stade et par type</summary>
@@ -2347,4 +2349,54 @@ PKCOUNTER
 <button type="button" onClick="{{ prem.close }}" class="pkm-pas-cancel">{{ prem.later }}</button>
 </section>
 </div>
+</sc-if>
+
+<!-- fragment: progress -->
+<sc-if value="{{ ui.isProgress }}" hint-placeholder-val="{{ false }}">
+<section aria-label="{{ pg.seasonLabel }}" class="pkm-pg-season pkm-dark">
+<span class="pkm-pg-sbadge"><img src="img/rank/1.svg" alt="" width="34" height="34"><b>{{ pg.seasonN }}</b></span>
+<span class="pkm-pg-stext"><b>{{ pg.left }}</b><span>{{ pg.dates }} · 60 jours</span></span>
+<i class="pkm-pg-sbar" aria-hidden="true"><i style="{{ pg.barW }}"></i></i>
+</section>
+<section aria-label="{{ pg.card.aria }}" class="pkm-pg-card pkm-dark">
+<div class="pkm-pg-card-top">
+<span class="pkm-pg-ava"><img src="{{ pg.card.avatar }}" alt="" width="84" height="84"><img src="{{ pg.card.gImg }}" alt="" width="40" height="40" class="pkm-pg-ava-g"></span>
+<span class="pkm-pg-id"><b class="pkm-pg-pseudo">{{ pg.card.pseudo }}</b><span class="pkm-pg-grade" style="{{ pg.card.gStyle }}"><img src="{{ pg.card.gImg }}" alt="" width="22" height="22">{{ pg.card.gName }}</span></span>
+<span class="pkm-pg-rank"><small>Classement</small><b>{{ pg.card.rank }}</b><small>{{ pg.card.of }}</small></span>
+</div>
+<div class="pkm-pg-stats">
+<span><small>PK de la saison</small><b><img src="img/brand/pk.svg" alt="" width="22" height="22">{{ pg.card.pkSeason }}</b></span>
+<span><small>PK gagnés au total</small><b><img src="img/brand/pk.svg" alt="" width="22" height="22">{{ pg.card.pkTotal }}</b></span>
+</div>
+<sc-if value="{{ pg.card.hasPrize }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-prize">{{ pg.card.prize }}</p></sc-if>
+<sc-if value="{{ pg.card.hasUnranked }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ pg.card.unranked }}</p></sc-if>
+</section>
+<section aria-label="Classement général" class="pkm-pg-board pkm-dark">
+<div class="pkm-pg-h"><h2>Classement général</h2><button type="button" onClick="{{ pg.refresh }}" aria-label="Actualiser le classement" class="pkm-pg-refresh"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg></button></div>
+<sc-if value="{{ pg.hasBoard }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-pg-podium" role="list" aria-label="Top 3">
+<sc-for list="{{ pg.podium }}" as="pgp" hint-placeholder-count="3"><div role="listitem" class="{{ pgp.podCls }}" aria-label="{{ pgp.aria }}">
+<img src="{{ pgp.medal }}" alt="" width="52" height="52" class="pkm-pg-medal">
+<b class="pkm-pg-ppseudo">{{ pgp.pseudo }}</b>
+<span class="pkm-pg-pgrade" style="color: {{ pgp.gColor }}"><img src="{{ pgp.gImg }}" alt="" width="20" height="20">{{ pgp.gName }}</span>
+<span class="pkm-pg-ppk">{{ pgp.pk }}</span>
+<span class="pkm-pg-step"><b>{{ pgp.rankText }}</b></span>
+</div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ pg.hasRest }}" hint-placeholder-val="{{ true }}">
+<ol class="pkm-pg-list"><sc-for list="{{ pg.rest }}" as="pgr" hint-placeholder-count="5"><li class="{{ pgr.cls }}" aria-label="{{ pgr.aria }}"><span class="pkm-pg-n">{{ pgr.rankText }}</span><img src="{{ pgr.gImg }}" alt="" width="30" height="30"><span class="pkm-pg-who"><b>{{ pgr.pseudo }}</b><small style="color: {{ pgr.gColor }}">{{ pgr.gName }}</small></span><span class="pkm-pg-pk">{{ pgr.pk }}</span></li></sc-for></ol>
+</sc-if>
+<sc-if value="{{ pg.hasMeRow }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-pg-gap" aria-hidden="true">•••</div>
+<div class="{{ pg.meRow.cls }}" aria-label="{{ pg.meRow.aria }}"><span class="pkm-pg-n">{{ pg.meRow.rankText }}</span><img src="{{ pg.meRow.gImg }}" alt="" width="30" height="30"><span class="pkm-pg-who"><b>{{ pg.meRow.pseudo }}</b><small style="color: {{ pg.meRow.gColor }}">{{ pg.meRow.gName }}</small></span><span class="pkm-pg-pk">{{ pg.meRow.pk }}</span></div>
+</sc-if>
+<sc-if value="{{ pg.busy }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">Chargement du classement…</p></sc-if>
+<sc-if value="{{ pg.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ pg.emptyText }}</p></sc-if>
+</section>
+<section aria-label="Lots de la saison" class="pkm-pg-rewards pkm-dark">
+<h2>Lots de la saison</h2>
+<sc-for list="{{ pg.rewards }}" as="pgw" hint-placeholder-count="3"><div class="{{ pgw.cls }}"><span class="pkm-pg-rwico"><sc-if value="{{ pgw.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pgw.img }}" alt="" width="36" height="36"></sc-if><sc-if value="{{ pgw.noImg }}" hint-placeholder-val="{{ false }}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" class="pkm-pg-crown"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg></sc-if></span><span class="pkm-pg-rwt"><b>{{ pgw.range }}</b><span>{{ pgw.prize }}</span><small>{{ pgw.note }}</small></span></div></sc-for>
+<p class="pkm-pg-rules">{{ pg.rules }}</p>
+</section>
 </sc-if>
