@@ -1,6 +1,6 @@
 {"v":1,"note":"Contrôle des données publiées (tools/check_data.py) : une source par ligne.",
 
-"cards":{"checked":"2026-11-07T11:33:50Z","ok":true,"upstream":"2026-11-07","count":21365,"previous":21365,"delta":0,"warnings":[],"errors":[],"details":{"cardsCm":20837,"cardsPriced":21097,"cardsEn":1211,"imgNone":269,"cardsDoubt":2146,"sets":208}},
+"cards":{"checked":"2026-11-08T11:55:04Z","ok":true,"upstream":"2026-11-07","count":21365,"previous":21365,"delta":0,"warnings":[],"errors":[],"details":{"cardsCm":20837,"cardsPriced":21097,"cardsEn":1211,"imgNone":269,"cardsDoubt":2146,"sets":208}},
 
 "sealed":{"checked":"2026-11-08T11:16:29Z","ok":false,"upstream":"2026-11-07T02:45:48+0100","count":61,"previous":61,"delta":0,"warnings":[],"errors":["prix du 2026-11-07 : guide Cardmarket non renouvelé depuis 34 h"],"details":{"priced":58,"pricedBefore":58,"days":31}},
 
