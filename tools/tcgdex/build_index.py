@@ -368,7 +368,10 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
     for sids in groups.values():
         sid = "+".join(sids)
         rows = [c for s in sids for c in sorted(by_set[s], key=lambda c: natural(c[f["num"]]))]
-        if not files or not any(no_cm(c) for c in rows):
+        # 30ᵉ Anniversaire (table EXPANSIONS) : toujours rapproché, même quand TCGdex donne un prix, car TCGdex y relie des
+        # réimpressions au mauvais produit (Palkia LV.X de la Collection Classique au Palkia du set principal, 2026-11-08).
+        fixed_set = sids[0] in cmfiles.EXPANSIONS
+        if not files or not (fixed_set or any(no_cm(c) for c in rows)):
             continue
         english = lambda c: (sets.get(c[f["set"]]) or [""] * 6)[5] == "en"
         names = {c[f["id"]]: en_names.get(c[f["id"]]) or (c[f["name"]] if english(c) or c[f["lang"]] == "en" else None) for c in rows}
@@ -385,7 +388,9 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
         found = files.match([(c[f["id"]], names.get(c[f["id"]])) for c in rows], exps)
         got = 0
         for c in rows:
-            p = files.prices(found[c[f["id"]]]) if no_cm(c) and c[f["id"]] in found else None
+            cid = c[f["id"]]
+            wrong = fixed_set and cid in cm_ids and cid in found and cm_ids[cid] != found[cid]
+            p = files.prices(found[cid]) if (no_cm(c) or wrong) and cid in found else None
             if not p:
                 continue
             trend, low, avg30, avg7, avg1, other, grp = p

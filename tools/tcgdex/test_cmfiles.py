@@ -148,6 +148,17 @@ class Verify(unittest.TestCase):
         n, _ = fill_cardmarket(cards, {"ex8": ["Holon", "", "", "", "", "en"]}, {}, {"ex13-15": 5}, files, en_fetch=lambda sid: {})
         self.assertEqual((n, cards[0][f["cm"]], cards[0][f["cmf"]]), (0, 59.26, 0))
 
+    def test_30th_reprint_linked_by_tcgdex_to_the_wrong_product(self):
+        # 2026-11-08 : TCGdex donne au Palkia LV.X de la Collection Classique le prix du Palkia du set principal.
+        f = {k: i for i, k in enumerate(FIELDS)}
+        files = cmfiles.CmFiles([prod(30, "Palkia [Wormhole | 30]"), prod(31, "Palkia LV.X [Restructure | Hydro Reflect]")],
+                                [guide(30, 0.07, 0.07, 0.07), guide(31, 12.21, 12.45, 12.65, 8)], "2026-11-07")
+        cards = [row("30th-020", "Palkia", "30th", "020", "", "", (0.06, None, 0.11, None, "2026-11-07", 0.08, None, None, "n", 0)),
+                 row("30th-c-022", "Palkia", "30th-c", "022", "", "", (0.06, None, 0.11, None, "2026-11-07", 0.08, None, None, "n", 0))]
+        n, _ = fill_cardmarket(cards, {}, {"30th-020": "Palkia", "30th-c-022": "Palkia"}, {"30th-020": 30, "30th-c-022": 30}, files, en_fetch=lambda sid: {})
+        self.assertEqual((cards[1][f["cm"]], cards[1][f["avg30"]], cards[1][f["cmf"]]), (12.21, 12.45, 1))
+        self.assertEqual((cards[0][f["cm"]], cards[0][f["cmf"]]), (0.06, 0))  # bien relié par TCGdex : inchangé
+
     def test_volatile_trend_alone_is_not_enough(self):
         f = {k: i for i, k in enumerate(FIELDS)}
         files = cmfiles.CmFiles([prod(7, "Lugia [Aeroblast]", 202)], [guide(7, 1328.93, 825.5, 913.69)], "2026-11-01")
