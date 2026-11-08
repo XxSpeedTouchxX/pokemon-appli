@@ -1,0 +1,27 @@
+# Lecture des enregistrements DNS e-mail de dropicards.fr (SPF, DKIM de Brevo, DMARC, MX) : vérifie que les e-mails de
+# l'app peuvent arriver en boîte de réception plutôt qu'en spam (2026-11-08). Lecture seule, à la demande.
+name: Contrôle DNS des e-mails
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/dns-check.yml
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Enregistrements
+        run: |
+          sudo apt-get install -y -qq dnsutils >/dev/null 2>&1 || true
+          for n in dropicards.fr _dmarc.dropicards.fr brevo1._domainkey.dropicards.fr brevo2._domainkey.dropicards.fr mail._domainkey.dropicards.fr; do
+            echo "== TXT $n"; dig +short TXT "$n" @1.1.1.1
+            echo "== CNAME $n"; dig +short CNAME "$n" @1.1.1.1
+          done
+          echo "== MX dropicards.fr"; dig +short MX dropicards.fr @1.1.1.1
