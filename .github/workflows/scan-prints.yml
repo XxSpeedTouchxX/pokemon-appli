@@ -1,0 +1,57 @@
+# Empreintes visuelles des cartes pour le scan (2026-11-08) : tools/scan/prints.mjs télécharge le petit visuel de
+# chaque carte (une seule fois, gardé dans le cache d'Actions), calcule son empreinte avec le code de l'app
+# (tools/web/scan-print.js) et publie web/data/scan-prints.json. Chaque lundi (nouvelles cartes), à la demande, ou
+# quand le calcul change.
+name: Empreintes des cartes
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "41 5 * * 1"
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - tools/scan/prints.mjs
+      - tools/web/scan-print.js
+      - .github/workflows/scan-prints.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scan-prints
+  cancel-in-progress: false
+
+jobs:
+  prints:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/web/package-lock.json
+      - name: Dépendances
+        working-directory: tools/web
+        run: npm ci && npx playwright-core install --with-deps chromium
+      - name: Visuels et empreintes déjà connus
+        uses: actions/cache@v4
+        with:
+          path: .cache/scan
+          key: scan-prints-${{ github.run_id }}
+          restore-keys: scan-prints-
+      - name: Empreintes
+        run: node tools/scan/prints.mjs
+      - name: Publier
+        run: |
+          git add web/data/scan-prints.json
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Empreintes des cartes pour le scan ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin claude/pokemon-app-mockup-1mxt7p
+          git push origin HEAD:claude/pokemon-app-mockup-1mxt7p

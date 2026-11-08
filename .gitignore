@@ -4,3 +4,4 @@ tools/web/artifact.html
 __pycache__/
 tools/brand/node_modules/
 tools/web/e2e/out/
+.cache/
