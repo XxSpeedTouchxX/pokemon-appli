@@ -18,6 +18,8 @@ const rules = page.locator('section[aria-label="Informations légales"]');
 ok('règles : petit booster devant « Booster PK » (plus de cadeau)', (await rules.locator('section[aria-label="Booster PK"] h3 .pkm-rules-pack').count()) === 1 && !/🎁/.test(await rules.innerText()));
 ok('règles : 3 tickets Bronze, Argent, Or dans la ligne du PK shop', (await rules.locator('.pkm-rules-shop .pkm-shop-t-bronze').count()) === 1 && (await rules.locator('.pkm-rules-shop .pkm-shop-t-argent').count()) === 1 && (await rules.locator('.pkm-rules-shop .pkm-shop-t-or').count()) === 1);
 const me = rules.locator('.pkm-rules-me');
+const xs = await rules.locator('.pkm-rules-shop > div').evaluateAll(rs => rs.map(r => Math.round(r.querySelector('b').getBoundingClientRect().left)));
+ok('règles : tickets dans la même colonne que les photos, textes alignés (' + xs.join(', ') + ')', xs.length === 6 && xs.every(x => Math.abs(x - xs[0]) <= 1));
 ok('règles : « Grade actuel » dans l’encadré jaune du grade', (await me.count()) === 1 && /Grade actuel/i.test(await me.innerText()) && (await rules.locator('.pkm-rules-nowtag').count()) === 1);
 const rowH = await rules.locator('.pkm-rules-row:not(.pkm-rules-th)').first().evaluate(e => e.getBoundingClientRect().height);
 ok('règles : lignes des grades agrandies (' + Math.round(rowH) + ' px)', rowH >= 52);

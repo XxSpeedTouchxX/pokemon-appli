@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-08 — Retouches : tickets des règles, entrée de « Ma progression » (demande du porteur)
+
+- Règles des PK et PA : les 3 tickets du PK shop sont dans la même colonne que les photos des items, textes alignés (la boîte du ticket prenait la moitié de la ligne).
+- « Ma progression » : la page arrive de la droite, puis la saison, la carte, le classement et les lots glissent l'un après l'autre ; le podium se pose (3ᵉ, 2ᵉ, puis 1ᵉʳ). Rien de tout cela si le téléphone demande moins d'animations.
+- Cache v160.
+
+---
+
 ## 2026-11-08 — « Mon avatar » (demande du porteur, avec vidéo)
 
 - **Photo personnelle retirée** de Mon profil. La bulle de l'avatar (crayon) ouvre **« Mon avatar »** : chacun compose un dresseur dessiné par l'app (dessin original en SVG, inspiré de la vidéo du porteur pour l'ergonomie, pas pour les dessins), avec son Pokémon préféré à ses côtés.

@@ -99,7 +99,9 @@
 .pkm-rules-pack::before { top: -2px; border-radius: 3px 3px 0 0; } .pkm-rules-pack::after { bottom: -2px; border-radius: 0 0 3px 3px; }
 .pkm-rules-card h3 .pkm-rules-pack img { width: 12px; height: 12px; }
 /* Tickets Bronze, Argent, Or (2026-11-08, porteur) : à la place de la gemme des PK, dans la ligne du PK shop. */
-.pkm-rules-tkbox { flex: none; width: 56px; height: 44px; display: flex; align-items: center; justify-content: center; }
+/* « .pkm-rules-shop > div > span » (texte, flex: 1) prenait aussi la boîte du ticket : le ticket occupait la moitié de la
+   ligne et poussait le texte (2026-11-08, porteur). Même colonne de 56 px que les photos des items. */
+.pkm-rules-shop > div > .pkm-rules-tkbox { flex: none; width: 56px; min-width: 56px; height: 44px; display: flex; flex-direction: row; align-items: center; justify-content: center; }
 .pkm-rules-tkbox .pkm-shop-ticket { width: 50px; height: 34px; border-width: 2px; border-radius: 7px; }
 .pkm-rules-tkbox .pkm-shop-ticket::before, .pkm-rules-tkbox .pkm-shop-ticket::after { width: 10px; height: 10px; margin-top: -5px; border-width: 2px; background: #0B1120; }
 .pkm-rules-tkbox .pkm-shop-ticket::before { left: -6px; } .pkm-rules-tkbox .pkm-shop-ticket::after { right: -6px; }

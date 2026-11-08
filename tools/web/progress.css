@@ -82,3 +82,14 @@ html.pkm-calm .pkm-pg-banner-cup, html.pkm-calm .pkm-pg-pod-1 .pkm-pg-medal { an
 .pkm-pg-ava-m img.pkm-pg-ava-pk { inset: auto; image-rendering: pixelated; object-fit: contain; }
 .pkm-pg-ava-pod { width: 56px; height: 56px; border-radius: 18px; border-color: #FFFFFF; }
 .pkm-pg-row > img { width: 26px; height: 26px; }
+
+/* Entrée de « Ma progression » (2026-11-08, porteur) : la page glisse de la droite (nav.js), puis la saison, la carte,
+   le classement et les lots arrivent l'un après l'autre ; le podium se pose (3ᵉ, 2ᵉ, puis 1ᵉʳ en dernier). */
+@keyframes pkmPgIn { from { opacity: 0; transform: translateX(48px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes pkmPgPop { 0% { opacity: 0; transform: translateY(26px) scale(0.6); } 70% { opacity: 1; transform: translateY(-4px) scale(1.06); } 100% { opacity: 1; transform: none; } }
+.pkm-pg-season, .pkm-pg-card, .pkm-pg-board, .pkm-pg-rewards { animation: pkmPgIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pkm-pg-season { animation-delay: 0.12s; } .pkm-pg-card { animation-delay: 0.22s; } .pkm-pg-board { animation-delay: 0.32s; } .pkm-pg-rewards { animation-delay: 0.42s; }
+.pkm-pg-pod { animation: pkmPgPop 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.pkm-pg-pod-3 { animation-delay: 0.55s; } .pkm-pg-pod-2 { animation-delay: 0.68s; } .pkm-pg-pod-1 { animation-delay: 0.82s; }
+@media (prefers-reduced-motion: reduce) { .pkm-pg-season, .pkm-pg-card, .pkm-pg-board, .pkm-pg-rewards, .pkm-pg-pod { animation: none; } }
+html.pkm-calm .pkm-pg-season, html.pkm-calm .pkm-pg-card, html.pkm-calm .pkm-pg-board, html.pkm-calm .pkm-pg-rewards, html.pkm-calm .pkm-pg-pod { animation: none; }
