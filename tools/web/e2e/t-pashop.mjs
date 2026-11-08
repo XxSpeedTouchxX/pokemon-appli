@@ -34,7 +34,7 @@ const lines = N(await dlg.locator('.pkm-pas-lines').innerText());
 ok('récapitulatif : ' + lines, /Tu recevras 6 000 PA/.test(lines) && /Ton solde après l’achat 6 120 PA/.test(lines) && /Total TTC 14,99 €/.test(lines));
 ok('paiement pas encore ouvert, bouton désactivé', /pas encore ouvert/.test(await dlg.innerText()) && (await dlg.locator('.pkm-pas-pay').isDisabled()));
 await page.screenshot({ path: shot('pashop-recap.png') });
-await dlg.locator('button:has-text("Fermer")').click(); await page.waitForTimeout(300);
+await dlg.locator('button:has-text("Fermer")').click(); await page.waitForTimeout(800);
 ok('fermé, rien de crédité', (await dlg.count()) === 0 && (await page.evaluate(() => window.__pkm.st().pa)) === 120);
 // Pokédex › Tous les Pokémon : logo des PA à côté du prix.
 await page.evaluate(() => { window.__pkm.tab('market'); window.__pkm.setState({ dexList: true }); }); await page.waitForTimeout(900);
