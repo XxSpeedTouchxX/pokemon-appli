@@ -144,15 +144,14 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
 // Accueil en 3 pages (2026-10-30) : flèche de retour et points cliquables (pages déjà vues), pages qui glissent.
 patch('<span aria-hidden="true" style="display: flex; gap: 6px"><sc-for list="{{ ob.dots }}" as="dt" hint-placeholder-count="3"><span style="width: {{ dt.w }}; height: 8px; border-radius: 4px; background: {{ dt.bg }}"></span></sc-for></span>', FRAG['onb-top'].trim());
 patch('<sc-if value="{{ ob.is1 }}" hint-placeholder-val="{{ true }}">\n<div style="flex: 1; display: flex;', '<sc-if value="{{ ob.is1 }}" hint-placeholder-val="{{ true }}">\n<div class="pkm-onb-page" style="flex: 1; display: flex;');
-// Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de la photo ouvre la photothèque
-// (input caché) ; rubrique « Informations du dresseur » sous l'identité.
+// Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de l'avatar ouvre « Mon avatar »
+// (2026-11-08 : photo personnelle retirée, avatar.js, crayon à la place de l'appareil photo) ; rubrique « Informations du dresseur » sous l'identité.
 patch(`<span style="position: relative; flex: none; width: 76px; height: 76px">
-<img src="{{ pf.avatar }}"`, `<input type="file" id="pkm-pf-photo" accept="image/*" tabindex="-1" aria-hidden="true" onChange="{{ pf.photo.onFile }}" style="position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none">
-<button type="button" onClick="{{ pf.photo.pick }}" aria-label="{{ pf.photo.label }}" class="pkm-pf-photo" style="position: relative; flex: none; width: 76px; height: 76px; padding: 0; border: 0; background: transparent; cursor: pointer">
+<img src="{{ pf.avatar }}"`, `<button type="button" onClick="{{ pf.photo.pick }}" aria-label="{{ pf.photo.label }}" class="pkm-pf-photo" style="position: relative; flex: none; width: 76px; height: 76px; padding: 0; border: 0; background: transparent; cursor: pointer">
 <img src="{{ pf.avatar }}"`);
 patch(`<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"></path></svg>
 </span>`, `<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"></path></svg>
-<span class="pkm-pf-cam" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></span>
+<span class="pkm-pf-cam" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M4 20l4-1 11-11-3-3L5 16z"></path><path d="M14 6l3 3"></path></svg></span>
 </button>`);
 patch(`letter-spacing: -0.02em">Ton espace</span>`, `letter-spacing: -0.02em">Mon profil</span>
 <sc-if value="{{ pf.hasName }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13.5px; font-weight: 700; color: var(--pkm-accent)">{{ pf.nameLine }}</span></sc-if>`);
@@ -228,7 +227,7 @@ patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x
   "return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x.who[a.by || 'toi'] : '') + this.copyMeta(p, l), amount:");
 // Onglet « Jeux » (games.js, 2026-10-11, demande du porteur) : l'onglet « Marché » devient « Jeux » (manette) ; son
 // écran montre le booster PK et le pile ou face. L'ancien Marché reste l'écran de recherche (« search »).
-patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.progress + FRAG.games + FRAG.pkshop + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
+patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.progress + FRAG.avatar + FRAG.games + FRAG.pkshop + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
 // 4ᵉ onglet : « PK shop » à la place de Territoire (2026-10-12) ; Territoire s'ouvre depuis l'accueil.
 patch('<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>\n<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.terDot }}"></span>', '<path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"></path><path d="M9 8V6.5a3 3 0 0 1 6 0V8"></path><path d="M12 11.5l1 2 2 .3-1.5 1.4.4 2-1.9-1-1.9 1 .4-2-1.5-1.4 2-.3z"></path></svg>\n<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.terDot }}"></span>');
 // Fiche d'une carte (2026-10-11) : cote à confirmer, et lien vers les ventes réussies eBay (pas de chiffre : ni API
@@ -754,7 +753,7 @@ const { code } = compile(vueTpl, { mode: 'function', prefixIdentifiers: true, ho
 const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.meta.url)), 'utf8'));
 const catalogJs = mod('catalog.js'), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js').replace('__BUILD_VERSION__', 'v' + (/pkm-demo-v(\d+)/.exec(readFileSync(ROOT + 'web/sw.js', 'utf8')) || [0, '?'])[1]), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), cloudJs = mod('cloud.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), notifJs = mod('notif.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), gradedJs = mod('graded.js'), sfxJs = mod('sfx.js'), gameCloudJs = mod('game-cloud.js'), passkeyJs = mod('passkey.js'), premiumJs = mod('premium.js'), navJs = mod('nav.js'), sheetJs = mod('sheet.js'), progressJs = mod('progress.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js').replace('__BUILD_VERSION__', 'v' + (/pkm-demo-v(\d+)/.exec(readFileSync(ROOT + 'web/sw.js', 'utf8')) || [0, '?'])[1]), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), cloudJs = mod('cloud.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), notifJs = mod('notif.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), gradedJs = mod('graded.js'), sfxJs = mod('sfx.js'), gameCloudJs = mod('game-cloud.js'), passkeyJs = mod('passkey.js'), premiumJs = mod('premium.js'), navJs = mod('nav.js'), sheetJs = mod('sheet.js'), progressJs = mod('progress.js'), avatarJs = mod('avatar.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -797,7 +796,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + cloudJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + notifJs + dexJs + voiceJs + tutoJs + ficheJs + gradedJs + sfxJs + gameCloudJs + passkeyJs + premiumJs + navJs + sheetJs + progressJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + cloudJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + notifJs + dexJs + voiceJs + tutoJs + ficheJs + gradedJs + sfxJs + gameCloudJs + passkeyJs + premiumJs + navJs + sheetJs + progressJs + avatarJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -817,7 +816,7 @@ ${logic}
   // Images servies avec la page.
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
-${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${cloudJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${notifJs}${dexJs}${voiceJs}${tutoJs}${ficheJs}${gradedJs}${sfxJs}${gameCloudJs}${passkeyJs}${premiumJs}${progressJs}${navJs}${sheetJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${cloudJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${notifJs}${dexJs}${voiceJs}${tutoJs}${ficheJs}${gradedJs}${sfxJs}${gameCloudJs}${passkeyJs}${premiumJs}${progressJs}${avatarJs}${navJs}${sheetJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -1026,6 +1025,7 @@ ${readFileSync(new URL('./rules.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./premium.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./sheet.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./progress.css', import.meta.url), 'utf8')}
+${readFileSync(new URL('./avatar.css', import.meta.url), 'utf8')}
 ${cssVars()}
 ${v6Css()}
 ${keyframes}`;

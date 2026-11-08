@@ -52,10 +52,9 @@
     ['email', 'Adresse e-mail', 'Ex. : sacha@exemple.fr', 80, 'email', 'email']
   ];
   const pfImgBase = proto.img;
-  proto.img = function () {
-    const o = pfImgBase.call(this), a = this.state && this.state.avatarImg;
-    return typeof a === 'string' && a.startsWith('data:image/') ? Object.assign({}, o, { avatar: a }) : o;
-  };
+  // Photo personnelle retirée le 2026-11-08 (porteur) : l'avatar composé (avatar.js) la remplace ; une photo déjà
+  // choisie n'est plus affichée.
+  proto.img = function () { return pfImgBase.call(this); };
   // Lecture de la photo choisie : recadrage centré, carré de 256 px, JPEG.
   proto.pfPhoto = function (file) {
     if (!file || !/^image\//.test(file.type || 'image/')) return;

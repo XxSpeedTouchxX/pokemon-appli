@@ -20,6 +20,8 @@ ok('sans serveur : carte sans place, invitation à se connecter', /Connecte-toi 
 // Classement du serveur imité : 40 joueurs, moi 34ᵉ.
 await page.evaluate(() => {
   const top = Array.from({ length: 30 }, (_, i) => ({ rank: i + 1, pseudo: ['SachaDuBourg', 'Ondine', 'PierreRoc', 'Flora', 'Régis'][i] || 'Dresseur' + (i + 1), grade: Math.max(0, 5 - Math.floor(i / 6)), pk: 52000 - i * 1500, me: false }));
+  top[0].avatar = { skin: 's2', face: 'ovale', eyes: 'grands', hair: 'long', hc: 'roux', outfit: 'cape', bg: 'holo', pos: 'right', size: 100, poke: 25 };
+  top[4].avatar = { skin: 's7', hair: 'pics', hc: 'noir', outfit: 'maillot', bg: 'nuit', pos: 'left', poke: 6 };
   window.__pkm.setState({ progBoard: { season: { n: 1, start: '2026-11-07T23:00:00Z', end: '2027-01-06T23:00:00Z' }, players: 40, top: top, me: { rank: 34, pk: 4200 }, pk_total: 12850, grade: 2 }, progAt: Date.now() });
 });
 await page.waitForTimeout(400);
@@ -31,6 +33,7 @@ await page.screenshot({ path: shot('progress-carte.png') });
 const pods = await page.locator('.pkm-pg-pod').evaluateAll(ps => ps.map(p => p.className + '|' + p.querySelector('.pkm-pg-ppseudo').textContent));
 ok('podium : 2ᵉ à gauche, 1ᵉʳ au centre (coupe), 3ᵉ à droite', pods.length === 3 && /pod-2/.test(pods[0]) && /pod-1\b/.test(pods[1]) && /SachaDuBourg/.test(pods[1]) && /pod-3/.test(pods[2]));
 ok('podium : coupe et médailles dessinées', (await page.locator('.pkm-pg-pod img.pkm-pg-medal[src="img/rank/1.svg"]').count()) === 1 && (await page.locator('.pkm-pg-pod img.pkm-pg-medal[src="img/rank/3.svg"]').count()) === 1);
+ok('avatars des joueurs : podium (1ᵉʳ) et liste (5ᵉ), emblème sinon', (await page.locator('.pkm-pg-pod-1 .pkm-pg-ava-pod').count()) === 1 && (await page.locator('ol.pkm-pg-list > li').nth(1).locator('.pkm-pg-ava-m').count()) === 1 && (await page.locator('ol.pkm-pg-list > li').nth(0).locator('.pkm-pg-ava-m').count()) === 0);
 ok('classement : 4ᵉ à 30ᵉ avec le grade à côté du pseudo', (await page.locator('ol.pkm-pg-list > li').count()) === 27 && /Flora/.test(await page.locator('ol.pkm-pg-list > li').first().innerText()));
 ok('ma ligne en bas (34ᵉ), en jaune', (await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').count()) === 1 && /34/.test(await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').innerText()));
 await page.locator('section[aria-label="Classement général"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('progress-podium.png') });

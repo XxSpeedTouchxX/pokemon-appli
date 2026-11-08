@@ -1891,6 +1891,84 @@ html.pkm-calm .pkm-sheet, html.pkm-calm :has(> .pkm-sheet) { animation: none; }
 .pkm-pg-rules { margin: 0; font-size: 12px; line-height: 1.5; color: #9AA8C3; }
 @media (prefers-reduced-motion: reduce) { .pkm-pg-banner-cup, .pkm-pg-pod-1 .pkm-pg-medal { animation: none; } }
 html.pkm-calm .pkm-pg-banner-cup, html.pkm-calm .pkm-pg-pod-1 .pkm-pg-medal { animation: none; }
+.pkm-pg-ava-m { flex: none; position: relative; display: block; width: 38px; height: 38px; border-radius: 12px; overflow: hidden; background: #0B1120; border: 2px solid #2A3A5C; }
+.pkm-pg-ava-m img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pkm-pg-ava-m img.pkm-pg-ava-pk { inset: auto; image-rendering: pixelated; object-fit: contain; }
+.pkm-pg-ava-pod { width: 56px; height: 56px; border-radius: 18px; border-color: #FFFFFF; }
+.pkm-pg-row > img { width: 26px; height: 26px; }
+
+/* « Mon avatar » (2026-11-08, porteur, d'après sa vidéo) : aperçu, rubriques, styles PRO, choix du Pokémon. */
+.pkm-av-top { flex: none; position: relative; display: flex; justify-content: center; padding: 4px 0; }
+.pkm-av-side { position: absolute; left: 0; top: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 2; }
+.pkm-av-side-b { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 64px; padding: 8px 0; border: 1px solid #2A3A5C; border-radius: 16px; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+.pkm-av-side-b svg { fill: none; stroke: currentColor; stroke-width: 1.8; }
+.pkm-av-side-b svg circle { fill: currentColor; }
+.pkm-av-prev { position: relative; width: 220px; height: 220px; border-radius: 52px; overflow: hidden; border: 4px solid #FFFFFF; box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35); background: #111A2C; }
+.pkm-av-l { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pkm-av-pk-l { position: absolute; display: block; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.35)); }
+.pkm-av-trial { flex: none; margin: 0; padding: 8px 12px; border-radius: 14px; background: rgba(255, 214, 10, 0.16); border: 1px solid rgba(255, 214, 10, 0.55); color: #0B1120; font-size: 13px; font-weight: 800; text-align: center; }
+.pkm-av-tabs { flex: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 20px; background: #111A2C; border: 1px solid #1E2B45; }
+.pkm-av-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; padding: 6px 0; border: 0; border-radius: 16px; background: transparent; color: #C9D3EA; font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+.pkm-av-tab svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-av-tab-on { background: #FFD60A; color: #0B1120; }
+.pkm-av-premtag { flex: none; margin: -2px 0 0; font-size: 12px; color: #0B1120; text-align: center; font-weight: 700; opacity: 0.8; }
+.pkm-av-sec { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; }
+.pkm-av-sec h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; }
+.pkm-av-sec h3 { margin: 4px 0 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #9AA8C3; }
+.pkm-av-size { color: #FFD60A; letter-spacing: 0; }
+.pkm-av-p { margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA; }
+.pkm-av-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pkm-av-slot { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 108px; padding: 8px 4px; border-radius: 18px; border: 1px dashed #3B4F86; background: #0B1120; color: #F3F6FC; font: inherit; cursor: pointer; }
+.pkm-av-slot img { image-rendering: pixelated; }
+.pkm-av-slot b { font-size: 12.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-av-slot small { font-size: 11px; color: #FF7AC6; font-weight: 700; }
+.pkm-av-slot-on { border: 2px solid #FF7AC6; background: rgba(255, 122, 198, 0.12); }
+.pkm-av-plus { font-size: 28px; line-height: 1; color: #9AA8C3; }
+.pkm-av-row2 { display: flex; gap: 8px; flex-wrap: wrap; }
+.pkm-av-btn { flex: 1; min-height: 44px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.pkm-av-btn-red { color: #FF8A8F; border-color: #5A2A34; }
+.pkm-av-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pkm-av-chips button { min-height: 40px; padding: 0 14px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.pkm-av-range { width: 100%; accent-color: #FFD60A; }
+.pkm-av-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pkm-av-grid5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.pkm-av-opt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 2px 6px; border: 2px solid transparent; border-radius: 18px; background: transparent; color: #C9D3EA; font: inherit; cursor: pointer; }
+.pkm-av-opt small { font-size: 11px; line-height: 1.15; text-align: center; }
+.pkm-av-on { border-color: #FFD60A; background: rgba(255, 214, 10, 0.1); color: #FFFFFF; }
+.pkm-av-mini { position: relative; display: block; width: 100%; aspect-ratio: 1; border-radius: 16px; overflow: hidden; background: #0B1120; }
+.pkm-av-mini img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pkm-av-mini-xl { width: 140px; border-radius: 34px; border: 3px solid #FFFFFF; }
+.pkm-av-swatch { display: block; width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.85); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-av-sw.pkm-av-on .pkm-av-swatch { box-shadow: 0 0 0 3px #FFD60A; }
+.pkm-av-pro { position: absolute; top: -4px; right: -2px; padding: 2px 6px; border-radius: 999px; background: linear-gradient(135deg, #FFE46B, #F2A900); color: #0B1120; font-size: 9.5px; font-weight: 900; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-av-pro::before { content: '♛ '; }
+.pkm-av-pro-ok { background: linear-gradient(135deg, #CFFFE4, #3BC48A); }
+.pkm-av-pro-big { position: static; align-self: center; font-size: 12px; padding: 3px 10px; }
+.pkm-av-save { flex: none; position: sticky; bottom: 92px; z-index: 3; padding-top: 4px; }
+.pkm-av-savebtn { width: 100%; min-height: 56px; border: 0; border-radius: 999px; background: #3D63FF; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 800; box-shadow: 0 10px 24px rgba(61, 99, 255, 0.45); cursor: pointer; }
+.pkm-av-wrap { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(3, 6, 14, 0.62); }
+.pkm-av-scrim { position: absolute; inset: 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.pkm-av-sheet { position: relative; max-height: 86vh; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; padding: 16px 16px calc(22px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; border-top: 1px solid #24345C; background: #0F1828; color: #F3F6FC; }
+.pkm-av-sh { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.pkm-av-sh > span { display: flex; flex-direction: column; gap: 2px; }
+.pkm-av-sh b { font-family: 'Sora', sans-serif; font-size: 19px; }
+.pkm-av-sh small { font-size: 13px; color: #C9D3EA; }
+.pkm-av-x { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #1E2B45; border-radius: 22px; background: #111A2C; color: #F3F6FC; cursor: pointer; }
+.pkm-av-x svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.pkm-av-q { min-height: 46px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; }
+.pkm-av-pks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.pkm-av-pk { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; border: 2px solid transparent; border-radius: 16px; background: #111A2C; color: #F3F6FC; font: inherit; cursor: pointer; }
+.pkm-av-pk img { image-rendering: pixelated; }
+.pkm-av-pk b { font-size: 11.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-av-pk small { font-size: 10px; color: #9AA8C3; }
+.pkm-av-locksh { align-items: stretch; text-align: center; }
+.pkm-av-locksh .pkm-av-mini-xl { align-self: center; }
+.pkm-av-locksh h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 20px; }
+.pkm-av-buy { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 0; border-radius: 999px; background: linear-gradient(135deg, #B26BFF, #6A3CEB); color: #FFFFFF; font: inherit; font-size: 15.5px; font-weight: 800; cursor: pointer; }
+.pkm-av-buy[aria-disabled="true"] { opacity: 0.5; }
+.pkm-av-short { margin: -4px 0 0; font-size: 12.5px; color: #FF8A8F; font-weight: 700; }
+.pkm-av-premgo { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 2px solid #C9A227; border-radius: 999px; background: linear-gradient(135deg, #F3F6FC, #AEB9D0); color: #0B1120; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.pkm-av-premgo svg { fill: #FFD60A; stroke: #0B1120; stroke-width: 1.4; stroke-linejoin: round; }
 
 :root { --pkm-app: #0B1120; --pkm-field: #0B1120; --pkm-card: #111A2C; --pkm-card-hi: #121C33; --pkm-card-2: #0F1828; --pkm-card-teal: #0F1D2B; --pkm-img-bg: #16213A; --pkm-toast: #16223A; --pkm-track: #24345C; --pkm-photo-mat: #FFFFFF; --pkm-pearl: #E8ECFF; --pkm-line: #1E2B45; --pkm-line-2: #2A3A5C; --pkm-line-3: #24345C; --pkm-line-4: #3A4A75; --pkm-line-teal: #1F5A55; --pkm-t1: #F3F6FC; --pkm-t2: #C9D3EA; --pkm-t3: #9AA8C3; --pkm-t4: #7D8BA8; --pkm-t5: #5A6B8C; --pkm-link: #B9C5FF; --pkm-ink: #0B1120; --pkm-white: #FFFFFF; --pkm-accent: #A8B6FF; --pkm-on-accent: #0B1120; --pkm-brand: #3D63FF; --pkm-scan-1: #5B7BFF; --pkm-scan-2: #2F4FE0; --pkm-scan-3: #3D63FF; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #FFFFFF; --pkm-iris: #6C84F2; --pkm-regular: #A8B6FF; --pkm-green: #3DDC84; --pkm-up: #3DDC84; --pkm-down: #FF6B6B; --pkm-red: #FF8A8A; --pkm-orange: #F5B14C; --pkm-amber: #FFB547; --pkm-teal: #5EE0CF; --pkm-logo: #FFD60A; --pkm-gold: #FFD66B; --pkm-sand: #F7C77E; --pkm-sand-2: #F3D9AE; --pkm-gray: #9AA8C3; --pkm-off: #56648A; --pkm-peach: #FFC9A8; --pkm-bar-cost: #34415F; --pkm-bar-edge: #56648A; --pkm-bar-fees: #D5763A; --pkm-bar-margin: #6C84F2; --pkm-chip-bg: transparent; --pkm-chip-bc: #2A3A5C; --pkm-chip-fg: #C9D3EA; --pkm-chip-on-bg: #26345A; --pkm-chip-on-bc: #3A4A75; --pkm-chip-on-fg: #FFFFFF; --pkm-choice-bg: #111A2C; --pkm-choice-bc: #24345C; --pkm-choice-on-bg: #1A2645; --pkm-choice-on-bc: #A8B6FF; --pkm-nav-on: #FFFFFF; --pkm-nav-off: #7D8BA8; --pkm-nav-dot: #A8B6FF; --pkm-dim: 0.6; --pkm-off-bg: #26345A; --pkm-glow-rgb: 98, 122, 255; --pkm-accent-rgb: 168, 182, 255; --pkm-regular-rgb: 168, 182, 255; --pkm-ink-rgb: 8, 13, 26; --pkm-app-rgb: 11, 17, 32; --pkm-deep-rgb: 5, 8, 15; --pkm-scrim-rgb: 3, 6, 14; --pkm-hl-rgb: 255, 255, 255; --pkm-shadow-rgb: 0, 0, 0; --pkm-orange-rgb: 245, 177, 76; --pkm-teal-rgb: 94, 224, 207; --pkm-green-rgb: 61, 220, 132; --pkm-amber-rgb: 255, 181, 71; --pkm-gold-rgb: 255, 214, 107; --pkm-iris-rgb: 108, 132, 242; --pkm-blue-rgb: 61, 99, 255; --pkm-gray-rgb: 154, 168, 195; }
 html:not(.pkm-classic) .pkm-root { --pkm-app: radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFD60A 45%, #FFB703 100%); --pkm-t1: #0B1120; --pkm-t2: #1F2433; --pkm-t3: #33363F; --pkm-t4: #41434A; --pkm-t5: #41434A; --pkm-link: #0A2A88; --pkm-ink: #0B1120; --pkm-logo: #0B1120; --pkm-accent: #0B1120; --pkm-on-accent: #FFD84D; --pkm-accent-rgb: 11, 17, 32; --pkm-glow-rgb: 255, 255, 255; --pkm-brand: #0B1120; --pkm-line: rgba(11, 17, 32, 0.16); --pkm-line-2: rgba(11, 17, 32, 0.22); --pkm-line-3: rgba(11, 17, 32, 0.2); --pkm-line-4: rgba(11, 17, 32, 0.32); --pkm-track: rgba(11, 17, 32, 0.16); --pkm-chip-bg: rgba(255, 255, 255, 0.45); --pkm-chip-bc: rgba(11, 17, 32, 0.18); --pkm-chip-fg: #1F2433; --pkm-chip-on-bg: #0B1120; --pkm-chip-on-bc: #0B1120; --pkm-chip-on-fg: #FFD84D; --pkm-choice-bg: rgba(255, 255, 255, 0.45); --pkm-choice-bc: rgba(11, 17, 32, 0.18); --pkm-choice-on-bg: rgba(255, 255, 255, 0.85); --pkm-choice-on-bc: #0B1120; --pkm-green: #054A24; --pkm-up: #054A24; --pkm-down: #8F1414; --pkm-red: #8F1414; --pkm-orange: #6B3500; --pkm-amber: #6B3500; --pkm-teal: #04463F; --pkm-gold: #5C4400; --pkm-sand: #5C3D00; --pkm-sand-2: #4D3810; --pkm-gray: #41434A; --pkm-off: #4D4F57; --pkm-regular: #22348F; --pkm-iris: #22348F; --pkm-shadow-rgb: 70, 45, 0; --pkm-off-bg: rgba(11, 17, 32, 0.08); --pkm-card: rgba(10, 17, 48, 0.9); --pkm-card-hi: rgba(12, 22, 66, 0.94); --pkm-card-2: rgba(8, 14, 40, 0.92); --pkm-card-teal: rgba(4, 32, 44, 0.9); --pkm-field: rgba(0, 4, 18, 0.55); --pkm-toast: rgba(10, 17, 48, 0.86); --pkm-nav-on: #FFD60A; --pkm-nav-off: #BCC5D9; --pkm-nav-dot: #FFD60A; --pkm-scan-1: #FFE45C; --pkm-scan-2: #F2A900; --pkm-scan-3: #FFD60A; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #0B1120; --pkm-blue-rgb: 255, 214, 10; --pkm-dim: 0.8; }
@@ -2048,6 +2126,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=a8663477"></script>
+<script src="app.js?v=fb98dab6"></script>
 </body>
 </html>

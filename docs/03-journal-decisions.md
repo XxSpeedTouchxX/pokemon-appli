@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-08 — « Mon avatar » (demande du porteur, avec vidéo)
+
+- **Photo personnelle retirée** de Mon profil. La bulle de l'avatar (crayon) ouvre **« Mon avatar »** : chacun compose un dresseur dessiné par l'app (dessin original en SVG, inspiré de la vidéo du porteur pour l'ergonomie, pas pour les dessins), avec son Pokémon préféré à ses côtés.
+- **5 rubriques** : Préféré (Pokémon choisi parmi ceux débloqués dans le Pokédex, 6 placements, taille de 60 à 140 %, 2ᵉ « coup de cœur » en PRO), Visage (10 teints + 4 PRO, 3 formes, 4 yeux dont 1 PRO), Cheveux (11 coiffures dont 4 PRO, 12 couleurs dont 4 PRO), Style (9 tenues dont 3 PRO), Décor (11 fonds dont 4 PRO) ; bouton « Aléatoire » ; « Enregistrer mon avatar ».
+- **Styles PRO** (21) : ouverts avec Premium, ou débloqués pour toujours avec des PA (**prix par défaut, à confirmer** : teints 150, yeux étoilés 150, coiffures 200, couleurs 100, tenues 250, fonds 150, coup de cœur 300 PA). On peut les essayer dans l'aperçu ; l'enregistrement demande de les débloquer.
+- L'avatar remplace l'illustration partout (en-tête, profil, Ma progression) et apparaît dans le classement (podium et liste).
+- **Serveur** : `tools/supabase/014_avatar.sql` (20 tests), **à installer par le porteur après 013** : PA débités et styles vérifiés par le serveur.
+- **Pas fait** : « Looks » de la vidéo (avatars enregistrés pour passer de l'un à l'autre), à faire si le porteur le souhaite.
+- Cache v159.
+
+---
+
 ## 2026-11-08 — « Ma progression » : saisons et classement (demande du porteur)
 
 - **Nouvelle rubrique « Ma progression »**, ouverte depuis l'onglet Jeux (bannière sous le solde) : saison en cours et temps restant ; carte du joueur (avatar, pseudo, emblème du grade, PK de la saison, PK gagnés au total, place sur le nombre de joueurs) ; classement général avec podium du top 3 (coupe à couronne, médailles d'argent et de bronze, dessinées pour l'app) et le grade à côté de chaque pseudo ; lots de la saison.

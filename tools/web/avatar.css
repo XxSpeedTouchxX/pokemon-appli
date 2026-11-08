@@ -1,0 +1,72 @@
+/* « Mon avatar » (2026-11-08, porteur, d'après sa vidéo) : aperçu, rubriques, styles PRO, choix du Pokémon. */
+.pkm-av-top { flex: none; position: relative; display: flex; justify-content: center; padding: 4px 0; }
+.pkm-av-side { position: absolute; left: 0; top: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 2; }
+.pkm-av-side-b { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 64px; padding: 8px 0; border: 1px solid #2A3A5C; border-radius: 16px; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+.pkm-av-side-b svg { fill: none; stroke: currentColor; stroke-width: 1.8; }
+.pkm-av-side-b svg circle { fill: currentColor; }
+.pkm-av-prev { position: relative; width: 220px; height: 220px; border-radius: 52px; overflow: hidden; border: 4px solid #FFFFFF; box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35); background: #111A2C; }
+.pkm-av-l { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pkm-av-pk-l { position: absolute; display: block; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.35)); }
+.pkm-av-trial { flex: none; margin: 0; padding: 8px 12px; border-radius: 14px; background: rgba(255, 214, 10, 0.16); border: 1px solid rgba(255, 214, 10, 0.55); color: #0B1120; font-size: 13px; font-weight: 800; text-align: center; }
+.pkm-av-tabs { flex: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 20px; background: #111A2C; border: 1px solid #1E2B45; }
+.pkm-av-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; padding: 6px 0; border: 0; border-radius: 16px; background: transparent; color: #C9D3EA; font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+.pkm-av-tab svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-av-tab-on { background: #FFD60A; color: #0B1120; }
+.pkm-av-premtag { flex: none; margin: -2px 0 0; font-size: 12px; color: #0B1120; text-align: center; font-weight: 700; opacity: 0.8; }
+.pkm-av-sec { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; }
+.pkm-av-sec h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; }
+.pkm-av-sec h3 { margin: 4px 0 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #9AA8C3; }
+.pkm-av-size { color: #FFD60A; letter-spacing: 0; }
+.pkm-av-p { margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA; }
+.pkm-av-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pkm-av-slot { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 108px; padding: 8px 4px; border-radius: 18px; border: 1px dashed #3B4F86; background: #0B1120; color: #F3F6FC; font: inherit; cursor: pointer; }
+.pkm-av-slot img { image-rendering: pixelated; }
+.pkm-av-slot b { font-size: 12.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-av-slot small { font-size: 11px; color: #FF7AC6; font-weight: 700; }
+.pkm-av-slot-on { border: 2px solid #FF7AC6; background: rgba(255, 122, 198, 0.12); }
+.pkm-av-plus { font-size: 28px; line-height: 1; color: #9AA8C3; }
+.pkm-av-row2 { display: flex; gap: 8px; flex-wrap: wrap; }
+.pkm-av-btn { flex: 1; min-height: 44px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.pkm-av-btn-red { color: #FF8A8F; border-color: #5A2A34; }
+.pkm-av-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pkm-av-chips button { min-height: 40px; padding: 0 14px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.pkm-av-range { width: 100%; accent-color: #FFD60A; }
+.pkm-av-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pkm-av-grid5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.pkm-av-opt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 2px 6px; border: 2px solid transparent; border-radius: 18px; background: transparent; color: #C9D3EA; font: inherit; cursor: pointer; }
+.pkm-av-opt small { font-size: 11px; line-height: 1.15; text-align: center; }
+.pkm-av-on { border-color: #FFD60A; background: rgba(255, 214, 10, 0.1); color: #FFFFFF; }
+.pkm-av-mini { position: relative; display: block; width: 100%; aspect-ratio: 1; border-radius: 16px; overflow: hidden; background: #0B1120; }
+.pkm-av-mini img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pkm-av-mini-xl { width: 140px; border-radius: 34px; border: 3px solid #FFFFFF; }
+.pkm-av-swatch { display: block; width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.85); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-av-sw.pkm-av-on .pkm-av-swatch { box-shadow: 0 0 0 3px #FFD60A; }
+.pkm-av-pro { position: absolute; top: -4px; right: -2px; padding: 2px 6px; border-radius: 999px; background: linear-gradient(135deg, #FFE46B, #F2A900); color: #0B1120; font-size: 9.5px; font-weight: 900; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-av-pro::before { content: '♛ '; }
+.pkm-av-pro-ok { background: linear-gradient(135deg, #CFFFE4, #3BC48A); }
+.pkm-av-pro-big { position: static; align-self: center; font-size: 12px; padding: 3px 10px; }
+.pkm-av-save { flex: none; position: sticky; bottom: 92px; z-index: 3; padding-top: 4px; }
+.pkm-av-savebtn { width: 100%; min-height: 56px; border: 0; border-radius: 999px; background: #3D63FF; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 800; box-shadow: 0 10px 24px rgba(61, 99, 255, 0.45); cursor: pointer; }
+.pkm-av-wrap { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(3, 6, 14, 0.62); }
+.pkm-av-scrim { position: absolute; inset: 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.pkm-av-sheet { position: relative; max-height: 86vh; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; padding: 16px 16px calc(22px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; border-top: 1px solid #24345C; background: #0F1828; color: #F3F6FC; }
+.pkm-av-sh { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.pkm-av-sh > span { display: flex; flex-direction: column; gap: 2px; }
+.pkm-av-sh b { font-family: 'Sora', sans-serif; font-size: 19px; }
+.pkm-av-sh small { font-size: 13px; color: #C9D3EA; }
+.pkm-av-x { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #1E2B45; border-radius: 22px; background: #111A2C; color: #F3F6FC; cursor: pointer; }
+.pkm-av-x svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.pkm-av-q { min-height: 46px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; }
+.pkm-av-pks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.pkm-av-pk { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px; border: 2px solid transparent; border-radius: 16px; background: #111A2C; color: #F3F6FC; font: inherit; cursor: pointer; }
+.pkm-av-pk img { image-rendering: pixelated; }
+.pkm-av-pk b { font-size: 11.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-av-pk small { font-size: 10px; color: #9AA8C3; }
+.pkm-av-locksh { align-items: stretch; text-align: center; }
+.pkm-av-locksh .pkm-av-mini-xl { align-self: center; }
+.pkm-av-locksh h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 20px; }
+.pkm-av-buy { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 0; border-radius: 999px; background: linear-gradient(135deg, #B26BFF, #6A3CEB); color: #FFFFFF; font: inherit; font-size: 15.5px; font-weight: 800; cursor: pointer; }
+.pkm-av-buy[aria-disabled="true"] { opacity: 0.5; }
+.pkm-av-short { margin: -4px 0 0; font-size: 12.5px; color: #FF8A8F; font-weight: 700; }
+.pkm-av-premgo { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 2px solid #C9A227; border-radius: 999px; background: linear-gradient(135deg, #F3F6FC, #AEB9D0); color: #0B1120; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.pkm-av-premgo svg { fill: #FFD60A; stroke: #0B1120; stroke-width: 1.4; stroke-linejoin: round; }
