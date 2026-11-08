@@ -157,6 +157,9 @@
   const CLASSIC_30 = ['base1-4', 'ex1-5', 'ex11-11', 'bw10-11', 'gym1-18', 'ex7-19', 'neo1-25', 'sm9-33', 'xy9-41', 'dp6-43',
     'pl1-47', 'swsh4-50', 'sm4-57', 'base1-58', 'gym2-69', 'bw6-85', 'sm1-89', 'hgss4-94', 'hgss4-99', 'hgss4-100',
     'bw3-101', 'dp4-106', 'xy5-106', 'neo4-106', 'ex10-108', 'swsh8-114', 'swsh9-123', 'swsh1-138', 'ecard2-149', 'sv02-203'];
+  // Bord doré des vraies réimpressions (2026-11-08, porteur, d'après sa photo) : visuel d'origine au bord redessiné
+  // (web/img/c30/, tools/c30/gold.mjs), liste mise par le build.
+  const C30_GOLD = new Set(__C30_GOLD__);
   const reprintOf = id => { const m = /^30th-c-(\d{3})$/.exec(id); return m ? CLASSIC_30[Number(m[1]) - 1] || null : null; };
   function buildItem(id, r, F, set) {
     // Collection Classique (30ᵉ) : la carte d'origine donne visuel, numéro et rareté, même si le catalogue a trouvé un
@@ -193,6 +196,10 @@
       imgFrom: !ov && r[F.img] && TCG.doc && TCG.doc.imgFrom && TCG.doc.imgFrom[id] || ''
     };
     if (ov && v) p.credit = 'Visuel de la carte d’origine (' + ov.set[0] + ', ' + numShort + ') via TCGdex';
+    if (ov && C30_GOLD.has(id)) {
+      const lo = 'img/c30/' + id + '-low.webp', hi = 'img/c30/' + id + '.webp';
+      Object.assign(p, { img: lo, imgHi: hi, srcset: lo + ' 245w, ' + hi + ' 600w', credit: 'Visuel de la carte d’origine (' + ov.set[0] + ', ' + numShort + ') via TCGdex, bord doré des 30 ans redessiné' });
+    }
     if (!v) { p.img = p.imgHi = drawnCard(p); p.fallback = p.fallbackHi = ''; }
     return p;
   }

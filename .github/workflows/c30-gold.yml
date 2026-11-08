@@ -1,0 +1,46 @@
+# Bords dorés des réimpressions de la Collection Classique du 30ᵉ anniversaire (2026-11-08) : redessine le bord du
+# visuel TCGdex de la carte d'origine (tools/c30/gold.mjs) et commite web/img/c30/. À la demande, ou quand le dessin change.
+name: Bords dorés des 30 ans
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - tools/c30/**
+      - .github/workflows/c30-gold.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: c30-gold
+  cancel-in-progress: false
+
+jobs:
+  gold:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/web/package-lock.json
+      - name: Dépendances
+        working-directory: tools/web
+        run: npm ci && npx playwright-core install --with-deps chromium
+      - name: Visuels dorés
+        run: node tools/c30/gold.mjs
+      - name: Publier
+        run: |
+          git add web/img/c30
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Visuels dorés des réimpressions des 30 ans"
+          git pull --rebase origin claude/pokemon-app-mockup-1mxt7p
+          git push origin "HEAD:claude/pokemon-app-mockup-1mxt7p"
