@@ -1,0 +1,37 @@
+# Banc d'essai du scan (2026-11-08) : copie, une fois, les scans en haute définition des cartes de
+# tools/web/e2e/files/bench/cards.json (TCGdex), puis commite. À la demande, ou quand la liste change.
+name: Banc d'essai du scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - tools/web/e2e/files/bench/cards.json
+      - tools/web/e2e/fetch_bench.py
+
+permissions:
+  contents: write
+
+jobs:
+  cartes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Cartes
+        run: pip install --quiet pillow && python tools/web/e2e/fetch_bench.py
+      - name: Commit
+        run: |
+          git add tools/web/e2e/files/bench
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Banc d'essai du scan : scans des cartes (TCGdex)"
+          git pull --rebase origin claude/pokemon-app-mockup-1mxt7p
+          git push origin "HEAD:claude/pokemon-app-mockup-1mxt7p"
