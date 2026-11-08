@@ -136,7 +136,13 @@
       login: ['Connecte-toi', 'Avec l’adresse et le mot de passe de ton compte Dropicards.', 'Me connecter'],
       reset: resetSent ? ['Nouveau mot de passe', 'Entre le code reçu à ' + (s.obEmail || 'ton adresse') + ', puis ton nouveau mot de passe.', 'Changer mon mot de passe'] : ['Mot de passe oublié', 'Entre ton adresse : tu vas recevoir un code par e-mail.', 'Recevoir un code']
     }[mode];
-    r.acc = {
+    // Connexion automatique (2026-11-08, porteur) : si Face ID / l'empreinte a été activé sur ce téléphone, la page de
+    // connexion le demande tout de suite, une fois ; sinon le bouton reste en tête.
+    if (cloud && mode === 'login' && page === 2 && pkyHas() && !pkyOut() && Cloud.passkeyOk() && !this._pkyAuto) {
+      this._pkyAuto = true;
+      setTimeout(() => { const t = this.st(); if (t.onb === 2 && t.obMode === 'login' && !t.obBusy && this._obAcc) this._obAcc.pkyLogin(true); }, 500);
+    }
+    r.acc = this._obAcc = {
       email: s.obEmail !== undefined ? s.obEmail : (tr.email || (acc && acc.email) || ''), pwd: s.obPwd || '', news: s.obNews !== undefined ? !!s.obNews : !!(acc && acc.news),
       title: T[0], lead: T[1], go: busy ? 'Un instant…' : T[2], busy: busy ? 'true' : 'false',
       isSignup: mode === 'signup', isLogin: mode === 'login', isReset: mode === 'reset', showPwd: mode !== 'reset' || resetSent, showCode: resetSent,
@@ -150,11 +156,14 @@
       err: err, hasErr: !!err && page === 2, notice: note, hasNotice: !!note && !err && page === 2,
       note: 'Ton adresse sert à te connecter et, seulement si tu le coches, à recevoir nos nouveautés. Tu peux te désinscrire à tout moment.',
       // Connexion avec Face ID, Touch ID ou l'empreinte (clés d'accès, cloud.js, 2026-11-06, « go » du porteur).
-      pkyOk: cloud && mode === 'login' && Cloud.passkeyOk(), pkyLabel: busy ? 'Un instant…' : 'Face ID / empreinte',
-      pkyLogin: async () => {
+      pkyOk: cloud && mode === 'login' && Cloud.passkeyOk(), pkyLabel: busy ? 'Un instant…' : 'Me connecter avec ' + PKY_NAME,
+      pkyLogin: async auto => {
         if (this.st().obBusy) return;
         this.setState({ obBusy: true, obErr: '' });
-        try { await Cloud.passkeyLogin(); fromProfile(await Cloud.profile()); } catch (e2) { fail(e2); }
+        try { await Cloud.passkeyLogin(); pkySetHas(); pkyIn(); fromProfile(await Cloud.profile()); } catch (e2) {
+          // Essai automatique refusé ou annulé (le téléphone demande parfois un appui) : le bouton reste là, sans message.
+          if (auto === true) this.setState({ obBusy: false }); else fail(e2);
+        }
       },
       links: cloud && !busy, toLogin: () => this.setState({ obMode: 'login', obErr: '', obNote: '' }),
       toSignup: () => this.setState({ obMode: 'signup', obErr: '', obNote: '', obResetSent: false }),
@@ -172,7 +181,7 @@
         if (mode === 'login') {
           if (!pwd) { this.setState({ obEmail: email, obErr: 'Entre ton mot de passe.' }); return; }
           this.setState({ obEmail: email, obBusy: true, obErr: '' });
-          try { await Cloud.signIn(email, pwd); fromProfile(await Cloud.profile()); } catch (e2) {
+          try { await Cloud.signIn(email, pwd); pkyIn(); fromProfile(await Cloud.profile()); } catch (e2) {
             if (e2.code === 'email_not_confirmed') {
               try { await Cloud.resend(email); } catch (e3) { /* code déjà envoyé */ }
               this.setState({ obBusy: false, obErr: '', obPwd: pwd, obAfter: 'login', obCode: '', onb: 4 });
@@ -195,7 +204,24 @@
         }
         const news = f && f.news ? !!f.news.checked : t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news);
         if (pwd.length < 12 && !(!needPwd && !pwd)) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
-        // Le mot de passe reste en mémoire (jamais enregistré) pour pouvoir revenir à cette page.
+        // Compte créé tout de suite sur le serveur (2026-11-08, porteur : « l'adresse mail est directement enregistrée
+        // dans notre serveur »), puis connexion sans attendre la vérification de l'adresse (lien ou code reçu par e-mail,
+        // à faire plus tard) et proposition de Face ID / Touch ID / empreinte. Si le serveur exige encore la vérification
+        // avant la première connexion, le code à 6 chiffres est demandé d'abord (page 4), puis la suite.
+        if (cloud && !signed) {
+          this.setState({ obEmail: email, obNews: news, obBusy: true, obErr: '', obNote: '' });
+          try {
+            const res = await Cloud.signUp(email, pwd, { news_optin: news });
+            if (res.exists) { this.setState({ obBusy: false, obMode: 'login', obPwd: '', obErr: 'Un compte existe déjà avec cette adresse : connecte-toi.' }); return; }
+            let ok = !!res.session;
+            if (!ok) { try { await Cloud.signIn(email, pwd); ok = true; } catch (e3) { if (e3.code !== 'email_not_confirmed') throw e3; } }
+            if (!ok) { this.setState({ obBusy: false, obPwd: pwd, onb: 4, obCode: '', obAfter: 'p3', obNote: 'Code envoyé à ' + email + ' (regarde aussi dans les spams).' }); return; }
+            this.setState({ obBusy: false, obPwd: '', onb: 3, obErr: '', obNote: '' });
+            this.pkyOfferNow();
+          } catch (e2) { fail(e2); }
+          return;
+        }
+        // Sans serveur (tests) ou compte déjà connecté : le mot de passe reste en mémoire (jamais enregistré).
         this.setState({ obEmail: email, obPwd: pwd, obNews: news, obErr: '', obNote: '', onb: 3 });
       }
     };
@@ -237,6 +263,7 @@
         this.setState({ obBusy: true, obErr: '', obCode: code });
         try {
           await Cloud.verify(t.obEmail, code, 'signup');
+          if (t.obAfter === 'p3') { this.setState({ obBusy: false, obPwd: '', onb: 3, obErr: '', obNote: '', obCode: '', obAfter: '' }); this.pkyOfferNow(); return; }
           if (t.obAfter === 'login' || !t.obPending) { fromProfile(await Cloud.profile()); return; }
           const P = t.obPending;
           done(t, P.nick, P.age, P.line, true);

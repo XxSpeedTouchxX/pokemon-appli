@@ -84,7 +84,7 @@ ok('fiche du 30ᵉ : ' + n30 + ' cartes, dont ' + nCC + ' de la Collection Class
 // Écran d'une extension façon vidéo du porteur (2026-10-17) : réimpressions avec le visuel de leur carte d'origine,
 // filtres de rareté, Possédées, ajout rapide, favori et taille de la grille.
 const reprint = page.locator('main button[aria-label^="Dracaufeu, n° 4/102"]');
-ok('réimpression : Dracaufeu 4/102 avec le visuel du Set de Base', (await reprint.count()) === 1 && /\/base\/base1\/4\//.test(await reprint.locator('img').getAttribute('src')));
+ok('réimpression : Dracaufeu 4/102, visuel du Set de Base au bord doré des 30 ans', (await reprint.count()) === 1 && /img\/c30\/30th-c-001/.test(await reprint.locator('img').getAttribute('src')));
 await page.locator('[aria-label="Filtrer par rareté"] button[aria-label^="Collection Classique"]').click(); await page.waitForTimeout(400);
 ok('rareté Collection Classique : ' + nCC + ' cartes', (await page.locator('main .pkm-sv-card').count()) === nCC);
 ok('cartes en couleur, même celles qu’on n’a pas (2026-10-17)', await page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img')].slice(0, 6).every(i => getComputedStyle(i).filter === 'none' && getComputedStyle(i).opacity === '1')));

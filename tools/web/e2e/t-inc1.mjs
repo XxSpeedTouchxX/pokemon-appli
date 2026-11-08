@@ -27,21 +27,7 @@ const broken = page => page.evaluate(() => [...document.querySelectorAll('#app i
   return i.getAttribute('loading') !== 'lazy' || (r.top < innerHeight && r.bottom > 0 && r.left < innerWidth && r.right > 0);
 }).map(i => (i.getAttribute('src') || '(vide)').slice(0, 70)));
 
-// 1. Scan réel, onglet Scellé : chaque produit de la liste a un visuel chargé (photos officielles).
-{
-  const ctx = await newCtx(), page = await ctx.newPage(); watch(page, 'scan');
-  await page.goto(E2E + '/#scan', { waitUntil: 'load' });
-  await page.waitForTimeout(800);
-  await page.click('button:has-text("Scellé")');
-  await page.waitForSelector('[aria-label="Produits scellés"] img');
-  await page.waitForTimeout(800);
-  const flat = await page.evaluate(() => [...document.querySelectorAll('[aria-label="Produits scellés"] img')].filter(i => i.getBoundingClientRect().top < innerHeight)
-    .map(i => ({ src: (i.getAttribute('src') || '').slice(0, 60), w: i.naturalWidth, done: i.complete })));
-  ok('scan scellé : ' + flat.length + ' visuels visibles, tous chargés', flat.length >= 4 && flat.every(x => x.done && x.w > 0));
-  ok('scan scellé : photos officielles affichées (' + flat.filter(x => /img\/products\//.test(x.src)).length + ')', flat.filter(x => /img\/products\//.test(x.src)).length >= 4);
-  ok('scan scellé : aucune source « () => »', flat.every(x => !/=>|function/.test(x.src)));
-  await ctx.close();
-}
+// 1. (Onglet Scellé du scan retiré le 2026-11-08, porteur : les visuels du scellé sont vérifiés par le catalogue du scellé.)
 
 // 2. Territoire : pastilles sur une seule ligne, espace insécable avant « % ».
 for (const [w, h] of [[390, 844], [360, 740]]) {
@@ -75,7 +61,6 @@ for (const [label, opts] of [['photos bloquées', { blockPhotos: true }], ['phot
   for (const url of ['', '?start=collection', '?start=market', '?start=item&itemId=p2', '#scan']) {
     await page.goto(E2E + '/' + url, { waitUntil: 'load' });
     await page.waitForTimeout(900);
-    if (url === '#scan') { await page.click('button:has-text("Scellé")'); await page.waitForTimeout(300); }
     // Logos des extensions : la cascade webp, png, logo local, icône prend quelques rendus quand tout est bloqué.
     for (let i = 0; i < 20 && (await broken(page)).length; i++) await page.waitForTimeout(400);
     const bb = await broken(page);

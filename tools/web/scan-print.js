@@ -17,12 +17,21 @@
     const canvas = () => { if (!cv) { cv = document.createElement('canvas'); cv.width = cv.height = SIDE; } return cv; };
     // Niveaux de gris N × N d'une zone (src : image, vidéo ou canevas ; r : rectangle de la carte en pixels de src).
     // Deux étapes (SIDE puis moyenne par blocs) : même résultat qu'on parte d'un visuel de 245 px ou d'une photo.
+    // r.a : inclinaison de la carte (radians, sens des aiguilles d'une montre), redressée avant la comparaison.
     function gray(src, r, z) {
       const c = canvas(), g = c.getContext('2d', { willReadFrequently: true });
       const sx = r.sx + r.sw * z[0], sy = r.sy + r.sh * z[1], sw = r.sw * (z[2] - z[0]), sh = r.sh * (z[3] - z[1]);
       g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+      g.setTransform(1, 0, 0, 1, 0, 0);
       g.clearRect(0, 0, SIDE, SIDE);
-      g.drawImage(src, sx, sy, sw, sh, 0, 0, SIDE, SIDE);
+      if (r.a) {
+        // Zone tournée autour du centre de la carte : point de l'image → carte droite → zone → canevas.
+        g.translate(SIDE / 2, SIDE / 2); g.scale(SIDE / sw, SIDE / sh);
+        g.translate(-(sx + sw / 2 - r.sx - r.sw / 2), -(sy + sh / 2 - r.sy - r.sh / 2));
+        g.rotate(-r.a); g.translate(-(r.sx + r.sw / 2), -(r.sy + r.sh / 2));
+        g.drawImage(src, 0, 0);
+        g.setTransform(1, 0, 0, 1, 0, 0);
+      } else g.drawImage(src, sx, sy, sw, sh, 0, 0, SIDE, SIDE);
       const d = g.getImageData(0, 0, SIDE, SIDE).data, out = new Float64Array(N * N), b = SIDE / N;
       for (let y = 0; y < SIDE; y++) for (let x = 0; x < SIDE; x++) {
         const i = (y * SIDE + x) * 4;
@@ -70,13 +79,15 @@
       out.sort((a, b) => best[a] - best[b]);
       return out.slice(0, k || 12).map(i => ({ id: idx.ids[i], d: best[i] }));
     }
-    // Cadrages essayés autour du rectangle de la carte (carte jamais exactement dans le cadre).
+    // Cadrages essayés autour du rectangle de la carte (carte jamais exactement dans le cadre), et inclinaisons
+    // voisines de celle mesurée (r.a) : ± 1,5° (carte tenue à la main).
     function jitter(r) {
-      const out = [r];
+      const a = r.a || 0, out = [r];
       [[-0.03, 0, 1], [0.03, 0, 1], [0, -0.025, 1], [0, 0.025, 1], [0, 0, 0.95], [0, 0, 1.05]].forEach(([dx, dy, s]) => {
         const w = r.sw * s, h = r.sh * s;
-        out.push({ sx: r.sx + (r.sw - w) / 2 + dx * r.sw, sy: r.sy + (r.sh - h) / 2 + dy * r.sh, sw: w, sh: h });
+        out.push({ sx: r.sx + (r.sw - w) / 2 + dx * r.sw, sy: r.sy + (r.sh - h) / 2 + dy * r.sh, sw: w, sh: h, a: a });
       });
+      [-0.026, 0.026].forEach(d => out.push({ sx: r.sx, sy: r.sy, sw: r.sw, sh: r.sh, a: a + d }));
       return out;
     }
     // ——— Où est la carte ? ———
@@ -137,13 +148,80 @@
       const sp = (best.b - best.t) * 0.06;
       best.t = out(R, allT, best.t, -1, sp); best.b = out(R, allB, best.b, 1, sp);
       best.l = out(C, allL, best.l, -1, sp); best.r = out(C, allR, best.r, 1, sp);
+      // Inclinaison : bords gauche et droit cherchés séparément dans le haut et le bas de la carte.
+      const colsIn = (y0, y1) => { const m = new Float32Array(w * 3), a0 = Math.max(0, Math.round(y0)), a1 = Math.min(h, Math.round(y1)); for (let x = 0; x < w; x++) for (let y = a0; y < a1; y++) { const j = (y * w + x) * 4; m[x * 3] += d[j]; m[x * 3 + 1] += d[j + 1]; m[x * 3 + 2] += d[j + 2]; } for (let i = 0; i < m.length; i++) m[i] /= Math.max(1, a1 - a0); return edge(m, w); };
+      const ch0 = best.b - best.t, Ct = colsIn(best.t + ch0 * 0.12, best.t + ch0 * 0.36), Cb = colsIn(best.t + ch0 * 0.64, best.t + ch0 * 0.88);
+      const near = (e, x0) => { let bx = -1, bv = 0; for (let x = Math.max(2, x0 - 10); x <= Math.min(e.length - 3, x0 + 10); x++) if (e[x] > bv) { bv = e[x]; bx = x; } return bv >= 14 ? fine(e, bx) : null; };
+      const slope = x0 => { const a = near(Ct, x0), b = near(Cb, x0); return a === null || b === null ? null : Math.atan2(a - b, ch0 * 0.52); };
+      // Bords haut et bas de même, dans la gauche et la droite de la carte ; inclinaison = médiane des 4 mesures.
+      const cw0 = best.r - best.l;
+      const rowsIn = (x0, x1) => { const m = new Float32Array(h * 3), a0 = Math.max(0, Math.round(x0)), a1 = Math.min(w, Math.round(x1)); for (let y = 0; y < h; y++) for (let x = a0; x < a1; x++) { const j = (y * w + x) * 4; m[y * 3] += d[j]; m[y * 3 + 1] += d[j + 1]; m[y * 3 + 2] += d[j + 2]; } for (let i = 0; i < m.length; i++) m[i] /= Math.max(1, a1 - a0); return edge(m, h); };
+      const Rl = rowsIn(best.l + cw0 * 0.12, best.l + cw0 * 0.36), Rrt = rowsIn(best.l + cw0 * 0.64, best.l + cw0 * 0.88);
+      const tilt = y0 => { const a = near(Rl, y0), b = near(Rrt, y0); return a === null || b === null ? null : Math.atan2(b - a, cw0 * 0.52); };
+      const all = [slope(best.l), slope(best.r), tilt(best.t), tilt(best.b)].filter(v => v !== null && Math.abs(v) < 0.1).sort((p, q) => p - q);
+      const ang = all.length >= 2 ? (all.length % 2 ? all[all.length >> 1] : (all[all.length / 2 - 1] + all[all.length / 2]) / 2) : 0;
       let T = fine(R, best.t), B = fine(R, best.b);
       const L = fine(C, best.l), Rr = fine(C, best.r);
       // La largeur est la mesure la plus sûre (bords gauche et droit nets sur toute la hauteur) : la hauteur en découle
       // (63 × 88 mm), à partir du bord haut ou du bord bas, celui dont le bord opposé attendu est le plus net.
       const H0 = (Rr - L) / AR, at = i => { const k = Math.round(i); return k >= 2 && k < R.length - 2 ? Math.max(R[k - 1], R[k], R[k + 1]) : 0; };
       if (Math.abs((B - T) - H0) > H0 * 0.03) { if (at(T + H0) >= at(B - H0)) B = T + H0; else T = B - H0; }
-      return { sx: ox + (L + 0.5) / sc, sy: oy + (T + 0.5) / sc, sw: (Rr - L) / sc, sh: (B - T) / sc, found: true };
+      // a : inclinaison mesurée (le rectangle englobe la carte ; scan.js redresse l'image et cherche à nouveau).
+      return { sx: ox + (L + 0.5) / sc, sy: oy + (T + 0.5) / sc, sw: (Rr - L) / sc, sh: (B - T) / sc, a: Math.abs(ang) > 0.005 ? ang : 0, found: true };
     }
-    return { print: print, load: load, encode: encode, nearest: nearest, jitter: jitter, locate: locate, ZONES: ZONES };
+    // ——— Bord doré des réimpressions des 30 ans ———
+    // Les 30 réimpressions de la Collection Classique ont le même dessin et le même numéro que leur carte d'origine ;
+    // seul le bord change : doré à paillettes (grain fort, peu saturé) au lieu de jaune uni (saturé) ou argenté.
+    // Anneau de 1,2 % à 3,2 % de la largeur à l'intérieur de la carte : grain (écart à la moyenne des 4 voisins,
+    // rapporté à la luminosité, en %) et saturation moyenne. Mesuré sur la photo du porteur (Cizayox ex 30 ans, sous
+    // pochette) : grain 3,9, saturation 0,27 ; bords jaunes des scans TCGdex : saturation 0,5 à 0,86, grain sous 2,4.
+    let bc = null;
+    function border(src, r) {
+      const W = 360, H = Math.max(8, Math.round(W / r.sw * r.sh));
+      if (!bc) bc = document.createElement('canvas');
+      bc.width = W; bc.height = H;
+      const g = bc.getContext('2d', { willReadFrequently: true });
+      g.drawImage(src, r.sx, r.sy, r.sw, r.sh, 0, 0, W, H);
+      const d = g.getImageData(0, 0, W, H).data, Y = new Float32Array(W * H);
+      for (let i = 0; i < W * H; i++) Y[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+      const a = Math.round(W * 0.012), b = Math.round(W * 0.032);
+      let e = 0, n = 0, lum = 0, sat = 0;
+      for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+        const m = Math.min(x, W - 1 - x, y, H - 1 - y);
+        if (m < a || m > b) continue;
+        const i = y * W + x;
+        e += Math.abs(Y[i] - (Y[i - 1] + Y[i + 1] + Y[i - W] + Y[i + W]) / 4); lum += Y[i]; n++;
+        const R = d[i * 4], G = d[i * 4 + 1], B = d[i * 4 + 2], mx = Math.max(R, G, B);
+        sat += mx ? (mx - Math.min(R, G, B)) / mx : 0;
+      }
+      return n ? { grain: 100 * e / Math.max(1, lum), sat: sat / n } : null;
+    }
+    // Image redressée : tournée de -a autour de son centre (même taille), pour retrouver une carte droite.
+    // out : canevas de destination (chaque lecture garde le sien : la lecture du texte se fait plus tard).
+    function deskew(src, a, out) {
+      const W = src.videoWidth || src.naturalWidth || src.width, H = src.videoHeight || src.naturalHeight || src.height;
+      const dc = out || document.createElement('canvas');
+      dc.width = W; dc.height = H;
+      const g = dc.getContext('2d', { willReadFrequently: true });
+      g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+      g.translate(W / 2, H / 2); g.rotate(-a); g.translate(-W / 2, -H / 2);
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+      g.drawImage(src, 0, 0, W, H);
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      return dc;
+    }
+    // Distance exacte entre la photo (plusieurs cadrages) et des cartes précises (ids) : pour vérifier qu'une carte
+    // proposée par le texte a bien ce dessin.
+    function distTo(idx, prints, ids) {
+      if (!idx.at) idx.at = new Map(idx.ids.map((id, i) => [id, i]));
+      const h = idx.h;
+      return ids.map(id => {
+        const i = idx.at.get(id);
+        if (i === undefined) return null;
+        let best = 999;
+        for (const p of prints) { const j = i * 4, d = pop(h[j] ^ p[0]) + pop(h[j + 1] ^ p[1]) + pop(h[j + 2] ^ p[2]) + pop(h[j + 3] ^ p[3]); if (d < best) best = d; }
+        return { id: id, d: best };
+      }).filter(Boolean);
+    }
+    return { print: print, load: load, encode: encode, nearest: nearest, jitter: jitter, locate: locate, border: border, deskew: deskew, distTo: distTo, ZONES: ZONES };
   })();

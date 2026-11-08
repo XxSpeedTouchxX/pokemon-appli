@@ -101,12 +101,19 @@
       r.trainer.cloudState = ses ? 'Connecté · ' + (ses.email || (s.account && s.account.email) || '') + (ses.role === 'admin' ? ' · admin' : '') : 'Non connecté';
       r.trainer.cloudLabel = ses ? 'Me déconnecter' : (s.account && s.account.server ? 'Me reconnecter' : 'Enregistrer mon compte');
       r.trainer.cloudAct = ses
-        ? async () => { await Cloud.signOut(); this.setState({ toast: 'Tu es déconnecté · ta collection reste sur cet appareil' }); }
+        ? async () => { try { localStorage.setItem('pkm-pky-out', '1'); } catch (e) { /* stockage indisponible */ } await Cloud.signOut(); this.setState({ toast: 'Tu es déconnecté · ta collection reste sur cet appareil' }); }
         : () => this.setState({ onb: 2, obMode: s.account && s.account.server ? 'login' : 'signup', obErr: '', obNote: '' });
       r.trainer.note = ses
         ? 'Ton compte Dropicards (adresse, pseudo, âge, compagnon) est enregistré sur notre serveur. Ta collection reste sur cet appareil pour l’instant.'
         : 'Connecte-toi pour enregistrer ton compte Dropicards. En attendant, ton pseudo et ta collection restent sur cet appareil.';
-    } else r.trainer.cloudOn = false;
+      // Adresse pas encore vérifiée (compte créé sans attendre, 2026-11-08) : rappel et nouvel e-mail.
+      r.trainer.mailOn = !!(ses && ses.confirmed === false);
+      r.trainer.mailText = 'Adresse à vérifier : touche le lien de l’e-mail reçu (regarde aussi dans les spams). Les jeux et le PK shop s’ouvrent ensuite.';
+      r.trainer.mailAct = async () => {
+        try { await Cloud.resend(ses.email); this.setState({ toast: 'E-mail de vérification renvoyé à ' + ses.email }); } catch (e) { this.setState({ toast: (e && e.message) || CLOUD_ERR.other }); }
+        this.flash();
+      };
+    } else { r.trainer.cloudOn = false; r.trainer.mailOn = false; }
     return r;
   };
 

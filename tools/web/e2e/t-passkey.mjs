@@ -41,7 +41,7 @@ async function fake(route) {
   if (p === '/auth/v1/logout') return send(204, {});
   return send(404, {});
 }
-const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36' });
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
 await ctx.route(FAKE + '/**', fake);
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
@@ -59,10 +59,10 @@ await page.evaluate(([k, t, uid, email]) => {
 }, [KEY, jwt(), U.id, U.email]);
 await page.goto(BASE + '/?x=1' + Q, { waitUntil: 'load' }); await page.waitForTimeout(4500);
 const offer = page.locator('section[aria-label="Face ID et empreinte"]');
-ok('accueil : proposition « Connexion avec Face ID ou ton empreinte »', (await offer.count()) === 1 && /sans taper ton mot de passe/.test(await offer.innerText()));
+ok('accueil : proposition « Connexion avec Face ID / Touch ID » (iPhone, Mac)', (await offer.count()) === 1 && /Connexion avec Face ID \/ Touch ID/.test(await offer.innerText()) && /sans taper ton mot de passe/.test(await offer.innerText()));
 await page.screenshot({ path: shot('passkey-proposition.png') });
-await offer.locator('button:has-text("Activer Face ID")').click(); await page.waitForTimeout(1500);
-ok('activation : clé créée par le téléphone et envoyée au serveur', passkeys.length === 1 && (await offer.count()) === 0 && /Face ID \/ empreinte activé/.test(await page.locator('body').innerText()));
+await offer.locator('button:has-text("Oui, utiliser Face ID")').click(); await page.waitForTimeout(1500);
+ok('activation : clé créée par le téléphone et envoyée au serveur', passkeys.length === 1 && (await offer.count()) === 0 && /Face ID \/ Touch ID activé/.test(await page.locator('body').innerText()));
 ok('proposition retenue sur l’appareil (pas reposée)', (await page.evaluate(() => localStorage.getItem('pkm-pky-asked'))) === '1');
 // Mon profil : appareil listé.
 await page.goto(BASE + '/?start=profile' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1800);
@@ -73,15 +73,22 @@ await tr.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('passkey-p
 // 2. Déconnexion, puis connexion sans mot de passe.
 await tr.locator('button:has-text("Me déconnecter")').click(); await page.waitForTimeout(800);
 ok('déconnecté', (await page.evaluate(() => localStorage.getItem('pkm-cloud-session'))) === null);
-await page.waitForTimeout(400); // connexion obligatoire : la page de connexion s'ouvre d'elle-même
+await page.waitForTimeout(1500); // connexion obligatoire : la page de connexion s'ouvre d'elle-même
 const fl = page.locator('form[aria-label="Connecte-toi"]');
-ok('page de connexion : « Me connecter avec Face ID / mon empreinte »', (await fl.locator('button[aria-label="Me connecter avec Face ID ou mon empreinte"]').count()) === 1);
+ok('déconnexion volontaire : pas de Face ID automatique, bouton « Me connecter avec Face ID / Touch ID »', (await page.evaluate(() => localStorage.getItem('pkm-cloud-session'))) === null && (await fl.locator('button[aria-label="Me connecter avec Face ID / Touch ID"]').count()) === 1);
 await page.screenshot({ path: shot('passkey-connexion.png') });
-await fl.locator('button[aria-label="Me connecter avec Face ID ou mon empreinte"]').click(); await page.waitForTimeout(1500);
-const ses = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-cloud-session') || 'null'));
+await fl.locator('button[aria-label="Me connecter avec Face ID / Touch ID"]').click(); await page.waitForTimeout(1500);
+let ses = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-cloud-session') || 'null'));
 ok('connecté sans adresse ni mot de passe : session ' + (ses && ses.uid), ses && ses.uid === U.id && calls.includes('POST /auth/v1/passkeys/authentication/verify'));
 ok('directement dans l’app (pas de page 3), « Content de te revoir, Sacha ! »', (await page.locator('form[aria-label="Ton profil de dresseur"]').count()) === 0 && /Content de te revoir, Sacha/.test(await page.locator('body').innerText()));
 
+// 2 bis. Session perdue (expirée, autre cause) : à l'ouverture, Face ID est demandé tout de suite, sans rien toucher
+// (2026-11-08, porteur : connexion automatique sans le mot de passe).
+const nVerify = calls.filter(c => c === 'POST /auth/v1/passkeys/authentication/verify').length;
+await page.evaluate(() => localStorage.removeItem('pkm-cloud-session'));
+await page.goto(BASE + '/?y=1' + Q, { waitUntil: 'load' }); await page.waitForTimeout(3500);
+ses = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-cloud-session') || 'null'));
+ok('connexion automatique avec Face ID à l’ouverture : session ' + (ses && ses.uid), ses && ses.uid === U.id && calls.filter(c => c === 'POST /auth/v1/passkeys/authentication/verify').length === nVerify + 1);
 // 3. Retrait de l'appareil.
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.onb = 0; d.tuto = 'done'; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
 await page.goto(BASE + '/?start=profile' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1800);

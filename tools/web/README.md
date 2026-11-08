@@ -331,7 +331,11 @@ Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande 
   - nom comparé sans accents, avec « ex », « V », « VMAX », « GX »… ;
   - les indices s'additionnent d'une image à l'autre : les propositions s'affichent dès qu'une carte domine.
 - **Sans caméra** (refus, absence, caméra occupée, moteur indisponible) : un panneau propose « Prendre une photo », « Importer une photo », « Rechercher une carte » et, selon le cas, « Réessayer ». Une photo est lue au centre (format carte), puis en entier.
-- **Onglet Scellé :** recherche parmi les vrais produits scellés, qui ouvre la même fiche. Nos données n'ont pas de code-barres.
+- **Scans restants (2026-11-08, porteur) :** l'onglet Scellé du scan est retiré (inutile pour scanner des cartes) ; à sa place, le nombre de scans encore disponibles aujourd'hui (« Illimité » avec Premium). Le scellé s'ajoute depuis « Ajouter des produits scellés » (classeur).
+- **Lampe automatique (2026-11-08, porteur) :** allumée d'office à l'ouverture du scan quand le téléphone le permet (Android, Chrome) ; un appui l'éteint pour le reste de la visite. Safari sur iPhone ne donne pas accès à la lampe aux sites web.
+- **Carte inclinée (2026-11-08, d'après la photo du porteur) :** l'inclinaison est mesurée sur les 4 bords ; l'image redressée et l'image telle quelle sont comparées, on garde celle dont le dessin ressemble le plus à une carte (une mesure faussée par une table de la couleur du bord ne gâche rien) ; la lecture du texte se fait sur la même image.
+- **Réimpressions des 30 ans (2026-11-08) :** même dessin et même numéro que leur carte d'origine (prix très différents : Cizayox ex 278 €, sa réimpression 12,78 €) ; les deux sont toujours proposées, jamais d'ouverture directe ; l'ordre suit le bord mesuré (`ScanPrint.border` : doré à paillettes, grain fort et peu saturé → réimpression ; jaune uni → origine ; sinon la réimpression). Réglé sur la photo du porteur (Cizayox ex 30 ans sous pochette : grain 5,8 à 6,2, saturation 0,29 à 0,40).
+- **Texte lu mais dessin contraire :** une carte proposée par le texte dont le dessin ne ressemble pas du tout à la photo, alors qu'une autre lui ressemble, est reléguée (reflets, petits caractères mal lus).
 - **Confidentialité :** la lecture et la comparaison des dessins se font sur l'appareil ; aucune image n'est envoyée ni gardée. La caméra s'arrête dès qu'on quitte l'écran ou l'app ; le moteur de lecture est libéré dix minutes après.
 - **Diagnostic :** `?debug=scan` affiche les bandes lues, le texte reconnu, les temps, la carte trouvée (ou non) dans l'image, les dessins les plus proches et les cartes proposées. Il sert à régler la lecture sur un vrai téléphone.
 - **Banc d'essai** (`tools/web/e2e/bench-scan.mjs`, 2026-11-08) : 48 scans HD de toutes les époques (`e2e/files/bench/`, workflow « Banc d'essai du scan ») « photographiés » de 8 façons (nette, petite, inclinée, floue, sombre, reflet, loin, décalée), puis la vraie lecture et le vrai rapprochement. `--quick` (4 prises), `--only=<id>`, `--novis` (sans le dessin), `--vis` (dessin seul, en 1 min : temps détaillé, règle de l'app, seuils).
@@ -345,6 +349,12 @@ Depuis le 2026-10-26, refait le 2026-10-28 puis v3 le même soir, à la demande 
   - `tools/web/scan-print.js` : empreintes, recherche des bords de la carte, cartes au dessin le plus proche ;
   - `tools/web/scan-ocr.js` : Tesseract.js, découpe et lecture des bandes ;
   - `tools/web/scan.js` : écran, caméra, lecture continue, propositions, photo, onglet Scellé ; fragment `scan` de `tools/web/catalog.dc.html`. Le build remplace le viseur simulé de la maquette.
+
+## Réimpressions des 30 ans avec leur bord doré
+
+- 30 réimpressions de la Collection Classique (`CLASSIC_30`, `catalog.js`) : visuel de la carte d'origine (TCGdex n'a pas leur scan), avec un **bord doré à paillettes** comme les vraies cartes (2026-11-08, porteur, photo de Cizayox ex 30 ans) ;
+- `tools/c30/goldframe.js` repère la largeur du bord de chaque côté et le repeint (dégradé or, grain, paillettes, fine ombre intérieure), coins transparents gardés ; pas de logo officiel des 30 ans (marque déposée) ;
+- `tools/c30/gold.mjs` (workflow « Bords dorés des 30 ans ») produit `web/img/c30/30th-c-NNN.webp` (600 px) et `-low.webp` (245 px) ; `build.mjs` injecte la liste (`C30_GOLD`), utilisée par `buildItem` partout où la carte apparaît.
 
 ## Langue et état des exemplaires
 

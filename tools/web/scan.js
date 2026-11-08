@@ -57,6 +57,9 @@
       try {
         const caps = track && track.getCapabilities ? track.getCapabilities() : {};
         SCAN.hasTorch = !!caps.torch;
+        // Lampe allumée d'office à l'ouverture du scan (2026-11-08, porteur), sauf si on l'a éteinte pendant cette
+        // visite de l'app. iPhone : Safari ne donne pas accès à la lampe aux sites web (pas de bouton).
+        if (SCAN.hasTorch && !SCAN.torchOff) track.applyConstraints({ advanced: [{ torch: true }] }).then(() => { if (gen === SCAN.gen) inst.setState({ scanTorch: true }); }).catch(() => {});
         if (caps.focusMode && caps.focusMode.indexOf('continuous') >= 0) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
       } catch (e) { SCAN.hasTorch = false; }
       if (track) track.addEventListener('ended', () => { if (gen === SCAN.gen) { SCAN.stopCam(); SCAN.sync(inst); } });
@@ -84,17 +87,57 @@
   SCAN.prints = function () {
     if (SCAN.pReady) return SCAN.pReady;
     SCAN.pReady = fetch('data/scan-prints.json').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(doc => (SCAN.pidx = ScanPrint.load(doc)))
+      .then(doc => {
+        const idx = ScanPrint.load(doc);
+        // Réimpressions des 30 ans sans visuel propre : l'empreinte de leur carte d'origine (même dessin).
+        const at = new Map(idx.ids.map((id, i) => [id, i])), add = [];
+        SCAN_TWIN.forEach((o, id) => { if (/^30th-c-/.test(id) && !at.has(id) && at.has(o)) add.push([id, at.get(o)]); });
+        if (add.length) {
+          const h = new Uint32Array(idx.h.length + add.length * 4);
+          h.set(idx.h);
+          add.forEach(([id, i], k) => { h.set(idx.h.subarray(i * 4, i * 4 + 4), idx.h.length + k * 4); });
+          idx.ids = idx.ids.concat(add.map(a => a[0])); idx.h = h;
+        }
+        return (SCAN.pidx = idx);
+      })
       .catch(() => { SCAN.pReady = null; return null; });
     return SCAN.pReady;
   };
+  // Réimpressions des 30 ans ↔ cartes d'origine (CLASSIC_30, catalog.js).
+  const SCAN_TWIN = new Map();
+  CLASSIC_30.forEach((o, k) => { const id = '30th-c-' + String(k + 1).padStart(3, '0'); SCAN_TWIN.set(id, o); SCAN_TWIN.set(o, id); });
   // Carte trouvée dans l'image (ses bords), puis cartes au dessin le plus proche (7 cadrages autour d'elle).
-  SCAN.look = function (src, rect) {
-    let r = rect, found = false;
-    try { const l = ScanPrint.locate(src, rect); if (l.found) { r = { sx: l.sx, sy: l.sy, sw: l.sw, sh: l.sh }; found = true; } } catch (e) { /* cadre gardé */ }
-    let vis = null;
-    if (SCAN.pidx) { try { vis = ScanPrint.nearest(SCAN.pidx, ScanPrint.jitter(r).map(x => ScanPrint.print(src, x)), 12); } catch (e) { vis = null; } }
-    return { rect: r, found: found, vis: vis };
+  // Carte inclinée (tenue à la main) : image redressée, bords cherchés à nouveau ; la lecture du texte se fait aussi sur
+  // l'image redressée (look.src).
+  SCAN.look = function (src, rect, key) {
+    // Deux essais quand la carte paraît inclinée : image telle quelle et image redressée ; on garde celui dont le dessin
+    // ressemble le plus à une carte du catalogue (une inclinaison mal mesurée, sur une table de la couleur du bord de
+    // la carte, ne gâche donc rien).
+    const tries = [];
+    let found = false;
+    try {
+      const l = ScanPrint.locate(src, rect);
+      found = !!l.found;
+      tries.push({ src: src, r: l.found ? { sx: l.sx, sy: l.sy, sw: l.sw, sh: l.sh } : rect });
+      if (l.found && l.a) {
+        const k = 'dk' + (key || 'X'), c = ScanPrint.deskew(src, l.a, SCAN[k] || (SCAN[k] = document.createElement('canvas'))), l2 = ScanPrint.locate(c, rect);
+        if (l2.found) tries.push({ src: c, r: { sx: l2.sx, sy: l2.sy, sw: l2.sw, sh: l2.sh } });
+      }
+    } catch (e) { if (!tries.length) tries.push({ src: src, r: rect }); }
+    let best = tries[0], vis = null, prints = null;
+    if (SCAN.pidx) {
+      tries.forEach(t => {
+        try {
+          const p = ScanPrint.jitter(t.r).map(x => ScanPrint.print(t.src, x)), v = ScanPrint.nearest(SCAN.pidx, p, 12);
+          if (!vis || (v[0] ? v[0].d : 999) < (vis[0] ? vis[0].d : 999)) { vis = v; prints = p; best = t; }
+        } catch (e) { /* essai suivant */ }
+      });
+    }
+    src = best.src;
+    const r = best.r;
+    // Bord mesuré seulement si une réimpression des 30 ans ou sa carte d'origine est parmi les plus proches.
+    if (vis && vis.slice(0, 3).some(v => SCAN_TWIN.has(v.id))) { try { SCAN.lastBorder = ScanPrint.border(src, r); } catch (e) { /* bord inconnu */ } }
+    return { rect: r, found: found, vis: vis, src: src, prints: prints };
   };
   // Moteur de lecture prêt (progression affichée la première fois), puis lecture continue.
   SCAN.ready = function (inst, gen) {
@@ -136,7 +179,7 @@
       if (s.screen !== 'scan' || s.scanPhase !== 'live' || s.scanSheet || s.sheet || document.hidden || SCAN.fine || !SCAN.pidx) { SCAN.visTimer = setTimeout(step, 300); return; }
       const shot = SCAN.grab('cvVis');
       if (shot) {
-        const look = SCAN.look(shot.canvas, shot.rect);
+        const look = SCAN.look(shot.canvas, shot.rect, 'Vis');
         if (look.vis) {
           // Temps de reconnaissance : depuis la première image où un dessin proche apparaît.
           if (!SCAN.visSeen && look.vis[0] && look.vis[0].d <= 30) SCAN.visSeen = Date.now();
@@ -210,10 +253,10 @@
       if (hint) { SCAN.say(inst, hint); SCAN.timer = setTimeout(step, 350); return; }
       // Polarité : celle choisie par l'image, puis l'inverse une fois sur deux tant que rien n'est lu.
       const invert = SCAN.miss % 2 === 1 ? !SCAN.inv : undefined;
-      const look = SCAN.look(shot.canvas, shot.rect);
-      ScanOcr.read(shot.canvas, look.rect, { invert: invert, debug: SCAN.debug }).then(read => {
+      const look = SCAN.look(shot.canvas, shot.rect, 'Loop');
+      ScanOcr.read(look.src, look.rect, { invert: invert, debug: SCAN.debug }).then(read => {
         if (gen !== SCAN.gen) return;
-        read.vis = look.vis; read.found = look.found;
+        read.vis = look.vis; read.found = look.found; read.prints = look.prints;
         if (inst.st().scanPhase === 'live') SCAN.consider(inst, read, false);
         SCAN.timer = setTimeout(step, Math.max(30, 250 - (Date.now() - t0)));
       }).catch(() => { if (gen === SCAN.gen) SCAN.timer = setTimeout(step, 1000); });
@@ -225,7 +268,13 @@
     // Scans du jour épuisés (selon le grade) : on n'ouvre plus de fiche.
     const q = inst.scanQuota();
     if (q.left <= 0) { SCAN.frames = []; SCAN.say(inst, q.over); return false; }
-    const m = ScanCore.match(SCAN.idx, read, read.vis), now = Date.now();
+    let m = ScanCore.match(SCAN.idx, read, read.vis);
+    // Cartes proposées par le texte : leur dessin est vérifié sur la photo (distance exacte), puis nouveau classement.
+    if (read.prints && SCAN.pidx && m.cands.length) {
+      const known = new Set((read.vis || []).map(v => v.id)), more = ScanPrint.distTo(SCAN.pidx, read.prints, m.cands.map(c => c.id).filter(id => !known.has(id)));
+      if (more.length) m = ScanCore.match(SCAN.idx, read, (read.vis || []).concat(more));
+    }
+    const now = Date.now();
     if (!fine) { SCAN.inv = read.inverted; SCAN.miss = m.ev.num ? 0 : SCAN.miss + 1; }
     // La carte vue en tête vient d'être ajoutée (ou écartée) : rien à proposer tant qu'elle reste devant la caméra,
     // pendant quelques secondes (ses voisines du même numéro ne prennent pas sa place).
@@ -254,6 +303,10 @@
   // Carte reconnue sans doute possible (2026-10-25) : sa fiche s'ouvre tout de suite (carte, cote, état, ajout) ;
   // les 3 propositions restent derrière « Pas la bonne carte ? ». Sinon, on propose les 3.
   SCAN.open = function (inst, ids, auto) {
+    // Carte qui existe aussi en réimpression des 30 ans (même dessin, même numéro) : les deux proposées, au choix.
+    const tw = ScanCore.twinOrder(ids, SCAN_TWIN, SCAN.lastBorder);
+    if (tw) { ids = tw.ids; auto = false; }
+    SCAN.lastBorder = null;
     try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) { /* pas de vibreur */ }
     SCAN.seen = 0;
     inst.scanCount();
@@ -269,10 +322,10 @@
     if (!shot) return;
     SCAN.fine = true;
     SCAN.say(inst, 'Lecture fine…');
-    const look = SCAN.look(shot.canvas, shot.rect);
-    ScanOcr.read(shot.canvas, look.rect, { fine: true, debug: SCAN.debug }).then(read => {
+    const look = SCAN.look(shot.canvas, shot.rect, 'Shot');
+    ScanOcr.read(look.src, look.rect, { fine: true, debug: SCAN.debug }).then(read => {
       SCAN.fine = false;
-      read.vis = look.vis;
+      read.vis = look.vis; read.prints = look.prints;
       if (inst.st().scanPhase === 'live' && !SCAN.consider(inst, read, true)) SCAN.say(inst, 'Rien de lisible : rapproche la carte, évite les reflets, ou prends une photo');
     }).catch(() => { SCAN.fine = false; });
   };
@@ -290,8 +343,8 @@
       const center = { sx: (W - k * 0.716) / 2, sy: (H - k) / 2, sw: k * 0.716, sh: k };
       let look = null;
       Promise.all([ScanOcr.start(), SCAN.catalog(), SCAN.prints()])
-        .then(() => { look = SCAN.look(img, center); return ScanOcr.read(img, look.rect, { fine: true, debug: SCAN.debug }); })
-        .then(a => ScanOcr.read(img, { sx: 0, sy: 0, sw: W, sh: H }, { fine: true }).then(b => ({ num: a.num + '\n' + b.num, name: a.name + '\n' + b.name, inverted: a.inverted, ms: a.ms, bands: a.bands, vis: look && look.vis })))
+        .then(() => { look = SCAN.look(img, center, 'Photo'); return ScanOcr.read(look.src, look.rect, { fine: true, debug: SCAN.debug }); })
+        .then(a => ScanOcr.read(img, { sx: 0, sy: 0, sw: W, sh: H }, { fine: true }).then(b => ({ num: a.num + '\n' + b.num, name: a.name + '\n' + b.name, inverted: a.inverted, ms: a.ms, bands: a.bands, vis: look && look.vis, prints: look && look.prints })))
         .then(read => {
           URL.revokeObjectURL(url);
           SCAN.ev = {};
@@ -306,6 +359,7 @@
   SCAN.setTorch = function (inst, on) {
     const t = SCAN.stream && SCAN.stream.getVideoTracks()[0];
     if (!t || !SCAN.hasTorch) return;
+    SCAN.torchOff = !on;
     t.applyConstraints({ advanced: [{ torch: on }] }).then(() => inst.setState({ scanTorch: on })).catch(() => {});
   };
   // Mode diagnostic (?debug=scan) : bandes lues, texte reconnu, temps, cartes proposées.
@@ -419,7 +473,8 @@
   scanProto.vScan = function (x) {
     const s = x.s;
     if (s.screen !== 'scan') return SCAN_OFF;
-    const sealed = s.scanMode === 'sealed', ph = s.scanPhase, panel = SCAN_PANELS[ph], live = ph === 'live';
+    // Onglet Scellé retiré du scan (2026-11-08, porteur) : à sa place, le nombre de scans encore disponibles aujourd'hui.
+    const sealed = false, ph = s.scanPhase, panel = SCAN_PANELS[ph], live = ph === 'live';
     const on = 'var(--pkm-accent)', onFg = 'var(--pkm-on-accent)', off = 'transparent', offFg = 'var(--pkm-t2)';
     const clickInput = id => () => { const el = document.getElementById(id); if (el) { el.value = ''; el.click(); } };
     const quota = this.scanQuota();
@@ -434,7 +489,8 @@
       modeCard: !sealed, modeSealed: sealed,
       cardBg: sealed ? off : on, cardFg: sealed ? offFg : onFg, sealedBg: sealed ? on : off, sealedFg: sealed ? onFg : offFg,
       toCard: () => this.setState({ scanMode: 'card', scanPhase: SCAN_PANELS[ph] ? ph : 'idle', scanCands: [], scanPid: null, scanSheet: false }),
-      toSealed: () => this.setState({ scanMode: 'sealed', scanCands: [], scanPid: null, scanSheet: false }),
+      leftText: quota.left === Infinity ? 'Illimité' : quota.left + (quota.left > 1 ? ' scans' : ' scan'),
+      leftAria: quota.left === Infinity ? 'Scans illimités avec Premium' : quota.text,
       hasTorch: !sealed && SCAN.hasTorch && !panel, noTorch: sealed || !SCAN.hasTorch || !!panel,
       torchOn: !!s.scanTorch, torchLabel: s.scanTorch ? 'Éteindre la lampe' : 'Allumer la lampe',
       torchBg: s.scanTorch ? 'var(--pkm-accent)' : 'rgba(var(--pkm-ink-rgb), 0.66)', torchFg: s.scanTorch ? 'var(--pkm-on-accent)' : 'var(--pkm-white)',

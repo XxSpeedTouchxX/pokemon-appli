@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-08 — Scan, 30 ans dorés, inscription directe avec Face ID, e-mails (demande du porteur)
+
+- **Scan** : onglet « Scellé » retiré, remplacé par le nombre de scans restants du jour (« Illimité » avec Premium) ; lampe allumée d'office à l'ouverture (Android ; l'iPhone ne le permet pas à un site web) ; carte tenue de travers redressée (d'après la photo du porteur, Cizayox ex 30 ans sous pochette) ; banc d'essai inchangé à 93 % de bonne carte en tête, 99 % dans les 3 propositions.
+- **Réimpressions des 30 ans** : bord doré à paillettes redessiné sur le visuel d'origine pour les 30 cartes de la Collection Classique (`tools/c30/`, workflow « Bords dorés des 30 ans ») ; au scan, la carte d'origine et sa réimpression (même dessin, même numéro, prix très différents) sont toujours proposées ensemble, dans l'ordre donné par le bord mesuré, jamais ouvertes d'office.
+- **Inscription directe** : e-mail et mot de passe → compte créé tout de suite sur le serveur, puis « Compte créé ! Utiliser Face ID / Touch ID ? » (« mon empreinte » sur Android), puis âge, pseudo, compagnon ; vérification de l'adresse plus tard (lien de l'e-mail, rappel et « Renvoyer l'e-mail » dans Mon profil) ; connexion automatique avec Face ID quand la session est perdue (pas après un « Me déconnecter » volontaire). **Réglage serveur à faire par le porteur** (`docs/31` A : `GOTRUE_MAILER_ALLOW_UNVERIFIED_EMAIL_SIGN_INS`) ; sans lui, le code à 6 chiffres est demandé d'abord. **Choix par défaut à confirmer** : jeux et PK shop toujours fermés tant que l'adresse n'est pas vérifiée (anti-triche).
+- **E-mails en spam** : DNS vérifiés (DKIM Brevo et DMARC en place, **SPF sans Brevo**) ; guide `docs/31` B : SPF, suivi des clics Brevo coupé, nom d'expéditeur, Gmail Postmaster Tools ; domaine neuf : réputation à construire quelques jours.
+- Cache v163.
+
 ## 2026-11-08 — Scan instantané (demande du porteur)
 
 - Le dessin de la carte est comparé à part de la lecture du texte, toutes les 110 ms environ (≈ 10 ms de calcul), et démarre dès l'allumage de la caméra, sans attendre le moteur de lecture (1 à 3 s sur un téléphone).

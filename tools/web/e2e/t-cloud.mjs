@@ -8,7 +8,7 @@ const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 const KEY = 'pkm-collection-v1';
 // Faux serveur : comptes en mémoire.
-const users = {}; const calls = []; let down = false; const CODE = '482915';
+const users = {}; const calls = []; let down = false, unverifiedOk = false; const CODE = '482915';
 const jwt = (uid, email, aal) => 'h.' + Buffer.from(JSON.stringify({ sub: uid, email: email, aal: aal || 'aal1' })).toString('base64url') + '.s';
 const sess = u => ({ access_token: jwt(u.id, u.email), refresh_token: 'r-' + u.id, expires_in: 3600, user: { id: u.id, email: u.email } });
 async function fake(route) {
@@ -36,7 +36,7 @@ async function fake(route) {
     const u = users[body.email];
     if (url.searchParams.get('grant_type') === 'password') {
       if (!u || u.pwd !== body.password) return send(400, { code: 400, error_code: 'invalid_credentials', msg: 'Invalid login credentials' });
-      if (!u.confirmed) return send(400, { code: 400, error_code: 'email_not_confirmed', msg: 'Email not confirmed' });
+      if (!u.confirmed && !unverifiedOk) return send(400, { code: 400, error_code: 'email_not_confirmed', msg: 'Email not confirmed' });
       return send(200, sess(u));
     }
     return send(400, {});
@@ -100,25 +100,51 @@ const profilePage = async (page, starter, nick, age) => {
   await page.click('button:has-text("Choisir ' + starter + ' comme compagnon")');
 };
 
-// 1. Inscription : compte, profil, code.
+// 0. Inscription directe (2026-11-08, porteur) : serveur qui accepte la connexion avant la vérification de l'adresse.
+//    E-mail et mot de passe → compte créé sur le serveur, page 3 tout de suite, Face ID / Touch ID proposé.
+unverifiedOk = true;
 let { ctx, page } = await fresh();
 await page.click('button:has-text("Créer mon compte")'); await page.waitForTimeout(600);
 let f2 = page.locator('form[aria-label="Crée ton compte Dropicards"]');
+await f2.locator('input[name=email]').fill('Sacha@Exemple.fr'); await f2.locator('input[name=password]').fill('mot-de-passe-solide-43');
+await f2.locator('button[type=submit]').click(); await page.waitForTimeout(1200);
+ok('inscription directe : compte créé sur le serveur dès l’e-mail et le mot de passe', !!users['sacha@exemple.fr'] && calls.some(c => c.startsWith('POST /auth/v1/token')));
+ok('inscription directe : pas de code demandé, page du profil de dresseur', (await page.locator('form[aria-label="Confirme ton adresse"]').count()) === 0 && (await page.locator('form[aria-label="Ton profil de dresseur"]').count()) === 1);
+const offer = page.locator('section[aria-label="Face ID et empreinte"]');
+const offTxt = (await offer.count()) ? (await offer.innerText()).replace(/\s+/g, ' ') : '';
+ok('Face ID / Touch ID proposé juste après : ' + offTxt.slice(0, 90), /Compte créé/.test(offTxt) && /Oui, utiliser/.test(offTxt) && /Non, plus tard/.test(offTxt));
+await page.screenshot({ path: shot('cloud-pky-offer.png') });
+await offer.locator('button:has-text("Non, plus tard")').click(); await page.waitForTimeout(500);
+await profilePage(page, 'Salamèche', 'Sacha', 'Entre 15 et 25 ans'); await page.waitForTimeout(1500);
+ok('profil enregistré sur le serveur (pseudo, âge, starter) : ' + JSON.stringify(users['sacha@exemple.fr'].meta), users['sacha@exemple.fr'].meta.pseudo === 'Sacha' && users['sacha@exemple.fr'].meta.starter === 4);
+await page.goto(E2E + '/?start=profile&cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+ok('Mon profil : adresse à vérifier, « Renvoyer l’e-mail »', (await page.locator('button:has-text("Renvoyer l’e-mail")').count()) === 1);
+await ctx.close();
+unverifiedOk = false;
+
+// 1. Serveur qui exige la vérification avant la première connexion : code d'abord, puis le profil.
+({ ctx, page } = await fresh());
+await page.click('button:has-text("Créer mon compte")'); await page.waitForTimeout(600);
+f2 = page.locator('form[aria-label="Crée ton compte Dropicards"]');
 ok('page 2 : lien « J’ai déjà un compte »', (await f2.locator('button:has-text("J’ai déjà un compte")').count()) === 1);
 await f2.locator('input[name=email]').fill('Ondine@Exemple.fr'); await f2.locator('input[name=password]').fill('mot-de-passe-solide-42');
 await f2.locator('input[name=news]').check();
-await f2.locator('button[type=submit]').click(); await page.waitForTimeout(600);
-await profilePage(page, 'Carapuce', 'Ondine', 'Entre 25 et 35 ans'); await page.waitForTimeout(900);
+await f2.locator('button[type=submit]').click(); await page.waitForTimeout(900);
 const f4 = page.locator('form[aria-label="Confirme ton adresse"]');
 ok('page 4 : code demandé, adresse affichée', (await f4.count()) === 1 && /ondine@exemple\.fr/.test(await f4.innerText()));
 const u = users['ondine@exemple.fr'];
-ok('compte créé sur le serveur avec le profil : ' + JSON.stringify(u && u.meta), u && u.meta.pseudo === 'Ondine' && u.meta.age_range === '25-35' && u.meta.starter === 7 && u.meta.news_optin === true);
+ok('compte créé sur le serveur dès la page 2 : ' + JSON.stringify(u && u.meta), u && u.meta.news_optin === true);
 await page.screenshot({ path: shot('cloud-code.png') });
 await f4.locator('input[name=code]').fill('111111'); await f4.locator('button[type=submit]').click(); await page.waitForTimeout(700);
 ok('mauvais code refusé : ' + await page.locator('.pkm-acc-err').innerText().catch(() => ''), /n’est plus valable ou il est faux/.test(await page.locator('.pkm-acc-err').innerText().catch(() => '')));
 await f4.locator('button:has-text("Renvoyer le code")').click(); await page.waitForTimeout(500);
 ok('« Renvoyer le code »', calls.some(c => c.startsWith('POST /auth/v1/resend')) && /Nouveau code envoyé/.test(await page.locator('.pkm-acc-ok').innerText().catch(() => '')));
-await f4.locator('input[name=code]').fill(CODE); await f4.locator('button[type=submit]').click(); await page.waitForTimeout(2200);
+await f4.locator('input[name=code]').fill(CODE); await f4.locator('button[type=submit]').click(); await page.waitForTimeout(1200);
+// Bon code : Face ID proposé, puis la page du profil de dresseur.
+const off1 = page.locator('section[aria-label="Face ID et empreinte"]');
+if (await off1.count()) { await off1.locator('button:has-text("Non, plus tard")').click(); await page.waitForTimeout(400); }
+await profilePage(page, 'Carapuce', 'Ondine', 'Entre 25 et 35 ans'); await page.waitForTimeout(2200);
+ok('profil enregistré sur le serveur : ' + JSON.stringify(u.meta), u.meta.pseudo === 'Ondine' && u.meta.age_range === '25-35' && u.meta.starter === 7 && u.meta.news_optin === true);
 let st = await page.evaluate(k => { const t = localStorage.getItem(k) || ''; return { d: JSON.parse(t || '{}'), pwd: t.includes('solide'), ses: JSON.parse(localStorage.getItem('pkm-cloud-session') || 'null') }; }, KEY);
 ok('bon code : compte actif, starter qui remercie', (await page.locator('.pkm-ty').count()) === 1 || st.d.onb === 0);
 ok('compte marqué « serveur » : ' + JSON.stringify(st.d.account), st.d.account && st.d.account.server === true && st.d.account.uid === u.id && st.d.account.email === 'ondine@exemple.fr' && st.d.trainer.name === 'Ondine');
@@ -145,12 +171,13 @@ await fl.locator('input[name=email]').fill('ondine@exemple.fr'); await fl.locato
 await fl.locator('button[type=submit]').click(); await page.waitForTimeout(600);
 ok('mauvais mot de passe refusé', /Adresse ou mot de passe incorrect/.test(await page.locator('.pkm-acc-err').innerText().catch(() => '')));
 await page.screenshot({ path: shot('cloud-connexion.png') });
+const callsBefore = calls.length;
 await fl.locator('input[name=password]').fill('mot-de-passe-solide-42'); await fl.locator('button[type=submit]').click(); await page.waitForTimeout(900);
 ok('connecté : entrée directe dans l’app, sans rechoisir le Pokémon (pas de page 3)', (await page.locator('form[aria-label="Ton profil de dresseur"]').count()) === 0 && (await page.locator('section[aria-label^="Bienvenue"]').count()) === 0);
 ok('« Content de te revoir, Ondine ! »', /Content de te revoir, Ondine/.test(await page.locator('body').innerText()));
 st = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
 ok('compte « serveur » sur ce nouvel appareil, starter du compte (Carapuce) en compagnon, didacticiel passé', st.account && st.account.server === true && st.trainer.name === 'Ondine' && st.evo && st.evo.line === 'cara' && st.tuto === 'done' && !st.onb);
-ok('aucun profil réécrit sur le serveur', !calls.some(c => c.startsWith('PATCH /rest/v1/profiles')));
+ok('aucun profil réécrit sur le serveur', !calls.slice(callsBefore).some(c => c.startsWith('PATCH /rest/v1/profiles')));
 // Relancement de l'app déconnecté : la page de connexion s'ouvre d'elle-même, adresse préremplie.
 await page.evaluate(() => localStorage.removeItem('pkm-cloud-session'));
 await page.goto(E2E + '/?cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test', { waitUntil: 'load' }); await page.waitForTimeout(1500);
@@ -188,15 +215,13 @@ await ctx.close();
 await page.click('button:has-text("Créer mon compte")'); await page.waitForTimeout(600);
 f2 = page.locator('form[aria-label="Crée ton compte Dropicards"]');
 await f2.locator('input[name=email]').fill('ondine@exemple.fr'); await f2.locator('input[name=password]').fill('encore-un-mot-de-passe');
-await f2.locator('button[type=submit]').click(); await page.waitForTimeout(600);
-await profilePage(page, 'Pikachu', 'Doublon', 'Entre 15 et 25 ans'); await page.waitForTimeout(800);
-ok('adresse déjà inscrite : connexion proposée', (await page.locator('form[aria-label="Connecte-toi"]').count()) === 1 && /Un compte existe déjà/.test(await page.locator('.pkm-acc-err').innerText().catch(() => '')));
+await f2.locator('button[type=submit]').click(); await page.waitForTimeout(900);
+ok('adresse déjà inscrite : connexion proposée dès la page 2', (await page.locator('form[aria-label="Connecte-toi"]').count()) === 1 && /Un compte existe déjà/.test(await page.locator('.pkm-acc-err').innerText().catch(() => '')));
 await page.click('button:has-text("Créer un compte")'); await page.waitForTimeout(300);
 f2 = page.locator('form[aria-label="Crée ton compte Dropicards"]');
 await f2.locator('input[name=email]').fill('pierre@exemple.fr'); await f2.locator('input[name=password]').fill('encore-un-mot-de-passe');
-await f2.locator('button[type=submit]').click(); await page.waitForTimeout(600);
 down = true;
-await profilePage(page, 'Pikachu', 'Pierre', 'Entre 15 et 25 ans'); await page.waitForTimeout(800);
+await f2.locator('button[type=submit]').click(); await page.waitForTimeout(900);
 ok('réseau coupé : message clair', /Impossible de joindre Dropicards/.test(await page.locator('.pkm-acc-err').innerText().catch(() => '')));
 await page.screenshot({ path: shot('cloud-horsligne.png') });
 ok('réseau coupé : pas de « Continuer sans compte » (connexion obligatoire)', (await page.locator('button:has-text("Continuer sans compte")').count()) === 0 && (await page.locator('section[aria-label^="Bienvenue"]').count()) === 1);

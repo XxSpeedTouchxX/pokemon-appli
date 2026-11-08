@@ -22,11 +22,15 @@ const check = async (width, height, label) => {
   await page.click('button[aria-label^="Comptoir des Cartes"]'); steps.push(['fiche magasin', await has('Historique des arrivages')]);
   await page.click('button:has-text("Me prévenir des arrivages")'); steps.push(['alerte', await has('Alerte activée')]);
   await page.click('button[aria-label="Retour"]'); await page.click('button[aria-label="Scanner une carte ou un produit"]');
-  // Scan réel : sans caméra dans ce test, panneau de repli ; l'ajout passe par l'onglet Scellé.
+  // Scan réel : sans caméra dans ce test, panneau de repli ; scans restants à la place de l'ancien onglet Scellé
+  // (2026-11-08, porteur) ; l'ajout passe par une photo importée.
   await page.waitForSelector('section[aria-label="Pas de caméra disponible"], section[aria-label="Caméra refusée"]', { timeout: 10000 }).catch(() => {});
   steps.push(['scan', await has('Prendre une photo')]);
-  await page.click('button:has-text("Scellé")'); await page.waitForSelector('[aria-label="Produits scellés"] button');
-  await page.click('[aria-label="Produits scellés"] button'); steps.push(['résultat du scan', await has('Ajouter à ma collection')]);
+  steps.push(['scans restants, plus d’onglet Scellé', (await page.locator('[role="status"]:has-text("scan")').count()) > 0 && (await page.locator('button:has-text("Scellé")').count()) === 0]);
+  await page.setInputFiles('#pkm-scan-file', ROOT + 'tools/web/e2e/files/photo-tg05.jpg');
+  await page.waitForSelector('section[aria-label="C’est laquelle ?"], section[aria-label="Résultat du scan"]', { timeout: 60000 });
+  if (await page.locator('section[aria-label="C’est laquelle ?"]').count()) await page.locator('section[aria-label="C’est laquelle ?"] button').first().click();
+  steps.push(['résultat du scan', await has('Ajouter à ma collection')]);
   await page.click('button:has-text("Ajouter à ma collection")'); steps.push(['ajout', await has('ajouté')]);
   await page.click('button[aria-label="Fermer le scan"]'); await page.click('button[aria-label="Toutes les séries"]');
   await page.waitForSelector('nav[aria-label="Aller à une série"]', { timeout: 20000 }); steps.push(['toutes les séries', (await page.locator('main section[aria-label="Méga-Évolution"]').count()) === 1]);

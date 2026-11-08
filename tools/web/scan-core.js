@@ -100,20 +100,21 @@
 
     // ——— Lecture du numéro ———
     // Suite de chiffres avec confusions corrigées (O→0, I→1, S→5…) ; null si ce n'est pas un nombre.
-    function digits(t) {
+    // loose : chiffres tous lus comme des lettres acceptés (après un préfixe connu : « TGOS » → TG05).
+    function digits(t, loose) {
       let s = '', subs = 0;
       for (const c of t) {
         if (c >= '0' && c <= '9') s += c;
         else if (DIGIT[c]) { s += DIGIT[c]; subs++; } else return null;
       }
-      return s && subs * 2 <= s.length ? { s: s, subs: subs } : null;
+      return s && (loose ? s.length <= 3 : subs * 2 <= s.length) ? { s: s, subs: subs } : null;
     }
     // « TG05 », « T605 » (6 lu pour G), « SWSH123 », « 123 » → { pre, s, subs }.
     function splitPre(tok, known) {
       for (let k = Math.min(4, tok.length - 1); k >= 1; k--) {
         const head = tok.slice(0, k), fixed = head.replace(/[0-9]/g, c => LETTER[c] || c);
         if (!/^[A-Z]+$/.test(fixed) || !known.has(fixed)) continue;
-        const d = digits(tok.slice(k));
+        const d = digits(tok.slice(k), true);
         if (d) return { pre: fixed, s: d.s, subs: d.subs + [...head].filter((c, i) => c !== fixed[i]).length };
       }
       const d = digits(tok);
@@ -291,11 +292,18 @@
         if (qn) c.numEv = Math.max(c.numEv, 0.6 * qn);
         else if (qt) c.numEv = Math.max(c.numEv, 0.5 * qt);
       });
-      // Dessin : les cartes proches entrent dans la liste (même sans rien de lu).
-      const visEv = new Map();
-      (vis || []).forEach(v => {
-        const i = idx.byId ? idx.byId.get(v.id) : undefined, e = visOf(v.d);
-        if (i === undefined || e <= 0) return;
+      // Dessin : les cartes proches entrent dans la liste (même sans rien de lu). Sur une vraie photo (reflets,
+      // pochette), la bonne carte est souvent à 24-28 et les autres à 30 et plus : l'avance sur la carte suivante
+      // (au dessin différent) compte aussi. vis peut contenir des cartes lointaines (vérification des cartes lues).
+      const visEv = new Map(), visD = new Map(), vl = (vis || []).slice().sort((a, b) => a.d - b.d);
+      const d1 = vl.length ? vl[0].d : 999, d2 = (vl.find(v => v.d > d1 + 1) || { d: 999 }).d;
+      const gapEv = d1 <= 32 ? 0.8 * Math.max(0, Math.min(1, (d2 - d1) / 8)) : 0;
+      vl.forEach(v => {
+        const i = idx.byId ? idx.byId.get(v.id) : undefined;
+        if (i === undefined) return;
+        if (!visD.has(i)) visD.set(i, v.d);
+        const e = Math.max(visOf(v.d), v.d <= d1 + 1 ? gapEv : 0);
+        if (e <= 0) return;
         if (!(visEv.get(i) >= e)) visEv.set(i, e);
         if (!cand.has(i)) cand.set(i, { i: i, numEv: 0, pad: null });
       });
@@ -314,6 +322,9 @@
         }
         // Dessin : il compte pour moitié ; dessin et texte qui concordent font une carte sûre.
         const ve = visEv.get(c.i) || 0;
+        // Carte lue dont le dessin ne ressemble pas du tout à la photo, alors qu'une autre lui ressemble : texte
+        // sans doute mal lu (reflets, petits caractères).
+        if (!ve && visD.has(c.i) && d1 <= 30 && visD.get(c.i) >= d1 + 12) score *= 0.5;
         if (ve > 0) {
           const agree = ve >= 0.8 && (c.numEv >= 0.6 || nameEv >= 0.7) ? 0.12 : 0;
           score = Math.max(score, 0.5 * ve + 0.25 * c.numEv + 0.25 * nameEv + agree);
@@ -373,6 +384,20 @@
       return null;
     }
 
+    // ——— Réimpressions des 30 ans : laquelle des deux ? ———
+    // ids : cartes proposées (la 1re en tête) ; twin : Map carte → sa jumelle (origine ↔ réimpression des 30 ans,
+    // même dessin et même numéro) ; b : bord mesuré (ScanPrint.border). La jumelle est toujours proposée juste après,
+    // l'ordre suit le bord (doré à paillettes : réimpression ; jaune uni : origine ; sinon la réimpression, bien plus
+    // courante). Jamais d'ouverture directe : c'est l'utilisateur qui choisit (le prix diffère beaucoup).
+    function twinOrder(ids, twin, b) {
+      const a = ids[0], t = a && twin.get(a);
+      if (!t) return null;
+      const repr = /^30th-c-/.test(a) ? a : t, orig = repr === a ? t : a;
+      const gold = !b ? null : b.grain >= 3 && b.sat < 0.45 ? true : b.sat >= 0.5 && b.grain < 2.6 ? false : null;
+      const pair = gold === false ? [orig, repr] : [repr, orig];
+      return { ids: pair.concat(ids.filter(x => x !== repr && x !== orig)).slice(0, 3), gold: gold };
+    }
+
     // ——— Géométrie ———
     // Cadre affiché (r, relatif à la vidéo à l'écran el) → rectangle dans les pixels de la vidéo v,
     // pour une vidéo affichée en « object-fit: cover ».
@@ -426,5 +451,5 @@
     }
 
     return { BANDS: BANDS, fold: fold, skel: skel, lev: lev, index: index, parseNumber: parseNumber, parseName: parseName,
-      match: match, decide: decide, visSure: visSure, coverMap: coverMap, bandRect: bandRect, prep: prep };
+      match: match, decide: decide, visSure: visSure, twinOrder: twinOrder, coverMap: coverMap, bandRect: bandRect, prep: prep };
   })();

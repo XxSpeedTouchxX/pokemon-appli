@@ -57,7 +57,7 @@ const out = await page.evaluate(async ({ cards, vars, novis, visonly }) => {
         res.push({ want: want, v: vn, vis: (look.vis || []).slice(0, 4), found: look.found, t: [b - a, c - b, e - c] });
         continue;
       }
-      const read = await S.ScanOcr.read(c2, look.rect, {}), m = S.ScanCore.match(idx, read, look.vis), ms = Math.round(performance.now() - t0);
+      const read = await S.ScanOcr.read(look.src, look.rect, {}), m = S.ScanCore.match(idx, read, look.vis), ms = Math.round(performance.now() - t0);
       const vr = (look.vis || []).findIndex(v => v.id === want), vd = (look.vis || [])[0];
       const top = m.cands[0];
       

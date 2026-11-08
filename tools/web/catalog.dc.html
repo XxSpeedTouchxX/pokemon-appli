@@ -1071,11 +1071,11 @@
 <div class="pkm-pky-veil">
 <section aria-label="Face ID et empreinte" role="dialog" aria-modal="true" class="pkm-pky-box">
 <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true" class="pkm-pky-ico"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"></path><path d="M9 9.5v1M15 9.5v1M12 9v4h-1M9.5 16c1.5 1.2 3.5 1.2 5 0"></path></svg>
-<h2 class="pkm-pky-h">Connexion avec Face ID ou ton empreinte</h2>
-<p class="pkm-pky-p">La prochaine fois, connecte-toi d’un coup d’œil ou du bout du doigt, sans taper ton mot de passe. C’est aussi plus sûr : rien ne peut être deviné ni volé par un faux site.</p>
+<h2 class="pkm-pky-h">{{ pky.title }}</h2>
+<p class="pkm-pky-p">{{ pky.text }}</p>
 <sc-if value="{{ pky.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ pky.msg }}</p></sc-if>
 <button type="button" class="pkm-acc-go" onClick="{{ pky.go }}" aria-busy="{{ pky.busy }}">{{ pky.goLabel }}</button>
-<button type="button" class="pkm-acc-link" onClick="{{ pky.later }}">Plus tard</button>
+<button type="button" class="pkm-acc-link" onClick="{{ pky.later }}">{{ pky.laterLabel }}</button>
 </section>
 </div>
 </sc-if>
@@ -1492,7 +1492,7 @@
 </button>
 <div role="group" aria-label="Que scannes-tu ?" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 3px; border-radius: 999px; background: rgba(var(--pkm-ink-rgb), 0.66); border: 1px solid rgba(var(--pkm-hl-rgb), 0.16)">
 <button type="button" onClick="{{ scan.toCard }}" aria-pressed="{{ scan.modeCard }}" style="height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: {{ scan.cardBg }}; color: {{ scan.cardFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Carte</button>
-<button type="button" onClick="{{ scan.toSealed }}" aria-pressed="{{ scan.modeSealed }}" style="height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: {{ scan.sealedBg }}; color: {{ scan.sealedFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Scellé</button>
+<span role="status" aria-label="{{ scan.leftAria }}" style="height: 44px; padding: 0 16px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--pkm-t1); font-size: 14px; font-weight: 700; white-space: nowrap"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"></path></svg>{{ scan.leftText }}</span>
 </div>
 <sc-if value="{{ scan.hasTorch }}" hint-placeholder-val="{{ false }}">
 <button type="button" onClick="{{ scan.torch }}" aria-label="{{ scan.torchLabel }}" aria-pressed="{{ scan.torchOn }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.16); border-radius: 22px; background: {{ scan.torchBg }}; color: {{ scan.torchFg }}; display: flex; align-items: center; justify-content: center; cursor: pointer">
@@ -1942,8 +1942,9 @@
 <div class="pkm-tr-row"><span class="pkm-tr-k">Membre depuis</span><span class="pkm-tr-v">{{ pf.trainer.since }}</span></div>
 <div class="pkm-tr-row"><span class="pkm-tr-k">Grade</span><span class="pkm-tr-v" style="display: flex; align-items: center; gap: 8px; color: {{ pf.trainer.gradeColor }}"><img src="{{ pf.trainer.gradeBadge }}" alt="" width="28" height="28" style="display: block">{{ pf.trainer.grade }}</span></div>
 <sc-if value="{{ pf.trainer.cloudOn }}" hint-placeholder-val="{{ false }}"><div class="pkm-tr-row"><span class="pkm-tr-k">Compte</span><span class="pkm-tr-v">{{ pf.trainer.cloudState }}</span></div></sc-if>
+<sc-if value="{{ pf.trainer.mailOn }}" hint-placeholder-val="{{ false }}"><div role="note" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--pkm-accent); background: transparent"><p style="margin: 0; font-size: 13px; line-height: 1.45; color: #F3F6FC">{{ pf.trainer.mailText }}</p><button type="button" onClick="{{ pf.trainer.mailAct }}" style="align-self: flex-start; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer">Renvoyer l’e-mail</button></div></sc-if>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ pf.trainer.note }}</p>
-<sc-if value="{{ pf.trainer.pkyOn }}" hint-placeholder-val="{{ false }}"><div class="pkm-tr-row"><span class="pkm-tr-k">Face ID / empreinte</span><span class="pkm-tr-v">{{ pf.trainer.pkyState }}</span></div>
+<sc-if value="{{ pf.trainer.pkyOn }}" hint-placeholder-val="{{ false }}"><div class="pkm-tr-row"><span class="pkm-tr-k">{{ pf.trainer.pkyName }}</span><span class="pkm-tr-v">{{ pf.trainer.pkyState }}</span></div>
 <sc-for list="{{ pf.trainer.pkyList }}" as="pkd" hint-placeholder-count="1"><div class="pkm-tr-row"><span class="pkm-tr-k">{{ pkd.name }}</span><button type="button" class="pkm-pky-del" onClick="{{ pkd.remove }}" aria-label="{{ pkd.aria }}">Retirer</button></div></sc-for>
 <button type="button" class="pkm-pky-add" onClick="{{ pf.trainer.pkyAdd }}">{{ pf.trainer.pkyAddLabel }}</button></sc-if>
 <sc-if value="{{ pf.trainer.cloudOn }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.trainer.cloudAct }}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ pf.trainer.cloudLabel }}</button></sc-if>
@@ -2246,7 +2247,7 @@ PKCOUNTER
 <sc-if value="{{ ob.acc.hasNotice }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-acc-ok">{{ ob.acc.notice }}</p></sc-if>
 <sc-if value="{{ ob.acc.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-acc-err">{{ ob.acc.err }}</p></sc-if>
 <button type="submit" class="pkm-acc-go" aria-busy="{{ ob.acc.busy }}">{{ ob.acc.go }}</button>
-<sc-if value="{{ ob.acc.pkyOk }}" hint-placeholder-val="{{ false }}"><p class="pkm-acc-or" aria-hidden="true">ou</p><button type="button" class="pkm-acc-pky" onClick="{{ ob.acc.pkyLogin }}" aria-busy="{{ ob.acc.busy }}" aria-label="Me connecter avec Face ID ou mon empreinte"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"></path><path d="M9 9.5v1M15 9.5v1M12 9v4h-1M9.5 16c1.5 1.2 3.5 1.2 5 0"></path></svg>{{ ob.acc.pkyLabel }}</button></sc-if>
+<sc-if value="{{ ob.acc.pkyOk }}" hint-placeholder-val="{{ false }}"><p class="pkm-acc-or" aria-hidden="true">ou</p><button type="button" class="pkm-acc-pky" onClick="{{ ob.acc.pkyLogin }}" aria-busy="{{ ob.acc.busy }}" aria-label="{{ ob.acc.pkyLabel }}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"></path><path d="M9 9.5v1M15 9.5v1M12 9v4h-1M9.5 16c1.5 1.2 3.5 1.2 5 0"></path></svg>{{ ob.acc.pkyLabel }}</button></sc-if>
 <sc-if value="{{ ob.acc.links }}" hint-placeholder-val="{{ false }}"><div class="pkm-acc-links">
 <sc-if value="{{ ob.acc.isSignup }}" hint-placeholder-val="{{ true }}"><button type="button" class="pkm-acc-link" onClick="{{ ob.acc.toLogin }}">J’ai déjà un compte : me connecter</button></sc-if>
 <sc-if value="{{ ob.acc.isLogin }}" hint-placeholder-val="{{ false }}"><button type="button" class="pkm-acc-link" onClick="{{ ob.acc.toReset }}">Mot de passe oublié ?</button><button type="button" class="pkm-acc-link" onClick="{{ ob.acc.toSignup }}">Créer un compte</button></sc-if>

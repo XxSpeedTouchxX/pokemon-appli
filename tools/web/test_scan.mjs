@@ -107,6 +107,14 @@ test('dessin seul : ouverture sans attendre le texte seulement sans ambiguïté'
   assert.equal(S.visSure([[{ id: 'a', d: 9 }]]), 'a', 'seule carte proche');
 });
 
+test('réimpression des 30 ans : les deux jumelles proposées, ordre selon le bord, jamais d\'ouverture directe', () => {
+  const tw = new Map([['30th-c-025', 'ex10-108'], ['ex10-108', '30th-c-025']]);
+  assert.equal(S.twinOrder(['sv08-1', 'ex10-108'], tw, null), null, 'carte sans jumelle');
+  assert.deepEqual(S.twinOrder(['ex10-108', 'x'], tw, { grain: 3.9, sat: 0.27 }).ids, ['30th-c-025', 'ex10-108', 'x'], 'bord doré à paillettes (photo du porteur)');
+  assert.deepEqual(S.twinOrder(['30th-c-025'], tw, { grain: 1.2, sat: 0.7 }).ids, ['ex10-108', '30th-c-025'], 'bord jaune uni');
+  assert.deepEqual(S.twinOrder(['ex10-108'], tw, null).ids, ['30th-c-025', 'ex10-108'], 'bord inconnu : la réimpression d\'abord');
+});
+
 test('rapprochement : total partagé par deux extensions, sans nom → les deux', () => {
   const r = S.match(idx, { num: '182/182', name: '' });
   assert.deepEqual(ids(r).slice().sort(), ['sv04-182', 'sv10-182']);
