@@ -1,0 +1,7 @@
+/* Fenêtres d'infos qui montent du bas (2026-11-08, porteur) : même mouvement que « Mon Pokédex » (dex.css). La fermeture
+   glissée est dans sheet.js. */
+.pkm-sheet { animation: pkmDexlUp 0.48s cubic-bezier(0.32, 0.72, 0, 1) both; }
+:has(> .pkm-sheet) { animation: pkmSheetFade 0.32s ease-out both; }
+@keyframes pkmSheetFade { from { background-color: rgba(3, 6, 14, 0); } }
+@media (prefers-reduced-motion: reduce) { .pkm-sheet, :has(> .pkm-sheet) { animation: none; } }
+html.pkm-calm .pkm-sheet, html.pkm-calm :has(> .pkm-sheet) { animation: none; }

@@ -9,7 +9,7 @@ await ctx.route('https://assets.tcgdex.net/**', r => r.fulfill({ contentType: 'i
 await ctx.route('https://fonts.googleapis.com/**', r => r.abort());
 const page = await ctx.newPage();
 page.on('pageerror', e => errors.push('pageerror: ' + e.message));
-await page.goto(E2E + '/?start=search', { waitUntil: 'load' });
+await page.goto(E2E + '/?start=search&today=2026-10-31', { waitUntil: 'load' });
 await page.waitForSelector('text=Produits scellés', { timeout: 8000 });
 ok('Marché : entrée « ' + await page.locator('button:has-text("Produits scellés") span span').nth(1).innerText() + ' »', true);
 await page.screenshot({ path: shot('sealed-1-marche.png') });
@@ -75,7 +75,7 @@ await page.goto(E2E + '/?start=item&itemId=' + saved.k[0], { waitUntil: 'load' }
 await page.waitForTimeout(900);
 ok('après rechargement : dans la collection (fiche, historique d’achat)', (await page.locator('section[aria-label="Historique d’achat"]').count()) === 1 && (await page.locator('text=Coffret Dresseur d’élite Chaos Ascendant').count()) > 0);
 // Recherche et sorties
-await page.goto(E2E + '/?start=search', { waitUntil: 'load' });
+await page.goto(E2E + '/?start=search&today=2026-10-31', { waitUntil: 'load' });
 await page.waitForSelector('text=Produits scellés');
 await page.fill('input[type="search"]', 'Nuit Noire');
 await page.waitForTimeout(300);

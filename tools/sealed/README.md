@@ -55,7 +55,9 @@ Relevés du 2026-10-04 (gamme 30ᵉ Anniversaire et Règne Delta) : poketrack.fr
 
 `demo` relie les produits de la démo (p1 à m4) aux produits réels.
 
-Les displays, le booster 30ᵉ Anniversaire et Règne Delta (6 novembre 2026) ne sont pas dans la galerie : ils n'ont pas de visuel officiel. L'app affiche alors le logo de l'extension.
+Les displays et le booster 30ᵉ Anniversaire ne sont pas dans la galerie : ils n'ont pas de visuel officiel. L'app affiche alors le logo de l'extension.
+
+Règne Delta (6 novembre 2026, ajouté le 2026-11-08 à la demande du porteur) : ses 4 produits (Coffret Dresseur d'élite Méga-Rayquaza, display de 36 boosters, lot de 6 boosters, Boîtier Stratégies et Combats) ne sont pas encore dans la galerie. Leurs visuels viennent de l'article officiel « aperçu des produits » de pokemon.com (images de la boîte seule, au format PNG), noté dans `gallery`.
 
 ### 3. Visuels (`fetch_images.py`)
 

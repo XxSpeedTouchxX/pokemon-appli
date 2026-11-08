@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-08 — Sons, fenêtres glissées, règles des PK et PA, grades, Règne Delta (demande du porteur)
+
+- **Sons muets** : depuis que les jeux passent par le serveur, le son partait à la réponse du serveur, hors du toucher, et Safari (iPhone) le laissait muet. L'audio s'ouvre désormais à chaque toucher. De plus, le bouton « son » du didacticiel coupait tous les bruits sans moyen de les rallumer : nouveau réglage **Réglages › Sons** (Activés / Coupés). Sur iPhone, le bouton silencieux sur le côté coupe aussi les sons.
+- **Fenêtres d'infos** (Mes PK, Mes PA, règles des PK et PA, informations légales, fiche d'une carte, modification d'un ajout, import, compagnon, panneau Admin, résultat du scan) : elles montent du bas et redescendent à la fermeture, comme « Mon Pokédex » (`sheet.js`, `sheet.css`). Mon profil (une page) n'est pas changé.
+- **Règles des PK et PA** : petit booster dessiné devant « Booster PK » (à la place du cadeau) ; les 3 tickets Bronze, Argent, Or à la place des PK dans la ligne du PK shop ; tableau « Plus ton grade monte, plus tu joues » agrandi, « Grade actuel » dans l'encadré jaune.
+- **Grades** : dans la fiche d'un grade, les avantages déjà là au grade précédent en haut, les « Nouveau » en bas ; « Grade précédent » et « Grade suivant » glissent comme une page (de gauche ou de droite).
+- **Centrages** : titre « Arbre de Pokévolution » (la police le dessinait 7 px trop haut) ; icônes de la barre du bas (5 px trop haut : le point de l'onglet actif est sorti du flux).
+- **Règne Delta** : 4 produits avec les visuels officiels de l'article « aperçu des produits » de pokemon.com : Coffret Dresseur d'élite (Méga-Rayquaza), display de 36 boosters, et 2 produits ajoutés (lot de 6 boosters, Boîtier Stratégies et Combats). Les visuels arrivent avec le prochain passage du robot « Catalogue scellé » (la machine de travail ne peut pas joindre pokemon.com).
+- Cache v157.
+
+---
+
 ## 2026-11-07 — Animation du ticket acheté : choix du porteur
 
 - Le porteur a choisi la proposition 2 (tampon « VALIDÉ », secousse, « +1 », étincelles), terminée par l'envol de la proposition 1 : le ticket file vers celui de la fiche et disparaît. C'est l'animation par défaut ; `?anitk=1` (Envol seul) et `?anitk=3` (Brillance) restent pour essai. Cache v156.

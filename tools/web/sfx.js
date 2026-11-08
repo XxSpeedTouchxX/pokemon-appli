@@ -671,9 +671,22 @@
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
     if (!sfxAc) sfxAc = new AC();
-    if (sfxAc.state === 'suspended') sfxAc.resume();
+    if (sfxAc.state !== 'running' && sfxAc.state !== 'closed') { try { const p = sfxAc.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* refusé hors d'un toucher */ } }
     return sfxAc;
   };
+  // Déverrouillage du son (2026-11-08) : depuis que les jeux passent par le serveur, le son part à la réponse du serveur,
+  // hors du toucher, et Safari (iPhone) laisse alors l'audio muet. On ouvre donc l'audio à chaque toucher, tant qu'il
+  // n'est pas actif (un son vide d'un échantillon suffit à l'ouvrir sur les anciens iPhone), puis on ne fait plus rien.
+  const sfxUnlockAudio = () => {
+    try {
+      if (sfxMuted() || (sfxAc && sfxAc.state === 'running')) return;
+      const ac = sfxCtx();
+      if (!ac) return;
+      const b = ac.createBuffer(1, 1, 22050), src = ac.createBufferSource();
+      src.buffer = b; src.connect(ac.destination); src.start(0);
+    } catch (e) { /* son indisponible */ }
+  };
+  try { ['touchend', 'pointerdown', 'keydown'].forEach(t => document.addEventListener(t, sfxUnlockAudio, { capture: true, passive: true })); } catch (e) { /* pas de document */ }
   const sfxProto = Component.prototype;
   // Lancer de la pièce (games.js, gmFlip) : appelé au toucher, ce qui autorise le son.
   sfxProto.sfxCoin = function () {
@@ -711,6 +724,10 @@
       const ac = sfxCtx(), x = sfxPick('songrade', '', SFX_GRADE, SFX_GRADE_DEFAULT);
       if (ac && x) sfxSchedule(ac, ac.destination, 'grade', x.id, ac.currentTime + 0.05);
     } catch (e) { /* son indisponible */ }
+  };
+  // Petit « plop » quand on rallume les sons (Réglages › Sons) : au toucher, ce qui ouvre aussi l'audio.
+  sfxProto.sfxPop = function () {
+    try { const ac = sfxCtx(); if (ac) sfxPop(ac, sfxBus(ac, ac.destination, 0.9), ac.currentTime + 0.02, 0.5); } catch (e) { /* son indisponible */ }
   };
   sfxProto.sfxEvo = function () {
     try {

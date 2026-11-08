@@ -84,6 +84,15 @@
         help: (look === 'dark' ? 'Fond nuit, textes clairs, accent jaune.' : 'Fond jaune Dropicards, textes bleu nuit.')
           + (themed ? ' Ton compagnon garde son thème « ' + HOME_THEMES[s.buddy].name + ' » tant qu’il t’accompagne.' : '')
       };
+      // Sons (2026-11-08, porteur) : le bouton « son » du didacticiel coupait aussi tous les bruits de l'app, sans moyen
+      // de les rallumer ailleurs. Même réglage (clé pkm-tuto-sound), désormais visible ici.
+      let sndOff = false;
+      try { sndOff = localStorage.getItem('pkm-tuto-sound') === 'off'; } catch (e) { sndOff = false; }
+      const sndSet = off => { try { localStorage.setItem('pkm-tuto-sound', off ? 'off' : 'on'); } catch (e) { /* stockage indisponible */ } this.setState({ sndAt: Date.now() }); if (!off && this.sfxPop) this.sfxPop(); };
+      r.set.snd = {
+        modes: [[false, 'Activés'], [true, 'Coupés']].map(([k, label]) => Object.assign({ label: label, on: sndOff === k, pick: () => sndSet(k) }, this.chip(sndOff === k))),
+        help: sndOff ? 'Aucun son : évolution, Booster PK, pièce, PA du jour, grades et voix du didacticiel restent muets.' : 'Sons de l’évolution, du Booster PK, de la pièce, des PA du jour, des grades et voix du didacticiel. Sur iPhone, le bouton silencieux sur le côté coupe aussi les sons.'
+      };
       r.set.fx = {
         modes: FX_MODES.map(([k, label]) => Object.assign({ label: label, on: mode === k, pick: () => this.setState({ bgFx: k }) }, this.chip(mode === k))),
         help: { auto: 'Reflet holo sur l’accueil, gemmes dans le Marché, ondes radar dans Territoire ; pluie et vagues avec Kyogre, volcan et lave avec Groudon, orage et météores avec Rayquaza.', calm: 'Mêmes décors, deux fois plus lents et plus discrets.', off: 'Fond fixe, sans décor animé.' }[mode]

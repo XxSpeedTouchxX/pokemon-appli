@@ -19,7 +19,7 @@ const add = async graded => {
   const SH = 'section[aria-label="Saisie"]';
   if (graded) await graded(SH);
   await page.locator(SH + ' button:has-text("Ajouter à ma collection"), ' + SH + ' button:has-text("Ajouter un exemplaire")').last().click(); await page.waitForTimeout(500);
-  await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
+  await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(700); // la fiche redescend d'abord (sheet.js)
 };
 const SH = 'section[aria-label="Saisie"]';
 await add(null);

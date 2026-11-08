@@ -783,7 +783,7 @@
 <sc-if value="{{ hb.picking }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer le choix du compagnon" onClick="{{ hb.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Choisis ton compagnon" role="dialog" aria-modal="true" style="flex: none; position: relative; height: 78%; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<section aria-label="Choisis ton compagnon" role="dialog" aria-modal="true" style="flex: none; position: relative; height: 78%; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 18px; display: flex; flex-direction: column; gap: 10px" class="pkm-sheet">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <h2 style="flex: 1; min-width: 0; margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Choisis ton compagnon</h2>
@@ -879,7 +879,7 @@
 <sc-if value="{{ pk.sheet }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer Mes PK" onClick="{{ pk.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Mes PK" role="dialog" aria-modal="true" style="flex: none; max-height: 86%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+<section aria-label="Mes PK" role="dialog" aria-modal="true" style="flex: none; max-height: 86%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 20px; display: flex; flex-direction: column; gap: 14px" class="pkm-sheet">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Mes PK</h2>
@@ -923,7 +923,7 @@
 <sc-if value="{{ pk.paSheet.open }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer Mes PA" onClick="{{ pk.paSheet.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Mes PA" role="dialog" aria-modal="true" class="pkm-pa-sheet">
+<section aria-label="Mes PA" role="dialog" aria-modal="true" class="pkm-sheet pkm-pa-sheet">
 <div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
 <div class="pkm-pa-sheet-head"><h2>Mes PA</h2><button type="button" onClick="{{ pk.paSheet.close }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
 <div class="pkm-pa-sheet-bal"><img src="{{ pk.paSheet.logo }}" alt="" width="64" height="64"><div><span>Ton solde</span><b>{{ pk.paSheet.balance }} PA</b></div></div>
@@ -1084,7 +1084,7 @@
 <sc-if value="{{ adm.sheet }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer le panneau Admin" onClick="{{ adm.close }}" style="flex: 1 1 auto; min-height: 36px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Panneau Admin" role="dialog" aria-modal="true" style="flex: none; max-height: 92%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 10px">
+<section aria-label="Panneau Admin" role="dialog" aria-modal="true" style="flex: none; max-height: 92%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 10px" class="pkm-sheet">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Panneau Admin</h2>
@@ -1197,7 +1197,7 @@
 <sc-if value="{{ legal.open }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 35; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer les informations légales" onClick="{{ legal.close }}" style="flex: 1 1 auto; min-height: 36px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Informations légales" role="dialog" aria-modal="true" style="flex: none; max-height: 92%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 12px">
+<section aria-label="Informations légales" role="dialog" aria-modal="true" style="flex: none; max-height: 92%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 12px" class="pkm-sheet">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">{{ legal.title }}</h2>
@@ -1229,7 +1229,7 @@
 <p class="pkm-rules-note">Ajouter des cartes ou ouvrir l’app ne rapporte pas de PK.</p>
 </section>
 <section aria-label="Booster PK" class="pkm-rules-card">
-<h3><span class="pkm-rules-ico" aria-hidden="true">🎁</span>Booster PK</h3>
+<h3><span class="pkm-rules-pack" aria-hidden="true"><img src="img/brand/pk.svg" alt="" width="14" height="14"></span>Booster PK</h3>
 <p class="pkm-rules-note">Un booster gratuit, plus souvent selon ton grade. Ce qu’il peut contenir :</p>
 <div class="pkm-rules-odds" aria-hidden="true"><sc-for list="{{ legal.pk.odds }}" as="lro" hint-placeholder-count="5"><i style="{{ lro.w }}; background: {{ lro.color }}"></i></sc-for></div>
 <ul class="pkm-rules-legend"><sc-for list="{{ legal.pk.odds }}" as="lrl" hint-placeholder-count="5"><li><i aria-hidden="true" style="background: {{ lrl.color }}"></i><b>{{ lrl.pk }}</b><span>{{ lrl.pct }}</span></li></sc-for></ul>
@@ -1247,7 +1247,7 @@
 <h3><span class="pkm-rules-ico" aria-hidden="true">⏱️</span>Plus ton grade monte, plus tu joues</h3>
 <div role="table" aria-label="Délais et scans par grade" class="pkm-rules-table">
 <div role="row" class="pkm-rules-row pkm-rules-th"><span role="columnheader">Grade</span><span role="columnheader">Booster</span><span role="columnheader">Pièce</span><span role="columnheader">Scans / j</span></div>
-<sc-for list="{{ legal.pk.grades }}" as="lrg" hint-placeholder-count="6"><div role="row" class="{{ lrg.cls }}" aria-label="{{ lrg.aria }}"><span role="cell" class="pkm-rules-gname"><img src="{{ lrg.img }}" alt="" width="28" height="28">{{ lrg.name }}</span><span role="cell">{{ lrg.booster }}</span><span role="cell">{{ lrg.coin }}</span><span role="cell">{{ lrg.scans }}</span></div></sc-for>
+<sc-for list="{{ legal.pk.grades }}" as="lrg" hint-placeholder-count="6"><div role="row" class="{{ lrg.cls }}" aria-label="{{ lrg.aria }}"><span role="cell" class="pkm-rules-gname"><img src="{{ lrg.img }}" alt="" width="36" height="36"><span><span>{{ lrg.name }}</span><sc-if value="{{ lrg.me }}" hint-placeholder-val="{{ false }}"><b class="pkm-rules-nowtag">Grade actuel</b></sc-if></span></span><span role="cell">{{ lrg.booster }}</span><span role="cell">{{ lrg.coin }}</span><span role="cell">{{ lrg.scans }}</span></div></sc-for>
 </div>
 </section>
 <section aria-label="Points d’Aura" class="pkm-rules-card pkm-rules-aura">
@@ -1259,7 +1259,7 @@
 </section>
 <section aria-label="PK shop" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">🛍️</span>PK shop</h3>
-<div class="pkm-rules-shop"><sc-for list="{{ legal.pk.shop }}" as="lrp" hint-placeholder-count="3"><div><img src="{{ lrp.img }}" alt="" width="44" height="44"><span><b>{{ lrp.name }}</b><em>{{ lrp.grade }}</em></span><strong>{{ lrp.price }}</strong></div></sc-for></div>
+<div class="pkm-rules-shop"><sc-for list="{{ legal.pk.shop }}" as="lrp" hint-placeholder-count="3"><div><sc-if value="{{ lrp.isTicket }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-tkbox" aria-hidden="true"><span class="{{ lrp.ticketCls }}"><span class="pkm-shop-ticket-in">{{ lrp.tag }}</span></span></span></sc-if><sc-if value="{{ lrp.notTicket }}" hint-placeholder-val="{{ true }}"><img src="{{ lrp.img }}" alt="" width="44" height="44"></sc-if><span><b>{{ lrp.name }}</b><em>{{ lrp.grade }}</em></span><strong>{{ lrp.price }}</strong></div></sc-for></div>
 <p class="pkm-rules-note">Le tirage au sort suivra un règlement publié avant le tirage. L’envoi des lots demandera un compte et une adresse.</p>
 </section>
 </div>
@@ -1272,7 +1272,7 @@
 <sc-if value="{{ bed.open }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 35; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer sans modifier" onClick="{{ bed.close }}" style="flex: 1 1 auto; min-height: 36px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Modifier l’ajout" role="dialog" aria-modal="true" style="flex: none; max-height: 92%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 12px">
+<section aria-label="Modifier l’ajout" role="dialog" aria-modal="true" style="flex: none; max-height: 92%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 12px" class="pkm-sheet">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="flex: none; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px">
 <div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
@@ -1337,7 +1337,7 @@
 <sc-if value="{{ imp.open }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 35; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer l’import" onClick="{{ imp.close }}" style="flex: 1 1 auto; min-height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Importer un tableur" role="dialog" aria-modal="true" style="flex: none; max-height: 94%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 12px">
+<section aria-label="Importer un tableur" role="dialog" aria-modal="true" style="flex: none; max-height: 94%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 12px" class="pkm-sheet">
 <div aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px">
 <div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
@@ -1398,6 +1398,13 @@
 <sc-for list="{{ set.look.modes }}" as="lkm" hint-placeholder-count="2"><button type="button" onClick="{{ lkm.pick }}" aria-pressed="{{ lkm.on }}" style="flex: 1; min-height: 44px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ lkm.bc }}; background: {{ lkm.bg }}; color: {{ lkm.fg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ lkm.label }}</button></sc-for>
 </div>
 <span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ set.look.help }}</span>
+</section>
+<section aria-label="Sons" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Sons</h2>
+<div role="group" aria-label="Sons" style="display: flex; gap: 8px">
+<sc-for list="{{ set.snd.modes }}" as="snm" hint-placeholder-count="2"><button type="button" onClick="{{ snm.pick }}" aria-pressed="{{ snm.on }}" style="flex: 1; min-height: 44px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ snm.bc }}; background: {{ snm.bg }}; color: {{ snm.fg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ snm.label }}</button></sc-for>
+</div>
+<span style="font-size: 12.5px; line-height: 1.45; color: #9AA8C3">{{ set.snd.help }}</span>
 </section>
 <section aria-label="Fonds animés" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 10px">
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600">Fonds animés</h2>
@@ -1578,8 +1585,8 @@
 
 <sc-if value="{{ scan.picking }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; background: rgba(var(--pkm-scrim-rgb), 0.5)">
-<button type="button" aria-label="Revenir à la caméra" onClick="{{ scan.retry }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="C’est laquelle ?" role="dialog" aria-modal="true" style="flex: none; max-height: 80%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: var(--pkm-card-2); border-top: 1px solid var(--pkm-line-3); border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 10px">
+<button type="button" aria-label="Revenir à la caméra" data-sheet-close="1" onClick="{{ scan.retry }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
+<section aria-label="C’est laquelle ?" role="dialog" aria-modal="true" style="flex: none; max-height: 80%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: var(--pkm-card-2); border-top: 1px solid var(--pkm-line-3); border-radius: 28px 28px 0 0; padding: 8px 16px 22px; display: flex; flex-direction: column; gap: 10px" class="pkm-sheet">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: var(--pkm-line-2)"></div>
 <h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 600; color: var(--pkm-t1)">C’est laquelle ?</h2>
 <p style="margin: 0; font-size: 13px; line-height: 1.4; color: var(--pkm-t3)">{{ scan.evText }}</p>
@@ -1731,7 +1738,7 @@
 </section>
 <sc-if value="{{ pks.ask.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-pas-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.ask.close }}" class="pkm-pas-scrim"></button>
-<section aria-label="Ton achat de PA" role="dialog" aria-modal="true" class="pkm-dark pkm-pas-sheet">
+<section aria-label="Ton achat de PA" role="dialog" aria-modal="true" class="pkm-sheet pkm-dark pkm-pas-sheet">
 <h2>Ton achat</h2>
 <div class="pkm-pas-recap"><img src="img/brand/pa.svg" alt="" width="48" height="48"><div><span class="pkm-pas-qty">{{ pks.ask.qty }} <small>PA</small></span><span class="pkm-pas-bonus">{{ pks.ask.bonus }}</span></div></div>
 <div class="pkm-pas-lines"><div><span>1ʳᵉ recharge doublée</span><b>{{ pks.ask.first }}</b></div><div><span>Tu recevras</span><b>{{ pks.ask.get }}</b></div><div><span>Ton solde après l’achat</span><b>{{ pks.ask.after }}</b></div><div class="pkm-pas-tot"><span>Total TTC</span><span>{{ pks.ask.price }}</span></div></div>
@@ -2063,7 +2070,7 @@ PKCOUNTER
 <sc-if value="{{ fi.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-fi-wrap">
 <button type="button" aria-label="Fermer la fiche" onClick="{{ fi.close }}" class="pkm-fi-back"></button>
-<section aria-label="{{ fi.title }}" role="dialog" aria-modal="true" class="pkm-fi pkm-dark pkm-rise">
+<section aria-label="{{ fi.title }}" role="dialog" aria-modal="true" class="pkm-sheet pkm-fi pkm-dark">
 <div aria-hidden="true" class="pkm-fi-grip"></div>
 <div class="pkm-fi-head">
 <div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">

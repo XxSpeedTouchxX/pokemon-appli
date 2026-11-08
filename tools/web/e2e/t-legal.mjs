@@ -20,7 +20,7 @@ for (const [tab, title, re] of [['Confidentialité', 'Politique de confidentiali
   ok(tab + ' : « ' + title + ' », texte attendu', re.test(await sh.innerText()) && (await sh.locator('h2').innerText()) === title);
 }
 await page.screenshot({ path: shot('legal-pk.png') });
-await sh.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
+await sh.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(700); // la fenêtre redescend d'abord (sheet.js, 2026-11-08)
 ok('fermé', (await sh.count()) === 0);
 await page.goto(E2E + '/', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('header button[aria-label^="Mes PK"]'); await page.waitForTimeout(300);

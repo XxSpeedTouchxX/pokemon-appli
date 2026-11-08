@@ -1083,8 +1083,8 @@
 
 <sc-if value="{{ ui.scanSheetOpen }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 25; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.55)">
-<button type="button" aria-label="Revenir au scan" onClick="{{ sr.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Résultat du scan" style="flex: none; max-height: 770px; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 24px; display: flex; flex-direction: column; gap: 14px">
+<button type="button" aria-label="Revenir au scan" data-sheet-close="1" onClick="{{ sr.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
+<section aria-label="Résultat du scan" style="flex: none; max-height: 770px; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 24px; display: flex; flex-direction: column; gap: 14px" class="pkm-sheet">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="flex: none; display: flex; gap: 14px; align-items: flex-start">
 <span style="position: relative; flex: none; width: 84px; height: 112px; border-radius: 10px; overflow: hidden; background: {{ sr.bg }}; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.12)">
@@ -1149,7 +1149,7 @@
 <sc-if value="{{ ui.sheetOpen }}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
 <button type="button" aria-label="Fermer la saisie" onClick="{{ closeSheet }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Saisie" style="flex: none; max-height: 796px; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 26px; display: flex; flex-direction: column; gap: 14px">
+<section aria-label="Saisie" style="flex: none; max-height: 796px; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 26px; display: flex; flex-direction: column; gap: 14px" class="pkm-sheet">
 <div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
 <div style="flex: none; display: flex; align-items: center; gap: 8px">
 <div role="group" aria-label="Type de saisie" style="flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 999px; background: #0B1120; border: 1px solid #1E2B45">

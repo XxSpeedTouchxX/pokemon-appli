@@ -17,6 +17,9 @@
   proto.push = function (screen, extra) { NAV.dir = 'fwd'; NAV.from = 0; navSnapTake(); return navBasePush.call(this, screen, extra); };
   proto.pop = function () { NAV.dir = 'back'; navSnapTake(); return navBasePop.call(this); };
   proto.tab = function (screen) { NAV.dir = 'tab'; navSnapDrop(); return navBaseTab.call(this, screen); };
+  // Même page, autre contenu, avec le glissement d'une page (2026-11-08, porteur : « Grade précédent » / « Grade
+  // suivant ») : dir = 'fwd' (le nouveau arrive de la droite) ou 'back' (il revient de la gauche).
+  proto.navSlide = function (dir, patch) { NAV.dir = dir; NAV.from = 0; navSnapTake(); return this.setState(patch); };
   // Retour « matériel » : zoom, puis fiche ou panneau, puis écran précédent, puis l'accueil. false à l'accueil.
   proto.navBack = function () {
     const s = this.st();

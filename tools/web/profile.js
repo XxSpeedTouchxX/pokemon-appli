@@ -260,7 +260,11 @@
     });
     return r;
   };
-  const pfPerks = (T, i) => (T[i].perks || []).map(p => ({ text: p, isNew: i > 0 && (T[i - 1].perks || []).indexOf(p) < 0 }));
+  // Avantages d'un grade (2026-11-08, porteur) : ceux déjà là au grade précédent en haut, les « Nouveau » en bas.
+  const pfPerks = (T, i) => {
+    const all = (T[i].perks || []).map(p => ({ text: p, isNew: i > 0 && (T[i - 1].perks || []).indexOf(p) < 0 }));
+    return all.filter(p => !p.isNew).concat(all.filter(p => p.isNew));
+  };
   // Fiche d'un grade : emblème en grand, condition, avantages, état (obtenu, en cours, à venir).
   proto.vGrade = function (s) {
     const T = this.tiers(), i = Math.max(0, Math.min(T.length - 1, Number(s.gradeIx) || 0)), g = T[i], cur = this.tierOf().i;
@@ -277,8 +281,10 @@
       prog: [['Objectif du grade', pk, g.pk, ' PK']].concat(g.comp ? [['Compagnons débloqués', comp, g.comp, '']] : [], g.mega ? [['Méga-évolutions', mega, g.mega, '']] : [])
         .filter(r => r[2] > 0).map(([label, have, need, unit]) => ({ label: label, val: pfNum(Math.min(have, need)) + ' / ' + pfNum(need) + unit + (have >= need ? ' ✓' : ''),
           cls: have >= need ? 'pkm-gr-ok' : '', w: 'width: ' + Math.round(Math.min(1, have / need) * 100) + '%' })),
-      prev: i > 0 ? () => this.setState({ gradeIx: i - 1 }) : null, hasPrev: i > 0,
-      next: i < T.length - 1 ? () => this.setState({ gradeIx: i + 1 }) : null, hasNext: i < T.length - 1
+      // Glissement d'une page entre les grades (2026-11-08, porteur) : le précédent revient de la gauche, le suivant
+      // arrive de la droite (nav.js, navSlide).
+      prev: i > 0 ? () => this.navSlide('back', { gradeIx: i - 1 }) : null, hasPrev: i > 0,
+      next: i < T.length - 1 ? () => this.navSlide('fwd', { gradeIx: i + 1 }) : null, hasNext: i < T.length - 1
     };
   };
   // Grade actuel (Mon profil) : emblème mis en avant, progression, avantages.
