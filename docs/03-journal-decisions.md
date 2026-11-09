@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-09 — Lots en quantité limitée, tirage mensuel d'une carte, 2XP PK offert avec Premium (« go » du porteur)
+
+- **Achats directs plafonnés** (porteur) : 10 boosters par mois, 3 items rares par mois, 1 ETB 30 ans tous les 2 mois (périodes novembre-décembre, janvier-février…) ; réassort le **1er du mois à 20 h** (heure de Paris). L'app affiche « Plus que N ce mois-ci » (points restants), puis « Épuisé · Retour le 1er … à 20 h » avec un compte à rebours.
+- **Un achat direct par compte et par mois** (tous lots confondus), « pour donner la chance à tout le monde » : « Tu as déjà fait ton achat du mois », prochain achat le 1er à 20 h, compte à rebours. Les tickets n'en font pas partie.
+- **Tickets toujours en vente**, un **tirage par mois** pour chacun, le 1er à 20 h, **1 lot par tirage** : Bronze = une carte **ultra rare** (double étoile argentée), Argent = une carte **AR** (une étoile dorée), Or = une carte **ALT** (deux étoiles dorées). Les tirages du dimanche (toutes les 2 semaines, chaque mois, tous les 2 mois) sont remplacés.
+- **Cartes à gagner chargées par le porteur chaque mois** (une ou plusieurs par ticket) : panneau Admin › « Cartes des tirages » (tirage, ticket, recherche dans le catalogue filtrée sur la rareté du ticket, « + Ajouter », « Retirer ») ; une carte déjà choisie par des joueurs ne peut plus être retirée. Le joueur **choisit sa carte dans la fiche du ticket** avant d'acheter ; le gagnant reçoit la carte qu'il a choisie. Sans carte chargée, le ticket ne s'achète pas (« Les cartes du tirage arrivent très bientôt »).
+- **Premium : 2XP PK offert le premier mois** (30 jours), une seule fois par compte, dès le premier paiement ; affiché dans l'offre Premium. Les 2XP achetés au PK shop restent payés en PA (choix par défaut annoncé ; option « payés en PK » toujours en attente).
+- Serveur : `tools/supabase/018_lots_limites.sql` (**à installer par le porteur**, après 017) et 59 vérifications (`tests/test_018.sql`) ; e-mail de chaque achat avec le nom de la carte choisie. Sans 018 installé, les tickets ne s'achètent plus dans l'app (cartes du mois introuvables) : installer 018, puis charger les cartes du 1er décembre.
+- **Défauts à confirmer** : le gagnant reçoit la carte qu'il a choisie ; les périodes de 2 mois de l'ETB commencent en novembre ; un admin déverrouillé n'est ni plafonné ni compté dans les stocks.
+- Cache v171.
+
 ## 2026-11-09 — Scan sans déclencheur, bulles des tickets (demande du porteur)
 
 - **Scan** : bouton rond (déclencheur) retiré : la lecture se fait toute seule quand la carte reste dans le cadre ; un appui forçait une lecture et ouvrait des propositions de cartes au hasard quand le cadre était vide. Import d'une photo et « Aide » gardés.

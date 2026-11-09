@@ -8,10 +8,7 @@
   // Le lot s'échange directement (pas de tirage) ; son envoi demande un compte et une adresse : l'app l'enregistre sur
   // l'appareil et l'annonce, sans rien expédier pour l'instant.
   // Nouveau magasin (2026-11-06, porteur ; serveur : tools/supabase/007_admin_boutique.sql puis 008_shop_grades.sql) :
-  // - 3 tickets, chacun pour son tirage au sort, le dimanche à 20 h (heure de Paris) : Bronze 500 PK (un booster, 5 à
-  //   15 €) toutes les 2 semaines dès le 22 novembre 2026 ; Argent 1 500 PK (un item rare, 20 à 60 €) chaque mois, le
-  //   dernier dimanche ; Or 5 000 PK (l'ETB de la série du moment, 60 à 200 €) tous les 2 mois, le dernier dimanche de
-  //   novembre, janvier, mars… ; lots du moment susceptibles de changer avec les sorties ;
+  // - 3 tickets : Bronze 500 PK, Argent 1 500 PK, Or 5 000 PK (tirages et lots revus le 2026-11-09, plus bas) ;
   // - 3 achats directs : booster de la série du moment 7 500 PK, item rare au choix 25 000 PK, ETB 30 ans 50 000 PK ;
   // - grade demandé (porteur, 2026-11-06) : Recrue et plus → ticket Bronze et booster ; Collectionneur et plus → ticket
   //   Argent et item rare ; Maître Pokémon et plus → ticket Or et ETB. Sinon « Déverrouillé au grade … » et son emblème,
@@ -20,16 +17,24 @@
   // Les 3 tickets sont réunis dans une seule rubrique ; un appui ouvre la fiche du ticket (lot, valeur, rythme, prochain
   // tirage, à quoi il sert) et l'achat.
   const SHOP_RARE = ['Coffret classeur', 'Poster', 'Coffret thématique', 'Collection', 'Pokébox', 'Mini tin', 'Bundle'];
+  // Lots limités et tirage mensuel (2026-11-09, porteur ; serveur : tools/supabase/018_lots_limites.sql) :
+  // - tickets toujours en vente ; un tirage par mois pour chacun, le 1er à 20 h (heure de Paris), avec 1 lot par
+  //   tirage : Bronze = une carte ultra rare (double étoile argentée), Argent = une carte AR (une étoile dorée), Or = une
+  //   carte ALT (deux étoiles dorées). Le porteur charge chaque mois une ou plusieurs cartes par ticket (panneau Admin) ;
+  //   le joueur choisit sa carte dans la fiche du ticket avant d'acheter ; le gagnant reçoit la carte qu'il a choisie ;
+  // - achats directs en quantité limitée, réassort le 1er du mois à 20 h : booster 10 par mois, item rare 3 par mois,
+  //   ETB 30 ans 1 tous les 2 mois ; « Plus que N ce mois-ci », puis « Épuisé · retour le 1er … à 20 h » et un compte à
+  //   rebours ; un seul achat direct par compte et par mois (« pour donner la chance à tout le monde »).
   const SHOP_ITEMS = [
-    { id: 'ticket-bronze', kind: 'ticket', tier: 'bronze', tag: 'BRONZE', name: 'Ticket Bronze', prize: 'Un booster Pokémon', lot: 'un booster Pokémon', value: '5 à 15 €', price: 500, minGrade: 0, cycle: '2w',
-      every: 'Toutes les 2 semaines', everyShort: 'toutes les 2 sem.', note: 'Lot du moment : un booster 30 ans. Il peut changer avec les sorties.' },
-    { id: 'ticket-argent', kind: 'ticket', tier: 'argent', tag: 'ARGENT', name: 'Ticket Argent', prize: 'Un item rare', lot: 'un item rare', value: '20 à 60 €', price: 1500, minGrade: 2, cycle: '1m',
-      every: 'Chaque mois, le dernier dimanche', everyShort: 'chaque mois', note: 'Coffret classeur, poster, coffret thématique, collection, Pokébox, mini tin ou bundle, selon la série du moment.' },
-    { id: 'ticket-or', kind: 'ticket', tier: 'or', tag: 'OR', name: 'Ticket Or', prize: 'L’ETB de la série du moment', lot: 'l’ETB de la série du moment', value: '60 à 200 €', price: 5000, minGrade: 4, cycle: '2m',
-      every: 'Tous les 2 mois, le dernier dimanche', everyShort: 'tous les 2 mois', note: 'Ultra rare : le Coffret Dresseur d’élite (ETB) de la série du moment.' },
+    { id: 'ticket-bronze', kind: 'ticket', tier: 'bronze', tag: 'BRONZE', name: 'Ticket Bronze', prize: 'Une carte ultra rare', lot: 'une carte ultra rare', rarity: 'Ultra Rare', starsN: 2, starsCls: 'pkm-shop-stars pkm-shop-stars-silver',
+      starsText: 'Double étoile argentée', price: 500, minGrade: 0, cycle: '1m', every: 'Chaque mois, le 1er à 20 h', everyShort: 'chaque mois', note: 'Carte ultra rare (double étoile argentée). Les cartes à gagner changent chaque mois.' },
+    { id: 'ticket-argent', kind: 'ticket', tier: 'argent', tag: 'ARGENT', name: 'Ticket Argent', prize: 'Une carte AR', lot: 'une carte AR', rarity: 'Illustration rare', starsN: 1, starsCls: 'pkm-shop-stars pkm-shop-stars-gold',
+      starsText: 'Une étoile dorée', price: 1500, minGrade: 2, cycle: '1m', every: 'Chaque mois, le 1er à 20 h', everyShort: 'chaque mois', note: 'Carte AR, illustration rare (une étoile dorée). Les cartes à gagner changent chaque mois.' },
+    { id: 'ticket-or', kind: 'ticket', tier: 'or', tag: 'OR', name: 'Ticket Or', prize: 'Une carte ALT', lot: 'une carte ALT', rarity: 'Illustration spéciale rare', starsN: 2, starsCls: 'pkm-shop-stars pkm-shop-stars-gold',
+      starsText: 'Deux étoiles dorées', price: 5000, minGrade: 4, cycle: '1m', every: 'Chaque mois, le 1er à 20 h', everyShort: 'chaque mois', note: 'Carte ALT, illustration spéciale rare (deux étoiles dorées). Les cartes à gagner changent chaque mois.' },
     { id: 'achat-booster', kind: 'lot', name: 'Booster de la série du moment', prize: 'Booster 30 ans, envoyé chez toi', value: 'Valeur : 5 à 15 €', price: 7500, minGrade: 0,
       img: 'img/shop-booster-30-anniversaire.webp', imgAlt: 'Booster du 30ᵉ anniversaire Pokémon',
-      note: 'Achat direct, sans tirage.', head: 'Achat direct', headSub: 'Sans tirage : l’article est pour toi. Envoi après vérification de ton identité.' },
+      note: 'Achat direct, sans tirage.', head: 'Achat direct', headSub: 'Sans tirage : l’article est pour toi. Quantités limitées, réassort le 1er de chaque mois à 20 h ; 1 achat direct par compte et par mois, pour donner sa chance à tout le monde. Envoi après vérification de ton identité.' },
     { id: 'achat-rare', kind: 'lot', name: 'Item rare au choix', prize: 'Coffret, classeur… de la série du moment, envoyé chez toi', value: 'Valeur : 20 à 60 €', price: 25000, minGrade: 2,
       img: 'img/products/30th-celebration-binder-collection.webp', imgAlt: 'Coffret classeur 30ᵉ anniversaire Pokémon', wide: true, choices: SHOP_RARE,
       note: 'Tu choisis le type d’item à l’achat ; le modèle dépend de la série du moment.' },
@@ -38,27 +43,29 @@
       note: 'Achat direct, sans tirage.' },
     // Item « Deluxe » retiré du shop le 2026-11-06 (porteur).
   ];
-  // Prochain tirage, même calcul que le serveur (008) ; avec le serveur, ses dates font foi (cloudGame.draws).
-  const SHOP_DRAW0 = Date.parse('2026-11-22T19:00:00Z'), SHOP_DRAW_EVERY = 14 * 86400000;
-  const shopNextDraw = now => {
-    const k = Math.max(0, Math.ceil((now - SHOP_DRAW0) / SHOP_DRAW_EVERY));
-    return new Date(SHOP_DRAW0 + k * SHOP_DRAW_EVERY);
+  // Stock des achats directs, comme le serveur (018) ; avec le serveur, ses chiffres font foi (shop_state).
+  const SHOP_STOCK = { 'achat-booster': { qty: 10, months: 1 }, 'achat-rare': { qty: 3, months: 1 }, 'achat-etb-30': { qty: 1, months: 2 } };
+  // Calendrier du PK shop, à l'heure de Paris : un mois va du 1er à 20 h au 1er suivant à 20 h ; les périodes de 2 mois
+  // (ETB) commencent en novembre 2026, puis tous les 2 mois.
+  const shopPart = (t, opt) => { try { const o = {}; new Intl.DateTimeFormat('en-GB', Object.assign({ timeZone: 'Europe/Paris' }, opt)).formatToParts(new Date(t)).forEach(x => { o[x.type] = x.value; }); return o; } catch (e) { return {}; } };
+  const shopParis = (y, m, d, h) => {
+    for (const off of [1, 2]) { const t = Date.UTC(y, m - 1, d, h - off); if (Number(shopPart(t, { hour: '2-digit', hourCycle: 'h23' }).hour) === h) return t; }
+    return Date.UTC(y, m - 1, d, h - 1);
   };
-  const shopDrawOf = (cyc, now) => {
-    if (cyc === '2w') return shopNextDraw(now);
-    const n = new Date(now);
-    let y = 2026, m = 11;
-    if (n.getUTCFullYear() * 12 + n.getUTCMonth() + 1 > y * 12 + m) { y = n.getUTCFullYear(); m = n.getUTCMonth() + 1; }
-    for (let k = 0; k < 30; k++) {
-      if (cyc === '1m' || ((y * 12 + m) - (2026 * 12 + 11)) % 2 === 0) {
-        const last = new Date(Date.UTC(y, m, 0, 19)); // dernier jour du mois m, puis le dimanche d'avant
-        last.setUTCDate(last.getUTCDate() - last.getUTCDay());
-        if (last.getTime() >= now) return last;
-      }
-      m++; if (m > 12) { m = 1; y++; }
-    }
-    return shopNextDraw(now);
+  const shopAddM = (y, m, k) => { const z = y * 12 + (m - 1) + k; return { y: Math.floor(z / 12), m: (z % 12) + 1 }; };
+  const shopPeriod = (now, months) => {
+    const n = Math.max(1, months || 1), p = shopPart(now, { year: 'numeric', month: 'numeric' });
+    let y = Number(p.year) || new Date(now).getUTCFullYear(), m = Number(p.month) || new Date(now).getUTCMonth() + 1;
+    if (now < shopParis(y, m, 1, 20)) ({ y, m } = shopAddM(y, m, -1));
+    if (n > 1) { const k = (y * 12 + m) - (2026 * 12 + 11); ({ y, m } = shopAddM(y, m, -(((k % n) + n) % n))); }
+    const e = shopAddM(y, m, n);
+    return { start: shopParis(y, m, 1, 20), end: shopParis(e.y, e.m, 1, 20) };
   };
+  const shopNextDraw = now => new Date(shopPeriod(now, 1).end);
+  const shopDrawOf = (cyc, now) => shopNextDraw(now);
+  const SHOP_MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  // « le 1er décembre à 20 h »
+  const shopWhen = t => { const p = shopPart(t, { day: 'numeric', month: 'numeric', hour: '2-digit', hourCycle: 'h23' }), d = Number(p.day); return 'le ' + (d === 1 ? '1er' : d) + ' ' + SHOP_MONTHS[Number(p.month) - 1] + ' à ' + Number(p.hour) + ' h'; };
   const shopDrawText = d => {
     try { return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }) + ' à 20 h'; } catch (e) { return ''; }
   };
@@ -128,14 +135,74 @@
   const shopTickets = s => SHOP_ITEMS.filter(x => x.kind === 'ticket').reduce((n, x) => n + ((s.tickets || {})[x.id] || 0), 0);
   const shopUnit = (it, n) => it.kind === 'ticket' ? (n > 1 ? n + ' tickets pour le prochain tirage' : n + ' ticket pour le prochain tirage') : (n > 1 ? n + ' achats' : n + ' achat');
 
+  // État du PK shop : celui du serveur (shop_state, 018) avec un compte connecté, sinon calculé sur l'appareil (démo,
+  // tests). Sur l'appareil, seuls les achats de cet appareil comptent dans le stock.
+  const shopCloud = s => !!(s && s.cloudShop && typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn());
+  const shopOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
+  const shopFree = s => !!(s && s.cloudGame && s.cloudGame.unlimited && shopOnline());
+  shopProto.shopSync = function () {
+    if (!shopOnline()) return Promise.resolve(null);
+    return Cloud.rpc('shop_state').then(r => { if (r) this.setState({ cloudShop: Object.assign({ at: Date.now() }, r) }); return r; },
+      () => null); // 018 pas encore installé : rien ne change
+  };
+  shopProto.shopDrawAt = function (s) {
+    const c = shopCloud(s) && Date.parse(s.cloudShop.draw_at);
+    return c > Date.now() ? c : shopNextDraw(Date.now()).getTime();
+  };
+  const shopDrawKey = t => new Date(t).toISOString();
+  // Cartes à gagner au prochain tirage d'un ticket.
+  shopProto.shopPrizes = function (s, item) {
+    if (shopCloud(s)) return ((s.cloudShop.prizes || {})[item] || []).slice();
+    if (shopOnline()) return [];
+    return (((s.shopPrizes || {})[shopDrawKey(this.shopDrawAt(s))] || {})[item] || []).slice();
+  };
+  // Mes tickets pour chaque carte du prochain tirage.
+  shopProto.shopMine = function (s, item) {
+    if (shopCloud(s)) return (s.cloudShop.mine || {})[item] || {};
+    return (((s.shopPicks || {})[shopDrawKey(this.shopDrawAt(s))] || {})[item]) || {};
+  };
+  // Stock restant d'un achat direct.
+  shopProto.shopStock = function (s, id) {
+    const lim = SHOP_STOCK[id];
+    if (!lim) return null;
+    const c = shopCloud(s) && s.cloudShop.stock && s.cloudShop.stock[id];
+    if (c) return { left: Math.max(0, c.left | 0), total: c.total | 0, months: c.months | 0 || 1, restock: Date.parse(c.restock) || shopPeriod(Date.now(), lim.months).end };
+    const p = shopPeriod(Date.now(), lim.months), used = (s.shopLots || []).filter(x => x.id === id && Date.parse(x.at) >= p.start).length;
+    return { left: Math.max(0, lim.qty - used), total: lim.qty, months: lim.months, restock: p.end };
+  };
+  // Achat direct déjà fait ce mois-ci (un par compte et par mois) : { id, at, next } ou null.
+  shopProto.shopMonthBuy = function (s) {
+    const p = shopPeriod(Date.now(), 1);
+    if (shopCloud(s)) { const m = s.cloudShop.month_buy; return m && m.item ? { id: m.item, at: m.at, next: Date.parse(s.cloudShop.next_month) || p.end } : null; }
+    const mine = (s.shopLots || []).filter(x => Date.parse(x.at) >= p.start);
+    return mine.length ? { id: mine[mine.length - 1].id, at: mine[mine.length - 1].at, next: p.end } : null;
+  };
+  // Raison qui empêche un achat direct (épuisé, achat du mois fait), ou ''.
+  shopProto.shopLotBlock = function (s, id) {
+    if (shopFree(s)) return '';
+    const st = this.shopStock(s, id), mb = this.shopMonthBuy(s);
+    if (st && st.left <= 0) return 'Épuisé : retour ' + shopWhen(st.restock);
+    if (st && mb) return 'Tu as déjà fait ton achat du mois : prochain achat possible ' + shopWhen(mb.next);
+    return '';
+  };
   shopProto.shopBuy = function (id, choice) {
     const s = this.st(), item = SHOP_ITEMS.find(x => x.id === id), pk = Number(s.pk) || 0;
     if (!item || item.soon || pk < item.price || this.shopGrade() < (item.minGrade || 0) || (item.choices && item.choices.indexOf(choice) < 0)) return;
+    const patch = {};
+    if (item.kind === 'ticket') {
+      if (!this.shopPrizes(s, id).some(c => c.id === choice)) return;
+      const key = shopDrawKey(this.shopDrawAt(s)), picks = Object.assign({}, s.shopPicks || {}), d = Object.assign({}, picks[key] || {}), mine = Object.assign({}, d[id] || {});
+      mine[choice] = (mine[choice] || 0) + 1; d[id] = mine; picks[key] = d; patch.shopPicks = picks;
+    } else {
+      const why = this.shopLotBlock(s, id);
+      if (why) { this.setState({ toast: why, shopAsk: null, shopChoice: null }); return; }
+      patch.shopLots = (s.shopLots || []).concat([{ id: id, at: new Date().toISOString() }]).slice(-50);
+    }
     const tickets = Object.assign({}, s.tickets || {});
     tickets[id] = (tickets[id] || 0) + 1;
     const left = (pk - item.price).toLocaleString('fr-FR');
-    this.setState({ pk: pk - item.price, tickets: tickets, shopAsk: null, shopChoice: null,
-      toast: item.kind === 'ticket' ? item.name + ' ajouté · tu en as ' + tickets[id] + ' · il te reste ' + left + ' PK' : null });
+    this.setState(Object.assign(patch, { pk: pk - item.price, tickets: tickets, shopAsk: null, shopChoice: null,
+      toast: item.kind === 'ticket' ? item.name + ' ajouté · tu en as ' + tickets[id] + ' · il te reste ' + left + ' PK' : null }));
     this.flash();
     this.shopDone(id, choice, tickets[id]);
   };
@@ -249,13 +316,31 @@
     return { ms: ms, d: String(d), h: String(h).padStart(2, '0'), m: String(m).padStart(2, '0'), s: String(sec).padStart(2, '0') };
   };
   let shopCdTimer = null;
+  const shopCdUnits = (box, c) => ['d', 'h', 'm', 's'].forEach(k => { const el = box.querySelector('[data-u="' + k + '"]'); if (el && el.textContent !== c[k]) el.textContent = c[k]; });
+  let shopCdApp = null;
   const shopCdTick = () => {
-    const box = document.querySelector('.pkm-tks-cd');
-    if (!box) { clearInterval(shopCdTimer); shopCdTimer = null; return; }
-    const end = Number(box.getAttribute('data-end')), cyc = Number(box.getAttribute('data-cycle')), c = shopCd(end);
-    ['d', 'h', 'm', 's'].forEach(k => { const el = box.querySelector('[data-u="' + k + '"]'); if (el && el.textContent !== c[k]) el.textContent = c[k]; });
-    const bar = box.querySelector('.pkm-tks-cd-bar i');
-    if (bar && cyc) bar.style.width = Math.min(100, Math.max(0, (1 - c.ms / cyc) * 100)).toFixed(2) + '%';
+    const box = document.querySelector('.pkm-tks-cd'), more = document.querySelectorAll('.pkm-cdx[data-end]');
+    if (!box && !more.length) { clearInterval(shopCdTimer); shopCdTimer = null; return; }
+    if (box) {
+      const end = Number(box.getAttribute('data-end')), cyc = Number(box.getAttribute('data-cycle')), c = shopCd(end);
+      shopCdUnits(box, c);
+      const bar = box.querySelector('.pkm-tks-cd-bar i');
+      if (bar && cyc) bar.style.width = Math.min(100, Math.max(0, (1 - c.ms / cyc) * 100)).toFixed(2) + '%';
+    }
+    // Comptes à rebours des achats directs (épuisé, achat du mois) : à zéro, le stock est relu (réassort).
+    let done = false;
+    more.forEach(el => { const c = shopCd(Number(el.getAttribute('data-end'))); shopCdUnits(el, c); if (c.ms <= 0) done = true; });
+    if (done && shopCdApp) { const app = shopCdApp; shopCdApp = null; setTimeout(() => { app.shopSync().then(() => app.setState({ shopTick: Date.now() })); }, 1500); }
+  };
+  const shopCdStart = self => { shopCdApp = self; if (!shopCdTimer && typeof setInterval === 'function') shopCdTimer = setInterval(shopCdTick, 1000); };
+  // Compte à rebours compact (jours, heures, minutes, secondes) pour la carte d'un achat direct.
+  const shopCdView = end => { const c = shopCd(end); return { end: String(end), d: c.d, h: c.h, m: c.m, s: c.s, aria: 'Encore ' + c.d + ' jours, ' + Number(c.h) + ' heures et ' + Number(c.m) + ' minutes' }; };
+  // Visuel d'une carte à gagner (chemin TCGdex), sinon celui du catalogue.
+  const shopCardImg = c => {
+    const row = typeof TCG !== 'undefined' && TCG.byId && TCG.byId[c.id];
+    const path = c.img || (row && TCG.F ? row.r[TCG.F.img] : '');
+    const v = path && typeof visual === 'function' ? visual(path) : null;
+    return v ? { src: v.img, srcset: v.srcset || '', hi: v.hi } : { src: '', srcset: '', hi: '' };
   };
   // Fermeture de la fiche d'un ticket : elle descend et le voile s'efface, puis elle se ferme (comme « Mon Pokédex »).
   let shopSheetClosing = false;
@@ -270,57 +355,89 @@
     setTimeout(() => { shopSheetClosing = false; done(); }, 360);
   };
   shopProto.vPkShop = function (s) {
-    const pk = Number(s.pk) || 0, tickets = s.tickets || {}, cg = s.cloudGame || {}, gi = this.shopGrade();
-    const drawOf = it => (cg.draws && cg.draws[it.id] ? new Date(cg.draws[it.id]) : shopDrawOf(it.cycle, Date.now()));
+    const pk = Number(s.pk) || 0, tickets = s.tickets || {}, gi = this.shopGrade(), free = shopFree(s);
+    const drawAt = this.shopDrawAt(s), draw = shopDrawText(new Date(drawAt));
     const emblem = i => 'img/grades/grade-' + (i + 1) + '.svg';
     const lockLabel = it => 'Déverrouillé au grade ' + shopGradeName(it.minGrade);
     const tks = SHOP_ITEMS.filter(it => it.kind === 'ticket');
     const cur = tks.find(it => it.id === s.shopTk);
-    // Fiche d'un ticket (appui sur un ticket).
+    const stars = it => Array.from({ length: it.starsN || 0 }, () => ({}));
+    shopCdStart(this);
+    // Fiche d'un ticket (appui sur un ticket) : lot du mois, cartes à choisir, achat.
     const sheet = (() => {
       if (!cur) return { open: false };
-      const it = cur, n = tickets[it.id] || 0, open = gi >= it.minGrade, can = open && pk >= it.price, ask = can && s.shopAsk === it.id;
-      const price = it.price.toLocaleString('fr-FR') + ' PK', drawAt = drawOf(it), draw = shopDrawText(drawAt);
-      const end = drawAt.getTime(), cyc = SHOP_CYCLE_MS[it.cycle] || SHOP_CYCLE_MS['2w'], cd = shopCd(end);
-      if (!shopCdTimer) shopCdTimer = setInterval(shopCdTick, 1000);
+      const it = cur, n = tickets[it.id] || 0, open = gi >= it.minGrade, prizes = this.shopPrizes(s, it.id), mine = this.shopMine(s, it.id);
+      const pick = prizes.find(c => c.id === s.shopCard) || (prizes.length === 1 ? prizes[0] : null);
+      const can = open && pk >= it.price && !!pick, ask = can && s.shopAsk === it.id;
+      const price = it.price.toLocaleString('fr-FR') + ' PK';
+      const end = drawAt, cyc = SHOP_CYCLE_MS['1m'], cd = shopCd(end);
       return {
         cdEnd: String(end), cdCycle: String(cyc), cdD: cd.d, cdH: cd.h, cdM: cd.m, cdS: cd.s, cdCls: 'pkm-tks-cd pkm-tks-cd-' + it.tier,
         cdW: 'width: ' + Math.min(100, Math.max(0, (1 - cd.ms / cyc) * 100)).toFixed(2) + '%', cdDate: 'Tirage le ' + draw,
         cdLast: cd.ms < 86400000, cdAria: 'Temps restant avant le tirage : ' + cd.d + ' jours, ' + Number(cd.h) + ' heures et ' + Number(cd.m) + ' minutes. Tirage le ' + draw + '.',
-        open: true, name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier, prize: it.prize, value: it.value,
+        open: true, name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier, prize: it.prize, value: '1 carte ce mois-ci',
+        stars: stars(it), starsCls: it.starsCls, starsText: it.starsText,
         every: it.every, draw: draw, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note,
-        use: 'Ce ticket te donne une chance de gagner ' + it.lot + ' au tirage du ' + draw + '. Plus tu as de tickets, plus tu as de chances. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit son lot chez lui, après vérification de son identité.',
+        use: 'Ce ticket te donne une chance de gagner la carte que tu choisis ci-dessous, au tirage du ' + draw + '. Un seul gagnant par tirage ; plus tu as de tickets, plus tu as de chances. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit sa carte chez lui, après vérification de son identité.',
+        // Cartes à gagner ce mois-ci.
+        cardsHead: prizes.length > 1 ? 'Choisis ta carte' : 'La carte à gagner',
+        cardsSub: prizes.length > 1 ? 'Touche la carte que tu veux gagner, puis achète ton ticket. Tu peux prendre des tickets pour plusieurs cartes.' : 'Ton ticket participe au tirage de cette carte.',
+        hasCards: prizes.length > 0, noCards: prizes.length === 0,
+        noCardsText: 'Les cartes du tirage du ' + draw + ' arrivent très bientôt. Reviens vite pour choisir la tienne !',
+        cards: prizes.map(c => {
+          const v = shopCardImg(c), on = !!pick && pick.id === c.id, m = mine[c.id] | 0;
+          return {
+            name: c.name, info: c.info || '', hasInfo: !!c.info, img: v.src, srcset: v.srcset, hasImg: !!v.src, noImg: !v.src,
+            mine: m > 0, mineText: '×' + m, on: String(on), cls: 'pkm-tkc' + (on ? ' pkm-tkc-on' : ''),
+            aria: c.name + (c.info ? ', ' + c.info : '') + (m ? ', tu as ' + m + ' ticket' + (m > 1 ? 's' : '') + ' pour cette carte' : '') + (on ? ', choisie' : ''),
+            pick: () => this.setState({ shopCard: c.id, shopAsk: null })
+          };
+        }),
         owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n), locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade),
-        can: can, miss: open && !can, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
-        ask: ask, idle: !ask, buyLabel: 'Acheter un ticket · ' + price, confirmText: 'Échanger ' + price + ' contre 1 ' + it.name.toLowerCase() + ' ?',
-        buyOpen: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => this.shopBuy(it.id),
-        lock: () => this.shopLockOpen(it), close: () => shopSheetSlide(() => this.setState({ shopTk: null, shopAsk: null }))
+        can: can, needCard: open && pk >= it.price && !pick && prizes.length > 0, needCardText: 'Choisis d’abord ta carte',
+        miss: open && pk < it.price, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
+        ask: ask, idle: !ask, buyLabel: 'Acheter un ticket · ' + price,
+        confirmText: pick ? 'Échanger ' + price + ' contre 1 ' + it.name.toLowerCase() + ' pour « ' + pick.name + ' » ?' : '',
+        buyOpen: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => pick && this.shopBuy(it.id, pick.id),
+        lock: () => this.shopLockOpen(it), close: () => shopSheetSlide(() => this.setState({ shopTk: null, shopAsk: null, shopCard: null }))
       };
     })();
+    const month = this.shopMonthBuy(s);
     return {
       pk: pk.toLocaleString('fr-FR'),
-      ticketsHead: 'Tickets du tirage au sort', ticketsSub: 'Chaque ticket a son tirage, le dimanche à 20 h. Touche un ticket pour voir son lot et à quoi il sert.',
+      ticketsHead: 'Tickets du tirage au sort', ticketsSub: 'Un tirage par mois pour chaque ticket, le 1er à 20 h, avec une carte à gagner. Touche un ticket pour choisir ta carte.',
       tickets: tks.map(it => {
         const n = tickets[it.id] || 0, open = gi >= it.minGrade;
         return {
           name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-t-' + it.tier, price: it.price.toLocaleString('fr-FR') + ' PK', priceN: it.price.toLocaleString('fr-FR'), every: it.everyShort,
+          stars: stars(it), starsCls: it.starsCls, prize: it.prize,
           locked: !open, lockName: shopGradeName(it.minGrade), lockImg: emblem(it.minGrade), owned: n > 0, ownedText: '×' + n,
-          cls: 'pkm-shop-tk' + (open ? '' : ' pkm-shop-tk-off'), aria: it.name + ', ' + it.price + ' PK, tirage ' + it.everyShort + (open ? '' : ', déverrouillé au grade ' + shopGradeName(it.minGrade)) + '. Voir le ticket',
-          pick: () => { this.setState({ shopTk: it.id, shopAsk: null }); requestAnimationFrame(() => requestAnimationFrame(() => { const sh = document.querySelector('.pkm-tks-sheet'); if (sh) sh.scrollTop = 0; })); }
+          cls: 'pkm-shop-tk' + (open ? '' : ' pkm-shop-tk-off'), aria: it.name + ', ' + it.prize + ' (' + it.starsText.toLowerCase() + '), ' + it.price + ' PK, tirage ' + it.everyShort + (open ? '' : ', déverrouillé au grade ' + shopGradeName(it.minGrade)) + '. Voir le ticket',
+          pick: () => { this.setState({ shopTk: it.id, shopAsk: null, shopCard: null }); if (shopOnline()) this.shopSync(); requestAnimationFrame(() => requestAnimationFrame(() => { const sh = document.querySelector('.pkm-tks-sheet'); if (sh) sh.scrollTop = 0; })); }
         };
       }),
       sheet: sheet,
       items: SHOP_ITEMS.filter(it => it.kind !== 'ticket').map(it => {
-        const n = tickets[it.id] || 0, open = gi >= (it.minGrade || 0), can = open && !it.soon && pk >= it.price, ask = can && s.shopAsk === it.id;
+        const n = tickets[it.id] || 0, open = gi >= (it.minGrade || 0), st = this.shopStock(s, it.id);
+        const out = !free && !!st && st.left <= 0, done = !free && !out && !!month;
+        const can = open && !it.soon && !out && !done && pk >= it.price, ask = can && s.shopAsk === it.id;
         const price = it.price.toLocaleString('fr-FR') + ' PK';
         const choice = ask && it.choices && it.choices.indexOf(s.shopChoice) >= 0 ? s.shopChoice : '';
+        const stockText = !st ? '' : st.left <= 0 ? 'Épuisé' : 'Plus que ' + st.left + (st.months > 1 ? ' jusqu’' + shopWhen(st.restock).replace(/^le /, 'au ').replace(/ à 20 h$/, '') : ' ce mois-ci');
         return {
           name: it.name, prize: it.prize, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note, value: it.value || '', hasValue: !!it.value,
           hasHead: !!it.head, head: it.head || '', headSub: it.headSub || '', hasHeadSub: !!it.headSub,
           isTicket: false, isDeluxe: false, ticketCls: 'pkm-shop-ticket', tag: 'TICKET',
-          hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '', imgCls: it.wide ? 'pkm-shop-img pkm-shop-img-wide' : 'pkm-shop-img',
+          hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '', imgCls: (it.wide ? 'pkm-shop-img pkm-shop-img-wide' : 'pkm-shop-img') + (out ? ' pkm-shop-img-out' : ''),
+          // Stock (2026-11-09, porteur) : « Plus que N ce mois-ci », points restants, puis « Épuisé » et le réassort.
+          hasStock: !!st && !out, stockText: stockText, stockCls: 'pkm-stock' + (out ? ' pkm-stock-out' : st && st.left <= Math.max(1, Math.ceil(st.total / 3)) ? ' pkm-stock-low' : ''),
+          dots: st && st.total <= 12 ? Array.from({ length: st.total }, (_, k) => ({ cls: 'pkm-stock-dot' + (k < st.left ? ' pkm-stock-dot-on' : '') })) : [],
+          stockAria: st ? (st.left <= 0 ? 'Épuisé' : 'Encore ' + st.left + ' sur ' + st.total) : '',
+          out: out, outTitle: 'Épuisé', outText: st ? 'Retour ' + shopWhen(st.restock) : '', outCd: st ? shopCdView(st.restock) : shopCdView(Date.now()),
+          done: done, doneTitle: 'Tu as déjà fait ton achat du mois', doneText: month ? 'Prochain achat possible ' + shopWhen(month.next) + ' : un achat direct par compte et par mois, pour donner sa chance à tout le monde.' : '',
+          doneCd: month ? shopCdView(month.next) : shopCdView(Date.now()),
           owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n),
-          can: can, cannot: !can && open, locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade || 0), lock: () => this.shopLockOpen(it),
+          can: can, cannot: !can && open && !out && !done, locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade || 0), lock: () => this.shopLockOpen(it),
           missText: it.soon ? 'Bientôt disponible' : 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
           ask: ask, idle: !ask, buyLabel: 'Acheter · ' + price,
           hasChoices: ask && !!it.choices, choices: (it.choices || []).map(c => ({ label: c, on: String(c === choice), cls: 'pkm-shop-choice' + (c === choice ? ' pkm-shop-choice-on' : ''), pick: () => this.setState({ shopChoice: c }) })),
@@ -332,7 +449,7 @@
       }),
       // Rubriques (2026-11-01, porteur) : « Magasin » (les articles) et « Recharger mes PA » (packs de PA en argent réel).
       ...shopTabs(this, s),
-      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Tirages au sort le dimanche à 20 h (Bronze toutes les 2 semaines, Argent chaque mois, Or tous les 2 mois), fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi. Google et Apple ne sont ni organisateurs, ni partenaires, ni sponsors de ces tirages.',
+      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Un tirage au sort par mois pour chaque ticket, le 1er à 20 h, avec une carte à gagner (Bronze : ultra rare ; Argent : AR ; Or : ALT), fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Achats directs en quantité limitée, réassort le 1er de chaque mois à 20 h, un par compte et par mois. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi. Google et Apple ne sont ni organisateurs, ni partenaires, ni sponsors de ces tirages.',
       openRules: () => this.legalOpen('pk')
     };
   };
@@ -376,3 +493,82 @@
   };
   const shopBaseParent = shopProto.parentOf;
   shopProto.parentOf = function (sc) { return sc === 'territory' ? 'home' : sc === 'pkshop' ? 'home' : shopBaseParent.call(this, sc); };
+
+  // ——— Panneau Admin › « Cartes des tirages » (2026-11-09, porteur : « je chargerai au fur et à mesure des mois la
+  // liste de 1 ou plusieurs cartes que l'on fait gagner pour chaque ticket ») ———
+  // Le porteur choisit le tirage (prochain ou suivant), le ticket, cherche une carte du catalogue (rareté du ticket par
+  // défaut : ultra rare, AR ou ALT ; « Toutes les raretés » sinon) et l'ajoute ; une carte déjà choisie par des joueurs
+  // ne peut plus être retirée. Compte connecté : enregistré sur le serveur (admin_prize_add, 018), sinon sur l'appareil.
+  const SHOP_ADM_TK = SHOP_ITEMS.filter(x => x.kind === 'ticket');
+  shopProto.shopAdmLoad = function () {
+    if (!shopOnline()) return Promise.resolve(null);
+    return Cloud.rpc('admin_prizes').then(list => { this.setState({ admPrz: Array.isArray(list) ? list : [], admPrzErr: '' }); return list; },
+      e => { this.setState({ admPrzErr: 'Liste indisponible : installe 018_lots_limites.sql et ouvre le mode Admin (' + ((e && e.message) || 'erreur') + ')' }); return null; });
+  };
+  shopProto.shopAdmView = function (s) {
+    const now = Date.now(), d0 = shopNextDraw(now).getTime(), d1 = shopPeriod(d0 + 3600000, 1).end, draws = [d0, d1];
+    const di = s.admPrzDraw === 1 ? 1 : 0, draw = draws[di], tk = SHOP_ADM_TK.find(x => x.id === s.admPrzTk) || SHOP_ADM_TK[0];
+    const online = shopOnline();
+    if (online && s.admPrz === undefined && !this.__admPrzAsked) { this.__admPrzAsked = true; setTimeout(() => this.shopAdmLoad(), 0); }
+    const key = shopDrawKey(draw);
+    const list = online
+      ? (s.admPrz || []).filter(p => p.item === tk.id && Math.abs(Date.parse(p.draw_at) - draw) < 60000).map(p => ({ pid: p.id, id: p.card, name: p.name, info: p.info, img: p.img, n: p.tickets | 0 }))
+      : (((s.shopPrizes || {})[key] || {})[tk.id] || []).map(p => Object.assign({ n: 0 }, p));
+    const have = new Set(list.map(p => p.id));
+    const add = c => {
+      if (online) {
+        Cloud.rpc('admin_prize_add', { draw: new Date(draw).toISOString(), item_id: tk.id, card_id: c.id, card_name: c.name, card_info: c.info || null, card_img: c.img || null })
+          .then(() => { this.setState({ toast: c.name + ' ajoutée au ' + tk.name.toLowerCase() + ' (' + shopWhen(draw) + ')' }); this.shopAdmLoad(); this.shopSync(); },
+            e => this.setState({ toast: 'Ajout impossible : ' + ((e && e.message) || 'erreur') }));
+        return;
+      }
+      const all = Object.assign({}, s.shopPrizes || {}), byTk = Object.assign({}, all[key] || {});
+      byTk[tk.id] = (byTk[tk.id] || []).filter(x => x.id !== c.id).concat([{ id: c.id, name: c.name, info: c.info || '', img: c.img || '' }]);
+      all[key] = byTk;
+      this.setState({ shopPrizes: all, toast: c.name + ' ajoutée au ' + tk.name.toLowerCase() + ' (' + shopWhen(draw) + ')' });
+    };
+    const remove = p => {
+      if (online) {
+        Cloud.rpc('admin_prize_remove', { prize_id: p.pid }).then(r => { this.setState({ toast: r && r.ok === false ? r.msg : p.name + ' retirée' }); this.shopAdmLoad(); this.shopSync(); },
+          e => this.setState({ toast: (e && e.message) || 'Retrait impossible' }));
+        return;
+      }
+      const all = Object.assign({}, s.shopPrizes || {}), byTk = Object.assign({}, all[key] || {});
+      byTk[tk.id] = (byTk[tk.id] || []).filter(x => x.id !== p.id);
+      all[key] = byTk;
+      this.setState({ shopPrizes: all, toast: p.name + ' retirée' });
+    };
+    // Recherche dans le catalogue (nom, extension, numéro), rareté du ticket par défaut.
+    const q = fold(String(s.admPrzQ || '').trim()), F = TCG.F, sets = (TCG.doc && TCG.doc.sets) || {};
+    let found = [];
+    if (q.length >= 2 && TCG.status === 'ready') {
+      const words = q.split(/\s+/);
+      for (const x of TCG.rows) {
+        if (!s.admPrzAll && x.r[F.rarity] !== tk.rarity) continue;
+        if (!words.every(w => x.hay.indexOf(w) >= 0)) continue;
+        found.push(x);
+        if (found.length >= 12) break;
+      }
+    }
+    const cardOf = x => { const r = x.r, st = sets[r[F.set]] || []; return { id: r[F.id], name: r[F.name], info: [st[0] || r[F.set], r[F.num], r[F.rarity]].filter(Boolean).join(' · '), img: r[F.img] || '' }; };
+    return {
+      head: 'Cartes des tirages (PK shop)',
+      text: 'Chaque mois, ajoute une ou plusieurs cartes par ticket : les joueurs choisissent la leur avant d’acheter. Bronze : ultra rare ; Argent : AR ; Or : ALT.',
+      draws: draws.map((t, i) => ({ label: 'Tirage ' + shopWhen(t).replace(/^le /, 'du '), on: String(i === di), cls: 'pkm-admz-chip' + (i === di ? ' pkm-admz-chip-on' : ''), pick: () => this.setState({ admPrzDraw: i }) })),
+      tks: SHOP_ADM_TK.map(x => ({ label: x.tag, on: String(x.id === tk.id), cls: 'pkm-admz-chip pkm-admz-' + x.tier + (x.id === tk.id ? ' pkm-admz-chip-on' : ''), pick: () => this.setState({ admPrzTk: x.id }) })),
+      list: list.map(p => { const v = shopCardImg(p); return { name: p.name, info: p.info || '', img: v.src, hasImg: !!v.src, n: p.n ? p.n + ' ticket' + (p.n > 1 ? 's' : '') : 'aucun ticket', remove: () => remove(p), removeAria: 'Retirer ' + p.name }; }),
+      hasList: list.length > 0, empty: list.length === 0, emptyText: 'Aucune carte pour ce ticket et ce tirage : les joueurs ne peuvent pas encore l’acheter.',
+      q: s.admPrzQ || '', onQ: e => this.setState({ admPrzQ: e.target.value }),
+      all: String(!!s.admPrzAll), allLabel: s.admPrzAll ? 'Toutes les raretés' : 'Rareté du ticket : ' + tk.rarity, toggleAll: () => this.setState({ admPrzAll: !s.admPrzAll }),
+      status: TCG.status !== 'ready' ? 'Chargement du catalogue…' : q.length < 2 ? 'Tape au moins 2 lettres (nom, extension ou numéro).' : found.length ? '' : 'Aucune carte trouvée' + (s.admPrzAll ? '' : ' dans cette rareté'),
+      hasStatus: TCG.status !== 'ready' || q.length < 2 || !found.length,
+      found: found.map(x => { const c = cardOf(x), v = shopCardImg(c), on = have.has(c.id); return { name: c.name, info: c.info, img: v.src, hasImg: !!v.src, added: on, can: !on, add: () => add(c), addAria: 'Ajouter ' + c.name + ' au tirage' }; }),
+      hasErr: !!s.admPrzErr, err: s.admPrzErr || ''
+    };
+  };
+  const shopBaseAdm = shopProto.admView;
+  shopProto.admView = function (s) {
+    const r = shopBaseAdm.call(this, s);
+    r.prz = r.sheet ? this.shopAdmView(s) : { list: [], found: [], draws: [], tks: [] };
+    return r;
+  };

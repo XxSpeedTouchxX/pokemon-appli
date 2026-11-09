@@ -14,6 +14,8 @@
     { kind: 'binder', ico: '', title: 'Cartes et items scellés illimités', text: 'Ton classeur sans aucune limite.' },
     { kind: 'radar', ico: '', title: 'Radar des boutiques débloqué', text: 'Toutes les boutiques et leurs chances d’arrivage.' },
     { kind: 'xp', ico: '', title: 'Double XP permanent sur tes PA', text: 'Tes PA comptent double, tous les jours.' },
+    // 2XP PK offert le premier mois (2026-11-09, porteur ; serveur : 018, une fois par compte).
+    { kind: 'xppk', ico: '', title: '1er mois : 2XP PK offert', text: 'Tes PK du Booster PK et de pile ou face doublés pendant 30 jours.' },
     { kind: 'hist', ico: '', title: 'Historique des prix complet', text: 'Toute l’évolution de la cote de chaque carte.' }
   ];
   const PREM_PLANS = [
@@ -129,7 +131,7 @@
     r.prem = {
       banner: { title: 'Dropicards Premium', text: on ? 'Premium actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP sur tes PA, Radar et historique complet.', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.premClose(),
-      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isXp: p.kind === 'xp', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
+      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
       buy: !on, isOn: on,
       mine: { title: mineTitle, text: mineText },
       manage: () => this.premGo('portal'),

@@ -19,6 +19,13 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 - **Adresse :** https://dropicards.fr, sur le serveur dédié du porteur (OVHcloud Rise-S) depuis le 2026-10-29. Avant : https://pokemon-appli.pages.dev (Cloudflare Pages), débranché.
 - **Page claude.ai (privée) :** https://claude.ai/artifact/9sDF5mc4brvvYaZWLd64qe. Elle n'a pas le catalogue complet.
 
+## Lots limités et tirage mensuel d'une carte (2026-11-09, porteur)
+
+- PK shop (`pkshop.js`) : stock des achats directs (`SHOP_STOCK`, « Plus que N ce mois-ci », points restants, « Épuisé · Retour le 1er … à 20 h » et compte à rebours `.pkm-cdx`), un achat direct par compte et par mois ; calendrier à l'heure de Paris (`shopPeriod`, `shopWhen`). Avec un compte, le serveur fait foi (`shop_state`, `018_lots_limites.sql`, relu après chaque achat et à chaque synchronisation) ; sans compte, calcul sur l'appareil (`shopLots`).
+- Tickets : tirage le 1er de chaque mois à 20 h, étoiles de rareté (Bronze ultra rare, Argent AR, Or ALT), cartes à gagner dans la fiche du ticket (choix obligatoire avant l'achat, « ×N » sur mes cartes).
+- Panneau Admin › « Cartes des tirages » : tirage (prochain ou suivant), ticket, recherche dans le catalogue sur la rareté du ticket, ajout et retrait (`admin_prize_add`, `admin_prize_remove` ; sur l'appareil : `shopPrizes`).
+- Premium : avantage « 1er mois : 2XP PK offert ». Test `e2e/t-lots.mjs`.
+
 ## Prix de base, attente des jeux et 2XP PK (2026-11-08, porteur)
 
 - Prix sous les cartes (extensions, Pokédex, recherche) = prix du marché Cardmarket en Near Mint, le même que la fiche ouverte depuis cette carte ; un seul format (`coteTxt`, `catalog.js`) : au centime près, à l'euro près dès 1 000 €. Depuis « Mon classeur » (`fiOpen(id, { from: 'binder' })`), pastille et fiche montrent la valeur de mon exemplaire selon son état.

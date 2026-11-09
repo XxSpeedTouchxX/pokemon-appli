@@ -65,7 +65,7 @@ await page.screenshot({ path: shot('locks-booster-500.png') });
 await page.evaluate(() => { window.__hiRand = false; });
 // 6. Ticket : compte à rebours.
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
-await page.evaluate(() => window.__pkm.setState({ pk: 20000 }));
+await page.evaluate(() => { const app = window.__pkm, key = new Date(app.shopDrawAt(app.st())).toISOString(); app.setState({ pk: 20000, shopPrizes: { [key]: { 'ticket-bronze': [{ id: 'sv03.5-199', name: 'Dracaufeu-ex', info: '151 · 199/165', img: '' }] } } }); });
 await page.locator('button[aria-label^="Ticket Bronze"]').first().click(); await page.waitForTimeout(120);
 const tkT = await page.evaluate(() => getComputedStyle(document.querySelector('.pkm-tks-sheet')).transform);
 ok('fiche du ticket : arrive du bas (en cours : ' + tkT + ')', tkT !== 'none' && tkT !== 'matrix(1, 0, 0, 1, 0, 0)');
@@ -98,12 +98,12 @@ ok('« Super ! » ferme l’écran', (await page.locator('.pkm-lotfx').count()) 
 await page.locator('button[aria-label^="Ticket Bronze"]').first().click(); await page.waitForTimeout(600);
 const cd = page.locator('.pkm-tks-cd');
 const s1 = await cd.locator('[data-u="s"]').innerText().catch(() => '');
-ok('fiche du ticket : compte à rebours (jours, heures, min, s) et date du tirage', (await cd.count()) === 1 && /jours/.test(await cd.innerText()) && /Tirage le dimanche/.test(await cd.innerText()));
+ok('fiche du ticket : compte à rebours (jours, heures, min, s) et date du tirage', (await cd.count()) === 1 && /jours/.test(await cd.innerText()) && /Tirage le [a-z]+ 1 [a-zéû]+ à 20 h/.test(await cd.innerText()));
 await page.waitForFunction(v => { const e = document.querySelector('.pkm-tks-cd [data-u="s"]'); return e && e.textContent !== v; }, s1, { timeout: 5000 }).catch(() => {});
 const s2 = await cd.locator('[data-u="s"]').innerText().catch(() => '');
 ok('les secondes défilent (' + s1 + ' → ' + s2 + ')', s1 !== s2);
 await page.screenshot({ path: shot('locks-ticket-decompte.png') });
-ok('fiche du ticket : « Lot à gagner », « Valeur », « Tirage »', /Lot à gagner/.test(await page.locator('.pkm-tks-lines').innerText()) && /Valeur/.test(await page.locator('.pkm-tks-lines').innerText()) && /Tirage/.test(await page.locator('.pkm-tks-lines').innerText()));
+ok('fiche du ticket : « Lot à gagner », « Lots », « Tirage »', /Lot à gagner/.test(await page.locator('.pkm-tks-lines').innerText()) && /Lots/.test(await page.locator('.pkm-tks-lines').innerText()) && /Tirage/.test(await page.locator('.pkm-tks-lines').innerText()));
 ok('fiche du ticket : plus de ligne « Prochain tirage » (le compte à rebours suffit)', !/Prochain tirage\n/.test(await page.locator('.pkm-tks-lines').innerText()) && !/Prochain tirage/.test(await page.locator('.pkm-tks-lines').innerText()));
 // Petit écran (barres de Safari) : le ticket reste entier en haut de la fiche.
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);

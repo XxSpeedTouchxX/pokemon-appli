@@ -28,6 +28,7 @@ export function describe(p) {
   const who = (p.pseudo ? p.pseudo + ' · ' : '') + (p.email || 'adresse inconnue');
   const lines = p.kind === 'ticket' || /^ticket-/.test(p.item)
     ? [['Achat', nameOf(p) + ' (' + Number(p.cost_pk || 0).toLocaleString('fr-FR') + ' PK)'], ['Joueur', who], ['Tirage', when(p.draw_at)],
+      ...(p.choice ? [['Carte choisie', String(p.choice)]] : []),
       ['Tickets de ce joueur pour ce tirage', String(p.count || 1)], ['Acheté le', when(p.bought_at)], ['Compte', p.user_id], ['Référence', p.id]]
     : [['Achat direct', nameOf(p) + (p.choice ? ' : ' + p.choice : '') + ' (' + Number(p.cost_pk || 0).toLocaleString('fr-FR') + ' PK)'], ['Joueur', who],
       ['À faire', 'écrire au joueur pour son adresse de livraison et vérifier son identité'], ['Acheté le', when(p.bought_at)], ['Compte', p.user_id], ['Référence', p.id]];

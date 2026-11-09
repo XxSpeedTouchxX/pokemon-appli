@@ -1450,6 +1450,74 @@ html:has(.pkm-lockw-wrap), html:has(.pkm-lockw-wrap) body { overflow: hidden; ov
 @keyframes pkmShOk { 0%, 34% { opacity: 0; transform: scale(0.4); } 42% { opacity: 1; transform: scale(1.15); } 48%, 100% { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .pkm-scanhelp-ill * { animation: none !important; } .pkm-sh-ok, .pkm-sh-okline { opacity: 1; } }
 
+/* ——— Lots limités et tirage mensuel d'une carte (2026-11-09, porteur) ——— */
+/* Étoiles de rareté : double étoile argentée (ultra rare), une ou deux étoiles dorées (AR, ALT). */
+.pkm-shop-stars { display: inline-flex; align-items: center; gap: 1px; vertical-align: -2px; }
+.pkm-shop-stars svg { display: block; stroke: rgba(0, 0, 0, 0.55); stroke-width: 1.4; stroke-linejoin: round; }
+.pkm-shop-stars-silver svg { fill: #E4E9F2; filter: drop-shadow(0 0 3px rgba(220, 230, 255, 0.55)); }
+.pkm-shop-stars-gold svg { fill: #FFD23F; filter: drop-shadow(0 0 3px rgba(255, 200, 40, 0.6)); }
+/* Cartes à gagner dans la fiche d'un ticket. */
+.pkm-tkcs { display: flex; flex-direction: column; gap: 8px; }
+.pkm-tkc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+.pkm-tkc { position: relative; min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 5px; padding: 8px; border-radius: 18px; border: 1.5px solid #24345C; background: #0B1120; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s; }
+.pkm-tkc:active { transform: scale(0.97); }
+.pkm-tkc-on { border-color: var(--cd, #FFD60A); box-shadow: 0 0 0 2px var(--cd, #FFD60A), 0 8px 22px rgba(255, 214, 10, 0.22); }
+.pkm-tks-sheet .pkm-tkc-on { border-color: var(--pkm-accent); box-shadow: 0 0 0 2px var(--pkm-accent), 0 8px 22px rgba(255, 214, 10, 0.22); }
+.pkm-tkc-img { position: relative; display: block; aspect-ratio: 600 / 825; border-radius: 10px; overflow: hidden; background: #16223A; }
+.pkm-tkc-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pkm-tkc-q { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 28px; font-weight: 800; color: #3A4A75; }
+.pkm-tkc-n { position: absolute; left: 6px; top: 6px; padding: 2px 7px; border-radius: 999px; background: rgba(5, 9, 18, 0.82); color: #5EE0CF; font-size: 12px; font-weight: 800; }
+.pkm-tkc-check { position: absolute; right: 6px; top: 6px; width: 24px; height: 24px; border-radius: 50%; background: var(--pkm-accent); opacity: 0; transform: scale(0.4); transition: opacity 0.18s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.pkm-tkc-check::after { content: ''; position: absolute; left: 8.5px; top: 4.5px; width: 5px; height: 10px; border: solid var(--pkm-on-accent); border-width: 0 2.6px 2.6px 0; transform: rotate(45deg); }
+.pkm-tkc-on .pkm-tkc-check { opacity: 1; transform: none; }
+.pkm-tkc-name { font-size: 13px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.pkm-tkc-info { font-size: 11px; line-height: 1.3; color: #9AA8C3; overflow-wrap: anywhere; }
+.pkm-tkc-none { margin: 0; padding: 14px; border-radius: 16px; border: 1.5px dashed #3A4A75; font-size: 13.5px; line-height: 1.45; color: #C9D3EA; text-align: center; }
+.pkm-tks-buy-off { opacity: 0.5; cursor: default; }
+/* Stock d'un achat direct : « Plus que N ce mois-ci » et les points restants. */
+.pkm-stock { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; padding: 8px 12px; border-radius: 14px; background: rgba(94, 224, 207, 0.1); box-shadow: inset 0 0 0 1px rgba(94, 224, 207, 0.35); }
+.pkm-stock-t { font-size: 13.5px; font-weight: 800; color: #5EE0CF; }
+.pkm-stock-low { background: rgba(245, 177, 76, 0.12); box-shadow: inset 0 0 0 1px rgba(245, 177, 76, 0.45); }
+.pkm-stock-low .pkm-stock-t { color: #F5B14C; }
+.pkm-stock-out { background: rgba(255, 92, 92, 0.12); box-shadow: inset 0 0 0 1px rgba(255, 92, 92, 0.5); }
+.pkm-stock-out .pkm-stock-t { color: #FF8A8A; text-transform: uppercase; letter-spacing: 0.06em; }
+.pkm-stock-dots { display: flex; flex-wrap: wrap; gap: 4px; }
+.pkm-stock-dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.14); }
+.pkm-stock-dot-on { background: currentColor; color: #5EE0CF; box-shadow: 0 0 6px rgba(94, 224, 207, 0.6); }
+.pkm-stock-low .pkm-stock-dot-on { color: #F5B14C; box-shadow: 0 0 6px rgba(245, 177, 76, 0.6); }
+.pkm-shop-img-out { filter: grayscale(1) brightness(0.7); }
+/* Épuisé, ou achat du mois déjà fait : retour le 1er à 20 h, avec un compte à rebours. */
+.pkm-lotwait { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px; border-radius: 16px; background: rgba(0, 0, 0, 0.3); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); text-align: center; }
+.pkm-lotwait > b { font-size: 14.5px; font-weight: 800; color: #F5B14C; }
+.pkm-lotwait > span { font-size: 12.5px; line-height: 1.4; color: #C9D3EA; }
+.pkm-lotwait-out > b { font-size: 16px; color: #FF8A8A; text-transform: uppercase; letter-spacing: 0.08em; }
+.pkm-cdx { display: flex; align-items: flex-start; gap: 3px; }
+.pkm-cdx > span { min-width: 44px; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 3px; border-radius: 10px; background: rgba(0, 0, 0, 0.35); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.pkm-cdx b { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 800; line-height: 1.1; color: #FFFFFF; font-variant-numeric: tabular-nums; }
+.pkm-cdx small { font-size: 10px; font-weight: 700; color: #9AA8C3; }
+.pkm-cdx > i { font-style: normal; font-size: 16px; font-weight: 800; line-height: 30px; color: #F5B14C; animation: pkmCdBlink 1s steps(2, start) infinite; }
+@media (prefers-reduced-motion: reduce) { .pkm-cdx > i { animation: none; } .pkm-tkc-check { transition: none; } }
+/* Panneau Admin › Cartes des tirages. */
+.pkm-admz { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 18px; border: 1px solid #24345C; background: #111A2C; }
+.pkm-admz h3 { margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA; }
+.pkm-admz > p { margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3; }
+.pkm-admz-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pkm-admz-chip { align-self: flex-start; min-height: 40px; padding: 0 13px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.pkm-admz-chip-on { border-color: var(--pkm-accent); background: var(--pkm-accent); color: var(--pkm-on-accent); }
+.pkm-admz-q { height: 44px; box-sizing: border-box; padding: 0 14px; border-radius: 14px; border: 1px solid #1E2B45; background: #0B1120; color: #F3F6FC; font: inherit; font-size: 15px; }
+.pkm-admz-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pkm-admz-list li { display: flex; align-items: center; gap: 10px; padding: 6px; border-radius: 14px; background: #0B1120; }
+.pkm-admz-list img { flex: none; width: 40px; height: 55px; border-radius: 4px; object-fit: cover; }
+.pkm-admz-list li > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-admz-list b { font-size: 13.5px; }
+.pkm-admz-list small { font-size: 11.5px; color: #9AA8C3; overflow-wrap: anywhere; }
+.pkm-admz-add, .pkm-admz-x { flex: none; min-height: 40px; padding: 0 12px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.pkm-admz-add { border: 0; background: var(--pkm-accent); color: var(--pkm-on-accent); }
+.pkm-admz-x { border: 1px solid #2A3A5C; background: transparent; color: #FF8A8A; }
+.pkm-admz-ok { flex: none; font-weight: 800; color: #5EE0CF !important; }
+.pkm-admz-empty { margin: 0; font-size: 12.5px; color: #9AA8C3; }
+.pkm-admz-err { margin: 0; font-size: 12.5px; color: #FF8A8A; }
+
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
    de PA sur celui de droite. Puis l'écran « Route d'évolution » d'après la « Digivolution Route » de Digimon World Dusk
@@ -2296,6 +2364,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=fff49b41"></script>
+<script src="app.js?v=a996e981"></script>
 </body>
 </html>

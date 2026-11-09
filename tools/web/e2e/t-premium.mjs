@@ -15,10 +15,10 @@ await banner.click(); await page.waitForTimeout(600);
 const sh = page.locator('section[aria-label="Dropicards Premium"]');
 const t = await sh.innerText();
 ok('icônes animées : scanner, classeur, radar, goutte des PA « 2XP », graphique', (await sh.locator('svg.pkm-prem-scan').count()) === 1 && (await sh.locator('svg.pkm-prem-bind').count()) === 1 && (await sh.locator('.pkm-prem-radar').count()) === 1
-  && (await sh.locator('.pkm-prem-xp-tag').innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1
+  && (await sh.locator('.pkm-prem-xp-tag').first().innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1
   && (await sh.locator('.pkm-prem-bind-card').evaluate(e => getComputedStyle(e).animationName)) === 'pkmPremCard');
 const boxes = await sh.locator('.pkm-prem-ico').evaluateAll(l => l.map(e => Math.round(e.getBoundingClientRect().left)));
-ok('5 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 5 && new Set(boxes).size === 1);
+ok('6 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 6 && new Set(boxes).size === 1);
 ok('double XP sur les PA seulement', /Double XP permanent sur tes PA/.test(await sh.innerText()) && !/PK et tes PA/.test(await sh.innerText()));
 const top = await sh.locator('.pkm-prem-crown-xl').evaluate(e => e.getBoundingClientRect().top);
 ok('couronne entière, sous le haut de l’écran (' + Math.round(top) + ' px)', top > 0);
@@ -35,7 +35,7 @@ const scroll = await sh.evaluate(e => { const c = getComputedStyle(e); return c.
 ok('défilement de l’offre : sans entraîner la page derrière (' + scroll + ')', /contain/.test(scroll) && /pan-y/.test(scroll));
 // « 2XP » centré dans sa bulle : mesuré sur les lettres elles-mêmes (pixels sombres), bulle à plat et immobile.
 await page.addStyleTag({ content: '.pkm-prem-xp-tag { animation: none !important; transform: none !important; }' }); await page.waitForTimeout(100);
-const tagPng = await sh.locator('.pkm-prem-xp-tag').screenshot();
+const tagPng = await sh.locator('.pkm-prem-xp-tag').first().screenshot();
 const tag = await page.evaluate(async b64 => {
   const bm = await createImageBitmap(await (await fetch('data:image/png;base64,' + b64)).blob());
   const c = new OffscreenCanvas(bm.width, bm.height), x = c.getContext('2d'); x.drawImage(bm, 0, 0);
@@ -46,6 +46,7 @@ const tag = await page.evaluate(async b64 => {
 ok('« 2XP » centré dans sa bulle (écart ' + tag.map(v => v.toFixed(1)).join(' et ') + ' px)', tag[0] < 0.75 && tag[1] < 0.5);
 ok('graphique de l’historique sans flèche jaune', (await sh.locator('.pkm-prem-hist g, .pkm-prem-hist-arrow').count()) === 0);
 const mh = await sh.evaluate(e => getComputedStyle(e).maxHeight);
+await sh.evaluate(e => { for (let n = e; n; n = n.parentElement) n.scrollTop = 0; e.querySelectorAll('*').forEach(x => { if (x.scrollTop) x.scrollTop = 0; }); }); await page.waitForTimeout(200);
 const backTop = await sh.locator('button[aria-label="Retour au PK shop"]').evaluate(e => e.getBoundingClientRect().top);
 ok('haut de l’offre dégagé : flèche « précédent » entière (' + Math.round(backTop) + ' px du haut, hauteur ' + mh + ')', backTop >= 40 && /env|px/.test(mh));
 await sh.locator('button.pkm-prem-cgv').click(); await page.waitForTimeout(400);

@@ -66,10 +66,15 @@ async function fake(route) {
       u.until = new Date(Date.now() + 86400e3).toISOString(); return send(200, { ok: true, until: u.until });
     }
     if (fn === 'admin_lock') { u.until = null; return send(200, null); }
+    // État du PK shop imité (017) : une carte à gagner par ticket, stocks pleins.
+    if (fn === 'shop_state') return send(200, { draw_at: new Date(Date.now() + 10 * 864e5).toISOString(), next_month: new Date(Date.now() + 10 * 864e5).toISOString(), draw_lots: 1,
+      stock: { 'achat-booster': { total: 10, left: 10, months: 1, restock: new Date(Date.now() + 10 * 864e5).toISOString() }, 'achat-rare': { total: 3, left: 3, months: 1, restock: new Date(Date.now() + 10 * 864e5).toISOString() } },
+      month_buy: null, prizes: { 'ticket-or': [{ id: 'sv08-238', name: 'Pikachu-ex', info: 'Étincelles Déferlantes · 238 · ALT', img: null }] }, mine: {} });
     if (fn === 'buy_item') {
       const free = u.until && Date.parse(u.until) > Date.now();
       if (!free) return err('Disponible 7 jours après la création de ton compte');
       if (body.item_id === 'achat-rare' && !body.choice) return err('Choisis ton item');
+      if (/^ticket-/.test(body.item_id) && !body.choice) return err('Choisis la carte que tu veux gagner');
       G.shop[body.item_id] = (G.shop[body.item_id] || 0) + 1;
       return send(200, { item: body.item_id, count: G.shop[body.item_id], choice: body.choice || null, pk: G.pk, pa: G.pa, pk_earned: G.earned, draw_at: '2026-11-22T19:00:00Z' });
     }
@@ -287,7 +292,7 @@ await page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk
 const tOr = page.locator('section[aria-label="Ticket Or"]');
 await tOr.locator('button:has-text("Acheter un ticket")').click(); await page.waitForTimeout(300);
 await tOr.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
-ok('admin : ticket Or acheté sans rien débiter (aucun grade demandé)', calls.some(c => c.startsWith('RPC buy_item') && c.includes('ticket-or')) && /rien débité/.test(await page.locator('body').innerText()));
+ok('admin : ticket Or acheté pour la seule carte du tirage, sans rien débiter (aucun grade demandé)', calls.some(c => c.startsWith('RPC buy_item') && c.includes('ticket-or') && c.includes('sv08-238')) && /rien débité/.test(await page.locator('body').innerText()));
 ok('achat : la fonction « notify » du serveur est réveillée (e-mail à Dropicards)', calls.some(c => c.startsWith('POST /functions/v1/notify/shop')));
 await page.waitForTimeout(1800);
 await tOr.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(700);
@@ -324,7 +329,7 @@ const shopTxt = await page.locator('main').innerText();
 ok('PK shop : 3 tickets (500, 1 500, 5 000 PK) ; achats 7 500, 25 000, 50 000 PK', ['Booster de la série du moment', 'Item rare au choix', 'ETB 30 ans'].every(t => shopTxt.includes(t))
   && ['500PK', '1500PK', '5000PK', '7500PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)));
 await page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk').nth(0).click(); await page.waitForTimeout(400);
-ok('compte à 300 PK : fiche du ticket Bronze, « Il te manque 200 PK », tirage du dimanche 22 novembre', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()) && /dimanche 22 novembre à 20 h/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
+ok('compte à 300 PK : fiche du ticket Bronze, « Il te manque 200 PK », date du tirage du serveur', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()) && /Tirage le [a-z]+ \d+ [a-zéû]+ à \d+ h/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
 await page.screenshot({ path: shot('cloud-shop.png'), fullPage: false });
 await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);

@@ -1,5 +1,5 @@
 // Tests de la fonction « notify » (index.ts) sous Node, sans réseau : un faux Brevo en mémoire, et la vraie base de
-// test locale (PostgreSQL avec 001 à 012, voir tools/supabase/README.md). Jamais sur le vrai serveur ni le vrai Brevo.
+// test locale (PostgreSQL avec 001 à 017, voir tools/supabase/README.md). Jamais sur le vrai serveur ni le vrai Brevo.
 //   node tools/supabase/functions/notify/test.mjs        (PGPORT=5499, PGDB=t7 par défaut)
 import { execFileSync } from 'node:child_process';
 import { makeHandler, buildMail } from './index.ts';
@@ -51,7 +51,7 @@ r = await call('tok-ok'); j = await r.json();
 const m1 = B.mails[0] || {};
 ok('ticket Bronze : un e-mail envoyé à contact@dropicards.fr', r.status === 200 && j.sent === 1 && m1.to && m1.to[0].email === 'contact@dropicards.fr' && m1.sender.email === 'noreply@dropicards.fr');
 ok('objet : « [Dropicards] Nouveau Ticket Bronze · Ondine »', m1.subject === '[Dropicards] Nouveau Ticket Bronze · Ondine');
-ok('contenu : joueur, e-mail, tirage, nombre de tickets', /Ondine · notify-/.test(m1.textContent) && /Tirage : dimanche/.test(m1.textContent) && /Tickets de ce joueur pour ce tirage : 1/.test(m1.textContent));
+ok('contenu : joueur, e-mail, tirage, nombre de tickets', /Ondine · notify-/.test(m1.textContent) && /Tirage : [a-z]+ 1 [a-zéû]+ 20\d\d/.test(m1.textContent) && /Tickets de ce joueur pour ce tirage : 1/.test(m1.textContent));
 r = await call('tok-ok'); j = await r.json();
 ok('le même achat ne repart pas', j.sent === 0 && B.mails.length === 1);
 sql("insert into public.tickets (user_id, item, cost_pk, choice) values (" + lit(UID) + ", 'achat-etb-30', 50000, null)");

@@ -35,7 +35,7 @@
 | P2 | Limite de cartes et d'items sans Premium | **Décidé (2026-11-07) : par grade** (36/9, 72/27, 144/54, 288/108, puis illimité dès Maître Pokémon) ; Premium : illimité |
 | P3 | Radar | **Décidé (2026-11-07) : dès le grade Maître Pokémon** ; Premium : débloqué à tout grade |
 | P4 | Historique des prix sans Premium | 1 mois ; Premium : tout l'historique (archive depuis le 3 octobre 2026) |
-| P5 | Double XP | **Décidé le 2026-11-06 (porteur) : sur les PA seulement**, badge « 2XP » et goutte des PA dans l'offre |
+| P5 | Double XP | **Décidé le 2026-11-06 (porteur) : sur les PA seulement**, badge « 2XP » et goutte des PA dans l'offre ; **2026-11-09 (porteur) : en plus, 2XP PK offert le premier mois** (30 jours, une fois par compte, `018_lots_limites.sql`) ; lots du PK shop plafonnés pour tenir le budget |
 | P6 | Paiement | **Décidé (2026-11-07) : Stripe sur le site**, compte « DROPICARDS » de la micro-entreprise du porteur (mode test d'abord, `docs/28`) ; dans les apps des stores : achats intégrés d'Apple et de Google, plus tard |
 
 ## 4. Points légaux (France), à faire relire

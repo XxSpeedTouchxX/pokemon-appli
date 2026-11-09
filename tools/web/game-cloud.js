@@ -47,6 +47,7 @@
       if (g.unlimited) { patch.pk = GC_INF; patch.pa = GC_INF; }
       if (g.buddy && (dexOwn(Object.assign({}, s, patch), g.buddy))) patch.buddy = g.buddy;
       this.setState(patch);
+      if (this.shopSync) this.shopSync(); // état du PK shop (018 ; sans 018 installé, rien ne change)
       return g;
     }, e => { gcSyncing = null; if (e && e.code !== 'network') console.warn('Dropicards : état du jeu indisponible', e.message); return null; });
     return gcSyncing;
@@ -194,7 +195,8 @@
             + (free ? ' · mode Admin, rien débité' : ' · il te reste ' + Number(r.pk).toLocaleString('fr-FR') + ' PK') : null });
         this.flash();
         this.shopDone(id, r.choice, r.count | 0);
-      }, e => { busy = false; this.gcFail(e, { shopAsk: null, shopChoice: null }); });
+        if (this.shopSync) this.shopSync(); // stock, achat du mois, mes tickets par carte (018)
+      }, e => { busy = false; this.gcFail(e, { shopAsk: null, shopChoice: null }); if (this.shopSync) this.shopSync(); });
     };
   })(gcProto.shopBuy);
 

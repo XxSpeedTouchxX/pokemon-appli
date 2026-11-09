@@ -87,7 +87,7 @@
       ['Ce que sont les PK', 'Les PK sont une monnaie virtuelle de l’app. Ils servent, dans le PK shop, à obtenir des tickets de tirage au sort ou des lots offerts par l’éditeur. Les Pokémon du Pokédex se débloquent avec des PA.'],
       ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas entre joueurs et ne se convertissent pas en argent. Ils n’ont aucune valeur en euros.'],
       ['Gains et jeux', 'Montants, chances et délais selon ton grade : voir les cartes ci-dessus. Les tirages sont faits au hasard par le serveur de Dropicards, qui tient tes soldes.'],
-      ['PK shop et tirage au sort', 'Prix, grades demandés et dates des tirages : affichés dans le PK shop. Chaque tirage suit un règlement publié avant sa date. Les tickets et lots sont disponibles 7 jours après la confirmation de ton adresse e-mail ; une pièce d’identité est demandée au gagnant avant l’envoi.'],
+      ['PK shop et tirage au sort', 'Prix, grades demandés et dates des tirages : affichés dans le PK shop. Un tirage par mois pour chaque ticket, le 1er à 20 h (heure de Paris), avec une carte à gagner que tu choisis à l’achat du ticket (Bronze : ultra rare ; Argent : AR ; Or : ALT) ; un seul gagnant par tirage. Achats directs en quantité limitée (10 boosters et 3 items rares par mois, 1 ETB tous les 2 mois), réassort le 1er du mois à 20 h, un achat direct par compte et par mois. Chaque tirage suit un règlement publié avant sa date. Les tickets et lots sont disponibles 7 jours après la confirmation de ton adresse e-mail ; une pièce d’identité est demandée au gagnant avant l’envoi.'],
       ['Évolution', 'Les montants, les taux, les prix et ces règles peuvent évoluer.']
     ] }
   };

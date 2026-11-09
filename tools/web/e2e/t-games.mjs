@@ -71,7 +71,7 @@ await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(
 // item rare 25 000 (Collectionneur), ETB 30 ans 50 000 (Maître Pokémon) ; « Déverrouillé au grade … » et fenêtre.
 const tks = page.locator('section[aria-label="Tickets du tirage au sort"]');
 const tkTxt = (await tks.innerText()).replace(/[\u202f\u00a0]/g, ' ');
-ok('3 tickets dans une seule rubrique : Bronze 500, Argent 1 500, Or 5 000 PK', (await tks.locator('.pkm-shop-tk').count()) === 3 && ['500PK', '1500PK', '5000PK'].every(t => tkTxt.replace(/\s/g, '').includes(t)) && ['toutes les 2 sem.', 'chaque mois', 'tous les 2 mois'].every(t => tkTxt.includes(t)));
+ok('3 tickets dans une seule rubrique : Bronze 500, Argent 1 500, Or 5 000 PK', (await tks.locator('.pkm-shop-tk').count()) === 3 && ['500PK', '1500PK', '5000PK'].every(t => tkTxt.replace(/\s/g, '').includes(t)) && (tkTxt.match(/chaque mois/g) || []).length === 3);
 const orF = await tks.locator('.pkm-shop-tk').nth(2).locator('.pkm-shop-ticket').evaluate(e => getComputedStyle(e).filter);
 ok('ticket Or verrouillé, toujours dans sa couleur (filtre : ' + orF + ')', orF === 'none');
 ok('Recrue : Argent et Or « Collectionneur » et « Maître Pokémon » avec leur emblème', /Collectionneur/.test(tkTxt) && /Maître Pokémon/.test(tkTxt) && (await tks.locator('img[src="img/grades/grade-3.svg"]').count()) === 1 && (await tks.locator('img[src="img/grades/grade-5.svg"]').count()) === 1);
@@ -86,12 +86,20 @@ await page.screenshot({ path: shot('pkshop-verrou.png') });
 await lw.locator('button:has-text("Compris")').click(); await page.waitForTimeout(300);
 await tks.locator('.pkm-shop-tk').nth(1).click(); await page.waitForTimeout(500);
 const sheet = page.locator('section[aria-label="Ticket Argent"]');
-ok('fiche du ticket Argent : lot, valeur, chaque mois, prochain tirage, à quoi il sert', /Un item rare/.test(await sheet.innerText()) && /20 à 60 €/.test(await sheet.innerText()) && /Chaque mois/.test(await sheet.innerText()) && /dimanche \d+ [a-zéû]+ à 20 h/.test(await sheet.innerText()) && /À quoi sert ce ticket/.test(await sheet.innerText()));
+ok('fiche du ticket Argent : carte AR, 1 lot, chaque mois le 1er à 20 h, prochain tirage, à quoi il sert', /Une carte AR/.test(await sheet.innerText()) && /1 carte ce mois-ci/.test(await sheet.innerText()) && /Chaque mois, le 1er à 20 h/.test(await sheet.innerText()) && /Tirage le [a-z]+ 1 [a-zéû]+ à 20 h/.test(await sheet.innerText()) && /À quoi sert ce ticket/.test(await sheet.innerText()));
 await sheet.locator('button:has-text("Déverrouillé au grade")').click(); await page.waitForTimeout(500);
 ok('ticket verrouillé : « pour avoir accès à cette loterie »', /grade Collectionneur pour avoir accès à cette loterie/.test(await lw.innerText()));
 await lw.locator('button:has-text("Compris")').click(); await sheet.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
 ok('en-tête : plus de barre de tickets, les PA à la place (2026-10-25)', (await page.locator('header button[aria-label^="Mes tickets"]').count()) === 0 && (await page.locator('header button[aria-label^="Mes points d’Aura"]').count()) >= 1);
-await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pk = 700; localStorage.setItem(k, JSON.stringify(d)); });
+// Prochain tirage : le 1er du mois à 20 h, heure de Paris (clé des cartes chargées sur l'appareil).
+const drawKey = (() => {
+  const hourAt = t => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', hourCycle: 'h23' }).format(new Date(t)));
+  const at = (y, m) => [1, 2].map(o => Date.UTC(y, m - 1, 1, 20 - o)).find(t => hourAt(t) === 20);
+  const p = {}; new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric' }).formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  let y = +p.year, m = +p.month; if (Date.now() >= at(y, m)) { m++; if (m > 12) { m = 1; y++; } }
+  return new Date(at(y, m)).toISOString();
+})();
+await page.evaluate(([k0, key]) => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pk = 700; d.shopPrizes = { [key]: { 'ticket-bronze': [{ id: 'sv03.5-199', name: 'Dracaufeu-ex', info: '151 · 199/165', img: '' }] } }; localStorage.setItem(k, JSON.stringify(d)); }, ['', drawKey]);
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
 await tks.locator('.pkm-shop-tk').nth(0).click(); await page.waitForTimeout(400);
