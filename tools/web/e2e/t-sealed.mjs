@@ -17,7 +17,7 @@ await page.click('button:has-text("Produits scellés")');
 await page.waitForSelector('[role="tablist"][aria-label="Parcourir le scellé"]');
 const TILE = 'main article:has(button[aria-label^="Détails de"])';
 const tiles = await page.locator(TILE).count();
-ok('écran Produits scellés : ' + tiles + ' produits, grille de 3', tiles === 61 && (await page.locator('main div:has(> article)').first().evaluate(e => getComputedStyle(e).gridTemplateColumns.split(' ').length)) === 3);
+ok('écran Produits scellés : ' + tiles + ' produits, grille de 3', tiles === JSON.parse(readDay(ROOT + 'web/data/sealed.json', 'utf8')).count && (await page.locator('main div:has(> article)').first().evaluate(e => getComputedStyle(e).gridTemplateColumns.split(' ').length)) === 3);
 const types = await page.locator('[aria-label="Type de produit"] button').allInnerTexts();
 ok('filtres : ' + types.join(', '), types.join('|') === 'Tout|ETB|Display|UPC|Boosters|Mini tin|Bundle|Autres items');
 await page.waitForTimeout(400);
