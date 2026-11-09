@@ -93,3 +93,11 @@
 .pkm-prem-err { margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(255, 99, 99, 0.14); color: #FFB4B4; font-size: 13.5px; line-height: 1.45; }
 .pkm-prem-secure { background: rgba(94, 224, 207, 0.1); color: #BFEFE8; }
 .pkm-prem-cgv { align-self: center; min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: #CFC4F5; font: inherit; font-size: 13.5px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* Soutenir Dropicards (2026-11-09) : main ouverte qui tient un cœur qui bat. */
+.pkm-prem-heart { width: 30px; height: 30px; overflow: visible; }
+.pkm-prem-heart-h { fill: #FF5C8A; stroke: #7A1238; stroke-width: 1.2; transform-box: fill-box; transform-origin: 50% 70%; animation: pkmPremBeat 1.3s ease-in-out infinite; }
+.pkm-prem-heart-hand { fill: none; stroke: #FFD23F; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-prem-heart-rays { fill: none; stroke: #FF9DBA; stroke-width: 1.6; stroke-linecap: round; animation: pkmPremRays 1.3s ease-in-out infinite; }
+@keyframes pkmPremBeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(0.98); } 45% { transform: scale(1.1); } }
+@keyframes pkmPremRays { 0%, 100% { opacity: 0.2; } 30% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pkm-prem-heart-h, .pkm-prem-heart-rays { animation: none; } }

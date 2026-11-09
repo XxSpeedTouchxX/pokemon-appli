@@ -19,6 +19,13 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 - **Adresse :** https://dropicards.fr, sur le serveur dédié du porteur (OVHcloud Rise-S) depuis le 2026-10-29. Avant : https://pokemon-appli.pages.dev (Cloudflare Pages), débranché.
 - **Page claude.ai (privée) :** https://claude.ai/artifact/9sDF5mc4brvvYaZWLd64qe. Elle n'a pas le catalogue complet.
 
+## Boîte mystère, scans bonus, un ticket par mois, Premium à 6,90 € (2026-11-09, porteur)
+
+- Boîte mystère (`xppk.js`, `MY_LOTS`, `myOpen`, `myReveal`) : rubrique du PK shop à la place des offres de 2XP, boîte cadeau dessinée en SVG (classes `pkm-my-*`, `games.css`), ouverture animée, lots et chances dépliables ; serveur `open_mystery_box` (019), sinon tirage sur l'appareil (`window.__myLot` pour les tests).
+- Scans bonus (`scan.js`, `scanBonusUse`) : compteur `.pkm-scan-bonus` à côté des scans du jour, +20 quand ceux du jour sont finis (`scanExtra`).
+- PK shop (`pkshop.js`) : un ticket par catégorie et par mois (`shopBought`, « Ticket déjà acheté »), barre des tickets retirée, ETB « 1 article disponible jusqu'au … ».
+- Premium (`premium.js`) : 6,90 € et 69,90 €, avantage « Soutenir Dropicards » (`pkm-prem-heart`, `premium.css`). Fiche du scan jamais plus haute que l'écran (`games.css`). Tests `e2e/t-xppk.mjs`, `e2e/t-lots.mjs`.
+
 ## Lots limités et tirage mensuel d'une carte (2026-11-09, porteur)
 
 - PK shop (`pkshop.js`) : stock des achats directs (`SHOP_STOCK`, « Plus que N ce mois-ci », points restants, « Épuisé · Retour le 1er … à 20 h » et compte à rebours `.pkm-cdx`), un achat direct par compte et par mois ; calendrier à l'heure de Paris (`shopPeriod`, `shopWhen`). Avec un compte, le serveur fait foi (`shop_state`, `018_lots_limites.sql`, relu après chaque achat et à chaque synchronisation) ; sans compte, calcul sur l'appareil (`shopLots`).

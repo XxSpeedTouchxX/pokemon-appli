@@ -11,7 +11,7 @@
   - Radar des boutiques débloqué ;
   - double XP permanent sur les PK et les PA ;
   - historique des prix complet.
-- Prix : **4,90 € par mois**, ou **49,90 € par an** (le message disait « 49,90 €/mois » : compris comme « par an »).
+- Prix : **4,90 € par mois**, ou **49,90 € par an** (**6,90 € et 69,90 € depuis le 2026-11-09, porteur** ; `docs/28` § 8 bis) (le message disait « 49,90 €/mois » : compris comme « par an »).
 - Renouvellement automatique tant que l'abonné n'arrête pas.
 - Arrêt possible à tout moment : la période commencée reste due, l'abonnement s'arrête juste avant la suivante, rien n'est débité ensuite.
 

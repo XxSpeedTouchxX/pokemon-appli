@@ -6,6 +6,31 @@
 
 ---
 
+## 2026-11-09 — Boîte mystère, un ticket par mois, Premium à 6,90 €, scan, business plan (demande du porteur)
+
+- **2XP PK** : les offres de 7, 14 et 30 jours ne s'achètent plus. Les 2XP se gagnent dans la **boîte mystère** du PK shop, à **300 PA**.
+  - Lots et chances (porteur) : 2XP PK 3 j (25 %), 7 j (15 %), 10 j (10 %), 300 PK (15 %), 20 scans bonus (20 %), Kyogre, Groudon, Rayquaza (5 % chacun ; aussi à 1 000 PA dans le Pokédex).
+  - Un Pokémon déjà débloqué n'est jamais redonné (tirage refait parmi les autres lots, **défaut à confirmer**).
+  - Visuel proposé : boîte cadeau violette au ruban doré, grand « ? » qui brille, couvercle qui sautille. À l'ouverture, la boîte tremble, le couvercle s'envole, un éclat de lumière, puis le lot. Chances affichées (exigé par les stores).
+- **Scans bonus** : compteur « +N » à côté de « N scans disponibles ». Les scans bonus s'additionnent ; un appui en ajoute 20 seulement quand les scans du jour sont finis.
+- **Tickets** : un seul par catégorie (Bronze, Argent, Or) et par mois. « Ticket déjà acheté », prochain ticket le 1er à 20 h, avec un compte à rebours ; « Acheté » sur le ticket. Barre « N tickets » retirée entre « Magasin » et Premium.
+- **ETB 30 ans** : « 1 article disponible jusqu'au 1er janvier ».
+- **Premium** :
+  - **6,90 € par mois, 69,90 € par an** (−16 %, 12,90 € d'économie) ;
+  - nouvel avantage « **Soutenir Dropicards** · Pour vous faire gagner de plus en plus de lots », avec une main qui tient un cœur qui bat ;
+  - CGV : « Le prix d'un abonnement déjà en cours ne change pas » ;
+  - **nouveaux prix à créer dans Stripe par le porteur** (`docs/28` § 8 bis).
+- **Scan** : « Ajouter à ma collection » n'est plus coupé en bas. La fiche ne dépasse plus l'écran et son bas est dégagé au-dessus de la barre de navigation.
+- Serveur : `tools/supabase/019_boite_mystere.sql` (**à installer par le porteur**, après 018), 24 vérifications (`tests/test_019.sql`).
+- **Analyse** : `docs/32-progression-et-business-plan.md`.
+  - Grand maître en ≈ 354 jours gratuit, ≈ 258 avec Premium, ≈ 263 avec un pack de PA par mois (en jouant 2 fois par jour).
+  - Premier grade trop lent (12 jours) : nouvelle courbe proposée (Chasseur en ≈ 3 jours).
+  - Rentable à partir de ≈ 77 abonnés si tous les lots partent, ≈ 20 pour les seuls tirages.
+  - Risque de loterie : PA achetés → boîte → PK → tickets.
+  - Contradiction avec le principe 4 (quêtes et saisons) signalée.
+  - **4 décisions attendues.**
+- Cache v172.
+
 ## 2026-11-09 — Lots en quantité limitée, tirage mensuel d'une carte, 2XP PK offert avec Premium (« go » du porteur)
 
 - **Achats directs plafonnés** (porteur) : 10 boosters par mois, 3 items rares par mois, 1 ETB 30 ans tous les 2 mois (périodes novembre-décembre, janvier-février…) ; réassort le **1er du mois à 20 h** (heure de Paris). L'app affiche « Plus que N ce mois-ci » (points restants), puis « Épuisé · Retour le 1er … à 20 h » avec un compte à rebours.

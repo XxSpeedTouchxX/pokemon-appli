@@ -1260,3 +1260,76 @@ html:has(.pkm-lockw-wrap), html:has(.pkm-lockw-wrap) body { overflow: hidden; ov
 .pkm-admz-ok { flex: none; font-weight: 800; color: #5EE0CF !important; }
 .pkm-admz-empty { margin: 0; font-size: 12.5px; color: #9AA8C3; }
 .pkm-admz-err { margin: 0; font-size: 12.5px; color: #FF8A8A; }
+
+/* ——— Boîte mystère (2026-11-09, porteur : « une sorte de boîte à cadeau avec un point d'interrogation ») ——— */
+.pkm-my-sec { flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #5B3FA8; color: #F3F6FC;
+  background: radial-gradient(120% 90% at 15% 0%, rgba(160, 100, 255, 0.32), rgba(160, 100, 255, 0) 60%), radial-gradient(90% 80% at 100% 100%, rgba(255, 210, 63, 0.14), rgba(255, 210, 63, 0) 60%), #111A2C; }
+.pkm-my-head { display: flex; align-items: center; gap: 14px; }
+.pkm-my-boxwrap { position: relative; flex: none; width: 112px; height: 112px; display: flex; align-items: center; justify-content: center; }
+.pkm-my-halo { position: absolute; inset: 4px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 214, 90, 0.55), rgba(160, 100, 255, 0.25) 45%, rgba(160, 100, 255, 0) 70%); animation: pkmMyHalo 3s ease-in-out infinite; }
+.pkm-my-spark { position: absolute; width: 8px; height: 8px; background: #FFE680; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: pkmMySpark 2.4s ease-in-out infinite; }
+.pkm-my-spark-1 { left: 8px; top: 18px; } .pkm-my-spark-2 { right: 6px; top: 30px; width: 11px; height: 11px; animation-delay: 0.8s; } .pkm-my-spark-3 { right: 22px; bottom: 6px; animation-delay: 1.6s; }
+.pkm-my-svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; animation: pkmMyBob 2.6s ease-in-out infinite; }
+.pkm-my-side { fill: #7B3FE4; stroke: #2A1260; stroke-width: 2.5; }
+.pkm-my-top { fill: #9461F7; stroke: #2A1260; stroke-width: 2.5; }
+.pkm-my-ribbon { fill: #FFD23F; stroke: #2A1260; stroke-width: 2; }
+.pkm-my-bow { fill: #FFC21A; stroke: #2A1260; stroke-width: 2.5; stroke-linejoin: round; }
+.pkm-my-knot { fill: #FFE680; stroke: #2A1260; stroke-width: 2; }
+.pkm-my-q { font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 800; fill: #FFFFFF; stroke: #2A1260; stroke-width: 3; paint-order: stroke; animation: pkmMyQ 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.pkm-my-lid { transform-box: fill-box; transform-origin: 50% 100%; animation: pkmMyLid 2.6s ease-in-out infinite; }
+.pkm-my-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.pkm-my-txt h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; }
+.pkm-my-txt p { margin: 0; font-size: 12.5px; line-height: 1.45; color: #C9D3EA; }
+.pkm-my-buy { box-shadow: 0 6px 22px rgba(255, 210, 63, 0.35); }
+.pkm-my-oddsbtn { align-self: center; min-height: 40px; padding: 0 14px; border: 0; background: transparent; color: #C9B6FF; font: inherit; font-size: 13.5px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.pkm-my-odds { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.pkm-my-odds li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.28); font-size: 13.5px; }
+.pkm-my-odds small { color: #5EE0CF; } .pkm-my-odds b { color: #FFD23F; font-variant-numeric: tabular-nums; }
+@keyframes pkmMyBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes pkmMyLid { 0%, 62%, 100% { transform: none; } 70% { transform: translateY(-7px) rotate(-6deg); } 78% { transform: translateY(-3px) rotate(5deg); } 86% { transform: translateY(-5px) rotate(-3deg); } 94% { transform: none; } }
+@keyframes pkmMyQ { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255, 230, 128, 0.6)); } 50% { transform: scale(1.12); filter: drop-shadow(0 0 8px rgba(255, 230, 128, 1)); } }
+@keyframes pkmMyHalo { 0%, 100% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.06); opacity: 1; } }
+@keyframes pkmMySpark { 0%, 100% { transform: scale(0.2) rotate(0deg); opacity: 0; } 40%, 60% { transform: scale(1) rotate(45deg); opacity: 1; } }
+/* Ouverture : tremblement, couvercle qui s'envole, rayons, lot. */
+.pkm-my-fx { position: fixed; inset: 0; z-index: 9990; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(5, 8, 18, 0.9); animation: pkmMyFade 0.25s ease-out; }
+.pkm-my-stage { position: relative; width: min(340px, 100%); min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.pkm-my-big { position: absolute; top: 50%; left: 50%; width: 200px; height: 200px; margin: -100px 0 0 -100px; animation: pkmMyShake 1.2s ease-in both; }
+.pkm-my-big .pkm-my-svg, .pkm-my-big .pkm-my-lid, .pkm-my-big .pkm-my-q { animation: none; }
+.pkm-my-rays { position: absolute; top: 50%; left: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%; opacity: 0; transform: scale(0.2);
+  background: repeating-conic-gradient(rgba(255, 220, 110, 0.5) 0deg 9deg, rgba(255, 220, 110, 0) 9deg 22deg); -webkit-mask: radial-gradient(circle, #000 0, #000 30%, transparent 68%); mask: radial-gradient(circle, #000 0, #000 30%, transparent 68%); }
+.pkm-my-fx-open .pkm-my-rays { animation: pkmMyRays 0.6s ease-out forwards, pkmMySpin 9s linear 0.6s infinite; }
+.pkm-my-fx-open .pkm-my-big .pkm-my-lid { animation: pkmMyLidOff 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) forwards; }
+.pkm-my-fx-open .pkm-my-big { animation: pkmMyDown 0.7s ease-in 0.25s forwards; }
+.pkm-my-win { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; opacity: 0; transform: scale(0.4) translateY(40px); pointer-events: none; }
+.pkm-my-fx-win .pkm-my-win { opacity: 1; transform: none; pointer-events: auto; transition: opacity 0.35s ease-out, transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.pkm-my-win h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; color: #FFFFFF; }
+.pkm-my-win p { margin: 0; max-width: 300px; font-size: 14px; line-height: 1.45; color: #C9D3EA; }
+.pkm-my-tag { padding: 4px 12px; border-radius: 999px; background: #7B3FE4; color: #FFFFFF; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.pkm-my-pz { position: relative; display: flex; align-items: center; justify-content: center; width: 150px; height: 150px; }
+.pkm-my-pz img { width: 92px; height: 92px; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5)); }
+.pkm-my-pz b { position: absolute; right: 2px; top: 8px; padding: 3px 9px; border-radius: 10px; background: #FFD23F; color: #2A1260; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; box-shadow: 0 0 14px rgba(255, 210, 63, 0.7); }
+.pkm-my-pz-xp img { position: absolute; width: 80px; height: 80px; left: 22px; top: 36px; } .pkm-my-pz-xp .pkm-my-pz-b { left: 48px; top: 26px; opacity: 0.85; }
+.pkm-my-pz-xp i { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); padding: 2px 10px; border-radius: 999px; background: #5EE0CF; color: #0B1120; font-style: normal; font-size: 14px; font-weight: 800; }
+.pkm-my-pz-sc svg { width: 96px; height: 96px; fill: none; stroke: #5EE0CF; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 10px rgba(94, 224, 207, 0.7)); }
+.pkm-my-pz-poke img { width: 130px; height: 130px; object-fit: contain; image-rendering: pixelated; }
+.pkm-my-win .pkm-lotfx-ok { margin-top: 6px; min-width: 180px; }
+.pkm-my-fx-still .pkm-my-big { display: none; }
+@keyframes pkmMyFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pkmMyShake { 0% { transform: scale(0.6); } 20% { transform: scale(1); } 30%, 50%, 70%, 90% { transform: rotate(-6deg) scale(1.02); } 40%, 60%, 80%, 100% { transform: rotate(6deg) scale(1.04); } }
+@keyframes pkmMyLidOff { to { transform: translate(40px, -220px) rotate(38deg); opacity: 0; } }
+@keyframes pkmMyDown { to { transform: translateY(80px) scale(0.85); opacity: 0; } }
+@keyframes pkmMyRays { to { opacity: 1; transform: scale(1); } }
+@keyframes pkmMySpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pkm-my-svg, .pkm-my-lid, .pkm-my-q, .pkm-my-halo, .pkm-my-spark, .pkm-my-rays { animation: none !important; } }
+/* Compteur des scans bonus, à côté des scans du jour (2026-11-09). */
+.pkm-scan-bonus { flex: none; height: 44px; padding: 0 14px; box-sizing: border-box; border-radius: 999px; display: flex; align-items: center; gap: 6px; background: rgba(123, 63, 228, 0.85); border: 1px solid rgba(255, 210, 63, 0.6); color: #FFFFFF; font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer; }
+.pkm-scan-bonus svg { flex: none; fill: none; stroke: #FFD23F; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-scan-bonus-go { animation: pkmScanBonus 1.4s ease-in-out infinite; }
+@keyframes pkmScanBonus { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 210, 63, 0.7); } 50% { box-shadow: 0 0 0 8px rgba(255, 210, 63, 0); } }
+@media (prefers-reduced-motion: reduce) { .pkm-scan-bonus-go { animation: none; } }
+.pkm-lotwait-ok > b { color: #5EE0CF; }
+.pkm-tkc-mine .pkm-tkc-n { color: #0B1120; background: #5EE0CF; }
+.pkm-tkc-mine { border-color: #5EE0CF; }
+/* Fiche du scan (2026-11-09, porteur : « le bouton est coupé en bas ») : jamais plus haute que l'écran, et le bas dégagé
+   au-dessus de la barre de navigation pour que « Ajouter à ma collection » se voie en entier en faisant défiler. */
+section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(100% - 44px)) !important; padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important; }

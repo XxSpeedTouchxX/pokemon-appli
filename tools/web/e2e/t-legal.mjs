@@ -15,7 +15,7 @@ ok('mentions : éditeur (micro-entreprise, adresse, téléphone), hébergeur, no
 await page.screenshot({ path: shot('legal-mentions.png') });
 const tabs = await sh.locator('[aria-label="Rubriques"] button').allInnerTexts();
 ok('4 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Utilisation,Vente (Premium)');
-for (const [tab, title, re] of [['Confidentialité', 'Politique de confidentialité', /Brevo[\s\S]*Stripe[\s\S]*arrondie à environ 100 m[\s\S]*CNIL/], ['Utilisation', 'Conditions générales d’utilisation', /pas une plateforme de vente/], ['Vente (Premium)', 'Conditions générales de vente', /4,90 € par mois[\s\S]*49,90 € par an[\s\S]*renouvelé automatiquement[\s\S]*14 jours[\s\S]*médiateur/]]) {
+for (const [tab, title, re] of [['Confidentialité', 'Politique de confidentialité', /Brevo[\s\S]*Stripe[\s\S]*arrondie à environ 100 m[\s\S]*CNIL/], ['Utilisation', 'Conditions générales d’utilisation', /pas une plateforme de vente/], ['Vente (Premium)', 'Conditions générales de vente', /6,90 € par mois[\s\S]*69,90 € par an[\s\S]*renouvelé automatiquement[\s\S]*14 jours[\s\S]*médiateur/]]) {
   await sh.locator('[aria-label="Rubriques"] button:has-text("' + tab + '")').click(); await page.waitForTimeout(250);
   ok(tab + ' : « ' + title + ' », texte attendu', re.test(await sh.innerText()) && (await sh.locator('h2').innerText()) === title);
 }
@@ -33,7 +33,7 @@ ok('règles en images : ' + cards, cards === 'Gagner des PK|Booster PK|Pile ou f
 ok('plus de « Pas un jeu d’argent » ni de texte complet', (await rk.locator('details').count()) === 0 && !/Pas un jeu d’argent|Lire le texte complet/.test(await rk.innerText()));
 await rk.screenshot({ path: shot('legal-regles.png') });
 // Pages publiques (Stripe, Google Play, App Store) : mêmes textes que l'app.
-for (const [f, re] of [['mentions-legales.html', /Nicolas Bouit, entrepreneur individuel[\s\S]*OVH SAS/], ['confidentialite.html', /Brevo[\s\S]*Stripe[\s\S]*CNIL/], ['cgu.html', /pas une plateforme de vente/], ['cgv.html', /49,90 € par an[\s\S]*Droit de rétractation/], ['supprimer-mon-compte.html', /Supprimer mon compte[\s\S]*sous 30 jours[\s\S]*10 ans/]]) {
+for (const [f, re] of [['mentions-legales.html', /Nicolas Bouit, entrepreneur individuel[\s\S]*OVH SAS/], ['confidentialite.html', /Brevo[\s\S]*Stripe[\s\S]*CNIL/], ['cgu.html', /pas une plateforme de vente/], ['cgv.html', /69,90 € par an[\s\S]*Droit de rétractation/], ['supprimer-mon-compte.html', /Supprimer mon compte[\s\S]*sous 30 jours[\s\S]*10 ans/]]) {
   const r = await page.goto(E2E + '/' + f, { waitUntil: 'load' });
   ok('page publique ' + f + ' (' + r.status() + ')', r.status() === 200 && re.test(await page.locator('main').innerText()) && (await page.locator('nav[aria-label="Pages légales"] a').count()) === 4);
 }

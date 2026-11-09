@@ -161,6 +161,9 @@
     if (shopCloud(s)) return (s.cloudShop.mine || {})[item] || {};
     return (((s.shopPicks || {})[shopDrawKey(this.shopDrawAt(s))] || {})[item]) || {};
   };
+  // Un ticket par catégorie et par tirage (2026-11-09, porteur : « on pourra acheter qu'un ticket de chaque catégorie
+  // par mois ») : nombre de tickets de ce joueur pour le prochain tirage.
+  shopProto.shopBought = function (s, item) { const m = this.shopMine(s, item); return Object.keys(m).reduce((t, k) => t + (m[k] | 0), 0); };
   // Stock restant d'un achat direct.
   shopProto.shopStock = function (s, id) {
     const lim = SHOP_STOCK[id];
@@ -191,6 +194,7 @@
     const patch = {};
     if (item.kind === 'ticket') {
       if (!this.shopPrizes(s, id).some(c => c.id === choice)) return;
+      if (this.shopBought(s, id)) { this.setState({ toast: 'Ticket déjà acheté : prochain ticket disponible ' + shopWhen(this.shopDrawAt(s)), shopAsk: null }); return; }
       const key = shopDrawKey(this.shopDrawAt(s)), picks = Object.assign({}, s.shopPicks || {}), d = Object.assign({}, picks[key] || {}), mine = Object.assign({}, d[id] || {});
       mine[choice] = (mine[choice] || 0) + 1; d[id] = mine; picks[key] = d; patch.shopPicks = picks;
     } else {
@@ -366,9 +370,9 @@
     // Fiche d'un ticket (appui sur un ticket) : lot du mois, cartes à choisir, achat.
     const sheet = (() => {
       if (!cur) return { open: false };
-      const it = cur, n = tickets[it.id] || 0, open = gi >= it.minGrade, prizes = this.shopPrizes(s, it.id), mine = this.shopMine(s, it.id);
+      const it = cur, open = gi >= it.minGrade, prizes = this.shopPrizes(s, it.id), mine = this.shopMine(s, it.id), bought = !free && this.shopBought(s, it.id) > 0;
       const pick = prizes.find(c => c.id === s.shopCard) || (prizes.length === 1 ? prizes[0] : null);
-      const can = open && pk >= it.price && !!pick, ask = can && s.shopAsk === it.id;
+      const can = open && !bought && pk >= it.price && !!pick, ask = can && s.shopAsk === it.id;
       const price = it.price.toLocaleString('fr-FR') + ' PK';
       const end = drawAt, cyc = SHOP_CYCLE_MS['1m'], cd = shopCd(end);
       return {
@@ -378,24 +382,26 @@
         open: true, name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier, prize: it.prize, value: '1 carte ce mois-ci',
         stars: stars(it), starsCls: it.starsCls, starsText: it.starsText,
         every: it.every, draw: draw, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note,
-        use: 'Ce ticket te donne une chance de gagner la carte que tu choisis ci-dessous, au tirage du ' + draw + '. Un seul gagnant par tirage ; plus tu as de tickets, plus tu as de chances. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit sa carte chez lui, après vérification de son identité.',
+        use: 'Ce ticket te donne une chance de gagner la carte que tu choisis ci-dessous, au tirage du ' + draw + '. Un seul ticket par catégorie et par mois, un seul gagnant par tirage. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit sa carte chez lui, après vérification de son identité.',
         // Cartes à gagner ce mois-ci.
         cardsHead: prizes.length > 1 ? 'Choisis ta carte' : 'La carte à gagner',
-        cardsSub: prizes.length > 1 ? 'Touche la carte que tu veux gagner, puis achète ton ticket. Tu peux prendre des tickets pour plusieurs cartes.' : 'Ton ticket participe au tirage de cette carte.',
+        cardsSub: bought ? 'Ton ticket du mois participe au tirage de la carte marquée « Ton choix ».' : prizes.length > 1 ? 'Touche la carte que tu veux gagner, puis achète ton ticket. Un seul ticket par mois : choisis bien !' : 'Ton ticket participe au tirage de cette carte.',
         hasCards: prizes.length > 0, noCards: prizes.length === 0,
         noCardsText: 'Les cartes du tirage du ' + draw + ' arrivent très bientôt. Reviens vite pour choisir la tienne !',
         cards: prizes.map(c => {
           const v = shopCardImg(c), on = !!pick && pick.id === c.id, m = mine[c.id] | 0;
           return {
             name: c.name, info: c.info || '', hasInfo: !!c.info, img: v.src, srcset: v.srcset, hasImg: !!v.src, noImg: !v.src,
-            mine: m > 0, mineText: '×' + m, on: String(on), cls: 'pkm-tkc' + (on ? ' pkm-tkc-on' : ''),
-            aria: c.name + (c.info ? ', ' + c.info : '') + (m ? ', tu as ' + m + ' ticket' + (m > 1 ? 's' : '') + ' pour cette carte' : '') + (on ? ', choisie' : ''),
-            pick: () => this.setState({ shopCard: c.id, shopAsk: null })
+            mine: m > 0, mineText: 'Ton choix', on: String(on && !bought), cls: 'pkm-tkc' + (on && !bought ? ' pkm-tkc-on' : '') + (m > 0 ? ' pkm-tkc-mine' : ''),
+            aria: c.name + (c.info ? ', ' + c.info : '') + (m ? ', ton ticket du mois' : '') + (on && !bought ? ', choisie' : ''),
+            pick: () => { if (!bought) this.setState({ shopCard: c.id, shopAsk: null }); }
           };
         }),
-        owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n), locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade),
-        can: can, needCard: open && pk >= it.price && !pick && prizes.length > 0, needCardText: 'Choisis d’abord ta carte',
-        miss: open && pk < it.price, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
+        owned: false, ownedText: '', locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade),
+        // Ticket du mois déjà pris : « Ticket déjà acheté », le prochain au tirage suivant, compte à rebours.
+        bought: bought, boughtTitle: 'Ticket déjà acheté', boughtText: 'Prochain ticket disponible ' + shopWhen(drawAt) + ', juste après le tirage.', boughtCd: shopCdView(drawAt),
+        can: can, needCard: open && !bought && pk >= it.price && !pick && prizes.length > 0, needCardText: 'Choisis d’abord ta carte',
+        miss: open && !bought && pk < it.price, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
         ask: ask, idle: !ask, buyLabel: 'Acheter un ticket · ' + price,
         confirmText: pick ? 'Échanger ' + price + ' contre 1 ' + it.name.toLowerCase() + ' pour « ' + pick.name + ' » ?' : '',
         buyOpen: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => pick && this.shopBuy(it.id, pick.id),
@@ -405,13 +411,13 @@
     const month = this.shopMonthBuy(s);
     return {
       pk: pk.toLocaleString('fr-FR'),
-      ticketsHead: 'Tickets du tirage au sort', ticketsSub: 'Un tirage par mois pour chaque ticket, le 1er à 20 h, avec une carte à gagner. Touche un ticket pour choisir ta carte.',
+      ticketsHead: 'Tickets du tirage au sort', ticketsSub: 'Un tirage par mois pour chaque ticket, le 1er à 20 h, avec une carte à gagner. Un ticket de chaque catégorie par mois : touche un ticket pour choisir ta carte.',
       tickets: tks.map(it => {
-        const n = tickets[it.id] || 0, open = gi >= it.minGrade;
+        const open = gi >= it.minGrade, n = this.shopBought(s, it.id);
         return {
           name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-t-' + it.tier, price: it.price.toLocaleString('fr-FR') + ' PK', priceN: it.price.toLocaleString('fr-FR'), every: it.everyShort,
           stars: stars(it), starsCls: it.starsCls, prize: it.prize,
-          locked: !open, lockName: shopGradeName(it.minGrade), lockImg: emblem(it.minGrade), owned: n > 0, ownedText: '×' + n,
+          locked: !open, lockName: shopGradeName(it.minGrade), lockImg: emblem(it.minGrade), owned: n > 0, ownedText: 'Acheté',
           cls: 'pkm-shop-tk' + (open ? '' : ' pkm-shop-tk-off'), aria: it.name + ', ' + it.prize + ' (' + it.starsText.toLowerCase() + '), ' + it.price + ' PK, tirage ' + it.everyShort + (open ? '' : ', déverrouillé au grade ' + shopGradeName(it.minGrade)) + '. Voir le ticket',
           pick: () => { this.setState({ shopTk: it.id, shopAsk: null, shopCard: null }); if (shopOnline()) this.shopSync(); requestAnimationFrame(() => requestAnimationFrame(() => { const sh = document.querySelector('.pkm-tks-sheet'); if (sh) sh.scrollTop = 0; })); }
         };
@@ -423,7 +429,8 @@
         const can = open && !it.soon && !out && !done && pk >= it.price, ask = can && s.shopAsk === it.id;
         const price = it.price.toLocaleString('fr-FR') + ' PK';
         const choice = ask && it.choices && it.choices.indexOf(s.shopChoice) >= 0 ? s.shopChoice : '';
-        const stockText = !st ? '' : st.left <= 0 ? 'Épuisé' : 'Plus que ' + st.left + (st.months > 1 ? ' jusqu’' + shopWhen(st.restock).replace(/^le /, 'au ').replace(/ à 20 h$/, '') : ' ce mois-ci');
+        // ETB (tous les 2 mois, porteur 2026-11-09) : « 1 article disponible jusqu'au 1er janvier ».
+        const stockText = !st ? '' : st.left <= 0 ? 'Épuisé' : st.months > 1 ? st.left + (st.left > 1 ? ' articles disponibles' : ' article disponible') + ' jusqu’' + shopWhen(st.restock).replace(/^le /, 'au ').replace(/ à 20 h$/, '') : 'Plus que ' + st.left + ' ce mois-ci';
         return {
           name: it.name, prize: it.prize, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note, value: it.value || '', hasValue: !!it.value,
           hasHead: !!it.head, head: it.head || '', headSub: it.headSub || '', hasHeadSub: !!it.headSub,
@@ -449,7 +456,7 @@
       }),
       // Rubriques (2026-11-01, porteur) : « Magasin » (les articles) et « Recharger mes PA » (packs de PA en argent réel).
       ...shopTabs(this, s),
-      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Un tirage au sort par mois pour chaque ticket, le 1er à 20 h, avec une carte à gagner (Bronze : ultra rare ; Argent : AR ; Or : ALT), fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Achats directs en quantité limitée, réassort le 1er de chaque mois à 20 h, un par compte et par mois. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi. Google et Apple ne sont ni organisateurs, ni partenaires, ni sponsors de ces tirages.',
+      rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Un tirage au sort par mois pour chaque ticket, le 1er à 20 h, avec une carte à gagner (Bronze : ultra rare ; Argent : AR ; Or : ALT), un ticket de chaque catégorie par mois, fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Achats directs en quantité limitée, réassort le 1er de chaque mois à 20 h, un par compte et par mois. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi. Google et Apple ne sont ni organisateurs, ni partenaires, ni sponsors de ces tirages.',
       openRules: () => this.legalOpen('pk')
     };
   };

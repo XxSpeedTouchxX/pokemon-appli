@@ -428,11 +428,31 @@
   // Dresseur Pokémon 50, Maître et Grand maître 100. Un scan = une carte reconnue (fiche ou propositions), à la
   // caméra ou sur une photo ; la recherche à la main et l'onglet Scellé ne comptent pas. Remis à zéro chaque jour.
   scanProto.scanQuota = function () {
-    const s = this.st(), P = this.perks(), used = s.scanDay === realToday() ? Number(s.scanN) || 0 : 0, left = Math.max(0, P.scans - used);
+    // Scans bonus pris aujourd'hui (boîte mystère, 2026-11-09) : ajoutés aux scans du jour.
+    const s = this.st(), P = this.perks(), today = realToday(), used = s.scanDay === today ? Number(s.scanN) || 0 : 0;
+    const extra = s.scanExtraDay === today ? Number(s.scanExtra) || 0 : 0, left = Math.max(0, P.scans + extra - used);
     const T = this.tiers(), next = T.find(t => t.scans > P.scans);
-    return { max: P.scans, used: used, left: left,
+    return { max: P.scans + extra, used: used, left: left,
       text: left + (left > 1 ? ' scans restants' : ' scan restant') + ' aujourd’hui (' + P.scans + ' par jour au grade ' + P.name + ')',
-      over: 'Tes ' + P.scans + ' scans du jour sont utilisés. Reviens demain' + (next ? ', ou passe ' + next.name + ' pour ' + next.scans + ' par jour' : '') + '. La recherche reste ouverte.' };
+      over: (Number(s.scanBonus) || 0) >= 20 ? 'Tes scans du jour sont utilisés. Touche « +' + s.scanBonus + ' » en haut pour ajouter 20 scans bonus.' : 'Tes ' + P.scans + ' scans du jour sont utilisés. Reviens demain' + (next ? ', ou passe ' + next.name + ' pour ' + next.scans + ' par jour' : '') + '. La recherche reste ouverte.' };
+  };
+  // Scans bonus (2026-11-09, porteur : « ces 20 scans seront dans un compteur à côté des scans disponibles ; si
+  // l'utilisateur a terminé ses scans quotidiens, il peut appuyer sur ce compteur pour rajouter les 20 scans ») : le
+  // compteur garde tous les scans bonus gagnés ; un appui en prend 20, seulement quand ceux du jour sont finis.
+  scanProto.scanBonusUse = function () {
+    const s = this.st(), bonus = Number(s.scanBonus) || 0, q = this.scanQuota(), today = realToday();
+    if (bonus < 20 || s.scanBonusBusy) return;
+    if (q.left > 0) { this.setState({ toast: 'Il te reste ' + q.left + (q.left > 1 ? ' scans' : ' scan') + ' aujourd’hui : tes scans bonus serviront quand ils seront finis' }); return; }
+    // 20 scans de plus à partir de maintenant, quel que soit le nombre déjà fait aujourd'hui.
+    const used = s.scanDay === today ? Number(s.scanN) || 0 : 0, cur = s.scanExtraDay === today ? Number(s.scanExtra) || 0 : 0;
+    const add = left => this.setState({ scanBonus: left, scanBonusBusy: false, scanExtraDay: today, scanExtra: Math.max(cur, used - this.perks().scans) + 20,
+      toast: '+20 scans pour aujourd’hui' });
+    if (typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn()) {
+      this.setState({ scanBonusBusy: true });
+      Cloud.rpc('use_scan_bonus', { req: Cloud.reqId() }).then(r => add(r.scan_bonus | 0), e => { this.setState({ scanBonusBusy: false }); if (this.gcFail) this.gcFail(e); });
+      return;
+    }
+    add(bonus - 20);
   };
   scanProto.scanCount = function () {
     const s = this.st(), today = realToday(), used = s.scanDay === today ? Number(s.scanN) || 0 : 0;
@@ -483,6 +503,9 @@
       showLeft: !sealed && quota.left !== Infinity, noLeft: sealed || quota.left === Infinity,
       leftText: Math.max(0, quota.left) + (quota.left > 1 ? ' scans disponibles' : ' scan disponible'),
       leftAria: quota.text,
+      hasBonus: quota.left !== Infinity && (Number(s.scanBonus) || 0) > 0, bonusText: '+' + (Number(s.scanBonus) || 0),
+      bonusAria: (Number(s.scanBonus) || 0) + ' scans bonus' + (quota.left > 0 ? ', à utiliser quand tes scans du jour seront finis' : ' : touche pour ajouter 20 scans'),
+      bonusCls: 'pkm-scan-bonus' + (quota.left <= 0 && (Number(s.scanBonus) || 0) >= 20 ? ' pkm-scan-bonus-go' : ''), bonusUse: () => this.scanBonusUse(),
       hasTorch: !sealed && SCAN.hasTorch && !panel, noTorch: sealed || !SCAN.hasTorch || !!panel,
       torchOn: !!s.scanTorch, torchLabel: s.scanTorch ? 'Éteindre la lampe' : 'Allumer la lampe',
       torchBg: s.scanTorch ? 'var(--pkm-accent)' : 'rgba(var(--pkm-ink-rgb), 0.66)', torchFg: s.scanTorch ? 'var(--pkm-on-accent)' : 'var(--pkm-white)',

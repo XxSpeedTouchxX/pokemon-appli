@@ -1,42 +1,38 @@
-// 2026-11-08 : 2XP PK au PK shop (3 offres en PA), gains doublés au Booster PK et à pile ou face ; boutons « Tu dois
-// attendre … pour rejouer » des jeux ; 3 visuels proposés (?xpvis=1, 2, 3).
+// 2026-11-08 : 2XP PK, gains doublés au Booster PK et à pile ou face ; boutons « Tu dois attendre … pour rejouer » des
+// jeux. 2026-11-09 : les 2XP se gagnent dans la boîte mystère (300 PA), avec 20 scans bonus, 300 PK et 3 légendaires.
 import { withFonts, launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 const N = t => String(t).replace(/[\s  ]+/g, ' ').trim();
-for (const v of [1, 2]) {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); await withFonts(ctx);
-  const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
-  await page.goto(E2E + '/?debug&xpvis=' + v, { waitUntil: 'load' }); await page.waitForTimeout(1200);
-  await page.evaluate(() => window.__pkm.tab('pkshop')); await page.waitForTimeout(600);
-  ok('visuel ' + v + ' : 3 offres', (await page.locator('section[aria-label="2XP PK"] .pkm-xp-v' + v).count()) === 3);
-  await ctx.close();
-}
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); await withFonts(ctx);
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?debug', { waitUntil: 'load' }); await page.waitForTimeout(1200);
-await page.evaluate(() => { window.__pkm.setState({ pa: 1500, pk: 0 }); window.__pkm.tab('pkshop'); }); await page.waitForTimeout(700);
-const sec = page.locator('section[aria-label="2XP PK"]');
-const offers = (await sec.locator('.pkm-xp-offer').allInnerTexts()).map(N);
-ok('3 offres : ' + offers.join(' | '), offers.length === 3 && /7 jours 400 PA/.test(offers[0]) && /14 jours 700 PA/.test(offers[1]) && /30 jours 1 000 PA/.test(offers[2]) && (await sec.locator('.pkm-xp-v3').count()) === 3);
-// « 2XP » centré dans son encadré (2026-11-08, porteur) : centre du texte et centre de l'encadré à moins de 1,5 px.
-const gap = await sec.locator('.pkm-xp-tag').first().evaluate(t => { const r = document.createRange(); r.selectNodeContents(t); const a = r.getBoundingClientRect(), b = t.getBoundingClientRect(); return Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2); });
-ok('double gemme par défaut, « 2XP » centré dans son encadré (écart ' + gap.toFixed(1) + ' px)', gap < 1.5);
-await sec.locator('.pkm-xp-offer').first().click(); await page.waitForTimeout(300);
-ok('confirmation : « Activer 7 jours de 2XP PK pour 400 PA ? »', /Activer 7 jours de 2XP PK pour 400 PA/.test(N(await sec.innerText())));
-await sec.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(600);
+await page.evaluate(() => { window.__pkm.setState({ pa: 1000, pk: 0, pkOwn: [1, 4, 7, 25] }); window.__pkm.tab('pkshop'); }); await page.waitForTimeout(700);
+// Boîte mystère (2026-11-09) : les 2XP ne s'achètent plus, ils se gagnent dans la boîte (300 PA).
+const sec = page.locator('section[aria-label="Boîte mystère"]');
+ok('plus d’offres 2XP à acheter ; boîte mystère à 300 PA avec le « ? »', (await page.locator('.pkm-xp-offer').count()) === 0 && (await sec.count()) === 1 && /300 PA/.test(N(await sec.innerText())) && (await sec.locator('.pkm-my-q').textContent()) === '?');
+await sec.locator('button:has-text("Voir les lots")').click(); await page.waitForTimeout(250);
+const odds = N(await sec.locator('.pkm-my-odds').innerText());
+ok('lots et chances affichés : ' + odds.slice(0, 60) + '…', /2XP PK · 3 jours 25 %/.test(odds) && /2XP PK · 7 jours 15 %/.test(odds) && /2XP PK · 10 jours 10 %/.test(odds) && /300 PK 15 %/.test(odds) && /20 scans bonus 20 %/.test(odds) && /Kyogre 5 %/.test(odds) && /Groudon 5 %/.test(odds) && /Rayquaza 5 %/.test(odds));
+const open = async lot => { await page.evaluate(l => { window.__myLot = l; }, lot); await sec.locator('button:has-text("Ouvrir une boîte")').click(); await page.waitForTimeout(250); await sec.locator('.pkm-xp-ask button:has-text("Ouvrir")').click(); await page.waitForTimeout(2300); };
+await open('xp-7');
+const fx = page.locator('.pkm-my-fx');
+ok('ouverture : la boîte s’ouvre, « Tu as gagné · 2XP PK · 7 jours »', (await fx.count()) === 1 && /Tu as gagné/i.test(N(await fx.innerText())) && /2XP PK · 7 jours/.test(N(await fx.innerText())));
+await page.screenshot({ path: shot('mystery-open.png') });
+await fx.locator('button:has-text("Super")').click(); await page.waitForTimeout(300);
 let st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, u: window.__pkm.st().xpUntil }));
-ok('7 jours : 400 PA débités, fin dans 7 jours', st.pa === 1100 && Math.abs(Date.parse(st.u) - Date.now() - 7 * 864e5) < 6e4);
-await sec.locator('.pkm-xp-offer').nth(1).click(); await page.waitForTimeout(300);
-await sec.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(600);
+ok('300 PA débités, 2XP PK de 7 jours', st.pa === 700 && Math.abs(Date.parse(st.u) - Date.now() - 7 * 864e5) < 6e4);
+await open('xp-3'); await page.locator('.pkm-my-fx button:has-text("Super")').click(); await page.waitForTimeout(300);
 st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, u: window.__pkm.st().xpUntil }));
-ok('14 jours de plus : 700 PA débités, fin prolongée à 21 jours', st.pa === 400 && Math.abs(Date.parse(st.u) - Date.now() - 21 * 864e5) < 6e4);
-ok('bandeau « 2XP PK actif »', /2XP PK actif · encore 2\d j/.test(N(await sec.innerText())));
-await sec.locator('.pkm-xp-offer').nth(2).click(); await page.waitForTimeout(300);
-ok('30 jours avec 400 PA : « Il te manque 600 PA », pas de bouton Confirmer', /Il te manque 600 PA/.test(N(await sec.innerText())) && (await sec.locator('button:has-text("Confirmer")').count()) === 0);
-const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').xpUntil);
-ok('fin du 2XP gardée sur l’appareil', !!saved);
-await page.screenshot({ path: shot('xppk-shop.png') });
+ok('2ᵉ boîte : 3 jours ajoutés (10 jours en tout)', st.pa === 400 && Math.abs(Date.parse(st.u) - Date.now() - 10 * 864e5) < 6e4);
+ok('bandeau « 2XP PK actif »', /2XP PK actif · encore (9|10) j/.test(N(await sec.innerText())));
+await open('kyogre'); await page.locator('.pkm-my-fx button:has-text("Super")').click(); await page.waitForTimeout(300);
+st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, own: window.__pkm.st().pkOwn }));
+ok('Kyogre gagné : débloqué dans le Pokédex', st.pa === 100 && st.own.indexOf(382) >= 0);
+ok('lots : Kyogre « déjà débloqué »', /Kyogre · déjà débloqué/.test(N(await sec.locator('.pkm-my-odds').innerText())));
+ok('100 PA : « Il te manque 200 PA »', /Il te manque 200 PA/.test(N(await sec.innerText())) && (await sec.locator('button:has-text("Ouvrir une boîte")').count()) === 0);
+await page.evaluate(() => { window.__myLot = null; window.__pkm.setState({ pa: 300 }); }); await page.waitForTimeout(200);
+await sec.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('xppk-shop.png') });
 // Jeux : gains doublés.
 await page.evaluate(() => window.__pkm.tab('market')); await page.waitForTimeout(700);
 ok('Jeux : bandeau « 2XP PK actif »', (await page.locator('.pkm-xp-live-gm').count()) === 1);

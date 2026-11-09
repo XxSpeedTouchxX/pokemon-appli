@@ -22,7 +22,7 @@ await page.evaluate(() => { window.__pkm.setState({ pk: 100000, shopLots: [], ti
 const boosterCard = page.locator('section.pkm-shop-item[aria-label="Booster de la série du moment"]');
 ok('booster : « Plus que 10 ce mois-ci » et 10 points', /Plus que 10 ce mois-ci/.test(N(await boosterCard.innerText())) && (await boosterCard.locator('.pkm-stock-dot-on').count()) === 10);
 const etbText = N(await page.locator('section.pkm-shop-item[aria-label="ETB 30 ans"]').innerText());
-ok('ETB : « Plus que 1 jusqu’au 1er … » (1 tous les 2 mois)', /Plus que 1 jusqu’au 1er (janvier|mars|mai|juillet|septembre|novembre)/.test(etbText));
+ok('ETB : « 1 article disponible jusqu’au 1er … » (1 tous les 2 mois)', /1 article disponible jusqu’au 1er (janvier|mars|mai|juillet|septembre|novembre)/.test(etbText));
 ok('rubrique : quantités limitées, réassort le 1er à 20 h, 1 achat par mois', /Quantités limitées, réassort le 1er de chaque mois à 20 h ; 1 achat direct par compte et par mois/.test(N(await page.locator('.pkm-shop-head').allInnerTexts().then(a => a.join(' ')))));
 await boosterCard.locator('button:has-text("Acheter")').click(); await page.waitForTimeout(300);
 await boosterCard.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
@@ -71,7 +71,12 @@ await sheet.locator('.pkm-tks-two button:has-text("Confirmer")').click(); await 
 const st = await page.evaluate(() => { const app = window.__pkm, s = app.st(); return { n: (s.tickets || {})['ticket-bronze'], mine: app.shopMine(s, 'ticket-bronze') }; });
 ok('ticket acheté pour Mew-ex', st.n === 1 && st.mine['sv03.5-200'] === 1);
 sheet = page.locator('.pkm-tks-sheet');
-ok('fiche : « ×1 » sur Mew-ex', /×1/.test(N(await sheet.locator('.pkm-tkc').nth(1).innerText())));
+ok('fiche : « Ton choix » sur Mew-ex', /Ton choix/.test(N(await sheet.locator('.pkm-tkc').nth(1).innerText())));
+t = N(await sheet.innerText());
+ok('un ticket par mois : « Ticket déjà acheté », prochain ticket le 1er à 20 h, compte à rebours, plus de bouton d’achat', /Ticket déjà acheté/.test(t) && /Prochain ticket disponible le 1er \S+ à 20 h/.test(t) && (await sheet.locator('.pkm-lotwait-ok .pkm-cdx').count()) === 1 && (await sheet.locator('button:has-text("Acheter un ticket")').count()) === 0);
+const pkT = await page.evaluate(() => window.__pkm.st().pk);
+await page.evaluate(() => window.__pkm.shopBuy('ticket-bronze', 'sv03.5-199'));
+ok('2ᵉ ticket Bronze le même mois : refusé, aucun PK débité', (await page.evaluate(() => window.__pkm.st().pk)) === pkT);
 ok('les tickets ne comptent pas comme l’achat direct du mois', (await page.evaluate(() => window.__pkm.shopMonthBuy(window.__pkm.st()))) === null);
 await page.screenshot({ path: shot('lots-ticket.png') });
 await sheet.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(800);
@@ -92,10 +97,27 @@ await adm.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('lots-adm
 await adm.locator('button.pkm-admz-x').first().click(); await page.waitForTimeout(400);
 ok('carte retirée', (await page.evaluate(() => window.__pkm.shopPrizes(window.__pkm.st(), 'ticket-argent'))).length === 0);
 
+// D2. PK shop : plus de barre « N tickets » sous les onglets ; ticket Bronze marqué « Acheté ».
+ok('plus de barre des tickets entre « Magasin » et Premium', (await page.locator('main .pkm-shop-tk .pkm-tk-bar').count()) === 0);
+ok('ticket Bronze : « Acheté »', /Acheté/.test(N(await page.locator('.pkm-shop-tkrow .pkm-shop-tk').first().innerText())));
+// D3. Scans bonus : compteur à côté des scans du jour ; un appui en ajoute 20 quand ceux du jour sont finis.
+await page.evaluate(() => window.__pkm.setState({ admSheet: false, admin: { on: false }, scanBonus: 40, scanDay: new Date().toISOString().slice(0, 10), scanN: 0 }));
+await page.goto(E2E + '/?debug&start=scan', { waitUntil: 'load' }); await page.waitForTimeout(1200);
+const bonus = page.locator('button.pkm-scan-bonus');
+ok('scan : compteur « +40 » à côté des scans disponibles', (await bonus.count()) === 1 && /\+40/.test(await bonus.innerText()));
+await bonus.click(); await page.waitForTimeout(300);
+ok('scans du jour pas finis : rien n’est pris', (await page.evaluate(() => window.__pkm.st().scanBonus)) === 40);
+await page.evaluate(() => window.__pkm.setState({ scanN: 999, scanDay: (() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })() })); await page.waitForTimeout(300);
+const q0 = await page.evaluate(() => window.__pkm.scanQuota().left);
+await bonus.click(); await page.waitForTimeout(400);
+const q1 = await page.evaluate(() => ({ left: window.__pkm.scanQuota().left, bonus: window.__pkm.st().scanBonus }));
+ok('scans du jour finis : un appui ajoute 20 scans (' + q0 + ' → ' + q1.left + '), compteur à +20', q0 === 0 && q1.left === 20 && q1.bonus === 20 && /\+20/.test(await bonus.innerText()));
+await page.screenshot({ path: shot('scan-bonus.png') });
 // E. Premium : « 1er mois : 2XP PK offert » dans les avantages.
 await page.evaluate(() => window.__pkm.setState({ admSheet: false, admin: { on: false } })); await page.waitForTimeout(300);
 await page.evaluate(() => window.__pkm.premOpen()); await page.waitForTimeout(1200);
-ok('offre Premium : « 1er mois : 2XP PK offert »', /1er mois : 2XP PK offert/.test(N(await page.locator('.pkm-prem-perks').innerText())));
+ok('offre Premium : « 1er mois : 2XP PK offert », « Soutenir Dropicards » avec le cœur dans la main', /1er mois : 2XP PK offert/.test(N(await page.locator('.pkm-prem-perks').innerText())) && /Soutenir Dropicards Pour vous faire gagner de plus en plus de lots/.test(N(await page.locator('.pkm-prem-perks').innerText())) && (await page.locator('svg.pkm-prem-heart').count()) === 1);
+ok('prix : 6,90 € par mois, 69,90 € par an', /69,90 €/.test(N(await page.locator('section[aria-label="Dropicards Premium"]').innerText())) && /6,90 €/.test(N(await page.locator('section[aria-label="Dropicards Premium"]').innerText())));
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

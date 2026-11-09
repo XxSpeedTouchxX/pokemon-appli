@@ -172,6 +172,23 @@ Si le retour reste sur « s'active… » : Stripe › Webhooks › ta destinatio
    Je les prépare dès que tu me donnes ces informations.
 5. Fais un premier vrai paiement avec ta carte, puis rembourse-le depuis Stripe.
 
+## 8 bis. Changer les prix : 6,90 € par mois et 69,90 € par an (2026-11-09)
+
+L'app affiche les nouveaux prix depuis la version v172. Stripe, lui, garde les anciens tant que tu n'as pas fait ces étapes. Fais-les **en production** (et en test si tu veux réessayer). Compte 5 minutes.
+
+1. Stripe › **Catalogue de produits** › ouvre le produit **Dropicards Premium**.
+2. **Ajouter un autre prix** :
+   - **6,90 EUR**, **Récurrent**, **Mensuel** ;
+   - ouvre **Plus d'options de tarification** et mets la clé de recherche `dropicards_premium_month` ;
+   - coche **Transférer la clé de recherche** (elle quitte l'ancien prix à 4,90 €) ;
+   - **Ajouter le prix**.
+3. Recommence avec **69,90 EUR**, **Récurrent**, **Annuel**, clé `dropicards_premium_year`, en cochant aussi **Transférer la clé de recherche**.
+4. Sur chacun des deux anciens prix (4,90 € et 49,90 €) : **⋯** › **Archiver le prix**.
+5. Seulement si tu avais mis `STRIPE_PRICE_MONTH` ou `STRIPE_PRICE_YEAR` dans Coolify : remplace leurs valeurs par les identifiants des nouveaux prix (`price_…`), puis **Restart** de Supabase. Sinon, rien à faire dans Coolify.
+6. Essai : dans l'app, Premium › Mensuel › « Devenir Premium ». La page de Stripe doit afficher 6,90 €. Ferme-la sans payer.
+
+Les abonnés déjà inscrits gardent leur ancien prix : Stripe ne change jamais le prix d'un abonnement en cours (c'est aussi écrit dans les conditions de vente). Pour les faire passer au nouveau prix, il faudrait les prévenir au moins un mois avant ; je te le prépare si tu le souhaites.
+
 ## 9. Ce qui reste à décider
 
 | # | Question | Défaut proposé |
@@ -182,6 +199,6 @@ Si le retour reste sur « s'active… » : Stripe › Webhooks › ta destinatio
 
 ## 10. Coût
 
-- Stripe : environ 1,5 % + 0,25 € par paiement avec une carte européenne, plus environ 0,7 % pour la gestion des abonnements. Il te reste environ 4,55 € sur 4,90 € et environ 48,55 € sur 49,90 €.
+- Stripe : environ 1,5 % + 0,25 € par paiement avec une carte européenne, plus environ 0,7 % pour la gestion des abonnements. Il te reste environ 6,50 € sur 6,90 € et environ 68,10 € sur 69,90 € (4,55 € sur 4,90 € et 48,55 € sur 49,90 € avec les anciens prix).
 - Serveur : rien de plus.
 - Stripe Tax : non activé (franchise de TVA).

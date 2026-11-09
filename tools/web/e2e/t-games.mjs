@@ -106,10 +106,10 @@ await tks.locator('.pkm-shop-tk').nth(0).click(); await page.waitForTimeout(400)
 const ticket = page.locator('section[aria-label="Ticket Bronze"]');
 await ticket.locator('button:has-text("Acheter un ticket")').click(); await ticket.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(500);
 const sd = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'));
-ok('ticket Bronze acheté depuis sa fiche (Recrue) : 1 ticket, 200 PK', sd.pk === 200 && sd.tickets && sd.tickets['ticket-bronze'] === 1 && /Tu as 1 ticket/.test(await ticket.innerText()));
+ok('ticket Bronze acheté depuis sa fiche (Recrue) : 1 ticket, 200 PK', sd.pk === 200 && sd.tickets && sd.tickets['ticket-bronze'] === 1 && /Ticket déjà acheté/.test(await ticket.innerText()));
 await ticket.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
 await page.evaluate(() => localStorage.setItem('pkm-grade-force', '6'));
-ok("tickets affichés dans le PK shop (« 1 ticket », sans le solde de PK depuis le 2026-11-02)", /1 ticket/.test(await page.locator('p[aria-label="Mes tickets du tirage au sort"]').innerText()) && (await page.locator('section[aria-label="Mon solde de PK"]').count()) === 0);
+ok("PK shop : ticket Bronze « Acheté », sans barre « N tickets » ni solde de PK (2026-11-09)", /Acheté/.test(await page.locator('.pkm-shop-tkrow .pkm-shop-tk').first().innerText()) && (await page.locator('p[aria-label="Mes tickets du tirage au sort"]').count()) === 0 && (await page.locator('section[aria-label="Mon solde de PK"]').count()) === 0);
 await page.screenshot({ path: shot('pkshop.png') });
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 ok('délais gardés après rechargement', /Tu dois attendre/.test(await boost.innerText()) && /Tu dois attendre/.test(await coin.innerText()));

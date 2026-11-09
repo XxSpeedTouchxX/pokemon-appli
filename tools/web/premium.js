@@ -1,6 +1,6 @@
   // ——— Abonnement « Premium » (2026-11-06, demande du porteur ; docs/27) ———
   // Bannière qui donne envie (PK shop › Magasin et Mon profil) et écran de l'offre : avantages, formules mensuelle
-  // (4,90 €/mois) et annuelle (49,90 €/an), renouvellement automatique, arrêt à tout moment (la période commencée
+  // (4,90 €/mois) et annuelle (49,90 €/an ; 6,90 € et 69,90 € depuis le 2026-11-09, porteur), renouvellement automatique, arrêt à tout moment (la période commencée
   // reste due, l'abonnement s'arrête juste avant la suivante).
   // Paiement branché (2026-11-07, « go » du porteur ; guide docs/28) : « Devenir Premium » demande au serveur
   // (fonction « stripe », tools/supabase/functions/stripe/index.ts) une page de paiement Stripe et y envoie le joueur ;
@@ -16,11 +16,15 @@
     { kind: 'xp', ico: '', title: 'Double XP permanent sur tes PA', text: 'Tes PA comptent double, tous les jours.' },
     // 2XP PK offert le premier mois (2026-11-09, porteur ; serveur : 018, une fois par compte).
     { kind: 'xppk', ico: '', title: '1er mois : 2XP PK offert', text: 'Tes PK du Booster PK et de pile ou face doublés pendant 30 jours.' },
+    // Soutien (2026-11-09, porteur : « Soutenir Dropicards pour vous faire gagner de plus en plus de lots », avec un cœur
+    // dans la main) : icône d'une main ouverte qui tient un cœur qui bat.
+    { kind: 'heart', ico: '', title: 'Soutenir Dropicards', text: 'Pour vous faire gagner de plus en plus de lots.' },
     { kind: 'hist', ico: '', title: 'Historique des prix complet', text: 'Toute l’évolution de la cote de chaque carte.' }
   ];
   const PREM_PLANS = [
-    { id: 'year', name: 'Annuel', price: '49,90 €', per: 'par an', sub: 'soit 4,16 € par mois', tag: 'Meilleure offre · −15 %', save: '8,90 € d’économie par an' },
-    { id: 'month', name: 'Mensuel', price: '4,90 €', per: 'par mois', sub: 'sans engagement', tag: '', save: '' }
+    // Prix du 2026-11-09 (porteur) : 6,90 € par mois, 69,90 € par an (12 mois à 6,90 € = 82,80 €, soit 12,90 € et 16 % de moins).
+    { id: 'year', name: 'Annuel', price: '69,90 €', per: 'par an', sub: 'soit 5,83 € par mois', tag: 'Meilleure offre · −16 %', save: '12,90 € d’économie par an' },
+    { id: 'month', name: 'Mensuel', price: '6,90 €', per: 'par mois', sub: 'sans engagement', tag: '', save: '' }
   ];
   // Ouverture et retour animés comme les pages de l'app (2026-11-07, porteur : « le retour est trop brusque ») : l'offre
   // glisse depuis la droite, et repart vers la droite au retour (courbe d'iOS, comme nav.js), le fond s'éclaircit.
@@ -131,7 +135,7 @@
     r.prem = {
       banner: { title: 'Dropicards Premium', text: on ? 'Premium actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP sur tes PA, Radar et historique complet.', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.premClose(),
-      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
+      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isHeart: p.kind === 'heart', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
       buy: !on, isOn: on,
       mine: { title: mineTitle, text: mineText },
       manage: () => this.premGo('portal'),
