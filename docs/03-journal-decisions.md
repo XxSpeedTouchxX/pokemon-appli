@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-11-09 — PA jusqu'à 80, boîte offerte, lot 2XP PA, ouverture animée, paliers des grades proposés (demande du porteur)
+
+- **Boîte mystère** : lot « 300 PK » retiré, remplacé par **2XP PA 7 jours** (15 %). Il double les PA du jour pendant 7 jours. Un abonné Premium a déjà ses PA doublés : ce lot n'est jamais tiré pour lui (**défaut à confirmer** ; 2XP PA et Premium ne se cumulent pas).
+- **Logo à côté de chaque lot** : double gemme des PK (2XP PK 3, 7, 10 j, couleur par durée), double goutte des PA (2XP PA), scanner « +20 », Pokémon animé (Kyogre, Groudon, Rayquaza).
+- **Ouverture animée** d'après la vidéo du porteur, avec nos propres dessins : fond bleu, la boîte tombe, sautille, s'écrase puis éclate, éclair blanc, écran coloré du lot (titre, lot qui tombe et rebondit, quantité, étincelles). Un appui ferme.
+- **PA du jour** : J1 +20, J2 +30, J3 +40, J4 +50, **J5 +60, J6 +70, J7 +80** puis **80 chaque jour** (maximum).
+  - **Boîte mystère offerte** au 7e jour d'affilée, puis à chaque nouvelle série de 7 jours ; bouton « Ouvrir ma boîte offerte » au PK shop.
+  - Un jour manqué : retour au **palier J3** (+40), et la série de 7 recommence. Deux jours manqués : retour à **J1**.
+  - Un jour manqué alors qu'on est à J2 : on reste à J2 (**défaut à confirmer**).
+  - Premium ou 2XP PA : gains doublés.
+- Serveur : `019_boite_mystere.sql` **à relancer par le porteur** (rejouable, même s'il est déjà installé) ; 38 vérifications (`tests/test_019.sql`, 392 en tout).
+- **Paliers des grades proposés, non appliqués** (`docs/32` §3 bis), pour un joueur qui ne s'arrête jamais et n'achète rien : Chasseur 850 PK (7 jours) ; Collectionneur 4 750 PK + 50 Pokémon (27 j) ; Dresseur Pokémon 16 500 PK + 100 dont 5 méga (63 j) ; Maître Pokémon 57 500 PK + 150 dont 5 méga (130 j) ; Grand maître Pokémon 150 000 PK + les 171 (242 j). Tous dans les fenêtres du porteur. « go » attendu.
+- Cache v173.
+
 ## 2026-11-09 — Boîte mystère, un ticket par mois, Premium à 6,90 €, scan, business plan (demande du porteur)
 
 - **2XP PK** : les offres de 7, 14 et 30 jours ne s'achètent plus. Les 2XP se gagnent dans la **boîte mystère** du PK shop, à **300 PA**.

@@ -1,6 +1,6 @@
   // ——— PA (points d'Aura) et jeu d'évolution (2026-10-25, demande du porteur) ———
   // Les PA se gagnent en ouvrant l'app, une fois par jour, selon les jours d'affilée (choix du porteur) : 1er jour +20,
-  // 2e +30, 3e +40, 4e +50, puis +70 chaque jour (2026-11-02). Un jour sans les récupérer : la série reprend à +30 (palier J2).
+  // 2e +30, 3e +40, 4e +50, 5e +60, 6e +70, puis +80 chaque jour (2026-11-09). Un jour manqué : palier J3 ; deux : J1.
   // Ils servent au jeu d'évolution (onglet Jeux, à la place de la roulette) : le starter choisi (Bulbizarre, Salamèche,
   // Carapuce ou Pikachu, un seul choix avec le didacticiel et le compagnon) évolue pour 500 PA, puis 1 500 PA ; ses
   // évolutions sont en silhouette noire tant qu'elles ne sont pas débloquées, et deviennent des compagnons.
@@ -17,7 +17,8 @@
   // (1) et Grand maître Pokémon (5). Prix : PA_PRICES (pk.js, 2026-11-01, porteur) ; PA_MEGA en repli.
   const PA_MEGA = 2500;
   // Règle des PA, écrite une fois (2026-11-01, porteur : chaque jour dès minuit, un jour manqué → palier J2 ; gains du 2026-11-02).
-  const PA_RULES = 'Chaque jour dès minuit, touche ton solde de PA pour récupérer tes PA : +20, +30, +40, +50, puis +70 PA par jour d’affilée. Un jour sans les récupérer : la série reprend à +30 PA.';
+  // Paliers du 2026-11-09 (porteur) : jusqu'à +80 PA, une boîte mystère offerte tous les 7 jours d'affilée.
+  const PA_RULES = 'Chaque jour dès minuit, touche ton solde de PA pour récupérer tes PA : +20, +30, +40, +50, +60, +70, puis +80 PA par jour d’affilée (le maximum), et une boîte mystère offerte tous les 7 jours d’affilée. Un jour sans les récupérer : retour au palier J3 (+40 PA) ; deux jours ou plus : retour au palier J1 (+20 PA).';
   HOME_MEGAS.forEach(([id, base, nom]) => { HOME_NAMES[id] = nom; });
   const PA_MEGA_IDS = n => HOME_MEGAS.some(m => m[0] === n);
   const paMegas = s => (Array.isArray(s.megas) ? s.megas : []);
@@ -39,7 +40,7 @@
   // mes PA ». La série suit les jours où les PA sont récupérés (un jour manqué : reprise à +30, PaCore).
   // Règle du porteur (2026-11-01, après un essai « toutes les 24 h ») : PA disponibles chaque jour dès minuit (jour de
   // l'appareil, ou date simulée ?today= / Admin ; ?now=AAAA-MM-JJTHH:MM pour les tests) ; un jour entier sans les
-  // récupérer : la série reprend à +30 PA. « paAt » garde en plus l'heure de la récupération (informatif).
+  // récupérer : palier J3 (deux jours : J1, 2026-11-09). « paAt » garde en plus l'heure de la récupération (informatif).
   const paNow = () => {
     try { const q = new URLSearchParams(location.search).get('now'), t = q ? Date.parse(q) : NaN; if (t > 0) return t; } catch (e) { /* adresse sans paramètres */ }
     const d = new Date(), t = realToday(), m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
@@ -50,8 +51,10 @@
   // Mode Admin « PA à volonté » (2026-11-01, porteur) : les PA se récupèrent à chaque appui sur le solde.
   const paFree = s => !!(s.admin && s.admin.on && s.admin.paFree && admAllowed() && !Cloud.on());
   const paPending = s => {
-    const n = PaCore.next(s.paDay || '', s.paStreak || 0, paToday());
-    return n || !paFree(s) ? n : PaCore.next(s.paDay, s.paStreak || 0, PaCore.nextDay(s.paDay));
+    const n0 = PaCore.next(s.paDay || '', s.paStreak || 0, paToday(), s.paRun || 0);
+    const n = n0 || !paFree(s) ? n0 : PaCore.next(s.paDay, s.paStreak || 0, PaCore.nextDay(s.paDay), s.paRun || 0);
+    // 2XP PA gagné dans la boîte mystère (2026-11-09) : PA du jour doublés (le serveur fait de même, 019).
+    return n && Date.parse(s.paXpUntil || '') > Date.now() ? Object.assign({}, n, { gain: n.gain * 2, xp: true }) : n;
   };
   // Temps restant jusqu'à minuit, lisible : « 5 h 12 », « 12 min », « moins d'une minute ».
   const paLeft = ms => { const m = Math.max(0, Math.ceil(ms / 60000)), h = Math.floor(m / 60); return m < 1 ? 'moins d’une minute' : h ? h + ' h ' + String(m % 60).padStart(2, '0') : m + ' min'; };
@@ -106,10 +109,11 @@
     if (!n || paFlyOn) return;
     const from = document.querySelector('.pkm-pa-claim-btn'), to = document.querySelector('header .pkm-pa-bar') || document.querySelector('.pkm-pa-bar');
     const old = Number(s.pa) || 0, total = old + n.gain;
-    this.setState({ pa: total, paDay: paToday(), paAt: paNow(), paStreak: n.streak, paClaim: false, paCount: paStill() || !from || !to ? null : old,
+    // Boîte mystère offerte au 7e jour d'affilée (puis tous les 7 jours) : rangée avec les boîtes offertes du PK shop.
+    this.setState({ pa: total, paDay: paToday(), paAt: paNow(), paStreak: n.streak, paRun: n.run, myFree: (Number(s.myFree) || 0) + (n.gift ? 1 : 0), paClaim: false, paCount: paStill() || !from || !to ? null : old,
       toast: null });
     this.saveNow();
-    const end = () => { paFlyOn = false; this.setState({ paCount: null, paGain: n.gain, toast: '+' + n.gain + ' PA · ' + (n.streak > 1 ? n.streak + ' jours d’affilée' : 'premier jour') }); this.flash(); setTimeout(() => { if (this.st().paGain) this.setState({ paGain: 0 }); }, 2200); };
+    const end = () => { paFlyOn = false; this.setState({ paCount: null, paGain: n.gain, toast: '+' + n.gain + ' PA · ' + (n.run > 1 ? n.run + ' jours d’affilée' : 'premier jour') + (n.gift ? ' · une boîte mystère offerte ! Ouvre-la au PK shop' : '') }); this.flash(); setTimeout(() => { if (this.st().paGain) this.setState({ paGain: 0 }); }, 2200); };
     if (paStill() || !from || !to) { end(); return; }
     paFlyOn = true;
     const drops = Math.min(14, Math.max(8, Math.round(n.gain / 2)));
@@ -239,7 +243,7 @@
         return { open: true, close: () => this.setState({ paSheet: false }), balance: Number(pa).toLocaleString('fr-FR'), logo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
           what: 'Les PA sont tes points d’Aura : ils montrent le lien entre toi et ton compagnon. Ils sont gratuits, ne s’achètent pas et n’ont aucune valeur en euros.',
           how: 'Chaque jour dès minuit, touche ton solde de PA pour les récupérer. Plus tu les récupères de jours d’affilée, plus tu gagnes de PA :',
-          note: (n ? '' : paNextText(s) + '. ') + 'Un jour sans les récupérer : la série reprend à +30 PA.',
+          note: (n ? '' : paNextText(s) + '. ') + 'Un jour sans les récupérer : retour au palier J3 (+40 PA) ; deux jours ou plus : palier J1. Une boîte mystère offerte tous les 7 jours d’affilée.',
           use: 'Dans le Pokédex, tes PA débloquent les Pokémon et font évoluer ton compagnon :',
           streak: R.streak, evo: R.evo, dex: () => { this.setState({ paSheet: false }); openDex(); } };
       })(),

@@ -8,11 +8,11 @@
 - **Jeux** :
   - Booster PK : 87 PK en moyenne, toutes les 24, 20, 12, 8, 6 puis 4 h selon le grade ;
   - pile ou face : 25 PK en moyenne, fermé à la Recrue, puis toutes les 24, 12, 8, 6, 4 h.
-- **PA du jour** : 20, 30, 40, 50, puis 70 par jour. Premium : doublés.
+- **PA du jour** (depuis le 2026-11-09) : 20, 30, 40, 50, 60, 70, puis 80 par jour à partir du 7e jour d'affilée, et une **boîte mystère offerte** à chaque série de 7 jours. Un jour manqué : retour au palier J3 (série remise à zéro) ; deux jours manqués : retour à J1. Premium : PA doublés.
 - **Pokédex** : 15 150 PA pour les 171, dont Kyogre, Groudon et Rayquaza à 1 000 PA chacun.
 - **Boîte mystère** (300 PA) :
   - 2XP PK 3 j (25 %), 7 j (15 %), 10 j (10 %) ;
-  - 300 PK (15 %) ;
+  - **2XP PA 7 j (15 %)**, à la place de 300 PK depuis le 2026-11-09 (jamais tiré pour un abonné Premium, qui a déjà ses PA doublés) ;
   - 20 scans (20 %) ;
   - Kyogre, Groudon, Rayquaza (5 % chacun).
 
@@ -23,6 +23,8 @@
   - La boîte mystère est donc bien utile au joueur.
 
 ## 2. Temps pour monter chaque grade (médiane, en jours)
+
+> Calculé avec les anciens PA du jour (jusqu'à 70) et le lot 300 PK. Les nouveaux chiffres sont au §3 bis.
 
 « 2×/jour » : le joueur ouvre l'app matin et soir. « Assidu » : il joue dès que c'est prêt.
 
@@ -73,6 +75,40 @@ Elle est **à moitié atteinte**.
 L'écart entre deux grades grandit alors à chaque fois : 3, 17, 29, 48, puis 238 jours. C'est exactement « vite au début, de plus en plus dur ».
 
 Pour combler le long passage vers Grand maître, je propose aussi **3 paliers** (Grand maître I, II, III, à 50 000, 75 000 et 100 000 PK), avec une boîte mystère offerte à chaque palier.
+
+## 3 bis. Paliers proposés pour tes cibles (2026-11-09, à valider)
+
+**Ta demande** : un joueur qui ne dort jamais et rejoue dès que le sablier est fini (Booster PK et pile ou face) doit atteindre Chasseur en 5 à 10 jours, Collectionneur en 25 à 30, Dresseur en 60 à 65, Maître Pokémon en 120 à 140 et Grand maître Pokémon en 230 à 250.
+
+**Ce que j'ai simulé** (300 joueurs virtuels par cas) :
+- les nouveaux PA du jour (jusqu'à 80, boîte offerte tous les 7 jours) et le lot 2XP PA ;
+- les délais actuels des jeux selon le grade ;
+- le joueur dépense ses PA au mieux (Pokémon demandés d'abord, puis boîtes mystère) et n'achète rien.
+
+| Grade | PK gagnés au total | Pokémon débloqués | Atteint en (médiane) | 8 joueurs sur 10 entre |
+|---|---|---|---|---|
+| Chasseur | **850** | — | **7 jours** | 4 et 11 jours |
+| Collectionneur | **4 750** | **50** | **27 jours** | 20 et 36 jours |
+| Dresseur Pokémon | **16 500** | **100**, dont 5 méga-évolutions | **63 jours** | 52 et 76 jours |
+| Maître Pokémon | **57 500** | **150**, dont 5 méga-évolutions | **130 jours** | 119 et 142 jours |
+| Grand maître Pokémon | **150 000** | **les 171** | **242 jours** | 228 et 255 jours |
+
+Les 5 grades tombent dans tes fenêtres. Les autres profils, avec les mêmes paliers :
+
+| Profil | Chasseur | Collectionneur | Dresseur | Maître | Grand maître |
+|---|---|---|---|---|---|
+| Sans arrêt, n'achète rien (ta cible) | 7 | 27 | 63 | 130 | 242 |
+| Sans arrêt + Premium | 5 | 19 | 46 | 106 | 210 |
+| Sans arrêt + 1 pack de 1 500 PA par mois | 5 | 21 | 54 | 116 | 219 |
+| Ouvre l'app 2 fois par jour, n'achète rien | 7 | 30 | 67 | 161 | 372 |
+
+**À retenir.**
+- Les PK sont le vrai frein à partir de Maître : avec 80 PA par jour, les Pokémon arrivent assez vite, donc les seuils de PK montent beaucoup (57 500 et 150 000).
+- Premium fait gagner environ un mois sur chaque grade à partir de Dresseur ; il ne permet pas de sauter d'étape.
+- Le joueur qui ouvre l'app 2 fois par jour met environ un an pour Grand maître : le dernier grade reste un objectif de très long terme.
+- Les Pokémon demandés (50, 100, 150, 171) sont ma proposition : ils suivent le coût du Pokédex en PA (690 PA pour 50 Pokémon, 2 480 pour 100, 5 600 pour 150, 15 150 pour les 171).
+
+**Rien n'est appliqué.** Sur ton « go », je mets ces paliers dans l'app, dans les règles et sur le serveur (nouveau script SQL).
 
 ## 4. Business plan
 
@@ -130,13 +166,13 @@ Les packs de PA, une fois branchés, s'ajoutent : un pack à 9,99 € laisse ≈
 ## 5. Point d'attention juridique (à faire relire)
 
 - **Le risque** : les règles disent que « les PK ne s'achètent pas ».
-  - Or une boîte mystère payée en PA peut donner 300 PK, et les PA seront vendus en argent réel.
-  - De même, Premium (payant) donne 30 jours de 2XP PK.
+  - Le lot « 300 PK » est retiré (2026-11-09), ce qui supprime le chemin le plus direct.
+  - Mais une boîte mystère payée en PA peut encore donner un 2XP PK, les PA seront vendus en argent réel, et Premium (payant) donne 30 jours de 2XP PK.
   - Il y a donc un chemin argent → hasard → PK → tickets → vraie carte à gagner.
   - C'est exactement ce que la loi appelle une loterie interdite : un sacrifice d'argent, le hasard et un gain réel.
 - **Les défauts que je propose, à valider avec un avocat** :
   - seuls les PA gagnés gratuitement ouvrent une boîte mystère, pas ceux achetés ;
-  - ou bien le lot « 300 PK » est remplacé par un lot sans lien avec les tickets, par exemple un style d'avatar.
+  - ou bien les lots 2XP PK sont remplacés par des lots sans lien avec les tickets, par exemple un style d'avatar.
 - **Les stores** : les chances de la boîte mystère sont affichées dans l'app, ce qu'Apple et Google exigent pour les achats au hasard.
 
 ## 6. Pour ne pas lasser le joueur
@@ -149,7 +185,7 @@ Chaque proposition est classée selon ce qu'elle rend durable (principe 7 de `CL
 | 2 | **Paliers Grand maître I, II, III** | Plus de « trou » de 8 mois | Rétention entre le 4e et le 12e mois |
 | 3 | **Objectifs de collection** : compléter une extension ou une famille de Pokémon dans son classeur → badge et PA | Relie le jeu à la valeur de la collection, ce qu'un concurrent ne copie pas en un jour | Cartes ajoutées par joueur et par mois |
 | 4 | **Événements datés** : week-end 2XP, semaine d'un légendaire, sortie d'une extension (page Sorties) | Donne une raison de revenir à une date précise | Connexions pendant l'événement |
-| 5 | **Calendrier de connexion** : boîte mystère offerte au 7e jour d'affilée | Prolonge la série des PA du jour | Séries de 7 jours |
+| 5 | **Calendrier de connexion** : boîte mystère offerte au 7e jour d'affilée — **fait le 2026-11-09** | Prolonge la série des PA du jour | Séries de 7 jours |
 | 6 | **Shiny** (déjà en attente) | Rejouer le Pokédex une fois fini | Pokédex shiny débloqués |
 | 7 | **Parrainage** (en attente) et classement entre amis | Croissance sans publicité | Inscriptions venues d'un parrain |
 
@@ -157,7 +193,7 @@ Chaque proposition est classée selon ce qu'elle rend durable (principe 7 de `CL
 
 ## 7. Ce que j'attends de toi
 
-1. La nouvelle courbe des grades (§3) : oui ou non.
-2. La boîte mystère : PA gratuits seulement, ou lot « 300 PK » remplacé (§5).
+1. Les paliers des grades du §3 bis (ils remplacent la courbe du §3) : « go » ou changements.
+2. La boîte mystère : PA gratuits seulement, ou lots 2XP PK remplacés (§5).
 3. Ta part du serveur à compter dans les coûts (0 € ou un montant).
 4. Les propositions anti-lassitude à lancer (§6).

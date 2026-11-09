@@ -1274,7 +1274,7 @@
 <h3><img src="img/brand/pa.svg" alt="" width="22" height="22">Points d’Aura (PA)</h3>
 <p class="pkm-rules-note">Chaque jour dès minuit, touche ton solde de PA pour récupérer tes PA : ils montent avec les jours d’affilée.</p>
 <div class="pkm-rules-streak"><sc-for list="{{ legal.pk.streak }}" as="lrs" hint-placeholder-count="5"><div class="{{ lrs.cls }}"><b>{{ lrs.pa }}</b><span>{{ lrs.day }}</span></div></sc-for></div>
-<p class="pkm-rules-note">Un jour sans les récupérer : la série reprend à +30 PA. Les PA débloquent les Pokémon du Pokédex :</p>
+<p class="pkm-rules-note">Une boîte mystère offerte tous les 7 jours d’affilée. Un jour sans les récupérer : retour à +40 PA ; deux jours : +20 PA. Les PA débloquent les Pokémon du Pokédex :</p>
 <div class="pkm-rules-evo"><sc-for list="{{ legal.pk.evo }}" as="lrv" hint-placeholder-count="3"><div><span>{{ lrv.label }}</span><b>{{ lrv.pa }}</b></div></sc-for></div>
 </section>
 <section aria-label="PK shop" class="pkm-rules-card">
@@ -1704,6 +1704,8 @@
 <div class="pkm-my-head"><span class="pkm-my-boxwrap" aria-hidden="true"><i class="pkm-my-halo"></i><i class="pkm-my-spark pkm-my-spark-1"></i><i class="pkm-my-spark pkm-my-spark-2"></i><i class="pkm-my-spark pkm-my-spark-3"></i><svg viewBox="0 0 120 120" class="pkm-my-svg" aria-hidden="true"><g class="pkm-my-body"><rect x="18" y="52" width="84" height="60" rx="8" class="pkm-my-side"></rect><rect x="52" y="52" width="16" height="60" class="pkm-my-ribbon"></rect><text x="60" y="97" text-anchor="middle" class="pkm-my-q">?</text></g><g class="pkm-my-lid"><rect x="12" y="38" width="96" height="18" rx="6" class="pkm-my-top"></rect><rect x="52" y="38" width="16" height="18" class="pkm-my-ribbon"></rect><path d="M60 38c-6-14-26-16-24-4 1 6 14 6 24 4zM60 38c6-14 26-16 24-4-1 6-14 6-24 4z" class="pkm-my-bow"></path><circle cx="60" cy="37" r="4.5" class="pkm-my-knot"></circle></g></svg></span>
 <div class="pkm-my-txt"><h2>{{ xp.head }}</h2><p>{{ xp.sub }}</p><b class="pkm-shop-price"><img src="img/brand/pa.svg" alt="" width="24" height="24">{{ xp.price }}<small>PA</small></b></div></div>
 <sc-if value="{{ xp.on }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-xp-live"><b>2XP PK actif</b> · encore {{ xp.left }} · jusqu’à {{ xp.end }}</p></sc-if>
+<sc-if value="{{ xp.paOn }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-xp-live pkm-xp-live-pa"><b>2XP PA actif</b> · tes PA du jour sont doublés encore {{ xp.paLeft }}</p></sc-if>
+<sc-if value="{{ xp.hasFree }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ xp.openFree }}" aria-disabled="{{ xp.busy }}" class="pkm-tks-buy pkm-my-free">🎁 {{ xp.freeLabel }}</button></sc-if>
 <sc-if value="{{ xp.idle }}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{ xp.can }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ xp.openAsk }}" class="pkm-tks-buy pkm-my-buy">{{ xp.buyLabel }}</button></sc-if>
 <sc-if value="{{ xp.miss }}" hint-placeholder-val="{{ false }}"><p class="pkm-xp-miss">{{ xp.missText }}</p></sc-if>
@@ -1711,7 +1713,12 @@
 <sc-if value="{{ xp.ask }}" hint-placeholder-val="{{ false }}"><div class="pkm-xp-ask" role="group" aria-label="Confirmer la boîte mystère"><p>{{ xp.confirmText }}</p>
 <div class="pkm-tks-two"><button type="button" onClick="{{ xp.cancel }}" class="pkm-pas-cancel">Annuler</button><button type="button" onClick="{{ xp.buy }}" aria-disabled="{{ xp.busy }}" class="pkm-tks-buy">Ouvrir</button></div></div></sc-if>
 <button type="button" onClick="{{ xp.toggleOdds }}" aria-expanded="{{ xp.oddsOpen }}" class="pkm-my-oddsbtn">{{ xp.oddsLabel }}</button>
-<sc-if value="{{ xp.oddsOpen }}" hint-placeholder-val="{{ false }}"><ul class="pkm-my-odds"><sc-for list="{{ xp.lots }}" as="myl" hint-placeholder-count="8"><li><span>{{ myl.label }}<sc-if value="{{ myl.owned }}" hint-placeholder-val="{{ false }}"><small> · {{ myl.ownedText }}</small></sc-if></span><b>{{ myl.pct }}</b></li></sc-for></ul></sc-if>
+<sc-if value="{{ xp.oddsOpen }}" hint-placeholder-val="{{ false }}"><ul class="pkm-my-odds"><sc-for list="{{ xp.lots }}" as="myl" hint-placeholder-count="8"><li><span class="pkm-my-ico" aria-hidden="true">
+<sc-if value="{{ myl.isXp }}" hint-placeholder-val="{{ false }}"><span class="{{ myl.tone }}"><i class="pkm-xp-halo"></i><img src="img/brand/pk.svg" alt="" class="pkm-xp-gem pkm-xp-gem2"><i class="pkm-xp-orbit"><b></b><b></b><b></b></i><img src="img/brand/pk.svg" alt="" class="pkm-xp-gem"><b class="pkm-xp-tag"><svg width="34" height="20" viewBox="0 0 34 20"><text x="17" y="16.3" text-anchor="middle">2XP</text></svg></b><span class="pkm-xp-days">{{ myl.days }}</span></span></sc-if>
+<sc-if value="{{ myl.isXpPa }}" hint-placeholder-val="{{ false }}"><span class="{{ myl.tone }}"><i class="pkm-xp-halo"></i><img src="img/brand/pa.svg" alt="" class="pkm-xp-gem pkm-xp-gem2"><i class="pkm-xp-orbit"><b></b><b></b><b></b></i><img src="img/brand/pa.svg" alt="" class="pkm-xp-gem"><b class="pkm-xp-tag"><svg width="34" height="20" viewBox="0 0 34 20"><text x="17" y="16.3" text-anchor="middle">2XP</text></svg></b><span class="pkm-xp-days">{{ myl.days }}</span></span></sc-if>
+<sc-if value="{{ myl.isScan }}" hint-placeholder-val="{{ false }}"><span class="pkm-my-ico-scan"><svg viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"></path><rect x="8" y="7" width="8" height="10" rx="1"></rect></svg><b>+20</b></span></sc-if>
+<sc-if value="{{ myl.isPoke }}" hint-placeholder-val="{{ false }}"><img src="{{ myl.img }}" alt="" class="pkm-my-ico-poke"></sc-if>
+</span><span class="pkm-my-lbl">{{ myl.label }}<sc-if value="{{ myl.owned }}" hint-placeholder-val="{{ false }}"><small> · {{ myl.ownedText }}</small></sc-if></span><b>{{ myl.pct }}</b></li></sc-for></ul></sc-if>
 </section>
 <sc-for list="{{ pks.items }}" as="si" hint-placeholder-count="1">
 <sc-if value="{{ si.hasHead }}" hint-placeholder-val="{{ false }}"><div class="pkm-shop-head"><h2>{{ si.head }}</h2><sc-if value="{{ si.hasHeadSub }}" hint-placeholder-val="{{ false }}"><p>{{ si.headSub }}</p></sc-if></div></sc-if>

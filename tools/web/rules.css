@@ -106,3 +106,8 @@
 .pkm-rules-tkbox .pkm-shop-ticket::before, .pkm-rules-tkbox .pkm-shop-ticket::after { width: 10px; height: 10px; margin-top: -5px; border-width: 2px; background: #0B1120; }
 .pkm-rules-tkbox .pkm-shop-ticket::before { left: -6px; } .pkm-rules-tkbox .pkm-shop-ticket::after { right: -6px; }
 .pkm-rules-tkbox .pkm-shop-ticket-in { font-size: 8.5px; padding: 1px 2px; border-width: 1.5px; }
+/* 7 paliers de PA du jour (2026-11-09). */
+.pkm-rules-streak { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.pkm-rules-day { font-size: 10px; }
+.pkm-rules-day b { font-size: 13.5px; }
+.pkm-rules-day:nth-child(1) { height: 44px; } .pkm-rules-day:nth-child(2) { height: 50px; } .pkm-rules-day:nth-child(3) { height: 56px; } .pkm-rules-day:nth-child(4) { height: 62px; } .pkm-rules-day:nth-child(5) { height: 68px; } .pkm-rules-day:nth-child(6) { height: 74px; } .pkm-rules-day:nth-child(7) { height: 80px; }

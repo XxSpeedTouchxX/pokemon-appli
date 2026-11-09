@@ -88,7 +88,7 @@
       ['Sans valeur', 'Les PK ne s’achètent pas, ne se vendent pas, ne s’échangent pas entre joueurs et ne se convertissent pas en argent. Ils n’ont aucune valeur en euros.'],
       ['Gains et jeux', 'Montants, chances et délais selon ton grade : voir les cartes ci-dessus. Les tirages sont faits au hasard par le serveur de Dropicards, qui tient tes soldes.'],
       ['PK shop et tirage au sort', 'Prix, grades demandés et dates des tirages : affichés dans le PK shop. Un tirage par mois pour chaque ticket, le 1er à 20 h (heure de Paris), avec une carte à gagner que tu choisis à l’achat du ticket (Bronze : ultra rare ; Argent : AR ; Or : ALT) ; un seul ticket de chaque catégorie par mois et par compte ; un seul gagnant par tirage. Achats directs en quantité limitée (10 boosters et 3 items rares par mois, 1 ETB tous les 2 mois), réassort le 1er du mois à 20 h, un achat direct par compte et par mois. Chaque tirage suit un règlement publié avant sa date. Les tickets et lots sont disponibles 7 jours après la confirmation de ton adresse e-mail ; une pièce d’identité est demandée au gagnant avant l’envoi.'],
-      ['Boîte mystère', 'Au PK shop, 300 PA. Lots et chances : 2XP PK pendant 3 jours (25 %), 7 jours (15 %) ou 10 jours (10 %), 300 PK (15 %), 20 scans bonus (20 %), Kyogre, Groudon ou Rayquaza (5 % chacun). Un Pokémon déjà débloqué n’est jamais redonné : le tirage est refait parmi les autres lots. Les scans bonus se gardent et s’ajoutent par 20 quand les scans du jour sont finis.'],
+      ['Boîte mystère', 'Au PK shop, 300 PA. Lots et chances : 2XP PK pendant 3 jours (25 %), 7 jours (15 %) ou 10 jours (10 %), 2XP PA pendant 7 jours (15 % ; PA du jour doublés, jamais pour un abonné Premium dont les PA sont déjà doublés), 20 scans bonus (20 %), Kyogre, Groudon ou Rayquaza (5 % chacun). Un Pokémon déjà débloqué n’est jamais redonné : le tirage est refait parmi les autres lots. Les scans bonus se gardent et s’ajoutent par 20 quand les scans du jour sont finis.'],
       ['Évolution', 'Les montants, les taux, les prix et ces règles peuvent évoluer.']
     ] }
   };
@@ -140,7 +140,8 @@
       coinWin: '+' + GM_COIN_WIN + ' PK',
       grades: PF_GRADES.map((g, i) => ({ name: g.name, me: i === gi, img: 'img/grades/grade-' + (i + 1) + '.svg', booster: g.boosterH + ' h', coin: g.coinH ? g.coinH + ' h' : '—', scans: legalNum(g.scans),
         cls: 'pkm-rules-row' + (i === gi ? ' pkm-rules-me' : ''), aria: g.name + (i === gi ? ', ton grade' : '') + ' : booster toutes les ' + g.boosterH + ' h, ' + (g.coinH ? 'pièce toutes les ' + g.coinH + ' h' : 'pièce fermée') + ', ' + g.scans + ' scans par jour' })),
-      streak: PaCore.GAIN.map((v, i) => ({ day: i === 4 ? 'J5 et +' : 'J' + (i + 1), pa: '+' + v, cls: 'pkm-rules-day' + (Math.min(streak, 5) === i + 1 ? ' pkm-rules-today' : '') + (i < Math.min(streak, 5) ? ' pkm-rules-done' : '') })),
+      // 7 paliers depuis le 2026-11-09 (J7 et + : +80 PA, boîte offerte tous les 7 jours).
+      streak: PaCore.GAIN.map((v, i) => { const L = PaCore.GAIN.length; return { day: i === L - 1 ? 'J' + L + ' et +' : 'J' + (i + 1), pa: '+' + v, cls: 'pkm-rules-day' + (Math.min(streak, L) === i + 1 ? ' pkm-rules-today' : '') + (i < Math.min(streak, L) ? ' pkm-rules-done' : '') }; }),
       // Prix fixés Pokémon par Pokémon par le porteur (2026-11-01, PA_PRICES) : fourchette par catégorie, lue dans les prix.
       evo: legalEvoRows(),
       // Tickets (2026-11-08, porteur) : le ticket Bronze, Argent ou Or à la place de la gemme des PK.

@@ -21,7 +21,7 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 
 ## Boîte mystère, scans bonus, un ticket par mois, Premium à 6,90 € (2026-11-09, porteur)
 
-- Boîte mystère (`xppk.js`, `MY_LOTS`, `myOpen`, `myReveal`) : rubrique du PK shop à la place des offres de 2XP, boîte cadeau dessinée en SVG (classes `pkm-my-*`, `games.css`), ouverture animée, lots et chances dépliables ; serveur `open_mystery_box` (019), sinon tirage sur l'appareil (`window.__myLot` pour les tests).
+- Boîte mystère (`xppk.js`, `MY_LOTS`, `myOpen`, `myReveal`) : rubrique du PK shop à la place des offres de 2XP, boîte cadeau dessinée en SVG (classes `pkm-my-*`, `games.css`), ouverture animée, lots et chances dépliables ; serveur `open_mystery_box` (019), sinon tirage sur l'appareil (`window.__myLot` pour les tests). Depuis le 2026-11-09 : logo à côté de chaque lot (`.pkm-my-ico` : double gemme, double goutte des PA, scanner, Pokémon), lot 2XP PA 7 jours (`paXpUntil`), ouverture façon vidéo du porteur (classes `pkm-mx-*` : chute, sauts, écrasement, éclair, écran coloré du lot), boîte offerte (`myFree`, `open_gift_box`). PA du jour (`pa-core.js`) : 20 à 80, boîte offerte tous les 7 jours (`paRun`), jour manqué → J3, deux → J1.
 - Scans bonus (`scan.js`, `scanBonusUse`) : compteur `.pkm-scan-bonus` à côté des scans du jour, +20 quand ceux du jour sont finis (`scanExtra`).
 - PK shop (`pkshop.js`) : un ticket par catégorie et par mois (`shopBought`, « Ticket déjà acheté »), barre des tickets retirée, ETB « 1 article disponible jusqu'au … ».
 - Premium (`premium.js`) : 6,90 € et 69,90 €, avantage « Soutenir Dropicards » (`pkm-prem-heart`, `premium.css`). Fiche du scan jamais plus haute que l'écran (`games.css`). Tests `e2e/t-xppk.mjs`, `e2e/t-lots.mjs`.

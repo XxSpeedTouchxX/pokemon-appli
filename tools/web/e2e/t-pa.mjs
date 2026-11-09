@@ -46,15 +46,15 @@ const balCol = await paSheet.locator('.pkm-pa-sheet-bal b').evaluate(b => getCom
 ok('Mes PA : solde en blanc (' + balCol + ')', balCol === 'rgb(255, 255, 255)');
 await page.locator('section[aria-label="Mes PA"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
 const c = await day('2026-11-03'); ok('3e jour : +40 PA (' + c.pa + ')', c.pa === 90 && c.streak === 3);
-// Un jour sans récupérer (le 4) : la série reprend à +30 PA le 5.
-const d = await day('2026-11-05'); ok('un jour manqué : reprise à +30 PA (' + d.pa + ')', d.aria && /30 PA à récupérer/.test(d.aria) && d.pa === 120 && d.streak === 2);
+// Un jour sans récupérer (le 4) : palier J3 (+40 PA) le 5 (2026-11-09).
+const d = await day('2026-11-05'); ok('un jour manqué : palier J3, +40 PA (' + d.pa + ')', d.aria && /40 PA à récupérer/.test(d.aria) && d.pa === 130 && d.streak === 3);
 // Ouvrir sans récupérer : rien n'est crédité, les PA attendent le lendemain d'ouverture.
 await page.goto(E2E + '/?today=2026-11-06', { waitUntil: 'load' }); await page.waitForTimeout(900);
 await pill.click(); await page.waitForTimeout(400);
 await page.screenshot({ path: shot('pa-du-jour.png') });
 await sheet.locator('xpath=..').locator('button[aria-label="Fermer"]').first().click({ position: { x: 10, y: 10 } }); await page.waitForTimeout(300);
-ok('fermer sans récupérer : rien de crédité, pastille gardée', (await saved()).pa === 120 && !(await sheet.isVisible().catch(() => false)) && await dot.count() > 0);
-ok('PA dans l’en-tête : ' + (await pill.innerText()).replace(/\s+/g, ' '), /120\s*PA/.test(await pill.innerText()));
+ok('fermer sans récupérer : rien de crédité, pastille gardée', (await saved()).pa === 130 && !(await sheet.isVisible().catch(() => false)) && await dot.count() > 0);
+ok('PA dans l’en-tête : ' + (await pill.innerText()).replace(/\s+/g, ' '), /130\s*PA/.test(await pill.innerText()));
 await page.screenshot({ path: shot('pa-entete.png'), clip: { x: 0, y: 0, width: 390, height: 120 } });
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');

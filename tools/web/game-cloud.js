@@ -77,7 +77,9 @@
       // Animation d'origine, avec le gain et la série donnés par le serveur : la veille et la série d'avant sont posées
       // pour que le calcul de l'appareil (PaCore) retombe exactement sur la réponse du serveur.
       const yday = new Date(Date.parse(paToday()) - 86400000).toISOString().slice(0, 10);
-      this.setState({ pa: gcPa(this.st(), (r.pa | 0) - (r.gain | 0)), paDay: r.streak > 1 ? yday : '', paStreak: Math.max(0, r.streak - 1) });
+      // Série de jours d'affilée (run) et boîte offerte : posées de même (019 ; sans 019, run vaut la série).
+      const run = r.run !== undefined ? r.run | 0 : r.streak | 0;
+      this.setState({ pa: gcPa(this.st(), (r.pa | 0) - (r.gain | 0)), paDay: r.streak > 1 || run > 1 ? yday : '', paStreak: Math.max(0, r.streak - 1), paRun: Math.max(0, run - 1) });
       gcBasePaClaim.call(this);
       setTimeout(() => this.gcSync(), 2500);
     }, e => { gcPaBusy = false; this.gcFail(e, { paClaim: false }); });
