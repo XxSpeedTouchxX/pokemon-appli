@@ -4,4 +4,4 @@
 
 "sealed":{"checked":"2026-11-09T00:08:14Z","ok":true,"upstream":"2026-11-07T02:45:48+0100","count":63,"previous":63,"delta":0,"warnings":["prix du 2026-11-07 : guide Cardmarket non renouvelé depuis 46 h"],"errors":[],"details":{"priced":58,"pricedBefore":58,"days":31}},
 
-"stores":{"checked":"2026-11-02T11:44:47Z","ok":true,"upstream":"2026-11-02","count":4257,"previous":4228,"delta":29,"warnings":[],"errors":[],"details":{"regions":{"11":611,"24":177,"27":212,"28":244,"32":344,"44":367,"52":267,"53":273,"75":459,"76":412,"84":523,"93":335,"94":33}}}}
+"stores":{"checked":"2026-11-09T12:39:15Z","ok":true,"upstream":"2026-11-02","count":4257,"previous":4257,"delta":0,"warnings":[],"errors":[],"details":{"regions":{"11":611,"24":177,"27":212,"28":244,"32":344,"44":367,"52":267,"53":273,"75":459,"76":412,"84":523,"93":335,"94":33}}}}
