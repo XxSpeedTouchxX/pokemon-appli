@@ -6,3 +6,9 @@ tools/brand/node_modules/
 tools/web/e2e/out/
 .cache/
 tools/web/e2e/bench-vis.json
+
+# App Android (mobile/) : dépendances et clés de signature, jamais dans le dépôt.
+mobile/node_modules/
+*.jks
+*.keystore
+out-android/

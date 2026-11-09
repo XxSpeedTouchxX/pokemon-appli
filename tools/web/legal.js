@@ -7,7 +7,7 @@
   // @legal-data-start (aussi lu par build.mjs pour publier les pages publiques web/mentions-legales.html, cgu.html,
   // cgv.html et confidentialite.html, demandées par Stripe, Google Play et l'App Store)
   const LEGAL_TODO = '[à compléter par l’éditeur avant publication]';
-  const LEGAL_UPDATED = '7 novembre 2026';
+  const LEGAL_UPDATED = '9 novembre 2026';
   const LEGAL_MAIL = 'contact@dropicards.fr';
   // Éditeur (2026-11-07, porteur : « mets-le dans les mentions légales ») : identité et adresse de la micro-entreprise
   // telles que déclarées dans son compte Stripe ; SIRET donné par le porteur le 2026-11-07. Médiateur de la consommation : à donner.
@@ -45,6 +45,7 @@
       ['Notifications', 'L’app ne demande l’autorisation d’afficher des notifications que si tu le choisis (Mon profil › Notifications). Les rappels sont calculés sur ton appareil. Tu peux retirer l’autorisation dans les réglages du navigateur.'],
       ['Services contactés', 'Ton navigateur contacte : dropicards.fr (l’app et ses données) et api.dropicards.fr (ton compte), hébergés par OVHcloud ; assets.tcgdex.net et images.pokemontcg.io (visuels de cartes) ; tiles.openfreemap.org (fond de carte) ; checkout.stripe.com et billing.stripe.com quand tu t’abonnes ou gères ton abonnement. Comme toute page web, ces services voient l’adresse IP de ton appareil.'],
       ['Mineurs', 'Avant 15 ans, demande l’accord d’un parent pour créer un compte. L’accord pour les nouveautés n’est jamais proposé avant 15 ans. L’abonnement Premium demande d’être majeur ou d’avoir l’accord de ses parents.'],
+      ['Supprimer ton compte', 'Dans l’app : Mon profil › « Supprimer mon compte », puis confirmer. Ton compte est effacé tout de suite et pour de bon : adresse e-mail, mot de passe, pseudo, PK, PA, Pokédex, tickets, avatar, journal de tes gains et dépenses, ainsi que ta collection et tes réglages sur l’appareil. Seuls les paiements Premium déjà reçus restent 10 ans, sans lien avec ton compte (obligation comptable). Sans accès à l’app : écris à ' + LEGAL_MAIL + ' depuis l’adresse de ton compte ; il est supprimé sous 30 jours au plus. Un abonnement Premium en cours doit d’abord être arrêté.'],
       ['Tes droits', 'Tu peux demander l’accès à tes données, leur correction, leur suppression (y compris celle de ton compte), leur portabilité, la limitation de leur usage ou t’y opposer, et retirer ton accord pour les nouveautés : écris à ' + LEGAL_MAIL + '. Réponse sous un mois au plus. Ta collection, elle, s’exporte et s’efface depuis l’app. Tu peux aussi saisir la CNIL (www.cnil.fr). Mise à jour le ' + LEGAL_UPDATED + '.']
     ] },
     terms: { label: 'Conditions générales d’utilisation', short: 'Utilisation', blocks: [
@@ -72,6 +73,15 @@
       ['Données personnelles', 'Voir la politique de confidentialité.'],
       ['Réclamations et médiation', 'Écris d’abord à ' + LEGAL_MAIL + ' : réponse sous 7 jours ouvrés. Si le désaccord persiste, tu peux recourir gratuitement à un médiateur de la consommation : ' + LEGAL_TODO + '.'],
       ['Droit applicable', 'Conditions soumises au droit français. En cas de litige, tu peux saisir le tribunal de ton domicile. Mises à jour le ' + LEGAL_UPDATED + '.']
+    ] },
+    // Page publique demandée par Google Play (adresse web pour supprimer son compte), publiée en supprimer-mon-compte.html.
+    delete: { label: 'Supprimer mon compte', short: 'Supprimer mon compte', blocks: [
+      ['Depuis l’app', 'Ouvre Dropicards, touche ton avatar pour ouvrir Mon profil, puis « Supprimer mon compte » et confirme avec « Oui, supprimer définitivement ». C’est immédiat.'],
+      ['Sans l’app', 'Écris à ' + LEGAL_MAIL + ' depuis l’adresse e-mail de ton compte, avec l’objet « Supprimer mon compte ». Ton compte est supprimé sous 30 jours au plus, et tu reçois une confirmation.'],
+      ['Ce qui est supprimé', 'Ton adresse e-mail, ton mot de passe, Face ID ou l’empreinte enregistrés, ton pseudo, ta tranche d’âge, tes PK et PA, le journal de tes gains et dépenses, ton Pokédex, tes tickets, ton avatar et tes styles débloqués, ton classement. Dans l’app, ta collection et tes réglages gardés sur l’appareil sont aussi effacés.'],
+      ['Ce qui est gardé', 'Les paiements de l’abonnement Premium déjà reçus (montant, date, facture) restent 10 ans pour la comptabilité, comme la loi l’exige, sans lien avec ton compte. Rien d’autre.'],
+      ['Abonnement Premium', 'Un abonnement Premium en cours doit d’abord être arrêté : sur dropicards.fr (écran Premium › « Gérer ou arrêter mon abonnement ») ou en écrivant à ' + LEGAL_MAIL + '.'],
+      ['Éditeur', 'Dropicards, ' + LEGAL_WHO + ' · ' + LEGAL_MAIL + '.']
     ] },
     pk: { label: 'PK et jeux', short: 'PK et jeux', blocks: [
       ['Ce que sont les PK', 'Les PK sont une monnaie virtuelle de l’app. Ils servent, dans le PK shop, à obtenir des tickets de tirage au sort ou des lots offerts par l’éditeur. Les Pokémon du Pokédex se débloquent avec des PA.'],

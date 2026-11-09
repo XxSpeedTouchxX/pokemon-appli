@@ -1,0 +1,17 @@
+{
+  "appId": "fr.dropicards.app",
+  "appName": "Dropicards",
+  "webDir": "www",
+  "backgroundColor": "#FFD60A",
+  "server": {
+    "url": "https://dropicards.fr",
+    "androidScheme": "https",
+    "errorPath": "hors-ligne.html"
+  },
+  "android": {
+    "appendUserAgent": "DropicardsApp/Android",
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  }
+}

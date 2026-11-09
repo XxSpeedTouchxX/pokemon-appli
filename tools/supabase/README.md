@@ -21,6 +21,7 @@ Proposition et plan : `docs/24-proposition-espace-admin-et-comptes.md` §4.1 et 
 - `functions/stripe/index.ts` : fonction du serveur (Edge Functions de Supabase) : page de paiement Stripe, page client (gérer ou arrêter), messages signés de Stripe (signature vérifiée, abonnement relu chez Stripe). Sans bibliothèque. Tests `functions/stripe/test.mjs` (30 vérifications, faux Stripe et base locale : `node tools/supabase/functions/stripe/test.mjs`). Installation : `functions/install-stripe.sh` (docs/28 §6).
 - `015_sans_verification.sql` (2026-11-08, porteur) : jeux sans adresse vérifiée ; seul l'achat au PK shop la demande. Tests `tests/test_015.sql`.
 - `016_xp_pk.sql` (2026-11-08, porteur, **à installer par le porteur, après 015**) : « 2XP PK » achetables avec des PA (`pk_boost_offers` : 7 j 400, 14 j 700, 30 j 1 000 PA ; `pk_boosts` écrit par le serveur seulement) ; `buy_pk_boost` (PA débités, journal « boost », jours ajoutés à un 2XP en cours) ; `open_booster` et `flip_coin` doublent les PK pendant un 2XP (`won`, `base`, `boost`) ; `pk_boost_state` pour l'app. Tests `tests/test_016.sql` (20).
+- `017_suppression_compte.sql` (2026-11-09, porteur, **à installer par le porteur, après 016**) : « Supprimer mon compte » (exigé par Google Play et l'App Store) ; `delete_my_account()` efface le compte connecté (connexion, profil, porte-monnaie, Pokédex, tickets, avatar, 2XP, Premium et journal `ledger`, qui ne s'efface jamais autrement) ; paiements Premium gardés sans lien (comptabilité) ; refus pour un compte admin ou un abonnement Premium en cours non arrêté. Tests `tests/test_017.sql` (15).
 - `emails.mjs` : modèles des e-mails en français (`web/email/*.html`, publiés sur dropicards.fr) ; `node tools/supabase/emails.mjs` après une modification.
 - `tests/mock_supabase.sql` et `tests/test_001.sql` : 25 vérifications de sécurité sur un PostgreSQL ordinaire (un compte ne voit que ses données, ne peut pas se donner le rôle admin ni des PK, ne touche pas la collection d'un autre ; l'admin voit tout, avec un motif obligatoire ; journal intouchable ; visiteur non connecté refusé).
 
@@ -58,6 +59,8 @@ psql -d test -f tools/supabase/015_sans_verification.sql
 psql -d test -f tools/supabase/tests/test_015.sql
 psql -d test -f tools/supabase/016_xp_pk.sql
 psql -d test -f tools/supabase/tests/test_016.sql   # 20 de plus (280 en tout)
+psql -d test -f tools/supabase/017_suppression_compte.sql
+psql -d test -f tools/supabase/tests/test_017.sql   # 15 de plus (295 en tout)
 node tools/supabase/tests/avatar_prices.mjs          # prix des styles PRO : app = serveur
 node tools/supabase/functions/notify/test.mjs        # fonction « notify » : 12 vérifications
 node tools/supabase/functions/stripe/test.mjs        # fonction « stripe » : 30 vérifications (base « t7 », port 5499 par défaut)

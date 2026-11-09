@@ -1978,6 +1978,8 @@
 <sc-for list="{{ pf.trainer.pkyList }}" as="pkd" hint-placeholder-count="1"><div class="pkm-tr-row"><span class="pkm-tr-k">{{ pkd.name }}</span><button type="button" class="pkm-pky-del" onClick="{{ pkd.remove }}" aria-label="{{ pkd.aria }}">Retirer</button></div></sc-for>
 <button type="button" class="pkm-pky-add" onClick="{{ pf.trainer.pkyAdd }}">{{ pf.trainer.pkyAddLabel }}</button></sc-if>
 <sc-if value="{{ pf.trainer.cloudOn }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.trainer.cloudAct }}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ pf.trainer.cloudLabel }}</button></sc-if>
+<sc-if value="{{ pf.trainer.delIdle }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.trainer.delOpen }}" class="pkm-acct-del">Supprimer mon compte</button></sc-if>
+<sc-if value="{{ pf.trainer.delAsk }}" hint-placeholder-val="{{ false }}"><div role="alertdialog" aria-label="Supprimer mon compte" class="pkm-acct-del-ask"><p>{{ pf.trainer.delText }}</p><div class="pkm-acct-del-row"><button type="button" onClick="{{ pf.trainer.delGo }}" class="pkm-acct-del-go">{{ pf.trainer.delLabel }}</button><button type="button" onClick="{{ pf.trainer.delCancel }}" class="pkm-acct-del-no">Annuler</button></div></div></sc-if>
 
 </section>
 

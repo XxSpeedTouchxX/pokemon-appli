@@ -33,9 +33,9 @@ ok('règles en images : ' + cards, cards === 'Gagner des PK|Booster PK|Pile ou f
 ok('plus de « Pas un jeu d’argent » ni de texte complet', (await rk.locator('details').count()) === 0 && !/Pas un jeu d’argent|Lire le texte complet/.test(await rk.innerText()));
 await rk.screenshot({ path: shot('legal-regles.png') });
 // Pages publiques (Stripe, Google Play, App Store) : mêmes textes que l'app.
-for (const [f, re] of [['mentions-legales.html', /Nicolas Bouit, entrepreneur individuel[\s\S]*OVH SAS/], ['confidentialite.html', /Brevo[\s\S]*Stripe[\s\S]*CNIL/], ['cgu.html', /pas une plateforme de vente/], ['cgv.html', /49,90 € par an[\s\S]*Droit de rétractation/]]) {
+for (const [f, re] of [['mentions-legales.html', /Nicolas Bouit, entrepreneur individuel[\s\S]*OVH SAS/], ['confidentialite.html', /Brevo[\s\S]*Stripe[\s\S]*CNIL/], ['cgu.html', /pas une plateforme de vente/], ['cgv.html', /49,90 € par an[\s\S]*Droit de rétractation/], ['supprimer-mon-compte.html', /Supprimer mon compte[\s\S]*sous 30 jours[\s\S]*10 ans/]]) {
   const r = await page.goto(E2E + '/' + f, { waitUntil: 'load' });
-  ok('page publique ' + f + ' (' + r.status() + ')', r.status() === 200 && re.test(await page.locator('main').innerText()) && (await page.locator('nav[aria-label="Pages légales"] a').count()) === 3);
+  ok('page publique ' + f + ' (' + r.status() + ')', r.status() === 200 && re.test(await page.locator('main').innerText()) && (await page.locator('nav[aria-label="Pages légales"] a').count()) === 4);
 }
 await page.goto(E2E + '/cgv.html'); await page.screenshot({ path: shot('legal-cgv-page.png'), fullPage: true });
 ok('aucune erreur JS', errors.length === 0);

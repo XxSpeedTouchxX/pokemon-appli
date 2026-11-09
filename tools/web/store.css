@@ -1,0 +1,16 @@
+/* App des stores (store.js, 2026-11-09) : aucune offre payante tant que l'achat intégré n'est pas branché. */
+.pkm-store .pkm-prem-banner,
+.pkm-store .pkm-prem-wrap,
+.pkm-store .pkm-shop-tabs,
+.pkm-store .pkm-pas,
+.pkm-store .pkm-lockw-prem,
+.pkm-store .pkm-lockw-premgo,
+.pkm-store .pkm-av-premgo { display: none !important; }
+
+/* Supprimer mon compte (profile.js, 2026-11-09) : discret, rouge, avec confirmation. */
+.pkm-acct-del { align-self: flex-start; min-height: 40px; padding: 0 4px; border: 0; background: transparent; color: #FF8A8A; font: inherit; font-size: 13.5px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.pkm-acct-del-ask { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 16px; border: 1px solid #7A2A2A; background: #2A1416; }
+.pkm-acct-del-ask p { margin: 0; font-size: 13px; line-height: 1.45; color: #F3F6FC; }
+.pkm-acct-del-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.pkm-acct-del-go { min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: #E5484D; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.pkm-acct-del-no { min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }

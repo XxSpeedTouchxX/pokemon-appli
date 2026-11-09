@@ -114,8 +114,36 @@
         try { await Cloud.resend(ses.email); this.setState({ toast: 'E-mail de vérification renvoyé à ' + ses.email }); } catch (e) { this.setState({ toast: (e && e.message) || CLOUD_ERR.other }); }
         this.flash();
       };
-    } else { r.trainer.cloudOn = false; r.trainer.mailOn = false; }
+      // Supprimer mon compte (2026-11-09, porteur ; obligatoire sur Google Play et l'App Store, docs/23 §2) : en deux temps
+      // (bouton, puis confirmation), le compte est effacé sur le serveur (tools/supabase/017_suppression_compte.sql), puis
+      // tout ce qui est gardé sur cet appareil (collection, réglages, session) ; l'app repart de zéro, sur l'inscription.
+      // Refus du serveur (admin, Premium encore actif) : son message, en français, est montré tel quel.
+      r.trainer.delOn = !!ses;
+      r.trainer.delAsk = !!(ses && s.pfDelAsk);
+      r.trainer.delIdle = !!(ses && !s.pfDelAsk);
+      r.trainer.delLabel = s.pfDelBusy ? 'Suppression…' : 'Oui, supprimer définitivement';
+      r.trainer.delText = 'Ton compte Dropicards sera supprimé pour de bon : adresse, pseudo, PK, PA, Pokédex, tickets, avatar, et ta collection sur cet appareil. Impossible de revenir en arrière.';
+      r.trainer.delOpen = () => this.setState({ pfDelAsk: true });
+      r.trainer.delCancel = () => this.setState({ pfDelAsk: false, pfDelBusy: false });
+      r.trainer.delGo = async () => {
+        if (this.st().pfDelBusy) return;
+        this.setState({ pfDelBusy: true });
+        try { await Cloud.rpc('delete_my_account', {}); } catch (e) {
+          this.setState({ pfDelBusy: false, toast: (e && e.message) || CLOUD_ERR.other }); this.flash(); return;
+        }
+        pfWipe();
+      };
+    } else { r.trainer.cloudOn = false; r.trainer.mailOn = false; r.trainer.delOn = false; r.trainer.delAsk = false; r.trainer.delIdle = false; }
     return r;
+  };
+  // Après la suppression du compte : plus rien de Dropicards sur l'appareil, puis l'app redémarre.
+  const pfWipe = () => {
+    // Plus aucun enregistrement de l'app (persist.js) : sinon l'état en mémoire réécrirait la collection effacée.
+    if (typeof DEVICE === 'object' && DEVICE) { DEVICE.enabled = false; if (DEVICE.timer) { clearTimeout(DEVICE.timer); DEVICE.timer = null; } }
+    try { localStorage.clear(); } catch (e) { /* stockage indisponible */ }
+    try { sessionStorage.clear(); } catch (e) { /* stockage indisponible */ }
+    try { if (window.indexedDB && indexedDB.databases) indexedDB.databases().then(l => l.forEach(d => { if (d.name) indexedDB.deleteDatabase(d.name); })).catch(() => {}); } catch (e) { /* rien à effacer */ }
+    setTimeout(() => { try { location.replace(location.pathname + location.search); } catch (e) { location.reload(); } }, 300);
   };
 
   // ——— Grades (2026-10-14 ; conditions et avantages du 2026-10-28, demande du porteur) ———

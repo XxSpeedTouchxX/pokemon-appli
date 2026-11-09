@@ -1,0 +1,76 @@
+# App Android de Dropicards pour Google Play (2026-11-09, demande du porteur ; mobile/README.md, docs/23).
+# Fabrique le fichier à déposer dans la Play Console (« app bundle », .aab), signé avec la clé d'envoi du porteur
+# (secrets ANDROID_KEYSTORE_B64 et ANDROID_KEYSTORE_PASSWORD, jamais dans le dépôt). Sans ces secrets, le fichier est
+# fabriqué quand même pour vérifier que tout compile, mais il n'est pas signé et Google le refuserait.
+# Lancer : onglet Actions › « App Android (Google Play) » › Run workflow. Le fichier est dans « Artifacts », en bas de
+# la page de la fabrication. Le numéro de version (versionCode) est le numéro de la fabrication : il augmente toujours.
+name: App Android (Google Play)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "Version affichée sur Google Play (ex. 1.0.0)"
+        required: true
+        default: "1.0.0"
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - mobile/**
+      - .github/workflows/android.yml
+
+permissions:
+  contents: read
+
+jobs:
+  aab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Projet Capacitor
+        working-directory: mobile
+        run: |
+          npm ci --no-audit --no-fund
+          npx cap sync android
+      - name: Clé de signature
+        id: key
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KP: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS" ] && [ -n "$KP" ]; then
+            echo "$KS" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/upload.jks"
+            echo "file=$RUNNER_TEMP/upload.jks" >> "$GITHUB_OUTPUT"
+            echo "tag=signe" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Clé de signature absente (secrets ANDROID_KEYSTORE_B64 et ANDROID_KEYSTORE_PASSWORD, mobile/README.md) : fichier NON SIGNÉ, refusé par Google Play."
+            echo "file=" >> "$GITHUB_OUTPUT"
+            echo "tag=NON-SIGNE" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Fabrication de l'app bundle
+        working-directory: mobile/android
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ steps.key.outputs.file }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: ${{ github.event.inputs.version_name || '1.0.0' }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease
+          if [ -n "$ANDROID_KEYSTORE_FILE" ]; then jarsigner -verify app/build/outputs/bundle/release/app-release.aab | tail -1; fi
+          mkdir -p ../../out-android
+          cp app/build/outputs/bundle/release/app-release.aab "../../out-android/Dropicards-${VERSION_NAME}-${VERSION_CODE}-${{ steps.key.outputs.tag }}.aab"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Dropicards-${{ github.event.inputs.version_name || '1.0.0' }}-${{ github.run_number }}-${{ steps.key.outputs.tag }}
+          path: out-android/*.aab
+          retention-days: 30
+          if-no-files-found: error
