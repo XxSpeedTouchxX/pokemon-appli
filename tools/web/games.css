@@ -893,8 +893,10 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-shop-tk-price { font-size: 14px; font-weight: 800; }
 .pkm-shop-tk-every { font-size: 11.5px; color: #9AA8C3; text-align: center; line-height: 1.25; }
 .pkm-shop-tk-n { position: absolute; top: 6px; right: 8px; padding: 1px 7px; border-radius: 999px; background: #5EE0CF; color: #0B1120; font-size: 11.5px; font-weight: 800; }
-.pkm-shop-tk-lock { display: flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 8px 2px 3px; border-radius: 999px; background: rgba(255, 107, 107, 0.16); color: #FFB3B3; font-size: 10.5px; font-weight: 800; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pkm-shop-tk-lock img { flex: none; }
+/* Bulle rouge du grade demandé (2026-11-09, porteur) : un peu plus petite, toujours dans le cadre du ticket (marge de
+   marge de chaque côté) ; le nom du grade passe sur deux lignes plutôt que d'être coupé. */
+.pkm-shop-tk-lock { box-sizing: border-box; display: flex; align-items: center; gap: 3px; max-width: calc(100% - 8px); padding: 2px 6px 2px 2px; border-radius: 12px; background: rgba(255, 107, 107, 0.16); color: #FFB3B3; font-size: 9px; font-weight: 800; letter-spacing: -0.1px; line-height: 1.12; white-space: normal; text-align: left; }
+.pkm-shop-tk-lock img { flex: none; width: 18px; height: 18px; }
 /* Ticket pas encore débloqué (2026-11-06, porteur) : toujours dans sa couleur officielle, seul le cadre change. */
 .pkm-shop-tk-off { border-color: rgba(255, 107, 107, 0.35); }
 .pkm-shop-lockbtn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 4px 16px; border-radius: 999px; border: 1px dashed rgba(255, 138, 138, 0.6); background: rgba(255, 107, 107, 0.1); color: #FFC2C2; font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer; }

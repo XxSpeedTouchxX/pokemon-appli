@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-09 — Scan sans déclencheur, bulles des tickets (demande du porteur)
+
+- **Scan** : bouton rond (déclencheur) retiré : la lecture se fait toute seule quand la carte reste dans le cadre ; un appui forçait une lecture et ouvrait des propositions de cartes au hasard quand le cadre était vide. Import d'une photo et « Aide » gardés.
+- **PK shop** : bulles rouges « grade demandé » des tickets un peu plus petites, toujours dans le cadre du ticket ; le nom du grade passe sur deux lignes au lieu d'être coupé.
+- Cache v169.
+
 ## 2026-11-09 — Scan avec aide illustrée, sablier, « 2XP » centré, visuels de Règne Delta (demande du porteur)
 
 - **Scan** : bulle du haut réduite à « 5 scans disponibles » avec le logo du scan (selon le grade) ; **rien avec Premium** (scans illimités) ; bouton « Carte » retiré ; consigne « Place la carte dans le cadre, bien à plat » déplacée sous le cadre (elle passait devant la bulle sur les petits écrans) ; loupe remplacée par un bouton **« Aide »** : fenêtre « Bien scanner ta carte », 4 astuces illustrées et animées (bon éclairage / flash, pas de reflets, carte qui remplit le cadre, téléphone stable), « J'ai compris » ; la recherche à la main reste dans l'aide.

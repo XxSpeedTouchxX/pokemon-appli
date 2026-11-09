@@ -10,7 +10,7 @@
   const SCAN = {
     gen: 0, on: false, stream: null, video: null, starting: false, idx: null, frames: [], timer: 0, since: 0,
     miss: 0, inv: false, cool: new Map(), coolMsg: '', hasTorch: false, fine: false, back: null, ev: {}, stopWorker: 0,
-    thumb: null, cvLoop: null, cvShot: null, debug: false, inst: null, visFrames: [], visTimer: 0, visSeen: 0
+    thumb: null, cvLoop: null, debug: false, inst: null, visFrames: [], visTimer: 0, visSeen: 0
   };
   try { SCAN.debug = /[?&]debug=scan(&|$)/.test(location.search); } catch (e) { /* adresse sans paramètres */ }
   // Banc d'essai du scan (tools/web/e2e/bench-scan.mjs) : fonctions accessibles avec ?debug.
@@ -286,7 +286,7 @@
     if (!fine && !SCAN.seen && (m.ev.num || m.ev.name)) SCAN.seen = now;
     SCAN.frames.push(cands);
     if (SCAN.frames.length > 12) SCAN.frames.shift();
-    // Lecture fine (déclencheur, photo) : fiche directe si la lecture est sûre, sinon les propositions.
+    // Lecture fine (photo prise ou importée) : fiche directe si la lecture est sûre, sinon les propositions.
     const d = fine ? (ScanCore.decide([cands]).state === 'auto' ? { state: 'auto', ids: cands.map(c => c.id) } : { state: cands.length ? 'ask' : 'wait', ids: cands.map(c => c.id) }) : ScanCore.decide(SCAN.frames);
     if (d.state !== 'wait' && d.ids.length) {
       const ids = d.ids.concat(cands.map(c => c.id).filter(id => d.ids.indexOf(id) < 0)).slice(0, 3);
@@ -316,19 +316,8 @@
   SCAN.say = function (inst, msg) { if (inst.st().scanMsg !== msg) inst.setState({ scanMsg: msg }); };
   // Déclencheur : lecture fine de l'image en cours (deux polarités pour le numéro), propositions même si la carte
   // ne domine pas encore.
-  SCAN.shutter = function (inst) {
-    if (SCAN.fine || inst.st().scanPhase !== 'live' || !SCAN.idx) return;
-    const shot = SCAN.grab('cvShot');
-    if (!shot) return;
-    SCAN.fine = true;
-    SCAN.say(inst, 'Lecture fine…');
-    const look = SCAN.look(shot.canvas, shot.rect, 'Shot');
-    ScanOcr.read(look.src, look.rect, { fine: true, debug: SCAN.debug }).then(read => {
-      SCAN.fine = false;
-      read.vis = look.vis; read.prints = look.prints;
-      if (inst.st().scanPhase === 'live' && !SCAN.consider(inst, read, true)) SCAN.say(inst, 'Rien de lisible : rapproche la carte, évite les reflets, ou prends une photo');
-    }).catch(() => { SCAN.fine = false; });
-  };
+  // Déclencheur retiré (2026-11-09, porteur) : la lecture se fait toute seule quand la carte reste dans le cadre ; un
+  // appui forçait une lecture et ouvrait des propositions au hasard quand le cadre était vide.
   // Photo prise ou importée : pas de cadre ; on lit la carte au centre (format 63 × 88), puis toute la photo.
   SCAN.photo = function (inst, file) {
     const s = inst.st();
@@ -507,7 +496,6 @@
       // Aide (2026-11-08, porteur) : à la place de la loupe, 4 astuces illustrées ; la recherche reste dans l'aide.
       help: !!s.scanHelp, helpOpen: () => this.setState({ scanHelp: true }), helpClose: () => this.setState({ scanHelp: false }),
       helpSearch: () => { this.setState({ scanHelp: false }); this.scanSearch(ev.name || ''); },
-      shutter: () => SCAN.shutter(this), shutterLabel: 'Lecture fine de la carte', shutterOff: !live, shutterOp: live ? '1' : '0.45',
       takePhoto: clickInput('pkm-scan-photo'), importPhoto: clickInput('pkm-scan-file'),
       onFile: e => SCAN.photo(this, e && e.target && e.target.files && e.target.files[0]),
       search: () => this.scanSearch(ev.name || ''),

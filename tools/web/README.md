@@ -28,6 +28,7 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 
 ## Scan : aide et bulle des scans (2026-11-09, porteur)
 
+- Plus de déclencheur (2026-11-09) : lecture automatique seulement ; import d'une photo à gauche, « Aide » à droite.
 - Bulle du haut : « N scans disponibles » (logo du scan), cachée avec Premium ; consigne sous le cadre ; bouton « Aide » (`scan.help`, fenêtre « Bien scanner ta carte », 4 astuces illustrées, `games.css` `.pkm-scanhelp`) à la place de la loupe, recherche à la main dans l'aide. Test `e2e/t-scanhelp.mjs`.
 - Bouton d'attente des jeux : sablier animé (`.pkm-gm-hg`). « 2XP » des offres en SVG (ligne de base fixe).
 

@@ -15,6 +15,7 @@ ok('plus de bouton « Carte » ni d’onglet Scellé', (await page.locator('butt
 const hint = await page.locator('.pkm-scan-hint').boundingBox(), frame = await page.locator('#pkm-scan-frame').boundingBox(), pb = await pill.boundingBox();
 ok('consigne « bien à plat » sous le cadre, la bulle du haut dégagée', !!(hint && frame && pb) && hint.y >= frame.y + frame.height - 1 && pb.y + pb.height <= frame.y);
 ok('loupe retirée, bouton « Aide » en bas à droite', (await page.locator('button[aria-label="Rechercher une carte"]').count()) === 0 && /Aide/.test(await page.locator('.pkm-scan-helpbtn').innerText()));
+ok('plus de déclencheur (lecture automatique)', (await page.locator('button[aria-label="Lecture fine de la carte"]').count()) === 0);
 await page.screenshot({ path: shot('scan-ecran.png') });
 await page.click('.pkm-scan-helpbtn'); await page.waitForTimeout(700);
 const help = page.locator('section[aria-label="Bien scanner une carte"]');
