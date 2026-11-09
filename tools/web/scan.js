@@ -489,8 +489,11 @@
       modeCard: !sealed, modeSealed: sealed,
       cardBg: sealed ? off : on, cardFg: sealed ? offFg : onFg, sealedBg: sealed ? on : off, sealedFg: sealed ? onFg : offFg,
       toCard: () => this.setState({ scanMode: 'card', scanPhase: SCAN_PANELS[ph] ? ph : 'idle', scanCands: [], scanPid: null, scanSheet: false }),
-      leftText: quota.left === Infinity ? 'Illimité' : quota.left + (quota.left > 1 ? ' scans' : ' scan'),
-      leftAria: quota.left === Infinity ? 'Scans illimités avec Premium' : quota.text,
+      // Bulle du haut (2026-11-08, porteur) : seulement « 5 scans disponibles » avec le logo du scan ; rien avec Premium
+      // (scans illimités) ni pendant la recherche du scellé.
+      showLeft: !sealed && quota.left !== Infinity, noLeft: sealed || quota.left === Infinity,
+      leftText: Math.max(0, quota.left) + (quota.left > 1 ? ' scans disponibles' : ' scan disponible'),
+      leftAria: quota.text,
       hasTorch: !sealed && SCAN.hasTorch && !panel, noTorch: sealed || !SCAN.hasTorch || !!panel,
       torchOn: !!s.scanTorch, torchLabel: s.scanTorch ? 'Éteindre la lampe' : 'Allumer la lampe',
       torchBg: s.scanTorch ? 'var(--pkm-accent)' : 'rgba(var(--pkm-ink-rgb), 0.66)', torchFg: s.scanTorch ? 'var(--pkm-on-accent)' : 'var(--pkm-white)',
@@ -500,7 +503,10 @@
       hint: quota.left > 0 ? 'Place la carte dans le cadre, bien à plat' : 'Plus de scan aujourd’hui',
       reading: live || ph === 'photo',
       status: status, hasStatus: !panel || !!s.scanMsg, dot: panel ? 'var(--pkm-orange)' : live ? 'var(--pkm-green)' : 'var(--pkm-t3)',
-      count: (n > 0 ? n + (n > 1 ? ' articles ajoutés depuis l’ouverture' : ' article ajouté depuis l’ouverture') : 'Lecture sur ton téléphone : aucune image n’est envoyée') + ' · ' + quota.text,
+      count: n > 0 ? n + (n > 1 ? ' articles ajoutés depuis l’ouverture' : ' article ajouté depuis l’ouverture') : 'Lecture sur ton téléphone : aucune image n’est envoyée',
+      // Aide (2026-11-08, porteur) : à la place de la loupe, 4 astuces illustrées ; la recherche reste dans l'aide.
+      help: !!s.scanHelp, helpOpen: () => this.setState({ scanHelp: true }), helpClose: () => this.setState({ scanHelp: false }),
+      helpSearch: () => { this.setState({ scanHelp: false }); this.scanSearch(ev.name || ''); },
       shutter: () => SCAN.shutter(this), shutterLabel: 'Lecture fine de la carte', shutterOff: !live, shutterOp: live ? '1' : '0.45',
       takePhoto: clickInput('pkm-scan-photo'), importPhoto: clickInput('pkm-scan-file'),
       onFile: e => SCAN.photo(this, e && e.target && e.target.files && e.target.files[0]),

@@ -90,3 +90,5 @@ python3 -m unittest discover -s tools/sealed -p "test_*.py"
 
 - les conditions d'utilisation des fichiers publics Cardmarket (points V1 à V6 de `docs/05-sources-donnees-prix.md`) ;
 - l'usage des visuels de la galerie Pokémon. Les noms et visuels sont autorisés par le porteur (CLAUDE.md §4), avec la mention de non-affiliation.
+
+- 2026-11-09 : guide des prix refusé → prix de la veille gardés, mais liste des produits et visuels mis à jour (`build_sealed.py` écrit le fichier et sort en erreur ; `check_data.py` n'en fait qu'un avertissement si la date des prix est inchangée).

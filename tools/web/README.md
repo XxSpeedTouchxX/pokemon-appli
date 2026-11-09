@@ -26,6 +26,11 @@ Il n'y a ni compte ni serveur. La collection est **enregistrée sur l'appareil**
 - 2XP PK (`xppk.js`) : rubrique du PK shop, 3 offres en PA, gains doublés au Booster PK et à pile ou face (serveur : `016_xp_pk.sql`) ; 3 visuels : `?xpvis=1` (gemme rayonnante), `2` (sablier), `3` (double gemme, choix du porteur, par défaut). Bouton d'attente des jeux : un appui le fait vibrer, sans message. Test `e2e/t-xppk.mjs`.
 - Fenêtre « Accès verrouillé » bloquante : aucun geste hors de la fenêtre tant qu'elle est ouverte (`pkshop.js`), fond qui ne la ferme plus.
 
+## Scan : aide et bulle des scans (2026-11-09, porteur)
+
+- Bulle du haut : « N scans disponibles » (logo du scan), cachée avec Premium ; consigne sous le cadre ; bouton « Aide » (`scan.help`, fenêtre « Bien scanner ta carte », 4 astuces illustrées, `games.css` `.pkm-scanhelp`) à la place de la loupe, recherche à la main dans l'aide. Test `e2e/t-scanhelp.mjs`.
+- Bouton d'attente des jeux : sablier animé (`.pkm-gm-hg`). « 2XP » des offres en SVG (ligne de base fixe).
+
 ## Identité Dropicards
 
 - **Logo :** dans l'en-tête, le logo exact fourni par le porteur (son fichier, fond rendu transparent : `tools/brand/`, voir son README), 196 px de large au plus (réduit sur les petits écrans pour rester centré) ; la pastille « Marché FR » devient « FR ». Les icônes et le logo de « Mon classeur » sont redessinés en SVG.

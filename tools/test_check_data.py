@@ -79,6 +79,13 @@ class Sealed(unittest.TestCase):
         e = C.check("sealed", sealed(9, prices="2026-10-09T23:00:00+0200"), sealed(9), NOW)
         self.assertTrue(any("non renouvelé" in x for x in e["errors"]))
 
+    def test_stale_guide_kept_from_yesterday(self):
+        # 2026-11-09 : prix de la veille gardés (même date) : avertissement seulement, liste et visuels publiés.
+        old = "2026-10-09T23:00:00+0200"
+        r = C.check("sealed", sealed(9, prices=old), sealed(9, prices=old), NOW)
+        self.assertTrue(r["ok"])
+        self.assertTrue(any("non renouvelé" in w for w in r["warnings"]))
+
     def test_priced_drop_and_gap(self):
         e = C.check("sealed", sealed(5, days=("2026-10-04", "2026-10-06")), sealed(9), NOW)
         self.assertTrue(any("produits cotés" in x for x in e["errors"]))

@@ -152,8 +152,12 @@ class Guard(unittest.TestCase):
                     mock.patch("sys.stdout", io.StringIO()):
                 with self.assertRaises(SystemExit) as e:
                     build_sealed.main()
-            self.assertIn("n'est pas modifié", str(e.exception.code))
-            self.assertEqual(out.read_text("utf-8"), before)
+            # Guide refusé (2026-11-09) : prix de la veille gardés, mais liste et visuels mis à jour.
+            self.assertIn("prix de la veille gardés", str(e.exception.code))
+            after = json.loads(out.read_text("utf-8"))
+            self.assertNotEqual(out.read_text("utf-8"), before)
+            self.assertNotEqual(after["prices"], "2026-01-01T02:00:00+0100")  # le guide refusé n'est pas daté comme utilisé
+            self.assertEqual(after["count"], len(json.loads(build_sealed.PRODUCTS.read_text("utf-8"))["products"]))
 
 
 if __name__ == "__main__":

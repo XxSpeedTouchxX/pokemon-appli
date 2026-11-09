@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-09 — Scan avec aide illustrée, sablier, « 2XP » centré, visuels de Règne Delta (demande du porteur)
+
+- **Scan** : bulle du haut réduite à « 5 scans disponibles » avec le logo du scan (selon le grade) ; **rien avec Premium** (scans illimités) ; bouton « Carte » retiré ; consigne « Place la carte dans le cadre, bien à plat » déplacée sous le cadre (elle passait devant la bulle sur les petits écrans) ; loupe remplacée par un bouton **« Aide »** : fenêtre « Bien scanner ta carte », 4 astuces illustrées et animées (bon éclairage / flash, pas de reflets, carte qui remplit le cadre, téléphone stable), « J'ai compris » ; la recherche à la main reste dans l'aide.
+- **Jeux** : sablier du bouton rouge redessiné (verre, sable doré qui coule, filet de sable, retournement, halo rouge), plus grand ; texte sur une ligne.
+- **2XP PK** : « 2XP » dessiné (ligne de base fixe) pour être centré pareil sur tous les téléphones (écart mesuré : un quart de pixel).
+- **Règne Delta** : l'ETB et le display avaient leurs visuels depuis le 8 novembre, mais le catalogue scellé n'était pas refait (guide des prix Cardmarket refusé, non renouvelé depuis le 7 novembre) ; le lot de boosters et le Boîtier Stratégies et Combats manquaient aussi au catalogue. Désormais, un guide refusé garde les prix de la veille mais met à jour la liste et les visuels (`build_sealed.py`, `check_data.py`) ; catalogue refait.
+- Cache v168.
+
 ## 2026-11-08 — 2XP PK : double gemme choisie ; bouton d'attente sans message (porteur)
 
 - Visuel des 2XP PK : **la double gemme (3), choix du porteur**, par défaut ; « 2XP » centré dans son encadré (les autres pour essai : `?xpvis=1|2`).

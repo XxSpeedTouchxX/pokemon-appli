@@ -1490,10 +1490,8 @@
 <button type="button" onClick="{{ scan.close }}" aria-label="Fermer le scan" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.16); border-radius: 22px; background: rgba(var(--pkm-ink-rgb), 0.66); color: var(--pkm-white); display: flex; align-items: center; justify-content: center; cursor: pointer">
 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
 </button>
-<div role="group" aria-label="Que scannes-tu ?" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 3px; border-radius: 999px; background: rgba(var(--pkm-ink-rgb), 0.66); border: 1px solid rgba(var(--pkm-hl-rgb), 0.16)">
-<button type="button" onClick="{{ scan.toCard }}" aria-pressed="{{ scan.modeCard }}" style="height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: {{ scan.cardBg }}; color: {{ scan.cardFg }}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Carte</button>
-<span role="status" aria-label="{{ scan.leftAria }}" style="height: 44px; padding: 0 16px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--pkm-t1); font-size: 14px; font-weight: 700; white-space: nowrap"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"></path></svg>{{ scan.leftText }}</span>
-</div>
+<sc-if value="{{ scan.showLeft }}" hint-placeholder-val="{{ true }}"><span role="status" aria-label="{{ scan.leftAria }}" class="pkm-scan-left"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"></path></svg>{{ scan.leftText }}</span></sc-if>
+<sc-if value="{{ scan.noLeft }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="flex: 1"></span></sc-if>
 <sc-if value="{{ scan.hasTorch }}" hint-placeholder-val="{{ false }}">
 <button type="button" onClick="{{ scan.torch }}" aria-label="{{ scan.torchLabel }}" aria-pressed="{{ scan.torchOn }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.16); border-radius: 22px; background: {{ scan.torchBg }}; color: {{ scan.torchFg }}; display: flex; align-items: center; justify-content: center; cursor: pointer">
 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"></path></svg>
@@ -1507,8 +1505,7 @@
 <sc-if value="{{ scan.modeCard }}" hint-placeholder-val="{{ true }}">
 <div style="position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 0 16px">
 <sc-if value="{{ scan.showFrame }}" hint-placeholder-val="{{ true }}">
-<span style="position: relative; z-index: 2; max-width: 100%; padding: 6px 12px; border-radius: 999px; background: rgba(var(--pkm-ink-rgb), 0.7); color: var(--pkm-t1); font-size: 13px; font-weight: 600; text-align: center">{{ scan.hint }}</span>
-<div id="pkm-scan-frame" style="position: relative; flex: none; height: min(52vh, 460px, calc(82vw / 0.716)); height: min(52dvh, 460px, calc(82vw / 0.716)); aspect-ratio: 63 / 88; border-radius: 18px; box-shadow: 0 0 0 200vmax rgba(var(--pkm-scrim-rgb), 0.5)">
+<div id="pkm-scan-frame" style="position: relative; flex: none; height: min(48vh, 440px, calc(80vw / 0.716)); height: min(48dvh, 440px, calc(80vw / 0.716)); aspect-ratio: 63 / 88; border-radius: 18px; box-shadow: 0 0 0 200vmax rgba(var(--pkm-scrim-rgb), 0.5)">
 <span aria-hidden="true" style="position: absolute; left: -3px; top: -3px; width: 38px; height: 38px; box-sizing: border-box; border-left: 4px solid var(--pkm-accent); border-top: 4px solid var(--pkm-accent); border-radius: 18px 0 0 0"></span>
 <span aria-hidden="true" style="position: absolute; right: -3px; top: -3px; width: 38px; height: 38px; box-sizing: border-box; border-right: 4px solid var(--pkm-accent); border-top: 4px solid var(--pkm-accent); border-radius: 0 18px 0 0"></span>
 <span aria-hidden="true" style="position: absolute; left: -3px; bottom: -3px; width: 38px; height: 38px; box-sizing: border-box; border-left: 4px solid var(--pkm-accent); border-bottom: 4px solid var(--pkm-accent); border-radius: 0 0 0 18px"></span>
@@ -1517,6 +1514,7 @@
 <span aria-hidden="true" class="pkm-anim" style="position: absolute; left: 8%; right: 8%; top: 4%; height: 2px; border-radius: 1px; background: linear-gradient(90deg, rgba(var(--pkm-accent-rgb), 0), var(--pkm-accent), rgba(var(--pkm-accent-rgb), 0)); box-shadow: 0 0 14px var(--pkm-accent); animation: pkmScanLine 2.2s ease-in-out infinite alternate"></span>
 </sc-if>
 </div>
+<span class="pkm-scan-hint">{{ scan.hint }}</span>
 </sc-if>
 <sc-if value="{{ scan.hasPanel }}" hint-placeholder-val="{{ false }}">
 <section aria-label="{{ scan.panelTitle }}" style="width: 100%; max-width: 360px; box-sizing: border-box; padding: 18px 16px; border-radius: 22px; background: var(--pkm-card-2); border: 1px solid var(--pkm-line-2); display: flex; flex-direction: column; gap: 12px">
@@ -1550,9 +1548,7 @@
 <button type="button" onClick="{{ scan.shutter }}" aria-label="{{ scan.shutterLabel }}" aria-disabled="{{ scan.shutterOff }}" style="width: 80px; height: 80px; padding: 6px; box-sizing: border-box; border: 4px solid var(--pkm-white); border-radius: 40px; background: rgba(var(--pkm-hl-rgb), 0.12); opacity: {{ scan.shutterOp }}; cursor: pointer">
 <span style="display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--pkm-white)"></span>
 </button>
-<button type="button" onClick="{{ scan.search }}" aria-label="Rechercher une carte" style="justify-self: end; width: 52px; height: 52px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.18); border-radius: 16px; background: rgba(var(--pkm-ink-rgb), 0.66); color: var(--pkm-white); display: flex; align-items: center; justify-content: center; cursor: pointer">
-<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
-</button>
+<button type="button" onClick="{{ scan.helpOpen }}" aria-label="Aide pour bien scanner une carte" class="pkm-scan-helpbtn"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2"></circle><path d="M9.4 9.3a2.7 2.7 0 0 1 5.2 1c0 1.8-2.6 2.3-2.6 3.9"></path><circle cx="12" cy="17.2" r="0.6" class="pkm-scan-helpdot"></circle></svg><span>Aide</span></button>
 </div>
 </div>
 </sc-if>
@@ -1610,6 +1606,24 @@
 <button type="button" onClick="{{ scan.none }}" style="height: 48px; padding: 0 10px; border: 1px solid var(--pkm-line-2); border-radius: 999px; background: transparent; color: var(--pkm-t1); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Aucune de ces cartes</button>
 <button type="button" onClick="{{ scan.retry }}" style="height: 48px; padding: 0 10px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Réessayer</button>
 </div>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{ scan.help }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-scanhelp-wrap"><button type="button" aria-label="Fermer l’aide" onClick="{{ scan.helpClose }}" class="pkm-pas-scrim"></button>
+<section aria-label="Bien scanner une carte" role="dialog" aria-modal="true" class="pkm-dark pkm-sheet pkm-scanhelp">
+<span class="pkm-scanhelp-grab" aria-hidden="true"></span>
+<h2>Bien scanner ta carte</h2>
+<p class="pkm-scanhelp-sub">4 astuces pour une lecture en une seconde</p>
+<ol class="pkm-scanhelp-grid">
+<li class="pkm-scanhelp-tip"><span class="pkm-scanhelp-ill pkm-sh-light" aria-hidden="true"><svg viewBox="0 0 80 80"><g class="pkm-sh-rays"><path d="M40 6v9M40 65v9M6 40h9M65 40h9M16 16l6 6M58 58l6 6M64 16l-6 6M22 58l-6 6"></path></g><circle cx="40" cy="40" r="17" class="pkm-sh-sun"></circle><path d="M43 28l-9 14h7l-3 11 10-15h-7z" class="pkm-sh-bolt"></path></svg></span><b>Trouve un bon éclairage</b><span>Par exemple, utilise le flash (l’éclair en haut à droite).</span></li>
+<li class="pkm-scanhelp-tip"><span class="pkm-scanhelp-ill pkm-sh-glare" aria-hidden="true"><svg viewBox="0 0 80 80"><defs><clipPath id="pkmShCard"><rect x="22" y="10" width="36" height="52" rx="5"></rect></clipPath></defs><rect x="22" y="10" width="36" height="52" rx="5" class="pkm-sh-card"></rect><rect x="27" y="15" width="26" height="20" rx="2" class="pkm-sh-art"></rect><g clip-path="url(#pkmShCard)"><rect x="-10" y="0" width="12" height="90" class="pkm-sh-shine"></rect></g><circle cx="58" cy="58" r="13" class="pkm-sh-no"></circle><path d="M49 49l18 18" class="pkm-sh-noline"></path></svg></span><b>Évite les reflets</b><span>Incline un peu la carte si la lumière brille dessus.</span></li>
+<li class="pkm-scanhelp-tip"><span class="pkm-scanhelp-ill pkm-sh-fill" aria-hidden="true"><svg viewBox="0 0 80 80"><path d="M17 14V6h8M55 6h8v8M63 66v8h-8M25 74h-8v-8" class="pkm-sh-corner"></path><g class="pkm-sh-grow"><rect x="20" y="9" width="40" height="62" rx="5" class="pkm-sh-card"></rect><rect x="25" y="15" width="30" height="22" rx="2" class="pkm-sh-art"></rect></g></svg></span><b>Remplis tout le cadre</b><span>Ta carte doit toucher les 4 coins jaunes.</span></li>
+<li class="pkm-scanhelp-tip"><span class="pkm-scanhelp-ill pkm-sh-steady" aria-hidden="true"><svg viewBox="0 0 80 80"><g class="pkm-sh-phone"><rect x="25" y="8" width="30" height="58" rx="6" class="pkm-sh-body"></rect><rect x="30" y="16" width="20" height="38" rx="2" class="pkm-sh-screen"></rect><path d="M14 30l-5 7 5 7M66 30l5 7-5 7" class="pkm-sh-shake"></path></g><circle cx="58" cy="60" r="11" class="pkm-sh-ok"></circle><path d="M53 60l4 4 7-8" class="pkm-sh-okline"></path></svg></span><b>Garde le téléphone stable</b><span>Ne bouge plus une seconde : la lecture se fait toute seule.</span></li>
+</ol>
+<button type="button" onClick="{{ scan.helpClose }}" data-sheet-close="1" class="pkm-tks-buy">J’ai compris</button>
+<button type="button" onClick="{{ scan.helpSearch }}" class="pkm-scanhelp-search">Rechercher une carte à la main</button>
 </section>
 </div>
 </sc-if>
@@ -1677,7 +1691,7 @@
 <sc-if value="{{ xo.v2 }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 64 80" class="pkm-xp-hg"><path d="M14 6h36M14 74h36" class="pkm-xp-hg-cap"></path><path d="M18 8c0 16 26 18 26 32S18 56 18 72M46 8c0 16-26 18-26 32s26 16 26 32" class="pkm-xp-hg-glass"></path><path d="M22 14h20c-2 8-8 12-10 14-2-2-8-6-10-14z" class="pkm-xp-hg-top"></path><path d="M20 70h24c-1-8-7-12-12-14-5 2-11 6-12 14z" class="pkm-xp-hg-bot"></path><path d="M32 30v26" class="pkm-xp-hg-flow"></path></svg><img src="img/brand/pk.svg" alt="" class="pkm-xp-fall pkm-xp-fall-1"><img src="img/brand/pk.svg" alt="" class="pkm-xp-fall pkm-xp-fall-2"></sc-if>
 <sc-if value="{{ xo.v3 }}" hint-placeholder-val="{{ false }}"><img src="img/brand/pk.svg" alt="" class="pkm-xp-gem pkm-xp-gem2"><i class="pkm-xp-orbit"><b></b><b></b><b></b></i></sc-if>
 <img src="img/brand/pk.svg" alt="" class="pkm-xp-gem">
-<b class="pkm-xp-tag">2XP</b><span class="pkm-xp-days">{{ xo.days }}</span></span>
+<b class="pkm-xp-tag"><svg width="34" height="20" viewBox="0 0 34 20"><text x="17" y="16.3" text-anchor="middle">2XP</text></svg></b><span class="pkm-xp-days">{{ xo.days }}</span></span>
 <span class="pkm-xp-title">{{ xo.title }}</span>
 <b class="pkm-shop-price pkm-shop-price-sm"><img src="img/brand/pa.svg" alt="" width="20" height="20">{{ xo.price }}<small>PA</small></b>
 </button></sc-for></div>
@@ -1818,7 +1832,7 @@
 </div>
 </sc-if>
 </div>
-<button type="button" onClick="{{ gm.b.open }}" aria-disabled="{{ gm.b.dis }}" class="{{ gm.b.btnCls }}"><sc-if value="{{ gm.b.noIco }}" hint-placeholder-val="{{ false }}"><svg class="pkm-gm-hg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9s10 4 10 9"></path></svg></sc-if>{{ gm.b.button }}</button>
+<button type="button" onClick="{{ gm.b.open }}" aria-disabled="{{ gm.b.dis }}" class="{{ gm.b.btnCls }}"><sc-if value="{{ gm.b.noIco }}" hint-placeholder-val="{{ false }}"><span class="pkm-gm-hg" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32"><g class="pkm-gm-hg-flip"><path d="M8 6.5c0 6 6.4 7.2 6.4 9.5S8 19.5 8 25.5h16c0-6-6.4-7.2-6.4-9.5S24 12.5 24 6.5z" class="pkm-gm-hg-glass"></path><path d="M10.4 9h11.2c-.6 3-4.2 4.6-5.6 6.2-1.4-1.6-5-3.2-5.6-6.2z" class="pkm-gm-hg-top"></path><path d="M9.8 24h12.4c-.4-2.6-3.4-4.4-6.2-5.4-2.8 1-5.8 2.8-6.2 5.4z" class="pkm-gm-hg-bot"></path><path d="M16 15.6v7.4" class="pkm-gm-hg-stream"></path><rect x="5.5" y="3.5" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect><rect x="5.5" y="24.9" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect></g></svg></span></sc-if>{{ gm.b.button }}</button>
 <details style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px">
 <summary class="pkm-gm-sum" style="min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; font-weight: 700; color: #C9D3EA; cursor: pointer">Contenu possible et chances<span class="pkm-gm-chev" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" style="display: block; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round"><path d="M6 9l6 6 6-6"></path></svg></span></summary>
 <div role="list" style="display: flex; flex-direction: column; gap: 6px; padding: 6px 0 2px">
@@ -1854,7 +1868,7 @@
 <span style="display: flex; align-items: center; gap: 8px"><img src="img/brand/pk.svg" alt="" width="22" height="22">Gagnant : +50 PK</span>
 <span style="display: flex; align-items: center; gap: 8px"><span class="pkm-gm-dead" style="width: 18px; height: 18px"></span>Perdant</span>
 </div>
-<button type="button" onClick="{{ gm.c.flip }}" aria-disabled="{{ gm.c.flipping }}" class="{{ gm.c.btnCls }}"><sc-if value="{{ gm.c.noIco }}" hint-placeholder-val="{{ false }}"><svg class="pkm-gm-hg" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9s10 4 10 9"></path></svg></sc-if>{{ gm.c.button }}</button>
+<button type="button" onClick="{{ gm.c.flip }}" aria-disabled="{{ gm.c.flipping }}" class="{{ gm.c.btnCls }}"><sc-if value="{{ gm.c.noIco }}" hint-placeholder-val="{{ false }}"><span class="pkm-gm-hg" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32"><g class="pkm-gm-hg-flip"><path d="M8 6.5c0 6 6.4 7.2 6.4 9.5S8 19.5 8 25.5h16c0-6-6.4-7.2-6.4-9.5S24 12.5 24 6.5z" class="pkm-gm-hg-glass"></path><path d="M10.4 9h11.2c-.6 3-4.2 4.6-5.6 6.2-1.4-1.6-5-3.2-5.6-6.2z" class="pkm-gm-hg-top"></path><path d="M9.8 24h12.4c-.4-2.6-3.4-4.4-6.2-5.4-2.8 1-5.8 2.8-6.2 5.4z" class="pkm-gm-hg-bot"></path><path d="M16 15.6v7.4" class="pkm-gm-hg-stream"></path><rect x="5.5" y="3.5" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect><rect x="5.5" y="24.9" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect></g></svg></span></sc-if>{{ gm.c.button }}</button>
 <sc-if value="{{ gm.c.locked }}" hint-placeholder-val="{{ false }}"><p style="margin: -4px 0 0; text-align: center; font-size: 13px; line-height: 1.4; color: #C9D3EA">{{ gm.c.lockText }}</p></sc-if>
 </section>
 

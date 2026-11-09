@@ -167,12 +167,16 @@ def main():
         previous = {r[f["id"]]: [r[f[k]] if k in f else None for k in PRICED] for r in old["products"]}  # anciens fichiers : sans avg7, avg1
         previous_priced = sum(1 for v in previous.values() if v[0] is not None)
     rows, priced = build(manifest["products"], guide, previous)
+    refused = False
     if guide is not None:
         problems = check_guide(guide, priced, previous_priced)
         if problems:
             for p in problems:
                 print(f"::warning::Guide des prix Cardmarket refusé : {p}")
-            sys.exit("sealed.json n'est pas modifié : les prix de la veille restent affichés.")
+            # Prix de la veille gardés, mais la liste et les visuels sont mis à jour (2026-11-09 : l'ETB et le display de
+            # Règne Delta restaient « sans visuel » alors que leurs images étaient arrivées, le guide étant refusé).
+            refused, guide = True, None
+            rows, priced = build(manifest["products"], None, previous)
     else:
         print("::warning::Guide des prix Cardmarket injoignable : prix de la veille gardés.")
     days = archive(rows, old, guide.get("createdAt", "")[:10] or None if guide is not None else None)
@@ -187,6 +191,8 @@ def main():
     OUT.write_text(json.dumps(head, ensure_ascii=False)[:-1] + ',\n"products":[\n' + body + "\n]}\n", "utf-8")
     print(f"sealed.json : {len(rows)} produits, {priced} avec un prix Cardmarket, {sum(r[7] for r in rows)} avec un visuel officiel"
           + ("" if guide is not None else " · prix de la veille gardés"))
+    if refused:
+        sys.exit("Guide des prix refusé : prix de la veille gardés (liste et visuels mis à jour).")
 
 
 if __name__ == "__main__":

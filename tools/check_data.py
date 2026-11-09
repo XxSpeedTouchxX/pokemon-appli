@@ -154,9 +154,12 @@ def check_sealed(cur, prev, now):
     age = hours_since(doc.get("prices"), now)
     if age is None:
         errors.append(f"date du guide des prix illisible ({doc.get('prices')!r})")
-    elif age > 30:
-        errors.append(f"prix du {doc['prices'][:10]} : guide Cardmarket non renouvelé depuis {age:.0f} h")
     old = prev.get("web/data/sealed.json") or {}
+    if age is not None and age > 30:
+        # Prix de la veille gardés tels quels (guide refusé) : simple avertissement, pour que la liste et les visuels
+        # mis à jour soient publiés quand même (2026-11-09, visuels de Règne Delta) ; sinon, erreur.
+        msg = f"prix du {doc['prices'][:10]} : guide Cardmarket non renouvelé depuis {age:.0f} h"
+        (warnings if doc.get("prices") == old.get("prices") else errors).append(msg)
     of = {k: i for i, k in enumerate(old.get("fields") or [])}
     old_priced = sum(1 for r in old.get("products") or [] if "trend" in of and r[of["trend"]] is not None)
     drop("produits", len(rows), len(old.get("products") or []), MAX_DROP["sealed"], errors)
