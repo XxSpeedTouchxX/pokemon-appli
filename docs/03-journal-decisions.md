@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-10 (soir) — Avatar « Carte de dresseur », coffres mystère proposés (porteur)
+
+- **Mon avatar** : interface 2 « Carte de dresseur » **choisie par le porteur** (les autres pour essai : `?avui=1` ou `3`).
+- **Mes PA** : la boîte retirée du palier J7+ ; la « Série de connexion » dessous suffit (porteur).
+- **Coffres mystère proposés** (porteur : « propose-moi des visuels de coffre mystère ») : en plus du coffre royal violet et or, 4 coffres dessinés pour Dropicards, avec la même ouverture et une lumière de leur couleur. Essai : `?myvis=5` bois et fer, `6` Dropicards (jaune et noir), `7` cristal, `8` légendaire (obsidienne et runes violettes). **Choix du porteur attendu.**
+- Cache v175.
+
 ## 2026-11-10 — Boîte mystère réparée et 4 visuels, Mes PA, Jeux en 2 rubriques, avatar v2, Premium en 4 formules (demande du porteur)
 
 - **Boîte mystère** :

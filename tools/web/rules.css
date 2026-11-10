@@ -112,12 +112,9 @@
 .pkm-rules-day b { font-size: 13.5px; }
 .pkm-rules-day:nth-child(1) { height: 44px; } .pkm-rules-day:nth-child(2) { height: 50px; } .pkm-rules-day:nth-child(3) { height: 56px; } .pkm-rules-day:nth-child(4) { height: 62px; } .pkm-rules-day:nth-child(5) { height: 68px; } .pkm-rules-day:nth-child(6) { height: 74px; } .pkm-rules-day:nth-child(7) { height: 80px; }
 
-/* Boîte offerte au dernier palier et série de connexion de 7 jours (2026-11-10, porteur). */
+/* Série de connexion de 7 jours (2026-11-10, porteur ; boîte retirée du palier J7+ le soir même). */
 .pkm-rules-day { position: relative; }
-.pkm-rules-gift { position: relative; display: block; width: 30px; height: 30px; margin-bottom: 1px; animation: pkmMyBob 2.6s ease-in-out infinite; }
-.pkm-rules-gift img, .pkm-pa-ser-box img { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pkm-rules-day:last-child { height: 104px !important; border-color: #FFD60A; background: radial-gradient(120% 80% at 50% 0%, rgba(255, 214, 10, 0.28), rgba(255, 214, 10, 0) 70%), #1E1638; }
-.pkm-rules-done:last-child { background: radial-gradient(120% 80% at 50% 0%, rgba(255, 214, 10, 0.35), rgba(255, 214, 10, 0) 70%), linear-gradient(180deg, #7A2A9E, #3B1A5E); }
+.pkm-pa-ser-box img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .pkm-pa-series { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 18px; border: 1px solid #3B2A6B; background: radial-gradient(110% 80% at 100% 0%, rgba(255, 214, 10, 0.12), rgba(255, 214, 10, 0) 60%), #140F28; }
 .pkm-pa-series h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: #FFFFFF; }
 .pkm-pa-ser-days { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)) minmax(0, 1.5fr); align-items: center; gap: 5px; }
@@ -130,4 +127,4 @@
 .pkm-pa-ser-gift.pkm-pa-ser-on .pkm-pa-ser-box { animation: pkmMyWobble 1.6s ease-in-out infinite; }
 .pkm-pa-ser-status { margin: 0; font-size: 13.5px; font-weight: 800; color: #FFD60A; }
 .pkm-pa-ser-text { margin: 0; font-size: 12.5px; line-height: 1.45; color: #C9D3EA; }
-@media (prefers-reduced-motion: reduce) { .pkm-rules-gift, .pkm-pa-ser-box { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .pkm-pa-ser-box { animation: none !important; } }

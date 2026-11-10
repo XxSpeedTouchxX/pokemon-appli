@@ -1440,3 +1440,12 @@ section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(
 .pkm-mx-gone { animation: pkmMxOut 0.4s ease-in 0.1s forwards; }
 .pkm-my-free { background: linear-gradient(135deg, #9461F7, #D3409A); color: #FFFFFF; box-shadow: 0 6px 22px rgba(211, 64, 154, 0.45); animation: pkmScanBonus 1.6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pkm-my-free { animation: none; } }
+
+/* Coffres mystère proposés (2026-11-10, soir) : lumière de leur couleur à l'ouverture. */
+.pkm-mx-c-coffre-cristal .pkm-mx-beam { background: linear-gradient(0deg, rgba(160, 235, 255, 0.95), rgba(160, 235, 255, 0)); }
+.pkm-mx-c-coffre-cristal .pkm-mx-glow { background: radial-gradient(circle, rgba(200, 245, 255, 0.9), rgba(90, 190, 255, 0.35) 45%, rgba(90, 190, 255, 0) 70%); }
+.pkm-mx-c-coffre-legende .pkm-mx-beam { background: linear-gradient(0deg, rgba(199, 125, 255, 0.95), rgba(199, 125, 255, 0)); }
+.pkm-mx-c-coffre-legende .pkm-mx-glow { background: radial-gradient(circle, rgba(220, 160, 255, 0.85), rgba(120, 60, 220, 0.4) 45%, rgba(120, 60, 220, 0) 70%); }
+.pkm-mx-c-coffre-legende.pkm-mx-wait .pkm-mx-boxin { filter: drop-shadow(0 0 12px rgba(199, 125, 255, 0.9)); }
+.pkm-mx-c-coffre-dropi .pkm-mx-beam { background: linear-gradient(0deg, rgba(255, 230, 90, 1), rgba(255, 230, 90, 0)); }
+.pkm-mx-c-coffre-bois .pkm-mx-beam { background: linear-gradient(0deg, rgba(255, 210, 120, 0.95), rgba(255, 210, 120, 0)); }

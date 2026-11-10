@@ -141,7 +141,7 @@
       grades: PF_GRADES.map((g, i) => ({ name: g.name, me: i === gi, img: 'img/grades/grade-' + (i + 1) + '.svg', booster: g.boosterH + ' h', coin: g.coinH ? g.coinH + ' h' : '—', scans: legalNum(g.scans),
         cls: 'pkm-rules-row' + (i === gi ? ' pkm-rules-me' : ''), aria: g.name + (i === gi ? ', ton grade' : '') + ' : booster toutes les ' + g.boosterH + ' h, ' + (g.coinH ? 'pièce toutes les ' + g.coinH + ' h' : 'pièce fermée') + ', ' + g.scans + ' scans par jour' })),
       // 7 paliers depuis le 2026-11-09 (J7 et + : +80 PA, boîte offerte tous les 7 jours).
-      streak: PaCore.GAIN.map((v, i) => { const L = PaCore.GAIN.length, bx = myBoxImgs(); return { gift: i === L - 1, giftBase: bx.base, giftLid: bx.lid, day: i === L - 1 ? 'J' + L + ' et +' : 'J' + (i + 1), pa: '+' + v, cls: 'pkm-rules-day' + (Math.min(streak, L) === i + 1 ? ' pkm-rules-today' : '') + (i < Math.min(streak, L) ? ' pkm-rules-done' : '') }; }),
+      streak: PaCore.GAIN.map((v, i) => { const L = PaCore.GAIN.length; return { day: i === L - 1 ? 'J' + L + ' et +' : 'J' + (i + 1), pa: '+' + v, cls: 'pkm-rules-day' + (Math.min(streak, L) === i + 1 ? ' pkm-rules-today' : '') + (i < Math.min(streak, L) ? ' pkm-rules-done' : '') }; }),
       // Prix fixés Pokémon par Pokémon par le porteur (2026-11-01, PA_PRICES) : fourchette par catégorie, lue dans les prix.
       evo: legalEvoRows(),
       // Tickets (2026-11-08, porteur) : le ticket Bronze, Argent ou Or à la place de la gemme des PK.

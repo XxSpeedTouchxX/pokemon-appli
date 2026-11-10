@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E3FBFF"/><stop offset="1" stop-color="#7CCFF5"/></linearGradient><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#B7E6FF"/></linearGradient></defs>
+<path d="M14 58V44C14 30 30 22 60 22S106 30 106 44V58Z" fill="url(#l)" stroke="#0D3A66" stroke-width="3" stroke-linejoin="round"/>
+<path d="M44 26l8 12-10 6zM70 24l10 6-6 14z" fill="#fff" opacity=".55"/>
+<path d="M22 58V40c0-6 4-10 11-12v30z" fill="url(#g)" stroke="#0D3A66" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M98 58V40c0-6-4-10-11-12v30z" fill="url(#g)" stroke="#0D3A66" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M38 28c7-3 14-4 22-4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+<rect x="11" y="51" width="98" height="9" rx="3.5" fill="url(#g)" stroke="#0D3A66" stroke-width="3"/>
+<text x="60" y="48" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="24" fill="#FFFFFF" stroke="#0D3A66" stroke-width="3" paint-order="stroke">?</text>
+</svg>

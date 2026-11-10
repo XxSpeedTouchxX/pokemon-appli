@@ -48,17 +48,24 @@
   // Visuels de la boîte (2026-11-10, porteur : « je n'aime pas celui-ci, propose-moi plusieurs visuels et animations ») :
   // 4 propositions dessinées pour Dropicards (aucun visuel repris d'un jeu), chacune en deux images (web/img/mybox/) :
   // le corps et le couvercle, pour l'ouverture. Essai : ?myvis=1 (coffre, par défaut), 2 (œuf mystère), 3 (booster
-  // mystère), 4 (géode PK) ; le choix est gardé sur l'appareil (pkm-myvis).
+  // mystère), 4 (géode PK), puis les coffres 5 (bois et fer), 6 (Dropicards), 7 (cristal), 8 (légendaire) ; le choix est
+  // gardé sur l'appareil (pkm-myvis).
+  // Coffres mystère proposés le 2026-11-10 au soir (porteur : « propose-moi des visuels de coffre mystère ») : 5 à 8,
+  // même ouverture que le coffre (kind « coffre »), lumière de leur couleur.
   const MY_VIS = [
-    { id: 'coffre', name: 'Coffre au trésor', open: 'Le couvercle bascule, la lumière jaillit du coffre.' },
-    { id: 'oeuf', name: 'Œuf mystère', open: 'L’œuf se fêle à chaque saut, puis le haut de la coquille s’envole.' },
-    { id: 'booster', name: 'Booster mystère', open: 'Le haut du booster se déchire et part sur le côté.' },
-    { id: 'geode', name: 'Géode PK', open: 'La pierre éclate en morceaux et révèle ses cristaux.' }
+    { id: 'coffre', kind: 'coffre', name: 'Coffre royal (violet et or)' },
+    { id: 'oeuf', kind: 'oeuf', name: 'Œuf mystère' },
+    { id: 'booster', kind: 'booster', name: 'Booster mystère' },
+    { id: 'geode', kind: 'geode', name: 'Géode PK' },
+    { id: 'coffre-bois', kind: 'coffre', name: 'Coffre en bois et fer' },
+    { id: 'coffre-dropi', kind: 'coffre', name: 'Coffre Dropicards (jaune et noir)' },
+    { id: 'coffre-cristal', kind: 'coffre', name: 'Coffre de cristal' },
+    { id: 'coffre-legende', kind: 'coffre', name: 'Coffre légendaire (obsidienne et runes)' }
   ];
   const myVis = () => {
     let n = 0;
-    try { const m = /[?&]myvis=([1-4])\b/.exec(location.search); if (m) { n = Number(m[1]); localStorage.setItem('pkm-myvis', String(n)); } else n = Number(localStorage.getItem('pkm-myvis')) || 0; } catch (e) { n = 0; }
-    return MY_VIS[(n >= 1 && n <= 4 ? n : 1) - 1];
+    try { const m = /[?&]myvis=([1-8])\b/.exec(location.search); if (m) { n = Number(m[1]); localStorage.setItem('pkm-myvis', String(n)); } else n = Number(localStorage.getItem('pkm-myvis')) || 0; } catch (e) { n = 0; }
+    return MY_VIS[(n >= 1 && n <= MY_VIS.length ? n : 1) - 1];
   };
   // Images de la boîte choisie, aussi dans « Mes PA » (boîte offerte au 7e jour d'affilée, 2026-11-10).
   const myBoxImgs = () => { const v = myVis(); return { base: 'img/mybox/' + v.id + '-base.svg', lid: 'img/mybox/' + v.id + '-lid.svg' }; };
@@ -75,7 +82,7 @@
   const myCount = lot => lot.days ? lot.days + ' jours' : lot.paDays ? lot.paDays + ' jours' : lot.scans ? '× ' + lot.scans : lot.label;
   const myStage = () => {
     const ov = document.createElement('div'), still = myStill(), v = myVis(), t0 = Date.now();
-    ov.className = 'pkm-mx pkm-mx-v-' + v.id + (still ? ' pkm-mx-still' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Boîte mystère');
+    ov.className = 'pkm-mx pkm-mx-v-' + v.kind + ' pkm-mx-c-' + v.id + (still ? ' pkm-mx-still' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Boîte mystère');
     let shards = '';
     for (let k = 0; k < 8; k++) shards += '<i class="pkm-mx-shard" style="--a: ' + (k * 45 + 10) + 'deg"></i>';
     ov.innerHTML = '<div class="pkm-mx-box"><i class="pkm-mx-glow" aria-hidden="true"></i><span class="pkm-mx-boxin"><i class="pkm-mx-beam" aria-hidden="true"></i>' + myArt(v) + shards + '</span></div>'
@@ -160,7 +167,7 @@
     return {
       on: !!until, off: !until, left: until ? xpLeft(until - Date.now()) : '', end: until ? xpEnd(until) : '',
       paOn: !!this.paXpUntilMs(), paLeft: this.paXpUntilMs() ? xpLeft(this.paXpUntilMs() - Date.now()) : '',
-      artCls: 'pkm-my-boxwrap pkm-my-v-' + myVis().id, artBase: 'img/mybox/' + myVis().id + '-base.svg', artLid: 'img/mybox/' + myVis().id + '-lid.svg',
+      artCls: 'pkm-my-boxwrap pkm-my-v-' + myVis().kind, artBase: 'img/mybox/' + myVis().id + '-base.svg', artLid: 'img/mybox/' + myVis().id + '-lid.svg',
       head: 'Boîte mystère', sub: 'Un lot surprise à chaque ouverture : des 2XP PK, des 2XP PA, des scans bonus ou un Pokémon légendaire. Un Pokémon déjà débloqué n’est jamais redonné.',
       price: xpNum(MY_PRICE), can: pa >= MY_PRICE, miss: pa < MY_PRICE, missText: 'Il te manque ' + xpNum(Math.max(0, MY_PRICE - pa)) + ' PA',
       busy: !!s.myBusy, ask: !!s.myAsk && pa >= MY_PRICE, idle: !(s.myAsk && pa >= MY_PRICE),

@@ -11,7 +11,8 @@
   //     derrière le dresseur ; l'accessoire aussi (ax, ay : décalage, asz : taille) ;
   //   - accessoires dessinés pour Dropicards (lunettes de soleil, casquette de dresseur, couronne, nœud, chapeau de fête,
   //     écharpe) ; version shiny (sprites web/img/pokemon/shiny/, tools/sprites/fetch_shiny.py) ;
-  //   - 3 interfaces proposées (?avui=1 « Studio » par défaut, 2 « Carte de dresseur », 3 « Plein écran »).
+  //   - 3 interfaces proposées (?avui=1 « Studio », 2 « Carte de dresseur », 3 « Plein écran ») ; choix du porteur le
+  //     2026-11-10 au soir : 2 « Carte de dresseur ».
   //   Prix PRO proposés, à confirmer : shiny 300 PA ; couronne 150 PA ; nœud, chapeau de fête, écharpe 100 PA ;
   //   lunettes et casquette gratuites (serveur : 021_avatar_v2.sql).
   // Styles PRO (badge couronne) : ouverts avec l'abonnement Premium, ou débloqués pour toujours avec des PA (prix à
@@ -274,8 +275,10 @@
   const AV_ROW2 = [['poke', 'Pokémon', 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z'], ['acc', 'Accessoire', 'M3 14c0-4 4-7 9-7s9 3 9 7M3 14h18M7 14v-2M17 14v-2'],
     ['shiny', 'Shiny', 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z']];
   const AV_TABS = AV_ROW1.concat(AV_ROW2);
-  // Interfaces proposées (2026-11-10) : 1 « Studio » (défaut), 2 « Carte de dresseur », 3 « Plein écran » (?avui=).
-  const avUi = () => { let n = 1; try { const m = /[?&]avui=([123])\b/.exec(location.search); if (m) { n = Number(m[1]); localStorage.setItem('pkm-avui', String(n)); } else n = Number(localStorage.getItem('pkm-avui')) || 1; } catch (e) { n = 1; } return n >= 1 && n <= 3 ? n : 1; };
+  // Interfaces proposées (2026-11-10) : 1 « Studio », 2 « Carte de dresseur » (choisie), 3 « Plein écran » (?avui=).
+  // Choix du porteur (2026-11-10, soir) : 2 « Carte de dresseur ». Les autres restent pour essai (?avui=1 ou 3, sans
+  // mémoire : la carte de dresseur revient à l'ouverture suivante).
+  const avUi = () => { try { const m = /[?&]avui=([123])\b/.exec(location.search); if (m) return Number(m[1]); } catch (e) { /* adresse sans paramètres */ } return 2; };
   avProto.vAvatar = function (s) {
     const d = avNorm(s.avDraft, s), tab = s.avTab || 'poke', prem = !!(this.premOn && this.premOn());
     const mini = patch => { const c = Object.assign({}, d, patch); return { bg: avUrl(avBg(c, avTypeColor(c.poke))), char: avUrl(avChar(c)) }; };

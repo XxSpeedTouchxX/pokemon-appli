@@ -929,7 +929,7 @@
 <div class="pkm-pa-sheet-bal"><img src="{{ pk.paSheet.logo }}" alt="" width="64" height="64"><div><span>Ton solde</span><b>{{ pk.paSheet.balance }} PA</b></div></div>
 <div class="pkm-cur-what"><h3>C’est quoi ?</h3><p>{{ pk.paSheet.what }}</p></div>
 <div class="pkm-cur-what"><h3>Comment les gagner ?</h3><p>{{ pk.paSheet.how }}</p></div>
-<div class="pkm-rules-streak"><sc-for list="{{ pk.paSheet.streak }}" as="pas" hint-placeholder-count="5"><div class="{{ pas.cls }}"><sc-if value="{{ pas.gift }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-gift" aria-label="+ boîte mystère offerte"><img src="{{ pas.giftBase }}" alt=""><img src="{{ pas.giftLid }}" alt=""></span></sc-if><b>{{ pas.pa }}</b><span>{{ pas.day }}</span></div></sc-for></div>
+<div class="pkm-rules-streak"><sc-for list="{{ pk.paSheet.streak }}" as="pas" hint-placeholder-count="5"><div class="{{ pas.cls }}"><b>{{ pas.pa }}</b><span>{{ pas.day }}</span></div></sc-for></div>
 <p class="pkm-pa-sheet-note">{{ pk.paSheet.note }}</p>
 <div class="pkm-pa-series" role="group" aria-label="Série de connexion"><h3>Série de connexion</h3><div class="pkm-pa-ser-days"><sc-for list="{{ pk.paSheet.series.days }}" as="psd" hint-placeholder-count="7"><span class="{{ psd.cls }}" aria-label="{{ psd.aria }}"><sc-if value="{{ psd.notGift }}" hint-placeholder-val="{{ true }}"><b>{{ psd.n }}</b></sc-if><sc-if value="{{ psd.gift }}" hint-placeholder-val="{{ false }}"><i class="pkm-pa-ser-box"><img src="{{ psd.base }}" alt=""><img src="{{ psd.lid }}" alt=""></i></sc-if></span></sc-for></div><p class="pkm-pa-ser-status">{{ pk.paSheet.series.status }}</p><p class="pkm-pa-ser-text">{{ pk.paSheet.series.text }}</p></div>
 <div class="pkm-cur-what"><h3>À quoi servent-ils ?</h3><p>{{ pk.paSheet.use }}</p></div>
@@ -1274,7 +1274,7 @@
 <section aria-label="Points d’Aura" class="pkm-rules-card pkm-rules-aura">
 <h3><img src="img/brand/pa.svg" alt="" width="22" height="22">Points d’Aura (PA)</h3>
 <p class="pkm-rules-note">Chaque jour dès minuit, touche ton solde de PA pour récupérer tes PA : ils montent avec les jours d’affilée.</p>
-<div class="pkm-rules-streak"><sc-for list="{{ legal.pk.streak }}" as="lrs" hint-placeholder-count="5"><div class="{{ lrs.cls }}"><sc-if value="{{ lrs.gift }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-gift" aria-label="+ boîte mystère offerte"><img src="{{ lrs.giftBase }}" alt=""><img src="{{ lrs.giftLid }}" alt=""></span></sc-if><b>{{ lrs.pa }}</b><span>{{ lrs.day }}</span></div></sc-for></div>
+<div class="pkm-rules-streak"><sc-for list="{{ legal.pk.streak }}" as="lrs" hint-placeholder-count="5"><div class="{{ lrs.cls }}"><b>{{ lrs.pa }}</b><span>{{ lrs.day }}</span></div></sc-for></div>
 <p class="pkm-rules-note">Une boîte mystère offerte tous les 7 jours d’affilée. Un jour sans les récupérer : retour à +40 PA ; deux jours : +20 PA. Les PA débloquent les Pokémon du Pokédex :</p>
 <div class="pkm-rules-evo"><sc-for list="{{ legal.pk.evo }}" as="lrv" hint-placeholder-count="3"><div><span>{{ lrv.label }}</span><b>{{ lrv.pa }}</b></div></sc-for></div>
 </section>
