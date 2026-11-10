@@ -14,7 +14,7 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, de
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?today=2026-10-31&debug&start=market', { waitUntil: 'load' }); await page.waitForTimeout(2500);
-await page.evaluate(() => { window.__pkm.paChoose('bulbi', true); }); await page.waitForTimeout(800);
+await page.evaluate(() => { window.__pkm.paChoose('bulbi', true); window.__pkm.setState({ gameTab: 'dex' }); }); await page.waitForTimeout(800);
 const ids = JSON.parse(readFileSync(ROOT + 'tools/sprites/dex.json', 'utf8')).dex.map(e => e.n);
 const rows = [];
 for (const n of ids) {

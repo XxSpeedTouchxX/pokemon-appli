@@ -31,9 +31,9 @@
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label^="Scanner"]', text: 'Ici, c’est le Scan Dropicards : grâce à lui, tu pourras scanner rapidement ta carte et connaître sa valeur sur le marché actuel.' },
     { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', kids: 2, text: 'Tu pourras retrouver ici le radar des boutiques : il te permettra de localiser précisément les boutiques qui vendent du Pokémon autour de toi, et la probabilité d’y trouver des items.' },
     { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', sweep: true, text: 'Ici, tu pourras retrouver toutes les séries et leurs extensions. Touche une carte pour voir ses infos, et ajoute-la dans ton classeur si tu la possèdes déjà.' },
-    { tab: 'market', sel: '.pkm-dex-device', top: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
-    { tab: 'market', sel: '.pkm-dex-lcd-r', top: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
-    { tab: 'market', sel: '[aria-label="Route d’évolution"]', top: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
+    { tab: 'market', dex: true, sel: '.pkm-dex-device', top: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
+    { tab: 'market', dex: true, sel: '.pkm-dex-lcd-r', top: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
+    { tab: 'market', dex: true, sel: '[aria-label="Route d’évolution"]', top: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
     { tab: 'market', sel: 'header .pkm-pa-bar', text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : tu peux en obtenir jusqu’à 80 quotidiennement !' }, // texte du porteur, 2026-11-01 ; 80 depuis le 2026-11-09 (avant : 70) ; 70 depuis les gains du 2026-11-02
     { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', inner: true, pad: 3, text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés !' },
@@ -420,6 +420,8 @@
     const same = this.st().screen === st.tab;
     // Changement d'onglet : le trou du cadre se referme (l'écran reste assombri) et la phrase s'efface pendant que la
     // page glisse, puis il se rouvre sur la partie suivante : plus de flash ni de cadre qui traverse l'écran.
+    // Étapes du Pokédex : rubrique « Pokédex » de l'onglet Jeux (2026-11-10).
+    if (st.tab === 'market' && this.st().gameTab !== (st.dex ? 'dex' : 'pk')) this.setState({ gameTab: st.dex ? 'dex' : 'pk' });
     if (!same) { TUTO.switching = true; if (TUTO.el) TUTO.el.box.classList.add('pkm-tt-switch'); this.tab(st.tab); }
     this.setState({ tutoStep: i, dexList: false, paClaim: false, toast: null });
     // L'onglet s'ouvre (transition de page), puis l'étape se montre.

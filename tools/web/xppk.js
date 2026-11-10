@@ -45,41 +45,68 @@
     : lot.paDays ? '<span class="pkm-my-pz pkm-my-pz-xp pkm-my-pz-pa"><img src="img/brand/pa.svg" alt=""><img src="img/brand/pa.svg" alt="" class="pkm-my-pz-b"><b>2XP</b><i>' + lot.paDays + ' J</i></span>'
       : lot.scans ? '<span class="pkm-my-pz pkm-my-pz-sc"><svg viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"></path><rect x="8" y="7" width="8" height="10" rx="1"></rect></svg><b>+20</b></span>'
         : '<span class="pkm-my-pz pkm-my-pz-poke"><img src="img/pokemon/' + lot.poke + '.gif" alt=""></span>';
-  // Boîte cadeau dessinée (aussi dans le gabarit, classes pkm-my-box).
-  const MY_BOX = '<svg viewBox="0 0 120 120" class="pkm-my-svg" aria-hidden="true">'
-    + '<g class="pkm-my-body"><rect x="18" y="52" width="84" height="60" rx="8" class="pkm-my-side"></rect><rect x="52" y="52" width="16" height="60" class="pkm-my-ribbon"></rect>'
-    + '<text x="60" y="97" text-anchor="middle" class="pkm-my-q">?</text></g>'
-    + '<g class="pkm-my-lid"><rect x="12" y="38" width="96" height="18" rx="6" class="pkm-my-top"></rect><rect x="52" y="38" width="16" height="18" class="pkm-my-ribbon"></rect>'
-    + '<path d="M60 38c-6-14-26-16-24-4 1 6 14 6 24 4zM60 38c6-14 26-16 24-4-1 6-14 6-24 4z" class="pkm-my-bow"></path><circle cx="60" cy="37" r="4.5" class="pkm-my-knot"></circle></g></svg>';
+  // Visuels de la boîte (2026-11-10, porteur : « je n'aime pas celui-ci, propose-moi plusieurs visuels et animations ») :
+  // 4 propositions dessinées pour Dropicards (aucun visuel repris d'un jeu), chacune en deux images (web/img/mybox/) :
+  // le corps et le couvercle, pour l'ouverture. Essai : ?myvis=1 (coffre, par défaut), 2 (œuf mystère), 3 (booster
+  // mystère), 4 (géode PK) ; le choix est gardé sur l'appareil (pkm-myvis).
+  const MY_VIS = [
+    { id: 'coffre', name: 'Coffre au trésor', open: 'Le couvercle bascule, la lumière jaillit du coffre.' },
+    { id: 'oeuf', name: 'Œuf mystère', open: 'L’œuf se fêle à chaque saut, puis le haut de la coquille s’envole.' },
+    { id: 'booster', name: 'Booster mystère', open: 'Le haut du booster se déchire et part sur le côté.' },
+    { id: 'geode', name: 'Géode PK', open: 'La pierre éclate en morceaux et révèle ses cristaux.' }
+  ];
+  const myVis = () => {
+    let n = 0;
+    try { const m = /[?&]myvis=([1-4])\b/.exec(location.search); if (m) { n = Number(m[1]); localStorage.setItem('pkm-myvis', String(n)); } else n = Number(localStorage.getItem('pkm-myvis')) || 0; } catch (e) { n = 0; }
+    return MY_VIS[(n >= 1 && n <= 4 ? n : 1) - 1];
+  };
+  // Images de la boîte choisie, aussi dans « Mes PA » (boîte offerte au 7e jour d'affilée, 2026-11-10).
+  const myBoxImgs = () => { const v = myVis(); return { base: 'img/mybox/' + v.id + '-base.svg', lid: 'img/mybox/' + v.id + '-lid.svg' }; };
+  const myArt = v => '<img src="img/mybox/' + v.id + '-base.svg" alt="" class="pkm-my-art-b" draggable="false"><img src="img/mybox/' + v.id + '-lid.svg" alt="" class="pkm-my-art-l" draggable="false">';
   const myStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return true; } };
   // Ouverture (2026-11-09, porteur, d'après sa vidéo) : fond bleu nuit, la boîte tombe et rebondit, deux petits sauts,
-  // elle s'écrase puis s'étire, le couvercle saute dans un éclair blanc ; puis un écran de la couleur du lot : titre en
-  // haut, le lot qui tombe et rebondit au centre, sa durée dessous, étincelles ; « Touche pour continuer ».
+  // elle s'écrase puis s'étire, elle s'ouvre (selon le visuel) dans un éclair blanc ; puis un écran de la couleur du lot :
+  // titre en haut, le lot qui tombe et rebondit au centre, sa durée dessous, étincelles ; « Touche pour continuer ».
+  // Depuis le 2026-11-10, l'animation part dès l'appui : la boîte sautille tant que le serveur n'a pas répondu (avant,
+  // une erreur du serveur empêchait toute animation) ; en cas d'échec, elle repart et le message s'affiche.
   const MY_SCENE = { 'xp-3': ['#11A89A', '#0B5E57'], 'xp-7': ['#7B4FE0', '#3A1F86'], 'xp-10': ['#E3A90C', '#8A5A00'], 'xppa-7': ['#D3409A', '#6E1E52'],
     'scans-20': ['#1BA7C8', '#0B4F6E'], kyogre: ['#2B6FE0', '#0E2F7A'], groudon: ['#D9432B', '#6E1408'], rayquaza: ['#1F9E5A', '#0B4A2A'] };
   const myTitle = lot => lot.days ? '2XP PK' : lot.paDays ? '2XP PA' : lot.scans ? 'Scans bonus' : 'Pokémon légendaire';
   const myCount = lot => lot.days ? lot.days + ' jours' : lot.paDays ? lot.paDays + ' jours' : lot.scans ? '× ' + lot.scans : lot.label;
-  const myReveal = (lot, done) => {
-    const ov = document.createElement('div'), still = myStill(), c = MY_SCENE[lot.id] || ['#7B4FE0', '#3A1F86'];
-    ov.className = 'pkm-mx' + (still ? ' pkm-mx-still' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Boîte mystère');
-    ov.style.setProperty('--mx1', c[0]); ov.style.setProperty('--mx2', c[1]);
-    let sparks = '';
-    for (let k = 0; k < 10; k++) sparks += '<i class="pkm-mx-sp" style="--a: ' + (k * 36) + 'deg; --d: ' + (0.2 + (k % 5) * 0.25) + 's"></i>';
-    ov.innerHTML = '<div class="pkm-mx-box"><i class="pkm-mx-glow" aria-hidden="true"></i><span class="pkm-mx-boxin">' + MY_BOX + '</span></div>'
-      + '<div class="pkm-mx-flash" aria-hidden="true"></div>'
-      + '<div class="pkm-mx-win"><i class="pkm-mx-rays" aria-hidden="true"></i><h2 class="pkm-mx-title">' + myTitle(lot) + '</h2>'
-      + '<div class="pkm-mx-item">' + myPrizeHtml(lot) + sparks + '</div><b class="pkm-mx-count">' + myCount(lot) + '</b>'
-      + '<p class="pkm-mx-text">' + myText(lot) + '</p><button type="button" class="pkm-mx-ok">Touche pour continuer</button></div>';
+  const myStage = () => {
+    const ov = document.createElement('div'), still = myStill(), v = myVis(), t0 = Date.now();
+    ov.className = 'pkm-mx pkm-mx-v-' + v.id + (still ? ' pkm-mx-still' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Boîte mystère');
+    let shards = '';
+    for (let k = 0; k < 8; k++) shards += '<i class="pkm-mx-shard" style="--a: ' + (k * 45 + 10) + 'deg"></i>';
+    ov.innerHTML = '<div class="pkm-mx-box"><i class="pkm-mx-glow" aria-hidden="true"></i><span class="pkm-mx-boxin"><i class="pkm-mx-beam" aria-hidden="true"></i>' + myArt(v) + shards + '</span></div>'
+      + '<div class="pkm-mx-flash" aria-hidden="true"></div><div class="pkm-mx-win"></div>';
     document.body.appendChild(ov);
-    const at = (ms, f) => setTimeout(f, still ? 0 : ms);
+    const timers = [], at = (ms, f) => timers.push(setTimeout(f, still ? 0 : Math.max(0, ms - (Date.now() - t0))));
     at(30, () => ov.classList.add('pkm-mx-drop'));
     at(900, () => ov.classList.add('pkm-mx-hop'));
-    at(2050, () => ov.classList.add('pkm-mx-burst'));
-    at(2450, () => { ov.classList.add('pkm-mx-flashing', 'pkm-mx-show'); if (typeof gmParty === 'function' && !still && (lot.poke || (lot.days || 0) >= 10)) setTimeout(() => gmParty(500), 500); });
-    at(3100, () => { ov.classList.add('pkm-mx-ready'); const b = ov.querySelector('.pkm-mx-ok'); if (b) b.focus({ preventScroll: true }); if (done) done(); });
+    at(2000, () => { if (!ov.classList.contains('pkm-mx-burst')) ov.classList.add('pkm-mx-wait'); });
     const close = () => { if (!ov.classList.contains('pkm-mx-ready')) return; ov.classList.add('pkm-mx-out'); setTimeout(() => ov.remove(), still ? 0 : 260); };
     ov.addEventListener('click', close);
+    return {
+      // Lot connu : ouverture (pas avant 2,05 s, pour garder la chute et les deux sauts), éclair, écran du lot.
+      win(lot, done) {
+        const c = MY_SCENE[lot.id] || ['#7B4FE0', '#3A1F86'];
+        ov.style.setProperty('--mx1', c[0]); ov.style.setProperty('--mx2', c[1]);
+        let sparks = '';
+        for (let k = 0; k < 10; k++) sparks += '<i class="pkm-mx-sp" style="--a: ' + (k * 36) + 'deg; --d: ' + (0.2 + (k % 5) * 0.25) + 's"></i>';
+        ov.querySelector('.pkm-mx-win').innerHTML = '<i class="pkm-mx-rays" aria-hidden="true"></i><h2 class="pkm-mx-title">' + myTitle(lot) + '</h2>'
+          + '<div class="pkm-mx-item">' + myPrizeHtml(lot) + sparks + '</div><b class="pkm-mx-count">' + myCount(lot) + '</b>'
+          + '<p class="pkm-mx-text">' + myText(lot) + '</p><button type="button" class="pkm-mx-ok">Touche pour continuer</button>';
+        const go = Math.max(2050, Date.now() - t0 + 120);
+        at(go, () => { ov.classList.remove('pkm-mx-wait'); ov.classList.add('pkm-mx-burst'); });
+        at(go + 420, () => { ov.classList.add('pkm-mx-flashing', 'pkm-mx-show'); if (typeof gmParty === 'function' && !still && (lot.poke || (lot.days || 0) >= 10)) setTimeout(() => gmParty(500), 500); });
+        at(go + 1050, () => { ov.classList.add('pkm-mx-ready'); const b = ov.querySelector('.pkm-mx-ok'); if (b) b.focus({ preventScroll: true }); if (done) done(); });
+      },
+      // Échec (serveur) : la boîte repart vers le haut, l'écran se ferme.
+      fail() { timers.forEach(clearTimeout); ov.classList.add('pkm-mx-gone'); setTimeout(() => ov.remove(), still ? 0 : 420); }
+    };
   };
+  const myReveal = (lot, done) => myStage().win(lot, done);
   // Achat et ouverture d'une boîte.
   // gift : boîte offerte (série de 7 jours d'affilée de PA du jour, 2026-11-09), ouverte sans payer de PA.
   xpProto.myOpen = function (gift) {
@@ -90,7 +117,8 @@
     const apply = (lot, patch) => myReveal(lot, () => { this.setState(Object.assign({ myBusy: false, myAsk: false }, patch)); this.flash && this.flash(); });
     if (xpCloud()) {
       if (this.gcNeed && this.gcNeed()) return;
-      this.setState({ myBusy: true });
+      this.setState({ myBusy: true, myAsk: false });
+      const stage = myStage();
       Cloud.rpc(gift ? 'open_gift_box' : 'open_mystery_box', { req: Cloud.reqId() }).then(r => {
         const lot = MY_LOTS.find(x => x.id === r.lot) || { id: r.lot, label: r.label || 'Lot', short: r.label || 'Lot' };
         const patch = { pa: typeof gcPa === 'function' ? gcPa(this.st(), r.pa | 0) : (r.pa | 0), pk: typeof gcPk === 'function' ? gcPk(this.st(), r.pk | 0) : (r.pk | 0), scanBonus: r.scan_bonus | 0 };
@@ -99,8 +127,8 @@
         if (r.free_boxes !== undefined) patch.myFree = r.free_boxes | 0;
         if (r.pk_earned !== undefined) patch.pkEarned = r.pk_earned | 0;
         if (lot.poke) patch.pkOwn = (this.st().pkOwn || []).concat([lot.poke]);
-        apply(lot, patch);
-      }, e => { this.setState({ myBusy: false, myAsk: false }); if (this.gcFail) this.gcFail(e); else this.setState({ toast: 'Ouverture impossible pour le moment' }); });
+        stage.win(lot, () => { this.setState(Object.assign({ myBusy: false, myAsk: false }, patch)); this.flash && this.flash(); });
+      }, e => { stage.fail(); this.setState({ myBusy: false, myAsk: false }); if (this.gcFail) this.gcFail(e); else this.setState({ toast: 'Ouverture impossible pour le moment' }); });
       return;
     }
     // Sur l'appareil (démo, tests) : même tirage que le serveur.
@@ -132,7 +160,8 @@
     return {
       on: !!until, off: !until, left: until ? xpLeft(until - Date.now()) : '', end: until ? xpEnd(until) : '',
       paOn: !!this.paXpUntilMs(), paLeft: this.paXpUntilMs() ? xpLeft(this.paXpUntilMs() - Date.now()) : '',
-      head: 'Boîte mystère', sub: 'Une boîte cadeau, un lot surprise : des 2XP PK, des 2XP PA, des scans bonus ou un Pokémon légendaire. Un Pokémon déjà débloqué n’est jamais redonné.',
+      artCls: 'pkm-my-boxwrap pkm-my-v-' + myVis().id, artBase: 'img/mybox/' + myVis().id + '-base.svg', artLid: 'img/mybox/' + myVis().id + '-lid.svg',
+      head: 'Boîte mystère', sub: 'Un lot surprise à chaque ouverture : des 2XP PK, des 2XP PA, des scans bonus ou un Pokémon légendaire. Un Pokémon déjà débloqué n’est jamais redonné.',
       price: xpNum(MY_PRICE), can: pa >= MY_PRICE, miss: pa < MY_PRICE, missText: 'Il te manque ' + xpNum(Math.max(0, MY_PRICE - pa)) + ' PA',
       busy: !!s.myBusy, ask: !!s.myAsk && pa >= MY_PRICE, idle: !(s.myAsk && pa >= MY_PRICE),
       buyLabel: 'Ouvrir une boîte · ' + xpNum(MY_PRICE) + ' PA', confirmText: 'Échanger ' + xpNum(MY_PRICE) + ' PA contre une boîte mystère ?',

@@ -117,7 +117,7 @@ await page.screenshot({ path: shot('scan-bonus.png') });
 await page.evaluate(() => window.__pkm.setState({ admSheet: false, admin: { on: false } })); await page.waitForTimeout(300);
 await page.evaluate(() => window.__pkm.premOpen()); await page.waitForTimeout(1200);
 ok('offre Premium : « 1er mois : 2XP PK offert », « Soutenir Dropicards » avec le cœur dans la main', /1er mois : 2XP PK offert/.test(N(await page.locator('.pkm-prem-perks').innerText())) && /Soutenir Dropicards Pour vous faire gagner de plus en plus de lots/.test(N(await page.locator('.pkm-prem-perks').innerText())) && (await page.locator('svg.pkm-prem-heart').count()) === 1);
-ok('prix : 6,90 € par mois, 69,90 € par an', /69,90 €/.test(N(await page.locator('section[aria-label="Dropicards Premium"]').innerText())) && /6,90 €/.test(N(await page.locator('section[aria-label="Dropicards Premium"]').innerText())));
+ok('prix : 9,90 € par mois, 69,90 € par an', /69,90 €/.test(N(await page.locator('section[aria-label="Dropicards Premium"]').innerText())) && /9,90 €/.test(N(await page.locator('section[aria-label="Dropicards Premium"]').innerText())));
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

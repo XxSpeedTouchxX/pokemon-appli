@@ -15,7 +15,7 @@ ok('mentions : éditeur (micro-entreprise, adresse, téléphone), hébergeur, no
 await page.screenshot({ path: shot('legal-mentions.png') });
 const tabs = await sh.locator('[aria-label="Rubriques"] button').allInnerTexts();
 ok('4 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Utilisation,Vente (Premium)');
-for (const [tab, title, re] of [['Confidentialité', 'Politique de confidentialité', /Brevo[\s\S]*Stripe[\s\S]*arrondie à environ 100 m[\s\S]*CNIL/], ['Utilisation', 'Conditions générales d’utilisation', /pas une plateforme de vente/], ['Vente (Premium)', 'Conditions générales de vente', /6,90 € par mois[\s\S]*69,90 € par an[\s\S]*renouvelé automatiquement[\s\S]*14 jours[\s\S]*médiateur/]]) {
+for (const [tab, title, re] of [['Confidentialité', 'Politique de confidentialité', /Brevo[\s\S]*Stripe[\s\S]*arrondie à environ 100 m[\s\S]*CNIL/], ['Utilisation', 'Conditions générales d’utilisation', /pas une plateforme de vente/], ['Vente (Premium)', 'Conditions générales de vente', /9,90 € par mois[\s\S]*24,90 € pour 3 mois[\s\S]*39,90 € pour 6 mois[\s\S]*69,90 € par an[\s\S]*renouvelé automatiquement[\s\S]*14 jours[\s\S]*médiateur/]]) {
   await sh.locator('[aria-label="Rubriques"] button:has-text("' + tab + '")').click(); await page.waitForTimeout(250);
   ok(tab + ' : « ' + title + ' », texte attendu', re.test(await sh.innerText()) && (await sh.locator('h2').innerText()) === title);
 }

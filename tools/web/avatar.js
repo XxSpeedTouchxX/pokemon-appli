@@ -3,7 +3,17 @@
   // original, en SVG) avec son Pokémon préféré à ses côtés. Cinq rubriques, comme dans la vidéo du porteur :
   //   Préféré (Pokémon choisi parmi ceux débloqués dans le Pokédex, place et taille ; un 2ᵉ « coup de cœur » en PRO),
   //   Visage (teint, forme, yeux), Cheveux (coiffure, couleur), Style (tenue), Décor (fond).
-  // Bouton « Aléatoire » ; aperçu en grand ; « Enregistrer mon avatar ».
+  // Aperçu en grand ; « Enregistrer mon avatar ». Bouton « Aléatoire » retiré le 2026-11-10 (porteur).
+  // Refonte du 2026-11-10 (porteur : « c'est trop copié-collé, 2 lignes : ton avatar (Cheveux, Visage, Style, Décor) et
+  // ton Pokémon, avec des accessoires, la version shiny, et le Pokémon déplaçable n'importe où sur l'avatar ») :
+  //   - ligne « Ton avatar » : Cheveux, Visage, Style, Décor ; ligne « Ton Pokémon » : Pokémon, Accessoire, Shiny ;
+  //   - le Pokémon se fait glisser du doigt n'importe où dans l'aperçu (px, py : centre en % de l'avatar), devant ou
+  //     derrière le dresseur ; l'accessoire aussi (ax, ay : décalage, asz : taille) ;
+  //   - accessoires dessinés pour Dropicards (lunettes de soleil, casquette de dresseur, couronne, nœud, chapeau de fête,
+  //     écharpe) ; version shiny (sprites web/img/pokemon/shiny/, tools/sprites/fetch_shiny.py) ;
+  //   - 3 interfaces proposées (?avui=1 « Studio » par défaut, 2 « Carte de dresseur », 3 « Plein écran »).
+  //   Prix PRO proposés, à confirmer : shiny 300 PA ; couronne 150 PA ; nœud, chapeau de fête, écharpe 100 PA ;
+  //   lunettes et casquette gratuites (serveur : 021_avatar_v2.sql).
   // Styles PRO (badge couronne) : ouverts avec l'abonnement Premium, ou débloqués pour toujours avec des PA (prix à
   // côté de chaque style). On peut essayer un style PRO dans l'aperçu ; l'enregistrer demande de le débloquer.
   // L'avatar enregistré (avatarCfg) est dessiné dans une image (avatarPng, 256 px) qui remplace l'illustration partout
@@ -28,13 +38,32 @@
     { id: 'vert', label: 'Vert', c: ['#6EDDA8', '#1E7F5C'] }, { id: 'ciel', label: 'Ciel', c: ['#BDE6FF', '#3D8BFF'] }, { id: 'corail', label: 'Corail', c: ['#FFB59E', '#E5484D'] },
     { id: 'jaune', label: 'Jaune', c: ['#FFF0A0', '#F2A900'] },
     { id: 'etoiles', label: 'Étoiles', pa: 150 }, { id: 'holo', label: 'Holo', pa: 150 }, { id: 'aurore', label: 'Aurore', pa: 150 }, { id: 'volcan', label: 'Volcan', pa: 150 }];
+  // Accessoires du Pokémon (2026-11-10) : dessins originaux. w : largeur (part de la largeur du Pokémon), cx, cy : centre
+  // (part de sa boîte, depuis son coin haut gauche ; cy < 0 = au-dessus de la tête), vb : largeur et hauteur du dessin.
+  const AV_ACC = [
+    { id: 'aucun', label: 'Aucun' },
+    { id: 'lunettes', label: 'Lunettes de soleil', w: 0.62, cx: 0.5, cy: 0.28, vb: [100, 34],
+      svg: '<path d="M4 6h92v6l-4 1c-2 14-10 19-22 19-11 0-17-6-19-15h-2c-2 9-8 15-19 15-12 0-20-5-22-19l-4-1z" fill="#14121C" stroke="#000" stroke-width="2" stroke-linejoin="round"/><path d="M14 13c2 6 6 9 11 10M60 13c2 6 6 9 11 10" stroke="#8FD3FF" stroke-width="3" stroke-linecap="round" opacity=".8"/>' },
+    { id: 'casquette', label: 'Casquette de dresseur', w: 0.8, cx: 0.5, cy: 0.03, vb: [100, 62],
+      svg: '<path d="M14 44C14 18 30 4 52 4s36 14 36 40z" fill="#E5484D" stroke="#2A1E2E" stroke-width="3" stroke-linejoin="round"/><path d="M38 44c0-20 6-34 14-38 8 4 14 18 14 38z" fill="#FFFFFF" stroke="#2A1E2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M54 14l-8 13h6l-4 11 10-15h-6l4-9z" fill="#FFD60A" stroke="#2A1E2E" stroke-width="1.5" stroke-linejoin="round"/><path d="M6 44h80c8 0 12 4 12 8s-4 6-10 6H18C8 58 4 50 6 44z" fill="#C93A40" stroke="#2A1E2E" stroke-width="3" stroke-linejoin="round"/>' },
+    { id: 'couronne', label: 'Couronne', pa: 150, w: 0.5, cx: 0.5, cy: -0.06, vb: [100, 64],
+      svg: '<path d="M8 22l20 16L50 6l22 32 20-16-6 38H14z" fill="#FFD60A" stroke="#7A4A00" stroke-width="3.5" stroke-linejoin="round"/><rect x="14" y="52" width="72" height="9" rx="3" fill="#FFB000" stroke="#7A4A00" stroke-width="3"/><circle cx="50" cy="40" r="6" fill="#E5484D" stroke="#7A4A00" stroke-width="2.5"/><circle cx="8" cy="20" r="5" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"/><circle cx="50" cy="6" r="5" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"/><circle cx="92" cy="20" r="5" fill="#FFF3A6" stroke="#7A4A00" stroke-width="2.5"/>' },
+    { id: 'noeud', label: 'Nœud', pa: 100, w: 0.38, cx: 0.78, cy: 0.06, vb: [100, 60],
+      svg: '<path d="M50 30C38 10 8 2 6 18c-2 14 26 22 44 12zM50 30c12-20 42-28 44-12 2 14-26 22-44 12z" fill="#FF7AC6" stroke="#8A1E5A" stroke-width="3.5" stroke-linejoin="round"/><path d="M44 34l-12 22 12-4 6 6zM56 34l12 22-12-4-6 6z" fill="#FF5BB0" stroke="#8A1E5A" stroke-width="3" stroke-linejoin="round"/><circle cx="50" cy="30" r="8" fill="#FFB3DF" stroke="#8A1E5A" stroke-width="3"/>' },
+    { id: 'fete', label: 'Chapeau de fête', pa: 100, w: 0.3, cx: 0.55, cy: -0.16, vb: [60, 84],
+      svg: '<path d="M30 10L6 78h48z" fill="#5EC8F0" stroke="#163A66" stroke-width="3.5" stroke-linejoin="round"/><path d="M22 34l18 6M15 54l30 8" stroke="#FFD60A" stroke-width="6" stroke-linecap="round"/><circle cx="30" cy="9" r="8" fill="#FF7AC6" stroke="#163A66" stroke-width="3"/><path d="M6 78h48" stroke="#163A66" stroke-width="4" stroke-linecap="round"/>' },
+    { id: 'echarpe', label: 'Écharpe', pa: 100, w: 0.66, cx: 0.5, cy: 0.62, vb: [100, 52],
+      svg: '<path d="M6 12c28 10 60 10 88 0l2 14c-30 12-62 12-92 0z" fill="#E5484D" stroke="#6E1408" stroke-width="3" stroke-linejoin="round"/><path d="M64 22l4 26 14-4-4-24z" fill="#C93A40" stroke="#6E1408" stroke-width="3" stroke-linejoin="round"/><path d="M20 18v8M36 21v8M52 22v8" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".7"/>' }
+  ];
+  const AV_SHINY = { id: 'shiny:1', label: 'Version shiny', pa: 300 };
   const AV_POS = [['right', 'À droite'], ['left', 'À gauche'], ['shoulder', 'Sur l’épaule'], ['above', 'Au-dessus'], ['front', 'Devant'], ['behind', 'Derrière']];
   const AV_SLOT2 = { id: 'slot:2', label: 'Coup de cœur', pa: 300 };
   // Catégorie → liste, clé de l'avatar, préfixe de l'identifiant d'un style PRO (le même que sur le serveur).
-  const AV_CATS = { skin: [AV_SKIN, 'skin'], face: [AV_FACE, 'face'], eyes: [AV_EYES, 'eyes'], hair: [AV_HAIR, 'hair'], hc: [AV_HC, 'hc'], outfit: [AV_OUTFIT, 'outfit'], bg: [AV_BG, 'bg'] };
-  const AV_DEF = { skin: 's3', face: 'rond', eyes: 'grands', hair: 'court', hc: 'brun', outfit: 'tshirt', bg: 'type', poke: 25, pos: 'right', size: 100, poke2: 0 };
+  const AV_CATS = { skin: [AV_SKIN, 'skin'], face: [AV_FACE, 'face'], eyes: [AV_EYES, 'eyes'], hair: [AV_HAIR, 'hair'], hc: [AV_HC, 'hc'], outfit: [AV_OUTFIT, 'outfit'], bg: [AV_BG, 'bg'], acc: [AV_ACC, 'acc'] };
+  const AV_DEF = { skin: 's3', face: 'rond', eyes: 'grands', hair: 'court', hc: 'brun', outfit: 'tshirt', bg: 'type', poke: 25, pos: 'right', size: 100, poke2: 0,
+    acc: 'aucun', shiny: false, px: null, py: null, ax: 0, ay: 0, asz: 100 };
   // Prix en PA de chaque style PRO (copiés dans 014_avatar.sql ; un test vérifie qu'ils sont identiques).
-  const AV_PRICES = (() => { const o = {}; Object.keys(AV_CATS).forEach(k => AV_CATS[k][0].forEach(x => { if (x.pa) o[k + ':' + x.id] = x.pa; })); o[AV_SLOT2.id] = AV_SLOT2.pa; return o; })();
+  const AV_PRICES = (() => { const o = {}; Object.keys(AV_CATS).forEach(k => AV_CATS[k][0].forEach(x => { if (x.pa) o[k + ':' + x.id] = x.pa; })); o[AV_SLOT2.id] = AV_SLOT2.pa; o[AV_SHINY.id] = AV_SHINY.pa; return o; })();
   const avFind = (k, id) => AV_CATS[k][0].find(x => x.id === id) || AV_CATS[k][0].find(x => x.id === AV_DEF[k]);
 
   // Teinte plus sombre ou plus claire d'une couleur (#RRGGBB).
@@ -128,23 +157,37 @@
   const AV_SPOT = { right: [80, 80, 40], left: [20, 80, 40], shoulder: [76, 63, 30], above: [50, 15, 28], front: [50, 86, 36], behind: [76, 52, 44] };
   const avOther = pos => (pos === 'left' ? 'right' : 'left');
   const avTypeColor = n => { const e = DEX[n]; return e && e.types && DEX_TYPE[e.types[0]] ? DEX_TYPE[e.types[0]] : ''; };
-  // Avatar complet en calques (aperçu, classement) : fond, Pokémon derrière, dresseur, Pokémon devant.
+  // Avatar complet en calques (aperçu, classement) : fond, Pokémon derrière, dresseur, Pokémon devant, son accessoire.
+  // Le Pokémon est placé par son centre (px, py, en % de l'avatar) quand il a été glissé, sinon à sa place prédéfinie.
+  const avSprite = (n, shiny) => (shiny ? 'img/pokemon/shiny/' + n + '.png' : dexSprite(n, true));
+  const avBox = (l, t, w, h) => ({ l: l, t: t, w: w, h: h, style: 'left: ' + l.toFixed(1) + '%; top: ' + t.toFixed(1) + '%; width: ' + w.toFixed(1) + '%; height: ' + h.toFixed(1) + '%' });
   const avLayers = c => {
-    const spot = (pos, n, k) => { if (!n || !DEX[n]) return null; const p = AV_SPOT[pos] || AV_SPOT.right, w = p[2] * (Number(c.size) || 100) / 100 * (k || 1);
-      return { src: dexSprite(n, true), style: 'left: ' + (p[0] - w / 2).toFixed(1) + '%; top: ' + (p[1] - w / 2).toFixed(1) + '%; width: ' + w.toFixed(1) + '%; height: ' + w.toFixed(1) + '%', name: DEX[n].name }; };
-    const p1 = spot(c.pos, c.poke), p2 = c.poke2 ? spot(c.pos === 'right' || c.pos === 'left' ? avOther(c.pos) : 'left', c.poke2, 0.85) : null;
+    const spot = (pos, n, k, free) => { if (!n || !DEX[n]) return null; const p = AV_SPOT[pos] || AV_SPOT.right, w = (free ? 40 : p[2]) * (Number(c.size) || 100) / 100 * (k || 1);
+      const cx = free ? c.px : p[0], cy = free ? c.py : p[1], b = avBox(cx - w / 2, cy - w / 2, w, w);
+      return Object.assign(b, { src: avSprite(n, k ? false : c.shiny), name: DEX[n].name, n: n }); };
+    const free = c.px != null && c.py != null;
+    const p1 = spot(c.pos, c.poke, 0, free), p2 = c.poke2 ? spot(free ? (c.px > 50 ? 'left' : 'right') : (c.pos === 'right' || c.pos === 'left' ? avOther(c.pos) : 'left'), c.poke2, 0.85, false) : null;
     const behind = c.pos === 'behind';
-    return { bg: avUrl(avBg(c, avTypeColor(c.poke))), char: avUrl(avChar(c)), back: behind ? p1 : null, front: behind ? null : p1, extra: p2, hasBack: behind && !!p1, hasFront: !behind && !!p1, hasExtra: !!p2 };
+    // Accessoire posé sur le Pokémon, d'après sa boîte (pixels visibles du sprite, 96 × 96) ; décalage et taille choisis.
+    let acc = null;
+    const a = AV_ACC.find(x => x.id === c.acc);
+    if (p1 && a && a.svg && DEX[c.poke] && DEX[c.poke].box) {
+      const [x0, y0, x1, y1] = DEX[c.poke].box, u = p1.w / 96, bw = (x1 - x0) * u, bh = (y1 - y0) * u, z = (Number(c.asz) || 100) / 100;
+      const w = a.w * bw * z, h = w * a.vb[1] / a.vb[0], cx = p1.l + x0 * u + a.cx * bw + (Number(c.ax) || 0) / 100 * bw, cy = p1.t + y0 * u + a.cy * bh + (Number(c.ay) || 0) / 100 * bw;
+      acc = Object.assign(avBox(cx - w / 2, cy - h / 2, w, h), { src: avUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + a.vb[0] + ' ' + a.vb[1] + '">' + a.svg + '</svg>') });
+    }
+    return { bg: avUrl(avBg(c, avTypeColor(c.poke))), char: avUrl(avChar(c)), back: behind ? p1 : null, front: behind ? null : p1, extra: p2, hasBack: behind && !!p1, hasFront: !behind && !!p1, hasExtra: !!p2,
+      acc: acc, hasAccBack: behind && !!acc, hasAccFront: !behind && !!acc };
   };
   // Avatar enregistré en image (JPEG 256 px) : même ordre des calques ; sprites dessinés sans lissage (pixel art).
   const avLoad = src => new Promise((ok, ko) => { const im = new Image(); im.onload = () => ok(im); im.onerror = ko; im.src = src; });
   const avCompose = async c => {
     const L = avLayers(c), N = 256, cv = document.createElement('canvas');
     cv.width = cv.height = N;
-    const x = cv.getContext('2d'), draw = async (src, r) => { const im = await avLoad(src); x.drawImage(im, r ? r[0] : 0, r ? r[1] : 0, r ? r[2] : N, r ? r[2] : N); };
-    const rect = p => { const m = /left: ([\d.-]+)%; top: ([\d.-]+)%; width: ([\d.]+)%/.exec(p.style); return [m[1] / 100 * N, m[2] / 100 * N, m[3] / 100 * N]; };
-    const sprite = async p => { if (!p) return; x.imageSmoothingEnabled = false; try { await draw(p.src, rect(p)); } catch (e) { /* sprite indisponible */ } x.imageSmoothingEnabled = true; };
-    await draw(L.bg); await sprite(L.back); await draw(L.char); await sprite(L.front); await sprite(L.extra);
+    const x = cv.getContext('2d'), draw = async (src, r) => { const im = await avLoad(src); x.drawImage(im, r ? r[0] : 0, r ? r[1] : 0, r ? r[2] : N, r ? r[3] : N); };
+    const rect = p => [p.l / 100 * N, p.t / 100 * N, p.w / 100 * N, p.h / 100 * N];
+    const sprite = async (p, smooth) => { if (!p) return; x.imageSmoothingEnabled = !!smooth; try { await draw(p.src, rect(p)); } catch (e) { /* image indisponible */ } x.imageSmoothingEnabled = true; };
+    await draw(L.bg); await sprite(L.back); if (L.hasAccBack) await sprite(L.acc, true); await draw(L.char); await sprite(L.front); if (L.hasAccFront) await sprite(L.acc, true); await sprite(L.extra);
     return cv.toDataURL('image/jpeg', 0.9);
   };
   // Configuration complète et valide (valeurs inconnues remplacées par celles par défaut).
@@ -153,19 +196,22 @@
     Object.keys(AV_CATS).forEach(k => { if (!AV_CATS[k][0].some(x => x.id === o[k])) o[k] = AV_DEF[k]; });
     if (!AV_POS.some(([k]) => k === o.pos)) o.pos = 'right';
     o.size = Math.max(60, Math.min(140, Math.round(Number(o.size) || 100)));
+    const num = (v, a, b) => (v == null || v === '' || !isFinite(Number(v)) ? null : Math.max(a, Math.min(b, Math.round(Number(v)))));
+    o.px = num(o.px, -10, 110); o.py = num(o.py, -10, 110); if (o.px == null || o.py == null) { o.px = null; o.py = null; }
+    o.ax = num(o.ax, -80, 80) || 0; o.ay = num(o.ay, -80, 80) || 0; o.asz = num(o.asz, 50, 180) || 100; o.shiny = o.shiny === true;
     const own = n => !!DEX[n] && (!s || dexOwn(s, n));
     if (!own(o.poke)) o.poke = s && own(s.buddy) ? s.buddy : (s && own(s.evo && s.evo.line && s.evo.line[0]) ? s.evo.line[0] : 25);
     if (!own(o.poke2) || o.poke2 === o.poke) o.poke2 = 0;
     return o;
   };
   // Styles PRO utilisés par une configuration, et ceux qui ne sont pas encore débloqués.
-  const avProIds = c => { const ids = Object.keys(AV_CATS).map(k => k + ':' + c[k]).filter(id => AV_PRICES[id]); if (c.poke2) ids.push(AV_SLOT2.id); return ids; };
+  const avProIds = c => { const ids = Object.keys(AV_CATS).map(k => k + ':' + c[k]).filter(id => AV_PRICES[id]); if (c.poke2) ids.push(AV_SLOT2.id); if (c.shiny) ids.push(AV_SHINY.id); return ids; };
 
   const avProto = Component.prototype;
   avProto.avHas = function (id) { const s = this.st(); return !AV_PRICES[id] || (this.premOn && this.premOn()) || (Array.isArray(s.avOwned) && s.avOwned.indexOf(id) >= 0); };
   avProto.avOpen = function () {
     const s = this.st();
-    this.setState({ avDraft: avNorm(s.avatarCfg, s), avTab: 'poke', avPick: 0, avLock: '' });
+    this.setState({ avDraft: avNorm(s.avatarCfg, s), avTab: 'hair', avPick: 0, avLock: '' });
     this.push('avatar');
     this.avSync();
   };
@@ -175,8 +221,9 @@
     return Cloud.rpc('avatar_state').then(r => {
       if (!r) return null;
       const s = this.st(), patch = { avOwned: Array.isArray(r.owned) ? r.owned : [] };
-      if (r.avatar && JSON.stringify(r.avatar) !== JSON.stringify(s.avatarCfg || null)) {
-        patch.avatarCfg = avNorm(r.avatar, null);
+      if (r.avatar && Object.keys(r.avatar).some(k => JSON.stringify(r.avatar[k]) !== JSON.stringify((s.avatarCfg || {})[k]))) {
+        // Serveur sans 021 : il ne garde pas encore la place, l'accessoire ni le shiny ; ceux de l'appareil restent.
+        patch.avatarCfg = avNorm(Object.assign({}, s.avatarCfg || {}, r.avatar), null);
         avCompose(patch.avatarCfg).then(png => this.setState({ avatarPng: png }), () => {});
       }
       this.setState(patch);
@@ -184,14 +231,6 @@
     }, () => null);
   };
   avProto.avSet = function (patch) { this.setState({ avDraft: Object.assign({}, this.st().avDraft || AV_DEF, patch) }); };
-  avProto.avRandom = function () {
-    const s = this.st(), pick = (k) => { const l = AV_CATS[k][0].filter(x => this.avHas(k + ':' + x.id)); return l[Math.floor(Math.random() * l.length)].id; };
-    const owned = DEX_DATA.filter(e => dexOwn(s, e.n)).map(e => e.n), d = s.avDraft || AV_DEF;
-    const patch = {}; Object.keys(AV_CATS).forEach(k => { patch[k] = pick(k); });
-    patch.poke = owned.length ? owned[Math.floor(Math.random() * owned.length)] : d.poke;
-    patch.pos = AV_POS[Math.floor(Math.random() * 3)][0];
-    this.avSet(patch); this.flash && this.flash();
-  };
   // Achat d'un style PRO avec des PA (serveur quand le compte est connecté).
   avProto.avBuy = function (id) {
     const s = this.st(), price = AV_PRICES[id], pa = Number(s.pa) || 0;
@@ -229,8 +268,14 @@
   };
 
   // ——— Écran « Mon avatar » ———
-  const AV_TABS = [['poke', 'Préféré', 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z'], ['face', 'Visage', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9 10h.01M15 10h.01M9 15c1.5 1.3 4.5 1.3 6 0'],
-    ['hair', 'Cheveux', 'M6 9a6 6 0 0 1 12 0v3M6 9c2 2 6 2 8-2 1 3 3 4 4 5M6 9v6'], ['style', 'Style', 'M8 4l4 3 4-3 4 4-3 3v9H7v-9L4 8z'], ['bg', 'Décor', 'M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4']];
+  // Deux lignes de rubriques (2026-11-10, porteur) : « Ton avatar » puis « Ton Pokémon ».
+  const AV_ROW1 = [['hair', 'Cheveux', 'M6 9a6 6 0 0 1 12 0v3M6 9c2 2 6 2 8-2 1 3 3 4 4 5M6 9v6'], ['face', 'Visage', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9 10h.01M15 10h.01M9 15c1.5 1.3 4.5 1.3 6 0'],
+    ['style', 'Style', 'M8 4l4 3 4-3 4 4-3 3v9H7v-9L4 8z'], ['bg', 'Décor', 'M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4']];
+  const AV_ROW2 = [['poke', 'Pokémon', 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z'], ['acc', 'Accessoire', 'M3 14c0-4 4-7 9-7s9 3 9 7M3 14h18M7 14v-2M17 14v-2'],
+    ['shiny', 'Shiny', 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z']];
+  const AV_TABS = AV_ROW1.concat(AV_ROW2);
+  // Interfaces proposées (2026-11-10) : 1 « Studio » (défaut), 2 « Carte de dresseur », 3 « Plein écran » (?avui=).
+  const avUi = () => { let n = 1; try { const m = /[?&]avui=([123])\b/.exec(location.search); if (m) { n = Number(m[1]); localStorage.setItem('pkm-avui', String(n)); } else n = Number(localStorage.getItem('pkm-avui')) || 1; } catch (e) { n = 1; } return n >= 1 && n <= 3 ? n : 1; };
   avProto.vAvatar = function (s) {
     const d = avNorm(s.avDraft, s), tab = s.avTab || 'poke', prem = !!(this.premOn && this.premOn());
     const mini = patch => { const c = Object.assign({}, d, patch); return { bg: avUrl(avBg(c, avTypeColor(c.poke))), char: avUrl(avChar(c)) }; };
@@ -244,12 +289,16 @@
     const pk = n => n && DEX[n] ? { n: n, name: DEX[n].name, icon: 'img/pokemon/icon/' + n + '.png' } : null;
     const owned = DEX_DATA.filter(e => dexOwn(s, e.n));
     const q = String(s.avQ || '').trim().toLowerCase();
-    const lockId = s.avLock || '', lockCat = lockId.split(':')[0], lockItem = lockId === AV_SLOT2.id ? AV_SLOT2 : (AV_CATS[lockCat] ? AV_CATS[lockCat][0].find(x => x.id === lockId.split(':')[1]) : null);
+    const lockId = s.avLock || '', lockCat = lockId.split(':')[0], lockItem = lockId === AV_SLOT2.id ? AV_SLOT2 : lockId === AV_SHINY.id ? AV_SHINY : (AV_CATS[lockCat] ? AV_CATS[lockCat][0].find(x => x.id === lockId.split(':')[1]) : null);
     const pa = Number(s.pa) || 0, price = AV_PRICES[lockId] || 0;
     return {
       tabs: AV_TABS.map(([k, label, path]) => ({ label: label, path: path, on: tab === k, cls: 'pkm-av-tab' + (tab === k ? ' pkm-av-tab-on' : ''), pick: () => this.setState({ avTab: k }) })),
-      isPoke: tab === 'poke', isFace: tab === 'face', isHair: tab === 'hair', isStyle: tab === 'style', isBg: tab === 'bg',
-      prev: L, random: () => this.avRandom(), save: () => this.avSave(), busy: !!s.avBusy, saveLabel: s.avBusy ? 'Enregistrement…' : 'Enregistrer mon avatar',
+      row1: AV_ROW1.map(([k, label, path]) => ({ label: label, path: path, on: tab === k, cls: 'pkm-av-tab' + (tab === k ? ' pkm-av-tab-on' : ''), pick: () => this.setState({ avTab: k }) })),
+      row2: AV_ROW2.map(([k, label, path]) => ({ label: label, path: path, on: tab === k, cls: 'pkm-av-tab pkm-av-tab2' + (tab === k ? ' pkm-av-tab-on' : '') + (k === 'shiny' && d.shiny ? ' pkm-av-tab-shiny' : ''), pick: () => this.setState({ avTab: k }) })),
+      uiCls: 'pkm-av-ui pkm-av-ui' + avUi(), prevCls: 'pkm-av-prev' + (tab === 'acc' ? ' pkm-av-drag-acc' : ' pkm-av-drag-poke'),
+      dragHint: tab === 'acc' ? (d.acc !== 'aucun' ? 'Fais glisser l’accessoire pour l’ajuster' : '') : 'Fais glisser ton Pokémon où tu veux',
+      isPoke: tab === 'poke', isFace: tab === 'face', isHair: tab === 'hair', isStyle: tab === 'style', isBg: tab === 'bg', isAcc: tab === 'acc', isShiny: tab === 'shiny',
+      prev: L, save: () => this.avSave(), busy: !!s.avBusy, saveLabel: s.avBusy ? 'Enregistrement…' : 'Enregistrer mon avatar',
       trial: pend.length > 0, trialText: 'Essai : ' + pend.length + ' style' + (pend.length > 1 ? 's' : '') + ' PRO à débloquer pour enregistrer',
       prem: prem, premTag: prem ? 'Premium : tous les styles PRO sont ouverts' : 'Styles PRO : ouverts avec Premium, ou à débloquer avec tes PA',
       skin: AV_SKIN.map(x => opt('skin', x, true)), face: AV_FACE.map(x => opt('face', x)), eyes: AV_EYES.map(x => opt('eyes', x)),
@@ -258,7 +307,13 @@
       pokeAria: 'Changer de Pokémon préféré' + (DEX[d.poke] ? ' : ' + DEX[d.poke].name : ''), poke2Aria: 'Changer de coup de cœur' + (DEX[d.poke2] ? ' : ' + DEX[d.poke2].name : ''), slot2Has: this.avHas(AV_SLOT2.id), slot2Price: AV_SLOT2.pa + ' PA',
       slot2Lock: !this.avHas(AV_SLOT2.id), slot2Open: () => this.avHas(AV_SLOT2.id) ? this.setState({ avPick: 2, avQ: '' }) : this.setState({ avLock: AV_SLOT2.id, avLockWhy: 'try' }),
       changePoke: () => this.setState({ avPick: 1, avQ: '' }), removePoke2: () => this.avSet({ poke2: 0 }),
-      pos: AV_POS.map(([k, label]) => Object.assign({ label: label, on: d.pos === k, pick: () => this.avSet({ pos: k }) }, this.chip(d.pos === k))),
+      layer: [['right', 'Devant moi'], ['behind', 'Derrière moi']].map(([k, label]) => { const on = k === 'behind' ? d.pos === 'behind' : d.pos !== 'behind'; return Object.assign({ label: label, on: on, pick: () => this.avSet({ pos: k }) }, this.chip(on)); }),
+      moved: d.px != null, resetPlace: () => this.avSet({ px: null, py: null }),
+      acc: AV_ACC.map(x => { const o = opt('acc', x, false); o.icon = x.svg ? avUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + x.vb[0] + ' ' + x.vb[1] + '">' + x.svg + '</svg>') : ''; o.hasIcon = !!x.svg; o.none = !x.svg; o.cls = 'pkm-av-opt pkm-av-accopt' + (o.on ? ' pkm-av-on' : ''); return o; }),
+      accOn: d.acc !== 'aucun', accSize: d.asz, accSizeLabel: d.asz + ' %', onAccSize: e => this.avSet({ asz: Number(e.target.value) || 100 }), accMoved: !!(d.ax || d.ay), resetAcc: () => this.avSet({ ax: 0, ay: 0, asz: 100 }),
+      shinyHas: this.avHas(AV_SHINY.id), shinyPrice: AV_SHINY.pa + ' PA', shinyOn: d.shiny,
+      shinyCards: [false, true].map(v => ({ label: v ? 'Shiny' : 'Normal', on: d.shiny === v, img: v ? avSprite(d.poke, true) : avSprite(d.poke, false), cls: 'pkm-av-shc' + (d.shiny === v ? ' pkm-av-on' : '') + (v ? ' pkm-av-shc-s' : ''),
+        lock: v && !this.avHas(AV_SHINY.id), price: AV_SHINY.pa + ' PA', aria: (v ? 'Version shiny' : 'Version normale') + (DEX[d.poke] ? ' de ' + DEX[d.poke].name : '') + (d.shiny === v ? ', choisie' : ''), pick: () => this.avSet({ shiny: v }) })),
       size: d.size, sizeLabel: d.size + ' %', onSize: e => this.avSet({ size: Number(e.target.value) || 100 }),
       picker: {
         open: !!s.avPick, title: s.avPick === 2 ? 'Un autre coup de cœur ?' : 'Ton Pokémon préféré', sub: s.avPick === 2 ? 'Un Pokémon de plus à tes côtés.' : 'Parmi les Pokémon débloqués dans ton Pokédex.',
@@ -275,9 +330,51 @@
         buy: () => this.avBuy(lockId), buyLabel: s.avBusy ? 'Déblocage…' : 'Débloquer pour ' + price.toLocaleString('fr-FR') + ' PA',
         prem: () => { this.setState({ avLock: '' }); if (this.premOpen) this.premOpen(); else this.setState({ premOpen: true }); },
         close: () => this.setState({ avLock: '' }),
-        preview: lockItem && lockCat !== 'slot' ? (() => { const m = mini({ [lockCat]: lockItem.id }); return m; })() : L
+        preview: lockItem && lockCat !== 'slot' && lockCat !== 'shiny' && lockCat !== 'acc' ? (() => { const m = mini({ [lockCat]: lockItem.id }); return m; })() : L
       }
     };
+  };
+  // Glisser le Pokémon (ou son accessoire, rubrique « Accessoire ») du doigt dans l'aperçu (2026-11-10, porteur : « tu
+  // pourras le déplacer n'importe où sur l'écran de ton avatar »). Pendant le geste, l'image suit le doigt ; au lâcher,
+  // la place est gardée dans le brouillon (px, py ou ax, ay). Un seul écouteur pour tout le document.
+  let avDragOn = false;
+  const avDragInit = self => {
+    if (avDragOn || typeof document === 'undefined') return;
+    avDragOn = true;
+    let g = null;
+    document.addEventListener('pointerdown', ev => {
+      const box = ev.target && ev.target.closest && ev.target.closest('.pkm-av-prev');
+      if (!box) return;
+      const s = self.st(), d = avNorm(s.avDraft, s), accMode = (s.avTab || 'hair') === 'acc' && d.acc !== 'aucun';
+      const img = box.querySelector(accMode ? '.pkm-av-acc' : '.pkm-av-pk-main');
+      if (!img) return;
+      const r = box.getBoundingClientRect(), L = avLayers(d), base = accMode ? L.acc : (L.front || L.back);
+      if (!base) return;
+      ev.preventDefault();
+      g = { box: box, img: img, r: r, acc: accMode, d: d, base: base, orig: base, accL: L.acc, x0: ev.clientX, y0: ev.clientY, id: ev.pointerId };
+      try { box.setPointerCapture(ev.pointerId); } catch (e) { /* capture indisponible */ }
+      box.classList.add('pkm-av-dragging');
+      // Un appui (sans glisser) sur le Pokémon ne bouge rien ; ailleurs dans l'aperçu, le Pokémon vient sous le doigt.
+      if (!accMode && ev.target !== img) { g.base = Object.assign({}, base, { l: (ev.clientX - r.left) / r.width * 100 - base.w / 2, t: (ev.clientY - r.top) / r.height * 100 - base.h / 2 }); g.jump = true; avDragPaint(g, 0, 0); }
+    }, { passive: false });
+    document.addEventListener('pointermove', ev => { if (!g || ev.pointerId !== g.id) return; ev.preventDefault(); avDragPaint(g, (ev.clientX - g.x0) / g.r.width * 100, (ev.clientY - g.y0) / g.r.height * 100); }, { passive: false });
+    const end = ev => {
+      if (!g || (ev && ev.pointerId !== g.id)) return;
+      const k = g; g = null; k.box.classList.remove('pkm-av-dragging');
+      const dx = ev ? (ev.clientX - k.x0) / k.r.width * 100 : 0, dy = ev ? (ev.clientY - k.y0) / k.r.height * 100 : 0;
+      if (!k.jump && Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+      if (k.acc) {
+        const P = avLayers(k.d), p = P.front || P.back, bw = p && DEX[k.d.poke] ? (DEX[k.d.poke].box[2] - DEX[k.d.poke].box[0]) * p.w / 96 : 0;
+        if (bw > 0) self.avSet({ ax: Math.round((k.d.ax || 0) + dx / bw * 100), ay: Math.round((k.d.ay || 0) + dy / bw * 100) });
+      } else self.avSet({ px: Math.round(k.base.l + k.base.w / 2 + dx), py: Math.round(k.base.t + k.base.h / 2 + dy) });
+    };
+    document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+  };
+  const avDragPaint = (g, dx, dy) => {
+    const l = Math.max(-30, Math.min(130 - g.base.w, g.base.l + dx)), t = Math.max(-30, Math.min(130 - g.base.h, g.base.t + dy));
+    g.img.style.left = l.toFixed(1) + '%'; g.img.style.top = t.toFixed(1) + '%';
+    // L'accessoire suit le Pokémon pendant que celui-ci est glissé.
+    if (!g.acc) { const a = g.box.querySelector('.pkm-av-acc'), A = g.accL; if (a && A) { a.style.left = (A.l + l - g.orig.l).toFixed(1) + '%'; a.style.top = (A.t + t - g.orig.t).toFixed(1) + '%'; } }
   };
   // Bouton « Mon avatar » de Mon profil (à la place du choix d'une photo).
   const avBaseProfile = avProto.vProfile;
@@ -290,7 +387,8 @@
   avProto.renderVals = function () {
     const s = this.st(), r = avBaseRender.call(this), ui = r.ui;
     ui.isAvatar = s.screen === 'avatar';
-    r.av = ui.isAvatar ? this.vAvatar(s) : { tabs: [], skin: [], face: [], eyes: [], hair: [], hc: [], outfit: [], bg: [], pos: [], prev: {}, picker: { items: [] }, lock: { preview: {} } };
+    r.av = ui.isAvatar ? this.vAvatar(s) : { tabs: [], row1: [], row2: [], skin: [], face: [], eyes: [], hair: [], hc: [], outfit: [], bg: [], acc: [], layer: [], shinyCards: [], prev: {}, picker: { items: [] }, lock: { preview: {} } };
+    if (ui.isAvatar) avDragInit(this);
     if (ui.isAvatar) Object.assign(ui, { title: 'Mon avatar', subtitle: '', hasSubtitle: false, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
     return r;
   };
@@ -311,4 +409,4 @@
     return p;
   };
   // Mini-avatar d'un autre joueur (classement) : calques de sa configuration.
-  const avMini = cfg => { if (!cfg || typeof cfg !== 'object') return null; const L = avLayers(avNorm(cfg, null)); return { bg: L.bg, char: L.char, poke: L.front || L.back, pokeStyle: (L.front || L.back || {}).style || '', hasPoke: !!(L.front || L.back) }; };
+  const avMini = cfg => { if (!cfg || typeof cfg !== 'object') return null; const L = avLayers(avNorm(cfg, null)); return { bg: L.bg, char: L.char, poke: L.front || L.back, pokeStyle: (L.front || L.back || {}).style || '', hasPoke: !!(L.front || L.back), acc: L.acc || {}, accStyle: (L.acc || {}).style || '', hasAcc: !!L.acc }; };

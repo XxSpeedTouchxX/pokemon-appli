@@ -70,3 +70,60 @@
 .pkm-av-short { margin: -4px 0 0; font-size: 12.5px; color: #FF8A8F; font-weight: 700; }
 .pkm-av-premgo { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 2px solid #C9A227; border-radius: 999px; background: linear-gradient(135deg, #F3F6FC, #AEB9D0); color: #0B1120; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
 .pkm-av-premgo svg { fill: #FFD60A; stroke: #0B1120; stroke-width: 1.4; stroke-linejoin: round; }
+
+/* ——— Mon avatar v2 (2026-11-10, porteur) : 2 lignes de rubriques (Ton avatar / Ton Pokémon), Pokémon et accessoire
+   à glisser dans l'aperçu, shiny ; 3 interfaces proposées (?avui=1 Studio, 2 Carte de dresseur, 3 Plein écran). ——— */
+.pkm-av-ui { flex: none; display: flex; flex-direction: column; gap: 12px; }
+.pkm-av-prev { touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.pkm-av-prev img { -webkit-user-drag: none; pointer-events: auto; }
+.pkm-av-dragging { cursor: grabbing; }
+.pkm-av-dragging .pkm-av-pk-main, .pkm-av-dragging .pkm-av-acc { filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.45)) brightness(1.06); }
+.pkm-av-acc { position: absolute; display: block; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3)); }
+.pkm-av-drag-acc .pkm-av-acc { outline: 2px dashed rgba(255, 214, 10, 0.9); outline-offset: 2px; border-radius: 6px; }
+.pkm-av-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); padding: 5px 12px; border-radius: 999px; background: rgba(11, 17, 32, 0.72); color: #FFFFFF; font-size: 11.5px; font-weight: 700; white-space: nowrap; pointer-events: none; }
+.pkm-av-hint:empty { display: none; }
+.pkm-av-dragging .pkm-av-hint { opacity: 0; }
+.pkm-av-rows { flex: none; display: flex; flex-direction: column; gap: 6px; }
+.pkm-av-rowl { font-size: 11.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #0B1120; opacity: 0.75; padding-left: 6px; }
+.pkm-av-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pkm-av-tabs2 { grid-template-columns: repeat(3, minmax(0, 1fr)); background: linear-gradient(135deg, #1B1233, #111A2C); border-color: #3B2A6B; }
+.pkm-av-tab2.pkm-av-tab-on { background: linear-gradient(135deg, #FF7AC6, #B26BFF); color: #FFFFFF; }
+.pkm-av-tab-shiny:not(.pkm-av-tab-on) { color: #FFE46B; }
+.pkm-av-panel { flex: none; display: flex; flex-direction: column; gap: 12px; }
+.pkm-av-reset { min-height: 40px; padding: 0 14px; border: 1px dashed #5A6A8E; border-radius: 999px; background: transparent; color: #C9D3EA; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.pkm-av-accopt { background: #0B1120; border-color: #1E2B45; padding: 8px 2px; }
+.pkm-av-accopt.pkm-av-on { border-color: #FFD60A; background: rgba(255, 214, 10, 0.1); }
+.pkm-av-accico { display: flex; align-items: center; justify-content: center; width: 100%; height: 46px; }
+.pkm-av-accico img { max-width: 70%; max-height: 42px; }
+.pkm-av-accico svg { fill: none; stroke: #5A6A8E; stroke-width: 2; stroke-linecap: round; }
+.pkm-av-shiny { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.pkm-av-shc { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px 12px; border: 2px solid #1E2B45; border-radius: 20px; background: #0B1120; color: #F3F6FC; font: inherit; cursor: pointer; }
+.pkm-av-shc img { width: 96px; height: 96px; image-rendering: pixelated; }
+.pkm-av-shc b { font-size: 14px; }
+.pkm-av-shc-s { background: radial-gradient(90% 70% at 50% 30%, rgba(255, 228, 107, 0.22), rgba(255, 228, 107, 0) 70%), #0B1120; }
+.pkm-av-shc-s b::before { content: '✨ '; }
+.pkm-av-shc.pkm-av-on { border-color: #FFD60A; box-shadow: 0 0 16px rgba(255, 214, 10, 0.35); }
+.pkm-pg-ava-acc { image-rendering: auto; }
+/* 1 · Studio (par défaut) : grand aperçu carré, rubriques en deux lignes, réglages dessous. */
+.pkm-av-ui1 .pkm-av-prev { width: min(264px, 72vw); height: min(264px, 72vw); border-radius: 44px; }
+/* 2 · Carte de dresseur : l'aperçu dans une carte holographique dorée, rubriques en pastilles rondes. */
+.pkm-av-ui2 .pkm-av-top { padding: 14px; border-radius: 30px; background: linear-gradient(135deg, #FFE46B, #F2A900 40%, #FFF3B0 55%, #E8A100); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3); }
+.pkm-av-ui2 .pkm-av-prev { width: 100%; height: auto; aspect-ratio: 1; border-radius: 22px; border: 3px solid #0B1120; box-shadow: none; }
+.pkm-av-ui2 .pkm-av-prev::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.28) 45%, rgba(255, 255, 255, 0) 60%); background-size: 250% 100%; animation: pkmAvHolo 4s ease-in-out infinite; }
+.pkm-av-ui2 .pkm-av-tabs { background: transparent; border: 0; padding: 0; gap: 8px; }
+.pkm-av-ui2 .pkm-av-tab { min-height: 74px; border-radius: 22px; background: #111A2C; border: 2px solid #1E2B45; }
+.pkm-av-ui2 .pkm-av-tab svg { width: 26px; height: 26px; padding: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); }
+.pkm-av-ui2 .pkm-av-tab-on { border-color: #FFD60A; }
+@keyframes pkmAvHolo { 0%, 100% { background-position: 120% 0; } 50% { background-position: -20% 0; } }
+/* 3 · Plein écran : l'aperçu sur toute la largeur, rubriques en pastilles, choix sur une ligne qui défile. */
+.pkm-av-ui3 .pkm-av-top { margin: 0 -16px; padding: 0; }
+.pkm-av-ui3 .pkm-av-prev { width: 100%; height: auto; aspect-ratio: 1; border-radius: 0 0 36px 36px; border: 0; }
+.pkm-av-ui3 .pkm-av-tabs { display: flex; overflow-x: auto; scrollbar-width: none; background: transparent; border: 0; padding: 0; gap: 6px; }
+.pkm-av-ui3 .pkm-av-tab { flex: none; flex-direction: row; gap: 6px; min-height: 42px; padding: 0 14px; border-radius: 999px; background: #111A2C; color: #F3F6FC; font-size: 13px; }
+.pkm-av-ui3 .pkm-av-tab-on { background: #FFD60A; color: #0B1120; }
+.pkm-av-ui3 .pkm-av-tab2.pkm-av-tab-on { background: linear-gradient(135deg, #FF7AC6, #B26BFF); color: #FFFFFF; }
+.pkm-av-ui3 .pkm-av-grid { display: flex; overflow-x: auto; scrollbar-width: none; gap: 8px; scroll-snap-type: x mandatory; }
+.pkm-av-ui3 .pkm-av-grid > * { flex: 0 0 84px; scroll-snap-align: start; }
+@media (prefers-reduced-motion: reduce) { .pkm-av-ui2 .pkm-av-prev::after { animation: none; } }
+.pkm-av-ui2 .pkm-av-tab.pkm-av-tab-on { background: #FFD60A; color: #0B1120; }
+.pkm-av-ui2 .pkm-av-tab2.pkm-av-tab-on { background: linear-gradient(135deg, #FF7AC6, #B26BFF); color: #FFFFFF; }

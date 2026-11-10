@@ -189,6 +189,36 @@ L'app affiche les nouveaux prix depuis la version v172. Stripe, lui, garde les a
 
 Les abonnés déjà inscrits gardent leur ancien prix : Stripe ne change jamais le prix d'un abonnement en cours (c'est aussi écrit dans les conditions de vente). Pour les faire passer au nouveau prix, il faudrait les prévenir au moins un mois avant ; je te le prépare si tu le souhaites.
 
+## 8 ter. Nouveaux prix et 4 formules (2026-11-10)
+
+Prix du porteur : **9,90 € par mois**, **24,90 € pour 3 mois**, **39,90 € pour 6 mois**, **69,90 € par an**. L'app et les conditions de vente les affichent depuis la version v174. **Si tu n'as pas encore fait le § 8 bis, saute-le** : fais seulement celui-ci. Compte 10 minutes, d'abord en mode test, puis en production.
+
+**A. La base (une fois)** : Supabase Studio › SQL Editor › colle `tools/supabase/020_premium_formules.sql` › **Run**. Il permet à la base de ranger les deux nouvelles formules.
+
+**B. La fonction `stripe`** : elle a changé (4 formules). Réinstalle-la comme au § 6 (`functions/install-stripe.sh`), puis **Restart** de Supabase dans Coolify.
+
+**C. Les prix dans Stripe** : Catalogue de produits › **Dropicards Premium** › **Ajouter un autre prix**, 4 fois :
+
+| Prix | Facturation | Clé de recherche |
+|---|---|---|
+| 9,90 EUR | Récurrent · Mensuel | `dropicards_premium_month` |
+| 24,90 EUR | Récurrent · **Personnalisé : tous les 3 mois** | `dropicards_premium_quarter` |
+| 39,90 EUR | Récurrent · **Personnalisé : tous les 6 mois** | `dropicards_premium_semester` |
+| 69,90 EUR | Récurrent · Annuel | `dropicards_premium_year` |
+
+- La clé de recherche se met dans **Plus d'options de tarification**.
+- Pour le mensuel et l'annuel, coche **Transférer la clé de recherche** : elle quitte l'ancien prix.
+- Archive ensuite les anciens prix (4,90 €, 49,90 €, et 6,90 € s'il existe) : **⋯** › **Archiver le prix**. Le 69,90 € annuel du § 8 bis peut rester s'il existe déjà avec la bonne clé.
+- Seulement si tu avais mis `STRIPE_PRICE_MONTH` ou `STRIPE_PRICE_YEAR` dans Coolify : mets les nouveaux identifiants (`price_…`). Tu peux aussi ajouter `STRIPE_PRICE_QUARTER` et `STRIPE_PRICE_SEMESTER`, mais ce n'est pas obligatoire : les clés de recherche suffisent.
+
+**D. Essai** : Premium › Trimestriel › « Devenir Premium ». La page de Stripe doit afficher 24,90 €. Ferme-la sans payer. Tant qu'un prix manque dans Stripe, l'app affiche « Cette formule n'existe pas encore dans Stripe » pour cette formule seulement.
+
+Les abonnés déjà inscrits gardent leur prix.
+
+**Économies affichées** (par rapport au mensuel) : trimestriel 8,30 € par mois (−16 %, 4,80 € d'économie), semestriel 6,65 € par mois (−33 %, 19,50 €), annuel 5,83 € par mois (−41 %, 48,90 €).
+
+> **Point d'attention** : avec ces prix, l'annuel rapporte 5,83 € par mois au lieu de 9,90 €. Le revenu par abonné baisse si beaucoup de joueurs le choisissent (`docs/32` §4 est à recalculer).
+
 ## 9. Ce qui reste à décider
 
 | # | Question | Défaut proposé |
@@ -199,6 +229,6 @@ Les abonnés déjà inscrits gardent leur ancien prix : Stripe ne change jamais 
 
 ## 10. Coût
 
-- Stripe : environ 1,5 % + 0,25 € par paiement avec une carte européenne, plus environ 0,7 % pour la gestion des abonnements. Il te reste environ 6,50 € sur 6,90 € et environ 68,10 € sur 69,90 € (4,55 € sur 4,90 € et 48,55 € sur 49,90 € avec les anciens prix).
+- Stripe : environ 1,5 % + 0,25 € par paiement avec une carte européenne, plus environ 0,7 % pour la gestion des abonnements. Il te reste environ 9,45 € sur 9,90 €, 24,05 € sur 24,90 €, 38,70 € sur 39,90 € et 68,10 € sur 69,90 €.
 - Serveur : rien de plus.
 - Stripe Tax : non activé (franchise de TVA).

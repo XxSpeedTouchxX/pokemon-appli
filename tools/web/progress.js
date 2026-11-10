@@ -49,7 +49,7 @@
       // Avatar du joueur (014_avatar.sql) ; le sien vient de l'appareil. Sans avatar : l'emblème du grade.
       const av = e.me && s.avatarCfg ? avMini(s.avatarCfg) : avMini(e.avatar);
       return { rank: rank, rankText: String(rank), pseudo: e.pseudo || '—', gImg: g.img, gName: g.name, gColor: g.color, pk: progNum(e.pk) + ' PK', me: !!e.me,
-        hasAva: !!av, noAva: !av, ava: av || { bg: '', char: '', poke: {}, pokeStyle: '', hasPoke: false },
+        hasAva: !!av, noAva: !av, ava: av || { bg: '', char: '', poke: {}, pokeStyle: '', hasPoke: false, acc: {}, accStyle: '', hasAcc: false },
         cls: 'pkm-pg-row' + (e.me ? ' pkm-pg-me' : '') + (rank <= 10 ? ' pkm-pg-top10' : rank <= 30 ? ' pkm-pg-top30' : ''),
         aria: rank + (rank === 1 ? 'ᵉʳ' : 'ᵉ') + ' : ' + (e.pseudo || '—') + ', grade ' + g.name + ', ' + progNum(e.pk) + ' PK' + (e.me ? ' (toi)' : '') };
     });

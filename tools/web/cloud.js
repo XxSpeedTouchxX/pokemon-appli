@@ -29,6 +29,9 @@
     webauthn_credential_not_found: 'Aucun Face ID ni empreinte enregistré pour ce compte : connecte-toi avec ton mot de passe, puis active-le dans Mon profil.',
     user_banned: 'Ce compte est suspendu. Écris-nous à contact@dropicards.fr.',
     same_password: 'Choisis un mot de passe différent de l’ancien.',
+    // Fonction ou table absente du serveur (script SQL pas encore installé, 2026-11-10) : PostgREST PGRST202, ou
+    // Postgres 42883, 42P01, 42703. Avant, le joueur lisait « Une erreur est survenue » (boîte mystère sans 019).
+    not_installed: 'Cette fonction n’est pas encore en place sur le serveur de Dropicards. Réessaie un peu plus tard.',
     other: 'Une erreur est survenue. Réessaie dans un instant.'
   };
   const cloudLs = {
@@ -44,6 +47,7 @@
     if (!k && /not confirmed/i.test(msg)) k = 'email_not_confirmed';
     if (!k && /expired|invalid.*(otp|token)|token.*(invalid|expired)/i.test(msg)) k = 'otp_expired';
     if (!k && status === 429) k = 'over_request_rate_limit';
+    if (!k && /^(PGRST202|42883|42P01|42703)$/.test(String(code))) k = 'not_installed';
     // Adresse jetable refusée par la base (tools/supabase/005_jetables.sql) : GoTrue répond « Database error ».
     if (!k && /database error saving new user|jetable/i.test(msg)) k = 'email_address_invalid';
     // Règles du jeu (tools/supabase/004_jeu.sql) : leur message, déjà en français, est montré tel quel.
@@ -53,7 +57,7 @@
       const g = new Error(msg); g.code = 'game'; g.status = status; return g;
     }
     const e = new Error(CLOUD_ERR[k || 'other']);
-    e.code = k || 'other'; e.status = status;
+    e.code = k || 'other'; e.status = status; e.tech = String(code || status || '') + (msg ? ' · ' + msg.slice(0, 120) : '');
     return e;
   };
   // Clés d'accès : conversions base64url ↔ octets, et demande au téléphone (Face ID, empreinte) avec ses refus.

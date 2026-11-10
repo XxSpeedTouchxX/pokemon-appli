@@ -51,7 +51,7 @@ ok('panneau : +300 partage', /\+300 une fois, en partageant/.test(sheetText) && 
 await page.screenshot({ path: shot('pk-panneau.png') });
 // 4. Pokédex (onglet Jeux) après fermeture de « Mes PK » ; sans starter, on le choisit d'abord.
 await page.locator('button[aria-label="Fermer Mes PK"]').click(); await page.waitForTimeout(400);
-await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(1200);
+await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(1200); await page.click('[role=tablist][aria-label=\"Jeux\"] button:has-text(\"Pokédex\")'); await page.waitForTimeout(300);
 const dex = page.locator('section[aria-label="Pokédex"]');
 // (l'onglet Jeux a aussi un encadré « Mes PK », sans rôle de dialogue)
 const k4 = [await page.locator('section[aria-label="Mes PK"][role="dialog"]').count(), await dex.count(), await page.locator('[role="alertdialog"]').count(), await page.locator('section[aria-label="Choisis ton compagnon"]').count()];
@@ -184,7 +184,7 @@ const after = await page.$$eval('section[aria-label="Mes PK"] button[aria-label]
 ok('après déblocage, « Mes PK » sans compagnons ni Pokédex (' + (after.join(' ; ') || 'aucun') + ')', after.length === 0);
 await page.locator('button[aria-label="Fermer Mes PK"]').click(); await page.waitForTimeout(400);
 // La liste complète s'ouvre depuis le Pokédex (onglet Jeux, « Tous les Pokémon »).
-await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(800);
+await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(800); await page.click('[role=tablist][aria-label=\"Jeux\"] button:has-text(\"Pokédex\")'); await page.waitForTimeout(300);
 await page.click('.pkm-dex-all'); await page.waitForTimeout(1000);
 ok('« Tous les Pokémon » : liste ouverte, « ' + (await dexl.count() ? await dexCount() : '—') + ' »', (await dexl.count()) === 1 && await dexCount() === '5 / 171 débloqués · 2 120 PA');
 await dexl.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);

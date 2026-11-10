@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="e" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFBEF"/><stop offset="1" stop-color="#EBCB86"/></linearGradient><clipPath id="c"><polygon points="0,120 120,120 120,62 102,62 98,64 88,56 78,66 68,56 58,66 48,56 38,66 28,56 18,64  0,64"/></clipPath></defs>
+<ellipse cx="60" cy="114" rx="34" ry="5" fill="#000" opacity=".25"/>
+<g clip-path="url(#c)"><path d="M60 8C84 8 102 46 102 72C102 98 84 114 60 114C36 114 18 98 18 72C18 46 36 8 60 8Z" fill="url(#e)"/><circle cx="44" cy="40" r="7" fill="#2EC4B6"/><circle cx="78" cy="30" r="5" fill="#FF8A5C"/><circle cx="86" cy="52" r="6.5" fill="#2EC4B6"/><circle cx="34" cy="64" r="5" fill="#FF8A5C"/><circle cx="88" cy="88" r="7" fill="#FF8A5C"/><circle cx="36" cy="94" r="6" fill="#2EC4B6"/><circle cx="62" cy="104" r="4" fill="#FF8A5C"/>
+<text x="60" y="94" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="30" fill="#6B35E0" stroke="#fff" stroke-width="4" paint-order="stroke">?</text>
+<path d="M60 8C84 8 102 46 102 72C102 98 84 114 60 114C36 114 18 98 18 72C18 46 36 8 60 8Z" fill="none" stroke="#3A2A12" stroke-width="3"/></g>
+<polyline points="18,64 28,56 38,66 48,56 58,66 68,56 78,66 88,56 98,64 102,62" fill="none" stroke="#3A2A12" stroke-width="2.5" stroke-linejoin="round"/>
+</svg>

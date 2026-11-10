@@ -6,7 +6,7 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, de
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
 const page = await ctx.newPage();
 await page.goto(E2E + '/?today=2026-10-31&debug&start=market', { waitUntil: 'load' }); await page.waitForTimeout(2500);
-await page.evaluate(() => { window.__pkm.paChoose('bulbi', true); }); await page.waitForTimeout(800);
+await page.evaluate(() => { window.__pkm.paChoose('bulbi', true); window.__pkm.setState({ gameTab: 'dex' }); }); await page.waitForTimeout(800);
 const ids = await page.evaluate(() => window.__pkm.dexAllIds ? window.__pkm.dexAllIds() : null);
 const list = process.argv.slice(2).map(Number);
 const all = list.length ? list : (process.env.IDS || '').split(' ').map(Number);

@@ -104,7 +104,7 @@ ok('Groudon choisi : toast, bouton retiré', (await page.locator('text=Groudon t
 
 // 5. Débloquer avec des PA : forme de base (Chenipan, 15 PA), puis évolution animée (Herbizarre, 50 PA ; prix du 2026-11-01).
 await seed({ pa: 650, buddy: 1, paDay: '2026-10-04', paStreak: 1 }); await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1500);
-await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(800);
+await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(800); await page.click('[role=tablist][aria-label=\"Jeux\"] button:has-text(\"Pokédex\")'); await page.waitForTimeout(300);
 await page.click('.pkm-dex-all'); await page.waitForTimeout(400);
 await search('chenipan'); await tiles.first().click(); await page.waitForTimeout(600);
 ok('Chenipan : « ' + await act.innerText() + ' »', (await act.innerText()) === 'Débloquer · 15 PA');

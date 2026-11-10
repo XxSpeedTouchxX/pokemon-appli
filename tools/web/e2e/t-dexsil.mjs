@@ -10,7 +10,7 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, de
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?today=2026-10-31&debug&start=market', { waitUntil: 'load' }); await page.waitForTimeout(2500);
-await page.evaluate(() => { window.__pkm.paChoose('bulbi', true); }); await page.waitForTimeout(800);
+await page.evaluate(() => { window.__pkm.paChoose('bulbi', true); window.__pkm.setState({ gameTab: 'dex' }); }); await page.waitForTimeout(800);
 const nodes = page.locator('div[aria-label="Route d’évolution"] button');
 const lock = nodes.filter({ has: page.locator('img') }).nth(1); // Herbizarre, à débloquer
 await lock.scrollIntoViewIfNeeded(); await page.waitForTimeout(300);

@@ -1,6 +1,6 @@
   // ——— Abonnement « Premium » (2026-11-06, demande du porteur ; docs/27) ———
   // Bannière qui donne envie (PK shop › Magasin et Mon profil) et écran de l'offre : avantages, formules mensuelle
-  // (4,90 €/mois) et annuelle (49,90 €/an ; 6,90 € et 69,90 € depuis le 2026-11-09, porteur), renouvellement automatique, arrêt à tout moment (la période commencée
+  // (4,90 €/mois) et annuelle (49,90 €/an ; 6,90 € et 69,90 € le 2026-11-09, 9,90 € et 99,90 € depuis le 2026-11-10, porteur), renouvellement automatique, arrêt à tout moment (la période commencée
   // reste due, l'abonnement s'arrête juste avant la suivante).
   // Paiement branché (2026-11-07, « go » du porteur ; guide docs/28) : « Devenir Premium » demande au serveur
   // (fonction « stripe », tools/supabase/functions/stripe/index.ts) une page de paiement Stripe et y envoie le joueur ;
@@ -22,10 +22,15 @@
     { kind: 'hist', ico: '', title: 'Historique des prix complet', text: 'Toute l’évolution de la cote de chaque carte.' }
   ];
   const PREM_PLANS = [
-    // Prix du 2026-11-09 (porteur) : 6,90 € par mois, 69,90 € par an (12 mois à 6,90 € = 82,80 €, soit 12,90 € et 16 % de moins).
-    { id: 'year', name: 'Annuel', price: '69,90 €', per: 'par an', sub: 'soit 5,83 € par mois', tag: 'Meilleure offre · −16 %', save: '12,90 € d’économie par an' },
-    { id: 'month', name: 'Mensuel', price: '6,90 €', per: 'par mois', sub: 'sans engagement', tag: '', save: '' }
+    // Prix du 2026-11-10 (porteur) : 9,90 € par mois, 24,90 € pour 3 mois, 39,90 € pour 6 mois, 69,90 € par an.
+    // Économies par rapport au mensuel : 3 × 9,90 = 29,70 € (−4,80 €, −16 %), 6 × 9,90 = 59,40 € (−19,50 €, −33 %),
+    // 12 × 9,90 = 118,80 € (−48,90 €, −41 %). renew : texte du renouvellement ; next : ce que l'arrêt évite.
+    { id: 'year', name: 'Annuel', price: '69,90 €', per: 'par an', sub: 'soit 5,83 € par mois', tag: 'Meilleure offre · −41 %', save: '48,90 € d’économie', renew: 'chaque année', next: 'prochaine année', formule: 'Formule annuelle' },
+    { id: 'semester', name: 'Semestriel', price: '39,90 €', per: 'pour 6 mois', sub: 'soit 6,65 € par mois', tag: '−33 %', save: '19,50 € d’économie', renew: 'tous les 6 mois', next: 'prochaine période de 6 mois', formule: 'Formule semestrielle' },
+    { id: 'quarter', name: 'Trimestriel', price: '24,90 €', per: 'pour 3 mois', sub: 'soit 8,30 € par mois', tag: '−16 %', save: '4,80 € d’économie', renew: 'tous les 3 mois', next: 'prochaine période de 3 mois', formule: 'Formule trimestrielle' },
+    { id: 'month', name: 'Mensuel', price: '9,90 €', per: 'par mois', sub: 'sans engagement', tag: '', save: '', renew: 'chaque mois', next: 'prochaine mensualité', formule: 'Formule mensuelle' }
   ];
+  const premPlanOf = s => (PREM_PLANS.some(p => p.id === s.premPlan) ? s.premPlan : 'year');
   // Ouverture et retour animés comme les pages de l'app (2026-11-07, porteur : « le retour est trop brusque ») : l'offre
   // glisse depuis la droite, et repart vers la droite au retour (courbe d'iOS, comme nav.js), le fond s'éclaircit.
   const PREM_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)', PREM_MS = 420;
@@ -79,7 +84,7 @@
   premProto.premGo = function (route) {
     const s = this.st();
     if (s.premBusy) return;
-    const plan = s.premPlan === 'month' ? 'month' : 'year';
+    const plan = premPlanOf(s);
     this.setState({ premBusy: route, premErr: '' });
     this.premCall(route, route === 'checkout' ? { plan: plan } : {}).then(url => {
       try { sessionStorage.setItem('pkm-premium-wait', route === 'checkout' ? String(Date.now()) : ''); } catch (e) { /* stockage indisponible */ }
@@ -122,12 +127,12 @@
 
   const premBaseRender = premProto.renderVals;
   premProto.renderVals = function () {
-    const r = premBaseRender.call(this), s = this.st(), plan = s.premPlan === 'month' ? 'month' : 'year';
+    const r = premBaseRender.call(this), s = this.st(), plan = premPlanOf(s);
     if (!premBack) setTimeout(() => this.premReturn(), 0);
     const P = PREM_PLANS.find(p => p.id === plan), info = premInfo(s), on = this.premOn(), busy = s.premBusy || '';
     let mineTitle = 'Tu es Premium', mineText = 'Merci de soutenir Dropicards !';
     if (info && info.on) {
-      const formule = info.plan === 'month' ? 'Formule mensuelle' : 'Formule annuelle';
+      const formule = (PREM_PLANS.find(p => p.id === info.plan) || PREM_PLANS[0]).formule;
       if (info.status === 'past_due') { mineTitle = 'Paiement à mettre à jour'; mineText = 'Le renouvellement n’est pas passé : mets à jour ta carte dans « Gérer mon abonnement » pour garder Premium.'; }
       else if (info.cancel) mineText = formule + ' · s’arrête le ' + premDate(info.until) + '. Tu gardes tous les avantages jusque-là.';
       else mineText = formule + ' · renouvelée automatiquement le ' + premDate(info.until) + '.';
@@ -152,9 +157,9 @@
       soon: 'Paiement sécurisé par Stripe (carte, Apple Pay, Google Pay). Dropicards ne voit jamais ta carte.',
       later: on ? 'Fermer' : 'Plus tard',
       terms: [
-        'Renouvellement automatique ' + (plan === 'year' ? 'chaque année' : 'chaque mois') + ', tant que tu n’arrêtes pas ton abonnement.',
+        'Renouvellement automatique ' + P.renew + ', tant que tu n’arrêtes pas ton abonnement.',
         'Tu peux l’arrêter à tout moment, en quelques secondes, depuis Mon profil.',
-        'La période déjà commencée reste due : ton abonnement s’arrête juste avant la ' + (plan === 'year' ? 'prochaine année' : 'prochaine mensualité') + ', rien n’est débité ensuite.',
+        'La période déjà commencée reste due : ton abonnement s’arrête juste avant la ' + P.next + ', rien n’est débité ensuite.',
         'Tu gardes tous les avantages Premium jusqu’à la fin de la période payée.'
       ].map(t => ({ text: t }))
     };

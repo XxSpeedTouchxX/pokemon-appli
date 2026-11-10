@@ -10,7 +10,7 @@ await page.goto(E2E + '/?debug', { waitUntil: 'load' }); await page.waitForTimeo
 await page.evaluate(() => { window.__pkm.setState({ pa: 1000, pk: 0, pkOwn: [1, 4, 7, 25] }); window.__pkm.tab('pkshop'); }); await page.waitForTimeout(700);
 // Boîte mystère (2026-11-09) : les 2XP ne s'achètent plus, ils se gagnent dans la boîte (300 PA).
 const sec = page.locator('section[aria-label="Boîte mystère"]');
-ok('plus d’offres 2XP à acheter ; boîte mystère à 300 PA avec le « ? »', (await page.locator('.pkm-xp-offer').count()) === 0 && (await sec.count()) === 1 && /300 PA/.test(N(await sec.innerText())) && (await sec.locator('.pkm-my-q').textContent()) === '?');
+ok('plus d’offres 2XP à acheter ; boîte mystère à 300 PA, visuel « coffre » par défaut (2026-11-10)', (await page.locator('.pkm-xp-offer').count()) === 0 && (await sec.count()) === 1 && /300 PA/.test(N(await sec.innerText())) && (await sec.locator('img.pkm-my-art-b[src="img/mybox/coffre-base.svg"]').count()) === 1 && (await sec.locator('img.pkm-my-art-l').count()) === 1);
 await sec.locator('button:has-text("Voir les lots")').click(); await page.waitForTimeout(250);
 const odds = N(await sec.locator('.pkm-my-odds').innerText());
 ok('lots et chances affichés : ' + odds.slice(0, 60) + '…', /2XP PK · 3 jours 25 %/.test(odds) && /2XP PK · 7 jours 15 %/.test(odds) && /2XP PK · 10 jours 10 %/.test(odds) && /2XP PA · 7 jours 15 %/.test(odds) && !/300 PK/.test(odds) && /20 scans bonus 20 %/.test(odds) && /Kyogre 5 %/.test(odds) && /Groudon 5 %/.test(odds) && /Rayquaza 5 %/.test(odds));

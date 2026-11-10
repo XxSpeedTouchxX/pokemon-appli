@@ -1,4 +1,5 @@
-// « Mon avatar » (2026-11-08, porteur, d'après sa vidéo) : photo retirée de Mon profil ; éditeur avec aperçu, Aléatoire,
+// « Mon avatar » (2026-11-08, porteur, d'après sa vidéo ; v2 du 2026-11-10 : 2 lignes, accessoires, shiny, Pokémon à
+// glisser, « Aléatoire » retiré) : photo retirée de Mon profil ; éditeur avec aperçu,
 // 5 rubriques (Préféré, Visage, Cheveux, Style, Décor), styles PRO (Premium ou PA), choix du Pokémon parmi ceux
 // débloqués, placement et taille, enregistrement : l'avatar remplace l'illustration dans l'en-tête.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -12,14 +13,32 @@ ok('Mon profil : plus de choix de photo dans la photothèque', (await page.locat
 const bubble = page.locator('button.pkm-pf-photo');
 ok('Mon profil : la bulle de l’avatar ouvre « Modifier mon avatar »', (await bubble.getAttribute('aria-label')) === 'Modifier mon avatar');
 await bubble.click(); await page.waitForTimeout(900);
-ok('écran « Mon avatar » : aperçu et 5 rubriques', (await page.locator('.pkm-av-prev').count()) === 1 && (await page.locator('.pkm-av-tab').allInnerTexts()).join('|') === 'Préféré|Visage|Cheveux|Style|Décor');
-ok('Préféré : Pokémon préféré, coup de cœur PRO, placement (6) et taille', (await page.locator('.pkm-av-slot').count()) === 2 && (await page.locator('.pkm-av-chips button').count()) === 6 && (await page.locator('input.pkm-av-range').count()) === 1);
+const rowTexts = async l => (await page.locator('[role=tablist][aria-label="' + l + '"] button').allInnerTexts()).map(t => t.trim()).join('|');
+ok('écran « Mon avatar » : aperçu, ligne « Ton avatar » (Cheveux, Visage, Style, Décor), ligne « Ton Pokémon » (Pokémon, Accessoire, Shiny), sans « Aléatoire »', (await page.locator('.pkm-av-prev').count()) === 1 && await rowTexts('Ton avatar') === 'Cheveux|Visage|Style|Décor' && await rowTexts('Ton Pokémon') === 'Pokémon|Accessoire|Shiny' && (await page.locator('text=Aléatoire').count()) === 0);
+await page.locator('[role=tablist][aria-label="Ton Pokémon"] button:has-text("Pokémon")').click(); await page.waitForTimeout(300);
+ok('Pokémon : préféré, coup de cœur PRO, devant ou derrière, taille', (await page.locator('.pkm-av-slot').count()) === 2 && (await page.locator('.pkm-av-chips button').count()) === 2 && (await page.locator('input.pkm-av-range').count()) === 1);
 await page.screenshot({ path: shot('avatar-prefere.png') });
-// Placement et taille.
-await page.locator('.pkm-av-chips button:has-text("Sur l’épaule")').click(); await page.waitForTimeout(200);
+// Glisser le Pokémon dans l'aperçu, puis la taille.
+const pkb = await page.locator('.pkm-av-pk-main').boundingBox();
+await page.mouse.move(pkb.x + pkb.width / 2, pkb.y + pkb.height / 2); await page.mouse.down(); await page.mouse.move(pkb.x - 100, pkb.y - 120, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(300);
+const moved = await page.evaluate(() => window.__pkm.st().avDraft);
+ok('Pokémon glissé du doigt : nouvelle place (' + moved.px + ' %, ' + moved.py + ' %), « Remettre à sa place »', moved.px != null && moved.px < 60 && moved.py < 60 && (await page.locator('button:has-text("Remettre à sa place")').count()) === 1);
 await page.locator('input.pkm-av-range').evaluate(e => { e.value = '130'; e.dispatchEvent(new Event('input', { bubbles: true })); }); await page.waitForTimeout(200);
-ok('placement « Sur l’épaule » et taille 130 %', /130 %/.test(await page.locator('.pkm-av-size').innerText()) && (await page.locator('.pkm-av-chips button[aria-pressed="true"]').innerText()) === 'Sur l’épaule');
+ok('taille 130 %', /130 %/.test(await page.locator('.pkm-av-size').innerText()));
+// Accessoire : casquette gratuite posée sur le Pokémon, couronne PRO.
+await page.locator('[role=tablist][aria-label="Ton Pokémon"] button:has-text("Accessoire")').click(); await page.waitForTimeout(300);
+ok('Accessoire : 7 choix (aucun, lunettes, casquette, couronne, nœud, chapeau de fête, écharpe), 4 PRO', (await page.locator('section[aria-label="Accessoire"] .pkm-av-opt').count()) === 7 && (await page.locator('section[aria-label="Accessoire"] .pkm-av-pro').count()) === 4);
+await page.locator('section[aria-label="Accessoire"] button[aria-label^="Casquette"]').click(); await page.waitForTimeout(300);
+ok('casquette posée sur le Pokémon dans l’aperçu', (await page.locator('.pkm-av-prev img.pkm-av-acc').count()) === 1);
+await page.screenshot({ path: shot('avatar-accessoire.png') });
+// Shiny (PRO) : essai.
+await page.locator('[role=tablist][aria-label="Ton Pokémon"] button:has-text("Shiny")').click(); await page.waitForTimeout(300);
+await page.locator('button[aria-label^="Version shiny"]').click(); await page.waitForTimeout(300);
+ok('Shiny choisi : sprite chromatique dans l’aperçu, essai PRO', /img\/pokemon\/shiny\//.test(await page.locator('.pkm-av-pk-main').getAttribute('src')) && /Essai : 1 style PRO/.test(await page.locator('.pkm-av-trial').innerText()));
+await page.screenshot({ path: shot('avatar-shiny.png') });
+await page.locator('button[aria-label^="Version normale"]').click(); await page.waitForTimeout(300);
 // Choix du Pokémon : seulement les Pokémon débloqués.
+await page.locator('[role=tablist][aria-label="Ton Pokémon"] button:has-text("Pokémon")').click(); await page.waitForTimeout(300);
 await page.locator('button.pkm-av-btn:has-text("Changer de Pokémon")').click(); await page.waitForTimeout(700);
 const nPk = await page.locator('.pkm-av-pk').count(), nOwn = await page.evaluate(() => { const s = window.__pkm.st(); return (s.pkOwn || []).length; });
 ok('choix du Pokémon : ' + nPk + ' Pokémon débloqués proposés', nPk > 0 && nPk <= 171);
@@ -45,17 +64,13 @@ ok('Holo débloqué pour 150 PA (500 → 350)', await page.evaluate(() => { cons
 await page.waitForTimeout(500);
 await page.locator('button.pkm-av-savebtn').click(); await page.waitForTimeout(1500);
 const saved = await page.evaluate(() => { const s = window.__pkm.st(); return { cfg: s.avatarCfg, png: (s.avatarPng || '').slice(0, 23), screen: s.screen }; });
-ok('avatar enregistré (image JPEG) et retour à Mon profil', saved.cfg && saved.cfg.bg === 'holo' && saved.cfg.pos === 'shoulder' && saved.png === 'data:image/jpeg;base64,' && saved.screen === 'profile');
+ok('avatar enregistré (image JPEG) et retour à Mon profil', saved.cfg && saved.cfg.bg === 'holo' && saved.cfg.px != null && saved.cfg.acc === 'casquette' && saved.png === 'data:image/jpeg;base64,' && saved.screen === 'profile');
 ok('en-tête et profil : l’avatar remplace l’illustration', (await page.locator('button.pkm-pf-photo img').first().getAttribute('src')).startsWith('data:image/jpeg'));
 await page.screenshot({ path: shot('avatar-profil.png') });
 // Premium : tous les styles PRO ouverts.
 await page.evaluate(() => window.__pkm.avOpen()); await page.waitForTimeout(800);
 await page.evaluate(() => { window.__pkm.premOn = () => true; window.__pkm.setState({ avTab: 'hair' }); }); await page.waitForTimeout(400);
 ok('Premium : coiffures PRO ouvertes (badge vert)', (await page.locator('section[aria-label="Cheveux"] .pkm-av-pro-ok').count()) >= 4);
-// Aléatoire.
-const before = await page.evaluate(() => JSON.stringify(window.__pkm.st().avDraft));
-await page.locator('.pkm-av-side-b:has-text("Aléatoire")').click(); await page.waitForTimeout(300);
-ok('« Aléatoire » change l’avatar', before !== await page.evaluate(() => JSON.stringify(window.__pkm.st().avDraft)));
 ok('aucune erreur JavaScript', errors.length === 0);
 if (errors.length) console.log(errors.join('\n'));
 console.log(res.join('\n'));

@@ -157,9 +157,15 @@
     if (ui.isGames) {
       Object.assign(ui, { title: 'Jeux', subtitle: 'Gagne des PK et fais évoluer ton Pokémon', hasSubtitle: true, hasSubRow: false });
       r.gm = this.vGames(s);
+      // Deux rubriques (2026-11-10, porteur) : « Jeux à PK » (Booster PK, pile ou face) et « Pokédex » (le Pokédex, déplacé
+      // tel quel). gameTab : 'pk' par défaut ; le Pokédex s'ouvre aussi depuis le compagnon, Mes PA ou le didacticiel.
+      const dexOn = s.gameTab === 'dex';
+      r.gtab = { isPk: !dexOn, isDex: dexOn, pkOn: String(!dexOn), dexOn: String(dexOn),
+        pkCls: 'pkm-shop-tab' + (dexOn ? '' : ' pkm-shop-tab-on'), dexCls: 'pkm-shop-tab' + (dexOn ? ' pkm-shop-tab-on' : ''),
+        goPk: () => this.setState({ gameTab: 'pk' }), goDex: () => this.setState({ gameTab: 'dex' }) };
       // Compte à rebours : nouveau rendu chaque minute tant que l'écran est ouvert.
       if (!gmTick) gmTick = setInterval(() => { if (this.st().screen === 'market') this.setState({ gmNow: Date.now() }); else { clearInterval(gmTick); gmTick = null; } }, 30000);
-    } else r.gm = GM_EMPTY;
+    } else { r.gm = GM_EMPTY; r.gtab = { isPk: false, isDex: false }; }
     r.unl = this.vUnlock(s);
     if (ui.isMarket) Object.assign(ui, { title: 'Recherche', subtitle: 'Toutes les cartes et le scellé', hasSubtitle: true, headerBig: false, headerDetail: true });
     return r;

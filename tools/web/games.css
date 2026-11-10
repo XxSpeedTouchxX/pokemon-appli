@@ -1397,5 +1397,46 @@ section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(
 @keyframes pkmMxSpark { 0%, 100% { opacity: 0; transform: rotate(var(--a)) translateY(-80px) scale(0.3); } 50% { opacity: 1; transform: rotate(var(--a)) translateY(-104px) scale(1); } }
 @keyframes pkmMxOut { to { opacity: 0; transform: scale(1.04); } }
 @media (prefers-reduced-motion: reduce) { .pkm-mx *, .pkm-mx { animation: none !important; } .pkm-mx-win .pkm-mx-title, .pkm-mx-win .pkm-mx-item, .pkm-mx-win .pkm-mx-count, .pkm-mx-win .pkm-mx-text, .pkm-mx-win .pkm-mx-ok { opacity: 1; transform: none; } }
+/* ——— 4 visuels de la boîte mystère (2026-11-10, porteur) : coffre, œuf mystère, booster mystère, géode PK (?myvis=1-4).
+   Chaque visuel = deux images (corps et couvercle, web/img/mybox/) ; dans le PK shop, la boîte vit ; à l'ouverture, le
+   couvercle part à sa façon. ——— */
+.pkm-my-art { position: relative; display: block; width: 100%; height: 100%; animation: pkmMyBob 2.6s ease-in-out infinite; }
+.pkm-my-art img, .pkm-mx-boxin > img { position: absolute; inset: 0; width: 100%; height: 100%; -webkit-user-drag: none; user-select: none; }
+.pkm-my-art-l { animation: pkmMyLid 2.6s ease-in-out infinite; transform-origin: 50% 48%; }
+.pkm-my-v-oeuf .pkm-my-art { transform-origin: 50% 94%; animation: pkmMyWobble 2.4s ease-in-out infinite; }
+.pkm-my-v-oeuf .pkm-my-art-l { animation: none; }
+.pkm-my-v-booster .pkm-my-art { animation: pkmMySway 3s ease-in-out infinite; }
+.pkm-my-v-booster .pkm-my-art-l { transform-origin: 30% 20%; animation: pkmMyTear 2.6s ease-in-out infinite; }
+.pkm-my-v-geode .pkm-my-art { animation: pkmMyBob 2.6s ease-in-out infinite, pkmMyGlowGem 2s ease-in-out infinite; }
+.pkm-my-v-geode .pkm-my-art-l { animation: none; }
+@keyframes pkmMyWobble { 0%, 55%, 100% { transform: none; } 62% { transform: rotate(-7deg); } 70% { transform: rotate(6deg); } 78% { transform: rotate(-4deg); } 86% { transform: rotate(2deg); } }
+@keyframes pkmMySway { 0%, 100% { transform: rotate(-3deg) translateY(0); } 50% { transform: rotate(3deg) translateY(-4px); } }
+@keyframes pkmMyTear { 0%, 60%, 100% { transform: none; } 72% { transform: translate(2px, -3px) rotate(4deg); } 84% { transform: translate(1px, -1px) rotate(1deg); } }
+@keyframes pkmMyGlowGem { 0%, 100% { filter: drop-shadow(0 0 2px rgba(255, 210, 63, 0.3)); } 50% { filter: drop-shadow(0 0 10px rgba(255, 210, 63, 0.9)); } }
+/* Ouverture plein écran. */
+.pkm-mx-boxin > img { animation: none; }
+.pkm-mx-wait .pkm-mx-boxin { animation: pkmMxHop 0.55s ease-in-out infinite; }
+.pkm-mx-wait .pkm-mx-glow { animation: pkmMxGlow 0.55s ease-in-out infinite; }
+.pkm-mx-beam { position: absolute; left: 50%; bottom: 46%; width: 150px; height: 230px; margin-left: -75px; opacity: 0; transform-origin: 50% 100%; transform: scaleY(0.2);
+  background: linear-gradient(0deg, rgba(255, 236, 140, 0.95), rgba(255, 236, 140, 0)); clip-path: polygon(38% 100%, 62% 100%, 100% 0, 0 0); }
+.pkm-mx-shard { position: absolute; left: 50%; top: 40%; width: 18px; height: 14px; margin: -7px 0 0 -9px; background: #8E80B8; border: 2px solid #1E1438; clip-path: polygon(0 30%, 60% 0, 100% 55%, 40% 100%); opacity: 0; }
+.pkm-mx-burst .pkm-mx-beam { animation: pkmMxBeam 0.4s ease-out 0.12s forwards; }
+.pkm-mx-v-coffre.pkm-mx-burst .pkm-my-art-l { transform-origin: 88% 48%; animation: pkmMxChest 0.36s cubic-bezier(0.3, 1.4, 0.6, 1) 0.1s forwards; }
+.pkm-mx-v-oeuf.pkm-mx-burst .pkm-my-art-l { animation: pkmMxShell 0.45s ease-out 0.1s forwards; }
+.pkm-mx-v-oeuf.pkm-mx-wait .pkm-mx-boxin { animation: pkmMxHop 0.55s ease-in-out infinite, pkmMxShake 0.22s linear infinite; }
+.pkm-mx-v-booster.pkm-mx-burst .pkm-my-art-l { transform-origin: 0% 20%; animation: pkmMxRip 0.42s ease-in 0.08s forwards; }
+.pkm-mx-v-booster .pkm-mx-beam { bottom: 72%; }
+.pkm-mx-v-geode.pkm-mx-burst .pkm-my-art-l { animation: pkmMxCrumble 0.3s ease-out 0.1s forwards; }
+.pkm-mx-v-geode.pkm-mx-burst .pkm-mx-shard { animation: pkmMxShardFly 0.55s ease-out 0.1s forwards; }
+@keyframes pkmMxChest { to { transform: rotate(108deg); } }
+@keyframes pkmMxShell { to { transform: translate(-26px, -170px) rotate(-38deg); opacity: 0; } }
+@keyframes pkmMxShake { 0%, 100% { translate: 0 0; } 25% { translate: -2px 0; } 75% { translate: 2px 0; } }
+@keyframes pkmMxRip { 0% { transform: none; } 30% { transform: rotate(-8deg); } 100% { transform: translate(120px, -110px) rotate(48deg); opacity: 0; } }
+@keyframes pkmMxCrumble { to { transform: scale(1.25); opacity: 0; filter: blur(2px); } }
+@keyframes pkmMxShardFly { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-150px) rotate(220deg); } }
+@keyframes pkmMxBeam { to { opacity: 1; transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .pkm-my-art, .pkm-my-art-l { animation: none !important; } }
+.pkm-mx-gone .pkm-mx-box { transition: transform 0.4s ease-in, opacity 0.4s; transform: translateY(-120vh) !important; }
+.pkm-mx-gone { animation: pkmMxOut 0.4s ease-in 0.1s forwards; }
 .pkm-my-free { background: linear-gradient(135deg, #9461F7, #D3409A); color: #FFFFFF; box-shadow: 0 6px 22px rgba(211, 64, 154, 0.45); animation: pkmScanBonus 1.6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pkm-my-free { animation: none; } }

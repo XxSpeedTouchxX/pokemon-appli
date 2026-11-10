@@ -2,20 +2,23 @@
 // Elle tourne dans le service « Edge Functions » de Supabase (Coolify), à l'adresse
 //   https://api.dropicards.fr/functions/v1/stripe/…
 // Trois chemins :
-//   POST /stripe/checkout  (joueur connecté) → page de paiement Stripe pour la formule choisie (« month » ou « year »)
+//   POST /stripe/checkout  (joueur connecté) → page de paiement Stripe pour la formule choisie (« month », « quarter »,
+//                         « semester » ou « year » ; trimestrielle et semestrielle depuis le 2026-11-10, porteur)
 //   POST /stripe/portal    (joueur connecté) → page Stripe pour gérer ou arrêter son abonnement
 //   POST /stripe/webhook   (Stripe seulement) → message signé de Stripe : abonnement créé, renouvelé, arrêté, payé…
 // Les secrets restent dans les variables du serveur (Coolify), jamais dans le dépôt ni dans l'app :
 //   STRIPE_SECRET_KEY      clé secrète ou restreinte de Stripe (sk_… ou rk_…)
 //   STRIPE_WEBHOOK_SECRET  secret de signature du point de terminaison (whsec_…)
 //   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY : déjà fournis par Supabase au service.
-// Facultatif : APP_URL (https://dropicards.fr par défaut), STRIPE_PRICE_MONTH et STRIPE_PRICE_YEAR (sinon les prix sont
-// trouvés par leur clé de recherche : dropicards_premium_month et dropicards_premium_year).
+// Facultatif : APP_URL (https://dropicards.fr par défaut), STRIPE_PRICE_MONTH, STRIPE_PRICE_QUARTER, STRIPE_PRICE_SEMESTER
+// et STRIPE_PRICE_YEAR (sinon les prix sont trouvés par leur clé de recherche : dropicards_premium_month, _quarter,
+// _semester et _year).
 // Aucune bibliothèque : l'API de Stripe est appelée directement, la signature est vérifiée avec WebCrypto.
 // Le même fichier est testé sous Node (tools/supabase/functions/stripe/test.mjs) avec un faux Stripe et la base locale.
 
 const STRIPE_API = 'https://api.stripe.com/v1';
-const LOOKUP = { month: 'dropicards_premium_month', year: 'dropicards_premium_year' };
+const LOOKUP: Record<string, string> = { month: 'dropicards_premium_month', quarter: 'dropicards_premium_quarter', semester: 'dropicards_premium_semester', year: 'dropicards_premium_year' };
+const PRICE_ENV: Record<string, string> = { month: 'STRIPE_PRICE_MONTH', quarter: 'STRIPE_PRICE_QUARTER', semester: 'STRIPE_PRICE_SEMESTER', year: 'STRIPE_PRICE_YEAR' };
 const TOLERANCE_S = 300;
 
 const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
@@ -62,10 +65,11 @@ export async function verifySignature(raw, header, secret, nowS = Math.floor(Dat
 const periodEnd = sub => sub.current_period_end || (sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].current_period_end) || null;
 function planOf(price) {
   if (!price) return null;
-  if (price.lookup_key === LOOKUP.year) return 'year';
-  if (price.lookup_key === LOOKUP.month) return 'month';
-  const iv = price.recurring && price.recurring.interval;
-  return iv === 'year' ? 'year' : iv === 'month' ? 'month' : null;
+  for (const k of Object.keys(LOOKUP)) if (price.lookup_key === LOOKUP[k]) return k;
+  const iv = price.recurring && price.recurring.interval, n = Number(price.recurring && price.recurring.interval_count) || 1;
+  if (iv === 'year') return 'year';
+  if (iv === 'month') return n === 12 ? 'year' : n === 6 ? 'semester' : n === 3 ? 'quarter' : n === 1 ? 'month' : null;
+  return null;
 }
 const iso = s => (s ? new Date(Number(s) * 1000).toISOString() : null);
 
@@ -113,7 +117,7 @@ export function makeHandler(env, fetchImpl = fetch) {
     return u && u.id ? u : null;
   }
   async function priceId(plan) {
-    const fixed = E(plan === 'year' ? 'STRIPE_PRICE_YEAR' : 'STRIPE_PRICE_MONTH');
+    const fixed = E(PRICE_ENV[plan]);
     if (fixed) return fixed;
     const j = await stripe('GET', '/prices', { 'lookup_keys': [LOOKUP[plan]], active: 'true', limit: 1 });
     const p = j && j.data && j.data[0];
@@ -133,8 +137,8 @@ export function makeHandler(env, fetchImpl = fetch) {
     const u = await userOf(req);
     if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards pour devenir Premium.');
     const b = await req.json().catch(() => ({}));
-    const plan = b && b.plan === 'month' ? 'month' : b && b.plan === 'year' ? 'year' : '';
-    if (!plan) return fail(400, 'Choisis la formule mensuelle ou annuelle.');
+    const plan = b && typeof b.plan === 'string' && Object.prototype.hasOwnProperty.call(LOOKUP, b.plan) ? b.plan : '';
+    if (!plan) return fail(400, 'Choisis une formule : mensuelle, trimestrielle, semestrielle ou annuelle.');
     const row = await premiumRow(u.id);
     if (row && ['active', 'trialing', 'past_due'].includes(row.status) && row.period_end && new Date(row.period_end).getTime() > Date.now()) {
       return fail(409, 'Tu es déjà Premium : gère ton abonnement depuis Mon profil.');
@@ -189,7 +193,7 @@ export function makeHandler(env, fetchImpl = fetch) {
     const fromPrice = planOf(p);
     if (fromPrice) return fromPrice;
     const days = l.period && l.period.end && l.period.start ? (l.period.end - l.period.start) / 86400 : 0;
-    return days > 300 ? 'year' : days > 20 ? 'month' : null;
+    return days > 300 ? 'year' : days > 150 ? 'semester' : days > 60 ? 'quarter' : days > 20 ? 'month' : null;
   }
 
   async function webhook(req) {

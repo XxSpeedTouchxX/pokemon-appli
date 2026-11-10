@@ -22,7 +22,8 @@ const tokens = { 'tok-ok': { id: UID, email: email } };
 // ——— Faux Stripe ———
 const KEY = 'sk_test_faux', WH = 'whsec_faux_secret';
 const S = { n: 0, customers: {}, idem: {}, sessions: [], portal: 0, subs: {}, calls: [] };
-const prices = [{ id: 'price_M', lookup_key: 'dropicards_premium_month', recurring: { interval: 'month' } }, { id: 'price_Y', lookup_key: 'dropicards_premium_year', recurring: { interval: 'year' } }];
+const prices = [{ id: 'price_M', lookup_key: 'dropicards_premium_month', recurring: { interval: 'month' } }, { id: 'price_Y', lookup_key: 'dropicards_premium_year', recurring: { interval: 'year' } },
+  { id: 'price_Q', lookup_key: 'dropicards_premium_quarter', recurring: { interval: 'month', interval_count: 3 } }, { id: 'price_S', lookup_key: 'dropicards_premium_semester', recurring: { interval: 'month', interval_count: 6 } }];
 const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 async function fakeFetch(url, init = {}) {
   const u = new URL(url), h = init.headers || {};
@@ -92,6 +93,9 @@ const cust = out(sql('select stripe_customer from public.premium where user_id =
 ok('client Stripe créé avec l\'e-mail et rangé dans la base (' + cust + ')', /^cus_F/.test(cust) && S.customers[cust].email === email && s1.get('customer') === cust);
 await call('checkout', { plan: 'month' }, 'tok-ok');
 ok('deuxième essai (mensuel) : même client Stripe, prix mensuel', Object.keys(S.customers).length === 1 && S.sessions[1].get('customer') === cust && S.sessions[1].get('line_items[0][price]') === 'price_M');
+await call('checkout', { plan: 'quarter' }, 'tok-ok');
+await call('checkout', { plan: 'semester' }, 'tok-ok');
+ok('formules trimestrielle et semestrielle (2026-11-10) : prix trouvés par leur clé de recherche', S.sessions[2].get('line_items[0][price]') === 'price_Q' && S.sessions[3].get('line_items[0][price]') === 'price_S');
 ok('pas encore payé : pas Premium', !row().status || row().status === 'none');
 
 // 3. Messages de Stripe.

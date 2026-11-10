@@ -33,6 +33,10 @@ ok('lancer suivant dans 4 h', /Tu dois attendre [34] h \d* ?(min )?pour rejouer|
 await page.screenshot({ path: shot('games-coin.png') });
 // Roulette retirée (2026-10-25) : Pokédex avec les PA (points d'Aura) ; déblocage des Pokémon en PA (2026-10-28).
 ok('roulette retirée', (await page.locator('section[aria-label="Roulette"]').count()) === 0);
+// Deux rubriques (2026-11-10, porteur) : « Jeux à PK » (Booster PK, pile ou face) et « Pokédex ».
+ok('rubriques « Jeux à PK » (ouverte) et « Pokédex » ; le Pokédex n’est pas sous les jeux', (await page.locator('[role=tablist][aria-label="Jeux"] button[aria-selected="true"]').innerText()).trim() === 'Jeux à PK' && (await page.locator('section[aria-label="Pokédex"]').count()) === 0 && (await page.locator('section[aria-label="Booster PK"]').count()) === 1);
+await page.click('[role=tablist][aria-label="Jeux"] button:has-text("Pokédex")'); await page.waitForTimeout(400);
+ok('rubrique « Pokédex » : le Pokédex, sans les jeux à PK', (await page.locator('section[aria-label="Pokédex"]').count()) === 1 && (await page.locator('section[aria-label="Booster PK"], section[aria-label="Pile ou face"]').count()) === 0);
 const evo = page.locator('section[aria-label="Pokédex"]');
 ok('Pokédex : 4 starters (' + (await evo.locator('[aria-label="Starters"] button').allInnerTexts()).join(', ') + ')', (await evo.locator('[aria-label="Starters"] button').allInnerTexts()).join(',') === 'Bulbizarre,Salamèche,Carapuce,Pikachu');
 await evo.locator('button[aria-label="Choisir Carapuce comme starter"]').click(); await page.waitForTimeout(400);
@@ -50,7 +54,7 @@ ok('Pokédex : Tortank demande d’abord Carabaffe', /^Débloque d’abord Carab
 await route.locator('button[aria-label^="Carabaffe,"]').click(); await page.waitForTimeout(300);
 ok('Pokédex : bouton bloqué sans assez de PA (' + (await act.innerText()).trim() + ')', /^Encore 50 PA pour le débloquer$/.test((await act.innerText()).trim()) && (await act.getAttribute('aria-disabled')) === 'true');
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k)); d.pa = 520; localStorage.setItem(k, JSON.stringify(d)); });
-await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200); await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(600);
+await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1200); await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(600); await page.click('[role=tablist][aria-label="Jeux"] button:has-text("Pokédex")'); await page.waitForTimeout(300);
 await route.locator('button[aria-label^="Carabaffe,"]').click(); await page.waitForTimeout(300);
 ok('Pokédex : « Faire évoluer · 50 PA » sur Carabaffe', /^Faire évoluer · 50 PA$/.test((await act.innerText()).trim()));
 await act.click(); await page.waitForTimeout(8500); // évolution de 8,2 s (2026-11-01)

@@ -17,7 +17,7 @@ const BASE = E2E + '/?today=2026-10-04&debug';
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k) || '{}'); d.tuto = 'done'; d.dexTips = 2; d.evo = { line: 'pika', stage: 0 }; d.buddy = 25; d.pkOwn = [25]; d.pa = 0; delete d.dexSeen; localStorage.setItem(k, JSON.stringify(d)); });
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-const openDex = async () => { await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(900); };
+const openDex = async () => { await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(900); await page.click('[role=tablist][aria-label=\"Jeux\"] button:has-text(\"Pokédex\")'); await page.waitForTimeout(300); };
 const prog = async () => (await page.locator('section[aria-label="Progression du Pokédex"]').innerText()).replace(/\s+/g, ' ');
 const pick = async name => {
   await page.click('.pkm-dex-all'); await page.waitForTimeout(300);

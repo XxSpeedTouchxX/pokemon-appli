@@ -63,6 +63,19 @@
   const paNextText = s => (s.paDay ? 'Prochains PA à minuit (dans ' + paLeft(paToMidnight()) + ') : +' + PaCore.tomorrow(s.paStreak) + ' PA' : '');
   // PA qui attendent avec une série en cours : à récupérer avant ce soir minuit.
   const paKeepText = s => { const n = paPending(s); return n && s.paDay && PaCore.nextDay(s.paDay) === paToday() && !paFree(s) ? 'À récupérer avant ce soir minuit (dans ' + paLeft(paToMidnight()) + ') pour garder ta série' : ''; };
+  // Série de connexion (2026-11-10, porteur : « une sorte de série de connexion, à 7 d'affilée tu obtiens le cadeau
+  // mystère ») : 7 cases, la 7e est la boîte offerte. r = jours d'affilée déjà comptés (un jour manqué : la série repart
+  // du jour 1, PaCore.next) ; si la boîte vient d'être gagnée aujourd'hui, les 7 cases restent pleines jusqu'à minuit.
+  const paSeries = s => {
+    const n = paPending(s), r = n ? n.run - 1 : (Number(s.paRun) || 0), full = !n && r > 0 && r % 7 === 0, done = full ? 7 : r % 7;
+    const bx = myBoxImgs(), left = 7 - done;
+    return {
+      days: [1, 2, 3, 4, 5, 6, 7].map(d => ({ n: d, gift: d === 7, notGift: d !== 7, base: bx.base, lid: bx.lid,
+        cls: 'pkm-pa-ser-d' + (d <= done ? ' pkm-pa-ser-on' : '') + (d === done + 1 && !full ? ' pkm-pa-ser-next' : '') + (d === 7 ? ' pkm-pa-ser-gift' : ''), aria: 'Jour ' + d + (d <= done ? ', fait' : '') })),
+      status: full ? 'Bravo, 7 jours d’affilée : ta boîte mystère t’attend au PK shop !' : left === 1 ? 'Plus qu’un jour avant ta boîte mystère offerte !' : 'Encore ' + left + ' jours d’affilée avant ta boîte mystère offerte.',
+      text: 'Récupère tes PA 7 jours d’affilée : au 7e jour, une boîte mystère t’est offerte (à ouvrir au PK shop). Ensuite, ça recommence : une nouvelle boîte à chaque série de 7 jours. Si tu oublies un jour, ta série repart du jour 1.'
+    };
+  };
   // Série affichée : celle qui sera comptée en récupérant les PA du jour, sinon la série en cours.
   const paStreakNow = s => { const n = paPending(s); return n ? n.streak : (Number(s.paStreak) || 0); };
   const paStreakText = s => { const k = paStreakNow(s), n = paPending(s); return (k > 1 ? k + ' jours d’affilée' : k === 1 ? '1er jour' : '—') + (n ? ' (à récupérer)' : ''); };
@@ -230,7 +243,7 @@
   const paBasePk = paProto.pkView;
   paProto.pkView = function (s) {
     const v = paBasePk.call(this, s), pa = Number(s.pa) || 0, shown = s.paCount !== null && s.paCount >= 0 ? s.paCount : pa, n = paPending(s);
-    const openDex = () => { this.tab('market'); setTimeout(() => { const el = document.querySelector('section[aria-label="Pokédex"]'); if (el) el.scrollIntoView({ block: 'start', behavior: paStill() ? 'auto' : 'smooth' }); }, 520); };
+    const openDex = () => { this.setState({ gameTab: 'dex' }); this.tab('market'); setTimeout(() => { const el = document.querySelector('section[aria-label="Pokédex"]'); if (el) el.scrollIntoView({ block: 'start', behavior: paStill() ? 'auto' : 'smooth' }); }, 520); };
     return Object.assign(v, { wrapCls: 'pkm-pk-tk', pa: Number(shown).toLocaleString('fr-FR'),
       paAria: 'Mes points d’Aura : ' + pa + ' PA.' + (n ? ' ' + n.gain + ' PA à récupérer' : ' Ouvrir Mes PA'),
       // Avec des PA à récupérer : « Tes PA du jour » ; sinon le solde ouvre le Pokédex, où les PA servent.
@@ -238,14 +251,14 @@
       // (2026-10-31, porteur) ; le Pokédex s'ouvre depuis ce panneau.
       openPa: () => { if (n) { this.setState({ paClaim: true }); paDialogKeys(this); } else this.setState({ paSheet: true }); }, paReady: !!n,
       paSheet: (() => {
-        if (!s.paSheet) return { open: false, streak: [], evo: [], note: '' };
+        if (!s.paSheet) return { open: false, streak: [], evo: [], note: '', series: { days: [], status: '', text: '' } };
         const R = this.vRules(s);
         return { open: true, close: () => this.setState({ paSheet: false }), balance: Number(pa).toLocaleString('fr-FR'), logo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
           what: 'Les PA sont tes points d’Aura : ils montrent le lien entre toi et ton compagnon. Ils sont gratuits, ne s’achètent pas et n’ont aucune valeur en euros.',
           how: 'Chaque jour dès minuit, touche ton solde de PA pour les récupérer. Plus tu les récupères de jours d’affilée, plus tu gagnes de PA :',
           note: (n ? '' : paNextText(s) + '. ') + 'Un jour sans les récupérer : retour au palier J3 (+40 PA) ; deux jours ou plus : palier J1. Une boîte mystère offerte tous les 7 jours d’affilée.',
           use: 'Dans le Pokédex, tes PA débloquent les Pokémon et font évoluer ton compagnon :',
-          streak: R.streak, evo: R.evo, dex: () => { this.setState({ paSheet: false }); openDex(); } };
+          streak: R.streak, evo: R.evo, dex: () => { this.setState({ paSheet: false }); openDex(); }, series: paSeries(s) };
       })(),
       paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') + (n ? ' pkm-pa-ready' : ''),
       claim: { open: !!(n && s.paClaim), gain: n ? '+' + n.gain + ' PA' : '', streak: n ? (n.streak > 1 ? n.streak + ' jours d’affilée' : 'Premier jour de ta série') : '',

@@ -258,7 +258,7 @@
   // Ouvrir le Pokédex (compagnon de l'accueil, « Mes PK », didacticiel) : onglet Jeux, Pokémon choisi, liste au besoin.
   dexProto.dexOpen = function (n, list) {
     const go = () => { const el = document.querySelector('section[aria-label="Pokédex"]'); if (el && !list) el.scrollIntoView({ block: 'start', behavior: dexStill() ? 'auto' : 'smooth' }); };
-    const patch = { dexSel: DEX[n] ? n : this.st().buddy, dexList: !!list, megaAsk: null };
+    const patch = { dexSel: DEX[n] ? n : this.st().buddy, dexList: !!list, megaAsk: null, gameTab: 'dex' };
     if (this.st().screen !== 'market') { this.tab('market'); this.setState(patch); setTimeout(go, 520); } else { this.setState(patch); setTimeout(go, 60); }
     if (list) dexListKeys(this);
   };

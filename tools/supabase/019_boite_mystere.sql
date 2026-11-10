@@ -12,6 +12,14 @@
 --   - Scans bonus : gardés sur un compteur qui s'additionne ; quand les scans du jour sont finis, le joueur en prend 20.
 --   - Tickets : un seul par catégorie (Bronze, Argent, Or) et par tirage, donc un par mois (« Ticket déjà acheté »).
 
+-- 0. Scripts demandés avant celui-ci (2026-11-10) : sans eux, ce script s'arrêtait à sa 1re ligne, rien n'était
+--    installé et l'app affichait « Une erreur est survenue » à l'ouverture de la boîte. Message clair à la place.
+do $$
+begin
+  if to_regclass('public.pk_boost_offers') is null then raise exception 'Installe d''abord 016_xp_pk.sql, puis relance 019 (000_verifier.sql liste ce qui manque)'; end if;
+  if to_regclass('public.shop_stock') is null then raise exception 'Installe d''abord 018_lots_limites.sql, puis relance 019 (000_verifier.sql liste ce qui manque)'; end if;
+end $$;
+
 -- 1. 2XP de 7, 14 et 30 jours retirés de la vente (la fonction reste, elle répond « Offre indisponible »).
 update public.pk_boost_offers set active = false;
 

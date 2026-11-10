@@ -17,7 +17,8 @@
   - Kyogre, Groudon, Rayquaza (5 % chacun).
 
   En moyenne, une boîte donne 2,8 jours de 2XP.
-- **Premium** : 6,90 €/mois ou 69,90 €/an, PA doublés, 30 jours de 2XP PK offerts au départ.
+- **Premium** : 6,90 €/mois ou 69,90 €/an au moment de ce calcul ; depuis le 2026-11-10 (porteur) : 9,90 €/mois, 24,90 €/3 mois, 39,90 €/6 mois, 69,90 €/an. PA doublés, 30 jours de 2XP PK offerts au départ.
+  > Le business plan du §4 utilise les prix du 9 novembre : à recalculer (l'annuel rapporte 5,83 € par mois).
 - **Joueur simulé** : il dépense ses PA au mieux. Il prend d'abord les Pokémon qu'il lui faut pour le grade suivant. Ensuite, il ouvre des boîtes mystère quand ce sont les PK qui le freinent.
   - Sans boîte, il faut 50 à 130 jours de plus pour Grand maître.
   - La boîte mystère est donc bien utile au joueur.

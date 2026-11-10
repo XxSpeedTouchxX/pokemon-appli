@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"><defs><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A38B0"/><stop offset="1" stop-color="#22175E"/></linearGradient><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE27A"/><stop offset="1" stop-color="#F0A800"/></linearGradient></defs>
+<ellipse cx="60" cy="112" rx="44" ry="5" fill="#000" opacity=".25"/>
+<rect x="14" y="56" width="92" height="52" rx="7" fill="url(#b)" stroke="#140C3A" stroke-width="3"/>
+<rect x="18" y="60" width="84" height="8" rx="3" fill="#000" opacity=".22"/>
+<rect x="22" y="56" width="11" height="52" fill="url(#g)" stroke="#140C3A" stroke-width="2.5"/>
+<rect x="87" y="56" width="11" height="52" fill="url(#g)" stroke="#140C3A" stroke-width="2.5"/>
+<rect x="14" y="80" width="92" height="7" fill="url(#g)" stroke="#140C3A" stroke-width="2.5"/>
+<path d="M47 56h26v20c0 8-6 12-13 15-7-3-13-7-13-15z" fill="url(#g)" stroke="#140C3A" stroke-width="3" stroke-linejoin="round"/>
+<path d="M60 62l7 6-7 13-7-13z" fill="#FFF6C2" stroke="#140C3A" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M60 62l7 6h-14z" fill="#fff"/>
+<circle cx="27.5" cy="100" r="2" fill="#140C3A"/><circle cx="92.5" cy="100" r="2" fill="#140C3A"/>
+</svg>

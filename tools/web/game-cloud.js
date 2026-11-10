@@ -13,7 +13,9 @@
   const gcPk = (s, v) => (gcFree(s) ? GC_INF : v), gcPa = (s, v) => (gcFree(s) ? GC_INF : v);
   const GC_LOGIN = 'Connecte-toi à ton compte Dropicards pour jouer (Mon profil › Me reconnecter).';
   const GC_NET = 'Connexion internet nécessaire pour jouer : réessaie quand tu es connecté.';
-  const gcMsg = e => (e && e.code === 'network' ? GC_NET : e && e.code === 'login' ? GC_LOGIN : (e && e.message) || CLOUD_ERR.other);
+  // Compte admin : le code technique du serveur est ajouté au message, pour savoir quoi réparer (2026-11-10).
+  const gcMsg = e => (e && e.code === 'network' ? GC_NET : e && e.code === 'login' ? GC_LOGIN : (e && e.message) || CLOUD_ERR.other)
+    + (e && e.tech && (e.code === 'other' || e.code === 'not_installed') && typeof Cloud !== 'undefined' && Cloud.isAdmin() ? ' [admin : ' + e.tech + ']' : '');
   // Compte connecté ? Sinon : message et page de connexion.
   gcProto.gcNeed = function () {
     if (!gcOn() || Cloud.signedIn()) return false;

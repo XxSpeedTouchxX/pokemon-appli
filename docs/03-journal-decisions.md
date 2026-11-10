@@ -6,6 +6,27 @@
 
 ---
 
+## 2026-11-10 — Boîte mystère réparée et 4 visuels, Mes PA, Jeux en 2 rubriques, avatar v2, Premium en 4 formules (demande du porteur)
+
+- **Boîte mystère** :
+  - « Une erreur est survenue » à l'ouverture : le serveur n'avait pas la fonction (script `019` pas installé, ou arrêté à sa 1re ligne sans `016`). Maintenant, `019` dit clairement ce qui manque, l'app affiche « pas encore en place sur le serveur » (et le code technique pour un admin), et **`tools/supabase/000_verifier.sql`** liste les scripts installés (lecture seule).
+  - L'animation part dès l'appui (chute, sauts tant que le serveur répond), puis l'ouverture et l'écran du lot.
+  - **4 visuels proposés**, dessinés pour Dropicards, chacun avec son ouverture : 1 coffre (couvercle qui bascule, lumière), 2 œuf mystère (coquille qui s'envole), 3 booster mystère (haut déchiré), 4 géode PK (pierre qui éclate). Coffre par défaut ; essai `?myvis=1` à `4`. **Choix du porteur attendu.**
+- **Mes PA** : la boîte mystère offerte dessinée sur le dernier palier (+80) ; nouvelle « Série de connexion » de 7 cases (la 7e est la boîte), avec « Encore N jours » et l'explication. Un jour oublié : la série de la boîte repart du jour 1 ; les PA reviennent au palier J3 (règle du 2026-11-09). **À confirmer** : le porteur a écrit « tu redescends au palier 1 ».
+- **Jeux** : deux rubriques, « Jeux à PK » (Booster PK, pile ou face, derniers gains) et « Pokédex » (le Pokédex, inchangé). Le compagnon, Mes PA et le didacticiel ouvrent la rubrique « Pokédex ».
+- **Mon avatar v2** :
+  - « Aléatoire » retiré ;
+  - deux lignes : « Ton avatar » (Cheveux, Visage, Style, Décor) et « Ton Pokémon » (Pokémon, Accessoire, Shiny) ;
+  - le Pokémon se glisse du doigt n'importe où sur l'avatar, devant ou derrière le dresseur ;
+  - 6 accessoires dessinés pour Dropicards (lunettes de soleil, casquette de dresseur, couronne, nœud, chapeau de fête, écharpe), posés sur le Pokémon et ajustables ;
+  - version shiny (171 sprites, `tools/sprites/fetch_shiny.py`) ;
+  - 3 interfaces proposées : 1 Studio (défaut), 2 Carte de dresseur, 3 Plein écran (`?avui=`). **Choix du porteur attendu.**
+  - Prix PRO **proposés, à confirmer** : shiny 300 PA, couronne 150 PA, nœud, chapeau de fête et écharpe 100 PA ; lunettes et casquette gratuites ; tout ouvert avec Premium.
+  - Serveur : `021_avatar_v2.sql` (**à installer**).
+- **Premium** (porteur) : **9,90 € par mois, 24,90 € pour 3 mois, 39,90 € pour 6 mois, 69,90 € par an**. 4 formules dans l'app, les conditions de vente, la fonction `stripe` (à réinstaller) et la base (`020_premium_formules.sql`, **à installer**) ; prix à créer dans Stripe (`docs/28` § 8 ter). L'annuel rapporte 5,83 € par mois : `docs/32` §4 est à recalculer.
+- **Mini-jeu proposé** : « Plus ou moins cher ? » (`docs/33`), rien n'est codé sans « go ».
+- Tests : 406 vérifications SQL, fonction Stripe 31, prix de l'avatar 26 identiques. Cache v174.
+
 ## 2026-11-09 — PA jusqu'à 80, boîte offerte, lot 2XP PA, ouverture animée, paliers des grades proposés (demande du porteur)
 
 - **Boîte mystère** : lot « 300 PK » retiré, remplacé par **2XP PA 7 jours** (15 %). Il double les PA du jour pendant 7 jours. Un abonné Premium a déjà ses PA doublés : ce lot n'est jamais tiré pour lui (**défaut à confirmer** ; 2XP PA et Premium ne se cumulent pas).

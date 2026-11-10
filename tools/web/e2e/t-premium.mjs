@@ -1,5 +1,5 @@
 // Abonnement Premium (2026-11-06, demande du porteur ; docs/27) : bannière dans le PK shop et dans Mon profil, écran de
-// l'offre (7 avantages, Annuel 69,90 € choisi par défaut, Mensuel 6,90 €), règles de renouvellement et d'arrêt,
+// l'offre (7 avantages, Annuel 69,90 € choisi par défaut, Semestriel 39,90 €, Trimestriel 24,90 €, Mensuel 9,90 €), règles de renouvellement et d'arrêt,
 // paiement par Stripe (sans compte connecté : message de connexion ; le parcours payé est dans t-premium-pay.mjs).
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
@@ -23,11 +23,11 @@ ok('double XP sur les PA seulement', /Double XP permanent sur tes PA/.test(await
 const top = await sh.locator('.pkm-prem-crown-xl').evaluate(e => e.getBoundingClientRect().top);
 ok('couronne entière, sous le haut de l’écran (' + Math.round(top) + ' px)', top > 0);
 ok('5 avantages', ['Scans illimités', 'Cartes et items scellés illimités', 'Radar des boutiques débloqué', 'Double XP permanent', 'Historique des prix complet'].every(x => t.includes(x)));
-ok('formules : Annuel 69,90 € par an (choisie, meilleure offre) et Mensuel 6,90 € par mois', /69,90 €/.test(t) && /6,90 €/.test(t) && (await sh.locator('button[role=radio][aria-checked=true]').innerText()).includes('Annuel') && /Meilleure offre/.test(t));
+ok('formules : Annuel 69,90 € par an (choisie, meilleure offre), Semestriel 39,90 €, Trimestriel 24,90 € et Mensuel 9,90 €', /69,90 €/.test(t) && /39,90 €/.test(t) && /24,90 €/.test(t) && /9,90 €/.test(t) && (await sh.locator('button[role=radio][aria-checked=true]').innerText()).includes('Annuel') && /Meilleure offre/.test(t));
 ok('règles : renouvellement automatique, arrêt à tout moment, période commencée due', /Renouvellement automatique chaque année/.test(t) && /arrêter à tout moment/.test(t) && /période déjà commencée reste due/.test(t));
 await page.screenshot({ path: shot('premium.png') });
 await sh.locator('button[role=radio]:has-text("Mensuel")').click(); await page.waitForTimeout(300);
-ok('Mensuel choisi : « Devenir Premium · 6,90 € par mois », « chaque mois »', /Devenir Premium · 6,90 € par mois/.test(await sh.innerText()) && /Renouvellement automatique chaque mois/.test(await sh.innerText()));
+ok('Mensuel choisi : « Devenir Premium · 9,90 € par mois », « chaque mois »', /Devenir Premium · 9,90 € par mois/.test(await sh.innerText()) && /Renouvellement automatique chaque mois/.test(await sh.innerText()));
 ok('paiement sécurisé par Stripe annoncé, bouton actif', !(await sh.locator('button.pkm-prem-cta').isDisabled()) && /Paiement sécurisé par Stripe/.test(await sh.innerText()));
 await sh.locator('button.pkm-prem-cta').click(); await page.waitForTimeout(500);
 ok('sans serveur (tests) : le paiement explique qu’il n’est pas disponible, rien n’est ouvert', /pas disponible/.test(await sh.locator('.pkm-prem-err').innerText().catch(() => '')) && page.url().startsWith(E2E));
