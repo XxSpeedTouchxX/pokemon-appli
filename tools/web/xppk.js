@@ -62,10 +62,12 @@
     { id: 'coffre-cristal', kind: 'coffre', name: 'Coffre de cristal' },
     { id: 'coffre-legende', kind: 'coffre', name: 'Coffre légendaire (obsidienne et runes)' }
   ];
+  // Choix du porteur (2026-11-10, soir) : le coffre en bois et fer (« ? » remonté et centré). Les autres pour essai
+  // (?myvis=1 à 8, sans mémoire : le coffre en bois revient à l'ouverture suivante).
   const myVis = () => {
-    let n = 0;
-    try { const m = /[?&]myvis=([1-8])\b/.exec(location.search); if (m) { n = Number(m[1]); localStorage.setItem('pkm-myvis', String(n)); } else n = Number(localStorage.getItem('pkm-myvis')) || 0; } catch (e) { n = 0; }
-    return MY_VIS[(n >= 1 && n <= MY_VIS.length ? n : 1) - 1];
+    let n = 5;
+    try { const m = /[?&]myvis=([1-8])\b/.exec(location.search); if (m) n = Number(m[1]); } catch (e) { n = 5; }
+    return MY_VIS[n - 1];
   };
   // Images de la boîte choisie, aussi dans « Mes PA » (boîte offerte au 7e jour d'affilée, 2026-11-10).
   const myBoxImgs = () => { const v = myVis(); return { base: 'img/mybox/' + v.id + '-base.svg', lid: 'img/mybox/' + v.id + '-lid.svg' }; };
