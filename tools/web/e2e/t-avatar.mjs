@@ -98,7 +98,9 @@ await page.locator('.pkm-av-pk:has(img[src$="/383.png"])').first().click(); awai
 ok('Premium : Groudon choisi sans fenêtre de déblocage', (await lk.count()) === 0 && (await st()).avDraft.poke === 383);
 await page.evaluate(() => window.__pkm.setState({ avTab: 'hair' })); await page.waitForTimeout(300);
 ok('Premium : coiffures PRO ouvertes (badge vert)', (await page.locator('section[aria-label="Cheveux"] .pkm-av-pro-ok').count()) >= 4);
-// Dessins proposés : ?avdesign=2 (Manga).
+// Dessin du dresseur : « Autocollant » par défaut (choix du porteur, 2026-11-11) ; les autres pour essai.
+ok('dessin par défaut « Autocollant » : contour blanc', /url\(#avst\)/.test(decodeURIComponent(await page.locator('.pkm-av-char').getAttribute('src'))));
+// Dessins pour essai : ?avdesign=2 (Manga).
 const p2 = await ctx.newPage(); await p2.goto(E2E + '/?start=avatar&debug&avdesign=2', { waitUntil: 'load' }); await p2.waitForTimeout(1200);
 ok('dessin proposé « Manga » (?avdesign=2) : tête agrandie', /scale\(1\.12\)/.test(decodeURIComponent(await p2.locator('.pkm-av-char').getAttribute('src'))));
 await p2.close();

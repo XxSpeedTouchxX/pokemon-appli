@@ -156,11 +156,11 @@
     }
   };
   // Dessins du dresseur proposés (2026-11-11, porteur : « essaie de me changer l'image de l'avatar, propose-moi des
-  // designs ») ; essai : ?avdesign=1 à 4, en attendant le choix du porteur (1 reste celui par défaut).
+  // designs ») ; choix du porteur (2026-11-11) : 3 « Autocollant », par défaut ; les autres pour essai (?avdesign=1, 2 ou 4).
   //   1 « Classique » (d'origine) ; 2 « Manga » (tête plus grande, grands yeux colorés à reflets, ombres franches, traits
   //   épais) ; 3 « Autocollant » (contour blanc épais et ombre portée, comme un sticker) ; 4 « Doux » (sans contours, yeux
   //   en points, joues marquées, formes simples).
-  const avDesign = (() => { try { const m = /[?&]avdesign=([1-4])\b/.exec(location.search); if (m) return Number(m[1]); } catch (e) { /* sans adresse */ } return 1; })();
+  const avDesign = (() => { try { const m = /[?&]avdesign=([1-4])\b/.exec(location.search); if (m) return Number(m[1]); } catch (e) { /* sans adresse */ } return 3; })();
   const avChar = c => {
     const sk = avFind('skin', c.skin).c, hc = avFind('hc', c.hc).c, D = avDesign;
     const cheeks = '<ellipse cx="72" cy="116" rx="8" ry="4.5" fill="#FF7A9A" opacity="' + (D === 4 ? '.7' : '.45') + '"/><ellipse cx="128" cy="116" rx="8" ry="4.5" fill="#FF7A9A" opacity="' + (D === 4 ? '.7' : '.45') + '"/>';

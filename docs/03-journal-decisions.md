@@ -15,7 +15,7 @@
 - **Rubrique « Place » retirée** (devant/derrière, curseur de taille).
 - **Icônes** : silhouette de Pikachu pour « Pokémon », lunettes pour « Accessoire ».
 - **Avatar en rectangle arrondi** (comme dans l'éditeur) dans l'en-tête de l'accueil et dans Mon profil : plus de rond.
-- **Dessin du dresseur : 4 propositions** (essai : `?avdesign=1` à `4`) : 1 Classique (actuel, par défaut), 2 Manga (tête plus grande, grands yeux colorés à reflets, ombres), 3 Autocollant (contour blanc épais et ombre portée), 4 Doux (sans contours, yeux en points). **Choix du porteur attendu.**
+- **Dessin du dresseur : 4 propositions** : 1 Classique (l'ancien), 2 Manga (tête plus grande, grands yeux colorés à reflets, ombres), 3 Autocollant (contour blanc épais et ombre portée), 4 Doux (sans contours, yeux en points). **Choix du porteur : 3 « Autocollant »**, par défaut partout ; les autres pour essai (`?avdesign=1`, `2` ou `4`).
 - **Serveur** : `022_avatar_v3.sql` mis à jour (Premium ouvre les Pokémon et les shiny, taille 5 à 5 000 %, rotations `prot` et `arot`) ; `install_011_a_022.sql` refait. 26 tests pour 022, 432 vérifications SQL.
 - Test `t-avatar` refait (30 vérifications). Cache v179.
 
