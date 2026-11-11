@@ -18,7 +18,7 @@ ok('icônes animées : scanner, classeur, radar, goutte des PA « 2XP », graphi
   && (await sh.locator('.pkm-prem-xp-tag').first().innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1
   && (await sh.locator('.pkm-prem-bind-card').evaluate(e => getComputedStyle(e).animationName)) === 'pkmPremCard');
 const boxes = await sh.locator('.pkm-prem-ico').evaluateAll(l => l.map(e => Math.round(e.getBoundingClientRect().left)));
-ok('7 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 7 && new Set(boxes).size === 1);
+ok('8 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 8 && new Set(boxes).size === 1);
 ok('double XP sur les PA seulement', /Double XP permanent sur tes PA/.test(await sh.innerText()) && !/PK et tes PA/.test(await sh.innerText()));
 const top = await sh.locator('.pkm-prem-crown-xl').evaluate(e => e.getBoundingClientRect().top);
 ok('couronne entière, sous le haut de l’écran (' + Math.round(top) + ' px)', top > 0);
