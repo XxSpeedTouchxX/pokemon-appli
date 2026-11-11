@@ -486,6 +486,13 @@ def compare_catalog(prev, doc):
     drop("cartes en anglais (cardsEn)", s0.get("cardsEn", 0), s1.get("cardsEn", 0))
     drop("visuels de repli (imgAlt)", sum((s0.get("imgAlt") or {}).values()), sum((s1.get("imgAlt") or {}).values()))
     a, b = s0.get("imgNone", 0), s1.get("imgNone", 0)
+    # Extension apparue depuis la veille (2026-11-11, me06 : 141 cartes annoncées par TCGdex sans leurs images) :
+    # ses cartes sans visuel ne sont pas une perte ; elles sont signalées à part et ne bloquent pas l'index.
+    new_sets = set(doc.get("sets") or {}) - set(prev.get("sets") or {})
+    if new_sets:
+        fresh = sum(1 for c in doc["cards"] if c[nf["set"]] in new_sets and not c[nf["img"]])
+        warnings.append(f"nouvelles extensions : {', '.join(sorted(new_sets))} ({fresh} cartes encore sans visuel)")
+        b -= fresh
     detail = ""
     if b > a * 1.1 + 20:
         # Diagnostic (2026-11-11) : quelles cartes illustrées la veille n'ont plus de visuel, et d'où venait-il ?

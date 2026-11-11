@@ -135,6 +135,16 @@ class Compare(unittest.TestCase):
         errors, _ = compare_catalog(self.prev, new)
         self.assertEqual(len(errors), 2)
 
+    def test_new_set_without_images(self):
+        # 2026-11-11 : me06 annoncée par TCGdex avec 141 cartes sans image ; pas une perte de visuels.
+        new = doc([("a", 1.0)] * 60 + [("b", 2.0)] * 40 + [("me06", None)] * 141, stats={**self.prev["stats"], "imgNone": 241})
+        errors, warnings = compare_catalog(self.prev, new)
+        self.assertEqual(errors, [])
+        self.assertTrue(any("nouvelles extensions : me06 (141 cartes encore sans visuel)" in w for w in warnings))
+        # Mais des visuels perdus dans les extensions déjà connues restent une erreur.
+        new["stats"]["imgNone"] = 241 + 100
+        self.assertTrue(any("imgNone" in e for e in compare_catalog(self.prev, new)[0]))
+
 
 class Coverage(unittest.TestCase):
     def test_sets_without_cardmarket(self):
