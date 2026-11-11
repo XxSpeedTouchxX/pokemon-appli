@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""
+etb_cotes.py (2026-11-11, contenus réseaux sociaux, lecture seule) : cote Cardmarket du jour de tous les Coffrets
+Dresseur d'élite (ETB) depuis Écarlate et Violet, et visuels officiels de la galerie Pokémon France. Rien n'est écrit
+dans l'app : le résultat (out/etb.json, out/img/*.png) est déposé comme pièce jointe du workflow « Cotes des ETB ».
+"""
+import gzip
+import json
+import time
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+CM = "https://downloads.s3.cardmarket.com/productCatalog/"
+UA = {"User-Agent": "PKM-App-index/1.0 (catalogue Dropicards)", "Accept-Encoding": "gzip"}
+OUT = Path("out")
+# Extension (code des visuels pokemon.com) et années où chercher le visuel.
+SETS = ["sv01", "sv02", "sv03", "sv3pt5", "sv04", "sv4pt5", "sv05", "sv06", "sv6pt5", "sv07", "sv08", "sv8pt5",
+        "sv09", "sv10", "sv10pt5", "me01", "me02", "me2pt5", "me03", "me04", "me05"]
+IMG = "https://www.pokemon.com/static-assets/content-assets/cms2-fr-fr/img/trading-card-game/series/incrementals/{y}/{s}-elite-trainer-box/{s}-elite-trainer-box-169-fr.png"
+
+
+def get(url, binary=False):
+    req = Request(url, headers=UA if not binary else {"User-Agent": "Mozilla/5.0 (compatible; PKM-App/1.0)"})
+    with urlopen(req, timeout=120) as r:
+        data = r.read()
+        if r.headers.get("Content-Encoding") == "gzip":
+            data = gzip.decompress(data)
+    return data
+
+
+def main():
+    OUT.mkdir(exist_ok=True); (OUT / "img").mkdir(exist_ok=True)
+    prods = json.loads(get(CM + "productList/products_nonsingles_6.json"))
+    guide = json.loads(get(CM + "priceGuide/price_guide_6.json"))
+    print("fichiers :", prods.get("createdAt"), guide.get("createdAt"))
+    g = {x["idProduct"]: x for x in guide["priceGuides"]}
+    rows = []
+    for p in prods["products"]:
+        n = p.get("name", "")
+        if "elite trainer box" not in n.lower() or (p.get("dateAdded") or "") < "2022-12-01":
+            continue
+        x = g.get(p["idProduct"], {})
+        rows.append({"id": p["idProduct"], "name": n, "cat": p.get("categoryName"), "exp": p.get("idExpansion"),
+                     "added": p.get("dateAdded"), "trend": x.get("trend"), "avg30": x.get("avg30"), "avg7": x.get("avg7"),
+                     "avg1": x.get("avg1"), "low": x.get("low"), "avg": x.get("avg")})
+    rows.sort(key=lambda r: r["added"] or "")
+    for r in rows:
+        print(f'{r["id"]:>7} {r["added"][:10]} exp {r["exp"]} trend {r["trend"]} avg30 {r["avg30"]} low {r["low"]} | {r["name"]}')
+    found = {}
+    for s in SETS:
+        for y in (2023, 2024, 2025, 2026):
+            url = IMG.format(y=y, s=s)
+            try:
+                data = get(url, binary=True)
+            except (HTTPError, URLError, TimeoutError):
+                continue
+            if data[:4] == b"\x89PNG":
+                (OUT / "img" / f"{s}.png").write_bytes(data); found[s] = url; break
+        time.sleep(1)
+    print("visuels :", len(found), "sur", len(SETS), "manquants :", [s for s in SETS if s not in found])
+    (OUT / "etb.json").write_text(json.dumps({"created": guide.get("createdAt"), "rows": rows, "images": found},
+                                             ensure_ascii=False, indent=1), "utf-8")
+
+
+if __name__ == "__main__":
+    main()

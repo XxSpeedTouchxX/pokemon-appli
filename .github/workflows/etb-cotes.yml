@@ -1,0 +1,33 @@
+# Cotes des ETB depuis Écarlate et Violet (2026-11-11, contenus réseaux sociaux, lecture seule) : fichiers publics
+# Cardmarket et visuels de la galerie Pokémon France, déposés comme pièce jointe du workflow. Rien n'est écrit dans l'app.
+name: Cotes des ETB
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - tools/marketing/etb_cotes.py
+      - .github/workflows/etb-cotes.yml
+
+permissions:
+  contents: read
+
+jobs:
+  etb:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Cotes et visuels
+        run: python tools/marketing/etb_cotes.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: etb-cotes
+          path: out/
+          retention-days: 7
