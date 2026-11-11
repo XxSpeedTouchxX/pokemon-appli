@@ -21,6 +21,8 @@ from (values
   ('018_lots_limites', to_regclass('public.shop_stock') is not null, 'lots limités, tirage mensuel'),
   ('019_boite_mystere (1re version)', to_regclass('public.mystery_lots') is not null, 'boîte mystère, scans bonus'),
   ('019_boite_mystere (version du 9 novembre au soir)', to_regprocedure('public.open_gift_box(uuid)') is not null, '2XP PA, PA jusqu''à 80, boîte offerte'),
+  ('021_avatar_v2', exists (select 1 from public.avatar_items where id = 'acc:couronne'), 'avatar v2 : accessoires, shiny'),
+  ('022_avatar_v3', exists (select 1 from public.avatar_items where id = 'frame:lave'), 'avatar v3 : Pokémon d''avatar, cadres'),
   ('020_premium_formules', exists (select 1 from pg_constraint where conname = 'premium_plan_check' and pg_get_constraintdef(oid) like '%quarter%'), 'Premium trimestriel et semestriel')
 ) as t(script, ok, role)
 order by script;

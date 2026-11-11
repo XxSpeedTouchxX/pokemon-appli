@@ -152,7 +152,7 @@
         // l'ouverture, en aperçu (rien n'est débité ni gagné) ; un joueur lit « Bientôt disponible ».
         if (e && e.code === 'not_installed') {
           this.setState({ myOff: true });
-          if (myAdmin()) { stage.win(myDraw(this, this.st()), () => this.setState({ myBusy: false, myAsk: false, toast: 'Aperçu admin : rien n’est débité. Pour les vraies boîtes, installe tools/supabase/install_011_a_021.sql dans Supabase Studio.' })); return; }
+          if (myAdmin()) { stage.win(myDraw(this, this.st()), () => this.setState({ myBusy: false, myAsk: false, toast: 'Aperçu admin : rien n’est débité. Pour les vraies boîtes, installe tools/supabase/install_011_a_022.sql dans Supabase Studio.' })); return; }
           stage.fail(); this.setState({ myBusy: false, myAsk: false, toast: 'La boîte mystère arrive très bientôt !' }); return;
         }
         stage.fail(); this.setState({ myBusy: false, myAsk: false }); if (this.gcFail) this.gcFail(e); else this.setState({ toast: 'Ouverture impossible pour le moment' });

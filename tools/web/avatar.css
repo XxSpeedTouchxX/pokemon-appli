@@ -45,7 +45,7 @@
 .pkm-av-pro::before { content: '♛ '; }
 .pkm-av-pro-ok { background: linear-gradient(135deg, #CFFFE4, #3BC48A); }
 .pkm-av-pro-big { position: static; align-self: center; font-size: 12px; padding: 3px 10px; }
-.pkm-av-save { flex: none; position: sticky; bottom: 92px; z-index: 3; padding-top: 4px; }
+.pkm-av-save { flex: none; height: 76px; }
 .pkm-av-savebtn { width: 100%; min-height: 56px; border: 0; border-radius: 999px; background: #3D63FF; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 800; box-shadow: 0 10px 24px rgba(61, 99, 255, 0.45); cursor: pointer; }
 .pkm-av-wrap { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(3, 6, 14, 0.62); }
 .pkm-av-scrim { position: absolute; inset: 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
@@ -127,3 +127,65 @@
 @media (prefers-reduced-motion: reduce) { .pkm-av-ui2 .pkm-av-prev::after { animation: none; } }
 .pkm-av-ui2 .pkm-av-tab.pkm-av-tab-on { background: #FFD60A; color: #0B1120; }
 .pkm-av-ui2 .pkm-av-tab2.pkm-av-tab-on { background: linear-gradient(135deg, #FF7AC6, #B26BFF); color: #FFFFFF; }
+
+/* ——— Mon avatar v3 (2026-11-10, porteur) ——— */
+/* « Enregistrer mon avatar » dans un volet figé en bas, au-dessus de la barre de navigation ; la place réservée sous
+   les réglages (.pkm-av-save) évite que le dernier choix passe dessous. */
+.pkm-av-savebar { position: fixed; left: 0; right: 0; bottom: calc(var(--pkm-nav-h, 84px) + env(safe-area-inset-bottom, 0px)); z-index: 12; display: flex; justify-content: center; padding: 10px 16px 12px; background: linear-gradient(180deg, rgba(255, 214, 10, 0), rgba(255, 214, 10, 0.92) 30%); pointer-events: none; }
+.pkm-av-savebar .pkm-av-savebtn { max-width: 440px; pointer-events: auto; }
+html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear-gradient(180deg, rgba(11, 17, 32, 0), rgba(11, 17, 32, 0.94) 30%); }
+.pkm-av-choose { margin-top: 2px; }
+.pkm-av-pkrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.pkm-av-pkrow .pkm-av-slot { min-height: 120px; }
+.pkm-av-pkrow .pkm-av-slot small { color: #C9D3EA; text-align: center; line-height: 1.2; }
+.pkm-av-slot-on { border-color: #FFD60A; background: rgba(255, 214, 10, 0.1); }
+.pkm-av-slot-sh { border: 2px solid #B26BFF; background: radial-gradient(90% 70% at 50% 30%, rgba(255, 228, 107, 0.22), rgba(255, 228, 107, 0) 70%), #0B1120; }
+.pkm-av-slot-sh b::before { content: '✨ '; }
+.pkm-av-lockpk { align-self: center; display: flex; align-items: center; justify-content: center; width: 140px; height: 140px; border-radius: 34px; border: 3px solid #FFFFFF; background: radial-gradient(circle at 50% 40%, #2B3F7A, #0B1120); }
+.pkm-av-lockpk img { image-rendering: pixelated; }
+.pkm-av-pk-own small { color: #3BC48A; font-weight: 800; }
+
+/* Cadres animés (2026-11-10, porteur) : un anneau dessiné autour de l'élément (::before, découpé en anneau par un
+   masque), sans toucher à son contenu. Utilisés sur l'aperçu, la bulle de Mon profil, l'avatar de l'en-tête et les
+   vignettes du choix. --frw : épaisseur de l'anneau. Prix proposés, à confirmer (avatar.js, AV_FRAMES). */
+@property --pkm-fra { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.pkm-fr { position: relative; --frw: 4px; }
+.pkm-fr-aucun::before, .pkm-fr-aucun::after { content: none; }
+.pkm-fr:not(.pkm-fr-aucun)::before { content: ''; position: absolute; inset: calc(-1 * var(--frw)); z-index: 2; border-radius: inherit; padding: var(--frw); pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  background: var(--frbg); animation: pkmFrSpin var(--frt, 4s) linear infinite; }
+.pkm-fr:not(.pkm-fr-aucun)::after { content: ''; position: absolute; inset: calc(-1 * var(--frw)); z-index: 1; border-radius: inherit; pointer-events: none; box-shadow: 0 0 calc(var(--frw) * 3) var(--frglow, transparent); animation: pkmFrGlow var(--frg, 2.4s) ease-in-out infinite; }
+@keyframes pkmFrSpin { to { --pkm-fra: 360deg; } }
+@keyframes pkmFrGlow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.pkm-fr-dore { --frbg: conic-gradient(from var(--pkm-fra), #7A4A00, #FFD60A, #FFF6C2, #F2A900, #7A4A00, #FFE46B, #7A4A00); --frglow: rgba(255, 214, 10, 0.55); --frt: 5s; }
+.pkm-fr-arcenciel { --frbg: conic-gradient(from var(--pkm-fra), #FF4D6D, #FF9F1C, #FFE14D, #3BC48A, #3D8BFF, #9B6BFF, #FF4D6D); --frglow: rgba(255, 255, 255, 0.55); --frt: 3s; }
+.pkm-fr-tempete { --frbg: conic-gradient(from var(--pkm-fra), #0E3B2E, #1E7F5C, #6EF2B4, #2F3A48, #0E3B2E, #3BC48A, #E8FFF4 52%, #1E7F5C 54%, #0E3B2E); --frglow: rgba(59, 196, 138, 0.7); --frt: 2.6s; --frg: 1.3s; }
+.pkm-fr-tempete::after { animation-name: pkmFrStorm; }
+@keyframes pkmFrStorm { 0%, 78%, 100% { opacity: 0.5; } 80% { opacity: 1; box-shadow: 0 0 calc(var(--frw) * 6) #E8FFF4; } 83% { opacity: 0.6; } 86% { opacity: 1; box-shadow: 0 0 calc(var(--frw) * 5) #6EF2B4; } }
+.pkm-fr-vague { --frbg: conic-gradient(from var(--pkm-fra), #0B3D91, #3D8BFF, #BDE6FF, #3D8BFF, #0B3D91, #5EC8F0, #FFFFFF 40%, #5EC8F0 44%, #0B3D91); --frglow: rgba(61, 139, 255, 0.7); --frt: 3.4s; }
+.pkm-fr-vague::after { animation-name: pkmFrWave; }
+@keyframes pkmFrWave { 0%, 100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.04); opacity: 1; } }
+.pkm-fr-lave { --frbg: conic-gradient(from var(--pkm-fra), #3A0A04, #C7260E, #FF6A00, #FFD60A, #FF6A00, #7A1A12, #FF9F1C, #3A0A04); --frglow: rgba(255, 106, 0, 0.8); --frt: 5s; --frg: 0.9s; }
+.pkm-fr-lave::after { animation-name: pkmFrLava; }
+@keyframes pkmFrLava { 0%, 100% { opacity: 0.6; } 30% { opacity: 1; } 55% { opacity: 0.75; } 70% { opacity: 1; } }
+.pkm-fr-galaxie { --frbg: radial-gradient(circle at 20% 30%, #FFFFFF 0 1px, transparent 2px), radial-gradient(circle at 75% 70%, #FFFFFF 0 1px, transparent 2px), conic-gradient(from var(--pkm-fra), #1B0F3A, #6A3CEB, #FF5BE1, #2B3F7A, #1B0F3A, #9B6BFF, #1B0F3A); --frglow: rgba(155, 107, 255, 0.7); --frt: 6s; }
+.pkm-fr-eclair { --frbg: conic-gradient(from var(--pkm-fra), #2A1E2E, #FFD60A 10%, #FFFFFF 12%, #FFD60A 14%, #2A1E2E 30%, #FFD60A 60%, #FFF6C2 62%, #2A1E2E 80%); --frglow: rgba(255, 214, 10, 0.9); --frt: 1.6s; --frg: 0.7s; }
+.pkm-fr-glace { --frbg: conic-gradient(from var(--pkm-fra), #BDE6FF, #FFFFFF, #8FD3FF, #E8F7FF, #5EC8F0, #FFFFFF, #BDE6FF); --frglow: rgba(189, 230, 255, 0.85); --frt: 7s; }
+.pkm-fr-neon { --frbg: conic-gradient(from var(--pkm-fra), #FF2BD6, #2BF0FF, #FF2BD6, #2BF0FF, #FF2BD6); --frglow: rgba(255, 43, 214, 0.9); --frt: 2.2s; --frg: 1s; }
+.pkm-fr-brume { --frbg: conic-gradient(from var(--pkm-fra), #2A1E3E, #8A6BD8, #D9CCFF, #4A3A6B, #2A1E3E, #B9A6F0, #2A1E3E); --frglow: rgba(185, 166, 240, 0.7); --frt: 8s; --frg: 3.6s; }
+.pkm-fr-sakura { --frbg: radial-gradient(circle at 15% 20%, #FFFFFF 0 1.5px, transparent 2.5px), radial-gradient(circle at 80% 85%, #FFFFFF 0 1.5px, transparent 2.5px), conic-gradient(from var(--pkm-fra), #FFB3DF, #FF7AC6, #FFF0F7, #FF9ACD, #FFB3DF, #FFE4F2, #FFB3DF); --frglow: rgba(255, 122, 198, 0.65); --frt: 6s; }
+.pkm-fr-holo { --frbg: conic-gradient(from var(--pkm-fra), #FF8AD8, #8FD3FF, #A8F0C8, #FFE46B, #C9A6FF, #FF8AD8); --frglow: rgba(201, 166, 255, 0.7); --frt: 2.8s; }
+@media (prefers-reduced-motion: reduce) { .pkm-fr::before, .pkm-fr::after { animation: none !important; } }
+/* Aperçu : l'anneau entoure l'avatar ; bulle de l'en-tête et de Mon profil : anneau plus fin. */
+.pkm-av-frwrap { display: block; border-radius: 52px; --frw: 6px; }
+.pkm-av-ui1 .pkm-av-frwrap { border-radius: 44px; }
+.pkm-av-ui2 .pkm-av-frwrap { width: 100%; border-radius: 22px; }
+.pkm-av-ui3 .pkm-av-frwrap { width: 100%; border-radius: 0 0 36px 36px; }
+.pkm-hh-me.pkm-fr { --frw: 3px; }
+.pkm-pf-photo.pkm-fr { --frw: 4px; }
+.pkm-av-frgrid { row-gap: 12px; }
+.pkm-av-fropt { padding-top: 14px; }
+.pkm-av-fropt .pkm-av-pro { top: -6px; right: -4px; z-index: 3; }
+.pkm-av-frdot { display: block; width: 46px; height: 46px; border-radius: 50%; --frw: 5px; }
+.pkm-av-frin { display: block; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #FFF0A0, #F2A900); }
+.pkm-av-frdot.pkm-fr-aucun .pkm-av-frin { box-shadow: inset 0 0 0 2px #5A6A8E; }

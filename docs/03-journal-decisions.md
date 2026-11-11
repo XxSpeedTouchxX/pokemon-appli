@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-11 — Mon avatar v3 (demande du porteur)
+
+- **« Enregistrer mon avatar »** reste en bas de l'écran, dans un volet figé au-dessus de la barre du bas, pendant qu'on fait défiler les réglages.
+- **Avatar de départ** : cheveux noirs en pics, fond jaune, sans Pokémon. Il est **déjà dans la bulle du profil et l'en-tête** dès la connexion, même avant d'avoir ouvert « Mon avatar ».
+- **Pokémon de l'avatar, à part du Pokédex** : les 171 Pokémon se débloquent ici avec des PA, pour toujours : 1re forme 25 PA, 2e forme 50 PA, 3e forme 100 PA, légendaires 300 PA, Kyogre, Groudon et Rayquaza 500 PA. **Méga-évolutions : 200 PA (proposé, à confirmer)**. On peut essayer n'importe lequel avant de le débloquer.
+- **« Coup de cœur » retiré** : un seul Pokémon. À côté de lui, sa **version shiny** est toujours proposée, au **double de son prix** (Pikachu 25 PA, Pikachu shiny 50 PA).
+- **Accessoires** : sur le Pokémon **ou sur moi** ; on les fait glisser, et on les **pince à deux doigts** pour les grossir ou les rapetisser, **sans limite** (aussi la molette de la souris, et des boutons − et +).
+- **Décor › Cadre animé** : 13 cadres autour de l'avatar (aperçu, bulle du profil, en-tête) : Sans cadre et Doré (gratuits), Arc-en-ciel, Tempête émeraude (façon Rayquaza, éclairs), Vague océane (façon Kyogre), Lave volcanique (façon Groudon), Galaxie, Éclair, Glace, Néon, Brume spectrale, Fleurs de cerisier, Holographique. **Prix proposés, à confirmer** : 150 PA, 200 PA (Holographique), 250 PA (Tempête, Vague, Lave).
+- **Défauts à confirmer** : Premium ouvre toujours les styles PRO et les cadres, **mais pas les Pokémon d'avatar ni leurs shiny** ; un avatar déjà enregistré garde son Pokémon (offert une fois) ; l'ancien « shiny » de la v2 devient la version shiny du Pokémon de l'avatar.
+- **Serveur** : `tools/supabase/022_avatar_v3.sql` (mêmes prix, calculés depuis la liste des Pokémon du jeu ; vérifications à l'enregistrement et à l'achat ; 24 tests). **L'installateur unique devient `install_011_a_022.sql`** (011 à 022, rejouable). Sans 022, l'app affiche « Bientôt disponible » (un admin voit le fichier à installer).
+- Tests : `t-avatar` refait (27 vérifications), `avatar_prices.mjs` (35 styles identiques app/serveur), 430 vérifications SQL. Cache v178.
+
 ## 2026-11-11 — Boîte mystère : « pas encore en place » (demande du porteur)
 
 - **Cause** : le serveur de Dropicards n'a pas encore la boîte mystère. Le script `019` (et `016`, `018` dont il a besoin) n'est pas installé dans Supabase. L'app demande la fonction `open_mystery_box` au serveur, qui répond qu'elle n'existe pas.

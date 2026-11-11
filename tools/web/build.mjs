@@ -147,7 +147,7 @@ patch('<sc-if value="{{ ob.is1 }}" hint-placeholder-val="{{ true }}">\n<div styl
 // Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de l'avatar ouvre « Mon avatar »
 // (2026-11-08 : photo personnelle retirée, avatar.js, crayon à la place de l'appareil photo) ; rubrique « Informations du dresseur » sous l'identité.
 patch(`<span style="position: relative; flex: none; width: 76px; height: 76px">
-<img src="{{ pf.avatar }}"`, `<button type="button" onClick="{{ pf.photo.pick }}" aria-label="{{ pf.photo.label }}" class="pkm-pf-photo" style="position: relative; flex: none; width: 76px; height: 76px; padding: 0; border: 0; background: transparent; cursor: pointer">
+<img src="{{ pf.avatar }}"`, `<button type="button" onClick="{{ pf.photo.pick }}" aria-label="{{ pf.photo.label }}" class="{{ ui.pfPhotoCls }}" style="position: relative; border-radius: 38px; flex: none; width: 76px; height: 76px; padding: 0; border: 0; background: transparent; cursor: pointer">
 <img src="{{ pf.avatar }}"`);
 patch(`<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"></path></svg>
 </span>`, `<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"></path></svg>
