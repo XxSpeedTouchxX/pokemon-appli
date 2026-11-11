@@ -80,6 +80,29 @@
     return 'data:image/svg+xml,' + encodeURIComponent(svg);
   }
   const setOf = id => (TCG.doc && TCG.doc.sets[id]) || [id, '', '', '', '', 'fr'];
+  // Liens de la fiche vers la bonne carte (2026-11-11, porteur : Groudon ☆ d'EX Espèces Delta, 111/113, « le lien des
+  // ventes réussies eBay ouvre une mauvaise carte »).
+  // - eBay : nom anglais de la carte (TCGdex, champ en du catalogue ; sinon le nom affiché) et numéro imprimé
+  //   (« Groudon Star 111/113 »). ☆ devient « Star » (annonces « Groudon Star » et « Groudon Gold Star »), ◇ « Prism »,
+  //   δ et les autres symboles sont retirés (eBay ne les lit pas). Plus de « FR » : absent de la plupart des annonces, il
+  //   faisait élargir la recherche par eBay à d'autres cartes. Numéro sans total (promos « 045 ») : « Promo » en plus.
+  //   Réimpression de la Collection Classique (30 ans) : la recherche d'avant (nom, numéro d'origine, « 30 ans », « FR »).
+  const ebayWords = t => String(t || '').replace(/☆/g, ' Star ').replace(/◇/g, ' Prism ')
+    .replace(/[^0-9A-Za-zÀ-ÖØ-öø-ÿ'’./ -]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const ebayQuery = p => {
+    if (p.reprintOf) return [p.name, p.numShort, '30 ans', p.lang === 'EN' ? '' : 'FR'].filter(Boolean).join(' ');
+    const num = String(p.numShort || '');
+    return [ebayWords(p.en || p.name), num, /^\d+$/.test(num) ? 'Promo' : ''].filter(Boolean).join(' ');
+  };
+  // - Cardmarket : page du produit quand le catalogue connaît son identifiant (cmid : celui de TCGdex ou des fichiers
+  //   publics de Cardmarket ; lien officiel « Products?idProduct= », qui renvoie vers la page de la carte) ; sinon la
+  //   recherche Cardmarket par le nom anglais (noms des produits Cardmarket : « Groudon Gold Star »).
+  const cmName = t => {
+    const s = String(t || '').replace(/\s*☆\s*/g, ' Gold Star ').replace(/\s+/g, ' ').trim();
+    return / Star$/.test(s) && !/ (Gold|Prism) Star$/.test(s) ? s.replace(/ Star$/, ' Gold Star') : s;
+  };
+  const cmLink = p => (p && p.cmid ? 'https://www.cardmarket.com/fr/Pokemon/Products?idProduct=' + encodeURIComponent(p.cmid)
+    : 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + encodeURIComponent(cmName(p && (p.en || p.name))));
   // Collections rattachées à leur extension (2026-10-09, demande du porteur) : la Collection Classique du
   // 30ᵉ Anniversaire s'affiche avec le 30ᵉ Anniversaire, comme sur le site officiel et les autres applis.
   const SET_PARENT = { '30th-c': '30th', cel25cc: 'cel25' };
@@ -190,6 +213,9 @@
       // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
       cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1 && !coteConfirmed(r, F),
       dup: !!(TCG.dup && TCG.dup.has(id)),
+      // Produit Cardmarket (lien direct de la fiche) et nom anglais (recherche eBay) : 2026-11-11, champs cmid et en
+      // du catalogue (absents des catalogues plus anciens).
+      cmid: F.cmid !== undefined && r[F.cmid] ? r[F.cmid] : null, en: F.en !== undefined && r[F.en] ? String(r[F.en]) : '',
       // Réimpression : carte et extension d'origine (visuel et numéro repris).
       reprintOf: ov ? orig : '', reprintSet: ov ? ov.set[0] : '',
       // Visuel pris sur une réimpression du même dessin (catalogue, imgFrom, 2026-11-01).
@@ -507,7 +533,7 @@
     }
     // Ventes réussies eBay : pas d'API ouverte ni de scraping autorisé, donc un lien vers la recherche eBay
     // (annonces terminées et vendues) au lieu d'un chiffre inventé.
-    const q = p.tcg ? [p.name, p.numShort, p.reprintOf ? '30 ans' : '', p.lang === 'EN' ? '' : 'FR'].filter(Boolean).join(' ') : p.name;
+    const q = p.tcg ? ebayQuery(p) : p.name;
     it.ebayUrl = 'https://www.ebay.fr/sch/i.html?_nkw=' + encodeURIComponent(q) + '&LH_Sold=1&LH_Complete=1';
     it.ebayText = 'Ventes réussies eBay pour « ' + q + ' »';
     return it;

@@ -22,6 +22,104 @@ insert into public.avatar_items (id, price_pa) values
   ('frame:eclair', 150), ('frame:glace', 150), ('frame:neon', 150), ('frame:brume', 150), ('frame:sakura', 150), ('frame:holo', 200)
 on conflict (id) do update set price_pa = excluded.price_pa;
 
+-- 1 bis. Styles de la v5 (2026-11-11, soir, porteur) : nouvel ordre, nouvelles coiffures, teints, formes de visage, yeux,
+--   couleur des yeux, habits, décors animés, cadres et accessoires ; prix proposés, à confirmer (mêmes que l'app).
+insert into public.avatar_items (id, price_pa) values
+  ('skin:citrouille', 150),
+  ('skin:menthe', 150),
+  ('skin:bonbon', 150),
+  ('skin:ciel', 150),
+  ('skin:lavande', 150),
+  ('skin:glace', 150),
+  ('skin:or', 150),
+  ('skin:ombre', 200),
+  ('skin:emeraude', 200),
+  ('face:coeur', 100),
+  ('eyes:manga', 150),
+  ('eyes:etoiles', 150),
+  ('eyes:coeurs', 150),
+  ('eyes:spirale', 150),
+  ('ec:violet', 100),
+  ('ec:rouge', 100),
+  ('ec:or', 100),
+  ('hair:banane', 200),
+  ('hair:afro', 200),
+  ('hair:mulet', 200),
+  ('hair:chignon', 200),
+  ('hair:queue', 200),
+  ('hair:couettes', 200),
+  ('hair:crete', 200),
+  ('hair:antennes', 250),
+  ('hair:ananas', 250),
+  ('hair:nuage', 250),
+  ('hair:flamme', 300),
+  ('hc:bleu', 100),
+  ('hc:rose', 100),
+  ('hc:orange', 100),
+  ('hc:vert', 100),
+  ('hc:turquoise', 100),
+  ('hc:violet', 100),
+  ('outfit:hawai', 200),
+  ('outfit:maillot', 250),
+  ('outfit:aventurier', 250),
+  ('outfit:pirate', 250),
+  ('outfit:kimono', 250),
+  ('outfit:smoking', 250),
+  ('outfit:cape', 250),
+  ('outfit:heros', 300),
+  ('outfit:astronaute', 350),
+  ('outfit:chevalier', 350),
+  ('outfit:royal', 400),
+  ('bg:coucher', 150),
+  ('bg:foret', 150),
+  ('bg:plage', 150),
+  ('bg:etoiles', 150),
+  ('bg:holo', 150),
+  ('bg:aurore', 150),
+  ('bg:volcan', 150),
+  ('bg:neige', 200),
+  ('bg:galaxie', 200),
+  ('bg:tempete', 300),
+  ('bg:lave', 300),
+  ('bg:tsunami', 300),
+  ('acc:couronne', 150),
+  ('acc:noeud', 100),
+  ('acc:fete', 100),
+  ('acc:echarpe', 100),
+  ('acc:papillon', 50),
+  ('acc:moustache', 50),
+  ('acc:bulle', 50),
+  ('acc:chat', 100),
+  ('acc:masque', 100),
+  ('acc:monocle', 100),
+  ('acc:medaille', 100),
+  ('acc:aureole', 150),
+  ('acc:cornes', 150),
+  ('acc:casque', 150),
+  ('acc:pirate', 150),
+  ('acc:fleurs', 150),
+  ('acc:coeurs', 150),
+  ('frame:arcenciel', 150),
+  ('frame:tempete', 250),
+  ('frame:vague', 250),
+  ('frame:lave', 250),
+  ('frame:galaxie', 150),
+  ('frame:eclair', 150),
+  ('frame:glace', 150),
+  ('frame:neon', 150),
+  ('frame:brume', 150),
+  ('frame:sakura', 150),
+  ('frame:holo', 200),
+  ('frame:bulles', 150),
+  ('frame:electrique', 200),
+  ('frame:pixel', 200),
+  ('frame:ombre', 200),
+  ('frame:feu', 250),
+  ('frame:cosmique', 250),
+  ('frame:cristal', 250),
+  ('frame:diamant', 300)
+on conflict (id) do update set price_pa = excluded.price_pa;
+
 -- 2. L'ancien « shiny » de la v2 (021 : « shiny:1 », 300 PA, valable pour n'importe quel Pokémon) devient la version
 --    shiny du Pokémon de l'avatar enregistré ; ses acheteurs sont notés avant le changement de prix (rejouable : une
 --    fois les prix v3 posés, « shiny:1 » ne vaut plus 300 PA et rien n'est refait).
@@ -87,9 +185,9 @@ declare uid uuid := public._game_begin(); k text; v text; prem boolean; clean js
 begin
   if cfg is null or jsonb_typeof(cfg) <> 'object' or length(cfg::text) > 1100 then raise exception 'Avatar invalide' using errcode = 'P0001'; end if;
   prem := public._premium_on(uid);
-  foreach k in array array['skin', 'face', 'eyes', 'hair', 'hc', 'outfit', 'bg', 'pos', 'acc', 'frame', 'aon'] loop
+  foreach k in array array['skin', 'face', 'eyes', 'ec', 'hair', 'hc', 'outfit', 'bg', 'pos', 'acc', 'frame', 'aon'] loop
     v := cfg->>k;
-    if v is null then v := case k when 'acc' then 'aucun' when 'frame' then 'aucun' when 'aon' then 'poke' else null end; end if;
+    if v is null then v := case k when 'acc' then 'aucun' when 'frame' then 'aucun' when 'aon' then 'poke' when 'ec' then 'noir' else null end; end if;
     if v is null or v !~ '^[a-z0-9]{1,16}$' then raise exception 'Avatar invalide (%)', k using errcode = 'P0001'; end if;
     if k not in ('pos', 'aon') and exists (select 1 from public.avatar_items a where a.id = k || ':' || v)
        and not prem and not exists (select 1 from public.avatar_unlocks u where u.user_id = uid and u.item = k || ':' || v) then
@@ -97,8 +195,8 @@ begin
     end if;
     clean := clean || jsonb_build_object(k, v);
   end loop;
-  if clean->>'acc' not in ('aucun', 'lunettes', 'casquette', 'couronne', 'noeud', 'fete', 'echarpe') then raise exception 'Avatar invalide (acc)' using errcode = 'P0001'; end if;
-  if clean->>'frame' not in ('aucun', 'dore', 'arcenciel', 'tempete', 'vague', 'lave', 'galaxie', 'eclair', 'glace', 'neon', 'brume', 'sakura', 'holo') then raise exception 'Avatar invalide (frame)' using errcode = 'P0001'; end if;
+  if clean->>'acc' not in ('aucun', 'lunettes', 'casquette', 'couronne', 'noeud', 'fete', 'echarpe', 'bandeau', 'papillon', 'moustache', 'bulle', 'chat', 'masque', 'monocle', 'medaille', 'aureole', 'cornes', 'casque', 'pirate', 'fleurs', 'coeurs') then raise exception 'Avatar invalide (acc)' using errcode = 'P0001'; end if;
+  if clean->>'frame' not in ('aucun', 'dore', 'arcenciel', 'tempete', 'vague', 'lave', 'galaxie', 'eclair', 'glace', 'neon', 'brume', 'sakura', 'holo', 'bulles', 'electrique', 'pixel', 'ombre', 'feu', 'cosmique', 'cristal', 'diamant') then raise exception 'Avatar invalide (frame)' using errcode = 'P0001'; end if;
   if clean->>'aon' not in ('poke', 'perso') then raise exception 'Avatar invalide (aon)' using errcode = 'P0001'; end if;
   if clean->>'pos' not in ('right', 'left', 'shoulder', 'above', 'front', 'behind') then raise exception 'Avatar invalide (pos)' using errcode = 'P0001'; end if;
   n := coalesce(round((cfg->>'size')::numeric)::int, 100);

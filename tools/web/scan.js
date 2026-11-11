@@ -544,7 +544,7 @@
         const k = this.cote(p), q = x.c.stock[p.id] ? x.c.stock[p.id].qty : 0;
         return {
           name: p.name, sub: [p.setName, p.numLabel].filter(Boolean).join(' · ') + (p.lang === 'EN' ? ' · EN' : ''),
-          cote: k !== null && k !== undefined ? 'Cote ' + this.eur(k) : 'Pas encore de cote',
+          cote: k !== null && k !== undefined ? 'Cote ' + this.eur(k) : p.dup ? 'Cote à confirmer' : 'Pas encore de cote',
           img: p.img, fallback: p.fallback, best: i === 0, hasOwned: q > 0, owned: 'à toi ×' + q,
           bc: i === 0 ? 'var(--pkm-accent)' : 'var(--pkm-line-2)', bg: i === 0 ? 'rgba(var(--pkm-accent-rgb), 0.1)' : 'transparent',
           aria: p.name + ', ' + [p.setName, p.numLabel].filter(Boolean).join(', ') + (i === 0 ? ', le plus probable' : ''),
@@ -577,8 +577,10 @@
     const sf = s.sf || {}, raw = p ? this.rawVal(p, s.valuation) : 0, sealed = p && p.type === 'sealed', lang = sf.lang || 'FR', cond = copyCode(p, sf.cond);
     const coef = this.valOn() ? valCoef(lang, cond) : 1, unit = raw ? raw * coef : 0, q = Math.max(1, sf.qty || 1);
     r.fallback = (p && p.fallback) || '';
-    r.big = raw ? this.eur(unit) : 'Pas encore de cote';
-    r.bigSub = !raw ? 'Cardmarket ne la cote pas encore' : (sealed ? lang : copyLabel(p, cond) + (lang === 'JP' ? ', JP' : '')) + ' · ' + Math.round(coef * 100) + ' % de la cote (' + this.eur(raw) + ')'
+    // Cote écartée parce que TCGdex donne le même produit Cardmarket à plusieurs cartes (p.dup) : « à confirmer », pas
+    // « pas encore de cote » (Cardmarket la cote, mais le prix lu peut être celui d'une autre carte ; 2026-11-11).
+    r.big = raw ? this.eur(unit) : p && p.dup ? 'Cote à confirmer' : 'Pas encore de cote';
+    r.bigSub = !raw ? (p && p.dup ? 'Même prix Cardmarket que d’autres cartes de l’extension : prix non compté' : 'Cardmarket ne la cote pas encore') : (sealed ? lang : copyLabel(p, cond) + (lang === 'JP' ? ', JP' : '')) + ' · ' + Math.round(coef * 100) + ' % de la cote (' + this.eur(raw) + ')'
       + (q > 1 ? ' · ×' + q + ' = ' + this.eur(unit * q) : '');
     r.saveLabel = q > 1 ? 'Ajouter ' + q + ' exemplaires à ma collection' : 'Ajouter à ma collection';
     return r;

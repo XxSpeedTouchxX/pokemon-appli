@@ -6,6 +6,27 @@
 
 ---
 
+## 2026-11-11 (soir) — Avatar v5, boîte mystère et légendaires, bugs, cotes manquantes, business plan (demande du porteur)
+
+- **Série de connexion** : confirmé par le porteur, un jour oublié fait repartir la boîte offerte au jour 1, et les PA au palier J3 (déjà en place).
+- **Boîte mystère et légendaires** : un légendaire gagné dans la boîte entre au Pokédex sans payer de PA (déjà le cas). Un légendaire déjà au Pokédex (gagné ou acheté) est **barré** dans « Voir les lots et leurs chances », et ses chances vont sur un 2XP PK : 1 légendaire → 2XP PK 3 jours passe de 25 à 30 % ; 2 → 2XP PK 7 jours de 15 à 25 % ; 3 → 2XP PK 10 jours de 10 à 25 %. Serveur : `023_boite_legendaires.sql` (8 tests). **L'installateur unique devient `install_011_a_023.sql`.**
+- **Bugs corrigés** :
+  - Admin › « Cartes des tirages » : la recherche d'une carte ne réagissait qu'en quittant le champ (sur téléphone, rien ne s'affichait) ; elle réagit maintenant à chaque lettre. Si le serveur n'a pas `018`, le message dit d'installer `install_011_a_023.sql`.
+  - Déblocage d'un Pokémon d'avatar : les messages (« Il te manque … PA », serveur pas à jour) s'affichaient **sous** l'écran de l'avatar, donc invisibles. Ils passent au premier plan ; un déblocage réussi montre un éclat « Débloqué ! » et le Pokémon arrive au centre de l'avatar.
+  - Méga-évolution sans animation : l'animation était sautée quand le téléphone a « Réduire les animations » ou les fonds « Calmes ». Elle est maintenant toujours jouée, et l'écran remonte dessus.
+- **Mon avatar v5** :
+  - écran 50/50 : moitié haute figée (avatar et rubriques), moitié basse (choix qui défilent, puis « Valider mon avatar ») ;
+  - prix avec la **goutte des PA** à côté du nombre (plus de couronne dorée) ;
+  - un style payant **s'achète au toucher**, puis s'applique ; « Valider mon avatar » enregistre tout de suite, sans fenêtre ;
+  - nouvel ordre partout, et beaucoup de nouveautés (prix proposés, à confirmer) : 7 coiffures drôles (banane rock, afro géante, mulet, antennes, ananas, nuage, flamme), teints (olive, rosé, citrouille, bonbon, glace, ombre, émeraude), formes de visage (menton pointu, large, cœur), yeux (clin d'œil, endormis, manga, cœurs, tourbillon), **couleur des yeux** (8), « Style » devient **« Habit »** avec 8 habits atypiques (chemise hawaïenne, pirate, kimono, smoking, cape de super-héros, astronaute, armure de chevalier, manteau royal), 8 décors dont 3 animés façon Rayquaza (tempête émeraude), Groudon (coulée de lave) et Kyogre (tsunami), 8 cadres aux animations différentes (flammes, électrique, bulles, pixel, diamant, ombre, cosmique, cristal), 14 accessoires (bandeau, nœud papillon, moustache, bulle de chewing-gum, oreilles de chat, masque de héros, monocle, médaille, auréole, petites cornes, casque audio, chapeau de pirate, couronne de fleurs, lunettes cœurs).
+  - Premium : nouvelle ligne « Tous les accessoires et Pokémon du mode avatar débloqués ».
+  - Serveur : `022` mis à jour (nouveaux prix, couleur des yeux, nouveaux accessoires et cadres acceptés).
+- **Mes produits scellés** : les 4 visuels de Règne Delta étaient en 4:3 (les autres en 16:9), d'où l'ETB Rayquaza plus gros. Ils sont remis au format 16:9, avec la boîte à la même place ; le script qui télécharge les visuels fait de même pour les prochains (`tools/sealed/fetch_images.py`, `to_169`).
+- **Cartes « pas encore de cote »** : Groudon ☆ 111/113 (EX Espèces Delta) n'est pas relié à Cardmarket par TCGdex, et Cardmarket l'appelle « Groudon Gold Star » (TCGdex : « Groudon Star »). Le rapprochement par les fichiers publics de Cardmarket est corrigé (« Star » → « Gold Star », orthographes réunies, mots dans un autre ordre, Coffre Étincelant rapproché de Destinées Occultes, produits partagés par plusieurs cartes). 533 cartes sans prix Cardmarket recensées par cause ; l'effet réel sera visible au prochain passage du workflow « Catalogue TCGdex ». Kits du dresseur, promos et Règne Delta (pas encore de prix chez Cardmarket) restent sans cote. Une cote partagée non résolue affiche « Cote à confirmer ».
+- **Liens** : Cardmarket ouvre directement la page du produit quand on le connaît, sinon la recherche par le nom anglais ; eBay cherche le nom anglais et le numéro (« Groudon Star 111/113 »), sans « FR ».
+- **Documents** : `docs/34-business-plan-premium-et-temps-pk.md` (rentabilité, point mort, temps pour le booster, l'item et l'ETB selon le joueur) et `docs/35-proposition-mini-jeu-et-classement.md` (mini-jeu « Cote de demain », classement par points de saison) ; **propositions, rien n'est codé sans « go »**.
+- Tests : `t-avatar` (38), `t-xppk` (légendaires barrés), `t-lots` (recherche à la frappe), `test_links.mjs`, tests du pipeline (75), 444 vérifications SQL. Cache v180.
+
 ## 2026-11-11 (après-midi) — Mon avatar v4 : écran en 3 parties, Premium ouvre tout, propositions de dessin (demande du porteur)
 
 - **Écran coupé en trois** : en haut (45 %, figé) l'avatar qui change à chaque modification, avec dessous les rubriques Cheveux, Visage, Style, Décor puis Pokémon, Shiny, Accessoire ; au milieu (45 %) les choix, qui défilent au doigt ; en bas (10 %, figé) seulement **« Valider mon avatar »**. L'écran prend toute la hauteur, au-dessus de la barre du bas.

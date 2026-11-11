@@ -9,7 +9,8 @@ Rapprochement d'une carte TCGdex avec un produit Cardmarket :
       relie déjà à Cardmarket (idProduct) ;
     - même nom anglais (Cardmarket : « Charizard [Energy Burn | Fire Spin] » → « charizard ») ;
     - plusieurs cartes du même nom (30 Pikachu, 3 Mewtwo-ex…) : autant de produits que de cartes, dans le même ordre
-      (numéro TCGdex, identifiant Cardmarket croissant) ; sinon, aucun prix (jamais un prix au hasard).
+      (numéro TCGdex, identifiant Cardmarket croissant) ; sinon, aucun prix (jamais un prix au hasard). Les produits des
+      cartes que TCGdex relie déjà sont mis de côté avant de compter (2026-11-11, voir match).
 Mesuré le 2026-10-18 (reconnaissance tools/cardmarket/recon_singles.py) : l'extension 6601 contient les 191 cartes du
 30ᵉ Anniversaire et de sa Collection Classique, dans l'ordre de TCGdex (Dracaufeu 4/102 : tendance 173,99 €).
 
@@ -27,6 +28,10 @@ TCGDEX_EN = "https://api.tcgdex.net/v2/en/sets/"
 UA = {"User-Agent": "PKM-App-index/1.0 (catalogue Dropicards)", "Accept-Encoding": "gzip"}
 # Extensions TCGdex sans aucune carte reliée à Cardmarket par TCGdex : extension Cardmarket vérifiée à la main.
 EXPANSIONS = {"30th": [6601], "30th-c": [6601]}
+# Extensions TCGdex que Cardmarket range dans l'extension d'une autre (2026-11-11) : rapprochées avec elle, comme le 30ᵉ et
+# sa Collection Classique. Destinées Occultes Coffre Étincelant (sma, 94 cartes sans prix) : Cardmarket vend ses cartes
+# dans « Hidden Fates » (Charizard GX « HIF SV49 »), que TCGdex relie aux cartes de sm115.
+PARENT = {"sma": "sm115"}
 
 
 def fold(t):
@@ -40,6 +45,21 @@ def star(name):
     « Raichu Delta Species » (Cardmarket : « Raichu δ Delta Species », δ effacé par fold)."""
     t = re.sub(r"\s*☆", " Gold Star", str(name or ""))
     return re.sub(r"\s*δ(\s+Delta Species)?", " Delta Species", t)
+
+
+def gold(name):
+    """Carte étoile écrite « Star » (2026-11-11, porteur : Groudon ☆ d'EX Espèces Delta sans cote) : TCGdex écrit en
+    anglais « Groudon Star » (ex11-111 à 113 : Groudon, Kyogre, Metagross), Cardmarket « Groudon Gold Star ». Nom passé
+    par fold ; None s'il ne finit pas par « star » ou s'il est déjà « gold star » ou « prism star ». Essayé seulement
+    après le nom tel quel."""
+    if name.endswith(" star") and not name.endswith((" gold star", " prism star")):
+        return name[:-len(" star")] + " gold star"
+    return None
+
+
+def bag(name):
+    """Mots d'un nom sans ordre : « delta species rainbow energy » (δ Rainbow Energy) ↔ « rainbow energy delta »."""
+    return " ".join(sorted(set(name.split()) - {"species"}))
 
 
 def base_name(name):
@@ -101,29 +121,55 @@ class CmFiles:
                 good.append((share, exp))
         return [good[0][1]] if len(good) == 1 else []
 
-    def match(self, cards, exps):
+    def lookup(self, name, prods, full):
+        """Produits Cardmarket d'un nom (déjà passé par fold et star) : (identifiants, nom exact ?), ou (None, False).
+        Ordre : mêmes lettres, espaces mis à part, toutes orthographes réunies (« M Charizard EX » et « MCharizard EX »,
+        les deux chez Cardmarket pour Flashfire) ; carte étoile « … Star » → « … Gold Star » (gold) ; nom complet,
+        crochets compris (« Professor's Research [Professor Magnolia] ») ; un seul nom qui commence pareil (« Palkia » ↔
+        « Palkia LV.X », « Metagross δ » ↔ « Metagross ») ; mêmes mots dans un autre ordre (« δ Rainbow Energy » ↔
+        « Rainbow Energy Delta »)."""
+        tight = name.replace(" ", "")
+        same = [n for n in prods if n.replace(" ", "") == tight]  # le nom exact compris, s'il existe
+        if same:
+            return sorted(i for n in same for i in prods[n]), True
+        if gold(name) in prods:
+            return prods[gold(name)], True
+        if name in full:
+            return full[name], True
+        near = [n for n in prods if n.startswith(name + " ") or name.startswith(n + " ")]
+        if len(near) == 1:
+            return prods[near[0]], False
+        words = [n for n in prods if bag(n) == bag(name)]
+        if len(words) == 1:
+            return prods[words[0]], True
+        return None, False
+
+    def match(self, cards, exps, trusted=None):
         """cards : [(clé, nom anglais)] dans l'ordre TCGdex ; renvoie {clé: idProduct}. Même nom : même nombre de
-        cartes et de produits, appariés dans l'ordre ; sinon rien pour ce nom."""
-        prods = {}
+        cartes et de produits, appariés dans l'ordre ; sinon rien pour ce nom.
+        trusted : {clé: idProduct} des cartes que TCGdex relie déjà à Cardmarket (2026-11-11). Leur produit est retiré
+        des candidats de leur nom : les autres cartes du même nom se partagent ceux qui restent (Charizard GX de
+        Hidden Fates 9, relié, et SV49, non relié). S'il reste plus de produits que de cartes, les produits créés après le
+        dernier produit relié par TCGdex dans ces extensions (version « Oversized » de MCharizard EX, ajoutée des années
+        après Flashfire) sont écartés ; le compte doit alors tomber juste."""
+        trusted = trusted or {}
+        prods, full = {}, {}
         for e in exps:
             for p in self.by_exp.get(e, []):
                 prods.setdefault(base_name(p["name"]), []).append(p["idProduct"])
+                full.setdefault(fold(p["name"]), []).append(p["idProduct"])
+        mine = {i for e in exps for i in (p["idProduct"] for p in self.by_exp.get(e, []))}
+        last = max((i for i in trusted.values() if i in mine), default=None)
         ours = {}
         for key, en in cards:
             if en:
                 ours.setdefault(fold(star(en)), []).append(key)
         out = {}
         for name, keys in ours.items():
-            ids = prods.get(name)
+            ids, exact = self.lookup(name, prods, full)
             if not ids:
-                # « M Gardevoir EX » ↔ « MGardevoir EX » : mêmes lettres, espaces mis à part.
-                same = [n for n in prods if n.replace(" ", "") == name.replace(" ", "")]
-                ids = prods[same[0]] if len(same) == 1 else None
-            if not ids:
-                # « Palkia » ↔ « Palkia LV.X », « Metagross δ » ↔ « Metagross » : un seul candidat qui commence pareil.
-                near = [n for n in prods if n.startswith(name + " ") or name.startswith(n + " ")]
-                ids = prods[near[0]] if len(near) == 1 else None
-            elif len(ids) < len(keys):
+                continue
+            if exact and len(ids) < len(keys):
                 # Deux « Palkia » chez nous (30ᵉ et sa Collection Classique), « Palkia » et « Palkia LV.X » chez Cardmarket
                 # (2026-11-08, porteur : « le prix du Palkia 30 ans est faux ») : les produits au nom exact d'abord, puis le
                 # seul autre nom qui le prolonge, si le compte tombe juste (l'extension principale vient avant la Classique).
@@ -131,8 +177,17 @@ class CmFiles:
                 if len(near) == 1 and len(ids) + len(prods[near[0]]) == len(keys):
                     out.update(zip(keys, sorted(ids) + sorted(prods[near[0]])))
                     continue
-            if ids and len(ids) == len(keys):
-                out.update(zip(keys, sorted(ids)))
+            ids = sorted(set(ids))
+            known = [k for k in keys if trusted.get(k) in ids]
+            if known:
+                out.update((k, trusted[k]) for k in known)
+                taken = {trusted[k] for k in known}
+                keys, ids = [k for k in keys if k not in known], [i for i in ids if i not in taken]
+            if keys and len(ids) > len(keys) and last is not None:
+                early = [i for i in ids if i <= last]
+                ids = early if len(early) == len(keys) else ids
+            if keys and len(ids) == len(keys):
+                out.update(zip(keys, ids))
         return out
 
     def prices(self, idp):
@@ -166,6 +221,7 @@ class CmFiles:
         carte garde le produit de TCGdex : les noms diffèrent trop souvent pour de bonnes raisons (δ, Niv., RC5…), et un
         rapprochement par le nom seul les reliait à la version ordinaire (Tortank δ 269 € → 6 €, premier passage)."""
         name = fold(star(en)) if en else ""
+        name = gold(name) or name  # « Groudon Star » (TCGdex, anglais) = « Groudon Gold Star » (Cardmarket)
         have = self.name_of.get(idp)
         if "gold star" not in name or have is None or "gold star" in have:
             return idp

@@ -27,24 +27,50 @@
   // (en-tête, profil, Ma progression) ; il est aussi gardé sur le serveur (014_avatar.sql : avatar_save vérifie les
   // styles débloqués, avatar_buy débite les PA) et affiché dans le classement.
   // Ce module partage la portée des autres : ses noms commencent par AV_ ou av.
-  const AV_SKIN = [['s1', '#FFE2D1'], ['s2', '#F9D2B6'], ['s3', '#F1C09A'], ['s4', '#E3A77F'], ['s5', '#D18E62'], ['s6', '#B97548'], ['s7', '#9A5B34'], ['s8', '#7A4426'], ['s9', '#5C321C'], ['s10', '#3F2214']]
-    .map(([id, c], i) => ({ id: id, label: 'Teint ' + (i + 1), c: c }))
-    .concat([['lavande', 'Lavande', '#C9B6FF'], ['menthe', 'Menthe', '#A8EBC8'], ['ciel', 'Ciel', '#A9D8FF'], ['or', 'Or', '#FFD86B']].map(([id, label, c]) => ({ id: id, label: label, c: c, pa: 150 })));
-  const AV_FACE = [{ id: 'rond', label: 'Rond' }, { id: 'ovale', label: 'Ovale' }, { id: 'carre', label: 'Carré' }];
-  const AV_EYES = [{ id: 'grands', label: 'Grands yeux' }, { id: 'rieurs', label: 'Rieurs' }, { id: 'vifs', label: 'Déterminés' }, { id: 'etoiles', label: 'Étoilés', pa: 150 }];
-  const AV_HAIR = [{ id: 'rase', label: 'Rasé' }, { id: 'court', label: 'Court' }, { id: 'meche', label: 'Mèche' }, { id: 'pics', label: 'En pics' },
-    { id: 'milong', label: 'Mi-long' }, { id: 'long', label: 'Long' }, { id: 'boucles', label: 'Boucles' },
-    { id: 'chignon', label: 'Chignon', pa: 200 }, { id: 'queue', label: 'Queue de cheval', pa: 200 }, { id: 'couettes', label: 'Couettes', pa: 200 }, { id: 'crete', label: 'Crête', pa: 200 }];
-  const AV_HC = [['noir', 'Noir', '#25202E'], ['brun', 'Brun', '#4A2E1E'], ['chatain', 'Châtain', '#7A4A2A'], ['roux', 'Roux', '#C2562A'], ['blond', 'Blond', '#E8C26A'],
-    ['platine', 'Platine', '#F2E6C8'], ['gris', 'Gris', '#9AA3B5'], ['blanc', 'Blanc', '#F3F6FC']].map(([id, label, c]) => ({ id: id, label: label, c: c }))
-    .concat([['rose', 'Rose', '#FF7AC6'], ['bleu', 'Bleu électrique', '#3D8BFF'], ['vert', 'Vert', '#3BC48A'], ['violet', 'Violet', '#9B6BFF']].map(([id, label, c]) => ({ id: id, label: label, c: c, pa: 100 })));
-  const AV_OUTFIT = [{ id: 'tshirt', label: 'T-shirt' }, { id: 'sweat', label: 'Sweat' }, { id: 'veste', label: 'Veste' }, { id: 'colroule', label: 'Col roulé' },
-    { id: 'gilet', label: 'Gilet' }, { id: 'chemise', label: 'Chemise' },
-    { id: 'aventurier', label: 'Aventurier', pa: 250 }, { id: 'maillot', label: 'Maillot éclair', pa: 250 }, { id: 'cape', label: 'Cape de Maître', pa: 250 }];
-  const AV_BG = [{ id: 'type', label: 'Type du Pokémon' }, { id: 'violet', label: 'Violet', c: ['#9B85FF', '#4A22B8'] }, { id: 'nuit', label: 'Nuit', c: ['#2B3F7A', '#0B1120'] },
-    { id: 'vert', label: 'Vert', c: ['#6EDDA8', '#1E7F5C'] }, { id: 'ciel', label: 'Ciel', c: ['#BDE6FF', '#3D8BFF'] }, { id: 'corail', label: 'Corail', c: ['#FFB59E', '#E5484D'] },
-    { id: 'jaune', label: 'Jaune', c: ['#FFF0A0', '#F2A900'] },
-    { id: 'etoiles', label: 'Étoiles', pa: 150 }, { id: 'holo', label: 'Holo', pa: 150 }, { id: 'aurore', label: 'Aurore', pa: 150 }, { id: 'volcan', label: 'Volcan', pa: 150 }];
+  // Nouvel ordre et nouveautés (2026-11-11, porteur : « change-moi l'ordre, ça fait trop copié sur PikaCheck, propose-moi
+  // de nouvelles coiffures drôles, couleurs, formes de visage, yeux (manga, cœurs…), couleur des yeux, des habits
+  // atypiques (cape de super-héros, manteau royal…), des décors animés (tempête, lave, tsunami) »). Prix proposés, à
+  // confirmer ; mêmes prix sur le serveur (022_avatar_v3.sql).
+  const AV_SKIN = [{ id: 's4', label: 'Doré', c: '#E3A77F' }, { id: 's2', label: 'Clair', c: '#F9D2B6' }, { id: 's6', label: 'Caramel', c: '#B97548' },
+    { id: 's1', label: 'Porcelaine', c: '#FFE2D1' }, { id: 's8', label: 'Cacao', c: '#7A4426' }, { id: 's3', label: 'Pêche', c: '#F1C09A' },
+    { id: 's5', label: 'Miel', c: '#D18E62' }, { id: 's9', label: 'Ébène', c: '#5C321C' }, { id: 'olive', label: 'Olive', c: '#C9A27A' },
+    { id: 's7', label: 'Noisette', c: '#9A5B34' }, { id: 'rose', label: 'Rosé', c: '#F6C6C2' }, { id: 's10', label: 'Ébène foncé', c: '#3F2214' },
+    { id: 'citrouille', label: 'Citrouille', c: '#FFB36B', pa: 150 }, { id: 'menthe', label: 'Menthe', c: '#A8EBC8', pa: 150 }, { id: 'bonbon', label: 'Bonbon', c: '#FF9ACD', pa: 150 },
+    { id: 'ciel', label: 'Ciel', c: '#A9D8FF', pa: 150 }, { id: 'lavande', label: 'Lavande', c: '#C9B6FF', pa: 150 }, { id: 'glace', label: 'Glace', c: '#CDEFFF', pa: 150 },
+    { id: 'or', label: 'Or', c: '#FFD86B', pa: 150 }, { id: 'ombre', label: 'Ombre', c: '#8A7BB0', pa: 200 }, { id: 'emeraude', label: 'Émeraude', c: '#4FD39A', pa: 200 }];
+  const AV_FACE = [{ id: 'ovale', label: 'Ovale' }, { id: 'pointu', label: 'Menton pointu' }, { id: 'rond', label: 'Rond' }, { id: 'large', label: 'Large' },
+    { id: 'carre', label: 'Carré' }, { id: 'coeur', label: 'Cœur', pa: 100 }];
+  const AV_EYES = [{ id: 'rieurs', label: 'Rieurs' }, { id: 'vifs', label: 'Déterminés' }, { id: 'grands', label: 'Grands yeux' }, { id: 'clin', label: 'Clin d’œil' },
+    { id: 'endormis', label: 'Endormis' }, { id: 'manga', label: 'Manga', pa: 150 }, { id: 'etoiles', label: 'Étoilés', pa: 150 },
+    { id: 'coeurs', label: 'Cœurs', pa: 150 }, { id: 'spirale', label: 'Tourbillon', pa: 150 }];
+  // Couleur des yeux (2026-11-11, porteur).
+  const AV_EC = [{ id: 'marron', label: 'Marron', c: '#6B3E1E' }, { id: 'noir', label: 'Noir', c: '#2A1E2E' }, { id: 'vert', label: 'Vert', c: '#2E9E5B' },
+    { id: 'bleu', label: 'Bleu', c: '#2F6FE0' }, { id: 'gris', label: 'Gris', c: '#6C7A89' },
+    { id: 'violet', label: 'Violet', c: '#7A3FD8', pa: 100 }, { id: 'rouge', label: 'Rouge', c: '#D8323A', pa: 100 }, { id: 'or', label: 'Or', c: '#E0A800', pa: 100 }];
+  const AV_HAIR = [{ id: 'meche', label: 'Mèche' }, { id: 'boucles', label: 'Boucles' }, { id: 'court', label: 'Court' }, { id: 'long', label: 'Long' },
+    { id: 'pics', label: 'En pics' }, { id: 'milong', label: 'Mi-long' }, { id: 'rase', label: 'Rasé' },
+    { id: 'banane', label: 'Banane rock', pa: 200 }, { id: 'afro', label: 'Afro géante', pa: 200 }, { id: 'mulet', label: 'Mulet', pa: 200 },
+    { id: 'chignon', label: 'Chignon', pa: 200 }, { id: 'queue', label: 'Queue de cheval', pa: 200 }, { id: 'couettes', label: 'Couettes', pa: 200 }, { id: 'crete', label: 'Crête', pa: 200 },
+    { id: 'antennes', label: 'Antennes', pa: 250 }, { id: 'ananas', label: 'Ananas', pa: 250 }, { id: 'nuage', label: 'Nuage', pa: 250 }, { id: 'flamme', label: 'Flamme', pa: 300 }];
+  const AV_HC = [{ id: 'chatain', label: 'Châtain', c: '#7A4A2A' }, { id: 'noir', label: 'Noir', c: '#25202E' }, { id: 'blond', label: 'Blond', c: '#E8C26A' },
+    { id: 'roux', label: 'Roux', c: '#C2562A' }, { id: 'brun', label: 'Brun', c: '#4A2E1E' }, { id: 'gris', label: 'Gris', c: '#9AA3B5' },
+    { id: 'platine', label: 'Platine', c: '#F2E6C8' }, { id: 'blanc', label: 'Blanc', c: '#F3F6FC' },
+    { id: 'bleu', label: 'Bleu électrique', c: '#3D8BFF', pa: 100 }, { id: 'rose', label: 'Rose', c: '#FF7AC6', pa: 100 }, { id: 'orange', label: 'Orange', c: '#FF8A1C', pa: 100 },
+    { id: 'vert', label: 'Vert', c: '#3BC48A', pa: 100 }, { id: 'turquoise', label: 'Turquoise', c: '#2BD1C6', pa: 100 }, { id: 'violet', label: 'Violet', c: '#9B6BFF', pa: 100 }];
+  // « Style » devient « Habit » (2026-11-11, porteur).
+  const AV_OUTFIT = [{ id: 'sweat', label: 'Sweat' }, { id: 'chemise', label: 'Chemise' }, { id: 'tshirt', label: 'T-shirt' }, { id: 'gilet', label: 'Gilet' },
+    { id: 'veste', label: 'Veste' }, { id: 'colroule', label: 'Col roulé' },
+    { id: 'hawai', label: 'Chemise hawaïenne', pa: 200 }, { id: 'maillot', label: 'Maillot éclair', pa: 250 }, { id: 'aventurier', label: 'Aventurier', pa: 250 },
+    { id: 'pirate', label: 'Pirate', pa: 250 }, { id: 'kimono', label: 'Kimono', pa: 250 }, { id: 'smoking', label: 'Smoking', pa: 250 }, { id: 'cape', label: 'Cape de Maître', pa: 250 },
+    { id: 'heros', label: 'Cape de super-héros', pa: 300 }, { id: 'astronaute', label: 'Astronaute', pa: 350 }, { id: 'chevalier', label: 'Armure de chevalier', pa: 350 },
+    { id: 'royal', label: 'Manteau royal', pa: 400 }];
+  const AV_BG = [{ id: 'ciel', label: 'Ciel', c: ['#BDE6FF', '#3D8BFF'] }, { id: 'jaune', label: 'Jaune', c: ['#FFF0A0', '#F2A900'] }, { id: 'corail', label: 'Corail', c: ['#FFB59E', '#E5484D'] },
+    { id: 'vert', label: 'Vert', c: ['#6EDDA8', '#1E7F5C'] }, { id: 'violet', label: 'Violet', c: ['#9B85FF', '#4A22B8'] }, { id: 'nuit', label: 'Nuit', c: ['#2B3F7A', '#0B1120'] },
+    { id: 'type', label: 'Type du Pokémon' },
+    { id: 'coucher', label: 'Coucher de soleil', pa: 150 }, { id: 'foret', label: 'Forêt', pa: 150 }, { id: 'plage', label: 'Plage', pa: 150 },
+    { id: 'etoiles', label: 'Étoiles', pa: 150 }, { id: 'holo', label: 'Holo', pa: 150 }, { id: 'aurore', label: 'Aurore', pa: 150 }, { id: 'volcan', label: 'Volcan', pa: 150 },
+    { id: 'neige', label: 'Neige animée', pa: 200 }, { id: 'galaxie', label: 'Galaxie animée', pa: 200 },
+    { id: 'tempete', label: 'Tempête émeraude', pa: 300 }, { id: 'lave', label: 'Coulée de lave', pa: 300 }, { id: 'tsunami', label: 'Tsunami', pa: 300 }];
   // Accessoires du Pokémon (2026-11-10) : dessins originaux. w : largeur (part de la largeur du Pokémon), cx, cy : centre
   // (part de sa boîte, depuis son coin haut gauche ; cy < 0 = au-dessus de la tête), vb : largeur et hauteur du dessin.
   const AV_ACC = [
@@ -60,7 +86,36 @@
     { id: 'fete', label: 'Chapeau de fête', pa: 100, pcx: 57, pcy: 10, pw: 22, w: 0.3, cx: 0.55, cy: -0.16, vb: [60, 84],
       svg: '<path d="M30 10L6 78h48z" fill="#5EC8F0" stroke="#163A66" stroke-width="3.5" stroke-linejoin="round"/><path d="M22 34l18 6M15 54l30 8" stroke="#FFD60A" stroke-width="6" stroke-linecap="round"/><circle cx="30" cy="9" r="8" fill="#FF7AC6" stroke="#163A66" stroke-width="3"/><path d="M6 78h48" stroke="#163A66" stroke-width="4" stroke-linecap="round"/>' },
     { id: 'echarpe', label: 'Écharpe', pa: 100, pcx: 50, pcy: 76, pw: 46, w: 0.66, cx: 0.5, cy: 0.62, vb: [100, 52],
-      svg: '<path d="M6 12c28 10 60 10 88 0l2 14c-30 12-62 12-92 0z" fill="#E5484D" stroke="#6E1408" stroke-width="3" stroke-linejoin="round"/><path d="M64 22l4 26 14-4-4-24z" fill="#C93A40" stroke="#6E1408" stroke-width="3" stroke-linejoin="round"/><path d="M20 18v8M36 21v8M52 22v8" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".7"/>' }
+      svg: '<path d="M6 12c28 10 60 10 88 0l2 14c-30 12-62 12-92 0z" fill="#E5484D" stroke="#6E1408" stroke-width="3" stroke-linejoin="round"/><path d="M64 22l4 26 14-4-4-24z" fill="#C93A40" stroke="#6E1408" stroke-width="3" stroke-linejoin="round"/><path d="M20 18v8M36 21v8M52 22v8" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".7"/>' },
+    // Nouveaux accessoires (2026-11-11, porteur : « rajoute-moi plein d'accessoires ») ; prix proposés, à confirmer.
+    { id: 'bandeau', label: 'Bandeau', pcx: 50, pcy: 33, pw: 50, w: 0.72, cx: 0.5, cy: 0.16, vb: [100, 26],
+      svg: '<path d="M4 8c30-8 62-8 92 0v12c-30-8-62-8-92 0z" fill="#E5484D" stroke="#6E1408" stroke-width="2.5" stroke-linejoin="round"/><path d="M90 12l9-8 1 10-9 6z" fill="#C93A40" stroke="#6E1408" stroke-width="2" stroke-linejoin="round"/>' },
+    { id: 'papillon', label: 'Nœud papillon', pa: 50, pcx: 50, pcy: 73, pw: 22, w: 0.36, cx: 0.5, cy: 0.66, vb: [100, 50],
+      svg: '<path d="M50 25L8 6v38zM50 25l42-19v38z" fill="#2A1E2E" stroke="#000" stroke-width="3" stroke-linejoin="round"/><rect x="42" y="17" width="16" height="16" rx="4" fill="#4A3A5E" stroke="#000" stroke-width="2.5"/>' },
+    { id: 'moustache', label: 'Moustache', pa: 50, pcx: 50, pcy: 57, pw: 26, w: 0.4, cx: 0.5, cy: 0.5, vb: [100, 34],
+      svg: '<path d="M50 12c-6-8-18-10-28-4-8 5-12 14-20 16 10 8 26 8 36-2 6-6 8-8 12-10 4 2 6 4 12 10 10 10 26 10 36 2-8-2-12-11-20-16-10-6-22-4-28 4z" fill="#3A2416" stroke="#1A0E06" stroke-width="2.5" stroke-linejoin="round"/>' },
+    { id: 'bulle', label: 'Bulle de chewing-gum', pa: 50, pcx: 54, pcy: 63, pw: 18, w: 0.3, cx: 0.55, cy: 0.62, vb: [100, 100],
+      svg: '<circle cx="50" cy="50" r="44" fill="#FF9ACD" stroke="#C2407E" stroke-width="4"/><ellipse cx="34" cy="32" rx="12" ry="8" fill="#FFFFFF" opacity=".6"/>' },
+    { id: 'chat', label: 'Oreilles de chat', pa: 100, pcx: 50, pcy: 22, pw: 56, w: 0.8, cx: 0.5, cy: -0.02, vb: [120, 44],
+      svg: '<path d="M10 42L18 4l30 26zM110 42L102 4 72 30z" fill="#2A1E2E" stroke="#000" stroke-width="3" stroke-linejoin="round"/><path d="M20 34l4-20 14 14zM100 34l-4-20-14 14z" fill="#FF9ACD"/>' },
+    { id: 'masque', label: 'Masque de héros', pa: 100, pcx: 50, pcy: 51, pw: 50, w: 0.7, cx: 0.5, cy: 0.3, vb: [100, 32],
+      svg: '<path d="M4 10c14-8 30-8 46 2 16-10 32-10 46-2-2 12-10 20-22 20-10 0-18-6-24-12-6 6-14 12-24 12C14 30 6 22 4 10z" fill="#3D63FF" stroke="#0B1A5A" stroke-width="3" stroke-linejoin="round"/><ellipse cx="27" cy="16" rx="9" ry="6" fill="#0B1120"/><ellipse cx="73" cy="16" rx="9" ry="6" fill="#0B1120"/>' },
+    { id: 'monocle', label: 'Monocle', pa: 100, pcx: 60, pcy: 51, pw: 14, w: 0.24, cx: 0.66, cy: 0.3, vb: [60, 90],
+      svg: '<circle cx="30" cy="30" r="24" fill="#BDE6FF" fill-opacity=".35" stroke="#D9A400" stroke-width="6"/><path d="M50 46c4 14 0 28-8 40" fill="none" stroke="#D9A400" stroke-width="3" stroke-linecap="round"/>' },
+    { id: 'medaille', label: 'Médaille d’or', pa: 100, pcx: 50, pcy: 84, pw: 20, w: 0.32, cx: 0.5, cy: 0.8, vb: [80, 110],
+      svg: '<path d="M20 4l20 44 20-44" fill="none" stroke="#3D63FF" stroke-width="12"/><circle cx="40" cy="74" r="30" fill="#FFD60A" stroke="#9A6A00" stroke-width="5"/><path d="M40 56l5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z" fill="#FFF3A6"/>' },
+    { id: 'aureole', label: 'Auréole', pa: 150, pcx: 50, pcy: 12, pw: 46, w: 0.66, cx: 0.5, cy: -0.12, vb: [100, 30],
+      svg: '<ellipse cx="50" cy="15" rx="44" ry="11" fill="none" stroke="#FFE46B" stroke-width="7"/><ellipse cx="50" cy="15" rx="44" ry="11" fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".8"/>' },
+    { id: 'cornes', label: 'Petites cornes', pa: 150, pcx: 50, pcy: 23, pw: 50, w: 0.72, cx: 0.5, cy: -0.02, vb: [120, 40],
+      svg: '<path d="M14 38c-4-14 0-28 14-36-2 12 2 22 10 30zM106 38c4-14 0-28-14-36 2 12-2 22-10 30z" fill="#E5484D" stroke="#6E1408" stroke-width="3" stroke-linejoin="round"/>' },
+    { id: 'casque', label: 'Casque audio', pa: 150, pcx: 50, pcy: 42, pw: 60, w: 0.86, cx: 0.5, cy: 0.18, vb: [120, 80],
+      svg: '<path d="M14 56C14 26 34 6 60 6s46 20 46 50" fill="none" stroke="#2A1E2E" stroke-width="9" stroke-linecap="round"/><rect x="2" y="44" width="22" height="34" rx="9" fill="#E5484D" stroke="#2A1E2E" stroke-width="4"/><rect x="96" y="44" width="22" height="34" rx="9" fill="#E5484D" stroke="#2A1E2E" stroke-width="4"/>' },
+    { id: 'pirate', label: 'Chapeau de pirate', pa: 150, pcx: 50, pcy: 20, pw: 66, w: 0.9, cx: 0.5, cy: 0.0, vb: [140, 60],
+      svg: '<path d="M6 46c20-8 34-40 64-40s44 32 64 40c-20 10-108 10-128 0z" fill="#1E1A24" stroke="#000" stroke-width="3" stroke-linejoin="round"/><path d="M12 46c30 8 86 8 116 0" fill="none" stroke="#FFD60A" stroke-width="4"/><circle cx="70" cy="28" r="8" fill="#F3F6FC"/><path d="M62 38l16 0M64 42l12-8M64 34l12 8" stroke="#F3F6FC" stroke-width="2"/>' },
+    { id: 'fleurs', label: 'Couronne de fleurs', pa: 150, pcx: 50, pcy: 24, pw: 60, w: 0.86, cx: 0.5, cy: 0.02, vb: [140, 40],
+      svg: '<path d="M6 30c40-14 88-14 128 0" fill="none" stroke="#3BC48A" stroke-width="5" stroke-linecap="round"/>' + [[16, '#FF7AC6'], [42, '#FFD60A'], [70, '#FF5B5B'], [98, '#B26BFF'], [124, '#FF9ACD']].map(([x, c]) => '<g transform="translate(' + x + ' 24)"><circle r="7" cx="0" cy="-7" fill="' + c + '"/><circle r="7" cx="7" cy="0" fill="' + c + '"/><circle r="7" cx="0" cy="7" fill="' + c + '"/><circle r="7" cx="-7" cy="0" fill="' + c + '"/><circle r="4.5" fill="#FFE46B"/></g>').join('') },
+    { id: 'coeurs', label: 'Lunettes cœurs', pa: 150, pcx: 50, pcy: 51, pw: 46, w: 0.66, cx: 0.5, cy: 0.28, vb: [110, 44],
+      svg: '<path d="M30 40C10 28 4 18 6 10c2-8 14-10 24-2 10-8 22-6 24 2 2 8-4 18-24 30zM80 40C60 28 54 18 56 10c2-8 14-10 24-2 10-8 22-6 24 2 2 8-4 18-24 30z" fill="#FF4D8D" stroke="#8A1E4A" stroke-width="3" stroke-linejoin="round"/><path d="M54 14h2" stroke="#8A1E4A" stroke-width="4"/>' }
   ];
   // Cadres autour de l'avatar (2026-11-10, porteur : « des bords animés arc-en-ciel, vert tempête comme Rayquaza, bleu
   // vague comme Kyogre, rouge lave comme Groudon… propose-moi plein de cadres sympa ») : dessinés en CSS (avatar.css,
@@ -69,7 +124,17 @@
     { id: 'arcenciel', label: 'Arc-en-ciel', pa: 150 }, { id: 'tempete', label: 'Tempête émeraude', pa: 250 }, { id: 'vague', label: 'Vague océane', pa: 250 },
     { id: 'lave', label: 'Lave volcanique', pa: 250 }, { id: 'galaxie', label: 'Galaxie', pa: 150 }, { id: 'eclair', label: 'Éclair', pa: 150 },
     { id: 'glace', label: 'Glace', pa: 150 }, { id: 'neon', label: 'Néon', pa: 150 }, { id: 'brume', label: 'Brume spectrale', pa: 150 },
-    { id: 'sakura', label: 'Fleurs de cerisier', pa: 150 }, { id: 'holo', label: 'Holographique', pa: 200 }];
+    { id: 'sakura', label: 'Fleurs de cerisier', pa: 150 }, { id: 'holo', label: 'Holographique', pa: 200 },
+    // Nouveaux cadres (2026-11-11, porteur : « d'autres cadres avec différentes animations ») : flammes qui vacillent,
+    // décharges électriques, bulles, pixels qui tournent par à-coups, éclat de diamant qui balaie, ombre qui respire,
+    // cosmos, cristal. Prix proposés, à confirmer.
+    { id: 'bulles', label: 'Bulles', pa: 150 }, { id: 'electrique', label: 'Électrique', pa: 200 }, { id: 'pixel', label: 'Pixel', pa: 200 },
+    { id: 'ombre', label: 'Ombre', pa: 200 }, { id: 'feu', label: 'Flammes', pa: 250 }, { id: 'cosmique', label: 'Cosmique', pa: 250 },
+    { id: 'cristal', label: 'Cristal', pa: 250 }, { id: 'diamant', label: 'Diamant', pa: 300 }];
+  // Nouvel ordre des cadres (2026-11-11, porteur : « change-moi l'ordre »).
+  ['aucun', 'dore', 'neon', 'bulles', 'arcenciel', 'glace', 'electrique', 'galaxie', 'sakura', 'pixel', 'eclair', 'ombre', 'brume', 'holo', 'feu',
+    'cosmique', 'cristal', 'tempete', 'vague', 'lave', 'diamant'].forEach((id, i) => { const f = AV_FRAMES.find(x => x.id === id); if (f) f.o = i; });
+  AV_FRAMES.sort((a, b) => (a.o == null ? 99 : a.o) - (b.o == null ? 99 : b.o));
   // Pokémon de l'avatar (2026-11-10, porteur) : à part du Pokédex, débloqués ici avec des PA. 1re forme 25 PA, 2e 50 PA,
   // 3e 100 PA ; légendaires 300 PA ; Kyogre, Groudon, Rayquaza 500 PA ; méga-évolutions 200 PA (proposé, à confirmer).
   // Version shiny : le double du prix du Pokémon, une fois le Pokémon débloqué. Premium n'ouvre pas les Pokémon (défaut à
@@ -79,9 +144,9 @@
     let k = 1, x = e; while (x && x.from && DEX[x.from] && k < 4) { k++; x = DEX[x.from]; } return k >= 3 ? 100 : k === 2 ? 50 : 25; };
   const AV_POS = [['right', 'À droite'], ['left', 'À gauche'], ['shoulder', 'Sur l’épaule'], ['above', 'Au-dessus'], ['front', 'Devant'], ['behind', 'Derrière']];
   // Catégorie → liste, clé de l'avatar, préfixe de l'identifiant d'un style PRO (le même que sur le serveur).
-  const AV_CATS = { skin: [AV_SKIN, 'skin'], face: [AV_FACE, 'face'], eyes: [AV_EYES, 'eyes'], hair: [AV_HAIR, 'hair'], hc: [AV_HC, 'hc'], outfit: [AV_OUTFIT, 'outfit'], bg: [AV_BG, 'bg'], acc: [AV_ACC, 'acc'], frame: [AV_FRAMES, 'frame'] };
+  const AV_CATS = { skin: [AV_SKIN, 'skin'], face: [AV_FACE, 'face'], eyes: [AV_EYES, 'eyes'], ec: [AV_EC, 'ec'], hair: [AV_HAIR, 'hair'], hc: [AV_HC, 'hc'], outfit: [AV_OUTFIT, 'outfit'], bg: [AV_BG, 'bg'], acc: [AV_ACC, 'acc'], frame: [AV_FRAMES, 'frame'] };
   // Avatar de départ (2026-11-10, porteur) : cheveux noirs en pics, fond jaune, sans Pokémon (à débloquer).
-  const AV_DEF = { skin: 's3', face: 'rond', eyes: 'grands', hair: 'pics', hc: 'noir', outfit: 'tshirt', bg: 'jaune', poke: 0, pos: 'right', size: 100,
+  const AV_DEF = { skin: 's3', face: 'rond', eyes: 'grands', ec: 'noir', hair: 'pics', hc: 'noir', outfit: 'tshirt', bg: 'jaune', poke: 0, pos: 'right', size: 100,
     acc: 'aucun', aon: 'poke', shiny: false, px: null, py: null, ax: 0, ay: 0, asz: 100, frame: 'aucun', prot: 0, arot: 0 };
   // Prix en PA de chaque style PRO (copiés dans 014_avatar.sql ; un test vérifie qu'ils sont identiques).
   const AV_PRICES = (() => { const o = {}; Object.keys(AV_CATS).forEach(k => AV_CATS[k][0].forEach(x => { if (x.pa) o[k + ':' + x.id] = x.pa; })); return o; })();
@@ -105,6 +170,9 @@
       case 'long': return '<path d="M42 100C38 52 66 28 100 28s62 24 58 72l8 82c-14 8-30 8-42 0l-4-72H80l-4 72c-12 8-28 8-42 0z" fill="' + h + '" stroke="' + d + '" stroke-width="2"/>';
       case 'queue': return '<path d="M134 52c40 4 52 52 30 104-2-30-8-58-34-82z" fill="' + h + '" stroke="' + d + '" stroke-width="2"/><circle cx="136" cy="58" r="7" fill="#E5484D" stroke="' + AV_INK + '" stroke-width="2"/>';
       case 'couettes': return '<path d="M52 82c-30 6-36 46-18 74 4-24 12-42 26-54z" fill="' + h + '" stroke="' + d + '" stroke-width="2"/><path d="M148 82c30 6 36 46 18 74-4-24-12-42-26-54z" fill="' + h + '" stroke="' + d + '" stroke-width="2"/><circle cx="54" cy="88" r="6" fill="#FFD60A" stroke="' + AV_INK + '" stroke-width="2"/><circle cx="146" cy="88" r="6" fill="#FFD60A" stroke="' + AV_INK + '" stroke-width="2"/>';
+      case 'afro': return '<circle cx="100" cy="74" r="66" fill="' + h + '" stroke="' + d + '" stroke-width="2"/>' + [[52, 40], [148, 40], [40, 86], [160, 86], [100, 14]].map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="22" fill="' + h + '" stroke="' + d + '" stroke-width="2"/>').join('');
+      case 'mulet': return '<path d="M54 96c-8 34-6 60 10 74 12-12 16-30 14-50zM146 96c8 34 6 60-10 74-12-12-16-30-14-50z" fill="' + h + '" stroke="' + d + '" stroke-width="2"/>';
+      case 'nuage': return [[56, 66, 26], [100, 46, 32], [144, 66, 26], [70, 40, 22], [130, 40, 22]].map(([x, y, r]) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + h + '" stroke="' + d + '" stroke-width="2"/>').join('');
       case 'chignon': return '<circle cx="100" cy="30" r="19" fill="' + h + '" stroke="' + d + '" stroke-width="2"/><path d="M86 26c8-6 20-6 28 0" fill="none" stroke="' + d + '" stroke-width="2.5" stroke-linecap="round"/>';
       default: return '';
     }
@@ -120,6 +188,12 @@
       case 'boucles': return '<ellipse cx="100" cy="62" rx="46" ry="26"' + st + '/>' + [[58, 80, 13], [62, 60, 15], [78, 45, 15], [100, 38, 16], [122, 45, 15], [138, 60, 15], [142, 80, 13]].map(([x, y, r]) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '"' + st + '/>').join('');
       case 'chignon': case 'queue': return '<path d="M52 94C48 58 72 40 100 40s52 18 48 54c-8-20-26-30-48-30s-40 10-48 30z"' + st + '/>';
       case 'couettes': return '<path d="M52 94C48 58 72 40 100 40s52 18 48 54c-6-14-14-22-24-26l-24 10-24-10c-10 4-18 12-24 26z"' + st + '/><path d="M100 46v20" stroke="' + d + '" stroke-width="2.5" stroke-linecap="round"/>';
+      case 'afro': case 'mulet': return '<path d="M52 92C50 60 72 44 100 44s50 16 48 48c-10-12-28-18-48-18s-38 6-48 18z"' + st + '/>';
+      case 'nuage': return '<path d="M52 92C50 62 72 48 100 48s50 14 48 44c-10-12-28-18-48-18s-38 6-48 18z"' + st + '/>';
+      case 'banane': return '<path d="M50 96C46 64 62 46 84 42c-8-12 6-32 36-32 30 0 44 22 34 36-6 10-18 10-26 6 18 10 22 28 14 44-10-16-28-24-50-24-20 0-38 8-48 24z"' + st + '/><path d="M96 22c14-6 34-2 42 10" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".45"/>';
+      case 'ananas': return '<path d="M100 48l-14-34 12 12 2-24 8 24 12-14-6 34z" fill="#3BC48A" stroke="#1E7F5C" stroke-width="2.5" stroke-linejoin="round"/><path d="M52 94C48 60 72 44 100 44s52 16 48 50c-6-14-14-20-24-22l-24 8-24-8c-10 2-18 8-24 22z"' + st + '/>';
+      case 'flamme': return '<path d="M50 96C44 62 58 42 72 32c-2 10 2 18 8 20 0-16 8-34 22-42-2 14 4 22 12 26 4-12 12-20 22-22-6 12-2 24 8 34 6 8 8 22 2 48-8-16-26-24-48-24s-38 8-48 24z"' + st + '/><path d="M84 52c2-10 8-18 16-22-2 8 2 14 8 16 2-6 6-10 12-12-4 8-2 14 2 20-12-4-26-6-38-2z" fill="#FF9F1C" opacity=".85"/><path d="M96 48c2-6 6-10 10-12 0 6 2 8 6 10z" fill="#FFE46B"/>';
+      case 'antennes': return '<path d="M86 48L70 14M114 48l16-34" stroke="' + d + '" stroke-width="5" stroke-linecap="round"/><circle cx="70" cy="13" r="8" fill="' + h + '" stroke="' + d + '" stroke-width="2"/><circle cx="130" cy="13" r="8" fill="' + h + '" stroke="' + d + '" stroke-width="2"/><path d="M52 92C50 60 72 44 100 44s50 16 48 48c-10-12-28-18-48-18s-38 6-48 18z"' + st + '/>';
       case 'crete': return '<path d="M55 88C54 58 74 44 100 44s46 14 45 44c-8-14-24-22-45-22s-37 8-45 22z" fill="' + d + '" opacity=".55"/><path d="M84 54c0-24 10-44 16-50 6 6 16 26 16 50z"' + st + '/>';
       default: return '';
     }
@@ -129,16 +203,38 @@
     const ears = '<circle cx="53" cy="100" r="9"' + st + '/><circle cx="147" cy="100" r="9"' + st + '/>';
     if (face === 'ovale') return ears + '<ellipse cx="100" cy="96" rx="44" ry="52"' + st + '/>';
     if (face === 'carre') return ears + '<rect x="55" y="46" width="90" height="98" rx="32"' + st + '/>';
+    if (face === 'pointu') return ears + '<path d="M56 82c0-22 20-36 44-36s44 14 44 36c0 30-20 56-44 64-24-8-44-34-44-64z"' + st + '/>';
+    if (face === 'large') return ears + '<ellipse cx="100" cy="98" rx="54" ry="45"' + st + '/>';
+    if (face === 'coeur') return ears + '<path d="M100 146C70 132 52 110 52 84c0-24 18-38 40-38 4 0 6 2 8 6 2-4 4-6 8-6 22 0 40 14 40 38 0 26-18 48-48 62z"' + st + '/>';
     return ears + '<circle cx="100" cy="94" r="48"' + st + '/>';
   };
-  const avEyes = (id, hc) => {
-    const brow = avShade(hc, -0.15), bw = ' fill="none" stroke="' + brow + '" stroke-width="3.2" stroke-linecap="round"';
-    const iris = (x, star) => '<ellipse cx="' + x + '" cy="102" rx="8" ry="10.5" fill="' + AV_INK + '"/>' + (star
+  const avEyes = (id, hc, ec) => {
+    const brow = avShade(hc, -0.15), bw = ' fill="none" stroke="' + brow + '" stroke-width="3.2" stroke-linecap="round"', col = ec || AV_INK;
+    const iris = (x, star) => '<ellipse cx="' + x + '" cy="102" rx="8" ry="10.5" fill="' + col + '"/>' + (star
       ? '<path d="M' + x + ' 95l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#FFD60A"/>'
-      : '<circle cx="' + (x - 2.6) + '" cy="98" r="3" fill="#FFFFFF"/><circle cx="' + (x + 2.8) + '" cy="106" r="1.4" fill="#FFFFFF"/>');
-    if (id === 'rieurs') return '<path d="M71 104q9-10 18 0M111 104q9-10 18 0" fill="none" stroke="' + AV_INK + '" stroke-width="3.6" stroke-linecap="round"/><path d="M70 86q10-5 18 0M112 86q8-5 18 0"' + bw + '/>';
-    if (id === 'vifs') return iris(80) + iris(120) + '<path d="M68 86l20 5M132 86l-20 5"' + bw + '/>';
-    return iris(80, id === 'etoiles') + iris(120, id === 'etoiles') + '<path d="M70 86q10-6 19-1M111 85q9-5 19 1"' + bw + '/>';
+      : (col !== AV_INK ? '<ellipse cx="' + x + '" cy="103" rx="3.6" ry="5" fill="' + AV_INK + '"/>' : '') + '<circle cx="' + (x - 2.6) + '" cy="98" r="3" fill="#FFFFFF"/><circle cx="' + (x + 2.8) + '" cy="106" r="1.4" fill="#FFFFFF"/>');
+    const browN = '<path d="M70 86q10-6 19-1M111 85q9-5 19 1"' + bw + '/>';
+    switch (id) {
+      case 'rieurs': return '<path d="M71 104q9-10 18 0M111 104q9-10 18 0" fill="none" stroke="' + AV_INK + '" stroke-width="3.6" stroke-linecap="round"/><path d="M70 86q10-5 18 0M112 86q8-5 18 0"' + bw + '/>';
+      case 'vifs': return iris(80) + iris(120) + '<path d="M68 86l20 5M132 86l-20 5"' + bw + '/>';
+      case 'endormis': return '<path d="M71 101q9 7 18 0M111 101q9 7 18 0" fill="none" stroke="' + AV_INK + '" stroke-width="3.6" stroke-linecap="round"/>' + browN;
+      case 'clin': return iris(80) + '<path d="M111 103q9-8 18 0" fill="none" stroke="' + AV_INK + '" stroke-width="3.6" stroke-linecap="round"/>' + browN;
+      case 'manga': {
+        const ir = col === AV_INK ? '#4C6FD8' : col;
+        const e = x => '<ellipse cx="' + x + '" cy="101" rx="10" ry="13" fill="' + AV_INK + '"/><ellipse cx="' + x + '" cy="103" rx="7.4" ry="10" fill="' + ir + '"/><ellipse cx="' + x + '" cy="104" rx="3.8" ry="5.4" fill="' + AV_INK + '"/>'
+          + '<ellipse cx="' + (x - 3) + '" cy="95.5" rx="3.6" ry="4.2" fill="#FFFFFF"/><circle cx="' + (x + 3.6) + '" cy="108" r="1.9" fill="#FFFFFF"/>';
+        return e(80) + e(120) + '<path d="M68 85q11-7 21-1M111 84q10-6 21 1"' + bw + '/>';
+      }
+      case 'coeurs': {
+        const h = x => '<path d="M' + x + ' 111c-10-6-13-11-12-15 1-4 7-5 12-1 5-4 11-3 12 1 1 4-2 9-12 15z" fill="#FF4D8D" stroke="#8A1E4A" stroke-width="1.6" stroke-linejoin="round"/><circle cx="' + (x - 4) + '" cy="98" r="1.8" fill="#FFFFFF"/>';
+        return h(80) + h(120) + browN;
+      }
+      case 'spirale': {
+        const sp = x => '<path d="M' + x + ' 102m0 0a2 2 0 1 1 3 1a4.5 4.5 0 1 1-7 -3a7 7 0 1 1 11 6a9.5 9.5 0 1 1-14-9" fill="none" stroke="' + AV_INK + '" stroke-width="2.4" stroke-linecap="round"/>';
+        return sp(80) + sp(120) + browN;
+      }
+      default: return iris(80, id === 'etoiles') + iris(120, id === 'etoiles') + browN;
+    }
   };
   const avOutfit = (id, sk) => {
     const torso = c => '<path d="M28 200c0-30 22-48 50-52h44c28 4 50 22 50 52z" fill="' + c + '" stroke="' + AV_INK + '" stroke-width="2.4" stroke-linejoin="round"/>';
@@ -152,6 +248,14 @@
       case 'aventurier': return neck + torso('#8A5A2B') + '<path d="M80 146c12 10 28 10 40 0l3 9c-14 10-32 10-46 0z" fill="#E5484D" stroke="' + AV_INK + '" stroke-width="2"/><path d="M112 156l9 26-13-5z" fill="#C93A40" stroke="' + AV_INK + '" stroke-width="2" stroke-linejoin="round"/><path d="M60 170h18M122 170h18" stroke="#5E3B1A" stroke-width="3" stroke-linecap="round"/><rect x="66" y="176" width="14" height="10" rx="2" fill="#5E3B1A"/>';
       case 'maillot': return neck + torso('#FFD60A') + '<path d="M84 150q16 10 32 0" fill="none" stroke="' + AV_INK + '" stroke-width="3"/><path d="M106 160l-14 18h9l-6 18 16-22h-9l6-14z" fill="' + AV_INK + '"/><path d="M40 182l18-6M160 182l-18-6" stroke="' + AV_INK + '" stroke-width="3" stroke-linecap="round"/>';
       case 'cape': return '<path d="M22 200c8-38 34-54 62-56h32c28 2 54 18 62 56z" fill="#4A22B8" stroke="' + AV_INK + '" stroke-width="2.4"/>' + neck + '<path d="M60 200c4-24 20-40 40-40s36 16 40 40z" fill="#1B1F3A"/><path d="M72 138l12 12h32l12-12 4 16-28 8-28-8z" fill="#FFD60A" stroke="' + AV_INK + '" stroke-width="2" stroke-linejoin="round"/><circle cx="100" cy="166" r="5" fill="#FF5BE1" stroke="' + AV_INK + '" stroke-width="2"/>';
+      case 'hawai': return neck + torso('#2BB3C0') + [[60, 172, '#FF7AC6'], [86, 186, '#FFD60A'], [122, 178, '#FF5B5B'], [144, 190, '#FFFFFF'], [104, 196, '#FF9F1C']].map(([x, y, c]) => '<circle cx="' + x + '" cy="' + y + '" r="6" fill="' + c + '"/><circle cx="' + x + '" cy="' + y + '" r="2" fill="#FFE46B"/>').join('') + '<path d="M84 148l16 14 16-14" fill="#F3F6FC" stroke="' + AV_INK + '" stroke-width="2"/>';
+      case 'pirate': return neck + torso('#F3F6FC') + [158, 170, 182, 194].map(y => '<path d="M36 ' + y + 'h128" stroke="#2F3A56" stroke-width="5" opacity=".9"/>').join('') + '<path d="M44 186c20 6 92 6 112 0v10H44z" fill="#C8323A" stroke="' + AV_INK + '" stroke-width="2"/>';
+      case 'kimono': return neck + torso('#C8323A') + '<path d="M84 146l36 54h-16l-30-48zM116 146l-20 30" fill="none" stroke="#F3F6FC" stroke-width="7" stroke-linejoin="round"/><path d="M40 182h120v10H40z" fill="#2A1E2E"/><circle cx="66" cy="168" r="5" fill="#FFB3DF"/><circle cx="140" cy="172" r="5" fill="#FFB3DF"/>';
+      case 'smoking': return neck + torso('#1E1A24') + '<path d="M86 148l14 52 14-52z" fill="#F3F6FC"/><path d="M86 148l-12 14 22 38zM114 148l12 14-22 38z" fill="#2E2A36" stroke="' + AV_INK + '" stroke-width="2" stroke-linejoin="round"/><path d="M100 156l-10-5v10zM100 156l10-5v10z" fill="#C8323A"/><circle cx="100" cy="176" r="2.2" fill="#2A1E2E"/>';
+      case 'heros': return '<path d="M22 200c4-44 30-62 62-64h32c32 2 58 20 62 64z" fill="#C8323A" stroke="' + AV_INK + '" stroke-width="2.4"/>' + neck + '<path d="M44 200c2-26 18-42 40-46h32c22 4 38 20 40 46z" fill="#2F5BFF" stroke="' + AV_INK + '" stroke-width="2.4" stroke-linejoin="round"/><path d="M100 160l7 14 15 2-11 10 3 15-14-7-14 7 3-15-11-10 15-2z" fill="#FFD60A" stroke="' + AV_INK + '" stroke-width="2" stroke-linejoin="round"/><path d="M74 146l26 10 26-10" fill="none" stroke="#FFD60A" stroke-width="4"/>';
+      case 'astronaute': return neck + torso('#EEF2F8') + '<rect x="70" y="164" width="60" height="30" rx="6" fill="#C9D3EA" stroke="' + AV_INK + '" stroke-width="2"/><circle cx="84" cy="179" r="5" fill="#E5484D"/><circle cx="100" cy="179" r="5" fill="#3D8BFF"/><circle cx="116" cy="179" r="5" fill="#FFD60A"/><path d="M76 146c16 10 32 10 48 0" fill="none" stroke="#9AA8C3" stroke-width="8" stroke-linecap="round"/><rect x="44" y="166" width="16" height="10" rx="2" fill="#3D63FF"/>';
+      case 'chevalier': return neck + torso('#AEB9D0') + '<path d="M60 160h80M54 176h92M50 192h100" stroke="#6C7A89" stroke-width="3"/><path d="M100 150v50" stroke="#6C7A89" stroke-width="3"/><path d="M84 162h32v18c0 8-8 14-16 16-8-2-16-8-16-16z" fill="#C8323A" stroke="' + AV_INK + '" stroke-width="2"/><path d="M100 166v24M90 174h20" stroke="#FFD60A" stroke-width="3"/><circle cx="56" cy="160" r="12" fill="#C9D3EA" stroke="' + AV_INK + '" stroke-width="2"/><circle cx="144" cy="160" r="12" fill="#C9D3EA" stroke="' + AV_INK + '" stroke-width="2"/>';
+      case 'royal': return '<path d="M18 200c6-44 34-62 66-64h32c32 2 60 20 66 64z" fill="#3A1F8A" stroke="' + AV_INK + '" stroke-width="2.4"/>' + [[40, 186], [56, 178], [144, 178], [160, 186]].map(([x, y]) => '<path d="M' + x + ' ' + (y - 6) + 'l3 6-3 6-3-6z" fill="#FFD60A"/>').join('') + neck + '<path d="M60 200c4-24 20-40 40-40s36 16 40 40z" fill="#2E66D8"/><path d="M66 140c8 12 20 18 34 18s26-6 34-18l8 14c-10 16-26 24-42 24s-32-8-42-24z" fill="#FFFFFF" stroke="' + AV_INK + '" stroke-width="2" stroke-linejoin="round"/>' + [[74, 152], [90, 162], [110, 162], [126, 152], [100, 168]].map(([x, y]) => '<path d="M' + x + ' ' + y + 'l-2 4h4z" fill="#1E1A24"/>').join('') + '<path d="M80 170c10 8 30 8 40 0" fill="none" stroke="#FFD60A" stroke-width="3"/><circle cx="100" cy="182" r="6" fill="#FFD60A" stroke="#9A6A00" stroke-width="2"/>';
       default: return neck + torso('#3D63FF') + '<path d="M84 150q16 12 32 0" fill="none" stroke="#2A48C4" stroke-width="4" stroke-linecap="round"/>';
     }
   };
@@ -166,7 +270,7 @@
     const cheeks = '<ellipse cx="72" cy="116" rx="8" ry="4.5" fill="#FF7A9A" opacity="' + (D === 4 ? '.7' : '.45') + '"/><ellipse cx="128" cy="116" rx="8" ry="4.5" fill="#FF7A9A" opacity="' + (D === 4 ? '.7' : '.45') + '"/>';
     const mouth = D === 4 ? '<path d="M94 121q6 6 12 0" fill="none" stroke="#7A2E3A" stroke-width="3" stroke-linecap="round"/>'
       : '<path d="M92 120q8 9 16 0" fill="#7A2E3A" stroke="' + AV_INK + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
-    let eyes = avEyes(c.eyes, hc);
+    let eyes = avEyes(c.eyes, hc, c.ec && c.ec !== 'noir' ? avFind('ec', c.ec).c : '');
     if (D === 2 && (c.eyes === 'grands' || c.eyes === 'vifs' || c.eyes === 'etoiles')) {
       // Grands yeux manga : iris coloré (couleur des cheveux éclaircie), pupille, deux reflets.
       const ir = avShade(hc === '#25202E' ? '#5A7BD8' : hc, 0.1), brow = avShade(hc, -0.15);
@@ -199,6 +303,24 @@
     else if (b.id === 'holo') inner = '<defs><linearGradient id="h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8AD8"/><stop offset=".25" stop-color="#8FD3FF"/><stop offset=".5" stop-color="#A8F0C8"/><stop offset=".75" stop-color="#FFE46B"/><stop offset="1" stop-color="#C9A6FF"/></linearGradient></defs><rect width="200" height="200" fill="url(#h)"/><path d="M-20 140L140 -20h40L-20 180z" fill="#FFFFFF" opacity=".35"/>';
     else if (b.id === 'aurore') inner = g('#1E3A5F', '#0B1120') + '<path d="M0 70c40-30 80 10 120-14s60-30 80-20v40c-30-6-50 20-90 26S30 96 0 110z" fill="#3BC48A" opacity=".55"/><path d="M0 40c50-10 90 20 140 0s50-10 60-6v24c-30 0-60 30-110 20S20 70 0 76z" fill="#9B6BFF" opacity=".45"/>';
     else if (b.id === 'volcan') inner = g('#FF9F1C', '#7A1A12') + '<path d="M0 200l40-70 20 18 30-48 26 40 24-26 60 86z" fill="#3A1410"/><path d="M84 104l6-14 8 16-4 24z" fill="#FFD60A"/><circle cx="40" cy="40" r="5" fill="#FFD60A" opacity=".8"/><circle cx="168" cy="54" r="4" fill="#FFB020" opacity=".8"/>';
+    // Décors ajoutés le 2026-11-11 (porteur) ; les animés bougent dans l'aperçu et les bulles (animation dans le dessin).
+    else if (b.id === 'coucher') inner = '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B3A9E"/><stop offset=".45" stop-color="#FF6F61"/><stop offset=".75" stop-color="#FFB36B"/><stop offset="1" stop-color="#FFE29A"/></linearGradient></defs><rect width="200" height="200" fill="url(#g)"/><circle cx="100" cy="150" r="40" fill="#FFE46B" opacity=".9"/><path d="M0 160h200v40H0z" fill="#3A1F5E" opacity=".55"/>';
+    else if (b.id === 'foret') inner = g('#BDF0C8', '#2E8B57') + [[20, 200, 46], [60, 200, 58], [110, 200, 50], [160, 200, 62], [196, 200, 44]].map(([x, y, h]) => '<path d="M' + x + ' ' + (y - h * 2) + 'l-' + (h * 0.7) + ' ' + h * 2 + 'h' + (h * 1.4) + 'z" fill="#1E6B45" opacity=".85"/>').join('');
+    else if (b.id === 'plage') inner = '<rect width="200" height="200" fill="#9ED8FF"/><rect y="118" width="200" height="40" fill="#2F9BE0"/><path d="M0 118c20 6 40-6 60 0s40 6 60 0 40-6 80 0v6H0z" fill="#FFFFFF" opacity=".6"/><rect y="156" width="200" height="44" fill="#F5D89A"/><circle cx="160" cy="40" r="18" fill="#FFE46B"/>';
+    else if (b.id === 'neige') inner = g('#DDEBFF', '#7A97C9') + '<style>.f{animation:fl 6s linear infinite}@keyframes fl{from{transform:translateY(-210px)}to{transform:translateY(0)}}</style>' + '<g class="f">' + [0, 1].map(k => [[20, 30], [60, 70], [100, 20], [140, 90], [180, 50], [40, 140], [90, 170], [130, 130], [170, 180], [10, 100]].map(([x, y]) => '<circle cx="' + x + '" cy="' + (y + k * 210) + '" r="3" fill="#FFFFFF"/>').join('')).join('') + '</g>';
+    else if (b.id === 'galaxie') inner = g('#5B2A9E', '#0B0620') + '<style>.t{animation:tw 2.4s ease-in-out infinite}.t2{animation-delay:1.2s}@keyframes tw{0%,100%{opacity:.2}50%{opacity:1}}</style>' + [[24, 30, 2.2, ''], [60, 16, 1.6, 't2'], [150, 26, 2.4, ''], [176, 60, 1.6, 't2'], [32, 80, 1.6, ''], [170, 120, 2.2, 't2'], [20, 150, 1.8, ''], [120, 14, 1.4, 't2'], [90, 44, 1.2, '']].map(([x, y, r, c]) => '<circle class="t ' + c + '" cx="' + x + '" cy="' + y + '" r="' + r + '" fill="#FFFFFF"/>').join('') + '<ellipse cx="100" cy="100" rx="90" ry="26" fill="#C9A6FF" opacity=".18" transform="rotate(-20 100 100)"/>';
+    else if (b.id === 'tempete') inner = '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2A2A"/><stop offset="1" stop-color="#0E3B2E"/></linearGradient></defs><rect width="200" height="200" fill="url(#g)"/>'
+      + '<style>.r{animation:rn .7s linear infinite}@keyframes rn{from{transform:translate(0,-40px)}to{transform:translate(-14px,0)}}.l{opacity:0;animation:lg 3.2s infinite}@keyframes lg{0%,86%,100%{opacity:0}88%{opacity:1}90%{opacity:.2}92%{opacity:1}}.c{animation:cl 8s ease-in-out infinite alternate}@keyframes cl{to{transform:translateX(16px)}}</style>'
+      + '<rect class="l" width="200" height="200" fill="#C8FFE6" opacity=".0"/><g class="c"><ellipse cx="50" cy="30" rx="60" ry="22" fill="#2F4A44"/><ellipse cx="150" cy="24" rx="70" ry="24" fill="#26403A"/></g>'
+      + '<path class="l" d="M140 40l-14 34h12l-16 40 30-48h-12l12-26z" fill="#E8FFF4"/><g class="r" stroke="#6EF2B4" stroke-width="1.6" opacity=".55">' + [10, 40, 70, 100, 130, 160, 190].map(x => '<path d="M' + x + ' 50l-8 22M' + (x + 14) + ' 110l-8 22M' + (x - 6) + ' 160l-8 22"/>').join('') + '</g>';
+    else if (b.id === 'lave') inner = '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A0A06"/><stop offset=".6" stop-color="#7A1A12"/><stop offset="1" stop-color="#FF6A00"/></linearGradient></defs><rect width="200" height="200" fill="url(#g)"/>'
+      + '<style>.v{animation:gl 1.6s ease-in-out infinite alternate}@keyframes gl{to{opacity:.55}}.e{animation:em 3s linear infinite}.e2{animation-delay:1s}.e3{animation-delay:2s}@keyframes em{from{transform:translateY(0);opacity:1}to{transform:translateY(-120px);opacity:0}}</style>'
+      + '<path d="M0 200l46-86 22 18 32-56 30 48 26-28 44 104z" fill="#2A0E0A"/><path class="v" d="M92 84l8-16 10 18-6 30-10 30-4-34z" fill="#FF9F1C"/><path class="v" d="M0 186c30-10 60 8 100-4s70 6 100-2v20H0z" fill="#FF6A00"/>'
+      + [[40, 180, ''], [100, 176, 'e2'], [150, 182, 'e3'], [70, 190, 'e3'], [176, 188, 'e2']].map(([x, y, c]) => '<circle class="e ' + c + '" cx="' + x + '" cy="' + y + '" r="3" fill="#FFD60A"/>').join('');
+    else if (b.id === 'tsunami') inner = '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E3A6E"/><stop offset="1" stop-color="#0B3D91"/></linearGradient></defs><rect width="200" height="200" fill="url(#g)"/>'
+      + '<style>.w{animation:wv 3s ease-in-out infinite}@keyframes wv{0%,100%{transform:translateX(-20px)}50%{transform:translateX(0)}}.r{animation:rn .6s linear infinite}@keyframes rn{from{transform:translateY(-40px)}to{transform:translateY(0)}}</style>'
+      + '<g class="r" stroke="#BDE6FF" stroke-width="1.4" opacity=".6">' + [12, 36, 60, 84, 108, 132, 156, 180].map(x => '<path d="M' + x + ' 20v16M' + (x + 10) + ' 80v16M' + (x - 6) + ' 130v16"/>').join('') + '</g>'
+      + '<g class="w"><path d="M-20 200V140c30-50 90-60 130-30 20 16 18 40 0 46 30 0 50-24 50-50 30 20 60 50 60 94z" fill="#2F7BE0"/><path d="M-20 200v-40c40-30 90-30 120-6 30 24 60 8 80-6 20 14 40 30 40 52z" fill="#5EC8F0"/><path d="M90 112c10-6 22-4 28 6" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/></g>';
     else inner = g(b.c[0], b.c[1]);
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">' + inner + '</svg>';
   };
@@ -311,6 +433,10 @@
       const pm = /^(poke|shiny):(\d+)$/.exec(id);
       if (pm && pm[1] === 'poke' && this.st().avLockWhy === 'pick') this.avSet({ poke: Number(pm[2]), shiny: false, px: 50, py: 50, size: 140, prot: 0 });
       if (pm && pm[1] === 'shiny' && this.st().avLockWhy === 'pick') this.avSet({ shiny: true });
+      const sm2 = /^([a-z]+):([a-z0-9]+)$/.exec(id);
+      if (!pm && sm2 && AV_CATS[sm2[1]] && this.st().avLockWhy === 'pick') this.avSet({ [sm2[1]]: sm2[2] });
+      // Petite animation de déblocage sur l'aperçu (2026-11-11, porteur).
+      this.setState({ avBurst: Date.now() }); setTimeout(() => this.setState({ avBurst: 0 }), 1700);
       this.setState({ avOwned: owned, pa: left, avLock: '', avBusy: false, toast: /^poke:/.test(id) ? avLabel(id) + ' débloqué pour ton avatar' : /^shiny:/.test(id) ? 'Version shiny débloquée' : 'Style débloqué pour toujours' });
       this.flash && this.flash();
     };
@@ -320,7 +446,7 @@
         e => {
           this.setState({ avBusy: false });
           // Serveur sans 022 : les Pokémon d'avatar, leurs shiny et les cadres n'y existent pas encore.
-          if (/Style inconnu/.test(String(e && e.message))) { this.setState({ toast: typeof myAdmin === 'function' && myAdmin() ? 'Installe tools/supabase/install_011_a_022.sql dans Supabase Studio' : 'Bientôt disponible' }); return; }
+          if (/Style inconnu/.test(String(e && e.message))) { this.setState({ toast: typeof myAdmin === 'function' && myAdmin() ? 'Installe tools/supabase/install_011_a_023.sql dans Supabase Studio' : 'Bientôt disponible' }); return; }
           if (this.gcFail) this.gcFail(e); else this.setState({ toast: 'Achat impossible pour le moment' });
         });
       return;
@@ -328,8 +454,10 @@
     done(pa - price);
   };
   avProto.avSave = function () {
-    const s = this.st(), c = avNorm(s.avDraft, s), lock = avProIds(c).find(id => !this.avHas(id));
-    if (lock) { this.setState({ avLock: lock, avLockWhy: 'save' }); return; }
+    const s = this.st(), c = avNorm(s.avDraft, s);
+    // « Valider mon avatar » enregistre tout de suite (2026-11-11, porteur) : un style payant ne peut être ajouté qu'une
+    // fois débloqué ; s'il en reste un (Premium arrêté entre-temps), il reprend sa valeur par défaut.
+    avProIds(c).filter(id => !this.avHas(id)).forEach(id => { const k = id.split(':')[0]; if (k === 'poke') { c.poke = 0; c.shiny = false; } else if (k === 'shiny') c.shiny = false; else c[k] = AV_DEF[k]; });
     this.setState({ avBusy: true });
     avCompose(c).then(png => {
       this.setState({ avatarCfg: c, avatarPng: png, avatarImg: '', avBusy: false, toast: 'Avatar enregistré' });
@@ -355,7 +483,7 @@
   // ——— Écran « Mon avatar » ———
   // Deux lignes de rubriques (2026-11-10, porteur) : « Ton avatar » puis « Ton Pokémon ».
   const AV_ROW1 = [['hair', 'Cheveux', 'M6 9a6 6 0 0 1 12 0v3M6 9c2 2 6 2 8-2 1 3 3 4 4 5M6 9v6'], ['face', 'Visage', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9 10h.01M15 10h.01M9 15c1.5 1.3 4.5 1.3 6 0'],
-    ['style', 'Style', 'M8 4l4 3 4-3 4 4-3 3v9H7v-9L4 8z'], ['bg', 'Décor', 'M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4']];
+    ['style', 'Habit', 'M8 4l4 3 4-3 4 4-3 3v9H7v-9L4 8z'], ['bg', 'Décor', 'M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4']];
   // 2ᵉ ligne (2026-11-11, porteur) : Pokémon (silhouette de Pikachu, pleine), Shiny, Accessoire (lunettes).
   const AV_PIKA = 'M5 15.4a6.2 5.2 0 1 0 12.4 0a6.2 5.2 0 1 0-12.4 0zM6.4 12.4L3.6.8l6.6 9.4zM12.2 10.2l6.6-9.4-2.8 11.6zM8 14.6a1.2 1.2 0 1 1 2.4 0a1.2 1.2 0 1 1-2.4 0zM12 14.6a1.2 1.2 0 1 1 2.4 0a1.2 1.2 0 1 1-2.4 0zM17.2 17.4l6-4.2-2.4-.8 2.8-5.2-6 4.6 2.2.7-3 2.2z';
   const AV_GLASSES = 'M2.5 9.5h8v3a3.2 3.2 0 0 1-3.2 3.2H5.7a3.2 3.2 0 0 1-3.2-3.2zM13.5 9.5h8v3a3.2 3.2 0 0 1-3.2 3.2h-1.6a3.2 3.2 0 0 1-3.2-3.2zM10.5 10.6c1-0.8 2-0.8 3 0M2.5 9.5L1 8M21.5 9.5L23 8';
@@ -371,9 +499,12 @@
     const mini = patch => { const c = Object.assign({}, d, patch); return { bg: avUrl(avBg(c, avTypeColor(c.poke))), char: avUrl(avChar(c)) }; };
     const opt = (k, x, swatch) => {
       const id = k + ':' + x.id, pro = !!x.pa, has = this.avHas(id), on = d[k] === x.id, m = swatch ? null : mini({ [k]: x.id });
-      return { label: x.label, on: on, pro: pro, lock: pro && !has, open: pro && has, price: pro && !has ? x.pa + ' PA' : '', swatch: swatch ? 'background: ' + x.c : '', isSwatch: !!swatch, notSwatch: !swatch,
+      return { label: x.label, on: on, pro: pro, lock: pro && !has, open: pro && has, price: pro && !has ? x.pa.toLocaleString('fr-FR') : '', swatch: swatch ? 'background: ' + x.c : '', isSwatch: !!swatch, notSwatch: !swatch,
         bg: m ? m.bg : '', char: m ? m.char : '', cls: 'pkm-av-opt' + (on ? ' pkm-av-on' : '') + (swatch ? ' pkm-av-sw' : ''),
-        aria: x.label + (pro ? (has ? ' (PRO débloqué)' : ' (PRO, ' + x.pa + ' PA ou Premium)') : '') + (on ? ', choisi' : ''), pick: () => this.avSet({ [k]: x.id }) };
+        aria: x.label + (pro ? (has ? ' (débloqué)' : ' (' + x.pa + ' PA, ou Premium)') : '') + (on ? ', choisi' : ''),
+        // Style payant pas encore débloqué : la fenêtre de déblocage s'ouvre d'abord ; il s'applique une fois acheté
+        // (2026-11-11, porteur : « du moment que ce style a été ajouté à ton avatar, c'est que tu l'as débloqué »).
+        pick: () => (pro && !has ? this.setState({ avLock: id, avLockWhy: 'pick' }) : this.avSet({ [k]: x.id })) };
     };
     const L = avLayers(d), pend = avProIds(d).filter(id => !this.avHas(id));
     const pk = n => n && DEX[n] ? { n: n, name: DEX[n].name, icon: 'img/pokemon/icon/' + n + '.png' } : null;
@@ -411,17 +542,17 @@
       actl: ctl('l’accessoire', 'asz', 'arot', { ax: 0, ay: 0, asz: 100, arot: 0 }),
       isPoke: tab === 'poke', isFace: tab === 'face', isHair: tab === 'hair', isStyle: tab === 'style', isBg: tab === 'bg', isAcc: tab === 'acc', isShiny: tab === 'shiny',
       prev: L, save: () => this.avSave(), busy: !!s.avBusy, saveLabel: s.avBusy ? 'Enregistrement…' : 'Valider mon avatar',
-      trial: pend.length > 0, trialText: 'Essai : ' + pend.length + ' élément' + (pend.length > 1 ? 's' : '') + ' à débloquer pour valider',
+      trial: false, burst: !!s.avBurst, burstKey: 'b' + (s.avBurst || 0), trialText: 'Essai : ' + pend.length + ' élément' + (pend.length > 1 ? 's' : '') + ' à débloquer pour valider',
       prem: prem, premTag: prem ? 'Premium : tous les styles PRO sont ouverts' : 'Styles PRO : ouverts avec Premium, ou à débloquer avec tes PA',
-      skin: AV_SKIN.map(x => opt('skin', x, true)), face: AV_FACE.map(x => opt('face', x)), eyes: AV_EYES.map(x => opt('eyes', x)),
+      skin: AV_SKIN.map(x => opt('skin', x, true)), face: AV_FACE.map(x => opt('face', x)), eyes: AV_EYES.map(x => opt('eyes', x)), ec: AV_EC.map(x => opt('ec', x, true)),
       hair: AV_HAIR.map(x => opt('hair', x)), hc: AV_HC.map(x => opt('hc', x, true)), outfit: AV_OUTFIT.map(x => opt('outfit', x)), bg: AV_BG.map(x => opt('bg', x)),
       frames: AV_FRAMES.map(frameOpt),
       // Pokémon de l'avatar (2026-11-10, v3) : un seul, à débloquer ici ; version shiny proposée à côté.
       hasPoke: !!d.poke, noPoke: !d.poke, poke: pk(d.poke) || { name: '', icon: '' },
       pokeAria: d.poke ? 'Changer de Pokémon : ' + DEX[d.poke].name : 'Choisir mon Pokémon', changePoke: () => this.setState({ avPick: 1, avQ: '' }),
-      pokeLock: !!d.poke && !pkHas, pokePrice: pkPrice + ' PA', unlockPoke: () => this.setState({ avLock: 'poke:' + d.poke, avLockWhy: 'try' }),
+      pokeLock: !!d.poke && !pkHas, pokePrice: pkPrice.toLocaleString('fr-FR'), unlockPoke: () => this.setState({ avLock: 'poke:' + d.poke, avLockWhy: 'try' }),
       removePoke: () => this.avSet({ poke: 0, shiny: false }),
-      shinyOffer: !!d.poke, shinyImg: d.poke ? avSprite(d.poke, true) : '', shinyName: d.poke ? DEX[d.poke].name + ' shiny' : '', shinyPrice: (pkPrice * 2) + ' PA', shinyLock: !shHas, shinyOwned: !!d.poke && shHas,
+      shinyOffer: !!d.poke, shinyImg: d.poke ? avSprite(d.poke, true) : '', shinyName: d.poke ? DEX[d.poke].name + ' shiny' : '', shinyPrice: (pkPrice * 2).toLocaleString('fr-FR'), shinyLock: !shHas, shinyOwned: !!d.poke && shHas,
       shinyLabel: d.shiny ? 'Version shiny choisie' : shHas ? 'Mettre la version shiny' : 'Le double du prix',
       shinyGo: () => { if (!d.poke) return; if (shHas) this.avSet({ shiny: !d.shiny }); else this.setState({ avLock: pkHas ? 'shiny:' + d.poke : 'poke:' + d.poke, avLockWhy: pkHas ? 'try' : 'shiny' }); },
       layer: [['right', 'Devant moi'], ['behind', 'Derrière moi']].map(([k, label]) => { const on = k === 'behind' ? d.pos === 'behind' : d.pos !== 'behind'; return Object.assign({ label: label, on: on, pick: () => this.avSet({ pos: k }) }, this.chip(on)); }),
@@ -432,7 +563,7 @@
       accSizeLabel: d.asz + ' %', accBigger: () => scaleAcc(1.15), accSmaller: () => scaleAcc(1 / 1.15),
       accMoved: !!(d.ax || d.ay || d.asz !== 100), resetAcc: () => this.avSet({ ax: 0, ay: 0, asz: 100 }),
       shinyCards: [false, true].map(v => ({ label: v ? 'Shiny' : 'Normal', on: d.shiny === v, img: d.poke ? avSprite(d.poke, v) : '', cls: 'pkm-av-shc' + (d.shiny === v ? ' pkm-av-on' : '') + (v ? ' pkm-av-shc-s' : ''),
-        lock: v && !shHas, price: (pkPrice * 2) + ' PA', aria: (v ? 'Version shiny' : 'Version normale') + (DEX[d.poke] ? ' de ' + DEX[d.poke].name : '') + (d.shiny === v ? ', choisie' : ''),
+        lock: v && !shHas, price: (pkPrice * 2).toLocaleString('fr-FR'), aria: (v ? 'Version shiny' : 'Version normale') + (DEX[d.poke] ? ' de ' + DEX[d.poke].name : '') + (d.shiny === v ? ', choisie' : ''),
         pick: () => { if (v && !shHas) this.setState({ avLock: pkHas ? 'shiny:' + d.poke : 'poke:' + d.poke, avLockWhy: pkHas ? 'pick' : 'shiny' }); else this.avSet({ shiny: v }); } })),
       size: d.size, sizeLabel: d.size + ' %', onSize: e => this.avSet({ size: Number(e.target.value) || 100 }),
       picker: {
@@ -446,7 +577,7 @@
             cls: 'pkm-av-pk' + (on ? ' pkm-av-on' : '') + (has ? ' pkm-av-pk-own' : ' pkm-av-pk-lock'), pick: () => (has ? pickPoke(e.n) : lockPoke(e.n)) }; })
       },
       lock: {
-        open: !!lockItem, name: lockItem ? lockItem.label : '', aria: (isPk ? 'À débloquer : ' : 'Style PRO : ') + (lockItem ? lockItem.label : ''), price: price.toLocaleString('fr-FR') + ' PA', pa: pa.toLocaleString('fr-FR') + ' PA',
+        open: !!lockItem, name: lockItem ? lockItem.label : '', priceN: price.toLocaleString('fr-FR'), aria: (isPk ? 'À débloquer : ' : 'Style PRO : ') + (lockItem ? lockItem.label : ''), price: price.toLocaleString('fr-FR') + ' PA', pa: pa.toLocaleString('fr-FR') + ' PA',
         why: s.avLockWhy === 'shiny' ? 'Débloque d’abord ce Pokémon pour ton avatar, puis sa version shiny.' : isPk ? (s.avLockWhy === 'save' ? 'Ton avatar utilise ce Pokémon : débloque-le pour valider.' : 'Pokémon d’avatar, à part du Pokédex : débloqué pour toujours avec tes PA, ou avec Premium.')
           : s.avLockWhy === 'save' ? 'Ton avatar utilise ce style PRO : débloque-le pour valider.' : 'Style PRO : débloqué pour toujours avec tes PA, ou avec Premium.',
         enough: pa >= price, short: pa >= price ? '' : 'Il te manque ' + (price - pa).toLocaleString('fr-FR') + ' PA', notEnough: pa < price,
@@ -562,8 +693,9 @@
     const s = this.st(), r = avBaseRender.call(this), ui = r.ui;
     ui.isAvatar = s.screen === 'avatar';
     const fr = this.avFrameCls(); ui.hhMeCls = 'pkm-hh-me' + (fr ? ' ' + fr : ''); ui.pfPhotoCls = 'pkm-pf-photo' + (fr ? ' ' + fr : '');
-    r.av = ui.isAvatar ? this.vAvatar(s) : { tabs: [], row1: [], row2: [], skin: [], face: [], eyes: [], hair: [], hc: [], outfit: [], bg: [], acc: [], aon: [], frames: [], layer: [], shinyCards: [], prev: {}, picker: { items: [] }, lock: { preview: {} } };
+    r.av = ui.isAvatar ? this.vAvatar(s) : { tabs: [], row1: [], row2: [], skin: [], face: [], eyes: [], ec: [], hair: [], hc: [], outfit: [], bg: [], acc: [], aon: [], frames: [], layer: [], shinyCards: [], prev: {}, picker: { items: [] }, lock: { preview: {} } };
     if (ui.isAvatar) avDragInit(this);
+    if (ui.isAvatar) ui.toastBottom = '88px'; // au-dessus de « Valider mon avatar »
     if (ui.isAvatar) Object.assign(ui, { title: 'Mon avatar', subtitle: '', hasSubtitle: false, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
     return r;
   };

@@ -177,5 +177,111 @@ class Verify(unittest.TestCase):
         self.assertEqual((n, cards[0][f["cm"]], cards[0][f["cmf"]]), (0, 30.0, 0))
 
 
+class Missing(unittest.TestCase):
+    """Cartes sans cote alors que Cardmarket en a une (2026-11-11, porteur : Groudon ☆ d'EX Espèces Delta, 111/113)."""
+    F = {k: i for i, k in enumerate(FIELDS)}
+
+    def card(self, cid, name, sid, p=NONE, cmid=None):
+        return row(cid, name, sid, cid.split("-")[-1], "", "", p, cmid=cmid)
+
+    def priced(self, cm):
+        return (cm, None, cm, None, "2026-11-10", cm, None, None, "n", 0)
+
+    def test_star_written_star_in_english(self):
+        # TCGdex : « Groudon Star » en anglais, Cardmarket : « Groudon Gold Star » (produit 276874, DS 111).
+        f = self.F
+        files = cmfiles.CmFiles([prod(276874, "Groudon Gold Star", 1500), prod(276875, "Kyogre Gold Star", 1500),
+                                 prod(276876, "Metagross Gold Star", 1500), prod(276800, "Groudon ex [Dual]", 1500)]
+                                + [prod(276700 + i, f"Card {i}", 1500) for i in range(3)],
+                                [guide(276874, 1180.0, 1105.5, 1290.0, 899.0), guide(276875, 950.0, 990.0, 940.0)], "2026-11-11")
+        cards = [self.card("ex11-111", "Groudon ☆", "ex11"), self.card("ex11-112", "Kyogre ☆", "ex11"),
+                 self.card("ex11-113", "Metalosse ☆", "ex11")]
+        cards += [self.card(f"ex11-{i}", f"Carte {i}", "ex11", self.priced(1.0), 276700 + i) for i in range(3)]
+        en = {"ex11-111": "Groudon Star", "ex11-112": "Kyogre Star", "ex11-113": "Metagross Star"}
+        ids = {f"ex11-{i}": 276700 + i for i in range(3)}
+        n, report = fill_cardmarket(cards, {"ex11": ["EX Espèces Delta", "", "", "", 113, "fr"]}, en, ids, files, en_fetch=lambda sid: {})
+        g = {c[f["id"]]: c for c in cards}
+        self.assertEqual((g["ex11-111"][f["cm"]], g["ex11-111"][f["avg30"]], g["ex11-111"][f["cmf"]]), (1180.0, 1105.5, 1))
+        self.assertEqual((g["ex11-111"][f["cmid"]], g["ex11-111"][f["en"]]), (276874, "Groudon Star"))
+        self.assertEqual(g["ex11-112"][f["cm"]], 950.0)
+        # Metagross : produit trouvé, sans prix ce jour-là : pas de cote inventée, mais le lien direct est connu.
+        self.assertEqual((g["ex11-113"][f["cm"]], g["ex11-113"][f["cmid"]]), (None, 276876))
+        self.assertEqual(report[0], "ex11 2/3")
+
+    def test_gold_only_after_plain_name(self):
+        self.assertEqual(cmfiles.gold("groudon star"), "groudon gold star")
+        self.assertIsNone(cmfiles.gold("rayquaza gold star"))
+        self.assertIsNone(cmfiles.gold("tapu koko prism star"))
+        files = cmfiles.CmFiles([prod(1, "Star Piece", 7), prod(2, "Lucky Star", 7)], [])
+        self.assertEqual(files.match([("a", "Lucky Star"), ("b", "Star Piece")], [7]), {"a": 2, "b": 1})
+
+    def test_spellings_brackets_and_word_order(self):
+        files = cmfiles.CmFiles([prod(1, "M Charizard EX", 8), prod(2, "MCharizard EX", 8),
+                                 prod(3, "Professor's Research [Professor Magnolia]", 8), prod(4, "Rainbow Energy Delta", 8)], [])
+        m = files.match([("xy2-13", "M Charizard EX"), ("xy2-69", "M Charizard EX"),
+                         ("swsh1-178", "Professor's Research Professor Magnolia"), ("ex13-98", "δ Rainbow Energy")], [8])
+        self.assertEqual(m, {"xy2-13": 1, "xy2-69": 2, "swsh1-178": 3, "ex13-98": 4})
+
+    def test_linked_products_set_aside_and_late_oversized_dropped(self):
+        # Flashfire : 4 MCharizard EX (13, 69, 107, 108) sans lien TCGdex + une version « Oversized » ajoutée bien plus
+        # tard ; Charizard EX 12 relié par TCGdex. Sans la mise à l'écart : 5 produits pour 4 cartes, aucun prix.
+        files = cmfiles.CmFiles([prod(100, "Charizard EX", 9), prod(101, "MCharizard EX", 9), prod(102, "MCharizard EX", 9),
+                                 prod(150, "MCharizard EX", 9), prod(151, "MCharizard EX", 9), prod(900, "MCharizard EX", 9),
+                                 prod(160, "Charizard EX", 9)], [])
+        cards = [("xy2-11", "Charizard EX"), ("xy2-12", "Charizard EX"), ("xy2-13", "M Charizard EX"), ("xy2-69", "M Charizard EX"),
+                 ("xy2-107", "M Charizard EX"), ("xy2-108", "M Charizard EX")]
+        m = files.match(cards, [9], trusted={"xy2-12": 160})
+        self.assertEqual((m["xy2-11"], m["xy2-12"]), (100, 160))  # le produit relié n'est pas donné à une autre carte
+        self.assertEqual([m[k] for k in ("xy2-13", "xy2-69", "xy2-107", "xy2-108")], [101, 102, 150, 151])
+        self.assertEqual(files.match(cards[2:], [9]), {})  # sans repère TCGdex : 5 produits, 4 cartes, rien
+
+    def test_shiny_vault_matched_with_its_parent_set(self):
+        # Destinées Occultes Coffre Étincelant (sma) : vendu par Cardmarket dans « Hidden Fates », avec sm115.
+        f = self.F
+        files = cmfiles.CmFiles([prod(200 + i, f"Card {i}", 2600) for i in range(3)]
+                                + [prod(210, "Charizard GX", 2600), prod(211, "Charizard GX", 2600), prod(212, "Rowlet", 2600)],
+                                [guide(211, 437.98, 559.34, 480.0), guide(212, 1.2, 1.1, 1.0), guide(210, 90.0, 88.0, 92.0)], "2026-11-11")
+        cards = [self.card(f"sm115-{i}", f"Carte {i}", "sm115", self.priced(1.0), 200 + i) for i in range(3)]
+        cards += [self.card("sm115-9", "Dracaufeu GX", "sm115", self.priced(91.0), 210),
+                  self.card("sma-SV1", "Brindibou", "sma"), self.card("sma-SV49", "Dracaufeu GX", "sma")]
+        en = {"sm115-9": "Charizard-GX", "sma-SV1": "Rowlet", "sma-SV49": "Charizard-GX"}
+        ids = {f"sm115-{i}": 200 + i for i in range(3)}
+        ids["sm115-9"] = 210
+        n, report = fill_cardmarket(cards, {}, en, ids, files, en_fetch=lambda sid: {})
+        g = {c[f["id"]]: c for c in cards}
+        self.assertEqual((g["sma-SV49"][f["cm"]], g["sma-SV49"][f["cmid"]]), (437.98, 211))
+        self.assertEqual(g["sma-SV1"][f["cm"]], 1.2)
+        self.assertEqual((g["sm115-9"][f["cm"]], g["sm115-9"][f["cmf"]]), (91.0, 0))  # relié par TCGdex : inchangé
+        self.assertIn("sm115+sma 2/2", report)
+
+    def test_product_shared_by_several_cards(self):
+        # TCGdex relie Dracaufeu d'Expedition 6 (holo) et 39 au même produit : l'app ne les cotait pas (« dup »).
+        f = self.F
+        files = cmfiles.CmFiles([prod(300, "Charizard [Burning Tail]", 31), prod(301, "Charizard [Burning Tail]", 31),
+                                 prod(302, "Groudon", 31), prod(303, "Groudon", 31), prod(304, "Groudon", 31), prod(305, "Mew", 31)],
+                                [guide(300, 554.38, 520.0, 540.0), guide(301, 60.0, 58.0, 61.0)], "2026-11-11")
+        cards = [self.card("ecard1-6", "Dracaufeu", "ecard1", self.priced(554.38), 300),
+                 self.card("ecard1-39", "Dracaufeu", "ecard1", self.priced(554.38), 300),
+                 self.card("ecard1-50", "Groudon", "ecard1", self.priced(2.0), 302),
+                 self.card("ecard1-51", "Groudon", "ecard1", self.priced(2.0), 302),
+                 self.card("ecard1-60", "Mew", "ecard1", self.priced(3.0), 305)]
+        en = {"ecard1-6": "Charizard", "ecard1-39": "Charizard", "ecard1-50": "Groudon", "ecard1-51": "Groudon", "ecard1-60": "Mew"}
+        ids = {"ecard1-6": 300, "ecard1-39": 300, "ecard1-50": 302, "ecard1-51": 302, "ecard1-60": 305}
+        n, report = fill_cardmarket(cards, {}, en, ids, files, en_fetch=lambda sid: {})
+        g = {c[f["id"]]: c for c in cards}
+        self.assertEqual((g["ecard1-6"][f["cm"]], g["ecard1-6"][f["cmf"]], g["ecard1-6"][f["cmid"]]), (554.38, 0, 300))
+        self.assertEqual((g["ecard1-39"][f["cm"]], g["ecard1-39"][f["cmf"]], g["ecard1-39"][f["cmid"]]), (60.0, 1, 301))
+        # 3 produits Groudon pour 2 cartes : rien de sûr, prix de TCGdex gardés, mais plus de lien direct douteux.
+        self.assertEqual((g["ecard1-50"][f["cm"]], g["ecard1-50"][f["cmid"]], g["ecard1-51"][f["cmid"]]), (2.0, None, None))
+        self.assertEqual(g["ecard1-60"][f["cmid"]], 305)
+        self.assertIn("liens TCGdex partagés corrigés 1 : ecard1-39", report)
+
+    def test_row_keeps_english_name_only_when_different(self):
+        f = self.F
+        self.assertEqual(FIELDS[-2:], ["cmid", "en"])
+        self.assertEqual(row("ex11-111", "Groudon ☆", "ex11", "111", "", "", NONE, cmid=5, en="Groudon Star")[f["en"]], "Groudon Star")
+        self.assertEqual(row("lc-7", "Dark Raichu", "lc", "7", "", "", NONE, en="Dark Raichu")[f["en"]], "")
+
+
 if __name__ == "__main__":
     unittest.main()

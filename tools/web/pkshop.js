@@ -510,7 +510,7 @@
   shopProto.shopAdmLoad = function () {
     if (!shopOnline()) return Promise.resolve(null);
     return Cloud.rpc('admin_prizes').then(list => { this.setState({ admPrz: Array.isArray(list) ? list : [], admPrzErr: '' }); return list; },
-      e => { this.setState({ admPrzErr: 'Liste indisponible : installe 018_lots_limites.sql et ouvre le mode Admin (' + ((e && e.message) || 'erreur') + ')' }); return null; });
+      e => { this.setState({ admPrzErr: 'Liste indisponible : installe tools/supabase/install_011_a_023.sql dans Supabase Studio, puis rouvre le mode Admin (' + ((e && e.message) || 'erreur') + ')' }); return null; });
   };
   shopProto.shopAdmView = function (s) {
     const now = Date.now(), d0 = shopNextDraw(now).getTime(), d1 = shopPeriod(d0 + 3600000, 1).end, draws = [d0, d1];

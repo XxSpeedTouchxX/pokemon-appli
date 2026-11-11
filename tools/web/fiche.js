@@ -297,8 +297,8 @@
       rarity: sealed ? '' : (p.rarity || ''), hasRarity: !sealed && !!p.rarity,
       // Langue et origine du visuel (carte en anglais, scan d'une autre version, réimpression) : comme la fiche complète.
       imgNote: it.imgNote || '', hasImgNote: !sealed && !!it.hasImgNote,
-      cote: mine !== null ? this.coteTxt(mine) : k !== null ? this.coteTxt(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Pas encore de cote'),
-      coteSrc: adj ? (groups.some(g => gradeOf(g.gr)) ? (groups.every(g => gradeOf(g.gr)) ? 'Selon la note · ' : 'Selon l’état et la note · ') : 'Selon l’état · ') + this.coteTxt(k) + ' en Near Mint (Cardmarket)' : k !== null ? (sealed ? 'Prix du marché · Cardmarket' : 'Prix du marché en Near Mint · Cardmarket') : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
+      cote: mine !== null ? this.coteTxt(mine) : k !== null ? this.coteTxt(k) : p.dup ? 'Cote à confirmer' : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Pas encore de cote'),
+      coteSrc: adj ? (groups.some(g => gradeOf(g.gr)) ? (groups.every(g => gradeOf(g.gr)) ? 'Selon la note · ' : 'Selon l’état et la note · ') : 'Selon l’état · ') + this.coteTxt(k) + ' en Near Mint (Cardmarket)' : k !== null ? (sealed ? 'Prix du marché · Cardmarket' : 'Prix du marché en Near Mint · Cardmarket') : p.dup ? 'Même prix Cardmarket que d’autres cartes de l’extension : non compté' : (typeof p.low === 'number' ? 'Prix demandé' : ''), flag: this.flag(p.lang || 'FR'),
       // « Déjà possédée ×2 » (2026-10-31, porteur) à la place de « ×2 dans ta collection ».
       owned: owned, ownedText: owned ? (sealed ? 'Déjà possédé ×' : 'Déjà possédée ×') + st.qty : '',
       etats: etats, hasEtats: etats.length > 0, etatPick: etatPick,
@@ -306,7 +306,8 @@
       add: () => this.openSheet('buy', p.id), canAdd: !p.release,
       remove: () => { if (last && last.edit) last.edit(); }, canRemove: owned && !!(last && last.edit),
       rows: rows, hasRows: rows.length > 0, marketDate: day ? 'Mis à jour le ' + this.d2(day) : '',
-      cmUrl: 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + q,
+      // Carte du catalogue : page du produit Cardmarket (cmLink, catalog.js) ; scellé et démo : recherche par le nom.
+      cmUrl: p.tcg ? cmLink(p) : 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + q,
       ebayUrl: it.ebayUrl || 'https://www.ebay.fr/sch/i.html?_nkw=' + q + '&LH_Sold=1&LH_Complete=1',
       hist: hist,
       conds: conds, condOpen: !!s.fiCond, toggleCond: () => this.setState({ fiCond: !s.fiCond }),

@@ -41,6 +41,22 @@ def download(url):
         return None
 
 
+def to_169(im):
+    """Visuel opaque d'un autre format que 16:9 (images « product-showcase » en 4:3 de Règne Delta, 2026-11-11, porteur :
+    « harmonise la taille de tous les items ») : on garde les 85 % du milieu en hauteur et on complète les côtés avec la
+    couleur moyenne du bord gauche, pour que la boîte occupe la même place que sur les vignettes 16:9 de la galerie."""
+    w, h = im.size
+    if im.getchannel("A").getextrema()[0] < 250 or abs(w / h - 16 / 9) < 0.08:
+        return im
+    ch = round(h * 0.85) if w / h < 16 / 9 else h
+    cy = (h - ch) // 2
+    tw = max(w, round(ch * 16 / 9))
+    edge = im.crop((0, cy, min(6, w), cy + ch)).convert("RGB").resize((1, 1), Image.BOX).getpixel((0, 0))
+    out = Image.new("RGBA", (tw, ch), edge + (255,))
+    out.paste(im.crop((0, cy, w, cy + ch)), ((tw - w) // 2, 0))
+    return out
+
+
 def to_webp(data, path):
     """Recadre les bords transparents, réduit à 800 px au plus et enregistre en WebP (transparence gardée)."""
     im = Image.open(io.BytesIO(data))
@@ -51,6 +67,7 @@ def to_webp(data, path):
         if box:
             im = im.crop(box)
     im.thumbnail((MAX_SIDE, MAX_SIDE), Image.LANCZOS)
+    im = to_169(im)
     opaque = im.getchannel("A").getextrema()[0] >= 250
     (im.convert("RGB") if opaque else im).save(path, "WEBP", quality=82, method=6)
     return im.size

@@ -21,7 +21,7 @@ select pg_temp.check((select count(*) from public.avatar_items where id in ('pok
 select pg_temp.check((select price_pa from public.avatar_items where id = 'poke:10034') = 200, 'méga-évolution 200 PA');
 select pg_temp.check((select price_pa from public.avatar_items where id = 'shiny:6') = 200 and (select price_pa from public.avatar_items where id = 'shiny:383') = 1000, 'shiny : le double (Dracaufeu 200, Groudon 1 000 PA)');
 select pg_temp.check((select count(*) from public.avatar_items where id like 'poke:%') = (select count(*) from public.game_pokemon), 'un prix pour chaque Pokémon du jeu');
-select pg_temp.check((select price_pa from public.avatar_items where id = 'frame:tempete') = 250 and (select count(*) from public.avatar_items where id like 'frame:%') = 11, '11 cadres PRO');
+select pg_temp.check((select price_pa from public.avatar_items where id = 'frame:tempete') = 250 and (select count(*) from public.avatar_items where id like 'frame:%') = 19, '19 cadres PRO');
 -- L'avatar déjà enregistré de c1 (Pikachu, test_021) garde son Pokémon.
 select pg_temp.check(exists (select 1 from public.avatar_unlocks where user_id = '00000000-0000-0000-0000-0000000000c1' and item = 'poke:25'), 'Pokémon de l''avatar déjà enregistré offert');
 select pg_temp.check(exists (select 1 from public.avatar_unlocks where user_id = '00000000-0000-0000-0000-0000000000c1' and item = 'shiny:25') and not exists (select 1 from public.avatar_unlocks where user_id = '00000000-0000-0000-0000-0000000000c1' and item = 'shiny:1'), 'ancien shiny (v2) converti en Pikachu shiny');
@@ -61,3 +61,11 @@ select pg_temp.check((current_setting('t.r')::jsonb->>'size')::int = 3000 and (c
 select pg_temp.fails($$select public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":9999}'::jsonb)$$, 'Pokémon inconnu');
 reset role;
 delete from public.premium where user_id = '00000000-0000-0000-0000-0000000000c1';
+-- v5 (2026-11-11, soir) : couleur des yeux, nouveaux accessoires et cadres.
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c1', false);
+set role authenticated;
+select pg_temp.check(public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","ec":"bleu","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":0,"acc":"bandeau"}'::jsonb)->>'ec' = 'bleu', 'couleur des yeux gratuite (bleu) et bandeau enregistrés');
+select pg_temp.fails($$select public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","ec":"or","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":0}'::jsonb)$$, 'yeux dorés (100 PA) sans les avoir débloqués');
+select pg_temp.fails($$select public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","hair":"flamme","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":0}'::jsonb)$$, 'coiffure Flamme (300 PA) sans l''avoir débloquée');
+reset role;
+select pg_temp.check((select price_pa from public.avatar_items where id = 'outfit:royal') = 400 and (select price_pa from public.avatar_items where id = 'bg:tsunami') = 300, 'manteau royal 400 PA, tsunami 300 PA');

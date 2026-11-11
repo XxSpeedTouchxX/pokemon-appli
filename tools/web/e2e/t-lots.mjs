@@ -87,7 +87,7 @@ const adm = page.locator('section.pkm-admz');
 ok('panneau Admin : rubrique « Cartes des tirages », 2 tirages et 3 tickets', (await adm.count()) === 1 && (await adm.locator('.pkm-admz-row').first().locator('button').count()) === 2 && (await adm.locator('.pkm-admz-row').nth(1).locator('button').count()) === 3);
 ok('ticket Argent sans carte : prévenu', /Aucune carte pour ce ticket/.test(N(await adm.innerText())));
 await page.waitForFunction(() => { try { return TCG.status === 'ready'; } catch (e) { return true; } }, null, { timeout: 30000 }).catch(() => {});
-await adm.locator('input.pkm-admz-q').fill('pikachu'); await adm.locator('input.pkm-admz-q').dispatchEvent('change'); await page.waitForTimeout(800);
+await adm.locator('input.pkm-admz-q').pressSequentially('pikachu', { delay: 20 }); await page.waitForTimeout(800);
 const found = await adm.locator('button.pkm-admz-add').count();
 ok('recherche « pikachu » dans la rareté AR : ' + found + ' cartes', found > 0 && (await adm.locator('ul.pkm-admz-list').last().innerText()).includes('Illustration rare'));
 await adm.locator('button.pkm-admz-add').first().click(); await page.waitForTimeout(500);

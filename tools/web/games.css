@@ -1449,3 +1449,9 @@ section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(
 .pkm-mx-c-coffre-legende.pkm-mx-wait .pkm-mx-boxin { filter: drop-shadow(0 0 12px rgba(199, 125, 255, 0.9)); }
 .pkm-mx-c-coffre-dropi .pkm-mx-beam { background: linear-gradient(0deg, rgba(255, 230, 90, 1), rgba(255, 230, 90, 0)); }
 .pkm-mx-c-coffre-bois .pkm-mx-beam { background: linear-gradient(0deg, rgba(255, 210, 120, 0.95), rgba(255, 210, 120, 0)); }
+/* Chances de la boîte mystère (2026-11-11, porteur) : légendaire déjà au Pokédex barré, chances reportées sur un 2XP PK. */
+.pkm-my-odds li.pkm-my-off { opacity: 0.5; }
+.pkm-my-odds li.pkm-my-off .pkm-my-lbl, .pkm-my-odds li.pkm-my-off > b { text-decoration: line-through; text-decoration-thickness: 2px; }
+.pkm-my-odds li.pkm-my-off small { text-decoration: none; display: inline-block; }
+.pkm-my-odds li.pkm-my-up > b { color: #3BC48A; }
+.pkm-my-uptxt { color: #3BC48A; font-weight: 700; }

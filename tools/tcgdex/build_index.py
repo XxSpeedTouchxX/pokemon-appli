@@ -31,7 +31,8 @@ numéro), sinon dans l'extension parente (« swsh9tg » TG01 → « swsh9 » TG0
 Contenu de cards.json :
     sets      { set_id: [nom, série, date de sortie, logo, nombre officiel de cartes, langue des cartes] }
     fields    noms des colonnes de chaque carte
-    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue, cmh, cmv, q, cmf], ...]
+    cards     [[id, nom, set_id, numéro, rareté, image, cm, low, avg30, tcp, maj, avg7, avg1, langue, cmh, cmv, q, cmf,
+                cmid, en], ...]
               cm    = tendance Cardmarket (€)      low = plus bas Cardmarket (€, prix demandé)
               avg30 = moyenne Cardmarket 30 jours  tcp = TCGplayer « market », converti en €
               maj   = date de mise à jour des prix Cardmarket
@@ -46,6 +47,11 @@ Contenu de cards.json :
                       pas à Cardmarket, cmfiles.py), 0 sinon
               q     = 1 si la cote est douteuse (plus bas < 5 % de la tendance, moyenne 1 jour et tendance à plus
                       de 3 fois d'écart, carte holo seulement cotée sans le groupe holo), 0 sinon
+              cmid  = produit Cardmarket de la carte (idProduct, 2026-11-11) : celui de TCGdex, ou celui trouvé dans
+                      les fichiers publics ; null s'il est inconnu ou douteux (même produit relié par TCGdex à plusieurs
+                      cartes de l'extension, sans meilleur rapprochement). Lien direct de la fiche vers Cardmarket.
+              en    = nom anglais de la carte (TCGdex), vide s'il est le même que le nom affiché ou inconnu
+                      (2026-11-11 : recherche des ventes réussies eBay de la bonne carte)
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
               Le chemin commence par la langue du visuel (fr/… ou en/…) ; « ptcg:set/numéro » pour
               pokemontcg.io.
@@ -68,6 +74,7 @@ import math
 import re
 import sys
 import time
+from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -83,7 +90,8 @@ ASSETS = "https://assets.tcgdex.net/"
 ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 FALLBACK_USD_EUR = 0.86  # taux de secours si la BCE ne répond pas
 SKIP_SERIES = {"tcgp"}  # Pokémon TCG Pocket : cartes numériques, hors collection physique
-FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q", "cmf"]
+FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q", "cmf",
+          "cmid", "en"]
 Q_MIN_TREND = 1.0  # en dessous de 1 €, l'écart entre plus bas et tendance ne dit rien : pas de « cote douteuse »
 SOON_DAYS = 90  # extension récente sans cote Cardmarket : « cote à venir »
 # Prix TCGplayer (tcp) : plus dans la cote depuis le 2026-10-18 (porteur), seulement un repère. Les tirages illimités
@@ -193,9 +201,10 @@ def prices(card, rate):
     return (trend, low, avg30, tcp, upd, avg7, avg1, cmh, cmv, q)
 
 
-def row(cid, name, sid, local, rarity, img, p, lang=""):
-    """Ligne du catalogue dans l'ordre de FIELDS ; p : prix au format de prices()."""
-    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:], 0]
+def row(cid, name, sid, local, rarity, img, p, lang="", cmid=None, en=None):
+    """Ligne du catalogue dans l'ordre de FIELDS ; p : prix au format de prices() ; cmid : produit Cardmarket ;
+    en : nom anglais (gardé seulement s'il diffère du nom affiché)."""
+    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:], 0, cmid, en if en and en != name else ""]
 
 
 def ptcg_row_prices(card, rate):
@@ -352,26 +361,38 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
     """Cartes sans aucun prix Cardmarket dans TCGdex : prix des fichiers publics de Cardmarket (cmfiles.py), cmf = 1.
     Le rapprochement porte sur toutes les cartes de l'extension (noms anglais, ordre TCGdex) ; seules les cartes sans
     prix reçoivent celui du produit trouvé. Sans fichiers Cardmarket ce jour-là, les prix de la veille sont repris.
+    Écrit aussi le produit Cardmarket de chaque carte (cmid) et son nom anglais s'il manquait (en).
     Retourne (cartes complétées, rapport par extension)."""
     f = {k: i for i, k in enumerate(FIELDS)}
     no_cm = lambda c: all(c[f[k]] is None for k in ("cm", "avg30", "avg7"))
     by_set = {}
     for c in cards:
         by_set.setdefault(c[f["set"]], []).append(c)
-    # Extensions TCGdex rangées par Cardmarket dans une même extension (30ᵉ Anniversaire et sa Collection Classique) :
-    # rapprochées ensemble, dans l'ordre des extensions puis des numéros, pour que les 31 Pikachu ou les 2 Lugia
-    # retrouvent autant de produits.
+    # Extensions TCGdex rangées par Cardmarket dans une même extension (30ᵉ Anniversaire et sa Collection Classique,
+    # Destinées Occultes et son Coffre Étincelant) : rapprochées ensemble, dans l'ordre des extensions puis des numéros,
+    # pour que les 31 Pikachu ou les 2 Lugia retrouvent autant de produits.
     groups = {}
     for sid in sorted(by_set):
-        groups.setdefault(tuple(cmfiles.EXPANSIONS[sid]) if sid in cmfiles.EXPANSIONS else sid, []).append(sid)
-    n, report = 0, []
+        key = tuple(cmfiles.EXPANSIONS[sid]) if sid in cmfiles.EXPANSIONS else cmfiles.PARENT.get(sid, sid)
+        groups.setdefault(key, []).append(sid)
+    n, report, shared_fixed = 0, [], []
     for sids in groups.values():
+        sids = sorted(sids, key=lambda x: x in cmfiles.PARENT)  # extension parente d'abord (sm115 avant sma)
         sid = "+".join(sids)
         rows = [c for s in sids for c in sorted(by_set[s], key=lambda c: natural(c[f["num"]]))]
         # 30ᵉ Anniversaire (table EXPANSIONS) : toujours rapproché, même quand TCGdex donne un prix, car TCGdex y relie des
         # réimpressions au mauvais produit (Palkia LV.X de la Collection Classique au Palkia du set principal, 2026-11-08).
         fixed_set = sids[0] in cmfiles.EXPANSIONS
-        if not files or not (fixed_set or any(no_cm(c) for c in rows)):
+        # Produit relié par TCGdex à plusieurs cartes de l'extension (2026-11-11 : 263 cartes de 20 € et plus que l'app
+        # ne cotait pas, « cote à confirmer » ; Dracaufeu d'Expedition 6, 39 et 40 à 554 €, Groudon illustration rare de
+        # Règne Delta au prix du Groudon commun) : liens douteux, ces cartes sont rapprochées par leur nom comme celles
+        # sans prix ; une carte qui retrouve son produit garde le prix de TCGdex.
+        links = Counter(cm_ids[c[f["id"]]] for c in rows if c[f["id"]] in cm_ids)
+        shared = {c[f["id"]] for c in rows if links.get(cm_ids.get(c[f["id"]]), 0) > 1}
+        for c in rows:
+            if c[f["id"]] in shared:
+                c[f["cmid"]] = None  # pas de lien direct vers un produit douteux (rétabli s'il est retrouvé par le nom)
+        if not files or not (fixed_set or shared or any(no_cm(c) for c in rows)):
             continue
         english = lambda c: (sets.get(c[f["set"]]) or [""] * 6)[5] == "en"
         names = {c[f["id"]]: en_names.get(c[f["id"]]) or (c[f["name"]] if english(c) or c[f["lang"]] == "en" else None) for c in rows}
@@ -382,14 +403,22 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
             mine = [c[f["id"]] for c in by_set[s]]
             if sum(1 for k in mine if names.get(k)) < len(mine) / 2:
                 names.update({k: v for k, v in en_fetch(s).items() if k in names and v})
+        for c in rows:  # nom anglais chargé pour le rapprochement : gardé pour la recherche eBay de la carte
+            en = names.get(c[f["id"]])
+            if en and not c[f["en"]] and en != c[f["name"]]:
+                c[f["en"]] = en
         exps = files.expansions_for(sids[0], known, [names.get(c[f["id"]]) for c in rows])
         if not exps:
             continue
-        found = files.match([(c[f["id"]], names.get(c[f["id"]])) for c in rows], exps)
+        trusted = {} if fixed_set else {c[f["id"]]: cm_ids[c[f["id"]]] for c in rows
+                                        if c[f["id"]] in cm_ids and c[f["id"]] not in shared}
+        found = files.match([(c[f["id"]], names.get(c[f["id"]])) for c in rows], exps, trusted)
         got = 0
         for c in rows:
             cid = c[f["id"]]
-            wrong = fixed_set and cid in cm_ids and cid in found and cm_ids[cid] != found[cid]
+            wrong = (fixed_set or cid in shared) and cid in cm_ids and cid in found and cm_ids[cid] != found[cid]
+            if cid in found and (no_cm(c) or wrong or cid in shared):
+                c[f["cmid"]] = found[cid]  # produit Cardmarket connu, même sans prix ce jour-là
             p = files.prices(found[cid]) if (no_cm(c) or wrong) and cid in found else None
             if not p:
                 continue
@@ -398,8 +427,13 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
             c[f["cmh"]], c[f["cmv"]], c[f["upd"]], c[f["cmf"]] = other, grp, files.created, 1
             c[f["q"]] = 1 if doubtful(trend, low, avg1) else 0
             got += 1
+            if cid in shared:
+                shared_fixed.append(cid)
         n += got
-        report.append(f"{sid} {got}/{sum(1 for c in rows if no_cm(c) or c[f['cmf']] == 1)}")
+        report.append(f"{sid} {got}/{sum(1 for c in rows if no_cm(c) or c[f['cmf']] == 1 or c[f['id']] in shared)}")
+    if shared_fixed:
+        report.append(f"liens TCGdex partagés corrigés {len(shared_fixed)} : " + ", ".join(shared_fixed[:30])
+                      + (" …" if len(shared_fixed) > 30 else ""))
     # Vérification des cotes TCGdex (2026-11-01, porteur : « Rayquaza ☆ coûte très cher et n'est qu'à 500 € ») :
     # Cardmarket affichait 6 985 € de tendance, TCGdex 505 €. Chaque carte reliée par TCGdex est comparée aux fichiers
     # publics de Cardmarket : produit au nom d'une autre carte (relink) ou cote du même groupe écartée de plus de
@@ -411,13 +445,15 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
             if c[f["cmf"]] == 1 or cid not in cm_ids or no_cm(c):
                 continue
             english = (sets.get(c[f["set"]]) or [""] * 6)[5] == "en" or c[f["lang"]] == "en"
-            en = en_names.get(cid) or (c[f["name"]] if english else None)
+            en = en_names.get(cid) or c[f["en"]] or (c[f["name"]] if english else None)
             idp = files.relink(cm_ids[cid], en)
             if idp is None:
                 continue
             # Autre produit : ses prix au choix habituel (groupe normal s'il a une tendance) ; le groupe holo choisi pour
             # le produit de TCGdex n'a plus de sens (Rayquaza ☆ : 6 985,88 € en normal, 3 312,82 € en holo).
             moved = idp != cm_ids[cid]
+            if moved:
+                c[f["cmid"]] = idp
             full = files.prices(idp) if moved else None
             grp = full[6] if full else (c[f["cmv"]] or "n")
             p = full[:5] if full else (None if moved else files.group(idp, grp))
@@ -449,8 +485,9 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
         for c in cards:
             o = old.get(c[f["id"]])
             if o and (no_cm(c) or (not files and c[f["id"]] in cm_ids)):
-                for k in ("cm", "low", "avg30", "avg7", "avg1", "cmh", "cmv", "upd", "q", "cmf"):
-                    c[f[k]] = o[pf[k]]
+                for k in ("cm", "low", "avg30", "avg7", "avg1", "cmh", "cmv", "upd", "q", "cmf", "cmid"):
+                    if k in pf:
+                        c[f[k]] = o[pf[k]]
                 kept += 1
         if kept:
             report.append(f"repris de la veille {kept}")
@@ -658,7 +695,7 @@ def main():
             idp = ((c.get("pricing") or {}).get("cardmarket") or {}).get("idProduct")
             if idp:
                 cm_ids[cid] = idp
-            cards.append(row(cid, r["name"], sid, str(r["local"]), rarity, short_img(img), prices(c, rate)))
+            cards.append(row(cid, r["name"], sid, str(r["local"]), rarity, short_img(img), prices(c, rate), cmid=idp or None, en=r["en"]))
             (art_known if cards[-1][5] else art_pending).append((art_key(c), cards[-1]))
         if lang == "fr":
             complete_set(sid, s, rows)
@@ -671,8 +708,11 @@ def main():
             rarity = c.get("rarity") or ""
             rarity = RARITY_FR.get(rarity.lower(), rarity)
             rarities[rarity] = rarities.get(rarity, 0) + 1
+            idp = ((c.get("pricing") or {}).get("cardmarket") or {}).get("idProduct")
+            if idp:
+                cm_ids[b["id"]] = idp
             cards.append(row(b["id"], c.get("name") or b.get("name") or "", sid, str(b.get("localId") or ""), rarity,
-                             short_img(c.get("image") or b.get("image")), prices(c, rate), "en"))
+                             short_img(c.get("image") or b.get("image")), prices(c, rate), "en", cmid=idp or None))
             have_n.add(norm_number(b.get("localId", "")))
             have_ids.add(b["id"])
             stats["cardsEnExtra"] += 1

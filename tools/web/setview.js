@@ -40,7 +40,7 @@
     const k = this.cote(p);
     try { r = this.addRecord(s, p.id, 1, k || 0, 'Ajout rapide', 'toi'); } finally { this.__copy = null; }
     if (r.blocked) return; // classeur plein au grade actuel (pkshop.js)
-    const msg = p.name + ' ajouté' + (k ? ' · cote ' + this.eur(k) : ' · pas encore de cote') + ' · collection à ' + this.eur(this.snap(this.st(), { purchases: r.purchases }).total);
+    const msg = p.name + ' ajouté' + (k ? ' · cote ' + this.eur(k) : p.dup ? ' · cote à confirmer' : ' · pas encore de cote') + ' · collection à ' + this.eur(this.snap(this.st(), { purchases: r.purchases }).total);
     this.setState({ purchases: r.purchases, seq: s.seq + 1, toast: msg, edUndo: { msg: msg, purchases: prev } });
     if (this._tt) clearTimeout(this._tt);
     this._tt = setTimeout(() => { this._tt = null; this.setState({ toast: null, edUndo: null }); }, SV_UNDO_MS);

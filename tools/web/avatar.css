@@ -232,3 +232,45 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 .pkm-av-wrap { z-index: 80; }
 .pkm-av-full .pkm-av-pk-l, .pkm-av-full .pkm-av-acc { transform-origin: 50% 50%; }
 @media (prefers-reduced-motion: reduce) { .pkm-av-full .pkm-av-prev::after { animation: none; } }
+
+/* ——— Mon avatar v5 (2026-11-11, soir, porteur) ——— */
+/* Écran 50/50 : l'avatar et ses rubriques (moitié haute, figée) ; les choix qui défilent et « Valider mon avatar » (moitié basse). */
+.pkm-av-full .pkm-av-top { height: 50%; height: 50dvh; min-height: 320px; }
+.pkm-av-bot { height: 72px; min-height: 72px; }
+/* Prix en PA : la goutte des PA à côté du nombre (plus de couronne dorée). */
+.pkm-av-pro { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px 2px 3px; background: linear-gradient(135deg, #B26BFF, #6A3CEB); color: #FFFFFF; font-size: 10.5px; }
+.pkm-av-pro::before { content: none; }
+.pkm-av-pro img { flex: none; filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.8)); }
+.pkm-av-pro-ok { padding: 2px 6px; background: #3BC48A; font-size: 11px; }
+.pkm-av-pro-big { gap: 4px; padding: 4px 12px 4px 6px; font-size: 14px; }
+/* Éclat de déblocage sur l'aperçu. */
+.pkm-av-burst { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.pkm-av-burst b { padding: 6px 14px; border-radius: 999px; background: #3BC48A; color: #FFFFFF; font-size: 15px; font-weight: 900; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); animation: pkmAvBurstTxt 1.6s ease-out both; }
+.pkm-av-burst i { position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px; border-radius: 50%; background: #FFE46B; box-shadow: 0 0 8px #FFE46B; animation: pkmAvBurst 1.1s ease-out both; }
+.pkm-av-burst i:nth-child(2n) { background: #B26BFF; box-shadow: 0 0 8px #B26BFF; }
+.pkm-av-burst i:nth-child(1) { --dx: 0; --dy: -90px; } .pkm-av-burst i:nth-child(2) { --dx: 64px; --dy: -64px; } .pkm-av-burst i:nth-child(3) { --dx: 90px; --dy: 0; } .pkm-av-burst i:nth-child(4) { --dx: 64px; --dy: 64px; }
+.pkm-av-burst i:nth-child(5) { --dx: 0; --dy: 90px; } .pkm-av-burst i:nth-child(6) { --dx: -64px; --dy: 64px; } .pkm-av-burst i:nth-child(7) { --dx: -90px; --dy: 0; } .pkm-av-burst i:nth-child(8) { --dx: -64px; --dy: -64px; }
+@keyframes pkmAvBurst { from { transform: translate(0, 0) scale(0.4); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0; } }
+@keyframes pkmAvBurstTxt { 0% { transform: scale(0.3); opacity: 0; } 25% { transform: scale(1.15); opacity: 1; } 40% { transform: scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+@media (prefers-reduced-motion: reduce) { .pkm-av-burst i { display: none; } }
+/* Nouveaux cadres animés (2026-11-11) : chacun son mouvement. */
+.pkm-fr-feu { --frbg: conic-gradient(from var(--pkm-fra), #FF3D00, #FFD60A, #FF6A00, #C7260E, #FF9F1C, #FFE46B, #FF3D00); --frglow: rgba(255, 106, 0, 0.9); --frt: 1.4s; --frg: 0.35s; }
+.pkm-fr-feu::after { animation-name: pkmFrFlick; }
+@keyframes pkmFrFlick { 0%, 100% { opacity: 0.6; } 20% { opacity: 1; } 35% { opacity: 0.7; } 60% { opacity: 0.95; } 80% { opacity: 0.55; } }
+.pkm-fr-electrique { --frbg: repeating-conic-gradient(from var(--pkm-fra), #FFD60A 0 12deg, #2BF0FF 12deg 20deg, #0B1120 20deg 30deg); --frglow: rgba(43, 240, 255, 0.9); --frt: 1.2s; --frg: 0.5s; }
+.pkm-fr-electrique::before { animation-timing-function: steps(6); }
+.pkm-fr-electrique::after { animation-name: pkmFrZap; }
+@keyframes pkmFrZap { 0%, 49% { opacity: 0.3; } 50%, 60% { opacity: 1; } 61%, 100% { opacity: 0.4; } }
+.pkm-fr-bulles { --frbg: radial-gradient(circle at 20% 20%, #FFFFFF 0 2px, transparent 3px), radial-gradient(circle at 70% 80%, #FFFFFF 0 2px, transparent 3px), conic-gradient(from var(--pkm-fra), #8FD3FF, #FFB3DF, #A8F0C8, #FFF3A6, #8FD3FF); --frglow: rgba(143, 211, 255, 0.7); --frt: 7s; }
+.pkm-fr-bulles::after { animation-name: pkmFrWave; }
+.pkm-fr-pixel { --frbg: repeating-conic-gradient(from var(--pkm-fra), #3BC48A 0 15deg, #0B1120 15deg 30deg, #FFD60A 30deg 45deg, #0B1120 45deg 60deg); --frglow: rgba(59, 196, 138, 0.6); --frt: 4s; }
+.pkm-fr-pixel::before { animation-timing-function: steps(12); }
+.pkm-fr-diamant { --frbg: linear-gradient(115deg, #BDE6FF 0%, #FFFFFF 18%, #8FD3FF 30%, #E8F7FF 45%, #FFFFFF 50%, #8FD3FF 62%, #FFFFFF 80%, #BDE6FF 100%); --frglow: rgba(255, 255, 255, 0.95); }
+.pkm-fr-diamant::before { background-size: 300% 300%; animation: pkmFrSweep 2.4s linear infinite; }
+@keyframes pkmFrSweep { from { background-position: 0% 50%; } to { background-position: 300% 50%; } }
+.pkm-fr-ombre { --frbg: conic-gradient(from var(--pkm-fra), #0B0620, #4A2A7A, #0B0620, #2A1650, #0B0620); --frglow: rgba(122, 63, 216, 0.95); --frt: 9s; --frg: 2s; }
+.pkm-fr-ombre::after { animation-name: pkmFrBreath; }
+@keyframes pkmFrBreath { 0%, 100% { opacity: 0.3; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.05); } }
+.pkm-fr-cosmique { --frbg: radial-gradient(circle at 30% 20%, #FFFFFF 0 1.5px, transparent 2.5px), radial-gradient(circle at 80% 60%, #FFFFFF 0 1.5px, transparent 2.5px), conic-gradient(from var(--pkm-fra), #FF5BE1, #6A3CEB, #2BF0FF, #FFD60A, #FF5BE1); --frglow: rgba(255, 91, 225, 0.8); --frt: 5s; }
+.pkm-fr-cristal { --frbg: conic-gradient(from var(--pkm-fra), #E8F7FF, #8FD3FF, #FFFFFF, #C9A6FF, #E8F7FF, #8FD3FF, #FFFFFF); --frglow: rgba(201, 166, 255, 0.85); --frt: 3s; --frg: 1.2s; }
+.pkm-fr-cristal::after { animation-name: pkmFrBreath; }

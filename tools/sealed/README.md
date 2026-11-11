@@ -63,6 +63,7 @@ Règne Delta (6 novembre 2026, ajouté le 2026-11-08 à la demande du porteur) :
 
 - **Image retenue :** la vignette de la galerie (16:9), qui montre toujours la boîte. Les images « inline » des fiches montrent souvent le contenu (cartes promo, dés…) : elles ne sont pas utilisées.
 - **Format :** WebP, 800 px au plus. Chaque image est téléchargée une seule fois, avec une requête toutes les deux secondes.
+- **Même taille partout (2026-11-11) :** une image opaque qui n'est pas en 16:9 (les 4 visuels de Règne Delta étaient en 4:3) est remise en 16:9 par `to_169` : 85 % du milieu en hauteur, côtés complétés par la couleur du bord. Ainsi la boîte occupe la même place dans « Mes produits scellés ».
 
 ### 4. Prix (`build_sealed.py`)
 

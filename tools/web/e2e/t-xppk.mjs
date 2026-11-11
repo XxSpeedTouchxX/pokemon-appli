@@ -16,6 +16,16 @@ const odds = N(await sec.locator('.pkm-my-odds').innerText());
 ok('lots et chances affichés : ' + odds.slice(0, 60) + '…', /2XP PK · 3 jours 25 %/.test(odds) && /2XP PK · 7 jours 15 %/.test(odds) && /2XP PK · 10 jours 10 %/.test(odds) && /2XP PA · 7 jours 15 %/.test(odds) && !/300 PK/.test(odds) && /20 scans bonus 20 %/.test(odds) && /Kyogre 5 %/.test(odds) && /Groudon 5 %/.test(odds) && /Rayquaza 5 %/.test(odds));
 ok('un logo devant chaque lot (double gemme des 2XP PK et PA, scanner, Pokémon)', (await sec.locator('.pkm-my-odds li').count()) === 8 && (await sec.locator('.pkm-my-odds .pkm-my-xpi').count()) === 4 && (await sec.locator('.pkm-my-odds .pkm-my-xpi img[src="img/brand/pa.svg"]').count()) === 2 && (await sec.locator('.pkm-my-odds .pkm-my-ico-scan').count()) === 1 && (await sec.locator('.pkm-my-odds img.pkm-my-ico-poke').count()) === 3);
 await sec.locator('.pkm-my-odds').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('mystery-odds.png') });
+// Légendaires déjà au Pokédex (2026-11-11, porteur) : barrés, leurs chances vont sur un 2XP PK.
+const oddsWith = async own => { await page.evaluate(o => window.__pkm.setState({ pkOwn: [1, 4, 7, 25].concat(o) }), own); await page.waitForTimeout(200); return N(await sec.locator('.pkm-my-odds').innerText()); };
+let o1 = await oddsWith([383]);
+ok('Groudon déjà au Pokédex : barré, 2XP PK 3 jours 30 %', (await sec.locator('.pkm-my-odds li.pkm-my-off').count()) === 1 && /Groudon ?· déjà au Pokédex/.test(o1) && /2XP PK · 3 jours · au lieu de 25 % 30 %/.test(o1));
+o1 = await oddsWith([383, 382]);
+ok('Groudon et Kyogre : 2XP PK 7 jours 25 %', (await sec.locator('.pkm-my-odds li.pkm-my-off').count()) === 2 && /2XP PK · 7 jours · au lieu de 15 % 25 %/.test(o1) && /2XP PK · 3 jours 25 %/.test(o1));
+o1 = await oddsWith([382, 383, 384]);
+ok('les 3 légendaires : 2XP PK 10 jours 25 %', (await sec.locator('.pkm-my-odds li.pkm-my-off').count()) === 3 && /2XP PK · 10 jours · au lieu de 10 % 25 %/.test(o1));
+await sec.locator('.pkm-my-odds').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('mystery-odds-legendaires.png') });
+await page.evaluate(() => window.__pkm.setState({ pkOwn: [1, 4, 7, 25] })); await page.waitForTimeout(200);
 const open = async lot => { await page.evaluate(l => { window.__myLot = l; }, lot); await sec.locator('button:has-text("Ouvrir une boîte")').click(); await page.waitForTimeout(250); await sec.locator('.pkm-xp-ask button:has-text("Ouvrir")').click(); await page.waitForTimeout(3400); };
 await open('xp-7');
 const fx = page.locator('.pkm-mx');
@@ -35,7 +45,7 @@ ok('2XP PA · 7 jours : PA du jour doublés pendant 7 jours, bandeau « 2XP PA a
 await open('kyogre'); await page.locator('.pkm-mx').click(); await page.waitForTimeout(300);
 st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, own: window.__pkm.st().pkOwn }));
 ok('Kyogre gagné : débloqué dans le Pokédex', st.pa === 100 && st.own.indexOf(382) >= 0);
-ok('lots : Kyogre « déjà débloqué »', /Kyogre · déjà débloqué/.test(N(await sec.locator('.pkm-my-odds').innerText())));
+ok('lots : Kyogre « déjà au Pokédex »', /Kyogre ?· déjà au Pokédex/.test(N(await sec.locator('.pkm-my-odds').innerText())));
 ok('100 PA : « Il te manque 200 PA »', /Il te manque 200 PA/.test(N(await sec.innerText())) && (await sec.locator('button:has-text("Ouvrir une boîte")').count()) === 0);
 await page.evaluate(() => { window.__myLot = null; window.__pkm.setState({ pa: 300 }); }); await page.waitForTimeout(200);
 await sec.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('xppk-shop.png') });

@@ -22,12 +22,26 @@ ok('avatar de départ : cheveux noirs en pics, fond jaune, sans Pokémon', d0.ha
 // Écran en 3 parties : 45 % figé en haut, 45 % qui défile, 10 % figé en bas.
 const lay = await page.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(), m = document.querySelector('.pkm-av-mid');
   return { pos: getComputedStyle(document.querySelector('.pkm-av-full')).position, top: r('.pkm-av-top').height, mid: r('.pkm-av-mid').height, bot: r('.pkm-av-bot').height, scroll: m.scrollHeight > m.clientHeight, h: innerHeight }; });
-ok('écran en 3 parties : haut ' + Math.round(lay.top) + ' px, milieu ' + Math.round(lay.mid) + ' px (défile), bas ' + Math.round(lay.bot) + ' px', lay.pos === 'fixed' && Math.abs(lay.top - lay.h * 0.45) < 4 && lay.mid > lay.h * 0.4 && Math.abs(lay.bot - lay.h * 0.1) < 4 && lay.scroll);
+ok('écran 50/50 : haut ' + Math.round(lay.top) + ' px (figé), bas ' + Math.round(lay.mid + lay.bot) + ' px (choix qui défilent + « Valider »)', lay.pos === 'fixed' && Math.abs(lay.top - lay.h * 0.5) < 4 && Math.abs(lay.mid + lay.bot - lay.h * 0.5) < 4 && Math.round(lay.bot) === 72 && lay.scroll);
 ok('bas de l’écran : seulement « Valider mon avatar »', (await page.locator('.pkm-av-bot button').allInnerTexts()).join('|').trim() === 'Valider mon avatar');
 const rowTexts = async l => (await page.locator('[role=tablist][aria-label="' + l + '"] button').allInnerTexts()).map(t => t.trim()).join('|');
-ok('rubriques sous l’avatar : Cheveux, Visage, Style, Décor puis Pokémon, Shiny, Accessoire', await rowTexts('Ton avatar') === 'Cheveux|Visage|Style|Décor' && await rowTexts('Ton Pokémon') === 'Pokémon|Shiny|Accessoire');
+ok('rubriques sous l’avatar : Cheveux, Visage, Habit, Décor puis Pokémon, Shiny, Accessoire', await rowTexts('Ton avatar') === 'Cheveux|Visage|Habit|Décor' && await rowTexts('Ton Pokémon') === 'Pokémon|Shiny|Accessoire');
 ok('icône Pokémon : silhouette de Pikachu pleine ; plus de rubrique « Place »', (await page.locator('[role=tablist][aria-label="Ton Pokémon"] button:has-text("Pokémon") svg.pkm-av-ifill').count()) === 1 && (await page.locator('.pkm-av-full h3:has-text("Place")').count()) === 0);
 await page.screenshot({ path: shot('avatar-ecran.png') });
+ok('prix des styles payants avec la goutte des PA (plus de couronne dorée)', (await page.locator('section[aria-label="Cheveux"] .pkm-av-pro img[src$="pa.svg"]').count()) >= 10 && !/♛|PRO/.test(await page.locator('section[aria-label="Cheveux"]').innerText()));
+// Style payant : la fenêtre de déblocage s'ouvre au toucher ; une fois débloqué, il est appliqué (plus d'essai).
+await page.evaluate(() => window.__pkm.setState({ pa: 2000 })); await page.waitForTimeout(150);
+await page.locator('section[aria-label="Cheveux"] .pkm-av-opt[aria-label^="Flamme"]').evaluate(e => e.click()); await page.waitForTimeout(400);
+ok('coiffure « Flamme » (300 PA) : fenêtre de déblocage avant de l’appliquer', (await page.locator('section.pkm-av-locksh').count()) === 1 && (await st()).avDraft.hair === 'pics');
+await page.locator('section.pkm-av-locksh button.pkm-av-buy').click(); await page.waitForTimeout(300);
+ok('« Flamme » débloquée (2 000 → 1 700 PA), appliquée, éclat « Débloqué ! »', (await st()).pa === 1700 && (await st()).avDraft.hair === 'flamme' && (await page.locator('.pkm-av-burst').count()) === 1);
+await page.screenshot({ path: shot('avatar-debloque.png') });
+await page.locator('.pkm-av-tab:has-text("Visage")').click(); await page.waitForTimeout(300);
+ok('Visage : couleur des yeux (8), nouveaux yeux (cœurs…), formes (menton pointu…)', (await page.locator('section[aria-label="Visage"] .pkm-av-grid').nth(3).locator('.pkm-av-opt').count()) === 8 && (await page.locator('section[aria-label="Visage"] .pkm-av-opt[aria-label^="Cœurs"]').count()) === 1 && (await page.locator('section[aria-label="Visage"] .pkm-av-opt[aria-label^="Menton pointu"]').count()) === 1);
+await page.locator('section[aria-label="Visage"] .pkm-av-grid').nth(3).locator('.pkm-av-opt[aria-label^="Vert"]').evaluate(e => e.click()); await page.waitForTimeout(200);
+ok('yeux verts choisis', (await st()).avDraft.ec === 'vert');
+await page.locator('.pkm-av-tab:has-text("Habit")').click(); await page.waitForTimeout(300);
+ok('Habit : 17 habits dont la cape de super-héros et le manteau royal (400 PA)', (await page.locator('section[aria-label="Habit"] .pkm-av-opt').count()) === 17 && /400/.test(await page.locator('section[aria-label="Habit"] .pkm-av-opt[aria-label^="Manteau royal"]').innerText()));
 // Pokémon : la grille des 171, en couleur, prix des non débloqués.
 await page.locator('[role=tablist][aria-label="Ton Pokémon"] button:has-text("Pokémon")').click(); await page.waitForTimeout(400);
 const price = async n => (await page.locator('.pkm-av-pk:has(img[src$="/' + n + '.png"]) small').first().innerText()).trim();
@@ -67,6 +81,7 @@ await lk.locator('button.pkm-av-buy').click(); await page.waitForTimeout(700);
 ok('Pikachu shiny débloqué et choisi', (await st()).avDraft.shiny === true && /img\/pokemon\/shiny\//.test(await page.locator('.pkm-av-pk-main').getAttribute('src')));
 // Accessoire : sur moi, grossi et tourné.
 await page.locator('[role=tablist][aria-label="Ton Pokémon"] button:has-text("Accessoire")').click(); await page.waitForTimeout(300);
+ok('Accessoire : 21 choix, 17 payants', (await page.locator('section[aria-label="Accessoire"] .pkm-av-opt').count()) === 21 && (await page.locator('section[aria-label="Accessoire"] .pkm-av-pro').count()) === 17);
 await page.locator('section[aria-label="Accessoire"] button[aria-label^="Casquette"]').click(); await page.waitForTimeout(200);
 await page.locator('section[aria-label="Accessoire"] button:has-text("Sur moi")').click(); await page.waitForTimeout(200);
 await page.locator('button[aria-label="Grossir l’accessoire"]').click(); await page.locator('button[aria-label="Tourner l’accessoire vers la gauche"]').click(); await page.waitForTimeout(300);
@@ -75,12 +90,13 @@ ok('casquette sur moi, grossie (' + a1.asz + ' %) et tournée (' + a1.arot + '°
 await page.screenshot({ path: shot('avatar-accessoire.png') });
 // Décor : cadre PRO essayé, puis « Valider mon avatar ».
 await page.locator('.pkm-av-tab:has-text("Décor")').click(); await page.waitForTimeout(300);
-ok('Décor : 11 fonds et 13 cadres animés', (await page.locator('section[aria-label="Décor"] .pkm-av-opt:not(.pkm-av-fropt)').count()) === 11 && (await page.locator('.pkm-av-fropt').count()) === 13);
+ok('Décor : 19 fonds (dont tempête, lave et tsunami animés) et 21 cadres animés', (await page.locator('section[aria-label="Décor"] .pkm-av-opt:not(.pkm-av-fropt)').count()) === 19 && (await page.locator('.pkm-av-fropt').count()) === 21 && (await page.locator('section[aria-label="Décor"] .pkm-av-opt[aria-label^="Tsunami"]').count()) === 1);
 await page.locator('.pkm-av-fropt[aria-label^="Lave"]').evaluate(e => e.click()); await page.waitForTimeout(300);
-await page.locator('.pkm-av-bot button').click(); await page.waitForTimeout(600);
-ok('valider : le cadre PRO se débloque d’abord (250 PA ou Premium)', (await lk.count()) === 1 && /250 PA/.test(await lk.innerText()));
+ok('cadre « Lave volcanique » : fenêtre de déblocage (250 PA ou Premium) dès le toucher', (await lk.count()) === 1 && /250/.test(await lk.innerText()) && /Tout débloquer avec Premium/.test(await lk.innerText()));
 await lk.locator('button.pkm-av-buy').click(); await page.waitForTimeout(600);
-await page.locator('.pkm-av-bot button').click(); await page.waitForTimeout(1500);
+await page.locator('.pkm-av-bot button').click(); await page.waitForTimeout(400);
+ok('« Valider mon avatar » : aucune fenêtre, enregistré tout de suite', (await lk.count()) === 0);
+await page.waitForTimeout(1100);
 const saved = await st();
 ok('avatar validé : image, accessoire tourné, retour à Mon profil', saved.avatarCfg && saved.avatarCfg.poke === 25 && saved.avatarCfg.shiny === true && saved.avatarCfg.frame === 'lave' && saved.avatarCfg.arot === 345 && /^data:image\/jpeg/.test(saved.avatarPng || '') && saved.screen === 'profile');
 const pfImg = page.locator('button.pkm-pf-photo img').first();

@@ -93,6 +93,24 @@ Les cartes que TCGdex ne relie pas à Cardmarket (tout le 30ᵉ Anniversaire et 
 - Vérification des cotes TCGdex (2026-11-01, Rayquaza ☆ à 505 € au lieu d'environ 6 986 € chez Cardmarket) : chaque carte que TCGdex relie à Cardmarket est comparée aux fichiers publics ; carte étoile reliée à un autre produit (`CmFiles.relink`, « ☆ » lu « Gold Star » ; seules les cartes étoile changent de produit, les autres noms diffèrent pour de bonnes raisons : δ, Niv., RC5) ou cote médiane (tendance, moyennes 7 et 30 jours) du même groupe écartée de plus de `VERIFY_RATIO` (3) fois au-delà de 5 € (`CmFiles.group`) ; « δ » lu « Delta Species » dans les rapprochements par nom → prix des fichiers Cardmarket (`cmf` = 1), listés dans le journal du job (« cotes TCGdex corrigées »). Fichiers indisponibles un jour : prix de la veille repris.
 - Tests : `test_cmfiles.py`.
 
+## Cartes sans cote alors que Cardmarket en a une, liens de la fiche (2026-11-11)
+
+Signalé par le porteur : Groudon ☆ d'EX Espèces Delta (ex11-111, 111/113) affichait « pas encore de cote » et le lien « ventes réussies eBay » ouvrait une autre carte.
+
+- **Cause pour Groudon ☆ :** TCGdex ne relie pas ex11-111 à Cardmarket (pas de `thirdParty.cardmarket` dans sa fiche source) et l'écrit « Groudon Star » en anglais ; Cardmarket le vend sous « Groudon Gold Star » (produit 276874, « DS 111 »). `cmfiles.py` ne traduisait que « ☆ » en « Gold Star » : le nom ne correspondait à aucun produit (journal du 2026-11-11 : `ex11 0/3`, avec Kyogre et Metagross Star).
+- **Bilan du catalogue du 2026-11-11 :** 533 cartes sans aucun prix Cardmarket, et 263 cartes de 20 € et plus dont TCGdex donne le prix d'un produit partagé avec d'autres cartes de l'extension (l'app ne les cotait pas : `dup`).
+- **Rapprochement par le nom, élargi (`cmfiles.match`, `lookup`) :**
+  - carte étoile « … Star » → « … Gold Star » (`gold`), essayé après le nom tel quel ;
+  - toutes les orthographes d'un même nom réunies, espaces mis à part (« M Charizard EX » et « MCharizard EX ») ;
+  - nom complet, crochets compris (« Professor's Research [Professor Magnolia] ») ;
+  - mêmes mots dans un autre ordre (« δ Rainbow Energy » ↔ « Rainbow Energy Delta ») ;
+  - produits des cartes que TCGdex relie déjà mis de côté avant de compter ; s'il reste plus de produits que de cartes, ceux créés après le dernier produit relié (version « Oversized » de MCharizard EX) sont écartés, si le compte tombe alors juste. Sinon, toujours aucun prix (jamais un prix au hasard).
+- **Coffre Étincelant de Destinées Occultes (`sma`, 94 cartes) :** Cardmarket le range dans « Hidden Fates » ; il est rapproché avec `sm115` (`cmfiles.PARENT`).
+- **Produit relié par TCGdex à plusieurs cartes d'une extension** (Dracaufeu d'Expedition 6, 39 et 40 à 554 €) : ces cartes sont rapprochées par leur nom ; celle qui retrouve son produit garde le prix de TCGdex, les autres prennent celui de leur produit (`cmf` = 1, journal « liens TCGdex partagés corrigés »). Sans meilleur rapprochement, le prix reste et l'app affiche « Cote à confirmer » (et plus « Pas encore de cote »).
+- **Nouvelles colonnes** (partie fixe, `cards-base.json`) : `cmid`, produit Cardmarket de la carte (TCGdex ou fichiers publics ; vide s'il est douteux), et `en`, nom anglais s'il diffère du nom affiché.
+- **Liens de la fiche (`tools/web/catalog.js`) :** Cardmarket ouvre la page du produit (`https://www.cardmarket.com/fr/Pokemon/Products?idProduct=…`, lien officiel de Cardmarket qui renvoie vers la carte) ; sans `cmid`, la recherche Cardmarket par le nom anglais. eBay cherche le nom anglais et le numéro imprimé (« Groudon Star 111/113 ») : ☆ lu « Star », ◇ « Prism », δ retiré ; plus de « FR », absent de la plupart des annonces, qui faisait élargir la recherche par eBay à d'autres cartes. Promo sans total : « Promo » en plus. Tests : `tools/web/test_links.mjs`.
+- **Restent sans cote (aucune source vérifiable sans les fichiers Cardmarket) :** kits du dresseur XY (`tk-xy-*`, 240 cartes), promos (DP, BW, XY, Nintendo…), variantes « a », Règne Delta tant que Cardmarket n'a pas de prix (extension sortie le 2026-11-06). Le bilan par extension est dans le journal du workflow (`Cardmarket (fichiers publics) : …`).
+
 ## Archive quotidienne de la cote (2026-10-31)
 
 Demande du porteur : « une variation de prix de la carte depuis sa sortie ». Aucune source ouverte ne donne cet historique : `history.py` garde chaque jour la cote de chaque carte, celle de l'app (médiane de la tendance et des moyennes 30 et 7 jours Cardmarket ; une cote recopiée sur plusieurs cartes d'une extension ne compte pas), en centimes.

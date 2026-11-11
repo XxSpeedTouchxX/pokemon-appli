@@ -37,6 +37,18 @@
     { id: 'rayquaza', label: 'Rayquaza', short: 'Rayquaza', w: 5, poke: 384 }
   ];
   const myOwns = (s, n) => (typeof dexOwn === 'function' ? dexOwn(s, n) : (s.pkOwn || []).indexOf(n) >= 0);
+  // Chances selon les légendaires déjà débloqués (2026-11-11, porteur) : un légendaire déjà au Pokédex sort des lots
+  // (barré) et ses chances vont sur un 2XP PK : 1 légendaire → +5 sur 2XP 3 j (25 → 30 %), 2 → +10 sur 2XP 7 j (15 → 25 %),
+  // 3 → +15 sur 2XP 10 j (10 → 25 %). Premium : pas de 2XP PA (déjà doublés), chances recalculées sur le reste.
+  // Mêmes règles sur le serveur (023_boite_legendaires.sql).
+  const MY_BONUS = ['xp-3', 'xp-7', 'xp-10'];
+  const myWeights = (s, prem) => {
+    const own = MY_LOTS.filter(l => l.poke && myOwns(s, l.poke)).length;
+    return MY_LOTS.map(l => {
+      const off = (!!l.poke && myOwns(s, l.poke)) || (prem && !!l.paDays);
+      return Object.assign({}, l, { off: off, w: off ? 0 : l.w + (own && MY_BONUS[own - 1] === l.id ? own * 5 : 0) });
+    });
+  };
   // Texte et visuel d'un lot gagné.
   const myText = lot => lot.days ? 'Tes PK du Booster PK et de pile ou face sont doublés pendant ' + lot.days + ' jours (ils s’ajoutent à un 2XP en cours).'
     : lot.paDays ? 'Tes PA du jour sont doublés pendant ' + lot.paDays + ' jours (ils s’ajoutent à un 2XP PA en cours).' : lot.scans ? '20 scans bonus rangés à côté de tes scans du jour : quand ils sont finis, touche le compteur pour les ajouter.'
@@ -119,7 +131,7 @@
   // Tirage d'un lot sur l'appareil (démo, tests, aperçu admin) : mêmes chances que le serveur.
   const myDraw = (self, s) => {
     const prem = typeof self.premOn === 'function' && self.premOn();
-    const lots = MY_LOTS.filter(l => (!l.poke || !myOwns(s, l.poke)) && !(prem && l.paDays)), tot = lots.reduce((t, l) => t + l.w, 0);
+    const lots = myWeights(s, prem).filter(l => l.w > 0), tot = lots.reduce((t, l) => t + l.w, 0);
     let x = Math.random() * tot, lot = lots[lots.length - 1];
     for (const l of lots.slice().sort((a, b) => b.w - a.w || (a.id < b.id ? -1 : 1))) { if (x < l.w) { lot = l; break; } x -= l.w; }
     if (typeof window !== 'undefined' && window.__myLot) lot = MY_LOTS.find(l => l.id === window.__myLot) || lot; // tests
@@ -152,7 +164,7 @@
         // l'ouverture, en aperçu (rien n'est débité ni gagné) ; un joueur lit « Bientôt disponible ».
         if (e && e.code === 'not_installed') {
           this.setState({ myOff: true });
-          if (myAdmin()) { stage.win(myDraw(this, this.st()), () => this.setState({ myBusy: false, myAsk: false, toast: 'Aperçu admin : rien n’est débité. Pour les vraies boîtes, installe tools/supabase/install_011_a_022.sql dans Supabase Studio.' })); return; }
+          if (myAdmin()) { stage.win(myDraw(this, this.st()), () => this.setState({ myBusy: false, myAsk: false, toast: 'Aperçu admin : rien n’est débité. Pour les vraies boîtes, installe tools/supabase/install_011_a_023.sql dans Supabase Studio.' })); return; }
           stage.fail(); this.setState({ myBusy: false, myAsk: false, toast: 'La boîte mystère arrive très bientôt !' }); return;
         }
         stage.fail(); this.setState({ myBusy: false, myAsk: false }); if (this.gcFail) this.gcFail(e); else this.setState({ toast: 'Ouverture impossible pour le moment' });
@@ -196,9 +208,11 @@
       oddsOpen: !!s.myOdds, oddsLabel: s.myOdds ? 'Masquer les chances' : 'Voir les lots et leurs chances', toggleOdds: () => this.setState({ myOdds: !s.myOdds }),
       // Un logo devant chaque lot (2026-11-09, porteur) : double gemme des PK (l'ancien visuel des 2XP), double goutte
       // des PA, scanner, Pokémon animé.
-      lots: MY_LOTS.map(l => ({ label: l.label, pct: l.w + ' %', owned: !!l.poke && myOwns(s, l.poke), ownedText: 'déjà débloqué',
+      lots: myWeights(s, !!(this.premOn && this.premOn())).map((l, i, all) => { const tot = all.reduce((t, x) => t + x.w, 0) || 1, pct = Math.round(l.w / tot * 1000) / 10, base = MY_LOTS[i].w;
+        return { label: l.label, pct: (l.off ? base : String(pct).replace('.', ',')) + ' %', owned: l.off, ownedText: l.poke ? 'déjà au Pokédex' : 'déjà doublés avec Premium',
+        up: !l.off && pct > base, upText: 'au lieu de ' + base + ' %', cls: l.off ? 'pkm-my-off' : pct > base ? 'pkm-my-up' : '',
         isXp: !!l.days, isXpPa: !!l.paDays, isScan: !!l.scans, isPoke: !!l.poke, days: (l.days || l.paDays || 0) + ' J', img: l.poke ? 'img/pokemon/' + l.poke + '.gif' : '',
-        tone: 'pkm-xp pkm-xp-v3 pkm-my-xpi pkm-my-t-' + (l.paDays ? 'pa' : l.days) }))
+        tone: 'pkm-xp pkm-xp-v3 pkm-my-xpi pkm-my-t-' + (l.paDays ? 'pa' : l.days) }; })
     };
   };
   const xpBaseRender = xpProto.renderVals;

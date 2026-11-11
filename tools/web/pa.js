@@ -197,7 +197,8 @@
   // mêmes instants qu'avant, la nouvelle forme reste 1 s de plus à l'écran (games.css, pkmEvo*).
   const PA_FX_MS = 8200;
   paProto.paFxRun = function (from, to, done) {
-    if (paStill()) { done(); return; }
+    // Toujours jouée, même avec « Réduire les animations » du téléphone ou les fonds « Calmes » (2026-11-11, porteur : « dès
+    // qu'un utilisateur clique sur évolution ou méga-évolution, qu'il voie toute l'animation »).
     // Une animation de passage de grade encore ouverte passait par-dessus l'évolution (2026-11-01, soir, porteur : « pas
     // d'animation de méga-évolution pour Méga-Flagadoss ») : elle se ferme, l'évolution se voit en entier.
     this.setState(Object.assign({ paFx: { from: from, to: to, n: Date.now() } }, this.st().gradeUp ? { gradeUp: null } : {}));

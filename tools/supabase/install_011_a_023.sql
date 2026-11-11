@@ -1,8 +1,8 @@
--- INSTALLATION EN UNE FOIS des scripts 011 à 022 (2026-11-11, porteur : « la boîte mystère dit que la fonctionnalité
+-- INSTALLATION EN UNE FOIS des scripts 011 à 023 (2026-11-11, porteur : « la boîte mystère dit que la fonctionnalité
 -- n'est pas encore en place »). La boîte mystère (019) a besoin de 016 et 018 avant elle ; ce fichier les met tous,
 -- dans l'ordre. Rejouable : sans risque si certains sont déjà installés (il remet simplement leur dernière version).
 -- Supabase Studio › SQL Editor › New query › colle TOUT ce fichier › Run. Puis colle 000_verifier.sql › Run : tout doit
--- être « oui ». Ce fichier est fabriqué à partir des scripts 011 à 022 (tools/supabase/make_install.sh) : ne pas le
+-- être « oui ». Ce fichier est fabriqué à partir des scripts 011 à 023 (tools/supabase/make_install.sh) : ne pas le
 -- modifier à la main.
 
 -- ================= 011_grades_v4.sql =================
@@ -1259,6 +1259,104 @@ insert into public.avatar_items (id, price_pa) values
   ('frame:eclair', 150), ('frame:glace', 150), ('frame:neon', 150), ('frame:brume', 150), ('frame:sakura', 150), ('frame:holo', 200)
 on conflict (id) do update set price_pa = excluded.price_pa;
 
+-- 1 bis. Styles de la v5 (2026-11-11, soir, porteur) : nouvel ordre, nouvelles coiffures, teints, formes de visage, yeux,
+--   couleur des yeux, habits, décors animés, cadres et accessoires ; prix proposés, à confirmer (mêmes que l'app).
+insert into public.avatar_items (id, price_pa) values
+  ('skin:citrouille', 150),
+  ('skin:menthe', 150),
+  ('skin:bonbon', 150),
+  ('skin:ciel', 150),
+  ('skin:lavande', 150),
+  ('skin:glace', 150),
+  ('skin:or', 150),
+  ('skin:ombre', 200),
+  ('skin:emeraude', 200),
+  ('face:coeur', 100),
+  ('eyes:manga', 150),
+  ('eyes:etoiles', 150),
+  ('eyes:coeurs', 150),
+  ('eyes:spirale', 150),
+  ('ec:violet', 100),
+  ('ec:rouge', 100),
+  ('ec:or', 100),
+  ('hair:banane', 200),
+  ('hair:afro', 200),
+  ('hair:mulet', 200),
+  ('hair:chignon', 200),
+  ('hair:queue', 200),
+  ('hair:couettes', 200),
+  ('hair:crete', 200),
+  ('hair:antennes', 250),
+  ('hair:ananas', 250),
+  ('hair:nuage', 250),
+  ('hair:flamme', 300),
+  ('hc:bleu', 100),
+  ('hc:rose', 100),
+  ('hc:orange', 100),
+  ('hc:vert', 100),
+  ('hc:turquoise', 100),
+  ('hc:violet', 100),
+  ('outfit:hawai', 200),
+  ('outfit:maillot', 250),
+  ('outfit:aventurier', 250),
+  ('outfit:pirate', 250),
+  ('outfit:kimono', 250),
+  ('outfit:smoking', 250),
+  ('outfit:cape', 250),
+  ('outfit:heros', 300),
+  ('outfit:astronaute', 350),
+  ('outfit:chevalier', 350),
+  ('outfit:royal', 400),
+  ('bg:coucher', 150),
+  ('bg:foret', 150),
+  ('bg:plage', 150),
+  ('bg:etoiles', 150),
+  ('bg:holo', 150),
+  ('bg:aurore', 150),
+  ('bg:volcan', 150),
+  ('bg:neige', 200),
+  ('bg:galaxie', 200),
+  ('bg:tempete', 300),
+  ('bg:lave', 300),
+  ('bg:tsunami', 300),
+  ('acc:couronne', 150),
+  ('acc:noeud', 100),
+  ('acc:fete', 100),
+  ('acc:echarpe', 100),
+  ('acc:papillon', 50),
+  ('acc:moustache', 50),
+  ('acc:bulle', 50),
+  ('acc:chat', 100),
+  ('acc:masque', 100),
+  ('acc:monocle', 100),
+  ('acc:medaille', 100),
+  ('acc:aureole', 150),
+  ('acc:cornes', 150),
+  ('acc:casque', 150),
+  ('acc:pirate', 150),
+  ('acc:fleurs', 150),
+  ('acc:coeurs', 150),
+  ('frame:arcenciel', 150),
+  ('frame:tempete', 250),
+  ('frame:vague', 250),
+  ('frame:lave', 250),
+  ('frame:galaxie', 150),
+  ('frame:eclair', 150),
+  ('frame:glace', 150),
+  ('frame:neon', 150),
+  ('frame:brume', 150),
+  ('frame:sakura', 150),
+  ('frame:holo', 200),
+  ('frame:bulles', 150),
+  ('frame:electrique', 200),
+  ('frame:pixel', 200),
+  ('frame:ombre', 200),
+  ('frame:feu', 250),
+  ('frame:cosmique', 250),
+  ('frame:cristal', 250),
+  ('frame:diamant', 300)
+on conflict (id) do update set price_pa = excluded.price_pa;
+
 -- 2. L'ancien « shiny » de la v2 (021 : « shiny:1 », 300 PA, valable pour n'importe quel Pokémon) devient la version
 --    shiny du Pokémon de l'avatar enregistré ; ses acheteurs sont notés avant le changement de prix (rejouable : une
 --    fois les prix v3 posés, « shiny:1 » ne vaut plus 300 PA et rien n'est refait).
@@ -1324,9 +1422,9 @@ declare uid uuid := public._game_begin(); k text; v text; prem boolean; clean js
 begin
   if cfg is null or jsonb_typeof(cfg) <> 'object' or length(cfg::text) > 1100 then raise exception 'Avatar invalide' using errcode = 'P0001'; end if;
   prem := public._premium_on(uid);
-  foreach k in array array['skin', 'face', 'eyes', 'hair', 'hc', 'outfit', 'bg', 'pos', 'acc', 'frame', 'aon'] loop
+  foreach k in array array['skin', 'face', 'eyes', 'ec', 'hair', 'hc', 'outfit', 'bg', 'pos', 'acc', 'frame', 'aon'] loop
     v := cfg->>k;
-    if v is null then v := case k when 'acc' then 'aucun' when 'frame' then 'aucun' when 'aon' then 'poke' else null end; end if;
+    if v is null then v := case k when 'acc' then 'aucun' when 'frame' then 'aucun' when 'aon' then 'poke' when 'ec' then 'noir' else null end; end if;
     if v is null or v !~ '^[a-z0-9]{1,16}$' then raise exception 'Avatar invalide (%)', k using errcode = 'P0001'; end if;
     if k not in ('pos', 'aon') and exists (select 1 from public.avatar_items a where a.id = k || ':' || v)
        and not prem and not exists (select 1 from public.avatar_unlocks u where u.user_id = uid and u.item = k || ':' || v) then
@@ -1334,8 +1432,8 @@ begin
     end if;
     clean := clean || jsonb_build_object(k, v);
   end loop;
-  if clean->>'acc' not in ('aucun', 'lunettes', 'casquette', 'couronne', 'noeud', 'fete', 'echarpe') then raise exception 'Avatar invalide (acc)' using errcode = 'P0001'; end if;
-  if clean->>'frame' not in ('aucun', 'dore', 'arcenciel', 'tempete', 'vague', 'lave', 'galaxie', 'eclair', 'glace', 'neon', 'brume', 'sakura', 'holo') then raise exception 'Avatar invalide (frame)' using errcode = 'P0001'; end if;
+  if clean->>'acc' not in ('aucun', 'lunettes', 'casquette', 'couronne', 'noeud', 'fete', 'echarpe', 'bandeau', 'papillon', 'moustache', 'bulle', 'chat', 'masque', 'monocle', 'medaille', 'aureole', 'cornes', 'casque', 'pirate', 'fleurs', 'coeurs') then raise exception 'Avatar invalide (acc)' using errcode = 'P0001'; end if;
+  if clean->>'frame' not in ('aucun', 'dore', 'arcenciel', 'tempete', 'vague', 'lave', 'galaxie', 'eclair', 'glace', 'neon', 'brume', 'sakura', 'holo', 'bulles', 'electrique', 'pixel', 'ombre', 'feu', 'cosmique', 'cristal', 'diamant') then raise exception 'Avatar invalide (frame)' using errcode = 'P0001'; end if;
   if clean->>'aon' not in ('poke', 'perso') then raise exception 'Avatar invalide (aon)' using errcode = 'P0001'; end if;
   if clean->>'pos' not in ('right', 'left', 'shoulder', 'above', 'front', 'behind') then raise exception 'Avatar invalide (pos)' using errcode = 'P0001'; end if;
   n := coalesce(round((cfg->>'size')::numeric)::int, 100);
@@ -1369,6 +1467,102 @@ begin
 end; $$;
 revoke all on function public.avatar_save(jsonb) from public, anon;
 grant execute on function public.avatar_save(jsonb) to authenticated;
+
+-- ================= 023_boite_legendaires.sql =================
+-- 023 : boîte mystère et légendaires (2026-11-11, porteur). Après 019. Rejouable.
+--   - Un légendaire gagné dans la boîte (Kyogre, Groudon, Rayquaza) entre au Pokédex sans payer de PA (déjà le cas
+--     depuis 019 : dex_unlocks).
+--   - Un légendaire déjà au Pokédex (gagné ou acheté) n'est plus dans la boîte, et ses chances vont sur un 2XP PK :
+--     1 légendaire possédé → +5 sur « 2XP PK 3 jours » (25 → 30 %) ; 2 → +10 sur « 2XP PK 7 jours » (15 → 25 %) ;
+--     3 → +15 sur « 2XP PK 10 jours » (10 → 25 %).
+--   - Premium : pas de « 2XP PA » (PA déjà doublés) ; les chances sont recalculées sur les autres lots (inchangé).
+do $$
+begin
+  if to_regclass('public.mystery_lots') is null or to_regprocedure('public.open_gift_box(uuid)') is null then
+    raise exception 'Installe d''abord 019_boite_mystere.sql (version du 9 novembre au soir), puis relance 023 (000_verifier.sql liste ce qui manque)';
+  end if;
+end $$;
+
+-- Chances de chaque lot pour un joueur.
+create or replace function public._mystery_weights(uid uuid, prem boolean) returns table (id text, weight int, owned boolean)
+language sql stable security definer set search_path = '' as $$
+  with own as (
+    select count(*)::int as n from public.mystery_lots m
+    where m.pokemon is not null and exists (select 1 from public.dex_unlocks d where d.user_id = uid and d.pokemon = m.pokemon)
+  )
+  select m.id,
+    case when (m.pokemon is not null and exists (select 1 from public.dex_unlocks d where d.user_id = uid and d.pokemon = m.pokemon))
+           or (prem and m.pa_days is not null) or m.weight <= 0 then 0
+         else m.weight + case when own.n = 1 and m.id = 'xp-3' then 5 when own.n = 2 and m.id = 'xp-7' then 10 when own.n = 3 and m.id = 'xp-10' then 15 else 0 end
+    end,
+    m.pokemon is not null and exists (select 1 from public.dex_unlocks d where d.user_id = uid and d.pokemon = m.pokemon)
+  from public.mystery_lots m, own;
+$$;
+revoke all on function public._mystery_weights(uuid, boolean) from public, anon, authenticated;
+
+-- Ouvrir une boîte (même fonction que 019, avec les chances ci-dessus).
+create or replace function public._mystery_open(req uuid, gift boolean) returns jsonb
+language plpgsql volatile security definer set search_path = '' as $$
+declare uid uuid := public._game_begin(); r jsonb; lot public.mystery_lots%rowtype; lid text; wt int; tot int; x double precision; acc int := 0;
+  nu timestamptz; cur timestamptz; left_scans int; pu timestamptz; prem boolean := public._premium_on(uid); gb int;
+begin
+  r := public._game_replay(uid, req); if r is not null then return r; end if;
+  if gift then
+    select boxes into gb from public.mystery_gifts where user_id = uid for update;
+    if coalesce(gb, 0) < 1 then raise exception 'Pas de boîte offerte' using errcode = 'P0001'; end if;
+    update public.mystery_gifts set boxes = boxes - 1, updated_at = now() where user_id = uid;
+  end if;
+  -- Lots possibles et leurs chances (023) : sans les légendaires déjà débloqués (chances reportées sur un 2XP PK), ni le
+  -- 2XP PA pour un abonné Premium.
+  select coalesce(sum(w.weight), 0) into tot from public._mystery_weights(uid, prem) w;
+  if tot <= 0 then raise exception 'Boîte mystère indisponible' using errcode = 'P0001'; end if;
+  x := public._game_rand() * tot;
+  for lid, wt in select m.id, w.weight from public.mystery_lots m join public._mystery_weights(uid, prem) w on w.id = m.id
+      where w.weight > 0 order by w.weight desc, m.id loop
+    acc := acc + wt;
+    exit when x < acc;
+  end loop;
+  select * into lot from public.mystery_lots m where m.id = lid;
+  -- 300 PA débités (journal « mystery »), plus les PK gagnés s'il y en a.
+  r := public._game_move(uid, 'mystery', coalesce(lot.pk, 0), case when gift then 0 else -300 end, lot.id || case when gift then ' · offerte' else '' end, req);
+  if lot.xp_days is not null then
+    select until into cur from public.pk_boosts where user_id = uid for update;
+    nu := greatest(coalesce(cur, now()), now()) + make_interval(days => lot.xp_days);
+    insert into public.pk_boosts (user_id, until) values (uid, nu) on conflict (user_id) do update set until = excluded.until, updated_at = now();
+  end if;
+  if lot.pa_days is not null then
+    select until into cur from public.pa_boosts where user_id = uid for update;
+    pu := greatest(coalesce(cur, now()), now()) + make_interval(days => lot.pa_days);
+    insert into public.pa_boosts (user_id, until) values (uid, pu) on conflict (user_id) do update set until = excluded.until, updated_at = now();
+  end if;
+  if lot.scans is not null then
+    insert into public.scan_bonus (user_id, scans) values (uid, lot.scans)
+    on conflict (user_id) do update set scans = public.scan_bonus.scans + excluded.scans, updated_at = now();
+  end if;
+  if lot.pokemon is not null then
+    insert into public.dex_unlocks (user_id, pokemon) values (uid, lot.pokemon) on conflict do nothing;
+  end if;
+  select scans into left_scans from public.scan_bonus where user_id = uid;
+  return r || jsonb_build_object('lot', lot.id, 'label', lot.label, 'xp_days', lot.xp_days, 'until', nu, 'won_pk', lot.pk, 'pa_until', pu,
+    'pokemon', lot.pokemon, 'scan_bonus', coalesce(left_scans, 0), 'gift', gift,
+    'free_boxes', coalesce((select boxes from public.mystery_gifts where user_id = uid), 0));
+end; $$;
+
+-- État : lots avec les chances du joueur (barré : légendaire déjà au Pokédex).
+create or replace function public.mystery_state() returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare uid uuid := auth.uid(); prem boolean;
+begin
+  if uid is null then raise exception 'Connexion requise' using errcode = '28000'; end if;
+  prem := public._premium_on(uid);
+  return jsonb_build_object('scan_bonus', coalesce((select scans from public.scan_bonus where user_id = uid), 0), 'price_pa', 300,
+    'pa_xp_until', (select until from public.pa_boosts where user_id = uid and until > now()),
+    'free_boxes', coalesce((select boxes from public.mystery_gifts where user_id = uid), 0),
+    'lots', coalesce((select jsonb_agg(jsonb_build_object('id', m.id, 'label', m.label, 'weight', w.weight, 'base', m.weight, 'owned', w.owned) order by m.weight desc, m.id)
+      from public.mystery_lots m join public._mystery_weights(uid, prem) w on w.id = m.id), '[]'::jsonb));
+end; $$;
+revoke all on function public.mystery_state() from public, anon;
+grant execute on function public.mystery_state() to authenticated;
 
 -- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).
 notify pgrst, 'reload schema';
