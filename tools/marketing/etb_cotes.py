@@ -85,6 +85,15 @@ def main():
                 continue
             if data[:4] == b"\x89PNG":
                 (OUT / "img" / f"logo-{s}.png").write_bytes(data); found["logo-" + s] = lang; break
+    # Carte phare (la plus cotée) des extensions de 2023 sans visuel de coffret.
+    for s, path in {"sv01": "sv01/245", "sv02": "sv02/203", "sv03": "sv03/223", "sv3pt5": "sv03.5/199",
+                    "sv04": "sv04/199", "sv4pt5": "sv04.5/232"}.items():
+        try:
+            data = get(f"https://assets.tcgdex.net/fr/sv/{path}/high.png", binary=True)
+        except (HTTPError, URLError, TimeoutError) as e:
+            print("carte", path, e); continue
+        if data[:4] == b"\x89PNG":
+            (OUT / "img" / f"card-{s}.png").write_bytes(data); found["card-" + s] = path
     print("visuels :", len(found), "sur", len(SETS), "manquants :", [s for s in SETS if s not in found])
     (OUT / "etb.json").write_text(json.dumps({"created": guide.get("createdAt"), "rows": rows, "images": found},
                                              ensure_ascii=False, indent=1), "utf-8")
