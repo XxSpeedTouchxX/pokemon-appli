@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-11 — Boîte mystère : « pas encore en place » (demande du porteur)
+
+- **Cause** : le serveur de Dropicards n'a pas encore la boîte mystère. Le script `019` (et `016`, `018` dont il a besoin) n'est pas installé dans Supabase. L'app demande la fonction `open_mystery_box` au serveur, qui répond qu'elle n'existe pas.
+- **Correction pour de bon (à faire par le porteur, 2 minutes)** : un seul fichier, **`tools/supabase/install_011_a_021.sql`**, qui installe dans l'ordre tous les scripts de 011 à 021. Il est rejouable (testé deux fois de suite sur une base neuve) et finit par faire relire la liste des fonctions au serveur. Ensuite, `000_verifier.sql` doit tout dire « oui ».
+- **En attendant, dans l'app** :
+  - un compte **admin** voit quand même l'ouverture animée du coffre, en aperçu : rien n'est débité ni gagné, avec un message qui rappelle le fichier à installer ;
+  - un joueur voit « Bientôt disponible » à la place du bouton, au lieu d'un message d'erreur.
+- L'évolution d'un Pokémon ouvre toujours la rubrique « Pokédex » de Jeux, pour que son animation soit visible.
+- Tests : `t-cloud` (faux serveur sans 019 : aperçu admin animé), `grades`, `gradewait`, `locks`, `unlocksfx` mis à jour pour les 2 rubriques de Jeux. Cache v177.
+
 ## 2026-11-10 (soir) — Avatar « Carte de dresseur », coffres mystère proposés (porteur)
 
 - **Mon avatar** : interface 2 « Carte de dresseur » **choisie par le porteur** (les autres pour essai : `?avui=1` ou `3`).

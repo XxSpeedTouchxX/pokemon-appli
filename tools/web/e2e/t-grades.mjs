@@ -67,7 +67,7 @@ ok('emblème Collectionneur dans l’en-tête', (await page.locator('header img[
 // 3. Méga-évolution avec des PA, dans le Pokédex (2026-10-28) : route d'évolution de la famille, méga au bout
 // (Reptincel et Dracaufeu sont déjà dans PAID.slice(0, 11) ; starter Salamèche au dernier stade).
 await seed({ pa: 3000, pkOwn: PAID.slice(0, 11), gradeSeen: 2, evo: { line: 'sala', stage: 2 }, buddy: 6 });
-await go('start=market');
+await go('start=pokedex');
 const dex = page.locator('section[aria-label="Pokédex"]'), route = dex.locator('div[aria-label="Route d’évolution"]');
 const megaNodes = route.locator('button[aria-label*="méga-évolution"]');
 ok('route de Dracaufeu : 2 méga-évolutions au bout, en silhouette', (await megaNodes.count()) === 2 && (await route.locator('button.pkm-dex-lock[aria-label*="méga-évolution"]').count()) === 2);

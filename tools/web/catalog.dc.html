@@ -1710,6 +1710,7 @@
 <sc-if value="{{ xp.idle }}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{ xp.can }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ xp.openAsk }}" class="pkm-tks-buy pkm-my-buy">{{ xp.buyLabel }}</button></sc-if>
 <sc-if value="{{ xp.miss }}" hint-placeholder-val="{{ false }}"><p class="pkm-xp-miss">{{ xp.missText }}</p></sc-if>
+<sc-if value="{{ xp.soon }}" hint-placeholder-val="{{ false }}"><p class="pkm-xp-miss pkm-my-soon">Bientôt disponible : la boîte mystère arrive très vite !</p></sc-if>
 </sc-if>
 <sc-if value="{{ xp.ask }}" hint-placeholder-val="{{ false }}"><div class="pkm-xp-ask" role="group" aria-label="Confirmer la boîte mystère"><p>{{ xp.confirmText }}</p>
 <div class="pkm-tks-two"><button type="button" onClick="{{ xp.cancel }}" class="pkm-pas-cancel">Annuler</button><button type="button" onClick="{{ xp.buy }}" aria-disabled="{{ xp.busy }}" class="pkm-tks-buy">Ouvrir</button></div></div></sc-if>

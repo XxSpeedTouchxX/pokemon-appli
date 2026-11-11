@@ -47,7 +47,7 @@
     if (!k && /not confirmed/i.test(msg)) k = 'email_not_confirmed';
     if (!k && /expired|invalid.*(otp|token)|token.*(invalid|expired)/i.test(msg)) k = 'otp_expired';
     if (!k && status === 429) k = 'over_request_rate_limit';
-    if (!k && /^(PGRST202|42883|42P01|42703)$/.test(String(code))) k = 'not_installed';
+    if (!k && (/^(PGRST202|42883|42P01|42703)$/.test(String(code)) || (status === 404 && !code))) k = 'not_installed';
     // Adresse jetable refusée par la base (tools/supabase/005_jetables.sql) : GoTrue répond « Database error ».
     if (!k && /database error saving new user|jetable/i.test(msg)) k = 'email_address_invalid';
     // Règles du jeu (tools/supabase/004_jeu.sql) : leur message, déjà en français, est montré tel quel.

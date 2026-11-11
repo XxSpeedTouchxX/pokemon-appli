@@ -266,7 +266,7 @@
   dexProto.dexUnlock = function (n) {
     const s = this.st(), e = DEX[n], price = dexPrice(n), pa = Number(s.pa) || 0;
     if (!e || s.paFx || dexOwn(s, n) || (e.from && !dexOwn(s, e.from)) || pa < price) return;
-    const patch = { pa: pa - price, buddy: n, dexSel: n, megaAsk: null };
+    const patch = { pa: pa - price, buddy: n, dexSel: n, megaAsk: null, gameTab: 'dex' }; // l'évolution s'affiche dans la rubrique « Pokédex » (2026-11-10)
     if (e.mega) patch.megas = (Array.isArray(s.megas) ? s.megas : []).concat([n]);
     else patch.pkOwn = (s.pkOwn || []).concat([n]);
     // Lignée du starter : le stade suit (didacticiel, anciens écrans).

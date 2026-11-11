@@ -37,7 +37,7 @@ ok('conditions des grades : ' + tiers.slice(2).join(' | '), /7.500 PK gagnés \+
 // 3. Barre du bas : scanner animé.
 ok('bouton du scan : scanner animé (laser) à la place de l’appareil photo', (await page.locator('button[aria-label="Scanner une carte ou un produit"] svg.pkm-navscan .pkm-prem-scan-laser').count()) === 1);
 // 4. Pokédex : 171, liste qui monte, Nouveau thème sous le prix, fermeture glissée.
-await page.goto(E2E + '/?start=market&debug', { waitUntil: 'load' }); await page.waitForTimeout(1500);
+await page.goto(E2E + '/?start=pokedex&debug', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.click('button[aria-label="Choisir Carapuce comme starter"]'); await page.waitForTimeout(600);
 ok('Pokédex : compteur sur 171', / \/ 171/.test(await page.locator('section[aria-label="Pokédex"]').innerText()));
 ok('plus de « Gratuit, sans achat… » dans Jeux', !/Gratuit, sans achat/.test(await page.locator('body').innerText()));
@@ -59,6 +59,7 @@ await page.waitForTimeout(600);
 ok('fermeture : liste fermée', (await page.locator('section[aria-label="Mon Pokédex"]').count()) === 0);
 // 5. Booster : 500 PK, confettis et feu d'artifice.
 await page.evaluate(() => { window.__hiRand = true; });
+await page.click('[role=tablist][aria-label="Jeux"] button:has-text("Jeux à PK")'); await page.waitForTimeout(300);
 await page.locator('section[aria-label="Booster PK"] button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(2600);
 ok('booster à 500 PK : confettis et feu d’artifice', (await page.locator('.pkm-party .pkm-party-c').count()) > 50 && (await page.locator('.pkm-party .pkm-fw').count()) >= 5);
 await page.screenshot({ path: shot('locks-booster-500.png') });

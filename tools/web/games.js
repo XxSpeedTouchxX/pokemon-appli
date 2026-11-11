@@ -180,5 +180,7 @@
   gmProto.st = function () {
     const d = gmBaseSt.call(this), p = this.props || {};
     if (!(this.state && this.state.screen) && p.start === 'search') { d.screen = 'search'; d.stack = ['home']; }
+    // ?start=pokedex (2026-11-10) : onglet Jeux, rubrique « Pokédex » (tests, liens).
+    if (!(this.state && this.state.screen) && p.start === 'pokedex') { d.screen = 'market'; if (!(this.state && this.state.gameTab)) d.gameTab = 'dex'; }
     return d;
   };

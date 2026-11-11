@@ -22,7 +22,7 @@ const open = async (q) => {
   await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
   await ctx.addInitScript(spy);
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
-  const url = E2E + '/?today=2026-11-01&debug&start=market' + (q || '');
+  const url = E2E + '/?today=2026-11-01&debug&start=pokedex' + (q || '');
   await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(1200);
   await page.evaluate(([k, own]) => { const d = JSON.parse(localStorage.getItem(k) || '{}'); Object.assign(d, { tuto: 'done', evo: { line: 'sala', stage: 0 }, buddy: 4, pkOwn: own, pa: 20000, pk: 8000, pkEarned: 8000, gradeSeen: 1, megas: [] }); delete d.dexTips; localStorage.setItem(k, JSON.stringify(d)); }, [KEY, OWN]);
   await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(2000);

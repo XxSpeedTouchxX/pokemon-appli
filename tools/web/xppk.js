@@ -116,6 +116,16 @@
     };
   };
   const myReveal = (lot, done) => myStage().win(lot, done);
+  // Tirage d'un lot sur l'appareil (démo, tests, aperçu admin) : mêmes chances que le serveur.
+  const myDraw = (self, s) => {
+    const prem = typeof self.premOn === 'function' && self.premOn();
+    const lots = MY_LOTS.filter(l => (!l.poke || !myOwns(s, l.poke)) && !(prem && l.paDays)), tot = lots.reduce((t, l) => t + l.w, 0);
+    let x = Math.random() * tot, lot = lots[lots.length - 1];
+    for (const l of lots.slice().sort((a, b) => b.w - a.w || (a.id < b.id ? -1 : 1))) { if (x < l.w) { lot = l; break; } x -= l.w; }
+    if (typeof window !== 'undefined' && window.__myLot) lot = MY_LOTS.find(l => l.id === window.__myLot) || lot; // tests
+    return lot;
+  };
+  const myAdmin = () => typeof Cloud !== 'undefined' && Cloud.isAdmin && Cloud.isAdmin();
   // Achat et ouverture d'une boîte.
   // gift : boîte offerte (série de 7 jours d'affilée de PA du jour, 2026-11-09), ouverte sans payer de PA.
   xpProto.myOpen = function (gift) {
@@ -137,15 +147,20 @@
         if (r.pk_earned !== undefined) patch.pkEarned = r.pk_earned | 0;
         if (lot.poke) patch.pkOwn = (this.st().pkOwn || []).concat([lot.poke]);
         stage.win(lot, () => { this.setState(Object.assign({ myBusy: false, myAsk: false }, patch)); this.flash && this.flash(); });
-      }, e => { stage.fail(); this.setState({ myBusy: false, myAsk: false }); if (this.gcFail) this.gcFail(e); else this.setState({ toast: 'Ouverture impossible pour le moment' }); });
+      }, e => {
+        // Serveur sans la boîte mystère (scripts 016, 018 ou 019 pas installés, 2026-11-11) : un admin voit quand même
+        // l'ouverture, en aperçu (rien n'est débité ni gagné) ; un joueur lit « Bientôt disponible ».
+        if (e && e.code === 'not_installed') {
+          this.setState({ myOff: true });
+          if (myAdmin()) { stage.win(myDraw(this, this.st()), () => this.setState({ myBusy: false, myAsk: false, toast: 'Aperçu admin : rien n’est débité. Pour les vraies boîtes, installe tools/supabase/install_011_a_021.sql dans Supabase Studio.' })); return; }
+          stage.fail(); this.setState({ myBusy: false, myAsk: false, toast: 'La boîte mystère arrive très bientôt !' }); return;
+        }
+        stage.fail(); this.setState({ myBusy: false, myAsk: false }); if (this.gcFail) this.gcFail(e); else this.setState({ toast: 'Ouverture impossible pour le moment' });
+      });
       return;
     }
     // Sur l'appareil (démo, tests) : même tirage que le serveur.
-    const prem = typeof this.premOn === 'function' && this.premOn();
-    const lots = MY_LOTS.filter(l => (!l.poke || !myOwns(s, l.poke)) && !(prem && l.paDays)), tot = lots.reduce((t, l) => t + l.w, 0);
-    let x = Math.random() * tot, lot = lots[lots.length - 1];
-    for (const l of lots.slice().sort((a, b) => b.w - a.w || (a.id < b.id ? -1 : 1))) { if (x < l.w) { lot = l; break; } x -= l.w; }
-    if (typeof window !== 'undefined' && window.__myLot) lot = MY_LOTS.find(l => l.id === window.__myLot) || lot; // tests
+    const lot = myDraw(this, s);
     const patch = gift ? { myFree: free - 1 } : { pa: pa - MY_PRICE };
     if (lot.days) patch.xpUntil = new Date(Math.max(Date.now(), this.xpUntilMs()) + lot.days * 86400000).toISOString();
     if (lot.paDays) patch.paXpUntil = new Date(Math.max(Date.now(), this.paXpUntilMs()) + lot.paDays * 86400000).toISOString();
@@ -161,7 +176,7 @@
     if (!xpCloud()) return p;
     return p.then(g => Promise.all([
       Cloud.rpc('pk_boost_state').then(b => { if (b) this.setState({ xpUntil: b.on && b.until ? b.until : '' }); }, () => null),
-      Cloud.rpc('mystery_state').then(m => { if (m) this.setState({ scanBonus: m.scan_bonus | 0, paXpUntil: m.pa_xp_until || '', myFree: m.free_boxes | 0 }); }, () => null)
+      Cloud.rpc('mystery_state').then(m => { if (m) this.setState({ myOff: false, scanBonus: m.scan_bonus | 0, paXpUntil: m.pa_xp_until || '', myFree: m.free_boxes | 0 }); }, e => { if (e && e.code === 'not_installed') this.setState({ myOff: true }); return null; })
     ]).then(() => g));
   };
   xpProto.vXp = function (s) {
@@ -171,7 +186,7 @@
       paOn: !!this.paXpUntilMs(), paLeft: this.paXpUntilMs() ? xpLeft(this.paXpUntilMs() - Date.now()) : '',
       artCls: 'pkm-my-boxwrap pkm-my-v-' + myVis().kind, artBase: 'img/mybox/' + myVis().id + '-base.svg', artLid: 'img/mybox/' + myVis().id + '-lid.svg',
       head: 'Boîte mystère', sub: 'Un lot surprise à chaque ouverture : des 2XP PK, des 2XP PA, des scans bonus ou un Pokémon légendaire. Un Pokémon déjà débloqué n’est jamais redonné.',
-      price: xpNum(MY_PRICE), can: pa >= MY_PRICE, miss: pa < MY_PRICE, missText: 'Il te manque ' + xpNum(Math.max(0, MY_PRICE - pa)) + ' PA',
+      soon: !!s.myOff && !myAdmin(), price: xpNum(MY_PRICE), can: pa >= MY_PRICE && !(s.myOff && !myAdmin()), miss: pa < MY_PRICE && !(s.myOff && !myAdmin()), missText: 'Il te manque ' + xpNum(Math.max(0, MY_PRICE - pa)) + ' PA',
       busy: !!s.myBusy, ask: !!s.myAsk && pa >= MY_PRICE, idle: !(s.myAsk && pa >= MY_PRICE),
       buyLabel: 'Ouvrir une boîte · ' + xpNum(MY_PRICE) + ' PA', confirmText: 'Échanger ' + xpNum(MY_PRICE) + ' PA contre une boîte mystère ?',
       openAsk: () => this.setState({ myAsk: true }), cancel: () => this.setState({ myAsk: false }), buy: () => this.myOpen(false),

@@ -78,7 +78,8 @@ async function fake(route) {
       G.shop[body.item_id] = (G.shop[body.item_id] || 0) + 1;
       return send(200, { item: body.item_id, count: G.shop[body.item_id], choice: body.choice || null, pk: G.pk, pa: G.pa, pk_earned: G.earned, draw_at: '2026-11-22T19:00:00Z' });
     }
-    return send(404, {});
+    // Fonction absente du serveur (script SQL pas installé) : réponse de PostgREST.
+    return send(404, { code: 'PGRST202', message: 'Could not find the function public.' + fn + ' in the schema cache' });
   }
   if (p === '/rest/v1/profiles') {
     const u = Object.values(users).find(x => url.searchParams.get('id') === 'eq.' + x.id);
@@ -288,6 +289,13 @@ await page.locator('section[aria-label="Panneau Admin"] button[aria-label="Ferme
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
 ok('en-tête : PK et PA « ∞ »', ((await page.locator('header').first().innerText()).match(/∞/g) || []).length >= 2);
 await page.screenshot({ path: shot('cloud-admin-infini.png') });
+// Boîte mystère sur un serveur qui n'a pas encore 019 (2026-11-11, porteur : « l'appli me dit que la fonctionnalité
+// n'est pas encore en place ») : un admin voit quand même l'ouverture animée, en aperçu, sans rien débiter.
+const myBox = page.locator('section[aria-label="Boîte mystère"]');
+await myBox.locator('button:has-text("Ouvrir une boîte")').click(); await page.waitForTimeout(300);
+await myBox.locator('.pkm-xp-ask button:has-text("Ouvrir")').click(); await page.waitForTimeout(3600);
+ok('boîte mystère sans 019 sur le serveur : admin, ouverture animée en aperçu, « rien n’est débité »', (await page.locator('.pkm-mx.pkm-mx-ready').count()) === 1 && calls.some(c => c.startsWith('RPC open_mystery_box')) && /Aperçu admin/.test(await page.locator('body').innerText()));
+await page.locator('.pkm-mx').click(); await page.waitForTimeout(500);
 await page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk').nth(2).click(); await page.waitForTimeout(400);
 const tOr = page.locator('section[aria-label="Ticket Or"]');
 await tOr.locator('button:has-text("Acheter un ticket")').click(); await page.waitForTimeout(300);
