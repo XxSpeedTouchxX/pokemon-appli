@@ -486,10 +486,25 @@ def compare_catalog(prev, doc):
     drop("cartes en anglais (cardsEn)", s0.get("cardsEn", 0), s1.get("cardsEn", 0))
     drop("visuels de repli (imgAlt)", sum((s0.get("imgAlt") or {}).values()), sum((s1.get("imgAlt") or {}).values()))
     a, b = s0.get("imgNone", 0), s1.get("imgNone", 0)
+    detail = ""
+    if b > a * 1.1 + 20:
+        # Diagnostic (2026-11-11) : quelles cartes illustrées la veille n'ont plus de visuel, et d'où venait-il ?
+        old = {c[pf["id"]]: c[pf["img"]] for c in prev["cards"] if c[pf["img"]]}
+        lost = [(c[nf["set"]], c[nf["id"]], old[c[nf["id"]]]) for c in doc["cards"] if not c[nf["img"]] and c[nf["id"]] in old]
+        by_set, by_src = {}, {}
+        for sid, _, img in lost:
+            by_set[sid] = by_set.get(sid, 0) + 1
+            src = "ptcg" if str(img).startswith("ptcg:") else ("tcgdex:" + str(img).split("/")[0])
+            by_src[src] = by_src.get(src, 0) + 1
+        detail = (f" · {len(lost)} visuels perdus depuis la veille ; par extension : "
+                  + ", ".join(f"{k} {v}" for k, v in sorted(by_set.items(), key=lambda kv: -kv[1])[:20])
+                  + " ; par source de la veille : " + ", ".join(f"{k} {v}" for k, v in sorted(by_src.items(), key=lambda kv: -kv[1]))
+                  + " ; exemples : " + ", ".join(f"{cid}={img}" for _, cid, img in lost[:8])
+                  + f" · repli du jour {json.dumps(s1.get('imgAlt') or {})} contre {json.dumps(s0.get('imgAlt') or {})}")
     if b > a * 1.25 + 50:
-        errors.append(f"cartes sans visuel (imgNone) : {b} contre {a} la veille")
+        errors.append(f"cartes sans visuel (imgNone) : {b} contre {a} la veille{detail}")
     elif b > a * 1.1 + 20:
-        warnings.append(f"cartes sans visuel (imgNone) : {b} contre {a} la veille")
+        warnings.append(f"cartes sans visuel (imgNone) : {b} contre {a} la veille{detail}")
     return errors, warnings
 
 
