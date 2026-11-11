@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Cotes et visuels
-        run: python tools/marketing/etb_cotes.py
+        run: pip install --quiet pillow && python tools/marketing/etb_cotes.py
       - uses: actions/upload-artifact@v4
         with:
           name: etb-cotes

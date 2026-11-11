@@ -61,6 +61,19 @@ def main():
     print("visuels :", len(found), "sur", len(SETS), "manquants :", [s for s in SETS if s not in found])
     (OUT / "etb.json").write_text(json.dumps({"created": guide.get("createdAt"), "rows": rows, "images": found},
                                              ensure_ascii=False, indent=1), "utf-8")
+    # Copie lisible dans le journal du workflow (les pièces jointes ne sont pas téléchargeables partout) : lignes
+    # « ROW » en JSON, visuels réduits à 800 px en WebP, en base64 par morceaux de 4 000 caractères.
+    import base64, io
+    from PIL import Image
+    for r in rows:
+        print("ROW " + json.dumps(r, ensure_ascii=False))
+    for s in found:
+        im = Image.open(OUT / "img" / f"{s}.png").convert("RGBA")
+        im.thumbnail((800, 800), Image.LANCZOS)
+        buf = io.BytesIO(); im.save(buf, "WEBP", quality=85, method=6)
+        b = base64.b64encode(buf.getvalue()).decode()
+        for k in range(0, len(b), 4000):
+            print(f"IMG {s} {k // 4000} {b[k:k + 4000]}")
 
 
 if __name__ == "__main__":
