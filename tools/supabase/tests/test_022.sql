@@ -50,11 +50,14 @@ select pg_temp.fails($$select public.avatar_save('{"skin":"s3","face":"rond","ey
 select pg_temp.fails($$select public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":0,"aon":"tete"}'::jsonb)$$, 'place d''accessoire inconnue');
 select pg_temp.check(public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":0,"frame":"dore"}'::jsonb)->>'frame' = 'dore', 'cadre doré (gratuit) enregistré');
 reset role;
--- Premium : cadre PRO sans achat, mais pas les Pokémon d'avatar.
+-- Premium (2026-11-11, porteur) : tout le mode avatar ouvert, Pokémon d'avatar et shiny compris.
 insert into public.premium (user_id, plan, status, period_end) values ('00000000-0000-0000-0000-0000000000c1', 'month', 'active', now() + interval '20 days')
   on conflict (user_id) do update set plan = 'month', status = 'active', period_end = now() + interval '20 days';
 set role authenticated;
 select pg_temp.check(public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":0,"frame":"lave"}'::jsonb)->>'frame' = 'lave', 'Premium : cadre lave sans achat');
-select pg_temp.fails($$select public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":383}'::jsonb)$$, 'Premium : Groudon d''avatar toujours à débloquer');
+select set_config('t.r', public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":3000,"poke":383,"shiny":true,"prot":-90,"arot":725}'::jsonb)::text, false);
+select pg_temp.check((current_setting('t.r')::jsonb->>'poke')::int = 383 and (current_setting('t.r')::jsonb->>'shiny')::boolean, 'Premium : Groudon shiny d''avatar sans achat');
+select pg_temp.check((current_setting('t.r')::jsonb->>'size')::int = 3000 and (current_setting('t.r')::jsonb->>'prot')::int = 270 and (current_setting('t.r')::jsonb->>'arot')::int = 5, 'taille 3 000 %, rotations ramenées entre 0 et 359° (270, 5)');
+select pg_temp.fails($$select public.avatar_save('{"skin":"s3","face":"rond","eyes":"grands","hair":"pics","hc":"noir","outfit":"tshirt","bg":"jaune","pos":"right","size":100,"poke":9999}'::jsonb)$$, 'Pokémon inconnu');
 reset role;
 delete from public.premium where user_id = '00000000-0000-0000-0000-0000000000c1';

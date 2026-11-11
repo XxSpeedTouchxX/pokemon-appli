@@ -82,7 +82,7 @@
   const AV_CATS = { skin: [AV_SKIN, 'skin'], face: [AV_FACE, 'face'], eyes: [AV_EYES, 'eyes'], hair: [AV_HAIR, 'hair'], hc: [AV_HC, 'hc'], outfit: [AV_OUTFIT, 'outfit'], bg: [AV_BG, 'bg'], acc: [AV_ACC, 'acc'], frame: [AV_FRAMES, 'frame'] };
   // Avatar de départ (2026-11-10, porteur) : cheveux noirs en pics, fond jaune, sans Pokémon (à débloquer).
   const AV_DEF = { skin: 's3', face: 'rond', eyes: 'grands', hair: 'pics', hc: 'noir', outfit: 'tshirt', bg: 'jaune', poke: 0, pos: 'right', size: 100,
-    acc: 'aucun', aon: 'poke', shiny: false, px: null, py: null, ax: 0, ay: 0, asz: 100, frame: 'aucun' };
+    acc: 'aucun', aon: 'poke', shiny: false, px: null, py: null, ax: 0, ay: 0, asz: 100, frame: 'aucun', prot: 0, arot: 0 };
   // Prix en PA de chaque style PRO (copiés dans 014_avatar.sql ; un test vérifie qu'ils sont identiques).
   const AV_PRICES = (() => { const o = {}; Object.keys(AV_CATS).forEach(k => AV_CATS[k][0].forEach(x => { if (x.pa) o[k + ':' + x.id] = x.pa; })); return o; })();
   // Prix d'un élément : style PRO, Pokémon d'avatar (« poke:n ») ou sa version shiny (« shiny:n », le double).
@@ -155,14 +155,40 @@
       default: return neck + torso('#3D63FF') + '<path d="M84 150q16 12 32 0" fill="none" stroke="#2A48C4" stroke-width="4" stroke-linecap="round"/>';
     }
   };
+  // Dessins du dresseur proposés (2026-11-11, porteur : « essaie de me changer l'image de l'avatar, propose-moi des
+  // designs ») ; essai : ?avdesign=1 à 4, en attendant le choix du porteur (1 reste celui par défaut).
+  //   1 « Classique » (d'origine) ; 2 « Manga » (tête plus grande, grands yeux colorés à reflets, ombres franches, traits
+  //   épais) ; 3 « Autocollant » (contour blanc épais et ombre portée, comme un sticker) ; 4 « Doux » (sans contours, yeux
+  //   en points, joues marquées, formes simples).
+  const avDesign = (() => { try { const m = /[?&]avdesign=([1-4])\b/.exec(location.search); if (m) return Number(m[1]); } catch (e) { /* sans adresse */ } return 1; })();
   const avChar = c => {
-    const sk = avFind('skin', c.skin).c, hc = avFind('hc', c.hc).c;
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">'
-      + avHairBack(c.hair, hc) + avOutfit(c.outfit, sk) + avHead(c.face, sk)
-      + '<ellipse cx="72" cy="116" rx="8" ry="4.5" fill="#FF7A9A" opacity=".45"/><ellipse cx="128" cy="116" rx="8" ry="4.5" fill="#FF7A9A" opacity=".45"/>'
-      + avEyes(c.eyes, hc)
-      + '<path d="M92 120q8 9 16 0" fill="#7A2E3A" stroke="' + AV_INK + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
-      + avHairFront(c.hair, hc) + '</svg>';
+    const sk = avFind('skin', c.skin).c, hc = avFind('hc', c.hc).c, D = avDesign;
+    const cheeks = '<ellipse cx="72" cy="116" rx="8" ry="4.5" fill="#FF7A9A" opacity="' + (D === 4 ? '.7' : '.45') + '"/><ellipse cx="128" cy="116" rx="8" ry="4.5" fill="#FF7A9A" opacity="' + (D === 4 ? '.7' : '.45') + '"/>';
+    const mouth = D === 4 ? '<path d="M94 121q6 6 12 0" fill="none" stroke="#7A2E3A" stroke-width="3" stroke-linecap="round"/>'
+      : '<path d="M92 120q8 9 16 0" fill="#7A2E3A" stroke="' + AV_INK + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+    let eyes = avEyes(c.eyes, hc);
+    if (D === 2 && (c.eyes === 'grands' || c.eyes === 'vifs' || c.eyes === 'etoiles')) {
+      // Grands yeux manga : iris coloré (couleur des cheveux éclaircie), pupille, deux reflets.
+      const ir = avShade(hc === '#25202E' ? '#5A7BD8' : hc, 0.1), brow = avShade(hc, -0.15);
+      const eye = x => '<ellipse cx="' + x + '" cy="101" rx="9.5" ry="12.5" fill="' + AV_INK + '"/><ellipse cx="' + x + '" cy="103" rx="7" ry="9.5" fill="' + ir + '"/><ellipse cx="' + x + '" cy="104" rx="3.6" ry="5" fill="' + AV_INK + '"/>'
+        + '<ellipse cx="' + (x - 3) + '" cy="96" rx="3.4" ry="4" fill="#FFFFFF"/><circle cx="' + (x + 3.4) + '" cy="108" r="1.8" fill="#FFFFFF"/>';
+      eyes = eye(80) + eye(120) + '<path d="M68 84q11-7 21-1M111 83q10-6 21 1" fill="none" stroke="' + brow + '" stroke-width="3.6" stroke-linecap="round"/>';
+    }
+    if (D === 4) eyes = c.eyes === 'rieurs' ? '<path d="M73 103q7-7 14 0M113 103q7-7 14 0" fill="none" stroke="#2A1E2F" stroke-width="4.6" stroke-linecap="round"/>'
+      : '<circle cx="80" cy="102" r="5.5" fill="' + AV_INK + '"/><circle cx="120" cy="102" r="5.5" fill="' + AV_INK + '"/><circle cx="78" cy="100" r="1.8" fill="#FFFFFF"/><circle cx="118" cy="100" r="1.8" fill="#FFFFFF"/>';
+    const shade = D === 2 ? '<path d="M56 92c10-14 30-22 44-22s34 8 44 22c-14-6-28-9-44-9s-30 3-44 9z" fill="' + avShade(sk, -0.22) + '" opacity=".45"/>' : '';
+    let head = avHead(c.face, sk) + shade + cheeks + eyes + mouth + avHairFront(c.hair, hc), back = avHairBack(c.hair, hc), body = avOutfit(c.outfit, sk);
+    if (D === 2) {
+      // Tête plus grande, traits plus épais.
+      const big = x => '<g transform="translate(100 98) scale(1.12) translate(-100 -98)">' + x.replace(/stroke-width="2"/g, 'stroke-width="3"') + '</g>';
+      head = big(head); back = big(back); body = body.replace(/stroke-width="2(\.4)?"/g, 'stroke-width="3"');
+    }
+    let inner = back + body + head;
+    if (D === 4) inner = inner.replace(/ stroke="(?!#7A2E3A|#2A1E2F)[^"]*"/g, ' stroke="none"');
+    if (D === 3) inner = '<defs><filter id="avst" x="-10%" y="-10%" width="120%" height="120%"><feMorphology in="SourceAlpha" operator="dilate" radius="5" result="d"/><feFlood flood-color="#FFFFFF"/><feComposite in2="d" operator="in" result="w"/>'
+      + '<feGaussianBlur in="d" stdDeviation="3" result="b"/><feOffset in="b" dx="0" dy="4" result="o"/><feFlood flood-color="#000000" flood-opacity=".35"/><feComposite in2="o" operator="in" result="sh"/>'
+      + '<feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#avst)">' + inner + '</g>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">' + inner + '</svg>';
   };
   // Fond (200 × 200) : dégradé, ou décor PRO.
   const avBg = (c, typeColor) => {
@@ -185,13 +211,14 @@
   // Avatar complet en calques (aperçu, classement) : fond, Pokémon derrière, dresseur, Pokémon devant, son accessoire.
   // Le Pokémon est placé par son centre (px, py, en % de l'avatar) quand il a été glissé, sinon à sa place prédéfinie.
   const avSprite = (n, shiny) => (shiny ? 'img/pokemon/shiny/' + n + '.png' : dexSprite(n, true));
-  const avBox = (l, t, w, h) => ({ l: l, t: t, w: w, h: h, style: 'left: ' + l.toFixed(1) + '%; top: ' + t.toFixed(1) + '%; width: ' + w.toFixed(1) + '%; height: ' + h.toFixed(1) + '%' });
+  // Rotation (2026-11-11, porteur : « faire des rotations de 360° ») : autour du centre de l'image.
+  const avBox = (l, t, w, h, rot) => ({ l: l, t: t, w: w, h: h, style: 'left: ' + l.toFixed(1) + '%; top: ' + t.toFixed(1) + '%; width: ' + w.toFixed(1) + '%; height: ' + h.toFixed(1) + '%' + (rot ? '; transform: rotate(' + rot + 'deg)' : '') });
   const avAccSvg = a => avUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + a.vb[0] + ' ' + a.vb[1] + '">' + a.svg + '</svg>');
   const avLayers = c => {
     const free = c.px != null && c.py != null, n = c.poke;
     let p1 = null;
     if (n && DEX[n]) { const p = AV_SPOT[c.pos] || AV_SPOT.right, w = (free ? 40 : p[2]) * (Number(c.size) || 100) / 100, cx = free ? c.px : p[0], cy = free ? c.py : p[1];
-      p1 = Object.assign(avBox(cx - w / 2, cy - w / 2, w, w), { src: avSprite(n, c.shiny), name: DEX[n].name, n: n }); }
+      p1 = Object.assign(avBox(cx - w / 2, cy - w / 2, w, w, c.prot), { src: avSprite(n, c.shiny), name: DEX[n].name, n: n, rot: Number(c.prot) || 0 }); }
     const behind = c.pos === 'behind';
     // Accessoire (2026-11-10, v3) : sur le Pokémon (d'après la boîte de son sprite) ou sur le dresseur ; décalage (ax, ay,
     // en % de l'avatar) et taille (asz, en %, sans limite : pincée à deux doigts).
@@ -204,7 +231,7 @@
       else { w = a.pw * z; cx = a.pcx; cy = a.pcy; }
       const h = w * a.vb[1] / a.vb[0];
       cx += Number(c.ax) || 0; cy += Number(c.ay) || 0;
-      acc = Object.assign(avBox(cx - w / 2, cy - h / 2, w, h), { src: avAccSvg(a), onPoke: !!onPoke });
+      acc = Object.assign(avBox(cx - w / 2, cy - h / 2, w, h, c.arot), { src: avAccSvg(a), onPoke: !!onPoke, rot: Number(c.arot) || 0 });
     }
     const accBack = !!(acc && acc.onPoke && behind), accMid = !!(acc && !acc.onPoke), accFront = !!(acc && acc.onPoke && !behind);
     return { bg: avUrl(avBg(c, avTypeColor(c.poke))), char: avUrl(avChar(c)), back: behind ? p1 : null, front: behind ? null : p1, hasBack: behind && !!p1, hasFront: !behind && !!p1, hasExtra: false, extra: null,
@@ -217,7 +244,9 @@
     cv.width = cv.height = N;
     const x = cv.getContext('2d'), draw = async (src, r) => { const im = await avLoad(src); x.drawImage(im, r ? r[0] : 0, r ? r[1] : 0, r ? r[2] : N, r ? r[3] : N); };
     const rect = p => [p.l / 100 * N, p.t / 100 * N, p.w / 100 * N, p.h / 100 * N];
-    const sprite = async (p, smooth) => { if (!p) return; x.imageSmoothingEnabled = !!smooth; try { await draw(p.src, rect(p)); } catch (e) { /* image indisponible */ } x.imageSmoothingEnabled = true; };
+    const sprite = async (p, smooth) => { if (!p) return; x.imageSmoothingEnabled = !!smooth;
+      try { const im = await avLoad(p.src), [l, t, w, h] = rect(p); x.save(); x.translate(l + w / 2, t + h / 2); x.rotate((p.rot || 0) * Math.PI / 180); x.drawImage(im, -w / 2, -h / 2, w, h); x.restore(); } catch (e) { /* image indisponible */ }
+      x.imageSmoothingEnabled = true; };
     await draw(L.bg); await sprite(L.back); if (L.hasAccBack) await sprite(L.acc, true); await draw(L.char); if (L.hasAccMid) await sprite(L.acc, true); await sprite(L.front); if (L.hasAccFront) await sprite(L.acc, true);
     return cv.toDataURL('image/jpeg', 0.9);
   };
@@ -226,7 +255,9 @@
     const o = Object.assign({}, AV_DEF, c && typeof c === 'object' ? c : {});
     Object.keys(AV_CATS).forEach(k => { if (!AV_CATS[k][0].some(x => x.id === o[k])) o[k] = AV_DEF[k]; });
     if (!AV_POS.some(([k]) => k === o.pos)) o.pos = 'right';
-    o.size = Math.max(60, Math.min(140, Math.round(Number(o.size) || 100)));
+    o.size = Math.max(5, Math.min(5000, Math.round(Number(o.size) || 100)));
+    const deg = v => ((Math.round(Number(v) || 0) % 360) + 360) % 360;
+    o.prot = deg(o.prot); o.arot = deg(o.arot);
     const num = (v, a, b) => (v == null || v === '' || !isFinite(Number(v)) ? null : Math.max(a, Math.min(b, Math.round(Number(v)))));
     o.px = num(o.px, -10, 110); o.py = num(o.py, -10, 110); if (o.px == null || o.py == null) { o.px = null; o.py = null; }
     o.ax = num(o.ax, -400, 400) || 0; o.ay = num(o.ay, -400, 400) || 0; o.asz = num(o.asz, 5, 5000) || 100; o.shiny = o.shiny === true;
@@ -241,7 +272,7 @@
   const avProIds = c => { const ids = Object.keys(AV_CATS).map(k => k + ':' + c[k]).filter(id => AV_PRICES[id]); if (c.poke) ids.push('poke:' + c.poke); if (c.poke && c.shiny) ids.push('shiny:' + c.poke); return ids; };
 
   const avProto = Component.prototype;
-  avProto.avHas = function (id) { const s = this.st(), mine = Array.isArray(s.avOwned) && s.avOwned.indexOf(id) >= 0; if (!avPrice(id) || mine) return true; return !/^(poke|shiny):/.test(id) && !!(this.premOn && this.premOn()); };
+  avProto.avHas = function (id) { const s = this.st(), mine = Array.isArray(s.avOwned) && s.avOwned.indexOf(id) >= 0; if (!avPrice(id) || mine) return true; return !!(this.premOn && this.premOn()); };  // Premium débloque tout le mode avatar (2026-11-11, porteur)
   avProto.avOpen = function () {
     const s = this.st();
     this.setState({ avDraft: avNorm(s.avatarCfg, s), avTab: 'hair', avPick: 0, avLock: '' });
@@ -263,7 +294,11 @@
       return r;
     }, () => null);
   };
-  avProto.avSet = function (patch) { this.setState({ avDraft: Object.assign({}, this.st().avDraft || AV_DEF, patch) }); };
+  avProto.avSet = function (patch) {
+    const p = Object.assign({}, patch);
+    ['prot', 'arot'].forEach(k => { if (k in p) p[k] = ((Math.round(Number(p[k]) || 0) % 360) + 360) % 360; });
+    this.setState({ avDraft: Object.assign({}, this.st().avDraft || AV_DEF, p) });
+  };
   // Achat d'un style PRO avec des PA (serveur quand le compte est connecté).
   avProto.avBuy = function (id) {
     const s = this.st(), price = avPrice(id), pa = Number(s.pa) || 0;
@@ -273,6 +308,9 @@
     if (pa < price) { this.setState({ toast: 'Il te manque ' + (price - pa).toLocaleString('fr-FR') + ' PA' }); return; }
     const done = (left) => {
       const owned = (Array.isArray(this.st().avOwned) ? this.st().avOwned : []).concat([id]);
+      const pm = /^(poke|shiny):(\d+)$/.exec(id);
+      if (pm && pm[1] === 'poke' && this.st().avLockWhy === 'pick') this.avSet({ poke: Number(pm[2]), shiny: false, px: 50, py: 50, size: 140, prot: 0 });
+      if (pm && pm[1] === 'shiny' && this.st().avLockWhy === 'pick') this.avSet({ shiny: true });
       this.setState({ avOwned: owned, pa: left, avLock: '', avBusy: false, toast: /^poke:/.test(id) ? avLabel(id) + ' débloqué pour ton avatar' : /^shiny:/.test(id) ? 'Version shiny débloquée' : 'Style débloqué pour toujours' });
       this.flash && this.flash();
     };
@@ -318,15 +356,18 @@
   // Deux lignes de rubriques (2026-11-10, porteur) : « Ton avatar » puis « Ton Pokémon ».
   const AV_ROW1 = [['hair', 'Cheveux', 'M6 9a6 6 0 0 1 12 0v3M6 9c2 2 6 2 8-2 1 3 3 4 4 5M6 9v6'], ['face', 'Visage', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM9 10h.01M15 10h.01M9 15c1.5 1.3 4.5 1.3 6 0'],
     ['style', 'Style', 'M8 4l4 3 4-3 4 4-3 3v9H7v-9L4 8z'], ['bg', 'Décor', 'M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4']];
-  const AV_ROW2 = [['poke', 'Pokémon', 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z'], ['acc', 'Accessoire', 'M3 14c0-4 4-7 9-7s9 3 9 7M3 14h18M7 14v-2M17 14v-2'],
-    ['shiny', 'Shiny', 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z']];
+  // 2ᵉ ligne (2026-11-11, porteur) : Pokémon (silhouette de Pikachu, pleine), Shiny, Accessoire (lunettes).
+  const AV_PIKA = 'M5 15.4a6.2 5.2 0 1 0 12.4 0a6.2 5.2 0 1 0-12.4 0zM6.4 12.4L3.6.8l6.6 9.4zM12.2 10.2l6.6-9.4-2.8 11.6zM8 14.6a1.2 1.2 0 1 1 2.4 0a1.2 1.2 0 1 1-2.4 0zM12 14.6a1.2 1.2 0 1 1 2.4 0a1.2 1.2 0 1 1-2.4 0zM17.2 17.4l6-4.2-2.4-.8 2.8-5.2-6 4.6 2.2.7-3 2.2z';
+  const AV_GLASSES = 'M2.5 9.5h8v3a3.2 3.2 0 0 1-3.2 3.2H5.7a3.2 3.2 0 0 1-3.2-3.2zM13.5 9.5h8v3a3.2 3.2 0 0 1-3.2 3.2h-1.6a3.2 3.2 0 0 1-3.2-3.2zM10.5 10.6c1-0.8 2-0.8 3 0M2.5 9.5L1 8M21.5 9.5L23 8';
+  const AV_ROW2 = [['poke', 'Pokémon', AV_PIKA], ['shiny', 'Shiny', 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z'],
+    ['acc', 'Accessoire', AV_GLASSES]];
   const AV_TABS = AV_ROW1.concat(AV_ROW2);
   // Interfaces proposées (2026-11-10) : 1 « Studio », 2 « Carte de dresseur » (choisie), 3 « Plein écran » (?avui=).
   // Choix du porteur (2026-11-10, soir) : 2 « Carte de dresseur ». Les autres restent pour essai (?avui=1 ou 3, sans
   // mémoire : la carte de dresseur revient à l'ouverture suivante).
   const avUi = () => { try { const m = /[?&]avui=([123])\b/.exec(location.search); if (m) return Number(m[1]); } catch (e) { /* adresse sans paramètres */ } return 2; };
   avProto.vAvatar = function (s) {
-    const d = avNorm(s.avDraft, s), tab = s.avTab || 'poke', prem = !!(this.premOn && this.premOn());
+    const d = avNorm(s.avDraft, s), tab = s.avTab || 'hair', prem = !!(this.premOn && this.premOn());
     const mini = patch => { const c = Object.assign({}, d, patch); return { bg: avUrl(avBg(c, avTypeColor(c.poke))), char: avUrl(avChar(c)) }; };
     const opt = (k, x, swatch) => {
       const id = k + ':' + x.id, pro = !!x.pa, has = this.avHas(id), on = d[k] === x.id, m = swatch ? null : mini({ [k]: x.id });
@@ -343,17 +384,34 @@
     const pkPrice = d.poke ? avPokePrice(d.poke) : 0, pkHas = !d.poke || this.avHas('poke:' + d.poke), shHas = !d.poke || this.avHas('shiny:' + d.poke);
     const accPick = x => { const o = opt('acc', x, false); o.icon = x.svg ? avAccSvg(x) : ''; o.hasIcon = !!x.svg; o.none = !x.svg; o.cls = 'pkm-av-opt pkm-av-accopt' + (o.on ? ' pkm-av-on' : ''); return o; };
     const frameOpt = x => { const o = opt('frame', x, true); o.cls = 'pkm-av-opt pkm-av-fropt' + (o.on ? ' pkm-av-on' : ''); o.frCls = 'pkm-av-frdot pkm-fr pkm-fr-' + x.id; return o; };
-    const scaleAcc = k => this.avSet({ asz: Math.max(5, Math.round((Number(d.asz) || 100) * k)) });
+    const scaleAcc = k => this.avSet({ asz: Math.max(5, Math.min(5000, Math.round((Number(d.asz) || 100) * k))) });
+    // Pokémon choisi (2026-11-11, porteur) : il arrive au centre de l'avatar, pour le manipuler facilement.
+    const pickPoke = n => this.avSet({ poke: n, shiny: false, px: 50, py: 50, size: 140, prot: 0 });
+    const lockPoke = n => this.setState({ avLock: 'poke:' + n, avLockWhy: 'pick' });
+    const ico = { minus: 'M5 12h14', plus: 'M12 5v14M5 12h14', left: 'M4 4v6h6M5 10a8 8 0 1 1 2.3 6.5', right: 'M20 4v6h-6M19 10a8 8 0 1 0-2.3 6.5',
+      center: 'M12 2v5M12 17v5M2 12h5M17 12h5M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z', x: 'M6 6l12 12M18 6L6 18' };
+    const ctl = (who, sizeKey, rotKey, center, extra) => [
+      ['Plus petit', 'Rapetisser ' + who, ico.minus, () => this.avSet({ [sizeKey]: Math.max(5, Math.round((Number(d[sizeKey]) || 100) / 1.15)) })],
+      ['Plus grand', 'Grossir ' + who, ico.plus, () => this.avSet({ [sizeKey]: Math.min(5000, Math.round((Number(d[sizeKey]) || 100) * 1.15)) })],
+      ['Tourner', 'Tourner ' + who + ' vers la gauche', ico.left, () => this.avSet({ [rotKey]: (Number(d[rotKey]) || 0) - 15 })],
+      ['Tourner', 'Tourner ' + who + ' vers la droite', ico.right, () => this.avSet({ [rotKey]: (Number(d[rotKey]) || 0) + 15 })],
+      ['Recentrer', 'Recentrer ' + who, ico.center, () => this.avSet(center)]].concat(extra || [])
+      .map(([label, aria, path, go]) => ({ label: label, aria: aria, path: path, go: go }));
+    const owned = (Array.isArray(s.avOwned) ? s.avOwned : []).filter(x => /^poke:/.test(x)).length;
     return {
       tabs: AV_TABS.map(([k, label, path]) => ({ label: label, path: path, on: tab === k, cls: 'pkm-av-tab' + (tab === k ? ' pkm-av-tab-on' : ''), pick: () => this.setState({ avTab: k }) })),
-      row1: AV_ROW1.map(([k, label, path]) => ({ label: label, path: path, on: tab === k, cls: 'pkm-av-tab' + (tab === k ? ' pkm-av-tab-on' : ''), pick: () => this.setState({ avTab: k }) })),
-      row2: AV_ROW2.map(([k, label, path]) => ({ label: label, path: path, on: tab === k, cls: 'pkm-av-tab pkm-av-tab2' + (tab === k ? ' pkm-av-tab-on' : '') + (k === 'shiny' && d.shiny ? ' pkm-av-tab-shiny' : ''), pick: () => this.setState({ avTab: k }) })),
+      row1: AV_ROW1.map(([k, label, path]) => ({ label: label, path: path, icls: '', on: tab === k, cls: 'pkm-av-tab' + (tab === k ? ' pkm-av-tab-on' : ''), pick: () => this.setState({ avTab: k }) })),
+      row2: AV_ROW2.map(([k, label, path]) => ({ label: label, path: path, icls: k === 'poke' ? 'pkm-av-ifill' : '', on: tab === k, cls: 'pkm-av-tab pkm-av-tab2' + (tab === k ? ' pkm-av-tab-on' : '') + (k === 'shiny' && d.shiny ? ' pkm-av-tab-shiny' : ''), pick: () => this.setState({ avTab: k }) })),
       uiCls: 'pkm-av-ui pkm-av-ui' + avUi(), prevCls: 'pkm-av-prev' + (tab === 'acc' ? ' pkm-av-drag-acc' : ' pkm-av-drag-poke'),
       frameCls: 'pkm-av-frwrap pkm-fr pkm-fr-' + d.frame,
-      dragHint: tab === 'acc' ? (d.acc !== 'aucun' ? 'Glisse l’accessoire · pince pour le grossir' : '') : d.poke ? 'Fais glisser ton Pokémon où tu veux' : '',
+      dragHint: tab === 'acc' ? (d.acc !== 'aucun' ? 'Glisse, pince ou tourne l’accessoire' : '') : d.poke ? 'Glisse, pince ou tourne ton Pokémon' : '',
+      back: () => this.pop(), paLabel: (Number(s.pa) || 0).toLocaleString('fr-FR'), goPoke: () => this.setState({ avTab: 'poke' }),
+      pkCount: prem ? 'Premium : les 171 Pokémon sont débloqués pour ton avatar.' : owned + ' Pokémon débloqué' + (owned > 1 ? 's' : '') + ' sur 171 pour ton avatar · 1re forme 25 PA, 2e 50 PA, 3e 100 PA, légendaires 300 PA, Kyogre, Groudon et Rayquaza 500 PA',
+      pctl: ctl('ton Pokémon', 'size', 'prot', { px: 50, py: 50, size: 140, prot: 0 }, [['Retirer', 'Retirer le Pokémon', ico.x, () => this.avSet({ poke: 0, shiny: false })]]),
+      actl: ctl('l’accessoire', 'asz', 'arot', { ax: 0, ay: 0, asz: 100, arot: 0 }),
       isPoke: tab === 'poke', isFace: tab === 'face', isHair: tab === 'hair', isStyle: tab === 'style', isBg: tab === 'bg', isAcc: tab === 'acc', isShiny: tab === 'shiny',
-      prev: L, save: () => this.avSave(), busy: !!s.avBusy, saveLabel: s.avBusy ? 'Enregistrement…' : 'Enregistrer mon avatar',
-      trial: pend.length > 0, trialText: 'Essai : ' + pend.length + ' élément' + (pend.length > 1 ? 's' : '') + ' à débloquer pour enregistrer',
+      prev: L, save: () => this.avSave(), busy: !!s.avBusy, saveLabel: s.avBusy ? 'Enregistrement…' : 'Valider mon avatar',
+      trial: pend.length > 0, trialText: 'Essai : ' + pend.length + ' élément' + (pend.length > 1 ? 's' : '') + ' à débloquer pour valider',
       prem: prem, premTag: prem ? 'Premium : tous les styles PRO sont ouverts' : 'Styles PRO : ouverts avec Premium, ou à débloquer avec tes PA',
       skin: AV_SKIN.map(x => opt('skin', x, true)), face: AV_FACE.map(x => opt('face', x)), eyes: AV_EYES.map(x => opt('eyes', x)),
       hair: AV_HAIR.map(x => opt('hair', x)), hc: AV_HC.map(x => opt('hc', x, true)), outfit: AV_OUTFIT.map(x => opt('outfit', x)), bg: AV_BG.map(x => opt('bg', x)),
@@ -374,24 +432,27 @@
       accSizeLabel: d.asz + ' %', accBigger: () => scaleAcc(1.15), accSmaller: () => scaleAcc(1 / 1.15),
       accMoved: !!(d.ax || d.ay || d.asz !== 100), resetAcc: () => this.avSet({ ax: 0, ay: 0, asz: 100 }),
       shinyCards: [false, true].map(v => ({ label: v ? 'Shiny' : 'Normal', on: d.shiny === v, img: d.poke ? avSprite(d.poke, v) : '', cls: 'pkm-av-shc' + (d.shiny === v ? ' pkm-av-on' : '') + (v ? ' pkm-av-shc-s' : ''),
-        lock: v && !shHas, price: (pkPrice * 2) + ' PA', aria: (v ? 'Version shiny' : 'Version normale') + (DEX[d.poke] ? ' de ' + DEX[d.poke].name : '') + (d.shiny === v ? ', choisie' : ''), pick: () => this.avSet({ shiny: v }) })),
+        lock: v && !shHas, price: (pkPrice * 2) + ' PA', aria: (v ? 'Version shiny' : 'Version normale') + (DEX[d.poke] ? ' de ' + DEX[d.poke].name : '') + (d.shiny === v ? ', choisie' : ''),
+        pick: () => { if (v && !shHas) this.setState({ avLock: pkHas ? 'shiny:' + d.poke : 'poke:' + d.poke, avLockWhy: pkHas ? 'pick' : 'shiny' }); else this.avSet({ shiny: v }); } })),
       size: d.size, sizeLabel: d.size + ' %', onSize: e => this.avSet({ size: Number(e.target.value) || 100 }),
       picker: {
         open: !!s.avPick, title: 'Ton Pokémon d’avatar', sub: 'À débloquer ici avec tes PA, à part du Pokédex : 1re forme 25 PA, 2e 50 PA, 3e 100 PA, légendaires 300 PA (Kyogre, Groudon, Rayquaza 500 PA).',
         close: () => this.setState({ avPick: 0 }), q: s.avQ || '', onQ: e => this.setState({ avQ: e.target.value }),
-        items: DEX_DATA.filter(e => !q || e.name.toLowerCase().indexOf(q) >= 0 || String(e.n) === q).map(e => { const has = this.avHas('poke:' + e.n);
-          return { n: e.n, name: e.name, no: has ? 'Débloqué' : avPokePrice(e.n) + ' PA', icon: 'img/pokemon/icon/' + e.n + '.png', on: d.poke === e.n,
-            cls: 'pkm-av-pk' + (d.poke === e.n ? ' pkm-av-on' : '') + (has ? ' pkm-av-pk-own' : ''), pick: () => { this.avSet({ poke: e.n, shiny: false }); this.setState({ avPick: 0 }); } }; }),
-        count: (Array.isArray(s.avOwned) ? s.avOwned.filter(x => /^poke:/.test(x)).length : 0) + ' Pokémon d’avatar débloqué(s) sur 171 · tu peux essayer n’importe lequel avant de le débloquer'
+        // Les 171 Pokémon en couleur (2026-11-11, porteur : « comme dans le Pokédex mais pas cachés en noir ») : débloqués
+        // marqués d'une coche, les autres avec leur prix en PA ; un Pokémon non débloqué ouvre la fenêtre de déblocage.
+        items: DEX_DATA.filter(e => !q || e.name.toLowerCase().indexOf(q) >= 0 || String(e.n) === q).map(e => { const has = this.avHas('poke:' + e.n), on = d.poke === e.n;
+          return { n: e.n, name: e.name, own: has, lock: !has, price: avPokePrice(e.n).toLocaleString('fr-FR'), icon: 'img/pokemon/icon/' + e.n + '.png', on: on,
+            aria: e.name + (has ? ', débloqué' : ', ' + avPokePrice(e.n) + ' PA') + (on ? ', choisi' : ''),
+            cls: 'pkm-av-pk' + (on ? ' pkm-av-on' : '') + (has ? ' pkm-av-pk-own' : ' pkm-av-pk-lock'), pick: () => (has ? pickPoke(e.n) : lockPoke(e.n)) }; })
       },
       lock: {
         open: !!lockItem, name: lockItem ? lockItem.label : '', aria: (isPk ? 'À débloquer : ' : 'Style PRO : ') + (lockItem ? lockItem.label : ''), price: price.toLocaleString('fr-FR') + ' PA', pa: pa.toLocaleString('fr-FR') + ' PA',
-        why: s.avLockWhy === 'shiny' ? 'Débloque d’abord ce Pokémon pour ton avatar, puis sa version shiny.' : isPk ? (s.avLockWhy === 'save' ? 'Ton avatar utilise ce Pokémon : débloque-le pour enregistrer.' : 'Pokémon d’avatar, à part du Pokédex : débloqué pour toujours avec tes PA.')
-          : s.avLockWhy === 'save' ? 'Ton avatar utilise ce style PRO : débloque-le pour enregistrer.' : 'Style PRO : ouvert avec l’abonnement Premium, ou débloqué pour toujours avec tes PA.',
+        why: s.avLockWhy === 'shiny' ? 'Débloque d’abord ce Pokémon pour ton avatar, puis sa version shiny.' : isPk ? (s.avLockWhy === 'save' ? 'Ton avatar utilise ce Pokémon : débloque-le pour valider.' : 'Pokémon d’avatar, à part du Pokédex : débloqué pour toujours avec tes PA, ou avec Premium.')
+          : s.avLockWhy === 'save' ? 'Ton avatar utilise ce style PRO : débloque-le pour valider.' : 'Style PRO : débloqué pour toujours avec tes PA, ou avec Premium.',
         enough: pa >= price, short: pa >= price ? '' : 'Il te manque ' + (price - pa).toLocaleString('fr-FR') + ' PA', notEnough: pa < price,
         buy: () => this.avBuy(lockId), buyLabel: s.avBusy ? 'Déblocage…' : 'Débloquer pour ' + price.toLocaleString('fr-FR') + ' PA',
         isPk: isPk, notPk: !isPk, pkImg: isPk ? avSprite(Number(lockId.split(':')[1]), lockCat === 'shiny') : '',
-        showPrem: !isPk, prem: () => { this.setState({ avLock: '' }); if (this.premOpen) this.premOpen(); else this.setState({ premOpen: true }); },
+        showPrem: true, prem: () => { this.setState({ avLock: '' }); if (this.premOpen) this.premOpen(); else this.setState({ premOpen: true }); },
         close: () => this.setState({ avLock: '' }),
         preview: lockItem && !isPk && lockCat !== 'acc' && lockCat !== 'frame' ? mini({ [lockCat]: lockId.split(':')[1] }) : L
       }
@@ -403,43 +464,52 @@
   // Pincer ou écarter deux doigts sur l'accessoire (rubrique « Accessoire ») change sa taille, sans limite (2026-11-10,
   // porteur) ; la molette de la souris aussi.
   let avDragOn = false;
+  // Gestes dans l'aperçu (2026-11-11, porteur : « agrandir, rapetisser comme il le souhaite son Pokémon et même faire des
+  // rotations de 360° avec son Pokémon et n'importe quel accessoire ») : un doigt glisse ; deux doigts pincent (taille,
+  // sans limite) et tournent. Cible : l'accessoire dans la rubrique « Accessoire », sinon le Pokémon. Ordinateur : la
+  // molette change la taille, Maj + molette fait tourner.
   const avDragInit = self => {
     if (avDragOn || typeof document === 'undefined') return;
     avDragOn = true;
     let g = null, pinch = null;
     const pts = new Map();
-    const accMode = () => { const s = self.st(), d = avNorm(s.avDraft, s); return (s.avTab || 'hair') === 'acc' && d.acc !== 'aucun' ? d : null; };
+    const target = () => {
+      const s = self.st(), d = avNorm(s.avDraft, s), L = avLayers(d);
+      if ((s.avTab || 'hair') === 'acc' && L.acc) return { d: d, L: L, acc: true, base: L.acc, sel: '.pkm-av-acc', sizeKey: 'asz', rotKey: 'arot' };
+      const p = L.front || L.back;
+      return p ? { d: d, L: L, acc: false, base: p, sel: '.pkm-av-pk-main', sizeKey: 'size', rotKey: 'prot' } : null;
+    };
+    const two = () => { const [a, b] = [...pts.values()]; return { dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, ang: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI }; };
     document.addEventListener('pointerdown', ev => {
       const box = ev.target && ev.target.closest && ev.target.closest('.pkm-av-prev');
       if (!box) return;
       pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
-      const s = self.st(), d = avNorm(s.avDraft, s), am = accMode();
-      // Deux doigts sur l'aperçu, rubrique « Accessoire » : pincée.
-      if (pts.size === 2 && am) {
-        const [a, b] = [...pts.values()], img = box.querySelector('.pkm-av-acc');
-        if (g) { g.box.classList.remove('pkm-av-dragging'); g = null; }
-        pinch = { box: box, img: img, d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, asz: Number(am.asz) || 100, w0: img ? img.getBoundingClientRect().width : 0 };
-        ev.preventDefault(); return;
+      const t = target();
+      if (!t) return;
+      ev.preventDefault();
+      if (pts.size === 2) {
+        if (g) { g.box.classList.remove('pkm-av-dragging'); g.img.style.left = ''; g.img.style.top = ''; g = null; }
+        const m = two();
+        pinch = { box: box, img: box.querySelector(t.sel), t: t, d0: m.dist, a0: m.ang, k: 1, r: 0 };
+        return;
       }
       if (pts.size > 1) return;
-      const img = box.querySelector(am ? '.pkm-av-acc' : '.pkm-av-pk-main');
+      const img = box.querySelector(t.sel);
       if (!img) return;
-      const r = box.getBoundingClientRect(), L = avLayers(d), base = am ? L.acc : (L.front || L.back);
-      if (!base) return;
-      ev.preventDefault();
-      g = { box: box, img: img, r: r, acc: !!am, d: d, base: base, orig: base, accL: L.acc, x0: ev.clientX, y0: ev.clientY, id: ev.pointerId };
+      const r = box.getBoundingClientRect();
+      g = { box: box, img: img, r: r, acc: t.acc, d: t.d, base: t.base, orig: t.base, accL: t.L.acc, x0: ev.clientX, y0: ev.clientY, id: ev.pointerId };
       try { box.setPointerCapture(ev.pointerId); } catch (e) { /* capture indisponible */ }
       box.classList.add('pkm-av-dragging');
       // Un appui ailleurs dans l'aperçu : le Pokémon vient sous le doigt.
-      if (!am && ev.target !== img) { g.base = Object.assign({}, base, { l: (ev.clientX - r.left) / r.width * 100 - base.w / 2, t: (ev.clientY - r.top) / r.height * 100 - base.h / 2 }); g.jump = true; avDragPaint(g, 0, 0); }
+      if (!t.acc && ev.target !== img) { g.base = Object.assign({}, t.base, { l: (ev.clientX - r.left) / r.width * 100 - t.base.w / 2, t: (ev.clientY - r.top) / r.height * 100 - t.base.h / 2 }); g.jump = true; avDragPaint(g, 0, 0); }
     }, { passive: false });
     document.addEventListener('pointermove', ev => {
       if (pts.has(ev.pointerId)) pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
       if (pinch && pts.size >= 2) {
         ev.preventDefault();
-        const [a, b] = [...pts.values()], k = (Math.hypot(a.x - b.x, a.y - b.y) || 1) / pinch.d0;
-        pinch.k = k;
-        if (pinch.img) pinch.img.style.transform = 'scale(' + k.toFixed(3) + ')';
+        const m = two();
+        pinch.k = m.dist / pinch.d0; pinch.r = m.ang - pinch.a0;
+        if (pinch.img) pinch.img.style.transform = 'rotate(' + ((pinch.t.base.rot || 0) + pinch.r).toFixed(1) + 'deg) scale(' + pinch.k.toFixed(3) + ')';
         return;
       }
       if (!g || ev.pointerId !== g.id) return;
@@ -448,7 +518,14 @@
     const end = ev => {
       if (ev) pts.delete(ev.pointerId);
       if (pinch) {
-        if (pts.size < 2) { const p = pinch; pinch = null; if (p.img) p.img.style.transform = ''; if (p.k && Math.abs(p.k - 1) > 0.01) self.avSet({ asz: Math.max(5, Math.round(p.asz * p.k)) }); }
+        if (pts.size < 2) {
+          const p = pinch, t = p.t; pinch = null; g = null;
+          if (p.img) p.img.style.transform = '';
+          const patch = {};
+          if (Math.abs(p.k - 1) > 0.01) patch[t.sizeKey] = Math.max(5, Math.min(5000, Math.round((Number(t.d[t.sizeKey]) || 100) * p.k)));
+          if (Math.abs(p.r) > 1) patch[t.rotKey] = Math.round((Number(t.d[t.rotKey]) || 0) + p.r);
+          if (Object.keys(patch).length) self.avSet(patch);
+        }
         return;
       }
       if (!g || (ev && ev.pointerId !== g.id)) return;
@@ -459,12 +536,12 @@
       else self.avSet({ px: Math.round(k.base.l + k.base.w / 2 + dx), py: Math.round(k.base.t + k.base.h / 2 + dy) });
     };
     document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
-    // Molette (ordinateur) : taille de l'accessoire.
     document.addEventListener('wheel', ev => {
-      const box = ev.target && ev.target.closest && ev.target.closest('.pkm-av-prev'), am = box && accMode();
-      if (!am) return;
+      const box = ev.target && ev.target.closest && ev.target.closest('.pkm-av-prev'), t = box && target();
+      if (!t) return;
       ev.preventDefault();
-      self.avSet({ asz: Math.max(5, Math.round((Number(am.asz) || 100) * Math.exp(-ev.deltaY * 0.0015))) });
+      if (ev.shiftKey) self.avSet({ [t.rotKey]: Math.round((Number(t.d[t.rotKey]) || 0) + (ev.deltaY > 0 ? 15 : -15)) });
+      else self.avSet({ [t.sizeKey]: Math.max(5, Math.min(5000, Math.round((Number(t.d[t.sizeKey]) || 100) * Math.exp(-ev.deltaY * 0.0015)))) });
     }, { passive: false });
   };
   const avDragPaint = (g, dx, dy) => {

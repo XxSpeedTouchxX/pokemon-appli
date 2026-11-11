@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-11 (après-midi) — Mon avatar v4 : écran en 3 parties, Premium ouvre tout, propositions de dessin (demande du porteur)
+
+- **Écran coupé en trois** : en haut (45 %, figé) l'avatar qui change à chaque modification, avec dessous les rubriques Cheveux, Visage, Style, Décor puis Pokémon, Shiny, Accessoire ; au milieu (45 %) les choix, qui défilent au doigt ; en bas (10 %, figé) seulement **« Valider mon avatar »**. L'écran prend toute la hauteur, au-dessus de la barre du bas.
+- **Pokémon** : les 171 s'affichent dans la rubrique, **en couleur** (pas de silhouette noire) ; ceux débloqués sont cochés « Débloqué », les autres montrent leur prix en PA. Toucher un Pokémon non débloqué ouvre une fenêtre : le débloquer avec ses PA, ou **« Tout débloquer avec Premium »**. Un Pokémon débloqué choisi arrive **au centre de l'avatar**.
+- **Premium débloque tout le mode avatar** (Pokémon, shiny, accessoires, décors, cadres), quelle que soit la formule (décision du porteur ; remplace le défaut du matin).
+- **Taille et rotation libres** du Pokémon et de l'accessoire : pincer à deux doigts pour grossir ou rapetisser (sans limite, de 5 à 5 000 %), tourner à deux doigts (360°) ; aussi des boutons Plus petit, Plus grand, Tourner, Recentrer (et Retirer pour le Pokémon) ; sur ordinateur, la molette (et Maj + molette pour tourner).
+- **Rubrique « Place » retirée** (devant/derrière, curseur de taille).
+- **Icônes** : silhouette de Pikachu pour « Pokémon », lunettes pour « Accessoire ».
+- **Avatar en rectangle arrondi** (comme dans l'éditeur) dans l'en-tête de l'accueil et dans Mon profil : plus de rond.
+- **Dessin du dresseur : 4 propositions** (essai : `?avdesign=1` à `4`) : 1 Classique (actuel, par défaut), 2 Manga (tête plus grande, grands yeux colorés à reflets, ombres), 3 Autocollant (contour blanc épais et ombre portée), 4 Doux (sans contours, yeux en points). **Choix du porteur attendu.**
+- **Serveur** : `022_avatar_v3.sql` mis à jour (Premium ouvre les Pokémon et les shiny, taille 5 à 5 000 %, rotations `prot` et `arot`) ; `install_011_a_022.sql` refait. 26 tests pour 022, 432 vérifications SQL.
+- Test `t-avatar` refait (30 vérifications). Cache v179.
+
 ## 2026-11-11 — Mon avatar v3 (demande du porteur)
 
 - **« Enregistrer mon avatar »** reste en bas de l'écran, dans un volet figé au-dessus de la barre du bas, pendant qu'on fait défiler les réglages.

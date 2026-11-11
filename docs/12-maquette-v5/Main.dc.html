@@ -21,7 +21,7 @@
 <span style="font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -0.03em">PKM</span>
 </span>
 <button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" style="justify-self: end; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 22px; background: transparent; cursor: pointer">
-<img src="{{ ui.avatar }}" alt="" style="display: block; width: 40px; height: 40px; margin: 2px; box-sizing: border-box; border-radius: 20px; border: 2px solid {{ ui.ring }}; object-fit: cover">
+<img src="{{ ui.avatar }}" alt="" style="display: block; width: 40px; height: 40px; margin: 2px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{ ui.ring }}; object-fit: cover">
 </button>
 </header>
 </sc-if>
@@ -30,7 +30,7 @@
 <header style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 16px 8px">
 <h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em">{{ ui.title }}</h1>
 <button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 22px; background: transparent; cursor: pointer">
-<img src="{{ ui.avatar }}" alt="" style="display: block; width: 40px; height: 40px; margin: 2px; box-sizing: border-box; border-radius: 20px; border: 2px solid {{ ui.ring }}; object-fit: cover">
+<img src="{{ ui.avatar }}" alt="" style="display: block; width: 40px; height: 40px; margin: 2px; box-sizing: border-box; border-radius: 12px; border: 2px solid {{ ui.ring }}; object-fit: cover">
 </button>
 </header>
 </sc-if>
@@ -435,7 +435,7 @@
 <sc-if value="{{ ui.isProfile }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Identité" style="flex: none; display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 0% 0%, rgba(98, 122, 255, 0.22), rgba(98, 122, 255, 0) 60%), #121C33">
 <span style="position: relative; flex: none; width: 76px; height: 76px">
-<img src="{{ pf.avatar }}" alt="" style="display: block; width: 76px; height: 76px; box-sizing: border-box; border-radius: 38px; border: 3px solid {{ pf.ring }}; object-fit: cover">
+<img src="{{ pf.avatar }}" alt="" style="display: block; width: 76px; height: 76px; box-sizing: border-box; border-radius: 20px; border: 3px solid {{ pf.ring }}; object-fit: cover">
 <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; right: -6px; bottom: -4px; overflow: visible"><path d="M12 2l8.66 5v10L12 22l-8.66-5V7z" style="fill: #121C33; stroke: {{ pf.tierColor }}; stroke-width: 1.6; stroke-linejoin: round"></path><path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"></path></svg>
 </span>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">

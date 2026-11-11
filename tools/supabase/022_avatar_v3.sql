@@ -1,12 +1,13 @@
 -- 022 : Mon avatar v3 (2026-11-10, porteur). Après 014 et 021. Rejouable.
 --   - Pokémon de l'avatar à part du Pokédex : débloqués ici avec des PA (« poke:n »). 1re forme 25 PA, 2e forme 50 PA,
 --     3e forme 100 PA ; légendaires 300 PA ; Kyogre, Groudon, Rayquaza 500 PA ; méga-évolutions 200 PA (proposé, à
---     confirmer). Version shiny (« shiny:n ») : le double, une fois le Pokémon débloqué. Premium n'ouvre ni les
---     Pokémon ni les shiny (défaut à confirmer) ; il ouvre toujours les styles PRO.
+--     confirmer). Version shiny (« shiny:n ») : le double, une fois le Pokémon débloqué. Premium ouvre TOUT le mode
+--     avatar, Pokémon et shiny compris, quelle que soit la formule (porteur, 2026-11-11).
 --   - Plus de « coup de cœur » (2ᵉ Pokémon) : la clé poke2 n'est plus gardée.
 --   - Avatar sans Pokémon possible (poke = 0) : c'est l'avatar de départ.
 --   - Accessoire sur le Pokémon ou sur le dresseur (aon : poke ou perso), taille sans limite pratique (asz de 5 à
---     5 000 %), décalage ax, ay de -400 à 400.
+--     5 000 %), décalage ax, ay de -400 à 400. Pokémon et accessoire tournent (prot, arot : 0 à 359°) ; taille du
+--     Pokémon de 5 à 5 000 % (porteur, 2026-11-11).
 --   - Cadres animés autour de l'avatar (frame) ; prix proposés, à confirmer.
 --   - Un avatar déjà enregistré garde son Pokémon (et sa version shiny) : ils sont offerts une fois, à l'installation.
 do $$
@@ -100,8 +101,10 @@ begin
   if clean->>'frame' not in ('aucun', 'dore', 'arcenciel', 'tempete', 'vague', 'lave', 'galaxie', 'eclair', 'glace', 'neon', 'brume', 'sakura', 'holo') then raise exception 'Avatar invalide (frame)' using errcode = 'P0001'; end if;
   if clean->>'aon' not in ('poke', 'perso') then raise exception 'Avatar invalide (aon)' using errcode = 'P0001'; end if;
   if clean->>'pos' not in ('right', 'left', 'shoulder', 'above', 'front', 'behind') then raise exception 'Avatar invalide (pos)' using errcode = 'P0001'; end if;
-  n := coalesce((cfg->>'size')::int, 100);
-  clean := clean || jsonb_build_object('size', greatest(60, least(140, n)));
+  n := coalesce(round((cfg->>'size')::numeric)::int, 100);
+  clean := clean || jsonb_build_object('size', greatest(5, least(5000, n)),
+    'prot', case when jsonb_typeof(cfg->'prot') = 'number' then ((round((cfg->>'prot')::numeric)::int % 360) + 360) % 360 else 0 end,
+    'arot', case when jsonb_typeof(cfg->'arot') = 'number' then ((round((cfg->>'arot')::numeric)::int % 360) + 360) % 360 else 0 end);
   if jsonb_typeof(cfg->'px') = 'number' and jsonb_typeof(cfg->'py') = 'number' then
     clean := clean || jsonb_build_object('px', greatest(-10, least(110, round((cfg->>'px')::numeric)::int)), 'py', greatest(-10, least(110, round((cfg->>'py')::numeric)::int)));
   end if;
@@ -109,14 +112,15 @@ begin
     'ax', case when jsonb_typeof(cfg->'ax') = 'number' then greatest(-400, least(400, round((cfg->>'ax')::numeric)::int)) else 0 end,
     'ay', case when jsonb_typeof(cfg->'ay') = 'number' then greatest(-400, least(400, round((cfg->>'ay')::numeric)::int)) else 0 end,
     'asz', case when jsonb_typeof(cfg->'asz') = 'number' then greatest(5, least(5000, round((cfg->>'asz')::numeric)::int)) else 100 end);
-  -- Pokémon de l'avatar : aucun (0), ou débloqué ici (Premium n'y donne pas accès).
+  -- Pokémon de l'avatar : aucun (0), débloqué ici, ou ouvert par Premium.
   n := coalesce((cfg->>'poke')::int, 0);
-  if n <> 0 and not exists (select 1 from public.avatar_unlocks u where u.user_id = uid and u.item = 'poke:' || n) then
+  if n <> 0 and not exists (select 1 from public.avatar_items a where a.id = 'poke:' || n) then raise exception 'Avatar invalide (poke)' using errcode = 'P0001'; end if;
+  if n <> 0 and not prem and not exists (select 1 from public.avatar_unlocks u where u.user_id = uid and u.item = 'poke:' || n) then
     raise exception 'Pokémon d''avatar à débloquer : %', 'poke:' || n using errcode = 'P0001';
   end if;
   clean := clean || jsonb_build_object('poke', n);
   if (cfg->'shiny') = 'true'::jsonb then
-    if n = 0 or not exists (select 1 from public.avatar_unlocks u where u.user_id = uid and u.item = 'shiny:' || n) then
+    if n = 0 or (not prem and not exists (select 1 from public.avatar_unlocks u where u.user_id = uid and u.item = 'shiny:' || n)) then
       raise exception 'Version shiny à débloquer : %', 'shiny:' || n using errcode = 'P0001';
     end if;
     clean := clean || jsonb_build_object('shiny', true);

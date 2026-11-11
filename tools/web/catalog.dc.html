@@ -2142,8 +2142,8 @@
 PKCOUNTER
 </span>
 <span style="justify-self: center; min-width: 0; display: flex; align-items: center"><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: 172px; max-width: 100%; height: auto"></span>
-<button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" class="{{ ui.hhMeCls }}" style="justify-self: end; position: relative; width: 62px; height: 62px; padding: 0; border: 0; border-radius: 31px; background: transparent; cursor: pointer">
-<img src="{{ ui.avatar }}" alt="" style="display: block; width: 58px; height: 58px; margin: 2px; box-sizing: border-box; border-radius: 29px; border: 3px solid {{ ui.ring }}; object-fit: cover">
+<button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" class="{{ ui.hhMeCls }}" style="justify-self: end; position: relative; width: 62px; height: 62px; padding: 0; border: 0; border-radius: 17px; background: transparent; cursor: pointer">
+<img src="{{ ui.avatar }}" alt="" style="display: block; width: 58px; height: 58px; margin: 2px; box-sizing: border-box; border-radius: 15px; border: 3px solid {{ ui.ring }}; object-fit: cover">
 <sc-if value="{{ hh.show }}" hint-placeholder-val="{{ true }}"><img src="{{ hh.badge }}" alt="" width="34" height="34" class="pkm-hh-grade"></sc-if>
 </button>
 </header>
@@ -2487,9 +2487,10 @@ PKCOUNTER
 
 <!-- fragment: avatar -->
 <sc-if value="{{ ui.isAvatar }}" hint-placeholder-val="{{ false }}">
-<div class="{{ av.uiCls }}">
+<div class="pkm-av-full">
 <section aria-label="Aperçu de mon avatar" class="pkm-av-top">
-<div class="{{ av.frameCls }}"><div class="{{ av.prevCls }}" aria-label="Aperçu de ton avatar" role="img">
+<div class="pkm-av-head"><button type="button" onClick="{{ av.back }}" aria-label="Retour" class="pkm-av-back"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button><b>Mon avatar</b><span class="pkm-av-pa"><img src="img/brand/pa.svg" alt="" width="18" height="18">{{ av.paLabel }}</span></div>
+<div class="pkm-av-stage"><div class="pkm-av-card"><div class="{{ av.frameCls }}"><div class="{{ av.prevCls }}" aria-label="Aperçu de ton avatar" role="img">
 <img src="{{ av.prev.bg }}" alt="" class="pkm-av-l" draggable="false">
 <sc-if value="{{ av.prev.hasBack }}" hint-placeholder-val="{{ false }}"><img src="{{ av.prev.back.src }}" alt="" class="pkm-av-pk-l pkm-av-pk-main" style="{{ av.prev.back.style }}" draggable="false"></sc-if>
 <sc-if value="{{ av.prev.hasAccBack }}" hint-placeholder-val="{{ false }}"><img src="{{ av.prev.acc.src }}" alt="" class="pkm-av-acc" style="{{ av.prev.acc.style }}" draggable="false"></sc-if>
@@ -2498,17 +2499,12 @@ PKCOUNTER
 <sc-if value="{{ av.prev.hasFront }}" hint-placeholder-val="{{ true }}"><img src="{{ av.prev.front.src }}" alt="" class="pkm-av-pk-l pkm-av-pk-main" style="{{ av.prev.front.style }}" draggable="false"></sc-if>
 <sc-if value="{{ av.prev.hasAccFront }}" hint-placeholder-val="{{ false }}"><img src="{{ av.prev.acc.src }}" alt="" class="pkm-av-acc" style="{{ av.prev.acc.style }}" draggable="false"></sc-if>
 <span class="pkm-av-hint" aria-hidden="true">{{ av.dragHint }}</span>
-</div></div>
+</div></div></div></div>
+<div role="tablist" aria-label="Ton avatar" class="pkm-av-tabs"><sc-for list="{{ av.row1 }}" as="avt" hint-placeholder-count="4"><button type="button" role="tab" aria-selected="{{ avt.on }}" onClick="{{ avt.pick }}" class="{{ avt.cls }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" class="{{ avt.icls }}"><path d="{{ avt.path }}"></path></svg><span>{{ avt.label }}</span></button></sc-for></div>
+<div role="tablist" aria-label="Ton Pokémon" class="pkm-av-tabs pkm-av-tabs2"><sc-for list="{{ av.row2 }}" as="avt" hint-placeholder-count="3"><button type="button" role="tab" aria-selected="{{ avt.on }}" onClick="{{ avt.pick }}" class="{{ avt.cls }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" class="{{ avt.icls }}"><path d="{{ avt.path }}"></path></svg><span>{{ avt.label }}</span></button></sc-for></div>
 </section>
+<div class="pkm-av-mid">
 <sc-if value="{{ av.trial }}" hint-placeholder-val="{{ false }}"><p class="pkm-av-trial">{{ av.trialText }}</p></sc-if>
-<div class="pkm-av-rows">
-<div class="pkm-av-rowl">Ton avatar</div>
-<div role="tablist" aria-label="Ton avatar" class="pkm-av-tabs"><sc-for list="{{ av.row1 }}" as="avt" hint-placeholder-count="4"><button type="button" role="tab" aria-selected="{{ avt.on }}" onClick="{{ avt.pick }}" class="{{ avt.cls }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ avt.path }}"></path></svg><span>{{ avt.label }}</span></button></sc-for></div>
-<div class="pkm-av-rowl">Ton Pokémon</div>
-<div role="tablist" aria-label="Ton Pokémon" class="pkm-av-tabs pkm-av-tabs2"><sc-for list="{{ av.row2 }}" as="avt" hint-placeholder-count="3"><button type="button" role="tab" aria-selected="{{ avt.on }}" onClick="{{ avt.pick }}" class="{{ avt.cls }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ avt.path }}"></path></svg><span>{{ avt.label }}</span></button></sc-for></div>
-</div>
-<p class="pkm-av-premtag">{{ av.premTag }}</p>
-<div class="pkm-av-panel">
 <sc-if value="{{ av.isHair }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Cheveux" class="pkm-av-sec">
 <h3>Coiffure</h3>
@@ -2544,54 +2540,30 @@ PKCOUNTER
 </sc-if>
 <sc-if value="{{ av.isPoke }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Ton Pokémon" class="pkm-av-sec">
-<sc-if value="{{ av.noPoke }}" hint-placeholder-val="{{ false }}"><p class="pkm-av-p">Choisis le Pokémon qui t’accompagne. Il se débloque ici avec tes PA, à part du Pokédex : 1re forme 25 PA, 2e forme 50 PA, 3e forme 100 PA, légendaires 300 PA (Kyogre, Groudon, Rayquaza 500 PA).</p>
-<button type="button" onClick="{{ av.changePoke }}" class="pkm-av-savebtn pkm-av-choose">Choisir mon Pokémon</button></sc-if>
-<sc-if value="{{ av.hasPoke }}" hint-placeholder-val="{{ true }}">
-<div class="pkm-av-pkrow">
-<button type="button" onClick="{{ av.changePoke }}" class="pkm-av-slot pkm-av-slot-on" aria-label="{{ av.pokeAria }}"><img src="{{ av.poke.icon }}" alt="" width="56" height="56"><b>{{ av.poke.name }}</b><small>Changer</small><sc-if value="{{ av.pokeLock }}" hint-placeholder-val="{{ false }}"><span class="pkm-av-pro">{{ av.pokePrice }}</span></sc-if></button>
-<button type="button" onClick="{{ av.shinyGo }}" class="pkm-av-slot pkm-av-slot-sh" aria-label="{{ av.shinyLabel }}"><img src="{{ av.shinyImg }}" alt="" width="56" height="56"><b>{{ av.shinyName }}</b><small>{{ av.shinyLabel }}</small><sc-if value="{{ av.shinyLock }}" hint-placeholder-val="{{ true }}"><span class="pkm-av-pro">{{ av.shinyPrice }}</span></sc-if></button>
-</div>
-<sc-if value="{{ av.pokeLock }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ av.unlockPoke }}" class="pkm-av-buy"><img src="img/brand/pa.svg" alt="" width="22" height="22">Débloquer {{ av.poke.name }} · {{ av.pokePrice }}</button></sc-if>
-<h3>Place</h3>
-<p class="pkm-av-p">Fais glisser ton Pokémon du doigt, n’importe où sur ton avatar.</p>
-<div role="group" aria-label="Devant ou derrière toi" class="pkm-av-chips"><sc-for list="{{ av.layer }}" as="avp" hint-placeholder-count="2"><button type="button" onClick="{{ avp.pick }}" aria-pressed="{{ avp.on }}" style="border: 1px solid {{ avp.bc }}; background: {{ avp.bg }}; color: {{ avp.fg }}">{{ avp.label }}</button></sc-for><sc-if value="{{ av.moved }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ av.resetPlace }}" class="pkm-av-reset">Remettre à sa place</button></sc-if></div>
-<h3>Taille <span class="pkm-av-size">{{ av.sizeLabel }}</span></h3>
-<input type="range" min="60" max="140" step="5" value="{{ av.size }}" onInput="{{ av.onSize }}" aria-label="Taille du Pokémon" class="pkm-av-range">
-<button type="button" onClick="{{ av.removePoke }}" class="pkm-av-btn pkm-av-btn-red">Retirer le Pokémon</button>
-</sc-if>
-</section>
-</sc-if>
-<sc-if value="{{ av.isAcc }}" hint-placeholder-val="{{ false }}">
-<section aria-label="Accessoire" class="pkm-av-sec">
-<p class="pkm-av-p">Pose un accessoire sur ton Pokémon ou sur toi, fais-le glisser dans l’aperçu, et pince-le à deux doigts pour le grossir ou le rapetisser (sans limite).</p>
-<div role="group" aria-label="Où poser l’accessoire" class="pkm-av-chips"><sc-for list="{{ av.aon }}" as="avp" hint-placeholder-count="2"><button type="button" onClick="{{ avp.pick }}" aria-pressed="{{ avp.on }}" style="border: 1px solid {{ avp.bc }}; background: {{ avp.bg }}; color: {{ avp.fg }}">{{ avp.label }}</button></sc-for></div>
-<div class="pkm-av-grid"><sc-for list="{{ av.acc }}" as="avo" hint-placeholder-count="7"><button type="button" onClick="{{ avo.pick }}" aria-label="{{ avo.aria }}" aria-pressed="{{ avo.on }}" class="{{ avo.cls }}"><span class="pkm-av-accico"><sc-if value="{{ avo.hasIcon }}" hint-placeholder-val="{{ true }}"><img src="{{ avo.icon }}" alt=""></sc-if><sc-if value="{{ avo.none }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M6.5 17.5l11-11"></path></svg></sc-if></span><small>{{ avo.label }}</small><sc-if value="{{ avo.lock }}" hint-placeholder-val="{{ false }}"><span class="pkm-av-pro">{{ avo.price }}</span></sc-if><sc-if value="{{ avo.open }}" hint-placeholder-val="{{ false }}"><span class="pkm-av-pro pkm-av-pro-ok">PRO</span></sc-if></button></sc-for></div>
-<sc-if value="{{ av.accOn }}" hint-placeholder-val="{{ false }}"><h3>Taille de l’accessoire <span class="pkm-av-size">{{ av.accSizeLabel }}</span></h3>
-<div class="pkm-av-row2"><button type="button" onClick="{{ av.accSmaller }}" class="pkm-av-btn" aria-label="Rapetisser l’accessoire">− Plus petit</button><button type="button" onClick="{{ av.accBigger }}" class="pkm-av-btn" aria-label="Grossir l’accessoire">+ Plus grand</button></div>
-<sc-if value="{{ av.accMoved }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ av.resetAcc }}" class="pkm-av-reset">Recentrer l’accessoire</button></sc-if></sc-if>
+<sc-if value="{{ av.hasPoke }}" hint-placeholder-val="{{ false }}"><div role="group" aria-label="Taille et rotation" class="pkm-av-ctl"><sc-for list="{{ av.pctl }}" as="avc" hint-placeholder-count="5"><button type="button" onClick="{{ avc.go }}" aria-label="{{ avc.aria }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ avc.path }}"></path></svg><small>{{ avc.label }}</small></button></sc-for></div></sc-if>
+<p class="pkm-av-p">{{ av.pkCount }}</p>
+<input type="search" value="{{ av.picker.q }}" onInput="{{ av.picker.onQ }}" placeholder="Nom ou numéro (Pikachu, 25…)" aria-label="Chercher un Pokémon" class="pkm-av-q">
+<div class="pkm-av-pks"><sc-for list="{{ av.picker.items }}" as="avk" hint-placeholder-count="12"><button type="button" onClick="{{ avk.pick }}" aria-pressed="{{ avk.on }}" aria-label="{{ avk.aria }}" class="{{ avk.cls }}"><img src="{{ avk.icon }}" alt="" width="48" height="48" loading="lazy"><b>{{ avk.name }}</b><sc-if value="{{ avk.own }}" hint-placeholder-val="{{ true }}"><small class="pkm-av-own">✓ Débloqué</small></sc-if><sc-if value="{{ avk.lock }}" hint-placeholder-val="{{ false }}"><small class="pkm-av-price"><img src="img/brand/pa.svg" alt="" width="14" height="14">{{ avk.price }}</small></sc-if></button></sc-for></div>
 </section>
 </sc-if>
 <sc-if value="{{ av.isShiny }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Version shiny" class="pkm-av-sec">
 <p class="pkm-av-p">La version chromatique de ton Pokémon, aux couleurs rares. Elle coûte le double du prix de ton Pokémon.</p>
-<sc-if value="{{ av.noPoke }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ av.changePoke }}" class="pkm-av-btn">Choisir d’abord mon Pokémon</button></sc-if>
+<sc-if value="{{ av.noPoke }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ av.goPoke }}" class="pkm-av-btn">Choisir d’abord mon Pokémon</button></sc-if>
 <sc-if value="{{ av.hasPoke }}" hint-placeholder-val="{{ true }}"><div class="pkm-av-shiny"><sc-for list="{{ av.shinyCards }}" as="avs" hint-placeholder-count="2"><button type="button" onClick="{{ avs.pick }}" aria-label="{{ avs.aria }}" aria-pressed="{{ avs.on }}" class="{{ avs.cls }}"><img src="{{ avs.img }}" alt="" width="96" height="96"><b>{{ avs.label }}</b><sc-if value="{{ avs.lock }}" hint-placeholder-val="{{ false }}"><span class="pkm-av-pro">{{ avs.price }}</span></sc-if></button></sc-for></div></sc-if>
 </section>
 </sc-if>
-</div>
-<div class="pkm-av-save" aria-hidden="true"></div>
-<div class="pkm-av-savebar"><button type="button" onClick="{{ av.save }}" aria-disabled="{{ av.busy }}" class="pkm-av-savebtn">{{ av.saveLabel }}</button></div>
-</div>
-<sc-if value="{{ av.picker.open }}" hint-placeholder-val="{{ false }}">
-<div class="pkm-av-wrap"><button type="button" aria-label="Fermer le choix du Pokémon" onClick="{{ av.picker.close }}" class="pkm-av-scrim"></button>
-<section aria-label="{{ av.picker.title }}" role="dialog" aria-modal="true" class="pkm-sheet pkm-av-sheet pkm-dark">
-<div class="pkm-av-sh"><span><b>{{ av.picker.title }}</b><small>{{ av.picker.sub }}</small></span><button type="button" onClick="{{ av.picker.close }}" aria-label="Fermer" class="pkm-av-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
-<input type="search" value="{{ av.picker.q }}" onInput="{{ av.picker.onQ }}" placeholder="Nom ou numéro (Pikachu, 25…)" aria-label="Chercher un Pokémon" class="pkm-av-q">
-<div class="pkm-av-pks"><sc-for list="{{ av.picker.items }}" as="avk" hint-placeholder-count="12"><button type="button" onClick="{{ avk.pick }}" aria-pressed="{{ avk.on }}" class="{{ avk.cls }}"><img src="{{ avk.icon }}" alt="" width="48" height="48" loading="lazy"><b>{{ avk.name }}</b><small>{{ avk.no }}</small></button></sc-for></div>
-<p class="pkm-av-p">{{ av.picker.count }}</p>
+<sc-if value="{{ av.isAcc }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Accessoire" class="pkm-av-sec">
+<p class="pkm-av-p">Pose un accessoire sur ton Pokémon ou sur toi. Dans l’aperçu : glisse-le, pince-le pour le grossir ou le rapetisser, tourne-le à deux doigts.</p>
+<div role="group" aria-label="Où poser l’accessoire" class="pkm-av-chips"><sc-for list="{{ av.aon }}" as="avp" hint-placeholder-count="2"><button type="button" onClick="{{ avp.pick }}" aria-pressed="{{ avp.on }}" style="border: 1px solid {{ avp.bc }}; background: {{ avp.bg }}; color: {{ avp.fg }}">{{ avp.label }}</button></sc-for></div>
+<sc-if value="{{ av.accOn }}" hint-placeholder-val="{{ false }}"><div role="group" aria-label="Taille et rotation" class="pkm-av-ctl"><sc-for list="{{ av.actl }}" as="avc" hint-placeholder-count="5"><button type="button" onClick="{{ avc.go }}" aria-label="{{ avc.aria }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ avc.path }}"></path></svg><small>{{ avc.label }}</small></button></sc-for></div></sc-if>
+<div class="pkm-av-grid"><sc-for list="{{ av.acc }}" as="avo" hint-placeholder-count="7"><button type="button" onClick="{{ avo.pick }}" aria-label="{{ avo.aria }}" aria-pressed="{{ avo.on }}" class="{{ avo.cls }}"><span class="pkm-av-accico"><sc-if value="{{ avo.hasIcon }}" hint-placeholder-val="{{ true }}"><img src="{{ avo.icon }}" alt=""></sc-if><sc-if value="{{ avo.none }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M6.5 17.5l11-11"></path></svg></sc-if></span><small>{{ avo.label }}</small><sc-if value="{{ avo.lock }}" hint-placeholder-val="{{ false }}"><span class="pkm-av-pro">{{ avo.price }}</span></sc-if><sc-if value="{{ avo.open }}" hint-placeholder-val="{{ false }}"><span class="pkm-av-pro pkm-av-pro-ok">PRO</span></sc-if></button></sc-for></div>
 </section>
-</div>
 </sc-if>
+</div>
+<div class="pkm-av-bot"><button type="button" onClick="{{ av.save }}" aria-disabled="{{ av.busy }}" class="pkm-av-savebtn">{{ av.saveLabel }}</button></div>
+</div>
 <sc-if value="{{ av.lock.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-av-wrap"><button type="button" aria-label="Fermer" onClick="{{ av.lock.close }}" class="pkm-av-scrim"></button>
 <section aria-label="{{ av.lock.aria }}" role="dialog" aria-modal="true" class="pkm-sheet pkm-av-sheet pkm-av-locksh pkm-dark">
@@ -2602,7 +2574,8 @@ PKCOUNTER
 <p class="pkm-av-p">{{ av.lock.why }}</p>
 <button type="button" onClick="{{ av.lock.buy }}" aria-disabled="{{ av.lock.notEnough }}" class="pkm-av-buy"><img src="img/brand/pa.svg" alt="" width="22" height="22">{{ av.lock.buyLabel }}</button>
 <sc-if value="{{ av.lock.notEnough }}" hint-placeholder-val="{{ false }}"><p class="pkm-av-short">{{ av.lock.short }} (tu as {{ av.lock.pa }})</p></sc-if>
-<sc-if value="{{ av.lock.showPrem }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ av.lock.prem }}" class="pkm-av-premgo"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg>Tout ouvrir avec Premium</button></sc-if>
+<sc-if value="{{ av.lock.showPrem }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ av.lock.prem }}" class="pkm-av-premgo"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg>Tout débloquer avec Premium</button>
+<p class="pkm-av-p pkm-av-premnote">Premium débloque tout le mode avatar : Pokémon, shiny, accessoires, décors et cadres.</p></sc-if>
 <button type="button" onClick="{{ av.lock.close }}" class="pkm-av-btn">Plus tard</button>
 </section>
 </div>
