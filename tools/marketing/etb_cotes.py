@@ -58,36 +58,33 @@ def main():
             if data[:4] == b"\x89PNG":
                 (OUT / "img" / f"{s}.png").write_bytes(data); found[s] = url; break
         time.sleep(1)
-    # Visuels de 2023 : chemins différents, cherchés dans les fiches de la galerie Pokémon France puis par variantes.
-    import re
-    base = "https://www.pokemon.com/fr/jcc-pokemon/galerie-produits/"
-    pages = {"sv01": ["coffret-dresseur-delite-ecarlate-et-violet", "coffret-dresseur-delite-ecarlate-et-violet-koraidon-et-miraidon"],
-             "sv02": ["coffret-dresseur-delite-ecarlate-et-violet-evolutions-a-paldea"],
-             "sv03": ["coffret-dresseur-delite-ecarlate-et-violet-flammes-obsidiennes"],
-             "sv3pt5": ["coffret-dresseur-delite-ecarlate-et-violet-151"],
-             "sv04": ["coffret-dresseur-delite-ecarlate-et-violet-faille-paradoxe"],
-             "sv4pt5": ["coffret-dresseur-delite-ecarlate-et-violet-destinees-de-paldea"]}
-    for s, slugs in pages.items():
+    # Visuels de 2023 : la galerie bloque la lecture des fiches ; essais de chemins de la galerie anglaise, puis logos
+    # TCGdex des extensions en secours (logo-<set>.png).
+    st = "https://www.pokemon.com/static-assets/content-assets/"
+    var = {"sv01": ["", "-koraidon", "-miraidon"], "sv04": ["", "-roaring-moon", "-iron-valiant"]}
+    tcg = {"sv01": "sv01", "sv02": "sv02", "sv03": "sv03", "sv3pt5": "sv03.5", "sv04": "sv04", "sv4pt5": "sv04.5"}
+    for s, tid in tcg.items():
         if s in found:
             continue
-        for slug in slugs:
+        tries = []
+        for v in var.get(s, [""]):
+            for y in (2022, 2023, 2024):
+                for loc, suf in (("cms2", "-169-en"), ("cms2", "-169"), ("cms2-fr-fr", "-169"), ("cms2-en-us", "-169-en")):
+                    tries.append(f"{st}{loc}/img/trading-card-game/series/incrementals/{y}/{s}-elite-trainer-box{v}/{s}-elite-trainer-box{v}{suf}.png")
+        for u in tries:
             try:
-                html = get(base + slug, binary=True).decode("utf-8", "replace")
-            except (HTTPError, URLError, TimeoutError) as e:
-                print("page", slug, e); continue
-            urls = sorted(set(re.findall(r'https://www\.pokemon\.com/static-assets/[^"\' )]+?\.(?:png|jpg)', html)))
-            urls = [u for u in urls if "elite" in u.lower() or "dresseur" in u.lower() or s in u]
-            print("page", slug, len(html), urls[:6])
-            for u in urls:
-                try:
-                    data = get(u, binary=True)
-                except (HTTPError, URLError, TimeoutError):
-                    continue
-                if data[:4] == b"\x89PNG" or data[:3] == b"\xff\xd8\xff":
-                    (OUT / "img" / f"{s}.png").write_bytes(data); found[s] = u; break
-            time.sleep(2)
-            if s in found:
-                break
+                data = get(u, binary=True)
+            except (HTTPError, URLError, TimeoutError):
+                continue
+            if data[:4] == b"\x89PNG":
+                (OUT / "img" / f"{s}.png").write_bytes(data); found[s] = u; print("trouvé", u); break
+        for lang in ("fr", "en"):
+            try:
+                data = get(f"https://assets.tcgdex.net/{lang}/sv/{tid}/logo.png", binary=True)
+            except (HTTPError, URLError, TimeoutError):
+                continue
+            if data[:4] == b"\x89PNG":
+                (OUT / "img" / f"logo-{s}.png").write_bytes(data); found["logo-" + s] = lang; break
     print("visuels :", len(found), "sur", len(SETS), "manquants :", [s for s in SETS if s not in found])
     (OUT / "etb.json").write_text(json.dumps({"created": guide.get("createdAt"), "rows": rows, "images": found},
                                              ensure_ascii=False, indent=1), "utf-8")
