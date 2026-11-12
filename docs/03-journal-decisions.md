@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-11-13 — Safari éclair, badge 2XP net, un seul cadre, emblème au-dessus du logo (« go » et demande du porteur)
+
+- **Safari éclair** (« go » du porteur) : 3ᵉ jeu à PK, dans Jeux › Jeux à PK, sous Pile ou face.
+  - 20 secondes : 36 Pokémon traversent une prairie ; il faut toucher ceux du type demandé (« Attrape les Pokémon Eau ! »).
+  - +2 PK par bon Pokémon, −1 PK par erreur, jamais moins de 0 ; 18 bons Pokémon par partie, donc 36 PK au plus (72 avec un 2XP PK).
+  - Le serveur tire le type et les Pokémon, puis compte lui-même les bons et les erreurs et crédite les PK : `tools/supabase/024_safari.sql`, **à installer par le porteur** (Studio, puis `000_verifier.sql`). Tant qu'il n'est pas installé, le bouton affiche « Bientôt disponible ».
+  - Une partie toutes les 8 h (Recrue, Chasseur, Collectionneur), 6 h (Dresseur, Maître), 4 h (Grand maître) : **défaut à confirmer**.
+  - Les PK gagnés comptent pour les grades et le classement de la saison.
+  - Plafond « un seul jeu en plus par jour » (J3 de `docs/37`) : sans objet, un seul jeu a été ajouté.
+- **Badge « 2XP » des PK** : refait sans le calque de reflet posé par-dessus le texte (photo du porteur : badge voilé sur iPhone) ; le reflet passe dans le fond du badge, le texte reste net.
+- **Cadre de l'avatar** : avec un cadre choisi (bord doré, arc-en-ciel…), l'anneau de couleur du grade disparaît ; on ne voit que le cadre choisi et l'avatar (en-tête et Mon profil).
+- **Emblème du grade** : centré au-dessus du logo Dropicards, et plus en bas à droite de l'avatar.
+- Cache v185.
+
 ## 2026-11-12 (fin de nuit) — Soldes, message 2XP, ticket agrandi, barre du bas, visuels Règne Delta et Mew RGB, maquettes des mini-jeux (demande du porteur)
 
 - **Soldes de PK et de PA** : exactement la même taille (hauteur, largeur, police, logo). Le badge « 2XP » est posé au-dessus du coin haut gauche de chaque solde : il ne cache plus le logo des PK ni celui des PA.

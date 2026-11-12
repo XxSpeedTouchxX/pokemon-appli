@@ -1292,6 +1292,10 @@
 </div>
 <p class="pkm-rules-note">Une chance sur deux. Ouvert à partir du grade Chasseur.</p>
 </section>
+<section aria-label="Safari éclair" class="pkm-rules-card">
+<h3><span class="pkm-rules-ico" aria-hidden="true">🌿</span>Safari éclair</h3>
+<p class="pkm-rules-note">20 secondes : touche les Pokémon du type demandé. +2 PK par bon Pokémon, −1 PK par erreur, jamais moins de 0 (36 PK au plus). Une partie toutes les 8 h, 6 h au grade Dresseur et Maître, 4 h au grade Grand maître.</p>
+</section>
 <section aria-label="Délais selon le grade" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">⏱️</span>Plus ton grade monte, plus tu joues</h3>
 <div role="table" aria-label="Délais et scans par grade" class="pkm-rules-table">
@@ -1940,6 +1944,19 @@
 <sc-if value="{{ gm.c.locked }}" hint-placeholder-val="{{ false }}"><p style="margin: -4px 0 0; text-align: center; font-size: 13px; line-height: 1.4; color: #C9D3EA">{{ gm.c.lockText }}</p></sc-if>
 </section>
 
+<section aria-label="Safari éclair" class="pkm-sf-card-gm" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
+<h2 class="pkm-gm-title">Safari éclair</h2>
+<span style="font-size: 12.5px; color: #9AA8C3">{{ gm.sf.every }}</span>
+</div>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">20 secondes : des Pokémon traversent la prairie. Touche ceux du type demandé (+2 PK chacun) et évite les autres (−1 PK).</p>
+<div class="pkm-sf-prev" aria-hidden="true"><span class="pkm-sf-prev-chip">Attrape les Pokémon Eau !</span><img src="img/pokemon/7.gif" alt="" class="pkm-sf-prev-a"><img src="img/pokemon/129.gif" alt="" class="pkm-sf-prev-b"><img src="img/pokemon/25.gif" alt="" class="pkm-sf-prev-c"><i class="pkm-sf-prev-ring"></i><b class="pkm-sf-prev-pop">+2</b></div>
+<div aria-hidden="true" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; font-size: 12px; color: #C9D3EA">
+<span class="pkm-sf-rule"><b>20 s</b>par partie</span><span class="pkm-sf-rule pkm-sf-rule-ok"><b>+2</b>bon Pokémon</span><span class="pkm-sf-rule pkm-sf-rule-ko"><b>−1</b>erreur</span>
+</div>
+<button type="button" onClick="{{ gm.sf.play }}" class="{{ gm.sf.btnCls }}"><sc-if value="{{ gm.sf.noIco }}" hint-placeholder-val="{{ false }}"><span class="pkm-gm-hg" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32"><g class="pkm-gm-hg-flip"><path d="M8 6.5c0 6 6.4 7.2 6.4 9.5S8 19.5 8 25.5h16c0-6-6.4-7.2-6.4-9.5S24 12.5 24 6.5z" class="pkm-gm-hg-glass"></path><path d="M10.4 9h11.2c-.6 3-4.2 4.6-5.6 6.2-1.4-1.6-5-3.2-5.6-6.2z" class="pkm-gm-hg-top"></path><path d="M9.8 24h12.4c-.4-2.6-3.4-4.4-6.2-5.4-2.8 1-5.8 2.8-6.2 5.4z" class="pkm-gm-hg-bot"></path><path d="M16 15.6v7.4" class="pkm-gm-hg-stream"></path><rect x="5.5" y="3.5" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect><rect x="5.5" y="24.9" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect></g></svg></span></sc-if>{{ gm.sf.button }}</button>
+</section>
+
 <sc-if value="{{ gm.hasHist }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Derniers gains" style="flex: none; display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; border-radius: 20px; border: 1px solid #1E2B45; background: #111A2C">
 <h2 style="margin: 0 0 2px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600">Derniers tirages</h2>
@@ -2166,10 +2183,9 @@
 <span class="pkm-hh-left" style="justify-self: start; min-width: 0; display: flex">
 PKCOUNTER
 </span>
-<span style="justify-self: center; min-width: 0; display: flex; align-items: center"><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: 172px; max-width: 100%; height: auto"></span>
+<span class="pkm-hh-mid" style="justify-self: center; min-width: 0; display: flex; flex-direction: column; align-items: center"><sc-if value="{{ hh.show }}" hint-placeholder-val="{{ true }}"><img src="{{ hh.badge }}" alt="{{ hh.alt }}" width="40" height="40" class="pkm-hh-grade"></sc-if><img src="img/brand/dropicards-header.png" alt="Dropicards" width="562" height="76" style="display: block; width: 172px; max-width: 100%; height: auto"></span>
 <button type="button" onClick="{{ goProfile }}" aria-label="{{ ui.profileLabel }}" class="{{ ui.hhMeCls }}" style="justify-self: end; position: relative; width: 62px; height: 62px; padding: 0; border: 0; border-radius: 17px; background: transparent; cursor: pointer">
 <img src="{{ ui.avatar }}" alt="" style="display: block; width: 58px; height: 58px; margin: 2px; box-sizing: border-box; border-radius: 15px; border: 3px solid {{ ui.ring }}; object-fit: cover">
-<sc-if value="{{ hh.show }}" hint-placeholder-val="{{ true }}"><img src="{{ hh.badge }}" alt="" width="34" height="34" class="pkm-hh-grade"></sc-if>
 </button>
 </header>
 

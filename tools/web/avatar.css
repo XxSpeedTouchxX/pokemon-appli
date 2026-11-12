@@ -299,3 +299,8 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 @keyframes pkmAvSavedTick { to { stroke-dashoffset: 0; } }
 @keyframes pkmAvSavedSpark { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.4) rotate(160deg); } }
 @media (prefers-reduced-motion: reduce) { .pkm-av-saved, .pkm-av-saved > b, .pkm-av-saved-card, .pkm-av-saved-ok, .pkm-av-saved-fx i { animation: none; opacity: 1; } .pkm-av-saved-ok path { stroke-dashoffset: 0; animation: none; } .pkm-av-saved-fx { display: none; } }
+/* Un seul cadre (2026-11-12, porteur : « on a l'impression qu'il y a deux cadres l'un dans l'autre ») : avec un cadre
+   choisi dans Décor, l'anneau de couleur du grade autour de l'image disparaît ; l'avatar remplit tout l'intérieur du
+   cadre (en-tête et Mon profil). Sans cadre (« Aucun »), l'anneau du grade reste. */
+.pkm-hh-me.pkm-fr:not(.pkm-fr-aucun) > img:first-of-type { width: 62px !important; height: 62px !important; margin: 0 !important; border: 0 !important; border-radius: 17px !important; }
+.pkm-pf-photo.pkm-fr:not(.pkm-fr-aucun) > img:first-of-type { border: 0 !important; }

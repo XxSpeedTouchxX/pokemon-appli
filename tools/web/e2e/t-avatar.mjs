@@ -108,7 +108,7 @@ ok('Mon profil : avatar en rectangle arrondi (plus de rond), avec son cadre', (a
 await page.screenshot({ path: shot('avatar-profil.png') });
 await page.evaluate(() => window.__pkm.setState({ screen: 'home', stack: [] })); await page.waitForTimeout(900);
 const hh = page.locator('button.pkm-hh-me img').first();
-ok('accueil : avatar en rectangle arrondi dans l’en-tête, avec son cadre', (await hh.getAttribute('src')).startsWith('data:image/jpeg') && (await hh.evaluate(e => parseFloat(getComputedStyle(e).borderTopLeftRadius))) <= 16 && (await page.locator('button.pkm-hh-me.pkm-fr-lave').count()) === 1);
+ok('accueil : avatar en rectangle arrondi dans l’en-tête, avec son seul cadre (plus d’anneau du grade)', (await hh.getAttribute('src')).startsWith('data:image/jpeg') && (await hh.evaluate(e => parseFloat(getComputedStyle(e).borderTopLeftRadius))) <= 18 && (await hh.evaluate(e => getComputedStyle(e).borderTopWidth)) === '0px' && (await page.locator('button.pkm-hh-me.pkm-fr-lave').count()) === 1);
 await page.screenshot({ path: shot('avatar-entete.png') });
 // Premium : tout le mode avatar est ouvert (Pokémon, shiny, styles, cadres).
 await page.evaluate(() => window.__pkm.avOpen()); await page.waitForTimeout(800);

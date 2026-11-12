@@ -366,7 +366,7 @@
     const ht = (pfGradePend && this.tiers()[pfGradePend.from]) || this.tierOf().cur;
     // Pas d'emblème aux grades Recrue et Chasseur (2026-11-07, porteur ; « Emblème du grade » dès Collectionneur).
     const hi = pfGradePend && this.tiers()[pfGradePend.from] ? pfGradePend.from : this.tierOf().i;
-    r.hh = { badge: ht.sym, grade: ht.name, show: hi >= 2 };
+    r.hh = { badge: ht.sym, grade: ht.name, alt: 'Grade ' + ht.name, show: hi >= 2 };
     r.gr = ui.isGrade ? this.vGrade(s) : { perks: [] };
     if (ui.isGrade) Object.assign(ui, { title: r.gr.name, subtitle: '', hasSubtitle: false, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
     r.gu = this.vGradeUp(s);

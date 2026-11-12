@@ -24,6 +24,7 @@ from (values
   ('021_avatar_v2', exists (select 1 from public.avatar_items where id = 'acc:couronne'), 'avatar v2 : accessoires, shiny'),
   ('023_boite_legendaires', to_regprocedure('public._mystery_weights(uuid,boolean)') is not null, 'boîte mystère : légendaires barrés'),
   ('022_avatar_v3', exists (select 1 from public.avatar_items where id = 'frame:lave'), 'avatar v3 : Pokémon d''avatar, cadres'),
+  ('024_safari', to_regprocedure('public.safari_start(uuid)') is not null, 'jeu Safari éclair'),
   ('020_premium_formules', exists (select 1 from pg_constraint where conname = 'premium_plan_check' and pg_get_constraintdef(oid) like '%quarter%'), 'Premium trimestriel et semestriel')
 ) as t(script, ok, role)
 order by script;

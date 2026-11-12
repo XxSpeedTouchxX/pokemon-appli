@@ -455,7 +455,8 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 /* En-tête de l'accueil (2026-10-16) : PK à gauche, logo au centre, avatar avec l'emblème du grade à droite. */
 .pkm-hh-left > span { align-items: flex-start !important; }
 .pkm-hh-left .pkm-tk-head { align-self: flex-start; }
-.pkm-hh-grade { position: absolute; right: -8px; bottom: -8px; width: 34px; height: 34px; display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5)); pointer-events: none; }
+/* Emblème du grade centré au-dessus du logo Dropicards (2026-11-12, porteur), plus sur l'avatar. */
+.pkm-hh-grade { display: block; width: 40px; height: 40px; margin: -6px 0 2px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45)); pointer-events: none; }
 /* Écran d'une extension façon vidéo du porteur (2026-10-17, setview.js) : progression, taille de la grille, raretés,
    cœur (favori) et « + » (ajout avec la cote du jour) sur chaque carte. */
 .pkm-sv-bar { display: block; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
@@ -1754,17 +1755,17 @@ section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(
 .pkm-bal-row .pkm-bal-pk, .pkm-tk-head.pkm-pa-head .pkm-pa-bar { flex: 1 1 auto; box-sizing: border-box; height: 34px !important; margin: 0 !important; padding: 0 12px 0 4px !important; gap: 6px !important; font-family: 'Sora', sans-serif !important; font-size: 15.5px !important; font-weight: 800 !important; line-height: 1 !important; align-self: auto !important; }
 .pkm-bal-row .pkm-bal-pk > img, .pkm-tk-head.pkm-pa-head .pkm-pa-bar > img { width: 26px !important; height: 26px !important; }
 .pkm-bal-row .pkm-pk-unit, .pkm-bal-row .pkm-pa-unit { font-size: 11.5px !important; color: #FFFFFF; }
-.pkm-xpb { position: absolute; z-index: 4; left: 4px; top: -13px; display: flex; align-items: center; justify-content: center; min-width: 30px; height: 15px; padding: 0 5px; box-sizing: border-box; border-radius: 8px; border: 1.5px solid #FFFFFF; font: 900 9px/1 'Sora', sans-serif; letter-spacing: 0.02em; color: #0B1120; cursor: pointer; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+/* Badge v3 (2026-11-12, porteur : « je ne veux plus voir ce flou ») : plus de calque de reflet par-dessus le texte ni de
+   découpe (overflow) ; le reflet passe dans le fond même du badge, le texte « 2XP » reste net et opaque. */
+.pkm-xpb { position: absolute; z-index: 6; isolation: isolate; left: 4px; top: -13px; display: flex; align-items: center; justify-content: center; min-width: 30px; height: 15px; padding: 0 5px; box-sizing: border-box; border-radius: 8px; border: 1.5px solid #FFFFFF; font: 900 9px/1 'Sora', sans-serif; letter-spacing: 0.02em; color: #0B1120; opacity: 1; filter: none; -webkit-font-smoothing: antialiased; cursor: pointer; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35); background-repeat: no-repeat; background-size: 260% 100%, 100% 100%; background-position: 130% 0, 0 0; animation: pkmXpbShine 3.2s ease-in-out infinite; }
 .pkm-xpb::before { content: ''; position: absolute; inset: -10px -6px; } /* zone de toucher plus grande */
 .pkm-xpb > span { position: relative; z-index: 1; }
-.pkm-xpb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0) 65%); background-size: 250% 100%; background-position: 120% 0; animation: pkmXpbShine 3.2s ease-in-out infinite; }
-.pkm-xpb-pk { background: linear-gradient(135deg, #FFF3A6, #FFD60A 45%, #F2A900); }
-.pkm-xpb-pa { background: linear-gradient(135deg, #F3C8FF, #B26BFF 50%, #7B3FE4); color: #FFFFFF; }
-.pkm-xpb-hot { animation: pkmXpbHot 0.55s ease-in-out 4; }
-.pkm-xpb-hot::after { animation-duration: 0.7s; }
-@keyframes pkmXpbShine { 0%, 55% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
-@keyframes pkmXpbHot { 0%, 100% { transform: scale(1); filter: none; } 50% { transform: scale(1.35) rotate(-6deg); filter: drop-shadow(0 0 6px #FFE46B) brightness(1.25); } }
-@media (prefers-reduced-motion: reduce) { .pkm-xpb::after, .pkm-xpb-hot { animation: none; } }
+.pkm-xpb-pk { background-image: linear-gradient(115deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0) 62%), linear-gradient(135deg, #FFF3A6, #FFD60A 45%, #F2A900); }
+.pkm-xpb-pa { background-image: linear-gradient(115deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0) 62%), linear-gradient(135deg, #F3C8FF, #B26BFF 50%, #7B3FE4); color: #FFFFFF; }
+.pkm-xpb-hot { animation: pkmXpbShine 0.7s ease-in-out 4, pkmXpbHot 0.55s ease-in-out 4; }
+@keyframes pkmXpbShine { 0%, 55% { background-position: 130% 0, 0 0; } 100% { background-position: -30% 0, 0 0; } }
+@keyframes pkmXpbHot { 0%, 100% { transform: scale(1); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35); } 50% { transform: scale(1.3) rotate(-6deg); box-shadow: 0 0 10px 2px rgba(255, 228, 107, 0.9); } }
+@media (prefers-reduced-motion: reduce) { .pkm-xpb, .pkm-xpb-hot { animation: none; } }
 /* Ticket acheté : badge « acheté » (coche verte) à la place de « +1 » (2026-11-12, porteur). */
 .pkm-tkfx-ok { top: -26px; right: -30px; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #22B35E; border: 4px solid #FFFFFF; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35); -webkit-text-stroke: 0; }
 .pkm-tkfx-ok svg path { fill: none; stroke: #FFFFFF; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -1834,6 +1835,97 @@ input, textarea, select, [contenteditable="true"], input *, textarea * { -webkit
 
 /* Barre du bas : les 4 icônes remontées de 3 px (2026-11-12, nuit, porteur : « légèrement centrés vers le bas »). */
 nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform: translateY(-3px); }
+
+/* ——— Safari éclair (2026-11-12, « go » du porteur ; maquette docs/37-maquette-mini-jeux) ——— */
+.pkm-sf-card-gm { background: radial-gradient(120% 90% at 50% 0%, rgba(127, 211, 255, 0.2), rgba(127, 211, 255, 0) 60%), #111A2C; color: #F3F6FC; }
+.pkm-sf-prev { position: relative; height: 128px; border-radius: 18px; overflow: hidden; background: linear-gradient(180deg, #7FD3FF 0%, #BDEBFF 48%, #9BE07A 49%, #5DBB4A 100%); }
+.pkm-sf-prev img { position: absolute; width: 58px; height: 58px; image-rendering: pixelated; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.25)); }
+.pkm-sf-prev-chip { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); padding: 4px 10px; border-radius: 999px; background: rgba(11, 17, 32, 0.88); color: #FFFFFF; font: 700 11.5px/1.2 'Sora', sans-serif; white-space: nowrap; }
+.pkm-sf-prev-a { left: 12%; top: 52px; animation: pkmSfRun 3.6s linear infinite; }
+.pkm-sf-prev-b { left: 58%; top: 60px; transform: scaleX(-1); animation: pkmSfRun2 4.4s linear infinite; }
+.pkm-sf-prev-c { left: 34%; top: 66px; opacity: 0.95; animation: pkmSfRun 5.2s linear infinite reverse; }
+.pkm-sf-prev-ring { position: absolute; left: calc(58% - 6px); top: 54px; width: 66px; height: 66px; border-radius: 50%; border: 3px solid #FFFFFF; box-shadow: 0 0 0 3px #22B35E; animation: pkmSfRing 2.2s ease-out infinite; }
+.pkm-sf-prev-pop { position: absolute; left: calc(58% + 46px); top: 44px; font: 900 18px/1 'Sora', sans-serif; color: #FFFFFF; -webkit-text-stroke: 1.2px #0B1120; paint-order: stroke fill; animation: pkmSfPopLoop 2.2s ease-out infinite; }
+@keyframes pkmSfRun { from { translate: -40px 0; } to { translate: 40px 0; } }
+@keyframes pkmSfRun2 { from { translate: 30px 0; } to { translate: -30px 0; } }
+@keyframes pkmSfRing { 0%, 30% { opacity: 0; transform: scale(0.6); } 45% { opacity: 1; transform: scale(1); } 85%, 100% { opacity: 0; transform: scale(1.1); } }
+@keyframes pkmSfPopLoop { 0%, 40% { opacity: 0; transform: translateY(6px); } 55% { opacity: 1; transform: translateY(0); } 85%, 100% { opacity: 0; transform: translateY(-10px); } }
+.pkm-sf-rule { padding: 7px 4px; border-radius: 12px; background: #16223A; }
+.pkm-sf-rule b { display: block; font: 800 16px/1.2 'Sora', sans-serif; color: #FFFFFF; }
+
+/* Calque de la partie : posé sur l'app, à sa taille. */
+.pkm-sf { position: fixed; z-index: 3000; overflow: hidden; border-radius: inherit; background: #0B1120; color: #F3F6FC; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; animation: pkmSfIn 0.3s ease-out both; }
+@media (min-width: 521px) { .pkm-sf { border-radius: 42px; } }
+@keyframes pkmSfIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+.pkm-sf-field { position: absolute; inset: 0; background: linear-gradient(180deg, #7FD3FF 0%, #BDEBFF 40%, #9BE07A 41%, #5DBB4A 100%); }
+.pkm-sf-hill { position: absolute; left: -12%; right: -12%; top: 37%; height: 12%; border-radius: 50%; background: #79CC5B; }
+.pkm-sf-cloud { position: absolute; width: 74px; height: 24px; border-radius: 20px; background: #FFFFFF; opacity: 0.9; animation: pkmSfCloud 14s ease-in-out infinite alternate; }
+.pkm-sf-cloud::before, .pkm-sf-cloud::after { content: ''; position: absolute; border-radius: 50%; background: #FFFFFF; }
+.pkm-sf-cloud::before { width: 32px; height: 32px; left: 12px; top: -15px; }
+.pkm-sf-cloud::after { width: 22px; height: 22px; left: 38px; top: -9px; }
+@keyframes pkmSfCloud { to { translate: 26px 0; } }
+.pkm-sf-bush { position: absolute; bottom: -20px; width: 32%; height: 80px; border-radius: 60px 60px 0 0; background: #3E9A3A; box-shadow: inset 0 8px 0 rgba(255, 255, 255, 0.12); }
+.pkm-sf-mons { position: absolute; inset: 0; }
+.pkm-sf-mon { position: absolute; left: 0; padding: 0; border: 0; background: transparent; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.pkm-sf-mon img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.25)); animation: pkmSfHop 0.5s ease-in-out infinite alternate; }
+@keyframes pkmSfHop { to { translate: 0 -7px; } }
+.pkm-sf-hit::after, .pkm-sf-miss::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; animation: pkmSfMark 0.6s ease-out both; }
+.pkm-sf-hit::after { border: 4px solid #FFFFFF; box-shadow: 0 0 0 4px #22B35E, 0 0 24px rgba(34, 179, 94, 0.9); }
+.pkm-sf-miss::after { border: 4px solid #FF5A5F; background: linear-gradient(45deg, transparent 46%, #FF5A5F 46% 54%, transparent 54%), linear-gradient(-45deg, transparent 46%, #FF5A5F 46% 54%, transparent 54%); }
+.pkm-sf-hit img { animation: pkmSfCaught 0.6s ease-in both; }
+.pkm-sf-miss img { opacity: 0.6; animation: pkmSfShake 0.4s ease-in-out; }
+@keyframes pkmSfMark { from { transform: scale(0.5); opacity: 0; } 30% { opacity: 1; } to { transform: scale(1.05); opacity: 0.9; } }
+@keyframes pkmSfCaught { 0%, 40% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.2); opacity: 0; } }
+@keyframes pkmSfShake { 25% { translate: -5px 0; } 75% { translate: 5px 0; } }
+.pkm-sf-pop { position: absolute; z-index: 3; font: 900 26px/1 'Sora', sans-serif; color: #FFFFFF; -webkit-text-stroke: 1.6px #0B1120; paint-order: stroke fill; text-shadow: 0 3px 0 #0B1120; pointer-events: none; animation: pkmSfPop 0.65s ease-out both; }
+.pkm-sf-pop-ko { color: #FF5A5F; }
+@keyframes pkmSfPop { from { transform: translateY(8px) scale(0.7); opacity: 0; } 30% { opacity: 1; transform: none; } to { transform: translateY(-24px); opacity: 0; } }
+.pkm-sf-top { position: absolute; z-index: 6; left: 12px; right: 12px; top: calc(env(safe-area-inset-top, 0px) + 12px); display: flex; align-items: center; gap: 8px; }
+.pkm-sf-x { flex: none; width: 42px; height: 42px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 21px; border: 1px solid #2A3A5C; background: rgba(11, 17, 32, 0.9); color: #F3F6FC; cursor: pointer; }
+.pkm-sf-x svg { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.pkm-sf-hud { flex: 1; min-width: 0; display: flex; gap: 6px; }
+.pkm-sf-hud[hidden], .pkm-sf-target[hidden], .pkm-sf-bar[hidden], .pkm-sf-panel[hidden] { display: none; }
+.pkm-sf-hud > span { display: flex; align-items: center; gap: 4px; height: 38px; padding: 0 10px; border-radius: 14px; background: rgba(11, 17, 32, 0.9); border: 1px solid #24345C; font: 800 14.5px/1 'Sora', sans-serif; white-space: nowrap; }
+.pkm-sf-g { color: #3BC48A; } .pkm-sf-b { color: #FF6B6B; }
+.pkm-sf-t { margin-left: auto; color: #FFD60A; min-width: 46px; justify-content: center; }
+.pkm-sf-target { position: absolute; z-index: 4; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 64px); transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border-radius: 999px; background: rgba(11, 17, 32, 0.9); font: 700 13.5px/1 'Sora', sans-serif; white-space: nowrap; }
+.pkm-sf-type { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 999px; background: var(--ty); color: #FFFFFF; font: 800 13px/1 'Sora', sans-serif; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.2); }
+.pkm-sf-bar { position: absolute; z-index: 4; left: 14px; right: 14px; bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); height: 12px; border-radius: 6px; background: rgba(11, 17, 32, 0.35); overflow: hidden; }
+.pkm-sf-bar i { display: block; height: 100%; border-radius: 6px; transform-origin: left center; background: linear-gradient(90deg, #FF5A5F, #FFD60A 40%, #3BC48A); }
+.pkm-sf-panel { position: absolute; z-index: 5; inset: 0; display: flex; align-items: center; justify-content: center; padding: 70px 16px 24px; box-sizing: border-box; background: rgba(5, 8, 15, 0.45); overflow-y: auto; }
+.pkm-sf-panel:empty { display: none; }
+.pkm-sf-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 26px; border: 1px solid #24345C; background: rgba(11, 17, 32, 0.96); text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); animation: pkmSfIn 0.3s ease-out both; }
+.pkm-sf-h { margin: 0; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 29px; line-height: 1.1; color: #FFFFFF; letter-spacing: 0.02em; }
+.pkm-sf-h em { font-style: normal; }
+.pkm-sf-done { color: #FFD60A; }
+.pkm-sf-p { margin: 0; font-size: 14px; line-height: 1.45; color: #C9D3EA; }
+.pkm-sf-p b { color: #FFFFFF; }
+.pkm-sf-wait { margin: 0; font: 700 15px/1.4 'Sora', sans-serif; color: #C9D3EA; }
+.pkm-sf-ex { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.pkm-sf-ex img { width: 52px; height: 52px; border-radius: 14px; background: #16223A; image-rendering: pixelated; }
+.pkm-sf-ex img.pkm-sf-no { opacity: 0.45; filter: grayscale(1); }
+.pkm-sf-rules { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pkm-sf-rules div { padding: 8px 4px; border-radius: 14px; background: #16223A; font-size: 11.5px; color: #9AA8C3; }
+.pkm-sf-rules b { display: block; font: 800 18px/1.2 'Sora', sans-serif; color: #FFFFFF; }
+.pkm-sf-rules .pkm-sf-plus { color: #3BC48A; } .pkm-sf-rules .pkm-sf-minus { color: #FF6B6B; }
+.pkm-sf-go { width: 100%; height: 54px; margin-top: 4px; border: 0; border-radius: 18px; background: #FFD60A; color: #0B1120; font: 800 17px/1 'Sora', sans-serif; box-shadow: 0 5px 0 #B38F00; cursor: pointer; }
+.pkm-sf-go:active { transform: translateY(3px); box-shadow: 0 2px 0 #B38F00; }
+.pkm-sf-count { width: 128px; height: 128px; border-radius: 64px; display: flex; align-items: center; justify-content: center; background: #0B1120; color: #FFD60A; font: 400 76px/1 'Luckiest Guy', 'Sora', sans-serif; box-shadow: 0 0 0 10px rgba(11, 17, 32, 0.25), 0 12px 30px rgba(0, 0, 0, 0.4); animation: pkmSfCount 0.65s ease-out both; }
+@keyframes pkmSfCount { from { transform: scale(1.6); opacity: 0; } 40% { transform: scale(0.95); opacity: 1; } to { transform: scale(1); } }
+.pkm-sf-gain { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px 8px 10px; border-radius: 999px; background: #FFD60A; color: #0B1120; font: 800 26px/1 'Sora', sans-serif; box-shadow: 0 8px 22px rgba(255, 214, 10, 0.4); animation: pkmSfCount 0.6s 0.15s ease-out both; }
+.pkm-sf-boost { font-size: 12.5px; font-weight: 700; color: #FFD60A; }
+.pkm-sf-h3 { margin: 6px 0 0; align-self: flex-start; font: 700 14px/1.2 'Sora', sans-serif; color: #C9D3EA; }
+.pkm-sf-caught { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.pkm-sf-caught div { position: relative; aspect-ratio: 1; border-radius: 14px; background: #16223A; display: flex; align-items: center; justify-content: center; }
+.pkm-sf-caught img { width: 90%; height: auto; image-rendering: pixelated; }
+.pkm-sf-c-ko { box-shadow: inset 0 0 0 2px #FF5A5F; }
+.pkm-sf-c-ok::after, .pkm-sf-c-ko::after { position: absolute; right: 4px; top: 3px; font: 900 10px/1 'Sora', sans-serif; }
+.pkm-sf-c-ok::after { content: '+2'; color: #3BC48A; } .pkm-sf-c-ko::after { content: '−1'; color: #FF6B6B; }
+.pkm-sf-next { margin: 2px 0 0; font-size: 12.5px; color: #9AA8C3; }
+@media (prefers-reduced-motion: reduce) { .pkm-sf-prev img, .pkm-sf-prev-ring, .pkm-sf-prev-pop, .pkm-sf-cloud, .pkm-sf-mon img { animation: none; } }
+.pkm-sf-rule-ok b { color: #3BC48A; } .pkm-sf-rule-ko b { color: #FF6B6B; }
+.pkm-hh-mid { padding-left: 10px; }
+.pkm-hh-mid > img:last-child { width: 160px !important; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -2772,6 +2864,11 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 @keyframes pkmAvSavedTick { to { stroke-dashoffset: 0; } }
 @keyframes pkmAvSavedSpark { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.4) rotate(160deg); } }
 @media (prefers-reduced-motion: reduce) { .pkm-av-saved, .pkm-av-saved > b, .pkm-av-saved-card, .pkm-av-saved-ok, .pkm-av-saved-fx i { animation: none; opacity: 1; } .pkm-av-saved-ok path { stroke-dashoffset: 0; animation: none; } .pkm-av-saved-fx { display: none; } }
+/* Un seul cadre (2026-11-12, porteur : « on a l'impression qu'il y a deux cadres l'un dans l'autre ») : avec un cadre
+   choisi dans Décor, l'anneau de couleur du grade autour de l'image disparaît ; l'avatar remplit tout l'intérieur du
+   cadre (en-tête et Mon profil). Sans cadre (« Aucun »), l'anneau du grade reste. */
+.pkm-hh-me.pkm-fr:not(.pkm-fr-aucun) > img:first-of-type { width: 62px !important; height: 62px !important; margin: 0 !important; border: 0 !important; border-radius: 17px !important; }
+.pkm-pf-photo.pkm-fr:not(.pkm-fr-aucun) > img:first-of-type { border: 0 !important; }
 
 /* App des stores (store.js, 2026-11-09) : aucune offre payante tant que l'achat intégré n'est pas branché. */
 .pkm-store .pkm-prem-banner,
@@ -2954,6 +3051,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=670b7664"></script>
+<script src="app.js?v=5a1f2f84"></script>
 </body>
 </html>

@@ -158,7 +158,7 @@
       open: () => this.setState({ pkSheet: true }), close: () => this.setState({ pkSheet: false }), sheet: !!s.pkSheet,
       balance: pkNum(s.pk),
       rules: [
-        ['Jeux', 'booster PK et pile ou face, dans l’onglet Jeux'],
+        ['Jeux', 'booster PK, pile ou face et Safari éclair, dans l’onglet Jeux'],
         ['+' + PK_WELCOME, 'de bienvenue, offerts une fois'],
         ['+' + PK_SHARE, 'une fois, en partageant l’app sur un réseau social']
       ].map(([n, t]) => ({ n: n, text: t })), // du plus petit gain au plus grand (demande du porteur)

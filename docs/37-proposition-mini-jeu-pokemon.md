@@ -1,5 +1,7 @@
 # Proposition : un mini-jeu « Pokémon » en plus du Booster PK et du pile ou face (PKM-App, vivant)
 
+*Mise à jour le 2026-11-13 : **« go » du porteur pour « Safari éclair »**, intégré dans Jeux (`tools/web/safari.js`, serveur `tools/supabase/024_safari.sql`) ; Mémo des cartes et Chaîne d'évolution restent des propositions.*
+
 *Créé le 2026-11-12 · demande du porteur (« propose-moi aussi un nouveau jeu que l'on pourrait intégrer en plus du jeu des boosters et du pile ou face, peut-être un mini-jeu Pokémon ») · proposition, **rien n'est codé sans « go »**.*
 
 ## 0. Ce qui est déjà proposé (pour ne pas refaire la même chose)

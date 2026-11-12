@@ -246,7 +246,7 @@
       open: true, cls: 'pkm-xptip pkm-xptip-' + xt.what.toLowerCase() + (xt.out ? ' pkm-xptip-out' : ''),
       icon: xt.what === 'PA' ? 'img/brand/pa.svg' : 'img/brand/pk.svg', title: '2XP ' + xt.what + ' actif', left: xpLeft(xtU - Date.now()),
       end: 'jusqu’au ' + xpEnd(xtU),
-      what: xt.what === 'PA' ? 'Tes PA du jour sont doublés.' : 'Tes gains de PK sont doublés au Booster PK et à pile ou face.',
+      what: xt.what === 'PA' ? 'Tes PA du jour sont doublés.' : 'Tes gains de PK sont doublés au Booster PK, à pile ou face et au Safari éclair.',
       aria: '2XP ' + xt.what + ' actif, encore ' + xpLeft(xtU - Date.now()) + ', jusqu’au ' + xpEnd(xtU) + '. Toucher pour fermer.',
       close: () => this.xpTipClose()
     } : { open: false };
