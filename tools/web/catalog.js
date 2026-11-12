@@ -7,7 +7,8 @@
   // - Images : CDN TCGdex (assets.tcgdex.net), jamais stockées chez nous. Vignettes en low.webp
   //   (245 × 337) ; grilles en low ou high.webp selon l'écran (srcset) ; fiche et zoom en high.png
   //   (600 × 825, sans perte), la meilleure qualité que publie TCGdex.
-  // - Cartes sans scan TCGdex dans aucune langue : scan anglais pokemontcg.io (chemin « ptcg: », petit visuel
+  // - Cartes sans scan TCGdex dans aucune langue : scan anglais pokemontcg.io (chemin « ptcg: », ou « sdx: » pour ses
+  //   visuels hébergés chez Scrydex ; petit visuel
   //   dans les grilles, 734 × 1024 sur la fiche) ; sinon une carte « visuel à venir » dessinée par l'app.
   //   Si une image ne charge plus, data-fallback (« drawn:<id> ») affiche la carte dessinée, créée à la demande.
   const TCG = { status: 'loading', doc: null, F: null, rows: [], byId: {}, bySet: {}, setList: [], items: {}, saved: {}, fan: [], dup: new Set() };
@@ -40,7 +41,7 @@
   };
   // Langue d'un visuel de repli (même dessin officiel, texte dans une autre langue).
   const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole', PT: 'portugaise', 'PT-BR': 'brésilienne', NL: 'néerlandaise', PL: 'polonaise' };
-  const PTCG = 'https://images.pokemontcg.io/', ASSETS = 'https://assets.tcgdex.net/';
+  const PTCG = 'https://images.pokemontcg.io/', SDX = 'https://images.scrydex.com/pokemon/', ASSETS = 'https://assets.tcgdex.net/';
   // Adresses d'un visuel selon sa source (chemin de cards.json).
   function visual(path) {
     if (!path) return null;
@@ -48,6 +49,11 @@
       // Grilles : le petit visuel seulement (le grand pèse jusqu'à 1 Mo) ; fiche et zoom : le grand.
       const b = PTCG + path.slice(5);
       return { img: b + '.png', hi: b + '_hires.png', srcset: '', lang: 'EN', credit: 'pokemontcg.io · haute définition (734 × 1024)' };
+    }
+    if (path.indexOf('sdx:') === 0) {
+      // Nouveaux visuels de pokemontcg.io, hébergés chez Scrydex (2026-11-12) : Règne Delta, Mew RGB des 30 ans.
+      const b = SDX + path.slice(4);
+      return { img: b + '/small', hi: b + '/large', srcset: '', lang: 'EN', credit: 'pokemontcg.io (Scrydex) · haute définition' };
     }
     const b = /^https?:/.test(path) ? path : ((TCG.doc && TCG.doc.img) || ASSETS) + path;
     return { img: b + '/low.webp', hi: b + '/high.png', srcset: b + '/low.webp 245w, ' + b + '/high.webp 600w',

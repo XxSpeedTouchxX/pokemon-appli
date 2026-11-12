@@ -24,6 +24,23 @@ from pathlib import Path
 from urllib.parse import unquote
 
 PTCG_IMG = "https://images.pokemontcg.io/"
+# Depuis fin 2026, pokemontcg.io publie les visuels des nouvelles extensions chez Scrydex (AVIF, « small » et « large »).
+SDX_IMG = "https://images.scrydex.com/pokemon/"
+# Visuels Scrydex imposés (2026-11-12, porteur) : TCGdex n'a pas encore les scans de Règne Delta, et ceux des trois
+# Mew RGB du 30ᵉ anniversaire (fr/me/30th/B, G, R) répondent 404. Extension TCGdex → extension pokemontcg.io (même
+# numérotation, sans zéros devant), puis cartes une par une.
+SDX_SETS = {"me06": "me6"}
+SDX_CARDS = {"30th-B": "me55-B", "30th-G": "me55-G", "30th-R": "me55-R"}
+
+
+def sdx_image(cid, sid, local, img):
+    """Chemin « sdx:<id> » imposé pour cette carte, ou None : carte listée dans SDX_CARDS (toujours), ou carte sans
+    visuel d'une extension de SDX_SETS."""
+    if cid in SDX_CARDS:
+        return "sdx:" + SDX_CARDS[cid]
+    if not img and sid in SDX_SETS and str(local or "").strip():
+        return "sdx:" + SDX_SETS[sid] + "-" + norm_number(local)
+    return None
 
 # Identifiants TCGdex qui ne se déduisent pas de ceux de pokemontcg.io.
 SET_TABLE = {
@@ -64,10 +81,14 @@ def candidates(sid):
 
 
 def compact_image(images):
-    """Adresse courte « ptcg:set/numéro » d'une image pokemontcg.io, ou None (autre hébergeur, format inattendu)."""
+    """Adresse courte « ptcg:set/numéro » d'une image pokemontcg.io, « sdx:id » d'une image Scrydex, ou None (autre
+    hébergeur, format inattendu)."""
     small, large = (images or {}).get("small") or "", (images or {}).get("large") or ""
     if small.startswith(PTCG_IMG) and small.endswith(".png") and large == small[:-4] + "_hires.png":
         return "ptcg:" + small[len(PTCG_IMG):-4]
+    m = re.fullmatch(re.escape(SDX_IMG) + r"([A-Za-z0-9.\-]+)/small", small)
+    if m and large == SDX_IMG + m.group(1) + "/large":
+        return "sdx:" + m.group(1)
     return None
 
 

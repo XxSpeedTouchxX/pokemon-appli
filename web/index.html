@@ -1746,16 +1746,20 @@ section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(
 
 /* Soldes de PK et de PA plus grands et badge « 2XP » (2026-11-12, porteur) : visible tant qu'un 2XP est actif, il
    scintille quand des PK ou des PA arrivent ; un appui donne le temps restant. */
+/* v2 (2026-11-12, nuit, porteur) : les deux soldes ont exactement la même taille (hauteur, largeur, police, logo) et le
+   badge « 2XP » se pose au-dessus du coin haut gauche de chaque solde, sans cacher le logo des PK ni celui des PA. */
+.pkm-pk-tk, .pkm-hh-left > span.pkm-pk-tk { gap: 14px; padding-top: 10px; align-items: stretch !important; }
 .pkm-bal-row { position: relative; display: flex; align-items: center; }
-.pkm-tk-head.pkm-pa-head .pkm-pa-bar { height: 28px; font-size: 14.5px; font-weight: 800; padding-right: 11px; }
-.pkm-tk-head.pkm-pa-head { height: 32px; margin-top: 4px; }
-.pkm-pk-unit { font-size: 12px; }
-.pkm-pa-unit { font-size: 11.5px; }
-.pkm-xpb { position: absolute; z-index: 4; left: -8px; top: -4px; display: flex; align-items: center; justify-content: center; min-width: 30px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; border: 2px solid #FFFFFF; font: 900 9.5px/1 'Sora', sans-serif; letter-spacing: 0.02em; color: #0B1120; cursor: pointer; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-bal-row > .pkm-bal-btn { flex: 1 1 auto; display: flex !important; height: auto !important; margin: 0 !important; align-self: stretch !important; }
+.pkm-bal-row .pkm-bal-pk, .pkm-tk-head.pkm-pa-head .pkm-pa-bar { flex: 1 1 auto; box-sizing: border-box; height: 34px !important; margin: 0 !important; padding: 0 12px 0 4px !important; gap: 6px !important; font-family: 'Sora', sans-serif !important; font-size: 15.5px !important; font-weight: 800 !important; line-height: 1 !important; align-self: auto !important; }
+.pkm-bal-row .pkm-bal-pk > img, .pkm-tk-head.pkm-pa-head .pkm-pa-bar > img { width: 26px !important; height: 26px !important; }
+.pkm-bal-row .pkm-pk-unit, .pkm-bal-row .pkm-pa-unit { font-size: 11.5px !important; color: #FFFFFF; }
+.pkm-xpb { position: absolute; z-index: 4; left: 4px; top: -13px; display: flex; align-items: center; justify-content: center; min-width: 30px; height: 15px; padding: 0 5px; box-sizing: border-box; border-radius: 8px; border: 1.5px solid #FFFFFF; font: 900 9px/1 'Sora', sans-serif; letter-spacing: 0.02em; color: #0B1120; cursor: pointer; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-xpb::before { content: ''; position: absolute; inset: -10px -6px; } /* zone de toucher plus grande */
 .pkm-xpb > span { position: relative; z-index: 1; }
 .pkm-xpb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0) 65%); background-size: 250% 100%; background-position: 120% 0; animation: pkmXpbShine 3.2s ease-in-out infinite; }
-.pkm-xpb-pk { top: 2px; background: linear-gradient(135deg, #FFF3A6, #FFD60A 45%, #F2A900); }
-.pkm-xpb-pa { top: -6px; background: linear-gradient(135deg, #F3C8FF, #B26BFF 50%, #7B3FE4); color: #FFFFFF; }
+.pkm-xpb-pk { background: linear-gradient(135deg, #FFF3A6, #FFD60A 45%, #F2A900); }
+.pkm-xpb-pa { background: linear-gradient(135deg, #F3C8FF, #B26BFF 50%, #7B3FE4); color: #FFFFFF; }
 .pkm-xpb-hot { animation: pkmXpbHot 0.55s ease-in-out 4; }
 .pkm-xpb-hot::after { animation-duration: 0.7s; }
 @keyframes pkmXpbShine { 0%, 55% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
@@ -1783,7 +1787,7 @@ section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(
 .pkm-tkc-one .pkm-tkc-name { font-size: 15px; }
 .pkm-tkc-zoom { position: absolute; right: 12px; bottom: 54px; z-index: 2; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; border-radius: 17px; background: rgba(5, 9, 18, 0.78); color: #FFFFFF; cursor: zoom-in; }
 .pkm-tkc-zoom svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
-.pkm-tkz { position: fixed; inset: 0; z-index: 95; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 64px 18px 28px; box-sizing: border-box; background: rgba(5, 8, 15, 0.95); color: #F3F6FC; animation: pkmAvSavedIn 0.2s ease-out both; }
+.pkm-tkz { position: absolute; inset: 0; z-index: 96; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 64px 18px 28px; box-sizing: border-box; background: rgba(5, 8, 15, 0.95); color: #F3F6FC; animation: pkmAvSavedIn 0.2s ease-out both; }
 .pkm-tkz-img { display: block; max-width: 100%; max-height: 76vh; width: auto; height: auto; border-radius: 4.8% / 3.4%; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65); cursor: zoom-out; }
 .pkm-tkz b { font-family: 'Sora', sans-serif; font-size: 16px; }
 .pkm-tkz small { font-size: 12.5px; color: #9AA8C3; }
@@ -1799,6 +1803,37 @@ input, textarea, select, [contenteditable="true"], input *, textarea * { -webkit
 /* Règles des PK et PA : boîte mystère en fin de liste du PK shop (2026-11-12, porteur). */
 .pkm-rules-box { position: relative; flex: none; width: 44px; height: 44px; display: block; }
 .pkm-rules-box img { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Message du badge « 2XP » (2026-11-12, nuit, porteur) : une carte descend du haut de l'écran avec un léger rebond, le
+   badge saute, le temps restant s'affiche en grand ; la barre du bas se vide en 5 s, puis la carte remonte. */
+.pkm-xptip-wrap { position: absolute; z-index: 97; left: 12px; right: 12px; top: calc(env(safe-area-inset-top, 0px) + 10px); display: flex; justify-content: center; pointer-events: none; }
+.pkm-xptip { pointer-events: auto; position: relative; width: 100%; max-width: 420px; display: flex; align-items: center; gap: 14px; padding: 14px 16px 16px; box-sizing: border-box; overflow: hidden; border-radius: 22px; border: 1.5px solid rgba(255, 214, 10, 0.55); background: linear-gradient(135deg, rgba(22, 34, 58, 0.97), rgba(11, 17, 32, 0.97)); color: #F3F6FC; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(255, 214, 10, 0.12); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); animation: pkmXptipIn 0.55s cubic-bezier(0.2, 1.25, 0.35, 1) both; }
+.pkm-xptip-pa { border-color: rgba(178, 107, 255, 0.65); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(178, 107, 255, 0.14); }
+.pkm-xptip-out { animation: pkmXptipOut 0.3s ease-in both; }
+.pkm-xptip::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.14) 48%, rgba(255, 255, 255, 0) 66%); background-size: 260% 100%; animation: pkmXptipShine 1.4s 0.35s ease-out both; pointer-events: none; }
+.pkm-xptip-badge { flex: none; position: relative; width: 58px; height: 58px; display: flex; align-items: center; justify-content: center; border-radius: 18px; background: radial-gradient(circle at 50% 35%, rgba(255, 228, 107, 0.35), rgba(255, 214, 10, 0.06) 70%); animation: pkmXptipPop 0.7s 0.18s cubic-bezier(0.3, 1.6, 0.4, 1) both; }
+.pkm-xptip-pa .pkm-xptip-badge { background: radial-gradient(circle at 50% 35%, rgba(213, 160, 255, 0.4), rgba(123, 63, 228, 0.08) 70%); }
+.pkm-xptip-badge img { width: 34px; height: 34px; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45)); }
+.pkm-xptip-badge b { position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%); padding: 2px 6px; border-radius: 8px; border: 1.5px solid #FFFFFF; background: linear-gradient(135deg, #FFF3A6, #FFD60A 45%, #F2A900); color: #0B1120; font: 900 10px/1 'Sora', sans-serif; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-xptip-pa .pkm-xptip-badge b { background: linear-gradient(135deg, #F3C8FF, #B26BFF 50%, #7B3FE4); color: #FFFFFF; }
+.pkm-xptip-txt { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.pkm-xptip-t { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 800; color: #FFD60A; }
+.pkm-xptip-pa .pkm-xptip-t { color: #D9B2FF; }
+.pkm-xptip-left { font-size: 14px; color: #C9D3EA; }
+.pkm-xptip-left strong { font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 800; color: #FFFFFF; }
+.pkm-xptip-txt small { font-size: 12px; color: #9AA8C3; }
+.pkm-xptip-txt .pkm-xptip-what { color: #C9D3EA; }
+.pkm-xptip-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #FFD60A; transform-origin: left center; animation: pkmXptipBar 5s linear both; }
+.pkm-xptip-pa .pkm-xptip-bar { background: #B26BFF; }
+@keyframes pkmXptipIn { 0% { transform: translateY(-130%) scale(0.96); opacity: 0; } 60% { opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+@keyframes pkmXptipOut { to { transform: translateY(-130%); opacity: 0; } }
+@keyframes pkmXptipPop { 0% { transform: scale(0.4) rotate(-14deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes pkmXptipShine { from { background-position: 130% 0; } to { background-position: -40% 0; } }
+@keyframes pkmXptipBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .pkm-xptip, .pkm-xptip-badge, .pkm-xptip::after { animation: none; } .pkm-xptip-out { opacity: 0; } }
+
+/* Barre du bas : les 4 icônes remontées de 3 px (2026-11-12, nuit, porteur : « légèrement centrés vers le bas »). */
+nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform: translateY(-3px); }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -2919,6 +2954,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=3b48e044"></script>
+<script src="app.js?v=670b7664"></script>
 </body>
 </html>

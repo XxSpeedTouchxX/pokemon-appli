@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-12 (fin de nuit) — Soldes, message 2XP, ticket agrandi, barre du bas, visuels Règne Delta et Mew RGB, maquettes des mini-jeux (demande du porteur)
+
+- **Soldes de PK et de PA** : exactement la même taille (hauteur, largeur, police, logo). Le badge « 2XP » est posé au-dessus du coin haut gauche de chaque solde : il ne cache plus le logo des PK ni celui des PA.
+- **Message du badge 2XP** : un appui fait descendre une carte du haut de l'écran, avec un petit rebond : « 2XP PK actif », « Encore 4 j 23 h » en grand, la date de fin et ce qui est doublé. Elle remonte seule au bout de 5 s (une barre se vide) ou au toucher. Elle remplace le message du bas.
+- **Carte d'un ticket agrandie** : elle s'affiche en plein écran, centrée. Elle était posée dans la fiche glissée, d'où l'affichage décalé vers le bas.
+- **Barre du bas** : les 4 icônes remontées de 3 px.
+- **Règne Delta** : les 141 cartes ont leur visuel. TCGdex n'a pas encore les scans ; ils viennent de pokemontcg.io (version anglaise, même dessin), dont les nouveaux visuels sont hébergés chez Scrydex.
+- **Mew R, G, B (30 ans)** : leurs visuels TCGdex répondaient « introuvable » ; ils viennent aussi de pokemontcg.io (Scrydex). Les trois Mew sont dans la liste de l'extension 30ᵉ Anniversaire.
+- Le pipeline quotidien garde ces visuels (`tools/tcgdex/ptcg.py`, `SDX_SETS`, `SDX_CARDS`) ; quand TCGdex publiera les scans français de Règne Delta, ils passeront devant.
+- **Mini-jeux** : maquettes de « Mémo des cartes » et de « Safari éclair », 3 écrans chacun (`docs/37-maquette-mini-jeux/`). Proposition seulement : rien n'est codé sans « go » (décisions J1 à J3 de `docs/37`).
+- Cache v184.
+
 ## 2026-11-12 (nuit) — Avatar, 2XP, tickets, en-tête, Radar, achats réservés aux admins (demande du porteur)
 
 - **Mon avatar** :

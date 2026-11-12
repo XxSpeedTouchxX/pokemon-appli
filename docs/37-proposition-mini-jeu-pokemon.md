@@ -58,6 +58,15 @@ Tu demandes cette fois un jeu plus « Pokémon ». Voici trois jeux originaux qu
 | Limite | Plus long à faire (animation, réglage de la difficulté) ; plus dur sur un vieux téléphone | Vite connu par cœur pour les familles célèbres |
 | Effort | ≈ 18 h (≈ 2,5 jours à 8 h/j ; ≈ 6 jours à 3 h/j) | ≈ 12 h (1,5 jour à 8 h/j ; ≈ 4 jours à 3 h/j) |
 
+## 2 bis. Maquettes (2026-11-12, fin de nuit)
+
+Le porteur a demandé des visuels des deux jeux : `docs/37-maquette-mini-jeux/` (page `index.html` à ouvrir depuis la racine du dépôt, et deux images).
+
+- **Mémo des cartes** (`memo-des-cartes.png`) : 1. les 12 cartes se montrent 1,5 s (barre qui se vide) ; 2. la partie : coups, paires, gain visé selon les coups, paire trouvée en vert avec une coche, erreur en rouge qui tremble, dos des cartes aux couleurs de Dropicards (gemme des PK) ; 3. fin : « Bravo ! 6 paires en 9 coups », +40 PK, puis les cartes de la partie avec leur cote Cardmarket et un « + » pour les ajouter, bouton d'attente rouge comme les autres jeux.
+- **Safari éclair** (`safari-eclair.png`) : 1. consigne (« Attrape les Pokémon Eau ! », exemples, 20 s, +2 / −1, compte à rebours) ; 2. la partie : prairie, Pokémon animés qui traversent, cercle vert « +2 » sur un bon Pokémon, croix rouge « −1 » sur une erreur, chrono et barre de temps ; 3. bilan : Pokémon attrapés, gain, record du jour, bouton d'attente.
+
+Les cartes de la maquette sont celles de la Collection Classique des 30 ans (visuels déjà dans l'app). Rien n'est branché.
+
 ## 3. Point d'attention : le coût des PK
 
 Chaque nouveau jeu donne des PK, et les PK achètent des lots réels au PK shop (`docs/34`). Un jeu à environ 35 PK par partie ajoute environ 70 à 210 PK par jour selon le grade : l'achat d'un booster arriverait environ 15 à 25 % plus tôt. Je propose donc l'une de ces deux options :

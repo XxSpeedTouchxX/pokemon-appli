@@ -487,6 +487,10 @@
     // Territoire n'est plus un onglet : écran de détail ouvert depuis l'accueil, avec Retour.
     if (ui.isTerritory) Object.assign(ui, { headerBig: false, headerDetail: true });
     r.tabShop = () => this.tab('pkshop');
+    // Carte d'un ticket agrandie (2026-11-12, nuit, porteur : « on voit le bas de la page zoomé ») : la vue est posée à la
+    // racine de l'app, hors de la fiche glissée, pour rester centrée à l'écran.
+    const tz = s.tkZoom;
+    r.tkz = tz ? { open: true, img: tz.img || '', name: tz.name || '', info: tz.info || '', close: () => this.setState({ tkZoom: null }) } : { open: false };
     const lk = s.shopLock;
     r.lockw = lk ? {
       open: true, img: 'img/grades/grade-' + (lk.g + 1) + '.svg', grade: shopGradeName(lk.g), text: shopLockText(lk),

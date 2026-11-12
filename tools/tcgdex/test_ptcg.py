@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ptcg import PtcgData, agrees, candidates, compact_image, fold, norm_number, same_name
+from ptcg import PtcgData, agrees, candidates, compact_image, fold, norm_number, same_name, sdx_image
 
 FIXTURES = json.loads(Path(__file__).with_name("test_ptcg_fixtures.json").read_text("utf-8"))
 
@@ -42,7 +42,18 @@ class Helpers(unittest.TestCase):
 
     def test_compact_image(self):
         self.assertEqual(compact_image(FIXTURES["tk2a"][0]["images"]), "ptcg:tk2a/1")
-        self.assertIsNone(compact_image({"small": "https://images.scrydex.com/pokemon/me2pt5-1/small", "large": "https://images.scrydex.com/pokemon/me2pt5-1/large"}))
+        self.assertEqual(compact_image({"small": "https://images.scrydex.com/pokemon/me2pt5-1/small", "large": "https://images.scrydex.com/pokemon/me2pt5-1/large"}), "sdx:me2pt5-1")
+        self.assertIsNone(compact_image({"small": "https://images.scrydex.com/pokemon/me2pt5-1/small", "large": "https://images.scrydex.com/pokemon/me2pt5-2/large"}))
+        self.assertIsNone(compact_image({"small": "https://exemple.fr/me2pt5-1/small", "large": "https://exemple.fr/me2pt5-1/large"}))
+
+    def test_sdx_image(self):
+        # Règne Delta : numéro sans zéros devant, seulement pour les cartes sans visuel.
+        self.assertEqual(sdx_image("me06-001", "me06", "001", None), "sdx:me6-1")
+        self.assertEqual(sdx_image("me06-141", "me06", "141", ""), "sdx:me6-141")
+        self.assertIsNone(sdx_image("me06-001", "me06", "001", "fr/me/me06/001"))
+        # Mew RGB des 30 ans : toujours imposés (le scan TCGdex répond 404).
+        self.assertEqual(sdx_image("30th-R", "30th", "R", "fr/me/30th/R"), "sdx:me55-R")
+        self.assertIsNone(sdx_image("30th-021", "30th", "021", None))
 
 
 class Data(unittest.TestCase):

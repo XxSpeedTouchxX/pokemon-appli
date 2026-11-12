@@ -46,6 +46,9 @@ ok('carte unique : centrée et large (' + Math.round(box.width) + ' px)', (await
 ok('« À quoi sert ce ticket » : « gagner la carte que tu as choisie ci-dessus »', /gagner la carte que tu as choisie ci-dessus/.test(N(await sheet.innerText())));
 await sheet.locator('.pkm-tkc').first().click(); await page.waitForTimeout(400);
 ok('toucher la carte : agrandie en plein écran', (await page.locator('.pkm-tkz').count()) === 1 && /Dracaufeu-ex/.test(await page.locator('.pkm-tkz').innerText()));
+// Hors de la fiche glissée (2026-11-12, nuit, porteur : « on voit le bas de la page zoomé ») : l'écran entier, carte centrée.
+const zb = await page.locator('.pkm-tkz').boundingBox(), zi = await page.locator('.pkm-tkz-img').boundingBox();
+ok('vue agrandie : tout l’écran, carte centrée (' + Math.round(zb.y) + ', ' + Math.round(zb.height) + ' px)', zb.y === 0 && zb.height >= 840 && (await page.locator('.pkm-tks-sheet .pkm-tkz').count()) === 0 && zi.y > 40 && Math.abs((zi.x + zi.width / 2) - 195) < 4);
 await page.screenshot({ path: shot('ticket-zoom.png') });
 await page.locator('.pkm-tkz-x').click(); await page.waitForTimeout(300);
 ok('fermée', (await page.locator('.pkm-tkz').count()) === 0);

@@ -40,6 +40,7 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
    - **cartes :** par numéro, avec vérification du nom anglais, ou du Pokédex et de l'illustrateur. Plusieurs cartes peuvent partager un numéro. Une carte invérifiable n'est prise que si la numérotation de l'extension est confirmée à 90 % au moins.
 
    Les correspondances validées sont gardées dans `ptcg_images.json`, pour les jours où le dépôt manque. Les images sont retirées si l'hébergeur ne répond plus.
+   - **Visuels Scrydex (2026-11-12, porteur) :** pokemontcg.io héberge les visuels des nouvelles extensions chez Scrydex (`https://images.scrydex.com/pokemon/<id>/small` et `/large`, AVIF). Chemin court `sdx:<id>` (`compact_image`, `sdx_image`) ; visuels imposés par `SDX_SETS` (Règne Delta `me06` → `me6-<numéro sans zéros>`, seulement pour les cartes sans scan TCGdex) et `SDX_CARDS` (Mew `30th-B/G/R` → `me55-B/G/R`, toujours : le scan TCGdex répond 404). L'app les lit dans `catalog.js` (`visual()`), les empreintes du scan dans `tools/scan/prints.mjs`.
    - **Bilan au 2026-10-04 :** 771 cartes reçoivent un scan pokemontcg.io ; 432 restent sans scan.
    - **Cartes encore sans scan :** l'app dessine une carte « Visuel à venir » (nom, extension, numéro, rareté).
    - **Exclu :** les scans récents servis par le CDN commercial Scrydex. La Collection Classique 30ᵉ Anniversaire reste donc dessinée.

@@ -80,7 +80,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
 
-from ptcg import PTCG_IMG, PtcgData, compact_image, fold, norm_number  # visuels anglais de dernier recours (pokemontcg.io)
+from ptcg import PTCG_IMG, SDX_IMG, PtcgData, compact_image, fold, norm_number, sdx_image  # visuels anglais de dernier recours (pokemontcg.io)
 from complete import en_extra, numbering_confirmed, ptcg_extra, ptcg_prices  # cartes manquantes en français (version anglaise, pokemontcg.io)
 import cmfiles  # prix Cardmarket des cartes que TCGdex ne relie pas (fichiers publics Cardmarket, 2026-10-18)
 
@@ -304,8 +304,13 @@ def reprint_images(known, pending):
     return {cid: first[key] for key, cid in pending if key and key in first and first[key][1] != cid}
 
 
+def image_url(path):
+    """Adresse d'un visuel « ptcg: » (pokemontcg.io) ou « sdx: » (Scrydex, hébergeur des nouveaux visuels de pokemontcg.io)."""
+    return SDX_IMG + path[len("sdx:"):] + "/small" if path.startswith("sdx:") else PTCG_IMG + path[len("ptcg:"):] + ".png"
+
+
 def probe_image(path):
-    url = PTCG_IMG + path[len("ptcg:"):] + ".png"
+    url = image_url(path)
     try:
         with urlopen(Request(url, method="HEAD", headers={"User-Agent": "PKM-App-index/1.0"}), timeout=20) as resp:
             if resp.status == 200 and (resp.headers.get("Content-Type") or "").startswith("image/"):
@@ -538,7 +543,7 @@ def compare_catalog(prev, doc):
         by_set, by_src = {}, {}
         for sid, _, img in lost:
             by_set[sid] = by_set.get(sid, 0) + 1
-            src = "ptcg" if str(img).startswith("ptcg:") else ("tcgdex:" + str(img).split("/")[0])
+            src = "ptcg" if str(img).startswith(("ptcg:", "sdx:")) else ("tcgdex:" + str(img).split("/")[0])
             by_src[src] = by_src.get(src, 0) + 1
         detail = (f" · {len(lost)} visuels perdus depuis la veille ; par extension : "
                   + ", ".join(f"{k} {v}" for k, v in sorted(by_set.items(), key=lambda kv: -kv[1])[:20])
@@ -678,7 +683,13 @@ def main():
         ptcg_found.update(last_resort)
         for r in rows:
             c, cid, img = r["c"], r["cid"], r["img"]
-            if img and r["img_lang"] == lang:
+            # Visuels Scrydex imposés (ptcg.sdx_image) : Règne Delta tant que TCGdex n'a pas ses scans, Mew RGB des 30 ans.
+            forced = sdx_image(cid, sid, r["local"], img or last_resort.get(cid))
+            if forced:
+                img = forced
+                ptcg_found[cid] = forced
+                stats["imgAlt"]["pokemontcg.io"] = stats["imgAlt"].get("pokemontcg.io", 0) + 1
+            elif img and r["img_lang"] == lang:
                 stats["imgOwn"] += 1
             elif img:
                 stats["imgAlt"][r["img_lang"]] = stats["imgAlt"].get(r["img_lang"], 0) + 1
@@ -759,7 +770,7 @@ def main():
     if ptcg_found and not args.no_probe and not ptcg_alive(ptcg_found.values()):
         print(f"Images pokemontcg.io indisponibles : {len(ptcg_found)} visuels retirés.")
         for c in cards:
-            if c[5].startswith("ptcg:"):
+            if c[5].startswith(("ptcg:", "sdx:")):
                 c[5] = ""
         stats["imgNone"] += stats["imgAlt"].pop("pokemontcg.io", 0)
 

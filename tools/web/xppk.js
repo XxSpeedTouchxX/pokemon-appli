@@ -230,14 +230,37 @@
     // quand des PK (ou des PA) arrivent ; un appui dit combien de temps il reste (les phrases « 2XP actif » sont retirées).
     if (r.pk) {
       const pkU = this.xpUntilMs(), paU = this.paXpUntilMs(), now = Date.now();
-      const tip = (what, u) => '2XP ' + what + ' actif · encore ' + xpLeft(u - now) + ' (jusqu’au ' + xpEnd(u) + ')';
       Object.assign(r.pk, {
         xpPk: !!pkU, xpPkCls: 'pkm-xpb pkm-xpb-pk' + (pkU && s.pkGain > 0 ? ' pkm-xpb-hot' : ''),
-        xpPkAria: pkU ? '2XP PK actif : voir le temps restant' : '', xpPkTap: () => { const u = this.xpUntilMs(); if (u) this.setState({ toast: tip('PK', u) }); },
+        xpPkAria: pkU ? '2XP PK actif : voir le temps restant' : '', xpPkTap: () => this.xpTipOpen('PK'),
         xpPa: !!paU, xpPaCls: 'pkm-xpb pkm-xpb-pa' + (paU && s.paGain ? ' pkm-xpb-hot' : ''),
-        xpPaAria: paU ? '2XP PA actif : voir le temps restant' : '', xpPaTap: () => { const u = this.paXpUntilMs(); if (u) this.setState({ toast: tip('PA', u) }); }
+        xpPaAria: paU ? '2XP PA actif : voir le temps restant' : '', xpPaTap: () => this.xpTipOpen('PA')
       });
       if (pkU && r.pk.gain) r.pk.gainText = '2XP · ' + r.pk.gainText;
     }
+    // Message du badge « 2XP » (2026-11-12, nuit, porteur : « que le message apparaisse de manière la plus satisfaisante
+    // possible […] d'en haut de l'écran ») : une carte descend du haut, le badge rebondit, le temps restant en grand ;
+    // elle remonte seule au bout de 5 s (barre qui se vide) ou au toucher.
+    const xt = s.xpTip, xtU = xt ? (xt.what === 'PA' ? this.paXpUntilMs() : this.xpUntilMs()) : 0;
+    r.xptip = xt && xtU ? {
+      open: true, cls: 'pkm-xptip pkm-xptip-' + xt.what.toLowerCase() + (xt.out ? ' pkm-xptip-out' : ''),
+      icon: xt.what === 'PA' ? 'img/brand/pa.svg' : 'img/brand/pk.svg', title: '2XP ' + xt.what + ' actif', left: xpLeft(xtU - Date.now()),
+      end: 'jusqu’au ' + xpEnd(xtU),
+      what: xt.what === 'PA' ? 'Tes PA du jour sont doublés.' : 'Tes gains de PK sont doublés au Booster PK et à pile ou face.',
+      aria: '2XP ' + xt.what + ' actif, encore ' + xpLeft(xtU - Date.now()) + ', jusqu’au ' + xpEnd(xtU) + '. Toucher pour fermer.',
+      close: () => this.xpTipClose()
+    } : { open: false };
     return r;
+  };
+  xpProto.xpTipOpen = function (what) {
+    if (!(what === 'PA' ? this.paXpUntilMs() : this.xpUntilMs())) return;
+    clearTimeout(this._xpTipT); clearTimeout(this._xpTipT2);
+    this.setState({ xpTip: { what: what, at: Date.now() } });
+    this._xpTipT = setTimeout(() => this.xpTipClose(), 5000);
+  };
+  xpProto.xpTipClose = function () {
+    const t = this.st().xpTip; if (!t || t.out) return;
+    clearTimeout(this._xpTipT); clearTimeout(this._xpTipT2);
+    this.setState({ xpTip: Object.assign({}, t, { out: true }) });
+    this._xpTipT2 = setTimeout(() => { if ((this.st().xpTip || {}).out) this.setState({ xpTip: null }); }, 320);
   };

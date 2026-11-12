@@ -38,8 +38,14 @@ await open('xp-3'); await page.locator('.pkm-mx').click(); await page.waitForTim
 st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, u: window.__pkm.st().xpUntil }));
 ok('2ᵉ boîte : 3 jours ajoutés (10 jours en tout)', st.pa === 400 && Math.abs(Date.parse(st.u) - Date.now() - 10 * 864e5) < 6e4);
 ok('badge « 2XP » sur le solde de PK, plus de bandeau « 2XP PK actif »', (await page.locator('.pkm-xpb-pk').count()) === 1 && !/2XP PK actif/.test(N(await sec.innerText())));
-await page.locator('.pkm-xpb-pk').click(); await page.waitForTimeout(200);
-ok('appui sur le badge : temps restant (« 2XP PK actif · encore … j »)', /2XP PK actif · encore (9|10) j/.test(await page.evaluate(() => window.__pkm.st().toast || '')));
+await page.locator('.pkm-xpb-pk').click(); await page.waitForTimeout(700);
+const tipBox = await page.locator('.pkm-xptip').boundingBox();
+ok('appui sur le badge : carte « 2XP PK actif » qui descend du haut, temps restant en grand', !!tipBox && tipBox.y < 60 && /2XP PK actif/.test(await page.locator('.pkm-xptip').innerText()) && /Encore (9|10) j/.test(N(await page.locator('.pkm-xptip').innerText())));
+// Logos jamais cachés : le badge est posé au-dessus du solde ; soldes de PK et de PA de la même taille.
+const geo = await page.evaluate(() => { const b = s => document.querySelector(s).getBoundingClientRect(); return { x: b('.pkm-xpb-pk'), i: b('.pkm-bal-pk > img'), pk: b('.pkm-bal-pk'), pa: b('.pkm-pa-head .pkm-pa-bar') }; });
+ok('badge au-dessus du logo des PK, sans le couvrir ; soldes PK et PA de même taille (' + Math.round(geo.pk.width) + '×' + Math.round(geo.pk.height) + ')', geo.x.bottom <= geo.i.top + 0.5 && Math.abs(geo.pk.width - geo.pa.width) < 1 && Math.abs(geo.pk.height - geo.pa.height) < 1);
+await page.locator('.pkm-xptip').click(); await page.waitForTimeout(500);
+ok('un toucher la referme', (await page.locator('.pkm-xptip').count()) === 0);
 await page.evaluate(() => window.__pkm.setState({ pa: 700 })); await page.waitForTimeout(150);
 await open('xppa-7'); await page.locator('.pkm-mx').click(); await page.waitForTimeout(300);
 st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, u: window.__pkm.st().paXpUntil, pend: window.__pkm.st().paDay }));

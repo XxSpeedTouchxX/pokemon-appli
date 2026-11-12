@@ -17,7 +17,7 @@ mkdirSync(IMGS, { recursive: true });
 const doc = JSON.parse(readFileSync(ROOT + 'web/data/cards.json', 'utf8')), F = {};
 doc.fields.forEach((k, i) => { F[k] = i; });
 const ASSETS = doc.img || 'https://assets.tcgdex.net/', PTCG = 'https://images.pokemontcg.io/';
-const urlOf = p => !p ? null : p.indexOf('ptcg:') === 0 ? PTCG + p.slice(5) + '.png' : (/^https?:/.test(p) ? p : ASSETS + p) + '/low.webp';
+const urlOf = p => !p ? null : p.indexOf('ptcg:') === 0 ? PTCG + p.slice(5) + '.png' : p.indexOf('sdx:') === 0 ? 'https://images.scrydex.com/pokemon/' + p.slice(4) + '/small' : (/^https?:/.test(p) ? p : ASSETS + p) + '/low.webp';
 const cards = doc.cards.map(r => ({ id: r[F.id], url: urlOf(r[F.img]) })).filter(c => c.url);
 // Empreintes gardées, valables tant que le calcul (scan-print.js) ne change pas.
 const ALG = createHash('sha1').update(readFileSync(ROOT + 'tools/web/scan-print.js')).digest('hex');

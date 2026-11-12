@@ -838,21 +838,30 @@
 </sc-if>
 
 <!-- fragment: pk-counter -->
-<span class="{{ pk.wrapCls }}" style="flex: none; position: relative; display: flex; flex-direction: column; align-items: flex-end">
+<span class="{{ pk.wrapCls }}" style="flex: none; position: relative; display: flex; flex-direction: column; align-items: stretch">
 <span class="pkm-bal-row">
-<button type="button" onClick="{{ pk.open }}" aria-label="{{ pk.aria }}" style="display: flex; align-items: center; height: 46px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer">
-<span class="pkm-bal-pk" style="display: flex; align-items: center; gap: 5px; height: 38px; padding: 0 12px 0 4px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 16.5px; font-weight: 800; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="30" height="30" style="flex: none; display: block; width: 30px; height: 30px">{{ pk.n }}<span class="pkm-pk-unit">PK</span></span>
+<button type="button" onClick="{{ pk.open }}" aria-label="{{ pk.aria }}" class="pkm-bal-btn" style="display: flex; align-items: center; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer">
+<span class="pkm-bal-pk" style="display: flex; align-items: center; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="26" height="26" style="flex: none; display: block">{{ pk.n }}<span class="pkm-pk-unit">PK</span></span>
 </button>
 <sc-if value="{{ pk.xpPk }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pk.xpPkTap }}" aria-label="{{ pk.xpPkAria }}" class="{{ pk.xpPkCls }}"><span>2XP</span></button></sc-if>
 </span>
 <span class="pkm-bal-row">
-<button type="button" onClick="{{ pk.openPa }}" aria-label="{{ pk.paAria }}" class="pkm-tk-head pkm-pa-head"><span class="{{ pk.paCls }}"><img src="img/brand/pa.svg" alt="" width="22" height="22" style="flex: none; display: block; width: 22px; height: 22px">{{ pk.pa }}<span class="pkm-pa-unit">PA</span><sc-if value="{{ pk.paReady }}" hint-placeholder-val="{{ false }}"><span class="pkm-pa-dot" aria-hidden="true">1</span></sc-if></span></button>
+<button type="button" onClick="{{ pk.openPa }}" aria-label="{{ pk.paAria }}" class="pkm-tk-head pkm-pa-head pkm-bal-btn"><span class="{{ pk.paCls }}"><img src="img/brand/pa.svg" alt="" width="26" height="26" style="flex: none; display: block">{{ pk.pa }}<span class="pkm-pa-unit">PA</span><sc-if value="{{ pk.paReady }}" hint-placeholder-val="{{ false }}"><span class="pkm-pa-dot" aria-hidden="true">1</span></sc-if></span></button>
 <sc-if value="{{ pk.xpPa }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pk.xpPaTap }}" aria-label="{{ pk.xpPaAria }}" class="{{ pk.xpPaCls }}"><span>2XP</span></button></sc-if>
 </span>
 <sc-if value="{{ pk.gain }}" hint-placeholder-val="{{ false }}">
 <span aria-hidden="true" class="pkm-gain" style="position: absolute; z-index: 5; right: 4px; top: 100%; margin-top: -6px; padding: 2px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12.5px; font-weight: 800; white-space: nowrap; pointer-events: none">{{ pk.gainText }} PK</span>
 </sc-if>
 </span>
+
+<!-- fragment: tk-zoom -->
+<sc-if value="{{ tkz.open }}" hint-placeholder-val="{{ false }}"><div role="dialog" aria-modal="true" aria-label="{{ tkz.name }}" class="pkm-tkz"><button type="button" onClick="{{ tkz.close }}" aria-label="Fermer" class="pkm-tkz-x"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><img src="{{ tkz.img }}" alt="{{ tkz.name }}" onClick="{{ tkz.close }}" class="pkm-tkz-img"><b>{{ tkz.name }}</b><small>{{ tkz.info }}</small></div></sc-if>
+
+<!-- fragment: xp-tip -->
+<sc-if value="{{ xptip.open }}" hint-placeholder-val="{{ false }}"><div class="pkm-xptip-wrap"><button type="button" onClick="{{ xptip.close }}" role="status" aria-label="{{ xptip.aria }}" class="{{ xptip.cls }}">
+<span class="pkm-xptip-badge" aria-hidden="true"><img src="{{ xptip.icon }}" alt="" width="30" height="30"><b>2XP</b></span>
+<span class="pkm-xptip-txt"><b class="pkm-xptip-t">{{ xptip.title }}</b><span class="pkm-xptip-left">Encore <strong>{{ xptip.left }}</strong></span><small>{{ xptip.end }}</small><small class="pkm-xptip-what">{{ xptip.what }}</small></span>
+<i class="pkm-xptip-bar" aria-hidden="true"></i></button></div></sc-if>
 
 <!-- fragment: tuto -->
 <sc-if value="{{ tu.ask }}" hint-placeholder-val="{{ false }}">
@@ -1797,7 +1806,6 @@
 <sc-if value="{{ tkc.mine }}" hint-placeholder-val="{{ false }}"><b class="pkm-tkc-n">{{ tkc.mineText }}</b></sc-if><i class="pkm-tkc-check" aria-hidden="true"></i></span>
 <span class="pkm-tkc-name">{{ tkc.name }}</span><sc-if value="{{ tkc.hasInfo }}" hint-placeholder-val="{{ false }}"><small class="pkm-tkc-info">{{ tkc.info }}</small></sc-if>
 </button><sc-if value="{{ tkc.canZoom }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ tkc.zoom }}" aria-label="{{ tkc.zoomAria }}" class="pkm-tkc-zoom"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"></circle><path d="M15 15l5 5M8 10.5h5M10.5 8v5"></path></svg></button></sc-if></span></sc-for></div></sc-if>
-<sc-if value="{{ pks.sheet.zoomOpen }}" hint-placeholder-val="{{ false }}"><div role="dialog" aria-modal="true" aria-label="{{ pks.sheet.zoomName }}" class="pkm-tkz"><button type="button" onClick="{{ pks.sheet.zoomClose }}" aria-label="Fermer" class="pkm-tkz-x"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><img src="{{ pks.sheet.zoomImg }}" alt="{{ pks.sheet.zoomName }}" onClick="{{ pks.sheet.zoomClose }}" class="pkm-tkz-img"><b>{{ pks.sheet.zoomName }}</b><small>{{ pks.sheet.zoomInfo }}</small></div></sc-if>
 <sc-if value="{{ pks.sheet.noCards }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-tkc-none">{{ pks.sheet.noCardsText }}</p></sc-if>
 </section>
 <h3 class="pkm-tks-h">À quoi sert ce ticket ?</h3>
