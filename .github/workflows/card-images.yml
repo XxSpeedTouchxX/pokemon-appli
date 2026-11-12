@@ -1,0 +1,29 @@
+# Visuels de cartes (2026-11-12, contenus réseaux sociaux, lecture seule) : visuels TCGdex des cartes demandées, copiés
+# dans le journal du workflow. Rien n'est écrit dans l'app.
+name: Visuels de cartes
+
+on:
+  workflow_dispatch:
+    inputs:
+      paths:
+        description: "Chemins TCGdex séparés par des espaces (ex. fr/me/me02.5/276)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  images:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Visuels
+        env:
+          PATHS: ${{ github.event.inputs.paths }}
+        run: pip install --quiet pillow && python tools/marketing/card_images.py "$PATHS"
