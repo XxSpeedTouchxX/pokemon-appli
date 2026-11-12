@@ -27,7 +27,9 @@ const geo = async () => page.evaluate(() => {
 });
 let g = await geo();
 // En-tête de l'accueil (2026-10-16) : PK à gauche, logo au centre (plus petit), avatar plus grand à droite.
-ok('390 : PK à gauche, logo ' + Math.round(g.logo[2]) + ' px au centre, avatar à droite ; bouton de 44 px', g.pk[0] < 30 && g.pk[1] <= g.logo[0] && g.logo[1] <= g.av[0] && g.av[1] <= g.vw - 10 && g.pk[2] >= 44 && g.logo[2] >= 110 && g.av[1] - g.av[0] >= 56);
+// Soldes PK et PA de 34 px (2026-11-12, porteur : même taille), zone de toucher de 44 px autour (::after).
+const touch = await page.evaluate(() => { const b = document.querySelector('header button[aria-label^="Mes PK"]'), a = getComputedStyle(b, '::after'); return b.getBoundingClientRect().height - parseFloat(a.top) - parseFloat(a.bottom); });
+ok('390 : PK à gauche, logo ' + Math.round(g.logo[2]) + ' px au centre, avatar à droite ; solde de ' + Math.round(g.pk[2]) + ' px, zone de toucher de ' + Math.round(touch) + ' px', g.pk[0] < 30 && g.pk[1] <= g.logo[0] && g.logo[1] <= g.av[0] && g.av[1] <= g.vw - 10 && g.pk[2] >= 34 && touch >= 44 && g.logo[2] >= 110 && g.av[1] - g.av[0] >= 56);
 await page.screenshot({ path: shot('pk-accueil.png'), clip: { x: 0, y: 0, width: 390, height: 300 } });
 // 2. Même jour, lendemain : rien de plus (gain du jour retiré le 2026-10-12).
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(800);

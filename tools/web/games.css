@@ -1669,3 +1669,6 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-sf-rule-ok b { color: #3BC48A; } .pkm-sf-rule-ko b { color: #FF6B6B; }
 .pkm-hh-mid { padding-left: 10px; }
 .pkm-hh-mid > img:last-child { width: 160px !important; }
+/* Zone de toucher de 44 px autour des soldes (pastilles de 34 px). */
+.pkm-bal-row > .pkm-bal-btn { position: relative; }
+.pkm-bal-row > .pkm-bal-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -5px; bottom: -5px; }
