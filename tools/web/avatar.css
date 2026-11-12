@@ -98,7 +98,8 @@
 .pkm-av-accico svg { fill: none; stroke: #5A6A8E; stroke-width: 2; stroke-linecap: round; }
 .pkm-av-shiny { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .pkm-av-shc { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px 12px; border: 2px solid #1E2B45; border-radius: 20px; background: #0B1120; color: #F3F6FC; font: inherit; cursor: pointer; }
-.pkm-av-shc img { width: 96px; height: 96px; image-rendering: pixelated; }
+.pkm-av-shc > img { width: 96px; height: 96px; image-rendering: pixelated; }
+.pkm-av-shc .pkm-av-pro img { width: 14px; height: 14px; image-rendering: auto; }
 .pkm-av-shc b { font-size: 14px; }
 .pkm-av-shc-s { background: radial-gradient(90% 70% at 50% 30%, rgba(255, 228, 107, 0.22), rgba(255, 228, 107, 0) 70%), #0B1120; }
 .pkm-av-shc-s b::before { content: '✨ '; }
@@ -235,7 +236,7 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 
 /* ——— Mon avatar v5 (2026-11-11, soir, porteur) ——— */
 /* Écran 50/50 : l'avatar et ses rubriques (moitié haute, figée) ; les choix qui défilent et « Valider mon avatar » (moitié basse). */
-.pkm-av-full .pkm-av-top { height: 50%; height: 50dvh; min-height: 320px; }
+.pkm-av-full .pkm-av-top { height: 70%; height: 70dvh; min-height: 360px; }
 .pkm-av-bot { height: 72px; min-height: 72px; }
 /* Prix en PA : la goutte des PA à côté du nombre (plus de couronne dorée). */
 .pkm-av-pro { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px 2px 3px; background: linear-gradient(135deg, #B26BFF, #6A3CEB); color: #FFFFFF; font-size: 10.5px; }
@@ -274,3 +275,27 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 .pkm-fr-cosmique { --frbg: radial-gradient(circle at 30% 20%, #FFFFFF 0 1.5px, transparent 2.5px), radial-gradient(circle at 80% 60%, #FFFFFF 0 1.5px, transparent 2.5px), conic-gradient(from var(--pkm-fra), #FF5BE1, #6A3CEB, #2BF0FF, #FFD60A, #FF5BE1); --frglow: rgba(255, 91, 225, 0.8); --frt: 5s; }
 .pkm-fr-cristal { --frbg: conic-gradient(from var(--pkm-fra), #E8F7FF, #8FD3FF, #FFFFFF, #C9A6FF, #E8F7FF, #8FD3FF, #FFFFFF); --frglow: rgba(201, 166, 255, 0.85); --frt: 3s; --frg: 1.2s; }
 .pkm-fr-cristal::after { animation-name: pkmFrBreath; }
+
+/* 2026-11-12 (porteur) : haut figé à 70 % de l'écran ; solde de PA bien lisible ; animation « Avatar enregistré ». */
+.pkm-av-full .pkm-av-pa { padding: 6px 13px 6px 7px; gap: 6px; font-size: 16px; font-weight: 800; letter-spacing: 0.01em; color: #FFFFFF; background: #0B1120; border: 2px solid #FFFFFF; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+.pkm-av-full .pkm-av-pa img { width: 22px; height: 22px; }
+.pkm-av-saved { position: absolute; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: rgba(11, 17, 32, 0.82); color: #FFFFFF; animation: pkmAvSavedIn 0.25s ease-out both; }
+.pkm-av-saved > b { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; animation: pkmAvSavedTxt 0.5s 0.25s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.pkm-av-saved-card { position: relative; width: 170px; height: 170px; border-radius: 30px; padding: 6px; background: linear-gradient(135deg, #FFE46B, #F2A900 40%, #FFF3B0 55%, #E8A100); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45); animation: pkmAvSavedPop 0.6s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
+.pkm-av-saved-img { width: 100%; height: 100%; border-radius: 24px; display: block; object-fit: cover; }
+.pkm-av-saved-ok { position: absolute; right: -12px; bottom: -12px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #22B35E; border: 4px solid #FFFFFF; animation: pkmAvSavedTxt 0.45s 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+.pkm-av-saved-ok path { fill: none; stroke: #FFFFFF; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; animation: pkmAvSavedTick 0.4s 0.7s ease-out forwards; }
+.pkm-av-saved-fx { position: absolute; left: 50%; top: 45%; width: 0; height: 0; pointer-events: none; }
+.pkm-av-saved-fx i { position: absolute; width: 10px; height: 10px; margin: -5px; border-radius: 3px; background: #FFD60A; opacity: 0; animation: pkmAvSavedSpark 0.9s 0.35s ease-out forwards; }
+.pkm-av-saved-fx i:nth-child(2n) { background: #FF7AC6; }
+.pkm-av-saved-fx i:nth-child(3n) { background: #5EE0CF; }
+.pkm-av-saved-fx i:nth-child(1) { --dx: 0px; --dy: -150px; } .pkm-av-saved-fx i:nth-child(2) { --dx: 106px; --dy: -106px; }
+.pkm-av-saved-fx i:nth-child(3) { --dx: 150px; --dy: 0px; } .pkm-av-saved-fx i:nth-child(4) { --dx: 106px; --dy: 106px; }
+.pkm-av-saved-fx i:nth-child(5) { --dx: 0px; --dy: 150px; } .pkm-av-saved-fx i:nth-child(6) { --dx: -106px; --dy: 106px; }
+.pkm-av-saved-fx i:nth-child(7) { --dx: -150px; --dy: 0px; } .pkm-av-saved-fx i:nth-child(8) { --dx: -106px; --dy: -106px; }
+@keyframes pkmAvSavedIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pkmAvSavedPop { 0% { transform: scale(0.4) rotate(-8deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes pkmAvSavedTxt { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes pkmAvSavedTick { to { stroke-dashoffset: 0; } }
+@keyframes pkmAvSavedSpark { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.4) rotate(160deg); } }
+@media (prefers-reduced-motion: reduce) { .pkm-av-saved, .pkm-av-saved > b, .pkm-av-saved-card, .pkm-av-saved-ok, .pkm-av-saved-fx i { animation: none; opacity: 1; } .pkm-av-saved-ok path { stroke-dashoffset: 0; animation: none; } .pkm-av-saved-fx { display: none; } }

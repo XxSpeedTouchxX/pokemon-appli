@@ -52,6 +52,8 @@ def main():
         index.append({"n": n, "sha256": hashlib.sha256(png).hexdigest(), "source": url})
     INDEX.write_text(json.dumps({"count": len(index), "shiny": index}, ensure_ascii=False, indent=1) + "\n", "utf-8")
     print(f"{len(index)} sprites shiny dans {OUT}")
+    # Kyogre, Groudon et Rayquaza ont un shiny « maison » (2026-11-12, porteur) : on le refait par-dessus l'officiel.
+    print("Relance ensuite : python3 tools/sprites/recolor_legend_shiny.py (shiny maison de Kyogre, Groudon, Rayquaza)")
 
 
 if __name__ == "__main__":

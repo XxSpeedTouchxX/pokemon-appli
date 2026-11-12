@@ -22,7 +22,7 @@ ok('avatar de départ : cheveux noirs en pics, fond jaune, sans Pokémon', d0.ha
 // Écran en 3 parties : 45 % figé en haut, 45 % qui défile, 10 % figé en bas.
 const lay = await page.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(), m = document.querySelector('.pkm-av-mid');
   return { pos: getComputedStyle(document.querySelector('.pkm-av-full')).position, top: r('.pkm-av-top').height, mid: r('.pkm-av-mid').height, bot: r('.pkm-av-bot').height, scroll: m.scrollHeight > m.clientHeight, h: innerHeight }; });
-ok('écran 50/50 : haut ' + Math.round(lay.top) + ' px (figé), bas ' + Math.round(lay.mid + lay.bot) + ' px (choix qui défilent + « Valider »)', lay.pos === 'fixed' && Math.abs(lay.top - lay.h * 0.5) < 4 && Math.abs(lay.mid + lay.bot - lay.h * 0.5) < 4 && Math.round(lay.bot) === 72 && lay.scroll);
+ok('écran 70/30 : haut ' + Math.round(lay.top) + ' px (figé, 70 %), bas ' + Math.round(lay.mid + lay.bot) + ' px (choix qui défilent + « Valider »)', lay.pos === 'fixed' && Math.abs(lay.top - lay.h * 0.7) < 4 && Math.abs(lay.mid + lay.bot - lay.h * 0.3) < 4 && Math.round(lay.bot) === 72 && lay.scroll);
 ok('bas de l’écran : seulement « Valider mon avatar »', (await page.locator('.pkm-av-bot button').allInnerTexts()).join('|').trim() === 'Valider mon avatar');
 const rowTexts = async l => (await page.locator('[role=tablist][aria-label="' + l + '"] button').allInnerTexts()).map(t => t.trim()).join('|');
 ok('rubriques sous l’avatar : Cheveux, Visage, Habit, Décor puis Pokémon, Shiny, Accessoire', await rowTexts('Ton avatar') === 'Cheveux|Visage|Habit|Décor' && await rowTexts('Ton Pokémon') === 'Pokémon|Shiny|Accessoire');
@@ -96,7 +96,11 @@ ok('cadre « Lave volcanique » : fenêtre de déblocage (250 PA ou Premium) dè
 await lk.locator('button.pkm-av-buy').click(); await page.waitForTimeout(600);
 await page.locator('.pkm-av-bot button').click(); await page.waitForTimeout(400);
 ok('« Valider mon avatar » : aucune fenêtre, enregistré tout de suite', (await lk.count()) === 0);
-await page.waitForTimeout(1100);
+await page.waitForTimeout(300);
+ok('animation « Avatar enregistré ! » avec le nouvel avatar', (await page.locator('.pkm-av-saved').count()) === 1 && /Avatar enregistré/.test(await page.locator('.pkm-av-saved').innerText()) && /^data:image/.test(await page.locator('.pkm-av-saved-img').getAttribute('src') || ''));
+await page.screenshot({ path: shot('avatar-enregistre.png') });
+ok('pas d’offre Premium ouverte derrière', !(await page.evaluate(() => window.__pkm.st().premOpen)));
+await page.waitForTimeout(1800);
 const saved = await st();
 ok('avatar validé : image, accessoire tourné, retour à Mon profil', saved.avatarCfg && saved.avatarCfg.poke === 25 && saved.avatarCfg.shiny === true && saved.avatarCfg.frame === 'lave' && saved.avatarCfg.arot === 345 && /^data:image\/jpeg/.test(saved.avatarPng || '') && saved.screen === 'profile');
 const pfImg = page.locator('button.pkm-pf-photo img').first();

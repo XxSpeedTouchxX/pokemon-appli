@@ -839,10 +839,16 @@
 
 <!-- fragment: pk-counter -->
 <span class="{{ pk.wrapCls }}" style="flex: none; position: relative; display: flex; flex-direction: column; align-items: flex-end">
-<button type="button" onClick="{{ pk.open }}" aria-label="{{ pk.aria }}" style="display: flex; align-items: center; height: 44px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer">
-<span style="display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 11px 0 4px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="26" height="26" style="flex: none; display: block; width: 26px; height: 26px">{{ pk.n }}<span class="pkm-pk-unit">PK</span></span>
+<span class="pkm-bal-row">
+<button type="button" onClick="{{ pk.open }}" aria-label="{{ pk.aria }}" style="display: flex; align-items: center; height: 46px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer">
+<span class="pkm-bal-pk" style="display: flex; align-items: center; gap: 5px; height: 38px; padding: 0 12px 0 4px; border-radius: 999px; background: #111A2C; border: 1px solid #1E2B45; color: #F3F6FC; font-family: 'Sora', sans-serif; font-size: 16.5px; font-weight: 800; white-space: nowrap"><img src="img/brand/pk.svg" alt="" width="30" height="30" style="flex: none; display: block; width: 30px; height: 30px">{{ pk.n }}<span class="pkm-pk-unit">PK</span></span>
 </button>
-<button type="button" onClick="{{ pk.openPa }}" aria-label="{{ pk.paAria }}" class="pkm-tk-head pkm-pa-head"><span class="{{ pk.paCls }}"><img src="img/brand/pa.svg" alt="" width="18" height="18" style="flex: none; display: block; width: 18px; height: 18px">{{ pk.pa }}<span class="pkm-pa-unit">PA</span><sc-if value="{{ pk.paReady }}" hint-placeholder-val="{{ false }}"><span class="pkm-pa-dot" aria-hidden="true">1</span></sc-if></span></button>
+<sc-if value="{{ pk.xpPk }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pk.xpPkTap }}" aria-label="{{ pk.xpPkAria }}" class="{{ pk.xpPkCls }}"><span>2XP</span></button></sc-if>
+</span>
+<span class="pkm-bal-row">
+<button type="button" onClick="{{ pk.openPa }}" aria-label="{{ pk.paAria }}" class="pkm-tk-head pkm-pa-head"><span class="{{ pk.paCls }}"><img src="img/brand/pa.svg" alt="" width="22" height="22" style="flex: none; display: block; width: 22px; height: 22px">{{ pk.pa }}<span class="pkm-pa-unit">PA</span><sc-if value="{{ pk.paReady }}" hint-placeholder-val="{{ false }}"><span class="pkm-pa-dot" aria-hidden="true">1</span></sc-if></span></button>
+<sc-if value="{{ pk.xpPa }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pk.xpPaTap }}" aria-label="{{ pk.xpPaAria }}" class="{{ pk.xpPaCls }}"><span>2XP</span></button></sc-if>
+</span>
 <sc-if value="{{ pk.gain }}" hint-placeholder-val="{{ false }}">
 <span aria-hidden="true" class="pkm-gain" style="position: absolute; z-index: 5; right: 4px; top: 100%; margin-top: -6px; padding: 2px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12.5px; font-weight: 800; white-space: nowrap; pointer-events: none">{{ pk.gainText }} PK</span>
 </sc-if>
@@ -995,7 +1001,7 @@
 <sc-if value="{{ BB.info.hasHours }}" hint-placeholder-val="{{ true }}"><span style="font-size: 13px; line-height: 1.45"><span style="font-weight: 700; color: {{ BB.info.hoursColor }}">{{ BB.info.hoursState }}</span> · {{ BB.info.hoursText }}</span></sc-if>
 <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px">
 <a href="{{ BB.info.route }}" target="_blank" rel="noopener" style="display: flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 13.5px; font-weight: 800; text-decoration: none">Itinéraire</a>
-<sc-if value="{{ BB.info.hasTel }}" hint-placeholder-val="{{ true }}"><a href="{{ BB.info.tel }}" aria-label="{{ BB.info.telAria }}" style="display: flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; color: #F3F6FC; font-size: 13.5px; font-weight: 700; text-decoration: none">Appeler</a></sc-if>
+<sc-if value="{{ BB.info.hasTel }}" hint-placeholder-val="{{ true }}"><a href="{{ BB.info.tel }}" target="{{ BB.info.telTarget }}" rel="noopener" aria-label="{{ BB.info.telAria }}" style="display: flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; color: #F3F6FC; font-size: 13.5px; font-weight: 700; text-decoration: none">Appeler</a></sc-if>
 <sc-if value="{{ BB.info.hasSite }}" hint-placeholder-val="{{ true }}"><a href="{{ BB.info.site }}" target="_blank" rel="noopener" aria-label="{{ BB.info.siteAria }}" style="display: flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; color: #F3F6FC; font-size: 13.5px; font-weight: 700; text-decoration: none">{{ BB.info.siteLabel }}</a></sc-if>
 <button type="button" onClick="{{ BB.open }}" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Fiche complète</button>
 </div>
@@ -1128,7 +1134,7 @@
 <input type="search" aria-label="Chercher une carte du catalogue" placeholder="Dracaufeu, 151, 199…" value="{{ adm.prz.q }}" onInput="{{ adm.prz.onQ }}" class="pkm-admz-q">
 <button type="button" onClick="{{ adm.prz.toggleAll }}" aria-pressed="{{ adm.prz.all }}" class="pkm-admz-chip">{{ adm.prz.allLabel }}</button>
 <sc-if value="{{ adm.prz.hasStatus }}" hint-placeholder-val="{{ true }}"><p class="pkm-admz-empty">{{ adm.prz.status }}</p></sc-if>
-<ul class="pkm-admz-list"><sc-for list="{{ adm.prz.found }}" as="azf" hint-placeholder-count="1"><li>
+<ul class="pkm-admz-found"><sc-for list="{{ adm.prz.found }}" as="azf" hint-placeholder-count="1"><li>
 <sc-if value="{{ azf.hasImg }}" hint-placeholder-val="{{ false }}"><img src="{{ azf.img }}" alt="" loading="lazy"></sc-if>
 <span><b>{{ azf.name }}</b><small>{{ azf.info }}</small></span>
 <sc-if value="{{ azf.can }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ azf.add }}" aria-label="{{ azf.addAria }}" class="pkm-admz-add">+ Ajouter</button></sc-if>
@@ -1293,7 +1299,7 @@
 </section>
 <section aria-label="PK shop" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">🛍️</span>PK shop</h3>
-<div class="pkm-rules-shop"><sc-for list="{{ legal.pk.shop }}" as="lrp" hint-placeholder-count="3"><div><sc-if value="{{ lrp.isTicket }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-tkbox" aria-hidden="true"><span class="{{ lrp.ticketCls }}"><span class="pkm-shop-ticket-in">{{ lrp.tag }}</span></span></span></sc-if><sc-if value="{{ lrp.notTicket }}" hint-placeholder-val="{{ true }}"><img src="{{ lrp.img }}" alt="" width="44" height="44"></sc-if><span><b>{{ lrp.name }}</b><em>{{ lrp.grade }}</em></span><strong>{{ lrp.price }}</strong></div></sc-for></div>
+<div class="pkm-rules-shop"><sc-for list="{{ legal.pk.shop }}" as="lrp" hint-placeholder-count="3"><div><sc-if value="{{ lrp.isTicket }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-tkbox" aria-hidden="true"><span class="{{ lrp.ticketCls }}"><span class="pkm-shop-ticket-in">{{ lrp.tag }}</span></span></span></sc-if><sc-if value="{{ lrp.notTicket }}" hint-placeholder-val="{{ true }}"><img src="{{ lrp.img }}" alt="" width="44" height="44"></sc-if><sc-if value="{{ lrp.isBox }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-box" aria-hidden="true"><img src="{{ lrp.boxBase }}" alt=""><img src="{{ lrp.boxLid }}" alt=""></span></sc-if><span><b>{{ lrp.name }}</b><em>{{ lrp.grade }}</em></span><strong>{{ lrp.price }}</strong></div></sc-for></div>
 <p class="pkm-rules-note">Le tirage au sort suivra un règlement publié avant le tirage. L’envoi des lots demandera un compte et une adresse.</p>
 </section>
 </div>
@@ -1717,8 +1723,6 @@
 <section aria-label="Boîte mystère" class="pkm-dark pkm-my-sec">
 <div class="pkm-my-head"><span class="{{ xp.artCls }}" aria-hidden="true"><i class="pkm-my-halo"></i><i class="pkm-my-spark pkm-my-spark-1"></i><i class="pkm-my-spark pkm-my-spark-2"></i><i class="pkm-my-spark pkm-my-spark-3"></i><span class="pkm-my-art"><img src="{{ xp.artBase }}" alt="" class="pkm-my-art-b" draggable="false"><img src="{{ xp.artLid }}" alt="" class="pkm-my-art-l" draggable="false"></span></span>
 <div class="pkm-my-txt"><h2>{{ xp.head }}</h2><p>{{ xp.sub }}</p><b class="pkm-shop-price"><img src="img/brand/pa.svg" alt="" width="24" height="24">{{ xp.price }}<small>PA</small></b></div></div>
-<sc-if value="{{ xp.on }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-xp-live"><b>2XP PK actif</b> · encore {{ xp.left }} · jusqu’à {{ xp.end }}</p></sc-if>
-<sc-if value="{{ xp.paOn }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-xp-live pkm-xp-live-pa"><b>2XP PA actif</b> · tes PA du jour sont doublés encore {{ xp.paLeft }}</p></sc-if>
 <sc-if value="{{ xp.hasFree }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ xp.openFree }}" aria-disabled="{{ xp.busy }}" class="pkm-tks-buy pkm-my-free">🎁 {{ xp.freeLabel }}</button></sc-if>
 <sc-if value="{{ xp.idle }}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{ xp.can }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ xp.openAsk }}" class="pkm-tks-buy pkm-my-buy">{{ xp.buyLabel }}</button></sc-if>
@@ -1788,11 +1792,12 @@
 <section aria-label="{{ pks.sheet.cardsHead }}" class="pkm-tkcs">
 <h3 class="pkm-tks-h">{{ pks.sheet.cardsHead }}</h3>
 <sc-if value="{{ pks.sheet.hasCards }}" hint-placeholder-val="{{ true }}"><p class="pkm-tks-note">{{ pks.sheet.cardsSub }}</p>
-<div class="pkm-tkc-grid"><sc-for list="{{ pks.sheet.cards }}" as="tkc" hint-placeholder-count="2"><button type="button" onClick="{{ tkc.pick }}" aria-pressed="{{ tkc.on }}" aria-label="{{ tkc.aria }}" class="{{ tkc.cls }}">
+<div class="{{ pks.sheet.gridCls }}"><sc-for list="{{ pks.sheet.cards }}" as="tkc" hint-placeholder-count="2"><span class="pkm-tkc-cell"><button type="button" onClick="{{ tkc.pick }}" aria-pressed="{{ tkc.on }}" aria-label="{{ tkc.aria }}" class="{{ tkc.cls }}">
 <span class="pkm-tkc-img"><sc-if value="{{ tkc.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ tkc.img }}" srcset="{{ tkc.srcset }}" sizes="40vw" alt="" loading="lazy"></sc-if><sc-if value="{{ tkc.noImg }}" hint-placeholder-val="{{ false }}"><i class="pkm-tkc-q" aria-hidden="true">?</i></sc-if>
 <sc-if value="{{ tkc.mine }}" hint-placeholder-val="{{ false }}"><b class="pkm-tkc-n">{{ tkc.mineText }}</b></sc-if><i class="pkm-tkc-check" aria-hidden="true"></i></span>
 <span class="pkm-tkc-name">{{ tkc.name }}</span><sc-if value="{{ tkc.hasInfo }}" hint-placeholder-val="{{ false }}"><small class="pkm-tkc-info">{{ tkc.info }}</small></sc-if>
-</button></sc-for></div></sc-if>
+</button><sc-if value="{{ tkc.canZoom }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ tkc.zoom }}" aria-label="{{ tkc.zoomAria }}" class="pkm-tkc-zoom"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"></circle><path d="M15 15l5 5M8 10.5h5M10.5 8v5"></path></svg></button></sc-if></span></sc-for></div></sc-if>
+<sc-if value="{{ pks.sheet.zoomOpen }}" hint-placeholder-val="{{ false }}"><div role="dialog" aria-modal="true" aria-label="{{ pks.sheet.zoomName }}" class="pkm-tkz"><button type="button" onClick="{{ pks.sheet.zoomClose }}" aria-label="Fermer" class="pkm-tkz-x"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button><img src="{{ pks.sheet.zoomImg }}" alt="{{ pks.sheet.zoomName }}" onClick="{{ pks.sheet.zoomClose }}" class="pkm-tkz-img"><b>{{ pks.sheet.zoomName }}</b><small>{{ pks.sheet.zoomInfo }}</small></div></sc-if>
 <sc-if value="{{ pks.sheet.noCards }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-tkc-none">{{ pks.sheet.noCardsText }}</p></sc-if>
 </section>
 <h3 class="pkm-tks-h">À quoi sert ce ticket ?</h3>
@@ -1859,7 +1864,6 @@
 
 <button type="button" onClick="{{ pgb.open }}" class="pkm-pg-banner pkm-dark" aria-label="{{ pgb.aria }}"><img src="img/rank/1.svg" alt="" width="46" height="46" class="pkm-pg-banner-cup"><span><b>{{ pgb.title }}</b><small>{{ pgb.sub }}</small></span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
 
-<sc-if value="{{ xp.on }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-xp-live pkm-xp-live-gm"><b>2XP PK actif</b> · tes gains sont doublés · encore {{ xp.left }}</p></sc-if>
 <section aria-label="Booster PK" class="pkm-gm-boost pkm-dark" style="color: #F3F6FC; flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
 <h2 class="pkm-gm-title">Booster PK</h2>
@@ -2501,6 +2505,7 @@ PKCOUNTER
 <!-- fragment: avatar -->
 <sc-if value="{{ ui.isAvatar }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-av-full">
+<sc-if value="{{ av.saved }}" hint-placeholder-val="{{ false }}"><div role="status" class="pkm-av-saved"><div class="pkm-av-saved-card"><img src="{{ av.savedImg }}" alt="Ton nouvel avatar" class="pkm-av-saved-img"><span class="pkm-av-saved-ok" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></div><b>Avatar enregistré !</b><span aria-hidden="true" class="pkm-av-saved-fx"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div></sc-if>
 <section aria-label="Aperçu de mon avatar" class="pkm-av-top">
 <div class="pkm-av-head"><button type="button" onClick="{{ av.back }}" aria-label="Retour" class="pkm-av-back"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button><b>Mon avatar</b><span class="pkm-av-pa"><img src="img/brand/pa.svg" alt="" width="18" height="18">{{ av.paLabel }}</span></div>
 <div class="pkm-av-stage"><div class="pkm-av-card"><div class="{{ av.frameCls }}"><div class="{{ av.prevCls }}" aria-label="Aperçu de ton avatar" role="img">

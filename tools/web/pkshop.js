@@ -229,7 +229,8 @@
     if (v >= 2) for (let k = 0; k < 12; k++) sparks += '<i class="pkm-tkfx-sp" style="--a: ' + (k * 30) + 'deg; animation-delay: ' + (v === 2 ? 0.55 : 0.9) + 's"></i>';
     ov.innerHTML = '<div class="pkm-tkfx-box"><span class="pkm-tkfx-tk"><span class="pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier + '"><span class="pkm-shop-ticket-in">' + shopEsc(it.tag) + '</span></span>'
       + (v === 3 ? '<i class="pkm-tkfx-shine"></i>' : '') + (v === 2 ? '<b class="pkm-tkfx-stamp">VALIDÉ</b>' : '') + '</span>'
-      + '<b class="pkm-tkfx-plus">+1</b>' + sparks + '<span class="pkm-tkfx-cap">' + shopEsc(it.name) + ' · tu en as ' + (n || 1) + '</span></div>';
+      // « +1 » remplacé par un badge « acheté » (coche) (2026-11-12, porteur).
+      + '<b class="pkm-tkfx-plus pkm-tkfx-ok" role="img" aria-label="Acheté"><svg viewBox="0 0 24 24" width="34" height="34"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></b>' + sparks + '<span class="pkm-tkfx-cap">' + shopEsc(it.name) + ' · tu en as ' + (n || 1) + '</span></div>';
     document.body.appendChild(ov);
     if (v === 1 || v === 2) {
       // Vers le ticket de la fiche ouverte (ou vers le haut de l'écran) à la fin.
@@ -382,21 +383,28 @@
         open: true, name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier, prize: it.prize, value: '1 carte ce mois-ci',
         stars: stars(it), starsCls: it.starsCls, starsText: it.starsText,
         every: it.every, draw: draw, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note,
-        use: 'Ce ticket te donne une chance de gagner la carte que tu choisis ci-dessous, au tirage du ' + draw + '. Un seul ticket par catégorie et par mois, un seul gagnant par tirage. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit sa carte chez lui, après vérification de son identité.',
+        use: 'Ce ticket te donne une chance de gagner la carte que tu as choisie ci-dessus, au tirage du ' + draw + '. Un seul ticket par catégorie et par mois, un seul gagnant par tirage. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit sa carte chez lui, après vérification de son identité.',
         // Cartes à gagner ce mois-ci.
         cardsHead: prizes.length > 1 ? 'Choisis ta carte' : 'La carte à gagner',
         cardsSub: bought ? 'Ton ticket du mois participe au tirage de la carte marquée « Ton choix ».' : prizes.length > 1 ? 'Touche la carte que tu veux gagner, puis achète ton ticket. Un seul ticket par mois : choisis bien !' : 'Ton ticket participe au tirage de cette carte.',
         hasCards: prizes.length > 0, noCards: prizes.length === 0,
         noCardsText: 'Les cartes du tirage du ' + draw + ' arrivent très bientôt. Reviens vite pour choisir la tienne !',
+        // Une seule carte (2026-11-12, porteur) : plus grande, au centre, et un appui l'agrandit en plein écran. Avec
+        // plusieurs cartes, un appui la choisit ; la loupe l'agrandit.
+        gridCls: 'pkm-tkc-grid' + (prizes.length === 1 ? ' pkm-tkc-one' : ''),
         cards: prizes.map(c => {
-          const v = shopCardImg(c), on = !!pick && pick.id === c.id, m = mine[c.id] | 0;
+          const v = shopCardImg(c), on = !!pick && pick.id === c.id, m = mine[c.id] | 0, one = prizes.length === 1;
+          const zoom = () => { if (v.src) this.setState({ tkZoom: { img: v.hi || v.src, name: c.name, info: c.info || '' } }); };
           return {
             name: c.name, info: c.info || '', hasInfo: !!c.info, img: v.src, srcset: v.srcset, hasImg: !!v.src, noImg: !v.src,
             mine: m > 0, mineText: 'Ton choix', on: String(on && !bought), cls: 'pkm-tkc' + (on && !bought ? ' pkm-tkc-on' : '') + (m > 0 ? ' pkm-tkc-mine' : ''),
-            aria: c.name + (c.info ? ', ' + c.info : '') + (m ? ', ton ticket du mois' : '') + (on && !bought ? ', choisie' : ''),
-            pick: () => { if (!bought) this.setState({ shopCard: c.id, shopAsk: null }); }
+            aria: c.name + (c.info ? ', ' + c.info : '') + (m ? ', ton ticket du mois' : '') + (on && !bought ? ', choisie' : '') + (one ? ' · toucher pour agrandir' : ''),
+            pick: () => { if (!bought) this.setState({ shopCard: c.id, shopAsk: null }); if (one) zoom(); },
+            canZoom: !one && !!v.src, zoom: zoom, zoomAria: 'Agrandir ' + c.name
           };
         }),
+        zoomOpen: !!s.tkZoom, zoomImg: (s.tkZoom || {}).img || '', zoomName: (s.tkZoom || {}).name || '', zoomInfo: (s.tkZoom || {}).info || '',
+        zoomClose: () => this.setState({ tkZoom: null }),
         owned: false, ownedText: '', locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade),
         // Ticket du mois déjà pris : « Ticket déjà acheté », le prochain au tirage suivant, compte à rebours.
         bought: bought, boughtTitle: 'Ticket déjà acheté', boughtText: 'Prochain ticket disponible ' + shopWhen(drawAt) + ', juste après le tirage.', boughtCd: shopCdView(drawAt),
@@ -405,7 +413,7 @@
         ask: ask, idle: !ask, buyLabel: 'Acheter un ticket · ' + price,
         confirmText: pick ? 'Échanger ' + price + ' contre 1 ' + it.name.toLowerCase() + ' pour « ' + pick.name + ' » ?' : '',
         buyOpen: () => this.setState({ shopAsk: it.id }), cancel: () => this.setState({ shopAsk: null }), buy: () => pick && this.shopBuy(it.id, pick.id),
-        lock: () => this.shopLockOpen(it), close: () => shopSheetSlide(() => this.setState({ shopTk: null, shopAsk: null, shopCard: null }))
+        lock: () => this.shopLockOpen(it), close: () => shopSheetSlide(() => this.setState({ shopTk: null, shopAsk: null, shopCard: null, tkZoom: null }))
       };
     })();
     const month = this.shopMonthBuy(s);

@@ -14,6 +14,10 @@
   const navStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('pkm-calm'); } catch (e) { return true; } };
   const navMain = () => document.querySelector('#app main');
   const navBasePush = proto.push, navBasePop = proto.pop, navBaseTab = proto.tab;
+  // En-tête commun (logo, soldes, avatar et emblème du grade) gardé tel quel entre l'accueil et les onglets à grand titre
+  // (2026-11-12, porteur : l'emblème « sautait » à chaque changement d'onglet) : un seul bloc, ui.hhAny (build.mjs).
+  const navBaseRender = proto.renderVals;
+  proto.renderVals = function () { const r = navBaseRender.call(this); if (r && r.ui) r.ui.hhAny = !!(r.ui.headerHome || r.ui.headerBig); return r; };
   proto.push = function (screen, extra) { NAV.dir = 'fwd'; NAV.from = 0; navSnapTake(); return navBasePush.call(this, screen, extra); };
   proto.pop = function () { NAV.dir = 'back'; navSnapTake(); return navBasePop.call(this); };
   proto.tab = function (screen) { NAV.dir = 'tab'; navSnapDrop(); return navBaseTab.call(this, screen); };

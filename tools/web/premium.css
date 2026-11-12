@@ -101,3 +101,6 @@
 @keyframes pkmPremBeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(0.98); } 45% { transform: scale(1.1); } }
 @keyframes pkmPremRays { 0%, 100% { opacity: 0.2; } 30% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .pkm-prem-heart-h, .pkm-prem-heart-rays { animation: none; } }
+
+/* L'offre Premium s'ouvre au-dessus de l'écran « Mon avatar » (2026-11-12) : elle restait cachée dessous et réapparaissait après « Valider mon avatar ». */
+.pkm-pas-wrap.pkm-prem-wrap { z-index: 85; }

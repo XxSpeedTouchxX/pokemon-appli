@@ -93,6 +93,9 @@
       else ui.syncText = this.srcLine();
     }
     if (srcOffline() && ui.syncText) ui.syncText = 'Hors ligne · ' + ui.syncText;
+    // Plus de ligne « Cotes du … · Cardmarket » en haut des onglets principaux (2026-11-12, porteur) : la place va aux
+    // soldes de PK et de PA, agrandis. La source et la date restent sous la courbe de la valeur et dans chaque fiche.
+    if ((ui.headerHome || ui.headerBig) && !srcOffline()) ui.hasSubRow = false;
     return r;
   };
 

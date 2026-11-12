@@ -89,7 +89,7 @@ ok('ticket Argent sans carte : prévenu', /Aucune carte pour ce ticket/.test(N(a
 await page.waitForFunction(() => { try { return TCG.status === 'ready'; } catch (e) { return true; } }, null, { timeout: 30000 }).catch(() => {});
 await adm.locator('input.pkm-admz-q').pressSequentially('pikachu', { delay: 20 }); await page.waitForTimeout(800);
 const found = await adm.locator('button.pkm-admz-add').count();
-ok('recherche « pikachu » dans la rareté AR : ' + found + ' cartes', found > 0 && (await adm.locator('ul.pkm-admz-list').last().innerText()).includes('Illustration rare'));
+ok('recherche « pikachu » dans la rareté AR : ' + found + ' cartes, en grand sous la barre', found > 0 && (await adm.locator('ul.pkm-admz-found').innerText()).includes('Illustration rare') && (await adm.locator('ul.pkm-admz-found img').first().evaluate(e => e.getBoundingClientRect().width)) > 100);
 await adm.locator('button.pkm-admz-add').first().click(); await page.waitForTimeout(500);
 const argent = await page.evaluate(() => window.__pkm.shopPrizes(window.__pkm.st(), 'ticket-argent'));
 ok('carte ajoutée au prochain tirage Argent', argent.length === 1 && /pikachu/i.test(argent[0].name));

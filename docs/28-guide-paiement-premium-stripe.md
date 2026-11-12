@@ -219,6 +219,16 @@ Les abonnés déjà inscrits gardent leur prix.
 
 > **Point d'attention** : avec ces prix, l'annuel rapporte 5,83 € par mois au lieu de 9,90 €. Le revenu par abonné baisse si beaucoup de joueurs le choisissent (`docs/32` §4 est à recalculer).
 
+## 8 quater. Achats réservés aux admins (2026-11-12, porteur)
+
+Décision du porteur : pour l'instant, **seuls les comptes admin** peuvent payer le Premium (et, plus tard, les recharges de PA).
+
+- **Dans l'app (rien à faire)** : un compte joueur ne voit plus les bannières Premium, « Découvrir Premium », « Tout débloquer avec Premium » ni « Recharger mes PA ». Un abonné déjà Premium garde « Gérer ou arrêter mon abonnement ».
+- **Sur le serveur (à faire une fois)** : la fonction `stripe` refuse maintenant le paiement à un compte qui n'est pas admin (« Le Premium n'est pas encore ouvert »). Réinstalle-la comme au § 6 (même ligne dans le terminal de Coolify), puis **Restart** de Supabase.
+- **Pour tout ouvrir plus tard** :
+  1. dans Coolify, service Supabase › variables d'environnement, ajoute `PREMIUM_OPEN` avec la valeur `true`, puis **Restart** ;
+  2. demande-moi de remettre les offres dans l'app (une ligne : `NOBUY_ON = false` dans `tools/web/store.js`).
+
 ## 9. Ce qui reste à décider
 
 | # | Question | Défaut proposé |

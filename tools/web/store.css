@@ -14,3 +14,11 @@
 .pkm-acct-del-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .pkm-acct-del-go { min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: #E5484D; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
 .pkm-acct-del-no { min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+/* Achats réservés aux admins (store.js, 2026-11-12) : pas d'offre Premium ni de « Recharger mes PA » pour les joueurs. */
+.pkm-nobuy .pkm-prem-banner,
+.pkm-nobuy .pkm-lockw-prem,
+.pkm-nobuy .pkm-lockw-premgo,
+.pkm-nobuy .pkm-av-premgo,
+.pkm-nobuy-pa .pkm-shop-tabs,
+.pkm-nobuy-pa .pkm-pas { display: none !important; }

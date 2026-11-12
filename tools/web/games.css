@@ -1486,3 +1486,59 @@ section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(
 .pkm-my-odds li.pkm-my-off small { text-decoration: none; display: inline-block; }
 .pkm-my-odds li.pkm-my-up > b { color: #3BC48A; }
 .pkm-my-uptxt { color: #3BC48A; font-weight: 700; }
+
+/* Soldes de PK et de PA plus grands et badge « 2XP » (2026-11-12, porteur) : visible tant qu'un 2XP est actif, il
+   scintille quand des PK ou des PA arrivent ; un appui donne le temps restant. */
+.pkm-bal-row { position: relative; display: flex; align-items: center; }
+.pkm-tk-head.pkm-pa-head .pkm-pa-bar { height: 28px; font-size: 14.5px; font-weight: 800; padding-right: 11px; }
+.pkm-tk-head.pkm-pa-head { height: 32px; margin-top: 4px; }
+.pkm-pk-unit { font-size: 12px; }
+.pkm-pa-unit { font-size: 11.5px; }
+.pkm-xpb { position: absolute; z-index: 4; left: -8px; top: -4px; display: flex; align-items: center; justify-content: center; min-width: 30px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; border: 2px solid #FFFFFF; font: 900 9.5px/1 'Sora', sans-serif; letter-spacing: 0.02em; color: #0B1120; cursor: pointer; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-xpb > span { position: relative; z-index: 1; }
+.pkm-xpb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0) 65%); background-size: 250% 100%; background-position: 120% 0; animation: pkmXpbShine 3.2s ease-in-out infinite; }
+.pkm-xpb-pk { top: 2px; background: linear-gradient(135deg, #FFF3A6, #FFD60A 45%, #F2A900); }
+.pkm-xpb-pa { top: -6px; background: linear-gradient(135deg, #F3C8FF, #B26BFF 50%, #7B3FE4); color: #FFFFFF; }
+.pkm-xpb-hot { animation: pkmXpbHot 0.55s ease-in-out 4; }
+.pkm-xpb-hot::after { animation-duration: 0.7s; }
+@keyframes pkmXpbShine { 0%, 55% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
+@keyframes pkmXpbHot { 0%, 100% { transform: scale(1); filter: none; } 50% { transform: scale(1.35) rotate(-6deg); filter: drop-shadow(0 0 6px #FFE46B) brightness(1.25); } }
+@media (prefers-reduced-motion: reduce) { .pkm-xpb::after, .pkm-xpb-hot { animation: none; } }
+/* Ticket acheté : badge « acheté » (coche verte) à la place de « +1 » (2026-11-12, porteur). */
+.pkm-tkfx-ok { top: -26px; right: -30px; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #22B35E; border: 4px solid #FFFFFF; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35); -webkit-text-stroke: 0; }
+.pkm-tkfx-ok svg path { fill: none; stroke: #FFFFFF; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Panneau Admin › Cartes des tirages : résultats de la recherche en grand, sous la barre (2026-11-12, porteur : « là
+   c'est trop petit, on ne voit rien »). */
+.pkm-admz-found { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pkm-admz-found li { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px; border-radius: 16px; background: #0B1120; border: 1px solid #24345C; }
+.pkm-admz-found img { display: block; width: 100%; aspect-ratio: 600 / 825; height: auto; border-radius: 8px; object-fit: cover; background: #16213A; }
+.pkm-admz-found li > span { display: flex; flex-direction: column; gap: 2px; }
+.pkm-admz-found b { font-size: 13.5px; line-height: 1.25; }
+.pkm-admz-found small { font-size: 11.5px; color: #9AA8C3; overflow-wrap: anywhere; }
+.pkm-admz-found .pkm-admz-add { align-self: stretch; }
+.pkm-admz-found .pkm-admz-ok { align-self: center; }
+/* Fiche d'un ticket : une seule carte à gagner, plus grande et centrée ; un appui l'agrandit (2026-11-12, porteur). */
+.pkm-tkc-cell { position: relative; display: flex; min-width: 0; }
+.pkm-tkc-cell > .pkm-tkc { flex: 1; }
+.pkm-tkc-grid.pkm-tkc-one { display: flex; justify-content: center; }
+.pkm-tkc-one .pkm-tkc-cell { width: min(240px, 66%); }
+.pkm-tkc-one .pkm-tkc { text-align: center; cursor: zoom-in; }
+.pkm-tkc-one .pkm-tkc-name { font-size: 15px; }
+.pkm-tkc-zoom { position: absolute; right: 12px; bottom: 54px; z-index: 2; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; border-radius: 17px; background: rgba(5, 9, 18, 0.78); color: #FFFFFF; cursor: zoom-in; }
+.pkm-tkc-zoom svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.pkm-tkz { position: fixed; inset: 0; z-index: 95; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 64px 18px 28px; box-sizing: border-box; background: rgba(5, 8, 15, 0.95); color: #F3F6FC; animation: pkmAvSavedIn 0.2s ease-out both; }
+.pkm-tkz-img { display: block; max-width: 100%; max-height: 76vh; width: auto; height: auto; border-radius: 4.8% / 3.4%; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65); cursor: zoom-out; }
+.pkm-tkz b { font-family: 'Sora', sans-serif; font-size: 16px; }
+.pkm-tkz small { font-size: 12.5px; color: #9AA8C3; }
+.pkm-tkz-x { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 14px); right: 14px; width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #2A3A5C; border-radius: 22px; background: #111A2C; color: #F3F6FC; cursor: pointer; }
+.pkm-tkz-x svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+
+/* Appui long (2026-11-12, porteur : « je ne veux plus du tout pouvoir sélectionner une écriture en bleu ») : aucune
+   sélection de texte, aucune bulle « Copier » ni aperçu d'image ou de lien, sur toute l'app. Les champs de saisie
+   restent utilisables (on peut y écrire, sélectionner et coller). */
+html, body, body * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+img, a { -webkit-user-drag: none; }
+input, textarea, select, [contenteditable="true"], input *, textarea * { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+/* Règles des PK et PA : boîte mystère en fin de liste du PK shop (2026-11-12, porteur). */
+.pkm-rules-box { position: relative; flex: none; width: 44px; height: 44px; display: block; }
+.pkm-rules-box img { position: absolute; inset: 0; width: 100%; height: 100%; }

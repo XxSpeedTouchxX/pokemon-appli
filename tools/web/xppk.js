@@ -157,8 +157,15 @@
         if (r.pa_until) patch.paXpUntil = r.pa_until;
         if (r.free_boxes !== undefined) patch.myFree = r.free_boxes | 0;
         if (r.pk_earned !== undefined) patch.pkEarned = r.pk_earned | 0;
-        if (lot.poke) patch.pkOwn = (this.st().pkOwn || []).concat([lot.poke]);
-        stage.win(lot, () => { this.setState(Object.assign({ myBusy: false, myAsk: false }, patch)); this.flash && this.flash(); });
+        // Légendaire gagné (2026-11-12, porteur) : débloqué tout de suite dans le Pokédex, sans payer ses PA (le serveur
+        // l'a enregistré, dex_unlocks) ; l'état du serveur est relu juste après pour le confirmer.
+        const won = lot.poke || (r.pokemon | 0);
+        if (won) patch.pkOwn = Array.from(new Set((this.st().pkOwn || []).concat([won])));
+        stage.win(lot, () => {
+          this.setState(Object.assign({ myBusy: false, myAsk: false }, patch, won && DEX[won] ? { toast: DEX[won].name + ' est débloqué dans ton Pokédex !' } : {}));
+          this.flash && this.flash();
+          if (won && this.gcSync) setTimeout(() => this.gcSync(), 400);
+        });
       }, e => {
         // Serveur sans la boîte mystère (scripts 016, 018 ou 019 pas installés, 2026-11-11) : un admin voit quand même
         // l'ouverture, en aperçu (rien n'est débité ni gagné) ; un joueur lit « Bientôt disponible ».
@@ -177,7 +184,7 @@
     if (lot.days) patch.xpUntil = new Date(Math.max(Date.now(), this.xpUntilMs()) + lot.days * 86400000).toISOString();
     if (lot.paDays) patch.paXpUntil = new Date(Math.max(Date.now(), this.paXpUntilMs()) + lot.paDays * 86400000).toISOString();
     if (lot.scans) patch.scanBonus = (Number(s.scanBonus) || 0) + lot.scans;
-    if (lot.poke) patch.pkOwn = (s.pkOwn || []).concat([lot.poke]);
+    if (lot.poke) { patch.pkOwn = Array.from(new Set((s.pkOwn || []).concat([lot.poke]))); if (DEX[lot.poke]) patch.toast = DEX[lot.poke].name + ' est débloqué dans ton Pokédex !'; }
     this.setState({ myBusy: true });
     apply(lot, patch);
   };
@@ -219,5 +226,18 @@
   xpProto.renderVals = function () {
     const r = xpBaseRender.call(this), s = this.st();
     r.xp = r.ui && (r.ui.isPkShop || r.ui.isGames) ? this.vXp(s) : { on: false, off: true, lots: [] };
+    // Badge « 2XP » sur les soldes de PK et de PA (2026-11-12, porteur) : toujours visible pendant un 2XP, il scintille
+    // quand des PK (ou des PA) arrivent ; un appui dit combien de temps il reste (les phrases « 2XP actif » sont retirées).
+    if (r.pk) {
+      const pkU = this.xpUntilMs(), paU = this.paXpUntilMs(), now = Date.now();
+      const tip = (what, u) => '2XP ' + what + ' actif · encore ' + xpLeft(u - now) + ' (jusqu’au ' + xpEnd(u) + ')';
+      Object.assign(r.pk, {
+        xpPk: !!pkU, xpPkCls: 'pkm-xpb pkm-xpb-pk' + (pkU && s.pkGain > 0 ? ' pkm-xpb-hot' : ''),
+        xpPkAria: pkU ? '2XP PK actif : voir le temps restant' : '', xpPkTap: () => { const u = this.xpUntilMs(); if (u) this.setState({ toast: tip('PK', u) }); },
+        xpPa: !!paU, xpPaCls: 'pkm-xpb pkm-xpb-pa' + (paU && s.paGain ? ' pkm-xpb-hot' : ''),
+        xpPaAria: paU ? '2XP PA actif : voir le temps restant' : '', xpPaTap: () => { const u = this.paXpUntilMs(); if (u) this.setState({ toast: tip('PA', u) }); }
+      });
+      if (pkU && r.pk.gain) r.pk.gainText = '2XP · ' + r.pk.gainText;
+    }
     return r;
   };

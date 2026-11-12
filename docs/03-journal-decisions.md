@@ -6,6 +6,43 @@
 
 ---
 
+## 2026-11-12 (nuit) — Avatar, 2XP, tickets, en-tête, Radar, achats réservés aux admins (demande du porteur)
+
+- **Mon avatar** :
+  - haut figé à 70 % de l'écran ;
+  - tuile « Shiny » réparée : le logo des PA était énorme ; on voit le Pokémon en version shiny ;
+  - « Valider mon avatar » : animation « Avatar enregistré ! », puis retour sur Mon profil avec le nouvel avatar. L'offre Premium restait ouverte sous l'écran de l'avatar et réapparaissait : elle passe au-dessus, et elle est refermée à l'enregistrement ;
+  - accessoire choisi ou débloqué : posé au centre de l'avatar ;
+  - solde de PA plus grand et bien lisible (« 1 234 PA »).
+- **Shiny maison** : Kyogre violet clair, Groudon doré comme Groudon ☆ (EX Espèces Delta 111/113), Rayquaza noir aux anneaux dorés et rouges comme Rayquaza ☆ (EX Deoxys 107/107). Script `tools/sprites/recolor_legend_shiny.py`, à relancer après `fetch_shiny.py`.
+- **Décors animés** : ils bougent aussi dans l'en-tête et dans Mon profil. L'avatar y est un dessin : décor animé + image du reste (`avatarFg`).
+- **2XP** :
+  - badge « 2XP » en haut à gauche des soldes de PK et de PA, tant qu'un 2XP est actif ;
+  - il scintille quand des PK ou des PA arrivent (« 2XP · +200 PK ») ;
+  - un appui donne le temps restant ;
+  - les phrases « 2XP PK actif · encore … » sont retirées.
+- **Soldes de PK et de PA agrandis** ; plus de ligne « Cotes du … · Cardmarket » en haut des 4 onglets principaux. La source reste sous la courbe et dans les fiches.
+- **Tickets** :
+  - Admin › Cartes des tirages : résultats de la recherche en grand (2 par ligne) sous la barre ;
+  - fiche d'un ticket : une carte unique est plus grande, centrée, et s'agrandit en plein écran au toucher. Avec plusieurs cartes, une loupe ;
+  - texte : « gagner la carte que tu as choisie ci-dessus » ;
+  - ticket acheté : badge vert « acheté » à la place de « +1 ».
+- **Boîte mystère** : un légendaire gagné entre au Pokédex tout de suite, avec le message « … est débloqué dans ton Pokédex ! ». L'état du serveur est relu juste après. Les légendaires gagnés pendant « l'aperçu admin » (avant l'installation des scripts) n'avaient rien débloqué.
+- **Appui long** : plus aucune sélection de texte ni bulle « Copier » dans l'app. Les champs de saisie restent utilisables.
+- **Emblème du grade** : l'en-tête de l'accueil, de Toutes les séries, de Jeux et du PK shop est maintenant un seul bloc, gardé d'un onglet à l'autre (`ui.hhAny`). L'emblème ne « saute » plus.
+- **Règles des PK et PA** : boîte mystère (300 PA) ajoutée à la fin du PK shop, avec son coffre.
+- **Radar › Appeler** : 2 276 boutiques sur 4 257 n'ont pas de numéro dans OpenStreetMap. « Appeler » n'est plus grisé : sans numéro, il ouvre la fiche Google Maps de la boutique, qui donne le numéro et un bouton d'appel.
+- **Achats réservés aux admins** (décision du porteur) :
+  - dans l'app, un compte joueur ne voit ni Premium ni « Recharger mes PA » (`store.js`, `NOBUY_ON`) ;
+  - la fonction `stripe` refuse le paiement aux non-admins, sauf si `PREMIUM_OPEN=true` (**à réinstaller par le porteur**, `docs/28` § 8 quater) ;
+  - un abonné garde « Gérer mon abonnement ».
+- **Mini-jeu Pokémon proposé** : `docs/37-proposition-mini-jeu-pokemon.md`, avec « Mémo des cartes » recommandé et « Safari éclair » et « Chaîne d'évolution » en secours. Rien n'est codé sans « go ».
+- Tests :
+  - `t-retouches12.mjs` (19) ;
+  - mis à jour : `t-avatar`, `t-xppk`, `t-lots`, `t-premium-pay`, `t-store` ;
+  - fonction `stripe` : 34 vérifications.
+- Cache v183.
+
 ## 2026-11-12 (soir) — Inscriptions en direct dans le panneau Admin (demande du porteur)
 
 - Demande du porteur : « un visuel de qui s'inscrit en temps direct ».

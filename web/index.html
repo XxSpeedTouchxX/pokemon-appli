@@ -1744,6 +1744,62 @@ section.pkm-sheet[aria-label="Résultat du scan"] { max-height: min(770px, calc(
 .pkm-my-odds li.pkm-my-up > b { color: #3BC48A; }
 .pkm-my-uptxt { color: #3BC48A; font-weight: 700; }
 
+/* Soldes de PK et de PA plus grands et badge « 2XP » (2026-11-12, porteur) : visible tant qu'un 2XP est actif, il
+   scintille quand des PK ou des PA arrivent ; un appui donne le temps restant. */
+.pkm-bal-row { position: relative; display: flex; align-items: center; }
+.pkm-tk-head.pkm-pa-head .pkm-pa-bar { height: 28px; font-size: 14.5px; font-weight: 800; padding-right: 11px; }
+.pkm-tk-head.pkm-pa-head { height: 32px; margin-top: 4px; }
+.pkm-pk-unit { font-size: 12px; }
+.pkm-pa-unit { font-size: 11.5px; }
+.pkm-xpb { position: absolute; z-index: 4; left: -8px; top: -4px; display: flex; align-items: center; justify-content: center; min-width: 30px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; border: 2px solid #FFFFFF; font: 900 9.5px/1 'Sora', sans-serif; letter-spacing: 0.02em; color: #0B1120; cursor: pointer; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+.pkm-xpb > span { position: relative; z-index: 1; }
+.pkm-xpb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0) 65%); background-size: 250% 100%; background-position: 120% 0; animation: pkmXpbShine 3.2s ease-in-out infinite; }
+.pkm-xpb-pk { top: 2px; background: linear-gradient(135deg, #FFF3A6, #FFD60A 45%, #F2A900); }
+.pkm-xpb-pa { top: -6px; background: linear-gradient(135deg, #F3C8FF, #B26BFF 50%, #7B3FE4); color: #FFFFFF; }
+.pkm-xpb-hot { animation: pkmXpbHot 0.55s ease-in-out 4; }
+.pkm-xpb-hot::after { animation-duration: 0.7s; }
+@keyframes pkmXpbShine { 0%, 55% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
+@keyframes pkmXpbHot { 0%, 100% { transform: scale(1); filter: none; } 50% { transform: scale(1.35) rotate(-6deg); filter: drop-shadow(0 0 6px #FFE46B) brightness(1.25); } }
+@media (prefers-reduced-motion: reduce) { .pkm-xpb::after, .pkm-xpb-hot { animation: none; } }
+/* Ticket acheté : badge « acheté » (coche verte) à la place de « +1 » (2026-11-12, porteur). */
+.pkm-tkfx-ok { top: -26px; right: -30px; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #22B35E; border: 4px solid #FFFFFF; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35); -webkit-text-stroke: 0; }
+.pkm-tkfx-ok svg path { fill: none; stroke: #FFFFFF; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Panneau Admin › Cartes des tirages : résultats de la recherche en grand, sous la barre (2026-11-12, porteur : « là
+   c'est trop petit, on ne voit rien »). */
+.pkm-admz-found { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pkm-admz-found li { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px; border-radius: 16px; background: #0B1120; border: 1px solid #24345C; }
+.pkm-admz-found img { display: block; width: 100%; aspect-ratio: 600 / 825; height: auto; border-radius: 8px; object-fit: cover; background: #16213A; }
+.pkm-admz-found li > span { display: flex; flex-direction: column; gap: 2px; }
+.pkm-admz-found b { font-size: 13.5px; line-height: 1.25; }
+.pkm-admz-found small { font-size: 11.5px; color: #9AA8C3; overflow-wrap: anywhere; }
+.pkm-admz-found .pkm-admz-add { align-self: stretch; }
+.pkm-admz-found .pkm-admz-ok { align-self: center; }
+/* Fiche d'un ticket : une seule carte à gagner, plus grande et centrée ; un appui l'agrandit (2026-11-12, porteur). */
+.pkm-tkc-cell { position: relative; display: flex; min-width: 0; }
+.pkm-tkc-cell > .pkm-tkc { flex: 1; }
+.pkm-tkc-grid.pkm-tkc-one { display: flex; justify-content: center; }
+.pkm-tkc-one .pkm-tkc-cell { width: min(240px, 66%); }
+.pkm-tkc-one .pkm-tkc { text-align: center; cursor: zoom-in; }
+.pkm-tkc-one .pkm-tkc-name { font-size: 15px; }
+.pkm-tkc-zoom { position: absolute; right: 12px; bottom: 54px; z-index: 2; width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF; border-radius: 17px; background: rgba(5, 9, 18, 0.78); color: #FFFFFF; cursor: zoom-in; }
+.pkm-tkc-zoom svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.pkm-tkz { position: fixed; inset: 0; z-index: 95; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 64px 18px 28px; box-sizing: border-box; background: rgba(5, 8, 15, 0.95); color: #F3F6FC; animation: pkmAvSavedIn 0.2s ease-out both; }
+.pkm-tkz-img { display: block; max-width: 100%; max-height: 76vh; width: auto; height: auto; border-radius: 4.8% / 3.4%; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65); cursor: zoom-out; }
+.pkm-tkz b { font-family: 'Sora', sans-serif; font-size: 16px; }
+.pkm-tkz small { font-size: 12.5px; color: #9AA8C3; }
+.pkm-tkz-x { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 14px); right: 14px; width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #2A3A5C; border-radius: 22px; background: #111A2C; color: #F3F6FC; cursor: pointer; }
+.pkm-tkz-x svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+
+/* Appui long (2026-11-12, porteur : « je ne veux plus du tout pouvoir sélectionner une écriture en bleu ») : aucune
+   sélection de texte, aucune bulle « Copier » ni aperçu d'image ou de lien, sur toute l'app. Les champs de saisie
+   restent utilisables (on peut y écrire, sélectionner et coller). */
+html, body, body * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+img, a { -webkit-user-drag: none; }
+input, textarea, select, [contenteditable="true"], input *, textarea * { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+/* Règles des PK et PA : boîte mystère en fin de liste du PK shop (2026-11-12, porteur). */
+.pkm-rules-box { position: relative; flex: none; width: 44px; height: 44px; display: block; }
+.pkm-rules-box img { position: absolute; inset: 0; width: 100%; height: 100%; }
+
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
    de PA sur celui de droite. Puis l'écran « Route d'évolution » d'après la « Digivolution Route » de Digimon World Dusk
@@ -2270,6 +2326,9 @@ nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="wi
 @keyframes pkmPremRays { 0%, 100% { opacity: 0.2; } 30% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .pkm-prem-heart-h, .pkm-prem-heart-rays { animation: none; } }
 
+/* L'offre Premium s'ouvre au-dessus de l'écran « Mon avatar » (2026-11-12) : elle restait cachée dessous et réapparaissait après « Valider mon avatar ». */
+.pkm-pas-wrap.pkm-prem-wrap { z-index: 85; }
+
 /* Fenêtres d'infos qui montent du bas (2026-11-08, porteur) : même mouvement que « Mon Pokédex » (dex.css). La fermeture
    glissée est dans sheet.js. */
 .pkm-sheet { animation: pkmDexlUp 0.48s cubic-bezier(0.32, 0.72, 0, 1) both; }
@@ -2474,7 +2533,8 @@ html.pkm-calm .pkm-pg-season, html.pkm-calm .pkm-pg-card, html.pkm-calm .pkm-pg-
 .pkm-av-accico svg { fill: none; stroke: #5A6A8E; stroke-width: 2; stroke-linecap: round; }
 .pkm-av-shiny { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .pkm-av-shc { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px 12px; border: 2px solid #1E2B45; border-radius: 20px; background: #0B1120; color: #F3F6FC; font: inherit; cursor: pointer; }
-.pkm-av-shc img { width: 96px; height: 96px; image-rendering: pixelated; }
+.pkm-av-shc > img { width: 96px; height: 96px; image-rendering: pixelated; }
+.pkm-av-shc .pkm-av-pro img { width: 14px; height: 14px; image-rendering: auto; }
 .pkm-av-shc b { font-size: 14px; }
 .pkm-av-shc-s { background: radial-gradient(90% 70% at 50% 30%, rgba(255, 228, 107, 0.22), rgba(255, 228, 107, 0) 70%), #0B1120; }
 .pkm-av-shc-s b::before { content: '✨ '; }
@@ -2611,7 +2671,7 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 
 /* ——— Mon avatar v5 (2026-11-11, soir, porteur) ——— */
 /* Écran 50/50 : l'avatar et ses rubriques (moitié haute, figée) ; les choix qui défilent et « Valider mon avatar » (moitié basse). */
-.pkm-av-full .pkm-av-top { height: 50%; height: 50dvh; min-height: 320px; }
+.pkm-av-full .pkm-av-top { height: 70%; height: 70dvh; min-height: 360px; }
 .pkm-av-bot { height: 72px; min-height: 72px; }
 /* Prix en PA : la goutte des PA à côté du nombre (plus de couronne dorée). */
 .pkm-av-pro { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px 2px 3px; background: linear-gradient(135deg, #B26BFF, #6A3CEB); color: #FFFFFF; font-size: 10.5px; }
@@ -2651,6 +2711,30 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 .pkm-fr-cristal { --frbg: conic-gradient(from var(--pkm-fra), #E8F7FF, #8FD3FF, #FFFFFF, #C9A6FF, #E8F7FF, #8FD3FF, #FFFFFF); --frglow: rgba(201, 166, 255, 0.85); --frt: 3s; --frg: 1.2s; }
 .pkm-fr-cristal::after { animation-name: pkmFrBreath; }
 
+/* 2026-11-12 (porteur) : haut figé à 70 % de l'écran ; solde de PA bien lisible ; animation « Avatar enregistré ». */
+.pkm-av-full .pkm-av-pa { padding: 6px 13px 6px 7px; gap: 6px; font-size: 16px; font-weight: 800; letter-spacing: 0.01em; color: #FFFFFF; background: #0B1120; border: 2px solid #FFFFFF; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+.pkm-av-full .pkm-av-pa img { width: 22px; height: 22px; }
+.pkm-av-saved { position: absolute; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: rgba(11, 17, 32, 0.82); color: #FFFFFF; animation: pkmAvSavedIn 0.25s ease-out both; }
+.pkm-av-saved > b { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; animation: pkmAvSavedTxt 0.5s 0.25s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.pkm-av-saved-card { position: relative; width: 170px; height: 170px; border-radius: 30px; padding: 6px; background: linear-gradient(135deg, #FFE46B, #F2A900 40%, #FFF3B0 55%, #E8A100); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45); animation: pkmAvSavedPop 0.6s cubic-bezier(0.2, 1.5, 0.4, 1) both; }
+.pkm-av-saved-img { width: 100%; height: 100%; border-radius: 24px; display: block; object-fit: cover; }
+.pkm-av-saved-ok { position: absolute; right: -12px; bottom: -12px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #22B35E; border: 4px solid #FFFFFF; animation: pkmAvSavedTxt 0.45s 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+.pkm-av-saved-ok path { fill: none; stroke: #FFFFFF; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; animation: pkmAvSavedTick 0.4s 0.7s ease-out forwards; }
+.pkm-av-saved-fx { position: absolute; left: 50%; top: 45%; width: 0; height: 0; pointer-events: none; }
+.pkm-av-saved-fx i { position: absolute; width: 10px; height: 10px; margin: -5px; border-radius: 3px; background: #FFD60A; opacity: 0; animation: pkmAvSavedSpark 0.9s 0.35s ease-out forwards; }
+.pkm-av-saved-fx i:nth-child(2n) { background: #FF7AC6; }
+.pkm-av-saved-fx i:nth-child(3n) { background: #5EE0CF; }
+.pkm-av-saved-fx i:nth-child(1) { --dx: 0px; --dy: -150px; } .pkm-av-saved-fx i:nth-child(2) { --dx: 106px; --dy: -106px; }
+.pkm-av-saved-fx i:nth-child(3) { --dx: 150px; --dy: 0px; } .pkm-av-saved-fx i:nth-child(4) { --dx: 106px; --dy: 106px; }
+.pkm-av-saved-fx i:nth-child(5) { --dx: 0px; --dy: 150px; } .pkm-av-saved-fx i:nth-child(6) { --dx: -106px; --dy: 106px; }
+.pkm-av-saved-fx i:nth-child(7) { --dx: -150px; --dy: 0px; } .pkm-av-saved-fx i:nth-child(8) { --dx: -106px; --dy: -106px; }
+@keyframes pkmAvSavedIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pkmAvSavedPop { 0% { transform: scale(0.4) rotate(-8deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes pkmAvSavedTxt { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes pkmAvSavedTick { to { stroke-dashoffset: 0; } }
+@keyframes pkmAvSavedSpark { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.4) rotate(160deg); } }
+@media (prefers-reduced-motion: reduce) { .pkm-av-saved, .pkm-av-saved > b, .pkm-av-saved-card, .pkm-av-saved-ok, .pkm-av-saved-fx i { animation: none; opacity: 1; } .pkm-av-saved-ok path { stroke-dashoffset: 0; animation: none; } .pkm-av-saved-fx { display: none; } }
+
 /* App des stores (store.js, 2026-11-09) : aucune offre payante tant que l'achat intégré n'est pas branché. */
 .pkm-store .pkm-prem-banner,
 .pkm-store .pkm-prem-wrap,
@@ -2667,6 +2751,14 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 .pkm-acct-del-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .pkm-acct-del-go { min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: #E5484D; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
 .pkm-acct-del-no { min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+/* Achats réservés aux admins (store.js, 2026-11-12) : pas d'offre Premium ni de « Recharger mes PA » pour les joueurs. */
+.pkm-nobuy .pkm-prem-banner,
+.pkm-nobuy .pkm-lockw-prem,
+.pkm-nobuy .pkm-lockw-premgo,
+.pkm-nobuy .pkm-av-premgo,
+.pkm-nobuy-pa .pkm-shop-tabs,
+.pkm-nobuy-pa .pkm-pas { display: none !important; }
 
 :root { --pkm-app: #0B1120; --pkm-field: #0B1120; --pkm-card: #111A2C; --pkm-card-hi: #121C33; --pkm-card-2: #0F1828; --pkm-card-teal: #0F1D2B; --pkm-img-bg: #16213A; --pkm-toast: #16223A; --pkm-track: #24345C; --pkm-photo-mat: #FFFFFF; --pkm-pearl: #E8ECFF; --pkm-line: #1E2B45; --pkm-line-2: #2A3A5C; --pkm-line-3: #24345C; --pkm-line-4: #3A4A75; --pkm-line-teal: #1F5A55; --pkm-t1: #F3F6FC; --pkm-t2: #C9D3EA; --pkm-t3: #9AA8C3; --pkm-t4: #7D8BA8; --pkm-t5: #5A6B8C; --pkm-link: #B9C5FF; --pkm-ink: #0B1120; --pkm-white: #FFFFFF; --pkm-accent: #A8B6FF; --pkm-on-accent: #0B1120; --pkm-brand: #3D63FF; --pkm-scan-1: #5B7BFF; --pkm-scan-2: #2F4FE0; --pkm-scan-3: #3D63FF; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #FFFFFF; --pkm-iris: #6C84F2; --pkm-regular: #A8B6FF; --pkm-green: #3DDC84; --pkm-up: #3DDC84; --pkm-down: #FF6B6B; --pkm-red: #FF8A8A; --pkm-orange: #F5B14C; --pkm-amber: #FFB547; --pkm-teal: #5EE0CF; --pkm-logo: #FFD60A; --pkm-gold: #FFD66B; --pkm-sand: #F7C77E; --pkm-sand-2: #F3D9AE; --pkm-gray: #9AA8C3; --pkm-off: #56648A; --pkm-peach: #FFC9A8; --pkm-bar-cost: #34415F; --pkm-bar-edge: #56648A; --pkm-bar-fees: #D5763A; --pkm-bar-margin: #6C84F2; --pkm-chip-bg: transparent; --pkm-chip-bc: #2A3A5C; --pkm-chip-fg: #C9D3EA; --pkm-chip-on-bg: #26345A; --pkm-chip-on-bc: #3A4A75; --pkm-chip-on-fg: #FFFFFF; --pkm-choice-bg: #111A2C; --pkm-choice-bc: #24345C; --pkm-choice-on-bg: #1A2645; --pkm-choice-on-bc: #A8B6FF; --pkm-nav-on: #FFFFFF; --pkm-nav-off: #7D8BA8; --pkm-nav-dot: #A8B6FF; --pkm-dim: 0.6; --pkm-off-bg: #26345A; --pkm-glow-rgb: 98, 122, 255; --pkm-accent-rgb: 168, 182, 255; --pkm-regular-rgb: 168, 182, 255; --pkm-ink-rgb: 8, 13, 26; --pkm-app-rgb: 11, 17, 32; --pkm-deep-rgb: 5, 8, 15; --pkm-scrim-rgb: 3, 6, 14; --pkm-hl-rgb: 255, 255, 255; --pkm-shadow-rgb: 0, 0, 0; --pkm-orange-rgb: 245, 177, 76; --pkm-teal-rgb: 94, 224, 207; --pkm-green-rgb: 61, 220, 132; --pkm-amber-rgb: 255, 181, 71; --pkm-gold-rgb: 255, 214, 107; --pkm-iris-rgb: 108, 132, 242; --pkm-blue-rgb: 61, 99, 255; --pkm-gray-rgb: 154, 168, 195; }
 html:not(.pkm-classic) .pkm-root { --pkm-app: radial-gradient(110% 60% at 100% 100%, rgba(255, 140, 0, 0.28), rgba(255, 140, 0, 0) 70%), linear-gradient(165deg, #FFE45C 0%, #FFD60A 45%, #FFB703 100%); --pkm-t1: #0B1120; --pkm-t2: #1F2433; --pkm-t3: #33363F; --pkm-t4: #41434A; --pkm-t5: #41434A; --pkm-link: #0A2A88; --pkm-ink: #0B1120; --pkm-logo: #0B1120; --pkm-accent: #0B1120; --pkm-on-accent: #FFD84D; --pkm-accent-rgb: 11, 17, 32; --pkm-glow-rgb: 255, 255, 255; --pkm-brand: #0B1120; --pkm-line: rgba(11, 17, 32, 0.16); --pkm-line-2: rgba(11, 17, 32, 0.22); --pkm-line-3: rgba(11, 17, 32, 0.2); --pkm-line-4: rgba(11, 17, 32, 0.32); --pkm-track: rgba(11, 17, 32, 0.16); --pkm-chip-bg: rgba(255, 255, 255, 0.45); --pkm-chip-bc: rgba(11, 17, 32, 0.18); --pkm-chip-fg: #1F2433; --pkm-chip-on-bg: #0B1120; --pkm-chip-on-bc: #0B1120; --pkm-chip-on-fg: #FFD84D; --pkm-choice-bg: rgba(255, 255, 255, 0.45); --pkm-choice-bc: rgba(11, 17, 32, 0.18); --pkm-choice-on-bg: rgba(255, 255, 255, 0.85); --pkm-choice-on-bc: #0B1120; --pkm-green: #054A24; --pkm-up: #054A24; --pkm-down: #8F1414; --pkm-red: #8F1414; --pkm-orange: #6B3500; --pkm-amber: #6B3500; --pkm-teal: #04463F; --pkm-gold: #5C4400; --pkm-sand: #5C3D00; --pkm-sand-2: #4D3810; --pkm-gray: #41434A; --pkm-off: #4D4F57; --pkm-regular: #22348F; --pkm-iris: #22348F; --pkm-shadow-rgb: 70, 45, 0; --pkm-off-bg: rgba(11, 17, 32, 0.08); --pkm-card: rgba(10, 17, 48, 0.9); --pkm-card-hi: rgba(12, 22, 66, 0.94); --pkm-card-2: rgba(8, 14, 40, 0.92); --pkm-card-teal: rgba(4, 32, 44, 0.9); --pkm-field: rgba(0, 4, 18, 0.55); --pkm-toast: rgba(10, 17, 48, 0.86); --pkm-nav-on: #FFD60A; --pkm-nav-off: #BCC5D9; --pkm-nav-dot: #FFD60A; --pkm-scan-1: #FFE45C; --pkm-scan-2: #F2A900; --pkm-scan-3: #FFD60A; --pkm-scan-ring: #0B1120; --pkm-scan-fg: #0B1120; --pkm-blue-rgb: 255, 214, 10; --pkm-dim: 0.8; }
@@ -2824,6 +2916,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=4a616db3"></script>
+<script src="app.js?v=3b48e044"></script>
 </body>
 </html>

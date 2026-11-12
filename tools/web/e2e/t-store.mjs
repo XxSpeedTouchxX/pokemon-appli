@@ -52,7 +52,8 @@ await login();
 await page.goto(E2E + '/?start=market&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.waitForFunction(() => window.__pkm && window.__pkm.premOn, null, { timeout: 15000 });
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
-ok('site : onglet « Recharger mes PA » et bannière Premium présents', await vis('.pkm-shop-tabs') && await vis('.pkm-prem-banner'));
+// Depuis le 2026-11-12 (porteur), les achats sont réservés aux admins : un compte joueur ne les voit plus sur le site non plus.
+ok('site, compte joueur : ni « Recharger mes PA » ni bannière Premium (achats réservés aux admins)', !(await vis('.pkm-shop-tabs')) && !(await vis('.pkm-prem-banner')));
 ok('site : pas de marque « app des stores »', !(await page.evaluate(() => document.documentElement.classList.contains('pkm-store'))));
 
 // 2. App des stores.

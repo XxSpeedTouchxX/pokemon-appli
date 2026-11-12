@@ -25,7 +25,7 @@ Tu reprends le projet **Dropicards** (nom de code PKM-App), une app pour les col
 
 - **Source** : le gabarit `docs/12-maquette-v5/Main.dc.html` et les modules `tools/web/*.js` (start, cloud, game-cloud, passkey, premium, pkshop, pa, dex, tuto, fiche, legal…), et `tools/web/catalog.dc.html` (fragments).
 - **Construction** : `node tools/web/build.mjs` génère `web/index.html`, `web/app.js` (minifié), les pages légales publiques (`web/mentions-legales.html`, `confidentialite.html`, `cgu.html`, `cgv.html`, à partir de `legal.js`) et le reste.
-- **À chaque changement visible** : monter la version du cache dans `web/sw.js` (`pkm-demo-vNNN`, **v181** au 2026-11-11), reconstruire, lancer les tests, ajouter une ligne au journal, à `CLAUDE.md` §3 et à `tools/web/README.md`, faire un commit court, puis pousser.
+- **À chaque changement visible** : monter la version du cache dans `web/sw.js` (`pkm-demo-vNNN`, **v183** au 2026-11-11), reconstruire, lancer les tests, ajouter une ligne au journal, à `CLAUDE.md` §3 et à `tools/web/README.md`, faire un commit court, puis pousser.
 - **Tests navigateur** :
 
   ```

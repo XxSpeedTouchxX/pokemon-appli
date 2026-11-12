@@ -58,7 +58,13 @@
       // Sans site connu (ni celui de l'enseigne), « Site » cherche la boutique sur le web ; sans numéro, « Appeler » est grisé.
       hasSite: !!site, site: site || 'https://www.google.com/search?q=' + encodeURIComponent([st.name, st.city].filter(Boolean).join(' ')), siteLabel: st.site ? 'Site' : 'Site de l’enseigne',
       siteAria: (st.site ? 'Site de la boutique ' : site ? 'Site de l’enseigne ' : 'Chercher le site de ') + st.name + ' (nouvel onglet)',
-      hasTel: tel.length >= 8, noTel: tel.length < 8, tel: 'tel:' + tel, telLabel: 'Appeler', telAria: 'Appeler ' + st.name + ' : ' + st.tel,
+      // « Appeler » toujours actif (2026-11-12, porteur : « je veux pouvoir appeler n'importe quelle boutique de
+      // France ») : 2 boutiques sur 3 n'ont pas de numéro dans OpenStreetMap ; elles ouvrent alors leur fiche Google Maps,
+      // qui donne le numéro et un bouton d'appel.
+      hasTel: true, noTel: false,
+      tel: tel.length >= 8 ? 'tel:' + tel : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([st.name, st.address, st.city].filter(Boolean).join(' ')),
+      telTarget: tel.length >= 8 ? '_self' : '_blank', telLabel: 'Appeler',
+      telAria: tel.length >= 8 ? 'Appeler ' + st.name + ' : ' + st.tel : 'Trouver le numéro de ' + st.name + ' sur Google Maps (nouvel onglet)',
       hasHours: !!st.hours, hoursState: now ? now.label : 'Horaires', hoursColor: now ? (now.open ? 'var(--pkm-green)' : 'var(--pkm-t3)') : 'var(--pkm-t2)',
       hoursText: RadarCore.hoursText(st.hours) + (hours ? '' : ' (horaires OpenStreetMap)'),
       hasAddress: !!st.address, address: st.address || '',

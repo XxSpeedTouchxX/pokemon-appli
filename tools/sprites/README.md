@@ -29,3 +29,11 @@ Sur l'accueil, un Pokémon animé accompagne la valeur de la collection. On le c
 `fetch_megatext.py` (2026-11-01, demande du porteur) : PokeAPI n'a aucune description pour les formes méga. Le script lit le Pokédex de **Légendes Pokémon : Z-A** (2025) en français dans un relevé public des textes du jeu (`CPokemon/plza-text`, `french/common/zukan_comment_A.txt`, étiquettes `ZKN_COMMENT_A_<n°>_<forme>`), vérifie le nom de chaque forme dans `zkn_form.txt` contre `megas.json`, et fige les 15 textes dans `megas_text.json` (recoupés le 2026-11-01 avec `abcboy101/poke-corpus`, identiques). `fetch_dex.py` les reprend pour les fiches méga. Textes © The Pokémon Company (CLAUDE.md §4).
 
 `dex_boxes.py` (2026-10-29) ajoute à chaque fiche de `dex.json` la taille du GIF animé (`gif`) et la boîte du Pokémon dans l'image fixe de 96 px (`box`), le centre horizontal de son corps (`gc` pour le GIF, `pc` pour l'image fixe ; depuis le 2026-10-30, la plus grosse tache de la silhouette érodée d'environ 28 %, sans queue, flamme ni ailes, médiane de l'animation : Reptincel n'est plus décalé) et le vide sous lui dans l'image médiane du GIF (`gb`) : le Pokédex s'en sert pour dessiner chaque Pokémon à sa hauteur proportionnelle, en animé comme en image fixe. Régénérer après `fetch_dex.py` : `python3 tools/sprites/dex_boxes.py`.
+
+## Shiny maison des 3 légendaires de Hoenn (2026-11-12, porteur)
+
+`recolor_legend_shiny.py` refait `web/img/pokemon/shiny/382.png`, `383.png` et `384.png` à partir des sprites normaux : Kyogre violet clair, Groudon doré (comme Groudon ☆, EX Espèces Delta 111/113), Rayquaza noir aux anneaux dorés et rouges (comme Rayquaza ☆, EX Deoxys 107/107). À relancer après `fetch_shiny.py`, qui remet les shiny officiels :
+
+```sh
+python3 tools/sprites/recolor_legend_shiny.py
+```

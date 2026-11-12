@@ -107,6 +107,15 @@ export function makeHandler(env, fetchImpl = fetch) {
     const rows = res.ok ? await res.json() : [];
     return rows && rows[0] || null;
   }
+  // Achats réservés aux admins tant que le Premium n'est pas ouvert à tous (2026-11-12, porteur : « je veux que tu me
+  // bloques dès à présent toutes les possibilités d'achat des comptes utilisateur ») : variable PREMIUM_OPEN=true dans
+  // Coolify pour l'ouvrir à tout le monde. La page client (gérer, arrêter) reste ouverte à tous les abonnés.
+  async function isAdmin(uid) {
+    const k = E('SUPABASE_SERVICE_ROLE_KEY');
+    const res = await fetchImpl(SB + '/rest/v1/profiles?select=role,status&id=eq.' + encodeURIComponent(uid), { headers: { apikey: k, Authorization: 'Bearer ' + k } });
+    const rows = res.ok ? await res.json() : [];
+    return !!(rows && rows[0] && rows[0].role === 'admin' && rows[0].status !== 'suspended');
+  }
   // Joueur connecté : son jeton est vérifié par le service des comptes de Supabase.
   async function userOf(req) {
     const auth = req.headers.get('authorization') || '';
@@ -136,6 +145,7 @@ export function makeHandler(env, fetchImpl = fetch) {
   async function checkout(req) {
     const u = await userOf(req);
     if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards pour devenir Premium.');
+    if (String(E('PREMIUM_OPEN') || '').toLowerCase() !== 'true' && !(await isAdmin(u.id))) return fail(403, 'Le Premium n’est pas encore ouvert : il arrive très bientôt.');
     const b = await req.json().catch(() => ({}));
     const plan = b && typeof b.plan === 'string' && Object.prototype.hasOwnProperty.call(LOOKUP, b.plan) ? b.plan : '';
     if (!plan) return fail(400, 'Choisis une formule : mensuelle, trimestrielle, semestrielle ou annuelle.');

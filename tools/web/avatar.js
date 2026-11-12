@@ -361,7 +361,11 @@
   };
   // Avatar enregistré en image (JPEG 256 px) : même ordre des calques ; sprites dessinés sans lissage (pixel art).
   const avLoad = src => new Promise((ok, ko) => { const im = new Image(); im.onload = () => ok(im); im.onerror = ko; im.src = src; });
-  const avCompose = async c => {
+  // Décors animés (neige, galaxie, tempête, lave, tsunami : un <style> dans leur dessin). Pour qu'ils bougent aussi dans
+  // l'en-tête et Mon profil (2026-11-12, porteur), l'avatar y est un dessin : le décor animé, puis le reste en image PNG
+  // transparente (noBg).
+  const avAnimBg = c => /<style>/.test(avBg(c, ''));
+  const avCompose = async (c, noBg) => {
     const L = avLayers(c), N = 256, cv = document.createElement('canvas');
     cv.width = cv.height = N;
     const x = cv.getContext('2d'), draw = async (src, r) => { const im = await avLoad(src); x.drawImage(im, r ? r[0] : 0, r ? r[1] : 0, r ? r[2] : N, r ? r[3] : N); };
@@ -369,8 +373,9 @@
     const sprite = async (p, smooth) => { if (!p) return; x.imageSmoothingEnabled = !!smooth;
       try { const im = await avLoad(p.src), [l, t, w, h] = rect(p); x.save(); x.translate(l + w / 2, t + h / 2); x.rotate((p.rot || 0) * Math.PI / 180); x.drawImage(im, -w / 2, -h / 2, w, h); x.restore(); } catch (e) { /* image indisponible */ }
       x.imageSmoothingEnabled = true; };
-    await draw(L.bg); await sprite(L.back); if (L.hasAccBack) await sprite(L.acc, true); await draw(L.char); if (L.hasAccMid) await sprite(L.acc, true); await sprite(L.front); if (L.hasAccFront) await sprite(L.acc, true);
-    return cv.toDataURL('image/jpeg', 0.9);
+    if (!noBg) await draw(L.bg);
+    await sprite(L.back); if (L.hasAccBack) await sprite(L.acc, true); await draw(L.char); if (L.hasAccMid) await sprite(L.acc, true); await sprite(L.front); if (L.hasAccFront) await sprite(L.acc, true);
+    return noBg ? cv.toDataURL('image/png') : cv.toDataURL('image/jpeg', 0.9);
   };
   // Configuration complète et valide (valeurs inconnues remplacées par celles par défaut).
   const avNorm = (c, s) => {
@@ -393,6 +398,10 @@
   // Styles PRO utilisés par une configuration, et ceux qui ne sont pas encore débloqués.
   const avProIds = c => { const ids = Object.keys(AV_CATS).map(k => k + ':' + c[k]).filter(id => AV_PRICES[id]); if (c.poke) ids.push('poke:' + c.poke); if (c.poke && c.shiny) ids.push('shiny:' + c.poke); return ids; };
 
+  // Accessoire choisi ou débloqué (2026-11-12, porteur : « qu'il apparaisse directement au centre de l'image de
+  // l'avatar ») : posé sur le dresseur, centré dans l'image, à sa taille d'origine ; on le déplace ensuite au doigt.
+  const avAccCenter = id => { const a = AV_ACC.find(x => x.id === id); if (!a || !a.svg) return { acc: id };
+    return { acc: id, aon: 'perso', ax: 50 - a.pcx, ay: 50 - a.pcy, asz: 100, arot: 0 }; };
   const avProto = Component.prototype;
   avProto.avHas = function (id) { const s = this.st(), mine = Array.isArray(s.avOwned) && s.avOwned.indexOf(id) >= 0; if (!avPrice(id) || mine) return true; return !!(this.premOn && this.premOn()); };  // Premium débloque tout le mode avatar (2026-11-11, porteur)
   avProto.avOpen = function () {
@@ -411,6 +420,7 @@
         // Serveur sans 021 ou 022 : il ne garde pas encore tout (place, accessoire, shiny, cadre) ; ceux de l'appareil restent.
         patch.avatarCfg = avNorm(Object.assign({}, s.avatarCfg || {}, r.avatar), null);
         avCompose(patch.avatarCfg).then(png => this.setState({ avatarPng: png }), () => {});
+        patch.avatarFg = '';
       }
       this.setState(patch);
       return r;
@@ -434,7 +444,7 @@
       if (pm && pm[1] === 'poke' && this.st().avLockWhy === 'pick') this.avSet({ poke: Number(pm[2]), shiny: false, px: 50, py: 50, size: 140, prot: 0 });
       if (pm && pm[1] === 'shiny' && this.st().avLockWhy === 'pick') this.avSet({ shiny: true });
       const sm2 = /^([a-z]+):([a-z0-9]+)$/.exec(id);
-      if (!pm && sm2 && AV_CATS[sm2[1]] && this.st().avLockWhy === 'pick') this.avSet({ [sm2[1]]: sm2[2] });
+      if (!pm && sm2 && AV_CATS[sm2[1]] && this.st().avLockWhy === 'pick') this.avSet(sm2[1] === 'acc' ? avAccCenter(sm2[2]) : { [sm2[1]]: sm2[2] });
       // Petite animation de déblocage sur l'aperçu (2026-11-11, porteur).
       this.setState({ avBurst: Date.now() }); setTimeout(() => this.setState({ avBurst: 0 }), 1700);
       this.setState({ avOwned: owned, pa: left, avLock: '', avBusy: false, toast: /^poke:/.test(id) ? avLabel(id) + ' débloqué pour ton avatar' : /^shiny:/.test(id) ? 'Version shiny débloquée' : 'Style débloqué pour toujours' });
@@ -453,6 +463,7 @@
     }
     done(pa - price);
   };
+  const AV_SAVED_MS = 1500;
   avProto.avSave = function () {
     const s = this.st(), c = avNorm(s.avDraft, s);
     // « Valider mon avatar » enregistre tout de suite (2026-11-11, porteur) : un style payant ne peut être ajouté qu'une
@@ -460,10 +471,18 @@
     avProIds(c).filter(id => !this.avHas(id)).forEach(id => { const k = id.split(':')[0]; if (k === 'poke') { c.poke = 0; c.shiny = false; } else if (k === 'shiny') c.shiny = false; else c[k] = AV_DEF[k]; });
     this.setState({ avBusy: true });
     avCompose(c).then(png => {
-      this.setState({ avatarCfg: c, avatarPng: png, avatarImg: '', avBusy: false, toast: 'Avatar enregistré' });
+      // Animation « Avatar enregistré » (2026-11-12, porteur), puis retour sur Mon profil avec le nouvel avatar. L'offre
+      // Premium restée ouverte sous l'écran de l'avatar est refermée (elle réapparaissait au retour).
+      this.setState({ avatarCfg: c, avatarPng: png, avatarFg: '', avatarImg: '', avBusy: false, avSaved: png, premOpen: false });
+      if (avAnimBg(c)) avCompose(c, true).then(fg => this.setState({ avatarFg: fg }), () => {});
       this.flash && this.flash();
       if (typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn()) Cloud.rpc('avatar_save', { cfg: c }).catch(e => { if (this.gcFail) this.gcFail(e); });
-      this.pop();
+      setTimeout(() => {
+        this.setState({ avSaved: '' });
+        if (this.st().screen !== 'avatar') return;
+        this.pop();
+        if (this.st().screen !== 'profile') this.push('profile');
+      }, AV_SAVED_MS);
     }, () => this.setState({ avBusy: false, toast: 'L’avatar n’a pas pu être dessiné' }));
   };
   // L'avatar enregistré remplace l'illustration (et l'ancienne photo, retirée le 2026-11-08) partout.
@@ -472,9 +491,22 @@
   const avFlat = c => { const inner = svg => svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
     return avUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">' + inner(avBg(c, avTypeColor(c.poke))) + inner(avChar(c)) + '</svg>'); };
   const avBaseImg = avProto.img;
+  let avFgBusy = false;
   avProto.img = function () {
     const o = avBaseImg.call(this), st = this.state || {}, p = st.avatarPng;
-    if (typeof p === 'string' && p.startsWith('data:image/')) return Object.assign({}, o, { avatar: p });
+    if (typeof p === 'string' && p.startsWith('data:image/')) {
+      const c = avNorm(st.avatarCfg, null);
+      if (avAnimBg(c)) {
+        const fg = st.avatarFg;
+        if (typeof fg === 'string' && fg.startsWith('data:image/png')) {
+          const inner = avBg(c, avTypeColor(c.poke)).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+          return Object.assign({}, o, { avatar: avUrl('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">' + inner + '<image width="200" height="200" href="' + fg + '" xlink:href="' + fg + '"/></svg>') });
+        }
+        // Avatar enregistré avant le 2026-11-12 : la partie sans décor est dessinée une fois, puis gardée.
+        if (!avFgBusy && typeof document !== 'undefined') { avFgBusy = true; avCompose(c, true).then(f => { avFgBusy = false; this.setState({ avatarFg: f }); }, () => { avFgBusy = false; }); }
+      }
+      return Object.assign({}, o, { avatar: p });
+    }
     return Object.assign({}, o, { avatar: avFlat(avNorm(st.avatarCfg, null)) });
   };
   // Cadre animé de l'avatar enregistré (en-tête, bulle de Mon profil).
@@ -504,7 +536,7 @@
         aria: x.label + (pro ? (has ? ' (débloqué)' : ' (' + x.pa + ' PA, ou Premium)') : '') + (on ? ', choisi' : ''),
         // Style payant pas encore débloqué : la fenêtre de déblocage s'ouvre d'abord ; il s'applique une fois acheté
         // (2026-11-11, porteur : « du moment que ce style a été ajouté à ton avatar, c'est que tu l'as débloqué »).
-        pick: () => (pro && !has ? this.setState({ avLock: id, avLockWhy: 'pick' }) : this.avSet({ [k]: x.id })) };
+        pick: () => (pro && !has ? this.setState({ avLock: id, avLockWhy: 'pick' }) : this.avSet(k === 'acc' ? avAccCenter(x.id) : { [k]: x.id })) };
     };
     const L = avLayers(d), pend = avProIds(d).filter(id => !this.avHas(id));
     const pk = n => n && DEX[n] ? { n: n, name: DEX[n].name, icon: 'img/pokemon/icon/' + n + '.png' } : null;
@@ -536,12 +568,12 @@
       uiCls: 'pkm-av-ui pkm-av-ui' + avUi(), prevCls: 'pkm-av-prev' + (tab === 'acc' ? ' pkm-av-drag-acc' : ' pkm-av-drag-poke'),
       frameCls: 'pkm-av-frwrap pkm-fr pkm-fr-' + d.frame,
       dragHint: tab === 'acc' ? (d.acc !== 'aucun' ? 'Glisse, pince ou tourne l’accessoire' : '') : d.poke ? 'Glisse, pince ou tourne ton Pokémon' : '',
-      back: () => this.pop(), paLabel: (Number(s.pa) || 0).toLocaleString('fr-FR'), goPoke: () => this.setState({ avTab: 'poke' }),
+      back: () => this.pop(), paLabel: (Number(s.pa) || 0).toLocaleString('fr-FR') + ' PA', goPoke: () => this.setState({ avTab: 'poke' }),
       pkCount: prem ? 'Premium : les 171 Pokémon sont débloqués pour ton avatar.' : owned + ' Pokémon débloqué' + (owned > 1 ? 's' : '') + ' sur 171 pour ton avatar · 1re forme 25 PA, 2e 50 PA, 3e 100 PA, légendaires 300 PA, Kyogre, Groudon et Rayquaza 500 PA',
       pctl: ctl('ton Pokémon', 'size', 'prot', { px: 50, py: 50, size: 140, prot: 0 }, [['Retirer', 'Retirer le Pokémon', ico.x, () => this.avSet({ poke: 0, shiny: false })]]),
       actl: ctl('l’accessoire', 'asz', 'arot', { ax: 0, ay: 0, asz: 100, arot: 0 }),
       isPoke: tab === 'poke', isFace: tab === 'face', isHair: tab === 'hair', isStyle: tab === 'style', isBg: tab === 'bg', isAcc: tab === 'acc', isShiny: tab === 'shiny',
-      prev: L, save: () => this.avSave(), busy: !!s.avBusy, saveLabel: s.avBusy ? 'Enregistrement…' : 'Valider mon avatar',
+      saved: !!s.avSaved, savedImg: s.avSaved || '', prev: L, save: () => (s.avSaved ? null : this.avSave()), busy: !!s.avBusy || !!s.avSaved, saveLabel: s.avBusy ? 'Enregistrement…' : 'Valider mon avatar',
       trial: false, burst: !!s.avBurst, burstKey: 'b' + (s.avBurst || 0), trialText: 'Essai : ' + pend.length + ' élément' + (pend.length > 1 ? 's' : '') + ' à débloquer pour valider',
       prem: prem, premTag: prem ? 'Premium : tous les styles PRO sont ouverts' : 'Styles PRO : ouverts avec Premium, ou à débloquer avec tes PA',
       skin: AV_SKIN.map(x => opt('skin', x, true)), face: AV_FACE.map(x => opt('face', x)), eyes: AV_EYES.map(x => opt('eyes', x)), ec: AV_EC.map(x => opt('ec', x, true)),

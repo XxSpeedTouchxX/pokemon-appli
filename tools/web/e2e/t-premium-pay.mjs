@@ -41,7 +41,7 @@ async function fake(route) {
     if (route2 === 'portal') return send(200, { url: E2E + '/?start=profile&debug&premium=retour' + Q });
     return send(404, { error: 'Chemin inconnu' });
   }
-  if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Sacha', age_range: '15-25', starter: 25, news_optin: false, role: 'user', status: 'active' }]);
+  if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Sacha', age_range: '15-25', starter: 25, news_optin: false, role: 'admin', status: 'active' }]); // achats réservés aux admins (2026-11-12)
   if (p === '/auth/v1/token') return send(200, { access_token: TOKEN, refresh_token: 'r', expires_in: 3600, user: { id: UID, email: EMAIL } });
   return send(404, {});
 }
@@ -53,7 +53,7 @@ if (process.env.DBG) { page.on('pageerror', e => console.log('PAGEERR', e.messag
 await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.waitForTimeout(800);
 await page.evaluate(([k, tok, uid, email]) => {
   const d = JSON.parse(localStorage.getItem(k) || '{}'); d.tuto = 'done'; d.onb = 0; localStorage.setItem(k, JSON.stringify(d));
-  localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: 'user' }));
+  localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: 'admin' }));
 }, [KEY, TOKEN, UID, EMAIL]);
 await page.goto(E2E + '/?start=market&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.waitForFunction(() => window.__pkm && window.__pkm.premOn, null, { timeout: 15000 });

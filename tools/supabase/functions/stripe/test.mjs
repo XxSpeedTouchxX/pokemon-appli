@@ -51,13 +51,17 @@ async function fakeFetch(url, init = {}) {
     try { return new Response(JSON.stringify(out(sql('select public.' + rpc[1] + '(' + Object.keys(a).map(k => k + ' => ' + lit(a[k])).join(', ') + ')::text', 'service_role')))); }
     catch (e) { return reply(400, { message: String(e.stderr || e.message) }); }
   }
+  if (u.pathname === '/rest/v1/profiles') {
+    const id = u.searchParams.get('id').replace(/^eq\./, '');
+    return new Response(sql("select coalesce(json_agg(json_build_object('role', role, 'status', status)), '[]') from public.profiles where id = " + lit(id))); // service_role lit tout dans Supabase ; ici, sans rôle
+  }
   if (u.pathname === '/rest/v1/premium') {
     const id = u.searchParams.get('user_id').replace(/^eq\./, '');
     return new Response(sql("select coalesce(json_agg(json_build_object('status', status, 'period_end', period_end)), '[]') from public.premium where user_id = " + lit(id), 'service_role'));
   }
   return reply(404, {});
 }
-const env = { STRIPE_SECRET_KEY: KEY, STRIPE_WEBHOOK_SECRET: WH, SUPABASE_URL: 'http://kong:8000', SUPABASE_ANON_KEY: 'anon-key', SUPABASE_SERVICE_ROLE_KEY: 'service-key', APP_URL: 'https://dropicards.fr' };
+const env = { STRIPE_SECRET_KEY: KEY, STRIPE_WEBHOOK_SECRET: WH, SUPABASE_URL: 'http://kong:8000', SUPABASE_ANON_KEY: 'anon-key', SUPABASE_SERVICE_ROLE_KEY: 'service-key', APP_URL: 'https://dropicards.fr', PREMIUM_OPEN: '' };
 const handle = makeHandler(k => env[k], fakeFetch);
 const call = async (route, body, token) => {
   const r = await handle(new Request('http://edge/stripe/' + route, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: 'Bearer ' + token } : {}), body: JSON.stringify(body || {}) }));
@@ -82,6 +86,16 @@ ok('message de plus de 5 minutes : refusé (rejeu)', !(await verifySignature(raw
 // 2. Page de paiement.
 ok('sans être connecté : refusé (401)', (await call('checkout', { plan: 'year' })).status === 401);
 ok('faux jeton : refusé (401)', (await call('checkout', { plan: 'year' }, 'tok-faux')).status === 401);
+// Achats réservés aux admins (2026-11-12, porteur) tant que PREMIUM_OPEN n'est pas « true ».
+const c0 = await call('checkout', { plan: 'year' }, 'tok-ok');
+ok('compte joueur, Premium pas encore ouvert : refusé (403, « pas encore ouvert »)', c0.status === 403 && /pas encore ouvert/.test(c0.j.error || ''));
+ok('aucune page de paiement créée pour un joueur', !S.sessions.length);
+sql("update public.profiles set role = 'admin' where id = " + lit(UID));
+const cA = await call('checkout', { plan: 'year' }, 'tok-ok');
+ok('compte admin : page de paiement (200)', cA.status === 200 && /^https:\/\/checkout\.stripe\.com\//.test(cA.j.url));
+sql("update public.profiles set role = 'user' where id = " + lit(UID));
+S.sessions.length = 0;
+env.PREMIUM_OPEN = 'true'; // ouvert à tous : la suite des essais
 ok('formule inconnue : refusée (400)', (await call('checkout', { plan: 'vie' }, 'tok-ok')).status === 400);
 const c1 = await call('checkout', { plan: 'year' }, 'tok-ok');
 const s1 = S.sessions[0];

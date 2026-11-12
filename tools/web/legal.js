@@ -146,7 +146,10 @@
       evo: legalEvoRows(),
       // Tickets (2026-11-08, porteur) : le ticket Bronze, Argent ou Or à la place de la gemme des PK.
       shop: SHOP_ITEMS.map(x => ({ name: x.name, price: x.soon ? 'Bientôt' : legalNum(x.price) + ' PK', grade: x.minGrade ? 'Dès le grade ' + PF_GRADES[x.minGrade].name : '', img: x.img || 'img/brand/pk.svg',
-        isTicket: x.kind === 'ticket', notTicket: x.kind !== 'ticket', tag: x.tag || '', ticketCls: 'pkm-shop-ticket pkm-shop-t-' + (x.tier || 'or') })),
+        isTicket: x.kind === 'ticket', notTicket: x.kind !== 'ticket', isBox: false, tag: x.tag || '', ticketCls: 'pkm-shop-ticket pkm-shop-t-' + (x.tier || 'or') }))
+        // Boîte mystère à la fin (2026-11-12, porteur), avec son coffre.
+        .concat([{ name: 'Boîte mystère', price: legalNum(MY_PRICE) + ' PA', grade: '2XP PK ou PA, scans bonus ou un légendaire', img: '', isTicket: false, notTicket: false, isBox: true,
+          boxBase: 'img/mybox/' + myVis().id + '-base.svg', boxLid: 'img/mybox/' + myVis().id + '-lid.svg', tag: '', ticketCls: '' }]),
       free: [['0 €', 'de mise'], ['0 €', 'à gagner en argent'], ['0', 'achat possible']].map(([a, b]) => ({ big: a, label: b }))
     };
   };

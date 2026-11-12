@@ -37,11 +37,13 @@ ok('300 PA débités, 2XP PK de 7 jours', st.pa === 700 && Math.abs(Date.parse(s
 await open('xp-3'); await page.locator('.pkm-mx').click(); await page.waitForTimeout(300);
 st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, u: window.__pkm.st().xpUntil }));
 ok('2ᵉ boîte : 3 jours ajoutés (10 jours en tout)', st.pa === 400 && Math.abs(Date.parse(st.u) - Date.now() - 10 * 864e5) < 6e4);
-ok('bandeau « 2XP PK actif »', /2XP PK actif · encore (9|10) j/.test(N(await sec.innerText())));
+ok('badge « 2XP » sur le solde de PK, plus de bandeau « 2XP PK actif »', (await page.locator('.pkm-xpb-pk').count()) === 1 && !/2XP PK actif/.test(N(await sec.innerText())));
+await page.locator('.pkm-xpb-pk').click(); await page.waitForTimeout(200);
+ok('appui sur le badge : temps restant (« 2XP PK actif · encore … j »)', /2XP PK actif · encore (9|10) j/.test(await page.evaluate(() => window.__pkm.st().toast || '')));
 await page.evaluate(() => window.__pkm.setState({ pa: 700 })); await page.waitForTimeout(150);
 await open('xppa-7'); await page.locator('.pkm-mx').click(); await page.waitForTimeout(300);
 st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, u: window.__pkm.st().paXpUntil, pend: window.__pkm.st().paDay }));
-ok('2XP PA · 7 jours : PA du jour doublés pendant 7 jours, bandeau « 2XP PA actif »', st.pa === 400 && Math.abs(Date.parse(st.u) - Date.now() - 7 * 864e5) < 6e4 && /2XP PA actif/.test(N(await sec.innerText())));
+ok('2XP PA · 7 jours : PA du jour doublés pendant 7 jours, badge « 2XP » sur le solde de PA', st.pa === 400 && Math.abs(Date.parse(st.u) - Date.now() - 7 * 864e5) < 6e4 && (await page.locator('.pkm-xpb-pa').count()) === 1);
 await open('kyogre'); await page.locator('.pkm-mx').click(); await page.waitForTimeout(300);
 st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, own: window.__pkm.st().pkOwn }));
 ok('Kyogre gagné : débloqué dans le Pokédex', st.pa === 100 && st.own.indexOf(382) >= 0);
@@ -51,7 +53,7 @@ await page.evaluate(() => { window.__myLot = null; window.__pkm.setState({ pa: 3
 await sec.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('xppk-shop.png') });
 // Jeux : gains doublés.
 await page.evaluate(() => window.__pkm.tab('market')); await page.waitForTimeout(700);
-ok('Jeux : bandeau « 2XP PK actif »', (await page.locator('.pkm-xp-live-gm').count()) === 1);
+ok('Jeux : badge « 2XP » sur le solde, sans bandeau', (await page.locator('.pkm-xpb-pk').count()) === 1 && (await page.locator('.pkm-xp-live, .pkm-xp-live-gm').count()) === 0);
 const boost = page.locator('section[aria-label="Booster PK"]');
 await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(3000);
 const g = await page.evaluate(() => ({ pk: window.__pkm.st().pk, mul: window.__pkm.st().games.bMul }));
