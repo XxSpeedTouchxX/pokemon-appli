@@ -94,6 +94,34 @@ def main():
             print("carte", path, e); continue
         if data[:4] == b"\x89PNG":
             (OUT / "img" / f"card-{s}.png").write_bytes(data); found["card-" + s] = path
+    # Visuels officiels des ETB de 2023 hébergés par Poképédia (API MediaWiki, une requête par page, 2026-11-12).
+    from urllib.parse import quote
+    api = "https://www.pokepedia.fr/api.php?format=json&action=query"
+    pp = {"sv01": "Coffret Dresseur d'élite Écarlate et Violet",
+          "sv02": "Coffret Dresseur d'élite Écarlate et Violet Évolutions à Paldea",
+          "sv03": "Coffret Dresseur d'élite Écarlate et Violet Flammes Obsidiennes",
+          "sv3pt5": "Coffret Dresseur d'élite Écarlate et Violet 151",
+          "sv04": "Coffret Dresseur d'élite Écarlate et Violet Faille Paradoxe",
+          "sv4pt5": "Coffret Dresseur d'élite Écarlate et Violet Destinées de Paldea"}
+    for s, title in pp.items():
+        try:
+            d = json.loads(get(api + "&prop=images&imlimit=50&titles=" + quote(title), binary=True))
+        except (HTTPError, URLError, TimeoutError, ValueError) as e:
+            print("poképédia", s, e); continue
+        files = [i["title"] for pg in d.get("query", {}).get("pages", {}).values() for i in pg.get("images", [])]
+        print("poképédia", s, files)
+        keep = [f for f in files if "Coffret Dresseur" in f and not any(w in f for w in ("Contenu", "Center", "Promo", "Logo"))]
+        for k, f in enumerate(keep[:3]):
+            try:
+                info = json.loads(get(api + "&prop=imageinfo&iiprop=url&iiurlwidth=1200&titles=" + quote(f), binary=True))
+                ii = [pg["imageinfo"][0] for pg in info["query"]["pages"].values() if pg.get("imageinfo")][0]
+                data = get(ii.get("thumburl") or ii["url"], binary=True)
+            except (HTTPError, URLError, TimeoutError, ValueError, IndexError, KeyError) as e:
+                print("poképédia", f, e); continue
+            if data[:4] == b"\x89PNG" or data[:3] == b"\xff\xd8\xff":
+                name = f"pp-{s}-{k}"
+                (OUT / "img" / f"{name}.png").write_bytes(data); found[name] = f; print("poképédia trouvé", name, f)
+            time.sleep(1)
     print("visuels :", len(found), "sur", len(SETS), "manquants :", [s for s in SETS if s not in found])
     (OUT / "etb.json").write_text(json.dumps({"created": guide.get("createdAt"), "rows": rows, "images": found},
                                              ensure_ascii=False, indent=1), "utf-8")
