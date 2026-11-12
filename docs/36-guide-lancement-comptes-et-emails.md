@@ -15,7 +15,7 @@ Il n'y a donc rien à « déployer ». En revanche, **deux limites peuvent bloqu
 
 ---
 
-## 1. Limite de 30 e-mails par heure (Coolify, 5 minutes) — à faire avant tout
+## 1. Limite de 30 e-mails par heure (Coolify, 5 minutes) — ✅ fait le 2026-11-12
 
 **Le problème.** À chaque inscription, le serveur des comptes (Supabase Auth) envoie un e-mail : la bienvenue avec le lien « Valider mon adresse e-mail ». Par défaut, il n'en envoie que **30 par heure, pour tout le site**. Ce réglage n'est pas dans la configuration installée par Coolify, donc c'est ce défaut qui s'applique. À la 31ᵉ inscription de l'heure, l'e-mail ne part pas, la création du compte échoue et la personne voit « Trop d'e-mails envoyés : attends quelques minutes ».
 
@@ -39,7 +39,7 @@ Il n'y a donc rien à « déployer ». En revanche, **deux limites peuvent bloqu
 
 ---
 
-## 2. Quota d'e-mails de Brevo (5 minutes)
+## 2. Quota d'e-mails de Brevo (5 minutes) — offre gratuite gardée pour l'instant (décision du 2026-11-12)
 
 **Le problème.** Les e-mails partent par Brevo. L'offre gratuite de Brevo est limitée à **300 e-mails par jour** (chiffre à vérifier sur ton compte). Au-delà, Brevo refuse l'envoi et la création du compte échoue, comme à l'étape 1.
 

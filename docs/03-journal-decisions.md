@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-12 (suite) — Limite d'e-mails réglée, Brevo gratuit gardé (porteur)
+
+- `GOTRUE_RATE_LIMIT_EMAIL_SENT=1000` et `GOTRUE_MAILER_ALLOW_UNVERIFIED_EMAIL_SIGN_INS=true` ajoutés par le porteur dans le bloc `supabase-auth` de Coolify (vérifiés sur sa capture).
+- **Décision du porteur** : offre gratuite de Brevo (≈ 300 e-mails par jour) gardée pour l'instant ; offre payante plus tard si besoin. Repère : la requête 4 de `requetes_emails.sql` (inscriptions par jour) ; au-delà d'environ 250 par jour, passer à l'offre payante ou utiliser la solution de secours de `docs/36` §2.
+
 ## 2026-11-12 — Lancement TikTok : comptes et récupération des e-mails (demande du porteur)
 
 - Base déjà en ligne (001 à 023 installés, inscription branchée depuis la v132) : rien à déployer.
