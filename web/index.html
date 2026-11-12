@@ -2221,6 +2221,9 @@ nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="wi
 .pkm-pa-ser-status { margin: 0; font-size: 13.5px; font-weight: 800; color: #FFD60A; }
 .pkm-pa-ser-text { margin: 0; font-size: 12.5px; line-height: 1.45; color: #C9D3EA; }
 @media (prefers-reduced-motion: reduce) { .pkm-pa-ser-box { animation: none !important; } }
+/* Boîte mystère (2026-11-12) : même colonne que les photos et les tickets. */
+.pkm-rules-shop > div > .pkm-rules-box { flex: none; width: 56px; min-width: 56px; height: 44px; position: relative; display: block; }
+.pkm-rules-shop .pkm-rules-box img { position: absolute; left: 6px; top: 0; width: 44px; height: 44px; object-fit: contain; }
 
 /* Abonnement Premium (2026-11-06, porteur) : bannière dorée qui brille et écran de l'offre. */
 .pkm-prem-banner { position: relative; flex: none; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; border: 2px solid #FFD60A; border-radius: 22px; overflow: hidden; background: linear-gradient(115deg, #E9EDF3 0%, #C3CBD8 22%, #FFFFFF 42%, #B4BDCB 62%, #EEF1F6 82%, #CDD4DF 100%); color: #141A26; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.35), 0 0 22px rgba(255, 200, 0, 0.55), 0 10px 26px rgba(20, 26, 38, 0.35); overflow: visible; isolation: isolate; }

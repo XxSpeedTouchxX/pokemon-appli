@@ -128,3 +128,6 @@
 .pkm-pa-ser-status { margin: 0; font-size: 13.5px; font-weight: 800; color: #FFD60A; }
 .pkm-pa-ser-text { margin: 0; font-size: 12.5px; line-height: 1.45; color: #C9D3EA; }
 @media (prefers-reduced-motion: reduce) { .pkm-pa-ser-box { animation: none !important; } }
+/* Boîte mystère (2026-11-12) : même colonne que les photos et les tickets. */
+.pkm-rules-shop > div > .pkm-rules-box { flex: none; width: 56px; min-width: 56px; height: 44px; position: relative; display: block; }
+.pkm-rules-shop .pkm-rules-box img { position: absolute; left: 6px; top: 0; width: 44px; height: 44px; object-fit: contain; }

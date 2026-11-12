@@ -75,7 +75,7 @@ await page.waitForTimeout(600);
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Acheter un ticket")').click(); await page.waitForTimeout(250);
 await page.evaluate(() => { const an = Element.prototype.animate; window.__tkFly = []; Element.prototype.animate = function (k, o) { if (this.classList && this.classList.contains('pkm-tkfx-tk')) window.__tkFly.push(JSON.stringify(k)); return an.call(this, k, o); }; });
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Confirmer")').click(); await page.waitForTimeout(700);
-ok('ticket acheté : ticket Bronze, tampon « VALIDÉ » et « +1 » (choix du porteur)', (await page.locator('.pkm-tkfx.pkm-tkfx-v2 .pkm-shop-t-bronze').count()) === 1 && (await page.locator('.pkm-tkfx-stamp').innerText()) === 'VALIDÉ' && (await page.locator('.pkm-tkfx-plus').innerText()) === '+1' && /Ticket Bronze · tu en as 1/.test(await page.locator('.pkm-tkfx-cap').innerText()));
+ok('ticket acheté : ticket Bronze, tampon « VALIDÉ » et badge « acheté » à la place de « +1 » (2026-11-12)', (await page.locator('.pkm-tkfx.pkm-tkfx-v2 .pkm-shop-t-bronze').count()) === 1 && (await page.locator('.pkm-tkfx-stamp').innerText()) === 'VALIDÉ' && (await page.locator('.pkm-tkfx-ok[aria-label="Acheté"] svg').count()) === 1 && /Ticket Bronze · tu en as 1/.test(await page.locator('.pkm-tkfx-cap').innerText()));
 await page.screenshot({ path: shot('locks-ticket-plus1.png') });
 await page.waitForTimeout(1250);
 const fly = await page.evaluate(() => (window.__tkFly || []).some(t => /translate\(/.test(t)));

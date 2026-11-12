@@ -19,7 +19,7 @@ ok('règles : petit booster devant « Booster PK » (plus de cadeau)', (await ru
 ok('règles : 3 tickets Bronze, Argent, Or dans la ligne du PK shop', (await rules.locator('.pkm-rules-shop .pkm-shop-t-bronze').count()) === 1 && (await rules.locator('.pkm-rules-shop .pkm-shop-t-argent').count()) === 1 && (await rules.locator('.pkm-rules-shop .pkm-shop-t-or').count()) === 1);
 const me = rules.locator('.pkm-rules-me');
 const xs = await rules.locator('.pkm-rules-shop > div').evaluateAll(rs => rs.map(r => Math.round(r.querySelector('b').getBoundingClientRect().left)));
-ok('règles : tickets dans la même colonne que les photos, textes alignés (' + xs.join(', ') + ')', xs.length === 6 && xs.every(x => Math.abs(x - xs[0]) <= 1));
+ok('règles : tickets dans la même colonne que les photos, textes alignés (' + xs.join(', ') + ')', xs.length === 7 && xs.every(x => Math.abs(x - xs[0]) <= 1)); // 7 lignes avec la boîte mystère (2026-11-12)
 ok('règles : « Grade actuel » dans l’encadré jaune du grade', (await me.count()) === 1 && /Grade actuel/i.test(await me.innerText()) && (await rules.locator('.pkm-rules-nowtag').count()) === 1);
 const rowH = await rules.locator('.pkm-rules-row:not(.pkm-rules-th)').first().evaluate(e => e.getBoundingClientRect().height);
 ok('règles : lignes des grades agrandies (' + Math.round(rowH) + ' px)', rowH >= 52);

@@ -11,7 +11,7 @@ const sync = async () => (await page.locator('#app').innerText()).match(/(Hors l
 await page.goto(B, { waitUntil: 'load' }); await page.waitForTimeout(2500);
 const all = await page.locator('#app').innerText();
 ok('plus de date figée « 3 oct. à 07:00 »', !/3 oct\. à 07:00|03\/10 à 07:00/.test(all));
-const s1 = await sync(); ok('en-tête accueil : ' + s1, /^Cotes (du|cartes du) \d\d\/\d\d.* · Cardmarket$/.test(s1));
+const s1 = await sync(); ok('en-tête accueil : plus de ligne « Cotes du … · Cardmarket » (2026-11-12, porteur)', s1 === '');
 ok('valeur : « Calculé selon les cotes Cardmarket » sous la courbe (date dans l’en-tête)', /Calculé selon les cotes Cardmarket/.test(all) && !/Cote Dropicards : Cardmarket · du/.test(all));
 const bi = page.locator('section[aria-label="Mon classeur"] button[aria-label="Source et date des cotes"]');
 ok('bouton « i » du classeur', (await bi.count()) === 1);
