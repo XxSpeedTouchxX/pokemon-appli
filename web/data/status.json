@@ -2,6 +2,6 @@
 
 "cards":{"checked":"2026-11-11T19:16:29Z","ok":true,"upstream":"2026-11-11","count":21538,"previous":21538,"delta":0,"warnings":[],"errors":[],"details":{"cardsCm":21146,"cardsPriced":21386,"cardsEn":1211,"imgNone":431,"cardsDoubt":2140,"sets":209}},
 
-"sealed":{"checked":"2026-11-11T18:54:26Z","ok":true,"upstream":"2026-11-11T02:45:38+0100","count":63,"previous":63,"delta":0,"warnings":[],"errors":[],"details":{"priced":60,"pricedBefore":60,"days":31}},
+"sealed":{"checked":"2026-11-12T12:41:24Z","ok":true,"upstream":"2026-11-12T02:51:19+0100","count":63,"previous":63,"delta":0,"warnings":[],"errors":[],"details":{"priced":60,"pricedBefore":60,"days":31}},
 
 "stores":{"checked":"2026-11-09T12:39:15Z","ok":true,"upstream":"2026-11-02","count":4257,"previous":4257,"delta":0,"warnings":[],"errors":[],"details":{"regions":{"11":611,"24":177,"27":212,"28":244,"32":344,"44":367,"52":267,"53":273,"75":459,"76":412,"84":523,"93":335,"94":33}}}}
