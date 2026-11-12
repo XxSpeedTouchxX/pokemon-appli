@@ -1260,6 +1260,37 @@ html:has(.pkm-lockw-wrap), html:has(.pkm-lockw-wrap) body { overflow: hidden; ov
 .pkm-admz-ok { flex: none; font-weight: 800; color: #5EE0CF !important; }
 .pkm-admz-empty { margin: 0; font-size: 12.5px; color: #9AA8C3; }
 .pkm-admz-err { margin: 0; font-size: 12.5px; color: #FF8A8A; }
+/* Panneau Admin › Inscriptions en direct (2026-11-12, porteur). */
+.pkm-sig { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 18px; border: 1px solid #24345C; background: #111A2C; }
+.pkm-sig-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-sig-top h3 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #C9D3EA; }
+.pkm-sig-dot { width: 10px; height: 10px; border-radius: 50%; background: #3BD37A; box-shadow: 0 0 0 0 rgba(59, 211, 122, 0.6); animation: pkmSigPulse 1.6s ease-out infinite; }
+@keyframes pkmSigPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 211, 122, 0.6); } 100% { box-shadow: 0 0 0 9px rgba(59, 211, 122, 0); } }
+.pkm-sig-live { margin: 0; font-size: 11.5px; color: #9AA8C3; }
+.pkm-sig-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.pkm-sig-stats > span { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 12px; background: #0B1120; }
+.pkm-sig-stats b { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; }
+.pkm-sig-stats small { font-size: 10.5px; color: #9AA8C3; text-align: center; }
+.pkm-sig-chart { display: flex; align-items: stretch; gap: 3px; height: 112px; padding: 8px 6px 4px; border-radius: 12px; background: #0B1120; }
+.pkm-sig-bar { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; }
+.pkm-sig-bar i { display: block; width: 100%; max-width: 16px; border-radius: 4px 4px 1px 1px; background: #3A5BA8; }
+.pkm-sig-bar small { font-size: 9.5px; font-weight: 700; color: #C9D3EA; font-variant-numeric: tabular-nums; }
+.pkm-sig-bar em { font-style: normal; font-size: 8.5px; color: #7F8DA9; white-space: nowrap; }
+.pkm-sig-bar-today i { background: var(--pkm-accent); }
+.pkm-sig-bar-today em { color: #F3F6FC; font-weight: 700; }
+.pkm-sig-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pkm-sig-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 12px; background: #0B1120; border: 1px solid transparent; }
+.pkm-sig-row > span:first-child { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-sig-row b { font-size: 13.5px; }
+.pkm-sig-row small { font-size: 11.5px; color: #9AA8C3; overflow-wrap: anywhere; }
+.pkm-sig-row-new { border-color: var(--pkm-accent); animation: pkmSigNew 2.4s ease-out 1; }
+@keyframes pkmSigNew { 0% { background: rgba(255, 210, 63, 0.28); } 100% { background: #0B1120; } }
+.pkm-sig-meta { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.pkm-sig-tags { display: flex; gap: 4px; }
+.pkm-sig-tag { font-style: normal; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 999px; background: #24345C; color: #C9D3EA; }
+.pkm-sig-ok { background: rgba(59, 211, 122, 0.18); color: #7FE3A6; }
+.pkm-sig-news { background: rgba(255, 210, 63, 0.18); color: #FFD23F; }
+@media (prefers-reduced-motion: reduce) { .pkm-sig-dot, .pkm-sig-row-new { animation: none; } }
 
 /* ——— Boîte mystère (2026-11-09, porteur : « une sorte de boîte à cadeau avec un point d'interrogation ») ——— */
 .pkm-my-sec { flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #5B3FA8; color: #F3F6FC;

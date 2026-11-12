@@ -1092,6 +1092,19 @@
 <button type="button" onClick="{{ adm.close }}" aria-label="Fermer" style="flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
 </div>
 <p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3">Réglages de démonstration, sur cet appareil seulement.</p>
+<section aria-label="{{ adm.sig.head }}" class="pkm-sig">
+<div class="pkm-sig-top"><h3><span aria-hidden="true" class="pkm-sig-dot"></span>{{ adm.sig.head }}</h3><button type="button" onClick="{{ adm.sig.refresh }}" class="pkm-admz-chip">Actualiser</button></div>
+<sc-if value="{{ adm.sig.offline }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.sig.offlineText }}</p></sc-if>
+<sc-if value="{{ adm.sig.online }}" hint-placeholder-val="{{ true }}">
+<p role="status" class="pkm-sig-live">{{ adm.sig.live }}</p>
+<sc-if value="{{ adm.sig.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-admz-err">{{ adm.sig.err }}</p></sc-if>
+<div class="pkm-sig-stats"><sc-for list="{{ adm.sig.stats }}" as="sgs" hint-placeholder-count="4"><span><b>{{ sgs.n }}</b><small>{{ sgs.label }}</small></span></sc-for></div>
+<div role="list" aria-label="Inscriptions des 14 derniers jours" class="pkm-sig-chart"><sc-for list="{{ adm.sig.bars }}" as="sgb" hint-placeholder-count="14"><div role="listitem" aria-label="{{ sgb.aria }}" class="{{ sgb.cls }}"><small>{{ sgb.n }}</small><i style="{{ sgb.style }}"></i><em>{{ sgb.day }}</em></div></sc-for></div>
+<sc-if value="{{ adm.sig.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.sig.emptyText }}</p></sc-if>
+<sc-if value="{{ adm.sig.hasList }}" hint-placeholder-val="{{ true }}"><ul aria-label="Dernières inscriptions" class="pkm-sig-list"><sc-for list="{{ adm.sig.list }}" as="sgl" hint-placeholder-count="3"><li class="{{ sgl.cls }}"><span><b>{{ sgl.who }}</b><small>{{ sgl.email }}</small></span><span class="pkm-sig-meta"><small>{{ sgl.when }}</small><span class="pkm-sig-tags"><sc-if value="{{ sgl.admin }}" hint-placeholder-val="{{ false }}"><em class="pkm-sig-tag">admin</em></sc-if><sc-if value="{{ sgl.verified }}" hint-placeholder-val="{{ true }}"><em class="pkm-sig-tag pkm-sig-ok">vérifiée</em></sc-if><sc-if value="{{ sgl.news }}" hint-placeholder-val="{{ false }}"><em class="pkm-sig-tag pkm-sig-news">nouveautés</em></sc-if></span></span></li></sc-for></ul></sc-if>
+<sc-if value="{{ adm.sig.hasMore }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.sig.more }}</p></sc-if>
+</sc-if>
+</section>
 <h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">PK, PA et compagnons</h3>
 <span style="font-size: 13px; color: #C9D3EA">{{ adm.pkText }}</span>
 <div style="display: flex; gap: 8px">

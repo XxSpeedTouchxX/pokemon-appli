@@ -65,6 +65,18 @@ Si une étape échoue, envoie-moi une capture de l'écran et du message.
 
 ---
 
+## 3 bis. Voir les inscriptions en direct (dans l'app, depuis la v181)
+
+1. Sur ton téléphone ou ton ordinateur, connecte-toi à dropicards.fr avec ton **compte admin**.
+2. Réglages › **Mode Admin · paramétrage**, puis le mot de passe des admins.
+3. En haut du panneau Admin : **« Inscriptions en direct »**, avec le point vert qui clignote.
+   - 4 compteurs : comptes, inscrits aujourd'hui, dans la dernière heure, ayant accepté les nouveautés.
+   - Les barres des 14 derniers jours (aujourd'hui en jaune) : l'effet de chaque vidéo TikTok.
+   - Les 30 dernières inscriptions, avec le pseudo, l'e-mail et l'heure.
+4. Laisse le panneau ouvert : il se met à jour **toutes les 15 secondes**. Une nouvelle inscription arrive en haut, surlignée en jaune, avec le message « Nouvelle inscription : … ».
+
+Ces données ne sont visibles que par un compte admin déverrouillé : le serveur refuse tous les autres.
+
 ## 4. Récupérer les e-mails des comptes (Studio, quand tu veux)
 
 Le fichier `tools/supabase/requetes_emails.sql` contient 4 requêtes. Elles **lisent seulement** : rien n'est modifié.

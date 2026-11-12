@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-12 (soir) — Inscriptions en direct dans le panneau Admin (demande du porteur)
+
+- Demande du porteur : « un visuel de qui s'inscrit en temps direct ».
+- Nouvelle rubrique **« Inscriptions en direct »** en tête du panneau Admin (`tools/web/signups.js`) :
+  - 4 compteurs : comptes, aujourd'hui, dernière heure, nouveautés OK ;
+  - barres des 14 derniers jours ;
+  - les 30 dernières inscriptions : pseudo, e-mail, depuis quand, étiquettes vérifiée / nouveautés / admin ;
+  - relue toutes les 15 secondes tant que le panneau est ouvert ;
+  - une nouvelle inscription apparaît en tête, surlignée, avec le message « Nouvelle inscription : … ».
+- Données lues sur le serveur par `admin_list_users()` (001, déjà installée), réservée aux admins déverrouillés par le mot de passe des admins : rien à installer, rien gardé sur l'appareil.
+- Test `t-signups.mjs` (14 vérifications, serveur imité). Cache v181.
+
 ## 2026-11-12 (suite) — Limite d'e-mails réglée, Brevo gratuit gardé (porteur)
 
 - `GOTRUE_RATE_LIMIT_EMAIL_SENT=1000` et `GOTRUE_MAILER_ALLOW_UNVERIFIED_EMAIL_SIGN_INS=true` ajoutés par le porteur dans le bloc `supabase-auth` de Coolify (vérifiés sur sa capture).
