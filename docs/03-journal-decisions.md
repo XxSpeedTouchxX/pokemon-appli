@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-12 — Scripts 011 à 023 installés sur le serveur (porteur)
+
+- Le porteur a lancé `install_011_a_023.sql` dans Supabase Studio, puis `000_verifier.sql` : tous les scripts sont en place (« oui » partout, 021, 022 et 023 compris).
+- La boîte mystère, les Pokémon et styles payants de l'avatar et le choix des cartes des tirages (Admin) passent donc par le serveur. Reste : essai sur le téléphone.
+
 ## 2026-11-11 (soir) — Avatar v5, boîte mystère et légendaires, bugs, cotes manquantes, business plan (demande du porteur)
 
 - **Série de connexion** : confirmé par le porteur, un jour oublié fait repartir la boîte offerte au jour 1, et les PA au palier J3 (déjà en place).
