@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-12 — Lancement TikTok : comptes et récupération des e-mails (demande du porteur)
+
+- Base déjà en ligne (001 à 023 installés, inscription branchée depuis la v132) : rien à déployer.
+- **Deux limites relevées, qui peuvent bloquer les inscriptions en cas d'afflux** : le serveur des comptes n'envoie par défaut que 30 e-mails par heure (`GOTRUE_RATE_LIMIT_EMAIL_SENT`, absent de la configuration de Coolify) ; l'offre gratuite de Brevo est limitée à environ 300 e-mails par jour. Au-delà, la création du compte échoue. Correction guidée (`GOTRUE_RATE_LIMIT_EMAIL_SENT=1000`, offre Brevo, solution de secours `GOTRUE_MAILER_AUTOCONFIRM=true`) : `docs/36-guide-lancement-comptes-et-emails.md`, **à faire par le porteur**.
+- Récupération des e-mails : `tools/supabase/requetes_emails.sql` (4 requêtes en lecture seule pour Studio, export CSV : nombre de comptes, tous les comptes, adresses ayant accepté les nouveautés, inscriptions par jour) ; rappel RGPD : publicité seulement aux adresses ayant donné leur accord, jamais aux moins de 15 ans.
+
 ## 2026-11-12 — Scripts 011 à 023 installés sur le serveur (porteur)
 
 - Le porteur a lancé `install_011_a_023.sql` dans Supabase Studio, puis `000_verifier.sql` : tous les scripts sont en place (« oui » partout, 021, 022 et 023 compris).
