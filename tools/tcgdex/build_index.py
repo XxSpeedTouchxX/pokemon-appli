@@ -91,7 +91,9 @@ ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 FALLBACK_USD_EUR = 0.86  # taux de secours si la BCE ne répond pas
 SKIP_SERIES = {"tcgp"}  # Pokémon TCG Pocket : cartes numériques, hors collection physique
 FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q", "cmf",
-          "cmid", "en"]
+          "cmid", "en", "c30"]
+# Cote « à confirmer » plus de 3 fois au-dessus du prix TCGplayer : cote = moyenne 30 jours de Cardmarket (c30 = 1).
+C30_RATIO = 3.0
 Q_MIN_TREND = 1.0  # en dessous de 1 €, l'écart entre plus bas et tendance ne dit rien : pas de « cote douteuse »
 SOON_DAYS = 90  # extension récente sans cote Cardmarket : « cote à venir »
 # Prix TCGplayer (tcp) : plus dans la cote depuis le 2026-10-18 (porteur), seulement un repère. Les tirages illimités
@@ -231,7 +233,7 @@ def prices(card, rate):
 def row(cid, name, sid, local, rarity, img, p, lang="", cmid=None, en=None):
     """Ligne du catalogue dans l'ordre de FIELDS ; p : prix au format de prices() ; cmid : produit Cardmarket ;
     en : nom anglais (gardé seulement s'il diffère du nom affiché)."""
-    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:], 0, cmid, en if en and en != name else ""]
+    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:], 0, cmid, en if en and en != name else "", 0]
 
 
 def ptcg_row_prices(card, rate):
@@ -527,6 +529,25 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
     return n, report
 
 
+def cap_doubtful(cards):
+    """Cote « à confirmer » trop haute (2026-11-13, « go » du porteur) : quand la cote d'une carte est douteuse (q = 1) et
+    plus de C30_RATIO fois au-dessus de son prix TCGplayer, l'app prend la moyenne 30 jours de Cardmarket (c30 = 1), si
+    elle est plus basse. Ex. : Dracaufeu ex ex6-105, tendance 1 866,64 € tirée par quelques ventes très chères (une vente
+    du jour à 5 100 €), moyenne 30 jours 862,77 €, TCGplayer 452,41 €. La cote reste 100 % Cardmarket ; TCGplayer ne sert
+    qu'à repérer l'écart. Renvoie la liste « id ancienne→nouvelle » pour le journal du calcul."""
+    f = {k: i for i, k in enumerate(FIELDS)}
+    out = []
+    for c in cards:
+        c[f["c30"]] = 0
+        v = sorted(x for x in (c[f["cm"]], c[f["avg7"]], c[f["avg30"]]) if x)
+        cote = (v[len(v) // 2] if len(v) % 2 else (v[len(v) // 2 - 1] + v[len(v) // 2]) / 2) if v else None
+        a30, tcp = c[f["avg30"]], c[f["tcp"]]
+        if c[f["q"]] == 1 and cote and a30 and tcp and cote > C30_RATIO * tcp and a30 < cote:
+            c[f["c30"]] = 1
+            out.append(f"{c[f['id']]} {round(cote, 2)}→{a30}")
+    return out
+
+
 def price_audit(cards):
     """Relevé des cotes à vérifier (2026-11-13, porteur : « regarde chaque carte pour qu'il n'y ait pas de loupés »),
     écrit dans le journal du calcul : carte de 20 € et plus dont les deux groupes de prix Cardmarket s'écartent de 3 fois
@@ -536,7 +557,7 @@ def price_audit(cards):
     out = []
     for c in cards:
         v = sorted(x for x in (c[f["cm"]], c[f["avg7"]], c[f["avg30"]]) if x)
-        cote = v[len(v) // 2] if v else None
+        cote = c[f["avg30"]] if c[f["c30"]] == 1 else (v[len(v) // 2] if v else None)
         if not cote:
             continue
         other, tcp = c[f["cmh"]], c[f["tcp"]]
@@ -813,6 +834,9 @@ def main():
         print(f"Cardmarket (fichiers publics) : {n_cm} cartes complétées · " + " · ".join(report))
     if EX_SWITCHED:
         print(f"Cartes « ex » de l'époque EX cotées sur le groupe normal ({len(EX_SWITCHED)}) : " + ", ".join(EX_SWITCHED))
+    capped = cap_doubtful(cards)
+    print(f"Cotes à confirmer plus de {C30_RATIO:g} fois au-dessus de TCGplayer, moyenne 30 jours retenue ({len(capped)}) : "
+          + ", ".join(capped))
     audit = price_audit(cards)
     print(f"Cotes à vérifier ({len(audit)}, 20 € et plus : groupes Cardmarket à 3 fois d'écart ou plus, ou TCGplayer à 4 fois) :")
     for line in audit[:150]:

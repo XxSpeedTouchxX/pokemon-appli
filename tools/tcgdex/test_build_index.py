@@ -80,6 +80,19 @@ class Prices(unittest.TestCase):
         # Une holo d'une autre époque garde l'arbitrage TCGplayer (règle du 2026-11-01).
         self.assertEqual(prices(dict(c, id="ex15-5", name="Milobellus δ", pricing={"cardmarket": cm, "tcgplayer": {"holofoil": {"marketPrice": 30}}}), 0.9)[8], "h")
 
+    def test_cap_doubtful(self):
+        # 2026-11-13 (« go » du porteur) : cote à confirmer plus de 3 fois au-dessus de TCGplayer → moyenne 30 jours.
+        f = {k: i for i, k in enumerate(FIELDS)}
+        dra = row("ex6-105", "Dracaufeu ex", "ex6", "105", "", "", (1866.64, 600, 862.77, 452.41, "2026-11-13", 2128.33, 5099.99, None, "n", 1))
+        sure = row("a-1", "Sûre", "a", "1", "", "", (1866.64, 600, 862.77, 452.41, "2026-11-13", 2128.33, 1900, None, "n", 0))
+        near = row("b-2", "Proche", "b", "2", "", "", (300, 10, 250, 120, "2026-11-13", 280, 900, None, "n", 1))
+        low30 = row("c-3", "Moyenne plus haute", "c", "3", "", "", (100, 1, 400, 20, "2026-11-13", 90, 900, None, "n", 1))
+        out = build_index.cap_doubtful([dra, sure, near, low30])
+        self.assertEqual(out, ["ex6-105 1866.64→862.77"])
+        self.assertEqual([r[f["c30"]] for r in (dra, sure, near, low30)], [1, 0, 0, 0])
+        # Relevé : cote finale comptée (862,77 € à moins de 4 fois de TCGplayer : plus listée ; 1 866,64 € l'était).
+        self.assertEqual(build_index.price_audit([dra]), [])
+
     def test_price_audit(self):
         f = {k: i for i, k in enumerate(FIELDS)}
         ok = row("a-1", "Carte sûre", "a", "1", "", "", (50, 40, 50, 55, "2026-11-13", 50, 50, 60, "n", 0))

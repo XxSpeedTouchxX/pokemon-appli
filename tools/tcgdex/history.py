@@ -53,7 +53,8 @@ def cotes(doc):
     out = {}
     for r in doc["cards"]:
         cid = g(r, "id")
-        v = 0 if cid in dup else med(g(r, "cm"), g(r, "avg30"), g(r, "avg7"))
+        # Cote « à confirmer » trop haute (c30 = 1, 2026-11-13) : moyenne 30 jours, comme dans l'app.
+        v = 0 if cid in dup else (g(r, "avg30") or 0) if g(r, "c30") == 1 else med(g(r, "cm"), g(r, "avg30"), g(r, "avg7"))
         out[cid] = (g(r, "set"), int(round(v * 100)) if v > 0 else None)
     return out
 

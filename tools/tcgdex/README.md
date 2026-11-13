@@ -62,6 +62,7 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
      |---|---|
      | `cmh` | tendance de l'autre groupe : la reverse (carte avec reverse), la version normale (carte holo seulement), sinon le groupe `-holo` ; `null` s'il manque |
      | `cmv` | groupe d'où vient `cm` : `"n"` (champs normaux) ou `"h"` (champs `-holo`) ; `null` sans cote |
+     | `c30` | `1` (2026-11-13, « go » du porteur) : cote douteuse (`q` = 1) plus de 3 fois au-dessus du prix TCGplayer ; l'app et l'archive prennent alors la moyenne 30 jours de Cardmarket (si elle est plus basse) au lieu de la médiane. Ex. : Dracaufeu ex `ex6-105`, tendance 1 866,64 € tirée par quelques ventes très chères, moyenne 30 jours 862,77 €, TCGplayer 452,41 €. Listées chaque jour dans le journal du calcul ; `0` sinon |
      | `q` | `1` si la cote est douteuse, `0` sinon : plus bas sous 5 % de la tendance, ou moyenne 1 jour à plus de 3 fois d'écart de la tendance (une carte holo seulement cotée sans le groupe `-holo` n'est plus marquée : le groupe normal est son prix). Jamais sous 1 € de tendance (l'écart n'y dit rien) |
 
      Ils sont dans `cards-prices.json` (prix du jour) : la partie fixe `cards-base.json` et son empreinte ne changent pas.

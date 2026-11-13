@@ -278,7 +278,7 @@ class Missing(unittest.TestCase):
 
     def test_row_keeps_english_name_only_when_different(self):
         f = self.F
-        self.assertEqual(FIELDS[-2:], ["cmid", "en"])
+        self.assertEqual(FIELDS[-3:], ["cmid", "en", "c30"])
         self.assertEqual(row("ex11-111", "Groudon ☆", "ex11", "111", "", "", NONE, cmid=5, en="Groudon Star")[f["en"]], "Groudon Star")
         self.assertEqual(row("lc-7", "Dark Raichu", "lc", "7", "", "", NONE, en="Dark Raichu")[f["en"]], "")
 
