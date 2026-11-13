@@ -25,7 +25,9 @@ Le premier passage a « redressé » 723 visuels, presque tous des scans droits 
    - moins de 0,45° après (0,6° sur le petit visuel) ;
    - coins du visuel déplacés de 0,6 % à 8 % de la largeur.
 
-   La photo est alors remise droite, puis recadrée au plus grand cadre sans coin vide.
+   La photo est alors remise droite, puis recadrée au plus grand cadre sans coin vide (2,5 % retirés au plus, pour garder le nom en haut de la carte entier).
+
+   Cette méthode ne sert que pour les **anciennes séries** (Set de Base, Gym, Neo, Légendaire, e-Card, EX, POP, Diamant & Perle, Platine, HeartGold SoulSilver, L'Appel des Légendes), où TCGdex a des photos. Les séries récentes sont des scans officiels : un dessin plein cadre y tromperait la méthode.
 4. **Confirmation sur le grand visuel** (600 × 825) : même contrôle, et la carte doit être trouvée au même endroit sur le petit et le grand visuel.
 5. **Redressement** :
    - carte sur fond uni : elle est remise droite (perspective), recadrée 0,4 % à l'intérieur de son bord, au format 600 × 825, coins arrondis transparents ;

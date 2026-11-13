@@ -51,6 +51,10 @@ LINE_DEV = 0.8           # lignes penchées d'au moins 0,8° en moyenne avant co
 LINE_FIT = 0.45          # après correction, écart moyen des lignes de moins de 0,45° sur le grand visuel (vraie perspective)
 LINE_FIT_LOW = 0.6       # même contrôle, plus souple, sur le petit visuel (245 px : traits moins précis)
 LINE_MOVE_MAX = 0.08     # au-delà de 8 % de la largeur, la correction n'est pas crédible (traits trop peu nombreux)
+# Séries où TCGdex a des photos de cartes (anciennes cartes) : la méthode « lignes » ne sert que là. Les séries
+# récentes (Noir & Blanc et après) sont des scans officiels : un dessin plein cadre y tromperait la méthode.
+OLD_SERIES = {"base", "gym", "neo", "lc", "ecard", "ex", "pop", "dp", "pl", "hgss", "col"}
+CROP_MIN = 0.975         # photo serrée : recadrée de 2,5 % au plus (le nom en haut de la carte reste entier)
 EDGE_BAND = 0.15         # traits pris en compte : à moins de 15 % d'un bord du visuel (pourtour de la carte)
 LINE_MOVE = 0.006        # la correction déplace un coin du visuel d'au moins 0,6 % de la largeur (sinon invisible)
 UA = {"User-Agent": "Dropicards/1.0 (+https://dropicards.fr)"}
@@ -198,13 +202,14 @@ def measure(q, w, h):
     return {"tilt": abs(rot), "rot": rot, "skew": skew, "persp": persp, "margins": margins, "aspect": aspect, "area": area}
 
 
-def crooked(img, low=False):
+def crooked(img, low=False, lines=True):
     """(True/False, correction, mesures, raison) : True quand le visuel est une photo de travers à redresser.
     Deux cas : une carte posée sur un fond uni (correction « bords » : la carte est découpée, remise droite) ; ou une
     photo serrée sans fond autour (correction « lignes » : perspective qui rend droits les grands traits de la carte).
-    low=True : premier tri, sur le petit visuel (contrôle des lignes plus souple)."""
+    low=True : premier tri, sur le petit visuel (contrôle des lignes plus souple). lines=False : méthode « lignes »
+    coupée (séries récentes, scans officiels)."""
     bad, card, m, why = edge_crooked(img)
-    if bad:
+    if bad or not lines:
         return bad, card, m, why
     ok, r, why2 = line_crooked(img, LINE_FIT_LOW if low else LINE_FIT)
     if ok:
@@ -242,6 +247,7 @@ def edge_crooked(img):
 
 
 _LSD = None
+a_assets = None  # adresse d'un visuel TCGdex (fixée par main)
 
 
 def _segments(img):
@@ -368,7 +374,8 @@ def line_crooked(img, fit=LINE_FIT):
 
 def unskew(img, H, size=(W, H)):
     """Photo serrée remise droite : correction H, puis le plus grand cadre centré, aux proportions du visuel, qui ne
-    contient que des pixels de la photo (aucun coin vide), mis au format size (BGRA, coins carrés comme la photo)."""
+    contient que des pixels de la photo (aucun coin vide), sans retirer plus de 2,5 % ; mis au format size (BGRA, coins
+    carrés comme la photo)."""
     bgr = split(img)[0]
     h, w = bgr.shape[:2]
     out = cv2.warpPerspective(bgr, H, (w, h), flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE)
@@ -382,6 +389,8 @@ def unskew(img, H, size=(W, H)):
             lo = mid
         else:
             hi = mid
+    # Jamais plus de 2,5 % retirés : un reste de coin vide est comblé par le bord de la photo (BORDER_REPLICATE).
+    lo = max(lo, CROP_MIN)
     cw, ch = w * lo, h * lo
     x0, y0 = round((w - cw) / 2), round((h - ch) / 2)
     crop = out[y0:y0 + round(ch), x0:x0 + round(cw)]
@@ -500,11 +509,13 @@ def main():
     ap.add_argument("--max", type=int, default=400, help="au-delà, rien n'est publié (détection à revoir)")
     ap.add_argument("--essai", action="store_true",
                     help="essai à blanc : rapport, mesures et planches dans tools/cadrage/essai/, aucun visuel de l'app changé")
-    ap.add_argument("--voir", default="ex8-107", help="essai : cartes dont le visuel d'origine est toujours joint au rapport")
+    ap.add_argument("--voir", default="ex8-107,ex6-65,dp3-131", help="essai : cartes dont le visuel d'origine est toujours joint au rapport")
     a = ap.parse_args()
     doc = json.loads((ROOT / "web/data/cards.json").read_text("utf-8"))
     f = {k: i for i, k in enumerate(doc["fields"])}
     assets = doc.get("img") or "https://assets.tcgdex.net/"
+    global a_assets
+    a_assets = lambda p: assets + p
     only = {x for x in a.only.split(",") if x}
     voir = {x for x in a.voir.split(",") if x}
     paths = {}
@@ -532,7 +543,8 @@ def main():
         im = read(lf)
         if im is None:
             continue
-        bad, card, m, why = crooked(im, low=True)
+        old_card = p.split("/")[1] in OLD_SERIES if p.count("/") >= 2 else False
+        bad, card, m, why = crooked(im, low=True, lines=old_card)
         seen[p] = why
         if a.essai and (bad or cid in voir or (m and m.get("bg", 0) >= 0.005)):
             rows.append((cid, p, "oui" if bad else "non", why, m or {}))
@@ -552,7 +564,7 @@ def main():
         im = read(hf)
         if im is None:
             continue
-        bad, card, m, why2 = crooked(im)
+        bad, card, m, why2 = crooked(im, lines=p.split("/")[1] in OLD_SERIES)
         if not bad:
             log.append(f"{cid} {p} : droit sur le grand visuel ({why2})")
             continue
@@ -623,6 +635,14 @@ def essai(a, paths, low_file, rows, pairs, log, fixed, seen, voir):
         lf = low_file(p)
         if lf.exists():
             shutil.copy(lf, d / "orig" / (ids[p] + ".webp"))
+    # Grand visuel des cartes demandées (réglage de la détection sur la vraie image).
+    for p in (p for p, cid in ids.items() if cid in voir):
+        hf = ROOT / ".cache/cadrage/high" / (key_of(p) + ".img")
+        if not hf.exists():
+            get(a_assets(p) + "/high.webp", hf) or get(a_assets(p) + "/high.png", hf)
+        if hf.exists():
+            data = hf.read_bytes()
+            (d / "orig" / (ids[p] + "-grand." + ("webp" if data[8:12] == b"WEBP" else "png"))).write_bytes(data)
     for i in range(0, min(len(pairs), 120), 12):
         sheet(pairs[i:i + 12], d / f"planche-{i // 12 + 1:02d}.jpg")
     with (d / "rapport.txt").open("w", encoding="utf-8") as fh:
