@@ -87,15 +87,20 @@
   // Route seulement (top = DEX_PX) : la fiche montre chaque Pokémon à la même taille de mise en avant.
   const dexPx = (e, max, top, fit) => Math.round(dexPx0(e, max, top, fit) * (top === DEX_PX ? DEX_BOOST[e.n] || 1 : 1));
   const dexShift = (px, w) => Math.round(Math.max(-0.22 * w, Math.min(0.22 * w, px)));
+  // Retouche à l'œil, en part de la largeur de l'image, après le centrage calculé (2026-11-13, porteur : « Reptincel est
+  // décalé trop à gauche sur l'écran du Pokédex, recentre-le un peu vers la droite ») : sa grande queue enflammée
+  // tirait encore le centre de son corps vers la gauche.
+  const DEX_NUDGE = { 5: 0.09 };
+  const dexNudge = (n, w) => Math.round((DEX_NUDGE[n] || 0) * w);
   const dexSize = (e, max, top, still, fit) => {
     const p = dexPx(e, max, top, fit);
     if (!still) {
       const w = p * e.gif[0] / Math.max(1, e.gif[1]);
       // Un Pokémon qui vole ou rebondit est posé d'après l'image médiane de son animation (« gb »).
-      return 'height: ' + p + 'px; margin-bottom: -' + Math.round((e.gb || 0) * p) + 'px; translate: ' + dexShift((0.5 - (e.gc || 0.5)) * w, w) + 'px 0';
+      return 'height: ' + p + 'px; margin-bottom: -' + Math.round((e.gb || 0) * p) + 'px; translate: ' + (dexShift((0.5 - (e.gc || 0.5)) * w, w) + dexNudge(e.n, w)) + 'px 0';
     }
     const [, y0, , y1] = e.box, H = Math.round(p * 96 / Math.max(1, y1 - y0)), bw = (e.box[2] - e.box[0]) * H / 96;
-    return 'height: ' + H + 'px; width: ' + H + 'px; margin-bottom: -' + Math.round((96 - y1) * H / 96) + 'px; translate: ' + dexShift((48 - (e.pc || 48)) * H / 96, bw) + 'px 0';
+    return 'height: ' + H + 'px; width: ' + H + 'px; margin-bottom: -' + Math.round((96 - y1) * H / 96) + 'px; translate: ' + (dexShift((48 - (e.pc || 48)) * H / 96, bw) + dexNudge(e.n, bw)) + 'px 0';
   };
   // Nom court sur la route : « Méga X », « Méga Y » ou « Méga » (le nom complet est dans la fiche).
   const dexShort = e => (e.mega ? 'Méga' + ((/ ([XY])$/.exec(e.name) || [])[1] ? ' ' + / ([XY])$/.exec(e.name)[1] : '') : e.name);

@@ -7,7 +7,7 @@
   // @legal-data-start (aussi lu par build.mjs pour publier les pages publiques web/mentions-legales.html, cgu.html,
   // cgv.html et confidentialite.html, demandées par Stripe, Google Play et l'App Store)
   const LEGAL_TODO = '[à compléter par l’éditeur avant publication]';
-  const LEGAL_UPDATED = '10 novembre 2026';
+  const LEGAL_UPDATED = '13 novembre 2026';
   const LEGAL_MAIL = 'contact@dropicards.fr';
   // Éditeur (2026-11-07, porteur : « mets-le dans les mentions légales ») : identité et adresse de la micro-entreprise
   // telles que déclarées dans son compte Stripe ; SIRET donné par le porteur le 2026-11-07. Médiateur de la consommation : à donner.
@@ -31,12 +31,13 @@
       ['Droit applicable', 'Ces mentions et l’app sont soumises au droit français. Mises à jour le ' + LEGAL_UPDATED + '.']
     ] },
     privacy: { label: 'Politique de confidentialité', short: 'Confidentialité', blocks: [
-      ['En bref', 'Ta collection de cartes reste sur ton appareil. Ton compte Dropicards (e-mail, pseudo, PK, PA, Pokédex, tickets, abonnement Premium) est gardé sur le serveur de Dropicards, en France, dans l’Union européenne. Aucune publicité, aucune revente de données, aucun suivi.'],
+      ['En bref', 'Ta collection de cartes reste sur ton appareil. Ton compte Dropicards (e-mail, pseudo, PK, PA, Pokédex, tickets, abonnement Premium) est gardé sur le serveur de Dropicards, en France, dans l’Union européenne. Aucune publicité, aucune revente de données, aucun suivi publicitaire. Seul le temps passé dans l’app est mesuré, pour l’améliorer (voir plus bas).'],
       ['Responsable', LEGAL_WHO + ', ' + LEGAL_ADDR + ' · ' + LEGAL_MAIL + '.'],
       ['Données de ton compte', 'À l’inscription : ton adresse e-mail, ton mot de passe (enregistré sous une forme brouillée que personne ne peut relire), ton pseudo de dresseur, ta tranche d’âge, ton starter et, si tu l’acceptes, ton accord pour recevoir les nouveautés (avec sa date). Ensuite : tes soldes de PK et de PA, le journal de tes gains et dépenses, tes Pokémon débloqués, tes tickets et lots, les dates de tes jeux. Si tu gagnes un lot : ton nom, ton adresse de livraison et une pièce d’identité, demandés seulement à ce moment-là pour l’envoi.'],
       ['Classement des saisons', 'Dans « Ma progression », les autres joueurs voient ton pseudo, ton avatar (le dresseur dessiné que tu composes dans l’app, jamais une photo), l’emblème de ton grade et tes PK gagnés pendant la saison, avec ta place au classement. Jamais ton adresse e-mail. Choisis un pseudo qui ne permet pas de t’identifier. Les comptes admin ne sont pas classés. À la fin de chaque saison, l’éditeur utilise ton adresse e-mail pour te contacter si tu as gagné un lot (exécution du service).'],
+      ['Temps passé dans l’app', 'Quand tu es connecté à ton compte, l’app envoie au serveur le moment où tu l’ouvres et, chaque minute pendant qu’elle est ouverte et visible à l’écran, le temps que tu y passes. Rien d’autre : ni les écrans consultés, ni ta position, ni ton appareil. Seuls les admins de Dropicards voient ces totaux (aujourd’hui, 7 jours, 30 jours, depuis le début), avec ton pseudo, ton grade et tes soldes de PK et de PA, pour savoir comment l’app est utilisée et l’améliorer. Ils sont effacés avec ton compte.'],
       ['Abonnement Premium', 'Ta formule (mensuelle, trimestrielle, semestrielle ou annuelle), son état, ses dates, ton identifiant client chez Stripe et le montant de chaque paiement. Ta carte bancaire est saisie chez Stripe : Dropicards ne voit et ne garde jamais son numéro.'],
-      ['Pourquoi', 'Faire fonctionner ton compte, les jeux et le PK shop, et fournir l’abonnement Premium (exécution du service que tu demandes) ; garder les factures et paiements (obligation comptable) ; empêcher la triche et protéger le service (intérêt légitime) ; t’envoyer les nouveautés, seulement si tu l’as accepté (consentement, que tu peux retirer à tout moment).'],
+      ['Pourquoi', 'Faire fonctionner ton compte, les jeux et le PK shop, et fournir l’abonnement Premium (exécution du service que tu demandes) ; garder les factures et paiements (obligation comptable) ; empêcher la triche, protéger le service et mesurer le temps passé dans l’app pour l’améliorer (intérêt légitime : tu peux t’y opposer en écrivant à l’adresse ci-dessus) ; t’envoyer les nouveautés, seulement si tu l’as accepté (consentement, que tu peux retirer à tout moment).'],
       ['Qui y a accès', 'L’éditeur, et seulement les prestataires nécessaires : OVHcloud (hébergement, France), Brevo (envoi des e-mails : codes de connexion, mot de passe oublié, nouveautés ; France), Stripe (paiement de l’abonnement ; Stripe peut traiter certaines données hors de l’Union européenne, avec les garanties prévues par le RGPD). Aucune donnée n’est vendue ni cédée.'],
       ['Durée', 'Ton compte et ses données : jusqu’à sa suppression. Paiements et factures : 10 ans (obligation comptable). Accord pour les nouveautés : jusqu’à son retrait. Journaux techniques du serveur (dont l’adresse IP) : le temps nécessaire à la sécurité.'],
       ['Sur ton appareil', 'L’app utilise le stockage local du navigateur (pas de cookie) pour garder ta collection, tes réglages, ta session de connexion et une copie hors ligne de l’app et du catalogue. Ce stockage est strictement nécessaire au service : il ne demande pas de consentement et ne sert à aucun suivi.'],
@@ -145,11 +146,18 @@
       // Prix fixés Pokémon par Pokémon par le porteur (2026-11-01, PA_PRICES) : fourchette par catégorie, lue dans les prix.
       evo: legalEvoRows(),
       // Tickets (2026-11-08, porteur) : le ticket Bronze, Argent ou Or à la place de la gemme des PK.
-      shop: SHOP_ITEMS.map(x => ({ name: x.name, price: x.soon ? 'Bientôt' : legalNum(x.price) + ' PK', grade: x.minGrade ? 'Dès le grade ' + PF_GRADES[x.minGrade].name : '', img: x.img || 'img/brand/pk.svg',
-        isTicket: x.kind === 'ticket', notTicket: x.kind !== 'ticket', isBox: false, tag: x.tag || '', ticketCls: 'pkm-shop-ticket pkm-shop-t-' + (x.tier || 'or') }))
-        // Boîte mystère à la fin (2026-11-12, porteur), avec son coffre.
-        .concat([{ name: 'Boîte mystère', price: legalNum(MY_PRICE) + ' PA', grade: '2XP PK ou PA, scans bonus ou un légendaire', img: '', isTicket: false, notTicket: false, isBox: true,
-          boxBase: 'img/mybox/' + myVis().id + '-base.svg', boxLid: 'img/mybox/' + myVis().id + '-lid.svg', tag: '', ticketCls: '' }]),
+      // Boîte mystère en 4ᵉ position, juste sous le ticket Or (2026-11-13, porteur ; avant : à la fin) ; chaque prix avec
+      // le logo de sa monnaie : gemme des PK ou goutte des PA (2026-11-13, porteur).
+      shop: (() => {
+        const row = (o, num, cur) => Object.assign({ priceNum: num, hasIco: !!cur, priceIco: cur === 'pa' ? 'img/brand/pa.svg' : 'img/brand/pk.svg', unit: cur === 'pa' ? 'PA' : 'PK',
+          price: num + (cur ? ' ' + (cur === 'pa' ? 'PA' : 'PK') : '') }, o);
+        const items = SHOP_ITEMS.map(x => row({ name: x.name, grade: x.minGrade ? 'Dès le grade ' + PF_GRADES[x.minGrade].name : '', img: x.img || 'img/brand/pk.svg',
+          isTicket: x.kind === 'ticket', notTicket: x.kind !== 'ticket', isBox: false, tag: x.tag || '', ticketCls: 'pkm-shop-ticket pkm-shop-t-' + (x.tier || 'or') }, x.soon ? 'Bientôt' : legalNum(x.price), x.soon ? '' : 'pk'));
+        const box = row({ name: 'Boîte mystère', grade: '2XP PK ou PA, scans bonus ou un légendaire', img: '', isTicket: false, notTicket: false, isBox: true,
+          boxBase: 'img/mybox/' + myVis().id + '-base.svg', boxLid: 'img/mybox/' + myVis().id + '-lid.svg', tag: '', ticketCls: '' }, legalNum(MY_PRICE), 'pa');
+        const at = SHOP_ITEMS.map(x => x.kind).lastIndexOf('ticket') + 1;
+        return items.slice(0, at).concat([box], items.slice(at));
+      })(),
       free: [['0 €', 'de mise'], ['0 €', 'à gagner en argent'], ['0', 'achat possible']].map(([a, b]) => ({ big: a, label: b }))
     };
   };

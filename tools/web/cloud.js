@@ -89,7 +89,8 @@
       const timer = ctl ? setTimeout(() => ctl.abort(), 15000) : 0;
       let res;
       try {
-        res = await fetch(this.url + path, { method: o.method || 'GET', headers: h, body: o.body ? JSON.stringify(o.body) : undefined, signal: ctl ? ctl.signal : undefined, cache: 'no-store' });
+        // keepalive : envoi qui part même si l'app se ferme juste après (temps passé, players.js).
+        res = await fetch(this.url + path, { method: o.method || 'GET', headers: h, body: o.body ? JSON.stringify(o.body) : undefined, signal: ctl ? ctl.signal : undefined, cache: 'no-store', keepalive: !!o.keepalive });
       } catch (e) {
         const n = new Error(CLOUD_ERR.network); n.code = 'network'; throw n;
       } finally { if (timer) clearTimeout(timer); }
@@ -164,10 +165,10 @@
       return pr;
     },
     // Règle du jeu sur le serveur (tools/supabase/004_jeu.sql) : PA du jour, booster, pièce, partage, Pokédex, PK shop.
-    async rpc(fn, args) {
+    async rpc(fn, args, opt) {
       const tk = await this.token();
       if (!tk) { const e = new Error('Connecte-toi à ton compte Dropicards pour jouer.'); e.code = 'login'; throw e; }
-      return this.req('/rest/v1/rpc/' + fn, { method: 'POST', token: tk, body: args || {} });
+      return this.req('/rest/v1/rpc/' + fn, { method: 'POST', token: tk, body: args || {}, keepalive: !!(opt && opt.keepalive) });
     },
     reqId() {
       try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* ancien navigateur */ }

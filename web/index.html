@@ -1953,6 +1953,117 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-ios .pkm-hh { padding-top: 26px !important; }
 .pkm-ios .pkm-hh-mid { top: -20px; }
 
+/* Badge « 2XP » sans aucun voile (2026-11-13, porteur : « il y a encore un très léger voile flou sur le double XP PK ») :
+   plus de reflet blanc qui balaie le badge, plus d'ombre ni de halo ; couleurs pleines, texte net. Au gain, le badge
+   grossit simplement un instant. */
+.pkm-xpb { animation: none !important; box-shadow: none !important; background-size: 100% 100% !important; background-position: 0 0 !important; text-shadow: none; }
+.pkm-xpb-pk { background-image: none !important; background-color: #FFD60A !important; }
+.pkm-xpb-pa { background-image: none !important; background-color: #9B55F2 !important; }
+.pkm-xpb.pkm-xpb-hot { animation: pkmXpbPop 0.55s ease-in-out 4 !important; }
+@keyframes pkmXpbPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.25) rotate(-6deg); } }
+@media (prefers-reduced-motion: reduce) { .pkm-xpb.pkm-xpb-hot { animation: none !important; } }
+
+/* ——— Safari éclair, retouches (2026-11-13, porteur) ———
+   Démonstration avant de jouer (carte du jeu et consigne) : un doigt touche un bon Pokémon (cercle vert, coche,
+   « +2 » vert, « Bon Pokémon ! »), puis un mauvais (cercle rouge barré, il tremble, « −1 » rouge, « Erreur ! »), 6 s. */
+.pkm-sf-demo { --my: 62px; position: relative; flex: none; width: 100%; height: 182px; border-radius: 18px; overflow: hidden; background: linear-gradient(180deg, #7FD3FF 0%, #BDEBFF 40%, #9BE07A 41%, #5DBB4A 100%); }
+.pkm-sf-demo-chip { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); padding: 5px 12px; border-radius: 999px; background: rgba(11, 17, 32, 0.9); color: #FFFFFF; font: 700 12px/1.2 'Sora', sans-serif; white-space: nowrap; }
+.pkm-sf-demo-eau { color: #6BB7FF; }
+.pkm-sf-demo-mon { position: absolute; top: var(--my); width: 72px; height: 72px; }
+.pkm-sf-demo-ok { left: calc(27% - 36px); }
+.pkm-sf-demo-ko { left: calc(73% - 36px); animation: pkmSfDemoShake 6s linear infinite; }
+.pkm-sf-demo-mon img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 5px 3px rgba(0, 0, 0, 0.25)); }
+.pkm-sf-demo-ok img { animation: pkmSfHop 0.5s ease-in-out infinite alternate, pkmSfDemoCaught 6s ease-in-out infinite; }
+.pkm-sf-demo-ko img { animation: pkmSfHop 0.5s ease-in-out infinite alternate, pkmSfDemoDim 6s ease-in-out infinite; }
+.pkm-sf-demo-ring { position: absolute; inset: -9px; border-radius: 50%; opacity: 0; }
+.pkm-sf-demo-ok .pkm-sf-demo-ring { border: 5px solid #22C55E; background: rgba(34, 197, 94, 0.18); box-shadow: 0 0 0 3px #FFFFFF, 0 0 22px 4px rgba(34, 197, 94, 0.85); animation: pkmSfDemoRingOk 6s ease-out infinite; }
+.pkm-sf-demo-ok .pkm-sf-demo-ring::after { content: '✓'; position: absolute; right: -8px; top: -8px; width: 24px; height: 24px; border-radius: 12px; background: #22C55E; color: #FFFFFF; border: 2px solid #FFFFFF; font: 900 14px/20px 'Sora', sans-serif; text-align: center; box-sizing: border-box; }
+.pkm-sf-demo-ko .pkm-sf-demo-ring { border: 5px solid #FF3B44; background: linear-gradient(45deg, transparent 45%, #FF3B44 45% 55%, transparent 55%), linear-gradient(-45deg, transparent 45%, #FF3B44 45% 55%, transparent 55%), rgba(255, 59, 68, 0.16); box-shadow: 0 0 0 3px #FFFFFF, 0 0 22px 4px rgba(255, 59, 68, 0.8); animation: pkmSfDemoRingKo 6s ease-out infinite; }
+.pkm-sf-demo-pop { position: absolute; left: 50%; top: -24px; margin-left: -20px; width: 40px; text-align: center; font: 900 25px/1 'Sora', sans-serif; -webkit-text-stroke: 1.6px #0B1120; paint-order: stroke fill; text-shadow: 0 3px 0 #0B1120; opacity: 0; }
+.pkm-sf-demo-ok .pkm-sf-demo-pop { color: #3BE07A; animation: pkmSfDemoPopOk 6s ease-out infinite; }
+.pkm-sf-demo-ko .pkm-sf-demo-pop { color: #FF4D55; animation: pkmSfDemoPopKo 6s ease-out infinite; }
+.pkm-sf-demo-tag { position: absolute; left: 50%; bottom: -36px; transform: translateX(-50%); padding: 3px 9px; border-radius: 999px; color: #FFFFFF; font: 800 11.5px/1.3 'Sora', sans-serif; white-space: nowrap; opacity: 0; }
+.pkm-sf-demo-ok .pkm-sf-demo-tag { background: #16A34A; animation: pkmSfDemoTagOk 6s ease-out infinite; }
+.pkm-sf-demo-ko .pkm-sf-demo-tag { background: #E11D2E; animation: pkmSfDemoTagKo 6s ease-out infinite; }
+.pkm-sf-demo-hand { position: absolute; z-index: 3; width: 34px; height: 42px; left: calc(50% - 12px); top: 150px; opacity: 0; transform-origin: 12px 4px; animation: pkmSfDemoHand 6s ease-in-out infinite; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35)); }
+.pkm-sf-demo-hand path { fill: #FFFFFF; stroke: #0B1120; stroke-width: 2.2; stroke-linejoin: round; }
+@keyframes pkmSfDemoHand {
+  0% { left: calc(50% - 12px); top: calc(var(--my) + 120px); opacity: 0; transform: scale(1); }
+  6% { opacity: 1; top: calc(var(--my) + 80px); }
+  14% { left: calc(27% - 12px); top: calc(var(--my) + 34px); transform: scale(1); }
+  17% { transform: scale(0.8); }
+  21% { transform: scale(1); }
+  36% { left: calc(27% - 12px); top: calc(var(--my) + 44px); }
+  48% { left: calc(73% - 12px); top: calc(var(--my) + 34px); transform: scale(1); }
+  51% { transform: scale(0.8); }
+  55% { transform: scale(1); }
+  78% { left: calc(73% - 12px); top: calc(var(--my) + 44px); opacity: 1; }
+  90%, 100% { left: calc(73% - 12px); top: calc(var(--my) + 120px); opacity: 0; }
+}
+@keyframes pkmSfDemoRingOk { 0%, 16% { opacity: 0; transform: scale(0.5); } 19% { opacity: 1; transform: scale(1.15); } 23% { transform: scale(1); } 42% { opacity: 1; transform: scale(1); } 48%, 100% { opacity: 0; transform: scale(1.1); } }
+@keyframes pkmSfDemoRingKo { 0%, 50% { opacity: 0; transform: scale(0.5); } 53% { opacity: 1; transform: scale(1.15); } 57% { transform: scale(1); } 80% { opacity: 1; transform: scale(1); } 86%, 100% { opacity: 0; transform: scale(1.05); } }
+@keyframes pkmSfDemoPopOk { 0%, 17% { opacity: 0; transform: translateY(8px) scale(0.6); } 21% { opacity: 1; transform: translateY(-2px) scale(1.25); } 26% { transform: translateY(-6px) scale(1); } 38% { opacity: 1; transform: translateY(-14px); } 44%, 100% { opacity: 0; transform: translateY(-22px); } }
+@keyframes pkmSfDemoPopKo { 0%, 51% { opacity: 0; transform: translateY(8px) scale(0.6); } 55% { opacity: 1; transform: translateY(-2px) scale(1.25); } 60% { transform: translateY(-6px) scale(1); } 74% { opacity: 1; transform: translateY(-14px); } 80%, 100% { opacity: 0; transform: translateY(-22px); } }
+@keyframes pkmSfDemoTagOk { 0%, 18% { opacity: 0; transform: translateX(-50%) scale(0.7); } 22% { opacity: 1; transform: translateX(-50%) scale(1.08); } 25% { transform: translateX(-50%) scale(1); } 43% { opacity: 1; } 48%, 100% { opacity: 0; transform: translateX(-50%) scale(1); } }
+@keyframes pkmSfDemoTagKo { 0%, 52% { opacity: 0; transform: translateX(-50%) scale(0.7); } 56% { opacity: 1; transform: translateX(-50%) scale(1.08); } 59% { transform: translateX(-50%) scale(1); } 81% { opacity: 1; } 86%, 100% { opacity: 0; transform: translateX(-50%) scale(1); } }
+@keyframes pkmSfDemoCaught { 0%, 34% { transform: scale(1); opacity: 1; } 43% { transform: scale(0.15); opacity: 0; } 88% { transform: scale(0.6); opacity: 0; } 96%, 100% { transform: scale(1); opacity: 1; } }
+@keyframes pkmSfDemoDim { 0%, 52% { opacity: 1; } 56%, 82% { opacity: 0.55; } 90%, 100% { opacity: 1; } }
+@keyframes pkmSfDemoShake { 0%, 52% { translate: 0 0; } 53.5% { translate: -7px 0; } 55% { translate: 7px 0; } 56.5% { translate: -6px 0; } 58% { translate: 5px 0; } 59.5%, 100% { translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .pkm-sf-demo-hand { display: none; }
+  .pkm-sf-demo-ring, .pkm-sf-demo-pop, .pkm-sf-demo-tag { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .pkm-sf-demo-tag { transform: translateX(-50%) !important; }
+  .pkm-sf-demo-mon, .pkm-sf-demo-mon img { animation: none !important; }
+}
+.pkm-sf-card .pkm-sf-demo { --my: 40px; height: 160px; margin: 2px 0 4px; }
+.pkm-sf-card .pkm-sf-demo-chip { display: none; }
+/* Pendant la partie : « +2 » vert (il était blanc), « −1 » rouge ; bon Pokémon nettement entouré de vert. */
+.pkm-sf-pop { color: #3BE07A; }
+.pkm-sf-pop.pkm-sf-pop-ko { color: #FF4D55; }
+.pkm-sf-hit::after { border: 5px solid #22C55E; background: rgba(34, 197, 94, 0.18); box-shadow: 0 0 0 3px #FFFFFF, 0 0 24px 4px rgba(34, 197, 94, 0.9); }
+.pkm-sf-miss::after { border-width: 5px; box-shadow: 0 0 0 3px #FFFFFF, 0 0 20px 3px rgba(255, 90, 95, 0.8); }
+/* Compte à rebours 3, 2, 1 centré dans sa bulle (2026-11-13, porteur) : le chiffre de la police « Luckiest Guy » se
+   dessinait 13 px trop haut (mesuré : haut du chiffre à −4 px, bas à 54 px dans une ligne de 76 px). */
+.pkm-sf-count { box-sizing: border-box; padding-top: 26px; }
+/* « Récupérer mes PK » : bouton qui appelle. */
+.pkm-sf-go.pkm-sf-collect { animation: pkmSfCollect 1.6s ease-in-out 0.6s infinite; }
+@keyframes pkmSfCollect { 0%, 100% { box-shadow: 0 5px 0 #B38F00, 0 0 0 0 rgba(255, 214, 10, 0); } 50% { box-shadow: 0 5px 0 #B38F00, 0 0 0 7px rgba(255, 214, 10, 0.35); } }
+@media (prefers-reduced-motion: reduce) { .pkm-sf-go.pkm-sf-collect { animation: none; } }
+
+/* Panneau Admin › « Joueurs » (2026-11-13, porteur) : tous les comptes, PK, PA, régularité, temps passé dans l'app. */
+.pkm-ply { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 18px; border: 1px solid #24345C; background: #111A2C; }
+.pkm-ply-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.pkm-ply-by { font-size: 11.5px; color: #9AA8C3; margin-right: 2px; }
+.pkm-ply-chip { min-height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid #2A3A5C; background: #0B1120; color: #C9D3EA; font: 700 12px/1 'Sora', sans-serif; cursor: pointer; }
+.pkm-ply-chip.pkm-ply-on { background: #FFD60A; border-color: #FFD60A; color: #0B1120; }
+.pkm-ply-sort { min-height: 28px; padding: 0 10px; font-size: 11.5px; }
+.pkm-ply-count { margin: 0; font-size: 12px; color: #9AA8C3; }
+.pkm-ply-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pkm-ply-row { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 14px; background: #0B1120; border: 1px solid #1E2B45; }
+.pkm-ply-reg { border-color: rgba(59, 211, 122, 0.55); }
+.pkm-ply-id { display: flex; align-items: center; gap: 8px; }
+.pkm-ply-id > img { flex: none; width: 34px; height: 34px; object-fit: contain; }
+.pkm-ply-id > span:nth-child(2) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pkm-ply-id b { font-size: 14px; color: #FFFFFF; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-ply-id small { font-size: 11.5px; color: #9AA8C3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-ply-id small.pkm-ply-grade { color: #FFD60A; font-weight: 700; }
+.pkm-ply-bal { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.pkm-ply-bal > span { display: inline-flex; align-items: center; gap: 4px; }
+.pkm-ply-bal img { width: 18px; height: 18px; }
+.pkm-ply-bal b { font: 800 14px/1 'Sora', sans-serif; color: #FFFFFF; font-variant-numeric: tabular-nums; }
+.pkm-ply-bal em { font-style: normal; font-size: 10px; font-weight: 700; color: #9AA8C3; }
+.pkm-ply-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.pkm-ply-tags small { margin-left: auto; font-size: 11.5px; color: #C9D3EA; }
+.pkm-ply-tag-reg { background: rgba(59, 211, 122, 0.16); color: #3BD37A; }
+.pkm-ply-tag-prem { background: rgba(255, 214, 10, 0.16); color: #FFD60A; }
+.pkm-ply-tag-off { background: rgba(255, 90, 95, 0.16); color: #FF6B6B; }
+.pkm-ply-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.pkm-ply-grid > span { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; border-radius: 10px; background: #111A2C; }
+.pkm-ply-grid small { font-size: 10px; color: #9AA8C3; }
+.pkm-ply-grid b { font: 800 12.5px/1.1 'Sora', sans-serif; color: #FFFFFF; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pkm-ply-line { margin: 0; font-size: 11.5px; line-height: 1.4; color: #9AA8C3; }
+.pkm-ply-more { align-self: center; }
+
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
    de PA sur celui de droite. Puis l'écran « Route d'évolution » d'après la « Digivolution Route » de Digimon World Dusk
@@ -2377,6 +2488,10 @@ nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="wi
 /* Boîte mystère (2026-11-12) : même colonne que les photos et les tickets. */
 .pkm-rules-shop > div > .pkm-rules-box { flex: none; width: 56px; min-width: 56px; height: 44px; position: relative; display: block; }
 .pkm-rules-shop .pkm-rules-box img { position: absolute; left: 6px; top: 0; width: 44px; height: 44px; object-fit: contain; }
+
+/* Prix du PK shop avec le logo de leur monnaie (2026-11-13, porteur) : gemme des PK, goutte des PA (boîte mystère). */
+.pkm-rules-shop strong.pkm-rules-price { display: inline-flex; align-items: center; gap: 4px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; }
+.pkm-rules-shop strong.pkm-rules-price img.pkm-rules-cur { width: 20px; height: 20px; object-fit: contain; }
 
 /* Abonnement Premium (2026-11-06, porteur) : bannière dorée qui brille et écran de l'offre. */
 .pkm-prem-banner { position: relative; flex: none; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; border: 2px solid #FFD60A; border-radius: 22px; overflow: hidden; background: linear-gradient(115deg, #E9EDF3 0%, #C3CBD8 22%, #FFFFFF 42%, #B4BDCB 62%, #EEF1F6 82%, #CDD4DF 100%); color: #141A26; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.35), 0 0 22px rgba(255, 200, 0, 0.55), 0 10px 26px rgba(20, 26, 38, 0.35); overflow: visible; isolation: isolate; }
@@ -2901,6 +3016,9 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
    d'être coupée par lui ; même chose pour la pastille du grade. */
 .pkm-pf-photo > .pkm-pf-cam { z-index: 3; }
 .pkm-pf-photo > svg { z-index: 3; }
+/* Emblème du grade retiré de l'avatar de Mon profil (2026-11-13, porteur) : il reste seulement en haut de l'accueil,
+   au-dessus du logo Dropicards. */
+.pkm-pf-photo > img.pkm-grade { display: none !important; }
 
 /* App des stores (store.js, 2026-11-09) : aucune offre payante tant que l'achat intégré n'est pas branché. */
 .pkm-store .pkm-prem-banner,
@@ -3083,6 +3201,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=81d3fad7"></script>
+<script src="app.js?v=ee9314b7"></script>
 </body>
 </html>

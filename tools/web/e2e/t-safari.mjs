@@ -19,8 +19,16 @@ await sec.locator('button').click(); await page.waitForTimeout(600);
 const ov = page.locator('.pkm-sf');
 const brief = N(await ov.innerText());
 ok('consigne : « Attrape les Pokémon … ! », 20 s, +2, −1', /Attrape les Pokémon \S+ !/.test(brief) && /20 s/.test(brief) && /\+2/.test(brief) && /−1/.test(brief));
-await page.screenshot({ path: shot('safari-brief.png') });
-await page.locator('.pkm-sf-go').click(); await page.waitForTimeout(2300);
+// Démonstration animée (2026-11-13, porteur) : un bon Pokémon (cercle vert, « +2 » vert), un mauvais (cercle rouge, « −1 »).
+const demo = await page.evaluate(() => { const d = document.querySelector('.pkm-sf .pkm-sf-demo'); if (!d) return null; const c = q => getComputedStyle(d.querySelector(q)); return { hand: !!d.querySelector('.pkm-sf-demo-hand'), okRing: c('.pkm-sf-demo-ok .pkm-sf-demo-ring').borderTopColor, koRing: c('.pkm-sf-demo-ko .pkm-sf-demo-ring').borderTopColor, okPop: c('.pkm-sf-demo-ok .pkm-sf-demo-pop').color, koPop: c('.pkm-sf-demo-ko .pkm-sf-demo-pop').color, tags: [...d.querySelectorAll('.pkm-sf-demo-tag')].map(t => t.textContent).join('|') }; });
+ok('consigne : démonstration (doigt, cercle vert et « +2 » vert, cercle rouge et « −1 » rouge)', !!demo && demo.hand && demo.okRing === 'rgb(34, 197, 94)' && demo.koRing === 'rgb(255, 59, 68)' && demo.okPop === 'rgb(59, 224, 122)' && demo.koPop === 'rgb(255, 77, 85)' && demo.tags === 'Bon Pokémon !|Erreur !');
+await page.waitForTimeout(1300); await page.screenshot({ path: shot('safari-brief.png') });
+await page.locator('.pkm-sf-go').click(); await page.waitForTimeout(150);
+// 3, 2, 1 centré dans sa bulle (2026-11-13, porteur) : chiffre mesuré dans un canevas, même police, même taille.
+const cnt = await page.evaluate(() => { const e = document.querySelector('.pkm-sf-count'); if (!e) return null; const cs = getComputedStyle(e), r = e.getBoundingClientRect(), x = document.createElement('canvas').getContext('2d'); x.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; const m = x.measureText(e.textContent), fs = parseFloat(cs.fontSize), pt = parseFloat(cs.paddingTop); const lineTop = pt + (r.height - pt - fs) / 2, base = lineTop + m.fontBoundingBoxAscent * fs / (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent); return { off: Math.round(base + (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2 - r.height / 2) }; });
+ok('3, 2, 1 centré dans la bulle (écart ' + (cnt && cnt.off) + ' px)', !!cnt && Math.abs(cnt.off) <= 3);
+await page.screenshot({ path: shot('safari-count.png') });
+await page.waitForTimeout(2150);
 ok('compte à rebours puis la partie (chrono, cible)', await page.locator('.pkm-sf-hud').isVisible() && await page.locator('.pkm-sf-target').isVisible());
 // Toucher les Pokémon visibles : chaque toucher compte (bon ou erreur), une seule fois.
 let taps = 0;
@@ -29,7 +37,9 @@ for (let k = 0; k < 44; k++) {
   const p = await page.evaluate(() => { const r = [...document.querySelectorAll('.pkm-sf-mon:not(.pkm-sf-hit):not(.pkm-sf-miss)')].map(m => m.getBoundingClientRect()).find(r => r.left > 8 && r.right < 382); return r ? [r.left + r.width / 2, r.top + r.height / 2] : null; });
   if (p) { await page.mouse.click(p[0], p[1]); taps++; }
   if (k === 10) await page.screenshot({ path: shot('safari-play.png') });
+  if (k === 12) { const pc = await page.evaluate(() => [...document.querySelectorAll('.pkm-sf-pop')].map(e => (e.classList.contains('pkm-sf-pop-ko') ? 'ko:' : 'ok:') + getComputedStyle(e).color)); if (pc.length) res.push('  (couleurs « +2 » / « −1 » : ' + pc.join(', ') + ')'); }
 }
+ok('« +2 » en vert pendant la partie', await page.evaluate(() => { const e = document.createElement('span'); e.className = 'pkm-sf-pop'; document.querySelector('.pkm-sf-mons').appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c === 'rgb(59, 224, 122)'; }));
 const hud = await page.evaluate(() => ({ g: parseInt(document.querySelector('.pkm-sf-g').textContent, 10), b: parseInt(document.querySelector('.pkm-sf-b').textContent, 10) }));
 ok('touchers comptés (' + hud.g + ' bons, ' + hud.b + ' erreurs, ' + taps + ' touchers)', hud.g + hud.b === taps && taps > 10);
 await page.waitForTimeout(2600);
@@ -37,9 +47,16 @@ const end = N(await ov.innerText()), won = Math.max(0, 2 * hud.g - hud.b);
 ok('bilan : « Temps écoulé ! », ' + hud.g + ' Pokémon attrapés, +' + won + ' PK', /Temps écoulé !/.test(end) && new RegExp('\\+' + won + ' PK').test(end) && new RegExp(hud.g + ' Pokémon').test(end));
 await page.screenshot({ path: shot('safari-end.png') });
 const st = await page.evaluate(() => { const s = window.__pkm.st(); return { pk: s.pk, at: s.games.safariAt, h: s.games.hist[0] }; });
-ok('PK crédités (' + st.pk + ') et partie dans l’historique', st.pk === 100 + won && st.h.game === 'safari' && st.h.pk === won && !!st.at);
-await page.locator('.pkm-sf-go').click(); await page.waitForTimeout(500);
-ok('« Fermer » : calque retiré', (await page.locator('.pkm-sf').count()) === 0);
+// « Récupérer mes PK » (2026-11-13, porteur) : partie enregistrée tout de suite, le solde monte au toucher du bouton.
+ok('partie dans l’historique, solde encore à ' + st.pk + ' avant « Récupérer mes PK »', st.pk === 100 && st.h.game === 'safari' && st.h.pk === won && !!st.at);
+const btn = N(await page.locator('.pkm-sf-go').innerText());
+ok('bouton « ' + btn + ' »', btn === (won > 0 ? 'Récupérer mes PK' : 'Fermer'));
+await page.locator('.pkm-sf-go').click(); await page.waitForTimeout(450);
+const flying = await page.evaluate(() => [...document.querySelectorAll('.pkm-pafly-drop')].map(d => d.getAttribute('src')));
+if (won > 0) ok('gemmes des PK qui volent vers le solde (' + flying.length + ')', flying.length >= 6 && flying.every(f => f === 'img/brand/pk.svg'));
+await page.screenshot({ path: shot('safari-collect.png') });
+await page.waitForTimeout(2200);
+ok('calque retiré, PK ajoutés au solde (' + (await page.evaluate(() => window.__pkm.st().pk)) + ')', (await page.locator('.pkm-sf').count()) === 0 && (await page.evaluate(() => window.__pkm.st().pk)) === 100 + won && !(await page.locator('.pkm-pafly-drop').count()));
 ok('ensuite : « Tu dois attendre ' + (H - 1) + ' h … pour rejouer »', new RegExp('Tu dois attendre (' + (H - 1) + ' h|' + H + ' h)').test(await sec.innerText()));
 await sec.locator('button').click(); await page.waitForTimeout(300);
 ok('pendant le délai : pas de nouvelle partie', (await page.locator('.pkm-sf').count()) === 0);
@@ -93,8 +110,10 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   const hud2 = await p2.evaluate(() => ({ g: parseInt(document.querySelector('.pkm-sf-g').textContent, 10), b: parseInt(document.querySelector('.pkm-sf-b').textContent, 10) }));
   ok('serveur : Pokémon touchés envoyés (' + ((S.finish || {}).hits || []).length + '), partie « r-1 »', !!S.finish && S.finish.round === 'r-1' && S.finish.hits.length === hud2.g + hud2.b && !!S.finish.req);
   const w2 = Math.max(0, 2 * hud2.g - hud2.b);
-  ok('serveur : gain du serveur affiché (+' + w2 + ' PK) et solde repris du serveur (' + S.pk + ')', new RegExp('\\+' + w2 + ' PK').test(N(await p2.locator('.pkm-sf').innerText())) && (await p2.evaluate(() => window.__pkm.st().pk)) === S.pk);
+  const shown = new RegExp('\\+' + w2 + ' PK').test(N(await p2.locator('.pkm-sf').innerText()));
   await p2.screenshot({ path: shot('safari-cloud-end.png') });
+  await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(2600);
+  ok('serveur : gain du serveur affiché (+' + w2 + ' PK), puis « Récupérer mes PK » : solde repris du serveur (' + S.pk + ')', shown && (await p2.evaluate(() => window.__pkm.st().pk)) === S.pk);
   await c2.close();
 }
 // Serveur sans 024_safari.sql (2026-11-13, porteur : « rends-le dispo ») : un joueur voit « Bientôt disponible » ; un admin

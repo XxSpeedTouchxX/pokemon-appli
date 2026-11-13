@@ -29,7 +29,7 @@ const rk = page.locator('section[aria-label="Informations légales"]');
 ok('depuis « Mes PK » : « ' + (await rk.locator('h2').innerText()) + ' »', (await rk.locator('h2').innerText()) === 'Règles des PK et PA');
 ok('sans bulles Mentions légales, Confidentialité, Conditions', (await rk.locator('[aria-label="Rubriques"]').count()) === 0);
 const cards = await rk.locator('.pkm-rules-card').evaluateAll(els => els.map(e => e.getAttribute('aria-label')).join('|'));
-ok('règles en images : ' + cards, cards === 'Gagner des PK|Booster PK|Pile ou face|Délais selon le grade|Points d’Aura|PK shop' && (await rk.locator('.pkm-rules-row:not(.pkm-rules-th)').count()) === 6 && (await rk.locator('.pkm-rules-odds i').count()) === 5);
+ok('règles en images : ' + cards, cards === 'Gagner des PK|Booster PK|Pile ou face|Safari éclair|Délais selon le grade|Points d’Aura|PK shop' && (await rk.locator('.pkm-rules-row:not(.pkm-rules-th)').count()) === 6 && (await rk.locator('.pkm-rules-odds i').count()) === 5);
 ok('plus de « Pas un jeu d’argent » ni de texte complet', (await rk.locator('details').count()) === 0 && !/Pas un jeu d’argent|Lire le texte complet/.test(await rk.innerText()));
 await rk.screenshot({ path: shot('legal-regles.png') });
 // Pages publiques (Stripe, Google Play, App Store) : mêmes textes que l'app.

@@ -310,3 +310,6 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
    d'être coupée par lui ; même chose pour la pastille du grade. */
 .pkm-pf-photo > .pkm-pf-cam { z-index: 3; }
 .pkm-pf-photo > svg { z-index: 3; }
+/* Emblème du grade retiré de l'avatar de Mon profil (2026-11-13, porteur) : il reste seulement en haut de l'accueil,
+   au-dessus du logo Dropicards. */
+.pkm-pf-photo > img.pkm-grade { display: none !important; }

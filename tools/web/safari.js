@@ -19,6 +19,16 @@
   const SF_TYPE_COLOR = { Eau: '#3D7FD9', Feu: '#E8662F', Plante: '#3FA34D', Électrik: '#E0B000', Psy: '#F0507E', Insecte: '#8FAE1B', Roche: '#B09A3A', Normal: '#8A846F', Vol: '#7F96E8', Sol: '#C9973F', Poison: '#9B4FC4' };
   const sfHas = (n, t) => !!(DEX[n] && (DEX[n].types || []).indexOf(t) >= 0);
   const sfEsc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  // Démonstration animée avant de jouer (2026-11-13, porteur : « qu'on voie vraiment bien entouré quand on touche le bon
+  // Pokémon et qu'on voie qu'on se trompe quand on touche le mauvais, très clair avant de commencer ») : un doigt touche
+  // un bon Pokémon (cercle vert, coche, « +2 » vert, « Bon Pokémon ! »), puis un mauvais (cercle rouge barré, il tremble,
+  // « −1 » rouge, « Erreur ! »), en boucle de 6 s. Même dessin dans la carte du jeu (catalog.dc.html) et la consigne.
+  const SF_HAND = '<svg class="pkm-sf-demo-hand" viewBox="0 0 34 42" width="34" height="42"><path d="M12 4.5a3 3 0 0 1 6 0V18l2.3-.4a3 3 0 0 1 3.3 1.8l1.9-.3a3 3 0 0 1 3.4 2.4l.1.6c1.8.1 3 1.5 3 3.2V30c0 6-4.5 10.5-10 10.5h-3.6a9 9 0 0 1-7.4-3.9L4.7 28a3 3 0 0 1 4.6-3.8L12 27z"></path></svg>';
+  const sfDemo = (okN, koN, kind) => '<div class="pkm-sf-demo" aria-hidden="true">'
+    + '<span class="pkm-sf-demo-chip">Attrape les Pokémon <b style="color: ' + (SF_TYPE_COLOR[kind] || '#6BC1FF') + '">' + sfEsc(kind) + '</b> !</span>'
+    + '<div class="pkm-sf-demo-mon pkm-sf-demo-ok"><img src="img/pokemon/' + okN + '.gif" alt=""><i class="pkm-sf-demo-ring"></i><b class="pkm-sf-demo-pop">+2</b><span class="pkm-sf-demo-tag">Bon Pokémon !</span></div>'
+    + '<div class="pkm-sf-demo-mon pkm-sf-demo-ko"><img src="img/pokemon/' + koN + '.gif" alt=""><i class="pkm-sf-demo-ring"></i><b class="pkm-sf-demo-pop">−1</b><span class="pkm-sf-demo-tag">Erreur !</span></div>'
+    + SF_HAND + '</div>';
   // Partie tirée sur l'appareil (sans serveur) : même règle que 024_safari.sql.
   const sfLocalRound = () => {
     const kind = SF_TYPES[Math.floor(gmRand() * SF_TYPES.length)];
@@ -50,10 +60,31 @@
   const sfLater = (fn, ms) => { if (SF) SF.timers.push(setTimeout(fn, ms)); };
   const sfTypeChip = t => '<span class="pkm-sf-type" style="--ty: ' + (SF_TYPE_COLOR[t] || '#3D7FD9') + '">' + sfEsc(t) + '</span>';
   sfProto.sfClose = function () {
+    if (SF && SF.pend) { this.sfCollect(false); return; }
     sfClear();
     if (SF && SF.el) SF.el.remove();
     SF = null;
     this.setState({ sfOpen: false });
+  };
+  // Récupérer ses PK (2026-11-13, porteur : « une animation où les PK s'ajoutent au solde PK ») : le safari se ferme, les
+  // gemmes jaillissent du gain et volent en arc jusqu'au solde de l'en-tête, qui monte à chaque gemme (même animation
+  // que « Récupérer mes PA », pa.js). Sans animation (croix, mouvements réduits, solde introuvable) : solde mis à jour.
+  sfProto.sfCollect = function (anim) {
+    if (!SF || !SF.pend) return;
+    const pend = SF.pend, gain = SF.el.querySelector('.pkm-sf-gain'), rect = gain ? gain.getBoundingClientRect() : null;
+    SF.pend = null;
+    this.sfClose();
+    const end = () => {
+      this.setState({ pk: pend.final, pkGain: pend.won });
+      this.pkGainEnd(); this.flash();
+      if (sfCloud()) setTimeout(() => this.gcSync(), 600);
+    };
+    const to = document.querySelector('header .pkm-bal-pk') || document.querySelector('.pkm-bal-pk');
+    let still = false; try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* rien */ }
+    if (!anim || still || !rect || !to || typeof paFly !== 'function') { end(); return; }
+    const drops = Math.min(14, Math.max(6, Math.round(pend.won / 2)));
+    try { if (typeof this.sfxPa === 'function') this.sfxPa(drops); } catch (e) { /* son coupé */ }
+    paFly({ getBoundingClientRect: () => rect }, to, drops, k => this.setState({ pk: pend.from + Math.round(pend.won * (k + 1) / drops) }), end, { img: 'img/brand/pk.svg' });
   };
   sfProto.sfPanel = function (html) {
     if (!SF) return;
@@ -98,12 +129,11 @@
   // 1. Consigne : le type demandé, des exemples, les règles.
   sfProto.sfBrief = function () {
     const rd = SF.round, kind = rd.kind;
-    const ex = rd.spawns.filter(x => x.ok).slice(0, 3).map(x => '<img src="img/pokemon/' + x.n + '.png" alt="" width="52" height="52">')
-      .concat(rd.spawns.filter(x => !x.ok).slice(0, 2).map(x => '<img src="img/pokemon/' + x.n + '.png" alt="" width="52" height="52" class="pkm-sf-no">')).join('');
+    const okS = rd.spawns.find(x => x.ok) || rd.spawns[0], koS = rd.spawns.find(x => !x.ok) || rd.spawns[1] || okS;
     this.sfPanel('<div class="pkm-sf-card">' + sfTypeChip(kind)
       + '<h2 class="pkm-sf-h">Attrape les Pokémon <em style="color: ' + (SF_TYPE_COLOR[kind] || '#6BC1FF') + '">' + sfEsc(kind) + '</em> !</h2>'
       + '<p class="pkm-sf-p">Touche-les avant qu’ils ne quittent l’écran. Évite les autres.</p>'
-      + '<div class="pkm-sf-ex">' + ex + '</div>'
+      + sfDemo(okS.n, koS.n, kind)
       + '<div class="pkm-sf-rules"><div><b>20 s</b>de partie</div><div><b class="pkm-sf-plus">+2</b>PK par bon Pokémon</div><div><b class="pkm-sf-minus">−1</b>PK par erreur</div></div>'
       + '<button type="button" class="pkm-sf-go">C’est parti !</button></div>');
     SF.phase = 'brief';
@@ -184,17 +214,17 @@
         + (boost ? '<small class="pkm-sf-boost">2XP PK : gain doublé</small>' : '')
         + (grid ? '<h3 class="pkm-sf-h3">Ton safari</h3><div class="pkm-sf-caught">' + grid + '</div>' : '<p class="pkm-sf-p">Aucun Pokémon attrapé cette fois.</p>')
         + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : aucun PK crédité. Le safari s’ouvre à tous dès que 024_safari.sql est installé dans Studio.</p>' : '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>')
-        + '<button type="button" class="pkm-sf-go">Fermer</button></div>');
-      el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfClose());
-      if (SF.preview) return;
-      // Gain dans l'app : solde, date de la partie, historique des jeux.
-      const s = this.st(), g = s.games || {}, at = new Date().toISOString();
+        // « Récupérer mes PK » à la place de « Fermer » (2026-11-13, porteur) : les gemmes volent jusqu'au solde.
+        + '<button type="button" class="pkm-sf-go' + (won > 0 && !SF.preview ? ' pkm-sf-collect' : '') + '">' + (won > 0 && !SF.preview ? 'Récupérer mes PK' : 'Fermer') + '</button></div>');
+      if (SF.preview) { el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfClose()); return; }
+      // Partie enregistrée tout de suite (date, historique) ; le solde monte quand le joueur récupère ses PK.
+      const s = this.st(), g = s.games || {}, at = new Date().toISOString(), from = Number(s.pk) || 0;
+      const final = res.pk != null ? gcPk(s, res.pk) : from + won;
       const patch = { games: Object.assign({}, g, { safariAt: at, hist: [{ at: at, game: 'safari', pk: won }].concat(g.hist || []).slice(0, 20) }) };
-      if (res.pk != null) Object.assign(patch, { pk: gcPk(s, res.pk), pkEarned: res.pk_earned | 0 }); else patch.pk = (Number(s.pk) || 0) + won;
-      if (won > 0) patch.pkGain = won;
+      if (res.pk_earned != null) patch.pkEarned = res.pk_earned | 0;
       this.setState(patch);
-      if (won > 0) { this.pkGainEnd(); this.flash(); }
-      if (sfCloud()) setTimeout(() => this.gcSync(), 800);
+      SF.pend = { won: won, from: from, final: final };
+      el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfCollect(true));
     };
     if (!sfCloud() || SF.preview) {
       const good = rd.spawns.filter(x => x.ok && SF.hits.has(x.i)).length, bad = hits.length - good, mul = typeof this.xpMul === 'function' ? this.xpMul() : 1;

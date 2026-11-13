@@ -133,7 +133,8 @@
     this.sfxPa(drops); // bruitage des PA du jour (sfx.js, 2026-11-01)
     paFly(from, to, drops, k => this.setState({ paCount: Math.round(old + n.gain * (k + 1) / drops) }), end);
   };
-  const paFly = (fromEl, toEl, count, hit, done) => {
+  // opts.img : image qui vole (gouttes des PA par défaut ; gemmes des PK pour le Safari, 2026-11-13).
+  const paFly = (fromEl, toEl, count, hit, done, opts) => {
     const root = document.querySelector('.pkm-root') || document.body, R = root.getBoundingClientRect();
     const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
     const ax = a.left - R.left + a.width / 2, ay = a.top - R.top + a.height / 2, bx = b.left - R.left + 14, by = b.top - R.top + b.height / 2;
@@ -146,7 +147,7 @@
     let left = count;
     for (let i = 0; i < count; i++) {
       const d = document.createElement('img');
-      d.src = 'img/brand/pa.svg'; d.alt = ''; d.className = 'pkm-pafly-drop';
+      d.src = (opts && opts.img) || 'img/brand/pa.svg'; d.alt = ''; d.className = 'pkm-pafly-drop';
       d.style.left = (ax - 18) + 'px'; d.style.top = (ay - 18) + 'px';
       layer.appendChild(d);
       // Éparpillement (angle d'or, rayon variable), puis vol en arc vers le solde.

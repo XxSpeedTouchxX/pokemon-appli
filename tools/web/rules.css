@@ -131,3 +131,7 @@
 /* Boîte mystère (2026-11-12) : même colonne que les photos et les tickets. */
 .pkm-rules-shop > div > .pkm-rules-box { flex: none; width: 56px; min-width: 56px; height: 44px; position: relative; display: block; }
 .pkm-rules-shop .pkm-rules-box img { position: absolute; left: 6px; top: 0; width: 44px; height: 44px; object-fit: contain; }
+
+/* Prix du PK shop avec le logo de leur monnaie (2026-11-13, porteur) : gemme des PK, goutte des PA (boîte mystère). */
+.pkm-rules-shop strong.pkm-rules-price { display: inline-flex; align-items: center; gap: 4px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; }
+.pkm-rules-shop strong.pkm-rules-price img.pkm-rules-cur { width: 20px; height: 20px; object-fit: contain; }

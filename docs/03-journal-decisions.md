@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-11-13 (soir) — Safari v2, Admin › Joueurs et temps passé, règles, Mon profil, badge 2XP, Reptincel (demande du porteur)
+
+- **Safari éclair** :
+  - Démonstration animée avant de jouer (carte du jeu et écran de consigne) : un doigt touche un bon Pokémon (grand cercle vert, coche, « +2 » vert, « Bon Pokémon ! »), puis un mauvais (cercle rouge barré, il tremble, « −1 » rouge, « Erreur ! »), en boucle de 6 s.
+  - Pendant la partie : « +2 » en vert (il était blanc), bon Pokémon nettement entouré de vert.
+  - Compte à rebours 3, 2, 1 centré dans sa bulle (le chiffre de la police dessinait 13 px trop haut).
+  - Fin de partie : « Récupérer mes PK » à la place de « Fermer » ; le safari se ferme et les gemmes volent jusqu'au solde de PK, qui monte à chaque gemme. La partie est enregistrée dès la fin ; fermer par la croix ajoute aussi les PK, sans animation.
+  - Texte de la carte du jeu de nouveau lisible (il était presque invisible en thème clair).
+  - **Ouverture à tous** : rien n'est réservé aux admins dans l'app. Le serveur de dropicards.fr n'a pas encore le script 024 : tant qu'il manque, un joueur voit « Bientôt disponible » et un admin peut seulement jouer un aperçu. Dès que le porteur colle `tools/supabase/install_024_025.sql` dans Studio, le Safari s'ouvre à tous les joueurs, sans autre changement.
+- **Admin › « Joueurs »** (nouvelle rubrique du panneau Admin, sous « Inscriptions en direct ») : tous les comptes Dropicards, avec pseudo, adresse, grade, PK et PA actuels, PK gagnés au total, Premium, dernière activité (« en ligne »), jours actifs sur 7 et 30 jours, parties jouées, ouvertures de l'app et **temps passé dans l'app** (aujourd'hui, 7 jours, 30 jours, depuis le début). Recherche, filtres (Tous, Réguliers = actifs au moins 3 jours sur 7, Aujourd'hui, Inactifs 7 j), tri (dernière activité, PK, PA, temps sur 7 jours, régularité). Relue chaque minute. Visible seulement par un admin déverrouillé par le mot de passe des admins : le serveur refuse la liste à tout autre compte.
+  - Temps passé : compté quand l'app est ouverte **et visible à l'écran** (de l'ouverture jusqu'à la fermeture ou au passage en arrière-plan), envoyé au serveur chaque minute. Le serveur ne compte jamais plus que le temps réellement écoulé. Rien d'autre n'est enregistré (ni écran consulté, ni position) ; effacé avec le compte.
+  - Serveur : `tools/supabase/025_suivi_joueurs.sql` (21 tests), **à installer par le porteur**, avec 024, en un seul fichier : `install_024_025.sql`.
+  - Politique de confidentialité complétée (temps passé dans l'app, intérêt légitime, droit d'opposition), mise à jour du 13 novembre 2026.
+- **Règles des PK et PA** : le coffre mystère passe en 4ᵉ position, juste sous le ticket Or ; chaque prix est écrit avec le logo de sa monnaie : goutte des PA pour le coffre (300), gemme des PK pour les tickets et les achats directs.
+- **Mon profil** : l'emblème du grade n'est plus en bas à droite de l'avatar ; il reste seulement en haut de l'accueil, au-dessus du logo.
+- **Badge « 2XP »** : en couleur pleine, sans le reflet blanc qui passait dessus toutes les 3 secondes ni l'ombre (le « voile » encore visible) ; au gain, il grossit simplement un instant.
+- **Pokédex** : Reptincel recentré vers la droite sur son socle (sa queue enflammée tirait le calcul vers la gauche).
+- Cache v187.
+
 ## 2026-11-13 (suite) — Historique au doigt, 6M et 1A, en-tête sur iPhone, avatar 58/32/10, Safari (demande du porteur)
 
 - **Historique du prix d'une carte** :

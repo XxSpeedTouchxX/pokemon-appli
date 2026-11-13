@@ -1120,6 +1120,28 @@
 <sc-if value="{{ adm.sig.hasMore }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.sig.more }}</p></sc-if>
 </sc-if>
 </section>
+<section aria-label="{{ adm.ply.head }}" class="pkm-ply">
+<div class="pkm-sig-top"><h3><span aria-hidden="true" class="pkm-sig-dot"></span>{{ adm.ply.head }}</h3><button type="button" onClick="{{ adm.ply.refresh }}" class="pkm-admz-chip">Actualiser</button></div>
+<sc-if value="{{ adm.ply.offline }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.ply.offlineText }}</p></sc-if>
+<sc-if value="{{ adm.ply.online }}" hint-placeholder-val="{{ true }}">
+<p role="status" class="pkm-sig-live">{{ adm.ply.live }}</p>
+<sc-if value="{{ adm.ply.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-admz-err">{{ adm.ply.err }}</p></sc-if>
+<div class="pkm-sig-stats"><sc-for list="{{ adm.ply.stats }}" as="pys" hint-placeholder-count="4"><span><b>{{ pys.n }}</b><small>{{ pys.label }}</small></span></sc-for></div>
+<input type="search" aria-label="Chercher un joueur par pseudo ou adresse" placeholder="Pseudo ou adresse e-mail…" value="{{ adm.ply.q }}" onInput="{{ adm.ply.onQ }}" class="pkm-admz-q">
+<div role="group" aria-label="Filtrer les joueurs" class="pkm-ply-chips"><sc-for list="{{ adm.ply.filters }}" as="pyf" hint-placeholder-count="4"><button type="button" onClick="{{ pyf.pick }}" aria-pressed="{{ pyf.on }}" class="{{ pyf.cls }}">{{ pyf.label }}</button></sc-for></div>
+<div role="group" aria-label="Trier les joueurs" class="pkm-ply-chips"><span class="pkm-ply-by">Trier par</span><sc-for list="{{ adm.ply.sorts }}" as="pyt" hint-placeholder-count="5"><button type="button" onClick="{{ pyt.pick }}" aria-pressed="{{ pyt.on }}" class="{{ pyt.cls }}">{{ pyt.label }}</button></sc-for></div>
+<p class="pkm-ply-count">{{ adm.ply.count }}</p>
+<sc-if value="{{ adm.ply.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.ply.emptyText }}</p></sc-if>
+<sc-if value="{{ adm.ply.hasList }}" hint-placeholder-val="{{ true }}"><ul aria-label="Liste des joueurs" class="pkm-ply-list"><sc-for list="{{ adm.ply.list }}" as="pyl" hint-placeholder-count="3"><li class="{{ pyl.cls }}">
+<div class="pkm-ply-id"><img src="{{ pyl.emblem }}" alt="{{ pyl.grade }}" width="34" height="34"><span><b>{{ pyl.who }}</b><small>{{ pyl.email }}</small><small class="pkm-ply-grade">{{ pyl.grade }}</small></span>
+<span class="pkm-ply-bal"><span><img src="img/brand/pk.svg" alt="" width="18" height="18"><b>{{ pyl.pk }}</b><em>PK</em></span><span><img src="img/brand/pa.svg" alt="" width="18" height="18"><b>{{ pyl.pa }}</b><em>PA</em></span></span></div>
+<div class="pkm-ply-tags"><sc-if value="{{ pyl.now }}" hint-placeholder-val="{{ false }}"><em class="pkm-sig-tag pkm-sig-ok">en ligne</em></sc-if><sc-if value="{{ pyl.regular }}" hint-placeholder-val="{{ false }}"><em class="pkm-sig-tag pkm-ply-tag-reg">régulier</em></sc-if><sc-if value="{{ pyl.premium }}" hint-placeholder-val="{{ false }}"><em class="pkm-sig-tag pkm-ply-tag-prem">Premium</em></sc-if><sc-if value="{{ pyl.admin }}" hint-placeholder-val="{{ false }}"><em class="pkm-sig-tag">admin</em></sc-if><sc-if value="{{ pyl.suspended }}" hint-placeholder-val="{{ false }}"><em class="pkm-sig-tag pkm-ply-tag-off">suspendu</em></sc-if><small>Vu {{ pyl.seen }}</small></div>
+<div class="pkm-ply-grid"><span><small>Aujourd’hui</small><b>{{ pyl.tToday }}</b></span><span><small>7 jours</small><b>{{ pyl.t7 }}</b></span><span><small>30 jours</small><b>{{ pyl.t30 }}</b></span><span><small>Total</small><b>{{ pyl.tAll }}</b></span></div>
+<p class="pkm-ply-line">{{ pyl.days }} · {{ pyl.games }} · {{ pyl.sessions }} · {{ pyl.earned }}</p>
+</li></sc-for></ul></sc-if>
+<sc-if value="{{ adm.ply.hasMore }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ adm.ply.showMore }}" class="pkm-admz-chip pkm-ply-more">{{ adm.ply.more }}</button></sc-if>
+</sc-if>
+</section>
 <h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">PK, PA et compagnons</h3>
 <span style="font-size: 13px; color: #C9D3EA">{{ adm.pkText }}</span>
 <div style="display: flex; gap: 8px">
@@ -1312,7 +1334,7 @@
 </section>
 <section aria-label="PK shop" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">🛍️</span>PK shop</h3>
-<div class="pkm-rules-shop"><sc-for list="{{ legal.pk.shop }}" as="lrp" hint-placeholder-count="3"><div><sc-if value="{{ lrp.isTicket }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-tkbox" aria-hidden="true"><span class="{{ lrp.ticketCls }}"><span class="pkm-shop-ticket-in">{{ lrp.tag }}</span></span></span></sc-if><sc-if value="{{ lrp.notTicket }}" hint-placeholder-val="{{ true }}"><img src="{{ lrp.img }}" alt="" width="44" height="44"></sc-if><sc-if value="{{ lrp.isBox }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-box" aria-hidden="true"><img src="{{ lrp.boxBase }}" alt=""><img src="{{ lrp.boxLid }}" alt=""></span></sc-if><span><b>{{ lrp.name }}</b><em>{{ lrp.grade }}</em></span><strong>{{ lrp.price }}</strong></div></sc-for></div>
+<div class="pkm-rules-shop"><sc-for list="{{ legal.pk.shop }}" as="lrp" hint-placeholder-count="3"><div><sc-if value="{{ lrp.isTicket }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-tkbox" aria-hidden="true"><span class="{{ lrp.ticketCls }}"><span class="pkm-shop-ticket-in">{{ lrp.tag }}</span></span></span></sc-if><sc-if value="{{ lrp.notTicket }}" hint-placeholder-val="{{ true }}"><img src="{{ lrp.img }}" alt="" width="44" height="44"></sc-if><sc-if value="{{ lrp.isBox }}" hint-placeholder-val="{{ false }}"><span class="pkm-rules-box" aria-hidden="true"><img src="{{ lrp.boxBase }}" alt=""><img src="{{ lrp.boxLid }}" alt=""></span></sc-if><span><b>{{ lrp.name }}</b><em>{{ lrp.grade }}</em></span><strong class="pkm-rules-price" aria-label="{{ lrp.price }}"><span aria-hidden="true">{{ lrp.priceNum }}</span><sc-if value="{{ lrp.hasIco }}" hint-placeholder-val="{{ true }}"><img src="{{ lrp.priceIco }}" alt="" width="20" height="20" class="pkm-rules-cur"></sc-if></strong></div></sc-for></div>
 <p class="pkm-rules-note">Le tirage au sort suivra un règlement publié avant le tirage. L’envoi des lots demandera un compte et une adresse.</p>
 </section>
 </div>
@@ -1944,13 +1966,13 @@
 <sc-if value="{{ gm.c.locked }}" hint-placeholder-val="{{ false }}"><p style="margin: -4px 0 0; text-align: center; font-size: 13px; line-height: 1.4; color: #C9D3EA">{{ gm.c.lockText }}</p></sc-if>
 </section>
 
-<section aria-label="Safari éclair" class="pkm-sf-card-gm" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
+<section aria-label="Safari éclair" class="pkm-sf-card-gm pkm-dark" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
 <h2 class="pkm-gm-title">Safari éclair</h2>
 <span class="pkm-sf-every" style="font-size: 12.5px">{{ gm.sf.every }}</span>
 </div>
 <p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">20 secondes : des Pokémon traversent la prairie. Touche ceux du type demandé (+2 PK chacun) et évite les autres (−1 PK).</p>
-<div class="pkm-sf-prev" aria-hidden="true"><span class="pkm-sf-prev-chip">Attrape les Pokémon Eau !</span><img src="img/pokemon/7.gif" alt="" class="pkm-sf-prev-a"><img src="img/pokemon/129.gif" alt="" class="pkm-sf-prev-b"><img src="img/pokemon/25.gif" alt="" class="pkm-sf-prev-c"><i class="pkm-sf-prev-ring"></i><b class="pkm-sf-prev-pop">+2</b></div>
+<div class="pkm-sf-demo pkm-sf-demo-card" aria-hidden="true"><span class="pkm-sf-demo-chip">Attrape les Pokémon <b class="pkm-sf-demo-eau">Eau</b> !</span><div class="pkm-sf-demo-mon pkm-sf-demo-ok"><img src="img/pokemon/7.gif" alt=""><i class="pkm-sf-demo-ring"></i><b class="pkm-sf-demo-pop">+2</b><span class="pkm-sf-demo-tag">Bon Pokémon !</span></div><div class="pkm-sf-demo-mon pkm-sf-demo-ko"><img src="img/pokemon/25.gif" alt=""><i class="pkm-sf-demo-ring"></i><b class="pkm-sf-demo-pop">−1</b><span class="pkm-sf-demo-tag">Erreur !</span></div><svg class="pkm-sf-demo-hand" viewBox="0 0 34 42" width="34" height="42"><path d="M12 4.5a3 3 0 0 1 6 0V18l2.3-.4a3 3 0 0 1 3.3 1.8l1.9-.3a3 3 0 0 1 3.4 2.4l.1.6c1.8.1 3 1.5 3 3.2V30c0 6-4.5 10.5-10 10.5h-3.6a9 9 0 0 1-7.4-3.9L4.7 28a3 3 0 0 1 4.6-3.8L12 27z"></path></svg></div>
 <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; font-size: 12px; color: #C9D3EA">
 <span class="pkm-sf-rule"><b>20 s</b>par partie</span><span class="pkm-sf-rule pkm-sf-rule-ok"><b>+2</b>bon Pokémon</span><span class="pkm-sf-rule pkm-sf-rule-ko"><b>−1</b>erreur</span>
 </div>
