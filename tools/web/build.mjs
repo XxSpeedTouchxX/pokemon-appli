@@ -915,6 +915,15 @@ ${code}
     // Visuel TCGdex en WebP qui ne charge pas (réseau, format refusé par le téléphone : 2026-10-22, visuels absents chez
     // le porteur alors que le CDN répond) : un nouvel essai en PNG, même adresse, avant le visuel de secours.
     const cur = t.currentSrc || t.getAttribute('src') || '';
+    // Visuel redressé (img/fix/, 2026-11-13) absent : le visuel TCGdex d'origine.
+    const fixAt = cur.indexOf('/img/fix/');
+    if (!t.dataset.unfix && fixAt >= 0) {
+      const name = cur.slice(fixAt + 9).split('?')[0], low = /-low\.webp$/.test(name);
+      t.dataset.unfix = '1';
+      t.removeAttribute('srcset');
+      t.src = 'https://assets.tcgdex.net/' + name.replace(/(-low)?\.webp$/, '').replace(/_/g, '/') + (low ? '/low.webp' : '/high.webp');
+      return;
+    }
     if (!t.dataset.png && cur.indexOf('https://assets.tcgdex.net/') === 0 && (cur.slice(-9) === '/low.webp' || cur.slice(-10) === '/high.webp')) {
       t.dataset.png = '1';
       t.removeAttribute('srcset');
@@ -936,7 +945,10 @@ ${code}
   // En cas d'échec (réseau, serveur), nouvel essai automatique : après 5 s, 15 s puis 45 s, au retour du réseau et
   // quand l'app revient au premier plan (2026-10-11 ; avant, l'utilisateur restait bloqué sans catalogue).
   const getJson = u => fetch(u).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-  const loadCatalog = () => Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json')]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
+  // Visuels de travers redressés (2026-11-13, web/data/img-fix.json, workflow « Cadrage des cartes ») : lus avec le
+  // catalogue ; sans eux, les visuels TCGdex d'origine.
+  const loadFix = () => getJson('data/img-fix.json').then(x => { TCG.fix = (x && x.p) || {}; }).catch(() => { TCG.fix = TCG.fix || {}; });
+  const loadCatalog = () => Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json'), loadFix()]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
     .then(doc => doc || getJson('data/cards.json'))
     .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); })
     .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); retryLater(); });

@@ -55,6 +55,14 @@
       const b = SDX + path.slice(4);
       return { img: b + '/small', hi: b + '/large', srcset: '', lang: 'EN', credit: 'pokemontcg.io (Scrydex) · haute définition' };
     }
+    // Photo de travers redressée et recadrée (2026-11-13, porteur : « certaines cartes sont tordues, arrange cela dans
+    // le cadrage » ; tools/cadrage/redresse.py, web/img/fix/) : même format que les visuels TCGdex.
+    const fx = TCG.fix && TCG.fix[path];
+    if (fx) {
+      const k = 'img/fix/' + path.replace(/\//g, '_'), lo = k + '-low.webp?v=' + fx, hi = k + '.webp?v=' + fx;
+      return { img: lo, hi: hi, srcset: lo + ' 245w, ' + hi + ' 600w', fixed: true,
+        lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · photo de la carte redressée et recadrée par Dropicards' };
+    }
     const b = /^https?:/.test(path) ? path : ((TCG.doc && TCG.doc.img) || ASSETS) + path;
     return { img: b + '/low.webp', hi: b + '/high.png', srcset: b + '/low.webp 245w, ' + b + '/high.webp 600w',
       lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · qualité maximale (PNG 600 × 825)' };

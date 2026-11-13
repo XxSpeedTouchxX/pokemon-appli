@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-13 (nuit) — Visuels de cartes « de travers » redressés et recadrés (demande du porteur)
+
+- **Constat** (photo du porteur : Rayquaza ☆ d'EX Deoxys) : une partie des visuels TCGdex en français sont des photos de la carte, prises un peu de travers, avec du fond noir autour, au lieu d'un scan bien droit.
+- **Correction automatique** (`tools/cadrage/redresse.py`, workflow « Cadrage des cartes », chaque lundi et à la demande) :
+  - pour chaque visuel, l'outil trouve les 4 bords de la carte ;
+  - il ne garde que les visuels où il y a du fond autour de la carte (d'une autre couleur que le bord de la carte) et où la carte est penchée, en perspective, ou entourée de fond ;
+  - il remet la carte droite et la recadre au format des autres visuels (600 × 825, coins arrondis), sans rien redessiner.
+  - Les vrais scans, qui remplissent tout le visuel, ne sont jamais touchés. 6 tests sur des photos fabriquées à partir de vrais visuels.
+- **Dans l'app** : la carte redressée remplace la photo partout (fiche, classeur, extensions, zoom). Le crédit dit « photo de la carte redressée et recadrée par Dropicards ». Si le fichier manque, l'app reprend le visuel TCGdex d'origine.
+- Le scan reconnaîtra mieux ces cartes : leur empreinte est calculée sur la carte redressée. Les bords dorés des 30 ans partent aussi de la carte redressée.
+- Le nombre de visuels redressés est connu après le premier passage sur GitHub ; des planches avant / après sont publiées pour vérifier à l'œil (`tools/cadrage/apercu/`).
+- Cache v192.
+
 ## 2026-11-13 (soir) — Safari éclair en 3 niveaux, sons de bonne et mauvaise réponse, cote « à confirmer » ramenée à la moyenne 30 jours (demande et « go » du porteur)
 
 - **3 niveaux du Safari éclair**, à choisir après « GO » (écran « Choisis ton niveau ») :

@@ -1,0 +1,66 @@
+# Cadrage des cartes (2026-11-13, porteur : « certaines cartes sont tordues, arrange cela dans le cadrage ») :
+# tools/cadrage/redresse.py repère les visuels TCGdex qui sont des photos de travers (carte penchée, en perspective ou
+# entourée de fond), les redresse et les recadre (web/img/fix/), et publie la liste lue par l'app
+# (web/data/img-fix.json) avec des planches avant / après (tools/cadrage/apercu/). Chaque lundi après les empreintes
+# du scan (nouvelles cartes), à la demande, ou quand le calcul change.
+name: Cadrage des cartes
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Seulement ces cartes (ids séparés par des virgules), vide = tout le catalogue"
+        required: false
+        default: ""
+  schedule:
+    - cron: "17 8 * * 1"
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - tools/cadrage/redresse.py
+      - .github/workflows/cadrage.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cadrage
+  cancel-in-progress: false
+
+jobs:
+  cadrage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dépendances
+        run: pip install opencv-python-headless==4.10.0.84 numpy pillow
+      - name: Tests du redressement
+        run: python3 -m unittest discover -s tools/cadrage -p "test_*.py" -v
+      # Petits visuels déjà téléchargés par le workflow « Empreintes des cartes » (même dossier, mêmes noms).
+      - name: Visuels déjà connus
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/scan/img
+            .cache/cadrage
+          key: cadrage-${{ github.run_id }}
+          restore-keys: |
+            cadrage-
+            scan-prints-
+      - name: Redressement
+        run: python3 tools/cadrage/redresse.py --only "${{ github.event.inputs.only }}"
+      - name: Publier
+        run: |
+          git add -A web/img/fix web/data/img-fix.json tools/cadrage/apercu
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Cadrage des cartes : visuels de travers redressés ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin claude/pokemon-app-mockup-1mxt7p
+          git push origin HEAD:claude/pokemon-app-mockup-1mxt7p

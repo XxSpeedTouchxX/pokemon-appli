@@ -18,12 +18,16 @@ const doc = JSON.parse(readFileSync(ROOT + 'web/data/cards.json', 'utf8')), F = 
 doc.fields.forEach((k, i) => { F[k] = i; });
 const ASSETS = doc.img || 'https://assets.tcgdex.net/', PTCG = 'https://images.pokemontcg.io/';
 const urlOf = p => !p ? null : p.indexOf('ptcg:') === 0 ? PTCG + p.slice(5) + '.png' : p.indexOf('sdx:') === 0 ? 'https://images.scrydex.com/pokemon/' + p.slice(4) + '/small' : (/^https?:/.test(p) ? p : ASSETS + p) + '/low.webp';
-const cards = doc.cards.map(r => ({ id: r[F.id], url: urlOf(r[F.img]) })).filter(c => c.url);
+// Visuels de travers redressés (2026-11-13, tools/cadrage/redresse.py) : l'empreinte vient de la carte remise droite,
+// comme celle que filme l'appareil photo. Adresse « fix:<fichier>?<version> », lue sur le disque (web/img/fix/).
+const FIX = (() => { try { return JSON.parse(readFileSync(ROOT + 'web/data/img-fix.json', 'utf8')).p || {}; } catch (e) { return {}; } })();
+const fixUrl = p => { const k = p && FIX[p] ? p.replace(/\//g, '_') : ''; return k && existsSync(ROOT + 'web/img/fix/' + k + '-low.webp') ? 'fix:' + k + '?' + FIX[p] : null; };
+const cards = doc.cards.map(r => ({ id: r[F.id], url: fixUrl(r[F.img]) || urlOf(r[F.img]) })).filter(c => c.url);
 // Empreintes gardées, valables tant que le calcul (scan-print.js) ne change pas.
 const ALG = createHash('sha1').update(readFileSync(ROOT + 'tools/web/scan-print.js')).digest('hex');
 const kept = existsSync(CACHE + 'prints.json') ? JSON.parse(readFileSync(CACHE + 'prints.json', 'utf8')) : {};
 const known = kept.alg === ALG && kept.p ? kept.p : {};
-const file = u => IMGS + createHash('sha1').update(u).digest('hex').slice(0, 20) + (u.endsWith('.png') ? '.png' : '.webp');
+const file = u => u.indexOf('fix:') === 0 ? ROOT + 'web/img/fix/' + u.slice(4).split('?')[0] + '-low.webp' : IMGS + createHash('sha1').update(u).digest('hex').slice(0, 20) + (u.endsWith('.png') ? '.png' : '.webp');
 // 1. Téléchargements (12 à la fois), seulement ceux qui manquent.
 const todo = [...new Set(cards.map(c => c.url))].filter(u => !known[u] && !existsSync(file(u)));
 console.log(cards.length + ' cartes avec visuel · ' + Object.keys(known).length + ' empreintes déjà connues · ' + todo.length + ' visuels à télécharger');
