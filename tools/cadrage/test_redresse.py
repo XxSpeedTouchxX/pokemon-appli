@@ -123,6 +123,38 @@ class Redresse(unittest.TestCase):
             bad, _, m, why = R.crooked(ph)
             self.assertTrue(bad and "penchée" in why, f"{p.name} de travers : {why}")
 
+    def test_tight_photo_lines(self):
+        # Photo serrée (la carte remplit le visuel, sans fond autour) prise un peu de travers, comme Rayquaza ☆ ex8-107 :
+        # repérée par ses grands traits du pourtour, puis remise droite (traits droits après correction).
+        found = 0
+        for path in CASES:
+            bgr = cv2.resize(cv2.imread(str(path)), (R.W, R.H), interpolation=cv2.INTER_CUBIC)
+            h, w = bgr.shape[:2]
+            ref = R.line_skew(bgr)
+            if ref is None or ref["n"] < 10:
+                continue  # petit visuel agrandi : trop peu de traits nets sur le pourtour
+            src = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+            dst = np.float32([[22, 36], [w - 4, 2], [w - 14, h - 8], [8, h - 2]])
+            M = cv2.getPerspectiveTransform(src, dst)
+            warped = cv2.warpPerspective(bgr, M, (w, h), borderMode=cv2.BORDER_REPLICATE)
+            ph = cv2.resize(warped[38:h - 14, 26:w - 18], (w, h), interpolation=cv2.INTER_AREA)
+            bad, fix, m, why = R.crooked(ph)
+            if not bad:
+                continue
+            found += 1
+            self.assertEqual(fix["mode"], "lignes", f"{path.name} : {why}")
+            out = R.unskew(ph, fix["H"])
+            self.assertEqual(out.shape, (R.H, R.W, 4))
+            after = R.line_skew(out)
+            self.assertFalse(R.crooked(out)[0], f"{path.name} encore de travers après correction")
+            if after is not None:
+                self.assertLess(after["before"], 0.4, f"{path.name} encore de travers après correction")
+            # Le petit visuel donne la même correction (contrôle « petit / grand » du workflow).
+            small = cv2.resize(ph, (245, round(245 * h / w)), interpolation=cv2.INTER_AREA)
+            self.assertTrue(R.crooked(small, low=True)[0], path.name)
+            self.assertTrue(R.agree(small, ph, fix), path.name)
+        self.assertGreaterEqual(found, 3)
+
     def test_small_low_image(self):
         # Même tri sur le petit visuel (245 px de large).
         bgr = R.split(self.cards[2])[0]
