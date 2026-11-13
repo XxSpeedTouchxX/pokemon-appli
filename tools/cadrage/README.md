@@ -44,7 +44,9 @@ Le premier passage a « redressé » 723 visuels, presque tous des scans droits 
    - la liste `web/data/img-fix.json` ;
    - les planches avant / après dans `tools/cadrage/apercu/`.
 
-Plus de 400 visuels redressés : rien n'est publié (détection à revoir). Le passage du lundi est suspendu jusqu'à la validation de la détection.
+Plus de 400 visuels redressés : rien n'est publié (détection à revoir). Le workflow se lance à la main seulement : les nouvelles extensions sont des scans officiels, droits.
+
+**Publié le 13 novembre 2026 (soir), après 3 essais à blanc** : 95 visuels redressés, dont Rayquaza ☆ ex8-107. Sur la photo, la carte est un peu courbée (haut penché, bas droit) : la correction est gardée quand elle divise l'écart des traits au moins par deux, avec au plus 0,55° restants. Répartition : EX 54, Set de Base 15, Diamant & Perle 10, POP 7, Platine 5, e-Card 2, Neo 2.
 
 ## Dans l'app
 
