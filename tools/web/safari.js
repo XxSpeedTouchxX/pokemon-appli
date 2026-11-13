@@ -53,10 +53,12 @@
   };
   const sfCloud = () => typeof gcOn === 'function' && gcOn();
   // Délai du grade (0 : fermé) ; le serveur fait foi quand il répond. Admin déverrouillé (PK illimités) : jamais fermé.
-  const sfFree = s => !!(s && s.cloudGame && s.cloudGame.unlimited);
+  // Sans délai aussi pour les comptes admin et ceux de la liste safari_free (2026-11-13, porteur : « Safari illimité
+  // pour l'instant pour les admins et le compte de mon ami » ; 027_safari_libre.sql, champ « free » de safari_state).
+  const sfFree = s => !!(s && ((s.cloudGame && s.cloudGame.unlimited) || s.sfFreeSrv));
   sfProto.sfHours = function () { const s = this.st(); return (s.sfHours | 0) || (this.perks().safariH | 0); };
   sfProto.sfLocked = function () { const s = this.st(); return !this.sfHours() && !sfFree(s) && !(sfCloud() && Cloud.isAdmin() && s.sfOff); };
-  sfProto.sfWaitMs = function () { const g = this.st().games || {}, h = this.sfHours(); return h ? gmWait(g.safariAt, h * 3600000) : 0; };
+  sfProto.sfWaitMs = function () { const s = this.st(), g = s.games || {}, h = this.sfHours(); return h && !sfFree(s) ? gmWait(g.safariAt, h * 3600000) : 0; };
 
   // État du serveur (dernière partie, délai du grade) : relu à l'ouverture des Jeux et après chaque partie.
   let sfSynced = 0;
@@ -66,7 +68,7 @@
     Cloud.rpc('safari_state').then(x => {
       if (!x) return;
       const s = this.st();
-      this.setState({ sfHours: x.hours | 0, sfOff: false, games: Object.assign({}, s.games || {}, { safariAt: x.last || '' }) });
+      this.setState({ sfHours: x.hours | 0, sfFreeSrv: !!x.free, sfOff: false, games: Object.assign({}, s.games || {}, { safariAt: x.last || '' }) });
     }, e => { if (e && e.code === 'not_installed') this.setState({ sfOff: true }); });
   };
 
@@ -160,7 +162,7 @@
     if (!sfCloud()) { go(sfLocalRound(lvl)); return; }
     // Aperçu pour un admin tant que 024_safari.sql n'est pas installé (2026-11-13, porteur : « rends-le dispo ») :
     // partie complète tirée sur l'appareil, aucun PK crédité, rien d'enregistré.
-    const preview = () => { SF.preview = true; this.setState({ toast: 'Aperçu admin : aucun PK. Installe install_024_a_026.sql dans Studio pour ouvrir le safari à tous.' }); go(sfLocalRound(lvl)); };
+    const preview = () => { SF.preview = true; this.setState({ toast: 'Aperçu admin : aucun PK. Installe install_024_a_027.sql dans Studio pour ouvrir le safari à tous.' }); go(sfLocalRound(lvl)); };
     if (this.st().sfOff && Cloud.isAdmin()) { preview(); return; }
     // Serveur sans 026 (niveaux) : partie Facile seulement, comme avant ; le joueur est prévenu.
     const start = lvl === 1 ? Cloud.rpc('safari_start', { req: Cloud.reqId(), lvl: 1 }).catch(e => (e && e.code === 'not_installed' ? Cloud.rpc('safari_start', { req: Cloud.reqId() }) : Promise.reject(e)))
@@ -276,7 +278,7 @@
         + (won < 0 ? '<p class="pkm-sf-lossmsg">Plus d’erreurs que de bons Pokémon : <b>' + (-won) + ' PK</b> sont retirés de ton solde.'
           + (raw < won ? ' Ton total était de ' + sfSigned(raw) + ' PK, mais ton solde ne descend jamais sous 0.' : '') + '</p>' : '')
         + (grid ? '<h3 class="pkm-sf-h3">Ton safari</h3><div class="pkm-sf-caught">' + grid + '</div>' : '<p class="pkm-sf-p">Aucun Pokémon attrapé cette fois.</p>')
-        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : les PK ne sont pas enregistrés tant que 024_safari.sql n’est pas installé dans Studio (install_024_a_026.sql).</p>' : (this.sfHours() ? '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>' : ''))
+        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : les PK ne sont pas enregistrés tant que 024_safari.sql n’est pas installé dans Studio (install_024_a_027.sql).</p>' : (sfFree(this.st()) ? '<p class="pkm-sf-next">Sans délai : tu peux rejouer tout de suite</p>' : this.sfHours() ? '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>' : ''))
         // « Récupérer mes PK » à la place de « Fermer » (2026-11-13, porteur) : les gemmes volent jusqu'au solde, avec
         // l'animation et le bruit des PA du jour (aussi dans l'aperçu admin, où le solde ne bouge pas).
         + '<button type="button" class="pkm-sf-go' + (won > 0 ? ' pkm-sf-collect' : won < 0 ? ' pkm-sf-lose' : '') + '">' + (won > 0 ? 'Récupérer mes PK' : won < 0 ? 'J’ai compris' : 'Fermer') + '</button></div>');
@@ -321,7 +323,7 @@
     const w = this.sfWaitMs(), busy = !!s.sfOpen, h = this.sfHours(), locked = this.sfLocked(), adminTry = !!s.sfOff && sfCloud() && Cloud.isAdmin();
     const grade = this.perkGrade('safariH') || 'Collectionneur';
     r.sf = {
-      every: locked ? 'Au grade ' + grade : h ? '1 partie toutes les ' + h + ' h' : 'Sans délai (admin)', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
+      every: locked ? 'Au grade ' + grade : sfFree(s) ? 'Sans délai' : h ? '1 partie toutes les ' + h + ' h' : 'Sans délai (admin)', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
       lockText: 'Le Safari éclair se débloque au grade ' + grade + ' (7 500 PK gagnés et 30 compagnons).',
       // « GO » (2026-11-13, porteur) : à la place de « Jouer au safari » et de « Essayer (aperçu admin) ».
       button: locked ? '🔒 Au grade ' + grade : s.sfOff && !adminTry ? 'Bientôt disponible' : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'GO',

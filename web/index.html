@@ -421,7 +421,7 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 /* Passage de grade (2026-10-16, allongé d'une seconde le même jour à la demande du porteur, d'après les promotions de rang de League of Legends) : l'ancien emblème se charge
    d'énergie (étincelles qui convergent, tremblement), éclate dans un flash et une onde de choc, le nouvel emblème
    s'abat avec des rayons qui tournent et un reflet, puis le nom du grade. --gu : couleur du nouveau grade. */
-.pkm-gu { position: absolute; inset: 0; z-index: 70; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: radial-gradient(70% 50% at 50% 42%, rgba(30, 40, 70, 0.92), rgba(5, 8, 15, 0.97) 75%); color: #FFFFFF; animation: pkmGuIn 0.35s ease-out both; }
+.pkm-gu { position: absolute; inset: 0; z-index: 70; overflow: hidden; container-type: inline-size; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: radial-gradient(70% 50% at 50% 42%, rgba(30, 40, 70, 0.92), rgba(5, 8, 15, 0.97) 75%); color: #FFFFFF; animation: pkmGuIn 0.35s ease-out both; }
 @keyframes pkmGuIn { from { opacity: 0; } to { opacity: 1; } }
 .pkm-gu-rays { position: absolute; left: 50%; top: 42%; width: 760px; height: 760px; margin: -380px 0 0 -380px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, var(--gu) 0deg 6deg, transparent 6deg 22deg); -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 62%); mask-image: radial-gradient(circle, #000 0%, transparent 62%); opacity: 0; animation: pkmGuRays 1.2s 2.45s ease-out forwards, pkmGuSpin 18s 2.45s linear infinite; }
 @keyframes pkmGuRays { from { opacity: 0; transform: scale(0.4); } to { opacity: 0.3; transform: scale(1); } }
@@ -441,7 +441,7 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 @keyframes pkmGuNew { 0% { opacity: 0; transform: scale(1.9); filter: brightness(3) drop-shadow(0 0 30px #FFFFFF); } 45% { opacity: 1; transform: scale(0.94); } 100% { opacity: 1; transform: scale(1); filter: brightness(1) drop-shadow(0 0 22px var(--gu)); } }
 .pkm-gu-kicker, .pkm-gu-name, .pkm-gu-sub, .pkm-gu-go { position: relative; opacity: 0; animation: pkmGuText 0.6s ease-out forwards; }
 .pkm-gu-kicker { margin-top: 10px; font-size: 13px; font-weight: 800; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gu); animation-delay: 3.05s; }
-.pkm-gu-name { max-width: 100%; box-sizing: border-box; white-space: nowrap; letter-spacing: 0.02em; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: clamp(18px, 6.6vw, 34px); line-height: 1.05; text-align: center; color: #FFFFFF; -webkit-text-stroke: 1.5px #111111; text-shadow: 0 3px 0 #111111, 0 0 22px var(--gu); padding: 0 16px; animation-name: pkmGuName; animation-delay: 3.2s; }
+.pkm-gu-name { max-width: 100%; box-sizing: border-box; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; letter-spacing: 0.02em; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 26px; font-size: min(34px, calc((100cqi - 40px) / (var(--gu-len, 14) * 0.62))); line-height: 1.05; text-align: center; color: #FFFFFF; -webkit-text-stroke: 1.5px #111111; text-shadow: 0 3px 0 #111111, 0 0 22px var(--gu); padding: 0 16px; animation-name: pkmGuName; animation-delay: 3.2s; }
 @keyframes pkmGuName { 0% { opacity: 0; transform: scale(1.25); filter: blur(4px); } 100% { opacity: 1; transform: none; filter: none; } }
 .pkm-gu-sub { max-width: 300px; font-size: 13.5px; line-height: 1.45; color: #C9D3EA; text-align: center; animation-delay: 3.5s; }
 .pkm-gu-go { margin-top: 14px; min-width: 200px; height: 50px; border: 2px solid #111111; border-radius: 999px; background: #FFD60A; color: #111111; font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; animation-delay: 3.9s; }
@@ -2138,7 +2138,8 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 /* Pokédex agrandi (2026-10-31, porteur) : écran gauche de 146 × 76 dans le dessin (pokedex-device.svg). */
 .pkm-dex-lcd-l { left: 8.5%; top: 35.6%; width: 36.5%; height: 30.4%; flex-direction: column; gap: 0; font-size: 12px; line-height: 1.1; }
 .pkm-dex-lcd-l img { width: 56%; height: auto; max-height: 72%; object-fit: contain; image-rendering: pixelated; animation: pkmDexBob 2.4s ease-in-out infinite; }
-.pkm-dex-lcd-l span { max-width: 96%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Nom dans le petit écran : jamais coupé (2026-11-13, « Choisis ton starter » tronqué sur un écran de 320 px) : deux lignes au besoin. */
+.pkm-dex-lcd-l span { max-width: 96%; white-space: normal; text-align: center; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .pkm-dex-q { font-family: 'Luckiest Guy', sans-serif; font-size: 30px; font-weight: 400; line-height: 1; }
 .pkm-dex-lcd-r { left: 58%; top: 36.8%; width: 35%; height: 15.2%; gap: 4px; font-family: 'Sora', sans-serif; font-size: clamp(12px, 4vw, 16px); white-space: nowrap; }
 .pkm-dex-lcd-r img { width: 26px; height: 26px; flex: none; }
@@ -2201,7 +2202,7 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-dex-all > span > span { font-size: 12px; color: #E2E6FF; }
 .pkm-dex-all svg { flex: none; fill: none; stroke: #FFD60A; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 /* Fiche du Pokémon */
-.pkm-dex-fiche { display: flex; flex-direction: column; gap: 10px; margin: 0 10px; padding: 10px; border-radius: 10px; border: 2px solid #8C7BFF; background: rgba(28, 27, 110, 0.85); }
+.pkm-dex-fiche { container-type: inline-size; display: flex; flex-direction: column; gap: 10px; margin: 0 10px; padding: 10px; border-radius: 10px; border: 2px solid #8C7BFF; background: rgba(28, 27, 110, 0.85); }
 /* Pokémon touché mis en avant (2026-10-30, porteur) : en grand sous un halo de projecteur, sa description à côté. */
 .pkm-dex-fiche-top { display: grid; grid-template-columns: 142px minmax(0, 1fr); gap: 10px; align-items: start; }
 /* Pokémon centré sur son socle par la mise en page (flex), sans translateX(-50%) : Safari calcule le pourcentage d'une
@@ -2213,7 +2214,7 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-dex-big { position: relative; z-index: 1; flex: none; width: auto; height: 96px; object-fit: contain; object-position: center bottom; image-rendering: pixelated; animation: pkmDexBob2 2.4s ease-in-out infinite; }
 @keyframes pkmDexBob2 { 50% { transform: translateY(-3px); } }
 .pkm-dex-id { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.pkm-dex-id h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.15; }
+.pkm-dex-id h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
 .pkm-dex-genus { font-size: 12.5px; font-weight: 700; color: #7CF5FF; }
 .pkm-dex-types { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .pkm-dex-types b { padding: 2px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 800; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25); }
@@ -2408,6 +2409,13 @@ section[aria-label="Pokédex"] img, section[aria-label="Mon Pokédex"] img { -we
    place sous l'icône). Le point est sorti du flux : l'icône est au centre exact de la barre, le point juste dessous. */
 nav[aria-label="Navigation principale"] > button[aria-current] { position: relative; }
 nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="width: 5px"] { position: absolute; left: 50%; bottom: 3px; margin-left: -2.5px; }
+/* Petit écran (2026-11-13, porteur : textes coupés ; fiche de 220 px sur un téléphone de 320 px) : image moins large,
+   nom plus petit, jamais coupé. */
+@container (max-width: 270px) {
+  .pkm-dex-fiche-top { grid-template-columns: 96px minmax(0, 1fr); gap: 8px; }
+  .pkm-dex-id h3 { font-size: 16px; }
+  .pkm-dex-text { overflow-wrap: anywhere; }
+}
 
 /* Règles des PK et des jeux, en images (2026-10-28, demande du porteur) : rubrique « PK et jeux » des informations
    légales (legal.js). Cartes sombres à liseré, chiffres en grand, barre des chances du Booster PK, tableau des grades
@@ -3273,6 +3281,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=3abc97c1"></script>
+<script src="app.js?v=3d6119dc"></script>
 </body>
 </html>

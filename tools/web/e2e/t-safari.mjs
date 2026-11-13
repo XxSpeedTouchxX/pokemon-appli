@@ -103,7 +103,7 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   await c2.route(FAKE + '/**', route => {
     const req = route.request(), p = new URL(req.url()).pathname, send = (st, j) => route.fulfill({ status: st, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(j) });
     if (p === '/rest/v1/rpc/game_state') return send(200, { pk: S.pk, pa: 0, pk_earned: S.pk, unlocked: [], today: new Date().toISOString().slice(0, 10) });
-    if (p === '/rest/v1/rpc/safari_state') return send(200, { last: null, hours: 6, next: new Date().toISOString() });
+    if (p === '/rest/v1/rpc/safari_state') return send(200, { last: S.free ? new Date().toISOString() : null, hours: 6, free: !!S.free, next: new Date().toISOString() });
     if (p === '/rest/v1/rpc/safari_start') { const a = JSON.parse(req.postData() || '{}'), lv = a.lvl || 1, sp = [1, 2, 3][lv - 1]; S.starts.push(a); S.lvl = lv; return send(200, { round: 'r-' + S.starts.length, kind: 'Eau', lvl: lv, plus: [2, 4, 8][lv - 1], minus: [1, 4, 8][lv - 1], spawns: spawns.map(x => Object.assign({}, x, { dur: Math.floor(x.dur / sp) })) }); }
     if (p === '/rest/v1/rpc/safari_finish') { S.finish = JSON.parse(req.postData() || '{}'); const hits = S.finish.hits || [], g = hits.filter(h => h % 2 === 1).length, b = hits.length - g, lv = S.lvl || 1, raw = [2, 4, 8][lv - 1] * g - [1, 4, 8][lv - 1] * b, w = lv === 1 ? Math.max(0, raw) : Math.max(raw, -S.pk); S.pk += w; return send(200, { won: w, base: w, raw: raw, lvl: lv, boost: false, good: g, bad: b, pk: S.pk, pa: 0, pk_earned: S.pk }); }
     if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Sacha', age_range: '15-25', starter: 25, role: 'user', status: 'active' }]);
@@ -161,6 +161,11 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   const after3 = await p2.evaluate(() => ({ pk: window.__pkm.st().pk, pill: (document.querySelector('header .pkm-gain-loss') || {}).textContent || '' }));
   ok('après la perte : solde ' + pk3 + ' → ' + after3.pk + ' (serveur ' + S.pk + '), « ' + N(after3.pill) + ' » en rouge sous le solde', after3.pk === S.pk && pk3 - after3.pk === 8 * wrong && N(after3.pill) === '−' + (8 * wrong) + ' PK');
   await p2.screenshot({ path: shot('safari-loss-after.png'), clip: { x: 0, y: 0, width: 390, height: 140 } });
+  // Compte sans délai (admin ou ami ajouté dans Studio, 027_safari_libre.sql) : rejouer tout de suite.
+  S.free = true; await p2.evaluate(() => window.__pkm.sfSync(true)); await p2.waitForTimeout(800);
+  ok('compte sans délai : « Sans délai » et « GO » juste après une partie', /Sans délai/.test(N(await sc.innerText())) && N(await sc.locator('button.pkm-gm-go').innerText()) === 'GO');
+  await sc.locator('button.pkm-gm-go').click(); await p2.waitForTimeout(600);
+  ok('compte sans délai : nouvelle partie ouverte (choix du niveau)', (await p2.locator('.pkm-sf-lv').count()) === 3);
   await c2.close();
 }
 // Serveur sans 024_safari.sql (2026-11-13, porteur : « rends-le dispo ») : un joueur voit « Bientôt disponible » ; un admin

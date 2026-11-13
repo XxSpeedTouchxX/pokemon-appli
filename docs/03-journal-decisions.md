@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-11-13 (nuit, suite) — Grade offert à un ami, textes coupés dans les animations, Safari sans délai pour les admins et un ami (demande du porteur)
+
+- **Grade offert** : `tools/supabase/requetes_grade.sql`, à coller dans Studio avec l'adresse du compte. Il débloque tous les Pokémon du Pokédex et met les « PK gagnés au total » à 100 000. Le solde de PK ne change pas, et la requête écrit une ligne au journal admin. Essayée sur la base de test puis utilisée par le porteur : animation « Grand maître Pokémon » vue sur son écran.
+- **Textes coupés dans les animations** (capture du porteur : « Grand maître Pokémon » coupé sur un écran large) :
+  - nom du grade : sa taille dépend maintenant de la largeur de l'app (et non de la fenêtre) et de la longueur du nom, avec retour à la ligne si besoin ;
+  - Pokédex : petit écran (« Choisis ton starter » sur deux lignes au lieu de « … ») ; arbre de Pokévolution à la largeur de la colonne de l'app (il débordait sur ordinateur et sur un téléphone de 320 px) ; fiche du Pokémon resserrée sur petit écran (nom jamais coupé).
+  - Nouveau test `t-textclip.mjs` : 7 animations (passage de grade, déblocage, évolution, méga-évolution, Booster PK, boîte mystère, PA du jour) à 320 px, 390 px et sur ordinateur, aucun texte coupé.
+- **Safari éclair sans délai** (« pour l'instant », porteur) :
+  - pour les comptes admin, même sans le mot de passe des admins ;
+  - pour les comptes ajoutés dans Studio : `tools/supabase/027_safari_libre.sql` (9 tests) et `requetes_safari.sql` (ajouter, voir, retirer, tout arrêter) ;
+  - l'app affiche « Sans délai » et « GO » juste après chaque partie ; les points des niveaux, le Booster PK et la pièce ne changent pas.
+  - **Point d'attention** : les PK gagnés au Safari comptent pour le classement de la saison. Un compte sans délai peut y monter vite ; les admins ne sont pas classés, l'ami oui.
+  - Un seul fichier à coller pour 024 à 027 : **`install_024_a_027.sql`** (remplace `install_024_a_026.sql`).
+- Cache v193.
+
 ## 2026-11-13 (nuit) — Visuels de cartes « de travers » redressés et recadrés (demande du porteur)
 
 - **Constat** (photo du porteur : Rayquaza ☆ d'EX Deoxys) : une partie des visuels TCGdex en français sont des photos de la carte, prises un peu de travers, avec du fond noir autour, au lieu d'un scan bien droit.

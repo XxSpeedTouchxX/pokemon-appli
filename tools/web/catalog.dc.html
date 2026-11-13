@@ -2175,7 +2175,7 @@
 
 <!-- fragment: grade-up -->
 <sc-if value="{{ gu.on }}" hint-placeholder-val="{{ false }}">
-<div class="pkm-gu" key="{{ gu.key }}" role="dialog" aria-modal="true" aria-label="{{ gu.title }}" style="--gu: {{ gu.color }}">
+<div class="pkm-gu" key="{{ gu.key }}" role="dialog" aria-modal="true" aria-label="{{ gu.title }}" style="{{ gu.style }}">
 <span class="pkm-gu-rays" aria-hidden="true"></span>
 <span class="pkm-gu-stage" aria-hidden="true">
 <sc-for list="{{ gu.sparks }}" as="gs" hint-placeholder-count="4"><i class="pkm-gu-spark" style="{{ gs.style }}"></i></sc-for>

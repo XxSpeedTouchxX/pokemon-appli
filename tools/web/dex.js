@@ -291,7 +291,10 @@
   // Route d'évolution de la famille de n : colonnes par stade, méga-évolutions dans la dernière colonne ; la première
   // branche suit la ligne du haut, les autres partent dessous. Mesures en px (nœud de 78 × 134 ; socle à 88 px du haut).
   const DEX_TOP = 44, DEX_ROW = 148, DEX_PED = 88, DEX_GAP = 6, DEX_ON = 1.08;
-  const dexRouteW = () => Math.max(284, Math.min(380, (typeof innerWidth === 'number' && innerWidth > 0 ? Math.min(innerWidth, 560) : 390) - 76));
+  // Largeur de l'arbre (2026-11-13, porteur : textes coupés) : celle de la colonne de l'app (et non de la fenêtre :
+  // sur ordinateur l'app est une colonne de 390 px), 240 px au moins (téléphone de 320 px).
+  const dexAppW = () => { const a = typeof document !== 'undefined' && document.getElementById('app'); const w = a && a.clientWidth; return w > 0 ? w : (typeof innerWidth === 'number' && innerWidth > 0 ? innerWidth : 390); };
+  const dexRouteW = () => Math.max(240, Math.min(380, Math.min(dexAppW(), 560) - 76));
   const dexRoute = n => {
     const fam = DEX[n].fam, nodes = DEX_DATA.filter(e => e.fam === fam && (e.mega || DEX_IDS.indexOf(e.n) >= 0)).map(e => ({ e: e, n: e.n }));
     const by = {}; nodes.forEach(x => { by[x.n] = x; });
@@ -331,7 +334,7 @@
   // chaque colonne prend la largeur de ses Pokémon (au moins DEX_NAME_W pour le nom et le prix), les petites formes
   // laissent la place aux grandes, sur toute la largeur de l'écran ; la famille ne rapetisse que si la somme dépasse
   // l'écran. Deux Pokémon voisins restent à 6 px au moins l'un de l'autre, même agrandis quand ils sont touchés.
-  const DEX_NAME_W = 66;
+  const DEX_NAME_W = 60;
   const dexGeom = (route, max, fit0, still) => {
     const W = Math.min(dexRouteW(), route.cols * 100);
     const halves = f => Array.from({ length: route.cols }, (_, c) => Math.max(DEX_NAME_W / 2, ...route.nodes.filter(x => x.col === c)

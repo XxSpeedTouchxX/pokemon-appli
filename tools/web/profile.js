@@ -355,7 +355,10 @@
     const u = s.gradeUp, T = this.tiers();
     if (!u || !T[u.to]) return { on: false, sparks: [], shards: [] };
     const g = T[u.to], o = T[Math.max(0, Math.min(u.from, u.to - 1))];
+    // Nom du grade toujours en entier (2026-11-13, porteur : « Grand maître Pokémon » coupé sur un écran large) : taille
+    // calculée sur la largeur de l'app et la longueur du nom (--gu-len), retour à la ligne si besoin (games.css).
     return { on: true, key: 'gu-' + u.n, title: 'Nouveau grade : ' + g.name, color: g.color, oldBadge: o.sym, newBadge: g.sym, name: g.name,
+      style: '--gu: ' + g.color + '; --gu-len: ' + g.name.length,
       sub: 'Tu passes de ' + o.name + ' à ' + g.name + '. Découvre tes nouveaux avantages.', sparks: PF_SPARKS, shards: PF_SHARDS, maskStyle: '--gu-mask: url(' + g.sym + ')',
       close: () => this.setState({ gradeUp: null }) };
   };
