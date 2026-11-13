@@ -9,6 +9,7 @@ import redresse as R
 
 ROOT = Path(__file__).resolve().parents[2]
 CARDS = sorted((ROOT / "web/img/c30").glob("30th-c-0[0-1]?.webp"))
+CASES = sorted((Path(__file__).resolve().parent / "cas").glob("scan-droit-*.webp"))
 
 
 def photo(card_bgr, corners, size=(900, 1200), bg=(18, 18, 22), noise=6, seed=1):
@@ -37,10 +38,21 @@ def similar(a_bgra, b_bgr):
     return float(np.abs(a - b)[m:-m, m:-m].mean())
 
 
+def opaque(im):
+    """Visuel limité à la carte : les rangées ou colonnes entièrement transparentes (bande vide sous certains visuels
+    des 30 ans) sont retirées, puis le visuel remis à 600 × 825."""
+    bgr, alpha = R.split(im)
+    if alpha is None:
+        return im
+    rows, cols = np.where((alpha > 128).any(1))[0], np.where((alpha > 128).any(0))[0]
+    crop = im[rows[0]:rows[-1] + 1, cols[0]:cols[-1] + 1]
+    return cv2.resize(crop, (R.W, R.H), interpolation=cv2.INTER_AREA)
+
+
 class Redresse(unittest.TestCase):
     def setUp(self):
         self.assertTrue(CARDS, "visuels de test absents (web/img/c30)")
-        self.cards = [cv2.imread(str(p), cv2.IMREAD_UNCHANGED) for p in CARDS[:6]]
+        self.cards = [opaque(cv2.imread(str(p), cv2.IMREAD_UNCHANGED)) for p in CARDS[:6]]
 
     def test_clean_scans_untouched(self):
         # Vrais visuels (coins transparents) et les mêmes sans transparence (coins blancs ou noirs) : jamais touchés.
@@ -80,13 +92,36 @@ class Redresse(unittest.TestCase):
         self.assertTrue(bad and "penchée" in why, why)
         self.assertLess(similar(R.rectify(ph, card["q"]), bgr), 18)
 
-    def test_straight_with_background_recropped(self):
+    def test_straight_with_background_untouched(self):
+        # Carte droite avec du fond autour : pas « de travers », laissée telle quelle (aucun recadrage seul).
         bgr = R.split(self.cards[1])[0]
         ph = photo(bgr, [[150, 190], [750, 190], [750, 1015], [150, 1015]])
         bad, card, m, why = R.crooked(ph)
-        self.assertTrue(bad and "fond autour" in why, why)
+        self.assertFalse(bad, why)
         self.assertLess(m["tilt"], 0.3)
-        self.assertLess(similar(R.rectify(ph, card["q"]), bgr), 18)
+
+    def test_real_clean_scans_untouched(self):
+        # Vrais visuels TCGdex droits que le premier passage (13 novembre 2026) avait pris à tort pour des photos de
+        # travers (bord argenté, cadres dessinés) : coins sombres opaques, puis coins rendus transparents.
+        self.assertTrue(CASES, "cas réels absents (tools/cadrage/cas)")
+        for p in CASES:
+            im = cv2.imread(str(p), cv2.IMREAD_UNCHANGED)
+            bad, _, m, why = R.crooked(im)
+            self.assertFalse(bad, f"{p.name} : {why}")
+            near = (np.abs(im[..., :3].astype(int) - 40).max(2) < 14).astype(np.uint8)
+            n, lbl = cv2.connectedComponents(near)
+            edge = np.unique(np.concatenate([lbl[0], lbl[-1], lbl[:, 0], lbl[:, -1]]))
+            alpha = np.where(np.isin(lbl, edge[edge > 0]), 0, 255).astype(np.uint8)
+            bad, _, m, why = R.crooked(np.dstack([im[..., :3], alpha]))
+            self.assertFalse(bad, f"{p.name} (transparent) : {why}")
+            # Le même scan photographié de travers, lui, est repéré.
+            h, w = im.shape[:2]
+            c, ang = np.array([w * 0.75, h * 0.75]), np.radians(3)
+            rot = np.array([[np.cos(ang), -np.sin(ang)], [np.sin(ang), np.cos(ang)]])
+            corners = [c + rot @ np.array(q) for q in ([-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2])]
+            ph = photo(im[..., :3], corners, size=(round(w * 1.5), round(h * 1.5)))
+            bad, _, m, why = R.crooked(ph)
+            self.assertTrue(bad and "penchée" in why, f"{p.name} de travers : {why}")
 
     def test_small_low_image(self):
         # Même tri sur le petit visuel (245 px de large).

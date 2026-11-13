@@ -11,7 +11,8 @@ Un vrai scan (la carte remplit tout le visuel, coins transparents) n'est jamais 
 pixels de la photo sont déplacés (perspective), comme quand on remet une photo droite.
 
 Usage (GitHub Actions, workflow « Cadrage des cartes ») :
-    python3 tools/cadrage/redresse.py            # tout le catalogue
+    python3 tools/cadrage/redresse.py --essai    # essai à blanc : rapport et planches dans tools/cadrage/essai/
+    python3 tools/cadrage/redresse.py            # publication : tout le catalogue
     python3 tools/cadrage/redresse.py --only ex8-107,ex8-106
 Écrit web/img/fix/<chemin>.webp (600 px) et <chemin>-low.webp (245 px), web/data/img-fix.json (liste lue par l'app) et
 tools/cadrage/apercu/*.jpg (avant / après, pour vérifier à l'œil).
@@ -36,12 +37,15 @@ W, H = 600, 825          # visuels TCGdex « high »
 LOW_W = 245              # visuels TCGdex « low »
 RADIUS = 0.045           # coins arrondis, en part de la largeur (≈ 27 px sur 600)
 INSET = 0.004            # la carte est recadrée 0,4 % à l'intérieur de son bord (aucun liseré de fond)
-# Seuils : au-delà, le visuel est « de travers ».
-TILT_DEG = 0.8           # bord penché de plus de 0,8°
-PERSP = 0.025            # côtés opposés de longueurs différentes de plus de 2,5 % (photo en perspective)
-FRAMED = 0.05            # fond de plus de 5 % de la largeur ou de la hauteur d'un côté
+# Seuils (v2, après un premier passage qui prenait des scans droits pour des photos de travers) :
+BG_MIN = 0.015           # fond visible autour de la carte : au moins 1,5 % du visuel (coins arrondis d'un scan ≈ 0,2 %)
+BG_T = 16.0              # écart de couleur (Lab) toléré à l'intérieur du fond
+SPREAD = 20.0            # au moins 3 des 4 coins du visuel ont la même couleur de fond (à cet écart près)
+FILL = 0.97              # la carte remplit le quadrilatère de ses bords : vraie forme de carte (sinon fond mal trouvé)
+TILT_DEG = 1.0           # carte tournée d'au moins 1°
+PERSP = 0.03             # perspective signalée (côtés opposés à 3 % d'écart ou plus), redressée avec la rotation
+SKEW = 6.0               # côtés penchés différemment de plus de 6° : forme douteuse, laissé tel quel
 AGREE = 0.02             # petit et grand visuel : mêmes coins à 2 % de la largeur près (sinon détection instable)
-CONTRAST = 22.0          # écart de couleur minimal entre le fond et le bord de la carte (Lab)
 UA = {"User-Agent": "Dropicards/1.0 (+https://dropicards.fr)"}
 
 
@@ -99,108 +103,121 @@ def _quad(contour, w, h):
     return q2
 
 
-def find_card(img):
-    """Carte dans le visuel : {'q': 4 coins (TL, TR, BR, BL), 'src': 'alpha' | 'bords'} ou None.
-    Visuel avec transparence : la forme de la carte vient de sa transparence. Sinon : bords de la carte (contours)."""
+def _lab(bgr):
+    """Couleurs Lab à la vraie échelle (L 0-100, a et b centrés sur 0)."""
+    lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
+    lab[..., 0] *= 100.0 / 255.0
+    lab[..., 1:] -= 128.0
+    return lab
+
+
+def background(img):
+    """Fond autour de la carte, repéré depuis les 4 coins du visuel : (masque du fond sur une image réduite, source,
+    couleur Lab du fond, écart entre les coins, échelle) ou None quand les coins n'ont pas la même couleur (pas de fond uni).
+    Visuel avec coins transparents : le fond est la partie transparente. Sinon : les pixels de la couleur des coins
+    reliés au bord du visuel (la carte, d'une autre couleur, les arrête)."""
     bgr, alpha = split(img)
     h, w = bgr.shape[:2]
-    k = 520.0 / max(w, h)
-    small = cv2.resize(bgr, (round(w * k), round(h * k)), interpolation=cv2.INTER_AREA) if k < 1 else bgr
+    k = min(1.0, 420.0 / max(w, h))
+    size = (max(1, round(w * k)), max(1, round(h * k)))
+    small = cv2.resize(bgr, size, interpolation=cv2.INTER_AREA) if k < 1 else bgr
     sh, sw = small.shape[:2]
-    scale = w / sw
-    if alpha is not None and (alpha < 128).mean() > 0.002:
-        a = cv2.resize(alpha, (sw, sh), interpolation=cv2.INTER_AREA) if k < 1 else alpha
-        mask = (a >= 128).astype(np.uint8) * 255
-        cs, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        if not cs:
-            return None
-        c = max(cs, key=cv2.contourArea)
-        if cv2.contourArea(c) < 0.25 * sw * sh:
-            return None
-        return {"q": _quad(c, sw, sh) * scale, "src": "alpha"}
-    gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray, (5, 5), 0)
-    best = None
-    v = float(np.median(gray))
-    for lo, hi in ((max(10, 0.5 * v), min(255, 1.2 * v + 30)), (20, 60), (40, 120)):
-        edges = cv2.Canny(gray, lo, hi)
-        edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=2)
-        cs, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        for c in cs:
-            area = cv2.contourArea(cv2.convexHull(c))
-            if area >= 0.25 * sw * sh and (best is None or area > best[0]):
-                best = (area, c)
-        if best is not None:
-            break
-    if best is None:
+    p = max(2, round(0.015 * sw))
+    corners = [(slice(0, p), slice(0, p)), (slice(0, p), slice(sw - p, sw)),
+               (slice(sh - p, sh), slice(0, p)), (slice(sh - p, sh), slice(sw - p, sw))]
+    if alpha is not None:
+        a = cv2.resize(alpha, size, interpolation=cv2.INTER_AREA) if k < 1 else alpha
+        if sum(float(a[c].mean()) < 128 for c in corners) >= 3:
+            return a < 128, "alpha", None, 0.0, k
+    lab = _lab(small)
+    cols = np.array([np.median(lab[c].reshape(-1, 3), 0) for c in corners])
+    bgc = np.median(cols, 0)
+    d = np.linalg.norm(cols - bgc, axis=1)
+    if int((d < SPREAD).sum()) < 3:
         return None
-    return {"q": _quad(best[1], sw, sh) * scale, "src": "bords"}
+    bgc = cols[d < SPREAD].mean(0)
+    near = (np.linalg.norm(lab - bgc, axis=2) < BG_T).astype(np.uint8)
+    n, lbl = cv2.connectedComponents(near, connectivity=8)
+    edge = np.concatenate([lbl[0], lbl[-1], lbl[:, 0], lbl[:, -1]])
+    nedge = np.concatenate([near[0], near[-1], near[:, 0], near[:, -1]])
+    keep = np.unique(edge[nedge > 0])
+    bg = np.isin(lbl, keep).astype(np.uint8)
+    # Un fond qui s'infiltre dans la carte par de fins passages (paillettes, bord sombre) est coupé : seul le fond
+    # assez épais (≥ 1,2 % de la largeur) reste du fond.
+    r = max(3, round(0.012 * sw)) | 1
+    bg = cv2.morphologyEx(bg, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (r, r)))
+    return bg > 0, "couleur", bgc, float(d.max()), k
+
+
+def find_card(img):
+    """Carte dans le visuel : {'q': 4 coins (TL, TR, BR, BL), 'src', 'bg' (part de fond), 'fill' (la carte remplit son
+    rectangle), 'spread' (écart entre les coins)} ou None (pas de fond uni autour : visuel laissé tel quel)."""
+    r = background(img)
+    if r is None:
+        return None
+    bg, src, bgc, spread, k = r
+    sh, sw = bg.shape
+    card = np.where(bg, 0, 255).astype(np.uint8)
+    card = cv2.morphologyEx(card, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)))
+    cs, _ = cv2.findContours(card, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    if not cs:
+        return None
+    c = max(cs, key=cv2.contourArea)
+    area = cv2.contourArea(c)
+    if area < 0.25 * sw * sh:
+        return None
+    q = _quad(c, sw, sh)
+    # La carte remplit le quadrilatère de ses 4 bords et n'a pas de creux (contour sans fuite du fond).
+    fill = min(area / max(1.0, cv2.contourArea(q.astype(np.float32))), area / max(1.0, cv2.contourArea(cv2.convexHull(c))))
+    return {"q": q / k, "src": src, "bg": float(bg.mean()), "fill": float(fill), "spread": spread,
+            "bgL": None if bgc is None else float(bgc[0])}
 
 
 def measure(q, w, h):
-    """Mesures d'une carte trouvée : penche (degrés), perspective, fond de chaque côté, proportions, surface."""
+    """Mesures d'une carte trouvée : rotation (degrés, signée), écart entre les côtés, perspective, proportions, surface."""
     tl, tr, br, bl = q
     top, bottom = np.linalg.norm(tr - tl), np.linalg.norm(br - bl)
     left, right = np.linalg.norm(bl - tl), np.linalg.norm(br - tr)
-    ang = lambda a, b, horiz: abs(math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]) if horiz else math.atan2(b[0] - a[0], b[1] - a[1])))
-    tilt = max(ang(tl, tr, True), ang(bl, br, True), ang(tl, bl, False), ang(tr, br, False))
+    deg = lambda y, x: math.degrees(math.atan2(y, x))
+    # Angle de chaque côté (0 quand il est droit) ; une carte tournée a ses 4 côtés tournés du même angle.
+    angs = [deg(tr[1] - tl[1], tr[0] - tl[0]), deg(br[1] - bl[1], br[0] - bl[0]),
+            -deg(bl[0] - tl[0], bl[1] - tl[1]), -deg(br[0] - tr[0], br[1] - tr[1])]
+    rot = float(np.mean(angs))
+    skew = float(max(abs(x - rot) for x in angs))
     persp = max(abs(top - bottom) / max(top, bottom), abs(left - right) / max(left, right))
     margins = [min(tl[0], bl[0]) / w, min(tl[1], tr[1]) / h, (w - max(tr[0], br[0])) / w, (h - max(bl[1], br[1])) / h]
     aspect = ((top + bottom) / 2) / ((left + right) / 2)
     area = cv2.contourArea(q.astype(np.float32)) / (w * h)
-    return {"tilt": tilt, "persp": persp, "margins": margins, "aspect": aspect, "area": area}
-
-
-def border_contrast(img, q):
-    """Écart de couleur (Lab) entre une bande juste à l'extérieur de la carte et une bande juste à l'intérieur."""
-    bgr = split(img)[0]
-    h, w = bgr.shape[:2]
-    k = 900.0 / max(w, h)
-    if k < 1:
-        bgr = cv2.resize(bgr, (round(w * k), round(h * k)), interpolation=cv2.INTER_AREA)
-        q = q * k
-        h, w = bgr.shape[:2]
-    mask = np.zeros((h, w), np.uint8)
-    cv2.fillPoly(mask, [np.round(q).astype(np.int32)], 255)
-    r = max(2, round(0.02 * w))
-    ker = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1, 2 * r + 1))
-    outer = cv2.dilate(mask, ker) & ~mask
-    inner = mask & ~cv2.erode(mask, ker)
-    if cv2.countNonZero(outer) < 0.004 * w * h or cv2.countNonZero(inner) == 0:
-        return 0.0
-    lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB).astype(np.float32)
-    mo = np.array(cv2.mean(lab, outer)[:3])
-    mi = np.array(cv2.mean(lab, inner)[:3])
-    return float(np.linalg.norm(mo - mi))
+    return {"tilt": abs(rot), "rot": rot, "skew": skew, "persp": persp, "margins": margins, "aspect": aspect, "area": area}
 
 
 def crooked(img):
-    """(True/False, carte trouvée, mesures, raison) : True quand le visuel doit être redressé ou recadré."""
+    """(True/False, carte trouvée, mesures, raison) : True quand le visuel est une photo de travers à redresser.
+    Il faut, à la fois : un fond uni autour de la carte (même couleur aux coins du visuel, ou transparent), au moins
+    1,5 % du visuel ; une vraie forme de carte (proportions, quadrilatère bien rempli, côtés cohérents) ; et une carte
+    tournée d'au moins 1° (la perspective est redressée en même temps). Un scan droit n'est jamais touché."""
     card = find_card(img)
     h, w = img.shape[:2]
     if card is None:
-        return False, None, None, "carte introuvable"
+        return False, None, None, "pas de fond uni autour de la carte"
     m = measure(card["q"], w, h)
-    if not (0.62 <= m["aspect"] <= 0.82) or m["area"] < 0.35:
+    m.update(bg=card["bg"], fill=card["fill"], spread=card["spread"], src=card["src"])
+    if card["bg"] < BG_MIN:
+        return False, card, m, f"pas de fond autour de la carte ({card['bg'] * 100:.1f} %)"
+    if not (0.66 <= m["aspect"] <= 0.78) or m["area"] < 0.4:
         return False, card, m, "forme différente d'une carte"
-    # La carte touche le bord du visuel : c'est un scan plein cadre (ou une photo coupée, impossible à compléter).
-    if min(m["margins"]) < 0.004:
-        return False, card, m, "carte jusqu'au bord du visuel"
-    # Autour de la carte, il faut du fond : une couleur nettement différente du bord de la carte juste à l'intérieur.
-    # Sinon le contour trouvé est une ligne dessinée sur la carte (cadre intérieur, bord doré à paillettes) : scan droit.
-    if card["src"] != "alpha":
-        de = border_contrast(img, card["q"])
-        m["contrast"] = de
-        if de < CONTRAST:
-            return False, card, m, f"pas de fond autour de la carte (écart de couleur {de:.0f})"
-    why = []
-    if m["tilt"] >= TILT_DEG:
-        why.append(f"penchée de {m['tilt']:.1f}°")
+    if card["fill"] < FILL:
+        return False, card, m, f"contour irrégulier ({card['fill'] * 100:.0f} %)"
+    if m["skew"] > SKEW:
+        return False, card, m, f"côtés incohérents ({m['skew']:.1f}°)"
+    # Il faut une carte tournée : un fond qui déborde un peu sur un côté de la carte (bord sombre, paillettes) donne
+    # une fausse perspective, jamais une carte tournée de 1° dont les 4 côtés suivent le fond.
+    if m["tilt"] < TILT_DEG:
+        return False, card, m, "droite"
+    why = [f"penchée de {m['tilt']:.1f}°"]
     if m["persp"] >= PERSP:
         why.append(f"perspective {m['persp'] * 100:.1f} %")
-    if max(m["margins"]) >= FRAMED:
-        why.append(f"fond autour ({max(m['margins']) * 100:.0f} %)")
-    return bool(why), card, m, ", ".join(why) or "droite"
+    return True, card, m, ", ".join(why)
 
 
 def round_corners(rgba, radius):
@@ -292,30 +309,34 @@ def main():
     ap = argparse.ArgumentParser(description="Redresse les visuels de cartes de travers.")
     ap.add_argument("--only", default="", help="ids de cartes séparés par des virgules")
     ap.add_argument("--cache", default=str(ROOT / ".cache/scan/img"), help="dossier des petits visuels (même cache que le scan)")
-    ap.add_argument("--max", type=int, default=3000, help="au-delà, rien n'est publié (détection à revoir)")
+    ap.add_argument("--max", type=int, default=400, help="au-delà, rien n'est publié (détection à revoir)")
+    ap.add_argument("--essai", action="store_true",
+                    help="essai à blanc : rapport, mesures et planches dans tools/cadrage/essai/, aucun visuel de l'app changé")
+    ap.add_argument("--voir", default="ex8-107", help="essai : cartes dont le visuel d'origine est toujours joint au rapport")
     a = ap.parse_args()
     doc = json.loads((ROOT / "web/data/cards.json").read_text("utf-8"))
     f = {k: i for i, k in enumerate(doc["fields"])}
     assets = doc.get("img") or "https://assets.tcgdex.net/"
     only = {x for x in a.only.split(",") if x}
+    voir = {x for x in a.voir.split(",") if x}
     paths = {}
     for r in doc["cards"]:
         p = r[f["img"]]
         if not p or p.startswith(("ptcg:", "sdx:")) or p.startswith("http"):
             continue
-        if only and r[f["id"]] not in only:
+        if only and r[f["id"]] not in only and r[f["id"]] not in voir:
             continue
         paths.setdefault(p, r[f["id"]])
     cache, high = Path(a.cache), ROOT / ".cache/cadrage/high"
     cache.mkdir(parents=True, exist_ok=True)
     high.mkdir(parents=True, exist_ok=True)
     low_file = lambda p: cache / (hashlib.sha1((assets + p + "/low.webp").encode()).hexdigest()[:20] + ".webp")
-    print(f"{len(paths)} visuels TCGdex à contrôler")
+    print(f"{len(paths)} visuels TCGdex à contrôler" + (" (essai à blanc)" if a.essai else ""))
     with ThreadPoolExecutor(12) as ex:
         ok = list(ex.map(lambda p: get(assets + p + "/low.webp", low_file(p)), paths))
     print(f"petits visuels : {sum(ok)} disponibles, {len(ok) - sum(ok)} introuvables")
     # 1. Tri sur le petit visuel ; 2. confirmation et redressement sur le grand.
-    cand = []
+    cand, rows, seen = [], [], {}
     for p, cid in paths.items():
         lf = low_file(p)
         if not lf.exists():
@@ -323,13 +344,16 @@ def main():
         im = read(lf)
         if im is None:
             continue
-        bad, _, m, why = crooked(im)
+        bad, card, m, why = crooked(im)
+        seen[p] = why
+        if a.essai and (bad or cid in voir or (m and m.get("bg", 0) >= 0.005)):
+            rows.append((cid, p, "oui" if bad else "non", why, m or {}))
         if bad:
             cand.append((p, cid, why))
     print(f"{len(cand)} visuels peut-être de travers sur les petits visuels (vérifiés sur les grands)")
     if len(cand) > 4 * a.max:
         sys.exit(f"Trop de visuels repérés ({len(cand)}) : détection à revoir, rien n'est publié.")
-    out_dir = ROOT / "web/img/fix"
+    out_dir = ROOT / ("tools/cadrage/essai/fix" if a.essai else "web/img/fix")
     out_dir.mkdir(parents=True, exist_ok=True)
     fixed, pairs, log = {}, [], []
     for p, cid, why in cand:
@@ -344,8 +368,8 @@ def main():
         if not bad:
             log.append(f"{cid} {p} : droit sur le grand visuel ({why2})")
             continue
-        # Même carte trouvée sur le petit et le grand visuel ? Un cadre dessiné sur la carte (faux contour) ne l'est
-        # presque jamais aux deux tailles ; le vrai bord d'une photo, toujours.
+        # Même carte trouvée sur le petit et le grand visuel ? Un faux contour ne l'est presque jamais aux deux tailles ;
+        # le vrai bord d'une photo, toujours.
         lim = read(low_file(p))
         lc = find_card(lim) if lim is not None else None
         if lc is None or np.max(np.linalg.norm(lc["q"] * (im.shape[1] / lim.shape[1]) - card["q"], axis=1)) > AGREE * im.shape[1]:
@@ -354,13 +378,19 @@ def main():
         hi = rectify(im, card["q"])
         lo = cv2.resize(hi, (LOW_W, round(LOW_W * H / W)), interpolation=cv2.INTER_AREA)
         k = key_of(p)
-        cv2.imwrite(str(out_dir / (k + ".webp")), hi, [cv2.IMWRITE_WEBP_QUALITY, 90])
-        cv2.imwrite(str(out_dir / (k + "-low.webp")), lo, [cv2.IMWRITE_WEBP_QUALITY, 86])
-        fixed[p] = hashlib.sha1((out_dir / (k + ".webp")).read_bytes()).hexdigest()[:8]
+        if not a.essai:
+            cv2.imwrite(str(out_dir / (k + ".webp")), hi, [cv2.IMWRITE_WEBP_QUALITY, 84])
+            cv2.imwrite(str(out_dir / (k + "-low.webp")), lo, [cv2.IMWRITE_WEBP_QUALITY, 82])
+            fixed[p] = hashlib.sha1((out_dir / (k + ".webp")).read_bytes()).hexdigest()[:8]
+        else:
+            fixed[p] = "essai"
         log.append(f"{cid} {p} : {why2}")
         pairs.append((cid, im, hi))
     if len(fixed) > a.max:
         sys.exit(f"Trop de visuels redressés ({len(fixed)} > {a.max}) : détection à revoir, rien n'est publié.")
+    if a.essai:
+        essai(a, paths, low_file, rows, pairs, log, fixed, seen, voir)
+        return
     # Fichiers d'anciens redressements devenus inutiles : retirés (sauf avec --only).
     if not only:
         keep = {key_of(p) for p in fixed}
@@ -381,6 +411,39 @@ def main():
     print(f"{len(fixed)} visuels redressés (web/img/fix, web/data/img-fix.json)")
     for line in log:
         print("  " + line)
+
+
+def essai(a, paths, low_file, rows, pairs, log, fixed, seen, voir):
+    """Essai à blanc : tools/cadrage/essai/ reçoit le rapport, les mesures, les planches avant / après des visuels qui
+    seraient redressés, et les petits visuels d'origine utiles pour régler la détection (repérés, demandés, au hasard)."""
+    d = ROOT / "tools/cadrage/essai"
+    import shutil
+    shutil.rmtree(d, ignore_errors=True)
+    (d / "orig").mkdir(parents=True)
+    with (d / "mesures.csv").open("w", encoding="utf-8") as fh:
+        fh.write("id;chemin;repere;raison;source;fond;remplissage;rotation;ecart_cotes;perspective;proportions;surface;coins\n")
+        for cid, p, flag, why, m in rows:
+            g = lambda k, n=3: "" if m.get(k) is None else (f"{m[k]:.{n}f}" if isinstance(m[k], (float, np.floating)) else str(m[k]))
+            fh.write(";".join([cid, p, flag, why.replace(";", ","), g("src"), g("bg"), g("fill"), g("rot", 2), g("skew", 2),
+                               g("persp"), g("aspect"), g("area"), g("spread", 1)]) + "\n")
+    ids = {p: cid for p, cid in paths.items()}
+    want = [p for p, cid in ids.items() if cid in voir]
+    want += [p for _, p, flag, _, _ in rows if flag == "oui"][:150]
+    others = sorted((p for p in seen if p not in want), key=lambda p: hashlib.sha1(p.encode()).hexdigest())[:24]
+    for p in dict.fromkeys(want + others):
+        lf = low_file(p)
+        if lf.exists():
+            shutil.copy(lf, d / "orig" / (ids[p] + ".webp"))
+    for i in range(0, min(len(pairs), 120), 12):
+        sheet(pairs[i:i + 12], d / f"planche-{i // 12 + 1:02d}.jpg")
+    with (d / "rapport.txt").open("w", encoding="utf-8") as fh:
+        fh.write(f"Essai à blanc du {date.today().isoformat()} : {len(paths)} visuels contrôlés, "
+                 f"{sum(1 for r in rows if r[2] == 'oui')} repérés sur les petits visuels, {len(fixed)} seraient redressés.\n")
+        for cid in sorted(voir):
+            p = next((p for p, c in ids.items() if c == cid), None)
+            fh.write(f"Carte demandée {cid} ({p}) : {seen.get(p, 'visuel introuvable')}\n")
+        fh.write("\n" + "\n".join(log) + "\n")
+    print((d / "rapport.txt").read_text("utf-8")[:4000])
 
 
 if __name__ == "__main__":

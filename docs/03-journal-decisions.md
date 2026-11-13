@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-13 (nuit, fin) — Cadrage des cartes : premier passage annulé, détection refaite, essai à blanc d'abord
+
+- **Ce qui s'est passé** : le premier passage du workflow « Cadrage des cartes » a « redressé » 723 visuels, presque tous des scans droits (cartes récentes au bord argenté : le bord était pris pour un fond, les cadres dessinés pour les bords de la carte). Rayquaza ☆ (ex8-107), la carte envoyée par le porteur, n'était même pas repéré. **Tout a été retiré aussitôt** (`web/data/img-fix.json` vide, aucun visuel redressé dans l'app).
+- **Nouvelle détection** (`tools/cadrage/redresse.py`) : le fond est repéré depuis les 4 coins du visuel (même couleur, ou transparents) et suivi jusqu'à la carte ; il faut au moins 1,5 % de fond (les coins arrondis d'un scan en font 0,2 %), une vraie forme de carte (proportions, quadrilatère bien rempli, côtés cohérents) et une carte **tournée d'au moins 1°**. Une carte droite avec du fond autour n'est plus recadrée seule.
+- **Tests** : les 120 scans droits recadrés à tort sont repris des planches du premier passage ; 12 sont gardés dans `tools/cadrage/cas/`. Ils restent droits, avec des coins sombres ou transparents, et sont repérés quand on les « photographie » penchés de 3°. Les photos fabriquées (perspective, fond clair, petit visuel) passent aussi.
+- **Essai à blanc d'abord** : un envoi du calcul ou un lancement à la main écrit seulement `tools/cadrage/essai/` (rapport, mesures, planches avant / après, visuels d'origine utiles au réglage), sans rien changer dans l'app. La publication se fait avec « publier = oui », après vérification des planches. Le passage du lundi est suspendu jusque-là.
+
 ## 2026-11-13 (nuit, suite) — Grade offert à un ami, textes coupés dans les animations, Safari sans délai pour les admins et un ami (demande du porteur)
 
 - **Grade offert** : `tools/supabase/requetes_grade.sql`, à coller dans Studio avec l'adresse du compte. Il débloque tous les Pokémon du Pokédex et met les « PK gagnés au total » à 100 000. Le solde de PK ne change pas, et la requête écrit une ligne au journal admin. Essayée sur la base de test puis utilisée par le porteur : animation « Grand maître Pokémon » vue sur son écran.
