@@ -1,13 +1,8 @@
-Essai à blanc du 2026-11-13 : 20272 visuels contrôlés, 152 repérés sur les petits visuels, 108 seraient redressés.
+Essai à blanc du 2026-11-13 : 20272 visuels contrôlés, 145 repérés sur les petits visuels, 104 seraient redressés.
+Carte demandée dp3-131 (fr/dp/dp3/131) : photo serrée de travers (2.0° → 0.25°)
+Carte demandée ex6-65 (fr/ex/ex6/65) : photo serrée de travers (1.8° → 0.19°)
 Carte demandée ex8-107 (fr/ex/ex8/107) : photo serrée de travers (1.0° → 0.45°)
 
-sv10-223 fr/sv/sv10/223 : photo serrée de travers (1.6° → 0.14°)
-sv08-230 fr/sv/sv08/230 : droit sur le grand visuel (pas de fond autour de la carte (0.1 %))
-sv05-181 fr/sv/sv05/181 : droit sur le grand visuel (pas de fond autour de la carte (0.1 %))
-sv02-205 fr/sv/sv02/205 : photo serrée de travers (1.1° → 0.13°)
-sv02-260 fr/sv/sv02/260 : droit sur le grand visuel (pas de fond autour de la carte (0.1 %))
-sv01-204 fr/sv/sv01/204 : photo serrée de travers (1.0° → 0.13°)
-smp-SM112 en/sm/smp/SM112 : photo serrée de travers (0.9° → 0.18°)
 pl3-1 fr/pl/pl3/1 : photo serrée de travers (1.1° → 0.20°)
 pl3-5 fr/pl/pl3/5 : photo serrée de travers (1.2° → 0.22°)
 pl3-8 fr/pl/pl3/8 : photo serrée de travers (1.1° → 0.26°)
