@@ -6,7 +6,7 @@ const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const 
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); await withFonts(ctx);
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 
-await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1200);
+await page.goto(E2E + '/?start=market&debug', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 ok('onglet « Jeux » dans la barre du bas', (await page.locator('nav button[aria-label="Jeux"]').count()) === 1);
 const boost = page.locator('section[aria-label="Booster PK"]'), coin = page.locator('section[aria-label="Pile ou face"]');
 ok('booster et pile ou face affichés', (await boost.count()) === 1 && (await coin.count()) === 1);
@@ -20,13 +20,20 @@ ok('plus de « Gratuit, sans achat… » sous le Pokédex', !/Gratuit, sans acha
 const pk0 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(1300);
 await page.screenshot({ path: shot('games-scissors.png') });
-await page.waitForTimeout(1300);
+await page.waitForTimeout(1100);
+// Gain des PK comme les PA du jour (2026-11-13, porteur) : les gemmes volent jusqu'au solde, qui monte à chaque gemme.
+const fly = await page.evaluate(() => [...document.querySelectorAll('.pkm-pafly-drop')].map(d => d.getAttribute('src')));
+ok('booster : gemmes des PK qui volent jusqu’au solde (' + fly.length + ')', fly.length >= 8 && fly.every(f => f === 'img/brand/pk.svg'));
+await page.screenshot({ path: shot('games-pkfly.png') });
+// Un autre mouvement du solde pendant le vol des gemmes (achat au PK shop…) n'est jamais effacé par la fin du vol.
+await page.evaluate(() => window.__pkm.setState({ pk: window.__pkm.st().pk + 1000 }));
+await page.waitForTimeout(2600);
 const pk1 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
-ok('booster ouvert : PK crédités (' + pk0 + ' → ' + pk1 + ')', [30, 50, 100, 200, 500].indexOf(pk1 - pk0) >= 0);
+ok('booster ouvert : PK crédités, sans effacer les +1 000 PK reçus pendant le vol (' + pk0 + ' → ' + pk1 + ')', [30, 50, 100, 200, 500].indexOf(pk1 - pk0 - 1000) >= 0);
 // Grade forcé à Grand maître (helpers.mjs) : booster et pièce toutes les 4 h (2026-10-28).
 ok('booster suivant dans 4 h', /Tu dois attendre [34] h \d* ?(min )?pour rejouer|Tu dois attendre [34] h pour rejouer/.test(await boost.innerText()));
 await page.screenshot({ path: shot('games-booster.png') });
-await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(3400);
+await coin.locator('button:has-text("Lancer la pièce")').click(); await page.waitForTimeout(6200); // pièce, puis gemmes qui volent si gagné
 const pk2 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk);
 ok('pièce lancée : 0 ou 50 PK (' + (pk2 - pk1) + ')', pk2 - pk1 === 0 || pk2 - pk1 === 50);
 ok('lancer suivant dans 4 h', /Tu dois attendre [34] h \d* ?(min )?pour rejouer|Tu dois attendre [34] h pour rejouer/.test(await coin.innerText()));
@@ -39,7 +46,9 @@ await page.click('[role=tablist][aria-label="Jeux"] button:has-text("Pokédex")'
 ok('rubrique « Pokédex » : le Pokédex, sans les jeux à PK', (await page.locator('section[aria-label="Pokédex"]').count()) === 1 && (await page.locator('section[aria-label="Booster PK"], section[aria-label="Pile ou face"]').count()) === 0);
 const evo = page.locator('section[aria-label="Pokédex"]');
 ok('Pokédex : 4 starters (' + (await evo.locator('[aria-label="Starters"] button').allInnerTexts()).join(', ') + ')', (await evo.locator('[aria-label="Starters"] button').allInnerTexts()).join(',') === 'Bulbizarre,Salamèche,Carapuce,Pikachu');
-await evo.locator('button[aria-label="Choisir Carapuce comme starter"]').click(); await page.waitForTimeout(400);
+// Toucher direct (le message du gain de la pièce peut couvrir le bas de l'écran), puis attente de la sauvegarde.
+await evo.locator('button[aria-label="Choisir Carapuce comme starter"]').evaluate(e => e.click());
+await page.waitForFunction(() => (JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').evo || {}).line === 'cara', null, { timeout: 4000 }).catch(() => null);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { evo: d.evo, buddy: d.buddy, own: d.pkOwn || [] }; });
 ok('Pokédex : Carapuce choisi, débloqué et devenu le compagnon', st.evo && st.evo.line === 'cara' && st.evo.stage === 0 && st.buddy === 7 && st.own.indexOf(7) >= 0);
 // Route d'évolution de la famille : Carapuce, Carabaffe, Tortank, puis Méga-Tortank au bout de la ligne.

@@ -160,12 +160,12 @@
   // Grade forcé : mode Admin, ou la clé « pkm-grade-force » de l'appareil (1 à 6, utilisée par les tests).
   // Le champ sym d'un grade porte le chemin de son emblème (build.mjs remplace les hexagones de la maquette).
   const PF_GRADES = [
-    { name: 'Recrue', pk: 0, comp: 0, mega: 0, scans: 5, boosterH: 24, coinH: 0, cards: 36, sealed: 9, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)' },
-    { name: 'Chasseur', pk: 1500, comp: 0, mega: 0, scans: 10, boosterH: 20, coinH: 24, cards: 72, sealed: 27, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)' },
-    { name: 'Collectionneur', pk: 7500, comp: 30, mega: 0, scans: 20, boosterH: 12, coinH: 12, cards: 144, sealed: 54, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
-    { name: 'Dresseur Pokémon', pk: 15000, comp: 50, mega: 0, scans: 50, boosterH: 8, coinH: 8, cards: 288, sealed: 108, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
-    { name: 'Maître Pokémon', pk: 30000, comp: 100, mega: 5, scans: 100, boosterH: 6, coinH: 6, cards: 0, sealed: 0, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
-    { name: 'Grand maître Pokémon', pk: 100000, comp: 171, all: true, mega: 0, scans: 200, boosterH: 4, coinH: 4, cards: 0, sealed: 0, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
+    { name: 'Recrue', safariH: 0, pk: 0, comp: 0, mega: 0, scans: 5, boosterH: 24, coinH: 0, cards: 36, sealed: 9, color: '#F2A35E', glow: 'rgba(240, 160, 85, 0.28)' },
+    { name: 'Chasseur', safariH: 0, pk: 1500, comp: 0, mega: 0, scans: 10, boosterH: 20, coinH: 24, cards: 72, sealed: 27, color: '#C9D1DE', glow: 'rgba(201, 209, 222, 0.24)' },
+    { name: 'Collectionneur', safariH: 24, pk: 7500, comp: 30, mega: 0, scans: 20, boosterH: 12, coinH: 12, cards: 144, sealed: 54, ticket: true, color: '#FFC93C', glow: 'rgba(255, 201, 60, 0.26)' },
+    { name: 'Dresseur Pokémon', safariH: 12, pk: 15000, comp: 50, mega: 0, scans: 50, boosterH: 8, coinH: 8, cards: 288, sealed: 108, ticket: true, shopBooster: true, color: '#5BE08F', glow: 'rgba(47, 211, 122, 0.26)' },
+    { name: 'Maître Pokémon', safariH: 6, pk: 30000, comp: 100, mega: 5, scans: 100, boosterH: 6, coinH: 6, cards: 0, sealed: 0, ticket: true, shopBooster: true, radar: true, color: '#7CF5FF', glow: 'rgba(124, 245, 255, 0.26)' },
+    { name: 'Grand maître Pokémon', safariH: 4, pk: 100000, comp: 171, all: true, mega: 0, scans: 200, boosterH: 4, coinH: 4, cards: 0, sealed: 0, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
   ];
   // Avantages de chaque grade (2026-11-07, listes du porteur, mot pour mot) : classeur limité (cartes et items scellés,
   // illimité dès Maître Pokémon), scans par jour, délais du Booster PK et de la pièce, PK shop, emblème (dès
@@ -179,6 +179,8 @@
       pfN(g.scans) + ' scans disponibles par jour',
       '« Booster PK » toutes les ' + g.boosterH + ' h'
     ].concat(g.coinH ? ['« Pile ou face » toutes les ' + g.coinH + ' h'] : [],
+      // Safari éclair dès Collectionneur (2026-11-13, porteur) : 24 h, 12 h, 6 h, 4 h.
+      g.safariH ? ['« Safari éclair » toutes les ' + g.safariH + ' h'] : [],
       [i >= 4 ? 'Ticket Or + achat « ETB » au PK shop' : i >= 2 ? 'Ticket Argent + achat « item rare » au PK shop' : 'Ticket Bronze + achat de « booster » au PK shop'],
       i >= 2 ? ['Emblème du grade disponible sur ton profil'] : [],
       g.radar ? ['Radar de boutiques disponible'] : []);

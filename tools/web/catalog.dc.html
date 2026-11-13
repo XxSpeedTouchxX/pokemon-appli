@@ -1316,13 +1316,13 @@
 </section>
 <section aria-label="Safari éclair" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">🌿</span>Safari éclair</h3>
-<p class="pkm-rules-note">20 secondes : touche les Pokémon du type demandé. +2 PK par bon Pokémon, −1 PK par erreur, jamais moins de 0 (36 PK au plus). Une partie toutes les 8 h, 6 h au grade Dresseur et Maître, 4 h au grade Grand maître.</p>
+<p class="pkm-rules-note">20 secondes : touche les Pokémon du type demandé. +2 PK par bon Pokémon, −1 PK par erreur, jamais moins de 0 (36 PK au plus). Ouvert à partir du grade Collectionneur : une partie toutes les 24 h, 12 h au grade Dresseur Pokémon, 6 h au grade Maître Pokémon, 4 h au grade Grand maître Pokémon.</p>
 </section>
 <section aria-label="Délais selon le grade" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">⏱️</span>Plus ton grade monte, plus tu joues</h3>
 <div role="table" aria-label="Délais et scans par grade" class="pkm-rules-table">
-<div role="row" class="pkm-rules-row pkm-rules-th"><span role="columnheader">Grade</span><span role="columnheader">Booster</span><span role="columnheader">Pièce</span><span role="columnheader">Scans / j</span></div>
-<sc-for list="{{ legal.pk.grades }}" as="lrg" hint-placeholder-count="6"><div role="row" class="{{ lrg.cls }}" aria-label="{{ lrg.aria }}"><span role="cell" class="pkm-rules-gname"><img src="{{ lrg.img }}" alt="" width="36" height="36"><span><span>{{ lrg.name }}</span><sc-if value="{{ lrg.me }}" hint-placeholder-val="{{ false }}"><b class="pkm-rules-nowtag">Grade actuel</b></sc-if></span></span><span role="cell">{{ lrg.booster }}</span><span role="cell">{{ lrg.coin }}</span><span role="cell">{{ lrg.scans }}</span></div></sc-for>
+<div role="row" class="pkm-rules-row pkm-rules-th"><span role="columnheader">Grade</span><span role="columnheader">Booster</span><span role="columnheader">Pièce</span><span role="columnheader">Safari</span><span role="columnheader">Scans / j</span></div>
+<sc-for list="{{ legal.pk.grades }}" as="lrg" hint-placeholder-count="6"><div role="row" class="{{ lrg.cls }}" aria-label="{{ lrg.aria }}"><span role="cell" class="pkm-rules-gname"><img src="{{ lrg.img }}" alt="" width="36" height="36"><span><span>{{ lrg.name }}</span><sc-if value="{{ lrg.me }}" hint-placeholder-val="{{ false }}"><b class="pkm-rules-nowtag">Grade actuel</b></sc-if></span></span><span role="cell">{{ lrg.booster }}</span><span role="cell">{{ lrg.coin }}</span><span role="cell">{{ lrg.safari }}</span><span role="cell">{{ lrg.scans }}</span></div></sc-for>
 </div>
 </section>
 <section aria-label="Points d’Aura" class="pkm-rules-card pkm-rules-aura">
@@ -1839,7 +1839,7 @@
 <p class="pkm-tks-note">{{ pks.sheet.note }}</p>
 <sc-if value="{{ pks.sheet.owned }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-tks-owned">{{ pks.sheet.ownedText }}</p></sc-if>
 <sc-if value="{{ pks.sheet.locked }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pks.sheet.lock }}" class="pkm-shop-lockbtn"><img src="{{ pks.sheet.lockImg }}" alt="" width="30" height="30"><span>{{ pks.sheet.lockLabel }}</span><i class="pkm-lock-pad" aria-hidden="true"></i></button></sc-if>
-<sc-if value="{{ pks.sheet.bought }}" hint-placeholder-val="{{ false }}"><div class="pkm-lotwait pkm-lotwait-ok"><b>{{ pks.sheet.boughtTitle }}</b><span>{{ pks.sheet.boughtText }}</span>
+<sc-if value="{{ pks.sheet.bought }}" hint-placeholder-val="{{ false }}"><div class="pkm-lotwait pkm-lotwait-ok"><b class="pkm-tks-boughttag">✓ {{ pks.sheet.boughtTitle }}</b><span>{{ pks.sheet.boughtText }}</span>
 <div class="pkm-cdx" data-end="{{ pks.sheet.boughtCd.end }}" role="timer" aria-label="{{ pks.sheet.boughtCd.aria }}"><span><b data-u="d">{{ pks.sheet.boughtCd.d }}</b><small>j</small></span><i>:</i><span><b data-u="h">{{ pks.sheet.boughtCd.h }}</b><small>h</small></span><i>:</i><span><b data-u="m">{{ pks.sheet.boughtCd.m }}</b><small>min</small></span><i>:</i><span><b data-u="s">{{ pks.sheet.boughtCd.s }}</b><small>s</small></span></div></div></sc-if>
 <sc-if value="{{ pks.sheet.miss }}" hint-placeholder-val="{{ false }}"><p class="pkm-tks-miss">{{ pks.sheet.missText }}</p></sc-if>
 <sc-if value="{{ pks.sheet.needCard }}" hint-placeholder-val="{{ false }}"><button type="button" aria-disabled="true" class="pkm-tks-buy pkm-tks-buy-off">{{ pks.sheet.needCardText }}</button></sc-if>
@@ -1977,6 +1977,7 @@
 <span class="pkm-sf-rule"><b>20 s</b>par partie</span><span class="pkm-sf-rule pkm-sf-rule-ok"><b>+2</b>bon Pokémon</span><span class="pkm-sf-rule pkm-sf-rule-ko"><b>−1</b>erreur</span>
 </div>
 <button type="button" onClick="{{ gm.sf.play }}" class="{{ gm.sf.btnCls }}"><sc-if value="{{ gm.sf.noIco }}" hint-placeholder-val="{{ false }}"><span class="pkm-gm-hg" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32"><g class="pkm-gm-hg-flip"><path d="M8 6.5c0 6 6.4 7.2 6.4 9.5S8 19.5 8 25.5h16c0-6-6.4-7.2-6.4-9.5S24 12.5 24 6.5z" class="pkm-gm-hg-glass"></path><path d="M10.4 9h11.2c-.6 3-4.2 4.6-5.6 6.2-1.4-1.6-5-3.2-5.6-6.2z" class="pkm-gm-hg-top"></path><path d="M9.8 24h12.4c-.4-2.6-3.4-4.4-6.2-5.4-2.8 1-5.8 2.8-6.2 5.4z" class="pkm-gm-hg-bot"></path><path d="M16 15.6v7.4" class="pkm-gm-hg-stream"></path><rect x="5.5" y="3.5" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect><rect x="5.5" y="24.9" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect></g></svg></span></sc-if>{{ gm.sf.button }}</button>
+<sc-if value="{{ gm.sf.locked }}" hint-placeholder-val="{{ false }}"><p class="pkm-sf-lock">{{ gm.sf.lockText }}</p></sc-if>
 </section>
 
 <sc-if value="{{ gm.hasHist }}" hint-placeholder-val="{{ false }}">

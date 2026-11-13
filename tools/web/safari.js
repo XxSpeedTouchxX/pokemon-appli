@@ -3,8 +3,8 @@
   // - 20 s : 36 Pokémon traversent une prairie ; le joueur touche ceux du type demandé (« Attrape les Pokémon Eau ! ») :
   //   +2 PK par bon Pokémon, −1 PK par erreur, jamais moins de 0 ; 18 bons Pokémon par partie, donc 36 PK au plus
   //   (doublés pendant un 2XP PK). Défauts de docs/37, retenus avec le « go ».
-  // - Une partie toutes les 8 h (Recrue, Chasseur, Collectionneur), 6 h (Dresseur, Maître), 4 h (Grand maître) :
-  //   **défaut à confirmer**.
+  // - Ouvert à partir du grade Collectionneur (2026-11-13, porteur) : une partie toutes les 24 h (Collectionneur), 12 h
+  //   (Dresseur Pokémon), 6 h (Maître Pokémon), 4 h (Grand maître Pokémon) ; PF_GRADES[].safariH (profile.js).
   // - Avec le serveur (tools/supabase/024_safari.sql) : le serveur tire le type et les Pokémon (safari_start), puis compte
   //   lui-même les bons et les erreurs à partir des Pokémon touchés et crédite les PK (safari_finish) ; sans serveur
   //   (tests automatiques), la partie est tirée et comptée sur l'appareil, de la même façon.
@@ -12,7 +12,6 @@
   //   redessiner l'écran ; le résultat (gain, date, historique) rejoint ensuite l'état de l'app.
   // Ce module partage la portée des autres : ses noms commencent par SF_ ou sf.
   const sfProto = Component.prototype;
-  const SF_H = [8, 8, 8, 6, 6, 4]; // heures entre deux parties, par grade (Recrue … Grand maître)
   const SF_TYPES = ['Eau', 'Feu', 'Plante', 'Électrik', 'Psy', 'Insecte', 'Roche', 'Normal', 'Vol', 'Sol', 'Poison'];
   const SF_POOL = DEX_DATA.filter(e => !e.mega).map(e => e.n);
   const SF_N = 36, SF_GOOD = 18, SF_PLAY_MS = 20000, SF_END_MS = 21000;
@@ -39,8 +38,11 @@
       t: i * 520 + Math.floor(gmRand() * 250), lane: Math.floor(gmRand() * 5), dir: gmRand() < 0.5 ? 1 : -1, dur: 3400 - i * 38 + Math.floor(gmRand() * 300) })) };
   };
   const sfCloud = () => typeof gcOn === 'function' && gcOn();
-  sfProto.sfHours = function () { const s = this.st(); return (s.sfHours | 0) || SF_H[this.tierOf().i] || 8; };
-  sfProto.sfWaitMs = function () { const g = this.st().games || {}; return gmWait(g.safariAt, this.sfHours() * 3600000); };
+  // Délai du grade (0 : fermé) ; le serveur fait foi quand il répond. Admin déverrouillé (PK illimités) : jamais fermé.
+  const sfFree = s => !!(s && s.cloudGame && s.cloudGame.unlimited);
+  sfProto.sfHours = function () { const s = this.st(); return (s.sfHours | 0) || (this.perks().safariH | 0); };
+  sfProto.sfLocked = function () { const s = this.st(); return !this.sfHours() && !sfFree(s) && !(sfCloud() && Cloud.isAdmin() && s.sfOff); };
+  sfProto.sfWaitMs = function () { const g = this.st().games || {}, h = this.sfHours(); return h ? gmWait(g.safariAt, h * 3600000) : 0; };
 
   // État du serveur (dernière partie, délai du grade) : relu à l'ouverture des Jeux et après chaque partie.
   let sfSynced = 0;
@@ -74,17 +76,15 @@
     const pend = SF.pend, gain = SF.el.querySelector('.pkm-sf-gain'), rect = gain ? gain.getBoundingClientRect() : null;
     SF.pend = null;
     this.sfClose();
-    const end = () => {
-      this.setState({ pk: pend.final, pkGain: pend.won });
-      this.pkGainEnd(); this.flash();
-      if (sfCloud()) setTimeout(() => this.gcSync(), 600);
-    };
-    const to = document.querySelector('header .pkm-bal-pk') || document.querySelector('.pkm-bal-pk');
-    let still = false; try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* rien */ }
-    if (!anim || still || !rect || !to || typeof paFly !== 'function') { end(); return; }
-    const drops = Math.min(14, Math.max(6, Math.round(pend.won / 2)));
-    try { if (typeof this.sfxPa === 'function') this.sfxPa(drops); } catch (e) { /* son coupé */ }
-    paFly({ getBoundingClientRect: () => rect }, to, drops, k => this.setState({ pk: pend.from + Math.round(pend.won * (k + 1) / drops) }), end, { img: 'img/brand/pk.svg' });
+    const after = () => { if (sfCloud() && !pend.preview) setTimeout(() => this.gcSync(), 600); };
+    if (!anim || !rect) {
+      this.setState(pend.final > pend.from ? { pk: pend.final, pkGain: pend.won } : { pk: pend.final });
+      if (pend.final > pend.from) { this.pkGainEnd(); this.flash(); }
+      after();
+      return;
+    }
+    // Même animation et même bruit que « Récupérer mes PA » (pa.js, pkFlyGain).
+    this.pkFlyGain({ getBoundingClientRect: () => rect }, pend.won, pend.from, pend.final, after, sfCloud() && !pend.preview);
   };
   sfProto.sfPanel = function (html) {
     if (!SF) return;
@@ -93,6 +93,7 @@
   };
   sfProto.sfOpen = function () {
     if (SF || this.st().sfOpen) return;
+    if (this.sfLocked()) { this.setState({ toast: 'Le Safari éclair s’ouvre au grade Collectionneur' }); this.flash(); return; }
     if (this.sfWaitMs() > 0) { this.gmNo('s'); return; }
     if (sfCloud() && this.gcNeed && this.gcNeed()) return;
     // Calque à la taille de l'app (téléphone plein écran, ou téléphone centré sur ordinateur).
@@ -213,10 +214,16 @@
         + '<span class="pkm-sf-gain"><img src="img/brand/pk.svg" alt="" width="34" height="34">+' + won + ' PK</span>'
         + (boost ? '<small class="pkm-sf-boost">2XP PK : gain doublé</small>' : '')
         + (grid ? '<h3 class="pkm-sf-h3">Ton safari</h3><div class="pkm-sf-caught">' + grid + '</div>' : '<p class="pkm-sf-p">Aucun Pokémon attrapé cette fois.</p>')
-        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : aucun PK crédité. Le safari s’ouvre à tous dès que 024_safari.sql est installé dans Studio.</p>' : '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>')
-        // « Récupérer mes PK » à la place de « Fermer » (2026-11-13, porteur) : les gemmes volent jusqu'au solde.
-        + '<button type="button" class="pkm-sf-go' + (won > 0 && !SF.preview ? ' pkm-sf-collect' : '') + '">' + (won > 0 && !SF.preview ? 'Récupérer mes PK' : 'Fermer') + '</button></div>');
-      if (SF.preview) { el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfClose()); return; }
+        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : les PK ne sont pas enregistrés tant que 024_safari.sql n’est pas installé dans Studio (install_024_025.sql).</p>' : (this.sfHours() ? '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>' : ''))
+        // « Récupérer mes PK » à la place de « Fermer » (2026-11-13, porteur) : les gemmes volent jusqu'au solde, avec
+        // l'animation et le bruit des PA du jour (aussi dans l'aperçu admin, où le solde ne bouge pas).
+        + '<button type="button" class="pkm-sf-go' + (won > 0 ? ' pkm-sf-collect' : '') + '">' + (won > 0 ? 'Récupérer mes PK' : 'Fermer') + '</button></div>');
+      if (SF.preview) {
+        const cur = Number(this.st().pk) || 0;
+        if (won > 0) { SF.pend = { won: won, from: cur, final: cur, preview: true }; el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfCollect(true)); }
+        else el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfClose());
+        return;
+      }
       // Partie enregistrée tout de suite (date, historique) ; le solde monte quand le joueur récupère ses PK.
       const s = this.st(), g = s.games || {}, at = new Date().toISOString(), from = Number(s.pk) || 0;
       const final = res.pk != null ? gcPk(s, res.pk) : from + won;
@@ -246,14 +253,21 @@
   sfProto.vGames = function (s) {
     const r = sfBaseVGames.call(this, s);
     this.sfSync(false);
-    const w = this.sfWaitMs(), busy = !!s.sfOpen, h = this.sfHours();
+    const w = this.sfWaitMs(), busy = !!s.sfOpen, h = this.sfHours(), locked = this.sfLocked(), adminTry = !!s.sfOff && sfCloud() && Cloud.isAdmin();
+    const grade = this.perkGrade('safariH') || 'Collectionneur';
     r.sf = {
-      every: '1 partie toutes les ' + h + ' h', ready: w === 0 && !busy, off: !!s.sfOff,
-      button: s.sfOff ? (sfCloud() && Cloud.isAdmin() ? 'Essayer (aperçu admin)' : 'Bientôt disponible') : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'Jouer au safari',
-      btnCls: 'pkm-gm-go' + (w > 0 && !busy ? ' pkm-gm-go-no' + (s.gmNoWhich === 's' ? ' pkm-gm-go-shake' : '') : '') + (s.sfOff ? ' pkm-gm-go-lock' : ''), noIco: w > 0 && !busy,
-      play: () => { if (s.sfOff && !(sfCloud() && Cloud.isAdmin())) { this.setState({ toast: 'Safari éclair arrive très bientôt !' }); this.flash(); return; } this.sfOpen(); }
+      every: locked ? 'Au grade ' + grade : h ? '1 partie toutes les ' + h + ' h' : 'Sans délai (admin)', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
+      lockText: 'Le Safari éclair se débloque au grade ' + grade + ' (7 500 PK gagnés et 30 compagnons).',
+      // « GO » (2026-11-13, porteur) : à la place de « Jouer au safari » et de « Essayer (aperçu admin) ».
+      button: locked ? '🔒 Au grade ' + grade : s.sfOff && !adminTry ? 'Bientôt disponible' : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'GO',
+      btnCls: 'pkm-gm-go' + (w > 0 && !busy && !locked ? ' pkm-gm-go-no' + (s.gmNoWhich === 's' ? ' pkm-gm-go-shake' : '') : '') + ((s.sfOff && !adminTry) || locked ? ' pkm-gm-go-lock' : '') + (!locked && !(s.sfOff && !adminTry) && !busy && w === 0 ? ' pkm-sf-gobtn' : ''), noIco: w > 0 && !busy && !locked,
+      play: () => {
+        if (locked) { this.setState({ toast: 'Le Safari éclair s’ouvre au grade ' + grade }); this.flash(); return; }
+        if (s.sfOff && !adminTry) { this.setState({ toast: 'Safari éclair arrive très bientôt !' }); this.flash(); return; }
+        this.sfOpen();
+      }
     };
-    r.rules = r.rules.replace(' ; plus ton grade monte', ', une partie de Safari éclair toutes les ' + h + ' h ; plus ton grade monte');
+    r.rules = r.rules.replace(' ; plus ton grade monte', locked ? ', Safari éclair au grade ' + grade + ' ; plus ton grade monte' : ', une partie de Safari éclair toutes les ' + h + ' h ; plus ton grade monte');
     r.hist = (s.games && s.games.hist || []).slice(0, 5).map((x, i) => x.game === 'safari' ? Object.assign({}, r.hist[i], { text: 'Safari éclair · ' + this.d2(x.at.slice(0, 10)) }) : r.hist[i]);
     return r;
   };
@@ -261,7 +275,7 @@
   const sfBaseRender = sfProto.renderVals;
   sfProto.renderVals = function () {
     const r = sfBaseRender.call(this);
-    if (r.gm && !r.gm.sf) r.gm.sf = { every: '', button: '', btnCls: 'pkm-gm-go', play: () => {} };
+    if (r.gm && !r.gm.sf) r.gm.sf = { every: '', button: '', btnCls: 'pkm-gm-go', locked: false, lockText: '', play: () => {} };
     if (SF && this.st().screen !== 'market') setTimeout(() => this.sfClose(), 0);
     return r;
   };

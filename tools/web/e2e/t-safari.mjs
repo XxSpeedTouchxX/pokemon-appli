@@ -13,7 +13,7 @@ await page.evaluate(() => window.__pkm.setState({ pk: 100, gradeUp: null }));
 const sec = page.locator('section[aria-label="Safari éclair"]');
 await sec.scrollIntoViewIfNeeded(); await page.waitForTimeout(300);
 const H = +((/toutes les (\d+) h/.exec(await sec.innerText()) || [])[1] || 0);
-ok('carte « Safari éclair » dans Jeux à PK, prête (« Jouer au safari », 1 partie toutes les ' + H + ' h selon le grade)', (await sec.count()) === 1 && /Jouer au safari/.test(await sec.innerText()) && [4, 6, 8].includes(H));
+ok('carte « Safari éclair » dans Jeux à PK, prête (« GO », 1 partie toutes les ' + H + ' h au grade Grand maître)', (await sec.count()) === 1 && N(await sec.locator('button.pkm-gm-go').innerText()) === 'GO' && H === 4);
 await sec.screenshot({ path: shot('safari-card.png') });
 await sec.locator('button').click(); await page.waitForTimeout(600);
 const ov = page.locator('.pkm-sf');
@@ -53,7 +53,7 @@ const btn = N(await page.locator('.pkm-sf-go').innerText());
 ok('bouton « ' + btn + ' »', btn === (won > 0 ? 'Récupérer mes PK' : 'Fermer'));
 await page.locator('.pkm-sf-go').click(); await page.waitForTimeout(450);
 const flying = await page.evaluate(() => [...document.querySelectorAll('.pkm-pafly-drop')].map(d => d.getAttribute('src')));
-if (won > 0) ok('gemmes des PK qui volent vers le solde (' + flying.length + ')', flying.length >= 6 && flying.every(f => f === 'img/brand/pk.svg'));
+if (won > 0) ok('gemmes des PK qui volent vers le solde (' + flying.length + '), comme les PA du jour', flying.length >= 8 && flying.every(f => f === 'img/brand/pk.svg'));
 await page.screenshot({ path: shot('safari-collect.png') });
 await page.waitForTimeout(2200);
 ok('calque retiré, PK ajoutés au solde (' + (await page.evaluate(() => window.__pkm.st().pk)) + ')', (await page.locator('.pkm-sf').count()) === 0 && (await page.evaluate(() => window.__pkm.st().pk)) === 100 + won && !(await page.locator('.pkm-pafly-drop').count()));
@@ -143,7 +143,7 @@ for (const role of ['user', 'admin']) {
     await sc.locator('button').last().click(); await p3.waitForTimeout(500);
     ok('sans 024, joueur : pas de partie', (await p3.locator('.pkm-sf').count()) === 0);
   } else {
-    ok('sans 024, admin : « ' + btn + ' »', btn === 'Essayer (aperçu admin)');
+    ok('sans 024, admin : « ' + btn + ' »', btn === 'GO');
     const pk0 = await p3.evaluate(() => window.__pkm.st().pk);
     await sc.locator('button').last().click(); await p3.waitForTimeout(800);
     ok('sans 024, admin : partie d’aperçu ouverte', /Attrape les Pokémon/.test(N(await p3.locator('.pkm-sf').innerText())));
@@ -156,10 +156,41 @@ for (const role of ['user', 'admin']) {
     await p3.waitForTimeout(13000);
     const end = N(await p3.locator('.pkm-sf').innerText());
     const st = await p3.evaluate(() => { const s = window.__pkm.st(); return { pk: s.pk, at: (s.games || {}).safariAt || '' }; });
-    ok('sans 024, admin : bilan « aperçu », aucun PK crédité (' + pk0 + ' → ' + st.pk + '), aucune partie enregistrée', /Temps écoulé/.test(end) && /Aperçu admin : aucun PK crédité/.test(end) && st.pk === pk0 && !st.at && !calls.includes('/rest/v1/rpc/safari_finish'));
+    ok('sans 024, admin : bilan « aperçu », aucun PK crédité (' + pk0 + ' → ' + st.pk + '), aucune partie enregistrée', /Temps écoulé/.test(end) && /Aperçu admin : les PK ne sont pas enregistrés/.test(end) && st.pk === pk0 && !st.at && !calls.includes('/rest/v1/rpc/safari_finish'));
+    const won0 = +((/\+(\d+) PK/.exec(end) || [])[1] || 0);
+    if (won0 > 0) {
+      ok('sans 024, admin : « Récupérer mes PK » aussi dans l’aperçu', N(await p3.locator('.pkm-sf-go').innerText()) === 'Récupérer mes PK');
+      await p3.locator('.pkm-sf-go').click(); await p3.waitForTimeout(450);
+      ok('aperçu : les gemmes volent vers le solde (' + (await p3.locator('.pkm-pafly-drop').count()) + '), le solde ne bouge pas', (await p3.locator('.pkm-pafly-drop').count()) >= 8);
+      await p3.waitForTimeout(2300);
+      ok('aperçu : solde inchangé (' + (await p3.evaluate(() => window.__pkm.st().pk)) + ')', (await p3.evaluate(() => window.__pkm.st().pk)) === pk0);
+    }
     await p3.screenshot({ path: shot('safari-apercu.png') });
   }
   await c3.close();
+}
+// Grades (2026-11-13, porteur) : Safari fermé aux grades Recrue et Chasseur, 24 h Collectionneur, 12 h Dresseur, 6 h Maître, 4 h Grand maître.
+{
+  const c4 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await c4.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
+  const p4 = await c4.newPage(); p4.on('pageerror', e => errors.push(e.message));
+  await p4.goto(E2E + '/?debug&start=market', { waitUntil: 'load' }); await p4.waitForTimeout(800);
+  const res4 = [];
+  for (const [g, want] of [['2', 'lock'], ['3', 24], ['4', 12], ['5', 6], ['6', 4]]) {
+    await p4.evaluate(v => localStorage.setItem('pkm-grade-force', v), g);
+    await p4.reload({ waitUntil: 'load' }); await p4.waitForTimeout(1200);
+    await p4.evaluate(() => window.__pkm.setState({ gradeUp: null }));
+    const sc = p4.locator('section[aria-label="Safari éclair"]'); await sc.scrollIntoViewIfNeeded();
+    const t = N(await sc.innerText());
+    res4.push(g + ':' + (want === 'lock' ? (/🔒 Au grade Collectionneur/.test(t) && /se débloque au grade Collectionneur/.test(t)) : new RegExp('toutes les ' + want + ' h').test(t) && /GO/.test(t)));
+    if (want === 'lock') {
+      await sc.locator('button.pkm-gm-go').click(); await p4.waitForTimeout(400);
+      res4.push('fermé:' + ((await p4.locator('.pkm-sf').count()) === 0));
+      await sc.screenshot({ path: shot('safari-lock.png') });
+    }
+  }
+  ok('Safari selon le grade (Chasseur fermé, puis 24, 12, 6, 4 h) : ' + res4.join(' '), res4.every(x => /:true$/.test(x)));
+  await c4.close();
 }
 ok('aucune erreur JS', errors.length === 0);
 if (errors.length) console.log(errors.join('\n'));

@@ -11,6 +11,18 @@ insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000f2401
 create temp table sf (k text primary key, v jsonb);
 grant all on sf to authenticated;
 
+-- Grade Recrue : Safari fermé (ouvert au grade Collectionneur, 2026-11-13, porteur).
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000f2401', false);
+set role authenticated;
+select pg_temp.check(pg_temp.fails('select public.safari_start(gen_random_uuid())', 'grade Collectionneur'), 'Recrue : Safari fermé');
+select pg_temp.check((public.safari_state()->>'locked')::boolean and (public.safari_state()->>'hours')::int = 0, 'Recrue : état « fermé »');
+reset role;
+select pg_temp.check((select array_agg(safari_h order by i) from public.game_grades) = array[0, 0, 24, 12, 6, 4], 'délais : fermé, fermé, 24 h, 12 h, 6 h, 4 h');
+-- Le joueur passe Collectionneur (conditions du grade abaissées le temps du test, remises à la fin).
+create temp table gg_save as select * from public.game_grades;
+update public.game_grades set pk_earned = 0, comp = 0, mega = 0 where i = 2;
+update public.game_throttle set n = 0;
+
 -- Départ : 36 Pokémon, 18 du bon type, tous dans les 20 s.
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000f2401', false);
 set role authenticated;
@@ -43,13 +55,13 @@ select pg_temp.check((public.safari_finish((select (v->>'round')::uuid from sf w
 select pg_temp.check(pg_temp.fails(format('select public.safari_finish(%L, array[0]::int[], gen_random_uuid())', (select v->>'round' from sf where k = 'a')), 'déjà finie'), 'partie finie : impossible de la finir deux fois');
 reset role;
 select pg_temp.check((select pk from public.ledger where user_id = '00000000-0000-0000-0000-0000000f2401' and kind = 'safari') = 34, 'journal : +34 PK « safari »');
--- Délai : nouvelle partie refusée pendant 8 h (Recrue).
+-- Délai : nouvelle partie refusée pendant 24 h (Collectionneur).
 set role authenticated;
 select pg_temp.check(pg_temp.fails('select public.safari_start(gen_random_uuid())', 'pas encore prêt'), 'nouvelle partie refusée pendant le délai');
-select pg_temp.check((public.safari_state()->>'hours')::int = 8, 'délai de la Recrue : 8 h');
+select pg_temp.check((public.safari_state()->>'hours')::int = 24 and not (public.safari_state()->>'locked')::boolean, 'délai du Collectionneur : 24 h');
 reset role;
 alter table public.ledger disable trigger ledger_no_change;
-update public.ledger set at = now() - interval '9 hours' where user_id = '00000000-0000-0000-0000-0000000f2401' and kind = 'safari';
+update public.ledger set at = now() - interval '25 hours' where user_id = '00000000-0000-0000-0000-0000000f2401' and kind = 'safari';
 alter table public.ledger enable trigger ledger_no_change;
 update public.game_throttle set n = 0;
 -- Que des erreurs : jamais moins de 0 ; 2XP PK : gain doublé.
@@ -61,7 +73,7 @@ set role authenticated;
 select pg_temp.check((public.safari_finish((select (v->>'round')::uuid from sf where k = 'b'), array(select (e->>'i')::int from jsonb_array_elements((select v->'spawns' from sf where k = 'b')) e where not (e->>'ok')::boolean), gen_random_uuid())->>'won')::int = 0, 'que des erreurs : 0 PK, jamais négatif');
 reset role;
 alter table public.ledger disable trigger ledger_no_change;
-update public.ledger set at = now() - interval '9 hours' where user_id = '00000000-0000-0000-0000-0000000f2401' and kind = 'safari';
+update public.ledger set at = now() - interval '25 hours' where user_id = '00000000-0000-0000-0000-0000000f2401' and kind = 'safari';
 alter table public.ledger enable trigger ledger_no_change;
 insert into public.pk_boosts (user_id, until) values ('00000000-0000-0000-0000-0000000f2401', now() + interval '1 day') on conflict (user_id) do update set until = excluded.until;
 set role authenticated;
@@ -78,3 +90,5 @@ set role authenticated;
 select pg_temp.check(pg_temp.fails('update public.safari_rounds set won = 999', 'permission'), 'parties : écriture refusée');
 select pg_temp.check(pg_temp.fails('select * from public.safari_types', 'permission'), 'types : lecture directe refusée');
 reset role;
+-- Conditions des grades remises.
+update public.game_grades g set pk_earned = x.pk_earned, comp = x.comp, mega = x.mega from gg_save x where g.i = x.i;

@@ -61,7 +61,7 @@ await sec.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('xppk-sho
 await page.evaluate(() => window.__pkm.tab('market')); await page.waitForTimeout(700);
 ok('Jeux : badge « 2XP » sur le solde, sans bandeau', (await page.locator('.pkm-xpb-pk').count()) === 1 && (await page.locator('.pkm-xp-live, .pkm-xp-live-gm').count()) === 0);
 const boost = page.locator('section[aria-label="Booster PK"]');
-await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(3000);
+await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(5200); // révélation (2,15 s), puis gemmes qui volent jusqu'au solde (pkFlyGain)
 const g = await page.evaluate(() => ({ pk: window.__pkm.st().pk, mul: window.__pkm.st().games.bMul }));
 ok('booster pendant le 2XP : gain doublé (' + g.pk + ' PK)', g.mul === 2 && [60, 100, 200, 400, 1000].indexOf(g.pk) >= 0 && /2XP PK/.test(await boost.innerText()));
 // Bouton d'attente : « Tu dois attendre … pour rejouer », message du grade.

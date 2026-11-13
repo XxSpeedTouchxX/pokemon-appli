@@ -69,9 +69,9 @@
     const hist = [{ at: at, game: 'booster', pk: win }].concat(g.hist || []).slice(0, 20);
     const credit = () => {
       const t = this.st();
-      this.setState({ pk: t.pk + win, pkGain: win,
-        toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' + (mul > 1 ? ' (2XP PK)' : '') });
-      this.pkGainEnd(); this.flash();
+      this.setState({ toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' + (mul > 1 ? ' (2XP PK)' : '') });
+      // Gemmes qui volent jusqu'au solde, comme les PA du jour (pa.js, pkFlyGain, 2026-11-13).
+      this.pkFlyGain('section[aria-label="Booster PK"] .pkm-gm-reveal', win, Number(t.pk) || 0, (Number(t.pk) || 0) + win);
       gmParty(win);
     };
     // Enregistré tout de suite (une fermeture pendant l'animation ne rejoue pas le booster), crédité à la révélation.
@@ -90,10 +90,9 @@
     const hist = [{ at: at, game: 'coin', pk: win ? gain : 0 }].concat(g.hist || []).slice(0, 20);
     const done = () => {
       const t = this.st(), patch = { games: Object.assign({}, t.games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + gain + ' PK' + (mul > 1 ? ' (2XP PK)' : '') : 'Cristal éteint : pas de PK cette fois' };
-      if (win) Object.assign(patch, { pk: t.pk + gain, pkGain: gain });
       this.setState(patch);
-      if (win) this.pkGainEnd();
-      this.flash();
+      if (win) this.pkFlyGain('section[aria-label="Pile ou face"] .pkm-gm-coin', gain, Number(t.pk) || 0, (Number(t.pk) || 0) + gain);
+      else this.flash();
     };
     this.setState({ games: Object.assign({}, g, { coinAt: at, cWin: win, cMul: mul, cPhase: gmStill() ? 'done' : 'flip', cN: (g.cN || 0) + 1, hist: hist }) });
     if (gmStill()) { done(); return; }

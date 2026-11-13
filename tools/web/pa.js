@@ -168,6 +168,49 @@
       };
     }
   };
+  // Gain de PK avec exactement la même animation et le même bruit que les PA du jour (2026-11-13, porteur : « lorsque
+  // l'on gagne des PK, je veux exactement la même animation et le même bruit que lorsqu'on gagne des PA ») : éclat, les
+  // gemmes des PK jaillissent du gain (booster, pièce, Safari), s'éparpillent puis volent jusqu'au solde de PK, qui
+  // monte à chaque gemme ; bruitage « Gouttes d'aura ». origin : élément, sélecteur CSS ou { getBoundingClientRect }.
+  // Sans animation (mouvements réduits, solde introuvable) : solde mis à jour d'un coup.
+  // Le solde ne fait que recevoir la part du gain déjà arrivée : un autre mouvement pendant le vol (achat au PK shop…)
+  // n'est jamais effacé. server : le solde du serveur fait foi (compte connecté) ; s'il arrive pendant le vol, il
+  // contient déjà le gain et l'animation ne touche plus au nombre.
+  let pkFlyOn = false;
+  paProto.pkFlyGain = function (origin, gain, from, final, after, server) {
+    const climb = gain > 0 && final - from === gain;
+    let added = 0, last = from, lost = false, ended = false;
+    const put = target => {
+      if (lost) return;
+      const cur = Number(this.st().pk) || 0;
+      if (cur !== last && server) { lost = true; return; }
+      const v = climb ? cur + (target - added) : (cur !== last ? cur : final);
+      added = target; last = v;
+      this.setState({ pk: v });
+    };
+    const fin = () => {
+      if (ended) return;
+      ended = true; pkFlyOn = false;
+      put(gain);
+      this.setState({ pkGain: gain }); this.pkGainEnd(); this.flash(); if (after) after();
+    };
+    if (!(gain > 0) || paStill() || pkFlyOn) { fin(); return; }
+    pkFlyOn = true;
+    // Filet de sécurité : le gain est toujours versé, même si l'animation est interrompue.
+    setTimeout(fin, 4500);
+    // L'élément du gain apparaît au rendu suivant : on attend deux images avant de le mesurer.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (ended) return;
+      const el = typeof origin === 'string' ? document.querySelector(origin) : origin;
+      const to = document.querySelector('header .pkm-bal-pk') || document.querySelector('.pkm-bal-pk');
+      const r = el && el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+      if (!r || !to || (!r.width && !r.height)) { fin(); return; }
+      const drops = Math.min(14, Math.max(8, Math.round(gain / 2)));
+      try { this.sfxPa(drops); } catch (e) { /* son coupé */ }
+      // Solde qui monte gemme après gemme ; solde illimité (admin déverrouillé) : les gemmes volent, le nombre reste.
+      paFly({ getBoundingClientRect: () => r }, to, drops, k => { if (climb && !ended) put(Math.round(gain * (k + 1) / drops)); }, fin, { img: 'img/brand/pk.svg' });
+    }));
+  };
   // Choix du starter (didacticiel ou jeu d'évolution) : il devient aussi le compagnon de l'accueil.
   paProto.paChoose = function (line, quiet) {
     if (!PA_LINES[line]) return;

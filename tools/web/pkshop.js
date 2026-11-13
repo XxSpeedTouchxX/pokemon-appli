@@ -371,7 +371,7 @@
     // Fiche d'un ticket (appui sur un ticket) : lot du mois, cartes à choisir, achat.
     const sheet = (() => {
       if (!cur) return { open: false };
-      const it = cur, open = gi >= it.minGrade, prizes = this.shopPrizes(s, it.id), mine = this.shopMine(s, it.id), bought = !free && this.shopBought(s, it.id) > 0;
+      const it = cur, open = gi >= it.minGrade, prizes = this.shopPrizes(s, it.id), mine = this.shopMine(s, it.id), bought = this.shopBought(s, it.id) > 0; // aussi pour un admin (2026-11-13, porteur)
       const pick = prizes.find(c => c.id === s.shopCard) || (prizes.length === 1 ? prizes[0] : null);
       const can = open && !bought && pk >= it.price && !!pick, ask = can && s.shopAsk === it.id;
       const price = it.price.toLocaleString('fr-FR') + ' PK';

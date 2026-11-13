@@ -101,8 +101,10 @@
         const t = this.st(), gg = t.games || {};
         const hist = [{ at: at, game: 'booster', pk: win }].concat(gg.hist || []).slice(0, 20);
         const credit = () => {
-          this.setState({ pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, pkGain: win, toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' + (mul > 1 ? ' (2XP PK)' : '') });
-          this.pkGainEnd(); this.flash();
+          const now = this.st(), from = Number(now.pk) || 0;
+          this.setState({ pkEarned: r.pk_earned, toast: (i >= 3 ? GM_TABLE[i][2] + ' ' : '') + '+' + win.toLocaleString('fr-FR') + ' PK gagnés' + (mul > 1 ? ' (2XP PK)' : '') });
+          // Gemmes qui volent jusqu'au solde, comme les PA du jour (pa.js, pkFlyGain, 2026-11-13) ; solde final du serveur.
+          this.pkFlyGain('section[aria-label="Booster PK"] .pkm-gm-reveal', win, from, gcPk(now, r.pk), null, true);
           gmParty(win);
         };
         this.setState({ games: Object.assign({}, gg, { boosterAt: at, bWin: i, bMul: mul, bPhase: gmStill() ? 'reveal' : 'shake', hist: hist }) });
@@ -127,11 +129,12 @@
         const win = !!r.win, at = new Date().toISOString(), gg = this.st().games || {}, mul = r.boost ? 2 : 1, gain = r.won || GM_COIN_WIN;
         const hist = [{ at: at, game: 'coin', pk: win ? gain : 0 }].concat(gg.hist || []).slice(0, 20);
         const done = () => {
-          const patch = { pk: gcPk(this.st(), r.pk), pkEarned: r.pk_earned, games: Object.assign({}, this.st().games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + gain + ' PK' + (mul > 1 ? ' (2XP PK)' : '') : 'Cristal éteint : pas de PK cette fois' };
-          if (win) patch.pkGain = gain;
+          const now = this.st(), from = Number(now.pk) || 0, final = gcPk(now, r.pk);
+          const patch = { pkEarned: r.pk_earned, games: Object.assign({}, now.games, { cPhase: 'done' }), toast: win ? 'Gemme PK ! +' + gain + ' PK' + (mul > 1 ? ' (2XP PK)' : '') : 'Cristal éteint : pas de PK cette fois' };
+          if (!win) patch.pk = final;
           this.setState(patch);
-          if (win) this.pkGainEnd();
-          this.flash();
+          if (win) this.pkFlyGain('section[aria-label="Pile ou face"] .pkm-gm-coin', gain, from, final, null, true);
+          else this.flash();
         };
         // Nouveau lancer avec le bon résultat (le nombre de demi-tours dépend de cWin).
         this.setState({ games: Object.assign({}, gg, { coinAt: at, cWin: win, cMul: mul, cPhase: gmStill() ? 'done' : 'flip', cN: (gg.cN || 0) + 1, hist: hist }) });
@@ -188,6 +191,8 @@
     return function (id, choice) {
       if (!gcOn()) return base.call(this, id, choice);
       if (busy || this.gcNeed()) return;
+      // Un ticket de chaque catégorie par mois, admin compris (2026-11-13, porteur).
+      if (id.indexOf('ticket') === 0 && this.shopBought(this.st(), id)) { this.setState({ toast: 'Ticket déjà acheté : prochain ticket au prochain tirage', shopAsk: null }); return; }
       busy = true;
       Cloud.rpc('buy_item', { item_id: id, req: Cloud.reqId(), choice: choice || null }).then(r => {
         busy = false;

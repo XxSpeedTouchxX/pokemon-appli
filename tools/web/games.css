@@ -1695,15 +1695,16 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-ios .pkm-hh { padding-top: 26px !important; }
 .pkm-ios .pkm-hh-mid { top: -20px; }
 
-/* Badge « 2XP » sans aucun voile (2026-11-13, porteur : « il y a encore un très léger voile flou sur le double XP PK ») :
-   plus de reflet blanc qui balaie le badge, plus d'ombre ni de halo ; couleurs pleines, texte net. Au gain, le badge
-   grossit simplement un instant. */
-.pkm-xpb { animation: none !important; box-shadow: none !important; background-size: 100% 100% !important; background-position: 0 0 !important; text-shadow: none; }
-.pkm-xpb-pk { background-image: none !important; background-color: #FFD60A !important; }
-.pkm-xpb-pa { background-image: none !important; background-color: #9B55F2 !important; }
-.pkm-xpb.pkm-xpb-hot { animation: pkmXpbPop 0.55s ease-in-out 4 !important; }
+/* Badge « 2XP » (2026-11-13, porteur) : couleurs pleines, sans ombre ni halo autour (le « voile ») ; un reflet brillant
+   passe toutes les 3 s, seulement à l'intérieur de la bulle (calque de fond, coupé par ses bords arrondis). Au gain, le
+   badge grossit un instant. */
+.pkm-xpb { box-shadow: none !important; text-shadow: none; background-repeat: no-repeat !important; background-size: 260% 100%, 100% 100% !important; background-position: 140% 0, 0 0; animation: pkmXpbGlint 3s ease-in-out infinite !important; }
+.pkm-xpb-pk { background-color: #FFD60A !important; background-image: linear-gradient(115deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0) 62%), linear-gradient(#FFD60A, #FFD60A) !important; }
+.pkm-xpb-pa { background-color: #9B55F2 !important; background-image: linear-gradient(115deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0) 62%), linear-gradient(#9B55F2, #9B55F2) !important; }
+@keyframes pkmXpbGlint { 0%, 62% { background-position: 140% 0, 0 0; } 100% { background-position: -40% 0, 0 0; } }
+.pkm-xpb.pkm-xpb-hot { animation: pkmXpbGlint 3s ease-in-out infinite, pkmXpbPop 0.55s ease-in-out 4 !important; }
 @keyframes pkmXpbPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.25) rotate(-6deg); } }
-@media (prefers-reduced-motion: reduce) { .pkm-xpb.pkm-xpb-hot { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .pkm-xpb, .pkm-xpb.pkm-xpb-hot { animation: none !important; } }
 
 /* ——— Safari éclair, retouches (2026-11-13, porteur) ———
    Démonstration avant de jouer (carte du jeu et consigne) : un doigt touche un bon Pokémon (cercle vert, coche,
@@ -1805,3 +1806,9 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-ply-grid b { font: 800 12.5px/1.1 'Sora', sans-serif; color: #FFFFFF; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .pkm-ply-line { margin: 0; font-size: 11.5px; line-height: 1.4; color: #9AA8C3; }
 .pkm-ply-more { align-self: center; }
+
+/* Safari éclair (2026-11-13, porteur) : bouton « GO », verrou avant le grade Collectionneur. */
+.pkm-gm-go.pkm-sf-gobtn { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 28px; line-height: 1; letter-spacing: 0.1em; padding-top: 4px; }
+.pkm-sf-lock { margin: -4px 0 0; text-align: center; font-size: 13px; line-height: 1.4; color: #C9D3EA; }
+/* Ticket du mois déjà acheté (2026-11-13, porteur) : « Ticket déjà acheté » en vert, comme la pastille « Acheté ». */
+.pkm-lotwait-ok > b.pkm-tks-boughttag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; background: #5EE0CF; color: #0B1120; font-size: 15px; font-weight: 800; }

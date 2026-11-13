@@ -329,7 +329,7 @@ await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.w
 let gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
 ok('triche sur l’appareil (999 999 PK et PA, Mewtwo) effacée par le serveur : ' + gs.pk + ' PK, ' + gs.pa + ' PA', gs.pk === 100 && gs.pa === 0 && (gs.pkOwn || []).length === 0);
 const boost = page.locator('section[aria-label="Booster PK"]');
-await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(3000);
+await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(5200); // révélation, puis gemmes qui volent jusqu'au solde (pkFlyGain)
 gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
 ok('booster : gain tiré par le serveur (+200), animation jouée : ' + gs.pk + ' PK', gs.pk === 300 && calls.some(c => c.startsWith('RPC open_booster')) && /\+200 PK/.test(await boost.innerText()));
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);

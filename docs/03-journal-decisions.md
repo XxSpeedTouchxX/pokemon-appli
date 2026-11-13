@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-11-13 (nuit) — Safari par grade, bouton « GO », gains de PK animés comme les PA, reflet du 2XP, ticket déjà acheté (demande du porteur)
+
+- **Safari éclair par grade** (décision du porteur) : fermé aux grades Recrue et Chasseur ; une partie toutes les **24 h** au grade Collectionneur, **12 h** Dresseur Pokémon, **6 h** Maître Pokémon, **4 h** Grand maître Pokémon (auparavant 8, 6 et 4 h pour tous).
+  - Avant le grade Collectionneur, la carte du jeu affiche « 🔒 Au grade Collectionneur » et la condition (7 500 PK gagnés et 30 compagnons) ; le serveur refuse aussi la partie (`024_safari.sql` mis à jour, `install_024_025.sql` refait, 21 tests).
+  - Nouvelle colonne « Safari » dans le tableau des grades des « Règles des PK et PA », entre « Pièce » et « Scans » ; ligne de règle du Safari complétée.
+  - « Information sur les grades » : avantage « Safari éclair toutes les N h » à partir de Collectionneur, marqué « Nouveau » à ce grade et à chaque grade où le délai baisse.
+- **Bouton « GO »** sur la carte du Safari, à la place de « Essayer (aperçu admin) » ou « Jouer ».
+- **Gains de PK** (Booster PK, pièce, Safari) : **même animation et même son que les PA du jour** (gemmes qui volent jusqu'au solde de PK, compteur qui monte à chaque gemme, bruitage « Gouttes d'aura »).
+  - Pendant les 2 secondes du vol, un autre mouvement du solde (achat au PK shop…) est conservé : l'animation n'ajoute que la part du gain. Avec un compte connecté, le solde du serveur fait foi. Le gain est toujours versé, même si l'animation est interrompue.
+- **Fin du Safari** : toujours « Récupérer mes PK » quand des PK sont gagnés (plus de « Fermer »), aussi dans l'aperçu admin (l'animation se joue, le solde ne change pas tant que 024 n'est pas installé).
+- **Badge « 2XP »** des soldes de PK et de PA : le reflet brillant revient toutes les 3 secondes, **seulement à l'intérieur** de la petite bulle (plus aucun voile ni ombre autour).
+- **Tickets Bronze, Argent, Or** : un ticket acheté ne peut plus être racheté avant le tirage suivant, admins compris ; la fiche du ticket affiche « ✓ Ticket déjà acheté » dans une pastille verte, de la couleur du badge « acheté ».
+- Cache v188.
+
 ## 2026-11-13 (soir) — Safari v2, Admin › Joueurs et temps passé, règles, Mon profil, badge 2XP, Reptincel (demande du porteur)
 
 - **Safari éclair** :

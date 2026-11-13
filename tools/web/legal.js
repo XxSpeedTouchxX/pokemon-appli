@@ -139,8 +139,8 @@
       ],
       odds: GM_TABLE.map(([pk, pct, label, color]) => ({ pk: legalNum(pk) + ' PK', pct: pct + ' %', label: label, w: 'flex: ' + pct + ' 1 0; min-width: 4px', color: color })),
       coinWin: '+' + GM_COIN_WIN + ' PK',
-      grades: PF_GRADES.map((g, i) => ({ name: g.name, me: i === gi, img: 'img/grades/grade-' + (i + 1) + '.svg', booster: g.boosterH + ' h', coin: g.coinH ? g.coinH + ' h' : '—', scans: legalNum(g.scans),
-        cls: 'pkm-rules-row' + (i === gi ? ' pkm-rules-me' : ''), aria: g.name + (i === gi ? ', ton grade' : '') + ' : booster toutes les ' + g.boosterH + ' h, ' + (g.coinH ? 'pièce toutes les ' + g.coinH + ' h' : 'pièce fermée') + ', ' + g.scans + ' scans par jour' })),
+      grades: PF_GRADES.map((g, i) => ({ name: g.name, me: i === gi, img: 'img/grades/grade-' + (i + 1) + '.svg', booster: g.boosterH + ' h', coin: g.coinH ? g.coinH + ' h' : '—', safari: g.safariH ? g.safariH + ' h' : '—', scans: legalNum(g.scans),
+        cls: 'pkm-rules-row' + (i === gi ? ' pkm-rules-me' : ''), aria: g.name + (i === gi ? ', ton grade' : '') + ' : booster toutes les ' + g.boosterH + ' h, ' + (g.coinH ? 'pièce toutes les ' + g.coinH + ' h' : 'pièce fermée') + ', ' + (g.safariH ? 'Safari éclair toutes les ' + g.safariH + ' h' : 'Safari éclair fermé') + ', ' + g.scans + ' scans par jour' })),
       // 7 paliers depuis le 2026-11-09 (J7 et + : +80 PA, boîte offerte tous les 7 jours).
       streak: PaCore.GAIN.map((v, i) => { const L = PaCore.GAIN.length; return { day: i === L - 1 ? 'J' + L + ' et +' : 'J' + (i + 1), pa: '+' + v, cls: 'pkm-rules-day' + (Math.min(streak, L) === i + 1 ? ' pkm-rules-today' : '') + (i < Math.min(streak, L) ? ' pkm-rules-done' : '') }; }),
       // Prix fixés Pokémon par Pokémon par le porteur (2026-11-01, PA_PRICES) : fourchette par catégorie, lue dans les prix.

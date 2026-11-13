@@ -14,13 +14,15 @@
 --   - Le serveur tire tout : le type, les 36 Pokémon, leur ordre et leur passage (18 du bon type). Il compte lui-même les
 --     bons et les mauvais à partir des Pokémon touchés, avec son heure : partie finie au plus tôt 18 s après le départ.
 --     Gain maximal : 36 PK (72 PK pendant un 2XP PK).
---   - Une partie toutes les 8 h (Recrue, Chasseur, Collectionneur), 6 h (Dresseur, Maître), 4 h (Grand maître) :
---     **défaut à confirmer** ; sans délai pour un admin déverrouillé (007).
+--   - Ouvert à partir du grade Collectionneur (2026-11-13, porteur) : une partie toutes les 24 h (Collectionneur), 12 h
+--     (Dresseur Pokémon), 6 h (Maître Pokémon), 4 h (Grand maître Pokémon) ; fermé aux grades Recrue et Chasseur ;
+--     sans délai ni grade demandé pour un admin déverrouillé (007).
 --   - Les PK gagnés comptent pour les grades et le classement de la saison, comme le Booster PK et la pièce.
 
 -- 1. Délai de chaque grade.
-alter table public.game_grades add column if not exists safari_h int not null default 8;
-update public.game_grades g set safari_h = v.h from (values (0, 8), (1, 8), (2, 8), (3, 6), (4, 6), (5, 4)) as v(i, h) where g.i = v.i;
+-- 0 = fermé (Recrue, Chasseur).
+alter table public.game_grades add column if not exists safari_h int not null default 0;
+update public.game_grades g set safari_h = v.h from (values (0, 0), (1, 0), (2, 24), (3, 12), (4, 6), (5, 4)) as v(i, h) where g.i = v.i;
 
 -- 2. Types proposés et leurs Pokémon (les 156 du Pokédex, sans les méga-évolutions ; tools/sprites/dex.json).
 create table if not exists public.safari_types (t text primary key, nums int[] not null);
@@ -80,7 +82,8 @@ begin
   if uid is null then raise exception 'Connexion requise' using errcode = '28000'; end if;
   select max(at) into last from public.ledger where user_id = uid and kind = 'safari';
   select safari_h into h from public.game_grades where i = public._game_grade(uid);
-  return jsonb_build_object('last', last, 'hours', h, 'next', case when last is null or public._game_free(uid) then now() else last + make_interval(hours => h) end, 'server_now', now());
+  return jsonb_build_object('last', last, 'hours', h, 'locked', coalesce(h, 0) = 0 and not public._game_free(uid),
+    'next', case when last is null or public._game_free(uid) or coalesce(h, 0) = 0 then now() else last + make_interval(hours => h) end, 'server_now', now());
 end; $$;
 revoke all on function public.safari_state() from public, anon;
 grant execute on function public.safari_state() to authenticated;
@@ -95,6 +98,9 @@ begin
   if found then return jsonb_build_object('round', old.id, 'kind', old.kind, 'spawns', old.spawns, 'server_now', now()); end if;
   select * into gr from public.game_grades where i = public._game_grade(uid);
   select max(at) into last from public.ledger where user_id = uid and kind = 'safari';
+  if not public._game_free(uid) and coalesce(gr.safari_h, 0) = 0 then
+    raise exception 'Le Safari éclair s’ouvre au grade Collectionneur' using errcode = 'P0001';
+  end if;
   if not public._game_free(uid) and last is not null and last + make_interval(hours => gr.safari_h) > now() then
     raise exception 'Safari pas encore prêt' using errcode = 'P0001';
   end if;
