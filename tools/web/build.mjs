@@ -1052,6 +1052,10 @@ const localFonts = FONT_FILES.map(([pkg, family, weights]) => weights.map(w => [
 const VUE_LOCAL = 'vendor/vue.runtime.global.prod.js';
 const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global.prod.js';
 // Thème : jaune et verre par défaut ; ?theme=classic garde l'ancien thème (comparaison, retour arrière).
+// iPhone et iPad (2026-11-13, porteur : « toujours ce voile flou sur le double XP en haut du solde PK ») : iOS floute
+// une bande d'environ 20 px sous la barre d'état, par-dessus la page (Safari comme l'app posée sur l'écran d'accueil) ;
+// la classe pkm-ios descend un peu l'en-tête pour que le badge 2XP et les soldes restent nets. ?iosgap=1 pour l'essayer.
+const IOS_EARLY = '<script>try { var ua = navigator.userAgent || \'\'; if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) || /[?&]iosgap=1(&|$)/.test(location.search)) document.documentElement.classList.add(\'pkm-ios\'); } catch (e) {}</script>';
 const THEME_SWITCH = '<script>try { if (/[?&]theme=classic(&|$)/.test(location.search)) { document.documentElement.classList.add(\'pkm-classic\'); var m = document.querySelector(\'meta[name="theme-color"]\'); if (m) m.content = \'#0B1120\'; } } catch (e) {}</script>';
 // Mode sombre (Réglages › Apparence, 2026-11-02) : posé avant le premier affichage pour éviter un éclair jaune au
 // démarrage (sauf avec un compagnon à thème, qui garde son fond) ; home.js reprend ensuite la main.
@@ -1082,6 +1086,7 @@ const index = `<!doctype html>
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 ${THEME_SWITCH}
+${IOS_EARLY}
 ${NIGHT_EARLY}
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>

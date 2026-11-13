@@ -236,8 +236,9 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 
 /* ——— Mon avatar v5 (2026-11-11, soir, porteur) ——— */
 /* Écran 50/50 : l'avatar et ses rubriques (moitié haute, figée) ; les choix qui défilent et « Valider mon avatar » (moitié basse). */
-.pkm-av-full .pkm-av-top { height: 70%; height: 70dvh; min-height: 360px; }
-.pkm-av-bot { height: 72px; min-height: 72px; }
+/* Répartition 58 / 32 / 10 (2026-11-13, porteur) : haut figé 58 %, choix qui défilent 32 %, « Valider mon avatar » 10 %. */
+.pkm-av-full .pkm-av-top { height: 58%; height: 58dvh; min-height: 300px; }
+.pkm-av-bot { height: 10%; height: 10dvh; min-height: 64px; }
 /* Prix en PA : la goutte des PA à côté du nombre (plus de couronne dorée). */
 .pkm-av-pro { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px 2px 3px; background: linear-gradient(135deg, #B26BFF, #6A3CEB); color: #FFFFFF; font-size: 10.5px; }
 .pkm-av-pro::before { content: none; }
@@ -304,3 +305,8 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
    cadre (en-tête et Mon profil). Sans cadre (« Aucun »), l'anneau du grade reste. */
 .pkm-hh-me.pkm-fr:not(.pkm-fr-aucun) > img:first-of-type { width: 62px !important; height: 62px !important; margin: 0 !important; border: 0 !important; border-radius: 17px !important; }
 .pkm-pf-photo.pkm-fr:not(.pkm-fr-aucun) > img:first-of-type { border: 0 !important; }
+
+/* Mon profil (2026-11-13, porteur) : la bulle du crayon (en bas à gauche de l'avatar) passe devant le cadre choisi au lieu
+   d'être coupée par lui ; même chose pour la pastille du grade. */
+.pkm-pf-photo > .pkm-pf-cam { z-index: 3; }
+.pkm-pf-photo > svg { z-index: 3; }

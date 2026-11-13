@@ -97,6 +97,51 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   await p2.screenshot({ path: shot('safari-cloud-end.png') });
   await c2.close();
 }
+// Serveur sans 024_safari.sql (2026-11-13, porteur : « rends-le dispo ») : un joueur voit « Bientôt disponible » ; un admin
+// peut jouer une partie d'aperçu tirée sur l'appareil, sans PK crédité ni partie enregistrée.
+for (const role of ['user', 'admin']) {
+  const FAKE = 'http://127.0.0.1:59995', Q = '&cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test';
+  const UID = 'u-sf0', EMAIL = 'sf0@exemple.fr', TOKEN = 'h.' + Buffer.from(JSON.stringify({ sub: UID, email: EMAIL })).toString('base64url') + '.s';
+  const calls = [];
+  const c3 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await c3.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
+  await c3.route(FAKE + '/**', route => {
+    const req = route.request(), p = new URL(req.url()).pathname, send = (st, j) => route.fulfill({ status: st, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(j) });
+    if (/safari_/.test(p)) { calls.push(p); return send(404, { code: 'PGRST202', message: 'Could not find the function public.' + p.split('/').pop() + ' in the schema cache' }); }
+    if (p === '/rest/v1/rpc/game_state') return send(200, { pk: 500, pa: 0, pk_earned: 500, unlocked: [], today: new Date().toISOString().slice(0, 10) });
+    if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Sacha', age_range: '15-25', starter: 25, role: role, status: 'active' }]);
+    if (p === '/auth/v1/token') return send(200, { access_token: TOKEN, refresh_token: 'r', expires_in: 3600, user: { id: UID, email: EMAIL } });
+    return send(404, {});
+  });
+  const p3 = await c3.newPage(); p3.on('pageerror', e => errors.push(e.message));
+  await p3.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await p3.waitForTimeout(600);
+  await p3.evaluate(([tok, uid, email, role]) => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.onb = 0; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: role })); }, [TOKEN, UID, EMAIL, role]);
+  await p3.goto(E2E + '/?start=market&debug' + Q, { waitUntil: 'load' }); await p3.waitForTimeout(2500);
+  const sc = p3.locator('section[aria-label="Safari éclair"]'); await sc.scrollIntoViewIfNeeded();
+  const btn = N(await sc.locator('button').last().innerText());
+  if (role === 'user') {
+    ok('sans 024, joueur : « ' + btn + ' »', btn === 'Bientôt disponible');
+    await sc.locator('button').last().click(); await p3.waitForTimeout(500);
+    ok('sans 024, joueur : pas de partie', (await p3.locator('.pkm-sf').count()) === 0);
+  } else {
+    ok('sans 024, admin : « ' + btn + ' »', btn === 'Essayer (aperçu admin)');
+    const pk0 = await p3.evaluate(() => window.__pkm.st().pk);
+    await sc.locator('button').last().click(); await p3.waitForTimeout(800);
+    ok('sans 024, admin : partie d’aperçu ouverte', /Attrape les Pokémon/.test(N(await p3.locator('.pkm-sf').innerText())));
+    await p3.locator('.pkm-sf-go').click(); await p3.waitForTimeout(2300);
+    for (let k = 0; k < 20; k++) {
+      await p3.waitForTimeout(400);
+      const pt = await p3.evaluate(() => { const r = [...document.querySelectorAll('.pkm-sf-mon:not(.pkm-sf-hit):not(.pkm-sf-miss)')].map(m => m.getBoundingClientRect()).find(r => r.left > 8 && r.right < 382); return r ? [r.left + r.width / 2, r.top + r.height / 2] : null; });
+      if (pt) await p3.mouse.click(pt[0], pt[1]);
+    }
+    await p3.waitForTimeout(13000);
+    const end = N(await p3.locator('.pkm-sf').innerText());
+    const st = await p3.evaluate(() => { const s = window.__pkm.st(); return { pk: s.pk, at: (s.games || {}).safariAt || '' }; });
+    ok('sans 024, admin : bilan « aperçu », aucun PK crédité (' + pk0 + ' → ' + st.pk + '), aucune partie enregistrée', /Temps écoulé/.test(end) && /Aperçu admin : aucun PK crédité/.test(end) && st.pk === pk0 && !st.at && !calls.includes('/rest/v1/rpc/safari_finish'));
+    await p3.screenshot({ path: shot('safari-apercu.png') });
+  }
+  await c3.close();
+}
 ok('aucune erreur JS', errors.length === 0);
 if (errors.length) console.log(errors.join('\n'));
 console.log(res.join('\n'));

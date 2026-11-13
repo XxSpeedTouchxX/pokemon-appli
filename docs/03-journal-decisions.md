@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-11-13 (suite) — Historique au doigt, 6M et 1A, en-tête sur iPhone, avatar 58/32/10, Safari (demande du porteur)
+
+- **Historique du prix d'une carte** :
+  - « 3M » retiré : périodes 1S, 1M, 6M, 1A, MAX.
+  - 6M et 1A ne sont plus grisées. Raison du gris : Dropicards archive la cote de chaque carte depuis le 3 octobre 2026 et aucune source ouverte ne donne la cote d'avant (Cardmarket ne publie que la tendance et les moyennes 1, 7 et 30 jours). Désormais, 6M et 1A gardent leur vraie longueur : la partie d'avant le 3 octobre est hachurée (« Cote archivée depuis le 3 oct. »), la courbe commence à la première cote archivée, la variation est calculée depuis cette date. La période se remplit jour après jour.
+  - Doigt posé sur la courbe (ou souris) : un trait, un point et une bulle donnent le prix exact (centimes) et la date du jour touché ; la bulle s'efface 1,6 s après le doigt levé.
+  - Vérifié sur une carte de chaque extension de l'archive (195) et trois cartes sans archive : 198 cartes × 5 périodes, courbe et lecture au doigt partout (`tools/web/e2e/diag-fihist.mjs`). 36 cartes cotées n'ont pas d'archive (surtout Platine Rivaux Émergents et XY Impulsion TURBO) : elles gardent la courbe des moyennes Cardmarket (30 jours, 7 jours, veille, jour).
+- **Voile sur le badge 2XP (iPhone)** : il ne vient pas de l'app. iOS floute une bande d'environ 20 px sous la barre d'état, par-dessus la page (Safari et app posée sur l'écran d'accueil). Sur iPhone et iPad, l'en-tête descend de 14 px : le badge 2XP et les soldes sortent de cette bande.
+- **Grade et logo Dropicards** remontés de 10 px (sur iPhone : remontés par rapport aux soldes et à l'avatar, juste sous la bande floutée).
+- **Mon avatar** : haut figé 58 %, choix qui défilent 32 %, « Valider mon avatar » 10 %.
+- **Mon profil** : la bulle du crayon (en bas à gauche de l'avatar) et la pastille du grade passent devant le cadre choisi, plus coupées.
+- **Safari éclair** : l'app est prête ; le jeu s'ouvre à tous dès que `tools/supabase/024_safari.sql` est installé dans Studio par le porteur (puis `000_verifier.sql`). En attendant, un admin peut jouer une partie d'aperçu, sans PK ni partie enregistrée ; un joueur voit « Bientôt disponible ».
+- Cache v186.
+
 ## 2026-11-13 — Safari éclair, badge 2XP net, un seul cadre, emblème au-dessus du logo (« go » et demande du porteur)
 
 - **Safari éclair** (« go » du porteur) : 3ᵉ jeu à PK, dans Jeux › Jeux à PK, sous Pile ou face.

@@ -1947,7 +1947,7 @@
 <section aria-label="Safari éclair" class="pkm-sf-card-gm" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
 <h2 class="pkm-gm-title">Safari éclair</h2>
-<span style="font-size: 12.5px; color: #9AA8C3">{{ gm.sf.every }}</span>
+<span class="pkm-sf-every" style="font-size: 12.5px">{{ gm.sf.every }}</span>
 </div>
 <p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">20 secondes : des Pokémon traversent la prairie. Touche ceux du type demandé (+2 PK chacun) et évite les autres (−1 PK).</p>
 <div class="pkm-sf-prev" aria-hidden="true"><span class="pkm-sf-prev-chip">Attrape les Pokémon Eau !</span><img src="img/pokemon/7.gif" alt="" class="pkm-sf-prev-a"><img src="img/pokemon/129.gif" alt="" class="pkm-sf-prev-b"><img src="img/pokemon/25.gif" alt="" class="pkm-sf-prev-c"><i class="pkm-sf-prev-ring"></i><b class="pkm-sf-prev-pop">+2</b></div>
@@ -2278,6 +2278,7 @@ PKCOUNTER
 <div class="pkm-fh-plot">
 <div aria-hidden="true" class="pkm-fh-y"><sc-for list="{{ fi.hist.yl }}" as="fhy" hint-placeholder-count="3"><span style="top: {{ fhy.top }}">{{ fhy.label }}</span></sc-for></div>
 <div class="pkm-fh-box">
+<sc-if value="{{ fi.hist.hasGap }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" class="pkm-fh-gap" style="width: {{ fi.hist.gapW }}"><i>{{ fi.hist.gapLabel }}</i></span></sc-if>
 <svg width="100%" height="120" viewBox="0 0 300 120" preserveAspectRatio="none" role="img" aria-label="{{ fi.hist.aria }}" class="pkm-fh-svg">
 <sc-for list="{{ fi.hist.grid }}" as="fhg" hint-placeholder-count="3"><path d="{{ fhg.d }}" class="pkm-fh-grid"></path></sc-for>
 <path d="{{ fi.hist.area }}" class="pkm-fh-area" style="fill: {{ fi.hist.color }}"></path>
@@ -2290,6 +2291,7 @@ PKCOUNTER
 </div>
 <div aria-hidden="true" class="pkm-fh-x"><sc-for list="{{ fi.hist.xl }}" as="fhx" hint-placeholder-count="3"><span style="left: {{ fhx.left }}; transform: {{ fhx.tx }}">{{ fhx.label }}</span></sc-for></div>
 <div role="group" aria-label="Période" class="pkm-fh-per"><sc-for list="{{ fi.hist.periods }}" as="fip" hint-placeholder-count="6"><button type="button" onClick="{{ fip.pick }}" aria-pressed="{{ fip.on }}" aria-disabled="{{ fip.dis }}" aria-label="{{ fip.aria }}" class="{{ fip.cls }}" style="border-color: {{ fip.bc }}; background: {{ fip.bg }}; color: {{ fip.fg }}">{{ fip.label }}</button></sc-for></div>
+<span class="pkm-fh-hint">{{ fi.hist.hint }}</span>
 <span class="pkm-fi-note">{{ fi.hist.source }}</span>
 <sc-if value="{{ fi.hist.since }}" hint-placeholder-val="{{ false }}"><span class="pkm-fi-note">{{ fi.hist.since }}</span></sc-if>
 </sc-if>

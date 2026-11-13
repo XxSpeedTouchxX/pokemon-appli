@@ -22,7 +22,8 @@ ok('avatar de départ : cheveux noirs en pics, fond jaune, sans Pokémon', d0.ha
 // Écran en 3 parties : 45 % figé en haut, 45 % qui défile, 10 % figé en bas.
 const lay = await page.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(), m = document.querySelector('.pkm-av-mid');
   return { pos: getComputedStyle(document.querySelector('.pkm-av-full')).position, top: r('.pkm-av-top').height, mid: r('.pkm-av-mid').height, bot: r('.pkm-av-bot').height, scroll: m.scrollHeight > m.clientHeight, h: innerHeight }; });
-ok('écran 70/30 : haut ' + Math.round(lay.top) + ' px (figé, 70 %), bas ' + Math.round(lay.mid + lay.bot) + ' px (choix qui défilent + « Valider »)', lay.pos === 'fixed' && Math.abs(lay.top - lay.h * 0.7) < 4 && Math.abs(lay.mid + lay.bot - lay.h * 0.3) < 4 && Math.round(lay.bot) === 72 && lay.scroll);
+// Répartition 58 / 32 / 10 (2026-11-13, porteur).
+ok('écran 58/32/10 : haut ' + Math.round(lay.top) + ' px (figé, 58 %), choix ' + Math.round(lay.mid) + ' px (32 %, défilent), « Valider » ' + Math.round(lay.bot) + ' px (10 %)', lay.pos === 'fixed' && Math.abs(lay.top - lay.h * 0.58) < 4 && Math.abs(lay.mid - lay.h * 0.32) < 4 && Math.abs(lay.bot - lay.h * 0.1) < 4 && lay.scroll);
 ok('bas de l’écran : seulement « Valider mon avatar »', (await page.locator('.pkm-av-bot button').allInnerTexts()).join('|').trim() === 'Valider mon avatar');
 const rowTexts = async l => (await page.locator('[role=tablist][aria-label="' + l + '"] button').allInnerTexts()).map(t => t.trim()).join('|');
 ok('rubriques sous l’avatar : Cheveux, Visage, Habit, Décor puis Pokémon, Shiny, Accessoire', await rowTexts('Ton avatar') === 'Cheveux|Visage|Habit|Décor' && await rowTexts('Ton Pokémon') === 'Pokémon|Shiny|Accessoire');

@@ -15,6 +15,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=cc0ec01c">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=ee75798b">
 <script>try { if (/[?&]theme=classic(&|$)/.test(location.search)) { document.documentElement.classList.add('pkm-classic'); var m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = '#0B1120'; } } catch (e) {}</script>
+<script>try { var ua = navigator.userAgent || ''; if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) || /[?&]iosgap=1(&|$)/.test(location.search)) document.documentElement.classList.add('pkm-ios'); } catch (e) {}</script>
 <script>try { var q = (location.search.match(/[?&]look=(dark|light)(&|$)/) || [])[1], d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); if ((q || d.look) === 'dark' && [382,383,384].indexOf(d.buddy) < 0 && !document.documentElement.classList.contains('pkm-classic')) { document.documentElement.classList.add('pkm-theme-night'); var mm = document.querySelector('meta[name="theme-color"]'); if (mm) mm.content = '#10131F'; } } catch (e) {}</script>
 <link rel="preload" href="fonts/plus-jakarta-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
@@ -614,7 +615,7 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fh-area { transition: fill 0.45s; }
 .pkm-fh-x { position: relative; height: 15px; margin-left: 58px; font-size: 11px; color: #9AA8C3; }
 .pkm-fh-x span { position: absolute; white-space: nowrap; }
-.pkm-fh-per { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
+.pkm-fh-per { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
 .pkm-fh-per button { height: 34px; min-width: 0; padding: 0; border: 1px solid; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.15s; }
 .pkm-fh-per button:active { transform: scale(0.94); }
 .pkm-fh-per button.pkm-fh-off { opacity: 0.38; cursor: default; }
@@ -1838,6 +1839,7 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 
 /* ——— Safari éclair (2026-11-12, « go » du porteur ; maquette docs/37-maquette-mini-jeux) ——— */
 .pkm-sf-card-gm { background: radial-gradient(120% 90% at 50% 0%, rgba(127, 211, 255, 0.2), rgba(127, 211, 255, 0) 60%), #111A2C; color: #F3F6FC; }
+.pkm-sf-card-gm .pkm-sf-every { color: #9AA8C3; }
 .pkm-sf-prev { position: relative; height: 128px; border-radius: 18px; overflow: hidden; background: linear-gradient(180deg, #7FD3FF 0%, #BDEBFF 48%, #9BE07A 49%, #5DBB4A 100%); }
 .pkm-sf-prev img { position: absolute; width: 58px; height: 58px; image-rendering: pixelated; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.25)); }
 .pkm-sf-prev-chip { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); padding: 4px 10px; border-radius: 999px; background: rgba(11, 17, 32, 0.88); color: #FFFFFF; font: 700 11.5px/1.2 'Sora', sans-serif; white-space: nowrap; }
@@ -1929,6 +1931,27 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 /* Zone de toucher de 44 px autour des soldes (pastilles de 34 px). */
 .pkm-bal-row > .pkm-bal-btn { position: relative; }
 .pkm-bal-row > .pkm-bal-btn::after { content: ''; position: absolute; left: 0; right: 0; top: -5px; bottom: -5px; }
+
+/* Historique du prix (2026-11-13, porteur) : partie hachurée avant la première cote archivée (6M, 1A) ; lecture au doigt
+   (trait, point et bulle « prix · date ») ; « 3M » retiré. */
+.pkm-fh-box { touch-action: pan-y; cursor: crosshair; -webkit-user-select: none; user-select: none; }
+.pkm-fh-svg { position: relative; z-index: 1; }
+.pkm-fh-gap { position: absolute; z-index: 0; left: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: repeating-linear-gradient(135deg, rgba(154, 168, 195, 0.13) 0 6px, rgba(154, 168, 195, 0) 6px 12px); border-right: 1px dashed rgba(154, 168, 195, 0.45); }
+.pkm-fh-gap i { padding: 0 6px; font-style: normal; font-size: 10.5px; line-height: 1.3; text-align: center; color: #9AA8C3; }
+.pkm-fh-scrub { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
+.pkm-fh-scrub.pkm-fh-on { opacity: 1; }
+.pkm-fh-cur { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1.5px solid rgba(243, 246, 252, 0.7); }
+.pkm-fh-cdot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; box-shadow: 0 0 0 3px #0B1120, 0 0 0 5px rgba(243, 246, 252, 0.6); }
+.pkm-fh-tip { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 10px; border-radius: 12px; background: #F3F6FC; color: #0B1120; white-space: nowrap; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45); }
+.pkm-fh-tip b { font: 800 14px/1.1 'Sora', sans-serif; font-variant-numeric: tabular-nums; }
+.pkm-fh-tip small { font-size: 11px; font-weight: 600; color: #4A5878; }
+.pkm-fh-hint { font-size: 11.5px; color: #9AA8C3; }
+
+/* En-tête (2026-11-13, porteur) : emblème du grade et logo Dropicards remontés ; sur iPhone et iPad, l'en-tête descend
+   de 16 px pour sortir de la bande floutée par iOS sous la barre d'état (le badge 2XP y prenait un voile). */
+.pkm-hh-mid { position: relative; top: -10px; }
+.pkm-ios .pkm-hh { padding-top: 26px !important; }
+.pkm-ios .pkm-hh-mid { top: -20px; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -2804,8 +2827,9 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
 
 /* ——— Mon avatar v5 (2026-11-11, soir, porteur) ——— */
 /* Écran 50/50 : l'avatar et ses rubriques (moitié haute, figée) ; les choix qui défilent et « Valider mon avatar » (moitié basse). */
-.pkm-av-full .pkm-av-top { height: 70%; height: 70dvh; min-height: 360px; }
-.pkm-av-bot { height: 72px; min-height: 72px; }
+/* Répartition 58 / 32 / 10 (2026-11-13, porteur) : haut figé 58 %, choix qui défilent 32 %, « Valider mon avatar » 10 %. */
+.pkm-av-full .pkm-av-top { height: 58%; height: 58dvh; min-height: 300px; }
+.pkm-av-bot { height: 10%; height: 10dvh; min-height: 64px; }
 /* Prix en PA : la goutte des PA à côté du nombre (plus de couronne dorée). */
 .pkm-av-pro { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px 2px 3px; background: linear-gradient(135deg, #B26BFF, #6A3CEB); color: #FFFFFF; font-size: 10.5px; }
 .pkm-av-pro::before { content: none; }
@@ -2872,6 +2896,11 @@ html.pkm-th-dark .pkm-av-savebar, .pkm-dark .pkm-av-savebar { background: linear
    cadre (en-tête et Mon profil). Sans cadre (« Aucun »), l'anneau du grade reste. */
 .pkm-hh-me.pkm-fr:not(.pkm-fr-aucun) > img:first-of-type { width: 62px !important; height: 62px !important; margin: 0 !important; border: 0 !important; border-radius: 17px !important; }
 .pkm-pf-photo.pkm-fr:not(.pkm-fr-aucun) > img:first-of-type { border: 0 !important; }
+
+/* Mon profil (2026-11-13, porteur) : la bulle du crayon (en bas à gauche de l'avatar) passe devant le cadre choisi au lieu
+   d'être coupée par lui ; même chose pour la pastille du grade. */
+.pkm-pf-photo > .pkm-pf-cam { z-index: 3; }
+.pkm-pf-photo > svg { z-index: 3; }
 
 /* App des stores (store.js, 2026-11-09) : aucune offre payante tant que l'achat intégré n'est pas branché. */
 .pkm-store .pkm-prem-banner,
@@ -3054,6 +3083,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=5a1f2f84"></script>
+<script src="app.js?v=81d3fad7"></script>
 </body>
 </html>

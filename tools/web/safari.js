@@ -83,7 +83,12 @@
     this.sfPanel('<div class="pkm-sf-card"><p class="pkm-sf-wait">Préparation du safari…</p></div>');
     const go = round => { if (!SF) return; SF.round = round; this.sfBrief(); };
     if (!sfCloud()) { go(sfLocalRound()); return; }
+    // Aperçu pour un admin tant que 024_safari.sql n'est pas installé (2026-11-13, porteur : « rends-le dispo ») :
+    // partie complète tirée sur l'appareil, aucun PK crédité, rien d'enregistré.
+    const preview = () => { SF.preview = true; this.setState({ toast: 'Aperçu admin : aucun PK. Installe 024_safari.sql dans Studio pour ouvrir le safari à tous.' }); go(sfLocalRound()); };
+    if (this.st().sfOff && Cloud.isAdmin()) { preview(); return; }
     Cloud.rpc('safari_start', { req: Cloud.reqId() }).then(r => go(r), e => {
+      if (e && e.code === 'not_installed' && Cloud.isAdmin() && SF) { this.setState({ sfOff: true }); preview(); return; }
       this.sfClose();
       if (e && e.code === 'not_installed') { this.setState({ sfOff: true, toast: 'Safari éclair arrive très bientôt !' + (Cloud.isAdmin() ? ' [admin : installe 024_safari.sql]' : '') }); this.flash(); return; }
       this.gcFail(e);
@@ -178,9 +183,10 @@
         + '<span class="pkm-sf-gain"><img src="img/brand/pk.svg" alt="" width="34" height="34">+' + won + ' PK</span>'
         + (boost ? '<small class="pkm-sf-boost">2XP PK : gain doublé</small>' : '')
         + (grid ? '<h3 class="pkm-sf-h3">Ton safari</h3><div class="pkm-sf-caught">' + grid + '</div>' : '<p class="pkm-sf-p">Aucun Pokémon attrapé cette fois.</p>')
-        + '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>'
+        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : aucun PK crédité. Le safari s’ouvre à tous dès que 024_safari.sql est installé dans Studio.</p>' : '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>')
         + '<button type="button" class="pkm-sf-go">Fermer</button></div>');
       el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfClose());
+      if (SF.preview) return;
       // Gain dans l'app : solde, date de la partie, historique des jeux.
       const s = this.st(), g = s.games || {}, at = new Date().toISOString();
       const patch = { games: Object.assign({}, g, { safariAt: at, hist: [{ at: at, game: 'safari', pk: won }].concat(g.hist || []).slice(0, 20) }) };
@@ -190,7 +196,7 @@
       if (won > 0) { this.pkGainEnd(); this.flash(); }
       if (sfCloud()) setTimeout(() => this.gcSync(), 800);
     };
-    if (!sfCloud()) {
+    if (!sfCloud() || SF.preview) {
       const good = rd.spawns.filter(x => x.ok && SF.hits.has(x.i)).length, bad = hits.length - good, mul = typeof this.xpMul === 'function' ? this.xpMul() : 1;
       show({ good: good, bad: bad, won: Math.max(0, 2 * good - bad) * mul, boost: mul > 1 });
       return;
@@ -213,9 +219,9 @@
     const w = this.sfWaitMs(), busy = !!s.sfOpen, h = this.sfHours();
     r.sf = {
       every: '1 partie toutes les ' + h + ' h', ready: w === 0 && !busy, off: !!s.sfOff,
-      button: s.sfOff ? 'Bientôt disponible' : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'Jouer au safari',
+      button: s.sfOff ? (sfCloud() && Cloud.isAdmin() ? 'Essayer (aperçu admin)' : 'Bientôt disponible') : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'Jouer au safari',
       btnCls: 'pkm-gm-go' + (w > 0 && !busy ? ' pkm-gm-go-no' + (s.gmNoWhich === 's' ? ' pkm-gm-go-shake' : '') : '') + (s.sfOff ? ' pkm-gm-go-lock' : ''), noIco: w > 0 && !busy,
-      play: () => { if (s.sfOff) { this.setState({ toast: 'Safari éclair arrive très bientôt !' }); this.flash(); return; } this.sfOpen(); }
+      play: () => { if (s.sfOff && !(sfCloud() && Cloud.isAdmin())) { this.setState({ toast: 'Safari éclair arrive très bientôt !' }); this.flash(); return; } this.sfOpen(); }
     };
     r.rules = r.rules.replace(' ; plus ton grade monte', ', une partie de Safari éclair toutes les ' + h + ' h ; plus ton grade monte');
     r.hist = (s.games && s.games.hist || []).slice(0, 5).map((x, i) => x.game === 'safari' ? Object.assign({}, r.hist[i], { text: 'Safari éclair · ' + this.d2(x.at.slice(0, 10)) }) : r.hist[i]);

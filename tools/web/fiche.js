@@ -8,8 +8,9 @@
   // Les calculs viennent de la fiche complète (vItem) ; ce module ne fait que les présenter.
   // Ce module partage la portée des autres : ses noms commencent par FI_ ou fi.
   const fiProto = Component.prototype;
-  // Périodes de l'historique (2026-10-31, photo du porteur) : 1S, 1M, 3M, 6M, 1A, MAX (MAX par défaut).
-  const FI_PER = [['1S', 7, '1 semaine'], ['1M', 30, '1 mois'], ['3M', 91, '3 mois'], ['6M', 182, '6 mois'], ['1A', 365, '1 an'], ['MAX', 0, 'max']];
+  // Périodes de l'historique (2026-10-31, photo du porteur) : 1S, 1M, 6M, 1A, MAX (MAX par défaut) ; 3M retiré le
+  // 2026-11-13 (porteur).
+  const FI_PER = [['1S', 7, '1 semaine'], ['1M', 30, '1 mois'], ['6M', 182, '6 mois'], ['1A', 365, '1 an'], ['MAX', 0, 'max']];
   const FI_W = 300, FI_H = 120;
 
   // Ouvrir la fiche : l'article rejoint le catalogue de l'app s'il n'y est pas (comme openTcg).
@@ -134,6 +135,8 @@
     const n = P.length, sl = n > 2 ? fiSlopes(P) : null, out = [];
     for (let i = 0, j = 0; i < FI_N; i++) {
       const xx = i / (FI_N - 1) * FI_W;
+      // Avant la première cote (partie hachurée d'une période plus longue que l'archive) : pas de courbe.
+      if (xx < P[0][0] - 0.5) { out.push(null); continue; }
       while (j < n - 2 && P[j + 1][0] < xx) j++;
       const a = P[j], b = P[Math.min(j + 1, n - 1)], h = b[0] - a[0], u = h > 0 ? Math.max(0, Math.min(1, (xx - a[0]) / h)) : 0;
       if (!sl) { out.push(a[1] + (b[1] - a[1]) * u); continue; }
@@ -142,56 +145,56 @@
     }
     return out;
   };
-  // Périodes pas encore couvertes : « 1M dès le 1 nov., 3M dès le 1 janv. 2027 … » (archive), sinon simple mention.
-  const fiSoon = (miss, start, since) => {
-    if (!miss.length) return '';
-    if (!since) return miss.map(q => q[0]).join(', ') + ' : pas encore assez d’historique pour cette carte.';
-    const y0 = since.slice(0, 4);
-    const when = q => { const d = fiAgo(start, -(q[1] - 1)); return q[0] + ' dès le ' + fiDay(d) + (d.slice(0, 4) !== y0 ? ' ' + d.slice(0, 4) : ''); };
-    return 'Archive Dropicards depuis le ' + fiDay(since) + ' ' + y0 + ' : ' + miss.map(when).join(', ') + '.';
-  };
+  const fiYear = d => fiDay(d) + ' ' + String(d).slice(0, 4);
   // Historique façon photo : valeur, variation sur la période, axe des montants, dates, ligne du prix d'achat.
   // f : coefficient de l'état des exemplaires possédés (la courbe suit alors la valeur affichée en haut de la fiche).
+  // Toutes les périodes se choisissent (2026-11-13, porteur : « 6M et 1A en gris, il faudrait qu'elles soient
+  // fonctionnelles ») : une période plus longue que l'archive (commencée le 3 octobre 2026, aucune source ouverte avant)
+  // garde sa vraie longueur sur l'axe des dates ; la partie sans cote est hachurée et dit depuis quand la cote est
+  // archivée, et la variation est calculée depuis la première cote connue.
   fiProto.fiHistory = function (p, x, k, per, f, buy) {
     const H = this.fiPoints(p, x, k);
     if (H.loading) return { has: true, loading: true, periods: [] };
     if (H.pts.length < 2) return { has: false, periods: [] };
-    // Périodes couvertes (2026-11-01, porteur : « des fois le prix ne bouge pas entre 1M et 6M ») : tant que l'historique
-    // ne couvre pas toute la période (archive commencée le 3 octobre 2026), elle est grisée avec sa date d'arrivée ;
-    // sinon 1M, 3M, 6M et 1A montreraient tous le même historique que MAX. Une période grisée choisie revient à MAX.
-    const start = H.pts[0].d, endD = H.pts[H.pts.length - 1].d, span = Math.round((Date.parse(endD) - Date.parse(start)) / 86400000);
-    const covered = q => !q[1] || q[1] - 1 <= span;
-    const P = FI_PER.find(q => q[0] === per && covered(q)) || FI_PER[FI_PER.length - 1];
+    const P = FI_PER.find(q => q[0] === per) || FI_PER[FI_PER.length - 1];
     per = P[0];
-    const end = endD, cut = P[1] ? fiAgo(end, P[1]) : '';
+    const end = H.pts[H.pts.length - 1].d, cut = P[1] ? fiAgo(end, P[1]) : '';
     let pts = H.pts.filter(q => !cut || q.d >= cut);
     if (pts.length < 2) pts = H.pts.slice(-2);
+    const axis0 = cut && cut < pts[0].d ? cut : pts[0].d, gap = axis0 < pts[0].d;
     const V = pts.map(q => q.v * f), first = V[0], last = V[V.length - 1], d = last - first, pct = first > 0 ? d / first * 100 : 0;
     const showBuy = buy > 0, T = HomeCore.ticks(Math.min(...V, showBuy ? buy : Infinity), Math.max(...V, showBuy ? buy : -Infinity));
     const lo = T[0], hi = T[T.length - 1], y = v => FI_H - (v - lo) / (hi - lo || 1) * FI_H;
-    const t0 = Date.parse(pts[0].d), t1 = Date.parse(end), X = d2 => (t1 > t0 ? (Date.parse(d2) - t0) / (t1 - t0) : 1) * FI_W;
+    const t0 = Date.parse(axis0), t1 = Date.parse(end), X = d2 => (t1 > t0 ? (Date.parse(d2) - t0) / (t1 - t0) : 1) * FI_W;
     const XY = pts.map((q, i) => [X(q.d), y(V[i])]), line = fiSmooth(XY), col = x.col(d);
+    const x0 = XY[0][0], xN = XY[XY.length - 1][0], close = ' L' + xN.toFixed(1) + ' ' + FI_H + ' L' + x0.toFixed(1) + ' ' + FI_H + ' Z';
     const key = p.id + '|' + per + '|' + line + '|' + buy;
-    const mid = pts[Math.floor((pts.length - 1) / 2)].d;
-    const xl = [[pts[0].d, 0], [mid, X(mid) / FI_W * 100], [end, 100]].filter((q, i, all) => i !== 1 || (q[1] > 22 && q[1] < 78 && q[0] !== all[0][0]));
-    const label = x.mask(this.signed(d)) + ' (' + this.chg(pct) + ') · ' + P[2];
+    // Dates sous l'axe : début de la période, première cote (s'il y a une partie hachurée) ou milieu, puis fin.
+    const midD = gap ? pts[0].d : pts[Math.floor((pts.length - 1) / 2)].d;
+    const xl = [[axis0, 0], [midD, X(midD) / FI_W * 100], [end, 100]].filter((q, i, all) => i !== 1 || (q[1] > 22 && q[1] < 78 && q[0] !== all[0][0]));
+    const since = pts[0].d, perLab = gap ? 'depuis le ' + fiDay(since) : P[2];
+    const label = x.mask(this.signed(d)) + ' (' + this.chg(pct) + ') · ' + perLab;
+        const masked = !!x.s.masked;
     return {
-      has: true, loading: false, ready: true, line: line, area: line + ' L' + FI_W + ' ' + FI_H + ' L0 ' + FI_H + ' Z', color: col,
-      fx: { id: p.id, key: key, line: line, samp: fiSample(XY), buyY: showBuy ? y(buy) : null },
+      has: true, loading: false, ready: true, line: line, area: line + close, color: col,
+      fx: { id: p.id, key: key, line: line, close: close, samp: fiSample(XY), buyY: showBuy ? y(buy) : null,
+        // Lecture au doigt : position et valeur de chaque cote (2026-11-13, porteur).
+        pts: pts.map((q, i) => ({ x: XY[i][0] / FI_W, y: XY[i][1] / FI_H, d: fiYear(q.d), v: x.mask(this.eur(V[i])) })) },
       value: x.mask(this.eur(last)), change: label, w: FI_W, h: FI_H,
       dotX: (XY[XY.length - 1][0] / FI_W * 100).toFixed(2) + '%', dotY: (XY[XY.length - 1][1] / FI_H * 100).toFixed(2) + '%',
-      yl: T.map(t => ({ label: x.s.masked ? '•••' : fiMoney(t), top: (y(t) / FI_H * 100).toFixed(2) + '%' })),
+      hasGap: gap, gapW: (x0 / FI_W * 100).toFixed(2) + '%', gapLabel: x0 / FI_W > 0.34 ? 'Cote archivée depuis le ' + fiDay(since) : '',
+      yl: T.map(t => ({ label: masked ? '•••' : fiMoney(t), top: (y(t) / FI_H * 100).toFixed(2) + '%' })),
       grid: T.map(t => ({ d: 'M0 ' + y(t).toFixed(1) + ' H' + FI_W })),
-      xl: xl.map(([dd, left], i, all) => ({ label: fiDay(dd), left: left.toFixed(1) + '%', tx: i === 0 ? 'none' : i === all.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)' })),
+      xl: xl.map(([dd, left], i, all) => ({ label: i === 0 && dd.slice(0, 4) !== end.slice(0, 4) ? fiYear(dd) : fiDay(dd), left: left.toFixed(1) + '%', tx: i === 0 ? 'none' : i === all.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)' })),
       hasBuy: showBuy, buyD: showBuy ? 'M0 ' + y(buy).toFixed(1) + ' H' + FI_W : '', buyTop: showBuy ? (y(buy) / FI_H * 100).toFixed(2) + '%' : '0%',
       buyLabel: showBuy ? '🛒 ' + x.mask(this.eur(buy)) : '',
-      aria: 'Historique du prix, ' + P[2] + ' : de ' + x.mask(this.eur(first)) + ' à ' + x.mask(this.eur(last)),
-      source: H.src + (f !== 1 ? ' · selon l’état de ta carte' : ''),
-      since: fiSoon(FI_PER.filter(q => !covered(q)), start, H.since),
+      aria: 'Historique du prix, ' + P[2] + ' : de ' + x.mask(this.eur(first)) + ' (' + fiYear(since) + ') à ' + x.mask(this.eur(last)),
+      source: H.src + (H.since ? ' depuis le ' + fiYear(H.since) : '') + (f !== 1 ? ' · selon l’état de ta carte' : ''),
+      since: gap ? 'Aucune source ouverte ne donne la cote de cette carte avant le ' + fiYear(since) + ' : la partie hachurée se remplit jour après jour.' : '',
+      hint: 'Pose le doigt sur la courbe pour voir le prix à une date.',
       periods: FI_PER.map(q => {
-        const [v, , lab] = q, ok = covered(q), on = per === v;
-        return Object.assign({ label: v, aria: lab + (ok ? '' : ', pas encore assez d’historique'), on: on, dis: !ok,
-          cls: ok ? '' : 'pkm-fh-off', pick: () => { if (ok) this.setState({ fiPer: v }); } }, this.chip(on));
+        const [v, , lab] = q, on = per === v;
+        return Object.assign({ label: v, aria: lab, on: on, dis: false, cls: '', pick: () => this.setState({ fiPer: v }) }, this.chip(on));
       })
     };
   };
@@ -330,17 +333,21 @@
     const box = document.querySelector('.pkm-fh'), line = box && box.querySelector('.pkm-fh-line'), area = box && box.querySelector('.pkm-fh-area');
     if (!same || !from || !line || !area || fiStill()) { fiAnim.cur = null; return; }
     const buy = box.querySelector('.pkm-fh-buy'), close = ' L' + FI_W + ' ' + FI_H + ' L0 ' + FI_H + ' Z', t0 = performance.now();
+    fiScrubHide();
     const b0 = fromBuy === null ? fx.buyY : fromBuy;
     const step = now => {
       const k = Math.min(1, (now - t0) / 650), e = fiEase(k);
       if (k >= 1) {
-        fiAnim.cur = null; line.setAttribute('d', fx.line); area.setAttribute('d', fx.line + close);
+        fiAnim.cur = null; line.setAttribute('d', fx.line); area.setAttribute('d', fx.line + (fx.close || close));
         if (buy && fx.buyY !== null) buy.setAttribute('d', 'M0 ' + fx.buyY.toFixed(1) + ' H' + FI_W);
         return;
       }
-      const P = from.map((v, i) => v + (fx.samp[i] - v) * e);
-      const d = 'M' + P.map((v, i) => (i / (FI_N - 1) * FI_W).toFixed(1) + ' ' + v.toFixed(1)).join(' L');
-      fiAnim.cur = P; line.setAttribute('d', d); area.setAttribute('d', d + close);
+      const P = from.map((v, i) => { const to = fx.samp[i]; return to === null ? null : v === null ? to : v + (to - v) * e; });
+      const xy = P.map((v, i) => [i / (FI_N - 1) * FI_W, v]).filter(q => q[1] !== null);
+      if (xy.length < 2) { fiAnim.raf = requestAnimationFrame(step); return; }
+      const d = 'M' + xy.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L');
+      fiAnim.cur = P; line.setAttribute('d', d);
+      area.setAttribute('d', d + ' L' + xy[xy.length - 1][0].toFixed(1) + ' ' + FI_H + ' L' + xy[0][0].toFixed(1) + ' ' + FI_H + ' Z');
       if (buy && fx.buyY !== null) buy.setAttribute('d', 'M0 ' + (b0 + (fx.buyY - b0) * e).toFixed(1) + ' H' + FI_W);
       fiAnim.raf = requestAnimationFrame(step);
     };
@@ -349,11 +356,60 @@
     box.querySelectorAll('.pkm-fh-top').forEach(el => { if (el.animate) el.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' }); });
   };
 
+  // Lecture de la courbe au doigt (2026-11-13, porteur : « quand on passe le doigt sur un endroit de la courbe, cela
+  // indique exactement le prix de la carte à ce moment précis, selon la date ») : un trait vertical, un point et une
+  // bulle « prix · date » suivent le doigt (ou la souris) et se calent sur la cote du jour la plus proche. Le défilement
+  // vertical de la fiche reste possible (touch-action: pan-y) ; la bulle s'efface peu après qu'on lève le doigt.
+  const fiScrub = { pts: [], color: '', box: null, el: null, timer: 0 };
+  const fiScrubHide = () => { clearTimeout(fiScrub.timer); if (fiScrub.el) fiScrub.el.classList.remove('pkm-fh-on'); };
+  const fiScrubEls = box => {
+    let el = box.querySelector('.pkm-fh-scrub');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'pkm-fh-scrub'; el.setAttribute('aria-hidden', 'true');
+      el.innerHTML = '<i class="pkm-fh-cur"></i><i class="pkm-fh-cdot"></i><span class="pkm-fh-tip"><b></b><small></small></span>';
+      box.appendChild(el);
+    }
+    fiScrub.el = el;
+    return el;
+  };
+  const fiScrubAt = (box, clientX) => {
+    const pts = fiScrub.pts;
+    if (!pts.length) return;
+    const R = box.getBoundingClientRect(), fx = (clientX - R.left) / (R.width || 1);
+    let best = pts[0];
+    pts.forEach(q => { if (Math.abs(q.x - fx) < Math.abs(best.x - fx)) best = q; });
+    const el = fiScrubEls(box), cur = el.querySelector('.pkm-fh-cur'), dot = el.querySelector('.pkm-fh-cdot'), tip = el.querySelector('.pkm-fh-tip');
+    const col = (box.querySelector('.pkm-fh-line') || {}).style ? box.querySelector('.pkm-fh-line').style.stroke : '';
+    cur.style.left = (best.x * 100) + '%';
+    dot.style.left = (best.x * 100) + '%'; dot.style.top = (best.y * 100) + '%'; dot.style.background = col || '#FFD60A';
+    tip.querySelector('b').textContent = best.v; tip.querySelector('small').textContent = best.d;
+    el.classList.add('pkm-fh-on');
+    // Bulle au-dessus du point, gardée dans le cadre.
+    const w = tip.offsetWidth || 90, px = best.x * R.width, left = Math.max(0, Math.min(R.width - w, px - w / 2));
+    tip.style.left = left + 'px';
+    tip.style.top = Math.max(-34, best.y * R.height - 48) + 'px';
+  };
+  const fiScrubBind = box => {
+    if (!box || box.__fhScrub) return;
+    box.__fhScrub = true;
+    let down = false;
+    box.addEventListener('pointerdown', e => { down = true; clearTimeout(fiScrub.timer); try { box.setPointerCapture(e.pointerId); } catch (er) { /* rien */ } fiScrubAt(box, e.clientX); });
+    box.addEventListener('pointermove', e => { if (down || e.pointerType === 'mouse') fiScrubAt(box, e.clientX); });
+    const up = e => { down = false; clearTimeout(fiScrub.timer); fiScrub.timer = setTimeout(fiScrubHide, e && e.pointerType === 'mouse' ? 0 : 1600); };
+    box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
+    box.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') up(e); });
+  };
+
   const fiBaseRender = fiProto.renderVals;
   fiProto.renderVals = function () {
     const r = fiBaseRender.call(this);
     const s = this.st();
     r.fi = this.fiView(s);
+    if (r.fi.open && r.fi.hist && r.fi.hist.fx) {
+      fiScrub.pts = r.fi.hist.fx.pts || [];
+      queueMicrotask(() => fiScrubBind(document.querySelector('.pkm-fh-box')));
+    }
     // La courbe affichée change (autre période, autre état, archive arrivée) → glissement, après la mise à jour de la page.
     const fx = r.fi.open && r.fi.hist && r.fi.hist.fx;
     if (fx && fx.key !== fiAnim.key) queueMicrotask(() => fiMorph(fx));
