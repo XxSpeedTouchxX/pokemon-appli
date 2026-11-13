@@ -3,9 +3,9 @@
 # les redresse et les recadre (web/img/fix/), et publie la liste lue par l'app (web/data/img-fix.json) avec des
 # planches avant / après (tools/cadrage/apercu/).
 # Depuis le premier passage du 13 novembre 2026 (scans droits pris à tort pour des photos de travers, annulé) :
-# un envoi du calcul ou un lancement à la main fait un ESSAI À BLANC (tools/cadrage/essai/ : rapport, mesures,
-# planches, aucun visuel de l'app changé) ; la publication se fait seulement avec « publier = oui », après
-# vérification des planches. Le passage du lundi reviendra quand la détection aura été validée.
+# un lancement à la main fait un ESSAI À BLANC (tools/cadrage/essai/ : rapport, mesures, planches, aucun visuel de
+# l'app changé) ; la publication se fait seulement avec « publier = oui », après vérification des planches.
+# Lancé à la main seulement : les nouvelles extensions sont des scans officiels, droits.
 name: Cadrage des cartes
 
 on:
@@ -19,11 +19,6 @@ on:
         description: "oui = publier les visuels redressés dans l'app ; non = essai à blanc (rapport et planches)"
         required: false
         default: "non"
-  push:
-    branches: [claude/pokemon-app-mockup-1mxt7p]
-    paths:
-      - tools/cadrage/redresse.py
-      - .github/workflows/cadrage.yml
 
 permissions:
   contents: write

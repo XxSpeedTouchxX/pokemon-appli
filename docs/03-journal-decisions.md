@@ -16,7 +16,8 @@
   - 3 scans récents à dessin plein cadre étaient pris à tort : la méthode « lignes » est désormais réservée aux anciennes séries (Set de Base à HeartGold SoulSilver), les séries récentes étant des scans officiels ;
   - le recadrage coupait parfois le haut du nom : il est limité à 2,5 %.
 
-  Rayquaza ☆ passe le premier tri, mais pas encore la confirmation sur le grand visuel : son grand visuel est joint au troisième essai pour régler son cas.
+  Rayquaza ☆ passe le premier tri, mais pas la confirmation sur le grand visuel.
+- **Troisième essai à blanc** : 104 visuels, uniquement des photos d'anciennes cartes, redressés sans dégât sur les planches. Le grand visuel de Rayquaza ☆ montre une **carte un peu courbée** (haut penché de 1 à 2,5°, bas droit) : la correction divise l'écart par deux (1,1° → 0,53°) et la carte est nettement plus droite. Une correction de ce genre est désormais gardée jusqu'à 0,55° restants. Les traits collés au bord de l'image (bord de la photo) sont écartés. **Publication lancée** (« publier = oui »). Le workflow ne se lance plus qu'à la main.
 - **Essai à blanc d'abord** : un envoi du calcul ou un lancement à la main écrit seulement `tools/cadrage/essai/` (rapport, mesures, planches avant / après, visuels d'origine utiles au réglage), sans rien changer dans l'app. La publication se fait avec « publier = oui », après vérification des planches. Le passage du lundi est suspendu jusque-là.
 
 ## 2026-11-13 (nuit, suite) — Grade offert à un ami, textes coupés dans les animations, Safari sans délai pour les admins et un ami (demande du porteur)

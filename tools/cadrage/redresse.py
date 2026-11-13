@@ -49,6 +49,7 @@ AGREE = 0.02             # petit et grand visuel : mêmes coins à 2 % de la lar
 # Photo serrée (la carte remplit le visuel, sans fond autour) : redressée d'après ses grandes lignes droites.
 LINE_DEV = 0.8           # lignes penchées d'au moins 0,8° en moyenne avant correction
 LINE_FIT = 0.45          # après correction, écart moyen des lignes de moins de 0,45° sur le grand visuel (vraie perspective)
+LINE_FIT_BENT = 0.55     # carte courbée : jusqu'à 0,55° restants si l'écart est au moins divisé par deux
 LINE_FIT_LOW = 0.6       # même contrôle, plus souple, sur le petit visuel (245 px : traits moins précis)
 LINE_MOVE_MAX = 0.08     # au-delà de 8 % de la largeur, la correction n'est pas crédible (traits trop peu nombreux)
 # Séries où TCGdex a des photos de cartes (anciennes cartes) : la méthode « lignes » ne sert que là. Les séries
@@ -271,6 +272,10 @@ def _segments(img):
             continue
         ang = (math.degrees(math.atan2(y2 - y1, x2 - x1)) + 90) % 180 - 90
         cx, cy = (x1 + x2) / 2 / w, (y1 + y2) / 2 / h
+        # Les traits collés au bord du visuel (à moins de 1 %) sont le bord de l'image elle-même (recadrage de la
+        # photo), pas un trait de la carte : écartés.
+        if min(cx, 1 - cx) < 0.01 or min(cy, 1 - cy) < 0.01:
+            continue
         # Seulement le pourtour de la carte (bords, cadre, haut et bas) : les grands traits penchés du dessin, au
         # milieu, ne comptent pas (un scan droit avec un dessin en biais n'est jamais « corrigé »).
         if abs(ang) <= 6 and (cy < EDGE_BAND or cy > 1 - EDGE_BAND):
@@ -363,7 +368,9 @@ def line_crooked(img, fit=LINE_FIT):
         return False, r, "lignes peu cohérentes"
     if r["before"] < LINE_DEV:
         return False, r, "droite"
-    if r["after"] > fit:
+    # Carte un peu courbée sur la photo (Rayquaza ☆ ex8-107 : haut penché, bas droit) : une correction qui divise au
+    # moins par deux l'écart des traits, jusqu'à 0,55° restants, est gardée (nettement plus droite qu'avant).
+    if r["after"] > fit and not (r["after"] <= LINE_FIT_BENT and r["after"] <= 0.5 * r["before"]):
         return False, r, f"lignes du dessin, pas une perspective ({r['after']:.2f}°)"
     if r["move"] < LINE_MOVE:
         return False, r, "correction invisible"
