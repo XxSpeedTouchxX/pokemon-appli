@@ -1,0 +1,13 @@
+Essai à blanc du 2026-11-13 : 20272 visuels contrôlés, 10 repérés sur les petits visuels, 2 seraient redressés.
+Carte demandée ex8-107 (fr/ex/ex8/107) : contour irrégulier (55 %)
+
+ex4-12 fr/ex/ex4/12 : penchée de 1.5°, perspective 9.2 %
+ex2-89 fr/ex/ex2/89 : droit sur le grand visuel (pas de fond autour de la carte (0.0 %))
+ecard2-8 fr/ecard/ecard2/8 : penchée de 1.6°, perspective 20.3 %
+ecard2-82 fr/ecard/ecard2/82 : droit sur le grand visuel (droite)
+ecard1-31 fr/ecard/ecard1/31 : droit sur le grand visuel (droite)
+ecard1-115 fr/ecard/ecard1/115 : droit sur le grand visuel (contour irrégulier (94 %))
+base4-87 en/base/base4/87 : droit sur le grand visuel (droite)
+base3-15 fr/base/base3/15 : droit sur le grand visuel (droite)
+basep-2 en/base/basep/2 : droit sur le grand visuel (contour irrégulier (96 %))
+base2-4 fr/base/base2/4 : détection instable entre petit et grand visuel, laissé tel quel
