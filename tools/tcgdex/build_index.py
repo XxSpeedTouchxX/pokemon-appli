@@ -208,8 +208,10 @@ def prices(card, rate):
         if has_n and has_h and ex_era_ex(card):
             # Avant l'arbitrage TCGplayer (2026-11-13, calcul du jour : Mew ex ex12-88 gardait 52,87 € à cause d'un prix
             # TCGplayer de 1,25 $) : la carte n'existant pas en reverse, son groupe « -holo » n'est jamais le sien.
+            # Sans écart minimal entre les deux groupes (2026-11-13, 2ᵉ passage : Drattak ex 33,63 € en holo, 63,31 € en
+            # normal, gardé sur le holo à cause d'un écart sous 2 fois) ; seul garde-fou : groupe normal d'au moins 1 €.
             tn, th = num(cm.get("trend")), num(cm.get("trend-holo"))
-            if tn >= EX_MIN_NORMAL and max(tn, th) >= GROUP_GAP * min(tn, th):
+            if tn >= EX_MIN_NORMAL:
                 sfx = ""
                 EX_SWITCHED.append(f"{card.get('id')} {th}→{tn}")
         elif has_n and has_h and ref:

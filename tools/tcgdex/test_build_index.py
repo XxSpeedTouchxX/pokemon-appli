@@ -67,6 +67,9 @@ class Prices(unittest.TestCase):
         p = prices(c, 0.9)
         self.assertEqual((p[0], p[2], p[5], p[7], p[8]), (184.72, 170, 190, 31.89, "n"))
         self.assertIn("ex15-91 31.89→184.72", build_index.EX_SWITCHED)
+        # Écart de moins de 2 fois entre les groupes (Drattak ex ex16-96 : 63,31 € en normal, 33,63 € en holo) : normal aussi.
+        self.assertEqual(prices(dict(c, id="ex16-96", name="Drattak ex", set={"id": "ex16"},
+                                     pricing={"cardmarket": dict(cm, trend=63.31, **{"trend-holo": 33.63})}), 0.9)[:1], (63.31,))
         # Groupe normal vide (sous 1 €) : groupe holo gardé.
         self.assertEqual(prices(dict(c, pricing={"cardmarket": dict(cm, trend=0.74)}), 0.9)[8], "h")
         # « -ex » d'Écarlate et Violet, ou carte holo d'une autre époque : règle d'origine (groupe holo).
