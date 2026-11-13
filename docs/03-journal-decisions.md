@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-13 (fin de nuit) — Tableau des grades sans chevauchement, logo sous l'emblème (demande du porteur)
+
+- **Règles des PK et PA › tableau des grades** : des textes se chevauchaient (« Collectionneur » sur la colonne Booster, titres « BOOSTER » et « PIÈCE » collés, « SCANS / J » coupé). Chaque colonne de chiffres prend maintenant la largeur de son titre, avec 10 px entre deux colonnes ; titres en minuscules (« Booster », « Pièce », « Safari », « Scans/j ») ; nom du grade et emblème un peu plus petits sur les téléphones étroits, emblème au-dessus du nom sur les très petits écrans. Vérifié de 320 à 430 px de large : au moins 6 px entre deux textes voisins, rien ne dépasse ; le test des fenêtres le contrôle désormais.
+- **En-tête** : logo Dropicards descendu de 6 px sous l'emblème du grade ; l'emblème ne bouge pas.
+- Cache v189.
+
 ## 2026-11-13 (nuit) — Safari par grade, bouton « GO », gains de PK animés comme les PA, reflet du 2XP, ticket déjà acheté (demande du porteur)
 
 - **Safari éclair par grade** (décision du porteur) : fermé aux grades Recrue et Chasseur ; une partie toutes les **24 h** au grade Collectionneur, **12 h** Dresseur Pokémon, **6 h** Maître Pokémon, **4 h** Grand maître Pokémon (auparavant 8, 6 et 4 h pour tous).

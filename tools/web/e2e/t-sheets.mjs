@@ -23,6 +23,17 @@ ok('règles : tickets dans la même colonne que les photos, textes alignés (' +
 ok('règles : « Grade actuel » dans l’encadré jaune du grade', (await me.count()) === 1 && /Grade actuel/i.test(await me.innerText()) && (await rules.locator('.pkm-rules-nowtag').count()) === 1);
 const rowH = await rules.locator('.pkm-rules-row:not(.pkm-rules-th)').first().evaluate(e => e.getBoundingClientRect().height);
 ok('règles : lignes des grades agrandies (' + Math.round(rowH) + ' px)', rowH >= 52);
+// Colonnes espacées, rien ne se chevauche (2026-11-13, porteur) : au moins 6 px entre le texte de deux colonnes voisines.
+const over = await rules.locator('.pkm-rules-table').first().evaluate(t => {
+  const out = [];
+  for (const row of t.querySelectorAll('.pkm-rules-row')) {
+    const cells = [...row.children].map(c => { const r = document.createRange(); r.selectNodeContents(c); const rs = [...r.getClientRects()]; return { L: Math.min(...rs.map(x => x.left)), R: Math.max(...rs.map(x => x.right)), t: c.textContent.trim() }; });
+    for (let i = 0; i + 1 < cells.length; i++) if (cells[i + 1].L - cells[i].R < 6) out.push(cells[i].t + ' / ' + cells[i + 1].t);
+    if (cells[cells.length - 1].R > row.getBoundingClientRect().right - 4) out.push(cells[cells.length - 1].t + ' dépasse');
+  }
+  return out;
+});
+ok('règles : colonnes Grade, Booster, Pièce, Safari, Scans/j espacées, sans chevauchement' + (over.length ? ' (' + over.join(' ; ') + ')' : ''), over.length === 0);
 await rules.locator('section[aria-label="Délais selon le grade"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('sheets-regles-grades.png') });
 await rules.locator('section[aria-label="PK shop"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('sheets-regles-shop.png') });
 // 2. Fermeture glissée vers le bas.

@@ -1694,6 +1694,8 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-hh-mid { position: relative; top: -10px; }
 .pkm-ios .pkm-hh { padding-top: 26px !important; }
 .pkm-ios .pkm-hh-mid { top: -20px; }
+/* Logo Dropicards descendu de 6 px sous l'emblème du grade, qui ne bouge pas (2026-11-13, porteur). */
+.pkm-hh-mid > .pkm-hh-grade + img { position: relative; top: 6px; }
 
 /* Badge « 2XP » (2026-11-13, porteur) : couleurs pleines, sans ombre ni halo autour (le « voile ») ; un reflet brillant
    passe toutes les 3 s, seulement à l'intérieur de la bulle (calque de fond, coupé par ses bords arrondis). Au gain, le

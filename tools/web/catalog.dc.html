@@ -1321,7 +1321,7 @@
 <section aria-label="Délais selon le grade" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">⏱️</span>Plus ton grade monte, plus tu joues</h3>
 <div role="table" aria-label="Délais et scans par grade" class="pkm-rules-table">
-<div role="row" class="pkm-rules-row pkm-rules-th"><span role="columnheader">Grade</span><span role="columnheader">Booster</span><span role="columnheader">Pièce</span><span role="columnheader">Safari</span><span role="columnheader">Scans / j</span></div>
+<div role="row" class="pkm-rules-row pkm-rules-th"><span role="columnheader">Grade</span><span role="columnheader">Booster</span><span role="columnheader">Pièce</span><span role="columnheader">Safari</span><span role="columnheader">Scans/j</span></div>
 <sc-for list="{{ legal.pk.grades }}" as="lrg" hint-placeholder-count="6"><div role="row" class="{{ lrg.cls }}" aria-label="{{ lrg.aria }}"><span role="cell" class="pkm-rules-gname"><img src="{{ lrg.img }}" alt="" width="36" height="36"><span><span>{{ lrg.name }}</span><sc-if value="{{ lrg.me }}" hint-placeholder-val="{{ false }}"><b class="pkm-rules-nowtag">Grade actuel</b></sc-if></span></span><span role="cell">{{ lrg.booster }}</span><span role="cell">{{ lrg.coin }}</span><span role="cell">{{ lrg.safari }}</span><span role="cell">{{ lrg.scans }}</span></div></sc-for>
 </div>
 </section>
