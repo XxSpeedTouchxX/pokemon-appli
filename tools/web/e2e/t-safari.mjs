@@ -186,7 +186,17 @@ for (const role of ['user', 'admin']) {
     if (want === 'lock') {
       await sc.locator('button.pkm-gm-go').click(); await p4.waitForTimeout(400);
       res4.push('fermé:' + ((await p4.locator('.pkm-sf').count()) === 0));
-      await sc.screenshot({ path: shot('safari-lock.png') });
+      // Même blocage que les autres icônes verrouillées (2026-11-13, porteur) : fenêtre « Accès verrouillé » qui tremble.
+      const lw = p4.locator('section[aria-label="Grade requis"]');
+      res4.push('fenêtre:' + ((await lw.count()) === 1 && /Accès verrouillé/.test(await lw.innerText()) && /Safari éclair/.test(await lw.innerText()) && /Collectionneur/.test(await lw.innerText()) && (await lw.evaluate(e => getComputedStyle(e).animationName)) === 'pkmLockShake'));
+      await p4.screenshot({ path: shot('safari-lock.png') });
+      await lw.locator('button:has-text("Compris")').click(); await p4.waitForTimeout(400);
+      // La pièce, fermée au grade Recrue, ouvre la même fenêtre.
+      await p4.evaluate(() => localStorage.setItem('pkm-grade-force', '1')); await p4.reload({ waitUntil: 'load' }); await p4.waitForTimeout(1200);
+      await p4.evaluate(() => window.__pkm.setState({ gradeUp: null }));
+      await p4.locator('section[aria-label="Pile ou face"] button.pkm-gm-go').click(); await p4.waitForTimeout(400);
+      res4.push('pièce:' + ((await lw.count()) === 1 && /lancer la pièce/.test(await lw.innerText()) && /Chasseur/.test(await lw.innerText())));
+      await lw.locator('button:has-text("Compris")').click(); await p4.waitForTimeout(400);
     }
   }
   ok('Safari selon le grade (Chasseur fermé, puis 24, 12, 6, 4 h) : ' + res4.join(' '), res4.every(x => /:true$/.test(x)));

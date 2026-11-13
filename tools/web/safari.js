@@ -93,7 +93,7 @@
   };
   sfProto.sfOpen = function () {
     if (SF || this.st().sfOpen) return;
-    if (this.sfLocked()) { this.setState({ toast: 'Le Safari éclair s’ouvre au grade Collectionneur' }); this.flash(); return; }
+    if (this.sfLocked()) { this.gameLockOpen('safari', 'safariH'); return; }
     if (this.sfWaitMs() > 0) { this.gmNo('s'); return; }
     if (sfCloud() && this.gcNeed && this.gcNeed()) return;
     // Calque à la taille de l'app (téléphone plein écran, ou téléphone centré sur ordinateur).
@@ -262,7 +262,7 @@
       button: locked ? '🔒 Au grade ' + grade : s.sfOff && !adminTry ? 'Bientôt disponible' : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'GO',
       btnCls: 'pkm-gm-go' + (w > 0 && !busy && !locked ? ' pkm-gm-go-no' + (s.gmNoWhich === 's' ? ' pkm-gm-go-shake' : '') : '') + ((s.sfOff && !adminTry) || locked ? ' pkm-gm-go-lock' : '') + (!locked && !(s.sfOff && !adminTry) && !busy && w === 0 ? ' pkm-sf-gobtn' : ''), noIco: w > 0 && !busy && !locked,
       play: () => {
-        if (locked) { this.setState({ toast: 'Le Safari éclair s’ouvre au grade ' + grade }); this.flash(); return; }
+        if (locked) { this.gameLockOpen('safari', 'safariH'); return; }
         if (s.sfOff && !adminTry) { this.setState({ toast: 'Safari éclair arrive très bientôt !' }); this.flash(); return; }
         this.sfOpen();
       }

@@ -23,7 +23,10 @@ const ftxt = await first.innerText();
 ok('Méga-Évolution : extensions, années, progression', /\d+ extensions · 2025 →/.test(ftxt) && /\d+\/[\d\s ]+ · \d+ %/.test(ftxt));
 const tiles = first.locator('div.pkm-rise > button');
 const t0 = await tiles.first().innerText();
-ok('Bientôt : Règne Delta, sortie le 06/11/2026 (' + t0.replace(/\n/g, ' · ') + ')', /Règne Delta/.test(t0) && /Bientôt/.test(t0) && /06\/11\/2026/.test(t0));
+// Règne Delta sortie le 6 novembre 2026 ; TCGdex sans logo : celui gardé avec l'app (2026-11-13, porteur : « l'image de la
+// série Règne Delta n'est plus dispo »).
+const d0 = await tiles.first().locator('img').evaluateAll(l => l.map(i => [i.getAttribute('src'), i.complete && i.naturalWidth > 0]));
+ok('Règne Delta en tête, avec son logo (' + t0.replace(/\n/g, ' · ') + ' ; ' + JSON.stringify(d0) + ')', /Règne Delta/.test(t0) && /nov\. 2026/.test(t0) && d0.length === 1 && d0[0][0] === 'img/logo-regne-delta.webp' && d0[0][1]);
 const t1 = await tiles.nth(1).innerText();
 ok('extension : cartes et mois de sortie (' + t1.replace(/\n/g, ' · ') + ')', /\d+ cartes/.test(t1) && /(janv|févr|mars|avr|mai|juin|juil|août|sept|oct|nov|déc)/.test(t1));
 await page.screenshot({ path: shot('series-top.png') });

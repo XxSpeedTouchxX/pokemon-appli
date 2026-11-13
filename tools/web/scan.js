@@ -506,7 +506,7 @@
       hasBonus: quota.left !== Infinity && (Number(s.scanBonus) || 0) > 0, bonusText: '+' + (Number(s.scanBonus) || 0),
       bonusAria: (Number(s.scanBonus) || 0) + ' scans bonus' + (quota.left > 0 ? ', à utiliser quand tes scans du jour seront finis' : ' : touche pour ajouter 20 scans'),
       bonusCls: 'pkm-scan-bonus' + (quota.left <= 0 && (Number(s.scanBonus) || 0) >= 20 ? ' pkm-scan-bonus-go' : ''), bonusUse: () => this.scanBonusUse(),
-      hasTorch: !sealed && SCAN.hasTorch && !panel, noTorch: sealed || !SCAN.hasTorch || !!panel,
+      hasTorch: !sealed && SCAN.hasTorch && !panel, noTorch: (sealed || !SCAN.hasTorch || !!panel) && !(quota.left !== Infinity && (Number(s.scanBonus) || 0) > 0), // place libre rendue à la bulle quand le compteur bonus est là (2026-11-13)
       torchOn: !!s.scanTorch, torchLabel: s.scanTorch ? 'Éteindre la lampe' : 'Allumer la lampe',
       torchBg: s.scanTorch ? 'var(--pkm-accent)' : 'rgba(var(--pkm-ink-rgb), 0.66)', torchFg: s.scanTorch ? 'var(--pkm-on-accent)' : 'var(--pkm-white)',
       torch: () => SCAN.setTorch(this, !s.scanTorch),

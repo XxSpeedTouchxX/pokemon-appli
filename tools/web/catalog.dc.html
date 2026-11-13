@@ -1565,7 +1565,7 @@
 <button type="button" onClick="{{ scan.close }}" aria-label="Fermer le scan" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.16); border-radius: 22px; background: rgba(var(--pkm-ink-rgb), 0.66); color: var(--pkm-white); display: flex; align-items: center; justify-content: center; cursor: pointer">
 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>
 </button>
-<sc-if value="{{ scan.showLeft }}" hint-placeholder-val="{{ true }}"><span role="status" aria-label="{{ scan.leftAria }}" class="pkm-scan-left"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"></path></svg>{{ scan.leftText }}</span></sc-if><sc-if value="{{ scan.hasBonus }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ scan.bonusUse }}" aria-label="{{ scan.bonusAria }}" class="{{ scan.bonusCls }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="1.5"></rect><path d="M3 7h18v3H3zM12 7v13M12 7c-2-4-6-4-6-1 0 1.5 3 1 6 1zM12 7c2-4 6-4 6-1 0 1.5-3 1-6 1z"></path></svg>{{ scan.bonusText }}</button></sc-if>
+<sc-if value="{{ scan.showLeft }}" hint-placeholder-val="{{ true }}"><span role="status" aria-label="{{ scan.leftAria }}" class="pkm-scan-left"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"></path></svg><span class="pkm-scan-left-t">{{ scan.leftText }}</span></span></sc-if><sc-if value="{{ scan.hasBonus }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ scan.bonusUse }}" aria-label="{{ scan.bonusAria }}" class="{{ scan.bonusCls }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="1.5"></rect><path d="M3 7h18v3H3zM12 7v13M12 7c-2-4-6-4-6-1 0 1.5 3 1 6 1zM12 7c2-4 6-4 6-1 0 1.5-3 1-6 1z"></path></svg>{{ scan.bonusText }}</button></sc-if>
 <sc-if value="{{ scan.noLeft }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="flex: 1"></span></sc-if>
 <sc-if value="{{ scan.hasTorch }}" hint-placeholder-val="{{ false }}">
 <button type="button" onClick="{{ scan.torch }}" aria-label="{{ scan.torchLabel }}" aria-pressed="{{ scan.torchOn }}" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid rgba(var(--pkm-hl-rgb), 0.16); border-radius: 22px; background: {{ scan.torchBg }}; color: {{ scan.torchFg }}; display: flex; align-items: center; justify-content: center; cursor: pointer">
@@ -1887,6 +1887,8 @@
 </button>
 </sc-if>
 
+<!-- fragment: evo-fx -->
+<sc-if value="{{ evo.fx }}" hint-placeholder-val="{{ false }}"><div class="pkm-evo-fx" key="{{ evo.fxKey }}" role="status" aria-live="polite"><span class="pkm-evo-glow" aria-hidden="true"></span><img class="pkm-evo-from" src="{{ evo.fxFrom }}" alt=""><img class="pkm-evo-to" src="{{ evo.fxTo }}" alt=""><span class="pkm-evo-text"><span class="pkm-evo-t1">{{ evo.fxText }}</span><span class="pkm-evo-t2">{{ evo.fxDone }}</span></span></div></sc-if>
 <!-- fragment: games -->
 <sc-if value="{{ ui.isGames }}" hint-placeholder-val="{{ false }}">
 <div role="tablist" aria-label="Jeux" class="pkm-shop-tabs pkm-gm-tabs"><button type="button" role="tab" aria-selected="{{ gtab.pkOn }}" onClick="{{ gtab.goPk }}" class="{{ gtab.pkCls }}">Jeux à PK</button><button type="button" role="tab" aria-selected="{{ gtab.dexOn }}" onClick="{{ gtab.goDex }}" class="{{ gtab.dexCls }}">Pokédex</button></div>
@@ -2068,7 +2070,6 @@
 </section>
 </sc-if>
 </div>
-<sc-if value="{{ evo.fx }}" hint-placeholder-val="{{ false }}"><div class="pkm-evo-fx" key="{{ evo.fxKey }}" role="status" aria-live="polite"><span class="pkm-evo-glow" aria-hidden="true"></span><img class="pkm-evo-from" src="{{ evo.fxFrom }}" alt=""><img class="pkm-evo-to" src="{{ evo.fxTo }}" alt=""><span class="pkm-evo-text"><span class="pkm-evo-t1">{{ evo.fxText }}</span><span class="pkm-evo-t2">{{ evo.fxDone }}</span></span></div></sc-if>
 </section>
 </sc-if>
 </sc-if>

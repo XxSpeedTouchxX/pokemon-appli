@@ -222,20 +222,12 @@
   // Évolution et méga-évolution : depuis le 2026-10-28, chaque Pokémon se débloque dans le Pokédex (dex.js, dexUnlock),
   // avec la même animation d'évolution (paFx) quand sa forme précédente est déjà à toi.
   let paFxTimer = null;
-  // Centre le calque d'évolution dans la partie visible de l'écran, au-dessus de la barre du bas (2026-11-01, porteur :
-  // « l'écriture "Félicitations… a évolué en…" est cachée par la barre de l'appli, au niveau du scan »). Avant, il était
-  // centré sur tout l'écran (scrollIntoView) : sur un téléphone de 667 à 740 px de haut, le texte passait sous la barre.
-  // Si le calque est plus haut que la place libre, son bas (le texte) reste au-dessus de la barre.
-  const paFxCenter = el => {
-    let box = el.parentElement;
-    while (box && box !== document.body) { const o = getComputedStyle(box).overflowY; if ((o === 'auto' || o === 'scroll') && box.scrollHeight > box.clientHeight) break; box = box.parentElement; }
-    if (!box || box === document.body) box = document.scrollingElement || document.documentElement;
-    const nav = document.querySelector('nav[aria-label="Navigation principale"]'), vh = window.innerHeight;
-    const navTop = nav && nav.getBoundingClientRect().height ? nav.getBoundingClientRect().top : vh;
-    const boxTop = box === document.scrollingElement || box === document.documentElement ? 0 : Math.max(0, box.getBoundingClientRect().top);
-    const top = boxTop + 8, bottom = Math.min(vh, navTop) - 8, r = el.getBoundingClientRect(), h = r.height;
-    const want = h <= bottom - top ? top + (bottom - top - h) / 2 : bottom - h;
-    box.scrollBy({ top: r.top - want, behavior: 'smooth' });
+  // L'évolution s'affiche en plein écran, au milieu de la partie visible (games.css, 2026-11-13, porteur : « que
+  // l'utilisateur soit redirigé sur l'animation de l'évolution en direct pour ne pas qu'il la loupe »). Derrière le
+  // calque, la page remonte sur le Pokédex dessiné : à la fin, on y voit la nouvelle forme.
+  const paFxBehind = () => {
+    const dev = document.querySelector('.pkm-dex-device') || document.querySelector('section[aria-label="Pokédex"]');
+    if (dev) dev.scrollIntoView({ block: 'center', behavior: paStill() ? 'auto' : 'smooth' });
   };
   // 8,2 s depuis le 2026-11-01 (porteur : « 1 s de plus après les évolutions, on ne voit pas assez l'évolution ») :
   // mêmes instants qu'avant, la nouvelle forme reste 1 s de plus à l'écran (games.css, pkmEvo*).
@@ -247,16 +239,9 @@
     // d'animation de méga-évolution pour Méga-Flagadoss ») : elle se ferme, l'évolution se voit en entier.
     this.setState(Object.assign({ paFx: { from: from, to: to, n: Date.now() } }, this.st().gradeUp ? { gradeUp: null } : {}));
     this.sfxEvo(); // son et musique d'évolution choisis (sfx.js, 2026-11-01)
-    // L'animation se joue en haut du Pokédex (calque de 520 px au plus) : l'écran y remonte dès l'appui, d'où qu'il
-    // vienne (bouton de la fiche, bouton vert du Pokédex dessiné) (2026-10-29, puis 2026-10-31, porteur : « l'écran ne
-    // remonte pas »). On attend que le calque soit affiché (quelques images au plus) avant de le centrer.
-    let tries = 0;
-    const focus = () => {
-      const el = document.querySelector('.pkm-evo-fx');
-      if (!el && ++tries < 30) { requestAnimationFrame(focus); return; }
-      if (el) paFxCenter(el);
-    };
-    requestAnimationFrame(focus);
+    // Le calque est en plein écran, quel que soit l'endroit de l'appui (bouton de la fiche en bas, bouton vert du Pokédex
+    // dessiné) ; la page remonte derrière lui sur le Pokédex (paFxBehind).
+    requestAnimationFrame(() => requestAnimationFrame(paFxBehind));
     // 7,2 s (2026-10-31, porteur : « au moins 3 s de plus, et 2 s de plus pour voir la nouvelle évolution ») : la
     // nouvelle forme reste près de 3 s à l'écran avant la fin (games.css, pkmEvoTo).
     clearTimeout(paFxTimer);

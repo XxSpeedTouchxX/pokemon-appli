@@ -9,15 +9,16 @@
   // Ce module partage la portée des autres : ses noms commencent par FI_ ou fi.
   const fiProto = Component.prototype;
   // Périodes de l'historique (2026-10-31, photo du porteur) : 1S, 1M, 6M, 1A, MAX (MAX par défaut) ; 3M retiré le
-  // 2026-11-13 (porteur).
-  const FI_PER = [['1S', 7, '1 semaine'], ['1M', 30, '1 mois'], ['6M', 182, '6 mois'], ['1A', 365, '1 an'], ['MAX', 0, 'max']];
+  // 2026-11-13 (porteur) ; puis (même jour, porteur) : 3 bulles seulement, 1S, 1M et COMPLET (l'ancien « MAX », par
+  // défaut) ; 6M et 1A retirées.
+  const FI_PER = [['1S', 7, '1 semaine'], ['1M', 30, '1 mois'], ['COMPLET', 0, 'historique complet']];
   const FI_W = 300, FI_H = 120;
 
   // Ouvrir la fiche : l'article rejoint le catalogue de l'app s'il n'y est pas (comme openTcg).
   // opts.from === 'binder' : ouverte depuis « Mon classeur », dont la pastille montre la valeur de mon exemplaire.
   fiProto.fiOpen = function (id, opts) {
     const ex = this.st().extra || [], p = this.catalog().find(q => q.id === id);
-    this.setState(Object.assign({ fiId: id, fiPer: 'MAX', fiCond: false, fiZoom: false, fiEtat: null, fiFrom: opts && opts.from || '' }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
+    this.setState(Object.assign({ fiId: id, fiPer: 'COMPLET', fiCond: false, fiZoom: false, fiEtat: null, fiFrom: opts && opts.from || '' }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
   };
   fiProto.fiClose = function () { this.setState({ fiId: null, fiZoom: false, fiEtat: null }); };
 
@@ -279,7 +280,7 @@
         toggle: () => this.setState({ fiEtat: on ? null : g.key }) };
     });
     // Courbe : valeur de mes exemplaires (selon leur état) ; ligne du prix d'achat moyen s'il est connu.
-    const per = FI_PER.some(q => q[0] === s.fiPer) ? s.fiPer : 'MAX', known = st.qty - st.unk;
+    const per = FI_PER.some(q => q[0] === s.fiPer) ? s.fiPer : 'COMPLET', known = st.qty - st.unk;
     const hist = this.fiHistory(p, x, k, per, adj ? mine / k : 1, owned && known > 0 && st.cost > 0 ? st.cost / known : 0);
     const eg = groups.find(g => g.key === s.fiEtat);
     const etatPick = eg ? {

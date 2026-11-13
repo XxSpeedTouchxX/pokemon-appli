@@ -357,7 +357,7 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fh-area { transition: fill 0.45s; }
 .pkm-fh-x { position: relative; height: 15px; margin-left: 58px; font-size: 11px; color: #9AA8C3; }
 .pkm-fh-x span { position: absolute; white-space: nowrap; }
-.pkm-fh-per { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
+.pkm-fh-per { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 2px; } /* 3 bulles : 1S, 1M, COMPLET (2026-11-13, porteur) */
 .pkm-fh-per button { height: 34px; min-width: 0; padding: 0; border: 1px solid; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.15s; }
 .pkm-fh-per button:active { transform: scale(0.94); }
 .pkm-fh-per button.pkm-fh-off { opacity: 0.38; cursor: default; }
@@ -494,6 +494,11 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 @keyframes pkmEvoT1 { 0%, 54.44% { opacity: 1; } 57.95%, 100% { opacity: 0; } }
 @keyframes pkmEvoT2 { 0%, 56.2% { opacity: 0; transform: translateY(6px); } 61.46%, 100% { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .pkm-evo-fx * { animation: none !important; } }
+/* Évolution en plein écran (2026-11-13, porteur : « j'ai fait évoluer Chenipan depuis le bas du Pokédex, l'évolution s'est
+   faite en haut et je ne l'ai pas vue ») : le calque ne dépend plus de l'endroit où l'on est dans la page. Il est posé
+   au milieu de la partie visible, au-dessus de la barre du bas, et le reste de l'écran est assombri. */
+.pkm-evo-fx { position: fixed; left: 50%; right: auto; top: calc(50% - 40px); width: min(calc(100vw - 24px), 440px); height: min(520px, calc(100vh - 170px)); transform: translate(-50%, -50%); z-index: 70; border-radius: 28px; box-shadow: 0 0 0 100vmax rgba(5, 9, 18, 0.78), 0 18px 60px rgba(0, 0, 0, 0.6); }
+@supports (height: 100dvh) { .pkm-evo-fx { height: min(520px, calc(100dvh - 170px)); } }
 .pkm-pa-head { position: relative; z-index: 1; height: 30px; margin-top: 7px; display: flex; align-items: center; justify-content: flex-end; } /* 7 px sous les PK : les deux pastilles ne se touchent plus (2026-10-28) */
 
 /* Didacticiel (2026-10-25, refait le 2026-10-28) : calque construit par tuto.js. Cadre jaune animé autour de ce que
@@ -1147,6 +1152,11 @@ html:has(.pkm-lockw-wrap), html:has(.pkm-lockw-wrap) body { overflow: hidden; ov
 /* ——— Scan (2026-11-08, porteur) : bulle des scans disponibles, consigne sous le cadre, aide illustrée ——— */
 .pkm-scan-left { flex: 0 1 auto; min-width: 0; height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(var(--pkm-ink-rgb), 0.66); border: 1px solid rgba(var(--pkm-hl-rgb), 0.16); color: var(--pkm-t1); font-size: 14.5px; font-weight: 700; white-space: nowrap; }
 .pkm-scan-left svg { flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Texte toujours dans la bulle (2026-11-13, porteur : « l'écriture du nombre de scans est hors de la bulle ») : à côté
+   du compteur de scans bonus, la bulle rétrécit et son texte passe sur deux lignes (« 200 scans / disponibles »). */
+.pkm-scan-left { overflow: hidden; padding: 0 14px 0 12px; }
+.pkm-scan-left-t { min-width: 0; white-space: normal; line-height: 1.1; font-size: 14px; text-align: center; overflow-wrap: anywhere; }
+@media (max-width: 359px) { .pkm-scan-left { gap: 5px; padding: 0 10px; } .pkm-scan-left svg { width: 15px; height: 15px; } .pkm-scan-left-t { font-size: 12px; } }
 .pkm-scan-hint { position: relative; z-index: 2; max-width: 100%; padding: 6px 12px; border-radius: 999px; background: rgba(var(--pkm-ink-rgb), 0.7); color: var(--pkm-t1); font-size: 13px; font-weight: 600; text-align: center; }
 .pkm-scan-helpbtn { justify-self: end; height: 52px; padding: 0 14px; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(var(--pkm-hl-rgb), 0.18); border-radius: 16px; background: rgba(var(--pkm-ink-rgb), 0.66); color: var(--pkm-white); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
 .pkm-scan-helpbtn svg { fill: none; stroke: var(--pkm-accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }

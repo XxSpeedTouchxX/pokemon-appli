@@ -58,6 +58,34 @@ class Prices(unittest.TestCase):
         # Seulement un prix 1re édition chez TCGplayer : pas de repère, groupe holo.
         self.assertEqual(prices(card(cm, {"1st-edition-holofoil": {"marketPrice": 12000}}, variants(holo=True)), 0.9)[8], "h")
 
+    def test_ex_era_ex_card_uses_normal_group(self):
+        # 2026-11-13 (porteur : « Dracolosse d'Île des Dragons à 27 € sur Dropicards, vers 400 € en ventes réussies ») :
+        # une carte « ex » de l'époque EX n'existe pas en reverse, sa cote est le groupe normal de Cardmarket.
+        cm = {"trend": 184.72, "low": 120, "avg30": 170, "avg7": 190, "avg1": 200,
+              "trend-holo": 31.89, "avg30-holo": 22.23, "avg7-holo": 27.25, "avg1-holo": 9.99}
+        c = dict(card(cm, variants=variants(holo=True)), id="ex15-91", name="Dracolosse ex δ", set={"id": "ex15"})
+        p = prices(c, 0.9)
+        self.assertEqual((p[0], p[2], p[5], p[7], p[8]), (184.72, 170, 190, 31.89, "n"))
+        self.assertIn("ex15-91 31.89→184.72", build_index.EX_SWITCHED)
+        # Groupe normal vide (sous 1 €) : groupe holo gardé.
+        self.assertEqual(prices(dict(c, pricing={"cardmarket": dict(cm, trend=0.74)}), 0.9)[8], "h")
+        # « -ex » d'Écarlate et Violet, ou carte holo d'une autre époque : règle d'origine (groupe holo).
+        self.assertEqual(prices(dict(c, id="sv03.5-199", name="Dracaufeu-ex", set={"id": "sv03.5"}), 0.9)[8], "h")
+        self.assertEqual(prices(dict(c, id="ex15-5", name="Milobellus δ"), 0.9)[8], "h")
+        # Repère TCGplayer présent : c'est lui qui départage (règle du 2026-11-01).
+        self.assertEqual(prices(dict(c, pricing={"cardmarket": cm, "tcgplayer": {"holofoil": {"marketPrice": 30}}}), 0.9)[8], "h")
+
+    def test_price_audit(self):
+        f = {k: i for i, k in enumerate(FIELDS)}
+        ok = row("a-1", "Carte sûre", "a", "1", "", "", (50, 40, 50, 55, "2026-11-13", 50, 50, 60, "n", 0))
+        grp = row("ex7-99", "Rocket's Mewtwo ex", "ex7", "99", "", "", (2012, None, 130, None, "2026-11-13", 140, None, 20.5, "n", 0))
+        tcp = row("b-2", "Celebi", "b", "2", "", "", (970, 500, 960, 8573, "2026-11-13", 980, 900, None, "n", 0))
+        cheap = row("c-3", "Petite", "c", "3", "", "", (2, 1, 2, 9, "2026-11-13", 2, 2, 0.3, "n", 0))
+        out = build_index.price_audit([ok, grp, tcp, cheap])
+        self.assertEqual(len(out), 2)
+        self.assertTrue(out[0].startswith("b-2 Celebi : cote 970") and "TCGplayer 8573" in out[0])
+        self.assertTrue(out[1].startswith("ex7-99") and "autre groupe 20.5" in out[1])
+
     def test_holo_only_without_holo_bucket(self):
         # Carte holo seulement mais seul le groupe normal est coté (vieilles holos) : c'est son prix, pas un doute
         # (2026-10-11 : marquées douteuses avant, 2 858 cartes « cote à confirmer » sans raison).

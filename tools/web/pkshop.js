@@ -95,10 +95,19 @@
   }
   // Fenêtre « Tu dois d'abord déverrouiller le grade … ».
   shopProto.shopLockOpen = function (it) { this.setState({ shopLock: { g: it.minGrade, kind: it.kind } }); };
+  // Jeu fermé à ce grade (Safari éclair, pièce ; 2026-11-13, porteur : « exactement la même animation de blocage que
+  // pour les autres icônes ») : même fenêtre « Accès verrouillé », qui arrive en tremblant et bloque l'écran derrière.
+  // key : avantage du grade qui ouvre le jeu (safariH, coinH).
+  shopProto.gameLockOpen = function (kind, key) {
+    const g = PF_GRADES.findIndex(x => x[key]);
+    this.setState({ shopLock: { g: g < 0 ? PF_GRADES.length - 1 : g, kind: kind }, toast: null });
+  };
   // Fenêtre « Accès verrouillé », pour tout l'app (PK shop, Radar, classeur plein ; 2026-11-07).
   const shopLockText = lk => {
     const g = shopGradeName(lk.g);
     if (lk.kind === 'radar') return 'Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « ' + g + ' ».';
+    if (lk.kind === 'safari') return 'Tu ne peux pas jouer au Safari éclair tant que tu n’as pas atteint le grade « ' + g + ' ».';
+    if (lk.kind === 'coin') return 'Tu ne peux pas lancer la pièce tant que tu n’as pas atteint le grade « ' + g + ' ».';
     if (lk.kind === 'binder') return 'Ton classeur est plein : ' + lk.lim + ' ' + lk.what + ' au maximum au grade ' + shopGradeName(lk.cur) + '. Tu dois d’abord déverrouiller le grade ' + g + ' pour en ajouter plus.';
     return 'Tu dois d’abord déverrouiller le grade ' + g + ' pour avoir accès à ' + (lk.kind === 'ticket' ? 'cette loterie.' : 'cet item.');
   };

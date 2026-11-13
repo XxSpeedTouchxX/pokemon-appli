@@ -100,6 +100,22 @@ TCP_VARIANTS = ["normal", "holofoil", "reverse-holofoil", "unlimited-holofoil", 
 # Repère d'une carte holo seulement : holo illimitée, jamais la 1re édition ni la reverse.
 TCP_HOLO_REF = ["holofoil", "unlimited-holofoil"]
 GROUP_GAP = 2.0  # deux groupes de prix Cardmarket à plus de 2 fois d'écart : le repère TCGplayer départage
+# Cartes « ex » de l'époque EX (2003-2007 : Dracolosse ex δ, Rayquaza ex δ…), 2026-11-13 (porteur : « le Dracolosse
+# d'Île des Dragons est à 27 € alors que les ventes réussies eBay sont vers 400 € »). Elles n'existent jamais en reverse :
+# chez Cardmarket, la carte est dans le groupe normal ; le groupe « -holo » ne contient que des annonces mal rangées
+# (Dracolosse ex δ : 31,89 € contre 184,72 € pour le groupe normal). Les 117 autres « ex » de l'époque, que TCGdex ne
+# dit pas « holo seulement », étaient déjà cotés sur le groupe normal. Groupe normal sous 1 € : vide, groupe holo gardé.
+EX_ERA_SET = re.compile(r"^(ex\d+|exu|pop\d+|np|tk-ex-)")
+EX_CARD = re.compile(r"(?<![\w-])ex(?![\w-])")  # « Dracolosse ex δ », pas « Dracaufeu-ex » (Écarlate et Violet)
+EX_MIN_NORMAL = 1.0
+EX_SWITCHED = []  # cartes « ex » de l'époque EX passées au groupe normal, pour le relevé du jour
+
+
+def ex_era_ex(card):
+    """Carte « ex » de l'époque EX (jamais en reverse) : son prix Cardmarket est le groupe normal."""
+    cid = str(card.get("id") or "")
+    sid = str((card.get("set") or {}).get("id") or (cid.rsplit("-", 1)[0] if "-" in cid else ""))
+    return bool(EX_ERA_SET.match(sid)) and bool(EX_CARD.search(str(card.get("name") or "")))
 # Raretés des cartes en anglais, dites comme dans le catalogue français.
 RARITY_FR = {
     "common": "Commune", "uncommon": "Peu Commune", "rare": "Rare", "rare holo": "Rare Holo", "holo rare": "Holo Rare",
@@ -167,6 +183,8 @@ def prices(card, rate):
       plus de 2 fois et que le prix TCGplayer de la holo illimitée est nettement plus proche du groupe normal :
       Dracaufeu base1-4, groupe holo 123,63 €, groupe normal 497,57 €, TCGplayer 854,50 € → groupe normal. Le prix
       TCGplayer ne sert qu'à choisir le groupe Cardmarket : la cote reste 100 % Cardmarket.
+    - Carte « ex » de l'époque EX (2026-11-13), sans repère TCGplayer : groupe normal, la carte n'existant pas en reverse
+      (Dracolosse ex δ ex15-91 : groupe normal 184,72 €, groupe holo 31,89 €).
     - Carte avec une version reverse : « -holo » est le prix de la reverse ; cote du groupe normal, reverse à part (cmh).
     - Sinon : groupe normal s'il a une tendance, sinon groupe holo."""
     pr = card.get("pricing") or {}
@@ -191,6 +209,11 @@ def prices(card, rate):
             tn, th = num(cm.get("trend")), num(cm.get("trend-holo"))
             if max(tn, th) >= GROUP_GAP * min(tn, th) and abs(math.log(tn / ref)) < abs(math.log(th / ref)):
                 sfx = ""
+        elif has_n and has_h and ex_era_ex(card):
+            tn, th = num(cm.get("trend")), num(cm.get("trend-holo"))
+            if tn >= EX_MIN_NORMAL and max(tn, th) >= GROUP_GAP * min(tn, th):
+                sfx = ""
+                EX_SWITCHED.append(f"{card.get('id')} {th}→{tn}")
     else:
         sfx = "" if has_n or not has_h else "-holo"
     trend, low, avg30, avg7, avg1 = (num(cm.get(k + sfx)) for k in ("trend", "low", "avg30", "avg7", "avg1"))
@@ -500,6 +523,30 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
     return n, report
 
 
+def price_audit(cards):
+    """Relevé des cotes à vérifier (2026-11-13, porteur : « regarde chaque carte pour qu'il n'y ait pas de loupés »),
+    écrit dans le journal du calcul : carte de 20 € et plus dont les deux groupes de prix Cardmarket s'écartent de 3 fois
+    ou plus, ou dont la cote s'écarte de 4 fois ou plus du prix TCGplayer. Rien n'est changé : c'est une liste de travail,
+    triée par montant."""
+    f = {k: i for i, k in enumerate(FIELDS)}
+    out = []
+    for c in cards:
+        v = sorted(x for x in (c[f["cm"]], c[f["avg7"]], c[f["avg30"]]) if x)
+        cote = v[len(v) // 2] if v else None
+        if not cote:
+            continue
+        other, tcp = c[f["cmh"]], c[f["tcp"]]
+        why = []
+        if other and max(cote, other) >= 20 and max(cote, other) >= 3 * min(cote, other):
+            why.append(f"autre groupe {other}")
+        if tcp and max(cote, tcp) >= 20 and max(cote, tcp) >= 4 * min(cote, tcp):
+            why.append(f"TCGplayer {tcp}")
+        if why:
+            out.append((max([cote] + [x for x in (other, tcp) if x]), f"{c[f['id']]} {c[f['name']]} : cote {cote} ({c[f['cmv']] or '-'}"
+                        + (", fichiers Cardmarket" if c[f["cmf"]] == 1 else "") + "), " + ", ".join(why)))
+    return [t for _, t in sorted(out, key=lambda x: -x[0])]
+
+
 def compare_catalog(prev, doc):
     """Anomalies du nouveau catalogue face à celui de la veille : (erreurs, avertissements)."""
     errors, warnings = [], []
@@ -760,6 +807,12 @@ def main():
                                        load(Path(args.previous) if args.previous else out))
         stats["cardsCmFiles"] = n_cm
         print(f"Cardmarket (fichiers publics) : {n_cm} cartes complétées · " + " · ".join(report))
+    if EX_SWITCHED:
+        print(f"Cartes « ex » de l'époque EX cotées sur le groupe normal ({len(EX_SWITCHED)}) : " + ", ".join(EX_SWITCHED))
+    audit = price_audit(cards)
+    print(f"Cotes à vérifier ({len(audit)}, 20 € et plus : groupes Cardmarket à 3 fois d'écart ou plus, ou TCGplayer à 4 fois) :")
+    for line in audit[:150]:
+        print("  " + line)
     stats.update(coverage(cards, sets))
     if ptcg_report:
         print("pokemontcg.io, par extension :", " · ".join(ptcg_report))

@@ -334,7 +334,9 @@ patch('<section aria-label="Tickets du tirage au sort" class="pkm-shop-tks">', F
 patch(FRAG['profile-trainer'] + '\n' + FRAG['profile-notif'], FRAG['premium-banner'] + FRAG['profile-trainer'] + '\n' + FRAG['profile-notif']);
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
-patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-unlock'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Évolution en plein écran (2026-11-13, porteur) : calque posé à la racine de l'app, au-dessus de l'en-tête et de la
+// barre du bas, pour qu'on ne la rate jamais, d'où qu'on ait appuyé (fragment evo-fx).
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-unlock'] + FRAG['evo-fx'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Passage de grade (2026-10-16) : animation façon « promotion » (profile.js, games.css).
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['grade-up'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Formulaire d'ajout (2026-10-21, demande du porteur) : tient dans l'écran et défile jusqu'au bouton (il dépassait
