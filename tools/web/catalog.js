@@ -129,7 +129,10 @@
     return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
   }
   const coteSpread = (cm, a30, a7) => { const k = [cm, a30, a7].filter(coteNum); return k.length > 1 ? Math.max(...k) / Math.min(...k) : 1; };
-  function coteOf(r, F) { return TCG.dup.has(r[F.id]) ? 0 : coteMed(r[F.cm], r[F.avg30], r[F.avg7]); }
+  // Cote « à confirmer » plus de 3 fois au-dessus de TCGplayer (c30 = 1, tools/tcgdex/build_index.py, cap_doubtful ;
+  // 2026-11-13, « go » du porteur) : moyenne 30 jours de Cardmarket (Dracaufeu ex : 863 € au lieu de 1 867 €).
+  const coteC30 = (r, F) => F.c30 !== undefined && r[F.c30] === 1 && coteNum(r[F.avg30]);
+  function coteOf(r, F) { return TCG.dup.has(r[F.id]) ? 0 : coteC30(r, F) ? r[F.avg30] : coteMed(r[F.cm], r[F.avg30], r[F.avg7]); }
   // Marché assez régulier pour figurer dans « Les plus chères ».
   const coteSteady = (r, F) => coteSpread(r[F.cm], r[F.avg30], r[F.avg7]) <= COTE_SPREAD;
   // Cote confirmée (2026-11-01, porteur : « il en manque dans Les plus chères ») : marché mince (cote douteuse ou
@@ -218,7 +221,7 @@
       // Cote selon la version (2026-10-11) : cmv = groupe de prix de cm (« n » normal, « h » holo), cmh = tendance de
       // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
       cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1 && !coteConfirmed(r, F),
-      dup: !!(TCG.dup && TCG.dup.has(id)),
+      dup: !!(TCG.dup && TCG.dup.has(id)), c30: coteC30(r, F),
       // Produit Cardmarket (lien direct de la fiche) et nom anglais (recherche eBay) : 2026-11-11, champs cmid et en
       // du catalogue (absents des catalogues plus anciens).
       cmid: F.cmid !== undefined && r[F.cmid] ? r[F.cmid] : null, en: F.en !== undefined && r[F.en] ? String(r[F.en]) : '',
@@ -319,7 +322,7 @@
   proto.cote = function (p) {
     if (!p || !p.tcg) return baseCote.call(this, p);
     if (p.dup) return null;
-    const v = coteMed(p.cm, p.avg30, p.avg7);
+    const v = p.c30 && coteNum(p.avg30) ? p.avg30 : coteMed(p.cm, p.avg30, p.avg7);
     return v > 0 ? v : null;
   };
   // Date du jour (2026-10-11) : la logique de la maquette comptait depuis le 3 octobre 2026 (today() figé), d'où des
@@ -511,6 +514,7 @@
       it.sources = it.sources.filter(so => so.label !== 'TCGplayer');
       it.sources.forEach((so, i) => { so.border = x.line(i); });
       it.coteRule = p.dup ? 'Cote à confirmer : TCGdex donne la même cote Cardmarket à plusieurs cartes de cette extension (rattachement erroné). Aucune cote n’est comptée pour cette carte.'
+        : p.c30 ? 'Cote à confirmer : la tendance Cardmarket de cette carte est plus de 3 fois au-dessus de son prix TCGplayer (quelques ventes très chères, souvent des cartes gradées). La cote retenue est la moyenne des ventes Cardmarket sur 30 jours.'
         : typeof p.cm === 'number' ? 'Cote Dropicards = Cardmarket uniquement : médiane de la tendance et des moyennes 7 et 30 jours de cette version. Une médiane écarte un pic isolé ; le prix demandé est affiché, jamais compté. Les ventes réussies eBay s’ajouteront dès qu’un accès officiel sera ouvert.' + (coteSpread(p.cm, p.avg30, p.avg7) > COTE_SPREAD ? ' Marché peu actif : les prix Cardmarket varient fortement, cote à confirmer.' : '')
           : 'Pas encore de prix Cardmarket pour cette carte : pas de cote pour l’instant.';
       if (it.noCote) it.release = 'Pas encore de prix Cardmarket pour cette carte. Tu peux quand même l’ajouter à ta collection.';
@@ -523,7 +527,8 @@
         it.sources.forEach((so, i) => { so.border = x.line(i); });
       }
       it.doubt = !!p.doubt;
-      it.doubtText = 'Cote à confirmer : les prix Cardmarket de cette carte s’écartent anormalement (peu de ventes ou annonce isolée). Vérifie les ventes réussies avant de te fier au chiffre.';
+      it.doubtText = p.c30 ? 'Cote à confirmer : la tendance Cardmarket est plus de 3 fois au-dessus du prix TCGplayer (quelques ventes très chères). La cote retenue est la moyenne Cardmarket sur 30 jours.'
+        : 'Cote à confirmer : les prix Cardmarket de cette carte s’écartent anormalement (peu de ventes ou annonce isolée). Vérifie les ventes réussies avant de te fier au chiffre.';
       const soon = (((TCG.doc || {}).stats || {}).setsPriceSoon || []);
       if (it.noCote && soon.some(z => (z.id || z) === p.set)) it.release = 'Cote à venir : extension sortie récemment, pas encore de prix Cardmarket pour cette carte. Tu peux déjà l’ajouter à ta collection.';
       const notes = [];

@@ -616,6 +616,37 @@
   // pour essai seulement (?sonpa=1 à 5).
   const SFX_PA_DEFAULT = 'gouttes';
 
+  // ——— Safari éclair : bonne et mauvaise réponse, perte de PK (safari.js ; 2026-11-13, porteur : « un bruit de
+  // satisfaction pour dire bonne réponse et un bruit "décevant" pour une mauvaise réponse, propose-moi des bruits
+  // différents ») ———
+  // Sons très courts (0,1 à 0,4 s) : ils se suivent vite pendant la partie, surtout en Difficile. 5 paires au choix ;
+  // ?sonsafari=1 à 5 pour en essayer une (0 = aucun).
+  const SFX_SF = [
+    { id: 'cloche', name: 'Clochette et bourdon', desc: 'Bonne réponse : deux notes de clochette qui montent (« ding-ding »). Erreur : un petit bourdon grave et bref (« bzz »).',
+      ok: (ac, out, t0) => { sfxBell(ac, out, sfxHz(19), t0, 0.35, 0.07, [1, 2.0, 3.01], [1, 0.3, 0.1]); sfxBell(ac, out, sfxHz(26), t0 + 0.07, 0.4, 0.07, [1, 2.0, 3.01], [1, 0.3, 0.1]); },
+      ko: (ac, out, t0) => { sfxTone(ac, out, 'sawtooth', 110, t0, 0.22, 0.05, 0.005, 92); sfxTone(ac, out, 'square', 116, t0, 0.22, 0.025, 0.005, 96); } },
+    { id: 'bulle', name: 'Bulle et plouf', desc: 'Bonne réponse : une bulle qui éclôt vers l’aigu (« bloop »). Erreur : une bulle qui retombe dans l’eau (« bloup », vers le grave).',
+      ok: (ac, out, t0) => { sfxTone(ac, out, 'sine', 380, t0, 0.1, 0.2, 0.004, 1150); sfxTone(ac, out, 'sine', 900, t0 + 0.08, 0.08, 0.08, 0.003, 1700); },
+      ko: (ac, out, t0) => { sfxTone(ac, out, 'sine', 520, t0, 0.2, 0.2, 0.004, 150); sfxHiss(ac, out, t0 + 0.05, 0.14, 0.05, 'lowpass', 900, 300, 0.7, 0.01); } },
+    { id: 'arcade', name: 'Arcade', desc: 'Bonne réponse : une pièce de jeu rétro (deux notes rapides qui montent). Erreur : deux « bips » graves qui descendent.',
+      ok: (ac, out, t0) => { sfxTone(ac, out, 'square', sfxHz(14), t0, 0.06, 0.04, 0.002); sfxTone(ac, out, 'square', sfxHz(19), t0 + 0.06, 0.16, 0.04, 0.002); },
+      ko: (ac, out, t0) => { sfxTone(ac, out, 'square', sfxHz(-14), t0, 0.1, 0.04, 0.002); sfxTone(ac, out, 'square', sfxHz(-19), t0 + 0.12, 0.16, 0.04, 0.002); } },
+    { id: 'cristal', name: 'Cristal et trombone', desc: 'Bonne réponse : un petit arpège de cristal, brillant. Erreur : un « wouah-wouah » de trombone triste, très court.',
+      ok: (ac, out, t0) => [15, 19, 22].forEach((k, i) => sfxBell(ac, out, sfxHz(k + 12), t0 + i * 0.045, 0.4, 0.05, [1, 2.0, 3.0], [1, 0.25, 0.1])),
+      ko: (ac, out, t0) => { sfxTone(ac, out, 'triangle', sfxHz(-7), t0, 0.16, 0.16, 0.01, sfxHz(-8)); sfxTone(ac, out, 'triangle', sfxHz(-9), t0 + 0.17, 0.26, 0.16, 0.01, sfxHz(-12)); } },
+    { id: 'pop', name: 'Pop et toc', desc: 'Bonne réponse : un « pop » rond et un petit tintement. Erreur : un « toc » sourd, comme sur du bois.',
+      ok: (ac, out, t0) => { sfxPop(ac, out, t0, 0.35); sfxBell(ac, out, sfxHz(24), t0 + 0.05, 0.3, 0.05, [1, 2.0], [1, 0.2]); },
+      ko: (ac, out, t0) => { sfxTone(ac, out, 'sine', 190, t0, 0.09, 0.35, 0.002, 120); sfxHiss(ac, out, t0, 0.05, 0.12, 'bandpass', 700, 400, 2, 0.001); } }
+  ];
+  // Défaut (en attendant le choix du porteur) : « Clochette et bourdon ».
+  const SFX_SF_DEFAULT = 'cloche';
+  // Perte de PK à la fin d'une partie (pa.js, pkFlyLoss) : des gouttes qui tombent de plus en plus grave, puis un coup
+  // sourd et une petite note qui descend, au rythme des gemmes qui quittent le solde.
+  const sfxLossPlay = (ac, out, t0) => {
+    for (let i = 0; i < 6; i++) sfxTone(ac, out, 'sine', 1100 - i * 120, t0 + 0.12 + i * 0.12, 0.09, 0.12, 0.002, (1100 - i * 120) * 0.6);
+    sfxTone(ac, out, 'sine', 140, t0 + 0.9, 0.3, 0.3, 0.004, 70);
+    sfxTone(ac, out, 'triangle', sfxHz(-5), t0 + 0.95, 0.5, 0.08, 0.02, sfxHz(-10));
+  };
   // Choix du porteur (2026-11-01, « c'est ok pour 0-reference-suspense-et-lumiere ») : la musique « Suspense et
   // lumière » seule, sans son d'évolution par-dessus.
   const SFX_EVO_DEFAULT = null, SFX_MUSIC_DEFAULT = 'suspense';
@@ -628,6 +659,9 @@
     // Passage de grade : crête vers −3 dBFS (moment fort, plus présent que les autres sons).
     'bo-doux': 1.1, 'bo-pop': 1.1, 'bo-carillon': 2.6,
     'ul-clic': 1.1, 'ul-souffle': 1.1, 'ul-carillon': 1.25, 'ul-bulle': 1, 'ul-clochette': 1.25,
+    // Safari éclair (sons courts, crête vers −6 dBFS, réglés sur leur rendu) et perte de PK.
+    'sf-cloche-ok': 3.3, 'sf-cloche-ko': 7.9, 'sf-bulle-ok': 2.6, 'sf-bulle-ko': 2.5, 'sf-arcade-ok': 9.3, 'sf-arcade-ko': 9.9,
+    'sf-cristal-ok': 3.8, 'sf-cristal-ko': 2.2, 'sf-pop-ok': 1.45, 'sf-pop-ko': 1.6, loss: 1.26,
     'gr-origine': 0.55, 'gr-couronnement': 0.45, 'gr-celeste': 0.5, 'gr-trailer': 0.45, 'gr-arcade': 1.5, 'gr-tonnerre': 0.45 };
   const SFX_MUSIC_LEVEL = 0.75;
 
@@ -661,6 +695,13 @@
   // Joue dans ac (temps réel ou hors ligne) : kind = 'coin', 'evo' ou 'music', id = identifiant de la liste.
   function sfxSchedule(ac, dest, kind, id, t0, n) {
     if (kind === 'coin') { sfxCoin(ac, sfxBus(ac, dest, SFX_GAIN.coin), t0); return true; }
+    if (kind === 'loss') { sfxLossPlay(ac, sfxBus(ac, dest, SFX_GAIN.loss), t0); return true; }
+    if (kind === 'sfok' || kind === 'sfko') {
+      const it = SFX_SF.find(x => x.id === id), side = kind === 'sfok' ? 'ok' : 'ko';
+      if (!it) return false;
+      it[side](ac, sfxBus(ac, dest, SFX_GAIN['sf-' + id + '-' + side] || 1), t0);
+      return true;
+    }
     const item = (kind === 'music' ? SFX_MUSIC : kind === 'pa' ? SFX_PA : kind === 'grade' ? SFX_GRADE : kind === 'booster' ? SFX_BOOSTER : kind === 'unlock' ? SFX_UNLOCK : SFX_EVO).find(x => x.id === id);
     if (!item) return false;
     item.play(ac, sfxBus(ac, dest, (SFX_GAIN[kind === 'pa' ? 'pa-' + id : kind === 'grade' ? 'gr-' + id : kind === 'booster' ? 'bo-' + id : kind === 'unlock' ? 'ul-' + id : id] || 1) * (kind === 'music' ? SFX_MUSIC_LEVEL : 1)), t0, Math.max(1, Math.min(14, n || 12)));
@@ -725,6 +766,18 @@
       if (ac && x) sfxSchedule(ac, ac.destination, 'grade', x.id, ac.currentTime + 0.05);
     } catch (e) { /* son indisponible */ }
   };
+  // Safari éclair : bonne réponse (ok = true) ou erreur, au toucher d'un Pokémon.
+  sfxProto.sfxSafari = function (ok) {
+    try {
+      if (sfxMuted()) return;
+      const ac = sfxCtx(), x = sfxPick('sonsafari', '', SFX_SF, SFX_SF_DEFAULT);
+      if (ac && x) sfxSchedule(ac, ac.destination, ok ? 'sfok' : 'sfko', x.id, ac.currentTime + 0.005);
+    } catch (e) { /* son indisponible */ }
+  };
+  // Perte de PK (pa.js, pkFlyLoss).
+  sfxProto.sfxLoss = function () {
+    try { if (sfxMuted()) return; const ac = sfxCtx(); if (ac) sfxSchedule(ac, ac.destination, 'loss', '', ac.currentTime + 0.02); } catch (e) { /* son indisponible */ }
+  };
   // Petit « plop » quand on rallume les sons (Réglages › Sons) : au toucher, ce qui ouvre aussi l'audio.
   sfxProto.sfxPop = function () {
     try { const ac = sfxCtx(); if (ac) sfxPop(ac, sfxBus(ac, ac.destination, 0.9), ac.currentTime + 0.02, 0.5); } catch (e) { /* son indisponible */ }
@@ -760,4 +813,5 @@
     pa: SFX_PA.map(x => ({ id: x.id, name: x.name, desc: x.desc })), paDef: SFX_PA_DEFAULT,
     grade: SFX_GRADE.map(x => ({ id: x.id, name: x.name, desc: x.desc })), gradeDef: SFX_GRADE_DEFAULT,
     booster: SFX_BOOSTER.map(x => ({ id: x.id, name: x.name, desc: x.desc })), boosterDef: SFX_BOOSTER_DEFAULT,
-    unlock: SFX_UNLOCK.map(x => ({ id: x.id, name: x.name, desc: x.desc })), unlockDef: SFX_UNLOCK_DEFAULT }; };
+    unlock: SFX_UNLOCK.map(x => ({ id: x.id, name: x.name, desc: x.desc })), unlockDef: SFX_UNLOCK_DEFAULT,
+    safari: SFX_SF.map(x => ({ id: x.id, name: x.name, desc: x.desc })), safariDef: SFX_SF_DEFAULT }; };

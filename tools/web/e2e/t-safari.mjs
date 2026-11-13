@@ -17,8 +17,17 @@ ok('carte « Safari éclair » dans Jeux à PK, prête (« GO », 1 partie toute
 await sec.screenshot({ path: shot('safari-card.png') });
 await sec.locator('button').click(); await page.waitForTimeout(600);
 const ov = page.locator('.pkm-sf');
+// 3 niveaux après « GO » (2026-11-13, porteur) : règles de chaque mode et avertissement de perte.
+const lvs = await page.evaluate(() => [...document.querySelectorAll('.pkm-sf .pkm-sf-lv')].map(b => b.innerText.replace(/\s+/g, ' ').trim()));
+ok('« GO » → choix du niveau : ' + lvs.map(t => t.split(' ')[0]).join(', '), lvs.length === 3 && /^Facile/.test(lvs[0]) && /\+2 PK par bon Pokémon · −1 PK par erreur/.test(lvs[0]) && /Sans risque/.test(lvs[0])
+  && /^Normal/.test(lvs[1]) && /×2/.test(lvs[1]) && /\+4 PK par bon Pokémon · −4 PK par erreur/.test(lvs[1]) && /−72 PK/.test(lvs[1]) && /négatif/.test(lvs[1])
+  && /^Difficile/.test(lvs[2]) && /×3/.test(lvs[2]) && /\+8 PK par bon Pokémon · −8 PK par erreur/.test(lvs[2]) && /\+144 PK/.test(lvs[2]) && /retirés de ton solde/.test(lvs[2]));
+await page.screenshot({ path: shot('safari-levels.png') });
+await page.locator('.pkm-sf-lv1').click(); await page.waitForTimeout(500);
 const brief = N(await ov.innerText());
-ok('consigne : « Attrape les Pokémon … ! », 20 s, +2, −1', /Attrape les Pokémon \S+ !/.test(brief) && /20 s/.test(brief) && /\+2/.test(brief) && /−1/.test(brief));
+ok('consigne : « Attrape les Pokémon … ! », 20 s, +2, −1, niveau Facile sans risque', /Attrape les Pokémon \S+ !/.test(brief) && /20 s/.test(brief) && /\+2/.test(brief) && /−1/.test(brief) && /Niveau Facile/.test(brief) && /sans risque/.test(brief) && /Changer de niveau/.test(brief));
+// Sons de bonne et de mauvaise réponse : appelés à chaque toucher.
+await page.evaluate(() => { const o = window.__pkm, f = o.sfxSafari; window.__sfx = []; o.sfxSafari = function (x) { window.__sfx.push(!!x); return f.call(this, x); }; });
 // Démonstration animée (2026-11-13, porteur) : un bon Pokémon (cercle vert, « +2 » vert), un mauvais (cercle rouge, « −1 »).
 const demo = await page.evaluate(() => { const d = document.querySelector('.pkm-sf .pkm-sf-demo'); if (!d) return null; const c = q => getComputedStyle(d.querySelector(q)); return { hand: !!d.querySelector('.pkm-sf-demo-hand'), okRing: c('.pkm-sf-demo-ok .pkm-sf-demo-ring').borderTopColor, koRing: c('.pkm-sf-demo-ko .pkm-sf-demo-ring').borderTopColor, okPop: c('.pkm-sf-demo-ok .pkm-sf-demo-pop').color, koPop: c('.pkm-sf-demo-ko .pkm-sf-demo-pop').color, tags: [...d.querySelectorAll('.pkm-sf-demo-tag')].map(t => t.textContent).join('|') }; });
 ok('consigne : démonstration (doigt, cercle vert et « +2 » vert, cercle rouge et « −1 » rouge)', !!demo && demo.hand && demo.okRing === 'rgb(34, 197, 94)' && demo.koRing === 'rgb(255, 59, 68)' && demo.okPop === 'rgb(59, 224, 122)' && demo.koPop === 'rgb(255, 77, 85)' && demo.tags === 'Bon Pokémon !|Erreur !');
@@ -42,6 +51,8 @@ for (let k = 0; k < 44; k++) {
 ok('« +2 » en vert pendant la partie', await page.evaluate(() => { const e = document.createElement('span'); e.className = 'pkm-sf-pop'; document.querySelector('.pkm-sf-mons').appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c === 'rgb(59, 224, 122)'; }));
 const hud = await page.evaluate(() => ({ g: parseInt(document.querySelector('.pkm-sf-g').textContent, 10), b: parseInt(document.querySelector('.pkm-sf-b').textContent, 10) }));
 ok('touchers comptés (' + hud.g + ' bons, ' + hud.b + ' erreurs, ' + taps + ' touchers)', hud.g + hud.b === taps && taps > 10);
+const sfx = await page.evaluate(() => window.__sfx);
+ok('un son par toucher : ' + sfx.filter(Boolean).length + ' « bonne réponse », ' + sfx.filter(x => !x).length + ' « erreur »', sfx.length === taps && sfx.filter(Boolean).length === hud.g);
 await page.waitForTimeout(2600);
 const end = N(await ov.innerText()), won = Math.max(0, 2 * hud.g - hud.b);
 ok('bilan : « Temps écoulé ! », ' + hud.g + ' Pokémon attrapés, +' + won + ' PK', /Temps écoulé !/.test(end) && new RegExp('\\+' + won + ' PK').test(end) && new RegExp(hud.g + ' Pokémon').test(end));
@@ -63,6 +74,13 @@ ok('pendant le délai : pas de nouvelle partie', (await page.locator('.pkm-sf').
 // Quitter pendant la consigne : rien n'est compté.
 await page.evaluate(() => window.__pkm.setState({ games: Object.assign({}, window.__pkm.st().games, { safariAt: '' }) })); await page.waitForTimeout(200);
 await sec.locator('button').click(); await page.waitForTimeout(500);
+await page.locator('.pkm-sf-lv2').click(); await page.waitForTimeout(500);
+// Normal : consigne avec l'avertissement de perte ; « Changer de niveau » revient au choix.
+const b2 = N(await ov.innerText());
+ok('Normal : consigne +4 / −4, vitesse ×2, avertissement « retirés de ton solde »', /Niveau Normal · vitesse ×2/.test(b2) && /\+4/.test(b2) && /−4/.test(b2) && /Attention/.test(b2) && /retirés de ton solde/.test(b2));
+await page.screenshot({ path: shot('safari-brief-normal.png') });
+await page.locator('.pkm-sf-relv').click(); await page.waitForTimeout(400);
+ok('« Changer de niveau » : retour au choix', (await page.locator('.pkm-sf-lv').count()) === 3);
 await page.locator('.pkm-sf-x').click(); await page.waitForTimeout(300);
 ok('quitter avant la fin : rien de crédité, partie pas comptée', (await page.locator('.pkm-sf').count()) === 0 && (await page.evaluate(() => window.__pkm.st().pk)) === 100 + won && !(await page.evaluate(() => window.__pkm.st().games.safariAt)));
 
@@ -79,15 +97,15 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   const FAKE = 'http://127.0.0.1:59996', Q = '&cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test';
   const UID = 'u-sf', EMAIL = 'sf@exemple.fr', TOKEN = 'h.' + Buffer.from(JSON.stringify({ sub: UID, email: EMAIL })).toString('base64url') + '.s';
   const spawns = Array.from({ length: 36 }, (_, i) => ({ i: i, n: i % 2 ? 7 : 25, ok: i % 2 === 1, t: 300 + i * 500, lane: i % 5, dir: i % 3 ? 1 : -1, dur: 3000 }));
-  const S = { finish: null, pk: 500 };
+  const S = { finish: null, pk: 500, starts: [] };
   const c2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await c2.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   await c2.route(FAKE + '/**', route => {
     const req = route.request(), p = new URL(req.url()).pathname, send = (st, j) => route.fulfill({ status: st, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(j) });
     if (p === '/rest/v1/rpc/game_state') return send(200, { pk: S.pk, pa: 0, pk_earned: S.pk, unlocked: [], today: new Date().toISOString().slice(0, 10) });
     if (p === '/rest/v1/rpc/safari_state') return send(200, { last: null, hours: 6, next: new Date().toISOString() });
-    if (p === '/rest/v1/rpc/safari_start') return send(200, { round: 'r-1', kind: 'Eau', spawns: spawns });
-    if (p === '/rest/v1/rpc/safari_finish') { S.finish = JSON.parse(req.postData() || '{}'); const hits = S.finish.hits || [], g = hits.filter(h => h % 2 === 1).length, b = hits.length - g, w = Math.max(0, 2 * g - b); S.pk += w; return send(200, { won: w, base: w, boost: false, good: g, bad: b, pk: S.pk, pa: 0, pk_earned: S.pk }); }
+    if (p === '/rest/v1/rpc/safari_start') { const a = JSON.parse(req.postData() || '{}'), lv = a.lvl || 1, sp = [1, 2, 3][lv - 1]; S.starts.push(a); S.lvl = lv; return send(200, { round: 'r-' + S.starts.length, kind: 'Eau', lvl: lv, plus: [2, 4, 8][lv - 1], minus: [1, 4, 8][lv - 1], spawns: spawns.map(x => Object.assign({}, x, { dur: Math.floor(x.dur / sp) })) }); }
+    if (p === '/rest/v1/rpc/safari_finish') { S.finish = JSON.parse(req.postData() || '{}'); const hits = S.finish.hits || [], g = hits.filter(h => h % 2 === 1).length, b = hits.length - g, lv = S.lvl || 1, raw = [2, 4, 8][lv - 1] * g - [1, 4, 8][lv - 1] * b, w = lv === 1 ? Math.max(0, raw) : Math.max(raw, -S.pk); S.pk += w; return send(200, { won: w, base: w, raw: raw, lvl: lv, boost: false, good: g, bad: b, pk: S.pk, pa: 0, pk_earned: S.pk }); }
     if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Sacha', age_range: '15-25', starter: 25, role: 'user', status: 'active' }]);
     if (p === '/auth/v1/token') return send(200, { access_token: TOKEN, refresh_token: 'r', expires_in: 3600, user: { id: UID, email: EMAIL } });
     return send(404, {});
@@ -99,7 +117,8 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   const sc = p2.locator('section[aria-label="Safari éclair"]'); await sc.scrollIntoViewIfNeeded();
   ok('serveur : délai lu sur le serveur (« toutes les 6 h »)', /toutes les 6 h/.test(await sc.innerText()));
   await sc.locator('button').click(); await p2.waitForTimeout(800);
-  ok('serveur : partie tirée par le serveur (« Pokémon Eau »)', /Attrape les Pokémon Eau !/.test(N(await p2.locator('.pkm-sf').innerText())));
+  await p2.locator('.pkm-sf-lv1').click(); await p2.waitForTimeout(800);
+  ok('serveur : partie tirée par le serveur (« Pokémon Eau »), niveau 1 demandé', /Attrape les Pokémon Eau !/.test(N(await p2.locator('.pkm-sf').innerText())) && S.starts.length === 1 && S.starts[0].lvl === 1);
   await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(2300);
   for (let k = 0; k < 40; k++) {
     await p2.waitForTimeout(450);
@@ -114,6 +133,34 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   await p2.screenshot({ path: shot('safari-cloud-end.png') });
   await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(2600);
   ok('serveur : gain du serveur affiché (+' + w2 + ' PK), puis « Récupérer mes PK » : solde repris du serveur (' + S.pk + ')', shown && (await p2.evaluate(() => window.__pkm.st().pk)) === S.pk);
+  // Difficile (vitesse ×3, −8 par erreur) : que des erreurs → total négatif, PK retirés du solde avec l'animation de perte.
+  await p2.evaluate(() => window.__pkm.setState({ games: Object.assign({}, window.__pkm.st().games, { safariAt: '' }), toast: null })); await p2.waitForTimeout(300);
+  await sc.scrollIntoViewIfNeeded(); await sc.locator('button.pkm-gm-go').click(); await p2.waitForTimeout(600);
+  await p2.locator('.pkm-sf-lv3').click(); await p2.waitForTimeout(800);
+  const b3 = N(await p2.locator('.pkm-sf').innerText());
+  ok('Difficile : niveau 3 demandé au serveur, consigne +8 / −8, vitesse ×3 et avertissement', S.starts.length === 2 && S.starts[1].lvl === 3 && /Niveau Difficile · vitesse ×3/.test(b3) && /\+8/.test(b3) && /−8/.test(b3) && /retirés de ton solde/.test(b3));
+  await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(2300);
+  const durs = await p2.evaluate(() => document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.classList && a.effect.target.classList.contains('pkm-sf-mon')).map(a => a.effect.getTiming().duration));
+  let wrong = 0;
+  for (let k = 0; k < 44; k++) {
+    await p2.waitForTimeout(400);
+    const pt = await p2.evaluate(() => { const m = [...document.querySelectorAll('.pkm-sf-mon:not(.pkm-sf-hit):not(.pkm-sf-miss)')].find(m => { const r = m.getBoundingClientRect(); return r.left > 8 && r.right < 382 && /\/25\.gif/.test(m.querySelector('img').src); }); if (!m) return null; const r = m.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+    if (pt) { await p2.mouse.click(pt[0], pt[1]); wrong++; }
+    if (k === 8) { const neg = await p2.evaluate(() => ({ t: document.querySelector('.pkm-sf-pk b').textContent, neg: document.querySelector('.pkm-sf-pk').classList.contains('pkm-sf-pk-neg') })); res.push('  (total en direct : ' + neg.t + (neg.neg ? ', en rouge' : '') + ')'); await p2.screenshot({ path: shot('safari-hard-play.png') }); }
+  }
+  ok('Difficile : Pokémon 3 fois plus rapides (traversée ' + Math.max(...durs) + ' ms au lieu de 3 000)', durs.length > 0 && Math.max(...durs) <= 1000);
+  await p2.waitForTimeout(3200);
+  const pk3 = await p2.evaluate(() => window.__pkm.st().pk), e3 = N(await p2.locator('.pkm-sf').innerText()), lost = -((S.finish && S.lvl === 3) ? Math.max(-8 * wrong, -999) : 0);
+  ok('Difficile : ' + wrong + ' erreurs → « −' + (8 * wrong) + ' PK », message de perte, bouton « J’ai compris »', wrong > 2 && new RegExp('−' + (8 * wrong) + ' PK').test(e3) && /Plus d’erreurs que de bons Pokémon/.test(e3) && /retirés de ton solde/.test(e3) && N(await p2.locator('.pkm-sf-go').innerText()) === 'J’ai compris');
+  await p2.screenshot({ path: shot('safari-hard-end.png') });
+  await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(500);
+  const fly = await p2.evaluate(() => ({ n: document.querySelectorAll('.pkm-pafly-lost').length, hurt: !!document.querySelector('header .pkm-bal-pk.pkm-pk-hurt') }));
+  ok('animation de perte : ' + fly.n + ' gemmes ternies quittent le solde, qui tremble', fly.n >= 6 && fly.hurt);
+  await p2.screenshot({ path: shot('safari-loss-anim.png') });
+  await p2.waitForTimeout(2200);
+  const after3 = await p2.evaluate(() => ({ pk: window.__pkm.st().pk, pill: (document.querySelector('header .pkm-gain-loss') || {}).textContent || '' }));
+  ok('après la perte : solde ' + pk3 + ' → ' + after3.pk + ' (serveur ' + S.pk + '), « ' + N(after3.pill) + ' » en rouge sous le solde', after3.pk === S.pk && pk3 - after3.pk === 8 * wrong && N(after3.pill) === '−' + (8 * wrong) + ' PK');
+  await p2.screenshot({ path: shot('safari-loss-after.png'), clip: { x: 0, y: 0, width: 390, height: 140 } });
   await c2.close();
 }
 // Serveur sans 024_safari.sql (2026-11-13, porteur : « rends-le dispo ») : un joueur voit « Bientôt disponible » ; un admin
@@ -146,6 +193,7 @@ for (const role of ['user', 'admin']) {
     ok('sans 024, admin : « ' + btn + ' »', btn === 'GO');
     const pk0 = await p3.evaluate(() => window.__pkm.st().pk);
     await sc.locator('button').last().click(); await p3.waitForTimeout(800);
+    await p3.locator('.pkm-sf-lv1').click(); await p3.waitForTimeout(800);
     ok('sans 024, admin : partie d’aperçu ouverte', /Attrape les Pokémon/.test(N(await p3.locator('.pkm-sf').innerText())));
     await p3.locator('.pkm-sf-go').click(); await p3.waitForTimeout(2300);
     for (let k = 0; k < 20; k++) {

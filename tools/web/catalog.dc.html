@@ -850,7 +850,7 @@
 <sc-if value="{{ pk.xpPa }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pk.xpPaTap }}" aria-label="{{ pk.xpPaAria }}" class="{{ pk.xpPaCls }}"><span>2XP</span></button></sc-if>
 </span>
 <sc-if value="{{ pk.gain }}" hint-placeholder-val="{{ false }}">
-<span aria-hidden="true" class="pkm-gain" style="position: absolute; z-index: 5; right: 4px; top: 100%; margin-top: -6px; padding: 2px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12.5px; font-weight: 800; white-space: nowrap; pointer-events: none">{{ pk.gainText }} PK</span>
+<span aria-hidden="true" class="{{ pk.gainCls }}" style="position: absolute; z-index: 5; right: 4px; top: 100%; margin-top: -6px; padding: 2px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-size: 12.5px; font-weight: 800; white-space: nowrap; pointer-events: none">{{ pk.gainText }} PK</span>
 </sc-if>
 </span>
 
@@ -1316,7 +1316,7 @@
 </section>
 <section aria-label="Safari éclair" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">🌿</span>Safari éclair</h3>
-<p class="pkm-rules-note">20 secondes : touche les Pokémon du type demandé. +2 PK par bon Pokémon, −1 PK par erreur, jamais moins de 0 (36 PK au plus). Ouvert à partir du grade Collectionneur : une partie toutes les 24 h, 12 h au grade Dresseur Pokémon, 6 h au grade Maître Pokémon, 4 h au grade Grand maître Pokémon.</p>
+<p class="pkm-rules-note">20 secondes : touche les Pokémon du type demandé. 3 niveaux au choix après « GO » : Facile (vitesse normale, +2 PK par bon Pokémon, −1 PK par erreur, jamais moins de 0, 36 PK au plus), Normal (2 fois plus rapide, +4 / −4, de −72 à +72 PK) et Difficile (3 fois plus rapide, +8 / −8, de −144 à +144 PK). En Normal et Difficile, un total négatif retire ces PK de ton solde (jamais sous 0). Ouvert à partir du grade Collectionneur : une partie toutes les 24 h, 12 h au grade Dresseur Pokémon, 6 h au grade Maître Pokémon, 4 h au grade Grand maître Pokémon.</p>
 </section>
 <section aria-label="Délais selon le grade" class="pkm-rules-card">
 <h3><span class="pkm-rules-ico" aria-hidden="true">⏱️</span>Plus ton grade monte, plus tu joues</h3>
@@ -1973,10 +1973,10 @@
 <h2 class="pkm-gm-title">Safari éclair</h2>
 <span class="pkm-sf-every" style="font-size: 12.5px">{{ gm.sf.every }}</span>
 </div>
-<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">20 secondes : des Pokémon traversent la prairie. Touche ceux du type demandé (+2 PK chacun) et évite les autres (−1 PK).</p>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #C9D3EA">20 secondes : des Pokémon traversent la prairie. Touche ceux du type demandé et évite les autres. Choisis ton niveau après « GO » : plus c’est rapide, plus tu gagnes… ou plus tu perds.</p>
 <div class="pkm-sf-demo pkm-sf-demo-card" aria-hidden="true"><span class="pkm-sf-demo-chip">Attrape les Pokémon <b class="pkm-sf-demo-eau">Eau</b> !</span><div class="pkm-sf-demo-mon pkm-sf-demo-ok"><img src="img/pokemon/7.gif" alt=""><i class="pkm-sf-demo-ring"></i><b class="pkm-sf-demo-pop">+2</b><span class="pkm-sf-demo-tag">Bon Pokémon !</span></div><div class="pkm-sf-demo-mon pkm-sf-demo-ko"><img src="img/pokemon/25.gif" alt=""><i class="pkm-sf-demo-ring"></i><b class="pkm-sf-demo-pop">−1</b><span class="pkm-sf-demo-tag">Erreur !</span></div><svg class="pkm-sf-demo-hand" viewBox="0 0 34 42" width="34" height="42"><path d="M12 4.5a3 3 0 0 1 6 0V18l2.3-.4a3 3 0 0 1 3.3 1.8l1.9-.3a3 3 0 0 1 3.4 2.4l.1.6c1.8.1 3 1.5 3 3.2V30c0 6-4.5 10.5-10 10.5h-3.6a9 9 0 0 1-7.4-3.9L4.7 28a3 3 0 0 1 4.6-3.8L12 27z"></path></svg></div>
 <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; font-size: 12px; color: #C9D3EA">
-<span class="pkm-sf-rule"><b>20 s</b>par partie</span><span class="pkm-sf-rule pkm-sf-rule-ok"><b>+2</b>bon Pokémon</span><span class="pkm-sf-rule pkm-sf-rule-ko"><b>−1</b>erreur</span>
+<span class="pkm-sf-rule pkm-sf-lvl1"><b>Facile</b>+2 / −1</span><span class="pkm-sf-rule pkm-sf-lvl2"><b>Normal</b>+4 / −4</span><span class="pkm-sf-rule pkm-sf-lvl3"><b>Difficile</b>+8 / −8</span>
 </div>
 <button type="button" onClick="{{ gm.sf.play }}" class="{{ gm.sf.btnCls }}"><sc-if value="{{ gm.sf.noIco }}" hint-placeholder-val="{{ false }}"><span class="pkm-gm-hg" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32"><g class="pkm-gm-hg-flip"><path d="M8 6.5c0 6 6.4 7.2 6.4 9.5S8 19.5 8 25.5h16c0-6-6.4-7.2-6.4-9.5S24 12.5 24 6.5z" class="pkm-gm-hg-glass"></path><path d="M10.4 9h11.2c-.6 3-4.2 4.6-5.6 6.2-1.4-1.6-5-3.2-5.6-6.2z" class="pkm-gm-hg-top"></path><path d="M9.8 24h12.4c-.4-2.6-3.4-4.4-6.2-5.4-2.8 1-5.8 2.8-6.2 5.4z" class="pkm-gm-hg-bot"></path><path d="M16 15.6v7.4" class="pkm-gm-hg-stream"></path><rect x="5.5" y="3.5" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect><rect x="5.5" y="24.9" width="21" height="3.6" rx="1.8" class="pkm-gm-hg-cap"></rect></g></svg></span></sc-if>{{ gm.sf.button }}</button>
 <sc-if value="{{ gm.sf.locked }}" hint-placeholder-val="{{ false }}"><p class="pkm-sf-lock">{{ gm.sf.lockText }}</p></sc-if>

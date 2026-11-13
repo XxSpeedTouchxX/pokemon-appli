@@ -88,7 +88,7 @@
   // « +10 » à côté du compteur, quelques secondes.
   proto.pkGainEnd = function () {
     clearTimeout(this._pkT);
-    this._pkT = setTimeout(() => { this._pkT = null; this.setState({ pkGain: 0 }); }, PK_GAIN_MS);
+    this._pkT = setTimeout(() => { this._pkT = null; this.setState({ pkGain: 0, pkLoss: 0 }); }, PK_GAIN_MS);
   };
 
   // Partage de l'app sur un réseau social : +300 PK la première fois (l'app ne peut pas vérifier la publication).
@@ -154,7 +154,8 @@
     });
     return {
       n: pkNum(s.pk), aria: 'Mes PK : ' + pkNum(s.pk) + '. Voir comment en gagner et quoi débloquer',
-      gain: s.pkGain > 0, gainText: '+' + pkNum(s.pkGain),
+      // Gain (« +N ») ou perte (« −N », en rouge : Safari éclair en Normal ou Difficile, 2026-11-13) sous le solde.
+      gain: s.pkGain > 0 || s.pkLoss > 0, gainText: s.pkGain > 0 ? '+' + pkNum(s.pkGain) : '−' + pkNum(s.pkLoss), gainCls: 'pkm-gain' + (s.pkGain > 0 ? '' : ' pkm-gain-loss'),
       open: () => this.setState({ pkSheet: true }), close: () => this.setState({ pkSheet: false }), sheet: !!s.pkSheet,
       balance: pkNum(s.pk),
       rules: [

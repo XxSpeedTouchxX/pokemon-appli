@@ -26,6 +26,7 @@ from (values
   ('022_avatar_v3', exists (select 1 from public.avatar_items where id = 'frame:lave'), 'avatar v3 : Pokémon d''avatar, cadres'),
   ('024_safari', to_regprocedure('public.safari_start(uuid)') is not null, 'jeu Safari éclair'),
   ('025_suivi_joueurs', to_regprocedure('public.admin_players()') is not null, 'Admin › Joueurs, temps passé dans l''app'),
+  ('026_safari_niveaux', to_regprocedure('public.safari_start(uuid,integer)') is not null, 'Safari : 3 niveaux de difficulté'),
   ('020_premium_formules', exists (select 1 from pg_constraint where conname = 'premium_plan_check' and pg_get_constraintdef(oid) like '%quarter%'), 'Premium trimestriel et semestriel')
 ) as t(script, ok, role)
 order by script;

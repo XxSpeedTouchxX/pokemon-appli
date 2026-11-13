@@ -211,6 +211,69 @@
       paFly({ getBoundingClientRect: () => r }, to, drops, k => { if (climb && !ended) put(Math.round(gain * (k + 1) / drops)); }, fin, { img: 'img/brand/pk.svg' });
     }));
   };
+  // Perte de PK (Safari éclair en Normal ou Difficile, 2026-11-13, porteur : « une animation d'enlèvement de PK si
+  // l'utilisateur termine en négatif ») : le solde de l'en-tête tremble et rougit, des gemmes ternies s'en échappent,
+  // tombent en tournoyant vers le résultat de la partie et s'éteignent ; le solde descend gemme après gemme, « −N PK »
+  // en rouge sous le solde, petit bruit de perte (sfx.js, sfxLoss). Mêmes garde-fous que pkFlyGain (solde du serveur,
+  // filet de sécurité, mouvements réduits : solde mis à jour d'un coup).
+  paProto.pkFlyLoss = function (origin, loss, from, final, after, server) {
+    const fall = loss > 0 && from - final === loss;
+    let taken = 0, last = from, lost = false, ended = false;
+    const put = target => {
+      if (lost) return;
+      const cur = Number(this.st().pk) || 0;
+      if (cur !== last && server) { lost = true; return; }
+      const v = fall ? Math.max(0, cur - (target - taken)) : (cur !== last ? cur : final);
+      taken = target; last = v;
+      this.setState({ pk: v });
+    };
+    const fin = () => {
+      if (ended) return;
+      ended = true; pkFlyOn = false;
+      put(loss);
+      const bal = document.querySelector('header .pkm-bal-pk');
+      if (bal) bal.classList.remove('pkm-pk-hurt');
+      this.setState({ pkGain: 0, pkLoss: loss > 0 ? loss : 0 }); this.pkGainEnd(); if (after) after();
+    };
+    if (!(loss > 0) || paStill() || pkFlyOn) { fin(); return; }
+    pkFlyOn = true;
+    setTimeout(fin, 4500);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (ended) return;
+      const el = typeof origin === 'string' ? document.querySelector(origin) : origin;
+      const from_ = document.querySelector('header .pkm-bal-pk') || document.querySelector('.pkm-bal-pk');
+      const r = el && el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+      if (!r || !from_ || (!r.width && !r.height)) { fin(); return; }
+      try { this.sfxLoss(); } catch (e) { /* son coupé */ }
+      from_.classList.remove('pkm-pk-hurt'); void from_.offsetWidth; from_.classList.add('pkm-pk-hurt');
+      const root = document.querySelector('.pkm-root') || document.body, R = root.getBoundingClientRect(), b = from_.getBoundingClientRect();
+      const bx = b.left - R.left + 14, by = b.top - R.top + b.height / 2, ax = r.left - R.left + r.width / 2, ay = r.top - R.top + r.height / 2;
+      const layer = document.createElement('div');
+      layer.className = 'pkm-pafly'; layer.setAttribute('aria-hidden', 'true');
+      root.appendChild(layer);
+      const drops = Math.min(12, Math.max(6, Math.round(loss / 6)));
+      let left = drops;
+      for (let i = 0; i < drops; i++) {
+        const d = document.createElement('img');
+        d.src = 'img/brand/pk.svg'; d.alt = ''; d.className = 'pkm-pafly-drop pkm-pafly-lost';
+        d.style.left = (bx - 18) + 'px'; d.style.top = (by - 18) + 'px';
+        layer.appendChild(d);
+        // Les gemmes sautent hors du solde, puis tombent en tournoyant vers le résultat de la partie et s'éteignent.
+        const tx = ax - bx + ((i * 37) % 90 - 45), ty = ay - by + ((i * 23) % 40 - 20), jx = (i % 2 ? 1 : -1) * (14 + (i * 11) % 26);
+        const an = d.animate([
+          { transform: 'translate(0, 0) scale(0.9) rotate(0deg)', opacity: 1 },
+          { transform: 'translate(' + jx + 'px, -26px) scale(1.05) rotate(' + (i % 2 ? 40 : -40) + 'deg)', opacity: 1, offset: 0.22 },
+          { transform: 'translate(' + (tx * 0.6) + 'px, ' + (ty * 0.55) + 'px) scale(0.85) rotate(' + (i % 2 ? 200 : -200) + 'deg)', opacity: 0.9, offset: 0.7 },
+          { transform: 'translate(' + tx + 'px, ' + ty + 'px) scale(0.3) rotate(' + (i % 2 ? 320 : -320) + 'deg)', opacity: 0 }
+        ], { duration: 1100, delay: 80 + i * 70, easing: 'cubic-bezier(0.5, 0, 0.75, 0.4)', fill: 'forwards' });
+        an.onfinish = () => {
+          d.remove(); left--;
+          put(Math.round(loss * (drops - left) / drops));
+          if (!left) { setTimeout(() => layer.remove(), 200); fin(); }
+        };
+      }
+    }));
+  };
   // Choix du starter (didacticiel ou jeu d'évolution) : il devient aussi le compagnon de l'accueil.
   paProto.paChoose = function (line, quiet) {
     if (!PA_LINES[line]) return;

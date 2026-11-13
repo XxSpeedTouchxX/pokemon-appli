@@ -620,7 +620,12 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
   animation: pkmPaBurst 0.75s ease-out forwards; }
 .pkm-pafly-burst::after { content: ''; position: absolute; inset: -30px; border-radius: 50%; background: repeating-conic-gradient(rgba(255, 226, 122, 0.85) 0 8deg, rgba(255, 226, 122, 0) 8deg 30deg); -webkit-mask: radial-gradient(circle, transparent 30%, #000 32%, transparent 70%); mask: radial-gradient(circle, transparent 30%, #000 32%, transparent 70%); }
 @keyframes pkmPaBurst { 0% { transform: scale(0.1) rotate(0deg); opacity: 1; } 60% { opacity: 1; } 100% { transform: scale(1.35) rotate(40deg); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .pkm-pa-ready, .pkm-pa-dot, .pkm-pa-claim, .pkm-pa-claim-btn { animation: none; } }
+/* Perte de PK (Safari éclair, 2026-11-13) : gemmes ternies qui tombent, solde qui tremble et rougit, « −N » rouge. */
+.pkm-pafly-lost { filter: grayscale(0.85) brightness(0.8) drop-shadow(0 0 6px rgba(224, 69, 58, 0.9)); }
+.pkm-pk-hurt { animation: pkmPkHurt 0.9s ease-out; }
+@keyframes pkmPkHurt { 0%, 100% { transform: none; color: inherit; } 10%, 30%, 50% { transform: translateX(-4px); color: #FF5A4E; } 20%, 40%, 60% { transform: translateX(4px); color: #FF5A4E; } 80% { color: #FF5A4E; } }
+.pkm-gain.pkm-gain-loss { background: #E0453A !important; color: #FFFFFF !important; }
+@media (prefers-reduced-motion: reduce) { .pkm-pa-ready, .pkm-pa-dot, .pkm-pa-claim, .pkm-pa-claim-btn, .pkm-pk-hurt { animation: none; } }
 
 /* Mon profil › Notifications (notif.js, 2026-10-29) : une ligne par rappel, interrupteur à droite. */
 .pkm-nt-row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 0; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; }
@@ -1648,6 +1653,8 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-sf-bar i { display: block; height: 100%; border-radius: 6px; transform-origin: left center; background: linear-gradient(90deg, #FF5A5F, #FFD60A 40%, #3BC48A); }
 .pkm-sf-panel { position: absolute; z-index: 5; inset: 0; display: flex; align-items: center; justify-content: center; padding: 70px 16px 24px; box-sizing: border-box; background: rgba(5, 8, 15, 0.45); overflow-y: auto; }
 .pkm-sf-panel:empty { display: none; }
+/* Carte centrée quand elle tient, sinon lue depuis le haut (consigne plus longue en Normal et Difficile). */
+.pkm-sf-panel > * { margin-top: auto; margin-bottom: auto; }
 .pkm-sf-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; border-radius: 26px; border: 1px solid #24345C; background: rgba(11, 17, 32, 0.96); text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); animation: pkmSfIn 0.3s ease-out both; }
 .pkm-sf-h { margin: 0; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 29px; line-height: 1.1; color: #FFFFFF; letter-spacing: 0.02em; }
 .pkm-sf-h em { font-style: normal; }
@@ -1674,10 +1681,38 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-sf-caught img { width: 90%; height: auto; image-rendering: pixelated; }
 .pkm-sf-c-ko { box-shadow: inset 0 0 0 2px #FF5A5F; }
 .pkm-sf-c-ok::after, .pkm-sf-c-ko::after { position: absolute; right: 4px; top: 3px; font: 900 10px/1 'Sora', sans-serif; }
-.pkm-sf-c-ok::after { content: '+2'; color: #3BC48A; } .pkm-sf-c-ko::after { content: '−1'; color: #FF6B6B; }
+.pkm-sf-c-ok::after { content: attr(data-pts); color: #3BC48A; } .pkm-sf-c-ko::after { content: attr(data-pts); color: #FF6B6B; }
 .pkm-sf-next { margin: 2px 0 0; font-size: 12.5px; color: #9AA8C3; }
 @media (prefers-reduced-motion: reduce) { .pkm-sf-prev img, .pkm-sf-prev-ring, .pkm-sf-prev-pop, .pkm-sf-cloud, .pkm-sf-mon img { animation: none; } }
 .pkm-sf-rule-ok b { color: #3BC48A; } .pkm-sf-rule-ko b { color: #FF6B6B; }
+/* 3 niveaux du Safari (2026-11-13, porteur) : choix après « GO », niveau rappelé dans la consigne et le bilan, total
+   négatif en rouge, avertissement de perte en Normal et Difficile. */
+.pkm-sf-lvl1 b { color: #3BC48A; } .pkm-sf-lvl2 b { color: #FFB020; } .pkm-sf-lvl3 b { color: #FF5A4E; }
+.pkm-sf-levels { gap: 10px; }
+.pkm-sf-lv { position: relative; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 12px 14px; border-radius: 18px; border: 2px solid var(--lv); background: linear-gradient(135deg, color-mix(in srgb, var(--lv) 22%, #111A2C), #111A2C 70%); color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 4px 0 color-mix(in srgb, var(--lv) 55%, #000); }
+.pkm-sf-lv:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--lv) 55%, #000); }
+.pkm-sf-lv-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-sf-lv-head b { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 23px; line-height: 1; letter-spacing: 0.02em; color: var(--lv); }
+.pkm-sf-lv-speed { display: inline-flex; align-items: center; gap: 2px; padding: 4px 9px; border-radius: 999px; background: rgba(5, 8, 15, 0.55); font: 800 12px/1 'Sora', sans-serif; color: #FFFFFF; white-space: nowrap; }
+.pkm-sf-lv-speed i { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid var(--lv); }
+.pkm-sf-lv-speed i:last-of-type { margin-right: 4px; }
+.pkm-sf-lv-pts { font-size: 13.5px; line-height: 1.35; color: #C9D3EA; }
+.pkm-sf-lv-max { font-size: 12.5px; line-height: 1.35; color: #9AA8C3; }
+.pkm-sf-lv-max b { color: #FFFFFF; }
+.pkm-sf-plus { color: #3BC48A; font-weight: 800; } .pkm-sf-minus { color: #FF6B6B; font-weight: 800; }
+.pkm-sf-lv-max b.pkm-sf-minus { color: #FF6B6B; }
+.pkm-sf-lv-warn { font-size: 12.5px; line-height: 1.35; font-weight: 700; color: #FFC2BD; }
+.pkm-sf-lv-safe { font-size: 12.5px; line-height: 1.35; font-weight: 700; color: #9BE7C4; }
+.pkm-sf-lvchip { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 999px; border: 1.5px solid var(--lv); color: var(--lv); background: rgba(5, 8, 15, 0.5); font: 800 12.5px/1 'Sora', sans-serif; }
+.pkm-sf-warn { width: 100%; box-sizing: border-box; margin: 0; padding: 10px 12px; border-radius: 14px; border: 1px solid #FF5A4E; background: rgba(224, 69, 58, 0.14); font-size: 13px; line-height: 1.4; color: #FFD9D6; text-align: left; }
+.pkm-sf-warn b { color: #FFFFFF; }
+.pkm-sf-safe { margin: 0; font-size: 13px; font-weight: 700; color: #9BE7C4; }
+.pkm-sf-relv { min-height: 44px; border: 0; background: transparent; color: #B9C5FF; font: 700 13.5px/1 'Sora', sans-serif; cursor: pointer; }
+.pkm-sf-pk-neg b, .pkm-sf-pk.pkm-sf-pk-neg { color: #FF6B6B; }
+.pkm-sf-gain-neg { background: #E0453A; color: #FFFFFF; box-shadow: 0 8px 22px rgba(224, 69, 58, 0.45); }
+.pkm-sf-lossmsg { margin: 0; font-size: 13.5px; line-height: 1.45; color: #FFD9D6; }
+.pkm-sf-lossmsg b { color: #FFFFFF; }
+.pkm-sf-go.pkm-sf-lose { background: #FF5A4E; color: #FFFFFF; box-shadow: 0 5px 0 #9E2A22; }
 .pkm-hh-mid { padding-left: 10px; }
 .pkm-hh-mid > img:last-child { width: 160px !important; }
 /* Zone de toucher de 44 px autour des soldes (pastilles de 34 px). */
