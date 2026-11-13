@@ -183,8 +183,8 @@ def prices(card, rate):
       plus de 2 fois et que le prix TCGplayer de la holo illimitée est nettement plus proche du groupe normal :
       Dracaufeu base1-4, groupe holo 123,63 €, groupe normal 497,57 €, TCGplayer 854,50 € → groupe normal. Le prix
       TCGplayer ne sert qu'à choisir le groupe Cardmarket : la cote reste 100 % Cardmarket.
-    - Carte « ex » de l'époque EX (2026-11-13), sans repère TCGplayer : groupe normal, la carte n'existant pas en reverse
-      (Dracolosse ex δ ex15-91 : groupe normal 184,72 €, groupe holo 31,89 €).
+    - Carte « ex » de l'époque EX (2026-11-13), avant tout repère TCGplayer : groupe normal, la carte n'existant pas en
+      reverse (Dracolosse ex δ ex15-91 : groupe normal 184,72 €, groupe holo 31,89 € ; Mew ex ex12-88 : TCGplayer à 1,25 $).
     - Carte avec une version reverse : « -holo » est le prix de la reverse ; cote du groupe normal, reverse à part (cmh).
     - Sinon : groupe normal s'il a une tendance, sinon groupe holo."""
     pr = card.get("pricing") or {}
@@ -205,15 +205,17 @@ def prices(card, rate):
     if holo_only:
         sfx = "-holo" if has_h else ""
         ref = holo_ref(tp, rate)
-        if has_n and has_h and ref:
-            tn, th = num(cm.get("trend")), num(cm.get("trend-holo"))
-            if max(tn, th) >= GROUP_GAP * min(tn, th) and abs(math.log(tn / ref)) < abs(math.log(th / ref)):
-                sfx = ""
-        elif has_n and has_h and ex_era_ex(card):
+        if has_n and has_h and ex_era_ex(card):
+            # Avant l'arbitrage TCGplayer (2026-11-13, calcul du jour : Mew ex ex12-88 gardait 52,87 € à cause d'un prix
+            # TCGplayer de 1,25 $) : la carte n'existant pas en reverse, son groupe « -holo » n'est jamais le sien.
             tn, th = num(cm.get("trend")), num(cm.get("trend-holo"))
             if tn >= EX_MIN_NORMAL and max(tn, th) >= GROUP_GAP * min(tn, th):
                 sfx = ""
                 EX_SWITCHED.append(f"{card.get('id')} {th}→{tn}")
+        elif has_n and has_h and ref:
+            tn, th = num(cm.get("trend")), num(cm.get("trend-holo"))
+            if max(tn, th) >= GROUP_GAP * min(tn, th) and abs(math.log(tn / ref)) < abs(math.log(th / ref)):
+                sfx = ""
     else:
         sfx = "" if has_n or not has_h else "-holo"
     trend, low, avg30, avg7, avg1 = (num(cm.get(k + sfx)) for k in ("trend", "low", "avg30", "avg7", "avg1"))

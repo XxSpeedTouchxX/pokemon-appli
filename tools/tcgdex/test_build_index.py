@@ -72,8 +72,10 @@ class Prices(unittest.TestCase):
         # « -ex » d'Écarlate et Violet, ou carte holo d'une autre époque : règle d'origine (groupe holo).
         self.assertEqual(prices(dict(c, id="sv03.5-199", name="Dracaufeu-ex", set={"id": "sv03.5"}), 0.9)[8], "h")
         self.assertEqual(prices(dict(c, id="ex15-5", name="Milobellus δ"), 0.9)[8], "h")
-        # Repère TCGplayer présent : c'est lui qui départage (règle du 2026-11-01).
-        self.assertEqual(prices(dict(c, pricing={"cardmarket": cm, "tcgplayer": {"holofoil": {"marketPrice": 30}}}), 0.9)[8], "h")
+        # Même avec un repère TCGplayer (Mew ex ex12-88 : 1,25 $ chez TCGplayer), la règle de l'époque EX passe avant.
+        self.assertEqual(prices(dict(c, pricing={"cardmarket": cm, "tcgplayer": {"holofoil": {"marketPrice": 1.25}}}), 0.9)[8], "n")
+        # Une holo d'une autre époque garde l'arbitrage TCGplayer (règle du 2026-11-01).
+        self.assertEqual(prices(dict(c, id="ex15-5", name="Milobellus δ", pricing={"cardmarket": cm, "tcgplayer": {"holofoil": {"marketPrice": 30}}}), 0.9)[8], "h")
 
     def test_price_audit(self):
         f = {k: i for i, k in enumerate(FIELDS)}
