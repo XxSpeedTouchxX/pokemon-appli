@@ -1,5 +1,5 @@
 -- Safari éclair sans délai pour un compte (2026-11-13, porteur : « Safari illimité pour l'instant pour les admins et le
--- compte de mon ami »). Il faut 027_safari_libre.sql installé (install_024_a_027.sql). Les comptes admin sont déjà
+-- compte de mon ami »). Il faut 027_safari_libre.sql installé (install_024_a_028.sql). Les comptes admin sont déjà
 -- sans délai ; ici, on ajoute (ou retire) un autre compte. Supabase Studio › SQL Editor › New query › Run.
 
 -- 1. AJOUTER un compte : remplace l'adresse, puis Run.

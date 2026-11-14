@@ -6,6 +6,59 @@
 
 ---
 
+## 2026-11-14 — Points de loyauté construits (« go » du porteur), son du coffre retiré
+
+- **« Go » du porteur** sur les Points de loyauté (`docs/38`), avec mes choix par défaut L1 à L8. **Son d'ouverture du coffre mystère : aucun pour l'instant** (les 5 propositions ne lui plaisent pas ; toujours essayables avec `?soncoffre=1` à `5`).
+- **Ce qu'est un PL** : un point de fidélité qui sert seulement au classement de la saison.
+  - Il ne s'achète pas, ne se dépense pas et ne s'échange pas.
+  - On ne le voit que dans « Ma progression » (jamais sur l'accueil ni dans l'en-tête).
+- **Serveur** (`tools/supabase/028_points_loyaute.sql`, 80 vérifications) : le serveur seul donne les PL ; l'app ne fait que les demander.
+  - **Parrainage** :
+    - 200 PL au parrain quand son filleul a vérifié son adresse et ouvert l'app 3 jours différents dans ses 14 premiers jours ;
+    - au plus 20 filleuls comptés par saison ;
+    - 400 PL quand le filleul a payé le Premium depuis plus de 14 jours (après le délai de rétractation) ;
+    - 50 PL de bienvenue au filleul ;
+    - jamais soi-même, ni en boucle (A parraine B qui parraine A), ni après les 14 premiers jours du compte ;
+    - pas de PL pour un filleul dont l'adresse est un alias d'un compte plus ancien (`nom+1@gmail.com`, `n.om@gmail.com` : même boîte), pour empêcher les faux filleuls fabriqués avec une seule adresse.
+  - **TikTok, Instagram, Discord** : 100 PL une seule fois par réseau, sur l'honneur.
+  - **Jours d'affilée dans la saison** (app ouverte ou partie jouée ce jour-là) : 5 jours 30 PL, 15 jours 100 PL, 30 jours 150 PL, une fois par saison chacun.
+  - **Partage avec capture** : 100 PL une fois par saison, après validation d'un admin.
+    - La capture est réduite sur le téléphone (1 080 px), puis effacée du serveur dès la décision.
+    - 3 envois au plus par saison.
+  - **Classement de la saison en PL** :
+    - égalité départagée par l'heure du dernier gain ;
+    - comptes admin non classés ;
+    - total à vie affiché en petit ;
+    - la saison 1 en cours passe aux PL dès l'installation (tout le monde à 0 PL).
+  - **Lots** (grille du porteur) :
+    - 1ʳᵉ place : ETB ; 2ᵉ : coffret ; 3ᵉ : 2 boosters (seulement avec au moins 50 joueurs classés, sinon 1 mois de Premium) ;
+    - 4ᵉ et 5ᵉ : Premium ou ticket Or ; 6ᵉ et 7ᵉ : Premium ou ticket Argent ; 8ᵉ à 10ᵉ : Premium ou ticket Bronze ;
+    - l'ancien « Premium de la 11ᵉ à la 30ᵉ place » est retiré.
+  - **Pour l'admin** : correction possible dans Studio, avec un motif (`pl_admin_adjust`).
+  - **Tests** : journal ineffaçable, et toute triche essayée est refusée (PL écrits soi-même, faux parrainage, deuxième réclamation, image trafiquée).
+- **App** :
+  - **« Ma progression » en 2 onglets** : « Classement et récompenses » (en PL) et « Gagner des PL ».
+  - **Page « Gagner des PL »** :
+    - PL de la saison et à vie ;
+    - parrainage : code, lien `dropicards.fr/?parrain=CODE`, QR code dessiné dans l'app (bibliothèque libre qrcode-generator, licence MIT, sans service extérieur), « Partager mon lien », « Copier le lien », amis comptés et en attente, champ pour le code d'un ami ;
+    - 7 défis avec leur état ;
+    - envoi d'une capture.
+  - **Lien de parrainage** : le code est gardé sur l'appareil jusqu'à la connexion, puis envoyé au serveur ; un seul message réunit la bienvenue et les gains.
+  - **Admin › « Défis à valider »** : la capture, puis Valider ou Refuser.
+  - Serveur sans `028` : « Bientôt disponible » pour un joueur, le fichier à installer pour un admin.
+- **Pas de PL contre un clic sur une pub ni contre un avis sur les stores** (interdit par Google et Apple, L1 et L2).
+- **Textes** :
+  - politique de confidentialité (PL, parrainage, captures ; 14 novembre 2026) ;
+  - CGU (classement en PL, nouveaux lots) ;
+  - **projet de règlement de la saison** (`docs/39`) : à relire, si possible par un juriste, puis à publier au plus vite, la saison 1 étant déjà commencée.
+- **À faire par le porteur** :
+  - installer `tools/supabase/install_024_a_028.sql` dans Studio (il remplace `install_024_a_027.sql` et ouvre aussi le Safari, ses niveaux et le suivi des joueurs) ;
+  - donner les adresses TikTok, Instagram et Discord de Dropicards (sinon les 3 défis restent « Bientôt ») ;
+  - valider le règlement.
+- **Effort réel** : ≈ 10 h (serveur et tests ≈ 4 h, app ≈ 5 h, textes ≈ 1 h).
+- **Coût** : rien de plus en hébergement ; lots ≈ 190 € par saison (`docs/38` §4).
+- Cache v195.
+
 ## 2026-11-14 — Safari : Normal et Difficile réparés, sons choisis, sons du coffre, Points de loyauté proposés (demande du porteur)
 
 - **Sons du Safari choisis par le porteur** : « Cristal et trombone » (n° 4) pour bonne et mauvaise réponse, et le son de perte de PK gardé. Les autres paires restent pour essai (`?sonsafari=1` à `5`).

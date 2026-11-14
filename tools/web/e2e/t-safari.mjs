@@ -278,7 +278,7 @@ for (const role of ['user', 'admin']) {
     await p6.locator('.pkm-sf-go').click(); await p6.waitForTimeout(900);
     ok('sans 026, joueur : « Jouer en Facile » ouvre la partie Facile du serveur', /Attrape les Pokémon Eau !/.test(N(await p6.locator('.pkm-sf').innerText())) && starts.some(a => a.lvl == null));
   } else {
-    ok('sans 026, admin : « Normal » ouvre une partie d’aperçu (vitesse ×2, sans PK)', /Niveau Normal · vitesse ×2/.test(t6) && /Aperçu admin : aucun PK/.test(t6) && /install_024_a_027\.sql/.test(t6));
+    ok('sans 026, admin : « Normal » ouvre une partie d’aperçu (vitesse ×2, sans PK)', /Niveau Normal · vitesse ×2/.test(t6) && /Aperçu admin : aucun PK/.test(t6) && /install_024_a_028\.sql/.test(t6));
   }
   await c6.close();
 }

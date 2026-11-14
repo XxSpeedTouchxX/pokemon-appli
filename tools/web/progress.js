@@ -6,13 +6,21 @@
   // de la saison : top 10 (à définir), Premium offert de la 11ᵉ à la 30ᵉ place, remis après la fin de la saison.
   // Le classement vient du serveur (fonction season_board de 013_saisons.sql : PK gagnés pendant la saison, achats non
   // déduits, comptes admin non classés). Sans connexion au serveur, la carte s'affiche sans place.
+  // Depuis le 2026-11-14 (« go » du porteur, docs/38) : 2 onglets, « Classement et récompenses » et « Gagner des PL »
+  // (pl.js) ; classement en Points de loyauté (season_board de 028_points_loyaute.sql) ; lots de la grille du porteur.
+  // Serveur sans 028 : classement en PK comme avant.
   const PROG_START = Date.parse('2026-11-08T00:00:00+01:00'), PROG_DAYS = 60, PROG_DAY = 86400000;
   const PROG_TTL = 60000; // classement relu au plus une fois par minute
+  // Lots de la saison (grille du porteur, docs/38 §4, L8) ; podium seulement avec au moins 50 joueurs classés.
   const PROG_REWARDS = [
-    { range: '1ʳᵉ à 3ᵉ place', prize: 'Les plus beaux lots de la saison', note: 'Lots à définir', img: 'img/rank/1.svg', cls: 'pkm-pg-rw pkm-pg-rw-top' },
-    { range: '4ᵉ à 10ᵉ place', prize: 'Un lot pour chaque place du top 10', note: 'Lots à définir', img: 'img/rank/2.svg', cls: 'pkm-pg-rw' },
-    { range: '11ᵉ à 30ᵉ place', prize: 'Abonnement Premium offert', note: 'Scans et classeur illimités, Radar, PA doublés', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem' }
+    { range: '1ʳᵉ place', prize: 'Un ETB du moment', note: 'Elite Trainer Box', img: 'img/rank/1.svg', cls: 'pkm-pg-rw pkm-pg-rw-top' },
+    { range: '2ᵉ place', prize: 'Un coffret du moment', note: '', img: 'img/rank/2.svg', cls: 'pkm-pg-rw pkm-pg-rw-top' },
+    { range: '3ᵉ place', prize: '2 boosters du moment', note: '', img: 'img/rank/3.svg', cls: 'pkm-pg-rw pkm-pg-rw-top' },
+    { range: '4ᵉ et 5ᵉ place', prize: '1 mois de Premium ou 1 ticket Or', note: 'Au choix, en fin de saison', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-or' },
+    { range: '6ᵉ et 7ᵉ place', prize: '1 mois de Premium ou 1 ticket Argent', note: 'Au choix, en fin de saison', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-ag' },
+    { range: '8ᵉ à 10ᵉ place', prize: '1 mois de Premium ou 1 ticket Bronze', note: 'Au choix, en fin de saison', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-bz' }
   ];
+  PROG_REWARDS.forEach(w => { if (!w.note) w.note = ''; w.hasNote = !!w.note; });
   PROG_REWARDS.forEach(w => { w.hasImg = !!w.img; w.noImg = !w.img; });
   let progTick = null;
   const progNum = n => Number(n || 0).toLocaleString('fr-FR');
@@ -36,7 +44,13 @@
     Cloud.rpc('season_board', { lim: 50 }).then(b => this.setState({ progBoard: b || null, progAt: Date.now(), progBusy: false, progErr: '' }),
       e => this.setState({ progBusy: false, progErr: e && e.code === 'network' ? 'Pas de réseau : le classement s’affichera dès que tu seras connecté.' : 'Le classement n’est pas disponible pour le moment.' }));
   };
-  progProto.progOpen = function () { this.push('progress'); this.progLoad(false); };
+  progProto.progOpen = function () { this.push('progress'); this.progLoad(false); if (this.plSync) this.plSync(false); };
+  progProto.progTab = function (t) {
+    if (this.st().pgTab === t) return;
+    this.setState({ pgTab: t });
+    if (t === 'earn' && this.plSync) this.plSync(Date.now() - (this.__plTabAt || 0) > 60000).then(() => { this.__plTabAt = Date.now(); });
+    else this.progLoad(false);
+  };
   const progGrade = (T, i) => { const g = T[Math.max(0, Math.min(T.length - 1, Number(i) || 0))]; return { name: g.name, img: g.sym, color: g.color }; };
   progProto.vProgress = function (s) {
     const T = this.tiers(), b = s.progBoard && typeof s.progBoard === 'object' ? s.progBoard : null, now = Date.now();
@@ -44,14 +58,16 @@
     const cur = this.tierOf().i, my = progGrade(T, b && b.grade != null ? b.grade : cur);
     const pseudo = (s.account && s.account.pseudo) || (s.trainer && s.trainer.name) || 'Dresseur';
     const me = b && b.me ? b.me : null, players = b ? Number(b.players) || 0 : 0;
+    // Unité du classement : PL (serveur avec 028) ou PK (avant).
+    const isPl = !!(b && b.unit === 'pl'), unit = isPl ? 'PL' : 'PK', pts = e => (e ? (isPl ? e.pl : e.pk) : 0);
     const top = (b && Array.isArray(b.top) ? b.top : []).map(e => {
       const g = progGrade(T, e.grade), rank = Number(e.rank) || 0;
       // Avatar du joueur (014_avatar.sql) ; le sien vient de l'appareil. Sans avatar : l'emblème du grade.
       const av = e.me && s.avatarCfg ? avMini(s.avatarCfg) : avMini(e.avatar);
-      return { rank: rank, rankText: String(rank), pseudo: e.pseudo || '—', gImg: g.img, gName: g.name, gColor: g.color, pk: progNum(e.pk) + ' PK', me: !!e.me,
+      return { rank: rank, rankText: String(rank), pseudo: e.pseudo || '—', gImg: g.img, gName: g.name, gColor: g.color, pk: progNum(pts(e)) + ' ' + unit, me: !!e.me,
         hasAva: !!av, noAva: !av, ava: av || { bg: '', char: '', poke: {}, pokeStyle: '', hasPoke: false, acc: {}, accStyle: '', hasAcc: false },
-        cls: 'pkm-pg-row' + (e.me ? ' pkm-pg-me' : '') + (rank <= 10 ? ' pkm-pg-top10' : rank <= 30 ? ' pkm-pg-top30' : ''),
-        aria: rank + (rank === 1 ? 'ᵉʳ' : 'ᵉ') + ' : ' + (e.pseudo || '—') + ', grade ' + g.name + ', ' + progNum(e.pk) + ' PK' + (e.me ? ' (toi)' : '') };
+        cls: 'pkm-pg-row' + (e.me ? ' pkm-pg-me' : '') + (rank <= 10 ? ' pkm-pg-top10' : !isPl && rank <= 30 ? ' pkm-pg-top30' : ''),
+        aria: rank + (rank === 1 ? 'ᵉʳ' : 'ᵉ') + ' : ' + (e.pseudo || '—') + ', grade ' + g.name + ', ' + progNum(pts(e)) + ' ' + unit + (e.me ? ' (toi)' : '') };
     });
     const pod = [1, 0, 2].map(i => top[i]).filter(Boolean).map(e => Object.assign({}, e, {
       pos: e.rank, medal: 'img/rank/' + Math.min(3, Math.max(1, e.rank)) + '.svg', podCls: 'pkm-pg-pod pkm-pg-pod-' + Math.min(3, Math.max(1, e.rank)) + (e.me ? ' pkm-pg-pod-me' : '')
@@ -60,24 +76,32 @@
     const span = Math.max(1, se.end - se.start), done = Math.max(0, Math.min(1, (now - se.start) / span));
     const online = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
     const rankTxt = me ? '#' + progNum(me.rank) : '—';
-    const myPrize = me ? (me.rank <= 10 ? 'Dans le top 10 : un lot t’attend si tu y restes' : me.rank <= 30 ? 'Dans le top 30 : Premium offert si tu y restes' : 'Encore ' + progNum(Math.max(0, me.rank - 30)) + ' place' + (me.rank - 30 > 1 ? 's' : '') + ' pour le top 30') : '';
+    const cap = isPl ? 10 : 30;
+    const myPrize = me ? (me.rank <= 10 ? 'Dans le top 10 : un lot t’attend si tu y restes' : !isPl && me.rank <= 30 ? 'Dans le top 30 : Premium offert si tu y restes' : 'Encore ' + progNum(Math.max(0, me.rank - cap)) + ' place' + (me.rank - cap > 1 ? 's' : '') + ' pour le top ' + cap + (isPl ? ' : gagne des PL avec les défis' : '')) : '';
+    const tab = s.pgTab === 'earn' ? 'earn' : 'board';
     return {
       seasonN: 'Saison ' + se.n, seasonLabel: 'Saison ' + se.n, left: progLeft(se.end - now), barW: 'width: ' + Math.round(done * 100) + '%',
       dates: 'Du ' + new Date(se.start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }) + ' au ' + new Date(se.end - 1).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }),
       card: {
         avatar: this.img().avatar, pseudo: pseudo, gImg: my.img, gName: my.name, gColor: my.color, gStyle: 'color: ' + my.color,
-        pkSeason: progNum(me ? me.pk : 0), pkTotal: progNum(b && b.pk_total != null ? b.pk_total : (s.pkEarned != null ? s.pkEarned : s.pk)),
+        pkSeason: progNum(me ? pts(me) : 0), pkTotal: isPl ? progNum(b.pl_total) : progNum(b && b.pk_total != null ? b.pk_total : (s.pkEarned != null ? s.pkEarned : s.pk)),
+        unitImg: isPl ? 'img/brand/pl.svg' : 'img/brand/pk.svg', seasonLabel: unit + ' de la saison', totalLabel: isPl ? 'PL gagnés au total' : 'PK gagnés au total',
         rank: rankTxt, of: players ? 'sur ' + progNum(players) + ' joueur' + (players > 1 ? 's' : '') : '',
         prize: myPrize, hasPrize: !!myPrize,
         unranked: b && !me ? 'Les comptes admin ne sont pas classés.' : !b && !online ? 'Connecte-toi pour voir ta place au classement.' : '', hasUnranked: !!(b && !me) || (!b && !online),
-        aria: 'Ma carte de progression : ' + pseudo + ', grade ' + my.name + ', ' + (me ? rankTxt + ' ' : 'pas classé, ') + progNum(me ? me.pk : 0) + ' PK cette saison'
+        aria: 'Ma carte de progression : ' + pseudo + ', grade ' + my.name + ', ' + (me ? rankTxt + ' ' : 'pas classé, ') + progNum(me ? pts(me) : 0) + ' ' + unit + ' cette saison'
       },
       hasBoard: top.length > 0, podium: pod, rest: rest, hasRest: rest.length > 0,
-      meRow: !inList && me ? { rankText: progNum(me.rank), pseudo: pseudo, gImg: my.img, gName: my.name, gColor: my.color, pk: progNum(me.pk) + ' PK', cls: 'pkm-pg-row pkm-pg-me', aria: 'Toi : ' + me.rank + 'ᵉ, ' + progNum(me.pk) + ' PK' } : null,
+      meRow: !inList && me ? { rankText: progNum(me.rank), pseudo: pseudo, gImg: my.img, gName: my.name, gColor: my.color, pk: progNum(pts(me)) + ' ' + unit, cls: 'pkm-pg-row pkm-pg-me', aria: 'Toi : ' + me.rank + 'ᵉ, ' + progNum(pts(me)) + ' ' + unit } : null,
       hasMeRow: !inList && !!me,
-      busy: !!s.progBusy && !b, empty: !s.progBusy && !top.length, emptyText: s.progErr || (online ? 'Le classement de la saison s’affiche dès les premiers PK gagnés.' : 'Le classement s’affiche une fois connecté à ton compte Dropicards.'),
+      busy: !!s.progBusy && !b, empty: !s.progBusy && !top.length, emptyText: s.progErr || (online ? 'Le classement de la saison s’affiche dès les premiers ' + unit + ' gagnés.' : 'Le classement s’affiche une fois connecté à ton compte Dropicards.'),
       rewards: PROG_REWARDS, refresh: () => this.progLoad(true), refreshing: !!s.progBusy,
-      rules: 'Classement selon les PK gagnés pendant la saison (Booster PK, pièce, bienvenue, partage) ; les achats au PK shop ne font pas baisser ton score. Égalité : même place. Lots remis après la fin de la saison, selon un règlement publié avant sa fin ; les comptes admin ne sont pas classés.'
+      rewardsNote: 'Lots des 3 premières places remis si au moins 50 joueurs sont classés (sinon, 1 mois de Premium pour chacun).',
+      tabs: [['board', 'Classement et récompenses'], ['earn', 'Gagner des PL']].map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-pg-tab' + (tab === k ? ' pkm-pg-tab-on' : ''), pick: () => this.progTab(k) })),
+      isBoard: tab === 'board', isEarn: tab === 'earn',
+      rules: isPl
+        ? 'Classement selon les Points de loyauté (PL) gagnés pendant la saison, avec les défis de « Gagner des PL ». Les PL ne s’achètent pas et ne se dépensent pas. Égalité : le premier arrivé à ce score passe devant. Lots remis après la fin de la saison, selon un règlement publié avant son début ; les comptes admin ne sont pas classés.'
+        : 'Classement selon les PK gagnés pendant la saison (Booster PK, pièce, bienvenue, partage) ; les achats au PK shop ne font pas baisser ton score. Égalité : même place. Lots remis après la fin de la saison, selon un règlement publié avant sa fin ; les comptes admin ne sont pas classés.'
     };
   };
   // Bannière de l'onglet Jeux.
@@ -93,10 +117,11 @@
     r.pgb = this.vProgressBanner(s);
     if (ui.isProgress) {
       r.pg = this.vProgress(s);
-      Object.assign(ui, { title: 'Ma progression', subtitle: r.pg.seasonLabel + ' · classement général', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
+      r.ple = r.pg.isEarn && this.vPlEarn ? this.vPlEarn(s) : { rows: [], shareNets: [] };
+      Object.assign(ui, { title: 'Ma progression', subtitle: r.pg.seasonLabel + (r.pg.isEarn ? ' · Points de loyauté' : ' · classement général'), hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
       // Temps restant : nouveau rendu chaque minute tant que la page est ouverte ; classement relu s'il date.
       if (!progTick) progTick = setInterval(() => { if (this.st().screen === 'progress') { this.setState({ pgNow: Date.now() }); this.progLoad(false); } else { clearInterval(progTick); progTick = null; } }, 60000);
-    } else r.pg = { card: {}, podium: [], rest: [], rewards: [] };
+    } else { r.pg = { card: {}, podium: [], rest: [], rewards: [], tabs: [] }; r.ple = { rows: [], shareNets: [] }; }
     return r;
   };
   const progBaseParent = progProto.parentOf;
@@ -105,6 +130,6 @@
   const progBaseSt = progProto.st;
   progProto.st = function () {
     const d = progBaseSt.call(this), p = this.props || {};
-    if (!(this.state && this.state.screen) && p.start === 'progress') { d.screen = 'progress'; d.stack = ['market']; }
+    if (!(this.state && this.state.screen) && p.start === 'progress') { d.screen = 'progress'; d.stack = ['market']; if (p.pgtab === 'earn' && !(this.state && this.state.pgTab)) d.pgTab = 'earn'; }
     return d;
   };

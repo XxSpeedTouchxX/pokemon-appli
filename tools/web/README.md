@@ -791,5 +791,22 @@ Le script `tools/web/build.mjs` :
     - `t-safari.mjs` : Normal gagné, serveur sans `026` côté joueur et côté admin, « Quitter le safari » ;
     - `t-sfsfx.mjs` : niveaux des sons du coffre, échantillons ;
     - `t-xppk.mjs` : arrivée puis ouverture.
+- **Points de loyauté (cache v195)** :
+  - `pl.js` (nouveau) :
+    - code d'un lien `?parrain=CODE` gardé (`pkm-parrain`, 30 jours) puis envoyé par `pl_set_parrain` à la connexion ;
+    - `plSync` (`pl_state`, après `gcSync`, au plus toutes les 10 min, forcé à l'ouverture de l'onglet) et `plCelebrate` (un seul message) ;
+    - `vPlEarn` : page « Gagner des PL », QR code `plQr` (chemin SVG), `plShare`, `plCopy` ;
+    - `plNet` : réseau ouvert, puis « Valider » ; `plShrink` réduit la capture à 1 080 px en JPEG avant `pl_submit_proof` ;
+    - Admin › « Défis à valider » : `plpView`, `admin_pl_proofs`, `admin_pl_decide`.
+  - `progress.js` : onglets `pgTab` (`?pgtab=earn`) ; classement en PL quand `season_board.unit = 'pl'`, sinon en PK comme avant ; nouvelle grille des lots.
+  - `profile.js` : `SOCIAL_LINKS` (adresses des réseaux, partagées avec Mon profil ; `window.__pkmSocial` pour les tests seulement).
+  - `build.mjs` :
+    - qrcode-generator 2.0.4 (licence MIT, `devDependencies`) ajouté au paquet, avec sa mention en tête de `app.js` ;
+    - `pgtab` lu dans l'adresse.
+  - `catalog.dc.html` et `progress.css` : onglets, `.pkm-ple-*`, `.pkm-plp-*`.
+  - `web/img/social/instagram.svg`.
+  - `legal.js` : confidentialité (PL, parrainage, captures) et CGU (classement en PL, lots), 14 novembre 2026.
+  - `sfx.js` : `SFX_CHEST_DEFAULT = null`.
+  - Tests : `t-pl.mjs` (33), `t-progress.mjs` (lots), `t-safari.mjs` (`install_024_a_028.sql`), `t-sfsfx.mjs` (pas de son du coffre par défaut).
 - **Textes des animations, Safari sans délai (cache v193)** : `profile.js` et `games.css` (nom du grade : `--gu-len`, taille selon la largeur de l'app en `cqi`, retour à la ligne) ; `dex.css` (petit écran du Pokédex sur deux lignes, fiche resserrée par requête de conteneur) ; `dex.js` (`dexAppW` : arbre à la largeur de la colonne de l'app, 240 px au moins, `DEX_NAME_W` 60) ; `safari.js` (`sfFreeSrv` lu dans `safari_state.free` : sans délai, « Sans délai », pas de verrou de grade) ; tests `t-textclip.mjs` (7 animations × 3 largeurs) et `t-safari.mjs` (compte sans délai).
 - **Retouches (2026-11-08, porteur, cache v160)** : `rules.css` `.pkm-rules-shop > div > .pkm-rules-tkbox` (colonne de 56 px, plus de `flex: 1`) ; `progress.css` `pkmPgIn` (blocs en cascade) et `pkmPgPop` (podium) après le glissement de page de `nav.js`. Tests : `t-sheets`, `t-progress`.

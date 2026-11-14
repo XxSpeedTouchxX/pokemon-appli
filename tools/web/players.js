@@ -90,7 +90,7 @@
     }, e => {
       this.__plyBusy = false;
       const msg = e && e.code === 'not_installed'
-        ? 'Le suivi des joueurs n’est pas encore installé sur le serveur : colle tools/supabase/install_024_a_027.sql dans Studio (SQL Editor › Run).'
+        ? 'Le suivi des joueurs n’est pas encore installé sur le serveur : colle tools/supabase/install_024_a_028.sql dans Studio (SQL Editor › Run).'
         : 'Liste indisponible : rouvre le mode Admin avec le mot de passe des admins (' + ((e && e.message) || 'erreur') + ').';
       this.setState({ plyErr: msg, plyAt: Date.now() });
       return null;

@@ -708,8 +708,9 @@
         sfxBell(ac, out, sfxHz(n > 1 ? 24 : 19), t0 + SFX_CH_COUNT, 1.0, 0.06, [1, 2.0, 3.0], [1, 0.3, 0.1]);
       } }
   ];
-  // Défaut (en attendant le choix du porteur) : « Coffre au trésor ».
-  const SFX_CHEST_DEFAULT = 'tresor';
+  // Aucun son par défaut (2026-11-14, porteur : « pour l'instant ça ne me plaît pas, les sons proposés ») ; les 5
+  // propositions restent pour essai (?soncoffre=1 à 5).
+  const SFX_CHEST_DEFAULT = null;
   // Perte de PK à la fin d'une partie (pa.js, pkFlyLoss) : des gouttes qui tombent de plus en plus grave, puis un coup
   // sourd et une petite note qui descend, au rythme des gemmes qui quittent le solde.
   const sfxLossPlay = (ac, out, t0) => {

@@ -43,7 +43,7 @@ ok('classement : 4ᵉ à 30ᵉ avec le grade à côté du pseudo', (await page.l
 ok('ma ligne en bas (34ᵉ), en jaune', (await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').count()) === 1 && /34/.test(await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').innerText()));
 await page.locator('section[aria-label="Classement général"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('progress-podium.png') });
 const rw = await page.locator('section[aria-label="Lots de la saison"]').innerText();
-ok('lots : top 10 (à définir), Premium de la 11ᵉ à la 30ᵉ place', /1ʳᵉ à 3ᵉ place/.test(rw) && /4ᵉ à 10ᵉ place/.test(rw) && /11ᵉ à 30ᵉ place/.test(rw) && /Premium offert/.test(rw) && /à définir/.test(rw));
+ok('lots (grille du porteur, 2026-11-14) : ETB, coffret, 2 boosters, puis Premium ou ticket jusqu’à la 10ᵉ place', /1ʳᵉ place/.test(rw) && /ETB du moment/.test(rw) && /8ᵉ à 10ᵉ place/.test(rw) && /ticket Bronze/.test(rw) && !/11ᵉ à 30ᵉ place/.test(rw));
 await page.locator('section[aria-label="Lots de la saison"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('progress-lots.png') });
 // Dans le top 10 : ma ligne dans la liste, message du lot.
 await page.evaluate(() => { const b = window.__pkm.st().progBoard; b.top[6].me = true; b.me = { rank: 7, pk: b.top[6].pk }; window.__pkm.setState({ progBoard: Object.assign({}, b) }); });

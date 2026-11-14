@@ -201,7 +201,7 @@
       + '<div class="pkm-sf-rules"><div><b>20 s</b>de partie</div><div><b class="pkm-sf-plus">+' + lv.plus + '</b>PK par bon Pokémon</div><div><b class="pkm-sf-minus">−' + lv.minus + '</b>PK par erreur</div></div>'
       + (lv.loss ? '<p class="pkm-sf-warn"><b>⚠️ Attention :</b> si tu fais plus d’erreurs que de bons Pokémon, ton total finit en négatif et ces PK sont <b>retirés de ton solde</b> (jusqu’à ' + lv.loss + ' PK, jamais sous 0).</p>'
         : '<p class="pkm-sf-safe">✓ Niveau sans risque : au pire, tu gagnes 0 PK.</p>')
-      + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : aucun PK. ' + (SF.noLvl ? 'Installe install_024_a_027.sql dans Studio pour ouvrir Normal et Difficile à tous.' : 'Installe install_024_a_027.sql dans Studio pour ouvrir le safari à tous.') + '</p>' : '')
+      + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : aucun PK. ' + (SF.noLvl ? 'Installe install_024_a_028.sql dans Studio pour ouvrir Normal et Difficile à tous.' : 'Installe install_024_a_028.sql dans Studio pour ouvrir le safari à tous.') + '</p>' : '')
       + '<button type="button" class="pkm-sf-go">C’est parti !</button>'
       + '<button type="button" class="pkm-sf-relv">Changer de niveau</button></div>');
     SF.phase = 'brief';
@@ -289,7 +289,7 @@
         + (won < 0 ? '<p class="pkm-sf-lossmsg">Plus d’erreurs que de bons Pokémon : <b>' + (-won) + ' PK</b> sont retirés de ton solde.'
           + (raw < won ? ' Ton total était de ' + sfSigned(raw) + ' PK, mais ton solde ne descend jamais sous 0.' : '') + '</p>' : '')
         + (grid ? '<h3 class="pkm-sf-h3">Ton safari</h3><div class="pkm-sf-caught">' + grid + '</div>' : '<p class="pkm-sf-p">Aucun Pokémon attrapé cette fois.</p>')
-        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : les PK ne sont pas enregistrés tant que 024_safari.sql n’est pas installé dans Studio (install_024_a_027.sql).</p>' : (sfFree(this.st()) ? '<p class="pkm-sf-next">Sans délai : tu peux rejouer tout de suite</p>' : this.sfHours() ? '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>' : ''))
+        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : les PK ne sont pas enregistrés tant que 024_safari.sql n’est pas installé dans Studio (install_024_a_028.sql).</p>' : (sfFree(this.st()) ? '<p class="pkm-sf-next">Sans délai : tu peux rejouer tout de suite</p>' : this.sfHours() ? '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>' : ''))
         // « Récupérer mes PK » à la place de « Fermer » (2026-11-13, porteur) : les gemmes volent jusqu'au solde, avec
         // l'animation et le bruit des PA du jour (aussi dans l'aperçu admin, où le solde ne bouge pas).
         // Perte ou 0 : « Quitter le safari » (2026-11-14, porteur) ; après une perte, les PK quittent le solde en sortant.

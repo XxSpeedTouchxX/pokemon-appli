@@ -2,7 +2,7 @@
 
 *2026-11-14 · demande du porteur : « un nouveau système de points qui va s'appeler des "Points de loyauté", gagnés grâce à différentes actions de l'utilisateur » ; classement de la saison en PL au lieu des PK ; « Ma progression » en 2 pages ; lots de saison ; « est-ce que tout ce que je te propose là est bien pour toi ? ce n'est pas trop de rajouter encore une autre monnaie ? ».*
 
-**Statut : proposition. Rien n'est codé sans « go ».** Les visuels du logo (5 propositions) sont dans `docs/38-logos-points-de-loyaute.png` et `tools/brand/pl/` ; **logo choisi par le porteur le 2026-11-14 : « Bouclier-cœur »** (`web/img/brand/pl.svg`).
+**Statut : « go » du porteur le 2026-11-14 avec les choix par défaut L1 à L8 (§6) : construit.** Serveur `tools/supabase/028_points_loyaute.sql` (à installer avec `install_024_a_028.sql`), app `tools/web/pl.js` et `progress.js`, projet de règlement `docs/39`. Restent : adresses des réseaux de Dropicards (`SOCIAL_LINKS`, `tools/web/profile.js`), relecture et publication du règlement. Les visuels du logo (5 propositions) sont dans `docs/38-logos-points-de-loyaute.png` et `tools/brand/pl/` ; **logo choisi par le porteur le 2026-11-14 : « Bouclier-cœur »** (`web/img/brand/pl.svg`).
 
 ---
 

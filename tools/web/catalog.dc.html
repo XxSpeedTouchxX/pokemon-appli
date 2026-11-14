@@ -1142,6 +1142,17 @@
 <sc-if value="{{ adm.ply.hasMore }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ adm.ply.showMore }}" class="pkm-admz-chip pkm-ply-more">{{ adm.ply.more }}</button></sc-if>
 </sc-if>
 </section>
+<section aria-label="{{ adm.plp.head }}" class="pkm-ply pkm-plp">
+<div class="pkm-sig-top"><h3><img src="img/brand/pl.svg" alt="" width="20" height="20">{{ adm.plp.head }}</h3><button type="button" onClick="{{ adm.plp.refresh }}" class="pkm-admz-chip">Actualiser</button></div>
+<sc-if value="{{ adm.plp.offline }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.plp.offlineText }}</p></sc-if>
+<sc-if value="{{ adm.plp.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-admz-err">{{ adm.plp.err }}</p></sc-if>
+<p class="pkm-ply-count">{{ adm.plp.count }}</p>
+<sc-if value="{{ adm.plp.hasList }}" hint-placeholder-val="{{ false }}"><ul aria-label="Captures de partage à valider" class="pkm-plp-list"><sc-for list="{{ adm.plp.list }}" as="plq" hint-placeholder-count="1"><li>
+<div class="pkm-plp-who"><b>{{ plq.who }}</b><small>{{ plq.net }} · {{ plq.when }}</small></div>
+<sc-if value="{{ plq.hasImg }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ plq.zoom }}" aria-label="Agrandir ou réduire la capture" class="pkm-plp-zoom"><img src="{{ plq.img }}" alt="{{ plq.alt }}" class="{{ plq.imgCls }}"></button></sc-if>
+<div class="pkm-plp-btns"><button type="button" onClick="{{ plq.ok }}" class="pkm-plp-ok">Valider (+100 PL)</button><button type="button" onClick="{{ plq.no }}" class="pkm-plp-no">Refuser</button></div>
+</li></sc-for></ul></sc-if>
+</section>
 <h3 style="margin: 4px 0 0; font-size: 14px; font-weight: 700; color: #C9D3EA">PK, PA et compagnons</h3>
 <span style="font-size: 13px; color: #C9D3EA">{{ adm.pkText }}</span>
 <div style="display: flex; gap: 8px">
@@ -2508,6 +2519,8 @@ PKCOUNTER
 <span class="pkm-pg-stext"><b>{{ pg.left }}</b><span>{{ pg.dates }} · 60 jours</span></span>
 <i class="pkm-pg-sbar" aria-hidden="true"><i style="{{ pg.barW }}"></i></i>
 </section>
+<div role="tablist" aria-label="Ma progression" class="pkm-pg-tabs"><sc-for list="{{ pg.tabs }}" as="pgt" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ pgt.on }}" onClick="{{ pgt.pick }}" class="{{ pgt.cls }}">{{ pgt.label }}</button></sc-for></div>
+<sc-if value="{{ pg.isBoard }}" hint-placeholder-val="{{ true }}">
 <section aria-label="{{ pg.card.aria }}" class="pkm-pg-card pkm-dark">
 <div class="pkm-pg-card-top">
 <span class="pkm-pg-ava"><img src="{{ pg.card.avatar }}" alt="" width="84" height="84"><img src="{{ pg.card.gImg }}" alt="" width="40" height="40" class="pkm-pg-ava-g"></span>
@@ -2515,8 +2528,8 @@ PKCOUNTER
 <span class="pkm-pg-rank"><small>Classement</small><b>{{ pg.card.rank }}</b><small>{{ pg.card.of }}</small></span>
 </div>
 <div class="pkm-pg-stats">
-<span><small>PK de la saison</small><b><img src="img/brand/pk.svg" alt="" width="22" height="22">{{ pg.card.pkSeason }}</b></span>
-<span><small>PK gagnés au total</small><b><img src="img/brand/pk.svg" alt="" width="22" height="22">{{ pg.card.pkTotal }}</b></span>
+<span><small>{{ pg.card.seasonLabel }}</small><b><img src="{{ pg.card.unitImg }}" alt="" width="22" height="22">{{ pg.card.pkSeason }}</b></span>
+<span><small>{{ pg.card.totalLabel }}</small><b><img src="{{ pg.card.unitImg }}" alt="" width="22" height="22">{{ pg.card.pkTotal }}</b></span>
 </div>
 <sc-if value="{{ pg.card.hasPrize }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-prize">{{ pg.card.prize }}</p></sc-if>
 <sc-if value="{{ pg.card.hasUnranked }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ pg.card.unranked }}</p></sc-if>
@@ -2547,9 +2560,55 @@ PKCOUNTER
 </section>
 <section aria-label="Lots de la saison" class="pkm-pg-rewards pkm-dark">
 <h2>Lots de la saison</h2>
-<sc-for list="{{ pg.rewards }}" as="pgw" hint-placeholder-count="3"><div class="{{ pgw.cls }}"><span class="pkm-pg-rwico"><sc-if value="{{ pgw.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pgw.img }}" alt="" width="36" height="36"></sc-if><sc-if value="{{ pgw.noImg }}" hint-placeholder-val="{{ false }}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" class="pkm-pg-crown"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg></sc-if></span><span class="pkm-pg-rwt"><b>{{ pgw.range }}</b><span>{{ pgw.prize }}</span><small>{{ pgw.note }}</small></span></div></sc-for>
+<sc-for list="{{ pg.rewards }}" as="pgw" hint-placeholder-count="3"><div class="{{ pgw.cls }}"><span class="pkm-pg-rwico"><sc-if value="{{ pgw.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pgw.img }}" alt="" width="36" height="36"></sc-if><sc-if value="{{ pgw.noImg }}" hint-placeholder-val="{{ false }}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" class="pkm-pg-crown"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg></sc-if></span><span class="pkm-pg-rwt"><b>{{ pgw.range }}</b><span>{{ pgw.prize }}</span><sc-if value="{{ pgw.hasNote }}" hint-placeholder-val="{{ true }}"><small>{{ pgw.note }}</small></sc-if></span></div></sc-for>
+<p class="pkm-pg-rules">{{ pg.rewardsNote }}</p>
 <p class="pkm-pg-rules">{{ pg.rules }}</p>
 </section>
+</sc-if>
+<sc-if value="{{ pg.isEarn }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ ple.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-ple-msg">{{ ple.msg }}</p></sc-if>
+<sc-if value="{{ ple.ready }}" hint-placeholder-val="{{ true }}">
+<section aria-label="{{ ple.headAria }}" class="pkm-ple-head pkm-dark">
+<img src="img/brand/pl.svg" alt="" width="68" height="68" class="pkm-ple-logo">
+<span class="pkm-ple-tot"><small>Mes PL de la saison</small><b>{{ ple.season }}</b><small>{{ ple.total }} PL gagnés au total</small></span>
+</section>
+<p class="pkm-ple-what">Les Points de loyauté (PL) récompensent ta fidélité. Ils servent seulement au classement de la saison : ils ne s’achètent pas et ne se dépensent pas.</p>
+<section aria-label="Parrainage" class="pkm-ple-ref pkm-dark">
+<h2>Parraine tes amis</h2>
+<p class="pkm-ple-sub"><b>+200 PL</b> par ami qui s’inscrit avec ton lien, vérifie son adresse e-mail et ouvre l’app 3 jours différents dans ses 14 premiers jours (20 amis comptés par saison). <b>+400 PL</b> s’il garde le Premium plus de 14 jours. Ton ami reçoit 50 PL de bienvenue.</p>
+<div class="pkm-ple-qrrow">
+<sc-if value="{{ ple.hasQr }}" hint-placeholder-val="{{ true }}"><svg viewBox="{{ ple.qrBox }}" width="128" height="128" role="img" aria-label="QR code de ton lien de parrainage" class="pkm-ple-qr"><path d="{{ ple.qrPath }}"></path></svg></sc-if>
+<span class="pkm-ple-code"><small>Ton code</small><b>{{ ple.code }}</b><small class="pkm-ple-link">{{ ple.linkShort }}</small></span>
+</div>
+<div class="pkm-ple-btns"><button type="button" onClick="{{ ple.share }}" class="pkm-ple-btn pkm-ple-btn-main">Partager mon lien</button><button type="button" onClick="{{ ple.copy }}" class="pkm-ple-btn">Copier le lien</button></div>
+<div class="pkm-ple-stats"><span><b>{{ ple.refCount }}</b><small>amis comptés cette saison</small></span><span><b>{{ ple.refPending }}</b><small>en attente</small></span><span><b>{{ ple.refPrem }}</b><small>Premium</small></span></div>
+<sc-if value="{{ ple.hasParrain }}" hint-placeholder-val="{{ false }}"><p class="pkm-ple-sub">Tu as été parrainé par <b>{{ ple.parrain }}</b>.</p></sc-if>
+<sc-if value="{{ ple.canCode }}" hint-placeholder-val="{{ false }}"><div class="pkm-ple-codein"><input type="text" aria-label="Code de parrainage d’un ami" placeholder="Code d’un ami" autocomplete="off" maxlength="12" value="{{ ple.codeIn }}" onInput="{{ ple.onCode }}"><button type="button" onClick="{{ ple.sendCode }}" disabled="{{ ple.codeBusy }}">Valider</button></div></sc-if>
+</section>
+<section aria-label="Défis" class="pkm-ple-list pkm-dark">
+<h2>Défis</h2>
+<sc-for list="{{ ple.rows }}" as="plr" hint-placeholder-count="7"><div class="{{ plr.cls }}">
+<span class="{{ plr.icoCls }}"><img src="{{ plr.icon }}" alt="" width="24" height="24"></span>
+<span class="pkm-ple-txt"><b>{{ plr.title }}</b><small>{{ plr.sub }}</small><sc-if value="{{ plr.hasBar }}" hint-placeholder-val="{{ false }}"><i class="pkm-ple-bar" aria-hidden="true"><i style="{{ plr.barW }}"></i></i></sc-if></span>
+<span class="pkm-ple-side"><span class="pkm-ple-gain"><img src="img/brand/pl.svg" alt="" width="16" height="16">+{{ plr.pl }}</span><button type="button" onClick="{{ plr.pick }}" disabled="{{ plr.off }}" aria-label="{{ plr.aria }}" class="{{ plr.btnCls }}">{{ plr.cta }}</button></span>
+</div></sc-for>
+<sc-if value="{{ ple.shareOpen }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-ple-shot">
+<p class="pkm-ple-sub">1. Partage ton lien de parrainage ou une capture de l’app sur un réseau social. 2. Fais une capture d’écran de ta publication. 3. Envoie-la ici : un admin la vérifie, puis tes 100 PL arrivent. La capture est effacée dès la vérification.</p>
+<button type="button" onClick="{{ ple.shareMine }}" class="pkm-ple-btn">Partager mon lien</button>
+<div role="group" aria-label="Réseau de ta publication" class="pkm-ple-chips"><sc-for list="{{ ple.shareNets }}" as="pln" hint-placeholder-count="8"><button type="button" aria-pressed="{{ pln.on }}" onClick="{{ pln.pick }}" class="{{ pln.cls }}">{{ pln.label }}</button></sc-for></div>
+<input type="file" id="pkm-pl-file" accept="image/*" tabindex="-1" aria-hidden="true" onChange="{{ ple.onFile }}" style="position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none">
+<button type="button" onClick="{{ ple.pickFile }}" class="pkm-ple-btn">Choisir ma capture d’écran</button>
+<sc-if value="{{ ple.shotBusy }}" hint-placeholder-val="{{ false }}"><p class="pkm-ple-sub">Préparation de l’image…</p></sc-if>
+<sc-if value="{{ ple.hasShotErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-ple-err">{{ ple.shotErr }}</p></sc-if>
+<sc-if value="{{ ple.hasShot }}" hint-placeholder-val="{{ false }}"><img src="{{ ple.shot }}" alt="Aperçu de ta capture" class="pkm-ple-prev"></sc-if>
+<button type="button" onClick="{{ ple.send }}" disabled="{{ ple.sendOff }}" class="pkm-ple-btn pkm-ple-btn-main">{{ ple.sendLabel }}</button>
+</div>
+</sc-if>
+<p class="pkm-pg-rules">Pas de PL contre un clic sur une publicité ni contre un avis sur les stores : c’est interdit par Google et Apple. Les abonnements aux réseaux se valident sur l’honneur ; toute triche (faux comptes, faux filleuls) retire les PL et exclut du classement.</p>
+</section>
+</sc-if>
+</sc-if>
 </sc-if>
 
 <!-- fragment: avatar -->
