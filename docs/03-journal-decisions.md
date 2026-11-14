@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-14 — Pré-gradation construite, « Version Proto » (go du porteur, D1 à D6)
+
+- **Go du porteur** sur la proposition `docs/40` avec ses décisions : D1 logo L1 (loupe) ; D2 analyse sur le téléphone d'abord (option A), l'IA (option B) seulement si A déçoit ; D3 1 pré-gradation gratuite tous les 3 jours, 100 par mois avec Premium (remise à zéro chaque mois), compteur toujours visible ; D4 tarifs de gradation envoyés par le porteur plus tard ; D5 barèmes PSA, PCA et CCC du porteur intégrés mot pour mot ; D6 badge « Version Proto ».
+- **Construit** : rubrique de l'accueil sous les boutiques, prise de vue guidée (recto puis verso, photo automatique, import), analyse sur le téléphone (centrage, coins, bords, surface), note probable avec fourchette et fiabilité, chances de chaque note chez PSA, PCA et CCC, « ça vaut le coup ? », ajout à la collection avec l'état estimé, vraie note, « Mes pré-gradations » (`tools/web/pregrade-core.js`, `pregrade.js`, `pregrade.css`) ; cache v197.
+- **Défauts appliqués** (à confirmer) : compteur tenu sur l'appareil comme celui des scans ; un reflet ne bloque pas une photo prise à la main (fiabilité baissée) ; surface comptée seulement si la lecture est sûre ; état de l'app tiré du barème CCC ; en attendant D4, chacun saisit son coût de gradation.
+- **Reste** : tarifs D4 ; réglage sur 20 à 30 vraies photos du porteur (dont des cartes gradées) ; option B seulement sur demande.
+
 ## 2026-11-14 — Pré-gradation proposée ; installation du serveur mise de côté (porteur)
 
 - **Installation de `install_024_a_028.sql` mise de côté** par le porteur (« met moi ça de côté pour l'instant »), après le pas à pas de Studio (bouton « + », « Create a new snippet », ou l'adresse `…/project/default/sql/new`).

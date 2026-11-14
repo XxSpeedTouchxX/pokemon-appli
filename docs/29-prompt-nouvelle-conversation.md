@@ -25,7 +25,7 @@ Tu reprends le projet **Dropicards** (nom de code PKM-App), une app pour les col
 
 - **Source** : le gabarit `docs/12-maquette-v5/Main.dc.html` et les modules `tools/web/*.js` (start, cloud, game-cloud, passkey, premium, pkshop, pa, dex, tuto, fiche, legal…), et `tools/web/catalog.dc.html` (fragments).
 - **Construction** : `node tools/web/build.mjs` génère `web/index.html`, `web/app.js` (minifié), les pages légales publiques (`web/mentions-legales.html`, `confidentialite.html`, `cgu.html`, `cgv.html`, à partir de `legal.js`) et le reste.
-- **À chaque changement visible** : monter la version du cache dans `web/sw.js` (`pkm-demo-vNNN`, **v196** au 2026-11-14), reconstruire, lancer les tests, ajouter une ligne au journal, à `CLAUDE.md` §3 et à `tools/web/README.md`, faire un commit court, puis pousser.
+- **À chaque changement visible** : monter la version du cache dans `web/sw.js` (`pkm-demo-vNNN`, **v197** au 2026-11-14), reconstruire, lancer les tests, ajouter une ligne au journal, à `CLAUDE.md` §3 et à `tools/web/README.md`, faire un commit court, puis pousser.
 - **Tests navigateur** :
 
   ```
@@ -69,7 +69,7 @@ Tu reprends le projet **Dropicards** (nom de code PKM-App), une app pour les col
   - faire relire les textes légaux par un juriste.
 - **À essayer sur un vrai téléphone** : Face ID, la connexion directe, la connexion obligatoire.
 - **P4** (historique des prix pour les non-Premium) : en attente de la décision du porteur (`docs/27`).
-- **Pré-gradation** (`docs/40`, 2026-11-14) : proposition avec maquette et 4 logos, 6 décisions (D1 à D6) et « go » attendus ; rien n'est codé. L'installation de `install_024_a_028.sql` est mise de côté par le porteur.
+- **Pré-gradation** (`docs/40`, 2026-11-14) : construite après le « go » du porteur (D1 à D6, `docs/40` § 10), badge « Version Proto » ; analyse sur le téléphone ; 1 gratuite tous les 3 jours, 100 par mois avec Premium ; tarifs de gradation (D4) attendus du porteur ; réglage sur vraies photos à faire. L'installation de `install_024_a_028.sql` est mise de côté par le porteur.
 - **Points de loyauté (PL)** (`docs/38`, 2026-11-14) : **« go » du porteur avec les choix par défaut L1 à L8, construits** (serveur `028`, app `tools/web/pl.js` et `progress.js`) ; `install_024_a_028.sql` à installer ; « Ma progression » renommée « Ma ligue » (onglets « Classement et récompenses » et « Mes missions », mini-tuto à la première ouverture) ; TikTok et Instagram branchés, adresse Discord à fournir (`SOCIAL_LINKS`, `tools/web/profile.js`) ; pubs : seulement des vidéos récompensées, proposition à faire si le porteur dit « go » ; règlement de la saison à relire et publier (`docs/39`, projet). Son d'ouverture du coffre mystère : aucun pour l'instant (les 5 propositions n'ont pas plu au porteur, toujours essayables avec `?soncoffre=1-5`).
 - **Plus tard, App Store et Play Store** (`docs/23`) : option A choisie pour l'instant (paiement Premium sur le site seulement, bouton caché dans les apps des stores) ; option B possible (achat intégré).
 - **Serveur** :

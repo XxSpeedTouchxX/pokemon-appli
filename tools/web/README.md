@@ -804,6 +804,21 @@ Le script `tools/web/build.mjs` :
     - `t-progress.mjs`, `t-series.mjs` ;
     - `t-top.mjs` : cartes « confirmées » cherchées dans le catalogue du jour ;
     - `t-radar.mjs` : sans WebGL, liste directe.
+- **Pré-gradation, « Version Proto » (cache v197)** :
+  - `pregrade-core.js` (nouveau, `PGCore`, sans dépendance, testé par `test_pregrade.mjs`) :
+    - contrôles de la photo : `sharpness` (variance du laplacien), `glare` (plus grande tache de pixels saturés) ;
+    - `findCard` (bords exacts et inclinaison sur l'image redressée), `crop` (750 × 1047) ;
+    - `centering` (bande du bord, saut de couleur, recto et verso), `centerScore` (paliers `CENTER_STEPS`) ;
+    - `wear` (coins et bords : blanchiment et manque de matière, rayon du coin mesuré), `surface` (marques claires, lecture sûre ou non) ;
+    - `grade` (note, fourchette, fiabilité), `SCALES` (barèmes PSA, PCA, CCC du porteur), `companies` (chances de chaque note, règles des 10, Black et Gold Label), `stateOf`, `worth`, `quota` / `spend` (1 tous les 3 jours, 100 par mois avec Premium, illimité en Admin).
+  - `pregrade.js` (nouveau) :
+    - `PG` (caméra 4K idéale, contrôle toutes les 400 ms, photo automatique après 3 contrôles verts), `PG.quality`, `PG.prepare` (recadrage et redressement), `pgTake` (refus expliqués ; un reflet ne bloque pas une photo à la main), `pgFile` (import) ;
+    - `pgAnalyse` (étapes animées, `PG.identify` par les empreintes du scan, entrée de `pgHist`), vignettes `localStorage` `pkm-pgd-thumbs` (12) ;
+    - `pgWorth` (coefficients `FI_GRADERS`, coût `pgCost` ou `PG_FEES`, **tarifs D4 à remplir**), `pgAdd` (ajout avec l'état estimé), `pgSetCard`, recherche à la main `pgQ`, `pgSetReal` ;
+    - rendus `vPgHome` (`pgh`, rubrique de l'accueil) et `vPregrade` / `vPgResult` (`pgr`) ; écran `pregrade` (parent : accueil), `?start=pregrade` ; `window.__pkmPg` avec `?debug`.
+  - `pregrade.css` (nouveau) : `.pkm-pgh-*` (accueil), `.pkm-pgd-*` (écran) ; `catalog.dc.html` : fragments `pregrade-home` (après les boutiques) et `pregrade` ; `build.mjs` : modules, fragment, styles ; `persist.js` : `pgLast`, `pgMonth`, `pgUsed`, `pgHist`, `pgCost` ; `web/img/brand/pregrade.svg` (logo L1).
+  - `legal.js` : confidentialité (photos analysées sur le téléphone, jamais envoyées) et CGU (« Pré-gradation »).
+  - Tests : `test_pregrade.mjs` (11), `e2e/t-pregrade.mjs` (45 : accueil, recto et verso importés, photo sans carte, compteur gratuit puis Premium, recherche, ajout, vraie note, liste, app des stores).
 - **Points de loyauté (cache v195)** :
   - `pl.js` (nouveau) :
     - code d'un lien `?parrain=CODE` gardé (`pkm-parrain`, 30 jours) puis envoyé par `pl_set_parrain` à la connexion ;

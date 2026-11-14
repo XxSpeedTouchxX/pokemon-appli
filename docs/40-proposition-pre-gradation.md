@@ -2,7 +2,7 @@
 
 *2026-11-14 · demande du porteur (« je voudrais que dans le premier onglet tu me rajoutes, sous le radar de boutiques, une rubrique "Pré-gradation" ») avec 2 vidéos de l'outil d'un concurrent (PokéItem), qui servent d'inspiration et pas de modèle à copier.*
 
-**Statut : proposition. Rien n'est codé sans « go ».**
+**Statut : « go » du porteur reçu le 2026-11-14, décisions D1 à D6 au § 10. Option A construite (cache v197). Reste : tarifs de gradation (D4) et réglage sur de vraies photos.**
 
 Fichiers liés :
 - maquette des écrans : `docs/40-maquette-pre-gradation/maquette.jpg`, avec sa source `index.html` ;
@@ -171,3 +171,26 @@ Il faudra aussi tes photos de cartes pour régler l'analyse (§ 5).
 | D6 | Badge « Bêta » au lancement ? | Oui, le temps de mesurer la justesse |
 
 Ensuite, un « go » pour commencer par l'option A.
+
+## 10. Décisions du porteur (2026-11-14) et ce qui est construit
+
+| # | Décision du porteur | Dans l'app |
+|---|---|---|
+| D1 | Logo L1, la loupe | `web/img/brand/pregrade.svg` : rubrique de l'accueil, compteur de l'écran |
+| D2 | A d'abord ; B (IA) seulement si A ne donne pas satisfaction | Analyse sur le téléphone (`tools/web/pregrade-core.js`), aucune photo envoyée |
+| D3 | 1 pré-gradation gratuite tous les 3 jours ; 100 par mois avec Premium, compteur remis à zéro chaque mois ; compteur des pré-gradations restantes toujours visible | Compteur sur l'accueil et en haut de l'écran (« 1 pré-gradation disponible », « Prochaine pré-gradation dans 2 j 5 h », « 87 pré-gradations restantes ce mois-ci (sur 100) ») ; illimité en mode Admin |
+| D4 | Tarifs envoyés par le porteur « dans la journée » | **En attente.** En attendant, chacun saisit son coût (gardé sur l'appareil) ; sans coût, le verdict le signale |
+| D5 | Barèmes PSA, PCA et CCC du porteur, mot pour mot | `PGCore.SCALES` : notes par entreprise (barres de chances), barème de la « vraie note » ; état de l'app d'après le barème CCC (9 et plus Mint, 8 Near Mint, 6 et 7 Excellent, 4 et 5 Good, 2 et 3 Played, 1 Poor) |
+| D6 | Badge « Version Proto » | Sur la rubrique de l'accueil et sous le titre de l'écran |
+
+**Ce qui est construit (option A) :**
+- accueil : rubrique « Pré-gradation » sous « Boutiques près de toi » (logo, 3 étapes, bouton, compteur, dernière pré-gradation) ;
+- prise de vue : caméra en haute définition, cadre à la forme d'une carte, 4 contrôles en direct (carte entière, netteté, reflet, fond), photo automatique après 3 contrôles verts, déclencheur, import d'une photo ; une photo refusée est expliquée (carte introuvable, floue, penchée, déformée) ; un reflet ne bloque pas une photo prise à la main, il baisse la fiabilité ;
+- analyse : carte retrouvée et redressée, centrage recto et verso, coins et bords (blanchiment, manque de matière), surface (marques claires ; comptée seulement si la lecture est sûre), note probable avec sa fourchette et sa fiabilité ;
+- résultat : 4 critères détaillés, repères sur la photo (recto, verso) et les 4 coins agrandis, chances de chaque note chez PSA, PCA et CCC, « ça vaut le coup ? » (valeur brute selon l'état, valeur gradée attendue, coût, gain, verdict), ajout à la collection avec l'état estimé, « J'ai reçu la vraie note » ;
+- carte reconnue par son dessin (empreintes du scan) ; sinon 3 propositions et une recherche à la main ;
+- « Mes pré-gradations » : 30 dernières, sur l'appareil (photos réduites des 12 dernières) ;
+- tests : `tools/web/test_pregrade.mjs` (moteur, 11 tests) et `tools/web/e2e/t-pregrade.mjs` (parcours complet, 45 vérifications).
+
+**Limites connues (Version Proto) :** réglages faits sur des cartes dessinées et de petits scans officiels ; la surface des cartes holo ou très illustrées est souvent « peu sûre » ; le centrage des cartes à bord argenté peut se tromper. Le réglage sur 20 à 30 vraies photos du porteur (dont quelques cartes déjà gradées) reste à faire.
+

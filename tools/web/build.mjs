@@ -95,7 +95,7 @@ const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.m
 for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
 // Fragments réutilisés (views.js) : « @@view-switch tx.vs@@ » insère le sélecteur de vues sur l'objet tx.vs ;
 // « @@ter-bubble tw@@ » insère la bulle d'infos d'une boutique sur l'alias tw.
-const ALIAS = { 'view-switch': 'VS', 'ter-bubble': 'BB', 'backup-reminder': '' };
+const ALIAS = { 'view-switch': 'VS', 'ter-bubble': 'BB', 'backup-reminder': '', 'pregrade-home': '' };
 for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w.]+))?@@/g, (m, name, o) => {
   if (!FRAG[name] || ALIAS[name] === undefined) throw new Error('Fragment réutilisé inconnu : ' + name);
   return ALIAS[name] ? FRAG[name].trim().split(ALIAS[name] + '.').join(o + '.') : FRAG[name].trim();
@@ -227,7 +227,7 @@ patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x
   "return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x.who[a.by || 'toi'] : '') + this.copyMeta(p, l), amount:");
 // Onglet « Jeux » (games.js, 2026-10-11, demande du porteur) : l'onglet « Marché » devient « Jeux » (manette) ; son
 // écran montre le booster PK et le pile ou face. L'ancien Marché reste l'écran de recherche (« search »).
-patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.progress + FRAG.avatar + FRAG.games + FRAG.pkshop + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
+patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.progress + FRAG.pregrade + FRAG.avatar + FRAG.games + FRAG.pkshop + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
 // 4ᵉ onglet : « PK shop » à la place de Territoire (2026-10-12) ; Territoire s'ouvre depuis l'accueil.
 patch('<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>\n<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.terDot }}"></span>', '<path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"></path><path d="M9 8V6.5a3 3 0 0 1 6 0V8"></path><path d="M12 11.5l1 2 2 .3-1.5 1.4.4 2-1.9-1-1.9 1 .4-2-1.5-1.4 2-.3z"></path></svg>\n<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.terDot }}"></span>');
 // Fiche d'une carte (2026-10-11) : cote à confirmer, et lien vers les ventes réussies eBay (pas de chiffre : ni API
@@ -765,7 +765,7 @@ const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.met
 const C30_GOLD = (() => { try { return readdirSync(ROOT + 'web/img/c30').filter(f => /^30th-c-\d{3}\.webp$/.test(f)).map(f => f.slice(0, 10)); } catch (e) { return []; } })();
 const catalogJs = mod('catalog.js').replace('__C30_GOLD__', JSON.stringify(C30_GOLD)), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');
 const releasesJs = mod('releases.js'), radarCoreJs = mod('radar-core.js'), radarJs = mod('radar.js'), territoryJs = mod('territory.js');
-const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanPrintJs = mod('scan-print.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js').replace('__BUILD_VERSION__', 'v' + (/pkm-demo-v(\d+)/.exec(readFileSync(ROOT + 'web/sw.js', 'utf8')) || [0, '?'])[1]), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), cloudJs = mod('cloud.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), notifJs = mod('notif.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), gradedJs = mod('graded.js'), sfxJs = mod('sfx.js'), gameCloudJs = mod('game-cloud.js'), passkeyJs = mod('passkey.js'), premiumJs = mod('premium.js'), navJs = mod('nav.js'), sheetJs = mod('sheet.js'), progressJs = mod('progress.js'), plJs = mod('pl.js'), qrJs = readFileSync(fileURLToPath(new URL('./node_modules/qrcode-generator/dist/qrcode.js', import.meta.url)), 'utf8').replace(/\n\(function \(factory\)[\s\S]*$/, '\n'), avatarJs = mod('avatar.js'), xppkJs = mod('xppk.js'), safariJs = mod('safari.js'), signupsJs = mod('signups.js'), playersJs = mod('players.js'), storeJs = mod('store.js');
+const homeCoreJs = mod('home-core.js'), homeJs = mod('home.js'), scanCoreJs = mod('scan-core.js'), scanPrintJs = mod('scan-print.js'), scanOcrJs = mod('scan-ocr.js'), scanJs = mod('scan.js'), copiesJs = mod('copies.js'), pkJs = mod('pk.js'), profileJs = mod('profile.js'), viewsJs = mod('views.js'), adminJs = mod('admin.js').replace('__BUILD_VERSION__', 'v' + (/pkm-demo-v(\d+)/.exec(readFileSync(ROOT + 'web/sw.js', 'utf8')) || [0, '?'])[1]), backupJs = mod('backup.js'), legalJs = mod('legal.js'), catalogJoinJs = mod('catalog-join.js'), seriesJs = mod('series.js'), setviewJs = mod('setview.js'), editJs = mod('edit.js'), valueJs = mod('value.js'), importCoreJs = mod('import-core.js'), importJs = mod('import.js'), fxJs = mod('fx.js'), cloudJs = mod('cloud.js'), startJs = mod('start.js'), gamesJs = mod('games.js'), pkshopJs = mod('pkshop.js'), paCoreJs = mod('pa-core.js'), paJs = mod('pa.js'), notifJs = mod('notif.js'), dexJs = mod('dex.js'), voiceJs = mod('voice.js'), tutoJs = mod('tuto.js'), ficheJs = mod('fiche.js'), gradedJs = mod('graded.js'), sfxJs = mod('sfx.js'), gameCloudJs = mod('game-cloud.js'), passkeyJs = mod('passkey.js'), premiumJs = mod('premium.js'), navJs = mod('nav.js'), sheetJs = mod('sheet.js'), progressJs = mod('progress.js'), plJs = mod('pl.js'), qrJs = readFileSync(fileURLToPath(new URL('./node_modules/qrcode-generator/dist/qrcode.js', import.meta.url)), 'utf8').replace(/\n\(function \(factory\)[\s\S]*$/, '\n'), avatarJs = mod('avatar.js'), xppkJs = mod('xppk.js'), safariJs = mod('safari.js'), pregradeCoreJs = mod('pregrade-core.js'), pregradeJs = mod('pregrade.js'), signupsJs = mod('signups.js'), playersJs = mod('players.js'), storeJs = mod('store.js');
 // Visuels locaux des cartes de démo (A4, sources.js) : secours si le CDN TCGdex ne répond pas.
 const DEMO_LOCAL = { k1: 'card-pikachu-ex', k2: 'card-mega-meganium-ex', k3: 'card-favianos-ex', k4: 'card-jirachi-ex', k5: 'card-pikachu-zekrom-gx' };
 for (const f of Object.values(DEMO_LOCAL)) if (!existsSync(ROOT + 'web/img/' + f + '.webp')) throw new Error('Visuel de démo absent : ' + f);
@@ -808,7 +808,7 @@ Object.assign(img, Object.fromEntries([
   ['k5', 'sm/sm9/162/high'], ['megaEvo', 'me/me01/logo'], ['chaos', 'me/me04/logo']
 ].map(([k, f]) => [k, 'https://assets.tcgdex.net/fr/' + f + '.webp'])));
 
-const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanPrintJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + cloudJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + notifJs + dexJs + voiceJs + tutoJs + ficheJs + gradedJs + sfxJs + gameCloudJs + passkeyJs + premiumJs + navJs + sheetJs + progressJs + plJs + avatarJs + xppkJs + safariJs + signupsJs + playersJs + storeJs).filter(n => !(n in TOKENS));
+const unknownTokens = usedTokens(tpl + logic + catalogJs + sealedJs + showcaseJs + releasesJs + radarJs + territoryJs + homeCoreJs + homeJs + scanCoreJs + scanPrintJs + scanOcrJs + scanJs + copiesJs + pkJs + profileJs + viewsJs + adminJs + backupJs + legalJs + seriesJs + setviewJs + editJs + sourcesJs + valueJs + importCoreJs + importJs + fxJs + cloudJs + startJs + gamesJs + pkshopJs + paCoreJs + paJs + notifJs + dexJs + voiceJs + tutoJs + ficheJs + gradedJs + sfxJs + gameCloudJs + passkeyJs + premiumJs + navJs + sheetJs + progressJs + plJs + avatarJs + xppkJs + safariJs + pregradeCoreJs + pregradeJs + signupsJs + playersJs + storeJs).filter(n => !(n in TOKENS));
 if (unknownTokens.length) throw new Error('Thème : variables inconnues : ' + unknownTokens.join(', '));
 
 const app = `/* Dropicards (nom de code PKM-App) · démo web. Fichier généré par tools/web/build.mjs à partir de
@@ -829,7 +829,7 @@ ${logic}
   const IMG = ${JSON.stringify(img)};
   Component.prototype.img = function () { return IMG; };
 ${catalogJs}${sealedJs}${showcaseJs}${releasesJs}${persistJs}${radarCoreJs}${radarJs}${territoryJs}${homeCoreJs}${buddiesJs}${homeJs}${scanCoreJs}${scanPrintJs}${scanOcrJs}${scanJs}${copiesJs}${pkJs}${profileJs}${viewsJs}${adminJs}${backupJs}${legalJs}${catalogJoinJs}${seriesJs}${setviewJs}${editJs}${sourcesJs}${valueJs}${importCoreJs}${importJs}${fxJs}${cloudJs}${startJs}${gamesJs}${pkshopJs}${paCoreJs}${paJs}${notifJs}${dexJs}${voiceJs}${tutoJs}${ficheJs}${gradedJs}${sfxJs}${gameCloudJs}${passkeyJs}${premiumJs}${progressJs}/*! qrcode-generator 2.0.4 · Copyright (c) 2009 Kazuhiko Arase · licence MIT · QR Code est une marque déposée de DENSO WAVE */
-${qrJs}${plJs}${avatarJs}${xppkJs}${safariJs}${signupsJs}${playersJs}${navJs}${sheetJs}${storeJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
+${qrJs}${plJs}${avatarJs}${xppkJs}${safariJs}${pregradeCoreJs}${pregradeJs}${signupsJs}${playersJs}${navJs}${sheetJs}${storeJs}  // Carte du territoire : repères placés en pourcentage pour suivre la largeur de l'écran.
   const vTerritory = Component.prototype.vTerritory;
   Component.prototype.vTerritory = function (x) {
     const r = vTerritory.call(this, x);
@@ -1050,6 +1050,7 @@ ${readFileSync(new URL('./rules.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./premium.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./sheet.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./progress.css', import.meta.url), 'utf8')}
+${readFileSync(new URL('./pregrade.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./avatar.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./store.css', import.meta.url), 'utf8')}
 ${cssVars()}

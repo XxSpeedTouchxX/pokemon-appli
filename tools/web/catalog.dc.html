@@ -460,6 +460,7 @@
 </sc-if>
 <span role="status" style="font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ home.hr.status }}</span>
 </section>
+@@pregrade-home@@
 
 <sc-if value="{{ home.hasMargin }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ goSales }}" style="flex: none; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 16px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
@@ -2711,4 +2712,133 @@ PKCOUNTER
 </section>
 </div>
 </sc-if>
+</sc-if>
+
+<!-- fragment: pregrade-home -->
+<sc-if value="{{ pgh.show }}" hint-placeholder-val="{{ true }}">
+<section aria-label="Pré-gradation" class="pkm-pgh">
+<div class="pkm-pgh-head"><h2 class="pkm-pgh-title">Pré-gradation</h2><span class="pkm-pgh-proto">Version Proto</span></div>
+<span class="pkm-pgh-sub">Estime la note de ta carte avant de l’envoyer en gradation</span>
+<div class="pkm-pgh-card pkm-dark">
+<div class="pkm-pgh-top"><img src="{{ pgh.logoSrc }}" alt="" width="104" height="85" class="pkm-pgh-logo"><div class="pkm-pgh-txt"><b>Ta carte vaut-elle une gradation ?</b><span>Centrage, coins, bords et surface analysés en 2 photos, sur ton téléphone.</span></div></div>
+<div class="pkm-pgh-steps" aria-hidden="true"><span><b>1</b>Recto</span><span><b>2</b>Verso</span><span><b>3</b>Ta note</span></div>
+<button type="button" onClick="{{ pgh.open }}" class="{{ pgh.btnCls }}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"></path><path d="M4 12h16"></path></svg><span>{{ pgh.btn }}</span></button>
+<p class="pkm-pgh-count" role="status"><span class="pkm-pgh-dot" aria-hidden="true"></span>{{ pgh.counter }}</p>
+<sc-if value="{{ pgh.hasUpsell }}" hint-placeholder-val="{{ true }}"><p class="pkm-pgh-up">{{ pgh.upsell }}</p></sc-if>
+<sc-if value="{{ pgh.hasLast }}" hint-placeholder-val="{{ false }}">
+<span class="pkm-pgh-tag">Ma dernière pré-gradation</span>
+<button type="button" onClick="{{ pgh.openLast }}" class="pkm-pgh-last"><sc-if value="{{ pgh.hasLastImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pgh.lastImg }}" alt="" width="34" height="47" loading="lazy"></sc-if><span class="pkm-pgh-last-t"><b>{{ pgh.lastName }}</b><span>{{ pgh.lastWhen }}</span></span><span class="pkm-pgh-last-g">{{ pgh.lastGrade }}</span></button>
+</sc-if>
+</div>
+</section>
+</sc-if>
+
+<!-- fragment: pregrade -->
+<sc-if value="{{ ui.isPregrade }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-pgd">
+<div class="{{ pgr.counterCls }}" role="status"><img src="img/brand/pregrade.svg" alt="" width="40" height="33"><span class="pkm-pgd-counter-t"><b>{{ pgr.counter }}</b><sc-if value="{{ pgr.hasUpsell }}" hint-placeholder-val="{{ true }}"><span>{{ pgr.upsell }}</span></sc-if></span></div>
+<sc-if value="{{ pgr.hasHist }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pgr.goHist }}" class="pkm-pgd-histbtn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg>Mes pré-gradations ({{ pgr.histN }})</button></sc-if>
+<sc-if value="{{ pgr.showSteps }}" hint-placeholder-val="{{ true }}"><div class="pkm-pgd-stepper" aria-label="Étapes"><sc-for list="{{ pgr.steps }}" as="pgs" hint-placeholder-count="3"><span class="{{ pgs.cls }}"><i>{{ pgs.n }}</i>{{ pgs.label }}</span></sc-for></div></sc-if>
+
+<sc-if value="{{ pgr.isIntro }}" hint-placeholder-val="{{ false }}">
+<section class="pkm-pgd-box pkm-dark" aria-label="Pré-gradation indisponible">
+<p class="pkm-pgd-lead">Photographie le recto puis le verso de ta carte : l’app estime son centrage, ses coins, ses bords et sa surface, puis la note qu’elle pourrait obtenir chez PSA, PCA et CCC.</p>
+<sc-if value="{{ pgr.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-wait">{{ pgr.counter }}</p></sc-if>
+<sc-if value="{{ pgr.empty }}" hint-placeholder-val="{{ false }}"><button type="button" class="pkm-pgd-btn pkm-pgd-btn-off" aria-disabled="true" onClick="{{ pgr.start }}">Pré-grader une carte</button></sc-if>
+</section>
+</sc-if>
+
+<sc-if value="{{ pgr.isCap }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-pgd-cam">
+<div id="pkm-pgd-cam" aria-hidden="true" class="pkm-pgd-video"></div>
+<div id="pkm-pgd-frame" class="pkm-pgd-frame" aria-hidden="true"><i class="pkm-pgd-br pkm-pgd-br-tl"></i><i class="pkm-pgd-br pkm-pgd-br-tr"></i><i class="pkm-pgd-br pkm-pgd-br-bl"></i><i class="pkm-pgd-br pkm-pgd-br-br"></i></div>
+<p class="pkm-pgd-hint">{{ pgr.hint }}</p>
+<sc-if value="{{ pgr.camOff }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-camoff">{{ pgr.camText }}</p></sc-if>
+</div>
+<div class="pkm-pgd-checks"><sc-for list="{{ pgr.checks }}" as="pgc" hint-placeholder-count="4"><span class="{{ pgc.cls }}"><b aria-hidden="true">{{ pgc.mark }}</b>{{ pgc.label }}</span></sc-for></div>
+<sc-if value="{{ pgr.hasMsg }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-msg" role="status">{{ pgr.msg }}</p></sc-if>
+<div class="pkm-pgd-shoot">
+<button type="button" onClick="{{ pgr.sideAct }}" aria-disabled="{{ pgr.sideOff }}" class="{{ pgr.sideCls }}">{{ pgr.sideLabel }}</button>
+<span class="pkm-pgd-shoot-c"><button type="button" onClick="{{ pgr.shoot }}" aria-label="Prendre la photo" aria-disabled="{{ pgr.camOff }}" class="pkm-pgd-shutter"></button><span class="pkm-pgd-auto">Photo auto dès que tout est vert</span></span>
+<button type="button" onClick="{{ pgr.importPhoto }}" class="pkm-pgd-side">Importer une photo</button>
+</div>
+<input type="file" id="pkm-pgd-file" accept="image/*" tabindex="-1" aria-hidden="true" onChange="{{ pgr.onFile }}" style="position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none">
+<div class="pkm-pgd-tips"><sc-for list="{{ pgr.tips }}" as="pgt" hint-placeholder-count="4"><span class="{{ pgt.cls }}"><i aria-hidden="true"></i>{{ pgt.text }}</span></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ pgr.isAna }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-pgd-anacards" aria-hidden="true"><span class="pkm-pgd-anacard"><i></i></span><span class="pkm-pgd-anacard pkm-pgd-anacard-b"><i></i></span></div>
+<section class="pkm-pgd-box pkm-dark" aria-label="Analyse en cours"><sc-for list="{{ pgr.ana }}" as="pga" hint-placeholder-count="5"><div class="{{ pga.cls }}"><b aria-hidden="true"></b><span>{{ pga.label }}</span></div></sc-for></section>
+<p class="pkm-pgd-note-s">L’analyse se fait sur ton téléphone : tes photos ne sont envoyées nulle part.</p>
+</sc-if>
+
+<sc-if value="{{ pgr.isRes }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ pgr.hasRes }}" hint-placeholder-val="{{ true }}">
+<section class="pkm-pgd-box pkm-dark pkm-pgd-id" aria-label="Carte analysée">
+<sc-if value="{{ pgr.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pgr.img }}" alt="" width="48" height="67" loading="lazy"></sc-if>
+<span class="pkm-pgd-id-t"><span class="pkm-pgd-tag">{{ pgr.when }}</span><b>{{ pgr.name }}</b><span>{{ pgr.sub }}</span></span>
+<sc-if value="{{ pgr.known }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ pgr.openFiche }}" class="pkm-pgd-link">Fiche ›</button></sc-if>
+</section>
+<sc-if value="{{ pgr.unknown }}" hint-placeholder-val="{{ false }}">
+<section class="pkm-pgd-box pkm-dark" aria-label="C’est laquelle ?"><h3 class="pkm-pgd-h">C’est laquelle ?</h3>
+<sc-if value="{{ pgr.hasCands }}" hint-placeholder-val="{{ true }}"><p class="pkm-pgd-muted">Les plus proches de ta photo :</p></sc-if>
+<sc-for list="{{ pgr.cands }}" as="pgk" hint-placeholder-count="3"><button type="button" onClick="{{ pgk.pick }}" class="pkm-pgd-cand"><img src="{{ pgk.img }}" alt="" width="36" height="50" loading="lazy"><span><b>{{ pgk.name }}</b><span>{{ pgk.sub }}</span></span></button></sc-for>
+<label class="pkm-pgd-q"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><input type="search" placeholder="Pas dedans ? Cherche ta carte (nom, numéro…)" aria-label="Chercher la carte" value="{{ pgr.q }}" onInput="{{ pgr.onQ }}"></label>
+<sc-for list="{{ pgr.found }}" as="pgf" hint-placeholder-count="0"><button type="button" onClick="{{ pgf.pick }}" class="pkm-pgd-cand"><img src="{{ pgf.img }}" alt="" width="36" height="50" loading="lazy"><span><b>{{ pgf.name }}</b><span>{{ pgf.sub }}</span></span></button></sc-for>
+</section>
+</sc-if>
+<section class="pkm-pgd-box pkm-dark pkm-pgd-medal" aria-label="Note probable">
+<span class="pkm-pgd-gauge"><svg viewBox="0 0 132 132" width="132" height="132" aria-hidden="true"><circle cx="66" cy="66" r="56" class="pkm-pgd-gauge-bg"></circle><circle cx="66" cy="66" r="56" class="pkm-pgd-gauge-fg" stroke-dasharray="{{ pgr.ringDash }}" stroke="{{ pgr.ringColor }}"></circle></svg><span class="pkm-pgd-gauge-n"><b>{{ pgr.grade }}</b><span>sur 10</span></span></span>
+<span class="pkm-pgd-medal-t"><span class="pkm-pgd-tag">Note probable</span><b>{{ pgr.range }}</b><span class="{{ pgr.relCls }}">{{ pgr.rel }}</span><span class="pkm-pgd-chip pkm-pgd-chip-state">{{ pgr.state }}</span></span>
+</section>
+<div class="pkm-pgd-crit"><sc-for list="{{ pgr.crit }}" as="pgx" hint-placeholder-count="4"><section class="pkm-pgd-critbox pkm-dark" aria-label="{{ pgx.label }}"><div class="pkm-pgd-crit-hd"><span class="pkm-pgd-ring"><svg viewBox="0 0 46 46" width="46" height="46" aria-hidden="true"><circle cx="23" cy="23" r="19" class="pkm-pgd-gauge-bg"></circle><circle cx="23" cy="23" r="19" class="pkm-pgd-ring-fg" stroke-dasharray="{{ pgx.dash }}" stroke="{{ pgx.color }}"></circle></svg><b>{{ pgx.score }}</b></span><span class="pkm-pgd-crit-n">{{ pgx.label }}</span></div><p>{{ pgx.text }}</p></section></sc-for></div>
+<section class="pkm-pgd-box pkm-dark" aria-label="Où sont les défauts">
+<div class="pkm-pgd-rowhd"><h3 class="pkm-pgd-h">Où sont les défauts</h3><span class="pkm-pgd-segs"><sc-for list="{{ pgr.defTabs }}" as="pgd" hint-placeholder-count="2"><button type="button" onClick="{{ pgd.pick }}" class="{{ pgd.cls }}">{{ pgd.label }}</button></sc-for></span></div>
+<sc-if value="{{ pgr.hasThumb }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-pgd-defects"><span class="pkm-pgd-defimg"><img src="{{ pgr.thumb }}" alt="Photo analysée"><sc-for list="{{ pgr.marks }}" as="pgm" hint-placeholder-count="2"><i class="{{ pgm.cls }}" style="{{ pgm.style }}"></i></sc-for></span>
+<span class="pkm-pgd-legend"><span><i class="pkm-pgd-dot pkm-pgd-dot-w"></i>Coin ou bord à surveiller</span><span><i class="pkm-pgd-dot pkm-pgd-dot-r"></i>Défaut net</span><span><i class="pkm-pgd-dot pkm-pgd-dot-s"></i>Marque claire sur la surface</span></span></div>
+<span class="pkm-pgd-tag">Les 4 coins, agrandis</span>
+<div class="pkm-pgd-zooms"><sc-for list="{{ pgr.zooms }}" as="pgz" hint-placeholder-count="4"><span class="pkm-pgd-zoom" style="{{ pgz.style }}" aria-label="{{ pgz.name }}"><b>{{ pgz.label }}</b></span></sc-for></div>
+</sc-if>
+<sc-if value="{{ pgr.noThumb }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-muted">Photos de cette analyse plus gardées sur l’appareil.</p></sc-if>
+</section>
+<section class="pkm-pgd-box pkm-dark" aria-label="Notes probables par entreprise">
+<h3 class="pkm-pgd-h">Notes probables par entreprise</h3><p class="pkm-pgd-muted">Chances estimées pour chaque note, d’après les barèmes de chaque entreprise</p>
+<sc-for list="{{ pgr.companies }}" as="pgo" hint-placeholder-count="3"><div class="pkm-pgd-co">
+<div class="pkm-pgd-co-top"><span class="{{ pgo.logoCls }}"><img src="{{ pgo.logoSrc }}" alt="{{ pgo.co }}"></span><span class="pkm-pgd-dist"><sc-for list="{{ pgo.bars }}" as="pgb" hint-placeholder-count="4"><span class="{{ pgb.cls }}"><i style="{{ pgb.style }}"></i><em>{{ pgb.pct }}</em>{{ pgb.key }}</span></sc-for></span><span class="pkm-pgd-best"><b>{{ pgo.best }}</b><span>le plus probable</span></span></div>
+<p class="pkm-pgd-co-txt"><b>{{ pgo.co }} {{ pgo.best }} · {{ pgo.bestName }}</b> {{ pgo.bestText }}</p>
+</div></sc-for>
+</section>
+<section class="pkm-pgd-box pkm-dark" aria-label="Ça vaut le coup de la grader ?">
+<h3 class="pkm-pgd-h">Ça vaut le coup de la grader ?</h3>
+<span class="pkm-pgd-segs"><sc-for list="{{ pgr.coTabs }}" as="pgw" hint-placeholder-count="3"><button type="button" onClick="{{ pgw.pick }}" class="{{ pgw.cls }}">{{ pgw.label }}</button></sc-for></span>
+<sc-if value="{{ pgr.hasWorth }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ pgr.wLines }}" as="pgl" hint-placeholder-count="3"><div class="pkm-pgd-ln"><span>{{ pgl.label }}</span><b>{{ pgl.value }}</b></div></sc-for>
+<label class="pkm-pgd-ln pkm-pgd-fee"><span>{{ pgr.feeLabel }}</span><span class="pkm-pgd-fee-in"><input type="text" inputmode="decimal" placeholder="€" value="{{ pgr.feeInput }}" onChange="{{ pgr.onFee }}" aria-label="{{ pgr.feeLabel }}"><b>{{ pgr.feeValue }}</b></span></label>
+<div class="pkm-pgd-ln"><span>Gain probable</span><b class="{{ pgr.gainCls }}">{{ pgr.gain }}</b></div>
+<div class="{{ pgr.verdictCls }}"><span class="pkm-pgd-verdict-ic" aria-hidden="true">{{ pgr.verdictIcon }}</span><span><b>{{ pgr.verdict }}</b><span>{{ pgr.verdictText }}</span></span></div>
+</sc-if>
+<sc-if value="{{ pgr.noWorth }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-muted">{{ pgr.worthNone }}</p></sc-if>
+</section>
+<sc-if value="{{ pgr.canAdd }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ pgr.add }}" class="pkm-pgd-btn">{{ pgr.addLabel }}</button></sc-if>
+<button type="button" onClick="{{ pgr.redo }}" class="pkm-pgd-btn pkm-pgd-btn-2">{{ pgr.redoText }}</button>
+<section class="pkm-pgd-box pkm-dark" aria-label="J’ai reçu la vraie note">
+<button type="button" onClick="{{ pgr.toggleReal }}" class="pkm-pgd-real" aria-expanded="{{ pgr.realOpen }}"><span><b>J’ai reçu la vraie note</b><span>Indique-la : c’est ce qui rendra les estimations plus justes</span></span><i aria-hidden="true">›</i></button>
+<sc-if value="{{ pgr.hasReal }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-realtxt">{{ pgr.realText }}</p></sc-if>
+<sc-if value="{{ pgr.realOpen }}" hint-placeholder-val="{{ false }}">
+<span class="pkm-pgd-segs"><sc-for list="{{ pgr.realCos }}" as="pgrc" hint-placeholder-count="3"><button type="button" onClick="{{ pgrc.pick }}" class="{{ pgrc.cls }}">{{ pgrc.label }}</button></sc-for></span>
+<div class="pkm-pgd-notes"><sc-for list="{{ pgr.realNotes }}" as="pgn" hint-placeholder-count="10"><button type="button" onClick="{{ pgn.pick }}" class="{{ pgn.cls }}" title="{{ pgn.title }}">{{ pgn.label }}</button></sc-for></div>
+</sc-if>
+</section>
+<p class="pkm-pgd-legal">Estimation à partir de photos, pas une gradation officielle. Dropicards n’est lié à aucune entreprise de gradation ; PSA, PCA et CCC sont des marques de leurs propriétaires.</p>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ pgr.isHist }}" hint-placeholder-val="{{ false }}">
+<section class="pkm-pgd-box pkm-dark" aria-label="Mes pré-gradations">
+<sc-for list="{{ pgr.hist }}" as="pgh2" hint-placeholder-count="3"><button type="button" onClick="{{ pgh2.open }}" class="pkm-pgd-hrow"><sc-if value="{{ pgh2.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pgh2.img }}" alt="" width="36" height="50" loading="lazy"></sc-if><span class="pkm-pgd-hrow-t"><b>{{ pgh2.name }}</b><span>{{ pgh2.sub }}</span><sc-if value="{{ pgh2.hasReal }}" hint-placeholder-val="{{ false }}"><span class="pkm-pgd-hreal">Vraie note : {{ pgh2.real }}</span></sc-if></span><b class="pkm-pgd-hrow-g" style="{{ pgh2.gradeStyle }}">{{ pgh2.grade }}</b></button></sc-for>
+</section>
+<button type="button" onClick="{{ pgr.start }}" class="pkm-pgd-btn">Pré-grader une carte</button>
+</sc-if>
+</div>
 </sc-if>
