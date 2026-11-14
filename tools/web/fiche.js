@@ -238,12 +238,16 @@
   // Vinted n'est lue (pas d'accès officiel, docs/42), donc aucun chiffre inventé pour ces deux sites.
   // Confiance (règle Dropicards, affichée telle quelle) : « bonne » = les 3 indicateurs Cardmarket (tendance, moyennes
   // 7 et 30 jours) existent et s'écartent de moins de 1,5 fois ; « moyenne » = au moins 2 indicateurs, écart ≤ 2,5 fois
-  // (COTE_SPREAD, catalog.js) ; sinon, ou cote signalée douteuse (doubt, c30), « à confirmer ».
+  // (COTE_SPREAD, catalog.js) ; sinon, ou cote signalée douteuse (doubt, c30), « à confirmer ». Règle validée par le
+  // porteur le 2026-11-14, « avec un % également » : pourcentage dans la tranche de son niveau, selon l'écart (s = plus
+  // haut ÷ plus bas des indicateurs) : bonne 100 % (s = 1) à 75 % (s = 1,5) ; moyenne 74 % (s = 1) à 50 % (s = 2,5),
+  // 4 points de moins avec 2 indicateurs seulement ; à confirmer : 49 % au plus, 40 % avec un seul indicateur, 30 % pour
+  // une cote signalée douteuse, et 8 points de moins par unité d'écart au-delà de 2,5 (10 % au moins).
   const FM_CONF = { ok: ['Confiance bonne', 'pkm-fm-conf pkm-fm-conf-ok'], mid: ['Confiance moyenne', 'pkm-fm-conf pkm-fm-conf-mid'], low: ['Cote à confirmer', 'pkm-fm-conf pkm-fm-conf-low'] };
   // Estimations eBay et Vinted (2026-11-14, porteur : « sur les prix du marché pour Vinted et eBay fais-moi également
   // une estimation des tendances du marché ») : aucune vente eBay ni annonce Vinted n'est relevée (pas d'accès officiel à
   // eBay, Vinted bloque les robots : docs/42), donc estimation Dropicards = cote Cardmarket × coefficient, toujours
-  // marquée « ≈ » et « estimation », jamais comptée dans la cote. Coefficients proposés, à valider par le porteur :
+  // marquée « ≈ » et « estimation », jamais comptée dans la cote. Coefficients validés par le porteur le 2026-11-14 :
   // eBay × 1,10 (ventes réussies en général un peu au-dessus de Cardmarket : frais des vendeurs répercutés, acheteurs
   // de plusieurs pays), Vinted × 0,90 (vendeurs particuliers sans commission, prix négociés).
   const FM_EST = { ebay: 1.10, vinted: 0.90 };
@@ -252,6 +256,9 @@
     const num = v => typeof v === 'number' && v > 0, n = [p.cm, p.avg7, p.avg30].filter(num).length;
     const spread = n > 1 ? coteSpread(p.cm, p.avg30, p.avg7) : 1;
     const lvl = k === null ? '' : (p.doubt || p.c30 || n < 2 || spread > COTE_SPREAD) ? 'low' : (n === 3 && spread < 1.5) ? 'ok' : 'mid';
+    const pct = !lvl ? 0 : lvl === 'ok' ? Math.max(75, 100 - (spread - 1) / 0.5 * 25)
+      : lvl === 'mid' ? Math.max(50, Math.min(74, 74 - (spread - 1) / 1.5 * 24 - (n === 2 ? 4 : 0)))
+      : Math.min(49, p.doubt || p.c30 ? 30 : 49, n < 2 ? 40 : 49, spread > COTE_SPREAD ? Math.max(10, 49 - (spread - COTE_SPREAD) * 8) : 49);
     const main = num(p.cm) ? 'cm' : num(p.low) ? 'low' : '';
     const detail = rows.filter(r => r.key !== main).map(r => ({ label: r.label, value: r.value, tag: r.tag === 'demandé' ? 'prix demandé' : r.tag === 'vendu' ? 'ventes conclues' : r.tag, tagFg: r.tagFg }));
     const nm = sealed ? '' : ' · Near Mint';
@@ -261,14 +268,14 @@
     return {
       dpVal: k !== null ? this.eur(k) : '—',
       dpSub: k === null ? (p.dup ? 'Cote à confirmer' : 'Pas encore de cote') : (p.c30 && num(p.avg30) ? 'Moyenne 30 j Cardmarket' : 'Médiane Cardmarket') + nm,
-      hasConf: !!lvl, conf: lvl ? FM_CONF[lvl][0] : '', confCls: lvl ? FM_CONF[lvl][1] : '',
+      hasConf: !!lvl, conf: lvl ? FM_CONF[lvl][0] + ' · ' + Math.round(pct) + '\u00a0%' : '', confPct: lvl ? Math.round(pct) : 0, confCls: lvl ? FM_CONF[lvl][1] : '',
       cmVal: main ? this.eur(p[main]) : '—', cmSub: main === 'cm' ? 'Tendance du marché' : main === 'low' ? 'Plus bas en vente · prix demandé' : 'Pas encore de prix',
       detail: detail, hasDetail: detail.length > 0,
       hasDate: !!day,
       hasEst: k !== null,
       ebVal: k !== null ? '≈ ' + this.eur(k * FM_EST.ebay) : '', vtVal: k !== null ? '≈ ' + this.eur(k * FM_EST.vinted) : '',
       ebSub: 'Ventes réussies', vtSub: 'Annonces récentes',
-      estNote: '≈ Estimations Dropicards d’après la cote Cardmarket (eBay ' + fmCoef(FM_EST.ebay) + ', Vinted ' + fmCoef(FM_EST.vinted) + ') : aucune vente eBay ni annonce Vinted n’est relevée. Touche la ligne pour voir les vrais prix sur le site.',
+      estNote: 'Confiance : accord entre la tendance et les moyennes 7 et 30 jours de Cardmarket (100 % quand les trois prix sont identiques). ≈ Estimations Dropicards d’après la cote Cardmarket (eBay ' + fmCoef(FM_EST.ebay) + ', Vinted ' + fmCoef(FM_EST.vinted) + ') : aucune vente eBay ni annonce Vinted n’est relevée. Touche la ligne pour voir les vrais prix sur le site.',
       report: 'mailto:' + PF_MAIL + '?subject=' + encodeURIComponent('Erreur de prix · ' + name) + '&body=' + encodeURIComponent(body)
     };
   }

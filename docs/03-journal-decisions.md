@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-14 — Coefficients eBay/Vinted et confiance validés, confiance en % (porteur)
+
+- **Décisions du porteur** :
+  - « Ok pour les coefficients » : estimations eBay **× 1,10** et Vinted **× 0,90** de la cote Cardmarket, **validées** ;
+  - « Ok pour la confiance avec un % également » : règle de confiance **validée** (bonne / moyenne / à confirmer), avec un pourcentage.
+- **Pourcentage** : il reste dans la tranche de son niveau et dépend de l'écart entre la tendance et les moyennes 7 et 30 jours de Cardmarket (le plus haut divisé par le plus bas) :
+  - **bonne** : de 100 % (trois prix identiques) à 75 % (écart de 1,5 fois) ;
+  - **moyenne** : de 74 % à 50 % (écart de 2,5 fois), 4 points de moins avec seulement 2 prix ;
+  - **à confirmer** : 49 % au plus ; 40 % avec un seul prix, 30 % pour une cote déjà signalée douteuse, 8 points de moins par unité d'écart au-delà de 2,5 (10 % au moins).
+- **Affichage** : « Confiance bonne · 83 % ». La note sous les lignes explique ce que mesure la confiance.
+- **Cache** : v204.
+
 ## 2026-11-14 — Estimations eBay et Vinted, boutons empilés (porteur)
 
 - **Demande** : « Sur les prix du marché pour Vinted et eBay fais-moi également une estimation des tendances du marché » ; « en dessous, chaque onglet l'un après l'autre, alignés, un peu plus petits ».
