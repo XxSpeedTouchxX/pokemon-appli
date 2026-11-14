@@ -42,7 +42,9 @@ ok('retour : Information sur les grades', /Information sur les grades/.test(awai
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.pkEarned = 1495; d.gradeSeen = 0; d.games = {}; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
 await page.close(); page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(BASE + '&start=market', { waitUntil: 'load' }); await page.waitForTimeout(1500);
-await page.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(3200);
+await page.locator('button:has-text("Ouvrir mon booster")').click();
+// Le gain arrive avec l'envolée des gemmes (jusqu'à 4,5 s, pa.js), puis le grade attend 0,9 s : attente jusqu'à 10 s.
+for (let i = 0; i < 40 && !(await page.locator('.pkm-gu').count()); i++) await page.waitForTimeout(250);
 ok('animation de passage de grade : « Nouveau grade Chasseur »', (await page.locator('.pkm-gu').count()) === 1 && /Chasseur/.test(await page.locator('.pkm-gu-name').innerText()));
 await page.screenshot({ path: shot('grade-passage.png') });
 await page.waitForTimeout(1500);
