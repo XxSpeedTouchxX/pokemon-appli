@@ -65,7 +65,9 @@ ok('gerbe retirée après l’animation', (await page3.locator('.pkm-burst').cou
 await page3.evaluate(() => { const s = JSON.parse(localStorage.getItem('pkm-collection-v1')); s.games = {}; localStorage.setItem('pkm-collection-v1', JSON.stringify(s)); });
 await page3.goto(B + 'start=market&r=2', { waitUntil: 'load' }); await page3.waitForTimeout(2000);
 await page3.evaluate(() => { window.__bursts = []; new MutationObserver(m => m.forEach(r => r.addedNodes.forEach(n => { if (n.classList && n.classList.contains('pkm-burst')) window.__bursts.push(n.className); }))).observe(document.body, { childList: true }); });
-await page3.click('button:has-text("Ouvrir mon booster")'); await page3.waitForTimeout(2800);
+await page3.click('button:has-text("Ouvrir mon booster")');
+// Gain versé à l'arrivée des gemmes (jusqu'à 4,5 s après l'ouverture, pa.js) : attente jusqu'à 8 s.
+for (let i = 0; i < 32 && !(await page3.evaluate(() => window.__bursts.some(c => /pkm-burst-gem/.test(c)))); i++) await page3.waitForTimeout(250);
 const b2 = await page3.evaluate(() => window.__bursts.slice());
 ok('gain de PK (booster) : pluie de gemmes (' + b2.join(', ') + ')', b2.some(c => /pkm-burst-gem/.test(c)));
 ok('aucune erreur JS', errors.length === 0);
