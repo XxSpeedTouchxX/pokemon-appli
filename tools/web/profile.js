@@ -384,14 +384,16 @@
 
   // ——— Mon profil : Communauté, Nous contacter, version de l'app (2026-11-01, porteur) ———
   // Liens à remplir quand les comptes existeront (porteur) ; vides, la ligne affiche « Bientôt » et ne s'ouvre pas.
-  // Les mêmes adresses servent aux défis « Gagner des PL » de Ma progression (pl.js, 2026-11-14) : à remplir ici,
+  // Les mêmes adresses servent aux missions de « Ma ligue › Mes missions » (pl.js, 2026-11-14) : à remplir ici,
   // une seule fois. Tests automatiques seulement : adresses d'essai (window.__pkmSocial).
-  const SOCIAL_LINKS = Object.assign({ discord: '', tiktok: '', instagram: '', appstore: '' },
+  // TikTok et Instagram : adresses données par le porteur le 2026-11-14 ; Discord en cours de création.
+  const SOCIAL_LINKS = Object.assign({ discord: '', tiktok: 'https://www.tiktok.com/@dropicards', instagram: 'https://www.instagram.com/dropicards/', appstore: '' },
     (typeof navigator !== 'undefined' && navigator.webdriver && typeof window !== 'undefined' && window.__pkmSocial) || {});
   const PF_LINKS = [
     ['discord', 'Rejoindre le Discord', 'Échange avec les autres collectionneurs', SOCIAL_LINKS.discord],
     ['appstore', 'Noter Dropicards sur l’App Store', 'Ton avis aide l’app à grandir', SOCIAL_LINKS.appstore],
-    ['tiktok', 'Suivre Dropicards sur TikTok', 'Nouveautés, sorties et coulisses', SOCIAL_LINKS.tiktok]
+    ['tiktok', 'Suivre Dropicards sur TikTok', 'Nouveautés, sorties et coulisses', SOCIAL_LINKS.tiktok],
+    ['instagram', 'Suivre Dropicards sur Instagram', 'Photos, nouveautés et concours', SOCIAL_LINKS.instagram]
   ];
   // Adresse de contact à créer par le porteur (domaine dropicards.fr) : ouvre l'application d'e-mail, adresse déjà remplie.
   const PF_MAIL = 'contact@dropicards.fr';

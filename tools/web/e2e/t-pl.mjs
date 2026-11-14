@@ -1,5 +1,5 @@
-// Points de loyauté (2026-11-14, « go » du porteur, docs/38) : « Ma progression » en 2 onglets, classement en PL, page
-// « Gagner des PL » (parrainage avec lien et QR code, réseaux sur l'honneur, séries de jours, capture d'un partage),
+// Points de loyauté (2026-11-14, « go » du porteur, docs/38) : « Ma ligue » (ex-« Ma progression ») en 2 onglets, classement en PL,
+// onglet « Mes missions » (ex-« Gagner des PL ») (parrainage avec lien et QR code, réseaux sur l'honneur, séries de jours, capture d'un partage),
 // code d'un lien ?parrain=CODE appliqué à la connexion, Admin › « Défis à valider ».
 // Le serveur est imité (page.route) : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -8,21 +8,44 @@ const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const 
 const N = t => String(t || '').replace(/\s+/g, ' ');
 const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/;
 
-// A. Sans serveur : 2 onglets, nouvelle grille des lots, « Gagner des PL » demande la connexion.
+// A. Sans serveur : 2 onglets, nouvelle grille des lots, « Mes missions » demande la connexion.
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   await ctx.route(ABORT, r => r.abort());
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
-  await page.goto(E2E + '/?start=progress&debug', { waitUntil: 'load' }); await page.waitForTimeout(1600);
+  await page.goto(E2E + '/?start=progress&debug', { waitUntil: 'load' }); await page.waitForTimeout(2600);
+  // Mini-tuto de « Ma ligue » à la première ouverture : 5 étapes, le starter parle, cadre sur chaque partie.
+  const bub = page.locator('section.pkm-tuto-bubble[aria-label="Explication de Ma ligue"]');
+  ok('première ouverture : mini-tuto de Ma ligue', (await bub.count()) === 1);
+  const steps = [];
+  for (let i = 0; i < 6 && (await bub.count()); i++) {
+    steps.push(N(await bub.locator('.pkm-tt-full').innerText()));
+    if (i === 3) await page.screenshot({ path: shot('ligue-tuto-missions.png') });
+    if (i === 4) { steps.push('onglet:' + await page.locator('.pkm-pg-tab-on').innerText()); await page.screenshot({ path: shot('ligue-tuto-fin.png') }); }
+    await bub.locator('.pkm-tt-next').click(); await page.waitForTimeout(150);
+    if (await bub.count()) await bub.locator('.pkm-tt-next').click(); // la phrase en cours s'écrit d'un coup, puis étape suivante
+    await page.waitForTimeout(900);
+  }
+  ok('étape 1 : un championnat chaque saison', /championnat/.test(steps[0] || '') && /60 jours/.test(steps[0] || ''));
+  ok('étape 2 : la place au classement et les PL', /classement/.test(steps[1] || '') && /PL/.test(steps[1] || ''));
+  ok('étape 3 : les lots des 10 premiers', /10 premiers/.test(steps[2] || ''));
+  ok('étape 4 : monter avec les missions de « Mes missions »', /onglet « Mes missions »/.test(steps[3] || ''));
+  ok('étape 5 : l’onglet « Mes missions » s’ouvre, les missions sont présentées', /Mes missions/.test(steps[5] || '') && /Parraine tes amis/.test(steps[4] || ''));
+  const lt = await page.evaluate(() => window.__pkm.st().ligueTuto);
+  ok('« Terminer » : mini-tuto fermé et noté comme vu', lt === 'done' && (await bub.count()) === 0 && (await page.locator('.pkm-tuto-host').count()) === 0);
+  await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(2200);
+  ok('seconde ouverture : plus de mini-tuto', (await bub.count()) === 0);
+  await page.locator('.pkm-pg-tabs button').nth(0).click(); await page.waitForTimeout(400);
+  ok('bas du classement : « Revoir l’explication de la ligue »', (await page.locator('button.pkm-pg-replay').count()) === 1);
   const tabs = await page.locator('.pkm-pg-tabs button').allInnerTexts();
-  ok('2 onglets : « Classement et récompenses » et « Gagner des PL »', tabs.length === 2 && /Classement et récompenses/.test(tabs[0]) && /Gagner des PL/.test(tabs[1]));
+  ok('2 onglets : « Classement et récompenses » et « Mes missions »', tabs.length === 2 && /Classement et récompenses/.test(tabs[0]) && /Mes missions/.test(tabs[1]));
   ok('onglet du classement ouvert d’abord', (await page.locator('.pkm-pg-tab-on').innerText()) === tabs[0] && (await page.locator('section.pkm-pg-card').count()) === 1);
   const rw = N(await page.locator('section[aria-label="Lots de la saison"]').innerText());
   ok('lots : ETB, coffret, 2 boosters, Premium ou ticket Or / Argent / Bronze', /1ʳᵉ place Un ETB du moment/.test(rw) && /2ᵉ place Un coffret du moment/.test(rw) && /3ᵉ place 2 boosters du moment/.test(rw)
     && /4ᵉ et 5ᵉ place 1 mois de Premium ou 1 ticket Or/.test(rw) && /6ᵉ et 7ᵉ place 1 mois de Premium ou 1 ticket Argent/.test(rw) && /8ᵉ à 10ᵉ place 1 mois de Premium ou 1 ticket Bronze/.test(rw) && /au moins 50 joueurs/.test(rw));
   await page.locator('.pkm-pg-tabs button').nth(1).click(); await page.waitForTimeout(500);
-  ok('« Gagner des PL » sans compte : invitation à se connecter, classement caché', /Connecte-toi à ton compte Dropicards pour gagner des Points de loyauté/.test(await page.locator('.pkm-ple-msg').innerText()) && (await page.locator('section.pkm-pg-card').count()) === 0);
-  ok('en-tête : « Points de loyauté »', /Points de loyauté/.test(await page.locator('header').first().innerText()));
+  ok('« Mes missions » sans compte : invitation à se connecter, classement caché', /Connecte-toi à ton compte Dropicards pour gagner des Points de loyauté/.test(await page.locator('.pkm-ple-msg').innerText()) && (await page.locator('section.pkm-pg-card').count()) === 0);
+  ok('en-tête : « Ma ligue · Mes missions »', /Ma ligue/.test(await page.locator('header').first().innerText()) && /Mes missions/.test(await page.locator('header').first().innerText()));
   await ctx.close();
 }
 
@@ -65,7 +88,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   await page.goto(E2E + '/?parrain=ond1ne28' + Q, { waitUntil: 'load' }); await page.waitForTimeout(900);
   ok('lien ?parrain= : code gardé sur l’appareil (ONDINE28 → majuscules), retiré de l’adresse',
     JSON.parse(await page.evaluate(() => localStorage.getItem('pkm-parrain')) || '{}').code === 'OND1NE28' && !/parrain=/.test(page.url()));
-  await page.evaluate(([tok, uid, email]) => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.onb = 0; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); localStorage.setItem('pkm-pky-asked', '1'); localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: 'user' })); }, [TOKEN, UID, EMAIL]);
+  await page.evaluate(([tok, uid, email]) => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.ligueTuto = 'done'; d.onb = 0; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); localStorage.setItem('pkm-pky-asked', '1'); localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: 'user' })); }, [TOKEN, UID, EMAIL]);
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' });
   let toasts = [];
   for (let i = 0; i < 16; i++) { await page.waitForTimeout(250); const t = await page.evaluate(() => window.__pkm && window.__pkm.st().toast); if (t && !toasts.includes(t)) toasts.push(t); }
@@ -73,7 +96,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   ok('un seul message : « parrainé par Ondine : +50 PL » et gain de la série (+30 PL) (' + toasts.join(' | ') + ')', toasts.some(t => /parrainé par Ondine : \+50 PL · \+30 PL · 5 jours d’affilée/.test(t)));
   ok('état des PL lu à l’ouverture (pl_state)', (S.calls.pl_state || []).length >= 1);
   ok('les PL ne s’affichent pas sur l’accueil', !/PL de la saison|Points de loyauté/.test(await page.locator('main').innerText()));
-  // Page « Gagner des PL ».
+  // Onglet « Mes missions ».
   await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2600);
   const head = N(await page.locator('section.pkm-ple-head').innerText());
   ok('en tête : PL de la saison (150) et total (170 PL gagnés au total), logo des PL', /Mes PL de la saison 150/.test(head) && /170 PL gagnés au total/.test(head) && (await page.locator('section.pkm-ple-head img[src="img/brand/pl.svg"]').count()) === 1);
@@ -88,7 +111,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   ok('« Partager mon lien » : partage du téléphone avec le lien', !!sh && sh.url === 'https://dropicards.fr/?parrain=SACHA7' && /50 PL de bienvenue/.test(sh.text));
   await page.locator('section[aria-label="Parrainage"] button', { hasText: 'Copier le lien' }).click(); await page.waitForTimeout(300);
   ok('« Copier le lien » : lien dans le presse-papiers', (await page.evaluate(() => navigator.clipboard.readText())) === 'https://dropicards.fr/?parrain=SACHA7');
-  // Défis.
+  // Missions.
   const rows = await page.locator('.pkm-ple-row').allInnerTexts();
   ok('7 défis : 3 réseaux, 3 séries de jours, 1 partage', rows.length === 7);
   ok('Discord sans adresse : « Bientôt », bouton inactif', /Discord/.test(rows[2]) && /Bientôt/.test(rows[2]) && await page.locator('.pkm-ple-row').nth(2).locator('button').isDisabled());
@@ -112,8 +135,8 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   const dims = S.proof ? await page.evaluate(src => new Promise(r => { const i = new Image(); i.onload = () => r([i.naturalWidth, i.naturalHeight]); i.src = src; }), S.proof.img) : [0, 0];
   ok('capture envoyée : réseau Instagram, JPEG de 1 080 px au plus (' + dims.join(' × ') + ', ' + Math.round(((S.proof || {}).img || '').length / 1024) + ' Ko)', !!S.proof && S.proof.net === 'instagram' && /^data:image\/jpeg;base64,/.test(S.proof.img) && Math.max(...dims) === 1080 && S.proof.img.length < 600000);
   ok('partage : « En attente » de validation', /En attente/.test(await page.locator('.pkm-ple-row').nth(6).innerText()) && (await page.locator('.pkm-ple-shot').count()) === 0);
-  ok('règle : pas de PL contre une pub ni un avis', /Pas de PL contre un clic sur une publicité ni contre un avis sur les stores/.test(await page.locator('section[aria-label="Défis"]').innerText()));
-  await page.locator('section[aria-label="Défis"]').screenshot({ path: shot('pl-defis.png') });
+  ok('règle : pas de PL contre une pub ni un avis', /Pas de PL contre un clic sur une publicité ni contre un avis sur les stores/.test(await page.locator('section[aria-label="Missions"]').innerText()));
+  await page.locator('section[aria-label="Missions"]').screenshot({ path: shot('pl-missions.png') });
   await page.screenshot({ path: shot('pl-gagner.png') });
   // Onglet du classement : en PL.
   await page.locator('.pkm-pg-tabs button').nth(0).click(); await page.waitForTimeout(1200);
@@ -142,7 +165,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   });
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
   await page.goto(E2E + '/?start=home' + Q, { waitUntil: 'load' }); await page.waitForTimeout(500);
-  await page.evaluate(([tok, uid, email]) => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.onb = 0; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); localStorage.setItem('pkm-pky-asked', '1'); localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: 'admin' })); }, [TOKEN, UID, EMAIL]);
+  await page.evaluate(([tok, uid, email]) => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.ligueTuto = 'done'; d.onb = 0; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); localStorage.setItem('pkm-pky-asked', '1'); localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: 'admin' })); }, [TOKEN, UID, EMAIL]);
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
   await page.evaluate(() => window.__pkm.setState({ admin: { on: true, hash: 'x', salt: 'y' }, cloudGame: Object.assign({}, window.__pkm.st().cloudGame || {}, { adminUntil: new Date(Date.now() + 864e5).toISOString() }), admSheet: true }));
   await page.waitForTimeout(900);
@@ -151,7 +174,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   await sec.scrollIntoViewIfNeeded(); await sec.screenshot({ path: shot('pl-admin.png') });
   await sec.locator('button.pkm-plp-ok').click(); await page.waitForTimeout(700);
   ok('Admin : « Valider » envoyé au serveur, capture retirée de la liste', S.decide.length === 1 && S.decide[0].proof === 'p1' && S.decide[0].ok === true && (await sec.locator('li').count()) === 0);
-  // « Gagner des PL » pour un admin quand 028 manque : aperçu avec le fichier à installer.
+  // « Mes missions » pour un admin quand 028 manque : aperçu avec le fichier à installer.
   await page.evaluate(() => window.__pkm.setState({ admSheet: false }));
   await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2600);
   ok('sans 028, admin : « install_024_a_028.sql » à coller dans Studio', /install_024_a_028\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));

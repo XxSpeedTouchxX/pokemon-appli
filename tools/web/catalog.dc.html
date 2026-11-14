@@ -2519,7 +2519,7 @@ PKCOUNTER
 <span class="pkm-pg-stext"><b>{{ pg.left }}</b><span>{{ pg.dates }} · 60 jours</span></span>
 <i class="pkm-pg-sbar" aria-hidden="true"><i style="{{ pg.barW }}"></i></i>
 </section>
-<div role="tablist" aria-label="Ma progression" class="pkm-pg-tabs"><sc-for list="{{ pg.tabs }}" as="pgt" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ pgt.on }}" onClick="{{ pgt.pick }}" class="{{ pgt.cls }}">{{ pgt.label }}</button></sc-for></div>
+<div role="tablist" aria-label="Ma ligue" class="pkm-pg-tabs"><sc-for list="{{ pg.tabs }}" as="pgt" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ pgt.on }}" onClick="{{ pgt.pick }}" class="{{ pgt.cls }}">{{ pgt.label }}</button></sc-for></div>
 <sc-if value="{{ pg.isBoard }}" hint-placeholder-val="{{ true }}">
 <section aria-label="{{ pg.card.aria }}" class="pkm-pg-card pkm-dark">
 <div class="pkm-pg-card-top">
@@ -2563,6 +2563,7 @@ PKCOUNTER
 <sc-for list="{{ pg.rewards }}" as="pgw" hint-placeholder-count="3"><div class="{{ pgw.cls }}"><span class="pkm-pg-rwico"><sc-if value="{{ pgw.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pgw.img }}" alt="" width="36" height="36"></sc-if><sc-if value="{{ pgw.noImg }}" hint-placeholder-val="{{ false }}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" class="pkm-pg-crown"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"></path></svg></sc-if></span><span class="pkm-pg-rwt"><b>{{ pgw.range }}</b><span>{{ pgw.prize }}</span><sc-if value="{{ pgw.hasNote }}" hint-placeholder-val="{{ true }}"><small>{{ pgw.note }}</small></sc-if></span></div></sc-for>
 <p class="pkm-pg-rules">{{ pg.rewardsNote }}</p>
 <p class="pkm-pg-rules">{{ pg.rules }}</p>
+<button type="button" onClick="{{ pg.ligueReplay }}" class="pkm-pg-replay"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"></path><path d="M12 16.8v.2"></path></svg>Revoir l’explication de la ligue</button>
 </section>
 </sc-if>
 <sc-if value="{{ pg.isEarn }}" hint-placeholder-val="{{ false }}">
@@ -2572,7 +2573,7 @@ PKCOUNTER
 <img src="img/brand/pl.svg" alt="" width="68" height="68" class="pkm-ple-logo">
 <span class="pkm-ple-tot"><small>Mes PL de la saison</small><b>{{ ple.season }}</b><small>{{ ple.total }} PL gagnés au total</small></span>
 </section>
-<p class="pkm-ple-what">Les Points de loyauté (PL) récompensent ta fidélité. Ils servent seulement au classement de la saison : ils ne s’achètent pas et ne se dépensent pas.</p>
+<p class="pkm-ple-what">Les Points de loyauté (PL) récompensent ta fidélité. Remplis les missions pour en gagner et monter au classement de ta ligue. Ils ne s’achètent pas et ne se dépensent pas.</p>
 <section aria-label="Parrainage" class="pkm-ple-ref pkm-dark">
 <h2>Parraine tes amis</h2>
 <p class="pkm-ple-sub"><b>+200 PL</b> par ami qui s’inscrit avec ton lien, vérifie son adresse e-mail et ouvre l’app 3 jours différents dans ses 14 premiers jours (20 amis comptés par saison). <b>+400 PL</b> s’il garde le Premium plus de 14 jours. Ton ami reçoit 50 PL de bienvenue.</p>
@@ -2585,8 +2586,8 @@ PKCOUNTER
 <sc-if value="{{ ple.hasParrain }}" hint-placeholder-val="{{ false }}"><p class="pkm-ple-sub">Tu as été parrainé par <b>{{ ple.parrain }}</b>.</p></sc-if>
 <sc-if value="{{ ple.canCode }}" hint-placeholder-val="{{ false }}"><div class="pkm-ple-codein"><input type="text" aria-label="Code de parrainage d’un ami" placeholder="Code d’un ami" autocomplete="off" maxlength="12" value="{{ ple.codeIn }}" onInput="{{ ple.onCode }}"><button type="button" onClick="{{ ple.sendCode }}" disabled="{{ ple.codeBusy }}">Valider</button></div></sc-if>
 </section>
-<section aria-label="Défis" class="pkm-ple-list pkm-dark">
-<h2>Défis</h2>
+<section aria-label="Missions" class="pkm-ple-list pkm-dark">
+<h2>Missions</h2>
 <sc-for list="{{ ple.rows }}" as="plr" hint-placeholder-count="7"><div class="{{ plr.cls }}">
 <span class="{{ plr.icoCls }}"><img src="{{ plr.icon }}" alt="" width="24" height="24"></span>
 <span class="pkm-ple-txt"><b>{{ plr.title }}</b><small>{{ plr.sub }}</small><sc-if value="{{ plr.hasBar }}" hint-placeholder-val="{{ false }}"><i class="pkm-ple-bar" aria-hidden="true"><i style="{{ plr.barW }}"></i></i></sc-if></span>

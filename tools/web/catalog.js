@@ -204,7 +204,9 @@
   function buildItem(id, r, F, set) {
     // Collection Classique (30ᵉ) : la carte d'origine donne visuel, numéro et rareté, même si le catalogue a trouvé un
     // visuel de réimpression (imgFrom, 2026-11-01) ; un vrai scan TCGdex de la réimpression passe avant.
-    const fromCat = !!(TCG.doc && TCG.doc.imgFrom && TCG.doc.imgFrom[id]);
+    // Un scan anglais pokemontcg.io (« ptcg: », « sdx: », ajoutés le 2026-11-12) n'est pas un scan TCGdex : la carte
+    // d'origine garde la main (numéro « 4/102 », rareté, bord doré), comme décidé le 2026-10-17.
+    const fromCat = !!(TCG.doc && TCG.doc.imgFrom && TCG.doc.imgFrom[id]) || /^(ptcg|sdx):/.test(String(r[F.img] || ''));
     const orig = reprintOf(id), ox = orig && (!r[F.img] || fromCat) && TCG.byId ? TCG.byId[orig] : null;
     const ov = ox ? { r: ox.r, set: setOf(ox.r[TCG.F.set]) } : null;
     const v = visual((ov ? ov.r[TCG.F.img] : '') || r[F.img] || ''), num = String(r[F.num] || ''), official = set[4] || '';

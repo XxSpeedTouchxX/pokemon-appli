@@ -1,4 +1,5 @@
-  // ——— « Ma progression » : saison, carte du joueur, classement général (2026-11-08, demande du porteur) ———
+  // ——— « Ma ligue » (ex-« Ma progression », renommée le 2026-11-14 par le porteur) : saison, carte du joueur, classement
+  // général (2026-11-08, demande du porteur) ———
   // Page ouverte depuis l'onglet Jeux (bannière sous le solde). En haut, la saison en cours (saisons de 60 jours, la
   // saison 1 commence le 8 novembre 2026) et le temps qu'il reste ; puis la carte du joueur : son avatar, son pseudo,
   // l'emblème de son grade, ses PK de la saison, ses PK gagnés au total et sa place parmi tous les joueurs ; puis le
@@ -6,7 +7,7 @@
   // de la saison : top 10 (à définir), Premium offert de la 11ᵉ à la 30ᵉ place, remis après la fin de la saison.
   // Le classement vient du serveur (fonction season_board de 013_saisons.sql : PK gagnés pendant la saison, achats non
   // déduits, comptes admin non classés). Sans connexion au serveur, la carte s'affiche sans place.
-  // Depuis le 2026-11-14 (« go » du porteur, docs/38) : 2 onglets, « Classement et récompenses » et « Gagner des PL »
+  // Depuis le 2026-11-14 (« go » du porteur, docs/38) : 2 onglets, « Classement et récompenses » et « Mes missions » (ex-« Gagner des PL »)
   // (pl.js) ; classement en Points de loyauté (season_board de 028_points_loyaute.sql) ; lots de la grille du porteur.
   // Serveur sans 028 : classement en PK comme avant.
   const PROG_START = Date.parse('2026-11-08T00:00:00+01:00'), PROG_DAYS = 60, PROG_DAY = 86400000;
@@ -97,10 +98,12 @@
       busy: !!s.progBusy && !b, empty: !s.progBusy && !top.length, emptyText: s.progErr || (online ? 'Le classement de la saison s’affiche dès les premiers ' + unit + ' gagnés.' : 'Le classement s’affiche une fois connecté à ton compte Dropicards.'),
       rewards: PROG_REWARDS, refresh: () => this.progLoad(true), refreshing: !!s.progBusy,
       rewardsNote: 'Lots des 3 premières places remis si au moins 50 joueurs sont classés (sinon, 1 mois de Premium pour chacun).',
-      tabs: [['board', 'Classement et récompenses'], ['earn', 'Gagner des PL']].map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-pg-tab' + (tab === k ? ' pkm-pg-tab-on' : ''), pick: () => this.progTab(k) })),
+      tabs: [['board', 'Classement et récompenses'], ['earn', 'Mes missions']].map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-pg-tab' + (tab === k ? ' pkm-pg-tab-on' : ''), pick: () => this.progTab(k) })),
       isBoard: tab === 'board', isEarn: tab === 'earn',
+      // Mini-tuto de « Ma ligue » (tuto.js) : à revoir depuis le bas du classement.
+      ligueReplay: () => { this.setState({ pgTab: 'board' }); setTimeout(() => { if (this.ligueStart) this.ligueStart(); }, 120); },
       rules: isPl
-        ? 'Classement selon les Points de loyauté (PL) gagnés pendant la saison, avec les défis de « Gagner des PL ». Les PL ne s’achètent pas et ne se dépensent pas. Égalité : le premier arrivé à ce score passe devant. Lots remis après la fin de la saison, selon un règlement publié avant son début ; les comptes admin ne sont pas classés.'
+        ? 'Classement selon les Points de loyauté (PL) gagnés pendant la saison, avec les missions de l’onglet « Mes missions ». Les PL ne s’achètent pas et ne se dépensent pas. Égalité : le premier arrivé à ce score passe devant. Lots remis après la fin de la saison, selon un règlement publié avant son début ; les comptes admin ne sont pas classés.'
         : 'Classement selon les PK gagnés pendant la saison (Booster PK, pièce, bienvenue, partage) ; les achats au PK shop ne font pas baisser ton score. Égalité : même place. Lots remis après la fin de la saison, selon un règlement publié avant sa fin ; les comptes admin ne sont pas classés.'
     };
   };
@@ -108,7 +111,7 @@
   progProto.vProgressBanner = function (s) {
     const b = s.progBoard && s.progBoard.me ? s.progBoard : null, se = b && b.season ? Number(b.season.n) : progLocalSeason(Date.now()).n;
     const sub = 'Saison ' + se + (b ? ' · #' + progNum(b.me.rank) + ' au classement' : ' · classement et lots');
-    return { title: 'Ma progression', sub: sub, aria: 'Ma progression : ' + sub, open: () => this.progOpen() };
+    return { title: 'Ma ligue', sub: sub, aria: 'Ma ligue : ' + sub, open: () => this.progOpen() };
   };
   const progBaseRender = progProto.renderVals;
   progProto.renderVals = function () {
@@ -118,7 +121,7 @@
     if (ui.isProgress) {
       r.pg = this.vProgress(s);
       r.ple = r.pg.isEarn && this.vPlEarn ? this.vPlEarn(s) : { rows: [], shareNets: [] };
-      Object.assign(ui, { title: 'Ma progression', subtitle: r.pg.seasonLabel + (r.pg.isEarn ? ' · Points de loyauté' : ' · classement général'), hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
+      Object.assign(ui, { title: 'Ma ligue', subtitle: r.pg.seasonLabel + (r.pg.isEarn ? ' · Mes missions' : ' · classement général'), hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
       // Temps restant : nouveau rendu chaque minute tant que la page est ouverte ; classement relu s'il date.
       if (!progTick) progTick = setInterval(() => { if (this.st().screen === 'progress') { this.setState({ pgNow: Date.now() }); this.progLoad(false); } else { clearInterval(progTick); progTick = null; } }, 60000);
     } else { r.pg = { card: {}, podium: [], rest: [], rewards: [], tabs: [] }; r.ple = { rows: [], shareNets: [] }; }

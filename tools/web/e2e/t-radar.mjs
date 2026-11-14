@@ -102,7 +102,8 @@ ok('alerte activée et expliquée', /Alerte activée/.test(await page.locator('[
 await page.screenshot({ path: shot('radar-3-fiche.png') });
 // Mode « Liste » : la liste défile (2026-10-24 : les blocs étaient comprimés et rognés).
 await page.click('button:has-text("Résultats")'); await page.waitForTimeout(300);
-await page.click('button:has-text("Liste")'); await page.waitForTimeout(500);
+// Sans carte (navigateur sans WebGL), la liste est déjà affichée et le bouton « Liste » n'existe pas.
+if (mapOn) { await page.click('button:has-text("Liste")'); await page.waitForTimeout(500); }
 const scroll = await page.evaluate(() => { const s = document.getElementById('pkm-radar-sheet'); s.scrollTop = 400; return { top: s.scrollTop, more: s.scrollHeight > s.clientHeight }; });
 ok('mode Liste : la liste défile (' + scroll.top + ' px)', scroll.more && scroll.top > 0);
 ok('aucune erreur JS', errors.length === 0);

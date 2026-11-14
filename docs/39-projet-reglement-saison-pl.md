@@ -8,7 +8,7 @@
 - Rien n'est publié tant que le porteur ne l'a pas validé.
 - **Saison 1** (8 novembre 2026 au 6 janvier 2027), commencée avant ce texte :
   - le passage aux PL s'est fait en cours de saison (tout le monde à 0 PL le jour de l'installation de `028`, choix L6) ;
-  - il faut donc publier le texte au plus vite et le dire dans l'app (proposition : un message à la première ouverture de « Ma progression »).
+  - il faut donc publier le texte au plus vite et le dire dans l'app (le mini-tuto de « Ma ligue », montré à la première ouverture, peut renvoyer vers le règlement).
 
 ---
 
@@ -35,12 +35,12 @@
 **Article 4. Durée.**
 - Chaque saison dure 60 jours, de minuit à minuit, heure de Paris.
 - Saison 1 : du 8 novembre 2026 au 6 janvier 2027 inclus. Les saisons suivantes s'enchaînent sans interruption.
-- La date de fin s'affiche dans l'app (« Ma progression »).
+- La date de fin s'affiche dans l'app (« Ma ligue »).
 
 **Article 5. Gagner des PL.**
-- Les PL se gagnent avec les défis de « Ma progression › Gagner des PL » :
+- Les PL se gagnent avec les missions de « Ma ligue › Mes missions » :
 
-  | Défi | PL | Fréquence |
+  | Mission | PL | Fréquence |
   |---|---|---|
   | Parrainer un ami : il s'inscrit avec ton lien, vérifie son adresse e-mail et ouvre l'app 3 jours différents dans ses 14 premiers jours | 200 | Au plus 20 amis comptés par saison |
   | Ton filleul garde le Premium payé plus de 14 jours | 400 | Une fois par filleul |

@@ -1,9 +1,9 @@
   // ——— Points de loyauté (PL) (2026-11-14, « go » du porteur ; docs/38, choix par défaut L1 à L8) ———
   // Les PL ne sont pas une monnaie : ils ne s'achètent pas et ne se dépensent pas. Ils classent seulement la saison et ne
-  // s'affichent que dans « Ma progression » (onglet « Gagner des PL » ; le classement est dans progress.js).
+  // s'affichent que dans « Ma ligue » (onglet « Mes missions », ex-« Gagner des PL » ; le classement est dans progress.js).
   // Le serveur seul les donne (tools/supabase/028_points_loyaute.sql) ; l'app ne fait que les demander :
   //   - pl_state : gains en attente (séries de jours, filleuls), puis l'état des défis ; relu à l'ouverture de l'app
-  //     (au plus toutes les 10 minutes) et à chaque ouverture de « Gagner des PL » ;
+  //     (au plus toutes les 10 minutes) et à chaque ouverture de « Mes missions » ;
   //   - pl_set_parrain : code d'un lien dropicards.fr/?parrain=CODE, gardé sur l'appareil jusqu'à la connexion ;
   //   - pl_claim_social : TikTok, Instagram, Discord, sur l'honneur (le bouton ouvre le réseau, puis « Valider ») ;
   //   - pl_submit_proof : capture d'écran d'un partage, réduite sur le téléphone (1 080 px, JPEG) avant l'envoi ;
@@ -77,7 +77,7 @@
     im.src = url;
   });
 
-  // Gains reçus : un message (et leur détail dans « Ma progression »).
+  // Gains reçus : un message (et leur détail dans « Ma ligue »).
   const PL_WHY = {
     streak: g => g.ref + ' jours d’affilée', referral: () => 'un ami de plus parrainé', referral_premium: () => 'ton filleul a pris le Premium',
     share: () => 'partage validé', social: () => 'merci de suivre Dropicards', welcome_ref: () => 'bienvenue'
@@ -85,8 +85,8 @@
   // « first » : message déjà prévu (bienvenue d'un filleul), mis devant pour ne pas être effacé.
   plProto.plCelebrate = function (list, first) {
     const sum = list.reduce((a, g) => a + (Number(g.pl) || 0), 0);
-    const why = list.length === 1 ? (PL_WHY[list[0].kind] ? PL_WHY[list[0].kind](list[0]) : '') : list.length + ' défis réussis';
-    const msg = sum ? '+' + plNum(sum) + ' PL' + (why ? ' · ' + why : '') + ' (Ma progression)' : '';
+    const why = list.length === 1 ? (PL_WHY[list[0].kind] ? PL_WHY[list[0].kind](list[0]) : '') : list.length + ' missions réussies';
+    const msg = sum ? '+' + plNum(sum) + ' PL' + (why ? ' · ' + why : '') + ' (Ma ligue)' : '';
     if (!msg && !first) return;
     this.setState({ toast: first && msg ? first + ' · ' + msg : first || msg });
     this.flash();
@@ -107,14 +107,14 @@
     }, e => { if (e && e.code === 'game') plForget(); }) : Promise.resolve();
     plBusy = first.then(() => Cloud.rpc('pl_state')).then(st => {
       plBusy = null;
-      if (!st || typeof st !== 'object') { if (hello) this.plCelebrate([], hello + ' (Ma progression)'); return null; }
+      if (!st || typeof st !== 'object') { if (hello) this.plCelebrate([], hello + ' (Ma ligue)'); return null; }
       this.setState({ plState: st, plErr: '' });
       const nw = Array.isArray(st.new) ? st.new : [];
       if (nw.length || hello) this.plCelebrate(nw, hello);
       return st;
     }, e => {
       plBusy = null;
-      if (hello) this.plCelebrate([], hello + ' (Ma progression)');
+      if (hello) this.plCelebrate([], hello + ' (Ma ligue)');
       if (e && e.code === 'not_installed') plOff = true;
       this.setState({ plErr: e && e.code === 'not_installed' ? 'off' : e && e.code === 'network' ? 'net' : 'err' });
       return null;
@@ -129,7 +129,7 @@
     return p;
   };
 
-  // Actions de la page « Gagner des PL ».
+  // Actions de la page « Mes missions ».
   plProto.plAct = function (fn, args, ok) {
     if (!plOnline()) { this.setState({ toast: 'Connecte-toi à ton compte Dropicards (Mon profil).' }); this.flash(); return Promise.resolve(null); }
     if (this.__plAct) return Promise.resolve(null);
@@ -195,9 +195,9 @@
     let msg = '';
     if (!online) msg = 'Connecte-toi à ton compte Dropicards pour gagner des Points de loyauté.';
     else if (s.plErr === 'off') msg = admin ? 'Aperçu admin : les Points de loyauté ne sont pas encore installés sur le serveur. Colle tools/supabase/install_024_a_028.sql dans Studio (SQL Editor › Run).' : 'Bientôt disponible : les Points de loyauté arrivent très vite.';
-    else if (!st && s.plErr === 'net') msg = 'Pas de réseau : les défis s’affichent dès que tu es connecté.';
-    else if (!st && s.plErr) msg = 'Les défis ne sont pas disponibles pour le moment.';
-    else if (!st) msg = 'Chargement de tes défis…';
+    else if (!st && s.plErr === 'net') msg = 'Pas de réseau : les missions s’affichent dès que tu es connecté.';
+    else if (!st && s.plErr) msg = 'Les missions ne sont pas disponibles pour le moment.';
+    else if (!st) msg = 'Chargement de tes missions…';
     const busy = s.plActBusy || '';
     const code = (st && st.code) || '', link = code ? PL_LINK + code : '', qr = plQr(link);
     const ref = (st && st.referrals) || {}, soc = (st && st.social) || {}, stk = (st && st.streak) || {}, sh = (st && st.share) || {};

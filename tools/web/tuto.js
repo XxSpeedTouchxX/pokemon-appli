@@ -39,6 +39,19 @@
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
   ];
+  // ——— Mini-tuto de « Ma ligue » (2026-11-14, porteur : « lorsque l'utilisateur va cliquer la première fois sur Ma
+  // ligue, qu'on lui explique rapidement qu'il y a un championnat chaque saison, avec un classement, et que pour monter
+  // dans le classement il faut remplir les défis de l'onglet Mes missions ») : même moteur, même starter qui parle,
+  // 5 étapes ; une seule fois par appareil (état « ligueTuto »), à revoir depuis le bas du classement.
+  const LIGUE_STEPS = [
+    { tab: 'progress', pg: 'board', sel: 'section.pkm-pg-season', noRing: true, text: 'Bienvenue dans ta ligue ! Chaque saison dure 60 jours : c’est un championnat entre tous les dresseurs de Dropicards.' },
+    { tab: 'progress', pg: 'board', sel: 'section.pkm-pg-card', noRing: true, text: 'Voici ta carte : ta place au classement et tes Points de loyauté (PL) de la saison. Plus tu as de PL, plus tu montes !' },
+    { tab: 'progress', pg: 'board', sel: 'section[aria-label="Lots de la saison"]', noRing: true, text: 'À la fin de la saison, les 10 premiers du classement gagnent des lots : un ETB, un coffret, des boosters, du Premium ou des tickets du PK shop !' },
+    { tab: 'progress', pg: 'board', sel: '.pkm-pg-tabs > button:last-child', pad: 4, noRing: true, text: 'Pour monter au classement, remplis les missions de l’onglet « Mes missions ».' },
+    { tab: 'progress', pg: 'earn', sel: 'section[aria-label="Missions"], .pkm-ple-msg', noRing: true, last: true, text: 'Parraine tes amis, suis Dropicards sur les réseaux, ouvre l’appli plusieurs jours d’affilée et partage-la : chaque mission te rapporte des PL. Bonne chance pour la saison !' }
+  ];
+  // Visite en cours : le didacticiel de l'app (TUTO_STEPS) ou celui de « Ma ligue » (LIGUE_STEPS).
+  let TSTEPS = TUTO_STEPS;
   const TUTO_TALKERS = [1, 4, 7, 25];
   const tutoProto = Component.prototype;
   const tutoForce = () => { try { return /[?&]tuto=1(&|$)/.test(location.search); } catch (e) { return false; } };
@@ -104,7 +117,7 @@
     const q = s => box.querySelector(s);
     TUTO.el = { host: host, frame: frame, ring: ring, link: link, box: box, mon: q('.pkm-tt-mon'), m0: q('.pkm-tt-m0'), m1: q('.pkm-tt-m1'), typed: q('.pkm-tt-typed'),
       full: q('.pkm-tt-full'), dots: q('.pkm-tt-dots'), count: q('.pkm-tt-count'), next: q('.pkm-tt-next'), prev: q('.pkm-tt-prev'), nextLabel: q('.pkm-tt-next span'), skip: q('.pkm-tt-skip'), snd: q('.pkm-tt-snd'), last: '' };
-    TUTO.el.dots.innerHTML = TUTO_STEPS.map(() => '<i></i>').join('');
+    TUTO.el.dots.innerHTML = TSTEPS.map(() => '<i></i>').join('');
     TUTO.el.next.addEventListener('click', () => tutoNext());
     TUTO.el.prev.addEventListener('click', () => tutoPrev());
     TUTO.el.skip.addEventListener('click', () => TUTO.comp && TUTO.comp.tutoEnd(false));
@@ -153,11 +166,12 @@
   };
   // « Suivant » : termine d'abord la phrase en cours, puis passe à l'étape suivante.
   const tutoNext = () => {
-    const st = TUTO_STEPS[TUTO.i];
+    const st = TSTEPS[TUTO.i];
     if (!st || !TUTO.el || TUTO.done) return;
     if (TUTO.typed < TUTO.text.length) { clearTimeout(TUTO.typing); TUTO.typed = TUTO.text.length; TUTO.el.typed.textContent = TUTO.text; tutoTyped(); return; }
     voiceStop();
     if (st.final) tutoFly();
+    else if (st.last) { if (TUTO.comp) TUTO.comp.tutoEnd(true); }
     else if (TUTO.comp) TUTO.comp.tutoGo(TUTO.i + 1);
   };
   // Retour à l'étape d'avant (sa page s'ouvre au besoin, la phrase s'écrit de nouveau).
@@ -179,7 +193,7 @@
       if (!t0) t0 = now;
       const k = Math.min(1, (now - t0) / 9000), e = 0.5 - Math.cos(Math.PI * k) / 2;
       nav.scrollLeft = Math.round(max * e);
-      if (k < 1 && TUTO_STEPS[TUTO.i] && TUTO_STEPS[TUTO.i].sweep) TUTO.sweep = requestAnimationFrame(step);
+      if (k < 1 && TSTEPS[TUTO.i] && TSTEPS[TUTO.i].sweep) TUTO.sweep = requestAnimationFrame(step);
     };
     TUTO.sweep = requestAnimationFrame(step);
   };
@@ -282,7 +296,7 @@
   const tutoTrack = () => {
     cancelAnimationFrame(TUTO.raf);
     const loop = () => {
-      const el = TUTO.el, st = TUTO_STEPS[TUTO.i];
+      const el = TUTO.el, st = TSTEPS[TUTO.i];
       if (!el || !st || !document.contains(el.host)) return;
       let t = TUTO.target;
       if (!t || !document.contains(t)) t = TUTO.target = document.querySelector(st.sel);
@@ -350,8 +364,10 @@
   };
   // Montre une étape : texte qui s'écrit, bulle placée, élément amené et encadré, onglet mis en avant.
   const tutoShow = i => {
-    const el = tutoBuild(), st = TUTO_STEPS[i];
+    const el = tutoBuild(), st = TSTEPS[i];
     if (!el || !st) return;
+    if (el.dots.children.length !== TSTEPS.length) el.dots.innerHTML = TSTEPS.map(() => '<i></i>').join('');
+    el.box.setAttribute('aria-label', TUTO.mode === 'ligue' ? 'Explication de Ma ligue' : 'Didacticiel');
     TUTO.i = i; TUTO.target = document.querySelector(st.sel); el.last = '';
     if (TUTO.switching) {
       // Après un changement d'onglet, le trou du cadre se rouvre depuis le centre de la nouvelle partie.
@@ -367,11 +383,11 @@
     el.m0.src = 'img/pokemon/talk/' + TUTO.mon + '-0.png'; el.m1.src = 'img/pokemon/talk/' + TUTO.mon + '-1.png';
     el.m0.alt = HOME_NAMES[TUTO.mon] || '';
     [...el.dots.children].forEach((d, k) => { d.className = k < i ? 'pkm-tt-d-done' : k === i ? 'pkm-tt-d-on' : ''; });
-    el.count.textContent = 'Étape ' + (i + 1) + ' / ' + TUTO_STEPS.length;
-    el.nextLabel.textContent = st.final ? 'Terminer' : 'Suivant';
+    el.count.textContent = 'Étape ' + (i + 1) + ' / ' + TSTEPS.length;
+    el.nextLabel.textContent = st.final || st.last ? 'Terminer' : 'Suivant';
     el.prev.hidden = i === 0;
-    const navBtn = TUTO_STEPS[i].sel.indexOf(TUTO_NAV) === 0;
-    TUTO.tab = st.tab === 'home' || navBtn ? null : document.querySelector(TUTO_NAV + 'button[aria-current="page"]');
+    const navBtn = st.sel.indexOf(TUTO_NAV) === 0;
+    TUTO.tab = st.tab === 'home' || navBtn || st.noRing ? null : document.querySelector(TUTO_NAV + 'button[aria-current="page"]');
     const text = tutoText(st);
     tutoSize(text);
     // Étape « fit » (la valeur de la collection) : si l'encadré ne tient pas au-dessus de la bulle, la bulle descend
@@ -413,11 +429,19 @@
     return TUTO_TALKERS.indexOf(s.buddy) >= 0 ? s.buddy : 25;
   };
   tutoProto.tutoGo = function (i) {
-    if (i >= TUTO_STEPS.length) { this.tutoEnd(true); return; }
-    const st = TUTO_STEPS[i];
+    if (i >= TSTEPS.length) { this.tutoEnd(true); return; }
+    const st = TSTEPS[i];
     TUTO.comp = this; TUTO.done = false; TUTO.mon = tutoMon(this.st());
     clearTimeout(TUTO.typing);
     const same = this.st().screen === st.tab;
+    // « Ma ligue » : passage d'un onglet de la page à l'autre (Classement et récompenses, Mes missions), même effet
+    // de cadre qui se referme puis se rouvre.
+    if (st.pg && this.st().pgTab !== st.pg) {
+      TUTO.switching = true; if (TUTO.el) TUTO.el.box.classList.add('pkm-tt-switch');
+      this.setState({ pgTab: st.pg });
+      if (st.pg === 'earn' && this.plSync) this.plSync(false);
+      setTimeout(() => { const m = document.querySelector('main'); if (m) m.scrollTop = 0; }, 40);
+    }
     // Changement d'onglet : le trou du cadre se referme (l'écran reste assombri) et la phrase s'efface pendant que la
     // page glisse, puis il se rouvre sur la partie suivante : plus de flash ni de cadre qui traverse l'écran.
     // Étapes du Pokédex : rubrique « Pokédex » de l'onglet Jeux (2026-11-10).
@@ -425,7 +449,7 @@
     if (!same) { TUTO.switching = true; if (TUTO.el) TUTO.el.box.classList.add('pkm-tt-switch'); this.tab(st.tab); }
     this.setState({ tutoStep: i, dexList: false, paClaim: false, toast: null });
     // L'onglet s'ouvre (transition de page), puis l'étape se montre.
-    setTimeout(() => { if (this.st().tutoStep === i) tutoShow(i); }, same ? 80 : 480);
+    setTimeout(() => { if (this.st().tutoStep === i) tutoShow(i); }, !same ? 480 : TUTO.switching ? 320 : 80);
   };
   // Remerciement (2026-10-30, porteur) : le starter choisi à la 3e page apparaît au milieu de l'écran, sourit et dit
   // « Merci de m'avoir choisi ! … », puis rejoint la bulle du didacticiel, qui commence aussitôt. Calque hors de Vue,
@@ -487,12 +511,27 @@
     return ov;
   };
   tutoProto.tutoEnd = function (finished) {
+    if (TUTO.mode === 'ligue') { this.ligueEnd(finished); return; }
     if (TUTO.ended) return;
     TUTO.ended = true; setTimeout(() => { TUTO.ended = false; }, 0);
     tutoForced = false;
     tutoStop();
     this.setState({ tuto: 'done', tutoStep: -2, toast: finished ? 'À toi de jouer ! Récupère tes PA du jour et débloque des Pokémon dans le Pokédex.' : null });
     if (finished) { if (this.st().screen !== 'home') this.tab('home'); this.flash(); }
+  };
+  // Mini-tuto de « Ma ligue » : départ, fin (vu ou passé), une seule fois par appareil.
+  tutoProto.ligueStart = function () {
+    const s = this.st();
+    if (s.tutoStep >= -1 || s.screen !== 'progress') return;
+    tutoAudioInit();
+    TUTO.mode = 'ligue'; TSTEPS = LIGUE_STEPS;
+    this.tutoGo(0);
+  };
+  tutoProto.ligueEnd = function (finished) {
+    tutoStop();
+    TUTO.mode = 'app'; TSTEPS = TUTO_STEPS;
+    this.setState({ ligueTuto: 'done', tutoStep: -2, toast: finished ? 'À toi de jouer ! Remplis tes missions pour gagner des PL et monter au classement.' : null });
+    if (finished) this.flash();
   };
   tutoProto.vTuto = function (s) {
     const ask = s.tuto === 'ask' && s.tutoStep === -2 && !(s.onb > 0) && s.screen === 'home' && !s.sheet && !s.scanSheet;
@@ -516,5 +555,10 @@
     const want = r.tu.ask ? 'ask' : r.tu.choose ? 'choose' : '';
     if (want && TUTO.dlg !== want) setTimeout(() => { const b = document.querySelector(want === 'ask' ? 'section[role="dialog"][aria-label="Didacticiel"] button' : 'section[aria-label="Choisis ton starter"] button'); if (b) b.focus({ preventScroll: true }); }, 80);
     TUTO.dlg = want;
+    // Première ouverture de « Ma ligue » : le mini-tuto démarre une fois la page arrivée (glissement de la page).
+    if (s.screen === 'progress' && s.ligueTuto !== 'done' && !(s.tutoStep >= -1) && !s.sheet && !s.fiId && !TUTO.ligueSoon) {
+      TUTO.ligueSoon = true;
+      setTimeout(() => { TUTO.ligueSoon = false; const t = this.st(); if (t.screen === 'progress' && t.ligueTuto !== 'done') this.ligueStart(); }, 900);
+    }
     return r;
   };

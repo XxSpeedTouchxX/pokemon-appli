@@ -791,6 +791,19 @@ Le script `tools/web/build.mjs` :
     - `t-safari.mjs` : Normal gagné, serveur sans `026` côté joueur et côté admin, « Quitter le safari » ;
     - `t-sfsfx.mjs` : niveaux des sons du coffre, échantillons ;
     - `t-xppk.mjs` : arrivée puis ouverture.
+- **« Ma ligue », mini-tuto, liens (cache v196)** :
+  - `progress.js` : titre « Ma ligue », onglet « Mes missions », bouton `pg.ligueReplay`.
+  - `tuto.js` :
+    - liste d'étapes interchangeable (`TSTEPS`, `TUTO.mode`), `LIGUE_STEPS` (5 étapes, `pg` pour changer d'onglet, `noRing`, `last`) ;
+    - `ligueStart`, `ligueEnd` ; départ automatique 0,9 s après la première arrivée sur la page ;
+    - `persist.js` garde `ligueTuto`.
+  - `profile.js` : `SOCIAL_LINKS` avec TikTok et Instagram, Instagram dans Communauté.
+  - `catalog.js` : un visuel `ptcg:` ou `sdx:` d'une réimpression de la Collection Classique laisse la carte d'origine donner numéro, rareté et bord doré.
+  - Tests :
+    - `t-pl.mjs` : mini-tuto, 9 vérifications de plus ;
+    - `t-progress.mjs`, `t-series.mjs` ;
+    - `t-top.mjs` : cartes « confirmées » cherchées dans le catalogue du jour ;
+    - `t-radar.mjs` : sans WebGL, liste directe.
 - **Points de loyauté (cache v195)** :
   - `pl.js` (nouveau) :
     - code d'un lien `?parrain=CODE` gardé (`pkm-parrain`, 30 jours) puis envoyé par `pl_set_parrain` à la connexion ;

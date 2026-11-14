@@ -6,6 +6,38 @@
 
 ---
 
+## 2026-11-14 — « Ma ligue », mini-tuto, liens TikTok et Instagram, 3 tests réparés (demande du porteur)
+
+- **« Ma progression » devient « Ma ligue »** (bannière de Jeux, titre de la page), et l'onglet « Gagner des PL » devient **« Mes missions »**.
+  - Les textes de l'app, des pages légales et du projet de règlement (`docs/39`) suivent.
+- **Mini-tuto à la première ouverture de « Ma ligue »** : le starter du joueur présente la ligue en 5 étapes, avec le même moteur que le didacticiel (cadre jaune, texte qui s'écrit, voix, « Suivant », « Passer »). Les 5 étapes :
+  1. un championnat chaque saison de 60 jours ;
+  2. sa carte (place et PL de la saison) ;
+  3. les lots des 10 premiers ;
+  4. l'onglet « Mes missions », pour monter au classement ;
+  5. les missions elles-mêmes (l'onglet s'ouvre tout seul).
+
+  Montré une seule fois par appareil (état `ligueTuto`), et à revoir avec « Revoir l'explication de la ligue », en bas du classement.
+- **Liens des réseaux** donnés par le porteur : TikTok (`@dropicards`) et Instagram (`dropicards`).
+  - Les missions TikTok et Instagram sont maintenant actives.
+  - Instagram s'ajoute à Mon profil › Communauté, à côté de TikTok.
+  - Discord : en cours de création, la mission reste « Bientôt ».
+- **3 tests réparés** :
+  - **Collection Classique des 30 ans** : vrai défaut de l'app. Depuis l'ajout des visuels Scrydex (12 novembre), les 30 réimpressions avaient reçu un scan anglais, et l'app avait perdu leur numéro d'origine (« 4/102 »), leur rareté « Collection Classique » et leur bord doré.
+    - Un scan pokemontcg.io ou Scrydex ne passe plus avant la carte d'origine ; seul un scan TCGdex passe avant, comme décidé le 17 octobre.
+  - **« Les plus chères »** : le test visait Latias et Latios GX. Ses prix ont bougé (TCGplayer à plus de 2 fois Cardmarket) : la règle l'écarte à juste titre. Le test cherche désormais les cartes concernées dans le catalogue du jour (41 aujourd'hui).
+  - **Radar** : sans carte (navigateur de test sans WebGL), la liste est déjà affichée ; le test ne cherche plus le bouton « Liste ».
+- **Installation de `install_024_a_028.sql` demandée à Claude** : impossible depuis cette session.
+  - La base Dropicards est sur le serveur OVH du porteur ; le seul accès Supabase relié ici est le compte Supabase des projets Axicall, auxquels on ne touche pas.
+  - Le mot de passe de la base n'est jamais demandé ni écrit.
+  - Le porteur colle le fichier dans Studio (3 gestes, rappelés dans la réponse).
+- **Pubs : réponse au porteur** (rien de codé). Seule voie autorisée : la **vidéo récompensée**.
+  - On regarde une pub jusqu'au bout et la régie confirme la récompense ; un clic récompensé fait fermer le compte publicitaire.
+  - Outils : AdMob dans l'app Android ; Google Ad Manager sur dropicards.fr.
+  - Conditions : bandeau de consentement, pubs non personnalisées pour les moins de 15 ans, Premium sans pub.
+  - Revenus : ordre de grandeur de 5 à 10 € pour 1 000 vidéos vues.
+- Cache v196.
+
 ## 2026-11-14 — Points de loyauté construits (« go » du porteur), son du coffre retiré
 
 - **« Go » du porteur** sur les Points de loyauté (`docs/38`), avec mes choix par défaut L1 à L8. **Son d'ouverture du coffre mystère : aucun pour l'instant** (les 5 propositions ne lui plaisent pas ; toujours essayables avec `?soncoffre=1` à `5`).

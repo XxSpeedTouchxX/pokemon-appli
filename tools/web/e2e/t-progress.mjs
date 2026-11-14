@@ -1,4 +1,4 @@
-// « Ma progression » (2026-11-08, porteur) : bannière dans Jeux, saison et temps restant, carte du joueur (avatar,
+// « Ma ligue » (ex-« Ma progression », 2026-11-08, porteur ; renommée le 2026-11-14) : bannière dans Jeux, saison et temps restant, carte du joueur (avatar,
 // pseudo, emblème, PK de la saison et au total, place), podium du top 3, classement avec grades, ma ligne hors du
 // top, lots de la saison. Le classement du serveur (season_board, 013_saisons.sql) est imité.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -8,9 +8,9 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, de
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?debug', { waitUntil: 'load' }); await page.waitForTimeout(1500);
-await page.evaluate(() => window.__pkm.tab('market')); await page.waitForTimeout(700);
+await page.evaluate(() => { window.__pkm.setState({ ligueTuto: 'done' }); window.__pkm.tab('market'); }); await page.waitForTimeout(700); // mini-tuto testé dans t-pl.mjs
 const ban = page.locator('button.pkm-pg-banner');
-ok('Jeux : bannière « Ma progression · Saison 1 »', (await ban.count()) === 1 && /Ma progression/.test(await ban.innerText()) && /Saison 1/.test(await ban.innerText()));
+ok('Jeux : bannière « Ma ligue · Saison 1 »', (await ban.count()) === 1 && /Ma ligue/.test(await ban.innerText()) && /Saison 1/.test(await ban.innerText()));
 ok('Pokédex : « Progression du Pokédex » (plus de doublon « Ma progression »)', (await page.locator('section[aria-label="Progression du Pokédex"]').count()) <= 1 && (await page.locator('section[aria-label="Ma progression"]').count()) === 0);
 await ban.click(); await page.waitForTimeout(60);
 const tIn = await page.evaluate(() => getComputedStyle(document.querySelector('#app main')).transform);
@@ -18,7 +18,7 @@ ok('ouverture : la page arrive de la droite (' + tIn + ')', /^matrix\(1, 0, 0, 1
 ok('ouverture : saison, carte, classement et lots arrivent l’un après l’autre', await page.evaluate(() => ['.pkm-pg-season', '.pkm-pg-card', '.pkm-pg-board', '.pkm-pg-rewards'].map(q => parseFloat(getComputedStyle(document.querySelector(q)).animationDelay)).every((d, i, a) => d > 0 && (i === 0 || d > a[i - 1]))));
 await page.screenshot({ path: shot('progress-entree.png') });
 await page.waitForTimeout(700);
-ok('page « Ma progression » ouverte', /Ma progression/.test(await page.locator('header').first().innerText().catch(() => '')) || (await page.locator('section.pkm-pg-card').count()) === 1);
+ok('page « Ma ligue » ouverte', /Ma ligue/.test(await page.locator('header').first().innerText().catch(() => '')) || (await page.locator('section.pkm-pg-card').count()) === 1);
 const season = await page.locator('section.pkm-pg-season').innerText();
 ok('saison : « Saison 1 », temps restant, 8 novembre au 6 janvier (' + season.replace(/\s+/g, ' ') + ')', /Saison 1/.test(season) && /Se termine dans \d+ j/.test(season) && /8 novembre au 6 janvier 2027/.test(season));
 ok('sans serveur : carte sans place, invitation à se connecter', /Connecte-toi pour voir ta place/.test(await page.locator('section.pkm-pg-card').innerText()));
