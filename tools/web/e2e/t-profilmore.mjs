@@ -1,5 +1,5 @@
-// Mon profil (2026-11-01, porteur) : rubrique Communauté (Discord, App Store, TikTok ; « Bientôt » tant que les liens
-// n'existent pas), Nous contacter (e-mail prérempli), conditions générales d'utilisation et politique de confidentialité
+// Mon profil (2026-11-01, porteur) : rubrique Communauté (Discord, App Store, TikTok, Instagram ; « Bientôt » tant que
+// les liens n'existent pas ; TikTok et Instagram ouverts depuis le 2026-11-14), Nous contacter (e-mail prérempli), conditions générales d'utilisation et politique de confidentialité
 // tout en bas, puis la version de l'app (non cliquable) et si elle est à jour.
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
@@ -13,9 +13,12 @@ for (const [w, h] of [[390, 844], [360, 740]]) {
   const C = page.locator('section[aria-label="Communauté"]');
   if (w === 390) {
     const rows = (await C.locator('.pkm-pc-row').allInnerTexts()).map(N);
-    ok('Communauté : ' + rows.join(' | '), rows.length === 3 && /Discord/.test(rows[0]) && /App Store/.test(rows[1]) && /TikTok/.test(rows[2]) && rows.every(r => /Bientôt$/.test(r)));
+    ok('Communauté : ' + rows.join(' | '), rows.length === 4 && /Discord/.test(rows[0]) && /App Store/.test(rows[1]) && /TikTok/.test(rows[2]) && /Instagram/.test(rows[3])
+      && /Bientôt$/.test(rows[0]) && /Bientôt$/.test(rows[1]) && !/Bientôt/.test(rows[2]) && !/Bientôt/.test(rows[3]));
+    const links = await C.locator('a.pkm-pc-row').evaluateAll(as => as.map(a => a.getAttribute('href') + ' ' + a.target));
+    ok('TikTok et Instagram ouverts dans un nouvel onglet : ' + links.join(', '), links.join() === 'https://www.tiktok.com/@dropicards _blank,https://www.instagram.com/dropicards/ _blank');
     const icons = await C.locator('img').evaluateAll(im => im.map(i => i.getAttribute('src').split('/').pop() + ':' + (i.naturalWidth > 0)));
-    ok('icônes : ' + icons.join(', '), icons.join(',') === 'discord.svg:true,appstore.svg:true,tiktok.svg:true');
+    ok('icônes : ' + icons.join(', '), icons.join(',') === 'discord.svg:true,appstore.svg:true,tiktok.svg:true,instagram.svg:true');
     const mail = page.locator('section[aria-label="Nous contacter"] a');
     ok('Nous contacter : ' + await mail.getAttribute('href'), /^mailto:contact@dropicards\.fr\?subject=Dropicards$/.test(await mail.getAttribute('href')) && /contact@dropicards\.fr/.test(await mail.innerText()));
     const ver = page.locator('.pkm-pc-ver');
