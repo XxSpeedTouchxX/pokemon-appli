@@ -1,0 +1,17 @@
+# Essai de lecture des pages Cardmarket filtrées « Français, Near Mint » (2026-11-14, « go » du porteur après avis de son
+# avocat). Lancé à la main ; n'écrit rien dans le dépôt : le résultat est dans le journal du job.
+name: Essai prix FR Cardmarket
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths: [tools/cmfr/probe.py]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/cmfr/probe.py
