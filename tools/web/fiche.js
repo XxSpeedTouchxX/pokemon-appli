@@ -313,6 +313,8 @@
       // Carte du catalogue : page du produit Cardmarket (cmLink, catalog.js) ; scellé et démo : recherche par le nom.
       cmUrl: p.tcg ? cmLink(p) : 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + q,
       ebayUrl: it.ebayUrl || 'https://www.ebay.fr/sch/i.html?_nkw=' + q + '&LH_Sold=1&LH_Complete=1',
+      // Vinted (2026-11-14, porteur) : recherche des annonces récentes, la même qu'eBay (vintedLink, catalog.js).
+      vintedUrl: it.vintedUrl || vintedLink(p.tcg ? ebayQuery(p) : p.name),
       hist: hist,
       conds: conds, condOpen: !!s.fiCond, toggleCond: () => this.setState({ fiCond: !s.fiCond }),
       condNote: 'Estimation Dropicards : cote × coefficient de l’état (les cotes Cardmarket sont celles d’un exemplaire ' + (sealed ? 'scellé d’origine' : 'Near Mint') + ').',

@@ -1,7 +1,7 @@
 // Fiche d'une carte du classeur (2026-10-31, porteur) : « Déjà possédée ×N » à la place de « ×N dans ta collection » ;
 // l'état de la carte avec sa bulle de couleur, modifiable à tout moment (Near Mint → Mint par erreur de saisie) ; le prix
 // de la fiche et la pastille du classeur suivent l'état (cote Cardmarket × coefficient) ; enregistré sur l'appareil ;
-// « Annuler » rend l'état d'avant.
+// « Annuler » rend l'état d'avant. Lien « Voir sur Vinted ↗ » (2026-11-14) : carte, scellé, carte d'une extension.
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -49,6 +49,33 @@ await fi.locator('.pkm-fi-etat-grid button[aria-label^="Near Mint"]').click(); a
 ok('retour à Near Mint : « ' + await price() + ' »', /^99,00 € Prix du marché en Near Mint · Cardmarket Déjà possédée ×1$/.test(await price()));
 await page.locator('div[role="status"] button:has-text("Annuler")').click(); await page.waitForTimeout(400);
 ok('« Annuler » rend Mint : « ' + await price() + ' »', /^113,85 €/.test(await price()));
+// « Voir sur Vinted ↗ » (2026-11-14, porteur) : sous Cardmarket et eBay, même recherche qu'eBay (avec « pokemon » si
+// le mot manque), annonces les plus récentes d'abord, ouvert dans une nouvelle page (sur Android : le navigateur).
+const vintedOf = async () => {
+  const a = fi.locator('a.pkm-fi-vinted'), e = fi.locator('a.pkm-fi-ebay');
+  if (!(await a.count())) return null;
+  const href = await a.getAttribute('href'), ebay = new globalThis.URL(await e.getAttribute('href')).searchParams.get('_nkw') || '';
+  const u = new globalThis.URL(href), want = /pok[eé]mon/i.test(ebay) ? ebay : (ebay + ' pokemon').trim();
+  return { href: href, q: u.searchParams.get('search_text'), want: want, ok: u.origin + u.pathname === 'https://www.vinted.fr/catalog' && u.searchParams.get('order') === 'newest_first',
+    target: await a.getAttribute('target'), rel: await a.getAttribute('rel'), text: (await a.innerText()).trim() };
+};
+const v1 = await vintedOf();
+ok('carte : « Voir sur Vinted ↗ » (« ' + (v1 && v1.q) + ' »)', !!v1 && v1.ok && v1.q === v1.want && /pokemon/i.test(v1.q) && v1.text === 'Voir sur Vinted ↗');
+ok('carte : lien ouvert dans une nouvelle page (target _blank, noopener)', !!v1 && v1.target === '_blank' && /noopener/.test(v1.rel || ''));
+ok('carte : adresse encodée (espaces en %20)', !!v1 && /search_text=[^&\s]+&order=newest_first$/.test(v1.href) && /%20/.test(v1.href));
+await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
+// Produit scellé : la recherche est son nom.
+await page.goto(URL + '&debug', { waitUntil: 'load' }); await page.waitForTimeout(2500);
+const sid = await page.evaluate(() => { const c = window.__pkm.catalog().find(p => p.kind === 'sealed' || p.sealed || /ETB|Display|Coffret/i.test(p.name)); return c ? c.id : null; });
+await page.evaluate(id => window.__pkm.fiOpen(id), sid); await page.waitForTimeout(800);
+const v2 = await vintedOf(), sname = await page.evaluate(id => (window.__pkm.catalog().find(p => p.id === id) || {}).name || '', sid);
+ok('scellé (' + sname + ') : « Voir sur Vinted ↗ » avec son nom (« ' + (v2 && v2.q) + ' »)', !!sid && !!v2 && v2.ok && v2.q === (/pok[eé]mon/i.test(sname) ? sname : sname + ' pokemon') && v2.target === '_blank');
+await page.locator('section.pkm-fi button[aria-label="Fermer"]').click().catch(() => {}); await page.waitForTimeout(300);
+// Carte du catalogue (extension) : même recherche qu'eBay (nom anglais et numéro).
+await page.goto(URL + '&debug&start=set&setId=sv08', { waitUntil: 'load' }); await page.waitForTimeout(3000);
+await page.locator('main button[aria-label]').filter({ hasText: /€|cote/i }).first().click().catch(() => {}); await page.waitForTimeout(900);
+const v3 = await vintedOf();
+ok('carte d’une extension : même recherche qu’eBay (« ' + (v3 && v3.q) + ' »)', !!v3 && v3.ok && v3.q === v3.want && /\d/.test(v3.q));
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
 await browser.close();

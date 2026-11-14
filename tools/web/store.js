@@ -5,6 +5,9 @@
   // intégré n'est pas branché, l'app des stores n'affiche aucune offre payante (bannières Premium, « Découvrir
   // Premium », « Recharger mes PA »). Un compte déjà Premium garde ses avantages. Sur le site, rien ne change.
   // Pour l'essayer dans un navigateur : ?store=1 (gardé pour la session de l'onglet).
+  // Liens sortants (Cardmarket, eBay, Vinted ; target="_blank") : vérifié dans Capacitor 8.6.0 (2026-11-14) : la vue
+  // n'ouvre pas de seconde fenêtre, le lien passe par Bridge.launchIntent, qui confie toute adresse hors dropicards.fr
+  // à Android (navigateur du téléphone, ou l'app Vinted si elle est installée). Rien à faire ici.
   const storeApp = (() => {
     try {
       if (/[?&]store=1\b/.test(location.search)) sessionStorage.setItem('pkm-store', '1');

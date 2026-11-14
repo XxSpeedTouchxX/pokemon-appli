@@ -11,6 +11,8 @@
   const AN_KINDS = [['all', 'Tout'], ['card', 'Cartes'], ['lot', 'Lots'], ['graded', 'Gradées'], ['sealed', 'Scellé']];
   const AN_SORTS = [['new', 'Plus récentes'], ['up', 'Prix croissant'], ['down', 'Prix décroissant']];
   const AN_SRC = { vinted: 'Vinted', ebay: 'eBay', dropicards: 'Dropicards' };
+  // Recherche Vinted proposée quand rien n'est trouvé et que rien n'est tapé : selon le type d'annonce choisi.
+  const AN_VQ = { all: 'cartes pokemon', card: 'carte pokemon', lot: 'lot cartes pokemon', graded: 'carte pokemon gradée', sealed: 'pokemon scellé' };
   const anProto = Component.prototype;
   const anEur = n => (Math.round(Number(n) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: Number(n) % 1 ? 2 : 0, maximumFractionDigits: 2 }) + ' €';
   const anAgo = iso => {
@@ -84,8 +86,13 @@
     const st = AN.status && AN.status.vinted, kind = s.anKind || 'all', sort = s.anSort || 'new';
     const upd = st && st.last_ok ? 'Mis à jour ' + anAgo(st.last_ok) : '';
     let empty = '';
-    if (!AN.rows.length) empty = AN.busy || (!AN.at && !AN.err) ? 'Chargement des annonces…' : AN.err || 'Aucune annonce pour le moment : le fil se remplit toutes les 30 minutes.';
+    const loading = !AN.rows.length && (AN.busy || (!AN.at && !AN.err));
+    if (!AN.rows.length) empty = loading ? 'Chargement des annonces…' : AN.err || 'Aucune annonce à afficher pour le moment.';
     else if (!list.length) empty = 'Aucune annonce ne correspond à ta recherche.';
+    // Rien à montrer (2026-11-14, porteur) : bouton vers la même recherche sur Vinted (vintedLink, catalog.js) ; ta
+    // recherche, sinon le type d'annonce choisi. Le fil Vinted est bloqué par Vinted (docs/42) : on ne le contourne pas.
+    const typed = String(s.anQ || '').replace(/\s+/g, ' ').trim();
+    const vq = typed || AN_VQ[kind] || AN_VQ.all, vUrl = vintedLink(vq), vShown = decodeURIComponent(vUrl.split('search_text=')[1].split('&')[0]);
     return {
       q: s.anQ || '', onQ: e => this.setState({ anQ: e && e.target ? e.target.value : '', anShow: AN_PAGE }),
       kinds: AN_KINDS.map(([k, label]) => ({ label: label, cls: 'pkm-anl-chip' + (k === kind ? ' pkm-anl-chip-on' : ''), pressed: k === kind ? 'true' : 'false', go: () => this.setState({ anKind: k, anShow: AN_PAGE }) })),
@@ -94,7 +101,8 @@
       hasCount: list.length > 0, items: list.slice(0, shown).map(r => anItem(r, this)),
       empty: empty, isEmpty: !!empty, more: shown < list.length, showMore: () => this.setState({ anShow: shown + AN_PAGE }),
       moreLabel: 'Afficher plus (' + (list.length - shown) + ')',
-      retry: !!AN.err && !AN.busy, doRetry: () => AN.load(this, true)
+      retry: !!AN.err && !AN.busy, doRetry: () => AN.load(this, true),
+      hasVinted: !!empty && !loading, vintedUrl: vUrl, vintedLabel: 'Chercher “' + vShown + '” sur Vinted ↗'
     };
   };
 

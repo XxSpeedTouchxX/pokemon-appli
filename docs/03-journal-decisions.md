@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-14 — Lien « Voir sur Vinted ↗ » dans la fiche (go du porteur)
+
+- **Contexte** : le fil d'annonces Vinted est bloqué par Vinted (réponses 403 anti-robot, `docs/42`) ; on ne contourne pas ce blocage. Un lien vers la recherche Vinted le remplace.
+- **Fait** : dans la fiche d'une carte et d'un produit scellé, sous Cardmarket et eBay, « Voir sur Vinted ↗ » vers `vinted.fr/catalog?search_text=…&order=newest_first` (même recherche qu'eBay pour une carte, le nom pour un scellé, « pokemon » ajouté s'il manque) ; écran « Annonces » : quand rien n'est trouvé, bouton « Chercher “…” sur Vinted ↗ » (ta recherche, sinon le type d'annonce choisi) ; lien sortant simple, sans affiliation, Dropicards ne vend rien ; cache v201.
+- **App Android** : vérifié dans le code de Capacitor 8.6.0 : un lien vers un autre site s'ouvre dans le navigateur du téléphone (ou l'app Vinted si elle est installée), jamais dans l'app ; rien à changer.
+
 ## 2026-11-14 — Pré-gradation v2 : transitions, vue unique, photo figée, analyse animée, tarifs PSA/PCA/CCC (porteur)
 
 - **Demandes du porteur** : ouverture avec la même transition que le reste de l'app ; cadre plus petit pour voir les 4 bulles passer au vert en même temps ; appareil photo, photo et 4 bulles dans une seule vue (bulles un peu plus petites) ; un appui sur l'appareil photo fige la photo, puis le verso de la même façon ; logo d'appareil photo sur le déclencheur ; après le verso, une analyse plus poussée avec une animation « Analyse de la pré-gradation en cours », puis une arrivée satisfaisante sur le résultat.

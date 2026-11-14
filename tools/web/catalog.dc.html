@@ -2305,6 +2305,7 @@ PKCOUNTER
 <span class="pkm-fi-note">{{ fi.marketDate }}</span>
 <a href="{{ fi.cmUrl }}" target="_blank" rel="noopener" class="pkm-fi-buy">Acheter sur Cardmarket ↗</a>
 <a href="{{ fi.ebayUrl }}" target="_blank" rel="noopener" class="pkm-fi-ebay">Ventes réussies sur eBay ↗</a>
+<a href="{{ fi.vintedUrl }}" target="_blank" rel="noopener" class="pkm-fi-vinted">Voir sur Vinted ↗</a>
 </section>
 <sc-if value="{{ fi.hist.has }}" hint-placeholder-val="{{ true }}">
 <section aria-label="Historique du prix" class="pkm-fi-box pkm-fh">
@@ -2885,6 +2886,7 @@ PKCOUNTER
 <sc-if value="{{ anl.hasCount }}" hint-placeholder-val="{{ true }}"><p class="pkm-anl-count" role="status">{{ anl.count }}</p></sc-if>
 <sc-if value="{{ anl.isEmpty }}" hint-placeholder-val="{{ false }}"><p class="pkm-anl-empty pkm-dark" role="status">{{ anl.empty }}</p></sc-if>
 <sc-if value="{{ anl.retry }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ anl.doRetry }}" class="pkm-anl-more">Réessayer</button></sc-if>
+<sc-if value="{{ anl.hasVinted }}" hint-placeholder-val="{{ false }}"><a href="{{ anl.vintedUrl }}" target="_blank" rel="noopener" class="pkm-anl-vinted">{{ anl.vintedLabel }}</a></sc-if>
 <div class="pkm-anl-grid" role="list">
 <sc-for list="{{ anl.items }}" as="al" hint-placeholder-count="6">
 <article role="listitem" class="pkm-anl-card pkm-dark">

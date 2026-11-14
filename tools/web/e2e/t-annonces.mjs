@@ -88,6 +88,11 @@ await scr.locator('.pkm-anl-sort', { hasText: 'Prix décroissant' }).click(); aw
 ok('tri « Prix décroissant » : Lugia PSA 9 à 210 € en tête', /^Lugia PSA 9/.test(N(await scr.locator('.pkm-anl-t').first().innerText())));
 await scr.locator('input[type=search]').fill('zzz introuvable'); await page.waitForTimeout(300);
 ok('aucun résultat : message', /Aucune annonce ne correspond/.test(N(await scr.innerText())));
+const vb = scr.locator('a.pkm-anl-vinted');
+ok('aucun résultat : « Chercher “zzz introuvable pokemon” sur Vinted ↗ »', (await vb.count()) === 1 && N(await vb.innerText()) === 'Chercher “zzz introuvable pokemon” sur Vinted ↗'
+  && (await vb.getAttribute('href')) === 'https://www.vinted.fr/catalog?search_text=zzz%20introuvable%20pokemon&order=newest_first' && (await vb.getAttribute('target')) === '_blank');
+await scr.locator('input[type=search]').fill('dracaufeu'); await page.waitForTimeout(300);
+ok('annonces trouvées : pas de bouton Vinted', (await scr.locator('a.pkm-anl-vinted').count()) === 0);
 ok('aucune donnée de vendeur dans la page', !/vendeur|login|quelquun/i.test(await page.evaluate(() => JSON.stringify(window.__pkmAn.rows))));
 ok('aucune erreur JavaScript', errors.length === 0);
 if (errors.length) console.log('ERREURS : ' + errors.join(' | '));

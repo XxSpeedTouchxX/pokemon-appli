@@ -108,6 +108,14 @@
     const num = String(p.numShort || '');
     return [ebayWords(p.en || p.name), num, /^\d+$/.test(num) ? 'Promo' : ''].filter(Boolean).join(' ');
   };
+  // - Vinted (2026-11-14, « go » du porteur) : le fil d'annonces Vinted est bloqué par Vinted (403 anti-robot, docs/42),
+  //   on ne contourne pas ce blocage ; à la place, un lien vers la recherche Vinted. Même recherche qu'eBay (carte) ou le
+  //   nom (scellé), avec « pokemon » si le mot n'y est pas, annonces les plus récentes d'abord. Lien sortant simple :
+  //   pas d'affiliation, Dropicards ne vend rien.
+  const vintedLink = q => {
+    const t = String(q || '').replace(/\s+/g, ' ').trim(), s = /pok[eé]mon/i.test(t) ? t : (t + ' pokemon').trim();
+    return 'https://www.vinted.fr/catalog?search_text=' + encodeURIComponent(s) + '&order=newest_first';
+  };
   // - Cardmarket : page du produit quand le catalogue connaît son identifiant (cmid : celui de TCGdex ou des fichiers
   //   publics de Cardmarket ; lien officiel « Products?idProduct= », qui renvoie vers la page de la carte) ; sinon la
   //   recherche Cardmarket par le nom anglais (noms des produits Cardmarket : « Groudon Gold Star »).
@@ -557,6 +565,7 @@
     const q = p.tcg ? ebayQuery(p) : p.name;
     it.ebayUrl = 'https://www.ebay.fr/sch/i.html?_nkw=' + encodeURIComponent(q) + '&LH_Sold=1&LH_Complete=1';
     it.ebayText = 'Ventes réussies eBay pour « ' + q + ' »';
+    it.vintedUrl = vintedLink(q);
     return it;
   };
 
