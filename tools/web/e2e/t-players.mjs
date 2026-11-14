@@ -101,7 +101,7 @@ const open = async (who) => {
   await page.evaluate(() => window.__pkm.setState({ plyQ: '' }));
   await ctx.route(FAKE + '/rest/v1/rpc/admin_players', r => r.fulfill({ status: 404, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ code: 'PGRST202', message: 'Could not find the function public.admin_players' }) }));
   await sec.locator('button', { hasText: 'Actualiser' }).click(); await page.waitForTimeout(600);
-  ok('serveur sans 025 : « colle tools/supabase/install_024_025.sql »', /install_024_025\.sql/.test(N(await sec.innerText())));
+  ok('serveur sans 025 : « colle tools/supabase/install_024_a_028.sql »', /install_024_a_028\.sql/.test(N(await sec.innerText())));
   await ctx.close();
 }
 ok('aucune erreur JavaScript', errors.length === 0);

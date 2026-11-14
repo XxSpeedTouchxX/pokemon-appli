@@ -1142,7 +1142,7 @@
 <sc-if value="{{ adm.ply.hasMore }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ adm.ply.showMore }}" class="pkm-admz-chip pkm-ply-more">{{ adm.ply.more }}</button></sc-if>
 </sc-if>
 </section>
-<section aria-label="{{ adm.plp.head }}" class="pkm-ply pkm-plp">
+<section aria-label="{{ adm.plp.head }}" class="pkm-plp">
 <div class="pkm-sig-top"><h3><img src="img/brand/pl.svg" alt="" width="20" height="20">{{ adm.plp.head }}</h3><button type="button" onClick="{{ adm.plp.refresh }}" class="pkm-admz-chip">Actualiser</button></div>
 <sc-if value="{{ adm.plp.offline }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.plp.offlineText }}</p></sc-if>
 <sc-if value="{{ adm.plp.hasErr }}" hint-placeholder-val="{{ false }}"><p role="alert" class="pkm-admz-err">{{ adm.plp.err }}</p></sc-if>
