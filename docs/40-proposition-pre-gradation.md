@@ -2,7 +2,7 @@
 
 *2026-11-14 · demande du porteur (« je voudrais que dans le premier onglet tu me rajoutes, sous le radar de boutiques, une rubrique "Pré-gradation" ») avec 2 vidéos de l'outil d'un concurrent (PokéItem), qui servent d'inspiration et pas de modèle à copier.*
 
-**Statut : « go » du porteur reçu le 2026-11-14, décisions D1 à D6 au § 10. Option A construite (cache v197). Reste : tarifs de gradation (D4) et réglage sur de vraies photos.**
+**Statut : « go » du porteur reçu le 2026-11-14, décisions D1 à D6 au § 10. Option A construite (cache v198). Reste : tarifs de gradation (D4) et réglage sur de vraies photos.**
 
 Fichiers liés :
 - maquette des écrans : `docs/40-maquette-pre-gradation/maquette.jpg`, avec sa source `index.html` ;

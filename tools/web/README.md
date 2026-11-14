@@ -804,7 +804,7 @@ Le script `tools/web/build.mjs` :
     - `t-progress.mjs`, `t-series.mjs` ;
     - `t-top.mjs` : cartes « confirmées » cherchées dans le catalogue du jour ;
     - `t-radar.mjs` : sans WebGL, liste directe.
-- **Pré-gradation, « Version Proto » (cache v197)** :
+- **Pré-gradation, « Version Proto » (cache v198)** :
   - `pregrade-core.js` (nouveau, `PGCore`, sans dépendance, testé par `test_pregrade.mjs`) :
     - contrôles de la photo : `sharpness` (variance du laplacien), `glare` (plus grande tache de pixels saturés) ;
     - `findCard` (bords exacts et inclinaison sur l'image redressée), `crop` (750 × 1047) ;
