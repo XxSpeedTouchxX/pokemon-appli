@@ -5,7 +5,7 @@
   // animée étape par étape sur le téléphone (pregrade-core.js : centrage, coins, bords, surface ; aucune photo envoyée),
   // résultat (note probable, fourchette, fiabilité, état, 4 critères, défauts repérés, notes probables PSA, PCA et CCC
   // selon les barèmes du porteur, « ça vaut le coup ? »), « J'ai reçu la vraie note », historique.
-  // Compteur (D3, porteur) : 1 pré-gradation tous les 3 jours sans Premium, 100 par mois avec Premium (remis à zéro le
+  // Compteur (D3, porteur) : 1 pré-gradation tous les 3 jours sans Premium, 60 par mois avec Premium (100 jusqu'au 2026-11-14) (remis à zéro le
   // 1er), illimité en mode Admin ; toujours affiché (accueil et écran). Gardé sur l'appareil, comme les scans du jour.
   // Tarifs de gradation (D4, porteur, 2026-11-14) : grilles PSA, PCA et CCC dans PGCore.FEES ; frais d'envoi et de
   // retour modifiables par chacun (gardés sur l'appareil, pgCost) ; formule PCA et CCC au choix (pgSvc).
@@ -38,7 +38,7 @@
       text = left > 0 ? '1 pré-gradation disponible' : 'Prochaine pré-gradation dans ' + dur(wait);
       short = left > 0 ? '1 dispo' : dur(wait);
     }
-    const upsell = q.mode === 'free' && !(typeof storeApp !== 'undefined' && storeApp) ? '1 tous les 3 jours · 100 par mois avec Premium' : q.mode === 'free' ? '1 tous les 3 jours' : '';
+    const upsell = q.mode === 'free' && !(typeof storeApp !== 'undefined' && storeApp) ? '1 tous les 3 jours · 60 par mois avec Premium' : q.mode === 'free' ? '1 tous les 3 jours' : '';
     return { left: left, mode: q.mode, text: text, short: short, upsell: upsell, hasUpsell: !!upsell, empty: left <= 0 };
   };
   pgProto.pgSpend = function () {

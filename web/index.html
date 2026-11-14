@@ -2736,6 +2736,14 @@ nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="wi
 
 /* L'offre Premium s'ouvre au-dessus de l'écran « Mon avatar » (2026-11-12) : elle restait cachée dessous et réapparaissait après « Valider mon avatar ». */
 .pkm-pas-wrap.pkm-prem-wrap { z-index: 85; }
+/* Pré-gradation (2026-11-14, porteur : « Pré-gradation 60/mois » version proto) : loupe L1 qui ondule doucement, un
+   reflet la traverse ; badge « Version Proto » comme sur la rubrique de l'accueil. */
+.pkm-prem-pg { position: relative; display: block; width: 30px; height: 25px; overflow: hidden; border-radius: 6px; }
+.pkm-prem-pg img { display: block; width: 30px; height: 25px; animation: pkmPremBob 2.4s ease-in-out infinite; }
+.pkm-prem-pg-glint { position: absolute; top: -4px; bottom: -4px; left: -14px; width: 10px; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0)); transform: skewX(-20deg); animation: pkmPremGlint 3s ease-in-out infinite; }
+@keyframes pkmPremGlint { 0%, 55% { left: -14px; } 85%, 100% { left: 36px; } }
+.pkm-prem-proto { display: inline-flex; align-items: center; height: 18px; margin-left: 1px; padding: 0 7px; border-radius: 999px; background: #111; box-shadow: 0 0 0 1px rgba(255, 214, 10, 0.55); color: #FFD60A; font-size: 10px; font-weight: 800; letter-spacing: 0.03em; vertical-align: 2px; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .pkm-prem-pg img, .pkm-prem-pg-glint { animation: none; } .pkm-prem-pg-glint { display: none; } }
 
 /* Fenêtres d'infos qui montent du bas (2026-11-08, porteur) : même mouvement que « Mon Pokédex » (dex.css). La fermeture
    glissée est dans sheet.js. */
@@ -3785,6 +3793,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=0cffaa24"></script>
+<script src="app.js?v=1f4c5587"></script>
 </body>
 </html>

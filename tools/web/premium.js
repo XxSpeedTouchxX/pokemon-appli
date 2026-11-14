@@ -13,6 +13,8 @@
     { kind: 'scan', ico: '', title: 'Scans illimités', text: 'Scanne autant de cartes que tu veux, chaque jour.' },
     { kind: 'binder', ico: '', title: 'Cartes et items scellés illimités', text: 'Ton classeur sans aucune limite.' },
     { kind: 'radar', ico: '', title: 'Radar des boutiques débloqué', text: 'Toutes les boutiques et leurs chances d’arrivage.' },
+    // Pré-gradation (2026-11-14, porteur : « Pré-gradation 60/mois » version proto, entre le Radar et le double XP PA).
+    { kind: 'pg', ico: '', title: 'Pré-gradation 60/mois', proto: true, text: 'La note probable de tes cartes chez PSA, PCA et CCC, à partir de tes photos.' },
     { kind: 'xp', ico: '', title: 'Double XP permanent sur tes PA', text: 'Tes PA comptent double, tous les jours.' },
     // 2XP PK offert le premier mois (2026-11-09, porteur ; serveur : 018, une fois par compte).
     { kind: 'xppk', ico: '', title: '1er mois : 2XP PK offert', text: 'Tes PK du Booster PK et de pile ou face doublés pendant 30 jours.' },
@@ -142,7 +144,7 @@
     r.prem = {
       banner: { title: 'Dropicards Premium', text: on ? 'Premium actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP sur tes PA, Radar et historique complet.', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.premClose(),
-      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isHeart: p.kind === 'heart', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
+      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isPg: p.kind === 'pg', hasProto: !!p.proto, isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isHeart: p.kind === 'heart', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
       buy: !on, isOn: on,
       mine: { title: mineTitle, text: mineText },
       manage: () => this.premGo('portal'),

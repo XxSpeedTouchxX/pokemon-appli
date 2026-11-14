@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-14 — Pré-gradation dans l'offre Premium : 60 par mois (porteur)
+
+- **Demande du porteur** : « Pré-gradation 60/mois », version proto, dans le Premium, entre « Radar des boutiques » et « Double XP PA ».
+- **Fait** : nouvelle ligne de l'offre (loupe de la pré-gradation animée, badge « Version Proto ») à cette place.
+- **Quota Premium : 100 → 60 pré-gradations par mois** (remis à zéro le 1er), pour que l'app donne ce que l'offre annonce ; sans Premium, toujours 1 tous les 3 jours ; illimité en mode Admin. CGU et CGV mises à jour. Remplace le D3 de `docs/40` pour la partie Premium.
+- Cache v206.
+
+---
+
 ## 2026-11-14 — Prix du marché par langue, pré-gradation, lots et missions de « Ma ligue » (porteur)
 
 - **Prix du marché** (fiche d'une carte et d'un produit scellé) :

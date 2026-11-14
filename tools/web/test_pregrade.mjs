@@ -177,15 +177,17 @@ test('ça vaut le coup ? valeur gradée attendue, coût, verdict', () => {
   assert.equal(P.worth(dist, 100, 100, coef, null).costKnown, false);
 });
 
-test('compteur : 1 tous les 3 jours sans Premium, 100 par mois avec Premium, illimité pour un admin', () => {
+test('compteur : 1 tous les 3 jours sans Premium, 60 par mois avec Premium, illimité pour un admin', () => {
   const now = new Date(2026, 10, 14, 12).getTime(), day = 86400e3;
   assert.equal(P.quota({ now: now }).left, 1);
   const q1 = P.quota({ now: now, last: now - day });
   assert.equal(q1.left, 0);
   assert.equal(q1.next, now + 2 * day);
   assert.equal(P.quota({ now: now, last: now - 3 * day }).left, 1);
-  assert.equal(P.quota({ now: now, premium: true, month: '2026-11', used: 100 }).left, 0);
-  assert.equal(P.quota({ now: now, premium: true, month: '2026-10', used: 100 }).left, 100, 'nouveau mois');
+  assert.equal(P.quota({ now: now, premium: true, month: '2026-11', used: 60 }).left, 0);
+  assert.equal(P.quota({ now: now, premium: true, month: '2026-11', used: 59 }).left, 1);
+  assert.equal(P.PREMIUM_MONTH, 60);
+  assert.equal(P.quota({ now: now, premium: true, month: '2026-10', used: 60 }).left, 60, 'nouveau mois');
   assert.equal(P.quota({ now: now, premium: true }).reset, new Date(2026, 11, 1).getTime());
   assert.equal(P.quota({ now: now, admin: true }).left, Infinity);
   assert.deepEqual(P.spend({ now: now, premium: true, month: '2026-11', used: 4 }), { pgMonth: '2026-11', pgUsed: 5, pgLast: now });

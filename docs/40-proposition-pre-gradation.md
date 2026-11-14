@@ -178,7 +178,7 @@ Ensuite, un « go » pour commencer par l'option A.
 |---|---|---|
 | D1 | Logo L1, la loupe | `web/img/brand/pregrade.svg` : rubrique de l'accueil, compteur de l'écran |
 | D2 | A d'abord ; B (IA) seulement si A ne donne pas satisfaction | Analyse sur le téléphone (`tools/web/pregrade-core.js`), aucune photo envoyée |
-| D3 | 1 pré-gradation gratuite tous les 3 jours ; 100 par mois avec Premium, compteur remis à zéro chaque mois ; compteur des pré-gradations restantes toujours visible | Compteur sur l'accueil et en haut de l'écran (« 1 pré-gradation disponible », « Prochaine pré-gradation dans 2 j 5 h », « 87 pré-gradations restantes ce mois-ci (sur 100) ») ; illimité en mode Admin |
+| D3 | 1 pré-gradation gratuite tous les 3 jours ; 100 par mois avec Premium (**60 par mois depuis le 2026-11-14**, porteur : « Pré-gradation 60/mois » dans l'offre Premium), compteur remis à zéro chaque mois ; compteur des pré-gradations restantes toujours visible | Compteur sur l'accueil et en haut de l'écran (« 1 pré-gradation disponible », « Prochaine pré-gradation dans 2 j 5 h », « 87 pré-gradations restantes ce mois-ci (sur 100) ») ; illimité en mode Admin |
 | D4 | Tarifs envoyés par le porteur le 14 novembre (PSA, PCA, CCC) | Grilles dans `PGCore.FEES` (§ 11) |
 | D5 | Barèmes PSA, PCA et CCC du porteur, mot pour mot | `PGCore.SCALES` : notes par entreprise (barres de chances), barème de la « vraie note » ; état de l'app d'après le barème CCC (9 et plus Mint, 8 Near Mint, 6 et 7 Excellent, 4 et 5 Good, 2 et 3 Played, 1 Poor) |
 | D6 | Badge « Version Proto » | Sur la rubrique de l'accueil et sous le titre de l'écran |

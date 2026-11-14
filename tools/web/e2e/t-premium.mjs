@@ -18,7 +18,11 @@ ok('icônes animées : scanner, classeur, radar, goutte des PA « 2XP », graphi
   && (await sh.locator('.pkm-prem-xp-tag').first().innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1
   && (await sh.locator('.pkm-prem-bind-card').evaluate(e => getComputedStyle(e).animationName)) === 'pkmPremCard');
 const boxes = await sh.locator('.pkm-prem-ico').evaluateAll(l => l.map(e => Math.round(e.getBoundingClientRect().left)));
-ok('8 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 8 && new Set(boxes).size === 1);
+ok('9 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 9 && new Set(boxes).size === 1);
+// Pré-gradation (2026-11-14, porteur) : « Pré-gradation 60/mois », badge « Version Proto », entre le Radar et le double XP PA.
+const order = await sh.locator('.pkm-prem-perks li > span:last-child > b').evaluateAll(l => l.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
+const iR = order.findIndex(x => /^Radar des boutiques/.test(x)), iP = order.findIndex(x => /^Pré-gradation 60\/mois Version Proto$/.test(x)), iX = order.findIndex(x => /^Double XP permanent sur tes PA/.test(x));
+ok('« Pré-gradation 60/mois · Version Proto » entre le Radar et le double XP PA (' + [iR, iP, iX].join(', ') + ' · ' + order[iR + 1] + ')', iR >= 0 && iP === iR + 1 && iX === iP + 1 && (await sh.locator('.pkm-prem-pg img[src="img/brand/pregrade.svg"]').count()) === 1);
 ok('double XP sur les PA seulement', /Double XP permanent sur tes PA/.test(await sh.innerText()) && !/PK et tes PA/.test(await sh.innerText()));
 const top = await sh.locator('.pkm-prem-crown-xl').evaluate(e => e.getBoundingClientRect().top);
 ok('couronne entière, sous le haut de l’écran (' + Math.round(top) + ' px)', top > 0);

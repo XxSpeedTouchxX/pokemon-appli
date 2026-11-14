@@ -467,8 +467,9 @@
     }
 
     // ——— Compteur (porteur, 2026-11-14) ———
-    // Sans Premium : 1 pré-gradation tous les 3 jours. Premium : 100 par mois, remises à zéro le 1er. Admin : illimité.
-    const FREE_EVERY = 3 * 86400e3, PREMIUM_MONTH = 100;
+    // Sans Premium : 1 pré-gradation tous les 3 jours. Premium : 60 par mois (100 jusqu'au 2026-11-14, porteur : « Pré-gradation
+    // 60/mois » dans l'offre Premium), remises à zéro le 1er. Admin : illimité.
+    const FREE_EVERY = 3 * 86400e3, PREMIUM_MONTH = 60;
     const monthKey = t => { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
     function quota(o) {
       if (o.admin) return { left: Infinity, max: Infinity, mode: 'admin' };
