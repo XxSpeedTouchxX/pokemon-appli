@@ -22,6 +22,7 @@ ok('9 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 9 && new S
 // Pré-gradation (2026-11-14, porteur) : « Pré-gradation 60/mois », badge « Version Proto », entre le Radar et le double XP PA.
 const order = await sh.locator('.pkm-prem-perks li > span:last-child > b').evaluateAll(l => l.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
 const iR = order.findIndex(x => /^Radar des boutiques/.test(x)), iP = order.findIndex(x => /^Pré-gradation 60\/mois Version Proto$/.test(x)), iX = order.findIndex(x => /^Double XP permanent sur tes PA/.test(x));
+ok('« Soutenir Dropicards » toute à la fin de la liste (' + order[order.length - 1] + ')', /^Soutenir Dropicards/.test(order[order.length - 1]));
 ok('« Pré-gradation 60/mois · Version Proto » entre le Radar et le double XP PA (' + [iR, iP, iX].join(', ') + ' · ' + order[iR + 1] + ')', iR >= 0 && iP === iR + 1 && iX === iP + 1 && (await sh.locator('.pkm-prem-pg img[src="img/brand/pregrade.svg"]').count()) === 1);
 ok('double XP sur les PA seulement', /Double XP permanent sur tes PA/.test(await sh.innerText()) && !/PK et tes PA/.test(await sh.innerText()));
 const top = await sh.locator('.pkm-prem-crown-xl').evaluate(e => e.getBoundingClientRect().top);

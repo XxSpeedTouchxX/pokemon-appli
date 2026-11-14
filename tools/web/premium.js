@@ -18,12 +18,13 @@
     { kind: 'xp', ico: '', title: 'Double XP permanent sur tes PA', text: 'Tes PA comptent double, tous les jours.' },
     // 2XP PK offert le premier mois (2026-11-09, porteur ; serveur : 018, une fois par compte).
     { kind: 'xppk', ico: '', title: '1er mois : 2XP PK offert', text: 'Tes PK du Booster PK et de pile ou face doublés pendant 30 jours.' },
-    // Soutien (2026-11-09, porteur : « Soutenir Dropicards pour vous faire gagner de plus en plus de lots », avec un cœur
-    // dans la main) : icône d'une main ouverte qui tient un cœur qui bat.
-    { kind: 'heart', ico: '', title: 'Soutenir Dropicards', text: 'Pour vous faire gagner de plus en plus de lots.' },
     { kind: 'hist', ico: '', title: 'Historique des prix complet', text: 'Toute l’évolution de la cote de chaque carte.' },
     // Mode avatar (2026-11-11, porteur) : Premium débloque tout, quelle que soit la formule.
-    { kind: '', ico: '🎨', title: 'Tous les accessoires et Pokémon du mode avatar débloqués', text: 'Coiffures, habits, décors, cadres, accessoires, Pokémon et shiny : tout ton avatar, sans PA.' }
+    { kind: '', ico: '🎨', title: 'Tous les accessoires et Pokémon du mode avatar débloqués', text: 'Coiffures, habits, décors, cadres, accessoires, Pokémon et shiny : tout ton avatar, sans PA.' },
+    // Soutien (2026-11-09, porteur : « Soutenir Dropicards pour vous faire gagner de plus en plus de lots », avec un cœur
+    // dans la main) : icône d'une main ouverte qui tient un cœur qui bat.
+    // Toute à la fin de la liste depuis le 2026-11-14 (porteur).
+    { kind: 'heart', ico: '', title: 'Soutenir Dropicards', text: 'Pour vous faire gagner de plus en plus de lots.' },
   ];
   const PREM_PLANS = [
     // Prix du 2026-11-10 (porteur) : 9,90 € par mois, 24,90 € pour 3 mois, 39,90 € pour 6 mois, 69,90 € par an.

@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-14 — « Soutenir Dropicards » en dernier ; dernière vente eBay demandée (porteur)
+
+- **Fait** : « Soutenir Dropicards » est désormais la dernière ligne des avantages Premium (cache v208).
+- **Demandé, non fait** : afficher sur la ligne eBay du « Prix du marché » la **dernière vente réussie** de chaque carte (exemple du porteur : Rayquaza réimpression vendu 42 € aujourd'hui → « 42 € »).
+  - La recherche des ventes réussies d'eBay est interdite aux robots par son `robots.txt`, répondait 403 depuis GitHub (2026-10-18) et demande, d'après des développeurs, d'être connecté à un compte depuis juillet 2026 : pas de contournement (règle du projet). L'avis juridique du porteur ne lève pas ces blocages techniques.
+  - 21 538 cartes chaque jour par lecture de pages serait de toute façon impossible sans être bloqué.
+  - **Seule voie officielle** : l'API « Marketplace Insights » d'eBay (historique des ventes réussies, « Limited Release » : accès à demander par le porteur, accord non garanti). Avec elle : lecture à l'ouverture de la fiche d'une carte, gardée 24 h, affichée « Dernière vente · 42 € · le jj/mm ».
+  - En attendant, la ligne eBay reste l'estimation étiquetée « Estimation » (cote × 1,10), jamais présentée comme une vente.
+
+---
+
 ## 2026-11-14 — Essai gratuit de pokemontcgapi pour les prix par langue (porteur)
 
 - **Constat (documentation de pokemontcgapi, relue le 14 novembre 2026)** : l'essai gratuit (800 crédits après confirmation de l'adresse, 30 jours, sans carte bancaire) ne renvoie **que les lignes en anglais** ; les lignes « explicitement d'une autre langue » (français, japonais…) et les cotes gradées sont retenues. Les prix dans toutes les langues commencent à l'offre **Developer : 29 € par mois** (ou 290 € par an), 50 000 crédits et 30 000 cartes différentes par mois ; Growth 79 €/mois (historique complet, gradées).
