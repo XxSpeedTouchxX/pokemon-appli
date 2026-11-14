@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-14 — Essai gratuit de pokemontcgapi pour les prix par langue (porteur)
+
+- **Constat (documentation de pokemontcgapi, relue le 14 novembre 2026)** : l'essai gratuit (800 crédits après confirmation de l'adresse, 30 jours, sans carte bancaire) ne renvoie **que les lignes en anglais** ; les lignes « explicitement d'une autre langue » (français, japonais…) et les cotes gradées sont retenues. Les prix dans toutes les langues commencent à l'offre **Developer : 29 € par mois** (ou 290 € par an), 50 000 crédits et 30 000 cartes différentes par mois ; Growth 79 €/mois (historique complet, gradées).
+- **Ce que l'essai vérifie quand même** : nos cartes reconnues (identifiants pokemontcg.io acceptés), l'indice en euros comparé à notre cote, le nombre de lignes FR et JP retenues par carte (`meta.withheld`), les versions japonaises (`jp_twin_id`).
+- **Clé** : formulaire sécurisé de la session refusé par le porteur ; à la place, **workflow manuel « Essai pokemontcgapi »** (`tools/ptcgapi/essai.py`, ≈ 16 crédits par passage, sous le plafond de 40 crédits par jour d'un compte pas encore confirmé) qui lit la clé dans le secret GitHub `PTCG_API_KEY`. La clé n'est jamais dans le dépôt ; le rapport n'affiche ni clé ni adresse e-mail.
+- **À faire par le porteur** : créer le compte d'essai (pokemontcgapi.com/free-api-key, son adresse e-mail et un mot de passe), confirmer l'adresse, ajouter la clé en secret GitHub `PTCG_API_KEY`. Puis Claude lance le workflow et rend le rapport.
+- Coût si on passe au payant : 29 €/mois = 348 €/an, dans le budget (500 à 5 000 €) ; **décision du porteur** après l'essai.
+
+---
+
 ## 2026-11-14 — Lots de « Ma ligue » alignés, logo argenté Premium (porteur)
 
 - Tous les lots alignés : les visuels ont la même largeur, les textes commencent au même endroit.

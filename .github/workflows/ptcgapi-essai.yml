@@ -1,0 +1,18 @@
+# Essai gratuit de l'API de prix pokemontcgapi.com (2026-11-14, demande du porteur : « prix par langue »).
+# Lancé à la main seulement (chaque passage coûte environ 16 crédits de l'essai). La clé vient du secret GitHub
+# PTCG_API_KEY, jamais du dépôt ; le rapport (sans clé ni adresse e-mail) est dans le résumé et le journal du job.
+name: Essai pokemontcgapi
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  essai:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Essai des prix (cartes de l'essai, lignes retenues, versions japonaises)
+        env:
+          PTCG_API_KEY: ${{ secrets.PTCG_API_KEY }}
+        run: python3 tools/ptcgapi/essai.py --out rapport.md; cat rapport.md >> "$GITHUB_STEP_SUMMARY"
