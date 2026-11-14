@@ -2,7 +2,7 @@
 
 *2026-11-14 · demande du porteur (« je voudrais que dans le premier onglet tu me rajoutes, sous le radar de boutiques, une rubrique "Pré-gradation" ») avec 2 vidéos de l'outil d'un concurrent (PokéItem), qui servent d'inspiration et pas de modèle à copier.*
 
-**Statut : « go » du porteur reçu le 2026-11-14, décisions D1 à D6 au § 10. Option A construite (cache v198). Reste : tarifs de gradation (D4) et réglage sur de vraies photos.**
+**Statut : « go » du porteur reçu le 2026-11-14, décisions D1 à D6 au § 10. Option A construite (cache v198), v2 le même jour (cache v200, § 11). Reste : réglage sur de vraies photos.**
 
 Fichiers liés :
 - maquette des écrans : `docs/40-maquette-pre-gradation/maquette.jpg`, avec sa source `index.html` ;
@@ -179,7 +179,7 @@ Ensuite, un « go » pour commencer par l'option A.
 | D1 | Logo L1, la loupe | `web/img/brand/pregrade.svg` : rubrique de l'accueil, compteur de l'écran |
 | D2 | A d'abord ; B (IA) seulement si A ne donne pas satisfaction | Analyse sur le téléphone (`tools/web/pregrade-core.js`), aucune photo envoyée |
 | D3 | 1 pré-gradation gratuite tous les 3 jours ; 100 par mois avec Premium, compteur remis à zéro chaque mois ; compteur des pré-gradations restantes toujours visible | Compteur sur l'accueil et en haut de l'écran (« 1 pré-gradation disponible », « Prochaine pré-gradation dans 2 j 5 h », « 87 pré-gradations restantes ce mois-ci (sur 100) ») ; illimité en mode Admin |
-| D4 | Tarifs envoyés par le porteur « dans la journée » | **En attente.** En attendant, chacun saisit son coût (gardé sur l'appareil) ; sans coût, le verdict le signale |
+| D4 | Tarifs envoyés par le porteur le 14 novembre (PSA, PCA, CCC) | Grilles dans `PGCore.FEES` (§ 11) |
 | D5 | Barèmes PSA, PCA et CCC du porteur, mot pour mot | `PGCore.SCALES` : notes par entreprise (barres de chances), barème de la « vraie note » ; état de l'app d'après le barème CCC (9 et plus Mint, 8 Near Mint, 6 et 7 Excellent, 4 et 5 Good, 2 et 3 Played, 1 Poor) |
 | D6 | Badge « Version Proto » | Sur la rubrique de l'accueil et sous le titre de l'écran |
 
@@ -193,4 +193,22 @@ Ensuite, un « go » pour commencer par l'option A.
 - tests : `tools/web/test_pregrade.mjs` (moteur, 11 tests) et `tools/web/e2e/t-pregrade.mjs` (parcours complet, 45 vérifications).
 
 **Limites connues (Version Proto) :** réglages faits sur des cartes dessinées et de petits scans officiels ; la surface des cartes holo ou très illustrées est souvent « peu sûre » ; le centrage des cartes à bord argenté peut se tromper. Le réglage sur 20 à 30 vraies photos du porteur (dont quelques cartes déjà gradées) reste à faire.
+
+## 11. Version 2 (2026-11-14, demandes du porteur)
+
+**Prise de vue** : tout dans une seule vue, sans défiler (consigne, 4 bulles courtes « Carte, Netteté, Reflet, Fond », cadre, vignette du recto, déclencheur au logo d'appareil photo, « Importer ») ; plus de photo automatique : quand les 4 bulles sont vertes, le cadre et le déclencheur passent au vert. Un appui fige la photo (éclair) : « Recto enregistré » en vert puis le verso arrive en glissant, ou la raison du refus en rouge avec « Reprendre la photo ».
+
+**Analyse** : écran « Analyse de la pré-gradation en cours » avec les 2 vraies photos balayées, une barre de progression et 9 étapes dont le résultat s'affiche (recadrage, centrage recto, centrage verso, 8 coins, 8 bords, surface recto, surface verso, reconnaissance de la carte, notes PSA, PCA et CCC), 0,65 s au moins par étape. Puis le résultat arrive en glissant : jauge qui se remplit, note qui compte, blocs en cascade.
+
+**Tarifs (D4)** :
+
+| Entreprise | Comment le prix est choisi | Grille |
+|---|---|---|
+| PSA | Palier selon la valeur déclarée ; surtaxe si la note fait dépasser le plafond (différence avec le palier supérieur) ; retour depuis l'Allemagne 25 à 60 € par commande | Value ≤ 450 € : 34,99 € · Standard ≤ 900 € : 49,99 € · Priority ≤ 1 300 € : 69,99 € · Express ≤ 2 200 € : 199 € · Super Express ≤ 4 500 € : 349 € · Premier ≤ 9 000 € : 599 € · Premium 1 ≤ 22 000 € : 999 € · au-delà : sur devis |
+| PCA | Formule (délai) × tranche de valeur | 1-249 € : 12,90 / 19,90 / 49,90 / 149 € · 250-999 € : 24,90 / 39,90 / 99,90 / 199 € · 1 000-9 999 € : 79,90 / 149 / 199 / 249 € · 10 000 € et plus : 390 / 490 € / non disponible / sur devis (Classic, Fast, Fast+, Excelsior) |
+| CCC | Formule (délai) × tranche de valeur | 1-50 € : 20 / 25 / 40 / 60 € · 51-100 € : 23 / 28 / 43 / 63 € · 101-500 € : 27 / 32 / 47 / 67 € · 501 € et plus : 31 / 36 / 51 / 71 € (Eco, Express, Super-Express, Ultra-Express) |
+
+**« Ça vaut le coup ? »** : bilan (oui / ça peut valoir le coup / non) avec le bénéfice probable de l'entreprise la plus rentable ; les 3 entreprises comparées ; pour celle choisie : formule (PCA, CCC) ou palier (PSA), valeur brute selon l'état, valeur à la note la plus probable, valeur gradée attendue, prix, surtaxe PSA éventuelle, frais d'envoi et de retour (modifiables), bénéfice probable, part de ce qui est dépensé, verdict avec la note du dessous.
+
+**Défauts à confirmer** : valeur déclarée = valeur estimée à la note la plus probable ; PSA « Premium 1 » jusqu'à 22 000 € ; prix à l'unité (remise PCA dès 10 cartes en note) ; retour PSA compté 25 € par défaut ; envoi PCA et CCC à 0 € par défaut.
 

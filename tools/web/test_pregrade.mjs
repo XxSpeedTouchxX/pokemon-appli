@@ -191,3 +191,44 @@ test('compteur : 1 tous les 3 jours sans Premium, 100 par mois avec Premium, ill
   assert.deepEqual(P.spend({ now: now, premium: true, month: '2026-11', used: 4 }), { pgMonth: '2026-11', pgUsed: 5, pgLast: now });
   assert.deepEqual(P.spend({ now: now }), { pgLast: now });
 });
+
+test('tarifs PSA : palier selon la valeur déclarée, au-delà de 22 000 € sur devis', () => {
+  assert.equal(P.fee('PSA', null, 120).price, 34.99);
+  assert.equal(P.fee('PSA', null, 450).tier, 'Value');
+  assert.equal(P.fee('PSA', null, 451).tier, 'Standard');
+  assert.equal(P.fee('PSA', null, 1300).price, 69.99);
+  assert.equal(P.fee('PSA', null, 2000).price, 199);
+  assert.equal(P.fee('PSA', null, 4500).price, 349);
+  assert.equal(P.fee('PSA', null, 8000).price, 599);
+  assert.equal(P.fee('PSA', null, 15000).price, 999);
+  assert.equal(P.fee('PSA', null, 30000).price, null);
+});
+
+test('tarifs PCA et CCC : formule et tranche de valeur', () => {
+  assert.deepEqual([P.fee('PCA', 'classic', 100).price, P.fee('PCA', 'fast', 100).price, P.fee('PCA', 'fastp', 100).price, P.fee('PCA', 'excelsior', 100).price], [12.9, 19.9, 49.9, 149]);
+  assert.equal(P.fee('PCA', 'classic', 500).price, 24.9);
+  assert.equal(P.fee('PCA', 'fast', 5000).price, 149);
+  assert.equal(P.fee('PCA', 'classic', 12000).price, 390);
+  assert.equal(P.fee('PCA', 'fastp', 12000).price, null);
+  assert.deepEqual([P.fee('CCC', 'eco', 50).price, P.fee('CCC', 'eco', 51).price, P.fee('CCC', 'eco', 300).price, P.fee('CCC', 'eco', 900).price], [20, 23, 27, 31]);
+  assert.deepEqual([P.fee('CCC', 'express', 80).price, P.fee('CCC', 'super', 80).price, P.fee('CCC', 'ultra', 80).price], [28, 43, 63]);
+});
+
+test('rentabilité avec les tarifs : gain, surtaxe PSA, verdict', () => {
+  // Carte à 200 € brute ; PSA 10 ×3, PSA 9 ×1,5, PSA 8 ×1.
+  const coef = k => ({ '10': 3, '9': 1.5, '8': 1 })[k] ?? null;
+  const dist = [{ key: '10', p: 0.3 }, { key: '9', p: 0.6 }, { key: '8', p: 0.1 }]; dist.best = dist[1];
+  const w = P.worthFees('PSA', null, dist, 200, 200, coef, 25);
+  assert.equal(w.declared, 300);                 // valeur à la note la plus probable (PSA 9)
+  assert.equal(w.fee.tier, 'Value');             // 300 € ≤ 450 €
+  assert.ok(w.upcharge && w.upcharge.key === '10' && w.upcharge.tier === 'Standard'); // PSA 10 = 600 € : palier Standard
+  const expFee = 0.3 * 49.99 + 0.6 * 34.99 + 0.1 * 34.99;
+  assert.ok(Math.abs(w.expFee - expFee) < 1e-9);
+  assert.ok(Math.abs(w.gain - (0.3 * 600 + 0.6 * 300 + 0.1 * 200 - 200 - expFee - 25)) < 1e-9);
+  assert.equal(w.verdict, 'avoir');              // avec PSA 8, la gradation coûte plus qu'elle ne rapporte
+  const c = P.worthFees('CCC', 'eco', dist, 200, 200, coef, 0);
+  assert.equal(c.fee.price, 27);                 // 300 € : tranche 101 à 500 €
+  assert.equal(c.upcharge, null);
+  const cheap = P.worthFees('PCA', 'classic', dist, 5, 5, coef, 0);
+  assert.equal(cheap.verdict, 'non');            // carte à 5 € : la gradation ne vaut pas le coup
+});

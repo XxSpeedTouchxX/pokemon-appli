@@ -9,7 +9,8 @@
   //   lieu de fermer l'app (historique du navigateur) ; il ferme d'abord le zoom ou la fiche ouverte.
   const NAV = { dir: '', lastKey: '', scroll: {}, guard: false, ignore: 0, inst: null, snap: null, from: 0 };
   // Clé d'une page : l'écran et ce qu'il montre (l'identifiant d'une carte reste dans l'état après sa fiche).
-  const NAV_ID = { set: 'setId', item: 'itemId', store: 'storeId', shop: 'shopId', sale: 'saleId', grade: 'gradeIx' };
+  // Pré-gradation (2026-11-14) : chaque étape (recto, verso, analyse, résultat, liste) glisse comme une page.
+  const NAV_ID = { set: 'setId', item: 'itemId', store: 'storeId', shop: 'shopId', sale: 'saleId', grade: 'gradeIx', pregrade: 'pgStep' };
   const navKey = s => s.screen + ':' + (NAV_ID[s.screen] ? s[NAV_ID[s.screen]] : '');
   const navStill = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('pkm-calm'); } catch (e) { return true; } };
   const navMain = () => document.querySelector('#app main');

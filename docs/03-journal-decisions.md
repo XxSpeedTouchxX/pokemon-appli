@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-14 — Pré-gradation v2 : transitions, vue unique, photo figée, analyse animée, tarifs PSA/PCA/CCC (porteur)
+
+- **Demandes du porteur** : ouverture avec la même transition que le reste de l'app ; cadre plus petit pour voir les 4 bulles passer au vert en même temps ; appareil photo, photo et 4 bulles dans une seule vue (bulles un peu plus petites) ; un appui sur l'appareil photo fige la photo, puis le verso de la même façon ; logo d'appareil photo sur le déclencheur ; après le verso, une analyse plus poussée avec une animation « Analyse de la pré-gradation en cours », puis une arrivée satisfaisante sur le résultat.
+- **Tarifs (D4) donnés par le porteur** : grilles PSA (paliers Value à Premium selon la valeur déclarée, surtaxe si la note dépasse le plafond, retour depuis l'Allemagne 25 à 60 €), PCA (Classic, Fast, Fast+, Excelsior par tranche de valeur) et CCC (Eco, Express, Super-Express, Ultra-Express par tranche de valeur) ; « ça vaut le coup ? » dit si la gradation est rentable et de combien.
+- **Fait** : glissement des pages à l'ouverture et entre chaque étape (recto, verso, analyse, résultat) ; vue unique (consigne, 4 bulles courtes, cadre, vignette du recto, déclencheur, import) ; plus de photo automatique (le déclencheur passe au vert et pulse quand tout est vert) ; photo figée avec éclair, « Recto enregistré » en vert ou refus en rouge avec « Reprendre la photo » ; analyse en 9 étapes visibles (photos réelles balayées, barre de progression, résultat de chaque mesure, 0,65 s au moins par étape) ; résultat qui arrive en cascade, jauge qui se remplit et note qui compte ; comparaison des 3 entreprises (la plus rentable en tête), formule PCA et CCC au choix, palier et surtaxe PSA, frais de retour modifiables, bénéfice probable, verdict ; cache v200.
+- **Défauts appliqués (à confirmer)** : valeur déclarée = valeur estimée à la note la plus probable ; PSA : palier « Premium 1 » jusqu'à 22 000 €, sur devis au-delà ; prix à l'unité (PCA moins cher dès 10 cartes, indiqué en note) ; retour PSA compté 25 € par défaut, frais d'envoi PCA et CCC à 0 € (chacun peut les changer).
 ## 2026-11-14 — Fil « Annonces » : Vinted construit (go du porteur)
 
 - **Go du porteur :** « fais-moi déjà la manip pour Vinted, que ça fonctionne déjà pour Vinted, après on verra pour eBay ».

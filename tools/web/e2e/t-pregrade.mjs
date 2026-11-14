@@ -2,7 +2,9 @@
 // Le serveur est imité (page.route) : jamais le vrai serveur. Les photos sont dessinées dans la page (carte simulée
 // posée sur un fond sombre), puis données au bouton « Importer une photo » : la caméra n'est pas nécessaire.
 // 1. Accueil : rubrique « Pré-gradation » sous les boutiques, badge « Version Proto », compteur toujours visible.
-// 2. Recto puis verso importés : analyse, note, 4 critères, notes PSA/PCA/CCC, « ça vaut le coup ? ».
+// 2. Ouverture avec le glissement des pages ; vue unique (caméra, 4 bulles, déclencheur à l'appareil photo) ; recto puis
+//    verso importés (photo figée, « Reprendre la photo » si refusée) ; analyse animée étape par étape ; note, 4 critères,
+//    notes PSA/PCA/CCC, « ça vaut le coup ? » avec les grilles tarifaires PSA, PCA et CCC (2026-11-14, porteur).
 // 3. Compteur gratuit : 1 tous les 3 jours (attente affichée ensuite, accueil compris).
 // 4. Carte cherchée à la main, ajout à la collection avec l'état estimé, vraie note, « Mes pré-gradations ».
 // 5. Photo sans carte : refus expliqué, compteur intact.
@@ -98,21 +100,43 @@ ok('accueil : rythme et offre Premium « 1 tous les 3 jours · 100 par mois avec
 await home.screenshot({ path: shot('pregrade-home.png') }).catch(() => {});
 
 // 2. Recto puis verso.
-await page.locator('section[aria-label="Pré-gradation"] .pkm-pgh-btn').click();
+const slid = await page.evaluate(() => { document.querySelector('section[aria-label="Pré-gradation"] .pkm-pgh-btn').click(); return !!document.querySelector('#app .pkm-root > [inert]'); });
+ok('ouverture avec le glissement des pages (copie de l’accueil qui recule)', slid);
+await page.waitForTimeout(600);
 ok('« Pré-grader une carte » ouvre l’écran au recto', await waitStep('front', 5000) && (await st()).screen === 'pregrade');
 ok('écran : compteur en haut', /1 pré-gradation disponible/.test(await txt('.pkm-pgd-counter')));
-ok('écran : 4 contrôles de la photo', await page.locator('.pkm-pgd-ck').count() === 4);
+ok('écran : 4 bulles de vérification dans la vue de la caméra', await page.locator('.pkm-pgd-cam .pkm-pgd-ck').count() === 4);
+ok('déclencheur avec le logo de l’appareil photo', await page.locator('.pkm-pgd-shutter svg').count() === 1 && /Prendre la photo du recto/.test(await page.locator('.pkm-pgd-shutter').getAttribute('aria-label')));
+const fits = await page.evaluate(() => { const nav = document.querySelector('#app nav'), top = nav ? nav.getBoundingClientRect().top : innerHeight;
+  const r = sel => document.querySelector(sel).getBoundingClientRect(); return [r('.pkm-pgd-checks').top >= 0, r('.pkm-pgd-frame').bottom <= top, r('.pkm-pgd-shutter').bottom <= top + 1]; });
+ok('cadre, 4 bulles et déclencheur visibles ensemble, sans défiler (' + fits.join(', ') + ')', fits.every(Boolean));
 await photo('front', F_FRONT); await photo('back', F_BACK); await photo('none', F_NONE);
 // Photo sans carte : refusée, rien de consommé.
 await page.setInputFiles('#pkm-pgd-file', F_NONE);
-await page.waitForFunction(() => /introuvable|bords/.test(window.__pkm.st().pgMsg || ''), null, { timeout: 8000 }).catch(() => {});
-ok('photo sans carte : refus expliqué (« ' + ((await st()).pgMsg || '').slice(0, 40) + '… »)', /introuvable|bords/.test((await st()).pgMsg || '') && (await st()).pgStep === 'front');
+await page.waitForFunction(() => (window.__pkm.st().pgFreeze || {}).ok === false, null, { timeout: 8000 }).catch(() => {});
+const frz = (await st()).pgFreeze || {};
+ok('photo sans carte : photo figée en rouge, refus expliqué (« ' + String(frz.text || '').slice(0, 40) + '… »)', /introuvable|bords/.test(frz.text || '') && (await st()).pgStep === 'front' && await vis('.pkm-pgd-frz-ko'));
+await page.locator('.pkm-pgd-retake').click(); await page.waitForTimeout(300);
+ok('« Reprendre la photo » : retour à la caméra', !(await st()).pgFreeze && !(await vis('.pkm-pgd-frz')));
 await page.setInputFiles('#pkm-pgd-file', F_FRONT);
+await page.waitForFunction(() => (window.__pkm.st().pgFreeze || {}).ok === true, null, { timeout: 8000 }).catch(() => {});
+ok('recto : photo figée en vert « Recto enregistré »', await vis('.pkm-pgd-frz-ok') && /Recto enregistré/.test(await txt('.pkm-pgd-frz-msg')));
 ok('recto importé : passage au verso', await waitStep('back', 10000));
+await page.waitForTimeout(500);
+ok('verso : vignette du recto sur « Refaire le recto »', /url\("?data:image/.test(await page.locator('.pkm-pgd-side-th').first().getAttribute('style') || ''));
 ok('verso : étape « Recto » cochée', /✓/.test(await txt('.pkm-pgd-stp-done')));
 await page.setInputFiles('#pkm-pgd-file', F_BACK);
-ok('verso importé : analyse', await waitStep('analyse', 10000) || (await st()).pgStep === 'result');
+ok('verso importé : analyse', await waitStep('analyse', 10000));
+await page.waitForTimeout(600);
+ok('analyse : « Analyse de la pré-gradation en cours » avec les 2 photos', /Analyse de la pré-gradation en cours/.test(await txt('.pkm-pgd-ana-t')) && await page.locator('.pkm-pgd-anacard img[src^="data:image"]').count() === 2);
+await page.waitForFunction(() => (window.__pkm.st().pgProg || 0) >= 3, null, { timeout: 15000 }).catch(() => {});
+const anaMid = await page.evaluate(() => [document.querySelectorAll('.pkm-pgd-ana-row').length, document.querySelectorAll('.pkm-pgd-ana-done').length, (document.querySelector('.pkm-pgd-prog b') || {}).textContent || '']);
+ok('analyse étape par étape : 9 étapes, résultats qui s’affichent, progression (' + anaMid.join(', ') + ')', anaMid[0] === 9 && anaMid[1] >= 3 && /%/.test(anaMid[2]));
+await page.screenshot({ path: shot('pregrade-analyse.png') });
+const tAna = Date.now();
 ok('analyse terminée : résultat', await waitStep('result', 25000));
+ok('analyse visible plusieurs secondes (temps de réflexion)', Date.now() - tAna > 2500);
+await page.waitForTimeout(1800);
 await page.waitForTimeout(500);
 const s1 = await st(), e1 = (s1.pgHist || [])[0] || {};
 ok('note entre 1 et 10 (' + e1.grade + ', fiabilité ' + e1.rel + ')', e1.grade >= 1 && e1.grade <= 10 && ['bonne', 'moyenne', 'faible'].includes(e1.rel));
@@ -142,8 +166,21 @@ ok('« Ça vaut le coup ? » : onglets PSA, PCA, CCC', await page.locator('secti
 const worthTxt = await page.locator('section[aria-label="Ça vaut le coup de la grader ?"]').innerText().catch(() => '');
 ok('« Ça vaut le coup ? » : valeurs et verdict, ou cote absente expliquée', /Valeur brute|Pas encore de cote/.test(worthTxt));
 if (/Valeur brute/.test(worthTxt)) {
-  await page.fill('.pkm-pgd-fee-in input', '25'); await page.locator('.pkm-pgd-fee-in input').blur(); await page.waitForTimeout(300);
-  ok('coût de gradation saisi : gardé (25 €)', ((await st()).pgCost || {}).PSA === 25);
+  const W = 'section[aria-label="Ça vaut le coup de la grader ?"]';
+  ok('bilan : verdict et bénéfice probable de la meilleure entreprise', await vis(W + ' .pkm-pgd-sum') && /coup|rentable/.test(await txt(W + ' .pkm-pgd-sum')));
+  ok('comparaison : PSA, PCA et CCC avec leur bénéfice', await page.locator(W + ' .pkm-pgd-cmp-row').count() === 3);
+  await page.locator(W + ' .pkm-pgd-seg', { hasText: 'PSA' }).click(); await page.waitForTimeout(200);
+  ok('PSA : palier selon la valeur déclarée (grille du porteur)', /Palier PSA (Value|Standard|Priority|Express|Super Express|Premier|Premium)/.test(await txt(W)));
+  ok('PSA : retour depuis l’Allemagne (25 € par défaut)', /Retour depuis l’Allemagne/.test(await txt(W)) && (await page.locator('.pkm-pgd-fee-in input').inputValue()) === '25');
+  await page.fill('.pkm-pgd-fee-in input', '40'); await page.locator('.pkm-pgd-fee-in input').blur(); await page.waitForTimeout(300);
+  ok('frais de retour modifiés : gardés (40 €)', ((await st()).pgCost || {}).PSA === 40);
+  await page.locator(W + ' .pkm-pgd-seg', { hasText: 'PCA' }).click(); await page.waitForTimeout(200);
+  ok('PCA : 4 formules (Classic, Fast, Fast+, Excelsior)', (await page.locator(W + ' .pkm-pgd-svc').allInnerTexts()).map(t => t.split('\n')[0]).join(',') === 'Classic,Fast,Fast+,Excelsior');
+  await page.locator(W + ' .pkm-pgd-svc', { hasText: 'Fast+' }).click(); await page.waitForTimeout(200);
+  ok('PCA Fast+ choisie : prix de la grille', ((await st()).pgSvc || {}).PCA === 'fastp' && /PCA Fast\+ \(/.test(await txt(W)));
+  await page.locator(W + ' .pkm-pgd-seg', { hasText: 'CCC' }).click(); await page.waitForTimeout(200);
+  ok('CCC : 4 formules (Eco à Ultra-Express)', (await page.locator(W + ' .pkm-pgd-svc').allInnerTexts()).map(t => t.split('\n')[0]).join(',') === 'Eco,Express,Super-Express,Ultra-Express');
+  ok('bénéfice probable chiffré', /Bénéfice probable/.test(await txt(W)) && /€|devis/i.test(await txt(W + ' .pkm-pgd-ln-gain')));
 }
 const recBefore = await page.evaluate(() => (window.__pkm.st().purchases || []).length);
 const addBtn = page.locator('.pkm-pgd-btn', { hasText: 'Ajouter à ma collection en' });
@@ -190,7 +227,7 @@ ok('Premium : « 100 pré-gradations restantes ce mois-ci (sur 100) »', /100 pr
 ok('Premium : plus de mention « avec Premium »', !/avec Premium/.test(await txt('.pkm-pgd-counter')));
 await page.evaluate(() => window.__pkm.pgStart()); await page.waitForTimeout(300);
 await page.setInputFiles('#pkm-pgd-file', F_FRONT); await waitStep('back', 10000);
-await page.setInputFiles('#pkm-pgd-file', F_BACK); await waitStep('result', 25000);
+await page.setInputFiles('#pkm-pgd-file', F_BACK); await waitStep('result', 30000);
 ok('Premium : 99 restantes après une analyse', /99 pré-gradations restantes/.test(await txt('.pkm-pgd-counter')));
 const pm = await st();
 ok('Premium : mois et nombre enregistrés', /^\d{4}-\d{2}$/.test(pm.pgMonth || '') && pm.pgUsed === 1);

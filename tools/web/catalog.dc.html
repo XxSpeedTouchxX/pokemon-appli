@@ -2753,28 +2753,35 @@ PKCOUNTER
 <div class="pkm-pgd-cam">
 <div id="pkm-pgd-cam" aria-hidden="true" class="pkm-pgd-video"></div>
 <div id="pkm-pgd-frame" class="pkm-pgd-frame" aria-hidden="true"><i class="pkm-pgd-br pkm-pgd-br-tl"></i><i class="pkm-pgd-br pkm-pgd-br-tr"></i><i class="pkm-pgd-br pkm-pgd-br-bl"></i><i class="pkm-pgd-br pkm-pgd-br-br"></i></div>
-<p class="pkm-pgd-hint">{{ pgr.hint }}</p>
+<p class="pkm-pgd-hint" role="status">{{ pgr.hint }}</p>
+<div class="pkm-pgd-checks" aria-label="Vérifications de la photo"><sc-for list="{{ pgr.checks }}" as="pgc" hint-placeholder-count="4"><span class="{{ pgc.cls }}"><b aria-hidden="true">{{ pgc.mark }}</b>{{ pgc.label }}</span></sc-for></div>
 <sc-if value="{{ pgr.camOff }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-camoff">{{ pgr.camText }}</p></sc-if>
+<sc-if value="{{ pgr.hasFreeze }}" hint-placeholder-val="{{ false }}"><div class="{{ pgr.frzCls }}"><img src="{{ pgr.frzImg }}" alt="Photo prise" class="{{ pgr.frzImgCls }}"><span class="pkm-pgd-frz-msg" role="status"><b aria-hidden="true">{{ pgr.frzIcon }}</b>{{ pgr.frzText }}</span><sc-if value="{{ pgr.frzBad }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pgr.retake }}" class="pkm-pgd-retake">Reprendre la photo</button></sc-if></div></sc-if>
+<div class="pkm-pgd-cambar">
+<button type="button" onClick="{{ pgr.sideAct }}" aria-disabled="{{ pgr.sideOff }}" class="{{ pgr.sideCls }}"><i class="pkm-pgd-side-th" style="{{ pgr.sideStyle }}" aria-hidden="true"></i><span>{{ pgr.sideLabel }}</span></button>
+<button type="button" onClick="{{ pgr.shoot }}" aria-label="{{ pgr.shootLabel }}" aria-disabled="{{ pgr.camOff }}" class="{{ pgr.shutCls }}"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.3-2h5.2l1.3 2h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"></path><circle cx="12" cy="12.5" r="3.6"></circle></svg></button>
+<button type="button" onClick="{{ pgr.importPhoto }}" class="pkm-pgd-side"><i class="pkm-pgd-side-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"></rect><circle cx="9" cy="10" r="1.8"></circle><path d="M5 17l5-5 3.5 3.5L16 13l3.5 4"></path></svg></i><span>Importer</span></button>
 </div>
-<div class="pkm-pgd-checks"><sc-for list="{{ pgr.checks }}" as="pgc" hint-placeholder-count="4"><span class="{{ pgc.cls }}"><b aria-hidden="true">{{ pgc.mark }}</b>{{ pgc.label }}</span></sc-for></div>
-<sc-if value="{{ pgr.hasMsg }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-msg" role="status">{{ pgr.msg }}</p></sc-if>
-<div class="pkm-pgd-shoot">
-<button type="button" onClick="{{ pgr.sideAct }}" aria-disabled="{{ pgr.sideOff }}" class="{{ pgr.sideCls }}">{{ pgr.sideLabel }}</button>
-<span class="pkm-pgd-shoot-c"><button type="button" onClick="{{ pgr.shoot }}" aria-label="Prendre la photo" aria-disabled="{{ pgr.camOff }}" class="pkm-pgd-shutter"></button><span class="pkm-pgd-auto">Photo auto dès que tout est vert</span></span>
-<button type="button" onClick="{{ pgr.importPhoto }}" class="pkm-pgd-side">Importer une photo</button>
 </div>
 <input type="file" id="pkm-pgd-file" accept="image/*" tabindex="-1" aria-hidden="true" onChange="{{ pgr.onFile }}" style="position: absolute; left: 0; top: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none">
+<sc-if value="{{ pgr.hasMsg }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-msg" role="status">{{ pgr.msg }}</p></sc-if>
 <div class="pkm-pgd-tips"><sc-for list="{{ pgr.tips }}" as="pgt" hint-placeholder-count="4"><span class="{{ pgt.cls }}"><i aria-hidden="true"></i>{{ pgt.text }}</span></sc-for></div>
 </sc-if>
 
 <sc-if value="{{ pgr.isAna }}" hint-placeholder-val="{{ false }}">
-<div class="pkm-pgd-anacards" aria-hidden="true"><span class="pkm-pgd-anacard"><i></i></span><span class="pkm-pgd-anacard pkm-pgd-anacard-b"><i></i></span></div>
-<section class="pkm-pgd-box pkm-dark" aria-label="Analyse en cours"><sc-for list="{{ pgr.ana }}" as="pga" hint-placeholder-count="5"><div class="{{ pga.cls }}"><b aria-hidden="true"></b><span>{{ pga.label }}</span></div></sc-for></section>
+<section class="pkm-pgd-ana pkm-dark" aria-label="Analyse en cours">
+<h3 class="pkm-pgd-ana-t">Analyse de la pré-gradation <span class="pkm-pgd-nowrap">en cours<i class="pkm-pgd-dots" aria-hidden="true"><b>.</b><b>.</b><b>.</b></i></span></h3>
+<p class="pkm-pgd-ana-s" role="status">{{ pgr.anaNow }}</p>
+<div class="pkm-pgd-anacards" aria-hidden="true"><span class="{{ pgr.anaFCls }}"><img src="{{ pgr.anaF }}" alt=""><i class="pkm-pgd-laser"></i><i class="pkm-pgd-grid"></i><em>Recto</em></span><span class="{{ pgr.anaBCls }}"><img src="{{ pgr.anaB }}" alt=""><i class="pkm-pgd-laser"></i><i class="pkm-pgd-grid"></i><em>Verso</em></span></div>
+<div class="pkm-pgd-prog"><span class="pkm-pgd-prog-bar"><i style="{{ pgr.anaW }}"></i></span><b>{{ pgr.anaPct }}</b></div>
+<div class="pkm-pgd-ana-list"><sc-for list="{{ pgr.ana }}" as="pga" hint-placeholder-count="9"><div class="{{ pga.cls }}"><b aria-hidden="true"></b><span class="pkm-pgd-ana-tx"><span class="pkm-pgd-ana-l">{{ pga.label }}</span><span class="pkm-pgd-ana-r">{{ pga.res }}</span></span></div></sc-for></div>
+</section>
 <p class="pkm-pgd-note-s">L’analyse se fait sur ton téléphone : tes photos ne sont envoyées nulle part.</p>
 </sc-if>
 
 <sc-if value="{{ pgr.isRes }}" hint-placeholder-val="{{ false }}">
 <sc-if value="{{ pgr.hasRes }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-pgd-res">
 <section class="pkm-pgd-box pkm-dark pkm-pgd-id" aria-label="Carte analysée">
 <sc-if value="{{ pgr.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ pgr.img }}" alt="" width="48" height="67" loading="lazy"></sc-if>
 <span class="pkm-pgd-id-t"><span class="pkm-pgd-tag">{{ pgr.when }}</span><b>{{ pgr.name }}</b><span>{{ pgr.sub }}</span></span>
@@ -2812,12 +2819,18 @@ PKCOUNTER
 </section>
 <section class="pkm-pgd-box pkm-dark" aria-label="Ça vaut le coup de la grader ?">
 <h3 class="pkm-pgd-h">Ça vaut le coup de la grader ?</h3>
-<span class="pkm-pgd-segs"><sc-for list="{{ pgr.coTabs }}" as="pgw" hint-placeholder-count="3"><button type="button" onClick="{{ pgw.pick }}" class="{{ pgw.cls }}">{{ pgw.label }}</button></sc-for></span>
 <sc-if value="{{ pgr.hasWorth }}" hint-placeholder-val="{{ true }}">
-<sc-for list="{{ pgr.wLines }}" as="pgl" hint-placeholder-count="3"><div class="pkm-pgd-ln"><span>{{ pgl.label }}</span><b>{{ pgl.value }}</b></div></sc-for>
-<label class="pkm-pgd-ln pkm-pgd-fee"><span>{{ pgr.feeLabel }}</span><span class="pkm-pgd-fee-in"><input type="text" inputmode="decimal" placeholder="€" value="{{ pgr.feeInput }}" onChange="{{ pgr.onFee }}" aria-label="{{ pgr.feeLabel }}"><b>{{ pgr.feeValue }}</b></span></label>
-<div class="pkm-pgd-ln"><span>Gain probable</span><b class="{{ pgr.gainCls }}">{{ pgr.gain }}</b></div>
+<div class="{{ pgr.sumCls }}"><span class="pkm-pgd-sum-ic" aria-hidden="true">{{ pgr.sumIcon }}</span><span class="pkm-pgd-sum-t"><b>{{ pgr.sumTitle }}</b><sc-if value="{{ pgr.sumHasGain }}" hint-placeholder-val="{{ true }}"><strong>{{ pgr.sumGain }}</strong></sc-if><span>{{ pgr.sumText }}</span></span></div>
+<div class="pkm-pgd-cmp" aria-label="Bénéfice probable par entreprise"><sc-for list="{{ pgr.cmp }}" as="pgq" hint-placeholder-count="3"><button type="button" onClick="{{ pgq.pick }}" class="{{ pgq.cls }}"><span class="{{ pgq.logoCls }}"><img src="{{ pgq.logoSrc }}" alt="{{ pgq.co }}"></span><span class="pkm-pgd-cmp-t"><span>{{ pgq.sub }}</span><sc-if value="{{ pgq.best }}" hint-placeholder-val="{{ false }}"><em>{{ pgq.bestLabel }}</em></sc-if></span><b class="{{ pgq.gainCls }}">{{ pgq.gain }}</b></button></sc-for></div>
+<span class="pkm-pgd-segs"><sc-for list="{{ pgr.coTabs }}" as="pgw" hint-placeholder-count="3"><button type="button" onClick="{{ pgw.pick }}" class="{{ pgw.cls }}">{{ pgw.label }}</button></sc-for></span>
+<sc-if value="{{ pgr.hasSvc }}" hint-placeholder-val="{{ false }}"><div class="pkm-pgd-svcs" aria-label="Formule"><sc-for list="{{ pgr.svcs }}" as="pgv" hint-placeholder-count="4"><button type="button" onClick="{{ pgv.pick }}" class="{{ pgv.cls }}"><b>{{ pgv.label }}</b><span>{{ pgv.sub }}</span></button></sc-for></div></sc-if>
+<sc-for list="{{ pgr.wLines }}" as="pgl" hint-placeholder-count="4"><div class="pkm-pgd-ln"><span>{{ pgl.label }}</span><b>{{ pgl.value }}</b></div></sc-for>
+<label class="pkm-pgd-ln pkm-pgd-fee"><span>{{ pgr.feeLabel }}</span><span class="pkm-pgd-fee-in"><input type="text" inputmode="decimal" placeholder="0" value="{{ pgr.feeInput }}" onChange="{{ pgr.onFee }}" aria-label="{{ pgr.feeLabel }}"><b>{{ pgr.feeValue }}</b></span></label>
+<div class="pkm-pgd-ln pkm-pgd-ln-gain"><span>Bénéfice probable</span><b class="{{ pgr.gainCls }}">{{ pgr.gain }}</b></div>
+<sc-if value="{{ pgr.hasRoi }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-roi">{{ pgr.roi }}</p></sc-if>
 <div class="{{ pgr.verdictCls }}"><span class="pkm-pgd-verdict-ic" aria-hidden="true">{{ pgr.verdictIcon }}</span><span><b>{{ pgr.verdict }}</b><span>{{ pgr.verdictText }}</span></span></div>
+<p class="pkm-pgd-muted">{{ pgr.decl }}</p>
+<sc-for list="{{ pgr.feeNotes }}" as="pgnt" hint-placeholder-count="1"><p class="pkm-pgd-muted">{{ pgnt.text }}</p></sc-for>
 </sc-if>
 <sc-if value="{{ pgr.noWorth }}" hint-placeholder-val="{{ false }}"><p class="pkm-pgd-muted">{{ pgr.worthNone }}</p></sc-if>
 </section>
@@ -2831,7 +2844,8 @@ PKCOUNTER
 <div class="pkm-pgd-notes"><sc-for list="{{ pgr.realNotes }}" as="pgn" hint-placeholder-count="10"><button type="button" onClick="{{ pgn.pick }}" class="{{ pgn.cls }}" title="{{ pgn.title }}">{{ pgn.label }}</button></sc-for></div>
 </sc-if>
 </section>
-<p class="pkm-pgd-legal">Estimation à partir de photos, pas une gradation officielle. Dropicards n’est lié à aucune entreprise de gradation ; PSA, PCA et CCC sont des marques de leurs propriétaires.</p>
+<p class="pkm-pgd-legal">Estimation à partir de photos, pas une gradation officielle. Tarifs de gradation relevés par Dropicards le 14 novembre 2026, à vérifier sur le site de chaque entreprise. Dropicards n’est lié à aucune entreprise de gradation ; PSA, PCA et CCC sont des marques de leurs propriétaires.</p>
+</div>
 </sc-if>
 </sc-if>
 

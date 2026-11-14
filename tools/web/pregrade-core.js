@@ -415,6 +415,57 @@
       return { expected: exp, bestValue: valAt(best), gain: gain, gainLow: gainLow, below: below, verdict: verdict, costKnown: known };
     }
 
+    // ——— Tarifs de gradation (porteur, 2026-11-14, D4) ———
+    // PSA : le palier se choisit selon la valeur déclarée (plafond par palier) ; si la note fait dépasser le plafond,
+    // PSA facture la différence avec le palier supérieur (surtaxe). Retour depuis l'Allemagne : 25 à 60 € par commande.
+    // PCA et CCC : prix selon la valeur déclarée et la formule choisie (délai). Prix à l'unité (PCA moins cher dès 10 cartes).
+    const FEES = {
+      PSA: { auto: true, ship: 25,
+        shipNote: 'Retour depuis l’Allemagne : 25 à 60 € par commande, selon le nombre de cartes et l’assurance.',
+        note: 'Surtaxe : si ta carte obtient une note qui fait dépasser sa valeur au-delà du plafond du palier, PSA facture la différence avec le palier supérieur avant de te la renvoyer.',
+        tiers: [['Value', 450, 34.99, '90 à 100 jours ouvrés'], ['Standard', 900, 49.99, '70 à 80 jours ouvrés'], ['Priority', 1300, 69.99, '50 à 60 jours ouvrés'],
+          ['Express', 2200, 199, '25 à 30 jours ouvrés'], ['Super Express', 4500, 349, '25 à 30 jours ouvrés'], ['Premier', 9000, 599, '25 à 30 jours ouvrés'],
+          ['Premium 1', 22000, 999, '25 à 30 jours ouvrés']] },
+      PCA: { ship: 0, services: [['classic', 'Classic', '6 mois'], ['fast', 'Fast', '1 mois'], ['fastp', 'Fast+', '1 semaine'], ['excelsior', 'Excelsior', '1 jour']],
+        bounds: [250, 1000, 10000], labels: ['1 € à 249 €', '250 € à 999 €', '1 000 € à 9 999 €', 'plus de 10 000 €'],
+        prices: [[12.9, 19.9, 49.9, 149], [24.9, 39.9, 99.9, 199], [79.9, 149, 199, 249], [390, 490, null, null]],
+        notes: { classic: 'Dès 10 cartes : 10,90 € (jusqu’à 249 €) ou 22,90 € (250 à 999 €) par carte.', excelsior: 'Excelsior : dépôt en main propre à l’atelier PCA seulement.' } },
+      CCC: { ship: 0, services: [['eco', 'Eco', '≈ 25 jours ouvrés'], ['express', 'Express', '10 jours'], ['super', 'Super-Express', '3 jours'], ['ultra', 'Ultra-Express', 'jour même']],
+        bounds: [50.5, 100.5, 500.5], labels: ['1 € à 50 €', '51 € à 100 €', '101 € à 500 €', '501 € et plus'],
+        prices: [[20, 25, 40, 60], [23, 28, 43, 63], [27, 32, 47, 67], [31, 36, 51, 71]], notes: {} }
+    };
+    // Prix d'une gradation pour une valeur déclarée : { price (null = sur devis ou indisponible), tier, label, days, svc }.
+    function fee(co, svc, declared) {
+      const F = FEES[co], v = Math.max(0, declared || 0);
+      if (!F) return null;
+      if (F.auto) {
+        const t = F.tiers.find(x => v <= x[1]);
+        if (!t) return { price: null, tier: 'Premium 2 à 10', label: 'au-delà de 22 000 €', days: '25 à 30 jours ouvrés', quote: true };
+        return { price: t[2], tier: t[0], label: 'jusqu’à ' + t[1].toLocaleString('fr-FR') + ' €', days: t[3], cap: t[1] };
+      }
+      const si = Math.max(0, F.services.findIndex(x => x[0] === svc)), s = F.services[si];
+      let ti = F.bounds.findIndex(b => v < b); if (ti < 0) ti = F.bounds.length;
+      const price = F.prices[ti][si];
+      return { price: price, tier: s[1], label: F.labels[ti], days: s[2], svc: s[0], quote: price === null };
+    }
+    // « Ça vaut le coup ? » avec les tarifs : valeur déclarée = valeur estimée à la note la plus probable ; chaque note
+    // coûte le palier de max(déclarée, valeur à cette note) chez PSA (surtaxe), le palier de la déclarée ailleurs.
+    function worthFees(co, svc, dist, raw, rawState, coef, ship) {
+      const valAt = x => { const c = coef(x.key); return c !== null && c !== undefined ? raw * c : rawState; };
+      const best = dist.best, idx = dist.indexOf(best), below = dist.slice(idx + 1).find(x => x.p > 0.02) || best;
+      const declared = valAt(best), base = fee(co, svc, declared), auto = !!FEES[co].auto;
+      const feeOf = x => { if (!auto) return base.price; const f = fee(co, svc, Math.max(declared, valAt(x))); return f.price; };
+      let exp = 0, expFee = 0, known = base.price !== null;
+      dist.forEach(x => { exp += x.p * valAt(x); const f = feeOf(x); if (f === null) known = false; else expFee += x.p * f; });
+      const k = Math.max(0, Number(ship) || 0);
+      const top = dist.filter(x => x.p >= 0.03).reduce((a, x) => (valAt(x) > valAt(a) ? x : a), best);
+      const upFee = auto ? feeOf(top) : base.price, upcharge = auto && known && upFee > base.price ? { key: top.key, value: valAt(top), fee: upFee, diff: upFee - base.price, tier: fee(co, svc, valAt(top)).tier } : null;
+      const gain = exp - rawState - expFee - k, gainBest = declared - rawState - (known ? base.price : 0) - k, gainLow = valAt(below) - rawState - (feeOf(below) || 0) - k;
+      const verdict = !known ? 'devis' : gainLow > 0 ? 'oui' : gain > 0 ? 'avoir' : 'non';
+      return { expected: exp, declared: declared, bestValue: declared, fee: base, expFee: expFee, ship: k, upcharge: upcharge, gain: gain, gainBest: gainBest, gainLow: gainLow,
+        below: below, verdict: verdict, costKnown: known, cost: (known ? base.price : 0) + k, roi: known && base.price + k > 0 ? gain / (base.price + k) : null };
+    }
+
     // ——— Compteur (porteur, 2026-11-14) ———
     // Sans Premium : 1 pré-gradation tous les 3 jours. Premium : 100 par mois, remises à zéro le 1er. Admin : illimité.
     const FREE_EVERY = 3 * 86400e3, PREMIUM_MONTH = 100;
@@ -436,5 +487,5 @@
 
     return { sharpness: sharpness, glare: glare, findCard: findCard, crop: crop, centering: centering, centerScore: centerScore, wear: wear,
       surface: surface, face: face, grade: grade, companies: companies, stateOf: stateOf, worth: worth, quota: quota, spend: spend,
-      monthKey: monthKey, SCALES: SCALES, scaleOf: scaleOf, CENTER_STEPS: CENTER_STEPS, FREE_EVERY: FREE_EVERY, PREMIUM_MONTH: PREMIUM_MONTH };
+      monthKey: monthKey, SCALES: SCALES, FEES: FEES, fee: fee, worthFees: worthFees, scaleOf: scaleOf, CENTER_STEPS: CENTER_STEPS, FREE_EVERY: FREE_EVERY, PREMIUM_MONTH: PREMIUM_MONTH };
   })();

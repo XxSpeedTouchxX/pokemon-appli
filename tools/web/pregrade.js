@@ -1,19 +1,19 @@
-  // ——— Pré-gradation (2026-11-14, « go » du porteur, docs/40, choix D1 à D6) ———
-  // Rubrique de l'accueil sous « Boutiques près de toi » (logo L1, badge « Version Proto ») et écran complet :
-  // photo du recto puis du verso (caméra guidée : cadre, 4 vérifications en direct, photo automatique ; ou photo
-  // importée), analyse sur le téléphone (pregrade-core.js : centrage, coins, bords, surface ; aucune photo envoyée),
+  // ——— Pré-gradation (2026-11-14, « go » du porteur, docs/40, choix D1 à D6 ; v2 le même jour) ———
+  // Rubrique de l'accueil sous « Boutiques près de toi » (logo L1, badge « Version Proto ») et écran complet, ouvert
+  // avec le glissement des pages de l'app : photo du recto puis du verso dans une seule vue (caméra, cadre, 4 bulles
+  // de vérification en direct, déclencheur à l'appareil photo ; photo figée puis verso ; ou photo importée), analyse
+  // animée étape par étape sur le téléphone (pregrade-core.js : centrage, coins, bords, surface ; aucune photo envoyée),
   // résultat (note probable, fourchette, fiabilité, état, 4 critères, défauts repérés, notes probables PSA, PCA et CCC
   // selon les barèmes du porteur, « ça vaut le coup ? »), « J'ai reçu la vraie note », historique.
   // Compteur (D3, porteur) : 1 pré-gradation tous les 3 jours sans Premium, 100 par mois avec Premium (remis à zéro le
   // 1er), illimité en mode Admin ; toujours affiché (accueil et écran). Gardé sur l'appareil, comme les scans du jour.
-  // Tarifs de gradation (D4) : à fournir par le porteur ; en attendant, chacun saisit le sien (gardé sur l'appareil).
+  // Tarifs de gradation (D4, porteur, 2026-11-14) : grilles PSA, PCA et CCC dans PGCore.FEES ; frais d'envoi et de
+  // retour modifiables par chacun (gardés sur l'appareil, pgCost) ; formule PCA et CCC au choix (pgSvc).
   // Ce module partage la portée des autres : ses noms commencent par PG / pg.
   const PG = {
-    gen: 0, stream: null, video: null, starting: false, on: false, timer: 0, ok: 0, shots: {}, busy: false, grab: null, small: null
+    gen: 0, stream: null, video: null, starting: false, on: false, timer: 0, ok: 0, shots: {}, thumbs: {}, busy: false, grab: null, small: null, reveal: false
   };
   const PG_W = 750, PG_H = Math.round(750 * 88 / 63);
-  // Tarifs de gradation et d'envoi par entreprise (D4) : null tant que le porteur ne les a pas donnés.
-  const PG_FEES = { PSA: null, PCA: null, CCC: null };
   const PG_CRIT = [['centering', 'Centrage'], ['corners', 'Coins'], ['edges', 'Bords'], ['surface', 'Surface']];
   const PG_LOGO = { PSA: 'img/grading/psa-color.png', PCA: 'img/grading/pca.png', CCC: 'img/grading/ccc.svg' };
   const PG_STATE_NAME = { MT: 'Mint', NM: 'Near Mint', EX: 'Excellent', GD: 'Good', PL: 'Played', PO: 'Poor' };
@@ -48,16 +48,18 @@
   };
 
   // ——— Ouverture ———
+  // Un seul changement d'état avec push : la page arrive en glissant comme les autres (un second setState juste après
+  // annulait le glissement, 2026-11-14, porteur : « transition trop brusque »).
+  const PG_FRESH = { pgMsg: '', pgChecks: null, pgReal: false, pgPick: null, pgFreeze: null, pgQ: '', pgAna: null, pgProg: 0 };
   pgProto.pgOpen = function () {
     const q = this.pgQuota();
-    this.push('pregrade');
-    this.setState({ pgStep: q.empty ? 'intro' : 'front', pgRes: null, pgSel: -1, pgMsg: '', pgChecks: null, pgReal: false, pgPick: null });
-    PG.shots = {};
+    PG.shots = {}; PG.thumbs = {};
+    this.push('pregrade', Object.assign({ pgStep: q.empty ? 'intro' : 'front', pgSel: -1 }, PG_FRESH));
   };
   pgProto.pgStart = function () {
     if (this.pgQuota().empty) { this.setState({ toast: this.pgQuota().text }); return; }
-    PG.shots = {};
-    this.setState({ pgStep: 'front', pgRes: null, pgSel: -1, pgMsg: '', pgChecks: null, pgReal: false, pgPick: null });
+    PG.shots = {}; PG.thumbs = {};
+    this.navSlide('fwd', Object.assign({ pgStep: 'front', pgSel: -1 }, PG_FRESH));
   };
 
   // ——— Caméra ———
@@ -109,14 +111,11 @@
     PG.timer = setTimeout(() => {
       if (gen !== PG.gen) return;
       const s = inst.st();
-      if (s.screen !== 'pregrade' || (s.pgStep !== 'front' && s.pgStep !== 'back') || PG.busy) { PG.loop(inst, gen); return; }
+      if (s.screen !== 'pregrade' || (s.pgStep !== 'front' && s.pgStep !== 'back') || PG.busy || s.pgFreeze) { PG.loop(inst, gen); return; }
       let res = null;
       try { res = PG.check(); } catch (e) { res = null; }
-      if (res) {
-        PG.ok = res.all ? PG.ok + 1 : 0;
-        inst.setState({ pgChecks: res });
-        if (PG.ok >= 3) { PG.ok = 0; inst.pgShoot(); return; }
-      }
+      // Plus de photo automatique (2026-11-14, porteur) : les 4 bulles passent au vert, puis on appuie sur l'appareil photo.
+      if (res) inst.setState({ pgChecks: res });
       PG.loop(inst, gen);
     }, 400);
   };
@@ -174,7 +173,14 @@
     c.width = v.videoWidth; c.height = v.videoHeight;
     c.getContext('2d').drawImage(v, 0, 0);
     const m = PG.frameRect() || { sx: c.width * 0.1, sy: c.height * 0.1, sw: c.width * 0.8, sh: c.height * 0.8 };
-    this.pgTake(c, { sx: m.sx, sy: m.sy, sw: m.sw, sh: m.sh }, s.pgStep);
+    this.pgTake(c, { sx: m.sx, sy: m.sy, sw: m.sw, sh: m.sh }, s.pgStep, false);
+  };
+  // Image figée affichée à la place de la vidéo (même cadrage) : réduite, en JPEG.
+  const pgStill = c => {
+    const k = Math.min(1, 900 / Math.max(c.width, c.height)), t = document.createElement('canvas');
+    t.width = Math.round(c.width * k); t.height = Math.round(c.height * k);
+    t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+    return t.toDataURL('image/jpeg', 0.82);
   };
   pgProto.pgFile = function (e) {
     const f = e && e.target && e.target.files && e.target.files[0], step = this.st().pgStep;
@@ -222,7 +228,10 @@
   pgProto.pgTake = function (c, rect, step, imported) {
     if (PG.busy) return;
     PG.busy = true;
-    this.setState({ pgMsg: 'Vérification de la photo…' });
+    const side = step === 'front' ? 'Recto' : 'Verso';
+    // Photo figée tout de suite (éclair blanc), puis vérification.
+    this.setState({ pgMsg: '', pgFreeze: { img: pgStill(c), cover: !imported, ok: null, text: 'Vérification de la photo…' } });
+    try { if (navigator.vibrate) navigator.vibrate(20); } catch (e) { /* sans vibreur */ }
     setTimeout(() => {
       let q = null, prep = null;
       try {
@@ -237,15 +246,26 @@
       const why = !q || !q.card ? (q && q.tilt ? 'Carte trop penchée : remets-la droite dans le cadre.' : 'Carte introuvable : elle doit être entière dans le cadre, sur un fond sombre et uni.')
         : !q.sharp ? 'Photo floue : tiens le téléphone immobile, à 20 cm environ, et laisse-le faire la mise au point.'
           : prep && prep.err ? prep.err : '';
-      if (why) { this.setState({ pgMsg: why, pgChecks: q }); try { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); } catch (e) { /* sans vibreur */ } return; }
+      const fz = this.st().pgFreeze || {};
+      if (why) {
+        this.setState({ pgFreeze: Object.assign({}, fz, { ok: false, text: why }), pgChecks: q });
+        try { if (navigator.vibrate) navigator.vibrate([30, 40, 30]); } catch (e) { /* sans vibreur */ }
+        return;
+      }
       PG.shots[step] = prep.card;
+      PG.thumbs[step] = pgThumb(prep.card, 360).url;
+      // Un reflet ne bloque pas la photo : il baisse la fiabilité de l'estimation.
+      this.setState({ pgFreeze: Object.assign({}, fz, { ok: true, text: side + ' enregistré' + (q.glare ? '' : ' · petit reflet repéré') }) });
       try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) { /* sans vibreur */ }
-      // Un reflet ne bloque pas une photo prise à la main ou importée : il baisse la fiabilité de l'estimation.
-      const gl = q.glare ? '' : ' Petit reflet repéré : l’estimation sera moins fiable.';
-      if (step === 'front') this.setState({ pgStep: 'back', pgMsg: (imported ? 'Recto enregistré. À toi le verso !' : 'Recto enregistré. Retourne la carte : place le verso dans le cadre.') + gl, pgChecks: null });
-      else { this.setState({ pgStep: 'analyse', pgMsg: '', pgChecks: null, pgProg: 0 }); this.pgAnalyse(); }
-    }, 30);
+      setTimeout(() => {
+        const s = this.st();
+        if (s.screen !== 'pregrade' || s.pgStep !== step) return;
+        if (step === 'front') this.navSlide('fwd', { pgStep: 'back', pgFreeze: null, pgChecks: null, pgMsg: imported ? 'À toi le verso : importe sa photo ou prends-le en photo.' : '' });
+        else { this.navSlide('fwd', { pgStep: 'analyse', pgFreeze: null, pgChecks: null, pgMsg: '', pgProg: 0, pgAna: [] }); this.pgAnalyse(); }
+      }, 1150);
+    }, 60);
   };
+  pgProto.pgRetake = function () { this.setState({ pgFreeze: null, pgChecks: null }); };
 
   // ——— Analyse ———
   const pgThumb = (card, w) => {
@@ -265,34 +285,63 @@
       return { id: sure ? top.id : null, cands: v.slice(0, 3).map(x => x.id).filter(id => TCG.item(id)) };
     }).catch(() => ({ id: null, cands: [] }));
   };
+  // Analyse étape par étape (2026-11-14, porteur : « analyse plus approfondie avec une animation de temps de
+  // réflexion ») : chaque mesure est faite à son tour et son résultat s'affiche ; 0,65 s au moins par étape.
+  const PG_ANA = [['Recadrage des photos', 'both'], ['Centrage du recto', 'f'], ['Centrage du verso', 'b'], ['Les 8 coins', 'both'],
+    ['Les 8 bords', 'both'], ['Surface du recto', 'f'], ['Surface du verso', 'b'], ['Reconnaissance de la carte', 'f'], ['Notes probables PSA, PCA et CCC', 'both']];
+  const PG_STEP_MS = 650;
   pgProto.pgAnalyse = function () {
-    const F = PG.shots.front, B = PG.shots.back, steps = [];
-    let front = null, back = null, ft = null, bt = null;
-    const tick = n => this.setState({ pgProg: n });
-    steps.push(() => { ft = pgThumb(F, 360); bt = pgThumb(B, 360); tick(1); });
-    steps.push(() => { front = PGCore.face(F); tick(2); });
-    steps.push(() => { back = PGCore.face(B); tick(3); });
-    const run = i => {
-      if (i < steps.length) { try { steps[i](); } catch (e) { this.setState({ pgStep: 'front', pgMsg: 'L’analyse a échoué sur cette photo. Recommence avec une photo plus nette.' }); return; } setTimeout(() => run(i + 1), 60); return; }
-      PG.identify(ft.canvas).then(idn => {
-        tick(4);
-        const G = PGCore.grade(front, back), C = PGCore.companies(G, front, back);
-        const entry = {
-          t: pgNow(), id: idn.id, cands: idn.id ? [] : idn.cands, grade: G.grade, low: G.low, high: G.high, rel: G.reliability, sigma: G.sigma,
-          subs: G.subs, surfSeen: G.surfaceSeen, surfSure: G.surfaceSure, state: PGCore.stateOf(G.grade),
-          best: { PSA: C.PSA.best.key, PCA: C.PCA.best.key, CCC: C.CCC.best.key },
-          dist: { PSA: C.PSA.map(x => [x.key, +x.p.toFixed(4)]), PCA: C.PCA.map(x => [x.key, +x.p.toFixed(4)]), CCC: C.CCC.map(x => [x.key, +x.p.toFixed(4)]) },
-          cen: { f: [front.centering.lr, front.centering.tb], b: [back.centering.lr, back.centering.tb] },
-          wear: { f: front.wear, b: back.wear }, defects: { f: front.surface.defects.slice(0, 6), b: back.surface.defects.slice(0, 6) },
-          light: front.wear.light || back.wear.light, real: null
-        };
-        const hist = [entry].concat(this.st().pgHist || []).slice(0, 30);
-        pgThumbsSave(entry.t, ft.url, bt.url);
-        this.setState(Object.assign({ pgHist: hist, pgSel: 0, pgStep: 'result', pgDef: 'f', pgCo: 'PSA', pgReal: false, pgPick: null }, this.pgSpend()));
-        if (this.flash) this.flash();
-      });
+    const F = PG.shots.front, B = PG.shots.back, out = [], fc = {}, bc = {};
+    let idn = { id: null, cands: [] }, G = null, C = null;
+    const fmt = v => (v === null || v === undefined ? '—' : Math.round(v) + '/' + (100 - Math.round(v)));
+    const cenTxt = c => (c && c.ok ? fmt(c.lr) + ' · ' + fmt(c.tb) : 'Bord peu visible : non mesuré');
+    const bad = (list, what) => { const n = list.filter(x => x.score < 9.5).length; return n ? n + ' ' + what + (n > 1 ? 's' : '') + ' à surveiller' : 'Aucun défaut repéré'; };
+    const surfTxt = f => (f.readable < 0.3 ? 'Lecture peu sûre sur cette carte' : f.count ? f.count + (f.count > 1 ? ' marques claires' : ' marque claire') : 'Aucune marque repérée');
+    const steps = [
+      () => { fc.sharp = PGCore.sharpness(F); bc.sharp = PGCore.sharpness(B); fc.glare = PGCore.glare(F); bc.glare = PGCore.glare(B); return 'Recto et verso redressés' + (fc.glare.part >= 0.004 || bc.glare.part >= 0.004 ? ' · reflet repéré' : ''); },
+      () => { fc.centering = PGCore.centering(F); return cenTxt(fc.centering); },
+      () => { bc.centering = PGCore.centering(B); return cenTxt(bc.centering); },
+      () => { fc.wear = PGCore.wear(F, fc.centering); bc.wear = PGCore.wear(B, bc.centering); return bad(fc.wear.corners.concat(bc.wear.corners), 'coin'); },
+      () => bad(fc.wear.edges.concat(bc.wear.edges), 'bord'),
+      () => { fc.surface = PGCore.surface(F); return surfTxt(fc.surface); },
+      () => { bc.surface = PGCore.surface(B); return surfTxt(bc.surface); },
+      () => { const cv = document.createElement('canvas'); cv.width = F.width; cv.height = F.height; cv.getContext('2d').putImageData(new ImageData(F.data, F.width, F.height), 0, 0);
+        return PG.identify(cv).then(r => { idn = r; const p = r.id ? TCG.item(r.id) : null; return p ? p.name + ' · ' + p.setName : 'À choisir juste après'; }); },
+      () => { G = PGCore.grade(fc, bc); C = PGCore.companies(G, fc, bc); return 'Note probable : ' + pgFr(G.grade) + ' sur 10'; }
+    ];
+    const alive = () => { const s = this.st(); return s.screen === 'pregrade' && s.pgStep === 'analyse'; };
+    const fail = () => { if (alive()) this.navSlide('back', { pgStep: 'front', pgFreeze: null, pgMsg: 'L’analyse a échoué sur ces photos. Recommence avec des photos plus nettes.' }); };
+    const finish = () => {
+      const entry = {
+        t: pgNow(), id: idn.id, cands: idn.id ? [] : idn.cands, grade: G.grade, low: G.low, high: G.high, rel: G.reliability, sigma: G.sigma,
+        subs: G.subs, surfSeen: G.surfaceSeen, surfSure: G.surfaceSure, state: PGCore.stateOf(G.grade),
+        best: { PSA: C.PSA.best.key, PCA: C.PCA.best.key, CCC: C.CCC.best.key },
+        dist: { PSA: C.PSA.map(x => [x.key, +x.p.toFixed(4)]), PCA: C.PCA.map(x => [x.key, +x.p.toFixed(4)]), CCC: C.CCC.map(x => [x.key, +x.p.toFixed(4)]) },
+        cen: { f: [fc.centering.lr, fc.centering.tb], b: [bc.centering.lr, bc.centering.tb] },
+        wear: { f: fc.wear, b: bc.wear }, defects: { f: fc.surface.defects.slice(0, 6), b: bc.surface.defects.slice(0, 6) },
+        light: fc.wear.light || bc.wear.light, real: null
+      };
+      const hist = [entry].concat(this.st().pgHist || []).slice(0, 30);
+      pgThumbsSave(entry.t, PG.thumbs.front, PG.thumbs.back);
+      PG.reveal = true;
+      this.navSlide('fwd', Object.assign({ pgHist: hist, pgSel: 0, pgStep: 'result', pgDef: 'f', pgCo: '', pgReal: false, pgPick: null, pgAna: null }, this.pgSpend()));
     };
-    setTimeout(() => run(0), 200);
+    const run = i => {
+      if (!alive()) return;
+      if (i >= steps.length) { setTimeout(() => { if (alive()) finish(); }, 700); return; }
+      const t0 = pgNow();
+      let r;
+      try { r = steps[i](); } catch (e) { fail(); return; }
+      Promise.resolve(r).then(txt => {
+        setTimeout(() => {
+          if (!alive()) return;
+          out[i] = txt;
+          this.setState({ pgAna: out.slice(), pgProg: i + 1 });
+          setTimeout(() => run(i + 1), 40);
+        }, Math.max(0, PG_STEP_MS - (pgNow() - t0)));
+      }, fail);
+    };
+    setTimeout(() => run(0), 450);
   };
   // Vignettes des photos (pour les repères des défauts) : sur l'appareil, 12 dernières seulement.
   const PG_THUMBS = 'pkm-pgd-thumbs';
@@ -314,14 +363,17 @@
     m.PCA['8,5'] = (m.PCA['8'] + m.PCA['9']) / 2;
     return m;
   })();
-  pgProto.pgWorth = function (e, co, p) {
+  // Formule choisie (PCA, CCC) et frais d'envoi et de retour : gardés sur l'appareil (pgSvc, pgCost).
+  const pgSvcOf = (s, co) => ((s.pgSvc || {})[co] || (PGCore.FEES[co].services ? PGCore.FEES[co].services[0][0] : null));
+  const pgShipOf = (s, co) => { const own = (s.pgCost || {})[co]; return own !== undefined && own !== null && own !== '' ? Math.max(0, Number(own) || 0) : PGCore.FEES[co].ship || 0; };
+  pgProto.pgWorth = function (e, co, p, svc) {
     const s = this.st(), raw = p ? this.rawVal(p, s.valuation) || 0 : 0;
     if (!raw) return null;
     const rawState = raw * (VAL_COND[e.state] || 1), dist = e.dist[co].map(([key, pr]) => ({ key: key, p: pr }));
     dist.best = dist.find(x => x.key === e.best[co]) || dist[0];
-    const own = (s.pgCost || {})[co], fee = own !== undefined && own !== null && own !== '' ? Number(own) : PG_FEES[co];
-    const w = PGCore.worth(dist, raw, rawState, key => (PG_COEF[co][key] !== undefined ? PG_COEF[co][key] : null), fee);
-    return Object.assign(w, { raw: raw, rawState: rawState, fee: fee });
+    const sv = svc || pgSvcOf(s, co), ship = pgShipOf(s, co);
+    const w = PGCore.worthFees(co, sv, dist, raw, rawState, key => (PG_COEF[co][key] !== undefined ? PG_COEF[co][key] : null), ship);
+    return Object.assign(w, { raw: raw, rawState: rawState, svc: sv, bestKey: dist.best.key });
   };
 
   // ——— Rendu ———
@@ -332,7 +384,7 @@
       btn: q.empty ? 'Voir mes pré-gradations' : 'Pré-grader une carte', btnCls: 'pkm-pgh-btn' + (q.empty ? ' pkm-pgh-btn-off' : ''),
       open: () => this.pgOpen(),
       hasLast: !!last, lastName: last ? (p ? p.name : 'Carte non reconnue') : '', lastImg: p ? p.img : '', hasLastImg: !!(p && p.img),
-      lastWhen: last ? pgAgo(last.t) : '', lastGrade: last ? pgFr(last.grade) + ' probable' : '', openLast: () => { this.push('pregrade'); this.setState({ pgStep: 'result', pgSel: 0, pgDef: 'f', pgCo: 'PSA', pgReal: false }); }
+      lastWhen: last ? pgAgo(last.t) : '', lastGrade: last ? pgFr(last.grade) + ' probable' : '', openLast: () => { PG.reveal = true; this.push('pregrade', Object.assign({ pgStep: 'result', pgSel: 0, pgDef: 'f', pgCo: '' }, PG_FRESH)); }
     };
   };
   const pgAgo = t => { const d = Math.floor((pgNow() - t) / 86400e3); return d <= 0 ? 'aujourd’hui' : d === 1 ? 'hier' : 'il y a ' + d + ' jours'; };
@@ -341,42 +393,69 @@
 
   pgProto.vPregrade = function (s) {
     const q = this.pgQuota(), step = s.pgStep || 'front';
-    const r = { counter: q.text, counterCls: 'pkm-pgd-counter' + (q.empty ? ' pkm-pgd-counter-off' : ''), upsell: q.upsell, hasUpsell: q.hasUpsell,
+    const r = { counter: q.text, upsell: q.upsell, hasUpsell: q.hasUpsell,
       isIntro: step === 'intro', isCap: step === 'front' || step === 'back', isAna: step === 'analyse', isRes: step === 'result', isHist: step === 'hist',
-      start: () => this.pgStart(), empty: q.empty, histN: (s.pgHist || []).length, hasHist: (s.pgHist || []).length > 0,
-      goHist: () => { PG.stopCam(); this.setState({ pgStep: 'hist' }); }, msg: s.pgMsg || '', hasMsg: !!s.pgMsg };
+      start: () => this.pgStart(), empty: q.empty, histN: (s.pgHist || []).length, hasHist: (s.pgHist || []).length > 0 && (step === 'intro' || step === 'result'),
+      goHist: () => { PG.stopCam(); this.navSlide('fwd', { pgStep: 'hist' }); }, msg: s.pgMsg || '', hasMsg: !!s.pgMsg };
+    // Compteur toujours visible ; en prise de vue, sur une ligne (tout tient dans l'écran).
+    r.counterCls = 'pkm-pgd-counter' + (q.empty ? ' pkm-pgd-counter-off' : '') + (r.isCap || r.isAna ? ' pkm-pgd-counter-sm' : '');
     // Étapes.
     const order = ['front', 'back', 'analyse'], at = step === 'result' ? 3 : order.indexOf(step);
     r.steps = [['Recto', 0], ['Verso', 1], ['Analyse', 2]].map(([label, i]) => ({ label: label, n: at > i ? '✓' : String(i + 1), cls: 'pkm-pgd-stp' + (at === i ? ' pkm-pgd-stp-on' : at > i ? ' pkm-pgd-stp-done' : '') }));
     r.showSteps = r.isCap || r.isAna;
     if (r.isCap) {
-      const ch = s.pgChecks || {}, cam = s.pgCam || '';
+      const ch = s.pgChecks || {}, cam = s.pgCam || '', has = !!s.pgChecks, fz = s.pgFreeze;
       r.side = step === 'front' ? 'RECTO' : 'VERSO';
-      r.hint = 'Place le ' + r.side + ' dans le cadre';
-      r.checks = [['card', 'Carte entière dans le cadre', ch.tilt ? 'Redresse la carte' : 'Carte à placer dans le cadre'], ['sharp', 'Image nette', 'Image floue : ne bouge pas'], ['glare', 'Pas de reflet', 'Reflet : incline un peu'], ['bg', 'Fond uni et sombre', 'Fond à changer : uni et sombre']]
-        .map(([k, ok, ko]) => { const v = s.pgChecks ? !!ch[k] : null; return { label: v === false ? ko : ok, cls: 'pkm-pgd-ck' + (v === true ? ' pkm-pgd-ck-ok' : v === false ? ' pkm-pgd-ck-ko' : ''), mark: v === true ? '✓' : v === false ? '!' : '•' }; });
+      // Les 4 bulles (courtes, dans la vue de la caméra) ; la consigne du haut donne le premier point à corriger.
+      const CK = [['card', 'Carte', ch.tilt ? 'Redresse la carte dans le cadre' : 'Place toute la carte dans le cadre'], ['sharp', 'Netteté', 'Image floue : ne bouge pas'],
+        ['glare', 'Reflet', 'Reflet sur la carte : incline un peu le téléphone'], ['bg', 'Fond', 'Pose la carte sur un fond uni et sombre']];
+      r.checks = CK.map(([k, label]) => { const v = has ? !!ch[k] : null; return { label: label, cls: 'pkm-pgd-ck' + (v === true ? ' pkm-pgd-ck-ok' : v === false ? ' pkm-pgd-ck-ko' : ''), mark: v === true ? '✓' : v === false ? '!' : '' }; });
+      const first = has ? CK.find(([k]) => !ch[k]) : null;
+      r.allGreen = has && !!ch.all;
+      r.hint = !has ? 'Place le ' + r.side + ' dans le cadre' : r.allGreen ? 'Tout est vert : appuie sur l’appareil photo' : first ? first[2] : 'Place le ' + r.side + ' dans le cadre';
       r.camOff = ['nocam', 'denied', 'busy'].includes(cam);
       r.camText = cam === 'denied' ? 'Caméra refusée : autorise-la dans les réglages du navigateur, ou importe une photo.' : cam === 'busy' ? 'Caméra occupée par une autre app.' : 'Pas de caméra disponible : importe une photo de la carte.';
-      r.shoot = () => this.pgShoot(); r.canShoot = !r.camOff;
+      r.shoot = () => { if (!r.camOff && !s.pgFreeze) this.pgShoot(); };
+      r.shootLabel = 'Prendre la photo du ' + r.side.toLowerCase();
+      r.shutCls = 'pkm-pgd-shutter' + (r.allGreen ? ' pkm-pgd-shutter-go' : '') + (r.camOff ? ' pkm-pgd-shutter-off' : '');
       r.importPhoto = () => { const el = document.getElementById('pkm-pgd-file'); if (el) { el.value = ''; el.click(); } };
       r.onFile = e => this.pgFile(e);
-      r.hasFront = !!PG.shots.front; r.frontImg = '';
       r.tips = [['Sans étui ni sleeve', 'tip-sleeve'], ['À plat, fond sombre', 'tip-flat'], ['Lumière douce, sans reflet', 'tip-light'], ['Téléphone parallèle', 'tip-phone']].map(([t, k]) => ({ text: t, cls: 'pkm-pgd-tip pkm-pgd-' + k }));
-      r.redo = () => { PG.shots = {}; this.setState({ pgStep: 'front', pgMsg: '' }); };
+      r.redo = () => { PG.shots = {}; PG.thumbs = {}; this.navSlide('back', { pgStep: 'front', pgMsg: '', pgFreeze: null, pgChecks: null }); };
       r.isBack = step === 'back';
-      r.sideLabel = r.isBack ? 'Refaire le recto' : 'Verso ensuite'; r.sideOff = !r.isBack;
-      r.sideCls = 'pkm-pgd-side' + (r.isBack ? '' : ' pkm-pgd-side-ghost'); r.sideAct = () => { if (r.isBack) r.redo(); };
+      // Bouton de gauche : au verso, la vignette du recto (un appui le refait).
+      r.sideLabel = r.isBack ? 'Refaire le recto' : 'Recto';
+      r.sideCls = 'pkm-pgd-side' + (r.isBack ? '' : ' pkm-pgd-side-ghost');
+      r.sideStyle = r.isBack && PG.thumbs.front ? 'background-image: url(' + PG.thumbs.front + ')' : '';
+      r.sideOff = !r.isBack; r.sideAct = () => { if (r.isBack) r.redo(); };
+      // Photo figée : éclair, puis « enregistré » (vert) ou la raison du refus (rouge) et « Reprendre la photo ».
+      r.hasFreeze = !!fz;
+      r.frzImg = fz ? fz.img : '';
+      r.frzCls = 'pkm-pgd-frz' + (fz && fz.ok === true ? ' pkm-pgd-frz-ok' : fz && fz.ok === false ? ' pkm-pgd-frz-ko' : '');
+      r.frzImgCls = 'pkm-pgd-frz-img' + (fz && fz.cover ? '' : ' pkm-pgd-frz-contain');
+      r.frzText = fz ? fz.text : '';
+      r.frzIcon = fz && fz.ok === true ? '✓' : fz && fz.ok === false ? '!' : '';
+      r.frzBad = !!(fz && fz.ok === false);
+      r.retake = () => this.pgRetake();
     }
     if (r.isAna) {
-      const n = s.pgProg || 0;
-      r.ana = [['Centrage', 2], ['Coins', 2], ['Bords', 3], ['Surface', 3], ['Carte reconnue', 4]].map(([label, need], i) => ({ label: label, done: n >= need, cls: 'pkm-pgd-ana-row' + (n >= need ? ' pkm-pgd-ana-done' : i === n ? ' pkm-pgd-ana-on' : '') }));
+      const n = s.pgProg || 0, res = s.pgAna || [], cur = PG_ANA[n];
+      r.ana = PG_ANA.map(([label], i) => ({ label: label, res: res[i] || '', cls: 'pkm-pgd-ana-row' + (i < n ? ' pkm-pgd-ana-done' : i === n ? ' pkm-pgd-ana-on' : '') }));
+      const pct = Math.round(100 * n / PG_ANA.length);
+      r.anaPct = pct + ' %'; r.anaW = 'width: ' + pct + '%';
+      r.anaNow = cur ? cur[0] + '…' : 'Analyse terminée : voici ta note';
+      r.anaDone = !cur;
+      const side = cur ? cur[1] : 'both';
+      r.anaF = PG.thumbs.front || ''; r.anaB = PG.thumbs.back || '';
+      r.anaFCls = 'pkm-pgd-anacard' + (side === 'b' ? ' pkm-pgd-anacard-dim' : ' pkm-pgd-anacard-on');
+      r.anaBCls = 'pkm-pgd-anacard' + (side === 'f' ? ' pkm-pgd-anacard-dim' : ' pkm-pgd-anacard-on');
     }
     if (r.isHist) {
       r.hist = (s.pgHist || []).map((e, i) => {
         const p = e.id ? TCG.item(e.id) : null;
         return { name: p ? p.name : 'Carte non reconnue', sub: (p ? p.setName + ' · ' : '') + new Date(e.t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }),
           img: p ? p.img : '', hasImg: !!(p && p.img), grade: pgFr(e.grade), gradeStyle: 'color: ' + pgCol(e.grade),
-          real: e.real ? e.real.co + ' ' + e.real.key : '', hasReal: !!e.real, open: () => this.setState({ pgStep: 'result', pgSel: i, pgDef: 'f', pgCo: 'PSA', pgReal: false }) };
+          real: e.real ? e.real.co + ' ' + e.real.key : '', hasReal: !!e.real, open: () => { PG.reveal = true; this.navSlide('fwd', { pgStep: 'result', pgSel: i, pgDef: 'f', pgCo: '', pgReal: false }); } };
       });
     }
     if (r.isRes) Object.assign(r, this.vPgResult(s));
@@ -439,27 +518,63 @@
       return { co: co, logoSrc: PG_LOGO[co], logoCls: 'pkm-pgd-co-logo pkm-pgd-co-' + co.toLowerCase(), best: best.key, bestName: best.name + ' · ' + best.short, bestText: best.text,
         bars: top.map(x => ({ key: x.key.replace(' Black Label', ' BL').replace(' Gold Label', ' GL'), pct: Math.round(x.p * 100) + ' %', style: 'height: ' + Math.max(4, Math.round(36 * x.p / mx)) + 'px', cls: 'pkm-pgd-bar' + (x.key === best.key ? ' pkm-pgd-bar-top' : '') })) };
     });
-    // Ça vaut le coup ?
-    const co = s.pgCo || 'PSA';
-    o.coTabs = ['PSA', 'PCA', 'CCC'].map(c => ({ label: c, cls: 'pkm-pgd-seg' + (co === c ? ' pkm-pgd-seg-on' : ''), pick: () => this.setState({ pgCo: c }) }));
-    const w = this.pgWorth(e, co, p);
+    // Ça vaut le coup ? (tarifs du porteur, 2026-11-14) : les 3 entreprises comparées, la plus rentable en tête ;
+    // détail de l'entreprise choisie (palier ou formule, surtaxe PSA, envoi et retour, bénéfice probable, verdict).
+    const W = {}; ['PSA', 'PCA', 'CCC'].forEach(c => { W[c] = this.pgWorth(e, c, p); });
+    const ranked = ['PSA', 'PCA', 'CCC'].filter(c => W[c] && W[c].costKnown).sort((a, b) => W[b].gain - W[a].gain);
+    const top = ranked[0] || 'PSA', co = s.pgCo || top, w = W[co];
     o.hasWorth = !!w; o.noWorth = !w;
-    o.worthNone = !p ? 'Choisis la carte ci-dessus pour estimer ce que la gradation peut rapporter.' : 'Pas encore de cote pour cette carte : impossible de chiffrer le gain.';
+    o.worthNone = !p ? 'Choisis la carte ci-dessus pour savoir si la gradation peut te rapporter.' : 'Pas encore de cote pour cette carte : impossible de chiffrer le gain.';
+    const sign = v => (v >= 0 ? '+ ' : '− ') + this.eur(Math.abs(v));
+    o.coTabs = ['PSA', 'PCA', 'CCC'].map(c => ({ label: c, cls: 'pkm-pgd-seg' + (co === c ? ' pkm-pgd-seg-on' : ''), pick: () => this.setState({ pgCo: c }) }));
     if (w) {
-      const bestKey = e.best[co];
-      o.wLines = [['Valeur brute (' + PG_STATE_NAME[e.state] + ')', this.eur(w.rawState)], ['Valeur si ' + co + ' ' + bestKey + ' (estimation)', this.eur(w.bestValue)],
-        ['Valeur gradée attendue (selon les chances)', this.eur(w.expected)]].map(([l, v]) => ({ label: l, value: v }));
-      o.feeLabel = 'Coût de gradation + envoi (' + co + ')';
-      o.feeValue = w.costKnown ? '− ' + this.eur(w.fee) : 'à saisir';
-      o.feeInput = w.costKnown ? String(w.fee) : '';
+      // Bilan : la meilleure entreprise, son bénéfice probable et le verdict.
+      const tw = W[top], good = tw && tw.costKnown && tw.gain > 0;
+      o.sumCls = 'pkm-pgd-sum ' + (!good ? 'pkm-pgd-sum-no' : tw.verdict === 'oui' ? 'pkm-pgd-sum-ok' : 'pkm-pgd-sum-mid');
+      o.sumIcon = !good ? '✕' : tw.verdict === 'oui' ? '✓' : '~';
+      o.sumTitle = !good ? 'Non, la gradation ne serait pas rentable' : tw.verdict === 'oui' ? 'Oui, ça vaut le coup de la grader' : 'Ça peut valoir le coup';
+      o.sumGain = good ? sign(tw.gain) : '';
+      o.sumHasGain = !!good;
+      o.sumText = good ? 'de bénéfice probable avec ' + top + ' (' + tw.fee.tier + '), frais de gradation et d’envoi déduits'
+        : 'Chez PSA, PCA et CCC, le prix de la gradation dépasse ce que la note probable ajoute à la valeur de ta carte.';
+      o.cmp = ['PSA', 'PCA', 'CCC'].map(c => {
+        const x = W[c];
+        return { co: c, logoSrc: PG_LOGO[c], logoCls: 'pkm-pgd-co-logo pkm-pgd-co-' + c.toLowerCase(), pick: () => this.setState({ pgCo: c }),
+          cls: 'pkm-pgd-cmp-row' + (c === co ? ' pkm-pgd-cmp-on' : ''), gain: x && x.costKnown ? sign(x.gain) : 'Sur devis',
+          gainCls: 'pkm-pgd-cmp-g ' + (x && x.costKnown ? (x.gain >= 0 ? 'pkm-pgd-gain-up' : 'pkm-pgd-gain-down') : ''),
+          sub: x ? (x.fee.price !== null ? x.fee.tier + ' · ' + this.eur(x.fee.price) : x.fee.tier + ' · sur devis') : '', best: c === top && good, bestLabel: 'Le plus rentable' };
+      });
+      // Formules (PCA, CCC) ; PSA : palier choisi selon la valeur déclarée.
+      const F = PGCore.FEES[co];
+      o.hasSvc = !!F.services;
+      o.svcs = (F.services || []).map(([k, label, days]) => ({ label: label, sub: days, cls: 'pkm-pgd-svc' + (w.svc === k ? ' pkm-pgd-svc-on' : ''),
+        pick: () => this.setState({ pgSvc: Object.assign({}, s.pgSvc || {}, { [co]: k }) }) }));
+      const fe = w.fee;
+      o.wLines = [
+        ['Valeur brute (' + PG_STATE_NAME[e.state] + ')', this.eur(w.rawState)],
+        ['Valeur si ' + co + ' ' + w.bestKey + ' (note la plus probable)', this.eur(w.declared)],
+        ['Valeur gradée attendue (selon les chances)', this.eur(w.expected)],
+        [co === 'PSA' ? 'Palier PSA ' + fe.tier + ' (' + fe.label + ', ' + fe.days + ')' : co + ' ' + fe.tier + ' (' + fe.label + ', ' + fe.days + ')', fe.price !== null ? '− ' + this.eur(fe.price) : 'Sur devis']
+      ].map(([l, v]) => ({ label: l, value: v }));
+      if (w.upcharge) o.wLines.push({ label: 'Si ' + co + ' ' + w.upcharge.key + ' (≈ ' + this.eur(w.upcharge.value) + ') : palier ' + w.upcharge.tier + ', surtaxe', value: '+ ' + this.eur(w.upcharge.diff) });
+      o.decl = 'Valeur déclarée retenue : ' + this.eur(w.declared) + ' (valeur estimée de la carte gradée).';
+      o.feeLabel = co === 'PSA' ? 'Retour depuis l’Allemagne (par commande)' : 'Envoi et retour (si tu postes ta carte)';
+      o.feeValue = w.ship ? '− ' + this.eur(w.ship) : '0 €';
+      o.feeInput = String(w.ship || '');
       o.onFee = ev => { const v = String(ev && ev.target ? ev.target.value : '').replace(',', '.'), n = v === '' ? '' : Math.max(0, Number(v) || 0); this.setState({ pgCost: Object.assign({}, s.pgCost || {}, { [co]: n }) }); };
-      o.gain = (w.gain >= 0 ? '+ ' : '− ') + this.eur(Math.abs(w.gain));
-      o.gainCls = 'pkm-pgd-gain ' + (w.gain >= 0 ? 'pkm-pgd-gain-up' : 'pkm-pgd-gain-down');
-      const V = { oui: ['Oui, ça peut valoir le coup', 'Même avec la note du dessous (' + co + ' ' + w.below.key + '), tu rentres dans tes frais.', 'ok'], avoir: ['À voir : petit gain possible', 'Le gain dépend de la note obtenue : avec ' + co + ' ' + w.below.key + ', tu perdrais un peu.', 'mid'], non: ['Non, pas pour l’instant', 'Le coût dépasse ce que la note probable ajoute à la valeur de ta carte.', 'low'] }[w.verdict];
-      o.verdict = V[0]; o.verdictText = V[1] + (w.costKnown ? '' : ' (calcul sans le coût de la gradation : indique-le pour un verdict juste)');
+      o.gain = w.costKnown ? sign(w.gain) : 'Sur devis';
+      o.gainCls = 'pkm-pgd-gain ' + (w.costKnown && w.gain >= 0 ? 'pkm-pgd-gain-up' : 'pkm-pgd-gain-down');
+      o.roi = w.roi !== null && w.gain > 0 ? 'soit ' + Math.round(w.roi * 100) + ' % de ce que tu dépenses (' + this.eur(w.cost) + ')' : '';
+      o.hasRoi = !!o.roi;
+      const V = { oui: ['Oui, ça vaut le coup avec ' + co, 'Même avec la note du dessous (' + co + ' ' + w.below.key + '), tu restes gagnant : ' + sign(w.gainLow) + '.', 'ok'],
+        avoir: ['À voir : rentable si la note suit', 'Avec la note du dessous (' + co + ' ' + w.below.key + '), tu perdrais ' + this.eur(Math.abs(w.gainLow)) + '.', 'mid'],
+        non: ['Non, pas avec ' + co, 'Le prix de la gradation et de l’envoi dépasse ce que la note probable ajoute à ta carte.', 'low'],
+        devis: ['Sur devis chez ' + co, 'Pour cette valeur, ' + co + ' fixe le prix sur devis : impossible de chiffrer le bénéfice.', 'mid'] }[w.verdict];
+      o.verdict = V[0]; o.verdictText = V[1];
       o.verdictCls = 'pkm-pgd-verdict pkm-pgd-verdict-' + V[2];
       o.verdictIcon = V[2] === 'ok' ? '✓' : V[2] === 'mid' ? '~' : '✕';
-    }
+      o.feeNotes = [co === 'PSA' ? F.note : '', co === 'PSA' ? F.shipNote : '', (F.notes || {})[w.svc] || ''].filter(Boolean).map(t => ({ text: t }));
+    } else { o.cmp = []; o.svcs = []; o.wLines = []; o.feeNotes = []; }
     // Ajout à la collection avec l'état estimé.
     o.canAdd = !!p;
     o.addLabel = 'Ajouter à ma collection en ' + PG_STATE_NAME[e.state];
@@ -510,9 +625,9 @@
     if (ui.isPregrade) {
       r.pgr = this.vPregrade(s);
       Object.assign(ui, { title: 'Pré-gradation', subtitle: 'Version Proto · estimation à partir de photos', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
-    } else r.pgr = { steps: [], checks: [], tips: [], ana: [], hist: [], crit: [], defTabs: [], marks: [], zooms: [], companies: [], coTabs: [], wLines: [], realCos: [], realNotes: [], cands: [], found: [] };
+    } else r.pgr = { steps: [], checks: [], tips: [], ana: [], hist: [], crit: [], defTabs: [], marks: [], zooms: [], companies: [], coTabs: [], wLines: [], realCos: [], realNotes: [], cands: [], found: [], cmp: [], svcs: [], feeNotes: [] };
     PG.inst = this;
-    setTimeout(() => PG.sync(this), 0);
+    setTimeout(() => { PG.sync(this); if (PG.reveal && s.pgStep === 'result') PG.revealRun(); }, 0);
     return r;
   };
   const pgBaseParent = pgProto.parentOf;
@@ -523,6 +638,20 @@
     const d = pgBaseSt.call(this), p = this.props || {};
     if (!(this.state && this.state.screen) && p.start === 'pregrade') { d.screen = 'pregrade'; d.stack = ['home']; if (!d.pgStep) d.pgStep = 'front'; }
     return d;
+  };
+  // Arrivée sur le résultat (2026-11-14, porteur : « transition satisfaisante ») : la jauge se remplit (CSS), la note
+  // compte de 0 à sa valeur, puis les blocs arrivent l'un après l'autre (pregrade.css).
+  PG.revealRun = function () {
+    if (!PG.reveal) return;
+    const b = document.querySelector('.pkm-pgd-gauge-n b');
+    if (!b) return;
+    PG.reveal = false;
+    const final = b.textContent, v = parseFloat(String(final).replace(',', '.'));
+    if (!isFinite(v) || !b.animate || document.documentElement.classList.contains('pkm-calm')) return;
+    const t0 = performance.now(), D = 1100;
+    const step = t => { const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3), x = Math.round(v * e * 2) / 2;
+      if (!b.isConnected) return; b.textContent = k < 1 ? pgFr(x) : final; if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
   };
   // Tests navigateur : accès au moteur et aux photos préparées (?debug seulement).
   try { if (/[?&]debug\b/.test(location.search)) window.__pkmPg = { PG: PG, PGCore: PGCore }; } catch (e) { /* adresse sans paramètres */ }

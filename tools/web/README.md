@@ -804,6 +804,12 @@ Le script `tools/web/build.mjs` :
     - `t-progress.mjs`, `t-series.mjs` ;
     - `t-top.mjs` : cartes « confirmées » cherchées dans le catalogue du jour ;
     - `t-radar.mjs` : sans WebGL, liste directe.
+- **Pré-gradation v2 (cache v200)** :
+  - `pregrade-core.js` : `FEES` (grilles PSA, PCA, CCC du porteur), `fee(co, formule, valeur déclarée)`, `worthFees` (valeur déclarée = valeur à la note la plus probable, surtaxe PSA note par note, frais d'envoi, bénéfice, verdict « oui / avoir / non / devis ») ; tests `test_pregrade.mjs` (14).
+  - `pregrade.js` : ouverture par `push('pregrade', état)` en un seul changement (le glissement n'était pas joué) ; étapes par `navSlide` ; plus de photo automatique ; `pgFreeze` (photo figée, `pgStill`, éclair, vert ou rouge, `pgRetake`) ; `PG.thumbs` (vignettes du recto et du verso) ; `pgAnalyse` en 9 étapes `PG_ANA` (0,65 s au moins chacune, `pgAna`, `pgProg`) ; `PG.revealRun` (la note compte) ; `pgSvcOf`, `pgShipOf`, comparaison `cmp` des 3 entreprises, formules `svcs`.
+  - `nav.js` : `NAV_ID.pregrade = 'pgStep'` (chaque étape glisse comme une page).
+  - `catalog.dc.html`, `pregrade.css` : vue unique `.pkm-pgd-cam` (hauteur selon l'écran), bulles `.pkm-pgd-ck` dans la vue, barre `.pkm-pgd-cambar`, déclencheur `.pkm-pgd-shutter` (logo appareil photo, `-go` vert qui pulse), `.pkm-pgd-frz*`, analyse `.pkm-pgd-ana*`, résultat `.pkm-pgd-res` en cascade, `.pkm-pgd-sum`, `.pkm-pgd-cmp*`, `.pkm-pgd-svc*`.
+  - `legal.js` : tarifs indicatifs dans la CGU. Test `e2e/t-pregrade.mjs` (63).
 - **Pré-gradation, « Version Proto » (cache v198)** :
   - `pregrade-core.js` (nouveau, `PGCore`, sans dépendance, testé par `test_pregrade.mjs`) :
     - contrôles de la photo : `sharpness` (variance du laplacien), `glare` (plus grande tache de pixels saturés) ;
