@@ -94,8 +94,14 @@
     'scans-20': ['#1BA7C8', '#0B4F6E'], kyogre: ['#2B6FE0', '#0E2F7A'], groudon: ['#D9432B', '#6E1408'], rayquaza: ['#1F9E5A', '#0B4A2A'] };
   const myTitle = lot => lot.days ? '2XP PK' : lot.paDays ? '2XP PA' : lot.scans ? 'Scans bonus' : 'Pokémon légendaire';
   const myCount = lot => lot.days ? lot.days + ' jours' : lot.paDays ? lot.paDays + ' jours' : lot.scans ? '× ' + lot.scans : lot.label;
-  const myStage = () => {
+  // Rang du lot pour le son d'ouverture (sfx.js, SFX_CHEST) : 3 légendaire, 2 gros lot, 1 petit lot.
+  const myRank = lot => lot.poke ? 3 : ((lot.days || 0) >= 7 || lot.paDays) ? 2 : 1;
+  const myStage = self => {
     const ov = document.createElement('div'), still = myStill(), v = myVis(), t0 = Date.now();
+    // Son de l'arrivée du coffre, joué dès l'appui (2026-11-14, porteur : « propose-moi plusieurs sons pour l'ouverture
+    // de coffre mystère » ; ?soncoffre=1 à 5).
+    const snd = (phase, n) => { if (!still && self && typeof self.sfxChest === 'function') self.sfxChest(phase, n); };
+    snd('start');
     ov.className = 'pkm-mx pkm-mx-v-' + v.kind + ' pkm-mx-c-' + v.id + (still ? ' pkm-mx-still' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Boîte mystère');
     let shards = '';
     for (let k = 0; k < 8; k++) shards += '<i class="pkm-mx-shard" style="--a: ' + (k * 45 + 10) + 'deg"></i>';
@@ -119,7 +125,7 @@
           + '<div class="pkm-mx-item">' + myPrizeHtml(lot) + sparks + '</div><b class="pkm-mx-count">' + myCount(lot) + '</b>'
           + '<p class="pkm-mx-text">' + myText(lot) + '</p><button type="button" class="pkm-mx-ok">Touche pour continuer</button>';
         const go = Math.max(2050, Date.now() - t0 + 120);
-        at(go, () => { ov.classList.remove('pkm-mx-wait'); ov.classList.add('pkm-mx-burst'); });
+        at(go, () => { ov.classList.remove('pkm-mx-wait'); ov.classList.add('pkm-mx-burst'); snd('open', myRank(lot)); });
         at(go + 420, () => { ov.classList.add('pkm-mx-flashing', 'pkm-mx-show'); if (typeof gmParty === 'function' && !still && (lot.poke || (lot.days || 0) >= 10)) setTimeout(() => gmParty(500), 500); });
         at(go + 1050, () => { ov.classList.add('pkm-mx-ready'); const b = ov.querySelector('.pkm-mx-ok'); if (b) b.focus({ preventScroll: true }); if (done) done(); });
       },
@@ -127,7 +133,7 @@
       fail() { timers.forEach(clearTimeout); ov.classList.add('pkm-mx-gone'); setTimeout(() => ov.remove(), still ? 0 : 420); }
     };
   };
-  const myReveal = (lot, done) => myStage().win(lot, done);
+  const myReveal = (lot, done, self) => myStage(self).win(lot, done);
   // Tirage d'un lot sur l'appareil (démo, tests, aperçu admin) : mêmes chances que le serveur.
   const myDraw = (self, s) => {
     const prem = typeof self.premOn === 'function' && self.premOn();
@@ -145,11 +151,11 @@
     if (s.myBusy) return;
     if (gift && free < 1) return;
     if (!gift && pa < MY_PRICE) { this.setState({ toast: 'Il te manque ' + xpNum(MY_PRICE - pa) + ' PA', myAsk: false }); return; }
-    const apply = (lot, patch) => myReveal(lot, () => { this.setState(Object.assign({ myBusy: false, myAsk: false }, patch)); this.flash && this.flash(); });
+    const apply = (lot, patch) => myReveal(lot, () => { this.setState(Object.assign({ myBusy: false, myAsk: false }, patch)); this.flash && this.flash(); }, this);
     if (xpCloud()) {
       if (this.gcNeed && this.gcNeed()) return;
       this.setState({ myBusy: true, myAsk: false });
-      const stage = myStage();
+      const stage = myStage(this);
       Cloud.rpc(gift ? 'open_gift_box' : 'open_mystery_box', { req: Cloud.reqId() }).then(r => {
         const lot = MY_LOTS.find(x => x.id === r.lot) || { id: r.lot, label: r.label || 'Lot', short: r.label || 'Lot' };
         const patch = { pa: typeof gcPa === 'function' ? gcPa(this.st(), r.pa | 0) : (r.pa | 0), pk: typeof gcPk === 'function' ? gcPk(this.st(), r.pk | 0) : (r.pk | 0), scanBonus: r.scan_bonus | 0 };

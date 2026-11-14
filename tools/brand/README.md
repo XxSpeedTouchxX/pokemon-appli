@@ -44,3 +44,9 @@ Sur un téléphone où l'app est déjà installée, la nouvelle icône n'appara�
 Demande du porteur : garder exactement le logo, mais remplacer l'intérieur de la carte « O » par le logo des PK. `import_logo.py` (fonction `pk_card`) garde le contour, le liseré blanc et le cadre noir intérieur de la carte, repeint la face en jaune (le disque étoilé et les traits disparaissent) et y centre la gemme des PK (`web/img/brand/pk.svg`, rendue une fois en PNG : `source/pk-512.png`). Le fichier du porteur n'est pas modifié. Sorties : `web/img/brand/dropicards-header.png` (en-tête) et `web/icons/favicon-32.png` (la carte O seule, dans l'onglet du navigateur). Les icônes de l'écran d'accueil du téléphone (monogramme « D » + carte O, `make_logo.mjs` puis `make_icons.mjs`) ont aussi la gemme des PK dans la carte depuis le même soir (demande du porteur ; option `pkCard` de `wordmark`, liseré blanc gardé).
 
 **Mise à jour sur les téléphones (2026-10-29).** Le build (`tools/web/build.mjs`) ajoute à l'adresse du logo de l'en-tête, des icônes et du manifeste une empreinte du fichier (`?v=…`) : dès qu'un dessin change, navigateurs et téléphones le téléchargent à nouveau au lieu de garder l'ancien en cache. Sur iPhone, l'icône d'une app déjà posée sur l'écran d'accueil ne change qu'en la supprimant puis en la réinstallant ; sur Android, Chrome la met à jour de lui-même, en général sous quelques jours.
+
+## Logo des PL (points de loyauté)
+
+`make_pl_proposals.py` dessine 5 propositions dans `pl/` (2026-11-14, porteur : un visuel « lié à la fidélité, à la confiance de l'utilisateur »). Elles sont de la même famille que la gemme des PK : contour noir, facettes, étincelle. Leurs couleurs leur sont propres.
+
+**Choix du porteur (2026-11-14) : n° 1 « Bouclier-cœur »**, copié en `web/img/brand/pl.svg`. Les PL eux-mêmes ne sont pas encore construits : la proposition, `docs/38`, attend le « go ».

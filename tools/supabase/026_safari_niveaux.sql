@@ -4,10 +4,10 @@
 --   - Normal (2) : vitesse ×2 (chaque Pokémon traverse deux fois plus vite), +4 PK par bon Pokémon, −4 PK par erreur.
 --   - Difficile (3) : vitesse ×3, +8 PK par bon Pokémon, −8 PK par erreur.
 --   - Normal et Difficile peuvent finir en négatif : les PK perdus sont retirés du solde (jamais sous 0 : la perte
---     s'arrête au solde). Facile ne fait jamais perdre de PK (défaut proposé, à confirmer par le porteur).
---   - 2XP PK : double les gains seulement, jamais les pertes (défaut proposé).
+--     s'arrête au solde). Facile ne fait jamais perdre de PK (validé par le porteur le 2026-11-14).
+--   - 2XP PK : double les gains seulement, jamais les pertes (validé par le porteur le 2026-11-14).
 --   - Une perte retire des PK du solde, comme un achat ; elle ne retire rien aux « PK gagnés au total » (grades) ni aux
---     PK de la saison (défaut proposé, comme les dépenses).
+--     PK de la saison (comme les dépenses ; validé par le porteur le 2026-11-14).
 --   - Gain maximal : 36 PK (Facile), 72 PK (Normal), 144 PK (Difficile) ; perte maximale : 0, 72 et 144 PK.
 --   - Les 36 Pokémon (18 bons) passent toujours en 20 s ; seule leur vitesse change. Le serveur garde le niveau de la
 --     partie : il compte lui-même les points à la fin.

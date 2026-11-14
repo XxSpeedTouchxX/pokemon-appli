@@ -151,7 +151,7 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   ok('Difficile : Pokémon 3 fois plus rapides (traversée ' + Math.max(...durs) + ' ms au lieu de 3 000)', durs.length > 0 && Math.max(...durs) <= 1000);
   await p2.waitForTimeout(3200);
   const pk3 = await p2.evaluate(() => window.__pkm.st().pk), e3 = N(await p2.locator('.pkm-sf').innerText()), lost = -((S.finish && S.lvl === 3) ? Math.max(-8 * wrong, -999) : 0);
-  ok('Difficile : ' + wrong + ' erreurs → « −' + (8 * wrong) + ' PK », message de perte, bouton « J’ai compris »', wrong > 2 && new RegExp('−' + (8 * wrong) + ' PK').test(e3) && /Plus d’erreurs que de bons Pokémon/.test(e3) && /retirés de ton solde/.test(e3) && N(await p2.locator('.pkm-sf-go').innerText()) === 'J’ai compris');
+  ok('Difficile : ' + wrong + ' erreurs → « −' + (8 * wrong) + ' PK », message de perte, bouton « Quitter le safari »', wrong > 2 && new RegExp('−' + (8 * wrong) + ' PK').test(e3) && /Plus d’erreurs que de bons Pokémon/.test(e3) && /retirés de ton solde/.test(e3) && N(await p2.locator('.pkm-sf-go').innerText()) === 'Quitter le safari');
   await p2.screenshot({ path: shot('safari-hard-end.png') });
   await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(500);
   const fly = await p2.evaluate(() => ({ n: document.querySelectorAll('.pkm-pafly-lost').length, hurt: !!document.querySelector('header .pkm-bal-pk.pkm-pk-hurt') }));
@@ -166,6 +166,25 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   ok('compte sans délai : « Sans délai » et « GO » juste après une partie', /Sans délai/.test(N(await sc.innerText())) && N(await sc.locator('button.pkm-gm-go').innerText()) === 'GO');
   await sc.locator('button.pkm-gm-go').click(); await p2.waitForTimeout(600);
   ok('compte sans délai : nouvelle partie ouverte (choix du niveau)', (await p2.locator('.pkm-sf-lv').count()) === 3);
+  // Normal (2026-11-14, porteur : « on ne peut pas rentrer dans le jeu ») : on entre dans la partie comme en Facile, que
+  // des bons Pokémon → gain du serveur, « Récupérer mes PK », solde repris du serveur.
+  await p2.locator('.pkm-sf-lv2').click(); await p2.waitForTimeout(800);
+  const b2 = N(await p2.locator('.pkm-sf').innerText());
+  ok('Normal : niveau 2 demandé au serveur, consigne « Niveau Normal · vitesse ×2 », +4 / −4', S.starts[S.starts.length - 1].lvl === 2 && /Niveau Normal · vitesse ×2/.test(b2) && /\+4/.test(b2) && /−4/.test(b2));
+  await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(2300);
+  let goodN = 0;
+  for (let k = 0; k < 44; k++) {
+    await p2.waitForTimeout(400);
+    const pt = await p2.evaluate(() => { const m = [...document.querySelectorAll('.pkm-sf-mon:not(.pkm-sf-hit):not(.pkm-sf-miss)')].find(m => { const r = m.getBoundingClientRect(); return r.left > 8 && r.right < 382 && /\/7\.gif/.test(m.querySelector('img').src); }); if (!m) return null; const r = m.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+    if (pt) { await p2.mouse.click(pt[0], pt[1]); goodN++; }
+  }
+  await p2.waitForTimeout(3200);
+  const eN = N(await p2.locator('.pkm-sf').innerText()), pkN = S.pk;
+  ok('Normal : ' + goodN + ' bons Pokémon → « +' + (4 * goodN) + ' PK », bouton « Récupérer mes PK »', goodN > 2 && new RegExp('\\+' + (4 * goodN) + ' PK').test(eN) && N(await p2.locator('.pkm-sf-go').innerText()) === 'Récupérer mes PK');
+  await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(450);
+  ok('Normal : les gemmes volent vers le solde (' + (await p2.locator('.pkm-pafly-drop').count()) + ')', (await p2.locator('.pkm-pafly-drop').count()) >= 8);
+  await p2.waitForTimeout(2600);
+  ok('Normal : solde repris du serveur (' + pkN + ')', (await p2.evaluate(() => window.__pkm.st().pk)) === pkN);
   await c2.close();
 }
 // Serveur sans 024_safari.sql (2026-11-13, porteur : « rends-le dispo ») : un joueur voit « Bientôt disponible » ; un admin
@@ -221,6 +240,47 @@ for (const role of ['user', 'admin']) {
     await p3.screenshot({ path: shot('safari-apercu.png') });
   }
   await c3.close();
+}
+// Serveur avec 024 mais sans 026 (niveaux) (2026-11-14, porteur : « les deux boutons ne fonctionnent pas ») : un joueur voit
+// « Bientôt disponible » dans le safari (plus un message caché derrière lui) et peut jouer en Facile ; un admin entre
+// dans une partie d'aperçu Normal ou Difficile, sans PK.
+for (const role of ['user', 'admin']) {
+  const FAKE = 'http://127.0.0.1:59994', Q = '&cloud=' + encodeURIComponent(FAKE) + '&cloudkey=test';
+  const UID = 'u-sf6', EMAIL = 'sf6@exemple.fr', TOKEN = 'h.' + Buffer.from(JSON.stringify({ sub: UID, email: EMAIL })).toString('base64url') + '.s';
+  const starts = [];
+  const spawns = Array.from({ length: 36 }, (_, i) => ({ i: i, n: i % 2 ? 7 : 25, ok: i % 2 === 1, t: 300 + i * 500, lane: i % 5, dir: i % 3 ? 1 : -1, dur: 3000 }));
+  const c6 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await c6.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
+  await c6.route(FAKE + '/**', route => {
+    const req = route.request(), p = new URL(req.url()).pathname, send = (st, j) => route.fulfill({ status: st, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(j) });
+    if (p === '/rest/v1/rpc/game_state') return send(200, { pk: 500, pa: 0, pk_earned: 500, unlocked: [], today: new Date().toISOString().slice(0, 10) });
+    if (p === '/rest/v1/rpc/safari_state') return send(200, { last: null, hours: 6, next: new Date().toISOString() });
+    if (p === '/rest/v1/rpc/safari_start') {
+      const a = JSON.parse(req.postData() || '{}'); starts.push(a);
+      if (a.lvl != null) return send(404, { code: 'PGRST202', message: 'Could not find the function public.safari_start(lvl, req) in the schema cache' });
+      return send(200, { round: 'r6', kind: 'Eau', spawns: spawns });
+    }
+    if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Sacha', age_range: '15-25', starter: 25, role: role, status: 'active' }]);
+    if (p === '/auth/v1/token') return send(200, { access_token: TOKEN, refresh_token: 'r', expires_in: 3600, user: { id: UID, email: EMAIL } });
+    return send(404, {});
+  });
+  const p6 = await c6.newPage(); p6.on('pageerror', e => errors.push(e.message));
+  await p6.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await p6.waitForTimeout(600);
+  await p6.evaluate(([tok, uid, email, role]) => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.onb = 0; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: role })); }, [TOKEN, UID, EMAIL, role]);
+  await p6.goto(E2E + '/?start=market&debug' + Q, { waitUntil: 'load' }); await p6.waitForTimeout(2500);
+  const sc6 = p6.locator('section[aria-label="Safari éclair"]'); await sc6.scrollIntoViewIfNeeded();
+  await sc6.locator('button.pkm-gm-go').click(); await p6.waitForTimeout(700);
+  await p6.locator('.pkm-sf-lv2').click(); await p6.waitForTimeout(900);
+  const t6 = N(await p6.locator('.pkm-sf').innerText());
+  if (role === 'user') {
+    ok('sans 026, joueur : « Normal » ouvre « Bientôt disponible » dans le safari, avec « Jouer en Facile »', /Bientôt disponible/.test(t6) && N(await p6.locator('.pkm-sf-go').innerText()) === 'Jouer en Facile');
+    await p6.screenshot({ path: shot('safari-sans-026.png') });
+    await p6.locator('.pkm-sf-go').click(); await p6.waitForTimeout(900);
+    ok('sans 026, joueur : « Jouer en Facile » ouvre la partie Facile du serveur', /Attrape les Pokémon Eau !/.test(N(await p6.locator('.pkm-sf').innerText())) && starts.some(a => a.lvl == null));
+  } else {
+    ok('sans 026, admin : « Normal » ouvre une partie d’aperçu (vitesse ×2, sans PK)', /Niveau Normal · vitesse ×2/.test(t6) && /Aperçu admin : aucun PK/.test(t6) && /install_024_a_027\.sql/.test(t6));
+  }
+  await c6.close();
 }
 // Grades (2026-11-13, porteur) : Safari fermé aux grades Recrue et Chasseur, 24 h Collectionneur, 12 h Dresseur, 6 h Maître, 4 h Grand maître.
 {

@@ -6,6 +6,37 @@
 
 ---
 
+## 2026-11-14 — Safari : Normal et Difficile réparés, sons choisis, sons du coffre, Points de loyauté proposés (demande du porteur)
+
+- **Sons du Safari choisis par le porteur** : « Cristal et trombone » (n° 4) pour bonne et mauvaise réponse, et le son de perte de PK gardé. Les autres paires restent pour essai (`?sonsafari=1` à `5`).
+- **4 règles du Safari validées** par le porteur :
+  - Facile ne fait jamais perdre de PK ;
+  - une perte s'arrête au solde (jamais sous 0) ;
+  - le 2XP PK double les gains, jamais les pertes ;
+  - une perte ne fait reculer ni le grade ni le classement de la saison, comme une dépense.
+- **Normal et Difficile « ne fonctionnaient pas »** : quand le serveur n'a pas encore le script des niveaux (`026`), le message partait sous l'écran du safari et le bouton semblait ne rien faire. Désormais :
+  - un joueur voit « Bientôt disponible » dans le safari, avec « Jouer en Facile » ;
+  - un admin entre dans une partie d'aperçu Normal ou Difficile (sans PK), avec le rappel d'installer `install_024_a_027.sql`.
+
+  Avec ce fichier installé dans Studio, les deux niveaux s'ouvrent à tous. On y entre comme en Facile, et à la fin d'une partie gagnée on récupère ses PK (vérifié avec le faux serveur des tests).
+- **« Quitter le safari »** remplace « J'ai compris » après une perte (les PK quittent le solde en sortant) et « Fermer » après un total de 0.
+- **Ouverture du coffre mystère : 5 sons proposés** (`sfx.js`, `?soncoffre=1` à `5`) : Coffre au trésor (par défaut en attendant le choix), Coffre magique, Fanfare du trésor, Coffre de cristal, Pièces d'or.
+  - Chaque son a deux temps, calés sur l'animation : l'arrivée (chute et deux rebonds), puis l'ouverture quand le serveur répond.
+  - L'ouverture est plus riche pour un gros lot et pour un légendaire.
+  - Échantillons envoyés au porteur ; **choix attendu**.
+- **Points de loyauté (PL) proposés** (`docs/38`) : la demande du porteur est d'ajouter des défis, un classement de saison en PL, « Ma progression » en 2 pages (« Classement et récompenses », « Gagner des PL ») et une nouvelle grille de lots.
+  - **Avis** : oui, si les PL ne sont pas une monnaie (ni achat, ni dépense, visibles seulement dans « Ma progression »).
+  - **2 défis interdits tels quels** :
+    - récompenser des clics sur des pubs (règles de Google) ;
+    - récompenser un avis sur les stores (règles de Google et d'Apple).
+
+    Remplacés par une vidéo récompensée, plus tard, et un bouton « Noter Dropicards » sans PL.
+  - Garde-fous du parrainage : filleul actif 3 jours, Premium compté après 14 jours, 20 filleuls par saison.
+  - Lots ≈ 190 € par saison ; règlement à publier.
+  - ≈ 40 h de travail ; **8 décisions attendues, rien n'est codé sans « go »**.
+  - **Logo choisi par le porteur : « Bouclier-cœur »** (`web/img/brand/pl.svg`, 5 propositions dans `tools/brand/pl/`).
+- Cache v194.
+
 ## 2026-11-13 (nuit, fin) — Cadrage des cartes : premier passage annulé, détection refaite, essai à blanc d'abord
 
 - **Ce qui s'est passé** : le premier passage du workflow « Cadrage des cartes » a « redressé » 723 visuels, presque tous des scans droits (cartes récentes au bord argenté : le bord était pris pour un fond, les cadres dessinés pour les bords de la carte). Rayquaza ☆ (ex8-107), la carte envoyée par le porteur, n'était même pas repéré. **Tout a été retiré aussitôt** (`web/data/img-fix.json` vide, aucun visuel redressé dans l'app).

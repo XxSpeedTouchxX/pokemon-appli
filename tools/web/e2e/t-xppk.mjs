@@ -27,8 +27,12 @@ ok('les 3 légendaires : 2XP PK 10 jours 25 %', (await sec.locator('.pkm-my-odds
 await sec.locator('.pkm-my-odds').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('mystery-odds-legendaires.png') });
 await page.evaluate(() => window.__pkm.setState({ pkOwn: [1, 4, 7, 25] })); await page.waitForTimeout(200);
 const open = async lot => { await page.evaluate(l => { window.__myLot = l; }, lot); await sec.locator('button:has-text("Ouvrir une boîte")').click(); await page.waitForTimeout(250); await sec.locator('.pkm-xp-ask button:has-text("Ouvrir")').click(); await page.waitForTimeout(3400); };
+await page.evaluate(() => { window.__chest = []; const f = window.__pkm.sfxChest; window.__pkm.sfxChest = function (ph, n) { window.__chest.push(ph + (n ? ':' + n : '')); return f.call(this, ph, n); }; });
 await open('xp-7');
 const fx = page.locator('.pkm-mx');
+// Son du coffre (2026-11-14, porteur : « propose-moi plusieurs sons pour l'ouverture de coffre mystère ») : arrivée dès
+// l'appui, puis ouverture avec le rang du lot (2XP PK 7 jours = gros lot, rang 2).
+ok('son du coffre : arrivée puis ouverture (« ' + (await page.evaluate(() => window.__chest.join(', '))) + ' »)', (await page.evaluate(() => window.__chest.join(','))) === 'start,open:2');
 ok('ouverture (d’après la vidéo du porteur) : écran du lot « 2XP PK », « 7 jours », « Touche pour continuer »', (await fx.count()) === 1 && /2XP PK/i.test(N(await fx.innerText())) && /7 jours/.test(N(await fx.innerText())) && /Touche pour continuer/i.test(N(await fx.innerText())) && (await fx.evaluate(e => e.classList.contains('pkm-mx-ready'))));
 await page.screenshot({ path: shot('mystery-open.png') });
 await fx.click(); await page.waitForTimeout(350); await page.waitForTimeout(300);

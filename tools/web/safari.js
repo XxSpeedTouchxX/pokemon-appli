@@ -162,15 +162,25 @@
     if (!sfCloud()) { go(sfLocalRound(lvl)); return; }
     // Aperçu pour un admin tant que 024_safari.sql n'est pas installé (2026-11-13, porteur : « rends-le dispo ») :
     // partie complète tirée sur l'appareil, aucun PK crédité, rien d'enregistré.
-    const preview = () => { SF.preview = true; this.setState({ toast: 'Aperçu admin : aucun PK. Installe install_024_a_027.sql dans Studio pour ouvrir le safari à tous.' }); go(sfLocalRound(lvl)); };
+    const preview = () => { SF.preview = true; go(sfLocalRound(lvl)); };
     if (this.st().sfOff && Cloud.isAdmin()) { preview(); return; }
     // Serveur sans 026 (niveaux) : partie Facile seulement, comme avant ; le joueur est prévenu.
     const start = lvl === 1 ? Cloud.rpc('safari_start', { req: Cloud.reqId(), lvl: 1 }).catch(e => (e && e.code === 'not_installed' ? Cloud.rpc('safari_start', { req: Cloud.reqId() }) : Promise.reject(e)))
       : Cloud.rpc('safari_start', { req: Cloud.reqId(), lvl: lvl });
     start.then(r => go(r), e => {
+      // Serveur sans 026 (niveaux) : Normal et Difficile ne peuvent pas compter les points sur le serveur. Avant, un
+      // message partait sous le calque du safari et le bouton semblait ne rien faire (2026-11-14, porteur : « les deux
+      // boutons ne fonctionnent pas, on ne peut pas rentrer dans le jeu »). Admin : partie d'aperçu jouable (sans PK) ;
+      // joueur : message dans le safari, avec « Jouer en Facile ».
       if (e && e.code === 'not_installed' && lvl > 1 && SF && !this.st().sfOff) {
-        this.setState({ toast: 'Les niveaux Normal et Difficile arrivent très bientôt ! Joue en Facile en attendant.' + (Cloud.isAdmin() ? ' [admin : installe 026_safari_niveaux.sql]' : '') });
-        SF.phase = 'levels'; this.sfLevels(); return;
+        if (Cloud.isAdmin()) { SF.noLvl = true; preview(); return; }
+        SF.phase = 'soon';
+        this.sfPanel('<div class="pkm-sf-card pkm-sf-soon"><h2 class="pkm-sf-h">Bientôt disponible</h2>'
+          + '<p class="pkm-sf-p">Les niveaux <b>Normal</b> et <b>Difficile</b> ouvrent très bientôt. En attendant, joue en <b>Facile</b> : sans risque, jusqu’à +36 PK.</p>'
+          + '<button type="button" class="pkm-sf-go">Jouer en Facile</button><button type="button" class="pkm-sf-relv">Retour aux niveaux</button></div>');
+        SF.el.querySelector('.pkm-sf-go').addEventListener('click', () => { if (SF && SF.phase === 'soon') { SF.phase = 'levels'; this.sfStart(1); } });
+        SF.el.querySelector('.pkm-sf-relv').addEventListener('click', () => { if (SF && SF.phase === 'soon') this.sfLevels(); });
+        return;
       }
       if (e && e.code === 'not_installed' && Cloud.isAdmin() && SF) { this.setState({ sfOff: true }); preview(); return; }
       this.sfClose();
@@ -191,11 +201,12 @@
       + '<div class="pkm-sf-rules"><div><b>20 s</b>de partie</div><div><b class="pkm-sf-plus">+' + lv.plus + '</b>PK par bon Pokémon</div><div><b class="pkm-sf-minus">−' + lv.minus + '</b>PK par erreur</div></div>'
       + (lv.loss ? '<p class="pkm-sf-warn"><b>⚠️ Attention :</b> si tu fais plus d’erreurs que de bons Pokémon, ton total finit en négatif et ces PK sont <b>retirés de ton solde</b> (jusqu’à ' + lv.loss + ' PK, jamais sous 0).</p>'
         : '<p class="pkm-sf-safe">✓ Niveau sans risque : au pire, tu gagnes 0 PK.</p>')
+      + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : aucun PK. ' + (SF.noLvl ? 'Installe install_024_a_027.sql dans Studio pour ouvrir Normal et Difficile à tous.' : 'Installe install_024_a_027.sql dans Studio pour ouvrir le safari à tous.') + '</p>' : '')
       + '<button type="button" class="pkm-sf-go">C’est parti !</button>'
       + '<button type="button" class="pkm-sf-relv">Changer de niveau</button></div>');
     SF.phase = 'brief';
     SF.el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfCount());
-    SF.el.querySelector('.pkm-sf-relv').addEventListener('click', () => { if (SF && SF.phase === 'brief') this.sfLevels(); });
+    SF.el.querySelector('.pkm-sf-relv').addEventListener('click', () => { if (SF && SF.phase === 'brief') { if (SF.noLvl) { SF.preview = false; SF.noLvl = false; } this.sfLevels(); } });
   };
   // 2. Compte à rebours 3, 2, 1.
   sfProto.sfCount = function () {
@@ -281,7 +292,8 @@
         + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : les PK ne sont pas enregistrés tant que 024_safari.sql n’est pas installé dans Studio (install_024_a_027.sql).</p>' : (sfFree(this.st()) ? '<p class="pkm-sf-next">Sans délai : tu peux rejouer tout de suite</p>' : this.sfHours() ? '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>' : ''))
         // « Récupérer mes PK » à la place de « Fermer » (2026-11-13, porteur) : les gemmes volent jusqu'au solde, avec
         // l'animation et le bruit des PA du jour (aussi dans l'aperçu admin, où le solde ne bouge pas).
-        + '<button type="button" class="pkm-sf-go' + (won > 0 ? ' pkm-sf-collect' : won < 0 ? ' pkm-sf-lose' : '') + '">' + (won > 0 ? 'Récupérer mes PK' : won < 0 ? 'J’ai compris' : 'Fermer') + '</button></div>');
+        // Perte ou 0 : « Quitter le safari » (2026-11-14, porteur) ; après une perte, les PK quittent le solde en sortant.
+        + '<button type="button" class="pkm-sf-go' + (won > 0 ? ' pkm-sf-collect' : won < 0 ? ' pkm-sf-lose' : '') + '">' + (won > 0 ? 'Récupérer mes PK' : 'Quitter le safari') + '</button></div>');
       if (SF.preview) {
         const cur = Number(this.st().pk) || 0;
         if (won !== 0) { SF.pend = { won: won, from: cur, final: cur, preview: true }; el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfCollect(true)); }

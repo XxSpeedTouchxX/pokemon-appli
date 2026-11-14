@@ -638,8 +638,78 @@
       ok: (ac, out, t0) => { sfxPop(ac, out, t0, 0.35); sfxBell(ac, out, sfxHz(24), t0 + 0.05, 0.3, 0.05, [1, 2.0], [1, 0.2]); },
       ko: (ac, out, t0) => { sfxTone(ac, out, 'sine', 190, t0, 0.09, 0.35, 0.002, 120); sfxHiss(ac, out, t0, 0.05, 0.12, 'bandpass', 700, 400, 2, 0.001); } }
   ];
-  // Défaut (en attendant le choix du porteur) : « Clochette et bourdon ».
-  const SFX_SF_DEFAULT = 'cloche';
+  // Choix du porteur (2026-11-14, « ok pour garder le son 4 (cristal) et ok pour garder le son "perte de PK" ») :
+  // « Cristal et trombone » ; les autres pour essai seulement (?sonsafari=1 à 5, 0 = aucun).
+  const SFX_SF_DEFAULT = 'cristal';
+
+  // ——— Ouverture du coffre mystère (xppk.js, myStage ; 2026-11-14, porteur : « propose-moi plusieurs sons pour
+  // l'ouverture de coffre mystère ») ———
+  // Deux temps, calés sur l'animation (games.css, pkmMx*) : l'arrivée (start), joué dès l'appui (chute posée à 0,65 s,
+  // deux sauts qui retombent à 1,34 s et 1,89 s), puis l'ouverture (open), jouée quand le serveur a répondu (au plus
+  // tôt 2,05 s après l'appui) : le coffre se tasse et s'ouvre (0 à 0,42 s), éclair et lot (0,42 s), le lot se pose
+  // (1,12 s), son nombre apparaît (1,27 s). n = rang du lot : 1 (scans, 2XP 3 jours), 2 (2XP 7 et 10 jours, 2XP PA),
+  // 3 (Pokémon légendaire). 5 propositions ; ?soncoffre=1 à 5 pour en essayer une (0 = aucun).
+  const SFX_CH_LAND = [0.65, 1.34, 1.89], SFX_CH_FLASH = 0.42, SFX_CH_ITEM = 1.12, SFX_CH_COUNT = 1.27, SFX_CH_GO = 2.05;
+  // Coup de bois (coffre qui se pose) : coup sourd et petit claquement filtré.
+  const sfxWood = (ac, out, at, vol) => { sfxThump(ac, out, at, vol, 150, 60, 0.16); sfxHiss(ac, out, at, 0.06, vol * 0.35, 'bandpass', 900, 500, 1.5, 0.001); };
+  // Charnière qui grince : dent de scie grave qui monte, filtrée, avec un peu de souffle.
+  const sfxCreak = (ac, out, at, dur, vol) => {
+    const o = ac.createOscillator(), fl = ac.createBiquadFilter(), g = ac.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(70, at); o.frequency.linearRampToValueAtTime(115, at + dur * 0.5); o.frequency.linearRampToValueAtTime(95, at + dur);
+    fl.type = 'bandpass'; fl.frequency.value = 1300; fl.Q.value = 6;
+    sfxEnv(g, at, dur * 0.3, vol, dur);
+    o.connect(fl); fl.connect(g); g.connect(out); o.start(at); o.stop(at + dur + 0.05);
+  };
+  // Pièces qui tintent : petites cloches très aiguës et brèves, « au hasard » mais toujours les mêmes.
+  const sfxCoins = (ac, out, from, to, k, vol) => { for (let i = 0; i < k; i++) { const u = ((i * 7919) % 97) / 97, w = ((i * 104729) % 89) / 89; sfxBell(ac, out, 2900 + w * 1900, from + (to - from) * (i + u * 0.7) / k, 0.22, vol * (0.55 + 0.45 * u), [1, 1.53, 2.37], [1, 0.45, 0.2]); } };
+  const SFX_CHEST = [
+    { id: 'tresor', name: 'Coffre au trésor', desc: 'Le coffre de bois se pose et rebondit (« toc »), le loquet claque, la charnière grince, puis un accord de clochettes et des étincelles. Pour un légendaire, une petite fanfare en plus.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxWood(ac, out, t0 + d, i ? 0.35 : 0.55)),
+      open: (ac, out, t0, n) => {
+        sfxSoftClick(ac, out, t0, 0.35);
+        sfxCreak(ac, out, t0 + 0.06, 0.34, 0.07);
+        [3, 7, 10, 15].forEach((k, i) => sfxBell(ac, out, sfxHz(k + 12), t0 + SFX_CH_FLASH + i * 0.05, 1.1, 0.06, [1, 2.0, 3.0], [1, 0.25, 0.08]));
+        sfxSparkle(ac, out, t0 + SFX_CH_FLASH + 0.05, t0 + SFX_CH_ITEM, 8, 0.03);
+        sfxThump(ac, out, t0 + SFX_CH_ITEM, 0.25, 140, 70, 0.14);
+        sfxTone(ac, out, 'triangle', sfxHz(n > 1 ? 22 : 19), t0 + SFX_CH_COUNT, 0.35, 0.07, 0.005);
+        if (n > 2) [[3, 7, 10], [5, 9, 12], [7, 11, 14]].forEach((ch, j) => ch.forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_CH_COUNT + 0.15 + j * 0.16, j === 2 ? 0.7 : 0.14, 0.035)));
+      } },
+    { id: 'magique', name: 'Coffre magique', desc: 'Des « whoop » qui montent à chaque saut, un souffle qui enfle pendant que le coffre se tasse, puis un accord féerique tenu, pailleté d’étincelles.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => { sfxThump(ac, out, t0 + d, i ? 0.22 : 0.4, 120, 55, 0.18); if (i) sfxTone(ac, out, 'sine', 300 + i * 120, t0 + d - 0.32, 0.26, 0.07, 0.02, 700 + i * 160); }),
+      open: (ac, out, t0, n) => {
+        sfxHiss(ac, out, t0, SFX_CH_FLASH + 0.08, 0.12, 'lowpass', 400, 7000, 1.2, SFX_CH_FLASH);
+        sfxPad(ac, out, n > 2 ? [3, 7, 10, 14, 19] : [3, 7, 10, 14], t0 + SFX_CH_FLASH, 1.8, 0.022, 0.05);
+        sfxSparkle(ac, out, t0 + SFX_CH_FLASH, t0 + 1.6, n > 2 ? 16 : 10, 0.03, 3000);
+        sfxBell(ac, out, sfxHz(27), t0 + SFX_CH_ITEM, 0.8, 0.05, [1, 2.0, 3.0], [1, 0.3, 0.1]);
+      } },
+    { id: 'fanfare', name: 'Fanfare du trésor', desc: 'Des coups de timbale à chaque rebond, un roulement de tambour pendant que le coffre se tasse, puis un « ta-da ! » de cuivres. Plus long pour un légendaire.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxThump(ac, out, t0 + d, i ? 0.4 : 0.6, 95, 48, 0.3)),
+      open: (ac, out, t0, n) => {
+        for (let i = 0; i < 12; i++) sfxHiss(ac, out, t0 + i * 0.035, 0.04, 0.05 + i * 0.006, 'bandpass', 1800, 1200, 1.4, 0.001);
+        sfxThump(ac, out, t0 + SFX_CH_FLASH, 0.45, 110, 50, 0.3);
+        [3, 7, 10].forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_CH_FLASH, 0.13, 0.04));
+        [3, 7, 10, 15].forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_CH_FLASH + 0.16, n > 2 ? 0.3 : 0.6, 0.04));
+        if (n > 2) [[5, 8, 12], [7, 10, 14, 19]].forEach((ch, j) => ch.forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_CH_FLASH + 0.5 + j * 0.2, j ? 0.8 : 0.18, 0.035)));
+        sfxThump(ac, out, t0 + SFX_CH_ITEM, 0.25, 140, 70, 0.14);
+      } },
+    { id: 'cristal', name: 'Coffre de cristal', desc: 'Dans l’esprit des sons « Cristal » du Safari : un tintement de verre à chaque rebond, un arpège de cristal qui monte, un éclat qui se brise en mille étincelles, puis l’arpège de la bonne réponse.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => { sfxThump(ac, out, t0 + d, i ? 0.18 : 0.3, 130, 60, 0.12); sfxBell(ac, out, sfxHz(22 + i * 3), t0 + d, 0.5, 0.05, [1, 2.0, 3.0], [1, 0.25, 0.1]); }),
+      open: (ac, out, t0, n) => {
+        [3, 7, 10, 15, 19, 22].forEach((k, i) => sfxBell(ac, out, sfxHz(k + 12), t0 + i * 0.065, 0.35, 0.035, [1, 2.0, 3.0], [1, 0.25, 0.1]));
+        sfxHiss(ac, out, t0 + SFX_CH_FLASH, 0.35, 0.09, 'highpass', 5000, 3000, 0.8, 0.002);
+        sfxSparkle(ac, out, t0 + SFX_CH_FLASH, t0 + 1.0, 14, 0.04, 3200);
+        [15, 19, 22].concat(n > 2 ? [27, 31] : []).forEach((k, i) => sfxBell(ac, out, sfxHz(k + 12), t0 + SFX_CH_ITEM + i * 0.045, 0.5, 0.05, [1, 2.0, 3.0], [1, 0.25, 0.1]));
+      } },
+    { id: 'pieces', name: 'Pièces d’or', desc: 'Un coffre lourd qui se pose, des pièces qui tintent dedans à chaque rebond, la charnière qui grince, puis une cascade de pièces et un « ding » final.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => { sfxWood(ac, out, t0 + d, i ? 0.32 : 0.5); sfxCoins(ac, out, t0 + d + 0.01, t0 + d + 0.18, 4, 0.025); }),
+      open: (ac, out, t0, n) => {
+        sfxCreak(ac, out, t0, 0.38, 0.08);
+        sfxCoins(ac, out, t0 + SFX_CH_FLASH, t0 + SFX_CH_FLASH + (n > 2 ? 1.1 : 0.7), n > 2 ? 26 : 16, 0.03);
+        sfxBell(ac, out, sfxHz(n > 1 ? 24 : 19), t0 + SFX_CH_COUNT, 1.0, 0.06, [1, 2.0, 3.0], [1, 0.3, 0.1]);
+      } }
+  ];
+  // Défaut (en attendant le choix du porteur) : « Coffre au trésor ».
+  const SFX_CHEST_DEFAULT = 'tresor';
   // Perte de PK à la fin d'une partie (pa.js, pkFlyLoss) : des gouttes qui tombent de plus en plus grave, puis un coup
   // sourd et une petite note qui descend, au rythme des gemmes qui quittent le solde.
   const sfxLossPlay = (ac, out, t0) => {
@@ -662,6 +732,8 @@
     // Safari éclair (sons courts, crête vers −6 dBFS, réglés sur leur rendu) et perte de PK.
     'sf-cloche-ok': 3.3, 'sf-cloche-ko': 7.9, 'sf-bulle-ok': 2.6, 'sf-bulle-ko': 2.5, 'sf-arcade-ok': 9.3, 'sf-arcade-ko': 9.9,
     'sf-cristal-ok': 3.8, 'sf-cristal-ko': 2.2, 'sf-pop-ok': 1.45, 'sf-pop-ko': 1.6, loss: 1.26,
+    // Coffre mystère (crête vers −6 dBFS, réglés sur leur rendu).
+    'ch-tresor': 0.66, 'ch-magique': 1, 'ch-fanfare': 0.62, 'ch-cristal': 1.25, 'ch-pieces': 0.75,
     'gr-origine': 0.55, 'gr-couronnement': 0.45, 'gr-celeste': 0.5, 'gr-trailer': 0.45, 'gr-arcade': 1.5, 'gr-tonnerre': 0.45 };
   const SFX_MUSIC_LEVEL = 0.75;
 
@@ -696,6 +768,16 @@
   function sfxSchedule(ac, dest, kind, id, t0, n) {
     if (kind === 'coin') { sfxCoin(ac, sfxBus(ac, dest, SFX_GAIN.coin), t0); return true; }
     if (kind === 'loss') { sfxLossPlay(ac, sfxBus(ac, dest, SFX_GAIN.loss), t0); return true; }
+    // Coffre mystère : 'chs' (arrivée), 'cho' (ouverture, n = rang du lot), 'chest' (les deux, ouverture à 2,05 s :
+    // échantillons et tests).
+    if (kind === 'chs' || kind === 'cho' || kind === 'chest') {
+      const it = SFX_CHEST.find(x => x.id === id);
+      if (!it) return false;
+      const bus = sfxBus(ac, dest, SFX_GAIN['ch-' + id] || 1);
+      if (kind !== 'cho') it.start(ac, bus, t0);
+      if (kind !== 'chs') it.open(ac, bus, t0 + (kind === 'chest' ? SFX_CH_GO : 0), Math.max(1, Math.min(3, n || 1)));
+      return true;
+    }
     if (kind === 'sfok' || kind === 'sfko') {
       const it = SFX_SF.find(x => x.id === id), side = kind === 'sfok' ? 'ok' : 'ko';
       if (!it) return false;
@@ -774,6 +856,14 @@
       if (ac && x) sfxSchedule(ac, ac.destination, ok ? 'sfok' : 'sfko', x.id, ac.currentTime + 0.005);
     } catch (e) { /* son indisponible */ }
   };
+  // Coffre mystère (xppk.js, myStage) : arrivée dès l'appui, ouverture quand le serveur répond (n = rang du lot).
+  sfxProto.sfxChest = function (phase, n) {
+    try {
+      if (sfxMuted()) return;
+      const ac = sfxCtx(), x = sfxPick('soncoffre', '', SFX_CHEST, SFX_CHEST_DEFAULT);
+      if (ac && x) sfxSchedule(ac, ac.destination, phase === 'open' ? 'cho' : 'chs', x.id, ac.currentTime + 0.01, n);
+    } catch (e) { /* son indisponible */ }
+  };
   // Perte de PK (pa.js, pkFlyLoss).
   sfxProto.sfxLoss = function () {
     try { if (sfxMuted()) return; const ac = sfxCtx(); if (ac) sfxSchedule(ac, ac.destination, 'loss', '', ac.currentTime + 0.02); } catch (e) { /* son indisponible */ }
@@ -814,4 +904,5 @@
     grade: SFX_GRADE.map(x => ({ id: x.id, name: x.name, desc: x.desc })), gradeDef: SFX_GRADE_DEFAULT,
     booster: SFX_BOOSTER.map(x => ({ id: x.id, name: x.name, desc: x.desc })), boosterDef: SFX_BOOSTER_DEFAULT,
     unlock: SFX_UNLOCK.map(x => ({ id: x.id, name: x.name, desc: x.desc })), unlockDef: SFX_UNLOCK_DEFAULT,
-    safari: SFX_SF.map(x => ({ id: x.id, name: x.name, desc: x.desc })), safariDef: SFX_SF_DEFAULT }; };
+    safari: SFX_SF.map(x => ({ id: x.id, name: x.name, desc: x.desc })), safariDef: SFX_SF_DEFAULT,
+    chest: SFX_CHEST.map(x => ({ id: x.id, name: x.name, desc: x.desc })), chestDef: SFX_CHEST_DEFAULT }; };

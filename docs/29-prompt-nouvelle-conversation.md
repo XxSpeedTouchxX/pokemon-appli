@@ -25,7 +25,7 @@ Tu reprends le projet **Dropicards** (nom de code PKM-App), une app pour les col
 
 - **Source** : le gabarit `docs/12-maquette-v5/Main.dc.html` et les modules `tools/web/*.js` (start, cloud, game-cloud, passkey, premium, pkshop, pa, dex, tuto, fiche, legal…), et `tools/web/catalog.dc.html` (fragments).
 - **Construction** : `node tools/web/build.mjs` génère `web/index.html`, `web/app.js` (minifié), les pages légales publiques (`web/mentions-legales.html`, `confidentialite.html`, `cgu.html`, `cgv.html`, à partir de `legal.js`) et le reste.
-- **À chaque changement visible** : monter la version du cache dans `web/sw.js` (`pkm-demo-vNNN`, **v193** au 2026-11-13), reconstruire, lancer les tests, ajouter une ligne au journal, à `CLAUDE.md` §3 et à `tools/web/README.md`, faire un commit court, puis pousser.
+- **À chaque changement visible** : monter la version du cache dans `web/sw.js` (`pkm-demo-vNNN`, **v194** au 2026-11-14), reconstruire, lancer les tests, ajouter une ligne au journal, à `CLAUDE.md` §3 et à `tools/web/README.md`, faire un commit court, puis pousser.
 - **Tests navigateur** :
 
   ```
@@ -69,6 +69,7 @@ Tu reprends le projet **Dropicards** (nom de code PKM-App), une app pour les col
   - faire relire les textes légaux par un juriste.
 - **À essayer sur un vrai téléphone** : Face ID, la connexion directe, la connexion obligatoire.
 - **P4** (historique des prix pour les non-Premium) : en attente de la décision du porteur (`docs/27`).
+- **Points de loyauté (PL)** (`docs/38`, 2026-11-14) : proposition, 8 décisions attendues (L1 à L8 ; logo « Bouclier-cœur » déjà choisi), **rien codé sans « go »**. Son d'ouverture du coffre mystère : 5 propositions (`?soncoffre=1-5`), choix attendu.
 - **Plus tard, App Store et Play Store** (`docs/23`) : option A choisie pour l'instant (paiement Premium sur le site seulement, bouton caché dans les apps des stores) ; option B possible (achat intégré).
 - **Serveur** :
   - faire un essai de restauration d'une sauvegarde ;

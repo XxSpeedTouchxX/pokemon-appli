@@ -18,7 +18,7 @@ await ctx.addInitScript(() => {
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?debug&start=market', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 const L = await page.evaluate(() => window.__pkm.sfxLists());
-ok('sons du Safari : ' + L.safari.map(x => x.name).join(', ') + ' (par défaut : ' + L.safariDef + ')', L.safari.length === 5 && L.safariDef === 'cloche');
+ok('sons du Safari : ' + L.safari.map(x => x.name).join(', ') + ' (choix du porteur : ' + L.safariDef + ')', L.safari.length === 5 && L.safariDef === 'cristal');
 const lv = [];
 for (const x of L.safari) for (const k of ['sfok', 'sfko']) {
   const r = await page.evaluate(([k, id]) => window.__pkm.sfxRender([[k, id]], 0.8).then(v => ({ peak: v.peak, rms: v.rms })), [k, x.id]);
@@ -27,6 +27,15 @@ for (const x of L.safari) for (const k of ['sfok', 'sfko']) {
 const loss = await page.evaluate(() => window.__pkm.sfxRender([['loss', '']], 1.8).then(v => ({ peak: v.peak, rms: v.rms })));
 lv.push(['perte', db(loss.peak)]);
 ok('niveaux (crête, dBFS) : ' + lv.map(x => x.join(' ')).join(' · '), lv.every(([, p]) => p <= -5 && p >= -12));
+// Coffre mystère (2026-11-14, porteur : « propose-moi plusieurs sons pour l'ouverture de coffre mystère ») : 5 propositions,
+// arrivée + ouverture (petit lot et légendaire), crête entre −12 et −3 dBFS.
+ok('sons du coffre : ' + L.chest.map(x => x.name).join(', ') + ' (par défaut : ' + L.chestDef + ')', L.chest.length === 5 && L.chestDef === 'tresor');
+const lc = [];
+for (const x of L.chest) for (const n of [1, 3]) {
+  const r = await page.evaluate(([id, n]) => window.__pkm.sfxRender([['chest', id, n]], 4.4).then(v => ({ peak: v.peak, rms: v.rms })), [x.id, n]);
+  lc.push([x.id + (n === 3 ? ' légendaire' : ''), db(r.peak), db(r.rms)]);
+}
+ok('niveaux du coffre (crête, dBFS) : ' + lc.map(x => x[0] + ' ' + x[1]).join(' · '), lc.every(([, p]) => p <= -3 && p >= -12));
 // Joué au toucher : quelques notes, rien avec ?sonsafari=0.
 await page.evaluate(() => { window.__osc = 0; window.__pkm.sfxSafari(true); window.__pkm.sfxSafari(false); window.__pkm.sfxLoss(); });
 await page.waitForTimeout(200);
@@ -53,6 +62,13 @@ if (process.env.SFX_OUT) {
   }
   const l = await page.evaluate(() => window.__pkm.sfxRender([['loss', '']], 1.8));
   writeFileSync(process.env.SFX_OUT + '/safari-perte-de-pk.wav', wav(l.b64, l.rate));
+  // Coffre : un petit lot, puis un légendaire (deux ouvertures de 4,4 s à la suite).
+  for (const [i, x] of L.chest.entries()) {
+    const a = await page.evaluate(id => window.__pkm.sfxRender([['chest', id, 1]], 4.4), x.id);
+    const b = await page.evaluate(id => window.__pkm.sfxRender([['chest', id, 3]], 4.4), x.id);
+    const pcm = Buffer.concat([Buffer.from(a.b64, 'base64'), Buffer.from(b.b64, 'base64')]);
+    writeFileSync(process.env.SFX_OUT + '/coffre-' + (i + 1) + '-' + x.id + '.wav', wav(pcm.toString('base64'), a.rate));
+  }
   res.push('  (échantillons écrits dans ' + process.env.SFX_OUT + ')');
 }
 ok('aucune erreur JS', errors.length === 0);
