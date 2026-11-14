@@ -41,7 +41,9 @@ Tout tourne sur ce qui existe déjà : le Supabase installé par Coolify et une 
    - option plus tard : IA pour les titres difficiles (coût à estimer à ce moment-là).
 6. **« Bonne affaire »** = annonce à prix fixe reliée avec une bonne confiance, livraison comprise, au moins 20 % sous la cote Cardmarket de la carte dans sa langue (**seuil à confirmer**).
 
-Exigence d'eBay à prévoir : les applications en production doivent soit recevoir les notifications de suppression de compte d'eBay, soit déclarer ne garder aucune donnée d'utilisateur eBay. Comme on ne garde aucun vendeur, la déclaration devrait suffire (**à confirmer** au moment de créer les clés).
+**Accès en production (vérifié le 2026-11-14, `docs/42`) :** l'API Browse est réservée aux partenaires d'eBay : compte EPN, demande « Buy API » acceptée (réponse en 10 jours ouvrés au plus), relecture par le support développeur, contrat signé ; refus possible. Règles : prix fixe seulement, livraison en France, tri d'eBay à ne pas modifier. Les filtres « Enchères » et le tri « Moins chères » du § 4 sont donc à revoir pour eBay.
+
+Exigence d'eBay à prévoir : les applications en production doivent soit recevoir les notifications de suppression de compte d'eBay, soit déclarer ne garder aucune donnée d'utilisateur eBay. Dropicards garde des annonces : la déclaration « aucune donnée gardée » ne serait pas exacte ; une petite fonction du serveur recevra donc ces avis (`docs/42`, étapes 4 et 5).
 
 ## 4. Ce que voit l'utilisateur
 
