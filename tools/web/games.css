@@ -333,8 +333,45 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fi-row-v { font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: #F3F6FC; }
 .pkm-fi-tag { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
 .pkm-fi-note { font-size: 12px; line-height: 1.45; color: #9AA8C3; }
-.pkm-fi-buy { height: 46px; border-radius: 999px; background: #F3F6FC; color: #0B1120; font-size: 14.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; text-decoration: none; }
-.pkm-fi-ebay, .pkm-fi-vinted { min-height: 40px; display: flex; align-items: center; justify-content: center; color: #B9C5FF; font-size: 13.5px; font-weight: 700; text-decoration: none; }
+.pkm-fi-buy { height: 48px; border-radius: 999px; background: #F3F6FC; color: #0B1120; font-size: 14.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
+.pkm-fi-ebay, .pkm-fi-vinted { min-width: 0; height: 46px; padding: 0 10px; border-radius: 999px; border: 1px solid #2E3F6B; background: #0B1120; display: flex; align-items: center; justify-content: center; gap: 8px; color: #F3F6FC; font-size: 13.5px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+/* Bloc « Prix du marché » sur le modèle de PokéItem (2026-11-14, porteur) : une ligne par source, logo du site dans une
+   pastille blanche (web/img/market : Simple Icons, CC0 ; marques de leurs propriétaires), prix ou lien à droite ; détail
+   Cardmarket en cases ; date ; « Signaler une erreur de prix » ; boutons avec logos. */
+.pkm-fm { gap: 10px; }
+.pkm-fm .pkm-fi-h3 .pkm-fi-flag { flex: none; }
+.pkm-fm-list { display: flex; flex-direction: column; gap: 8px; }
+.pkm-fm-row { min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; border: 1px solid #24345C; background: #18233F; color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+a.pkm-fm-row:active { background: #1E2B4D; }
+.pkm-fm-logo { flex: none; width: 44px; height: 44px; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.pkm-fm-logo img { display: block; max-width: 34px; max-height: 30px; width: auto; height: auto; }
+.pkm-fm-logo-dp { background: transparent; }
+.pkm-fm-logo-dp img { width: 44px; height: 44px; max-width: none; max-height: none; }
+.pkm-fm-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-fm-name { font-size: 14.5px; font-weight: 700; color: #F3F6FC; }
+.pkm-fm-sub { font-size: 12px; line-height: 1.35; color: #9AA8C3; }
+.pkm-fm-end { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.pkm-fm-v { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; color: #F3F6FC; }
+.pkm-fm-conf { align-self: flex-start; margin-top: 3px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.pkm-fm-conf-ok { background: rgba(61, 220, 132, 0.14); color: #3DDC84; }
+.pkm-fm-conf-mid { background: rgba(255, 213, 79, 0.14); color: #FFD54F; }
+.pkm-fm-conf-low { background: rgba(245, 177, 76, 0.16); color: #F5B14C; }
+.pkm-fm-go { flex: none; font-size: 13.5px; font-weight: 700; white-space: nowrap; color: #B9C5FF; }
+.pkm-fm-detail { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; border: 1px solid #24345C; background: #0F1830; }
+.pkm-fm-dh { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #C9D3EA; }
+.pkm-fm-mini { flex: none; width: 22px; height: 22px; border-radius: 6px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; }
+.pkm-fm-mini img { display: block; }
+.pkm-fm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pkm-fm-cell { min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 12px; background: #18233F; }
+.pkm-fm-cl { font-size: 11.5px; line-height: 1.3; color: #9AA8C3; }
+.pkm-fm-cv { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; color: #F3F6FC; }
+.pkm-fm-ct { font-size: 10.5px; font-weight: 700; }
+.pkm-fm-date { text-align: center; }
+.pkm-fm-report { align-self: center; min-height: 32px; display: flex; align-items: center; font-size: 12.5px; font-weight: 700; color: #9AA8C3; text-decoration: underline; text-underline-offset: 3px; }
+.pkm-fm-blogo { flex: none; width: 30px; height: 30px; border-radius: 9px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; }
+.pkm-fi-buy .pkm-fm-blogo { box-shadow: 0 0 0 1px #D7DEEC; }
+.pkm-fm-blogo img { display: block; }
+.pkm-fm-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .pkm-fi-big { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: #F3F6FC; }
 /* Historique du prix (2026-10-31, photo du porteur) : valeur, variation, axe des montants à gauche, dates en bas,
    courbe lissée avec son aire, point du jour, ligne pointillée orange du prix d'achat, périodes 1S à MAX. */

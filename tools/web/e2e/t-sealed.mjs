@@ -50,7 +50,7 @@ const FI = 'section.pkm-fi[role="dialog"]';
 const photo = await page.locator(FI + ' img.pkm-fi-photo').getAttribute('src');
 ok('fiche : photo officielle ' + photo, /img\/products\/me04-elite-trainer-box\.webp$/.test(photo));
 const body = (await page.locator(FI).innerText()).replace(/[\u202f\u00a0]/g, ' ');
-ok('fiche : prix du marché Cardmarket, mis à jour le ' + DAY, /Prix du marché/.test(body) && new RegExp('Mis à jour le ' + DAY.replace('/', '\\/')).test(body) && /Tendance/.test(body));
+ok('fiche : prix du marché Cardmarket, dernière mise à jour le ' + DAY, /Prix du marché/.test(body) && new RegExp('Dernière mise à jour : ' + DAY.replace('/', '\\/')).test(body) && /Tendance/.test(body));
 ok('fiche : historique du prix', /Historique du prix/.test(body));
 await page.screenshot({ path: shot('sealed-4-fiche.png') });
 await page.click(FI + ' .pkm-fi-visual');

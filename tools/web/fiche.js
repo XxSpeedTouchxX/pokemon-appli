@@ -232,6 +232,35 @@
     };
   };
 
+  // Bloc « Prix du marché » sur le modèle de PokéItem (2026-11-14, porteur : « que ça reprenne bien les logos de chaque
+  // site ») : une ligne par source avec son logo (web/img/market, Simple Icons CC0), la cote Dropicards et son niveau de
+  // confiance, Cardmarket (tendance) et son détail, eBay et Vinted en liens seulement : aucune vente eBay ni annonce
+  // Vinted n'est lue (pas d'accès officiel, docs/42), donc aucun chiffre inventé pour ces deux sites.
+  // Confiance (règle Dropicards, affichée telle quelle) : « bonne » = les 3 indicateurs Cardmarket (tendance, moyennes
+  // 7 et 30 jours) existent et s'écartent de moins de 1,5 fois ; « moyenne » = au moins 2 indicateurs, écart ≤ 2,5 fois
+  // (COTE_SPREAD, catalog.js) ; sinon, ou cote signalée douteuse (doubt, c30), « à confirmer ».
+  const FM_CONF = { ok: ['Confiance bonne', 'pkm-fm-conf pkm-fm-conf-ok'], mid: ['Confiance moyenne', 'pkm-fm-conf pkm-fm-conf-mid'], low: ['Cote à confirmer', 'pkm-fm-conf pkm-fm-conf-low'] };
+  function fiMarket(p, k, rows, sealed, day) {
+    const num = v => typeof v === 'number' && v > 0, n = [p.cm, p.avg7, p.avg30].filter(num).length;
+    const spread = n > 1 ? coteSpread(p.cm, p.avg30, p.avg7) : 1;
+    const lvl = k === null ? '' : (p.doubt || p.c30 || n < 2 || spread > COTE_SPREAD) ? 'low' : (n === 3 && spread < 1.5) ? 'ok' : 'mid';
+    const main = num(p.cm) ? 'cm' : num(p.low) ? 'low' : '';
+    const detail = rows.filter(r => r.key !== main).map(r => ({ label: r.label, value: r.value, tag: r.tag === 'demandé' ? 'prix demandé' : r.tag === 'vendu' ? 'ventes conclues' : r.tag, tagFg: r.tagFg }));
+    const nm = sealed ? '' : ' · Near Mint';
+    const name = (p.name || '') + (sealed || !p.numShort ? '' : ' ' + p.numShort), set = sealed ? '' : p.setName || '';
+    const body = 'Bonjour,\n\nLe prix de cette ' + (sealed ? 'référence' : 'carte') + ' me semble faux :\n- ' + name + (set ? ' (' + set + ')' : '') +
+      '\n- Cote affichée : ' + (k !== null ? this.eur(k) : 'aucune') + (day ? ' (' + this.d2(day) + ')' : '') + '\n- Prix qui me semble juste et où je l’ai vu : \n\nMerci !';
+    return {
+      dpVal: k !== null ? this.eur(k) : '—',
+      dpSub: k === null ? (p.dup ? 'Cote à confirmer' : 'Pas encore de cote') : (p.c30 && num(p.avg30) ? 'Moyenne 30 j Cardmarket' : 'Médiane Cardmarket') + nm,
+      hasConf: !!lvl, conf: lvl ? FM_CONF[lvl][0] : '', confCls: lvl ? FM_CONF[lvl][1] : '',
+      cmVal: main ? this.eur(p[main]) : '—', cmSub: main === 'cm' ? 'Tendance du marché' : main === 'low' ? 'Plus bas en vente · prix demandé' : 'Pas encore de prix',
+      detail: detail, hasDetail: detail.length > 0,
+      hasDate: !!day,
+      report: 'mailto:' + PF_MAIL + '?subject=' + encodeURIComponent('Erreur de prix · ' + name) + '&body=' + encodeURIComponent(body)
+    };
+  }
+
   fiProto.fiView = function (s) {
     const off = { open: false };
     if (!s.fiId || !fiX) return off;
@@ -247,7 +276,7 @@
       ['cm', 'Tendance', 'calculé'], ['avg7', 'Moyenne 7 jours', 'vendu'], ['avg30', 'Moyenne 30 jours', 'vendu'],
       ['avg1', 'Moyenne de la veille', 'vendu'], ['low', 'Plus bas en vente', 'demandé']
     ].filter(r => typeof p[r[0]] === 'number' && p[r[0]] > 0).map((r, i) => ({
-      label: r[1], tag: r[2], value: this.eur(p[r[0]]), border: x.line(i),
+      key: r[0], label: r[1], tag: r[2], value: this.eur(p[r[0]]), border: x.line(i),
       tagBg: r[2] === 'demandé' ? 'rgba(245, 177, 76, 0.16)' : r[2] === 'vendu' ? 'rgba(61, 220, 132, 0.14)' : 'rgba(168, 182, 255, 0.14)',
       tagFg: r[2] === 'demandé' ? 'var(--pkm-orange)' : r[2] === 'vendu' ? 'var(--pkm-up)' : 'var(--pkm-link)'
     }));
@@ -309,7 +338,8 @@
       addLabel: sealed ? 'Ajouter à mes produits scellés' : (owned ? 'Ajouter un exemplaire' : 'Ajouter à ma collection'),
       add: () => this.openSheet('buy', p.id), canAdd: !p.release,
       remove: () => { if (last && last.edit) last.edit(); }, canRemove: owned && !!(last && last.edit),
-      rows: rows, hasRows: rows.length > 0, marketDate: day ? 'Mis à jour le ' + this.d2(day) : '',
+      rows: rows, hasRows: rows.length > 0, marketDate: day ? 'Dernière mise à jour : ' + this.d2(day) : '',
+      mkt: fiMarket.call(this, p, k, rows, sealed, day),
       // Carte du catalogue : page du produit Cardmarket (cmLink, catalog.js) ; scellé et démo : recherche par le nom.
       cmUrl: p.tcg ? cmLink(p) : 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + q,
       ebayUrl: it.ebayUrl || 'https://www.ebay.fr/sch/i.html?_nkw=' + q + '&LH_Sold=1&LH_Complete=1',

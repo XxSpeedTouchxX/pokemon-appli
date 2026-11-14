@@ -6,6 +6,23 @@
 
 ---
 
+## 2026-11-14 — Bloc « Prix du marché » sur le modèle de PokéItem, avec les logos des sites (porteur)
+
+- **Demande** : « On reprend le modèle de l'application ci-dessous pour que ça soit bien affiché et que ça reprenne bien les logos de chaque site », d'après une capture du bloc « Prix du marché » de PokéItem.
+- **Fait** : fiche d'une carte et d'un produit scellé ; en-tête « Prix du marché » avec le drapeau de la langue ; une ligne par source avec son logo dans une pastille blanche :
+  - **Dropicards** : la cote (médiane Cardmarket) et un niveau de confiance ;
+  - **Cardmarket** : la tendance, la ligne ouvre la page de la carte ;
+  - **eBay** (ventes réussies) et **Vinted** (annonces récentes) : « Voir ↗ », sans chiffre.
+- **Autour des lignes** : encadré « Détail Cardmarket » (moyennes 7 et 30 jours, veille, plus bas en vente, chacun avec « ventes conclues » ou « prix demandé ») ; « Dernière mise à jour : jj/mm » ; « Signaler une erreur de prix » (e-mail prérempli vers contact@dropicards.fr avec la carte et la cote) ; bouton blanc « Acheter sur Cardmarket ↗ » et boutons sombres « Voir sur eBay ↗ », « Voir sur Vinted ↗ », chacun avec son logo.
+- **Logos** : Simple Icons (licence CC0, comme ceux de Mon profil › Communauté), `web/img/market/`, refaits par `tools/market/make_logos.py`. eBay a ses 4 couleurs officielles. Aucun site lu. Ce sont des marques de leurs propriétaires (point H3), affichées seulement à côté d'un lien vers le site concerné.
+- **Non repris du modèle** : la « dernière vente » eBay et le « Détail eBay » (ventes, annonces, enchères). Il faut l'accès officiel eBay (`docs/42`) ; aucun chiffre n'est inventé.
+- **Règle de confiance (proposée, à valider)** :
+  - « bonne » : tendance et moyennes 7 et 30 jours Cardmarket présentes, à moins de 1,5 fois l'une de l'autre ;
+  - « moyenne » : au moins 2 de ces prix, à 2,5 fois au plus ;
+  - sinon, ou si la cote est déjà signalée douteuse, « Cote à confirmer ».
+- **Ouverture dans l'app du site** : les liens sont des liens web ordinaires. Sur Android (navigateur et app Dropicards), ils s'ouvrent dans l'app eBay ou Vinted quand elle est installée ; sur iPhone, dans Safari, qui propose l'app si elle est installée.
+- **Cache** : v202.
+
 ## 2026-11-14 — Lien « Voir sur Vinted ↗ » dans la fiche (go du porteur)
 
 - **Contexte** : le fil d'annonces Vinted est bloqué par Vinted (réponses 403 anti-robot, `docs/42`) ; on ne contourne pas ce blocage. Un lien vers la recherche Vinted le remplace.

@@ -1,0 +1,20 @@
+{
+ "cardmarket": {
+  "file": "cardmarket.svg",
+  "source": "Simple Icons 16.37.0 (simple-icons, npm)",
+  "license": "CC0 (dessin) ; marque déposée de son propriétaire",
+  "date": "2026-11-14"
+ },
+ "ebay": {
+  "file": "ebay.svg",
+  "source": "Simple Icons 16.37.0 (simple-icons, npm)",
+  "license": "CC0 (dessin) ; marque déposée de son propriétaire",
+  "date": "2026-11-14"
+ },
+ "vinted": {
+  "file": "vinted.svg",
+  "source": "Simple Icons 16.37.0 (simple-icons, npm)",
+  "license": "CC0 (dessin) ; marque déposée de son propriétaire",
+  "date": "2026-11-14"
+ }
+}

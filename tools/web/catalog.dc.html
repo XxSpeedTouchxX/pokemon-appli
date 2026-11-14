@@ -2293,19 +2293,31 @@ PKCOUNTER
 <sc-if value="{{ fi.canRemove }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ fi.remove }}" class="pkm-fi-link pkm-fi-del">Retirer de ma collection</button></sc-if>
 </div>
 </sc-if>
-<section aria-label="Prix du marché" class="pkm-fi-box">
-<h3 class="pkm-fi-h3">Prix du marché <span class="pkm-fi-chip">Cardmarket</span></h3>
-<sc-if value="{{ fi.hasRows }}" hint-placeholder-val="{{ true }}">
-<div style="display: flex; flex-direction: column">
-<sc-for list="{{ fi.rows }}" as="fir" hint-placeholder-count="4">
-<div class="pkm-fi-row" style="border-top: {{ fir.border }}"><span class="pkm-fi-row-l">{{ fir.label }}</span><span class="pkm-fi-tag" style="background: {{ fir.tagBg }}; color: {{ fir.tagFg }}">{{ fir.tag }}</span><span class="pkm-fi-row-v">{{ fir.value }}</span></div>
+<section aria-label="Prix du marché" class="pkm-fi-box pkm-fm">
+<h3 class="pkm-fi-h3">Prix du marché <span class="pkm-fi-flag" style="background: {{ fi.flag }}"></span></h3>
+<div class="pkm-fm-list">
+<div class="pkm-fm-row"><span class="pkm-fm-logo pkm-fm-logo-dp"><img src="icons/icon-192.png" alt="" width="44" height="44"></span><span class="pkm-fm-txt"><span class="pkm-fm-name">Dropicards</span><span class="pkm-fm-sub">{{ fi.mkt.dpSub }}</span><sc-if value="{{ fi.mkt.hasConf }}" hint-placeholder-val="{{ true }}"><span class="{{ fi.mkt.confCls }}">{{ fi.mkt.conf }}</span></sc-if></span><span class="pkm-fm-end"><span class="pkm-fm-v">{{ fi.mkt.dpVal }}</span></span></div>
+<a href="{{ fi.cmUrl }}" target="_blank" rel="noopener" class="pkm-fm-row pkm-fm-cm"><span class="pkm-fm-logo"><img src="img/market/cardmarket.svg" alt="" width="30" height="28"></span><span class="pkm-fm-txt"><span class="pkm-fm-name">Cardmarket</span><span class="pkm-fm-sub">{{ fi.mkt.cmSub }}</span></span><span class="pkm-fm-end"><span class="pkm-fm-v">{{ fi.mkt.cmVal }}</span></span></a>
+<a href="{{ fi.ebayUrl }}" target="_blank" rel="noopener" class="pkm-fm-row pkm-fm-eb"><span class="pkm-fm-logo"><img src="img/market/ebay.svg" alt="" width="36" height="15"></span><span class="pkm-fm-txt"><span class="pkm-fm-name">eBay</span><span class="pkm-fm-sub">Ventes réussies</span></span><span class="pkm-fm-go">Voir ↗</span></a>
+<a href="{{ fi.vintedUrl }}" target="_blank" rel="noopener" class="pkm-fm-row pkm-fm-vt"><span class="pkm-fm-logo"><img src="img/market/vinted.svg" alt="" width="20" height="28"></span><span class="pkm-fm-txt"><span class="pkm-fm-name">Vinted</span><span class="pkm-fm-sub">Annonces récentes</span></span><span class="pkm-fm-go">Voir ↗</span></a>
+</div>
+<sc-if value="{{ fi.mkt.hasDetail }}" hint-placeholder-val="{{ true }}">
+<div class="pkm-fm-detail">
+<span class="pkm-fm-dh"><span class="pkm-fm-mini"><img src="img/market/cardmarket.svg" alt="" width="14" height="13"></span>Détail Cardmarket</span>
+<div class="pkm-fm-grid">
+<sc-for list="{{ fi.mkt.detail }}" as="fmd" hint-placeholder-count="4">
+<div class="pkm-fm-cell"><span class="pkm-fm-cl">{{ fmd.label }}</span><span class="pkm-fm-cv">{{ fmd.value }}</span><span class="pkm-fm-ct" style="color: {{ fmd.tagFg }}">{{ fmd.tag }}</span></div>
 </sc-for>
 </div>
+</div>
 </sc-if>
-<span class="pkm-fi-note">{{ fi.marketDate }}</span>
-<a href="{{ fi.cmUrl }}" target="_blank" rel="noopener" class="pkm-fi-buy">Acheter sur Cardmarket ↗</a>
-<a href="{{ fi.ebayUrl }}" target="_blank" rel="noopener" class="pkm-fi-ebay">Ventes réussies sur eBay ↗</a>
-<a href="{{ fi.vintedUrl }}" target="_blank" rel="noopener" class="pkm-fi-vinted">Voir sur Vinted ↗</a>
+<sc-if value="{{ fi.mkt.hasDate }}" hint-placeholder-val="{{ true }}"><span class="pkm-fi-note pkm-fm-date">{{ fi.marketDate }}</span></sc-if>
+<a href="{{ fi.mkt.report }}" class="pkm-fm-report">Signaler une erreur de prix</a>
+<a href="{{ fi.cmUrl }}" target="_blank" rel="noopener" class="pkm-fi-buy"><span class="pkm-fm-blogo"><img src="img/market/cardmarket.svg" alt="" width="20" height="19"></span>Acheter sur Cardmarket ↗</a>
+<div class="pkm-fm-pair">
+<a href="{{ fi.ebayUrl }}" target="_blank" rel="noopener" class="pkm-fi-ebay"><span class="pkm-fm-blogo"><img src="img/market/ebay.svg" alt="" width="26" height="11"></span>Voir sur eBay ↗</a>
+<a href="{{ fi.vintedUrl }}" target="_blank" rel="noopener" class="pkm-fi-vinted"><span class="pkm-fm-blogo"><img src="img/market/vinted.svg" alt="" width="14" height="20"></span>Voir sur Vinted ↗</a>
+</div>
 </section>
 <sc-if value="{{ fi.hist.has }}" hint-placeholder-val="{{ true }}">
 <section aria-label="Historique du prix" class="pkm-fi-box pkm-fh">
