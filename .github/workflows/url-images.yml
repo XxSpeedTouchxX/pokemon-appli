@@ -1,0 +1,29 @@
+# Visuels de produits (2026-11-14, contenus réseaux sociaux, lecture seule) : visuels officiels de produits à venir (adresses données), copiés
+# dans le journal du workflow. Rien n'est écrit dans l'app.
+name: Visuels de produits
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "nom=adresse séparés par des espaces"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  images:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Visuels
+        env:
+          URLS: ${{ github.event.inputs.urls }}
+        run: pip install --quiet pillow && python tools/marketing/url_images.py "$URLS"
