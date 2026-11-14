@@ -57,7 +57,7 @@ const vintedOf = async () => {
   const href = await a.getAttribute('href'), ebay = new globalThis.URL(await e.getAttribute('href')).searchParams.get('_nkw') || '';
   const u = new globalThis.URL(href), want = /pok[eé]mon/i.test(ebay) ? ebay : (ebay + ' pokemon').trim();
   return { href: href, q: u.searchParams.get('search_text'), want: want, ok: u.origin + u.pathname === 'https://www.vinted.fr/catalog' && u.searchParams.get('order') === 'newest_first',
-    target: await a.getAttribute('target'), rel: await a.getAttribute('rel'), text: (await a.innerText()).trim() };
+    target: await a.getAttribute('target'), rel: await a.getAttribute('rel'), text: (await a.innerText()).replace(/\s+/g, ' ').trim() };
 };
 const v1 = await vintedOf();
 ok('carte : « Voir sur Vinted ↗ » (« ' + (v1 && v1.q) + ' »)', !!v1 && v1.ok && v1.q === v1.want && /pokemon/i.test(v1.q) && v1.text === 'Voir sur Vinted ↗');
@@ -72,7 +72,9 @@ const fmRows = await fm.locator('.pkm-fm-row').evaluateAll(els => els.map(e => (
 ok('prix du marché : 4 lignes Dropicards, Cardmarket, eBay, Vinted (« ' + fmRows.map(r => r.text).join(' | ') + ' »)', fmRows.length === 4 && /^Dropicards /.test(fmRows[0].text) && /^Cardmarket /.test(fmRows[1].text) && /^eBay /.test(fmRows[2].text) && /^Vinted /.test(fmRows[3].text));
 ok('prix du marché : cote Dropicards 99,00 € avec sa confiance', /99,00 €/.test(fmRows[0].text) && /Confiance (bonne|moyenne)|Cote à confirmer/.test(fmRows[0].text) && /Médiane Cardmarket · Near Mint/.test(fmRows[0].text));
 ok('prix du marché : Cardmarket en lien vers la carte, tendance et prix', fmRows[1].tag === 'A' && /cardmarket\.com/.test(fmRows[1].href) && /Tendance du marché .*€/.test(fmRows[1].text));
-ok('prix du marché : eBay et Vinted en liens, sans chiffre inventé', fmRows[2].tag === 'A' && /ebay\.fr/.test(fmRows[2].href) && /Voir ↗$/.test(fmRows[2].text) && !/€/.test(fmRows[2].text) && fmRows[3].tag === 'A' && /vinted\.fr/.test(fmRows[3].href) && !/€/.test(fmRows[3].text));
+ok('prix du marché : eBay ≈ 108,90 € et Vinted ≈ 89,10 €, marqués « estimation » (cote × 1,10 et × 0,90)', fmRows[2].tag === 'A' && /ebay\.fr/.test(fmRows[2].href) && /^eBay Ventes réussies Estimation ≈ 108,90 € Voir ↗$/.test(fmRows[2].text) && fmRows[3].tag === 'A' && /vinted\.fr/.test(fmRows[3].href) && /^Vinted Annonces récentes Estimation ≈ 89,10 € Voir ↗$/.test(fmRows[3].text));
+const estNote = (await fm.locator('.pkm-fm-estnote').innerText()).replace(/\s+/g, ' ').trim();
+ok('prix du marché : méthode des estimations expliquée (« ' + estNote.slice(0, 60) + '… »)', /eBay × 1,10, Vinted × 0,90/.test(estNote) && /aucune vente eBay ni annonce Vinted n’est relevée/.test(estNote));
 const logos = await fm.locator('img').evaluateAll(els => els.map(e => ({ src: e.getAttribute('src'), w: e.naturalWidth })));
 ok('prix du marché : logos chargés (' + logos.map(l => l.src.split('/').pop() + ' ' + l.w).join(', ') + ')', ['cardmarket.svg', 'ebay.svg', 'vinted.svg', 'icon-192.png'].every(n => logos.some(l => l.src.split('?')[0].endsWith(n) && l.w > 0)) && logos.every(l => l.w > 0));
 ok('prix du marché : logo de chaque ligne (' + fmRows.map(r => r.logo.split('/').pop()).join(', ') + ')', /icon-192\.png(\?v=\w+)?$/.test(fmRows[0].logo) && /cardmarket\.svg$/.test(fmRows[1].logo) && /ebay\.svg$/.test(fmRows[2].logo) && /vinted\.svg$/.test(fmRows[3].logo));
@@ -81,10 +83,12 @@ ok('prix du marché : détail Cardmarket sans la tendance (« ' + cells.join(' |
 ok('prix du marché : pas de date pour une carte de démo (aucune source datée)', (await fm.locator('.pkm-fm-date').count()) === 0);
 const rep = await fm.locator('a.pkm-fm-report').getAttribute('href');
 ok('prix du marché : « Signaler une erreur de prix » (e-mail prérempli)', /^mailto:contact@dropicards\.fr\?subject=/.test(rep) && /Pikachu/.test(decodeURIComponent(rep)) && /99,00/.test(decodeURIComponent(rep)));
-const btns = await fm.locator('a.pkm-fi-buy, a.pkm-fi-ebay, a.pkm-fi-vinted').evaluateAll(els => els.map(e => e.innerText.trim() + ' [' + (e.querySelector('img') || { getAttribute: () => '' }).getAttribute('src').split('/').pop() + ']'));
+const btns = await fm.locator('a.pkm-fi-buy, a.pkm-fi-ebay, a.pkm-fi-vinted').evaluateAll(els => els.map(e => e.innerText.replace(/\s+/g, ' ').trim() + ' [' + (e.querySelector('img') || { getAttribute: () => '' }).getAttribute('src').split('/').pop() + ']'));
 ok('prix du marché : 3 boutons avec logos (« ' + btns.join(' | ') + ' »)', btns.length === 3 && /^Acheter sur Cardmarket ↗ \[cardmarket\.svg\]$/.test(btns[0]) && /^Voir sur eBay ↗ \[ebay\.svg\]$/.test(btns[1]) && /^Voir sur Vinted ↗ \[vinted\.svg\]$/.test(btns[2]));
 const over = await fm.evaluate(sec => { const r = sec.getBoundingClientRect(); return [...sec.querySelectorAll('*')].filter(e => { const b = e.getBoundingClientRect(); return b.width && (b.right > r.right + 0.5 || b.left < r.left - 0.5); }).map(e => e.className).slice(0, 4); });
 ok('prix du marché : rien ne dépasse du bloc (' + (over.join(', ') || 'rien') + ')', over.length === 0);
+const geo = await fm.locator('a.pkm-fi-buy, a.pkm-fi-ebay, a.pkm-fi-vinted').evaluateAll(els => els.map(e => { const b = e.getBoundingClientRect(), l = e.querySelector('.pkm-fm-blogo').getBoundingClientRect(), a = e.querySelector('.pkm-fm-ar').getBoundingClientRect(); return { x: Math.round(b.left), y: Math.round(b.top), w: Math.round(b.width), h: Math.round(b.height), lx: Math.round(l.left), ax: Math.round(a.right) }; }));
+ok('boutons les uns sous les autres, même taille, logos et flèches alignés (' + geo.map(g => g.w + '×' + g.h).join(', ') + ')', geo.length === 3 && geo[0].y < geo[1].y && geo[1].y < geo[2].y && geo.every(g => g.x === geo[0].x && g.w === geo[0].w && g.h === geo[0].h && g.lx === geo[0].lx && g.ax === geo[0].ax) && geo[0].h <= 44);
 await fm.screenshot({ path: shot('fiche-marche.png') });
 await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
 // Produit scellé : la recherche est son nom.
@@ -105,6 +109,8 @@ ok('carte d’une extension : « ' + fmDate + ' »', /^Dernière mise à jour : 
 const r3 = (await fm3.locator('.pkm-fm-row').allInnerTexts()).map(t => t.replace(/\s+/g, ' ').trim());
 ok('carte d’une extension : 4 lignes et cote Dropicards (« ' + r3[0] + ' »)', r3.length === 4 && /^Dropicards .*(Confiance|à confirmer|Pas encore)/.test(r3[0]));
 await fm3.scrollIntoViewIfNeeded(); await page.waitForTimeout(400); await fm3.screenshot({ path: shot('fiche-marche-serie.png') });
+await fm3.locator('.pkm-fm-btns').scrollIntoViewIfNeeded(); await page.waitForTimeout(400);
+await page.screenshot({ path: shot('fiche-marche-boutons.png') });
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
 await browser.close();

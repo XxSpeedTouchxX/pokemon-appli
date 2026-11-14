@@ -240,6 +240,14 @@
   // 7 et 30 jours) existent et s'écartent de moins de 1,5 fois ; « moyenne » = au moins 2 indicateurs, écart ≤ 2,5 fois
   // (COTE_SPREAD, catalog.js) ; sinon, ou cote signalée douteuse (doubt, c30), « à confirmer ».
   const FM_CONF = { ok: ['Confiance bonne', 'pkm-fm-conf pkm-fm-conf-ok'], mid: ['Confiance moyenne', 'pkm-fm-conf pkm-fm-conf-mid'], low: ['Cote à confirmer', 'pkm-fm-conf pkm-fm-conf-low'] };
+  // Estimations eBay et Vinted (2026-11-14, porteur : « sur les prix du marché pour Vinted et eBay fais-moi également
+  // une estimation des tendances du marché ») : aucune vente eBay ni annonce Vinted n'est relevée (pas d'accès officiel à
+  // eBay, Vinted bloque les robots : docs/42), donc estimation Dropicards = cote Cardmarket × coefficient, toujours
+  // marquée « ≈ » et « estimation », jamais comptée dans la cote. Coefficients proposés, à valider par le porteur :
+  // eBay × 1,10 (ventes réussies en général un peu au-dessus de Cardmarket : frais des vendeurs répercutés, acheteurs
+  // de plusieurs pays), Vinted × 0,90 (vendeurs particuliers sans commission, prix négociés).
+  const FM_EST = { ebay: 1.10, vinted: 0.90 };
+  const fmCoef = c => '× ' + String(c.toFixed(2)).replace('.', ',');
   function fiMarket(p, k, rows, sealed, day) {
     const num = v => typeof v === 'number' && v > 0, n = [p.cm, p.avg7, p.avg30].filter(num).length;
     const spread = n > 1 ? coteSpread(p.cm, p.avg30, p.avg7) : 1;
@@ -257,6 +265,10 @@
       cmVal: main ? this.eur(p[main]) : '—', cmSub: main === 'cm' ? 'Tendance du marché' : main === 'low' ? 'Plus bas en vente · prix demandé' : 'Pas encore de prix',
       detail: detail, hasDetail: detail.length > 0,
       hasDate: !!day,
+      hasEst: k !== null,
+      ebVal: k !== null ? '≈ ' + this.eur(k * FM_EST.ebay) : '', vtVal: k !== null ? '≈ ' + this.eur(k * FM_EST.vinted) : '',
+      ebSub: 'Ventes réussies', vtSub: 'Annonces récentes',
+      estNote: '≈ Estimations Dropicards d’après la cote Cardmarket (eBay ' + fmCoef(FM_EST.ebay) + ', Vinted ' + fmCoef(FM_EST.vinted) + ') : aucune vente eBay ni annonce Vinted n’est relevée. Touche la ligne pour voir les vrais prix sur le site.',
       report: 'mailto:' + PF_MAIL + '?subject=' + encodeURIComponent('Erreur de prix · ' + name) + '&body=' + encodeURIComponent(body)
     };
   }

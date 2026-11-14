@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-11-14 — Estimations eBay et Vinted, boutons empilés (porteur)
+
+- **Demande** : « Sur les prix du marché pour Vinted et eBay fais-moi également une estimation des tendances du marché » ; « en dessous, chaque onglet l'un après l'autre, alignés, un peu plus petits ».
+- **Fait** :
+  - lignes eBay et Vinted : un prix estimé (« ≈ 108,90 € ») avec une étiquette « Estimation » ; la ligne ouvre toujours le site ;
+  - une note sous les lignes explique la méthode ;
+  - les 3 boutons (Acheter sur Cardmarket, Voir sur eBay, Voir sur Vinted) sont empilés, même taille (42 px au lieu de 46-48), logos et flèches alignés.
+- **Méthode** : estimation Dropicards = cote Cardmarket × coefficient ; jamais comptée dans la cote ni dans la valeur de la collection.
+  - Aucune vente eBay ni annonce Vinted n'est relevée : pas d'accès officiel à eBay, et Vinted bloque les robots (`docs/42`).
+  - Coefficients **proposés, à valider** :
+    - eBay **× 1,10** : ventes réussies en général un peu au-dessus de Cardmarket (frais des vendeurs répercutés, acheteurs de plusieurs pays) ;
+    - Vinted **× 0,90** : particuliers sans commission, prix négociés.
+  - Constante `FM_EST` dans `tools/web/fiche.js`.
+- **Pas d'estimation sans cote** : la ligne garde alors seulement « Voir ↗ ».
+- **Cache** : v203.
+
 ## 2026-11-14 — Bloc « Prix du marché » sur le modèle de PokéItem, avec les logos des sites (porteur)
 
 - **Demande** : « On reprend le modèle de l'application ci-dessous pour que ça soit bien affiché et que ça reprenne bien les logos de chaque site », d'après une capture du bloc « Prix du marché » de PokéItem.

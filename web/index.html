@@ -591,8 +591,6 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fi-row-v { font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: #F3F6FC; }
 .pkm-fi-tag { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
 .pkm-fi-note { font-size: 12px; line-height: 1.45; color: #9AA8C3; }
-.pkm-fi-buy { height: 48px; border-radius: 999px; background: #F3F6FC; color: #0B1120; font-size: 14.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
-.pkm-fi-ebay, .pkm-fi-vinted { min-width: 0; height: 46px; padding: 0 10px; border-radius: 999px; border: 1px solid #2E3F6B; background: #0B1120; display: flex; align-items: center; justify-content: center; gap: 8px; color: #F3F6FC; font-size: 13.5px; font-weight: 700; text-decoration: none; white-space: nowrap; }
 /* Bloc « Prix du marché » sur le modèle de PokéItem (2026-11-14, porteur) : une ligne par source, logo du site dans une
    pastille blanche (web/img/market : Simple Icons, CC0 ; marques de leurs propriétaires), prix ou lien à droite ; détail
    Cardmarket en cases ; date ; « Signaler une erreur de prix » ; boutons avec logos. */
@@ -614,6 +612,10 @@ a.pkm-fm-row:active { background: #1E2B4D; }
 .pkm-fm-conf-ok { background: rgba(61, 220, 132, 0.14); color: #3DDC84; }
 .pkm-fm-conf-mid { background: rgba(255, 213, 79, 0.14); color: #FFD54F; }
 .pkm-fm-conf-low { background: rgba(245, 177, 76, 0.16); color: #F5B14C; }
+.pkm-fm-est { color: #C9D3EA; font-weight: 700; }
+.pkm-fm-conf-est { background: rgba(168, 182, 255, 0.14); color: #B9C5FF; }
+.pkm-fm-end .pkm-fm-go { font-size: 12px; }
+.pkm-fm-estnote { font-size: 11.5px; }
 .pkm-fm-go { flex: none; font-size: 13.5px; font-weight: 700; white-space: nowrap; color: #B9C5FF; }
 .pkm-fm-detail { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; border: 1px solid #24345C; background: #0F1830; }
 .pkm-fm-dh { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #C9D3EA; }
@@ -626,10 +628,17 @@ a.pkm-fm-row:active { background: #1E2B4D; }
 .pkm-fm-ct { font-size: 10.5px; font-weight: 700; }
 .pkm-fm-date { text-align: center; }
 .pkm-fm-report { align-self: center; min-height: 32px; display: flex; align-items: center; font-size: 12.5px; font-weight: 700; color: #9AA8C3; text-decoration: underline; text-underline-offset: 3px; }
-.pkm-fm-blogo { flex: none; width: 30px; height: 30px; border-radius: 9px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; }
+.pkm-fm-btns { display: flex; flex-direction: column; gap: 8px; }
+/* Boutons les uns sous les autres, même taille, logos et flèches alignés (2026-11-14, porteur : « chaque onglet après
+   l'autre, alignés les uns avec les autres, un peu plus petits »). */
+.pkm-fi-buy, .pkm-fi-ebay, .pkm-fi-vinted { box-sizing: border-box; min-width: 0; height: 42px; padding: 0 14px 0 7px; border-radius: 999px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.pkm-fi-buy { border: 1px solid #F3F6FC; background: #F3F6FC; color: #0B1120; }
+.pkm-fi-ebay, .pkm-fi-vinted { border: 1px solid #2E3F6B; background: #0B1120; color: #F3F6FC; }
+.pkm-fm-bl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pkm-fm-ar { flex: none; font-size: 14px; }
+.pkm-fm-blogo { flex: none; width: 28px; height: 28px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; }
 .pkm-fi-buy .pkm-fm-blogo { box-shadow: 0 0 0 1px #D7DEEC; }
 .pkm-fm-blogo img { display: block; }
-.pkm-fm-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .pkm-fi-big { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: #F3F6FC; }
 /* Historique du prix (2026-10-31, photo du porteur) : valeur, variation, axe des montants à gauche, dates en bas,
    courbe lissée avec son aire, point du jour, ligne pointillée orange du prix d'achat, périodes 1S à MAX. */
@@ -3728,6 +3737,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=23cfcbaf"></script>
+<script src="app.js?v=60805e5a"></script>
 </body>
 </html>
