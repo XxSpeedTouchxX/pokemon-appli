@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-14 — Pré-gradation proposée ; installation du serveur mise de côté (porteur)
+
+- **Installation de `install_024_a_028.sql` mise de côté** par le porteur (« met moi ça de côté pour l'instant »), après le pas à pas de Studio (bouton « + », « Create a new snippet », ou l'adresse `…/project/default/sql/new`).
+- **Pré-gradation demandée** : une rubrique sous « Boutiques près de toi » sur l'accueil. L'utilisateur photographie le recto puis le verso. L'app estime le centrage, les coins, les bords et la surface, puis la note probable et les notes chez PSA, PCA et CCC, pour savoir si la gradation vaut le coup. Inspiration : 2 vidéos de l'outil de PokéItem, sans copie.
+- **Proposition** `docs/40-proposition-pre-gradation.md` :
+  - maquette de 4 écrans et 4 logos dans `docs/40-maquette-pre-gradation/` ;
+  - analyse sur le téléphone recommandée d'abord (gratuite, photos jamais envoyées, même photo = même note) ;
+  - avis d'une IA en option, ≈ 0,11 € par analyse ;
+  - justesse mesurée avec « J'ai reçu la vraie note » ;
+  - ≈ 60 h de travail ;
+  - 6 décisions attendues (D1 à D6), **rien n'est codé sans « go »**.
+
 ## 2026-11-14 — Règlement de la saison : pas d'urgence (porteur)
 
 - « Pour la saison déjà commencée on s'en fiche, on est en version proto pour l'instant » (porteur).

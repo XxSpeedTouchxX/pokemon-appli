@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 122" role="img" aria-label="Pré-gradation : jauge de note sur une carte"><title>Pré-gradation : jauge de note sur une carte</title>
+<g transform="rotate(-8 75 60)" stroke="#111111" stroke-linejoin="round">
+<rect x="45" y="8" width="60" height="84" rx="8" fill="#FFD60A" stroke-width="7" paint-order="stroke"/>
+<rect x="52" y="15" width="46" height="32" rx="3" fill="#BFE3FF" stroke-width="2.5"/>
+</g>
+<path d="M24 104A51 51 0 0 1 126 104Z" fill="#FFFFFF" stroke="#111111" stroke-width="6" stroke-linejoin="round"/>
+<path d="M33 104A42 42 0 0 1 117 104" fill="none" stroke="#111111" stroke-width="17" stroke-linecap="butt"/>
+<path d="M33 104A42 42 0 0 1 45.3 74.3" fill="none" stroke="#EF4444" stroke-width="12"/>
+<path d="M45.3 74.3A42 42 0 0 1 75 62" fill="none" stroke="#F59E0B" stroke-width="12"/>
+<path d="M75 62A42 42 0 0 1 104.7 74.3" fill="none" stroke="#FACC15" stroke-width="12"/>
+<path d="M104.7 74.3A42 42 0 0 1 117 104" fill="none" stroke="#22C55E" stroke-width="12"/>
+<path d="M75 104L106 80" stroke="#111111" stroke-width="9" stroke-linecap="round"/>
+<path d="M75 104L106 80" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+<circle cx="75" cy="104" r="9" fill="#FFFFFF" stroke="#111111" stroke-width="4"/>
+<path d="M126 20l2.5 6l6 2.5l-6 2.5l-2.5 6l-2.5 -6l-6 -2.5l6 -2.5Z" fill="#FFFFFF" stroke="#111111" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M22 30l2 5l5 2l-5 2l-2 5l-2 -5l-5 -2l5 -2Z" fill="#FFFFFF" stroke="#111111" stroke-width="2" stroke-linejoin="round"/>
+</svg>

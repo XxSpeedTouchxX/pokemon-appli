@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette Pré-gradation</title>
+<!-- Maquette de proposition (2026-11-14) : rien n'est branché, chiffres d'exemple. Voir docs/40-proposition-pre-gradation.md. -->
+<style>
+@font-face{font-family:Sora;src:url(../../web/fonts/sora-latin-700-normal.woff2) format("woff2");font-weight:700}
+@font-face{font-family:Sora;src:url(../../web/fonts/sora-latin-600-normal.woff2) format("woff2");font-weight:600}
+@font-face{font-family:Jakarta;src:url(../../web/fonts/plus-jakarta-sans-latin-500-normal.woff2) format("woff2");font-weight:500}
+@font-face{font-family:Jakarta;src:url(../../web/fonts/plus-jakarta-sans-latin-700-normal.woff2) format("woff2");font-weight:700}
+@font-face{font-family:Jakarta;src:url(../../web/fonts/plus-jakarta-sans-latin-800-normal.woff2) format("woff2");font-weight:800}
+:root{--y:#FFD60A;--navy:#121C33;--navy2:#0E1629;--line:#24345C;--txt:#F3F6FC;--mut:#9AA8C3;--soft:#C9D3EA;--ok:#22C55E;--warn:#F59E0B;--bad:#EF4444;--blue:#A8B6FF}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#E9E4D0;font-family:Jakarta,Arial,sans-serif;color:#111;padding:28px}
+h1{font-family:Sora,Arial,sans-serif;font-size:26px}
+.lead{font-size:14px;margin:6px 0 22px;color:#4a4430;max-width:1100px}
+.row{display:flex;gap:26px;align-items:flex-start}
+.col{display:flex;flex-direction:column;gap:10px;align-items:center}
+.cap{font-family:Sora,Arial,sans-serif;font-weight:700;font-size:15px}
+.ph{width:390px;background:var(--y);border:8px solid #111;border-radius:40px;overflow:hidden;position:relative}
+.scr{padding:14px 16px 22px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;gap:10px;height:40px}
+.back{width:38px;height:38px;border-radius:19px;background:var(--navy);display:flex;align-items:center;justify-content:center}
+.back svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ttl{font-family:Sora,Arial,sans-serif;font-weight:700;font-size:20px}
+.h2{font-family:Sora,Arial,sans-serif;font-weight:600;font-size:18px}
+.sub{font-size:12.5px;color:#5c5220;margin-top:2px}
+.card{background:var(--navy);border:1px solid var(--line);border-radius:22px;padding:14px;color:var(--txt)}
+.btn{height:48px;border-radius:999px;border:0;background:var(--y);color:#111;font:inherit;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn2{height:44px;border-radius:999px;border:1px solid #2A3A5C;background:transparent;color:var(--txt);font:inherit;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;width:100%}
+.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700}
+.mut{color:var(--mut)}.soft{color:var(--soft)}
+.tag{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+/* A */
+.mini-radar{height:120px;border-radius:22px;background:#111A2C;border:1px solid #1E2B45;position:relative;overflow:hidden}
+.mini-radar i{position:absolute;border:1px dashed rgba(168,182,255,.4);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+.pg-tile{display:flex;gap:12px;align-items:center}
+.pg-tile img{width:104px;height:85px;flex:none}
+.steps{display:flex;gap:6px;margin-top:8px}
+.steps span{flex:1;height:28px;border-radius:10px;background:var(--navy2);border:1px solid var(--line);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;color:var(--soft)}
+.steps b{width:16px;height:16px;border-radius:8px;background:var(--y);color:#111;font-size:10px;display:inline-flex;align-items:center;justify-content:center}
+.last{display:flex;align-items:center;gap:10px;background:var(--navy2);border:1px solid var(--line);border-radius:16px;padding:8px 10px}
+.last img{width:34px;height:47px;border-radius:4px}
+/* B */
+.stepper{display:flex;align-items:center;gap:6px}
+.stp{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#6b5f1d}
+.stp i{width:24px;height:24px;border-radius:12px;border:2px solid #111;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;background:#fff}
+.stp.on{color:#111}.stp.on i{background:#111;color:var(--y)}
+.stp.done i{background:var(--ok);color:#fff;border-color:#111}
+.bar{flex:1;height:3px;border-radius:2px;background:#111;opacity:.25}
+.cam{height:360px;border-radius:24px;background:radial-gradient(120% 80% at 50% 40%,#1b2438,#070b14);position:relative;overflow:hidden;border:1px solid #000}
+.cam .photo{position:absolute;left:50%;top:54%;width:174px;transform:translate(-50%,-50%) rotate(-2.5deg);border-radius:9px;box-shadow:0 18px 30px rgba(0,0,0,.55)}
+.cam .frame{position:absolute;left:50%;top:54%;width:200px;height:280px;transform:translate(-50%,-50%);border-radius:14px;border:2px dashed rgba(255,214,10,.9)}
+.cam .br{position:absolute;width:26px;height:26px;border:4px solid var(--ok)}
+.cam .glare{position:absolute;left:206px;top:82px;width:60px;height:34px;border-radius:50%;background:radial-gradient(rgba(255,255,255,.75),rgba(255,255,255,0));filter:blur(2px)}
+.cam .hint{position:absolute;left:0;right:0;top:12px;text-align:center;color:#fff;font-weight:800;font-size:14px;text-shadow:0 1px 4px #000}
+.cam .ring{position:absolute;left:200px;top:72px;width:76px;height:52px;border:2px solid var(--warn);border-radius:50%}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ck{display:flex;align-items:center;gap:8px;background:var(--navy);border:1px solid var(--line);border-radius:14px;padding:8px 10px;color:var(--txt);font-size:12px;font-weight:700;line-height:1.25}
+.ck b{flex:none;width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}
+.shoot{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.shutter{width:72px;height:72px;border-radius:36px;border:5px solid #111;background:#fff;box-shadow:inset 0 0 0 5px var(--y)}
+.thumb{width:52px;height:72px;border-radius:8px;border:2px dashed #6b5f1d;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#6b5f1d;text-align:center}
+.tips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tip{background:var(--navy2);border:1px solid var(--line);border-radius:14px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--soft);text-align:center;line-height:1.2}
+.tip svg{width:30px;height:30px}
+/* C */
+.pair{display:flex;gap:12px;justify-content:center}
+.pair .c{position:relative;width:150px;aspect-ratio:63/88;border-radius:9px;overflow:hidden;box-shadow:0 10px 20px rgba(0,0,0,.35)}
+.pair .c img{display:block;width:100%;height:100%;object-fit:cover}
+.laser{position:absolute;left:0;right:0;top:58%;height:3px;background:#FF3B30;box-shadow:0 0 12px 3px rgba(255,59,48,.7)}
+.back-card{aspect-ratio:63/88;background:#1D4FA8;border:9px solid #2E6FD8;border-radius:9px;position:relative;overflow:hidden}
+.back-card::before{content:"";position:absolute;inset:8px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#7FB2FF 0,#2E6FD8 30%,#173E86 62%,#0F2C66 100%)}
+.back-card::after{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;transform:translate(-50%,-50%);border-radius:50%;border:6px solid #E8F0FF;opacity:.6}
+.prog{display:flex;flex-direction:column;gap:8px}
+.pr{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700}
+.pr b{width:24px;height:24px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex:none}
+.pr .bar2{flex:1;height:6px;border-radius:3px;background:#24345C;overflow:hidden}.pr .bar2 i{display:block;height:100%;background:var(--y)}
+.pr em{font-style:normal;font-size:12px;color:var(--mut);width:84px;text-align:right}
+.spin{border:3px solid #2A3A5C;border-top-color:var(--y);background:transparent!important}
+/* D */
+.idrow{display:flex;align-items:center;gap:12px}
+.idrow img{width:48px;height:67px;border-radius:5px}
+.medal{display:flex;align-items:center;gap:14px}
+.gauge{position:relative;width:132px;height:132px;flex:none}
+.gauge svg{position:absolute;inset:0}
+.gauge .n{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge .n b{font-family:Sora,Arial,sans-serif;font-size:40px;line-height:1;color:#fff}
+.gauge .n span{font-size:12px;color:var(--mut);font-weight:700}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.crit{background:var(--navy);border:1px solid var(--line);border-radius:18px;padding:11px;color:var(--txt);display:flex;flex-direction:column;gap:6px}
+.crit .hd{display:flex;align-items:center;gap:8px}
+.crit .ring{position:relative;width:46px;height:46px;flex:none}
+.crit .ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:Sora,Arial,sans-serif;font-size:15px}
+.crit .nm{font-family:Sora,Arial,sans-serif;font-weight:700;font-size:14px}
+.crit p{font-size:11.5px;line-height:1.35;color:var(--soft)}
+.defects{display:flex;gap:10px}
+.dc{flex:1;position:relative}
+.dc .lbl{font-size:11px;font-weight:800;color:var(--mut);margin-bottom:4px;text-align:center}
+.dc .im{position:relative;border-radius:8px;overflow:hidden}
+.dc .im img{display:block;width:100%}
+.mk{position:absolute;width:26px;height:26px;border-radius:13px;border:3px solid;transform:translate(-50%,-50%);box-shadow:0 0 0 2px rgba(0,0,0,.45)}
+.mk.w{border-color:var(--warn)}.mk.r{border-color:var(--bad)}
+.zooms{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.zm{aspect-ratio:1;border-radius:10px;border:2px solid;background-size:520%;position:relative}
+.zm span{position:absolute;left:4px;bottom:3px;font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000}
+.comp{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.comp:first-of-type{border-top:0}
+.comp .lg{width:54px;height:30px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;flex:none;padding:3px}
+.comp .lg img{max-width:100%;max-height:100%}
+.dist{flex:1;display:flex;gap:3px;align-items:flex-end;height:34px}
+.dist div{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9.5px;font-weight:800;color:var(--mut)}
+.dist i{display:block;width:100%;border-radius:3px 3px 0 0;background:#3A4B78}
+.dist .top i{background:var(--y)}
+.comp .best{width:62px;text-align:right}
+.comp .best b{font-family:Sora,Arial,sans-serif;font-size:20px;color:#fff;display:block;line-height:1}
+.comp .best span{font-size:10.5px;color:var(--mut);font-weight:700}
+.worth .ln{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-top:1px solid var(--line);color:var(--soft)}
+.worth .ln:first-of-type{border-top:0}
+.worth .ln b{color:#fff}
+.verdict{margin-top:10px;border-radius:16px;padding:12px;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.55);display:flex;gap:10px;align-items:center}
+.verdict .ic{width:38px;height:38px;border-radius:19px;background:var(--ok);display:flex;align-items:center;justify-content:center;flex:none}
+.small{font-size:11px;line-height:1.4;color:#5c5220}
+.seg{display:flex;gap:6px;margin:4px 0 8px}
+.seg span{height:30px;padding:0 12px;border-radius:999px;border:1px solid #2A3A5C;font-size:12px;font-weight:800;display:flex;align-items:center;color:var(--soft)}
+.seg span.on{background:var(--y);color:#111;border-color:var(--y)}
+</style></head><body>
+<h1>Pré-gradation : maquette des écrans (proposition)</h1>
+<p class="lead">4 écrans : la rubrique sur l'accueil, sous « Boutiques près de toi » ; la prise de vue guidée du recto puis du verso ; l'analyse ; le résultat. Chiffres d'exemple, rien n'est branché. Logo provisoire : L1 (la loupe), à remplacer par celui que tu choisiras.</p>
+<div class="row">
+
+<!-- A : accueil -->
+<div class="col"><div class="cap">1. Accueil : nouvelle rubrique</div>
+<div class="ph"><div class="scr">
+<div><div class="h2">Boutiques près de toi</div><div class="sub">Vraies boutiques, d'après OpenStreetMap</div></div>
+<div class="mini-radar"><i style="width:80px;height:80px"></i><i style="width:160px;height:160px"></i><i style="width:250px;height:250px"></i></div>
+<div style="margin-top:6px"><div class="h2">Pré-gradation</div><div class="sub">Estime la note de ta carte avant de l'envoyer en gradation</div></div>
+<div class="card">
+<div class="pg-tile"><img src="logos/L1-loupe.svg" alt=""><div><div style="font-family:Sora,Arial;font-weight:700;font-size:16px;line-height:1.25">Ta carte vaut-elle une gradation ?</div><div class="mut" style="font-size:12px;margin-top:4px;line-height:1.4">Centrage, coins, bords et surface analysés en 2 photos.</div></div></div>
+<div class="steps"><span><b>1</b>Recto</span><span><b>2</b>Verso</span><span><b>3</b>Ta note</span></div>
+<button class="btn" style="margin-top:12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M4 12h16"/></svg>Pré-grader une carte</button>
+<div class="mut" style="font-size:11.5px;text-align:center;margin-top:8px">1 pré-gradation offerte par jour · illimité avec Premium <span style="color:#F7C77E">(à confirmer)</span></div>
+<div class="tag" style="margin:12px 0 6px">Ma dernière pré-gradation</div>
+<div class="last"><img src="../../web/img/card-pikachu-ex.webp" alt=""><div style="flex:1"><div style="font-weight:800;font-size:13.5px">Pikachu-ex</div><div class="mut" style="font-size:11.5px">Étincelles Déferlantes · il y a 2 jours</div></div><span class="chip" style="background:rgba(34,197,94,.18);color:#86EFAC">8,5 probable</span></div>
+</div>
+</div></div></div>
+
+<!-- B : prise de vue -->
+<div class="col"><div class="cap">2. Prise de vue guidée</div>
+<div class="ph"><div class="scr">
+<div class="top"><span class="back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></span><span class="ttl">Pré-gradation</span></div>
+<div class="stepper"><span class="stp on"><i>1</i>Recto</span><span class="bar"></span><span class="stp"><i>2</i>Verso</span><span class="bar"></span><span class="stp"><i>3</i>Analyse</span></div>
+<div class="cam">
+<div class="hint">Place le RECTO dans le cadre</div>
+<img class="photo" src="../../web/img/card-pikachu-ex.webp" alt="">
+<div class="frame"></div>
+<span class="br" style="left:81px;top:44px;border-right:0;border-bottom:0;border-radius:10px 0 0 0"></span><span class="br" style="right:81px;top:44px;border-left:0;border-bottom:0;border-radius:0 10px 0 0"></span>
+<span class="br" style="left:81px;bottom:22px;border-right:0;border-top:0;border-radius:0 0 0 10px"></span><span class="br" style="right:81px;bottom:22px;border-left:0;border-top:0;border-radius:0 0 10px 0"></span>
+<div class="glare"></div><div class="ring"></div>
+</div>
+<div class="checks">
+<div class="ck"><b style="background:var(--ok)">✓</b>Carte entière dans le cadre</div>
+<div class="ck"><b style="background:var(--ok)">✓</b>Image nette</div>
+<div class="ck"><b style="background:var(--warn)">!</b>Reflet en haut à droite : incline un peu</div>
+<div class="ck"><b style="background:var(--ok)">✓</b>Fond sombre et uni</div>
+</div>
+<div class="shoot"><div class="thumb">Verso<br>à venir</div><div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="shutter"></div><div class="small" style="font-weight:800">Photo auto dès que tout est vert</div></div><div class="thumb" style="border-style:solid;border-color:#111;color:#111">Importer<br>une photo</div></div>
+<div class="tips">
+<div class="tip"><svg viewBox="0 0 32 32" fill="none" stroke="#FFD60A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="5" width="14" height="20" rx="2"/><path d="M5 5l22 22"/></svg>Sans étui ni sleeve</div>
+<div class="tip"><svg viewBox="0 0 32 32" fill="none" stroke="#FFD60A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 24h26"/><rect x="10" y="10" width="12" height="10" rx="1.5"/></svg>À plat, fond sombre</div>
+<div class="tip"><svg viewBox="0 0 32 32" fill="none" stroke="#FFD60A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="13" r="6"/><path d="M13 23h6M14 27h4M16 3v2M6 13H4M28 13h-2"/></svg>Lumière douce, sans reflet</div>
+<div class="tip"><svg viewBox="0 0 32 32" fill="none" stroke="#FFD60A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="11" y="3" width="10" height="16" rx="2"/><path d="M6 26h20M16 19v7"/></svg>Téléphone bien parallèle</div>
+</div>
+</div></div></div>
+
+<!-- C : analyse -->
+<div class="col"><div class="cap">3. Analyse (quelques secondes)</div>
+<div class="ph"><div class="scr">
+<div class="top"><span class="back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></span><span class="ttl">Analyse en cours</span></div>
+<div class="stepper"><span class="stp done"><i>✓</i>Recto</span><span class="bar"></span><span class="stp done"><i>✓</i>Verso</span><span class="bar"></span><span class="stp on"><i>3</i>Analyse</span></div>
+<div class="pair"><div class="c"><img src="../../web/img/card-pikachu-ex.webp" alt=""><span class="laser"></span></div><div class="c"><div class="back-card"></div><span class="laser" style="top:35%"></span></div></div>
+<div class="card prog">
+<div class="pr"><b style="background:var(--ok)">✓</b><span style="width:76px">Centrage</span><span class="bar2"><i style="width:100%"></i></span><em>53/47 · 61/39</em></div>
+<div class="pr"><b style="background:var(--ok)">✓</b><span style="width:76px">Coins</span><span class="bar2"><i style="width:100%"></i></span><em>8 coins vus</em></div>
+<div class="pr"><b class="spin"></b><span style="width:76px">Bords</span><span class="bar2"><i style="width:62%"></i></span><em>en cours…</em></div>
+<div class="pr"><b style="background:#2A3A5C">4</b><span style="width:76px">Surface</span><span class="bar2"><i style="width:0"></i></span><em>en attente</em></div>
+</div>
+<div class="card" style="display:flex;gap:10px;align-items:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A8B6FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span class="soft" style="font-size:12.5px;line-height:1.45">L'analyse se fait sur ton téléphone : tes photos ne sont envoyées nulle part <span style="color:#F7C77E">(option A)</span>.</span></div>
+<div class="small" style="text-align:center">Carte reconnue : Pikachu-ex · Étincelles Déferlantes (même moteur que le scan)</div>
+</div></div></div>
+
+<!-- D : résultat -->
+<div class="col"><div class="cap">4. Résultat</div>
+<div class="ph"><div class="scr">
+<div class="top"><span class="back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></span><span class="ttl">Ma pré-gradation</span></div>
+<div class="card idrow"><img src="../../web/img/card-pikachu-ex.webp" alt=""><div style="flex:1"><div class="tag">Carte reconnue</div><div style="font-weight:800;font-size:15px">Pikachu-ex</div><div class="mut" style="font-size:12px">Étincelles Déferlantes · 238/191</div></div><span style="font-size:12.5px;font-weight:800;color:var(--blue)">Fiche ›</span></div>
+<div class="card medal">
+<div class="gauge"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="56" fill="none" stroke="#24345C" stroke-width="12"/><circle cx="66" cy="66" r="56" fill="none" stroke="#22C55E" stroke-width="12" stroke-linecap="round" stroke-dasharray="299 352" transform="rotate(-90 66 66)"/></svg><div class="n"><b>8,5</b><span>sur 10</span></div></div>
+<div style="display:flex;flex-direction:column;gap:7px"><div class="tag">Note probable</div><div style="font-family:Sora,Arial;font-weight:700;font-size:16px">Entre 8 et 9</div>
+<span class="chip" style="background:rgba(34,197,94,.16);color:#86EFAC">Fiabilité : bonne</span><span class="chip" style="background:rgba(168,182,255,.16);color:#C7D0FF">État estimé : Near Mint</span></div>
+</div>
+<div class="grid4">
+<div class="crit"><div class="hd"><div class="ring"><svg viewBox="0 0 46 46" width="46" height="46"><circle cx="23" cy="23" r="19" fill="none" stroke="#24345C" stroke-width="5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#22C55E" stroke-width="5" stroke-linecap="round" stroke-dasharray="107 120" transform="rotate(-90 23 23)"/></svg><b>9</b></div><span class="nm">Centrage</span></div><p>Recto 53/47 · 51/49<br>Verso 61/39 · 56/44</p></div>
+<div class="crit"><div class="hd"><div class="ring"><svg viewBox="0 0 46 46" width="46" height="46"><circle cx="23" cy="23" r="19" fill="none" stroke="#24345C" stroke-width="5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#84CC16" stroke-width="5" stroke-linecap="round" stroke-dasharray="101 120" transform="rotate(-90 23 23)"/></svg><b>8,5</b></div><span class="nm">Coins</span></div><p>7 coins nets · 1 léger blanchiment (verso, bas gauche)</p></div>
+<div class="crit"><div class="hd"><div class="ring"><svg viewBox="0 0 46 46" width="46" height="46"><circle cx="23" cy="23" r="19" fill="none" stroke="#24345C" stroke-width="5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#22C55E" stroke-width="5" stroke-linecap="round" stroke-dasharray="107 120" transform="rotate(-90 23 23)"/></svg><b>9</b></div><span class="nm">Bords</span></div><p>Petite usure sur le bord droit du verso</p></div>
+<div class="crit"><div class="hd"><div class="ring"><svg viewBox="0 0 46 46" width="46" height="46"><circle cx="23" cy="23" r="19" fill="none" stroke="#24345C" stroke-width="5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#FACC15" stroke-width="5" stroke-linecap="round" stroke-dasharray="95 120" transform="rotate(-90 23 23)"/></svg><b>8</b></div><span class="nm">Surface</span></div><p>2 marques repérées au recto · à vérifier à la lumière</p></div>
+</div>
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="h2" style="font-size:15px">Où sont les défauts</span><span class="seg" style="margin:0"><span class="on">Recto</span><span>Verso</span></span></div>
+<div class="defects" style="margin-top:8px"><div class="dc"><div class="im"><img src="../../web/img/card-pikachu-ex.webp" alt=""><span class="mk w" style="left:70%;top:30%"></span><span class="mk w" style="left:36%;top:62%"></span></div></div>
+<div class="dc" style="flex:1.05;display:flex;flex-direction:column;gap:6px;justify-content:center">
+<div class="soft" style="font-size:12px;line-height:1.4"><b style="color:#FBBF24">●</b> Marque légère (surface)</div>
+<div class="soft" style="font-size:12px;line-height:1.4"><b style="color:#F87171">●</b> Défaut net</div>
+<div class="mut" style="font-size:11.5px;line-height:1.4">Touche un repère pour le voir en grand.</div></div></div>
+<div class="tag" style="margin-top:10px">Les 4 coins du recto, agrandis</div>
+<div class="zooms">
+<div class="zm" style="border-color:var(--ok);background-image:url(../../web/img/card-pikachu-ex.webp);background-position:0 0"><span>9,5</span></div>
+<div class="zm" style="border-color:var(--ok);background-image:url(../../web/img/card-pikachu-ex.webp);background-position:100% 0"><span>9,5</span></div>
+<div class="zm" style="border-color:var(--ok);background-image:url(../../web/img/card-pikachu-ex.webp);background-position:0 100%"><span>9</span></div>
+<div class="zm" style="border-color:var(--ok);background-image:url(../../web/img/card-pikachu-ex.webp);background-position:100% 100%"><span>9,5</span></div>
+</div></div>
+<div class="card">
+<div class="h2" style="font-size:15px">Notes probables par entreprise</div>
+<div class="mut" style="font-size:11.5px;margin:2px 0 6px">Chances estimées pour chaque note</div>
+<div class="comp"><span class="lg"><img src="../../web/img/grading/psa-color.png" alt="PSA"></span><div class="dist"><div><i style="height:6px"></i>10</div><div class="top"><i style="height:26px"></i>9</div><div><i style="height:16px"></i>8</div><div><i style="height:5px"></i>7</div></div><div class="best"><b>9</b><span>le plus probable</span></div></div>
+<div class="comp"><span class="lg"><img src="../../web/img/grading/pca.png" alt="PCA"></span><div class="dist"><div><i style="height:9px"></i>10</div><div class="top"><i style="height:24px"></i>9</div><div><i style="height:13px"></i>8,5</div><div><i style="height:5px"></i>8</div></div><div class="best"><b>9</b><span>le plus probable</span></div></div>
+<div class="comp"><span class="lg" style="background:#0B1120"><img src="../../web/img/grading/ccc.svg" alt="CCC"></span><div class="dist"><div><i style="height:7px"></i>9,5</div><div class="top"><i style="height:25px"></i>9</div><div><i style="height:14px"></i>8,5</div><div><i style="height:5px"></i>8</div></div><div class="best"><b>9</b><span>le plus probable</span></div></div>
+</div>
+<div class="card worth">
+<div class="h2" style="font-size:15px">Ça vaut le coup de la grader ?</div>
+<div class="seg"><span class="on">PSA</span><span>PCA</span><span>CCC</span></div>
+<div class="ln"><span>Valeur brute (Near Mint)</span><b>120 €</b></div>
+<div class="ln"><span>Valeur si PSA 9 (estimation)</span><b>210 €</b></div>
+<div class="ln"><span>Coût de gradation + envoi</span><b>− 35 €</b></div>
+<div class="ln"><span>Gain probable</span><b style="color:#86EFAC">+ 55 €</b></div>
+<div class="verdict"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><div><div style="font-weight:800;font-size:14px">Oui, ça peut valoir le coup</div><div class="soft" style="font-size:11.5px;line-height:1.35">Même à 8, tu rentres dans tes frais (+ 12 €).</div></div></div>
+</div>
+<button class="btn" style="background:#111;color:#FFD60A">Ajouter à ma collection en Near Mint</button>
+<button class="btn2" style="background:#fff;color:#111;border-color:#111">Refaire les photos</button>
+<div class="card" style="display:flex;gap:10px;align-items:center;padding:12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFD60A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M8.5 6h7"/><path d="M9 14l2 2 4-4"/></svg><div style="flex:1"><div style="font-weight:800;font-size:13.5px">J'ai reçu la vraie note</div><div class="mut" style="font-size:11.5px">Indique-la : elle rend les estimations plus justes</div></div><span style="color:var(--blue);font-weight:800">›</span></div>
+<p class="small">Estimation à partir de photos, pas une gradation officielle. Dropicards n'est lié à aucune entreprise de gradation ; PSA, PCA et CCC sont des marques de leurs propriétaires.</p>
+</div></div></div>
+
+</div></body></html>

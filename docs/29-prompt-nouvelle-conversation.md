@@ -69,6 +69,7 @@ Tu reprends le projet **Dropicards** (nom de code PKM-App), une app pour les col
   - faire relire les textes légaux par un juriste.
 - **À essayer sur un vrai téléphone** : Face ID, la connexion directe, la connexion obligatoire.
 - **P4** (historique des prix pour les non-Premium) : en attente de la décision du porteur (`docs/27`).
+- **Pré-gradation** (`docs/40`, 2026-11-14) : proposition avec maquette et 4 logos, 6 décisions (D1 à D6) et « go » attendus ; rien n'est codé. L'installation de `install_024_a_028.sql` est mise de côté par le porteur.
 - **Points de loyauté (PL)** (`docs/38`, 2026-11-14) : **« go » du porteur avec les choix par défaut L1 à L8, construits** (serveur `028`, app `tools/web/pl.js` et `progress.js`) ; `install_024_a_028.sql` à installer ; « Ma progression » renommée « Ma ligue » (onglets « Classement et récompenses » et « Mes missions », mini-tuto à la première ouverture) ; TikTok et Instagram branchés, adresse Discord à fournir (`SOCIAL_LINKS`, `tools/web/profile.js`) ; pubs : seulement des vidéos récompensées, proposition à faire si le porteur dit « go » ; règlement de la saison à relire et publier (`docs/39`, projet). Son d'ouverture du coffre mystère : aucun pour l'instant (les 5 propositions n'ont pas plu au porteur, toujours essayables avec `?soncoffre=1-5`).
 - **Plus tard, App Store et Play Store** (`docs/23`) : option A choisie pour l'instant (paiement Premium sur le site seulement, bouton caché dans les apps des stores) ; option B possible (achat intégré).
 - **Serveur** :
