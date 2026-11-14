@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-14 — Lots de « Ma ligue » alignés, logo argenté Premium (porteur)
+
+- Tous les lots alignés : les visuels ont la même largeur, les textes commencent au même endroit.
+- Lots 4ᵉ à 10ᵉ : la couronne est remplacée par le logo argenté « PREMIUM » bordé d'or (même dégradé que la bannière Premium), à côté du ticket Or, Argent ou Bronze.
+- Cache v207.
+
+---
+
 ## 2026-11-14 — Pré-gradation dans l'offre Premium : 60 par mois (porteur)
 
 - **Demande du porteur** : « Pré-gradation 60/mois », version proto, dans le Premium, entre « Radar des boutiques » et « Double XP PA ».

@@ -175,14 +175,13 @@ html.pkm-calm .pkm-ple-head, html.pkm-calm .pkm-ple-ref, html.pkm-calm .pkm-ple-
 .pkm-pg-replay svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Visuels des lots (2026-11-14, porteur) : produits des 30 ans pour le podium, logo Premium ou ticket pour la suite. */
-.pkm-pg-rwimg { flex: none; position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.pkm-pg-rwimg { flex: none; position: relative; width: 124px; height: 64px; display: flex; align-items: center; justify-content: center; }
 .pkm-pg-rwimg img { display: block; max-width: 64px; max-height: 64px; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
 .pkm-pg-rwimg-two img { max-width: 42px; transform: translateX(-9px) rotate(-8deg); }
 .pkm-pg-rwimg-two .pkm-pg-rwimg-b { position: absolute; left: 50%; top: 50%; transform: translate(-30%, -50%) rotate(8deg); }
-.pkm-pg-rwduo { flex: none; width: 120px; display: flex; align-items: center; gap: 4px; }
+.pkm-pg-rwduo { flex: none; width: 124px; display: flex; align-items: center; justify-content: center; gap: 5px; }
 .pkm-pg-rwduo small { font-size: 11px; font-weight: 700; color: #9AA8C3; }
-.pkm-pg-rwcrown { flex: none; display: block; }
-.pkm-pg-rwduo .pkm-pg-rwtk { width: 62px; height: 40px; border-width: 2px; transform: rotate(-6deg); margin-left: 6px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
+.pkm-pg-rwduo .pkm-pg-rwtk { flex: none; width: 54px; height: 36px; border-width: 2px; transform: rotate(-6deg); margin-left: 3px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
 .pkm-pg-rwduo .pkm-pg-rwtk::before, .pkm-pg-rwduo .pkm-pg-rwtk::after { width: 10px; height: 10px; margin-top: -5px; border-width: 2px; background: #0B1120; }
 .pkm-pg-rwduo .pkm-pg-rwtk::before { left: -6px; } .pkm-pg-rwduo .pkm-pg-rwtk::after { right: -6px; }
 .pkm-pg-rwduo .pkm-pg-rwtk .pkm-shop-ticket-in { font-size: 9px; padding: 1px 3px; border-width: 1.5px; }
@@ -207,3 +206,10 @@ html.pkm-calm .pkm-ple-head, html.pkm-calm .pkm-ple-ref, html.pkm-calm .pkm-ple-
 @keyframes pkm-plfx-glow { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1.12); opacity: 1; } }
 @keyframes pkm-plfx-spark { 0% { opacity: 0; transform: translate(0, 0) scale(0.4); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1) rotate(25deg); } }
 @media (prefers-reduced-motion: reduce) { .pkm-plfx, .pkm-plfx-box, .pkm-plfx-logo, .pkm-plfx-glow { animation: none; } .pkm-plfx-spark { display: none; } }
+/* Lots alignés (2026-11-14, porteur) : même colonne de 124 px pour tous les visuels, les textes commencent au même endroit.
+   « Premium » : logo argenté bordé d'or de la bannière Premium (même dégradé), à la place de la couronne. */
+.pkm-pg-rwprem { flex: none; position: relative; width: 50px; height: 36px; box-sizing: border-box; border-radius: 9px; border: 2px solid #FFD60A; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(115deg, #E9EDF3 0%, #C3CBD8 22%, #FFFFFF 42%, #B4BDCB 62%, #EEF1F6 82%, #CDD4DF 100%); box-shadow: 0 0 0 1.5px rgba(255, 214, 10, 0.35), 0 0 10px rgba(255, 200, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.4); transform: rotate(6deg); }
+.pkm-pg-rwprem b { position: relative; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 9px; line-height: 1; letter-spacing: 0.02em; padding-top: 2px; color: #141A26; }
+.pkm-pg-rwprem-shine { position: absolute; top: -6px; bottom: -6px; left: -16px; width: 12px; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0)); transform: skewX(-20deg); animation: pkmPgPremShine 3.2s ease-in-out infinite; }
+@keyframes pkmPgPremShine { 0%, 60% { left: -16px; } 90%, 100% { left: 60px; } }
+@media (prefers-reduced-motion: reduce) { .pkm-pg-rwprem-shine { animation: none; display: none; } }

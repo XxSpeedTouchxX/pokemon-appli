@@ -46,8 +46,11 @@ const rw = await page.locator('section[aria-label="Lots de la saison"]').innerTe
 ok('lots (grille du porteur, 2026-11-14) : ETB, coffret poster, 2 boosters des 30 ans, puis Premium ou ticket jusqu’à la 10ᵉ place', /1ʳᵉ place/.test(rw) && /ETB des 30 ans/.test(rw) && /coffret poster des 30 ans/.test(rw) && /8ᵉ à 10ᵉ place/.test(rw) && /ticket Bronze/.test(rw) && !/11ᵉ à 30ᵉ place/.test(rw));
 const lotImgs = await page.locator('section[aria-label="Lots de la saison"] .pkm-pg-rwimg img').evaluateAll(els => els.map(e => e.getAttribute('src').split('/').pop() + ':' + e.naturalWidth));
 ok('lots : visuels ETB, coffret poster, 2 boosters des 30 ans (' + lotImgs.join(', ') + ')', lotImgs.length === 4 && /30th-celebration-elite-trainer-box\.webp:[1-9]/.test(lotImgs[0]) && /30th-poster-collection\.webp:[1-9]/.test(lotImgs[1]) && lotImgs.slice(2).every(t => /shop-booster-30-anniversaire\.webp:[1-9]/.test(t)));
-const duo = await page.locator('section[aria-label="Lots de la saison"] .pkm-pg-rwduo').evaluateAll(els => els.map(e => (e.querySelector('.pkm-pg-rwcrown') ? 'Premium' : '') + '+' + ((e.querySelector('.pkm-shop-ticket-in') || {}).textContent || '')));
-ok('lots 4ᵉ à 10ᵉ : logo Premium ou ticket Or, Argent, Bronze (' + duo.join(', ') + ')', duo.join(',') === 'Premium+OR,Premium+ARGENT,Premium+BRONZE');
+const duo = await page.locator('section[aria-label="Lots de la saison"] .pkm-pg-rwduo').evaluateAll(els => els.map(e => (e.querySelector('.pkm-pg-rwprem') && !e.querySelector('svg') && /PREMIUM/.test(e.querySelector('.pkm-pg-rwprem').textContent) ? 'Premium' : '') + '+' + ((e.querySelector('.pkm-shop-ticket-in') || {}).textContent || '')));
+ok('lots 4ᵉ à 10ᵉ : logo argenté « PREMIUM » (plus de couronne) ou ticket Or, Argent, Bronze (' + duo.join(', ') + ')', duo.join(',') === 'Premium+OR,Premium+ARGENT,Premium+BRONZE');
+// Lots alignés (2026-11-14, porteur) : tous les textes des lots commencent au même endroit.
+const lx = await page.locator('section[aria-label="Lots de la saison"] .pkm-pg-rwt').evaluateAll(els => els.map(e => Math.round(e.getBoundingClientRect().left)));
+ok('lots alignés : textes au même bord gauche (' + lx.join(', ') + ')', lx.length === 6 && new Set(lx).size === 1);
 // Saison et onglets figés en haut : seul le contenu dessous défile.
 const pin = await page.evaluate(async () => { const main = document.querySelector('#app main'), sea = document.querySelector('.pkm-pg-season'), tabs = document.querySelector('.pkm-pg-tabs');
   const m0 = main.getBoundingClientRect().top, s0 = sea.getBoundingClientRect().top; main.scrollTop = 900; await new Promise(r => setTimeout(r, 200));
