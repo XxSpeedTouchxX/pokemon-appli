@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-11-14 — Prix des cartes françaises : lecture de Cardmarket autorisée, mais bloquée par Cardmarket (porteur)
+
+- **Demande** : « fie-toi aux cotes des cartes françaises uniquement » (capture : Méga-Rayquaza ex 138/103, Règne Delta, 321,57 €).
+- **Constat** :
+  - la cote affichée vient de Cardmarket par TCGdex et les fichiers publics de Cardmarket ; elle mélange toutes les langues (un produit Cardmarket = toutes les langues) ;
+  - aucune source ouverte ne donne un prix par langue ;
+  - l'accès officiel de Cardmarket pour les applications n'accepte plus de nouvelles demandes (site d'aide de Cardmarket).
+- **Décision du porteur** : son avocat valide la lecture des pages de Cardmarket filtrées « Français, Near Mint » (point 2 proposé) ; « go ».
+- **Essai** (workflow « Essai prix FR Cardmarket », `tools/cmfr/probe.py`, lancé à la main) :
+  - depuis GitHub, Cardmarket répond **403 « Attention Required »** (protection anti-robots Cloudflare) dès la première page, sans aucune offre lisible ;
+  - depuis l'environnement de Claude, Cardmarket est hors réseau autorisé.
+  - **Pas de contournement** de cette protection (même règle que pour Vinted).
+- **Pistes proposées au porteur** :
+  - essai d'une minute depuis son serveur (adresse différente de GitHub) ;
+  - fournisseur payant de prix Cardmarket par langue d'impression : pokemontcgapi.com, essai gratuit de 800 crédits sans carte bancaire ; 29 €/mois pour les cartes à 2 € et plus chaque jour, 79 €/mois pour tout le catalogue chaque jour ; usage commercial permis avec mention de la source ; qualité à vérifier sur des cartes françaises avant tout paiement ;
+  - en attendant, afficher « Cardmarket · toutes langues ».
+- **Rien changé dans l'app** à ce stade.
+
 ## 2026-11-14 — Coefficients eBay/Vinted et confiance validés, confiance en % (porteur)
 
 - **Décisions du porteur** :
