@@ -108,7 +108,10 @@
       ['TCGdex', 'Catalogue, visuels et prix Cardmarket des cartes' + (c ? ' · ' + this.d2(c) : ''), '#3DDC84', 'connecté'],
       ['eBay', 'API officielle, ventes réussies · accès à confirmer', '#F5B14C', 'à vérifier'],
       ['Archive maison', days.length ? 'Cote du scellé gardée chaque jour depuis le ' + this.d2(days[0]) : 'Cote du scellé gardée chaque jour', '#3DDC84', 'actif'],
-      ['Vinted, Leboncoin', 'Pas d’API publique, pas de scraping', '#56648A', 'non connectés']
+      // Vinted (2026-11-14) : annonces en cours reprises toutes les 30 minutes (annonces.js) ; prix demandés, hors cote.
+      (typeof AN !== 'undefined' && AN.status && AN.status.vinted && AN.status.vinted.last_ok)
+        ? ['Vinted', 'Annonces en cours, prix demandés (hors cote) · ' + anAgo(AN.status.vinted.last_ok), '#3DDC84', 'connecté']
+        : ['Vinted', 'Annonces en cours, prix demandés (hors cote) · mise en place sur le serveur', '#F5B14C', 'en attente']
     ];
     r.sources = rows.map((q, i) => Object.assign({}, r.sources[i] || {}, { label: q[0], sub: q[1], dot: q[2], state: q[3] }));
     if (x.s.valuation === 'pkm' || !x.s.valuation) r.valHelp = 'Recommandé. Prix Cardmarket : médiane de la tendance et des moyennes 7 et 30 jours. Les ventes réussies eBay s’ajouteront dès qu’un accès officiel sera ouvert.';

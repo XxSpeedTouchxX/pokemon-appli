@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-14 — Fil « Annonces » : Vinted construit (go du porteur)
+
+- **Go du porteur :** « fais-moi déjà la manip pour Vinted, que ça fonctionne déjà pour Vinted, après on verra pour eBay ».
+- **Construit :**
+  - base : `tools/supabase/029_annonces.sql` (table `listings` lue par tous, écrite par le serveur seulement, aucun vendeur ; passages espacés d'au moins 20 minutes ; annonce inactive après 2 jours sans être revue, effacée après 14 jours ; tâche pg_cron toutes les 30 minutes), 27 tests ;
+  - serveur : fonction `annonces` (`tools/supabase/functions/annonces/`) qui lit le catalogue public de Vinted (5 recherches, 1,5 s entre deux requêtes), garde les annonces Pokémon (cartes, lots, gradées, scellé ; peluches, vêtements, jeux vidéo écartés), s'arrête net si Vinted bloque (aucun contournement), 28 tests ; installation `install-annonces.sh` ;
+  - app : rubrique « Annonces du moment » sur l'accueil (sous la pré-gradation, cachée tant que 029 n'est pas installé) et écran « Annonces » (recherche sans accents, Cartes / Lots / Gradées / Scellé, tri par prix, « Voir l'annonce » vers Vinted, mention « prix demandés, hors cote, pas affilié à Vinted »), Réglages › Sources : Vinted « connecté » ou « en attente » (`annonces.js`, `annonces.css`, test `t-annonces.mjs`, 20) ; cache v199.
+- **Défauts appliqués (à confirmer) :** 5 recherches Vinted ; pas de nom de vendeur (RGPD), alors que PokéItem l'affiche ; bloc « Annonces » dans la fiche d'une carte et « Bonnes affaires » reportés (il faut d'abord relier les titres aux cartes).
+- **Reste :** installation par le porteur (`docs/42`, étapes V1 à V3) ; on ne sait pas encore si Vinted accepte le serveur (réponse au premier passage) ; eBay après les démarches du porteur.
+
 ## 2026-11-14 — Scraping d'eBay et de Vinted autorisé (avis juridique obtenu par le porteur)
 
 - **Contexte :** la règle du 2026-10-03 interdisait le scraping (eBay, Vinted, Leboncoin, Cardmarket) sans avis juridique ; le 2026-10-18, le scraping des ventes réussies eBay avait été abandonné (robots.txt d'eBay, réponses 403 depuis GitHub, aucun contournement). La proposition des annonces (`docs/41`) s'appuyait sur cette règle.

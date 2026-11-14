@@ -2,7 +2,7 @@
 
 *2026-11-14 · demande du porteur : « faire du scraping directement sur eBay et Vinted pour reprendre les annonces en ligne des cartes revendues, comme sur PokéItem » (capture d'écran de PokéItem, rubrique « Lots & collections », en inspiration).*
 
-**Statut : proposition, rien n'est codé. Décisions A1 à A6 au § 8, puis « go » attendu.**
+**Statut : Vinted construit le 2026-11-14 (« go » du porteur : « fais-moi déjà la manip pour Vinted ») ; installation sur le serveur par le porteur, `docs/42` étapes V1 à V3. eBay : en attente des démarches du porteur (`docs/42` étapes 1 à 8). Choix appliqués pour Vinted : A2 = scraping (V3), A3 = rubrique de l'accueil + écran « Annonces » (pas encore le bloc dans la fiche d'une carte, qui demande de relier les titres aux cartes), A4 = 30 minutes. « Bonnes affaires » (A6) attend la reconnaissance des cartes.**
 
 > **Mise à jour du 2026-11-14 (même jour) :** le porteur a obtenu un avis juridique ; le **scraping d'eBay et de Vinted est autorisé** (CLAUDE.md §4, journal du 2026-11-14). Les § 2, § 5 et A2 sont mis à jour en conséquence. Leboncoin et Cardmarket restent sous la règle du 2026-10-03.
 

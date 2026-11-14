@@ -461,6 +461,7 @@
 <span role="status" style="font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ home.hr.status }}</span>
 </section>
 @@pregrade-home@@
+@@annonces-home@@
 
 <sc-if value="{{ home.hasMargin }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ goSales }}" style="flex: none; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 16px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; color: inherit; font: inherit; text-align: left; cursor: pointer">
@@ -2840,5 +2841,51 @@ PKCOUNTER
 </section>
 <button type="button" onClick="{{ pgr.start }}" class="pkm-pgd-btn">Pré-grader une carte</button>
 </sc-if>
+</div>
+</sc-if>
+
+<!-- fragment: annonces-home -->
+<sc-if value="{{ anh.show }}" hint-placeholder-val="{{ true }}">
+<section aria-label="Annonces du moment" class="pkm-anh">
+<div class="pkm-anh-head"><h2 class="pkm-anh-title">Annonces du moment</h2><span class="pkm-anh-new">Nouveau</span></div>
+<span class="pkm-anh-sub">{{ anh.sub }}</span>
+<div class="pkm-anh-row" role="list">
+<sc-for list="{{ anh.items }}" as="ah" hint-placeholder-count="4">
+<a role="listitem" href="{{ ah.href }}" target="_blank" rel="noopener" aria-label="{{ ah.aria }}" class="pkm-anh-card pkm-dark">
+<span class="pkm-anh-pic"><sc-if value="{{ ah.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ ah.img }}" alt="" width="150" height="200" loading="lazy" referrerpolicy="no-referrer"></sc-if><span class="{{ ah.srcCls }}">{{ ah.src }}</span><sc-if value="{{ ah.hasTag }}" hint-placeholder-val="{{ false }}"><span class="pkm-anl-tag">{{ ah.tag }}</span></sc-if></span>
+<span class="pkm-anh-t">{{ ah.title }}</span>
+<b class="pkm-anh-p">{{ ah.price }}</b>
+</a>
+</sc-for>
+</div>
+<button type="button" onClick="{{ anh.open }}" class="pkm-anh-btn">{{ anh.btn }}</button>
+</section>
+</sc-if>
+
+<!-- fragment: annonces -->
+<sc-if value="{{ ui.isAnnonces }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-anl">
+<label class="pkm-anl-search pkm-dark"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input type="search" aria-label="Chercher une annonce" placeholder="Dracaufeu, ETB, PSA 10…" value="{{ anl.q }}" onInput="{{ anl.onQ }}"></label>
+<div class="pkm-anl-chips" role="group" aria-label="Type d’annonce"><sc-for list="{{ anl.kinds }}" as="ak" hint-placeholder-count="5"><button type="button" onClick="{{ ak.go }}" aria-pressed="{{ ak.pressed }}" class="{{ ak.cls }}">{{ ak.label }}</button></sc-for></div>
+<div class="pkm-anl-sorts" role="group" aria-label="Trier"><sc-for list="{{ anl.sorts }}" as="as" hint-placeholder-count="3"><button type="button" onClick="{{ as.go }}" aria-pressed="{{ as.pressed }}" class="{{ as.cls }}">{{ as.label }}</button></sc-for></div>
+<sc-if value="{{ anl.hasCount }}" hint-placeholder-val="{{ true }}"><p class="pkm-anl-count" role="status">{{ anl.count }}</p></sc-if>
+<sc-if value="{{ anl.isEmpty }}" hint-placeholder-val="{{ false }}"><p class="pkm-anl-empty pkm-dark" role="status">{{ anl.empty }}</p></sc-if>
+<sc-if value="{{ anl.retry }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ anl.doRetry }}" class="pkm-anl-more">Réessayer</button></sc-if>
+<div class="pkm-anl-grid" role="list">
+<sc-for list="{{ anl.items }}" as="al" hint-placeholder-count="6">
+<article role="listitem" class="pkm-anl-card pkm-dark">
+<span class="pkm-anl-pic"><sc-if value="{{ al.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ al.img }}" alt="" width="200" height="266" loading="lazy" referrerpolicy="no-referrer"></sc-if><span class="{{ al.srcCls }}">{{ al.src }}</span><sc-if value="{{ al.hasTag }}" hint-placeholder-val="{{ false }}"><span class="pkm-anl-tag">{{ al.tag }}</span></sc-if></span>
+<span class="pkm-anl-body">
+<span class="pkm-anl-t">{{ al.title }}</span>
+<b class="pkm-anl-p">{{ al.price }}</b>
+<sc-if value="{{ al.hasTotal }}" hint-placeholder-val="{{ false }}"><span class="pkm-anl-tot">{{ al.total }}</span></sc-if>
+<span class="pkm-anl-meta"><sc-if value="{{ al.hasCond }}" hint-placeholder-val="{{ true }}"><span>{{ al.cond }}</span></sc-if><span>{{ al.when }}</span></span>
+<a href="{{ al.href }}" target="_blank" rel="noopener" aria-label="{{ al.aria }}" class="pkm-anl-go"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M20 4l-9 9"></path><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"></path></svg>Voir l’annonce</a>
+</span>
+</article>
+</sc-for>
+</div>
+<sc-if value="{{ anl.more }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ anl.showMore }}" class="pkm-anl-more">{{ anl.moreLabel }}</button></sc-if>
+<p class="pkm-anl-note">Annonces publiques reprises de Vinted toutes les 30 minutes. Prix demandés par les vendeurs, hors frais de port : ils ne comptent pas dans la cote de tes cartes. Une annonce peut déjà être vendue. Dropicards n’est pas affilié à Vinted et ne vend rien : « Voir l’annonce » ouvre Vinted.</p>
 </div>
 </sc-if>

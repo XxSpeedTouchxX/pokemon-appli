@@ -2,7 +2,42 @@
 
 *2026-11-14 · pour le porteur, sans jargon · accompagne la proposition `docs/41-proposition-annonces-ebay-vinted.md`.*
 
-> **À retenir avant de commencer.** Vinted ne demande **aucune démarche** de ta part : Claude peut le construire tout de suite (scraping autorisé depuis le 2026-11-14). **eBay demande une validation** : l'accès aux annonces en production est réservé aux partenaires d'eBay. Il faut un compte eBay Partner Network (EPN), un dossier accepté et un contrat signé avec eBay. EPN répond en **10 jours ouvrés au plus**, puis l'équipe technique d'eBay relit l'app. **eBay peut refuser.**
+> **À retenir avant de commencer.** Vinted ne demande **aucun compte** : c'est construit (voir « Vinted : mise en place en 3 étapes » juste en dessous), il reste 3 petites étapes d'installation sur ton serveur (scraping autorisé depuis le 2026-11-14). **eBay demande une validation** : l'accès aux annonces en production est réservé aux partenaires d'eBay. Il faut un compte eBay Partner Network (EPN), un dossier accepté et un contrat signé avec eBay. EPN répond en **10 jours ouvrés au plus**, puis l'équipe technique d'eBay relit l'app. **eBay peut refuser.**
+
+---
+
+## Vinted : mise en place en 3 étapes (construit le 2026-11-14)
+
+Ce que Claude a construit : la table des annonces (`tools/supabase/029_annonces.sql`), la fonction du serveur qui lit Vinted toutes les 30 minutes (`tools/supabase/functions/annonces/`), et dans l'app la rubrique « Annonces du moment » sur l'accueil (sous la pré-gradation) et l'écran « Annonces » (recherche, Cartes / Lots / Gradées / Scellé, tri par prix). Tant que les étapes 1 et 2 ne sont pas faites, la rubrique reste cachée : rien ne casse.
+
+**Étape V1 · La table des annonces (Studio, 2 minutes)**
+1. Ouvre Supabase Studio (comme pour les scripts précédents) › **SQL Editor** › nouveau snippet.
+2. Colle tout le fichier `tools/supabase/029_annonces.sql` (sur GitHub : bouton « Raw », tout sélectionner, copier).
+3. Clique sur **Run**. En bas, tu dois lire « Passage automatique programmé : toutes les 30 minutes ». Si tu lis « NON programmé », envoie le message à Claude : le fil marchera quand même, mais seulement quand on appelle la fonction.
+
+**Étape V2 · La fonction qui lit Vinted (terminal de Coolify, 1 minute)**
+1. Coolify › **Terminal** › choisis le serveur.
+2. Colle cette ligne puis Entrée :
+   ```
+   curl -fsSL https://raw.githubusercontent.com/XxSpeedTouchxX/pokemon-appli/claude/pokemon-app-mockup-1mxt7p/tools/supabase/functions/install-annonces.sh | bash
+   ```
+3. Tu dois lire « OK : fonction « annonces » installée » puis « OK : le serveur joint Vinted ». Si tu lis « ATTENTION : Vinted refuse le serveur », envoie le message à Claude.
+
+**Étape V3 · Premier passage (navigateur, 1 minute)**
+1. Ouvre **https://api.dropicards.fr/functions/v1/annonces/vinted** dans ton navigateur (ordinateur ou téléphone).
+2. La page affiche un petit texte entre accolades. Ce qui compte :
+   - `"ok": true` et `"message": "… annonces Pokémon enregistrées sur … lues."` → c'est bon, ouvre l'app : la rubrique « Annonces du moment » apparaît sur l'accueil ;
+   - `"skipped": true` → un passage a déjà eu lieu il y a moins de 20 minutes : c'est bon aussi ;
+   - `"blocked": true` → Vinted refuse le serveur (protection anti-robot) : **envoie le texte à Claude**, rien n'est contourné ;
+   - `"error"` qui parle de `029_annonces.sql` → l'étape V1 n'est pas faite.
+3. Ensuite, plus rien à faire : la base relance la fonction toutes les 30 minutes.
+
+**À savoir**
+- Rythme volontairement modéré : 5 recherches Vinted par passage (« carte pokemon », « lot cartes pokemon », « carte pokemon psa », « etb pokemon », « display pokemon »), 1,5 seconde entre deux requêtes, un passage toutes les 30 minutes.
+- Aucun pseudo ni avatar de vendeur n'est gardé ; peluches, vêtements, jeux vidéo et objets sont écartés.
+- Une annonce plus revue depuis 2 jours disparaît du fil (souvent vendue), puis est effacée après 14 jours.
+- Les prix sont des **prix demandés** : ils ne comptent jamais dans la cote de tes cartes.
+- Pour tout arrêter : dans Studio, `select cron.unschedule('annonces-vinted');` (le fil garde les dernières annonces, puis se vide en 2 jours).
 
 ---
 
@@ -18,7 +53,7 @@
 | 6 | Envoyer la demande d'accès « Buy API » à EPN, avec maquettes et schéma | Claude prépare, toi tu envoies | 15 min, puis jusqu'à 10 jours ouvrés |
 | 7 | Ouvrir le ticket au support développeur d'eBay et signer le contrat | Toi, guidé | 20 min, puis attente |
 | 8 | Mettre les clés dans Coolify | Toi, guidé | 10 min |
-| — | Construire Vinted, la table des annonces, les écrans, et la partie eBay en mode test | Claude, en parallèle | — |
+| — | Vinted, la table des annonces et les écrans : **construits le 2026-11-14** (installation V1 à V3 ci-dessus) ; partie eBay en mode test | Claude | — |
 
 ---
 
