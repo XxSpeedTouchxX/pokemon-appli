@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-14 — Règlement de la saison : pas d'urgence (porteur)
+
+- « Pour la saison déjà commencée on s'en fiche, on est en version proto pour l'instant » (porteur).
+- Le projet de règlement (`docs/39`) n'est plus à publier en urgence. Il le sera avant une vraie saison avec des lots remis.
+- Installation de `tools/supabase/install_024_a_028.sql` : pas à pas donné au porteur dans la conversation (Studio, `https://api.dropicards.fr`), à faire par lui (aucun accès à la base depuis Claude).
+
 ## 2026-11-14 — « Ma ligue », mini-tuto, liens TikTok et Instagram, 3 tests réparés (demande du porteur)
 
 - **« Ma progression » devient « Ma ligue »** (bannière de Jeux, titre de la page), et l'onglet « Gagner des PL » devient **« Mes missions »**.

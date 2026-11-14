@@ -8,7 +8,7 @@
 - Rien n'est publié tant que le porteur ne l'a pas validé.
 - **Saison 1** (8 novembre 2026 au 6 janvier 2027), commencée avant ce texte :
   - le passage aux PL s'est fait en cours de saison (tout le monde à 0 PL le jour de l'installation de `028`, choix L6) ;
-  - il faut donc publier le texte au plus vite et le dire dans l'app (le mini-tuto de « Ma ligue », montré à la première ouverture, peut renvoyer vers le règlement).
+  - **pas d'urgence (porteur, 2026-11-14)** : l'app est encore un prototype, peu importe que la saison 1 ait commencé avant le règlement. Il sera publié avant une vraie saison avec des lots remis.
 
 ---
 
