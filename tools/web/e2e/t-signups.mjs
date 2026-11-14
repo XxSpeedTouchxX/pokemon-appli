@@ -11,7 +11,9 @@ const N = t => String(t).replace(/[\s  ]+/g, ' ').trim();
 const KEY = 'pkm-collection-v1';
 const UID = 'u-adm', EMAIL = 'admin@exemple.fr';
 const TOKEN = 'h.' + Buffer.from(JSON.stringify({ sub: UID, email: EMAIL })).toString('base64url') + '.s';
-const now = Date.now(), iso = ms => new Date(now - ms).toISOString();
+// Heure figée à midi (page comprise) : « aujourd'hui » et « dernière heure » ne dépendent plus de l'heure du test
+// (avant, entre minuit et 5 h, le compte créé il y a 5 h tombait la veille).
+const now = (() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d.getTime(); })(), iso = ms => new Date(now - ms).toISOString();
 const U = (id, pseudo, email, ago, extra) => Object.assign({ id: id, email: email, email_confirmed: false, pseudo: pseudo, age_range: '15-25', role: 'user', status: 'active', news_optin: false, created_at: iso(ago), last_sign_in_at: null, pk: 100, pa: 0, items: 0 }, extra || {});
 const S = { users: [
   U('a', 'Admin', EMAIL, 20 * 864e5, { role: 'admin', email_confirmed: true }),
@@ -37,6 +39,7 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, de
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
 await ctx.route(FAKE + '/**', fake);
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+await page.clock.setFixedTime(new Date(now));
 
 await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.waitForTimeout(800);
 await page.evaluate(([k, tok, uid, email]) => {
