@@ -13,16 +13,22 @@
   const PROG_START = Date.parse('2026-11-08T00:00:00+01:00'), PROG_DAYS = 60, PROG_DAY = 86400000;
   const PROG_TTL = 60000; // classement relu au plus une fois par minute
   // Lots de la saison (grille du porteur, docs/38 §4, L8) ; podium seulement avec au moins 50 joueurs classés.
+  // Visuels des lots (2026-11-14, porteur) : 1ʳᵉ place l'ETB des 30 ans, 2ᵉ le coffret poster des 30 ans, 3ᵉ deux
+  // boosters des 30 ans ; de la 4ᵉ à la 10ᵉ, le logo Premium (1 mois) ou le ticket Or, Argent ou Bronze du PK shop.
   const PROG_REWARDS = [
-    { range: '1ʳᵉ place', prize: 'Un ETB du moment', note: 'Elite Trainer Box', img: 'img/rank/1.svg', cls: 'pkm-pg-rw pkm-pg-rw-top' },
-    { range: '2ᵉ place', prize: 'Un coffret du moment', note: '', img: 'img/rank/2.svg', cls: 'pkm-pg-rw pkm-pg-rw-top' },
-    { range: '3ᵉ place', prize: '2 boosters du moment', note: '', img: 'img/rank/3.svg', cls: 'pkm-pg-rw pkm-pg-rw-top' },
-    { range: '4ᵉ et 5ᵉ place', prize: '1 mois de Premium ou 1 ticket Or', note: 'Au choix, en fin de saison', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-or' },
-    { range: '6ᵉ et 7ᵉ place', prize: '1 mois de Premium ou 1 ticket Argent', note: 'Au choix, en fin de saison', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-ag' },
-    { range: '8ᵉ à 10ᵉ place', prize: '1 mois de Premium ou 1 ticket Bronze', note: 'Au choix, en fin de saison', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-bz' }
+    { range: '1ʳᵉ place', prize: 'Un ETB des 30 ans', note: 'Coffret Dresseur d’élite du 30ᵉ anniversaire', img: 'img/products/30th-celebration-elite-trainer-box.webp', cls: 'pkm-pg-rw pkm-pg-rw-top' },
+    { range: '2ᵉ place', prize: 'Un coffret poster des 30 ans', note: 'Collection poster du 30ᵉ anniversaire', img: 'img/products/30th-poster-collection.webp', cls: 'pkm-pg-rw pkm-pg-rw-top' },
+    { range: '3ᵉ place', prize: '2 boosters des 30 ans', note: 'Boosters du 30ᵉ anniversaire', img: 'img/shop-booster-30-anniversaire.webp', two: true, cls: 'pkm-pg-rw pkm-pg-rw-top' },
+    { range: '4ᵉ et 5ᵉ place', prize: '1 mois de Premium ou 1 ticket Or', note: 'Au choix, en fin de saison', tier: 'or', tag: 'OR', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-or' },
+    { range: '6ᵉ et 7ᵉ place', prize: '1 mois de Premium ou 1 ticket Argent', note: 'Au choix, en fin de saison', tier: 'argent', tag: 'ARGENT', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-ag' },
+    { range: '8ᵉ à 10ᵉ place', prize: '1 mois de Premium ou 1 ticket Bronze', note: 'Au choix, en fin de saison', tier: 'bronze', tag: 'BRONZE', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-bz' }
   ];
   PROG_REWARDS.forEach(w => { if (!w.note) w.note = ''; w.hasNote = !!w.note; });
-  PROG_REWARDS.forEach(w => { w.hasImg = !!w.img; w.noImg = !w.img; });
+  PROG_REWARDS.forEach(w => {
+    w.hasImg = !!w.img; w.noImg = !w.img; w.two = !!w.two;
+    w.imgCls = 'pkm-pg-rwimg' + (w.two ? ' pkm-pg-rwimg-two' : '');
+    w.tkCls = 'pkm-shop-ticket pkm-pg-rwtk pkm-shop-t-' + (w.tier || 'or'); w.tag = w.tag || '';
+  });
   let progTick = null;
   const progNum = n => Number(n || 0).toLocaleString('fr-FR');
   // Saison locale (même règle que le serveur) quand le serveur n'a pas répondu.
@@ -125,6 +131,11 @@
       // Temps restant : nouveau rendu chaque minute tant que la page est ouverte ; classement relu s'il date.
       if (!progTick) progTick = setInterval(() => { if (this.st().screen === 'progress') { this.setState({ pgNow: Date.now() }); this.progLoad(false); } else { clearInterval(progTick); progTick = null; } }, 60000);
     } else { r.pg = { card: {}, podium: [], rest: [], rewards: [], tabs: [] }; r.ple = { rows: [], shareNets: [] }; }
+    // Fond de l'en-tête figé = fond de l'app (jaune, thème d'un compagnon ou apparence sombre).
+    if (r.ui && r.ui.isProgress) setTimeout(() => { try {
+      const app = document.getElementById('app'), c = app ? getComputedStyle(app).backgroundColor : '';
+      if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) document.documentElement.style.setProperty('--pkm-app-bg', c);
+    } catch (e) { /* page sans racine */ } }, 0);
     return r;
   };
   const progBaseParent = progProto.parentOf;

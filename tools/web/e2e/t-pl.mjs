@@ -41,7 +41,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   ok('2 onglets : « Classement et récompenses » et « Mes missions »', tabs.length === 2 && /Classement et récompenses/.test(tabs[0]) && /Mes missions/.test(tabs[1]));
   ok('onglet du classement ouvert d’abord', (await page.locator('.pkm-pg-tab-on').innerText()) === tabs[0] && (await page.locator('section.pkm-pg-card').count()) === 1);
   const rw = N(await page.locator('section[aria-label="Lots de la saison"]').innerText());
-  ok('lots : ETB, coffret, 2 boosters, Premium ou ticket Or / Argent / Bronze', /1ʳᵉ place Un ETB du moment/.test(rw) && /2ᵉ place Un coffret du moment/.test(rw) && /3ᵉ place 2 boosters du moment/.test(rw)
+  ok('lots : ETB, coffret, 2 boosters, Premium ou ticket Or / Argent / Bronze', /1ʳᵉ place Un ETB des 30 ans/.test(rw) && /2ᵉ place Un coffret poster des 30 ans/.test(rw) && /3ᵉ place 2 boosters des 30 ans/.test(rw)
     && /4ᵉ et 5ᵉ place 1 mois de Premium ou 1 ticket Or/.test(rw) && /6ᵉ et 7ᵉ place 1 mois de Premium ou 1 ticket Argent/.test(rw) && /8ᵉ à 10ᵉ place 1 mois de Premium ou 1 ticket Bronze/.test(rw) && /au moins 50 joueurs/.test(rw));
   await page.locator('.pkm-pg-tabs button').nth(1).click(); await page.waitForTimeout(500);
   ok('« Mes missions » sans compte : invitation à se connecter, classement caché', /Connecte-toi à ton compte Dropicards pour gagner des Points de loyauté/.test(await page.locator('.pkm-ple-msg').innerText()) && (await page.locator('section.pkm-pg-card').count()) === 0);
@@ -120,7 +120,13 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   ok('TikTok : « Y aller », +100', /Y aller/.test(await tk.innerText()) && /\+100/.test(rows[0]));
   await tk.click(); await page.waitForTimeout(300);
   ok('TikTok : le réseau s’ouvre, puis « Valider »', (await page.evaluate(() => window.__opened[0])) === 'https://example.invalid/tiktok' && /Valider/.test(await tk.innerText()) && !(S.calls.pl_claim_social || []).length);
-  await tk.click(); await page.waitForTimeout(900);
+  await tk.click(); await page.waitForTimeout(400);
+  const fx = await page.evaluate(() => { const o = document.querySelector('.pkm-plfx'); return o ? o.innerText.replace(/\s+/g, ' ').trim() : ''; });
+  ok('animation des PL gagnés : bouclier-cœur et « +100 PL » (« ' + fx + ' »)', /\+\d+ PL/.test(fx) && /Points de loyauté gagnés/.test(fx) && await page.locator('.pkm-plfx .pkm-plfx-logo').count() === 1);
+  await page.waitForTimeout(1100);
+  ok('animation : compte jusqu’à +100 PL', /\+100 PL/.test(await page.evaluate(() => (document.querySelector('.pkm-plfx-n') || {}).textContent || '')));
+  await page.waitForTimeout(2200);
+  ok('animation : s’efface seule', await page.locator('.pkm-plfx').count() === 0);
   ok('TikTok validé : demandé au serveur, « Fait », +100 PL', (S.calls.pl_claim_social || []).length === 1 && S.calls.pl_claim_social[0].net === 'tiktok' && /Fait/.test(await tk.innerText()) && /Mes PL de la saison 250/.test(N(await page.locator('section.pkm-ple-head').innerText())));
   // Partage avec capture.
   await page.locator('.pkm-ple-row').nth(6).locator('button').click(); await page.waitForTimeout(300);

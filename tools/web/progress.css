@@ -173,3 +173,37 @@ html.pkm-calm .pkm-ple-head, html.pkm-calm .pkm-ple-ref, html.pkm-calm .pkm-ple-
 .pkm-plp-no { border: 1px solid #FF8A8A; background: transparent; color: #FF8A8A; }
 .pkm-pg-replay { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #C9D3EA; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 .pkm-pg-replay svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Visuels des lots (2026-11-14, porteur) : produits des 30 ans pour le podium, logo Premium ou ticket pour la suite. */
+.pkm-pg-rwimg { flex: none; position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.pkm-pg-rwimg img { display: block; max-width: 64px; max-height: 64px; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45)); }
+.pkm-pg-rwimg-two img { max-width: 42px; transform: translateX(-9px) rotate(-8deg); }
+.pkm-pg-rwimg-two .pkm-pg-rwimg-b { position: absolute; left: 50%; top: 50%; transform: translate(-30%, -50%) rotate(8deg); }
+.pkm-pg-rwduo { flex: none; width: 120px; display: flex; align-items: center; gap: 4px; }
+.pkm-pg-rwduo small { font-size: 11px; font-weight: 700; color: #9AA8C3; }
+.pkm-pg-rwcrown { flex: none; display: block; }
+.pkm-pg-rwduo .pkm-pg-rwtk { width: 62px; height: 40px; border-width: 2px; transform: rotate(-6deg); margin-left: 6px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
+.pkm-pg-rwduo .pkm-pg-rwtk::before, .pkm-pg-rwduo .pkm-pg-rwtk::after { width: 10px; height: 10px; margin-top: -5px; border-width: 2px; background: #0B1120; }
+.pkm-pg-rwduo .pkm-pg-rwtk::before { left: -6px; } .pkm-pg-rwduo .pkm-pg-rwtk::after { right: -6px; }
+.pkm-pg-rwduo .pkm-pg-rwtk .pkm-shop-ticket-in { font-size: 9px; padding: 1px 3px; border-width: 1.5px; }
+
+/* Saison et onglets figés en haut de « Ma ligue » (2026-11-14, porteur) : seul le contenu dessous défile, sur les deux
+   onglets. Fond de l'app repris (--pkm-app-bg, progress.js) pour que rien ne se voie dessous. */
+.pkm-pg-pin { position: sticky; top: -4px; z-index: 6; flex: none; display: flex; flex-direction: column; gap: 10px; margin: -4px -16px 0; padding: 4px 16px 10px; background: var(--pkm-app-bg, #FFD60A); }
+
+/* Animation des PL gagnés (pl.js, plFx). */
+.pkm-plfx { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; background: rgba(5, 9, 20, 0.55); animation: pkm-plfx-in 0.25s ease-out both; }
+.pkm-plfx-out { animation: pkm-plfx-fade 0.35s ease-in both; }
+.pkm-plfx-box { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px 30px 18px; border-radius: 28px; border: 2px solid rgba(255, 214, 10, 0.7); background: radial-gradient(120% 90% at 50% 0%, rgba(255, 214, 10, 0.28), rgba(255, 214, 10, 0) 60%), #121C33; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55); color: #F3F6FC; animation: pkm-plfx-pop 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.pkm-plfx-glow { position: absolute; left: 50%; top: 58px; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 214, 10, 0.55), rgba(255, 214, 10, 0) 65%); animation: pkm-plfx-glow 1.4s ease-in-out infinite alternate; pointer-events: none; }
+.pkm-plfx-logo { position: relative; width: 84px; height: 84px; animation: pkm-plfx-bounce 0.9s cubic-bezier(0.3, 1.6, 0.5, 1) both; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45)); }
+.pkm-plfx-n { position: relative; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 40px; letter-spacing: 0.02em; color: #FFD60A; -webkit-text-stroke: 1.5px #0B1120; font-variant-numeric: tabular-nums; }
+.pkm-plfx-box small { position: relative; font-size: 13px; font-weight: 700; color: #C9D3EA; }
+.pkm-plfx-spark { position: absolute; left: 50%; top: 58px; width: 22px; height: 22px; margin: -11px 0 0 -11px; opacity: 0; animation: pkm-plfx-spark 1.1s ease-out var(--d) both; pointer-events: none; }
+@keyframes pkm-plfx-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pkm-plfx-fade { to { opacity: 0; } }
+@keyframes pkm-plfx-pop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pkm-plfx-bounce { 0% { transform: translateY(-60px) scale(0.5); } 60% { transform: translateY(6px) scale(1.12); } 100% { transform: none; } }
+@keyframes pkm-plfx-glow { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1.12); opacity: 1; } }
+@keyframes pkm-plfx-spark { 0% { opacity: 0; transform: translate(0, 0) scale(0.4); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1) rotate(25deg); } }
+@media (prefers-reduced-motion: reduce) { .pkm-plfx, .pkm-plfx-box, .pkm-plfx-logo, .pkm-plfx-glow { animation: none; } .pkm-plfx-spark { display: none; } }

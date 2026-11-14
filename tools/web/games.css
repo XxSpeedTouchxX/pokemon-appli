@@ -1905,3 +1905,14 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-sf-lock { margin: -4px 0 0; text-align: center; font-size: 13px; line-height: 1.4; color: #C9D3EA; }
 /* Ticket du mois déjà acheté (2026-11-13, porteur) : « Ticket déjà acheté » en vert, comme la pastille « Acheté ». */
 .pkm-lotwait-ok > b.pkm-tks-boughttag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; background: #5EE0CF; color: #0B1120; font-size: 15px; font-weight: 800; }
+
+/* Langue de la carte dans « Prix du marché » (2026-11-14, porteur) : drapeau et flèche, menu de 3 drapeaux. */
+.pkm-fm-head { position: relative; display: flex; align-items: center; gap: 8px; }
+.pkm-fm-lang { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 4px 8px; border-radius: 999px; border: 1px solid #2E3F6B; background: #0B1120; color: #C9D3EA; cursor: pointer; font: inherit; }
+.pkm-fm-lflag { flex: none; width: 20px; height: 14px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25); }
+.pkm-fm-chev { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s ease; }
+.pkm-fm-chev-up { transform: rotate(180deg); }
+.pkm-fm-langs { position: absolute; left: 0; top: calc(100% + 6px); z-index: 5; display: flex; flex-direction: column; gap: 2px; min-width: 168px; padding: 6px; border-radius: 16px; border: 1px solid #2E3F6B; background: #0B1120; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5); animation: pkm-fm-pop 0.18s ease-out both; }
+.pkm-fm-langopt { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 6px 10px; border: 0; border-radius: 12px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; }
+.pkm-fm-langopt-on { background: rgba(255, 214, 10, 0.16); color: #FFD60A; }
+@keyframes pkm-fm-pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }

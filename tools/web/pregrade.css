@@ -277,3 +277,6 @@ html.pkm-th-dark .pkm-pgd-note-s, html.pkm-th-dark .pkm-pgd-legal { color: #9AA8
 .pkm-pgd-roi { margin: -6px 0 0; text-align: right; font-size: 11.5px; color: #86EFAC; }
 @media (prefers-reduced-motion: reduce) { .pkm-pgd-res > *, .pkm-pgd-gauge-fg, .pkm-pgd-ring-fg, .pkm-pgd-gauge-n b, .pkm-pgd-medal::after, .pkm-pgd-shutter-go, .pkm-pgd-frz::after, .pkm-pgd-dots b, .pkm-pgd-laser { animation: none !important; } }
 html.pkm-calm .pkm-pgd-res > *, html.pkm-calm .pkm-pgd-gauge-fg, html.pkm-calm .pkm-pgd-ring-fg { animation: none; }
+
+/* Pré-gradation sans la barre du bas (2026-11-14, porteur) : le bouton central « Scan » ne chevauche plus le déclencheur. */
+html.pkm-pg-on nav[aria-label="Navigation principale"] { display: none !important; }

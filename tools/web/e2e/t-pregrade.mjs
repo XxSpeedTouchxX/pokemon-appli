@@ -107,7 +107,9 @@ ok('« Pré-grader une carte » ouvre l’écran au recto', await waitStep('fron
 ok('écran : compteur en haut', /1 pré-gradation disponible/.test(await txt('.pkm-pgd-counter')));
 ok('écran : 4 bulles de vérification dans la vue de la caméra', await page.locator('.pkm-pgd-cam .pkm-pgd-ck').count() === 4);
 ok('déclencheur avec le logo de l’appareil photo', await page.locator('.pkm-pgd-shutter svg').count() === 1 && /Prendre la photo du recto/.test(await page.locator('.pkm-pgd-shutter').getAttribute('aria-label')));
-const fits = await page.evaluate(() => { const nav = document.querySelector('#app nav'), top = nav ? nav.getBoundingClientRect().top : innerHeight;
+const navHidden = await page.evaluate(() => { const n = document.querySelector('nav[aria-label="Navigation principale"]'); return !n || getComputedStyle(n).display === 'none'; });
+ok('barre du bas masquée pendant la pré-gradation (le bouton « Scan » ne chevauche plus le déclencheur)', navHidden);
+const fits = await page.evaluate(() => { const nav = document.querySelector('nav[aria-label="Navigation principale"]'), top = nav && getComputedStyle(nav).display !== 'none' ? nav.getBoundingClientRect().top : innerHeight;
   const r = sel => document.querySelector(sel).getBoundingClientRect(); return [r('.pkm-pgd-checks').top >= 0, r('.pkm-pgd-frame').bottom <= top, r('.pkm-pgd-shutter').bottom <= top + 1]; });
 ok('cadre, 4 bulles et déclencheur visibles ensemble, sans défiler (' + fits.join(', ') + ')', fits.every(Boolean));
 await photo('front', F_FRONT); await photo('back', F_BACK); await photo('none', F_NONE);

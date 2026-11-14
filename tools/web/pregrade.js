@@ -53,12 +53,12 @@
   const PG_FRESH = { pgMsg: '', pgChecks: null, pgReal: false, pgPick: null, pgFreeze: null, pgQ: '', pgAna: null, pgProg: 0 };
   pgProto.pgOpen = function () {
     const q = this.pgQuota();
-    PG.shots = {}; PG.thumbs = {};
+    PG.shots = {}; PG.thumbs = {}; PG.raw = null; PG.warm();
     this.push('pregrade', Object.assign({ pgStep: q.empty ? 'intro' : 'front', pgSel: -1 }, PG_FRESH));
   };
   pgProto.pgStart = function () {
     if (this.pgQuota().empty) { this.setState({ toast: this.pgQuota().text }); return; }
-    PG.shots = {}; PG.thumbs = {};
+    PG.shots = {}; PG.thumbs = {}; PG.raw = null; PG.warm();
     this.navSlide('fwd', Object.assign({ pgStep: 'front', pgSel: -1 }, PG_FRESH));
   };
 
@@ -253,6 +253,7 @@
         return;
       }
       PG.shots[step] = prep.card;
+      if (step === 'front') { try { PG.raw = PG.rawCopy(c, rect); } catch (e) { PG.raw = null; } }
       PG.thumbs[step] = pgThumb(prep.card, 360).url;
       // Un reflet ne bloque pas la photo : il baisse la fiabilité de l'estimation.
       this.setState({ pgFreeze: Object.assign({}, fz, { ok: true, text: side + ' enregistré' + (q.glare ? '' : ' · petit reflet repéré') }) });
@@ -275,14 +276,62 @@
     const g = t.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(c, 0, 0, t.width, t.height);
     return { url: t.toDataURL('image/jpeg', 0.82), canvas: c };
   };
-  // Carte reconnue par son dessin (empreintes du scan) : sûre si nettement plus proche que la suivante.
-  PG.identify = function (canvas) {
-    return SCAN.prints().then(idx => {
+  // Reconnaissance de la carte (2026-11-14, porteur : « base-toi exactement sur le scan, il reconnaît bien la carte ») :
+  // la photo du recto passe par le même chemin que le scan (SCAN.look : bords de la carte, image redressée, empreinte du
+  // dessin sur 7 cadrages, 12 cartes les plus proches) ; la carte recadrée de la pré-gradation donne une 2ᵉ « image ».
+  // Dessin sans ambiguïté (ScanCore.visSure, mêmes seuils que le scan) : carte trouvée. Sinon, lecture du nom et du
+  // numéro (ScanOcr, comme une photo importée dans le scan) puis ScanCore.match et ScanCore.decide. Réimpressions des
+  // 30 ans et leur carte d'origine (même dessin) : jamais choisies seules, les deux sont proposées.
+  const PG_OCR_MS = 15000;
+  // Moteurs du scan préparés dès l'ouverture de la pré-gradation (empreintes, catalogue, lecture du texte).
+  PG.warm = function () {
+    try { SCAN.prints(); SCAN.catalog().catch(() => {}); ScanOcr.start().catch(() => {}); } catch (e) { /* lecture du texte indisponible */ }
+  };
+  // Copie de la photo du recto autour du cadre (12 % de marge, comme SCAN.grab), carte d'environ 640 px de large.
+  PG.rawCopy = function (c, rect) {
+    const x0 = Math.max(0, rect.sx - rect.sw * 0.12), y0 = Math.max(0, rect.sy - rect.sh * 0.12);
+    const x1 = Math.min(c.width, rect.sx + rect.sw * 1.12), y1 = Math.min(c.height, rect.sy + rect.sh * 1.12), k = Math.min(1, 640 / rect.sw);
+    const o = document.createElement('canvas');
+    o.width = Math.max(1, Math.round((x1 - x0) * k)); o.height = Math.max(1, Math.round((y1 - y0) * k));
+    const g = o.getContext('2d', { willReadFrequently: true });
+    g.imageSmoothingQuality = 'high'; g.drawImage(c, x0, y0, x1 - x0, y1 - y0, 0, 0, o.width, o.height);
+    return { canvas: o, rect: { sx: (rect.sx - x0) * k, sy: (rect.sy - y0) * k, sw: rect.sw * k, sh: rect.sh * k } };
+  };
+  PG.identify = function (canvas, raw) {
+    const ok = id => !!(id && TCG.item(id));
+    const done = (id, ids) => {
+      let list = [];
+      (ids || []).forEach(x => { if (ok(x) && list.indexOf(x) < 0) list.push(x); });
+      if (id && SCAN_TWIN.has(id)) { const t = SCAN_TWIN.get(id); list = [id].concat(ok(t) ? [t] : [], list.filter(x => x !== id && x !== t)); id = null; }
+      return { id: ok(id) ? id : null, cands: list.slice(0, 3) };
+    };
+    return Promise.all([SCAN.catalog().catch(() => null), SCAN.prints()]).then(([, idx]) => {
       if (!idx) return { id: null, cands: [] };
-      const r = { sx: 0, sy: 0, sw: canvas.width, sh: canvas.height }, p = ScanPrint.jitter(r).map(x => ScanPrint.print(canvas, x)), v = ScanPrint.nearest(idx, p, 6);
-      const top = v[0], next = v[1];
-      const sure = top && top.d <= 22 && (!next || next.d - top.d >= 3);
-      return { id: sure ? top.id : null, cands: v.slice(0, 3).map(x => x.id).filter(id => TCG.item(id)) };
+      const frames = [];
+      let look = null;
+      try { const l = SCAN.look(canvas, { sx: 0, sy: 0, sw: canvas.width, sh: canvas.height }, 'PGc'); if (l.vis) { frames.push(l.vis); look = l; } } catch (e) { /* image suivante */ }
+      if (raw) { try { const l = SCAN.look(raw.canvas, raw.rect, 'PGr'); if (l.vis) { frames.push(l.vis); if (!look || (l.vis[0] && look.vis[0] && l.vis[0].d < look.vis[0].d)) look = l; } } catch (e) { /* image suivante */ } }
+      // Les deux images réunies : la meilleure distance de chaque carte.
+      const best = new Map();
+      frames.forEach(f => f.forEach(x => { const o = best.get(x.id); if (!o || x.d < o.d) best.set(x.id, x); }));
+      const vis = Array.from(best.values()).sort((a, b) => a.d - b.d);
+      const sure = ScanCore.visSure(frames) || ScanCore.visSure([vis]);
+      const visIds = vis.map(v => v.id);
+      if (sure || !look || !SCAN.idx) return done(sure, [sure].concat(visIds));
+      const ocr = ScanOcr.start().then(() => ScanOcr.read(look.src, look.rect, {})).then(read => {
+        read.vis = vis; read.prints = look.prints;
+        let m = ScanCore.match(SCAN.idx, read, vis), all = vis;
+        if (read.prints && m.cands.length) {
+          const known = new Set(visIds), more = ScanPrint.distTo(SCAN.pidx, read.prints, m.cands.map(c => c.id).filter(id => !known.has(id)));
+          if (more.length) { all = vis.concat(more); m = ScanCore.match(SCAN.idx, read, all); }
+        }
+        const ids = m.cands.map(c => c.id), dist = new Map(all.map(v => [v.id, v.d])), top = ids[0];
+        // Même dessin qu'une autre carte (réimpression, promo) : jamais choisie seule, les deux sont proposées.
+        const twinArt = top && dist.has(top) && all.some(v => v.id !== top && v.d <= dist.get(top) + 2);
+        return done(top && !twinArt && ScanCore.decide([m.cands]).state === 'auto' ? top : null, ids.concat(visIds));
+      });
+      const late = new Promise(r => setTimeout(() => r(done(null, visIds)), PG_OCR_MS));
+      return Promise.race([ocr, late]).catch(() => done(null, visIds));
     }).catch(() => ({ id: null, cands: [] }));
   };
   // Analyse étape par étape (2026-11-14, porteur : « analyse plus approfondie avec une animation de temps de
@@ -306,7 +355,7 @@
       () => { fc.surface = PGCore.surface(F); return surfTxt(fc.surface); },
       () => { bc.surface = PGCore.surface(B); return surfTxt(bc.surface); },
       () => { const cv = document.createElement('canvas'); cv.width = F.width; cv.height = F.height; cv.getContext('2d').putImageData(new ImageData(F.data, F.width, F.height), 0, 0);
-        return PG.identify(cv).then(r => { idn = r; const p = r.id ? TCG.item(r.id) : null; return p ? p.name + ' · ' + p.setName : 'À choisir juste après'; }); },
+        return PG.identify(cv, PG.raw).then(r => { idn = r; const p = r.id ? TCG.item(r.id) : null; return p ? p.name + ' · ' + p.setName : 'À choisir juste après'; }); },
       () => { G = PGCore.grade(fc, bc); C = PGCore.companies(G, fc, bc); return 'Note probable : ' + pgFr(G.grade) + ' sur 10'; }
     ];
     const alive = () => { const s = this.st(); return s.screen === 'pregrade' && s.pgStep === 'analyse'; };
@@ -622,6 +671,9 @@
     const s = this.st(), r = pgBaseRender.call(this), ui = r.ui;
     r.pgh = this.vPgHome(s);
     ui.isPregrade = s.screen === 'pregrade';
+    // Barre du bas masquée sur toute la pré-gradation (2026-11-14, porteur : le bouton « Scan » de la barre chevauchait
+    // le déclencheur de l'appareil photo) ; la flèche de l'en-tête ramène à l'accueil.
+    try { document.documentElement.classList.toggle('pkm-pg-on', ui.isPregrade); } catch (e) { /* page sans racine */ }
     if (ui.isPregrade) {
       r.pgr = this.vPregrade(s);
       Object.assign(ui, { title: 'Pré-gradation', subtitle: 'Version Proto · estimation à partir de photos', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
@@ -654,4 +706,4 @@
     requestAnimationFrame(step);
   };
   // Tests navigateur : accès au moteur et aux photos préparées (?debug seulement).
-  try { if (/[?&]debug\b/.test(location.search)) window.__pkmPg = { PG: PG, PGCore: PGCore }; } catch (e) { /* adresse sans paramètres */ }
+  try { if (/[?&]debug\b/.test(location.search)) window.__pkmPg = { PG: PG, PGCore: PGCore, SCAN: SCAN, ScanPrint: ScanPrint }; } catch (e) { /* adresse sans paramètres */ }

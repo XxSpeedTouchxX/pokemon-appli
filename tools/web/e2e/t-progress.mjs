@@ -43,7 +43,17 @@ ok('classement : 4ᵉ à 30ᵉ avec le grade à côté du pseudo', (await page.l
 ok('ma ligne en bas (34ᵉ), en jaune', (await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').count()) === 1 && /34/.test(await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').innerText()));
 await page.locator('section[aria-label="Classement général"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('progress-podium.png') });
 const rw = await page.locator('section[aria-label="Lots de la saison"]').innerText();
-ok('lots (grille du porteur, 2026-11-14) : ETB, coffret, 2 boosters, puis Premium ou ticket jusqu’à la 10ᵉ place', /1ʳᵉ place/.test(rw) && /ETB du moment/.test(rw) && /8ᵉ à 10ᵉ place/.test(rw) && /ticket Bronze/.test(rw) && !/11ᵉ à 30ᵉ place/.test(rw));
+ok('lots (grille du porteur, 2026-11-14) : ETB, coffret poster, 2 boosters des 30 ans, puis Premium ou ticket jusqu’à la 10ᵉ place', /1ʳᵉ place/.test(rw) && /ETB des 30 ans/.test(rw) && /coffret poster des 30 ans/.test(rw) && /8ᵉ à 10ᵉ place/.test(rw) && /ticket Bronze/.test(rw) && !/11ᵉ à 30ᵉ place/.test(rw));
+const lotImgs = await page.locator('section[aria-label="Lots de la saison"] .pkm-pg-rwimg img').evaluateAll(els => els.map(e => e.getAttribute('src').split('/').pop() + ':' + e.naturalWidth));
+ok('lots : visuels ETB, coffret poster, 2 boosters des 30 ans (' + lotImgs.join(', ') + ')', lotImgs.length === 4 && /30th-celebration-elite-trainer-box\.webp:[1-9]/.test(lotImgs[0]) && /30th-poster-collection\.webp:[1-9]/.test(lotImgs[1]) && lotImgs.slice(2).every(t => /shop-booster-30-anniversaire\.webp:[1-9]/.test(t)));
+const duo = await page.locator('section[aria-label="Lots de la saison"] .pkm-pg-rwduo').evaluateAll(els => els.map(e => (e.querySelector('.pkm-pg-rwcrown') ? 'Premium' : '') + '+' + ((e.querySelector('.pkm-shop-ticket-in') || {}).textContent || '')));
+ok('lots 4ᵉ à 10ᵉ : logo Premium ou ticket Or, Argent, Bronze (' + duo.join(', ') + ')', duo.join(',') === 'Premium+OR,Premium+ARGENT,Premium+BRONZE');
+// Saison et onglets figés en haut : seul le contenu dessous défile.
+const pin = await page.evaluate(async () => { const main = document.querySelector('#app main'), sea = document.querySelector('.pkm-pg-season'), tabs = document.querySelector('.pkm-pg-tabs');
+  const m0 = main.getBoundingClientRect().top, s0 = sea.getBoundingClientRect().top; main.scrollTop = 900; await new Promise(r => setTimeout(r, 200));
+  const s1 = sea.getBoundingClientRect().top, t1 = tabs.getBoundingClientRect().top, under = document.elementFromPoint(innerWidth / 2, tabs.getBoundingClientRect().top + 5);
+  const out = { moved: main.scrollTop, s0: Math.round(s0 - m0), s1: Math.round(s1 - m0), tabsOk: !!(under && under.closest('.pkm-pg-tabs')) }; main.scrollTop = 0; return out; });
+ok('saison et onglets figés en haut quand on fait défiler (' + JSON.stringify(pin) + ')', pin.moved > 300 && Math.abs(pin.s1 - pin.s0) <= 6 && pin.tabsOk);
 await page.locator('section[aria-label="Lots de la saison"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('progress-lots.png') });
 // Dans le top 10 : ma ligne dans la liste, message du lot.
 await page.evaluate(() => { const b = window.__pkm.st().progBoard; b.top[6].me = true; b.me = { rank: 7, pk: b.top[6].pk }; window.__pkm.setState({ progBoard: Object.assign({}, b) }); });

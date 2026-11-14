@@ -91,7 +91,7 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('un appui ouvre la fiche en panneau : ' + await page.locator(FI).getAttribute('aria-label'), (await page.locator(FI).getAttribute('aria-label')) === 'Pikachu ex' && (await page.locator(SEC).count()) === 1);
   const fiText = (await page.locator(FI).innerText()).replace(/[\u202f\u00a0]/g, ' ');
   ok('fiche : cote, ajout, retirer, prix du marché, Cardmarket, eBay, historique, prix gradés', /99,00 €/.test(fiText) && /Ajouter un exemplaire/.test(fiText)
-    && /Retirer de ma collection/.test(fiText) && /Prix du marché/.test(fiText) && /Tendance/.test(fiText) && /Acheter sur Cardmarket/.test(fiText) && /eBay/.test(fiText) && /Historique du prix/.test(fiText) && /Prix gradés/.test(fiText));
+    && /Retirer de ma collection/.test(fiText) && /Prix du marché/.test(fiText) && /Toutes langues/.test(fiText) && /Voir sur Cardmarket/.test(fiText) && /eBay/.test(fiText) && /Historique du prix/.test(fiText) && /Prix gradés/.test(fiText));
   // Retirés le 2026-10-31 (porteur) : « Investi », « Mes exemplaires », « Marquer comme vendu », « Voir la fiche complète ».
   ok('fiche : sans Investi, Mes exemplaires, Marquer comme vendu, Voir la fiche complète', !/Investi|Mes exemplaires|Marquer comme vendu|Voir la fiche complète/.test(fiText));
   ok('fiche : pas de TCGplayer', !/TCGplayer/.test(fiText));

@@ -18,7 +18,7 @@
   // opts.from === 'binder' : ouverte depuis « Mon classeur », dont la pastille montre la valeur de mon exemplaire.
   fiProto.fiOpen = function (id, opts) {
     const ex = this.st().extra || [], p = this.catalog().find(q => q.id === id);
-    this.setState(Object.assign({ fiId: id, fiPer: 'COMPLET', fiCond: false, fiZoom: false, fiEtat: null, fiFrom: opts && opts.from || '' }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
+    this.setState(Object.assign({ fiId: id, fiPer: 'COMPLET', fiCond: false, fiZoom: false, fiEtat: null, fiLang: 'fr', fiLangOpen: false, fiFrom: opts && opts.from || '' }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
   };
   fiProto.fiClose = function () { this.setState({ fiId: null, fiZoom: false, fiEtat: null }); };
 
@@ -251,8 +251,27 @@
   // eBay × 1,10 (ventes réussies en général un peu au-dessus de Cardmarket : frais des vendeurs répercutés, acheteurs
   // de plusieurs pays), Vinted × 0,90 (vendeurs particuliers sans commission, prix négociés).
   const FM_EST = { ebay: 1.10, vinted: 0.90 };
-  const fmCoef = c => '× ' + String(c.toFixed(2)).replace('.', ',');
-  function fiMarket(p, k, rows, sealed, day) {
+  // Langue de la carte (2026-11-14, porteur) : drapeau et flèche à droite de « Prix du marché », 3 choix (français par
+  // défaut à chaque fiche, japonais, anglais) ; les liens « Voir sur » cherchent la carte dans cette langue
+  // (Cardmarket : offres filtrées par langue, idLanguage 2 = français, 1 = anglais ; japonais : produits japonais à part
+  // chez Cardmarket, recherche par le nom anglais ; eBay : mots de la langue ; Vinted : mot de la langue).
+  // Aucune source ouverte ne donne encore un prix par langue (journal du 2026-11-14) : les montants restent ceux de
+  // Cardmarket toutes langues confondues, écrits comme tels, et les estimations eBay et Vinted en découlent.
+  const FM_LANGS = [['fr', 'Français', 'FR'], ['ja', 'Japonais', 'JP'], ['en', 'Anglais', 'EN']];
+  const FM_CM_LANG = { fr: 2, en: 1 };
+  const fmLinks = (p, lang, sealed) => {
+    const num = sealed ? '' : String(p.numShort || ''), frName = p.name || '', enName = ebayWords(p.en || p.name || '');
+    let cm = p.tcg ? cmLink(p) : 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + encodeURIComponent(frName);
+    if (/[?&]idProduct=/.test(cm) && lang !== 'ja') cm += '&language=' + FM_CM_LANG[lang];
+    else if (lang !== 'fr') cm = 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + encodeURIComponent(cmName(p.en || p.name));
+    const words = sealed ? (lang === 'fr' ? [frName] : [frName, lang === 'en' ? '(anglais,english)' : '(japonais,japanese)'])
+      : lang === 'fr' ? [frName, num, '(fr,français,vf)'] : lang === 'en' ? [enName, num, '(anglais,english,eng)'] : [enName, '(japonais,japanese,jap)'];
+    const q = words.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+    const vq = (sealed ? [frName, lang === 'en' ? 'anglais' : lang === 'ja' ? 'japonais' : '']
+      : lang === 'fr' ? [frName, num] : lang === 'en' ? [enName, num, 'anglaise'] : [enName, 'japonaise']).filter(Boolean).join(' ');
+    return { cm: cm, ebay: 'https://www.ebay.fr/sch/i.html?_nkw=' + encodeURIComponent(q) + '&LH_Sold=1&LH_Complete=1', vinted: vintedLink(vq) };
+  };
+  function fiMarket(p, k, rows, sealed, day, s) {
     const num = v => typeof v === 'number' && v > 0, n = [p.cm, p.avg7, p.avg30].filter(num).length;
     const spread = n > 1 ? coteSpread(p.cm, p.avg30, p.avg7) : 1;
     const lvl = k === null ? '' : (p.doubt || p.c30 || n < 2 || spread > COTE_SPREAD) ? 'low' : (n === 3 && spread < 1.5) ? 'ok' : 'mid';
@@ -265,17 +284,24 @@
     const name = (p.name || '') + (sealed || !p.numShort ? '' : ' ' + p.numShort), set = sealed ? '' : p.setName || '';
     const body = 'Bonjour,\n\nLe prix de cette ' + (sealed ? 'référence' : 'carte') + ' me semble faux :\n- ' + name + (set ? ' (' + set + ')' : '') +
       '\n- Cote affichée : ' + (k !== null ? this.eur(k) : 'aucune') + (day ? ' (' + this.d2(day) + ')' : '') + '\n- Prix qui me semble juste et où je l’ai vu : \n\nMerci !';
+    const lang = FM_LANGS.some(l => l[0] === s.fiLang) ? s.fiLang : 'fr', L = FM_LANGS.find(l => l[0] === lang), links = fmLinks(p, lang, sealed);
+    const cmV = k, ebV = k !== null ? k * FM_EST.ebay : null, vtV = k !== null ? k * FM_EST.vinted : null;
+    const vals = [cmV, ebV, vtV].filter(v => v !== null), dp = vals.length ? vals.reduce((a, v) => a + v, 0) / vals.length : null;
     return {
-      dpVal: k !== null ? this.eur(k) : '—',
-      dpSub: k === null ? (p.dup ? 'Cote à confirmer' : 'Pas encore de cote') : (p.c30 && num(p.avg30) ? 'Moyenne 30 j Cardmarket' : 'Médiane Cardmarket') + nm,
+      lang: lang, langLabel: L[1], flag: this.flag(L[2]), langOpen: !!s.fiLangOpen, langAria: 'Langue de la carte : ' + L[1].toLowerCase() + ' (changer)',
+      chevCls: 'pkm-fm-chev' + (s.fiLangOpen ? ' pkm-fm-chev-up' : ''),
+      toggleLang: () => this.setState({ fiLangOpen: !this.st().fiLangOpen }),
+      langs: FM_LANGS.map(l => ({ code: l[0], label: l[1], flag: this.flag(l[2]), on: l[0] === lang, cls: 'pkm-fm-langopt' + (l[0] === lang ? ' pkm-fm-langopt-on' : ''),
+        pick: () => this.setState({ fiLang: l[0], fiLangOpen: false }) })),
+      dpVal: dp !== null ? '≈ ' + this.eur(dp) : '—',
+      dpSub: dp === null ? (p.dup ? 'Cote à confirmer' : 'Pas encore de cote') : 'Estimation · moyenne des 3 plateformes',
       hasConf: !!lvl, conf: lvl ? FM_CONF[lvl][0] + ' · ' + Math.round(pct) + '\u00a0%' : '', confPct: lvl ? Math.round(pct) : 0, confCls: lvl ? FM_CONF[lvl][1] : '',
-      cmVal: main ? this.eur(p[main]) : '—', cmSub: main === 'cm' ? 'Tendance du marché' : main === 'low' ? 'Plus bas en vente · prix demandé' : 'Pas encore de prix',
-      detail: detail, hasDetail: detail.length > 0,
-      hasDate: !!day,
+      cmVal: cmV !== null ? this.eur(cmV) : '—', cmSub: cmV === null ? 'Pas encore de prix' : 'Toutes langues' + (day ? ' · au ' + this.d2(day) : ''),
       hasEst: k !== null,
-      ebVal: k !== null ? '≈ ' + this.eur(k * FM_EST.ebay) : '', vtVal: k !== null ? '≈ ' + this.eur(k * FM_EST.vinted) : '',
-      ebSub: 'Ventes réussies', vtSub: 'Annonces récentes',
-      estNote: 'Confiance : accord entre la tendance et les moyennes 7 et 30 jours de Cardmarket (100 % quand les trois prix sont identiques). ≈ Estimations Dropicards d’après la cote Cardmarket (eBay ' + fmCoef(FM_EST.ebay) + ', Vinted ' + fmCoef(FM_EST.vinted) + ') : aucune vente eBay ni annonce Vinted n’est relevée. Touche la ligne pour voir les vrais prix sur le site.',
+      ebVal: ebV !== null ? '≈ ' + this.eur(ebV) : '—', vtVal: vtV !== null ? '≈ ' + this.eur(vtV) : '—',
+      ebSub: 'Ventes réussies', vtSub: 'Annonces en ligne',
+      cmUrl: links.cm, ebayUrl: links.ebay, vintedUrl: links.vinted,
+      detail: detail, hasDetail: detail.length > 0, hasDate: !!day,
       report: 'mailto:' + PF_MAIL + '?subject=' + encodeURIComponent('Erreur de prix · ' + name) + '&body=' + encodeURIComponent(body)
     };
   }
@@ -358,7 +384,7 @@
       add: () => this.openSheet('buy', p.id), canAdd: !p.release,
       remove: () => { if (last && last.edit) last.edit(); }, canRemove: owned && !!(last && last.edit),
       rows: rows, hasRows: rows.length > 0, marketDate: day ? 'Dernière mise à jour : ' + this.d2(day) : '',
-      mkt: fiMarket.call(this, p, k, rows, sealed, day),
+      mkt: fiMarket.call(this, p, k, rows, sealed, day, s),
       // Carte du catalogue : page du produit Cardmarket (cmLink, catalog.js) ; scellé et démo : recherche par le nom.
       cmUrl: p.tcg ? cmLink(p) : 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + q,
       ebayUrl: it.ebayUrl || 'https://www.ebay.fr/sch/i.html?_nkw=' + q + '&LH_Sold=1&LH_Complete=1',

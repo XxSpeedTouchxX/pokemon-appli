@@ -82,12 +82,44 @@
     streak: g => g.ref + ' jours d’affilée', referral: () => 'un ami de plus parrainé', referral_premium: () => 'ton filleul a pris le Premium',
     share: () => 'partage validé', social: () => 'merci de suivre Dropicards', welcome_ref: () => 'bienvenue'
   };
+  // Animation des PL gagnés (2026-11-14, porteur : « quand l'utilisateur remporte des PL, une petite animation où l'on
+  // voit le nombre de PL gagnés ») : le bouclier-cœur des PL arrive en rebondissant, « +N PL » compte jusqu'au total,
+  // des petits boucliers jaillissent ; tout s'efface seul en 2,6 s (ou au toucher). Sans mouvement si l'appareil le
+  // demande (prefers-reduced-motion).
+  const plFx = n => {
+    if (!(n > 0) || typeof document === 'undefined') return;
+    try {
+      const old = document.querySelector('.pkm-plfx');
+      if (old) old.remove();
+      const ov = document.createElement('div');
+      ov.className = 'pkm-plfx'; ov.setAttribute('role', 'status'); ov.setAttribute('aria-live', 'polite');
+      let sparks = '';
+      for (let i = 0; i < 10; i++) {
+        const a = (i / 10) * Math.PI * 2 + 0.3, d = 120 + (i % 3) * 30;
+        sparks += '<img src="img/brand/pl.svg" alt="" class="pkm-plfx-spark" style="--x:' + Math.round(Math.cos(a) * d) + 'px;--y:' + Math.round(Math.sin(a) * d) + 'px;--d:' + (i * 30) + 'ms">';
+      }
+      ov.innerHTML = '<div class="pkm-plfx-box"><span class="pkm-plfx-glow" aria-hidden="true"></span>' + sparks
+        + '<img src="img/brand/pl.svg" alt="" class="pkm-plfx-logo"><b class="pkm-plfx-n">+' + plNum(n) + ' PL</b><small>Points de loyauté gagnés</small></div>';
+      document.body.appendChild(ov);
+      const b = ov.querySelector('.pkm-plfx-n'), t0 = performance.now(), dur = 900;
+      const still = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+      if (!still) {
+        b.textContent = '+0 PL';
+        const step = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); b.textContent = '+' + plNum(Math.round(n * e)) + ' PL'; if (k < 1) requestAnimationFrame(step); };
+        requestAnimationFrame(step);
+      }
+      const bye = () => { ov.classList.add('pkm-plfx-out'); setTimeout(() => ov.remove(), 380); };
+      ov.addEventListener('click', bye);
+      setTimeout(bye, 2600);
+    } catch (e) { /* animation facultative */ }
+  };
   // « first » : message déjà prévu (bienvenue d'un filleul), mis devant pour ne pas être effacé.
   plProto.plCelebrate = function (list, first) {
     const sum = list.reduce((a, g) => a + (Number(g.pl) || 0), 0);
     const why = list.length === 1 ? (PL_WHY[list[0].kind] ? PL_WHY[list[0].kind](list[0]) : '') : list.length + ' missions réussies';
     const msg = sum ? '+' + plNum(sum) + ' PL' + (why ? ' · ' + why : '') + ' (Ma ligue)' : '';
     if (!msg && !first) return;
+    plFx(sum);
     this.setState({ toast: first && msg ? first + ' · ' + msg : first || msg });
     this.flash();
   };

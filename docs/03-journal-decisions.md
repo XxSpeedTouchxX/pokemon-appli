@@ -6,6 +6,36 @@
 
 ---
 
+## 2026-11-14 — Prix du marché par langue, pré-gradation, lots et missions de « Ma ligue » (porteur)
+
+- **Prix du marché** (fiche d'une carte et d'un produit scellé) :
+  - **Choix de la langue** : drapeau et flèche à droite du titre ; 3 drapeaux (français par défaut à chaque ouverture de la fiche, japonais, anglais).
+  - **4 lignes** :
+    - Dropicards : estimation, moyenne des 3 plateformes, avec la confiance en % ;
+    - Cardmarket : la cote ;
+    - eBay : ventes réussies ;
+    - Vinted : annonces en ligne ; eBay et Vinted marqués « Estimation ».
+  - **Dessous** : seulement « Voir sur Cardmarket », « Voir sur eBay », « Voir sur Vinted », avec leur logo. Retirés : « Détail Cardmarket », l'explication de la confiance, la date en ligne à part et « Signaler une erreur de prix ».
+  - **Liens selon la langue** :
+    - Cardmarket : offres filtrées en français ou en anglais ; pour le japonais, recherche par le nom anglais, car les cartes japonaises sont des produits à part ;
+    - eBay : ventes réussies avec les mots de la langue (« fr, français, vf », « anglais, english » ou « japonais, japanese ») ;
+    - Vinted : annonces avec la langue.
+  - **Ce qui ne change pas encore avec le drapeau : les montants.** Aucune source ouverte ne donne un prix par langue (journal ci-dessous). La ligne Cardmarket l'écrit (« Toutes langues · au jj/mm »). Les montants par langue viendront avec une source de prix par langue, mise de côté par le porteur.
+- **Pré-gradation** :
+  - **Reconnaissance** : la photo du recto passe par le même chemin que le scan. Bords de la carte, image redressée, empreinte du dessin sur 7 cadrages, puis lecture du nom et du numéro si le dessin hésite.
+  - **Même dessin, deux cartes** : quand deux cartes ont le même dessin (réimpression, promo, 30 ans), les deux sont proposées, jamais choisies seules.
+  - **Banc d'essai** sur 48 vraies cartes, dont la moitié en photo difficile (flou, reflet, inclinaison, compression) : 48/48 retrouvées, dont 41 directement, aucune carte fausse (`t-pgid.mjs`).
+  - **Barre du bas masquée** sur toute la pré-gradation : le bouton « Scan » chevauchait le déclencheur.
+- **Ma ligue** :
+  - **Lots en images** :
+    - 1ʳᵉ place : ETB des 30 ans ;
+    - 2ᵉ : coffret poster des 30 ans ;
+    - 3ᵉ : 2 boosters des 30 ans ;
+    - 4ᵉ-5ᵉ, 6ᵉ-7ᵉ et 8ᵉ-10ᵉ : logo Premium ou ticket Or, Argent ou Bronze.
+  - **Animation des PL gagnés** : bouclier-cœur, « +N PL » qui compte, éclats.
+  - **En-tête figé** : saison et onglets « Classement et récompenses » / « Mes missions » restent en haut ; seul le bas défile, sur les deux onglets.
+- **Cache** : v205.
+
 ## 2026-11-14 — Prix des cartes françaises : lecture de Cardmarket autorisée, mais bloquée par Cardmarket (porteur)
 
 - **Demande** : « fie-toi aux cotes des cartes françaises uniquement » (capture : Méga-Rayquaza ex 138/103, Règne Delta, 321,57 €).
