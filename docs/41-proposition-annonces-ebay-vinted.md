@@ -4,6 +4,8 @@
 
 **Statut : proposition, rien n'est codé. Décisions A1 à A6 au § 8, puis « go » attendu.**
 
+> **Mise à jour du 2026-11-14 (même jour) :** le porteur a obtenu un avis juridique ; le **scraping d'eBay et de Vinted est autorisé** (CLAUDE.md §4, journal du 2026-11-14). Les § 2, § 5 et A2 sont mis à jour en conséquence. Leboncoin et Cardmarket restent sous la règle du 2026-10-03.
+
 ---
 
 ## 1. L'idée en une phrase
@@ -14,8 +16,8 @@ Un fil d'**annonces en cours** (cartes, lots, scellé) repris d'eBay et, si poss
 
 | Sujet | Règle actuelle du projet | Conséquence |
 |---|---|---|
-| Scraping eBay | Interdit sans avis juridique (03/10), abandonné le 18/10 (robots.txt, 403, pas de contournement) | **On ne scrape pas eBay.** L'**API officielle Browse** d'eBay donne les annonces en cours (titre, prix, photo, lien) : ce n'est pas du scraping, elle est gratuite et prévue pour cet usage. |
-| Scraping Vinted | Interdit sans avis juridique (03/10) | Vinted n'a **pas d'API ouverte** : l'API officielle (Vinted Pro Integrations) est réservée à des vendeurs Pro autorisés, pour gérer **leurs** annonces. Ses conditions d'utilisation interdisent les bots, le moissonnage de données et la rétro-ingénierie. **Scraper Vinted = revenir sur la décision du 03/10** ; à ne faire qu'après avis d'un avocat (voir § 5). |
+| Scraping eBay | **Autorisé depuis le 2026-11-14** (avis juridique obtenu par le porteur) | L'**API officielle Browse** reste recommandée pour les annonces en cours : gratuite, stable, liens affiliés EPN. Le `robots.txt` d'eBay interdit toujours ses pages de recherche et eBay avait répondu 403 le 18/10 : le scraping d'eBay ne servirait qu'en complément, pour une donnée que l'API ne donne pas. |
+| Scraping Vinted | **Autorisé depuis le 2026-11-14** (avis juridique obtenu par le porteur) | Vinted n'a **pas d'API ouverte** (Vinted Pro Integrations est réservée à des vendeurs Pro autorisés, pour gérer **leurs** annonces). Le scraping devient la seule voie pour afficher ses annonces. Restent des **risques techniques** : protection anti-robot, blocage de l'adresse du serveur, changement de format sans prévenir (voir § 5). |
 | Prix demandé / prix vendu (principe 3) | Chaque chiffre distingue prix demandé et prix vendu | Une annonce en cours = **prix demandé**. Elle ne compte **jamais** dans la cote (qui reste Cardmarket seule, décision du 18/10) et elle est étiquetée « Prix demandé · eBay ». |
 | Affiliation | Page Sorties « sans affiliation » | Nouvelle décision (A1) : les liens eBay peuvent passer par l'**eBay Partner Network** (EPN) et rapporter une commission à chaque achat après un clic. eBay exige l'inscription à l'EPN pour utiliser les API d'achat en production. |
 | Données personnelles | RGPD | On ne garde **ni pseudo ni avatar de vendeur**, seulement l'annonce : titre, prix, photo, lien. Les photos ne sont **pas copiées** : on affiche celle hébergée par eBay. |
@@ -54,9 +56,9 @@ Exigence d'eBay à prévoir : les applications en production doivent soit recevo
 |---|---|---|---|
 | **V1 · Lien de recherche** | Bouton « Chercher sur Vinted » dans la fiche et le fil, qui ouvre la recherche Vinted de la carte. | Aucun | ≈ 1 h |
 | **V2 · Le vendeur publie sur Dropicards** | Un joueur colle le lien de **sa** annonce Vinted, ajoute ses photos et son prix et accepte qu'elle soit affichée ; modération par un admin ; retrait quand c'est vendu. | Faible (accord du vendeur) ; modération à tenir | ≈ 20 h |
-| **V3 · Scraping** | Lecture du catalogue Vinted par un robot (directement ou par un prestataire comme Apify). | **Élevé** : contraire aux conditions de Vinted, anti-robot, coupure possible du jour au lendemain, mise en demeure ; contraire à la décision du 03/10 | ≈ 15 h, plus l'entretien à chaque changement de Vinted ; prestataire ≈ quelques dollars pour 1 000 annonces |
+| **V3 · Scraping** | Lecture des annonces publiques du catalogue Vinted par un robot sur le serveur (recherches de cartes Pokémon, rythme modéré), mêmes champs qu'eBay, sans pseudo ni avatar du vendeur. | Juridique : couvert par l'avis du porteur. Technique : **moyen à élevé** (anti-robot, blocage, format qui change) ; si Vinted bloque le serveur, le fil continue avec eBay seul | ≈ 15 h, plus l'entretien à chaque changement de Vinted ; prestataire (Apify…) possible : ≈ quelques dollars pour 1 000 annonces |
 
-**Défaut proposé : V1 tout de suite, V2 plus tard si le fil plaît, V3 seulement après avis d'un avocat** (le même que celui conseillé pour les droits Pokémon avant la soumission aux stores, `docs/23`).
+**Défaut proposé (mis à jour le 2026-11-14) : V1 tout de suite (bouton de secours) et V3 construit juste après eBay**, avec un interrupteur dans le panneau Admin pour couper Vinted à tout moment ; V2 plus tard si le fil plaît. Travail ajouté au total du § 6 : ≈ 15 h, soit ≈ 42 h en tout (5 jours à 8 h/j, 14 jours à 3 h/j).
 
 ## 6. Travail de A à Z
 
@@ -85,7 +87,7 @@ Exigence d'eBay à prévoir : les applications en production doivent soit recevo
 | # | Question | Défaut proposé |
 |---|---|---|
 | A1 | eBay par l'API officielle, avec liens affiliés EPN ? | **Oui** |
-| A2 | Vinted : V1, V2 ou V3 ? | **V1 maintenant**, V2 plus tard, V3 après avis d'un avocat |
+| A2 | Vinted : V1, V2 ou V3 ? | **V1 + V3** (scraping autorisé depuis le 2026-11-14), V2 plus tard |
 | A3 | Où dans l'app ? | **Bloc dans la fiche de chaque carte + fil « Annonces » depuis l'accueil** |
 | A4 | Fréquence de mise à jour | **Toutes les 30 min** |
 | A5 | Alertes « Préviens-moi » sous un prix | **Plus tard** (après le fil) |

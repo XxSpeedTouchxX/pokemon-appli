@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-14 — Scraping d'eBay et de Vinted autorisé (avis juridique obtenu par le porteur)
+
+- **Contexte :** la règle du 2026-10-03 interdisait le scraping (eBay, Vinted, Leboncoin, Cardmarket) sans avis juridique ; le 2026-10-18, le scraping des ventes réussies eBay avait été abandonné (robots.txt d'eBay, réponses 403 depuis GitHub, aucun contournement). La proposition des annonces (`docs/41`) s'appuyait sur cette règle.
+- **Décision (porteur) :** « j'ai eu l'avis juridique, c'est bon, on peut l'enlever » : **scraping d'eBay et de Vinted autorisé**. Le contenu de l'avis n'est pas versé au dépôt.
+- **Ce qui ne change pas :**
+  - Leboncoin, Cardmarket et les autres sites (PSA, enseignes…) : règle du 2026-10-03 maintenue, l'avis portant sur eBay et Vinted (à élargir seulement sur confirmation du porteur) ;
+  - pour eBay, l'API officielle Browse reste recommandée pour les annonces en cours (fiable, liens affiliés EPN) ; le robots.txt d'eBay interdit toujours ses pages de recherche et les réponses 403 du 2026-10-18 restent un obstacle technique ;
+  - une annonce reste un **prix demandé**, jamais compté dans la cote (principe 3, décision du 2026-10-18).
+- **Impact :** CLAUDE.md §3 et §4, `docs/41` (§ 2, § 5, A2). Les anciennes entrées du journal qui citent « scraping exclu » restent comme historique.
+
 ## 2026-11-14 — Pré-gradation construite, « Version Proto » (go du porteur, D1 à D6)
 
 - **Go du porteur** sur la proposition `docs/40` avec ses décisions : D1 logo L1 (loupe) ; D2 analyse sur le téléphone d'abord (option A), l'IA (option B) seulement si A déçoit ; D3 1 pré-gradation gratuite tous les 3 jours, 100 par mois avec Premium (remise à zéro chaque mois), compteur toujours visible ; D4 tarifs de gradation envoyés par le porteur plus tard ; D5 barèmes PSA, PCA et CCC du porteur intégrés mot pour mot ; D6 badge « Version Proto ».
