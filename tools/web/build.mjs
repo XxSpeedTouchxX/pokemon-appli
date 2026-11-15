@@ -421,11 +421,15 @@ patchRe(/(<section aria-label="À propos"[\s\S]*?<\/section>\n)(<\/sc-if>\n\n<sc
 // - Vignettes des listes (ventes, lots, arrivages, Marché, scan…) : plus larges pour le scellé (largeur × wk),
 //   cadre doré des cartes ultra rares (ring).
 let slots = 0;
-tpl = tpl.replace(/(<(?:span|button)\b[^>]*?style="position: relative; flex: none; )width: (\d+)px; height: (\d+)px;([^"]*?background: \{\{ ([\w.]+)\.bg \}\};)/g, (m, head, w, h, rest, o) => {
+const SLOT_RE = /(<(?:span|button)\b[^>]*?style="position: relative; flex: none; )width: (\d+)px; height: (\d+)px;([^"]*?background: \{\{ ([\w.]+)\.bg \}\};)/g;
+const slotSub = (m, head, w, h, rest, o) => {
   slots++;
   return head + 'width: calc({{ ' + o + '.wk }} * ' + w + 'px); height: calc({{ ' + o + '.hk }} * ' + h + 'px); outline: {{ ' + o + '.ring }}; outline-offset: -1.5px;' + rest;
-});
-if (slots !== 7) throw new Error('Vignettes de liste : ' + slots + ' au lieu de 7'); // dont 1 sur l'accueil : la recherche
+};
+tpl = tpl.replace(SLOT_RE, slotSub);
+// La recherche des cartes et des produits (sa vignette) est passée de l'accueil à « Toutes les séries » le 2026-11-15 :
+// elle est traitée avec ce fragment, plus bas.
+if (slots !== 6) throw new Error('Vignettes de liste : ' + slots + ' au lieu de 6');
 patch('aria-label="{{ po.label }}" style="flex: none; width: 104px;', 'aria-label="{{ po.label }}" style="--wk: {{ po.wk }}; flex: none; width: calc({{ po.wk }} * 104px);');
 // Ajout d'un seul article (fiche.js, 2026-10-22) : article centré et agrandi (classe pkm-art-one, games.css).
 patch('<div style="display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 4px">\n<sc-for list="{{ sh.products }}"',
@@ -440,7 +444,9 @@ patch('<div style="flex: none; display: grid; grid-template-columns: repeat(2, m
 {
   const open = '<sc-if value="{{ ui.isCollection }}" hint-placeholder-val="{{ false }}">\n', i = tpl.indexOf(open), j = tpl.indexOf('<sc-if value="{{ ui.isItem }}"', i);
   if (i < 0 || j < 0) throw new Error('Écran Collection introuvable');
-  tpl = tpl.slice(0, i + open.length) + FRAG.series + '</sc-if>\n\n' + tpl.slice(j);
+  const before = slots, series = FRAG.series.replace(SLOT_RE, slotSub);
+  if (slots !== before + 1) throw new Error('Vignette de la recherche de « Toutes les séries » introuvable');
+  tpl = tpl.slice(0, i + open.length) + series + '</sc-if>\n\n' + tpl.slice(j);
 }
 patch('onClick="{{ tabCollection }}" aria-label="Collection"', 'onClick="{{ tabCollection }}" aria-label="Toutes les séries"');
 patchJs("const titles = { collection: 'Collection',", "const titles = { collection: 'Toutes les séries',");

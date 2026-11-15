@@ -32,8 +32,9 @@ await step('extensions', async () => {
   const groups = await page.locator('main section[id^="pkm-ser-"]').evaluateAll(g => g.map(x => x.getAttribute('aria-label')));
   ok('« Toutes les cartes » mène à « Toutes les séries » (' + groups.length + ') : ' + groups.slice(0, 4).join(', ') + ' … ' + groups.slice(-2).join(', '), groups.length > 5 && groups[groups.length - 1] === 'Sans version française');
   await page.waitForTimeout(300); await shot('v6-extensions');
-  await page.fill('input[aria-label="Rechercher une série ou une extension"]', 'etincelles'); await page.waitForTimeout(300);
-  ok('recherche extension : ' + (await page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').count()) + ' extension(s)', (await page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').count()) >= 1);
+  // La recherche des extensions est retirée le 2026-11-15 (porteur) : la série s'ouvre depuis la barre des séries.
+  await page.locator('nav[aria-label="Aller à une série"] button[aria-label="Écarlate et Violet"]').click(); await page.waitForTimeout(900);
+  ok('série Écarlate et Violet : ' + (await page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').count()) + ' extension(s)', (await page.locator('button[aria-label^="Étincelles Déferlantes,"]').count()) >= 1);
 });
 await step('grille', async () => {
   await page.locator('button[aria-label^="Étincelles Déferlantes,"]').click();
@@ -44,10 +45,10 @@ await step('grille', async () => {
   await page.waitForTimeout(600); await shot('v6-grille');
   // Vignettes (low.webp, ~15 Ko) en Petit et Moyen, même sur un écran 3x : les visuels s'affichent d'un coup
   // (2026-11-01, porteur : 5,6 s d'attente avec le grand visuel) ; le grand visuel (high.webp) en « Grand ».
-  const gridSrcs = () => page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img')].slice(0, 3).map(i => i.currentSrc));
+  const gridSrcs = () => page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img:not(.pkm-sv-add img)')].slice(0, 3).map(i => i.currentSrc));
   const srcs = await gridSrcs();
   ok('grille Moyen en écran 3x → ' + srcs.map(u => u.split('/').slice(-2).join('/')).join(', '), srcs.length === 3 && srcs.every(u => /low\.webp$/.test(u)));
-  const eager = await page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img')].map(i => i.loading + ':' + i.getAttribute('fetchpriority')));
+  const eager = await page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img:not(.pkm-sv-add img)')].map(i => i.loading + ':' + i.getAttribute('fetchpriority')));
   ok('12 premières cartes chargées en tête, les autres au défilement', eager.slice(0, 12).every(x => x === 'eager:high') && eager.slice(12).every(x => x === 'lazy:auto'));
   await page.click('button:has-text("Grand")'); await page.waitForTimeout(600);
   const big = await gridSrcs();

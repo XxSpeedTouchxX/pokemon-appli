@@ -26,7 +26,6 @@
   const SV_EAGER = 12;
   const SV_SORTS = [['num', 'numéro'], ['cote', 'prix'], ['name', 'nom']];
   const SV_TABS = [['cards', 'Cartes'], ['items', 'Items']];
-  const SV_UNDO_MS = 6000;
   const SV_EMPTY = { v2: false, dateText: '', setFlag: '', hasDate: false, progLabel: '', sortAria: '', hasProg: false, progText: '', pct: '', progW: '0%', tabs: [], hasTabs: false, onCards: true, onItems: false, items: [], itemsEmpty: false, itemsCount: '', sizes: [], q: '', onQ: null,
     sortLabel: '', sortNext: null, rars: [], hasRars: false, hasRarClear: false, rarClear: null, cols: 'repeat(3, minmax(0, 1fr))', gridCls: 'pkm-sv-grid pkm-sv-m', cards: [] };
 
@@ -34,7 +33,7 @@
   // « + » : un exemplaire ajouté tout de suite, au prix de sa cote du jour (rien si la carte n'a pas encore de cote).
   // La carte entre d'abord au catalogue de l'app (extra), comme au scan.
   svProto.svQuickAdd = function (p) {
-    const s0 = this.st(), prev = s0.purchases;
+    const s0 = this.st();
     if ((s0.extra || []).indexOf(p.id) < 0) this.setState({ extra: (s0.extra || []).concat([p.id]) });
     const s = this.st();
     this.__copy = { lang: p.lang === 'EN' ? 'EN' : 'FR', cond: copyDef(p) };
@@ -42,10 +41,12 @@
     const k = this.cote(p);
     try { r = this.addRecord(s, p.id, 1, k || 0, 'Ajout rapide', 'toi'); } finally { this.__copy = null; }
     if (r.blocked) return; // classeur plein au grade actuel (pkshop.js)
-    const msg = p.name + ' ajouté' + (k ? ' · cote ' + this.eur(k) : p.dup ? ' · cote à confirmer' : ' · pas encore de cote') + ' · collection à ' + this.eur(this.snap(this.st(), { purchases: r.purchases }).total);
-    this.setState({ purchases: r.purchases, seq: s.seq + 1, toast: msg, edUndo: { msg: msg, purchases: prev } });
-    if (this._tt) clearTimeout(this._tt);
-    this._tt = setTimeout(() => { this._tt = null; this.setState({ toast: null, edUndo: null }); }, SV_UNDO_MS);
+    // Ajout animé (2026-11-15, porteur) : la carte s'envole dans le classeur et sa valeur s'ajoute à « Mes cartes »,
+    // à la place du message du bas (fiche.js, addFx). « Retirer de ma collection », dans sa fiche, défait l'ajout.
+    const sealed = p.type === 'sealed', before = this.fiBinderVal(s, sealed);
+    if (this._tt) { clearTimeout(this._tt); this._tt = null; }
+    this.setState({ purchases: r.purchases, seq: s.seq + 1, toast: null, edUndo: null });
+    this.addFx(p, before, this.fiBinderVal(this.st(), sealed));
   };
 
   const svBaseSet = svProto.vSet;

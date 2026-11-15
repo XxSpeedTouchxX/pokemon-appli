@@ -15,7 +15,7 @@ await page.click('section[aria-label="Mon classeur"] [role="tab"]:has-text("Mes 
 ok('accueil défilé : ' + await down(), (await top()) > 300);
 await tab('Toutes les séries');
 ok('Toutes les séries : en haut (' + await top() + ')', (await top()) === 0);
-const cq = page.locator('input[aria-label="Rechercher une série ou une extension"]');
+const cq = page.locator('input[aria-label="Rechercher dans le catalogue"]'); // recherche venue de l'accueil (2026-11-15)
 await cq.fill('pika'); await page.waitForTimeout(300); await down();
 await tab('Jeux');
 ok('Jeux : en haut', (await top()) === 0);
@@ -38,12 +38,14 @@ const kept = await top();
 // Depuis le 2026-11-01 (porteur), une carte d'une extension s'ouvre en panneau (comme dans le classeur) : l'extension
 // reste dessous, à sa place.
 const FI = page.locator('section.pkm-fi');
-await page.evaluate(() => document.elementFromPoint(195, 450).closest('button').click()); await page.waitForTimeout(800);
+// Une carte visible au milieu de l'écran (la grille a des espaces entre les cartes depuis les onglets Cartes / Items).
+await page.evaluate(() => { const b = [...document.querySelectorAll('.pkm-sv-card > button')].find(x => { const r = x.getBoundingClientRect(); return r.top > 250 && r.bottom < 700; }); b.click(); }); await page.waitForTimeout(800);
 ok('fiche ouverte en panneau, au-dessus de l’extension', (await FI.count()) === 1 && await FI.isVisible());
 await FI.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
 ok('« Fermer » : retour à l’extension, position gardée (' + kept + ' → ' + await top() + ')', kept > 600 && (await FI.count()) === 0 && Math.abs((await top()) - kept) < 8);
 const setTitle = await page.locator('header h1').innerText();
-await page.evaluate(() => document.elementFromPoint(195, 450).closest('button').click()); await page.waitForTimeout(800);
+// Une carte visible au milieu de l'écran (la grille a des espaces entre les cartes depuis les onglets Cartes / Items).
+await page.evaluate(() => { const b = [...document.querySelectorAll('.pkm-sv-card > button')].find(x => { const r = x.getBoundingClientRect(); return r.top > 250 && r.bottom < 700; }); b.click(); }); await page.waitForTimeout(800);
 await page.goBack(); await page.waitForTimeout(900);
 ok('bouton Retour du téléphone : ferme la fiche, l’extension reste à sa place', (await FI.count()) === 0 && (await page.locator('header h1').innerText()) === setTitle && Math.abs((await top()) - kept) < 8);
 await page.goBack(); await page.waitForTimeout(900);

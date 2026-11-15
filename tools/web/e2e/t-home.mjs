@@ -15,9 +15,11 @@ await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.w
 const order = await page.$$eval('main section[aria-label], main > button, main > div > button', els => els.map(e => e.getAttribute('aria-label') || (e.textContent.includes('Marge réalisée') ? 'Marge' : '')).filter(Boolean));
 // Depuis le 2026-10-07 : « Mon classeur » après la valeur ; depuis le 2026-10-12 : « Sorties récentes » puis
 // « Prochaines sorties » tout en bas.
-const want = ['Recherche dans le catalogue', 'Valeur de ma collection', 'Mon classeur', 'Boutiques près de toi', 'Marge', 'Sorties récentes', 'Prochaines sorties'];
+// La recherche des cartes et des produits est passée dans « Toutes les séries » le 2026-11-15 (porteur).
+const want = ['Valeur de ma collection', 'Mon classeur', 'Boutiques près de toi', 'Marge', 'Sorties récentes', 'Prochaines sorties'];
 const idx = want.map(l => order.indexOf(l));
 ok('ordre : ' + order.join(' › '), idx.every((v, i) => v >= 0 && (i === 0 || v > idx[i - 1])) && order[order.length - 1] === 'Prochaines sorties');
+ok('plus de recherche sur l’accueil (passée dans « Toutes les séries »)', (await page.locator('input[aria-label="Rechercher dans le catalogue"]').count()) === 0 && order.indexOf('Recherche dans le catalogue') < 0);
 // Courbe de la valeur (2026-10-25) : axe des montants et 4 périodes.
 {
   const V = page.locator('section[aria-label="Valeur de ma collection"]'), G = V.locator('[aria-label="Période de la courbe"] button');
@@ -38,7 +40,9 @@ ok('marge réalisée gardée', text.includes('Marge réalisée sur tes ventes'))
 ok('mention de non-affiliation', /non affiliée à Nintendo/.test(text));
 // 2. Plus de liste « Ma collection » (2026-10-07) : « Mon classeur » la remplace, la marge réalisée reste.
 ok('liste « Ma collection » retirée', (await page.locator('section[aria-label="Liste de ma collection"]').count()) === 0 && !(await page.locator('[aria-label="Ordre de ma collection"]').count()));
-// 3. Recherche.
+// 3. Recherche (dans « Toutes les séries » depuis le 2026-11-15, à la place de la recherche des extensions).
+await page.click('nav[aria-label="Navigation principale"] button[aria-label="Toutes les séries"]'); await page.waitForTimeout(700);
+ok('« Toutes les séries » : la recherche des cartes et des produits en haut, plus celle des extensions', (await page.locator('input[aria-label="Rechercher dans le catalogue"]').count()) === 1 && (await page.locator('input[aria-label="Rechercher une série ou une extension"]').count()) === 0);
 await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'pika'); await page.waitForTimeout(800);
 const status = await page.locator('section[aria-label="Recherche dans le catalogue"] [role="status"]').innerText();
 const hits = await page.$$eval('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]', b => b.map(x => x.innerText.split('\n')[0]));
@@ -47,8 +51,9 @@ const more = page.locator('section[aria-label="Recherche dans le catalogue"] but
 ok('« Voir les N résultats »', (await more.count()) === 1);
 await page.screenshot({ path: shot('home-recherche.png') });
 await page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').first().click(); await page.waitForTimeout(800);
-ok('résultat ouvert : fiche', (await page.locator('section[aria-label="Visuel"]').count()) === 1);
-await page.click('button[aria-label="Retour"]'); await page.waitForTimeout(500);
+// Un résultat s'ouvre dans la fiche en panneau (prix du marché Cardmarket, eBay, Vinted), plus dans l'ancienne page.
+ok('résultat ouvert : fiche en panneau (prix du marché), pas l’ancienne page', (await page.locator('section.pkm-fi').count()) === 1 && (await page.locator('section[aria-label="Visuel"]').count()) === 0 && /Prix du marché/.test(await page.locator('section.pkm-fi').innerText()));
+await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(600);
 await more.click(); await page.waitForTimeout(800);
 ok('Marché sur la même recherche : ' + await page.inputValue('input[aria-label="Rechercher une carte ou un produit"]'), (await page.inputValue('input[aria-label="Rechercher une carte ou un produit"]')) === 'pika');
 // 4. Ajout récent en tête : une carte du catalogue ajoutée apparaît en premier.
@@ -67,14 +72,18 @@ await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.w
   await page.locator('section[aria-label="PA dispo aujourd’hui"] .pkm-pa-claim-btn').click(); await page.waitForTimeout(5000);
   ok('PA du jour récupérés : plus de « 1 » ni de message', (await pill.locator('.pkm-pa-dot').count()) === 0 && (await paToast.count()) === 0);
 }
+await page.click('nav[aria-label="Navigation principale"] button[aria-label="Toutes les séries"]'); await page.waitForTimeout(700);
 await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'dracaufeu'); await page.waitForTimeout(800);
 const target = (await page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').nth(1).innerText()).split('\n')[0];
 await page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').nth(1).click(); await page.waitForTimeout(800);
-await page.locator('button:has-text("Ajouter")').first().click(); await page.waitForTimeout(500);
-const save = page.locator('button:has-text("Ajouter à ma collection")').first();
-if (await save.count()) { await save.click(); await page.waitForTimeout(500); }
+await page.locator('section.pkm-fi .pkm-fi-main').click(); await page.waitForTimeout(600);
+await page.locator('button[style*="height: 54px"][style*="border-radius: 999px"]').last().click(); await page.waitForTimeout(250);
+// Ajout animé (2026-11-15, porteur) : la carte s'envole dans le classeur, à la place du message du bas.
+ok('ajout : animation du classeur (« Ajouté à Mes cartes » ou « … produits scellés »), sans message en bas', (await page.locator('.pkm-afx').count()) === 1 && /Ajoutée? à Mes (cartes|produits scellés)/.test(await page.locator('.pkm-afx').textContent()) && (await page.locator('[role="status"]', { hasText: 'collection à' }).count()) === 0);
+await page.waitForTimeout(2400);
+ok('ajout : l’animation s’efface seule', (await page.locator('.pkm-afx').count()) === 0);
+await page.locator('section.pkm-fi button[aria-label="Fermer"]').click().catch(() => {}); await page.waitForTimeout(500);
 await page.click('button[aria-label="Accueil"]'); await page.waitForTimeout(600);
-await page.click('button[aria-label="Effacer la recherche"]').catch(() => {}); await page.waitForTimeout(300);
 // L'article ajouté est dans l'un des deux onglets, sur l'une des pages.
 const seen = [];
 for (const tab of [0, 1]) {

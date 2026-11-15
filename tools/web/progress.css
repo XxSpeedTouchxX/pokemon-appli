@@ -213,3 +213,15 @@ html.pkm-calm .pkm-ple-head, html.pkm-calm .pkm-ple-ref, html.pkm-calm .pkm-ple-
 .pkm-pg-rwprem-shine { position: absolute; top: -6px; bottom: -6px; left: -16px; width: 12px; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0)); transform: skewX(-20deg); animation: pkmPgPremShine 3.2s ease-in-out infinite; }
 @keyframes pkmPgPremShine { 0%, 60% { left: -16px; } 90%, 100% { left: 60px; } }
 @media (prefers-reduced-motion: reduce) { .pkm-pg-rwprem-shine { animation: none; display: none; } }
+/* Lots (2026-11-15, porteur) : visuels sur 30 % de la largeur, textes sur 70 %, même colonne de la 1ʳᵉ à la 10ᵉ place.
+   4ᵉ à 10ᵉ place : le logo du DropiPass (carte holo 2b) avec une petite bulle « 1M » (un mois de DropiPass). */
+.pkm-pg-rw { gap: 10px; }
+.pkm-pg-rwimg, .pkm-pg-rwduo { flex: 0 0 30%; width: 30%; min-width: 0; box-sizing: border-box; }
+.pkm-pg-rwt { flex: 1 1 0; }
+.pkm-pg-rwduo { gap: 3px; }
+.pkm-pg-rwduo small { font-size: 10px; }
+.pkm-pg-rwduo .pkm-pg-rwtk { width: 50px; height: 31px; margin-left: 1px; }
+.pkm-pg-rwduo .pkm-pg-rwtk .pkm-shop-ticket-in { font-size: 7.5px; padding: 1px 2px; letter-spacing: 0; }
+.pkm-pg-rwdp { flex: none; position: relative; width: 34px; height: 34px; display: block; }
+.pkm-pg-rwdp img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45)); }
+.pkm-pg-rwdp i { position: absolute; right: -5px; bottom: -3px; padding: 1px 3px; border-radius: 6px; border: 1px solid #FFD60A; background: #10151F; color: #FFE46B; font-family: 'Sora', sans-serif; font-style: normal; font-size: 8px; font-weight: 800; line-height: 1.1; letter-spacing: 0.02em; }

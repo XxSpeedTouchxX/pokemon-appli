@@ -327,8 +327,10 @@
   const homeBaseView = proto.vHome;
   proto.vHome = function (x) {
     const r = homeBaseView.call(this, x);
+    // Recherche des cartes et des produits (2026-11-15, porteur) : déplacée de l'accueil vers « Toutes les séries »,
+    // à la place de la recherche des extensions ; ses résultats s'ouvrent dans la fiche en panneau (fiche.js).
+    if (x.s.screen === 'collection') { r.hs = this.homeSearch(x); return r; }
     if (x.s.screen !== 'home') return r;
-    r.hs = this.homeSearch(x);
     r.hv = this.homeTrend(x, r.valueBig);
     r.hk = this.homeBinder(x);
     if (!x.s.tpos && !x.s.raround) { terAutoLocate(this); homeRadarWatch(this); } // autorisation déjà donnée : position retrouvée sans rien demander

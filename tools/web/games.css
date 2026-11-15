@@ -229,23 +229,29 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-sv-name { font-size: 12.5px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--pkm-t1); }
 .pkm-sv-meta { display: flex; justify-content: center; align-items: center; gap: 5px; min-width: 0; font-size: 11.5px; font-weight: 700; color: var(--pkm-t2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pkm-sv-flag { flex: none; width: 14px; height: 10px; border-radius: 2px; }
-.pkm-sv-add { position: absolute; top: 4px; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 16px; background: rgba(8, 13, 26, 0.8); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }
+/* « + » et mini-classeur (2026-11-15, porteur : « le petit logo de notre classeur de la page de garde, petit, discret ») :
+   pastille sombre dans le coin de la carte ; un appui ajoute la carte avec l'animation du classeur (fiche.js, addFx). */
+.pkm-sv-add { position: absolute; top: 4px; height: 26px; padding: 0 5px 0 3px; border: 0; border-radius: 13px; background: rgba(8, 13, 26, 0.72); color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 1px; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); -webkit-tap-highlight-color: transparent; }
+.pkm-sv-add::before { content: ''; position: absolute; inset: -6px -4px; }
 .pkm-sv-add { right: 4px; }
-.pkm-sv-add svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-sv-add svg { flex: none; width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-sv-add img { flex: none; display: block; width: 19px; height: auto; }
 .pkm-sv-add:active { transform: scale(0.9); }
 .pkm-sv-s .pkm-sv-name { font-size: 11px; }
 .pkm-sv-s .pkm-sv-meta { font-size: 10px; gap: 3px; }
 .pkm-sv-s .pkm-sv-flag { width: 11px; height: 8px; }
 .pkm-sv-s .pkm-sv-num, .pkm-sv-s .pkm-sv-qty { font-size: 9px; padding: 0 4px; }
-.pkm-sv-s .pkm-sv-add { top: 2px; width: 26px; height: 26px; border-radius: 13px; }
+.pkm-sv-s .pkm-sv-add { top: 2px; height: 21px; padding: 0 4px 0 2px; border-radius: 11px; }
 .pkm-sv-s .pkm-sv-add { right: 2px; }
-.pkm-sv-s .pkm-sv-add svg { width: 14px; height: 14px; }
+.pkm-sv-s .pkm-sv-add svg { width: 10px; height: 10px; }
+.pkm-sv-s .pkm-sv-add img { width: 15px; }
 .pkm-sv-l .pkm-sv-name { font-size: 14.5px; }
 .pkm-sv-l .pkm-sv-meta { font-size: 13px; }
 .pkm-sv-l .pkm-sv-num, .pkm-sv-l .pkm-sv-qty { font-size: 12px; padding: 2px 8px; }
-.pkm-sv-l .pkm-sv-add { top: 6px; width: 38px; height: 38px; border-radius: 19px; }
+.pkm-sv-l .pkm-sv-add { top: 6px; height: 32px; padding: 0 7px 0 4px; border-radius: 16px; }
 .pkm-sv-l .pkm-sv-add { right: 6px; }
-.pkm-sv-l .pkm-sv-add svg { width: 20px; height: 20px; }
+.pkm-sv-l .pkm-sv-add svg { width: 16px; height: 16px; }
+.pkm-sv-l .pkm-sv-add img { width: 24px; }
 @media (prefers-reduced-motion: reduce) { .pkm-sv-bar-in { transition: none; } }
 /* Séries (2026-10-17, vidéo du porteur) : les extensions d'une série ouverte se déplient vers le bas, ligne après ligne. */
 .pkm-ser-unfold { animation: pkmSerUnfold 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both; transform-origin: top center; }
@@ -1922,3 +1928,37 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-sv-tabs { flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid #2A3A5C; background: #111A2C; }
 /* Onglet Items d'une extension : « Autres items de la série » (2026-11-15, porteur). */
 .pkm-sv-others-h { flex: none; margin: 10px 0 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--pkm-t1); }
+
+/* ——— Ajout au classeur animé (2026-11-15, porteur ; fiche.js, addFx) ———
+   2,3 s : la carte (ou le produit) apparaît, s'envole dans le classeur, qui l'avale en rebondissant avec des éclats ;
+   la valeur ajoutée monte, puis la nouvelle valeur de l'onglet du classeur. Rien ne bloque l'écran (pointer-events). */
+.pkm-afx { position: fixed; inset: 0; z-index: 400; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+.pkm-afx-veil { position: absolute; inset: 0; background: rgba(4, 7, 14, 0.55); opacity: 0; animation: pkmAfxVeil 2.3s ease forwards; }
+@keyframes pkmAfxVeil { 0% { opacity: 0; } 10%, 84% { opacity: 1; } 100% { opacity: 0; } }
+.pkm-afx-stage { position: relative; width: 260px; height: 360px; animation: pkmAfxOut 2.3s ease forwards; }
+@keyframes pkmAfxOut { 0%, 84% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(10px) scale(0.96); } }
+.pkm-afx-binder { position: absolute; left: 50%; top: 158px; width: 140px; margin-left: -70px; opacity: 0; transform-origin: 50% 80%; animation: pkmAfxBinder 2.3s cubic-bezier(0.2, 0.9, 0.3, 1.25) forwards; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45)); }
+.pkm-afx-binder img { display: block; width: 100%; height: auto; }
+@keyframes pkmAfxBinder { 0% { opacity: 0; transform: scale(0.4) translateY(30px); } 12% { opacity: 1; transform: scale(1); } 42% { transform: scale(1); } 47% { transform: scale(1.16, 0.88); } 54% { transform: scale(0.95, 1.07); } 61%, 100% { opacity: 1; transform: scale(1); } }
+.pkm-afx-item { position: absolute; left: 50%; top: 0; width: 108px; aspect-ratio: 63 / 88; margin-left: -54px; border-radius: 6px; overflow: hidden; background: #0E1526; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.14); opacity: 0; animation: pkmAfxFly 2.3s cubic-bezier(0.55, 0, 0.65, 1) forwards; }
+.pkm-afx-item img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.pkm-afx-sealed .pkm-afx-item { width: 128px; aspect-ratio: 1; background: transparent; box-shadow: none; border-radius: 0; overflow: visible; }
+.pkm-afx-sealed .pkm-afx-item img { object-fit: contain; object-position: center; filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55)); }
+@keyframes pkmAfxFly { 0% { opacity: 0; transform: translateY(-40px) scale(0.7) rotate(-8deg); } 12% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); } 24% { opacity: 1; transform: translateY(-10px) scale(1.04) rotate(-2deg); } 44% { opacity: 1; transform: translateY(150px) scale(0.24) rotate(10deg); } 47%, 100% { opacity: 0; transform: translateY(156px) scale(0.12) rotate(12deg); } }
+.pkm-afx-sparks { position: absolute; left: 50%; top: 214px; width: 0; height: 0; }
+.pkm-afx-sparks i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #FFE46B; box-shadow: 0 0 10px 2px rgba(255, 214, 10, 0.7); opacity: 0; transform: rotate(var(--a)) translateY(0); animation: pkmAfxSpark 2.3s ease-out forwards; }
+.pkm-afx-sparks i:nth-child(2n) { width: 6px; height: 6px; background: #FFFFFF; }
+@keyframes pkmAfxSpark { 0%, 45% { opacity: 0; transform: rotate(var(--a)) translateY(0) scale(0.6); } 49% { opacity: 1; } 66% { opacity: 0; transform: rotate(var(--a)) translateY(-92px) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-92px); } }
+.pkm-afx-gain, .pkm-afx-what, .pkm-afx-total { position: absolute; left: -20px; right: -20px; margin: 0; text-align: center; opacity: 0; }
+.pkm-afx-gain { top: 112px; font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 800; color: #3DDC84; -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35); text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6); animation: pkmAfxGain 2.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards; }
+@keyframes pkmAfxGain { 0%, 46% { opacity: 0; transform: translateY(26px) scale(0.6); } 56% { opacity: 1; transform: translateY(0) scale(1.08); } 64%, 100% { opacity: 1; transform: translateY(0) scale(1); } }
+.pkm-afx-what { top: 284px; font-size: 14px; font-weight: 700; color: #F3F6FC; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); animation: pkmAfxText 2.3s ease forwards; }
+.pkm-afx-total { top: 308px; display: flex; flex-direction: column; align-items: center; gap: 1px; animation: pkmAfxText 2.3s ease forwards; }
+.pkm-afx-total span { font-size: 12px; font-weight: 600; color: #C9D3EA; }
+.pkm-afx-total b { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6); }
+@keyframes pkmAfxText { 0%, 44% { opacity: 0; transform: translateY(8px); } 54%, 100% { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .pkm-afx-item, .pkm-afx-sparks { display: none; }
+  .pkm-afx-binder { animation-name: pkmAfxVeil; transform: none; }
+  .pkm-afx-gain, .pkm-afx-what, .pkm-afx-total { animation-name: pkmAfxVeil; transform: none; }
+}

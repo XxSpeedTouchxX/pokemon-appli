@@ -194,7 +194,7 @@
 <span class="pkm-sv-meta"><span class="pkm-sv-flag" style="background: {{ ca.flag }}"></span><span>{{ ca.cote }}</span></span>
 </button>
 
-<button type="button" onClick="{{ ca.add }}" aria-label="{{ ca.addLabel }}" class="pkm-sv-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12 M6 12h12"></path></svg></button>
+<button type="button" onClick="{{ ca.add }}" aria-label="{{ ca.addLabel }}" class="pkm-sv-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12 M6 12h12"></path></svg><img src="img/brand/classeur.svg" alt="" width="150" height="122"></button>
 </div>
 </sc-for>
 </div>
@@ -299,44 +299,6 @@
 </sc-if>
 
 <!-- fragment: home -->
-<section aria-label="Recherche dans le catalogue" style="flex: none; display: flex; flex-direction: column; gap: 8px">
-<div style="flex: none; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 4px 0 16px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C">
-<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #9AA8C3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
-<input type="search" aria-label="Rechercher dans le catalogue" placeholder="Rechercher une carte, un produit…" value="{{ home.hs.q }}" onChange="{{ home.hs.onQ }}" style="flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; outline-offset: 4px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px">
-<sc-if value="{{ home.hs.hasQ }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ home.hs.clear }}" aria-label="Effacer la recherche" style="flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 22px; background: transparent; color: #9AA8C3; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></sc-if>
-</div>
-<sc-if value="{{ home.hs.open }}" hint-placeholder-val="{{ false }}">
-<span role="status" style="flex: none; padding: 0 6px; font-size: 12.5px; color: #7D8BA8">{{ home.hs.status }}</span>
-<sc-if value="{{ home.hs.hasRows }}" hint-placeholder-val="{{ true }}">
-<div style="flex: none; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
-<sc-for list="{{ home.hs.rows }}" as="hsr" hint-placeholder-count="4">
-<button type="button" onClick="{{ hsr.open }}" style="display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 10px 14px; border: 0; border-top: {{ hsr.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
-<span style="position: relative; flex: none; width: 42px; height: 56px; border-radius: 8px; overflow: hidden; background: {{ hsr.bg }}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)">
-<sc-if value="{{ hsr.isCard }}" hint-placeholder-val="{{ true }}"><img src="{{ hsr.img }}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; object-position: top"></sc-if>
-<sc-if value="{{ hsr.isSealed }}" hint-placeholder-val="{{ false }}"><img src="{{ hsr.logo }}" alt="" style="max-width: 36px; max-height: 26px; object-fit: contain"></sc-if>
-</span>
-<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
-<span style="font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hsr.name }}</span>
-<span style="display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; color: #9AA8C3"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hsr.sub }}</span>
-<sc-if value="{{ hsr.owned }}" hint-placeholder-val="{{ false }}">
-<span style="flex: none; padding: 1px 7px; border-radius: 999px; background: rgba(168, 182, 255, 0.14); color: #B9C5FF; font-size: 11px; font-weight: 700">à toi</span>
-</sc-if>
-</span>
-</span>
-<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 1px">
-<span style="font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums">{{ hsr.cote }}</span>
-<span style="font-size: 12px; font-weight: 700; color: {{ hsr.rightColor }}">{{ hsr.right }}</span>
-</span>
-</button>
-</sc-for>
-</div>
-</sc-if>
-<sc-if value="{{ home.hs.hasMore }}" hint-placeholder-val="{{ true }}">
-<button type="button" onClick="{{ home.hs.more }}" style="flex: none; height: 44px; padding: 0 6px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer">{{ home.hs.moreLabel }}</button>
-</sc-if>
-</sc-if>
-</section>
-
 <sc-if value="{{ home.al.show }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Tes alertes" class="pkm-rise" style="flex: none; display: flex; flex-direction: column; gap: 8px; padding: 14px 14px 12px; border-radius: 22px; border: 1px solid #1F5A55; background: radial-gradient(120% 140% at 0% 0%, rgba(94, 224, 207, 0.16), rgba(94, 224, 207, 0) 62%), #0F1D2B">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
@@ -1544,10 +1506,43 @@
 
 <!-- fragment: series -->
 <div style="flex: none; display: flex; flex-direction: column; gap: 12px">
-<div style="flex: none; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 16px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C">
+<section aria-label="Recherche dans le catalogue" style="flex: none; display: flex; flex-direction: column; gap: 8px">
+<div style="flex: none; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 4px 0 16px; border-radius: 999px; border: 1px solid #1E2B45; background: #111A2C">
 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #9AA8C3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
-<input type="search" value="{{ ser.q }}" onInput="{{ ser.onQ }}" placeholder="Rechercher « 151 », « Flammes »…" aria-label="Rechercher une série ou une extension" style="flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; outline-offset: 4px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px">
+<input type="search" aria-label="Rechercher dans le catalogue" placeholder="Rechercher une carte, un produit…" value="{{ ser.hs.q }}" onChange="{{ ser.hs.onQ }}" style="flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; outline-offset: 4px; background: transparent; color: #F3F6FC; font: inherit; font-size: 15px">
+<sc-if value="{{ ser.hs.hasQ }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ ser.hs.clear }}" aria-label="Effacer la recherche" style="flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 22px; background: transparent; color: #9AA8C3; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></sc-if>
 </div>
+<sc-if value="{{ ser.hs.open }}" hint-placeholder-val="{{ false }}">
+<span role="status" style="flex: none; padding: 0 6px; font-size: 12.5px; color: #7D8BA8">{{ ser.hs.status }}</span>
+<sc-if value="{{ ser.hs.hasRows }}" hint-placeholder-val="{{ true }}">
+<div style="flex: none; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; overflow: hidden; display: flex; flex-direction: column">
+<sc-for list="{{ ser.hs.rows }}" as="hsr" hint-placeholder-count="4">
+<button type="button" onClick="{{ hsr.open }}" style="display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 10px 14px; border: 0; border-top: {{ hsr.border }}; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">
+<span style="position: relative; flex: none; width: 42px; height: 56px; border-radius: 8px; overflow: hidden; background: {{ hsr.bg }}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12)">
+<sc-if value="{{ hsr.isCard }}" hint-placeholder-val="{{ true }}"><img src="{{ hsr.img }}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; object-position: top"></sc-if>
+<sc-if value="{{ hsr.isSealed }}" hint-placeholder-val="{{ false }}"><img src="{{ hsr.logo }}" alt="" style="max-width: 36px; max-height: 26px; object-fit: contain"></sc-if>
+</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<span style="font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hsr.name }}</span>
+<span style="display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; color: #9AA8C3"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ hsr.sub }}</span>
+<sc-if value="{{ hsr.owned }}" hint-placeholder-val="{{ false }}">
+<span style="flex: none; padding: 1px 7px; border-radius: 999px; background: rgba(168, 182, 255, 0.14); color: #B9C5FF; font-size: 11px; font-weight: 700">à toi</span>
+</sc-if>
+</span>
+</span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 1px">
+<span style="font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums">{{ hsr.cote }}</span>
+<span style="font-size: 12px; font-weight: 700; color: {{ hsr.rightColor }}">{{ hsr.right }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ ser.hs.hasMore }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ ser.hs.more }}" style="flex: none; height: 44px; padding: 0 6px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer">{{ ser.hs.moreLabel }}</button>
+</sc-if>
+</sc-if>
+</section>
 <sc-if value="{{ ser.ready }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ ser.top }}" style="flex: none; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 1px solid #24345C; border-radius: 20px; background: #121C33; color: inherit; font: inherit; text-align: left; cursor: pointer">
 <span aria-hidden="true" style="flex: none; width: 44px; height: 44px; border-radius: 14px; background: var(--pkm-accent); color: var(--pkm-on-accent); display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 3h12l3 6-9 12L3 9z M3 9h18 M9 3l3 6 3-6 M12 9v12"></path></svg></span>
@@ -2613,7 +2608,7 @@ PKCOUNTER
 </section>
 <section aria-label="Lots de la saison" class="pkm-pg-rewards pkm-dark">
 <h2>Lots de la saison</h2>
-<sc-for list="{{ pg.rewards }}" as="pgw" hint-placeholder-count="3"><div class="{{ pgw.cls }}"><sc-if value="{{ pgw.hasImg }}" hint-placeholder-val="{{ true }}"><span class="{{ pgw.imgCls }}"><img src="{{ pgw.img }}" alt="" width="64" height="64"><sc-if value="{{ pgw.two }}" hint-placeholder-val="{{ false }}"><img src="{{ pgw.img }}" alt="" width="64" height="64" class="pkm-pg-rwimg-b"></sc-if></span></sc-if><sc-if value="{{ pgw.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-pg-rwduo" aria-hidden="true"><span class="pkm-pg-rwprem"><i class="pkm-pg-rwprem-shine"></i><b>DROPIPASS</b></span><small>ou</small><span class="{{ pgw.tkCls }}"><span class="pkm-shop-ticket-in">{{ pgw.tag }}</span></span></span></sc-if><span class="pkm-pg-rwt"><b>{{ pgw.range }}</b><span>{{ pgw.prize }}</span><sc-if value="{{ pgw.hasNote }}" hint-placeholder-val="{{ true }}"><small>{{ pgw.note }}</small></sc-if></span></div></sc-for>
+<sc-for list="{{ pg.rewards }}" as="pgw" hint-placeholder-count="3"><div class="{{ pgw.cls }}"><sc-if value="{{ pgw.hasImg }}" hint-placeholder-val="{{ true }}"><span class="{{ pgw.imgCls }}"><img src="{{ pgw.img }}" alt="" width="64" height="64"><sc-if value="{{ pgw.two }}" hint-placeholder-val="{{ false }}"><img src="{{ pgw.img }}" alt="" width="64" height="64" class="pkm-pg-rwimg-b"></sc-if></span></sc-if><sc-if value="{{ pgw.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-pg-rwduo" aria-hidden="true"><span class="pkm-pg-rwdp"><img src="img/brand/dropipass-2b.svg" alt="" width="64" height="64"><i>1M</i></span><small>ou</small><span class="{{ pgw.tkCls }}"><span class="pkm-shop-ticket-in">{{ pgw.tag }}</span></span></span></sc-if><span class="pkm-pg-rwt"><b>{{ pgw.range }}</b><span>{{ pgw.prize }}</span><sc-if value="{{ pgw.hasNote }}" hint-placeholder-val="{{ true }}"><small>{{ pgw.note }}</small></sc-if></span></div></sc-for>
 <p class="pkm-pg-rules">{{ pg.rewardsNote }}</p>
 <p class="pkm-pg-rules">{{ pg.rules }}</p>
 <button type="button" onClick="{{ pg.ligueReplay }}" class="pkm-pg-replay"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"></path><path d="M12 16.8v.2"></path></svg>Revoir l’explication de la ligue</button>

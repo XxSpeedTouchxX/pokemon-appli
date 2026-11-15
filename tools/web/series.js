@@ -142,6 +142,8 @@
   serProto.renderVals = function () {
     const r = serBaseRender.call(this), s = this.st();
     r.ser = s.screen === 'collection' ? this.vSeries(s) : { ready: false, loading: '', chips: [], groups: [] };
+    // Recherche des cartes et des produits, venue de l'accueil (2026-11-15, porteur ; home.js).
+    r.ser.hs = s.screen === 'collection' && r.home && r.home.hs ? r.home.hs : { q: '', onQ: null, hasQ: false, clear: null, open: false, status: '', rows: [], hasRows: false, hasMore: false, moreLabel: '', more: null };
     if (s.screen === 'collection') {
       r.ui.title = 'Toutes les séries';
       if (r.ser.ready) { r.ui.subtitle = r.ser.count; r.ui.hasSubtitle = true; }

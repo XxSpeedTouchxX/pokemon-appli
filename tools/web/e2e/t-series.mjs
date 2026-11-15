@@ -45,13 +45,14 @@ ok('extension : toutes ses cartes (' + (setTxt.match(/Cartes \(\d+\)/) || [''])[
 await page.screenshot({ path: shot('series-set.png') });
 await page.locator('button[aria-label="Retour"]').click(); await page.waitForTimeout(700);
 ok('retour : Toutes les séries', /Toutes les séries/.test(await page.locator('h1').first().innerText()));
-// Recherche.
-await page.fill('input[aria-label="Rechercher une série ou une extension"]', '151'); await page.waitForTimeout(500);
-const found = await page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').allInnerTexts();
-ok('recherche « 151 » : ' + found.map(t => t.split('\n')[0]).join(', '), found.some(t => /(^|\n)151(\n|$)/.test(t)));
-await page.fill('input[aria-label="Rechercher une série ou une extension"]', 'zzzz'); await page.waitForTimeout(300);
-ok('recherche sans résultat : message', /Aucune série ni extension/.test(await page.locator('main').innerText()));
-await page.fill('input[aria-label="Rechercher une série ou une extension"]', ''); await page.waitForTimeout(300);
+// Recherche (2026-11-15, porteur) : la recherche des extensions est retirée ; à sa place, celle des cartes et des produits,
+// venue de l'accueil (ses résultats s'ouvrent dans la fiche en panneau, t-home.mjs).
+ok('plus de recherche d’extension ; recherche des cartes et des produits à sa place', (await page.locator('input[aria-label="Rechercher une série ou une extension"]').count()) === 0 && (await page.locator('input[aria-label="Rechercher dans le catalogue"]').count()) === 1);
+await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'zzzz'); await page.waitForTimeout(500);
+ok('recherche sans résultat : message', /Aucun résultat pour « zzzz »/.test(await page.locator('main').innerText()));
+await page.fill('input[aria-label="Rechercher dans le catalogue"]', ''); await page.waitForTimeout(300);
+// Une série s'ouvre depuis la barre des séries (la recherche des extensions est retirée).
+const serGo = async (pg, name) => { await pg.locator('nav[aria-label="Aller à une série"] button[aria-label="' + name + '"]').click(); await pg.waitForTimeout(900); };
 // Série repliable.
 await first.locator('button[aria-expanded]').click(); await page.waitForTimeout(300);
 const ex = await first.locator('button[aria-expanded]').getAttribute('aria-expanded');
@@ -68,12 +69,12 @@ const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 } })
 await ctx2.addInitScript(v => { if (!sessionStorage.getItem('seeded')) { localStorage.setItem('pkm-collection-v1', v); sessionStorage.setItem('seeded', '1'); } }, JSON.stringify(saved));
 const p2 = await ctx2.newPage(); p2.on('pageerror', e => errors.push(e.message));
 await p2.goto(B + '#series', { waitUntil: 'load' }); await p2.waitForFunction(() => document.querySelector('nav[aria-label="Aller à une série"]'), null, { timeout: 20000 });
-await p2.fill('input[aria-label="Rechercher une série ou une extension"]', '151'); await p2.waitForTimeout(500);
+await serGo(p2, 'Écarlate et Violet');
 const t151 = (await p2.locator('main section[id^="pkm-ser-"] div.pkm-rise > button').allInnerTexts()).find(t => /(^|\n)151(\n|$)/.test(t)) || '';
 ok('progression de l’extension 151 : ' + t151.replace(/\n/g, ' · '), /(^|\n)1\/\d+(\n|$)/.test(t151));
 await page.screenshot({ path: shot('series-search.png') });
 // 30ᵉ Anniversaire : la Collection Classique est rattachée (une seule tuile, cartes additionnées), logo de repli.
-await page.fill('input[aria-label="Rechercher une série ou une extension"]', 'anniversaire'); await page.waitForTimeout(2500);
+await serGo(page, 'Méga-Évolution'); await page.waitForTimeout(1600);
 const annTiles = page.locator('main section[id^="pkm-ser-"] div.pkm-rise > button');
 const annTxt = await annTiles.allInnerTexts(), n30 = DOC.cards.filter(c => c[2] === '30th' || c[2] === '30th-c').length;
 ok('30ᵉ Anniversaire avec sa Collection Classique : ' + annTxt.map(t => t.replace(/\n/g, ' · ')).join(' | '),
@@ -94,8 +95,11 @@ ok('cartes en couleur, même celles qu’on n’a pas (2026-10-17)', await page.
 const owned0 = await page.locator('main .pkm-sv-card .pkm-sv-qty').count();
 await page.locator('main .pkm-sv-add').first().click(); await page.waitForTimeout(400);
 const owned1 = await page.locator('main .pkm-sv-card .pkm-sv-qty').count();
-const toastAdd = (await page.locator('[role="status"]').allInnerTexts()).join(' ');
-ok('« + » : ajoutée avec sa cote du jour : ' + toastAdd.replace(/\n/g, ' '), /ajouté · (cote \d|pas encore de cote)/.test(toastAdd));
+// « + » et mini-classeur (2026-11-15, porteur) : animation du classeur à la place du message du bas.
+const afx = page.locator('.pkm-afx'), afxTxt = (await afx.count()) ? await afx.textContent() : '';
+ok('« + » (avec le mini-classeur) : animation « ' + afxTxt + ' », sans message en bas', (await page.locator('main .pkm-sv-add img[src$="classeur.svg"]').count()) > 0
+  && /^\+.*€Ajoutée à Mes cartesValeur de mes cartes/.test(afxTxt) && (await page.locator('[role="status"]', { hasText: 'collection à' }).count()) === 0);
+await page.waitForTimeout(2400);
 ok('« + » : cartes possédées ' + owned0 + ' → ' + owned1 + ', carte en couleur avec ×1', owned1 === owned0 + 1 && (await page.locator('main .pkm-sv-card').first().getAttribute('class')).indexOf('pkm-sv-miss') < 0
   && /×1/.test(await page.locator('main .pkm-sv-card').first().innerText()));
 // 2026-11-01 (porteur) : plus de cœur (favori), seul le « + » ; un appui sur une carte ouvre la fiche en panneau, la même
@@ -127,13 +131,12 @@ ok('retour à l’onglet Cartes', (await page.locator('main .pkm-sv-grid').count
 ok('pas de défilement horizontal (extension)', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
 await page.locator('button[aria-label="Retour"]').click(); await page.waitForTimeout(700);
 // Logos : chaque image de la série Méga-Évolution charge, sinon elle est remplacée (jamais d'image cassée).
-await page.fill('input[aria-label="Rechercher une série ou une extension"]', ''); await page.waitForTimeout(300);
 await page.locator('nav[aria-label="Aller à une série"] button[aria-label="Méga-Évolution"]').click(); await page.waitForTimeout(4000);
 const megaImgs = await page.locator('section#pkm-ser-mega-evolution img').evaluateAll(l => l.map(i => [i.getAttribute('src'), i.complete && i.naturalWidth > 0]));
 ok('logos de Méga-Évolution : ' + megaImgs.filter(x => x[1]).length + '/' + megaImgs.length + ' chargés, aucun cassé', megaImgs.length >= 6 && megaImgs.every(x => x[1]));
 await page.screenshot({ path: shot('series-logos.png') });
 // 360 px : pas de défilement horizontal.
-await page.setViewportSize({ width: 360, height: 740 }); await page.fill('input[aria-label="Rechercher une série ou une extension"]', ''); await page.waitForTimeout(400);
+await page.setViewportSize({ width: 360, height: 740 }); await page.waitForTimeout(400);
 ok('360 px : pas de défilement horizontal', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
 // Ouverture d'une série par son en-tête (2026-10-17, vidéo du porteur) : la page ne remonte pas, l'en-tête reste à sa
 // place (même si la série ouverte au-dessus se referme) et les extensions se déplient dessous, 3 par ligne.

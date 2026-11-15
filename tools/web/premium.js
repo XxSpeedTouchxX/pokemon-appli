@@ -13,10 +13,10 @@
   // visuels (img/brand/dropipass-1 à 4.svg, tools/brand/dropipass/) : ?dpvis=1 à 4 pour essayer ; 1 par défaut en
   // attendant le choix du porteur.
   const PREM_NAME = 'DropiPass';
-  // Carte holo (logo 2) choisie par le porteur le 2026-11-15, avec 6 motifs au centre à départager : 2a gemme des PK
-  // (par défaut en attendant), 2b « D » de l'icône, 2c « D » doré, 2d éclair, 2e étoile, 2f « D » et gemme
-  // (tools/brand/dropipass/make_holo.py) ; ?dpvis=1, 3 et 4 gardent les anciennes propositions pour comparer.
-  const PREM_VIS = ((location.search.match(/[?&]dpvis=(1|2[a-f]?|3|4)(&|$)/) || [])[1] || '2a').replace(/^2$/, '2a');
+  // Carte holo (logo 2) choisie par le porteur le 2026-11-15, avec 6 motifs au centre proposés : 2a gemme des PK,
+  // 2b « D » de l'icône (choix du porteur, même jour), 2c « D » doré, 2d éclair, 2e étoile, 2f « D » et gemme
+  // (tools/brand/dropipass/make_holo.py) ; ?dpvis=… garde les autres propositions pour comparer.
+  const PREM_VIS = ((location.search.match(/[?&]dpvis=(1|2[a-f]?|3|4)(&|$)/) || [])[1] || '2b').replace(/^2$/, '2b');
   const PREM_LOGO = 'img/brand/dropipass-' + PREM_VIS + '.svg';
   // Messages du serveur encore écrits « Premium » (scripts SQL déjà installés : suppression de compte, journal) :
   // affichés avec le nouveau nom, sans toucher à « Ultra-Premium » (nom d'un produit scellé).

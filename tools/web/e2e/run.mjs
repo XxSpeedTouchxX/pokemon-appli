@@ -26,7 +26,8 @@ for (const name of pick) {
   const bad = ko > 0 || out.code !== 0 || ok === 0;
   if (bad) failed++;
   console.log((bad ? '✗ ' : '✓ ') + name + ' : ' + ok + ' ✓, ' + ko + ' ✗' + (out.code ? ' (code ' + out.code + ')' : ''));
-  if (bad) console.log(out.text.split('\n').filter(l => /✗|Error|ERREURS|Erreurs/.test(l)).slice(0, 8).map(l => '    ' + l).join('\n'));
+  // Délai dépassé (2026-11-15) : la ligne du test et l'élément attendu sont affichés, pour retrouver l'étape en cause.
+  if (bad) console.log(out.text.split('\n').filter(l => /✗|Error|ERREURS|Erreurs|Timeout|waiting for|t-[\w-]+\.mjs:\d+/.test(l)).slice(0, 12).map(l => '    ' + l).join('\n'));
 }
 server.close();
 console.log((failed ? failed + ' suite(s) en échec' : 'Toutes les suites passent') + ' · ' + Math.round((Date.now() - t0) / 1000) + ' s');

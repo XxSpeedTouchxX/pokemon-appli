@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-15 — Recherche déplacée dans « Toutes les séries », fiche en panneau, ajout animé au classeur, DropiPass 2b, lots de « Ma ligue » (porteur)
+
+- **Recherche** (cache v213) : la recherche des extensions en haut de « Toutes les séries » est retirée ; la recherche des cartes et des produits de l'accueil y est déplacée (l'accueil n'a plus de barre de recherche). Une carte ou un produit touché dans ses résultats (et dans « Voir les N résultats ») s'ouvre dans la **fiche en panneau** (prix du marché Cardmarket, eBay, Vinted, historique, prix par état), plus dans l'ancienne page.
+  - *Lecture retenue de la demande, à confirmer :* la barre de l'accueil **déplacée** dans « Toutes les séries » (et non l'inverse). Les extensions s'ouvrent toujours par la barre des séries et les séries dépliables.
+- **Ajout animé au classeur** : à la place de la coche verte et du message du bas, la carte (ou le produit) s'envole dans le classeur de l'accueil, qui l'avale en rebondissant, puis « +X € » et la nouvelle valeur de « Mes cartes » (ou « Mes produits scellés ») comptée de l'ancienne à la nouvelle (2,3 s, rien ne bloque l'écran). Pour « Ajouter » du formulaire d'ajout (fiche d'une carte ou d'un produit, onglet Items, catalogue du scellé) et pour le « + » des cartes d'une extension. L'ajout est enregistré tout de suite ; « Annuler » du message disparaît avec lui (« Retirer de ma collection » dans la fiche défait l'ajout).
+- **« + » des cartes d'une extension** : petit « + » avec le mini-logo du classeur de l'accueil, dans une pastille sombre discrète (3 tailles selon la grille).
+- **DropiPass** : logo **2b** (carte holo arc-en-ciel avec le « D » de l'icône), choix du porteur, partout dans l'app ; les autres motifs restent visibles pour comparer (`?dpvis=`).
+- **« Ma ligue » › lots** : 4ᵉ à 10ᵉ place avec le logo 2b et une petite bulle « 1M » (un mois de DropiPass) ; visuels sur 30 % du cadre, textes sur 70 %, alignés de la 1ʳᵉ à la 10ᵉ place.
+- **Tests** : `nav` (point touché entre deux cartes) réparé ; `games`, en échec une fois sur GitHub (délai dépassé) et vert ensuite, reste suivi : le lanceur affiche désormais la ligne et l'élément attendu en cas de délai dépassé. Workflow « Catalogue scellé » : l'étape des produits officiels des extensions ne tournait pas sur un envoi (liste des fichiers illisible) : elle tourne maintenant à chaque envoi du catalogue, à la main et le lundi ; relancée à la main le 2026-11-15.
+
+---
+
 ## 2026-11-15 — DropiPass en carte holo, reflet sur « Pass », items de chaque extension, pré-gradation au premier écran, pastilles du classeur (porteur)
 
 - **DropiPass** (cache v212) : le porteur choisit la **carte holo arc-en-ciel (logo 2)** et demande d'autres motifs au centre. **6 motifs proposés** (2a gemme des PK, 2b « D » de l'icône Dropicards, 2c « D » doré, 2d éclair, 2e étoile, 2f « D » et gemme ; planche `tools/brand/dropipass/planche-holo.png`, essai `?dpvis=2a` à `2f`) : **choix du porteur attendu**, 2a affiché en attendant.

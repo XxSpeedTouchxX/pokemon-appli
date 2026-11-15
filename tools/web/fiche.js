@@ -22,6 +22,91 @@
   };
   fiProto.fiClose = function () { this.setState({ fiId: null, fiZoom: false, fiEtat: null }); };
 
+  // Résultats de recherche (2026-11-15, porteur : « la même interface que pour les cartes et items, avec la cote selon
+  // eBay, Vinted… ») : une carte ou un produit touché s'ouvre dans cette fiche en panneau, plus dans l'ancienne page.
+  // fiRouted(fn) lance fn en détournant l'ouverture de la page « item » vers fiOpen, le temps de l'appel.
+  fiProto.fiRouted = function (fn) {
+    return () => {
+      const me = this;
+      me.push = function (screen, extra) { return screen === 'item' && extra && extra.itemId ? me.fiOpen(extra.itemId) : fiProto.push.call(me, screen, extra); };
+      try { fn(); } finally { delete me.push; }
+    };
+  };
+  // ——— Ajout au classeur animé (2026-11-15, porteur : « une petite animation à la place de la petite coche verte avec
+  // l'écriture en bas de l'écran », pour une carte comme pour un produit scellé) ———
+  // La carte (ou le produit) apparaît, s'envole dans le classeur de l'accueil, qui l'avale en rebondissant ; puis la
+  // valeur ajoutée et la nouvelle valeur de « Mes cartes » (ou « Mes produits scellés ») s'affichent, comptée de l'ancienne
+  // à la nouvelle. L'ajout est déjà enregistré : à la fin, l'article est dans le classeur et sa valeur comptée.
+  // Valeur d'un onglet du classeur (cartes ou scellé) pour un état donné : cote × coefficient de l'état, comme le classeur.
+  fiProto.fiBinderVal = function (st, sealed) {
+    const keep = this.__valS;
+    this.__valS = st;
+    try {
+      const c = this.compute(st);
+      return this.catalog().reduce((n, p) => ((p.type === 'sealed') === sealed && c.stock[p.id] ? n + (this.unitVal(p, st.valuation) || 0) * c.stock[p.id].qty : n), 0);
+    } finally { this.__valS = keep; }
+  };
+  const FI_AFX_MS = 2300, FI_AFX_SPARKS = 10;
+  fiProto.addFx = function (p, before, after) {
+    if (typeof document === 'undefined' || !p) return;
+    const host = document.getElementById('app') || document.body, old = document.querySelector('.pkm-afx');
+    if (old) old.remove();
+    const sealed = p.type === 'sealed', l = this.look(p), src = sealed ? (l.photo || l.logo || '') : (l.img || '');
+    const hide = !!this.st().masked, money = v => (hide ? '•••• €' : this.eur(v));
+    const el = document.createElement('div');
+    el.className = 'pkm-afx' + (sealed ? ' pkm-afx-sealed' : '');
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    const sparks = Array.from({ length: FI_AFX_SPARKS }, (_, i) => '<i style="--a: ' + Math.round(i * 360 / FI_AFX_SPARKS) + 'deg"></i>').join('');
+    el.innerHTML = '<div class="pkm-afx-veil"></div><div class="pkm-afx-stage"><div class="pkm-afx-sparks" aria-hidden="true">' + sparks + '</div>'
+      + '<div class="pkm-afx-binder" aria-hidden="true"><img src="img/brand/classeur.svg" alt=""></div>'
+      + (src ? '<div class="pkm-afx-item" aria-hidden="true"><img alt=""></div>' : '')
+      + '<p class="pkm-afx-gain"></p><p class="pkm-afx-what"></p><p class="pkm-afx-total"><span></span><b></b></p></div>';
+    if (src) {
+      const im = el.querySelector('.pkm-afx-item img');
+      im.onerror = () => { if (l.fallback && im.src.indexOf(l.fallback) < 0) im.src = l.fallback; };
+      im.src = src;
+    }
+    const gain = Math.max(0, after - before), label = sealed ? 'Valeur de mes produits scellés' : 'Valeur de mes cartes';
+    el.querySelector('.pkm-afx-gain').textContent = '+' + money(gain);
+    el.querySelector('.pkm-afx-what').textContent = (sealed ? 'Ajouté à Mes produits scellés' : 'Ajoutée à Mes cartes');
+    el.querySelector('.pkm-afx-total span').textContent = label;
+    const b = el.querySelector('.pkm-afx-total b');
+    b.textContent = money(before);
+    el.setAttribute('aria-label', p.name + (sealed ? ' ajouté à Mes produits scellés' : ' ajoutée à Mes cartes') + ' · ' + label + ' : ' + money(after));
+    host.appendChild(el);
+    // La valeur du classeur monte de l'ancienne à la nouvelle quand l'article est avalé.
+    const t0 = Date.now() + 1050, dur = 650, raf = window.requestAnimationFrame || (f => setTimeout(f, 16));
+    const tick = () => {
+      if (!el.isConnected) return;
+      const k = Math.min(1, Math.max(0, (Date.now() - t0) / dur)), e = 1 - Math.pow(1 - k, 3);
+      b.textContent = money(before + (after - before) * e);
+      if (k < 1) raf(tick);
+    };
+    raf(tick);
+    setTimeout(() => el.remove(), FI_AFX_MS);
+  };
+  // « Ajouter » du formulaire d'ajout (fiche d'une carte ou d'un produit, catalogue du scellé…) : l'animation à la place
+  // du message du bas. Rien n'est joué si rien n'a été ajouté (classeur plein au grade actuel, quantité nulle).
+  const fiBaseSaveBuy = fiProto.saveBuy;
+  fiProto.saveBuy = function () {
+    const s = this.st(), f = s.f || {}, p = this.catalog().find(q => q.id === f.pid), prev = s.purchases;
+    const sealed = !!(p && p.type === 'sealed'), before = p ? this.fiBinderVal(s, sealed) : 0;
+    const r = fiBaseSaveBuy.call(this), s2 = this.st();
+    if (!p || s2.purchases === prev) return r;
+    if (this._tt) { clearTimeout(this._tt); this._tt = null; }
+    this.setState({ toast: null });
+    this.addFx(p, before, this.fiBinderVal(this.st(), sealed));
+    return r;
+  };
+
+  const fiBaseMarket = fiProto.vMarket;
+  fiProto.vMarket = function (x) {
+    const r = fiBaseMarket.call(this, x);
+    (r.list || []).forEach(l => { if (typeof l.open === 'function') l.open = this.fiRouted(l.open); });
+    return r;
+  };
+
   // État de ma carte (2026-10-31, porteur : « si par erreur l'utilisateur avait mis Near Mint alors que c'est une Mint,
   // il peut modifier l'état de sa carte à tout moment ») : les exemplaires de cette langue et de cet état passent au
   // nouvel état ; la valeur (cote × coefficient de l'état) et la collection suivent. « Annuler » dans le message.

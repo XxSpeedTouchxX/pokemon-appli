@@ -130,11 +130,13 @@ ok('rappel « Tes PA du jour t’attendent » : affiché à l’ouverture (' + r
 // Tant que le rappel reste affiché, les appuis passent par l'événement « click » (sans test de recouvrement) pour
 // vérifier la suite du parcours.
 const tap = async l => ((await remind.count()) ? l.dispatchEvent('click') : l.click());
+// Recherche dans « Toutes les séries » (2026-11-15) ; le résultat s'ouvre dans la fiche en panneau.
+await tap(page.locator('nav[aria-label="Navigation principale"] button[aria-label="Toutes les séries"]')); await page.waitForTimeout(700);
 await page.fill('input[aria-label="Rechercher dans le catalogue"]', 'dracaufeu'); await page.waitForTimeout(800);
-await page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').nth(1).click(); await page.waitForTimeout(800);
+await tap(page.locator('section[aria-label="Recherche dans le catalogue"] button[style*="min-height: 76px"]').nth(1)); await page.waitForTimeout(800);
 const addOnce = async () => {
-  await tap(page.locator('button:has-text("Ajouter")').first()); await page.waitForTimeout(400);
-  const save = page.locator('button:has-text("Ajouter à ma collection")').first();
+  await tap(page.locator('section.pkm-fi .pkm-fi-main')); await page.waitForTimeout(500);
+  const save = page.locator('button[style*="height: 54px"][style*="border-radius: 999px"]').last();
   if (await save.count()) { await tap(save); }
   await page.waitForTimeout(300);
   return (await page.locator('div[role="status"]').allInnerTexts().catch(() => [])).join(' / ').trim();
@@ -146,7 +148,8 @@ await page.waitForTimeout(3000);
 const t2 = await addOnce();
 d = await saved();
 ok('même carte une 2e fois : « ' + t2 + ' », solde ' + d.pk, !/PK/.test(t2) && d.pk === 100);
-await page.click('button[aria-label="Retour"]').catch(() => {}); await page.waitForTimeout(300);
+await page.waitForTimeout(2400); // fin de l'animation d'ajout au classeur
+await page.locator('section.pkm-fi button[aria-label="Fermer"]').click().catch(() => {}); await page.waitForTimeout(400);
 await page.click('button[aria-label="Accueil"]').catch(() => {}); await page.waitForTimeout(400);
 ok('compteur : ' + await cText(), await cText() === '100 PK');
 // 6. Déblocage avec des PA (2026-10-28) : 3 120 PA, le compagnon de l'accueil ouvre le Pokédex, Kyogre débloqué pour
