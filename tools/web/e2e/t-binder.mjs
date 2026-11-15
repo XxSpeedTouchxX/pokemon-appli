@@ -196,7 +196,7 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   // Retouche (2026-11-15, porteur) : les 2 flèches alignées (même axe vertical), celle du compagnon un peu plus bas.
   const kb = await kArrow.boundingBox(), img = await val.locator('img[width="96"]').boundingBox();
   ok('2 flèches alignées (' + Math.round(ab.x + ab.width / 2) + ' / ' + Math.round(kb.x + kb.width / 2) + ' px), flèche du compagnon sous son image de ' + Math.round(ab.y + ab.height - img.y - img.height) + ' px',
-    Math.abs((ab.x + ab.width / 2) - (kb.x + kb.width / 2)) <= 1 && ab.y + ab.height - (img.y + img.height) >= 8);
+    Math.abs((ab.x + ab.width / 2) - (kb.x + kb.width / 2)) <= 1 && ab.y + ab.height - (img.y + img.height) >= 14);
   const tile0 = async () => (await page.locator(TILE).first().boundingBox()).y;
   const valBottom = async () => { const b = await val.boundingBox(); return b.y + b.height; };
   const gapOpen = (await tile0()) - (await valBottom());
@@ -208,6 +208,8 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
       tabs: vis(k.querySelector('[role="tablist"]')), head: vis(k.querySelector('.pkm-hk-head')), total: vis(v.querySelector('.pkm-strict-text')) };
   });
   const gapShut = (await tile0()) - (await valBottom());
+  const abShut = await vArrow.boundingBox();
+  ok('pliée : la flèche du compagnon reste dans le cadre de la valeur (' + Math.round(await valBottom() - abShut.y - abShut.height) + ' px du bord)', (await valBottom()) - abShut.y - abShut.height >= 8);
   ok('pliés : courbe, périodes, logo, onglets et prix des cartes cachés, valeur totale gardée (' + JSON.stringify(hidden) + ')', !hidden.chart && !hidden.periods && !hidden.logo && !hidden.tabs && !hidden.head && hidden.total);
   ok('pliés : les cartes du classeur juste sous la valeur (' + Math.round(gapOpen) + ' px → ' + Math.round(gapShut) + ' px)', gapShut < 140 && gapShut < gapOpen / 3 && (await page.locator(TILE).count()) >= 6);
   await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(2500);

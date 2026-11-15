@@ -11,6 +11,7 @@
 - Titre « Mon classeur » **gardé** (porteur).
 - La flèche de « Mon classeur » est décalée de 11 px vers la gauche : les 2 flèches sont sur le même axe vertical, quelle que soit la largeur de l'écran (vérifié à 360, 390 et 430 px).
 - La flèche du compagnon descend de 10 px : elle n'est plus collée au Pokémon (10 px sous son image) et ne touche pas la ligne de variation en dessous. Cache v218 ; test `t-binder.mjs` (alignement à 1 px près).
+- Retouche (même jour, porteur) : la flèche du compagnon descend encore de 8 px (18 px sous son image) ; courbe pliée, le cadre de la valeur garde 6 px de plus pour que la flèche n'en touche jamais le bord (10 à 18 px selon l'écran). Cache v219 ; test `t-binder.mjs`.
 
 ---
 
