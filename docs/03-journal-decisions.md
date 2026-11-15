@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-15 — Mon classeur : tri Prix ou Nom à la place du « i » (porteur)
+
+- Le bouton « i » de Mon classeur (source et date des cotes) est **supprimé**, avec sa note.
+- À sa place : un bouton de tri (icône de filtre + « Prix » ou « Nom »). Un appui ouvre « Trier par : Prix | Nom » ; le choix referme le panneau et ramène à la 1ʳᵉ page.
+- **Prix** : du plus cher au moins cher (par défaut, comme avant). **Nom** : de A à Z (accents et majuscules ignorés).
+- Même tri dans les 2 onglets (Mes cartes, Mes produits scellés) et dans « Tout afficher » (« Classés par prix » ou « Classés par nom ») ; gardé sur l'appareil. Cache v220 ; tests `t-binder.mjs`, `t-sources.mjs`.
+
+---
+
 ## 2026-11-15 — Accueil : 2 flèches alignées (porteur)
 
 - Titre « Mon classeur » **gardé** (porteur).

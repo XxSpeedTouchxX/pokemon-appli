@@ -40,7 +40,10 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('valeur des cartes en haut : ' + await panelText(page), /^Valeur de mes cartes \| [\d ]+,\d\d € \| 6 cartes · 1 gradée$/.test(await panelText(page)));
   const headFont = await page.locator(PANEL + ' .pkm-hk-head .pkm-strict-text').evaluate(e => [getComputedStyle(e).fontFamily, getComputedStyle(e).fontWeight].join(' '));
   ok('valeur écrite comme « Valeur de toute ma collection » (Sora 700, contour) : ' + headFont, /Sora/.test(headFont) && /700/.test(headFont));
-  ok('plus de bulles de tri ni de filtre', (await page.locator(SEC + ' [aria-label="Trier le classeur"]').count()) === 0 && (await page.locator(SEC + ' button', { hasText: /^(Filtrer|Cote|Récents|Nom)$/ }).count()) === 0);
+  // Le « i » est remplacé par un bouton de tri Prix / Nom (2026-11-15, porteur), fermé par défaut, sur « Prix ».
+  ok('plus de « i » : un bouton de tri « Prix » à sa place, fermé', (await page.locator(SEC + ' button', { hasText: /^i$/ }).count()) === 0 && (await page.locator(SEC + ' [role="note"]').count()) === 0
+    && (await page.locator(SEC + ' .pkm-hk-head button.pkm-hk-sort').innerText()).trim() === 'Prix' && (await page.locator(SEC + ' [role="radiogroup"]').count()) === 0
+    && (await page.locator(SEC + ' button', { hasText: /^(Filtrer|Cote|Récents)$/ }).count()) === 0);
   const cards = await page.$$eval(TILE, bs => bs.map(b => b.getAttribute('aria-label')));
   ok('6 cartes, de la plus chère à la moins chère : ' + cards.map(c => c.split(',')[0]).join(', '), cards.length === 6 && /^Mewtwo ex, gradée PCA 9,5/.test(cards[0]));
   const vals = await page.$$eval(TILE, bs => bs.map(b => b.querySelector('span[style*="bottom: 6%"] .pkm-pill2-p').innerText.trim()));
@@ -170,7 +173,7 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   const HF = 'section.pkm-hf[role="dialog"]';
   const hfSub = (await page.locator(HF + ' .pkm-hf-sub').first().innerText()).replace(/[\u202f\u00a0]/g, ' ');
   ok('« Tout afficher » : « Toutes mes cartes », 11 cartes classées par valeur (' + hfSub + ')', (await page.locator(HF + ' h2').innerText()) === 'Toutes mes cartes'
-    && (await page.locator(HF + ' .pkm-hf-tile').count()) === 11 && /^Classés par valeur · 12 cartes · .+ €$/.test(hfSub));
+    && (await page.locator(HF + ' .pkm-hf-tile').count()) === 11 && /^Classés par prix · 12 cartes · .+ €$/.test(hfSub));
   const hv = (await page.locator(HF + ' .pkm-hf-pill').allInnerTexts()).map(t => Number(t.replace(/[^\d,]/g, '').replace(',', '.')));
   ok('du plus cher au moins cher', hv.every((v, i) => !i || hv[i - 1] >= v));
   ok('filtres : ' + (await page.locator(HF + ' [aria-label="Filtrer mes cartes"] button').allInnerTexts()).join(', '), /^Toutes \(11\)\|Loose \(11\)\|Gradées \(0\)$/.test((await page.locator(HF + ' [aria-label="Filtrer mes cartes"] button').allInnerTexts()).join('|')));
@@ -216,6 +219,25 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   ok('pliage gardé après rechargement', (await val.locator('button.pkm-fold-btn').getAttribute('aria-expanded')) === 'false' && (await sec.locator('button.pkm-fold-btn').getAttribute('aria-expanded')) === 'false');
   await val.locator('button.pkm-fold-btn').click(); await sec.locator('button.pkm-fold-btn').click(); await page.waitForTimeout(600);
   ok('dépliés : courbe et haut du classeur revenus', await val.locator('svg[role="img"]').isVisible() && await sec.locator('[role="tablist"]').isVisible() && await sec.locator('.pkm-hk-head').isVisible());
+  // Tri du classeur (2026-11-15, porteur) : Prix (du plus cher au moins cher) ou Nom (de A à Z), dans les 2 onglets, gardé.
+  const sortBtn = sec.locator('.pkm-hk-head button.pkm-hk-sort'), names = async () => (await page.$$eval(TILE, bs => bs.map(b => b.getAttribute('aria-label').split(',')[0])));
+  const priceOrder = await names();
+  await sortBtn.click(); await page.waitForTimeout(350);
+  const radios = sec.locator('[role="radiogroup"][aria-label="Trier mon classeur par"] [role="radio"]');
+  ok('tri ouvert : ' + (await radios.allInnerTexts()).join(' | ') + ', « Prix » coché', (await radios.allInnerTexts()).join('|') === 'Prix|Nom' && (await radios.first().getAttribute('aria-checked')) === 'true' && (await sortBtn.getAttribute('aria-expanded')) === 'true');
+  await page.screenshot({ path: shot('binder-sort.png') });
+  await radios.nth(1).click(); await page.waitForTimeout(500);
+  const nameOrder = await names(), coll = new Intl.Collator('fr', { sensitivity: 'base', numeric: true });
+  ok('tri par nom : ' + nameOrder.join(', '), nameOrder.length === priceOrder.length && nameOrder.every((n, i) => !i || coll.compare(nameOrder[i - 1], n) <= 0) && nameOrder.join() !== priceOrder.join()
+    && (await sec.locator('[role="radiogroup"]').count()) === 0 && (await sortBtn.innerText()).trim() === 'Nom');
+  await sec.locator('[role="tab"]', { hasText: 'Mes produits scellés' }).click(); await page.waitForTimeout(400);
+  const sNames = await page.$$eval(SEC + ' [role="tabpanel"] button[aria-label$="Ouvrir la fiche"]', bs => bs.map(b => b.getAttribute('aria-label').split(',')[0]));
+  ok('scellé aussi par nom (' + sNames.length + ' produits)', sNames.length > 1 && sNames.every((n, i) => !i || coll.compare(sNames[i - 1], n) <= 0));
+  await sec.locator('[role="tab"]', { hasText: 'Mes cartes' }).click(); await page.waitForTimeout(300);
+  await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(2500);
+  ok('tri par nom gardé après rechargement', (await sortBtn.innerText()).trim() === 'Nom' && (await names()).join() === nameOrder.join());
+  await sortBtn.click(); await page.waitForTimeout(300); await radios.first().click(); await page.waitForTimeout(500);
+  ok('retour au tri par prix', (await names()).join() === priceOrder.join() && (await sortBtn.innerText()).trim() === 'Prix');
   await ctx.close();
 }
 ok('aucune erreur JS' + (errors.length ? ' : ' + errors.join(' | ') : ''), errors.length === 0);

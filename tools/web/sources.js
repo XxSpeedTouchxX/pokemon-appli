@@ -47,31 +47,7 @@
     return label + ' · ' + (c || k ? 'du ' + this.d2(c > k ? c : k) : 'date en cours de chargement');
   };
 
-  // « i » de Mon classeur : d'où viennent les cotes de l'onglet affiché.
-  srcProto.srcBinderInfo = function (s, owned) {
-    const tab = s.hbk === 'sealed' ? 'sealed' : 'cards', mine = owned.filter(p => (p.type === 'sealed') === (tab === 'sealed'));
-    const demo = mine.filter(p => srcKind(p) === 'demo').length;
-    const lines = [
-      'Chaque cote est ' + (SRC_METHOD[s.valuation] || SRC_METHOD.pkm) + ', pour un exemplaire Near Mint.',
-      tab === 'sealed'
-        ? 'Produits scellés : prix Cardmarket du ' + this.srcDay(pricesDay()) + ', archivés chaque jour par Dropicards.'
-        : 'Cartes : prix Cardmarket relevés par TCGdex, catalogue du ' + this.srcDay(srcCardsDay()) + ' (la fiche donne la date de chaque carte).',
-      'Le prix le plus bas demandé est montré dans la fiche, jamais compté dans la cote.',
-      s.valAdj === false ? 'Cote brute : l’état et la langue ne sont pas comptés (Réglages).' : 'Chaque exemplaire compte selon son état et sa langue : Mint 115 %, Excellent 85 %, Played 55 %, JP 70 %… (règle dans Réglages).'
-    ];
-    if (demo) lines.push(demo + (demo > 1 ? ' articles viennent' : ' article vient') + ' de la collection de démo : prix d’exemple.');
-    if (srcOffline()) lines.push('Hors ligne : dernières cotes gardées sur l’appareil.');
-    const open = !!s.hbInfo;
-    return { open: open, text: lines.map(t => ({ t: t })), label: open ? 'Masquer la source des cotes' : 'Source et date des cotes', toggle: () => this.setState({ hbInfo: !open }) };
-  };
-
   let srcNetHooked = false;
-  const srcBaseHome = srcProto.vHome;
-  srcProto.vHome = function (x) {
-    const r = srcBaseHome.call(this, x);
-    if (r.hk) r.hk.info = this.srcBinderInfo(x.s, x.owned);
-    return r;
-  };
   const srcBaseItem = srcProto.vItem;
   srcProto.vItem = function (x) {
     const it = srcBaseItem.call(this, x), p = x.P[x.s.itemId] || x.cat[0];

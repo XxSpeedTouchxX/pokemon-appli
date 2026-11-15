@@ -381,13 +381,14 @@
 <span style="font-size: 13px; color: #9AA8C3">{{ home.hk.head.sub }}</span>
 </div>
 <div style="flex: none; align-self: stretch; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px">
-<button type="button" onClick="{{ home.hk.info.toggle }}" aria-expanded="{{ home.hk.info.open }}" aria-label="{{ home.hk.info.label }}" style="flex: none; width: 32px; height: 32px; padding: 0; border: 1px solid #2A3A5C; border-radius: 16px; background: transparent; color: #C9D3EA; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; font-style: italic; cursor: pointer">i</button>
+<button type="button" onClick="{{ home.hk.sort.toggle }}" aria-expanded="{{ home.hk.sort.open }}" aria-label="{{ home.hk.sort.label }}" class="pkm-hk-sort" style="flex: none; height: 32px; padding: 0 11px 0 9px; border: 1px solid #2A3A5C; border-radius: 16px; background: transparent; color: #C9D3EA; display: flex; align-items: center; gap: 5px; font: inherit; font-size: 12.5px; font-weight: 700; white-space: nowrap; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></svg><span>{{ home.hk.sort.cur }}</span></button>
 <sc-if value="{{ home.hk.all.show }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ home.hk.all.toggle }}" aria-pressed="{{ home.hk.all.on }}" class="pkm-hk-all">{{ home.hk.all.label }}</button></sc-if>
 </div>
 </div>
-<sc-if value="{{ home.hk.info.open }}" hint-placeholder-val="{{ false }}">
-<div role="note" aria-label="Source et date des cotes" class="pkm-rise" style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 16px; border: 1px solid #24345C; background: rgba(8, 13, 26, 0.5)">
-<sc-for list="{{ home.hk.info.text }}" as="hki" hint-placeholder-count="3"><p style="margin: 0; font-size: 12.5px; line-height: 1.5; color: #C9D3EA">{{ hki.t }}</p></sc-for>
+<sc-if value="{{ home.hk.sort.open }}" hint-placeholder-val="{{ false }}">
+<div role="radiogroup" aria-label="Trier mon classeur par" class="pkm-rise" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 14px; border-radius: 16px; border: 1px solid #24345C; background: rgba(8, 13, 26, 0.5)">
+<span style="flex: none; font-size: 13px; font-weight: 600; color: #C9D3EA">Trier par</span>
+<sc-for list="{{ home.hk.sort.opts }}" as="hks" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ hks.on }}" aria-label="{{ hks.aria }}" onClick="{{ hks.pick }}" style="flex: 1; min-width: 0; height: 36px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ hks.bc }}; background: {{ hks.bg }}; color: {{ hks.fg }}; font: inherit; font-size: 13.5px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ hks.label }}</button></sc-for>
 </div>
 </sc-if>
 </div></div>

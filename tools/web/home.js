@@ -64,11 +64,13 @@
   proto.homeBinder = function (x) {
     const s = x.s, tab = s.hbk, key = tab === 'sealed' ? 'hbsp' : 'hbcp';
     const unit = p => x.val(p) || 0, qty = p => x.c.stock[p.id].qty;
-    // Du plus cher au moins cher (les bulles de tri et de filtre sont retirées le 2026-10-21).
-    const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'fr');
+    // Tri du classeur (2026-11-15, porteur, à la place du « i ») : Prix (du plus cher au moins cher, par défaut) ou Nom
+    // (de A à Z) ; même ordre dans les 2 onglets et dans « Tout afficher », gardé sur l'appareil.
+    const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'fr', { sensitivity: 'base', numeric: true });
+    const sortBy = s.hbSort === 'name' ? 'name' : 'price';
     // Entrées du classeur (2026-11-01) : { p, gr, q, v } ; les exemplaires gradés d'une carte ont chacun la leur, par note
     // (graded.js), à côté des exemplaires non gradés.
-    const order = (a, b) => b.v - a.v || byName(a.p, b.p);
+    const order = sortBy === 'name' ? (a, b) => byName(a.p, b.p) || b.v - a.v : (a, b) => b.v - a.v || byName(a.p, b.p);
     const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
     const mine = sealed => all(sealed).flatMap(p => this.gradeEntries(s, p, unit(p), qty(p))).sort(order);
     const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, per = HOME_BINDER[tab];
@@ -109,6 +111,13 @@
         value: String(headBig).replace(/[\u202f\u00a0]/g, ' '), fit: Math.max(4, String(headBig).length * 0.66).toFixed(2),
         sub: tab === 'sealed' ? plural(units(sealed), 'produit', 'produits')
           : [plural(units(cards), 'carte', 'cartes')].concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · ')
+      },
+      sort: {
+        open: !!s.hbSortOpen, cur: sortBy === 'name' ? 'Nom' : 'Prix',
+        label: s.hbSortOpen ? 'Fermer le tri' : 'Trier mon classeur, par ' + (sortBy === 'name' ? 'nom' : 'prix') + ' en ce moment',
+        toggle: () => this.setState({ hbSortOpen: !s.hbSortOpen }),
+        opts: [['price', 'Prix', 'Trier par prix, du plus cher au moins cher'], ['name', 'Nom', 'Trier par nom, de A à Z']].map(([k, label, aria]) =>
+          Object.assign({ label: label, aria: aria, on: sortBy === k, pick: () => this.setState({ hbSort: k, hbSortOpen: false, hbcp: 0, hbsp: 0, hbTurn: null }) }, this.chip(sortBy === k)))
       },
       shelf: shelf, gridCls: 'pkm-hk-grid' + (tab !== 'sealed' && s.hbTurn ? ' pkm-turn-' + s.hbTurn : ''),
       // « Tout afficher » (2026-10-21, vidéo du porteur) : écran plein « Toutes mes cartes » ou « Tous mes produits
@@ -155,7 +164,7 @@
     return {
       open: true, isCards: !sealed, isSealed: sealed, gridCls: 'pkm-hf-grid' + (sealed ? ' pkm-hf-grid-s' : ''),
       title: sealed ? 'Tous mes produits scellés' : 'Toutes mes cartes',
-      sub: 'Classés par valeur · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
+      sub: (s.hbSort === 'name' ? 'Classés par nom' : 'Classés par prix') + ' · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
       chips: sealed ? [] : [chip('all', 'Toutes', list), chip('loose', 'Loose', list.filter(e => !isGraded(e))), chip('graded', 'Gradées', list.filter(isGraded))],
       hasChips: !sealed, items: shown.map(tile), empty: !kept.length,
       more: left > 0, moreLabel: 'Charger plus (' + Math.min(left, HOME_FULL) + ')', loadMore: () => this.setState({ hbFullN: n + HOME_FULL })

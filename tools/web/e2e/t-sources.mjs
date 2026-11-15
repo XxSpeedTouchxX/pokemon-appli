@@ -1,4 +1,4 @@
-// B7 : source et date des cotes (en-têtes, fiche, « i » du classeur) ; A4 : visuels locaux des cartes de démo,
+// B7 : source et date des cotes (en-têtes, fiche) ; A4 : visuels locaux des cartes de démo,
 // démarrage hors ligne avec les dernières cotes.
 import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const browser = await launch();
@@ -13,17 +13,8 @@ const all = await page.locator('#app').innerText();
 ok('plus de date figée « 3 oct. à 07:00 »', !/3 oct\. à 07:00|03\/10 à 07:00/.test(all));
 const s1 = await sync(); ok('en-tête accueil : plus de ligne « Cotes du … · Cardmarket » (2026-11-12, porteur)', s1 === '');
 ok('valeur : « Calculé selon les cotes Cardmarket » sous la courbe (date dans l’en-tête)', /Calculé selon les cotes Cardmarket/.test(all) && !/Cote Dropicards : Cardmarket · du/.test(all));
-const bi = page.locator('section[aria-label="Mon classeur"] button[aria-label="Source et date des cotes"]');
-ok('bouton « i » du classeur', (await bi.count()) === 1);
-await bi.click(); await page.waitForTimeout(300);
-const note = page.locator('[role="note"][aria-label="Source et date des cotes"]');
-const nt = await note.innerText();
-ok('note : TCGdex, date, prix demandé jamais compté, démo', /TCGdex, catalogue du \d\d\/\d\d/.test(nt) && /jamais compté/.test(nt) && /collection de démo : prix d’exemple/.test(nt));
-await note.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('src-binder.png') });
-await page.locator('section[aria-label="Mon classeur"] [role="tab"]:has-text("Mes produits scellés")').click(); await page.waitForTimeout(250);
-ok('onglet scellé : prix Cardmarket du …', /Produits scellés : prix Cardmarket du \d\d\/\d\d/.test(await note.innerText()));
-await page.locator('section[aria-label="Mon classeur"] button[aria-label="Masquer la source des cotes"]').click(); await page.waitForTimeout(200);
-ok('« i » replie la note', (await note.count()) === 0);
+// Le « i » du classeur est retiré (2026-11-15, porteur) : un bouton de tri Prix / Nom à sa place (t-binder.mjs).
+ok('plus de « i » dans le classeur', (await page.locator('section[aria-label="Mon classeur"] button[aria-label="Source et date des cotes"]').count()) === 0 && (await page.locator('section[aria-label="Mon classeur"] button', { hasText: /^i$/ }).count()) === 0);
 // A4 : TCGdex bloqué → visuel local de la carte de démo.
 await page.locator('section[aria-label="Mon classeur"] [role="tab"]:has-text("Mes cartes")').click(); await page.waitForTimeout(1200);
 const local = await page.evaluate(() => [...document.querySelectorAll('section[aria-label="Mon classeur"] img')].filter(i => /img\/card-/.test(i.src) && i.naturalWidth > 0).length);
