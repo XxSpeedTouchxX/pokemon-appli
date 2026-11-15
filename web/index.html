@@ -2799,13 +2799,15 @@ nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="wi
 .pkm-prem-crown-xl .pkm-prem-logo { width: 86%; height: 86%; }
 /* « Pass » de DropiPass (2026-11-15, porteur) : un reflet brillant passe seulement sur « Pass », toutes les 3 s
    (bannière et écran de l'offre) ; le voile qui balayait tout l'en-tête de l'offre est retiré. */
-.pkm-dp-pass { display: inline-block; background-image: linear-gradient(105deg, var(--dp-base) 0%, var(--dp-base) 38%, var(--dp-glint) 50%, var(--dp-base) 62%, var(--dp-base) 100%); background-size: 260% 100%; background-position: 120% 0; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; animation: pkmDpPass 3s ease-in-out infinite; }
+/* 2026-11-15 (porteur : « deux couleurs différentes, on dirait un bug de texture ») : dégradé sans répétition, une seule
+   couleur hors du reflet ; au repos (100 %) comme en fin de passage (0 %), le mot est entièrement de la couleur de base. */
+.pkm-dp-pass { display: inline-block; background-image: linear-gradient(105deg, var(--dp-base) 0%, var(--dp-base) 42%, var(--dp-glint) 50%, var(--dp-base) 58%, var(--dp-base) 100%); background-size: 300% 100%; background-repeat: no-repeat; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; animation: pkmDpPass 3s ease-in-out infinite; }
 .pkm-prem-btxt .pkm-dp-pass { --dp-base: #10151F; --dp-glint: #FFE46B; font-size: inherit; line-height: inherit; color: transparent; }
 /* Écran de l'offre (2026-11-15, porteur : « un reflet brillant qui revient toutes les 2,5 secondes ») : la règle
    « .pkm-prem-hero h2 em » (raccourci background, plus précise) remettait la taille du dégradé à 100 % et figeait le reflet. */
-.pkm-prem-hero h2 em.pkm-dp-pass { --dp-base: #FFD60A; --dp-glint: #FFFFFF; background-image: linear-gradient(105deg, #FFD60A 0%, #FFD60A 38%, #FFFFFF 50%, #FFD60A 62%, #FFB000 100%); background-size: 260% 100%; background-position: 120% 0; animation: pkmDpPass 2.5s ease-in-out infinite; }
-@keyframes pkmDpPass { 0%, 50% { background-position: 120% 0; } 80%, 100% { background-position: -20% 0; } }
-@media (prefers-reduced-motion: reduce) { .pkm-dp-pass { animation: none; background-position: 50% 0; } }
+.pkm-prem-hero h2 em.pkm-dp-pass { --dp-base: #FFD60A; --dp-glint: #FFFFFF; background-image: linear-gradient(105deg, #FFD60A 0%, #FFD60A 42%, #FFFFFF 50%, #FFD60A 58%, #FFD60A 100%); background-size: 300% 100%; background-repeat: no-repeat; background-position: 100% 0; animation: pkmDpPass 2.5s ease-in-out infinite; }
+@keyframes pkmDpPass { 0%, 55% { background-position: 100% 0; } 85%, 100% { background-position: 0% 0; } }
+@media (prefers-reduced-motion: reduce) { .pkm-dp-pass, .pkm-prem-hero h2 em.pkm-dp-pass { animation: none; background-position: 100% 0; } }
 
 /* Fenêtres d'infos qui montent du bas (2026-11-08, porteur) : même mouvement que « Mon Pokédex » (dex.css). La fermeture
    glissée est dans sheet.js. */
@@ -3884,6 +3886,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=6b9ceb44"></script>
+<script src="app.js?v=5d1ca5e1"></script>
 </body>
 </html>

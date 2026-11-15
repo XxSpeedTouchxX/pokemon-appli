@@ -22,9 +22,12 @@ ok('écran de l’offre : plus de voile sur tout l’en-tête, reflet sur « Pas
 const heroFx = await sh.locator('.pkm-prem-hero h2 .pkm-dp-pass').evaluate(async e => {
   const cs = () => getComputedStyle(e), a = [cs().animationName, cs().animationDuration, cs().backgroundSize], seen = new Set();
   for (let i = 0; i < 14; i++) { seen.add(cs().backgroundPositionX); await new Promise(r => setTimeout(r, 200)); }
-  return a.concat([seen.size]);
+  // 2026-11-15 (porteur : « deux couleurs, on dirait un bug de texture ») : jaune uni hors du reflet, sans répétition.
+  const colors = (cs().backgroundImage.match(/rgba?\([^)]*\)/g) || []).filter((c, i, all) => all.indexOf(c) === i);
+  return a.concat([seen.size, cs().backgroundRepeat, colors.join(' ')]);
 });
-ok('écran de l’offre : reflet animé sur « Pass » toutes les 2,5 s (' + heroFx.join(', ') + ')', heroFx[0] === 'pkmDpPass' && heroFx[1] === '2.5s' && /^260%/.test(heroFx[2]) && heroFx[3] > 2);
+ok('écran de l’offre : reflet animé sur « Pass » toutes les 2,5 s (' + heroFx.slice(0, 4).join(', ') + ')', heroFx[0] === 'pkmDpPass' && heroFx[1] === '2.5s' && /^300%/.test(heroFx[2]) && heroFx[3] > 2);
+ok('« Pass » jaune uni au repos (' + heroFx[5] + ', ' + heroFx[4] + ')', /no-repeat/.test(heroFx[4]) && heroFx[5] === 'rgb(255, 214, 10) rgb(255, 255, 255)');
 const t = await sh.innerText();
 ok('icônes animées : scanner, classeur, radar, goutte des PA « 2XP », graphique', (await sh.locator('svg.pkm-prem-scan').count()) === 1 && (await sh.locator('svg.pkm-prem-bind').count()) === 1 && (await sh.locator('.pkm-prem-radar').count()) === 1
   && (await sh.locator('.pkm-prem-xp-tag').first().innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1
