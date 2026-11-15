@@ -84,7 +84,8 @@ ok('logo du 30ᵉ Anniversaire affiché : ' + JSON.stringify(annImg), annImg.len
 await annTiles.filter({ hasText: '30ᵉ Anniversaire' }).first().click(); await page.waitForTimeout(1200);
 const annSet = await page.locator('#app').innerText();
 const nCC = DOC.cards.filter(c => c[2] === '30th-c').length;
-ok('fiche du 30ᵉ : ' + n30 + ' cartes, dont ' + nCC + ' de la Collection Classique', new RegExp('Cartes \\(' + n30 + '\\)').test(annSet) && new RegExp('Dont ' + nCC + ' cartes de la Collection Classique').test(annSet) && /4\/102/.test(annSet));
+// Description « Dont 30 cartes de la Collection Classique… » retirée (2026-11-15, porteur) : plus de texte sous l'en-tête du 30ᵉ.
+ok('fiche du 30ᵉ : ' + n30 + ' cartes (dont ' + nCC + ' de la Collection Classique), sans description sous l’en-tête', new RegExp('Cartes \\(' + n30 + '\\)').test(annSet) && !/Dont \d+ cartes de la|visuels? viennent de la version/.test(annSet) && /4\/102/.test(annSet));
 // Écran d'une extension façon vidéo du porteur (2026-10-17) : réimpressions avec le visuel de leur carte d'origine,
 // filtres de rareté, Possédées, ajout rapide, favori et taille de la grille.
 const reprint = page.locator('main button[aria-label^="Dracaufeu, n° 4/102"]');

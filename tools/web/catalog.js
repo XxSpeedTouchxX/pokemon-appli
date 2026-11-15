@@ -477,10 +477,11 @@
     const priced = all.filter(p => this.cote(p) !== null), full = priced.reduce((t, p) => t + this.cote(p), 0);
     const foreign = all.filter(p => p.imgLang && p.imgLang !== p.lang && !p.reprintOf), noImgs = all.filter(p => !p.imgLang).length;
     const versions = foreign.map(p => VERSION[p.imgLang] || p.imgLang).filter((v, i, a) => a.indexOf(v) === i);
-    const notes = [], kids = all.filter(p => p.set !== e.id), enCards = e.lang === 'EN' ? [] : all.filter(p => p.lang === 'EN');
+    const notes = [], enCards = e.lang === 'EN' ? [] : all.filter(p => p.lang === 'EN');
     if (e.lang === 'EN') notes.push('Cartes en anglais : cette extension n’a pas de version française dans le catalogue TCGdex.');
-    if (kids.length) notes.push('Dont ' + kids.length + ' cartes de la ' + (setOf(kids[0].set)[0] || 'collection rattachée')
-      + (kids.some(p => p.reprintOf) ? ' : des réimpressions, avec le numéro et le visuel de leur carte d’origine.' : ' (numéros « CC »).'));
+    // 30ᵉ Anniversaire (extension avec une collection rattachée) : plus de description sous l'en-tête (2026-11-15, porteur :
+    // « Dont 30 cartes de la Collection Classique… ça ne sert à rien »).
+    const attached = all.some(p => p.set !== e.id);
     if (enCards.length) notes.push(enCards.length + (enCards.length > 1 ? ' cartes sont en anglais : absentes' : ' carte est en anglais : absente') + ' de la version française du catalogue TCGdex.');
     if (foreign.length) {
       notes.push(foreign.length + (foreign.length > 1 ? ' visuels viennent de la version ' : ' visuel vient de la version ') + versions.join(', ')
@@ -493,7 +494,7 @@
       hasLogo: !!setLogo(e.id, e.logo), logo: setLogo(e.id, e.logo),
       countText: all.length + (all.length > 1 ? ' cartes' : ' carte') + (e.official && Number(e.official) !== all.length ? ' · ' + e.official + ' officielles' : ''),
       valueText: priced.length ? 'Série complète ≈ ' + this.eur0(full) + ' (cote PKM de ' + priced.length + ' cartes)' : 'Pas encore de prix pour cette extension',
-      hasNote: notes.length > 0, note: notes.join(' '),
+      hasNote: notes.length > 0 && !attached, note: attached ? '' : notes.join(' '),
       filters: defs.map(([k, label]) => Object.assign({ label: label, on: f === k, pick: () => this.setState({ setFilter: k }) }, this.chip(f === k))),
       count: shown.length + (shown.length > 1 ? ' cartes' : ' carte') + (f === 'top' ? ' · par cote décroissante' : ' · par numéro'),
       empty: shown.length === 0, emptyText: f === 'own' ? 'Aucune carte de cette extension dans ta collection.' : 'Aucune carte.',

@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-15 — 30ᵉ Anniversaire : description retirée (porteur)
+
+- Sous l'en-tête de la série 30 ans, le paragraphe « Dont 30 cartes de la Collection Classique : des réimpressions… » (suivi de « 3 visuels viennent de la version anglaise… ») est **supprimé** (porteur : « ça ne sert à rien »).
+- Seule l'extension avec une collection rattachée (30ᵉ Anniversaire) perd sa description ; les autres extensions gardent leur note (cartes en anglais, visuels d'une autre langue, cartes sans scan). Cache v224 ; test `t-series.mjs`.
+
+---
+
 ## 2026-11-15 — Mon classeur : tri Prix ou Nom à la place du « i » (porteur)
 
 - Le bouton « i » de Mon classeur (source et date des cotes) est **supprimé**, avec sa note.
