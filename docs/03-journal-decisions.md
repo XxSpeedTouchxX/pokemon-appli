@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-15 — Accueil : flèches pour plier la courbe et le haut du classeur (porteur)
+
+- **Valeur de toute ma collection** (cache v217) : petite flèche ronde en bas à droite du compagnon ; elle plie et déplie tout ce qui est sous le montant (variation, périodes, courbe, dates, « Calculé selon les cotes Cardmarket »). Le montant et la ligne « N articles · N cartes · N scellés » restent.
+- **Mon classeur** : petite flèche à droite du titre « Mon classeur » ; elle plie et déplie le logo du classeur, les 2 onglets et le prix « Valeur de mes cartes » (avec ses boutons « i » et « Tout afficher »). Les 9 cartes, les pages et « Ajouter des cartes » restent.
+- Les deux pliées : la valeur totale, puis tout de suite les 9 premières cartes (écart passé de 366 à 69 px sur un iPhone de 390 px, titre « Mon classeur » compris). Glissement doux (0,3 s), flèche qui pivote ; choix gardé sur l'appareil (`hvFold`, `hkFold`), ouvert par défaut.
+- *Choix retenu, à confirmer :* le titre « Mon classeur » reste visible (il porte la flèche pour tout rouvrir).
+- Test `t-lotA` : l'exemple de cartes dessinées passe de McDonald's 2024 (illustré par Scrydex depuis ce matin) à My First Battle.
+
 ## 2026-11-15 — « Les plus chères » sans pastilles de rareté, passe sur les visuels manquants (porteur)
 
 - **« Les plus chères »** (cache v215) : les pastilles de rareté (étoile, double étoile…) sous « Nom ou numéro » sont retirées de cet écran, et aucun filtre de rareté ne s'y applique. Les écrans des extensions les gardent (demande du 2026-10-17).

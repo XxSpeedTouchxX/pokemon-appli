@@ -324,6 +324,10 @@
       homeRadarObs.observe(el);
     }, 0);
   };
+  const homeFold = (app, s, key, what) => {
+    const open = !s[key];
+    return { open: open, closed: !open, label: (open ? 'Masquer ' : 'Afficher ') + what, toggle: () => app.setState({ [key]: open }) };
+  };
   const homeBaseView = proto.vHome;
   proto.vHome = function (x) {
     const r = homeBaseView.call(this, x);
@@ -336,6 +340,11 @@
     if (x.s.screen !== 'home') return r;
     r.hv = this.homeTrend(x, r.valueBig);
     r.hk = this.homeBinder(x);
+    // Flèches pour plier (2026-11-15, porteur) : la courbe sous la valeur (flèche en bas à droite du compagnon) et le
+    // haut du classeur (logo, onglets, prix ; flèche à droite de « Mon classeur »), pour avoir la valeur puis tout de
+    // suite les 9 premières cartes. Choix gardé sur l'appareil (hvFold, hkFold).
+    r.hv.fold = homeFold(this, x.s, 'hvFold', 'la courbe de la valeur');
+    r.hk.fold = homeFold(this, x.s, 'hkFold', 'le haut du classeur (logo, onglets et prix)');
     if (!x.s.tpos && !x.s.raround) { terAutoLocate(this); homeRadarWatch(this); } // autorisation déjà donnée : position retrouvée sans rien demander
     r.hr = this.homeRadar(x.s);
     return r;

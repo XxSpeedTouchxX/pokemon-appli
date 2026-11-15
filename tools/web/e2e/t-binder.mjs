@@ -32,7 +32,7 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('plus d’encadré « Profil Passionné » sur l’accueil', !/Profil Passionné/.test(await page.locator('#app').innerText()) && (await page.locator('section[aria-label="Suggestion"]').count()) === 0);
   ok('titre « Mon classeur »', (await page.locator(SEC + ' h2').innerText()) === 'Mon classeur');
   const logo = page.locator(SEC + ' img[src="img/brand/classeur.svg"]');
-  const lb = await logo.boundingBox(), sb = await page.locator(SEC + ' > div').boundingBox();
+  const lb = await logo.boundingBox(), sb = await page.locator(SEC + ' > div').last().boundingBox(); // 2026-11-15 : 1er div = titre + flèche
   ok('logo du classeur chargé et centré', await logo.evaluate(i => i.complete && i.naturalWidth > 0) && Math.abs((lb.x + lb.width / 2) - (sb.x + sb.width / 2)) < 1.5);
   const tabs = page.locator(SEC + ' [role="tablist"] [role="tab"]');
   ok('2 onglets : ' + (await tabs.allInnerTexts()).join(' | '), (await tabs.allInnerTexts()).join('|') === 'Mes cartes|Mes produits scellés' && (await tabs.first().getAttribute('aria-selected')) === 'true');
@@ -182,6 +182,34 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   await page.locator(SEC + ' [role="tab"]').nth(1).click(); await page.waitForTimeout(400);
   ok('aucun produit scellé : message', /Aucun produit scellé dans ton classeur/.test(await page.locator(PANEL).innerText()) && (await page.locator(TILE).count()) === 0);
   await page.screenshot({ path: shot('binder-vide-scelle.png') });
+  await ctx.close();
+}
+// Flèches pour plier (2026-11-15, porteur) : la courbe sous la valeur (flèche en bas à droite du compagnon) et le haut
+// du classeur (logo, onglets, prix), pour avoir la valeur puis tout de suite les 9 premières cartes ; choix gardé.
+{
+  const [ctx, page] = await mk();
+  await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2500);
+  const val = page.locator('section[aria-label="Valeur de ma collection"]'), sec = page.locator(SEC);
+  const vArrow = val.locator('button.pkm-fold-btn'), kArrow = sec.locator('button.pkm-fold-btn');
+  const buddy = await val.locator('button[aria-label*="ompagnon"], button img[width="96"]').first().boundingBox(), ab = await vArrow.boundingBox();
+  ok('flèche en bas à droite du compagnon (ouverte)', ab && buddy && ab.x + ab.width > buddy.x + buddy.width - 40 && ab.y > buddy.y + buddy.height / 2 && (await vArrow.getAttribute('aria-expanded')) === 'true');
+  const tile0 = async () => (await page.locator(TILE).first().boundingBox()).y;
+  const valBottom = async () => { const b = await val.boundingBox(); return b.y + b.height; };
+  const gapOpen = (await tile0()) - (await valBottom());
+  await vArrow.click(); await kArrow.click(); await page.waitForTimeout(600);
+  const hidden = await page.evaluate(() => {
+    const vis = el => !!el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden' && el.getBoundingClientRect().height > 1;
+    const v = document.querySelector('section[aria-label="Valeur de ma collection"]'), k = document.querySelector('section[aria-label="Mon classeur"]');
+    return { chart: vis(v.querySelector('svg[role="img"]')), periods: vis(v.querySelector('[aria-label="Période de la courbe"]')), logo: vis(k.querySelector('img[src$="classeur.svg"]')),
+      tabs: vis(k.querySelector('[role="tablist"]')), head: vis(k.querySelector('.pkm-hk-head')), total: vis(v.querySelector('.pkm-strict-text')) };
+  });
+  const gapShut = (await tile0()) - (await valBottom());
+  ok('pliés : courbe, périodes, logo, onglets et prix des cartes cachés, valeur totale gardée (' + JSON.stringify(hidden) + ')', !hidden.chart && !hidden.periods && !hidden.logo && !hidden.tabs && !hidden.head && hidden.total);
+  ok('pliés : les cartes du classeur juste sous la valeur (' + Math.round(gapOpen) + ' px → ' + Math.round(gapShut) + ' px)', gapShut < 140 && gapShut < gapOpen / 3 && (await page.locator(TILE).count()) >= 6);
+  await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(2500);
+  ok('pliage gardé après rechargement', (await val.locator('button.pkm-fold-btn').getAttribute('aria-expanded')) === 'false' && (await sec.locator('button.pkm-fold-btn').getAttribute('aria-expanded')) === 'false');
+  await val.locator('button.pkm-fold-btn').click(); await sec.locator('button.pkm-fold-btn').click(); await page.waitForTimeout(600);
+  ok('dépliés : courbe et haut du classeur revenus', await val.locator('svg[role="img"]').isVisible() && await sec.locator('[role="tablist"]').isVisible() && await sec.locator('.pkm-hk-head').isVisible());
   await ctx.close();
 }
 ok('aucune erreur JS' + (errors.length ? ' : ' + errors.join(' | ') : ''), errors.length === 0);

@@ -1966,3 +1966,18 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
   .pkm-afx-binder { animation-name: pkmAfxVeil; transform: none; }
   .pkm-afx-gain, .pkm-afx-what, .pkm-afx-total { animation-name: pkmAfxVeil; transform: none; }
 }
+
+/* Plier la courbe de la valeur et le haut du classeur (2026-11-15, porteur) : la hauteur glisse de son contenu à 0. Le
+   contenu garde 8 px de marge à gauche et à droite pour ne pas couper le trait de la courbe pendant le glissement. */
+.pkm-fold { display: grid; grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.22s ease, margin 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.pkm-fold > .pkm-fold-in { min-height: 0; overflow: hidden; margin: 0 -8px; padding: 0 8px; }
+.pkm-fold[aria-hidden="true"] { grid-template-rows: 0fr; opacity: 0; }
+.pkm-fold[aria-hidden="true"] > .pkm-fold-in { visibility: hidden; transition: visibility 0s linear 0.32s; }
+.pkm-fold-hv[aria-hidden="true"] { margin-top: -6px; }
+.pkm-fold-g12[aria-hidden="true"] { margin-bottom: -12px; }
+.pkm-fold-g10[aria-hidden="true"] { margin-bottom: -10px; }
+.pkm-fold-btn { position: relative; }
+.pkm-fold-btn::before { content: ''; position: absolute; inset: -7px; }
+.pkm-fold-btn svg { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.pkm-fold-btn[aria-expanded="false"] svg { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .pkm-fold, .pkm-fold-btn svg { transition: none; } }
