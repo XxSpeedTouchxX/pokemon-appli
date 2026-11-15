@@ -80,7 +80,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
 
-from ptcg import PTCG_IMG, SDX_IMG, PtcgData, compact_image, fold, norm_number, sdx_image  # visuels anglais de dernier recours (pokemontcg.io)
+from ptcg import PTCG_IMG, SDX_IMG, PtcgData, compact_image, fold, norm_number, sdx_image, sdx_probe_path  # visuels anglais de dernier recours (pokemontcg.io)
 from complete import en_extra, numbering_confirmed, ptcg_extra, ptcg_prices  # cartes manquantes en français (version anglaise, pokemontcg.io)
 import cmfiles  # prix Cardmarket des cartes que TCGdex ne relie pas (fichiers publics Cardmarket, 2026-10-18)
 
@@ -333,21 +333,120 @@ def reprint_images(known, pending):
     return {cid: first[key] for key, cid in pending if key and key in first and first[key][1] != cid}
 
 
+# Énergies de base : nom (français ou anglais, plié par fold) → type (2026-11-15).
+ENERGY_TYPES = {"plante": "grass", "grass": "grass", "feu": "fire", "fire": "fire", "eau": "water", "water": "water",
+                "electrique": "lightning", "electrik": "lightning", "lightning": "lightning", "psy": "psychic",
+                "psychic": "psychic", "combat": "fighting", "fighting": "fighting", "obscurite": "darkness",
+                "darkness": "darkness", "metal": "metal", "fee": "fairy", "fairy": "fairy"}
+# Kits du dresseur rattachés à leur époque (série TCGdex) : leurs Énergies de base sont celles de l'époque.
+KIT_ERA = {"ex": "ex", "dp": "dp", "hs": "hgss", "bw": "bw", "xy": "xy", "sm": "sm"}
+
+
+def basic_energy(name):
+    """Type d'une Énergie de base d'après son nom (« Énergie Eau », « Basic Water Energy »…), sinon None."""
+    m = re.fullmatch(r"(?:basic )?(\w+) energy|energie (\w+)(?: de base)?", fold(name))
+    return ENERGY_TYPES.get(m.group(1) or m.group(2)) if m else None
+
+
+def era_of(sid, serie_id):
+    """Époque d'une extension : sa série TCGdex, ou celle d'un kit du dresseur (tk-hs-r → hgss)."""
+    m = re.match(r"^tk-([a-z]+)-", sid or "")
+    return KIT_ERA.get(m.group(1), serie_id) if m else serie_id
+
+
+def loose_key(c, era):
+    """Signature plus large du dessin (2026-11-15, porteur : « refais une passe sur tous les visuels manquants »), pour
+    les réimpressions qu'art_key ne relie pas (noms d'attaques non traduits, effet absent des kits du dresseur) :
+    - Pokémon : numéros de Pokédex, illustrateur, PV et dégâts des attaques (les mêmes dans toutes les langues) ;
+    - Dresseur : nom et illustrateur ;
+    - Énergie de base : type et époque.
+    None si la carte n'en dit pas assez."""
+    energy = basic_energy(c.get("name"))
+    if energy:
+        return ("energy", energy, era or "")
+    cat, artist = fold(c.get("category")), fold(c.get("illustrator"))
+    if not artist:
+        return None
+    if cat == "pokemon" and c.get("dexId") and c.get("hp"):
+        dmg = tuple(str(a.get("damage") or "") for a in c.get("attacks") or [] if isinstance(a, dict))
+        return ("pokemon", tuple(sorted(c["dexId"])), artist, str(c["hp"]), dmg)
+    if cat in ("trainer", "dresseur"):
+        return ("trainer", fold(c.get("name")), artist)
+    return None
+
+
+def loose_images(known, pending):
+    """Visuels des cartes encore sans visuel par la signature large (loose_key). known : [(clé, image, id, extension,
+    jour)] des cartes illustrées ; pending : [(clé, id, extension, jour)]. La même extension passe d'abord, puis la date
+    de sortie la plus proche (une réimpression suit de près l'originale). Les Énergies de base ne sont reprises que
+    pour les kits du dresseur (une même époque a parfois plusieurs dessins d'Énergie : Écarlate et Violet).
+    Renvoie {id sans visuel: (image, id de la carte d'origine)}."""
+    by_key = {}
+    for key, img, cid, sid, day in known:
+        if key and img:
+            by_key.setdefault(key, []).append((img, cid, sid, day))
+    out = {}
+    for key, cid, sid, day in pending:
+        cands = [x for x in by_key.get(key) or [] if x[1] != cid] if key else []
+        if not cands or (key[0] == "energy" and not str(sid).startswith("tk-")):
+            continue
+        dist = lambda x: (x[2] != sid, abs(day_num(x[3]) - day_num(day)), x[1])
+        img, origin = min(cands, key=dist)[:2]
+        out[cid] = (img, origin)
+    return out
+
+
+def day_num(day):
+    """Jour (AAAA-MM-JJ) en nombre, pour comparer des dates de sortie ; très loin si la date manque."""
+    try:
+        return date.fromisoformat(str(day)[:10]).toordinal()
+    except ValueError:
+        return 10 ** 7
+
+
 def image_url(path):
     """Adresse d'un visuel « ptcg: » (pokemontcg.io) ou « sdx: » (Scrydex, hébergeur des nouveaux visuels de pokemontcg.io)."""
     return SDX_IMG + path[len("sdx:"):] + "/small" if path.startswith("sdx:") else PTCG_IMG + path[len("ptcg:"):] + ".png"
 
 
-def probe_image(path):
+def probe_image(path, quiet=False):
     url = image_url(path)
     try:
         with urlopen(Request(url, method="HEAD", headers={"User-Agent": "PKM-App-index/1.0"}), timeout=20) as resp:
             if resp.status == 200 and (resp.headers.get("Content-Type") or "").startswith("image/"):
                 return True
-            print(f"pokemontcg.io : {url} → {resp.status} {resp.headers.get('Content-Type')}")
+            if not quiet:
+                print(f"pokemontcg.io : {url} → {resp.status} {resp.headers.get('Content-Type')}")
     except Exception as e:  # noqa: BLE001
-        print(f"pokemontcg.io ne répond pas pour {url} ({e}).")
+        if not quiet:
+            print(f"pokemontcg.io ne répond pas pour {url} ({e}).")
     return False
+
+
+def sdx_lookup(paths, probe=None, workers=8):
+    """Chemins « sdx: » (ptcg.sdx_probe_path) auxquels Scrydex répond par une image (2026-11-15). Par extension :
+    un numéro impossible d'abord (une image servie pour n'importe quel numéro serait une image d'attente : extension
+    laissée de côté), puis trois cartes témoins ; toutes les cartes seulement si l'une des témoins répond.
+    Renvoie l'ensemble des chemins qui répondent et un résumé par extension."""
+    from concurrent.futures import ThreadPoolExecutor
+    probe = probe or (lambda p: probe_image(p, quiet=True))
+    by_set = {}
+    for p in sorted(set(paths)):
+        by_set.setdefault(p[len("sdx:"):].rsplit("-", 1)[0], []).append(p)
+    ok, report = set(), []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for ext, group in sorted(by_set.items()):
+            if probe(f"sdx:{ext}-99999"):
+                report.append(f"{ext} image d'attente, ignorée")
+                continue
+            witnesses = list(dict.fromkeys([group[0], group[len(group) // 2], group[-1]]))
+            if not any(pool.map(probe, witnesses)):
+                report.append(f"{ext} 0/{len(group)}")
+                continue
+            found = [p for p, hit in zip(group, pool.map(probe, group)) if hit]
+            ok.update(found)
+            report.append(f"{ext} {len(found)}/{len(group)}")
+    return ok, report
 
 
 def ptcg_alive(paths, tries=3, pause=30):
@@ -681,6 +780,7 @@ def main():
 
     sets, cards, rarities, cm_ids = {}, [], {}, {}
     art_known, art_pending = [], []  # (signature du dessin, ligne) des cartes illustrées / sans visuel
+    loose_rows = []  # (signature large du dessin, ligne) de toutes les cartes (loose_key, 2026-11-15)
     stats = {"cards": 0, "cardsEn": 0, "cardsEnExtra": 0, "cardsPtcg": 0, "imgOwn": 0, "imgAlt": {}, "imgNone": 0, "noDetail": 0}
     # Extensions pokemontcg.io visées par plusieurs extensions TCGdex (Zarbi d'EX Forces Cachées) : pas de complément.
     ptcg_of = {sid: ptcg.map_set(sid, (en_sets.get(sid) or {}).get("name"), s.get("releaseDate")) for sid, s in fr_sets.items()} if ptcg else {}
@@ -731,6 +831,7 @@ def main():
         name = re.sub(r"(?<=[a-zà-ÿ])(?=\d)", " ", s.get("name") or sid)  # « Classique30ᵉ » → « Classique 30ᵉ »
         sets[sid] = [name, fr_series.get(serie.get("id")) or serie.get("name") or "",
                      s.get("releaseDate") or "", short_img(logo), official, lang]
+        era = era_of(sid, serie.get("id"))
         rows = []
         for b in s.get("cards") or []:
             cid = b["id"]
@@ -780,10 +881,33 @@ def main():
                 cm_ids[cid] = idp
             cards.append(row(cid, r["name"], sid, str(r["local"]), rarity, short_img(img), prices(c, rate), cmid=idp or None, en=r["en"]))
             (art_known if cards[-1][5] else art_pending).append((art_key(c), cards[-1]))
+            loose_rows.append((loose_key(c, era), cards[-1]))
         if lang == "fr":
-            complete_set(sid, s, rows)
+            complete_set(sid, s, rows, era)
 
-    def complete_set(sid, s, rows):
+    def extra_image(sid, cid, local, name, c):
+        """Visuel d'une carte ajoutée depuis la version anglaise et que l'anglais n'illustre pas (2026-11-15, porteur :
+        « Special Delivery Bidoof n'a pas de visuel ») : autre version de TCGdex, puis pokemontcg.io (même numéro et
+        même nom anglais). Renvoie (chemin, source) ou (None, None)."""
+        for fb in fallbacks:
+            if fb.lang != "en":
+                img = fb.image(cid, sid, local)
+                if img:
+                    return img, fb.lang
+        forced = sdx_image(cid, sid, local, None)
+        if forced:
+            return forced, "pokemontcg.io"
+        if not ptcg:
+            return (cache[cid], "pokemontcg.io") if cid in cache else (None, None)
+        ps = ptcg_of.get(sid)
+        if ps:
+            card, state = ptcg.match(ps, local, name, c.get("dexId") or [], c.get("illustrator"))
+            path = compact_image(card.get("images")) if card is not None and state is True else None
+            if path:
+                return path, "pokemontcg.io"
+        return None, None
+
+    def complete_set(sid, s, rows, era):
         """Cartes manquantes en français : version anglaise de TCGdex, puis pokemontcg.io (complete.py)."""
         have_n, have_ids = {norm_number(r["local"]) for r in rows}, {r["cid"] for r in rows}
         for b in en_extra(s, en_sets.get(sid)):
@@ -794,8 +918,21 @@ def main():
             idp = ((c.get("pricing") or {}).get("cardmarket") or {}).get("idProduct")
             if idp:
                 cm_ids[b["id"]] = idp
-            cards.append(row(b["id"], c.get("name") or b.get("name") or "", sid, str(b.get("localId") or ""), rarity,
-                             short_img(c.get("image") or b.get("image")), prices(c, rate), "en", cmid=idp or None))
+            cid, local, name = b["id"], str(b.get("localId") or ""), c.get("name") or b.get("name") or ""
+            img = c.get("image") or b.get("image")
+            if img:
+                stats["imgOwn"] += 1
+            else:
+                img, origin = extra_image(sid, cid, local, name, c)
+                if img:
+                    stats["imgAlt"][origin] = stats["imgAlt"].get(origin, 0) + 1
+                    if origin == "pokemontcg.io":
+                        ptcg_found[cid] = img
+                else:
+                    stats["imgNone"] += 1
+            cards.append(row(cid, name, sid, local, rarity, short_img(img), prices(c, rate), "en", cmid=idp or None))
+            (art_known if cards[-1][5] else art_pending).append((art_key(c), cards[-1]))
+            loose_rows.append((loose_key(c, era), cards[-1]))
             have_n.add(norm_number(b.get("localId", "")))
             have_ids.add(b["id"])
             stats["cardsEnExtra"] += 1
@@ -821,6 +958,29 @@ def main():
             r[5], img_from[r[0]] = found[r[0]]
             stats["imgNone"] -= 1
             stats["imgAlt"]["reprint"] = stats["imgAlt"].get("reprint", 0) + 1
+    # Puis la carte elle-même chez Scrydex (hébergeur des visuels de pokemontcg.io), pour les extensions que le dépôt
+    # pokemontcg.io ne publie pas en entier (ptcg.SDX_PROBE, 2026-11-15).
+    if not args.no_probe:
+        asked = {sdx_probe_path(r[2], r[3]): r for r in cards if not r[5] and sdx_probe_path(r[2], r[3])}
+        if asked:
+            hits, report = sdx_lookup(asked)
+            for path in hits:
+                r = asked[path]
+                r[5] = ptcg_found[r[0]] = path
+                stats["imgNone"] -= 1
+                stats["imgAlt"]["pokemontcg.io"] = stats["imgAlt"].get("pokemontcg.io", 0) + 1
+            print(f"Scrydex (cartes absentes du dépôt pokemontcg.io) : {len(hits)}/{len(asked)} · " + " · ".join(report))
+    # Enfin, signature large du dessin (loose_key) : kits du dresseur, McDonald's, promos réimprimées.
+    day = lambda r: sets.get(r[2], ["", "", ""])[2]
+    found = loose_images([(k, r[5], r[0], r[2], day(r)) for k, r in loose_rows if r[5]],
+                         [(k, r[0], r[2], day(r)) for k, r in loose_rows if not r[5]])
+    for k, r in loose_rows:
+        if r[0] in found and not r[5]:
+            r[5], img_from[r[0]] = found[r[0]]
+            stats["imgNone"] -= 1
+            stats["imgAlt"]["reprint"] = stats["imgAlt"].get("reprint", 0) + 1
+    print(f"Réimpressions du même dessin, signature large : {len(found)} visuels repris"
+          + (" (" + ", ".join(f"{k}←{v[1]}" for k, v in sorted(found.items())[:40]) + ("…" if len(found) > 40 else "") + ")" if found else ""))
     stats["cards"] = len(cards)
     if args.cardmarket:
         try:
@@ -909,6 +1069,7 @@ def main():
             missing[c[2]] = missing.get(c[2], 0) + 1
     if missing:
         print("Sans visuel :", ", ".join(f"{k} ({v})" for k, v in sorted(missing.items(), key=lambda kv: -kv[1])[:25]))
+        print("Cartes encore sans visuel :", ", ".join(f"{c[0]} {c[1]}" for c in cards if not c[5]))
     if en_only:
         print("Extensions en anglais :", ", ".join(f"{sid} ({en_sets[sid].get('name')})" for sid in en_only))
     print(f"Taux USD→EUR : {rate} ({rate_src}{' du ' + rate_day if rate_day else ''}).")

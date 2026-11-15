@@ -56,6 +56,12 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
      - **relevé « Cotes à vérifier » (2026-11-13) :** chaque jour, le journal du calcul liste les cartes de 20 € et plus dont les deux groupes Cardmarket s'écartent de 3 fois ou plus, ou dont la cote s'écarte de 4 fois ou plus du prix TCGplayer (`price_audit`, 150 premières par montant). Rien n'est changé automatiquement : c'est une liste de travail (pas de source ouverte de ventes réussies eBay, pas de scraping) ;
      - **repère `tcp` :** tirages illimités avant la 1re édition (ordre de `TCP_VARIANTS`).
    - **Visuels de repli (2026-11-01) :** versions TCGdex pt, pt-br, nl et pl ajoutées (après en, de, it, es). Dernier repli : **réimpression du même dessin** déjà illustrée dans le catalogue (`art_key` : même nom, même illustrateur, mêmes PV et mêmes attaques, talents ou effet ; `reprint_images`), notée dans `imgFrom` ({id: id de la carte d'origine}) et dans `stats.imgAlt.reprint`.
+   - **Passe sur les visuels manquants (2026-11-15, porteur) :**
+     - cartes ajoutées depuis la version anglaise (`complete_set`, `extra_image`) : autres langues de TCGdex, `sdx_image`, puis pokemontcg.io (même numéro, contrôle par le nom anglais) ; comptées dans `imgOwn`, `imgAlt`, `imgNone` ;
+     - `ptcg.same_name` : « Basic Grass Energy » = « Grass Energy » ;
+     - **signature élargie du dessin** (`loose_key`, `loose_images`) après `art_key` : Pokémon (Pokédex, illustrateur, PV, dégâts), Dresseur (nom, illustrateur), Énergie de base (type et époque, `era_of` : `tk-hs-*` → `hgss`) ; même extension d'abord, puis date la plus proche ; Énergies reprises seulement pour les kits du dresseur ; notée dans `imgFrom` et `stats.imgAlt.reprint` ;
+     - **Scrydex carte par carte** (`ptcg.SDX_PROBE`, `sdx_probe_path`, `sdx_lookup`) : `mep`, `svp`, `swshp`, `mee`, `sve`, `2023sv` → `mcd23`, `2024sv` → `mcd24` ; numéro impossible essayé d'abord (image d'attente : extension ignorée), puis 3 cartes témoins, puis toutes ; sauté avec `--no-probe` ;
+     - le journal du calcul liste « Cartes encore sans visuel » et les reprises « signature large ».
    - **Champs ajoutés en fin de ligne (2026-10-11), après `lang` :**
 
      | Champ | Contenu |

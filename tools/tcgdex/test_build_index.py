@@ -5,7 +5,8 @@ from datetime import date
 from unittest import mock
 
 import build_index
-from build_index import FIELDS, art_key, compare_catalog, coverage, prices, ptcg_alive, ptcg_row_prices, reprint_images, row
+from build_index import (FIELDS, art_key, basic_energy, compare_catalog, coverage, era_of, loose_images, loose_key, prices,
+                         ptcg_alive, ptcg_row_prices, reprint_images, row, sdx_lookup)
 
 
 def card(cm=None, tcp=None, variants=None):
@@ -244,6 +245,58 @@ class Reprints(unittest.TestCase):
         known = [(k, "fr/hgss/hgss1/22", "hgss1-22"), (k, "fr/hgss/hgss2/5", "hgss2-5"), (None, "fr/x/y/1", "y-1")]
         got = reprint_images(known, [(k, "tk-hs-r-12"), (other, "tk-hs-r-13"), (None, "tk-hs-r-14")])
         self.assertEqual(got, {"tk-hs-r-12": ("fr/hgss/hgss1/22", "hgss1-22")})  # la première illustrée gagne
+
+
+class LooseReprints(unittest.TestCase):
+    """Signature large du dessin (2026-11-15, porteur : « refais une passe sur tous les visuels manquants »)."""
+    # McDonald's 2023 n° 1 : la 2ᵉ attaque n'est pas traduite en français chez TCGdex, art_key ne la relie pas.
+    MCD = {"name": "Poussacha", "category": "Pokémon", "illustrator": "Saya Tsuruta", "dexId": [906], "hp": 70,
+           "attacks": [{"name": "Griffe", "damage": 10}, {"damage": 20}]}
+    SV1 = {"name": "Poussacha", "category": "Pokémon", "illustrator": "Saya Tsuruta", "dexId": [906], "hp": 70,
+           "attacks": [{"name": "Griffe", "damage": 10}, {"name": "Feuillage", "damage": 20}]}
+
+    def test_basic_energy_and_era(self):
+        self.assertEqual(basic_energy("Énergie Électrique"), "lightning")
+        self.assertEqual(basic_energy("Basic Water Energy"), "water")
+        self.assertEqual(basic_energy("Énergie Plante de base"), "grass")
+        self.assertIsNone(basic_energy("Double Énergie Turbo"))
+        self.assertEqual(era_of("tk-hs-r", "tk"), "hgss")
+        self.assertEqual(era_of("sv01", "sv"), "sv")
+
+    def test_keys(self):
+        self.assertNotEqual(art_key(self.MCD), art_key(self.SV1))
+        self.assertEqual(loose_key(self.MCD, "mc"), loose_key(self.SV1, "sv"))
+        self.assertNotEqual(loose_key(dict(self.MCD, hp=80), "mc"), loose_key(self.SV1, "sv"))
+        self.assertIsNone(loose_key(dict(self.MCD, illustrator=""), "mc"))
+        milk = {"name": "Lait Meumeu", "category": "Dresseur", "illustrator": "Noriko Hotta"}
+        self.assertEqual(loose_key(milk, "hgss"), ("trainer", "lait meumeu", "noriko hotta"))
+        self.assertEqual(loose_key({"name": "Lightning Energy", "category": "Energy"}, "sm"), ("energy", "lightning", "sm"))
+
+    def test_match(self):
+        k = loose_key(self.SV1, "sv")
+        known = [(k, "fr/sv/sv01/013", "sv01-013", "sv01", "2023-03-31"), (k, "fr/sv/svp/050", "svp-050", "svp", "2023-09-01"),
+                 (("energy", "lightning", "sm"), "fr/sm/sm1/165", "sm1-165", "sm1", "2017-02-03"),
+                 (("energy", "lightning", "sm"), "fr/tk/tk-sm-r/2", "tk-sm-r-2", "tk-sm-r", "2017-04-21"),
+                 (("energy", "grass", "sv"), "ptcg:sve/1", "sve-001", "sve", "2023-03-31")]
+        pending = [(k, "2023sv-1", "2023sv", "2023-08-01"),  # date la plus proche : la promo de septembre
+                   (("energy", "lightning", "sm"), "tk-sm-r-1", "tk-sm-r", "2017-04-21"),  # même kit d'abord
+                   (("energy", "grass", "sv"), "sve-017", "sve", "2025-01-01"),  # Énergies hors kits : jamais
+                   (None, "x-1", "x", "2020-01-01")]
+        self.assertEqual(loose_images(known, pending), {"2023sv-1": ("fr/sv/svp/050", "svp-050"),
+                                                        "tk-sm-r-1": ("fr/tk/tk-sm-r/2", "tk-sm-r-2")})
+
+
+class Scrydex(unittest.TestCase):
+    def test_lookup(self):
+        live = {"sdx:mep-1", "sdx:mep-5", "sdx:svp-176", "sdx:mcd23-99999", "sdx:mcd23-1"}
+        asked = []
+        probe = lambda p: asked.append(p) or p in live
+        paths = ["sdx:mep-1", "sdx:mep-3", "sdx:mep-5", "sdx:svp-176", "sdx:mcd23-1", "sdx:mee-1", "sdx:mee-2"]
+        ok, report = sdx_lookup(paths, probe=probe, workers=2)
+        self.assertEqual(ok, {"sdx:mep-1", "sdx:mep-5", "sdx:svp-176"})
+        self.assertIn("mcd23 image d'attente, ignorée", report)  # une image pour un numéro impossible : rien de gardé
+        self.assertIn("mee 0/2", report)
+        self.assertNotIn("sdx:mcd23-1", asked)
 
 
 if __name__ == "__main__":

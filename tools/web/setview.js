@@ -61,7 +61,7 @@
     const rank = new Map(all.map((p, i) => [p.id, i]));
     const mine = all.filter(p => qty(p) > 0);
     // Réglages propres à l'extension ouverte : recherche et raretés repartent de zéro sur une autre extension.
-    const here = s.setKey === s.setId, q = here ? String(s.setQ || '') : '', rarOn = here && Array.isArray(s.setRar) ? s.setRar : [];
+    const here = s.setKey === s.setId, q = here ? String(s.setQ || '') : '', rarOn = here && !top && Array.isArray(s.setRar) ? s.setRar : [];
     const tab = !top && s.setFilter === 'items' ? 'items' : 'cards';
     const size = SV_SIZES.find(z => z[0] === s.setSize) || SV_SIZES[1];
     const big = size[0] === 'l';
@@ -112,7 +112,8 @@
         return Object.assign({ glyph: ic.glyph, cls: ic.cls, n: String(n), on: on, label: (name || 'Sans rareté') + ', ' + plural(n, 'carte', 'cartes') + (on ? ', filtre actif' : ''),
           pick: () => setHere({ setRar: on ? rarOn.filter(x => x !== name) : rarOn.concat([name]) }) }, this.chip(on));
       }),
-      hasRars: rarCount.size > 1, hasRarClear: rarOn.length > 0, rarClear: () => setHere({ setRar: [] }),
+      hasRars: !top && rarCount.size > 1, // 2026-11-15 (porteur) : pas de pastilles de rareté dans « Les plus chères »
+      hasRarClear: rarOn.length > 0, rarClear: () => setHere({ setRar: [] }),
       cols: 'repeat(' + size[2] + ', minmax(0, 1fr))', gridCls: 'pkm-sv-grid pkm-sv-' + size[0],
       count: plural(shown.length, 'carte', 'cartes') + ' · par ' + sort[1],
       empty: tab === 'cards' && shown.length === 0,

@@ -17,6 +17,8 @@ await page.evaluate(() => window.__pkm.openTop()); await page.waitForTimeout(150
 const tiles = page.locator('main button[aria-label*=" n° "][aria-label*=", cote "]');
 const labels = await tiles.evaluateAll(bs => bs.map(b => b.getAttribute('aria-label')));
 ok('« Les plus chères » : ' + labels.length + ' cartes', labels.length === 200);
+// 2026-11-15 (porteur) : plus de pastilles de rareté (étoile, double étoile…) sous « Nom ou numéro ».
+ok('pas de pastilles de rareté', (await page.locator('[aria-label="Filtrer par rareté"]').count()) === 0);
 const has = name => labels.some(l => l.startsWith(name + ','));
 // Cartes au marché mince (cote douteuse, ou écart de plus de 2,5 fois entre les prix Cardmarket) mais confirmées par
 // TCGplayer (moins de 2 fois d'écart), mêmes règles que catalog.js, calculées sur le catalogue du jour.

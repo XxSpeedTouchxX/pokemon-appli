@@ -33,6 +33,20 @@ SDX_SETS = {"me06": "me6"}
 SDX_CARDS = {"30th-B": "me55-B", "30th-G": "me55-G", "30th-R": "me55-R"}
 
 
+# Visuels Scrydex cherchés carte par carte (2026-11-15, porteur : « refais une passe sur tous les visuels manquants ») :
+# extensions que le dépôt pokemontcg.io ne publie pas, ou pas en entier (promos MEP, dernières promos SVP et SWSH,
+# McDonald's 2023 et 2024, Énergies). Leur numérotation est officielle, la même dans toutes les langues ; une adresse
+# n'est gardée que si Scrydex y répond par une image (build_index.sdx_lookup).
+SDX_PROBE = {"mep": "mep", "svp": "svp", "swshp": "swshp", "mee": "mee", "sve": "sve", "2023sv": "mcd23", "2024sv": "mcd24"}
+
+
+def sdx_probe_path(sid, local):
+    """Chemin « sdx:<extension>-<numéro> » à essayer pour une carte encore sans visuel, ou None."""
+    if sid in SDX_PROBE and str(local or "").strip() and re.fullmatch(r"[A-Za-z]*\d+[a-z]?", unquote(str(local))):
+        return "sdx:" + SDX_PROBE[sid] + "-" + norm_number(local)
+    return None
+
+
 def sdx_image(cid, sid, local, img):
     """Chemin « sdx:<id> » imposé pour cette carte, ou None : carte listée dans SDX_CARDS (toujours), ou carte sans
     visuel d'une extension de SDX_SETS."""
@@ -93,8 +107,9 @@ def compact_image(images):
 
 
 def same_name(a, b):
-    """Même nom anglais, parenthèses ignorées : « Pikachu V (Full Art) » = « Pikachu V », mais « Pikachu » ≠ « Pikachu V »."""
-    strip = lambda t: fold(re.sub(r"\([^)]*\)", " ", str(t or "")))
+    """Même nom anglais, parenthèses ignorées : « Pikachu V (Full Art) » = « Pikachu V », mais « Pikachu » ≠ « Pikachu V ».
+    Énergies de base (2026-11-15) : « Basic Grass Energy » (pokemontcg.io) = « Grass Energy » (TCGdex)."""
+    strip = lambda t: re.sub(r"^basic (\w+ energy)$", r"\1", fold(re.sub(r"\([^)]*\)", " ", str(t or ""))))
     fa, fb = strip(a), strip(b)
     return bool(fa) and fa == fb
 

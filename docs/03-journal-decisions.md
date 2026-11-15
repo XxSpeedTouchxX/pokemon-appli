@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-15 — « Les plus chères » sans pastilles de rareté, passe sur les visuels manquants (porteur)
+
+- **« Les plus chères »** (cache v215) : les pastilles de rareté (étoile, double étoile…) sous « Nom ou numéro » sont retirées de cet écran, et aucun filtre de rareté ne s'y applique. Les écrans des extensions les gardent (demande du 2026-10-17).
+- **Visuels manquants** (« Mudkip », « Special Delivery Bidoof », « Pikachu with Grey Felt Hat »… : 307 cartes sans visuel au catalogue du 14 novembre). Causes trouvées et corrigées dans le calcul du catalogue (`tools/tcgdex/build_index.py`, `ptcg.py`) :
+  - **cartes ajoutées depuis la version anglaise** (promos SVP, SWSH, MEP, kit Raichu d'Alola, Détective Pikachu) : aucune solution de repli ne leur était appliquée. Elles passent maintenant par les autres langues de TCGdex, puis pokemontcg.io (même numéro et même nom anglais) : Bidoof, Pikachu au chapeau de feutre, Pikachu et Dracaufeu « Special Delivery », Bulbizarre, Arcanin, Amphinobi… ;
+  - **Énergies de base** : « Basic Grass Energy » (pokemontcg.io) et « Grass Energy » (TCGdex) sont maintenant reconnues comme la même carte (Énergies Écarlate et Violet n° 1 à 16) ;
+  - **réimpressions du même dessin, signature élargie** (`loose_key`) : Pokémon (numéro de Pokédex, illustrateur, PV et dégâts des attaques), Dresseurs (nom et illustrateur), Énergies de base des kits du dresseur (type et époque : kit HS → HeartGold SoulSilver). La réimpression de la même extension passe d'abord, puis la date la plus proche. Elle sert pour les kits du dresseur, les McDonald's et les promos réimprimées, que l'ancienne règle ne reliait pas (attaques non traduites, effet absent). Les Énergies hors kits ne sont jamais reprises (Écarlate et Violet a plusieurs dessins d'Énergie) ;
+  - **Scrydex carte par carte** (hébergeur des visuels de pokemontcg.io, déjà utilisé pour Règne Delta) : promos MEP, dernières promos SVP et SWSH, McDonald's 2023 et 2024, Énergies. Une adresse n'est gardée que si Scrydex répond par une image ; une extension est ignorée si Scrydex sert une image pour un numéro impossible (image d'attente).
+- **Ce qui reste sans source ouverte** (connu d'avance) : Poké Card Creator Pack (Mudkip, Treecko…), My First Battle, Ancient Mew, cartes alternatives « A Jaune », 2 cartes de la Collection Classique 30 ans. La liste exacte est écrite à chaque calcul du catalogue (« Cartes encore sans visuel »). Le premier calcul avec ces règles dira combien de cartes restent sans visuel.
+
+---
+
 ## 2026-11-15 — Animation d'ajout plus longue, reflet du « Pass », lignes du prix du marché, sorties de l'accueil, vitrine, « Profil Passionné » (porteur)
 
 - **Ajout au classeur** (cache v214) : animation passée de 2,3 s à 3,3 s (« 1 seconde de plus, qu'on ait bien le temps de voir »), même enchaînement.

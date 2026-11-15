@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ptcg import PtcgData, agrees, candidates, compact_image, fold, norm_number, same_name, sdx_image
+from ptcg import PtcgData, agrees, candidates, compact_image, fold, norm_number, same_name, sdx_image, sdx_probe_path
 
 FIXTURES = json.loads(Path(__file__).with_name("test_ptcg_fixtures.json").read_text("utf-8"))
 
@@ -33,6 +33,16 @@ class Helpers(unittest.TestCase):
         self.assertTrue(same_name("Pikachu V (Full Art)", "Pikachu V"))
         self.assertFalse(same_name("Pikachu", "Pikachu V"))
         self.assertFalse(same_name("", "Pikachu"))
+        # 2026-11-15 : Énergies de base (« Basic Grass Energy » chez pokemontcg.io, « Grass Energy » chez TCGdex).
+        self.assertTrue(same_name("Grass Energy", "Basic Grass Energy"))
+        self.assertFalse(same_name("Grass Energy", "Basic Fire Energy"))
+
+    def test_sdx_probe_path(self):
+        self.assertEqual(sdx_probe_path("mep", "001"), "sdx:mep-1")
+        self.assertEqual(sdx_probe_path("swshp", "SWSH300"), "sdx:swshp-SWSH300")
+        self.assertEqual(sdx_probe_path("2023sv", "7"), "sdx:mcd23-7")
+        self.assertIsNone(sdx_probe_path("mep", "Museum"))  # pas un numéro officiel
+        self.assertIsNone(sdx_probe_path("base1", "4"))  # extension non listée
 
     def test_agrees(self):
         beldum = FIXTURES["tk2a"][0]
