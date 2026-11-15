@@ -199,7 +199,9 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   // Retouche (2026-11-15, porteur) : les 2 flèches alignées (même axe vertical), celle du compagnon un peu plus bas.
   const kb = await kArrow.boundingBox(), img = await val.locator('img[width="96"]').boundingBox();
   ok('2 flèches alignées (' + Math.round(ab.x + ab.width / 2) + ' / ' + Math.round(kb.x + kb.width / 2) + ' px), flèche du compagnon sous son image de ' + Math.round(ab.y + ab.height - img.y - img.height) + ' px',
-    Math.abs((ab.x + ab.width / 2) - (kb.x + kb.width / 2)) <= 1 && ab.y + ab.height - (img.y + img.height) >= 14);
+    Math.abs((ab.x + ab.width / 2) - (kb.x + kb.width / 2)) <= 1 && ab.y + ab.height - (img.y + img.height) >= 24);
+  const dl = await val.locator('.pkm-fold-hv .pkm-fold-in > span').first().evaluate(e => { const r = document.createRange(); r.selectNodeContents(e); const b = r.getBoundingClientRect(); return { x: b.x, y: b.y, r: b.right, b: b.bottom }; });
+  ok('la flèche du compagnon ne touche pas la ligne de variation', ab.x > dl.r || ab.y > dl.b || ab.y + ab.height < dl.y);
   const tile0 = async () => (await page.locator(TILE).first().boundingBox()).y;
   const valBottom = async () => { const b = await val.boundingBox(); return b.y + b.height; };
   const gapOpen = (await tile0()) - (await valBottom());
