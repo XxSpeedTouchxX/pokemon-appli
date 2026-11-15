@@ -261,6 +261,18 @@
     if (!this.catalog().some(q => q.id === id)) this.setState({ extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) });
     this.openSheet('buy', id);
   };
+  // Tuile d'un produit scellé (grille de 3) : aussi dans l'onglet « Items » d'une extension (setview.js, 2026-11-14).
+  proto.slTile = function (p, c) {
+    const l = this.look(p), k = this.cote(p), st = c.stock[p.id], n = st ? st.qty : 0;
+    return Object.assign(l, {
+      name: p.name, sub: TYPE_LABEL[p.code] || 'Produit scellé', flag: this.flag('FR'),
+      price: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Prix à venir'),
+      owned: n > 0, qty: '×' + n, soon: !!p.release, canAdd: !p.release, soonText: p.release ? 'Sortie le ' + this.d2(p.release) : '',
+      label: p.name + (k !== null ? ', cote ' + this.eur(k) : '') + (n ? ', ' + n + ' dans ta collection' : ''),
+      add: () => this.slAdd(p.id), addLabel: 'Ajouter ' + p.name + ' à mes produits scellés',
+      details: () => this.fiOpen(p.id), detailsLabel: 'Détails de ' + p.name
+    });
+  };
   proto.vSealedList = function (s) {
     if (SEALED.status !== 'ready') return Object.assign({}, EMPTY_SEALED, { status: SEALED.status === 'error' ? 'Catalogue scellé indisponible pour le moment · nouvel essai automatique.' : 'Chargement du catalogue scellé…' });
     const c = this.compute(s), all = SEALED.list(), mode = s.smode === 'serie' ? 'serie' : 'type';
@@ -292,17 +304,7 @@
         })
       }));
     const typeDefs = SL_TYPES.filter(d => d[0] === 'all' || all.some(p => slIs(p, d[0]) && (set === null || setOf(p) === set)));
-    const tile = p => {
-      const l = this.look(p), k = this.cote(p), st = c.stock[p.id], n = st ? st.qty : 0;
-      return Object.assign(l, {
-        name: p.name, sub: TYPE_LABEL[p.code] || 'Produit scellé', flag: this.flag('FR'),
-        price: k !== null ? this.eur(k) : (typeof p.low === 'number' ? '~' + this.eur(p.low) : 'Prix à venir'),
-        owned: n > 0, qty: '×' + n, soon: !!p.release, canAdd: !p.release, soonText: p.release ? 'Sortie le ' + this.d2(p.release) : '',
-        label: p.name + (k !== null ? ', cote ' + this.eur(k) : '') + (n ? ', ' + n + ' dans ta collection' : ''),
-        add: () => this.slAdd(p.id), addLabel: 'Ajouter ' + p.name + ' à mes produits scellés',
-        details: () => this.fiOpen(p.id), detailsLabel: 'Détails de ' + p.name
-      });
-    };
+    const tile = p => this.slTile(p, c);
     const showGrid = mode === 'type' || set !== null || words.length > 0;
     const setLogoImg = set !== null && set ? logoOf(set) : '';
     return {

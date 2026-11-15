@@ -160,9 +160,8 @@
       balance: pkNum(s.pk),
       rules: [
         ['Jeux', 'booster PK, pile ou face et Safari éclair, dans l’onglet Jeux'],
-        ['+' + PK_WELCOME, 'de bienvenue, offerts une fois'],
-        ['+' + PK_SHARE, 'une fois, en partageant l’app sur un réseau social']
-      ].map(([n, t]) => ({ n: n, text: t })), // du plus petit gain au plus grand (demande du porteur)
+        ['+' + PK_WELCOME, 'de bienvenue, offerts une fois']
+      ].map(([n, t]) => ({ n: n, text: t })), // « +300 en partageant l’app » retiré le 2026-11-14 (porteur)
       shop: shop,
       locked: (() => { const n = HOME_BUDDIES.filter(([k]) => !pkOwns(s, k)).length; return n + (n > 1 ? ' Pokémon à débloquer avec tes PA dans le Pokédex' : ' Pokémon à débloquer avec tes PA'); })(),
       all: () => { this.setState({ pkSheet: false }); this.dexOpen(s.buddy, true); },

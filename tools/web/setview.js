@@ -1,8 +1,10 @@
   // ——— Écran d'une extension, d'après la vidéo du porteur (2026-10-17) ———
   // Même modèle pour toutes les extensions et pour « Les plus chères » :
   // - en tête, le logo, la date et la série, puis la progression (« 46 / 191 cartes possédées », barre et %) ;
-  // - Toutes, Possédées, Manquantes, Doublons (avec leur nombre) ; taille de la grille Petit (4 par ligne), Moyen (3),
-  //   Grand (2) ; recherche par nom ou numéro ; tri par numéro, cote ou nom ;
+  // - onglets « Cartes » et « Items » (2026-11-14, porteur ; à la place de Toutes, Possédées, Manquantes, Doublons) :
+  //   « Items » = les produits scellés sortis pour cette extension (sealed.js, même tuile que « Produits scellés ») ;
+  // - taille de la grille Petit (4 par ligne), Moyen (3), Grand (2) ; recherche par nom ou numéro ; tri par numéro,
+  //   prix (« cote » avant le 2026-11-14, porteur) ou nom ;
   // - filtres de rareté avec leur symbole et leur nombre de cartes, cumulables ;
   // - grille : toutes les cartes en couleur (2026-10-17, porteur ; en gris avant), pastille ×N sur celles possédées ;
   //   sur chaque carte, un cœur (favori, gardé sur l'appareil) et, en haut à droite, un « + » qui ajoute un exemplaire
@@ -22,10 +24,10 @@
   const svRar = name => { const m = SV_RAR.find(x => x[0].test(name || '')); return { glyph: m[1], cls: 'pkm-rar pkm-rar-' + m[2] }; };
   const SV_SIZES = [['s', 'Petit', 4], ['m', 'Moyen', 3], ['l', 'Grand', 2]];
   const SV_EAGER = 12;
-  const SV_SORTS = [['num', 'numéro'], ['cote', 'cote'], ['name', 'nom']];
-  const SV_TABS = [['all', 'Toutes'], ['own', 'Possédées'], ['miss', 'Manquantes'], ['dup', 'Doublons']];
+  const SV_SORTS = [['num', 'numéro'], ['cote', 'prix'], ['name', 'nom']];
+  const SV_TABS = [['cards', 'Cartes'], ['items', 'Items']];
   const SV_UNDO_MS = 6000;
-  const SV_EMPTY = { v2: false, dateText: '', setFlag: '', hasDate: false, progLabel: '', sortAria: '', hasProg: false, progText: '', pct: '', progW: '0%', tabs: [], sizes: [], q: '', onQ: null,
+  const SV_EMPTY = { v2: false, dateText: '', setFlag: '', hasDate: false, progLabel: '', sortAria: '', hasProg: false, progText: '', pct: '', progW: '0%', tabs: [], hasTabs: false, onCards: true, onItems: false, items: [], itemsEmpty: false, itemsCount: '', sizes: [], q: '', onQ: null,
     sortLabel: '', sortNext: null, rars: [], hasRars: false, hasRarClear: false, rarClear: null, cols: 'repeat(3, minmax(0, 1fr))', gridCls: 'pkm-sv-grid pkm-sv-m', cards: [] };
 
   // Cœur (favori) retiré le 2026-11-01 (porteur) : seul le « + » reste sur chaque carte.
@@ -56,25 +58,26 @@
     const all = top ? serTopIds().map(id => TCG.item(id)).filter(p => p && this.cote(p) !== null).sort((a, b) => this.cote(b) - this.cote(a))
       : TCG.bySet[e.id].map(x => TCG.item(x.r[TCG.F.id]));
     const rank = new Map(all.map((p, i) => [p.id, i]));
-    const mine = all.filter(p => qty(p) > 0), dups = all.filter(p => qty(p) > 1);
+    const mine = all.filter(p => qty(p) > 0);
     // Réglages propres à l'extension ouverte : recherche et raretés repartent de zéro sur une autre extension.
     const here = s.setKey === s.setId, q = here ? String(s.setQ || '') : '', rarOn = here && Array.isArray(s.setRar) ? s.setRar : [];
-    const tab = SV_TABS.some(t => t[0] === s.setFilter) ? s.setFilter : 'all';
+    const tab = !top && s.setFilter === 'items' ? 'items' : 'cards';
     const size = SV_SIZES.find(z => z[0] === s.setSize) || SV_SIZES[1];
     const big = size[0] === 'l';
     const sort = SV_SORTS.find(z => z[0] === s.setSort) || (top ? SV_SORTS[1] : SV_SORTS[0]);
     const setHere = patch => this.setState(Object.assign({ setKey: s.setId }, here ? {} : { setQ: '', setRar: [] }, patch));
-    const byTab = { all: all, own: mine, miss: all.filter(p => qty(p) === 0), dup: dups }[tab];
     // Raretés de l'extension, dans l'ordre où elles apparaissent (des communes aux plus rares).
     const rarCount = new Map();
     all.forEach(p => rarCount.set(p.rarity || '', (rarCount.get(p.rarity || '') || 0) + 1));
     const words = fold(q).split(/\s+/).filter(Boolean);
     const match = p => !words.length || words.every(w => fold([p.name, p.num, p.numShort].join(' ')).indexOf(w) >= 0);
-    const shown = byTab.filter(p => match(p) && (!rarOn.length || rarOn.indexOf(p.rarity || '') >= 0));
+    const shown = all.filter(p => match(p) && (!rarOn.length || rarOn.indexOf(p.rarity || '') >= 0));
     const order = { num: (a, b) => rank.get(a.id) - rank.get(b.id), cote: (a, b) => (this.cote(b) || 0) - (this.cote(a) || 0) || rank.get(a.id) - rank.get(b.id),
       name: (a, b) => String(a.name).localeCompare(String(b.name), 'fr') || rank.get(a.id) - rank.get(b.id) }[sort[0]];
     shown.sort(order);
     const pct = all.length ? Math.round(mine.length / all.length * 100) : 0;
+    // Items de l'extension : produits scellés rattachés à cette extension (setId), le plus récent d'abord.
+    const items = top || SEALED.status !== 'ready' ? [] : SEALED.list().filter(p => p.setId === e.id).sort((a, b) => (relKey(a) < relKey(b) ? 1 : relKey(a) > relKey(b) ? -1 : 0));
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
     return Object.assign({}, base, {
       v2: true,
@@ -82,10 +85,12 @@
       setFlag: top ? '' : this.flag(e.lang === 'EN' ? 'EN' : 'FR'), hasDate: !top,
       hasProg: true, progText: mine.length + ' / ' + plural(all.length, 'carte possédée', 'cartes possédées'), pct: pct + ' %', progW: pct + '%',
       progLabel: mine.length + ' cartes possédées sur ' + all.length + ', ' + pct + ' pour cent',
-      tabs: SV_TABS.map(([k, label]) => {
-        const n = { all: all.length, own: mine.length, miss: all.length - mine.length, dup: dups.length }[k];
-        return Object.assign({ label: label + ' (' + n + ')', on: tab === k, pick: () => this.setState({ setFilter: k }) }, this.chip(tab === k));
-      }),
+      tabs: SV_TABS.map(([k, label]) => Object.assign({ label: label + ' (' + (k === 'items' ? items.length : all.length) + ')', on: tab === k,
+        pick: () => this.setState({ setFilter: k }) }, this.chip(tab === k))),
+      hasTabs: !top, onCards: tab === 'cards', onItems: tab === 'items',
+      items: tab === 'items' ? items.map(p => this.slTile(p, c)) : [], itemsEmpty: tab === 'items' && !items.length,
+      itemsCount: items.length ? plural(items.length, 'produit', 'produits') + ' · du plus récent au plus ancien' : '',
+      itemsNote: SEALED.status === 'ready' ? 'Pas d’items sortis pour cette extension.' : 'Chargement des produits scellés…',
       sizes: SV_SIZES.map(([k, label]) => ({ label: label, on: size[0] === k, cls: 'pkm-sv-size' + (size[0] === k ? ' pkm-sv-size-on' : ''), pick: () => this.setState({ setSize: k }) })),
       q: q, onQ: ev => setHere({ setQ: ev.target.value }),
       sortLabel: 'Tri : ' + sort[1], sortAria: 'Trier les cartes, actuellement par ' + sort[1] + '. Toucher pour changer',
@@ -98,8 +103,8 @@
       hasRars: rarCount.size > 1, hasRarClear: rarOn.length > 0, rarClear: () => setHere({ setRar: [] }),
       cols: 'repeat(' + size[2] + ', minmax(0, 1fr))', gridCls: 'pkm-sv-grid pkm-sv-' + size[0],
       count: plural(shown.length, 'carte', 'cartes') + ' · par ' + sort[1],
-      empty: shown.length === 0,
-      emptyText: words.length || rarOn.length ? 'Aucune carte ne correspond.' : tab === 'own' ? 'Aucune carte de cette extension dans ta collection.' : tab === 'dup' ? 'Aucun doublon dans cette extension.' : tab === 'miss' ? 'Tu as toutes les cartes de cette extension !' : 'Aucune carte.',
+      empty: tab === 'cards' && shown.length === 0,
+      emptyText: words.length || rarOn.length ? 'Aucune carte ne correspond.' : 'Aucune carte.',
       cards: shown.map((p, i) => {
         const k = this.cote(p), n = qty(p), setName = top ? (setOf(p.set) || [])[0] || '' : '';
         return {

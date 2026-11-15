@@ -2174,6 +2174,9 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-fm-langopt { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 6px 10px; border: 0; border-radius: 12px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; }
 .pkm-fm-langopt-on { background: rgba(255, 214, 10, 0.16); color: #FFD60A; }
 @keyframes pkm-fm-pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+/* Onglets « Cartes » et « Items » d'une extension (2026-11-14, porteur ; à la place de Toutes, Possédées, Manquantes,
+   Doublons) : même pilule que « Par type / Par série » des produits scellés. */
+.pkm-sv-tabs { flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid #2A3A5C; background: #111A2C; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -3799,6 +3802,6 @@ html.pkm-theme-night:not(.pkm-classic) #app { background: #10131F; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=6cb04e4c"></script>
+<script src="app.js?v=c79121d4"></script>
 </body>
 </html>

@@ -47,9 +47,9 @@ ok('panneau : solde, c’est quoi, jeux, bienvenue, partage (sans +10), à quoi 
 ok('panneau : plus de « Compagnons à thème » ni de « Mon Pokédex »', !/Compagnons à thème|Mon Pokédex|Kyogre/.test(sheetText) && (await sheet.locator('button[aria-label^="Voir "][aria-label$=" PA"]').count()) === 0);
 ok('panneau : bouton « Règles des PK et PA »', (await sheet.locator('button', { hasText: 'Règles des PK et PA' }).count()) === 1);
 const order = await sheet.locator('ul li span:first-child').allInnerTexts();
-ok('gains : ' + order.join(' / '), order.join() === 'Jeux,+100,+300');
+ok('gains : ' + order.join(' / '), order.join() === 'Jeux,+100');
 ok('panneau : les PK ne s’achètent pas', /ne s’achètent pas et n’ont aucune valeur en euros/.test(sheetText));
-ok('panneau : +300 partage', /\+300 une fois, en partageant/.test(sheetText) && !/Tous les compagnons/.test(sheetText));
+ok('panneau : plus de +300 ni de « Partager Dropicards » (2026-11-14, porteur)', !/\+300/.test(sheetText) && !/Partager Dropicards/.test(sheetText) && !/Tous les compagnons/.test(sheetText));
 await page.screenshot({ path: shot('pk-panneau.png') });
 // 4. Pokédex (onglet Jeux) après fermeture de « Mes PK » ; sans starter, on le choisit d'abord.
 await page.locator('button[aria-label="Fermer Mes PK"]').click(); await page.waitForTimeout(400);
@@ -204,22 +204,14 @@ await edit(d => { delete d.pkV; d.buddy = 133; d.pkOwn = (d.pkOwn || []).filter(
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1000);
 d = await saved();
 ok('v2 : Évoli déjà choisi reste acquis : pkOwn ' + JSON.stringify(d.pkOwn) + ', buddy ' + d.buddy, d.pkOwn.includes(133) && d.buddy === 133 && d.pkV === 2);
-// 7 ter. Partage : +300 PK une fois.
-const before = d.pk;
+// 7 ter. Partage : « Partager Dropicards » (+300 PK) retiré de « Mes PK » (2026-11-14, porteur).
 await counter.click(); await page.waitForTimeout(400);
-ctx.on('page', p => p.close().catch(() => {}));
-await page.click('section[aria-label="Mes PK"] a[aria-label="Partager Dropicards sur WhatsApp"]'); await page.waitForTimeout(600);
-d = await saved();
-ok('partage WhatsApp : +300 PK (' + before + ' → ' + d.pk + '), « ' + (await page.locator('div[role="status"]').innerText()).trim() + ' »', d.pk === before + 300 && d.pkShared === 'WhatsApp');
-await page.screenshot({ path: shot('pk-partage.png') });
-await page.click('section[aria-label="Mes PK"] a[aria-label="Partager Dropicards sur X"]'); await page.waitForTimeout(600);
-d = await saved();
-ok('2e partage : rien de plus, « Merci » affiché', d.pk === before + 300 && /Tes \+300 PK sont reçus/.test(await page.locator('section[aria-label="Mes PK"]').innerText()));
+ok('« Mes PK » : plus de liens de partage', (await page.locator('section[aria-label="Mes PK"] a[aria-label^="Partager Dropicards"]').count()) === 0);
 await page.click('section[aria-label="Mes PK"] button[aria-label="Fermer"]'); await page.waitForTimeout(300);
 // 8. Grands titres et écrans de détail.
 for (const [tab, name] of [['Toutes les séries', 'Toutes les séries'], ['Jeux', 'Jeux'], ['PK shop', 'PK shop']]) {
   await page.click('nav button[aria-label="' + tab + '"]'); await page.waitForTimeout(500);
-  ok(name + ' : compteur à droite', (await counter.count()) === 1 && await cText() === '400 PK');
+  ok(name + ' : compteur à droite', (await counter.count()) === 1 && await cText() === '100 PK');
 }
 await page.click('nav button[aria-label="Accueil"]'); await page.waitForTimeout(400);
 // 9. 360 px et 320 px, solde à 4 chiffres.

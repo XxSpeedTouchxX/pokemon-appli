@@ -93,7 +93,7 @@ export const RULES = [
   ['line', '#0B1120', 'var(--pkm-ink)', { n: 2 }],
   ['line', '#FFFFFF', 'var(--pkm-white)'],
   // Textes
-  ['fg', '#0B1120', 'var(--pkm-on-accent)', { bg: 'var(--pkm-accent)', n: 11 }], // bouton d'ajout de la fiche du scan déjà en variables (2026-10-25) ; 2 boutons des questions du premier écran retirés (2026-10-30)
+  ['fg', '#0B1120', 'var(--pkm-on-accent)', { bg: 'var(--pkm-accent)', n: 12 }], // « + Ajouter » de l'onglet « Items » d'une extension (2026-11-14) ; bouton d'ajout de la fiche du scan déjà en variables (2026-10-25) ; 2 boutons des questions du premier écran retirés (2026-10-30)
   ['fg', '#0B1120', 'var(--pkm-ink)'],
   ['fg', '#F3F6FC', 'var(--pkm-t1)'],
   ['fg', '#C9D3EA', 'var(--pkm-t2)'],

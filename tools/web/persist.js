@@ -39,7 +39,10 @@
     if (!saved) return false;
     TCG.saved = saved.cards && typeof saved.cards === 'object' ? saved.cards : {};
     const st = { extra: Object.keys(TCG.saved) };
-    SAVED_KEYS.forEach(k => { if (saved[k] !== undefined && saved[k] !== null) st[k] = saved[k]; });
+    // « Valoriser ma collection avec » et « Selon l’état et la langue » retirés des Réglages (2026-11-14, porteur) : un
+    // ancien choix gardé sur l’appareil n’est plus repris, la valorisation reste celle par défaut (cote Dropicards, selon
+    // l’état et la langue).
+    SAVED_KEYS.forEach(k => { if (saved[k] !== undefined && saved[k] !== null && k !== 'valuation' && k !== 'valAdj') st[k] = saved[k]; });
     this.state = Object.assign({}, this.state || {}, st);
     // Ce qui vise un article inconnu est mis de côté (sinon le calcul de la collection échoue), mais gardé et
     // enregistré (« orphans ») : il revient dès que l'article est de nouveau connu (2026-10-11 ; avant, supprimé).

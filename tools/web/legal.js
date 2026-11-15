@@ -138,7 +138,6 @@
       pk: legalNum(Number(s.pk) || 0), pa: legalNum(Number(s.pa) || 0), grade: PF_GRADES[gi].name, emblem: 'img/grades/grade-' + (gi + 1) + '.svg',
       earn: [
         { big: '+100', label: 'Bienvenue', note: 'Une fois, à l’arrivée', icon: 'img/brand/pk.svg' },
-        { big: '+300', label: 'Partage', note: 'Une fois, en partageant l’app', icon: 'img/brand/pk.svg' },
         { big: 'Jeux', label: 'Booster et pièce', note: 'Dans l’onglet Jeux', icon: 'img/brand/pk.svg' }
       ],
       odds: GM_TABLE.map(([pk, pct, label, color]) => ({ pk: legalNum(pk) + ' PK', pct: pct + ' %', label: label, w: 'flex: ' + pct + ' 1 0; min-width: 4px', color: color })),

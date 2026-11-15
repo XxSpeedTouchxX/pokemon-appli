@@ -53,11 +53,11 @@ await step('grille', async () => {
   const big = await gridSrcs();
   ok('grille Grand → ' + big.map(u => u.split('/').slice(-2).join('/')).join(', '), big.length === 3 && big.every(u => /high\.webp$/.test(u)));
   await page.click('button:has-text("Moyen")'); await page.waitForTimeout(300);
-  // Tri par cote (2026-10-17 : bouton « Tri », qui passe de numéro à cote, puis nom).
+  // Tri par prix (2026-10-17 : bouton « Tri », qui passe de numéro à prix, puis nom ; « cote » renommé « prix » le 2026-11-14).
   await page.click('button:has-text("Tri : numéro")');
   const first = await page.locator('main button[aria-label*=", n° "]').first().getAttribute('aria-label');
-  ok('tri par cote : ' + first, /cote/.test(first));
-  await page.click('button:has-text("Tri : cote")'); await page.click('button:has-text("Tri : nom")');
+  ok('tri par prix : ' + first, /cote/.test(first));
+  await page.click('button:has-text("Tri : prix")'); await page.click('button:has-text("Tri : nom")');
 });
 // Depuis le 2026-11-01 (porteur), une carte d'une extension s'ouvre en panneau, comme dans le classeur.
 const FI = 'section.pkm-fi';

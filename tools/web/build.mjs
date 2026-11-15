@@ -402,6 +402,14 @@ patch('<span style="font-size: 12.5px; color: #9AA8C3">Cote, sources, mode avanc
 patch('<section aria-label="À propos"', '<sc-if value="{{ set.devShow }}" hint-placeholder-val="{{ false }}">\n' + FRAG['settings-device'] + '\n</sc-if>\n<section aria-label="À propos"');
 patch('Maquette v3 · prix fictifs · visuels provisoires', 'Démo · catalogue, scellé et prix réels (TCGdex, Cardmarket) · boutiques réelles (OpenStreetMap) · collection, ventes et partenaires de Territoire fictifs');
 patch('partenaires de Territoire fictifs</p>', 'partenaires de Territoire fictifs</p>\n<button type="button" onClick="{{ adm.tapVersion }}" aria-label="{{ adm.versionLabel }}" style="align-self: flex-start; min-height: 32px; padding: 0; border: 0; background: transparent; color: #7D8BA8; font: inherit; font-size: 12px; cursor: default">{{ adm.versionLabel }}</button>\n<button type="button" onClick="{{ legal.openMentions }}" style="height: 44px; margin-top: 4px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Informations légales et confidentialité</button>\n<sc-if value="{{ adm.can }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ adm.menu }}" style="height: 44px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ adm.menuLabel }}</button></sc-if>');
+// Réglages (2026-11-14, porteur) : « Valoriser ma collection avec » (avec « Selon l’état et la langue »), « Sources de
+// prix », tout le texte d’« À propos » (mention, démo, version) et « Retour à la page d’accueil » retirés ; restent le
+// titre « À propos », « Informations légales et confidentialité » et le panneau Admin. La valorisation garde ses valeurs
+// par défaut (persist.js). La mention de non-affiliation reste sur l’accueil et dans Mon profil.
+patchRe(/<section aria-label="Valorisation"[\s\S]*?<\/section>\n\n/, '');
+patchRe(/<section aria-label="Sources de prix"[\s\S]*?<\/section>\n\n/, '');
+patchRe(/(<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600">À propos<\/h2>\n)<p[\s\S]*?(<button type="button" onClick="\{\{ legal\.openMentions \}\}")/, '$1$2');
+patchRe(/\n<button type="button" onClick="\{\{ replayOnb \}\}"[^>]*>Retour à la page d’accueil<\/button>/, '');
 // Articles mis en avant (tools/web/showcase.js).
 // - Vignettes des listes (ventes, lots, arrivages, Marché, scan…) : plus larges pour le scellé (largeur × wk),
 //   cadre doré des cartes ultra rares (ring).
@@ -661,7 +669,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 52) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 52'); // dont 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 54) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 54'); // dont 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -696,7 +704,7 @@ if (brokenMarks !== 52) throw new Error('Photos et logos repérés : ' + brokenM
     .replace(/\bPalier\b/g, 'Grade').replace(/\bpalier\b/g, 'grade');
   tpl = regrade(tpl); logic = regrade(logic);
 }
-const BRAND = 'Dropicards', REBRANDED = 52; // « Cote PKM » de la fiche du scan remplacée par « Valeur Cardmarket » (2026-10-25) ; +2 pour les items d'un Pokémon (dex.js, 2026-10-31)
+const BRAND = 'Dropicards', REBRANDED = 51; // −1 : texte d’« À propos » retiré des Réglages (2026-11-14) ; « Cote PKM » de la fiche du scan remplacée par « Valeur Cardmarket » (2026-10-25) ; +2 pour les items d'un Pokémon (dex.js, 2026-10-31)
 let rebranded = 0;
 const rebrand = t => t.replace(/PKM-App|\bPKM\b/g, () => { rebranded++; return BRAND; });
 tpl = rebrand(tpl);

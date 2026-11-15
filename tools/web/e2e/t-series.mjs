@@ -41,7 +41,7 @@ await page.screenshot({ path: shot('series-swsh.png') });
 // Dans une série ouverte, chaque extension mène à toutes ses cartes.
 await swsh.locator('div.pkm-rise > button').first().click(); await page.waitForTimeout(1200);
 const setTxt = await page.locator('#app').innerText();
-ok('extension : toutes ses cartes (' + (setTxt.match(/Toutes \(\d+\)/) || [''])[0] + ')', /Toutes \(\d+\)/.test(setTxt) && (await page.locator('main button[aria-label*="n° "]').count()) > 10);
+ok('extension : toutes ses cartes (' + (setTxt.match(/Cartes \(\d+\)/) || [''])[0] + ')', /Cartes \(\d+\)/.test(setTxt) && (await page.locator('main button[aria-label*="n° "]').count()) > 10);
 await page.screenshot({ path: shot('series-set.png') });
 await page.locator('button[aria-label="Retour"]').click(); await page.waitForTimeout(700);
 ok('retour : Toutes les séries', /Toutes les séries/.test(await page.locator('h1').first().innerText()));
@@ -83,7 +83,7 @@ ok('logo du 30ᵉ Anniversaire affiché : ' + JSON.stringify(annImg), annImg.len
 await annTiles.filter({ hasText: '30ᵉ Anniversaire' }).first().click(); await page.waitForTimeout(1200);
 const annSet = await page.locator('#app').innerText();
 const nCC = DOC.cards.filter(c => c[2] === '30th-c').length;
-ok('fiche du 30ᵉ : ' + n30 + ' cartes, dont ' + nCC + ' de la Collection Classique', new RegExp('Toutes \\(' + n30 + '\\)').test(annSet) && new RegExp('Dont ' + nCC + ' cartes de la Collection Classique').test(annSet) && /4\/102/.test(annSet));
+ok('fiche du 30ᵉ : ' + n30 + ' cartes, dont ' + nCC + ' de la Collection Classique', new RegExp('Cartes \\(' + n30 + '\\)').test(annSet) && new RegExp('Dont ' + nCC + ' cartes de la Collection Classique').test(annSet) && /4\/102/.test(annSet));
 // Écran d'une extension façon vidéo du porteur (2026-10-17) : réimpressions avec le visuel de leur carte d'origine,
 // filtres de rareté, Possédées, ajout rapide, favori et taille de la grille.
 const reprint = page.locator('main button[aria-label^="Dracaufeu, n° 4/102"]');
@@ -91,12 +91,12 @@ ok('réimpression : Dracaufeu 4/102, visuel du Set de Base au bord doré des 30 
 await page.locator('[aria-label="Filtrer par rareté"] button[aria-label^="Collection Classique"]').click(); await page.waitForTimeout(400);
 ok('rareté Collection Classique : ' + nCC + ' cartes', (await page.locator('main .pkm-sv-card').count()) === nCC);
 ok('cartes en couleur, même celles qu’on n’a pas (2026-10-17)', await page.evaluate(() => [...document.querySelectorAll('main .pkm-sv-card img')].slice(0, 6).every(i => getComputedStyle(i).filter === 'none' && getComputedStyle(i).opacity === '1')));
-const owned0 = await page.locator('button:has-text("Possédées (")').innerText();
+const owned0 = await page.locator('main .pkm-sv-card .pkm-sv-qty').count();
 await page.locator('main .pkm-sv-add').first().click(); await page.waitForTimeout(400);
-const owned1 = await page.locator('button:has-text("Possédées (")').innerText();
+const owned1 = await page.locator('main .pkm-sv-card .pkm-sv-qty').count();
 const toastAdd = (await page.locator('[role="status"]').allInnerTexts()).join(' ');
 ok('« + » : ajoutée avec sa cote du jour : ' + toastAdd.replace(/\n/g, ' '), /ajouté · (cote \d|pas encore de cote)/.test(toastAdd));
-ok('« + » : ' + owned0 + ' → ' + owned1 + ', carte en couleur avec ×1', owned0 !== owned1 && (await page.locator('main .pkm-sv-card').first().getAttribute('class')).indexOf('pkm-sv-miss') < 0
+ok('« + » : cartes possédées ' + owned0 + ' → ' + owned1 + ', carte en couleur avec ×1', owned1 === owned0 + 1 && (await page.locator('main .pkm-sv-card').first().getAttribute('class')).indexOf('pkm-sv-miss') < 0
   && /×1/.test(await page.locator('main .pkm-sv-card').first().innerText()));
 // 2026-11-01 (porteur) : plus de cœur (favori), seul le « + » ; un appui sur une carte ouvre la fiche en panneau, la même
 // que dans « Mon classeur » (prix du marché, historique, prix par état, prix gradés), sans « J'ai vendu ».
@@ -110,6 +110,17 @@ ok('« Fermer » ramène à l’extension', (await fiSet.count()) === 0 && (awai
 await page.getByRole('button', { name: 'Petit', exact: true }).click(); await page.waitForTimeout(300);
 ok('taille Petit : 4 cartes par ligne', await page.evaluate(() => getComputedStyle(document.querySelector('main .pkm-sv-grid')).gridTemplateColumns.split(' ').length === 4));
 await page.getByRole('button', { name: 'Moyen', exact: true }).click();
+// Onglets « Cartes » et « Items » (2026-11-14, porteur ; à la place de Toutes, Possédées, Manquantes, Doublons).
+const svTabs = await page.locator('[role="tablist"][aria-label="Cartes ou items de l’extension"] [role="tab"]').allInnerTexts();
+ok('onglets : ' + svTabs.join(' / ') + ', plus de Toutes/Possédées/Manquantes/Doublons', svTabs.length === 2 && /^Cartes \(\d+\)$/.test(svTabs[0]) && /^Items \(\d+\)$/.test(svTabs[1])
+  && (await page.locator('main button:has-text("Possédées (")').count()) === 0 && (await page.locator('main button:has-text("Doublons (")').count()) === 0);
+await page.locator('[role="tab"]:has-text("Items (")').click(); await page.waitForTimeout(500);
+const itemTiles = await page.locator('main .pkm-sv-items article').count(), nItems = +(/Items \((\d+)\)/.exec(svTabs[1]) || [0, -1])[1];
+ok('onglet Items : ' + itemTiles + ' produits scellés de l’extension (+ Ajouter, Détails), cartes cachées', itemTiles === nItems && itemTiles > 0 && (await page.locator('main .pkm-sv-grid').count()) === 0
+  && (await page.locator('main .pkm-sv-items article').first().innerText()).includes('Détails'));
+await page.screenshot({ path: shot('series-items.png') });
+await page.locator('[role="tab"]:has-text("Cartes (")').click(); await page.waitForTimeout(400);
+ok('retour à l’onglet Cartes', (await page.locator('main .pkm-sv-grid').count()) === 1);
 ok('pas de défilement horizontal (extension)', !(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
 await page.locator('button[aria-label="Retour"]').click(); await page.waitForTimeout(700);
 // Logos : chaque image de la série Méga-Évolution charge, sinon elle est remplacée (jamais d'image cassée).

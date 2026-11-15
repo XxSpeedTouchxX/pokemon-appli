@@ -29,17 +29,15 @@ ok('55 % de la cote : ' + adj + ' / ' + raw, Math.abs(adj - raw * 0.55) < 0.011)
 const v1 = await homeValue();
 ok('message : collection à la nouvelle valeur (' + toastTxt.replace(/\n/g, ' ') + ')', toastTxt.indexOf(v1.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')) >= 0);
 ok('valeur de la collection baisse de 45 % de la carte : ' + v0 + ' → ' + v1, Math.abs((v0 - v1) - raw * 0.45) < 0.02);
-// Réglages : interrupteur.
+// Réglages (2026-11-14, porteur) : « Valoriser ma collection avec » et « Selon l’état et la langue » retirés ; la
+// valeur selon l’état reste appliquée (valeur par défaut), même si un ancien réglage « désactivé » était gardé.
 await page.goto(B + 'start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1200);
-const sw = page.locator('button[role="switch"]:has-text("Selon l’état et la langue")');
-ok('Réglages : interrupteur activé et règle', (await sw.getAttribute('aria-checked')) === 'true' && /Played 55 %/.test(await page.locator('#app').innerText()));
-await sw.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('value-settings.png') });
-await sw.click(); await page.waitForTimeout(300);
-ok('désactivé', (await sw.getAttribute('aria-checked')) === 'false' && (await saved()).valAdj === false);
+const setTxt = await page.locator('#app main').innerText();
+ok('Réglages : plus de « Valoriser ma collection avec » ni de « Selon l’état et la langue »', !/Valoriser ma collection/.test(setTxt) && !/Selon l’état et la langue/.test(setTxt)
+  && (await page.locator('button[role="switch"]:has-text("Selon l’état")').count()) === 0);
+await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.valAdj = false; d.valuation = 'low'; localStorage.setItem(k, JSON.stringify(d)); }, 'pkm-collection-v1');
 const v2 = await homeValue();
-ok('cote brute : valeur de départ retrouvée (' + v2 + ')', Math.abs(v2 - v0) < 0.011);
-await page.goto(B + 'start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1000);
-await page.locator('button[role="switch"]:has-text("Selon l’état et la langue")').click(); await page.waitForTimeout(300);
+ok('ancien réglage « désactivé » ignoré : valeur selon l’état gardée (' + v2 + ')', Math.abs(v2 - v1) < 0.011);
 // B2 : vendre l'exemplaire de l'ajout a6 (175 €).
 await page.goto(B + 'start=item&itemId=p1', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('button:has-text("J’ai vendu")'); await page.waitForTimeout(400);
