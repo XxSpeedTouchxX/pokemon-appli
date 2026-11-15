@@ -22,6 +22,7 @@
 - La flèche du compagnon descend de 10 px : elle n'est plus collée au Pokémon (10 px sous son image) et ne touche pas la ligne de variation en dessous. Cache v218 ; test `t-binder.mjs` (alignement à 1 px près).
 - Retouche (même jour, porteur) : la flèche du compagnon descend encore de 8 px (18 px sous son image) ; courbe pliée, le cadre de la valeur garde 6 px de plus pour que la flèche n'en touche jamais le bord (10 à 18 px selon l'écran). Cache v219 ; test `t-binder.mjs`.
 - 2ᵉ retouche (même jour, porteur) : encore 10 px plus bas (28 px sous l'image du compagnon, la flèche passe entièrement sous le Pokémon) ; la ligne de variation garde 28 px à droite pour qu'un long montant passe à la ligne au lieu de glisser sous la flèche ; courbe pliée, 10 px de plus en bas du cadre. Cache v221 ; test `t-binder.mjs` (flèche qui ne touche pas la ligne de variation).
+- 3ᵉ retouche (même jour, porteur) : encore 8 px plus bas (36 px sous l'image du compagnon, au niveau de la ligne de variation, au-dessus des boutons de période) ; courbe pliée, 8 px de plus en bas du cadre. Cache v222 ; test `t-binder.mjs` (flèche qui ne touche ni la variation ni les périodes).
 
 ---
 

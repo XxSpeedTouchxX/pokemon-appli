@@ -201,7 +201,8 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   ok('2 flèches alignées (' + Math.round(ab.x + ab.width / 2) + ' / ' + Math.round(kb.x + kb.width / 2) + ' px), flèche du compagnon sous son image de ' + Math.round(ab.y + ab.height - img.y - img.height) + ' px',
     Math.abs((ab.x + ab.width / 2) - (kb.x + kb.width / 2)) <= 1 && ab.y + ab.height - (img.y + img.height) >= 24);
   const dl = await val.locator('.pkm-fold-hv .pkm-fold-in > span').first().evaluate(e => { const r = document.createRange(); r.selectNodeContents(e); const b = r.getBoundingClientRect(); return { x: b.x, y: b.y, r: b.right, b: b.bottom }; });
-  ok('la flèche du compagnon ne touche pas la ligne de variation', ab.x > dl.r || ab.y > dl.b || ab.y + ab.height < dl.y);
+  const perB = await val.locator('[aria-label="Période de la courbe"]').boundingBox();
+  ok('la flèche du compagnon ne touche ni la ligne de variation ni les périodes', (ab.x > dl.r || ab.y > dl.b || ab.y + ab.height < dl.y) && ab.y + ab.height <= perB.y - 4);
   const tile0 = async () => (await page.locator(TILE).first().boundingBox()).y;
   const valBottom = async () => { const b = await val.boundingBox(); return b.y + b.height; };
   const gapOpen = (await tile0()) - (await valBottom());
