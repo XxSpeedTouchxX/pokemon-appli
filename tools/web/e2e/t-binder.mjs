@@ -215,7 +215,7 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   });
   const gapShut = (await tile0()) - (await valBottom());
   const abShut = await vArrow.boundingBox();
-  ok('pliée : la flèche du compagnon reste dans le cadre de la valeur (' + Math.round(await valBottom() - abShut.y - abShut.height) + ' px du bord)', (await valBottom()) - abShut.y - abShut.height >= 8);
+  ok('pliée : le bas du cadre de la valeur juste sous la flèche du compagnon (' + Math.round(await valBottom() - abShut.y - abShut.height) + ' px du bord)', (await valBottom()) - abShut.y - abShut.height >= 4 && (await valBottom()) - abShut.y - abShut.height <= 10);
   ok('pliés : courbe, périodes, logo, onglets et prix des cartes cachés, valeur totale gardée (' + JSON.stringify(hidden) + ')', !hidden.chart && !hidden.periods && !hidden.logo && !hidden.tabs && !hidden.head && hidden.total);
   ok('pliés : les cartes du classeur juste sous la valeur (' + Math.round(gapOpen) + ' px → ' + Math.round(gapShut) + ' px)', gapShut < 140 && gapShut < gapOpen / 3 && (await page.locator(TILE).count()) >= 6);
   await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(2500);

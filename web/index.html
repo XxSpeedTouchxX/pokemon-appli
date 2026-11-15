@@ -2232,6 +2232,13 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-fold[aria-hidden="true"] { grid-template-rows: 0fr; opacity: 0; }
 .pkm-fold[aria-hidden="true"] > .pkm-fold-in { visibility: hidden; transition: visibility 0s linear 0.32s; }
 .pkm-fold-hv[aria-hidden="true"] { margin-top: 18px; }
+/* Courbe pliée (2026-11-15, porteur) : le bas du cadre suit la flèche du compagnon (6 px sous elle, quelle que soit la
+   largeur de l'écran) au lieu de la ligne du texte ; sans :has(), la marge ci-dessus reste. */
+@supports selector(:has(*)) {
+  .pkm-hv-buddy { transition: margin-bottom 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .pkm-hv-buddy:has(> .pkm-fold-btn[aria-expanded="false"]) { margin-bottom: 28px !important; }
+  .pkm-fold-hv[aria-hidden="true"] { margin-top: -6px; }
+}
 .pkm-fold-g12[aria-hidden="true"] { margin-bottom: -12px; }
 .pkm-fold-g10[aria-hidden="true"] { margin-bottom: -10px; }
 .pkm-fold-btn { position: relative; }
@@ -3901,6 +3908,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=d99ecd21"></script>
+<script src="app.js?v=af312923"></script>
 </body>
 </html>
