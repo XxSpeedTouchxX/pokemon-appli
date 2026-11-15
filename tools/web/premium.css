@@ -119,6 +119,8 @@
    (bannière et écran de l'offre) ; le voile qui balayait tout l'en-tête de l'offre est retiré. */
 .pkm-dp-pass { display: inline-block; background-image: linear-gradient(105deg, var(--dp-base) 0%, var(--dp-base) 38%, var(--dp-glint) 50%, var(--dp-base) 62%, var(--dp-base) 100%); background-size: 260% 100%; background-position: 120% 0; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; animation: pkmDpPass 3s ease-in-out infinite; }
 .pkm-prem-btxt .pkm-dp-pass { --dp-base: #10151F; --dp-glint: #FFE46B; font-size: inherit; line-height: inherit; color: transparent; }
-.pkm-prem-hero h2 em.pkm-dp-pass { --dp-base: #FFD60A; --dp-glint: #FFFFFF; background-image: linear-gradient(105deg, #FFE46B 0%, #FFD60A 30%, #FFFFFF 50%, #FFD60A 70%, #FFB000 100%); }
+/* Écran de l'offre (2026-11-15, porteur : « un reflet brillant qui revient toutes les 2,5 secondes ») : la règle
+   « .pkm-prem-hero h2 em » (raccourci background, plus précise) remettait la taille du dégradé à 100 % et figeait le reflet. */
+.pkm-prem-hero h2 em.pkm-dp-pass { --dp-base: #FFD60A; --dp-glint: #FFFFFF; background-image: linear-gradient(105deg, #FFD60A 0%, #FFD60A 38%, #FFFFFF 50%, #FFD60A 62%, #FFB000 100%); background-size: 260% 100%; background-position: 120% 0; animation: pkmDpPass 2.5s ease-in-out infinite; }
 @keyframes pkmDpPass { 0%, 50% { background-position: 120% 0; } 80%, 100% { background-position: -20% 0; } }
 @media (prefers-reduced-motion: reduce) { .pkm-dp-pass { animation: none; background-position: 50% 0; } }

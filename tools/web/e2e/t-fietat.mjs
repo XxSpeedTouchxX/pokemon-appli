@@ -67,7 +67,9 @@ const fmRows = await rowsOf(fm);
 ok('prix du marché : 4 lignes Dropicards, Cardmarket, eBay, Vinted (« ' + fmRows.map(r => r.text).join(' | ') + ' »)', fmRows.length === 4 && /^Dropicards /.test(fmRows[0].text) && /^Cardmarket /.test(fmRows[1].text) && /^eBay /.test(fmRows[2].text) && /^Vinted /.test(fmRows[3].text));
 const confBand = t => { const m = /(Confiance bonne|Confiance moyenne|Cote à confirmer) · (\d+) %/.exec(N(t)); if (!m) return false; const v = +m[2]; return m[1] === 'Confiance bonne' ? v >= 75 && v <= 100 : m[1] === 'Confiance moyenne' ? v >= 50 && v <= 74 : v >= 10 && v <= 49; };
 ok('Dropicards : estimation = moyenne des 3 plateformes (≈ 99,00 €), confiance en %', /Estimation · moyenne des 3 plateformes/.test(fmRows[0].text) && /≈ 99,00 €$/.test(fmRows[0].text) && confBand(fmRows[0].text));
-ok('Cardmarket : 99,00 €, écrit « Toutes langues » (aucun prix par langue)', fmRows[1].tag === 'A' && /^Cardmarket Toutes langues 99,00 €$/.test(fmRows[1].text));
+ok('Cardmarket : 99,00 €, écrit « Toutes langues » (aucun prix par langue)', /^Cardmarket Toutes langues 99,00 €$/.test(fmRows[1].text));
+// 2026-11-15 (porteur) : les 4 lignes ne sont plus cliquables, seuls les boutons « Voir sur … » mènent aux sites.
+ok('les 4 lignes ne sont pas des liens (seuls « Voir sur Cardmarket / eBay / Vinted »)', fmRows.every(r => r.tag === 'DIV' && !r.href) && (await fm.locator('a').count()) === 3);
 ok('eBay ≈ 108,90 € et Vinted ≈ 89,10 €, marqués « Estimation »', /^eBay Ventes réussies Estimation ≈ 108,90 €$/.test(fmRows[2].text) && /^Vinted Annonces en ligne Estimation ≈ 89,10 €$/.test(fmRows[3].text));
 ok('détail Cardmarket, note d’explication, date et « Signaler » retirés', await fm.locator('.pkm-fm-detail, .pkm-fm-estnote, .pkm-fm-date, .pkm-fm-report').count() === 0);
 const logos = await fm.locator('img').evaluateAll(els => els.map(e => ({ src: e.getAttribute('src'), w: e.naturalWidth })));
@@ -87,7 +89,7 @@ ok('menu : 3 drapeaux Français, Japonais, Anglais (' + opts.join(', ') + ')', o
 await fm.locator('.pkm-fm-langs button', { hasText: 'Anglais' }).click(); await page.waitForTimeout(300);
 const en = await linksOf(fm), enRows = await rowsOf(fm);
 ok('anglais choisi : menu fermé, drapeau anglais', !(await fm.locator('.pkm-fm-langs').count()) && /anglais/.test(await flagBtn.getAttribute('aria-label')));
-ok('anglais : liens de la carte anglaise (eBay « ' + en.eb + ' », Vinted « ' + en.vt + ' »)', en.ebSold && /\(anglais,english,eng\)$/.test(en.eb) && /anglaise/.test(en.vt) && (/language=1/.test(en.cm) || /Search\?searchString=/.test(en.cm)) && enRows[1].href === en.cm);
+ok('anglais : liens de la carte anglaise (eBay « ' + en.eb + ' », Vinted « ' + en.vt + ' »)', en.ebSold && /\(anglais,english,eng\)$/.test(en.eb) && /anglaise/.test(en.vt) && (/language=1/.test(en.cm) || /Search\?searchString=/.test(en.cm)) && enRows.length === 4);
 await flagBtn.click(); await page.waitForTimeout(250);
 await fm.locator('.pkm-fm-langs button', { hasText: 'Japonais' }).click(); await page.waitForTimeout(300);
 const ja = await linksOf(fm);

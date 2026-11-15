@@ -148,7 +148,7 @@ await page.waitForTimeout(3000);
 const t2 = await addOnce();
 d = await saved();
 ok('même carte une 2e fois : « ' + t2 + ' », solde ' + d.pk, !/PK/.test(t2) && d.pk === 100);
-await page.waitForTimeout(2400); // fin de l'animation d'ajout au classeur
+await page.waitForTimeout(3400); // fin de l’animation d’ajout au classeur
 await page.locator('section.pkm-fi button[aria-label="Fermer"]').click().catch(() => {}); await page.waitForTimeout(400);
 await page.click('button[aria-label="Accueil"]').catch(() => {}); await page.waitForTimeout(400);
 ok('compteur : ' + await cText(), await cText() === '100 PK');

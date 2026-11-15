@@ -17,6 +17,14 @@ ok('bannière : reflet sur « Pass » (' + passFx.slice(0, 2).join(', ') + ')', 
 await banner.click(); await page.waitForTimeout(600);
 const sh = page.locator('section[aria-label="DropiPass"]');
 ok('écran de l’offre : plus de voile sur tout l’en-tête, reflet sur « Pass » seulement', (await sh.locator('.pkm-prem-hero .pkm-prem-shine').count()) === 0 && (await sh.locator('.pkm-prem-hero h2 .pkm-dp-pass').count()) === 1);
+// Reflet de l'écran de l'offre (2026-11-15, porteur) : il revient toutes les 2,5 s et se voit vraiment (dégradé plus
+// large que le mot, sa position bouge pendant l'animation).
+const heroFx = await sh.locator('.pkm-prem-hero h2 .pkm-dp-pass').evaluate(async e => {
+  const cs = () => getComputedStyle(e), a = [cs().animationName, cs().animationDuration, cs().backgroundSize], seen = new Set();
+  for (let i = 0; i < 14; i++) { seen.add(cs().backgroundPositionX); await new Promise(r => setTimeout(r, 200)); }
+  return a.concat([seen.size]);
+});
+ok('écran de l’offre : reflet animé sur « Pass » toutes les 2,5 s (' + heroFx.join(', ') + ')', heroFx[0] === 'pkmDpPass' && heroFx[1] === '2.5s' && /^260%/.test(heroFx[2]) && heroFx[3] > 2);
 const t = await sh.innerText();
 ok('icônes animées : scanner, classeur, radar, goutte des PA « 2XP », graphique', (await sh.locator('svg.pkm-prem-scan').count()) === 1 && (await sh.locator('svg.pkm-prem-bind').count()) === 1 && (await sh.locator('.pkm-prem-radar').count()) === 1
   && (await sh.locator('.pkm-prem-xp-tag').first().innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1

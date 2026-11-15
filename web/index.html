@@ -540,9 +540,12 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-vit-slot { position: relative; height: 132px; min-width: 0; }
 .pkm-vit-slot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 16px; height: 8px; background: linear-gradient(rgba(220, 235, 255, 0.55), rgba(160, 190, 255, 0.15)); box-shadow: 0 0 12px rgba(168, 182, 255, 0.35); }
 .pkm-vit-item { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-.pkm-vit-photo { position: absolute; left: 5%; right: 5%; top: 4px; bottom: 24px; display: flex; align-items: flex-end; justify-content: center; }
-.pkm-vit-photo > img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.6)); -webkit-box-reflect: below 2px linear-gradient(transparent 74%, rgba(255, 255, 255, 0.16)); }
-.pkm-vit-art { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 4 / 3; border-radius: 8px; box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5); }
+/* Vitrine : chaque produit dans une case identique (2026-11-15, porteur : « chaque item exactement la même taille ») ;
+   les visuels n'ont pas tous la même forme (photo large avec fond, display en hauteur) : ils sont ajustés dans la case
+   sans être coupés, la case garde la même largeur et la même hauteur pour tous. */
+.pkm-vit-photo { position: absolute; left: 6%; right: 6%; top: 6px; bottom: 28px; box-sizing: border-box; padding: 6px; border-radius: 12px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), 0 8px 14px rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.pkm-vit-photo > img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5)); }
+.pkm-vit-art { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; border-radius: 8px; }
 .pkm-vit-art > img { width: 80%; height: 70%; object-fit: contain; }
 .pkm-vit-pill { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); max-width: 96%; box-sizing: border-box; z-index: 2; }
 /* Fiche d'une carte ou d'un produit (2026-10-21, vidéos du porteur) : panneau qui monte du bas. */
@@ -604,7 +607,8 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fm .pkm-fi-h3 .pkm-fi-flag { flex: none; }
 .pkm-fm-list { display: flex; flex-direction: column; gap: 8px; }
 .pkm-fm-row { min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; border: 1px solid #24345C; background: #18233F; color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-a.pkm-fm-row:active { background: #1E2B4D; }
+/* Lignes du prix du marché : simples lignes d'information (2026-11-15, porteur) ; seuls « Voir sur Cardmarket / eBay /
+   Vinted » mènent aux sites. */
 .pkm-fm-logo { flex: none; width: 44px; height: 44px; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .pkm-fm-logo img { display: block; max-width: 34px; max-height: 30px; width: auto; height: auto; }
 .pkm-fm-logo-dp { background: transparent; }
@@ -2188,30 +2192,30 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-sv-others-h { flex: none; margin: 10px 0 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--pkm-t1); }
 
 /* ——— Ajout au classeur animé (2026-11-15, porteur ; fiche.js, addFx) ———
-   2,3 s : la carte (ou le produit) apparaît, s'envole dans le classeur, qui l'avale en rebondissant avec des éclats ;
+   3,3 s (2,3 s puis 1 s de plus, porteur, 2026-11-15) : la carte (ou le produit) apparaît, s'envole dans le classeur, qui l'avale en rebondissant avec des éclats ;
    la valeur ajoutée monte, puis la nouvelle valeur de l'onglet du classeur. Rien ne bloque l'écran (pointer-events). */
 .pkm-afx { position: fixed; inset: 0; z-index: 400; pointer-events: none; display: flex; align-items: center; justify-content: center; }
-.pkm-afx-veil { position: absolute; inset: 0; background: rgba(4, 7, 14, 0.55); opacity: 0; animation: pkmAfxVeil 2.3s ease forwards; }
+.pkm-afx-veil { position: absolute; inset: 0; background: rgba(4, 7, 14, 0.55); opacity: 0; animation: pkmAfxVeil 3.3s ease forwards; }
 @keyframes pkmAfxVeil { 0% { opacity: 0; } 10%, 84% { opacity: 1; } 100% { opacity: 0; } }
-.pkm-afx-stage { position: relative; width: 260px; height: 360px; animation: pkmAfxOut 2.3s ease forwards; }
+.pkm-afx-stage { position: relative; width: 260px; height: 360px; animation: pkmAfxOut 3.3s ease forwards; }
 @keyframes pkmAfxOut { 0%, 84% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(10px) scale(0.96); } }
-.pkm-afx-binder { position: absolute; left: 50%; top: 158px; width: 140px; margin-left: -70px; opacity: 0; transform-origin: 50% 80%; animation: pkmAfxBinder 2.3s cubic-bezier(0.2, 0.9, 0.3, 1.25) forwards; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45)); }
+.pkm-afx-binder { position: absolute; left: 50%; top: 158px; width: 140px; margin-left: -70px; opacity: 0; transform-origin: 50% 80%; animation: pkmAfxBinder 3.3s cubic-bezier(0.2, 0.9, 0.3, 1.25) forwards; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45)); }
 .pkm-afx-binder img { display: block; width: 100%; height: auto; }
 @keyframes pkmAfxBinder { 0% { opacity: 0; transform: scale(0.4) translateY(30px); } 12% { opacity: 1; transform: scale(1); } 42% { transform: scale(1); } 47% { transform: scale(1.16, 0.88); } 54% { transform: scale(0.95, 1.07); } 61%, 100% { opacity: 1; transform: scale(1); } }
-.pkm-afx-item { position: absolute; left: 50%; top: 0; width: 108px; aspect-ratio: 63 / 88; margin-left: -54px; border-radius: 6px; overflow: hidden; background: #0E1526; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.14); opacity: 0; animation: pkmAfxFly 2.3s cubic-bezier(0.55, 0, 0.65, 1) forwards; }
+.pkm-afx-item { position: absolute; left: 50%; top: 0; width: 108px; aspect-ratio: 63 / 88; margin-left: -54px; border-radius: 6px; overflow: hidden; background: #0E1526; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.14); opacity: 0; animation: pkmAfxFly 3.3s cubic-bezier(0.55, 0, 0.65, 1) forwards; }
 .pkm-afx-item img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .pkm-afx-sealed .pkm-afx-item { width: 128px; aspect-ratio: 1; background: transparent; box-shadow: none; border-radius: 0; overflow: visible; }
 .pkm-afx-sealed .pkm-afx-item img { object-fit: contain; object-position: center; filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.55)); }
 @keyframes pkmAfxFly { 0% { opacity: 0; transform: translateY(-40px) scale(0.7) rotate(-8deg); } 12% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); } 24% { opacity: 1; transform: translateY(-10px) scale(1.04) rotate(-2deg); } 44% { opacity: 1; transform: translateY(150px) scale(0.24) rotate(10deg); } 47%, 100% { opacity: 0; transform: translateY(156px) scale(0.12) rotate(12deg); } }
 .pkm-afx-sparks { position: absolute; left: 50%; top: 214px; width: 0; height: 0; }
-.pkm-afx-sparks i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #FFE46B; box-shadow: 0 0 10px 2px rgba(255, 214, 10, 0.7); opacity: 0; transform: rotate(var(--a)) translateY(0); animation: pkmAfxSpark 2.3s ease-out forwards; }
+.pkm-afx-sparks i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #FFE46B; box-shadow: 0 0 10px 2px rgba(255, 214, 10, 0.7); opacity: 0; transform: rotate(var(--a)) translateY(0); animation: pkmAfxSpark 3.3s ease-out forwards; }
 .pkm-afx-sparks i:nth-child(2n) { width: 6px; height: 6px; background: #FFFFFF; }
 @keyframes pkmAfxSpark { 0%, 45% { opacity: 0; transform: rotate(var(--a)) translateY(0) scale(0.6); } 49% { opacity: 1; } 66% { opacity: 0; transform: rotate(var(--a)) translateY(-92px) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-92px); } }
 .pkm-afx-gain, .pkm-afx-what, .pkm-afx-total { position: absolute; left: -20px; right: -20px; margin: 0; text-align: center; opacity: 0; }
-.pkm-afx-gain { top: 112px; font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 800; color: #3DDC84; -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35); text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6); animation: pkmAfxGain 2.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards; }
+.pkm-afx-gain { top: 112px; font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 800; color: #3DDC84; -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35); text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6); animation: pkmAfxGain 3.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards; }
 @keyframes pkmAfxGain { 0%, 46% { opacity: 0; transform: translateY(26px) scale(0.6); } 56% { opacity: 1; transform: translateY(0) scale(1.08); } 64%, 100% { opacity: 1; transform: translateY(0) scale(1); } }
-.pkm-afx-what { top: 284px; font-size: 14px; font-weight: 700; color: #F3F6FC; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); animation: pkmAfxText 2.3s ease forwards; }
-.pkm-afx-total { top: 308px; display: flex; flex-direction: column; align-items: center; gap: 1px; animation: pkmAfxText 2.3s ease forwards; }
+.pkm-afx-what { top: 284px; font-size: 14px; font-weight: 700; color: #F3F6FC; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); animation: pkmAfxText 3.3s ease forwards; }
+.pkm-afx-total { top: 308px; display: flex; flex-direction: column; align-items: center; gap: 1px; animation: pkmAfxText 3.3s ease forwards; }
 .pkm-afx-total span { font-size: 12px; font-weight: 600; color: #C9D3EA; }
 .pkm-afx-total b { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6); }
 @keyframes pkmAfxText { 0%, 44% { opacity: 0; transform: translateY(8px); } 54%, 100% { opacity: 1; transform: none; } }
@@ -2797,7 +2801,9 @@ nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="wi
    (bannière et écran de l'offre) ; le voile qui balayait tout l'en-tête de l'offre est retiré. */
 .pkm-dp-pass { display: inline-block; background-image: linear-gradient(105deg, var(--dp-base) 0%, var(--dp-base) 38%, var(--dp-glint) 50%, var(--dp-base) 62%, var(--dp-base) 100%); background-size: 260% 100%; background-position: 120% 0; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; animation: pkmDpPass 3s ease-in-out infinite; }
 .pkm-prem-btxt .pkm-dp-pass { --dp-base: #10151F; --dp-glint: #FFE46B; font-size: inherit; line-height: inherit; color: transparent; }
-.pkm-prem-hero h2 em.pkm-dp-pass { --dp-base: #FFD60A; --dp-glint: #FFFFFF; background-image: linear-gradient(105deg, #FFE46B 0%, #FFD60A 30%, #FFFFFF 50%, #FFD60A 70%, #FFB000 100%); }
+/* Écran de l'offre (2026-11-15, porteur : « un reflet brillant qui revient toutes les 2,5 secondes ») : la règle
+   « .pkm-prem-hero h2 em » (raccourci background, plus précise) remettait la taille du dégradé à 100 % et figeait le reflet. */
+.pkm-prem-hero h2 em.pkm-dp-pass { --dp-base: #FFD60A; --dp-glint: #FFFFFF; background-image: linear-gradient(105deg, #FFD60A 0%, #FFD60A 38%, #FFFFFF 50%, #FFD60A 62%, #FFB000 100%); background-size: 260% 100%; background-position: 120% 0; animation: pkmDpPass 2.5s ease-in-out infinite; }
 @keyframes pkmDpPass { 0%, 50% { background-position: 120% 0; } 80%, 100% { background-position: -20% 0; } }
 @media (prefers-reduced-motion: reduce) { .pkm-dp-pass { animation: none; background-position: 50% 0; } }
 
@@ -3878,6 +3884,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=9287a884"></script>
+<script src="app.js?v=391f6cd4"></script>
 </body>
 </html>

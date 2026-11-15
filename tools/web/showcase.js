@@ -32,7 +32,9 @@
       hasTag: soon || recent, tag: soon ? showCountdown(p.release) : 'Nouveau', tagBg: soon ? 'var(--pkm-orange)' : 'var(--pkm-green)',
       owned: q > 0, qty: '×' + q,
       label: p.name + ', ' + (when ? when.toLowerCase() : 'date à venir') + (k !== null ? ', cote ' + this.eur(k) : '') + (q ? ', ' + q + ' dans ta collection' : ''),
-      open: () => this.openTcg(p.id)
+      // Sorties récentes et prochaines sorties (2026-11-15, porteur) : la fiche en panneau, avec le prix du marché
+      // Dropicards, Cardmarket, eBay et Vinted, à la place de l'ancienne page.
+      open: () => this.fiOpen(p.id)
     });
   };
   // Compte à rebours d'une sortie à venir (« Dans 26 j », « Demain », « Aujourd'hui »).

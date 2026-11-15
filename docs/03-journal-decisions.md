@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-15 — Animation d'ajout plus longue, reflet du « Pass », lignes du prix du marché, sorties de l'accueil, vitrine, « Profil Passionné » (porteur)
+
+- **Ajout au classeur** (cache v214) : animation passée de 2,3 s à 3,3 s (« 1 seconde de plus, qu'on ait bien le temps de voir »), même enchaînement.
+- **Écran DropiPass** : le reflet du « Pass » était figé (une ancienne règle plus prioritaire remettait la taille du dégradé à 100 %) ; il passe maintenant toutes les 2,5 s. La bannière garde son reflet toutes les 3 s.
+- **Prix du marché** (fiche d'une carte ou d'un produit) : les 4 lignes Dropicards, Cardmarket, eBay et Vinted ne sont plus cliquables ; seuls « Voir sur Cardmarket », « Voir sur eBay » et « Voir sur Vinted » mènent aux sites.
+- **Sorties récentes et Prochaines sorties** (accueil) : un produit s'ouvre dans la fiche en panneau (prix Dropicards, Cardmarket, eBay, Vinted), plus dans l'ancienne page.
+- **Vitrine « Mes produits scellés »** : chaque produit dans une case identique (même largeur, même hauteur), visuel ajusté sans être coupé.
+- **Accueil** : encadré « Profil Passionné : le mode avancé… » retiré.
+
+---
+
 ## 2026-11-15 — Recherche déplacée dans « Toutes les séries », fiche en panneau, ajout animé au classeur, DropiPass 2b, lots de « Ma ligue » (porteur)
 
 - **Recherche** (cache v213) : la recherche des extensions en haut de « Toutes les séries » est retirée ; la recherche des cartes et des produits de l'accueil y est déplacée (l'accueil n'a plus de barre de recherche). Une carte ou un produit touché dans ses résultats (et dans « Voir les N résultats ») s'ouvre dans la **fiche en panneau** (prix du marché Cardmarket, eBay, Vinted, historique, prix par état), plus dans l'ancienne page.

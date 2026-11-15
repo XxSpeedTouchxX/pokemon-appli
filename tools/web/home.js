@@ -330,6 +330,9 @@
     // Recherche des cartes et des produits (2026-11-15, porteur) : déplacée de l'accueil vers « Toutes les séries »,
     // à la place de la recherche des extensions ; ses résultats s'ouvrent dans la fiche en panneau (fiche.js).
     if (x.s.screen === 'collection') { r.hs = this.homeSearch(x); return r; }
+    // Encadré « Profil Passionné : le mode avancé ajoute les lots… » retiré de l'accueil (2026-11-15, porteur : « on
+    // s'en fiche ») ; le mode avancé n'existe plus dans les Réglages depuis le 2026-11-06.
+    r.passion = false;
     if (x.s.screen !== 'home') return r;
     r.hv = this.homeTrend(x, r.valueBig);
     r.hk = this.homeBinder(x);

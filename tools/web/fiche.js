@@ -46,7 +46,8 @@
       return this.catalog().reduce((n, p) => ((p.type === 'sealed') === sealed && c.stock[p.id] ? n + (this.unitVal(p, st.valuation) || 0) * c.stock[p.id].qty : n), 0);
     } finally { this.__valS = keep; }
   };
-  const FI_AFX_MS = 2300, FI_AFX_SPARKS = 10;
+  // 3,3 s (2026-11-15, porteur : « 1 seconde de plus, qu'on ait bien le temps de voir ») ; games.css suit.
+  const FI_AFX_MS = 3300, FI_AFX_SPARKS = 10;
   fiProto.addFx = function (p, before, after) {
     if (typeof document === 'undefined' || !p) return;
     const host = document.getElementById('app') || document.body, old = document.querySelector('.pkm-afx');
@@ -76,7 +77,7 @@
     el.setAttribute('aria-label', p.name + (sealed ? ' ajouté à Mes produits scellés' : ' ajoutée à Mes cartes') + ' · ' + label + ' : ' + money(after));
     host.appendChild(el);
     // La valeur du classeur monte de l'ancienne à la nouvelle quand l'article est avalé.
-    const t0 = Date.now() + 1050, dur = 650, raf = window.requestAnimationFrame || (f => setTimeout(f, 16));
+    const t0 = Date.now() + 1520, dur = 900, raf = window.requestAnimationFrame || (f => setTimeout(f, 16));
     const tick = () => {
       if (!el.isConnected) return;
       const k = Math.min(1, Math.max(0, (Date.now() - t0) / dur)), e = 1 - Math.pow(1 - k, 3);

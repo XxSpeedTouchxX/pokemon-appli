@@ -99,7 +99,7 @@ const owned1 = await page.locator('main .pkm-sv-card .pkm-sv-qty').count();
 const afx = page.locator('.pkm-afx'), afxTxt = (await afx.count()) ? await afx.textContent() : '';
 ok('« + » (avec le mini-classeur) : animation « ' + afxTxt + ' », sans message en bas', (await page.locator('main .pkm-sv-add img[src$="classeur.svg"]').count()) > 0
   && /^\+.*€Ajoutée à Mes cartesValeur de mes cartes/.test(afxTxt) && (await page.locator('[role="status"]', { hasText: 'collection à' }).count()) === 0);
-await page.waitForTimeout(2400);
+await page.waitForTimeout(3400);
 ok('« + » : cartes possédées ' + owned0 + ' → ' + owned1 + ', carte en couleur avec ×1', owned1 === owned0 + 1 && (await page.locator('main .pkm-sv-card').first().getAttribute('class')).indexOf('pkm-sv-miss') < 0
   && /×1/.test(await page.locator('main .pkm-sv-card').first().innerText()));
 // 2026-11-01 (porteur) : plus de cœur (favori), seul le « + » ; un appui sur une carte ouvre la fiche en panneau, la même

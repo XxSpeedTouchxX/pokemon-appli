@@ -80,7 +80,7 @@ await page.locator('section.pkm-fi .pkm-fi-main').click(); await page.waitForTim
 await page.locator('button[style*="height: 54px"][style*="border-radius: 999px"]').last().click(); await page.waitForTimeout(250);
 // Ajout animé (2026-11-15, porteur) : la carte s'envole dans le classeur, à la place du message du bas.
 ok('ajout : animation du classeur (« Ajouté à Mes cartes » ou « … produits scellés »), sans message en bas', (await page.locator('.pkm-afx').count()) === 1 && /Ajoutée? à Mes (cartes|produits scellés)/.test(await page.locator('.pkm-afx').textContent()) && (await page.locator('[role="status"]', { hasText: 'collection à' }).count()) === 0);
-await page.waitForTimeout(2400);
+await page.waitForTimeout(3400);
 ok('ajout : l’animation s’efface seule', (await page.locator('.pkm-afx').count()) === 0);
 await page.locator('section.pkm-fi button[aria-label="Fermer"]').click().catch(() => {}); await page.waitForTimeout(500);
 await page.click('button[aria-label="Accueil"]'); await page.waitForTimeout(600);

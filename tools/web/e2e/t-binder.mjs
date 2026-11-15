@@ -22,6 +22,14 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('ordre de l’accueil : ' + order.join(' > '), order.join('|') === 'Valeur de ma collection|Mon classeur|Boutiques près de toi|Pré-gradation|Sorties récentes|Prochaines sorties');
   const last = await page.evaluate(() => { const s = document.querySelector('section[aria-label="Prochaines sorties"]'); let n = s.nextElementSibling; const after = []; while (n) { after.push(n.tagName + ':' + (n.getAttribute('aria-label') || n.innerText.slice(0, 30))); n = n.nextElementSibling; } return after; });
   ok('« Prochaines sorties » tout en bas, juste avant la mention de non-affiliation (' + last.join(', ') + ')', last.length === 1 && /non affiliée/.test(await page.locator('section[aria-label="Prochaines sorties"] + p').innerText()));
+  // Sorties récentes et prochaines sorties (2026-11-15, porteur) : un produit s'ouvre dans la fiche en panneau.
+  const rel = page.locator('section[aria-label="Sorties récentes"] button[aria-label], section[aria-label="Prochaines sorties"] button[aria-label]').filter({ hasNotText: 'Toutes les sorties' }).first();
+  if (await rel.count()) {
+    await rel.scrollIntoViewIfNeeded(); await rel.click(); await page.waitForTimeout(900);
+    ok('sortie de l’accueil : fiche en panneau avec le prix du marché, pas l’ancienne page', (await page.locator('section.pkm-fi').count()) === 1 && /Prix du marché/.test(await page.locator('section.pkm-fi').innerText()) && (await page.locator('section[aria-label="Visuel"]').count()) === 0);
+    await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(600);
+  }
+  ok('plus d’encadré « Profil Passionné » sur l’accueil', !/Profil Passionné/.test(await page.locator('#app').innerText()) && (await page.locator('section[aria-label="Suggestion"]').count()) === 0);
   ok('titre « Mon classeur »', (await page.locator(SEC + ' h2').innerText()) === 'Mon classeur');
   const logo = page.locator(SEC + ' img[src="img/brand/classeur.svg"]');
   const lb = await logo.boundingBox(), sb = await page.locator(SEC + ' > div').boundingBox();
@@ -73,6 +81,9 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   ok('vitrine en verre, 3 par tablette : ' + await page.locator(TILE).count() + ' produits', cols === 3 && (await page.locator(TILE).count()) === 6 && (await page.locator(SEC + ' button[aria-label="Page suivante"]').count()) === 0);
   const vpill = await page.locator(TILE).first().evaluate(b => { const p = b.querySelector('.pkm-vit-pill'), s = p.querySelectorAll(':scope > span'); return s.length === 3 && /linear-gradient/.test(getComputedStyle(s[0]).backgroundImage) && /€/.test(s[1].innerText); });
   ok('pastille du scellé identique aux cartes (drapeau, cote, état)', vpill);
+  // Cases identiques (2026-11-15, porteur : « chaque item exactement la même taille ») : même largeur, même hauteur.
+  const boxes = await page.locator(PANEL + ' .pkm-vit-photo').evaluateAll(els => els.map(e => { const r = e.getBoundingClientRect(); return Math.round(r.width) + '×' + Math.round(r.height); }));
+  ok('vitrine : toutes les cases de la même taille (' + [...new Set(boxes)].join(', ') + ')', boxes.length === 6 && new Set(boxes).size === 1);
   ok('« Tout afficher » aussi sur le scellé', (await page.locator(PANEL + ' .pkm-hk-all').innerText()) === 'Tout afficher');
   ok('bouton jaune « Ajouter des produits scellés » en bas de l’onglet', (await page.locator(PANEL + ' .pkm-hb-add button').innerText()).trim() === 'Ajouter des produits scellés'
     && await page.locator(PANEL).evaluate(p => p.lastElementChild && p.lastElementChild.classList.contains('pkm-hb-add')));
