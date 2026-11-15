@@ -220,7 +220,7 @@ CM_EXACT = {
     "ETB": r"elite trainer box( (?!display|case|bundle|plus)[a-z]+)?",
     "BDL": r"booster bundle",
     "DSP": r"booster (box|display|display box)",
-    "DCK": r"build (and )?battle (box|stadium)",
+    "DCK": r"build (and )?battle box",  # « Boîtier » ; le « Stade » (Stadium) est un autre produit
     "BST": r"sleeved booster",
     "UPC": r"ultra ?premium collection",
 }

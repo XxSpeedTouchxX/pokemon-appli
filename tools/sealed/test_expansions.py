@@ -75,6 +75,7 @@ class Cardmarket(unittest.TestCase):
         (6, "Scarlet & Violet 151 Elite Trainer Box"), (7, "151 Elite Trainer Box"),
         (8, "Pitch Black Booster Bundle Display"), (9, "Pitch Black Build & Battle Box"), (10, "Pitch Black Build & Battle Box Display"),
         (11, "Pitch Black Booster Box (18 Boosters)"), (12, "Pitch Black Enhanced Booster Box"), (13, "Pitch Black Sleeved Booster"),
+        (14, "Pitch Black Build & Battle Stadium"),
     ]]
 
     def test_sure_matches_only(self):
