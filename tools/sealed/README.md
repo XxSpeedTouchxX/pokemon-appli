@@ -117,3 +117,8 @@ python3 -m unittest discover -s tools/sealed -p "test_*.py"
 - l'usage des visuels de la galerie Pokémon. Les noms et visuels sont autorisés par le porteur (CLAUDE.md §4), avec la mention de non-affiliation.
 
 - 2026-11-09 : guide des prix refusé → prix de la veille gardés, mais liste des produits et visuels mis à jour (`build_sealed.py` écrit le fichier et sort en erreur ; `check_data.py` n'en fait qu'un avertissement si la date des prix est inchangée).
+
+**2026-11-15 (suite)** : rapprochement Cardmarket des produits officiels sur le nom exact « <extension> <sorte> » (`CM_EXACT`
+dans `expansions.py` ; jamais « … Display », « … (18 Boosters) », « Enhanced … ») ; liens `cmAuto` recalculés à chaque passage.
+`build_sealed.py` écrit `imgUrl` (visuel officiel, hôtes de Pokémon seulement) pour les produits sans image enregistrée ; l'app
+l'affiche directement. `fetch_images.py` écrit la raison d'un échec (réponse HTTP) dans le journal.

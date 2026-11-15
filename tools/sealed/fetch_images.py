@@ -31,14 +31,22 @@ def candidates(tile):
     return [tile]
 
 
+LAST = {"why": ""}  # raison du dernier échec, écrite dans le journal (2026-11-15 : savoir si le site refuse GitHub)
+
+
 def download(url):
     req = Request(url, headers={"User-Agent": UA, "Accept": "image/png,image/*"})
     try:
         with urlopen(req, timeout=60) as resp:
             data = resp.read()
-            return data if data[:4] == b"\x89PNG" or data[:3] == b"\xff\xd8\xff" else None
-    except (HTTPError, URLError, TimeoutError):
-        return None
+            ok = data[:4] == b"\x89PNG" or data[:3] == b"\xff\xd8\xff"
+            LAST["why"] = "" if ok else f"réponse {resp.status}, {resp.headers.get('Content-Type', '?')}, pas une image"
+            return data if ok else None
+    except HTTPError as e:
+        LAST["why"] = f"réponse {e.code}"
+    except (URLError, TimeoutError) as e:
+        LAST["why"] = f"injoignable ({getattr(e, 'reason', e)})"
+    return None
 
 
 def to_169(im):
@@ -94,7 +102,7 @@ def main():
             break
         else:
             missing.append(p["id"])
-            print(f"  {p['id']} : aucun visuel")
+            print(f"  {p['id']} : aucun visuel ({LAST['why'] or 'adresse vide'})")
     total = sum(f.stat().st_size for f in OUT.glob("*.webp"))
     print(f"{done} visuel(s) ajouté(s) · {len(list(OUT.glob('*.webp')))} au total, {total // 1024} Ko · sans visuel : {missing or 'aucun'}")
     if missing and len(missing) == sum(1 for p in products if p.get("img")):

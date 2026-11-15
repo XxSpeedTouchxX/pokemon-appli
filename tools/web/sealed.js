@@ -43,7 +43,9 @@
       // Avant la sortie, pas de cote : le prix Cardmarket des précommandes est affiché comme prix demandé.
       cm: upcoming ? null : trend, low: upcoming ? (low || trend) : low, avg30: r[F.avg30], ebay: null, tcp: null, seed: seed,
       release: upcoming ? rel : null, released: rel, releaseText: r[F.releaseText] || '', year: r[F.year],
-      photo: r[F.photo] ? 'img/products/' + r[F.id] + '.webp' : '', variants: r[F.variants] || 0,
+      // Sans visuel enregistré : visuel officiel affiché directement depuis le site de Pokémon (imgUrl, 2026-11-15 ;
+      // si lui aussi manque, le logo de l'extension, comme avant).
+      photo: r[F.photo] ? 'img/products/' + r[F.id] + '.webp' : (F.imgUrl !== undefined && /^https:\/\/(d1i787aglh9bmb\.cloudfront\.net|www\.pokemon\.com\/static-assets)\//.test(r[F.imgUrl] || '') ? r[F.imgUrl] : ''), variants: r[F.variants] || 0,
       // Page Sorties (absents des fichiers plus anciens) : ASIN Amazon, prix de lancement constaté, recherche, sources.
       amazon: r[F.amazon] || '', msrp: r[F.msrp] || null, msrpSource: r[F.msrpSource] || '', q: r[F.q] || '', dateSource: r[F.dateSource] || '',
       // Tendance archivée chaque jour (sealed.json : « days » en en-tête, « hist » alignée) : tendance sur l'accueil.

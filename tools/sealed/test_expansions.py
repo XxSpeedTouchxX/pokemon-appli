@@ -73,6 +73,8 @@ class Cardmarket(unittest.TestCase):
         (1, "Pitch Black Elite Trainer Box"), (2, "Pitch Black Booster Box"), (3, "Pitch Black Booster Bundle"),
         (4, "Scarlet & Violet Elite Trainer Box: Koraidon"), (5, "Scarlet & Violet Elite Trainer Box: Miraidon"),
         (6, "Scarlet & Violet 151 Elite Trainer Box"), (7, "151 Elite Trainer Box"),
+        (8, "Pitch Black Booster Bundle Display"), (9, "Pitch Black Build & Battle Box"), (10, "Pitch Black Build & Battle Box Display"),
+        (11, "Pitch Black Booster Box (18 Boosters)"), (12, "Pitch Black Enhanced Booster Box"), (13, "Pitch Black Sleeved Booster"),
     ]]
 
     def test_sure_matches_only(self):
@@ -81,9 +83,16 @@ class Cardmarket(unittest.TestCase):
         self.assertEqual(E.cm_match("sv01", "ETB", self.CM), [4, 5])
         self.assertEqual(E.cm_match("sv03.5", "ETB", self.CM), [7])
 
+    def test_never_a_whole_carton(self):
+        # 2026-11-15 : « Booster Bundle Display », « Build & Battle Box Display », « Booster Box (18 Boosters) » écartés.
+        self.assertEqual(E.cm_match("me05", "BDL", self.CM), [3])
+        self.assertEqual(E.cm_match("me05", "DCK", self.CM), [9])
+        self.assertEqual(E.cm_match("me05", "DSP", self.CM), [2])
+        self.assertEqual(E.cm_match("me05", "BST", self.CM), [13])
+
     def test_collections_never_guessed(self):
         self.assertEqual(E.cm_match("me05", "CFT", self.CM), [])
-        self.assertEqual(E.cm_match("me05", "BST", self.CM), [])
+        self.assertEqual(E.cm_match("me05", "TIN", self.CM), [])
 
 
 class Catalogue(unittest.TestCase):

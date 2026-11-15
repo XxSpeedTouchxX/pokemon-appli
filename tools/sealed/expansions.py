@@ -128,7 +128,9 @@ def collect():
             print(f"  {set_id} ({slug}) : {len(found)} produit(s)")
         else:
             prev = len((raw.get(set_id) or {}).get("products") or [])
-            print(f"  {set_id} ({slug}) : page illisible (réponse {status}), {prev} produit(s) déjà connus gardés")
+            # Indices pour comprendre une page lue sans produit (2026-11-15) : taille, images de produits, titres.
+            hint = f"{len(page or '')} car., {(page or '').count('/collections/')} image(s) de produits, {len(H3_RE.findall(page or ''))} titre(s)"
+            print(f"  {set_id} ({slug}) : page illisible (réponse {status} · {hint}), {prev} produit(s) déjà connus gardés")
     RAW.write_text(json.dumps(raw, ensure_ascii=False, indent=1) + "\n", "utf-8")
     print(f"{ok}/{len(SLUGS)} pages lues")
     return ok
@@ -210,14 +212,27 @@ def load_cm(path=None, url=False):
     return [p for p in prods if not re.search(EXCLUDED, p["fold"])]
 
 
+# Nom Cardmarket exact de chaque sorte, après le nom de l'extension (2026-11-15) : « Booster Bundle » mais pas
+# « Booster Bundle Display » (6 lots), « Build & Battle Box » mais pas « … Box Display » (10 boîtiers), « Booster Box »
+# (36 boosters) mais pas « Booster Box (18 Boosters) » ni « Enhanced Booster Box ». Sinon la cote (médiane des produits
+# reliés) mélange un article et un carton entier.
+CM_EXACT = {
+    "ETB": r"elite trainer box( (?!display|case|bundle|plus)[a-z]+)?",
+    "BDL": r"booster bundle",
+    "DSP": r"booster (box|display|display box)",
+    "DCK": r"build (and )?battle (box|stadium)",
+    "BST": r"sleeved booster",
+    "UPC": r"ultra ?premium collection",
+}
+
+
 def cm_match(set_id, kind, cm):
-    """Identifiants Cardmarket sûrs : nom qui commence par l'extension et contient la sorte (ETB, lot, display,
-    Stratégies et Combats, booster sous pochette, Ultra-Premium). Collections et boîtes : jamais devinées."""
-    if not cm or set_id not in EN or kind not in ("ETB", "BDL", "DSP", "DCK", "BST", "UPC"):
+    """Identifiants Cardmarket sûrs : nom exact « <extension> <sorte> » (ETB, lot, display, Stratégies et Combats,
+    booster sous pochette, Ultra-Premium). Collections et boîtes : jamais devinées."""
+    if not cm or set_id not in EN or kind not in CM_EXACT:
         return []
-    en_kind = next(en for code, _, en in KINDS if code == kind)
     head = fold(EN[set_id])
-    hits = [p for p in cm if p["fold"].startswith(head + " ") and re.search(en_kind, p["fold"])]
+    hits = [p for p in cm if p["fold"].startswith(head + " ") and re.fullmatch(CM_EXACT[kind], p["fold"][len(head) + 1:])]
     if set_id == "sv01":  # « Scarlet & Violet Elite Trainer Box » mais pas « Scarlet & Violet 151 … »
         hits = [p for p in hits if not re.search(r"\b(151|paldea|obsidian|paradox|temporal|twilight|shrouded|stellar|surging|prismatic|journey|destined|black bolt|white flare)\b", p["fold"])]
     return sorted(p["idProduct"] for p in hits)[:4] if 0 < len(hits) <= 4 else []
@@ -269,15 +284,23 @@ def merge(cm):
             ids.add(new_id)
             added += 1
     # Produits ajoutés lors d'un passage sans catalogue Cardmarket (en local) : reliés dès que le catalogue est là.
+    # Les liens posés automatiquement (cmAuto) sont recalculés à chaque passage : une règle plus stricte les corrige.
+    relinked = 0
     for p in prods:
-        if cm and p.get("imgSource") == "tcg.pokemon.com" and not p.get("cm"):
+        if cm and p.get("imgSource") == "tcg.pokemon.com" and (not p.get("cm") or p.get("cmAuto")):
             ids_cm = cm_match(p.get("set"), p.get("type"), cm)
             if ids_cm:
+                if p.get("cm") != ids_cm:
+                    relinked += bool(p.get("cm"))
+                    priced += not p.get("cm")
                 p["cm"] = ids_cm
                 p["cmAuto"] = True
-                priced += 1
+            elif p.get("cmAuto"):
+                p.pop("cm", None)
+                p.pop("cmAuto", None)
+                relinked += 1
     PRODUCTS.write_text(dump(doc), "utf-8")
-    print(f"products.json : {added} produit(s) ajouté(s), {priced} relié(s) à Cardmarket, {filled} visuel(s) officiel(s) complété(s)")
+    print(f"products.json : {added} produit(s) ajouté(s), {priced} relié(s) à Cardmarket, {relinked} lien(s) corrigé(s), {filled} visuel(s) officiel(s) complété(s)")
 
 
 def main():

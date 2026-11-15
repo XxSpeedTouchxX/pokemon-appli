@@ -37,7 +37,10 @@ OUT = ROOT / "web" / "data" / "sealed.json"
 IMG = ROOT / "web" / "img" / "products"
 PRICES = "https://downloads.s3.cardmarket.com/productCatalog/priceGuide/price_guide_6.json"
 FIELDS = ["id", "name", "type", "set", "release", "releaseText", "year", "photo", "trend", "avg30", "low", "variants",
-          "amazon", "msrp", "msrpSource", "q", "dateSource", "avg7", "avg1", "hist"]
+          "amazon", "msrp", "msrpSource", "q", "dateSource", "avg7", "avg1", "hist", "imgUrl"]
+# Visuel officiel affiché directement depuis le site de Pokémon quand l'image n'a pas pu être enregistrée dans
+# web/img/products (2026-11-15 : le CDN officiel ne répond pas aux téléchargements depuis GitHub). Hôtes officiels seulement.
+OFFICIAL_IMG = re.compile(r"^https://(d1i787aglh9bmb\.cloudfront\.net|www\.pokemon\.com/static-assets)/[^\s\"'<>]+\.(png|jpe?g|webp)$", re.I)
 HIST_DAYS = 31
 PRICED = ("trend", "avg30", "low", "avg7", "avg1")  # prix gardés d'un jour à l'autre si le guide manque
 ASIN = re.compile(r"^[A-Z0-9]{10}$")
@@ -92,7 +95,7 @@ def build(products, guide, previous):
         rows.append([p["id"], p["name"], p["type"], p.get("set") or "", p.get("release") or "", p.get("releaseText") or "",
                      p.get("year") or 0, 1 if photo else 0, trend, avg30, low, len(p.get("cm", [])),
                      asin(p), price, p.get("msrpSource") if price else None, p.get("q") or None, p.get("dateSource") or None,
-                     avg7, avg1, None])
+                     avg7, avg1, None, None if photo or not OFFICIAL_IMG.match(p.get("img") or "") else p["img"]])
         priced += trend is not None
     return rows, priced
 
