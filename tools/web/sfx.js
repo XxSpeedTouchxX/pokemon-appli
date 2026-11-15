@@ -648,7 +648,8 @@
   // deux sauts qui retombent à 1,34 s et 1,89 s), puis l'ouverture (open), jouée quand le serveur a répondu (au plus
   // tôt 2,05 s après l'appui) : le coffre se tasse et s'ouvre (0 à 0,42 s), éclair et lot (0,42 s), le lot se pose
   // (1,12 s), son nombre apparaît (1,27 s). n = rang du lot : 1 (scans, 2XP 3 jours), 2 (2XP 7 et 10 jours, 2XP PA),
-  // 3 (Pokémon légendaire). 5 propositions ; ?soncoffre=1 à 5 pour en essayer une (0 = aucun).
+  // 3 (Pokémon légendaire). 15 propositions en trois séries (1 à 5, 6 à 10, puis 11 à 15 : vrais enregistrements en
+  // fichiers) ; ?soncoffre=1 à 15 pour en essayer une (0 = aucun).
   const SFX_CH_LAND = [0.65, 1.34, 1.89], SFX_CH_FLASH = 0.42, SFX_CH_ITEM = 1.12, SFX_CH_COUNT = 1.27, SFX_CH_GO = 2.05;
   // Coup de bois (coffre qui se pose) : coup sourd et petit claquement filtré.
   const sfxWood = (ac, out, at, vol) => { sfxThump(ac, out, at, vol, 150, 60, 0.16); sfxHiss(ac, out, at, 0.06, vol * 0.35, 'bandpass', 900, 500, 1.5, 0.001); };
@@ -749,11 +750,61 @@
         sfxPop(ac, out, t0 + SFX_CH_FLASH, 0.34);
         const k = [4, 6, 9][n - 1];
         for (let i = 0; i < k; i++) sfxChBubble(ac, out, 520 + ((i * 7) % 5) * 90 + i * 25, t0 + SFX_CH_FLASH + 0.1 + i * 0.075, 0.1);
-      } }
+      } },
+    // 3ᵉ série (2026-11-15, porteur : « propose-moi vraiment des vrais bruits de coffre qui s'ouvre, avec une touche un
+    // peu "jeu" » ; les séries 1 à 5 et 6 à 10 étaient trop « jeu vidéo » et « trop gaming arcade ») : de vrais
+    // enregistrements libres de droits (CC0, Kenney : « RPG Audio » et « Impact Sounds », tools/sfx/coffre/SOURCES.md),
+    // mixés par tools/sfx/coffre/make_coffre.py : coups de bois, charnière qui grince, loquet et serrure en fer,
+    // couvercle lourd, pièces. Touche « jeu » discrète : reflets de verre, souffle, petite cloche frappée ; aucun bip.
+    // Un fichier par proposition (web/sfx/coffre-11.mp3 à coffre-15.mp3), lu par parties (SFX_CH_FILE) ; ?soncoffre=11 à 15.
+    { id: 'bois', name: 'Vieux coffre qui grince', file: 'sfx/coffre-11.mp3', desc: 'Un lourd coffre en bois qui se pose et sautille, le loquet qui saute, la charnière qui grince en deux temps pendant que le couvercle bascule et cogne en arrière, puis deux ou trois reflets de verre et un léger souffle.' },
+    { id: 'serrure', name: 'Serrure de fer et couvercle lourd', file: 'sfx/coffre-12.mp3', desc: 'Les ferrures vibrent à chaque choc, la serrure fait « clic-clac », le lourd couvercle se soulève en grinçant et retombe en arrière, puis une petite cloche discrète.' },
+    { id: 'pieces-or', name: 'Loquet, charnière et pièces d’or', file: 'sfx/coffre-13.mp3', desc: 'Des pièces sautent dans le coffre à chaque choc, le loquet saute, la charnière grince, puis les pièces d’or se déversent (plus de pièces pour un gros lot).' },
+    { id: 'cle', name: 'Clé qui tourne et scintillement', file: 'sfx/coffre-14.mp3', desc: 'Un petit coffre : le trousseau tinte, la clé tourne dans la serrure, le couvercle grince, puis un scintillement doux de petits reflets de verre et un souffle.' },
+    { id: 'pirate', name: 'Vieux coffre de pirate', file: 'sfx/coffre-15.mp3', desc: 'Un gros coffre cerclé de fer, plus grave : chocs sourds, serrure lourde, couvercle qui gémit et claque en arrière, pièces d’or, et une cloche de navire au loin, toute douce.' }
   ];
+  // Fichier d'un son enregistré (3ᵉ série) : arrivée (lue dès l'appui), ouverture (instant 0 de l'ouverture à 2,50 s du
+  // fichier) et supplément des gros lots (instant 0 à 4,70 s, joué quand le nombre du lot apparaît : à mi-volume pour un
+  // gros lot, en entier pour un Pokémon légendaire). [début de lecture, fin, instant 0] ; des silences les séparent.
+  const SFX_CH_FILE = { arr: [0, 2.4, 0], open: [2.48, 4.6, 2.5], bonus: [4.68, 5.8, 4.7] };
   // Aucun son par défaut (2026-11-14, porteur : « pour l'instant ça ne me plaît pas, les sons proposés ») ; les 5
-  // propositions restent pour essai (?soncoffre=1 à 5). 2ᵉ série douce le 2026-11-15 (?soncoffre=6 à 10), choix attendu.
+  // propositions restent pour essai (?soncoffre=1 à 5). 2ᵉ série douce le 2026-11-15 (?soncoffre=6 à 10), 3ᵉ série de
+  // vrais bruits de coffre le même jour (?soncoffre=11 à 15), choix attendu.
   const SFX_CHEST_DEFAULT = null;
+  // Sons enregistrés : fichier demandé une fois (copie gardée par le service worker, hors ligne aussi), décodé une fois
+  // (un AudioBuffer se rejoue autant qu'on veut). Un échec (réseau) n'est pas gardé : il sera redemandé la fois suivante.
+  const sfxFileData = new Map(), sfxFileBuf = new Map();
+  const sfxFetch = url => {
+    if (!sfxFileData.has(url)) sfxFileData.set(url, fetch(url).then(r => { if (!r.ok) throw new Error('son ' + r.status); return r.arrayBuffer(); }).catch(e => { sfxFileData.delete(url); throw e; }));
+    return sfxFileData.get(url);
+  };
+  const sfxDecode = (ac, url) => sfxFileBuf.has(url) ? Promise.resolve(sfxFileBuf.get(url)) : sfxFetch(url).then(d => new Promise((ok, ko) => {
+    // Copie : le décodage vide le tableau qu'on lui donne. Anciens Safari : réponse par fonctions de rappel seulement.
+    const p = ac.decodeAudioData(d.slice(0), ok, ko);
+    if (p && p.catch) p.catch(ko);
+  })).then(buf => { sfxFileBuf.set(url, buf); return buf; });
+  // Joue l'extrait [from, to) du fichier pour que son début tombe à l'instant « at » ; s'il est déjà passé (fichier arrivé
+  // en retard au premier appui), seule la suite est jouée, toujours au bon moment.
+  const sfxSeg = (ac, out, buf, at, from, to, vol) => {
+    const late = Math.max(0, ac.currentTime - at), end = Math.min(to, buf.duration);
+    if (from + late >= end - 0.01) return;
+    const s = ac.createBufferSource(), g = ac.createGain();
+    s.buffer = buf; g.gain.value = vol;
+    s.connect(g); g.connect(out);
+    s.start(at + late, from + late, end - from - late);
+  };
+  // Coffre en fichier : 'chs' arrivée, 'cho' ouverture (n = rang du lot), 'chest' les deux (ouverture 2,05 s après).
+  const sfxChestFile = (ac, out, url, kind, t0, n) => {
+    const F = SFX_CH_FILE, tOpen = t0 + (kind === 'chest' ? SFX_CH_GO : 0);
+    const play = buf => {
+      if (kind !== 'cho') sfxSeg(ac, out, buf, t0 - (F.arr[2] - F.arr[0]), F.arr[0], F.arr[1], 1);
+      if (kind === 'chs') return;
+      sfxSeg(ac, out, buf, tOpen - (F.open[2] - F.open[0]), F.open[0], F.open[1], 1);
+      if (n > 1) sfxSeg(ac, out, buf, tOpen + SFX_CH_COUNT - (F.bonus[2] - F.bonus[0]), F.bonus[0], F.bonus[1], n > 2 ? 1 : 0.55);
+    };
+    const buf = sfxFileBuf.get(url);
+    if (buf) play(buf); else sfxDecode(ac, url).then(play, () => { /* son indisponible (réseau) : rien */ });
+  };
   // Perte de PK à la fin d'une partie (pa.js, pkFlyLoss) : des gouttes qui tombent de plus en plus grave, puis un coup
   // sourd et une petite note qui descend, au rythme des gemmes qui quittent le solde.
   const sfxLossPlay = (ac, out, t0) => {
@@ -779,6 +830,8 @@
     // Coffre mystère (crête vers −6 dBFS, réglés sur leur rendu).
     'ch-tresor': 0.66, 'ch-magique': 1, 'ch-fanfare': 0.62, 'ch-cristal': 1.25, 'ch-pieces': 0.75,
     'ch-clochette': 1.25, 'ch-gouttes': 2.15, 'ch-boite': 1.65, 'ch-pop': 1.07, 'ch-bulles': 1.1,
+    // Vrais bruits de coffre (fichiers déjà ramenés à un volume commun par make_coffre.py) : même crête que les autres.
+    'ch-bois': 0.69, 'ch-serrure': 0.72, 'ch-pieces-or': 0.73, 'ch-cle': 0.72, 'ch-pirate': 0.68,
     'gr-origine': 0.55, 'gr-couronnement': 0.45, 'gr-celeste': 0.5, 'gr-trailer': 0.45, 'gr-arcade': 1.5, 'gr-tonnerre': 0.45 };
   const SFX_MUSIC_LEVEL = 0.75;
 
@@ -793,6 +846,9 @@
     return list.find(x => x.id === v) || list.find(x => x.id === def) || null;
   };
   const sfxMuted = () => { try { return localStorage.getItem('pkm-tuto-sound') === 'off'; } catch (e) { return false; } };
+  // Coffre en fichier choisi (?soncoffre=11 à 15, ou plus tard le choix du porteur) : fichier demandé dès l'ouverture de
+  // l'app (sans le décoder ni ouvrir l'audio), pour que le premier choc, 0,65 s après l'appui, n'attende pas le réseau.
+  try { const x = sfxPick('soncoffre', '', SFX_CHEST, SFX_CHEST_DEFAULT); if (x && x.file && !sfxMuted()) sfxFetch(x.file).catch(() => { /* réessayé au toucher */ }); } catch (e) { /* hors navigateur */ }
   // Sortie commune : gain du son, puis limiteur doux (aucune saturation, même si sons et musique se superposent).
   const sfxBus = (ac, dest, gain) => {
     const g = ac.createGain(), c = ac.createDynamicsCompressor();
@@ -819,6 +875,7 @@
       const it = SFX_CHEST.find(x => x.id === id);
       if (!it) return false;
       const bus = sfxBus(ac, dest, SFX_GAIN['ch-' + id] || 1);
+      if (it.file) { sfxChestFile(ac, bus, it.file, kind, t0, Math.max(1, Math.min(3, n || 1))); return true; }
       if (kind !== 'cho') it.start(ac, bus, t0);
       if (kind !== 'chs') it.open(ac, bus, t0 + (kind === 'chest' ? SFX_CH_GO : 0), Math.max(1, Math.min(3, n || 1)));
       return true;
@@ -932,9 +989,13 @@
   sfxProto.sfxRender = function (list, secs) {
     const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext, rate = 44100;
     const ac = new OAC(1, Math.round(rate * (secs || SFX_END + 0.6)), rate);
-    const dest = list.length > 1 ? sfxMaster(ac, ac.destination) : ac.destination;
-    list.forEach(([kind, id, n]) => sfxSchedule(ac, dest, kind, id, 0.05, n));
-    return ac.startRendering().then(buf => {
+    // Sons enregistrés (coffre, 3ᵉ série) : fichiers décodés avant de préparer le rendu.
+    const files = list.map(([kind, id]) => /^ch/.test(kind) && (SFX_CHEST.find(x => x.id === id) || {}).file).filter(Boolean);
+    return Promise.all(files.map(f => sfxDecode(ac, f))).then(() => {
+      const dest = list.length > 1 ? sfxMaster(ac, ac.destination) : ac.destination;
+      list.forEach(([kind, id, n]) => sfxSchedule(ac, dest, kind, id, 0.05, n));
+      return ac.startRendering();
+    }).then(buf => {
       const d = buf.getChannelData(0), pcm = new Int16Array(d.length);
       let peak = 0, sum = 0;
       for (let i = 0; i < d.length; i++) { const v = Math.max(-1, Math.min(1, d[i])); pcm[i] = v * 32767; peak = Math.max(peak, Math.abs(v)); sum += v * v; }
@@ -950,4 +1011,4 @@
     booster: SFX_BOOSTER.map(x => ({ id: x.id, name: x.name, desc: x.desc })), boosterDef: SFX_BOOSTER_DEFAULT,
     unlock: SFX_UNLOCK.map(x => ({ id: x.id, name: x.name, desc: x.desc })), unlockDef: SFX_UNLOCK_DEFAULT,
     safari: SFX_SF.map(x => ({ id: x.id, name: x.name, desc: x.desc })), safariDef: SFX_SF_DEFAULT,
-    chest: SFX_CHEST.map(x => ({ id: x.id, name: x.name, desc: x.desc })), chestDef: SFX_CHEST_DEFAULT }; };
+    chest: SFX_CHEST.map(x => ({ id: x.id, name: x.name, desc: x.desc, file: x.file || null })), chestDef: SFX_CHEST_DEFAULT }; };
