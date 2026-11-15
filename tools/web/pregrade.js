@@ -39,7 +39,7 @@
       short = left > 0 ? '1 dispo' : dur(wait);
     }
     const upsell = q.mode === 'free' && !(typeof storeApp !== 'undefined' && storeApp) ? '1 tous les 3 jours · 60 par mois avec le DropiPass' : q.mode === 'free' ? '1 tous les 3 jours' : '';
-    return { left: left, mode: q.mode, text: text, short: short, upsell: upsell, hasUpsell: !!upsell, empty: left <= 0 };
+    return { left: left, mode: q.mode, text: text, short: short, upsell: upsell, hasUpsell: !!upsell, empty: left <= 0, wait: dur(wait) };
   };
   pgProto.pgSpend = function () {
     const s = this.st(), premium = !!(this.premOn && this.premOn()), admin = typeof admOf === 'function' && !!admOf(s).on;
@@ -57,7 +57,11 @@
     this.push('pregrade', Object.assign({ pgStep: q.empty ? 'intro' : 'front', pgSel: -1 }, PG_FRESH));
   };
   pgProto.pgStart = function () {
-    if (this.pgQuota().empty) { this.setState({ toast: this.pgQuota().text }); return; }
+    const q = this.pgQuota();
+    // Pré-gradation gratuite déjà utilisée (2026-11-15, porteur) : fenêtre « Accès verrouillé » avec le DropiPass
+    // (60 par mois) ; un abonné qui a tout utilisé garde le simple message.
+    if (q.empty && q.mode === 'free' && typeof this.dpLock === 'function') { this.dpLock('pg', { wait: q.wait }); return; }
+    if (q.empty) { this.setState({ toast: q.text }); return; }
     PG.shots = {}; PG.thumbs = {}; PG.raw = null; PG.warm();
     this.navSlide('fwd', Object.assign({ pgStep: 'front', pgSel: -1 }, PG_FRESH));
   };

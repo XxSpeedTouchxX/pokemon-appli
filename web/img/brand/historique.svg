@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- Historique du prix (2026-11-15) : icône de la fenêtre « Accès verrouillé » de l'historique complet. -->
+  <rect x="6" y="10" width="84" height="76" rx="18" fill="#16233F" stroke="#3A4F80" stroke-width="3"/>
+  <path d="M20 70H78M20 70V24" fill="none" stroke="#6E80AD" stroke-width="4" stroke-linecap="round"/>
+  <path d="M24 60L38 46L50 54L64 34L76 40" fill="none" stroke="#FFD60A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="76" cy="40" r="5" fill="#FFFFFF"/>
+</svg>

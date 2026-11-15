@@ -78,7 +78,12 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
     if (fn === 'pl_claim_social') { S.social[body.net] = true; S.pl += 100; return send(200, { kind: 'social', ref: body.net, pl: 100, note: 'Abonné' }); }
     if (fn === 'pl_submit_proof') { S.proof = body; S.share = 'pending'; return send(200, { ok: true, status: 'pending' }); }
     if (fn === 'season_board') return send(200, { unit: 'pl', season: { n: 1, start: '2026-11-07T23:00:00Z', end: '2027-01-06T23:00:00Z' }, players: 40, ranked: 25,
-      top: Array.from({ length: 12 }, (_, i) => ({ rank: i + 1, pseudo: 'Dresseur' + (i + 1), grade: 1, pl: 2000 - i * 100, me: false })), me: { rank: 14, pl: S.pl }, pl_season: S.pl, pl_total: S.pl + 20, pk_total: 500, grade: 1 });
+      top: Array.from({ length: 12 }, (_, i) => ({ id: 'u-' + (i + 1), rank: i + 1, pseudo: 'Dresseur' + (i + 1), grade: 1, pl: 2000 - i * 100, me: false })), me: { id: UID, rank: 14, pl: S.pl }, pl_season: S.pl, pl_total: S.pl + 20, pk_total: 500, grade: 1 });
+    // Carte de dresseur (031_carte_joueur.sql) ; S.cardOff : serveur sans 031.
+    if (fn === 'player_card' && !S.cardOff) return send(200, body.target === UID
+      ? { id: UID, pseudo: 'Sacha', avatar: null, grade: 1, me: true, since: '2026-11', season: { n: 2, rank: 14, pl: S.pl, players: 40 }, past: [] }
+      : { id: body.target, pseudo: 'Dresseur5', avatar: { skin: 's2', hair: 'long', hc: 'roux', bg: 'holo', poke: 25 }, grade: 3, me: false, since: '2026-11',
+        season: { n: 2, rank: 5, pl: 1600, players: 40 }, past: [{ n: 1, rank: 2, pl: 900, players: 30 }] });
     if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Sacha', age_range: '15-25', starter: 25, role: 'user', status: 'active' }]);
     if (p === '/auth/v1/token') return send(200, { access_token: TOKEN, refresh_token: 'r', expires_in: 3600, user: { id: UID, email: EMAIL } });
     return send(404, {});
@@ -99,7 +104,8 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   // Onglet « Mes missions ».
   await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2600);
   const head = N(await page.locator('section.pkm-ple-head').innerText());
-  ok('en tête : PL de la saison (150) et total (170 PL gagnés au total), logo des PL', /Mes PL de la saison 150/.test(head) && /170 PL gagnés au total/.test(head) && (await page.locator('section.pkm-ple-head img[src="img/brand/pl.svg"]').count()) === 1);
+  // PL de la saison seulement (2026-11-15, porteur : « on s'en fiche des PL gagnés au total »).
+  ok('en tête : PL de la saison (150) seulement, sans total, logo des PL', /Mes PL de la saison 150/.test(head) && !/au total/.test(head) && (await page.locator('section.pkm-ple-head img[src="img/brand/pl.svg"]').count()) === 1);
   const ref = N(await page.locator('section[aria-label="Parrainage"]').innerText());
   ok('parrainage : code SACHA7, lien dropicards.fr/?parrain=SACHA7, 2 / 20 amis, 1 en attente', /SACHA7/.test(ref) && /dropicards\.fr\/\?parrain=SACHA7/.test(ref) && /2 \/ 20 amis comptés cette saison/.test(ref) && /1 en attente/.test(ref));
   ok('parrainage : « Tu as été parrainé par Ondine », plus de champ de code', /Tu as été parrainé par Ondine/.test(ref) && (await page.locator('.pkm-ple-codein').count()) === 0);
@@ -147,9 +153,32 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   // Onglet du classement : en PL.
   await page.locator('.pkm-pg-tabs button').nth(0).click(); await page.waitForTimeout(1200);
   const card = N(await page.locator('section.pkm-pg-card').innerText());
-  ok('classement en PL : carte « PL de la saison », 14ᵉ, « Encore 4 places pour le top 10 »', /PL de la saison/.test(card) && /#14/.test(card) && /Encore 4 places pour le top 10/.test(card) && (await page.locator('section.pkm-pg-card img[src="img/brand/pl.svg"]').count()) === 2);
+  ok('classement en PL : carte « PL de la saison » seulement (plus de total), 14ᵉ, « Encore 4 places pour le top 10 »', /PL de la saison/.test(card) && !/au total/.test(card) && /#14/.test(card) && /Encore 4 places pour le top 10/.test(card) && (await page.locator('section.pkm-pg-card img[src="img/brand/pl.svg"]').count()) === 1);
   ok('classement : chaque ligne en PL', /1 700 PL/.test(N(await page.locator('ol.pkm-pg-list').innerText())));
   await page.screenshot({ path: shot('pl-classement.png') });
+  // Carte de dresseur (2026-11-15, porteur) : petit onglet à côté de chaque pseudo ; un appui ouvre la carte.
+  ok('onglet « carte » à côté de chaque pseudo (podium, liste, ma ligne)', (await page.locator('.pkm-pg-pod .pkm-pg-vtab').count()) === 3 && (await page.locator('ol.pkm-pg-list .pkm-pg-vtab').count()) === 9
+    && (await page.locator('section[aria-label="Classement général"] > button.pkm-pg-me .pkm-pg-vtab').count()) === 1);
+  await page.locator('ol.pkm-pg-list button', { hasText: 'Dresseur5' }).click(); await page.waitForTimeout(900);
+  const PC = page.locator('section.pkm-pc'), pc = N(await PC.innerText().catch(() => ''));
+  ok('carte de Dresseur5 : avatar, pseudo, grade, membre depuis novembre 2026 (« ' + pc.slice(0, 120) + ' »)', /Carte de dresseur/.test(pc) && /Dresseur5/.test(pc) && /Dresseur Pokémon/.test(pc) && /Membre depuis novembre 2026/.test(pc)
+    && (await PC.locator('.pkm-pc-ava img').count()) >= 2 && (S.calls.player_card || []).slice(-1)[0].target === 'u-5');
+  ok('carte : saison en cours #5 sur 40, 1 600 PL', /Saison 2 · en cours/.test(pc) && /#5/.test(pc) && /sur 40 joueurs/.test(pc) && /1 600/.test(pc));
+  ok('carte : saisons passées (Saison 1, 2ᵉ sur 30, 900 PL, médaille d’argent)', /Saison 1/.test(pc) && /2ᵉ sur 30/.test(pc) && /900 PL/.test(pc) && (await PC.locator('.pkm-pc-past img[src="img/rank/2.svg"]').count()) === 1);
+  ok('carte : ni e-mail ni bouton de messagerie', !/@/.test(pc) && !/message|chat/i.test(pc));
+  await PC.screenshot({ path: shot('pl-carte-dresseur.png') });
+  await page.locator('section.pkm-pc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
+  ok('carte fermée', (await page.locator('section.pkm-pc').count()) === 0);
+  // Ma propre carte (ma ligne sous le classement) : « C'est toi ».
+  await page.locator('section[aria-label="Classement général"] > button.pkm-pg-me').click(); await page.waitForTimeout(900);
+  ok('ma carte : « C’est toi », #14, première saison', /C’est toi/.test(await page.locator('section.pkm-pc').innerText()) && /#14/.test(await page.locator('section.pkm-pc').innerText()) && (S.calls.player_card || []).slice(-1)[0].target === UID);
+  await page.locator('section.pkm-pc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
+  // Serveur sans 031 : la carte s'ouvre quand même avec ce que montre le classement.
+  S.cardOff = true;
+  await page.locator('.pkm-pg-pod button', { hasText: 'Dresseur1' }).click(); await page.waitForTimeout(900);
+  const pc2 = N(await page.locator('section.pkm-pc').innerText());
+  ok('serveur sans 031 : carte avec pseudo, place #1 et PL, message « carte complète bientôt » (' + pc2.slice(-90) + ')', /Dresseur1/.test(pc2) && /#1/.test(pc2) && /2 000/.test(pc2) && /arrive très bientôt/.test(pc2));
+  await page.locator('section.pkm-pc button[aria-label="Fermer"]').click(); await page.waitForTimeout(600);
   await ctx.close();
 }
 
@@ -183,7 +212,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   // « Mes missions » pour un admin quand 028 manque : aperçu avec le fichier à installer.
   await page.evaluate(() => window.__pkm.setState({ admSheet: false }));
   await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2600);
-  ok('sans 028, admin : « install_024_a_028.sql » à coller dans Studio', /install_024_a_028\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));
+  ok('sans 028, admin : « install_024_a_031.sql » à coller dans Studio', /install_024_a_031\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));
   await ctx.close();
 }
 

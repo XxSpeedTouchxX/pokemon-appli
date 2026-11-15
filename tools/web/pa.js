@@ -139,7 +139,8 @@
     const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
     const ax = a.left - R.left + a.width / 2, ay = a.top - R.top + a.height / 2, bx = b.left - R.left + 14, by = b.top - R.top + b.height / 2;
     const layer = document.createElement('div');
-    layer.className = 'pkm-pafly'; layer.setAttribute('aria-hidden', 'true');
+    // Gemmes des PK : reflet jaune comme les PK, pas violet comme les PA (2026-11-15, porteur).
+    layer.className = 'pkm-pafly' + (opts && /pk\.svg$/.test(opts.img || '') ? ' pkm-pafly-pk' : ''); layer.setAttribute('aria-hidden', 'true');
     const burst = document.createElement('i');
     burst.className = 'pkm-pafly-burst'; burst.style.left = ax + 'px'; burst.style.top = ay + 'px';
     layer.appendChild(burst);

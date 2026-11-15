@@ -935,6 +935,10 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pafly-burst::after { content: ''; position: absolute; inset: -30px; border-radius: 50%; background: repeating-conic-gradient(rgba(255, 226, 122, 0.85) 0 8deg, rgba(255, 226, 122, 0) 8deg 30deg); -webkit-mask: radial-gradient(circle, transparent 30%, #000 32%, transparent 70%); mask: radial-gradient(circle, transparent 30%, #000 32%, transparent 70%); }
 @keyframes pkmPaBurst { 0% { transform: scale(0.1) rotate(0deg); opacity: 1; } 60% { opacity: 1; } 100% { transform: scale(1.35) rotate(40deg); opacity: 0; } }
 /* Perte de PK (Safari éclair, 2026-11-13) : gemmes ternies qui tombent, solde qui tremble et rougit, « −N » rouge. */
+/* Gain de PK (2026-11-15, porteur : « pas de reflet violet autour des PK, un reflet jaune de la même couleur que les PK ») :
+   halo des gemmes et éclat de départ en jaune, comme la gemme des PK. */
+.pkm-pafly-pk .pkm-pafly-drop { filter: drop-shadow(0 0 6px rgba(255, 214, 10, 0.85)); }
+.pkm-pafly-pk .pkm-pafly-burst { background: radial-gradient(circle, #FFFFFF 0 10%, #FFF3B0 18%, #FFD60A 34%, rgba(255, 196, 0, 0.5) 52%, rgba(255, 196, 0, 0) 70%); }
 .pkm-pafly-lost { filter: grayscale(0.85) brightness(0.8) drop-shadow(0 0 6px rgba(224, 69, 58, 0.9)); }
 .pkm-pk-hurt { animation: pkmPkHurt 0.9s ease-out; }
 @keyframes pkmPkHurt { 0%, 100% { transform: none; color: inherit; } 10%, 30%, 50% { transform: translateX(-4px); color: #FF5A4E; } 20%, 40%, 60% { transform: translateX(4px); color: #FF5A4E; } 80% { color: #FF5A4E; } }
@@ -1237,6 +1241,8 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-lockw-prem { margin: 2px 0 0; padding: 10px 12px; border-radius: 14px; background: rgba(255, 214, 10, 0.1); border: 1px solid rgba(255, 214, 10, 0.4); font-size: 13px; line-height: 1.45; color: #FFE9A3; }
 .pkm-lockw-premgo { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #F5C542; border-radius: 999px; background: linear-gradient(180deg, #F2F4F8, #B9C0CC); color: #1A1306; font: inherit; font-size: 14.5px; font-weight: 900; cursor: pointer; box-shadow: 0 0 0 3px rgba(245, 197, 66, 0.25); }
 .pkm-lockw-premgo svg { fill: #C8930E; }
+/* Achats fermés aux joueurs (store.js) : l'avantage du DropiPass reste annoncé, sans bouton (2026-11-15). */
+.pkm-lockw-soon { margin: 2px 0 0; padding: 10px 12px; border-radius: 14px; background: rgba(255, 214, 10, 0.1); border: 1px solid rgba(255, 214, 10, 0.4); font-size: 13px; line-height: 1.45; color: #FFE9A3; }
 @media (prefers-reduced-motion: reduce) { .pkm-lock-pad, .pkm-lockw-pad { animation: none; } }
 /* Fiche d'un ticket. */
 /* Hauteur limitée à la plus petite hauteur visible (100svh : barres de Safari affichées), sinon le haut de la fiche
@@ -2220,8 +2226,9 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 @keyframes pkmAfxGain { 0%, 46% { opacity: 0; transform: translateY(26px) scale(0.6); } 56% { opacity: 1; transform: translateY(0) scale(1.08); } 64%, 100% { opacity: 1; transform: translateY(0) scale(1); } }
 .pkm-afx-what { top: 284px; font-size: 14px; font-weight: 700; color: #F3F6FC; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); animation: pkmAfxText 3.3s ease forwards; }
 .pkm-afx-total { top: 308px; display: flex; flex-direction: column; align-items: center; gap: 1px; animation: pkmAfxText 3.3s ease forwards; }
-.pkm-afx-total span { font-size: 12px; font-weight: 600; color: #C9D3EA; }
-.pkm-afx-total b { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6); }
+.pkm-afx-total span { font-size: 14px; font-weight: 600; color: #C9D3EA; }
+/* Montant écrit comme « Valeur de toute ma collection » (2026-11-15, porteur) : Sora 700, blanc, contour noir (.pkm-strict-text). */
+.pkm-afx-total b { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; color: #FFFFFF; font-variant-numeric: tabular-nums; padding: 0.02em 0.1em 0.08em 0.04em; }
 @keyframes pkmAfxText { 0%, 44% { opacity: 0; transform: translateY(8px); } 54%, 100% { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .pkm-afx-item, .pkm-afx-sparks { display: none; }
@@ -2259,6 +2266,8 @@ html, body { touch-action: pan-x pan-y; }
 /* Ticket dont la carte a été retirée par un admin (2026-11-15, porteur ; serveur 030) : le joueur rechoisit sa carte. */
 .pkm-tks-redo { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; border: 1px solid rgba(255, 178, 122, 0.55); background: rgba(255, 140, 60, 0.12); }
 .pkm-tks-redo > b { align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #FFB27A; color: #1A1206; font-size: 15px; font-weight: 800; }
+/* Bulle « COMPLET » de l'historique sans DropiPass : petit cadenas (2026-11-15). */
+.pkm-fh-lock { margin-left: 4px; vertical-align: -1px; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -3079,6 +3088,52 @@ html.pkm-calm .pkm-ple-head, html.pkm-calm .pkm-ple-ref, html.pkm-calm .pkm-ple-
 .pkm-pg-rwdp { flex: none; position: relative; width: 34px; height: 34px; display: block; }
 .pkm-pg-rwdp img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45)); }
 .pkm-pg-rwdp i { position: absolute; right: -5px; bottom: -3px; padding: 1px 3px; border-radius: 6px; border: 1px solid #FFD60A; background: #10151F; color: #FFE46B; font-family: 'Sora', sans-serif; font-style: normal; font-size: 8px; font-weight: 800; line-height: 1.1; letter-spacing: 0.02em; }
+
+/* « Ma ligue » (2026-11-15, porteur) : seulement les PL de la saison sur ma carte ; chaque joueur du classement s'ouvre
+   en « carte de dresseur », annoncée par un petit onglet (carte + flèche) à côté de son pseudo. */
+.pkm-pg-stats-one { grid-template-columns: 1fr; }
+.pkm-pg-stats-one > span { align-items: center; text-align: center; }
+.pkm-pg-list > li { display: block; }
+.pkm-pg-list button.pkm-pg-row, button.pkm-pg-row { width: 100%; box-sizing: border-box; font: inherit; color: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button.pkm-pg-row:active, .pkm-pg-podbtn:active { transform: scale(0.98); }
+.pkm-pg-podbtn { width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pkm-pg-name, .pkm-pg-pname { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+.pkm-pg-pname { justify-content: center; gap: 4px; }
+.pkm-pg-name b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-pg-pname .pkm-pg-ppseudo { min-width: 0; }
+.pkm-pg-vtab { flex: none; display: inline-flex; align-items: center; gap: 3px; height: 20px; padding: 0 6px 0 5px; border-radius: 7px; border: 1px solid rgba(255, 214, 10, 0.55); background: rgba(255, 214, 10, 0.14); color: #FFD60A; }
+.pkm-pg-pname .pkm-pg-vtab { height: 18px; padding: 0 4px; gap: 2px; }
+.pkm-pg-pname .pkm-pg-vtab svg:first-child { width: 12px; height: 10px; }
+
+.pkm-pc-wrap { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62); }
+.pkm-pc-scrim { flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.pkm-pc { flex: none; max-height: 88%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; padding: 8px 16px calc(22px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #3B4F80; border-radius: 28px 28px 0 0; background: radial-gradient(120% 60% at 50% 0%, rgba(255, 214, 10, 0.12), rgba(255, 214, 10, 0) 60%), #0F1828; color: #F3F6FC; }
+.pkm-pc-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-pc-head h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; }
+.pkm-pc-id { display: flex; align-items: center; gap: 14px; }
+.pkm-pg-ava-m.pkm-pc-ava { width: 104px; height: 104px; border-radius: 26px; border: 3px solid #FFD60A; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
+.pkm-pc-noava { flex: none; width: 104px; height: 104px; display: flex; align-items: center; justify-content: center; border-radius: 26px; background: #0B1120; border: 3px solid #2A3A5C; }
+.pkm-pc-who { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.pkm-pc-pseudo { max-width: 100%; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-pc-me { padding: 2px 8px; border-radius: 999px; background: #FFD60A; color: #0B1120; font-size: 11px; font-weight: 900; }
+.pkm-pc-grade { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; }
+.pkm-pc-since { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #C9D3EA; }
+.pkm-pc-since svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.pkm-pc-now { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 18px; border: 1px solid rgba(255, 214, 10, 0.4); background: rgba(11, 17, 32, 0.6); }
+.pkm-pc-now-h { font-size: 12px; font-weight: 800; letter-spacing: 0.02em; color: #FFD60A; }
+.pkm-pc-nowrow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pkm-pc-nowrow > span { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; border-radius: 14px; background: #0B1120; border: 1px solid #2A3A5C; }
+.pkm-pc-nowrow small { font-size: 11.5px; color: #C9D3EA; }
+.pkm-pc-nowrow b { display: flex; align-items: center; gap: 6px; font-family: 'Sora', sans-serif; font-size: 20px; color: #FFFFFF; }
+.pkm-pc-past { display: flex; flex-direction: column; gap: 8px; }
+.pkm-pc-past h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; }
+.pkm-pc-past ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.pkm-pc-past li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 14px; background: #0B1120; border: 1px solid #1E2B45; }
+.pkm-pc-past li b { font-size: 14px; }
+.pkm-pc-pmedal { width: 26px; height: 26px; }
+.pkm-pc-prank { font-size: 13px; font-weight: 700; color: #C9D3EA; white-space: nowrap; }
+.pkm-pc-ppl { display: flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 800; color: #FFD60A; white-space: nowrap; }
+.pkm-pc-note { text-align: center; }
 
 /* ——— Pré-gradation (2026-11-14, docs/40) : rubrique de l'accueil (pkm-pgh-) et écran (pkm-pgd-) ——— */
 .pkm-pgh { flex: none; display: flex; flex-direction: column; gap: 10px; }
@@ -3921,6 +3976,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=2f5d00d9"></script>
+<script src="app.js?v=68eab06d"></script>
 </body>
 </html>

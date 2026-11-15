@@ -6,6 +6,31 @@
 
 ---
 
+## 2026-11-15 — DropiPass fermé sans abonnement, carte de dresseur, Ma ligue, reflet des PK, valeurs du classeur (porteur)
+
+- **Ticket non rechoisi** (défaut du 2026-11-15) : **validé par le porteur** : il participe quand même au tirage ; s'il gagne, l'admin lui fait choisir une carte du tirage.
+- **Installation sur le serveur par Claude** : demandée par le porteur, **impossible** : Claude n'a aucun accès à la base de Dropicards (ni Studio, ni mot de passe, et il ne doit pas en demander). Pour simplifier, un seul fichier regroupe tout ce qui reste à installer : `tools/supabase/install_024_a_031.sql` (024 à 028, 030 et 031 ; remplace `install_024_a_028.sql` ; 029, les annonces Vinted, reste à part). `000_verifier.sql` montre aussi 029, 030 et 031.
+- **DropiPass fermé sans abonnement** (« tout ce qui est compris dans le DropiPass ne doit pas être dispo pour les gens qui ne l'ont pas pris », avec le même message que le Radar) : même fenêtre « Accès verrouillé » partout :
+  - **scans du jour épuisés** (sans scans bonus à prendre) : la fenêtre s'ouvre à la place du scanner, ou une fois pendant un scan : « Tes 5 scans du jour sont utilisés. Atteins le grade « Chasseur » pour avoir 10 scans par jour. » + « Ou prends le DropiPass : tes scans sont illimités » ;
+  - **classeur plein** : grade suivant + « Ou prends le DropiPass : ton classeur devient illimité » ;
+  - **pré-gradation gratuite déjà utilisée** (1 tous les 3 jours) : « Avec le DropiPass, tu as 60 pré-gradations par mois » (sans grade) ;
+  - **historique complet du prix** (bulle « COMPLET » avec un cadenas) : réservé au DropiPass ; sans abonnement, la fiche s'ouvre sur 1M (1S et 1M libres) ; ouvert aussi en mode Admin ;
+  - **Radar** : inchangé (grade Maître Pokémon ou DropiPass) ;
+  - déjà fermés avant : tous les styles et Pokémon payants du mode avatar (PA ou DropiPass), double XP des PA et 2XP PK du 1ᵉʳ mois (donnés par le serveur) ; le petit radar de l'accueil reste ouvert à tous (décision du 2026-11-01) ;
+  - achats fermés aux joueurs (`NOBUY_ON`) : pas de bouton, mais « Le DropiPass arrive très bientôt : … » ; app Android (Google Play) : aucune mention du DropiPass ;
+  - fenêtre renommée « Accès verrouillé » (aria), icônes `pregrade.svg` et `historique.svg` (nouvelle) pour les avantages sans grade ; test `t-dplock.mjs`, `t-fihist.mjs`.
+- **Ma ligue** : seulement les **PL de la saison** (« PL gagnés au total » retirés de la carte du classement et de « Mes missions »).
+- **Carte de dresseur** : un appui sur un joueur du classement (podium, liste, ma ligne) ouvre sa carte : avatar, pseudo, grade, « Membre depuis novembre 2026 » (au mois près), place et PL de la saison en cours, saisons passées (place, PL, médaille du podium) ; « C'est toi » sur la sienne ; petit **onglet jaune (carte + flèche)** à côté de chaque pseudo pour montrer qu'on peut appuyer.
+  - Serveur **`031_carte_joueur.sql`** (**à installer**, dans `install_024_a_031.sql`, après 028) : identifiant de chaque joueur dans le classement, `player_card` (jamais l'e-mail, l'âge, le rôle ni la collection ; compte suspendu refusé ; admin jamais classé), 17 tests (`tests/test_031.sql`).
+  - Sans 031 : la carte s'ouvre avec ce que montre le classement et « La carte complète arrive très bientôt ».
+  - Politique de confidentialité complétée (ce que la carte montre).
+- **Messagerie entre joueurs** (« même un chat pour le contacter ») : **pas construite**, point de validation : contradiction avec le principe 4 (pas de réseau social), joueurs de moins de 15 ans inscrits, règles des stores et du DSA (filtre, signaler, bloquer, modération). Proposition `docs/43-proposition-messagerie-joueurs.md` : A rien, **B messages tout faits (recommandé, ≈ 10 h)**, C messagerie libre encadrée (≈ 40 h) ; décisions M1 à M4 attendues.
+- **Gain de PK** : gemmes et éclat de départ avec un reflet **jaune** (couleur des PK) au lieu du violet des PA.
+- **Classeur** : « Valeur de mes cartes » et « Valeur de mes produits scellés » écrites exactement comme « Valeur de toute ma collection » (titre identique ; montant à la même taille, même formule) ; animation d'ajout : titre 14 px et montant en Sora blanc à contour noir.
+- Cache v228.
+
+---
+
 ## 2026-11-15 — Cartes des tirages modifiables même déjà choisies (porteur)
 
 - **Question du porteur** : « que veut dire "Des joueurs ont déjà choisi cette carte" ? Je ne peux pas changer les cartes des tickets, c'est normal ? »

@@ -677,6 +677,10 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pafly-burst::after { content: ''; position: absolute; inset: -30px; border-radius: 50%; background: repeating-conic-gradient(rgba(255, 226, 122, 0.85) 0 8deg, rgba(255, 226, 122, 0) 8deg 30deg); -webkit-mask: radial-gradient(circle, transparent 30%, #000 32%, transparent 70%); mask: radial-gradient(circle, transparent 30%, #000 32%, transparent 70%); }
 @keyframes pkmPaBurst { 0% { transform: scale(0.1) rotate(0deg); opacity: 1; } 60% { opacity: 1; } 100% { transform: scale(1.35) rotate(40deg); opacity: 0; } }
 /* Perte de PK (Safari éclair, 2026-11-13) : gemmes ternies qui tombent, solde qui tremble et rougit, « −N » rouge. */
+/* Gain de PK (2026-11-15, porteur : « pas de reflet violet autour des PK, un reflet jaune de la même couleur que les PK ») :
+   halo des gemmes et éclat de départ en jaune, comme la gemme des PK. */
+.pkm-pafly-pk .pkm-pafly-drop { filter: drop-shadow(0 0 6px rgba(255, 214, 10, 0.85)); }
+.pkm-pafly-pk .pkm-pafly-burst { background: radial-gradient(circle, #FFFFFF 0 10%, #FFF3B0 18%, #FFD60A 34%, rgba(255, 196, 0, 0.5) 52%, rgba(255, 196, 0, 0) 70%); }
 .pkm-pafly-lost { filter: grayscale(0.85) brightness(0.8) drop-shadow(0 0 6px rgba(224, 69, 58, 0.9)); }
 .pkm-pk-hurt { animation: pkmPkHurt 0.9s ease-out; }
 @keyframes pkmPkHurt { 0%, 100% { transform: none; color: inherit; } 10%, 30%, 50% { transform: translateX(-4px); color: #FF5A4E; } 20%, 40%, 60% { transform: translateX(4px); color: #FF5A4E; } 80% { color: #FF5A4E; } }
@@ -979,6 +983,8 @@ section[aria-label^="Bienvenue"] img { -webkit-user-drag: none; user-select: non
 .pkm-lockw-prem { margin: 2px 0 0; padding: 10px 12px; border-radius: 14px; background: rgba(255, 214, 10, 0.1); border: 1px solid rgba(255, 214, 10, 0.4); font-size: 13px; line-height: 1.45; color: #FFE9A3; }
 .pkm-lockw-premgo { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #F5C542; border-radius: 999px; background: linear-gradient(180deg, #F2F4F8, #B9C0CC); color: #1A1306; font: inherit; font-size: 14.5px; font-weight: 900; cursor: pointer; box-shadow: 0 0 0 3px rgba(245, 197, 66, 0.25); }
 .pkm-lockw-premgo svg { fill: #C8930E; }
+/* Achats fermés aux joueurs (store.js) : l'avantage du DropiPass reste annoncé, sans bouton (2026-11-15). */
+.pkm-lockw-soon { margin: 2px 0 0; padding: 10px 12px; border-radius: 14px; background: rgba(255, 214, 10, 0.1); border: 1px solid rgba(255, 214, 10, 0.4); font-size: 13px; line-height: 1.45; color: #FFE9A3; }
 @media (prefers-reduced-motion: reduce) { .pkm-lock-pad, .pkm-lockw-pad { animation: none; } }
 /* Fiche d'un ticket. */
 /* Hauteur limitée à la plus petite hauteur visible (100svh : barres de Safari affichées), sinon le haut de la fiche
@@ -1962,8 +1968,9 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 @keyframes pkmAfxGain { 0%, 46% { opacity: 0; transform: translateY(26px) scale(0.6); } 56% { opacity: 1; transform: translateY(0) scale(1.08); } 64%, 100% { opacity: 1; transform: translateY(0) scale(1); } }
 .pkm-afx-what { top: 284px; font-size: 14px; font-weight: 700; color: #F3F6FC; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); animation: pkmAfxText 3.3s ease forwards; }
 .pkm-afx-total { top: 308px; display: flex; flex-direction: column; align-items: center; gap: 1px; animation: pkmAfxText 3.3s ease forwards; }
-.pkm-afx-total span { font-size: 12px; font-weight: 600; color: #C9D3EA; }
-.pkm-afx-total b { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6); }
+.pkm-afx-total span { font-size: 14px; font-weight: 600; color: #C9D3EA; }
+/* Montant écrit comme « Valeur de toute ma collection » (2026-11-15, porteur) : Sora 700, blanc, contour noir (.pkm-strict-text). */
+.pkm-afx-total b { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; color: #FFFFFF; font-variant-numeric: tabular-nums; padding: 0.02em 0.1em 0.08em 0.04em; }
 @keyframes pkmAfxText { 0%, 44% { opacity: 0; transform: translateY(8px); } 54%, 100% { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .pkm-afx-item, .pkm-afx-sparks { display: none; }
@@ -2001,3 +2008,5 @@ html, body { touch-action: pan-x pan-y; }
 /* Ticket dont la carte a été retirée par un admin (2026-11-15, porteur ; serveur 030) : le joueur rechoisit sa carte. */
 .pkm-tks-redo { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; border: 1px solid rgba(255, 178, 122, 0.55); background: rgba(255, 140, 60, 0.12); }
 .pkm-tks-redo > b { align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #FFB27A; color: #1A1206; font-size: 15px; font-weight: 800; }
+/* Bulle « COMPLET » de l'historique sans DropiPass : petit cadenas (2026-11-15). */
+.pkm-fh-lock { margin-left: 4px; vertical-align: -1px; }

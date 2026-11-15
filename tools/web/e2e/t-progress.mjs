@@ -1,5 +1,5 @@
 // « Ma ligue » (ex-« Ma progression », 2026-11-08, porteur ; renommée le 2026-11-14) : bannière dans Jeux, saison et temps restant, carte du joueur (avatar,
-// pseudo, emblème, PK de la saison et au total, place), podium du top 3, classement avec grades, ma ligne hors du
+// pseudo, emblème, PK de la saison (le total retiré le 2026-11-15), place), podium du top 3, classement avec grades, ma ligne hors du
 // top, lots de la saison. Le classement du serveur (season_board, 013_saisons.sql) est imité.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
@@ -31,7 +31,7 @@ await page.evaluate(() => {
 });
 await page.waitForTimeout(400);
 const card = await page.locator('section.pkm-pg-card').innerText();
-ok('carte : place #34 sur 40 joueurs, PK de la saison 4 200, au total 12 850', /#34/.test(card) && /sur 40 joueurs/.test(card) && /4\s200/.test(card) && /12\s850/.test(card));
+ok('carte : place #34 sur 40 joueurs, PK de la saison 4 200, plus de total (2026-11-15)', /#34/.test(card) && /sur 40 joueurs/.test(card) && /4\s200/.test(card) && !/12\s850/.test(card) && !/au total/.test(card));
 ok('carte : emblème du grade Collectionneur et avatar', /Collectionneur/.test(card) && (await page.locator('section.pkm-pg-card img.pkm-pg-ava-g').count()) === 1);
 ok('carte : « Encore 4 places pour le top 30 »', /Encore 4 places pour le top 30/.test(card));
 await page.screenshot({ path: shot('progress-carte.png') });
@@ -65,7 +65,7 @@ await page.locator('section[aria-label="Lots de la saison"]').scrollIntoViewIfNe
 // Dans le top 10 : ma ligne dans la liste, message du lot.
 await page.evaluate(() => { const b = window.__pkm.st().progBoard; b.top[6].me = true; b.me = { rank: 7, pk: b.top[6].pk }; window.__pkm.setState({ progBoard: Object.assign({}, b) }); });
 await page.waitForTimeout(300);
-ok('7ᵉ : « Dans le top 10 », ligne surlignée dans la liste, pas de ligne en plus', /Dans le top 10/.test(await page.locator('section.pkm-pg-card').innerText()) && (await page.locator('ol.pkm-pg-list > li.pkm-pg-me').count()) === 1 && (await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').count()) === 0);
+ok('7ᵉ : « Dans le top 10 », ligne surlignée dans la liste, pas de ligne en plus', /Dans le top 10/.test(await page.locator('section.pkm-pg-card').innerText()) && (await page.locator('ol.pkm-pg-list > li > .pkm-pg-me').count()) === 1 && (await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').count()) === 0);
 // Retour vers Jeux.
 await page.evaluate(() => window.__pkm.pop()); await page.waitForTimeout(700);
 ok('retour : onglet Jeux', (await page.locator('button.pkm-pg-banner').count()) === 1);

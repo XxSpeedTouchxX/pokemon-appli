@@ -92,7 +92,7 @@ const shopTxt = (await page.locator('main').innerText()).replace(/[\u202f\u00a0]
 ok('achats directs : booster 7 500, item rare 25 000, ETB 30 ans 50 000 PK, avec visuels', ['7500PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)) && (await lot.locator('img[src="img/products/30th-celebration-elite-trainer-box.webp"]').count()) === 1);
 ok('Recrue : ETB « Déverrouillé au grade Maître Pokémon »', /Déverrouillé au grade Maître Pokémon/.test(await lot.innerText()));
 await lot.locator('button:has-text("Déverrouillé au grade")').click(); await page.waitForTimeout(500);
-const lw = page.locator('section[aria-label="Grade requis"]');
+const lw = page.locator('section[aria-label="Accès verrouillé"]');
 ok('fenêtre « Tu dois d’abord déverrouiller le grade Maître Pokémon pour avoir accès à cet item »', /Tu dois d’abord déverrouiller le grade Maître Pokémon pour avoir accès à cet item/.test(await lw.innerText()));
 await page.screenshot({ path: shot('pkshop-verrou.png') });
 await lw.locator('button:has-text("Compris")').click(); await page.waitForTimeout(300);

@@ -102,9 +102,34 @@
     const g = PF_GRADES.findIndex(x => x[key]);
     this.setState({ shopLock: { g: g < 0 ? PF_GRADES.length - 1 : g, kind: kind }, toast: null });
   };
+  // Avantages du DropiPass fermés sans abonnement (2026-11-15, porteur : « tout ce qui est compris dans le DropiPass ne
+  // doit pas être dispo pour les gens qui ne l'ont pas pris », avec le même message que le Radar : atteindre tel grade,
+  // ou prendre le DropiPass). Même fenêtre « Accès verrouillé » pour chacun : Radar (grade Maître Pokémon), scans du
+  // jour épuisés (grade suivant), classeur plein (grade suivant), pré-gradation gratuite déjà utilisée et historique
+  // complet du prix (DropiPass seulement, sans grade). Texte du DropiPass (avec le bouton « Découvrir le DropiPass ») :
+  const SHOP_DP = {
+    radar: 'Tu peux aussi l’avoir tout de suite avec le DropiPass : le Radar des boutiques y est inclus.',
+    scan: 'Ou prends le DropiPass : tes scans sont illimités, tous les jours.',
+    binder: 'Ou prends le DropiPass : ton classeur devient illimité.',
+    pg: 'Avec le DropiPass, tu as 60 pré-gradations par mois.',
+    hist: 'Avec le DropiPass, tu vois toute l’évolution du prix de chaque carte.'
+  };
+  // Achats fermés aux joueurs (store.js, NOBUY_ON) : pas de bouton, mais la même information.
+  const SHOP_DP_SOON = {
+    radar: 'Le DropiPass arrive très bientôt : le Radar des boutiques y sera inclus.',
+    scan: 'Le DropiPass arrive très bientôt : tes scans y seront illimités.',
+    binder: 'Le DropiPass arrive très bientôt : ton classeur y sera illimité.',
+    pg: 'Le DropiPass arrive très bientôt : 60 pré-gradations par mois y seront incluses.',
+    hist: 'Le DropiPass arrive très bientôt : l’historique complet du prix y sera inclus.'
+  };
+  shopProto.dpLock = function (kind, extra) { this.setState({ shopLock: Object.assign({ g: -1, kind: kind }, extra || {}), toast: null }); };
   // Fenêtre « Accès verrouillé », pour tout l'app (PK shop, Radar, classeur plein ; 2026-11-07).
   const shopLockText = lk => {
-    const g = shopGradeName(lk.g);
+    const g = lk.g >= 0 ? shopGradeName(lk.g) : '', store = typeof storeApp !== 'undefined' && storeApp;
+    if (lk.kind === 'scan') return 'Tes ' + lk.n + ' scans du jour sont utilisés.' + (lk.g >= 0 ? ' Atteins le grade « ' + g + ' » pour avoir ' + lk.next + ' scans par jour.' : ' Reviens demain.');
+    if (lk.kind === 'pg') return 'Ta pré-gradation gratuite est déjà utilisée : la prochaine arrive dans ' + lk.wait + ' (1 tous les 3 jours).';
+    if (lk.kind === 'hist') return store ? 'L’historique complet du prix n’est pas disponible dans cette version : tu vois la dernière semaine et le dernier mois.'
+      : 'L’historique complet du prix est réservé au DropiPass. Sans abonnement, tu vois la dernière semaine (1S) et le dernier mois (1M).';
     if (lk.kind === 'radar') return 'Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « ' + g + ' ».';
     if (lk.kind === 'safari') return 'Tu ne peux pas jouer au Safari éclair tant que tu n’as pas atteint le grade « ' + g + ' ».';
     if (lk.kind === 'coin') return 'Tu ne peux pas lancer la pièce tant que tu n’as pas atteint le grade « ' + g + ' ».';
@@ -515,15 +540,18 @@
     const tz = s.tkZoom;
     r.tkz = tz ? { open: true, img: tz.img || '', name: tz.name || '', info: tz.info || '', close: () => this.setState({ tkZoom: null }) } : { open: false };
     const lk = s.shopLock;
+    const hasG = !!lk && lk.g >= 0, dpOnly = { pg: 'img/brand/pregrade.svg', hist: 'img/brand/historique.svg' };
     r.lockw = lk ? {
-      open: true, img: 'img/grades/grade-' + (lk.g + 1) + '.svg', grade: shopGradeName(lk.g), text: shopLockText(lk),
-      cond: 'Condition : ' + (this.tiers()[lk.g] || {}).cond + '.',
+      open: true, hasGrade: hasG, grade: hasG ? shopGradeName(lk.g) : '', text: shopLockText(lk),
+      img: hasG ? 'img/grades/grade-' + (lk.g + 1) + '.svg' : lk.icon || dpOnly[lk.kind] || 'img/grades/grade-' + (this.shopGrade() + 1) + '.svg',
+      cond: hasG ? 'Condition : ' + (this.tiers()[lk.g] || {}).cond + '.' : '',
       close: () => this.setState({ shopLock: null }),
-      // Radar (2026-11-07, porteur) : aussi inclus dans l'abonnement Premium, bouton vers l'offre.
-      prem: lk.kind === 'radar' && typeof this.premOpen === 'function',
-      premText: 'Tu peux aussi l’avoir tout de suite en prenant l’abonnement DropiPass : le Radar des boutiques y est inclus.',
+      // Avantage aussi inclus dans le DropiPass (Radar depuis le 2026-11-07 ; scans, classeur, pré-gradation et
+      // historique depuis le 2026-11-15) : texte et bouton vers l'offre. soon : achats fermés (store.js).
+      prem: !!SHOP_DP[lk.kind] && typeof this.premOpen === 'function',
+      premText: SHOP_DP[lk.kind] || '', soon: false, soonText: SHOP_DP_SOON[lk.kind] || '',
       premGo: () => { this.setState({ shopLock: null }); this.premOpen(); },
-      grades: () => { this.setState({ shopLock: null, shopTk: null }); this.push('grade', { gradeIx: lk.g }); }
+      grades: () => { this.setState({ shopLock: null, shopTk: null }); if (lk.g >= 0) this.push('grade', { gradeIx: lk.g }); }
     } : { open: false };
     return r;
   };

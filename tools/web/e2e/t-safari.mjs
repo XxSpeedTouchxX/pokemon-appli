@@ -300,7 +300,7 @@ for (const role of ['user', 'admin']) {
       await sc.locator('button.pkm-gm-go').click(); await p4.waitForTimeout(400);
       res4.push('fermé:' + ((await p4.locator('.pkm-sf').count()) === 0));
       // Même blocage que les autres icônes verrouillées (2026-11-13, porteur) : fenêtre « Accès verrouillé » qui tremble.
-      const lw = p4.locator('section[aria-label="Grade requis"]');
+      const lw = p4.locator('section[aria-label="Accès verrouillé"]');
       res4.push('fenêtre:' + ((await lw.count()) === 1 && /Accès verrouillé/.test(await lw.innerText()) && /Safari éclair/.test(await lw.innerText()) && /Collectionneur/.test(await lw.innerText()) && (await lw.evaluate(e => getComputedStyle(e).animationName)) === 'pkmLockShake'));
       await p4.screenshot({ path: shot('safari-lock.png') });
       await lw.locator('button:has-text("Compris")').click(); await p4.waitForTimeout(400);

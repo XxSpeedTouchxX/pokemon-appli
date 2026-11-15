@@ -333,6 +333,8 @@ patchRe(/(<span style="font-weight: 600">Retour à la page d’accueil<\/span>[\
 }
 // Mode Admin (admin.js) : panneau, code d'accès ; « Version » cliquable dans À propos ; Scan et Territoire masquables.
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + FRAG['passkey-offer'] + FRAG['premium-sheet'] + FRAG['grade-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
+// Carte de dresseur d'un joueur du classement de « Ma ligue » (progress.js, 2026-11-15, porteur).
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['player-card'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Abonnement Premium (premium.js, 2026-11-06, porteur) : bannière en haut du PK shop (Magasin) et de Mon profil.
 patch('<section aria-label="Tickets du tirage au sort" class="pkm-shop-tks">', FRAG['premium-banner'] + '<section aria-label="Tickets du tirage au sort" class="pkm-shop-tks">');
 patch(FRAG['profile-trainer'], FRAG['premium-banner'] + FRAG['profile-trainer']);

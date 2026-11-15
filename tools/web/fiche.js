@@ -14,6 +14,10 @@
   const FI_PER = [['1S', 7, '1 semaine'], ['1M', 30, '1 mois'], ['COMPLET', 0, 'historique complet']];
   const FI_W = 300, FI_H = 120;
 
+  // Historique complet (bulle « COMPLET ») : avantage du DropiPass (2026-11-15, porteur) ; ouvert aussi en mode Admin.
+  fiProto.fiHistFull = function (s) {
+    return !!(this.premOn && this.premOn()) || (typeof admOf === 'function' && !!admOf(s || this.st()).on);
+  };
   // Ouvrir la fiche : l'article rejoint le catalogue de l'app s'il n'y est pas (comme openTcg).
   // opts.from === 'binder' : ouverte depuis « Mon classeur », dont la pastille montre la valeur de mon exemplaire.
   fiProto.fiOpen = function (id, opts) {
@@ -62,7 +66,7 @@
     el.innerHTML = '<div class="pkm-afx-veil"></div><div class="pkm-afx-stage"><div class="pkm-afx-sparks" aria-hidden="true">' + sparks + '</div>'
       + '<div class="pkm-afx-binder" aria-hidden="true"><img src="img/brand/classeur.svg" alt=""></div>'
       + (src ? '<div class="pkm-afx-item" aria-hidden="true"><img alt=""></div>' : '')
-      + '<p class="pkm-afx-gain"></p><p class="pkm-afx-what"></p><p class="pkm-afx-total"><span></span><b></b></p></div>';
+      + '<p class="pkm-afx-gain"></p><p class="pkm-afx-what"></p><p class="pkm-afx-total"><span></span><b class="pkm-strict-text"></b></p></div>';
     if (src) {
       const im = el.querySelector('.pkm-afx-item img');
       im.onerror = () => { if (l.fallback && im.src.indexOf(l.fallback) < 0) im.src = l.fallback; };
@@ -280,8 +284,9 @@
       since: gap ? 'Aucune source ouverte ne donne la cote de cette carte avant le ' + fiYear(since) + ' : la partie hachurée se remplit jour après jour.' : '',
       hint: 'Pose le doigt sur la courbe pour voir le prix à une date.',
       periods: FI_PER.map(q => {
-        const [v, , lab] = q, on = per === v;
-        return Object.assign({ label: v, aria: lab, on: on, dis: false, cls: '', pick: () => this.setState({ fiPer: v }) }, this.chip(on));
+        const [v, , lab] = q, on = per === v, lock = v === 'COMPLET' && !this.fiHistFull(this.st());
+        return Object.assign({ label: v, aria: lab + (lock ? ', réservé au DropiPass' : ''), on: on, dis: false, cls: '', lock: lock,
+          pick: () => (lock ? this.dpLock('hist') : this.setState({ fiPer: v })) }, this.chip(on));
       })
     };
   };
@@ -440,7 +445,9 @@
         toggle: () => this.setState({ fiEtat: on ? null : g.key }) };
     });
     // Courbe : valeur de mes exemplaires (selon leur état) ; ligne du prix d'achat moyen s'il est connu.
-    const per = FI_PER.some(q => q[0] === s.fiPer) ? s.fiPer : 'COMPLET', known = st.qty - st.unk;
+    // Historique complet réservé au DropiPass (2026-11-15, porteur) : sans abonnement, la fiche s'ouvre sur 1M.
+    const full = this.fiHistFull(s), want = FI_PER.some(q => q[0] === s.fiPer) ? s.fiPer : 'COMPLET';
+    const per = want === 'COMPLET' && !full ? '1M' : want, known = st.qty - st.unk;
     const hist = this.fiHistory(p, x, k, per, adj ? mine / k : 1, owned && known > 0 && st.cost > 0 ? st.cost / known : 0);
     const eg = groups.find(g => g.key === s.fiEtat);
     const etatPick = eg ? {

@@ -198,7 +198,7 @@
   // Carte reconnue par son dessin : sa fiche s'ouvre (même parcours qu'une lecture sûre).
   SCAN.visOpen = function (inst, id, vis) {
     const q = inst.scanQuota();
-    if (q.left <= 0) { SCAN.say(inst, q.over); return false; }
+    if (q.left <= 0) { SCAN.say(inst, q.over); inst.scanLockOnce(); return false; }
     if (!SCAN.idx || !SCAN.idx.byId.has(id)) return false;
     const ids = [id].concat(vis.map(v => v.id).filter(x => x !== id && SCAN.idx.byId.has(x))).slice(0, 3);
     SCAN.visFrames = []; SCAN.frames = [];
@@ -267,7 +267,7 @@
   SCAN.consider = function (inst, read, fine) {
     // Scans du jour épuisés (selon le grade) : on n'ouvre plus de fiche.
     const q = inst.scanQuota();
-    if (q.left <= 0) { SCAN.frames = []; SCAN.say(inst, q.over); return false; }
+    if (q.left <= 0) { SCAN.frames = []; SCAN.say(inst, q.over); inst.scanLockOnce(); return false; }
     let m = ScanCore.match(SCAN.idx, read, read.vis);
     // Cartes proposées par le texte : leur dessin est vérifié sur la photo (distance exacte), puis nouveau classement.
     if (read.prints && SCAN.pidx && m.cands.length) {
@@ -454,6 +454,24 @@
     }
     add(bonus - 20);
   };
+  // Scans du jour épuisés (2026-11-15, porteur : même message que le Radar, « atteins tel grade ou prends le
+  // DropiPass ») : fenêtre « Accès verrouillé » avec le grade qui donne plus de scans et le DropiPass (scans illimités).
+  // Pas de fenêtre tant qu'il reste 20 scans bonus à prendre (le compteur « +20 » du scanner suffit).
+  scanProto.scanLockNeeded = function () {
+    if (this.premOn && this.premOn()) return false;
+    const q = this.scanQuota();
+    return q.left <= 0 && (Number(this.st().scanBonus) || 0) < 20;
+  };
+  scanProto.scanLock = function () {
+    const P = this.perks(), T = this.tiers(), gi = T.findIndex(t => t.scans > P.scans);
+    this.dpLock('scan', { g: gi, n: P.scans, next: gi >= 0 ? T[gi].scans : 0 });
+  };
+  // Pendant un scan : une seule fois par ouverture du scanner (la caméra continue de lire derrière).
+  scanProto.scanLockOnce = function () {
+    if (SCAN.lockShown || !this.scanLockNeeded()) return;
+    SCAN.lockShown = true;
+    this.scanLock();
+  };
   scanProto.scanCount = function () {
     const s = this.st(), today = realToday(), used = s.scanDay === today ? Number(s.scanN) || 0 : 0;
     this.setState({ scanDay: today, scanN: used + 1 });
@@ -470,6 +488,9 @@
   const baseOpenScan = scanProto.openScan;
   scanProto.openScan = function () {
     const was = this.st().screen === 'scan';
+    // Plus aucun scan aujourd'hui (ni scans bonus) : la fenêtre « Accès verrouillé » au lieu du scanner.
+    if (!was && this.scanLockNeeded()) { this.scanLock(); return; }
+    SCAN.lockShown = false;
     baseOpenScan.call(this);
     if (!was) this.setState({ scanPhase: 'idle', scanCands: [], scanPid: null, scanEv: null, scanMsg: '', scanMode: 'card', scanAdded: 0 });
   };

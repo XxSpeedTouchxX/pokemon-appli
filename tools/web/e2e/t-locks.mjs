@@ -18,10 +18,10 @@ const card = page.locator('section[aria-label="Boutiques près de toi"] button')
 ok('accueil : badge « Déverrouillé au grade Maître Pokémon » avec cadenas', /Déverrouillé au grade Maître Pokémon/.test(await card.innerText()) && (await card.locator('.pkm-lock-pad').count()) === 1);
 await card.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('locks-radar-badge.png') });
 await page.evaluate(() => window.__pkm.openRadar()); await page.waitForTimeout(500);
-const lw = page.locator('section[aria-label="Grade requis"]');
+const lw = page.locator('section[aria-label="Accès verrouillé"]');
 const lwt = await lw.innerText().catch(() => '');
 ok('fenêtre : « Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon » »', /Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon »/.test(lwt));
-ok('fenêtre : Premium proposé, bouton « Découvrir le DropiPass »', /abonnement DropiPass/.test(lwt) && (await lw.locator('button:has-text("Découvrir le DropiPass")').count()) === 1);
+ok('fenêtre : Premium proposé, bouton « Découvrir le DropiPass »', /avec le DropiPass : le Radar des boutiques y est inclus/.test(lwt) && (await lw.locator('button:has-text("Découvrir le DropiPass")').count()) === 1);
 ok('fenêtre : condition 30 000 PK + 100 compagnons + 5 méga-évolutions', /30\s000 PK gagnés \+ 100 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(lwt.replace(/[  ]/g, ' ')));
 await page.screenshot({ path: shot('locks-radar-fenetre.png') });
 // Fenêtre bloquante (2026-11-08) : le fond ne la ferme pas, la page derrière ne défile pas.

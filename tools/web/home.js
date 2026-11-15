@@ -105,7 +105,8 @@
       .concat(Array.from({ length: (3 - shown.length % 3) % 3 }, () => ({ real: false }))) : [];
     const headV = sum(list), headBig = x.mask(this.eur(headV));
     return {
-      // Valeur totale de l'onglet, écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir).
+      // Valeur totale de l'onglet, écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir), à la même
+      // taille exactement (2026-11-15, porteur) : même formule que le montant du haut, avec sa longueur (home.hv.fit).
       head: {
         label: tab === 'sealed' ? 'Valeur de mes produits scellés' : 'Valeur de mes cartes',
         value: String(headBig).replace(/[\u202f\u00a0]/g, ' '), fit: Math.max(4, String(headBig).length * 0.66).toFixed(2),

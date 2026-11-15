@@ -312,6 +312,13 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - serveur `tools/supabase/030_tirages_cartes.sql` **à installer par le porteur** (sinon message dans le panneau Admin) ;
   - **défaut à confirmer** : sans nouveau choix avant le tirage, le ticket participe et l'admin fait choisir le gagnant ;
   - cache v227.
+- **DropiPass fermé, carte de dresseur, Ma ligue (2026-11-15, porteur) :**
+  - ticket non rechoisi qui participe quand même (l'admin fait choisir le gagnant) : **validé par le porteur** ;
+  - sans DropiPass, même fenêtre « Accès verrouillé » que le Radar (grade à atteindre ou DropiPass) : scans du jour épuisés, classeur plein, pré-gradation gratuite utilisée, historique complet du prix (bulle « COMPLET », 1S et 1M libres) ; achats fermés : « Le DropiPass arrive très bientôt » ; Android : aucune mention ;
+  - Ma ligue : PL de la saison seulement ; **carte de dresseur** au toucher d'un joueur (avatar, pseudo, grade, membre depuis, saison en cours, saisons passées) avec un petit onglet à côté de chaque pseudo ; serveur `031_carte_joueur.sql` **à installer** ;
+  - **un seul fichier pour tout ce qui reste : `tools/supabase/install_024_a_031.sql`** (024 à 028, 030, 031 ; Claude n'a pas accès à la base) ;
+  - messagerie entre joueurs **non construite** : `docs/43` (contradiction avec le principe 4, mineurs inscrits ; B « messages tout faits » recommandé), décisions M1 à M4 attendues ;
+  - reflet jaune des gemmes au gain de PK ; valeurs du classeur écrites comme « Valeur de toute ma collection » ; cache v228.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

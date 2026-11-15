@@ -68,7 +68,7 @@ ok('app des stores : le Magasin du PK shop reste là (tickets)', await vis('sect
 await page.evaluate(() => { window.__pkm.setState({ shopTab: 'pa' }); window.__pkm.premOpen(); }); await page.waitForTimeout(500);
 ok('app des stores : l’offre Premium et les packs de PA ne s’ouvrent jamais', !(await vis('section[aria-label="DropiPass"]')) && !(await vis('section[aria-label="Recharger mes PA"]')));
 await page.evaluate(() => window.__pkm.setState({ shopTab: 'store', shopLock: { kind: 'radar', g: 4 } })); await page.waitForTimeout(500);
-ok('Radar verrouillé : fenêtre affichée, sans « Découvrir Premium »', await vis('section[aria-label="Grade requis"]') && !(await vis('.pkm-lockw-premgo')));
+ok('Radar verrouillé : fenêtre affichée, sans « Découvrir Premium »', await vis('section[aria-label="Accès verrouillé"]') && !(await vis('.pkm-lockw-premgo')));
 await page.evaluate(() => window.__pkm.setState({ shopLock: null }));
 const rules = await page.evaluate(() => (window.__pkm.renderVals().pks || {}).rules || '');
 ok('règles du tirage : « Google et Apple ne sont ni organisateurs, ni partenaires »', /Google et Apple ne sont ni organisateurs, ni partenaires/.test(rules));

@@ -36,16 +36,16 @@ await page.screenshot({ path: shot('grades-recrue-shop.png'), fullPage: true });
 // Radar dès Maître Pokémon (2026-11-07, avantages des grades du porteur) : en dessous, la fenêtre « Accès verrouillé ».
 await go('debug&start=home');
 await page.evaluate(() => window.__pkm.openRadar()); await page.waitForTimeout(600);
-ok('Recrue : Radar verrouillé, « Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon » »', /Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon »/.test(await text('section[aria-label="Grade requis"]')) && (await page.locator('#pkm-radar-map').count()) === 0);
+ok('Recrue : Radar verrouillé, « Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon » »', /Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon »/.test(await text('section[aria-label="Accès verrouillé"]')) && (await page.locator('#pkm-radar-map').count()) === 0);
 await page.screenshot({ path: shot('grades-radar-verrou.png') });
-await page.locator('section[aria-label="Grade requis"] button:has-text("Compris")').click(); await page.waitForTimeout(300);
+await page.locator('section[aria-label="Accès verrouillé"] button:has-text("Compris")').click(); await page.waitForTimeout(300);
 // Classeur limité (2026-11-07) : Recrue 36 cartes et 9 items scellés ; la démo en a 15 : un item de plus est refusé.
 const before = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}').purchases.length, KEY);
 await page.evaluate(() => { const c = window.__pkm, s = c.st(), p = c.catalog().find(x => x.type === 'sealed'); const r = c.addRecord(s, p.id, 1, 0, 'Test', 'toi'); window.__blocked = !!r.blocked; });
 await page.waitForTimeout(500);
-ok('Recrue : classeur plein (9 items scellés), ajout refusé et fenêtre « Ton classeur est plein »', await page.evaluate(() => window.__blocked) && /Ton classeur est plein : 9 items scellés au maximum au grade Recrue/.test(await text('section[aria-label="Grade requis"]')));
+ok('Recrue : classeur plein (9 items scellés), ajout refusé et fenêtre « Ton classeur est plein »', await page.evaluate(() => window.__blocked) && /Ton classeur est plein : 9 items scellés au maximum au grade Recrue/.test(await text('section[aria-label="Accès verrouillé"]')));
 await page.screenshot({ path: shot('grades-classeur-plein.png') });
-await page.locator('section[aria-label="Grade requis"] button:has-text("Compris")').click(); await page.waitForTimeout(300);
+await page.locator('section[aria-label="Accès verrouillé"] button:has-text("Compris")').click(); await page.waitForTimeout(300);
 ok('collection gardée telle quelle', (await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}').purchases.length, KEY)) === before);
 await go('debug&start=home');
 await page.evaluate(() => window.__pkm.push('grade', { gradeIx: 4 })); await page.waitForTimeout(700);

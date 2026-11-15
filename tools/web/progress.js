@@ -72,9 +72,11 @@
       // Avatar du joueur (014_avatar.sql) ; le sien vient de l'appareil. Sans avatar : l'emblème du grade.
       const av = e.me && s.avatarCfg ? avMini(s.avatarCfg) : avMini(e.avatar);
       return { rank: rank, rankText: String(rank), pseudo: e.pseudo || '—', gImg: g.img, gName: g.name, gColor: g.color, pk: progNum(pts(e)) + ' ' + unit, me: !!e.me,
+        // Carte de dresseur du joueur (2026-11-15, porteur) : un appui sur sa ligne l'ouvre (031_carte_joueur.sql).
+        open: () => this.pcOpen(e, unit, pts(e)),
         hasAva: !!av, noAva: !av, ava: av || { bg: '', char: '', poke: {}, pokeStyle: '', hasPoke: false, acc: {}, accStyle: '', hasAcc: false },
         cls: 'pkm-pg-row' + (e.me ? ' pkm-pg-me' : '') + (rank <= 10 ? ' pkm-pg-top10' : !isPl && rank <= 30 ? ' pkm-pg-top30' : ''),
-        aria: rank + (rank === 1 ? 'ᵉʳ' : 'ᵉ') + ' : ' + (e.pseudo || '—') + ', grade ' + g.name + ', ' + progNum(pts(e)) + ' ' + unit + (e.me ? ' (toi)' : '') };
+        aria: rank + (rank === 1 ? 'ᵉʳ' : 'ᵉ') + ' : ' + (e.pseudo || '—') + ', grade ' + g.name + ', ' + progNum(pts(e)) + ' ' + unit + (e.me ? ' (toi)' : '') + '. Voir sa carte de dresseur' };
     });
     const pod = [1, 0, 2].map(i => top[i]).filter(Boolean).map(e => Object.assign({}, e, {
       pos: e.rank, medal: 'img/rank/' + Math.min(3, Math.max(1, e.rank)) + '.svg', podCls: 'pkm-pg-pod pkm-pg-pod-' + Math.min(3, Math.max(1, e.rank)) + (e.me ? ' pkm-pg-pod-me' : '')
@@ -91,15 +93,17 @@
       dates: 'Du ' + new Date(se.start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }) + ' au ' + new Date(se.end - 1).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }),
       card: {
         avatar: this.img().avatar, pseudo: pseudo, gImg: my.img, gName: my.name, gColor: my.color, gStyle: 'color: ' + my.color,
-        pkSeason: progNum(me ? pts(me) : 0), pkTotal: isPl ? progNum(b.pl_total) : progNum(b && b.pk_total != null ? b.pk_total : (s.pkEarned != null ? s.pkEarned : s.pk)),
-        unitImg: isPl ? 'img/brand/pl.svg' : 'img/brand/pk.svg', seasonLabel: unit + ' de la saison', totalLabel: isPl ? 'PL gagnés au total' : 'PK gagnés au total',
+        // PL de la saison seulement (2026-11-15, porteur : « on s'en fiche des PL gagnés au total »).
+        pkSeason: progNum(me ? pts(me) : 0),
+        unitImg: isPl ? 'img/brand/pl.svg' : 'img/brand/pk.svg', seasonLabel: unit + ' de la saison',
         rank: rankTxt, of: players ? 'sur ' + progNum(players) + ' joueur' + (players > 1 ? 's' : '') : '',
         prize: myPrize, hasPrize: !!myPrize,
         unranked: b && !me ? 'Les comptes admin ne sont pas classés.' : !b && !online ? 'Connecte-toi pour voir ta place au classement.' : '', hasUnranked: !!(b && !me) || (!b && !online),
         aria: 'Ma carte de progression : ' + pseudo + ', grade ' + my.name + ', ' + (me ? rankTxt + ' ' : 'pas classé, ') + progNum(me ? pts(me) : 0) + ' ' + unit + ' cette saison'
       },
       hasBoard: top.length > 0, podium: pod, rest: rest, hasRest: rest.length > 0,
-      meRow: !inList && me ? { rankText: progNum(me.rank), pseudo: pseudo, gImg: my.img, gName: my.name, gColor: my.color, pk: progNum(pts(me)) + ' ' + unit, cls: 'pkm-pg-row pkm-pg-me', aria: 'Toi : ' + me.rank + 'ᵉ, ' + progNum(pts(me)) + ' ' + unit } : null,
+      meRow: !inList && me ? { rankText: progNum(me.rank), pseudo: pseudo, gImg: my.img, gName: my.name, gColor: my.color, pk: progNum(pts(me)) + ' ' + unit, cls: 'pkm-pg-row pkm-pg-me', aria: 'Toi : ' + me.rank + 'ᵉ, ' + progNum(pts(me)) + ' ' + unit + '. Voir ma carte de dresseur',
+        open: () => this.pcOpen(Object.assign({ id: me.id || '', pseudo: pseudo, grade: b && b.grade != null ? b.grade : cur, me: true, rank: me.rank }, isPl ? { pl: me.pl } : { pk: me.pk }), unit, pts(me)) } : null,
       hasMeRow: !inList && !!me,
       busy: !!s.progBusy && !b, empty: !s.progBusy && !top.length, emptyText: s.progErr || (online ? 'Le classement de la saison s’affiche dès les premiers ' + unit + ' gagnés.' : 'Le classement s’affiche une fois connecté à ton compte Dropicards.'),
       rewards: PROG_REWARDS, refresh: () => this.progLoad(true), refreshing: !!s.progBusy,
@@ -113,6 +117,65 @@
         : 'Classement selon les PK gagnés pendant la saison (Booster PK, pièce, bienvenue, partage) ; les achats au PK shop ne font pas baisser ton score. Égalité : même place. Lots remis après la fin de la saison, selon un règlement publié avant sa fin ; les comptes admin ne sont pas classés.'
     };
   };
+  // ——— Carte de dresseur d'un joueur du classement (2026-11-15, porteur : « lorsqu'un utilisateur clique sur le profil
+  // d'un joueur du classement, il peut voir sa carte de visite : son avatar, son pseudo, depuis quand il est sur l'appli,
+  // les PL remportés et son classement des anciennes saisons et de sa saison actuelle ») ———
+  // La carte s'ouvre tout de suite avec ce que le classement montre déjà (avatar, pseudo, grade, place, PL), puis le
+  // serveur complète (player_card, 031_carte_joueur.sql) : mois d'arrivée sur Dropicards et saisons passées. Serveur sans
+  // 031 (ou classement sans identifiant) : la carte reste sur ces premières informations, avec un mot d'explication.
+  // Messagerie entre joueurs : pas construite (à valider par le porteur, docs/43).
+  const PC_MONTH = ym => { const m = /^(\d{4})-(\d{2})/.exec(ym || ''); if (!m) return ''; try { return new Date(Date.UTC(+m[1], +m[2] - 1, 15)).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }); } catch (e) { return ''; } };
+  const pcRank = r => (Number(r) > 0 ? Number(r) + (Number(r) === 1 ? 'ᵉʳ' : 'ᵉ') : '—');
+  progProto.pcOpen = function (e, unit, pts) {
+    const s = this.st(), online = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
+    const seed = { id: e.id || '', pseudo: e.pseudo || '—', avatar: e.me && s.avatarCfg ? s.avatarCfg : e.avatar || null, grade: e.grade, rank: Number(e.rank) || 0, pts: Number(pts) || 0, unit: unit || 'PL', me: !!e.me };
+    const ask = !!seed.id && online && seed.unit === 'PL';
+    this.setState({ pcCard: { seed: seed, data: null, busy: ask, err: ask ? '' : seed.id || !online ? '' : 'old' } });
+    if (!ask) return;
+    Cloud.rpc('player_card', { target: seed.id }).then(d => {
+      const c = this.st().pcCard;
+      if (c && c.seed.id === seed.id) this.setState({ pcCard: Object.assign({}, c, { data: d || null, busy: false }) });
+    }, err => {
+      const c = this.st().pcCard, m = (err && err.message) || '';
+      if (!c || c.seed.id !== seed.id) return;
+      const kind = err && err.code === 'network' ? 'net' : err && err.code === 'not_installed' ? 'old' : /plus dans la ligue/.test(m) ? 'gone' : 'err';
+      this.setState({ pcCard: Object.assign({}, c, { busy: false, err: kind }) });
+    });
+  };
+  progProto.vPlayerCard = function (s) {
+    const c = s.pcCard;
+    if (!c || !c.seed) return { open: false, past: [] };
+    const T = this.tiers(), sd = c.seed, d = c.data && typeof c.data === 'object' ? c.data : null;
+    const g = progGrade(T, d && d.grade != null ? d.grade : sd.grade);
+    const ava = avMini(sd.me && s.avatarCfg ? s.avatarCfg : d && d.avatar ? d.avatar : sd.avatar);
+    const cur = d && d.season ? d.season : null, isPl = sd.unit === 'PL', unitImg = isPl ? 'img/brand/pl.svg' : 'img/brand/pk.svg';
+    const board = s.progBoard && s.progBoard.season ? Number(s.progBoard.season.n) : progLocalSeason(Date.now()).n;
+    const n = cur ? Number(cur.n) || board : board, rank = cur ? Number(cur.rank) || 0 : sd.rank, players = cur ? Number(cur.players) || 0 : (s.progBoard ? Number(s.progBoard.players) || 0 : 0);
+    const since = d && d.since ? PC_MONTH(d.since) : '';
+    const past = (d && Array.isArray(d.past) ? d.past : []).map(x => {
+      const r = Number(x.rank) || 0;
+      return { season: 'Saison ' + x.n, rank: pcRank(r) + (Number(x.players) ? ' sur ' + progNum(x.players) : ''), pl: progNum(x.pl) + ' PL', medal: r >= 1 && r <= 3 ? 'img/rank/' + r + '.svg' : '', hasMedal: r >= 1 && r <= 3,
+        aria: 'Saison ' + x.n + ' : ' + pcRank(r) + ', ' + progNum(x.pl) + ' PL' };
+    });
+    const admin = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin();
+    const note = c.busy ? 'Chargement de la carte…'
+      : c.err === 'old' ? (admin ? 'Carte complète (date d’arrivée, saisons passées) après l’installation de tools/supabase/install_024_a_031.sql dans Supabase Studio.' : 'La carte complète (date d’arrivée, saisons passées) arrive très bientôt.')
+        : c.err === 'net' ? 'Pas de réseau : la carte complète s’affichera une fois connecté.'
+          : c.err === 'gone' ? 'Ce joueur n’est plus dans la ligue.'
+            : c.err ? 'La carte complète n’est pas disponible pour le moment.' : '';
+    return {
+      open: true, close: () => this.setState({ pcCard: null }),
+      aria: 'Carte de dresseur de ' + sd.pseudo, pseudo: sd.pseudo, me: sd.me,
+      hasAva: !!ava, noAva: !ava, ava: ava || { bg: '', char: '', poke: {}, pokeStyle: '', hasPoke: false, acc: {}, accStyle: '', hasAcc: false },
+      gImg: g.img, gName: g.name, gStyle: 'color: ' + g.color,
+      since: since ? 'Membre depuis ' + since : '', hasSince: !!since,
+      seasonLabel: 'Saison ' + n + ' · en cours', rank: rank ? '#' + progNum(rank) : '—', of: rank && players ? 'sur ' + progNum(players) + ' joueur' + (players > 1 ? 's' : '') : rank ? '' : 'pas classé',
+      unitLabel: sd.unit + ' de la saison', unitImg: unitImg, pts: progNum(cur ? cur.pl : sd.pts),
+      past: past, hasPast: past.length > 0, noPast: !past.length && !c.busy && (!!d || !c.err),
+      pastEmpty: !d ? 'Ses saisons passées s’affichent une fois connecté à ton compte Dropicards.' : n > 1 ? 'Aucun PL gagné lors des saisons passées.' : 'Première saison de la ligue : ses résultats passés s’afficheront ici.',
+      note: note, hasNote: !!note
+    };
+  };
   // Bannière de l'onglet Jeux.
   progProto.vProgressBanner = function (s) {
     const b = s.progBoard && s.progBoard.me ? s.progBoard : null, se = b && b.season ? Number(b.season.n) : progLocalSeason(Date.now()).n;
@@ -124,6 +187,7 @@
     const s = this.st(), r = progBaseRender.call(this), ui = r.ui;
     ui.isProgress = s.screen === 'progress';
     r.pgb = this.vProgressBanner(s);
+    r.pc = this.vPlayerCard(s);
     if (ui.isProgress) {
       r.pg = this.vProgress(s);
       r.ple = r.pg.isEarn && this.vPlEarn ? this.vPlEarn(s) : { rows: [], shareNets: [] };

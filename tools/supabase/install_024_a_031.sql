@@ -1,13 +1,16 @@
--- INSTALLATION EN UNE FOIS des scripts 024 à 028 (2026-11-13 et 14, porteur : « ouvre le Safari à tous », « suivre tous
+-- INSTALLATION EN UNE FOIS des scripts 024 à 028, 030 et 031 (2026-11-13 au 15, porteur : « ouvre le Safari à tous », « suivre tous
 -- les joueurs en mode admin », « 3 niveaux de difficulté pour le safari », « Safari illimité pour les admins et mon ami »,
 -- « Points de loyauté »). 024 : le jeu Safari éclair (le serveur
 -- tire les Pokémon, compte et donne les PK). 025 : Admin › Joueurs (PK, PA, régularité) et temps passé dans l'app.
 -- 026 : les 3 niveaux du Safari (Facile, Normal, Difficile ; perte de PK possible en Normal et Difficile).
 -- 027 : Safari sans délai pour les comptes admin et ceux de la liste safari_free (requetes_safari.sql).
 -- 028 : Points de loyauté (PL) : défis, parrainage, captures de partage à valider, classement de la saison en PL.
+-- 030 : cartes des tirages du PK shop modifiables même déjà choisies (tickets gardés, carte à rechoisir).
+-- 031 : carte de visite des joueurs du classement de « Ma ligue ».
+-- 029 (annonces Vinted) n'y est pas : il a sa propre installation (docs/42).
 -- Il faut 001 à 023 déjà installés (fait le 2026-11-12). Rejouable : sans risque si l'un d'eux est déjà installé.
 -- Supabase Studio › SQL Editor › New query › colle TOUT ce fichier › Run. Puis colle 000_verifier.sql › Run : les lignes
--- 024 à 028 doivent être « oui ». Ce fichier est fabriqué à partir de 024 à 028
+-- 024 à 028, 030 et 031 doivent être « oui ». Ce fichier est fabriqué à partir de ces scripts
 -- (tools/supabase/make_install_024.sh) : ne pas le modifier à la main.
 
 -- ================= 024_safari.sql =================
@@ -521,7 +524,7 @@ notify pgrst, 'reload schema';
 
 do $$ begin
   if to_regclass('public.app_time') is null then
-    raise exception 'Installe d''abord 025_suivi_joueurs.sql (le plus simple : tout le fichier install_024_a_028.sql)';
+    raise exception 'Installe d''abord 025_suivi_joueurs.sql (le plus simple : tout le fichier install_024_a_031.sql)';
   end if;
 end $$;
 
@@ -985,6 +988,195 @@ language sql stable security definer set search_path = '' as $$
   where rk.r <= 10 order by rk.r, p.pseudo;
 $$;
 revoke all on function public.season_winners(int) from public, anon, authenticated;
+
+-- ================= 030_tirages_cartes.sql =================
+-- 030_tirages_cartes.sql — Cartes des tirages modifiables même déjà choisies (2026-11-15, porteur).
+--
+-- Demande du porteur : « laisse-moi changer les cartes proposées même si des joueurs ont choisi des tickets ».
+-- Avant (018) : une carte déjà choisie par un joueur ne pouvait plus être retirée (« Des joueurs ont déjà choisi cette
+-- carte : elle reste au tirage »).
+-- Maintenant :
+--   - un admin retire n'importe quelle carte d'un tirage à venir, même choisie ;
+--   - les tickets qui l'avaient choisie restent valables (rien n'est remboursé ni perdu) : leur carte est simplement
+--     effacée, et le joueur doit en choisir une autre parmi les cartes du tirage (ticket_choose) ;
+--   - tant qu'il n'a pas rechoisi, l'app lui affiche « Carte à rechoisir » sur son ticket ; au tirage, un ticket sans
+--     carte participe quand même (défaut à confirmer : s'il gagne, l'admin lui fait choisir une carte du tirage) ;
+--   - chaque retrait est inscrit au journal des admins, avec le nombre de tickets à rechoisir.
+-- À installer après 018 et 019 (déjà en place sur le serveur). Rejouable. Tests : tests/test_030.sql.
+
+do $$ begin
+  if to_regclass('public.draw_prizes') is null or to_regprocedure('public._game_next_draw(timestamptz)') is null then
+    raise exception 'Installe d''abord 018_lots_limites.sql (cartes des tirages)';
+  end if;
+end $$;
+
+-- 1. Retirer une carte (admins) : possible même si des joueurs l'ont choisie ; leurs tickets sont à rechoisir.
+create or replace function public.admin_prize_remove(prize_id bigint) returns jsonb
+language plpgsql volatile security definer set search_path = '' as $$
+declare p public.draw_prizes%rowtype; n int := 0;
+begin
+  if not public.is_admin() then raise exception 'Réservé aux admins' using errcode = '42501'; end if;
+  select * into p from public.draw_prizes where id = prize_id for update;
+  if not found then return jsonb_build_object('ok', false, 'msg', 'Carte introuvable'); end if;
+  if p.draw_at <= now() then raise exception 'Ce tirage a déjà eu lieu : ses cartes ne changent plus' using errcode = 'P0001'; end if;
+  update public.tickets set choice = null where item = p.item and draw_at = p.draw_at and choice = p.card;
+  get diagnostics n = row_count;
+  delete from public.draw_prizes where id = prize_id;
+  insert into public.admin_log (admin_id, action, details, reason)
+  values (auth.uid(), 'prize_remove', jsonb_build_object('item', p.item, 'card', p.card, 'draw_at', p.draw_at, 'tickets_to_rechoose', n),
+    case when n > 0 then 'Carte retirée du tirage : ' || n || ' ticket(s) à rechoisir' else 'Carte retirée du tirage' end);
+  return jsonb_build_object('ok', true, 'rechoose', n);
+end; $$;
+revoke all on function public.admin_prize_remove(bigint) from public, anon;
+grant execute on function public.admin_prize_remove(bigint) to authenticated;
+
+-- 2. Rechoisir sa carte (joueur) : seulement pour son ticket du prochain tirage dont la carte a été retirée, et
+-- seulement une carte de ce tirage.
+create or replace function public.ticket_choose(item_id text, card text) returns jsonb
+language plpgsql volatile security definer set search_path = '' as $$
+declare uid uuid := auth.uid(); d timestamptz := public._game_next_draw(now()); c text := nullif(btrim(coalesce(card, '')), ''); n int := 0;
+begin
+  if uid is null then raise exception 'Connexion requise' using errcode = '28000'; end if;
+  if c is null or not exists (select 1 from public.draw_prizes where draw_at = d and item = item_id and draw_prizes.card = c) then
+    raise exception 'Choisis une carte de ce tirage' using errcode = 'P0001';
+  end if;
+  update public.tickets set choice = c where user_id = uid and item = item_id and draw_at = d and choice is null;
+  get diagnostics n = row_count;
+  if n = 0 then raise exception 'Aucun ticket à rechoisir pour ce tirage' using errcode = 'P0001'; end if;
+  return jsonb_build_object('ok', true, 'item', item_id, 'choice', c, 'draw_at', d);
+end; $$;
+revoke all on function public.ticket_choose(text, text) from public, anon;
+grant execute on function public.ticket_choose(text, text) to authenticated;
+
+-- 3. État du PK shop (remplace 018) : en plus, « redo » = mes tickets du prochain tirage dont la carte est à rechoisir.
+create or replace function public.shop_state() returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare uid uuid := auth.uid(); m timestamptz := public._shop_month_start(now()); nd timestamptz := public._game_next_draw(now());
+  mb jsonb; stock jsonb; prizes jsonb; mine jsonb; redo jsonb;
+begin
+  if uid is null then raise exception 'Connexion requise' using errcode = '28000'; end if;
+  select jsonb_build_object('item', t.item, 'at', t.bought_at) into mb from public.tickets t join public.game_items i on i.id = t.item
+    where t.user_id = uid and i.kind = 'lot' and t.cost_pk > 0 and t.bought_at >= m order by t.bought_at desc limit 1;
+  select jsonb_object_agg(s.item, jsonb_build_object('total', s.qty, 'months', s.months, 'restock', public._shop_period_end(now(), s.months),
+      'left', greatest(0, s.qty - (select count(*)::int from public.tickets t where t.item = s.item and t.cost_pk > 0 and t.bought_at >= public._shop_period(now(), s.months)))))
+    into stock from public.shop_stock s;
+  select jsonb_object_agg(x.item, x.cards) into prizes from (
+    select p.item, jsonb_agg(jsonb_build_object('id', p.card, 'name', p.name, 'info', p.info, 'img', p.img) order by p.id) as cards
+    from public.draw_prizes p where p.draw_at = nd group by p.item) x;
+  select jsonb_object_agg(y.item, y.picks) into mine from (
+    select t.item, jsonb_object_agg(t.choice, t.n) as picks
+    from (select item, choice, count(*) as n from public.tickets where user_id = uid and draw_at = nd and choice is not null group by item, choice) t
+    group by t.item) y;
+  select jsonb_agg(distinct t.item) into redo from public.tickets t where t.user_id = uid and t.draw_at = nd and t.choice is null;
+  return jsonb_build_object('server_now', now(), 'month_start', m, 'next_month', public._shop_period_end(now(), 1), 'draw_at', nd, 'draw_lots', 1,
+    'stock', coalesce(stock, '{}'::jsonb), 'month_buy', mb, 'prizes', coalesce(prizes, '{}'::jsonb), 'mine', coalesce(mine, '{}'::jsonb),
+    'redo', coalesce(redo, '[]'::jsonb));
+end; $$;
+revoke all on function public.shop_state() from public, anon;
+grant execute on function public.shop_state() to authenticated;
+
+-- 4. Participants (remplace 018) : un ticket dont la carte a été retirée apparaît « Carte à rechoisir ».
+create or replace function public.admin_draw_entries(draw timestamptz default null)
+returns table (draw_at timestamptz, item text, card text, user_id uuid, pseudo text, email text, tickets bigint)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not public.is_admin() then raise exception 'Réservé aux admins'; end if;
+  return query
+    select t.draw_at, t.item, coalesce(p.name || coalesce(' (' || p.info || ')', ''), t.choice, 'Carte à rechoisir (carte retirée)'), t.user_id, pr.pseudo, u.email::text, count(*)
+    from public.tickets t join auth.users u on u.id = t.user_id left join public.profiles pr on pr.id = t.user_id
+      left join public.draw_prizes p on p.draw_at = t.draw_at and p.item = t.item and p.card = t.choice
+    where t.draw_at is not null and (case when draw is null then t.draw_at > now() else t.draw_at = draw end)
+    group by t.draw_at, t.item, p.name, p.info, t.choice, t.user_id, pr.pseudo, u.email
+    order by t.draw_at, t.item, count(*) desc;
+end; $$;
+revoke all on function public.admin_draw_entries(timestamptz) from public, anon;
+grant execute on function public.admin_draw_entries(timestamptz) to authenticated;
+
+-- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).
+notify pgrst, 'reload schema';
+
+-- ================= 031_carte_joueur.sql =================
+-- 031_carte_joueur.sql — Carte de visite d'un joueur du classement de « Ma ligue » (2026-11-15, porteur).
+--
+-- Demande du porteur : « lorsqu'un utilisateur clique sur le profil d'un joueur du classement, il peut voir sa carte de
+-- visite : son avatar, son pseudo, depuis quand il est sur l'appli, les PL remportés et son classement des anciennes
+-- saisons et de sa saison actuelle ».
+--   - season_board (remplace celle de 028) : chaque joueur du classement (et ma ligne « me ») porte son identifiant
+--     (« id »), pour ouvrir sa carte ; rien d'autre ne change.
+--   - player_card(target) : la carte d'un joueur, pour tout compte connecté. Seulement ce que le classement montre déjà
+--     (pseudo, avatar, grade, PL et place) plus le mois d'arrivée sur Dropicards (« membre depuis », au mois près) et
+--     ses saisons passées (PL et place). Jamais l'adresse e-mail, l'âge ni la collection.
+--   - Comptes admin ou suspendus : pas classés (comme au classement) ; carte d'un compte suspendu ou supprimé refusée.
+-- À installer après 028 (install_024_a_031.sql). Rejouable. Tests : tests/test_031.sql.
+
+do $$ begin
+  if to_regprocedure('public._pl_scores(integer)') is null or to_regclass('public.pl_ledger') is null then
+    raise exception 'Installe d''abord 028_points_loyaute.sql (fichier install_024_a_031.sql)';
+  end if;
+end $$;
+
+-- 1. Classement de la saison (même règle que 028), avec l'identifiant de chaque joueur.
+create or replace function public.season_board(lim int default 50) returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare uid uuid := auth.uid(); se jsonb; s int; res jsonb; n int := least(greatest(coalesce(lim, 50), 3), 100);
+begin
+  if uid is null then raise exception 'Connecte-toi à ton compte Dropicards.' using errcode = '42501'; end if;
+  se := public._season_at(now()); s := (se->>'n')::int;
+  with sc as (select * from public._pl_scores(s)),
+       rk as (select sc.user_id, sc.pl, (rank() over (order by sc.pl desc, sc.last_at asc nulls last))::int as r,
+                     row_number() over (order by sc.pl desc, sc.last_at asc nulls last, sc.user_id) as rn from sc)
+  select jsonb_build_object(
+    'unit', 'pl', 'season', se, 'now', now(), 'players', (select count(*) from rk),
+    'ranked', (select count(*) from rk where rk.pl > 0),
+    'top', coalesce((select jsonb_agg(jsonb_build_object('id', rk.user_id, 'rank', rk.r, 'pseudo', p.pseudo, 'grade', public._game_grade(rk.user_id), 'pl', rk.pl,
+                       'me', rk.user_id = uid, 'avatar', p.avatar) order by rk.rn)
+                     from rk join public.profiles p on p.id = rk.user_id where rk.rn <= n), '[]'::jsonb),
+    'me', (select jsonb_build_object('id', rk.user_id, 'rank', rk.r, 'pl', rk.pl) from rk where rk.user_id = uid),
+    'pl_season', coalesce((select sum(l.pl) from public.pl_ledger l where l.user_id = uid and l.season = s), 0),
+    'pl_total', coalesce((select sum(l.pl) from public.pl_ledger l where l.user_id = uid), 0),
+    'pk_total', coalesce((select w.pk_earned from public.wallets w where w.user_id = uid), 0),
+    'grade', public._game_grade(uid)
+  ) into res;
+  return res;
+end; $$;
+revoke all on function public.season_board(int) from public, anon;
+grant execute on function public.season_board(int) to authenticated;
+
+-- 2. Place et PL d'un joueur dans une saison (même règle que le classement : PL décroissants, égalité départagée par
+-- l'heure du dernier gain). Aucune ligne si le joueur n'est pas classé (admin, compte suspendu, pas de pseudo).
+create or replace function public._pl_rank(target uuid, n int) returns table (rank int, pl bigint, players bigint)
+language sql stable security definer set search_path = '' as $$
+  with sc as (select * from public._pl_scores(n)),
+       rk as (select sc.user_id, sc.pl, (rank() over (order by sc.pl desc, sc.last_at asc nulls last))::int as r from sc)
+  select rk.r, rk.pl, (select count(*) from rk) from rk where rk.user_id = target;
+$$;
+revoke all on function public._pl_rank(uuid, int) from public, anon, authenticated;
+
+-- 3. Carte de visite d'un joueur.
+create or replace function public.player_card(target uuid) returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare uid uuid := auth.uid(); p public.profiles%rowtype; s int; cur jsonb; past jsonb;
+begin
+  if uid is null then raise exception 'Connecte-toi à ton compte Dropicards.' using errcode = '42501'; end if;
+  select * into p from public.profiles where id = target and status = 'active' and pseudo is not null;
+  if not found then raise exception 'Ce joueur n''est plus dans la ligue.' using errcode = 'P0001'; end if;
+  s := (public._season_at(now())->>'n')::int;
+  select jsonb_build_object('n', s, 'rank', r.rank, 'pl', r.pl, 'players', r.players) into cur from public._pl_rank(target, s) r;
+  -- Saisons passées où le joueur a gagné des PL, de la plus récente à la plus ancienne.
+  select coalesce(jsonb_agg(y.x order by y.k desc), '[]'::jsonb) into past from (
+    select k, jsonb_build_object('n', k, 'rank', r.rank, 'pl', r.pl, 'players', r.players) as x
+    from generate_series(1, greatest(s - 1, 0)) k cross join lateral public._pl_rank(target, k) r where r.pl > 0) y;
+  return jsonb_build_object(
+    'id', p.id, 'pseudo', p.pseudo, 'avatar', p.avatar, 'grade', public._game_grade(target), 'me', target = uid,
+    'since', to_char(date_trunc('month', p.created_at at time zone 'Europe/Paris'), 'YYYY-MM'),
+    'season', coalesce(cur, jsonb_build_object('n', s, 'rank', null, 'pl', 0, 'players', null)),
+    'past', past);
+end; $$;
+revoke all on function public.player_card(uuid) from public, anon;
+grant execute on function public.player_card(uuid) to authenticated;
+
+-- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).
+notify pgrst, 'reload schema';
 
 -- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).
 notify pgrst, 'reload schema';

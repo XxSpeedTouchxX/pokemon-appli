@@ -29,6 +29,9 @@ from (values
   ('026_safari_niveaux', to_regprocedure('public.safari_start(uuid,integer)') is not null, 'Safari : 3 niveaux de difficulté'),
   ('027_safari_libre', to_regclass('public.safari_free') is not null, 'Safari sans délai (admins, comptes choisis)'),
   ('028_points_loyaute', to_regprocedure('public.pl_state()') is not null, 'Points de loyauté, classement en PL'),
+  ('029_annonces', to_regclass('public.listings') is not null, 'annonces Vinted (installation à part, docs/42)'),
+  ('030_tirages_cartes', to_regprocedure('public.ticket_choose(text,text)') is not null, 'cartes des tirages modifiables, carte à rechoisir'),
+  ('031_carte_joueur', to_regprocedure('public.player_card(uuid)') is not null, 'carte de visite des joueurs de Ma ligue'),
   ('020_premium_formules', exists (select 1 from pg_constraint where conname = 'premium_plan_check' and pg_get_constraintdef(oid) like '%quarter%'), 'Premium trimestriel et semestriel')
 ) as t(script, ok, role)
 order by script;

@@ -1,6 +1,6 @@
 // Fiche d'une carte (2026-10-31, porteur, d'après sa photo et sa vidéo) :
 // - « Historique du prix » : archive quotidienne Dropicards de la cote (web/data/hist), valeur, variation sur la période,
-//   axe des montants, dates, ligne pointillée du prix d'achat, périodes 1S, 1M, COMPLET (COMPLET, l'ancien « MAX », par défaut ; « 3M », puis « 6M » et « 1A » retirés le 2026-11-13) ;
+//   axe des montants, dates, ligne pointillée du prix d'achat, périodes 1S, 1M, COMPLET (COMPLET, l'ancien « MAX », par défaut avec le DropiPass, réservé au DropiPass depuis le 2026-11-15 ; « 3M », puis « 6M » et « 1A » retirés le 2026-11-13) ;
 //   repli sur les moyennes Cardmarket si l'archive manque ;
 // - « Prix gradés » (cartes cotées 5 € et plus, 2026-11-01) : logos PCA, CCC, PSA ; notes 10 à 6 en nuances (10 or, 9,5 vert très foncé … 6 jaune-orangé), sans
 //   9,5 chez PSA, 10 Black Label et 10 Gold Label chez CCC (2026-11-01) ; estimations signalées ; jamais pour le scellé ;
@@ -10,8 +10,11 @@ const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 const N = t => String(t).replace(/\s+/g, ' ').replace(/[  ]/g, ' ').trim();
 const ID = 'sv03.5-199', SEALED = 'sp-30th-celebration-booster-bundle';
-const open = async (w, h, route) => {
+// Historique complet réservé au DropiPass (2026-11-15, porteur) : les essais de la courbe se font avec le DropiPass
+// (prem), le dernier bloc vérifie la bulle « COMPLET » verrouillée sans abonnement.
+const open = async (w, h, route, prem = true) => {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2 });
+  if (prem) await ctx.addInitScript(() => { try { localStorage.setItem('pkm-premium-force', '1'); } catch (e) { /* rien */ } });
   await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
   if (route) await ctx.route(route, r => r.abort());
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
@@ -106,6 +109,23 @@ const open = async (w, h, route) => {
   ok('sans archive : moyennes Cardmarket (« ' + N(await H.locator('.pkm-fi-note').first().innerText()) + ' »)', /Moyennes Cardmarket : 30 jours, 7 jours, veille/.test(await H.innerText()));
   const over = await page.locator('section.pkm-fi').evaluate(e => e.scrollWidth - e.clientWidth);
   ok('360 : pas de débord (' + over + ')', over <= 0 && await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await ctx.close();
+}
+{
+  // Sans DropiPass : la fiche s'ouvre sur 1M, « COMPLET » porte un cadenas et ouvre la fenêtre « Accès verrouillé ».
+  const [ctx, page] = await open(390, 844, null, false);
+  await page.evaluate(id => window.__pkm.fiOpen(id), ID); await page.waitForTimeout(1500);
+  const H = page.locator('section.pkm-fi section[aria-label="Historique du prix"]'), per = H.locator('.pkm-fh-per button');
+  const full = per.filter({ hasText: 'COMPLET' });
+  ok('sans DropiPass : ouverte sur 1M, « COMPLET » avec un cadenas', (await per.nth(1).getAttribute('aria-pressed')) === 'true' && (await full.getAttribute('aria-pressed')) === 'false'
+    && (await full.locator('svg.pkm-fh-lock').count()) === 1 && /réservé au DropiPass/.test(await full.getAttribute('aria-label')) && / · 1 mois$/.test(N(await H.locator('.pkm-fh-chg').innerText())));
+  await full.click(); await page.waitForTimeout(500);
+  const lw = page.locator('section[aria-label="Accès verrouillé"]');
+  ok('sans DropiPass : « COMPLET » → fenêtre « Accès verrouillé » (réservé au DropiPass, sans grade)', await lw.isVisible() && /historique complet du prix est réservé au DropiPass/.test(await lw.innerText())
+    && (await lw.locator('button:has-text("Découvrir le DropiPass")').count()) === 1 && (await lw.locator('button:has-text("Voir le grade")').count()) === 0
+    && (await lw.locator('img[src="img/brand/historique.svg"]').count()) === 1);
+  await lw.locator('button:has-text("Compris")').click(); await page.waitForTimeout(300);
+  ok('sans DropiPass : la courbe reste sur 1M', (await per.nth(1).getAttribute('aria-pressed')) === 'true');
   await ctx.close();
 }
 console.log(res.join('\n'));
