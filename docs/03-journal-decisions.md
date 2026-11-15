@@ -28,6 +28,7 @@
 - **Gain de PK** : gemmes et éclat de départ avec un reflet **jaune** (couleur des PK) au lieu du violet des PA.
 - **Classeur** : « Valeur de mes cartes » et « Valeur de mes produits scellés » écrites exactement comme « Valeur de toute ma collection » (titre identique ; montant à la même taille, même formule) ; animation d'ajout : titre 14 px et montant en Sora blanc à contour noir.
 - Cache v228.
+- **Sons du coffre mystère, 3ᵉ série** (« de vrais bruits de coffre qui s'ouvre, avec une touche un peu jeu ») : 5 sons faits à partir de **vrais enregistrements** libres de droits (CC0, packs « RPG Audio » et « Impact Sounds » de Kenney, pris sur un miroir public de GitHub car kenney.nl est bloqué ici ; empreintes vérifiées, `tools/sfx/coffre/SOURCES.md`) : 11 Vieux coffre qui grince, 12 Serrure de fer et couvercle lourd, 13 Loquet, charnière et pièces d'or, 14 Clé qui tourne et scintillement, 15 Vieux coffre de pirate ; touche « jeu » discrète (reflets de verre, petite cloche, souffle). Un MP3 par son (`web/sfx/coffre-11.mp3` à `15`, 46 Ko), joué en 3 temps calés sur l'animation ; essai `?soncoffre=11` à `15` ; **aucun son par défaut, choix du porteur attendu** ; cache v229.
 
 ---
 
