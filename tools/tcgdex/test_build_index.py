@@ -289,8 +289,8 @@ class LooseReprints(unittest.TestCase):
 class Scrydex(unittest.TestCase):
     def test_lookup(self):
         # Scrydex sert une image d'attente (même signature) pour tout numéro inconnu (catalogue du 2026-11-15).
-        wait = ("https://images.scrydex.com/pokemon/placeholder", '"w"', "1000")
-        real = {"sdx:mep-1": ("u1", '"a"', "51000"), "sdx:mep-5": ("u5", '"b"', "52000"), "sdx:svp-176": ("u6", '"c"', "50000")}
+        wait = ("", '"w"', "1000", "Mon, 01 Jan 2024 00:00:00 GMT")
+        real = {"sdx:mep-1": ("", '"a"', "51000", ""), "sdx:mep-5": ("", "", "52000", ""), "sdx:svp-176": ("", '"c"', "50000", "")}
         asked = []
 
         def sig(p):
@@ -298,14 +298,14 @@ class Scrydex(unittest.TestCase):
             if p.startswith("sdx:mee-"):
                 return None  # extension absente : rien du tout
             if p.startswith("sdx:mcd23-"):
-                return ("x", "", str(len(p)))  # attente changeante : impossible de la reconnaître
+                return ("", '"' + p + '"', "1000", "")  # attente changeante : impossible de la reconnaître
             return real.get(p, wait)
         paths = ["sdx:mep-1", "sdx:mep-3", "sdx:mep-5", "sdx:svp-176", "sdx:mcd23-1", "sdx:mee-1", "sdx:mee-2"]
         ok, report = sdx_lookup(paths, sig=sig, workers=2)
         self.assertEqual(ok, {"sdx:mep-1", "sdx:mep-5", "sdx:svp-176"})  # mep-3 = image d'attente : écartée
-        self.assertIn("mcd23 image d'attente non reconnaissable, ignorée", report)
+        self.assertTrue(any(r.startswith("mcd23 image d'attente non reconnaissable") for r in report))
         self.assertIn("mee 0/2", report)
-        self.assertIn("mep 2/3", report)
+        self.assertTrue(any(r.startswith("mep 2/3") for r in report))
         self.assertNotIn("sdx:mcd23-1", asked)
 
 

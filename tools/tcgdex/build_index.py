@@ -424,12 +424,16 @@ def probe_image(path, quiet=False):
 
 
 def image_sig(path):
-    """Signature de l'image servie à une adresse (2026-11-15) : None si pas d'image, sinon (adresse finale, ETag,
-    taille). Deux adresses servant la même image d'attente ont la même signature."""
+    """Signature de l'image servie à une adresse (2026-11-15) : None si pas d'image, sinon (adresse finale si
+    redirection, ETag, taille, date de modification). L'adresse demandée n'en fait pas partie : deux numéros qui
+    servent la même image d'attente ont la même signature."""
+    url = image_url(path)
     try:
-        with urlopen(Request(image_url(path), method="HEAD", headers={"User-Agent": "PKM-App-index/1.0"}), timeout=20) as resp:
+        with urlopen(Request(url, method="HEAD", headers={"User-Agent": "PKM-App-index/1.0"}), timeout=20) as resp:
             if resp.status == 200 and (resp.headers.get("Content-Type") or "").startswith("image/"):
-                return (resp.geturl(), resp.headers.get("ETag") or "", resp.headers.get("Content-Length") or "")
+                h = resp.headers
+                return ("" if resp.geturl() == url else resp.geturl(), h.get("ETag") or "", h.get("Content-Length") or "",
+                        h.get("Last-Modified") or "")
     except Exception:  # noqa: BLE001
         pass
     return None
@@ -451,8 +455,8 @@ def sdx_lookup(paths, sig=None, workers=8):
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for ext, group in sorted(by_set.items()):
             fake = list(pool.map(sig, [f"sdx:{ext}-99999", f"sdx:{ext}-99998"]))
-            if fake[0] != fake[1] or (fake[0] and not all(fake[0][1:])):
-                report.append(f"{ext} image d'attente non reconnaissable, ignorée")
+            if fake[0] != fake[1] or (fake[0] and not any(fake[0][1:3])):
+                report.append(f"{ext} image d'attente non reconnaissable ({fake[0]} / {fake[1]}), ignorée")
                 continue
             real = lambda got: got is not None and got != fake[0]
             witnesses = list(dict.fromkeys([group[0], group[len(group) // 2], group[-1]]))
@@ -461,7 +465,7 @@ def sdx_lookup(paths, sig=None, workers=8):
                 continue
             found = [p for p, g in zip(group, pool.map(sig, group)) if real(g)]
             ok.update(found)
-            report.append(f"{ext} {len(found)}/{len(group)}")
+            report.append(f"{ext} {len(found)}/{len(group)} (attente : {fake[0]})")
     return ok, report
 
 def ptcg_alive(paths, tries=3, pause=30):
