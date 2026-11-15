@@ -11,6 +11,7 @@
 - **Bannière du DropiPass** (PK shop, Mon profil) : texte du porteur, orthographe revue : « Scans illimités, double XP de PK et PA, Radar des boutiques, pré-gradation des cartes et plein d'autres avantages… ».
   - **Décalage signalé** : aujourd'hui le DropiPass double les PA en permanence, mais les PK seulement pendant les 30 premiers jours (2XP PK offert au 1ᵉʳ abonnement, `018`). La bannière promet donc plus que l'offre et les CGV.
   - À trancher par le porteur : 2XP PK permanent pour les abonnés (changement du serveur, coût des lots à revoir, `docs/27` le jugeait déficitaire), ou texte ajusté. Sans risque immédiat : les achats sont réservés aux admins (`NOBUY_ON`).
+  - **Tranché le même jour (porteur : « ok pour enlever PK doublé, tu laisses uniquement double XP de PA »)** : bannière « Scans illimités, double XP de PA, Radar des boutiques, pré-gradation des cartes et plein d'autres avantages… » ; le 2XP PK offert 30 jours au 1ᵉʳ abonnement reste dans la liste des avantages. Cache v226.
 - **Coffre mystère : 2ᵉ série de 5 sons, tous doux** (`sfx.js`, `?soncoffre=6` à `10`), dans l'esprit des sons déjà choisis par le porteur :
   - 6 « Clochette du coffre » (comme le déblocage) ;
   - 7 « Gouttes d'aura du coffre » (comme les PA du jour) ;

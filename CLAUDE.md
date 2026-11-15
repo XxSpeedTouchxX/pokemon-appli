@@ -302,7 +302,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - **Tri de Mon classeur (2026-11-15, porteur) :** le « i » (source des cotes) est retiré ; à sa place, un bouton de tri « Prix » (du plus cher au moins cher, par défaut) ou « Nom » (de A à Z), pour les cartes, le scellé et « Tout afficher », gardé sur l'appareil (cache v220).
 - **30ᵉ Anniversaire (2026-11-15, porteur) :** description « Dont 30 cartes de la Collection Classique… » retirée sous l'en-tête de la série (cache v224).
 - **DropiPass, coffre, zoom, pubs (2026-11-15, porteur) :**
-  - bannière du DropiPass : « Scans illimités, double XP de PK et PA, Radar des boutiques, pré-gradation des cartes et plein d'autres avantages… » ; **décalage** : le 2XP PK n'est offert que 30 jours au 1ᵉʳ abonnement, **décision du porteur attendue** ;
+  - bannière du DropiPass : « Scans illimités, double XP de PA, Radar des boutiques, pré-gradation des cartes et plein d'autres avantages… » (« PK doublés » retiré par le porteur : le 2XP PK n'est offert que 30 jours au 1ᵉʳ abonnement ; cache v226) ;
   - coffre mystère : 2ᵉ série de 5 sons doux (`?soncoffre=6` à `10` : Clochette, Gouttes d'aura, Boîte à musique, Pop, Bulles), **choix attendu**, aucun son par défaut ;
   - zoom de l'app bloqué (viewport, `touch-action`, gestes de Safari ; Radar et avatar gardent leurs pincements) ;
   - pubs : clics demandés ou récompensés interdits par Google ; vidéo récompensée seulement, **« go » attendu** pour une proposition ;

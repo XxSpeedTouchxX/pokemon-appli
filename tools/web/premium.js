@@ -162,8 +162,9 @@
     r.prem = {
       logo: PREM_LOGO, logoCls: 'pkm-prem-logo pkm-prem-logo-' + PREM_VIS,
       // Texte du porteur (2026-11-15) : « Scans illimités, double XP de PK et PA, radar de boutiques, pré-gradation des
-      // cartes et plein d'autres avantages… ».
-      banner: { title: PREM_NAME, text: on ? 'DropiPass actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP de PK et PA, Radar des boutiques, pré-gradation des cartes et plein d’autres avantages…', open: () => this.premOpen() },
+      // cartes et plein d'autres avantages… » ; même jour : « PK doublés » retiré, seul le double XP des PA reste (le 2XP
+      // PK n'est offert que 30 jours au 1er abonnement).
+      banner: { title: PREM_NAME, text: on ? 'DropiPass actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP de PA, Radar des boutiques, pré-gradation des cartes et plein d’autres avantages…', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.premClose(),
       perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isPg: p.kind === 'pg', hasProto: !!p.proto, isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isHeart: p.kind === 'heart', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
       buy: !on, isOn: on,
