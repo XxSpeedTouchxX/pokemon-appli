@@ -198,7 +198,8 @@ d = await saved();
 ok('ancien choix Groudon gardé : pkOwn ' + JSON.stringify(d.pkOwn) + ', buddy ' + d.buddy + ', ' + d.pk + ' PK', JSON.stringify(d.pkOwn) === '[383]' && d.buddy === 383 && d.pk === 100 && await page.evaluate(() => document.documentElement.classList.contains('pkm-theme-lava')));
 await edit(d => { d.buddy = 384; });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1000);
-ok('Rayquaza non débloqué : retour à Pikachu', /Pikachu/.test(await page.getAttribute('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]', 'aria-label')) && !(await page.evaluate(() => document.documentElement.className)).includes('pkm-theme-'));
+// Sans compagnon à thème : fond du mode choisi (Sombre par défaut depuis le 2026-11-15), pas d'océan, volcan ni ouragan.
+ok('Rayquaza non débloqué : retour à Pikachu', /Pikachu/.test(await page.getAttribute('section[aria-label="Valeur de ma collection"] button[aria-label^="Compagnon"]', 'aria-label')) && !/pkm-theme-(sea|lava|storm)/.test(await page.evaluate(() => document.documentElement.className)));
 // 7 bis. Migration v2 : un compagnon devenu payant, déjà choisi, reste acquis.
 await edit(d => { delete d.pkV; d.buddy = 133; d.pkOwn = (d.pkOwn || []).filter(n => n !== 133); });
 await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(1000);
