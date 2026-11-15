@@ -60,7 +60,7 @@ Le workflow `.github/workflows/tcgdex.yml` fait tout chaque jour, sur les serveu
      - cartes ajoutées depuis la version anglaise (`complete_set`, `extra_image`) : autres langues de TCGdex, `sdx_image`, puis pokemontcg.io (même numéro, contrôle par le nom anglais) ; comptées dans `imgOwn`, `imgAlt`, `imgNone` ;
      - `ptcg.same_name` : « Basic Grass Energy » = « Grass Energy » ;
      - **signature élargie du dessin** (`loose_key`, `loose_images`) après `art_key` : Pokémon (Pokédex, illustrateur, PV, dégâts), Dresseur (nom, illustrateur), Énergie de base (type et époque, `era_of` : `tk-hs-*` → `hgss`) ; même extension d'abord, puis date la plus proche ; Énergies reprises seulement pour les kits du dresseur ; notée dans `imgFrom` et `stats.imgAlt.reprint` ;
-     - **Scrydex carte par carte** (`ptcg.SDX_PROBE`, `sdx_probe_path`, `sdx_lookup`) : `mep`, `svp`, `swshp`, `mee`, `sve`, `2023sv` → `mcd23`, `2024sv` → `mcd24` ; numéro impossible essayé d'abord (image d'attente : extension ignorée), puis 3 cartes témoins, puis toutes ; sauté avec `--no-probe` ;
+     - **Scrydex carte par carte** (`ptcg.SDX_PROBE`, `sdx_probe_path`, `sdx_lookup`, `image_sig`) : `mep`, `svp`, `swshp`, `mee`, `sve`, `2023sv` → `mcd23`, `2024sv` → `mcd24` ; Scrydex sert une image d'attente pour un numéro inconnu : deux numéros impossibles donnent sa signature (adresse finale, ETag, taille), une carte n'est gardée que si son image en diffère (extension ignorée si l'attente n'est pas reconnaissable) ; 3 cartes témoins, puis toutes ; sauté avec `--no-probe` ;
      - le journal du calcul liste « Cartes encore sans visuel » et les reprises « signature large ».
    - **Champs ajoutés en fin de ligne (2026-10-11), après `lang` :**
 

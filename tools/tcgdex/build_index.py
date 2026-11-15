@@ -423,31 +423,46 @@ def probe_image(path, quiet=False):
     return False
 
 
-def sdx_lookup(paths, probe=None, workers=8):
-    """Chemins « sdx: » (ptcg.sdx_probe_path) auxquels Scrydex répond par une image (2026-11-15). Par extension :
-    un numéro impossible d'abord (une image servie pour n'importe quel numéro serait une image d'attente : extension
-    laissée de côté), puis trois cartes témoins ; toutes les cartes seulement si l'une des témoins répond.
-    Renvoie l'ensemble des chemins qui répondent et un résumé par extension."""
+def image_sig(path):
+    """Signature de l'image servie à une adresse (2026-11-15) : None si pas d'image, sinon (adresse finale, ETag,
+    taille). Deux adresses servant la même image d'attente ont la même signature."""
+    try:
+        with urlopen(Request(image_url(path), method="HEAD", headers={"User-Agent": "PKM-App-index/1.0"}), timeout=20) as resp:
+            if resp.status == 200 and (resp.headers.get("Content-Type") or "").startswith("image/"):
+                return (resp.geturl(), resp.headers.get("ETag") or "", resp.headers.get("Content-Length") or "")
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+def sdx_lookup(paths, sig=None, workers=8):
+    """Chemins « sdx: » (ptcg.sdx_probe_path) auxquels Scrydex répond par une vraie image de carte (2026-11-15).
+    Scrydex sert une image d'attente pour un numéro inconnu : par extension, deux numéros impossibles donnent sa
+    signature (image_sig) ; une carte n'est gardée que si son image en diffère. Si les deux numéros impossibles ne
+    donnent pas la même signature (rien pour reconnaître l'image d'attente), l'extension est laissée de côté.
+    Trois cartes témoins d'abord ; toutes les cartes seulement si l'une d'elles a une vraie image.
+    Renvoie l'ensemble des chemins gardés et un résumé par extension."""
     from concurrent.futures import ThreadPoolExecutor
-    probe = probe or (lambda p: probe_image(p, quiet=True))
+    sig = sig or image_sig
     by_set = {}
     for p in sorted(set(paths)):
         by_set.setdefault(p[len("sdx:"):].rsplit("-", 1)[0], []).append(p)
     ok, report = set(), []
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for ext, group in sorted(by_set.items()):
-            if probe(f"sdx:{ext}-99999"):
-                report.append(f"{ext} image d'attente, ignorée")
+            fake = list(pool.map(sig, [f"sdx:{ext}-99999", f"sdx:{ext}-99998"]))
+            if fake[0] != fake[1] or (fake[0] and not all(fake[0][1:])):
+                report.append(f"{ext} image d'attente non reconnaissable, ignorée")
                 continue
+            real = lambda got: got is not None and got != fake[0]
             witnesses = list(dict.fromkeys([group[0], group[len(group) // 2], group[-1]]))
-            if not any(pool.map(probe, witnesses)):
+            if not any(real(g) for g in pool.map(sig, witnesses)):
                 report.append(f"{ext} 0/{len(group)}")
                 continue
-            found = [p for p, hit in zip(group, pool.map(probe, group)) if hit]
+            found = [p for p, g in zip(group, pool.map(sig, group)) if real(g)]
             ok.update(found)
             report.append(f"{ext} {len(found)}/{len(group)}")
     return ok, report
-
 
 def ptcg_alive(paths, tries=3, pause=30):
     """L'hébergeur d'images de pokemontcg.io répond-il encore (vraie image, pas une page d'erreur) ?
