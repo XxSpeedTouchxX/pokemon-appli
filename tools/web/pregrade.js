@@ -38,7 +38,7 @@
       text = left > 0 ? '1 pré-gradation disponible' : 'Prochaine pré-gradation dans ' + dur(wait);
       short = left > 0 ? '1 dispo' : dur(wait);
     }
-    const upsell = q.mode === 'free' && !(typeof storeApp !== 'undefined' && storeApp) ? '1 tous les 3 jours · 60 par mois avec Premium' : q.mode === 'free' ? '1 tous les 3 jours' : '';
+    const upsell = q.mode === 'free' && !(typeof storeApp !== 'undefined' && storeApp) ? '1 tous les 3 jours · 60 par mois avec le DropiPass' : q.mode === 'free' ? '1 tous les 3 jours' : '';
     return { left: left, mode: q.mode, text: text, short: short, upsell: upsell, hasUpsell: !!upsell, empty: left <= 0 };
   };
   pgProto.pgSpend = function () {

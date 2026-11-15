@@ -14,8 +14,8 @@ const t1 = await sh.innerText();
 ok('mentions : éditeur (micro-entreprise, adresse, téléphone), hébergeur, non-affiliation, SIRET 883 722 993 00051', /Nicolas Bouit, entrepreneur individuel/.test(t1) && /Fos-sur-Mer/.test(t1) && /\+33 7 83 55 66 09/.test(t1) && /contact@dropicards\.fr/.test(t1) && /293 B/.test(t1) && /OVH SAS/.test(t1) && !/Cloudflare/.test(t1) && /non affiliée à Nintendo, GAME FREAK ou The Pokémon Company/.test(t1) && /SIRET : 883 722 993 00051/.test(t1) && !/à compléter/.test(t1));
 await page.screenshot({ path: shot('legal-mentions.png') });
 const tabs = await sh.locator('[aria-label="Rubriques"] button').allInnerTexts();
-ok('4 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Utilisation,Vente (Premium)');
-for (const [tab, title, re] of [['Confidentialité', 'Politique de confidentialité', /Brevo[\s\S]*Stripe[\s\S]*arrondie à environ 100 m[\s\S]*CNIL/], ['Utilisation', 'Conditions générales d’utilisation', /pas une plateforme de vente/], ['Vente (Premium)', 'Conditions générales de vente', /9,90 € par mois[\s\S]*24,90 € pour 3 mois[\s\S]*39,90 € pour 6 mois[\s\S]*69,90 € par an[\s\S]*renouvelé automatiquement[\s\S]*14 jours[\s\S]*médiateur/]]) {
+ok('4 rubriques : ' + tabs.join(', '), tabs.map(t => t.trim()).join() === 'Mentions légales,Confidentialité,Utilisation,Vente (DropiPass)');
+for (const [tab, title, re] of [['Confidentialité', 'Politique de confidentialité', /Brevo[\s\S]*Stripe[\s\S]*arrondie à environ 100 m[\s\S]*CNIL/], ['Utilisation', 'Conditions générales d’utilisation', /pas une plateforme de vente/], ['Vente (DropiPass)', 'Conditions générales de vente', /9,90 € par mois[\s\S]*24,90 € pour 3 mois[\s\S]*39,90 € pour 6 mois[\s\S]*69,90 € par an[\s\S]*renouvelé automatiquement[\s\S]*14 jours[\s\S]*médiateur/]]) {
   await sh.locator('[aria-label="Rubriques"] button:has-text("' + tab + '")').click(); await page.waitForTimeout(250);
   ok(tab + ' : « ' + title + ' », texte attendu', re.test(await sh.innerText()) && (await sh.locator('h2').innerText()) === title);
 }

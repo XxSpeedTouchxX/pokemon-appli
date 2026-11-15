@@ -1,6 +1,6 @@
-// Apparence (2026-11-02, porteur) : Réglages › Apparence, « Clair » (fond jaune) ou « Sombre » (fond nuit) ; choix
-// gardé sur l'appareil et posé avant le premier affichage ; un compagnon à thème garde son fond. PK shop sans le
-// solde de PK (le compteur de l'en-tête suffit).
+// Apparence (2026-11-02, porteur ; 3 modes le 2026-11-15) : Réglages › Apparence, « Sombre » (gris, par défaut),
+// « Clair » (blanc et bleu) ou « Original » (jaune) ; choix gardé sur l'appareil et posé avant le premier affichage ;
+// ancienne valeur « light » = Original ; un compagnon à thème garde son fond. PK shop sans le solde de PK.
 import { unlockPaid, launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -14,16 +14,34 @@ await page.goto(E2E + '/?today=2026-11-02', { waitUntil: 'load' }); await page.w
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); d.tuto = 'done'; d.onb = 0; d.paDay = '2026-11-02'; d.paStreak = 1; d.buddy = 25; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
 await page.goto(E2E + '/?today=2026-11-02&start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 let l = await look();
-ok('clair par défaut : ' + l.bar, l.cls === '' && l.bar === '#FFD60A');
+ok('sombre par défaut (gris) : ' + l.cls + ', barre ' + l.bar, l.cls === 'pkm-theme-night' && l.bar === '#1D1E22' && /44, 45, 50/.test(l.bg));
 const grp = page.locator('[role="group"][aria-label="Apparence"] button');
-ok('Réglages › Apparence : ' + (await grp.allInnerTexts()).join(' / '), (await grp.allInnerTexts()).join('/') === 'Clair/Sombre' && await grp.nth(0).getAttribute('aria-pressed') === 'true');
+ok('Réglages › Apparence : ' + (await grp.allInnerTexts()).join(' / '), (await grp.allInnerTexts()).join('/') === 'Sombre/Clair/Original' && await grp.nth(0).getAttribute('aria-pressed') === 'true');
+await page.screenshot({ path: shot('look-reglages-sombre.png') });
 await page.locator('section[aria-label="Apparence"]').scrollIntoViewIfNeeded();
 await grp.nth(1).click(); await page.waitForTimeout(600);
 l = await look();
-ok('Sombre : ' + l.cls + ', barre ' + l.bar, l.cls === 'pkm-theme-night' && l.bar === '#10131F' && /28, 33, 51/.test(l.bg));
-ok('choix gardé sur l’appareil', (await page.evaluate(k => JSON.parse(localStorage.getItem(k)).look, KEY)) === 'dark');
-await page.screenshot({ path: shot('look-reglages-sombre.png') });
-// Rechargement : classe posée avant l'app (pas d'éclair jaune).
+ok('Clair : ' + l.cls + ', barre ' + l.bar, l.cls === 'pkm-theme-day' && l.bar === '#EEF3FF' && /255, 255, 255/.test(l.bg));
+ok('choix gardé sur l’appareil', (await page.evaluate(k => JSON.parse(localStorage.getItem(k)).look, KEY)) === 'day');
+await page.screenshot({ path: shot('look-reglages-clair.png') });
+// Rechargement : classe posée avant l'app (pas d'éclair d'une autre couleur).
+await page.goto(E2E + '/?today=2026-11-02', { waitUntil: 'commit' });
+await page.waitForSelector('html.pkm-theme-day', { timeout: 3000 }).catch(() => {});
+ok('rechargement : clair dès le début', await page.evaluate(() => document.documentElement.classList.contains('pkm-theme-day')));
+await page.waitForTimeout(1500);
+await page.screenshot({ path: shot('look-accueil-clair.png') });
+// Original (jaune).
+await page.goto(E2E + '/?today=2026-11-02&start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1200);
+await grp.nth(2).click(); await page.waitForTimeout(600);
+l = await look();
+ok('Original : jaune, barre ' + l.bar, l.cls === '' && l.bar === '#FFD60A' && /255, 214, 10/.test(l.bg));
+// Ancienne valeur « light » (le jaune choisi avant le 2026-11-15) : Original.
+await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.look = 'light'; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
+await page.goto(E2E + '/?today=2026-11-02&start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1200);
+l = await look();
+ok('ancien « light » lu comme Original', l.cls === '' && l.bar === '#FFD60A' && await grp.nth(2).getAttribute('aria-pressed') === 'true');
+// Sombre de nouveau, gardé au rechargement.
+await grp.nth(0).click(); await page.waitForTimeout(500);
 await page.goto(E2E + '/?today=2026-11-02', { waitUntil: 'commit' });
 await page.waitForSelector('html.pkm-theme-night', { timeout: 3000 }).catch(() => {});
 ok('rechargement : sombre dès le début', await page.evaluate(() => document.documentElement.classList.contains('pkm-theme-night')));
@@ -38,11 +56,11 @@ await page.screenshot({ path: shot('look-pkshop-sombre.png') });
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.buddy = 382; d.pkOwn = (d.pkOwn || []).concat([382]); localStorage.setItem(k, JSON.stringify(d)); }, KEY);
 await page.goto(E2E + '/?today=2026-11-02', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 l = await look(); ok('Kyogre garde son thème en mode sombre : ' + l.cls, l.cls === 'pkm-theme-sea');
-// Retour au clair.
+// Retour au clair (blanc et bleu) sans compagnon à thème.
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k)); d.buddy = 25; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
 await page.goto(E2E + '/?today=2026-11-02&start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1200);
-await page.locator('[role="group"][aria-label="Apparence"] button').nth(0).click(); await page.waitForTimeout(500);
-l = await look(); ok('retour au clair : ' + l.bar, l.cls === '' && l.bar === '#FFD60A');
+await page.locator('[role="group"][aria-label="Apparence"] button').nth(1).click(); await page.waitForTimeout(500);
+l = await look(); ok('retour au clair : ' + l.bar, l.cls === 'pkm-theme-day' && l.bar === '#EEF3FF');
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

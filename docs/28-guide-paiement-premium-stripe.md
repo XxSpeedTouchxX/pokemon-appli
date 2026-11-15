@@ -240,6 +240,16 @@ Décision du porteur : supprimer son compte supprime aussi l'abonnement. Le bout
 
 Sans ces deux étapes, un abonné qui veut supprimer son compte voit « Stripe ne répond pas comme prévu » et rien n'est effacé (aucun risque : il peut réessayer plus tard). Un compte sans abonnement se supprime comme avant.
 
+## 8 sexies. « Premium » devient « DropiPass » (2026-11-15, porteur)
+
+Le nom affiché partout dans l'app et dans les pages légales est maintenant **DropiPass** ; le contenu (avantages, formules, prix) ne change pas. Côté Stripe, rien n'est obligatoire, mais pour que la page de paiement et les factures disent la même chose :
+
+1. **Stripe** › **Catalogue de produits** › ton produit (aujourd'hui « Dropicards Premium ») › **Modifier** : nom **DropiPass**, puis **Enregistrer**. Les prix et leurs identifiants (`price_…`) ne changent pas : rien à recopier dans Coolify.
+2. Facultatif : **Paramètres** › **Billing** › **Portail client** : vérifie que le nom affiché est bien DropiPass.
+3. La fonction `stripe` à réinstaller pour le § 8 quinquies contient aussi ses nouveaux messages (« Tu as déjà le DropiPass… ») : une seule réinstallation suffit pour les deux.
+
+Les anciens scripts SQL déjà installés gardent quelques messages écrits « Premium » (refus de suppression du compte, journal des PA) : l'app les affiche avec le nouveau nom. Les lots de `028_points_loyaute.sql` (pas encore installé) sont déjà renommés (« 1 mois de DropiPass… ») dans `install_024_a_028.sql`.
+
 ## 9. Ce qui reste à décider
 
 | # | Question | Défaut proposé |

@@ -112,3 +112,6 @@
 @keyframes pkmPremGlint { 0%, 55% { left: -14px; } 85%, 100% { left: 36px; } }
 .pkm-prem-proto { display: inline-flex; align-items: center; height: 18px; margin-left: 1px; padding: 0 7px; border-radius: 999px; background: #111; box-shadow: 0 0 0 1px rgba(255, 214, 10, 0.55); color: #FFD60A; font-size: 10px; font-weight: 800; letter-spacing: 0.03em; vertical-align: 2px; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .pkm-prem-pg img, .pkm-prem-pg-glint { animation: none; } .pkm-prem-pg-glint { display: none; } }
+/* Logo du DropiPass (2026-11-15) : 4 visuels proposés (img/brand/dropipass-N.svg, ?dpvis=N), à la place de la couronne. */
+.pkm-prem-logo { width: 88%; height: 88%; object-fit: contain; overflow: visible; filter: drop-shadow(0 2px 3px rgba(60, 30, 0, 0.35)); }
+.pkm-prem-crown-xl .pkm-prem-logo { width: 86%; height: 86%; }

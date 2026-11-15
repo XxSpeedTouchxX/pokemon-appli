@@ -66,7 +66,7 @@ await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(
 ok('app des stores : ni onglet « Recharger mes PA » ni bannière Premium', !(await vis('.pkm-shop-tabs')) && !(await vis('.pkm-prem-banner')) && !(await vis('section[aria-label="Recharger mes PA"]')));
 ok('app des stores : le Magasin du PK shop reste là (tickets)', await vis('section[aria-label="Tickets du tirage au sort"]'));
 await page.evaluate(() => { window.__pkm.setState({ shopTab: 'pa' }); window.__pkm.premOpen(); }); await page.waitForTimeout(500);
-ok('app des stores : l’offre Premium et les packs de PA ne s’ouvrent jamais', !(await vis('section[aria-label="Dropicards Premium"]')) && !(await vis('section[aria-label="Recharger mes PA"]')));
+ok('app des stores : l’offre Premium et les packs de PA ne s’ouvrent jamais', !(await vis('section[aria-label="DropiPass"]')) && !(await vis('section[aria-label="Recharger mes PA"]')));
 await page.evaluate(() => window.__pkm.setState({ shopTab: 'store', shopLock: { kind: 'radar', g: 4 } })); await page.waitForTimeout(500);
 ok('Radar verrouillé : fenêtre affichée, sans « Découvrir Premium »', await vis('section[aria-label="Grade requis"]') && !(await vis('.pkm-lockw-premgo')));
 await page.evaluate(() => window.__pkm.setState({ shopLock: null }));
@@ -93,7 +93,7 @@ ok('« Annuler » : rien n’est envoyé au serveur', S.del.length === 0 && !(aw
 S.refuse = true;
 await delBtn.click(); await page.waitForTimeout(300);
 await ask.locator('button.pkm-acct-del-go').click(); await page.waitForTimeout(1000);
-ok('refus du serveur (Premium actif) : message affiché', /abonnement Premium est encore actif/.test(await page.locator('body').innerText()));
+ok('refus du serveur (Premium actif) : message affiché', /abonnement DropiPass est encore actif/.test(await page.locator('body').innerText()));
 ok('refus : rien d’effacé sur l’appareil (session et collection gardées)', await page.evaluate(k => !!localStorage.getItem('pkm-cloud-session') && !!localStorage.getItem(k), KEY));
 // Suppression acceptée, avec un abonnement en cours (2026-11-14, porteur) : l'abonnement est arrêté d'abord.
 S.refuse = false; S.prem = true;

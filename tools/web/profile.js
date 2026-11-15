@@ -124,7 +124,7 @@
       r.trainer.delLabel = s.pfDelBusy ? 'Suppression…' : 'Oui, supprimer définitivement';
       const paying = !!(this.premPaying && this.premPaying());
       r.trainer.delText = 'Ton compte Dropicards sera supprimé pour de bon : adresse, pseudo, PK, PA, Pokédex, tickets, avatar, et ta collection sur cet appareil.'
-        + (paying ? ' Ton abonnement ' + (typeof PREM_NAME === 'string' ? PREM_NAME : 'Premium') + ' sera arrêté tout de suite : plus aucun prélèvement.' : '') + ' Impossible de revenir en arrière.';
+        + (paying ? ' Ton abonnement ' + PREM_NAME + ' sera arrêté tout de suite : plus aucun prélèvement.' : '') + ' Impossible de revenir en arrière.';
       r.trainer.delOpen = () => this.setState({ pfDelAsk: true });
       r.trainer.delCancel = () => this.setState({ pfDelAsk: false, pfDelBusy: false });
       r.trainer.delGo = async () => {
@@ -136,7 +136,8 @@
           try { await this.premCall('cancel', {}, true); } catch (e) { this.setState({ pfDelBusy: false, toast: (e && e.message) || CLOUD_ERR.other }); this.flash(); return; }
         }
         try { await Cloud.rpc('delete_my_account', {}); } catch (e) {
-          this.setState({ pfDelBusy: false, toast: (e && e.message) || CLOUD_ERR.other }); this.flash(); return;
+          // Refus du serveur encore écrit « Premium » (017 déjà installé) : affiché avec le nom « DropiPass ».
+          this.setState({ pfDelBusy: false, toast: premRename((e && e.message) || CLOUD_ERR.other) }); this.flash(); return;
         }
         pfWipe();
       };
@@ -325,7 +326,7 @@
     return {
       name: g.name, aria: 'Grade ' + g.name, alt: 'Emblème ' + g.name, badge: g.sym, color: g.color, glow: g.glow, cond: g.cond,
       state: i < cur ? 'Grade obtenu' : i === cur ? 'Ton grade actuel' : 'À débloquer',
-      stateColor: i <= cur ? '#3DDC84' : '#C9D3EA',
+      stateColor: i <= cur ? '#4FE592' : '#C9D3EA',
       // « Nouveau » au bout de chaque avantage absent du grade précédent (2026-11-07, porteur).
       perks: pfPerks(T, i),
       note: 'Avantages actifs dès que tu atteins ce grade, sur cet appareil.',

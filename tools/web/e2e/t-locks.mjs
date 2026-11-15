@@ -1,5 +1,5 @@
 // Demandes du porteur du 2026-11-07 : Radar réservé au grade Maître Pokémon (badge rouge « Déverrouillé au grade … »
-// avec cadenas, fenêtre « Tu ne peux pas accéder au Radar… », bouton « Découvrir Premium »), nouvelles conditions des
+// avec cadenas, fenêtre « Tu ne peux pas accéder au Radar… », bouton « Découvrir le DropiPass »), nouvelles conditions des
 // grades, Pokédex sur 171 (méga-évolutions comprises), « Nouveau thème » qui ne cache plus le numéro, liste « Mon
 // Pokédex » qui monte du bas et redescend à la fermeture, scanner animé dans la barre, compte à rebours des tickets,
 // confettis (200 PK) et feu d'artifice (500 PK) au Booster PK.
@@ -21,7 +21,7 @@ await page.evaluate(() => window.__pkm.openRadar()); await page.waitForTimeout(5
 const lw = page.locator('section[aria-label="Grade requis"]');
 const lwt = await lw.innerText().catch(() => '');
 ok('fenêtre : « Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon » »', /Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « Maître Pokémon »/.test(lwt));
-ok('fenêtre : Premium proposé, bouton « Découvrir Premium »', /abonnement Premium/.test(lwt) && (await lw.locator('button:has-text("Découvrir Premium")').count()) === 1);
+ok('fenêtre : Premium proposé, bouton « Découvrir le DropiPass »', /abonnement DropiPass/.test(lwt) && (await lw.locator('button:has-text("Découvrir le DropiPass")').count()) === 1);
 ok('fenêtre : condition 30 000 PK + 100 compagnons + 5 méga-évolutions', /30\s000 PK gagnés \+ 100 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(lwt.replace(/[  ]/g, ' ')));
 await page.screenshot({ path: shot('locks-radar-fenetre.png') });
 // Fenêtre bloquante (2026-11-08) : le fond ne la ferme pas, la page derrière ne défile pas.
@@ -29,8 +29,8 @@ const y0 = await page.evaluate(() => { const m = document.scrollingElement; retu
 await page.mouse.move(20, 300); await page.mouse.wheel(0, 900); await page.waitForTimeout(300);
 await page.mouse.click(12, 12); await page.waitForTimeout(300);
 ok('fenêtre bloquante : le fond ne la ferme pas et la page ne défile pas', (await lw.count()) === 1 && (await page.evaluate(() => document.scrollingElement.scrollTop)) === y0);
-await lw.locator('button:has-text("Découvrir Premium")').click(); await page.waitForTimeout(800);
-ok('« Découvrir Premium » ouvre l’offre Premium', (await page.locator('section[aria-label="Dropicards Premium"]').count()) === 1 && (await lw.count()) === 0);
+await lw.locator('button:has-text("Découvrir le DropiPass")').click(); await page.waitForTimeout(800);
+ok('« Découvrir le DropiPass » ouvre l’offre Premium', (await page.locator('section[aria-label="DropiPass"]').count()) === 1 && (await lw.count()) === 0);
 // 2. Grades.
 const tiers = await page.evaluate(() => window.__pkm.tiers().map(t => t.cond));
 ok('conditions des grades : ' + tiers.slice(2).join(' | '), /7.500 PK gagnés \+ 30 compagnons/.test(tiers[2]) && /15.000 PK gagnés \+ 50 compagnons/.test(tiers[3]) && /30.000 PK gagnés \+ 100 compagnons débloqués \+ 5 méga-évolutions débloquées/.test(tiers[4]) && /100.000 PK gagnés \+ tout le Pokédex débloqué \(171 Pokémon\)/.test(tiers[5]));

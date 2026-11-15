@@ -77,11 +77,12 @@
     const scene = s.screen === 'scan' ? '' : theme || (s.screen in FX_SCREEN ? FX_SCREEN[s.screen] : 'holo');
     fxSet(mode === 'off' || !scene ? '' : 'pkm-fx-on pkm-fx-' + scene + (mode === 'calm' ? ' pkm-fx-calm' : ''));
     if (r.set) {
-      // Apparence (2026-11-02, porteur) : mode clair (fond jaune) ou sombre (fond nuit) ; classe posée par home.js.
-      const look = s.look === 'dark' ? 'dark' : 'light', themed = !!HOME_THEMES[s.buddy];
+      // Apparence (2026-11-02, porteur ; 3 modes le 2026-11-15) : Sombre (gris, par défaut), Clair (blanc et bleu),
+      // Original (jaune Dropicards) ; classe posée par home.js. Ancienne valeur « light » (le jaune) = Original.
+      const look = homeLookOf(s.look), themed = !!HOME_THEMES[s.buddy];
       r.set.look = {
-        modes: [['light', 'Clair'], ['dark', 'Sombre']].map(([k, label]) => Object.assign({ label: label, on: look === k, pick: () => this.setState({ look: k }) }, this.chip(look === k))),
-        help: (look === 'dark' ? 'Fond nuit, textes clairs, accent jaune.' : 'Fond jaune Dropicards, textes bleu nuit.')
+        modes: [['dark', 'Sombre'], ['day', 'Clair'], ['original', 'Original']].map(([k, label]) => Object.assign({ label: label, on: look === k, pick: () => this.setState({ look: k }) }, this.chip(look === k))),
+        help: (look === 'day' ? 'Fond blanc et bleu, textes bleu nuit.' : look === 'original' ? 'Le jaune Dropicards d’origine, textes bleu nuit.' : 'Fond gris anthracite, textes clairs, accent jaune.')
           + (themed ? ' Ton compagnon garde son thème « ' + HOME_THEMES[s.buddy].name + ' » tant qu’il t’accompagne.' : '')
       };
       // Sons (2026-11-08, porteur) : le bouton « son » du didacticiel coupait aussi tous les bruits de l'app, sans moyen

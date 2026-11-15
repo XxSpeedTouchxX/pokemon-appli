@@ -46,7 +46,7 @@
   const LIGUE_STEPS = [
     { tab: 'progress', pg: 'board', sel: 'section.pkm-pg-season', noRing: true, text: 'Bienvenue dans ta ligue ! Chaque saison dure 60 jours : c’est un championnat entre tous les dresseurs de Dropicards.' },
     { tab: 'progress', pg: 'board', sel: 'section.pkm-pg-card', noRing: true, text: 'Voici ta carte : ta place au classement et tes Points de loyauté (PL) de la saison. Plus tu as de PL, plus tu montes !' },
-    { tab: 'progress', pg: 'board', sel: 'section[aria-label="Lots de la saison"]', noRing: true, text: 'À la fin de la saison, les 10 premiers du classement gagnent des lots : un ETB, un coffret, des boosters, du Premium ou des tickets du PK shop !' },
+    { tab: 'progress', pg: 'board', sel: 'section[aria-label="Lots de la saison"]', noRing: true, text: 'À la fin de la saison, les 10 premiers du classement gagnent des lots : un ETB, un coffret, des boosters, du DropiPass ou des tickets du PK shop !' },
     { tab: 'progress', pg: 'board', sel: '.pkm-pg-tabs > button:last-child', pad: 4, noRing: true, text: 'Pour monter au classement, remplis les missions de l’onglet « Mes missions ».' },
     { tab: 'progress', pg: 'earn', sel: 'section[aria-label="Missions"], .pkm-ple-msg', noRing: true, last: true, text: 'Parraine tes amis, suis Dropicards sur les réseaux, ouvre l’appli plusieurs jours d’affilée et partage-la : chaque mission te rapporte des PL. Bonne chance pour la saison !' }
   ];

@@ -507,7 +507,7 @@
       close: () => this.setState({ shopLock: null }),
       // Radar (2026-11-07, porteur) : aussi inclus dans l'abonnement Premium, bouton vers l'offre.
       prem: lk.kind === 'radar' && typeof this.premOpen === 'function',
-      premText: 'Tu peux aussi l’avoir tout de suite en prenant l’abonnement Premium : le Radar des boutiques y est inclus.',
+      premText: 'Tu peux aussi l’avoir tout de suite en prenant l’abonnement DropiPass : le Radar des boutiques y est inclus.',
       premGo: () => { this.setState({ shopLock: null }); this.premOpen(); },
       grades: () => { this.setState({ shopLock: null, shopTk: null }); this.push('grade', { gradeIx: lk.g }); }
     } : { open: false };

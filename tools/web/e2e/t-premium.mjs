@@ -9,10 +9,10 @@ await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r =
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(800);
-const banner = page.locator('button[aria-label="Découvrir Dropicards Premium"]');
-ok('PK shop : bannière « Dropicards Premium » (sans « Dès 4,16 € par mois »), couronne dessinée', (await banner.count()) === 1 && !/4,16/.test(await banner.innerText()) && (await banner.locator('svg.pkm-prem-crown-svg').count()) === 1);
+const banner = page.locator('button[aria-label="Découvrir le DropiPass"]');
+ok('PK shop : bannière « DropiPass » (sans « Dès 4,16 € par mois »), logo du DropiPass (visuel 1 par défaut)', (await banner.count()) === 1 && /^DropiPass/.test((await banner.innerText()).trim()) && !/4,16/.test(await banner.innerText()) && (await banner.locator('img.pkm-prem-logo[src="img/brand/dropipass-1.svg"]').evaluate(e => e.complete && e.naturalWidth > 0)));
 await banner.click(); await page.waitForTimeout(600);
-const sh = page.locator('section[aria-label="Dropicards Premium"]');
+const sh = page.locator('section[aria-label="DropiPass"]');
 const t = await sh.innerText();
 ok('icônes animées : scanner, classeur, radar, goutte des PA « 2XP », graphique', (await sh.locator('svg.pkm-prem-scan').count()) === 1 && (await sh.locator('svg.pkm-prem-bind').count()) === 1 && (await sh.locator('.pkm-prem-radar').count()) === 1
   && (await sh.locator('.pkm-prem-xp-tag').first().innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1
@@ -32,7 +32,7 @@ ok('formules : Annuel 69,90 € par an (choisie, meilleure offre), Semestriel 39
 ok('règles : renouvellement automatique, arrêt à tout moment, période commencée due', /Renouvellement automatique chaque année/.test(t) && /arrêter à tout moment/.test(t) && /période déjà commencée reste due/.test(t));
 await page.screenshot({ path: shot('premium.png') });
 await sh.locator('button[role=radio]:has-text("Mensuel")').click(); await page.waitForTimeout(300);
-ok('Mensuel choisi : « Devenir Premium · 9,90 € par mois », « chaque mois »', /Devenir Premium · 9,90 € par mois/.test(await sh.innerText()) && /Renouvellement automatique chaque mois/.test(await sh.innerText()));
+ok('Mensuel choisi : « Devenir Premium · 9,90 € par mois », « chaque mois »', /Prendre le DropiPass · 9,90 € par mois/.test(await sh.innerText()) && /Renouvellement automatique chaque mois/.test(await sh.innerText()));
 ok('paiement sécurisé par Stripe annoncé, bouton actif', !(await sh.locator('button.pkm-prem-cta').isDisabled()) && /Paiement sécurisé par Stripe/.test(await sh.innerText()));
 await sh.locator('button.pkm-prem-cta').click(); await page.waitForTimeout(500);
 ok('sans serveur (tests) : le paiement explique qu’il n’est pas disponible, rien n’est ouvert', /pas disponible/.test(await sh.locator('.pkm-prem-err').innerText().catch(() => '')) && page.url().startsWith(E2E));
@@ -57,14 +57,14 @@ ok('haut de l’offre dégagé : flèche « précédent » entière (' + Math.ro
 await sh.locator('button.pkm-prem-cgv').click(); await page.waitForTimeout(400);
 ok('lien « Conditions générales de vente » de l’offre', (await page.locator('section[aria-label="Informations légales"] h2').innerText()) === 'Conditions générales de vente');
 await page.locator('section[aria-label="Informations légales"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(300);
-await page.click('button[aria-label="Découvrir Dropicards Premium"]'); await page.waitForTimeout(700);
+await page.click('button[aria-label="Découvrir le DropiPass"]'); await page.waitForTimeout(700);
 await sh.locator('button[aria-label="Retour au PK shop"]').click(); await page.waitForTimeout(150);
 const mid = await page.locator('.pkm-prem-sheet').evaluate(e => getComputedStyle(e).transform).catch(() => 'none');
 ok('retour animé : l’offre glisse vers la droite (' + mid + ')', /matrix/.test(mid) && mid !== 'none');
 await page.waitForTimeout(600);
 ok('flèche en haut à gauche : retour au PK shop', (await sh.count()) === 0 && (await page.locator('section[aria-label="Tickets du tirage au sort"]').count()) === 1);
 await page.goto(E2E + '/?start=profile', { waitUntil: 'load' }); await page.waitForTimeout(1500);
-ok('Mon profil : bannière Premium (argentée, cadre or)', (await page.locator('button[aria-label="Découvrir Dropicards Premium"]').evaluate(e => getComputedStyle(e).borderTopColor)) === 'rgb(255, 214, 10)' && (await page.locator('button[aria-label="Découvrir Dropicards Premium"]').count()) === 1);
+ok('Mon profil : bannière Premium (argentée, cadre or)', (await page.locator('button[aria-label="Découvrir le DropiPass"]').evaluate(e => getComputedStyle(e).borderTopColor)) === 'rgb(255, 214, 10)' && (await page.locator('button[aria-label="Découvrir le DropiPass"]').count()) === 1);
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

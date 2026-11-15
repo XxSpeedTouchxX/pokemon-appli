@@ -331,7 +331,7 @@ reset role;
 update public.game_season set start_at = now() - interval '40 days';
 
 -- L. Lots (Studio) : moins de 50 joueurs classés → Premium pour le podium ; sinon ETB, coffret, 2 boosters.
-select pg_temp.check((select lot like '1 mois de Premium offert%' and pseudo = 'Prof28' from public.season_winners(1) where rang = 1), 'moins de 50 classés : Premium à la 1re place');
+select pg_temp.check((select lot like '1 mois de DropiPass offert%' and pseudo = 'Prof28' from public.season_winners(1) where rang = 1), 'moins de 50 classés : Premium à la 1re place');
 select pg_temp.check((select count(*) <= 10 and bool_and(pseudo <> 'Admin28') from public.season_winners(1)), 'top 10 seulement, sans admin');
 insert into auth.users (id, email, created_at)
   select ('00000000-0000-0000-0000-0000002801' || lpad(i::text, 2, '0'))::uuid, 'lot28_' || i || '@gmail.com', now() - interval '30 days' from generate_series(1, 50) i on conflict do nothing;

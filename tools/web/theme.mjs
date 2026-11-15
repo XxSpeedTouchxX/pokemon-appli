@@ -364,16 +364,37 @@ export const BUDDY_THEMES = [
     gold: '#FFE9AD', sand: '#FFE6BE', 'sand-2': '#FBEDD5', gray: '#D0EFE4', off: '#C4E8DC', regular: '#DCE2FF', iris: '#DCE2FF'
   }) }
 ];
-// Mode sombre (2026-11-02, porteur : « propose dans les réglages un mode sombre / clair ») : le fond jaune devient
-// une nuit bleu ardoise avec une lueur jaune discrète en haut à gauche ; textes clairs, accent jaune gardé. Les cartes
-// restent en verre bleu nuit (ton sombre), plus claires que le fond. Un compagnon à thème (Kyogre, Groudon,
-// Rayquaza) garde son propre fond, déjà sombre. Contraste vérifié comme les autres thèmes (t-contrast, QS=look=dark).
-export const NIGHT_THEME = { key: 'night', name: 'Sombre', bar: '#10131F', dark: true, tokens: Object.assign({}, ON_DEEP, {
-  app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 214, 10, 0.1), rgba(255, 214, 10, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0) 70%), linear-gradient(165deg, #1C2133 0%, #10131F 45%, #06070D 100%)',
-  t1: '#FFFFFF', t2: '#E6E9F2', t3: '#CDD3E1', t4: '#BCC4D6', t5: '#BCC4D6', 'chip-fg': '#E6E9F2', 'glow-rgb': '10, 14, 30', 'shadow-rgb': '0, 0, 0',
+// Mode sombre (2026-11-02, porteur : « propose dans les réglages un mode sombre / clair ») ; refait le 2026-11-15
+// (porteur : « un mode sombre noir clair / gris », mode par défaut) : fond gris anthracite, lueur jaune très discrète
+// en haut à gauche ; textes clairs, accent jaune gardé. Les cartes passent elles aussi au gris (surf : variables des
+// surfaces sombres, .pkm-dark), un peu plus claires que le fond. Un compagnon à thème (Kyogre, Groudon, Rayquaza)
+// garde son propre fond. Contraste vérifié comme les autres thèmes (t-contrast, QS=look=dark).
+export const NIGHT_THEME = { key: 'night', name: 'Sombre', bar: '#1D1E22', dark: true, nav: 'rgba(30, 31, 36, 0.86)', solid: '#1E1F24', tokens: Object.assign({}, ON_DEEP, {
+  app: 'radial-gradient(120% 55% at 0% 0%, rgba(255, 214, 10, 0.06), rgba(255, 214, 10, 0) 60%), radial-gradient(110% 60% at 100% 100%, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0) 70%), linear-gradient(165deg, #2C2D32 0%, #1D1E22 45%, #111214 100%)',
+  t1: '#FFFFFF', t2: '#E9E9ED', t3: '#D2D3D9', t4: '#C2C3CA', t5: '#C2C3CA', 'chip-fg': '#E9E9ED', 'glow-rgb': '18, 18, 22', 'shadow-rgb': '0, 0, 0',
   green: '#8DF5BC', up: '#8DF5BC', down: '#FFC2BA', red: '#FFC2BA', orange: '#FFDE96', amber: '#FFDE96', teal: '#9CF7EA',
-  gold: '#FFE7A3', sand: '#FFE3B5', 'sand-2': '#F8E8C8', gray: '#BCC4D6', off: '#B4BCCF', regular: '#D5DCFF', iris: '#D5DCFF'
-}) };
+  gold: '#FFE7A3', sand: '#FFE3B5', 'sand-2': '#F8E8C8', gray: '#C2C3CA', off: '#B8B9C1', regular: '#D5DCFF', iris: '#D5DCFF'
+}), surf: {
+  card: 'rgba(37, 39, 45, 0.94)', 'card-hi': 'rgba(44, 46, 53, 0.95)', 'card-2': 'rgba(31, 33, 38, 0.95)', 'card-teal': 'rgba(22, 38, 40, 0.94)',
+  field: 'rgba(0, 0, 0, 0.38)', toast: 'rgba(42, 44, 50, 0.92)',
+  t2: '#E2E3E8', t3: '#CBCCD3', t4: '#B6B8C0', t5: '#A9ABB4', gray: '#CBCCD3', 'nav-off': '#CBCCD3', 'glow-rgb': '20, 20, 24'
+} };
+// Mode clair (2026-11-15, porteur : « un mode clair, peut-être blanc / bleu ») : fond blanc qui descend vers un bleu
+// très pâle, lueur bleue en bas à droite ; textes bleu nuit (comme sur le jaune), accent bleu roi. Cartes, fiches et
+// barre du bas restent en verre bleu nuit : « blanc et bleu ».
+export const DAY_THEME = { key: 'day', name: 'Clair', bar: '#EEF3FF', dark: false, tokens: {
+  app: 'radial-gradient(110% 60% at 100% 100%, rgba(41, 98, 255, 0.18), rgba(41, 98, 255, 0) 70%), linear-gradient(165deg, #FFFFFF 0%, #F2F6FF 45%, #DDE8FF 100%)',
+  t1: '#0B1120', t2: '#1B2235', t3: '#2C3345', t4: '#3A4152', t5: '#3A4152', link: '#1238B0', ink: '#0B1120',
+  accent: '#1A45C9', 'on-accent': '#FFFFFF', 'accent-rgb': '26, 69, 201', 'glow-rgb': '255, 255, 255',
+  line: 'rgba(18, 56, 176, 0.16)', 'line-2': 'rgba(18, 56, 176, 0.22)', 'line-3': 'rgba(18, 56, 176, 0.24)', 'line-4': 'rgba(18, 56, 176, 0.32)',
+  track: 'rgba(18, 56, 176, 0.14)',
+  'chip-bg': 'rgba(255, 255, 255, 0.8)', 'chip-bc': 'rgba(18, 56, 176, 0.2)', 'chip-fg': '#1B2235',
+  'chip-on-bg': '#1A45C9', 'chip-on-bc': '#1A45C9', 'chip-on-fg': '#FFFFFF',
+  'choice-bg': 'rgba(255, 255, 255, 0.8)', 'choice-bc': 'rgba(18, 56, 176, 0.2)', 'choice-on-bg': '#FFFFFF', 'choice-on-bc': '#1A45C9',
+  'shadow-rgb': '20, 40, 110', 'off-bg': 'rgba(18, 56, 176, 0.07)', regular: '#1A45C9', iris: '#1A45C9'
+} };
+// Ordre des modes de Réglages › Apparence (2026-11-15) : Sombre (par défaut), Clair, Original (jaune, sans classe).
+export const LOOK_THEMES = [NIGHT_THEME, DAY_THEME];
 // Flou réel seulement sur ce qui passe au-dessus d'un contenu qui défile (au plus 5 éléments par écran) ;
 // sans flou possible, fond opaque. Le choix du compagnon, sa confirmation de déblocage et « Mes PK » sont toujours
 // opaques : rien de l'accueil ni de la grille ne doit se voir derrière.
@@ -397,7 +418,11 @@ export function v6Css() {
   return 'html:not(.pkm-classic) .pkm-root { ' + decl(k => (k in V6_LIGHT ? V6_LIGHT[k] : k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n'
     + 'html:not(.pkm-classic) .pkm-dark { ' + decl(k => (k in V6_DARK ? V6_DARK[k] : TOKENS[k])) + ' }\n' + V6_EXTRA
     // Thème d'un compagnon : variables du fond (ton sombre ou clair, puis celles du thème) ; fond derrière l'app.
-    + BUDDY_THEMES.concat([NIGHT_THEME]).map(t => '\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) .pkm-root { '
-      + decl(k => (k in t.tokens ? t.tokens[k] : t.dark ? (k in V6_DARK ? V6_DARK[k] : TOKENS[k]) : k in V6_LIGHT ? V6_LIGHT[k] : k in V6_DARK ? V6_DARK[k] : TOKENS[k]))
-      + ' }\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) #app { background: ' + t.bar + '; }').join('');
+    + BUDDY_THEMES.concat(LOOK_THEMES).map(t => '\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) .pkm-root { '
+      + decl(k => (k in t.tokens ? t.tokens[k] : t.surf && k in t.surf ? t.surf[k] : t.dark ? (k in V6_DARK ? V6_DARK[k] : TOKENS[k]) : k in V6_LIGHT ? V6_LIGHT[k] : k in V6_DARK ? V6_DARK[k] : TOKENS[k]))
+      + ' }\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) #app { background: ' + t.bar + '; }'
+      // Surfaces (cartes, fiches) d'un thème qui les change (Sombre gris, 2026-11-15) ; barre du bas, saisie, scan.
+      + (t.surf ? '\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) .pkm-dark { ' + Object.keys(t.surf).map(k => '--pkm-' + k + ': ' + t.surf[k] + ';').join(' ') + ' }' : '')
+      + (t.nav ? '\nhtml.pkm-theme-' + t.key + ':not(.pkm-classic) nav[aria-label="Navigation principale"], html.pkm-theme-' + t.key + ':not(.pkm-classic) section[aria-label="Saisie"], html.pkm-theme-' + t.key + ':not(.pkm-classic) section[aria-label="Résultat du scan"], html.pkm-theme-' + t.key + ':not(.pkm-classic) nav[aria-label="Aller à une série"] { background: ' + t.nav + ' !important; }'
+        + '\n@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { html.pkm-theme-' + t.key + ':not(.pkm-classic) nav[aria-label="Navigation principale"], html.pkm-theme-' + t.key + ':not(.pkm-classic) section[aria-label="Saisie"], html.pkm-theme-' + t.key + ':not(.pkm-classic) section[aria-label="Résultat du scan"] { background: ' + t.solid + ' !important; } html.pkm-theme-' + t.key + ':not(.pkm-classic) .pkm-dark { --pkm-toast: ' + t.solid + '; } }' : '')).join('');
 }

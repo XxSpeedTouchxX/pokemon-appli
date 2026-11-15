@@ -261,10 +261,7 @@ for (const [who, pwd, admin] of [['ondine@exemple.fr', 'nouveau-mot-de-passe-99'
   if (!admin) {
     ok('compte non admin : rôle « ' + role + ' », aucun bouton Admin dans les Réglages', role === 'user' && menu === 0);
     ok('compte non admin : mode Admin enregistré sur l’appareil ignoré (pas d’en-tête Admin)', (await page.locator('header button:has-text("Admin")').count()) === 0);
-    const ver = page.locator('button[aria-label^="Version"]');
-    for (let i = 0; i < 7; i++) await ver.click({ delay: 10 });
-    await page.waitForTimeout(400);
-    ok('compte non admin : 7 appuis sur « Version » refusés', (await page.locator('input[inputmode="numeric"][maxlength="6"]').count()) === 0 && /réservé aux comptes admin/.test(await page.locator('body').innerText()));
+    ok('compte non admin : ni « Version » à toucher ni champ de code Admin', (await page.locator('button[aria-label^="Version"]').count()) === 0 && (await page.locator('input[inputmode="numeric"][maxlength="6"]').count()) === 0);
   } else {
     ok('compte admin : rôle « ' + role + ' », « Panneau Admin » dans les Réglages', role === 'admin' && menu === 1);
   }

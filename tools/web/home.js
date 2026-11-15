@@ -360,14 +360,16 @@
   const HOME_NO_BUDDY = { picking: false, list: [] };
   // Thème du compagnon (2026-10-07) : Kyogre (océan), Groudon (volcan) et Rayquaza (ouragan) changent le fond de
   // l'app : classe pkm-theme-… sur <html> (variables dans theme.mjs) et couleur de la barre du navigateur.
-  // Mode sombre (Réglages › Apparence, 2026-11-02) : sans compagnon à thème, fond « nuit » (HOME_NIGHT) ; un
-  // compagnon à thème garde son fond, déjà sombre. ?look=dark ou ?look=light force le mode (essais, tests).
+  // Apparence (Réglages › Apparence) : sans compagnon à thème, Sombre (HOME_NIGHT, gris, par défaut depuis le
+  // 2026-11-15), Clair (HOME_DAY, blanc et bleu) ou Original (jaune, sans classe) ; un compagnon à thème garde son
+  // fond. ?look=dark, ?look=day ou ?look=original force le mode (essais, tests ; « light » = Original, l'ancien nom).
   // Classe déjà posée avant le premier affichage (script du <head>, build.mjs) : reprise ici pour pouvoir la retirer.
   let homeTheme = ([...document.documentElement.classList].find(c => c.indexOf('pkm-theme-') === 0) || '').slice(10) || null;
-  const homeLookQ = (location.search.match(/[?&]look=(dark|light)(&|$)/) || [])[1] || '';
-  const homeLook = s => homeLookQ || (s.look === 'dark' ? 'dark' : 'light');
+  const homeLookQ = (location.search.match(/[?&]look=(dark|day|original|light)(&|$)/) || [])[1] || '';
+  const homeLookOf = v => (v === 'day' ? 'day' : v === 'original' || v === 'light' ? 'original' : 'dark');
+  const homeLook = s => homeLookOf(homeLookQ || s.look);
   const homeApplyTheme = (n, look) => {
-    const t = HOME_THEMES[n] || (look === 'dark' ? HOME_NIGHT : null), key = t ? t.key : '', html = document.documentElement;
+    const t = HOME_THEMES[n] || (look === 'dark' ? HOME_NIGHT : look === 'day' ? HOME_DAY : null), key = t ? t.key : '', html = document.documentElement;
     if (key === homeTheme) return;
     if (homeTheme) html.classList.remove('pkm-theme-' + homeTheme);
     if (key) html.classList.add('pkm-theme-' + key);

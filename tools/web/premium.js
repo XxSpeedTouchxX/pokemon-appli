@@ -9,6 +9,16 @@
   // les PA (doublés par le serveur). « Gérer ou arrêter mon abonnement » ouvre la page client de Stripe.
   // Ce module partage la portée des autres : ses noms commencent par PREM_ ou prem.
   const premProto = Component.prototype;
+  // Nom « DropiPass » (2026-11-15, porteur : « Dropicards Premium » renommé, contenu inchangé). Logo proposé en 4
+  // visuels (img/brand/dropipass-1 à 4.svg, tools/brand/dropipass/) : ?dpvis=1 à 4 pour essayer ; 1 par défaut en
+  // attendant le choix du porteur.
+  const PREM_NAME = 'DropiPass';
+  const PREM_VIS = (location.search.match(/[?&]dpvis=([1-4])(&|$)/) || [])[1] || '1';
+  const PREM_LOGO = 'img/brand/dropipass-' + PREM_VIS + '.svg';
+  // Messages du serveur encore écrits « Premium » (scripts SQL déjà installés : suppression de compte, journal) :
+  // affichés avec le nouveau nom, sans toucher à « Ultra-Premium » (nom d'un produit scellé).
+  const premRename = t => String(t == null ? '' : t).replace(/Dropicards Premium/g, PREM_NAME).replace(/Tu es déjà Premium/g, 'Tu as déjà le ' + PREM_NAME)
+    .replace(/devenir Premium/g, 'prendre le ' + PREM_NAME).replace(/\b([Ll])e Premium\b/g, '$1e ' + PREM_NAME).replace(/(^|[^-\w])Premium(?![-\w])/g, '$1' + PREM_NAME);
   const PREM_PERKS = [
     { kind: 'scan', ico: '', title: 'Scans illimités', text: 'Scanne autant de cartes que tu veux, chaque jour.' },
     { kind: 'binder', ico: '', title: 'Cartes et items scellés illimités', text: 'Ton classeur sans aucune limite.' },
@@ -70,7 +80,7 @@
   const premDate = v => { try { return new Date(v).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
   // Appel de la fonction « stripe » du serveur avec le jeton du joueur ; ses messages d'erreur (en français) sont gardés.
   const PREM_NET = 'Impossible de joindre Dropicards. Vérifie ta connexion, puis réessaie.';
-  const PREM_LOGIN = 'Connecte-toi à ton compte Dropicards pour devenir Premium (Mon profil › Me reconnecter).';
+  const PREM_LOGIN = 'Connecte-toi à ton compte Dropicards pour prendre le DropiPass (Mon profil › Me reconnecter).';
   premProto.premCall = async function (route, body, raw) {
     if (!Cloud.on()) { const e = new Error('Le paiement n’est pas disponible sur cette version de l’app.'); e.code = 'off'; throw e; }
     let t = null;
@@ -84,8 +94,8 @@
       j = await res.json().catch(() => null);
     } catch (e) { const n = new Error(PREM_NET); n.code = 'network'; throw n; } finally { if (timer) clearTimeout(timer); }
     // Réponse sans adresse (arrêt immédiat avant « Supprimer mon compte », 2026-11-14) : le contenu est rendu tel quel.
-    if (raw) { if (!res.ok || !j || !j.ok) { const e = new Error((j && j.error) || 'Impossible d’arrêter ton abonnement pour le moment. Réessaie plus tard.'); e.code = 'server'; e.status = res.status; throw e; } return j; }
-    if (!res.ok || !j || !j.url) { const e = new Error((j && j.error) || 'Le paiement n’est pas encore ouvert. Réessaie plus tard.'); e.code = 'server'; e.status = res.status; throw e; }
+    if (raw) { if (!res.ok || !j || !j.ok) { const e = new Error(premRename((j && j.error) || 'Impossible d’arrêter ton abonnement pour le moment. Réessaie plus tard.')); e.code = 'server'; e.status = res.status; throw e; } return j; }
+    if (!res.ok || !j || !j.url) { const e = new Error(premRename((j && j.error) || 'Le paiement n’est pas encore ouvert. Réessaie plus tard.')); e.code = 'server'; e.status = res.status; throw e; }
     if (!/^https:\/\/(checkout|billing)\.stripe\.com\//.test(j.url) && !(navigator.webdriver && /^http:\/\/(127\.0\.0\.1|localhost):\d+\//.test(j.url))) { const e = new Error('Adresse de paiement inattendue.'); e.code = 'server'; throw e; }
     return j.url;
   };
@@ -113,12 +123,12 @@
     if (q === 'annule') { setTimeout(() => { this.setState({ toast: 'Paiement annulé : rien n’a été débité.' }); this.flash(); }, 400); return; }
     const sync = () => (this.gcSync ? this.gcSync() : Promise.resolve(null));
     if (q === 'retour') { setTimeout(sync, 300); return; }
-    setTimeout(() => { this.setState({ toast: 'Merci ! Ton abonnement Premium s’active…' }); this.flash(); }, 400);
+    setTimeout(() => { this.setState({ toast: 'Merci ! Ton abonnement DropiPass s’active…' }); this.flash(); }, 400);
     let n = 0;
     const poll = () => sync().then(() => {
-      if (this.premOn()) { this.setState({ toast: 'Bienvenue dans Dropicards Premium !' }); this.flash(); return; }
+      if (this.premOn()) { this.setState({ toast: 'Bienvenue dans le DropiPass !' }); this.flash(); return; }
       if (++n < 8) setTimeout(poll, 2500);
-      else { this.setState({ toast: 'Paiement reçu par Stripe : ton Premium s’activera dans quelques minutes. Rouvre l’app si besoin.' }); this.flash(); }
+      else { this.setState({ toast: 'Paiement reçu par Stripe : ton DropiPass s’activera dans quelques minutes. Rouvre l’app si besoin.' }); this.flash(); }
     });
     setTimeout(poll, 1200);
   };
@@ -128,7 +138,7 @@
   premProto.scanQuota = function () {
     if (!this.premOn()) return premBaseQuota.call(this);
     const s = this.st(), used = s.scanDay === realToday() ? Number(s.scanN) || 0 : 0;
-    return { max: Infinity, used: used, left: Infinity, text: 'Scans illimités avec Premium', over: '' };
+    return { max: Infinity, used: used, left: Infinity, text: 'Scans illimités avec le DropiPass', over: '' };
   };
   const premBaseRoom = premProto.binderRoom;
   premProto.binderRoom = function (s, pid, qty) { return this.premOn() ? null : premBaseRoom.call(this, s, pid, qty); };
@@ -139,15 +149,16 @@
     const r = premBaseRender.call(this), s = this.st(), plan = premPlanOf(s);
     if (!premBack) setTimeout(() => this.premReturn(), 0);
     const P = PREM_PLANS.find(p => p.id === plan), info = premInfo(s), on = this.premOn(), busy = s.premBusy || '';
-    let mineTitle = 'Tu es Premium', mineText = 'Merci de soutenir Dropicards !';
+    let mineTitle = 'Tu as le DropiPass', mineText = 'Merci de soutenir Dropicards !';
     if (info && info.on) {
       const formule = (PREM_PLANS.find(p => p.id === info.plan) || PREM_PLANS[0]).formule;
-      if (info.status === 'past_due') { mineTitle = 'Paiement à mettre à jour'; mineText = 'Le renouvellement n’est pas passé : mets à jour ta carte dans « Gérer mon abonnement » pour garder Premium.'; }
+      if (info.status === 'past_due') { mineTitle = 'Paiement à mettre à jour'; mineText = 'Le renouvellement n’est pas passé : mets à jour ta carte dans « Gérer mon abonnement » pour garder le DropiPass.'; }
       else if (info.cancel) mineText = formule + ' · s’arrête le ' + premDate(info.until) + '. Tu gardes tous les avantages jusque-là.';
       else mineText = formule + ' · renouvelée automatiquement le ' + premDate(info.until) + '.';
     }
     r.prem = {
-      banner: { title: 'Dropicards Premium', text: on ? 'Premium actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP sur tes PA, Radar et historique complet.', open: () => this.premOpen() },
+      logo: PREM_LOGO, logoCls: 'pkm-prem-logo pkm-prem-logo-' + PREM_VIS,
+      banner: { title: PREM_NAME, text: on ? 'DropiPass actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP sur tes PA, Radar et historique complet.', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.premClose(),
       perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isPg: p.kind === 'pg', hasProto: !!p.proto, isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isHeart: p.kind === 'heart', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
       buy: !on, isOn: on,
@@ -159,7 +170,7 @@
         on: String(p.id === plan), cls: 'pkm-prem-plan' + (p.id === plan ? ' pkm-prem-plan-on' : ''),
         pick: () => this.setState({ premPlan: p.id, premErr: '' })
       })),
-      cta: busy === 'checkout' ? 'Ouverture du paiement sécurisé…' : 'Devenir Premium · ' + P.price + ' ' + P.per,
+      cta: busy === 'checkout' ? 'Ouverture du paiement sécurisé…' : 'Prendre le DropiPass · ' + P.price + ' ' + P.per,
       buyNow: () => this.premGo('checkout'),
       busyAttr: String(!!busy),
       hasErr: !!s.premErr, err: s.premErr || '',
@@ -169,7 +180,7 @@
         'Renouvellement automatique ' + P.renew + ', tant que tu n’arrêtes pas ton abonnement.',
         'Tu peux l’arrêter à tout moment, en quelques secondes, depuis Mon profil.',
         'La période déjà commencée reste due : ton abonnement s’arrête juste avant la ' + P.next + ', rien n’est débité ensuite.',
-        'Tu gardes tous les avantages Premium jusqu’à la fin de la période payée.'
+        'Tu gardes tous les avantages du DropiPass jusqu’à la fin de la période payée.'
       ].map(t => ({ text: t }))
     };
     return r;

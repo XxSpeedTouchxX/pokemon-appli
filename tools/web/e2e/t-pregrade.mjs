@@ -96,7 +96,7 @@ const order = await page.evaluate(() => { const a = [...document.querySelectorAl
 ok('accueil : la rubrique est sous les boutiques (' + order.join(' < ') + ')', order[0] >= 0 && order[1] === order[0] + 1);
 const homeTxt = await home.innerText().catch(() => '');
 ok('accueil : compteur « 1 pré-gradation disponible »', /1 pré-gradation disponible/.test(homeTxt));
-ok('accueil : rythme et offre Premium « 1 tous les 3 jours · 60 par mois avec Premium »', /1 tous les 3 jours · 60 par mois avec Premium/.test(homeTxt));
+ok('accueil : rythme et offre Premium « 1 tous les 3 jours · 60 par mois avec le DropiPass »', /1 tous les 3 jours · 60 par mois avec le DropiPass/.test(homeTxt));
 await home.screenshot({ path: shot('pregrade-home.png') }).catch(() => {});
 
 // 2. Recto puis verso.
@@ -226,7 +226,7 @@ await page.goto(E2E + '/?start=pregrade&debug' + Q, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__pkm && window.__pkm.premOn && window.__pkm.premOn(), null, { timeout: 15000 }).catch(() => {});
 await page.waitForTimeout(800);
 ok('Premium : « 60 pré-gradations restantes ce mois-ci (sur 60) »', /60 pré-gradations restantes ce mois-ci \(sur 60\)/.test(await txt('.pkm-pgd-counter')));
-ok('Premium : plus de mention « avec Premium »', !/avec Premium/.test(await txt('.pkm-pgd-counter')));
+ok('Premium : plus de mention « avec Premium »', !/avec le DropiPass/.test(await txt('.pkm-pgd-counter')));
 await page.evaluate(() => window.__pkm.pgStart()); await page.waitForTimeout(300);
 await page.setInputFiles('#pkm-pgd-file', F_FRONT); await waitStep('back', 10000);
 await page.setInputFiles('#pkm-pgd-file', F_BACK); await waitStep('result', 30000);

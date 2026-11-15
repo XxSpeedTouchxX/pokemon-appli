@@ -47,7 +47,7 @@ for (const [w, h] of [[390, 844], [360, 740]]) {
     const closeBtn2 = page.locator('button[aria-label="Fermer"]').last();
     if (await closeBtn2.isVisible().catch(() => false)) { await closeBtn2.click(); await page.waitForTimeout(400); }
     await page.locator('nav[aria-label="Informations légales"] button', { hasText: 'Conditions générales de vente' }).click(); await page.waitForTimeout(500);
-    ok('« Conditions générales de vente » ouvre la vente (' + await tabOn() + ')', await tabOn() === 'Vente (Premium)');
+    ok('« Conditions générales de vente » ouvre la vente (' + await tabOn() + ')', await tabOn() === 'Vente (DropiPass)');
   }
   ok(w + ' px : pas de défilement horizontal', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await ctx.close();

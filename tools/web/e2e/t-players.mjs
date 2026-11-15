@@ -81,7 +81,7 @@ const open = async (who) => {
   const rows = sec.locator('.pkm-ply-row');
   ok('tous les comptes, du plus récemment actif (Admin, Sacha, Ondine, Pierre)', (await rows.count()) === 4 && /Admin/.test(await rows.nth(0).innerText()) && /Sacha/.test(await rows.nth(1).innerText()) && /Pierre/.test(await rows.nth(3).innerText()));
   const sacha = N(await rows.nth(1).innerText());
-  ok('Sacha : PK 8 450, PA 320, grade Collectionneur, Premium, régulier', /8 450 PK/.test(sacha) && /320 PA/.test(sacha) && /Collectionneur/.test(sacha) && /Premium/.test(sacha) && /régulier/.test(sacha) && (await rows.nth(1).locator('img[src="img/grades/grade-3.svg"]').count()) === 1);
+  ok('Sacha : PK 8 450, PA 320, grade Collectionneur, Premium, régulier', /8 450 PK/.test(sacha) && /320 PA/.test(sacha) && /Collectionneur/.test(sacha) && /DropiPass/.test(sacha) && /régulier/.test(sacha) && (await rows.nth(1).locator('img[src="img/grades/grade-3.svg"]').count()) === 1);
   ok('Sacha : temps aujourd’hui 15 min, 7 jours 2 h 01, 30 jours 8 h 20, total 12 h 30', /Aujourd’hui 15 min/.test(sacha) && /7 jours 2 h 01/.test(sacha) && /30 jours 8 h 20/.test(sacha) && /Total 12 h 30/.test(sacha));
   ok('Sacha : 5 j / 7, 18 j / 30, 31 parties, 9 ouvertures, vu il y a 40 min', /5 j \/ 7 · 18 j \/ 30/.test(sacha) && /31 parties en 7 j/.test(sacha) && /9 ouvertures en 7 j/.test(sacha) && /Vu il y a 40 min/.test(sacha));
   ok('Admin : « en ligne », temps total « 2 j 7 h »', /en ligne/.test(N(await rows.nth(0).innerText())) && /Total 2 j 7 h/.test(N(await rows.nth(0).innerText())));

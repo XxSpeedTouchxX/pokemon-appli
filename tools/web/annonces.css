@@ -47,3 +47,6 @@ html.pkm-th-dark .pkm-anl-count { color: #9AA8C3; }
 html.pkm-th-dark .pkm-anl-note { color: #9AA8C3; }
 /* Lien vers la recherche Vinted quand rien n'est trouvé (2026-11-14, porteur) : même bouton que « Afficher plus ». */
 .pkm-anl-vinted { height: 46px; width: 100%; border-radius: 999px; background: #111; color: #FFD60A; font-size: 14.5px; font-weight: 800; text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 0 16px; box-sizing: border-box; text-align: center; }
+
+/* Modes Sombre et Clair, thèmes des compagnons (2026-11-15) : texte olive prévu pour le fond jaune, remplacé par le texte secondaire du thème. */
+html[class*="pkm-theme-"]:not(.pkm-classic) .pkm-anh-sub, html[class*="pkm-theme-"]:not(.pkm-classic) .pkm-anl-count, html[class*="pkm-theme-"]:not(.pkm-classic) .pkm-anl-note { color: var(--pkm-t3); }

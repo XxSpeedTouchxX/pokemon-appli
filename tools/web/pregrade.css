@@ -280,3 +280,6 @@ html.pkm-calm .pkm-pgd-res > *, html.pkm-calm .pkm-pgd-gauge-fg, html.pkm-calm .
 
 /* Pré-gradation sans la barre du bas (2026-11-14, porteur) : le bouton central « Scan » ne chevauche plus le déclencheur. */
 html.pkm-pg-on nav[aria-label="Navigation principale"] { display: none !important; }
+
+/* Modes Sombre et Clair, thèmes des compagnons (2026-11-15) : texte olive prévu pour le fond jaune, remplacé par le texte secondaire du thème. */
+html[class*="pkm-theme-"]:not(.pkm-classic) .pkm-pgh-sub, html[class*="pkm-theme-"]:not(.pkm-classic) .pkm-pgd-stp, html[class*="pkm-theme-"]:not(.pkm-classic) .pkm-pgd-note-s, html[class*="pkm-theme-"]:not(.pkm-classic) .pkm-pgd-legal { color: var(--pkm-t3); }

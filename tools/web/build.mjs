@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
 import { transformSync } from 'esbuild';
 import { applyMarginPatches } from './margin-patch.mjs';
-import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens, BUDDY_THEMES, NIGHT_THEME } from './theme.mjs';
+import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens, BUDDY_THEMES, NIGHT_THEME, DAY_THEME } from './theme.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const SRC = ROOT + 'docs/12-maquette-v5/Main.dc.html';
@@ -676,7 +676,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 54) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 54'); // dont 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 57) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 57'); // dont 3 logos du DropiPass (bannière du PK shop et de Mon profil, écran de l'offre, 2026-11-15), 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -806,8 +806,9 @@ const buddiesJs = '  const HOME_BUDDIES = ' + JSON.stringify(buddies) + ';\n'
   + '  const DEX_DATA = ' + JSON.stringify(dexData) + ';\n'
   // Thèmes des compagnons (theme.mjs) : n° du Pokémon → classe, nom et couleur de la barre du navigateur.
   + '  const HOME_THEMES = ' + JSON.stringify(Object.fromEntries(BUDDY_THEMES.map(t => [t.buddy, { key: t.key, name: t.name, bar: t.bar }]))) + ';\n'
-  // Mode sombre (Réglages, 2026-11-02) : classe, nom et couleur de la barre du navigateur.
-  + '  const HOME_NIGHT = ' + JSON.stringify({ key: NIGHT_THEME.key, name: NIGHT_THEME.name, bar: NIGHT_THEME.bar }) + ';\n';
+  // Modes Sombre et Clair (Réglages › Apparence, 2026-11-02, 3 modes le 2026-11-15) : classe, nom, barre du navigateur.
+  + '  const HOME_NIGHT = ' + JSON.stringify({ key: NIGHT_THEME.key, name: NIGHT_THEME.name, bar: NIGHT_THEME.bar }) + ';\n'
+  + '  const HOME_DAY = ' + JSON.stringify({ key: DAY_THEME.key, name: DAY_THEME.name, bar: DAY_THEME.bar }) + ';\n';
 for (const t of BUDDY_THEMES) if (!buddies.some(([n]) => n === t.buddy)) throw new Error('Thème sans compagnon : ' + t.key);
 if (rebranded !== REBRANDED) throw new Error('Libellés « PKM » renommés : ' + rebranded + ' au lieu de ' + REBRANDED);
 
@@ -1089,9 +1090,11 @@ const VUE_CDN = 'https://cdn.jsdelivr.net/npm/vue@3.5.43/dist/vue.runtime.global
 // la classe pkm-ios descend un peu l'en-tête pour que le badge 2XP et les soldes restent nets. ?iosgap=1 pour l'essayer.
 const IOS_EARLY = '<script>try { var ua = navigator.userAgent || \'\'; if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) || /[?&]iosgap=1(&|$)/.test(location.search)) document.documentElement.classList.add(\'pkm-ios\'); } catch (e) {}</script>';
 const THEME_SWITCH = '<script>try { if (/[?&]theme=classic(&|$)/.test(location.search)) { document.documentElement.classList.add(\'pkm-classic\'); var m = document.querySelector(\'meta[name="theme-color"]\'); if (m) m.content = \'#0B1120\'; } } catch (e) {}</script>';
-// Mode sombre (Réglages › Apparence, 2026-11-02) : posé avant le premier affichage pour éviter un éclair jaune au
-// démarrage (sauf avec un compagnon à thème, qui garde son fond) ; home.js reprend ensuite la main.
-const NIGHT_EARLY = '<script>try { var q = (location.search.match(/[?&]look=(dark|light)(&|$)/) || [])[1], d = JSON.parse(localStorage.getItem(\'pkm-collection-v1\') || \'{}\'); if ((q || d.look) === \'dark\' && ' + JSON.stringify(BUDDY_THEMES.map(t => t.buddy)) + '.indexOf(d.buddy) < 0 && !document.documentElement.classList.contains(\'pkm-classic\')) { document.documentElement.classList.add(\'pkm-theme-' + NIGHT_THEME.key + '\'); var mm = document.querySelector(\'meta[name="theme-color"]\'); if (mm) mm.content = \'' + NIGHT_THEME.bar + '\'; } } catch (e) {}</script>';
+// Apparence (Réglages › Apparence) : posée avant le premier affichage pour éviter un éclair d'une autre couleur au
+// démarrage (sauf avec un compagnon à thème, qui garde son fond) ; home.js reprend ensuite la main. 3 modes depuis le
+// 2026-11-15 (porteur) : Sombre (gris, par défaut, même sans choix enregistré), Clair (blanc et bleu), Original (jaune).
+// Ancienne valeur « light » (le jaune, choisi avant le 2026-11-15) = Original.
+const NIGHT_EARLY = '<script>try { var q = (location.search.match(/[?&]look=(dark|day|original|light)(&|$)/) || [])[1], d = JSON.parse(localStorage.getItem(\'pkm-collection-v1\') || \'{}\'), lk = q || d.look || \'dark\', h = document.documentElement, k = lk === \'day\' ? \'' + DAY_THEME.key + '\' : lk === \'light\' || lk === \'original\' ? \'\' : \'' + NIGHT_THEME.key + '\'; if (k && ' + JSON.stringify(BUDDY_THEMES.map(t => t.buddy)) + '.indexOf(d.buddy) < 0 && !h.classList.contains(\'pkm-classic\')) { h.classList.add(\'pkm-theme-\' + k); var mm = document.querySelector(\'meta[name="theme-color"]\'); if (mm) mm.content = k === \'' + DAY_THEME.key + '\' ? \'' + DAY_THEME.bar + '\' : \'' + NIGHT_THEME.bar + '\'; } } catch (e) {}</script>';
 // Animation d'entrée « Ouverture de booster » (tools/web/intro.html) : démo hébergée seulement.
 const INTRO = readFileSync(fileURLToPath(new URL('./intro.html', import.meta.url)), 'utf8').trim();
 const body = vue => `<div id="shell">

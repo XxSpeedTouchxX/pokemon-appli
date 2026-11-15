@@ -152,14 +152,14 @@ export function makeHandler(env, fetchImpl = fetch) {
 
   async function checkout(req) {
     const u = await userOf(req);
-    if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards pour devenir Premium.');
-    if (String(E('PREMIUM_OPEN') || '').toLowerCase() !== 'true' && !(await isAdmin(u.id))) return fail(403, 'Le Premium n’est pas encore ouvert : il arrive très bientôt.');
+    if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards pour prendre le DropiPass.');
+    if (String(E('PREMIUM_OPEN') || '').toLowerCase() !== 'true' && !(await isAdmin(u.id))) return fail(403, 'Le DropiPass n’est pas encore ouvert : il arrive très bientôt.');
     const b = await req.json().catch(() => ({}));
     const plan = b && typeof b.plan === 'string' && Object.prototype.hasOwnProperty.call(LOOKUP, b.plan) ? b.plan : '';
     if (!plan) return fail(400, 'Choisis une formule : mensuelle, trimestrielle, semestrielle ou annuelle.');
     const row = await premiumRow(u.id);
     if (row && ['active', 'trialing', 'past_due'].includes(row.status) && row.period_end && new Date(row.period_end).getTime() > Date.now()) {
-      return fail(409, 'Tu es déjà Premium : gère ton abonnement depuis Mon profil.');
+      return fail(409, 'Tu as déjà le DropiPass : gère ton abonnement depuis Mon profil.');
     }
     const price = await priceId(plan);
     const cust = await customerOf(u);
@@ -182,7 +182,7 @@ export function makeHandler(env, fetchImpl = fetch) {
     const u = await userOf(req);
     if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards.');
     const cust = await rpc('premium_customer', { uid: u.id });
-    if (!cust) return fail(404, 'Aucun abonnement Premium sur ce compte.');
+    if (!cust) return fail(404, 'Aucun abonnement DropiPass sur ce compte.');
     const s = await stripe('POST', '/billing_portal/sessions', { customer: cust, return_url: APP + '/?premium=retour', locale: 'fr' });
     return json(200, { url: s.url });
   }

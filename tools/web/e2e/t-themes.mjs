@@ -1,4 +1,4 @@
-// Thèmes des compagnons : Kyogre (océan), Groudon (volcan), Rayquaza (vert et blanc) ; retour au jaune ; gardé après
+// Thèmes des compagnons : Kyogre (océan), Groudon (volcan), Rayquaza (vert et blanc) ; retour au mode choisi (Sombre) ; gardé après
 // rechargement ; barre du navigateur ; message ; thème classique inchangé. Captures de chaque thème.
 import { withFonts, withDemoCards, unlockPaid, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const BASE = E2E + '/?today=2026-10-04';
@@ -29,7 +29,7 @@ const state = () => page.evaluate(() => ({
 }));
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1000); await unlockPaid(page);
 const base = await state();
-ok('jaune par défaut (Pikachu) : barre ' + base.bar, base.cls === '' && base.bar === '#FFD60A' && /255, 214, 10/.test(base.bg));
+ok('sombre par défaut (Pikachu, 2026-11-15) : barre ' + base.bar, base.cls === 'pkm-theme-night' && base.bar === '#1D1E22' && /44, 45, 50/.test(base.bg));
 for (const [name, key, bar, color] of [['Kyogre', 'sea', '#0A4893', /10, 72, 147/], ['Groudon', 'lava', '#9E1F18', /158, 31, 24/], ['Rayquaza', 'storm', '#174D48', /23, 77, 72/]]) {
   await pick(name);
   const st = await state(), toast = await page.locator('#app').innerText();
@@ -49,10 +49,10 @@ await page.click('button[aria-label="Toutes les séries"]').catch(() => {}); awa
 ok('onglet Collection : même thème', (await page.evaluate(() => [...document.documentElement.classList].filter(c => c.indexOf('pkm-theme') === 0 || c === 'pkm-classic').join(' '))) === 'pkm-theme-storm');
 await page.screenshot({ path: shot('theme-storm-collection.png') });
 await page.click('button[aria-label="Accueil"]').catch(() => {}); await page.waitForTimeout(800);
-// Retour au jaune avec un autre compagnon.
+// Retour au mode choisi (Sombre par défaut) avec un autre compagnon.
 await pick('Pikachu');
 const back = await state();
-ok('Pikachu : retour au jaune', back.cls === '' && back.bar === '#FFD60A' && /255, 214, 10/.test(back.bg));
+ok('Pikachu : retour au mode sombre', back.cls === 'pkm-theme-night' && back.bar === '#1D1E22' && /44, 45, 50/.test(back.bg));
 // Thème classique : pas de thème de compagnon.
 await pick('Kyogre');
 await page.goto(BASE + '&theme=classic', { waitUntil: 'load' }); await page.waitForTimeout(1500);

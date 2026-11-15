@@ -43,7 +43,7 @@
   nobuyProto.buyLocked = function () { return NOBUY_ON && !storeApp && !nobuyAdmin(); };
   const nobuyBaseOpen = nobuyProto.premOpen;
   nobuyProto.premOpen = function () {
-    if (this.buyLocked() && !(this.premOn && this.premOn())) { if (this.st().premOpen) this.setState({ premOpen: false }); this.setState({ toast: 'Le Premium arrive très bientôt !' }); return; }
+    if (this.buyLocked() && !(this.premOn && this.premOn())) { if (this.st().premOpen) this.setState({ premOpen: false }); this.setState({ toast: 'Le DropiPass arrive très bientôt !' }); return; }
     return nobuyBaseOpen.call(this);
   };
   const nobuyBase = nobuyProto.renderVals;

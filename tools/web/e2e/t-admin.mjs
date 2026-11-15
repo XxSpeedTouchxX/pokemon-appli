@@ -1,4 +1,4 @@
-// P1 : mode Admin. 7 appuis sur « Version », code choisi puis confirmé, panneau ; solde, déblocages, prix (en PA depuis
+// P1 : mode Admin. bulle « Mode Admin · paramétrage » (7 appuis sur « Version » jusqu’au 2026-11-14), code choisi puis confirmé, panneau ; solde, déblocages, prix (en PA depuis
 // le 2026-10-28), profil et palier forcés, interrupteurs, date simulée ; sortie ; nouvel accès avec le code (faux puis bon).
 import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const BASE = E2E + '/?';
@@ -8,15 +8,14 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, de
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 const saved = () => page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || 'null'));
 const panel = page.locator('section[aria-label="Panneau Admin"]');
-const tap7 = async () => { const v = page.locator('button[aria-label^="Version "]'); for (let i = 0; i < 7; i++) await v.click({ delay: 10 }); await page.waitForTimeout(300); };
+// « Version » (7 appuis) retirée avec le texte d'« À propos » (2026-11-14) : le mode Admin s'ouvre par sa bulle.
+const tap7 = async () => { await page.locator('section[aria-label="À propos"] button:has-text("Admin · paramétrage")').click(); await page.waitForTimeout(300); };
 const typeCode = async c => { await page.fill('input[aria-label="Code à 6 chiffres"]', c); await page.click('section[aria-label="Code Admin"] button:has-text("Valider")'); await page.waitForTimeout(250); };
 await page.goto(BASE + 'start=settings', { waitUntil: 'load' }); await page.waitForTimeout(1500);
-ok('version visible dans À propos', (await page.locator('button[aria-label^="Version "]').count()) === 1);
-const v = page.locator('button[aria-label^="Version "]');
-for (let i = 0; i < 6; i++) await v.click();
-ok('6 appuis : rien', (await page.locator('section[aria-label="Code Admin"]').count()) === 0);
-await page.waitForTimeout(3200); await tap7();
-ok('7 appuis : « ' + await page.locator('section[aria-label="Code Admin"] h2').innerText() + ' »', /Choisis ton code Admin/.test(await page.locator('section[aria-label="Code Admin"] h2').innerText()));
+ok('bulle « Mode Admin · paramétrage » dans À propos', (await page.locator('section[aria-label="À propos"] button:has-text("Mode Admin · paramétrage")').count()) === 1);
+ok('plus de « Version » à toucher 7 fois', (await page.locator('button[aria-label^="Version "]').count()) === 0);
+await tap7();
+ok('bulle : « ' + await page.locator('section[aria-label="Code Admin"] h2').innerText() + ' »', /Choisis ton code Admin/.test(await page.locator('section[aria-label="Code Admin"] h2').innerText()));
 await typeCode('12345');
 ok('5 chiffres refusés', /6 chiffres/.test(await page.locator('section[aria-label="Code Admin"]').innerText()));
 await typeCode('246810');

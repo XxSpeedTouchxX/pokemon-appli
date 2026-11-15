@@ -51,7 +51,7 @@ ok('Pokémon en couleur (pas de silhouette noire)', (await page.locator('.pkm-av
 await page.screenshot({ path: shot('avatar-pokemon.png') });
 await page.locator('.pkm-av-pk:has(img[src$="/25.png"])').first().click(); await page.waitForTimeout(500);
 const lk = page.locator('section.pkm-av-locksh');
-ok('Pikachu non débloqué : fenêtre « 25 PA » ou « Tout débloquer avec Premium »', (await lk.count()) === 1 && /Pikachu/.test(await lk.innerText()) && /Débloquer pour 25 PA/.test(await lk.innerText()) && /Tout débloquer avec Premium/.test(await lk.innerText()));
+ok('Pikachu non débloqué : fenêtre « 25 PA » ou « Tout débloquer avec Premium »', (await lk.count()) === 1 && /Pikachu/.test(await lk.innerText()) && /Débloquer pour 25 PA/.test(await lk.innerText()) && /Tout débloquer avec le DropiPass/.test(await lk.innerText()));
 await page.screenshot({ path: shot('avatar-debloquer.png') });
 await page.evaluate(() => window.__pkm.setState({ pa: 1000 })); await page.waitForTimeout(200);
 await lk.locator('button.pkm-av-buy').click(); await page.waitForTimeout(700);
@@ -93,7 +93,7 @@ await page.screenshot({ path: shot('avatar-accessoire.png') });
 await page.locator('.pkm-av-tab:has-text("Décor")').click(); await page.waitForTimeout(300);
 ok('Décor : 19 fonds (dont tempête, lave et tsunami animés) et 21 cadres animés', (await page.locator('section[aria-label="Décor"] .pkm-av-opt:not(.pkm-av-fropt)').count()) === 19 && (await page.locator('.pkm-av-fropt').count()) === 21 && (await page.locator('section[aria-label="Décor"] .pkm-av-opt[aria-label^="Tsunami"]').count()) === 1);
 await page.locator('.pkm-av-fropt[aria-label^="Lave"]').evaluate(e => e.click()); await page.waitForTimeout(300);
-ok('cadre « Lave volcanique » : fenêtre de déblocage (250 PA ou Premium) dès le toucher', (await lk.count()) === 1 && /250/.test(await lk.innerText()) && /Tout débloquer avec Premium/.test(await lk.innerText()));
+ok('cadre « Lave volcanique » : fenêtre de déblocage (250 PA ou Premium) dès le toucher', (await lk.count()) === 1 && /250/.test(await lk.innerText()) && /Tout débloquer avec le DropiPass/.test(await lk.innerText()));
 await lk.locator('button.pkm-av-buy').click(); await page.waitForTimeout(600);
 await page.locator('.pkm-av-bot button').click(); await page.waitForTimeout(400);
 ok('« Valider mon avatar » : aucune fenêtre, enregistré tout de suite', (await lk.count()) === 0);

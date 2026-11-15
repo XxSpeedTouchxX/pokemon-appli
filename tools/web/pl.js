@@ -79,7 +79,7 @@
 
   // Gains reçus : un message (et leur détail dans « Ma ligue »).
   const PL_WHY = {
-    streak: g => g.ref + ' jours d’affilée', referral: () => 'un ami de plus parrainé', referral_premium: () => 'ton filleul a pris le Premium',
+    streak: g => g.ref + ' jours d’affilée', referral: () => 'un ami de plus parrainé', referral_premium: () => 'ton filleul a pris le DropiPass',
     share: () => 'partage validé', social: () => 'merci de suivre Dropicards', welcome_ref: () => 'bienvenue'
   };
   // Animation des PL gagnés (2026-11-14, porteur : « quand l'utilisateur remporte des PL, une petite animation où l'on

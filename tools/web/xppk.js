@@ -222,7 +222,7 @@
       // Un logo devant chaque lot (2026-11-09, porteur) : double gemme des PK (l'ancien visuel des 2XP), double goutte
       // des PA, scanner, Pokémon animé.
       lots: myWeights(s, !!(this.premOn && this.premOn())).map((l, i, all) => { const tot = all.reduce((t, x) => t + x.w, 0) || 1, pct = Math.round(l.w / tot * 1000) / 10, base = MY_LOTS[i].w;
-        return { label: l.label, pct: (l.off ? base : String(pct).replace('.', ',')) + ' %', owned: l.off, ownedText: l.poke ? 'déjà au Pokédex' : 'déjà doublés avec Premium',
+        return { label: l.label, pct: (l.off ? base : String(pct).replace('.', ',')) + ' %', owned: l.off, ownedText: l.poke ? 'déjà au Pokédex' : 'déjà doublés avec le DropiPass',
         up: !l.off && pct > base, upText: 'au lieu de ' + base + ' %', cls: l.off ? 'pkm-my-off' : pct > base ? 'pkm-my-up' : '',
         isXp: !!l.days, isXpPa: !!l.paDays, isScan: !!l.scans, isPoke: !!l.poke, days: (l.days || l.paDays || 0) + ' J', img: l.poke ? 'img/pokemon/' + l.poke + '.gif' : '',
         tone: 'pkm-xp pkm-xp-v3 pkm-my-xpi pkm-my-t-' + (l.paDays ? 'pa' : l.days) }; })

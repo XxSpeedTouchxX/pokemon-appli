@@ -43,7 +43,7 @@
   | Mission | PL | Fréquence |
   |---|---|---|
   | Parrainer un ami : il s'inscrit avec ton lien, vérifie son adresse e-mail et ouvre l'app 3 jours différents dans ses 14 premiers jours | 200 | Au plus 20 amis comptés par saison |
-  | Ton filleul garde le Premium payé plus de 14 jours | 400 | Une fois par filleul |
+  | Ton filleul garde le DropiPass payé plus de 14 jours | 400 | Une fois par filleul |
   | S'inscrire avec le lien d'un ami (bienvenue) | 50 | Une seule fois |
   | Suivre Dropicards sur TikTok, sur Instagram, rejoindre son Discord (sur l'honneur) | 100 chacun | Une seule fois par réseau |
   | Ouvrir l'app 5, 15 et 30 jours d'affilée pendant la saison | 30, 100 et 150 | Une fois chacun par saison |
@@ -65,11 +65,11 @@
 | 1ʳᵉ | Un ETB (Elite Trainer Box) du moment |
 | 2ᵉ | Un coffret du moment |
 | 3ᵉ | 2 boosters du moment |
-| 4ᵉ et 5ᵉ | 1 mois de Premium ou 1 ticket Or du PK shop, au choix du gagnant |
-| 6ᵉ et 7ᵉ | 1 mois de Premium ou 1 ticket Argent du PK shop, au choix du gagnant |
-| 8ᵉ à 10ᵉ | 1 mois de Premium ou 1 ticket Bronze du PK shop, au choix du gagnant |
+| 4ᵉ et 5ᵉ | 1 mois de DropiPass ou 1 ticket Or du PK shop, au choix du gagnant |
+| 6ᵉ et 7ᵉ | 1 mois de DropiPass ou 1 ticket Argent du PK shop, au choix du gagnant |
+| 8ᵉ à 10ᵉ | 1 mois de DropiPass ou 1 ticket Bronze du PK shop, au choix du gagnant |
 
-- Les lots des 3 premières places ne sont remis que si au moins 50 joueurs ont des PL dans la saison. Sinon, chacun des 3 premiers reçoit 1 mois de Premium.
+- Les lots des 3 premières places ne sont remis que si au moins 50 joueurs ont des PL dans la saison. Sinon, chacun des 3 premiers reçoit 1 mois de DropiPass.
 - Les lots ne s'échangent pas contre de l'argent.
 - Si un produit n'est plus disponible, l'organisateur peut le remplacer par un produit Pokémon de valeur égale ou supérieure.
 - Un ticket du PK shop gagné participe au tirage suivant de sa catégorie, selon les règles du PK shop.
@@ -78,7 +78,7 @@
 - Dans les 7 jours qui suivent la fin de la saison, l'organisateur écrit à chaque gagnant, à l'adresse e-mail de son compte.
 - Le gagnant doit répondre dans les 14 jours avec :
   - son adresse postale ;
-  - son choix (Premium ou ticket) ;
+  - son choix (DropiPass ou ticket) ;
   - une pièce d'identité, pour les lots physiques.
 - Sans réponse dans ce délai, le lot est perdu et n'est pas réattribué.
 - Les lots physiques sont envoyés en France métropolitaine, aux frais de l'organisateur.

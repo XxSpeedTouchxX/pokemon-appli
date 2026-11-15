@@ -403,7 +403,7 @@
   const avAccCenter = id => { const a = AV_ACC.find(x => x.id === id); if (!a || !a.svg) return { acc: id };
     return { acc: id, aon: 'perso', ax: 50 - a.pcx, ay: 50 - a.pcy, asz: 100, arot: 0 }; };
   const avProto = Component.prototype;
-  avProto.avHas = function (id) { const s = this.st(), mine = Array.isArray(s.avOwned) && s.avOwned.indexOf(id) >= 0; if (!avPrice(id) || mine) return true; return !!(this.premOn && this.premOn()); };  // Premium débloque tout le mode avatar (2026-11-11, porteur)
+  avProto.avHas = function (id) { const s = this.st(), mine = Array.isArray(s.avOwned) && s.avOwned.indexOf(id) >= 0; if (!avPrice(id) || mine) return true; return !!(this.premOn && this.premOn()); };  // Le DropiPass débloque tout le mode avatar (2026-11-11, porteur)
   avProto.avOpen = function () {
     const s = this.st();
     this.setState({ avDraft: avNorm(s.avatarCfg, s), avTab: 'hair', avPick: 0, avLock: '' });
@@ -533,7 +533,7 @@
       const id = k + ':' + x.id, pro = !!x.pa, has = this.avHas(id), on = d[k] === x.id, m = swatch ? null : mini({ [k]: x.id });
       return { label: x.label, on: on, pro: pro, lock: pro && !has, open: pro && has, price: pro && !has ? x.pa.toLocaleString('fr-FR') : '', swatch: swatch ? 'background: ' + x.c : '', isSwatch: !!swatch, notSwatch: !swatch,
         bg: m ? m.bg : '', char: m ? m.char : '', cls: 'pkm-av-opt' + (on ? ' pkm-av-on' : '') + (swatch ? ' pkm-av-sw' : ''),
-        aria: x.label + (pro ? (has ? ' (débloqué)' : ' (' + x.pa + ' PA, ou Premium)') : '') + (on ? ', choisi' : ''),
+        aria: x.label + (pro ? (has ? ' (débloqué)' : ' (' + x.pa + ' PA, ou le DropiPass)') : '') + (on ? ', choisi' : ''),
         // Style payant pas encore débloqué : la fenêtre de déblocage s'ouvre d'abord ; il s'applique une fois acheté
         // (2026-11-11, porteur : « du moment que ce style a été ajouté à ton avatar, c'est que tu l'as débloqué »).
         pick: () => (pro && !has ? this.setState({ avLock: id, avLockWhy: 'pick' }) : this.avSet(k === 'acc' ? avAccCenter(x.id) : { [k]: x.id })) };
@@ -569,13 +569,13 @@
       frameCls: 'pkm-av-frwrap pkm-fr pkm-fr-' + d.frame,
       dragHint: tab === 'acc' ? (d.acc !== 'aucun' ? 'Glisse, pince ou tourne l’accessoire' : '') : d.poke ? 'Glisse, pince ou tourne ton Pokémon' : '',
       back: () => this.pop(), paLabel: (Number(s.pa) || 0).toLocaleString('fr-FR') + ' PA', goPoke: () => this.setState({ avTab: 'poke' }),
-      pkCount: prem ? 'Premium : les 171 Pokémon sont débloqués pour ton avatar.' : owned + ' Pokémon débloqué' + (owned > 1 ? 's' : '') + ' sur 171 pour ton avatar · 1re forme 25 PA, 2e 50 PA, 3e 100 PA, légendaires 300 PA, Kyogre, Groudon et Rayquaza 500 PA',
+      pkCount: prem ? 'DropiPass : les 171 Pokémon sont débloqués pour ton avatar.' : owned + ' Pokémon débloqué' + (owned > 1 ? 's' : '') + ' sur 171 pour ton avatar · 1re forme 25 PA, 2e 50 PA, 3e 100 PA, légendaires 300 PA, Kyogre, Groudon et Rayquaza 500 PA',
       pctl: ctl('ton Pokémon', 'size', 'prot', { px: 50, py: 50, size: 140, prot: 0 }, [['Retirer', 'Retirer le Pokémon', ico.x, () => this.avSet({ poke: 0, shiny: false })]]),
       actl: ctl('l’accessoire', 'asz', 'arot', { ax: 0, ay: 0, asz: 100, arot: 0 }),
       isPoke: tab === 'poke', isFace: tab === 'face', isHair: tab === 'hair', isStyle: tab === 'style', isBg: tab === 'bg', isAcc: tab === 'acc', isShiny: tab === 'shiny',
       saved: !!s.avSaved, savedImg: s.avSaved || '', prev: L, save: () => (s.avSaved ? null : this.avSave()), busy: !!s.avBusy || !!s.avSaved, saveLabel: s.avBusy ? 'Enregistrement…' : 'Valider mon avatar',
       trial: false, burst: !!s.avBurst, burstKey: 'b' + (s.avBurst || 0), trialText: 'Essai : ' + pend.length + ' élément' + (pend.length > 1 ? 's' : '') + ' à débloquer pour valider',
-      prem: prem, premTag: prem ? 'Premium : tous les styles PRO sont ouverts' : 'Styles PRO : ouverts avec Premium, ou à débloquer avec tes PA',
+      prem: prem, premTag: prem ? 'DropiPass : tous les styles PRO sont ouverts' : 'Styles PRO : ouverts avec le DropiPass, ou à débloquer avec tes PA',
       skin: AV_SKIN.map(x => opt('skin', x, true)), face: AV_FACE.map(x => opt('face', x)), eyes: AV_EYES.map(x => opt('eyes', x)), ec: AV_EC.map(x => opt('ec', x, true)),
       hair: AV_HAIR.map(x => opt('hair', x)), hc: AV_HC.map(x => opt('hc', x, true)), outfit: AV_OUTFIT.map(x => opt('outfit', x)), bg: AV_BG.map(x => opt('bg', x)),
       frames: AV_FRAMES.map(frameOpt),
@@ -610,8 +610,8 @@
       },
       lock: {
         open: !!lockItem, name: lockItem ? lockItem.label : '', priceN: price.toLocaleString('fr-FR'), aria: (isPk ? 'À débloquer : ' : 'Style PRO : ') + (lockItem ? lockItem.label : ''), price: price.toLocaleString('fr-FR') + ' PA', pa: pa.toLocaleString('fr-FR') + ' PA',
-        why: s.avLockWhy === 'shiny' ? 'Débloque d’abord ce Pokémon pour ton avatar, puis sa version shiny.' : isPk ? (s.avLockWhy === 'save' ? 'Ton avatar utilise ce Pokémon : débloque-le pour valider.' : 'Pokémon d’avatar, à part du Pokédex : débloqué pour toujours avec tes PA, ou avec Premium.')
-          : s.avLockWhy === 'save' ? 'Ton avatar utilise ce style PRO : débloque-le pour valider.' : 'Style PRO : débloqué pour toujours avec tes PA, ou avec Premium.',
+        why: s.avLockWhy === 'shiny' ? 'Débloque d’abord ce Pokémon pour ton avatar, puis sa version shiny.' : isPk ? (s.avLockWhy === 'save' ? 'Ton avatar utilise ce Pokémon : débloque-le pour valider.' : 'Pokémon d’avatar, à part du Pokédex : débloqué pour toujours avec tes PA, ou avec le DropiPass.')
+          : s.avLockWhy === 'save' ? 'Ton avatar utilise ce style PRO : débloque-le pour valider.' : 'Style PRO : débloqué pour toujours avec tes PA, ou avec le DropiPass.',
         enough: pa >= price, short: pa >= price ? '' : 'Il te manque ' + (price - pa).toLocaleString('fr-FR') + ' PA', notEnough: pa < price,
         buy: () => this.avBuy(lockId), buyLabel: s.avBusy ? 'Déblocage…' : 'Débloquer pour ' + price.toLocaleString('fr-FR') + ' PA',
         isPk: isPk, notPk: !isPk, pkImg: isPk ? avSprite(Number(lockId.split(':')[1]), lockCat === 'shiny') : '',

@@ -203,7 +203,7 @@ begin
   if not (public._premium_on(f) or coalesce(pe, paid) >= paid + interval '14 days') then return null; end if;
   if exists (select 1 from public.profiles p where p.id = r.parrain and p.status = 'active') then
     select p.pseudo into ps from public.profiles p where p.id = f;
-    g := public._pl_give(r.parrain, 'referral_premium', f::text, 400, public._pl_season(), 'Filleul Premium : ' || coalesce(ps, 'dresseur'));
+    g := public._pl_give(r.parrain, 'referral_premium', f::text, 400, public._pl_season(), 'Filleul DropiPass : ' || coalesce(ps, 'dresseur'));
   end if;
   update public.pl_referrals set premium_at = now() where filleul = f;
   return g;
@@ -475,13 +475,13 @@ language sql stable security definer set search_path = '' as $$
        big as (select count(*) >= 50 as ok from sc),
        rk as (select sc.user_id, sc.pl, (rank() over (order by sc.pl desc, sc.last_at asc nulls last))::int as r from sc)
   select rk.r, p.pseudo, u.email::text, rk.pl,
-         case when rk.r <= 3 and not (select ok from big) then '1 mois de Premium offert (moins de 50 joueurs classés)'
+         case when rk.r <= 3 and not (select ok from big) then '1 mois de DropiPass offert (moins de 50 joueurs classés)'
               when rk.r = 1 then 'ETB du moment'
               when rk.r = 2 then 'Coffret du moment'
               when rk.r = 3 then '2 boosters du moment'
-              when rk.r <= 5 then '1 mois de Premium ou 1 ticket Or (au choix)'
-              when rk.r <= 7 then '1 mois de Premium ou 1 ticket Argent (au choix)'
-              else '1 mois de Premium ou 1 ticket Bronze (au choix)' end
+              when rk.r <= 5 then '1 mois de DropiPass ou 1 ticket Or (au choix)'
+              when rk.r <= 7 then '1 mois de DropiPass ou 1 ticket Argent (au choix)'
+              else '1 mois de DropiPass ou 1 ticket Bronze (au choix)' end
   from rk join public.profiles p on p.id = rk.user_id join auth.users u on u.id = rk.user_id
   where rk.r <= 10 order by rk.r, p.pseudo;
 $$;

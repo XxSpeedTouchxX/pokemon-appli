@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-15 — Apparence en 3 modes, « DropiPass », Réglages allégés, Notifications, suppression du compte, extensions Cartes / Items (porteur)
+
+- **Apparence** (cache v211) : Réglages › Apparence propose **Sombre** (gris anthracite, cartes grises, accent jaune), **Clair** (fond blanc et bleu, cartes bleu nuit) et **Original** (le jaune Dropicards). **Sombre par défaut**, pour les nouveaux comme pour ceux qui n'avaient rien choisi ; ceux qui avaient choisi l'ancien « Clair » (le jaune) gardent le jaune, sous le nom « Original ». Un compagnon à thème (Kyogre, Groudon, Rayquaza) garde son fond. Contraste des textes vérifié dans les 3 modes (9 textes corrigés sur le gris : vert « Forte » du Radar, « Grade obtenu », textes de la pré-gradation et des annonces).
+- **« Dropicards Premium » devient « DropiPass »** (cache v211) : nom changé partout (app, CGU, CGV, confidentialité, messages de la fonction `stripe`, lots de « Ma ligue » et de `028`), contenu inchangé. **4 logos proposés** (Pass doré, Carte holo, Couronne éclair, Badge D ; planche `tools/brand/dropipass/planche.png`, essai dans l'app `?dpvis=1` à `4`) : **choix du porteur attendu**, le n° 1 (Pass doré) est affiché en attendant. Côté Stripe, renommer le produit (`docs/28` § 8 sexies). Les messages des scripts SQL déjà installés (« Premium ») sont affichés avec le nouveau nom par l'app.
+- **Réglages allégés** (cache v209) : « Valoriser ma collection avec », « Selon l'état et la langue », « Sources de prix », tout le texte d'« À propos » et « Retour à la page d'accueil » retirés ; restent « Informations légales et confidentialité » et la bulle du mode Admin. Le mode Admin s'ouvre désormais par cette bulle (les 7 appuis sur « Version » ont disparu avec le texte). Mention de non-affiliation toujours sur l'accueil et dans Mon profil.
+- **Notifications** (cache v210) : rappel « Safari éclair prêt » ajouté ; rubrique « Notifications » entre « Information sur les grades » et « Réglages », qui ouvre les 5 choix à cocher.
+- **« Supprimer mon compte »** (cache v210) : tout en bas des Réglages ; un abonnement en cours est arrêté tout de suite (plus aucun prélèvement) avant l'effacement du compte. **À faire par le porteur** : clé restreinte Stripe « Subscriptions » en écriture et réinstallation de la fonction `stripe` (`docs/28` § 8 quinquies).
+- **Extensions** (cache v209) : bulles Toutes / Possédées / Manquantes / Doublons retirées ; onglets « Cartes » et « Items » (produits scellés de l'extension) pour chaque extension ; tri « cote » renommé « prix ».
+- **Mes PK et Jeux** (cache v209) : « +300 une fois en partageant l'app » et « Partager Dropicards » retirés de Mes PK ; « Ton solde » retiré de Jeux (le solde reste en haut à gauche).
+- **Mis de côté par le porteur** : dernière vente eBay (« pour l'instant on laisse eBay de côté »).
+
+---
+
 ## 2026-11-14 — « Soutenir Dropicards » en dernier ; dernière vente eBay demandée (porteur)
 
 - **Fait** : « Soutenir Dropicards » est désormais la dernière ligne des avantages Premium (cache v208).

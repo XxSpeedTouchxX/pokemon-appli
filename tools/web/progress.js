@@ -19,9 +19,9 @@
     { range: '1ʳᵉ place', prize: 'Un ETB des 30 ans', note: 'Coffret Dresseur d’élite du 30ᵉ anniversaire', img: 'img/products/30th-celebration-elite-trainer-box.webp', cls: 'pkm-pg-rw pkm-pg-rw-top' },
     { range: '2ᵉ place', prize: 'Un coffret poster des 30 ans', note: 'Collection poster du 30ᵉ anniversaire', img: 'img/products/30th-poster-collection.webp', cls: 'pkm-pg-rw pkm-pg-rw-top' },
     { range: '3ᵉ place', prize: '2 boosters des 30 ans', note: 'Boosters du 30ᵉ anniversaire', img: 'img/shop-booster-30-anniversaire.webp', two: true, cls: 'pkm-pg-rw pkm-pg-rw-top' },
-    { range: '4ᵉ et 5ᵉ place', prize: '1 mois de Premium ou 1 ticket Or', note: 'Au choix, en fin de saison', tier: 'or', tag: 'OR', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-or' },
-    { range: '6ᵉ et 7ᵉ place', prize: '1 mois de Premium ou 1 ticket Argent', note: 'Au choix, en fin de saison', tier: 'argent', tag: 'ARGENT', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-ag' },
-    { range: '8ᵉ à 10ᵉ place', prize: '1 mois de Premium ou 1 ticket Bronze', note: 'Au choix, en fin de saison', tier: 'bronze', tag: 'BRONZE', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-bz' }
+    { range: '4ᵉ et 5ᵉ place', prize: '1 mois de DropiPass ou 1 ticket Or', note: 'Au choix, en fin de saison', tier: 'or', tag: 'OR', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-or' },
+    { range: '6ᵉ et 7ᵉ place', prize: '1 mois de DropiPass ou 1 ticket Argent', note: 'Au choix, en fin de saison', tier: 'argent', tag: 'ARGENT', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-ag' },
+    { range: '8ᵉ à 10ᵉ place', prize: '1 mois de DropiPass ou 1 ticket Bronze', note: 'Au choix, en fin de saison', tier: 'bronze', tag: 'BRONZE', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-bz' }
   ];
   PROG_REWARDS.forEach(w => { if (!w.note) w.note = ''; w.hasNote = !!w.note; });
   PROG_REWARDS.forEach(w => {
@@ -84,7 +84,7 @@
     const online = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
     const rankTxt = me ? '#' + progNum(me.rank) : '—';
     const cap = isPl ? 10 : 30;
-    const myPrize = me ? (me.rank <= 10 ? 'Dans le top 10 : un lot t’attend si tu y restes' : !isPl && me.rank <= 30 ? 'Dans le top 30 : Premium offert si tu y restes' : 'Encore ' + progNum(Math.max(0, me.rank - cap)) + ' place' + (me.rank - cap > 1 ? 's' : '') + ' pour le top ' + cap + (isPl ? ' : gagne des PL avec les défis' : '')) : '';
+    const myPrize = me ? (me.rank <= 10 ? 'Dans le top 10 : un lot t’attend si tu y restes' : !isPl && me.rank <= 30 ? 'Dans le top 30 : DropiPass offert si tu y restes' : 'Encore ' + progNum(Math.max(0, me.rank - cap)) + ' place' + (me.rank - cap > 1 ? 's' : '') + ' pour le top ' + cap + (isPl ? ' : gagne des PL avec les défis' : '')) : '';
     const tab = s.pgTab === 'earn' ? 'earn' : 'board';
     return {
       seasonN: 'Saison ' + se.n, seasonLabel: 'Saison ' + se.n, left: progLeft(se.end - now), barW: 'width: ' + Math.round(done * 100) + '%',
@@ -103,7 +103,7 @@
       hasMeRow: !inList && !!me,
       busy: !!s.progBusy && !b, empty: !s.progBusy && !top.length, emptyText: s.progErr || (online ? 'Le classement de la saison s’affiche dès les premiers ' + unit + ' gagnés.' : 'Le classement s’affiche une fois connecté à ton compte Dropicards.'),
       rewards: PROG_REWARDS, refresh: () => this.progLoad(true), refreshing: !!s.progBusy,
-      rewardsNote: 'Lots des 3 premières places remis si au moins 50 joueurs sont classés (sinon, 1 mois de Premium pour chacun).',
+      rewardsNote: 'Lots des 3 premières places remis si au moins 50 joueurs sont classés (sinon, 1 mois de DropiPass pour chacun).',
       tabs: [['board', 'Classement et récompenses'], ['earn', 'Mes missions']].map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-pg-tab' + (tab === k ? ' pkm-pg-tab-on' : ''), pick: () => this.progTab(k) })),
       isBoard: tab === 'board', isEarn: tab === 'earn',
       // Mini-tuto de « Ma ligue » (tuto.js) : à revoir depuis le bas du classement.
