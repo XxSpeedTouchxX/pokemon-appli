@@ -193,6 +193,10 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   const vArrow = val.locator('button.pkm-fold-btn'), kArrow = sec.locator('button.pkm-fold-btn');
   const buddy = await val.locator('button[aria-label*="ompagnon"], button img[width="96"]').first().boundingBox(), ab = await vArrow.boundingBox();
   ok('flèche en bas à droite du compagnon (ouverte)', ab && buddy && ab.x + ab.width > buddy.x + buddy.width - 40 && ab.y > buddy.y + buddy.height / 2 && (await vArrow.getAttribute('aria-expanded')) === 'true');
+  // Retouche (2026-11-15, porteur) : les 2 flèches alignées (même axe vertical), celle du compagnon un peu plus bas.
+  const kb = await kArrow.boundingBox(), img = await val.locator('img[width="96"]').boundingBox();
+  ok('2 flèches alignées (' + Math.round(ab.x + ab.width / 2) + ' / ' + Math.round(kb.x + kb.width / 2) + ' px), flèche du compagnon sous son image de ' + Math.round(ab.y + ab.height - img.y - img.height) + ' px',
+    Math.abs((ab.x + ab.width / 2) - (kb.x + kb.width / 2)) <= 1 && ab.y + ab.height - (img.y + img.height) >= 8);
   const tile0 = async () => (await page.locator(TILE).first().boundingBox()).y;
   const valBottom = async () => { const b = await val.boundingBox(); return b.y + b.height; };
   const gapOpen = (await tile0()) - (await valBottom());

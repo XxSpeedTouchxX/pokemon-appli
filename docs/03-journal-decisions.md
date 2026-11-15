@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-15 — Accueil : 2 flèches alignées (porteur)
+
+- Titre « Mon classeur » **gardé** (porteur).
+- La flèche de « Mon classeur » est décalée de 11 px vers la gauche : les 2 flèches sont sur le même axe vertical, quelle que soit la largeur de l'écran (vérifié à 360, 390 et 430 px).
+- La flèche du compagnon descend de 10 px : elle n'est plus collée au Pokémon (10 px sous son image) et ne touche pas la ligne de variation en dessous. Cache v218 ; test `t-binder.mjs` (alignement à 1 px près).
+
+---
+
 ## 2026-11-15 — Accueil : flèches pour plier la courbe et le haut du classeur (porteur)
 
 - **Valeur de toute ma collection** (cache v217) : petite flèche ronde en bas à droite du compagnon ; elle plie et déplie tout ce qui est sous le montant (variation, périodes, courbe, dates, « Calculé selon les cotes Cardmarket »). Le montant et la ligne « N articles · N cartes · N scellés » restent.
