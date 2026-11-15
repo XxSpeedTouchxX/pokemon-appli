@@ -98,8 +98,11 @@ const audit = () => page.evaluate(() => {
     const hit = document.elementFromPoint(x, y);
     if (!hit || !(hit === el || el.contains(hit) || hit.contains(el))) continue;
     if (onImage(el)) continue;
-    let fg = parse(cs.color); if (!fg) continue;
-    const bgs = backs(el); if (!bgs) continue;
+    // Texte peint par son propre dégradé (background-clip: text, reflet « Pass » du DropiPass, 2026-11-15) : sa couleur
+    // visible est le premier arrêt du dégradé (le reflet ne fait que passer), posée sur le fond de son parent.
+    const clipped = /text/.test(cs.webkitBackgroundClip || '') || /text/.test(cs.backgroundClip || '');
+    let fg = clipped ? parse((cs.backgroundImage.match(/rgba?\([^)]*\)/) || [''])[0]) : parse(cs.color); if (!fg) continue;
+    const bgs = backs(clipped ? el.parentElement : el); if (!bgs) continue;
     let op = 1; for (let e = el; e && e.id !== 'app'; e = e.parentElement) op *= +getComputedStyle(e).opacity;
     let worst = 99, worstBg = null;
     for (const b of bgs) { const f = over({ r: fg.r, g: fg.g, b: fg.b, a: fg.a * op }, b); const k = ratio(f, b); if (k < worst) { worst = k; worstBg = b; } }

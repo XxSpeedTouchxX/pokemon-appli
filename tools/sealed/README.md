@@ -8,6 +8,7 @@ Produits scellés réels de l'app : ETB, UPC, displays, lots de boosters, coffre
 |---|---|---|---|
 | 1. Découverte | À la demande | `discover.py` | `candidates.json`, un rapport de travail |
 | 2. Liste figée | À la main | — | `products.json` |
+| 2 bis. Produits officiels des extensions | À la demande, chaque lundi, ou si le script change | `expansions.py` | `tcg-products.json`, produits ajoutés dans `products.json` |
 | 3. Visuels | Chaque jour (seulement les manquants) | `fetch_images.py` | `web/img/products/<id>.webp` |
 | 4. Prix | Chaque jour | `build_sealed.py` | `web/data/sealed.json` |
 
@@ -55,9 +56,32 @@ Relevés du 2026-10-04 (gamme 30ᵉ Anniversaire et Règne Delta) : poketrack.fr
 
 `demo` relie les produits de la démo (p1 à m4) aux produits réels.
 
-Les displays et le booster 30ᵉ Anniversaire ne sont pas dans la galerie : ils n'ont pas de visuel officiel. L'app affiche alors le logo de l'extension.
+Les displays et le booster 30ᵉ Anniversaire ne sont pas dans la galerie. Depuis le 2026-11-15, les displays prennent le visuel officiel de tcg.pokemon.com (`expansions.py`) et le booster 30ᵉ Anniversaire celui déjà utilisé dans l'app ; sans visuel, l'app affiche le logo de l'extension.
 
 Règne Delta (6 novembre 2026, ajouté le 2026-11-08 à la demande du porteur) : ses 4 produits (Coffret Dresseur d'élite Méga-Rayquaza, display de 36 boosters, lot de 6 boosters, Boîtier Stratégies et Combats) ne sont pas encore dans la galerie. Leurs visuels viennent de l'article officiel « aperçu des produits » de pokemon.com (images de la boîte seule, au format PNG), noté dans `gallery`.
+
+### 2 bis. Produits officiels des extensions (`expansions.py`, 2026-11-15)
+
+Demande du porteur : « le visuel de tous absolument TOUS LES ITEMS par série et par extension ».
+
+- **Source :** la page officielle de chaque extension Écarlate et Violet et Méga-Évolution sur tcg.pokemon.com
+  (`https://tcg.pokemon.com/fr-fr/expansions/<extension>/`, section « Produits à l'affiche ») : nom exact et visuel
+  officiel de chaque produit (Coffret Dresseur d'élite, lot de boosters, display, Boîtier Stratégies et Combats,
+  booster sous pochette, collections). `collect` les range dans `tcg-products.json` ; une page illisible garde la liste
+  déjà connue.
+- **Fusion (`merge`) :**
+  - produit déjà au catalogue (même extension, même sorte ; pour une collection, un mot distinctif en commun) : il reçoit
+    le visuel officiel s'il n'en avait pas (les displays de Méga-Évolution à Nuit Noire) ;
+  - produit absent : ajouté avec son nom français nettoyé, sa sorte, son extension et son visuel (`imgSource`) ;
+  - prix : relié au catalogue public Cardmarket seulement si la correspondance est sûre (nom qui commence par
+    l'extension et contient la sorte : ETB, lot, display, Stratégies et Combats, booster sous pochette, Ultra-Premium ;
+    `cmAuto`). Les collections et boîtes ne sont jamais devinées : elles restent sans cote plutôt qu'avec une cote douteuse.
+- **Booster 30ᵉ Anniversaire :** son visuel est celui déjà utilisé dans l'app (`web/img/shop-booster-30-anniversaire.webp`).
+- **Produits sans extension précise** (coffrets, boîtes, decks, calendriers) : l'app les montre dans l'onglet Items de
+  chaque extension de leur série, sous « Autres items de la série » (série déduite de la date de sortie).
+- **Pas encore couvert :** les séries d'avant Écarlate et Violet (Épée et Bouclier, Soleil et Lune, XY, et avant).
+  La galerie officielle Pokémon France remonte à 2014 et pourra servir pour Épée et Bouclier, Soleil et Lune et XY ;
+  avant 2014, aucune source officielle de visuels n'est connue.
 
 ### 3. Visuels (`fetch_images.py`)
 

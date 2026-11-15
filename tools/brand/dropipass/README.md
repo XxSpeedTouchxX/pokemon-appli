@@ -1,7 +1,13 @@
-# DropiPass : logos proposés (2026-11-15)
+# DropiPass : logo (2026-11-15)
 
 « Dropicards Premium » renommé « DropiPass » par le porteur ; seul le logo change, le contenu de l'offre reste le même.
 
-- `planche.png` : les 4 propositions, chacune dans la bannière argentée (PK shop, Mon profil) et en tête de l'écran de l'offre.
-- Fichiers des logos : `web/img/brand/dropipass-1.svg` (Pass doré), `-2` (Carte holo), `-3` (Couronne éclair), `-4` (Badge D).
-- Essai dans l'app : `dropicards.fr/?dpvis=1` à `4` (1 par défaut, en attendant le choix du porteur ; `PREM_VIS` dans `tools/web/premium.js`).
+- **Choix du porteur (2026-11-15) : la carte holo arc-en-ciel (logo 2)**, avec un autre motif au centre à départager.
+- `planche-holo.png` : les 6 motifs de la carte holo (2a gemme des PK, 2b « D » de l'icône, 2c « D » doré, 2d éclair,
+  2e étoile, 2f « D » et gemme), chacun dans la bannière et en tête de l'écran de l'offre. Fichiers :
+  `web/img/brand/dropipass-2a.svg` à `2f.svg`, faits par `make_holo.py` (le « D » reprend le tracé exact de
+  `web/img/brand/monogram.svg`). Essai : `dropicards.fr/?dpvis=2a` à `2f` ; 2a par défaut en attendant le choix.
+- `planche.png` : les 4 premières propositions (1 Pass doré, 2 Carte holo, 3 Couronne éclair, 4 Badge D), encore
+  visibles avec `?dpvis=1`, `3`, `4`.
+- « Pass » : reflet brillant toutes les 3 s, seulement sur « Pass » (bannière et écran de l'offre) ; le voile qui
+  balayait tout l'en-tête de l'offre est retiré (`premium.css`, `.pkm-dp-pass`).

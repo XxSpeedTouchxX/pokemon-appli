@@ -10,9 +10,13 @@ const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.messag
 await page.goto(E2E + '/?start=market', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(800);
 const banner = page.locator('button[aria-label="Découvrir le DropiPass"]');
-ok('PK shop : bannière « DropiPass » (sans « Dès 4,16 € par mois »), logo du DropiPass (visuel 1 par défaut)', (await banner.count()) === 1 && /^DropiPass/.test((await banner.innerText()).trim()) && !/4,16/.test(await banner.innerText()) && (await banner.locator('img.pkm-prem-logo[src="img/brand/dropipass-1.svg"]').evaluate(e => e.complete && e.naturalWidth > 0)));
+ok('PK shop : bannière « DropiPass » (sans « Dès 4,16 € par mois »), carte holo du DropiPass (motif 2a par défaut)', (await banner.count()) === 1 && /^DropiPass/.test((await banner.innerText()).trim()) && !/4,16/.test(await banner.innerText()) && (await banner.locator('img.pkm-prem-logo[src="img/brand/dropipass-2a.svg"]').evaluate(e => e.complete && e.naturalWidth > 0)));
+// Reflet sur « Pass » seulement, toutes les 3 s (2026-11-15, porteur), même taille que « Dropi ».
+const passFx = await banner.locator('.pkm-dp-pass').evaluate(e => { const cs = getComputedStyle(e); return [cs.animationName, cs.animationDuration, cs.fontSize === getComputedStyle(e.parentElement).fontSize, e.textContent]; });
+ok('bannière : reflet sur « Pass » (' + passFx.slice(0, 2).join(', ') + ')', passFx[0] === 'pkmDpPass' && passFx[1] === '3s' && passFx[2] && passFx[3] === 'Pass');
 await banner.click(); await page.waitForTimeout(600);
 const sh = page.locator('section[aria-label="DropiPass"]');
+ok('écran de l’offre : plus de voile sur tout l’en-tête, reflet sur « Pass » seulement', (await sh.locator('.pkm-prem-hero .pkm-prem-shine').count()) === 0 && (await sh.locator('.pkm-prem-hero h2 .pkm-dp-pass').count()) === 1);
 const t = await sh.innerText();
 ok('icônes animées : scanner, classeur, radar, goutte des PA « 2XP », graphique', (await sh.locator('svg.pkm-prem-scan').count()) === 1 && (await sh.locator('svg.pkm-prem-bind').count()) === 1 && (await sh.locator('.pkm-prem-radar').count()) === 1
   && (await sh.locator('.pkm-prem-xp-tag').first().innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1

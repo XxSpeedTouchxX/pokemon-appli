@@ -19,6 +19,7 @@ on:
       - tools/sealed/fetch_images.py
       - tools/sealed/build_sealed.py
       - tools/sealed/products.json
+      - tools/sealed/expansions.py
 
 permissions:
   contents: write
@@ -41,6 +42,16 @@ jobs:
       - name: Produits de la galerie officielle et candidats Cardmarket
         if: github.event_name == 'workflow_dispatch' || contains(toJSON(github.event.commits), 'tools/sealed/discover.py')
         run: python3 tools/sealed/discover.py
+
+      # Produits officiels de chaque extension (tcg.pokemon.com, 2026-11-15) : à la demande, chaque lundi ou si
+      # expansions.py change. Ajoute les produits manquants, complète les visuels, relie les prix Cardmarket sûrs.
+      - name: Produits officiels des extensions (tcg.pokemon.com)
+        if: github.event_name != 'push' || contains(toJSON(github.event.commits), 'tools/sealed/expansions.py')
+        continue-on-error: true
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%u)" != "1" ]; then echo "Pas lundi : pages officielles non relues."; exit 0; fi
+          python3 tools/sealed/expansions.py collect || echo "::warning::Pages officielles illisibles : produits déjà connus gardés."
+          python3 tools/sealed/expansions.py merge --cm-url
 
       - name: Visuels des produits retenus
         run: |
@@ -65,7 +76,7 @@ jobs:
       - name: Publier sur la branche
         if: ${{ !cancelled() }}
         run: |
-          tools/publish_data.sh sealed "Met à jour le catalogue scellé ($(date -u +%Y-%m-%d))" tools/sealed/candidates.json web/img/products web/data/sealed.json web/data/status.json
+          tools/publish_data.sh sealed "Met à jour le catalogue scellé ($(date -u +%Y-%m-%d))" tools/sealed/candidates.json tools/sealed/products.json tools/sealed/tcg-products.json web/img/products web/data/sealed.json web/data/status.json
 
       - name: Échec signalé (guide refusé ou anomalie)
         if: ${{ !cancelled() && (steps.build.outcome == 'failure' || steps.check.outcome == 'failure') }}

@@ -51,6 +51,10 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
     sp.textContent = t; tile.style.width = keep; return out;
   });
   ok('carte de 79 px (écran de 320 px), « 12 345 € · NM » : ' + narrow.slice(0, 2).join(' × ') + ' px, une ligne, rien de coupé', narrow[0] <= 79 && narrow[2] && narrow[3]);
+  // Drapeau, prix, bulle et sigle bien à l'intérieur de la bulle noire (2026-11-15, porteur) : au moins 5 px de chaque côté.
+  const inner = await page.$$eval(TILE, bs => bs.slice(0, 6).map(b => { const p = b.querySelector('.pkm-pill2'), r = p.getBoundingClientRect(), k = [...p.children].map(c => c.getBoundingClientRect());
+    return Math.min(Math.min(...k.map(x => x.left)) - r.left, r.right - Math.max(...k.map(x => x.right))); }));
+  ok('pastilles : contenu bien dans la bulle (marge mini ' + Math.min(...inner).toFixed(1) + ' px)', inner.every(m => m >= 5));
   // Carte gradée (2026-11-01) : logo de l'entreprise et note, plus « PCA 9,5 » en texte.
   const gb = page.locator(TILE).first().locator('.pkm-gr-badge');
   ok('note de gradation sur Mewtwo : logo PCA et « ' + (await gb.locator('b').innerText().catch(() => '')) + ' »', (await gb.count()) === 1 && (await gb.locator('b').innerText()) === '9,5' && /pca\.png$/.test(await gb.locator('img').getAttribute('src')));

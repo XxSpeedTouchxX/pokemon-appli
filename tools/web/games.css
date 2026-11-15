@@ -791,8 +791,9 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-cond-ico { flex: none; display: block; width: 19px; height: 19px; margin: -3px -2px -3px 0; }
 /* Pastille du classeur : drapeau et cote, puis bulle et sigle de l'état, toujours sur une seule ligne (2026-10-31,
    porteur) : tout est mesuré en « em » et la taille du texte suit la largeur de la carte (10,2 % de la carte, 11 px au
-   plus, unité « cqw » : la carte est un conteneur), pour que « 12 345 € · NM » tienne même sur un écran de 320 px. */
-.pkm-pill2 { position: absolute; left: 2%; right: 2%; bottom: 6%; width: fit-content; max-width: 96%; margin: 0 auto; transform: none; box-sizing: border-box; display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 0.25em; padding: 0.3em 0.45em; border-radius: 999px; background: rgba(8, 13, 26, 0.88); color: #FFFFFF; font-size: clamp(7.5px, 10.2cqw, 11px); font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
+   plus, unité « cqw » : la carte est un conteneur), pour que « 12 345 € · NM » tienne même sur un écran de 320 px.
+   Marges intérieures élargies (2026-11-15, porteur) : drapeau et sigle bien à l'intérieur des bouts arrondis. */
+.pkm-pill2 { position: absolute; left: 2%; right: 2%; bottom: 6%; width: fit-content; max-width: 96%; margin: 0 auto; transform: none; box-sizing: border-box; display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 0.3em; padding: 0.34em 0.85em 0.34em 0.78em; border-radius: 999px; background: rgba(8, 13, 26, 0.88); color: #FFFFFF; font-size: clamp(6.6px, 9.1cqw, 10.5px); font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
 .pkm-pill2-v, .pkm-pill2-c { flex: none; display: inline-flex; align-items: center; gap: 0.25em; }
 .pkm-pill2-c { gap: 0.12em; }
 .pkm-pill2-v > span:first-child { width: 1.1em !important; height: 0.8em !important; }
@@ -1919,3 +1920,5 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 /* Onglets « Cartes » et « Items » d'une extension (2026-11-14, porteur ; à la place de Toutes, Possédées, Manquantes,
    Doublons) : même pilule que « Par type / Par série » des produits scellés. */
 .pkm-sv-tabs { flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid #2A3A5C; background: #111A2C; }
+/* Onglet Items d'une extension : « Autres items de la série » (2026-11-15, porteur). */
+.pkm-sv-others-h { flex: none; margin: 10px 0 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--pkm-t1); }

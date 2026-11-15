@@ -118,6 +118,9 @@ await page.locator('[role="tab"]:has-text("Items (")').click(); await page.waitF
 const itemTiles = await page.locator('main .pkm-sv-items article').count(), nItems = +(/Items \((\d+)\)/.exec(svTabs[1]) || [0, -1])[1];
 ok('onglet Items : ' + itemTiles + ' produits scellés de l’extension (+ Ajouter, Détails), cartes cachées', itemTiles === nItems && itemTiles > 0 && (await page.locator('main .pkm-sv-grid').count()) === 0
   && (await page.locator('main .pkm-sv-items article').first().innerText()).includes('Détails'));
+// Autres items de la série (2026-11-15, porteur) : produits sans extension précise, sous les items de l'extension.
+const othersH = await page.locator('main .pkm-sv-others-h').count() ? await page.locator('main .pkm-sv-others-h').innerText() : '';
+ok('« Autres items de la série » : ' + (othersH || 'aucun') + ' (' + await page.locator('main .pkm-sv-others article').count() + ' produits)', !othersH || /^Autres items de la série /.test(othersH));
 await page.screenshot({ path: shot('series-items.png') });
 await page.locator('[role="tab"]:has-text("Cartes (")').click(); await page.waitForTimeout(400);
 ok('retour à l’onglet Cartes', (await page.locator('main .pkm-sv-grid').count()) === 1);

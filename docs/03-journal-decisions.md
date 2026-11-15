@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-15 — DropiPass en carte holo, reflet sur « Pass », items de chaque extension, pré-gradation au premier écran, pastilles du classeur (porteur)
+
+- **DropiPass** (cache v212) : le porteur choisit la **carte holo arc-en-ciel (logo 2)** et demande d'autres motifs au centre. **6 motifs proposés** (2a gemme des PK, 2b « D » de l'icône Dropicards, 2c « D » doré, 2d éclair, 2e étoile, 2f « D » et gemme ; planche `tools/brand/dropipass/planche-holo.png`, essai `?dpvis=2a` à `2f`) : **choix du porteur attendu**, 2a affiché en attendant.
+- **« Pass »** : reflet brillant toutes les 3 s, seulement sur « Pass », dans la bannière et l'écran de l'offre ; le voile qui balayait tout l'en-tête de l'écran de l'offre est retiré. La bannière garde son reflet d'origine (pas demandé de le retirer).
+- **Items de chaque extension** : revue complète demandée (« tous absolument TOUS LES ITEMS par série et par extension », ex. booster 30 ans sans visuel).
+  - Fait : visuel du booster 30ᵉ Anniversaire ; visuels officiels des 5 displays de Méga-Évolution à Nuit Noire ; 33 produits officiels ajoutés (Écarlate et Violet et Méga-Évolution : ETB, lots, displays, Stratégies et Combats, boosters sous pochette, collections) d'après les pages officielles tcg.pokemon.com (`tools/sealed/expansions.py`) ; « Autres items de la série » dans l'onglet Items (25 produits sans extension précise, rangés par date de sortie).
+  - Le workflow « Catalogue scellé » lit les pages encore manquantes (Règne Delta, 30 ans, Écarlate et Violet à Étincelles Déferlantes), télécharge les visuels et relie les prix Cardmarket seulement quand la correspondance est sûre ; il repasse chaque lundi.
+  - Pas encore couvert : les séries d'avant Écarlate et Violet. Épée et Bouclier, Soleil et Lune et XY peuvent venir de la galerie officielle Pokémon France (depuis 2014) ; avant 2014, aucune source officielle de visuels connue (les visuels de Cardmarket demanderaient un téléchargement en masse depuis une marketplace, exclu par la règle du projet).
+- **Premier écran** : ligne « Une pré-gradation de ta carte pour avoir une tendance globale sur l'état de ta carte selon chaque entreprise de gradation », avec le logo de la pré-gradation, entre le Radar et l'estimation du prix.
+- **Classeur** : pastille drapeau + prix + état élargie à l'intérieur (au moins 5 px de chaque côté, texte un peu plus petit), plus rien ne touche les bouts arrondis.
+
+---
+
 ## 2026-11-15 — Apparence en 3 modes, « DropiPass », Réglages allégés, Notifications, suppression du compte, extensions Cartes / Items (porteur)
 
 - **Apparence** (cache v211) : Réglages › Apparence propose **Sombre** (gris anthracite, cartes grises, accent jaune), **Clair** (fond blanc et bleu, cartes bleu nuit) et **Original** (le jaune Dropicards). **Sombre par défaut**, pour les nouveaux comme pour ceux qui n'avaient rien choisi ; ceux qui avaient choisi l'ancien « Clair » (le jaune) gardent le jaune, sous le nom « Original ». Un compagnon à thème (Kyogre, Groudon, Rayquaza) garde son fond. Contraste des textes vérifié dans les 3 modes (9 textes corrigés sur le gris : vert « Forte » du Radar, « Grade obtenu », textes de la pré-gradation et des annonces).

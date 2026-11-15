@@ -78,6 +78,14 @@
     const pct = all.length ? Math.round(mine.length / all.length * 100) : 0;
     // Items de l'extension : produits scellés rattachés à cette extension (setId), le plus récent d'abord.
     const items = top || SEALED.status !== 'ready' ? [] : SEALED.list().filter(p => p.setId === e.id).sort((a, b) => (relKey(a) < relKey(b) ? 1 : relKey(a) > relKey(b) ? -1 : 0));
+    // Autres items de la série (2026-11-15, porteur : « tous les items par série et par extension ») : produits sans
+    // extension précise (coffrets, boîtes, decks, calendriers…) sortis pendant la série de l'extension (de la première
+    // sortie de la série à celle de la série suivante).
+    const serStart = {};
+    TCG.setList.forEach(z => { if (z.serie && z.date && (!serStart[z.serie] || z.date < serStart[z.serie])) serStart[z.serie] = z.date; });
+    const serieAt = d => Object.keys(serStart).filter(k => serStart[k] <= d).sort((a, b) => (serStart[a] < serStart[b] ? 1 : -1))[0] || '';
+    const others = top || !e.serie || SEALED.status !== 'ready' ? [] : SEALED.list().filter(p => !p.setId && serieAt(relKey(p)) === e.serie)
+      .sort((a, b) => (relKey(a) < relKey(b) ? 1 : relKey(a) > relKey(b) ? -1 : 0));
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
     return Object.assign({}, base, {
       v2: true,
@@ -85,10 +93,13 @@
       setFlag: top ? '' : this.flag(e.lang === 'EN' ? 'EN' : 'FR'), hasDate: !top,
       hasProg: true, progText: mine.length + ' / ' + plural(all.length, 'carte possédée', 'cartes possédées'), pct: pct + ' %', progW: pct + '%',
       progLabel: mine.length + ' cartes possédées sur ' + all.length + ', ' + pct + ' pour cent',
-      tabs: SV_TABS.map(([k, label]) => Object.assign({ label: label + ' (' + (k === 'items' ? items.length : all.length) + ')', on: tab === k,
+      tabs: SV_TABS.map(([k, label]) => Object.assign({ label: label + ' (' + (k === 'items' ? items.length + others.length : all.length) + ')', on: tab === k,
         pick: () => this.setState({ setFilter: k }) }, this.chip(tab === k))),
       hasTabs: !top, onCards: tab === 'cards', onItems: tab === 'items',
-      items: tab === 'items' ? items.map(p => this.slTile(p, c)) : [], itemsEmpty: tab === 'items' && !items.length,
+      items: tab === 'items' ? items.map(p => this.slTile(p, c)) : [], itemsEmpty: tab === 'items' && !items.length && !others.length,
+      hasOthers: tab === 'items' && others.length > 0, others: tab === 'items' ? others.map(p => this.slTile(p, c)) : [],
+      othersTitle: 'Autres items de la série ' + (e && e.serie || ''),
+      othersNote: plural(others.length, 'produit', 'produits') + ' de la série, sans extension précise',
       itemsCount: items.length ? plural(items.length, 'produit', 'produits') + ' · du plus récent au plus ancien' : '',
       itemsNote: SEALED.status === 'ready' ? 'Pas d’items sortis pour cette extension.' : 'Chargement des produits scellés…',
       sizes: SV_SIZES.map(([k, label]) => ({ label: label, on: size[0] === k, cls: 'pkm-sv-size' + (size[0] === k ? ' pkm-sv-size-on' : ''), pick: () => this.setState({ setSize: k }) })),

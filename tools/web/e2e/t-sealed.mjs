@@ -24,7 +24,9 @@ await page.waitForTimeout(400);
 await page.screenshot({ path: shot('sealed-2-grille.png') });
 await page.click('[aria-label="Type de produit"] button:has-text("ETB")');
 const etb = await page.locator(TILE).count();
-ok('filtre ETB : ' + etb, etb === 8);
+// Autant d'ETB que dans le catalogue du jour (8 jusqu'au 2026-11-15, puis les ETB officiels de chaque extension).
+const etbData = JSON.parse(readDay(ROOT + 'web/data/sealed.json', 'utf8')), etbWant = etbData.products.filter(r => r[etbData.fields.indexOf('type')] === 'ETB').length;
+ok('filtre ETB : ' + etb + ' sur ' + etbWant + ' au catalogue', etb === etbWant && etb >= 14);
 ok('ETB Règne Delta : sortie à venir, pas de « + Ajouter »', /Sortie le/.test(await page.locator(TILE + ':has-text("Règne Delta")').first().innerText()) && (await page.locator(TILE + ':has-text("Règne Delta") button:has-text("+ Ajouter")').count()) === 0);
 await page.screenshot({ path: shot('sealed-3-etb.png') });
 // Par série : séries et extensions avec logo ; une extension ouvre ses produits.

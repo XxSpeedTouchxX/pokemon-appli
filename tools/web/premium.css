@@ -115,3 +115,10 @@
 /* Logo du DropiPass (2026-11-15) : 4 visuels proposés (img/brand/dropipass-N.svg, ?dpvis=N), à la place de la couronne. */
 .pkm-prem-logo { width: 88%; height: 88%; object-fit: contain; overflow: visible; filter: drop-shadow(0 2px 3px rgba(60, 30, 0, 0.35)); }
 .pkm-prem-crown-xl .pkm-prem-logo { width: 86%; height: 86%; }
+/* « Pass » de DropiPass (2026-11-15, porteur) : un reflet brillant passe seulement sur « Pass », toutes les 3 s
+   (bannière et écran de l'offre) ; le voile qui balayait tout l'en-tête de l'offre est retiré. */
+.pkm-dp-pass { display: inline-block; background-image: linear-gradient(105deg, var(--dp-base) 0%, var(--dp-base) 38%, var(--dp-glint) 50%, var(--dp-base) 62%, var(--dp-base) 100%); background-size: 260% 100%; background-position: 120% 0; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; animation: pkmDpPass 3s ease-in-out infinite; }
+.pkm-prem-btxt .pkm-dp-pass { --dp-base: #10151F; --dp-glint: #FFE46B; font-size: inherit; line-height: inherit; color: transparent; }
+.pkm-prem-hero h2 em.pkm-dp-pass { --dp-base: #FFD60A; --dp-glint: #FFFFFF; background-image: linear-gradient(105deg, #FFE46B 0%, #FFD60A 30%, #FFFFFF 50%, #FFD60A 70%, #FFB000 100%); }
+@keyframes pkmDpPass { 0%, 50% { background-position: 120% 0; } 80%, 100% { background-position: -20% 0; } }
+@media (prefers-reduced-motion: reduce) { .pkm-dp-pass { animation: none; background-position: 50% 0; } }
