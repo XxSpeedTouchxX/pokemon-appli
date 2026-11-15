@@ -6,6 +6,32 @@
 
 ---
 
+## 2026-11-15 — Bannière du DropiPass, sons du coffre (2ᵉ série), zoom bloqué, réponse sur les pubs (porteur)
+
+- **Bannière du DropiPass** (PK shop, Mon profil) : texte du porteur, orthographe revue : « Scans illimités, double XP de PK et PA, Radar des boutiques, pré-gradation des cartes et plein d'autres avantages… ».
+  - **Décalage signalé** : aujourd'hui le DropiPass double les PA en permanence, mais les PK seulement pendant les 30 premiers jours (2XP PK offert au 1ᵉʳ abonnement, `018`). La bannière promet donc plus que l'offre et les CGV.
+  - À trancher par le porteur : 2XP PK permanent pour les abonnés (changement du serveur, coût des lots à revoir, `docs/27` le jugeait déficitaire), ou texte ajusté. Sans risque immédiat : les achats sont réservés aux admins (`NOBUY_ON`).
+- **Coffre mystère : 2ᵉ série de 5 sons, tous doux** (`sfx.js`, `?soncoffre=6` à `10`), dans l'esprit des sons déjà choisis par le porteur :
+  - 6 « Clochette du coffre » (comme le déblocage) ;
+  - 7 « Gouttes d'aura du coffre » (comme les PA du jour) ;
+  - 8 « Boîte à musique » ;
+  - 9 « Pop tout simple » ;
+  - 10 « Bulles douces » (comme la voix du didacticiel).
+  - Crêtes à −6,5 dBFS ; toujours aucun son par défaut, **choix du porteur attendu** ; échantillons MP3 envoyés. Test `t-sfsfx.mjs`.
+- **Zoom de l'app bloqué** (porteur : « empêche la possibilité de zoomer ou dézoomer l'appli ») :
+  - balise viewport `maximum-scale=1, user-scalable=no` (Android, et pas de zoom automatique sur un champ de saisie iPhone) ;
+  - `touch-action: pan-x pan-y` sur la page (ni pincement ni double appui) ;
+  - `nav.js` : gestes de zoom de Safari (`gesturestart`…), pincement de la page et Ctrl + molette annulés.
+  - La carte du Radar et le pincement de l'avatar gardent leurs gestes. Test `t-nav.mjs`.
+- **Pubs cliquées : réponse au porteur** (rien de codé) :
+  - gagner de l'argent avec des pubs est possible, mais demander, inciter ou récompenser les clics est interdit par Google (règlement AdSense, « Encouraging clicks or views ») et fait fermer le compte avec les gains retenus ;
+  - seul format récompensé autorisé : la **vidéo récompensée** (AdMob dans l'app Android, Google Ad Manager sur le site) ;
+  - ordre de grandeur en France : environ 4 à 10 € pour 1 000 vidéos vues, moins de 1 € pour 1 000 bandeaux affichés ;
+  - **« go » attendu** pour une proposition chiffrée.
+- Cache v225.
+
+---
+
 ## 2026-11-15 — 30ᵉ Anniversaire : description retirée (porteur)
 
 - Sous l'en-tête de la série 30 ans, le paragraphe « Dont 30 cartes de la Collection Classique : des réimpressions… » (suivi de « 3 visuels viennent de la version anglaise… ») est **supprimé** (porteur : « ça ne sert à rien »).

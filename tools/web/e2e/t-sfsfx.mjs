@@ -28,8 +28,9 @@ const loss = await page.evaluate(() => window.__pkm.sfxRender([['loss', '']], 1.
 lv.push(['perte', db(loss.peak)]);
 ok('niveaux (crête, dBFS) : ' + lv.map(x => x.join(' ')).join(' · '), lv.every(([, p]) => p <= -5 && p >= -12));
 // Coffre mystère (2026-11-14, porteur : « propose-moi plusieurs sons pour l'ouverture de coffre mystère ») : 5 propositions,
+// puis 5 sons doux le 2026-11-15 (6 à 10, même porteur, même demande),
 // arrivée + ouverture (petit lot et légendaire), crête entre −12 et −3 dBFS.
-ok('sons du coffre : ' + L.chest.map(x => x.name).join(', ') + ' (par défaut : ' + L.chestDef + ')', L.chest.length === 5 && L.chestDef === null);
+ok('sons du coffre : ' + L.chest.map(x => x.name).join(', ') + ' (par défaut : ' + L.chestDef + ')', L.chest.length === 10 && L.chestDef === null);
 const lc = [];
 for (const x of L.chest) for (const n of [1, 3]) {
   const r = await page.evaluate(([id, n]) => window.__pkm.sfxRender([['chest', id, n]], 4.4).then(v => ({ peak: v.peak, rms: v.rms })), [x.id, n]);

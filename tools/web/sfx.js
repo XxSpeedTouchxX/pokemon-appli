@@ -660,6 +660,9 @@
     sfxEnv(g, at, dur * 0.3, vol, dur);
     o.connect(fl); fl.connect(g); g.connect(out); o.start(at); o.stop(at + dur + 0.05);
   };
+  // Goutte d'eau (« ploc ») et bulle qui éclôt (« bloop »), pour la 2ᵉ série de sons du coffre (doux, sous 2 500 Hz).
+  const sfxChDrop = (ac, out, f, at, vol) => { sfxTone(ac, out, 'sine', f * 1.6, at, 0.09, vol, 0.002, f * 0.7); sfxTone(ac, out, 'sine', f * 2.4, at + 0.012, 0.05, vol * 0.3, 0.002, f * 1.2); };
+  const sfxChBubble = (ac, out, f, at, vol) => sfxTone(ac, out, 'sine', f, at, 0.1, vol, 0.006, f * 1.9);
   // Pièces qui tintent : petites cloches très aiguës et brèves, « au hasard » mais toujours les mêmes.
   const sfxCoins = (ac, out, from, to, k, vol) => { for (let i = 0; i < k; i++) { const u = ((i * 7919) % 97) / 97, w = ((i * 104729) % 89) / 89; sfxBell(ac, out, 2900 + w * 1900, from + (to - from) * (i + u * 0.7) / k, 0.22, vol * (0.55 + 0.45 * u), [1, 1.53, 2.37], [1, 0.45, 0.2]); } };
   const SFX_CHEST = [
@@ -706,10 +709,50 @@
         sfxCreak(ac, out, t0, 0.38, 0.08);
         sfxCoins(ac, out, t0 + SFX_CH_FLASH, t0 + SFX_CH_FLASH + (n > 2 ? 1.1 : 0.7), n > 2 ? 26 : 16, 0.03);
         sfxBell(ac, out, sfxHz(n > 1 ? 24 : 19), t0 + SFX_CH_COUNT, 1.0, 0.06, [1, 2.0, 3.0], [1, 0.3, 0.1]);
+      } },
+    // 2ᵉ série (2026-11-15, porteur : « propose-moi des bruits d'ouverture de coffre mystère ») : 5 sons doux, dans
+    // l'esprit des sons déjà choisis par le porteur (« Clochette » du déblocage, « Gouttes d'aura » des PA, « Déchirure
+    // douce » du booster, voix « Bulles douces ») : coups feutrés, « pop » rond, notes de sinus ou de boîte à musique,
+    // rien de criard ; ?soncoffre=6 à 10.
+    { id: 'clochette', name: 'Clochette du coffre', desc: 'Comme le son du déblocage d’un Pokémon que tu as choisi : de petits coups feutrés quand le coffre se pose, un « clic » doux, un « pop » rond, puis la clochette qui sonne deux fois (trois pour un légendaire).',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxThump(ac, out, t0 + d, i ? 0.16 : 0.24, 170, 80, 0.12)),
+      open: (ac, out, t0, n) => {
+        sfxSoftClick(ac, out, t0 + 0.08, 0.26);
+        sfxPop(ac, out, t0 + SFX_CH_FLASH, 0.3);
+        [0.1, 0.32].concat(n > 2 ? [0.56] : []).forEach((d, i) => sfxBell(ac, out, sfxHz([19, 22, 27][i]), t0 + SFX_CH_FLASH + d, 1.0, 0.05, [1, 2.0], [1, 0.15]));
+      } },
+    { id: 'gouttes', name: 'Gouttes d’aura du coffre', desc: 'Comme le son des PA du jour que tu as choisi : un « ploc » d’eau à chaque rebond, un souffle feutré pendant que le coffre se tasse, puis des gouttes qui montent et un reflet d’eau. Plus de gouttes pour un gros lot.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxChDrop(ac, out, 460 + i * 70, t0 + d, i ? 0.13 : 0.18)),
+      open: (ac, out, t0, n) => {
+        sfxSoftTear(ac, out, t0, SFX_CH_FLASH + 0.05, 0.07);
+        const k = [5, 7, 10][n - 1];
+        for (let i = 0; i < k; i++) sfxChDrop(ac, out, 700 + i * 60, t0 + SFX_CH_FLASH + i * 0.07, 0.11);
+        sfxBell(ac, out, sfxHz(22), t0 + SFX_CH_ITEM, 0.9, 0.035, [1, 2.0], [1, 0.2]);
+      } },
+    { id: 'boite', name: 'Boîte à musique', desc: 'De petits coups feutrés, un « clic » doux quand le coffre s’ouvre, puis un air de boîte à musique de quelques notes, un peu plus long pour un gros lot.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxThump(ac, out, t0 + d, i ? 0.15 : 0.22, 160, 75, 0.12)),
+      open: (ac, out, t0, n) => {
+        sfxSoftClick(ac, out, t0 + 0.08, 0.24);
+        const air = [[15, 19, 22, 27], [15, 19, 22, 24, 27], [15, 19, 22, 24, 27, 31, 34]][n - 1];
+        air.forEach((d, i) => sfxTone(ac, out, 'triangle', sfxHz(d), t0 + SFX_CH_FLASH + i * 0.12, i === air.length - 1 ? 1.1 : 0.5, 0.07, 0.004));
+      } },
+    { id: 'pop', name: 'Pop tout simple', desc: 'Le plus discret : de légers coups sourds quand le coffre se pose, un « pop » rond à l’ouverture et une seule note claire quand le lot apparaît.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxThump(ac, out, t0 + d, i ? 0.12 : 0.18, 150, 70, 0.1)),
+      open: (ac, out, t0, n) => {
+        sfxPop(ac, out, t0 + SFX_CH_FLASH, 0.35);
+        sfxTone(ac, out, 'sine', sfxHz(n > 2 ? 22 : n > 1 ? 19 : 15), t0 + SFX_CH_ITEM, 0.8, 0.06, 0.01);
+      } },
+    { id: 'bulles', name: 'Bulles douces', desc: 'Comme la voix du didacticiel : une bulle à chaque rebond, une bulle qui gonfle pendant que le coffre se tasse et éclate en « pop », puis une grappe de petites bulles.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxChBubble(ac, out, 300 + i * 60, t0 + d, i ? 0.12 : 0.16)),
+      open: (ac, out, t0, n) => {
+        sfxTone(ac, out, 'sine', 170, t0, SFX_CH_FLASH, 0.06, 0.3, 480);
+        sfxPop(ac, out, t0 + SFX_CH_FLASH, 0.34);
+        const k = [4, 6, 9][n - 1];
+        for (let i = 0; i < k; i++) sfxChBubble(ac, out, 520 + ((i * 7) % 5) * 90 + i * 25, t0 + SFX_CH_FLASH + 0.1 + i * 0.075, 0.1);
       } }
   ];
   // Aucun son par défaut (2026-11-14, porteur : « pour l'instant ça ne me plaît pas, les sons proposés ») ; les 5
-  // propositions restent pour essai (?soncoffre=1 à 5).
+  // propositions restent pour essai (?soncoffre=1 à 5). 2ᵉ série douce le 2026-11-15 (?soncoffre=6 à 10), choix attendu.
   const SFX_CHEST_DEFAULT = null;
   // Perte de PK à la fin d'une partie (pa.js, pkFlyLoss) : des gouttes qui tombent de plus en plus grave, puis un coup
   // sourd et une petite note qui descend, au rythme des gemmes qui quittent le solde.
@@ -735,6 +778,7 @@
     'sf-cristal-ok': 3.8, 'sf-cristal-ko': 2.2, 'sf-pop-ok': 1.45, 'sf-pop-ko': 1.6, loss: 1.26,
     // Coffre mystère (crête vers −6 dBFS, réglés sur leur rendu).
     'ch-tresor': 0.66, 'ch-magique': 1, 'ch-fanfare': 0.62, 'ch-cristal': 1.25, 'ch-pieces': 0.75,
+    'ch-clochette': 1.25, 'ch-gouttes': 2.15, 'ch-boite': 1.65, 'ch-pop': 1.07, 'ch-bulles': 1.1,
     'gr-origine': 0.55, 'gr-couronnement': 0.45, 'gr-celeste': 0.5, 'gr-trailer': 0.45, 'gr-arcade': 1.5, 'gr-tonnerre': 0.45 };
   const SFX_MUSIC_LEVEL = 0.75;
 

@@ -301,6 +301,12 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
 - **Accueil plié (2026-11-15, porteur) :** flèche en bas à droite du compagnon pour plier la courbe sous la valeur, flèche à droite de « Mon classeur » pour plier le logo, les onglets et le prix ; pliées, la valeur est suivie des 9 premières cartes ; choix gardé sur l'appareil ; titre « Mon classeur » gardé (confirmé par le porteur) ; les 2 flèches alignées l'une sous l'autre, celle du compagnon entièrement sous le Pokémon (36 px sous son image, cache v222) ; courbe pliée, bas du cadre 7 px sous la flèche (cache v223).
 - **Tri de Mon classeur (2026-11-15, porteur) :** le « i » (source des cotes) est retiré ; à sa place, un bouton de tri « Prix » (du plus cher au moins cher, par défaut) ou « Nom » (de A à Z), pour les cartes, le scellé et « Tout afficher », gardé sur l'appareil (cache v220).
 - **30ᵉ Anniversaire (2026-11-15, porteur) :** description « Dont 30 cartes de la Collection Classique… » retirée sous l'en-tête de la série (cache v224).
+- **DropiPass, coffre, zoom, pubs (2026-11-15, porteur) :**
+  - bannière du DropiPass : « Scans illimités, double XP de PK et PA, Radar des boutiques, pré-gradation des cartes et plein d'autres avantages… » ; **décalage** : le 2XP PK n'est offert que 30 jours au 1ᵉʳ abonnement, **décision du porteur attendue** ;
+  - coffre mystère : 2ᵉ série de 5 sons doux (`?soncoffre=6` à `10` : Clochette, Gouttes d'aura, Boîte à musique, Pop, Bulles), **choix attendu**, aucun son par défaut ;
+  - zoom de l'app bloqué (viewport, `touch-action`, gestes de Safari ; Radar et avatar gardent leurs pincements) ;
+  - pubs : clics demandés ou récompensés interdits par Google ; vidéo récompensée seulement, **« go » attendu** pour une proposition ;
+  - cache v225.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

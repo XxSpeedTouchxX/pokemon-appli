@@ -1988,3 +1988,8 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-fold-btn svg { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .pkm-fold-btn[aria-expanded="false"] svg { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .pkm-fold, .pkm-fold-btn svg { transition: none; } }
+
+/* Pas de zoom de l'app (2026-11-15, porteur : « empêche la possibilité de zoomer ou dézoomer l'appli ») : ni pincement
+   à deux doigts ni double appui sur la page ; les gestes de l'app (carte du Radar, pincement de l'avatar) restent, car
+   ils sont gérés par l'app elle-même. Avec la balise viewport (Android) et nav.js (iPhone : gestes de zoom de Safari). */
+html, body { touch-action: pan-x pan-y; }

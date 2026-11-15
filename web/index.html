@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#FFD60A">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2247,6 +2247,11 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 .pkm-fold-btn[aria-expanded="false"] svg { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .pkm-fold, .pkm-fold-btn svg { transition: none; } }
 
+/* Pas de zoom de l'app (2026-11-15, porteur : « empêche la possibilité de zoomer ou dézoomer l'appli ») : ni pincement
+   à deux doigts ni double appui sur la page ; les gestes de l'app (carte du Radar, pincement de l'avatar) restent, car
+   ils sont gérés par l'app elle-même. Avec la balise viewport (Android) et nav.js (iPhone : gestes de zoom de Safari). */
+html, body { touch-action: pan-x pan-y; }
+
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
    de PA sur celui de droite. Puis l'écran « Route d'évolution » d'après la « Digivolution Route » de Digimon World Dusk
@@ -3908,6 +3913,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=ce27734b"></script>
+<script src="app.js?v=79b5a50f"></script>
 </body>
 </html>

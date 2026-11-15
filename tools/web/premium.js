@@ -161,7 +161,9 @@
     }
     r.prem = {
       logo: PREM_LOGO, logoCls: 'pkm-prem-logo pkm-prem-logo-' + PREM_VIS,
-      banner: { title: PREM_NAME, text: on ? 'DropiPass actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP sur tes PA, Radar et historique complet.', open: () => this.premOpen() },
+      // Texte du porteur (2026-11-15) : « Scans illimités, double XP de PK et PA, radar de boutiques, pré-gradation des
+      // cartes et plein d'autres avantages… ».
+      banner: { title: PREM_NAME, text: on ? 'DropiPass actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP de PK et PA, Radar des boutiques, pré-gradation des cartes et plein d’autres avantages…', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.premClose(),
       perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isPg: p.kind === 'pg', hasProto: !!p.proto, isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isHeart: p.kind === 'heart', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
       buy: !on, isOn: on,

@@ -8,6 +8,17 @@
   // - Bouton Retour du téléphone (Android, app installée, geste retour d'iOS) : il revient à l'écran précédent au
   //   lieu de fermer l'app (historique du navigateur) ; il ferme d'abord le zoom ou la fiche ouverte.
   const NAV = { dir: '', lastKey: '', scroll: {}, guard: false, ignore: 0, inst: null, snap: null, from: 0 };
+  // Pas de zoom de l'app (2026-11-15, porteur) : Safari (iPhone) ignore « user-scalable=no » ; on bloque ses gestes de
+  // zoom (gesturestart…), le pincement de la page (touchmove à deux doigts dont l'échelle change) et, sur ordinateur,
+  // le zoom au pavé tactile (molette avec Ctrl). Les gestes de l'app (carte du Radar, avatar) ont leurs propres
+  // écouteurs, appelés avant celui-ci : ils continuent de marcher.
+  if (typeof document !== 'undefined' && !window.__pkmNoZoom) {
+    window.__pkmNoZoom = true;
+    const noZoom = e => { if (e.cancelable) e.preventDefault(); };
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, noZoom, { passive: false }));
+    document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1 && typeof e.scale === 'number' && e.scale !== 1) noZoom(e); }, { passive: false });
+    document.addEventListener('wheel', e => { if (e.ctrlKey) noZoom(e); }, { passive: false });
+  }
   // Clé d'une page : l'écran et ce qu'il montre (l'identifiant d'une carte reste dans l'état après sa fiche).
   // Pré-gradation (2026-11-14) : chaque étape (recto, verso, analyse, résultat, liste) glisse comme une page.
   const NAV_ID = { set: 'setId', item: 'itemId', store: 'storeId', shop: 'shopId', sale: 'saleId', grade: 'gradeIx', pregrade: 'pgStep' };

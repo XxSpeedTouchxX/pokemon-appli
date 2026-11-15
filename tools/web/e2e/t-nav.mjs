@@ -50,6 +50,18 @@ await page.goBack(); await page.waitForTimeout(900);
 ok('bouton Retour du téléphone : ferme la fiche, l’extension reste à sa place', (await FI.count()) === 0 && (await page.locator('header h1').innerText()) === setTitle && Math.abs((await top()) - kept) < 8);
 await page.goBack(); await page.waitForTimeout(900);
 ok('second retour : quitte l’extension', (await page.locator('text=Série complète').count()) === 0);
+// Pas de zoom de l'app (2026-11-15, porteur) : balise viewport, pincement et double appui bloqués sur la page, gestes de
+// zoom de Safari (gesturestart) et Ctrl + molette annulés ; un glissement à un doigt reste permis.
+const zoom = await page.evaluate(() => {
+  const vp = document.querySelector('meta[name="viewport"]').getAttribute('content');
+  const ev = (type, init) => { const e = new Event(type, Object.assign({ bubbles: true, cancelable: true }, init)); document.body.dispatchEvent(e); return e.defaultPrevented; };
+  const wheel = new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -50 }); document.body.dispatchEvent(wheel);
+  const wheel2 = new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 50 }); document.body.dispatchEvent(wheel2);
+  return { vp: vp, ta: getComputedStyle(document.documentElement).touchAction, tb: getComputedStyle(document.body).touchAction,
+    gesture: ev('gesturestart') && ev('gesturechange'), ctrlWheel: wheel.defaultPrevented, wheel: wheel2.defaultPrevented };
+});
+ok('pas de zoom : ' + JSON.stringify(zoom), /maximum-scale=1/.test(zoom.vp) && /user-scalable=no/.test(zoom.vp) && zoom.ta === 'pan-x pan-y' && zoom.tb === 'pan-x pan-y'
+  && zoom.gesture && zoom.ctrlWheel && !zoom.wheel);
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();
