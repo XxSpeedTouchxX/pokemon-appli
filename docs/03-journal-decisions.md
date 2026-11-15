@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-11-15 — Cartes des tirages modifiables même déjà choisies (porteur)
+
+- **Question du porteur** : « que veut dire "Des joueurs ont déjà choisi cette carte" ? Je ne peux pas changer les cartes des tickets, c'est normal ? »
+  - Oui, c'était voulu par le script `018` : une carte choisie par un joueur ne pouvait plus être retirée, pour ne pas lui retirer sa carte.
+  - Le porteur demande de pouvoir la changer quand même.
+- **Serveur `030_tirages_cartes.sql`** (**à installer par le porteur**, un seul fichier à coller dans Studio) :
+  - un admin retire n'importe quelle carte d'un tirage à venir ;
+  - les tickets qui l'avaient choisie restent valables (rien de perdu ni de remboursé) : leur carte est effacée et le joueur en rechoisit une parmi celles du tirage (`ticket_choose`) ;
+  - chaque retrait est inscrit au journal des admins, avec le nombre de tickets à rechoisir ;
+  - les participants (`admin_draw_entries`) affichent « Carte à rechoisir ». 19 tests (`tests/test_030.sql`).
+- **App** (cache v227) :
+  - Panneau Admin › « Cartes des tirages » : « Retirer » sur une carte choisie affiche « N joueurs ont choisi cette carte : ils garderont leur ticket et devront en choisir une autre », puis « Confirmer » (rouge) ou « Garder la carte » ;
+  - sans `030` sur le serveur, un message dit de coller le script dans Studio ;
+  - côté joueur : ticket « Carte à rechoisir » dans le PK shop ; dans sa fiche, « La carte que tu avais choisie a été retirée… Ton ticket reste valable », puis « Choisir « … » » ;
+  - test `t-cloud.mjs`.
+- **Défaut à confirmer** : un joueur qui n'a pas rechoisi avant le tirage participe quand même ; s'il gagne, l'admin lui fait choisir une carte du tirage.
+
+---
+
 ## 2026-11-15 — Bannière du DropiPass, sons du coffre (2ᵉ série), zoom bloqué, réponse sur les pubs (porteur)
 
 - **Bannière du DropiPass** (PK shop, Mon profil) : texte du porteur, orthographe revue : « Scans illimités, double XP de PK et PA, Radar des boutiques, pré-gradation des cartes et plein d'autres avantages… ».

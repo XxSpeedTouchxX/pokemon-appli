@@ -1188,8 +1188,8 @@
 <sc-if value="{{ adm.prz.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-admz-empty">{{ adm.prz.emptyText }}</p></sc-if>
 <sc-if value="{{ adm.prz.hasList }}" hint-placeholder-val="{{ false }}"><ul class="pkm-admz-list"><sc-for list="{{ adm.prz.list }}" as="azl" hint-placeholder-count="2"><li>
 <sc-if value="{{ azl.hasImg }}" hint-placeholder-val="{{ false }}"><img src="{{ azl.img }}" alt="" loading="lazy"></sc-if>
-<span><b>{{ azl.name }}</b><small>{{ azl.info }}</small><small>{{ azl.n }}</small></span>
-<button type="button" onClick="{{ azl.remove }}" aria-label="{{ azl.removeAria }}" class="pkm-admz-x">Retirer</button></li></sc-for></ul></sc-if>
+<span><b>{{ azl.name }}</b><small>{{ azl.info }}</small><small>{{ azl.n }}</small><sc-if value="{{ azl.warn }}" hint-placeholder-val="{{ false }}"><small role="alert" class="pkm-admz-warn">{{ azl.warnText }}</small><button type="button" onClick="{{ azl.cancel }}" class="pkm-admz-keep">Garder la carte</button></sc-if></span>
+<button type="button" onClick="{{ azl.remove }}" aria-label="{{ azl.removeAria }}" class="{{ azl.rmCls }}">{{ azl.rmLabel }}</button></li></sc-for></ul></sc-if>
 <input type="search" aria-label="Chercher une carte du catalogue" placeholder="Dracaufeu, 151, 199…" value="{{ adm.prz.q }}" onInput="{{ adm.prz.onQ }}" class="pkm-admz-q">
 <button type="button" onClick="{{ adm.prz.toggleAll }}" aria-pressed="{{ adm.prz.all }}" class="pkm-admz-chip">{{ adm.prz.allLabel }}</button>
 <sc-if value="{{ adm.prz.hasStatus }}" hint-placeholder-val="{{ true }}"><p class="pkm-admz-empty">{{ adm.prz.status }}</p></sc-if>
@@ -1900,6 +1900,9 @@
 <p class="pkm-tks-note">{{ pks.sheet.note }}</p>
 <sc-if value="{{ pks.sheet.owned }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-tks-owned">{{ pks.sheet.ownedText }}</p></sc-if>
 <sc-if value="{{ pks.sheet.locked }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pks.sheet.lock }}" class="pkm-shop-lockbtn"><img src="{{ pks.sheet.lockImg }}" alt="" width="30" height="30"><span>{{ pks.sheet.lockLabel }}</span><i class="pkm-lock-pad" aria-hidden="true"></i></button></sc-if>
+<sc-if value="{{ pks.sheet.redo }}" hint-placeholder-val="{{ false }}"><div role="alert" class="pkm-tks-redo"><b>{{ pks.sheet.redoTitle }}</b>
+<sc-if value="{{ pks.sheet.redoNeed }}" hint-placeholder-val="{{ false }}"><button type="button" aria-disabled="true" class="pkm-tks-buy pkm-tks-buy-off">{{ pks.sheet.redoNeedText }}</button></sc-if>
+<sc-if value="{{ pks.sheet.redoCan }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pks.sheet.redoGo }}" class="pkm-tks-buy">{{ pks.sheet.redoLabel }}</button></sc-if></div></sc-if>
 <sc-if value="{{ pks.sheet.bought }}" hint-placeholder-val="{{ false }}"><div class="pkm-lotwait pkm-lotwait-ok"><b class="pkm-tks-boughttag">✓ {{ pks.sheet.boughtTitle }}</b><span>{{ pks.sheet.boughtText }}</span>
 <div class="pkm-cdx" data-end="{{ pks.sheet.boughtCd.end }}" role="timer" aria-label="{{ pks.sheet.boughtCd.aria }}"><span><b data-u="d">{{ pks.sheet.boughtCd.d }}</b><small>j</small></span><i>:</i><span><b data-u="h">{{ pks.sheet.boughtCd.h }}</b><small>h</small></span><i>:</i><span><b data-u="m">{{ pks.sheet.boughtCd.m }}</b><small>min</small></span><i>:</i><span><b data-u="s">{{ pks.sheet.boughtCd.s }}</b><small>s</small></span></div></div></sc-if>
 <sc-if value="{{ pks.sheet.miss }}" hint-placeholder-val="{{ false }}"><p class="pkm-tks-miss">{{ pks.sheet.missText }}</p></sc-if>

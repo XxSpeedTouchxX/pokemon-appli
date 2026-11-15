@@ -172,7 +172,17 @@
   };
   // Un ticket par catégorie et par tirage (2026-11-09, porteur : « on pourra acheter qu'un ticket de chaque catégorie
   // par mois ») : nombre de tickets de ce joueur pour le prochain tirage.
-  shopProto.shopBought = function (s, item) { const m = this.shopMine(s, item); return Object.keys(m).reduce((t, k) => t + (m[k] | 0), 0); };
+  shopProto.shopBought = function (s, item) { const m = this.shopMine(s, item); return Object.keys(m).reduce((t, k) => t + (m[k] | 0), 0) + (this.shopRedo(s, item) ? 1 : 0); };
+  // Ticket du prochain tirage dont la carte a été retirée par un admin (2026-11-15, porteur : « laisse-moi changer les
+  // cartes proposées même si des joueurs ont choisi des tickets », serveur 030) : le ticket reste valable, le joueur
+  // rechoisit une carte du tirage (ticket_choose).
+  shopProto.shopRedo = function (s, item) { return shopCloud(s) && Array.isArray(s.cloudShop.redo) && s.cloudShop.redo.indexOf(item) >= 0; };
+  shopProto.shopRechoose = function (item, card) {
+    if (!shopOnline() || !card) return;
+    Cloud.rpc('ticket_choose', { item_id: item, card: card.id })
+      .then(() => { this.setState({ toast: 'Carte choisie : ' + card.name + '. Ton ticket participe au tirage.', shopCard: null }); this.shopSync(); },
+        e => this.setState({ toast: (e && e.message) || 'Choix impossible pour le moment' }));
+  };
   // Stock restant d'un achat direct.
   shopProto.shopStock = function (s, id) {
     const lim = SHOP_STOCK[id];
@@ -381,6 +391,7 @@
     const sheet = (() => {
       if (!cur) return { open: false };
       const it = cur, open = gi >= it.minGrade, prizes = this.shopPrizes(s, it.id), mine = this.shopMine(s, it.id), bought = this.shopBought(s, it.id) > 0; // aussi pour un admin (2026-11-13, porteur)
+      const redo = this.shopRedo(s, it.id), choosing = !bought || redo;
       const pick = prizes.find(c => c.id === s.shopCard) || (prizes.length === 1 ? prizes[0] : null);
       const can = open && !bought && pk >= it.price && !!pick, ask = can && s.shopAsk === it.id;
       const price = it.price.toLocaleString('fr-FR') + ' PK';
@@ -395,7 +406,8 @@
         use: 'Ce ticket te donne une chance de gagner la carte que tu as choisie ci-dessus, au tirage du ' + draw + '. Un seul ticket par catégorie et par mois, un seul gagnant par tirage. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit sa carte chez lui, après vérification de son identité.',
         // Cartes à gagner ce mois-ci.
         cardsHead: prizes.length > 1 ? 'Choisis ta carte' : 'La carte à gagner',
-        cardsSub: bought ? 'Ton ticket du mois participe au tirage de la carte marquée « Ton choix ».' : prizes.length > 1 ? 'Touche la carte que tu veux gagner, puis achète ton ticket. Un seul ticket par mois : choisis bien !' : 'Ton ticket participe au tirage de cette carte.',
+        cardsSub: redo ? 'La carte que tu avais choisie a été retirée du tirage par Dropicards. Ton ticket reste valable : choisis une autre carte.'
+          : bought ? 'Ton ticket du mois participe au tirage de la carte marquée « Ton choix ».' : prizes.length > 1 ? 'Touche la carte que tu veux gagner, puis achète ton ticket. Un seul ticket par mois : choisis bien !' : 'Ton ticket participe au tirage de cette carte.',
         hasCards: prizes.length > 0, noCards: prizes.length === 0,
         noCardsText: 'Les cartes du tirage du ' + draw + ' arrivent très bientôt. Reviens vite pour choisir la tienne !',
         // Une seule carte (2026-11-12, porteur) : plus grande, au centre, et un appui l'agrandit en plein écran. Avec
@@ -406,9 +418,9 @@
           const zoom = () => { if (v.src) this.setState({ tkZoom: { img: v.hi || v.src, name: c.name, info: c.info || '' } }); };
           return {
             name: c.name, info: c.info || '', hasInfo: !!c.info, img: v.src, srcset: v.srcset, hasImg: !!v.src, noImg: !v.src,
-            mine: m > 0, mineText: 'Ton choix', on: String(on && !bought), cls: 'pkm-tkc' + (on && !bought ? ' pkm-tkc-on' : '') + (m > 0 ? ' pkm-tkc-mine' : ''),
-            aria: c.name + (c.info ? ', ' + c.info : '') + (m ? ', ton ticket du mois' : '') + (on && !bought ? ', choisie' : '') + (one ? ' · toucher pour agrandir' : ''),
-            pick: () => { if (!bought) this.setState({ shopCard: c.id, shopAsk: null }); if (one) zoom(); },
+            mine: m > 0, mineText: 'Ton choix', on: String(on && choosing), cls: 'pkm-tkc' + (on && choosing ? ' pkm-tkc-on' : '') + (m > 0 ? ' pkm-tkc-mine' : ''),
+            aria: c.name + (c.info ? ', ' + c.info : '') + (m ? ', ton ticket du mois' : '') + (on && choosing ? ', choisie' : '') + (one ? ' · toucher pour agrandir' : ''),
+            pick: () => { if (choosing) this.setState({ shopCard: c.id, shopAsk: null }); if (one) zoom(); },
             canZoom: !one && !!v.src, zoom: zoom, zoomAria: 'Agrandir ' + c.name
           };
         }),
@@ -416,6 +428,8 @@
         zoomClose: () => this.setState({ tkZoom: null }),
         owned: false, ownedText: '', locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade),
         // Ticket du mois déjà pris : « Ticket déjà acheté », le prochain au tirage suivant, compte à rebours.
+        redo: redo, redoTitle: 'Carte à rechoisir', redoCan: redo && !!pick, redoNeed: redo && !pick, redoNeedText: 'Touche la carte que tu veux gagner',
+        redoLabel: pick ? 'Choisir « ' + pick.name + ' »' : '', redoGo: () => pick && this.shopRechoose(it.id, pick),
         bought: bought, boughtTitle: 'Ticket déjà acheté', boughtText: 'Prochain ticket disponible ' + shopWhen(drawAt) + ', juste après le tirage.', boughtCd: shopCdView(drawAt),
         can: can, needCard: open && !bought && pk >= it.price && !pick && prizes.length > 0, needCardText: 'Choisis d’abord ta carte',
         miss: open && !bought && pk < it.price, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
@@ -434,7 +448,7 @@
         return {
           name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-t-' + it.tier, price: it.price.toLocaleString('fr-FR') + ' PK', priceN: it.price.toLocaleString('fr-FR'), every: it.everyShort,
           stars: stars(it), starsCls: it.starsCls, prize: it.prize,
-          locked: !open, lockName: shopGradeName(it.minGrade), lockImg: emblem(it.minGrade), owned: n > 0, ownedText: 'Acheté',
+          locked: !open, lockName: shopGradeName(it.minGrade), lockImg: emblem(it.minGrade), owned: n > 0, ownedText: this.shopRedo(s, it.id) ? 'Carte à rechoisir' : 'Acheté',
           cls: 'pkm-shop-tk' + (open ? '' : ' pkm-shop-tk-off'), aria: it.name + ', ' + it.prize + ' (' + it.starsText.toLowerCase() + '), ' + it.price + ' PK, tirage ' + it.everyShort + (open ? '' : ', déverrouillé au grade ' + shopGradeName(it.minGrade)) + '. Voir le ticket',
           pick: () => { this.setState({ shopTk: it.id, shopAsk: null, shopCard: null }); if (shopOnline()) this.shopSync(); requestAnimationFrame(() => requestAnimationFrame(() => { const sh = document.querySelector('.pkm-tks-sheet'); if (sh) sh.scrollTop = 0; })); }
         };
@@ -555,10 +569,19 @@
       all[key] = byTk;
       this.setState({ shopPrizes: all, toast: c.name + ' ajoutée au ' + tk.name.toLowerCase() + ' (' + shopWhen(draw) + ')' });
     };
+    // Carte déjà choisie par des joueurs (2026-11-15, porteur) : retrait possible après confirmation ; ces joueurs gardent
+    // leur ticket et choisissent une autre carte (serveur 030). Sans 030, le serveur refuse encore : message d'installation.
     const remove = p => {
       if (online) {
-        Cloud.rpc('admin_prize_remove', { prize_id: p.pid }).then(r => { this.setState({ toast: r && r.ok === false ? r.msg : p.name + ' retirée' }); this.shopAdmLoad(); this.shopSync(); },
-          e => this.setState({ toast: (e && e.message) || 'Retrait impossible' }));
+        if (p.n > 0 && s.admPrzDel !== p.pid) { this.setState({ admPrzDel: p.pid }); return; }
+        Cloud.rpc('admin_prize_remove', { prize_id: p.pid }).then(r => {
+          const k = r && r.rechoose | 0;
+          this.setState({ admPrzDel: null, toast: r && r.ok === false ? r.msg : p.name + ' retirée' + (k ? ' : ' + k + (k > 1 ? ' joueurs devront' : ' joueur devra') + ' choisir une autre carte' : '') });
+          this.shopAdmLoad(); this.shopSync();
+        }, e => {
+          const m = (e && e.message) || 'Retrait impossible';
+          this.setState({ admPrzDel: null, toast: /déjà choisi cette carte/.test(m) ? 'Le serveur n’a pas encore la mise à jour : colle tools/supabase/030_tirages_cartes.sql dans Supabase Studio, puis réessaie.' : m });
+        });
         return;
       }
       const all = Object.assign({}, s.shopPrizes || {}), byTk = Object.assign({}, all[key] || {});
@@ -581,10 +604,16 @@
     const cardOf = x => { const r = x.r, st = sets[r[F.set]] || []; return { id: r[F.id], name: r[F.name], info: [st[0] || r[F.set], r[F.num], r[F.rarity]].filter(Boolean).join(' · '), img: r[F.img] || '' }; };
     return {
       head: 'Cartes des tirages (PK shop)',
-      text: 'Chaque mois, ajoute une ou plusieurs cartes par ticket : les joueurs choisissent la leur avant d’acheter. Bronze : ultra rare ; Argent : AR ; Or : ALT.',
+      text: 'Chaque mois, ajoute une ou plusieurs cartes par ticket : les joueurs choisissent la leur avant d’acheter. Bronze : ultra rare ; Argent : AR ; Or : ALT. Tu peux retirer une carte même déjà choisie : ces joueurs gardent leur ticket et en choisissent une autre.',
       draws: draws.map((t, i) => ({ label: 'Tirage ' + shopWhen(t).replace(/^le /, 'du '), on: String(i === di), cls: 'pkm-admz-chip' + (i === di ? ' pkm-admz-chip-on' : ''), pick: () => this.setState({ admPrzDraw: i }) })),
       tks: SHOP_ADM_TK.map(x => ({ label: x.tag, on: String(x.id === tk.id), cls: 'pkm-admz-chip pkm-admz-' + x.tier + (x.id === tk.id ? ' pkm-admz-chip-on' : ''), pick: () => this.setState({ admPrzTk: x.id }) })),
-      list: list.map(p => { const v = shopCardImg(p); return { name: p.name, info: p.info || '', img: v.src, hasImg: !!v.src, n: p.n ? p.n + ' ticket' + (p.n > 1 ? 's' : '') : 'aucun ticket', remove: () => remove(p), removeAria: 'Retirer ' + p.name }; }),
+      list: list.map(p => {
+        const v = shopCardImg(p), sure = !!p.n && s.admPrzDel === p.pid;
+        return { name: p.name, info: p.info || '', img: v.src, hasImg: !!v.src, n: p.n ? p.n + ' ticket' + (p.n > 1 ? 's' : '') : 'aucun ticket', remove: () => remove(p),
+          removeAria: (sure ? 'Confirmer le retrait de ' : 'Retirer ') + p.name, rmLabel: sure ? 'Confirmer' : 'Retirer', rmCls: 'pkm-admz-x' + (sure ? ' pkm-admz-x-sure' : ''),
+          warn: sure, warnText: p.n + (p.n > 1 ? ' joueurs ont choisi cette carte : ils garderont leur ticket et devront' : ' joueur a choisi cette carte : il gardera son ticket et devra') + ' en choisir une autre.',
+          cancel: () => this.setState({ admPrzDel: null }) };
+      }),
       hasList: list.length > 0, empty: list.length === 0, emptyText: 'Aucune carte pour ce ticket et ce tirage : les joueurs ne peuvent pas encore l’acheter.',
       q: s.admPrzQ || '', onQ: e => this.setState({ admPrzQ: e.target.value }),
       all: String(!!s.admPrzAll), allLabel: s.admPrzAll ? 'Toutes les raretés' : 'Rareté du ticket : ' + tk.rarity, toggleAll: () => this.setState({ admPrzAll: !s.admPrzAll }),

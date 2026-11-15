@@ -307,6 +307,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - zoom de l'app bloqué (viewport, `touch-action`, gestes de Safari ; Radar et avatar gardent leurs pincements) ;
   - pubs : clics demandés ou récompensés interdits par Google ; vidéo récompensée seulement, **« go » attendu** pour une proposition ;
   - cache v225.
+- **Cartes des tirages modifiables (2026-11-15, porteur) :**
+  - un admin retire une carte même déjà choisie, après confirmation ; les tickets restent valables et leurs joueurs rechoisissent une carte (« Carte à rechoisir ») ;
+  - serveur `tools/supabase/030_tirages_cartes.sql` **à installer par le porteur** (sinon message dans le panneau Admin) ;
+  - **défaut à confirmer** : sans nouveau choix avant le tirage, le ticket participe et l'admin fait choisir le gagnant ;
+  - cache v227.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

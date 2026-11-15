@@ -1330,6 +1330,10 @@ html:has(.pkm-lockw-wrap), html:has(.pkm-lockw-wrap) body { overflow: hidden; ov
 .pkm-admz-add, .pkm-admz-x { flex: none; min-height: 40px; padding: 0 12px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
 .pkm-admz-add { border: 0; background: var(--pkm-accent); color: var(--pkm-on-accent); }
 .pkm-admz-x { border: 1px solid #2A3A5C; background: transparent; color: #FF8A8A; }
+.pkm-admz-x-sure { border-color: #E5484D; background: #E5484D; color: #FFFFFF; }
+/* Carte déjà choisie (2026-11-15, porteur) : avertissement avant le retrait, et « Garder la carte » pour annuler. */
+.pkm-admz-list small.pkm-admz-warn { color: #FFB27A; font-weight: 700; }
+.pkm-admz-keep { align-self: flex-start; margin-top: 2px; padding: 4px 0; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 12px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .pkm-admz-ok { flex: none; font-weight: 800; color: #5EE0CF !important; }
 .pkm-admz-empty { margin: 0; font-size: 12.5px; color: #9AA8C3; }
 .pkm-admz-err { margin: 0; font-size: 12.5px; color: #FF8A8A; }
@@ -1993,3 +1997,7 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
    à deux doigts ni double appui sur la page ; les gestes de l'app (carte du Radar, pincement de l'avatar) restent, car
    ils sont gérés par l'app elle-même. Avec la balise viewport (Android) et nav.js (iPhone : gestes de zoom de Safari). */
 html, body { touch-action: pan-x pan-y; }
+
+/* Ticket dont la carte a été retirée par un admin (2026-11-15, porteur ; serveur 030) : le joueur rechoisit sa carte. */
+.pkm-tks-redo { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 16px; border: 1px solid rgba(255, 178, 122, 0.55); background: rgba(255, 140, 60, 0.12); }
+.pkm-tks-redo > b { align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #FFB27A; color: #1A1206; font-size: 15px; font-weight: 800; }

@@ -9,6 +9,11 @@ const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const 
 const KEY = 'pkm-collection-v1';
 // Faux serveur : comptes en mémoire.
 const users = {}; const calls = []; let down = false, unverifiedOk = false; const CODE = '482915';
+// Cartes des tirages imitées (018, 030) : une carte au ticket Or ; prochain tirage = 1er du mois suivant à 20 h (Paris).
+const NEXT_DRAW = (() => { const now = Date.now(), d = new Date(); for (let add = 0; add < 3; add++) for (const off of [1, 2]) {
+  const t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + add, 1, 20 - off);
+  if (t > now && Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: 'numeric', hourCycle: 'h23' }).format(new Date(t))) === 20) return new Date(t).toISOString(); } })();
+const PRZ = [{ id: 1, item: 'ticket-or', card: 'sv08-238', name: 'Pikachu-ex', info: 'Étincelles Déferlantes · 238 · ALT', img: null }];
 const jwt = (uid, email, aal) => 'h.' + Buffer.from(JSON.stringify({ sub: uid, email: email, aal: aal || 'aal1' })).toString('base64url') + '.s';
 const sess = u => ({ access_token: jwt(u.id, u.email), refresh_token: 'r-' + u.id, expires_in: 3600, user: { id: u.id, email: u.email } });
 async function fake(route) {
@@ -69,13 +74,32 @@ async function fake(route) {
     // État du PK shop imité (017) : une carte à gagner par ticket, stocks pleins.
     if (fn === 'shop_state') return send(200, { draw_at: new Date(Date.now() + 10 * 864e5).toISOString(), next_month: new Date(Date.now() + 10 * 864e5).toISOString(), draw_lots: 1,
       stock: { 'achat-booster': { total: 10, left: 10, months: 1, restock: new Date(Date.now() + 10 * 864e5).toISOString() }, 'achat-rare': { total: 3, left: 3, months: 1, restock: new Date(Date.now() + 10 * 864e5).toISOString() } },
-      month_buy: null, prizes: { 'ticket-or': [{ id: 'sv08-238', name: 'Pikachu-ex', info: 'Étincelles Déferlantes · 238 · ALT', img: null }] }, mine: {} });
+      month_buy: null, prizes: PRZ.reduce((o, x) => { (o[x.item] = o[x.item] || []).push({ id: x.card, name: x.name, info: x.info, img: x.img }); return o; }, {}),
+      mine: G.tk || {}, redo: G.redo || [] });
+    // Retirer une carte déjà choisie (030, 2026-11-15, porteur) : les tickets restent, à rechoisir ; l'admin a mis une
+    // autre carte à la place (Électhor-ex).
+    if (fn === 'admin_prizes') return send(200, PRZ.map(x => Object.assign({}, x, { draw_at: NEXT_DRAW,
+      tickets: Object.values(users).reduce((t, v) => t + ((((v.game || {}).tk || {})[x.item] || {})[x.card] | 0), 0) })));
+    if (fn === 'admin_prize_remove') {
+      const i = PRZ.findIndex(x => x.id === body.prize_id); if (i < 0) return send(200, { ok: false, msg: 'Carte introuvable' });
+      const x = PRZ[i]; let n = 0;
+      Object.values(users).forEach(v => { const tk = v.game && v.game.tk && v.game.tk[x.item]; if (tk && tk[x.card]) { n += tk[x.card]; delete tk[x.card]; v.game.redo = (v.game.redo || []).concat([x.item]); } });
+      PRZ.splice(i, 1); PRZ.push({ id: 2, item: 'ticket-or', card: 'sv03.5-205', name: 'Électhor-ex', info: '151 · 205/165', img: null });
+      return send(200, { ok: true, rechoose: n });
+    }
+    if (fn === 'ticket_choose') {
+      if (!(G.redo || []).includes(body.item_id)) return err('Aucun ticket à rechoisir pour ce tirage');
+      if (!PRZ.some(x => x.item === body.item_id && x.card === body.card)) return err('Choisis une carte de ce tirage');
+      G.tk = G.tk || {}; G.tk[body.item_id] = { [body.card]: 1 }; G.redo = G.redo.filter(x => x !== body.item_id);
+      return send(200, { ok: true, item: body.item_id, choice: body.card });
+    }
     if (fn === 'buy_item') {
       const free = u.until && Date.parse(u.until) > Date.now();
       if (!free) return err('Disponible 7 jours après la création de ton compte');
       if (body.item_id === 'achat-rare' && !body.choice) return err('Choisis ton item');
       if (/^ticket-/.test(body.item_id) && !body.choice) return err('Choisis la carte que tu veux gagner');
       G.shop[body.item_id] = (G.shop[body.item_id] || 0) + 1;
+      if (/^ticket-/.test(body.item_id)) { G.tk = G.tk || {}; const t = G.tk[body.item_id] = G.tk[body.item_id] || {}; t[body.choice] = (t[body.choice] | 0) + 1; }
       return send(200, { item: body.item_id, count: G.shop[body.item_id], choice: body.choice || null, pk: G.pk, pa: G.pa, pk_earned: G.earned, draw_at: '2026-11-22T19:00:00Z' });
     }
     // Fonction absente du serveur (script SQL pas installé) : réponse de PostgREST.
@@ -310,6 +334,36 @@ await page.screenshot({ path: shot('cloud-shop-rare.png') });
 await rare.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
 ok('item rare au choix : « Poster » envoyé au serveur', calls.some(c => c.startsWith('RPC buy_item') && c.includes('achat-rare') && c.includes('Poster')));
 ok('item rare acheté : « Bravo ! … un item rare : Poster de la série 30ᵉ anniversaire »', /Tu viens d’acheter un item rare : Poster de la série 30ᵉ anniversaire/.test(await page.locator('.pkm-lotfx').innerText().catch(() => '')));
+await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
+await page.locator('button:has-text("Panneau Admin")').first().click(); await page.waitForTimeout(600);
+// Carte d'un tirage déjà choisie (2026-11-15, porteur : « laisse-moi changer les cartes proposées même si des joueurs ont
+// choisi des tickets », serveur 030) : retrait après confirmation, le joueur garde son ticket et rechoisit une carte.
+const prz = page.locator('section[aria-label="Cartes des tirages (PK shop)"]');
+await prz.locator('button:has-text("OR")').click(); await page.waitForTimeout(500);
+const pika = prz.locator('li', { hasText: 'Pikachu-ex' });
+ok('admin : Pikachu-ex au tirage Or, « 1 ticket »', (await pika.count()) === 1 && /1 ticket/.test(await pika.innerText()));
+await pika.locator('button:has-text("Retirer")').click(); await page.waitForTimeout(300);
+ok('carte déjà choisie : avertissement « 1 joueur… gardera son ticket et devra en choisir une autre », bouton « Confirmer », rien envoyé',
+  /1 joueur a choisi cette carte : il gardera son ticket et devra en choisir une autre/.test(await pika.innerText()) && (await pika.locator('button:has-text("Confirmer")').count()) === 1 && !calls.some(c => c.startsWith('RPC admin_prize_remove')));
+await page.screenshot({ path: shot('cloud-admin-retrait.png') });
+await pika.locator('button:has-text("Garder la carte")').click(); await page.waitForTimeout(300);
+ok('« Garder la carte » : retour à « Retirer », carte gardée', (await pika.locator('button:has-text("Retirer")').count()) === 1 && !calls.some(c => c.startsWith('RPC admin_prize_remove')));
+await pika.locator('button:has-text("Retirer")').click(); await page.waitForTimeout(200);
+await pika.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
+ok('carte retirée : « 1 joueur devra choisir une autre carte »', calls.some(c => c.startsWith('RPC admin_prize_remove')) && /Pikachu-ex retirée : 1 joueur devra choisir une autre carte/.test(await page.locator('body').innerText()));
+await page.locator('section[aria-label="Panneau Admin"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
+await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(1200);
+const orTile = page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk').nth(2);
+ok('PK shop : ticket Or « Carte à rechoisir »', /Carte à rechoisir/.test(await orTile.innerText()));
+await orTile.click(); await page.waitForTimeout(500);
+const tOr2 = page.locator('section[aria-label="Ticket Or"]');
+ok('fiche du ticket : « Carte à rechoisir », ticket gardé, « Choisir « Électhor-ex » »', /Carte à rechoisir/.test(await tOr2.innerText()) && /Ton ticket reste valable/.test(await tOr2.innerText())
+  && (await tOr2.locator('button:has-text("Choisir « Électhor-ex »")').count()) === 1 && (await tOr2.locator('button:has-text("Acheter un ticket")').count()) === 0);
+await page.screenshot({ path: shot('cloud-ticket-rechoisir.png') });
+await tOr2.locator('button:has-text("Choisir « Électhor-ex »")').click(); await page.waitForTimeout(1200);
+ok('carte rechoisie : envoyée au serveur, « Carte choisie : Électhor-ex », ticket « Acheté »', calls.some(c => c.startsWith('RPC ticket_choose') && c.includes('sv03.5-205'))
+  && (await tOr2.locator('.pkm-tks-redo').count()) === 0 && /Ton choix/.test(await tOr2.innerText()));
+await tOr2.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(700);
 await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.locator('button:has-text("Panneau Admin")').first().click(); await page.waitForTimeout(600);
 await page.locator('section[aria-label="Panneau Admin"] button:has-text("Quitter le mode Admin")').click(); await page.waitForTimeout(1200);
