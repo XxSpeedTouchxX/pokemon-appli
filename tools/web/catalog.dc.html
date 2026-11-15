@@ -454,7 +454,6 @@
 </div>
 </section>
 
-
 <section aria-label="Boutiques près de toi" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <h2 style="margin: 0; min-height: 44px; display: flex; align-items: center; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Boutiques autour de toi</h2>
 <button type="button" onClick="{{ home.hr.main }}" aria-label="{{ home.hr.mainLabel }}" style="flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid #1F5A55; border-radius: 22px; background: radial-gradient(120% 140% at 0% 0%, rgba(94, 224, 207, 0.16), rgba(94, 224, 207, 0) 62%), #0F1D2B; color: inherit; font: inherit; text-align: left; cursor: pointer">
@@ -2117,22 +2116,29 @@
 <sc-for list="{{ pf.trainer.pkyList }}" as="pkd" hint-placeholder-count="1"><div class="pkm-tr-row"><span class="pkm-tr-k">{{ pkd.name }}</span><button type="button" class="pkm-pky-del" onClick="{{ pkd.remove }}" aria-label="{{ pkd.aria }}">Retirer</button></div></sc-for>
 <button type="button" class="pkm-pky-add" onClick="{{ pf.trainer.pkyAdd }}">{{ pf.trainer.pkyAddLabel }}</button></sc-if>
 <sc-if value="{{ pf.trainer.cloudOn }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.trainer.cloudAct }}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{ pf.trainer.cloudLabel }}</button></sc-if>
-<sc-if value="{{ pf.trainer.delIdle }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.trainer.delOpen }}" class="pkm-acct-del">Supprimer mon compte</button></sc-if>
-<sc-if value="{{ pf.trainer.delAsk }}" hint-placeholder-val="{{ false }}"><div role="alertdialog" aria-label="Supprimer mon compte" class="pkm-acct-del-ask"><p>{{ pf.trainer.delText }}</p><div class="pkm-acct-del-row"><button type="button" onClick="{{ pf.trainer.delGo }}" class="pkm-acct-del-go">{{ pf.trainer.delLabel }}</button><button type="button" onClick="{{ pf.trainer.delCancel }}" class="pkm-acct-del-no">Annuler</button></div></div></sc-if>
 
 </section>
 
 <!-- fragment: profile-notif -->
-<section aria-label="Notifications" class="pkm-dark" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{ nt.open }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
+<button type="button" aria-label="Fermer les notifications" onClick="{{ nt.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
+<section aria-label="Notifications" role="dialog" aria-modal="true" class="pkm-sheet pkm-dark pkm-nt-sheet" style="flex: none; max-height: 88%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; padding: 12px 16px calc(20px + env(safe-area-inset-bottom)); border-radius: 28px 28px 0 0; border-top: 1px solid #24345C; background: #0F1828; color: #F3F6FC; display: flex; flex-direction: column; gap: 10px">
+<div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
+<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
 <h2 style="margin: 0; display: flex; align-items: center; gap: 8px; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: var(--pkm-accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg>Notifications</h2>
+<button type="button" onClick="{{ nt.close }}" aria-label="Fermer" style="flex: none; width: 44px; height: 44px; padding: 0; border: 1px solid #1E2B45; border-radius: 22px; background: #111A2C; color: #F3F6FC; font-size: 18px; cursor: pointer">✕</button>
+</div>
 <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #C9D3EA">Coche ce qui doit te prévenir.</p>
-<sc-for list="{{ nt.items }}" as="nti" hint-placeholder-count="4">
+<sc-for list="{{ nt.items }}" as="nti" hint-placeholder-count="5">
 <button type="button" role="switch" aria-checked="{{ nti.on }}" onClick="{{ nti.toggle }}" class="pkm-nt-row"><span class="pkm-nt-txt"><span class="pkm-nt-label">{{ nti.label }}</span><span class="pkm-nt-sub">{{ nti.sub }}</span></span><span class="{{ nti.cls }}" aria-hidden="true"><i></i></span></button>
 </sc-for>
 <p style="margin: 2px 0 0; font-size: 12.5px; line-height: 1.45; color: {{ nt.stateColor }}">{{ nt.state }}</p>
 <sc-if value="{{ nt.ask }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ nt.askGo }}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: #0B1120; font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer">Autoriser les notifications</button></sc-if>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ nt.note }}</p>
 </section>
+</div>
+</sc-if>
 
 <!-- fragment: profile-more -->
 <section aria-label="Communauté" class="pkm-pc">
@@ -2924,3 +2930,10 @@ PKCOUNTER
 <p class="pkm-anl-note">Annonces publiques reprises de Vinted toutes les 30 minutes. Prix demandés par les vendeurs, hors frais de port : ils ne comptent pas dans la cote de tes cartes. Une annonce peut déjà être vendue. Dropicards n’est pas affilié à Vinted et ne vend rien : « Voir l’annonce » ouvre Vinted.</p>
 </div>
 </sc-if>
+
+<!-- fragment: settings-delete -->
+<section aria-label="Supprimer mon compte" class="pkm-dark pkm-set-del" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600">Mon compte</h2>
+<sc-if value="{{ pf.trainer.delIdle }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pf.trainer.delOpen }}" class="pkm-acct-del">Supprimer mon compte</button></sc-if>
+<sc-if value="{{ pf.trainer.delAsk }}" hint-placeholder-val="{{ false }}"><div role="alertdialog" aria-label="Supprimer mon compte" class="pkm-acct-del-ask"><p>{{ pf.trainer.delText }}</p><div class="pkm-acct-del-row"><button type="button" onClick="{{ pf.trainer.delGo }}" class="pkm-acct-del-go">{{ pf.trainer.delLabel }}</button><button type="button" onClick="{{ pf.trainer.delCancel }}" class="pkm-acct-del-no">Annuler</button></div></div></sc-if>
+</section>

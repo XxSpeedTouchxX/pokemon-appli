@@ -122,12 +122,19 @@
       r.trainer.delAsk = !!(ses && s.pfDelAsk);
       r.trainer.delIdle = !!(ses && !s.pfDelAsk);
       r.trainer.delLabel = s.pfDelBusy ? 'Suppression…' : 'Oui, supprimer définitivement';
-      r.trainer.delText = 'Ton compte Dropicards sera supprimé pour de bon : adresse, pseudo, PK, PA, Pokédex, tickets, avatar, et ta collection sur cet appareil. Impossible de revenir en arrière.';
+      const paying = !!(this.premPaying && this.premPaying());
+      r.trainer.delText = 'Ton compte Dropicards sera supprimé pour de bon : adresse, pseudo, PK, PA, Pokédex, tickets, avatar, et ta collection sur cet appareil.'
+        + (paying ? ' Ton abonnement ' + (typeof PREM_NAME === 'string' ? PREM_NAME : 'Premium') + ' sera arrêté tout de suite : plus aucun prélèvement.' : '') + ' Impossible de revenir en arrière.';
       r.trainer.delOpen = () => this.setState({ pfDelAsk: true });
       r.trainer.delCancel = () => this.setState({ pfDelAsk: false, pfDelBusy: false });
       r.trainer.delGo = async () => {
         if (this.st().pfDelBusy) return;
         this.setState({ pfDelBusy: true });
+        // Abonnement en cours : arrêté tout de suite d'abord (fonction « stripe », route « cancel », 2026-11-14, porteur),
+        // sinon le serveur refuse la suppression. Un échec ici n'efface rien.
+        if (this.premPaying && this.premPaying()) {
+          try { await this.premCall('cancel', {}, true); } catch (e) { this.setState({ pfDelBusy: false, toast: (e && e.message) || CLOUD_ERR.other }); this.flash(); return; }
+        }
         try { await Cloud.rpc('delete_my_account', {}); } catch (e) {
           this.setState({ pfDelBusy: false, toast: (e && e.message) || CLOUD_ERR.other }); this.flash(); return;
         }

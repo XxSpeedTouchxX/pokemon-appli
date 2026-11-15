@@ -6,6 +6,8 @@
 //                         « semester » ou « year » ; trimestrielle et semestrielle depuis le 2026-11-10, porteur)
 //   POST /stripe/portal    (joueur connecté) → page Stripe pour gérer ou arrêter son abonnement
 //   POST /stripe/webhook   (Stripe seulement) → message signé de Stripe : abonnement créé, renouvelé, arrêté, payé…
+//   POST /stripe/cancel    (joueur connecté) → abonnement arrêté tout de suite, juste avant « Supprimer mon compte »
+//                         (2026-11-14, porteur : la suppression du compte supprime aussi l'abonnement)
 // Les secrets restent dans les variables du serveur (Coolify), jamais dans le dépôt ni dans l'app :
 //   STRIPE_SECRET_KEY      clé secrète ou restreinte de Stripe (sk_… ou rk_…)
 //   STRIPE_WEBHOOK_SECRET  secret de signature du point de terminaison (whsec_…)
@@ -101,6 +103,12 @@ export function makeHandler(env, fetchImpl = fetch) {
     if (!res.ok) { console.error('rpc', name, res.status, txt); throw Object.assign(new Error('Base de données indisponible.'), { status: 500 }); }
     return txt ? JSON.parse(txt) : null;
   }
+  async function premiumSub(uid) {
+    const k = E('SUPABASE_SERVICE_ROLE_KEY');
+    const res = await fetchImpl(SB + '/rest/v1/premium?select=status,stripe_subscription&user_id=eq.' + encodeURIComponent(uid), { headers: { apikey: k, Authorization: 'Bearer ' + k } });
+    const rows = res.ok ? await res.json() : [];
+    return rows && rows[0] || null;
+  }
   async function premiumRow(uid) {
     const k = E('SUPABASE_SERVICE_ROLE_KEY');
     const res = await fetchImpl(SB + '/rest/v1/premium?select=status,period_end&user_id=eq.' + encodeURIComponent(uid), { headers: { apikey: k, Authorization: 'Bearer ' + k } });
@@ -177,6 +185,20 @@ export function makeHandler(env, fetchImpl = fetch) {
     if (!cust) return fail(404, 'Aucun abonnement Premium sur ce compte.');
     const s = await stripe('POST', '/billing_portal/sessions', { customer: cust, return_url: APP + '/?premium=retour', locale: 'fr' });
     return json(200, { url: s.url });
+  }
+
+  // Arrêt immédiat de l'abonnement avant la suppression du compte (2026-11-14, porteur) : plus aucun prélèvement, la
+  // ligne « premium » passe à « canceled » (relue chez Stripe), et delete_my_account (017) accepte alors la suppression.
+  // Sans abonnement en cours : rien à faire, réponse { ok: true, canceled: false }.
+  async function cancelNow(req) {
+    const u = await userOf(req);
+    if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards.');
+    const row = await premiumSub(u.id);
+    const live = row && row.stripe_subscription && ['active', 'trialing', 'past_due', 'unpaid', 'paused', 'incomplete'].includes(row.status);
+    if (!live) return json(200, { ok: true, canceled: false });
+    await stripe('DELETE', '/subscriptions/' + encodeURIComponent(row.stripe_subscription), null, 'dropicards-cancel-' + row.stripe_subscription);
+    await syncSubscription(row.stripe_subscription, u.id);
+    return json(200, { ok: true, canceled: true });
   }
 
   // Abonnement relu chez Stripe (source de vérité, quel que soit l'ordre d'arrivée des messages), puis rangé.
@@ -259,6 +281,7 @@ export function makeHandler(env, fetchImpl = fetch) {
     try {
       if (route === 'checkout') return await checkout(req);
       if (route === 'portal') return await portal(req);
+      if (route === 'cancel') return await cancelNow(req);
       if (route === 'webhook') return await webhook(req);
       return fail(404, 'Chemin inconnu');
     } catch (e) {

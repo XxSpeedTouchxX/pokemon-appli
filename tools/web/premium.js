@@ -65,11 +65,13 @@
   const premForced = () => { try { return localStorage.getItem('pkm-premium-force') === '1' && (navigator.webdriver || /[?&]debug/.test(location.search)); } catch (e) { return false; } };
   const premInfo = s => (s && s.cloudGame && s.cloudGame.premium) || null;
   premProto.premOn = function () { const p = premInfo(this.st()); return !!(p && p.on) || premForced(); };
+  // Abonnement réellement en cours sur le serveur (sans l'interrupteur des tests) : à arrêter avant la suppression du compte.
+  premProto.premPaying = function () { const p = premInfo(this.st()); return !!(p && p.on); };
   const premDate = v => { try { return new Date(v).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
   // Appel de la fonction « stripe » du serveur avec le jeton du joueur ; ses messages d'erreur (en français) sont gardés.
   const PREM_NET = 'Impossible de joindre Dropicards. Vérifie ta connexion, puis réessaie.';
   const PREM_LOGIN = 'Connecte-toi à ton compte Dropicards pour devenir Premium (Mon profil › Me reconnecter).';
-  premProto.premCall = async function (route, body) {
+  premProto.premCall = async function (route, body, raw) {
     if (!Cloud.on()) { const e = new Error('Le paiement n’est pas disponible sur cette version de l’app.'); e.code = 'off'; throw e; }
     let t = null;
     try { t = await Cloud.token(); } catch (e) { if (e && e.code === 'network') throw e; }
@@ -81,6 +83,8 @@
       res = await fetch(Cloud.url + '/functions/v1/stripe/' + route, { method: 'POST', headers: { apikey: Cloud.key, Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), signal: ctl ? ctl.signal : undefined, cache: 'no-store' });
       j = await res.json().catch(() => null);
     } catch (e) { const n = new Error(PREM_NET); n.code = 'network'; throw n; } finally { if (timer) clearTimeout(timer); }
+    // Réponse sans adresse (arrêt immédiat avant « Supprimer mon compte », 2026-11-14) : le contenu est rendu tel quel.
+    if (raw) { if (!res.ok || !j || !j.ok) { const e = new Error((j && j.error) || 'Impossible d’arrêter ton abonnement pour le moment. Réessaie plus tard.'); e.code = 'server'; e.status = res.status; throw e; } return j; }
     if (!res.ok || !j || !j.url) { const e = new Error((j && j.error) || 'Le paiement n’est pas encore ouvert. Réessaie plus tard.'); e.code = 'server'; e.status = res.status; throw e; }
     if (!/^https:\/\/(checkout|billing)\.stripe\.com\//.test(j.url) && !(navigator.webdriver && /^http:\/\/(127\.0\.0\.1|localhost):\d+\//.test(j.url))) { const e = new Error('Adresse de paiement inattendue.'); e.code = 'server'; throw e; }
     return j.url;

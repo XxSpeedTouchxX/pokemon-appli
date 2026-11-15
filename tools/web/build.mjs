@@ -155,7 +155,11 @@ patch(`<path d="{{ pf.tierSym }}" style="fill: {{ pf.tierColor }}; stroke: none"
 </button>`);
 patch(`letter-spacing: -0.02em">Ton espace</span>`, `letter-spacing: -0.02em">Mon profil</span>
 <sc-if value="{{ pf.hasName }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13.5px; font-weight: 700; color: var(--pkm-accent)">{{ pf.nameLine }}</span></sc-if>`);
-patch('<section aria-label="Type de collectionneur"', FRAG['profile-trainer'] + '\n' + FRAG['profile-notif'] + '\n<section aria-label="Type de collectionneur"');
+patch('<section aria-label="Type de collectionneur"', FRAG['profile-trainer'] + '\n<section aria-label="Type de collectionneur"');
+// Notifications (2026-11-14, porteur) : une ligne de Mon profil, entre « Information sur les grades » et « Réglages »,
+// ouvre une fenêtre glissée avec les 5 cases (PA, Booster PK, pièce, Safari éclair, sorties et boutiques).
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['profile-notif'] + '\n<sc-if value="{{ ui.hasToast }}"');
+patch('<button type="button" onClick="{{ goSettings }}"', '<button type="button" onClick="{{ nt.openSheet }}" aria-label="{{ nt.entryLabel }}" class="pkm-nt-entry" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 16px; border: 0; border-top: 1px solid #1E2B45; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer">\n<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #B9C5FF; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg>\n<span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Notifications</span><span style="font-size: 12.5px; color: #9AA8C3">{{ nt.summary }}</span></span>\n<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #7D8BA8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M9 6l6 6-6 6"></path></svg>\n</button>\n<button type="button" onClick="{{ goSettings }}"');
 // Grades (2026-10-14, porteur, profile.js) : les hexagones des paliers deviennent les logos des 5 grades
 // (web/img/grades/, tools/brand/make_grades.mjs). Le symbole « sym » d'un palier est désormais le chemin du logo.
 {
@@ -331,7 +335,7 @@ patchRe(/(<span style="font-weight: 600">Retour à la page d’accueil<\/span>[\
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['admin-sheet'] + FRAG['admin-lock'] + FRAG['passkey-offer'] + FRAG['premium-sheet'] + FRAG['grade-lock'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Abonnement Premium (premium.js, 2026-11-06, porteur) : bannière en haut du PK shop (Magasin) et de Mon profil.
 patch('<section aria-label="Tickets du tirage au sort" class="pkm-shop-tks">', FRAG['premium-banner'] + '<section aria-label="Tickets du tirage au sort" class="pkm-shop-tks">');
-patch(FRAG['profile-trainer'] + '\n' + FRAG['profile-notif'], FRAG['premium-banner'] + FRAG['profile-trainer'] + '\n' + FRAG['profile-notif']);
+patch(FRAG['profile-trainer'], FRAG['premium-banner'] + FRAG['profile-trainer']);
 // Informations légales (legal.js) : panneau ouvert depuis À propos et « Mes PK ».
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Évolution en plein écran (2026-11-13, porteur) : calque posé à la racine de l'app, au-dessus de l'en-tête et de la
@@ -410,6 +414,9 @@ patchRe(/<section aria-label="Valorisation"[\s\S]*?<\/section>\n\n/, '');
 patchRe(/<section aria-label="Sources de prix"[\s\S]*?<\/section>\n\n/, '');
 patchRe(/(<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600">À propos<\/h2>\n)<p[\s\S]*?(<button type="button" onClick="\{\{ legal\.openMentions \}\}")/, '$1$2');
 patchRe(/\n<button type="button" onClick="\{\{ replayOnb \}\}"[^>]*>Retour à la page d’accueil<\/button>/, '');
+// « Supprimer mon compte » tout en bas des Réglages (2026-11-14, porteur ; avant dans Mon profil) : visible avec un
+// compte connecté ; l'abonnement (s'il y en a un) est arrêté tout de suite, puis le compte est supprimé (profile.js).
+patchRe(/(<section aria-label="À propos"[\s\S]*?<\/section>\n)(<\/sc-if>\n\n<sc-if value="\{\{ ui\.isSales \}\}")/, '$1<sc-if value="{{ pf.trainer.delOn }}" hint-placeholder-val="{{ false }}">\n' + FRAG['settings-delete'].trim().replace(/\$/g, '$$$$') + '\n</sc-if>\n$2');
 // Articles mis en avant (tools/web/showcase.js).
 // - Vignettes des listes (ventes, lots, arrivages, Marché, scan…) : plus larges pour le scellé (largeur × wk),
 //   cadre doré des cartes ultra rares (ring).

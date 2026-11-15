@@ -42,12 +42,18 @@ await page.evaluate(() => window.__pkm.notifTick()); await page.waitForTimeout(2
 ok('pas de doublon au rappel suivant', (await page.evaluate(() => window.__nt.shown.length)) === 2);
 // Mon profil › Notifications.
 await page.click('header button[aria-label^="Ouvrir mon profil"], header .pkm-hh-me'); await page.waitForTimeout(900);
+// Depuis le 2026-11-14 (porteur) : une ligne « Notifications » entre « Information sur les grades » et « Réglages »,
+// qui ouvre une fenêtre glissée avec les 5 cases (Safari éclair ajouté).
+ok('Mon profil : plus de rubrique Notifications dépliée', (await page.locator('section[aria-label="Notifications"]').count()) === 0);
+const rows = await page.locator('nav[aria-label="Raccourcis du profil"] > button').evaluateAll(bs => bs.map(b => (b.querySelector('span span') || b).textContent.trim()));
+const iG = rows.findIndex(t => /Information sur les grades/.test(t)), iN = rows.indexOf('Notifications'), iR = rows.indexOf('Réglages');
+ok('ligne « Notifications » entre « Information sur les grades » et « Réglages » (' + rows.join(' / ') + ')', iG >= 0 && iN === iG + 1 && iR === iN + 1);
+await page.locator('nav[aria-label="Raccourcis du profil"] button.pkm-nt-entry').click(); await page.waitForTimeout(700);
 const sec = page.locator('section[aria-label="Notifications"]');
-await sec.scrollIntoViewIfNeeded();
 const sw = sec.locator('button[role="switch"]');
 const labels = (await sw.allInnerTexts()).map(t => t.split('\n')[0]);
 const checked = await sw.evaluateAll(bs => bs.map(b => b.getAttribute('aria-checked')).join(','));
-ok('rubrique Notifications : ' + labels.join(' / ') + ' (' + checked + ')', labels.length === 4 && /^PA à récupérer$/.test(labels[0]) && /Booster PK/.test(labels[1]) && /Pièce/.test(labels[2]) && /Sorties/.test(labels[3]) && checked === 'true,true,true,true');
+ok('rubrique Notifications : ' + labels.join(' / ') + ' (' + checked + ')', labels.length === 5 && /^PA à récupérer$/.test(labels[0]) && /Booster PK/.test(labels[1]) && /Pièce/.test(labels[2]) && /Safari éclair/.test(labels[3]) && /Sorties/.test(labels[4]) && checked === 'true,true,true,true,true');
 ok('état : « ' + (await sec.innerText()).split('\n').find(l => /autorisées|bloquées|Autorise/.test(l)) + ' »', /Notifications du téléphone autorisées/.test(await sec.innerText()) && /compte Dropicards/.test(await sec.innerText()));
 await sec.screenshot({ path: shot('notif-profil.png') });
 // Décocher les PA : enregistré, plus de rappel de PA.
@@ -61,12 +67,17 @@ await page.waitForTimeout(3300);
 ok('message « Notifications refusées » effacé tout seul (' + shown + ' → ' + (await page.locator('text=Notifications refusées').count()) + ')', shown === 1 && (await page.locator('text=Notifications refusées').count()) === 0);
 const due = await page.evaluate(() => window.__pkm.notifDue(window.__pkm.st()).map(d => d.key).join(','));
 ok('rappels encore prêts : ' + due, due === 'booster');
+// Safari éclair prêt (2026-11-14, porteur) : dernière partie il y a 2 jours (délai du grade dépassé) → rappel « safari ».
+await page.evaluate(() => { const p = window.__pkm, s = p.st(); p.setState({ games: Object.assign({}, s.games || {}, { safariAt: new Date(Date.now() - 2 * 86400000).toISOString() }) }); });
+const due2 = await page.evaluate(() => window.__pkm.notifDue(window.__pkm.st()).map(d => d.key + ':' + d.title).join(','));
+ok('rappel Safari éclair prêt : ' + due2, /safari:Safari éclair prêt/.test(due2));
 await page.waitForTimeout(1500);
 await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 const st = await page.evaluate(k => JSON.parse(localStorage.getItem(k)).notif, KEY);
 ok('choix gardé après rechargement (' + JSON.stringify(st) + ')', st && st.pa === false);
 // Mise en page : pas de défilement horizontal, interrupteurs assez grands.
 await page.click('header .pkm-hh-me'); await page.waitForTimeout(900);
+await page.locator('nav[aria-label="Raccourcis du profil"] button.pkm-nt-entry').click(); await page.waitForTimeout(700);
 const lay = await page.evaluate(() => ({ over: document.documentElement.scrollWidth - document.documentElement.clientWidth, h: [...document.querySelectorAll('section[aria-label="Notifications"] button[role="switch"]')].map(b => Math.round(b.getBoundingClientRect().height)) }));
 ok('pas de défilement horizontal (' + lay.over + ' px), lignes de ' + lay.h.join(', ') + ' px', lay.over <= 0 && lay.h.every(h => h >= 44));
 console.log(res.join('\n'));

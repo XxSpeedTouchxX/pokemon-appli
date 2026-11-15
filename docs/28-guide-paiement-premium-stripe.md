@@ -71,7 +71,7 @@ Les clés de recherche doivent être écrites exactement comme ci-dessus : c'est
 | Customers (Clients) | Écriture |
 | Checkout Sessions | Écriture |
 | Customer portal (Billing portal) | Écriture |
-| Subscriptions (Abonnements) | Lecture |
+| Subscriptions (Abonnements) | Écriture (« Lecture » avant le 2026-11-15 : voir § 8 quinquies) |
 | Prices (Prix) | Lecture |
 
 3. Crée la clé, puis copie-la (elle commence par `rk_test_`). Garde l'onglet ouvert pour l'étape 3.
@@ -228,6 +228,17 @@ Décision du porteur : pour l'instant, **seuls les comptes admin** peuvent payer
 - **Pour tout ouvrir plus tard** :
   1. dans Coolify, service Supabase › variables d'environnement, ajoute `PREMIUM_OPEN` avec la valeur `true`, puis **Restart** ;
   2. demande-moi de remettre les offres dans l'app (une ligne : `NOBUY_ON = false` dans `tools/web/store.js`).
+
+## 8 quinquies. « Supprimer mon compte » arrête l'abonnement (2026-11-15, porteur)
+
+Décision du porteur : supprimer son compte supprime aussi l'abonnement. Le bouton est maintenant tout en bas de **Réglages**. Avant d'effacer le compte, l'app demande au serveur d'arrêter l'abonnement **tout de suite** (plus aucun prélèvement), puis supprime le compte.
+
+À faire une fois (5 minutes) :
+
+1. **Stripe** › **Développeurs** › **Clés API** › ta clé restreinte `Dropicards serveur` (celle en `rk_live_…`, et aussi celle en `rk_test_…` si tu la gardes) › **Modifier** : ligne **Subscriptions (Abonnements)** → **Écriture** (au lieu de « Lecture »), puis **Enregistrer**. La clé ne change pas : rien à recopier dans Coolify.
+2. **Réinstalle la fonction `stripe`** comme au § 6 (même ligne dans le terminal de Coolify), puis **Restart** de Supabase.
+
+Sans ces deux étapes, un abonné qui veut supprimer son compte voit « Stripe ne répond pas comme prévu » et rien n'est effacé (aucun risque : il peut réessayer plus tard). Un compte sans abonnement se supprime comme avant.
 
 ## 9. Ce qui reste à décider
 

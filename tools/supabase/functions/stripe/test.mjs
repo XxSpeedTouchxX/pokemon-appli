@@ -40,6 +40,7 @@ async function fakeFetch(url, init = {}) {
     if (u.pathname === '/v1/checkout/sessions') { S.sessions.push(p); return reply(200, { id: 'cs_F' + S.sessions.length, url: 'https://checkout.stripe.com/c/pay/cs_F' + S.sessions.length }); }
     if (u.pathname === '/v1/billing_portal/sessions') { S.portal++; return reply(200, { url: 'https://billing.stripe.com/p/session/F' + S.portal, customer: p.get('customer') }); }
     const m = u.pathname.match(/^\/v1\/subscriptions\/(sub_\w+)$/);
+    if (m && S.subs[m[1]] && init.method === 'DELETE') { S.subs[m[1]].status = 'canceled'; return reply(200, S.subs[m[1]]); }
     if (m && S.subs[m[1]]) return reply(200, S.subs[m[1]]);
     return reply(404, { error: { message: 'inconnu ' + u.pathname } });
   }
@@ -57,7 +58,7 @@ async function fakeFetch(url, init = {}) {
   }
   if (u.pathname === '/rest/v1/premium') {
     const id = u.searchParams.get('user_id').replace(/^eq\./, '');
-    return new Response(sql("select coalesce(json_agg(json_build_object('status', status, 'period_end', period_end)), '[]') from public.premium where user_id = " + lit(id), 'service_role'));
+    return new Response(sql("select coalesce(json_agg(json_build_object('status', status, 'period_end', period_end, 'stripe_subscription', stripe_subscription)), '[]') from public.premium where user_id = " + lit(id), 'service_role'));
   }
   return reply(404, {});
 }
@@ -138,6 +139,18 @@ ok('arrêt demandé : noté, Premium gardé jusqu\'à la fin de la période', r.
 S.subs[SUB].status = 'canceled';
 await hook({ id: 'evt_' + R + '4', type: 'customer.subscription.deleted', data: { object: { id: SUB } } });
 ok('abonnement terminé : plus Premium', row().status === 'canceled' && out(sql("select (public.game_state()->'premium'->>'on') from (select set_config('request.jwt.claim.sub', " + lit(UID) + ", false)) x", 'authenticated')) === 'false');
+// 5. Supprimer mon compte (2026-11-14, porteur) : l'abonnement est arrêté tout de suite avant la suppression.
+ok('arrêt immédiat sans être connecté : refusé (401)', (await call('cancel', {})).status === 401);
+const k0 = await call('cancel', {}, 'tok-ok');
+ok('arrêt immédiat sans abonnement en cours : rien à faire (' + JSON.stringify(k0.j) + ')', k0.status === 200 && k0.j.ok === true && k0.j.canceled === false && !S.calls.some(c => c.method === 'DELETE'));
+S.subs[SUB].status = 'active'; S.subs[SUB].cancel_at_period_end = false;
+await hook({ id: 'evt_' + R + '6', type: 'customer.subscription.updated', data: { object: { id: SUB } } });
+ok('abonnement repris pour l’essai : Premium', row().status === 'active');
+const k1 = await call('cancel', {}, 'tok-ok');
+const del = S.calls.filter(c => c.method === 'DELETE');
+ok('arrêt immédiat : abonnement supprimé chez Stripe (' + JSON.stringify(k1.j) + ')', k1.status === 200 && k1.j.canceled === true && del.length === 1 && del[0].path === '/v1/subscriptions/' + SUB);
+ok('arrêt immédiat : plus Premium dans la base (status ' + row().status + ')', row().status === 'canceled'
+  && out(sql("select (public.game_state()->'premium'->>'on') from (select set_config('request.jwt.claim.sub', " + lit(UID) + ", false)) x", 'authenticated')) === 'false');
 ok('message inconnu : accepté sans rien changer (200)', (await hook({ id: 'evt_' + R + '5', type: 'charge.refunded', data: { object: {} } })) === 200 && row().status === 'canceled');
 const noKey = makeHandler(k => (k === 'STRIPE_SECRET_KEY' ? '' : env[k]), fakeFetch);
 const nk = await noKey(new Request('http://edge/stripe/checkout', { method: 'POST', headers: { Authorization: 'Bearer tok-ok' }, body: '{"plan":"year"}' }));

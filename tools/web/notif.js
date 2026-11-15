@@ -14,6 +14,8 @@
     { k: 'pa', label: 'PA à récupérer', sub: 'Chaque jour dès minuit, quand tes points d’Aura t’attendent' },
     { k: 'booster', label: 'Booster PK prêt', sub: 'Quand ton Booster PK gratuit peut être ouvert' },
     { k: 'coin', label: 'Pièce prête', sub: 'Quand tu peux relancer la pièce pour gagner des PK' },
+    // Safari éclair (2026-11-14, porteur) : quand une nouvelle partie est possible (délai du grade, safari.js).
+    { k: 'safari', label: 'Safari éclair prêt', sub: 'Quand tu peux rejouer au Safari éclair' },
     { k: 'alerts', label: 'Sorties et boutiques suivies', sub: 'Le jour d’une sortie que tu suis, la veille pour tes boutiques' }
   ];
   const ntProto = Component.prototype;
@@ -32,6 +34,8 @@
       out.push({ key: 'booster', cycle: g.boosterAt, title: 'Booster PK prêt', text: 'Ton Booster PK gratuit peut être ouvert' });
     if (ntOn(s, 'coin') && P.coinH && g.coinAt && gmWait(g.coinAt, gmCoinMs(this)) === 0)
       out.push({ key: 'coin', cycle: g.coinAt, title: 'Pièce prête', text: 'Tu peux relancer la pièce pour gagner des PK' });
+    if (ntOn(s, 'safari') && g.safariAt && this.sfHours && this.sfHours() && !this.sfLocked() && this.sfWaitMs() === 0)
+      out.push({ key: 'safari', cycle: g.safariAt, title: 'Safari éclair prêt', text: 'Tu peux rejouer au Safari éclair pour gagner des PK' });
     return out;
   };
   const ntShow = (title, body, tag) => {
@@ -83,7 +87,12 @@
   };
   ntProto.vNotif = function (s) {
     const perm = ntPerm();
+    const nOn = NT_KINDS.filter(x => ntOn(s, x.k)).length;
     return {
+      // Fenêtre glissée ouverte depuis la ligne « Notifications » de Mon profil (2026-11-14, porteur).
+      open: !!s.ntOpen, openSheet: () => this.setState({ ntOpen: true }), close: () => this.setState({ ntOpen: false }),
+      summary: nOn === NT_KINDS.length ? 'Toutes activées' : nOn === 0 ? 'Toutes désactivées' : nOn + ' sur ' + NT_KINDS.length + ' activées',
+      entryLabel: 'Notifications, ' + (nOn === NT_KINDS.length ? 'toutes activées' : nOn === 0 ? 'toutes désactivées' : nOn + ' sur ' + NT_KINDS.length + ' activées'),
       items: NT_KINDS.map(x => {
         const on = ntOn(s, x.k);
         return { label: x.label, sub: x.sub, on: on ? 'true' : 'false', cls: 'pkm-nt-sw' + (on ? ' pkm-nt-on' : ''), toggle: () => this.notifSet(x.k, !on) };

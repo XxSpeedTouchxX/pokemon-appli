@@ -14,20 +14,21 @@ const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const 
 const KEY = 'pkm-collection-v1';
 const UID = 'u-del', EMAIL = 'ondine@exemple.fr';
 const TOKEN = 'h.' + Buffer.from(JSON.stringify({ sub: UID, email: EMAIL })).toString('base64url') + '.s';
-const S = { del: [], refuse: false };
+const S = { del: [], refuse: false, prem: false, cancel: [], order: [] };
 async function fake(route) {
   const req = route.request(), url = new URL(req.url()), p = url.pathname;
   const send = (status, j) => route.fulfill({ status: status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(j) });
   const auth = req.headers().authorization || '';
+  if (p === '/functions/v1/stripe/cancel') { S.cancel.push(auth); S.order.push('cancel'); S.prem = false; return send(200, { ok: true, canceled: true }); }
   if (p === '/rest/v1/rpc/delete_my_account') {
-    S.del.push(auth);
+    S.del.push(auth); S.order.push('delete');
     if (S.refuse) return send(400, { code: 'P0001', message: 'Ton abonnement Premium est encore actif : arrête-le d’abord (sur dropicards.fr, ou en écrivant à contact@dropicards.fr), puis supprime ton compte.' });
     return send(200, { ok: true });
   }
   if (p === '/rest/v1/rpc/game_state') {
     return send(200, { unlimited: false, admin_until: null, next_draw: '2026-11-22T19:00:00Z', shop_draw: {}, pk: 300, pa: 0, pk_earned: 300, pa_day: null, pa_streak: 0,
       pa_gain: 20, today: '2026-11-09', grade: 0, booster_last: null, coin_last: null, shared: false, unlocked: [], shop: {}, buddy: 25,
-      premium: { on: false, plan: null, status: 'none', until: null, cancel: false, customer: false } });
+      premium: S.prem ? { on: true, plan: 'month', status: 'active', until: '2026-12-09T10:00:00Z', cancel: false, customer: true } : { on: false, plan: null, status: 'none', until: null, cancel: false, customer: false } });
   }
   if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Ondine', age_range: '15-25', starter: 7, news_optin: false, role: 'user', status: 'active' }]);
   if (p === '/auth/v1/token') return send(200, { access_token: TOKEN, refresh_token: 'r', expires_in: 3600, user: { id: UID, email: EMAIL } });
@@ -74,10 +75,14 @@ ok('règles du tirage : « Google et Apple ne sont ni organisateurs, ni partenai
 await page.screenshot({ path: shot('store-pkshop.png') });
 
 // 3. Supprimer mon compte.
+// Depuis le 2026-11-14 (porteur) : tout en bas des Réglages, plus dans Mon profil.
 await page.goto(E2E + '/?start=profile&debug&store=1' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
+ok('Mon profil : plus de bouton « Supprimer mon compte »', (await page.locator('button.pkm-acct-del').count()) === 0);
+await page.goto(E2E + '/?start=settings&debug&store=1' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 const delBtn = page.locator('button.pkm-acct-del');
 await delBtn.scrollIntoViewIfNeeded().catch(() => {});
-ok('Mon profil : bouton « Supprimer mon compte »', await delBtn.isVisible().catch(() => false));
+const lastSec = await page.evaluate(() => { const secs = [...document.querySelectorAll('#app main section[aria-label]')]; return secs.length ? secs[secs.length - 1].getAttribute('aria-label') : ''; });
+ok('Réglages : « Supprimer mon compte » tout en bas (dernière rubrique : ' + lastSec + ')', await delBtn.isVisible().catch(() => false) && lastSec === 'Supprimer mon compte');
 await delBtn.click(); await page.waitForTimeout(400);
 const ask = page.locator('[role=alertdialog][aria-label="Supprimer mon compte"]');
 ok('confirmation : ce qui sera supprimé, « Impossible de revenir en arrière »', /Impossible de revenir en arrière/.test(await ask.innerText().catch(() => '')));
@@ -90,13 +95,16 @@ await delBtn.click(); await page.waitForTimeout(300);
 await ask.locator('button.pkm-acct-del-go').click(); await page.waitForTimeout(1000);
 ok('refus du serveur (Premium actif) : message affiché', /abonnement Premium est encore actif/.test(await page.locator('body').innerText()));
 ok('refus : rien d’effacé sur l’appareil (session et collection gardées)', await page.evaluate(k => !!localStorage.getItem('pkm-cloud-session') && !!localStorage.getItem(k), KEY));
-// Suppression acceptée.
-S.refuse = false;
-await page.waitForTimeout(3500);
-if (!(await ask.isVisible().catch(() => false))) { await delBtn.click(); await page.waitForTimeout(300); }
+// Suppression acceptée, avec un abonnement en cours (2026-11-14, porteur) : l'abonnement est arrêté d'abord.
+S.refuse = false; S.prem = true;
+await page.goto(E2E + '/?start=settings&debug&store=1' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2000);
+await delBtn.scrollIntoViewIfNeeded().catch(() => {});
+await delBtn.click(); await page.waitForTimeout(400);
+ok('abonné : la confirmation dit que l’abonnement sera arrêté tout de suite', /sera arrêté tout de suite : plus aucun prélèvement/.test(await ask.innerText().catch(() => '')));
 await page.evaluate(() => localStorage.setItem('pkm-marqueur-test', '1'));
 await ask.locator('button.pkm-acct-del-go').click();
 await page.waitForTimeout(2500);
+ok('abonnement arrêté avant la suppression (' + S.order.join(' → ') + '), avec le jeton du joueur', S.cancel.length === 1 && S.cancel[0] === 'Bearer ' + TOKEN && S.order.slice(-2).join() === 'cancel,delete');
 ok('suppression : appel au serveur avec le jeton du joueur', S.del.length === 2 && S.del[1] === 'Bearer ' + TOKEN);
 const left = await page.evaluate(() => ({ ses: localStorage.getItem('pkm-cloud-session'), mark: localStorage.getItem('pkm-marqueur-test'), onb: window.__pkm && window.__pkm.st().onb }));
 ok('après : plus de session ni d’anciennes données sur l’appareil, l’app repart de l’accueil', !left.ses && !left.mark && left.onb > 0);
