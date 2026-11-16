@@ -141,18 +141,30 @@
     return c[id];
   };
 
-  // ——— Animation « carte qui entre dans ma vitrine » (2026-11-16, porteur : à la place du message du bas) ———
-  // La carte apparaît, reçoit son étiquette (POUR TRADE, À VENDRE · prix), puis descend dans une vitrine en verre qui
-  // s'illumine. 2,6 s ; rien ne bloque l'écran (calque sans toucher) ; mouvement réduit : simple fondu (vitrine.css).
-  const VT_FX_MS = 2600;
-  const VT_CASE = '<svg viewBox="0 0 160 120" aria-hidden="true"><defs><linearGradient id="pkmVtG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#BFE8FF" stop-opacity=".55"/><stop offset=".5" stop-color="#8FC9F0" stop-opacity=".18"/><stop offset="1" stop-color="#D8F1FF" stop-opacity=".45"/></linearGradient><linearGradient id="pkmVtW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE680"/><stop offset="1" stop-color="#C99A12"/></linearGradient></defs>'
-    + '<rect x="8" y="98" width="144" height="16" rx="4" fill="url(#pkmVtW)" stroke="#0B1120" stroke-width="3"/>'
-    + '<rect x="16" y="8" width="128" height="92" rx="8" fill="url(#pkmVtG)" stroke="#E8F6FF" stroke-width="3"/>'
-    + '<path d="M30 16 L54 16 L26 74 L22 74 Z" fill="#fff" opacity=".35"/><path d="M62 16 L70 16 L44 70 L40 70 Z" fill="#fff" opacity=".22"/>'
-    + '<rect x="16" y="66" width="128" height="5" fill="#E8F6FF" opacity=".75"/><rect x="14" y="4" width="132" height="8" rx="4" fill="url(#pkmVtW)" stroke="#0B1120" stroke-width="2.5"/></svg>';
+  // ——— Animation « carte qui entre dans ma vitrine » (2026-11-16, porteur : à la place du message du bas ; puis, même
+  // soir : « un truc un peu plus satisfaisant, 1 s de plus ») ———
+  // 3,6 s : la carte se retourne et brille, l'étiquette (POUR TRADE, À VENDRE · prix) tombe comme un tampon, les portes
+  // en verre de la vitrine s'ouvrent, la carte y vole en arc et rebondit sur l'étagère, les portes se referment (« clic »),
+  // la vitrine s'illumine (rayons, étincelles), puis « Dans ta vitrine » et le nombre de cartes (N / 30). Petite
+  // vibration au tampon et à la fermeture, son doux si les sons sont activés. Calque sans toucher ; mouvement réduit :
+  // état final seulement (vitrine.css).
+  const VT_FX_MS = 3600;
+  vtProto.vtFxSound = function () {
+    try {
+      if (typeof sfxMuted === 'function' && sfxMuted()) return;
+      const ac = typeof sfxCtx === 'function' ? sfxCtx() : null;
+      if (!ac) return;
+      const t = ac.currentTime + 0.02, out = ac.destination;
+      sfxThump(ac, out, t + 1.05, 0.32, 150, 60, 0.2);            // tampon
+      sfxHiss(ac, out, t + 1.05, 0.08, 0.05, 'bandpass', 2400, 1200, 1.2);
+      sfxHiss(ac, out, t + 1.4, 0.32, 0.035, 'highpass', 3000, 6000, 0.7, 0.05); // portes qui glissent
+      sfxBell(ac, out, 1568, t + 2.7, 0.9, 0.12, [1, 2.76, 5.4], [1, 0.4, 0.15]); // « clic » de verre
+      sfxSparkle(ac, out, t + 2.75, t + 3.2, 6, 0.05, 2400);
+    } catch (e) { /* son indisponible */ }
+  };
   vtProto.vtFx = function (ref, kind, price) {
     if (typeof document === 'undefined') return;
-    const r = vtParse(ref), c = this.vtCard(r.pid, r.lang, r.cond, r.gr);
+    const r = vtParse(ref), c = this.vtCard(r.pid, r.lang, r.cond, r.gr), n = Object.keys(this.st().vit || {}).length;
     const host = document.getElementById('app') || document.body, old = document.querySelector('.pkm-vfx');
     if (old) old.remove();
     const el = document.createElement('div');
@@ -161,12 +173,15 @@
     el.setAttribute('aria-live', 'polite');
     const what = kind === 'trade' ? 'Pour trade dans ta vitrine' : kind === 'sale' ? 'En vente à ' + price : 'Dans ta vitrine';
     el.setAttribute('aria-label', c.name + ' : ' + what);
-    const tag = kind === 'trade' ? '<em class="pkm-vt-badge pkm-vfx-tag">⇄ POUR TRADE</em>' : kind === 'sale' ? '<em class="pkm-vt-badge pkm-vt-badge-sale pkm-vfx-tag"></em>' : '';
-    const sparks = Array.from({ length: 10 }, (_, i) => '<i style="--a: ' + i * 36 + 'deg"></i>').join('');
+    const tag = kind === 'trade' ? '<em class="pkm-vt-badge pkm-vfx-tag">⇄ POUR TRADE</em>' : kind === 'sale' ? '<em class="pkm-vt-badge pkm-vt-badge-sale pkm-vfx-tag"></em>' : '<em class="pkm-vt-badge pkm-vfx-tag pkm-vfx-tag-show">✦ VITRINE</em>';
+    const sparks = Array.from({ length: 14 }, (_, i) => '<i style="--a: ' + Math.round(i * 360 / 14) + 'deg; --d: ' + (70 + (i * 37) % 50) + 'px"></i>').join('');
     el.innerHTML = '<div class="pkm-vfx-veil"></div><div class="pkm-vfx-stage">'
-      + '<div class="pkm-vfx-case">' + VT_CASE + '<div class="pkm-vfx-sparks" aria-hidden="true">' + sparks + '</div></div>'
-      + '<div class="pkm-vfx-card" aria-hidden="true">' + (c.hasImg ? '<img alt="">' : '<span class="pkm-vt-noimg"></span>') + tag + '</div>'
-      + '<p class="pkm-vfx-what"></p></div>';
+      + '<div class="pkm-vfx-rays" aria-hidden="true"></div>'
+      + '<div class="pkm-vfx-case" aria-hidden="true"><div class="pkm-vfx-cap"></div><div class="pkm-vfx-box"><div class="pkm-vfx-light"></div><div class="pkm-vfx-shelf"></div></div><div class="pkm-vfx-base"></div></div>'
+      + '<div class="pkm-vfx-card" aria-hidden="true">' + (c.hasImg ? '<img alt="">' : '<span class="pkm-vt-noimg"></span>') + '<i class="pkm-vfx-shine"></i>' + tag + '<i class="pkm-vfx-ring"></i></div>'
+      + '<div class="pkm-vfx-doors" aria-hidden="true"><i class="pkm-vfx-door pkm-vfx-door-l"></i><i class="pkm-vfx-door pkm-vfx-door-r"></i></div>'
+      + '<div class="pkm-vfx-flash" aria-hidden="true"></div><div class="pkm-vfx-sparks" aria-hidden="true">' + sparks + '</div>'
+      + '<div class="pkm-vfx-text"><p class="pkm-vfx-what"></p><span class="pkm-vfx-count"></span></div></div>';
     if (kind === 'sale') el.querySelector('.pkm-vfx-tag').textContent = 'À VENDRE · ' + price;
     if (c.hasImg) {
       const im = el.querySelector('.pkm-vfx-card img');
@@ -174,7 +189,12 @@
       im.src = c.img;
     } else el.querySelector('.pkm-vfx-card .pkm-vt-noimg').textContent = c.name;
     el.querySelector('.pkm-vfx-what').textContent = what;
+    el.querySelector('.pkm-vfx-count').textContent = n + ' / ' + VT_MAX + ' dans ta vitrine';
     host.appendChild(el);
+    this.vtFxSound();
+    const buzz = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* pas de vibreur */ } };
+    setTimeout(() => buzz(18), 1050);
+    setTimeout(() => buzz([12, 40, 24]), 2700);
     setTimeout(() => el.remove(), VT_FX_MS);
   };
 

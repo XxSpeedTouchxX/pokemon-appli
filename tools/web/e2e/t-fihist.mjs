@@ -83,8 +83,8 @@ const open = async (w, h, route, prem = true) => {
   const logos = await G.locator('img.pkm-fg-logo').evaluateAll(im => im.map(i => i.getAttribute('src').split('/').pop() + ':' + (i.naturalWidth > 0)));
   ok('logos : ' + logos.join(', '), logos.join(',') === 'pca.png:true,ccc.svg:true,psa-color.png:true');
   const k = Number(cote.replace(/[^\d,]/g, '').replace(',', '.')), psa10 = N(await G.locator('.pkm-fg-co').nth(2).locator('.pkm-fg-v').first().innerText());
-  const want = '≈ ' + (Math.round(k * 3.5 * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/[\u202f\u00a0]/g, ' ') + ' €';
-  ok('PSA 10 « ' + psa10 + ' » = cote × 3,5 (' + want + ')', psa10 === want);
+  const want = '≈ ' + (Math.round(k * 2.5 * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/[\u202f\u00a0]/g, ' ') + ' €';
+  ok('PSA 10 « ' + psa10 + ' » = cote × 2,5 (' + want + ')', psa10 === want);
   ok('chaque note est une estimation signalée', (await G.locator('.pkm-fg-est').count()) === 19 && /aucune vente réelle/.test(await G.innerText()));
   const col = async sel => G.locator(sel).first().evaluate(e => { const c = getComputedStyle(e); return c.backgroundImage !== 'none' ? 'dégradé' : c.backgroundColor; });
   const cols = [await col('.pkm-fg-g10'), await col('.pkm-fg-g95'), await col('.pkm-fg-g9'), await col('.pkm-fg-g8'), await col('.pkm-fg-g7'), await col('.pkm-fg-g6'), await col('.pkm-fg-black'), await col('.pkm-fg-gold')];
@@ -112,20 +112,24 @@ const open = async (w, h, route, prem = true) => {
   await ctx.close();
 }
 {
-  // Sans DropiPass : la fiche s'ouvre sur 1M, « COMPLET » porte un cadenas et ouvre la fenêtre « Accès verrouillé ».
+  // Sans DropiPass (2026-11-16, porteur : « tout l'historique flouté, pas que le complet ») : tout le bloc flouté sous un
+  // voile « Réservé au DropiPass » ; un appui ouvre la fenêtre « Accès verrouillé ».
   const [ctx, page] = await open(390, 844, null, false);
   await page.evaluate(id => window.__pkm.fiOpen(id), ID); await page.waitForTimeout(1500);
   const H = page.locator('section.pkm-fi section[aria-label="Historique du prix"]'), per = H.locator('.pkm-fh-per button');
-  const full = per.filter({ hasText: 'COMPLET' });
-  ok('sans DropiPass : ouverte sur 1M, « COMPLET » avec un cadenas', (await per.nth(1).getAttribute('aria-pressed')) === 'true' && (await full.getAttribute('aria-pressed')) === 'false'
-    && (await full.locator('svg.pkm-fh-lock').count()) === 1 && /réservé au DropiPass/.test(await full.getAttribute('aria-label')) && / · 1 mois$/.test(N(await H.locator('.pkm-fh-chg').innerText())));
-  await full.click(); await page.waitForTimeout(500);
+  const blur = H.locator('.pkm-fh-blur'), veil = H.locator('button.pkm-fh-veil');
+  ok('sans DropiPass : tout l’historique flouté (courbe, montants, dates, bulles)', (await blur.count()) === 1 && (await blur.locator('.pkm-fh-plot').count()) === 1 && (await blur.locator('.pkm-fh-per').count()) === 1
+    && /blur/.test(await blur.evaluate(e => getComputedStyle(e).filter)) && (await blur.getAttribute('aria-hidden')) === 'true');
+  ok('sans DropiPass : les 3 bulles portent un cadenas', (await per.count()) === 3 && (await per.locator('svg.pkm-fh-lock').count()) === 3);
+  ok('sans DropiPass : voile « Historique du prix · Réservé au DropiPass · Débloquer »', (await veil.count()) === 1 && /Historique du prix/.test(N(await veil.innerText())) && /Réservé au DropiPass/.test(N(await veil.innerText())) && /Débloquer/.test(N(await veil.innerText())));
+  await H.screenshot({ path: shot('fihist-floute.png') });
+  await veil.click(); await page.waitForTimeout(500);
   const lw = page.locator('section[aria-label="Accès verrouillé"]');
-  ok('sans DropiPass : « COMPLET » → fenêtre « Accès verrouillé » (réservé au DropiPass, sans grade)', await lw.isVisible() && /historique complet du prix est réservé au DropiPass/.test(await lw.innerText())
+  ok('sans DropiPass : voile → fenêtre « Accès verrouillé » (réservé au DropiPass, sans grade)', await lw.isVisible() && /historique du prix est réservé au DropiPass/.test(await lw.innerText())
     && (await lw.locator('button:has-text("Découvrir le DropiPass")').count()) === 1 && (await lw.locator('button:has-text("Voir le grade")').count()) === 0
     && (await lw.locator('img[src="img/brand/historique.svg"]').count()) === 1);
   await lw.locator('button:has-text("Compris")').click(); await page.waitForTimeout(300);
-  ok('sans DropiPass : la courbe reste sur 1M', (await per.nth(1).getAttribute('aria-pressed')) === 'true');
+  ok('sans DropiPass : toujours flouté après la fenêtre', (await blur.count()) === 1);
   await ctx.close();
 }
 console.log(res.join('\n'));

@@ -414,6 +414,17 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-fh-x { position: relative; height: 15px; margin-left: 58px; font-size: 11px; color: #9AA8C3; }
 .pkm-fh-x span { position: absolute; white-space: nowrap; }
 .pkm-fh-per { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 2px; } /* 3 bulles : 1S, 1M, COMPLET (2026-11-13, porteur) */
+/* Historique flouté sans DropiPass (2026-11-16, porteur) : tout le bloc sous un voile, cadenas et « Débloquer » au centre. */
+.pkm-fh { position: relative; }
+.pkm-fh-body { display: flex; flex-direction: column; gap: 8px; }
+.pkm-fh-blur { filter: blur(7px); opacity: 0.8; pointer-events: none; user-select: none; -webkit-user-select: none; }
+.pkm-fh-veil { position: absolute; left: 0; right: 0; top: 44px; bottom: 0; z-index: 2; display: flex; align-items: center; justify-content: center; padding: 12px; border: 0; border-radius: 0 0 20px 20px; background: linear-gradient(180deg, rgba(18, 28, 51, 0.15), rgba(18, 28, 51, 0.55)); color: #F3F6FC; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pkm-fh-veil:focus-visible { outline: 3px solid #FFD60A; outline-offset: -3px; }
+.pkm-fh-veil-in { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 20px; border-radius: 18px; border: 1px solid rgba(255, 214, 10, 0.45); background: rgba(11, 17, 32, 0.82); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45); text-align: center; }
+.pkm-fh-veil-lock { color: #FFD60A; filter: drop-shadow(0 2px 6px rgba(255, 214, 10, 0.35)); }
+.pkm-fh-veil-in b { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; }
+.pkm-fh-veil-in small { font-size: 12.5px; color: #C9D3EA; }
+.pkm-fh-veil-in em { margin-top: 6px; padding: 7px 18px; border-radius: 999px; background: #FFD60A; color: #0B1120; font-size: 13.5px; font-style: normal; font-weight: 800; }
 .pkm-fh-per button { height: 34px; min-width: 0; padding: 0; border: 1px solid; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.15s; }
 .pkm-fh-per button:active { transform: scale(0.94); }
 .pkm-fh-per button.pkm-fh-off { opacity: 0.38; cursor: default; }

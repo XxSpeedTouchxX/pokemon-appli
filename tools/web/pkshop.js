@@ -120,7 +120,7 @@
     scan: 'Le DropiPass arrive très bientôt : tes scans y seront illimités.',
     binder: 'Le DropiPass arrive très bientôt : ton classeur y sera illimité.',
     pg: 'Le DropiPass arrive très bientôt : 60 pré-gradations par mois y seront incluses.',
-    hist: 'Le DropiPass arrive très bientôt : l’historique complet du prix y sera inclus.'
+    hist: 'Le DropiPass arrive très bientôt : l’historique du prix y sera inclus.'
   };
   shopProto.dpLock = function (kind, extra) { this.setState({ shopLock: Object.assign({ g: -1, kind: kind }, extra || {}), toast: null }); };
   // Fenêtre « Accès verrouillé », pour tout l'app (PK shop, Radar, classeur plein ; 2026-11-07).
@@ -128,8 +128,8 @@
     const g = lk.g >= 0 ? shopGradeName(lk.g) : '', store = typeof storeApp !== 'undefined' && storeApp;
     if (lk.kind === 'scan') return 'Tes ' + lk.n + ' scans du jour sont utilisés.' + (lk.g >= 0 ? ' Atteins le grade « ' + g + ' » pour avoir ' + lk.next + ' scans par jour.' : ' Reviens demain.');
     if (lk.kind === 'pg') return 'Ta pré-gradation gratuite est déjà utilisée : la prochaine arrive dans ' + lk.wait + ' (1 tous les 3 jours).';
-    if (lk.kind === 'hist') return store ? 'L’historique complet du prix n’est pas disponible dans cette version : tu vois la dernière semaine et le dernier mois.'
-      : 'L’historique complet du prix est réservé au DropiPass. Sans abonnement, tu vois la dernière semaine (1S) et le dernier mois (1M).';
+    if (lk.kind === 'hist') return store ? 'L’historique du prix n’est pas encore disponible dans cette version.'
+      : 'L’historique du prix est réservé au DropiPass : l’évolution de la cote sur 1 semaine, 1 mois et depuis le début.';
     if (lk.kind === 'radar') return 'Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « ' + g + ' ».';
     if (lk.kind === 'safari') return 'Tu ne peux pas jouer au Safari éclair tant que tu n’as pas atteint le grade « ' + g + ' ».';
     if (lk.kind === 'coin') return 'Tu ne peux pas lancer la pièce tant que tu n’as pas atteint le grade « ' + g + ' ».';

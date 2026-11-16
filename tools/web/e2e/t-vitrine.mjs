@@ -82,7 +82,8 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   ok('fiche : « 2 joueurs cherchent cette carte »', /2 joueurs cherchent cette carte/.test(N(await V.innerText())));
   ok('fiche : « Dropicards ne vend rien »', /Dropicards ne vend rien et ne prend aucun paiement/.test(N(await V.innerText())));
   await V.locator('[role="switch"]', { hasText: 'Dans ma vitrine' }).click(); await page.waitForTimeout(1400);
-  ok('vitrine : animation de la carte qui entre dans la vitrine (« Dans ta vitrine »)', await page.evaluate(() => { const e = document.querySelector('.pkm-vfx'); return !!e && /Dans ta vitrine/.test(e.textContent) && !!e.querySelector('.pkm-vfx-case svg') && !!e.querySelector('.pkm-vfx-card'); }));
+  ok('vitrine : animation de la carte qui entre dans la vitrine (portes en verre, « Dans ta vitrine », « 1 / 30 »)', await page.evaluate(() => { const e = document.querySelector('.pkm-vfx'); return !!e && /Dans ta vitrine/.test(e.textContent) && /1 \/ 30 dans ta vitrine/.test(e.textContent) && !!e.querySelector('.pkm-vfx-case .pkm-vfx-box') && e.querySelectorAll('.pkm-vfx-door').length === 2 && !!e.querySelector('.pkm-vfx-card .pkm-vfx-tag'); }));
+  ok('vitrine : animation de 3,6 s', await page.evaluate(() => { const c = document.querySelector('.pkm-vfx-card'); return !!c && c.getAnimations().some(a => a.effect && a.effect.getTiming().duration === 3600); }));
   ok('vitrine : envoyée au serveur (showcase_set, 1 carte, ni trade ni vente)', S.vit.length === 1 && S.vit[0].card_id === c0 && !S.vit[0].trade && !S.vit[0].sale && S.vit[0].lang === 'FR' && S.vit[0].cond === 'NM');
   await V.locator('[role="switch"]', { hasText: 'Pour trade' }).click(); await page.waitForTimeout(1400);
   ok('Pour trade : envoyé (trade = vrai)', S.vit.length === 1 && S.vit[0].trade === true);

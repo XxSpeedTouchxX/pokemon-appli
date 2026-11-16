@@ -41,7 +41,7 @@ await add(async SH => {
   await notes.nth(0).click(); await page.waitForTimeout(200);
   const t = await page.locator(SH).innerText();
   const unit = num(t.match(/Valeur Cardmarket à l’unité[^\n]*\n?\s*([\d\s  ]+,\d\d)/)[1]);
-  ok('valeur PSA 10 : ' + unit + ' € = cote ' + coteNM + ' × 3,5', Math.abs(unit - Math.round(coteNM * 3.5 * 100) / 100) < 0.02 && /PSA 10/.test(t));
+  ok('valeur PSA 10 : ' + unit + ' € = cote ' + coteNM + ' × 2,5', Math.abs(unit - Math.round(coteNM * 2.5 * 100) / 100) < 0.02 && /PSA 10/.test(t));
   ok('note d’estimation : « ' + N(await page.locator(SH + ' .pkm-gr-note').innerText()).slice(0, 70) + '… »', /PSA 10 : environ/.test(await page.locator(SH + ' .pkm-gr-note').innerText()));
   await page.screenshot({ path: shot('graded-add.png') });
 });
@@ -58,7 +58,7 @@ ok('pastille sur la carte gradée : logo PSA et « ' + N(await badge.locator('.p
 ok('pas de bulle d’état sur la carte gradée', (await badge.locator('.pkm-cond-ico').count()) === 0);
 const vs = await tiles.evaluateAll(b => b.map(x => x.getAttribute('aria-label').match(/cote ([^.]*)/)[1]));
 const vG = num(vs[labels.findIndex(l => /gradée/.test(l))]), vR = num(vs[labels.findIndex(l => !/gradée/.test(l))]);
-ok('valeurs : PSA 10 ' + vG + ' €, non gradée ' + vR + ' €', Math.abs(vG - vR * 3.5) < 0.05);
+ok('valeurs : PSA 10 ' + vG + ' €, non gradée ' + vR + ' €', Math.abs(vG - vR * 2.5) < 0.05);
 const head = num(await page.locator('section[aria-label="Mon classeur"]').locator('text=/€/').first().innerText().catch(() => '0'));
 await page.locator('section[aria-label="Mon classeur"]').scrollIntoViewIfNeeded(); await page.waitForTimeout(300);
 await page.screenshot({ path: shot('graded-binder.png') });

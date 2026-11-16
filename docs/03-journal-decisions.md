@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-16 (nuit) — Notes 10 revues, historique entièrement flouté, animation de vitrine refaite (porteur)
+
+- **Coefficients des notes 10** (porteur) : PCA 10 ×2,1 ; CCC 10 Black Label ×2,2, 10 Gold Label ×2, 10 ×1,8 ; PSA 10 ×2,5. Les autres notes restent celles du tableau précédent (`FI_GRADERS`, `fiche.js` ; tests `t-graded`, `t-fihist` adaptés).
+- **Historique du prix** (porteur : « que tout l'historique du prix soit flouté et pas que le complet ») : sans DropiPass, tout le bloc (courbe, montants, dates, bulles 1S, 1M, COMPLET) est flouté sous un voile « Historique du prix · Réservé au DropiPass · Débloquer », qui ouvre la fenêtre « Accès verrouillé » ; app Android : « Bientôt disponible dans cette version », sans mention du DropiPass. Admins et abonnés voient tout. Textes du DropiPass (fenêtre, achats fermés, CGV) alignés. **À savoir** : les achats du DropiPass étant fermés hors admins, aucun joueur ne peut le débloquer pour l'instant.
+- **Animation de la vitrine** (porteur : « plus satisfaisant, 1 s de plus ») : 3,6 s au lieu de 2,6 s ; la carte se retourne et brille, l'étiquette tombe comme un tampon (petite secousse, onde), les portes en verre s'ouvrent et la vitrine s'éclaire, la carte vole en arc et rebondit sur l'étagère, les portes se referment avec un éclat (rayons, étincelles), puis « Dans ta vitrine » et « N / 30 dans ta vitrine » ; vibration au tampon et à la fermeture, petit son (tampon, portes, tintement de verre) si les sons sont activés.
+- Cache v235.
+
 ## 2026-11-16 (soir, suite) — Nouveaux coefficients de gradation (porteur)
 
 - **Décision du porteur** : nouveaux coefficients des notes (valeur gradée = cote Cardmarket Near Mint × coefficient × langue), à la place de ceux du 2026-11-01 :

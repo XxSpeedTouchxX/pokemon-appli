@@ -300,11 +300,12 @@
   // (« Pristine », une imperfection), en plus du 10. PSA n'a pas de 9,5. Notes 8,5 retirées. Logo PSA rouge et bleu
   // (Wikipédia, 2026-11-01).
   // Coefficients des notes (valeur gradée = cote Cardmarket Near Mint × coefficient × langue) : tableau du porteur du
-  // 2026-11-16 (remplace celui du 2026-11-01). Estimations : aucune vente réelle de carte gradée en source ouverte.
+  // 2026-11-16 (remplace celui du 2026-11-01), notes 10 revues le même soir (PCA 2,1 ; CCC 2,2 / 2 / 1,8 ; PSA 2,5).
+  // Estimations : aucune vente réelle de carte gradée en source ouverte.
   const FI_GRADERS = [
-    ['PCA', 'img/grading/pca.png', [['10', 2.5], ['9.5', 1.9], ['9', 1.7], ['8', 1.35], ['7', 1.1], ['6', 1.05]]],
-    ['CCC', 'img/grading/ccc.svg', [['10', 3.2, 'Black Label'], ['10', 2.7, 'Gold Label'], ['10', 2.1], ['9.5', 1.65], ['9', 1.35], ['8', 1.2], ['7', 1.04], ['6', 1.02]]],
-    ['PSA', 'img/grading/psa-color.png', [['10', 3.5], ['9', 1.9], ['8', 1.5], ['7', 1.3], ['6', 1.1]]]
+    ['PCA', 'img/grading/pca.png', [['10', 2.1], ['9.5', 1.9], ['9', 1.7], ['8', 1.35], ['7', 1.1], ['6', 1.05]]],
+    ['CCC', 'img/grading/ccc.svg', [['10', 2.2, 'Black Label'], ['10', 2, 'Gold Label'], ['10', 1.8], ['9.5', 1.65], ['9', 1.35], ['8', 1.2], ['7', 1.04], ['6', 1.02]]],
+    ['PSA', 'img/grading/psa-color.png', [['10', 2.5], ['9', 1.9], ['8', 1.5], ['7', 1.3], ['6', 1.1]]]
   ];
   const FI_GRADE_CLS = { '10': 'g10', '9.5': 'g95', '9': 'g9', '8': 'g8', '7': 'g7', '6': 'g6', 'Black Label': 'black', 'Gold Label': 'gold' };
   // Pas de prix gradés pour une carte cotée moins de 5 € (2026-11-01, porteur) : la gradation coûterait plus que la carte.
@@ -451,6 +452,15 @@
     const full = this.fiHistFull(s), want = FI_PER.some(q => q[0] === s.fiPer) ? s.fiPer : 'COMPLET';
     const per = want === 'COMPLET' && !full ? '1M' : want, known = st.qty - st.unk;
     const hist = this.fiHistory(p, x, k, per, adj ? mine / k : 1, owned && known > 0 && st.cost > 0 ? st.cost / known : 0);
+    // Tout l'historique flouté sans DropiPass (2026-11-16, porteur : « que tout l'historique du prix soit flouté, et pas
+    // que le complet ») : courbe, montants, dates et bulles sous un voile ; un appui ouvre « Accès verrouillé ».
+    const histLock = !full && !!(hist && hist.ready), store = typeof storeApp !== 'undefined' && storeApp;
+    if (hist && hist.ready) Object.assign(hist, histLock ? {
+      locked: true, wrapCls: 'pkm-fh-body pkm-fh-blur', hide: 'true', unlock: () => this.dpLock('hist'),
+      lockTitle: 'Historique du prix', lockSub: store ? 'Bientôt disponible dans cette version' : 'Réservé au DropiPass', lockBtn: store ? 'En savoir plus' : 'Débloquer',
+      lockAria: store ? 'Historique du prix : bientôt disponible' : 'Historique du prix réservé au DropiPass : en savoir plus',
+      periods: (hist.periods || []).map(q => Object.assign({}, q, { lock: true, pick: () => this.dpLock('hist') }))
+    } : { locked: false, wrapCls: 'pkm-fh-body', hide: 'false' });
     const eg = groups.find(g => g.key === s.fiEtat);
     const etatPick = eg ? {
       open: true, title: 'Quel est l’état de ' + (eg.qty > 1 ? 'tes ' + eg.qty + ' exemplaires' : 'ta carte') + ' ?',

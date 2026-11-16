@@ -2391,6 +2391,8 @@ PKCOUNTER
 <h3 class="pkm-fi-h3">Historique du prix <span class="pkm-fi-chip">Cardmarket</span><span class="pkm-fi-flag" style="background: {{ fi.flag }}"></span></h3>
 <sc-if value="{{ fi.hist.loading }}" hint-placeholder-val="{{ false }}"><span class="pkm-fi-note">Chargement de l’historique…</span></sc-if>
 <sc-if value="{{ fi.hist.ready }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ fi.hist.locked }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ fi.hist.unlock }}" aria-label="{{ fi.hist.lockAria }}" class="pkm-fh-veil"><span class="pkm-fh-veil-in"><svg width="30" height="34" viewBox="0 0 12 14" aria-hidden="true" class="pkm-fh-veil-lock"><path d="M3 6V4.2a3 3 0 0 1 6 0V6" fill="none" stroke="currentColor" stroke-width="1.6"></path><rect x="1" y="6" width="10" height="7.5" rx="1.8" fill="currentColor"></rect></svg><b>{{ fi.hist.lockTitle }}</b><small>{{ fi.hist.lockSub }}</small><em>{{ fi.hist.lockBtn }}</em></span></button></sc-if>
+<div class="{{ fi.hist.wrapCls }}" aria-hidden="{{ fi.hist.hide }}">
 <div class="pkm-fh-top"><span class="pkm-fi-big">{{ fi.hist.value }}</span><span class="pkm-fh-chg" style="color: {{ fi.hist.color }}">{{ fi.hist.change }}</span></div>
 <div class="pkm-fh-plot">
 <div aria-hidden="true" class="pkm-fh-y"><sc-for list="{{ fi.hist.yl }}" as="fhy" hint-placeholder-count="3"><span style="top: {{ fhy.top }}">{{ fhy.label }}</span></sc-for></div>
@@ -2411,6 +2413,7 @@ PKCOUNTER
 <span class="pkm-fh-hint">{{ fi.hist.hint }}</span>
 <span class="pkm-fi-note">{{ fi.hist.source }}</span>
 <sc-if value="{{ fi.hist.since }}" hint-placeholder-val="{{ false }}"><span class="pkm-fi-note">{{ fi.hist.since }}</span></sc-if>
+</div>
 </sc-if>
 </section>
 </sc-if>
