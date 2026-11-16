@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ouvrir Supabase Studio</title>
+<style>
+  :root { --red: #FF3B4E; --yellow: #FFD60A; }
+  body { margin: 0; padding: 20px; background: #E9EDF3; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #111; }
+  .shot { width: 720px; margin: 0 auto 28px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  .cap { display: flex; gap: 14px; align-items: flex-start; padding: 18px 22px; background: #FFF7D1; border-bottom: 4px solid var(--yellow); }
+  .cap .n { flex: none; width: 48px; height: 48px; border-radius: 24px; background: var(--red); color: #fff; font-weight: 900; font-size: 26px; display: flex; align-items: center; justify-content: center; }
+  .cap b { display: block; font-size: 25px; line-height: 1.2; }
+  .cap small { display: block; margin-top: 5px; font-size: 18px; line-height: 1.35; color: #3a4252; }
+  .note { padding: 9px 16px; background: #F3F5F9; font-size: 14px; color: #5b6475; text-align: center; }
+  /* Fenêtre de navigateur */
+  .win { margin: 16px; border-radius: 14px; overflow: hidden; border: 1px solid #c9ced8; }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #DEE1E6; }
+  .dots { display: flex; gap: 6px; } .dots i { width: 12px; height: 12px; border-radius: 6px; background: #ff5f57; } .dots i:nth-child(2) { background: #febc2e; } .dots i:nth-child(3) { background: #28c840; }
+  .url { flex: 1; padding: 8px 14px; border-radius: 18px; background: #fff; font-size: 17px; color: #222; }
+  .url.hl { outline-offset: 2px; }
+  .screen { position: relative; display: flex; min-height: 470px; }
+  /* Repère rouge */
+  .hl { position: relative; outline: 4px solid var(--red); outline-offset: 4px; border-radius: 10px; box-shadow: 0 0 0 10px rgba(255,59,78,.18); }
+  .tag { position: absolute; z-index: 8; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; letter-spacing: 0; white-space: nowrap; padding: 6px 12px; border-radius: 999px; background: var(--red); color: #fff; font-size: 16px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,.3); }
+  .tag::before { content: attr(data-n); display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 7px; border-radius: 11px; background: #fff; color: var(--red); font-weight: 900; }
+  /* Coolify (sombre, violet) */
+  .co { background: #101010; color: #e6e6e6; width: 100%; }
+  .co-side { width: 210px; flex: none; padding: 18px 12px; background: #181818; border-right: 1px solid #262626; display: flex; flex-direction: column; gap: 4px; }
+  .co-logo { display: flex; align-items: center; gap: 8px; margin: 0 8px 14px; font-weight: 800; font-size: 20px; color: #fff; }
+  .co-logo i { width: 22px; height: 22px; border-radius: 6px; background: #6B16ED; }
+  .co-item { padding: 9px 10px; border-radius: 8px; font-size: 17px; color: #bdbdbd; }
+  .co-item.on { background: #242424; color: #fff; }
+  .co-main { flex: 1; padding: 22px 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .co-h { font-size: 27px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 12px; }
+  .co-btn { font-size: 14px; font-weight: 700; padding: 5px 10px; border-radius: 6px; background: #242424; border: 1px solid #333; color: #ddd; }
+  .co-card { padding: 16px 18px; border-radius: 10px; background: #1c1c1c; border: 1px solid #2c2c2c; }
+  .co-card b { display: block; font-size: 20px; color: #fff; } .co-card small { display: block; margin-top: 4px; font-size: 15px; color: #9a9a9a; }
+  .co-card.dim { opacity: .45; }
+  .crumb { font-size: 16px; color: #9a9a9a; } .crumb b { color: #fff; }
+  .run { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #8be9a8; } .run::before { content: ""; width: 9px; height: 9px; border-radius: 5px; background: #22c55e; }
+  .co-tabs { display: flex; gap: 18px; font-size: 16px; color: #9a9a9a; border-bottom: 1px solid #2a2a2a; padding-bottom: 8px; } .co-tabs .on { color: #fff; font-weight: 700; }
+  .co-sub { width: 205px; flex: none; display: flex; flex-direction: column; gap: 3px; }
+  .co-env { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+  .env { display: grid; grid-template-columns: 1fr; gap: 4px; padding: 9px 10px; border-radius: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; }
+  .env .k { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: #fff; overflow: hidden; text-overflow: ellipsis; }
+  .env .v { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; background: #101010; border: 1px solid #333; font-size: 15px; color: #aaa; }
+  .env .v span { flex: 1; letter-spacing: 2px; }
+  .eye { width: 22px; height: 22px; } .eye path, .eye circle { fill: none; stroke: #ddd; stroke-width: 2; }
+  .env.dim { opacity: .4; }
+  /* Studio (sombre, vert) */
+  .st { background: #1C1C1C; color: #ededed; width: 100%; flex-direction: column; }
+  .st-top { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid #2e2e2e; font-size: 16px; color: #bbb; }
+  .bolt { width: 22px; height: 22px; }
+  .st-body { flex: 1; display: flex; min-height: 420px; }
+  .rail { width: 58px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 0; border-right: 1px solid #2e2e2e; background: #171717; }
+  .ic { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #9b9b9b; }
+  .ic svg { width: 22px; height: 22px; } .ic svg * { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .ic.on { background: #2a2a2a; color: #fff; }
+  .tip { position: absolute; left: 76px; padding: 7px 12px; border-radius: 6px; background: #ededed; color: #111; font-size: 16px; font-weight: 700; white-space: nowrap; }
+  .st-main { flex: 1; padding: 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .st-h { font-size: 26px; font-weight: 700; color: #fff; }
+  .st-card { padding: 14px 16px; border-radius: 10px; background: #232323; border: 1px solid #333; font-size: 16px; color: #bbb; }
+  .sq-list { width: 235px; flex: none; padding: 14px 12px; border-right: 1px solid #2e2e2e; display: flex; flex-direction: column; gap: 10px; background: #1a1a1a; }
+  .sq-h { display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 700; color: #fff; }
+  .plus { width: 34px; height: 34px; border-radius: 8px; background: #2a2a2a; border: 1px solid #3a3a3a; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
+  .search { padding: 7px 10px; border-radius: 6px; background: #121212; border: 1px solid #333; font-size: 14px; color: #777; }
+  .menu { position: absolute; z-index: 4; left: 150px; top: 58px; width: 230px; padding: 6px; border-radius: 8px; background: #262626; border: 1px solid #3c3c3c; box-shadow: 0 10px 24px rgba(0,0,0,.5); }
+  .menu div { padding: 9px 10px; border-radius: 6px; font-size: 16px; color: #ddd; }
+  .menu .pick { background: #333; color: #fff; }
+  .sec { font-size: 12px; letter-spacing: .08em; color: #888; margin-top: 6px; }
+  .snip { padding: 7px 9px; border-radius: 6px; font-size: 15px; color: #ccc; } .snip.on { background: #2a2a2a; color: #fff; }
+  .ed { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .ed-tabs { display: flex; gap: 2px; padding: 8px 10px 0; border-bottom: 1px solid #2e2e2e; } .ed-tabs span { padding: 8px 12px; font-size: 15px; color: #fff; background: #232323; border-radius: 6px 6px 0 0; }
+  .code { flex: 1; position: relative; padding: 12px 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; line-height: 1.6; color: #ddd; background: #1C1C1C; }
+  .code .l { display: flex; } .code .l i { width: 40px; flex: none; text-align: right; padding-right: 12px; color: #666; font-style: normal; }
+  .code .c { color: #6a9955; } .code .k { color: #c586c0; } .code .cur { display: inline-block; width: 2px; height: 18px; background: #fff; vertical-align: middle; }
+  .ed-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 9px 12px; border-top: 1px solid #2e2e2e; background: #1a1a1a; }
+  .runbtn { padding: 8px 16px; border-radius: 6px; background: #3ECF8E; color: #0b2a1b; font-weight: 800; font-size: 16px; }
+  .res { padding: 12px 14px; border-top: 1px solid #2e2e2e; font-size: 15px; color: #888; background: #171717; min-height: 46px; }
+  .res.ok { color: #3ECF8E; font-weight: 700; }
+  .modal { position: absolute; z-index: 6; left: 50%; top: 46%; transform: translate(-50%, -50%); width: 420px; padding: 18px; border-radius: 12px; background: #262626; border: 1px solid #444; box-shadow: 0 20px 50px rgba(0,0,0,.7); }
+  .modal b { display: block; font-size: 18px; color: #fff; } .modal p { margin: 8px 0 14px; font-size: 15px; color: #bbb; line-height: 1.4; }
+  .modal .row { display: flex; justify-content: flex-end; gap: 10px; } .modal .row span { padding: 8px 12px; border-radius: 6px; font-size: 15px; font-weight: 700; } .modal .cancel { background: #333; color: #ddd; } .modal .go { background: #E5484D; color: #fff; }
+  .shade { position: absolute; inset: 0; z-index: 5; background: rgba(0,0,0,.45); }
+  /* Fenêtre de connexion du navigateur */
+  .login { margin: 70px auto; width: 430px; padding: 22px; border-radius: 12px; background: #fff; box-shadow: 0 16px 40px rgba(0,0,0,.35); color: #202124; }
+  .login b { display: block; font-size: 22px; } .login small { display: block; margin: 4px 0 16px; font-size: 15px; color: #5f6368; }
+  .login label { display: block; margin: 12px 0 5px; font-size: 15px; color: #3c4043; }
+  .login .in { position: relative; padding: 10px 12px; border-radius: 6px; border: 1px solid #9aa0a6; font-size: 16px; color: #999; }
+  .login .row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; } .login .row span { padding: 9px 16px; border-radius: 18px; font-size: 15px; font-weight: 700; } .login .no { color: #1a73e8; border: 1px solid #dadce0; } .login .yes { background: #1a73e8; color: #fff; }
+  .greyweb { background: #f1f3f4; width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- 1. Coolify : Projects puis PKM -->
+<section class="shot" id="s1">
+  <div class="cap"><span class="n">1</span><span><b>Dans Coolify : Projects, puis PKM</b><small>Ouvre Coolify comme d'habitude. Dans le menu de gauche, clique sur « Projects », puis sur le projet « PKM ».</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">Coolify (ton adresse habituelle)</span></div>
+    <div class="screen co">
+      <nav class="co-side">
+        <span class="co-logo"><i></i>Coolify</span>
+        <span class="co-item">Dashboard</span>
+        <span class="co-item on hl">Projects<span class="tag" data-n="1" style="left: 128px; top: 2px">Clique</span></span>
+        <span class="co-item">Servers</span>
+        <span class="co-item">Sources</span>
+        <span class="co-item">Destinations</span>
+        <span class="co-item">S3 Storages</span>
+        <span class="co-item">Shared Variables</span>
+        <span class="co-item">Notifications</span>
+        <span class="co-item">Keys &amp; Tokens</span>
+        <span class="co-item">Settings</span>
+      </nav>
+      <div class="co-main">
+        <span class="co-h">Projects <span class="co-btn">+ Add</span></span>
+        <div class="co-card hl" style="margin-top: 14px"><b>PKM</b><small>Dropicards</small><span class="tag" data-n="2" style="right: 14px; top: 18px">Clique</span></div>
+        <div class="co-card dim"><b>Autre projet</b><small>(tes autres sites)</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication (pas une capture de ton écran) · les noms peuvent varier un peu selon la version</div>
+</section>
+
+<!-- 2. production puis Supabase -->
+<section class="shot" id="s2">
+  <div class="cap"><span class="n">2</span><span><b>Clique sur « Supabase »</b><small>Si Coolify affiche d'abord « production », clique dessus. Dans la liste des services, clique sur « Supabase » (pas sur dropicards.fr).</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">Coolify (ton adresse habituelle)</span></div>
+    <div class="screen co">
+      <div class="co-main">
+        <span class="crumb">Projects / PKM / <b>production</b></span>
+        <span class="co-h">Resources</span>
+        <div class="co-card"><b>dropicards.fr</b><small>Static · nginx</small><span class="run" style="margin-top: 8px">Running</span></div>
+        <div class="co-card hl"><b>Supabase</b><small>Service · api.dropicards.fr</small><span class="run" style="margin-top: 8px">Running</span><span class="tag" data-n="1" style="right: 14px; top: 22px">Clique</span></div>
+        <div class="co-card dim"><b>Autres services</b><small>s'il y en a</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication (pas une capture de ton écran) · les noms peuvent varier un peu selon la version</div>
+</section>
+
+<!-- 3. Environment Variables -->
+<section class="shot" id="s3">
+  <div class="cap"><span class="n">3</span><span><b>Retrouve l'identifiant et le mot de passe</b><small>Onglet « Environment Variables ». Cherche SERVICE_USER_ADMIN (identifiant) et SERVICE_PASSWORD_ADMIN (mot de passe). L'œil les affiche. Ne les envoie à personne, même pas à moi.</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">Coolify (ton adresse habituelle)</span></div>
+    <div class="screen co">
+      <div class="co-main">
+        <span class="co-h">Supabase <span class="run">Running</span></span>
+        <div class="co-tabs"><span class="on">Configuration</span><span>Logs</span><span>Terminal</span></div>
+        <div style="display: flex; gap: 16px">
+          <div class="co-sub">
+            <span class="co-item">General</span>
+            <span class="co-item on hl">Environment Variables<span class="tag" data-n="1" style="left: 6px; top: 46px">Clique</span></span>
+            <span class="co-item" style="margin-top: 34px">Persistent Storages</span>
+            <span class="co-item">Scheduled Tasks</span>
+            <span class="co-item">Webhooks</span>
+            <span class="co-item">Danger Zone</span>
+          </div>
+          <div class="co-env">
+            <div class="env dim"><span class="k">POSTGRES_DB</span><span class="v"><span>postgres</span></span></div>
+            <div class="env hl"><span class="k">SERVICE_PASSWORD_ADMIN</span><span class="v"><span>••••••••••••••</span><svg class="eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><span class="tag" data-n="2" style="right: 6px; top: -18px">Mot de passe</span></div>
+            <div class="env dim"><span class="k">SERVICE_PASSWORD_JWT</span><span class="v"><span>••••••••••</span></span></div>
+            <div class="env hl" style="margin-top: 8px"><span class="k">SERVICE_USER_ADMIN</span><span class="v"><span>••••••••</span><svg class="eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><span class="tag" data-n="3" style="right: 6px; top: -18px">Identifiant</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Tu ne les vois pas ? Fais défiler la liste, ou cherche « ADMIN » avec Ctrl + F (Mac : ⌘ + F).</div>
+</section>
+
+<!-- 4. Connexion à Studio -->
+<section class="shot" id="s4">
+  <div class="cap"><span class="n">4</span><span><b>Ouvre api.dropicards.fr et connecte-toi</b><small>Nouvel onglet → tape api.dropicards.fr → Entrée. Une petite fenêtre demande l'identifiant (SERVICE_USER_ADMIN) et le mot de passe (SERVICE_PASSWORD_ADMIN).</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url hl">https://api.dropicards.fr<span class="tag" data-n="1" style="right: 10px; top: 4px">Tape l'adresse</span></span></div>
+    <div class="screen greyweb">
+      <div class="login">
+        <b>Se connecter</b><small>https://api.dropicards.fr</small>
+        <label>Nom d'utilisateur</label><div class="in hl">valeur de SERVICE_USER_ADMIN<span class="tag" data-n="2" style="right: -8px; top: -18px">Identifiant</span></div>
+        <label>Mot de passe</label><div class="in hl">valeur de SERVICE_PASSWORD_ADMIN<span class="tag" data-n="3" style="right: -8px; top: -18px">Mot de passe</span></div>
+        <div class="row"><span class="no">Annuler</span><span class="yes hl">Se connecter<span class="tag" data-n="4" style="right: -10px; top: 40px">Clique</span></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Sur Safari ou Firefox, la fenêtre a un autre aspect, mais elle demande les mêmes deux informations.</div>
+</section>
+
+<!-- 5. Studio : SQL Editor -->
+<section class="shot" id="s5">
+  <div class="cap"><span class="n">5</span><span><b>Dans Studio : clique sur « SQL Editor »</b><small>Tout à gauche, une colonne d'icônes. Passe la souris dessus : leur nom s'affiche. Clique sur « SQL Editor » (souvent la 3ᵉ icône, avec le signe &gt;_).</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://api.dropicards.fr/project/default</span></div>
+    <div class="screen st">
+      <div class="st-top"><svg class="bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z" fill="#3ECF8E"/></svg>Default Organization <span style="color: #555">/</span> Default Project</div>
+      <div class="st-body">
+        <nav class="rail">
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg></span>
+          <span class="ic on hl" style="position: relative"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 10l3 2-3 2M12 15h5"/></svg><span class="tip" style="top: 2px; left: 56px">SQL Editor</span><span class="tag" data-n="1" style="left: 172px; top: 1px">Clique</span></span>
+          <span class="ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM8 7V4h8v3"/></svg></span>
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M8 4L4 12l4 8M16 4l4 8-4 8"/></svg></span>
+        </nav>
+        <div class="st-main">
+          <span class="st-h">Default Project</span>
+          <div class="st-card">Welcome to your project</div>
+          <div class="st-card">Tables · Database · Auth</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication (pas une capture de ton écran) · les noms peuvent varier un peu selon la version</div>
+</section>
+
+<!-- 6. New query -->
+<section class="shot" id="s6">
+  <div class="cap"><span class="n">6</span><span><b>Ouvre une page vide (« New query »)</b><small>En haut de la liste de gauche, clique sur le « + », puis sur « Create a new snippet » (ou « New query »). Une page vide « Untitled query » s'ouvre à droite.</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://api.dropicards.fr/project/default/sql/new</span></div>
+    <div class="screen st">
+      <div class="st-body" style="position: relative">
+        <nav class="rail"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/></svg></span><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg></span><span class="ic on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 10l3 2-3 2M12 15h5"/></svg></span></nav>
+        <div class="sq-list">
+          <div class="sq-h">SQL Editor <span class="plus hl">+<span class="tag" data-n="1" style="left: -70px; top: 46px">Clique</span></span></div>
+          <div class="search" style="margin-top: 62px">Search queries…</div>
+          <span class="sec">PRIVATE</span>
+          <span class="snip">install_011_a_023</span>
+          <span class="snip on">Untitled query</span>
+        </div>
+        <div class="menu" style="left: 96px; top: 168px"><div class="pick hl">Create a new snippet<span class="tag" data-n="2" style="left: 238px; top: 2px">Puis ici</span></div><div>Create a new folder</div></div>
+        <div class="ed">
+          <div class="ed-tabs"><span>Untitled query</span></div>
+          <div class="code hl" style="margin: 10px">
+            <div class="l"><i>1</i><span class="cur"></span></div>
+            <span class="tag" data-n="3" style="left: 24px; top: 250px">Page vide : colle ici</span>
+          </div>
+          <div class="ed-foot"><span style="font-size: 14px; color: #888">Ctrl ↵</span><span class="runbtn">Run</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Si la grande zone de droite est déjà vide en arrivant, pas besoin du « + » : colle directement dedans.</div>
+</section>
+
+<!-- 7. Coller, Run, confirmer, Success -->
+<section class="shot" id="s7">
+  <div class="cap"><span class="n">7</span><span><b>Colle le fichier, puis « Run »</b><small>Ctrl + V (Mac : ⌘ + V), puis « Run ». Si la fenêtre « Potential issue detected » s'ouvre, clique sur « Run this query ». En bas doit s'afficher « Success. No rows returned ».</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://api.dropicards.fr/project/default/sql/new</span></div>
+    <div class="screen st">
+      <div class="st-body" style="position: relative">
+        <div class="ed">
+          <div class="ed-tabs"><span>Untitled query</span></div>
+          <div class="code">
+            <div class="l"><i>1</i><span class="c">-- INSTALLATION EN UNE FOIS des scripts 024 à 028 et 030 à 032</span></div>
+            <div class="l"><i>2</i><span class="c">-- (2026-11-13 au 16, porteur : « ouvre le Safari à tous…</span></div>
+            <div class="l"><i>3</i><span class="c">-- 024 : le jeu Safari éclair (le serveur tire les Pokémon…</span></div>
+            <div class="l"><i>…</i><span></span></div>
+            <div class="l"><i>1348</i><span class="k">notify</span>&nbsp;pgrst, 'reload schema';</div>
+          </div>
+          <div class="ed-foot"><span class="runbtn hl" style="z-index: 6">Run<span class="tag" data-n="1" style="right: 86px; top: 2px">Clique</span></span></div>
+          <div class="res ok hl" style="margin: 10px; z-index: 6">Success. No rows returned<span class="tag" data-n="3" style="right: 10px; top: -20px">C'est réussi</span></div>
+        </div>
+        <div class="shade"></div>
+        <div class="modal"><b>Potential issue detected with your query</b><p>The following potential issue has been detected: query has destructive operation. Make sure you are not accidentally removing something important.</p><div class="row"><span class="cancel">Cancel</span><span class="go hl">Run this query<span class="tag" data-n="2" style="right: -8px; top: 42px">Clique (normal ici)</span></span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="note">La fenêtre rouge apparaît parce que le fichier remplace d'anciennes règles : aucune donnée de joueur n'est effacée.</div>
+</section>
+
+</body>
+</html>
