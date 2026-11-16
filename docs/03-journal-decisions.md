@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-16 (soir, suite) — Nouveaux coefficients de gradation (porteur)
+
+- **Décision du porteur** : nouveaux coefficients des notes (valeur gradée = cote Cardmarket Near Mint × coefficient × langue), à la place de ceux du 2026-11-01 :
+  - PCA : 10 ×2,5 · 9,5 ×1,9 · 9 ×1,7 · 8 ×1,35 · 7 ×1,1 · 6 ×1,05 ;
+  - CCC : 10 Black Label ×3,2 · 10 Gold Label ×2,7 · 10 ×2,1 · 9,5 ×1,65 · 9 ×1,35 · 8 ×1,2 · 7 ×1,04 · 6 ×1,02 ;
+  - PSA : 10 ×3,5 · 9 ×1,9 · 8 ×1,5 · 7 ×1,3 · 6 ×1,1.
+- **Appliqué partout** (`FI_GRADERS`, `fiche.js`) : « Prix gradés » de la fiche, ajout d'une carte gradée, « Grader ma carte », valeur du classeur et pré-gradation (bénéfice probable ; PCA 10+ = PCA 10, notes 8,5 au milieu de 8 et 9, comme avant). Toujours affichés comme **estimations**.
+- Toutes les notes valent maintenant au moins la cote Near Mint (6 ≥ ×1,02). Test `t-gradeedit` adapté (CCC 9,5 ×1,65). Cache v234.
+
 ## 2026-11-16 (soir) — Vitrine sans message d'erreur, animation, app toujours à la verticale (porteur)
 
 - **Demandes du porteur** : « lorsque je mets une carte dans ma vitrine ou pour trade j'ai marqué "compte suspendu ou sans pseudo" : enlève-moi ça et remplace-le par une animation de carte dans ma vitrine » ; « je veux que l'appli reste dans le sens vertical, bloquée, même si l'utilisateur tourne son téléphone » ; « comment sont calculés les coefficients des 3 sociétés de gradation, je veux revoir le coef de chacune ».

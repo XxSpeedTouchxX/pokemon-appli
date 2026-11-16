@@ -299,10 +299,12 @@
   // 9 vert foncé, 8 vert, 7 vert-jaune, 6 jaune-orangé) ; chez CCC, 10 Black Label (note parfaite) et 10 Gold Label
   // (« Pristine », une imperfection), en plus du 10. PSA n'a pas de 9,5. Notes 8,5 retirées. Logo PSA rouge et bleu
   // (Wikipédia, 2026-11-01).
+  // Coefficients des notes (valeur gradée = cote Cardmarket Near Mint × coefficient × langue) : tableau du porteur du
+  // 2026-11-16 (remplace celui du 2026-11-01). Estimations : aucune vente réelle de carte gradée en source ouverte.
   const FI_GRADERS = [
-    ['PCA', 'img/grading/pca.png', [['10', 2.6], ['9.5', 1.9], ['9', 1.45], ['8', 1.12], ['7', 0.85], ['6', 0.7]]],
-    ['CCC', 'img/grading/ccc.svg', [['10', 6, 'Black Label'], ['10', 4, 'Gold Label'], ['10', 2.8], ['9.5', 2.0], ['9', 1.5], ['8', 1.15], ['7', 0.9], ['6', 0.72]]],
-    ['PSA', 'img/grading/psa-color.png', [['10', 3.5], ['9', 1.6], ['8', 1.2], ['7', 0.9], ['6', 0.75]]]
+    ['PCA', 'img/grading/pca.png', [['10', 2.5], ['9.5', 1.9], ['9', 1.7], ['8', 1.35], ['7', 1.1], ['6', 1.05]]],
+    ['CCC', 'img/grading/ccc.svg', [['10', 3.2, 'Black Label'], ['10', 2.7, 'Gold Label'], ['10', 2.1], ['9.5', 1.65], ['9', 1.35], ['8', 1.2], ['7', 1.04], ['6', 1.02]]],
+    ['PSA', 'img/grading/psa-color.png', [['10', 3.5], ['9', 1.9], ['8', 1.5], ['7', 1.3], ['6', 1.1]]]
   ];
   const FI_GRADE_CLS = { '10': 'g10', '9.5': 'g95', '9': 'g9', '8': 'g8', '7': 'g7', '6': 'g6', 'Black Label': 'black', 'Gold Label': 'gold' };
   // Pas de prix gradés pour une carte cotée moins de 5 € (2026-11-01, porteur) : la gradation coûterait plus que la carte.
