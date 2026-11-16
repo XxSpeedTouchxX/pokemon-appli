@@ -2348,6 +2348,26 @@ PKCOUNTER
 <sc-if value="{{ fi.canRemove }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ fi.remove }}" class="pkm-fi-link pkm-fi-del">Retirer de ma collection</button></sc-if>
 </div>
 </sc-if>
+<sc-if value="{{ fi.vt.show }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Ma vitrine et les échanges" class="pkm-fi-box pkm-vt">
+<div class="pkm-vt-head"><b>Ma vitrine · échanges</b><sc-if value="{{ fi.vt.hasDemand }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-demand">{{ fi.vt.demand }}</span></sc-if></div>
+<sc-for list="{{ fi.vt.groups }}" as="fvg" hint-placeholder-count="1"><div class="pkm-vt-grp">
+<sc-if value="{{ fvg.hasLabel }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-grp-h">{{ fvg.label }}</span></sc-if>
+<button type="button" role="switch" aria-checked="{{ fvg.show.on }}" onClick="{{ fvg.show.toggle }}" class="pkm-nt-row pkm-vt-row"><span class="pkm-nt-txt"><span class="pkm-nt-label">Dans ma vitrine</span><span class="pkm-nt-sub">Visible sur ta carte de dresseur, par les joueurs de ta ligue</span></span><span class="{{ fvg.show.cls }}" aria-hidden="true"><i></i></span></button>
+<sc-if value="{{ fvg.canTrade }}" hint-placeholder-val="{{ true }}">
+<button type="button" role="switch" aria-checked="{{ fvg.trade.on }}" onClick="{{ fvg.trade.toggle }}" class="pkm-nt-row pkm-vt-row"><span class="pkm-nt-txt"><span class="pkm-nt-label">⇄ Pour trade</span><span class="pkm-nt-sub">Tu veux l’échanger contre une autre carte</span></span><span class="{{ fvg.trade.cls }}" aria-hidden="true"><i></i></span></button>
+<button type="button" role="switch" aria-checked="{{ fvg.sale.on }}" onClick="{{ fvg.sale.toggle }}" class="pkm-nt-row pkm-vt-row"><span class="pkm-nt-txt"><span class="pkm-nt-label">À vendre</span><span class="pkm-nt-sub">{{ fvg.sale.sub }}</span></span><span class="{{ fvg.sale.cls }}" aria-hidden="true"><i></i></span></button>
+<sc-if value="{{ fvg.hasEdit }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ fvg.editPrice }}" class="pkm-fi-link pkm-vt-edit">Modifier mon prix de vente</button></sc-if>
+<sc-if value="{{ fvg.adultAsk }}" hint-placeholder-val="{{ false }}"><div role="group" aria-label="Vente réservée aux 18 ans et plus" class="pkm-vt-ask"><p>La vente entre joueurs est réservée aux 18 ans et plus. Tu confirmes avoir 18 ans ou plus ?</p><div class="pkm-fi-pair"><button type="button" onClick="{{ fvg.adultYes }}" class="pkm-vt-btn pkm-vt-btn-main">J’ai 18 ans ou plus</button><button type="button" onClick="{{ fvg.adultNo }}" class="pkm-fi-link">Annuler</button></div></div></sc-if>
+<sc-if value="{{ fvg.priceOpen }}" hint-placeholder-val="{{ false }}"><div role="group" aria-label="Mon prix de vente" class="pkm-vt-price"><span class="pkm-vt-price-l">Ton prix de vente</span><span class="pkm-vt-price-in"><input type="text" inputmode="decimal" aria-label="Ton prix de vente en euros" maxlength="10" value="{{ fvg.priceIn }}" onInput="{{ fvg.onPrice }}"><b>€</b></span><small class="pkm-vt-price-hint">{{ fvg.priceHint }}</small><div class="pkm-fi-pair"><button type="button" onClick="{{ fvg.priceSave }}" class="pkm-vt-btn pkm-vt-btn-main">Valider le prix</button><button type="button" onClick="{{ fvg.priceCancel }}" class="pkm-fi-link">Annuler</button></div></div></sc-if>
+</sc-if>
+<sc-if value="{{ fvg.deal }}" hint-placeholder-val="{{ false }}"><p class="pkm-vt-deal"><span>🤝 D’accord avec un joueur : la carte est réservée dans ta vitrine.</span><button type="button" onClick="{{ fvg.undeal }}" class="pkm-fi-link">Annuler l’accord</button></p></sc-if>
+</div></sc-for>
+<sc-if value="{{ fi.vt.hasNote }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-fi-note pkm-vt-note">{{ fi.vt.note }}</p></sc-if>
+<p class="pkm-vt-foot">{{ fi.vt.foot }}</p>
+</section>
+</sc-if>
+<sc-if value="{{ fi.vt.wantShow }}" hint-placeholder-val="{{ false }}"><section aria-label="Je cherche cette carte" class="pkm-fi-box pkm-vt pkm-vt-wantbox"><button type="button" aria-pressed="{{ fi.vt.wantOn }}" onClick="{{ fi.vt.wantToggle }}" class="{{ fi.vt.wantCls }}">{{ fi.vt.wantLabel }}</button><p class="pkm-vt-wantsub">{{ fi.vt.wantSub }}</p></section></sc-if>
 <section aria-label="Prix du marché" class="pkm-fi-box pkm-fm">
 <div class="pkm-fm-head">
 <h3 class="pkm-fi-h3">Prix du marché</h3>
@@ -2675,6 +2695,27 @@ PKCOUNTER
 </section>
 </sc-if>
 </sc-if>
+<sc-if value="{{ pg.isTrade }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Échanges entre joueurs" class="pkm-vt-tab">
+<sc-if value="{{ tdx.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note pkm-vt-msg">{{ tdx.msg }}</p></sc-if>
+<section aria-label="Mes cartes Pour trade et à vendre" class="pkm-vt-sec pkm-dark">
+<div class="pkm-vt-sec-h"><h3>Mes cartes Pour trade et à vendre</h3><small aria-label="cartes dans ma vitrine">{{ tdx.vitCount }}</small></div>
+<sc-if value="{{ tdx.hasMine }}" hint-placeholder-val="{{ true }}"><ul class="pkm-vt-grid"><sc-for list="{{ tdx.mine }}" as="tdm" hint-placeholder-count="3"><li><button type="button" onClick="{{ tdm.open }}" aria-label="{{ tdm.aria }}" class="pkm-vt-cd"><span class="pkm-vt-img"><sc-if value="{{ tdm.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ tdm.img }}" alt="" loading="lazy"></sc-if><sc-if value="{{ tdm.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-noimg">{{ tdm.name }}</span></sc-if><span class="pkm-vt-tags"><sc-if value="{{ tdm.trade }}" hint-placeholder-val="{{ true }}"><em class="pkm-vt-badge">⇄ POUR TRADE</em></sc-if><sc-if value="{{ tdm.sale }}" hint-placeholder-val="{{ false }}"><em class="pkm-vt-badge pkm-vt-badge-sale">À VENDRE · {{ tdm.price }}</em></sc-if><sc-if value="{{ tdm.deal }}" hint-placeholder-val="{{ false }}"><em class="pkm-vt-badge pkm-vt-badge-deal">🤝 D’ACCORD</em></sc-if></span></span><b class="pkm-vt-name">{{ tdm.name }}</b><span class="pkm-vt-sub">{{ tdm.cond }} · {{ tdm.value }}</span><sc-if value="{{ tdm.hasDemand }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-hot">🔎 {{ tdm.demand }}</span></sc-if></button></li></sc-for></ul></sc-if>
+<sc-if value="{{ tdx.noMine }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ tdx.mineEmpty }}</p></sc-if>
+</section>
+<section aria-label="Je cherche" class="pkm-vt-sec pkm-dark">
+<div class="pkm-vt-sec-h"><h3>♥ Je cherche</h3><small>{{ tdx.wantCount }}</small></div>
+<sc-if value="{{ tdx.hasWants }}" hint-placeholder-val="{{ true }}"><ul class="pkm-vt-grid"><sc-for list="{{ tdx.wants }}" as="tdw" hint-placeholder-count="3"><li><button type="button" onClick="{{ tdw.open }}" aria-label="{{ tdw.aria }}" class="pkm-vt-cd"><span class="pkm-vt-img"><sc-if value="{{ tdw.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ tdw.img }}" alt="" loading="lazy"></sc-if><sc-if value="{{ tdw.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-noimg">{{ tdw.name }}</span></sc-if></span><b class="pkm-vt-name">{{ tdw.name }}</b><span class="pkm-vt-sub">{{ tdw.sub }}</span><sc-if value="{{ tdw.hasHave }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-hot pkm-vt-hot-g">⇄ {{ tdw.have }}</span></sc-if></button></li></sc-for></ul></sc-if>
+<sc-if value="{{ tdx.noWants }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ tdx.wantsEmpty }}</p></sc-if>
+</section>
+<section aria-label="Échanges possibles" class="pkm-vt-sec pkm-dark">
+<div class="pkm-vt-sec-h"><h3>Échanges possibles</h3><button type="button" onClick="{{ tdx.refresh }}" class="pkm-fi-link pkm-vt-refresh">Actualiser</button></div>
+<sc-if value="{{ tdx.hasMatches }}" hint-placeholder-val="{{ true }}"><ul class="pkm-vt-matches"><sc-for list="{{ tdx.matches }}" as="tdp" hint-placeholder-count="2"><li><button type="button" onClick="{{ tdp.open }}" aria-label="{{ tdp.aria }}" class="pkm-vt-match"><sc-if value="{{ tdp.hasAva }}" hint-placeholder-val="{{ true }}"><span class="pkm-pg-ava-m pkm-qm-ava" aria-hidden="true"><img src="{{ tdp.ava.bg }}" alt=""><img src="{{ tdp.ava.char }}" alt=""><sc-if value="{{ tdp.ava.hasPoke }}" hint-placeholder-val="{{ false }}"><img src="{{ tdp.ava.poke.src }}" alt="" class="pkm-pg-ava-pk" style="{{ tdp.ava.pokeStyle }}"></sc-if><sc-if value="{{ tdp.ava.hasAcc }}" hint-placeholder-val="{{ false }}"><img src="{{ tdp.ava.acc.src }}" alt="" class="pkm-pg-ava-pk pkm-pg-ava-acc" style="{{ tdp.ava.accStyle }}"></sc-if></span></sc-if><sc-if value="{{ tdp.noAva }}" hint-placeholder-val="{{ false }}"><span class="pkm-qm-noava" aria-hidden="true"><img src="{{ tdp.gImg }}" alt="" width="40" height="40"></span></sc-if><span class="pkm-vt-match-t"><b>{{ tdp.pseudo }}</b><small>{{ tdp.text }}</small></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-qm-chev"><path d="M9 6l6 6-6 6"></path></svg></button></li></sc-for></ul></sc-if>
+<sc-if value="{{ tdx.noMatches }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ tdx.matchesEmpty }}</p></sc-if>
+</section>
+<p class="pkm-pg-rules">{{ tdx.rules }}</p>
+</section>
+</sc-if>
 </sc-if>
 
 <!-- fragment: avatar -->
@@ -2986,6 +3027,8 @@ PKCOUNTER
 <sc-if value="{{ qmx.hasErr }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note pkm-qm-err">{{ qmx.err }}</p></sc-if>
 <sc-if value="{{ qmx.hasItems }}" hint-placeholder-val="{{ true }}"><ul class="pkm-qm-list"><sc-for list="{{ qmx.items }}" as="qmi" hint-placeholder-count="3"><li class="{{ qmi.cls }}">
 <button type="button" onClick="{{ qmi.openCard }}" aria-label="{{ qmi.cardAria }}" class="pkm-qm-from"><sc-if value="{{ qmi.hasAva }}" hint-placeholder-val="{{ true }}"><span class="pkm-pg-ava-m pkm-qm-ava" aria-hidden="true"><img src="{{ qmi.ava.bg }}" alt=""><img src="{{ qmi.ava.char }}" alt=""><sc-if value="{{ qmi.ava.hasPoke }}" hint-placeholder-val="{{ false }}"><img src="{{ qmi.ava.poke.src }}" alt="" class="pkm-pg-ava-pk" style="{{ qmi.ava.pokeStyle }}"></sc-if><sc-if value="{{ qmi.ava.hasAcc }}" hint-placeholder-val="{{ false }}"><img src="{{ qmi.ava.acc.src }}" alt="" class="pkm-pg-ava-pk pkm-pg-ava-acc" style="{{ qmi.ava.accStyle }}"></sc-if></span></sc-if><sc-if value="{{ qmi.noAva }}" hint-placeholder-val="{{ false }}"><span class="pkm-qm-noava" aria-hidden="true"><img src="{{ qmi.gImg }}" alt="" width="40" height="40"></span></sc-if><span class="pkm-qm-txt"><span class="pkm-qm-top"><b>{{ qmi.pseudo }}</b><sc-if value="{{ qmi.isNew }}" hint-placeholder-val="{{ false }}"><em class="pkm-qm-newtag">Nouveau</em></sc-if><small>{{ qmi.ago }}</small></span><span class="pkm-qm-bubble">{{ qmi.text }}</span></span></button>
+<sc-if value="{{ qmi.isTrade }}" hint-placeholder-val="{{ false }}"><div class="{{ qmi.swapCls }}"><sc-for list="{{ qmi.tcards }}" as="qmt" hint-placeholder-count="2"><span class="pkm-qm-tcard"><span class="pkm-vt-img"><sc-if value="{{ qmt.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ qmt.img }}" alt="" loading="lazy"></sc-if><sc-if value="{{ qmt.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-noimg">{{ qmt.name }}</span></sc-if></span><span class="pkm-qm-tc-t"><small>{{ qmt.who }}</small><b>{{ qmt.name }}</b><span>{{ qmt.sub2 }}</span></span></span></sc-for></div></sc-if>
+<sc-if value="{{ qmi.hasDeal }}" hint-placeholder-val="{{ false }}"><div role="status" class="pkm-qm-deal"><b>🤝 {{ qmi.dealText }}</b><span>{{ qmi.dealNote }}</span></div></sc-if>
 <sc-if value="{{ qmi.hasReplies }}" hint-placeholder-val="{{ true }}"><div role="group" aria-label="Répondre" class="pkm-qm-chips pkm-qm-replies"><sc-for list="{{ qmi.replies }}" as="qmr" hint-placeholder-count="3"><button type="button" onClick="{{ qmr.pick }}" aria-label="{{ qmr.aria }}" class="{{ qmr.cls }}">{{ qmr.label }}</button></sc-for></div></sc-if>
 <sc-if value="{{ qmi.hasReplied }}" hint-placeholder-val="{{ false }}"><p class="pkm-qm-replied"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" class="pkm-qm-ok"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ qmi.replied }}</p></sc-if>
 </li></sc-for></ul></sc-if>
@@ -3024,12 +3067,40 @@ PKCOUNTER
 <p class="pkm-qm-foot">{{ tcd.qm.foot }}<sc-if value="{{ tcd.qm.hasLeft }}" hint-placeholder-val="{{ true }}"><br><b>{{ tcd.qm.left }}</b></sc-if></p>
 </section>
 </sc-if>
+<sc-if value="{{ tcd.vit.show }}" hint-placeholder-val="{{ false }}">
+<section aria-label="{{ tcd.vit.title }}" class="pkm-vt-pc">
+<div class="pkm-vt-sec-h"><h3>{{ tcd.vit.title }}</h3><small>{{ tcd.vit.count }}</small></div>
+<sc-if value="{{ tcd.vit.hasMatch }}" hint-placeholder-val="{{ false }}"><p class="pkm-vt-matchline">⇄ {{ tcd.vit.match }}</p></sc-if>
+<sc-if value="{{ tcd.vit.hasNote }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note">{{ tcd.vit.note }}</p></sc-if>
+<sc-if value="{{ tcd.vit.hasItems }}" hint-placeholder-val="{{ true }}"><ul class="pkm-vt-grid"><sc-for list="{{ tcd.vit.items }}" as="tvi" hint-placeholder-count="3"><li><button type="button" onClick="{{ tvi.open }}" aria-label="{{ tvi.aria }}" class="{{ tvi.cls }}"><span class="pkm-vt-img"><sc-if value="{{ tvi.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ tvi.img }}" alt="" loading="lazy"></sc-if><sc-if value="{{ tvi.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-noimg">{{ tvi.name }}</span></sc-if><span class="pkm-vt-tags"><sc-if value="{{ tvi.trade }}" hint-placeholder-val="{{ true }}"><em class="pkm-vt-badge">⇄ POUR TRADE</em></sc-if><sc-if value="{{ tvi.sale }}" hint-placeholder-val="{{ false }}"><em class="pkm-vt-badge pkm-vt-badge-sale">À VENDRE · {{ tvi.price }}</em></sc-if><sc-if value="{{ tvi.deal }}" hint-placeholder-val="{{ false }}"><em class="pkm-vt-badge pkm-vt-badge-deal">🤝 RÉSERVÉE</em></sc-if></span></span><b class="pkm-vt-name">{{ tvi.name }}</b><span class="pkm-vt-sub">{{ tvi.cond }} · {{ tvi.value }}</span><sc-if value="{{ tvi.wanted }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-hot">♥ Tu la cherches</span></sc-if></button></li></sc-for></ul></sc-if>
+<sc-if value="{{ tcd.vit.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ tcd.vit.emptyText }}</p></sc-if>
+<sc-if value="{{ tcd.vit.hasWants }}" hint-placeholder-val="{{ false }}"><div class="pkm-vt-sec-h pkm-vt-sec-h2"><h4>♥ {{ tcd.vit.wantsTitle }}</h4><small>{{ tcd.vit.wantsCount }}</small></div><ul class="pkm-vt-minis"><sc-for list="{{ tcd.vit.wants }}" as="tvw" hint-placeholder-count="4"><li class="{{ tvw.cls }}" aria-label="{{ tvw.name }}"><span class="pkm-vt-img"><sc-if value="{{ tvw.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ tvw.img }}" alt="" loading="lazy"></sc-if><sc-if value="{{ tvw.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-noimg">{{ tvw.name }}</span></sc-if></span><sc-if value="{{ tvw.have }}" hint-placeholder-val="{{ false }}"><em>Tu l’as</em></sc-if></li></sc-for></ul></sc-if>
+</section>
+</sc-if>
 <section aria-label="Saisons passées" class="pkm-tc-past">
 <h3>Saisons passées</h3>
 <sc-if value="{{ tcd.hasPast }}" hint-placeholder-val="{{ false }}"><ol><sc-for list="{{ tcd.past }}" as="pcp" hint-placeholder-count="2"><li aria-label="{{ pcp.aria }}"><span class="pkm-tc-pmedal"><sc-if value="{{ pcp.hasMedal }}" hint-placeholder-val="{{ false }}"><img src="{{ pcp.medal }}" alt="" width="26" height="26"></sc-if></span><b>{{ pcp.season }}</b><span class="pkm-tc-prank">{{ pcp.rank }}</span><span class="pkm-tc-ppl"><img src="img/brand/pl.svg" alt="" width="18" height="18">{{ pcp.pl }}</span></li></sc-for></ol></sc-if>
 <sc-if value="{{ tcd.noPast }}" hint-placeholder-val="{{ true }}"><p class="pkm-pg-note">{{ tcd.pastEmpty }}</p></sc-if>
 </section>
 <sc-if value="{{ tcd.hasNote }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note pkm-tc-note">{{ tcd.note }}</p></sc-if>
+</section>
+</div>
+</sc-if>
+
+<!-- fragment: trade-sheet -->
+<sc-if value="{{ tcs.open }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-tc-wrap pkm-vt-wrap">
+<button type="button" aria-label="Fermer" onClick="{{ tcs.close }}" class="pkm-tc-scrim"></button>
+<section aria-label="{{ tcs.aria }}" role="dialog" aria-modal="true" class="pkm-sheet pkm-tc pkm-vt-sheet">
+<div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
+<div class="pkm-tc-head"><h2>{{ tcs.title }}</h2><button type="button" onClick="{{ tcs.close }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="pkm-vt-hero"><span class="pkm-vt-img"><sc-if value="{{ tcs.card.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ tcs.card.img }}" alt="" loading="lazy"></sc-if><sc-if value="{{ tcs.card.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-noimg">{{ tcs.card.name }}</span></sc-if></span><span class="pkm-vt-hero-t"><b>{{ tcs.card.name }}</b><small>{{ tcs.card.sub }}</small><small>{{ tcs.card.condLong }}</small><span class="pkm-vt-tags"><sc-if value="{{ tcs.trade }}" hint-placeholder-val="{{ true }}"><em class="pkm-vt-badge">⇄ POUR TRADE</em></sc-if><sc-if value="{{ tcs.sale }}" hint-placeholder-val="{{ false }}"><em class="pkm-vt-badge pkm-vt-badge-sale">À VENDRE · {{ tcs.price }}</em></sc-if><sc-if value="{{ tcs.deal }}" hint-placeholder-val="{{ false }}"><em class="pkm-vt-badge pkm-vt-badge-deal">🤝 RÉSERVÉE</em></sc-if></span><span class="pkm-vt-pricenote">{{ tcs.priceNote }}</span></span></div>
+<sc-if value="{{ tcs.canAct }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ tcs.interest }}" class="pkm-vt-btn pkm-vt-btn-main pkm-vt-btn-wide">{{ tcs.interestLabel }}</button></sc-if>
+<sc-if value="{{ tcs.canOffer }}" hint-placeholder-val="{{ true }}"><section aria-label="Je te propose une de mes cartes" class="pkm-vt-offer"><h3>Je te propose une de mes cartes</h3>
+<sc-if value="{{ tcs.hasOffers }}" hint-placeholder-val="{{ true }}"><ul class="pkm-vt-picks"><sc-for list="{{ tcs.offers }}" as="tso" hint-placeholder-count="3"><li><button type="button" aria-pressed="{{ tso.on }}" onClick="{{ tso.pick }}" aria-label="{{ tso.aria }}" class="{{ tso.cls }}"><span class="pkm-vt-img"><sc-if value="{{ tso.hasImg }}" hint-placeholder-val="{{ true }}"><img src="{{ tso.img }}" alt="" loading="lazy"></sc-if><sc-if value="{{ tso.noImg }}" hint-placeholder-val="{{ false }}"><span class="pkm-vt-noimg">{{ tso.name }}</span></sc-if></span><b class="pkm-vt-name">{{ tso.name }}</b><span class="pkm-vt-sub">{{ tso.cond }} · {{ tso.value }}</span></button></li></sc-for></ul><button type="button" onClick="{{ tcs.offer }}" disabled="{{ tcs.offerOff }}" class="pkm-vt-btn pkm-vt-btn-wide">{{ tcs.offerLabel }}</button></sc-if>
+<sc-if value="{{ tcs.lacksOffers }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ tcs.noOffers }}</p></sc-if>
+</section></sc-if>
+<p class="pkm-qm-foot">{{ tcs.note }}</p>
 </section>
 </div>
 </sc-if>

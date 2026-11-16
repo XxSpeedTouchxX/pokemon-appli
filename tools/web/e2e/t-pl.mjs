@@ -38,7 +38,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   await page.locator('.pkm-pg-tabs button').nth(0).click(); await page.waitForTimeout(400);
   ok('bas du classement : « Revoir l’explication de la ligue »', (await page.locator('button.pkm-pg-replay').count()) === 1);
   const tabs = await page.locator('.pkm-pg-tabs button').allInnerTexts();
-  ok('2 onglets : « Classement et récompenses » et « Mes missions »', tabs.length === 2 && /Classement et récompenses/.test(tabs[0]) && /Mes missions/.test(tabs[1]));
+  ok('3 onglets : « Classement et récompenses », « Mes missions » et « Échanges »', tabs.length === 3 && /Classement et récompenses/.test(tabs[0]) && /Mes missions/.test(tabs[1]) && /Échanges/.test(tabs[2]));
   ok('onglet du classement ouvert d’abord', (await page.locator('.pkm-pg-tab-on').innerText()) === tabs[0] && (await page.locator('section.pkm-pg-card').count()) === 1);
   const rw = N(await page.locator('section[aria-label="Lots de la saison"]').innerText());
   ok('lots : ETB, coffret, 2 boosters, Premium ou ticket Or / Argent / Bronze', /1ʳᵉ place Un ETB des 30 ans/.test(rw) && /2ᵉ place Un coffret poster des 30 ans/.test(rw) && /3ᵉ place 2 boosters des 30 ans/.test(rw)
@@ -213,7 +213,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   // « Mes missions » pour un admin quand 028 manque : aperçu avec le fichier à installer.
   await page.evaluate(() => window.__pkm.setState({ admSheet: false }));
   await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2600);
-  ok('sans 028, admin : « install_024_a_032.sql » à coller dans Studio', /install_024_a_032\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));
+  ok('sans 028, admin : « install_024_a_033.sql » à coller dans Studio', /install_024_a_033\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));
   await ctx.close();
 }
 

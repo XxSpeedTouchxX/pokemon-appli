@@ -3189,6 +3189,133 @@ button.pkm-pg-row:active, .pkm-pg-podbtn:active { transform: scale(0.98); }
 @media (max-width: 360px) { .pkm-qm-replies { padding-left: 0; } .pkm-qm-replied { margin-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .pkm-qm-chip, .pkm-qm-badge { transition: none; animation: none; } }
 
+/* Échanges entre joueurs : vitrine, « Pour trade », « À vendre » au prix du joueur, « Je cherche » (vitrine.js,
+   2026-11-16, « go » du porteur, docs/45 et sa maquette). Fenêtres et rubriques sombres dans les 3 apparences. */
+
+/* Étiquettes (POUR TRADE jaune comme la maquette, À VENDRE orange, réservée violette). */
+.pkm-vt-badge { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; box-sizing: border-box; padding: 2px 7px; border-radius: 999px; background: #FFD60A; color: #0B1120; font-size: 10px; font-style: normal; font-weight: 900; letter-spacing: 0.02em; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
+.pkm-vt-badge-sale { background: #FF9F43; }
+.pkm-vt-badge-deal { background: #B9A6FF; }
+.pkm-vt-tags { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+
+/* Fiche d'une carte : « Ma vitrine · échanges ». */
+.pkm-vt-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; }
+.pkm-vt-head > b { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; }
+.pkm-vt-demand { padding: 3px 9px; border-radius: 999px; background: rgba(61, 220, 132, 0.14); border: 1px solid rgba(61, 220, 132, 0.45); color: #8DF0B8; font-size: 12px; font-weight: 800; }
+.pkm-vt-grp { display: flex; flex-direction: column; }
+.pkm-vt-grp + .pkm-vt-grp { margin-top: 6px; padding-top: 6px; border-top: 1px dashed #2A3A5C; }
+.pkm-vt-grp-h { padding: 2px 0 4px; font-size: 12.5px; font-weight: 800; color: #FFE680; }
+.pkm-vt-row { min-height: 50px; }
+.pkm-vt-grp .pkm-vt-row:first-of-type { border-top: 0; }
+.pkm-vt-sw-sale.pkm-nt-on { background: #FF9F43; }
+.pkm-vt-edit { align-self: flex-start; color: #FFB46B; }
+.pkm-vt-ask, .pkm-vt-price { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 2px; padding: 12px; border-radius: 16px; border: 1px solid rgba(255, 159, 67, 0.5); background: rgba(255, 159, 67, 0.08); }
+.pkm-vt-ask p { margin: 0; font-size: 13.5px; line-height: 1.45; color: #F3F6FC; }
+.pkm-vt-price-l { font-size: 13px; font-weight: 800; color: #FFD1A6; }
+.pkm-vt-price-in { display: flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: 14px; border: 1.5px solid #FF9F43; background: #0B1120; }
+.pkm-vt-price-in input { flex: 1; min-width: 0; height: 48px; padding: 0; border: 0; outline: none; background: transparent; color: #FFFFFF; font: inherit; font-size: 22px; font-weight: 800; }
+.pkm-vt-price-in:focus-within { box-shadow: 0 0 0 3px rgba(255, 159, 67, 0.35); }
+.pkm-vt-price-in b { font-size: 20px; color: #FFB46B; }
+.pkm-vt-price-hint { font-size: 12px; color: #C9D3EA; }
+.pkm-vt-btn { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #FFD60A; background: transparent; color: #FFE680; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.pkm-vt-btn-main { border-color: #FFD60A; background: #FFD60A; color: #0B1120; }
+.pkm-vt-btn-wide { width: 100%; min-height: 50px; font-size: 15px; }
+.pkm-vt-btn:disabled { opacity: 0.45; cursor: default; }
+.pkm-vt-btn:focus-visible, .pkm-vt-cd:focus-visible, .pkm-vt-match:focus-visible, .pkm-vt-pick:focus-visible, .pkm-vt-want:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
+.pkm-vt-deal { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 10px; margin: 6px 0 0; padding: 8px 12px; border-radius: 14px; background: rgba(185, 166, 255, 0.12); border: 1px solid rgba(185, 166, 255, 0.45); font-size: 13px; color: #E3DBFF; }
+.pkm-vt-deal .pkm-fi-link { color: #D7CCFF; }
+.pkm-vt-note { margin: 2px 0 0; color: #FFE680; }
+.pkm-vt-foot { margin: 0; font-size: 11.5px; line-height: 1.45; color: #9AA8C3; }
+.pkm-vt-wantbox { align-items: stretch; }
+.pkm-vt-want { min-height: 48px; border-radius: 999px; border: 1.5px solid #FF6B8A; background: transparent; color: #FFB3C3; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; transition: background-color 0.2s ease, transform 0.12s ease; }
+.pkm-vt-want:active { transform: scale(0.97); }
+.pkm-vt-want-on { background: #FF6B8A; color: #1A0710; }
+.pkm-vt-wantsub { margin: 0; font-size: 12.5px; line-height: 1.45; color: #C9D3EA; text-align: center; }
+
+/* Grilles de cartes (onglet « Échanges », carte de dresseur, fenêtre d'une carte). */
+.pkm-vt-sec { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 22px; border: 1px solid #24345C; background: #121C33; color: #F3F6FC; }
+.pkm-vt-sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pkm-vt-sec-h h3, .pkm-vt-sec-h h4 { margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; }
+.pkm-vt-sec-h h4 { font-size: 14px; }
+.pkm-vt-sec-h small { flex: none; font-size: 12px; color: #9AA8C3; }
+.pkm-vt-sec-h2 { margin-top: 4px; }
+.pkm-vt-refresh { color: #FFE680; }
+.pkm-vt-grid { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pkm-vt-cd, .pkm-vt-pick { width: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 3px; padding: 0; border: 0; background: transparent; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pkm-vt-cd:active, .pkm-vt-pick:active { transform: scale(0.97); }
+.pkm-vt-img { position: relative; display: block; aspect-ratio: 63 / 88; border-radius: 8px; overflow: hidden; background: #0B1120; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45); }
+.pkm-vt-img > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pkm-vt-img > .pkm-vt-badge, .pkm-vt-img > .pkm-vt-tags { position: absolute; left: 4px; top: 4px; right: 4px; }
+.pkm-vt-img > .pkm-vt-tags .pkm-vt-badge { font-size: 9px; padding: 2px 6px; }
+.pkm-vt-noimg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 6px; font-size: 11px; font-weight: 700; color: #9AA8C3; text-align: center; }
+.pkm-vt-name { margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
+.pkm-vt-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; color: #C9D3EA; }
+.pkm-vt-hot { align-self: flex-start; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 1px 7px; border-radius: 999px; background: rgba(255, 107, 138, 0.16); color: #FFB3C3; font-size: 10.5px; font-weight: 800; }
+.pkm-vt-hot-g { background: rgba(61, 220, 132, 0.16); color: #8DF0B8; }
+.pkm-vt-cd-want .pkm-vt-img { box-shadow: 0 0 0 2px #FF6B8A, 0 3px 10px rgba(0, 0, 0, 0.45); }
+.pkm-vt-cd-deal .pkm-vt-img > img { opacity: 0.55; }
+.pkm-vt-msg { padding: 10px 12px; border-radius: 14px; background: rgba(255, 214, 10, 0.08); border: 1px solid rgba(255, 214, 10, 0.35); color: #FFE680; }
+
+/* Onglet « Échanges » de Ma ligue (3 onglets sur une ligne). */
+.pkm-vt-tab { display: flex; flex-direction: column; gap: 12px; }
+.pkm-pg-tabs { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+.pkm-pg-tab { padding: 0 6px; font-size: 12.5px; }
+.pkm-vt-matches { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.pkm-vt-match { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 8px 10px; border-radius: 16px; border: 1px solid rgba(61, 220, 132, 0.4); background: #0B1120; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; }
+.pkm-vt-match-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-vt-match-t b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+.pkm-vt-match-t small { font-size: 12.5px; line-height: 1.35; color: #8DF0B8; }
+
+/* Carte de dresseur : sa vitrine. */
+.pkm-vt-pc { display: flex; flex-direction: column; gap: 10px; }
+.pkm-vt-matchline { margin: 0; padding: 9px 12px; border-radius: 14px; background: rgba(61, 220, 132, 0.12); border: 1px solid rgba(61, 220, 132, 0.45); color: #B8F5D3; font-size: 13px; font-weight: 700; line-height: 1.4; }
+.pkm-vt-minis { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.pkm-vt-mini { position: relative; display: flex; flex-direction: column; gap: 2px; }
+.pkm-vt-mini .pkm-vt-img { border-radius: 5px; }
+.pkm-vt-mini .pkm-vt-noimg { font-size: 8px; }
+.pkm-vt-mini em { align-self: center; padding: 0 5px; border-radius: 999px; background: #3DDC84; color: #062012; font-size: 9px; font-style: normal; font-weight: 900; white-space: nowrap; }
+.pkm-vt-mini-have .pkm-vt-img { box-shadow: 0 0 0 2px #3DDC84; }
+
+/* Fenêtre d'une carte d'un autre joueur (au-dessus de sa carte de dresseur). */
+.pkm-vt-wrap { z-index: 31; }
+.pkm-vt-hero { display: flex; gap: 14px; align-items: flex-start; }
+.pkm-vt-hero > .pkm-vt-img { flex: none; width: 128px; }
+.pkm-vt-hero-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pkm-vt-hero-t b { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; line-height: 1.25; }
+.pkm-vt-hero-t small { font-size: 12.5px; color: #C9D3EA; }
+.pkm-vt-hero-t .pkm-vt-tags { margin: 4px 0; }
+.pkm-vt-hero-t .pkm-vt-badge { font-size: 11px; padding: 3px 9px; }
+.pkm-vt-pricenote { font-size: 13px; line-height: 1.45; color: #F3F6FC; }
+.pkm-vt-offer { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+.pkm-vt-offer h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; }
+.pkm-vt-picks { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pkm-vt-pick { padding: 4px; border-radius: 12px; border: 2px solid transparent; }
+.pkm-vt-pick-on { border-color: #FFD60A; background: rgba(255, 214, 10, 0.1); }
+
+/* « Mes messages » : cartes d'une proposition et accord. */
+.pkm-qm-swap { display: flex; flex-direction: column; gap: 8px; padding-left: 58px; }
+.pkm-qm-swap2 { position: relative; }
+.pkm-qm-tcard { display: flex; align-items: center; gap: 10px; padding: 6px 10px 6px 6px; border-radius: 14px; background: #121C33; border: 1px solid #24345C; }
+.pkm-qm-tcard > .pkm-vt-img { flex: none; width: 46px; border-radius: 5px; }
+.pkm-qm-tcard .pkm-vt-noimg { font-size: 8px; }
+.pkm-qm-tc-t { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pkm-qm-tc-t small { font-size: 11px; font-weight: 800; color: #FFE680; text-transform: uppercase; letter-spacing: 0.03em; }
+.pkm-qm-tc-t b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.pkm-qm-tc-t span { font-size: 12px; color: #C9D3EA; }
+.pkm-qm-swap2 .pkm-qm-tcard:first-child::after { content: '⇄'; position: absolute; left: 50%; top: 50%; transform: translate(calc(-50% + 29px), -50%); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 13px; background: #FFD60A; color: #0B1120; font-size: 14px; font-weight: 900; box-shadow: 0 0 0 3px #0B1120; }
+.pkm-qm-deal { display: flex; flex-direction: column; gap: 3px; margin-left: 58px; padding: 9px 12px; border-radius: 14px; background: rgba(185, 166, 255, 0.12); border: 1px solid rgba(185, 166, 255, 0.5); }
+.pkm-qm-deal b { font-size: 14px; color: #E3DBFF; }
+.pkm-qm-deal span { font-size: 12px; line-height: 1.4; color: #C9D3EA; }
+.pkm-qm-chip-yes { border-color: #3DDC84; background: rgba(61, 220, 132, 0.14); color: #8DF0B8; }
+
+@media (max-width: 360px) {
+  .pkm-qm-swap, .pkm-qm-deal { padding-left: 0; margin-left: 0; }
+  .pkm-vt-hero > .pkm-vt-img { width: 104px; }
+  .pkm-vt-minis { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .pkm-pg-tab { font-size: 11.5px; }
+}
+@media (prefers-reduced-motion: reduce) { .pkm-vt-want, .pkm-vt-cd, .pkm-vt-pick { transition: none; } }
+
 /* ——— Pré-gradation (2026-11-14, docs/40) : rubrique de l'accueil (pkm-pgh-) et écran (pkm-pgd-) ——— */
 .pkm-pgh { flex: none; display: flex; flex-direction: column; gap: 10px; }
 .pkm-pgh-head { display: flex; align-items: center; gap: 10px; min-height: 30px; }
@@ -4030,6 +4157,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=872c31f2"></script>
+<script src="app.js?v=262174fd"></script>
 </body>
 </html>

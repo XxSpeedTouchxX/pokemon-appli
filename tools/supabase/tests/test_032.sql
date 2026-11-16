@@ -12,7 +12,7 @@ grant execute on function pg_temp.check(boolean, text), pg_temp.fails(text, text
 delete from public.quick_messages; delete from public.quick_msg_off;
 
 -- A. Catalogue : 8 messages, aucune table lisible directement.
-select pg_temp.check((select count(*) = 8 from public.quick_msg_catalog), 'catalogue : 8 messages tout faits');
+select pg_temp.check((select count(*) = 8 from public.quick_msg_catalog where pos <= 8), 'catalogue : 8 messages tout faits');
 set role authenticated;
 select pg_temp.check(pg_temp.fails($$select * from public.quick_messages$$, 'permission denied'), 'messages : table illisible pour un joueur');
 select pg_temp.check(pg_temp.fails($$select * from public.quick_msg_catalog$$, 'permission denied'), 'catalogue : table illisible pour un joueur');

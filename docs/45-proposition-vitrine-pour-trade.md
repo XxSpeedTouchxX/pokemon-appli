@@ -5,7 +5,33 @@
 > d'autres cartes des utilisateurs, et lorsque l'on irait sur la vitrine d'un utilisateur il faudrait qu'il y ait une
 > étiquette disant "pour trade", au moins chaque utilisateur sait quelle carte il veut échanger ».
 > Maquette : `docs/45-maquette-vitrine/` (`index.html`, `etape-1.png`, `etape-2.png`, `etape-3.png`).
-> État : **proposition, rien n'est construit**. « Go » attendu pour coder, avec les décisions V1 à V6 (§7).
+> État : **construit le 2026-11-16** (« go » du porteur : « tu peux valider tes propositions », V1 à V6 par défaut),
+> avec un ajout du porteur : « laisse le choix à l'utilisateur de mettre son prix de vente : soit il vend au prix qu'il
+> indique, soit il propose un trade ». Serveur `tools/supabase/033_vitrine.sql` (**à installer** avec
+> `install_024_a_033.sql`), app `tools/web/vitrine.js` et `vitrine.css`. Voir §0.
+
+## 0. Ce qui est construit (2026-11-16)
+
+- **Fiche d'une carte de mon classeur** : bloc « Ma vitrine · échanges », pour chaque exemplaire (langue, état, note) :
+  « Dans ma vitrine », « ⇄ Pour trade », « À vendre ». « À vendre » demande d'abord « J'ai 18 ans ou plus » (une fois,
+  gardé sur le serveur), puis le **prix choisi par le joueur** (prérempli avec la cote, de 1 € à 100 000 €), avec la cote
+  Dropicards rappelée. Une carte peut être à la fois « Pour trade » et « À vendre ». « 🔎 N joueurs cherchent cette
+  carte ». Carte que je n'ai pas : « ♡ Je la cherche » (50 cartes au plus) et « N joueurs l'ont pour trade ou à vendre ».
+- **Ma ligue › onglet « Échanges »** (3ᵉ onglet) : mes cartes Pour trade et à vendre (étiquettes, « N le cherchent »),
+  « Je cherche » (« N l'ont »), « Échanges possibles » (joueurs qui ont ce que je cherche ou cherchent ce que j'ai), qui
+  ouvrent leur carte de dresseur.
+- **Carte de dresseur** : « Sa vitrine » (étiquettes jaune « ⇄ POUR TRADE », orange « À VENDRE · 40 € », violette
+  « RÉSERVÉE », cote et état), bandeau vert de ce qui colle avec moi, « Il cherche » (« Tu l'as »).
+- **Appui sur une de ses cartes** : prix demandé à côté de la cote Dropicards, « 👋 Je suis intéressé » (avec le prix
+  pour une carte à vendre), « Je te propose une de mes cartes » (mes cartes Pour trade, pour une carte Pour trade).
+- **Mes messages** : propositions avec les cartes (« Sa carte proposée » ⇄ « Ta carte »), 3 réponses « 👍 Ça
+  m'intéresse », « 🙅 Non merci », « Plus disponible ». « Ça m'intéresse » = accord : les deux cartes sont marquées
+  « réservées » dans les vitrines (« Annuler l'accord » dans la fiche). Pour s'organiser : étage 2, plus tard.
+- **Garde-fous** : jamais de texte libre ni de paiement dans l'app, aucune commission ; le prix affiché est toujours
+  « prix demandé » par le joueur, jamais une cote ; échanges et propositions dès 15 ans, vente dès 18 ans (déclaration) ;
+  une carte vendue ou retirée du classeur sort de la vitrine ; CGU « Vitrine et échanges » (Dropicards n'est pas partie
+  aux échanges et ventes) et politique de confidentialité à jour (16 novembre 2026).
+- **Tests** : `tools/supabase/tests/test_033.sql` (60 vérifications), `tools/web/e2e/t-vitrine.mjs` (60, faux serveur).
 
 ## 1. En une phrase
 
@@ -85,14 +111,16 @@ Chaque joueur montre les cartes qu'il veut dans **sa vitrine**, marque celles qu
 
 - **Vision** : décision du porteur du 2026-11-16 : Dropicards n'est **pas une plateforme de vente**, mais il **met en
   relation les joueurs pour des échanges de cartes**. Cela assouplit le principe 4 (« on ne copie pas la marketplace de
-  PokéItem ») pour les échanges seulement : pas de vente, pas de paiement, pas de prix de vente.
+  PokéItem ») pour les échanges seulement : pas de paiement ni de commission dans l'app. **Ajout du porteur (même jour)** :
+  un joueur peut aussi mettre une carte « À vendre » **au prix qu'il choisit** ; Dropicards l'affiche comme prix demandé,
+  sans rien vendre lui-même (la vente se fait entre joueurs, hors de l'app, sous leur responsabilité).
 - **Mineurs** : l'étage 1 n'a aucun texte libre et aucun moyen de se contacter hors de l'app : risque très faible.
   L'étage 2 (s'écrire pour organiser l'échange) demandera l'avis de l'avocat et sera réservé aux 18 ans et plus.
 - **Stores** : sans texte libre ni photo des joueurs, pas de modération imposée par Apple et Google pour l'étage 1.
 - **Arnaques** : impossibles dans l'étage 1 (rien ne s'envoie) ; à traiter dans l'étage 2 (conseils, signalement,
   échange en boutique).
 
-## 7. Décisions attendues (défauts proposés)
+## 7. Décisions (défauts **validés par le porteur le 2026-11-16**)
 
 - **V1.** Vitrine : cartes choisies, 30 au plus (**défaut**), ou tout le classeur visible ?
 - **V2.** « Pour trade » met la carte dans la vitrine automatiquement ? (**défaut : oui**)

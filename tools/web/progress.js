@@ -159,7 +159,7 @@
     });
     const admin = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin();
     const note = c.busy ? 'Chargement de la carte…'
-      : c.err === 'old' ? (admin ? 'Carte complète (date d’arrivée, saisons passées) après l’installation de tools/supabase/install_024_a_032.sql dans Supabase Studio.' : 'La carte complète (date d’arrivée, saisons passées) arrive très bientôt.')
+      : c.err === 'old' ? (admin ? 'Carte complète (date d’arrivée, saisons passées) après l’installation de tools/supabase/install_024_a_033.sql dans Supabase Studio.' : 'La carte complète (date d’arrivée, saisons passées) arrive très bientôt.')
         : c.err === 'net' ? 'Pas de réseau : la carte complète s’affichera une fois connecté.'
           : c.err === 'gone' ? 'Ce joueur n’est plus dans la ligue.'
             : c.err ? 'La carte complète n’est pas disponible pour le moment.' : '';

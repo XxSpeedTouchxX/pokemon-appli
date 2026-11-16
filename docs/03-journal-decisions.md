@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-16 — Échanges entre joueurs : étage 1 construit, avec « À vendre » au prix du joueur (porteur)
+
+- **Demande du porteur** : « laisse le choix à l'utilisateur de mettre son prix de vente de sa carte : soit il veut à tout prix vendre sa carte avec le prix qu'il indique, soit il propose un trade » ; « tu peux valider tes propositions » (V1 à V6 de `docs/45` par défaut).
+- **Construit** : vitrine (30 cartes), « Pour trade », « À vendre » au prix du joueur (1 € à 100 000 €), « Je cherche » (50 cartes), onglet « Échanges » de Ma ligue, vitrine sur la carte de dresseur, propositions et accord dans « Mes messages » (`docs/45` §0). Serveur `033_vitrine.sql` (60 tests), app `vitrine.js` (60 tests navigateur), cache v232.
+- **Garde-fous retenus** (contradiction avec « pas une plateforme de vente » et le principe 4, assouplie par le porteur) : Dropicards ne vend rien, ne prend ni paiement ni commission et n'est pas partie aux ventes et échanges entre joueurs ; le prix est toujours affiché comme « prix demandé », à côté de la cote Dropicards ; vente réservée aux 18 ans et plus (déclaration), échanges dès 15 ans ; jamais de texte libre ; CGU « Vitrine et échanges » et confidentialité mises à jour.
+- **Limite** : la tranche d'âge « 15-25 ans » mélange mineurs et majeurs, d'où la déclaration « J'ai 18 ans ou plus » ; rien ne la vérifie. Pour conclure une vente ou un échange, les joueurs n'ont encore aucun moyen de s'écrire (étage 2, avis de l'avocat).
+- **Serveur** : `install_024_a_032.sql` (024 à 032) installé par le porteur le même jour (« tout est ok maintenant »), avec le guide illustré `docs/44-guide-ouvrir-studio/`. **À faire par le porteur** : coller `tools/supabase/install_024_a_033.sql` dans Studio (SQL Editor › Run ; rejouable, il refait 024 à 032 sans rien perdre), puis `000_verifier.sql`.
+
 ## 2026-11-16 — Échanges entre joueurs : vitrine et « Pour trade » proposés (porteur)
 
 - **Constat du porteur** : les messages tout faits seuls « n'apportent pas de plus-value ». Demande : permettre aux joueurs de se montrer leur classeur et d'indiquer les cartes qu'ils veulent échanger.
