@@ -2,6 +2,8 @@
 
 > Demande du porteur (2026-11-15) : sur la carte de dresseur d'un joueur du classement de « Ma ligue », « même un chat
 > pour le contacter directement s'il veut lui parler ».
+> Maquette (2026-11-16, demandée par le porteur avant de choisir) : `docs/43-maquette-messagerie/` (`index.html`,
+> `option-a.png`, `option-b.png`, `option-c.png`).
 > État : **proposition, rien n'est construit**. La carte de dresseur est livrée sans messagerie (`031_carte_joueur.sql`,
 > `progress.js`). Décisions attendues du porteur : M1 à M4 (§5).
 

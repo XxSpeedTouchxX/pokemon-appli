@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Messagerie entre joueurs</title>
+<!-- Maquette de docs/43-proposition-messagerie-joueurs.md (2026-11-16) : options A, B et C sur la carte de dresseur de
+     « Ma ligue ». Proposition, rien n'est construit. Avatars repris des captures de l'app (avatar-1.png, avatar-2.png). -->
+<style>
+@font-face { font-family: 'Sora'; font-weight: 600; src: url('../../web/fonts/sora-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Sora'; font-weight: 700; src: url('../../web/fonts/sora-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 400; src: url('../../web/fonts/plus-jakarta-sans-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 600; src: url('../../web/fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 700; src: url('../../web/fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 800; src: url('../../web/fonts/plus-jakarta-sans-latin-800-normal.woff2') format('woff2'); }
+:root { --bg: #EEF1F7; --ink: #0B1120; --muted: #4A5670; --yel: #FFD60A; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Jakarta', system-ui, sans-serif; }
+.page { display: flex; flex-direction: column; gap: 28px; padding: 28px; }
+.opt { display: flex; flex-direction: column; gap: 14px; width: max-content; padding: 22px; border-radius: 28px; background: #FFFFFF; box-shadow: 0 6px 24px rgba(11, 17, 32, 0.08); }
+.opt h1 { margin: 0; font-family: 'Sora', sans-serif; font-size: 26px; display: flex; align-items: center; gap: 12px; }
+.opt h1 .tag { padding: 4px 12px; border-radius: 999px; background: var(--yel); font-size: 14px; font-family: 'Jakarta'; font-weight: 800; }
+.opt h1 .tag.red { background: #FFE1DE; color: #B4231A; }
+.opt .sub { margin: -6px 0 0; font-size: 15px; color: var(--muted); max-width: 760px; }
+.phones { display: flex; gap: 22px; align-items: flex-start; }
+.ph { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.ph > b { font-size: 14px; color: var(--muted); }
+.phone { position: relative; width: 360px; height: 760px; border-radius: 44px; padding: 10px; background: #1A1F2B; box-shadow: 0 10px 30px rgba(11, 17, 32, 0.25); }
+.scr { position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: radial-gradient(120% 60% at 50% 0%, #2A3142, #161B26 60%); color: #F3F6FC; }
+.status { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 13px; font-weight: 700; }
+.top { display: flex; align-items: center; gap: 10px; padding: 4px 16px 10px; }
+.back { width: 36px; height: 36px; border-radius: 18px; border: 1px solid #2E3A55; display: flex; align-items: center; justify-content: center; }
+.top h2 { margin: 0; font-family: 'Sora'; font-size: 20px; }
+.top small { display: block; color: #9AA8C3; font-size: 12px; }
+.dim { position: absolute; inset: 0; background: rgba(3, 6, 14, 0.62); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 28px 28px 0 0; border-top: 1px solid #3B4F80; background: radial-gradient(120% 60% at 50% 0%, rgba(255, 214, 10, 0.12), rgba(255, 214, 10, 0) 60%), #0F1828; padding: 8px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.grip { align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C; }
+.shead { display: flex; justify-content: space-between; align-items: center; }
+.shead h3 { margin: 0; font-family: 'Sora'; font-size: 17px; }
+.x { width: 38px; height: 38px; border-radius: 19px; border: 1px solid #1E2B45; background: #111A2C; display: flex; align-items: center; justify-content: center; color: #F3F6FC; }
+.id { display: flex; align-items: center; gap: 12px; }
+.ava { width: 92px; height: 92px; border-radius: 24px; border: 3px solid var(--yel); overflow: hidden; flex: none; }
+.ava img { width: 100%; height: 100%; display: block; }
+.who { display: flex; flex-direction: column; gap: 4px; }
+.who b { font-family: 'Sora'; font-size: 21px; }
+.grade { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #5BE08F; }
+.since { font-size: 12px; color: #C9D3EA; }
+.now { padding: 10px; border-radius: 16px; border: 1px solid rgba(255, 214, 10, 0.4); background: rgba(11, 17, 32, 0.6); display: flex; flex-direction: column; gap: 6px; }
+.now > small { color: var(--yel); font-weight: 800; font-size: 11.5px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.row2 span { display: flex; flex-direction: column; gap: 2px; padding: 7px 9px; border-radius: 12px; background: #0B1120; border: 1px solid #2A3A5C; font-size: 11px; color: #C9D3EA; }
+.row2 b { font-family: 'Sora'; font-size: 18px; color: #FFF; display: flex; align-items: center; gap: 5px; }
+.past { font-size: 12px; color: #9AA8C3; }
+.past h4 { margin: 0 0 4px; font-family: 'Sora'; font-size: 14px; color: #F3F6FC; }
+.btn { height: 50px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; font-size: 15px; }
+.btn.yel { background: var(--yel); color: #0B1120; }
+.btn.blue { background: #3D7BFF; color: #FFF; }
+.note { font-size: 11.5px; color: #9AA8C3; text-align: center; margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 9px 12px; border-radius: 999px; border: 1px solid rgba(255, 214, 10, 0.5); background: rgba(255, 214, 10, 0.12); color: #FFE9A3; font-size: 13.5px; font-weight: 700; }
+.chip.sent { background: var(--yel); color: #0B1120; border-color: var(--yel); }
+.list { display: flex; flex-direction: column; gap: 10px; padding: 0 14px; }
+.msg { display: flex; gap: 10px; padding: 10px; border-radius: 16px; background: #0F1828; border: 1px solid #1E2B45; }
+.msg.new { border-color: rgba(255, 214, 10, 0.6); }
+.mava { width: 44px; height: 44px; border-radius: 12px; overflow: hidden; flex: none; border: 2px solid #2A3A5C; }
+.mava img { width: 100%; height: 100%; display: block; }
+.mtxt { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.mtxt .h { display: flex; justify-content: space-between; font-size: 13px; }
+.mtxt .h small { color: #7D8BA8; }
+.bub { align-self: flex-start; padding: 7px 11px; border-radius: 14px 14px 14px 4px; background: #1C2740; font-size: 14px; }
+.mini { display: flex; gap: 6px; flex-wrap: wrap; }
+.mini span { padding: 5px 9px; border-radius: 999px; background: rgba(255, 214, 10, 0.14); border: 1px solid rgba(255, 214, 10, 0.45); color: #FFE9A3; font-size: 12px; font-weight: 700; }
+.switch { margin: 0 14px; padding: 10px 12px; border-radius: 14px; background: #0F1828; border: 1px solid #1E2B45; display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.tog { width: 44px; height: 26px; border-radius: 13px; background: #2FD37A; position: relative; }
+.tog::after { content: ''; position: absolute; right: 3px; top: 3px; width: 20px; height: 20px; border-radius: 10px; background: #FFF; }
+.chat { position: absolute; left: 0; right: 0; top: 34px; bottom: 0; display: flex; flex-direction: column; }
+.chead { display: flex; align-items: center; gap: 10px; padding: 6px 14px 10px; border-bottom: 1px solid #1E2B45; }
+.chead .mava { width: 40px; height: 40px; }
+.chead b { font-family: 'Sora'; font-size: 16px; }
+.chead small { display: block; color: #5BE08F; font-size: 11.5px; font-weight: 700; }
+.acts { margin-left: auto; display: flex; gap: 6px; }
+.acts span { padding: 6px 9px; border-radius: 10px; font-size: 11.5px; font-weight: 800; border: 1px solid #3A2430; background: #23141B; color: #FF9A9A; }
+.thread { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; }
+.day { align-self: center; font-size: 11px; color: #7D8BA8; }
+.b { max-width: 78%; padding: 9px 12px; font-size: 14px; line-height: 1.35; }
+.b.them { align-self: flex-start; background: #1C2740; border-radius: 16px 16px 16px 4px; }
+.b.me { align-self: flex-end; background: var(--yel); color: #0B1120; border-radius: 16px 16px 4px 16px; font-weight: 600; }
+.b.ko { align-self: flex-end; background: #2A1418; border: 1px solid #E5484D; color: #FFB4B4; border-radius: 14px; font-size: 12.5px; }
+.compose { display: flex; gap: 8px; align-items: center; padding: 10px 14px 18px; border-top: 1px solid #1E2B45; }
+.field { flex: 1; height: 44px; border-radius: 22px; background: #0F1828; border: 1px solid #2A3A5C; display: flex; align-items: center; padding: 0 14px; color: #7D8BA8; font-size: 14px; }
+.send { width: 44px; height: 44px; border-radius: 22px; background: var(--yel); display: flex; align-items: center; justify-content: center; }
+.legal { font-size: 11px; color: #7D8BA8; text-align: center; padding: 0 14px 6px; }
+.pros { display: flex; gap: 18px; font-size: 14px; }
+.pros ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.pros b { display: block; margin-bottom: 4px; }
+.good b { color: #1D8A4F; } .bad b { color: #B4231A; }
+.bell { position: relative; }
+.bell i { position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; border-radius: 9px; background: #E5484D; color: #FFF; font-style: normal; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ============ A ============ -->
+<section class="opt" id="opt-a">
+<h1>A. Pas de messagerie</h1>
+<p class="sub">La carte de dresseur reste telle qu'elle est aujourd'hui dans l'app : on regarde le joueur, on ne peut pas lui écrire.</p>
+<div class="phones">
+<div class="ph"><b>Carte de dresseur (déjà dans l'app)</b>
+<div class="phone"><div class="scr">
+<div class="status"><span>9:41</span><span>●●● 5G</span></div>
+<div class="top"><span class="back">‹</span><div><h2>Ma ligue</h2><small>Saison 1 · classement général</small></div></div>
+<div class="dim"></div>
+<div class="sheet">
+<div class="grip"></div>
+<div class="shead"><h3>Carte de dresseur</h3><span class="x">✕</span></div>
+<div class="id"><span class="ava"><img src="avatar-1.png" alt=""></span><span class="who"><b>Ondine</b><span class="grade"><img src="../../web/img/grades/grade-4.svg" width="22" height="22" alt="">Dresseur Pokémon</span><span class="since">📅 Membre depuis novembre 2026</span></span></div>
+<div class="now"><small>Saison 1 · en cours</small><div class="row2"><span>Classement<b>#5</b>sur 40 joueurs</span><span>PL de la saison<b><img src="../../web/img/brand/pl.svg" width="20" height="20" alt="">1 600</b></span></div></div>
+<div class="past"><h4>Saisons passées</h4>Première saison de la ligue : ses résultats passés s'afficheront ici.</div>
+<p class="note">Aucun bouton pour écrire au joueur.</p>
+</div>
+</div></div></div>
+</div>
+<div class="pros"><div class="good"><b>Pour</b><ul><li>Aucun risque, aucune modération</li><li>Rien à construire</li></ul></div><div class="bad"><b>Contre</b><ul><li>Aucun lien entre les joueurs</li></ul></div></div>
+</section>
+
+<!-- ============ B ============ -->
+<section class="opt" id="opt-b">
+<h1>B. Messages tout faits <span class="tag">Recommandé</span></h1>
+<p class="sub">On ne peut envoyer que des messages déjà écrits par Dropicards (salut, bravo, bonne chance…). Pas de texte libre : pas d'insultes, pas de numéros, pas de liens, donc rien à modérer, même avec des joueurs de moins de 15 ans.</p>
+<div class="phones">
+<div class="ph"><b>1. Sur la carte : « Envoyer un message rapide »</b>
+<div class="phone"><div class="scr">
+<div class="status"><span>9:41</span><span>●●● 5G</span></div>
+<div class="top"><span class="back">‹</span><div><h2>Ma ligue</h2><small>Saison 1 · classement général</small></div></div>
+<div class="dim"></div>
+<div class="sheet">
+<div class="grip"></div>
+<div class="shead"><h3>Carte de dresseur</h3><span class="x">✕</span></div>
+<div class="id"><span class="ava"><img src="avatar-1.png" alt=""></span><span class="who"><b>Ondine</b><span class="grade"><img src="../../web/img/grades/grade-4.svg" width="22" height="22" alt="">Dresseur Pokémon</span><span class="since">📅 Membre depuis novembre 2026</span></span></div>
+<div class="now"><small>Saison 1 · en cours</small><div class="row2"><span>Classement<b>#5</b>sur 40 joueurs</span><span>PL de la saison<b><img src="../../web/img/brand/pl.svg" width="20" height="20" alt="">1 600</b></span></div></div>
+<div class="shead"><h3 style="font-size:15px">Envoyer un message rapide</h3></div>
+<div class="chips"><span class="chip">👋 Salut !</span><span class="chip sent">👏 Bien joué !</span><span class="chip">🔥 Belle collection !</span><span class="chip">🏆 Rendez-vous au top 10 !</span><span class="chip">💪 GG !</span><span class="chip">🎁 Bonne chance au tirage !</span><span class="chip">⚡ Prêt pour le Safari ?</span><span class="chip">😄 Merci !</span></div>
+<p class="note">Seulement ces messages · 10 par jour au plus · un joueur peut couper les messages</p>
+</div>
+</div></div></div>
+<div class="ph"><b>2. Le joueur reçoit : « Mes messages »</b>
+<div class="phone"><div class="scr">
+<div class="status"><span>9:41</span><span>●●● 5G</span></div>
+<div class="top"><span class="back">‹</span><div><h2>Mes messages</h2><small>Messages rapides des joueurs de ta ligue</small></div><span class="bell" style="margin-left:auto">🔔<i>2</i></span></div>
+<div class="list">
+<div class="msg new"><span class="mava"><img src="avatar-1.png" alt=""></span><span class="mtxt"><span class="h"><b>Ondine</b><small>il y a 2 min</small></span><span class="bub">👏 Bien joué !</span><span class="mini"><span>😄 Merci !</span><span>💪 GG !</span><span>🏆 Rendez-vous au top 10 !</span></span></span></div>
+<div class="msg new"><span class="mava"><img src="avatar-2.png" alt=""></span><span class="mtxt"><span class="h"><b>Régis</b><small>il y a 1 h</small></span><span class="bub">🎁 Bonne chance au tirage !</span><span class="mini"><span>😄 Merci !</span><span>🎁 Bonne chance au tirage !</span></span></span></div>
+<div class="msg"><span class="mava"><img src="avatar-2.png" alt=""></span><span class="mtxt"><span class="h"><b>Régis</b><small>hier</small></span><span class="bub">⚡ Prêt pour le Safari ?</span><span class="mini"><span>✓ Tu as répondu « 💪 GG ! »</span></span></span></div>
+</div>
+<div style="height:14px"></div>
+<div class="switch"><span>Recevoir les messages rapides</span><span class="tog"></span></div>
+<p class="legal" style="margin-top:10px">Un appui sur un message ouvre la carte de dresseur du joueur.</p>
+</div></div></div>
+</div>
+<div class="pros"><div class="good"><b>Pour</b><ul><li>Aucun risque pour les mineurs, rien à lire ni à modérer</li><li>Accepté par Apple et Google sans démarche</li><li>Environ 10 h de travail</li></ul></div><div class="bad"><b>Contre</b><ul><li>On ne peut pas vraiment discuter (échanger une carte, se donner rendez-vous)</li></ul></div></div>
+</section>
+
+<!-- ============ C ============ -->
+<section class="opt" id="opt-c">
+<h1>C. Messagerie libre encadrée <span class="tag red">Risques et modération</span></h1>
+<p class="sub">Une vraie conversation écrite, réservée aux 18 ans et plus, avec « Signaler », « Bloquer », un filtre qui refuse insultes, numéros, adresses e-mail et liens, et une file de messages signalés dans le panneau Admin, à traiter sous 24 h.</p>
+<div class="phones">
+<div class="ph"><b>1. Sur la carte : « Discuter avec Ondine »</b>
+<div class="phone"><div class="scr">
+<div class="status"><span>9:41</span><span>●●● 5G</span></div>
+<div class="top"><span class="back">‹</span><div><h2>Ma ligue</h2><small>Saison 1 · classement général</small></div></div>
+<div class="dim"></div>
+<div class="sheet">
+<div class="grip"></div>
+<div class="shead"><h3>Carte de dresseur</h3><span class="x">✕</span></div>
+<div class="id"><span class="ava"><img src="avatar-1.png" alt=""></span><span class="who"><b>Ondine</b><span class="grade"><img src="../../web/img/grades/grade-4.svg" width="22" height="22" alt="">Dresseur Pokémon</span><span class="since">📅 Membre depuis novembre 2026</span></span></div>
+<div class="now"><small>Saison 1 · en cours</small><div class="row2"><span>Classement<b>#5</b>sur 40 joueurs</span><span>PL de la saison<b><img src="../../web/img/brand/pl.svg" width="20" height="20" alt="">1 600</b></span></div></div>
+<div class="past"><h4>Saisons passées</h4>Première saison de la ligue : ses résultats passés s'afficheront ici.</div>
+<div class="btn blue">💬 Discuter avec Ondine</div>
+<p class="note">Réservé aux 18 ans et plus · Ondine peut couper ses messages</p>
+</div>
+</div></div></div>
+<div class="ph"><b>2. La conversation</b>
+<div class="phone"><div class="scr">
+<div class="status"><span>9:41</span><span>●●● 5G</span></div>
+<div class="chat">
+<div class="chead"><span class="back">‹</span><span class="mava"><img src="avatar-1.png" alt=""></span><span><b>Ondine</b><small>Dresseur Pokémon</small></span><span class="acts"><span>⚑ Signaler</span><span>⛔ Bloquer</span></span></div>
+<div class="thread">
+<span class="day">Aujourd'hui</span>
+<div class="b them">Salut ! Ta collection est trop belle 😮</div>
+<div class="b me">Merci ! Tu as le Dracaufeu ex du 151 ?</div>
+<div class="b them">Oui, en PSA 10, je l'ai eu au tirage du mois dernier 🔥</div>
+<div class="b me">Trop fort ! Tu le gardes ou tu l'échanges ?</div>
+<div class="b ko">⚠ Message refusé : pas de numéro de téléphone, d'adresse e-mail ni de lien dans les messages.</div>
+<div class="b them">Je le garde 😄 Bonne chance pour le top 10 !</div>
+</div>
+<p class="legal">Texte seulement · messages gardés 90 jours · 20 messages par heure au plus</p>
+<div class="compose"><span class="field">Écris ton message…</span><span class="send">➤</span></div>
+</div>
+</div></div></div>
+</div>
+<div class="pros"><div class="good"><b>Pour</b><ul><li>Les joueurs discutent vraiment</li></ul></div><div class="bad"><b>Contre</b><ul><li>Va contre la règle « pas de réseau social » du projet</li><li>Modération à faire chaque semaine, risques avec des mineurs (d'où 18 ans et plus)</li><li>Environ 40 h de travail, avis juridique conseillé</li></ul></div></div>
+</section>
+
+</div>
+</body>
+</html>

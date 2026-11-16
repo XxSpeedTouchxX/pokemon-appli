@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-16 — Maquette de la messagerie entre joueurs (porteur)
+
+- **Demande du porteur** : « je ne vois pas les visuels de la messagerie A, B ou C, montre-moi avant de tout valider ».
+- **Maquette** `docs/43-maquette-messagerie/` : A (carte de dresseur actuelle, sans bouton), B (« Envoyer un message rapide » : 8 messages tout faits sur la carte, puis « Mes messages » avec réponses rapides et réglage « Recevoir les messages rapides »), C (« Discuter avec … », conversation avec « Signaler », « Bloquer », message refusé par le filtre, 18 ans et plus). Avatars repris des captures de l'app.
+- Rien n'est construit ; décisions M1 à M4 de `docs/43` toujours attendues (B recommandé).
+
+---
+
 ## 2026-11-15 — DropiPass fermé sans abonnement, carte de dresseur, Ma ligue, reflet des PK, valeurs du classeur (porteur)
 
 - **Ticket non rechoisi** (défaut du 2026-11-15) : **validé par le porteur** : il participe quand même au tirage ; s'il gagne, l'admin lui fait choisir une carte du tirage.
