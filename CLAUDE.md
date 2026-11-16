@@ -324,6 +324,11 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - carte de dresseur d'un autre joueur : « Envoyer un message rapide », 8 messages tout faits (Salut, Bien joué, Belle collection, Rendez-vous au top 10, GG, Bonne chance au tirage, Prêt pour le Safari ?, Merci), jamais de texte libre ; bulle jaune cochée une fois envoyée, messages restants du jour ;
   - « Mes messages » : bouton dans la carte du joueur de Ma ligue, pastille rouge sur la bannière « Ma ligue » de l'onglet Jeux ; messages reçus (avatar, pseudo, « il y a 2 min », « Nouveau »), 2 ou 3 réponses en un appui, « Tu as répondu … », réglage « Recevoir les messages rapides » ; un appui sur un message ouvre la carte de l'expéditeur ;
   - serveur `tools/supabase/032_messages_rapides.sql` (42 tests) : 10 envois par jour, 3 au même joueur, une réponse par message, effacement après 90 jours et avec le compte (**défauts à confirmer**) ; **à installer avec `install_024_a_032.sql`** ; app `tools/web/qmsg.js`, `qmsg.css`, test `t-qmsg.mjs` ; politique de confidentialité à jour (16 novembre 2026) ; cache v231.
+- **Échanges entre joueurs (2026-11-16, porteur) :**
+  - **Dropicards n'est pas une plateforme de vente, mais met en relation les joueurs pour échanger des cartes** (décision du porteur ; principe 4 assoupli pour les échanges seulement) ;
+  - étage 1 proposé avec maquette (`docs/45-proposition-vitrine-pour-trade.md`, `docs/45-maquette-vitrine/`) : vitrine sur la carte de dresseur, étiquette **« POUR TRADE »**, « Je cherche », onglet « Échanges » de Ma ligue (échanges possibles), « Je suis intéressé » et propositions de carte contre carte dans « Mes messages », sans texte libre ni prix de vente ;
+  - **rien n'est codé, « go » et décisions V1 à V6 attendus** ;
+  - étage 2 (s'écrire pour organiser l'échange, 18 ans et plus, avis de l'avocat) et étage 3 (vente par lien Vinted) plus tard.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

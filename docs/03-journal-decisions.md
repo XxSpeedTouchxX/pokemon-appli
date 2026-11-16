@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-11-16 — Échanges entre joueurs : vitrine et « Pour trade » proposés (porteur)
+
+- **Constat du porteur** : les messages tout faits seuls « n'apportent pas de plus-value ». Demande : permettre aux joueurs de se montrer leur classeur et d'indiquer les cartes qu'ils veulent échanger.
+- **Avis de Claude** (accepté par le porteur) :
+  - des échanges plutôt qu'une vente ;
+  - en 3 étages : vitrine et « Je cherche », puis échanges encadrés réservés aux 18 ans et plus après avis de l'avocat, puis vente seulement par un lien Vinted ;
+  - la sauvegarde complète du classeur sur le serveur reste conseillée à part.
+- **Décision du porteur** : « Dropicards n'est pas une plateforme de vente », mais il doit **mettre en relation les joueurs pour échanger des cartes**, avec une étiquette **« Pour trade »** sur les cartes de la vitrine. Le principe 4 est assoupli pour les échanges seulement : pas de vente, pas de paiement, pas de prix de vente.
+- **« Ok pour étage 1 »** : proposition `docs/45-proposition-vitrine-pour-trade.md` et maquette `docs/45-maquette-vitrine/`, en 3 images :
+  - je prépare mes échanges ;
+  - la vitrine d'un joueur ;
+  - on se met d'accord.
+- **Rien n'est codé** : « go » attendu, avec les décisions V1 à V6 (≈ 40 h, 0 €).
+
+---
+
 ## 2026-11-16 — Messages rapides entre joueurs construits (option B, porteur)
 
 - **Décision du porteur** : « ok pour le B » (M1 de `docs/43` = **B, messages tout faits**). M2 à M4 (messagerie libre) sans objet tant que C n'est pas demandé ; le principe 4 (« pas de réseau social ») reste inchangé : pas de fil, pas de discussion libre.

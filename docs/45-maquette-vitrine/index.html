@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vitrine et Pour trade</title>
+<!-- Maquette de docs/45-proposition-vitrine-pour-trade.md (2026-11-16) : étage 1 des échanges entre joueurs (vitrine,
+     étiquette « Pour trade », « Je cherche », échanges possibles, messages rattachés à une carte). Proposition, rien
+     n'est construit. Cotes et pseudos d'exemple. -->
+<style>
+@font-face { font-family: 'Sora'; font-weight: 600; src: url('../../web/fonts/sora-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Sora'; font-weight: 700; src: url('../../web/fonts/sora-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 400; src: url('../../web/fonts/plus-jakarta-sans-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 600; src: url('../../web/fonts/plus-jakarta-sans-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 700; src: url('../../web/fonts/plus-jakarta-sans-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Jakarta'; font-weight: 800; src: url('../../web/fonts/plus-jakarta-sans-latin-800-normal.woff2') format('woff2'); }
+:root { --bg: #EEF1F7; --ink: #0B1120; --muted: #4A5670; --yel: #FFD60A; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Jakarta', system-ui, sans-serif; }
+.page { display: flex; flex-direction: column; gap: 28px; padding: 28px; }
+.opt { display: flex; flex-direction: column; gap: 14px; width: max-content; padding: 22px; border-radius: 28px; background: #FFFFFF; box-shadow: 0 6px 24px rgba(11, 17, 32, 0.08); }
+.opt h1 { margin: 0; font-family: 'Sora', sans-serif; font-size: 26px; display: flex; align-items: center; gap: 12px; }
+.opt h1 .tag { padding: 4px 12px; border-radius: 999px; background: var(--yel); font-size: 14px; font-family: 'Jakarta'; font-weight: 800; }
+.opt .sub { margin: -6px 0 0; font-size: 15px; color: var(--muted); max-width: 742px; line-height: 1.45; }
+.phones { display: flex; gap: 22px; align-items: flex-start; }
+.ph { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.ph > b { font-size: 14px; color: var(--muted); }
+.phone { position: relative; width: 360px; height: 760px; border-radius: 44px; padding: 10px; background: #1A1F2B; box-shadow: 0 10px 30px rgba(11, 17, 32, 0.25); }
+.scr { position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: radial-gradient(120% 60% at 50% 0%, #2A3142, #161B26 60%); color: #F3F6FC; display: flex; flex-direction: column; }
+.status { flex: none; height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 13px; font-weight: 700; }
+.top { flex: none; display: flex; align-items: center; gap: 10px; padding: 4px 16px 10px; }
+.back { flex: none; width: 36px; height: 36px; border-radius: 18px; border: 1px solid #2E3A55; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.top h2 { margin: 0; font-family: 'Sora'; font-size: 20px; }
+.top small { display: block; color: #9AA8C3; font-size: 12px; }
+.body { flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 0 14px 14px; }
+.dim { position: absolute; inset: 0; background: rgba(3, 6, 14, 0.62); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; top: 70px; border-radius: 28px 28px 0 0; border-top: 1px solid #3B4F80; background: radial-gradient(120% 60% at 50% 0%, rgba(255, 214, 10, 0.12), rgba(255, 214, 10, 0) 60%), #0F1828; padding: 8px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+.grip { align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C; }
+.shead { display: flex; justify-content: space-between; align-items: center; }
+.shead h3 { margin: 0; font-family: 'Sora'; font-size: 17px; }
+.x { width: 34px; height: 34px; border-radius: 17px; border: 1px solid #1E2B45; background: #111A2C; display: flex; align-items: center; justify-content: center; color: #F3F6FC; font-size: 15px; }
+.id { display: flex; align-items: center; gap: 12px; }
+.ava { width: 66px; height: 66px; border-radius: 18px; border: 3px solid var(--yel); overflow: hidden; flex: none; }
+.ava img { width: 100%; height: 100%; display: block; }
+.ava.s { width: 42px; height: 42px; border-radius: 12px; border-width: 2px; }
+.who { display: flex; flex-direction: column; gap: 3px; }
+.who b { font-family: 'Sora'; font-size: 19px; }
+.grade { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: #5BE08F; }
+.grade img { width: 18px; height: 18px; }
+.h4 { margin: 2px 0 0; font-family: 'Sora'; font-size: 14px; display: flex; align-items: center; justify-content: space-between; }
+.h4 small { font-family: 'Jakarta'; font-size: 12px; color: #FFE680; font-weight: 700; }
+/* Cartes */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.cd { position: relative; border-radius: 8px; overflow: hidden; background: #0B1120; aspect-ratio: 63 / 88; }
+.cd > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cd.mine { outline: 3px solid #3DDC84; outline-offset: -1px; }
+.trade { position: absolute; left: 4px; top: 4px; display: flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 999px; background: var(--yel); color: #0B1120; font-size: 9.5px; font-weight: 900; letter-spacing: .02em; box-shadow: 0 2px 6px rgba(0,0,0,.45); }
+.val { position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; align-items: center; justify-content: space-between; padding: 2px 6px; border-radius: 999px; background: rgba(11, 17, 32, 0.88); font-size: 10.5px; font-weight: 800; color: #fff; }
+.val i { font-style: normal; font-size: 9px; padding: 0 4px; border-radius: 4px; background: #1F8F4E; }
+.have { position: absolute; right: 4px; top: 4px; padding: 2px 6px; border-radius: 999px; background: #3DDC84; color: #0B1120; font-size: 9.5px; font-weight: 900; }
+.row { display: flex; gap: 7px; } .row .cd { width: 62px; flex: none; }
+.match { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: linear-gradient(120deg, rgba(61,220,132,.2), rgba(61,220,132,.05)); border: 1px solid rgba(61,220,132,.5); font-size: 12.5px; line-height: 1.35; }
+.match b { color: #8BF0B8; }
+.match .ic { flex: none; width: 30px; height: 30px; border-radius: 15px; background: #3DDC84; color: #0B1120; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 9px 12px; border-radius: 999px; border: 1.5px solid rgba(255, 214, 10, 0.55); background: rgba(255, 214, 10, 0.1); color: #FFE680; font-size: 13px; font-weight: 800; }
+.chip.on { background: var(--yel); color: #0B1120; border-color: var(--yel); }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.btn { height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; font-size: 14.5px; }
+.btn.yel { background: var(--yel); color: #0B1120; }
+.btn.ghost { border: 1.5px solid #2E3A55; color: #C9D3EA; }
+.btn.off { background: #1E2738; color: #6F7C96; border: 1px dashed #3A4763; }
+.note { font-size: 11px; color: #9AA8C3; text-align: center; margin: 0; line-height: 1.4; }
+/* Fiche d'une carte */
+.big { align-self: center; width: 150px; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 26px rgba(0,0,0,.55); position: relative; }
+.big img { width: 100%; display: block; }
+.ttl { text-align: center; } .ttl b { display: block; font-family: 'Sora'; font-size: 18px; } .ttl small { color: #9AA8C3; font-size: 12px; }
+.price { display: flex; justify-content: center; gap: 8px; align-items: center; font-family: 'Sora'; font-size: 22px; font-weight: 700; }
+.price i { font-style: normal; font-family: 'Jakarta'; font-size: 11px; font-weight: 800; padding: 3px 7px; border-radius: 6px; background: #1F8F4E; }
+.sw { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: #0B1120; border: 1px solid #1E2B45; }
+.sw .t { flex: 1; display: flex; flex-direction: column; gap: 2px; } .sw .t b { font-size: 14px; } .sw .t small { font-size: 11px; color: #9AA8C3; line-height: 1.3; }
+.tog { flex: none; width: 46px; height: 28px; border-radius: 14px; background: #2A3A5C; position: relative; } .tog::after { content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 11px; background: #F3F6FC; }
+.tog.on { background: #3DDC84; } .tog.on::after { left: 21px; } .tog.y { background: var(--yel); }
+.hint { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 12px; background: rgba(255,214,10,.1); border: 1px solid rgba(255,214,10,.35); font-size: 12.5px; color: #FFE680; font-weight: 700; }
+/* Onglets de Ma ligue */
+.tabs { flex: none; display: flex; gap: 4px; padding: 4px; margin: 0 14px 8px; border-radius: 999px; background: #0B1120; border: 1px solid #1E2B45; }
+.tabs span { flex: 1; text-align: center; padding: 8px 4px; border-radius: 999px; font-size: 12px; font-weight: 800; color: #9AA8C3; }
+.tabs span.on { background: var(--yel); color: #0B1120; }
+.box { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 16px; background: rgba(11,17,32,.7); border: 1px solid #1E2B45; }
+.pl { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 14px; background: #0B1120; border: 1px solid #1E2B45; }
+.pl .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .pl .t b { font-size: 14px; } .pl .t small { font-size: 11.5px; color: #C9D3EA; line-height: 1.3; }
+.pl .t small em { font-style: normal; color: #8BF0B8; font-weight: 800; }
+.pl .go { color: #9AA8C3; font-size: 18px; }
+.cnt { flex: none; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 13px; background: #3DDC84; color: #0B1120; font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.dot { font-size: 10px; padding: 2px 6px; border-radius: 999px; background: #17233A; color: #8BF0B8; font-weight: 800; }
+/* Messages */
+.msg { display: flex; flex-direction: column; gap: 9px; padding: 11px; border-radius: 18px; background: #0B1120; border: 1px solid rgba(255,214,10,.55); }
+.mtop { display: flex; align-items: center; gap: 9px; } .mtop .t { flex: 1; } .mtop b { font-size: 14px; } .mtop small { display: block; font-size: 11px; color: #9AA8C3; }
+.new { padding: 1px 7px; border-radius: 999px; background: var(--yel); color: #0B1120; font-size: 10px; font-weight: 900; }
+.bub { padding: 8px 11px; border-radius: 4px 14px 14px 14px; background: #1A2640; font-size: 13.5px; font-weight: 600; line-height: 1.35; }
+.swap { display: grid; grid-template-columns: 1fr 34px 1fr; align-items: center; gap: 6px; }
+.swap .side { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: #C9D3EA; text-align: center; }
+.swap .side .cd { width: 86px; }
+.swap .side b { color: #fff; font-size: 12px; }
+.swap .arr { width: 34px; height: 34px; border-radius: 17px; background: var(--yel); color: #0B1120; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 17px; }
+.done { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px; border-radius: 18px; background: linear-gradient(160deg, rgba(61,220,132,.25), rgba(61,220,132,.06)); border: 1px solid rgba(61,220,132,.55); text-align: center; }
+.done b { font-family: 'Sora'; font-size: 17px; } .done small { font-size: 12px; color: #C9D3EA; line-height: 1.4; }
+.lock { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 16px; border: 1px dashed #4A5878; background: rgba(255,255,255,.03); font-size: 12px; color: #C9D3EA; line-height: 1.45; }
+.lock b { color: #FFE680; font-size: 13px; }
+.pick { display: flex; gap: 7px; } .pick .cd { width: 70px; flex: none; } .pick .cd.sel { outline: 3px solid var(--yel); outline-offset: -1px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ============ 1. Je prépare mes échanges ============ -->
+<section class="opt" id="v1">
+  <h1>1. Je prépare mes échanges <span class="tag">Étage 1</span></h1>
+  <p class="sub">Dans la fiche d'une carte de mon classeur, deux interrupteurs : « Dans ma vitrine » (les autres joueurs la voient) et « Pour trade » (je veux bien l'échanger). Pour les cartes que je n'ai pas : « ♡ Je la cherche ». Tout se retrouve dans un nouvel onglet « Échanges » de Ma ligue.</p>
+  <div class="phones">
+    <div class="ph"><b>Fiche d'une carte de mon classeur</b>
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="dim"></div>
+        <div class="sheet" style="top: 44px">
+          <div class="grip"></div>
+          <div class="shead"><h3>Ma carte</h3><span class="x">✕</span></div>
+          <div class="big"><img src="../../web/img/onb/30th-c-029.webp" alt=""><span class="trade" style="font-size: 11px; padding: 3px 8px">⇄ POUR TRADE</span></div>
+          <div class="ttl"><b>Lugia</b><small>30ᵉ Anniversaire · Collection Classique</small></div>
+          <div class="price">≈ 24 € <i>NM</i></div>
+          <div class="sw"><span class="t"><b>Dans ma vitrine</b><small>Visible sur ma carte de dresseur</small></span><span class="tog on"></span></div>
+          <div class="sw" style="border-color: rgba(255,214,10,.55)"><span class="t"><b>Pour trade</b><small>Je veux bien l'échanger contre d'autres cartes</small></span><span class="tog on y"></span></div>
+          <div class="hint">🔎 3 joueurs cherchent cette carte</div>
+        </div>
+      </div></div>
+    </div>
+    <div class="ph"><b>Ma ligue › onglet « Échanges »</b>
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="top"><span class="back">‹</span><span><h2>Ma ligue</h2><small>Saison 1 · échanges</small></span></div>
+        <div class="tabs"><span>Classement</span><span>Missions</span><span class="on">Échanges</span></div>
+        <div class="body">
+          <div class="box">
+            <div class="h4">Mes cartes Pour trade <small>3 · Gérer</small></div>
+            <div class="row">
+              <span class="cd"><img src="../../web/img/onb/30th-c-029.webp" alt=""><span class="trade">⇄</span></span>
+              <span class="cd"><img src="../../web/img/card-jirachi-ex.webp" alt=""><span class="trade">⇄</span></span>
+              <span class="cd"><img src="../../web/img/fix/fr_base_base1_30.webp" alt=""><span class="trade">⇄</span></span>
+            </div>
+          </div>
+          <div class="box">
+            <div class="h4">Je cherche <small>4 · Ajouter</small></div>
+            <div class="row">
+              <span class="cd"><img src="../../web/img/onb/30th-151.webp" alt=""><span class="have">2 l'ont</span></span>
+              <span class="cd"><img src="../../web/img/onb/me02.5-276.webp" alt=""><span class="have">1 l'a</span></span>
+              <span class="cd" style="opacity: .55"><img src="../../web/img/onb/base1-4.webp" alt=""></span>
+              <span class="cd" style="opacity: .55"><img src="../../web/img/card-favianos-ex.webp" alt=""></span>
+            </div>
+          </div>
+          <div class="h4">Échanges possibles</div>
+          <div class="pl"><span class="ava s"><img src="../43-maquette-messagerie/avatar-2.png" alt=""></span><span class="t"><b>Sacha</b><small><em>a 2 cartes</em> que tu cherches · cherche ta Lugia</small></span><span class="cnt">3</span><span class="go">›</span></div>
+          <div class="pl"><span class="ava s"><img src="../43-maquette-messagerie/avatar-1.png" alt=""></span><span class="t"><b>Ondine</b><small><em>a 1 carte</em> que tu cherches</small></span><span class="cnt">1</span><span class="go">›</span></div>
+          <p class="note">Les joueurs sont classés par nombre de correspondances.</p>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. Je découvre la vitrine d'un joueur ============ -->
+<section class="opt" id="v2">
+  <h1>2. La vitrine d'un joueur <span class="tag">Étage 1</span></h1>
+  <p class="sub">Sur la carte de dresseur, sa vitrine : ses cartes, l'étiquette jaune « POUR TRADE » sur celles qu'il veut échanger, la cote Dropicards et l'état. Un bandeau vert dit ce qui colle avec moi. Un appui sur une carte « Pour trade » : « Je suis intéressé » ou « Je te propose une de mes cartes ».</p>
+  <div class="phones">
+    <div class="ph"><b>Carte de dresseur › sa vitrine</b>
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="dim"></div>
+        <div class="sheet" style="top: 44px">
+          <div class="grip"></div>
+          <div class="shead"><h3>Carte de dresseur</h3><span class="x">✕</span></div>
+          <div class="id"><span class="ava"><img src="../43-maquette-messagerie/avatar-2.png" alt=""></span><span class="who"><b>Sacha</b><span class="grade"><img src="../../web/img/grades/grade-4.svg" alt="">Dresseur Pokémon</span><span style="font-size: 11.5px; color: #C9D3EA">#5 de la saison · membre depuis nov. 2026</span></span></div>
+          <div class="match"><span class="ic">⇄</span><span><b>Il a 2 cartes que tu cherches</b> et il cherche ta Lugia (Pour trade)</span></div>
+          <div class="h4">Sa vitrine <small>9 cartes · tout voir</small></div>
+          <div class="grid">
+            <span class="cd"><img src="../../web/img/onb/30th-151.webp" alt=""><span class="trade" style="font-size: 8.6px; padding: 2px 5px">⇄ POUR TRADE</span><span class="have" style="top: auto; bottom: 26px">Tu la cherches</span><span class="val">≈ 38 € <i>NM</i></span></span>
+            <span class="cd"><img src="../../web/img/onb/me02.5-276.webp" alt=""><span class="trade" style="font-size: 8.6px; padding: 2px 5px">⇄ POUR TRADE</span><span class="have" style="top: auto; bottom: 26px">Tu la cherches</span><span class="val">≈ 95 € <i>NM</i></span></span>
+            <span class="cd"><img src="../../web/img/onb/30th-152.webp" alt=""><span class="val">≈ 41 € <i>M</i></span></span>
+            <span class="cd"><img src="../../web/img/card-pikachu-zekrom-gx.webp" alt=""><span class="trade" style="font-size: 8.6px; padding: 2px 5px">⇄ POUR TRADE</span><span class="val">≈ 12 € <i>EX</i></span></span>
+            <span class="cd"><img src="../../web/img/card-mega-meganium-ex.webp" alt=""><span class="val">≈ 9 € <i>NM</i></span></span>
+            <span class="cd"><img src="../../web/img/fix/fr_base_base1_24.webp" alt=""><span class="val">≈ 6 € <i>GD</i></span></span>
+          </div>
+          <div class="h4">Il cherche <small>4 cartes</small></div>
+          <div class="row">
+            <span class="cd mine"><img src="../../web/img/onb/30th-c-029.webp" alt=""><span class="have">Tu l'as</span></span>
+            <span class="cd" style="opacity: .55"><img src="../../web/img/card-favianos-ex.webp" alt=""></span>
+            <span class="cd" style="opacity: .55"><img src="../../web/img/onb/base1-4.webp" alt=""></span>
+          </div>
+        </div>
+      </div></div>
+    </div>
+    <div class="ph"><b>Appui sur une carte « Pour trade »</b>
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="dim"></div>
+        <div class="sheet" style="top: 44px">
+          <div class="grip"></div>
+          <div class="shead"><h3>Carte de Sacha</h3><span class="x">✕</span></div>
+          <div class="big" style="width: 132px"><img src="../../web/img/onb/30th-151.webp" alt=""><span class="trade" style="font-size: 11px; padding: 3px 8px">⇄ POUR TRADE</span></div>
+          <div class="ttl"><b>Mewtwo-ex</b><small>30ᵉ Anniversaire · état Near Mint</small></div>
+          <div class="price" style="font-size: 19px">≈ 38 € <i>NM</i></div>
+          <span class="btn ghost">👋 Je suis intéressé</span>
+          <div class="h4" style="margin-top: 2px">Je te propose une de mes cartes <small>Pour trade</small></div>
+          <div class="pick">
+            <span class="cd sel"><img src="../../web/img/onb/30th-c-029.webp" alt=""><span class="val">≈ 24 €</span></span>
+            <span class="cd"><img src="../../web/img/card-jirachi-ex.webp" alt=""><span class="val">≈ 31 €</span></span>
+            <span class="cd"><img src="../../web/img/fix/fr_base_base1_30.webp" alt=""><span class="val">≈ 7 €</span></span>
+          </div>
+          <span class="btn yel">⇄ Proposer ma Lugia</span>
+          <p class="note">Seulement des messages tout faits, avec les cartes. Pas de texte libre, jamais de prix de vente.</p>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. On se met d'accord ============ -->
+<section class="opt" id="v3">
+  <h1>3. On se met d'accord <span class="tag">Étage 1</span></h1>
+  <p class="sub">La proposition arrive dans « Mes messages », avec les deux cartes et leur cote. Réponse en un appui. Quand les deux sont d'accord, l'échange est noté. Pour organiser l'envoi ou un rendez-vous, il faudra l'étage 2 (18 ans et plus, après l'avis de ton avocat) : l'étage 1 s'arrête là.</p>
+  <div class="phones">
+    <div class="ph"><b>Mes messages › une proposition</b>
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="top"><span class="back">‹</span><span><h2>Mes messages</h2><small>Messages rapides de ta ligue</small></span></div>
+        <div class="body">
+          <div class="msg">
+            <div class="mtop"><span class="ava s"><img src="../43-maquette-messagerie/avatar-1.png" alt=""></span><span class="t"><b>Ondine <span class="new">Nouveau</span></b><small>il y a 3 min</small></span></div>
+            <div class="bub">⇄ Je te propose un échange</div>
+            <div class="swap">
+              <span class="side"><span class="cd"><img src="../../web/img/card-jirachi-ex.webp" alt=""><span class="val">≈ 31 €</span></span><b>Sa Jirachi-ex</b>NM</span>
+              <span class="arr">⇄</span>
+              <span class="side"><span class="cd"><img src="../../web/img/onb/30th-c-029.webp" alt=""><span class="val">≈ 24 €</span></span><b>Ta Lugia</b>Pour trade</span>
+            </div>
+            <div class="chips"><span class="chip">👍 Ça m'intéresse</span><span class="chip">🙅 Non merci</span><span class="chip">Plus disponible</span></div>
+          </div>
+          <div class="msg" style="border-color: #1E2B45">
+            <div class="mtop"><span class="ava s"><img src="../43-maquette-messagerie/avatar-2.png" alt=""></span><span class="t"><b>Sacha</b><small>hier</small></span></div>
+            <div class="bub">👋 Je suis intéressé par ta carte</div>
+            <div class="row"><span class="cd"><img src="../../web/img/onb/30th-c-029.webp" alt=""><span class="trade">⇄</span></span><span style="font-size: 12px; color: #C9D3EA; align-self: center">Ta Lugia · Pour trade<br><span style="color: #8BF0B8; font-weight: 800">Il a 2 cartes que tu cherches</span></span></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+    <div class="ph"><b>Les deux sont d'accord</b>
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="top"><span class="back">‹</span><span><h2>Mes messages</h2><small>Messages rapides de ta ligue</small></span></div>
+        <div class="body">
+          <div class="done">
+            <span style="font-size: 30px">🤝</span>
+            <b>Échange d'accord avec Ondine</b>
+            <div class="swap" style="width: 100%">
+              <span class="side"><span class="cd"><img src="../../web/img/card-jirachi-ex.webp" alt=""></span><b>Sa Jirachi-ex</b></span>
+              <span class="arr">⇄</span>
+              <span class="side"><span class="cd"><img src="../../web/img/onb/30th-c-029.webp" alt=""></span><b>Ta Lugia</b></span>
+            </div>
+            <small>Vos deux cartes sont marquées « Échange en cours » dans vos vitrines.</small>
+          </div>
+          <span class="btn off">🔒 Organiser l'échange · étage 2</span>
+          <div class="lock"><b>Ce qui n'est pas dans l'étage 1</b>Se donner rendez-vous ou s'envoyer les cartes demande de pouvoir s'écrire : c'est l'étage 2 (18 ans et plus, discussion encadrée avec « Signaler » et « Bloquer », après l'avis de ton avocat). En attendant, les joueurs savent qui veut échanger quoi.</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
