@@ -165,7 +165,8 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
     && (await PC.locator('.pkm-tc-ava img').count()) >= 2 && (S.calls.player_card || []).slice(-1)[0].target === 'u-5');
   ok('carte : saison en cours #5 sur 40, 1 600 PL', /Saison 2 · en cours/.test(pc) && /#5/.test(pc) && /sur 40 joueurs/.test(pc) && /1 600/.test(pc));
   ok('carte : saisons passées (Saison 1, 2ᵉ sur 30, 900 PL, médaille d’argent)', /Saison 1/.test(pc) && /2ᵉ sur 30/.test(pc) && /900 PL/.test(pc) && (await PC.locator('.pkm-tc-past img[src="img/rank/2.svg"]').count()) === 1);
-  ok('carte : ni e-mail ni bouton de messagerie', !/@/.test(pc) && !/message|chat/i.test(pc));
+  // Messages rapides (2026-11-16, option B de docs/43) : seulement les 8 messages tout faits, jamais de champ pour écrire.
+  ok('carte : ni e-mail ni champ pour écrire, « Envoyer un message rapide »', !/@/.test(pc) && /Envoyer un message rapide/.test(pc) && (await PC.locator('textarea, input').count()) === 0);
   await PC.screenshot({ path: shot('pl-carte-dresseur.png') });
   await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
   ok('carte fermée', (await page.locator('section.pkm-tc').count()) === 0);
@@ -212,7 +213,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   // « Mes missions » pour un admin quand 028 manque : aperçu avec le fichier à installer.
   await page.evaluate(() => window.__pkm.setState({ admSheet: false }));
   await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2600);
-  ok('sans 028, admin : « install_024_a_031.sql » à coller dans Studio', /install_024_a_031\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));
+  ok('sans 028, admin : « install_024_a_032.sql » à coller dans Studio', /install_024_a_032\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));
   await ctx.close();
 }
 

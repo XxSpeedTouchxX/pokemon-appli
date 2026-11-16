@@ -22,7 +22,7 @@
 
 do $$ begin
   if to_regclass('public.app_time') is null then
-    raise exception 'Installe d''abord 025_suivi_joueurs.sql (le plus simple : tout le fichier install_024_a_031.sql)';
+    raise exception 'Installe d''abord 025_suivi_joueurs.sql (le plus simple : tout le fichier install_024_a_032.sql)';
   end if;
 end $$;
 

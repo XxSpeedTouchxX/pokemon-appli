@@ -4,8 +4,8 @@
 > pour le contacter directement s'il veut lui parler ».
 > Maquette (2026-11-16, demandée par le porteur avant de choisir) : `docs/43-maquette-messagerie/` (`index.html`,
 > `option-a.png`, `option-b.png`, `option-c.png`).
-> État : **proposition, rien n'est construit**. La carte de dresseur est livrée sans messagerie (`031_carte_joueur.sql`,
-> `progress.js`). Décisions attendues du porteur : M1 à M4 (§5).
+> État (2026-11-16) : **B choisi par le porteur (« ok pour le B ») et construit** : `032_messages_rapides.sql`,
+> `tools/web/qmsg.js`, `qmsg.css`, test `t-qmsg.mjs` (voir §7). M2 à M4 ne concernent que C (non construit).
 
 ## 1. Pourquoi ce n'est pas construit tout de suite
 
@@ -60,7 +60,7 @@ ouvertes qui mènent à un message rapide (B).
 
 ## 5. Décisions attendues
 
-- **M1.** Option A, B ou C ? (défaut proposé : **B**)
+- **M1.** Option A, B ou C ? (défaut proposé : **B**) → **B, décision du porteur du 2026-11-16**
 - **M2.** Si C : âge minimum 15 ou 18 ans ? (défaut : **18 ans**)
 - **M3.** Si C : qui modère, et combien de temps par semaine ? (défaut : le porteur, réponse sous 24 h)
 - **M4.** Si C : le principe 4 (« pas de réseau social ») est-il modifié ? (défaut : non tant que B n'a pas été essayé)
@@ -71,3 +71,13 @@ ouvertes qui mènent à un message rapide (B).
   liste des messages reçus, tests. ≈ 10 h, soit ≈ 1,5 jour à plein régime (8 h/j) ou ≈ 3,5 jours au rythme réel (3 h/j).
 - **C** : tout B, plus texte libre, filtre, signalement, blocage, réglage de confidentialité, file Admin, effacement à
   90 jours, textes légaux, tests de sécurité. ≈ 40 h, soit ≈ 5 jours à plein régime ou ≈ 13 jours au rythme réel.
+
+## 7. Ce qui est construit (B, 2026-11-16)
+
+- **Serveur** (`tools/supabase/032_messages_rapides.sql`, à installer avec `install_024_a_032.sql`) : 8 messages tout
+  faits, 10 envois par jour au plus (jour de Paris) et 3 au même joueur, une réponse par message, réglage « couper mes
+  messages », effacement après 90 jours et avec le compte, tables fermées (seules les fonctions du serveur y accèdent).
+- **App** : « Envoyer un message rapide » sur la carte de dresseur d'un autre joueur ; « Mes messages » (bouton dans la
+  carte du joueur de Ma ligue, pastille sur la bannière de l'onglet Jeux) avec réponses en un appui, « Nouveau », réglage
+  « Recevoir les messages rapides » ; un appui sur un message ouvre la carte de l'expéditeur.
+- **Défauts à confirmer** : 10 par jour, 3 au même joueur, 90 jours ; les admins reçoivent et envoient comme les joueurs.

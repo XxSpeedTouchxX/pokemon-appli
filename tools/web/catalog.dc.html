@@ -1958,7 +1958,7 @@
 <div role="tablist" aria-label="Jeux" class="pkm-shop-tabs pkm-gm-tabs"><button type="button" role="tab" aria-selected="{{ gtab.pkOn }}" onClick="{{ gtab.goPk }}" class="{{ gtab.pkCls }}">Jeux à PK</button><button type="button" role="tab" aria-selected="{{ gtab.dexOn }}" onClick="{{ gtab.goDex }}" class="{{ gtab.dexCls }}">Pokédex</button></div>
 <sc-if value="{{ gtab.isPk }}" hint-placeholder-val="{{ true }}">
 
-<button type="button" onClick="{{ pgb.open }}" class="pkm-pg-banner pkm-dark" aria-label="{{ pgb.aria }}"><img src="img/rank/1.svg" alt="" width="46" height="46" class="pkm-pg-banner-cup"><span><b>{{ pgb.title }}</b><small>{{ pgb.sub }}</small></span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+<button type="button" onClick="{{ pgb.open }}" class="pkm-pg-banner pkm-dark" aria-label="{{ pgb.aria }}"><img src="img/rank/1.svg" alt="" width="46" height="46" class="pkm-pg-banner-cup"><sc-if value="{{ qmb.hasN }}" hint-placeholder-val="{{ false }}"><b class="pkm-qm-badge pkm-qm-badge-ban" aria-hidden="true">{{ qmb.n }}</b></sc-if><span><b>{{ pgb.title }}</b><small>{{ pgb.sub }}</small></span><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
 
 <section aria-label="Booster PK" class="pkm-gm-boost pkm-dark" style="color: #F3F6FC; flex: none; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 24px; border: 1px solid #24345C; overflow: hidden">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
@@ -2595,6 +2595,7 @@ PKCOUNTER
 <div class="pkm-pg-stats pkm-pg-stats-one">
 <span><small>{{ pg.card.seasonLabel }}</small><b><img src="{{ pg.card.unitImg }}" alt="" width="22" height="22">{{ pg.card.pkSeason }}</b></span>
 </div>
+<sc-if value="{{ qmb.show }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ qmb.open }}" aria-label="{{ qmb.aria }}" class="pkm-qm-open"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" class="pkm-qm-env"><rect x="3" y="5.5" width="18" height="13" rx="3"></rect><path d="M3.8 7.2l8.2 6 8.2-6"></path></svg><span>Mes messages</span><sc-if value="{{ qmb.hasN }}" hint-placeholder-val="{{ false }}"><b class="pkm-qm-badge" aria-hidden="true">{{ qmb.n }}</b></sc-if><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-qm-chev"><path d="M9 6l6 6-6 6"></path></svg></button></sc-if>
 <sc-if value="{{ pg.card.hasPrize }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-prize">{{ pg.card.prize }}</p></sc-if>
 <sc-if value="{{ pg.card.hasUnranked }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ pg.card.unranked }}</p></sc-if>
 </section>
@@ -2974,6 +2975,27 @@ PKCOUNTER
 <sc-if value="{{ pf.trainer.delAsk }}" hint-placeholder-val="{{ false }}"><div role="alertdialog" aria-label="Supprimer mon compte" class="pkm-acct-del-ask"><p>{{ pf.trainer.delText }}</p><div class="pkm-acct-del-row"><button type="button" onClick="{{ pf.trainer.delGo }}" class="pkm-acct-del-go">{{ pf.trainer.delLabel }}</button><button type="button" onClick="{{ pf.trainer.delCancel }}" class="pkm-acct-del-no">Annuler</button></div></div></sc-if>
 </section>
 
+<!-- fragment: quick-msgs -->
+<sc-if value="{{ qmx.open }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-tc-wrap pkm-qm-wrap">
+<button type="button" aria-label="Fermer mes messages" onClick="{{ qmx.close }}" class="pkm-tc-scrim"></button>
+<section aria-label="Mes messages" role="dialog" aria-modal="true" class="pkm-sheet pkm-tc pkm-qm">
+<div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
+<div class="pkm-tc-head"><span class="pkm-qm-h"><h2>Mes messages</h2><small>Messages rapides des joueurs de ta ligue</small></span><button type="button" onClick="{{ qmx.close }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<sc-if value="{{ qmx.busy }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note">Chargement de tes messages…</p></sc-if>
+<sc-if value="{{ qmx.hasErr }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note pkm-qm-err">{{ qmx.err }}</p></sc-if>
+<sc-if value="{{ qmx.hasItems }}" hint-placeholder-val="{{ true }}"><ul class="pkm-qm-list"><sc-for list="{{ qmx.items }}" as="qmi" hint-placeholder-count="3"><li class="{{ qmi.cls }}">
+<button type="button" onClick="{{ qmi.openCard }}" aria-label="{{ qmi.cardAria }}" class="pkm-qm-from"><sc-if value="{{ qmi.hasAva }}" hint-placeholder-val="{{ true }}"><span class="pkm-pg-ava-m pkm-qm-ava" aria-hidden="true"><img src="{{ qmi.ava.bg }}" alt=""><img src="{{ qmi.ava.char }}" alt=""><sc-if value="{{ qmi.ava.hasPoke }}" hint-placeholder-val="{{ false }}"><img src="{{ qmi.ava.poke.src }}" alt="" class="pkm-pg-ava-pk" style="{{ qmi.ava.pokeStyle }}"></sc-if><sc-if value="{{ qmi.ava.hasAcc }}" hint-placeholder-val="{{ false }}"><img src="{{ qmi.ava.acc.src }}" alt="" class="pkm-pg-ava-pk pkm-pg-ava-acc" style="{{ qmi.ava.accStyle }}"></sc-if></span></sc-if><sc-if value="{{ qmi.noAva }}" hint-placeholder-val="{{ false }}"><span class="pkm-qm-noava" aria-hidden="true"><img src="{{ qmi.gImg }}" alt="" width="40" height="40"></span></sc-if><span class="pkm-qm-txt"><span class="pkm-qm-top"><b>{{ qmi.pseudo }}</b><sc-if value="{{ qmi.isNew }}" hint-placeholder-val="{{ false }}"><em class="pkm-qm-newtag">Nouveau</em></sc-if><small>{{ qmi.ago }}</small></span><span class="pkm-qm-bubble">{{ qmi.text }}</span></span></button>
+<sc-if value="{{ qmi.hasReplies }}" hint-placeholder-val="{{ true }}"><div role="group" aria-label="Répondre" class="pkm-qm-chips pkm-qm-replies"><sc-for list="{{ qmi.replies }}" as="qmr" hint-placeholder-count="3"><button type="button" onClick="{{ qmr.pick }}" aria-label="{{ qmr.aria }}" class="{{ qmr.cls }}">{{ qmr.label }}</button></sc-for></div></sc-if>
+<sc-if value="{{ qmi.hasReplied }}" hint-placeholder-val="{{ false }}"><p class="pkm-qm-replied"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" class="pkm-qm-ok"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ qmi.replied }}</p></sc-if>
+</li></sc-for></ul></sc-if>
+<sc-if value="{{ qmx.empty }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note pkm-qm-empty">{{ qmx.emptyText }}</p></sc-if>
+<sc-if value="{{ qmx.showSet }}" hint-placeholder-val="{{ true }}"><button type="button" role="switch" aria-checked="{{ qmx.sw.on }}" onClick="{{ qmx.sw.toggle }}" class="pkm-nt-row pkm-qm-set"><span class="pkm-nt-txt"><span class="pkm-nt-label">{{ qmx.sw.label }}</span><span class="pkm-nt-sub">{{ qmx.sw.sub }}</span></span><span class="{{ qmx.sw.cls }}" aria-hidden="true"><i></i></span></button></sc-if>
+<p class="pkm-qm-foot">{{ qmx.foot }}</p>
+</section>
+</div>
+</sc-if>
+
 <!-- fragment: player-card -->
 <sc-if value="{{ tcd.open }}" hint-placeholder-val="{{ false }}">
 <div class="pkm-tc-wrap">
@@ -2994,6 +3016,14 @@ PKCOUNTER
 <small class="pkm-tc-now-h">{{ tcd.seasonLabel }}</small>
 <div class="pkm-tc-nowrow"><span><small>Classement</small><b>{{ tcd.rank }}</b><small>{{ tcd.of }}</small></span><span><small>{{ tcd.unitLabel }}</small><b><img src="{{ tcd.unitImg }}" alt="" width="22" height="22">{{ tcd.pts }}</b></span></div>
 </section>
+<sc-if value="{{ tcd.qm.show }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Envoyer un message rapide" class="pkm-qm-send">
+<h3>Envoyer un message rapide</h3>
+<div class="pkm-qm-chips"><sc-for list="{{ tcd.qm.chips }}" as="qmc" hint-placeholder-count="8"><button type="button" onClick="{{ qmc.pick }}" aria-label="{{ qmc.aria }}" class="{{ qmc.cls }}"><sc-if value="{{ qmc.isSent }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" class="pkm-qm-ok"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>{{ qmc.label }}</button></sc-for></div>
+<sc-if value="{{ tcd.qm.hasNote }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note pkm-qm-note">{{ tcd.qm.note }}</p></sc-if>
+<p class="pkm-qm-foot">{{ tcd.qm.foot }}<sc-if value="{{ tcd.qm.hasLeft }}" hint-placeholder-val="{{ true }}"><br><b>{{ tcd.qm.left }}</b></sc-if></p>
+</section>
+</sc-if>
 <section aria-label="Saisons passées" class="pkm-tc-past">
 <h3>Saisons passées</h3>
 <sc-if value="{{ tcd.hasPast }}" hint-placeholder-val="{{ false }}"><ol><sc-for list="{{ tcd.past }}" as="pcp" hint-placeholder-count="2"><li aria-label="{{ pcp.aria }}"><span class="pkm-tc-pmedal"><sc-if value="{{ pcp.hasMedal }}" hint-placeholder-val="{{ false }}"><img src="{{ pcp.medal }}" alt="" width="26" height="26"></sc-if></span><b>{{ pcp.season }}</b><span class="pkm-tc-prank">{{ pcp.rank }}</span><span class="pkm-tc-ppl"><img src="img/brand/pl.svg" alt="" width="18" height="18">{{ pcp.pl }}</span></li></sc-for></ol></sc-if>

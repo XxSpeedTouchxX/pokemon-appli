@@ -32,6 +32,7 @@ from (values
   ('029_annonces', to_regclass('public.listings') is not null, 'annonces Vinted (installation à part, docs/42)'),
   ('030_tirages_cartes', to_regprocedure('public.ticket_choose(text,text)') is not null, 'cartes des tirages modifiables, carte à rechoisir'),
   ('031_carte_joueur', to_regprocedure('public.player_card(uuid)') is not null, 'carte de visite des joueurs de Ma ligue'),
+  ('032_messages_rapides', to_regprocedure('public.quick_msg_send(uuid,text)') is not null, 'messages rapides entre joueurs de Ma ligue'),
   ('020_premium_formules', exists (select 1 from pg_constraint where conname = 'premium_plan_check' and pg_get_constraintdef(oid) like '%quarter%'), 'Premium trimestriel et semestriel')
 ) as t(script, ok, role)
 order by script;

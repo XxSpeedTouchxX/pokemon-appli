@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-16 — Messages rapides entre joueurs construits (option B, porteur)
+
+- **Décision du porteur** : « ok pour le B » (M1 de `docs/43` = **B, messages tout faits**). M2 à M4 (messagerie libre) sans objet tant que C n'est pas demandé ; le principe 4 (« pas de réseau social ») reste inchangé : pas de fil, pas de discussion libre.
+- **Serveur** `tools/supabase/032_messages_rapides.sql` (42 tests, `tests/test_032.sql`) : 8 messages tout faits (Salut, Bien joué, Belle collection, Rendez-vous au top 10, GG, Bonne chance au tirage, Prêt pour le Safari ?, Merci) ; jamais de texte libre ; 10 messages par jour au plus (jour de Paris), 3 au même joueur ; pas à soi-même, ni à un compte suspendu ou sans pseudo, ni à un joueur qui a coupé ses messages ; une seule réponse par message ; messages effacés après 90 jours et avec le compte ; tables lisibles seulement par les fonctions du serveur.
+- **App** (`tools/web/qmsg.js`, `qmsg.css`) : sur la carte de dresseur d'un autre joueur, « Envoyer un message rapide » (8 bulles, bulle jaune cochée une fois envoyée, messages restants du jour) ; « Mes messages » (bouton dans la carte du joueur de Ma ligue, pastille rouge sur la bannière « Ma ligue » de l'onglet Jeux) : messages reçus avec avatar, pseudo, « il y a 2 min », « Nouveau », 2 ou 3 réponses en un appui, « Tu as répondu … », réglage « Recevoir les messages rapides » ; un appui sur un message ouvre la carte de dresseur de l'expéditeur. Serveur sans 032 : « bientôt » pour un joueur, fichier à installer pour un admin.
+- **Défauts pris** (à confirmer par le porteur) : 10 messages par jour et 3 au même joueur ; 90 jours de conservation ; un admin peut recevoir et envoyer des messages comme un joueur.
+- **Politique de confidentialité** : rubrique « Messages rapides » (16 novembre 2026).
+- **À installer par le porteur** : un seul fichier, `tools/supabase/install_024_a_032.sql` (024 à 028, 030 à 032 ; remplace `install_024_a_031.sql`), puis `000_verifier.sql`. Cache v231.
+
+---
+
 ## 2026-11-16 — Maquette de la messagerie entre joueurs (porteur)
 
 - **Demande du porteur** : « je ne vois pas les visuels de la messagerie A, B ou C, montre-moi avant de tout valider ».

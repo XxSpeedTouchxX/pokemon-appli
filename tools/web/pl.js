@@ -226,7 +226,7 @@
     const admin = typeof Cloud !== 'undefined' && Cloud.isAdmin && Cloud.isAdmin();
     let msg = '';
     if (!online) msg = 'Connecte-toi à ton compte Dropicards pour gagner des Points de loyauté.';
-    else if (s.plErr === 'off') msg = admin ? 'Aperçu admin : les Points de loyauté ne sont pas encore installés sur le serveur. Colle tools/supabase/install_024_a_031.sql dans Studio (SQL Editor › Run).' : 'Bientôt disponible : les Points de loyauté arrivent très vite.';
+    else if (s.plErr === 'off') msg = admin ? 'Aperçu admin : les Points de loyauté ne sont pas encore installés sur le serveur. Colle tools/supabase/install_024_a_032.sql dans Studio (SQL Editor › Run).' : 'Bientôt disponible : les Points de loyauté arrivent très vite.';
     else if (!st && s.plErr === 'net') msg = 'Pas de réseau : les missions s’affichent dès que tu es connecté.';
     else if (!st && s.plErr) msg = 'Les missions ne sont pas disponibles pour le moment.';
     else if (!st) msg = 'Chargement de tes missions…';
@@ -299,7 +299,7 @@
     }, e => {
       this.__plpBusy = false;
       this.setState({ plpAt: Date.now(), plpErr: e && e.code === 'not_installed'
-        ? 'Les Points de loyauté ne sont pas encore installés sur le serveur : colle tools/supabase/install_024_a_031.sql dans Studio (SQL Editor › Run).'
+        ? 'Les Points de loyauté ne sont pas encore installés sur le serveur : colle tools/supabase/install_024_a_032.sql dans Studio (SQL Editor › Run).'
         : 'Liste indisponible : rouvre le mode Admin avec le mot de passe des admins (' + ((e && e.message) || 'erreur') + ').' });
     });
   };

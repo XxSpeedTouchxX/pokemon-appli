@@ -123,7 +123,7 @@
   // La carte s'ouvre tout de suite avec ce que le classement montre déjà (avatar, pseudo, grade, place, PL), puis le
   // serveur complète (player_card, 031_carte_joueur.sql) : mois d'arrivée sur Dropicards et saisons passées. Serveur sans
   // 031 (ou classement sans identifiant) : la carte reste sur ces premières informations, avec un mot d'explication.
-  // Messagerie entre joueurs : pas construite (à valider par le porteur, docs/43).
+  // Messages rapides entre joueurs (8 messages tout faits, option B de docs/43, 2026-11-16) : qmsg.js.
   const PC_MONTH = ym => { const m = /^(\d{4})-(\d{2})/.exec(ym || ''); if (!m) return ''; try { return new Date(Date.UTC(+m[1], +m[2] - 1, 15)).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }); } catch (e) { return ''; } };
   const pcRank = r => (Number(r) > 0 ? Number(r) + (Number(r) === 1 ? 'ᵉʳ' : 'ᵉ') : '—');
   progProto.pcOpen = function (e, unit, pts) {
@@ -159,7 +159,7 @@
     });
     const admin = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin();
     const note = c.busy ? 'Chargement de la carte…'
-      : c.err === 'old' ? (admin ? 'Carte complète (date d’arrivée, saisons passées) après l’installation de tools/supabase/install_024_a_031.sql dans Supabase Studio.' : 'La carte complète (date d’arrivée, saisons passées) arrive très bientôt.')
+      : c.err === 'old' ? (admin ? 'Carte complète (date d’arrivée, saisons passées) après l’installation de tools/supabase/install_024_a_032.sql dans Supabase Studio.' : 'La carte complète (date d’arrivée, saisons passées) arrive très bientôt.')
         : c.err === 'net' ? 'Pas de réseau : la carte complète s’affichera une fois connecté.'
           : c.err === 'gone' ? 'Ce joueur n’est plus dans la ligue.'
             : c.err ? 'La carte complète n’est pas disponible pour le moment.' : '';
