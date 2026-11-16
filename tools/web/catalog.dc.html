@@ -2975,31 +2975,31 @@ PKCOUNTER
 </section>
 
 <!-- fragment: player-card -->
-<sc-if value="{{ pc.open }}" hint-placeholder-val="{{ false }}">
-<div class="pkm-pc-wrap">
-<button type="button" aria-label="Fermer la carte de dresseur" onClick="{{ pc.close }}" class="pkm-pc-scrim"></button>
-<section aria-label="{{ pc.aria }}" role="dialog" aria-modal="true" class="pkm-sheet pkm-pc">
+<sc-if value="{{ tcd.open }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-tc-wrap">
+<button type="button" aria-label="Fermer la carte de dresseur" onClick="{{ tcd.close }}" class="pkm-tc-scrim"></button>
+<section aria-label="{{ tcd.aria }}" role="dialog" aria-modal="true" class="pkm-sheet pkm-tc">
 <div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
-<div class="pkm-pc-head"><h2>Carte de dresseur</h2><button type="button" onClick="{{ pc.close }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
-<div class="pkm-pc-id">
-<sc-if value="{{ pc.hasAva }}" hint-placeholder-val="{{ true }}"><span class="pkm-pg-ava-m pkm-pc-ava" aria-hidden="true"><img src="{{ pc.ava.bg }}" alt=""><img src="{{ pc.ava.char }}" alt=""><sc-if value="{{ pc.ava.hasPoke }}" hint-placeholder-val="{{ false }}"><img src="{{ pc.ava.poke.src }}" alt="" class="pkm-pg-ava-pk" style="{{ pc.ava.pokeStyle }}"></sc-if><sc-if value="{{ pc.ava.hasAcc }}" hint-placeholder-val="{{ false }}"><img src="{{ pc.ava.acc.src }}" alt="" class="pkm-pg-ava-pk pkm-pg-ava-acc" style="{{ pc.ava.accStyle }}"></sc-if></span></sc-if>
-<sc-if value="{{ pc.noAva }}" hint-placeholder-val="{{ false }}"><span class="pkm-pc-noava" aria-hidden="true"><img src="{{ pc.gImg }}" alt="" width="84" height="84"></span></sc-if>
-<span class="pkm-pc-who"><b class="pkm-pc-pseudo">{{ pc.pseudo }}</b>
-<sc-if value="{{ pc.me }}" hint-placeholder-val="{{ false }}"><span class="pkm-pc-me">C’est toi</span></sc-if>
-<span class="pkm-pc-grade" style="{{ pc.gStyle }}"><img src="{{ pc.gImg }}" alt="" width="22" height="22">{{ pc.gName }}</span>
-<sc-if value="{{ pc.hasSince }}" hint-placeholder-val="{{ true }}"><span class="pkm-pc-since"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>{{ pc.since }}</span></sc-if>
+<div class="pkm-tc-head"><h2>Carte de dresseur</h2><button type="button" onClick="{{ tcd.close }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<div class="pkm-tc-id">
+<sc-if value="{{ tcd.hasAva }}" hint-placeholder-val="{{ true }}"><span class="pkm-pg-ava-m pkm-tc-ava" aria-hidden="true"><img src="{{ tcd.ava.bg }}" alt=""><img src="{{ tcd.ava.char }}" alt=""><sc-if value="{{ tcd.ava.hasPoke }}" hint-placeholder-val="{{ false }}"><img src="{{ tcd.ava.poke.src }}" alt="" class="pkm-pg-ava-pk" style="{{ tcd.ava.pokeStyle }}"></sc-if><sc-if value="{{ tcd.ava.hasAcc }}" hint-placeholder-val="{{ false }}"><img src="{{ tcd.ava.acc.src }}" alt="" class="pkm-pg-ava-pk pkm-pg-ava-acc" style="{{ tcd.ava.accStyle }}"></sc-if></span></sc-if>
+<sc-if value="{{ tcd.noAva }}" hint-placeholder-val="{{ false }}"><span class="pkm-tc-noava" aria-hidden="true"><img src="{{ tcd.gImg }}" alt="" width="84" height="84"></span></sc-if>
+<span class="pkm-tc-who"><b class="pkm-tc-pseudo">{{ tcd.pseudo }}</b>
+<sc-if value="{{ tcd.me }}" hint-placeholder-val="{{ false }}"><span class="pkm-tc-me">C’est toi</span></sc-if>
+<span class="pkm-tc-grade" style="{{ tcd.gStyle }}"><img src="{{ tcd.gImg }}" alt="" width="22" height="22">{{ tcd.gName }}</span>
+<sc-if value="{{ tcd.hasSince }}" hint-placeholder-val="{{ true }}"><span class="pkm-tc-since"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>{{ tcd.since }}</span></sc-if>
 </span>
 </div>
-<section aria-label="Saison en cours" class="pkm-pc-now">
-<small class="pkm-pc-now-h">{{ pc.seasonLabel }}</small>
-<div class="pkm-pc-nowrow"><span><small>Classement</small><b>{{ pc.rank }}</b><small>{{ pc.of }}</small></span><span><small>{{ pc.unitLabel }}</small><b><img src="{{ pc.unitImg }}" alt="" width="22" height="22">{{ pc.pts }}</b></span></div>
+<section aria-label="Saison en cours" class="pkm-tc-now">
+<small class="pkm-tc-now-h">{{ tcd.seasonLabel }}</small>
+<div class="pkm-tc-nowrow"><span><small>Classement</small><b>{{ tcd.rank }}</b><small>{{ tcd.of }}</small></span><span><small>{{ tcd.unitLabel }}</small><b><img src="{{ tcd.unitImg }}" alt="" width="22" height="22">{{ tcd.pts }}</b></span></div>
 </section>
-<section aria-label="Saisons passées" class="pkm-pc-past">
+<section aria-label="Saisons passées" class="pkm-tc-past">
 <h3>Saisons passées</h3>
-<sc-if value="{{ pc.hasPast }}" hint-placeholder-val="{{ false }}"><ol><sc-for list="{{ pc.past }}" as="pcp" hint-placeholder-count="2"><li aria-label="{{ pcp.aria }}"><span class="pkm-pc-pmedal"><sc-if value="{{ pcp.hasMedal }}" hint-placeholder-val="{{ false }}"><img src="{{ pcp.medal }}" alt="" width="26" height="26"></sc-if></span><b>{{ pcp.season }}</b><span class="pkm-pc-prank">{{ pcp.rank }}</span><span class="pkm-pc-ppl"><img src="img/brand/pl.svg" alt="" width="18" height="18">{{ pcp.pl }}</span></li></sc-for></ol></sc-if>
-<sc-if value="{{ pc.noPast }}" hint-placeholder-val="{{ true }}"><p class="pkm-pg-note">{{ pc.pastEmpty }}</p></sc-if>
+<sc-if value="{{ tcd.hasPast }}" hint-placeholder-val="{{ false }}"><ol><sc-for list="{{ tcd.past }}" as="pcp" hint-placeholder-count="2"><li aria-label="{{ pcp.aria }}"><span class="pkm-tc-pmedal"><sc-if value="{{ pcp.hasMedal }}" hint-placeholder-val="{{ false }}"><img src="{{ pcp.medal }}" alt="" width="26" height="26"></sc-if></span><b>{{ pcp.season }}</b><span class="pkm-tc-prank">{{ pcp.rank }}</span><span class="pkm-tc-ppl"><img src="img/brand/pl.svg" alt="" width="18" height="18">{{ pcp.pl }}</span></li></sc-for></ol></sc-if>
+<sc-if value="{{ tcd.noPast }}" hint-placeholder-val="{{ true }}"><p class="pkm-pg-note">{{ tcd.pastEmpty }}</p></sc-if>
 </section>
-<sc-if value="{{ pc.hasNote }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note pkm-pc-note">{{ pc.note }}</p></sc-if>
+<sc-if value="{{ tcd.hasNote }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-pg-note pkm-tc-note">{{ tcd.note }}</p></sc-if>
 </section>
 </div>
 </sc-if>

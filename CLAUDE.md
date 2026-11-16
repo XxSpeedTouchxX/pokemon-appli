@@ -319,7 +319,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - **un seul fichier pour tout ce qui reste : `tools/supabase/install_024_a_031.sql`** (024 à 028, 030, 031 ; Claude n'a pas accès à la base) ;
   - messagerie entre joueurs **non construite** : `docs/43` (contradiction avec le principe 4, mineurs inscrits ; B « messages tout faits » recommandé), décisions M1 à M4 attendues ;
   - reflet jaune des gemmes au gain de PK ; valeurs du classeur écrites comme « Valeur de toute ma collection » ; cache v228 ;
-  - coffre mystère : 5 vrais bruits de coffre (enregistrements CC0 de Kenney, `tools/sfx/coffre/`), essai `?soncoffre=11` à `15`, **choix du porteur attendu** (aucun son par défaut) ; cache v229.
+  - coffre mystère : 5 vrais bruits de coffre (enregistrements CC0 de Kenney, `tools/sfx/coffre/`), essai `?soncoffre=11` à `15` ; « trop réels » : 5 sons « mix » réel + jeu, `?soncoffre=16` à `20`, **choix du porteur attendu** (aucun son par défaut) ; cache v230.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

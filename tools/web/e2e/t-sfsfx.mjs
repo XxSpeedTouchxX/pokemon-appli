@@ -1,6 +1,7 @@
 // Sons du Safari éclair (2026-11-13, porteur : « un bruit de satisfaction pour une bonne réponse et un bruit "décevant"
 // pour une mauvaise, propose-moi des bruits différents ») : 5 paires au choix (?sonsafari=1 à 5), son de perte de PK.
-// Coffre mystère : 15 sons proposés (?soncoffre=1 à 15), dont 5 vrais enregistrements en fichiers (11 à 15).
+// Coffre mystère : 20 sons proposés (?soncoffre=1 à 20), dont 5 vrais enregistrements en fichiers (11 à 15) et 5 « mix »
+// (16 à 20 : le même fichier, plus bas, avec des effets « jeu » par-dessus).
 // Avec SFX_OUT=dossier : écrit un échantillon WAV par paire (bonne, erreur, bonne, bonne, erreur), le son de perte et
 // chaque son du coffre (petit lot puis légendaire).
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -37,9 +38,11 @@ ok('niveaux (crête, dBFS) : ' + lv.map(x => x.join(' ')).join(' · '), lv.every
 // puis 5 sons doux le 2026-11-15 (6 à 10, même porteur, même demande), puis 5 vrais bruits de coffre le même jour
 // (11 à 15 : « des vrais bruits de coffre qui s'ouvre, avec une touche un peu "jeu" », fichiers web/sfx/coffre-11.mp3 à
 // coffre-15.mp3) ; arrivée + ouverture (petit lot et légendaire), crête entre −12 et −3 dBFS.
-ok('sons du coffre : ' + L.chest.map(x => x.name).join(', ') + ' (par défaut : ' + L.chestDef + ')', L.chest.length === 15 && L.chestDef === null);
-const files = L.chest.slice(10);
-ok('sons 11 à 15 en fichiers : ' + files.map(x => x.file).join(', '), files.every((x, i) => x.file === 'sfx/coffre-' + (11 + i) + '.mp3') && L.chest.slice(0, 10).every(x => !x.file));
+// 4ᵉ série le même jour (16 à 20 : « trop réels, fais-moi un mix avec le son réel et le son jeu »).
+ok('sons du coffre : ' + L.chest.map(x => x.name).join(', ') + ' (par défaut : ' + L.chestDef + ')', L.chest.length === 20 && L.chestDef === null);
+const files = L.chest.slice(10, 15), mixes = L.chest.slice(15);
+ok('sons 11 à 15 en fichiers : ' + files.map(x => x.file).join(', '), files.every((x, i) => x.file === 'sfx/coffre-' + (11 + i) + '.mp3' && !x.mix) && L.chest.slice(0, 10).every(x => !x.file));
+ok('sons 16 à 20 « mix » : fichier 11 à 15 + effets « jeu » (' + mixes.map(x => x.name).join(', ') + ')', mixes.length === 5 && mixes.every((x, i) => x.file === 'sfx/coffre-' + (11 + i) + '.mp3' && x.mix));
 // Fichiers : servis, légers (< 60 Ko), MP3 mono d'environ 5,8 s (arrivée, ouverture, supplément).
 const fi = [];
 for (const x of files) {

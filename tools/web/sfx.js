@@ -761,7 +761,54 @@
     { id: 'serrure', name: 'Serrure de fer et couvercle lourd', file: 'sfx/coffre-12.mp3', desc: 'Les ferrures vibrent à chaque choc, la serrure fait « clic-clac », le lourd couvercle se soulève en grinçant et retombe en arrière, puis une petite cloche discrète.' },
     { id: 'pieces-or', name: 'Loquet, charnière et pièces d’or', file: 'sfx/coffre-13.mp3', desc: 'Des pièces sautent dans le coffre à chaque choc, le loquet saute, la charnière grince, puis les pièces d’or se déversent (plus de pièces pour un gros lot).' },
     { id: 'cle', name: 'Clé qui tourne et scintillement', file: 'sfx/coffre-14.mp3', desc: 'Un petit coffre : le trousseau tinte, la clé tourne dans la serrure, le couvercle grince, puis un scintillement doux de petits reflets de verre et un souffle.' },
-    { id: 'pirate', name: 'Vieux coffre de pirate', file: 'sfx/coffre-15.mp3', desc: 'Un gros coffre cerclé de fer, plus grave : chocs sourds, serrure lourde, couvercle qui gémit et claque en arrière, pièces d’or, et une cloche de navire au loin, toute douce.' }
+    { id: 'pirate', name: 'Vieux coffre de pirate', file: 'sfx/coffre-15.mp3', desc: 'Un gros coffre cerclé de fer, plus grave : chocs sourds, serrure lourde, couvercle qui gémit et claque en arrière, pièces d’or, et une cloche de navire au loin, toute douce.' },
+    // 4ᵉ série (2026-11-15, porteur : « les 5 sons de coffre sont trop réels, fais-moi un mix avec le son "réel" et le
+    // son "jeu" ») : le vrai bruit de coffre (fichiers 11 à 15, un peu plus bas : fileVol) et, par-dessus, les effets
+    // « jeu » des 1ʳᵉ et 2ᵉ séries (clochettes, étincelles, arpège de cristal, fanfare) ; ?soncoffre=16 à 20.
+    { id: 'mix-tresor', name: 'Trésor enchanté (mix)', file: 'sfx/coffre-11.mp3', fileVol: 0.7, gameVol: 1.6,
+      desc: 'Le vieux coffre en bois qui grince (son 11), avec un petit tintement magique à chaque rebond, puis un accord de clochettes et des étincelles à l’ouverture. Une mini-fanfare pour un légendaire.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxBell(ac, out, sfxHz(19 + i * 4), t0 + d + 0.02, 0.45, 0.03, [1, 2.0, 3.0], [1, 0.25, 0.1])),
+      open: (ac, out, t0, n) => {
+        [3, 7, 10, 15].forEach((k, i) => sfxBell(ac, out, sfxHz(k + 12), t0 + SFX_CH_FLASH + i * 0.05, 1.1, 0.05, [1, 2.0, 3.0], [1, 0.25, 0.08]));
+        sfxSparkle(ac, out, t0 + SFX_CH_FLASH + 0.05, t0 + SFX_CH_ITEM + 0.2, n > 2 ? 14 : 9, 0.028);
+        sfxTone(ac, out, 'triangle', sfxHz(n > 1 ? 22 : 19), t0 + SFX_CH_COUNT, 0.35, 0.06, 0.005);
+        if (n > 2) [[3, 7, 10], [5, 9, 12], [7, 11, 14]].forEach((ch, j) => ch.forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_CH_COUNT + 0.15 + j * 0.16, j === 2 ? 0.7 : 0.14, 0.03)));
+      } },
+    { id: 'mix-magique', name: 'Serrure magique (mix)', file: 'sfx/coffre-12.mp3', fileVol: 0.7, gameVol: 1.6,
+      desc: 'La serrure en fer et le lourd couvercle (son 12), avec un « whoop » qui monte à chaque saut, un souffle magique qui enfle, puis un accord féerique pailleté d’étincelles.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => { if (i) sfxTone(ac, out, 'sine', 300 + i * 120, t0 + d - 0.3, 0.26, 0.05, 0.02, 700 + i * 160); }),
+      open: (ac, out, t0, n) => {
+        sfxHiss(ac, out, t0, SFX_CH_FLASH + 0.08, 0.08, 'lowpass', 400, 7000, 1.2, SFX_CH_FLASH);
+        sfxPad(ac, out, n > 2 ? [3, 7, 10, 14, 19] : [3, 7, 10, 14], t0 + SFX_CH_FLASH, 1.8, 0.018, 0.05);
+        sfxSparkle(ac, out, t0 + SFX_CH_FLASH, t0 + 1.6, n > 2 ? 16 : 10, 0.026, 3000);
+        sfxBell(ac, out, sfxHz(27), t0 + SFX_CH_ITEM, 0.8, 0.04, [1, 2.0, 3.0], [1, 0.3, 0.1]);
+      } },
+    { id: 'mix-pieces', name: 'Pièces d’or et cristal (mix)', file: 'sfx/coffre-13.mp3', fileVol: 0.7, gameVol: 1.6,
+      desc: 'Le loquet, la charnière et les pièces d’or (son 13), avec un tintement de verre à chaque rebond, un arpège de cristal qui monte à l’ouverture et un « ding » quand le lot apparaît.',
+      start: (ac, out, t0) => SFX_CH_LAND.forEach((d, i) => sfxBell(ac, out, sfxHz(22 + i * 3), t0 + d + 0.01, 0.5, 0.035, [1, 2.0, 3.0], [1, 0.25, 0.1])),
+      open: (ac, out, t0, n) => {
+        [3, 7, 10, 15, 19, 22].forEach((k, i) => sfxBell(ac, out, sfxHz(k + 12), t0 + 0.1 + i * 0.065, 0.35, 0.03, [1, 2.0, 3.0], [1, 0.25, 0.1]));
+        sfxSparkle(ac, out, t0 + SFX_CH_FLASH, t0 + 1.0, 10, 0.028, 3200);
+        sfxBell(ac, out, sfxHz(n > 1 ? 24 : 19), t0 + SFX_CH_COUNT, 1.0, 0.05, [1, 2.0, 3.0], [1, 0.3, 0.1]);
+      } },
+    { id: 'mix-cle', name: 'Clé et étoiles (mix)', file: 'sfx/coffre-14.mp3', fileVol: 0.7, gameVol: 1.6,
+      desc: 'La clé qui tourne et le couvercle qui grince (son 14), puis un petit air montant « niveau gagné » de boîte à musique et une pluie d’étoiles ; plus long pour un gros lot.',
+      start: () => {},
+      open: (ac, out, t0, n) => {
+        const air = [[15, 19, 22, 27], [15, 19, 22, 24, 27], [15, 19, 22, 24, 27, 31, 34]][n - 1];
+        air.forEach((d, i) => sfxTone(ac, out, 'triangle', sfxHz(d), t0 + SFX_CH_FLASH + i * 0.1, i === air.length - 1 ? 1.0 : 0.4, 0.05, 0.004));
+        sfxSparkle(ac, out, t0 + SFX_CH_FLASH + 0.1, t0 + 1.5, n > 2 ? 14 : 8, 0.026, 3400);
+      } },
+    { id: 'mix-pirate', name: 'Coffre de pirate héroïque (mix)', file: 'sfx/coffre-15.mp3', fileVol: 0.7, gameVol: 1.6,
+      desc: 'Le gros coffre de pirate cerclé de fer (son 15), avec un roulement de tambour pendant que le coffre se tasse, puis un « ta-da ! » de cuivres à l’ouverture. Plus long pour un légendaire.',
+      start: () => {},
+      open: (ac, out, t0, n) => {
+        for (let i = 0; i < 10; i++) sfxHiss(ac, out, t0 + i * 0.035, 0.04, 0.035 + i * 0.004, 'bandpass', 1800, 1200, 1.4, 0.001);
+        [3, 7, 10].forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_CH_FLASH, 0.13, 0.032));
+        [3, 7, 10, 15].forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_CH_FLASH + 0.16, n > 2 ? 0.3 : 0.6, 0.032));
+        if (n > 2) [[5, 8, 12], [7, 10, 14, 19]].forEach((ch, j) => ch.forEach(k => sfxBrass(ac, out, sfxHz(k), t0 + SFX_CH_FLASH + 0.5 + j * 0.2, j ? 0.8 : 0.18, 0.028)));
+        sfxSparkle(ac, out, t0 + SFX_CH_FLASH + 0.2, t0 + 1.4, 8, 0.024);
+      } }
   ];
   // Fichier d'un son enregistré (3ᵉ série) : arrivée (lue dès l'appui), ouverture (instant 0 de l'ouverture à 2,50 s du
   // fichier) et supplément des gros lots (instant 0 à 4,70 s, joué quand le nombre du lot apparaît : à mi-volume pour un
@@ -769,7 +816,7 @@
   const SFX_CH_FILE = { arr: [0, 2.4, 0], open: [2.48, 4.6, 2.5], bonus: [4.68, 5.8, 4.7] };
   // Aucun son par défaut (2026-11-14, porteur : « pour l'instant ça ne me plaît pas, les sons proposés ») ; les 5
   // propositions restent pour essai (?soncoffre=1 à 5). 2ᵉ série douce le 2026-11-15 (?soncoffre=6 à 10), 3ᵉ série de
-  // vrais bruits de coffre le même jour (?soncoffre=11 à 15), choix attendu.
+  // vrais bruits de coffre le même jour (?soncoffre=11 à 15), 4ᵉ série « mix » réel + jeu (?soncoffre=16 à 20), choix attendu.
   const SFX_CHEST_DEFAULT = null;
   // Sons enregistrés : fichier demandé une fois (copie gardée par le service worker, hors ligne aussi), décodé une fois
   // (un AudioBuffer se rejoue autant qu'on veut). Un échec (réseau) n'est pas gardé : il sera redemandé la fois suivante.
@@ -794,13 +841,14 @@
     s.start(at + late, from + late, end - from - late);
   };
   // Coffre en fichier : 'chs' arrivée, 'cho' ouverture (n = rang du lot), 'chest' les deux (ouverture 2,05 s après).
-  const sfxChestFile = (ac, out, url, kind, t0, n) => {
-    const F = SFX_CH_FILE, tOpen = t0 + (kind === 'chest' ? SFX_CH_GO : 0);
+  // vol : volume du fichier (sons « mix » de la 4ᵉ série : un peu plus bas, sous les effets « jeu »).
+  const sfxChestFile = (ac, out, url, kind, t0, n, vol) => {
+    const F = SFX_CH_FILE, tOpen = t0 + (kind === 'chest' ? SFX_CH_GO : 0), v = vol || 1;
     const play = buf => {
-      if (kind !== 'cho') sfxSeg(ac, out, buf, t0 - (F.arr[2] - F.arr[0]), F.arr[0], F.arr[1], 1);
+      if (kind !== 'cho') sfxSeg(ac, out, buf, t0 - (F.arr[2] - F.arr[0]), F.arr[0], F.arr[1], v);
       if (kind === 'chs') return;
-      sfxSeg(ac, out, buf, tOpen - (F.open[2] - F.open[0]), F.open[0], F.open[1], 1);
-      if (n > 1) sfxSeg(ac, out, buf, tOpen + SFX_CH_COUNT - (F.bonus[2] - F.bonus[0]), F.bonus[0], F.bonus[1], n > 2 ? 1 : 0.55);
+      sfxSeg(ac, out, buf, tOpen - (F.open[2] - F.open[0]), F.open[0], F.open[1], v);
+      if (n > 1) sfxSeg(ac, out, buf, tOpen + SFX_CH_COUNT - (F.bonus[2] - F.bonus[0]), F.bonus[0], F.bonus[1], (n > 2 ? 1 : 0.55) * v);
     };
     const buf = sfxFileBuf.get(url);
     if (buf) play(buf); else sfxDecode(ac, url).then(play, () => { /* son indisponible (réseau) : rien */ });
@@ -832,6 +880,8 @@
     'ch-clochette': 1.25, 'ch-gouttes': 2.15, 'ch-boite': 1.65, 'ch-pop': 1.07, 'ch-bulles': 1.1,
     // Vrais bruits de coffre (fichiers déjà ramenés à un volume commun par make_coffre.py) : même crête que les autres.
     'ch-bois': 0.69, 'ch-serrure': 0.72, 'ch-pieces-or': 0.73, 'ch-cle': 0.72, 'ch-pirate': 0.68,
+    // Sons « mix » (4ᵉ série) : vrai coffre + effets « jeu », même crête.
+    'ch-mix-tresor': 0.99, 'ch-mix-magique': 0.85, 'ch-mix-pieces': 1, 'ch-mix-cle': 1.04, 'ch-mix-pirate': 0.95,
     'gr-origine': 0.55, 'gr-couronnement': 0.45, 'gr-celeste': 0.5, 'gr-trailer': 0.45, 'gr-arcade': 1.5, 'gr-tonnerre': 0.45 };
   const SFX_MUSIC_LEVEL = 0.75;
 
@@ -875,9 +925,12 @@
       const it = SFX_CHEST.find(x => x.id === id);
       if (!it) return false;
       const bus = sfxBus(ac, dest, SFX_GAIN['ch-' + id] || 1);
-      if (it.file) { sfxChestFile(ac, bus, it.file, kind, t0, Math.max(1, Math.min(3, n || 1))); return true; }
-      if (kind !== 'cho') it.start(ac, bus, t0);
-      if (kind !== 'chs') it.open(ac, bus, t0 + (kind === 'chest' ? SFX_CH_GO : 0), Math.max(1, Math.min(3, n || 1)));
+      if (it.file) { sfxChestFile(ac, bus, it.file, kind, t0, Math.max(1, Math.min(3, n || 1)), it.fileVol); if (!it.start) return true; }
+      // Sons « mix » : les effets « jeu » ont leur propre volume (gameVol), au-dessus du vrai coffre.
+      let gb = bus;
+      if (it.gameVol) { gb = ac.createGain(); gb.gain.value = it.gameVol; gb.connect(bus); }
+      if (kind !== 'cho') it.start(ac, gb, t0);
+      if (kind !== 'chs') it.open(ac, gb, t0 + (kind === 'chest' ? SFX_CH_GO : 0), Math.max(1, Math.min(3, n || 1)));
       return true;
     }
     if (kind === 'sfok' || kind === 'sfko') {
@@ -1011,4 +1064,4 @@
     booster: SFX_BOOSTER.map(x => ({ id: x.id, name: x.name, desc: x.desc })), boosterDef: SFX_BOOSTER_DEFAULT,
     unlock: SFX_UNLOCK.map(x => ({ id: x.id, name: x.name, desc: x.desc })), unlockDef: SFX_UNLOCK_DEFAULT,
     safari: SFX_SF.map(x => ({ id: x.id, name: x.name, desc: x.desc })), safariDef: SFX_SF_DEFAULT,
-    chest: SFX_CHEST.map(x => ({ id: x.id, name: x.name, desc: x.desc, file: x.file || null })), chestDef: SFX_CHEST_DEFAULT }; };
+    chest: SFX_CHEST.map(x => ({ id: x.id, name: x.name, desc: x.desc, file: x.file || null, mix: !!(x.file && x.start) })), chestDef: SFX_CHEST_DEFAULT }; };

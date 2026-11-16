@@ -187,7 +187,7 @@
     const s = this.st(), r = progBaseRender.call(this), ui = r.ui;
     ui.isProgress = s.screen === 'progress';
     r.pgb = this.vProgressBanner(s);
-    r.pc = this.vPlayerCard(s);
+    r.tcd = this.vPlayerCard(s); // « pc » est déjà pris par Mon profil (Communauté, contact)
     if (ui.isProgress) {
       r.pg = this.vProgress(s);
       r.ple = r.pg.isEarn && this.vPlEarn ? this.vPlEarn(s) : { rows: [], shareNets: [] };

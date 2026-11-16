@@ -160,25 +160,25 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   ok('onglet « carte » à côté de chaque pseudo (podium, liste, ma ligne)', (await page.locator('.pkm-pg-pod .pkm-pg-vtab').count()) === 3 && (await page.locator('ol.pkm-pg-list .pkm-pg-vtab').count()) === 9
     && (await page.locator('section[aria-label="Classement général"] > button.pkm-pg-me .pkm-pg-vtab').count()) === 1);
   await page.locator('ol.pkm-pg-list button', { hasText: 'Dresseur5' }).click(); await page.waitForTimeout(900);
-  const PC = page.locator('section.pkm-pc'), pc = N(await PC.innerText().catch(() => ''));
+  const PC = page.locator('section.pkm-tc'), pc = N(await PC.innerText().catch(() => ''));
   ok('carte de Dresseur5 : avatar, pseudo, grade, membre depuis novembre 2026 (« ' + pc.slice(0, 120) + ' »)', /Carte de dresseur/.test(pc) && /Dresseur5/.test(pc) && /Dresseur Pokémon/.test(pc) && /Membre depuis novembre 2026/.test(pc)
-    && (await PC.locator('.pkm-pc-ava img').count()) >= 2 && (S.calls.player_card || []).slice(-1)[0].target === 'u-5');
+    && (await PC.locator('.pkm-tc-ava img').count()) >= 2 && (S.calls.player_card || []).slice(-1)[0].target === 'u-5');
   ok('carte : saison en cours #5 sur 40, 1 600 PL', /Saison 2 · en cours/.test(pc) && /#5/.test(pc) && /sur 40 joueurs/.test(pc) && /1 600/.test(pc));
-  ok('carte : saisons passées (Saison 1, 2ᵉ sur 30, 900 PL, médaille d’argent)', /Saison 1/.test(pc) && /2ᵉ sur 30/.test(pc) && /900 PL/.test(pc) && (await PC.locator('.pkm-pc-past img[src="img/rank/2.svg"]').count()) === 1);
+  ok('carte : saisons passées (Saison 1, 2ᵉ sur 30, 900 PL, médaille d’argent)', /Saison 1/.test(pc) && /2ᵉ sur 30/.test(pc) && /900 PL/.test(pc) && (await PC.locator('.pkm-tc-past img[src="img/rank/2.svg"]').count()) === 1);
   ok('carte : ni e-mail ni bouton de messagerie', !/@/.test(pc) && !/message|chat/i.test(pc));
   await PC.screenshot({ path: shot('pl-carte-dresseur.png') });
-  await page.locator('section.pkm-pc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
-  ok('carte fermée', (await page.locator('section.pkm-pc').count()) === 0);
+  await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
+  ok('carte fermée', (await page.locator('section.pkm-tc').count()) === 0);
   // Ma propre carte (ma ligne sous le classement) : « C'est toi ».
   await page.locator('section[aria-label="Classement général"] > button.pkm-pg-me').click(); await page.waitForTimeout(900);
-  ok('ma carte : « C’est toi », #14, première saison', /C’est toi/.test(await page.locator('section.pkm-pc').innerText()) && /#14/.test(await page.locator('section.pkm-pc').innerText()) && (S.calls.player_card || []).slice(-1)[0].target === UID);
-  await page.locator('section.pkm-pc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
+  ok('ma carte : « C’est toi », #14, première saison', /C’est toi/.test(await page.locator('section.pkm-tc').innerText()) && /#14/.test(await page.locator('section.pkm-tc').innerText()) && (S.calls.player_card || []).slice(-1)[0].target === UID);
+  await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
   // Serveur sans 031 : la carte s'ouvre quand même avec ce que montre le classement.
   S.cardOff = true;
   await page.locator('.pkm-pg-pod button', { hasText: 'Dresseur1' }).click(); await page.waitForTimeout(900);
-  const pc2 = N(await page.locator('section.pkm-pc').innerText());
+  const pc2 = N(await page.locator('section.pkm-tc').innerText());
   ok('serveur sans 031 : carte avec pseudo, place #1 et PL, message « carte complète bientôt » (' + pc2.slice(-90) + ')', /Dresseur1/.test(pc2) && /#1/.test(pc2) && /2 000/.test(pc2) && /arrive très bientôt/.test(pc2));
-  await page.locator('section.pkm-pc button[aria-label="Fermer"]').click(); await page.waitForTimeout(600);
+  await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(600);
   await ctx.close();
 }
 
