@@ -10,6 +10,7 @@
   - aucune offre payante : ni bannière ni écran Premium, ni « Recharger mes PA », ni « Découvrir Premium » (Google Play impose son propre paiement, pas encore branché) ;
   - un compte déjà Premium garde ses avantages.
 - Autorisations demandées par le téléphone : **caméra** (scan des cartes) et **position** (Radar, boutiques autour de toi), seulement au moment où on s'en sert.
+- L'app reste **toujours à la verticale**, même si on tourne le téléphone (verrou `android:screenOrientation="portrait"` dans `android/app/src/main/AndroidManifest.xml`, 2026-11-16).
 - Sans internet : écran « Pas de connexion » avec « Réessayer » (`www/hors-ligne.html`).
 - Icônes et écran de démarrage : le logo « D » et la carte, sur le jaune de l'app (`icone-play-store-512.png` sert aussi pour la fiche du Play Store).
 

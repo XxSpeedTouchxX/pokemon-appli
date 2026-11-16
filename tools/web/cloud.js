@@ -164,6 +164,13 @@
       if (cur && cur.uid === s.uid) { cur.role = pr && pr.role === 'admin' && pr.status !== 'suspended' ? 'admin' : 'user'; cloudLs.set(cur); }
       return pr;
     },
+    // Pseudo du profil sur le serveur (2026-11-16) : les comptes créés dans Studio (admins) n'en ont pas ; la vitrine et
+    // la ligue en demandent un. Seul le pseudo change (droit « update (pseudo) » de 001, ligne du joueur seulement).
+    async setPseudo(p) {
+      const s = cloudLs.get(), tk = await this.token();
+      if (!s || !tk) { const e = new Error('Connecte-toi à ton compte Dropicards.'); e.code = 'login'; throw e; }
+      return this.req('/rest/v1/profiles?id=eq.' + encodeURIComponent(s.uid), { method: 'PATCH', token: tk, body: { pseudo: p }, headers: { Prefer: 'return=minimal' } });
+    },
     // Règle du jeu sur le serveur (tools/supabase/004_jeu.sql) : PA du jour, booster, pièce, partage, Pokédex, PK shop.
     async rpc(fn, args, opt) {
       const tk = await this.token();

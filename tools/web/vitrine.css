@@ -124,3 +124,42 @@
   .pkm-pg-tab { font-size: 11.5px; }
 }
 @media (prefers-reduced-motion: reduce) { .pkm-vt-want, .pkm-vt-cd, .pkm-vt-pick { transition: none; } }
+
+/* Animation « carte qui entre dans ma vitrine » (vitrine.js, vtFx, 2026-11-16, porteur) : 2,6 s, sans toucher. */
+.pkm-vfx { position: fixed; inset: 0; z-index: 400; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+.pkm-vfx-veil { position: absolute; inset: 0; background: rgba(4, 7, 14, 0.6); opacity: 0; animation: pkmVfxVeil 2.6s ease forwards; }
+.pkm-vfx-stage { position: relative; width: 280px; height: 420px; animation: pkmVfxOut 2.6s ease forwards; }
+.pkm-vfx-card { position: absolute; left: 74px; top: 20px; width: 132px; aspect-ratio: 63 / 88; border-radius: 9px; overflow: visible; transform-origin: 50% 50%; animation: pkmVfxCard 2.6s cubic-bezier(0.3, 0.7, 0.3, 1) forwards; }
+.pkm-vfx-card > img, .pkm-vfx-card > .pkm-vt-noimg { display: block; width: 100%; height: 100%; border-radius: 9px; object-fit: cover; background: #121C33; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(255, 255, 255, 0.85); }
+.pkm-vfx-card > .pkm-vt-noimg { position: relative; display: flex; }
+.pkm-vfx-tag { position: absolute; left: 50%; top: 14px; font-size: 12px; padding: 4px 10px; transform: translateX(-50%) rotate(-6deg); opacity: 0; animation: pkmVfxTag 2.6s ease forwards; }
+.pkm-vfx-case { position: absolute; left: 40px; bottom: 0; width: 200px; height: 150px; opacity: 0; transform-origin: 50% 100%; animation: pkmVfxCase 2.6s ease forwards; }
+.pkm-vfx-case > svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5)); animation: pkmVfxGlow 2.6s ease forwards; }
+.pkm-vfx-sparks { position: absolute; left: 50%; top: 42%; width: 0; height: 0; }
+.pkm-vfx-sparks i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #FFE680; box-shadow: 0 0 8px #FFD60A; opacity: 0; transform: rotate(var(--a)) translateY(0); animation: pkmVfxSpark 2.6s ease-out forwards; }
+.pkm-vfx-trade .pkm-vfx-sparks i { background: #FFD60A; }
+.pkm-vfx-sale .pkm-vfx-sparks i { background: #FFB46B; box-shadow: 0 0 8px #FF9F43; }
+.pkm-vfx-what { position: absolute; left: 0; right: 0; top: 118px; margin: 0; text-align: center; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: #FFFFFF; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); opacity: 0; animation: pkmVfxWhat 2.6s ease forwards; }
+@keyframes pkmVfxVeil { 0% { opacity: 0; } 10% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes pkmVfxOut { 0%, 88% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(10px); } }
+@keyframes pkmVfxCard {
+  0% { opacity: 0; transform: translateY(24px) scale(0.6) rotate(-8deg); }
+  14% { opacity: 1; transform: translateY(0) scale(1.06) rotate(2deg); }
+  22% { transform: translateY(0) scale(1) rotate(0deg); }
+  48% { transform: translateY(0) scale(1) rotate(0deg); }
+  70% { transform: translateY(212px) scale(0.42) rotate(0deg); }
+  76% { transform: translateY(204px) scale(0.42); }
+  100% { opacity: 1; transform: translateY(204px) scale(0.42); }
+}
+@keyframes pkmVfxTag { 0%, 24% { opacity: 0; transform: translateX(-50%) rotate(-6deg) scale(2.4); } 32% { opacity: 1; transform: translateX(-50%) rotate(-6deg) scale(0.9); } 36%, 100% { opacity: 1; transform: translateX(-50%) rotate(-6deg) scale(1); } }
+@keyframes pkmVfxCase { 0% { opacity: 0; transform: translateY(30px); } 20% { opacity: 1; transform: translateY(0); } 70% { transform: scale(1); } 76% { transform: scale(1.07, 0.95); } 82%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes pkmVfxGlow { 0%, 70% { filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5)); } 78% { filter: drop-shadow(0 0 22px rgba(255, 214, 10, 0.95)); } 100% { filter: drop-shadow(0 0 10px rgba(255, 214, 10, 0.45)); } }
+@keyframes pkmVfxSpark { 0%, 72% { opacity: 0; transform: rotate(var(--a)) translateY(0) scale(0.6); } 78% { opacity: 1; } 96%, 100% { opacity: 0; transform: rotate(var(--a)) translateY(-96px) scale(1); } }
+@keyframes pkmVfxWhat { 0%, 72% { opacity: 0; transform: translateY(8px); } 80%, 100% { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .pkm-vfx-card, .pkm-vfx-tag, .pkm-vfx-case, .pkm-vfx-case > svg, .pkm-vfx-sparks i { animation: none; opacity: 1; }
+  .pkm-vfx-card { transform: translateY(204px) scale(0.42); }
+  .pkm-vfx-tag { transform: translateX(-50%) rotate(-6deg); }
+  .pkm-vfx-sparks i { opacity: 0; }
+  .pkm-vfx-what { animation: none; opacity: 1; }
+}

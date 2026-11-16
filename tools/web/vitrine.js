@@ -58,24 +58,49 @@
     return { items: out.slice(0, VT_MAX), keep: keep };
   };
   vtProto.vtSync = function () { clearTimeout(this.__vtT); this.__vtT = setTimeout(() => this.vtPush(), 500); };
-  vtProto.vtPush = function () {
+  // Pseudo sur le serveur (2026-11-16, porteur : « Compte suspendu ou sans pseudo » en mettant une carte en vitrine) :
+  // un compte créé dans Studio n'a pas de pseudo ; on y met celui du dresseur de l'appareil (sinon « Dresseur » et
+  // 4 chiffres), une fois par session. Un compte vraiment suspendu reste refusé par le serveur.
+  vtProto.vtEnsurePseudo = function (force) {
+    if (!vtOnline()) return Promise.resolve(false);
+    if (this.__vtPseudo && !force) return this.__vtPseudo;
+    this.__vtPseudo = Cloud.profile().then(pr => {
+      if (!pr) return false;
+      if (pr.status === 'suspended') return 'suspended';
+      if (pr.pseudo) return true;
+      const t = this.st().trainer || {}, nick = String(t.name || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+      const p = nick.length >= 2 ? nick : 'Dresseur ' + String(1000 + Math.floor(Math.random() * 9000));
+      return Cloud.setPseudo(p).then(() => true, () => false);
+    }, () => false);
+    return this.__vtPseudo;
+  };
+  const vtNoPseudo = e => !!(e && /sans pseudo|suspendu/i.test(e.message || ''));
+  vtProto.vtPush = function (retry) {
     if (!vtOnline()) return Promise.resolve(null);
-    const s = this.st(), r = this.vtItems(s), body = JSON.stringify(r.items), wants = (s.wants || []).slice(0, WANT_MAX), wb = JSON.stringify(wants);
-    if (Object.keys(r.keep).length !== Object.keys(s.vit || {}).length) this.setState({ vit: r.keep });
-    const jobs = [];
-    if (body !== this.__vtSentV) jobs.push(Cloud.rpc('showcase_set', { items: r.items }).then(() => {
-      this.__vtSentV = body;
-      // Accords annulés envoyés : la marque « off » n'a plus lieu d'être.
-      const vit = Object.assign({}, this.st().vit || {}); let ch = false;
-      Object.keys(vit).forEach(k => { if (vit[k] && vit[k].off) { vit[k] = Object.assign({}, vit[k]); delete vit[k].off; ch = true; } });
-      if (ch) { this.__vtSentV = JSON.stringify(this.vtItems(Object.assign({}, this.st(), { vit: vit })).items); this.setState({ vit: vit }); }
-    }));
-    if (wb !== this.__vtSentW) jobs.push(Cloud.rpc('wants_set', { ids: wants }).then(() => { this.__vtSentW = wb; }));
-    if (!jobs.length) return Promise.resolve(null);
-    return Promise.all(jobs).then(() => { this.setState({ vtErr: '' }); return this.vtLoadState(true); }, e => {
-      this.setState({ vtErr: e && e.code === 'not_installed' ? 'old' : e && e.code === 'network' ? 'net' : 'err' });
-      if (e && e.code !== 'network' && e.code !== 'not_installed') { this.setState({ toast: vtErrText(e) }); this.flash(); }
-      return null;
+    return this.vtEnsurePseudo(!!retry).then(ok => {
+      const s = this.st(), r = this.vtItems(s), body = JSON.stringify(r.items), wants = (s.wants || []).slice(0, WANT_MAX), wb = JSON.stringify(wants);
+      if (Object.keys(r.keep).length !== Object.keys(s.vit || {}).length) this.setState({ vit: r.keep });
+      const jobs = [];
+      if (body !== this.__vtSentV) jobs.push(Cloud.rpc('showcase_set', { items: r.items }).then(() => {
+        this.__vtSentV = body;
+        // Accords annulés envoyés : la marque « off » n'a plus lieu d'être.
+        const vit = Object.assign({}, this.st().vit || {}); let ch = false;
+        Object.keys(vit).forEach(k => { if (vit[k] && vit[k].off) { vit[k] = Object.assign({}, vit[k]); delete vit[k].off; ch = true; } });
+        if (ch) { this.__vtSentV = JSON.stringify(this.vtItems(Object.assign({}, this.st(), { vit: vit })).items); this.setState({ vit: vit }); }
+      }));
+      if (wb !== this.__vtSentW) jobs.push(Cloud.rpc('wants_set', { ids: wants }).then(() => { this.__vtSentW = wb; }));
+      if (!jobs.length) return null;
+      return Promise.all(jobs).then(() => { this.setState({ vtErr: '' }); return this.vtLoadState(true); }, e => {
+        // Pseudo manquant : remis, puis un seul nouvel essai ; jamais le message brut du serveur à l'écran.
+        if (vtNoPseudo(e) && !retry && ok !== 'suspended') return this.vtPush(true);
+        this.setState({ vtErr: e && e.code === 'not_installed' ? 'old' : e && e.code === 'network' ? 'net' : vtNoPseudo(e) ? 'pseudo' : 'err' });
+        if (vtNoPseudo(e)) {
+          if (ok === 'suspended' && !this.__vtSuspTold) { this.__vtSuspTold = true; this.setState({ toast: 'Ton compte est suspendu : ta vitrine reste sur ton téléphone.' }); this.flash(); }
+          return null;
+        }
+        if (e && e.code !== 'network' && e.code !== 'not_installed') { this.setState({ toast: vtErrText(e) }); this.flash(); }
+        return null;
+      });
     });
   };
   // Mon état (serveur) : majeur déclaré, âge, numéros et accords de mes cartes, demande et offre.
@@ -116,6 +141,43 @@
     return c[id];
   };
 
+  // ——— Animation « carte qui entre dans ma vitrine » (2026-11-16, porteur : à la place du message du bas) ———
+  // La carte apparaît, reçoit son étiquette (POUR TRADE, À VENDRE · prix), puis descend dans une vitrine en verre qui
+  // s'illumine. 2,6 s ; rien ne bloque l'écran (calque sans toucher) ; mouvement réduit : simple fondu (vitrine.css).
+  const VT_FX_MS = 2600;
+  const VT_CASE = '<svg viewBox="0 0 160 120" aria-hidden="true"><defs><linearGradient id="pkmVtG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#BFE8FF" stop-opacity=".55"/><stop offset=".5" stop-color="#8FC9F0" stop-opacity=".18"/><stop offset="1" stop-color="#D8F1FF" stop-opacity=".45"/></linearGradient><linearGradient id="pkmVtW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE680"/><stop offset="1" stop-color="#C99A12"/></linearGradient></defs>'
+    + '<rect x="8" y="98" width="144" height="16" rx="4" fill="url(#pkmVtW)" stroke="#0B1120" stroke-width="3"/>'
+    + '<rect x="16" y="8" width="128" height="92" rx="8" fill="url(#pkmVtG)" stroke="#E8F6FF" stroke-width="3"/>'
+    + '<path d="M30 16 L54 16 L26 74 L22 74 Z" fill="#fff" opacity=".35"/><path d="M62 16 L70 16 L44 70 L40 70 Z" fill="#fff" opacity=".22"/>'
+    + '<rect x="16" y="66" width="128" height="5" fill="#E8F6FF" opacity=".75"/><rect x="14" y="4" width="132" height="8" rx="4" fill="url(#pkmVtW)" stroke="#0B1120" stroke-width="2.5"/></svg>';
+  vtProto.vtFx = function (ref, kind, price) {
+    if (typeof document === 'undefined') return;
+    const r = vtParse(ref), c = this.vtCard(r.pid, r.lang, r.cond, r.gr);
+    const host = document.getElementById('app') || document.body, old = document.querySelector('.pkm-vfx');
+    if (old) old.remove();
+    const el = document.createElement('div');
+    el.className = 'pkm-vfx pkm-vfx-' + kind;
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    const what = kind === 'trade' ? 'Pour trade dans ta vitrine' : kind === 'sale' ? 'En vente à ' + price : 'Dans ta vitrine';
+    el.setAttribute('aria-label', c.name + ' : ' + what);
+    const tag = kind === 'trade' ? '<em class="pkm-vt-badge pkm-vfx-tag">⇄ POUR TRADE</em>' : kind === 'sale' ? '<em class="pkm-vt-badge pkm-vt-badge-sale pkm-vfx-tag"></em>' : '';
+    const sparks = Array.from({ length: 10 }, (_, i) => '<i style="--a: ' + i * 36 + 'deg"></i>').join('');
+    el.innerHTML = '<div class="pkm-vfx-veil"></div><div class="pkm-vfx-stage">'
+      + '<div class="pkm-vfx-case">' + VT_CASE + '<div class="pkm-vfx-sparks" aria-hidden="true">' + sparks + '</div></div>'
+      + '<div class="pkm-vfx-card" aria-hidden="true">' + (c.hasImg ? '<img alt="">' : '<span class="pkm-vt-noimg"></span>') + tag + '</div>'
+      + '<p class="pkm-vfx-what"></p></div>';
+    if (kind === 'sale') el.querySelector('.pkm-vfx-tag').textContent = 'À VENDRE · ' + price;
+    if (c.hasImg) {
+      const im = el.querySelector('.pkm-vfx-card img');
+      im.onerror = () => { if (c.fallback && im.src.indexOf(c.fallback) < 0 && !/^drawn:/.test(c.fallback)) im.src = c.fallback; };
+      im.src = c.img;
+    } else el.querySelector('.pkm-vfx-card .pkm-vt-noimg').textContent = c.name;
+    el.querySelector('.pkm-vfx-what').textContent = what;
+    host.appendChild(el);
+    setTimeout(() => el.remove(), VT_FX_MS);
+  };
+
   // ——— Actions de la fiche ———
   vtProto.vtSet = function (vit) { this.setState({ vit: vit, vtEver: true }); this.vtSync(); };
   vtProto.vtToggle = function (ref, what) {
@@ -125,11 +187,12 @@
     if (what === 'show') {
       if (v) delete vit[ref]; else vit[ref] = {};
       this.vtSet(vit);
+      if (!v) this.vtFx(ref, 'show');
       return;
     }
     if (s.vtSt && s.vtSt.ageOk === false) { this.setState({ toast: 'Les échanges sont ouverts à partir de 15 ans.' }); this.flash(); return; }
     const w = v || {};
-    if (what === 'trade') { w.t = !w.t; vit[ref] = w; this.vtSet(vit); return; }
+    if (what === 'trade') { w.t = !w.t; vit[ref] = w; this.vtSet(vit); if (w.t) this.vtFx(ref, 'trade'); return; }
     if (what === 'sale') {
       if (w.s) { delete w.s; delete w.p; vit[ref] = w; this.vtSet(vit); this.setState({ vtPriceRef: null }); return; }
       if (!s.tradeAdult) { this.setState({ vtAdultAsk: ref, vtPriceRef: null }); return; }
@@ -155,9 +218,9 @@
     const p = Math.round(n * 100) / 100, vit = Object.assign({}, s.vit || {});
     if (!vit[ref] && Object.keys(vit).length >= VT_MAX) { this.setState({ toast: 'Ta vitrine peut montrer 30 cartes au plus.' }); this.flash(); return; }
     vit[ref] = Object.assign({}, vit[ref] || {}, { s: true, p: p });
-    this.setState({ vtPriceRef: null, toast: 'En vente dans ta vitrine à ' + vtPriceTxt(Math.round(p * 100)) });
-    this.flash();
+    this.setState({ vtPriceRef: null });
     this.vtSet(vit);
+    this.vtFx(ref, 'sale', vtPriceTxt(Math.round(p * 100)));
   };
   vtProto.vtUndeal = function (ref) {
     const vit = Object.assign({}, this.st().vit || {});

@@ -31,6 +31,7 @@ const setup = async (S, role) => {
     if (/^(showcase_set|wants_set|trade_)/.test(fn) || fn === 'player_showcase') {
       if (S.off33) return send(404, { code: 'PGRST202', message: 'not found' });
       if (fn === 'trade_state') return send(200, { adult: S.adult, age_ok: S.ageOk, mine: S.vit.map((x, i) => ({ ref: x.ref, sid: 900 + i, deal: !!S.deal[x.ref] })), demand: { [S.ids[0]]: 2 }, supply: { [S.ids[5]]: 1 } });
+      if ((fn === 'showcase_set' || fn === 'wants_set') && S.pseudo === null) return send(403, { code: '42501', message: 'Compte suspendu ou sans pseudo.' });
       if (fn === 'showcase_set') {
         if (!S.ageOk && body.items.some(x => x.trade || x.sale)) return game('Les échanges sont ouverts à partir de 15 ans');
         if (body.items.some(x => x.sale) && !S.adult) return game('Confirme d’abord avoir 18 ans ou plus pour vendre une carte');
@@ -47,7 +48,8 @@ const setup = async (S, role) => {
       if (fn === 'trade_send') { S.tsend.push(body); S.left--; return send(200, { ok: true, id: 300 + S.tsend.length, left: S.left }); }
       if (fn === 'trade_answer') { const it = S.items.find(x => x.id === body.msg_id); it.replied = body.code; it.deal = body.code === 'deal_yes'; S.left--; return send(200, { ok: true, left: S.left, deal: body.code === 'deal_yes' }); }
     }
-    if (p === '/rest/v1/profiles') return send(200, [{ pseudo: 'Sacha', age_range: S.ageOk ? '25-35' : 'u15', starter: 25, role: role || 'user', status: 'active' }]);
+    if (p === '/rest/v1/profiles' && req.method() === 'PATCH') { S.patch = body; S.pseudo = body.pseudo; return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' }, body: '' }); }
+    if (p === '/rest/v1/profiles') return send(200, [{ pseudo: S.pseudo === undefined ? 'Sacha' : S.pseudo, age_range: S.ageOk ? '25-35' : 'u15', starter: 25, role: role || 'user', status: 'active' }]);
     if (p === '/auth/v1/token') return send(200, { access_token: TOKEN, refresh_token: 'r', expires_in: 3600, user: { id: UID, email: EMAIL } });
     return send(404, {});
   });
@@ -56,13 +58,13 @@ const setup = async (S, role) => {
   // Cartes réelles du catalogue : 3 dans mon classeur (0, 1, 2), les autres pour l'autre joueur.
   S.ids = await page.evaluate(() => window.__pkm.catalog().filter(p => p.type !== 'sealed' && p.img).slice(0, 6).map(p => p.id));
   S.ids.push(S.ids[4], S.ids[3]); // cartes 6 et 7 : hors de mon classeur
-  await page.evaluate(([tok, uid, email, rl, ids]) => {
+  await page.evaluate(([tok, uid, email, rl, ids, nick]) => {
     const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.ligueTuto = 'done'; d.onb = 0;
     d.purchases = ids.slice(0, 3).map((id, i) => ({ id: 'vt' + i, date: '2026-11-01', seq: i, lines: [{ pid: id, qty: i === 1 ? 2 : 1, lang: 'FR', cond: i === 2 ? 'EX' : 'NM' }], total: null, where: 'Test', by: 'toi' }));
-    d.sales = []; d.seq = 10; d.vit = {}; d.wants = [];
+    d.sales = []; d.seq = 10; d.vit = {}; d.wants = []; if (nick) d.trainer = Object.assign({}, d.trainer || {}, { name: nick });
     localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); localStorage.setItem('pkm-pky-asked', '1');
     localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: rl }));
-  }, [TOKEN, UID, EMAIL, role || 'user', S.ids]);
+  }, [TOKEN, UID, EMAIL, role || 'user', S.ids, S.nick || '']);
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
   return { ctx, page };
 };
@@ -80,9 +82,11 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   ok('fiche : « 2 joueurs cherchent cette carte »', /2 joueurs cherchent cette carte/.test(N(await V.innerText())));
   ok('fiche : « Dropicards ne vend rien »', /Dropicards ne vend rien et ne prend aucun paiement/.test(N(await V.innerText())));
   await V.locator('[role="switch"]', { hasText: 'Dans ma vitrine' }).click(); await page.waitForTimeout(1400);
+  ok('vitrine : animation de la carte qui entre dans la vitrine (« Dans ta vitrine »)', await page.evaluate(() => { const e = document.querySelector('.pkm-vfx'); return !!e && /Dans ta vitrine/.test(e.textContent) && !!e.querySelector('.pkm-vfx-case svg') && !!e.querySelector('.pkm-vfx-card'); }));
   ok('vitrine : envoyée au serveur (showcase_set, 1 carte, ni trade ni vente)', S.vit.length === 1 && S.vit[0].card_id === c0 && !S.vit[0].trade && !S.vit[0].sale && S.vit[0].lang === 'FR' && S.vit[0].cond === 'NM');
   await V.locator('[role="switch"]', { hasText: 'Pour trade' }).click(); await page.waitForTimeout(1400);
   ok('Pour trade : envoyé (trade = vrai)', S.vit.length === 1 && S.vit[0].trade === true);
+  ok('Pour trade : animation avec l’étiquette « ⇄ POUR TRADE »', await page.evaluate(() => { const e = document.querySelector('.pkm-vfx'); return !!e && /POUR TRADE/.test(e.textContent) && /Pour trade dans ta vitrine/.test(e.textContent); }));
   ok('Pour trade : interrupteur coché', (await V.locator('[role="switch"]', { hasText: 'Pour trade' }).getAttribute('aria-checked')) === 'true');
   // À vendre : d'abord « J'ai 18 ans ou plus ».
   await V.locator('[role="switch"]', { hasText: 'À vendre' }).click(); await page.waitForTimeout(500);
@@ -97,7 +101,7 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   ok('prix refusé sous 1 €', /de 1 € à 100 000 €/.test(await page.evaluate(() => window.__pkm.st().toast || '')));
   await inp.fill('42,50'); await V.locator('button', { hasText: 'Valider le prix' }).click(); await page.waitForTimeout(1500);
   ok('prix : envoyé (sale = vrai, 42,5 €, trade gardé)', S.vit.length === 1 && S.vit[0].sale === true && S.vit[0].price === 42.5 && S.vit[0].trade === true);
-  ok('prix : message « En vente dans ta vitrine à 42,50 € »', /En vente dans ta vitrine à 42,50 €/.test(await page.evaluate(() => window.__pkm.st().toast || '')));
+  ok('prix : animation « À VENDRE · 42,50 € » et « En vente à 42,50 € »', await page.evaluate(() => { const e = document.querySelector('.pkm-vfx'); return !!e && /À VENDRE · 42,50 €/.test(e.textContent) && /En vente à 42,50 €/.test(e.textContent); }));
   ok('prix : « Prix demandé : 42,50 € » sous l’interrupteur', /Prix demandé : 42,50 €/.test(N(await V.innerText())) && (await V.locator('button', { hasText: 'Modifier mon prix de vente' }).count()) === 1);
   ok('fiche : aucun champ de texte libre (seulement le prix)', (await page.locator('section.pkm-fi textarea').count()) === 0 && (await V.locator('input').count()) === 0);
   await page.locator('section.pkm-fi').screenshot({ path: shot('vitrine-fiche.png') });
@@ -219,6 +223,21 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   await M.screenshot({ path: shot('vitrine-messages.png') });
   await it.nth(1).locator('.pkm-qm-chip', { hasText: 'Non merci' }).click(); await page.waitForTimeout(900);
   ok('refus : trade_answer (12, deal_no), sans bandeau d’accord', S.calls.trade_answer.length === 2 && S.calls.trade_answer[1].code === 'deal_no' && (await it.nth(1).locator('.pkm-qm-deal').count()) === 0);
+  await ctx.close();
+}
+
+// H. Compte sans pseudo sur le serveur (admin créé dans Studio) : pseudo du dresseur remis, jamais « Compte suspendu ou sans pseudo ».
+{
+  const S = newS({ pseudo: null, nick: 'Nico' });
+  const { ctx, page } = await setup(S, 'admin');
+  await page.evaluate(id => window.__pkm.fiOpen(id, { from: 'binder' }), S.ids[0]); await page.waitForTimeout(1200);
+  const V = page.locator('section.pkm-fi .pkm-vt');
+  await V.locator('[role="switch"]', { hasText: 'Pour trade' }).click(); await page.waitForTimeout(1800);
+  ok('sans pseudo : pseudo du dresseur envoyé au profil (« Nico »)', S.patch && S.patch.pseudo === 'Nico');
+  ok('sans pseudo : vitrine enregistrée ensuite (Pour trade)', S.vit.length === 1 && S.vit[0].trade === true);
+  const toast = await page.evaluate(() => window.__pkm.st().toast || '');
+  ok('sans pseudo : aucun message « Compte suspendu ou sans pseudo » (' + toast + ')', !/suspendu|pseudo/i.test(toast) && !/suspendu|sans pseudo/i.test(await page.locator('body').innerText()));
+  ok('sans pseudo : animation de la vitrine jouée', await page.evaluate(() => !!document.querySelector('.pkm-vfx-trade')));
   await ctx.close();
 }
 

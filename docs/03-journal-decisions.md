@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-16 (soir) — Vitrine sans message d'erreur, animation, app toujours à la verticale (porteur)
+
+- **Demandes du porteur** : « lorsque je mets une carte dans ma vitrine ou pour trade j'ai marqué "compte suspendu ou sans pseudo" : enlève-moi ça et remplace-le par une animation de carte dans ma vitrine » ; « je veux que l'appli reste dans le sens vertical, bloquée, même si l'utilisateur tourne son téléphone » ; « comment sont calculés les coefficients des 3 sociétés de gradation, je veux revoir le coef de chacune ».
+- **Cause du message** : les comptes admin ont été créés dans Studio avant l'inscription par l'app : leur profil n'a **pas de pseudo** sur le serveur, et 033 refuse une vitrine sans pseudo (le joueur doit être visible dans la ligue).
+- **Corrigé dans l'app** (rien à installer) : avant d'envoyer la vitrine, l'app vérifie le profil ; sans pseudo, elle y met le pseudo du dresseur de l'appareil (sinon « Dresseur » et 4 chiffres ; `Cloud.setPseudo`, droit déjà donné par 001), puis réessaie une fois. Le message brut du serveur n'est plus jamais affiché ; un compte vraiment suspendu voit seulement « Ton compte est suspendu : ta vitrine reste sur ton téléphone ».
+- **Animation** (`vtFx`, `vitrine.js`, 2,6 s) à la place des messages du bas : la carte apparaît, reçoit son étiquette (« ⇄ POUR TRADE » ou « À VENDRE · prix »), puis descend dans une vitrine en verre qui s'illumine (« Dans ta vitrine », « Pour trade dans ta vitrine », « En vente à … »).
+- **App à la verticale** : app Android verrouillée en portrait (`android:screenOrientation="portrait"`, `mobile/android`, nouveau .aab fabriqué par le workflow) ; app installée depuis le navigateur : manifest « portrait » (déjà là) et `screen.orientation.lock` ; **iPhone et navigateurs : Apple ne permet pas à un site de bloquer la rotation** : téléphone tourné, l'app se cache derrière « Dropicards s'utilise à la verticale · Remets ton téléphone droit » (téléphone animé) et revient telle quelle (`orient.js`, `orient.css`). Seulement sur téléphone, d'après le sens de l'appareil (jamais quand le clavier d'Android rétrécit la fenêtre). L'app iPhone (quand elle sera publiée) aura le vrai verrou.
+- **Coefficients de gradation** : expliqués au porteur (estimations Dropicards du 2026-10-31, validées le 2026-11-01 ; pas de ventes réelles de cartes gradées en source ouverte) ; **nouveaux coefficients attendus du porteur**, rien de changé.
+- **Tests** : `t-vitrine.mjs` (66, dont le compte sans pseudo et l'animation), `t-orient.mjs` (9, nouveau). Cache v233.
+
 ## 2026-11-16 — Échanges entre joueurs : étage 1 construit, avec « À vendre » au prix du joueur (porteur)
 
 - **Demande du porteur** : « laisse le choix à l'utilisateur de mettre son prix de vente de sa carte : soit il veut à tout prix vendre sa carte avec le prix qu'il indique, soit il propose un trade » ; « tu peux valider tes propositions » (V1 à V6 de `docs/45` par défaut).
