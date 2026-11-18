@@ -141,13 +141,18 @@
     return c[id];
   };
 
-  // ——— Animation « carte qui entre dans ma vitrine » (2026-11-16, porteur : à la place du message du bas ; puis, même
-  // soir : « un truc un peu plus satisfaisant, 1 s de plus ») ———
-  // 3,6 s : la carte se retourne et brille, l'étiquette (POUR TRADE, À VENDRE · prix) tombe comme un tampon, les portes
-  // en verre de la vitrine s'ouvrent, la carte y vole en arc et rebondit sur l'étagère, les portes se referment (« clic »),
-  // la vitrine s'illumine (rayons, étincelles), puis « Dans ta vitrine » et le nombre de cartes (N / 30). Petite
-  // vibration au tampon et à la fermeture, son doux si les sons sont activés. Calque sans toucher ; mouvement réduit :
-  // état final seulement (vitrine.css).
+  // ——— Animation « la carte entre dans ma vitrine », façon vitrine de magasin (2026-11-16, porteur : à la place du
+  // message du bas ; 3,6 s depuis le même soir ; refaite le 2026-11-18 : « fais rentrer la carte comme dans une vitrine
+  // de magasin ») ———
+  // Une devanture se pose : store rayé, enseigne « MA VITRINE » éteinte, grande vitre, trois présentoirs sur un tapis.
+  // La carte se retourne et brille, l'étiquette (POUR TRADE, À VENDRE · prix) tombe dessus comme un tampon, puis la carte
+  // s'éloigne vers la vitrine, traverse la vitre (onde et reflet sur le verre, « tink ») et se pose sur le présentoir du
+  // milieu ; le spot s'allume, l'étiquette de prix bascule et se balance devant elle, l'enseigne clignote puis s'éclaire,
+  // des étincelles partent, puis « Dans ta vitrine » et le nombre de cartes (N / 30). Présentoirs de côté : deux autres
+  // cartes de ma vitrine, sinon des emplacements libres. La façade est un calque percé à l'endroit de la vitre (une
+  // ombre portée peint le mur autour du trou) : une fois la vitre traversée, la carte passe derrière le verre.
+  // Vibrations au tampon et à la pose, son doux si les sons sont activés. Calque sans toucher ; mouvement réduit : état
+  // final seulement (vitrine.css).
   const VT_FX_MS = 3600;
   vtProto.vtFxSound = function () {
     try {
@@ -155,16 +160,20 @@
       const ac = typeof sfxCtx === 'function' ? sfxCtx() : null;
       if (!ac) return;
       const t = ac.currentTime + 0.02, out = ac.destination;
-      sfxThump(ac, out, t + 1.05, 0.32, 150, 60, 0.2);            // tampon
+      sfxThump(ac, out, t + 1.05, 0.32, 150, 60, 0.2);                                 // tampon
       sfxHiss(ac, out, t + 1.05, 0.08, 0.05, 'bandpass', 2400, 1200, 1.2);
-      sfxHiss(ac, out, t + 1.4, 0.32, 0.035, 'highpass', 3000, 6000, 0.7, 0.05); // portes qui glissent
-      sfxBell(ac, out, 1568, t + 2.7, 0.9, 0.12, [1, 2.76, 5.4], [1, 0.4, 0.15]); // « clic » de verre
-      sfxSparkle(ac, out, t + 2.75, t + 3.2, 6, 0.05, 2400);
+      sfxHiss(ac, out, t + 1.5, 0.36, 0.03, 'bandpass', 700, 2600, 0.9, 0.14);          // envol vers la vitrine
+      sfxBell(ac, out, 2637, t + 1.87, 0.45, 0.06, [1, 2.76], [1, 0.3]);                // la carte traverse la vitre
+      sfxThump(ac, out, t + 2.16, 0.2, 230, 90, 0.14);                                  // posée sur le présentoir
+      sfxHiss(ac, out, t + 2.26, 0.03, 0.07, 'highpass', 4200, 4200, 0.7);              // « clic » du spot
+      sfxBell(ac, out, 1319, t + 2.45, 0.8, 0.09, [1, 2.76, 5.4], [1, 0.4, 0.15]);      // l'enseigne s'allume
+      sfxBell(ac, out, 1760, t + 2.6, 1, 0.09, [1, 2.76, 5.4], [1, 0.4, 0.15]);
+      sfxSparkle(ac, out, t + 2.3, t + 2.9, 7, 0.05, 2400);
     } catch (e) { /* son indisponible */ }
   };
   vtProto.vtFx = function (ref, kind, price) {
     if (typeof document === 'undefined') return;
-    const r = vtParse(ref), c = this.vtCard(r.pid, r.lang, r.cond, r.gr), n = Object.keys(this.st().vit || {}).length;
+    const vit = this.st().vit || {}, r = vtParse(ref), c = this.vtCard(r.pid, r.lang, r.cond, r.gr), n = Object.keys(vit).length;
     const host = document.getElementById('app') || document.body, old = document.querySelector('.pkm-vfx');
     if (old) old.remove();
     const el = document.createElement('div');
@@ -173,28 +182,37 @@
     el.setAttribute('aria-live', 'polite');
     const what = kind === 'trade' ? 'Pour trade dans ta vitrine' : kind === 'sale' ? 'En vente à ' + price : 'Dans ta vitrine';
     el.setAttribute('aria-label', c.name + ' : ' + what);
-    const tag = kind === 'trade' ? '<em class="pkm-vt-badge pkm-vfx-tag">⇄ POUR TRADE</em>' : kind === 'sale' ? '<em class="pkm-vt-badge pkm-vt-badge-sale pkm-vfx-tag"></em>' : '<em class="pkm-vt-badge pkm-vfx-tag pkm-vfx-tag-show">✦ VITRINE</em>';
-    const sparks = Array.from({ length: 14 }, (_, i) => '<i style="--a: ' + Math.round(i * 360 / 14) + 'deg; --d: ' + (70 + (i * 37) % 50) + 'px"></i>').join('');
+    const tagTxt = kind === 'trade' ? '⇄ POUR TRADE' : kind === 'sale' ? 'À VENDRE · ' + price : '✦ VITRINE';
+    const tagCls = 'pkm-vt-badge pkm-vfx-tag' + (kind === 'sale' ? ' pkm-vt-badge-sale' : kind === 'trade' ? '' : ' pkm-vfx-tag-show');
+    // Deux autres cartes de ma vitrine sur les présentoirs de côté (avec un visuel), sinon des emplacements libres.
+    const others = Object.keys(vit).filter(k => k !== ref).map(k => { const q = vtParse(k); return this.vtCard(q.pid, q.lang, q.cond, q.gr); }).filter(x => x.hasImg).slice(0, 2);
+    const side = i => '<div class="pkm-vfx-stand pkm-vfx-stand-' + (i ? 'r' : 'l') + '">' + (others[i] ? '<img alt="" class="pkm-vfx-side">' : '<span class="pkm-vfx-slot">+</span>') + '<i class="pkm-vfx-easel"></i></div>';
+    const sparks = Array.from({ length: 14 }, (_, i) => '<i style="--a: ' + Math.round(i * 360 / 14) + 'deg; --d: ' + (54 + (i * 37) % 44) + 'px"></i>').join('');
     el.innerHTML = '<div class="pkm-vfx-veil"></div><div class="pkm-vfx-stage">'
-      + '<div class="pkm-vfx-rays" aria-hidden="true"></div>'
-      + '<div class="pkm-vfx-case" aria-hidden="true"><div class="pkm-vfx-cap"></div><div class="pkm-vfx-box"><div class="pkm-vfx-light"></div><div class="pkm-vfx-shelf"></div></div><div class="pkm-vfx-base"></div></div>'
-      + '<div class="pkm-vfx-card" aria-hidden="true">' + (c.hasImg ? '<img alt="">' : '<span class="pkm-vt-noimg"></span>') + '<i class="pkm-vfx-shine"></i>' + tag + '<i class="pkm-vfx-ring"></i></div>'
-      + '<div class="pkm-vfx-doors" aria-hidden="true"><i class="pkm-vfx-door pkm-vfx-door-l"></i><i class="pkm-vfx-door pkm-vfx-door-r"></i></div>'
-      + '<div class="pkm-vfx-flash" aria-hidden="true"></div><div class="pkm-vfx-sparks" aria-hidden="true">' + sparks + '</div>'
+      // Intérieur de la vitrine (derrière la carte une fois la vitre traversée).
+      + '<div class="pkm-vfx-back" aria-hidden="true"><div class="pkm-vfx-wall"></div><i class="pkm-vfx-lamp"></i><i class="pkm-vfx-cone"></i>'
+      + side(0) + side(1) + '<div class="pkm-vfx-stand pkm-vfx-stand-c"><i class="pkm-vfx-easel"></i></div><div class="pkm-vfx-carpet"></div><div class="pkm-vfx-warm"></div></div>'
+      + '<div class="pkm-vfx-card" aria-hidden="true">' + (c.hasImg ? '<img alt="" class="pkm-vfx-main">' : '<span class="pkm-vt-noimg"></span>') + '<i class="pkm-vfx-shine"></i><em class="' + tagCls + '"></em><i class="pkm-vfx-ring"></i></div>'
+      + '<div class="pkm-vfx-label" aria-hidden="true"><em></em></div>'
+      // Façade percée : mur, vitre (reflets, onde au passage de la carte), cadre, appui, store, enseigne, trottoir.
+      + '<div class="pkm-vfx-front" aria-hidden="true"><div class="pkm-vfx-hole"><i class="pkm-vfx-glass"></i><i class="pkm-vfx-glint"></i><i class="pkm-vfx-ripple"></i></div>'
+      + '<i class="pkm-vfx-pil pkm-vfx-pil-l"></i><i class="pkm-vfx-pil pkm-vfx-pil-r"></i><i class="pkm-vfx-sill"></i><i class="pkm-vfx-street"></i>'
+      + '<div class="pkm-vfx-awning"><i class="pkm-vfx-scallop"></i></div><div class="pkm-vfx-sign"><b>MA VITRINE</b></div></div>'
+      + '<div class="pkm-vfx-sparks" aria-hidden="true">' + sparks + '</div>'
       + '<div class="pkm-vfx-text"><p class="pkm-vfx-what"></p><span class="pkm-vfx-count"></span></div></div>';
-    if (kind === 'sale') el.querySelector('.pkm-vfx-tag').textContent = 'À VENDRE · ' + price;
-    if (c.hasImg) {
-      const im = el.querySelector('.pkm-vfx-card img');
-      im.onerror = () => { if (c.fallback && im.src.indexOf(c.fallback) < 0 && !/^drawn:/.test(c.fallback)) im.src = c.fallback; };
-      im.src = c.img;
-    } else el.querySelector('.pkm-vfx-card .pkm-vt-noimg').textContent = c.name;
+    el.querySelector('.pkm-vfx-tag').textContent = tagTxt;
+    el.querySelector('.pkm-vfx-label em').textContent = tagTxt;
+    const setImg = (im, x) => { im.onerror = () => { if (x.fallback && im.src.indexOf(x.fallback) < 0 && !/^drawn:/.test(x.fallback)) im.src = x.fallback; }; im.src = x.img; };
+    if (c.hasImg) setImg(el.querySelector('.pkm-vfx-main'), c);
+    else el.querySelector('.pkm-vfx-card .pkm-vt-noimg').textContent = c.name;
+    el.querySelectorAll('.pkm-vfx-side').forEach((im, i) => setImg(im, others[i]));
     el.querySelector('.pkm-vfx-what').textContent = what;
     el.querySelector('.pkm-vfx-count').textContent = n + ' / ' + VT_MAX + ' dans ta vitrine';
     host.appendChild(el);
     this.vtFxSound();
     const buzz = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* pas de vibreur */ } };
     setTimeout(() => buzz(18), 1050);
-    setTimeout(() => buzz([12, 40, 24]), 2700);
+    setTimeout(() => buzz([14, 50, 22]), 2160);
     setTimeout(() => el.remove(), VT_FX_MS);
   };
 

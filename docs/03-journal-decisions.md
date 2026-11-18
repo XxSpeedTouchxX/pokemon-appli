@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-18 — Emblème dès Recrue, logo des PL dans le classement, vitrine de magasin (porteur)
+
+- **Emblème du grade à tous les grades** (porteur : « l'emblème du grade même sur le grade de Recrue, je ne veux plus qu'il soit déblocable à partir de Collectionneur ») : l'emblème s'affiche au-dessus du logo Dropicards dès Recrue (Chasseur compris) ; la ligne « Emblème du grade disponible sur ton profil » est retirée des avantages de Collectionneur à Grand maître Pokémon (`profile.js`). Remplace la décision du 2026-11-07 (emblème caché aux grades Recrue et Chasseur).
+- **Classement de « Ma ligue »** : les lettres « PL » après le score de chaque joueur (podium, liste, ma ligne) sont remplacées par le logo des PL (bouclier-cœur bleu-vert), à droite du score (`progress.js`, `catalog.dc.html`, `progress.css`). Avant l'installation de 028 (classement en PK), le logo des PK prend la même place.
+- **Animation de la vitrine façon vitrine de magasin** (porteur : « fais rentrer la carte comme dans une vitrine de magasin ») : toujours 3,6 s. Une devanture se pose (store rayé jaune et blanc qui se déroule, enseigne « MA VITRINE » éteinte, grande vitre, trois présentoirs sur un tapis rouge) ; la carte se retourne, reçoit son étiquette (tampon), s'éloigne vers la vitrine, traverse la vitre (onde et reflet sur le verre) et se pose sur le présentoir du milieu ; le spot s'allume, l'étiquette de prix (POUR TRADE, À VENDRE · prix) bascule et se balance devant la carte, l'enseigne clignote puis s'éclaire, des étincelles partent, puis « Dans ta vitrine » et « N / 30 ». Présentoirs de côté : deux autres cartes de la vitrine, sinon des emplacements libres « + ». Vibrations au tampon et à la pose ; sons (tampon, envol, verre, pose, spot, enseigne) si les sons sont activés (`vitrine.js`, `vitrine.css`).
+- Cache v236.
+
 ## 2026-11-16 (nuit) — Notes 10 revues, historique entièrement flouté, animation de vitrine refaite (porteur)
 
 - **Coefficients des notes 10** (porteur) : PCA 10 ×2,1 ; CCC 10 Black Label ×2,2, 10 Gold Label ×2, 10 ×1,8 ; PSA 10 ×2,5. Les autres notes restent celles du tableau précédent (`FI_GRADERS`, `fiche.js` ; tests `t-graded`, `t-fihist` adaptés).

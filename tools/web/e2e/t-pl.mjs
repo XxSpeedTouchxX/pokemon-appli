@@ -154,7 +154,11 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   await page.locator('.pkm-pg-tabs button').nth(0).click(); await page.waitForTimeout(1200);
   const card = N(await page.locator('section.pkm-pg-card').innerText());
   ok('classement en PL : carte « PL de la saison » seulement (plus de total), 14ᵉ, « Encore 4 places pour le top 10 »', /PL de la saison/.test(card) && !/au total/.test(card) && /#14/.test(card) && /Encore 4 places pour le top 10/.test(card) && (await page.locator('section.pkm-pg-card img[src="img/brand/pl.svg"]').count()) === 1);
-  ok('classement : chaque ligne en PL', /1 700 PL/.test(N(await page.locator('ol.pkm-pg-list').innerText())));
+  { const lt = N(await page.locator('ol.pkm-pg-list').innerText()), li = page.locator('ol.pkm-pg-list > li').first();
+  const pos = await li.evaluate(r => { const n = r.querySelector('.pkm-pg-pk'), im = n && n.querySelector('img.pkm-pg-unit'); if (!im) return null; const a = n.getBoundingClientRect(), b = im.getBoundingClientRect(); return { right: b.left >= a.left + 10, src: im.getAttribute('src') }; });
+  ok('classement : chaque ligne en PL, logo des PL à droite du score, sans les lettres « PL » (' + JSON.stringify(pos) + ')', /1 700/.test(lt) && !/\d PL\b/.test(lt) && !!pos && pos.right && pos.src === 'img/brand/pl.svg' && (await page.locator('ol.pkm-pg-list img.pkm-pg-unit').count()) === (await page.locator('ol.pkm-pg-list > li').count()));
+  await page.locator('.pkm-pg-podium').screenshot({ path: shot('pl-podium.png') }); await page.locator('ol.pkm-pg-list').screenshot({ path: shot('pl-classement-liste.png') });
+  ok('podium : logo des PL à droite du score', (await page.locator('.pkm-pg-podium .pkm-pg-ppk img[src="img/brand/pl.svg"]').count()) === (await page.locator('.pkm-pg-podium .pkm-pg-ppk').count()) && !/\d PL\b/.test(N(await page.locator('.pkm-pg-podium').innerText()))); }
   await page.screenshot({ path: shot('pl-classement.png') });
   // Carte de dresseur (2026-11-15, porteur) : petit onglet à côté de chaque pseudo ; un appui ouvre la carte.
   ok('onglet « carte » à côté de chaque pseudo (podium, liste, ma ligne)', (await page.locator('.pkm-pg-pod .pkm-pg-vtab').count()) === 3 && (await page.locator('ol.pkm-pg-list .pkm-pg-vtab').count()) === 9

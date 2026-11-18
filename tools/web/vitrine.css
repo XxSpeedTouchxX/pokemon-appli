@@ -125,28 +125,54 @@
 }
 @media (prefers-reduced-motion: reduce) { .pkm-vt-want, .pkm-vt-cd, .pkm-vt-pick { transition: none; } }
 
-/* Animation « carte qui entre dans ma vitrine » (vitrine.js, vtFx, 2026-11-16, porteur ; refaite le même soir :
-   « plus satisfaisant, 1 s de plus ») : 3,6 s, sans toucher. Repères : 1,05 s tampon, 1,4 s portes ouvertes,
-   1,75-2,35 s vol de la carte, 2,7 s portes fermées et éclat, 3,3 s fondu. */
+/* Animation « la carte entre dans ma vitrine », façon vitrine de magasin (vitrine.js, vtFx ; 2026-11-16, porteur ;
+   refaite le 2026-11-18 : « fais rentrer la carte comme dans une vitrine de magasin ») : 3,6 s, sans toucher.
+   Repères : 0-0,5 s la devanture se pose et le store se déroule, 1,05 s tampon, 1,5 s envol, 1,87 s la carte traverse
+   la vitre, 2,16 s posée sur le présentoir, 2,25 s spot allumé et étiquette qui se balance, 2,4 s enseigne allumée et
+   étincelles, 2,6 s « Dans ta vitrine », 3,3 s fondu. Scène de 300 × 460 px : façade de 280 × 324 px en (10, 132),
+   vitre de 236 × 168 px en (32, 236) ; la carte (132 px) part de (84, 24) et finit à 42 % sur le présentoir du milieu. */
 .pkm-vfx { position: fixed; inset: 0; z-index: 400; pointer-events: none; display: flex; align-items: center; justify-content: center; }
-.pkm-vfx-veil { position: absolute; inset: 0; background: radial-gradient(circle at 50% 62%, rgba(40, 52, 96, 0.55), rgba(4, 7, 14, 0.78) 70%); opacity: 0; animation: pkmVfxVeil 3.6s ease forwards; }
+.pkm-vfx-veil { position: absolute; inset: 0; background: radial-gradient(circle at 50% 62%, rgba(40, 52, 96, 0.55), rgba(4, 7, 14, 0.8) 70%); opacity: 0; animation: pkmVfxVeil 3.6s ease forwards; }
 .pkm-vfx-stage { position: relative; width: 300px; height: 460px; perspective: 900px; animation: pkmVfxOut 3.6s ease forwards; }
-/* Vitrine : chapeau doré, cadre vitré avec lumière et étagère, socle ; les portes sont un calque à part, devant la carte. */
-.pkm-vfx-case, .pkm-vfx-doors { animation: pkmVfxRise 3.6s cubic-bezier(0.25, 0.8, 0.3, 1) forwards; opacity: 0; }
-.pkm-vfx-case { position: absolute; left: 45px; top: 290px; width: 210px; height: 170px; z-index: 1; transform-origin: 50% 100%; }
-.pkm-vfx-cap { position: absolute; left: -4px; right: -4px; top: 0; height: 12px; border-radius: 6px; background: linear-gradient(180deg, #FFE680, #C99A12); border: 2.5px solid #0B1120; box-sizing: border-box; }
-.pkm-vfx-box { position: absolute; left: 0; right: 0; top: 12px; height: 130px; border-radius: 6px; border: 4px solid #E8F6FF; box-sizing: border-box; overflow: hidden; background: linear-gradient(180deg, #16223F, #0D1528); box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.6); animation: pkmVfxGlow 3.6s ease forwards; }
-.pkm-vfx-light { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(255, 236, 160, 0.75), rgba(255, 214, 10, 0.18) 45%, transparent 75%); opacity: 0; animation: pkmVfxLight 3.6s ease forwards; }
-.pkm-vfx-shelf { position: absolute; left: 0; right: 0; bottom: 8px; height: 6px; background: linear-gradient(180deg, #F3FBFF, #9CC7E6); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5); }
-.pkm-vfx-base { position: absolute; left: -8px; right: -8px; bottom: 0; height: 28px; border-radius: 6px; background: linear-gradient(180deg, #FFE680, #B8860B); border: 3px solid #0B1120; box-sizing: border-box; }
-.pkm-vfx-doors { position: absolute; left: 49px; top: 306px; width: 202px; height: 122px; z-index: 3; overflow: hidden; border-radius: 3px; }
-.pkm-vfx-door { position: absolute; top: 0; bottom: 0; width: 50%; background: linear-gradient(115deg, rgba(210, 240, 255, 0.34), rgba(160, 210, 245, 0.1) 40%, rgba(210, 240, 255, 0.28) 60%, rgba(160, 210, 245, 0.08)); border: 1.5px solid rgba(232, 246, 255, 0.85); box-sizing: border-box; }
-.pkm-vfx-door::after { content: ''; position: absolute; top: 8px; bottom: 30px; width: 7px; border-radius: 4px; background: rgba(255, 255, 255, 0.5); transform: skewX(-12deg); }
-.pkm-vfx-door-l { left: 0; animation: pkmVfxDoorL 3.6s cubic-bezier(0.5, 0, 0.3, 1) forwards; }
-.pkm-vfx-door-r { right: 0; animation: pkmVfxDoorR 3.6s cubic-bezier(0.5, 0, 0.3, 1) forwards; }
-.pkm-vfx-door-l::after { left: 14px; } .pkm-vfx-door-r::after { left: 22px; }
-/* Carte : retournement, reflet holo, tampon, choc, vol en arc, rebond sur l'étagère. */
-.pkm-vfx-card { position: absolute; left: 84px; top: 24px; width: 132px; aspect-ratio: 63 / 88; z-index: 2; border-radius: 9px; transform-origin: 50% 50%; transform-style: preserve-3d; opacity: 0; animation: pkmVfxCard 3.6s cubic-bezier(0.3, 0.7, 0.3, 1) forwards; }
+/* Intérieur de la vitrine (calque du fond) et façade percée (calque de devant) : même mouvement d'arrivée. */
+.pkm-vfx-back, .pkm-vfx-front { opacity: 0; animation: pkmVfxShop 3.6s cubic-bezier(0.25, 0.8, 0.3, 1) forwards; }
+.pkm-vfx-back { position: absolute; left: 32px; top: 236px; width: 236px; height: 168px; z-index: 1; overflow: hidden; }
+.pkm-vfx-wall { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 14px), radial-gradient(ellipse at 50% 0%, #3B3163, #1C1A36 72%); }
+.pkm-vfx-lamp { position: absolute; left: 109px; top: 5px; width: 18px; height: 9px; border-radius: 0 0 9px 9px; background: #0B1120; box-shadow: 0 -6px 0 -4px #0B1120; }
+.pkm-vfx-lamp::after { content: ''; position: absolute; left: 5px; bottom: -3px; width: 8px; height: 5px; border-radius: 0 0 5px 5px; background: #5A5F78; animation: pkmVfxBulb 3.6s linear forwards; }
+.pkm-vfx-cone { position: absolute; left: 58px; top: 12px; width: 120px; height: 132px; clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%); background: linear-gradient(180deg, rgba(255, 246, 205, 0.75), rgba(255, 230, 140, 0.14)); opacity: 0; animation: pkmVfxSpot 3.6s linear forwards; }
+.pkm-vfx-carpet { position: absolute; left: 0; right: 0; top: 142px; bottom: 0; z-index: 0; background: linear-gradient(180deg, #9A2A4C, #5A1229); border-top: 2px solid #D0567A; }
+.pkm-vfx-stand { position: absolute; z-index: 1; }
+.pkm-vfx-stand-l, .pkm-vfx-stand-r { top: 73px; width: 54px; height: 73px; filter: brightness(0.62); animation: pkmVfxSide 3.6s linear forwards; }
+.pkm-vfx-stand-l { left: 23px; } .pkm-vfx-stand-r { left: 159px; }
+.pkm-vfx-stand-c { left: 86px; top: 134px; width: 64px; height: 12px; transform-origin: 50% 100%; animation: pkmVfxPlinth 3.6s ease forwards; }
+.pkm-vfx-side, .pkm-vfx-slot { position: absolute; left: 5px; top: 0; width: 44px; height: 61px; border-radius: 4px; box-sizing: border-box; }
+.pkm-vfx-side { object-fit: cover; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55), 0 0 0 1.5px rgba(255, 255, 255, 0.85); }
+.pkm-vfx-slot { display: flex; align-items: center; justify-content: center; border: 1.5px dashed rgba(232, 246, 255, 0.4); color: rgba(232, 246, 255, 0.5); font-size: 18px; font-weight: 700; }
+.pkm-vfx-easel { position: absolute; left: 0; right: 0; bottom: 0; height: 12px; border-radius: 3px; background: linear-gradient(180deg, #FFE680, #B8860B); border: 1.5px solid #0B1120; box-sizing: border-box; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5); }
+.pkm-vfx-warm { position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(ellipse at 50% 78%, rgba(255, 214, 10, 0.32), transparent 62%); opacity: 0; animation: pkmVfxWarm 3.6s linear forwards; }
+/* Façade : le trou de la vitre peint le mur tout autour (ombre portée), le reste se dessine par-dessus. */
+.pkm-vfx-front { position: absolute; left: 10px; top: 132px; width: 280px; height: 324px; z-index: 4; overflow: hidden; border-radius: 12px 12px 4px 4px; }
+.pkm-vfx-hole { position: absolute; left: 22px; top: 104px; width: 236px; height: 168px; box-sizing: border-box; border: 5px solid #DCE5F3; border-radius: 4px; overflow: hidden;
+  box-shadow: 0 0 0 2px #0B1120, 0 0 0 640px #1C2748; }
+.pkm-vfx-glass { position: absolute; inset: 0; background: linear-gradient(118deg, transparent 0 12%, rgba(255, 255, 255, 0.16) 12% 19%, transparent 19% 24%, rgba(255, 255, 255, 0.09) 24% 27%, transparent 27% 70%, rgba(255, 255, 255, 0.07) 70% 76%, transparent 76%), linear-gradient(180deg, rgba(200, 230, 255, 0.1), rgba(200, 230, 255, 0.02) 40%, rgba(200, 230, 255, 0.06)); }
+.pkm-vfx-glint { position: absolute; top: -30%; bottom: -30%; left: -50%; width: 38%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), rgba(190, 230, 255, 0.25), transparent); transform: skewX(-20deg); opacity: 0; animation: pkmVfxGlint 3.6s ease-out forwards; }
+.pkm-vfx-ripple { position: absolute; left: 113px; top: 71px; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; border: 2px solid rgba(232, 246, 255, 0.9); box-shadow: 0 0 10px rgba(190, 230, 255, 0.7); opacity: 0; animation: pkmVfxRipple 3.6s ease-out forwards; }
+.pkm-vfx-pil { position: absolute; top: 92px; width: 13px; height: 204px; background: linear-gradient(90deg, #2B3B6C, #1F2B52); border: 1.5px solid #0B1120; box-sizing: border-box; border-radius: 3px; }
+.pkm-vfx-pil-l { left: 4px; } .pkm-vfx-pil-r { right: 4px; }
+.pkm-vfx-sill { position: absolute; left: 14px; top: 272px; width: 252px; height: 12px; border-radius: 3px; background: linear-gradient(180deg, #F0F4FB, #9AA8C4); border: 2px solid #0B1120; box-sizing: border-box; }
+.pkm-vfx-street { position: absolute; left: 0; right: 0; top: 304px; bottom: 0; background: repeating-linear-gradient(90deg, #4A557A 0 38px, #3E4869 38px 40px); border-top: 2px solid #0B1120; }
+/* Store rayé jaune et blanc qui se déroule, festons en bas ; ombre sur le mur et le haut de la vitre. */
+.pkm-vfx-awning { position: absolute; left: 6px; top: 48px; width: 268px; height: 52px; transform-origin: 50% 0; animation: pkmVfxAwning 3.6s cubic-bezier(0.3, 1.4, 0.5, 1) forwards; }
+.pkm-vfx-awning::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 40px; clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%); background: linear-gradient(180deg, rgba(0, 0, 0, 0.28), transparent 40%, rgba(0, 0, 0, 0.12)), repeating-linear-gradient(90deg, #FFD60A 0 24px, #F6F8FC 24px 48px); border-top: 3px solid #0B1120; box-sizing: border-box; }
+.pkm-vfx-awning::after { content: ''; position: absolute; left: 6px; right: 6px; top: 50px; height: 16px; background: linear-gradient(180deg, rgba(0, 0, 0, 0.38), transparent); }
+.pkm-vfx-scallop { position: absolute; left: 0; right: 0; top: 39px; height: 12px; background: radial-gradient(circle at 12px 0, #FFD60A 11px, transparent 12px) 0 0 / 48px 12px repeat-x, radial-gradient(circle at 36px 0, #F6F8FC 11px, transparent 12px) 0 0 / 48px 12px repeat-x; filter: drop-shadow(0 1.5px 0 #0B1120); }
+/* Enseigne « MA VITRINE » éteinte, qui clignote puis s'allume. */
+.pkm-vfx-sign { position: absolute; left: 50px; top: 10px; width: 180px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 7px; background: #0E1529; border: 2px solid #3A4A78; box-sizing: border-box; animation: pkmVfxSignBox 3.6s linear forwards; }
+.pkm-vfx-sign b { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 2.5px; color: #4A5578; animation: pkmVfxNeon 3.6s linear forwards; }
+/* Carte : retournement, reflet holo, tampon, choc, envol vers la vitre, traversée (elle passe derrière le verre),
+   pose sur le présentoir avec un rebond. */
+.pkm-vfx-card { position: absolute; left: 84px; top: 24px; width: 132px; aspect-ratio: 63 / 88; z-index: 6; border-radius: 9px; transform-origin: 50% 50%; transform-style: preserve-3d; opacity: 0; animation: pkmVfxCard 3.6s cubic-bezier(0.3, 0.7, 0.3, 1) forwards; }
 .pkm-vfx-card > img, .pkm-vfx-card > .pkm-vt-noimg { display: block; width: 100%; height: 100%; border-radius: 9px; object-fit: cover; background: #121C33; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 255, 255, 0.9); }
 .pkm-vfx-card > .pkm-vt-noimg { position: relative; display: flex; }
 .pkm-vfx-shine { position: absolute; inset: 0; border-radius: 9px; overflow: hidden; pointer-events: none; }
@@ -156,49 +182,76 @@
 .pkm-vfx-ring { position: absolute; left: 50%; top: 24px; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 3px solid #FFE680; opacity: 0; animation: pkmVfxRing 3.6s ease-out forwards; }
 .pkm-vfx-sale .pkm-vfx-ring { border-color: #FFB46B; }
 .pkm-vfx-show .pkm-vfx-ring { border-color: #E8F6FF; }
-/* Éclat final : rayons qui tournent derrière la vitrine, flash, étincelles. */
-.pkm-vfx-rays { position: absolute; left: 150px; top: 367px; width: 360px; height: 360px; margin: -180px 0 0 -180px; z-index: 0; border-radius: 50%; background: repeating-conic-gradient(rgba(255, 214, 10, 0.32) 0deg 10deg, transparent 10deg 30deg); -webkit-mask-image: radial-gradient(circle, #000 25%, transparent 68%); mask-image: radial-gradient(circle, #000 25%, transparent 68%); opacity: 0; animation: pkmVfxRays 3.6s linear forwards; }
-.pkm-vfx-flash { position: absolute; left: 150px; top: 367px; width: 240px; height: 240px; margin: -120px 0 0 -120px; z-index: 4; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.85), rgba(255, 230, 128, 0.35) 35%, transparent 65%); opacity: 0; animation: pkmVfxFlash 3.6s ease-out forwards; }
-.pkm-vfx-sparks { position: absolute; left: 150px; top: 367px; width: 0; height: 0; z-index: 5; }
+/* Étiquette de prix accrochée au présentoir, derrière la vitre : elle bascule puis se balance. */
+.pkm-vfx-label { position: absolute; left: 0; right: 0; top: 379px; z-index: 3; display: flex; justify-content: center; pointer-events: none; }
+.pkm-vfx-label em { position: relative; display: block; max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 8px; border-radius: 4px; background: #FFE680; color: #0B1120; border: 1.5px solid #0B1120; font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: 0.3px; transform-origin: 50% -4px; opacity: 0; animation: pkmVfxLabel 3.6s ease forwards; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45); }
+.pkm-vfx-sale .pkm-vfx-label em { background: #FFB46B; }
+.pkm-vfx-show .pkm-vfx-label em { background: #E8F6FF; }
+/* Étincelles autour de la carte posée. */
+.pkm-vfx-sparks { position: absolute; left: 150px; top: 331px; width: 0; height: 0; z-index: 5; }
 .pkm-vfx-sparks i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #FFE680; box-shadow: 0 0 10px #FFD60A; opacity: 0; transform: rotate(var(--a)) translateY(0); animation: pkmVfxSpark 3.6s ease-out forwards; }
 .pkm-vfx-sparks i:nth-child(3n) { width: 6px; height: 6px; background: #FFFFFF; }
 .pkm-vfx-sale .pkm-vfx-sparks i { background: #FFB46B; box-shadow: 0 0 10px #FF9F43; }
 .pkm-vfx-show .pkm-vfx-sparks i { background: #E8F6FF; box-shadow: 0 0 10px #9CD7FF; }
-.pkm-vfx-text { position: absolute; left: 0; right: 0; top: 112px; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: pkmVfxWhat 3.6s cubic-bezier(0.3, 1.5, 0.5, 1) forwards; }
+.pkm-vfx-text { position: absolute; left: 0; right: 0; top: 34px; z-index: 7; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: pkmVfxWhat 3.6s cubic-bezier(0.3, 1.5, 0.5, 1) forwards; }
 .pkm-vfx-what { margin: 0; text-align: center; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; color: #FFFFFF; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7); }
 .pkm-vfx-count { padding: 4px 12px; border-radius: 999px; background: rgba(255, 214, 10, 0.16); border: 1px solid rgba(255, 214, 10, 0.55); color: #FFE680; font-size: 13px; font-weight: 800; }
 @keyframes pkmVfxVeil { 0% { opacity: 0; } 8% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes pkmVfxOut { 0%, 91% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(12px) scale(0.97); } }
-@keyframes pkmVfxRise { 0% { opacity: 0; transform: translateY(46px); } 12% { opacity: 1; transform: translateY(-4px); } 17% { transform: translateY(0); } 75% { transform: scale(1); } 77.5% { transform: scale(1.06, 0.93); } 81% { transform: scale(0.98, 1.02); } 84%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes pkmVfxShop { 0% { opacity: 0; transform: translateY(40px) scale(0.96); } 12% { opacity: 1; transform: translateY(-4px) scale(1); } 17%, 100% { opacity: 1; transform: none; } }
+@keyframes pkmVfxAwning { 0%, 5% { transform: scaleY(0); } 15% { transform: scaleY(1.08); } 19%, 100% { transform: scaleY(1); } }
 @keyframes pkmVfxCard {
-  0% { opacity: 0; transform: translateY(30px) rotateY(-180deg) scale(0.55); }
+  0% { opacity: 0; z-index: 6; transform: translateY(30px) rotateY(-180deg) scale(0.55); }
   13.9% { opacity: 1; transform: translateY(-6px) rotateY(-12deg) scale(1.08); }
   19.4% { transform: translateY(0) rotateY(0deg) scale(1); }
-  29.2% { transform: translateY(0) scale(1); }
+  29.2% { transform: translate(0, 0) rotate(0deg) scale(1); }
   31% { transform: translate(-4px, 5px) rotate(-2deg) scale(0.97); }
   33% { transform: translate(4px, 0) rotate(1.5deg) scale(1.01); }
   35% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  48.6% { transform: translate(0, -10px) rotate(0deg) scale(1.03); }
-  56.9% { transform: translate(26px, 110px) rotate(9deg) scale(0.66); }
-  65.3% { transform: translate(0, 259px) rotate(0deg) scale(0.42); }
-  68.1% { transform: translate(0, 248px) scale(0.42, 0.44); }
-  70.8%, 100% { opacity: 1; transform: translate(0, 259px) scale(0.42); }
+  41% { transform: translate(0, -14px) rotate(-3deg) scale(1.05); }
+  47% { transform: translate(16px, 96px) rotate(6deg) scale(0.74); }
+  52% { z-index: 6; transform: translate(0, 192px) rotate(2deg) scale(0.5); }
+  52.5% { z-index: 2; }
+  55% { transform: translate(0, 200px) rotate(0deg) scale(0.46); }
+  59% { transform: translate(0, 219px) rotate(0deg) scale(0.42); }
+  61.5% { transform: translate(0, 207px) scale(0.41, 0.44); }
+  64%, 100% { opacity: 1; z-index: 2; transform: translate(0, 215px) scale(0.42); }
 }
 @keyframes pkmVfxShine { 0%, 19% { left: -60%; } 31% { left: 120%; } 100% { left: 120%; } }
 @keyframes pkmVfxTag { 0%, 28% { opacity: 0; transform: translateX(-50%) rotate(-14deg) scale(2.8); } 31% { opacity: 1; transform: translateX(-50%) rotate(-5deg) scale(0.88); } 34%, 100% { opacity: 1; transform: translateX(-50%) rotate(-6deg) scale(1); } }
 @keyframes pkmVfxRing { 0%, 29% { opacity: 0; transform: scale(0.3); } 30.5% { opacity: 0.95; } 41%, 100% { opacity: 0; transform: scale(3.4); } }
-@keyframes pkmVfxDoorL { 0%, 38.9% { transform: translateX(0); } 48.6% { transform: translateX(-104%); } 68.1% { transform: translateX(-104%); } 75% { transform: translateX(0); } 77%, 100% { transform: translateX(0); } }
-@keyframes pkmVfxDoorR { 0%, 38.9% { transform: translateX(0); } 48.6% { transform: translateX(104%); } 68.1% { transform: translateX(104%); } 75% { transform: translateX(0); } 77%, 100% { transform: translateX(0); } }
-@keyframes pkmVfxLight { 0%, 40% { opacity: 0; } 48.6% { opacity: 0.75; } 75% { opacity: 0.8; } 78% { opacity: 1; } 100% { opacity: 0.85; } }
-@keyframes pkmVfxGlow { 0%, 74% { box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.6), 0 0 0 rgba(255, 214, 10, 0); } 78% { box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.3), 0 0 34px rgba(255, 214, 10, 0.95); } 100% { box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.3), 0 0 16px rgba(255, 214, 10, 0.5); } }
-@keyframes pkmVfxRays { 0%, 74% { opacity: 0; transform: rotate(0deg) scale(0.6); } 80% { opacity: 1; transform: rotate(20deg) scale(1); } 100% { opacity: 0.7; transform: rotate(70deg) scale(1.05); } }
-@keyframes pkmVfxFlash { 0%, 74.5% { opacity: 0; transform: scale(0.4); } 77% { opacity: 1; transform: scale(1); } 88%, 100% { opacity: 0; transform: scale(1.3); } }
-@keyframes pkmVfxSpark { 0%, 75% { opacity: 0; transform: rotate(var(--a)) translateY(0) scale(0.5); } 78% { opacity: 1; } 94%, 100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(-1 * var(--d))) scale(1); } }
-@keyframes pkmVfxWhat { 0%, 75% { opacity: 0; transform: translateY(14px) scale(0.85); } 82%, 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes pkmVfxGlint { 0%, 51% { opacity: 0; left: -50%; } 53% { opacity: 1; } 64%, 100% { opacity: 0; left: 120%; } }
+@keyframes pkmVfxRipple { 0%, 51.5% { opacity: 0; transform: scale(0.4); } 53% { opacity: 1; transform: scale(1); } 62%, 100% { opacity: 0; transform: scale(6, 4.2); } }
+@keyframes pkmVfxPlinth { 0%, 58.5% { transform: none; } 60% { transform: scale(1.06, 0.72); } 63%, 100% { transform: none; } }
+@keyframes pkmVfxBulb { 0%, 61% { background: #5A5F78; box-shadow: none; } 62% { background: #FFF4C2; box-shadow: 0 0 10px #FFE680; } 63% { background: #8A8C9A; box-shadow: none; } 64.5%, 100% { background: #FFF4C2; box-shadow: 0 0 12px #FFE680; } }
+@keyframes pkmVfxSpot { 0%, 61% { opacity: 0; } 62% { opacity: 0.9; } 63% { opacity: 0.25; } 64.5%, 100% { opacity: 1; } }
+@keyframes pkmVfxWarm { 0%, 62% { opacity: 0; } 70%, 100% { opacity: 1; } }
+@keyframes pkmVfxSide { 0%, 62% { filter: brightness(0.62); } 70%, 100% { filter: brightness(0.92); } }
+@keyframes pkmVfxLabel {
+  0%, 62% { opacity: 0; transform: translateY(-6px) rotateX(-90deg); }
+  64.5% { opacity: 1; transform: rotate(10deg); }
+  68% { transform: rotate(-7deg); }
+  71.5% { transform: rotate(4.5deg); }
+  75% { transform: rotate(-3.5deg); }
+  78.5% { transform: rotate(1.5deg); }
+  82%, 100% { opacity: 1; transform: rotate(0deg); }
+}
+@keyframes pkmVfxNeon {
+  0%, 65.5% { color: #4A5578; text-shadow: none; }
+  66.5% { color: #FFE680; text-shadow: 0 0 6px #FFD60A, 0 0 14px #FFB800; }
+  67.5% { color: #6A6F84; text-shadow: none; }
+  69% { color: #FFE680; text-shadow: 0 0 6px #FFD60A, 0 0 14px #FFB800; }
+  70% { color: #8E8A70; text-shadow: none; }
+  71.5%, 100% { color: #FFF0A6; text-shadow: 0 0 6px #FFD60A, 0 0 16px #FFB800, 0 0 26px rgba(255, 184, 0, 0.6); }
+}
+@keyframes pkmVfxSignBox { 0%, 70.5% { border-color: #3A4A78; box-shadow: none; } 71.5%, 100% { border-color: #FFD60A; box-shadow: 0 0 14px rgba(255, 214, 10, 0.55), inset 0 0 10px rgba(255, 214, 10, 0.25); } }
+@keyframes pkmVfxSpark { 0%, 63% { opacity: 0; transform: rotate(var(--a)) translateY(0) scale(0.5); } 66% { opacity: 1; } 82%, 100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(-1 * var(--d))) scale(1); } }
+@keyframes pkmVfxWhat { 0%, 71% { opacity: 0; transform: translateY(14px) scale(0.85); } 78%, 100% { opacity: 1; transform: translateY(0) scale(1); } }
 @media (prefers-reduced-motion: reduce) {
-  .pkm-vfx-case, .pkm-vfx-doors, .pkm-vfx-card, .pkm-vfx-tag, .pkm-vfx-text, .pkm-vfx-light { animation: none; opacity: 1; }
-  .pkm-vfx-card { transform: translate(0, 259px) scale(0.42); }
+  .pkm-vfx-back, .pkm-vfx-front, .pkm-vfx-awning, .pkm-vfx-card, .pkm-vfx-tag, .pkm-vfx-text, .pkm-vfx-label em, .pkm-vfx-cone, .pkm-vfx-warm { animation: none; opacity: 1; }
+  .pkm-vfx-card { z-index: 2; transform: translate(0, 215px) scale(0.42); }
   .pkm-vfx-tag { transform: translateX(-50%) rotate(-6deg); }
-  .pkm-vfx-door, .pkm-vfx-box, .pkm-vfx-shine::before, .pkm-vfx-ring, .pkm-vfx-rays, .pkm-vfx-flash, .pkm-vfx-sparks i { animation: none; }
-  .pkm-vfx-ring, .pkm-vfx-rays, .pkm-vfx-flash, .pkm-vfx-sparks i { opacity: 0; }
+  .pkm-vfx-sign b { animation: none; color: #FFF0A6; text-shadow: 0 0 6px #FFD60A; }
+  .pkm-vfx-stand, .pkm-vfx-lamp::after, .pkm-vfx-sign, .pkm-vfx-shine::before, .pkm-vfx-ring, .pkm-vfx-glint, .pkm-vfx-ripple, .pkm-vfx-sparks i { animation: none; }
+  .pkm-vfx-ring, .pkm-vfx-glint, .pkm-vfx-ripple, .pkm-vfx-sparks i { opacity: 0; }
 }

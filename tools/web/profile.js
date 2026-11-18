@@ -176,8 +176,9 @@
     { name: 'Grand maître Pokémon', safariH: 4, pk: 100000, comp: 171, all: true, mega: 0, scans: 200, boosterH: 4, coinH: 4, cards: 0, sealed: 0, ticket: true, shopBooster: true, deluxe: true, radar: true, color: '#FF7E66', glow: 'rgba(227, 53, 13, 0.30)' }
   ];
   // Avantages de chaque grade (2026-11-07, listes du porteur, mot pour mot) : classeur limité (cartes et items scellés,
-  // illimité dès Maître Pokémon), scans par jour, délais du Booster PK et de la pièce, PK shop, emblème (dès
-  // Collectionneur), Radar des boutiques (dès Maître Pokémon). Délais aussi sur le serveur (009_grades_v3.sql).
+  // illimité dès Maître Pokémon), scans par jour, délais du Booster PK et de la pièce, PK shop, Radar des boutiques
+  // (dès Maître Pokémon). Délais aussi sur le serveur (009_grades_v3.sql). L'emblème n'est plus un avantage : affiché
+  // à tous les grades, Recrue compris (2026-11-18, porteur).
   const pfN = n => Number(n).toLocaleString('fr-FR');
   PF_GRADES.forEach((g, i) => {
     g.perks = [
@@ -190,7 +191,6 @@
       // Safari éclair dès Collectionneur (2026-11-13, porteur) : 24 h, 12 h, 6 h, 4 h.
       g.safariH ? ['« Safari éclair » toutes les ' + g.safariH + ' h'] : [],
       [i >= 4 ? 'Ticket Or + achat « ETB » au PK shop' : i >= 2 ? 'Ticket Argent + achat « item rare » au PK shop' : 'Ticket Bronze + achat de « booster » au PK shop'],
-      i >= 2 ? ['Emblème du grade disponible sur ton profil'] : [],
       g.radar ? ['Radar de boutiques disponible'] : []);
   });
   const pfNum = n => Number(n || 0).toLocaleString('fr-FR');
@@ -377,9 +377,9 @@
     // Emblème du grade sur l'avatar (en-tête) : l'ancien grade tant que le passage de grade attend la fin d'une
     // évolution (2026-11-01, porteur : le nouveau grade seulement une fois l'évolution effectuée).
     const ht = (pfGradePend && this.tiers()[pfGradePend.from]) || this.tierOf().cur;
-    // Pas d'emblème aux grades Recrue et Chasseur (2026-11-07, porteur ; « Emblème du grade » dès Collectionneur).
-    const hi = pfGradePend && this.tiers()[pfGradePend.from] ? pfGradePend.from : this.tierOf().i;
-    r.hh = { badge: ht.sym, grade: ht.name, alt: 'Grade ' + ht.name, show: hi >= 2 };
+    // Emblème affiché à tous les grades, Recrue et Chasseur compris (2026-11-18, porteur : il n'est plus un avantage
+    // débloqué dès Collectionneur).
+    r.hh = { badge: ht.sym, grade: ht.name, alt: 'Grade ' + ht.name, show: true };
     r.gr = ui.isGrade ? this.vGrade(s) : { perks: [] };
     if (ui.isGrade) Object.assign(ui, { title: r.gr.name, subtitle: '', hasSubtitle: false, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
     r.gu = this.vGradeUp(s);

@@ -47,7 +47,7 @@
 .pkm-pg-ppseudo { max-width: 100%; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pkm-pg-pgrade { display: flex; flex-direction: column; align-items: center; gap: 1px; max-width: 100%; font-size: 10.5px; line-height: 1.15; font-weight: 800; }
 .pkm-pg-pgrade img { width: 24px; height: 24px; }
-.pkm-pg-ppk { font-size: 12.5px; font-weight: 800; color: #FFD60A; }
+.pkm-pg-ppk { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 800; color: #FFD60A; }
 .pkm-pg-step { align-self: stretch; display: flex; align-items: flex-start; justify-content: center; margin-top: 4px; border-radius: 14px 14px 6px 6px; border: 1px solid #2A3A5C; }
 .pkm-pg-step b { font-family: 'Luckiest Guy', 'Sora', sans-serif; font-weight: 400; font-size: 24px; padding-top: 8px; color: #0B1120; }
 .pkm-pg-pod-1 .pkm-pg-step { height: 74px; background: linear-gradient(180deg, #FFE46B, #F2A900); }
@@ -61,7 +61,10 @@
 .pkm-pg-who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .pkm-pg-who b { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pkm-pg-who small { font-size: 11.5px; font-weight: 700; }
-.pkm-pg-pk { flex: none; font-size: 13.5px; font-weight: 800; color: #FFD60A; }
+.pkm-pg-pk { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 800; color: #FFD60A; font-variant-numeric: tabular-nums; }
+/* Logo de l'unité (PL, sinon PK) à droite du score, à la place des lettres (2026-11-18, porteur). */
+.pkm-pg-unit { flex: none; width: 18px; height: 18px; display: block; }
+.pkm-pg-ppk .pkm-pg-unit { width: 16px; height: 16px; }
 .pkm-pg-top10 { border-color: rgba(255, 214, 10, 0.35); }
 .pkm-pg-me { background: rgba(255, 214, 10, 0.14); border-color: #FFD60A; box-shadow: inset 0 0 0 1px #FFD60A; }
 .pkm-pg-gap { text-align: center; color: #5A6B8C; letter-spacing: 4px; font-size: 12px; }
