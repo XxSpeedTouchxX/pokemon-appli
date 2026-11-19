@@ -33,7 +33,8 @@ const make = (UID, EMAIL, role) => {
   return { TOKEN, S, fake, UID, EMAIL, role };
 };
 const open = async (who) => {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+  // Fuseau du navigateur choisi pour ne jamais être dans les 40 premières minutes de la journée (« vu il y a 40 min » reste aujourd'hui).
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, timezoneId: new Date().getUTCHours() === 0 ? 'Asia/Tokyo' : 'UTC' });
   await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   await ctx.route(FAKE + '/**', who.fake);
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
@@ -101,7 +102,7 @@ const open = async (who) => {
   await page.evaluate(() => window.__pkm.setState({ plyQ: '' }));
   await ctx.route(FAKE + '/rest/v1/rpc/admin_players', r => r.fulfill({ status: 404, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ code: 'PGRST202', message: 'Could not find the function public.admin_players' }) }));
   await sec.locator('button', { hasText: 'Actualiser' }).click(); await page.waitForTimeout(600);
-  ok('serveur sans 025 : « colle tools/supabase/install_024_a_034.sql »', /install_024_a_033\.sql/.test(N(await sec.innerText())));
+  ok('serveur sans 025 : « colle tools/supabase/install_024_a_034.sql »', /install_024_a_034\.sql/.test(N(await sec.innerText())));
   await ctx.close();
 }
 ok('aucune erreur JavaScript', errors.length === 0);

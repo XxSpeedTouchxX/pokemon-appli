@@ -217,7 +217,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   // « Mes missions » pour un admin quand 028 manque : aperçu avec le fichier à installer.
   await page.evaluate(() => window.__pkm.setState({ admSheet: false }));
   await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2600);
-  ok('sans 028, admin : « install_024_a_034.sql » à coller dans Studio', /install_024_a_033\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));
+  ok('sans 028, admin : « install_024_a_034.sql » à coller dans Studio', /install_024_a_034\.sql/.test(await page.locator('.pkm-ple-msg').innerText().catch(() => '')));
   await ctx.close();
 }
 

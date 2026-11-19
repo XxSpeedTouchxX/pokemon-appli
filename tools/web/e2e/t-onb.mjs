@@ -18,7 +18,7 @@ ok('cinq cartes de l’app : ' + fan.map(f => f[0].replace('img/onb/', '')).join
 ok('page 1 : ni « Passer » ni retour avant le compte', (await page.locator('button:has-text("Passer")').count()) === 0 && (await page.locator('button[aria-label="Page précédente"]').count()) === 0);
 // Ligne pré-gradation entre le Radar et l'estimation du prix (2026-11-15, porteur), avec le logo de la pré-gradation.
 const lines = await page.locator('ul[aria-label="Ce que fait Dropicards"] li').allInnerTexts();
-const pgAt = lines.findIndex(t => /^Une pré-gradation de ta carte pour avoir une tendance globale/.test(t));
+const pgAt = lines.findIndex(t => /^Une pré-gradation de ta carte pour connaître la rentabilité liée à une future gradation/.test(t));
 ok('ligne pré-gradation après le Radar, avant l’estimation du prix', pgAt > 0 && /^Radar/.test(lines[pgAt - 1]) && /^Estimation du prix/.test(lines[pgAt + 1])
   && (await page.locator('ul[aria-label="Ce que fait Dropicards"] li img[src="img/brand/pregrade.svg"]').count()) === 1);
 ok('trois points de progression', (await page.locator('.pkm-onb-dot').count()) === 3);

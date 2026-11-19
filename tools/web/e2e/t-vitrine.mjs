@@ -257,7 +257,7 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   const S = newS({ off33: true });
   const { ctx, page } = await setup(S, 'admin');
   await page.evaluate(() => window.__pkm.setState({ screen: 'progress', stack: ['market'], pgTab: 'trade' })); await page.waitForTimeout(1800);
-  ok('sans 033 : l’admin voit le fichier à installer', /install_024_a_033\.sql/.test(N(await page.locator('section.pkm-vt-tab').innerText().catch(() => ''))));
+  ok('sans 033 : l’admin voit le fichier à installer', /install_024_a_034\.sql/.test(N(await page.locator('section.pkm-vt-tab').innerText().catch(() => ''))));
   await ctx.close();
 }
 
