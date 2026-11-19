@@ -69,7 +69,7 @@
       + '<p class="pkm-afx-gain"></p><p class="pkm-afx-what"></p><p class="pkm-afx-total"><span></span><b class="pkm-strict-text"></b></p></div>';
     if (src) {
       const im = el.querySelector('.pkm-afx-item img');
-      im.onerror = () => { if (l.fallback && im.src.indexOf(l.fallback) < 0) im.src = l.fallback; };
+      im.onerror = () => { if (l.fallback && im.src.indexOf(l.fallback) < 0) im.src = l.fallback; else im.style.visibility = 'hidden'; };
       im.src = src;
     }
     const gain = Math.max(0, after - before), label = sealed ? 'Valeur de mes produits scellés' : 'Valeur de mes cartes';
@@ -98,6 +98,19 @@
     const s = this.st(), f = s.f || {}, p = this.catalog().find(q => q.id === f.pid), prev = s.purchases;
     const sealed = !!(p && p.type === 'sealed'), before = p ? this.fiBinderVal(s, sealed) : 0;
     const r = fiBaseSaveBuy.call(this), s2 = this.st();
+    if (!p || s2.purchases === prev) return r;
+    if (this._tt) { clearTimeout(this._tt); this._tt = null; }
+    this.setState({ toast: null });
+    this.addFx(p, before, this.fiBinderVal(this.st(), sealed));
+    return r;
+  };
+  // « Ajouter à ma collection » du scan (2026-11-19, porteur) : la même animation que l'ajout depuis une fiche (la carte
+  // s'envole dans le classeur, « +X € », nouvelle valeur), puis retour à la caméra pour la carte suivante.
+  const fiBaseSaveScan = fiProto.saveScan;
+  fiProto.saveScan = function () {
+    const s = this.st(), pid = this.scanTarget(s), p = pid ? this.catalog().find(q => q.id === pid) : null, prev = s.purchases;
+    const sealed = !!(p && p.type === 'sealed'), before = p ? this.fiBinderVal(s, sealed) : 0;
+    const r = fiBaseSaveScan.call(this), s2 = this.st();
     if (!p || s2.purchases === prev) return r;
     if (this._tt) { clearTimeout(this._tt); this._tt = null; }
     this.setState({ toast: null });

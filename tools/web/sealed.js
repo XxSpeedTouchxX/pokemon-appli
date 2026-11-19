@@ -273,7 +273,14 @@
       label: p.name + (k !== null ? ', cote ' + this.eur(k) : '') + (n ? ', ' + n + ' dans ta collection' : ''),
       add: () => this.slAdd(p.id), addLabel: 'Ajouter ' + p.name + ' à mes produits scellés',
       details: () => this.fiOpen(p.id), detailsLabel: 'Détails de ' + p.name
-    });
+    }, slLaunchOf(this, p));
+  };
+  // Prix de sortie en France et évolution jusqu'à la cote du jour (2026-11-19, porteur : frise du calendrier TCG ;
+  // calLaunch, coin.js). Rien sans prix de sortie sourcé (sealed.json, msrp).
+  const slLaunchOf = (inst, p) => {
+    const L = inst.calLaunch ? inst.calLaunch(p) : null;
+    return L ? { hasLaunch: true, launchText: 'Sortie ' + L.msrpText, launchPct: L.pctText, launchCls: 'pkm-launch ' + (L.up ? 'pkm-launch-up' : 'pkm-launch-down'),
+      launchAria: 'Prix de sortie ' + L.msrpText + ', ' + L.pctText + ' depuis la sortie' + (L.source ? ', source ' + L.source : '') } : { hasLaunch: false };
   };
   proto.vSealedList = function (s) {
     if (SEALED.status !== 'ready') return Object.assign({}, EMPTY_SEALED, { status: SEALED.status === 'error' ? 'Catalogue scellé indisponible pour le moment · nouvel essai automatique.' : 'Chargement du catalogue scellé…' });

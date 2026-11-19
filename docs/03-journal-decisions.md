@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-19 — Frise enrichie et ajout animé au scan (porteur : « Go, on verra derrière si on supprime des trucs »)
+
+- **Demande** : ajouter à la frise ce que Claude avait conseillé (rappels, prix de sortie, compte à rebours, cartes les plus chères, petits plus, vérification du calendrier), quitte à en retirer ensuite. En cours de route : « quand je scanne une carte et qu'elle apparaît avec le bouton Ajouter à ma collection, je veux la même cinématique que l'ajout d'une carte au classeur ».
+- **« Préviens-moi »** dans la fiche d'une sortie à venir : la veille et le jour même (et l'ouverture des précommandes quand une date `preorder` est saisie dans `calendar.json`, à remplir à la main), dans l'encadré « Tes alertes » de l'accueil et en notification si le téléphone l'autorise. **Limite : prévenu à l'ouverture de l'app** (ou app en arrière-plan), pas de vraie notification push app fermée (il faudrait un serveur d'envoi). Cloche sur le sigle suivi.
+- **Prix de sortie comparé au prix du jour** : badge « ETB +21 % » (ou Display, Lot, UPC) sur chaque extension sortie de la frise, et ligne « Sortie 55,99 € +21 % » sur les produits de l'onglet Items. **28 prix de sortie trouvés et sourcés** (pokecop, poketrack, Le CrocoDeal, GameMasters, graalia d'après Pokécardex), rangés dans `tools/sealed/products.json` ; aucun prix conseillé officiel n'est publié en France. Les displays (215,64 €) sont un **prix de référence** (36 × 5,99 €), pas un prix constaté ; deux ETB ont une fourchette 49,99-55,99 €.
+- **Compte à rebours** « J-8 » sur la prochaine sortie datée ; **« Les plus chères »** (3 cartes) en tête de l'onglet Cartes de chaque extension ; **progression** « 12/141 » sur chaque logo ; bouton **« Aujourd'hui »** quand on s'éloigne ; **« ? »** qui ouvre « Lire la frise » (couleurs et pastilles).
+- **Date passée sans mise à jour** : l'app affiche « À confirmer » (rumeur ou date au mois près) ou « Sortie » / « Sorti au Japon » (date exacte passée). **Vérification automatique** chaque lundi (`tools/calendar/check_calendar.py`, workflow « Calendrier TCG ») : rapport dans une issue GitHub « Calendrier TCG : dates à vérifier », fermée quand tout est à jour ; rien n'est modifié automatiquement.
+- **Scan** : « Ajouter à ma collection » joue la même animation que l'ajout depuis une fiche (la carte s'envole dans le classeur, « +X € », nouvelle valeur), puis retour à la caméra.
+- **Écarts relevés, non corrigés** (dates des produits scellés venues de pokemon.com) : ETB Héros Transcendants sortie le 20 février 2026 et son lot le 24 avril 2026 (liste : 30 janvier) ; lots Flamme Blanche et Foudre Noire le 22 août 2025 (liste : 18 juillet) ; l'identifiant de l'ETB Flamme Blanche contient « pc-etb » (version Pokémon Center ?), prix de l'ETB standard retenu.
+- Cache v248.
+
 ## 2026-11-19 — « Le calendrier TCG » : zoom façon caméra du Radar (porteur)
 
 - **Demande** (porteur : « le zoom n'est pas bien fait, je veux un zoom comme la cinématique du radar de boutique, de manière beaucoup plus fluide et satisfaisante »). Le zoom précédent enchaînait des effets séparés (voile sombre, logo qui s'envole, pause, fondu).

@@ -24,14 +24,14 @@
 
   // ——— Onglet et en-tête ———
   coinProto.coinGo = function (t) {
-    this.setState(Object.assign({ calSel: null }, t ? { coinTab: t } : {}));
+    this.setState(Object.assign({ calSel: null, calHelp: false }, t ? { coinTab: t } : {}));
     this.tab('coin');
     if ((t || this.st().coinTab || 'vit') === 'vit') setTimeout(() => this.coinEnterVit(false), 0);
     else setTimeout(() => this.calLoad(false), 0);
   };
   coinProto.coinPick = function (t) {
     if (this.st().coinTab === t) return;
-    this.setState({ coinTab: t, calSel: null });
+    this.setState({ coinTab: t, calSel: null, calHelp: false });
     if (t === 'vit') this.coinEnterVit(true); else this.calLoad(false);
   };
   coinProto.coinEnterVit = function (force) {
@@ -147,6 +147,53 @@
   // retirée sous la frise (2026-11-19, porteur : « ces infos quand tu cliques sur les prochaines sorties »).
   coinProto.calOpen = function (id) { this.setState({ calSel: id }); };
   coinProto.calClose = function () { this.setState({ calSel: null }); };
+  // Rappels du calendrier (2026-11-19, porteur : « go » sur les propositions de la frise) : « Préviens-moi » dans la fiche
+  // d'une sortie à venir, gardé avec les autres alertes de l'appareil (s.alerts, clé « cal:<id> »). Le rappel arrive la
+  // veille et le jour de la sortie, et à l'ouverture des précommandes quand le calendrier en donne la date (« preorder ») :
+  // encadré « Tes alertes » de l'accueil et notification du téléphone si elle est autorisée (start.js, alertsDue).
+  coinProto.calRemind = function (id, name) {
+    const s = this.st(), al = Object.assign({}, s.alerts || {}), key = 'cal:' + id, on = !al[key];
+    if (on) al[key] = realToday(); else delete al[key];
+    if (on) { try { if (typeof Notification !== 'undefined' && Notification.permission === 'default') Notification.requestPermission().catch(() => {}); } catch (e) { /* rien */ } }
+    this.setState({ alerts: al, toast: on ? 'Rappel activé : tu seras prévenu pour ' + name : 'Rappel retiré pour ' + name });
+  };
+  coinProto.calHelp = function (on) { this.setState({ calHelp: !!on, calSel: null }); };
+  // Bouton « Aujourd'hui » : la frise revient en douceur sur le mois en cours.
+  coinProto.calToday = function () {
+    try {
+      const w = document.querySelector('.pkm-cal-strip'), m = document.querySelector('.pkm-cal-m-now');
+      if (w && m) w.scrollTo({ left: m.offsetLeft - w.clientWidth / 2 + m.clientWidth / 2, behavior: 'smooth' });
+    } catch (e) { /* rien */ }
+  };
+  // Dernier jour d'une date du calendrier (« 2027-04 » : 30 avril) et écart en jours entre deux dates.
+  const calEnd = d => {
+    if (!d || d.length >= 10) return d || '';
+    const p = d.split('-').map(Number);
+    return d + '-' + String(new Date(Date.UTC(p[0], p[1], 0)).getUTCDate()).padStart(2, '0');
+  };
+  const calDays = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / 86400000);
+  // Prix de sortie et prix du jour d'un produit scellé (msrp de sealed.json, fourchette possible ; cote Cardmarket).
+  coinProto.calLaunch = function (p) {
+    if (!p || !Array.isArray(p.msrp) || !p.msrp.length || p.release) return null;
+    const k = this.cote(p);
+    if (k === null || !(k > 0)) return null;
+    const m = p.msrp.length > 1 ? (p.msrp[0] + p.msrp[1]) / 2 : p.msrp[0];
+    if (!(m > 0)) return null;
+    const pct = Math.round((k - m) / m * 100);
+    return { msrp: m, now: k, pct: pct, pctText: (pct > 0 ? '+' : pct < 0 ? '−' : '') + Math.abs(pct) + ' %', up: pct >= 0,
+      msrpText: p.msrp.length > 1 ? this.eur(p.msrp[0]) + ' à ' + this.eur(p.msrp[1]) : this.eur(p.msrp[0]), source: p.msrpSource || '' };
+  };
+  // Produit phare d'une extension pour la frise : l'ETB, sinon le display, le lot de boosters ou l'UPC.
+  const CAL_LEAD = ['ETB', 'DSP', 'BDL', 'UPC'], CAL_LEAD_TXT = { ETB: 'ETB', DSP: 'Display', BDL: 'Lot', UPC: 'UPC' };
+  coinProto.calLead = function (setId) {
+    if (typeof SEALED === 'undefined' || SEALED.status !== 'ready' || !setId) return null;
+    const list = SEALED.list().filter(p => p.setId === setId);
+    for (const code of CAL_LEAD) {
+      const p = list.find(z => z.code === code && this.calLaunch(z));
+      if (p) return Object.assign({ code: CAL_LEAD_TXT[code] }, this.calLaunch(p));
+    }
+    return null;
+  };
   // Appui sur le logo d'une extension dans la frise : un seul mouvement continu, comme la carte du Radar qui zoome sur une
   // zone (2026-11-19, porteur : « un zoom comme la cinématique du radar de boutique, beaucoup plus fluide et satisfaisant »).
   //  1. appui : la tuile s'enfonce et s'allume en jaune (0,14 s, petite vibration sur Android) ;
@@ -307,10 +354,28 @@
       requestAnimationFrame(land);
     }, CALZ_CAM - CALZ_OVERLAP + CALZ_OPEN);
   };
+  // Bouton « Aujourd'hui » visible seulement quand le mois en cours est sorti de la frise (classe posée sur la frise,
+  // sans nouveau rendu) ; sa flèche montre de quel côté il se trouve.
+  const calAwayWatch = () => {
+    try {
+      const w = document.querySelector('.pkm-cal-strip'), hero = w && w.closest('.pkm-cal-hero');
+      if (!w || !hero) return;
+      const check = () => {
+        const m = w.querySelector('.pkm-cal-m-now');
+        if (!m) return;
+        const a = w.getBoundingClientRect(), b = m.getBoundingClientRect();
+        const left = b.right < a.left + 30, right = b.left > a.right - 30;
+        hero.classList.toggle('pkm-cal-away', left || right);
+        hero.classList.toggle('pkm-cal-away-l', left);
+      };
+      if (!w.__calAway) { w.__calAway = true; w.addEventListener('scroll', check, { passive: true }); }
+      check();
+    } catch (e) { /* rien */ }
+  };
   coinProto.vCal = function (s) {
     const d = CAL.data, today = realToday(), todayKey = calMonthKey(today);
     if (!d || !Array.isArray(d.items)) {
-      return { ready: false, notReady: true, loading: CAL.status === 'error' ? 'Le calendrier n’a pas pu être chargé. Réessaie dans un instant.' : 'Chargement du calendrier…', months: [], sel: [] };
+      return { ready: false, notReady: true, loading: CAL.status === 'error' ? 'Le calendrier n’a pas pu être chargé. Réessaie dans un instant.' : 'Chargement du calendrier…', months: [], sel: [], remind: {}, help: false };
     }
     const setOf = id => (typeof TCG !== 'undefined' && TCG.status === 'ready' && id ? TCG.setList.find(e => e.id === id) : null);
     const items = d.items.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)).map((x, i) => {
@@ -319,10 +384,22 @@
       try { logo = set ? setLogo(set.id, set.logo) : x.logo || ''; } catch (e) { logo = x.logo || ''; }
       const past = x.status === 'sortie' || (x.date && x.date.length >= 10 && x.date <= today);
       const id = x.id || ('c' + i);
+      // Date passée sans mise à jour du calendrier (tools/calendar/check_calendar.py la signale chaque semaine) :
+      // une rumeur, ou une date au mois près, devient « À confirmer » ; une date officielle ou japonaise exacte passée
+      // veut dire « sorti » (« Sortie », « Sorti au Japon »).
+      const stale = x.status !== 'sortie' && !!x.date && calEnd(x.date) < today && (x.status === 'rumeur' || x.date.length < 10);
+      const outNow = !stale && x.status !== 'sortie' && past;
+      const exact = !!(x.date && x.date.length >= 10), days = exact && !past ? calDays(x.date, today) : null;
+      const soon = days === null ? '' : days === 0 ? 'aujourd’hui' : days === 1 ? 'demain' : 'dans ' + days + ' jours';
+      const pre = x.preorder && x.preorder.length >= 10 && x.preorder >= today ? x.preorder : '';
+      const remindOn = !!(s.alerts || {})['cal:' + id], canRemind = !past && !stale;
       return {
-        id: id, domId: 'pkm-cal-' + id, date: x.date || '', when: calDateText(x.date, x.dateText), name: x.name, sub: [x.en, x.jp].filter(Boolean).join(' · '),
+        id: id, domId: 'pkm-cal-' + id, date: x.date || '', when: calDateText(x.date, x.dateText) + (soon ? ' · ' + soon : ''), name: x.name, sub: [x.en, x.jp].filter(Boolean).join(' · '),
+        stale: stale, exact: exact, days: days, pre: pre, remindOn: remindOn && canRemind, canRemind: canRemind, jp: x.status === 'japon',
         hasSub: !!(x.en || x.jp), short: x.short || '', code: x.code || '', hasCode: !!x.code, type: x.type || 'Extension', stars: (x.stars || []).join(', '), hasStars: !!(x.stars && x.stars.length),
-        note: x.note || '', hasNote: !!x.note, status: st.label, stCls: 'pkm-cal-st ' + st.cls,
+        note: x.note || '', hasNote: !!x.note,
+        status: stale ? 'À confirmer' : outNow ? (x.status === 'japon' ? 'Sorti au Japon' : 'Sortie') : st.label,
+        stCls: 'pkm-cal-st ' + (stale ? 'pkm-cal-st-rum pkm-cal-st-stale' : outNow && x.status !== 'japon' ? CAL_STATUS.sortie.cls : st.cls),
         cls: 'pkm-cal-item ' + st.cls + (past ? ' pkm-cal-past' : ' pkm-cal-next'),
         logo: logo, hasLogo: !!logo, noLogo: !logo, initials: String(x.code || x.name || '?').slice(0, 4),
         source: x.source || '', srcText: x.source ? 'Source : ' + x.source + (x.sourceDate ? ' (' + calDateText(x.sourceDate) + ')' : '') : 'Estimation, sans annonce officielle',
@@ -337,6 +414,9 @@
     // l'extension (setview.js). Les sorties sans extension au catalogue (Japon, rumeurs, coffrets) gardent leur
     // sigle et mènent à leur fiche plus bas. Les mois qui ont des sorties alternent au-dessus et au-dessous de la
     // ligne du temps, pour que les visuels ne se gênent pas.
+    // Compte à rebours sur la prochaine sortie à date exacte (« J-8 », « Demain », « Aujourd'hui »).
+    const next = items.filter(x => x.days !== null && x.days >= 0).sort((a, b) => a.days - b.days)[0] || null;
+    const own = typeof this.ownedBySet === 'function' ? this.ownedBySet(s) : {};
     const keys = items.map(x => x.month).filter(Boolean).concat([todayKey]).sort();
     const months = [];
     let side = 0;
@@ -347,10 +427,18 @@
         const k = y + '-' + String(m).padStart(2, '0'), here = items.filter(x => x.month === k);
         const up = here.length ? side++ % 2 === 0 : false;
         const dots = here.map(x => {
-          const zoom = !!(x.setId && x.hasLogo);
-          return { cls: 'pkm-cal-dot ' + x.stCls.replace('pkm-cal-st ', '') + (zoom ? ' pkm-cal-dot-logo' : ''), code: x.short || x.code || x.initials,
+          const zoom = !!(x.setId && x.hasLogo), isNext = !!next && next.id === x.id;
+          const jn = isNext ? (x.days === 0 ? 'Aujourd’hui' : x.days === 1 ? 'Demain' : 'J-' + x.days) : '';
+          // Logos des extensions sorties : évolution du produit phare depuis sa sortie et ma progression dans l'extension.
+          const lead = zoom && x.past ? this.calLead(x.setId) : null;
+          const setN = zoom && typeof TCG !== 'undefined' && TCG.status === 'ready' ? ((TCG.setList.find(e => e.id === x.setId) || {}).n || 0) : 0, k = own[x.setId] || 0;
+          return { cls: 'pkm-cal-dot ' + x.stCls.replace('pkm-cal-st ', '') + (zoom ? ' pkm-cal-dot-logo' : '') + (x.remindOn ? ' pkm-cal-dot-bell' : '') + (isNext ? ' pkm-cal-dot-next' : ''),
+            code: x.short || x.code || x.initials, jn: jn, hasJn: !!jn,
             logo: zoom ? x.logo : '', hasLogo: zoom, setId: x.setId,
-            aria: x.name + ', ' + x.when + ', ' + x.status + (zoom ? '. Voir les items de l’extension' : ''),
+            hasDelta: !!lead, delta: lead ? lead.code + ' ' + lead.pctText : '', deltaCls: 'pkm-cal-delta ' + (lead && !lead.up ? 'pkm-cal-delta-down' : 'pkm-cal-delta-up'),
+            hasProg: setN > 0, prog: k + '/' + setN, progW: (setN ? Math.max(k ? 4 : 0, Math.round(k / setN * 100)) : 0) + '%',
+            aria: x.name + ', ' + x.when + ', ' + x.status + (lead ? ', ' + lead.code + ' ' + lead.pctText + ' depuis la sortie' : '') + (setN ? ', ' + k + (k > 1 ? ' cartes' : ' carte') + ' sur ' + setN + ' dans ta collection' : '')
+              + (x.remindOn ? ', rappel activé' : '') + (zoom ? '. Voir l’extension' : '. Voir la fiche'),
             pick: zoom ? ev => this.calZoom(ev, x.setId, x.setName || x.name) : () => this.calOpen(x.id) };
         });
         // Frise basse (20 % de l'écran, 2026-11-19) : dans un mois qui a un logo et des sigles, les sigles passent de
@@ -366,11 +454,21 @@
         m++; if (m > 12) { m = 1; y++; }
       }
     }
-    const sel = s.calSel ? items.filter(x => x.id === s.calSel) : [];
+    const sel = s.calSel ? items.filter(x => x.id === s.calSel) : [], it = sel[0] || null;
+    const rmd = it && it.canRemind ? {
+      on: it.remindOn, cls: 'pkm-cal-remind' + (it.remindOn ? ' pkm-cal-remind-on' : ''),
+      label: it.remindOn ? 'Rappel activé' : 'Préviens-moi',
+      sub: (it.exact ? 'La veille et le jour de la sortie' : 'Dès que la date exacte sera connue : la veille et le jour de la sortie') + (it.jp ? ' au Japon' : '')
+        + (it.pre ? ', et à l’ouverture des précommandes (' + calDateText(it.pre) + ')' : ''),
+      aria: (it.remindOn ? 'Retirer le rappel de ' : 'Activer un rappel pour ') + it.name,
+      toggle: () => this.calRemind(it.id, it.name)
+    } : null;
     return {
       ready: true, notReady: false, loading: '', months: months,
-      sel: sel, hasSel: sel.length > 0, selTitle: sel.length && sel[0].past ? 'Sortie' : 'Prochaine sortie',
-      selLabel: sel.length ? sel[0].name + ', ' + sel[0].when : '', closeSel: () => this.calClose()
+      sel: sel, hasSel: sel.length > 0, selTitle: it && it.stale ? 'Date à confirmer' : it && it.past ? 'Sortie' : 'Prochaine sortie',
+      selLabel: it ? it.name + ', ' + it.when : '', closeSel: () => this.calClose(),
+      remind: rmd || {}, hasRemind: !!rmd,
+      help: !!s.calHelp, openHelp: () => this.calHelp(true), closeHelp: () => this.calHelp(false), goToday: () => this.calToday()
     };
   };
   // ——— Rendu ———
@@ -419,6 +517,7 @@
           if (x == null) return;
           w.style.scrollBehavior = 'auto'; w.scrollLeft = x; w.style.scrollBehavior = '';
         } catch (e) { /* rien */ }
+        calAwayWatch();
       }, 60);
     }
     if (!(on && tab === 'cal')) this.__calScrolled = false;

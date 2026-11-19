@@ -119,6 +119,7 @@
 <span style="font-size: 12px; font-weight: 700; line-height: 1.25; color: #F3F6FC; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{ svi.name }}</span>
 <span style="font-size: 10.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ svi.sub }}</span>
 <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; color: #F3F6FC; font-variant-numeric: tabular-nums; white-space: nowrap"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ svi.flag }}"></span>{{ svi.price }}</span>
+<sc-if value="{{ svi.hasLaunch }}" hint-placeholder-val="{{ false }}"><span class="{{ svi.launchCls }}" aria-label="{{ svi.launchAria }}">{{ svi.launchText }} <b>{{ svi.launchPct }}</b></span></sc-if>
 <span style="flex: 1"></span>
 <sc-if value="{{ svi.canAdd }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ svi.add }}" aria-label="{{ svi.addLabel }}" style="height: 32px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer">+ Ajouter</button></sc-if>
 <sc-if value="{{ svi.soon }}" hint-placeholder-val="{{ false }}"><span style="min-height: 32px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: 700; line-height: 1.2; color: #F5B14C">{{ svi.soonText }}</span></sc-if>
@@ -142,6 +143,7 @@
 <span style="font-size: 12px; font-weight: 700; line-height: 1.25; color: #F3F6FC; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{ svo.name }}</span>
 <span style="font-size: 10.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ svo.sub }}</span>
 <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; color: #F3F6FC; font-variant-numeric: tabular-nums; white-space: nowrap"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ svo.flag }}"></span>{{ svo.price }}</span>
+<sc-if value="{{ svo.hasLaunch }}" hint-placeholder-val="{{ false }}"><span class="{{ svo.launchCls }}" aria-label="{{ svo.launchAria }}">{{ svo.launchText }} <b>{{ svo.launchPct }}</b></span></sc-if>
 <span style="flex: 1"></span>
 <sc-if value="{{ svo.canAdd }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ svo.add }}" aria-label="{{ svo.addLabel }}" style="height: 32px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer">+ Ajouter</button></sc-if>
 <sc-if value="{{ svo.soon }}" hint-placeholder-val="{{ false }}"><span style="min-height: 32px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: 700; line-height: 1.2; color: #F5B14C">{{ svo.soonText }}</span></sc-if>
@@ -153,6 +155,12 @@
 </sc-if>
 </sc-if>
 <sc-if value="{{ cset.onCards }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ cset.hasTop3 }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Les plus chères de l’extension" class="pkm-sv-top3">
+<h3>Les plus chères</h3>
+<div class="pkm-sv-top3-row"><sc-for list="{{ cset.top3 }}" as="svt" hint-placeholder-count="3"><button type="button" onClick="{{ svt.open }}" aria-label="{{ svt.label }}" class="{{ svt.cls }}"><span class="pkm-sv-top3-img"><img src="{{ svt.img }}" alt="" loading="lazy" decoding="async"><b>{{ svt.rank }}</b></span><span class="pkm-sv-top3-n">{{ svt.name }}</span><span class="pkm-sv-top3-p">{{ svt.cote }}</span></button></sc-for></div>
+</section>
+</sc-if>
 <sc-if value="{{ cset.v2 }}" hint-placeholder-val="{{ true }}">
 <div role="group" aria-label="Taille des cartes" class="pkm-sv-sizes">
 <sc-for list="{{ cset.sizes }}" as="svz" hint-placeholder-count="3">
@@ -258,6 +266,7 @@
 <span style="font-size: 12px; font-weight: 700; line-height: 1.25; color: #F3F6FC; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{ sp.name }}</span>
 <span style="font-size: 10.5px; color: #9AA8C3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ sp.sub }}</span>
 <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 800; color: #F3F6FC; font-variant-numeric: tabular-nums; white-space: nowrap"><span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ sp.flag }}"></span>{{ sp.price }}</span>
+<sc-if value="{{ sp.hasLaunch }}" hint-placeholder-val="{{ false }}"><span class="{{ sp.launchCls }}" aria-label="{{ sp.launchAria }}">{{ sp.launchText }} <b>{{ sp.launchPct }}</b></span></sc-if>
 <span style="flex: 1"></span>
 <sc-if value="{{ sp.canAdd }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ sp.add }}" aria-label="{{ sp.addLabel }}" style="height: 32px; border: 0; border-radius: 999px; background: #A8B6FF; color: #0B1120; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer">+ Ajouter</button></sc-if>
 <sc-if value="{{ sp.soon }}" hint-placeholder-val="{{ false }}"><span style="min-height: 32px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; font-weight: 700; line-height: 1.2; color: #F5B14C">{{ sp.soonText }}</span></sc-if>
@@ -3121,6 +3130,8 @@ PKCOUNTER
 <div role="tablist" aria-label="Le coin des dresseurs" class="pkm-coin-tabs"><sc-for list="{{ coin.tabs }}" as="cnt" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ cnt.on }}" onClick="{{ cnt.pick }}" class="{{ cnt.cls }}"><sc-if value="{{ cnt.isVit }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="4" width="17" height="15" rx="2"></rect><path d="M3.5 9h17M8 13v3M12 12v4M16 13v3"></path></svg></sc-if><sc-if value="{{ cnt.isCal }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="5" width="17" height="15" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"></path></svg></sc-if><span>{{ cnt.label }}</span></button></sc-for></div>
 <sc-if value="{{ coin.isCal }}" hint-placeholder-val="{{ false }}"><sc-if value="{{ cal.ready }}" hint-placeholder-val="{{ true }}">
 <section aria-label="Frise du JCC Pokémon" class="pkm-cal-hero pkm-dark">
+<button type="button" onClick="{{ cal.openHelp }}" aria-label="Que veulent dire les couleurs et les pastilles de la frise ?" class="pkm-cal-help">?</button>
+<button type="button" onClick="{{ cal.goToday }}" class="pkm-cal-todaybtn"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"></path></svg>Aujourd’hui</button>
 <div class="pkm-cal-strip" role="list" aria-label="Mois par mois"><sc-for list="{{ cal.months }}" as="cmo" hint-placeholder-count="8"><div role="listitem" class="{{ cmo.cls }}"><div class="pkm-cal-axis"><span class="pkm-cal-mlabel">{{ cmo.label }}</span><sc-if value="{{ cmo.hasYear }}" hint-placeholder-val="{{ false }}"><b class="pkm-cal-year">{{ cmo.year }}</b></sc-if><sc-if value="{{ cmo.now }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-now" aria-hidden="true">Aujourd’hui</span></sc-if></div><div class="pkm-cal-plot"><span class="pkm-cal-track" aria-hidden="true"></span><span class="{{ cmo.upCls }}"><sc-for list="{{ cmo.up }}" as="cdt" hint-placeholder-count="1">@@cal-dot@@</sc-for></span><span class="{{ cmo.downCls }}"><sc-for list="{{ cmo.down }}" as="cdt" hint-placeholder-count="1">@@cal-dot@@</sc-for></span></div></div></sc-for></div>
 </section>
 </sc-if></sc-if>
@@ -3152,6 +3163,27 @@ PKCOUNTER
 <div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
 <div class="pkm-cal-sheet-h"><b>{{ cal.selTitle }}</b><button type="button" onClick="{{ cal.closeSel }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
 <sc-for list="{{ cal.sel }}" as="cit" hint-placeholder-count="1">@@cal-item@@</sc-for>
+<sc-if value="{{ cal.hasRemind }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ cal.remind.toggle }}" aria-pressed="{{ cal.remind.on }}" aria-label="{{ cal.remind.aria }}" class="{{ cal.remind.cls }}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2H4.5z"></path><path d="M10 20.5a2.2 2.2 0 0 0 4 0"></path></svg><span><b>{{ cal.remind.label }}</b><small>{{ cal.remind.sub }}</small></span><i aria-hidden="true"></i></button></sc-if>
+</section>
+</div>
+</sc-if>
+<sc-if value="{{ cal.help }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-cal-ov">
+<button type="button" aria-label="Fermer l’aide de la frise" onClick="{{ cal.closeHelp }}" class="pkm-cal-ov-bg"></button>
+<section aria-label="Lire la frise" role="dialog" aria-modal="true" class="pkm-sheet pkm-cal-sheet pkm-dark">
+<div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
+<div class="pkm-cal-sheet-h"><b>Lire la frise</b><button type="button" onClick="{{ cal.closeHelp }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<ul class="pkm-cal-key-l">
+<li><span class="pkm-cal-dot pkm-cal-st-out">ME06</span><span><b>Sortie</b>L’extension est sortie en France.</span></li>
+<li><span class="pkm-cal-dot pkm-cal-st-off">Coffret</span><span><b>Officiel</b>Date annoncée par Pokémon pour la France.</span></li>
+<li><span class="pkm-cal-dot pkm-cal-st-jp">M7</span><span><b>Annonce Japon</b>Sortie japonaise annoncée ; la version française arrive en général quelques mois plus tard.</span></li>
+<li><span class="pkm-cal-dot pkm-cal-st-rum">ex★</span><span><b>Rumeur</b>Information non confirmée (fuite, estimation).</span></li>
+<li><span class="pkm-cal-dot pkm-cal-st-rum pkm-cal-st-stale">?</span><span><b>À confirmer</b>La date annoncée est passée sans mise à jour.</span></li>
+<li><span class="pkm-cal-jn pkm-cal-jn-key">J-8</span><span><b>Compte à rebours</b>Jours avant la prochaine sortie.</span></li>
+<li><span class="pkm-cal-delta pkm-cal-delta-up pkm-cal-key-chip">ETB +21 %</span><span><b>Prix depuis la sortie</b>Prix du jour (cote Cardmarket) du produit phare comparé à son prix de sortie en France.</span></li>
+<li><span class="pkm-cal-prog pkm-cal-key-chip"><i><b style="width: 30%"></b></i>12/141</span><span><b>Ma progression</b>Cartes de l’extension dans ta collection.</span></li>
+</ul>
+<p class="pkm-cal-key-p">Touche un logo pour ouvrir l’extension (cartes et items). Touche un sigle pour lire sa fiche et activer un rappel : la cloche montre les sorties que tu suis.</p>
 </section>
 </div>
 </sc-if>
@@ -3159,7 +3191,7 @@ PKCOUNTER
 </sc-if>
 
 <!-- fragment: cal-dot -->
-<button type="button" onClick="{{ cdt.pick }}" aria-label="{{ cdt.aria }}" class="{{ cdt.cls }}"><sc-if value="{{ cdt.hasLogo }}" hint-placeholder-val="{{ true }}"><span class="pkm-cal-dlogo"><img src="{{ cdt.logo }}" alt="" decoding="async"></span></sc-if><span class="pkm-cal-dcode">{{ cdt.code }}</span></button>
+<button type="button" onClick="{{ cdt.pick }}" aria-label="{{ cdt.aria }}" class="{{ cdt.cls }}"><sc-if value="{{ cdt.hasJn }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-jn" aria-hidden="true">{{ cdt.jn }}</span></sc-if><sc-if value="{{ cdt.hasLogo }}" hint-placeholder-val="{{ true }}"><span class="pkm-cal-dlogo"><img src="{{ cdt.logo }}" alt="" decoding="async"></span></sc-if><span class="pkm-cal-dcode">{{ cdt.code }}</span><sc-if value="{{ cdt.hasDelta }}" hint-placeholder-val="{{ false }}"><span class="{{ cdt.deltaCls }}" aria-hidden="true">{{ cdt.delta }}</span></sc-if><sc-if value="{{ cdt.hasProg }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-prog" aria-hidden="true"><i><b style="width: {{ cdt.progW }}"></b></i>{{ cdt.prog }}</span></sc-if></button>
 
 <!-- fragment: cal-item -->
-<article id="{{ cit.domId }}" class="{{ cit.cls }}"><span class="pkm-cal-node" aria-hidden="true"></span><div class="pkm-cal-card"><div class="pkm-cal-card-h"><span class="pkm-cal-logo"><sc-if value="{{ cit.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ cit.logo }}" alt="" loading="lazy"></sc-if><sc-if value="{{ cit.noLogo }}" hint-placeholder-val="{{ false }}"><b>{{ cit.initials }}</b></sc-if></span><span class="pkm-cal-card-t"><span class="pkm-cal-when">{{ cit.when }}</span><b>{{ cit.name }}</b><sc-if value="{{ cit.hasSub }}" hint-placeholder-val="{{ false }}"><small>{{ cit.sub }}</small></sc-if></span><span class="{{ cit.stCls }}">{{ cit.status }}</span></div><div class="pkm-cal-meta"><span class="pkm-cal-type">{{ cit.type }}</span><sc-if value="{{ cit.hasCode }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-code">{{ cit.code }}</span></sc-if><sc-if value="{{ cit.hasStars }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-stars">★ {{ cit.stars }}</span></sc-if></div><sc-if value="{{ cit.hasNote }}" hint-placeholder-val="{{ false }}"><p class="pkm-cal-note">{{ cit.note }}</p></sc-if><sc-if value="{{ cit.hasUrl }}" hint-placeholder-val="{{ true }}"><a href="{{ cit.url }}" target="_blank" rel="noopener noreferrer" class="pkm-cal-src">{{ cit.srcText }} ↗</a></sc-if><sc-if value="{{ cit.noUrl }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-src pkm-cal-src-t">{{ cit.srcText }}</span></sc-if></div></article>
+<article id="{{ cit.domId }}" class="{{ cit.cls }}"><span class="pkm-cal-node" aria-hidden="true"></span><div class="pkm-cal-card"><div class="pkm-cal-card-h"><span class="pkm-cal-logo"><sc-if value="{{ cit.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ cit.logo }}" alt="" loading="lazy"></sc-if><sc-if value="{{ cit.noLogo }}" hint-placeholder-val="{{ false }}"><b>{{ cit.initials }}</b></sc-if></span><span class="pkm-cal-card-t"><span class="pkm-cal-when">{{ cit.when }}</span><b>{{ cit.name }}</b><sc-if value="{{ cit.hasSub }}" hint-placeholder-val="{{ false }}"><small>{{ cit.sub }}</small></sc-if></span><span class="{{ cit.stCls }}">{{ cit.status }}</span></div><div class="pkm-cal-meta"><span class="pkm-cal-type">{{ cit.type }}</span><sc-if value="{{ cit.hasCode }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-code">{{ cit.code }}</span></sc-if><sc-if value="{{ cit.hasStars }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-stars">★ {{ cit.stars }}</span></sc-if></div><sc-if value="{{ cit.stale }}" hint-placeholder-val="{{ false }}"><p class="pkm-cal-stale-n">La date annoncée est passée : information en attente de mise à jour du calendrier.</p></sc-if><sc-if value="{{ cit.hasNote }}" hint-placeholder-val="{{ false }}"><p class="pkm-cal-note">{{ cit.note }}</p></sc-if><sc-if value="{{ cit.hasUrl }}" hint-placeholder-val="{{ true }}"><a href="{{ cit.url }}" target="_blank" rel="noopener noreferrer" class="pkm-cal-src">{{ cit.srcText }} ↗</a></sc-if><sc-if value="{{ cit.noUrl }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-src pkm-cal-src-t">{{ cit.srcText }}</span></sc-if></div></article>

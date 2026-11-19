@@ -1,0 +1,64 @@
+# Vérification du calendrier TCG (2026-11-19, porteur) : chaque lundi, liste les sorties de web/data/calendar.json dont
+# la date est passée sans mise à jour (statut encore rumeur, officiel ou Japon), une « sortie » encore à venir ou une
+# date mal écrite (tools/calendar/check_calendar.py). Ne modifie rien : le rapport va dans le résumé du job et dans une
+# issue « Calendrier TCG : dates à vérifier » (ouverte, mise à jour, puis fermée quand tout est à jour). Aucun secret :
+# seul le jeton fourni par GitHub, limité aux issues.
+name: Calendrier TCG
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * 1"   # le lundi vers 07:17 (heure de Paris en hiver)
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/calendar-check.yml
+      - tools/calendar/**
+      - web/data/calendar.json
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: calendar-check
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+
+      - name: Tests
+        run: python3 -m unittest discover -s tools/calendar -v
+
+      - name: Vérifier les dates
+        id: check
+        run: |
+          set +e
+          python3 tools/calendar/check_calendar.py --out "$RUNNER_TEMP/calendrier.md"
+          code=$?
+          set -e
+          cat "$RUNNER_TEMP/calendrier.md" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$code" -ge 2 ]; then exit "$code"; fi
+          echo "todo=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Issue « Calendrier TCG : dates à vérifier »
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TODO: ${{ steps.check.outputs.todo }}
+        run: |
+          title="Calendrier TCG : dates à vérifier"
+          num=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 50 --json number,title \
+                --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+          body="$RUNNER_TEMP/calendrier.md"
+          if [ "$TODO" = "1" ]; then
+            if [ -n "$num" ]; then gh issue edit "$num" --repo "$GITHUB_REPOSITORY" --body-file "$body"
+            else gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file "$body"; fi
+          elif [ -n "$num" ]; then
+            gh issue close "$num" --repo "$GITHUB_REPOSITORY" --comment "Calendrier à jour : plus rien à vérifier."
+          fi

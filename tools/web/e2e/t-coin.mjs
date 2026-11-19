@@ -55,9 +55,10 @@ const newS = o => Object.assign({ calls: {}, ids: [] }, o || {});
 const NAV = 'nav[aria-label="Navigation principale"]';
 
 // A. Barre du bas : 6 colonnes, l'onglet entre « Toutes les séries » et le scan (donc avant « Jeux »).
+// Date figée au 19 novembre 2026 : le compte à rebours et les rappels du calendrier ne dépendent pas du jour du test.
 {
   const S = newS();
-  const { ctx, page } = await setup(S);
+  const { ctx, page } = await setup(S, { q: '&today=2026-11-19' });
   const labels = await page.locator(NAV + ' > button').evaluateAll(b => b.map(x => x.getAttribute('aria-label')));
   ok('barre : 6 boutons, « Le coin des dresseurs » après « Toutes les séries » et avant le scan et « Jeux » (' + labels.join(' | ') + ')',
     labels.length === 6 && labels[1] === 'Toutes les séries' && labels[2] === 'Le coin des dresseurs' && /Scanner/.test(labels[3]));
@@ -131,20 +132,36 @@ const NAV = 'nav[aria-label="Navigation principale"]';
     return { logos: logos.length, imgs: logos.filter(b => b.querySelector('.pkm-cal-dlogo img')).length, tile: logos.length ? logos[0].getBoundingClientRect().width : 0,
       aria: logos.map(b => b.getAttribute('aria-label')), up: document.querySelectorAll('.pkm-cal-dots-up.pkm-cal-dots-on').length,
       down: document.querySelectorAll('.pkm-cal-dots-down.pkm-cal-dots-on').length, axisAbove: ax.bottom <= tr.top,
-      chips: [...document.querySelectorAll('.pkm-cal-dot:not(.pkm-cal-dot-logo)')].map(b => b.textContent.trim()) };
+      chips: [...document.querySelectorAll('.pkm-cal-dot:not(.pkm-cal-dot-logo) .pkm-cal-dcode')].map(b => b.textContent.trim()) };
   });
-  ok('frise : le logo de chaque extension du catalogue (' + fz.logos + '), Règne Delta compris, en grand (' + Math.round(fz.tile) + ' px)', fz.logos >= 10 && fz.imgs === fz.logos && fz.tile >= 96 && fz.aria.some(a => /^Règne Delta,.*Voir les items/.test(a)), JSON.stringify(fz.aria));
+  ok('frise : le logo de chaque extension du catalogue (' + fz.logos + '), Règne Delta compris, en grand (' + Math.round(fz.tile) + ' px)', fz.logos >= 10 && fz.imgs === fz.logos && fz.tile >= 96 && fz.aria.some(a => /^Règne Delta,.*Voir l’extension/.test(a)), JSON.stringify(fz.aria));
   ok('frise : sorties sans extension au catalogue gardées en sigle (Japon, rumeurs)', fz.chips.indexOf('M7') >= 0 && fz.chips.indexOf('ex★') >= 0, fz.chips.join(','));
   ok('frise : mois en haut, sorties en alternance au-dessus et au-dessous de la ligne', fz.axisAbove && fz.up >= 5 && fz.down >= 5, JSON.stringify(fz));
   const room = await page.evaluate(() => Math.min(...[...document.querySelectorAll('.pkm-cal-dots-on')].map(d => { const r = d.getBoundingClientRect(), pl = d.parentElement.getBoundingClientRect(); return Math.min(r.top - pl.top, pl.bottom - r.bottom); })));
   ok('frise : logos et sigles tiennent dans la hauteur (marge ' + Math.round(room) + ' px)', room >= 0);
   const line = await page.evaluate(() => { const tops = [...document.querySelectorAll('.pkm-cal-track')].map(t => t.getBoundingClientRect().top); return { n: tops.length, spread: Math.max(...tops) - Math.min(...tops) }; });
   ok('ligne du temps parfaitement droite (' + line.n + ' mois, écart ' + line.spread.toFixed(2) + ' px)', line.n > 12 && line.spread < 0.01, JSON.stringify(line));
+  // Ajouts du 2026-11-19 (porteur : « Go ») : compte à rebours, prix de sortie comparé à aujourd'hui, progression.
+  const extra = await page.evaluate(() => {
+    const m7 = [...document.querySelectorAll('.pkm-cal-dot:not(.pkm-cal-dot-logo)')].find(b => (b.querySelector('.pkm-cal-dcode') || {}).textContent === 'M7');
+    const jn = m7 && m7.querySelector('.pkm-cal-jn'), code = m7 && m7.querySelector('.pkm-cal-dcode');
+    const a = jn && jn.getBoundingClientRect(), c = code && code.getBoundingClientRect(), d = m7 && m7.getBoundingClientRect();
+    const logos = [...document.querySelectorAll('.pkm-cal-dot-logo')];
+    return { jn: jn ? jn.textContent : '', inside: !!(a && d && a.left >= d.left - 0.5 && a.right <= d.right + 0.5 && a.top >= d.top - 0.5 && a.bottom <= d.bottom + 0.5),
+      clear: !!(a && c && (a.left >= c.right || a.right <= c.left)), n: document.querySelectorAll('.pkm-cal-jn').length,
+      deltas: logos.map(b => (b.querySelector('.pkm-cal-delta') || {}).textContent || '').filter(Boolean),
+      progs: logos.map(b => (b.querySelector('.pkm-cal-prog') || {}).textContent || '').filter(Boolean), logos: logos.length,
+      rd: (document.querySelector('.pkm-cal-dot-logo[aria-label^="Règne Delta"]') || {}).getAttribute ? document.querySelector('.pkm-cal-dot-logo[aria-label^="Règne Delta"]').getAttribute('aria-label') : '' };
+  });
+  ok('compte à rebours « ' + extra.jn + ' » sur la prochaine sortie datée (M7), dans sa pastille, sans cacher le sigle', extra.jn === 'J-8' && extra.n === 1 && extra.inside && extra.clear, JSON.stringify(extra));
+  ok('prix de sortie et prix d’aujourd’hui sur les extensions sorties (' + extra.deltas.slice(0, 3).join(', ') + '…)', extra.deltas.length >= 3 && extra.deltas.every(t => /^(ETB|Display|Lot|UPC) [+−]\d+ %$/.test(t)), JSON.stringify(extra.deltas));
+  ok('progression de ma collection sur chaque logo (' + extra.progs.slice(0, 2).join(', ') + '…)', extra.progs.length === extra.logos && extra.progs.every(t => /^\d+\/\d+$/.test(t)) && /\d+ cartes? sur \d+ dans ta collection/.test(extra.rd) && !/\b[01] cartes\b/.test(extra.rd), extra.rd);
   await page.screenshot({ path: shot('coin-calendrier.png') });
 
   // Fiche d'une prochaine sortie : ce que montrait la liste retirée (date, nom, statut, type, sigle, cartes vedettes, explication, source).
   const sheet = page.locator('section.pkm-cal-sheet[role="dialog"]');
-  await page.locator('.pkm-cal-dot:not(.pkm-cal-dot-logo)', { hasText: /^M7$/ }).first().evaluate(b => b.click()); await page.waitForTimeout(700);
+  const CHIP = code => page.locator('.pkm-cal-dot:not(.pkm-cal-dot-logo)').filter({ has: page.locator('.pkm-cal-dcode', { hasText: new RegExp('^' + code + '$') }) });
+  await CHIP('M7').first().evaluate(b => b.click()); await page.waitForTimeout(700);
   const m7 = (await sheet.count()) === 1 ? N(await sheet.innerText()) : '';
   ok('appui sur « M7 » : sa fiche monte du bas (Aura Seeker, Annonce Japon, date, source)', /Prochaine sortie/.test(m7) && /Aura Seeker/.test(m7) && /Annonce Japon/.test(m7)
     && (await sheet.locator('.pkm-cal-when').count()) === 1 && (await sheet.locator('.pkm-cal-src').count()) === 1, m7.slice(0, 300));
@@ -153,11 +170,38 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   await page.screenshot({ path: shot('coin-calendrier-fiche.png') });
   await sheet.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(800);
   ok('« Fermer » : la fiche redescend et disparaît', (await sheet.count()) === 0 && (await page.evaluate(() => window.__pkm.st().calSel)) == null);
-  await page.locator('.pkm-cal-dot:not(.pkm-cal-dot-logo)', { hasText: /^ex★$/ }).last().evaluate(b => b.click()); await page.waitForTimeout(700);
+  await CHIP('ex★').last().evaluate(b => b.click()); await page.waitForTimeout(700);
   const exs = (await sheet.count()) === 1 ? N(await sheet.innerText()) : '';
   ok('appui sur « ex★ » : Entei, Raikou, Suicune, rumeur, estimation', /Entei, Raikou, Suicune/.test(exs) && /Rumeur/.test(exs) && /Estimation/.test(exs), exs.slice(0, 300));
   await page.locator('button.pkm-cal-ov-bg').click({ position: { x: 20, y: 20 } }); await page.waitForTimeout(800);
   ok('appui hors de la fiche : elle se ferme', (await sheet.count()) === 0);
+
+  // « ? » : la fiche « Lire la frise » (statuts, compte à rebours, prix de sortie, progression).
+  await page.click('button.pkm-cal-help'); await page.waitForTimeout(700);
+  const help = (await sheet.count()) === 1 ? N(await sheet.innerText()) : '';
+  ok('« ? » : la fiche « Lire la frise » explique les couleurs et les pastilles', /Lire la frise/.test(help) && /Sortie/.test(help) && /Officiel/.test(help) && /Annonce Japon/.test(help) && /Rumeur/.test(help) && /J-8/.test(help) && /\+21 %/.test(help), help.slice(0, 300));
+  await sheet.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(800);
+  ok('« Fermer » : la fiche d’aide se referme', (await sheet.count()) === 0 && !(await page.evaluate(() => window.__pkm.st().calHelp)));
+
+  // « Aujourd'hui » : caché tant que le mois en cours est à l'écran, puis ramène la frise sur aujourd'hui.
+  const todayBtn = page.locator('button.pkm-cal-todaybtn');
+  const vis0 = await todayBtn.evaluate(b => getComputedStyle(b).opacity);
+  await page.evaluate(() => { const w = document.querySelector('.pkm-cal-strip'); w.style.scrollBehavior = 'auto'; w.scrollLeft = 0; w.style.scrollBehavior = ''; w.dispatchEvent(new Event('scroll')); }); await page.waitForTimeout(450);
+  const vis1 = await todayBtn.evaluate(b => getComputedStyle(b).opacity);
+  await todayBtn.click(); await page.waitForTimeout(1100);
+  const back = await page.evaluate(() => { const n = document.querySelector('.pkm-cal-m-now').getBoundingClientRect(), w = document.querySelector('.pkm-cal-strip').getBoundingClientRect(); return { cx: n.left + n.width / 2 - (w.left + w.width / 2), away: document.querySelector('.pkm-cal-hero').classList.contains('pkm-cal-away') }; });
+  ok('« Aujourd’hui » : caché au départ, visible quand on s’éloigne, ramène la frise sur le mois en cours', +vis0 === 0 && +vis1 === 1 && Math.abs(back.cx) < 40 && !back.away, JSON.stringify({ vis0, vis1, back }));
+
+  // « Préviens-moi » sur une sortie à venir : rappel enregistré, cloche sur le sigle, retiré au second appui.
+  await CHIP('M7').first().evaluate(b => b.click()); await page.waitForTimeout(700);
+  const remind = sheet.locator('button.pkm-cal-remind');
+  ok('fiche d’une sortie à venir : « Préviens-moi » (la veille et le jour même)', (await remind.count()) === 1 && /Préviens-moi/.test(N(await remind.innerText())) && (await remind.getAttribute('aria-pressed')) === 'false');
+  await remind.click(); await page.waitForTimeout(300);
+  const on = await page.evaluate(() => ({ al: (window.__pkm.st().alerts || {})['cal:m7'], saved: (JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').alerts || {})['cal:m7'] }));
+  ok('« Préviens-moi » activé : rappel gardé sur l’appareil', on.al === '2026-11-19' && (await remind.getAttribute('aria-pressed')) === 'true' && /Rappel activé/.test(N(await remind.innerText())), JSON.stringify(on));
+  await sheet.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(800);
+  ok('cloche sur le sigle M7 de la frise', (await CHIP('M7').first().evaluate(b => b.classList.contains('pkm-cal-dot-bell'))));
+  await page.screenshot({ path: shot('coin-calendrier-rappel.png') });
 
   // Appui marqué sur le logo, puis zoom sur l'extension, puis ses items.
   await page.evaluate(() => { const w = document.querySelector('.pkm-cal-strip'); w.style.scrollBehavior = 'auto'; w.scrollLeft = 140; w.style.scrollBehavior = ''; });
@@ -207,6 +251,20 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   const over2 = await page.evaluate(() => { const m = document.querySelector('main'); return m ? m.scrollWidth - m.clientWidth : 99; });
   ok('calendrier à 320 px : aucun débordement horizontal (' + over2 + ')', over2 <= 1);
   await page.screenshot({ path: shot('coin-calendrier-320.png') });
+  await ctx.close();
+}
+
+// E. Le rappel du calendrier la veille de la sortie (26 novembre) : encadré « Tes alertes » de l'accueil, un appui ouvre la fiche.
+{
+  const S = newS();
+  const { ctx, page } = await setup(S, { q: '&today=2026-11-26' });
+  await page.evaluate(() => window.__pkm.setState({ alerts: { 'cal:m7': '2026-11-19' }, screen: 'home' })); await page.waitForTimeout(2500);
+  const box = page.locator('section[aria-label="Tes alertes"]');
+  const txt = (await box.count()) ? N(await box.innerText()) : '';
+  ok('veille de la sortie : « Aura Seeker (Japon) sort demain » dans « Tes alertes »', /Aura Seeker \(Japon\) sort demain/.test(txt) && !/Japon\) sort demain au Japon/.test(txt), txt.slice(0, 200));
+  await box.locator('button', { hasText: /sort demain/ }).first().click(); await page.waitForTimeout(1200);
+  const st = await page.evaluate(() => { const s = window.__pkm.st(); return { screen: s.screen, tab: s.coinTab, sel: s.calSel }; });
+  ok('un appui sur l’alerte ouvre la fiche de la sortie dans le calendrier', st.screen === 'coin' && st.tab === 'cal' && st.sel === 'm7', JSON.stringify(st));
   await ctx.close();
 }
 

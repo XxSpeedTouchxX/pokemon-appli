@@ -119,7 +119,15 @@ await page.getByRole('button', { name: 'Moyen', exact: true }).click();
 const svTabs = await page.locator('[role="tablist"][aria-label="Cartes ou items de l’extension"] [role="tab"]').allInnerTexts();
 ok('onglets : ' + svTabs.join(' / ') + ', plus de Toutes/Possédées/Manquantes/Doublons', svTabs.length === 2 && /^Cartes \(\d+\)$/.test(svTabs[0]) && /^Items \(\d+\)$/.test(svTabs[1])
   && (await page.locator('main button:has-text("Possédées (")').count()) === 0 && (await page.locator('main button:has-text("Doublons (")').count()) === 0);
+// « Les plus chères » de l'extension (2026-11-19, porteur) : ses 3 cartes les mieux cotées, en tête de l'onglet Cartes.
+const top3 = await page.evaluate(() => { const s = document.querySelector('main section[aria-label="Les plus chères de l’extension"]'); if (!s) return null;
+  const eur = t => +String(t).replace(/[^\d,]/g, '').replace(',', '.');
+  return [...s.querySelectorAll('.pkm-sv-top3-c')].map(b => ({ label: b.getAttribute('aria-label'), v: eur((b.querySelector('.pkm-sv-top3-p') || {}).textContent || '') })); });
+ok('« Les plus chères » de l’extension : ' + (top3 ? top3.map(t => t.v + ' €').join(', ') : 'absent'), !!top3 && top3.length === 3 && top3.every(t => t.v > 0) && top3[0].v >= top3[1].v && top3[1].v >= top3[2].v && /^1re carte la plus chère : /.test(top3[0].label), JSON.stringify(top3));
 await page.locator('[role="tab"]:has-text("Items (")').click(); await page.waitForTimeout(500);
+// Prix de sortie en France et écart avec le prix du jour (2026-11-19, porteur), sur les produits sortis qui en ont un.
+const svLaunch = await page.locator('main .pkm-sv-items .pkm-launch').evaluateAll(l => l.map(e => ({ t: e.textContent.replace(/\s+/g, ' ').trim(), a: e.getAttribute('aria-label') || '' })));
+ok('items : prix de sortie et écart avec le prix du jour (' + svLaunch.slice(0, 2).map(x => x.t).join(' · ') + ')', svLaunch.length > 0 && svLaunch.every(x => /^Sortie \d[\d  ]*,\d\d €( à \d[\d  ]*,\d\d €)? [+−]\d+ %$/.test(x.t) && /prix de sortie/i.test(x.a)), JSON.stringify(svLaunch.slice(0, 3)));
 const itemTiles = await page.locator('main .pkm-sv-items article').count(), nItems = +(/Items \((\d+)\)/.exec(svTabs[1]) || [0, -1])[1];
 ok('onglet Items : ' + itemTiles + ' produits scellés de l’extension (+ Ajouter, Détails), cartes cachées', itemTiles === nItems && itemTiles > 0 && (await page.locator('main .pkm-sv-grid').count()) === 0
   && (await page.locator('main .pkm-sv-items article').first().innerText()).includes('Détails'));

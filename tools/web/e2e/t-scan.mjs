@@ -50,7 +50,12 @@ const vNM = await val(); await conds.nth(0).click(); await page.waitForTimeout(1
 ok('la valeur suit l’état (Near Mint → Mint) : ' + vMT, vMT !== vNM && /Mint · 115 %/.test(vMT));
 await page.screenshot({ path: shot('scan-fiche.png') });
 const nBefore = await page.evaluate(() => (JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').purchases || []).length);
-await sheet.locator('button:has-text("Ajouter à ma collection")').click(); await page.waitForTimeout(700);
+await sheet.locator('button:has-text("Ajouter à ma collection")').click(); await page.waitForTimeout(250);
+// 2026-11-19 (porteur) : même animation que l'ajout depuis une fiche (carte qui s'envole dans le classeur, « +X € »).
+const afx = await page.evaluate(() => { const el = document.querySelector('.pkm-afx'); return el ? { item: !!el.querySelector('.pkm-afx-item img'), gain: (el.querySelector('.pkm-afx-gain') || {}).textContent || '', what: (el.querySelector('.pkm-afx-what') || {}).textContent || '' } : null; });
+ok('animation d’ajout au classeur : ' + (afx ? afx.gain + ' · ' + afx.what : 'absente'), !!afx && afx.item && /^\+/.test(afx.gain) && /Mes cartes/.test(afx.what));
+ok('plus de message du bas pendant l’animation', await page.evaluate(() => !Array.from(document.querySelectorAll('[role="status"]')).some(e => !e.closest('.pkm-afx') && /ajout/i.test(e.textContent))));
+await page.waitForTimeout(450);
 await page.waitForFunction(n => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return d.purchases && d.purchases.length > n; }, nBefore, { timeout: 5000 }).catch(() => {});
 const saved = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); const l = d.purchases.slice(-1)[0].lines[0]; return { pid: l.pid, cond: l.cond }; });
 ok('ajout enregistré : ' + saved.pid + ' · ' + saved.cond, /tg05/i.test(saved.pid) && saved.cond === 'MT');
