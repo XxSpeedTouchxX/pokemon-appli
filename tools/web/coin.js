@@ -18,6 +18,9 @@
   // Logo de l'onglet : 1 Dresseurs (deux dresseurs à casquette), 2 Échange de cartes, 3 Bulle et ball, 4 Rassemblement.
   const COIN_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('coinvis')); return v >= 1 && v <= 4 ? v : 1; } catch (e) { return 1; } })();
   if (typeof document !== 'undefined' && document.documentElement) document.documentElement.setAttribute('data-coinvis', String(COIN_VIS));
+  // Dessin de la barre du bas (2026-11-19, porteur) : 4 propositions (?navvis=1 à 4, navbar.css), « Dôme » par défaut.
+  const NAV_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('navvis')); return v >= 1 && v <= 4 ? v : 1; } catch (e) { return 1; } })();
+  if (typeof document !== 'undefined' && document.documentElement) document.documentElement.setAttribute('data-navvis', String(NAV_VIS));
 
   // ——— Onglet et en-tête ———
   coinProto.coinGo = function (t) {

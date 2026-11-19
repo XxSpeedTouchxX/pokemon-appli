@@ -1,0 +1,66 @@
+/* Barre du bas (2026-11-19, porteur : « les 2 icônes à gauche du scan, "Le coin des dresseurs" juste en dessous,
+   aligné avec le scan, et les 2 autres à droite ; le scan au milieu, un peu plus haut, toujours rattaché à la barre ;
+   propose-moi plusieurs visuels »). 5 colonnes : Accueil, Toutes les séries | scan + coin des dresseurs | Jeux, PK shop.
+   Les 6 boutons restent des enfants directs de la barre (tests, didacticiel) : le scan et « Le coin des dresseurs »
+   partagent la colonne du milieu. 4 dessins proposés (?navvis=1 à 4, coin.js) : 1 Dôme (par défaut), 2 Berceau,
+   3 Socle, 4 Vague. */
+
+/* Couleurs de la barre selon l'apparence (les mêmes que celles de theme.mjs, pour les formes dessinées). */
+html { --pkm-nb: rgba(10, 17, 48, 0.8); --pkm-nl: rgba(255, 255, 255, 0.16); }
+html.pkm-theme-night { --pkm-nb: rgba(30, 31, 36, 0.86); }
+html.pkm-classic { --pkm-nb: rgba(var(--pkm-ink-rgb), 0.92); --pkm-nl: var(--pkm-line); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html:not(.pkm-classic) { --pkm-nb: #0A1130; }
+  html.pkm-theme-night:not(.pkm-classic) { --pkm-nb: #1E1F24; }
+}
+
+/* Disposition commune. */
+nav[aria-label="Navigation principale"] { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; overflow: visible; }
+nav[aria-label="Navigation principale"] > button { position: relative; z-index: 2; }
+nav[aria-label="Navigation principale"] > button[aria-label="Scanner une carte ou un produit"] {
+  grid-column: 3; grid-row: 1; align-self: start; z-index: 4;
+  width: var(--pkm-scan-w, 62px) !important; height: var(--pkm-scan-w, 62px) !important; margin-top: var(--pkm-scan-top, -38px) !important;
+}
+nav[aria-label="Navigation principale"] > button.pkm-coin-navbtn {
+  grid-column: 3; grid-row: 1; align-self: end; justify-self: center; z-index: 3;
+  width: 52px; height: var(--pkm-coin-h, 32px) !important; margin-bottom: 4px; gap: 2px !important; justify-content: flex-start !important;
+}
+nav[aria-label="Navigation principale"] > button.pkm-coin-navbtn > svg { width: 22px; height: 22px; flex: none; }
+nav[aria-label="Navigation principale"] > button.pkm-coin-navbtn[aria-current="page"] > svg { transform: none; }
+nav[aria-label="Navigation principale"] > button.pkm-coin-navbtn[aria-current] > span[style*="width: 5px"] { bottom: 0; }
+
+/* Forme dessinée au-dessus de la barre (un seul dessin visible) : fond flouté et transparent comme la barre, découpé
+   à la forme, et son contour (le même trait que le bord de la barre). */
+.pkm-navdeco { position: absolute; left: 0; right: 0; top: 0; height: 0; pointer-events: none; z-index: 1; }
+.pkm-navdeco .pkm-ndf, .pkm-navdeco .pkm-nds { display: none; position: absolute; left: 50%; }
+.pkm-navdeco .pkm-ndf { background: var(--pkm-nb); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); }
+html.pkm-classic .pkm-navdeco .pkm-ndf { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.pkm-navdeco .pkm-nds { overflow: visible; }
+.pkm-navdeco .pkm-nds path { fill: none; stroke: var(--pkm-nl); stroke-width: 1; }
+
+/* 1 · Dôme : la barre se soulève en cloche sous le scan. */
+html[data-navvis="1"] .pkm-navdeco .pkm-nd-1 { display: block; width: 132px; height: 50px; margin-left: -66px; top: -49px; }
+html[data-navvis="1"] { --pkm-scan-top: -39px; }
+
+/* 2 · Berceau : une encoche ronde dans la barre, le scan posé dedans (fond de la barre redessiné avec l'encoche). */
+html[data-navvis="2"]:not(.pkm-x) nav[aria-label="Navigation principale"] { background: transparent !important; border-color: transparent !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+html[data-navvis="2"] .pkm-navdeco { bottom: 0; height: auto; border-radius: 26px; border: 1px solid var(--pkm-nl); margin: -1px; background: radial-gradient(circle at 50% -12px, transparent 36px, var(--pkm-nl) 36.5px, var(--pkm-nl) 37px, var(--pkm-nb) 37.5px); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-mask: radial-gradient(circle at 50% -12px, transparent 36px, #000 36.5px); mask: radial-gradient(circle at 50% -12px, transparent 36px, #000 36.5px); }
+html[data-navvis="2"] { --pkm-scan-top: -43px; }
+
+/* 3 · Socle : un plateau carré-arrondi sort de la barre, scan en carré arrondi. */
+html[data-navvis="3"] .pkm-navdeco .pkm-nd-3 { display: block; width: 120px; height: 32px; margin-left: -60px; top: -31px; }
+html[data-navvis="3"] { --pkm-scan-top: -33px; --pkm-scan-w: 58px; }
+html[data-navvis="3"] nav[aria-label="Navigation principale"] > button[aria-label="Scanner une carte ou un produit"] { border-radius: 19px !important; }
+
+/* 4 · Vague : une longue vague douce porte le scan. */
+html[data-navvis="4"] .pkm-navdeco .pkm-nd-4 { display: block; width: 220px; height: 32px; margin-left: -110px; top: -31px; }
+html[data-navvis="4"] { --pkm-scan-top: -36px; --pkm-scan-w: 60px; }
+
+/* Petit écran : scan un peu plus petit, mêmes formes. */
+@media (max-width: 374px) {
+  html { --pkm-scan-w: 58px; }
+  html[data-navvis="3"] { --pkm-scan-w: 54px; }
+  html[data-navvis="4"] { --pkm-scan-w: 56px; }
+  nav[aria-label="Navigation principale"] > button:not([aria-label^="Scanner"]) > svg { width: 23px; height: 23px; }
+}

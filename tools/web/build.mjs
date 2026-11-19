@@ -233,8 +233,28 @@ patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x
 // écran montre le booster PK et le pile ou face. L'ancien Marché reste l'écran de recherche (« search »).
 patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.progress + FRAG.pregrade + FRAG.annonces + FRAG.avatar + FRAG.games + FRAG.pkshop + FRAG.coin + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
 // 5ᵉ onglet « Le coin des dresseurs » (2026-11-18, porteur), entre « Toutes les séries » et le scan (donc avant « Jeux ») :
-// barre en 6 colonnes. Logo de l'onglet : 4 propositions (coin.js, ?coinvis=1 à 4), une seule visible (coin.css).
-patch('grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; padding: 0 6px; border-radius: 26px;', 'grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: center; padding: 0 6px; border-radius: 26px;');
+// logo de l'onglet : 4 propositions (coin.js, ?coinvis=1 à 4), une seule visible (coin.css).
+// Barre du bas (2026-11-19, porteur) : 5 colonnes, scan au milieu et « Le coin des dresseurs » juste en dessous (navbar.css),
+// forme dessinée sous le scan : Dôme, Socle ou Vague en SVG (Berceau : fond de la barre redessiné, navbar.css).
+// Dôme : un cercle de 37 px autour du scan (centre 7 px au-dessus de la barre), raccordé à la barre par deux arrondis
+// de 10 px (tangents) ; Socle : un plateau aux coins arrondis ; Vague : une longue vague douce. Base des dessins sur le
+// haut de la barre (y = B), 1 px de plus pour couvrir son trait.
+const navShape = (() => {
+  const f2 = n => Math.round(n * 100) / 100;
+  const dome = (W, B, R, dy, f) => {
+    const cx = W / 2, fx = Math.sqrt((R + f) * (R + f) - (dy - f) * (dy - f)), k = R / (R + f);
+    const tx = fx * k, ty = dy + (f - dy) * k;
+    const top = `M0 ${B} L${f2(cx - fx)} ${B} A${f} ${f} 0 0 0 ${f2(cx - tx)} ${f2(B - ty)} A${R} ${R} 0 0 1 ${f2(cx + tx)} ${f2(B - ty)} A${f} ${f} 0 0 0 ${f2(cx + fx)} ${B} L${W} ${B}`;
+    return { top, fill: top + ` L${W} ${B + 1} L0 ${B + 1} Z` };
+  };
+  // Fond : un bloc flouté comme la barre, découpé à la forme (clip-path) ; contour : un trait SVG à part (jamais coupé).
+  const svg = (cls, W, H, d) => `<i class="pkm-ndf ${cls}" style="clip-path: path('${d.fill}')"></i><svg class="pkm-nds ${cls}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" focusable="false"><path d="${d.top}"></path></svg>`;
+  const tab = 'M0 30 C9 30 11 28 11 22 L11 14 Q11 4 21 4 L99 4 Q109 4 109 14 L109 22 C109 28 111 30 120 30';
+  const wave = 'M0 30 C40 30 60 8 110 8 C160 8 180 30 220 30';
+  return svg('pkm-nd-1', 132, 50, dome(132, 48, 40, 7, 13)) + svg('pkm-nd-3', 120, 32, { top: tab, fill: tab + ' L120 31 L0 31 Z' }) + svg('pkm-nd-4', 220, 32, { top: wave, fill: wave + ' L220 31 L0 31 Z' });
+})();
+patch('<button type="button" onClick="{{ tabHome }}" aria-label="Accueil"', `<span class="pkm-navdeco" aria-hidden="true">${navShape}</span>
+<button type="button" onClick="{{ tabHome }}" aria-label="Accueil"`);
 patch('<button type="button" onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim"', `<button type="button" onClick="{{ tabCoin }}" aria-label="Le coin des dresseurs" aria-current="{{ tab.coinCur }}" class="pkm-coin-navbtn" style="height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; border: 0; background: transparent; color: {{ tab.coinFg }}; cursor: pointer">
 <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-ico pkm-coin-ico-1" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M6.1 10.4a3 3 0 1 0 5.8 0"></path><path d="M5.4 9.4a3.6 3.4 0 0 1 7.2 0z"></path><path d="M12.6 9.4h2.3"></path><path d="M3.5 20.3v-.6a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v.6"></path><path d="M15 9.1a2.4 2.4 0 1 0 4.5 0"></path><path d="M14.5 8.3a2.8 2.6 0 0 1 5.6 0z"></path><path d="M20.1 8.3h1.8"></path><path d="M16.6 13.4h.9a4 4 0 0 1 4 4v.6"></path></svg>
 <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-ico pkm-coin-ico-2" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><rect x="2.8" y="7.2" width="7.6" height="10.8" rx="1.3"></rect><rect x="13.6" y="7.2" width="7.6" height="10.8" rx="1.3"></rect><path d="M8.6 3.9h6.8M13.6 2.3l1.8 1.6-1.8 1.6"></path><path d="M15.4 21.2H8.6M10.4 19.6l-1.8 1.6 1.8 1.6"></path><path d="M6.6 10.8v3.6M17.4 10.8v3.6"></path></svg>
@@ -1092,6 +1112,7 @@ ${readFileSync(new URL('./qmsg.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./vitrine.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./orient.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./coin.css', import.meta.url), 'utf8')}
+${readFileSync(new URL('./navbar.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./pregrade.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./annonces.css', import.meta.url), 'utf8')}
 ${readFileSync(new URL('./avatar.css', import.meta.url), 'utf8')}

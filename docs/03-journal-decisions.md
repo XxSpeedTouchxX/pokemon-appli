@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-19 — Barre du bas : scan au centre, « Le coin des dresseurs » dessous, 4 dessins proposés (porteur)
+
+- **Disposition** (porteur : « les 2 icônes à gauche du scan, l'icône "Le coin des dresseurs" juste en dessous, alignée avec le scan, et les 2 autres icônes à droite ») : Accueil et Toutes les séries à gauche, le scan au centre, Jeux et PK shop à droite ; « Le coin des dresseurs » est sous le scan, sur le même axe. La barre repasse à 5 colonnes, le scan est de nouveau exactement au centre. Les 6 boutons restent dans la barre (didacticiel et tests inchangés), le scan et « Le coin des dresseurs » partagent la colonne du milieu (`tools/web/navbar.css`).
+- **Scan plus haut, toujours rattaché à la barre** (porteur : « ne me le détache pas de la barre ») : il dépasse de 38 à 43 px selon le dessin (30 px avant) et reste posé sur la barre.
+- **4 dessins proposés** (porteur : « propose-moi plusieurs visuels… on va peaufiner ensemble ») : 1 **Dôme** (la barre se soulève en rond autour du scan, **par défaut**), 2 **Berceau** (encoche ronde dans la barre, le scan posé dedans), 3 **Socle** (plateau qui sort de la barre, scan en carré arrondi), 4 **Vague** (longue vague douce). Les formes ont la couleur, la transparence, le flou et le trait de bord de la barre dans les 3 apparences. Planche `tools/brand/navbar/planche.png` (Sombre, Clair, Original, onglet ouvert) ; essai dans l'app `?navvis=1` à `4`. **Choix du porteur attendu**, puis réglages fins (hauteur, taille, arrondis).
+- Cache v238.
+
 ## 2026-11-19 — « Le coin des dresseurs » : 5ᵉ onglet, Ma vitrine et calendrier du JCC (porteur)
 
 - **Nouvel onglet dans la barre du bas, entre « Toutes les séries » et le scan** (porteur : « un 5ᵉ onglet entre "Toutes les séries" et "Jeux" ») : la barre passe à 6 boutons ; le bouton du scan n'est donc plus tout à fait au centre (4ᵉ place sur 6). Écran et sous-rubriques dans `tools/web/coin.js`, `coin.css`, fragment `coin` de `catalog.dc.html`.

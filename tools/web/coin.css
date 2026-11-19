@@ -2,15 +2,12 @@
    « Le calendrier TCG » (frise, blocs, sorties, annonces, rumeurs, News Pokémon). Cartes sombres, lisibles dans les
    3 apparences (Sombre, Clair, Original). */
 
-/* Barre du bas en 6 colonnes : un seul des 4 logos proposés est visible (?coinvis=1 à 4, « Dresseurs » par défaut). */
+/* Logo de l'onglet : un seul des 4 logos proposés est visible (?coinvis=1 à 4, « Dresseurs » par défaut). Disposition
+   de la barre du bas : navbar.css. */
 .pkm-coin-ico { display: none; }
 html:not([data-coinvis]) .pkm-coin-ico-1, html[data-coinvis="1"] .pkm-coin-ico-1, html[data-coinvis="2"] .pkm-coin-ico-2,
 html[data-coinvis="3"] .pkm-coin-ico-3, html[data-coinvis="4"] .pkm-coin-ico-4 { display: block; }
 nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-right: 4px !important; }
-@media (max-width: 374px) {
-  nav[aria-label="Navigation principale"] > button[aria-label="Scanner une carte ou un produit"] { width: 54px !important; height: 54px !important; margin-top: -26px !important; }
-  nav[aria-label="Navigation principale"] > button > svg { width: 23px; height: 23px; }
-}
 
 /* Sous-rubriques. */
 .pkm-coin-tabs { display: flex; gap: 8px; margin-bottom: 2px; }
