@@ -1,0 +1,15 @@
+{
+ "updated": "2026-11-19T00:30:00Z",
+ "sources": [
+  {"name": "Pokébip", "url": "https://www.pokebip.com"},
+  {"name": "Margxt", "url": "https://www.margxt.fr"}
+ ],
+ "items": [
+  {"title": "Pokémon Pocket : Combats restreints Fusion Double (C1) et nouveau Booster promo !", "url": "https://www.pokebip.com/news/7644/pokemon-pocket-combats-restreints-fusion-double-c1-et-nouveau-booster-promo", "date": "2026-11-18T08:48:00Z", "source": "Pokébip", "tcg": false},
+  {"title": "Pokémon GO : Collaboration avec Duolingo !", "url": "https://www.pokebip.com/news/7643/pokemon-go-collaboration-avec-duolingo", "date": "2026-11-18T07:50:00Z", "source": "Pokébip", "tcg": false},
+  {"title": "Pokémon Champions : Distribution de Coupons de Vitesse !", "url": "https://www.pokebip.com/news/7642/pokemon-champions-distribution-de-coupons-de-vitesse", "date": "2026-11-17T20:19:00Z", "source": "Pokébip", "tcg": false},
+  {"title": "Liste des cartes Promo McDonald's 2027 du jeu de cartes Pokémon", "url": "https://www.margxt.fr/liste-des-cartes-promo-mcdonalds-2027-du-jeu-de-cartes-pokemon/", "date": "2026-11-12T12:00:00Z", "source": "Margxt", "tcg": true},
+  {"title": "Liste des cartes japonaises Aura Seeker M7 du jeu de cartes Pokémon", "url": "https://www.margxt.fr/liste-des-cartes-japonaises-aura-seeker-m7-du-jeu-de-cartes-pokemon/", "date": "2026-11-09T12:00:00Z", "source": "Margxt", "tcg": true},
+  {"title": "JCC Pokémon : Collection tournoi premium Méga-Rayquaza début 2027", "url": "https://www.margxt.fr/jcc-pokemon-collection-tournoi-premium-mega-rayquaza-debut-2027/", "date": "2026-11-08T12:00:00Z", "source": "Margxt", "tcg": true}
+ ]
+}

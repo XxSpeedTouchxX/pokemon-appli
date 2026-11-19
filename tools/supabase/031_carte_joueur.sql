@@ -9,11 +9,11 @@
 --     (pseudo, avatar, grade, PL et place) plus le mois d'arrivée sur Dropicards (« membre depuis », au mois près) et
 --     ses saisons passées (PL et place). Jamais l'adresse e-mail, l'âge ni la collection.
 --   - Comptes admin ou suspendus : pas classés (comme au classement) ; carte d'un compte suspendu ou supprimé refusée.
--- À installer après 028 (install_024_a_033.sql). Rejouable. Tests : tests/test_031.sql.
+-- À installer après 028 (install_024_a_034.sql). Rejouable. Tests : tests/test_031.sql.
 
 do $$ begin
   if to_regprocedure('public._pl_scores(integer)') is null or to_regclass('public.pl_ledger') is null then
-    raise exception 'Installe d''abord 028_points_loyaute.sql (fichier install_024_a_033.sql)';
+    raise exception 'Installe d''abord 028_points_loyaute.sql (fichier install_024_a_034.sql)';
   end if;
 end $$;
 

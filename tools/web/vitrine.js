@@ -13,7 +13,7 @@
   //     disponible » (trade_answer). Jamais de texte libre, jamais de paiement : pour s'organiser, étage 2 (plus tard).
   // Serveur sans 033 : un admin voit le fichier à installer, un joueur « bientôt ».
   const VT_MAX = 30, WANT_MAX = 50, VT_TTL = 60000;
-  const VT_FILE = 'tools/supabase/install_024_a_033.sql';
+  const VT_FILE = 'tools/supabase/install_024_a_034.sql';
   const vtOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
   const vtAdmin = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin && Cloud.isAdmin();
   const vtRef = (pid, g) => pid + '|' + (g.lang || 'FR') + '|' + (g.cond || 'NM') + '|' + (g.gr || '');

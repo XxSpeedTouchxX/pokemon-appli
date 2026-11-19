@@ -1,4 +1,4 @@
--- INSTALLATION EN UNE FOIS des scripts 024 à 028 et 030 à 033 (2026-11-13 au 16, porteur : « ouvre le Safari à tous », « suivre tous
+-- INSTALLATION EN UNE FOIS des scripts 024 à 028 et 030 à 034 (2026-11-13 au 18, porteur : « ouvre le Safari à tous », « suivre tous
 -- les joueurs en mode admin », « 3 niveaux de difficulté pour le safari », « Safari illimité pour les admins et mon ami »,
 -- « Points de loyauté »). 024 : le jeu Safari éclair (le serveur
 -- tire les Pokémon, compte et donne les PK). 025 : Admin › Joueurs (PK, PA, régularité) et temps passé dans l'app.
@@ -9,10 +9,11 @@
 -- 031 : carte de visite des joueurs du classement de « Ma ligue ».
 -- 032 : messages rapides entre joueurs de « Ma ligue » (8 messages tout faits, « Mes messages »).
 -- 033 : vitrine, « Pour trade », « À vendre » et « Je cherche » (échanges entre joueurs, étage 1).
+-- 034 : « Le coin des dresseurs » : rechercher un dresseur par son pseudo et voir les vitrines des dresseurs.
 -- 029 (annonces Vinted) n'y est pas : il a sa propre installation (docs/42).
 -- Il faut 001 à 023 déjà installés (fait le 2026-11-12). Rejouable : sans risque si l'un d'eux est déjà installé.
 -- Supabase Studio › SQL Editor › New query › colle TOUT ce fichier › Run. Puis colle 000_verifier.sql › Run : les lignes
--- 024 à 028 et 030 à 033 doivent être « oui ». Ce fichier est fabriqué à partir de ces scripts
+-- 024 à 028 et 030 à 034 doivent être « oui ». Ce fichier est fabriqué à partir de ces scripts
 -- (tools/supabase/make_install_024.sh) : ne pas le modifier à la main.
 
 -- ================= 024_safari.sql =================
@@ -526,7 +527,7 @@ notify pgrst, 'reload schema';
 
 do $$ begin
   if to_regclass('public.app_time') is null then
-    raise exception 'Installe d''abord 025_suivi_joueurs.sql (le plus simple : tout le fichier install_024_a_033.sql)';
+    raise exception 'Installe d''abord 025_suivi_joueurs.sql (le plus simple : tout le fichier install_024_a_034.sql)';
   end if;
 end $$;
 
@@ -1109,11 +1110,11 @@ notify pgrst, 'reload schema';
 --     (pseudo, avatar, grade, PL et place) plus le mois d'arrivée sur Dropicards (« membre depuis », au mois près) et
 --     ses saisons passées (PL et place). Jamais l'adresse e-mail, l'âge ni la collection.
 --   - Comptes admin ou suspendus : pas classés (comme au classement) ; carte d'un compte suspendu ou supprimé refusée.
--- À installer après 028 (install_024_a_033.sql). Rejouable. Tests : tests/test_031.sql.
+-- À installer après 028 (install_024_a_034.sql). Rejouable. Tests : tests/test_031.sql.
 
 do $$ begin
   if to_regprocedure('public._pl_scores(integer)') is null or to_regclass('public.pl_ledger') is null then
-    raise exception 'Installe d''abord 028_points_loyaute.sql (fichier install_024_a_033.sql)';
+    raise exception 'Installe d''abord 028_points_loyaute.sql (fichier install_024_a_034.sql)';
   end if;
 end $$;
 
@@ -1192,11 +1193,11 @@ notify pgrst, 'reload schema';
 --     tout fait (une seule réponse par message), réglage « Recevoir les messages rapides ».
 --   - Messages effacés après 90 jours, et avec le compte (suppression du compte : effacement en cascade).
 --   - Tables lues et écrites seulement par ces fonctions (aucun accès direct).
--- À installer après 028 et 031 (fichier install_024_a_033.sql). Rejouable. Tests : tests/test_032.sql.
+-- À installer après 028 et 031 (fichier install_024_a_034.sql). Rejouable. Tests : tests/test_032.sql.
 
 do $$ begin
   if to_regprocedure('public._game_grade(uuid)') is null or to_regprocedure('public._game_today()') is null or to_regclass('public.profiles') is null then
-    raise exception 'Installe d''abord 001 à 031 (fichier install_024_a_033.sql)';
+    raise exception 'Installe d''abord 001 à 031 (fichier install_024_a_034.sql)';
   end if;
 end $$;
 
@@ -1363,11 +1364,11 @@ notify pgrst, 'reload schema';
 --   - Âge : vitrine visible par tous les joueurs connectés ; Pour trade, propositions et réponses dès 15 ans ; « À
 --     vendre » seulement après « J'ai 18 ans ou plus » (déclaré par le joueur, trade_adult_confirm).
 --   - Tables fermées aux joueurs : seules ces fonctions les lisent et les écrivent. Tout s'efface avec le compte.
--- À installer après 032 (fichier install_024_a_033.sql). Rejouable. Tests : tests/test_033.sql.
+-- À installer après 032 (fichier install_024_a_034.sql). Rejouable. Tests : tests/test_033.sql.
 
 do $$ begin
   if to_regprocedure('public.quick_msg_send(uuid,text)') is null or to_regclass('public.quick_messages') is null then
-    raise exception 'Installe d''abord 032_messages_rapides.sql (fichier install_024_a_033.sql)';
+    raise exception 'Installe d''abord 032_messages_rapides.sql (fichier install_024_a_034.sql)';
   end if;
 end $$;
 
@@ -1731,6 +1732,65 @@ grant execute on function public.quick_msg_inbox(int) to authenticated;
 
 -- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).
 notify pgrst, 'reload schema';
+
+-- ================= 034_recherche_dresseurs.sql =================
+-- 034_recherche_dresseurs.sql — « Le coin des dresseurs » › « Ma vitrine » : rechercher un dresseur et voir sa vitrine
+-- (2026-11-18, porteur : « il pourrait également rechercher tous les utilisateurs de l'appli et, en cliquant sur un
+-- utilisateur, tomber sur la vitrine que celui-ci aura partagée, pour engager une discussion si une carte l'intéresse »).
+--
+--   - player_search(q, lim) : pour tout compte connecté.
+--       · q vide : les dresseurs qui ont au moins une carte dans leur vitrine, la vitrine la plus récemment changée en
+--         premier (« Vitrines des dresseurs »).
+--       · q rempli (pseudo, 1 à 24 caractères, majuscules et accents comme tapés) : les dresseurs dont le pseudo contient
+--         ce texte ; pseudo identique d'abord, puis qui commence par lui, puis le reste.
+--     Pour chacun : identifiant, pseudo, avatar, grade et le nombre de cartes de sa vitrine (dont Pour trade et à vendre,
+--     hors cartes déjà « d'accord »). Jamais l'adresse e-mail, l'âge, le rôle ni la collection.
+--   - Comptes cachés : suspendus, sans pseudo, moi-même, et les moins de 15 ans (protection des mineurs : les échanges
+--     commencent à 15 ans ; défaut à confirmer par le porteur). Les comptes admin sont trouvables comme les autres.
+--   - Au plus 50 résultats par recherche. La vitrine elle-même s'ouvre avec player_showcase (033) et la carte de
+--     dresseur avec player_card (031) ; les propositions passent par trade_send (033) : rien ne change pour elles.
+-- À installer après 033 (fichier install_024_a_034.sql). Rejouable. Tests : tests/test_034.sql.
+
+do $$ begin
+  if to_regprocedure('public.player_showcase(uuid)') is null or to_regclass('public.showcase') is null then
+    raise exception 'Installe d''abord 033_vitrine.sql (fichier install_024_a_034.sql)';
+  end if;
+end $$;
+
+-- Recherche plus rapide sur le pseudo quand il y aura beaucoup de comptes.
+create index if not exists profiles_pseudo_lower on public.profiles (lower(pseudo)) where pseudo is not null;
+create index if not exists showcase_user on public.showcase (user_id);
+
+create or replace function public.player_search(q text default '', lim int default 30) returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  uid uuid := auth.uid();
+  top_n int := least(greatest(coalesce(lim, 30), 1), 50);
+  t text := lower(left(btrim(coalesce(q, '')), 24));
+  pat text;
+begin
+  if uid is null then raise exception 'Connecte-toi à ton compte Dropicards.' using errcode = '42501'; end if;
+  -- Les caractères spéciaux de LIKE (%, _ et \) sont cherchés tels quels.
+  pat := '%' || replace(replace(replace(t, '\', '\\'), '%', '\%'), '_', '\_') || '%';
+  return coalesce((select jsonb_agg(x.j order by x.rk, x.last_at desc nulls last, x.pseudo) from (
+    select p.pseudo, v.last_at,
+      case when t = '' then 0 when lower(p.pseudo) = t then 0 when left(lower(p.pseudo), char_length(t)) = t then 1 else 2 end as rk,
+      jsonb_build_object('id', p.id, 'pseudo', p.pseudo, 'avatar', p.avatar, 'grade', public._game_grade(p.id),
+        'cards', coalesce(v.n, 0), 'trade', coalesce(v.nt, 0), 'sale', coalesce(v.ns, 0)) as j
+    from public.profiles p
+    left join lateral (
+      select count(*)::int as n, (count(*) filter (where s.for_trade and not s.deal))::int as nt,
+             (count(*) filter (where s.for_sale and not s.deal))::int as ns, max(s.updated_at) as last_at
+      from public.showcase s where s.user_id = p.id
+    ) v on true
+    where p.status = 'active' and p.pseudo is not null and p.id <> uid
+      and p.age_range is distinct from 'u15'
+      and ((t = '' and coalesce(v.n, 0) > 0) or (t <> '' and lower(p.pseudo) like pat escape '\'))
+    order by 3, v.last_at desc nulls last, p.pseudo
+    limit top_n) x), '[]'::jsonb);
+end; $$;
+revoke all on function public.player_search(text, int) from public, anon;
+grant execute on function public.player_search(text, int) to authenticated;
 
 -- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).
 notify pgrst, 'reload schema';

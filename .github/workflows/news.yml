@@ -1,0 +1,41 @@
+# News Pokémon de « Le coin des dresseurs › Le calendrier TCG » (2026-11-18, porteur) : deux fois par jour, lit les flux
+# RSS publics de Pokébip et de la rubrique JCC de Margxt et publie web/data/news.json (titre, date, site et lien de
+# chaque article ; jamais leur texte ni leurs images). Un flux en panne est ignoré ; si aucun ne répond, le fichier
+# publié reste tel quel (le job échoue, courriel au porteur).
+name: News Pokémon
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 5 * * *"   # vers 06:41 (heure de Paris en hiver)
+    - cron: "41 16 * * *"  # vers 17:41
+  push:
+    branches: [claude/pokemon-app-mockup-1mxt7p]
+    paths:
+      - .github/workflows/news.yml
+      - tools/news/fetch_news.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: news
+  cancel-in-progress: false
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+
+      - name: Tests
+        run: python3 -m unittest discover -s tools/news -v
+
+      - name: Lire les flux
+        run: python3 tools/news/fetch_news.py --out web/data/news.json
+
+      - name: Publier sur la branche
+        run: tools/publish_data.sh news "Met à jour les news Pokémon ($(date -u +%Y-%m-%d))" web/data/news.json

@@ -15,11 +15,11 @@
 --   - Âge : vitrine visible par tous les joueurs connectés ; Pour trade, propositions et réponses dès 15 ans ; « À
 --     vendre » seulement après « J'ai 18 ans ou plus » (déclaré par le joueur, trade_adult_confirm).
 --   - Tables fermées aux joueurs : seules ces fonctions les lisent et les écrivent. Tout s'efface avec le compte.
--- À installer après 032 (fichier install_024_a_033.sql). Rejouable. Tests : tests/test_033.sql.
+-- À installer après 032 (fichier install_024_a_034.sql). Rejouable. Tests : tests/test_033.sql.
 
 do $$ begin
   if to_regprocedure('public.quick_msg_send(uuid,text)') is null or to_regclass('public.quick_messages') is null then
-    raise exception 'Installe d''abord 032_messages_rapides.sql (fichier install_024_a_033.sql)';
+    raise exception 'Installe d''abord 032_messages_rapides.sql (fichier install_024_a_034.sql)';
   end if;
 end $$;
 

@@ -18,7 +18,7 @@
   const QM_REPLIES = { salut: ['salut', 'gg', 'merci'], bravo: ['merci', 'gg', 'top10'], collection: ['merci', 'bravo'], top10: ['top10', 'gg', 'merci'],
     gg: ['gg', 'merci', 'top10'], tirage: ['merci', 'tirage'], safari: ['safari', 'gg', 'merci'], merci: ['salut', 'gg'] };
   const QM_TTL = 60000, QM_DAY_MAX = 10;
-  const QM_FILE = 'tools/supabase/install_024_a_033.sql';
+  const QM_FILE = 'tools/supabase/install_024_a_034.sql';
   const qmLabel = c => (QM_BY[c] ? QM_BY[c].label : '');
   const qmOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
   const qmAdmin = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin && Cloud.isAdmin();

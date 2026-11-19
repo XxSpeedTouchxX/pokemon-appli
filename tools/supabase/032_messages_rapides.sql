@@ -9,11 +9,11 @@
 --     tout fait (une seule réponse par message), réglage « Recevoir les messages rapides ».
 --   - Messages effacés après 90 jours, et avec le compte (suppression du compte : effacement en cascade).
 --   - Tables lues et écrites seulement par ces fonctions (aucun accès direct).
--- À installer après 028 et 031 (fichier install_024_a_033.sql). Rejouable. Tests : tests/test_032.sql.
+-- À installer après 028 et 031 (fichier install_024_a_034.sql). Rejouable. Tests : tests/test_032.sql.
 
 do $$ begin
   if to_regprocedure('public._game_grade(uuid)') is null or to_regprocedure('public._game_today()') is null or to_regclass('public.profiles') is null then
-    raise exception 'Installe d''abord 001 à 031 (fichier install_024_a_033.sql)';
+    raise exception 'Installe d''abord 001 à 031 (fichier install_024_a_034.sql)';
   end if;
 end $$;
 

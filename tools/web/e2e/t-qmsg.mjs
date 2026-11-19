@@ -155,7 +155,7 @@ const setup = async (S, role) => {
   await page.evaluate(() => { window.__pkm.setState({ screen: 'market', stack: [] }); }); await page.waitForTimeout(500);
   await page.locator('button.pkm-pg-banner').click(); await page.waitForTimeout(2000);
   await page.locator('section.pkm-pg-card button.pkm-qm-open').click(); await page.waitForTimeout(800);
-  ok('sans 032, admin : fichier install_024_a_033.sql à coller dans Studio', /install_024_a_033\.sql/.test(await page.locator('section.pkm-qm').innerText()));
+  ok('sans 032, admin : fichier install_024_a_034.sql à coller dans Studio', /install_024_a_033\.sql/.test(await page.locator('section.pkm-qm').innerText()));
   await ctx.close();
 }
 // C. Sans compte : pas de bouton « Mes messages », pas de messages sur les cartes.
