@@ -147,6 +147,58 @@
     this.setState({ calHi: id });
     setTimeout(() => { try { const el = document.getElementById('pkm-cal-' + id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* page fermée */ } }, 30);
   };
+  // Appui sur le logo d'une extension dans la frise : le logo sort de la frise, grandit au centre de l'écran sur un
+  // voile sombre (« zoom sur la série »), puis l'extension s'ouvre sur son onglet « Items » et le voile s'efface.
+  // Le logo est posé à sa taille finale puis rétréci au départ (net pendant tout le zoom). Sans animation possible
+  // (mouvements réduits, image pas chargée) : l'extension s'ouvre tout de suite.
+  const CALZ_FLY = 620, CALZ_GO = 860, CALZ_END = 1320;
+  coinProto.calZoom = function (ev, setId, name) {
+    if (!setId || this.__calZ) return;
+    const go = () => {
+      try { const w = document.querySelector('.pkm-cal-strip'); this.__calX = w ? w.scrollLeft : null; } catch (e) { /* rien */ }
+      this.push('set', { setId: setId, setFilter: 'items' });
+    };
+    let img = null;
+    try { const b = ev && ev.currentTarget; img = b && b.querySelector ? b.querySelector('img') : null; } catch (e) { img = null; }
+    const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof document === 'undefined' || !img || !img.complete || !img.naturalWidth || reduce || typeof img.animate !== 'function') { go(); return; }
+    const r = img.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+    if (!r.width || !r.height) { go(); return; }
+    this.__calZ = true;
+    const ratio = r.width / r.height, w = Math.min(vw * 0.74, 340, vh * 0.3 * ratio), h = w / ratio;
+    const cx = vw / 2, cy = vh * 0.44, k = r.width / w;
+    const el = document.createElement('div');
+    el.className = 'pkm-calz';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<div class="pkm-calz-veil"></div><div class="pkm-calz-ring"></div><img class="pkm-calz-logo" alt=""><p class="pkm-calz-t"><small>Items de l’extension</small><b></b></p>';
+    const logo = el.querySelector('.pkm-calz-logo'), ring = el.querySelector('.pkm-calz-ring'), t = el.querySelector('.pkm-calz-t');
+    logo.src = img.currentSrc || img.src;
+    Object.assign(logo.style, { width: w + 'px', height: h + 'px', left: (cx - w / 2) + 'px', top: (cy - h / 2) + 'px' });
+    Object.assign(ring.style, { left: cx + 'px', top: cy + 'px' });
+    t.style.top = (cy + h / 2 + 18) + 'px';
+    t.querySelector('b').textContent = name || '';
+    (document.getElementById('app') || document.body).appendChild(el);
+    const src = img.closest ? img.closest('button') : null;
+    if (src) src.style.visibility = 'hidden';
+    const dx = (r.left + r.width / 2) - cx, dy = (r.top + r.height / 2) - cy;
+    const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
+    try {
+      logo.animate([{ transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(' + k + ')' }, { transform: 'translate(0, 0) scale(1)' }], { duration: CALZ_FLY, easing: ease, fill: 'both' });
+      el.querySelector('.pkm-calz-veil').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 380, easing: 'ease-out', fill: 'both' });
+      ring.animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(0.4)' }, { opacity: 0.9, transform: 'translate(-50%, -50%) scale(0.9)', offset: 0.35 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(1.7)' }],
+        { duration: 700, delay: CALZ_FLY - 220, easing: 'ease-out', fill: 'both' });
+      t.animate([{ opacity: 0, transform: 'translate(-50%, 10px)' }, { opacity: 1, transform: 'translate(-50%, 0)' }], { duration: 300, delay: CALZ_FLY - 160, easing: 'ease-out', fill: 'both' });
+    } catch (e) { /* le zoom n'est qu'un décor */ }
+    setTimeout(() => {
+      go();
+      if (src) src.style.visibility = '';
+      try {
+        el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CALZ_END - CALZ_GO, easing: 'ease-in', fill: 'both' });
+        logo.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }], { duration: CALZ_END - CALZ_GO, easing: 'ease-in', fill: 'both' });
+      } catch (e) { /* rien */ }
+    }, CALZ_GO);
+    setTimeout(() => { el.remove(); this.__calZ = false; }, CALZ_END);
+  };
   coinProto.vCal = function (s) {
     const d = CAL.data, today = realToday(), todayKey = calMonthKey(today);
     if (!d || !Array.isArray(d.items)) {
@@ -166,20 +218,36 @@
         cls: 'pkm-cal-item ' + st.cls + (past ? ' pkm-cal-past' : ' pkm-cal-next') + (s.calHi === id ? ' pkm-cal-hi' : ''),
         logo: logo, hasLogo: !!logo, noLogo: !logo, initials: String(x.code || x.name || '?').slice(0, 4),
         source: x.source || '', srcText: x.source ? 'Source : ' + x.source + (x.sourceDate ? ' (' + calDateText(x.sourceDate) + ')' : '') : 'Estimation, sans annonce officielle',
-        url: x.url || '', hasUrl: !!x.url, noUrl: !x.url, past: past, month: calMonthKey(x.date)
+        url: x.url || '', hasUrl: !!x.url, noUrl: !x.url, past: past, month: calMonthKey(x.date),
+        setId: set ? set.id : '', setName: set ? set.name : ''
       };
     });
     // Frise : un mois par colonne, du premier au dernier mois du calendrier ; repère « Aujourd'hui ».
+    // Frise sur 70 % de l'écran (2026-11-19, porteur : « l'image de la série ou de l'extension à côté des termes,
+    // le calendrier sur 70 % de l'écran, un appui sur le visuel zoome sur la série et ouvre ses items ») : chaque
+    // extension du catalogue montre son logo ; un appui zoome sur le logo puis ouvre l'onglet « Items » de
+    // l'extension (setview.js). Les sorties sans extension au catalogue (Japon, rumeurs, coffrets) gardent leur
+    // sigle et mènent à leur fiche plus bas. Les mois qui ont des sorties alternent au-dessus et au-dessous de la
+    // ligne du temps, pour que les visuels ne se gênent pas.
     const keys = items.map(x => x.month).filter(Boolean).concat([todayKey]).sort();
     const months = [];
+    let side = 0;
     if (keys.length) {
       let [y, m] = keys[0].split('-').map(Number);
       const [yl, ml] = keys[keys.length - 1].split('-').map(Number);
       for (let guard = 0; (y < yl || (y === yl && m <= ml)) && guard < 60; guard++) {
         const k = y + '-' + String(m).padStart(2, '0'), here = items.filter(x => x.month === k);
+        const up = here.length ? side++ % 2 === 0 : false;
         months.push({ key: k, label: CAL_MONTHS[m - 1].replace('.', ''), year: m === 1 || !months.length ? String(y) : '', hasYear: m === 1 || !months.length,
-          now: k === todayKey, cls: 'pkm-cal-m' + (k === todayKey ? ' pkm-cal-m-now' : k < todayKey ? ' pkm-cal-m-past' : ''),
-          dots: here.map(x => ({ cls: 'pkm-cal-dot ' + x.stCls.replace('pkm-cal-st ', ''), code: x.short || x.code || x.initials, aria: x.name + ', ' + x.when + ', ' + x.status, pick: () => this.calJump(x.id) })) });
+          now: k === todayKey, cls: 'pkm-cal-m' + (k === todayKey ? ' pkm-cal-m-now' : k < todayKey ? ' pkm-cal-m-past' : '') + (here.length ? ' pkm-cal-m-has' : ''),
+          dotsCls: 'pkm-cal-dots ' + (up ? 'pkm-cal-dots-up' : 'pkm-cal-dots-down'),
+          dots: here.map(x => {
+            const zoom = !!(x.setId && x.hasLogo);
+            return { cls: 'pkm-cal-dot ' + x.stCls.replace('pkm-cal-st ', '') + (zoom ? ' pkm-cal-dot-logo' : ''), code: x.short || x.code || x.initials,
+              logo: zoom ? x.logo : '', hasLogo: zoom, setId: x.setId,
+              aria: x.name + ', ' + x.when + ', ' + x.status + (zoom ? '. Voir les items de l’extension' : ''),
+              pick: zoom ? ev => this.calZoom(ev, x.setId, x.setName || x.name) : () => this.calJump(x.id) };
+          }) });
         m++; if (m > 12) { m = 1; y++; }
       }
     }
@@ -199,6 +267,7 @@
       lessPast: showAll && past.length > 3,
       next: next, hasNext: next.length > 0,
       legend: Object.keys(CAL_STATUS).map(k => ({ label: CAL_STATUS[k].label, cls: 'pkm-cal-st ' + CAL_STATUS[k].cls })),
+      hint: 'Touche un logo pour voir les items de l’extension.',
       note: d.note || 'Dates françaises quand elles sont annoncées. Une annonce japonaise ou une rumeur peut changer : la source de chaque date est indiquée.'
     };
   };
@@ -242,7 +311,17 @@
     // Frise : le mois en cours au milieu, une fois le calendrier affiché.
     if (on && tab === 'cal' && CAL.data && !this.__calScrolled) {
       this.__calScrolled = true;
-      setTimeout(() => { try { const m = document.querySelector('.pkm-cal-m-now'), w = m && m.parentElement; if (m && w) w.scrollLeft = m.offsetLeft - w.clientWidth / 2 + m.clientWidth / 2; } catch (e) { /* rien */ } }, 60);
+      // Au retour des items d'une extension (calZoom), la frise reprend là où elle était.
+      setTimeout(() => {
+        try {
+          const w = document.querySelector('.pkm-cal-strip'), m = document.querySelector('.pkm-cal-m-now');
+          if (!w) return;
+          const x = this.__calX != null ? this.__calX : m ? m.offsetLeft - w.clientWidth / 2 + m.clientWidth / 2 : null;
+          this.__calX = null;
+          if (x == null) return;
+          w.style.scrollBehavior = 'auto'; w.scrollLeft = x; w.style.scrollBehavior = '';
+        } catch (e) { /* rien */ }
+      }, 60);
     }
     if (!(on && tab === 'cal')) this.__calScrolled = false;
     return r;

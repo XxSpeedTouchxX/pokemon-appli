@@ -1,6 +1,7 @@
 // « Le coin des dresseurs » (2026-11-18, porteur) : 5ᵉ onglet entre « Toutes les séries » et le scan ; « Ma vitrine »
 // (interface Échanges de Ma ligue + recherche des dresseurs, 034) ; « Le calendrier TCG » (frise, blocs, sorties,
-// statuts, sources) et « News Pokémon ». Le serveur est imité : jamais le vrai serveur.
+// statuts, sources ; frise sur 70 % de l'écran avec les logos des extensions, qui zooment puis ouvrent leurs items,
+// 2026-11-19) et « News Pokémon ». Le serveur est imité : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
 const res = []; const ok = (l, c, why) => res.push((c ? '✓ ' : '✗ ') + l + (!c && why ? ' — ' + why : '')); const errors = [];
@@ -134,6 +135,34 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   await page.screenshot({ path: shot('coin-calendrier.png') });
   await page.evaluate(() => { const m = document.querySelector('section[aria-label="News Pokémon"]'); if (m) m.scrollIntoView(); }); await page.waitForTimeout(300);
   await page.screenshot({ path: shot('coin-news.png') });
+
+  // C2. Frise sur 70 % de l'écran, logos des extensions, zoom puis items de l'extension (2026-11-19, porteur).
+  const fz = await page.evaluate(() => {
+    const h = document.querySelector('section[aria-label="Frise du JCC Pokémon"]').getBoundingClientRect();
+    const logos = [...document.querySelectorAll('.pkm-cal-dot-logo')];
+    const now = document.querySelector('.pkm-cal-m-now'), ax = now.querySelector('.pkm-cal-axis').getBoundingClientRect(), tr = now.querySelector('.pkm-cal-track').getBoundingClientRect();
+    return { ratio: h.height / innerHeight, logos: logos.length, imgs: logos.filter(b => b.querySelector('.pkm-cal-dlogo img')).length,
+      aria: logos.map(b => b.getAttribute('aria-label')), up: document.querySelectorAll('.pkm-cal-m-has .pkm-cal-dots-up').length,
+      down: document.querySelectorAll('.pkm-cal-m-has .pkm-cal-dots-down').length, axisAbove: ax.bottom <= tr.top,
+      chips: [...document.querySelectorAll('.pkm-cal-dot:not(.pkm-cal-dot-logo)')].map(b => b.textContent.trim()) };
+  });
+  ok('frise : au moins 70 % de la hauteur de l’écran (' + Math.round(fz.ratio * 100) + ' %)', fz.ratio >= 0.69);
+  ok('frise : le logo de chaque extension du catalogue (' + fz.logos + '), Règne Delta compris', fz.logos >= 10 && fz.imgs === fz.logos && fz.aria.some(a => /^Règne Delta,.*Voir les items/.test(a)), JSON.stringify(fz.aria));
+  ok('frise : sorties sans extension au catalogue gardées en sigle (Japon, rumeurs)', fz.chips.indexOf('M7') >= 0 && fz.chips.indexOf('ex★') >= 0, fz.chips.join(','));
+  ok('frise : mois en haut, sorties en alternance au-dessus et au-dessous de la ligne', fz.axisAbove && fz.up >= 5 && fz.down >= 5, JSON.stringify(fz));
+  await page.evaluate(() => { const w = document.querySelector('.pkm-cal-strip'); w.style.scrollBehavior = 'auto'; w.scrollLeft = 140; w.style.scrollBehavior = ''; });
+  const x0 = await page.evaluate(() => document.querySelector('.pkm-cal-strip').scrollLeft);
+  await page.locator('.pkm-cal-dot-logo[aria-label^="Règne Delta"]').evaluate(b => b.click()); await page.waitForTimeout(700);
+  const mid = await page.evaluate(() => { const z = document.querySelector('.pkm-calz'), l = z && z.querySelector('.pkm-calz-logo').getBoundingClientRect(); return { on: !!z, w: l ? l.width : 0, cx: l ? l.left + l.width / 2 : 0, t: z ? z.innerText : '' }; });
+  ok('appui sur le logo : zoom au centre de l’écran (' + Math.round(mid.w) + ' px)', mid.on && mid.w > 200 && Math.abs(mid.cx - 195) < 4 && /Règne Delta/.test(mid.t) && /Items de l’extension/i.test(mid.t), JSON.stringify(mid));
+  await page.screenshot({ path: shot('coin-calendrier-zoom.png') });
+  await page.waitForTimeout(1100);
+  const after = await page.evaluate(() => { const s = window.__pkm.st(); return { screen: s.screen, setId: s.setId, f: s.setFilter, over: !!document.querySelector('.pkm-calz'), items: [...document.querySelectorAll('button')].some(b => /^Items \(\d+\)$/.test(b.textContent.trim())) }; });
+  ok('puis l’extension s’ouvre sur ses items (onglet « Items »), le zoom disparaît', after.screen === 'set' && after.setId === 'me06' && after.f === 'items' && after.items && !after.over, JSON.stringify(after));
+  await page.screenshot({ path: shot('coin-calendrier-items.png') });
+  await page.evaluate(() => window.__pkm.pop()); await page.waitForTimeout(1200);
+  const x1 = await page.evaluate(() => { const w = document.querySelector('.pkm-cal-strip'); return w ? w.scrollLeft : -1; });
+  ok('retour : la frise reprend là où elle était (' + Math.round(x0) + ' → ' + Math.round(x1) + ')', await page.evaluate(() => window.__pkm.st().screen) === 'coin' && Math.abs(x1 - x0) <= 2);
   await ctx.close();
 }
 

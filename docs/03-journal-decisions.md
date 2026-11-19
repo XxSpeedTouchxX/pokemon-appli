@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-19 — « Le calendrier TCG » : logos des extensions, frise sur 70 % de l'écran, zoom vers les items (porteur)
+
+- **Logo de l'extension à côté de chaque sigle de la frise** (porteur : « l'image de la série ou de l'extension à côté des termes sur la roadmap, ME02 etc. ») : les 11 sorties qui ont leur extension au catalogue (EV09 à ME06, 30 ans) montrent leur logo, avec le sigle dessous. Les sorties sans extension au catalogue (Aura Seeker et MEGA×MEGA Parade du Japon, rumeurs, coffrets, Journée Pokémon) gardent leur sigle : pas encore de logo ni d'items ; un appui mène toujours à leur fiche plus bas.
+- **Frise sur 70 % de l'écran** (porteur) : les mois en haut (repère « Aujourd'hui » toujours visible au-dessus de la barre du bas), la ligne du temps au milieu, les sorties d'un mois tantôt au-dessus, tantôt au-dessous, reliées à la ligne par une tige, pour que les logos ne se gênent pas ; ligne pointillée jaune sur le mois en cours. Sur un très petit écran, la frise garde une hauteur minimale et la page défile.
+- **Un appui sur un logo zoome sur l'extension puis ouvre ses items** (porteur : « ça zoom sur la série et ça redirige sur les items dispo de cette série ») : le logo sort de la frise et grandit au centre de l'écran sur un voile sombre, avec un anneau doré et « Items de l'extension · Règne Delta » (0,9 s), puis l'écran de l'extension s'ouvre directement sur l'onglet **« Items »** (produits de l'extension, puis autres items de la série). Au retour, la frise reprend là où elle était. Mouvements réduits (réglage du téléphone) : l'extension s'ouvre sans zoom.
+- Phrase d'aide sous la légende : « Touche un logo pour voir les items de l'extension ».
+- Test `t-coin.mjs` (8 vérifications de plus : 70 %, logos, sigles, alternance, zoom centré, onglet Items, retour). Cache v240.
+
 ## 2026-11-19 — Barre du bas : Dôme choisi, 5 icônes sur la même ligne (porteur)
 
 - **Dessin « Dôme » choisi par le porteur** (« ok pour le premier design ») : il reste en place par défaut ; les 3 autres dessins restent seulement pour essai (`?navvis=2` à `4`).
