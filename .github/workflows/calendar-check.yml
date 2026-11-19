@@ -47,7 +47,7 @@ jobs:
           if [ "$code" -ge 2 ]; then exit "$code"; fi
           echo "todo=$code" >> "$GITHUB_OUTPUT"
 
-      - name: Issue « Calendrier TCG : dates à vérifier »
+      - name: "Issue « Calendrier TCG : dates à vérifier »"
         env:
           GH_TOKEN: ${{ github.token }}
           TODO: ${{ steps.check.outputs.todo }}
