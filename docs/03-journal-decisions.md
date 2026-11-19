@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-19 — « Le calendrier TCG » : frise sur 50 % de l'écran et figée (porteur)
+
+- **Frise sur 50 % de l'écran** (porteur : « finalement, mets la frise sur 50 % de l'écran ») à la place de 70 % ; logos, tiges et marges un peu réduits pour que tout tienne. Sur un petit écran, la frise garde au moins 400 px.
+- **Frise figée** (porteur : « fige l'écran de la frise ») : les onglets « Ma vitrine / Le calendrier TCG » et la frise restent en place ; seuls les blocs, les sorties et les news défilent dessous, comme la saison et les onglets de « Ma ligue ». Un appui sur un sigle amène sa sortie juste sous la frise.
+- **Écran de moins de 740 px de haut** (iPhone SE…) : rien n'est figé, la page défile normalement ; sinon il ne resterait presque rien à lire sous la frise.
+- Test `t-coin.mjs` (50 %, frise et onglets immobiles quand le contenu défile). Cache v241.
+
 ## 2026-11-19 — « Le calendrier TCG » : logos des extensions, frise sur 70 % de l'écran, zoom vers les items (porteur)
 
 - **Logo de l'extension à côté de chaque sigle de la frise** (porteur : « l'image de la série ou de l'extension à côté des termes sur la roadmap, ME02 etc. ») : les 11 sorties qui ont leur extension au catalogue (EV09 à ME06, 30 ans) montrent leur logo, avec le sigle dessous. Les sorties sans extension au catalogue (Aura Seeker et MEGA×MEGA Parade du Japon, rumeurs, coffrets, Journée Pokémon) gardent leur sigle : pas encore de logo ni d'items ; un appui mène toujours à leur fiche plus bas.

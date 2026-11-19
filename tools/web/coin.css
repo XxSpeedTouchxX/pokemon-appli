@@ -72,31 +72,41 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-cal-dot:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
 .pkm-cal-now { padding: 1px 6px; border-radius: 999px; background: #FFD60A; color: #0B1120; font-size: 9.5px; font-weight: 800; white-space: nowrap; box-shadow: 0 0 12px rgba(255, 214, 10, 0.55); }
 
-/* Frise sur 70 % de l'écran (2026-11-19, porteur) : les mois en haut, la ligne du temps au milieu, les sorties d'un
-   mois au-dessus ou au-dessous (en alternance), reliées à la ligne par une tige ; le logo de chaque extension
+/* Frise sur 50 % de l'écran (2026-11-19, porteur : 70 %, puis « finalement 50 % ») : les mois en haut, la ligne du
+   temps au milieu, les sorties d'un mois au-dessus ou au-dessous (en alternance), reliées à la ligne par une tige ; le logo de chaque extension
    du catalogue, qui ouvre ses items (coin.js, calZoom). */
-.pkm-cal-hero { min-height: 70vh; min-height: 70svh; }
-.pkm-cal-strip { flex: 1; min-height: 290px; }
+.pkm-cal-hero { box-sizing: border-box; height: 50vh; height: 50svh; min-height: 400px; gap: 8px; padding: 12px 0 10px; }
+.pkm-cal-strip { flex: 1; min-height: 0; }
 .pkm-cal-plot { position: relative; flex: 1; min-height: 0; }
 .pkm-cal-m-now .pkm-cal-plot::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 6px; border-left: 2px dashed rgba(255, 214, 10, 0.55); }
 .pkm-cal-m-has .pkm-cal-track::after { content: ''; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 6px; background: #0B1120; border: 3px solid #C9D3EA; box-sizing: border-box; }
 .pkm-cal-m-past.pkm-cal-m-has .pkm-cal-track::after { border-color: #3DDC84; }
-.pkm-cal-dots { position: absolute; left: 50%; transform: translateX(-50%); --pkm-cal-stem: clamp(14px, 3.2svh, 30px); }
+.pkm-cal-dots { position: absolute; left: 50%; transform: translateX(-50%); --pkm-cal-stem: clamp(8px, 1.6svh, 18px); }
 .pkm-cal-dots-up { bottom: 50%; flex-direction: column-reverse; padding-bottom: var(--pkm-cal-stem); }
 .pkm-cal-dots-down { top: 50%; padding-top: var(--pkm-cal-stem); }
 .pkm-cal-m-has .pkm-cal-dots::before { content: ''; position: absolute; left: 50%; width: 2px; margin-left: -1px; height: var(--pkm-cal-stem); background: rgba(201, 211, 234, 0.45); }
 .pkm-cal-dots-up::before { bottom: 0; }
 .pkm-cal-dots-down::before { top: 0; }
-.pkm-cal-axis { flex: none; min-height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding-bottom: 4px; }
+.pkm-cal-axis { flex: none; min-height: 32px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding-bottom: 4px; }
 .pkm-cal-dot { flex: none; white-space: nowrap; }
-.pkm-cal-dot-logo { display: flex; flex-direction: column; align-items: center; gap: 4px; width: clamp(100px, 14svh, 124px); padding: 7px 6px 6px; border-radius: 16px;
+.pkm-cal-dot-logo { display: flex; flex-direction: column; align-items: center; gap: 3px; width: clamp(96px, 12svh, 116px); padding: 6px 6px 5px; border-radius: 15px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03)), #0B1120; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.38); transition: transform 0.15s ease; }
 .pkm-cal-dot-logo:active { transform: scale(0.95); }
-.pkm-cal-dlogo { width: 100%; height: clamp(44px, 7svh, 66px); display: flex; align-items: center; justify-content: center; }
+.pkm-cal-dlogo { width: 100%; height: clamp(32px, 4.6svh, 48px); display: flex; align-items: center; justify-content: center; }
 .pkm-cal-dlogo img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55)); }
 .pkm-cal-dcode { font-size: 10.5px; font-weight: 800; letter-spacing: 0.2px; }
 .pkm-cal-m-now .pkm-cal-dot-logo { box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.35), 0 6px 18px rgba(0, 0, 0, 0.38); }
 .pkm-cal-hint { margin: -4px 0 0; padding: 0 14px; font-size: 11.5px; color: #9AA8C3; }
+
+/* Onglets et frise figés en haut du calendrier (2026-11-19, porteur : « fige l'écran de la frise ») : seul le contenu
+   dessous (blocs, sorties, news) défile. Fond de l'app derrière (--pkm-app-bg, coin.js), comme « Ma ligue ». Écran
+   trop bas (moins de 740 px) : rien n'est figé, sinon il ne resterait presque rien à lire sous la frise. */
+.pkm-coin-top { flex: none; display: flex; flex-direction: column; gap: 14px; }
+@media (min-height: 740px) {
+  .pkm-cal-pin { position: sticky; top: -4px; z-index: 6; margin: -4px -16px 0; padding: 4px 16px 10px; background: var(--pkm-app-bg, #1E1F24); box-shadow: 0 10px 12px -12px rgba(0, 0, 0, 0.55); }
+  /* Ce qui est amené à l'écran (clavier, lien, liste) s'arrête sous la frise figée, jamais derrière. */
+  main:has(.pkm-cal-pin) { scroll-padding-top: calc(max(50svh, 400px) + 76px); }
+}
 
 /* Zoom sur le logo touché, puis ouverture des items de l'extension (coin.js, calZoom). */
 .pkm-calz { position: fixed; inset: 0; z-index: 9000; pointer-events: auto; }

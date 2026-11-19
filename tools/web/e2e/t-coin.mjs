@@ -1,7 +1,7 @@
 // « Le coin des dresseurs » (2026-11-18, porteur) : 5ᵉ onglet entre « Toutes les séries » et le scan ; « Ma vitrine »
 // (interface Échanges de Ma ligue + recherche des dresseurs, 034) ; « Le calendrier TCG » (frise, blocs, sorties,
-// statuts, sources ; frise sur 70 % de l'écran avec les logos des extensions, qui zooment puis ouvrent leurs items,
-// 2026-11-19) et « News Pokémon ». Le serveur est imité : jamais le vrai serveur.
+// statuts, sources ; frise sur 50 % de l'écran, figée, avec les logos des extensions, qui zooment puis ouvrent leurs
+// items, 2026-11-19) et « News Pokémon ». Le serveur est imité : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
 const res = []; const ok = (l, c, why) => res.push((c ? '✓ ' : '✗ ') + l + (!c && why ? ' — ' + why : '')); const errors = [];
@@ -136,7 +136,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   await page.evaluate(() => { const m = document.querySelector('section[aria-label="News Pokémon"]'); if (m) m.scrollIntoView(); }); await page.waitForTimeout(300);
   await page.screenshot({ path: shot('coin-news.png') });
 
-  // C2. Frise sur 70 % de l'écran, logos des extensions, zoom puis items de l'extension (2026-11-19, porteur).
+  // C2. Frise sur 50 % de l'écran et figée, logos des extensions, zoom puis items de l'extension (2026-11-19, porteur).
   const fz = await page.evaluate(() => {
     const h = document.querySelector('section[aria-label="Frise du JCC Pokémon"]').getBoundingClientRect();
     const logos = [...document.querySelectorAll('.pkm-cal-dot-logo')];
@@ -146,7 +146,18 @@ const NAV = 'nav[aria-label="Navigation principale"]';
       down: document.querySelectorAll('.pkm-cal-m-has .pkm-cal-dots-down').length, axisAbove: ax.bottom <= tr.top,
       chips: [...document.querySelectorAll('.pkm-cal-dot:not(.pkm-cal-dot-logo)')].map(b => b.textContent.trim()) };
   });
-  ok('frise : au moins 70 % de la hauteur de l’écran (' + Math.round(fz.ratio * 100) + ' %)', fz.ratio >= 0.69);
+  ok('frise : la moitié de l’écran (' + Math.round(fz.ratio * 100) + ' %)', fz.ratio >= 0.49 && fz.ratio <= 0.51);
+  const pinned = await page.evaluate(async () => {
+    const main = document.querySelector('main'), hero = () => document.querySelector('section[aria-label="Frise du JCC Pokémon"]').getBoundingClientRect().top;
+    const eras = () => document.querySelector('section[aria-label="Les blocs du JCC"]').getBoundingClientRect().top;
+    main.scrollTop = 0; await new Promise(r => setTimeout(r, 250));
+    const h0 = hero(), e0 = eras(), t0 = document.querySelector('[aria-label="Le coin des dresseurs"][role="tablist"]').getBoundingClientRect().top;
+    main.scrollTop = 600; await new Promise(r => setTimeout(r, 250));
+    const r = { dh: hero() - h0, de: eras() - e0, dt: document.querySelector('[aria-label="Le coin des dresseurs"][role="tablist"]').getBoundingClientRect().top - t0 };
+    main.scrollTop = 0; await new Promise(r2 => setTimeout(r2, 250));
+    return r;
+  });
+  ok('frise et onglets figés : seul le contenu dessous défile', Math.abs(pinned.dh) < 1 && Math.abs(pinned.dt) < 1 && pinned.de < -500, JSON.stringify(pinned));
   ok('frise : le logo de chaque extension du catalogue (' + fz.logos + '), Règne Delta compris', fz.logos >= 10 && fz.imgs === fz.logos && fz.aria.some(a => /^Règne Delta,.*Voir les items/.test(a)), JSON.stringify(fz.aria));
   ok('frise : sorties sans extension au catalogue gardées en sigle (Japon, rumeurs)', fz.chips.indexOf('M7') >= 0 && fz.chips.indexOf('ex★') >= 0, fz.chips.join(','));
   ok('frise : mois en haut, sorties en alternance au-dessus et au-dessous de la ligne', fz.axisAbove && fz.up >= 5 && fz.down >= 5, JSON.stringify(fz));

@@ -145,7 +145,15 @@
   };
   coinProto.calJump = function (id) {
     this.setState({ calHi: id });
-    setTimeout(() => { try { const el = document.getElementById('pkm-cal-' + id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* page fermée */ } }, 30);
+    // La sortie vient juste sous la frise figée (ou en haut de la page quand la frise ne l'est pas, petit écran).
+    setTimeout(() => { try {
+      const el = document.getElementById('pkm-cal-' + id), main = el && el.closest('main');
+      if (!el) return;
+      if (!main) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+      const pin = document.querySelector('.pkm-cal-pin'), stuck = pin && getComputedStyle(pin).position === 'sticky';
+      const top = stuck ? pin.getBoundingClientRect().bottom : main.getBoundingClientRect().top;
+      main.scrollBy({ top: el.getBoundingClientRect().top - top - 12, behavior: 'smooth' });
+    } catch (e) { /* page fermée */ } }, 30);
   };
   // Appui sur le logo d'une extension dans la frise : le logo sort de la frise, grandit au centre de l'écran sur un
   // voile sombre (« zoom sur la série »), puis l'extension s'ouvre sur son onglet « Items » et le voile s'efface.
@@ -298,15 +306,22 @@
       r.coin = {
         tabs: COIN_TABS.map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-shop-tab pkm-coin-tab' + (tab === k ? ' pkm-shop-tab-on' : ''), pick: () => this.coinPick(k),
           icon: k === 'vit' ? 'vit' : 'cal', isVit: k === 'vit', isCal: k === 'cal' })),
-        isVit: tab === 'vit', isCal: tab === 'cal'
+        isVit: tab === 'vit', isCal: tab === 'cal',
+        // Calendrier : onglets et frise figés en haut (2026-11-19, porteur : « fige l'écran de la frise ») ; seul le
+        // contenu dessous défile. Fond de l'app repris derrière (--pkm-app-bg), comme « Ma ligue ».
+        pinCls: 'pkm-coin-top' + (tab === 'cal' ? ' pkm-cal-pin' : '')
       };
+      if (tab === 'cal') setTimeout(() => { try {
+        const app = document.getElementById('app'), c = app ? getComputedStyle(app).backgroundColor : '';
+        if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) document.documentElement.style.setProperty('--pkm-app-bg', c);
+      } catch (e) { /* page sans racine */ } }, 0);
       r.cv = tab === 'vit' ? this.vCoinVit(s) : { found: [], recent: [] };
       if (tab === 'vit' && typeof this.vTradeTab === 'function') r.tdx = this.vTradeTab(s);
       r.cal = tab === 'cal' ? this.vCal(s) : { months: [], eras: [], past: [], next: [], legend: [] };
       r.nws = tab === 'cal' ? this.vNews(s) : { items: [] };
     } else {
       this.__coinOnce = false;
-      r.coin = { tabs: [] }; r.cv = { found: [], recent: [] }; r.cal = { months: [], eras: [], past: [], next: [], legend: [] }; r.nws = { items: [] };
+      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], eras: [], past: [], next: [], legend: [] }; r.nws = { items: [] };
     }
     // Frise : le mois en cours au milieu, une fois le calendrier affiché.
     if (on && tab === 'cal' && CAL.data && !this.__calScrolled) {
