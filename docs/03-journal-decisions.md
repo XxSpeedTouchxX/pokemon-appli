@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-19 — « Le calendrier TCG » : frise sur 30 % de l'écran, figée en haut (porteur)
+
+- **Frise sur 30 % de l'écran, figée en haut de la page** (porteur : « finalement, mets la frise chronologique sur 30 % figé en haut de la page ») à la place de 50 % : les onglets et la frise restent en place, tout le reste défile dessous.
+- **Rien que la frise dans la partie figée** : le titre « Où en est le JCC Pokémon ? », la date du jour, la légende des 4 statuts et l'aide « Touche un logo… » passent juste sous la frise, dans un encadré qui défile.
+- **Plus compacte** : logos, sigles et tiges plus petits ; dans un mois qui a un logo et des sigles (novembre 2026 : Règne Delta et Aura Seeker), les sigles passent de l'autre côté de la ligne du temps pour que tout tienne.
+- Figée dès 600 px de hauteur d'écran (avant : 740 px) ; frise d'au moins 220 px. Zoom vers les items inchangé.
+- Test `t-coin.mjs` (30 %, rien de coupé, légende sous la frise). Cache v242.
+
 ## 2026-11-19 — « Le calendrier TCG » : frise sur 50 % de l'écran et figée (porteur)
 
 - **Frise sur 50 % de l'écran** (porteur : « finalement, mets la frise sur 50 % de l'écran ») à la place de 70 % ; logos, tiges et marges un peu réduits pour que tout tienne. Sur un petit écran, la frise garde au moins 400 px.

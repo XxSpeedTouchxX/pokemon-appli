@@ -3117,10 +3117,7 @@ PKCOUNTER
 <div role="tablist" aria-label="Le coin des dresseurs" class="pkm-coin-tabs"><sc-for list="{{ coin.tabs }}" as="cnt" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ cnt.on }}" onClick="{{ cnt.pick }}" class="{{ cnt.cls }}"><sc-if value="{{ cnt.isVit }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="4" width="17" height="15" rx="2"></rect><path d="M3.5 9h17M8 13v3M12 12v4M16 13v3"></path></svg></sc-if><sc-if value="{{ cnt.isCal }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="5" width="17" height="15" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"></path></svg></sc-if><span>{{ cnt.label }}</span></button></sc-for></div>
 <sc-if value="{{ coin.isCal }}" hint-placeholder-val="{{ false }}"><sc-if value="{{ cal.ready }}" hint-placeholder-val="{{ true }}">
 <section aria-label="Frise du JCC Pokémon" class="pkm-cal-hero pkm-dark">
-<div class="pkm-cal-hero-h"><h3>Où en est le JCC Pokémon ?</h3><span class="pkm-cal-today"><i aria-hidden="true"></i>{{ cal.today }}</span></div>
-<div class="pkm-cal-strip" role="list" aria-label="Mois par mois"><sc-for list="{{ cal.months }}" as="cmo" hint-placeholder-count="8"><div role="listitem" class="{{ cmo.cls }}"><div class="pkm-cal-axis"><span class="pkm-cal-mlabel">{{ cmo.label }}</span><sc-if value="{{ cmo.hasYear }}" hint-placeholder-val="{{ false }}"><b class="pkm-cal-year">{{ cmo.year }}</b></sc-if><sc-if value="{{ cmo.now }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-now" aria-hidden="true">Aujourd’hui</span></sc-if></div><div class="pkm-cal-plot"><span class="pkm-cal-track" aria-hidden="true"></span><span class="{{ cmo.dotsCls }}"><sc-for list="{{ cmo.dots }}" as="cdt" hint-placeholder-count="1"><button type="button" onClick="{{ cdt.pick }}" aria-label="{{ cdt.aria }}" class="{{ cdt.cls }}"><sc-if value="{{ cdt.hasLogo }}" hint-placeholder-val="{{ true }}"><span class="pkm-cal-dlogo"><img src="{{ cdt.logo }}" alt="" decoding="async"></span></sc-if><span class="pkm-cal-dcode">{{ cdt.code }}</span></button></sc-for></span></div></div></sc-for></div>
-<ul class="pkm-cal-legend" aria-label="Légende"><sc-for list="{{ cal.legend }}" as="clg" hint-placeholder-count="4"><li><span class="{{ clg.cls }}">{{ clg.label }}</span></li></sc-for></ul>
-<p class="pkm-cal-hint">{{ cal.hint }}</p>
+<div class="pkm-cal-strip" role="list" aria-label="Mois par mois"><sc-for list="{{ cal.months }}" as="cmo" hint-placeholder-count="8"><div role="listitem" class="{{ cmo.cls }}"><div class="pkm-cal-axis"><span class="pkm-cal-mlabel">{{ cmo.label }}</span><sc-if value="{{ cmo.hasYear }}" hint-placeholder-val="{{ false }}"><b class="pkm-cal-year">{{ cmo.year }}</b></sc-if><sc-if value="{{ cmo.now }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-now" aria-hidden="true">Aujourd’hui</span></sc-if></div><div class="pkm-cal-plot"><span class="pkm-cal-track" aria-hidden="true"></span><span class="{{ cmo.upCls }}"><sc-for list="{{ cmo.up }}" as="cdt" hint-placeholder-count="1">@@cal-dot@@</sc-for></span><span class="{{ cmo.downCls }}"><sc-for list="{{ cmo.down }}" as="cdt" hint-placeholder-count="1">@@cal-dot@@</sc-for></span></div></div></sc-for></div>
 </section>
 </sc-if></sc-if>
 </div>
@@ -3144,6 +3141,11 @@ PKCOUNTER
 
 <sc-if value="{{ coin.isCal }}" hint-placeholder-val="{{ false }}">
 <sc-if value="{{ cal.ready }}" hint-placeholder-val="{{ true }}">
+<section aria-label="Légende de la frise" class="pkm-cal-key pkm-dark">
+<div class="pkm-cal-hero-h"><h3>Où en est le JCC Pokémon ?</h3><span class="pkm-cal-today"><i aria-hidden="true"></i>{{ cal.today }}</span></div>
+<ul class="pkm-cal-legend" aria-label="Légende"><sc-for list="{{ cal.legend }}" as="clg" hint-placeholder-count="4"><li><span class="{{ clg.cls }}">{{ clg.label }}</span></li></sc-for></ul>
+<p class="pkm-cal-hint">{{ cal.hint }}</p>
+</section>
 <sc-if value="{{ cal.hasEras }}" hint-placeholder-val="{{ true }}">
 <section aria-label="Les blocs du JCC" class="pkm-cal-eras"><sc-for list="{{ cal.eras }}" as="cer" hint-placeholder-count="3"><div class="{{ cer.cls }}"><div class="pkm-cal-era-h"><b>{{ cer.name }}</b><sc-if value="{{ cer.hasTag }}" hint-placeholder-val="{{ true }}"><em>{{ cer.tag }}</em></sc-if></div><span class="pkm-cal-era-p">{{ cer.period }}</span><sc-if value="{{ cer.hasText }}" hint-placeholder-val="{{ false }}"><small>{{ cer.text }}</small></sc-if></div></sc-for></section>
 </sc-if>
@@ -3165,6 +3167,9 @@ PKCOUNTER
 </section>
 </sc-if>
 </sc-if>
+
+<!-- fragment: cal-dot -->
+<button type="button" onClick="{{ cdt.pick }}" aria-label="{{ cdt.aria }}" class="{{ cdt.cls }}"><sc-if value="{{ cdt.hasLogo }}" hint-placeholder-val="{{ true }}"><span class="pkm-cal-dlogo"><img src="{{ cdt.logo }}" alt="" decoding="async"></span></sc-if><span class="pkm-cal-dcode">{{ cdt.code }}</span></button>
 
 <!-- fragment: cal-item -->
 <article id="{{ cit.domId }}" class="{{ cit.cls }}"><span class="pkm-cal-node" aria-hidden="true"></span><div class="pkm-cal-card"><div class="pkm-cal-card-h"><span class="pkm-cal-logo"><sc-if value="{{ cit.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ cit.logo }}" alt="" loading="lazy"></sc-if><sc-if value="{{ cit.noLogo }}" hint-placeholder-val="{{ false }}"><b>{{ cit.initials }}</b></sc-if></span><span class="pkm-cal-card-t"><span class="pkm-cal-when">{{ cit.when }}</span><b>{{ cit.name }}</b><sc-if value="{{ cit.hasSub }}" hint-placeholder-val="{{ false }}"><small>{{ cit.sub }}</small></sc-if></span><span class="{{ cit.stCls }}">{{ cit.status }}</span></div><div class="pkm-cal-meta"><span class="pkm-cal-type">{{ cit.type }}</span><sc-if value="{{ cit.hasCode }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-code">{{ cit.code }}</span></sc-if><sc-if value="{{ cit.hasStars }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-stars">★ {{ cit.stars }}</span></sc-if></div><sc-if value="{{ cit.hasNote }}" hint-placeholder-val="{{ false }}"><p class="pkm-cal-note">{{ cit.note }}</p></sc-if><sc-if value="{{ cit.hasUrl }}" hint-placeholder-val="{{ true }}"><a href="{{ cit.url }}" target="_blank" rel="noopener noreferrer" class="pkm-cal-src">{{ cit.srcText }} ↗</a></sc-if><sc-if value="{{ cit.noUrl }}" hint-placeholder-val="{{ false }}"><span class="pkm-cal-src pkm-cal-src-t">{{ cit.srcText }}</span></sc-if></div></article>

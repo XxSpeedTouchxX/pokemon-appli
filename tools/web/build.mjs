@@ -95,7 +95,7 @@ const fragSrc = readFileSync(fileURLToPath(new URL('./catalog.dc.html', import.m
 for (let i = 1; i < fragSrc.length; i += 2) FRAG[fragSrc[i]] = fragSrc[i + 1].trim() + '\n';
 // Fragments réutilisés (views.js) : « @@view-switch tx.vs@@ » insère le sélecteur de vues sur l'objet tx.vs ;
 // « @@ter-bubble tw@@ » insère la bulle d'infos d'une boutique sur l'alias tw.
-const ALIAS = { 'view-switch': 'VS', 'ter-bubble': 'BB', 'backup-reminder': '', 'pregrade-home': '', 'annonces-home': '', 'trade-tab': '', 'cal-item': '' };
+const ALIAS = { 'view-switch': 'VS', 'ter-bubble': 'BB', 'backup-reminder': '', 'pregrade-home': '', 'annonces-home': '', 'trade-tab': '', 'cal-item': '', 'cal-dot': '' };
 for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w.]+))?@@/g, (m, name, o) => {
   if (!FRAG[name] || ALIAS[name] === undefined) throw new Error('Fragment réutilisé inconnu : ' + name);
   return ALIAS[name] ? FRAG[name].trim().split(ALIAS[name] + '.').join(o + '.') : FRAG[name].trim();
@@ -718,7 +718,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 62) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 62'); // dont 3 logos d'extensions dans « Le calendrier TCG » (frise 2026-11-19, liste 2026-11-18), 2 dans « Autres items de la série » (2026-11-15), 3 logos du DropiPass (bannière du PK shop et de Mon profil, écran de l'offre, 2026-11-15), 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 63) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 63'); // dont 4 logos d'extensions dans « Le calendrier TCG » (frise au-dessus et au-dessous de la ligne 2026-11-19, liste 2026-11-18), 2 dans « Autres items de la série » (2026-11-15), 3 logos du DropiPass (bannière du PK shop et de Mon profil, écran de l'offre, 2026-11-15), 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.

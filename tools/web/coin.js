@@ -231,8 +231,8 @@
       };
     });
     // Frise : un mois par colonne, du premier au dernier mois du calendrier ; repère « Aujourd'hui ».
-    // Frise sur 70 % de l'écran (2026-11-19, porteur : « l'image de la série ou de l'extension à côté des termes,
-    // le calendrier sur 70 % de l'écran, un appui sur le visuel zoome sur la série et ouvre ses items ») : chaque
+    // Frise (2026-11-19, porteur : « l'image de la série ou de l'extension à côté des termes, un appui sur le
+    // visuel zoome sur la série et ouvre ses items » ; 70 %, puis 50 %, puis 30 % de l'écran, figée en haut) : chaque
     // extension du catalogue montre son logo ; un appui zoome sur le logo puis ouvre l'onglet « Items » de
     // l'extension (setview.js). Les sorties sans extension au catalogue (Japon, rumeurs, coffrets) gardent leur
     // sigle et mènent à leur fiche plus bas. Les mois qui ont des sorties alternent au-dessus et au-dessous de la
@@ -246,16 +246,23 @@
       for (let guard = 0; (y < yl || (y === yl && m <= ml)) && guard < 60; guard++) {
         const k = y + '-' + String(m).padStart(2, '0'), here = items.filter(x => x.month === k);
         const up = here.length ? side++ % 2 === 0 : false;
+        const dots = here.map(x => {
+          const zoom = !!(x.setId && x.hasLogo);
+          return { cls: 'pkm-cal-dot ' + x.stCls.replace('pkm-cal-st ', '') + (zoom ? ' pkm-cal-dot-logo' : ''), code: x.short || x.code || x.initials,
+            logo: zoom ? x.logo : '', hasLogo: zoom, setId: x.setId,
+            aria: x.name + ', ' + x.when + ', ' + x.status + (zoom ? '. Voir les items de l’extension' : ''),
+            pick: zoom ? ev => this.calZoom(ev, x.setId, x.setName || x.name) : () => this.calJump(x.id) };
+        });
+        // Frise sur 30 % de l'écran (2026-11-19) : dans un mois qui a un logo et des sigles, les sigles passent de
+        // l'autre côté de la ligne, pour que tout tienne dans la hauteur.
+        const logos = dots.filter(d => d.hasLogo), chips = dots.filter(d => !d.hasLogo), split = logos.length > 0 && chips.length > 0;
+        const mine = split ? logos : dots, other = split ? chips : [];
+        const upList = up ? mine : other, downList = up ? other : mine;
         months.push({ key: k, label: CAL_MONTHS[m - 1].replace('.', ''), year: m === 1 || !months.length ? String(y) : '', hasYear: m === 1 || !months.length,
           now: k === todayKey, cls: 'pkm-cal-m' + (k === todayKey ? ' pkm-cal-m-now' : k < todayKey ? ' pkm-cal-m-past' : '') + (here.length ? ' pkm-cal-m-has' : ''),
-          dotsCls: 'pkm-cal-dots ' + (up ? 'pkm-cal-dots-up' : 'pkm-cal-dots-down'),
-          dots: here.map(x => {
-            const zoom = !!(x.setId && x.hasLogo);
-            return { cls: 'pkm-cal-dot ' + x.stCls.replace('pkm-cal-st ', '') + (zoom ? ' pkm-cal-dot-logo' : ''), code: x.short || x.code || x.initials,
-              logo: zoom ? x.logo : '', hasLogo: zoom, setId: x.setId,
-              aria: x.name + ', ' + x.when + ', ' + x.status + (zoom ? '. Voir les items de l’extension' : ''),
-              pick: zoom ? ev => this.calZoom(ev, x.setId, x.setName || x.name) : () => this.calJump(x.id) };
-          }) });
+          up: upList, down: downList, dots: dots,
+          upCls: 'pkm-cal-dots pkm-cal-dots-up' + (upList.length ? ' pkm-cal-dots-on' : ''),
+          downCls: 'pkm-cal-dots pkm-cal-dots-down' + (downList.length ? ' pkm-cal-dots-on' : '') });
         m++; if (m > 12) { m = 1; y++; }
       }
     }
