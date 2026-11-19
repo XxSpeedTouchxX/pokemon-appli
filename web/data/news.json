@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-19T14:40:04Z",
+ "updated": "2026-11-19T23:13:10Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,13 @@
   }
  ],
  "items": [
+  {
+   "title": "JCC Pokémon : Nouvelle extension Méga-Évolution – Poings Fluides !",
+   "url": "https://www.pokebip.com/news/7645/jcc-pokemon-nouvelle-extension-mega-evolution-poings-fluides",
+   "date": "2026-11-19T20:55:47Z",
+   "source": "Pokébip",
+   "tcg": true
+  },
   {
    "title": "Pokémon Pocket : Combats restreints Fusion Double (C1) et nouveau Booster promo !",
    "url": "https://www.pokebip.com/news/7644/pokemon-pocket-combats-restreints-fusion-double-c1-et-nouveau-booster-promo",
@@ -162,13 +169,6 @@
    "title": "[EDIT : Listes envoyées] Secret Santa 12 (Noël 2026) : Offrez un dessin !",
    "url": "https://www.pokebip.com/news/7627/edit-listes-envoyees-secret-santa-12-noel-2026-offrez-un-dessin",
    "date": "2026-11-04T20:10:02Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon Pokopia : Nouvel évènement annoncé !",
-   "url": "https://www.pokebip.com/news/7626/pokemon-pokopia-nouvel-evenement-annonce",
-   "date": "2026-11-04T15:02:21Z",
    "source": "Pokébip",
    "tcg": false
   },
