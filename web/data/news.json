@@ -1,15 +1,183 @@
 {
- "updated": "2026-11-19T00:30:00Z",
+ "updated": "2026-11-19T00:23:56Z",
  "sources": [
-  {"name": "Pokébip", "url": "https://www.pokebip.com"},
-  {"name": "Margxt", "url": "https://www.margxt.fr"}
+  {
+   "name": "Pokébip",
+   "url": "https://www.pokebip.com"
+  },
+  {
+   "name": "Margxt",
+   "url": "https://www.margxt.fr"
+  }
  ],
  "items": [
-  {"title": "Pokémon Pocket : Combats restreints Fusion Double (C1) et nouveau Booster promo !", "url": "https://www.pokebip.com/news/7644/pokemon-pocket-combats-restreints-fusion-double-c1-et-nouveau-booster-promo", "date": "2026-11-18T08:48:00Z", "source": "Pokébip", "tcg": false},
-  {"title": "Pokémon GO : Collaboration avec Duolingo !", "url": "https://www.pokebip.com/news/7643/pokemon-go-collaboration-avec-duolingo", "date": "2026-11-18T07:50:00Z", "source": "Pokébip", "tcg": false},
-  {"title": "Pokémon Champions : Distribution de Coupons de Vitesse !", "url": "https://www.pokebip.com/news/7642/pokemon-champions-distribution-de-coupons-de-vitesse", "date": "2026-11-17T20:19:00Z", "source": "Pokébip", "tcg": false},
-  {"title": "Liste des cartes Promo McDonald's 2027 du jeu de cartes Pokémon", "url": "https://www.margxt.fr/liste-des-cartes-promo-mcdonalds-2027-du-jeu-de-cartes-pokemon/", "date": "2026-11-12T12:00:00Z", "source": "Margxt", "tcg": true},
-  {"title": "Liste des cartes japonaises Aura Seeker M7 du jeu de cartes Pokémon", "url": "https://www.margxt.fr/liste-des-cartes-japonaises-aura-seeker-m7-du-jeu-de-cartes-pokemon/", "date": "2026-11-09T12:00:00Z", "source": "Margxt", "tcg": true},
-  {"title": "JCC Pokémon : Collection tournoi premium Méga-Rayquaza début 2027", "url": "https://www.margxt.fr/jcc-pokemon-collection-tournoi-premium-mega-rayquaza-debut-2027/", "date": "2026-11-08T12:00:00Z", "source": "Margxt", "tcg": true}
+  {
+   "title": "Pokémon Pocket : Combats restreints Fusion Double (C1) et nouveau Booster promo !",
+   "url": "https://www.pokebip.com/news/7644/pokemon-pocket-combats-restreints-fusion-double-c1-et-nouveau-booster-promo",
+   "date": "2026-11-18T08:48:06Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Collaboration avec Duolingo !",
+   "url": "https://www.pokebip.com/news/7643/pokemon-go-collaboration-avec-duolingo",
+   "date": "2026-11-18T07:50:01Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Champions : Distribution de Coupons de Vitesse !",
+   "url": "https://www.pokebip.com/news/7642/pokemon-champions-distribution-de-coupons-de-vitesse",
+   "date": "2026-11-17T20:19:33Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Pocket : Semaine bonus !",
+   "url": "https://www.pokebip.com/news/7641/pokemon-pocket-semaine-bonus",
+   "date": "2026-11-14T10:01:56Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Souhaits crépusculaires !",
+   "url": "https://www.pokebip.com/news/7632/pokemon-go-souhaits-crepusculaires",
+   "date": "2026-11-13T17:25:02Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Écarlate et Violet : Retour d'Ékaïser surpuissant",
+   "url": "https://www.pokebip.com/news/7640/ecarlate-et-violet-retour-dekaiser-surpuissant",
+   "date": "2026-11-13T08:40:16Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Légendes Pokémon Z-A : Saison X des combats classés !",
+   "url": "https://www.pokebip.com/news/7636/legendes-pokemon-z-a-saison-x-des-combats-classes",
+   "date": "2026-11-13T08:40:01Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Sleep : Quarante-et-unième Journée du doux dodo !",
+   "url": "https://www.pokebip.com/news/7639/pokemon-sleep-quarante-et-unieme-journee-du-doux-dodo",
+   "date": "2026-11-13T08:24:45Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Journée de Raids : Méga-Mélodelfe !",
+   "url": "https://www.pokebip.com/news/7633/pokemon-go-journee-de-raids-mega-melodelfe",
+   "date": "2026-11-12T22:17:01Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Sentiers Dynamax !",
+   "url": "https://www.pokebip.com/news/7631/pokemon-go-sentiers-dynamax",
+   "date": "2026-11-12T22:03:01Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Passe GO : Sentiers Dynamax !",
+   "url": "https://www.pokebip.com/news/7638/pokemon-go-passe-go-sentiers-dynamax",
+   "date": "2026-11-12T22:00:02Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Distributions d'Yveltal shiny sur Légendes Pokémon : Z-A et de meubles sur Pokémon Pokopia !",
+   "url": "https://www.pokebip.com/news/7637/distributions-dyveltal-shiny-sur-legendes-pokemon-z-a-et-de-meubles-sur-pokemon-pokopia",
+   "date": "2026-11-12T20:29:47Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Distributions de Xerneas shiny sur Légendes Pokémon : Z-A et de meubles sur Pokémon Pokopia !",
+   "url": "https://www.pokebip.com/news/7635/distributions-de-xerneas-shiny-sur-legendes-pokemon-z-a-et-de-meubles-sur-pokemon-pokopia",
+   "date": "2026-11-12T19:50:20Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Liste des cartes Promo McDonald’s 2027 du jeu de cartes Pokémon",
+   "url": "https://www.margxt.fr/liste-des-cartes-promo-mcdonalds-2027-du-jeu-de-cartes-pokemon/",
+   "date": "2026-11-12T09:00:00Z",
+   "source": "Margxt",
+   "tcg": true
+  },
+  {
+   "title": "Pokémon Sleep : Évènement Semaine Fragments de Rêve 3 !",
+   "url": "https://www.pokebip.com/news/7634/pokemon-sleep-evenement-semaine-fragments-de-reve-3",
+   "date": "2026-11-11T09:29:43Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Liste des cartes japonaises Aura Seeker M7 du jeu de cartes Pokémon",
+   "url": "https://www.margxt.fr/liste-des-cartes-japonaises-aura-seeker-m7-du-jeu-de-cartes-pokemon/",
+   "date": "2026-11-09T22:26:28Z",
+   "source": "Margxt",
+   "tcg": true
+  },
+  {
+   "title": "JCC Pokémon : Collection tournoi premium Méga-Rayquaza début 2027",
+   "url": "https://www.margxt.fr/jcc-pokemon-collection-tournoi-premium-mega-rayquaza-debut-2027/",
+   "date": "2026-11-08T00:04:00Z",
+   "source": "Margxt",
+   "tcg": true
+  },
+  {
+   "title": "Liste des cartes Promo McDonald’s 2026 du jeu de cartes Pokémon",
+   "url": "https://www.margxt.fr/liste-des-cartes-promo-mcdonalds-2026-du-jeu-de-cartes-pokemon/",
+   "date": "2026-11-07T22:38:41Z",
+   "source": "Margxt",
+   "tcg": true
+  },
+  {
+   "title": "Écarlate et Violet : Retour de Muplodocus surpuissant",
+   "url": "https://www.pokebip.com/news/7630/ecarlate-et-violet-retour-de-muplodocus-surpuissant",
+   "date": "2026-11-06T08:25:27Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Légendes Pokémon Z-A : Distribution de Prismillon (Motif Poké Ball) !",
+   "url": "https://www.pokebip.com/news/7628/legendes-pokemon-z-a-distribution-de-prismillon-motif-poke-ball",
+   "date": "2026-11-06T08:25:02Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Pocket : Évènement insigne Fusion Double",
+   "url": "https://www.pokebip.com/news/7629/pokemon-pocket-evenement-insigne-fusion-double",
+   "date": "2026-11-06T08:06:11Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "[EDIT : Listes envoyées] Secret Santa 12 (Noël 2026) : Offrez un dessin !",
+   "url": "https://www.pokebip.com/news/7627/edit-listes-envoyees-secret-santa-12-noel-2026-offrez-un-dessin",
+   "date": "2026-11-04T20:10:02Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Pokopia : Nouvel évènement annoncé !",
+   "url": "https://www.pokebip.com/news/7626/pokemon-pokopia-nouvel-evenement-annonce",
+   "date": "2026-11-04T15:02:21Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Distribution d'un Nymphali, de boosters numériques et d'une étude ponctuelle !",
+   "url": "https://www.pokebip.com/news/7593/distribution-dun-nymphali-de-boosters-numeriques-et-dune-etude-ponctuelle",
+   "date": "2026-10-16T16:34:31Z",
+   "source": "Pokébip",
+   "tcg": false
+  }
  ]
 }
