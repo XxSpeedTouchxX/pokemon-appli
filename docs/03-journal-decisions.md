@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-19 — « Le calendrier TCG » : ligne droite, zoom vers la page de l'extension (porteur)
+
+- **Ligne du temps parfaitement droite** (porteur : « la ligne n'est pas parfaitement droite, on dirait qu'elle a un léger décalage ») : les mois avec l'année (« 2027 ») ou « Aujourd'hui » sous leur nom avaient une étiquette plus haute, et la ligne y descendait de 1 à 2 px. Toutes les étiquettes ont maintenant la même hauteur : la ligne est au même pixel sur les 29 mois.
+- **Zoom sur l'extension, puis sa page** (porteur : « un zoom qui se fasse sur l'extension et ensuite ça ouvre la page de l'extension avec les items et les cartes ») : après l'appui (le logo s'enfonce et s'allume), la frise plonge vers l'extension touchée pendant que son logo grandit au centre de l'écran avec « Ouverture de l'extension » ; la page de l'extension arrive alors en zoom (au lieu du glissement habituel), sur l'onglet **« Cartes »** avec l'onglet **« Items »** juste à côté (avant : directement sur « Items »). Le retour reste le glissement habituel et ramène la frise à la même place.
+- Logo pas encore chargé : même zoom, sans le logo. Réglage « Réduire les animations » du téléphone : la page s'ouvre directement.
+- Test `t-coin.mjs` (ligne droite, plongée de la frise, page qui arrive en zoom, onglets Cartes et Items). Cache v246.
+
 ## 2026-11-19 — « Le calendrier TCG » : la frise seule, en plein écran (porteur)
 
 - **Tout ce qui était sous la frise est retiré** (porteur : « supprime-moi les infos sous la chronologie, je veux juste la chronologie qui prenne tout l'écran ») : titre, date du jour, légende des statuts, blocs du JCC, liste des sorties et **News Pokémon**. La frise remplit l'écran jusqu'au-dessus du bouton du scan, rien ne défile ; plus l'écran est haut, plus les logos sont grands.

@@ -31,6 +31,9 @@
   const navBaseRender = proto.renderVals;
   proto.renderVals = function () { const r = navBaseRender.call(this); if (r && r.ui) r.ui.hhAny = !!(r.ui.headerHome || r.ui.headerBig); return r; };
   proto.push = function (screen, extra) { NAV.dir = 'fwd'; NAV.from = 0; navSnapTake(); return navBasePush.call(this, screen, extra); };
+  // Ouverture « en zoom » (2026-11-19, calendrier TCG : zoom sur l'extension touchée, coin.js calZoom) : la nouvelle page
+  // grandit depuis le centre au lieu de glisser de la droite ; le retour reste le glissement habituel.
+  proto.navZoomPush = function (screen, extra) { NAV.dir = 'zoom'; NAV.from = 0; navSnapDrop(); return navBasePush.call(this, screen, extra); };
   proto.pop = function () { NAV.dir = 'back'; navSnapTake(); return navBasePop.call(this); };
   proto.tab = function (screen) { NAV.dir = 'tab'; navSnapDrop(); return navBaseTab.call(this, screen); };
   // Même page, autre contenu, avec le glissement d'une page (2026-11-08, porteur : « Grade précédent » / « Grade
@@ -92,6 +95,11 @@
   const navAnimate = (main, dir) => {
     const root = navRoot(), snap = NAV.snap;
     if (!root || navStill() || !root.animate) { navSnapDrop(); return; }
+    if (dir === 'zoom') {
+      navSnapDrop();
+      if (main) main.animate([{ transform: 'scale(0.82)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 480, easing: NAV_EASE });
+      return;
+    }
     if (dir === 'tab' || !snap) {
       navSnapDrop();
       if (main) main.animate([{ transform: 'translateY(10px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 300, easing: NAV_EASE });
