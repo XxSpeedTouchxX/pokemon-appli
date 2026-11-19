@@ -24,14 +24,14 @@
 
   // ——— Onglet et en-tête ———
   coinProto.coinGo = function (t) {
-    if (t) this.setState({ coinTab: t });
+    this.setState(Object.assign({ calSel: null }, t ? { coinTab: t } : {}));
     this.tab('coin');
     if ((t || this.st().coinTab || 'vit') === 'vit') setTimeout(() => this.coinEnterVit(false), 0);
     else setTimeout(() => this.calLoad(false), 0);
   };
   coinProto.coinPick = function (t) {
     if (this.st().coinTab === t) return;
-    this.setState({ coinTab: t });
+    this.setState({ coinTab: t, calSel: null });
     if (t === 'vit') this.coinEnterVit(true); else this.calLoad(false);
   };
   coinProto.coinEnterVit = function (force) {
@@ -109,17 +109,16 @@
     };
   };
 
-  // ——— Le calendrier TCG et les News Pokémon ———
-  const CAL = { status: 'idle', data: null, news: null, newsStatus: 'idle', at: 0 };
+  // ——— Le calendrier TCG ———
+  // (« News Pokémon » retirées de l'écran le 2026-11-19, porteur : « je veux juste la chronologie » ; le fichier
+  // data/news.json reste mis à jour par son workflow, l'app ne le lit plus.)
+  const CAL = { status: 'idle', data: null, at: 0 };
   const calGet = url => fetch(url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
   coinProto.calLoad = function (force) {
     if (CAL.status === 'busy' || (!force && CAL.status === 'ready' && Date.now() - CAL.at < 3600000)) return;
     CAL.status = 'busy';
     calGet('data/calendar.json').then(d => { CAL.data = d; CAL.status = 'ready'; CAL.at = Date.now(); this.setState({ calTick: Date.now() }); },
       () => { CAL.status = CAL.data ? 'ready' : 'error'; this.setState({ calTick: Date.now() }); });
-    CAL.newsStatus = 'busy';
-    calGet('data/news.json').then(d => { CAL.news = d; CAL.newsStatus = 'ready'; this.setState({ calTick: Date.now() }); },
-      () => { CAL.newsStatus = CAL.news ? 'ready' : 'error'; this.setState({ calTick: Date.now() }); });
   };
   const CAL_STATUS = {
     sortie: { label: 'Sortie', cls: 'pkm-cal-st-out' },
@@ -143,23 +142,18 @@
     const d = Math.round(h / 24); if (d < 30) return 'il y a ' + d + ' j';
     return new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
-  coinProto.calJump = function (id) {
-    this.setState({ calHi: id });
-    // La sortie vient juste sous la frise figée (ou en haut de la page quand la frise ne l'est pas, petit écran).
-    setTimeout(() => { try {
-      const el = document.getElementById('pkm-cal-' + id), main = el && el.closest('main');
-      if (!el) return;
-      if (!main) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
-      const pin = document.querySelector('.pkm-cal-pin'), stuck = pin && getComputedStyle(pin).position === 'sticky';
-      const top = stuck ? pin.getBoundingClientRect().bottom : main.getBoundingClientRect().top;
-      main.scrollBy({ top: el.getBoundingClientRect().top - top - 12, behavior: 'smooth' });
-    } catch (e) { /* page fermée */ } }, 30);
-  };
+  // Appui sur une sortie sans extension au catalogue (Japon, rumeurs, coffrets, annonces) : sa fiche monte du bas avec
+  // toutes ses infos (date, noms, statut, type, sigle, cartes vedettes, note, source), comme les fiches de la liste
+  // retirée sous la frise (2026-11-19, porteur : « ces infos quand tu cliques sur les prochaines sorties »).
+  coinProto.calOpen = function (id) { this.setState({ calSel: id }); };
+  coinProto.calClose = function () { this.setState({ calSel: null }); };
   // Appui sur le logo d'une extension dans la frise : le logo sort de la frise, grandit au centre de l'écran sur un
   // voile sombre (« zoom sur la série »), puis l'extension s'ouvre sur son onglet « Items » et le voile s'efface.
   // Le logo est posé à sa taille finale puis rétréci au départ (net pendant tout le zoom). Sans animation possible
   // (mouvements réduits, image pas chargée) : l'extension s'ouvre tout de suite.
-  const CALZ_FLY = 620, CALZ_GO = 860, CALZ_END = 1320;
+  // Appui marqué d'abord (2026-11-19, porteur : « la cinétique comme quoi tu appuies ») : la tuile s'enfonce (0,14 s,
+  // petite vibration sur Android), puis le zoom part de la tuile enfoncée.
+  const CALZ_PRESS = 180, CALZ_FLY = 620, CALZ_GO = CALZ_PRESS + 860, CALZ_END = CALZ_PRESS + 1320;
   coinProto.calZoom = function (ev, setId, name) {
     if (!setId || this.__calZ) return;
     const go = () => {
@@ -170,9 +164,17 @@
     try { const b = ev && ev.currentTarget; img = b && b.querySelector ? b.querySelector('img') : null; } catch (e) { img = null; }
     const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (typeof document === 'undefined' || !img || !img.complete || !img.naturalWidth || reduce || typeof img.animate !== 'function') { go(); return; }
-    const r = img.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
-    if (!r.width || !r.height) { go(); return; }
+    if (!img.getBoundingClientRect().width) { go(); return; }
     this.__calZ = true;
+    const src = img.closest ? img.closest('button') : null;
+    let press = null;
+    try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) { /* pas de vibreur */ }
+    try { if (src) press = src.animate([{ transform: 'scale(1)', boxShadow: getComputedStyle(src).boxShadow }, { transform: 'scale(0.86)', boxShadow: '0 0 0 3px rgba(255, 214, 10, 0.9), 0 0 22px rgba(255, 214, 10, 0.55)', offset: 0.7 }, { transform: 'scale(0.9)', boxShadow: '0 0 0 3px rgba(255, 214, 10, 0.9), 0 0 22px rgba(255, 214, 10, 0.55)' }], { duration: CALZ_PRESS, easing: 'ease-out', fill: 'forwards' }); } catch (e) { press = null; }
+    setTimeout(() => this.calZoomFly(img, src, press, name, go), CALZ_PRESS);
+  };
+  coinProto.calZoomFly = function (img, src, press, name, go) {
+    const r = img.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+    if (!r.width || !r.height) { this.__calZ = false; if (press) press.cancel(); go(); return; }
     const ratio = r.width / r.height, w = Math.min(vw * 0.74, 340, vh * 0.3 * ratio), h = w / ratio;
     const cx = vw / 2, cy = vh * 0.44, k = r.width / w;
     const el = document.createElement('div');
@@ -186,7 +188,6 @@
     t.style.top = (cy + h / 2 + 18) + 'px';
     t.querySelector('b').textContent = name || '';
     (document.getElementById('app') || document.body).appendChild(el);
-    const src = img.closest ? img.closest('button') : null;
     if (src) src.style.visibility = 'hidden';
     const dx = (r.left + r.width / 2) - cx, dy = (r.top + r.height / 2) - cy;
     const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
@@ -200,17 +201,18 @@
     setTimeout(() => {
       go();
       if (src) src.style.visibility = '';
+      if (press) try { press.cancel(); } catch (e) { /* rien */ }
       try {
         el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CALZ_END - CALZ_GO, easing: 'ease-in', fill: 'both' });
         logo.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }], { duration: CALZ_END - CALZ_GO, easing: 'ease-in', fill: 'both' });
       } catch (e) { /* rien */ }
-    }, CALZ_GO);
-    setTimeout(() => { el.remove(); this.__calZ = false; }, CALZ_END);
+    }, CALZ_GO - CALZ_PRESS);
+    setTimeout(() => { el.remove(); this.__calZ = false; }, CALZ_END - CALZ_PRESS);
   };
   coinProto.vCal = function (s) {
     const d = CAL.data, today = realToday(), todayKey = calMonthKey(today);
     if (!d || !Array.isArray(d.items)) {
-      return { ready: false, notReady: true, loading: CAL.status === 'error' ? 'Le calendrier n’a pas pu être chargé. Réessaie dans un instant.' : 'Chargement du calendrier…', months: [], eras: [], items: [], legend: [] };
+      return { ready: false, notReady: true, loading: CAL.status === 'error' ? 'Le calendrier n’a pas pu être chargé. Réessaie dans un instant.' : 'Chargement du calendrier…', months: [], sel: [] };
     }
     const setOf = id => (typeof TCG !== 'undefined' && TCG.status === 'ready' && id ? TCG.setList.find(e => e.id === id) : null);
     const items = d.items.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)).map((x, i) => {
@@ -223,7 +225,7 @@
         id: id, domId: 'pkm-cal-' + id, date: x.date || '', when: calDateText(x.date, x.dateText), name: x.name, sub: [x.en, x.jp].filter(Boolean).join(' · '),
         hasSub: !!(x.en || x.jp), short: x.short || '', code: x.code || '', hasCode: !!x.code, type: x.type || 'Extension', stars: (x.stars || []).join(', '), hasStars: !!(x.stars && x.stars.length),
         note: x.note || '', hasNote: !!x.note, status: st.label, stCls: 'pkm-cal-st ' + st.cls,
-        cls: 'pkm-cal-item ' + st.cls + (past ? ' pkm-cal-past' : ' pkm-cal-next') + (s.calHi === id ? ' pkm-cal-hi' : ''),
+        cls: 'pkm-cal-item ' + st.cls + (past ? ' pkm-cal-past' : ' pkm-cal-next'),
         logo: logo, hasLogo: !!logo, noLogo: !logo, initials: String(x.code || x.name || '?').slice(0, 4),
         source: x.source || '', srcText: x.source ? 'Source : ' + x.source + (x.sourceDate ? ' (' + calDateText(x.sourceDate) + ')' : '') : 'Estimation, sans annonce officielle',
         url: x.url || '', hasUrl: !!x.url, noUrl: !x.url, past: past, month: calMonthKey(x.date),
@@ -251,7 +253,7 @@
           return { cls: 'pkm-cal-dot ' + x.stCls.replace('pkm-cal-st ', '') + (zoom ? ' pkm-cal-dot-logo' : ''), code: x.short || x.code || x.initials,
             logo: zoom ? x.logo : '', hasLogo: zoom, setId: x.setId,
             aria: x.name + ', ' + x.when + ', ' + x.status + (zoom ? '. Voir les items de l’extension' : ''),
-            pick: zoom ? ev => this.calZoom(ev, x.setId, x.setName || x.name) : () => this.calJump(x.id) };
+            pick: zoom ? ev => this.calZoom(ev, x.setId, x.setName || x.name) : () => this.calOpen(x.id) };
         });
         // Frise basse (20 % de l'écran, 2026-11-19) : dans un mois qui a un logo et des sigles, les sigles passent de
         // l'autre côté de la ligne, pour que tout tienne dans la hauteur.
@@ -266,36 +268,13 @@
         m++; if (m > 12) { m = 1; y++; }
       }
     }
-    const nextIx = items.findIndex(x => !x.past);
-    const past = nextIx < 0 ? items : items.slice(0, nextIx), next = nextIx < 0 ? [] : items.slice(nextIx);
-    const showAll = !!s.calAll, pastShown = showAll ? past : past.slice(-3);
-    const eras = (d.eras || []).map(e => {
-      const st = CAL_STATUS[e.status] || null;
-      return { name: e.name, period: e.period || '', text: e.text || '', hasText: !!e.text, cls: 'pkm-cal-era' + (e.current ? ' pkm-cal-era-now' : '') + (e.status === 'rumeur' ? ' pkm-cal-era-rum' : ''),
-        tag: e.tag || (e.current ? 'En cours' : st ? st.label : ''), hasTag: !!(e.tag || e.current || st) };
-    });
+    const sel = s.calSel ? items.filter(x => x.id === s.calSel) : [];
     return {
-      ready: true, notReady: false, loading: '', today: 'Aujourd’hui · ' + calDateText(today), updated: d.updated ? 'Calendrier mis à jour le ' + calDateText(d.updated) : '',
-      months: months, eras: eras, hasEras: eras.length > 0,
-      past: pastShown, hasPast: pastShown.length > 0, morePast: !showAll && past.length > pastShown.length,
-      morePastText: 'Voir les ' + (past.length - pastShown.length) + ' sorties précédentes', togglePast: () => this.setState({ calAll: !showAll }),
-      lessPast: showAll && past.length > 3,
-      next: next, hasNext: next.length > 0,
-      legend: Object.keys(CAL_STATUS).map(k => ({ label: CAL_STATUS[k].label, cls: 'pkm-cal-st ' + CAL_STATUS[k].cls })),
-      hint: 'Touche un logo pour voir les items de l’extension.',
-      note: d.note || 'Dates françaises quand elles sont annoncées. Une annonce japonaise ou une rumeur peut changer : la source de chaque date est indiquée.'
+      ready: true, notReady: false, loading: '', months: months,
+      sel: sel, hasSel: sel.length > 0, selTitle: sel.length && sel[0].past ? 'Sortie' : 'Prochaine sortie',
+      selLabel: sel.length ? sel[0].name + ', ' + sel[0].when : '', closeSel: () => this.calClose()
     };
   };
-  coinProto.vNews = function () {
-    const n = CAL.news, list = n && Array.isArray(n.items) ? n.items : [];
-    const items = list.slice(0, 15).map(x => ({ title: x.title, url: x.url, source: x.source || '', ago: calAgo(x.date), tcg: !!x.tcg,
-      aria: x.title + ' · ' + (x.source || '') + ' · ' + calAgo(x.date) + ' (nouvel onglet)' }));
-    const msg = CAL.newsStatus === 'error' ? 'Les news n’ont pas pu être chargées. Réessaie dans un instant.' : CAL.newsStatus !== 'ready' ? 'Chargement des news…' : !items.length ? 'Pas de news Pokémon pour le moment.' : '';
-    return { items: items, has: items.length > 0, msg: msg, hasMsg: !!msg,
-      updated: n && n.updated ? 'News relues ' + calAgo(n.updated) : '',
-      sources: n && Array.isArray(n.sources) && n.sources.length ? 'Sources : ' + n.sources.map(x => x.name).join(', ') + '. Titres et liens seulement : chaque article s’ouvre sur son site.' : '' };
-  };
-
   // ——— Rendu ———
   const coinBaseRender = coinProto.renderVals;
   coinProto.renderVals = function () {
@@ -324,11 +303,10 @@
       } catch (e) { /* page sans racine */ } }, 0);
       r.cv = tab === 'vit' ? this.vCoinVit(s) : { found: [], recent: [] };
       if (tab === 'vit' && typeof this.vTradeTab === 'function') r.tdx = this.vTradeTab(s);
-      r.cal = tab === 'cal' ? this.vCal(s) : { months: [], eras: [], past: [], next: [], legend: [] };
-      r.nws = tab === 'cal' ? this.vNews(s) : { items: [] };
+      r.cal = tab === 'cal' ? this.vCal(s) : { months: [], sel: [] };
     } else {
       this.__coinOnce = false;
-      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], eras: [], past: [], next: [], legend: [] }; r.nws = { items: [] };
+      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], sel: [] };
     }
     // Frise : le mois en cours au milieu, une fois le calendrier affiché.
     if (on && tab === 'cal' && CAL.data && !this.__calScrolled) {

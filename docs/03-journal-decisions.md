@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-19 — « Le calendrier TCG » : la frise seule, en plein écran (porteur)
+
+- **Tout ce qui était sous la frise est retiré** (porteur : « supprime-moi les infos sous la chronologie, je veux juste la chronologie qui prenne tout l'écran ») : titre, date du jour, légende des statuts, blocs du JCC, liste des sorties et **News Pokémon**. La frise remplit l'écran jusqu'au-dessus du bouton du scan, rien ne défile ; plus l'écran est haut, plus les logos sont grands.
+- **Un appui sur une sortie ouvre sa fiche** (porteur : « retrouver ces infos quand tu cliques sur les prochaines sorties ») : fiche qui monte du bas, comme les autres fenêtres d'infos, avec la date, le nom, le statut (Sortie, Officiel, Annonce Japon, Rumeur), le type, le sigle, les cartes vedettes (ex★ : Entei, Raikou, Suicune), l'explication et la source de la date. Elle se ferme avec la croix ou un appui au-dessus d'elle.
+- **Appui sur une extension du catalogue** (porteur : « la cinétique comme quoi tu appuies ») : le logo s'enfonce et s'allume en jaune (0,18 s, petite vibration sur Android), puis zoom sur l'extension, puis ses items. Avec le réglage « Réduire les animations » du téléphone, l'extension s'ouvre directement, sans zoom.
+- Le fichier `web/data/news.json` reste mis à jour par son workflow, mais l'app ne l'affiche plus.
+- Test `t-coin.mjs` (frise plein écran, rien dessous, fiches M7 et ex★, appui puis zoom puis items). Cache v245.
+
 ## 2026-11-19 — Tous les prix de l'app passent par Stripe : recharges de PA payées (porteur)
 
 - **Demande** (porteur) : « reprendre les prix de Dropicards actuels et faire des redirections Stripe par rapport à tous les prix sur l'application ».
@@ -15,6 +23,7 @@
 - **Défauts appliqués, à confirmer** : 1ʳᵉ recharge doublée (une fois par compte), PA repris au prorata d'un remboursement sans passer sous 0, refus des comptes « moins de 15 ans ».
 - **Inchangé** : achats réservés aux admins (`NOBUY_ON`, `PREMIUM_OPEN`), aucune offre payante dans les apps des stores.
 - **À faire par le porteur** : `docs/28` § 8 septies (035, fonction `stripe`, 2 événements du webhook, reçus Stripe).
+
 ## 2026-11-19 — « Le calendrier TCG » : frise sur 20 % de l'écran, figée (porteur)
 
 - **Frise sur 20 % de l'écran, toujours figée en haut avec les onglets** (porteur : « fais 20 % de l'écran finalement, figé ») à la place de 30 %.

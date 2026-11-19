@@ -3482,8 +3482,8 @@ html.pkm-landscape, html.pkm-landscape body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .pkm-rotlock-g, .pkm-rotlock-arrow { animation: none; } }
 
 /* « Le coin des dresseurs » (coin.js, 2026-11-18, porteur) : 5ᵉ onglet, « Ma vitrine » (recherche des dresseurs) et
-   « Le calendrier TCG » (frise, blocs, sorties, annonces, rumeurs, News Pokémon). Cartes sombres, lisibles dans les
-   3 apparences (Sombre, Clair, Original). */
+   « Le calendrier TCG » (frise chronologique en plein écran ; un appui sur une sortie ouvre sa fiche, un appui sur une
+   extension ouvre ses items). Cartes sombres, lisibles dans les 3 apparences (Sombre, Clair, Original). */
 
 /* Logo de l'onglet : un seul des 4 logos proposés est visible (?coinvis=1 à 4, « Dresseurs » par défaut). Disposition
    de la barre du bas : navbar.css. */
@@ -3528,76 +3528,57 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-cal-st.pkm-cal-st-jp { background: rgba(185, 140, 255, 0.16); color: #D4BBFF; border: 1px solid rgba(185, 140, 255, 0.6); }
 .pkm-cal-st.pkm-cal-st-rum { background: rgba(255, 180, 107, 0.14); color: #FFC992; border: 1px dashed rgba(255, 180, 107, 0.75); }
 
-/* Frise : un mois par colonne, points des sorties, repère « Aujourd'hui ». */
-.pkm-cal-hero { display: flex; flex-direction: column; gap: 12px; padding: 14px 0 12px; border-radius: 22px; border: 1px solid #24345C; background: linear-gradient(180deg, #16234A, #0F1830); color: #F3F6FC; overflow: hidden; flex-shrink: 0; }
-.pkm-cal-hero-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; padding: 0 14px; }
-.pkm-cal-hero-h h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
-.pkm-cal-today { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: #FFE680; }
-.pkm-cal-today i { width: 8px; height: 8px; border-radius: 4px; background: #FFD60A; box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.7); animation: pkmCalPulse 1.8s ease-out infinite; }
-@keyframes pkmCalPulse { 0% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.7); } 100% { box-shadow: 0 0 0 9px rgba(255, 214, 10, 0); } }
-.pkm-cal-strip { display: flex; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 0 34px 4px; scroll-behavior: smooth; }
+
+/* Frise en plein écran (2026-11-19, porteur : « je veux juste la chronologie qui prenne tout l'écran ») : les mois en
+   haut, la ligne du temps au milieu, les sorties d'un mois au-dessus ou au-dessous (en alternance), reliées à la ligne
+   par une tige. Rien d'autre sous la frise : un appui sur une sortie ouvre sa fiche (.pkm-cal-ov), un appui sur le logo
+   d'une extension du catalogue zoome dessus puis ouvre ses items (coin.js, calZoom). Les tailles suivent la hauteur
+   de la frise (container-type: size, unités cqh) : plus l'écran est haut, plus les logos sont grands. */
+/* Onglets en haut de la rubrique ; sur le calendrier, ils et la frise remplissent toute la hauteur. */
+.pkm-coin-top { flex: none; display: flex; flex-direction: column; gap: 14px; }
+.pkm-coin-top.pkm-cal-pin { flex: 1 1 auto; min-height: 0; margin-bottom: 14px; } /* 14 px : la frise s’arrête au-dessus du dôme du scan. */
+.pkm-cal-hero { flex: 1 1 auto; min-height: 220px; box-sizing: border-box; display: flex; flex-direction: column; padding: 8px 0 6px; border-radius: 22px; border: 1px solid #24345C;
+  background: linear-gradient(180deg, #16234A, #0F1830); color: #F3F6FC; container-type: size; overflow: hidden;
+  --pkm-cal-tile: clamp(76px, 21cqh, 124px); --pkm-cal-stem: clamp(5px, 3.5cqh, 26px); }
+.pkm-cal-strip { flex: 1; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 0 34px 4px; scroll-behavior: smooth; }
 .pkm-cal-strip::-webkit-scrollbar { display: none; }
 .pkm-cal-m { position: relative; flex: none; width: 46px; display: flex; flex-direction: column; }
-.pkm-cal-m-has { width: 74px; }
-.pkm-cal-year { font-size: 10.5px; font-weight: 800; color: #9AA8C3; line-height: 1.1; }
-.pkm-cal-mlabel { font-size: 11.5px; font-weight: 700; color: #C9D3EA; text-transform: capitalize; line-height: 1.2; }
+.pkm-cal-m-has { width: clamp(74px, 15cqh, 96px); }
+.pkm-cal-axis { flex: none; min-height: 28px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding-bottom: 4px; }
+.pkm-cal-year { font-size: 10.5px; font-weight: 800; color: #9AA8C3; line-height: 13px; }
+.pkm-cal-mlabel { font-size: clamp(11.5px, 2.6cqh, 13.5px); font-weight: 700; color: #C9D3EA; text-transform: capitalize; line-height: 1.2; }
 .pkm-cal-m-past .pkm-cal-mlabel { color: #7D8BA8; }
 .pkm-cal-m-now .pkm-cal-mlabel { color: #FFE680; }
+.pkm-cal-now { padding: 1px 6px; border-radius: 999px; background: #FFD60A; color: #0B1120; font-size: 9.5px; line-height: 13px; font-weight: 800; white-space: nowrap; box-shadow: 0 0 12px rgba(255, 214, 10, 0.45); }
+.pkm-cal-plot { position: relative; flex: 1; min-height: 0; }
 .pkm-cal-track { position: absolute; left: 0; right: 0; top: calc(50% - 2px); height: 4px; background: #2A3A5C; }
 .pkm-cal-m-past .pkm-cal-track { background: #3DDC84; }
 .pkm-cal-m-now .pkm-cal-track { background: linear-gradient(90deg, #3DDC84 50%, #2A3A5C 50%); }
-.pkm-cal-dots { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.pkm-cal-dot { min-width: 44px; min-height: 24px; padding: 0 5px; border-radius: 999px; border: 2px solid; background: #0B1120; font: inherit; font-size: 10px; font-weight: 800; letter-spacing: 0.2px; cursor: pointer; }
+.pkm-cal-m-now .pkm-cal-plot::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 6px; border-left: 2px dashed rgba(255, 214, 10, 0.55); }
+.pkm-cal-m-has .pkm-cal-track::after { content: ''; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 6px; background: #0B1120; border: 3px solid #C9D3EA; box-sizing: border-box; }
+.pkm-cal-m-past.pkm-cal-m-has .pkm-cal-track::after { border-color: #3DDC84; }
+.pkm-cal-dots { position: absolute; z-index: 1; left: 50%; transform: translateX(-50%); width: calc(var(--pkm-cal-tile) + 4px); display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 4px; }
+.pkm-cal-dots-up { bottom: 50%; flex-wrap: wrap-reverse; padding-bottom: var(--pkm-cal-stem); }
+.pkm-cal-dots-down { top: 50%; padding-top: var(--pkm-cal-stem); }
+.pkm-cal-dots-on::before { content: ''; position: absolute; left: 50%; width: 2px; margin-left: -1px; height: var(--pkm-cal-stem); background: rgba(201, 211, 234, 0.45); }
+.pkm-cal-dots-up::before { bottom: 0; }
+.pkm-cal-dots-down::before { top: 0; }
+/* Sigle d'une sortie (annonce du Japon, rumeur, coffret…) : un appui ouvre sa fiche. */
+.pkm-cal-dot { flex: none; white-space: nowrap; min-width: 40px; min-height: clamp(22px, 5.5cqh, 30px); padding: 0 6px; border-radius: 999px; border: 2px solid; background: #0B1120; font: inherit;
+  font-size: clamp(9px, 2.3cqh, 11.5px); font-weight: 800; letter-spacing: 0.2px; cursor: pointer; transition: transform 0.12s ease-out; }
+.pkm-cal-dot:active { transform: scale(0.9); }
 .pkm-cal-dot.pkm-cal-st-out { border-color: #3DDC84; color: #8DF0B8; }
 .pkm-cal-dot.pkm-cal-st-off { border-color: #5B9DFF; color: #A8C8FF; }
 .pkm-cal-dot.pkm-cal-st-jp { border-color: #B98CFF; color: #D4BBFF; }
 .pkm-cal-dot.pkm-cal-st-rum { border-style: dashed; border-color: #FFB46B; color: #FFC992; }
 .pkm-cal-dot:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
-.pkm-cal-now { padding: 1px 6px; border-radius: 999px; background: #FFD60A; color: #0B1120; font-size: 9.5px; font-weight: 800; white-space: nowrap; box-shadow: 0 0 12px rgba(255, 214, 10, 0.55); }
-
-/* Frise sur 20 % de l'écran, figée en haut (2026-11-19, porteur : 70 %, puis 50 %, puis 30 % figé en haut de la page,
-   puis « 20 % de l'écran finalement figé ») : rien que la frise (titre, légende et aide juste dessous, .pkm-cal-key) ; les mois en haut, la ligne du
-   temps au milieu, les sorties d'un mois au-dessus ou au-dessous (en alternance), reliées à la ligne par une tige ; le logo de chaque extension
-   du catalogue, qui ouvre ses items (coin.js, calZoom). */
-.pkm-cal-hero { box-sizing: border-box; height: 20vh; height: 20svh; min-height: 160px; gap: 0; padding: 6px 0 4px; }
-.pkm-cal-strip { flex: 1; min-height: 0; }
-.pkm-cal-plot { position: relative; flex: 1; min-height: 0; }
-.pkm-cal-m-now .pkm-cal-plot::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 6px; border-left: 2px dashed rgba(255, 214, 10, 0.55); }
-.pkm-cal-m-has .pkm-cal-track::after { content: ''; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 6px; background: #0B1120; border: 3px solid #C9D3EA; box-sizing: border-box; }
-.pkm-cal-m-past.pkm-cal-m-has .pkm-cal-track::after { border-color: #3DDC84; }
-.pkm-cal-dots { position: absolute; left: 50%; transform: translateX(-50%); --pkm-cal-stem: clamp(5px, 0.8svh, 8px); }
-.pkm-cal-dots-up { bottom: 50%; flex-direction: column-reverse; padding-bottom: var(--pkm-cal-stem); }
-.pkm-cal-dots-down { top: 50%; padding-top: var(--pkm-cal-stem); }
-.pkm-cal-dots-on::before { content: ''; position: absolute; left: 50%; width: 2px; margin-left: -1px; height: var(--pkm-cal-stem); background: rgba(201, 211, 234, 0.45); }
-.pkm-cal-dots-up::before { bottom: 0; }
-.pkm-cal-dots-down::before { top: 0; }
-.pkm-cal-axis { flex: none; min-height: 28px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding-bottom: 4px; }
-.pkm-cal-dot { flex: none; white-space: nowrap; }
-.pkm-cal-dot-logo { display: flex; flex-direction: column; align-items: center; gap: 2px; width: clamp(76px, 10svh, 96px); padding: 3px 5px; border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03)), #0B1120; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.38); transition: transform 0.15s ease; }
-.pkm-cal-dot-logo:active { transform: scale(0.95); }
-.pkm-cal-dlogo { width: 100%; height: clamp(20px, 2.8svh, 28px); display: flex; align-items: center; justify-content: center; }
+/* Logo d'une extension du catalogue : enfoncement au toucher (coin.js, calZoom), puis zoom et items de l'extension. */
+.pkm-cal-dot-logo { display: flex; flex-direction: column; align-items: center; gap: 2px; width: var(--pkm-cal-tile); padding: 4px 6px; border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03)), #0B1120; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.38); }
+.pkm-cal-dlogo { width: 100%; height: clamp(20px, 9cqh, 58px); display: flex; align-items: center; justify-content: center; }
 .pkm-cal-dlogo img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55)); }
-.pkm-cal-dcode { font-size: 9.5px; line-height: 12px; font-weight: 800; letter-spacing: 0.2px; }
+.pkm-cal-dcode { font-size: clamp(9.5px, 2.4cqh, 12px); line-height: 1.25; font-weight: 800; letter-spacing: 0.2px; }
 .pkm-cal-m-now .pkm-cal-dot-logo { box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.35), 0 6px 18px rgba(0, 0, 0, 0.38); }
-.pkm-cal-hint { margin: 0; padding: 0 14px; font-size: 11.5px; color: #9AA8C3; }
-.pkm-cal-key { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-radius: 18px; border: 1px solid #24345C; background: #121C33; color: #F3F6FC; }
-.pkm-cal-hero .pkm-cal-dot:not(.pkm-cal-dot-logo) { min-height: 20px; min-width: 40px; font-size: 9px; }
-/* Plusieurs sigles dans un mois : rangés par deux sur une ligne (au-dessus de la ligne du temps, les lignes montent). */
-.pkm-cal-hero .pkm-cal-dots { gap: 4px; flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; width: 100px; }
-.pkm-cal-hero .pkm-cal-dots-up { flex-wrap: wrap-reverse; }
-.pkm-cal-hero .pkm-cal-mlabel { line-height: 14px; }
-.pkm-cal-hero .pkm-cal-year, .pkm-cal-hero .pkm-cal-now { line-height: 13px; }
-
-/* Onglets et frise figés en haut du calendrier (2026-11-19, porteur : « fige l'écran de la frise ») : seul le contenu
-   dessous (légende, blocs, sorties, news) défile. Fond de l'app derrière (--pkm-app-bg, coin.js), comme « Ma ligue ».
-   Écran très bas (moins de 600 px) : rien n'est figé, sinon il ne resterait presque rien à lire sous la frise. */
-.pkm-coin-top { flex: none; display: flex; flex-direction: column; gap: 14px; }
-@media (min-height: 600px) {
-  .pkm-cal-pin { position: sticky; top: -4px; z-index: 6; margin: -4px -16px 0; padding: 4px 16px 10px; background: var(--pkm-app-bg, #1E1F24); box-shadow: 0 10px 12px -12px rgba(0, 0, 0, 0.55); }
-  /* Ce qui est amené à l'écran (clavier, lien, liste) s'arrête sous la frise figée, jamais derrière. */
-  main:has(.pkm-cal-pin) { scroll-padding-top: calc(max(20svh, 160px) + 76px); }
-}
 
 /* Zoom sur le logo touché, puis ouverture des items de l'extension (coin.js, calZoom). */
 .pkm-calz { position: fixed; inset: 0; z-index: 9000; pointer-events: auto; }
@@ -3607,35 +3588,24 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-calz-t { position: absolute; left: 50%; margin: 0; width: min(86vw, 380px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; color: #F3F6FC; opacity: 0; }
 .pkm-calz-t small { font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #FFE680; }
 .pkm-calz-t b { font-family: 'Sora', sans-serif; font-size: 20px; line-height: 1.25; }
-.pkm-cal-legend { margin: 0; padding: 0 14px; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
 
-/* Blocs (ères) du JCC. */
-.pkm-cal-eras { display: grid; grid-template-columns: 1fr; gap: 8px; }
-.pkm-cal-era { display: flex; flex-direction: column; gap: 3px; padding: 11px 12px; border-radius: 18px; border: 1px solid #24345C; background: #121C33; color: #F3F6FC; }
-.pkm-cal-era-h { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-.pkm-cal-era-h b { font-family: 'Sora', sans-serif; font-size: 13.5px; }
-.pkm-cal-era-h em { flex: none; padding: 1px 7px; border-radius: 999px; background: rgba(61, 220, 132, 0.16); color: #8DF0B8; font-size: 10.5px; font-style: normal; font-weight: 800; }
-.pkm-cal-era-p { font-size: 12px; color: #C9D3EA; }
-.pkm-cal-era small { font-size: 11.5px; line-height: 1.4; color: #9AA8C3; }
-.pkm-cal-era-now { border-color: rgba(255, 214, 10, 0.65); box-shadow: 0 0 0 1px rgba(255, 214, 10, 0.25) inset; }
-.pkm-cal-era-now .pkm-cal-era-h em { background: #FFD60A; color: #0B1120; }
-.pkm-cal-era-rum { border-style: dashed; border-color: rgba(255, 180, 107, 0.7); }
-.pkm-cal-era-rum .pkm-cal-era-h em { background: rgba(255, 180, 107, 0.16); color: #FFC992; }
+/* Fiche d'une sortie, qui monte du bas (sheet.css, sheet.js) : date, nom, statut, type, sigle, cartes vedettes, explication
+   et source, ce que montrait la liste retirée sous la frise. Au-dessus de la barre du bas. */
+.pkm-cal-ov { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62); }
+.pkm-cal-ov-bg { flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.pkm-cal-sheet { flex: none; max-height: 86%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;
+  padding: 8px 16px calc(22px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; background: #0F1828; color: #F3F6FC; }
+.pkm-cal-sheet-h { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-cal-sheet-h b { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; }
+.pkm-cal-sheet .pkm-cal-node { display: none; }
 
-/* Liste chronologique : une ligne verticale, un point par sortie, la ligne « Aujourd'hui ». */
-.pkm-cal-line { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 4px 0 4px 22px; }
-.pkm-cal-line::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 3px; border-radius: 2px; background: linear-gradient(180deg, #3DDC84, #3DDC84 45%, #5B9DFF 55%, #FFB46B); opacity: 0.8; }
-.pkm-cal-item { position: relative; scroll-margin: 140px; }
-.pkm-cal-node { position: absolute; left: -20px; top: 18px; width: 13px; height: 13px; border-radius: 7px; border: 3px solid #3DDC84; background: #0B1120; box-sizing: border-box; }
-.pkm-cal-st-off > .pkm-cal-node { border-color: #5B9DFF; }
-.pkm-cal-st-jp > .pkm-cal-node { border-color: #B98CFF; }
-.pkm-cal-st-rum > .pkm-cal-node { border-color: #FFB46B; border-style: dashed; }
+/* Carte d'une sortie (dans la fiche). */
+.pkm-cal-item { position: relative; }
 .pkm-cal-card { display: flex; flex-direction: column; gap: 7px; padding: 12px; border-radius: 18px; border: 1px solid #24345C; background: #121C33; color: #F3F6FC; }
 .pkm-cal-st-rum > .pkm-cal-card { border-style: dashed; border-color: rgba(255, 180, 107, 0.6); }
 .pkm-cal-st-jp > .pkm-cal-card { border-color: rgba(185, 140, 255, 0.5); }
 .pkm-cal-st-off > .pkm-cal-card { border-color: rgba(91, 157, 255, 0.5); }
 .pkm-cal-past > .pkm-cal-card { opacity: 0.92; }
-.pkm-cal-hi > .pkm-cal-card { border-color: #FFD60A; box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.35); }
 .pkm-cal-card-h { display: flex; align-items: center; gap: 10px; }
 .pkm-cal-logo { flex: none; width: 64px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
 .pkm-cal-logo img { max-width: 60px; max-height: 36px; object-fit: contain; }
@@ -3651,25 +3621,8 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-cal-src { align-self: flex-start; font-size: 11.5px; color: #B9C5FF; text-decoration: none; }
 .pkm-cal-src-t { color: #9AA8C3; }
 .pkm-cal-src:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; border-radius: 4px; }
-.pkm-cal-nowline { position: relative; margin: 2px 0 2px -22px; display: flex; align-items: center; gap: 8px; }
-.pkm-cal-nowline::before, .pkm-cal-nowline::after { content: ''; flex: 1; height: 2px; background: repeating-linear-gradient(90deg, #FFD60A 0 8px, transparent 8px 13px); }
-.pkm-cal-nowline span { flex: none; padding: 4px 12px; border-radius: 999px; background: #FFD60A; color: #0B1120; font-size: 12px; font-weight: 800; box-shadow: 0 0 16px rgba(255, 214, 10, 0.45); }
-.pkm-cal-more { align-self: flex-start; min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid #2A3A5C; background: #121C33; color: #C9D3EA; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-.pkm-cal-more:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
-.pkm-coin-calnote { padding: 12px 14px; border-radius: 18px; border: 1px solid #24345C; background: #121C33; }
 
-/* News Pokémon. */
-.pkm-news-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.pkm-news-row { display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px; border-radius: 16px; border: 1px solid #2A3A5C; background: #0B1120; color: #F3F6FC; text-decoration: none; }
-.pkm-news-row:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
-.pkm-news-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.pkm-news-t b { font-size: 14px; line-height: 1.35; font-weight: 700; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
-.pkm-news-t small { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9AA8C3; }
-.pkm-news-tcg { padding: 0 6px; border-radius: 6px; background: rgba(255, 214, 10, 0.16); color: #FFE680; font-size: 10.5px; font-style: normal; font-weight: 800; }
-.pkm-news-out { flex: none; fill: none; stroke: #9AA8C3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.pkm-news-src { margin: 0; font-size: 11.5px; line-height: 1.45; color: #9AA8C3; }
-
-@media (prefers-reduced-motion: reduce) { .pkm-cal-today i { animation: none; } .pkm-cal-strip { scroll-behavior: auto; } }
+@media (prefers-reduced-motion: reduce) { .pkm-cal-strip { scroll-behavior: auto; } .pkm-cal-dot { transition: none; } }
 
 /* Barre du bas (2026-11-19, porteur : « les 2 icônes à gauche du scan, "Le coin des dresseurs" juste en dessous,
    aligné avec le scan, et les 2 autres à droite ; le scan au milieu, un peu plus haut, toujours rattaché à la barre ;
@@ -4582,6 +4535,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=e36972a8"></script>
+<script src="app.js?v=7e490906"></script>
 </body>
 </html>

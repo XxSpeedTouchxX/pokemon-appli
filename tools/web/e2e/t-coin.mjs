@@ -1,7 +1,7 @@
 // « Le coin des dresseurs » (2026-11-18, porteur) : 5ᵉ onglet entre « Toutes les séries » et le scan ; « Ma vitrine »
-// (interface Échanges de Ma ligue + recherche des dresseurs, 034) ; « Le calendrier TCG » (frise, blocs, sorties,
-// statuts, sources ; frise sur 20 % de l'écran, figée, avec les logos des extensions, qui zooment puis ouvrent leurs
-// items, 2026-11-19) et « News Pokémon ». Le serveur est imité : jamais le vrai serveur.
+// (interface Échanges de Ma ligue + recherche des dresseurs, 034) ; « Le calendrier TCG » (2026-11-19 : la frise seule,
+// en plein écran, avec les logos des extensions ; un appui sur une sortie ouvre sa fiche, un appui sur un logo l'enfonce,
+// zoome dessus puis ouvre les items de l'extension). Le serveur est imité : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
 const res = []; const ok = (l, c, why) => res.push((c ? '✓ ' : '✗ ') + l + (!c && why ? ' — ' + why : '')); const errors = [];
@@ -110,65 +110,62 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('« Voir ma vitrine » : ma carte de dresseur, « Ma vitrine »', (S.calls.player_showcase || []).some(b => b.target === UID) && /Ma vitrine/.test(N(await page.locator('body').innerText())));
   await page.evaluate(() => window.__pkm.setState({ pcCard: null, pcVit: null })); await page.waitForTimeout(300);
 
-  // C. Le calendrier TCG et les News Pokémon.
+  // C. Le calendrier TCG : la frise seule, en plein écran (2026-11-19, porteur : « je veux juste la chronologie qui prenne
+  // tout l'écran »), une fiche au toucher d'une sortie, l'appui puis le zoom et les items d'une extension.
   await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button').nth(1).click(); await page.waitForTimeout(1500);
   const hero = page.locator('section[aria-label="Frise du JCC Pokémon"]');
-  ok('frise : mois, repère « Aujourd’hui », légende des 4 statuts', (await hero.count()) === 1 && (await page.locator('.pkm-cal-m').count()) > 12
-    && (await page.locator('.pkm-cal-m-now .pkm-cal-now').count()) === 1 && (await page.locator('.pkm-cal-legend li').count()) === 4);
-  const eras = N(await page.locator('section[aria-label="Les blocs du JCC"]').innerText());
-  ok('blocs : Écarlate et Violet, Méga-Évolution (en cours), Pokémon ex★', /Écarlate et Violet/.test(eras) && /Méga-Évolution/.test(eras) && /En cours/.test(eras) && /Pokémon ex★/.test(eras));
-  const line = N(await page.locator('section[aria-label="Sorties et annonces"]').innerText());
-  ok('sorties : Règne Delta (sortie), puis la ligne « Aujourd’hui », puis Aura Seeker (Japon) et ex★ (rumeur)', /Règne Delta/.test(line) && /Aura Seeker/.test(line) && /Annonce Japon/.test(line) && /Rumeur/.test(line)
-    && line.indexOf('Règne Delta') < line.indexOf('Aujourd’hui ·') && line.indexOf('Aujourd’hui ·') < line.indexOf('Aura Seeker'));
-  await page.click('.pkm-cal-more'); await page.waitForTimeout(400);
-  const lineAll = N(await page.locator('section[aria-label="Sorties et annonces"]').innerText());
-  ok('Méga-Évolution en France le 10 oct. 2025 (sorties précédentes dépliées)', /10 oct\. 2025/i.test(lineAll), lineAll.slice(0, 400));
-  ok('chaque date a sa source (lien ou « Estimation »)', await page.locator('.pkm-cal-item').evaluateAll(a => a.every(x => !!x.querySelector('.pkm-cal-src'))));
-  ok('ex★ : Entei, Raikou, Suicune', /Entei, Raikou, Suicune/.test(line));
-  await page.locator('.pkm-cal-dot').last().click(); await page.waitForTimeout(700);
-  ok('un point de la frise met sa sortie en avant', (await page.locator('.pkm-cal-hi').count()) === 1);
-  const news = page.locator('section[aria-label="News Pokémon"]');
-  ok('News Pokémon : articles avec site et lien ouvert dans un nouvel onglet', (await news.locator('a.pkm-news-row').count()) >= 3
-    && (await news.locator('a.pkm-news-row').first().getAttribute('target')) === '_blank' && /Pokébip|Margxt/.test(await news.innerText()));
-  ok('News : étiquette JCC sur les articles de cartes', (await news.locator('.pkm-news-tcg').count()) >= 1);
-  await page.evaluate(() => { window.scrollTo(0, 0); document.querySelectorAll('*').forEach(e => { if (e.scrollTop > 0) e.scrollTop = 0; }); }); await page.waitForTimeout(400);
-  await page.screenshot({ path: shot('coin-calendrier.png') });
-  await page.evaluate(() => { const m = document.querySelector('section[aria-label="News Pokémon"]'); if (m) m.scrollIntoView(); }); await page.waitForTimeout(300);
-  await page.screenshot({ path: shot('coin-news.png') });
-
-  // C2. Frise sur 20 % de l'écran et figée, logos des extensions, zoom puis items de l'extension (2026-11-19, porteur).
+  ok('frise : mois et repère « Aujourd’hui »', (await hero.count()) === 1 && (await page.locator('.pkm-cal-m').count()) > 12
+    && (await page.locator('.pkm-cal-m-now .pkm-cal-now').count()) === 1);
+  const full = await page.evaluate(() => {
+    const m = document.querySelector('main'), h = document.querySelector('section[aria-label="Frise du JCC Pokémon"]').getBoundingClientRect();
+    const sc = document.querySelector('button[aria-label^="Scanner"]').getBoundingClientRect();
+    return { ratio: h.height / innerHeight, bottom: h.bottom, dome: sc.top, scroll: m.scrollHeight - m.clientHeight,
+      gone: ['Les blocs du JCC', 'Sorties et annonces', 'News Pokémon', 'Légende de la frise'].filter(l => document.querySelector('section[aria-label="' + l + '"]')),
+      list: document.querySelectorAll('main .pkm-cal-item').length };
+  });
+  ok('la frise remplit l’écran (' + Math.round(full.ratio * 100) + ' %), jusqu’au-dessus du scan, rien ne défile', full.ratio > 0.55 && full.bottom <= full.dome && full.dome - full.bottom < 30 && full.scroll <= 1, JSON.stringify(full));
+  ok('plus rien sous la frise : blocs, liste des sorties, légende et News retirés', full.gone.length === 0 && full.list === 0, JSON.stringify(full));
   const fz = await page.evaluate(() => {
-    const h = document.querySelector('section[aria-label="Frise du JCC Pokémon"]').getBoundingClientRect();
     const logos = [...document.querySelectorAll('.pkm-cal-dot-logo')];
     const now = document.querySelector('.pkm-cal-m-now'), ax = now.querySelector('.pkm-cal-axis').getBoundingClientRect(), tr = now.querySelector('.pkm-cal-track').getBoundingClientRect();
-    return { ratio: h.height / innerHeight, logos: logos.length, imgs: logos.filter(b => b.querySelector('.pkm-cal-dlogo img')).length,
+    return { logos: logos.length, imgs: logos.filter(b => b.querySelector('.pkm-cal-dlogo img')).length, tile: logos.length ? logos[0].getBoundingClientRect().width : 0,
       aria: logos.map(b => b.getAttribute('aria-label')), up: document.querySelectorAll('.pkm-cal-dots-up.pkm-cal-dots-on').length,
       down: document.querySelectorAll('.pkm-cal-dots-down.pkm-cal-dots-on').length, axisAbove: ax.bottom <= tr.top,
       chips: [...document.querySelectorAll('.pkm-cal-dot:not(.pkm-cal-dot-logo)')].map(b => b.textContent.trim()) };
   });
-  ok('frise : 20 % de l’écran (' + Math.round(fz.ratio * 100) + ' %)', fz.ratio >= 0.19 && fz.ratio <= 0.21);
-  const pinned = await page.evaluate(async () => {
-    const main = document.querySelector('main'), hero = () => document.querySelector('section[aria-label="Frise du JCC Pokémon"]').getBoundingClientRect().top;
-    const eras = () => document.querySelector('section[aria-label="Les blocs du JCC"]').getBoundingClientRect().top;
-    main.scrollTop = 0; await new Promise(r => setTimeout(r, 250));
-    const h0 = hero(), e0 = eras(), t0 = document.querySelector('[aria-label="Le coin des dresseurs"][role="tablist"]').getBoundingClientRect().top;
-    main.scrollTop = 600; await new Promise(r => setTimeout(r, 250));
-    const r = { dh: hero() - h0, de: eras() - e0, dt: document.querySelector('[aria-label="Le coin des dresseurs"][role="tablist"]').getBoundingClientRect().top - t0 };
-    main.scrollTop = 0; await new Promise(r2 => setTimeout(r2, 250));
-    return r;
-  });
-  ok('frise et onglets figés : seul le contenu dessous défile', Math.abs(pinned.dh) < 1 && Math.abs(pinned.dt) < 1 && pinned.de < -500, JSON.stringify(pinned));
-  ok('frise : le logo de chaque extension du catalogue (' + fz.logos + '), Règne Delta compris', fz.logos >= 10 && fz.imgs === fz.logos && fz.aria.some(a => /^Règne Delta,.*Voir les items/.test(a)), JSON.stringify(fz.aria));
+  ok('frise : le logo de chaque extension du catalogue (' + fz.logos + '), Règne Delta compris, en grand (' + Math.round(fz.tile) + ' px)', fz.logos >= 10 && fz.imgs === fz.logos && fz.tile >= 96 && fz.aria.some(a => /^Règne Delta,.*Voir les items/.test(a)), JSON.stringify(fz.aria));
   ok('frise : sorties sans extension au catalogue gardées en sigle (Japon, rumeurs)', fz.chips.indexOf('M7') >= 0 && fz.chips.indexOf('ex★') >= 0, fz.chips.join(','));
   ok('frise : mois en haut, sorties en alternance au-dessus et au-dessous de la ligne', fz.axisAbove && fz.up >= 5 && fz.down >= 5, JSON.stringify(fz));
   const room = await page.evaluate(() => Math.min(...[...document.querySelectorAll('.pkm-cal-dots-on')].map(d => { const r = d.getBoundingClientRect(), pl = d.parentElement.getBoundingClientRect(); return Math.min(r.top - pl.top, pl.bottom - r.bottom); })));
   ok('frise : logos et sigles tiennent dans la hauteur (marge ' + Math.round(room) + ' px)', room >= 0);
-  ok('titre, date du jour, légende et aide juste sous la frise', /Où en est le JCC Pokémon/.test(await page.locator('section[aria-label="Légende de la frise"]').innerText()));
+  await page.screenshot({ path: shot('coin-calendrier.png') });
+
+  // Fiche d'une prochaine sortie : ce que montrait la liste retirée (date, nom, statut, type, sigle, cartes vedettes, explication, source).
+  const sheet = page.locator('section.pkm-cal-sheet[role="dialog"]');
+  await page.locator('.pkm-cal-dot:not(.pkm-cal-dot-logo)', { hasText: /^M7$/ }).first().evaluate(b => b.click()); await page.waitForTimeout(700);
+  const m7 = (await sheet.count()) === 1 ? N(await sheet.innerText()) : '';
+  ok('appui sur « M7 » : sa fiche monte du bas (Aura Seeker, Annonce Japon, date, source)', /Prochaine sortie/.test(m7) && /Aura Seeker/.test(m7) && /Annonce Japon/.test(m7)
+    && (await sheet.locator('.pkm-cal-when').count()) === 1 && (await sheet.locator('.pkm-cal-src').count()) === 1, m7.slice(0, 300));
+  const cover = await page.evaluate(() => { const s = document.querySelector('.pkm-cal-sheet').getBoundingClientRect(), n = document.querySelector('nav[aria-label="Navigation principale"]').getBoundingClientRect(); const e = document.elementFromPoint(innerWidth / 2, n.top + 20); return { bottom: Math.round(s.bottom), sheet: !!(e && e.closest('.pkm-cal-sheet')) }; });
+  ok('la fiche passe au-dessus de la barre du bas', cover.sheet && cover.bottom >= 840, JSON.stringify(cover));
+  await page.screenshot({ path: shot('coin-calendrier-fiche.png') });
+  await sheet.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(800);
+  ok('« Fermer » : la fiche redescend et disparaît', (await sheet.count()) === 0 && (await page.evaluate(() => window.__pkm.st().calSel)) == null);
+  await page.locator('.pkm-cal-dot:not(.pkm-cal-dot-logo)', { hasText: /^ex★$/ }).last().evaluate(b => b.click()); await page.waitForTimeout(700);
+  const exs = (await sheet.count()) === 1 ? N(await sheet.innerText()) : '';
+  ok('appui sur « ex★ » : Entei, Raikou, Suicune, rumeur, estimation', /Entei, Raikou, Suicune/.test(exs) && /Rumeur/.test(exs) && /Estimation/.test(exs), exs.slice(0, 300));
+  await page.locator('button.pkm-cal-ov-bg').click({ position: { x: 20, y: 20 } }); await page.waitForTimeout(800);
+  ok('appui hors de la fiche : elle se ferme', (await sheet.count()) === 0);
+
+  // Appui marqué sur le logo, puis zoom sur l'extension, puis ses items.
   await page.evaluate(() => { const w = document.querySelector('.pkm-cal-strip'); w.style.scrollBehavior = 'auto'; w.scrollLeft = 140; w.style.scrollBehavior = ''; });
   const x0 = await page.evaluate(() => document.querySelector('.pkm-cal-strip').scrollLeft);
-  await page.locator('.pkm-cal-dot-logo[aria-label^="Règne Delta"]').evaluate(b => b.click()); await page.waitForTimeout(700);
+  await page.locator('.pkm-cal-dot-logo[aria-label^="Règne Delta"]').evaluate(b => b.click()); await page.waitForTimeout(110);
+  const press = await page.evaluate(() => { const b = document.querySelector('.pkm-cal-dot-logo[aria-label^="Règne Delta"]'), t = getComputedStyle(b).transform; const k = t && t !== 'none' ? +t.split('(')[1].split(',')[0] : 1; return { k: k, glow: /255, 214, 10/.test(getComputedStyle(b).boxShadow), zoom: !!document.querySelector('.pkm-calz') }; });
+  ok('appui sur le logo : il s’enfonce et s’allume avant le zoom (×' + press.k.toFixed(2) + ')', press.k < 0.97 && press.glow && !press.zoom, JSON.stringify(press));
+  await page.waitForTimeout(800);
   const mid = await page.evaluate(() => { const z = document.querySelector('.pkm-calz'), l = z && z.querySelector('.pkm-calz-logo').getBoundingClientRect(); return { on: !!z, w: l ? l.width : 0, cx: l ? l.left + l.width / 2 : 0, t: z ? z.innerText : '' }; });
-  ok('appui sur le logo : zoom au centre de l’écran (' + Math.round(mid.w) + ' px)', mid.on && mid.w > 200 && Math.abs(mid.cx - 195) < 4 && /Règne Delta/.test(mid.t) && /Items de l’extension/i.test(mid.t), JSON.stringify(mid));
+  ok('puis zoom au centre de l’écran (' + Math.round(mid.w) + ' px)', mid.on && mid.w > 200 && Math.abs(mid.cx - 195) < 4 && /Règne Delta/.test(mid.t) && /Items de l’extension/i.test(mid.t), JSON.stringify(mid));
   await page.screenshot({ path: shot('coin-calendrier-zoom.png') });
   await page.waitForTimeout(1100);
   const after = await page.evaluate(() => { const s = window.__pkm.st(); return { screen: s.screen, setId: s.setId, f: s.setFilter, over: !!document.querySelector('.pkm-calz'), items: [...document.querySelectorAll('button')].some(b => /^Items \(\d+\)$/.test(b.textContent.trim())) }; });

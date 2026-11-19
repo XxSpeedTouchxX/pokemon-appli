@@ -3144,31 +3144,17 @@ PKCOUNTER
 </sc-if>
 
 <sc-if value="{{ coin.isCal }}" hint-placeholder-val="{{ false }}">
-<sc-if value="{{ cal.ready }}" hint-placeholder-val="{{ true }}">
-<section aria-label="Légende de la frise" class="pkm-cal-key pkm-dark">
-<div class="pkm-cal-hero-h"><h3>Où en est le JCC Pokémon ?</h3><span class="pkm-cal-today"><i aria-hidden="true"></i>{{ cal.today }}</span></div>
-<ul class="pkm-cal-legend" aria-label="Légende"><sc-for list="{{ cal.legend }}" as="clg" hint-placeholder-count="4"><li><span class="{{ clg.cls }}">{{ clg.label }}</span></li></sc-for></ul>
-<p class="pkm-cal-hint">{{ cal.hint }}</p>
-</section>
-<sc-if value="{{ cal.hasEras }}" hint-placeholder-val="{{ true }}">
-<section aria-label="Les blocs du JCC" class="pkm-cal-eras"><sc-for list="{{ cal.eras }}" as="cer" hint-placeholder-count="3"><div class="{{ cer.cls }}"><div class="pkm-cal-era-h"><b>{{ cer.name }}</b><sc-if value="{{ cer.hasTag }}" hint-placeholder-val="{{ true }}"><em>{{ cer.tag }}</em></sc-if></div><span class="pkm-cal-era-p">{{ cer.period }}</span><sc-if value="{{ cer.hasText }}" hint-placeholder-val="{{ false }}"><small>{{ cer.text }}</small></sc-if></div></sc-for></section>
-</sc-if>
-<section aria-label="Sorties et annonces" class="pkm-cal-line">
-<sc-if value="{{ cal.morePast }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ cal.togglePast }}" class="pkm-cal-more">{{ cal.morePastText }}</button></sc-if>
-<sc-if value="{{ cal.lessPast }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ cal.togglePast }}" class="pkm-cal-more">Masquer les sorties précédentes</button></sc-if>
-<sc-for list="{{ cal.past }}" as="cit" hint-placeholder-count="2">@@cal-item@@</sc-for>
-<div class="pkm-cal-nowline" role="separator" aria-label="{{ cal.today }}"><span>{{ cal.today }}</span></div>
-<sc-for list="{{ cal.next }}" as="cit" hint-placeholder-count="3">@@cal-item@@</sc-for>
-</section>
-<p class="pkm-pg-rules">{{ cal.note }} {{ cal.updated }}</p>
-</sc-if>
 <sc-if value="{{ cal.notReady }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note" role="status">{{ cal.loading }}</p></sc-if>
-<section aria-label="News Pokémon" class="pkm-vt-sec pkm-dark pkm-news">
-<div class="pkm-vt-sec-h"><h3>📰 News Pokémon</h3><small>{{ nws.updated }}</small></div>
-<sc-if value="{{ nws.has }}" hint-placeholder-val="{{ true }}"><ul class="pkm-news-list"><sc-for list="{{ nws.items }}" as="nwi" hint-placeholder-count="3"><li><a href="{{ nwi.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ nwi.aria }}" class="pkm-news-row"><span class="pkm-news-t"><b>{{ nwi.title }}</b><small><sc-if value="{{ nwi.tcg }}" hint-placeholder-val="{{ false }}"><em class="pkm-news-tcg">JCC</em></sc-if>{{ nwi.source }} · {{ nwi.ago }}</small></span><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" class="pkm-news-out"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a></li></sc-for></ul></sc-if>
-<sc-if value="{{ nws.hasMsg }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ nws.msg }}</p></sc-if>
-<p class="pkm-news-src">{{ nws.sources }}</p>
+<sc-if value="{{ cal.hasSel }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-cal-ov">
+<button type="button" aria-label="Fermer la fiche de la sortie" onClick="{{ cal.closeSel }}" class="pkm-cal-ov-bg"></button>
+<section aria-label="{{ cal.selLabel }}" role="dialog" aria-modal="true" class="pkm-sheet pkm-cal-sheet pkm-dark">
+<div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
+<div class="pkm-cal-sheet-h"><b>{{ cal.selTitle }}</b><button type="button" onClick="{{ cal.closeSel }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<sc-for list="{{ cal.sel }}" as="cit" hint-placeholder-count="1">@@cal-item@@</sc-for>
 </section>
+</div>
+</sc-if>
 </sc-if>
 </sc-if>
 
