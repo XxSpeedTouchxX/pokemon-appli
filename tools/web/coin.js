@@ -232,7 +232,7 @@
     });
     // Frise : un mois par colonne, du premier au dernier mois du calendrier ; repère « Aujourd'hui ».
     // Frise (2026-11-19, porteur : « l'image de la série ou de l'extension à côté des termes, un appui sur le
-    // visuel zoome sur la série et ouvre ses items » ; 70 %, puis 50 %, puis 30 % de l'écran, figée en haut) : chaque
+    // visuel zoome sur la série et ouvre ses items » ; 70 %, puis 50 %, puis 30 %, puis 20 % de l'écran, figée en haut) : chaque
     // extension du catalogue montre son logo ; un appui zoome sur le logo puis ouvre l'onglet « Items » de
     // l'extension (setview.js). Les sorties sans extension au catalogue (Japon, rumeurs, coffrets) gardent leur
     // sigle et mènent à leur fiche plus bas. Les mois qui ont des sorties alternent au-dessus et au-dessous de la
@@ -253,7 +253,7 @@
             aria: x.name + ', ' + x.when + ', ' + x.status + (zoom ? '. Voir les items de l’extension' : ''),
             pick: zoom ? ev => this.calZoom(ev, x.setId, x.setName || x.name) : () => this.calJump(x.id) };
         });
-        // Frise sur 30 % de l'écran (2026-11-19) : dans un mois qui a un logo et des sigles, les sigles passent de
+        // Frise basse (20 % de l'écran, 2026-11-19) : dans un mois qui a un logo et des sigles, les sigles passent de
         // l'autre côté de la ligne, pour que tout tienne dans la hauteur.
         const logos = dots.filter(d => d.hasLogo), chips = dots.filter(d => !d.hasLogo), split = logos.length > 0 && chips.length > 0;
         const mine = split ? logos : dots, other = split ? chips : [];

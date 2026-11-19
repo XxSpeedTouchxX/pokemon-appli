@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-19 — « Le calendrier TCG » : frise sur 20 % de l'écran, figée (porteur)
+
+- **Frise sur 20 % de l'écran, toujours figée en haut avec les onglets** (porteur : « fais 20 % de l'écran finalement, figé ») à la place de 30 %.
+- Logos, sigles et tiges encore réduits ; plusieurs sigles d'un même mois rangés par deux sur une ligne (février 2027 : ME07, PTC, M7a) ; rien n'est coupé de 320 à 430 px de large ; frise d'au moins 160 px de haut.
+- Titre, date du jour, légende et aide toujours juste sous la frise ; zoom vers les items inchangé.
+- Test `t-coin.mjs` (20 %). Cache v243.
+
 ## 2026-11-19 — « Le calendrier TCG » : frise sur 30 % de l'écran, figée en haut (porteur)
 
 - **Frise sur 30 % de l'écran, figée en haut de la page** (porteur : « finalement, mets la frise chronologique sur 30 % figé en haut de la page ») à la place de 50 % : les onglets et la frise restent en place, tout le reste défile dessous.
