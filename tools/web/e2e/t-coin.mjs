@@ -66,14 +66,18 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('barre : tous les boutons dans l’écran', fits);
   // Disposition (2026-11-19) : 2 icônes à gauche, scan au centre au-dessus de la barre et « Le coin des dresseurs » juste
   // en dessous (même axe), 2 icônes à droite ; forme « Dôme » par défaut.
-  const geo = await page.evaluate(() => { const n = document.querySelector('nav[aria-label="Navigation principale"]'), r = e => n.querySelector(`button[aria-label${e}]`).getBoundingClientRect(), nr = n.getBoundingClientRect();
+  const geo = await page.evaluate(() => { const n = document.querySelector('nav[aria-label="Navigation principale"]'), b = e => n.querySelector(`button[aria-label${e}]`), r = e => b(e).getBoundingClientRect(), nr = n.getBoundingClientRect();
+    const ico = e => { const v = [...b(e).querySelectorAll(':scope > svg')].find(x => getComputedStyle(x).display !== 'none'); return v.getBoundingClientRect(); };
     const c = x => x.left + x.width / 2, sc = r('^="Scanner"'), co = r('="Le coin des dresseurs"'), se = r('="Toutes les séries"'), je = r('="Jeux"'), ac = r('="Accueil"'), pk = r('="PK shop"');
+    const icons = ['="Accueil"', '="Toutes les séries"', '="Le coin des dresseurs"', '="Jeux"', '="PK shop"'].map(ico), mids = icons.map(x => x.top + x.height / 2), sizes = icons.map((x, i) => i === 3 ? x.height - 2 : x.height);
     const dome = n.querySelector('.pkm-navdeco .pkm-nds.pkm-nd-1');
-    return { mid: Math.abs(c(sc) - (nr.left + nr.width / 2)), axis: Math.abs(c(sc) - c(co)), below: co.top >= sc.bottom - 2, raised: nr.top - sc.top, inBar: sc.bottom > nr.top + 4,
+    return { mid: Math.abs(c(sc) - (nr.left + nr.width / 2)), axis: Math.abs(c(sc) - c(co)), below: icons[2].top >= sc.bottom + 2, raised: nr.top - sc.top, inBar: sc.bottom > nr.top + 4,
+      line: Math.max(...mids) - Math.min(...mids), size: Math.max(...sizes) - Math.min(...sizes), ico: sizes[0], bottom: innerHeight - nr.bottom,
       order: ac.right <= se.left + 1 && se.right <= co.left + 1 && co.right <= je.left + 1 && je.right <= pk.left + 1, dome: !!dome && getComputedStyle(dome).display === 'block', vis: document.documentElement.dataset.navvis }; });
   ok('barre : scan au centre (' + geo.mid.toFixed(1) + ' px), « Le coin des dresseurs » juste en dessous et sur le même axe (' + geo.axis.toFixed(1) + ' px)', geo.mid < 2 && geo.axis < 2 && geo.below);
   ok('barre : Accueil, Toutes les séries | scan | Jeux, PK shop', geo.order);
-  ok('barre : scan plus haut que la barre (' + geo.raised.toFixed(0) + ' px) mais toujours posé dessus', geo.raised >= 34 && geo.inBar);
+  ok('barre : les 5 petites icônes sur la même ligne (écart ' + geo.line.toFixed(1) + ' px) et de la même taille (' + geo.ico + ' px)', geo.line < 1 && geo.size < 1 && geo.ico === 25);
+  ok('barre : scan plus haut que la barre (' + geo.raised.toFixed(0) + ' px) mais toujours posé dessus ; barre à ' + geo.bottom.toFixed(0) + ' px du bas', geo.raised >= 38 && geo.inBar && Math.round(geo.bottom) === 8);
   ok('barre : forme « Dôme » par défaut (?navvis=1)', geo.vis === '1' && geo.dome);
   await page.click(NAV + ' button[aria-label="Le coin des dresseurs"]'); await page.waitForTimeout(900);
   const tabSt = [await page.evaluate(() => window.__pkm.st().screen), await page.locator(NAV + ' button[aria-label="Le coin des dresseurs"]').getAttribute('aria-current'), N(await page.locator('h1, h2').first().innerText())];

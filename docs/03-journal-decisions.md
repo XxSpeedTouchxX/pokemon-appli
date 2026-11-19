@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-19 — Barre du bas : Dôme choisi, 5 icônes sur la même ligne (porteur)
+
+- **Dessin « Dôme » choisi par le porteur** (« ok pour le premier design ») : il reste en place par défaut ; les 3 autres dessins restent seulement pour essai (`?navvis=2` à `4`).
+- **Les 5 petites icônes sur la même ligne et à la même taille** (porteur : « quitte à descendre légèrement la barre ») : Accueil, Toutes les séries, Le coin des dresseurs, Jeux et PK shop sont à la même hauteur (28 px sous le haut de la barre) et en 25 px (23 px sous 375 px de large), « Le coin des dresseurs » compris ; la manette de « Jeux » garde sa boîte de 27 px, centrée sur la même ligne. La barre descend de 6 px (à 8 px du bas de l'écran, 74 px de haut au lieu de 68) : son haut ne bouge pas, rien ne change au-dessus. Le scan dépasse de 40 px et le dôme a été recalculé autour de lui (`navbar.css`, `build.mjs`). Le point de l'onglet ouvert est sous son icône, au même endroit pour les 5.
+- Test `t-coin.mjs` (icônes alignées, même taille, barre à 8 px du bas). Cache v239.
+
 ## 2026-11-19 — Barre du bas : scan au centre, « Le coin des dresseurs » dessous, 4 dessins proposés (porteur)
 
 - **Disposition** (porteur : « les 2 icônes à gauche du scan, l'icône "Le coin des dresseurs" juste en dessous, alignée avec le scan, et les 2 autres icônes à droite ») : Accueil et Toutes les séries à gauche, le scan au centre, Jeux et PK shop à droite ; « Le coin des dresseurs » est sous le scan, sur le même axe. La barre repasse à 5 colonnes, le scan est de nouveau exactement au centre. Les 6 boutons restent dans la barre (didacticiel et tests inchangés), le scan et « Le coin des dresseurs » partagent la colonne du milieu (`tools/web/navbar.css`).

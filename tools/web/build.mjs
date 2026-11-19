@@ -236,7 +236,7 @@ patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FR
 // logo de l'onglet : 4 propositions (coin.js, ?coinvis=1 à 4), une seule visible (coin.css).
 // Barre du bas (2026-11-19, porteur) : 5 colonnes, scan au milieu et « Le coin des dresseurs » juste en dessous (navbar.css),
 // forme dessinée sous le scan : Dôme, Socle ou Vague en SVG (Berceau : fond de la barre redessiné, navbar.css).
-// Dôme : un cercle de 37 px autour du scan (centre 7 px au-dessus de la barre), raccordé à la barre par deux arrondis
+// Dôme : un cercle de 40 px autour du scan (centre 9 px au-dessus de la barre), raccordé à la barre par deux arrondis
 // de 10 px (tangents) ; Socle : un plateau aux coins arrondis ; Vague : une longue vague douce. Base des dessins sur le
 // haut de la barre (y = B), 1 px de plus pour couvrir son trait.
 const navShape = (() => {
@@ -251,7 +251,7 @@ const navShape = (() => {
   const svg = (cls, W, H, d) => `<i class="pkm-ndf ${cls}" style="clip-path: path('${d.fill}')"></i><svg class="pkm-nds ${cls}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" focusable="false"><path d="${d.top}"></path></svg>`;
   const tab = 'M0 30 C9 30 11 28 11 22 L11 14 Q11 4 21 4 L99 4 Q109 4 109 14 L109 22 C109 28 111 30 120 30';
   const wave = 'M0 30 C40 30 60 8 110 8 C160 8 180 30 220 30';
-  return svg('pkm-nd-1', 132, 50, dome(132, 48, 40, 7, 13)) + svg('pkm-nd-3', 120, 32, { top: tab, fill: tab + ' L120 31 L0 31 Z' }) + svg('pkm-nd-4', 220, 32, { top: wave, fill: wave + ' L220 31 L0 31 Z' });
+  return svg('pkm-nd-1', 132, 52, dome(132, 50, 40, 9, 13)) + svg('pkm-nd-3', 120, 32, { top: tab, fill: tab + ' L120 31 L0 31 Z' }) + svg('pkm-nd-4', 220, 32, { top: wave, fill: wave + ' L220 31 L0 31 Z' });
 })();
 patch('<button type="button" onClick="{{ tabHome }}" aria-label="Accueil"', `<span class="pkm-navdeco" aria-hidden="true">${navShape}</span>
 <button type="button" onClick="{{ tabHome }}" aria-label="Accueil"`);
