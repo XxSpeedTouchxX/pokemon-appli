@@ -322,36 +322,97 @@
   // « Recharger mes PA » à côté de « Magasin », comme la maquette docs/20). Prix TTC et détail fixés par le porteur le
   // 2026-11-01 au soir : 500 PA 4,99 € ; 1 500 PA 9,99 € (1 000 + 500 offerts) ; 3 000 PA 14,99 € (1 500 + 1 500
   // offerts, le plus populaire) ; 5 000 PA 19,99 € (2 000 + 3 000 offerts). Le « +X % offerts » est remplacé par ce détail.
-  // 1ʳᵉ recharge doublée : toujours à valider. Le paiement n'est pas encore branché (il faut les comptes Dropicards, le
-  // serveur et Stripe, docs/20) : le récapitulatif le dit, rien n'est débité ni crédité.
+  // 1ʳᵉ recharge doublée : toujours à valider.
+  // Paiement Stripe branché le 2026-11-19 (porteur : « des redirections Stripe pour tous les prix de l'application ») :
+  // « Payer » ouvre la page de paiement de Stripe (fonction « stripe », chemin « pa ») après deux cases cochées (18 ans ou
+  // plus ; livraison immédiate des PA et renonciation au droit de rétractation). Le serveur prend le prix et les PA dans
+  // la base (035_recharges_pa.sql), jamais ceux de l'app, et donne les PA quand Stripe confirme le paiement.
+  // Sans serveur (démo hors ligne), le récapitulatif reste en lecture seule : rien n'est débité ni crédité.
   const SHOP_PA_PACKS = [
-    { pa: 500, cents: 499, base: 500, gift: 0, drops: 1 },
-    { pa: 1500, cents: 999, base: 1000, gift: 500, drops: 2 },
-    { pa: 3000, cents: 1499, base: 1500, gift: 1500, drops: 3, tag: 'Le plus populaire' },
-    { pa: 5000, cents: 1999, base: 2000, gift: 3000, drops: 4, tag: 'Meilleure valeur', best: true }
+    { id: 'pa_500', pa: 500, cents: 499, base: 500, gift: 0, drops: 1 },
+    { id: 'pa_1500', pa: 1500, cents: 999, base: 1000, gift: 500, drops: 2 },
+    { id: 'pa_3000', pa: 3000, cents: 1499, base: 1500, gift: 1500, drops: 3, tag: 'Le plus populaire' },
+    { id: 'pa_5000', pa: 5000, cents: 1999, base: 2000, gift: 3000, drops: 4, tag: 'Meilleure valeur', best: true }
   ].map(k => Object.assign(k, { eur: (k.cents / 100).toFixed(2).replace('.', ',') + ' €' }));
+  // État des recharges sur le serveur (1ʳᵉ recharge encore doublée ?), relu à l'ouverture de « Recharger mes PA ».
+  shopProto.paShopSync = function () {
+    if (typeof Cloud === 'undefined' || !Cloud.on() || !Cloud.session()) return;
+    Cloud.rpc('pa_shop_state').then(r => { if (r && typeof r === 'object') this.setState({ paShop: { first: !!r.first, bought: Number(r.bought) || 0 } }); }, () => { /* 035 pas encore installé : affichage de l'app */ });
+  };
+  const PA_LOGIN = 'Connecte-toi à ton compte Dropicards pour recharger tes PA (Mon profil › Me reconnecter).';
+  shopProto.paPay = function (k) {
+    const s = this.st();
+    if (s.paBusy) return;
+    if (!(s.paAdult && s.paWaive)) { this.setState({ paErr: 'Coche les deux cases pour continuer.' }); return; }
+    this.setState({ paBusy: true, paErr: '' });
+    this.premCall('pa', { pack: k.id, adult: true, waive: true }).then(url => {
+      try { sessionStorage.setItem('pkm-pa-wait', JSON.stringify({ at: Date.now(), pa: Number(this.st().pa) || 0 })); } catch (e) { /* stockage indisponible */ }
+      // Retour par le bouton « précédent » depuis Stripe (page gardée en mémoire) : le bouton redevient utilisable.
+      try { window.addEventListener('pageshow', ev => { if (ev.persisted) this.setState({ paBusy: false }); }, { once: true }); } catch (e) { /* navigateur ancien */ }
+      location.assign(url);
+    }, e => this.setState({ paBusy: false, paErr: e && e.code === 'login' ? PA_LOGIN : String(e && e.message || 'Le paiement n’a pas pu s’ouvrir. Réessaie dans un instant.') }));
+  };
+  // Retour de Stripe (?pa=merci | annule) : message, solde relu jusqu'à l'arrivée des PA (le message de Stripe peut
+  // arriver au serveur quelques secondes après le retour), adresse nettoyée.
+  let paBack = false;
+  shopProto.paReturn = function () {
+    if (paBack) return;
+    paBack = true;
+    let q = '';
+    try { q = new URLSearchParams(location.search).get('pa') || ''; } catch (e) { q = ''; }
+    if (!/^(merci|annule)$/.test(q)) return;
+    try { const u = new URL(location.href); u.searchParams.delete('pa'); history.replaceState(history.state, '', u.pathname + (u.search || '') + u.hash); } catch (e) { /* adresse gardée */ }
+    let wait = null;
+    try { wait = JSON.parse(sessionStorage.getItem('pkm-pa-wait') || 'null'); sessionStorage.removeItem('pkm-pa-wait'); } catch (e) { wait = null; }
+    if (q === 'annule') { setTimeout(() => { this.setState({ toast: 'Paiement annulé : rien n’a été débité.' }); this.flash(); }, 400); return; }
+    const was = wait && Number.isFinite(Number(wait.pa)) ? Number(wait.pa) : null;
+    setTimeout(() => { this.setState({ toast: 'Merci ! Tes PA arrivent…' }); this.flash(); }, 400);
+    const sync = () => (this.gcSync ? this.gcSync() : Promise.resolve(null));
+    let n = 0;
+    const poll = () => Promise.resolve(sync()).then(() => {
+      const now = Number(this.st().pa) || 0;
+      if (was !== null && now > was) {
+        this.setState({ toast: '+' + shopNum(now - was) + ' PA ajoutés à ton solde !', paShop: null }); this.flash();
+        if (typeof gmParty === 'function') setTimeout(() => gmParty(500), 200);
+        return;
+      }
+      if (++n < 8) setTimeout(poll, 2500);
+      else { this.setState({ toast: 'Paiement reçu par Stripe : tes PA arrivent dans quelques minutes. Rouvre l’app si besoin.' }); this.flash(); }
+    });
+    setTimeout(poll, 1200);
+  };
   const shopNum = n => Number(n).toLocaleString('fr-FR').replace(/\s/g, '\u00a0');
   const shopTabs = (self, s) => {
-    const onPa = s.shopTab === 'pa', pa = Number(s.pa) || 0, first = !s.paBought;
+    const onPa = s.shopTab === 'pa', pa = Number(s.pa) || 0, first = s.paShop ? !!s.paShop.first : !s.paBought;
+    const live = typeof Cloud !== 'undefined' && Cloud.on();
     const ask = SHOP_PA_PACKS[s.shopPaAsk];
     const tot = DEX_DATA.reduce((t, e) => t + (dexPrice(e.n) || 0), 0);
     return {
       isStore: !onPa, isPa: onPa, storeOn: String(!onPa), paOn: String(onPa),
       storeCls: 'pkm-shop-tab' + (onPa ? '' : ' pkm-shop-tab-on'), paCls: 'pkm-shop-tab' + (onPa ? ' pkm-shop-tab-on' : ''),
-      goStore: () => self.setState({ shopTab: 'store', shopPaAsk: null }), goPa: () => self.setState({ shopTab: 'pa', shopAsk: null }),
+      goStore: () => self.setState({ shopTab: 'store', shopPaAsk: null }), goPa: () => { self.setState({ shopTab: 'pa', shopAsk: null }); self.paShopSync(); },
       paLogo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg', paBal: shopNum(pa), paTotal: shopNum(tot),
       packs: SHOP_PA_PACKS.map((k, i) => ({
         qty: shopNum(k.pa), price: k.eur, hasGift: !!k.gift, noGift: !k.gift, base: shopNum(k.base), gift: '+ ' + shopNum(k.gift) + ' offerts',
         hasTag: !!k.tag, tag: k.tag || '', tagCls: 'pkm-pas-tag' + (k.best ? ' pkm-pas-tag-g' : ''),
         cls: 'pkm-pas-pack pkm-pas-p' + i + (k.tag && !k.best ? ' pkm-pas-hot' : ''), aria: shopNum(k.pa) + ' PA pour ' + k.eur + (k.gift ? ' : ' + shopNum(k.base) + ' PA et ' + shopNum(k.gift) + ' PA offerts' : ''),
         drops: Array.from({ length: k.drops }, (_, j) => ({ cls: 'pkm-pas-drop' + (j % 2 ? ' pkm-pas-drop-b' : '') })),
-        pick: () => self.setState({ shopPaAsk: i })
+        pick: () => self.setState({ shopPaAsk: i, paAdult: false, paWaive: false, paErr: '', paBusy: false })
       })),
       ask: ask ? {
         open: true, qty: shopNum(ask.pa), bonus: ask.gift ? shopNum(ask.base) + ' + ' + shopNum(ask.gift) + ' offerts' : 'Prix de base',
         first: first ? '+ ' + shopNum(ask.pa) + ' PA' : 'déjà utilisée', get: shopNum(ask.pa * (first ? 2 : 1)) + ' PA', after: shopNum(pa + ask.pa * (first ? 2 : 1)) + ' PA', price: ask.eur,
-        soon: 'Le paiement n’est pas encore ouvert : il arrivera avec les comptes Dropicards. Rien n’est débité.', payLabel: 'Payer ' + ask.eur + ' · bientôt',
-        close: () => self.setState({ shopPaAsk: null })
+        live: live, notLive: !live,
+        soon: live ? 'Paiement sécurisé par Stripe (carte, Apple Pay, Google Pay). Dropicards ne voit jamais ta carte ; tu reviens ici juste après.'
+          : 'Le paiement n’est pas disponible sur cette version de l’app. Rien n’est débité.',
+        payLabel: live ? (s.paBusy ? 'Ouverture du paiement sécurisé…' : 'Payer ' + ask.eur) : 'Payer ' + ask.eur + ' · bientôt',
+        payCls: 'pkm-pas-pay' + (live && s.paAdult && s.paWaive ? ' pkm-pas-pay-on' : ''), busyAttr: String(!!s.paBusy),
+        adult: !!s.paAdult, waive: !!s.paWaive,
+        onAdult: e => self.setState({ paAdult: !!(e && e.target && e.target.checked), paErr: '' }),
+        onWaive: e => self.setState({ paWaive: !!(e && e.target && e.target.checked), paErr: '' }),
+        pay: () => self.paPay(ask),
+        hasErr: !!s.paErr, err: s.paErr || '',
+        close: () => { if (!s.paBusy) self.setState({ shopPaAsk: null, paErr: '' }); }
       } : { open: false }
     };
   };
@@ -529,6 +590,7 @@
   const shopBaseRender = shopProto.renderVals;
   shopProto.renderVals = function () {
     const s = this.st(), r = shopBaseRender.call(this), ui = r.ui;
+    if (!paBack) setTimeout(() => this.paReturn(), 0); // retour de Stripe (?pa=), quel que soit l'écran ouvert
     ui.isPkShop = s.screen === 'pkshop';
     r.pks = ui.isPkShop ? this.vPkShop(s) : { items: [] }; // « shop » est déjà la fiche d'une boutique
     if (ui.isPkShop) Object.assign(ui, { title: 'PK shop', subtitle: 'Dépense tes PK', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });

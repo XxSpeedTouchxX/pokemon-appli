@@ -1,5 +1,5 @@
 // PK shop › « Recharger mes PA » (2026-11-01, porteur) : rubriques « Magasin » et « Recharger mes PA » en haut, 4 packs de
-// PA, récapitulatif ; paiement pas encore ouvert (rien n'est débité ni crédité).
+// PA, récapitulatif ; paiement par Stripe depuis le 2026-11-19 (ici, rien n'est payé : parcours complet dans t-pa-pay.mjs).
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -32,7 +32,9 @@ await sec.locator('.pkm-pas-pack').nth(2).click(); await page.waitForTimeout(400
 const dlg = page.locator('section[aria-label="Ton achat de PA"]');
 const lines = N(await dlg.locator('.pkm-pas-lines').innerText());
 ok('récapitulatif : ' + lines, /Tu recevras 6 000 PA/.test(lines) && /Ton solde après l’achat 6 120 PA/.test(lines) && /Total TTC 14,99 €/.test(lines));
-ok('paiement pas encore ouvert, bouton désactivé', /pas encore ouvert/.test(await dlg.innerText()) && (await dlg.locator('.pkm-pas-pay').isDisabled()));
+// Paiement Stripe branché (2026-11-19) : sans serveur (démo hors ligne, comme ici), le récapitulatif reste en lecture
+// seule ; le parcours complet avec le serveur imité est dans t-pa-pay.mjs.
+ok('sans serveur : paiement indisponible, bouton désactivé, aucune case à cocher', /pas disponible sur cette version/.test(await dlg.innerText()) && (await dlg.locator('.pkm-pas-pay').isDisabled()) && (await dlg.locator('input[type=checkbox]').count()) === 0);
 await page.screenshot({ path: shot('pashop-recap.png') });
 await dlg.locator('button:has-text("Fermer")').click(); await page.waitForTimeout(800);
 ok('fermé, rien de crédité', (await dlg.count()) === 0 && (await page.evaluate(() => window.__pkm.st().pa)) === 120);

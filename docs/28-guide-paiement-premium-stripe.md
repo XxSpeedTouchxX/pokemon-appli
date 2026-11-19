@@ -250,6 +250,86 @@ Le nom affiché partout dans l'app et dans les pages légales est maintenant **D
 
 Les anciens scripts SQL déjà installés gardent quelques messages écrits « Premium » (refus de suppression du compte, journal des PA) : l'app les affiche avec le nouveau nom. Les lots de `028_points_loyaute.sql` (pas encore installé) sont déjà renommés (« 1 mois de DropiPass… ») dans `install_024_a_028.sql`.
 
+## 8 septies. Tous les prix de l'app passent par Stripe : recharges de PA (2026-11-19, porteur)
+
+Demande du porteur : « reprendre les prix actuels de Dropicards et faire des redirections Stripe pour tous les prix de l'application ». Les seuls prix en euros de l'app sont le **DropiPass** (4 formules) et les **4 packs « Recharger mes PA »**. Tout le reste (tickets, boosters, ETB, Pokédex, avatar, coffre mystère…) se paie en PK ou en PA gagnés dans l'app : rien à payer chez Stripe.
+
+| Où dans l'app | Prix | Ce que fait le bouton | Rythme |
+|---|---|---|---|
+| DropiPass › Mensuel | 9,90 € | page de paiement Stripe (déjà en place) | tous les mois |
+| DropiPass › Trimestriel | 24,90 € | page de paiement Stripe (déjà en place) | tous les 3 mois |
+| DropiPass › Semestriel | 39,90 € | page de paiement Stripe (déjà en place) | tous les 6 mois |
+| DropiPass › Annuel | 69,90 € | page de paiement Stripe (déjà en place) | tous les ans |
+| PK shop › Recharger mes PA › 500 PA | 4,99 € | **nouveau** : page de paiement Stripe | une fois |
+| … › 1 500 PA (1 000 + 500 offerts) | 9,99 € | **nouveau** : page de paiement Stripe | une fois |
+| … › 3 000 PA (1 500 + 1 500 offerts) | 14,99 € | **nouveau** : page de paiement Stripe | une fois |
+| … › 5 000 PA (2 000 + 3 000 offerts) | 19,99 € | **nouveau** : page de paiement Stripe | une fois |
+
+**Ce qui a changé :**
+
+- **Recharges de PA payées pour de vrai.** Le joueur choisit un pack, coche « J'ai 18 ans ou plus » et « Je demande à recevoir mes PA tout de suite et je renonce à mon droit de rétractation », puis « Payer ». Il part sur la page de Stripe, paie, revient : « Merci ! Tes PA arrivent… », puis « +N PA ajoutés à ton solde ! ».
+- **Les PA sont donnés par le serveur**, jamais par l'app : quand Stripe prévient (message signé), le serveur relit le paiement chez Stripe et crédite le pack **une seule fois**. Le prix et le nombre de PA viennent de la base (`035_recharges_pa.sql`), pas de l'app.
+- **1ʳᵉ recharge doublée** (affichée dans l'app depuis le 1er novembre) : appliquée par le serveur, une fois par compte.
+- **Remboursement fait depuis Stripe** : les PA du pack sont repris au prorata, sans jamais passer le solde sous 0 (le manque est noté sur l'achat).
+- **Prix affiché = prix payé, pour le DropiPass aussi.** Si un prix rangé dans Stripe ne vaut pas exactement le prix de l'app (par exemple un ancien 6,90 € resté sur la clé `dropicards_premium_month`), ou s'il n'existe pas, le serveur crée la page de paiement avec le bon prix écrit directement dans la demande. Le paiement marche donc sans rien régler dans le catalogue de Stripe.
+- **Toujours réservé aux admins** tant que `PREMIUM_OPEN` n'est pas à `true` (§ 8 quater) : la même variable ouvre le DropiPass et les recharges.
+- **Jamais dans les apps Android et iPhone** : Google et Apple imposent leur propre paiement pour les PA et l'abonnement (mode store, `store.js`). Seulement sur dropicards.fr.
+- Conditions générales de vente, conditions d'utilisation et politique de confidentialité mises à jour (19 novembre 2026).
+
+### À faire, une fois (15 minutes, en test puis en production)
+
+**A. La base** : Supabase Studio › SQL Editor › New query › colle tout `tools/supabase/035_recharges_pa.sql` › **Run**. Puis colle `000_verifier.sql` › **Run** : la ligne `035_recharges_pa` doit être « oui ». Il ne dépend que de 010 et 017, déjà installés.
+
+**B. La fonction `stripe`** : réinstalle-la comme au § 6 (la même ligne dans le terminal de Coolify), puis **Restart** de Supabase. Cette réinstallation contient aussi celles demandées aux § 8 quinquies et 8 sexies.
+
+**C. Deux messages de plus dans Stripe** : Développeurs › Webhooks › ta destination `…/functions/v1/stripe/webhook` › **Modifier les événements**, ajoute :
+
+- `checkout.session.async_payment_succeeded` (paiement différé confirmé : virement, prélèvement) ;
+- `charge.refunded` (remboursement fait depuis Stripe).
+
+`checkout.session.completed` est déjà coché : il sert aussi aux recharges. À faire dans les deux modes (test et production).
+
+**D. La clé restreinte** : rien à changer (Checkout Sessions en écriture et Prices en lecture suffisent).
+
+**E. Les reçus** : Stripe › Paramètres › **E-mails clients** › active **Paiements réussis**. Chaque acheteur reçoit un reçu qui reprend le pack et la mention « livraison immédiate demandée, renonciation au droit de rétractation acceptée » (la loi demande cette confirmation par écrit).
+
+**F. Facultatif, pour une page de paiement et un catalogue plus propres** : Catalogue de produits › **Ajouter un produit** `Recharge de PA`, avec 4 prix **ponctuels** (pas récurrents) :
+
+| Prix | Clé de recherche |
+|---|---|
+| 4,99 EUR | `dropicards_pa_500` |
+| 9,99 EUR | `dropicards_pa_1500` |
+| 14,99 EUR | `dropicards_pa_3000` |
+| 19,99 EUR | `dropicards_pa_5000` |
+
+Sans ces prix, la page de paiement fonctionne quand même (prix écrit dans la demande). Si tu les crées, mets exactement ces montants : un prix différent est ignoré.
+
+**G. Essai (mode test)** : sur dropicards.fr, avec ton compte admin : PK shop › **Recharger mes PA** › 500 PA › coche les deux cases › **Payer 4,99 €**. Carte `4242 4242 4242 4242`, date future, code `123`. Retour sur l'app : « +1 000 PA ajoutés à ton solde ! » (1ʳᵉ recharge doublée). Vérifie dans Studio :
+
+```sql
+select u.email, a.pack, a.pa_given as pa_recus, a.first as premiere, a.amount_cents / 100.0 as euros,
+  a.paid_at as paye_le, a.refunded_cents / 100.0 as rembourse, a.note, a.livemode as reel
+from public.pa_purchases a left join auth.users u on u.id = a.user_id
+order by a.paid_at desc;
+```
+
+Puis, dans Stripe › Transactions, rembourse ce paiement : les PA repartent du solde (dans la limite de ce qu'il reste).
+
+**H. Ouvrir à tous** (plus tard) : comme au § 8 quater (`PREMIUM_OPEN=true` dans Coolify, et me demander `NOBUY_ON = false`). Le DropiPass et les recharges s'ouvrent ensemble.
+
+### Coût Stripe d'une recharge
+
+Environ 1,5 % + 0,25 € par paiement avec une carte européenne : il te reste environ 4,67 € sur 4,99 €, 9,59 € sur 9,99 €, 14,52 € sur 14,99 € et 19,45 € sur 19,99 €.
+
+### Défauts à confirmer
+
+| Sujet | Choix appliqué |
+|---|---|
+| 1ʳᵉ recharge doublée | Oui, une fois par compte, sur le premier paiement reçu (comme affiché dans l'app) |
+| PA après un remboursement | Repris au prorata, jamais sous 0 |
+| Âge | Déclaration « 18 ans ou plus » cochée à chaque achat ; refus pour un compte « moins de 15 ans » |
+| Renonciation au droit de rétractation | Case obligatoire avant le paiement, gardée datée chez Stripe ; texte à faire relire par un juriste |
+
 ## 9. Ce qui reste à décider
 
 | # | Question | Défaut proposé |

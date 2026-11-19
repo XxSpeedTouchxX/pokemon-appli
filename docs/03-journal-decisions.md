@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-19 — Tous les prix de l'app passent par Stripe : recharges de PA payées (porteur)
+
+- **Demande** (porteur) : « reprendre les prix de Dropicards actuels et faire des redirections Stripe par rapport à tous les prix sur l'application ».
+- **Inventaire** : les seuls prix en euros sont le DropiPass (4 formules, déjà payé par Stripe depuis le 2026-11-07) et les 4 packs « Recharger mes PA » (affichés depuis le 2026-11-01, paiement « bientôt »). Tickets, lots, Pokédex, avatar et coffre se paient en PK ou PA gagnés : pas de Stripe.
+- **Recharges de PA branchées** : page de paiement Stripe après deux cases cochées (18 ans ou plus ; livraison immédiate et renonciation au droit de rétractation, article L221-28 13° du Code de la consommation) ; PA crédités par le serveur à la confirmation de Stripe, une fois par paiement ; prix et PA lus dans la base (`035_recharges_pa.sql`), jamais dans l'app.
+- **Prix affiché = prix payé** : la fonction `stripe` n'utilise un prix rangé dans Stripe que s'il vaut exactement le prix de l'app ; sinon elle écrit le bon prix dans la demande (DropiPass compris).
+- **Défauts appliqués, à confirmer** : 1ʳᵉ recharge doublée (une fois par compte), PA repris au prorata d'un remboursement sans passer sous 0, refus des comptes « moins de 15 ans ».
+- **Inchangé** : achats réservés aux admins (`NOBUY_ON`, `PREMIUM_OPEN`), aucune offre payante dans les apps des stores.
+- **À faire par le porteur** : `docs/28` § 8 septies (035, fonction `stripe`, 2 événements du webhook, reçus Stripe).
 ## 2026-11-19 — « Le calendrier TCG » : frise sur 20 % de l'écran, figée (porteur)
 
 - **Frise sur 20 % de l'écran, toujours figée en haut avec les onglets** (porteur : « fais 20 % de l'écran finalement, figé ») à la place de 30 %.

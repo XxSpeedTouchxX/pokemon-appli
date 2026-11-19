@@ -8,19 +8,34 @@
 //   POST /stripe/webhook   (Stripe seulement) → message signé de Stripe : abonnement créé, renouvelé, arrêté, payé…
 //   POST /stripe/cancel    (joueur connecté) → abonnement arrêté tout de suite, juste avant « Supprimer mon compte »
 //                         (2026-11-14, porteur : la suppression du compte supprime aussi l'abonnement)
+//   POST /stripe/pa        (joueur connecté) → page de paiement Stripe d'un pack « Recharger mes PA » (« pa_500 »,
+//                         « pa_1500 », « pa_3000 » ou « pa_5000 » ; 2026-11-19, porteur : « des redirections Stripe pour
+//                         tous les prix de l'application »). Prix et PA lus dans la base (035), jamais envoyés par l'app ;
+//                         PA donnés par le message signé de Stripe, une seule fois par paiement.
 // Les secrets restent dans les variables du serveur (Coolify), jamais dans le dépôt ni dans l'app :
 //   STRIPE_SECRET_KEY      clé secrète ou restreinte de Stripe (sk_… ou rk_…)
 //   STRIPE_WEBHOOK_SECRET  secret de signature du point de terminaison (whsec_…)
 //   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY : déjà fournis par Supabase au service.
 // Facultatif : APP_URL (https://dropicards.fr par défaut), STRIPE_PRICE_MONTH, STRIPE_PRICE_QUARTER, STRIPE_PRICE_SEMESTER
 // et STRIPE_PRICE_YEAR (sinon les prix sont trouvés par leur clé de recherche : dropicards_premium_month, _quarter,
-// _semester et _year).
+// _semester et _year ; packs de PA : dropicards_pa_500, _1500, _3000 et _5000).
+// Prix affiché = prix payé (2026-11-19) : un prix trouvé dans Stripe n'est utilisé que s'il vaut exactement le prix de
+// l'app (en euros, même rythme). Sinon, ou s'il n'existe pas encore, la page de paiement est créée avec le bon prix écrit
+// directement dans la demande (« price_data ») : le paiement marche sans rien régler dans le catalogue de Stripe.
 // Aucune bibliothèque : l'API de Stripe est appelée directement, la signature est vérifiée avec WebCrypto.
 // Le même fichier est testé sous Node (tools/supabase/functions/stripe/test.mjs) avec un faux Stripe et la base locale.
 
 const STRIPE_API = 'https://api.stripe.com/v1';
 const LOOKUP: Record<string, string> = { month: 'dropicards_premium_month', quarter: 'dropicards_premium_quarter', semester: 'dropicards_premium_semester', year: 'dropicards_premium_year' };
 const PRICE_ENV: Record<string, string> = { month: 'STRIPE_PRICE_MONTH', quarter: 'STRIPE_PRICE_QUARTER', semester: 'STRIPE_PRICE_SEMESTER', year: 'STRIPE_PRICE_YEAR' };
+// Prix du DropiPass affichés dans l'app (tools/web/premium.js, porteur 2026-11-10), en centimes, et leur rythme.
+export const PLANS: Record<string, { cents: number, interval: string, count: number, name: string }> = {
+  month: { cents: 990, interval: 'month', count: 1, name: 'DropiPass · formule mensuelle' },
+  quarter: { cents: 2490, interval: 'month', count: 3, name: 'DropiPass · formule trimestrielle' },
+  semester: { cents: 3990, interval: 'month', count: 6, name: 'DropiPass · formule semestrielle' },
+  year: { cents: 6990, interval: 'year', count: 1, name: 'DropiPass · formule annuelle' }
+};
+const PA_PACK = /^pa_[0-9]{1,6}$/;
 const TOLERANCE_S = 300;
 
 const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
@@ -96,11 +111,18 @@ export function makeHandler(env, fetchImpl = fetch) {
     }
     return j;
   }
-  async function rpc(name, args) {
+  // say : un refus écrit pour le joueur par la base (code P0001, ex. « réservé aux 18 ans et plus ») lui est montré.
+  async function rpc(name, args, say = false) {
     const k = E('SUPABASE_SERVICE_ROLE_KEY');
     const res = await fetchImpl(SB + '/rest/v1/rpc/' + name, { method: 'POST', headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' }, body: JSON.stringify(args) });
     const txt = await res.text();
-    if (!res.ok) { console.error('rpc', name, res.status, txt); throw Object.assign(new Error('Base de données indisponible.'), { status: 500 }); }
+    if (!res.ok) {
+      console.error('rpc', name, res.status, txt);
+      let j = null; try { j = JSON.parse(txt); } catch (e) { j = null; }
+      if (say && j && j.code === 'P0001' && j.message) throw Object.assign(new Error(String(j.message)), { status: 400 });
+      if (/function .* does not exist|Could not find the function/i.test(txt)) throw Object.assign(new Error('Ce paiement n’est pas encore installé sur le serveur.'), { status: 503 });
+      throw Object.assign(new Error('Base de données indisponible.'), { status: 500 });
+    }
     return txt ? JSON.parse(txt) : null;
   }
   async function premiumSub(uid) {
@@ -133,14 +155,28 @@ export function makeHandler(env, fetchImpl = fetch) {
     const u = await res.json().catch(() => null);
     return u && u.id ? u : null;
   }
-  async function priceId(plan) {
-    const fixed = E(PRICE_ENV[plan]);
-    if (fixed) return fixed;
-    const j = await stripe('GET', '/prices', { 'lookup_keys': [LOOKUP[plan]], active: 'true', limit: 1 });
-    const p = j && j.data && j.data[0];
-    if (!p) throw Object.assign(new Error('Cette formule n’existe pas encore dans Stripe.'), { status: 503 });
-    return p.id;
+  // Ligne de la page de paiement : le prix rangé dans Stripe s'il vaut exactement le prix attendu, sinon le prix écrit
+  // dans la demande. want : { cents, interval?, count?, name }.
+  const sameRhythm = (p, want) => !want.interval
+    ? !p.recurring
+    : !!p.recurring && p.recurring.interval === want.interval && (Number(p.recurring.interval_count) || 1) === want.count;
+  async function lineOf(key, fixed, want) {
+    try {
+      let p = null;
+      if (fixed) p = await stripe('GET', '/prices/' + encodeURIComponent(fixed));
+      else { const j = await stripe('GET', '/prices', { 'lookup_keys': [key], active: 'true', limit: 1 }); p = j && j.data && j.data[0]; }
+      if (p && p.id && p.active !== false && p.unit_amount === want.cents && String(p.currency).toLowerCase() === 'eur' && sameRhythm(p, want)) return { price: p.id, quantity: 1 };
+      console.warn('prix Stripe', key, p ? 'différent du prix de l’app : prix écrit dans la demande' : 'absent : prix écrit dans la demande');
+    } catch (e) {
+      if (e && e.status === 503) throw e;
+      console.warn('prix Stripe', key, 'illisible : prix écrit dans la demande');
+    }
+    const pd: Record<string, unknown> = { currency: 'eur', unit_amount: want.cents, product_data: { name: want.name } };
+    if (want.interval) pd.recurring = { interval: want.interval, interval_count: want.count };
+    return { price_data: pd, quantity: 1 };
   }
+  // Achats réservés aux admins tant que PREMIUM_OPEN n'est pas réglée à true (DropiPass et recharges de PA).
+  const buyOpen = async uid => String(E('PREMIUM_OPEN') || '').toLowerCase() === 'true' || await isAdmin(uid);
   async function customerOf(u) {
     let cust = await rpc('premium_customer', { uid: u.id });
     if (cust) return cust;
@@ -153,7 +189,7 @@ export function makeHandler(env, fetchImpl = fetch) {
   async function checkout(req) {
     const u = await userOf(req);
     if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards pour prendre le DropiPass.');
-    if (String(E('PREMIUM_OPEN') || '').toLowerCase() !== 'true' && !(await isAdmin(u.id))) return fail(403, 'Le DropiPass n’est pas encore ouvert : il arrive très bientôt.');
+    if (!(await buyOpen(u.id))) return fail(403, 'Le DropiPass n’est pas encore ouvert : il arrive très bientôt.');
     const b = await req.json().catch(() => ({}));
     const plan = b && typeof b.plan === 'string' && Object.prototype.hasOwnProperty.call(LOOKUP, b.plan) ? b.plan : '';
     if (!plan) return fail(400, 'Choisis une formule : mensuelle, trimestrielle, semestrielle ou annuelle.');
@@ -161,13 +197,13 @@ export function makeHandler(env, fetchImpl = fetch) {
     if (row && ['active', 'trialing', 'past_due'].includes(row.status) && row.period_end && new Date(row.period_end).getTime() > Date.now()) {
       return fail(409, 'Tu as déjà le DropiPass : gère ton abonnement depuis Mon profil.');
     }
-    const price = await priceId(plan);
+    const line = await lineOf(LOOKUP[plan], E(PRICE_ENV[plan]), PLANS[plan]);
     const cust = await customerOf(u);
     const s = await stripe('POST', '/checkout/sessions', {
       mode: 'subscription',
       customer: cust,
       client_reference_id: u.id,
-      line_items: [{ price: price, quantity: 1 }],
+      line_items: [line],
       subscription_data: { metadata: { user_id: u.id } },
       metadata: { user_id: u.id, plan: plan },
       success_url: APP + '/?premium=merci',
@@ -176,6 +212,50 @@ export function makeHandler(env, fetchImpl = fetch) {
       custom_text: { submit: { message: 'Renouvellement automatique. Tu peux arrêter ton abonnement à tout moment depuis Mon profil.' } }
     });
     return json(200, { url: s.url });
+  }
+
+  // Recharge de PA : paiement unique. Le joueur a coché « J'ai 18 ans ou plus » et demandé la livraison immédiate de ses
+  // PA en renonçant à son droit de rétractation (contenu numérique, article L221-28 du Code de la consommation) : ces
+  // deux accords sont exigés ici et gardés dans la session de paiement (preuve, date comprise).
+  async function payPa(req) {
+    const u = await userOf(req);
+    if (!u) return fail(401, 'Connecte-toi à ton compte Dropicards pour recharger tes PA.');
+    if (!(await buyOpen(u.id))) return fail(403, 'Les recharges de PA ne sont pas encore ouvertes : elles arrivent très bientôt.');
+    const b = await req.json().catch(() => ({}));
+    const pack = b && typeof b.pack === 'string' && PA_PACK.test(b.pack) ? b.pack : '';
+    if (!pack) return fail(400, 'Choisis un pack de PA.');
+    if (!(b.adult === true && b.waive === true)) return fail(400, 'Coche les deux cases avant de payer : 18 ans ou plus, et livraison immédiate de tes PA.');
+    const k = await rpc('pa_checkout_pack', { uid: u.id, pack_id: pack }, true);
+    if (!k || !k.cents) return fail(400, 'Ce pack de PA n’existe pas.');
+    const line = await lineOf('dropicards_pa_' + k.pa, '', { cents: k.cents, name: 'Dropicards · ' + k.label });
+    const cust = await customerOf(u);
+    const now = new Date().toISOString();
+    const meta = { user_id: u.id, kind: 'pa', pack: k.id, adult: 'oui', waive: 'oui', agreed_at: now };
+    const s = await stripe('POST', '/checkout/sessions', {
+      mode: 'payment',
+      customer: cust,
+      client_reference_id: u.id,
+      line_items: [line],
+      metadata: meta,
+      payment_intent_data: { metadata: meta, description: 'Dropicards · ' + k.label + ' · livraison immédiate demandée, renonciation au droit de rétractation acceptée' },
+      success_url: APP + '/?pa=merci',
+      cancel_url: APP + '/?pa=annule',
+      locale: 'fr',
+      custom_text: { submit: { message: 'Tes PA sont livrés dès le paiement : tu as demandé cette livraison immédiate et renoncé à ton droit de rétractation.' } }
+    });
+    return json(200, { url: s.url });
+  }
+  // Session de paiement d'un pack relue chez Stripe (source de vérité), puis PA donnés par la base une seule fois.
+  async function creditPa(sessionId, live) {
+    const s = await stripe('GET', '/checkout/sessions/' + encodeURIComponent(sessionId));
+    const m = s && s.metadata || {};
+    if (!s || s.mode !== 'payment' || m.kind !== 'pa' || s.payment_status !== 'paid') return null;
+    const r = await rpc('pa_purchase_credit', {
+      sess: s.id, uid: m.user_id || s.client_reference_id || null, pack_id: m.pack || '',
+      amount: s.amount_total, cur: s.currency || '', pi: typeof s.payment_intent === 'string' ? s.payment_intent : s.payment_intent && s.payment_intent.id || null,
+      live: !!(live || s.livemode)
+    });
+    return r && r.user_id || null;
   }
 
   async function portal(req) {
@@ -239,7 +319,18 @@ export function makeHandler(env, fetchImpl = fetch) {
     switch (ev.type) {
       case 'checkout.session.completed':
         if (o.mode === 'subscription' && o.subscription) uid = await syncSubscription(typeof o.subscription === 'string' ? o.subscription : o.subscription.id, o.client_reference_id, ev.livemode);
+        else if (o.mode === 'payment' && o.metadata && o.metadata.kind === 'pa' && o.id) uid = await creditPa(o.id, ev.livemode);
         break;
+      // Paiement différé (virement, prélèvement) : les PA arrivent quand Stripe confirme l'argent.
+      case 'checkout.session.async_payment_succeeded':
+        if (o.mode === 'payment' && o.metadata && o.metadata.kind === 'pa' && o.id) uid = await creditPa(o.id, ev.livemode);
+        break;
+      // Remboursement fait depuis Stripe : PA du pack repris au prorata (rien pour un paiement qui n'est pas un pack).
+      case 'charge.refunded': {
+        const pi = typeof o.payment_intent === 'string' ? o.payment_intent : o.payment_intent && o.payment_intent.id;
+        if (pi) { const r = await rpc('pa_purchase_refund', { pi: pi, refunded: Number(o.amount_refunded) || 0, live: !!ev.livemode }); uid = r && r.user_id || null; }
+        break;
+      }
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
@@ -282,6 +373,7 @@ export function makeHandler(env, fetchImpl = fetch) {
       if (route === 'checkout') return await checkout(req);
       if (route === 'portal') return await portal(req);
       if (route === 'cancel') return await cancelNow(req);
+      if (route === 'pa') return await payPa(req);
       if (route === 'webhook') return await webhook(req);
       return fail(404, 'Chemin inconnu');
     } catch (e) {

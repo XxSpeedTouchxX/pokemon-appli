@@ -1931,7 +1931,11 @@
 <div class="pkm-pas-recap"><img src="img/brand/pa.svg" alt="" width="48" height="48"><div><span class="pkm-pas-qty">{{ pks.ask.qty }} <small>PA</small></span><span class="pkm-pas-bonus">{{ pks.ask.bonus }}</span></div></div>
 <div class="pkm-pas-lines"><div><span>1ʳᵉ recharge doublée</span><b>{{ pks.ask.first }}</b></div><div><span>Tu recevras</span><b>{{ pks.ask.get }}</b></div><div><span>Ton solde après l’achat</span><b>{{ pks.ask.after }}</b></div><div class="pkm-pas-tot"><span>Total TTC</span><span>{{ pks.ask.price }}</span></div></div>
 <p class="pkm-pas-soon" role="status">{{ pks.ask.soon }}</p>
-<button type="button" disabled class="pkm-pas-pay">{{ pks.ask.payLabel }}</button>
+<sc-if value="{{ pks.ask.live }}" hint-placeholder-val="{{ true }}"><div role="group" aria-label="Avant de payer" class="pkm-pas-checks"><label class="pkm-acc-news"><input type="checkbox" name="pa-adult" checked="{{ pks.ask.adult }}" onChange="{{ pks.ask.onAdult }}"><span>J’ai 18 ans ou plus.</span></label><label class="pkm-acc-news"><input type="checkbox" name="pa-waive" checked="{{ pks.ask.waive }}" onChange="{{ pks.ask.onWaive }}"><span>Je demande à recevoir mes PA tout de suite après le paiement et je renonce à mon droit de rétractation de 14 jours.</span></label></div>
+<button type="button" onClick="{{ pks.ask.pay }}" aria-disabled="{{ pks.ask.busyAttr }}" class="{{ pks.ask.payCls }}">{{ pks.ask.payLabel }}</button>
+<sc-if value="{{ pks.ask.hasErr }}" hint-placeholder-val="{{ false }}"><p class="pkm-prem-err" role="alert">{{ pks.ask.err }}</p></sc-if>
+<button type="button" onClick="{{ legal.openSales }}" class="pkm-prem-cgv">Conditions générales de vente</button></sc-if>
+<sc-if value="{{ pks.ask.notLive }}" hint-placeholder-val="{{ false }}"><button type="button" disabled class="pkm-pas-pay">{{ pks.ask.payLabel }}</button></sc-if>
 <button type="button" onClick="{{ pks.ask.close }}" class="pkm-pas-cancel">Fermer</button>
 </section></div>
 </sc-if>

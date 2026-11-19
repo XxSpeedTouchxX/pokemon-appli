@@ -934,6 +934,11 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pas-lines .pkm-pas-tot { border: 0; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 800; color: #FFFFFF; }
 .pkm-pas-soon { margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(245, 177, 76, 0.12); font-size: 13px; line-height: 1.45; color: #F5D08C; }
 .pkm-pas-pay { height: 52px; border: 0; border-radius: 14px; background: #3A4767; color: #C9D3EA; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 800; cursor: not-allowed; }
+.pkm-pas-checks { display: flex; flex-direction: column; gap: 4px; }
+.pkm-pas-checks .pkm-acc-news { color: #E6ECFA; font-size: 13px; }
+.pkm-pas-pay-on { background: linear-gradient(90deg, #FFE46B, #FFD60A, #FFB000); color: #2B124C; cursor: pointer; box-shadow: 0 8px 22px rgba(255, 190, 0, 0.3); }
+.pkm-pas-pay[aria-disabled="true"] { opacity: 0.75; cursor: progress; }
+.pkm-pas-sheet .pkm-prem-err { margin: 0; }
 .pkm-pas-cancel { min-height: 44px; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
 /* Recharger mes PA : reflet qui traverse chaque pack toutes les 2,6 s (décalé d'un pack à l'autre), gouttes qui
    flottent et étincelle qui scintille (2026-11-01, porteur : « que ça donne envie d'acheter les PA »). */

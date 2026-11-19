@@ -21,9 +21,10 @@ const tokens = { 'tok-ok': { id: UID, email: email } };
 
 // ——— Faux Stripe ———
 const KEY = 'sk_test_faux', WH = 'whsec_faux_secret';
-const S = { n: 0, customers: {}, idem: {}, sessions: [], portal: 0, subs: {}, calls: [] };
-const prices = [{ id: 'price_M', lookup_key: 'dropicards_premium_month', recurring: { interval: 'month' } }, { id: 'price_Y', lookup_key: 'dropicards_premium_year', recurring: { interval: 'year' } },
-  { id: 'price_Q', lookup_key: 'dropicards_premium_quarter', recurring: { interval: 'month', interval_count: 3 } }, { id: 'price_S', lookup_key: 'dropicards_premium_semester', recurring: { interval: 'month', interval_count: 6 } }];
+const S = { n: 0, customers: {}, idem: {}, sessions: [], portal: 0, subs: {}, calls: [], cs: {} };
+const prices = [{ id: 'price_M', lookup_key: 'dropicards_premium_month', recurring: { interval: 'month' }, unit_amount: 990 }, { id: 'price_Y', lookup_key: 'dropicards_premium_year', recurring: { interval: 'year' }, unit_amount: 6990 },
+  { id: 'price_Q', lookup_key: 'dropicards_premium_quarter', recurring: { interval: 'month', interval_count: 3 }, unit_amount: 2490 }, { id: 'price_S', lookup_key: 'dropicards_premium_semester', recurring: { interval: 'month', interval_count: 6 }, unit_amount: 3990 },
+  { id: 'price_P500', lookup_key: 'dropicards_pa_500', recurring: null, unit_amount: 499 }].map(p => Object.assign(p, { currency: 'eur', active: true }));
 const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 async function fakeFetch(url, init = {}) {
   const u = new URL(url), h = init.headers || {};
@@ -37,7 +38,16 @@ async function fakeFetch(url, init = {}) {
       const c = { id: 'cus_F' + R + 'n' + (++S.n), email: p.get('email'), metadata: { user_id: p.get('metadata[user_id]') } };
       S.customers[c.id] = c; if (h['Idempotency-Key']) S.idem[h['Idempotency-Key']] = c; return reply(200, c);
     }
-    if (u.pathname === '/v1/checkout/sessions') { S.sessions.push(p); return reply(200, { id: 'cs_F' + S.sessions.length, url: 'https://checkout.stripe.com/c/pay/cs_F' + S.sessions.length }); }
+    if (u.pathname === '/v1/checkout/sessions') {
+      S.sessions.push(p);
+      const id = 'cs_F' + R + 'n' + S.sessions.length, pr = prices.find(x => x.id === p.get('line_items[0][price]'));
+      const meta = {}; for (const [k, v] of p) { const mm = k.match(/^metadata\[(\w+)\]$/); if (mm) meta[mm[1]] = v; }
+      S.cs[id] = { id, mode: p.get('mode'), metadata: meta, client_reference_id: p.get('client_reference_id'), currency: 'eur', livemode: false,
+        amount_total: pr ? pr.unit_amount : Number(p.get('line_items[0][price_data][unit_amount]')), payment_status: 'unpaid', payment_intent: 'pi_F' + R + 'n' + S.sessions.length };
+      return reply(200, { id, url: 'https://checkout.stripe.com/c/pay/' + id });
+    }
+    const cs = u.pathname.match(/^\/v1\/checkout\/sessions\/(cs_\w+)$/);
+    if (cs && S.cs[cs[1]]) return reply(200, S.cs[cs[1]]);
     if (u.pathname === '/v1/billing_portal/sessions') { S.portal++; return reply(200, { url: 'https://billing.stripe.com/p/session/F' + S.portal, customer: p.get('customer') }); }
     const m = u.pathname.match(/^\/v1\/subscriptions\/(sub_\w+)$/);
     if (m && S.subs[m[1]] && init.method === 'DELETE') { S.subs[m[1]].status = 'canceled'; return reply(200, S.subs[m[1]]); }
@@ -50,7 +60,7 @@ async function fakeFetch(url, init = {}) {
   if (rpc) {
     const a = JSON.parse(init.body || '{}');
     try { return new Response(JSON.stringify(out(sql('select public.' + rpc[1] + '(' + Object.keys(a).map(k => k + ' => ' + lit(a[k])).join(', ') + ')::text', 'service_role')))); }
-    catch (e) { return reply(400, { message: String(e.stderr || e.message) }); }
+    catch (e) { const t = String(e.stderr || e.message), m = t.match(/ERROR:\s+(.*)/); return reply(400, { code: /permission denied/.test(t) ? '42501' : 'P0001', message: m ? m[1].trim() : t }); }
   }
   if (u.pathname === '/rest/v1/profiles') {
     const id = u.searchParams.get('id').replace(/^eq\./, '');
@@ -151,6 +161,64 @@ const del = S.calls.filter(c => c.method === 'DELETE');
 ok('arrêt immédiat : abonnement supprimé chez Stripe (' + JSON.stringify(k1.j) + ')', k1.status === 200 && k1.j.canceled === true && del.length === 1 && del[0].path === '/v1/subscriptions/' + SUB);
 ok('arrêt immédiat : plus Premium dans la base (status ' + row().status + ')', row().status === 'canceled'
   && out(sql("select (public.game_state()->'premium'->>'on') from (select set_config('request.jwt.claim.sub', " + lit(UID) + ", false)) x", 'authenticated')) === 'false');
+// 6. Prix affiché = prix payé (2026-11-19) : un prix de Stripe différent ou absent est remplacé par le bon prix.
+S.sessions.length = 0;
+sql("update public.premium set status = 'canceled', period_end = now() - interval '1 day' where user_id = " + lit(UID));
+prices[0].unit_amount = 690; // ancien prix mensuel resté sur la clé de recherche
+await call('checkout', { plan: 'month' }, 'tok-ok');
+const sm = S.sessions[0];
+ok('prix mensuel de Stripe à 6,90 € ≠ 9,90 € de l’app : page créée à 9,90 € (prix écrit dans la demande)', sm && !sm.get('line_items[0][price]') && sm.get('line_items[0][price_data][unit_amount]') === '990'
+  && sm.get('line_items[0][price_data][currency]') === 'eur' && sm.get('line_items[0][price_data][recurring][interval]') === 'month' && sm.get('line_items[0][price_data][recurring][interval_count]') === '1');
+prices[0].unit_amount = 990;
+const qi = prices.findIndex(x => x.id === 'price_Q'), qp = prices.splice(qi, 1)[0];
+await call('checkout', { plan: 'quarter' }, 'tok-ok');
+ok('formule trimestrielle absente de Stripe : page créée quand même à 24,90 € tous les 3 mois', S.sessions[1].get('line_items[0][price_data][unit_amount]') === '2490' && S.sessions[1].get('line_items[0][price_data][recurring][interval_count]') === '3'
+  && /trimestrielle/.test(S.sessions[1].get('line_items[0][price_data][product_data][name]')));
+prices.splice(qi, 0, qp);
+
+// 7. Recharger mes PA (2026-11-19).
+S.sessions.length = 0;
+sql("update public.profiles set age_range = '25-35' where id = " + lit(UID));
+const paBal = () => Number(out(sql('select pa::text from public.wallets where user_id = ' + lit(UID))));
+const yes = { adult: true, waive: true };
+ok('pack de PA sans être connecté : refusé (401)', (await call('pa', Object.assign({ pack: 'pa_500' }, yes))).status === 401);
+env.PREMIUM_OPEN = '';
+const pq = await call('pa', Object.assign({ pack: 'pa_500' }, yes), 'tok-ok');
+ok('pack de PA, achats pas encore ouverts, compte joueur : refusé (403)', pq.status === 403 && /pas encore ouvertes/.test(pq.j.error || '') && !S.sessions.length);
+env.PREMIUM_OPEN = 'true';
+ok('pack inventé : refusé (400)', (await call('pa', Object.assign({ pack: 'pa_999999' }, yes), 'tok-ok')).status === 400 && !S.sessions.length);
+ok('pack mal écrit : refusé (400)', (await call('pa', Object.assign({ pack: '../prices' }, yes), 'tok-ok')).status === 400);
+const pw = await call('pa', { pack: 'pa_500', adult: true }, 'tok-ok');
+ok('sans la renonciation au droit de rétractation : refusé (400)', pw.status === 400 && /Coche les deux cases/.test(pw.j.error || '') && !S.sessions.length);
+ok('sans « 18 ans ou plus » : refusé (400)', (await call('pa', { pack: 'pa_500', waive: true }, 'tok-ok')).status === 400);
+sql("update public.profiles set age_range = 'u15' where id = " + lit(UID));
+const pu = await call('pa', Object.assign({ pack: 'pa_500' }, yes), 'tok-ok');
+ok('compte « moins de 15 ans » : refusé avec le message de la base (' + pu.j.error + ')', pu.status === 400 && /18 ans/.test(pu.j.error || '') && !S.sessions.length);
+sql("update public.profiles set age_range = '25-35' where id = " + lit(UID));
+const p5 = await call('pa', Object.assign({ pack: 'pa_500' }, yes), 'tok-ok');
+const s5 = S.sessions[0];
+ok('pack 500 PA : page de paiement Stripe (' + p5.status + ')', p5.status === 200 && /^https:\/\/checkout\.stripe\.com\//.test(p5.j.url));
+ok('pack 500 PA : paiement unique, prix trouvé par sa clé de recherche (4,99 €)', s5.get('mode') === 'payment' && s5.get('line_items[0][price]') === 'price_P500');
+ok('pack : compte, pack et accords gardés dans la session (preuve datée)', s5.get('client_reference_id') === UID && s5.get('metadata[user_id]') === UID && s5.get('metadata[pack]') === 'pa_500'
+  && s5.get('metadata[waive]') === 'oui' && s5.get('metadata[adult]') === 'oui' && !!s5.get('metadata[agreed_at]') && s5.get('payment_intent_data[metadata][pack]') === 'pa_500');
+ok('pack : retour sur dropicards.fr (?pa=merci / ?pa=annule), même client Stripe', s5.get('success_url') === 'https://dropicards.fr/?pa=merci' && s5.get('cancel_url') === 'https://dropicards.fr/?pa=annule' && s5.get('customer') === cust);
+await call('pa', Object.assign({ pack: 'pa_3000', price: 1 }, yes), 'tok-ok');
+const s3 = S.sessions[1];
+ok('pack 3 000 PA sans prix dans Stripe : 14,99 € pris dans la base (prix envoyé par l’app ignoré)', s3.get('line_items[0][price_data][unit_amount]') === '1499' && !s3.get('line_items[0][price_data][recurring][interval]')
+  && /3 000 PA/.test(s3.get('line_items[0][price_data][product_data][name]')));
+const id5 = Object.keys(S.cs).find(k => S.cs[k].metadata.pack === 'pa_500'), id3 = Object.keys(S.cs).find(k => S.cs[k].metadata.pack === 'pa_3000');
+const before = paBal();
+const done5 = { id: 'evt_' + R + 'p1', type: 'checkout.session.completed', livemode: false, data: { object: { id: id5, mode: 'payment', metadata: { kind: 'pa' } } } };
+ok('session pas encore payée (paiement différé) : reçue, aucun PA', (await hook(done5)) === 200 && paBal() === before);
+S.cs[id5].payment_status = 'paid';
+ok('paiement différé confirmé (async_payment_succeeded) : 1re recharge, 500 PA doublés → +1 000 PA', (await hook({ id: 'evt_' + R + 'p2', type: 'checkout.session.async_payment_succeeded', data: { object: { id: id5, mode: 'payment', metadata: { kind: 'pa' } } } })) === 200 && paBal() === before + 1000);
+ok('même paiement annoncé encore (completed) : aucun PA de plus', (await hook(Object.assign({}, done5, { id: 'evt_' + R + 'p3' }))) === 200 && paBal() === before + 1000);
+S.cs[id3].payment_status = 'paid';
+const fake = { id: 'evt_' + R + 'p4', type: 'checkout.session.completed', data: { object: { id: id3, mode: 'payment', metadata: { kind: 'pa', pack: 'pa_5000', user_id: '00000000-0000-0000-0000-0000000000ff' } } } };
+ok('pack 3 000 PA payé : +3 000 PA (pack et compte relus chez Stripe, pas dans le message)', (await hook(fake)) === 200 && paBal() === before + 4000);
+ok('achats rangés dans la base (2 paiements, 1re recharge notée)', out(sql("select count(*)::text from public.pa_purchases where user_id = " + lit(UID) + " and pa_given > 0")) === '2'
+  && out(sql("select pack from public.pa_purchases where user_id = " + lit(UID) + " and first")) === 'pa_500');
+ok('remboursement complet du pack 3 000 PA (charge.refunded) : 3 000 PA repris', (await hook({ id: 'evt_' + R + 'p5', type: 'charge.refunded', data: { object: { payment_intent: S.cs[id3].payment_intent, amount_refunded: 1499 } } })) === 200 && paBal() === before + 1000);
 ok('message inconnu : accepté sans rien changer (200)', (await hook({ id: 'evt_' + R + '5', type: 'charge.refunded', data: { object: {} } })) === 200 && row().status === 'canceled');
 const noKey = makeHandler(k => (k === 'STRIPE_SECRET_KEY' ? '' : env[k]), fakeFetch);
 const nk = await noKey(new Request('http://edge/stripe/checkout', { method: 'POST', headers: { Authorization: 'Bearer tok-ok' }, body: '{"plan":"year"}' }));
