@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-19 — « Le calendrier TCG » : zoom façon caméra du Radar (porteur)
+
+- **Demande** (porteur : « le zoom n'est pas bien fait, je veux un zoom comme la cinématique du radar de boutique, de manière beaucoup plus fluide et satisfaisante »). Le zoom précédent enchaînait des effets séparés (voile sombre, logo qui s'envole, pause, fondu).
+- **Un seul mouvement continu**, comme la carte du Radar qui zoome sur une zone :
+  1. appui : la tuile s'enfonce et s'allume (0,14 s) ;
+  2. caméra (1,05 s) : toute la frise zoome vers l'extension touchée, qui glisse au centre du cadre en grandissant ; la vitesse de zoom est régulière (comme une carte), départ et arrivée en douceur ; la tuile reste nette, le nom de l'extension apparaît dessous ;
+  3. ouverture : juste avant la fin, la tuile s'ouvre et remplit l'écran, son cadre s'efface et seul le logo reste ;
+  4. la page de l'extension (onglets « Cartes » et « Items ») apparaît pendant que le logo vole jusqu'à sa place dans la page.
+- Durée totale ≈ 1,9 s. Mouvements réduits du téléphone : la page s'ouvre directement. Retour : glissement habituel, frise à la même place.
+- Test `t-coin.mjs` (appui, caméra, tuile au centre avec son nom, page qui se pose, logo à sa place). Cache v247.
+
 ## 2026-11-19 — « Le calendrier TCG » : ligne droite, zoom vers la page de l'extension (porteur)
 
 - **Ligne du temps parfaitement droite** (porteur : « la ligne n'est pas parfaitement droite, on dirait qu'elle a un léger décalage ») : les mois avec l'année (« 2027 ») ou « Aujourd'hui » sous leur nom avaient une étiquette plus haute, et la ligne y descendait de 1 à 2 px. Toutes les étiquettes ont maintenant la même hauteur : la ligne est au même pixel sur les 29 mois.

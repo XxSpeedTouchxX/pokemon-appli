@@ -147,15 +147,34 @@
   // retirée sous la frise (2026-11-19, porteur : « ces infos quand tu cliques sur les prochaines sorties »).
   coinProto.calOpen = function (id) { this.setState({ calSel: id }); };
   coinProto.calClose = function () { this.setState({ calSel: null }); };
-  // Appui sur le logo d'une extension dans la frise (2026-11-19, porteur : « un zoom qui se fasse sur l'extension et
-  // ensuite ça ouvre la page de l'extension avec les items et les cartes ») :
-  //  1. appui marqué : la tuile s'enfonce et s'allume en jaune (0,18 s, petite vibration sur Android) ;
-  //  2. zoom : la frise plonge vers la tuile touchée pendant qu'un voile sombre monte, et le logo grandit au centre de
-  //     l'écran avec le nom de l'extension (logo posé à sa taille finale puis rétréci au départ : net pendant tout le zoom) ;
-  //  3. la page de l'extension (onglets « Cartes » et « Items ») arrive en zoom par-dessous (navZoomPush, nav.js) pendant
-  //     que le logo continue de grandir et s'efface.
-  // Logo pas encore chargé : même chose sans le logo. Mouvements réduits : l'extension s'ouvre tout de suite.
-  const CALZ_PRESS = 180, CALZ_FLY = 620, CALZ_GO = CALZ_PRESS + 860, CALZ_END = CALZ_PRESS + 1320;
+  // Appui sur le logo d'une extension dans la frise : un seul mouvement continu, comme la carte du Radar qui zoome sur une
+  // zone (2026-11-19, porteur : « un zoom comme la cinématique du radar de boutique, beaucoup plus fluide et satisfaisant »).
+  //  1. appui : la tuile s'enfonce et s'allume en jaune (0,14 s, petite vibration sur Android) ;
+  //  2. caméra (1,05 s) : toute la frise zoome vers l'extension touchée, qui glisse au centre du cadre en grandissant ;
+  //     zoom exponentiel (vitesse de zoom régulière, comme une carte), départ et arrivée en douceur ; tuile redessinée à sa
+  //     taille finale puis réduite au départ (nette du début à la fin), nom de l'extension dessous ;
+  //  3. ouverture : avant la fin de la caméra, un panneau à la couleur de l'app part de la tuile et remplit l'écran, le
+  //     cadre de la tuile s'efface et seul le logo reste ;
+  //  4. la page de l'extension (onglets « Cartes » et « Items ») apparaît sous le panneau qui s'efface, pendant que le logo
+  //     vole jusqu'à sa place dans la page (navZoomPush, nav.js ; logo .pkm-set-logo).
+  // Le tout se joue dans un calque posé au-dessus de l'app ; la frise elle-même ne fait que zoomer. Mouvements réduits :
+  // l'extension s'ouvre tout de suite.
+  const CALZ_PRESS = 140, CALZ_CAM = 1050, CALZ_OPEN = 480, CALZ_OVERLAP = 230, CALZ_FLY = 440;
+  // Courbe cubique (x1, y1, x2, y2), comme une transition CSS : résolue par Newton puis dichotomie.
+  const calBezier = (x1, y1, x2, y2) => {
+    const bx = t => ((1 - 3 * x2 + 3 * x1) * t + (3 * x2 - 6 * x1)) * t * t + 3 * x1 * t;
+    const by = t => ((1 - 3 * y2 + 3 * y1) * t + (3 * y2 - 6 * y1)) * t * t + 3 * y1 * t;
+    const dx = t => (3 * (1 - 3 * x2 + 3 * x1) * t + 2 * (3 * x2 - 6 * x1)) * t + 3 * x1;
+    return x => {
+      if (x <= 0) return 0; if (x >= 1) return 1;
+      let t = x;
+      for (let i = 0; i < 6; i++) { const d = dx(t), e = bx(t) - x; if (Math.abs(e) < 1e-5) return by(t); if (Math.abs(d) < 1e-6) break; t -= e / d; }
+      let lo = 0, hi = 1; t = x;
+      for (let i = 0; i < 30; i++) { const v = bx(t); if (Math.abs(v - x) < 1e-5) break; if (v < x) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return by(t);
+    };
+  };
+  const CALZ_EASE = calBezier(0.42, 0, 0.18, 1);
   coinProto.calZoom = function (ev, setId, name) {
     if (!setId || this.__calZ) return;
     const go = () => {
@@ -166,68 +185,127 @@
     let src = null;
     try { const b = ev && ev.currentTarget; src = b && b.querySelector ? b : null; } catch (e) { src = null; }
     const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (typeof document === 'undefined' || !src || reduce || typeof src.animate !== 'function' || !src.getBoundingClientRect().width) { go(); return; }
+    if (typeof document === 'undefined' || !src || reduce || typeof src.animate !== 'function' || !src.getBoundingClientRect().width
+      || !src.closest || !src.closest('.pkm-cal-strip') || !src.closest('.pkm-cal-hero')) { go(); return; }
     this.__calZ = true;
     let press = null;
     try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) { /* pas de vibreur */ }
     const glow = '0 0 0 3px rgba(255, 214, 10, 0.9), 0 0 22px rgba(255, 214, 10, 0.55)';
-    try { press = src.animate([{ transform: 'scale(1)', boxShadow: getComputedStyle(src).boxShadow }, { transform: 'scale(0.86)', boxShadow: glow, offset: 0.7 }, { transform: 'scale(0.9)', boxShadow: glow }], { duration: CALZ_PRESS, easing: 'ease-out', fill: 'forwards' }); } catch (e) { press = null; }
-    setTimeout(() => this.calZoomFly(src, press, name, go), CALZ_PRESS);
+    try { press = src.animate([{ transform: 'scale(1)', boxShadow: getComputedStyle(src).boxShadow }, { transform: 'scale(0.9)', boxShadow: glow }], { duration: CALZ_PRESS, easing: 'cubic-bezier(0.3, 0, 0.2, 1)', fill: 'forwards' }); } catch (e) { press = null; }
+    setTimeout(() => {
+      try { this.calZoomCam(src, press, name, go); } catch (e) { this.__calZ = false; src.style.visibility = ''; if (press) try { press.cancel(); } catch (e2) { /* rien */ } go(); }
+    }, CALZ_PRESS);
   };
-  coinProto.calZoomFly = function (src, press, name, go) {
-    const img = src.querySelector('img'), r = src.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
-    const ir = img ? img.getBoundingClientRect() : null, hasLogo = !!(img && img.complete && img.naturalWidth && ir && ir.width && ir.height);
-    const cx = vw / 2, cy = vh * 0.44;
-    const el = document.createElement('div');
-    el.className = 'pkm-calz';
-    el.setAttribute('aria-hidden', 'true');
-    el.innerHTML = '<div class="pkm-calz-veil"></div><div class="pkm-calz-ring"></div>' + (hasLogo ? '<img class="pkm-calz-logo" alt="">' : '') + '<p class="pkm-calz-t"><small>Ouverture de l’extension</small><b></b></p>';
-    const logo = el.querySelector('.pkm-calz-logo'), ring = el.querySelector('.pkm-calz-ring'), t = el.querySelector('.pkm-calz-t');
-    let h = 0;
-    if (hasLogo) {
-      const ratio = ir.width / ir.height, w = Math.min(vw * 0.74, 340, vh * 0.3 * ratio);
-      h = w / ratio;
-      logo.src = img.currentSrc || img.src;
-      Object.assign(logo.style, { width: w + 'px', height: h + 'px', left: (cx - w / 2) + 'px', top: (cy - h / 2) + 'px' });
-      logo.__k = ir.width / w; logo.__dx = (ir.left + ir.width / 2) - cx; logo.__dy = (ir.top + ir.height / 2) - cy;
+  coinProto.calZoomCam = function (src, press, name, go) {
+    const strip = src.closest('.pkm-cal-strip'), hero = src.closest('.pkm-cal-hero');
+    const r = src.getBoundingClientRect(), hr = hero.getBoundingClientRect(), sr = strip.getBoundingClientRect();
+    const w0 = src.offsetWidth || r.width, h0 = src.offsetHeight || r.height, p = r.width / w0;
+    const finalW = Math.min(hr.width * 0.74, 300), S = finalW / w0, finalH = h0 * S;
+    const c0x = r.left + r.width / 2, c0y = r.top + r.height / 2, Cx = hr.left + hr.width / 2, Cy = hr.top + hr.height * 0.46;
+    const Dx = Cx - c0x, Dy = Cy - c0y, k0 = r.width / finalW;
+    const fl = Cx - finalW / 2, ft = Cy - finalH / 2; // place finale de la tuile (écran)
+    const cs = getComputedStyle(src), px = v => (parseFloat(v) || 0);
+    const app = document.getElementById('app') || document.body;
+    // Calque au-dessus de l'app (bloque les appuis) ; « cadre » à la place de la frise, qui coupe la tuile à ses bords.
+    const layer = document.createElement('div');
+    layer.className = 'pkm-calz';
+    layer.setAttribute('aria-hidden', 'true');
+    const frame = document.createElement('div');
+    frame.className = 'pkm-calz-frame';
+    Object.assign(frame.style, { left: hr.left + 'px', top: hr.top + 'px', width: hr.width + 'px', height: hr.height + 'px', borderRadius: getComputedStyle(hero).borderRadius });
+    const box = (cls) => { const d = document.createElement('div'); d.className = cls; Object.assign(d.style, { left: (fl - hr.left) + 'px', top: (ft - hr.top) + 'px', width: finalW + 'px', height: finalH + 'px' }); return d; };
+    // Deux calques de même géométrie : le cadre de la tuile (fond, bord, sigle) et le logo, pour effacer l'un sans l'autre.
+    const tile = box('pkm-calz-tile'), logoBox = box('pkm-calz-logo');
+    Object.assign(tile.style, { borderRadius: px(cs.borderTopLeftRadius) * S + 'px', borderWidth: px(cs.borderTopWidth) * S + 'px', borderStyle: cs.borderTopStyle,
+      borderColor: cs.borderTopColor, backgroundImage: cs.backgroundImage, backgroundColor: cs.backgroundColor });
+    const rel = el => { const e = el.getBoundingClientRect(); return { l: (e.left - r.left) / p * S, t: (e.top - r.top) / p * S, w: e.width / p * S, h: e.height / p * S }; };
+    const img = src.querySelector('img'), code = src.querySelector('.pkm-cal-dcode');
+    let logoRect = null;
+    if (img && img.complete && img.naturalWidth) {
+      const q = rel(img), im = document.createElement('img');
+      im.alt = ''; im.src = img.currentSrc || img.src;
+      Object.assign(im.style, { left: q.l + 'px', top: q.t + 'px', width: q.w + 'px', height: q.h + 'px' });
+      logoBox.appendChild(im);
+      logoRect = { l: fl + q.l, t: ft + q.t, w: q.w, h: q.h, nw: img.naturalWidth, nh: img.naturalHeight };
     }
-    Object.assign(ring.style, { left: cx + 'px', top: cy + 'px' });
-    t.style.top = (cy + Math.max(h / 2, 30) + 18) + 'px';
-    t.querySelector('b').textContent = name || '';
-    (document.getElementById('app') || document.body).appendChild(el);
-    if (hasLogo) src.style.visibility = 'hidden';
-    const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
-    // La frise plonge vers la tuile touchée (zoom de « caméra »), sous le voile qui monte.
-    const strip = src.closest ? src.closest('.pkm-cal-strip') : null;
-    let dive = null;
-    try {
-      if (strip) {
-        const sr = strip.getBoundingClientRect();
-        strip.style.transformOrigin = (r.left + r.width / 2 - sr.left) + 'px ' + (r.top + r.height / 2 - sr.top) + 'px';
-        dive = strip.animate([{ transform: 'scale(1)' }, { transform: 'scale(2.6)' }], { duration: CALZ_FLY + 120, easing: 'cubic-bezier(0.5, 0, 0.75, 0)', fill: 'forwards' });
-      }
-    } catch (e) { dive = null; }
-    try {
-      if (hasLogo) logo.animate([{ transform: 'translate(' + logo.__dx + 'px, ' + logo.__dy + 'px) scale(' + logo.__k + ')' }, { transform: 'translate(0, 0) scale(1)' }], { duration: CALZ_FLY, easing: ease, fill: 'both' });
-      el.querySelector('.pkm-calz-veil').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, delay: 80, easing: 'ease-out', fill: 'both' });
-      ring.animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(0.4)' }, { opacity: 0.9, transform: 'translate(-50%, -50%) scale(0.9)', offset: 0.35 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(1.7)' }],
-        { duration: 700, delay: CALZ_FLY - 220, easing: 'ease-out', fill: 'both' });
-      t.animate([{ opacity: 0, transform: 'translate(-50%, 10px)' }, { opacity: 1, transform: 'translate(-50%, 0)' }], { duration: 300, delay: CALZ_FLY - 160, easing: 'ease-out', fill: 'both' });
-    } catch (e) { /* le zoom n'est qu'un décor */ }
+    if (code) {
+      const q = rel(code), ccs = getComputedStyle(code), t = document.createElement('span');
+      t.textContent = code.textContent;
+      Object.assign(t.style, { left: '0', right: '0', top: q.t + 'px', fontSize: px(ccs.fontSize) * S + 'px', lineHeight: px(ccs.lineHeight) * S + 'px', color: ccs.color, fontWeight: ccs.fontWeight, letterSpacing: px(ccs.letterSpacing) * S + 'px' });
+      tile.appendChild(t);
+    }
+    const label = document.createElement('p');
+    label.className = 'pkm-calz-name';
+    label.textContent = name || '';
+    label.style.top = (Cy - hr.top + finalH / 2 + 14) + 'px';
+    frame.appendChild(tile); frame.appendChild(logoBox); frame.appendChild(label); layer.appendChild(frame);
+    app.appendChild(layer);
+    src.style.visibility = 'hidden';
+    if (press) try { press.cancel(); } catch (e) { /* rien */ }
+    // Caméra : mêmes images clés pour la frise et la tuile ; zoom exponentiel (S^e), la tuile suit exactement la frise.
+    const N = 30, kStrip = [], kTile = [];
+    for (let i = 0; i <= N; i++) {
+      const e = CALZ_EASE(i / N), sc = Math.pow(S, e), st = k0 * Math.pow(1 / k0, e);
+      kStrip.push({ offset: i / N, transform: 'translate(' + (Dx * e).toFixed(2) + 'px, ' + (Dy * e).toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')', opacity: (1 - 0.45 * e).toFixed(3) });
+      kTile.push({ offset: i / N, transform: 'translate(' + (-Dx * (1 - e)).toFixed(2) + 'px, ' + (-Dy * (1 - e)).toFixed(2) + 'px) scale(' + st.toFixed(4) + ')' });
+    }
+    strip.style.transformOrigin = (c0x - sr.left) + 'px ' + (c0y - sr.top) + 'px';
+    const cam = strip.animate(kStrip, { duration: CALZ_CAM, easing: 'linear', fill: 'forwards' });
+    tile.animate(kTile, { duration: CALZ_CAM, easing: 'linear', fill: 'forwards' });
+    logoBox.animate(kTile, { duration: CALZ_CAM, easing: 'linear', fill: 'forwards' });
+    label.animate([{ opacity: 0, transform: 'translate(-50%, 8px)' }, { opacity: 1, transform: 'translate(-50%, 0)' }], { duration: 320, delay: CALZ_CAM - 380, easing: 'ease-out', fill: 'both' });
+    const cleanup = () => {
+      layer.remove(); this.__calZ = false; src.style.visibility = '';
+      try { cam.cancel(); } catch (e) { /* rien */ }
+      strip.style.transformOrigin = '';
+    };
+    const vw = window.innerWidth, vh = window.innerHeight, rad = px(cs.borderTopLeftRadius) * S;
+    const ins = (t, rg, bt, l, rd) => 'inset(' + t.toFixed(1) + 'px ' + rg.toFixed(1) + 'px ' + bt.toFixed(1) + 'px ' + l.toFixed(1) + 'px round ' + rd.toFixed(1) + 'px)';
+    let panel = null;
+    // 3. Ouverture, juste avant la fin de la caméra.
+    setTimeout(() => {
+      panel = document.createElement('div');
+      panel.className = 'pkm-calz-panel';
+      panel.style.background = getComputedStyle(app).getPropertyValue('--pkm-app-bg').trim() || getComputedStyle(app).backgroundColor || '#1E1F24';
+      layer.insertBefore(panel, frame);
+      try {
+        panel.animate([{ clipPath: ins(ft, vw - fl - finalW, vh - ft - finalH, fl, rad) }, { clipPath: ins(0, 0, 0, 0, 0) }], { duration: CALZ_OPEN, easing: 'cubic-bezier(0.5, 0, 0.15, 1)', fill: 'forwards' });
+        tile.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CALZ_OPEN * 0.7, delay: CALZ_OVERLAP * 0.6, easing: 'ease-in-out', fill: 'forwards' });
+        label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CALZ_OPEN * 0.5, delay: CALZ_OVERLAP * 0.4, easing: 'ease-in', fill: 'forwards' });
+      } catch (e) { /* le zoom n'est qu'un décor */ }
+    }, CALZ_CAM - CALZ_OVERLAP);
+    // 4. La page arrive sous le panneau, qui s'efface ; le logo vole jusqu'à sa place dans la page.
     setTimeout(() => {
       go();
-      src.style.visibility = '';
-      if (press) try { press.cancel(); } catch (e) { /* rien */ }
-      try {
-        el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CALZ_END - CALZ_GO, easing: 'ease-in', fill: 'both' });
-        if (hasLogo) logo.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.6)' }], { duration: CALZ_END - CALZ_GO, easing: 'ease-in', fill: 'both' });
-      } catch (e) { /* rien */ }
-    }, CALZ_GO - CALZ_PRESS);
-    setTimeout(() => {
-      el.remove(); this.__calZ = false;
-      if (dive) try { dive.cancel(); } catch (e) { /* rien */ }
-      if (strip) strip.style.transformOrigin = '';
-    }, CALZ_END - CALZ_PRESS);
+      const lr = logoBox.getBoundingClientRect();
+      layer.appendChild(logoBox);
+      logoBox.getAnimations().forEach(a => a.cancel());
+      Object.assign(logoBox.style, { left: lr.left + 'px', top: lr.top + 'px' });
+      let tries = 0;
+      const land = () => {
+        const target = document.querySelector('#app main .pkm-set-logo');
+        if (!target && tries++ < 12) { requestAnimationFrame(land); return; }
+        try { if (panel) panel.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: 'ease-out', fill: 'forwards' }); } catch (e) { /* rien */ }
+        if (!target || !logoRect) {
+          try { logoBox.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.1)' }], { duration: 300, easing: 'ease-out', fill: 'forwards' }); } catch (e) { /* rien */ }
+          setTimeout(cleanup, 320);
+          return;
+        }
+        // Place du logo dans la page (image « contain » dans sa boîte), puis vol : la boîte du logo garde sa taille et rétrécit.
+        const tr = target.getBoundingClientRect(), fit = Math.min(tr.width / logoRect.nw, tr.height / logoRect.nh);
+        const gw = logoRect.nw * fit, gh = logoRect.nh * fit, gx = tr.left + (tr.width - gw) / 2, gy = tr.top + (tr.height - gh) / 2;
+        const ks = gw / logoRect.w, cx0 = logoRect.l + logoRect.w / 2, cy0 = logoRect.t + logoRect.h / 2;
+        logoBox.style.transformOrigin = (cx0 - lr.left) + 'px ' + (cy0 - lr.top) + 'px';
+        target.style.visibility = 'hidden';
+        let fly = null;
+        try { fly = logoBox.animate([{ transform: 'translate(0, 0) scale(1)' }, { transform: 'translate(' + (gx + gw / 2 - cx0).toFixed(1) + 'px, ' + (gy + gh / 2 - cy0).toFixed(1) + 'px) scale(' + ks.toFixed(4) + ')' }],
+          { duration: CALZ_FLY, easing: 'cubic-bezier(0.3, 0.7, 0.1, 1)', fill: 'forwards' }); } catch (e) { fly = null; }
+        const done = () => { target.style.visibility = ''; cleanup(); };
+        if (fly) fly.onfinish = done; else done();
+        setTimeout(() => { if (layer.isConnected) done(); }, CALZ_FLY + 200);
+      };
+      requestAnimationFrame(land);
+    }, CALZ_CAM - CALZ_OVERLAP + CALZ_OPEN);
   };
   coinProto.vCal = function (s) {
     const d = CAL.data, today = realToday(), todayKey = calMonthKey(today);

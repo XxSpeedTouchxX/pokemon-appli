@@ -3582,14 +3582,17 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-cal-dcode { font-size: clamp(9.5px, 2.4cqh, 12px); line-height: 1.25; font-weight: 800; letter-spacing: 0.2px; }
 .pkm-cal-m-now .pkm-cal-dot-logo { box-shadow: 0 0 0 2px rgba(255, 214, 10, 0.35), 0 6px 18px rgba(0, 0, 0, 0.38); }
 
-/* Zoom sur le logo touché, puis ouverture des items de l'extension (coin.js, calZoom). */
+/* Zoom sur l'extension touchée, façon caméra du Radar (coin.js, calZoom) : calque au-dessus de l'app, cadre à la place de la
+   frise (la tuile y reste coupée par les bords comme la carte), tuile redessinée à sa taille finale, nom dessous, puis
+   panneau à la couleur de l'app qui part de la tuile et remplit l'écran. */
 .pkm-calz { position: fixed; inset: 0; z-index: 9000; pointer-events: auto; }
-.pkm-calz-veil { position: absolute; inset: 0; background: radial-gradient(circle at 50% 44%, rgba(255, 214, 10, 0.2), rgba(9, 14, 32, 0.9) 46%, rgba(5, 8, 20, 0.96)); }
-.pkm-calz-logo { position: absolute; object-fit: contain; filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.6)); will-change: transform; }
-.pkm-calz-ring { position: absolute; width: min(82vw, 380px); aspect-ratio: 1; border-radius: 50%; border: 3px solid rgba(255, 214, 10, 0.8); box-shadow: 0 0 40px rgba(255, 214, 10, 0.45), inset 0 0 40px rgba(255, 214, 10, 0.25); transform: translate(-50%, -50%); opacity: 0; }
-.pkm-calz-t { position: absolute; left: 50%; margin: 0; width: min(86vw, 380px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; color: #F3F6FC; opacity: 0; }
-.pkm-calz-t small { font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #FFE680; }
-.pkm-calz-t b { font-family: 'Sora', sans-serif; font-size: 20px; line-height: 1.25; }
+.pkm-calz-frame { position: absolute; overflow: hidden; }
+.pkm-calz-tile { position: absolute; box-sizing: border-box; transform-origin: 50% 50%; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.75), 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 46px rgba(255, 214, 10, 0.28); }
+.pkm-calz-logo { position: absolute; transform-origin: 50% 50%; }
+.pkm-calz-logo img { position: absolute; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55)); }
+.pkm-calz-tile span { position: absolute; text-align: center; white-space: nowrap; }
+.pkm-calz-name { position: absolute; left: 50%; margin: 0; max-width: 86%; transform: translateX(-50%); font-family: 'Sora', sans-serif; font-size: 19px; line-height: 1.25; font-weight: 700; color: #F3F6FC; text-align: center; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); opacity: 0; }
+.pkm-calz-panel { position: absolute; inset: 0; }
 
 /* Fiche d'une sortie, qui monte du bas (sheet.css, sheet.js) : date, nom, statut, type, sigle, cartes vedettes, explication
    et source, ce que montrait la liste retirée sous la frise. Au-dessus de la barre du bas. */
@@ -4537,6 +4540,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=ef8ee1f8"></script>
+<script src="app.js?v=bd6e57c7"></script>
 </body>
 </html>

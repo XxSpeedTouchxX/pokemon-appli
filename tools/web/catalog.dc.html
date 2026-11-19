@@ -76,7 +76,7 @@
 <sc-if value="{{ ui.isSet }}" hint-placeholder-val="{{ false }}">
 <section aria-label="Extension" style="flex: none; display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border-radius: 22px; border: 1px solid #24345C; background: radial-gradient(120% 90% at 100% 0%, rgba(98, 122, 255, 0.18), rgba(98, 122, 255, 0) 60%), #121C33">
 <div style="display: flex; align-items: center; gap: 14px">
-<sc-if value="{{ cset.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ cset.logo }}" alt="" style="flex: none; width: 104px; height: 56px; object-fit: contain"></sc-if>
+<sc-if value="{{ cset.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ cset.logo }}" alt="" class="pkm-set-logo" style="flex: none; width: 104px; height: 56px; object-fit: contain"></sc-if>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
 <span style="font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600">{{ cset.countText }}</span>
 <sc-if value="{{ cset.hasDate }}" hint-placeholder-val="{{ true }}">
