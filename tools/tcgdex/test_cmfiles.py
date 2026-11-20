@@ -295,15 +295,18 @@ class FirstPrint(unittest.TestCase):
              mk(362859, "Pikachu [Gnaw | Thunder Jolt]", 211614, "2018-08-22 10:00:00"),
              mk(660169, "Pikachu [Gnaw | Thunder Jolt]", 211614, "2022-05-24 10:00:00"),
              mk(660170, "Pikachu [Gnaw | Thunder Jolt]", 211614, "2022-05-24 10:00:00"),
-             mk(273700, "Clefairy [Sing | Metronome]", 338992, "0000-00-00 00:00:00")],
+             mk(273700, "Clefairy [Sing | Metronome]", 338992, "0000-00-00 00:00:00"),
+             mk(273794, "Grass Energy", 211655, "0000-00-00 00:00:00"), mk(660102, "Grass Energy", 224031, "2022-05-24 10:00:00")],
             [guide(273699, 441.79, 473.74, 559.08, 89.95, holo=123.63), guide(660224, 3489.25, 2445.05, 2698.24, 979),
              guide(273753, 7.94, 9.1, 6.57, 0.1), guide(362859, 13.78, 17.74, 22.11), guide(660169, 186.4, 145.88, 239.11, 12.5),
-             guide(660170, 389.13, 180.7, 470.71, 54.99), guide(273700, 31.16, 45.54, 34.59)], "2026-11-20")
+             guide(660170, 389.13, 180.7, 470.71, 54.99), guide(273700, 31.16, 45.54, 34.59), guide(273794, 0.54, 0.31, 0.15),
+             guide(660102, 3.58, 2.11, 1.48)], "2026-11-20")
 
     def test_first_print_product(self):
         self.assertEqual(self.files.first_print(273699, "2022-05-24"), 660224)
         self.assertEqual(self.files.first_print(273753, "2022-05-24"), 660169)  # joues jaunes : la moins chère des deux
         self.assertIsNone(self.files.first_print(273700, "2022-05-24"))  # pas de fiche V2
+        self.assertEqual(self.files.first_print(273794, "2022-05-24"), 660102)  # autre idMetacard, même nom
         self.assertIsNone(self.files.first_print(1, "2022-05-24"))
 
     def test_first_edition_rows(self):

@@ -220,13 +220,18 @@ class CmFiles:
         """Produit « premier tirage » d'une carte du Set de Base (2026-11-20, porteur : « Dracaufeu première édition est
         beaucoup plus haut en prix ») : Cardmarket a ajouté le 24 mai 2022, dans la même extension, une deuxième fiche par
         carte (« V2 » dans l'adresse, ex. Charizard-V2-BS4) pour le tirage sans ombre et l'Édition 1 ; la fiche d'origine
-        garde le tirage illimité. Même carte = même idMetacard, même extension, ajoutée ce jour-là (batch). Plusieurs
+        garde le tirage illimité. Même carte = même idMetacard (sinon, un seul produit du même nom exact : 4 cartes),
+        même extension, ajoutée ce jour-là (batch). Plusieurs
         fiches (Pikachu joues jaunes et joues rouges) : la moins chère, la version courante. None si rien ne correspond."""
         o = self.prod.get(idp)
-        if not o or o.get("idMetacard") is None:
+        if not o:
             return None
-        same = [p["idProduct"] for p in self.by_exp.get(o.get("idExpansion"), [])
-                if p["idProduct"] != idp and p.get("idMetacard") == o["idMetacard"] and str(p.get("dateAdded") or "").startswith(batch)]
+        batch_prods = [p for p in self.by_exp.get(o.get("idExpansion"), [])
+                       if p["idProduct"] != idp and str(p.get("dateAdded") or "").startswith(batch)]
+        same = [p["idProduct"] for p in batch_prods if o.get("idMetacard") is not None and p.get("idMetacard") == o["idMetacard"]]
+        if not same:  # fiche V2 rangée sous une autre carte « méta » (Énergies Eau, Plante, Combat, Centre Pokémon) : même nom
+            same = [p["idProduct"] for p in batch_prods if p.get("name") == o.get("name")]
+            same = same if len(same) == 1 else []
         priced = [(self._mid(i), i) for i in same if self._mid(i)]
         return min(priced)[1] if priced else (same[0] if len(same) == 1 else None)
 
