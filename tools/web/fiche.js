@@ -371,11 +371,13 @@
     let cm = p.tcg ? cmLink(p) : 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + encodeURIComponent(frName);
     if (/[?&]idProduct=/.test(cm) && lang !== 'ja') cm += '&language=' + FM_CM_LANG[lang];
     else if (lang !== 'fr') cm = 'https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=' + encodeURIComponent(cmName(p.en || p.name));
+    // Set de Base au premier tirage (2026-11-20) : recherche limitée aux annonces « Édition 1 » / « 1st edition ».
+    const ed1 = !sealed && p.ed1 ? (lang === 'fr' ? '(edition,édition)' : lang === 'en' ? '1st' : '') : '';
     const words = sealed ? (lang === 'fr' ? [frName] : [frName, lang === 'en' ? '(anglais,english)' : '(japonais,japanese)'])
-      : lang === 'fr' ? [frName, num, '(fr,français,vf)'] : lang === 'en' ? [enName, num, '(anglais,english,eng)'] : [enName, '(japonais,japanese,jap)'];
+      : lang === 'fr' ? [frName, num, '(fr,français,vf)', ed1] : lang === 'en' ? [enName, num, '(anglais,english,eng)', ed1] : [enName, '(japonais,japanese,jap)'];
     const q = words.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
     const vq = (sealed ? [frName, lang === 'en' ? 'anglais' : lang === 'ja' ? 'japonais' : '']
-      : lang === 'fr' ? [frName, num] : lang === 'en' ? [enName, num, 'anglaise'] : [enName, 'japonaise']).filter(Boolean).join(' ');
+      : lang === 'fr' ? [frName, num, p.ed1 ? 'édition 1' : ''] : lang === 'en' ? [enName, num, 'anglaise', p.ed1 ? '1st edition' : ''] : [enName, 'japonaise']).filter(Boolean).join(' ');
     return { cm: cm, ebay: 'https://www.ebay.fr/sch/i.html?_nkw=' + encodeURIComponent(q) + '&LH_Sold=1&LH_Complete=1', vinted: vintedLink(vq) };
   };
   function fiMarket(p, k, rows, sealed, day, s) {
@@ -403,7 +405,9 @@
       dpVal: dp !== null ? '≈ ' + this.eur(dp) : '—',
       dpSub: dp === null ? (p.dup ? 'Cote à confirmer' : 'Pas encore de cote') : 'Estimation · moyenne des 3 plateformes',
       hasConf: !!lvl, conf: lvl ? FM_CONF[lvl][0] + ' · ' + Math.round(pct) + '\u00a0%' : '', confPct: lvl ? Math.round(pct) : 0, confCls: lvl ? FM_CONF[lvl][1] : '',
-      cmVal: cmV !== null ? this.eur(cmV) : '—', cmSub: cmV === null ? 'Pas encore de prix' : 'Toutes langues' + (day ? ' · au ' + this.d2(day) : ''),
+      cmVal: cmV !== null ? this.eur(cmV) : '—', cmSub: cmV === null ? 'Pas encore de prix' : (p.ed1 ? 'Édition 1 · toutes langues' : 'Toutes langues') + (day ? ' · au ' + this.d2(day) : ''),
+      // Set de Base (2026-11-20) : prix du tirage illimité sous la cote du premier tirage, affiché, jamais compté.
+      hasCmAlt: !!p.ed1 && typeof p.cmh === 'number' && cmV !== null, cmAlt: p.ed1 && typeof p.cmh === 'number' ? 'Tirage illimité : ' + this.eur(p.cmh) : '',
       hasEst: k !== null,
       ebVal: ebV !== null ? '≈ ' + this.eur(ebV) : '—', vtVal: vtV !== null ? '≈ ' + this.eur(vtV) : '—',
       ebSub: 'Ventes réussies', vtSub: 'Annonces en ligne',

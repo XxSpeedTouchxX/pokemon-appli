@@ -174,6 +174,32 @@ for (const name of ['Écarlate et Violet', 'Épée et Bouclier']) {
   ok('tampon « Édition 1 » : ' + ed1.length + ' visuels, Dracaufeu servi par sa copie tamponnée (' + src + ')', ed1.length === 21 && ed1.includes('fr/base/base1/4') && /^img\/local\/fr_base_base1_4-low\.webp/.test(src));
   await c3.close();
 }
+// Cote du premier tirage (2026-11-20, porteur : « Dracaufeu première édition est beaucoup plus haut en prix ») : fiche « V2 »
+// de Cardmarket (Édition 1 et sans ombre), champ ed1 du catalogue ; tirage illimité affiché à côté (cmh). Prix simulés
+// ici, pour ne pas dépendre du calcul du jour.
+{
+  const c4 = await browser.newContext({ viewport: { width: 390, height: 844 } }), page = await c4.newPage();
+  page.on('pageerror', e => errors.push(e.message));
+  let base = null;
+  await page.route('**/data/cards-base.json*', async r => { const res = await r.fetch(); base = await res.json(); await r.fulfill({ response: res, json: base }); });
+  await page.route('**/data/cards-prices.json*', async r => {
+    const res = await r.fetch(), d = await res.json();
+    for (let i = 0; i < 50 && !base; i++) await new Promise(z => setTimeout(z, 100));
+    const at = base.cards.findIndex(c => c[0] === 'base1-4'), f = Object.fromEntries(d.fields.map((k, i) => [k, i]));
+    if (!('ed1' in f)) { d.fields.push('ed1'); d.order.push('ed1'); d.prices.forEach(p => p.push(0)); f.ed1 = d.fields.length - 1; }
+    const p = d.prices[at];
+    Object.assign(p, { [f.cm]: 3489.25, [f.avg30]: 2445.05, [f.avg7]: 2698.24, [f.low]: 979, [f.cmh]: 441.79, [f.cmv]: 'n', [f.tcp]: null, [f.q]: 0, [f.c30]: 0, [f.ed1]: 1 });
+    await r.fulfill({ response: res, json: d });
+  });
+  await page.goto(E2E + '/?start=set&setId=base1', { waitUntil: 'load' });
+  await page.waitForSelector('main button[aria-label^="Dracaufeu"]');
+  await page.locator('main button[aria-label^="Dracaufeu"]').first().click(); await page.waitForTimeout(1500);
+  const cmRow = page.locator('section.pkm-fi .pkm-fm-cm'), cmTxt = (await cmRow.count()) ? (await cmRow.innerText()).replace(/\s+/g, ' ') : '';
+  ok('Dracaufeu : cote du premier tirage « ' + cmTxt + ' » (Édition 1, tirage illimité à côté)', /Édition 1 · toutes langues/.test(cmTxt) && /2[\s\u202f]?698,24/.test(cmTxt) && /Tirage illimité : 441,79/.test(cmTxt));
+  const eb = await page.locator('section.pkm-fi a.pkm-fi-ebay').getAttribute('href');
+  ok('recherche eBay limitée à l’Édition 1', /edition%2C%C3%A9dition/.test(eb), eb);
+  await c4.close();
+}
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

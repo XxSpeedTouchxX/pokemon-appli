@@ -23,6 +23,10 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# Extensions dont la cote a changé de fiche Cardmarket : {extension: premier jour de la nouvelle cote}. Les jours d'avant
+# sont retirés de l'archive, pour qu'une courbe ne relie pas deux tirages différents. Set de Base (2026-11-20, porteur) :
+# cote du premier tirage (Édition 1 et sans ombre, fiche « V2 ») à la place du tirage illimité (build_index.FIRST_PRINT).
+RESET = {"base1": "2026-11-20"}
 SRC = "web/data/cards.json"
 OUT = ROOT / "web" / "data" / "hist"
 
@@ -92,8 +96,17 @@ def put(days, by_set, day, values):
         arr[k] = cents
 
 
+def reset(days, by_set):
+    """Retire de l'archive les jours d'avant RESET pour les extensions concernées."""
+    for sid, start in RESET.items():
+        cut = sum(1 for d in days if d < start)
+        for arr in by_set.get(sid, {}).values():
+            arr[:cut] = [None] * min(cut, len(arr))
+
+
 def save(days, by_set):
     OUT.mkdir(parents=True, exist_ok=True)
+    reset(days, by_set)
     sets = {}
     for sid, cards in sorted(by_set.items()):
         # Une carte qui n'a jamais eu de cote n'est pas gardée.

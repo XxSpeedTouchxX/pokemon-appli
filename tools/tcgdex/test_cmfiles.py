@@ -278,9 +278,53 @@ class Missing(unittest.TestCase):
 
     def test_row_keeps_english_name_only_when_different(self):
         f = self.F
-        self.assertEqual(FIELDS[-3:], ["cmid", "en", "c30"])
+        self.assertEqual(FIELDS[-4:], ["cmid", "en", "c30", "ed1"])
         self.assertEqual(row("ex11-111", "Groudon ☆", "ex11", "111", "", "", NONE, cmid=5, en="Groudon Star")[f["en"]], "Groudon Star")
         self.assertEqual(row("lc-7", "Dark Raichu", "lc", "7", "", "", NONE, en="Dark Raichu")[f["en"]], "")
+
+
+class FirstPrint(unittest.TestCase):
+    """Premier tirage du Set de Base (2026-11-20) : fiche « V2 » de Cardmarket, ajoutée le 24 mai 2022."""
+
+    def setUp(self):
+        mk = lambda idp, name, meta, added: {"idProduct": idp, "name": name, "idExpansion": 1523, "idMetacard": meta, "dateAdded": added}
+        self.files = cmfiles.CmFiles(
+            [mk(273699, "Charizard [Energy Burn | Fire Spin]", 211560, "0000-00-00 00:00:00"),
+             mk(660224, "Charizard [Energy Burn | Fire Spin]", 211560, "2022-05-24 10:00:00"),
+             mk(273753, "Pikachu [Gnaw | Thunder Jolt]", 211614, "0000-00-00 00:00:00"),
+             mk(362859, "Pikachu [Gnaw | Thunder Jolt]", 211614, "2018-08-22 10:00:00"),
+             mk(660169, "Pikachu [Gnaw | Thunder Jolt]", 211614, "2022-05-24 10:00:00"),
+             mk(660170, "Pikachu [Gnaw | Thunder Jolt]", 211614, "2022-05-24 10:00:00"),
+             mk(273700, "Clefairy [Sing | Metronome]", 338992, "0000-00-00 00:00:00")],
+            [guide(273699, 441.79, 473.74, 559.08, 89.95, holo=123.63), guide(660224, 3489.25, 2445.05, 2698.24, 979),
+             guide(273753, 7.94, 9.1, 6.57, 0.1), guide(362859, 13.78, 17.74, 22.11), guide(660169, 186.4, 145.88, 239.11, 12.5),
+             guide(660170, 389.13, 180.7, 470.71, 54.99), guide(273700, 31.16, 45.54, 34.59)], "2026-11-20")
+
+    def test_first_print_product(self):
+        self.assertEqual(self.files.first_print(273699, "2022-05-24"), 660224)
+        self.assertEqual(self.files.first_print(273753, "2022-05-24"), 660169)  # joues jaunes : la moins chère des deux
+        self.assertIsNone(self.files.first_print(273700, "2022-05-24"))  # pas de fiche V2
+        self.assertIsNone(self.files.first_print(1, "2022-05-24"))
+
+    def test_first_edition_rows(self):
+        from build_index import first_edition
+        f = {k: i for i, k in enumerate(FIELDS)}
+        p = (441.79, 89.95, 473.74, 912.7, "2026-11-18", 559.08, 404.82, 123.63, "n", 0)
+        dra = row("base1-4", "Dracaufeu", "base1", "4", "Rare", "x", p, cmid=273699)
+        cle = row("base1-5", "Mélofée", "base1", "5", "Rare", "x", p, cmid=273700)
+        other = row("base2-4", "Dracaufeu", "base2", "4", "Rare", "x", p, cmid=273699)
+        log = first_edition([dra, cle, other], self.files)
+        self.assertEqual(log, ["base1-4 441.79→3489.25"])
+        self.assertEqual((dra[f["cm"]], dra[f["avg30"]], dra[f["avg7"]], dra[f["low"]]), (3489.25, 2445.05, 2698.24, 979))
+        self.assertEqual((dra[f["cmh"]], dra[f["cmv"]], dra[f["cmid"]], dra[f["ed1"]], dra[f["tcp"]], dra[f["cmf"]]),
+                         (441.79, "n", 660224, 1, None, 1))
+        self.assertEqual((cle[f["ed1"]], cle[f["cm"]], other[f["ed1"]], other[f["cm"]]), (0, 441.79, 0, 441.79))
+        # Fichiers Cardmarket absents : valeurs de la veille reprises.
+        fresh = row("base1-4", "Dracaufeu", "base1", "4", "Rare", "x", p, cmid=273699)
+        prev = {"fields": FIELDS, "cards": [list(dra)]}
+        prev["cards"][0][f["upd"]] = date.today().isoformat()
+        self.assertEqual(first_edition([fresh], None, prev), ["repris de la veille 1"])
+        self.assertEqual((fresh[f["cm"]], fresh[f["ed1"]], fresh[f["cmid"]]), (3489.25, 1, 660224))
 
 
 if __name__ == "__main__":

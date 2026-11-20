@@ -52,6 +52,9 @@ Contenu de cards.json :
                       cartes de l'extension, sans meilleur rapprochement). Lien direct de la fiche vers Cardmarket.
               en    = nom anglais de la carte (TCGdex), vide s'il est le même que le nom affiché ou inconnu
                       (2026-11-11 : recherche des ventes réussies eBay de la bonne carte)
+              c30   = 1 si la cote retenue est la moyenne 30 jours (cote « à confirmer » trop haute, 2026-11-13)
+              ed1   = 1 si la cote est celle du premier tirage (Édition 1 et sans ombre) : fiche « V2 » de Cardmarket du
+                      Set de Base (2026-11-20, FIRST_PRINT) ; cmh est alors la tendance du tirage illimité, tcp vide
     img       préfixe commun des adresses d'images (CDN TCGdex) : image = img + chemin.
               Le chemin commence par la langue du visuel (fr/… ou en/…) ; « ptcg:set/numéro » pour
               pokemontcg.io.
@@ -91,7 +94,12 @@ ECB = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 FALLBACK_USD_EUR = 0.86  # taux de secours si la BCE ne répond pas
 SKIP_SERIES = {"tcgp"}  # Pokémon TCG Pocket : cartes numériques, hors collection physique
 FIELDS = ["id", "name", "set", "num", "rarity", "img", "cm", "low", "avg30", "tcp", "upd", "avg7", "avg1", "lang", "cmh", "cmv", "q", "cmf",
-          "cmid", "en", "c30"]
+          "cmid", "en", "c30", "ed1"]
+# Premier tirage (2026-11-20, porteur : « refais une passe sur tous les prix de la première édition… Dracaufeu première
+# édition est beaucoup plus haut en prix ») : les visuels du Set de Base portent tous le tampon « Édition 1 » depuis le
+# 2026-11-20 ; la cote suit. Cardmarket a ajouté le 24 mai 2022 une fiche « V2 » par carte (tirage sans ombre et
+# Édition 1, toutes langues) à côté de la fiche d'origine (tirage illimité). {extension TCGdex: jour d'ajout des fiches}.
+FIRST_PRINT = {"base1": "2022-05-24"}
 # Cote « à confirmer » plus de 3 fois au-dessus du prix TCGplayer : cote = moyenne 30 jours de Cardmarket (c30 = 1).
 C30_RATIO = 3.0
 Q_MIN_TREND = 1.0  # en dessous de 1 €, l'écart entre plus bas et tendance ne dit rien : pas de « cote douteuse »
@@ -233,7 +241,7 @@ def prices(card, rate):
 def row(cid, name, sid, local, rarity, img, p, lang="", cmid=None, en=None):
     """Ligne du catalogue dans l'ordre de FIELDS ; p : prix au format de prices() ; cmid : produit Cardmarket ;
     en : nom anglais (gardé seulement s'il diffère du nom affiché)."""
-    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:], 0, cmid, en if en and en != name else "", 0]
+    return [cid, name, sid, local, rarity, img, *p[:7], lang, *p[7:], 0, cmid, en if en and en != name else "", 0, 0]
 
 
 def ptcg_row_prices(card, rate):
@@ -647,6 +655,46 @@ def fill_cardmarket(cards, sets, en_names, cm_ids, files, prev=None, en_fetch=cm
     return n, report
 
 
+def first_edition(cards, files, prev=None):
+    """Cote du premier tirage pour les extensions de FIRST_PRINT (Set de Base) : prix de la fiche « V2 » de Cardmarket
+    (Édition 1 et sans ombre), ed1 = 1. La tendance du tirage illimité passe dans cmh (affichée à côté dans la fiche),
+    le prix TCGplayer (tirage illimité, aucun prix « 1st edition » pour ce set chez TCGdex) est retiré pour ne pas
+    déclencher les contrôles « à confirmer ». Sans fichiers Cardmarket ce jour-là : valeurs de la veille (PREV_DAYS au
+    plus). La cote reste 100 % Cardmarket. Renvoie la liste « id illimité→premier tirage » pour le journal du calcul."""
+    f = {k: i for i, k in enumerate(FIELDS)}
+    rows = [c for c in cards if c[f["set"]] in FIRST_PRINT]
+    out, kept = [], 0
+    old = {}
+    if not files and prev and "ed1" in (prev.get("fields") or []):
+        pf = {k: i for i, k in enumerate(prev["fields"])}
+        today = date.today()
+        old = {c[pf["id"]]: c for c in prev["cards"] if c[pf["ed1"]] == 1 and c[pf["upd"]]
+               and (today - date.fromisoformat(str(c[pf["upd"]])[:10])).days <= PREV_DAYS}
+    for c in rows:
+        if not files:
+            o = old.get(c[f["id"]])
+            if o:
+                for k in ("cm", "low", "avg30", "avg7", "avg1", "cmh", "cmv", "upd", "q", "cmf", "cmid", "tcp", "ed1"):
+                    if k in pf:
+                        c[f[k]] = o[pf[k]]
+                kept += 1
+            continue
+        idp = files.first_print(c[f["cmid"]], FIRST_PRINT[c[f["set"]]]) if c[f["cmid"]] else None
+        p = files.prices(idp) if idp else None
+        if not p:
+            continue
+        trend, low, avg30, avg7, avg1 = p[:5]
+        unlimited = c[f["cm"]]
+        c[f["cm"]], c[f["low"]], c[f["avg30"]], c[f["avg7"]], c[f["avg1"]] = trend, low, avg30, avg7, avg1
+        c[f["cmh"]], c[f["cmv"]], c[f["upd"]], c[f["cmf"]], c[f["cmid"]] = unlimited, "n", files.created, 1, idp
+        c[f["tcp"]], c[f["ed1"]] = None, 1
+        c[f["q"]] = 1 if doubtful(trend, low, avg1) else 0
+        out.append(f"{c[f['id']]} {unlimited}→{trend}")
+    if kept:
+        out.append(f"repris de la veille {kept}")
+    return out
+
+
 def cap_doubtful(cards):
     """Cote « à confirmer » trop haute (2026-11-13, « go » du porteur) : quand la cote d'une carte est douteuse (q = 1) et
     plus de C30_RATIO fois au-dessus de son prix TCGplayer, l'app prend la moyenne 30 jours de Cardmarket (c30 = 1), si
@@ -1011,6 +1059,9 @@ def main():
                                        load(Path(args.previous) if args.previous else out))
         stats["cardsCmFiles"] = n_cm
         print(f"Cardmarket (fichiers publics) : {n_cm} cartes complétées · " + " · ".join(report))
+    if args.cardmarket:
+        firsts = first_edition(cards, files, load(Path(args.previous) if args.previous else out))
+        print(f"Premier tirage (Édition 1 et sans ombre, fiches « V2 » de Cardmarket) : {len(firsts)} cartes · " + ", ".join(firsts))
     if EX_SWITCHED:
         print(f"Cartes « ex » de l'époque EX cotées sur le groupe normal ({len(EX_SWITCHED)}) : " + ", ".join(EX_SWITCHED))
     capped = cap_doubtful(cards)

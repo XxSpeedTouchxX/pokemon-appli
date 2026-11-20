@@ -41,6 +41,14 @@ class TestHistory(unittest.TestCase):
         self.assertEqual(by_set["s"]["a"], [90, 110, None])
         self.assertEqual(by_set["s"]["c"], [None, None, 7])
 
+    def test_set_de_base_repart_du_premier_tirage(self):
+        from history import RESET, reset
+        days = ["2026-11-18", "2026-11-19", RESET["base1"], "2026-11-21"]
+        by_set = {"base1": {"base1-4": [39230, 39230, 269824, 270000]}, "base2": {"base2-4": [100, 100, 100, 100]}}
+        reset(days, by_set)
+        self.assertEqual(by_set["base1"]["base1-4"], [None, None, 269824, 270000])
+        self.assertEqual(by_set["base2"]["base2-4"], [100, 100, 100, 100])
+
 
 if __name__ == "__main__":
     unittest.main()

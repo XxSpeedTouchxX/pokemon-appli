@@ -83,8 +83,9 @@ class CmFiles:
     def __init__(self, products, guides, created=None):
         self.created = created
         self.exp_of, self.by_exp = {}, {}
-        self.name_of = {}
+        self.name_of, self.prod = {}, {}
         for p in products:
+            self.prod[p["idProduct"]] = p
             self.exp_of[p["idProduct"]] = p.get("idExpansion")
             self.name_of[p["idProduct"]] = base_name(p.get("name"))
             self.by_exp.setdefault(p.get("idExpansion"), []).append(p)
@@ -214,6 +215,25 @@ class CmFiles:
         sfx = "-holo" if grp == "h" else ""
         out = tuple(num(g.get(k + sfx)) for k in ("trend", "low", "avg30", "avg7", "avg1"))
         return out if out[0] is not None or out[2] is not None or out[3] is not None else None
+
+    def first_print(self, idp, batch):
+        """Produit « premier tirage » d'une carte du Set de Base (2026-11-20, porteur : « Dracaufeu première édition est
+        beaucoup plus haut en prix ») : Cardmarket a ajouté le 24 mai 2022, dans la même extension, une deuxième fiche par
+        carte (« V2 » dans l'adresse, ex. Charizard-V2-BS4) pour le tirage sans ombre et l'Édition 1 ; la fiche d'origine
+        garde le tirage illimité. Même carte = même idMetacard, même extension, ajoutée ce jour-là (batch). Plusieurs
+        fiches (Pikachu joues jaunes et joues rouges) : la moins chère, la version courante. None si rien ne correspond."""
+        o = self.prod.get(idp)
+        if not o or o.get("idMetacard") is None:
+            return None
+        same = [p["idProduct"] for p in self.by_exp.get(o.get("idExpansion"), [])
+                if p["idProduct"] != idp and p.get("idMetacard") == o["idMetacard"] and str(p.get("dateAdded") or "").startswith(batch)]
+        priced = [(self._mid(i), i) for i in same if self._mid(i)]
+        return min(priced)[1] if priced else (same[0] if len(same) == 1 else None)
+
+    def _mid(self, idp):
+        p = self.prices(idp)
+        v = sorted(x for x in (p[0], p[2], p[3]) if x) if p else []
+        return v[len(v) // 2] if v else None
 
     def relink(self, idp, en):
         """Produit Cardmarket d'une carte « étoile » que TCGdex relie à un autre produit (Rayquaza ☆ relié au Rayquaza

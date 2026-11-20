@@ -259,6 +259,9 @@
       // l'autre version (reverse, normale ou holo), doubt = cote douteuse (écart anormal, voir tools/tcgdex/README.md).
       cmh: typeof r[F.cmh] === 'number' ? r[F.cmh] : null, cmv: F.cmv !== undefined ? r[F.cmv] || '' : '', doubt: F.q !== undefined && r[F.q] === 1 && !coteConfirmed(r, F),
       dup: !!(TCG.dup && TCG.dup.has(id)), c30: coteC30(r, F),
+      // Premier tirage (2026-11-20, Set de Base) : cote de la fiche « V2 » de Cardmarket (Édition 1 et sans ombre) ;
+      // cmh = tendance du tirage illimité (champ ed1, absent des catalogues plus anciens).
+      ed1: F.ed1 !== undefined && r[F.ed1] === 1,
       // Produit Cardmarket (lien direct de la fiche) et nom anglais (recherche eBay) : 2026-11-11, champs cmid et en
       // du catalogue (absents des catalogues plus anciens).
       cmid: F.cmid !== undefined && r[F.cmid] ? r[F.cmid] : null, en: F.en !== undefined && r[F.en] ? String(r[F.en]) : '',
@@ -557,13 +560,14 @@
         : p.c30 ? 'Cote à confirmer : la tendance Cardmarket de cette carte est plus de 3 fois au-dessus de son prix TCGplayer (quelques ventes très chères, souvent des cartes gradées). La cote retenue est la moyenne des ventes Cardmarket sur 30 jours.'
         : typeof p.cm === 'number' ? 'Cote Dropicards = Cardmarket uniquement : médiane de la tendance et des moyennes 7 et 30 jours de cette version. Une médiane écarte un pic isolé ; le prix demandé est affiché, jamais compté. Les ventes réussies eBay s’ajouteront dès qu’un accès officiel sera ouvert.' + (coteSpread(p.cm, p.avg30, p.avg7) > COTE_SPREAD ? ' Marché peu actif : les prix Cardmarket varient fortement, cote à confirmer.' : '')
           : 'Pas encore de prix Cardmarket pour cette carte : pas de cote pour l’instant.';
+      if (p.ed1 && typeof p.cm === 'number') it.coteRule += ' Set de Base : cote du premier tirage (Édition 1 et sans ombre, toutes langues), d’après la fiche « V2 » de Cardmarket ; le tirage illimité est affiché à côté, jamais compté.';
       if (it.noCote) it.release = 'Pas encore de prix Cardmarket pour cette carte. Tu peux quand même l’ajouter à ta collection.';
       if (it.hasCote) it.change = 'Courbe après quelques jours d’archivage';
       // Deuxième prix Cardmarket : l'autre version de la carte (reverse, normale ou holo), affiché, jamais compté.
       if (typeof p.cmh === 'number' && typeof p.cm === 'number') {
-        const other = p.cmv === 'h' ? 'version normale' : /holo|rare/i.test(p.rarity) && !/reverse/i.test(p.rarity) ? 'version reverse ou holo' : 'version reverse';
-        it.sources.splice(1, 0, Object.assign({}, it.sources[0], { sub: 'Tendance · ' + other + ' · via TCGdex' + day, tag: 'autre version', value: this.eur(p.cmh), weight: '500', fg: '#C9D3EA' }));
-        it.sources[0] = Object.assign({}, it.sources[0], { sub: 'Tendance · ' + (p.cmv === 'h' ? 'version holo' : 'version normale') + ' · via TCGdex' + day });
+        const other = p.ed1 ? 'tirage illimité' : p.cmv === 'h' ? 'version normale' : /holo|rare/i.test(p.rarity) && !/reverse/i.test(p.rarity) ? 'version reverse ou holo' : 'version reverse';
+        it.sources.splice(1, 0, Object.assign({}, it.sources[0], { sub: 'Tendance · ' + other + ' · via TCGdex' + day, tag: p.ed1 ? 'autre tirage' : 'autre version', value: this.eur(p.cmh), weight: '500', fg: '#C9D3EA' }));
+        it.sources[0] = Object.assign({}, it.sources[0], { sub: 'Tendance · ' + (p.ed1 ? 'Édition 1 (premier tirage)' : p.cmv === 'h' ? 'version holo' : 'version normale') + (p.ed1 ? ' · fichier public Cardmarket' : ' · via TCGdex') + day });
         it.sources.forEach((so, i) => { so.border = x.line(i); });
       }
       it.doubt = !!p.doubt;
