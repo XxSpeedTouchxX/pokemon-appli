@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-20 — « Calendrier JCC » et accueil sans « Sorties » (porteur)
+
+- **Demandes** (porteur) : « Supprime “Prochaine sortie” et “Sortie récente” dans l'accueil, ça ne sert plus à rien : l'utilisateur va sur le calendrier TCG pour savoir ce qui va sortir » ; « Remplace aussi calendrier TCG par calendrier JCC ».
+- **Fait (cache v255)** : « Le calendrier TCG » devient **« Le calendrier JCC »** (onglet du coin des dresseurs, en-tête, rappels « Préviens-moi », workflow et issue GitHub « Calendrier JCC : dates à vérifier », l'ancienne issue renommée) ; « Sorties récentes » et « Prochaines sorties » retirées de l'accueil (la page Sorties reste ouverte depuis le bandeau « Prochaine sortie » de Territoire).
+- **Notifications envoyées par le serveur** (même demande du porteur) : plan validé, en cours (journal suivant).
+
 ## 2026-11-20 — Cote du premier tirage pour le Set de Base, frise fluide (porteur)
 
 - **Demande** (porteur) : « Refais une passe sur tous les prix de la première édition : je trouve qu'ils sont trop bas, par exemple Dracaufeu première édition est beaucoup plus haut en prix » ; et « sur la frise, quand on balaie vers les anciennes séries, l'écran lag beaucoup, c'est très saccadé ».
