@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-20T14:20:08Z",
+ "updated": "2026-11-20T22:47:54Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,55 @@
   }
  ],
  "items": [
+  {
+   "title": "Pokémon Pocket : Missions Évoli : Voli Voli !",
+   "url": "https://www.pokebip.com/news/7653/pokemon-pocket-missions-evoli-voli-voli",
+   "date": "2026-11-20T19:33:18Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Community Day All-Stars édition 2026 !",
+   "url": "https://www.pokebip.com/news/7651/pokemon-go-community-day-all-stars-edition-2026",
+   "date": "2026-11-20T19:15:01Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Programme du mois de décembre !",
+   "url": "https://www.pokebip.com/news/7652/pokemon-go-programme-du-mois-de-decembre",
+   "date": "2026-11-20T17:03:50Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Journée Communauté classique de janvier : retour d'Arcko !",
+   "url": "https://www.pokebip.com/news/7650/journee-communaute-classique-de-janvier-retour-darcko",
+   "date": "2026-11-20T16:27:00Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Journée de Raids clones",
+   "url": "https://www.pokebip.com/news/7649/pokemon-go-journee-de-raids-clones",
+   "date": "2026-11-20T16:16:44Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Journée Éclosion de Korillon !",
+   "url": "https://www.pokebip.com/news/7648/pokemon-go-journee-eclosion-de-korillon",
+   "date": "2026-11-20T16:08:46Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Journée Combat Max : Lézargus Gigamax !",
+   "url": "https://www.pokebip.com/news/7647/pokemon-go-journee-combat-max-lezargus-gigamax",
+   "date": "2026-11-20T16:04:03Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "Écarlate et Violet : Retour de Lanssorien surpuissant",
    "url": "https://www.pokebip.com/news/7646/ecarlate-et-violet-retour-de-lanssorien-surpuissant",
@@ -82,34 +131,6 @@
    "tcg": false
   },
   {
-   "title": "Pokémon Sleep : Quarante-et-unième Journée du doux dodo !",
-   "url": "https://www.pokebip.com/news/7639/pokemon-sleep-quarante-et-unieme-journee-du-doux-dodo",
-   "date": "2026-11-13T08:24:45Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Journée de Raids : Méga-Mélodelfe !",
-   "url": "https://www.pokebip.com/news/7633/pokemon-go-journee-de-raids-mega-melodelfe",
-   "date": "2026-11-12T22:17:01Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Sentiers Dynamax !",
-   "url": "https://www.pokebip.com/news/7631/pokemon-go-sentiers-dynamax",
-   "date": "2026-11-12T22:03:01Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Passe GO : Sentiers Dynamax !",
-   "url": "https://www.pokebip.com/news/7638/pokemon-go-passe-go-sentiers-dynamax",
-   "date": "2026-11-12T22:00:02Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
    "title": "Distributions d'Yveltal shiny sur Légendes Pokémon : Z-A et de meubles sur Pokémon Pokopia !",
    "url": "https://www.pokebip.com/news/7637/distributions-dyveltal-shiny-sur-legendes-pokemon-z-a-et-de-meubles-sur-pokemon-pokopia",
    "date": "2026-11-12T20:29:47Z",
@@ -131,13 +152,6 @@
    "tcg": true
   },
   {
-   "title": "Pokémon Sleep : Évènement Semaine Fragments de Rêve 3 !",
-   "url": "https://www.pokebip.com/news/7634/pokemon-sleep-evenement-semaine-fragments-de-reve-3",
-   "date": "2026-11-11T09:29:43Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
    "title": "Liste des cartes japonaises Aura Seeker M7 du jeu de cartes Pokémon",
    "url": "https://www.margxt.fr/liste-des-cartes-japonaises-aura-seeker-m7-du-jeu-de-cartes-pokemon/",
    "date": "2026-11-09T22:26:28Z",
@@ -157,20 +171,6 @@
    "date": "2026-11-07T22:38:41Z",
    "source": "Margxt",
    "tcg": true
-  },
-  {
-   "title": "Écarlate et Violet : Retour de Muplodocus surpuissant",
-   "url": "https://www.pokebip.com/news/7630/ecarlate-et-violet-retour-de-muplodocus-surpuissant",
-   "date": "2026-11-06T08:25:27Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Légendes Pokémon Z-A : Distribution de Prismillon (Motif Poké Ball) !",
-   "url": "https://www.pokebip.com/news/7628/legendes-pokemon-z-a-distribution-de-prismillon-motif-poke-ball",
-   "date": "2026-11-06T08:25:02Z",
-   "source": "Pokébip",
-   "tcg": false
   },
   {
    "title": "[EDIT : Listes envoyées] Secret Santa 12 (Noël 2026) : Offrez un dessin !",
