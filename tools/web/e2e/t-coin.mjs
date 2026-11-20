@@ -154,6 +154,21 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('la frise remonte au Set de Base (« ' + (hist.first || '').split(',').slice(0, 2).join(',') + ' »), ' + hist.logos + ' extensions', /^Set de Base, /.test(hist.first) && /^(1999|2000)$/.test(hist.firstYear) && hist.logos >= 100, JSON.stringify(hist));
   ok('années anciennes resserrées : ' + hist.thin + ' mois sans sortie en fines tranches, années ' + hist.jan.join(', ') + '…', hist.thin > 100 && hist.thinW <= 16.5 && hist.jan.length === 3 && /^(2000|2001)$/.test(hist.jan[0]), JSON.stringify(hist));
   ok('la frise s’ouvre toujours sur le mois en cours', hist.nowIn);
+  // Blocs de séries (2026-11-20, porteur) : une bande par série, dans l'ordre, l'étiquette collée à gauche pendant qu'on la parcourt.
+  const blocs = await page.evaluate(() => {
+    const list = [...document.querySelectorAll('.pkm-cal-bloc')].map(b => ({ name: (b.querySelector('.pkm-cal-bloc-tag b') || {}).textContent || '', n: b.querySelectorAll('.pkm-cal-dot-logo').length,
+      now: b.classList.contains('pkm-cal-bloc-now'), names: [...b.querySelectorAll('.pkm-cal-dot-logo')].map(t => t.getAttribute('aria-label').split(',')[0]) }));
+    const w = document.querySelector('.pkm-cal-strip'), b = document.querySelector('.pkm-cal-bloc[aria-label="Bloc Écarlate et Violet"]');
+    w.style.scrollBehavior = 'auto'; w.scrollLeft = b.offsetLeft - w.offsetLeft + 600;
+    const tag = b.querySelector('.pkm-cal-bloc-tag').getBoundingClientRect(), wr = w.getBoundingClientRect();
+    return { list: list.map(x => x.name + ':' + x.n), me: list.find(x => x.name === 'Méga-Évolution'), ev: list.find(x => x.name === 'Écarlate et Violet'), nb: list.find(x => x.name === 'Noir & Blanc'),
+      stuck: tag.left - wr.left, now: list.filter(x => x.now).map(x => x.name) };
+  });
+  await page.evaluate(() => window.__pkm.calToday()); await page.waitForTimeout(900);
+  ok('blocs de séries : ' + blocs.list.join(' · '), blocs.list.length >= 13 && blocs.list[0] === 'Base:4' && blocs.me && blocs.me.n >= 8 && blocs.me.names.indexOf('Règne Delta') >= 0 && blocs.me.names.indexOf('30ᵉ Anniversaire') >= 0
+    && blocs.ev && blocs.ev.names.indexOf('Écarlate et Violet') >= 0 && blocs.ev.names.indexOf('Foudre Noire et Flamme Blanche') >= 0 && blocs.ev.names.indexOf('Méga-Évolution') < 0
+    && blocs.nb && blocs.nb.names.indexOf('Explosion Plasma') >= 0 && blocs.nb.names.indexOf('Bienvenue à Kalos') < 0 && blocs.now.join() === 'Méga-Évolution', JSON.stringify(blocs));
+  ok('l’étiquette du bloc reste collée à gauche quand on le parcourt (' + Math.round(blocs.stuck) + ' px du bord)', blocs.stuck >= 0 && blocs.stuck < 50, JSON.stringify(blocs.stuck));
   // Ajouts du 2026-11-19 (porteur : « Go ») : compte à rebours, prix de sortie comparé à aujourd'hui, progression.
   const extra = await page.evaluate(() => {
     const m7 = [...document.querySelectorAll('.pkm-cal-dot:not(.pkm-cal-dot-logo)')].find(b => (b.querySelector('.pkm-cal-dcode') || {}).textContent === 'M7');
@@ -167,7 +182,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
       rd: (document.querySelector('.pkm-cal-dot-logo[aria-label^="Règne Delta"]') || {}).getAttribute ? document.querySelector('.pkm-cal-dot-logo[aria-label^="Règne Delta"]').getAttribute('aria-label') : '' };
   });
   ok('compte à rebours « ' + extra.jn + ' » sur la prochaine sortie datée (M7), dans sa pastille, sans cacher le sigle', extra.jn === 'J-8' && extra.n === 1 && extra.inside && extra.clear, JSON.stringify(extra));
-  ok('prix de sortie et prix d’aujourd’hui sur les extensions sorties (' + extra.deltas.slice(0, 3).join(', ') + '…)', extra.deltas.length >= 3 && extra.deltas.every(t => /^(ETB|Display|Lot|UPC) [+−]\d+ %$/.test(t)), JSON.stringify(extra.deltas));
+  ok('plus d’écart de prix d’ETB sur les extensions de la frise (retiré le 20 novembre 2026)', extra.deltas.length === 0 && (await page.locator('.pkm-cal-delta').count()) === 0, JSON.stringify(extra.deltas));
   ok('progression de ma collection sur chaque logo (' + extra.progs.slice(0, 2).join(', ') + '…)', extra.progs.length === extra.logos && extra.progs.every(t => /^\d+\/\d+$/.test(t)) && /\d+ cartes? sur \d+ dans ta collection/.test(extra.rd) && !/\b[01] cartes\b/.test(extra.rd), extra.rd);
   await page.screenshot({ path: shot('coin-calendrier.png') });
 
@@ -192,7 +207,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   // « ? » : la fiche « Lire la frise » (statuts, compte à rebours, prix de sortie, progression).
   await page.click('button.pkm-cal-help'); await page.waitForTimeout(700);
   const help = (await sheet.count()) === 1 ? N(await sheet.innerText()) : '';
-  ok('« ? » : la fiche « Lire la frise » explique les couleurs et les pastilles', /Lire la frise/.test(help) && /Sortie/.test(help) && /Officiel/.test(help) && /Annonce Japon/.test(help) && /Rumeur/.test(help) && /J-8/.test(help) && /\+21 %/.test(help), help.slice(0, 300));
+  ok('« ? » : la fiche « Lire la frise » explique les couleurs et les pastilles', /Lire la frise/.test(help) && /Sortie/.test(help) && /Officiel/.test(help) && /Annonce Japon/.test(help) && /Rumeur/.test(help) && /J-8/.test(help) && /Bloc de série/.test(help) && !/\+21 %/.test(help), help.slice(0, 300));
   await sheet.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(800);
   ok('« Fermer » : la fiche d’aide se referme', (await sheet.count()) === 0 && !(await page.evaluate(() => window.__pkm.st().calHelp)));
 

@@ -79,7 +79,6 @@
     const pct = all.length ? Math.round(mine.length / all.length * 100) : 0;
     // Les 3 cartes les plus chères de l'extension (2026-11-19, porteur : propositions de la frise du calendrier TCG),
     // en tête de l'onglet « Cartes » ; un appui ouvre leur fiche.
-    const top3 = top ? [] : all.filter(p => this.cote(p) !== null && this.cote(p) > 0).sort((a, b) => this.cote(b) - this.cote(a)).slice(0, 3);
     // Items de l'extension : produits scellés rattachés à cette extension (setId), le plus récent d'abord.
     const items = top || SEALED.status !== 'ready' ? [] : SEALED.list().filter(p => p.setId === e.id).sort((a, b) => (relKey(a) < relKey(b) ? 1 : relKey(a) > relKey(b) ? -1 : 0));
     // Autres items de la série (2026-11-15, porteur : « tous les items par série et par extension ») : produits sans
@@ -100,9 +99,6 @@
       tabs: SV_TABS.map(([k, label]) => Object.assign({ label: label + ' (' + (k === 'items' ? items.length + others.length : all.length) + ')', on: tab === k,
         pick: () => this.setState({ setFilter: k }) }, this.chip(tab === k))),
       hasTabs: !top, onCards: tab === 'cards', onItems: tab === 'items',
-      hasTop3: tab === 'cards' && top3.length > 0,
-      top3: top3.map((p, i) => ({ rank: String(i + 1), img: p.img, fallback: p.fallback || '', name: p.name, cote: this.coteTxt(this.cote(p)), owned: qty(p) > 0,
-        cls: 'pkm-sv-top3-c pkm-sv-top3-' + (i + 1), label: (i ? (i + 1) + 'e' : '1re') + ' carte la plus chère : ' + p.name + ', ' + this.eur(this.cote(p)) + (qty(p) ? ', dans ta collection' : ''), open: () => this.fiOpen(p.id) })),
       items: tab === 'items' ? items.map(p => this.slTile(p, c)) : [], itemsEmpty: tab === 'items' && !items.length && !others.length,
       hasOthers: tab === 'items' && others.length > 0, others: tab === 'items' ? others.map(p => this.slTile(p, c)) : [],
       othersTitle: 'Autres items de la série ' + (e && e.serie || ''),

@@ -63,6 +63,14 @@
       return { img: lo, hi: hi, srcset: lo + ' 245w, ' + hi + ' 600w', fixed: true,
         lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · photo de la carte redressée et recadrée par Dropicards' };
     }
+    // Copie locale (2026-11-20, porteur : visuels du Set de Base ; tools/visuels/mirror_set.py, web/img/local/) : le même
+    // visuel TCGdex, servi par dropicards.fr quand le CDN de TCGdex refuse des visuels par rafales.
+    const lc = TCG.local && TCG.local[path];
+    if (lc) {
+      const k = 'img/local/' + path.replace(/\//g, '_'), lo = k + '-low.webp?v=' + lc, hi = k + '.webp?v=' + lc;
+      return { img: lo, hi: hi, srcset: lo + ' 245w, ' + hi + ' 600w',
+        lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · copie hébergée par Dropicards (600 × 825)' };
+    }
     const b = /^https?:/.test(path) ? path : ((TCG.doc && TCG.doc.img) || ASSETS) + path;
     return { img: b + '/low.webp', hi: b + '/high.png', srcset: b + '/low.webp 245w, ' + b + '/high.webp 600w',
       lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · qualité maximale (PNG 600 × 825)' };

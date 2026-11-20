@@ -161,11 +161,11 @@
       "source": "PokeBeach", "sourceDate": "2026-08-25", "url": "https://www.pokebeach.com/2026/08/mega-x-mega-parade-high-class-pokemon-tcg-set-to-release-in-february" },
     { "id": "mxm-fr", "short": "Méga", "date": "2027-04", "dateText": "Printemps 2027 (estimation)", "name": "Extension spéciale Méga (version française de MEGA×MEGA Parade)", "type": "Extension spéciale", "status": "rumeur",
       "note": "Rien d’annoncé : estimation Dropicards, environ 2 mois après le Japon comme pour Héros Transcendants." },
-    { "id": "exstar-jp", "date": "2027-05-21", "name": "Pokémon ex★ : début au Japon", "jp": "Magma Heartbeat · Lightning Impact · Aurora Ripples", "code": "ex★", "type": "3 extensions (Japon)", "status": "rumeur",
+    { "id": "exstar-jp", "bloc": "Pokémon ex★", "date": "2027-05-21", "name": "Pokémon ex★ : début au Japon", "jp": "Magma Heartbeat · Lightning Impact · Aurora Ripples", "code": "ex★", "type": "3 extensions (Japon)", "status": "rumeur",
       "stars": ["Entei", "Raikou", "Suicune"],
       "note": "Série ex★ officielle (logo dévoilé aux Worlds 2026 avec Entei, Raikou et Suicune). Date du 21 mai 2027 et noms : fuite crédible, confirmée indirectement par la hausse du prix des boosters japonais annoncée « à partir des nouvelles extensions de mai 2027 ». Thème Or et Argent.",
       "source": "PokeBeach", "sourceDate": "2026-11-17", "url": "https://www.pokebeach.com/2026/11/magma-heartbeat-lightning-impact-and-aurora-ripples-to-launch-pokemon-ex%e2%98%85-series-in-may-2027" },
-    { "id": "exstar-fr", "date": "2027-07", "dateText": "Été 2027 (estimation)", "name": "Pokémon ex★ en France", "code": "ex★", "type": "Extension", "status": "rumeur",
+    { "id": "exstar-fr", "bloc": "Pokémon ex★", "date": "2027-07", "dateText": "Été 2027 (estimation)", "name": "Pokémon ex★ en France", "code": "ex★", "type": "Extension", "status": "rumeur",
       "stars": ["Entei", "Raikou", "Suicune"],
       "note": "Rien d’annoncé pour la France : d’habitude 8 à 14 semaines après le Japon (juillet-août 2027). Nom français et format (1 ou 3 extensions) inconnus." }
   ]

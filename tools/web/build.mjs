@@ -718,7 +718,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 62) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 62'); // dont 3 logos d'extensions dans « Le calendrier TCG » (frise au-dessus et au-dessous de la ligne et fiche d'une sortie, 2026-11-19), 2 dans « Autres items de la série » (2026-11-15), 3 logos du DropiPass (bannière du PK shop et de Mon profil, écran de l'offre, 2026-11-15), 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 63) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 63'); // dont 3 logos d'extensions dans « Le calendrier TCG » (frise au-dessus et au-dessous de la ligne et fiche d'une sortie, 2026-11-19), 1 logo de série sur l'étiquette de chaque bloc de la frise (2026-11-20), 2 dans « Autres items de la série » (2026-11-15), 3 logos du DropiPass (bannière du PK shop et de Mon profil, écran de l'offre, 2026-11-15), 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -974,8 +974,8 @@ ${code}
     // Visuel TCGdex en WebP qui ne charge pas (réseau, format refusé par le téléphone : 2026-10-22, visuels absents chez
     // le porteur alors que le CDN répond) : un nouvel essai en PNG, même adresse, avant le visuel de secours.
     const cur = t.currentSrc || t.getAttribute('src') || '';
-    // Visuel redressé (img/fix/, 2026-11-13) absent : le visuel TCGdex d'origine.
-    const fixAt = cur.indexOf('/img/fix/');
+    // Visuel redressé (img/fix/, 2026-11-13) ou copie locale (img/local/, 2026-11-20) absent : le visuel TCGdex d'origine.
+    const fixAt = cur.indexOf('/img/fix/') >= 0 ? cur.indexOf('/img/fix/') : cur.indexOf('/img/local/') >= 0 ? cur.indexOf('/img/local/') + 2 : -1;
     if (!t.dataset.unfix && fixAt >= 0) {
       const name = cur.slice(fixAt + 9).split('?')[0], low = /-low\.webp$/.test(name);
       t.dataset.unfix = '1';
@@ -986,7 +986,17 @@ ${code}
     if (!t.dataset.png && cur.indexOf('https://assets.tcgdex.net/') === 0 && (cur.slice(-9) === '/low.webp' || cur.slice(-10) === '/high.webp')) {
       t.dataset.png = '1';
       t.removeAttribute('srcset');
+      t.dataset.tcgdex = cur;
       t.src = cur.slice(0, -5) + '.png';
+      return;
+    }
+    // Le CDN de TCGdex refuse des visuels par rafales (503) quand une page en demande une centaine d'un coup (2026-11-20,
+    // Set de Base) : deux nouveaux essais espacés (1,5 puis 4 s, un peu de hasard) avant la carte dessinée.
+    const orig = t.dataset.tcgdex;
+    if (orig && (+t.dataset.retry || 0) < 2) {
+      const n = (+t.dataset.retry || 0) + 1;
+      t.dataset.retry = String(n);
+      setTimeout(() => { if (t.isConnected) t.src = orig + '?r=' + n; }, (n === 1 ? 1500 : 4000) + Math.round(Math.random() * 1500));
       return;
     }
     if (!t.dataset.fallback || t.dataset.fellBack === t.dataset.fallback) return;
@@ -1007,7 +1017,9 @@ ${code}
   // Visuels de travers redressés (2026-11-13, web/data/img-fix.json, workflow « Cadrage des cartes ») : lus avec le
   // catalogue ; sans eux, les visuels TCGdex d'origine.
   const loadFix = () => getJson('data/img-fix.json').then(x => { TCG.fix = (x && x.p) || {}; }).catch(() => { TCG.fix = TCG.fix || {}; });
-  const loadCatalog = () => Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json'), loadFix()]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
+  // Copies locales des visuels (2026-11-20, web/data/img-local.json, workflow « Copie locale des visuels »).
+  const loadLocal = () => getJson('data/img-local.json').then(x => { TCG.local = (x && x.p) || {}; }).catch(() => { TCG.local = TCG.local || {}; });
+  const loadCatalog = () => Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json'), loadFix(), loadLocal()]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
     .then(doc => doc || getJson('data/cards.json'))
     .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); })
     .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); retryLater(); });

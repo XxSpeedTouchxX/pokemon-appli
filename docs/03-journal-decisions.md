@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-20 — Blocs de série et visuels du Set de Base (porteur)
+
+- **Demande** (porteur) : « supprime les % d'évolution d'ETB dans la frise […] fais une séparation par gros bloc de série […] supprime les top 3 des cartes les plus chères pour chaque série […] et retrouve-moi le visuel de toutes les cartes de la première série, édition 1 ».
+- **Badges « ETB +21 % » retirés** de la frise (et de « Lire la frise ») ; le prix de sortie comparé au prix du jour reste dans l'onglet Items d'une extension.
+- **Blocs de série** : la frise est découpée en blocs (série du catalogue : Base, Néo, e-Card, EX, Diamant et Perle, Platine, HeartGold SoulSilver avec L'appel des Légendes, Noir & Blanc, XY, Soleil et Lune, Épée et Bouclier, Écarlate et Violet, Méga-Évolution ; Pokémon ex★ pour les sorties à venir) : teinte alternée, séparation en pointillés, étiquette avec le logo de la série qui reste collée à gauche pendant le défilement, bloc en cours en jaune. Un mois partagé par deux séries (novembre 2013) est coupé en deux.
+- **« Les plus chères » (3 cartes) retirée** de l'onglet Cartes d'une extension ; le tri par prix reste.
+- **Visuels du Set de Base** : diagnostic par workflow GitHub (`tools/visuels/check_set.py`) : **les 102 visuels français existent chez TCGdex** (vraies cartes françaises, différentes des anglaises) ; les cartes dessinées venaient de **refus passagers du serveur de TCGdex (503)** quand une page demande une centaine de visuels d'un coup. Réparations : **deux nouveaux essais automatiques** (1,5 puis 4 s) pour tout visuel TCGdex refusé, dans toute l'app ; **copie des visuels du Set de Base sur dropicards.fr** (`tools/visuels/mirror_set.py`, workflow « Copie locale des visuels », lancé à la main, autres extensions possibles), avec retour au visuel TCGdex si une copie manque.
+- **Limite** : les scans de TCGdex sont ceux de l'impression standard ; le tampon « Édition 1 » n'est pas distingué (ni par TCGdex ni par Cardmarket, décision du porteur attendue depuis le 2026-11-01).
+- Cache v251.
+
 ## 2026-11-20 — Frise depuis le Set de Base (porteur : « remonter toute la frise à partir de la première sortie Pokémon édition 1 »)
 
 - **111 extensions ajoutées** au calendrier (`web/data/calendar.json`), du **Set de Base (« Édition 1 », sorti en France le 18 novembre 1999)** à Évolutions Prismatiques (17 janvier 2025) ; la frise compte désormais 122 extensions avec logo (toutes celles du catalogue sorties en français).

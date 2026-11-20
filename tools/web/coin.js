@@ -191,17 +191,6 @@
     return { msrp: m, now: k, pct: pct, pctText: (pct > 0 ? '+' : pct < 0 ? '−' : '') + Math.abs(pct) + ' %', up: pct >= 0,
       msrpText: p.msrp.length > 1 ? this.eur(p.msrp[0]) + ' à ' + this.eur(p.msrp[1]) : this.eur(p.msrp[0]), source: p.msrpSource || '' };
   };
-  // Produit phare d'une extension pour la frise : l'ETB, sinon le display, le lot de boosters ou l'UPC.
-  const CAL_LEAD = ['ETB', 'DSP', 'BDL', 'UPC'], CAL_LEAD_TXT = { ETB: 'ETB', DSP: 'Display', BDL: 'Lot', UPC: 'UPC' };
-  coinProto.calLead = function (setId) {
-    if (typeof SEALED === 'undefined' || SEALED.status !== 'ready' || !setId) return null;
-    const list = SEALED.list().filter(p => p.setId === setId);
-    for (const code of CAL_LEAD) {
-      const p = list.find(z => z.code === code && this.calLaunch(z));
-      if (p) return Object.assign({ code: CAL_LEAD_TXT[code] }, this.calLaunch(p));
-    }
-    return null;
-  };
   // Appui sur le logo d'une extension dans la frise : un seul mouvement continu, comme la carte du Radar qui zoome sur une
   // zone (2026-11-19, porteur : « un zoom comme la cinématique du radar de boutique, beaucoup plus fluide et satisfaisant »).
   //  1. appui : la tuile s'enfonce et s'allume en jaune (0,14 s, petite vibration sur Android) ;
@@ -380,10 +369,12 @@
       check();
     } catch (e) { /* rien */ }
   };
+  // Blocs de la frise : L'appel des Légendes appartient à l'époque HeartGold SoulSilver ; noms affichés.
+  const CAL_BLOC_MERGE = { 'L\'appel des Légendes': 'HeartGold SoulSilver' }, CAL_BLOC_NAME = { 'e-cards': 'e-Card' };
   coinProto.vCal = function (s) {
     const d = CAL.data, today = realToday(), todayKey = calMonthKey(today);
     if (!d || !Array.isArray(d.items)) {
-      return { ready: false, notReady: true, loading: CAL.status === 'error' ? 'Le calendrier n’a pas pu être chargé. Réessaie dans un instant.' : 'Chargement du calendrier…', months: [], sel: [], remind: {}, help: false };
+      return { ready: false, notReady: true, loading: CAL.status === 'error' ? 'Le calendrier n’a pas pu être chargé. Réessaie dans un instant.' : 'Chargement du calendrier…', months: [], blocs: [], sel: [], remind: {}, help: false };
     }
     const setOf = id => (typeof TCG !== 'undefined' && TCG.status === 'ready' && id ? TCG.setList.find(e => e.id === id) : null);
     const items = d.items.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)).map((x, i) => {
@@ -426,6 +417,22 @@
     const next = items.filter(x => x.days !== null && x.days >= 0).sort((a, b) => a.days - b.days)[0] || null;
     const own = typeof this.ownedBySet === 'function' ? this.ownedBySet(s) : {};
     const keys = items.map(x => x.month).filter(Boolean).concat([todayKey]).sort();
+    // Blocs de séries (2026-11-20, porteur : « une séparation par gros bloc de série ») : la série de chaque extension
+    // vient du catalogue ; une sortie sans extension au catalogue (Japon, rumeurs, coffrets) reste dans le bloc en cours,
+    // sauf si le calendrier lui donne un bloc (« bloc » : Pokémon ex★). Un bloc commence à sa première sortie.
+    const blocStarts = [], seen = {};
+    const blocName = x => {
+      const set = setOf(x.setId), raw = (d.items.find(z => (z.id || '') === x.id) || {}).bloc, b = raw || (set && set.serie) || '';
+      return CAL_BLOC_MERGE[b] || b;
+    };
+    items.forEach(x => {
+      const b = blocName(x);
+      if (!b || seen[b] || !x.month) return;
+      seen[b] = true;
+      blocStarts.push({ name: b, start: x.month, set: setOf(x.setId) });
+    });
+    const blocAt = k => { let i = 0; blocStarts.forEach((b, j) => { if (b.start <= k) i = j; }); return i; };
+    const blocIdx = x => { const b = blocName(x); return b ? blocStarts.findIndex(z => z.name === b) : -1; };
     const months = [];
     let side = 0;
     // Toute l'histoire du JCC depuis le Set de Base (2026-11-20, porteur) : plus d'un an avant aujourd'hui, un mois sans
@@ -435,20 +442,23 @@
       let [y, m] = keys[0].split('-').map(Number);
       const [yl, ml] = keys[keys.length - 1].split('-').map(Number);
       for (let guard = 0; (y < yl || (y === yl && m <= ml)) && guard < 600; guard++) {
-        const k = y + '-' + String(m).padStart(2, '0'), here = items.filter(x => x.month === k);
+        const k = y + '-' + String(m).padStart(2, '0'), all = items.filter(x => x.month === k), base = blocAt(k);
+        // Mois où une série s'arrête et la suivante commence (novembre 2013 : Explosion Plasma puis Bienvenue à Kalos) :
+        // deux colonnes, la fin de l'ancien bloc puis le début du nouveau.
+        const before = blocStarts[base] && blocStarts[base].start === k ? all.filter(x => { const i = blocIdx(x); return i >= 0 && i < base; }) : [];
+        const runs = before.length ? [[base - 1, before], [base, all.filter(x => before.indexOf(x) < 0)]] : [[base, all]];
+        runs.forEach(([bi, here]) => {
         const up = here.length ? side++ % 2 === 0 : false;
         const dots = here.map(x => {
           const zoom = !!(x.setId && x.hasLogo), isNext = !!next && next.id === x.id;
           const jn = isNext ? (x.days === 0 ? 'Aujourd’hui' : x.days === 1 ? 'Demain' : 'J-' + x.days) : '';
-          // Logos des extensions sorties : évolution du produit phare depuis sa sortie et ma progression dans l'extension.
-          const lead = zoom && x.past ? this.calLead(x.setId) : null;
+          // Logos des extensions : ma progression dans l'extension (l'écart avec le prix de sortie a été retiré le 2026-11-20).
           const setN = zoom && typeof TCG !== 'undefined' && TCG.status === 'ready' ? ((TCG.setList.find(e => e.id === x.setId) || {}).n || 0) : 0, k = own[x.setId] || 0;
           return { cls: 'pkm-cal-dot ' + x.stCls.replace('pkm-cal-st ', '') + (zoom ? ' pkm-cal-dot-logo' : '') + (x.remindOn ? ' pkm-cal-dot-bell' : '') + (isNext ? ' pkm-cal-dot-next' : ''),
             code: x.short || x.code || x.initials, jn: jn, hasJn: !!jn,
             logo: zoom ? x.logo : '', hasLogo: zoom, setId: x.setId,
-            hasDelta: !!lead, delta: lead ? lead.code + ' ' + lead.pctText : '', deltaCls: 'pkm-cal-delta ' + (lead && !lead.up ? 'pkm-cal-delta-down' : 'pkm-cal-delta-up'),
             hasProg: setN > 0, prog: k + '/' + setN, progW: (setN ? Math.max(k ? 4 : 0, Math.round(k / setN * 100)) : 0) + '%',
-            aria: x.name + ', ' + x.when + ', ' + x.status + (lead ? ', ' + lead.code + ' ' + lead.pctText + ' depuis la sortie' : '') + (setN ? ', ' + k + (k > 1 ? ' cartes' : ' carte') + ' sur ' + setN + ' dans ta collection' : '')
+            aria: x.name + ', ' + x.when + ', ' + x.status + (setN ? ', ' + k + (k > 1 ? ' cartes' : ' carte') + ' sur ' + setN + ' dans ta collection' : '')
               + (x.remindOn ? ', rappel activé' : '') + (zoom ? '. Voir l’extension' : '. Voir la fiche'),
             pick: zoom ? ev => this.calZoom(ev, x.setId, x.setName || x.name) : () => this.calOpen(x.id) };
         });
@@ -458,15 +468,32 @@
         const mine = split ? logos : dots, other = split ? chips : [];
         const upList = up ? mine : other, downList = up ? other : mine;
         const old = k < oldKey, thin = old && !here.length, yearOn = m === 1 || !months.length || (old && here.length > 0);
-        months.push({ key: k, label: thin ? '' : CAL_MONTHS[m - 1].replace('.', ''), year: yearOn ? String(y) : '', hasYear: yearOn,
+        months.push({ key: k, bloc: bi, label: thin ? '' : CAL_MONTHS[m - 1].replace('.', ''), year: yearOn ? String(y) : '', hasYear: yearOn,
           now: k === todayKey, cls: 'pkm-cal-m' + (k === todayKey ? ' pkm-cal-m-now' : k < todayKey ? ' pkm-cal-m-past' : '') + (here.length ? ' pkm-cal-m-has' : '')
             + (thin ? ' pkm-cal-m-thin' + (m === 1 ? ' pkm-cal-m-jan' : '') : ''),
           up: upList, down: downList, dots: dots,
           upCls: 'pkm-cal-dots pkm-cal-dots-up' + (upList.length ? ' pkm-cal-dots-on' : ''),
           downCls: 'pkm-cal-dots pkm-cal-dots-down' + (downList.length ? ' pkm-cal-dots-on' : '') });
+        });
         m++; if (m > 12) { m = 1; y++; }
       }
     }
+    const blocs = [];
+    months.forEach(mo => {
+      const last = blocs[blocs.length - 1];
+      if (last && last.i === mo.bloc) { last.months.push(mo); return; }
+      const b = blocStarts[mo.bloc] || { name: '' }, name = CAL_BLOC_NAME[b.name] || b.name;
+      // Logo du bloc : celui de l'extension qui porte le nom de la série, sinon de la première du bloc (« Toutes les séries » fait pareil).
+      let logo = '';
+      try {
+        const sets = typeof TCG !== 'undefined' && TCG.status === 'ready' ? TCG.setList.filter(e => e.serie && (CAL_BLOC_MERGE[e.serie] || e.serie) === b.name && e.lang !== 'EN') : [];
+        const named = sets.find(e => fold(e.name) === fold(b.name)) || b.set || sets[0];
+        logo = named ? setLogo(named.id, named.logo) : '';
+      } catch (e) { logo = ''; }
+      blocs.push({ i: mo.bloc, name: name, hasName: !!name, logo: logo, hasLogo: !!logo, months: [mo],
+        cls: 'pkm-cal-bloc' + (blocs.length % 2 ? ' pkm-cal-bloc-odd' : '') + (mo.bloc === blocAt(todayKey) ? ' pkm-cal-bloc-now' : ''),
+        aria: name ? 'Bloc ' + name : 'Sorties' });
+    });
     const sel = s.calSel ? items.filter(x => x.id === s.calSel) : [], it = sel[0] || null;
     const rmd = it && it.canRemind ? {
       on: it.remindOn, cls: 'pkm-cal-remind' + (it.remindOn ? ' pkm-cal-remind-on' : ''),
@@ -477,7 +504,7 @@
       toggle: () => this.calRemind(it.id, it.name)
     } : null;
     return {
-      ready: true, notReady: false, loading: '', months: months,
+      ready: true, notReady: false, loading: '', months: months, blocs: blocs,
       sel: sel, hasSel: sel.length > 0, selTitle: it && it.stale ? 'Date à confirmer' : it && it.past ? 'Sortie' : 'Prochaine sortie',
       selLabel: it ? it.name + ', ' + it.when : '', closeSel: () => this.calClose(),
       remind: rmd || {}, hasRemind: !!rmd,
@@ -512,10 +539,10 @@
       } catch (e) { /* page sans racine */ } }, 0);
       r.cv = tab === 'vit' ? this.vCoinVit(s) : { found: [], recent: [] };
       if (tab === 'vit' && typeof this.vTradeTab === 'function') r.tdx = this.vTradeTab(s);
-      r.cal = tab === 'cal' ? this.vCal(s) : { months: [], sel: [] };
+      r.cal = tab === 'cal' ? this.vCal(s) : { months: [], blocs: [], sel: [] };
     } else {
       this.__coinOnce = false;
-      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], sel: [] };
+      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], blocs: [], sel: [] };
     }
     // Frise : le mois en cours au milieu, une fois le calendrier affiché.
     if (on && tab === 'cal' && CAL.data && !this.__calScrolled) {

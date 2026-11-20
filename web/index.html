@@ -3544,6 +3544,22 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-cal-strip::-webkit-scrollbar { display: none; }
 .pkm-cal-m { position: relative; flex: none; width: 46px; display: flex; flex-direction: column; }
 .pkm-cal-m-has { width: clamp(74px, 15cqh, 96px); }
+/* Blocs de séries (2026-11-20, porteur : « une séparation par gros bloc de série ») : chaque série (Méga-Évolution,
+   Écarlate et Violet…) a sa bande, teintée une fois sur deux et séparée de la suivante par un trait ; son nom, avec le
+   logo de la série, reste collé à gauche pendant qu'on la parcourt. Sous 300 px de haut, seuls la teinte et le trait restent. */
+.pkm-cal-bloc { flex: none; display: flex; flex-direction: column; min-height: 0; }
+.pkm-cal-bloc + .pkm-cal-bloc { border-left: 1.5px dashed rgba(201, 211, 234, 0.32); }
+.pkm-cal-bloc-odd { background: rgba(255, 255, 255, 0.035); }
+.pkm-cal-bloc-h { flex: none; height: 26px; display: flex; align-items: center; }
+.pkm-cal-bloc-tag { position: sticky; left: 6px; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; max-width: calc(100% - 10px); height: 22px; margin-left: 6px; padding: 0 9px 0 6px;
+  border-radius: 999px; border: 1px solid rgba(201, 211, 234, 0.3); background: rgba(11, 17, 32, 0.82); color: #C9D3EA; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px;
+  text-transform: uppercase; white-space: nowrap; overflow: hidden; }
+.pkm-cal-bloc-tag b { overflow: hidden; text-overflow: ellipsis; }
+.pkm-cal-bloc-tag img { flex: none; height: 15px; width: auto; max-width: 46px; object-fit: contain; }
+.pkm-cal-bloc-now .pkm-cal-bloc-tag { border-color: rgba(255, 214, 10, 0.5); color: #FFE680; }
+.pkm-cal-bloc-ms { flex: 1; min-height: 0; display: flex; }
+.pkm-cal-key-bloc { position: static; margin: 0; max-width: 100%; justify-content: center; font-size: 9.5px; padding: 0 7px; }
+@container (max-height: 300px) { .pkm-cal-bloc-h { display: none; } }
 /* Années anciennes (plus d'un an avant aujourd'hui) : un mois sans sortie est une fine tranche, seule l'année reste, en
    janvier, posée sur la ligne de la frise. */
 .pkm-cal-m-thin { width: 16px; }
@@ -3601,15 +3617,11 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-cal-dot:not(.pkm-cal-dot-logo) .pkm-cal-jn { position: static; order: 3; box-shadow: none; padding: 0 5px; line-height: 13px; }
 .pkm-cal-dot-bell::after { content: ''; position: absolute; top: -8px; left: -7px; z-index: 2; width: 17px; height: 17px; border-radius: 9px; box-shadow: 0 0 0 2px #0B1120;
   background: #FFD60A url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2H4.5z M10 20.5a2.2 2.2 0 0 0 4 0' fill='%230B1120'/%3E%3C/svg%3E") center / 11px no-repeat; }
-.pkm-cal-delta { padding: 1px 6px; border-radius: 999px; font-size: clamp(9px, 2.2cqh, 11px); line-height: 1.35; font-weight: 800; white-space: nowrap; }
-.pkm-cal-delta-up { background: rgba(61, 220, 132, 0.16); color: #8DF0B8; }
-.pkm-cal-delta-down { background: rgba(255, 107, 94, 0.16); color: #FF9B8F; }
 .pkm-cal-prog { display: flex; align-items: center; gap: 4px; font-size: clamp(8.5px, 2cqh, 10.5px); line-height: 1.3; font-weight: 700; color: #C9D3EA; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .pkm-cal-prog i { flex: none; width: 30px; height: 4px; border-radius: 2px; background: #2A3A5C; overflow: hidden; }
 .pkm-cal-prog b { display: block; height: 100%; border-radius: 2px; background: #FFD60A; }
 /* Frise basse (petit écran) : on garde le logo et le sigle, puis le prix, puis la progression. */
 @container (max-height: 430px) { .pkm-cal-prog { display: none; } }
-@container (max-height: 300px) { .pkm-cal-delta { display: none; } }
 .pkm-cal-help { position: absolute; top: 5px; right: 6px; z-index: 3; width: 30px; height: 30px; padding: 0; border-radius: 15px; border: 1px solid #3A4C74; background: #0B1120; box-shadow: -10px 0 12px 2px rgba(11, 17, 32, 0.85);
   color: #FFE680; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
 .pkm-cal-help::before { content: ''; position: absolute; inset: -7px; } /* zone de toucher de 44 px */
@@ -3704,20 +3716,6 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-launch-up b { color: #3DDC84; }
 .pkm-launch-down b { color: #FF7A6B; }
 
-/* Les 3 cartes les plus chères d'une extension (setview.js, en tête de l'onglet « Cartes »). */
-.pkm-sv-top3 { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 18px; border: 1px solid #24345C; background: linear-gradient(180deg, #16234A, #0F1830); color: #F3F6FC; }
-.pkm-sv-top3 h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; }
-.pkm-sv-top3-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.pkm-sv-top3-c { min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 4px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: center; cursor: pointer; }
-.pkm-sv-top3-img { position: relative; display: block; aspect-ratio: 63 / 88; border-radius: 8px; overflow: visible; }
-.pkm-sv-top3-img img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 6px; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45)); }
-.pkm-sv-top3-img b { position: absolute; top: -6px; left: -6px; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-  background: #C9D3EA; color: #0B1120; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 2px #0F1830; }
-.pkm-sv-top3-1 .pkm-sv-top3-img b { background: #FFD60A; }
-.pkm-sv-top3-3 .pkm-sv-top3-img b { background: #E0A26B; }
-.pkm-sv-top3-n { font-size: 11.5px; line-height: 1.25; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pkm-sv-top3-p { font-size: 13px; font-weight: 800; color: #FFE680; font-variant-numeric: tabular-nums; }
-.pkm-sv-top3-c:focus-visible { outline: 3px solid #FFD60A; outline-offset: 3px; border-radius: 8px; }
 
 /* Barre du bas (2026-11-19, porteur : « les 2 icônes à gauche du scan, "Le coin des dresseurs" juste en dessous,
    aligné avec le scan, et les 2 autres à droite ; le scan au milieu, un peu plus haut, toujours rattaché à la barre ;
@@ -4630,6 +4628,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=e4779594"></script>
+<script src="app.js?v=b5119581"></script>
 </body>
 </html>

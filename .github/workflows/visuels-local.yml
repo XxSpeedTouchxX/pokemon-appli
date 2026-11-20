@@ -1,0 +1,43 @@
+# Copie locale des visuels d'une extension (2026-11-20, porteur : visuels du Set de Base) : copie les visuels TCGdex
+# (WebP 600 px et 245 px) dans web/img/local/ et les inscrit dans web/data/img-local.json, lu par l'app ; ces cartes
+# s'affichent alors depuis dropicards.fr, même quand le CDN de TCGdex refuse des visuels. Lancé à la main.
+name: Copie locale des visuels
+
+on:
+  workflow_dispatch:
+    inputs:
+      sets:
+        description: "Extensions du catalogue, séparées par des espaces (ex. base1)"
+        required: true
+        default: "base1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: visuels-local
+  cancel-in-progress: false
+
+jobs:
+  copy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - name: Copie
+        env:
+          SETS: ${{ github.event.inputs.sets }}
+        run: python3 tools/visuels/mirror_set.py $SETS
+      - name: Publier
+        env:
+          SETS: ${{ github.event.inputs.sets }}
+        run: |
+          git add -A web/img/local web/data/img-local.json
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Copie locale des visuels : $SETS ($(date -u +%Y-%m-%d))"
+          git pull --rebase origin claude/pokemon-app-mockup-1mxt7p
+          git push origin HEAD:claude/pokemon-app-mockup-1mxt7p
