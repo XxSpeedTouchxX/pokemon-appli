@@ -91,7 +91,16 @@
       e.stopPropagation();
       if (e.cancelable && (e.type === 'touchmove' || e.type === 'wheel' || !inWin(t))) e.preventDefault();
     };
-    ['touchstart', 'touchmove', 'pointerdown', 'pointermove', 'wheel', 'mousedown', 'click'].forEach(k => window.addEventListener(k, guard, { capture: true, passive: false }));
+    // Écouteurs posés seulement pendant que la fenêtre est ouverte (2026-11-20, porteur : frise saccadée) : un écouteur
+    // de toucher « non passif » toujours présent oblige le téléphone à attendre le JavaScript à chaque mouvement du doigt,
+    // dans toute l'app.
+    const KINDS = ['touchstart', 'touchmove', 'pointerdown', 'pointermove', 'wheel', 'mousedown', 'click'];
+    let on = false;
+    window.__pkmLockGuardSet = want => {
+      if (want === on) return;
+      on = want;
+      KINDS.forEach(k => (want ? window.addEventListener : window.removeEventListener).call(window, k, guard, { capture: true, passive: false }));
+    };
   }
   // Fenêtre « Tu dois d'abord déverrouiller le grade … ».
   shopProto.shopLockOpen = function (it) { this.setState({ shopLock: { g: it.minGrade, kind: it.kind } }); };
@@ -602,6 +611,7 @@
     const tz = s.tkZoom;
     r.tkz = tz ? { open: true, img: tz.img || '', name: tz.name || '', info: tz.info || '', close: () => this.setState({ tkZoom: null }) } : { open: false };
     const lk = s.shopLock;
+    if (typeof window !== 'undefined' && window.__pkmLockGuardSet) window.__pkmLockGuardSet(!!lk);
     const hasG = !!lk && lk.g >= 0, dpOnly = { pg: 'img/brand/pregrade.svg', hist: 'img/brand/historique.svg' };
     r.lockw = lk ? {
       open: true, hasGrade: hasG, grade: hasG ? shopGradeName(lk.g) : '', text: shopLockText(lk),

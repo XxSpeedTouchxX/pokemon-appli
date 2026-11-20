@@ -966,13 +966,27 @@ ${code}
   inst.__changed = () => inst.scheduleSave();
   // Image qui ne charge plus. Photo ou logo du scellé : adresse notée, l'app affiche le visuel suivant.
   // Carte (ex. arrêt de pokemontcg.io) : visuel de secours, une fois par visuel.
-  let brokenTimer = null;
+  let brokenTimer = null, lastScroll = 0;
+  // Nouveau rendu après une photo manquante : jamais pendant un défilement (2026-11-20, porteur : frise saccadée), un
+  // seul pour toutes les images en échec du moment.
+  document.addEventListener('scroll', () => { lastScroll = Date.now(); }, { capture: true, passive: true });
+  const brokenRender = () => {
+    brokenTimer = null;
+    if (Date.now() - lastScroll < 300) { brokenTimer = setTimeout(brokenRender, 300); return; }
+    inst.__rerender();
+  };
   document.addEventListener('error', e => {
     const t = e.target;
     if (!t || t.tagName !== 'IMG' || !t.dataset) return;
     if (t.dataset.broken) {
       const bad = t.getAttribute('src');
-      if (bad && !BROKEN.has(bad)) { BROKEN.add(bad); if (!brokenTimer) brokenTimer = setTimeout(() => { brokenTimer = null; inst.__rerender(); }, 60); }
+      if (bad && !BROKEN.has(bad)) {
+        BROKEN.add(bad);
+        // Logo d'extension : le suivant de sa cascade (webp, png, logo gardé avec la page, nom dessiné), sans nouveau rendu.
+        const nx = LOGO_NEXT.get(bad);
+        if (nx) { t.removeAttribute('srcset'); t.src = nx; return; }
+        if (!brokenTimer) brokenTimer = setTimeout(brokenRender, 200);
+      }
       return;
     }
     // Visuel TCGdex en WebP qui ne charge pas (réseau, format refusé par le téléphone : 2026-10-22, visuels absents chez

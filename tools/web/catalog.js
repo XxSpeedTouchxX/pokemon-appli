@@ -20,6 +20,9 @@
   const LIMIT = 40;
   // Adresses d'images qui n'ont pas chargé (photos et logos) : l'app affiche alors le visuel suivant.
   const BROKEN = new Set();
+  // Logo suivant de la cascade d'un logo d'extension (setLogo) : en cas d'échec, l'image passe directement au suivant,
+  // sans nouveau rendu de toute l'app (2026-11-20, porteur : frise saccadée quand on remonte vers les anciennes séries).
+  const LOGO_NEXT = new Map();
   // Date du jour réelle (heure locale) pour le scellé, le Radar et les Sorties ; ?today=AAAA-MM-JJ pour les tests,
   // ou date simulée par le mode Admin.
   // La collection de démo garde sa date fixe (today() de la maquette).
@@ -323,7 +326,9 @@
     }
     if (SET_LOGO_LOCAL[id]) out.push('img/' + SET_LOGO_LOCAL[id] + '.webp');
     if (moreLogo(id)) out.push('img/' + moreLogo(id) + '.webp');
-    return out.find(u => !BROKEN.has(u)) || setBadge(id);
+    const ok = out.filter(u => !BROKEN.has(u));
+    if (ok.length && !LOGO_NEXT.has(ok[0])) { const badge = setBadge(id); ok.forEach((u, i) => LOGO_NEXT.set(u, ok[i + 1] || badge)); }
+    return ok[0] || setBadge(id);
   }
   // Logos absents de TCGdex (2026-10-11, signalés par le porteur) : repris du dépôt GitHub 1niceroli/ptcg-assets et
   // gardés avec la page (web/img) ; sinon un nom de série dessiné par l'app.

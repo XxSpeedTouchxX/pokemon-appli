@@ -16,7 +16,15 @@
     window.__pkmNoZoom = true;
     const noZoom = e => { if (e.cancelable) e.preventDefault(); };
     ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, noZoom, { passive: false }));
-    document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1 && typeof e.scale === 'number' && e.scale !== 1) noZoom(e); }, { passive: false });
+    // Pincement à deux doigts : l'écouteur « non passif » n'est posé que pendant qu'au moins deux doigts touchent l'écran
+    // (2026-11-20, porteur : frise saccadée) ; toujours présent, il faisait attendre le JavaScript à chaque mouvement d'un
+    // seul doigt, donc à chaque défilement.
+    const pinch = e => { if (e.touches && e.touches.length > 1 && typeof e.scale === 'number' && e.scale !== 1) noZoom(e); };
+    let pinchOn = false;
+    document.addEventListener('touchstart', e => { if (e.touches && e.touches.length > 1 && !pinchOn) { pinchOn = true; document.addEventListener('touchmove', pinch, { passive: false }); } }, { passive: true });
+    const pinchOff = e => { if (pinchOn && (!e.touches || e.touches.length < 2)) { pinchOn = false; document.removeEventListener('touchmove', pinch, { passive: false }); } };
+    document.addEventListener('touchend', pinchOff, { passive: true });
+    document.addEventListener('touchcancel', pinchOff, { passive: true });
     document.addEventListener('wheel', e => { if (e.ctrlKey) noZoom(e); }, { passive: false });
   }
   // Clé d'une page : l'écran et ce qu'il montre (l'identifiant d'une carte reste dans l'état après sa fiche).

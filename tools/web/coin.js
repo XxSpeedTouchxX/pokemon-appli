@@ -365,7 +365,8 @@
         hero.classList.toggle('pkm-cal-away', left || right);
         hero.classList.toggle('pkm-cal-away-l', left);
       };
-      if (!w.__calAway) { w.__calAway = true; w.addEventListener('scroll', check, { passive: true }); }
+      // Une vérification par image affichée au plus (2026-11-20, porteur : frise saccadée).
+      if (!w.__calAway) { w.__calAway = true; let q = false; w.addEventListener('scroll', () => { if (q) return; q = true; requestAnimationFrame(() => { q = false; check(); }); }, { passive: true }); }
       check();
     } catch (e) { /* rien */ }
   };
