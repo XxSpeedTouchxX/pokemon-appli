@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-19T23:13:10Z",
+ "updated": "2026-11-20T11:51:20Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,20 @@
   }
  ],
  "items": [
+  {
+   "title": "Écarlate et Violet : Retour de Lanssorien surpuissant",
+   "url": "https://www.pokebip.com/news/7646/ecarlate-et-violet-retour-de-lanssorien-surpuissant",
+   "date": "2026-11-20T08:35:53Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Distribution d'un Nymphali, de boosters numériques et d'une étude ponctuelle !",
+   "url": "https://www.pokebip.com/news/7593/distribution-dun-nymphali-de-boosters-numeriques-et-dune-etude-ponctuelle",
+   "date": "2026-11-20T08:00:01Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "JCC Pokémon : Nouvelle extension Méga-Évolution – Poings Fluides !",
    "url": "https://www.pokebip.com/news/7645/jcc-pokemon-nouvelle-extension-mega-evolution-poings-fluides",
@@ -159,23 +173,9 @@
    "tcg": false
   },
   {
-   "title": "Pokémon Pocket : Évènement insigne Fusion Double",
-   "url": "https://www.pokebip.com/news/7629/pokemon-pocket-evenement-insigne-fusion-double",
-   "date": "2026-11-06T08:06:11Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
    "title": "[EDIT : Listes envoyées] Secret Santa 12 (Noël 2026) : Offrez un dessin !",
    "url": "https://www.pokebip.com/news/7627/edit-listes-envoyees-secret-santa-12-noel-2026-offrez-un-dessin",
    "date": "2026-11-04T20:10:02Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Distribution d'un Nymphali, de boosters numériques et d'une étude ponctuelle !",
-   "url": "https://www.pokebip.com/news/7593/distribution-dun-nymphali-de-boosters-numeriques-et-dune-etude-ponctuelle",
-   "date": "2026-10-16T16:34:31Z",
    "source": "Pokébip",
    "tcg": false
   }
