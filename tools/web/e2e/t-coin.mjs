@@ -65,7 +65,10 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('barre : 6 boutons, « Le coin des dresseurs » après « Toutes les séries » et avant le scan et « Jeux » (' + labels.join(' | ') + ')',
     labels.length === 6 && labels[1] === 'Toutes les séries' && labels[2] === 'Le coin des dresseurs' && /Scanner/.test(labels[3]));
   const vis = await page.locator(NAV + ' .pkm-coin-ico').evaluateAll(a => a.map(s => getComputedStyle(s).display !== 'none'));
-  ok('logo par défaut : « Dresseurs » (1 sur 8 visible, 5 à 8 proposés le 2026-11-20)', vis.length === 8 && vis[0] && vis.filter(Boolean).length === 1);
+  ok('logo par défaut : « Dresseurs » (1 sur 12 visible, 5 à 12 proposés le 2026-11-20)', vis.length === 12 && vis[0] && vis.filter(Boolean).length === 1);
+  // « Toutes les séries » : la 2 (cartes en éventail, sans marque au milieu), choisie par le porteur le 2026-11-20.
+  const ser = await page.locator(NAV + ' .pkm-ser-ico').evaluateAll(a => a.filter(s => getComputedStyle(s).display !== 'none').map(s => s.getAttribute('class') + '|' + s.querySelectorAll('path').length));
+  ok('icône « Toutes les séries » par défaut : cartes en éventail sans marque (' + ser.join(', ') + ')', ser.length === 1 && /pkm-ser-ico-2\|0$/.test(ser[0]));
   const fits = await page.locator(NAV + ' > button').evaluateAll(b => b.every(x => { const r = x.getBoundingClientRect(); return r.width > 30 && r.right <= window.innerWidth; }));
   ok('barre : tous les boutons dans l’écran', fits);
   // Disposition (2026-11-19) : 2 icônes à gauche, scan au centre au-dessus de la barre et « Le coin des dresseurs » juste

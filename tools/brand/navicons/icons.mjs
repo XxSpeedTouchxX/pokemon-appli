@@ -12,10 +12,12 @@ export const SERIES = [
     hide(id, '<rect x="2.6" y="5.6" width="13.8" height="16.8" rx="3" fill="#000" stroke="none"></rect>')
     + `<rect x="9" y="2.8" width="11.2" height="14.4" rx="2" mask="url(#${id})"></rect><rect x="4" y="7" width="11" height="14" rx="2"></rect>`
     + '<rect x="6.6" y="9.6" width="5.8" height="4.6" rx="0.8"></rect><path d="M6.6 17.2h5.8"></path>') },
+  // Choisie par le porteur le 2026-11-20 (« le 2 mais sans le cœur au milieu, juste les cartes en éventail ») : icône
+  // de l'onglet par défaut.
   { n: 2, name: 'Cartes en éventail', svg: id => svg('pkm-ser-ico pkm-ser-ico-2',
     hide(id, '<rect x="3.6" y="4.6" width="12.8" height="16.8" rx="3" fill="#000" stroke="none" transform="rotate(-10 10 20)"></rect>')
     + `<g mask="url(#${id})"><rect x="9.4" y="3.2" width="10.6" height="14.4" rx="2" transform="rotate(12 14.7 17.6)"></rect></g>`
-    + '<rect x="4.4" y="5.6" width="11.2" height="15" rx="2" transform="rotate(-10 10 20)"></rect><path d="M8.4 11.2l1.5 2.6 1.5-2.6" transform="rotate(-10 10 20)"></path>') },
+    + '<rect x="4.4" y="5.6" width="11.2" height="15" rx="2" transform="rotate(-10 10 20)"></rect>') },
   { n: 3, name: 'Carte pleine devant', svg: id => svg('pkm-ser-ico pkm-ser-ico-3',
     hide(id, '<rect x="2.6" y="5.6" width="13.8" height="16.8" rx="3" fill="#000" stroke="none"></rect>')
     + `<rect x="9" y="2.8" width="11.2" height="14.4" rx="2" mask="url(#${id})"></rect>`
@@ -37,5 +39,23 @@ export const COIN = [
     + '<path d="M4.6 11.4v9.2h14.8v-9.2"></path><rect x="9.4" y="12.6" width="5.2" height="6.6" rx="0.8"></rect>') },
   { n: 8, name: 'Bulle et carte', svg: () => svg('pkm-coin-ico pkm-coin-ico-8',
     '<path d="M5 3.8h14a2.2 2.2 0 0 1 2.2 2.2v9a2.2 2.2 0 0 1-2.2 2.2h-6.6L7.8 21v-3.8H5A2.2 2.2 0 0 1 2.8 15V6A2.2 2.2 0 0 1 5 3.8z"></path>'
-    + '<rect x="9.6" y="6.6" width="4.8" height="6.8" rx="0.8"></rect><path d="M17.4 7.4v2.6M16.1 8.7h2.6" style="stroke-width: 1.5"></path>') }
+    + '<rect x="9.6" y="6.6" width="4.8" height="6.8" rx="0.8"></rect><path d="M17.4 7.4v2.6M16.1 8.7h2.6" style="stroke-width: 1.5"></path>') },
+  // 2ᵉ série (2026-11-20, porteur : « plus axé sur la communauté, on voit des profils de gens, par exemple le 1 mais
+  // sans leur casquette ») : ?coinvis=9 à 12.
+  { n: 9, name: 'Deux dresseurs', svg: () => svg('pkm-coin-ico pkm-coin-ico-9',
+    '<circle cx="9" cy="8.4" r="3.3"></circle><path d="M3.2 20.4v-.6a5 5 0 0 1 5-5h1.6a5 5 0 0 1 5 5v.6"></path>'
+    + '<circle cx="17" cy="7.4" r="2.5"></circle><path d="M16.2 12.6h1.2a4.2 4.2 0 0 1 4.2 4.2v.8"></path>') },
+  { n: 10, name: 'Groupe de dresseurs', svg: () => svg('pkm-coin-ico pkm-coin-ico-10',
+    '<circle cx="12" cy="8.6" r="3"></circle><path d="M6.6 20.4v-.4a4.6 4.6 0 0 1 4.6-4.6h1.6a4.6 4.6 0 0 1 4.6 4.6v.4"></path>'
+    + '<circle cx="5" cy="7.8" r="2.1"></circle><path d="M1.6 16.4v-.2a3.4 3.4 0 0 1 3.4-3.4h1.2"></path>'
+    + '<circle cx="19" cy="7.8" r="2.1"></circle><path d="M22.4 16.4v-.2a3.4 3.4 0 0 0-3.4-3.4h-1.2"></path>') },
+  { n: 11, name: 'Dresseurs qui discutent', svg: () => svg('pkm-coin-ico pkm-coin-ico-11',
+    '<path d="M8.6 2.6h6.8a1.8 1.8 0 0 1 1.8 1.8v2.8a1.8 1.8 0 0 1-1.8 1.8h-2.2L12 10.6 10.8 9h-2.2a1.8 1.8 0 0 1-1.8-1.8V4.4a1.8 1.8 0 0 1 1.8-1.8z"></path>'
+    + '<path d="M9.9 5.8h.01M12 5.8h.01M14.1 5.8h.01"></path>'
+    + '<circle cx="6" cy="13.2" r="2.3"></circle><path d="M2.4 21.2a3.6 3.6 0 0 1 7.2 0"></path>'
+    + '<circle cx="18" cy="13.2" r="2.3"></circle><path d="M14.4 21.2a3.6 3.6 0 0 1 7.2 0"></path>') },
+  { n: 12, name: 'Profils de dresseurs', svg: () => svg('pkm-coin-ico pkm-coin-ico-12',
+    hide('pkm-coin-m12', '<rect x="1.9" y="7.3" width="14.4" height="14.8" rx="3.2" fill="#000" stroke="none"></rect>')
+    + '<g mask="url(#pkm-coin-m12)"><rect x="8.6" y="2.6" width="12.8" height="12.8" rx="2.4"></rect><circle cx="17.6" cy="6.8" r="1.7"></circle><path d="M14.6 12.4a3 3 0 0 1 6 0"></path></g>'
+    + '<rect x="2.8" y="8.2" width="12.6" height="13" rx="2.4"></rect><circle cx="9.1" cy="13" r="2.1"></circle><path d="M5.6 19.4a3.5 3.5 0 0 1 7 0"></path>') }
 ];

@@ -52,15 +52,19 @@ const render = async (html, file) => {
   await p.screenshot({ path: OUT + file, fullPage: true }); await p.close();
 };
 
-const cur = await page.evaluate(() => document.querySelector('nav[aria-label="Navigation principale"] .pkm-ser-ico-0').outerHTML);
-const serCards = [card('0 · Actuelle', 'Pour comparer', cur, await bar('servis=0', 'collection'), true)];
-for (const it of SERIES) serCards.push(card(it.n + ' · ' + it.name, '', it.svg('m' + it.n), await bar('servis=' + it.n, 'collection')));
-await render(page2('Icône « Toutes les séries »', '4 propositions, deux cartes superposées et légèrement décalées. Essai dans l’app : ?servis=1 à 4 (0 = actuelle).', serCards), 'planche-series.png');
+// Planche « Toutes les séries » (1re série, 2026-11-20) : seulement avec l'argument « series » (la 2 est choisie).
+if (process.argv.includes('series')) {
+  const cur = await page.evaluate(() => document.querySelector('nav[aria-label="Navigation principale"] .pkm-ser-ico-0').outerHTML);
+  const serCards = [card('0 · Ancienne', 'Pour comparer', cur, await bar('servis=0', 'collection'), true)];
+  for (const it of SERIES) serCards.push(card(it.n + ' · ' + it.name, '', it.svg('m' + it.n), await bar('servis=' + it.n, 'collection')));
+  await render(page2('Icône « Toutes les séries »', 'La 2 (cartes en éventail) est choisie. Essai dans l’app : ?servis=0 à 4.', serCards), 'planche-series.png');
+}
 
+// « Le coin des dresseurs » : 2ᵉ série de propositions (9 à 12, communauté : profils de dresseurs sans casquette).
 const cur1 = await page.evaluate(() => document.querySelector('nav[aria-label="Navigation principale"] .pkm-coin-ico-1').outerHTML);
 const coinCards = [card('1 · Actuelle (Dresseurs)', 'Pour comparer', cur1, await bar('coinvis=1', 'coin'), true)];
-for (const it of COIN) coinCards.push(card(it.n + ' · ' + it.name, '', it.svg(), await bar('coinvis=' + it.n, 'coin')));
-await render(page2('Icône « Le coin des dresseurs »', '4 nouvelles propositions. Essai dans l’app : ?coinvis=5 à 8 (1 = actuelle ; 2 à 4 : anciennes propositions).', coinCards), 'planche-coin.png');
+for (const it of COIN.filter(c => c.n >= 9)) coinCards.push(card(it.n + ' · ' + it.name, '', it.svg(), await bar('coinvis=' + it.n, 'coin')));
+await render(page2('Icône « Le coin des dresseurs » : la communauté', '4 nouvelles propositions, des profils de dresseurs sans casquette. Essai dans l’app : ?coinvis=9 à 12 (1 = actuelle).', coinCards), 'planche-coin-communaute.png');
 await browser.close();
-writeFileSync(OUT + 'README.md', '# Icônes de la barre du bas (2026-11-20)\n\nPropositions pour « Toutes les séries » (`?servis=1` à `4`) et « Le coin des dresseurs » (`?coinvis=5` à `8`).\nDessins : `icons.mjs` ; planches : `planche-series.png`, `planche-coin.png` (`make_planche.mjs`). Choix du porteur attendu.\n');
+writeFileSync(OUT + 'README.md', '# Icônes de la barre du bas (2026-11-20)\n\n« Toutes les séries » : la 2 (cartes en éventail, sans marque au milieu) est choisie par le porteur ; `?servis=0` à `4` pour comparer (`planche-series.png`, `node make_planche.mjs series`).\n« Le coin des dresseurs » : 1re série `?coinvis=5` à `8` (`planche-coin.png`), 2e série axée sur la communauté `?coinvis=9` à `12` (`planche-coin-communaute.png`). Choix du porteur attendu.\nDessins : `icons.mjs`.\n');
 console.log('planches écrites');

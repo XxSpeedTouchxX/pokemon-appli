@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-20 — Icônes de la barre du bas (porteur)
+
+- **Choix du porteur** : « Toutes les séries » = la proposition 2, « cartes en éventail », **sans la marque au milieu** (« je veux le 2 mais sans le cœur au milieu, juste les cartes en éventail »). Icône par défaut de l'app (cache v258) ; les autres restent pour essai (`?servis=0` ancienne, `1`, `3`, `4`).
+- **« Le coin des dresseurs »** : nouvelles propositions « plus axées sur la communauté, des profils de gens, comme le 1 mais sans leur casquette » : 9 Deux dresseurs, 10 Groupe de dresseurs, 11 Dresseurs qui discutent, 12 Profils de dresseurs (`?coinvis=9` à `12`, planche `tools/brand/navicons/planche-coin-communaute.png`). **Choix du porteur attendu** ; « Dresseurs » (1) en attendant.
+
+---
+
 ## 2026-11-20 — Retrait animé, compteur du classeur, verrous DropiPass, « Recharger mes PA » (porteur)
 
 - **Demandes** (porteur) : « retirer de ma collection » avec l'animation inverse de l'ajout (la carte sort du classeur, le solde descend), sans la page « Modifier l'ajout » ; le décompte des cartes par rapport à ce qu'autorise le grade, à gauche du logo du classeur pour les cartes et à droite pour les produits scellés ; l'emblème du grade en haut qui ouvre la description du grade ; la pré-gradation et le calendrier JCC bloqués comme l'historique du prix (DropiPass, 60 pré-gradations par mois) ; « Recharger mes PA » retiré du PK shop et placé en haut à droite de « Mes PA » ; icônes « Toutes les séries » (deux cartes superposées, légèrement décalées) et « Le coin des dresseurs » plus claires, avec des propositions.

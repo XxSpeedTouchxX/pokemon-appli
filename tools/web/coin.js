@@ -17,9 +17,12 @@
   const COIN_TABS = [['vit', 'Ma vitrine'], ['cal', 'Le calendrier JCC']];
   // Logo de l'onglet : 1 Dresseurs (deux dresseurs à casquette), 2 Échange de cartes, 3 Bulle et ball, 4 Rassemblement.
   // 5 à 8 (2026-11-20, porteur : « propose-moi d'autres visuels, il n'est pas clair ») : 2 dresseurs qui échangent,
-  // casquette, vitrine, bulle et carte (tools/brand/navicons/). Icône « Toutes les séries » : ?servis=1 à 4 (0 = actuelle).
-  const COIN_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('coinvis')); return v >= 1 && v <= 8 ? v : 1; } catch (e) { return 1; } })();
-  const SER_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('servis')); return v >= 1 && v <= 4 ? v : 0; } catch (e) { return 0; } })();
+  // casquette, vitrine, bulle et carte (tools/brand/navicons/). 9 à 12 (2026-11-20, porteur : « plus axé sur la
+  // communauté, des profils de gens, le 1 sans leur casquette ») : deux dresseurs, groupe, discussion, profils.
+  // Icône « Toutes les séries » : la 2 (cartes en éventail, sans marque au milieu) choisie par le porteur le 2026-11-20 ;
+  // ?servis=0 (ancienne), 1, 3 ou 4 pour comparer.
+  const COIN_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('coinvis')); return v >= 1 && v <= 12 ? v : 1; } catch (e) { return 1; } })();
+  const SER_VIS = (() => { try { const q = new URLSearchParams(location.search).get('servis'), v = Number(q); return q !== null && q !== '' && v >= 0 && v <= 4 ? v : 2; } catch (e) { return 2; } })();
   if (typeof document !== 'undefined' && document.documentElement) { document.documentElement.setAttribute('data-coinvis', String(COIN_VIS)); document.documentElement.setAttribute('data-servis', String(SER_VIS)); }
   // Dessin de la barre du bas (2026-11-19, porteur) : 4 propositions (?navvis=1 à 4, navbar.css), « Dôme » par défaut.
   const NAV_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('navvis')); return v >= 1 && v <= 4 ? v : 1; } catch (e) { return 1; } })();
