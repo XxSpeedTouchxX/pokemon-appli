@@ -27,7 +27,9 @@
       if (document.querySelector('.pkm-rotlock') || !document.body) return;
       const el = document.createElement('div');
       el.className = 'pkm-rotlock';
-      el.setAttribute('role', 'alertdialog');
+      // Rôle de fenêtre d'alerte seulement quand le téléphone est tourné (orSet) : caché, le message n'existe pas pour
+      // les lecteurs d'écran ni pour les autres fenêtres de l'app.
+      el.setAttribute('aria-hidden', 'true');
       el.setAttribute('aria-live', 'assertive');
       el.setAttribute('aria-label', 'Dropicards s’utilise à la verticale. Remets ton téléphone droit.');
       el.innerHTML = '<div class="pkm-rotlock-in"><svg class="pkm-rotlock-ph" viewBox="0 0 124 120" aria-hidden="true">'
@@ -43,6 +45,11 @@
       const on = orPhone() && orLand();
       document.documentElement.classList.toggle('pkm-landscape', on);
       if (on) orBox();
+      const el = document.querySelector('.pkm-rotlock');
+      if (el) {
+        if (on) { el.setAttribute('role', 'alertdialog'); el.setAttribute('aria-hidden', 'false'); }
+        else { el.removeAttribute('role'); el.setAttribute('aria-hidden', 'true'); }
+      }
     };
     const orStart = () => { orBox(); orSet(); orLock(); };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', orStart); else orStart();

@@ -16,8 +16,11 @@
   const coinAdmin = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin && Cloud.isAdmin();
   const COIN_TABS = [['vit', 'Ma vitrine'], ['cal', 'Le calendrier JCC']];
   // Logo de l'onglet : 1 Dresseurs (deux dresseurs à casquette), 2 Échange de cartes, 3 Bulle et ball, 4 Rassemblement.
-  const COIN_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('coinvis')); return v >= 1 && v <= 4 ? v : 1; } catch (e) { return 1; } })();
-  if (typeof document !== 'undefined' && document.documentElement) document.documentElement.setAttribute('data-coinvis', String(COIN_VIS));
+  // 5 à 8 (2026-11-20, porteur : « propose-moi d'autres visuels, il n'est pas clair ») : 2 dresseurs qui échangent,
+  // casquette, vitrine, bulle et carte (tools/brand/navicons/). Icône « Toutes les séries » : ?servis=1 à 4 (0 = actuelle).
+  const COIN_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('coinvis')); return v >= 1 && v <= 8 ? v : 1; } catch (e) { return 1; } })();
+  const SER_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('servis')); return v >= 1 && v <= 4 ? v : 0; } catch (e) { return 0; } })();
+  if (typeof document !== 'undefined' && document.documentElement) { document.documentElement.setAttribute('data-coinvis', String(COIN_VIS)); document.documentElement.setAttribute('data-servis', String(SER_VIS)); }
   // Dessin de la barre du bas (2026-11-19, porteur) : 4 propositions (?navvis=1 à 4, navbar.css), « Dôme » par défaut.
   const NAV_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('navvis')); return v >= 1 && v <= 4 ? v : 1; } catch (e) { return 1; } })();
   if (typeof document !== 'undefined' && document.documentElement) document.documentElement.setAttribute('data-navvis', String(NAV_VIS));
@@ -541,6 +544,17 @@
       r.cv = tab === 'vit' ? this.vCoinVit(s) : { found: [], recent: [] };
       if (tab === 'vit' && typeof this.vTradeTab === 'function') r.tdx = this.vTradeTab(s);
       r.cal = tab === 'cal' ? this.vCal(s) : { months: [], blocs: [], sel: [] };
+      // Calendrier réservé au DropiPass (2026-11-20, porteur : « bloque-le comme l'historique du prix, pour que
+      // l'utilisateur ne puisse pas l'utiliser sans avoir pris le DropiPass ») : frise floutée sous un voile, un appui
+      // ouvre « Accès verrouillé ». Ouvert aux admins.
+      if (tab === 'cal') {
+        const store = typeof storeApp !== 'undefined' && !!storeApp;
+        const locked = !(typeof this.premOn === 'function' && this.premOn()) && !(typeof admOf === 'function' && admOf(s).on);
+        Object.assign(r.cal, { locked: locked, heroCls: 'pkm-cal-hero pkm-dark' + (locked ? ' pkm-cal-locked' : ''), unlock: () => this.dpLock('cal'),
+          lockSub: store ? 'Bientôt disponible dans cette version' : 'Réservé au DropiPass', lockBtn: store ? 'En savoir plus' : 'Débloquer',
+          lockAria: store ? 'Le calendrier JCC : bientôt disponible' : 'Le calendrier JCC réservé au DropiPass : en savoir plus' });
+        if (locked) r.cal.hasSel = false;
+      }
     } else {
       this.__coinOnce = false;
       r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], blocs: [], sel: [] };

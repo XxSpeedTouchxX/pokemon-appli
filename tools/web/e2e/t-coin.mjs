@@ -18,6 +18,8 @@ const setup = async (S, o) => {
   o = o || {};
   const ctx = await browser.newContext({ viewport: { width: o.w || 390, height: 844 }, deviceScaleFactor: 2 });
   await ctx.route(ABORT, r => r.abort());
+  // Calendrier JCC réservé au DropiPass (2026-11-20) : abonnement simulé (premForced, test seulement).
+  await ctx.addInitScript(() => { try { localStorage.setItem('pkm-premium-force', '1'); } catch (e) { /* rien */ } });
   await ctx.route(FAKE + '/**', route => {
     const req = route.request(), p = new URL(req.url()).pathname, send = (st, j) => route.fulfill({ status: st, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(j) });
     const fn = p.replace('/rest/v1/rpc/', ''), body = JSON.parse(req.postData() || '{}');
@@ -63,7 +65,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('barre : 6 boutons, « Le coin des dresseurs » après « Toutes les séries » et avant le scan et « Jeux » (' + labels.join(' | ') + ')',
     labels.length === 6 && labels[1] === 'Toutes les séries' && labels[2] === 'Le coin des dresseurs' && /Scanner/.test(labels[3]));
   const vis = await page.locator(NAV + ' .pkm-coin-ico').evaluateAll(a => a.map(s => getComputedStyle(s).display !== 'none'));
-  ok('logo par défaut : « Dresseurs » (1 sur 4 visible)', vis.length === 4 && vis[0] && vis.filter(Boolean).length === 1);
+  ok('logo par défaut : « Dresseurs » (1 sur 8 visible, 5 à 8 proposés le 2026-11-20)', vis.length === 8 && vis[0] && vis.filter(Boolean).length === 1);
   const fits = await page.locator(NAV + ' > button').evaluateAll(b => b.every(x => { const r = x.getBoundingClientRect(); return r.width > 30 && r.right <= window.innerWidth; }));
   ok('barre : tous les boutons dans l’écran', fits);
   // Disposition (2026-11-19) : 2 icônes à gauche, scan au centre au-dessus de la barre et « Le coin des dresseurs » juste

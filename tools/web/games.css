@@ -1988,9 +1988,20 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 /* Montant écrit comme « Valeur de toute ma collection » (2026-11-15, porteur) : Sora 700, blanc, contour noir (.pkm-strict-text). */
 .pkm-afx-total b { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; color: #FFFFFF; font-variant-numeric: tabular-nums; padding: 0.02em 0.1em 0.08em 0.04em; }
 @keyframes pkmAfxText { 0%, 44% { opacity: 0; transform: translateY(8px); } 54%, 100% { opacity: 1; transform: none; } }
+/* Retrait (2026-11-20, porteur : « l'animation inverse : la carte sort du classeur avec le solde qui descend ») : le classeur
+   s'ouvre en rebondissant, la carte en sort en grandissant puis s'envole ; « −X € » en rouge, la valeur descend.
+   « Annuler » reste touchable (le reste de l'écran aussi). */
+.pkm-afx-out .pkm-afx-binder { animation-name: pkmAfxBinderOut; }
+@keyframes pkmAfxBinderOut { 0% { opacity: 0; transform: scale(0.4) translateY(30px); } 12% { opacity: 1; transform: scale(1); } 15% { transform: scale(1.16, 0.88); } 20% { transform: scale(0.95, 1.07); } 26%, 100% { opacity: 1; transform: scale(1); } }
+.pkm-afx-out .pkm-afx-item { animation-name: pkmAfxFlyOut; animation-timing-function: cubic-bezier(0.3, 0.7, 0.4, 1); }
+@keyframes pkmAfxFlyOut { 0%, 15% { opacity: 0; transform: translateY(156px) scale(0.12) rotate(12deg); } 18% { opacity: 1; transform: translateY(150px) scale(0.24) rotate(10deg); } 34% { opacity: 1; transform: translateY(-10px) scale(1.04) rotate(-2deg); } 42% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); } 52% { opacity: 0; transform: translateY(-70px) scale(0.86) rotate(-9deg); } 100% { opacity: 0; transform: translateY(-70px) scale(0.86) rotate(-9deg); } }
+.pkm-afx-out .pkm-afx-sparks i { animation-name: pkmAfxSparkOut; }
+@keyframes pkmAfxSparkOut { 0%, 14% { opacity: 0; transform: rotate(var(--a)) translateY(0) scale(0.6); } 18% { opacity: 1; } 34% { opacity: 0; transform: rotate(var(--a)) translateY(-92px) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-92px); } }
+.pkm-afx-out .pkm-afx-gain { color: #FF6B6B; }
+.pkm-afx-undo { position: absolute; left: 0; right: 0; top: 376px; width: max-content; margin: 0 auto; min-height: 44px; padding: 0 22px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; background: rgba(11, 17, 32, 0.82); color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; pointer-events: auto; opacity: 0; animation: pkmAfxText 3.3s ease forwards; }
 @media (prefers-reduced-motion: reduce) {
   .pkm-afx-item, .pkm-afx-sparks { display: none; }
-  .pkm-afx-binder { animation-name: pkmAfxVeil; transform: none; }
+  .pkm-afx-binder, .pkm-afx-out .pkm-afx-binder { animation-name: pkmAfxVeil; transform: none; }
   .pkm-afx-gain, .pkm-afx-what, .pkm-afx-total { animation-name: pkmAfxVeil; transform: none; }
 }
 
@@ -2026,3 +2037,33 @@ html, body { touch-action: pan-x pan-y; }
 .pkm-tks-redo > b { align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #FFB27A; color: #1A1206; font-size: 15px; font-weight: 800; }
 /* Bulle « COMPLET » de l'historique sans DropiPass : petit cadenas (2026-11-15). */
 .pkm-fh-lock { margin-left: 4px; vertical-align: -1px; }
+
+/* Compteur de places du classeur (2026-11-20, porteur) : cartes à gauche du logo, produits scellés à droite ; nombre
+   possédé / maximum du grade, barre de remplissage (orange dès 80 %, rouge quand c'est plein), places restantes.
+   Un appui ouvre la fiche du grade actuel (avantages, dont la taille du classeur). */
+.pkm-bdc-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; }
+.pkm-bdc-logo { display: block; width: 132px; height: auto; }
+.pkm-bdc { min-width: 0; min-height: 44px; padding: 6px 4px; border: 0; background: transparent; color: var(--pkm-t1, #F3F6FC); font: inherit; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pkm-bdc .pkm-bdc-l { font-size: 12px; font-weight: 600; color: #C9D3EA; }
+.pkm-bdc b { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; color: #FFFFFF; }
+.pkm-bdc > i { display: block; width: 100%; max-width: 76px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.pkm-bdc > i > i { display: block; height: 100%; border-radius: 3px; background: #3DDC84; transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.pkm-bdc small { font-size: 11.5px; font-weight: 700; color: #9AA8C3; white-space: nowrap; }
+.pkm-bdc-warn > i > i { background: #FFA53D; }
+.pkm-bdc-warn small { color: #FFC266; }
+.pkm-bdc-full > i > i { background: #FF5A5A; }
+.pkm-bdc-full small { color: #FF7B7B; }
+.pkm-bdc-unl > i > i { background: linear-gradient(90deg, #FFD60A, #3DDC84); }
+.pkm-bdc-unl small { color: #FFD60A; }
+.pkm-bdc:active { transform: scale(0.96); }
+/* Emblème du grade de l'en-tête : touchable (fiche du grade), zone d'appui agrandie sans bouger le dessin. */
+.pkm-hh-gbtn { position: relative; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+.pkm-hh-gbtn::before { content: ''; position: absolute; inset: -4px; }
+.pkm-hh-gbtn img { display: block; width: 100%; height: 100%; }
+.pkm-hh-gbtn:active { transform: scale(0.92); }
+
+/* Verrou DropiPass sur toute une rubrique (2026-11-20, porteur : pré-gradation de l'accueil et calendrier JCC, « comme
+   l'historique du prix ») : contenu flouté et intouchable, voile « Réservé au DropiPass » par-dessus (pkm-fh-veil). */
+.pkm-lockable, .pkm-cal-locked { position: relative; }
+.pkm-lockable > :not(.pkm-lock-veil), .pkm-cal-locked > :not(.pkm-lock-veil) { filter: blur(6px); opacity: 0.75; pointer-events: none; user-select: none; -webkit-user-select: none; }
+.pkm-lock-veil { top: 0; border-radius: inherit; }

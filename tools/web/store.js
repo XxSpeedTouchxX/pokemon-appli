@@ -26,6 +26,7 @@
       const r = stBase.call(this);
       // PK shop : seulement le Magasin (articles payés en PK gagnés gratuitement), jamais les packs de PA.
       if (r.pks && r.pks.isPa !== undefined) Object.assign(r.pks, { isStore: true, isPa: false, goPa: r.pks.goStore || (() => {}), ask: { open: false } });
+      if (r.pas && r.pas.open) r.pas = { open: false, ask: { open: false }, packs: [] };
       if (r.lockw && r.lockw.open) { r.lockw.prem = false; r.lockw.soon = false; }
       if (r.prem) r.prem.open = false;
       return r;
@@ -52,6 +53,7 @@
     try { document.documentElement.classList.toggle('pkm-nobuy', lock && !prem); document.documentElement.classList.toggle('pkm-nobuy-pa', lock); } catch (e) { /* page sans racine */ }
     if (lock) {
       if (r.pks && r.pks.isPa !== undefined) Object.assign(r.pks, { isStore: true, isPa: false, goPa: r.pks.goStore || (() => {}), ask: { open: false } });
+      if (r.pas && r.pas.open) r.pas = { open: false, ask: { open: false }, packs: [] };
       if (!prem) {
         // Fenêtre « Accès verrouillé » (2026-11-15) : sans bouton, mais l'avantage du DropiPass reste annoncé.
         if (r.lockw && r.lockw.open) { r.lockw.soon = r.lockw.prem && !storeApp; r.lockw.prem = false; }

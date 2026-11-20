@@ -121,6 +121,7 @@
     scan: 'Ou prends le DropiPass : tes scans sont illimités, tous les jours.',
     binder: 'Ou prends le DropiPass : ton classeur devient illimité.',
     pg: 'Avec le DropiPass, tu as 60 pré-gradations par mois.',
+    cal: 'Avec le DropiPass, tu as tout le calendrier JCC et ses rappels.',
     hist: 'Avec le DropiPass, tu vois toute l’évolution du prix de chaque carte.'
   };
   // Achats fermés aux joueurs (store.js, NOBUY_ON) : pas de bouton, mais la même information.
@@ -129,6 +130,7 @@
     scan: 'Le DropiPass arrive très bientôt : tes scans y seront illimités.',
     binder: 'Le DropiPass arrive très bientôt : ton classeur y sera illimité.',
     pg: 'Le DropiPass arrive très bientôt : 60 pré-gradations par mois y seront incluses.',
+    cal: 'Le DropiPass arrive très bientôt : le calendrier JCC y sera inclus.',
     hist: 'Le DropiPass arrive très bientôt : l’historique du prix y sera inclus.'
   };
   shopProto.dpLock = function (kind, extra) { this.setState({ shopLock: Object.assign({ g: -1, kind: kind }, extra || {}), toast: null }); };
@@ -136,7 +138,10 @@
   const shopLockText = lk => {
     const g = lk.g >= 0 ? shopGradeName(lk.g) : '', store = typeof storeApp !== 'undefined' && storeApp;
     if (lk.kind === 'scan') return 'Tes ' + lk.n + ' scans du jour sont utilisés.' + (lk.g >= 0 ? ' Atteins le grade « ' + g + ' » pour avoir ' + lk.next + ' scans par jour.' : ' Reviens demain.');
-    if (lk.kind === 'pg') return 'Ta pré-gradation gratuite est déjà utilisée : la prochaine arrive dans ' + lk.wait + ' (1 tous les 3 jours).';
+    if (lk.kind === 'pg') return store ? 'La pré-gradation n’est pas encore disponible dans cette version.'
+      : 'La pré-gradation est réservée au DropiPass : centrage, coins, bords et surface de ta carte analysés, et la note qu’elle pourrait obtenir.';
+    if (lk.kind === 'cal') return store ? 'Le calendrier JCC n’est pas encore disponible dans cette version.'
+      : 'Le calendrier JCC est réservé au DropiPass : toutes les sorties, de l’Édition 1 aux prochaines extensions, et les rappels « Préviens-moi ».';
     if (lk.kind === 'hist') return store ? 'L’historique du prix n’est pas encore disponible dans cette version.'
       : 'L’historique du prix est réservé au DropiPass : l’évolution de la cote sur 1 semaine, 1 mois et depuis le début.';
     if (lk.kind === 'radar') return 'Tu ne peux pas accéder au Radar tant que tu n’as pas atteint le grade « ' + g + ' ».';
@@ -163,6 +168,30 @@
     if (have + (qty || 1) <= lim) return null;
     const to = PF_GRADES.findIndex((x, i) => i > gi && (!x.cards || (sealed ? x.sealed : x.cards) >= have + (qty || 1)));
     return { g: to < 0 ? PF_GRADES.length - 1 : to, cur: gi, kind: 'binder', lim: lim, what: sealed ? 'items scellés' : 'cartes' };
+  };
+  // Compteur de places du classeur (2026-11-20, porteur : « le décompte des cartes que l'on a actuellement par rapport à ce
+  // qui est autorisé en fonction de notre grade, à gauche du logo classeur pour les cartes et à droite pour les produits
+  // scellés : l'utilisateur sait combien il lui reste de place avant d'être bloqué jusqu'au prochain grade »).
+  // Illimité dès Maître Pokémon, avec le DropiPass et pour un admin déverrouillé. Orange à 80 %, rouge quand c'est plein.
+  shopProto.binderCap = function (s) {
+    const gi = this.shopGrade(), g = PF_GRADES[gi], n = this.binderCounts(s);
+    const unl = !g || !g.cards || (typeof this.premOn === 'function' && this.premOn());
+    const one = (have, lim, what, label) => {
+      const left = unl ? 0 : Math.max(0, lim - have), full = !unl && have >= lim, pct = unl ? 100 : Math.min(100, Math.round(have / lim * 100));
+      const sub = unl ? 'Illimité' : full ? 'Plein' : left + (left > 1 ? ' places' : ' place');
+      return { label: label, num: unl ? pfNum(have) : pfNum(have) + '/' + pfNum(lim), sub: sub, bar: 'width: ' + pct + '%',
+        cls: 'pkm-bdc' + (unl ? ' pkm-bdc-unl' : full ? ' pkm-bdc-full' : pct >= 80 ? ' pkm-bdc-warn' : ''),
+        aria: unl ? pfNum(have) + ' ' + what + ' dans ton classeur, places illimitées'
+          : pfNum(have) + ' ' + what + ' sur ' + pfNum(lim) + ' autorisées au grade ' + shopGradeName(gi) + (full ? ' : classeur plein' : ' : encore ' + sub),
+        open: () => this.push('grade', { gradeIx: gi }) };
+    };
+    return { cards: one(n.cards, g && g.cards, 'cartes', 'Cartes'), sealed: one(n.sealed, g && g.sealed, 'produits scellés', 'Scellés') };
+  };
+  const shopBaseHomeBinder = shopProto.homeBinder;
+  shopProto.homeBinder = function (x) {
+    const r = shopBaseHomeBinder.call(this, x);
+    r.cap = this.binderCap(x.s);
+    return r;
   };
   const shopBaseRecord = shopProto.addRecord;
   shopProto.addRecord = function (s, pid, qty, price, where, by) {
@@ -391,6 +420,12 @@
     setTimeout(poll, 1200);
   };
   const shopNum = n => Number(n).toLocaleString('fr-FR').replace(/\s/g, '\u00a0');
+  // Ouvre « Recharger mes PA » depuis « Mes PA » (relit sur le serveur si la 1ʳᵉ recharge est encore doublée).
+  shopProto.paStoreOpen = function () {
+    if (typeof this.buyLocked === 'function' && this.buyLocked()) return;
+    this.setState({ paStore: true, paSheet: false, shopPaAsk: null, paErr: '' });
+    this.paShopSync();
+  };
   const shopTabs = (self, s) => {
     const onPa = s.shopTab === 'pa', pa = Number(s.pa) || 0, first = s.paShop ? !!s.paShop.first : !s.paBought;
     const live = typeof Cloud !== 'undefined' && Cloud.on();
@@ -399,7 +434,7 @@
     return {
       isStore: !onPa, isPa: onPa, storeOn: String(!onPa), paOn: String(onPa),
       storeCls: 'pkm-shop-tab' + (onPa ? '' : ' pkm-shop-tab-on'), paCls: 'pkm-shop-tab' + (onPa ? ' pkm-shop-tab-on' : ''),
-      goStore: () => self.setState({ shopTab: 'store', shopPaAsk: null }), goPa: () => { self.setState({ shopTab: 'pa', shopAsk: null }); self.paShopSync(); },
+      goStore: () => self.setState({ shopTab: 'store', shopPaAsk: null }), goPa: () => self.paStoreOpen(),
       paLogo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg', paBal: shopNum(pa), paTotal: shopNum(tot),
       packs: SHOP_PA_PACKS.map((k, i) => ({
         qty: shopNum(k.pa), price: k.eur, hasGift: !!k.gift, noGift: !k.gift, base: shopNum(k.base), gift: '+ ' + shopNum(k.gift) + ' offerts',
@@ -580,8 +615,9 @@
           buy: () => { if (it.choices && !choice) return; this.shopBuy(it.id, choice || undefined); }
         };
       }),
-      // Rubriques (2026-11-01, porteur) : « Magasin » (les articles) et « Recharger mes PA » (packs de PA en argent réel).
-      ...shopTabs(this, s),
+      // « Recharger mes PA » n'est plus une rubrique du PK shop (2026-11-20, porteur : « qu'elle disparaisse complètement
+      // de l'onglet PK shop et qu'elle apparaisse quand l'utilisateur clique sur son solde de PA ») : page à part (r.pas).
+      ...shopTabs(this, Object.assign({}, s, { shopTab: 'store', shopPaAsk: null })),
       rules: 'Participation gratuite : les PK se gagnent sans achat et n’ont aucune valeur en euros. Un tirage au sort par mois pour chaque ticket, le 1er à 20 h, avec une carte à gagner (Bronze : ultra rare ; Argent : AR ; Or : ALT), un ticket de chaque catégorie par mois, fait par l’équipe Dropicards selon un règlement publié avant le premier tirage ; le gagnant est prévenu par e-mail. Achats directs en quantité limitée, réassort le 1er de chaque mois à 20 h, un par compte et par mois. Tickets et achats ouverts 7 jours après la confirmation de ton adresse ; pièce d’identité vérifiée avant tout envoi. Google et Apple ne sont ni organisateurs, ni partenaires, ni sponsors de ces tirages.',
       openRules: () => this.legalOpen('pk')
     };
@@ -602,6 +638,10 @@
     if (!paBack) setTimeout(() => this.paReturn(), 0); // retour de Stripe (?pa=), quel que soit l'écran ouvert
     ui.isPkShop = s.screen === 'pkshop';
     r.pks = ui.isPkShop ? this.vPkShop(s) : { items: [] }; // « shop » est déjà la fiche d'une boutique
+    // Page « Recharger mes PA », ouverte par le bouton en haut à droite de « Mes PA » (2026-11-20, porteur) ; la flèche
+    // ramène à « Mes PA ».
+    r.pas = s.paStore ? Object.assign(shopTabs(this, Object.assign({}, s, { shopTab: 'pa' })), { open: true,
+      back: () => { if (!s.paBusy) this.setState({ paStore: false, shopPaAsk: null, paErr: '', paSheet: true }); } }) : { open: false, ask: { open: false }, packs: [] };
     if (ui.isPkShop) Object.assign(ui, { title: 'PK shop', subtitle: 'Dépense tes PK', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
     // Territoire n'est plus un onglet : écran de détail ouvert depuis l'accueil, avec Retour.
     if (ui.isTerritory) Object.assign(ui, { headerBig: false, headerDetail: true });
@@ -612,7 +652,7 @@
     r.tkz = tz ? { open: true, img: tz.img || '', name: tz.name || '', info: tz.info || '', close: () => this.setState({ tkZoom: null }) } : { open: false };
     const lk = s.shopLock;
     if (typeof window !== 'undefined' && window.__pkmLockGuardSet) window.__pkmLockGuardSet(!!lk);
-    const hasG = !!lk && lk.g >= 0, dpOnly = { pg: 'img/brand/pregrade.svg', hist: 'img/brand/historique.svg' };
+    const hasG = !!lk && lk.g >= 0, dpOnly = { pg: 'img/brand/pregrade.svg', hist: 'img/brand/historique.svg', cal: 'img/brand/calendrier.svg' };
     r.lockw = lk ? {
       open: true, hasGrade: hasG, grade: hasG ? shopGradeName(lk.g) : '', text: shopLockText(lk),
       img: hasG ? 'img/grades/grade-' + (lk.g + 1) + '.svg' : lk.icon || dpOnly[lk.kind] || 'img/grades/grade-' + (this.shopGrade() + 1) + '.svg',

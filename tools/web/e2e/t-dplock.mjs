@@ -36,15 +36,27 @@ const close = async page => { await page.locator(LW + ' button:has-text("Compris
   ok('scans épuisés mais 20 scans bonus : le scanner s’ouvre, sans fenêtre', (await page.evaluate(() => window.__pkm.st().screen)) === 'scan' && !(await page.locator(LW).isVisible()));
   await page.evaluate(() => { window.__pkm.setState({ scanBonus: 0 }); window.__pkm.pop(); }); await page.waitForTimeout(600);
 
-  // 2. Pré-gradation gratuite déjà utilisée (1 tous les 3 jours).
-  await page.evaluate(() => window.__pkm.setState({ pgLast: Date.now() - 3600e3 }));
+  // 2. Pré-gradation réservée au DropiPass (2026-11-20, porteur : plus de pré-gradation gratuite).
   await page.evaluate(() => window.__pkm.pgStart()); await page.waitForTimeout(500);
   t = await lockText(page);
-  ok('pré-gradation utilisée : fenêtre (« ' + t.slice(0, 160) + ' »)', /Ta pré-gradation gratuite est déjà utilisée : la prochaine arrive dans 2 j 23 h/.test(t)
+  ok('pré-gradation sans DropiPass : fenêtre (« ' + t.slice(0, 160) + ' »)', /La pré-gradation est réservée au DropiPass/.test(t)
     && /Avec le DropiPass, tu as 60 pré-gradations par mois/.test(t) && /Découvrir le DropiPass/.test(t) && !/Voir le grade/.test(t) && !/Condition/.test(t)
     && (await page.locator(LW + ' img[src="img/brand/pregrade.svg"]').count()) === 1);
   await page.screenshot({ path: shot('dplock-pg.png') });
   await close(page);
+  // 2 bis. Calendrier JCC réservé au DropiPass (2026-11-20, porteur) : frise floutée, voile, même fenêtre.
+  await page.evaluate(() => window.__pkm.setState({ screen: 'coin', stack: [], coinTab: 'cal' })); await page.waitForTimeout(1500);
+  const calVeil = page.locator('section[aria-label="Frise du JCC Pokémon"] .pkm-lock-veil');
+  ok('calendrier sans DropiPass : voile « Réservé au DropiPass »', (await calVeil.count()) === 1 && /Réservé au DropiPass/.test(await calVeil.innerText()));
+  ok('calendrier : frise floutée', /blur/.test(await page.locator('section[aria-label="Frise du JCC Pokémon"] .pkm-cal-strip').evaluate(e => getComputedStyle(e).filter).catch(() => '')));
+  await page.screenshot({ path: shot('dplock-cal-veil.png') });
+  await calVeil.click(); await page.waitForTimeout(500);
+  t = await lockText(page);
+  ok('calendrier : fenêtre (« ' + t.slice(0, 140) + ' »)', /Le calendrier JCC est réservé au DropiPass/.test(t) && /Avec le DropiPass, tu as tout le calendrier JCC/.test(t)
+    && (await page.locator(LW + ' img[src="img/brand/calendrier.svg"]').count()) === 1);
+  await page.screenshot({ path: shot('dplock-cal.png') });
+  await close(page);
+  await page.evaluate(() => window.__pkm.setState({ screen: 'home', stack: [] })); await page.waitForTimeout(600);
 
   // 3. Classeur plein au grade Recrue (9 items scellés) : grade suivant + DropiPass.
   const room = await page.evaluate(() => { const i = window.__pkm, s = i.st(), p = i.catalog().find(x => x.type === 'sealed'); const r = i.binderRoom(s, p.id, 500); if (r) i.setState({ shopLock: r }); return !!r; });
@@ -76,6 +88,9 @@ const close = async page => { await page.locator(LW + ' button:has-text("Compris
   ok('DropiPass : 60 pré-gradations par mois (' + pg.text + ')', pg.mode === 'premium' && pg.left > 0);
   ok('DropiPass : classeur sans limite', await page.evaluate(() => { const i = window.__pkm, p = i.catalog().find(x => x.type === 'sealed'); return i.binderRoom(i.st(), p.id, 500) === null; }));
   ok('DropiPass : Radar ouvert', await page.evaluate(() => window.__pkm.radarLockMin() === -1));
+  await page.evaluate(() => window.__pkm.setState({ screen: 'coin', stack: [], coinTab: 'cal' })); await page.waitForTimeout(1500);
+  ok('DropiPass : calendrier JCC sans voile', (await page.locator('section[aria-label="Frise du JCC Pokémon"]').count()) === 1 && (await page.locator('section[aria-label="Frise du JCC Pokémon"] .pkm-lock-veil').count()) === 0);
+  await page.evaluate(() => window.__pkm.setState({ screen: 'home', stack: [] })); await page.waitForTimeout(500);
   await ctx.close();
 }
 console.log(res.join('\n'));

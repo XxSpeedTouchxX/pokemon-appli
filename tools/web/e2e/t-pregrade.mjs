@@ -5,10 +5,11 @@
 // 2. Ouverture avec le glissement des pages ; vue unique (caméra, 4 bulles, déclencheur à l'appareil photo) ; recto puis
 //    verso importés (photo figée, « Reprendre la photo » si refusée) ; analyse animée étape par étape ; note, 4 critères,
 //    notes PSA/PCA/CCC, « ça vaut le coup ? » avec les grilles tarifaires PSA, PCA et CCC (2026-11-14, porteur).
-// 3. Compteur gratuit : 1 tous les 3 jours (attente affichée ensuite, accueil compris).
+// 3. Sans DropiPass (2026-11-20, porteur) : rubrique floutée « Réservé au DropiPass », fenêtre « Accès verrouillé » ;
+//    avec le DropiPass : 60 par mois (59 après une analyse ; à 0, l'écran s'ouvre sur l'attente).
 // 4. Carte cherchée à la main, ajout à la collection avec l'état estimé, vraie note, « Mes pré-gradations ».
 // 5. Photo sans carte : refus expliqué, compteur intact.
-// 6. Premium : 60 par mois (59 après une analyse) ; app des stores : pas de mention de Premium.
+// 6. App des stores sans DropiPass : « bientôt disponible », jamais de mention du DropiPass.
 process.env.E2E_GRADE = '0';
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 import fs from 'node:fs';
@@ -95,8 +96,24 @@ ok('accueil : logo de la loupe (L1)', await page.locator('section[aria-label="Pr
 const order = await page.evaluate(() => { const a = [...document.querySelectorAll('section[aria-label]')].map(e => e.getAttribute('aria-label')); return [a.indexOf('Boutiques près de toi'), a.indexOf('Pré-gradation')]; });
 ok('accueil : la rubrique est sous les boutiques (' + order.join(' < ') + ')', order[0] >= 0 && order[1] === order[0] + 1);
 const homeTxt = await home.innerText().catch(() => '');
-ok('accueil : compteur « 1 pré-gradation disponible »', /1 pré-gradation disponible/.test(homeTxt));
-ok('accueil : rythme et offre Premium « 1 tous les 3 jours · 60 par mois avec le DropiPass »', /1 tous les 3 jours · 60 par mois avec le DropiPass/.test(homeTxt));
+ok('sans DropiPass : voile « Réservé au DropiPass » sur la rubrique', /Réservé au DropiPass/.test(homeTxt) && await home.locator('.pkm-lock-veil').count() === 1);
+ok('sans DropiPass : contenu flouté', /blur/.test(await home.locator('.pkm-pgh-top').evaluate(e => getComputedStyle(e.parentElement.querySelector('.pkm-pgh-top')).filter).catch(() => '')));
+await home.screenshot({ path: shot('pregrade-home-lock.png') }).catch(() => {});
+await home.locator('.pkm-lock-veil').click(); await page.waitForTimeout(500);
+const lw = await page.locator('section[aria-label="Accès verrouillé"], .pkm-lockw').first().innerText().catch(() => '');
+ok('voile touché : « Accès verrouillé » (« ' + lw.replace(/\s+/g, ' ').slice(0, 90) + '… »)', /réservée au DropiPass/.test(lw) && /60 pré-gradations par mois/.test(lw) && (await st()).screen === 'home');
+await page.evaluate(() => window.__pkm.setState({ shopLock: null })); await page.waitForTimeout(300);
+await page.evaluate(() => window.__pkm.pgOpen()); await page.waitForTimeout(400);
+ok('sans DropiPass : la pré-gradation ne s’ouvre pas', (await st()).screen === 'home');
+await page.evaluate(() => window.__pkm.setState({ shopLock: null })); await page.waitForTimeout(300);
+// Avec le DropiPass : 60 par mois.
+S.premium = true;
+await page.goto(E2E + '/?start=home&debug' + Q, { waitUntil: 'load' });
+await page.waitForFunction(() => window.__pkm && window.__pkm.premOn && window.__pkm.premOn(), null, { timeout: 15000 }).catch(() => {});
+await page.waitForTimeout(1000);
+await home.scrollIntoViewIfNeeded().catch(() => {});
+const homeTxtP = await home.innerText().catch(() => '');
+ok('DropiPass : rubrique sans voile, « 60 pré-gradations restantes ce mois-ci (sur 60) »', await home.locator('.pkm-lock-veil').count() === 0 && /60 pré-gradations restantes ce mois-ci \(sur 60\)/.test(homeTxtP));
 await home.screenshot({ path: shot('pregrade-home.png') }).catch(() => {});
 
 // 2. Recto puis verso.
@@ -104,7 +121,7 @@ const slid = await page.evaluate(() => { document.querySelector('section[aria-la
 ok('ouverture avec le glissement des pages (copie de l’accueil qui recule)', slid);
 await page.waitForTimeout(600);
 ok('« Pré-grader une carte » ouvre l’écran au recto', await waitStep('front', 5000) && (await st()).screen === 'pregrade');
-ok('écran : compteur en haut', /1 pré-gradation disponible/.test(await txt('.pkm-pgd-counter')));
+ok('écran : compteur en haut', /60 pré-gradations restantes/.test(await txt('.pkm-pgd-counter')));
 ok('écran : 4 bulles de vérification dans la vue de la caméra', await page.locator('.pkm-pgd-cam .pkm-pgd-ck').count() === 4);
 ok('déclencheur avec le logo de l’appareil photo', await page.locator('.pkm-pgd-shutter svg').count() === 1 && /Prendre la photo du recto/.test(await page.locator('.pkm-pgd-shutter').getAttribute('aria-label')));
 const navHidden = await page.evaluate(() => { const n = document.querySelector('nav[aria-label="Navigation principale"]'); return !n || getComputedStyle(n).display === 'none'; });
@@ -151,9 +168,9 @@ ok('repères sur la photo : recto et verso', await page.locator('section[aria-la
 ok('4 coins agrandis', await page.locator('.pkm-pgd-zoom').count() === 4);
 ok('mention « pas une gradation officielle »', /pas une gradation officielle/.test(await txt('.pkm-pgd-legal')));
 
-// 3. Compteur gratuit consommé.
-ok('compteur : « Prochaine pré-gradation dans 3 j … »', /Prochaine pré-gradation dans (3 j|2 j 23 h)/.test(await txt('.pkm-pgd-counter')));
-ok('date de la dernière pré-gradation enregistrée', s1.pgLast > 0);
+// 3. Compteur du DropiPass consommé.
+ok('compteur : « 59 pré-gradations restantes »', /59 pré-gradations restantes/.test(await txt('.pkm-pgd-counter')));
+ok('mois et nombre enregistrés', /^\d{4}-\d{2}$/.test(s1.pgMonth || '') && s1.pgUsed === 1 && s1.pgLast > 0);
 
 // 4. Carte cherchée à la main, ajout, vraie note.
 const unknown = await vis('section[aria-label="C’est laquelle ?"]');
@@ -208,8 +225,9 @@ ok('liste : vraie note affichée', /Vraie note : PSA 9/.test(await txt('.pkm-pgd
 // Retour à l'accueil : compteur d'attente, dernière pré-gradation.
 await page.evaluate(() => window.__pkm.setState({ screen: 'home', stack: [] })); await page.waitForTimeout(500);
 const homeTxt2 = await page.locator('section[aria-label="Pré-gradation"]').innerText().catch(() => '');
-ok('accueil : attente affichée et dernière pré-gradation', /Prochaine pré-gradation dans/.test(homeTxt2) && /probable/.test(homeTxt2));
-// Sans pré-gradation disponible : l'écran s'ouvre sur l'explication, pas sur la caméra.
+ok('accueil : compteur et dernière pré-gradation', /59 pré-gradations restantes/.test(homeTxt2) && /probable/.test(homeTxt2));
+// Plus de pré-gradation ce mois-ci : l'écran s'ouvre sur l'explication, pas sur la caméra.
+await page.evaluate(() => window.__pkm.setState({ pgUsed: 60 })); await page.waitForTimeout(300);
 await page.locator('section[aria-label="Pré-gradation"] .pkm-pgh-btn').click(); await page.waitForTimeout(400);
 ok('compteur à zéro : pas de nouvelle analyse possible', (await st()).pgStep === 'intro' && await vis('.pkm-pgd-wait'));
 
@@ -218,27 +236,14 @@ await page.waitForTimeout(600);
 await page.goto(E2E + '/?start=home&debug' + Q, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__pkm && window.__pkm.pgQuota, null, { timeout: 15000 }); await page.waitForTimeout(800);
 const kept = await st();
-ok('après rechargement : attente gardée et « Mes pré-gradations » conservée', /Prochaine pré-gradation dans/.test(await page.evaluate(() => window.__pkm.pgQuota().text)) && (kept.pgHist || []).length === 1 && ((kept.pgHist[0] || {}).real || {}).key === '9');
+ok('après rechargement : compteur gardé et « Mes pré-gradations » conservée', /Plus de pré-gradation ce mois-ci/.test(await page.evaluate(() => window.__pkm.pgQuota().text)) && (kept.pgHist || []).length === 1 && ((kept.pgHist[0] || {}).real || {}).key === '9');
 
-// 6. Premium : 60 par mois.
-S.premium = true;
-await page.goto(E2E + '/?start=pregrade&debug' + Q, { waitUntil: 'load' });
-await page.waitForFunction(() => window.__pkm && window.__pkm.premOn && window.__pkm.premOn(), null, { timeout: 15000 }).catch(() => {});
-await page.waitForTimeout(800);
-ok('Premium : « 60 pré-gradations restantes ce mois-ci (sur 60) »', /60 pré-gradations restantes ce mois-ci \(sur 60\)/.test(await txt('.pkm-pgd-counter')));
-ok('Premium : plus de mention « avec Premium »', !/avec le DropiPass/.test(await txt('.pkm-pgd-counter')));
-await page.evaluate(() => window.__pkm.pgStart()); await page.waitForTimeout(300);
-await page.setInputFiles('#pkm-pgd-file', F_FRONT); await waitStep('back', 10000);
-await page.setInputFiles('#pkm-pgd-file', F_BACK); await waitStep('result', 30000);
-ok('Premium : 59 restantes après une analyse', /59 pré-gradations restantes/.test(await txt('.pkm-pgd-counter')));
-const pm = await st();
-ok('Premium : mois et nombre enregistrés', /^\d{4}-\d{2}$/.test(pm.pgMonth || '') && pm.pgUsed === 1);
-// App des stores, compte gratuit : rythme seul.
+// 6. App des stores, compte sans DropiPass : « bientôt disponible ».
 S.premium = false;
 await page.goto(E2E + '/?start=home&debug&store=1' + Q, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__pkm && window.__pkm.pgQuota, null, { timeout: 15000 }); await page.waitForTimeout(800);
-const up = await page.evaluate(() => window.__pkm.pgQuota().upsell);
-ok('app des stores : « 1 tous les 3 jours », sans Premium', up === '1 tous les 3 jours');
+const qs = await page.evaluate(() => window.__pkm.pgQuota());
+ok('app des stores : « ' + qs.text + ' », sans DropiPass', qs.text === 'Pré-gradation bientôt disponible' && !qs.upsell && qs.locked);
 
 ok('aucune erreur de page', errors.length === 0);
 if (errors.length) console.log('Erreurs : ' + errors.slice(0, 5).join(' | '));

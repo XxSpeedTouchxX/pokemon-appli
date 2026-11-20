@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-20 — Retrait animé, compteur du classeur, verrous DropiPass, « Recharger mes PA » (porteur)
+
+- **Demandes** (porteur) : « retirer de ma collection » avec l'animation inverse de l'ajout (la carte sort du classeur, le solde descend), sans la page « Modifier l'ajout » ; le décompte des cartes par rapport à ce qu'autorise le grade, à gauche du logo du classeur pour les cartes et à droite pour les produits scellés ; l'emblème du grade en haut qui ouvre la description du grade ; la pré-gradation et le calendrier JCC bloqués comme l'historique du prix (DropiPass, 60 pré-gradations par mois) ; « Recharger mes PA » retiré du PK shop et placé en haut à droite de « Mes PA » ; icônes « Toutes les séries » (deux cartes superposées, légèrement décalées) et « Le coin des dresseurs » plus claires, avec des propositions.
+- **Fait (cache v257)** : tout ce qui précède. Retrait : un exemplaire (le dernier ajouté) ; « Annuler » dans l'animation ; refusé si une vente déjà saisie utilise cet exemplaire (comme avant). Compteur : « 6/36 », places restantes, barre verte puis orange (80 %) puis rouge « Plein » ; « Illimité » dès Maître Pokémon, avec le DropiPass ou en Admin ; un appui ouvre la fiche du grade. Pré-gradation : plus de pré-gradation gratuite (avant : 1 tous les 3 jours). Calendrier JCC : ouvert aux admins. CGU et CGV à jour. Tests de GitHub réparés (rouges depuis le 2026-11-20) : logo d'extension en échec remplacé sur toutes les images qui l'affichent, pas seulement la première ; carte de la démo affichée tout de suite avec son image locale quand TCGdex ne répond pas (sans attendre les 2 nouveaux essais) ; message « tourne ton téléphone » invisible pour les lecteurs d'écran quand il est caché.
+- **À choisir par le porteur** : icônes de la barre du bas (`tools/brand/navicons/planche-series.png`, `planche-coin.png` ; essai `?servis=1` à `4` et `?coinvis=5` à `8`) ; les icônes actuelles restent en attendant.
+
 ## 2026-11-20 — Notifications envoyées par le serveur, même app fermée (porteur)
 
 - **Demande** (porteur) : « j'ai l'impression que les notifs sont envoyées uniquement quand l'utilisateur ouvre son appli et ce n'est pas le but, je veux que l'utilisateur reçoive une notif sur son téléphone dès lors que les jeux (booster, pièce ou safari) sont de nouveau disponibles » ; plus une relance après 72 h sans ouvrir l'app et une après 1 semaine, sans réglage dans l'app.

@@ -20,6 +20,7 @@
   const pgProto = Component.prototype;
   const pgFr = v => String(v).replace('.', ',');
   const pgNow = () => Date.now();
+  const pgStore = () => typeof storeApp !== 'undefined' && !!storeApp;
 
   // ——— Compteur ———
   pgProto.pgQuota = function () {
@@ -35,11 +36,12 @@
       text = left > 0 ? left + (left > 1 ? ' pré-gradations restantes' : ' pré-gradation restante') + ' ce mois-ci (sur ' + q.max + ')' : 'Plus de pré-gradation ce mois-ci · remise à zéro le ' + reset;
       short = left + ' / ' + q.max;
     } else {
-      text = left > 0 ? '1 pré-gradation disponible' : 'Prochaine pré-gradation dans ' + dur(wait);
-      short = left > 0 ? '1 dispo' : dur(wait);
+      // Sans DropiPass (2026-11-20, porteur) : réservée au DropiPass, comme l'historique du prix.
+      text = pgStore() ? 'Pré-gradation bientôt disponible' : 'Réservée au DropiPass · 60 pré-gradations par mois';
+      short = pgStore() ? 'Bientôt' : 'DropiPass';
     }
-    const upsell = q.mode === 'free' && !(typeof storeApp !== 'undefined' && storeApp) ? '1 tous les 3 jours · 60 par mois avec le DropiPass' : q.mode === 'free' ? '1 tous les 3 jours' : '';
-    return { left: left, mode: q.mode, text: text, short: short, upsell: upsell, hasUpsell: !!upsell, empty: left <= 0, wait: dur(wait) };
+    const upsell = '';
+    return { left: left, mode: q.mode, text: text, short: short, upsell: upsell, hasUpsell: !!upsell, empty: left <= 0, wait: dur(wait), locked: q.mode === 'locked' };
   };
   pgProto.pgSpend = function () {
     const s = this.st(), premium = !!(this.premOn && this.premOn()), admin = typeof admOf === 'function' && !!admOf(s).on;
@@ -53,14 +55,15 @@
   const PG_FRESH = { pgMsg: '', pgChecks: null, pgReal: false, pgPick: null, pgFreeze: null, pgQ: '', pgAna: null, pgProg: 0 };
   pgProto.pgOpen = function () {
     const q = this.pgQuota();
+    if (q.locked && typeof this.dpLock === 'function') { this.dpLock('pg'); return; }
     PG.shots = {}; PG.thumbs = {}; PG.raw = null; PG.warm();
     this.push('pregrade', Object.assign({ pgStep: q.empty ? 'intro' : 'front', pgSel: -1 }, PG_FRESH));
   };
   pgProto.pgStart = function () {
     const q = this.pgQuota();
-    // Pré-gradation gratuite déjà utilisée (2026-11-15, porteur) : fenêtre « Accès verrouillé » avec le DropiPass
-    // (60 par mois) ; un abonné qui a tout utilisé garde le simple message.
-    if (q.empty && q.mode === 'free' && typeof this.dpLock === 'function') { this.dpLock('pg', { wait: q.wait }); return; }
+    // Sans DropiPass (2026-11-20, porteur) : fenêtre « Accès verrouillé » avec le DropiPass (60 par mois) ; un abonné
+    // qui a tout utilisé garde le simple message.
+    if (q.locked && typeof this.dpLock === 'function') { this.dpLock('pg'); return; }
     if (q.empty) { this.setState({ toast: q.text }); return; }
     PG.shots = {}; PG.thumbs = {}; PG.raw = null; PG.warm();
     this.navSlide('fwd', Object.assign({ pgStep: 'front', pgSel: -1 }, PG_FRESH));
@@ -434,6 +437,10 @@
     const q = this.pgQuota(), last = (s.pgHist || [])[0], p = last && last.id ? TCG.item(last.id) : null;
     return {
       show: true, logoSrc: 'img/brand/pregrade.svg', counter: q.text, counterShort: q.short, empty: q.empty, upsell: q.upsell, hasUpsell: q.hasUpsell,
+      // Voile « Réservé au DropiPass » sur toute la rubrique, comme l'historique du prix (2026-11-20, porteur).
+      locked: !!q.locked, cardCls: 'pkm-pgh-card pkm-dark' + (q.locked ? ' pkm-lockable' : ''), bodyCls: q.locked ? 'pkm-fh-blur' : '', hide: q.locked ? 'true' : 'false',
+      unlock: () => this.dpLock('pg'), lockSub: pgStore() ? 'Bientôt disponible dans cette version' : 'Réservé au DropiPass', lockBtn: pgStore() ? 'En savoir plus' : 'Débloquer',
+      lockAria: pgStore() ? 'Pré-gradation : bientôt disponible' : 'Pré-gradation réservée au DropiPass : en savoir plus',
       btn: q.empty ? 'Voir mes pré-gradations' : 'Pré-grader une carte', btnCls: 'pkm-pgh-btn' + (q.empty ? ' pkm-pgh-btn-off' : ''),
       open: () => this.pgOpen(),
       hasLast: !!last, lastName: last ? (p ? p.name : 'Carte non reconnue') : '', lastImg: p ? p.img : '', hasLastImg: !!(p && p.img),

@@ -65,7 +65,7 @@ await page.evaluate(() => window.__pkm.setState({ shopLock: null }));
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
 ok('app des stores : ni onglet « Recharger mes PA » ni bannière Premium', !(await vis('.pkm-shop-tabs')) && !(await vis('.pkm-prem-banner')) && !(await vis('section[aria-label="Recharger mes PA"]')));
 ok('app des stores : le Magasin du PK shop reste là (tickets)', await vis('section[aria-label="Tickets du tirage au sort"]'));
-await page.evaluate(() => { window.__pkm.setState({ shopTab: 'pa' }); window.__pkm.premOpen(); }); await page.waitForTimeout(500);
+await page.evaluate(() => { window.__pkm.setState({ shopTab: 'pa', paStore: true }); window.__pkm.premOpen(); }); await page.waitForTimeout(500);
 ok('app des stores : l’offre Premium et les packs de PA ne s’ouvrent jamais', !(await vis('section[aria-label="DropiPass"]')) && !(await vis('section[aria-label="Recharger mes PA"]')));
 await page.evaluate(() => window.__pkm.setState({ shopTab: 'store', shopLock: { kind: 'radar', g: 4 } })); await page.waitForTimeout(500);
 ok('Radar verrouillé : fenêtre affichée, sans « Découvrir Premium »', await vis('section[aria-label="Accès verrouillé"]') && !(await vis('.pkm-lockw-premgo')));

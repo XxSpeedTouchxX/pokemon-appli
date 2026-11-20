@@ -347,8 +347,13 @@
       paSheet: (() => {
         if (!s.paSheet) return { open: false, streak: [], evo: [], note: '', series: { days: [], status: '', text: '' } };
         const R = this.vRules(s);
+        // « Recharger mes PA » en haut à droite (2026-11-20, porteur) : jamais dans l'app des stores ni quand les achats
+        // sont fermés (store.js).
+        const canRe = !(typeof storeApp !== 'undefined' && storeApp) && !(typeof this.buyLocked === 'function' && this.buyLocked());
         return { open: true, close: () => this.setState({ paSheet: false }), balance: Number(pa).toLocaleString('fr-FR'), logo: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
-          what: 'Les PA sont tes points d’Aura : ils montrent le lien entre toi et ton compagnon. Ils sont gratuits, ne s’achètent pas et n’ont aucune valeur en euros.',
+          canRecharge: canRe, recharge: () => this.paStoreOpen(),
+          what: canRe ? 'Les PA sont tes points d’Aura : ils montrent le lien entre toi et ton compagnon. Tu les gagnes gratuitement chaque jour, et tu peux aussi en recharger ; ils n’ont aucune valeur en euros.'
+            : 'Les PA sont tes points d’Aura : ils montrent le lien entre toi et ton compagnon. Ils sont gratuits, ne s’achètent pas et n’ont aucune valeur en euros.',
           how: 'Chaque jour dès minuit, touche ton solde de PA pour les récupérer. Plus tu les récupères de jours d’affilée, plus tu gagnes de PA :',
           note: (n ? '' : paNextText(s) + '. ') + 'Un jour sans les récupérer : retour au palier J3 (+40 PA) ; deux jours ou plus : palier J1. Une boîte mystère offerte tous les 7 jours d’affilée.',
           use: 'Dans le Pokédex, tes PA débloquent les Pokémon et font évoluer ton compagnon :',

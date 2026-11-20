@@ -379,7 +379,11 @@
     const ht = (pfGradePend && this.tiers()[pfGradePend.from]) || this.tierOf().cur;
     // Emblème affiché à tous les grades, Recrue et Chasseur compris (2026-11-18, porteur : il n'est plus un avantage
     // débloqué dès Collectionneur).
-    r.hh = { badge: ht.sym, grade: ht.name, alt: 'Grade ' + ht.name, show: true };
+    // Un appui sur l'emblème ouvre la fiche de ce grade (2026-11-20, porteur : « lorsque l'utilisateur clique sur le petit
+    // grade qui apparaît en haut de Dropicards, qu'il tombe sur l'interface avec la description de son grade »).
+    const hix = Math.max(0, this.tiers().findIndex(t => t.name === ht.name));
+    r.hh = { badge: ht.sym, grade: ht.name, alt: 'Grade ' + ht.name, show: true, aria: 'Mon grade : ' + ht.name + ', voir ses avantages',
+      open: () => { if (!(s.screen === 'grade' && Number(s.gradeIx) === hix)) this.push('grade', { gradeIx: hix }); } };
     r.gr = ui.isGrade ? this.vGrade(s) : { perks: [] };
     if (ui.isGrade) Object.assign(ui, { title: r.gr.name, subtitle: '', hasSubtitle: false, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
     r.gu = this.vGradeUp(s);

@@ -153,3 +153,19 @@
 /* Prix du PK shop avec le logo de leur monnaie (2026-11-13, porteur) : gemme des PK, goutte des PA (boîte mystère). */
 .pkm-rules-shop strong.pkm-rules-price { display: inline-flex; align-items: center; gap: 4px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; }
 .pkm-rules-shop strong.pkm-rules-price img.pkm-rules-cur { width: 20px; height: 20px; object-fit: contain; }
+
+/* « Recharger mes PA » (2026-11-20, porteur : retiré du PK shop, ouvert depuis le haut à droite de « Mes PA ») :
+   bouton du haut de la fenêtre, puis page à part avec flèche de retour vers « Mes PA ». */
+.pkm-pa-sheet-tools { flex: none; display: flex; align-items: center; gap: 8px; }
+.pkm-pa-recharge { min-height: 40px; padding: 0 12px 0 8px; border: 1px solid rgba(201, 125, 255, 0.55); border-radius: 999px; background: linear-gradient(135deg, #3B1D5E, #241339); color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; box-shadow: 0 0 0 0 rgba(201, 125, 255, 0.5); animation: pkmPaRe 2.6s ease-in-out infinite; }
+.pkm-pa-recharge img { display: block; width: 22px; height: 22px; }
+.pkm-pa-recharge svg { fill: none; stroke: #FFD60A; stroke-width: 3; stroke-linecap: round; }
+@keyframes pkmPaRe { 0%, 70%, 100% { box-shadow: 0 0 0 0 rgba(201, 125, 255, 0); } 35% { box-shadow: 0 0 0 5px rgba(201, 125, 255, 0.22); } }
+@media (prefers-reduced-motion: reduce) { .pkm-pa-recharge { animation: none; } }
+@media (max-width: 360px) { .pkm-pa-recharge span { font-size: 12px; } }
+.pkm-pas-page { position: absolute; inset: 0; z-index: 31; display: flex; flex-direction: column; gap: 12px; padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px); overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--pkm-app-bg, #0B1120); animation: pkmPasIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes pkmPasIn { from { transform: translateX(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-pas-page { animation: none; } }
+.pkm-pas-page-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-pas-page-head h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; color: var(--pkm-t1, #F3F6FC); }
+.pkm-pas-page-head .pkm-pa-sheet-x svg { stroke-width: 2.6; stroke-linejoin: round; }

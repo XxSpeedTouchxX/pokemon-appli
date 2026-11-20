@@ -177,13 +177,11 @@ test('ça vaut le coup ? valeur gradée attendue, coût, verdict', () => {
   assert.equal(P.worth(dist, 100, 100, coef, null).costKnown, false);
 });
 
-test('compteur : 1 tous les 3 jours sans Premium, 60 par mois avec Premium, illimité pour un admin', () => {
+test('compteur : fermée sans DropiPass (2026-11-20), 60 par mois avec le DropiPass, illimité pour un admin', () => {
   const now = new Date(2026, 10, 14, 12).getTime(), day = 86400e3;
-  assert.equal(P.quota({ now: now }).left, 1);
-  const q1 = P.quota({ now: now, last: now - day });
-  assert.equal(q1.left, 0);
-  assert.equal(q1.next, now + 2 * day);
-  assert.equal(P.quota({ now: now, last: now - 3 * day }).left, 1);
+  assert.equal(P.quota({ now: now }).left, 0);
+  assert.equal(P.quota({ now: now }).mode, 'locked');
+  assert.equal(P.quota({ now: now, last: now - 30 * day }).left, 0, 'plus de pré-gradation gratuite');
   assert.equal(P.quota({ now: now, premium: true, month: '2026-11', used: 60 }).left, 0);
   assert.equal(P.quota({ now: now, premium: true, month: '2026-11', used: 59 }).left, 1);
   assert.equal(P.PREMIUM_MONTH, 60);

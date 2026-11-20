@@ -59,9 +59,11 @@ await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.w
 await login('admin');
 await page.goto(E2E + '/?start=market&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.waitForFunction(() => window.__pkm && window.__pkm.st().pa === 120, null, { timeout: 15000 }).catch(() => {});
+// Depuis le 2026-11-20 (porteur) : solde de PA de l'en-tête › « Mes PA » › « Recharger mes PA » (en haut à droite).
 const openPa = async () => {
-  await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
-  await page.locator('[role="tablist"][aria-label="PK shop"] [role="tab"]:has-text("Recharger mes PA")').click(); await page.waitForTimeout(500);
+  // (les PA du jour du compte imité sont à récupérer : le solde ouvrirait d'abord leur fenêtre)
+  await page.evaluate(() => window.__pkm.setState({ paClaim: false, paSheet: true })); await page.waitForTimeout(700);
+  await page.locator('section[aria-label="Mes PA"] button.pkm-pa-recharge').click(); await page.waitForTimeout(500);
 };
 await openPa();
 const sec = page.locator('section[aria-label="Recharger mes PA"]');
@@ -107,8 +109,8 @@ ok('paiement annulé : « rien n’a été débité »', /Paiement annulé : rie
 S.role = 'user';
 await login('user');
 await page.goto(E2E + '/?start=market&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(700);
-ok('compte joueur : « Recharger mes PA » caché (achats réservés aux admins)', !(await page.locator('[role="tablist"][aria-label="PK shop"] [role="tab"]:has-text("Recharger mes PA")').isVisible()) && (await page.locator('section[aria-label="Recharger mes PA"]').count()) === 0
+await page.evaluate(() => window.__pkm.setState({ paSheet: true })); await page.waitForTimeout(700);
+ok('compte joueur : « Recharger mes PA » caché (achats réservés aux admins)', (await page.locator('section[aria-label="Mes PA"]').count()) === 1 && (await page.locator('section[aria-label="Mes PA"] button.pkm-pa-recharge').count()) === 0 && (await page.locator('section[aria-label="Recharger mes PA"]').count()) === 0
   && (await page.evaluate(() => window.__pkm.buyLocked())));
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { compile } from '@vue/compiler-dom';
 import { transformSync } from 'esbuild';
 import { applyMarginPatches } from './margin-patch.mjs';
+import { SERIES as NAV_SERIES, COIN as NAV_COIN } from '../brand/navicons/icons.mjs';
 import { TOKENS, themeTemplate, themeScript, cssVars, v6Css, usedTokens, BUDDY_THEMES, NIGHT_THEME, DAY_THEME } from './theme.mjs';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -260,6 +261,7 @@ patch('<button type="button" onClick="{{ openScan }}" aria-label="Scanner une ca
 <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-ico pkm-coin-ico-2" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><rect x="2.8" y="7.2" width="7.6" height="10.8" rx="1.3"></rect><rect x="13.6" y="7.2" width="7.6" height="10.8" rx="1.3"></rect><path d="M8.6 3.9h6.8M13.6 2.3l1.8 1.6-1.8 1.6"></path><path d="M15.4 21.2H8.6M10.4 19.6l-1.8 1.6 1.8 1.6"></path><path d="M6.6 10.8v3.6M17.4 10.8v3.6"></path></svg>
 <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-ico pkm-coin-ico-3" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M5 3.8h14a2.2 2.2 0 0 1 2.2 2.2v9a2.2 2.2 0 0 1-2.2 2.2h-6.6L7.8 21v-3.8H5A2.2 2.2 0 0 1 2.8 15V6A2.2 2.2 0 0 1 5 3.8z"></path><circle cx="12" cy="10.5" r="4.1"></circle><path d="M7.9 10.5h2.7M13.4 10.5h2.7"></path><circle cx="12" cy="10.5" r="1.3"></circle></svg>
 <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-ico pkm-coin-ico-4" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><circle cx="12" cy="4.6" r="2.1"></circle><path d="M8.9 10.4a3.4 3.4 0 0 1 6.2 0"></path><circle cx="4.9" cy="10.6" r="1.9"></circle><path d="M2 15.6a3 3 0 0 1 5.4-1.6"></path><circle cx="19.1" cy="10.6" r="1.9"></circle><path d="M22 15.6a3 3 0 0 0-5.4-1.6"></path><circle cx="12" cy="17.2" r="4.2"></circle><path d="M7.8 17.2h2.8M13.4 17.2h2.8"></path><circle cx="12" cy="17.2" r="1.3"></circle></svg>
+${NAV_COIN.map(c => c.svg()).join('\n')}
 <span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.coinDot }}"></span>
 </button>
 <button type="button" onClick="{{ openScan }}" aria-label="Scanner une carte ou un produit" class="pkm-anim"`);
@@ -376,7 +378,7 @@ patch(FRAG['profile-trainer'], FRAG['premium-banner'] + FRAG['profile-trainer'])
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['legal-sheet'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Évolution en plein écran (2026-11-13, porteur) : calque posé à la racine de l'app, au-dessus de l'en-tête et de la
 // barre du bas, pour qu'on ne la rate jamais, d'où qu'on ait appuyé (fragment evo-fx).
-patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pk-unlock'] + FRAG['evo-fx'] + '\n<sc-if value="{{ ui.hasToast }}"');
+patch('<sc-if value="{{ ui.hasToast }}"', FRAG['pa-store'] + FRAG['pk-unlock'] + FRAG['evo-fx'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Passage de grade (2026-10-16) : animation façon « promotion » (profile.js, games.css).
 patch('<sc-if value="{{ ui.hasToast }}"', FRAG['grade-up'] + '\n<sc-if value="{{ ui.hasToast }}"');
 // Formulaire d'ajout (2026-10-21, demande du porteur) : tient dans l'écran et défile jusqu'au bouton (il dépassait
@@ -485,6 +487,12 @@ patch('<div style="flex: none; display: grid; grid-template-columns: repeat(2, m
   tpl = tpl.slice(0, i + open.length) + series + '</sc-if>\n\n' + tpl.slice(j);
 }
 patch('onClick="{{ tabCollection }}" aria-label="Collection"', 'onClick="{{ tabCollection }}" aria-label="Toutes les séries"');
+// Icône « Toutes les séries » (2026-11-20, porteur : « plus claire, deux cartes l'une sur l'autre légèrement décalées,
+// propose-moi des visuels ») : l'actuelle (0) reste affichée ; 4 propositions à essayer avec ?servis=1 à 4
+// (tools/brand/navicons/, planche tools/brand/navicons/planche.png).
+patch('<svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M8.5 4.5h9a1.5 1.5 0 0 1 1.5 1.5v12.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 7 18.5V6a1.5 1.5 0 0 1 1.5-1.5z"></path><path d="M4.5 7.5v10.5a2 2 0 0 0 2 2"></path></svg>\n<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.collDot }}"></span>',
+  '<svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true" class="pkm-ser-ico pkm-ser-ico-0" style="fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round"><path d="M8.5 4.5h9a1.5 1.5 0 0 1 1.5 1.5v12.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 7 18.5V6a1.5 1.5 0 0 1 1.5-1.5z"></path><path d="M4.5 7.5v10.5a2 2 0 0 0 2 2"></path></svg>\n'
+  + NAV_SERIES.map(c => c.svg('pkm-ser-m' + c.n)).join('\n') + '\n<span style="width: 5px; height: 5px; border-radius: 3px; background: {{ tab.collDot }}"></span>');
 patchJs("const titles = { collection: 'Collection',", "const titles = { collection: 'Toutes les séries',");
 // - Carrousels de produits scellés en grand (16:9) : « Sorties du moment » (Accueil), « Scellé à la une » (Marché).
 // Sigle des plaques dessinées (ETB, DSP…) : léger fond sombre, lisible quel que soit le visuel de l'extension derrière.
@@ -979,11 +987,14 @@ ${code}
     if (!t || t.tagName !== 'IMG' || !t.dataset) return;
     if (t.dataset.broken) {
       const bad = t.getAttribute('src');
-      if (bad && !BROKEN.has(bad)) {
+      if (!bad) return;
+      // Logo d'extension : le suivant de sa cascade (webp, png, logo gardé avec la page, nom dessiné), sans nouveau rendu.
+      // Pour chaque image en échec, même quand plusieurs affichent le même logo (2026-11-20 : seule la première passait
+      // au suivant, les autres restaient vides).
+      const nx = LOGO_NEXT.get(bad);
+      if (nx) { BROKEN.add(bad); t.removeAttribute('srcset'); t.src = nx; return; }
+      if (!BROKEN.has(bad)) {
         BROKEN.add(bad);
-        // Logo d'extension : le suivant de sa cascade (webp, png, logo gardé avec la page, nom dessiné), sans nouveau rendu.
-        const nx = LOGO_NEXT.get(bad);
-        if (nx) { t.removeAttribute('srcset'); t.src = nx; return; }
         if (!brokenTimer) brokenTimer = setTimeout(brokenRender, 200);
       }
       return;
@@ -1009,8 +1020,10 @@ ${code}
     }
     // Le CDN de TCGdex refuse des visuels par rafales (503) quand une page en demande une centaine d'un coup (2026-11-20,
     // Set de Base) : deux nouveaux essais espacés (1,5 puis 4 s, un peu de hasard) avant la carte dessinée.
-    const orig = t.dataset.tcgdex;
-    if (orig && (+t.dataset.retry || 0) < 2) {
+    // Carte qui a sa propre image gardée avec la page (cartes de la démo) : elle tout de suite, sans attendre les essais
+    // (2026-11-20 : TCGdex coupé, le classeur restait vide plusieurs secondes).
+    const orig = t.dataset.tcgdex, localFb = t.dataset.fallback && t.dataset.fallback.indexOf('drawn:') !== 0;
+    if (orig && !localFb && (+t.dataset.retry || 0) < 2) {
       const n = (+t.dataset.retry || 0) + 1;
       t.dataset.retry = String(n);
       setTimeout(() => { if (t.isConnected) t.src = orig + '?r=' + n; }, (n === 1 ? 1500 : 4000) + Math.round(Math.random() * 1500));

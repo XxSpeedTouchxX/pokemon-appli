@@ -467,8 +467,9 @@
     }
 
     // ——— Compteur (porteur, 2026-11-14) ———
-    // Sans Premium : 1 pré-gradation tous les 3 jours. Premium : 60 par mois (100 jusqu'au 2026-11-14, porteur : « Pré-gradation
-    // 60/mois » dans l'offre Premium), remises à zéro le 1er. Admin : illimité.
+    // DropiPass : 60 par mois (100 jusqu'au 2026-11-14, porteur : « Pré-gradation 60/mois » dans l'offre), remises à zéro le
+    // 1er. Admin : illimité. Sans DropiPass : fermée (2026-11-20, porteur : « bloque-la comme l'historique du prix, il faut
+    // le DropiPass pour pouvoir la faire 60 fois par mois » ; avant : 1 tous les 3 jours).
     const FREE_EVERY = 3 * 86400e3, PREMIUM_MONTH = 60;
     const monthKey = t => { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
     function quota(o) {
@@ -477,8 +478,7 @@
         const used = o.month === monthKey(o.now) ? o.used || 0 : 0, d = new Date(o.now);
         return { left: Math.max(0, PREMIUM_MONTH - used), max: PREMIUM_MONTH, used: used, mode: 'premium', reset: new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime() };
       }
-      const next = o.last ? o.last + FREE_EVERY : 0;
-      return { left: !o.last || o.now >= next ? 1 : 0, max: 1, mode: 'free', next: next };
+      return { left: 0, max: 0, mode: 'locked' };
     }
     // Pré-gradation faite : nouvel état du compteur.
     function spend(o) {

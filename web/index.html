@@ -2246,9 +2246,20 @@ nav[aria-label="Navigation principale"] > button[aria-current] > svg { transform
 /* Montant écrit comme « Valeur de toute ma collection » (2026-11-15, porteur) : Sora 700, blanc, contour noir (.pkm-strict-text). */
 .pkm-afx-total b { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; color: #FFFFFF; font-variant-numeric: tabular-nums; padding: 0.02em 0.1em 0.08em 0.04em; }
 @keyframes pkmAfxText { 0%, 44% { opacity: 0; transform: translateY(8px); } 54%, 100% { opacity: 1; transform: none; } }
+/* Retrait (2026-11-20, porteur : « l'animation inverse : la carte sort du classeur avec le solde qui descend ») : le classeur
+   s'ouvre en rebondissant, la carte en sort en grandissant puis s'envole ; « −X € » en rouge, la valeur descend.
+   « Annuler » reste touchable (le reste de l'écran aussi). */
+.pkm-afx-out .pkm-afx-binder { animation-name: pkmAfxBinderOut; }
+@keyframes pkmAfxBinderOut { 0% { opacity: 0; transform: scale(0.4) translateY(30px); } 12% { opacity: 1; transform: scale(1); } 15% { transform: scale(1.16, 0.88); } 20% { transform: scale(0.95, 1.07); } 26%, 100% { opacity: 1; transform: scale(1); } }
+.pkm-afx-out .pkm-afx-item { animation-name: pkmAfxFlyOut; animation-timing-function: cubic-bezier(0.3, 0.7, 0.4, 1); }
+@keyframes pkmAfxFlyOut { 0%, 15% { opacity: 0; transform: translateY(156px) scale(0.12) rotate(12deg); } 18% { opacity: 1; transform: translateY(150px) scale(0.24) rotate(10deg); } 34% { opacity: 1; transform: translateY(-10px) scale(1.04) rotate(-2deg); } 42% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); } 52% { opacity: 0; transform: translateY(-70px) scale(0.86) rotate(-9deg); } 100% { opacity: 0; transform: translateY(-70px) scale(0.86) rotate(-9deg); } }
+.pkm-afx-out .pkm-afx-sparks i { animation-name: pkmAfxSparkOut; }
+@keyframes pkmAfxSparkOut { 0%, 14% { opacity: 0; transform: rotate(var(--a)) translateY(0) scale(0.6); } 18% { opacity: 1; } 34% { opacity: 0; transform: rotate(var(--a)) translateY(-92px) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-92px); } }
+.pkm-afx-out .pkm-afx-gain { color: #FF6B6B; }
+.pkm-afx-undo { position: absolute; left: 0; right: 0; top: 376px; width: max-content; margin: 0 auto; min-height: 44px; padding: 0 22px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 999px; background: rgba(11, 17, 32, 0.82); color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; pointer-events: auto; opacity: 0; animation: pkmAfxText 3.3s ease forwards; }
 @media (prefers-reduced-motion: reduce) {
   .pkm-afx-item, .pkm-afx-sparks { display: none; }
-  .pkm-afx-binder { animation-name: pkmAfxVeil; transform: none; }
+  .pkm-afx-binder, .pkm-afx-out .pkm-afx-binder { animation-name: pkmAfxVeil; transform: none; }
   .pkm-afx-gain, .pkm-afx-what, .pkm-afx-total { animation-name: pkmAfxVeil; transform: none; }
 }
 
@@ -2284,6 +2295,36 @@ html, body { touch-action: pan-x pan-y; }
 .pkm-tks-redo > b { align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #FFB27A; color: #1A1206; font-size: 15px; font-weight: 800; }
 /* Bulle « COMPLET » de l'historique sans DropiPass : petit cadenas (2026-11-15). */
 .pkm-fh-lock { margin-left: 4px; vertical-align: -1px; }
+
+/* Compteur de places du classeur (2026-11-20, porteur) : cartes à gauche du logo, produits scellés à droite ; nombre
+   possédé / maximum du grade, barre de remplissage (orange dès 80 %, rouge quand c'est plein), places restantes.
+   Un appui ouvre la fiche du grade actuel (avantages, dont la taille du classeur). */
+.pkm-bdc-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; }
+.pkm-bdc-logo { display: block; width: 132px; height: auto; }
+.pkm-bdc { min-width: 0; min-height: 44px; padding: 6px 4px; border: 0; background: transparent; color: var(--pkm-t1, #F3F6FC); font: inherit; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pkm-bdc .pkm-bdc-l { font-size: 12px; font-weight: 600; color: #C9D3EA; }
+.pkm-bdc b { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; color: #FFFFFF; }
+.pkm-bdc > i { display: block; width: 100%; max-width: 76px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.pkm-bdc > i > i { display: block; height: 100%; border-radius: 3px; background: #3DDC84; transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.pkm-bdc small { font-size: 11.5px; font-weight: 700; color: #9AA8C3; white-space: nowrap; }
+.pkm-bdc-warn > i > i { background: #FFA53D; }
+.pkm-bdc-warn small { color: #FFC266; }
+.pkm-bdc-full > i > i { background: #FF5A5A; }
+.pkm-bdc-full small { color: #FF7B7B; }
+.pkm-bdc-unl > i > i { background: linear-gradient(90deg, #FFD60A, #3DDC84); }
+.pkm-bdc-unl small { color: #FFD60A; }
+.pkm-bdc:active { transform: scale(0.96); }
+/* Emblème du grade de l'en-tête : touchable (fiche du grade), zone d'appui agrandie sans bouger le dessin. */
+.pkm-hh-gbtn { position: relative; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+.pkm-hh-gbtn::before { content: ''; position: absolute; inset: -4px; }
+.pkm-hh-gbtn img { display: block; width: 100%; height: 100%; }
+.pkm-hh-gbtn:active { transform: scale(0.92); }
+
+/* Verrou DropiPass sur toute une rubrique (2026-11-20, porteur : pré-gradation de l'accueil et calendrier JCC, « comme
+   l'historique du prix ») : contenu flouté et intouchable, voile « Réservé au DropiPass » par-dessus (pkm-fh-veil). */
+.pkm-lockable, .pkm-cal-locked { position: relative; }
+.pkm-lockable > :not(.pkm-lock-veil), .pkm-cal-locked > :not(.pkm-lock-veil) { filter: blur(6px); opacity: 0.75; pointer-events: none; user-select: none; -webkit-user-select: none; }
+.pkm-lock-veil { top: 0; border-radius: inherit; }
 
 /* Pokédex (2026-10-28, demande du porteur) : l'ancien jeu « Évolution » de l'onglet Jeux. En tête, le Pokédex rouge
    dessiné (web/img/brand/pokedex.svg, gemme des PK sur l'objectif) : le Pokémon du moment sur l'écran de gauche, le solde
@@ -2739,6 +2780,22 @@ nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="wi
 /* Prix du PK shop avec le logo de leur monnaie (2026-11-13, porteur) : gemme des PK, goutte des PA (boîte mystère). */
 .pkm-rules-shop strong.pkm-rules-price { display: inline-flex; align-items: center; gap: 4px; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; }
 .pkm-rules-shop strong.pkm-rules-price img.pkm-rules-cur { width: 20px; height: 20px; object-fit: contain; }
+
+/* « Recharger mes PA » (2026-11-20, porteur : retiré du PK shop, ouvert depuis le haut à droite de « Mes PA ») :
+   bouton du haut de la fenêtre, puis page à part avec flèche de retour vers « Mes PA ». */
+.pkm-pa-sheet-tools { flex: none; display: flex; align-items: center; gap: 8px; }
+.pkm-pa-recharge { min-height: 40px; padding: 0 12px 0 8px; border: 1px solid rgba(201, 125, 255, 0.55); border-radius: 999px; background: linear-gradient(135deg, #3B1D5E, #241339); color: #FFFFFF; font: inherit; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; box-shadow: 0 0 0 0 rgba(201, 125, 255, 0.5); animation: pkmPaRe 2.6s ease-in-out infinite; }
+.pkm-pa-recharge img { display: block; width: 22px; height: 22px; }
+.pkm-pa-recharge svg { fill: none; stroke: #FFD60A; stroke-width: 3; stroke-linecap: round; }
+@keyframes pkmPaRe { 0%, 70%, 100% { box-shadow: 0 0 0 0 rgba(201, 125, 255, 0); } 35% { box-shadow: 0 0 0 5px rgba(201, 125, 255, 0.22); } }
+@media (prefers-reduced-motion: reduce) { .pkm-pa-recharge { animation: none; } }
+@media (max-width: 360px) { .pkm-pa-recharge span { font-size: 12px; } }
+.pkm-pas-page { position: absolute; inset: 0; z-index: 31; display: flex; flex-direction: column; gap: 12px; padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px); overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--pkm-app-bg, #0B1120); animation: pkmPasIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes pkmPasIn { from { transform: translateX(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-pas-page { animation: none; } }
+.pkm-pas-page-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-pas-page-head h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; color: var(--pkm-t1, #F3F6FC); }
+.pkm-pas-page-head .pkm-pa-sheet-x svg { stroke-width: 2.6; stroke-linejoin: round; }
 
 /* Abonnement Premium (2026-11-06, porteur) : bannière dorée qui brille et écran de l'offre. */
 .pkm-prem-banner { position: relative; flex: none; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; border: 2px solid #FFD60A; border-radius: 22px; overflow: hidden; background: linear-gradient(115deg, #E9EDF3 0%, #C3CBD8 22%, #FFFFFF 42%, #B4BDCB 62%, #EEF1F6 82%, #CDD4DF 100%); color: #141A26; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.35), 0 0 22px rgba(255, 200, 0, 0.55), 0 10px 26px rgba(20, 26, 38, 0.35); overflow: visible; isolation: isolate; }
@@ -3489,7 +3546,12 @@ html.pkm-landscape, html.pkm-landscape body { overflow: hidden; }
    de la barre du bas : navbar.css. */
 .pkm-coin-ico { display: none; }
 html:not([data-coinvis]) .pkm-coin-ico-1, html[data-coinvis="1"] .pkm-coin-ico-1, html[data-coinvis="2"] .pkm-coin-ico-2,
-html[data-coinvis="3"] .pkm-coin-ico-3, html[data-coinvis="4"] .pkm-coin-ico-4 { display: block; }
+html[data-coinvis="3"] .pkm-coin-ico-3, html[data-coinvis="4"] .pkm-coin-ico-4, html[data-coinvis="5"] .pkm-coin-ico-5,
+html[data-coinvis="6"] .pkm-coin-ico-6, html[data-coinvis="7"] .pkm-coin-ico-7, html[data-coinvis="8"] .pkm-coin-ico-8 { display: block; }
+/* Icône « Toutes les séries » (2026-11-20) : l'actuelle (0) par défaut, 4 propositions (?servis=1 à 4, tools/brand/navicons/). */
+.pkm-ser-ico { display: none; }
+html:not([data-servis]) .pkm-ser-ico-0, html[data-servis="0"] .pkm-ser-ico-0, html[data-servis="1"] .pkm-ser-ico-1, html[data-servis="2"] .pkm-ser-ico-2,
+html[data-servis="3"] .pkm-ser-ico-3, html[data-servis="4"] .pkm-ser-ico-4 { display: block; }
 nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-right: 4px !important; }
 
 /* Sous-rubriques. */
@@ -4636,6 +4698,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=9000fe07"></script>
+<script src="app.js?v=f7f321fb"></script>
 </body>
 </html>

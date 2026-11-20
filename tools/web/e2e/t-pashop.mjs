@@ -1,5 +1,6 @@
-// PK shop › « Recharger mes PA » (2026-11-01, porteur) : rubriques « Magasin » et « Recharger mes PA » en haut, 4 packs de
-// PA, récapitulatif ; paiement par Stripe depuis le 2026-11-19 (ici, rien n'est payé : parcours complet dans t-pa-pay.mjs).
+// « Recharger mes PA » (2026-11-01, porteur) : 4 packs de PA, récapitulatif. Depuis le 2026-11-20 (porteur : « qu'elle
+// disparaisse complètement de l'onglet PK shop et qu'elle apparaisse quand l'utilisateur clique sur son solde de PA, en haut
+// à droite de la description des PA ») : PK shop sans rubriques, bouton en haut à droite de « Mes PA », page à part ; paiement par Stripe depuis le 2026-11-19 (ici, rien n'est payé : parcours complet dans t-pa-pay.mjs).
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -11,12 +12,19 @@ await page.goto(E2E + '/?today=2026-10-31&debug', { waitUntil: 'load' }); await 
 await page.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k) || '{}'); d.tuto = 'done'; d.onb = 0; d.pa = 120; d.paDay = '2026-10-31'; localStorage.setItem(k, JSON.stringify(d)); });
 await page.goto(E2E + '/?today=2026-10-31&debug', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.evaluate(() => window.__pkm.tab('pkshop')); await page.waitForTimeout(900);
-const tabs = page.locator('[role="tablist"][aria-label="PK shop"] [role="tab"]');
-ok('rubriques : ' + (await tabs.allInnerTexts()).join(' / '), (await tabs.allInnerTexts()).join('|') === 'Magasin|Recharger mes PA' && (await tabs.first().getAttribute('aria-selected')) === 'true');
+ok('PK shop : plus de rubriques, plus de « Recharger mes PA »', (await page.locator('[role="tablist"][aria-label="PK shop"]').count()) === 0 && !/Recharger mes PA/.test(await page.locator('main, #app').first().innerText()));
 ok('Magasin : les articles (ticket) affichés', (await page.locator('section.pkm-shop-item').count()) >= 1);
-await tabs.nth(1).click(); await page.waitForTimeout(400);
+// Solde de PA de l'en-tête → « Mes PA » → bouton « Recharger mes PA » en haut à droite.
+await page.locator('header button.pkm-pa-head').first().click(); await page.waitForTimeout(700);
+const paS = page.locator('section[aria-label="Mes PA"]');
+const rb = paS.locator('.pkm-pa-sheet-head button.pkm-pa-recharge');
+const pos = await page.evaluate(() => { const h = document.querySelector('section[aria-label="Mes PA"] .pkm-pa-sheet-head'), b = h && h.querySelector('.pkm-pa-recharge'), x = h && h.querySelector('.pkm-pa-sheet-x'), t = h && h.querySelector('h2');
+  if (!b) return null; const R = e => e.getBoundingClientRect(), hr = R(h); return { right: (R(b).left + R(b).right) / 2 > hr.left + hr.width / 2, top: Math.abs(R(b).top + R(b).height / 2 - (R(t).top + R(t).height / 2)) < 12, beforeX: R(b).right <= R(x).left }; });
+ok('« Mes PA » : bouton « Recharger mes PA » en haut à droite (' + JSON.stringify(pos) + ')', (await rb.count()) === 1 && pos && pos.right && pos.top && pos.beforeX);
+ok('« Mes PA » : texte sans « ne s’achètent pas »', /tu peux aussi en recharger/.test(await paS.innerText()) && !/ne s’achètent pas/.test(await paS.innerText()));
+await paS.screenshot({ path: shot('pashop-mespa.png') });
+await rb.click(); await page.waitForTimeout(600);
 const sec = page.locator('section[aria-label="Recharger mes PA"]');
-ok('Recharger mes PA ouvert, Magasin caché', (await sec.count()) === 1 && (await page.locator('section.pkm-shop-item').count()) === 0 && (await tabs.nth(1).getAttribute('aria-selected')) === 'true');
 const packs = (await sec.locator('.pkm-pas-pack').evaluateAll(b => b.map(x => x.getAttribute('aria-label'))));
 ok('4 packs : ' + packs.join(' ; '), packs.length === 4 && /^500 PA pour 4,99 €$/.test(N(packs[0])) && /^3 000 PA pour 14,99 € : 1 500 PA et 1 500 PA offerts$/.test(N(packs[2])) && /^5 000 PA pour 19,99 € : 2 000 PA et 3 000 PA offerts$/.test(N(packs[3])));
 const splits = (await sec.locator('.pkm-pas-split').allInnerTexts()).map(N);
@@ -38,6 +46,9 @@ ok('sans serveur : paiement indisponible, bouton désactivé, aucune case à coc
 await page.screenshot({ path: shot('pashop-recap.png') });
 await dlg.locator('button:has-text("Fermer")').click(); await page.waitForTimeout(800);
 ok('fermé, rien de crédité', (await dlg.count()) === 0 && (await page.evaluate(() => window.__pkm.st().pa)) === 120);
+await page.locator('.pkm-pas-page button[aria-label="Retour à Mes PA"]').click(); await page.waitForTimeout(600);
+ok('flèche : retour à « Mes PA »', (await page.locator('.pkm-pas-page').count()) === 0 && (await page.locator('section[aria-label="Mes PA"]').count()) === 1);
+await page.evaluate(() => window.__pkm.setState({ paSheet: false })); await page.waitForTimeout(400);
 // Pokédex › Tous les Pokémon : logo des PA à côté du prix.
 await page.evaluate(() => { window.__pkm.tab('market'); window.__pkm.setState({ dexList: true }); }); await page.waitForTimeout(900);
 const herb = page.locator('[aria-label="Tous les Pokémon"] button[aria-label^="Herbizarre,"]');
