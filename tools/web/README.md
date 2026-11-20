@@ -828,6 +828,11 @@ Le script `tools/web/build.mjs` :
   - `catalog.dc.html` : section « Envoyer un message rapide » dans le fragment `player-card`, fragment `quick-msgs` (fenêtre « Mes messages », sous la carte de dresseur), bouton `.pkm-qm-open` dans la carte du joueur de Ma ligue, pastille `.pkm-qm-badge-ban` sur la bannière ; `build.mjs` (fragment, `qmsg.js`, `qmsg.css`) ; `qmsg.css` (nouveau) ;
   - `legal.js` : rubrique « Messages rapides » de la politique de confidentialité (16 novembre 2026) ; références à `install_024_a_032.sql` (`pl.js`, `players.js`, `progress.js`) ;
   - tests : `t-qmsg.mjs` (nouveau, 32 vérifications, faux serveur), `t-pl.mjs` (carte : messages tout faits, aucun champ pour écrire), `t-players.mjs`.
+- **Frise depuis le Set de Base (caches v249 et v250)** :
+  - `web/data/calendar.json` : 111 extensions de 1999 à 2025 (une ligne chacune ; `id` = `set` = identifiant du catalogue, `code` = sigle affiché, source et lien de la date) ;
+  - `coin.js` : `vCal` jusqu'à 600 mois ; plus d'un an avant aujourd'hui, `pkm-cal-m-thin` (mois sans sortie, `pkm-cal-m-jan` en janvier) et année affichée sous le mois d'une sortie ; `calToday` saute à 2 écrans d'aujourd'hui avant de glisser ;
+  - `coin.css` : `.pkm-cal-m-thin` (16 px), `.pkm-cal-m-jan` (année et petit trait sur la ligne) ; `catalog.dc.html` : logos de la frise en `loading="lazy"` ;
+  - tests : `t-coin.mjs` (57 vérifications : premier logo = Set de Base, plus de 100 mois resserrés, ouverture sur le mois en cours ; zoom et retour mesurés près d'aujourd'hui).
 - **Frise enrichie et scan (cache v248)** :
   - `coin.js` : `calRemind` (rappel `cal:<id>` dans `s.alerts`, permission de notification demandée), `calHelp` (fiche « Lire la frise »), `calToday` (défile jusqu'au mois en cours) et `calAwayWatch` (classes `pkm-cal-away` / `pkm-cal-away-l` du héros), `calLaunch` (prix de sortie `msrp` comparé à `cote`), `calLead` (produit phare ETB, Display, Lot, UPC) ; `vCal` : `stale` (« À confirmer »), `outNow` (« Sortie », « Sorti au Japon »), compte à rebours `jn` sur la prochaine date exacte, `delta` et `prog` sur les logos, `remind` et `help` ;
   - `start.js` : `alertsCal` (veille, jour J, précommandes) en tête de `alertsDue` ;

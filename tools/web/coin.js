@@ -158,11 +158,19 @@
     this.setState({ alerts: al, toast: on ? 'Rappel activé : tu seras prévenu pour ' + name : 'Rappel retiré pour ' + name });
   };
   coinProto.calHelp = function (on) { this.setState({ calHelp: !!on, calSel: null }); };
-  // Bouton « Aujourd'hui » : la frise revient en douceur sur le mois en cours.
+  // Bouton « Aujourd'hui » : la frise revient en douceur sur le mois en cours. De loin (le Set de Base est à plus de
+  // 13 000 px), elle saute d'abord à un écran d'aujourd'hui, puis glisse le reste du chemin.
   coinProto.calToday = function () {
     try {
       const w = document.querySelector('.pkm-cal-strip'), m = document.querySelector('.pkm-cal-m-now');
-      if (w && m) w.scrollTo({ left: m.offsetLeft - w.clientWidth / 2 + m.clientWidth / 2, behavior: 'smooth' });
+      if (!w || !m) return;
+      const to = m.offsetLeft - w.clientWidth / 2 + m.clientWidth / 2, far = w.clientWidth * 2;
+      if (Math.abs(to - w.scrollLeft) > far) {
+        w.style.scrollBehavior = 'auto';
+        w.scrollLeft = to + (to > w.scrollLeft ? -far : far);
+        w.style.scrollBehavior = '';
+      }
+      w.scrollTo({ left: to, behavior: 'smooth' });
     } catch (e) { /* rien */ }
   };
   // Dernier jour d'une date du calendrier (« 2027-04 » : 30 avril) et écart en jours entre deux dates.

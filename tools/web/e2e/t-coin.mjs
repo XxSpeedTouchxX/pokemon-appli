@@ -141,6 +141,19 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('frise : logos et sigles tiennent dans la hauteur (marge ' + Math.round(room) + ' px)', room >= 0);
   const line = await page.evaluate(() => { const tops = [...document.querySelectorAll('.pkm-cal-track')].map(t => t.getBoundingClientRect().top); return { n: tops.length, spread: Math.max(...tops) - Math.min(...tops) }; });
   ok('ligne du temps parfaitement droite (' + line.n + ' mois, écart ' + line.spread.toFixed(2) + ' px)', line.n > 12 && line.spread < 0.01, JSON.stringify(line));
+  // Toute l'histoire depuis le Set de Base (2026-11-20, porteur) : la frise commence par sa sortie en France, les vieux mois
+  // sans sortie sont de fines tranches (l'année en janvier), et elle s'ouvre toujours sur le mois en cours.
+  const hist = await page.evaluate(() => {
+    const w = document.querySelector('.pkm-cal-strip'), logos = [...document.querySelectorAll('.pkm-cal-dot-logo')], first = logos[0];
+    const firstM = first && first.closest('.pkm-cal-m'), thin = [...document.querySelectorAll('.pkm-cal-m-thin')];
+    const now = document.querySelector('.pkm-cal-m-now').getBoundingClientRect(), wr = w.getBoundingClientRect();
+    return { first: first ? first.getAttribute('aria-label') : '', firstYear: firstM ? (firstM.querySelector('.pkm-cal-year') || {}).textContent : '', logos: logos.length,
+      thin: thin.length, thinW: thin.length ? Math.max(...thin.map(m => m.getBoundingClientRect().width)) : 0,
+      jan: [...document.querySelectorAll('.pkm-cal-m-jan .pkm-cal-year')].map(e => e.textContent).slice(0, 3), nowIn: now.left >= wr.left && now.right <= wr.right };
+  });
+  ok('la frise remonte au Set de Base (« ' + (hist.first || '').split(',').slice(0, 2).join(',') + ' »), ' + hist.logos + ' extensions', /^Set de Base, /.test(hist.first) && /^(1999|2000)$/.test(hist.firstYear) && hist.logos >= 100, JSON.stringify(hist));
+  ok('années anciennes resserrées : ' + hist.thin + ' mois sans sortie en fines tranches, années ' + hist.jan.join(', ') + '…', hist.thin > 100 && hist.thinW <= 16.5 && hist.jan.length === 3 && /^(2000|2001)$/.test(hist.jan[0]), JSON.stringify(hist));
+  ok('la frise s’ouvre toujours sur le mois en cours', hist.nowIn);
   // Ajouts du 2026-11-19 (porteur : « Go ») : compte à rebours, prix de sortie comparé à aujourd'hui, progression.
   const extra = await page.evaluate(() => {
     const m7 = [...document.querySelectorAll('.pkm-cal-dot:not(.pkm-cal-dot-logo)')].find(b => (b.querySelector('.pkm-cal-dcode') || {}).textContent === 'M7');
@@ -204,7 +217,8 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   await page.screenshot({ path: shot('coin-calendrier-rappel.png') });
 
   // Appui marqué sur le logo, puis zoom sur l'extension, puis ses items.
-  await page.evaluate(() => { const w = document.querySelector('.pkm-cal-strip'); w.style.scrollBehavior = 'auto'; w.scrollLeft = 140; w.style.scrollBehavior = ''; });
+  // Frise décalée de 60 px à gauche du mois en cours (Règne Delta reste à l'écran) : le retour doit retrouver cette place.
+  await page.evaluate(() => { const w = document.querySelector('.pkm-cal-strip'), m = document.querySelector('.pkm-cal-m-now'); w.style.scrollBehavior = 'auto'; w.scrollLeft = Math.round(m.offsetLeft - w.clientWidth / 2 + m.clientWidth / 2 - 60); w.style.scrollBehavior = ''; });
   const x0 = await page.evaluate(() => document.querySelector('.pkm-cal-strip').scrollLeft);
   await page.locator('.pkm-cal-dot-logo[aria-label^="Règne Delta"]').evaluate(b => b.click()); await page.waitForTimeout(110);
   const press = await page.evaluate(() => { const b = document.querySelector('.pkm-cal-dot-logo[aria-label^="Règne Delta"]'), t = getComputedStyle(b).transform; const k = t && t !== 'none' ? +t.split('(')[1].split(',')[0] : 1; return { k: k, glow: /255, 214, 10/.test(getComputedStyle(b).boxShadow), zoom: !!document.querySelector('.pkm-calz') }; });

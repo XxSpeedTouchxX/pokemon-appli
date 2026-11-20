@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-20 — Frise depuis le Set de Base (porteur : « remonter toute la frise à partir de la première sortie Pokémon édition 1 »)
+
+- **111 extensions ajoutées** au calendrier (`web/data/calendar.json`), du **Set de Base (« Édition 1 », sorti en France le 18 novembre 1999)** à Évolutions Prismatiques (17 janvier 2025) ; la frise compte désormais 122 extensions avec logo (toutes celles du catalogue sorties en français).
+- **Dates françaises**, pas les dates américaines du catalogue (Set de Base : 9 janvier 1999 aux États-Unis) : relevées sur Poképédia, page de chaque extension, recoupées avec la page officielle pokemon.com/fr, Wikipédia FR, Pokécardex ; désaccords notés dans la fiche de l'extension. Deux dates prises sur la page officielle française plutôt que sur Poképédia : Destinées Radieuses (19 février 2021) et Zénith Suprême (25 février 2023, sortie repoussée en France). Quelques dates anciennes au mois seulement (Team Rocket, Neo Revelation, Neo Destiny, Aquapolis).
+- **Pas sur la frise** : les extensions jamais sorties en français (Base Set 2, Gym Heroes, Gym Challenge, Legendary Collection, Skyridge, Team Rocket Returns…), les promos, les collections McDonald's, les kits et les sous-ensembles (galeries de dresseurs, coffres étincelants), qui sortent avec leur extension.
+- **Affichage** : plus d'un an avant aujourd'hui, un mois sans sortie devient une fine tranche (l'année seule, en janvier), une sortie ancienne montre son mois et son année ; logos chargés au fil du défilement ; la frise s'ouvre toujours sur le mois en cours ; « Aujourd'hui » saute d'abord près d'aujourd'hui puis glisse (le Set de Base est à près de 13 000 px). Sigles : EX1, DP1, PL1, HS1, NB1, XY1, SL1, EB01, EV01… (abréviations françaises usuelles).
+- Caches v249 et v250.
+
 ## 2026-11-19 — Frise enrichie et ajout animé au scan (porteur : « Go, on verra derrière si on supprime des trucs »)
 
 - **Demande** : ajouter à la frise ce que Claude avait conseillé (rappels, prix de sortie, compte à rebours, cartes les plus chères, petits plus, vérification du calendrier), quitte à en retirer ensuite. En cours de route : « quand je scanne une carte et qu'elle apparaît avec le bouton Ajouter à ma collection, je veux la même cinématique que l'ajout d'une carte au classeur ».
