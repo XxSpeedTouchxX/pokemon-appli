@@ -43,7 +43,8 @@
   const VERSION = { FR: 'française', EN: 'anglaise', DE: 'allemande', IT: 'italienne', ES: 'espagnole', PT: 'portugaise', 'PT-BR': 'brésilienne', NL: 'néerlandaise', PL: 'polonaise' };
   const PTCG = 'https://images.pokemontcg.io/', SDX = 'https://images.scrydex.com/pokemon/', ASSETS = 'https://assets.tcgdex.net/';
   // Adresses d'un visuel selon sa source (chemin de cards.json).
-  function visual(path) {
+  // plain : sans le tampon « Édition 1 » posé par Dropicards (réimpressions des 30 ans, qui reprennent le visuel d'origine).
+  function visual(path, plain) {
     if (!path) return null;
     if (path.indexOf('ptcg:') === 0) {
       // Grilles : le petit visuel seulement (le grand pèse jusqu'à 1 Mo) ; fiche et zoom : le grand.
@@ -55,6 +56,17 @@
       const b = SDX + path.slice(4);
       return { img: b + '/small', hi: b + '/large', srcset: '', lang: 'EN', credit: 'pokemontcg.io (Scrydex) · haute définition' };
     }
+    // Copie locale (2026-11-20, porteur : visuels du Set de Base ; tools/visuels/mirror_set.py, web/img/local/) : le même
+    // visuel TCGdex, servi par dropicards.fr quand le CDN de TCGdex refuse des visuels par rafales. Passe avant le visuel
+    // redressé : une copie locale d'une carte redressée n'existe que pour lui poser le tampon « Édition 1 » (2026-11-20,
+    // porteur, tools/visuels/stamp_ed1.py).
+    const lc = TCG.local && TCG.local[path];
+    if (lc && !(plain && TCG.ed1 && TCG.ed1[path])) {
+      const k = 'img/local/' + path.replace(/\//g, '_'), lo = k + '-low.webp?v=' + lc, hi = k + '.webp?v=' + lc;
+      return { img: lo, hi: hi, srcset: lo + ' 245w, ' + hi + ' 600w',
+        lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(),
+        credit: TCG.ed1 && TCG.ed1[path] ? 'TCGdex · tampon « Édition 1 » posé par Dropicards (scan du tirage illimité)' : 'TCGdex · copie hébergée par Dropicards (600 × 825)' };
+    }
     // Photo de travers redressée et recadrée (2026-11-13, porteur : « certaines cartes sont tordues, arrange cela dans
     // le cadrage » ; tools/cadrage/redresse.py, web/img/fix/) : même format que les visuels TCGdex.
     const fx = TCG.fix && TCG.fix[path];
@@ -62,14 +74,6 @@
       const k = 'img/fix/' + path.replace(/\//g, '_'), lo = k + '-low.webp?v=' + fx, hi = k + '.webp?v=' + fx;
       return { img: lo, hi: hi, srcset: lo + ' 245w, ' + hi + ' 600w', fixed: true,
         lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · photo de la carte redressée et recadrée par Dropicards' };
-    }
-    // Copie locale (2026-11-20, porteur : visuels du Set de Base ; tools/visuels/mirror_set.py, web/img/local/) : le même
-    // visuel TCGdex, servi par dropicards.fr quand le CDN de TCGdex refuse des visuels par rafales.
-    const lc = TCG.local && TCG.local[path];
-    if (lc) {
-      const k = 'img/local/' + path.replace(/\//g, '_'), lo = k + '-low.webp?v=' + lc, hi = k + '.webp?v=' + lc;
-      return { img: lo, hi: hi, srcset: lo + ' 245w, ' + hi + ' 600w',
-        lang: (/^([a-z]{2}(?:-[a-z]{2})?)\//.exec(path) || [0, 'fr'])[1].toUpperCase(), credit: 'TCGdex · copie hébergée par Dropicards (600 × 825)' };
     }
     const b = /^https?:/.test(path) ? path : ((TCG.doc && TCG.doc.img) || ASSETS) + path;
     return { img: b + '/low.webp', hi: b + '/high.png', srcset: b + '/low.webp 245w, ' + b + '/high.webp 600w',
@@ -188,7 +192,7 @@
     // Extensions, des plus récentes aux plus anciennes.
     TCG.setList = Object.keys(doc.sets).filter(id => TCG.bySet[id]).map(id => {
       const s = doc.sets[id];
-      return { id: id, name: s[0], serie: s[1], date: s[2], logo: s[3], official: s[4] || '', lang: String(s[5] || 'fr').toUpperCase(), n: TCG.bySet[id].length, key: fold([s[0], s[1], id].join(' ')) };
+      return { id: id, name: s[0], serie: s[1], date: FR_DATES[id] || s[2], dateUs: s[2], dateFr: !!FR_DATES[id], logo: s[3], official: s[4] || '', lang: String(s[5] || 'fr').toUpperCase(), n: TCG.bySet[id].length, key: fold([s[0], s[1], id].join(' ')) };
     }).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
     // Bandeau du Marché : les trois cartes les plus cotées de la dernière extension française.
     const last = TCG.setList.find(e => e.lang === 'FR' && TCG.bySet[e.id].some(x => x.r[F.img]));
@@ -216,6 +220,10 @@
   // Bord doré des vraies réimpressions (2026-11-08, porteur, d'après sa photo) : visuel d'origine au bord redessiné
   // (web/img/c30/, tools/c30/gold.mjs), liste mise par le build.
   const C30_GOLD = new Set(__C30_GOLD__);
+  // Date de sortie en France de chaque extension (calendrier TCG, mise par le build) ; « 2001-03 » = mois seulement.
+  const FR_DATES = __FR_DATES__;
+  const MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const setDateText = d => !d ? '' : d.length === 7 ? MOIS_FR[Number(d.slice(5, 7)) - 1] + ' ' + d.slice(0, 4) : d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4);
   const reprintOf = id => { const m = /^30th-c-(\d{3})$/.exec(id); return m ? CLASSIC_30[Number(m[1]) - 1] || null : null; };
   function buildItem(id, r, F, set) {
     // Collection Classique (30ᵉ) : la carte d'origine donne visuel, numéro et rareté, même si le catalogue a trouvé un
@@ -225,7 +233,7 @@
     const fromCat = !!(TCG.doc && TCG.doc.imgFrom && TCG.doc.imgFrom[id]) || /^(ptcg|sdx):/.test(String(r[F.img] || ''));
     const orig = reprintOf(id), ox = orig && (!r[F.img] || fromCat) && TCG.byId ? TCG.byId[orig] : null;
     const ov = ox ? { r: ox.r, set: setOf(ox.r[TCG.F.set]) } : null;
-    const v = visual((ov ? ov.r[TCG.F.img] : '') || r[F.img] || ''), num = String(r[F.num] || ''), official = set[4] || '';
+    const v = visual((ov ? ov.r[TCG.F.img] : '') || r[F.img] || '', !!ov), num = String(r[F.num] || ''), official = set[4] || '';
     const rarity = ov && (!r[F.rarity] || r[F.rarity] === 'Sans Rareté') ? 'Collection Classique' : r[F.rarity] || '';
     // Carte en anglais : extension sans version française, ou carte ajoutée depuis la version anglaise (champ lang).
     const lang = F.lang !== undefined && r[F.lang] ? String(r[F.lang]).toUpperCase() : String(set[5] || 'fr').toUpperCase();
@@ -498,7 +506,7 @@
     if (noImgs) notes.push(noImgs + (noImgs > 1 ? ' cartes n’ont' : ' carte n’a') + ' pas encore de scan officiel : PKM les dessine en attendant.');
     const defs = [['all', 'Toutes · ' + all.length], ['top', 'Les plus chères'], ['ur', 'Ultra rares · ' + nUr], ['own', 'À toi · ' + mine.length]];
     return {
-      title: e.name, subtitle: [e.serie, e.date ? this.d3(e.date) : '', e.lang === 'EN' ? 'EN' : ''].filter(Boolean).join(' · '),
+      title: e.name, subtitle: [e.serie, setDateText(e.date), e.lang === 'EN' ? 'EN' : ''].filter(Boolean).join(' · '),
       hasLogo: !!setLogo(e.id, e.logo), logo: setLogo(e.id, e.logo),
       countText: all.length + (all.length > 1 ? ' cartes' : ' carte') + (e.official && Number(e.official) !== all.length ? ' · ' + e.official + ' officielles' : ''),
       valueText: priced.length ? 'Série complète ≈ ' + this.eur0(full) + ' (cote PKM de ' + priced.length + ' cartes)' : 'Pas encore de prix pour cette extension',

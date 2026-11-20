@@ -160,6 +160,20 @@ for (const name of ['Écarlate et Violet', 'Épée et Bouclier']) {
   ok('« ' + name + ' » : 3 extensions par ligne', cols === 3);
   await c2.close();
 }
+// Set de Base (2026-11-20, porteur) : date de sortie en France (calendrier TCG) et tampon « Édition 1 » posé par
+// Dropicards sur les 21 visuels du tirage illimité (copies web/img/local/, liste « ed1 » de img-local.json).
+{
+  const c3 = await browser.newContext({ viewport: { width: 390, height: 844 } }), page = await c3.newPage();
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(E2E + '/?start=set&setId=base1', { waitUntil: 'load' });
+  await page.waitForSelector('main button[aria-label*=", n° "]');
+  const txt = await page.locator('main').innerText();
+  ok('Set de Base : sortie en France le 18/11/1999 (date américaine 09/01/1999 retirée)', /18\/11\/1999/.test(txt) && !/09\/01\/1999/.test(txt));
+  const ed1 = await page.evaluate(() => fetch('data/img-local.json').then(r => r.json()).then(d => Object.keys(d.ed1 || {})));
+  const src = await page.locator('main button[aria-label^="Dracaufeu"] img').first().getAttribute('src');
+  ok('tampon « Édition 1 » : ' + ed1.length + ' visuels, Dracaufeu servi par sa copie tamponnée (' + src + ')', ed1.length === 21 && ed1.includes('fr/base/base1/4') && /^img\/local\/fr_base_base1_4-low\.webp/.test(src));
+  await c3.close();
+}
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

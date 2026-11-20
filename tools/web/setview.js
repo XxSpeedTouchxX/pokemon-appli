@@ -92,7 +92,7 @@
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
     return Object.assign({}, base, {
       v2: true,
-      dateText: top ? '' : [e.date ? this.d3(e.date) : '', e.serie ? 'Série ' + e.serie : ''].filter(Boolean).join(' · '),
+      dateText: top ? '' : [setDateText(e.date), e.serie ? 'Série ' + e.serie : ''].filter(Boolean).join(' · '),
       setFlag: top ? '' : this.flag(e.lang === 'EN' ? 'EN' : 'FR'), hasDate: !top,
       hasProg: true, progText: mine.length + ' / ' + plural(all.length, 'carte possédée', 'cartes possédées'), pct: pct + ' %', progW: pct + '%',
       progLabel: mine.length + ' cartes possédées sur ' + all.length + ', ' + pct + ' pour cent',

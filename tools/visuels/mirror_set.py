@@ -6,7 +6,8 @@ Le CDN de TCGdex refuse parfois des visuels par rafales (503) quand une page en 
 affichait alors la carte dessinée. Ce script copie les visuels de l'extension (WebP 600 px et 245 px, tels quels) dans
 web/img/local/ et les inscrit dans web/data/img-local.json, que l'app lit avec le catalogue : ces cartes s'affichent alors
 depuis dropicards.fr, avec retour au visuel TCGdex si la copie manque. Un visuel déjà redressé (web/data/img-fix.json)
-n'est pas copié : la version redressée reste prioritaire.
+n'est pas copié : la version redressée reste prioritaire. Après la copie du Set de Base, stamp_ed1.py repose le tampon
+« Édition 1 » sur les visuels du tirage illimité (une copie refaite efface le tampon : il est reposé aussitôt).
 
 Usage : python tools/visuels/mirror_set.py base1 [base2 …]
 """
@@ -69,6 +70,7 @@ def main(sets):
             (OUT / (name_of(path) + ".webp")).write_bytes(hi)
             (OUT / (name_of(path) + "-low.webp")).write_bytes(lo)
             doc["p"][path] = hashlib.md5(hi + lo).hexdigest()[:8]
+            doc.get("ed1", {}).pop(path, None)  # copie neuve : le tampon « Édition 1 » est à reposer
             done += 1
             print("COPIE", c[f["id"]], path, len(hi) // 1024, "Ko", flush=True)
             time.sleep(0.3)
@@ -77,6 +79,10 @@ def main(sets):
     doc["n"] = len(doc["p"])
     LIST.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")) + "\n", "utf-8")
     print(f"{done} visuels copiés, {missing} introuvables · web/img/local, web/data/img-local.json ({doc['n']} au total)")
+    if "base1" in sets:
+        sys.path.insert(0, str(pathlib.Path(__file__).parent))
+        import stamp_ed1  # Pillow et numpy (installés par le workflow)
+        stamp_ed1.main()
     return 1 if missing and not done else 0
 
 

@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-20 — Tampon « Édition 1 » sur le Set de Base, dates françaises des extensions (porteur)
+
+- **Demande** (porteur) : « Oui, rajoute-moi le tampon 1ère édition sur toutes les cartes de base » (« oui » en réponse à la proposition de mettre la date française sur la page d'une extension).
+- **Constat** : chez TCGdex, les visuels français du Set de Base mélangent deux tirages. **81 cartes sont déjà des scans de l'Édition 1** (tous les Dresseurs, la Double Énergie Incolore, les 6 Énergies et 48 Pokémon) ; **21 sont des scans du tirage illimité** (n° 1, 2, 4 à 7, 9, 11 à 16, 24, 26 à 29, 34, 35, 37 : la plupart des holos, dont Dracaufeu).
+- **Tampon posé sur ces 21 visuels** (`tools/visuels/stamp_ed1.py`) : le vrai tampon français (« EDITION » en arc au-dessus d'un « 1 » dans un disque noir), relevé sur 32 cartes du même set (`tools/visuels/ed1-tampon.png`), à sa place exacte (sous l'illustration, à gauche du bandeau « Pokémon … Taille … »), mesurée sur les 48 Pokémon déjà tamponnés (± 3 px). Planche de contrôle vérifiée carte par carte. Copies dans `web/img/local/`, liste « ed1 » de `web/data/img-local.json` ; la carte redressée n° 24 est tamponnée à partir de sa version redressée. Les réimpressions des 30 ans gardent le visuel sans tampon. Le workflow « Copie locale des visuels » repose le tampon s'il recopie le Set de Base.
+- **Limite** : la cote reste celle de Cardmarket, qui ne sépare pas l'Édition 1 du tirage illimité ; une vraie carte Édition 1 vaut en général bien plus (décision du porteur attendue sur l'affichage de la cote).
+- **Dates françaises** : la page d'une extension, « Toutes les séries » et leur ordre utilisent la date de sortie en France du calendrier TCG (`calendar.json`, 122 extensions ; 73 différaient de la date américaine de TCGdex), par exemple Set de Base 18/11/1999 au lieu du 09/01/1999 ; mois seul quand le jour n'est pas connu (« mars 2001 »).
+- Cache v252.
+
 ## 2026-11-20 — Blocs de série et visuels du Set de Base (porteur)
 
 - **Demande** (porteur) : « supprime les % d'évolution d'ETB dans la frise […] fais une séparation par gros bloc de série […] supprime les top 3 des cartes les plus chères pour chaque série […] et retrouve-moi le visuel de toutes les cartes de la première série, édition 1 ».

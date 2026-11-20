@@ -1,6 +1,7 @@
 # Copie locale des visuels d'une extension (2026-11-20, porteur : visuels du Set de Base) : copie les visuels TCGdex
 # (WebP 600 px et 245 px) dans web/img/local/ et les inscrit dans web/data/img-local.json, lu par l'app ; ces cartes
-# s'affichent alors depuis dropicards.fr, même quand le CDN de TCGdex refuse des visuels. Lancé à la main.
+# s'affichent alors depuis dropicards.fr, même quand le CDN de TCGdex refuse des visuels. Pour le Set de Base, le tampon
+# « Édition 1 » est reposé sur les visuels du tirage illimité (tools/visuels/stamp_ed1.py). Lancé à la main.
 name: Copie locale des visuels
 
 on:
@@ -26,6 +27,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Outils d'image (tampon « Édition 1 » du Set de Base)
+        run: pip install pillow numpy
       - name: Copie
         env:
           SETS: ${{ github.event.inputs.sets }}
