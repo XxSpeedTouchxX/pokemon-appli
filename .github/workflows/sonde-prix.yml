@@ -17,6 +17,10 @@ on:
         description: "Extension pokemontcg.io à sonder à la place (ex. base1), vide sinon"
         required: false
         default: ""
+      cm:
+        description: "Noms anglais (virgules) : tous les produits Cardmarket de ce nom, vide sinon"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -34,4 +38,5 @@ jobs:
           SET: ${{ github.event.inputs.set }}
           LANG_TCGDEX: ${{ github.event.inputs.lang }}
           PTCG: ${{ github.event.inputs.ptcg }}
-        run: python3 tools/tcgdex/probe_prices.py "$SET" --lang "$LANG_TCGDEX" --ptcg "$PTCG"
+          CMN: ${{ github.event.inputs.cm }}
+        run: python3 tools/tcgdex/probe_prices.py "$SET" --lang "$LANG_TCGDEX" --ptcg "$PTCG" --cm "$CMN"
