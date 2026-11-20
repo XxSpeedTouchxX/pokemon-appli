@@ -39,7 +39,7 @@
   const navBaseRender = proto.renderVals;
   proto.renderVals = function () { const r = navBaseRender.call(this); if (r && r.ui) r.ui.hhAny = !!(r.ui.headerHome || r.ui.headerBig); return r; };
   proto.push = function (screen, extra) { NAV.dir = 'fwd'; NAV.from = 0; navSnapTake(); return navBasePush.call(this, screen, extra); };
-  // Ouverture « en zoom » (2026-11-19, calendrier TCG : zoom sur l'extension touchée, coin.js calZoom) : la nouvelle page
+  // Ouverture « en zoom » (2026-11-19, calendrier JCC : zoom sur l'extension touchée, coin.js calZoom) : la nouvelle page
   // se pose en grandissant à peine, sous le panneau du zoom qui s'efface, au lieu de glisser de la droite ; le retour reste
   // le glissement habituel.
   proto.navZoomPush = function (screen, extra) { NAV.dir = 'zoom'; NAV.from = 0; navSnapDrop(); return navBasePush.call(this, screen, extra); };

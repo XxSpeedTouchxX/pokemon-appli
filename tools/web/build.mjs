@@ -515,8 +515,7 @@ ${FEATURE_CARD('fx', 'flex: none; width: 240px; scroll-snap-align: start;')}
 </section>
 </sc-if>
 `;
-patch('<!-- carrousel : home.rel -->', CAROUSEL('home.rel', 'Sorties récentes'));
-patch('<!-- carrousel : home.next -->', CAROUSEL('home.next', 'Prochaines sorties'));
+// « Sorties récentes » et « Prochaines sorties » retirées de l'accueil (2026-11-20, porteur : le calendrier JCC suffit).
 patch(FRAG['market-browse'], CAROUSEL('mk.feat', 'Scellé à la une') + FRAG['market-browse']);
 // - Produits scellés : une colonne de grandes cartes.
 // Écran « Produits scellés » : grille de 3 refaite le 2026-10-21 (gabarit catalog.dc.html, sealed.js).
@@ -718,7 +717,7 @@ tpl = tpl.replace(/<img src="\{\{ ([\w.]+)\.img \}\}"/g, (m, o) => m + ' data-fa
 // (photo → logo de l'extension sur son fond → plaque dessinée).
 let brokenMarks = 0;
 tpl = tpl.replace(/<img src="\{\{ [\w.]+\.(?:photo|logo) \}\}"/g, m => { brokenMarks++; return m + ' data-broken="1"'; });
-if (brokenMarks !== 63) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 63'); // dont 3 logos d'extensions dans « Le calendrier TCG » (frise au-dessus et au-dessous de la ligne et fiche d'une sortie, 2026-11-19), 1 logo de série sur l'étiquette de chaque bloc de la frise (2026-11-20), 2 dans « Autres items de la série » (2026-11-15), 3 logos du DropiPass (bannière du PK shop et de Mon profil, écran de l'offre, 2026-11-15), 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
+if (brokenMarks !== 63) throw new Error('Photos et logos repérés : ' + brokenMarks + ' au lieu de 63'); // dont 3 logos d'extensions dans « Le calendrier JCC » (frise au-dessus et au-dessous de la ligne et fiche d'une sortie, 2026-11-19), 1 logo de série sur l'étiquette de chaque bloc de la frise (2026-11-20), 2 dans « Autres items de la série » (2026-11-15), 3 logos du DropiPass (bannière du PK shop et de Mon profil, écran de l'offre, 2026-11-15), 2 dans l'onglet « Items » d'une extension (2026-11-14), 1 dans « Mes PA » (2026-10-31), 2 dans « Tout afficher » du classeur, 2 dans la fiche (photo et logo du scellé, 2026-10-21), 4 dans « Produits scellés » (grille, logos des extensions), 2 dans « Prochaines sorties » (accueil, 2026-10-11), 3 logos dans « Toutes les séries » (barre, série, extension), 4 sur l'accueil (vignette de la recherche, vitrine du classeur), 4 dans les vues du Marché ; plus celles du viseur simulé
 
 // Identité Dropicards : les libellés visibles « PKM » deviennent « Dropicards » (gabarit, logique, modules).
 // Les noms techniques (classes pkm-, variables --pkm-, clé d'enregistrement de la collection) sont en minuscules : inchangés.
@@ -821,7 +820,7 @@ const mod = f => rebrand(readFileSync(fileURLToPath(new URL('./' + f, import.met
 // Visuels dorés des réimpressions des 30 ans (web/img/c30/, workflow « Bords dorés des 30 ans ») : liste injectée.
 const C30_GOLD = (() => { try { return readdirSync(ROOT + 'web/img/c30').filter(f => /^30th-c-\d{3}\.webp$/.test(f)).map(f => f.slice(0, 10)); } catch (e) { return []; } })();
 // Dates de sortie en France des extensions (2026-11-20, porteur : « oui » à la date française sur la page d'une
-// extension) : celles du calendrier TCG tenu à la main (web/data/calendar.json, sorties « sortie » rattachées à une
+// extension) : celles du calendrier JCC tenu à la main (web/data/calendar.json, sorties « sortie » rattachées à une
 // extension du catalogue), à la place des dates américaines de TCGdex.
 const FR_DATES = (() => { try { const o = {}; JSON.parse(readFileSync(ROOT + 'web/data/calendar.json', 'utf8')).items.forEach(it => { if (it.set && it.status === 'sortie' && /^\d{4}-\d{2}(-\d{2})?$/.test(it.date || '')) o[it.set] = it.date; }); return o; } catch (e) { return {}; } })();
 const catalogJs = mod('catalog.js').replace('__C30_GOLD__', JSON.stringify(C30_GOLD)).replace('__FR_DATES__', JSON.stringify(FR_DATES)), persistJs = mod('persist.js'), sealedJs = mod('sealed.js'), showcaseJs = mod('showcase.js');

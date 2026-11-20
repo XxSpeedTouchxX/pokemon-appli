@@ -1,9 +1,9 @@
-# Vérification du calendrier TCG (2026-11-19, porteur) : chaque lundi, liste les sorties de web/data/calendar.json dont
+# Vérification du calendrier JCC (2026-11-19, porteur) : chaque lundi, liste les sorties de web/data/calendar.json dont
 # la date est passée sans mise à jour (statut encore rumeur, officiel ou Japon), une « sortie » encore à venir ou une
 # date mal écrite (tools/calendar/check_calendar.py). Ne modifie rien : le rapport va dans le résumé du job et dans une
-# issue « Calendrier TCG : dates à vérifier » (ouverte, mise à jour, puis fermée quand tout est à jour). Aucun secret :
+# issue « Calendrier JCC : dates à vérifier » (ouverte, mise à jour, puis fermée quand tout est à jour). Aucun secret :
 # seul le jeton fourni par GitHub, limité aux issues.
-name: Calendrier TCG
+name: Calendrier JCC
 
 on:
   workflow_dispatch:
@@ -47,14 +47,17 @@ jobs:
           if [ "$code" -ge 2 ]; then exit "$code"; fi
           echo "todo=$code" >> "$GITHUB_OUTPUT"
 
-      - name: "Issue « Calendrier TCG : dates à vérifier »"
+      - name: "Issue « Calendrier JCC : dates à vérifier »"
         env:
           GH_TOKEN: ${{ github.token }}
           TODO: ${{ steps.check.outputs.todo }}
         run: |
-          title="Calendrier TCG : dates à vérifier"
+          title="Calendrier JCC : dates à vérifier"
+          # Ancien nom (« Calendrier TCG », jusqu'au 2026-11-20) retrouvé aussi, puis renommé : pas de doublon.
+          old="Calendrier TCG : dates à vérifier"
           num=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 50 --json number,title \
-                --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+                --jq ".[] | select(.title == \"$title\" or .title == \"$old\") | .number" | head -n 1)
+          if [ -n "$num" ]; then gh issue edit "$num" --repo "$GITHUB_REPOSITORY" --title "$title" || true; fi
           body="$RUNNER_TEMP/calendrier.md"
           if [ "$TODO" = "1" ]; then
             if [ -n "$num" ]; then gh issue edit "$num" --repo "$GITHUB_REPOSITORY" --body-file "$body"

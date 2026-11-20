@@ -77,7 +77,7 @@
       name: (a, b) => String(a.name).localeCompare(String(b.name), 'fr') || rank.get(a.id) - rank.get(b.id) }[sort[0]];
     shown.sort(order);
     const pct = all.length ? Math.round(mine.length / all.length * 100) : 0;
-    // Les 3 cartes les plus chères de l'extension (2026-11-19, porteur : propositions de la frise du calendrier TCG),
+    // Les 3 cartes les plus chères de l'extension (2026-11-19, porteur : propositions de la frise du calendrier JCC),
     // en tête de l'onglet « Cartes » ; un appui ouvre leur fiche.
     // Items de l'extension : produits scellés rattachés à cette extension (setId), le plus récent d'abord.
     const items = top || SEALED.status !== 'ready' ? [] : SEALED.list().filter(p => p.setId === e.id).sort((a, b) => (relKey(a) < relKey(b) ? 1 : relKey(a) > relKey(b) ? -1 : 0));

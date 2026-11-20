@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Vérification du calendrier TCG (web/data/calendar.json, tenu à la main).
+"""Vérification du calendrier JCC (web/data/calendar.json, tenu à la main).
 
-« Le coin des dresseurs › Le calendrier TCG » (2026-11-19, porteur) : chaque semaine, la liste des sorties dont la date
+« Le coin des dresseurs › Le calendrier JCC » (2026-11-19, porteur) : chaque semaine, la liste des sorties dont la date
 est passée sans que le calendrier ait été mis à jour (statut encore « rumeur », « officiel » ou « japon »). L'app les
 affiche déjà en attendant (coin.js, vCal) : « À confirmer » pour une rumeur ou une date au mois près, « Sortie » ou
 « Sorti au Japon » pour une date exacte passée. Ce script ne modifie rien : il écrit un rapport (Markdown) que le
-workflow « Calendrier TCG » publie dans une issue GitHub.
+workflow « Calendrier JCC » publie dans une issue GitHub.
 
 Signalé aussi :
 - une sortie marquée « sortie » dont la date est encore à venir ;

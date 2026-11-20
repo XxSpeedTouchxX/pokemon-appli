@@ -223,7 +223,7 @@
   // Bord doré des vraies réimpressions (2026-11-08, porteur, d'après sa photo) : visuel d'origine au bord redessiné
   // (web/img/c30/, tools/c30/gold.mjs), liste mise par le build.
   const C30_GOLD = new Set(__C30_GOLD__);
-  // Date de sortie en France de chaque extension (calendrier TCG, mise par le build) ; « 2001-03 » = mois seulement.
+  // Date de sortie en France de chaque extension (calendrier JCC, mise par le build) ; « 2001-03 » = mois seulement.
   const FR_DATES = __FR_DATES__;
   const MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   const setDateText = d => !d ? '' : d.length === 7 ? MOIS_FR[Number(d.slice(5, 7)) - 1] + ' ' + d.slice(0, 4) : d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4);

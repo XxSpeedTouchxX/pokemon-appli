@@ -1,4 +1,4 @@
-# News Pokémon de « Le coin des dresseurs › Le calendrier TCG » (2026-11-18, porteur) : deux fois par jour, lit les flux
+# News Pokémon de « Le coin des dresseurs › Le calendrier JCC » (2026-11-18, porteur) : deux fois par jour, lit les flux
 # RSS publics de Pokébip et de la rubrique JCC de Margxt et publie web/data/news.json (titre, date, site et lien de
 # chaque article ; jamais leur texte ni leurs images). Un flux en panne est ignoré ; si aucun ne répond, le fichier
 # publié reste tel quel (le job échoue, courriel au porteur).

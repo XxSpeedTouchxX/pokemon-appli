@@ -160,7 +160,7 @@ for (const name of ['Écarlate et Violet', 'Épée et Bouclier']) {
   ok('« ' + name + ' » : 3 extensions par ligne', cols === 3);
   await c2.close();
 }
-// Set de Base (2026-11-20, porteur) : date de sortie en France (calendrier TCG) et tampon « Édition 1 » posé par
+// Set de Base (2026-11-20, porteur) : date de sortie en France (calendrier JCC) et tampon « Édition 1 » posé par
 // Dropicards sur les 21 visuels du tirage illimité (copies web/img/local/, liste « ed1 » de img-local.json).
 {
   const c3 = await browser.newContext({ viewport: { width: 390, height: 844 } }), page = await c3.newPage();

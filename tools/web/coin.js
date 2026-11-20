@@ -5,7 +5,7 @@
   //      échanges possibles : vitrine.js, vTradeTab), plus la recherche de tous les dresseurs de l'app par leur pseudo et
   //      les vitrines des dresseurs (serveur 034, player_search). Un dresseur trouvé ouvre sa carte de dresseur, avec sa
   //      vitrine : « Je suis intéressé », « Je te propose une de mes cartes », messages rapides (031 à 033, inchangés).
-  //   2. « Le calendrier TCG » : frise de l'univers JCC Pokémon (blocs, extensions sorties, à venir, annonces japonaises,
+  //   2. « Le calendrier JCC » : frise de l'univers JCC Pokémon (blocs, extensions sorties, à venir, annonces japonaises,
   //      rumeurs), chaque date avec son statut et sa source (web/data/calendar.json, tenu à la main), puis les « News
   //      Pokémon » du moment (web/data/news.json, relu chaque jour par le workflow « News Pokémon » : titre, date,
   //      source et lien seulement, jamais le texte des articles).
@@ -14,7 +14,7 @@
   const coinProto = Component.prototype;
   const coinOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
   const coinAdmin = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin && Cloud.isAdmin();
-  const COIN_TABS = [['vit', 'Ma vitrine'], ['cal', 'Le calendrier TCG']];
+  const COIN_TABS = [['vit', 'Ma vitrine'], ['cal', 'Le calendrier JCC']];
   // Logo de l'onglet : 1 Dresseurs (deux dresseurs à casquette), 2 Échange de cartes, 3 Bulle et ball, 4 Rassemblement.
   const COIN_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('coinvis')); return v >= 1 && v <= 4 ? v : 1; } catch (e) { return 1; } })();
   if (typeof document !== 'undefined' && document.documentElement) document.documentElement.setAttribute('data-coinvis', String(COIN_VIS));
@@ -109,7 +109,7 @@
     };
   };
 
-  // ——— Le calendrier TCG ———
+  // ——— Le calendrier JCC ———
   // (« News Pokémon » retirées de l'écran le 2026-11-19, porteur : « je veux juste la chronologie » ; le fichier
   // data/news.json reste mis à jour par son workflow, l'app ne le lit plus.)
   const CAL = { status: 'idle', data: null, at: 0 };
@@ -524,7 +524,7 @@
       Object.assign(r.tab, { coinFg: sec ? 'var(--pkm-nav-on)' : 'var(--pkm-nav-off)', coinDot: sec ? 'var(--pkm-nav-dot)' : 'transparent', coinCur: sec ? 'page' : 'false' });
     }
     if (on) {
-      Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Le calendrier TCG' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
+      Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Le calendrier JCC' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
       if (!this.__coinOnce) { this.__coinOnce = true; setTimeout(() => (tab === 'vit' ? this.coinEnterVit(false) : this.calLoad(false)), 0); }
       r.coin = {
         tabs: COIN_TABS.map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-shop-tab pkm-coin-tab' + (tab === k ? ' pkm-shop-tab-on' : ''), pick: () => this.coinPick(k),

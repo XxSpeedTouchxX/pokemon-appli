@@ -463,7 +463,7 @@
     }
     return out;
   };
-  // Rappels du calendrier TCG (« Préviens-moi », coin.js calRemind ; 2026-11-19, porteur) : la veille et le jour de la
+  // Rappels du calendrier JCC (« Préviens-moi », coin.js calRemind ; 2026-11-19, porteur) : la veille et le jour de la
   // sortie (jusqu'à 2 jours après, pour une app ouverte plus tard), et à l'ouverture des précommandes quand le calendrier
   // en donne la date (« preorder »). Seulement pour les dates exactes ; un rappel posé sur un mois attend la date.
   // Le calendrier est lu dès qu'un rappel existe, même sans ouvrir « Le coin des dresseurs ».
@@ -478,11 +478,11 @@
       const jp = x.status === 'japon', where = jp && !/Japon/.test(x.name || '') ? ' au Japon' : '', d = stDays(x.date, today);
       const open = () => this.setState({ screen: 'coin', coinTab: 'cal', calSel: id, calHelp: false });
       const push = (k, title, text) => { if (!done[k]) out.push({ key: k, title: title, text: text, open: open }); };
-      if (d === 1) push('cal:' + id + ':veille:' + x.date, x.name + ' sort demain' + where, 'Rappel du calendrier TCG : sortie le ' + this.d2(x.date) + where + '.');
-      if (d <= 0 && d >= -2) push('cal:' + id + ':jour:' + x.date, 'C’est le jour : ' + x.name, 'Sortie' + where + ' le ' + this.d2(x.date) + ' (rappel du calendrier TCG).');
+      if (d === 1) push('cal:' + id + ':veille:' + x.date, x.name + ' sort demain' + where, 'Rappel du calendrier JCC : sortie le ' + this.d2(x.date) + where + '.');
+      if (d <= 0 && d >= -2) push('cal:' + id + ':jour:' + x.date, 'C’est le jour : ' + x.name, 'Sortie' + where + ' le ' + this.d2(x.date) + ' (rappel du calendrier JCC).');
       if (x.preorder && x.preorder.length >= 10) {
         const p = stDays(x.preorder, today);
-        if (p <= 0 && p >= -3) push('cal:' + id + ':pre:' + x.preorder, 'Précommandes ouvertes : ' + x.name, 'Ouverture des précommandes le ' + this.d2(x.preorder) + ' (rappel du calendrier TCG).');
+        if (p <= 0 && p >= -3) push('cal:' + id + ':pre:' + x.preorder, 'Précommandes ouvertes : ' + x.name, 'Ouverture des précommandes le ' + this.d2(x.preorder) + ' (rappel du calendrier JCC).');
       }
     });
     return out;

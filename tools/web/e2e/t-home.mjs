@@ -13,12 +13,12 @@ const page = await mk();
 await page.goto(BASE + '?today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(2500);
 // 1. Ordre des blocs et retraits.
 const order = await page.$$eval('main section[aria-label], main > button, main > div > button', els => els.map(e => e.getAttribute('aria-label') || (e.textContent.includes('Marge réalisée') ? 'Marge' : '')).filter(Boolean));
-// Depuis le 2026-10-07 : « Mon classeur » après la valeur ; depuis le 2026-10-12 : « Sorties récentes » puis
-// « Prochaines sorties » tout en bas.
-// La recherche des cartes et des produits est passée dans « Toutes les séries » le 2026-11-15 (porteur).
-const want = ['Valeur de ma collection', 'Mon classeur', 'Boutiques près de toi', 'Marge', 'Sorties récentes', 'Prochaines sorties'];
+// Depuis le 2026-10-07 : « Mon classeur » après la valeur. La recherche des cartes et des produits est passée dans
+// « Toutes les séries » le 2026-11-15 ; « Sorties récentes » et « Prochaines sorties » retirées le 2026-11-20 (porteur).
+const want = ['Valeur de ma collection', 'Mon classeur', 'Boutiques près de toi', 'Marge'];
 const idx = want.map(l => order.indexOf(l));
-ok('ordre : ' + order.join(' › '), idx.every((v, i) => v >= 0 && (i === 0 || v > idx[i - 1])) && order[order.length - 1] === 'Prochaines sorties');
+ok('ordre : ' + order.join(' › '), idx.every((v, i) => v >= 0 && (i === 0 || v > idx[i - 1])));
+ok('plus de « Sorties récentes » ni de « Prochaines sorties » sur l’accueil', order.indexOf('Sorties récentes') < 0 && order.indexOf('Prochaines sorties') < 0);
 ok('plus de recherche sur l’accueil (passée dans « Toutes les séries »)', (await page.locator('input[aria-label="Rechercher dans le catalogue"]').count()) === 0 && order.indexOf('Recherche dans le catalogue') < 0);
 // Courbe de la valeur (2026-10-25) : axe des montants et 4 périodes.
 {

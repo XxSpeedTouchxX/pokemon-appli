@@ -275,7 +275,7 @@
       details: () => this.fiOpen(p.id), detailsLabel: 'Détails de ' + p.name
     }, slLaunchOf(this, p));
   };
-  // Prix de sortie en France et évolution jusqu'à la cote du jour (2026-11-19, porteur : frise du calendrier TCG ;
+  // Prix de sortie en France et évolution jusqu'à la cote du jour (2026-11-19, porteur : frise du calendrier JCC ;
   // calLaunch, coin.js). Rien sans prix de sortie sourcé (sealed.json, msrp).
   const slLaunchOf = (inst, p) => {
     const L = inst.calLaunch ? inst.calLaunch(p) : null;

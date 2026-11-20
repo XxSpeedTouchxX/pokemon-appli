@@ -1,5 +1,5 @@
 // « Le coin des dresseurs » (2026-11-18, porteur) : 5ᵉ onglet entre « Toutes les séries » et le scan ; « Ma vitrine »
-// (interface Échanges de Ma ligue + recherche des dresseurs, 034) ; « Le calendrier TCG » (2026-11-19 : la frise seule,
+// (interface Échanges de Ma ligue + recherche des dresseurs, 034) ; « Le calendrier JCC » (2026-11-19 : la frise seule,
 // en plein écran, avec les logos des extensions ; un appui sur une sortie ouvre sa fiche, un appui sur un logo l'enfonce,
 // zoome dessus puis ouvre la page de l'extension, onglets « Cartes » et « Items »). Le serveur est imité : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -85,7 +85,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   const tabSt = [await page.evaluate(() => window.__pkm.st().screen), await page.locator(NAV + ' button[aria-label="Le coin des dresseurs"]').getAttribute('aria-current'), N(await page.locator('h1, h2').first().innerText())];
   ok('onglet : écran « Le coin des dresseurs » ouvert, bouton allumé (' + tabSt.join(' | ') + ')', tabSt[0] === 'coin' && tabSt[1] === 'page' && /Le coin des dresseurs/.test(tabSt[2]));
   const tabs = await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button').allInnerTexts();
-  ok('2 sous-rubriques : « Ma vitrine » et « Le calendrier TCG »', tabs.length === 2 && /Ma vitrine/.test(tabs[0]) && /calendrier TCG/.test(tabs[1]));
+  ok('2 sous-rubriques : « Ma vitrine » et « Le calendrier JCC »', tabs.length === 2 && /Ma vitrine/.test(tabs[0]) && /calendrier JCC/.test(tabs[1]));
 
   // B. Ma vitrine : même interface que l'onglet Échanges, recherche, vitrines des dresseurs.
   ok('Ma vitrine : sections « Mes cartes Pour trade et à vendre », « Je cherche », « Échanges possibles » (interface Échanges)',
@@ -111,7 +111,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('« Voir ma vitrine » : ma carte de dresseur, « Ma vitrine »', (S.calls.player_showcase || []).some(b => b.target === UID) && /Ma vitrine/.test(N(await page.locator('body').innerText())));
   await page.evaluate(() => window.__pkm.setState({ pcCard: null, pcVit: null })); await page.waitForTimeout(300);
 
-  // C. Le calendrier TCG : la frise seule, en plein écran (2026-11-19, porteur : « je veux juste la chronologie qui prenne
+  // C. Le calendrier JCC : la frise seule, en plein écran (2026-11-19, porteur : « je veux juste la chronologie qui prenne
   // tout l'écran »), une fiche au toucher d'une sortie, l'appui puis le zoom et les items d'une extension.
   await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button').nth(1).click(); await page.waitForTimeout(1500);
   const hero = page.locator('section[aria-label="Frise du JCC Pokémon"]');

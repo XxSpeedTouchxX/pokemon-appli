@@ -19,16 +19,11 @@ const panelText = async page => (await page.locator(PANEL + ' .pkm-hk-head > div
   const [ctx, page] = await mk();
   await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(2500);
   const order = await page.$$eval('#app section[aria-label]', ss => ss.map(s => s.getAttribute('aria-label')).filter(l => !/^(Navigation|Recherche dans)/.test(l)));
-  ok('ordre de l’accueil : ' + order.join(' > '), order.join('|') === 'Valeur de ma collection|Mon classeur|Boutiques près de toi|Pré-gradation|Sorties récentes|Prochaines sorties');
-  const last = await page.evaluate(() => { const s = document.querySelector('section[aria-label="Prochaines sorties"]'); let n = s.nextElementSibling; const after = []; while (n) { after.push(n.tagName + ':' + (n.getAttribute('aria-label') || n.innerText.slice(0, 30))); n = n.nextElementSibling; } return after; });
-  ok('« Prochaines sorties » tout en bas, juste avant la mention de non-affiliation (' + last.join(', ') + ')', last.length === 1 && /non affiliée/.test(await page.locator('section[aria-label="Prochaines sorties"] + p').innerText()));
-  // Sorties récentes et prochaines sorties (2026-11-15, porteur) : un produit s'ouvre dans la fiche en panneau.
-  const rel = page.locator('section[aria-label="Sorties récentes"] button[aria-label], section[aria-label="Prochaines sorties"] button[aria-label]').filter({ hasNotText: 'Toutes les sorties' }).first();
-  if (await rel.count()) {
-    await rel.scrollIntoViewIfNeeded(); await rel.click(); await page.waitForTimeout(900);
-    ok('sortie de l’accueil : fiche en panneau avec le prix du marché, pas l’ancienne page', (await page.locator('section.pkm-fi').count()) === 1 && /Prix du marché/.test(await page.locator('section.pkm-fi').innerText()) && (await page.locator('section[aria-label="Visuel"]').count()) === 0);
-    await page.locator('section.pkm-fi button[aria-label="Fermer"]').click(); await page.waitForTimeout(600);
-  }
+  ok('ordre de l’accueil : ' + order.join(' > '), order.join('|') === 'Valeur de ma collection|Mon classeur|Boutiques près de toi|Pré-gradation');
+  // « Sorties récentes » et « Prochaines sorties » retirées (2026-11-20, porteur : le calendrier JCC suffit) :
+  // la pré-gradation est le dernier bloc, juste avant la mention de non-affiliation.
+  ok('plus de « Sorties récentes » ni de « Prochaines sorties »', (await page.locator('section[aria-label="Sorties récentes"], section[aria-label="Prochaines sorties"]').count()) === 0
+    && /non affiliée/.test(await page.locator('section[aria-label="Pré-gradation"] ~ p').last().innerText()));
   ok('plus d’encadré « Profil Passionné » sur l’accueil', !/Profil Passionné/.test(await page.locator('#app').innerText()) && (await page.locator('section[aria-label="Suggestion"]').count()) === 0);
   ok('titre « Mon classeur »', (await page.locator(SEC + ' h2').innerText()) === 'Mon classeur');
   const logo = page.locator(SEC + ' img[src="img/brand/classeur.svg"]');
