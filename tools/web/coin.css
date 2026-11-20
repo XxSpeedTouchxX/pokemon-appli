@@ -61,6 +61,13 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-cal-strip::-webkit-scrollbar { display: none; }
 .pkm-cal-m { position: relative; flex: none; width: 46px; display: flex; flex-direction: column; }
 .pkm-cal-m-has { width: clamp(74px, 15cqh, 96px); }
+/* Années anciennes (plus d'un an avant aujourd'hui) : un mois sans sortie est une fine tranche, seule l'année reste, en
+   janvier, posée sur la ligne de la frise. */
+.pkm-cal-m-thin { width: 16px; }
+.pkm-cal-m-thin .pkm-cal-axis { align-items: center; }
+.pkm-cal-m-thin .pkm-cal-mlabel { display: none; }
+.pkm-cal-m-jan .pkm-cal-year { font-size: clamp(11.5px, 2.6cqh, 13.5px); line-height: 1.2; color: #9AA8C3; white-space: nowrap; }
+.pkm-cal-m-jan .pkm-cal-track::before { content: ''; position: absolute; left: 50%; top: -5px; width: 2px; height: 14px; margin-left: -1px; border-radius: 1px; background: rgba(201, 211, 234, 0.55); }
 /* Hauteur fixe des noms de mois (2026-11-19, porteur : « la ligne n'est pas parfaitement droite ») : avec l'année ou
    « Aujourd'hui » sous le nom, la ligne du temps descendait de 1 à 2 px dans ces mois-là. */
 .pkm-cal-axis { flex: none; box-sizing: border-box; height: 36px; overflow: visible; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding-bottom: 4px; }

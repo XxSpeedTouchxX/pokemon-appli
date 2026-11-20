@@ -420,10 +420,13 @@
     const keys = items.map(x => x.month).filter(Boolean).concat([todayKey]).sort();
     const months = [];
     let side = 0;
+    // Toute l'histoire du JCC depuis le Set de Base (2026-11-20, porteur) : plus d'un an avant aujourd'hui, un mois sans
+    // sortie devient une fine tranche (seule l'année s'affiche, en janvier) et un mois avec sortie montre son année.
+    const [ty, tm] = todayKey.split('-').map(Number), oldKey = (ty - 1) + '-' + String(tm).padStart(2, '0');
     if (keys.length) {
       let [y, m] = keys[0].split('-').map(Number);
       const [yl, ml] = keys[keys.length - 1].split('-').map(Number);
-      for (let guard = 0; (y < yl || (y === yl && m <= ml)) && guard < 60; guard++) {
+      for (let guard = 0; (y < yl || (y === yl && m <= ml)) && guard < 600; guard++) {
         const k = y + '-' + String(m).padStart(2, '0'), here = items.filter(x => x.month === k);
         const up = here.length ? side++ % 2 === 0 : false;
         const dots = here.map(x => {
@@ -446,8 +449,10 @@
         const logos = dots.filter(d => d.hasLogo), chips = dots.filter(d => !d.hasLogo), split = logos.length > 0 && chips.length > 0;
         const mine = split ? logos : dots, other = split ? chips : [];
         const upList = up ? mine : other, downList = up ? other : mine;
-        months.push({ key: k, label: CAL_MONTHS[m - 1].replace('.', ''), year: m === 1 || !months.length ? String(y) : '', hasYear: m === 1 || !months.length,
-          now: k === todayKey, cls: 'pkm-cal-m' + (k === todayKey ? ' pkm-cal-m-now' : k < todayKey ? ' pkm-cal-m-past' : '') + (here.length ? ' pkm-cal-m-has' : ''),
+        const old = k < oldKey, thin = old && !here.length, yearOn = m === 1 || !months.length || (old && here.length > 0);
+        months.push({ key: k, label: thin ? '' : CAL_MONTHS[m - 1].replace('.', ''), year: yearOn ? String(y) : '', hasYear: yearOn,
+          now: k === todayKey, cls: 'pkm-cal-m' + (k === todayKey ? ' pkm-cal-m-now' : k < todayKey ? ' pkm-cal-m-past' : '') + (here.length ? ' pkm-cal-m-has' : '')
+            + (thin ? ' pkm-cal-m-thin' + (m === 1 ? ' pkm-cal-m-jan' : '') : ''),
           up: upList, down: downList, dots: dots,
           upCls: 'pkm-cal-dots pkm-cal-dots-up' + (upList.length ? ' pkm-cal-dots-on' : ''),
           downCls: 'pkm-cal-dots pkm-cal-dots-down' + (downList.length ? ' pkm-cal-dots-on' : '') });
