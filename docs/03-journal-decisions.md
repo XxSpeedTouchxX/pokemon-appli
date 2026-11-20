@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-20 — Animation « Choisir comme compagnon », logos des séries (porteur)
+
+- **Demande** : « lorsque l'on va dans le Pokédex et qu'on choisit “Choisir comme compagnon”, je veux une petite animation de 2 s qui montre le Pokémon qui est OK comme compagnon, propose-moi des choses ».
+- **Proposé et construit (cache v260)** : 4 animations de 2 s, le texte « X t'accompagne » (« · thème … » pour Kyogre, Groudon, Rayquaza) dans l'animation au lieu du message du bas : 1 **Saut de joie** (deux bonds, cœur qui jaillit, badge vert « ✓ Compagnon ») ; 2 **Halo d'amitié** (anneaux dorés, étincelles, Pokémon qui brille, coche verte) ; 3 **Cœurs** (grand cœur qui se dessine, Pokémon qui se dandine, petits cœurs qui montent) ; 4 **Direction l'accueil** (petit salut puis vol vers le bouton Accueil de la barre du bas, qui rebondit : « Il t'attend sur l'accueil »). Essai : `?compvis=1` à `4` ; vidéo des 4 côte à côte : `tools/brand/compfx/propositions.mp4` (`make_video.mjs`). **Choix du porteur attendu** (1 en attendant). Pas de son (à proposer si souhaité).
+- **Demande (même jour)** : « dans Toutes les séries, le bandeau avec toutes les séries, on ne voit plus le visuel de plusieurs séries ».
+- **Cause** : les logos venaient tous du CDN de TCGdex, qui refuse des images par rafales (même cause que les cartes du Set de Base le matin) ; un logo refusé passait au nom dessiné.
+- **Fait** : copie des logos sur dropicards.fr (`tools/visuels/mirror_logos.py`, workflow « Logos des extensions », chaque lundi pour les nouvelles extensions et à la main), liste `web/data/logos-local.json` lue avec le catalogue ; la copie passe avant TCGdex, retour à TCGdex si elle manque (test `t-logos.mjs`).
+
+---
+
 ## 2026-11-20 — Icônes de la barre du bas, couleurs du classeur, calendrier dans le DropiPass (porteur)
 
 - **Choix du porteur** : « Toutes les séries » = la proposition 2, « cartes en éventail », **sans la marque au milieu** (« je veux le 2 mais sans le cœur au milieu, juste les cartes en éventail »). Icône par défaut de l'app (cache v258) ; les autres restent pour essai (`?servis=0` ancienne, `1`, `3`, `4`).

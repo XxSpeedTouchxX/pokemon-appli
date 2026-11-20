@@ -1049,7 +1049,9 @@ ${code}
   const loadFix = () => getJson('data/img-fix.json').then(x => { TCG.fix = (x && x.p) || {}; }).catch(() => { TCG.fix = TCG.fix || {}; });
   // Copies locales des visuels (2026-11-20, web/data/img-local.json, workflow « Copie locale des visuels »).
   const loadLocal = () => getJson('data/img-local.json').then(x => { TCG.local = (x && x.p) || {}; TCG.ed1 = (x && x.ed1) || {}; }).catch(() => { TCG.local = TCG.local || {}; TCG.ed1 = TCG.ed1 || {}; });
-  const loadCatalog = () => Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json'), loadFix(), loadLocal()]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
+  // Copies locales des logos des extensions (2026-11-20, web/data/logos-local.json, workflow « Logos des extensions »).
+  const loadLogos = () => getJson('data/logos-local.json').then(x => { TCG.logos = (x && x.p) || {}; }).catch(() => { TCG.logos = TCG.logos || {}; });
+  const loadCatalog = () => Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json'), loadFix(), loadLocal(), loadLogos()]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
     .then(doc => doc || getJson('data/cards.json'))
     .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); })
     .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); retryLater(); });

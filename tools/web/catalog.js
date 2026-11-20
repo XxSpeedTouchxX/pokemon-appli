@@ -321,8 +321,11 @@
   // la page ; '' si aucun (l'app montre alors une icône). Certains logos n'existent qu'en png (Nuit Noire),
   // d'autres nulle part sur TCGdex (30ᵉ Anniversaire). Le chemin vient déjà de la langue qui a un logo (build_index.py).
   const SET_LOGO_LOCAL = { '30th': 'logo-30-anniversaire', '30th-c': 'logo-30-anniversaire', me05: 'logo-nuit-noire', me04: 'logo-chaos-ascendant', me01: 'logo-mega-evolution', me06: 'logo-regne-delta' }; // me06 : TCGdex sans logo (2026-11-13, porteur)
+  // Copie gardée sur dropicards.fr (web/img/logos/, web/data/logos-local.json, workflow « Logos des extensions »,
+  // 2026-11-20, porteur : logos absents du bandeau des séries quand TCGdex refuse des images) : essayée en premier.
   function setLogo(id, path) {
-    const out = [];
+    const out = [], loc = path && TCG.logos && TCG.logos[path];
+    if (loc && loc[0]) out.push('img/logos/' + loc[0] + '?v=' + (loc[1] || ''));
     if (path && /^https?:/.test(path)) out.push(path + '.webp');
     else if (path) {
       out.push(TCG.doc.img + path + '.webp', TCG.doc.img + path + '.png');

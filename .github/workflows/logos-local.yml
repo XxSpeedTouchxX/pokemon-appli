@@ -1,0 +1,48 @@
+# Copie locale des logos des extensions (2026-11-20, porteur : logos absents du bandeau « Toutes les séries ») : copie
+# les logos TCGdex dans web/img/logos/ et les inscrit dans web/data/logos-local.json, lu par l'app ; les logos
+# s'affichent alors depuis dropicards.fr, même quand le CDN de TCGdex refuse des images. Chaque lundi (nouvelles
+# extensions) et à la main (« tous » pour tout recopier).
+name: Logos des extensions
+
+on:
+  schedule:
+    - cron: "37 5 * * 1"
+  workflow_dispatch:
+    inputs:
+      all:
+        description: "Tout recopier (oui), sinon seulement les logos pas encore copiés"
+        required: false
+        default: "non"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: logos-local
+  cancel-in-progress: false
+
+jobs:
+  copy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Copie
+        env:
+          ALL: ${{ github.event.inputs.all }}
+        run: |
+          if [ "$ALL" = "oui" ]; then python3 tools/visuels/mirror_logos.py --all; else python3 tools/visuels/mirror_logos.py; fi
+          tail -1 web/data/logos-local.json | cut -c1-200
+      - name: Publier
+        run: |
+          git add -A web/img/logos web/data/logos-local.json
+          if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Copie locale des logos des extensions ($(date -u +%Y-%m-%d))"
+          for i in 1 2 3; do git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && break; sleep $((i * 5)); done

@@ -281,10 +281,59 @@
     if (e.from) this.paFxRun(e.from, n, done);
     else { this.pkUnlockShow(n); done(); }
   };
+  // « Choisir comme compagnon » animé (2026-11-20, porteur : « une petite animation de 2 s qui montre le Pokémon qui est
+  // OK comme compagnon, propose-moi des choses ») : 4 propositions, ?compvis=1 à 4 (1 par défaut en attendant le choix) :
+  //   1 Saut de joie : le Pokémon arrive, fait deux bonds, un cœur jaillit, badge vert « ✓ Compagnon ».
+  //   2 Halo d'amitié : anneaux dorés et étincelles derrière le Pokémon qui brille, coche verte qui se dessine.
+  //   3 Cœurs : un grand cœur se dessine derrière lui, il se dandine, des petits cœurs montent.
+  //   4 Direction l'accueil : il salue, puis file vers le bouton Accueil de la barre du bas (sa place), qui rebondit.
+  // Texte « X t’accompagne » (« · thème … » pour Kyogre, Groudon, Rayquaza) dans l'animation, à la place du message du bas.
+  const DEX_CMP_MS = 2000, DEX_CMP_BOX = 170;
+  const DEX_CMP_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('compvis')); return v >= 1 && v <= 4 ? v : 1; } catch (e) { return 1; } })();
+  dexProto.dexChooseFx = function (n, text) {
+    if (typeof document === 'undefined') return;
+    const host = document.getElementById('app') || document.body, old = document.querySelector('.pkm-cmp');
+    if (old) old.remove();
+    const e = DEX[n], b = e && e.box ? e.box : [16, 16, 80, 80];
+    const sc = Math.min(3.4, DEX_CMP_BOX / Math.max(1, b[2] - b[0], b[3] - b[1])), px = Math.round(96 * sc);
+    const left = Math.round(DEX_CMP_BOX / 2 - (b[0] + b[2]) / 2 * sc), top = Math.round(DEX_CMP_BOX / 2 - (b[1] + b[3]) / 2 * sc);
+    const v = DEX_CMP_VIS, still = (() => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (x) { return false; } })();
+    const rays = Array.from({ length: 10 }, (_, i) => '<i style="--a: ' + (i * 36) + 'deg"></i>').join('');
+    const hearts = Array.from({ length: 6 }, (_, i) => '<i style="--x: ' + [-78, 70, -46, 48, -88, 86][i] + 'px; animation-delay: ' + (0.55 + i * 0.14).toFixed(2) + 's">♥</i>').join('');
+    const deco = v === 1 ? '<i class="pkm-cmp-shadow"></i><b class="pkm-cmp-heart">♥</b>'
+      : v === 2 ? '<i class="pkm-cmp-ring"></i><i class="pkm-cmp-ring pkm-cmp-ring2"></i><span class="pkm-cmp-rays">' + rays + '</span>'
+        + '<svg class="pkm-cmp-check" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17"></circle><path d="M11.5 20.5l6 6 11-12"></path></svg>'
+        : v === 3 ? '<svg class="pkm-cmp-bigheart" viewBox="0 0 100 92"><path d="M50 86C22 64 6 48 6 28 6 14 17 5 29 5c9 0 16 5 21 12 5-7 12-12 21-12 12 0 23 9 23 23 0 20-16 36-44 58z"></path></svg><span class="pkm-cmp-hearts">' + hearts + '</span>'
+          : '<i class="pkm-cmp-shadow"></i><span class="pkm-cmp-rays">' + rays + '</span>';
+    const el = document.createElement('div');
+    el.className = 'pkm-cmp pkm-cmp-v' + v + (still ? ' pkm-cmp-still' : '');
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML = '<div class="pkm-cmp-veil"></div><div class="pkm-cmp-stage"><div class="pkm-cmp-mon" aria-hidden="true">' + deco
+      + '<span class="pkm-cmp-img"><img alt="" src="img/pokemon/' + n + '.png" style="width: ' + px + 'px; height: ' + px + 'px; left: ' + left + 'px; top: ' + top + 'px"></span></div>'
+      + '<p class="pkm-cmp-txt"></p>' + (v === 1 ? '<p class="pkm-cmp-badge">✓ Compagnon</p>' : v === 4 ? '<p class="pkm-cmp-badge">Il t’attend sur l’accueil</p>' : '') + '</div>';
+    el.querySelector('.pkm-cmp-txt').textContent = text;
+    // 4 : vol vers le bouton Accueil de la barre du bas (place du compagnon), mesuré au moment de l'animation.
+    if (v === 4 && !still) {
+      const nav = document.querySelector('nav[aria-label="Navigation principale"]'), hb = nav && (nav.querySelector('button[aria-label="Accueil"]') || nav.querySelector('button'));
+      const stage = el.querySelector('.pkm-cmp-stage');
+      host.appendChild(el);
+      const r = hb && hb.getBoundingClientRect(), m = el.querySelector('.pkm-cmp-mon').getBoundingClientRect();
+      if (r && r.width) {
+        stage.style.setProperty('--fx', Math.round(r.left + r.width / 2 - (m.left + m.width / 2)) + 'px');
+        stage.style.setProperty('--fy', Math.round(r.top + r.height / 2 - (m.top + m.height / 2)) + 'px');
+        hb.classList.remove('pkm-cmp-home'); void hb.offsetWidth; hb.classList.add('pkm-cmp-home');
+        setTimeout(() => hb.classList.remove('pkm-cmp-home'), DEX_CMP_MS + 200);
+      }
+    } else host.appendChild(el);
+    setTimeout(() => el.remove(), DEX_CMP_MS);
+  };
   dexProto.dexChoose = function (n) {
     const s = this.st();
     if (!dexOwn(s, n) || s.buddy === n) return;
-    this.setState({ buddy: n, toast: paName(n) + ' t’accompagne' + (HOME_THEMES[n] ? ' · thème ' + HOME_THEMES[n].name : '') });
+    const text = paName(n) + ' t’accompagne' + (HOME_THEMES[n] ? ' · thème ' + HOME_THEMES[n].name : ' !');
+    this.setState({ buddy: n });
+    this.dexChooseFx(n, text);
     this.flash();
   };
 
