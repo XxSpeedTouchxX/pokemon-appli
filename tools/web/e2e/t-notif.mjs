@@ -54,7 +54,7 @@ const sw = sec.locator('button[role="switch"]');
 const labels = (await sw.allInnerTexts()).map(t => t.split('\n')[0]);
 const checked = await sw.evaluateAll(bs => bs.map(b => b.getAttribute('aria-checked')).join(','));
 ok('rubrique Notifications : ' + labels.join(' / ') + ' (' + checked + ')', labels.length === 5 && /^PA à récupérer$/.test(labels[0]) && /Booster PK/.test(labels[1]) && /Pièce/.test(labels[2]) && /Safari éclair/.test(labels[3]) && /Sorties/.test(labels[4]) && checked === 'true,true,true,true,true');
-ok('état : « ' + (await sec.innerText()).split('\n').find(l => /autorisées|bloquées|Autorise/.test(l)) + ' »', /Notifications du téléphone autorisées/.test(await sec.innerText()) && /compte Dropicards/.test(await sec.innerText()));
+ok('état : « ' + (await sec.innerText()).split('\n').find(l => /autorisées|bloquées|Autorise/.test(l)) + ' »', /Notifications autorisées, quand l’app est ouverte/.test(await sec.innerText()) && /jamais entre 22 h et 9 h/.test(await sec.innerText()));
 await sec.screenshot({ path: shot('notif-profil.png') });
 // Décocher les PA : enregistré, plus de rappel de PA.
 await sw.nth(0).click(); await page.waitForTimeout(300);

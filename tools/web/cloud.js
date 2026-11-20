@@ -225,6 +225,12 @@
     },
     async signOut() {
       const s = cloudLs.get();
+      // Notifications (2026-11-20) : ce téléphone ne reçoit plus celles du compte qui se déconnecte.
+      if (s) try {
+        const reg = navigator.serviceWorker && navigator.serviceWorker.getRegistration ? await Promise.race([navigator.serviceWorker.getRegistration(), new Promise(r => setTimeout(r, 800))]) : null;
+        const sub = reg && reg.pushManager ? await reg.pushManager.getSubscription() : null;
+        if (sub) { await this.rpc('push_unsubscribe', { endpoint: sub.endpoint }).catch(() => {}); await sub.unsubscribe().catch(() => {}); }
+      } catch (e) { /* notifications indisponibles */ }
       cloudLs.set(null);
       if (s) { try { await this.req('/auth/v1/logout', { method: 'POST', token: s.access_token }); } catch (e) { /* déjà déconnecté */ } }
     },

@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-20 — Notifications envoyées par le serveur, même app fermée (porteur)
+
+- **Demande** (porteur) : « j'ai l'impression que les notifs sont envoyées uniquement quand l'utilisateur ouvre son appli et ce n'est pas le but, je veux que l'utilisateur reçoive une notif sur son téléphone dès lors que les jeux (booster, pièce ou safari) sont de nouveau disponibles » ; plus une relance après 72 h sans ouvrir l'app et une après 1 semaine, sans réglage dans l'app.
+- **Constat** : c'était exact, les rappels étaient calculés par l'app seulement quand elle était ouverte.
+- **Fait (cache v256)** : envoi par le serveur avec le standard Web Push des navigateurs (gratuit, sans Firebase pour le site). Base `036_notifications_push.sql` (adresse d'envoi de chaque téléphone, cases de Mon profil › Notifications, rappels dus, passage toutes les 5 minutes, 51 tests) ; fonction du serveur `push` (signature et chiffrement écrits à la main, vérifiés sur l'exemple officiel de la norme, 19 tests) ; app : le téléphone autorisé et connecté s'inscrit, chaque case part au serveur, bouton « Envoyer une notification de test », déconnexion = plus rien sur ce téléphone (27 tests).
+- **Choix par défaut (questions refusées, à confirmer)** : rien entre 22 h et 9 h (heure de Paris) ; relances seulement entre 17 h et 20 h ; PA du jour à 10 h ; au plus 6 notifications par jour ; site d'abord (Android, ordinateur ; iPhone avec l'app ajoutée à l'écran d'accueil), **app Android du Play Store plus tard** (Firebase, projet gratuit à créer par le porteur).
+- **À faire par le porteur** : 3 étapes, `docs/46-guide-notifications.md` (036 dans Studio, une ligne dans le terminal de Coolify, « Autoriser » sur le téléphone).
+- Politique de confidentialité complétée (20 novembre 2026).
+
 ## 2026-11-20 — « Calendrier JCC » et accueil sans « Sorties » (porteur)
 
 - **Demandes** (porteur) : « Supprime “Prochaine sortie” et “Sortie récente” dans l'accueil, ça ne sert plus à rien : l'utilisateur va sur le calendrier TCG pour savoir ce qui va sortir » ; « Remplace aussi calendrier TCG par calendrier JCC ».

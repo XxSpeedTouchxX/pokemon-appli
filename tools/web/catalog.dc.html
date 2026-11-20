@@ -2175,6 +2175,7 @@
 </sc-for>
 <p style="margin: 2px 0 0; font-size: 12.5px; line-height: 1.45; color: {{ nt.stateColor }}">{{ nt.state }}</p>
 <sc-if value="{{ nt.ask }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ nt.askGo }}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--pkm-accent); color: #0B1120; font: inherit; font-size: 14.5px; font-weight: 800; cursor: pointer">Autoriser les notifications</button></sc-if>
+<sc-if value="{{ nt.canTest }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ nt.test }}" style="min-height: 44px; padding: 0 16px; border: 1px solid #2A3A5C; border-radius: 999px; background: #111A2C; color: #F3F6FC; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Envoyer une notification de test</button></sc-if>
 <p style="margin: 0; font-size: 12px; line-height: 1.45; color: #9AA8C3">{{ nt.note }}</p>
 </section>
 </div>

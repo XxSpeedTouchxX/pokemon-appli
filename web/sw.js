@@ -1,6 +1,6 @@
 // Dropicards (nom de code PKM-App) · démo : réseau d'abord (les mises à jour s'affichent), copie locale si le réseau manque.
 // Le catalogue et les prix du scellé sont gardés dès la première visite : l'app s'ouvre hors ligne avec les dernières cotes.
-const CACHE = 'pkm-demo-v255';
+const CACHE = 'pkm-demo-v256';
 // Cache du moteur de lecture du scan, gardé d'une version de l'app à l'autre (fichiers versionnés par leur dossier).
 const SCAN_CACHE = 'pkm-scan-tesseract-7.0.0';
 const FILES = ['./', 'index.html', 'app.js', 'vendor/vue.runtime.global.prod.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'img/brand/dropicards-header.png', 'img/brand/pk.svg', 'data/cards-base.json', 'data/cards-prices.json', 'data/sealed.json'];
@@ -31,11 +31,21 @@ self.addEventListener('fetch', e => {
     return res;
   }).catch(() => caches.match(e.request).then(r => r || caches.match(e.request, { ignoreSearch: true }))));
 });
-// Toucher une notification (rappels PA, Booster PK, pièce, alertes ; notif.js) : ramène l'app au premier plan, ou l'ouvre.
+// Notification envoyée par le serveur (Web Push, 2026-11-20 ; fonction « push », 036_notifications_push.sql) :
+// { t: titre, b: texte, u: lien, g: étiquette }. Même étiquette que les rappels de l'app (« pkm-booster »…) : remplace.
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) { d = { b: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.t || 'Dropicards', { body: d.b || '', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: d.g || 'pkm', data: { u: d.u || './' } }));
+});
+// Toucher une notification (rappels PA, Booster PK, pièce, Safari, relances, alertes ; notif.js) : ramène l'app au premier
+// plan sur le bon écran (Jeux ou accueil), ou l'ouvre à cette adresse.
 self.addEventListener('notificationclick', e => {
   e.notification.close();
+  const url = (e.notification.data && e.notification.data.u) || './';
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
     const c = list.find(w => 'focus' in w);
-    return c ? c.focus() : self.clients.openWindow('./');
+    if (c) { try { c.postMessage({ type: 'pkm-open', url: url }); } catch (x) { /* ancienne fenêtre */ } return c.focus(); }
+    return self.clients.openWindow(url);
   }));
 });
