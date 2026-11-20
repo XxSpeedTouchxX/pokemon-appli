@@ -36,6 +36,7 @@ from (values
   ('033_vitrine', to_regprocedure('public.showcase_set(jsonb)') is not null, 'vitrine, Pour trade, À vendre, Je cherche'),
   ('034_recherche_dresseurs', to_regprocedure('public.player_search(text,integer)') is not null, 'Le coin des dresseurs : rechercher un dresseur'),
   ('035_recharges_pa', to_regprocedure('public.pa_shop_state()') is not null, 'Recharger mes PA : paiement Stripe des 4 packs'),
+  ('036_notifications_push', to_regprocedure('public.push_due(timestamp with time zone,integer)') is not null, 'notifications envoyées par le serveur (installation à part, docs/46)'),
   ('020_premium_formules', exists (select 1 from pg_constraint where conname = 'premium_plan_check' and pg_get_constraintdef(oid) like '%quarter%'), 'Premium trimestriel et semestriel')
 ) as t(script, ok, role)
 order by script;
