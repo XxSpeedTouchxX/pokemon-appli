@@ -49,6 +49,7 @@ export const COIN = [
     '<circle cx="12" cy="8.6" r="3"></circle><path d="M6.6 20.4v-.4a4.6 4.6 0 0 1 4.6-4.6h1.6a4.6 4.6 0 0 1 4.6 4.6v.4"></path>'
     + '<circle cx="5" cy="7.8" r="2.1"></circle><path d="M1.6 16.4v-.2a3.4 3.4 0 0 1 3.4-3.4h1.2"></path>'
     + '<circle cx="19" cy="7.8" r="2.1"></circle><path d="M22.4 16.4v-.2a3.4 3.4 0 0 0-3.4-3.4h-1.2"></path>') },
+  // Choisie par le porteur le 2026-11-20 (« ok pour le 11 ») : icône de l'onglet par défaut.
   { n: 11, name: 'Dresseurs qui discutent', svg: () => svg('pkm-coin-ico pkm-coin-ico-11',
     '<path d="M8.6 2.6h6.8a1.8 1.8 0 0 1 1.8 1.8v2.8a1.8 1.8 0 0 1-1.8 1.8h-2.2L12 10.6 10.8 9h-2.2a1.8 1.8 0 0 1-1.8-1.8V4.4a1.8 1.8 0 0 1 1.8-1.8z"></path>'
     + '<path d="M9.9 5.8h.01M12 5.8h.01M14.1 5.8h.01"></path>'

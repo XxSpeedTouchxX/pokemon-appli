@@ -2,10 +2,11 @@
    « Le calendrier JCC » (frise chronologique en plein écran ; un appui sur une sortie ouvre sa fiche, un appui sur une
    extension ouvre ses items). Cartes sombres, lisibles dans les 3 apparences (Sombre, Clair, Original). */
 
-/* Logo de l'onglet : un seul des 4 logos proposés est visible (?coinvis=1 à 4, « Dresseurs » par défaut). Disposition
+/* Logo de l'onglet : un seul des 12 logos proposés est visible (« Dresseurs qui discutent », n° 11, choisi par le porteur
+   le 2026-11-20 ; ?coinvis=1 à 12 pour comparer). Disposition
    de la barre du bas : navbar.css. */
 .pkm-coin-ico { display: none; }
-html:not([data-coinvis]) .pkm-coin-ico-1, html[data-coinvis="1"] .pkm-coin-ico-1, html[data-coinvis="2"] .pkm-coin-ico-2,
+html:not([data-coinvis]) .pkm-coin-ico-11, html[data-coinvis="1"] .pkm-coin-ico-1, html[data-coinvis="2"] .pkm-coin-ico-2,
 html[data-coinvis="3"] .pkm-coin-ico-3, html[data-coinvis="4"] .pkm-coin-ico-4, html[data-coinvis="5"] .pkm-coin-ico-5,
 html[data-coinvis="6"] .pkm-coin-ico-6, html[data-coinvis="7"] .pkm-coin-ico-7, html[data-coinvis="8"] .pkm-coin-ico-8,
 html[data-coinvis="9"] .pkm-coin-ico-9, html[data-coinvis="10"] .pkm-coin-ico-10, html[data-coinvis="11"] .pkm-coin-ico-11,

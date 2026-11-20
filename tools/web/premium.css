@@ -84,6 +84,17 @@
 .pkm-prem-xp-spark { position: absolute; left: 4px; top: 3px; width: 7px; height: 7px; background: #FFFFFF; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: pkmPremSpark 2s ease-in-out infinite; }
 @keyframes pkmPremSpark { 0%, 40%, 100% { opacity: 0; transform: scale(0.4); } 60% { opacity: 1; transform: scale(1.2) rotate(45deg); } }
 .pkm-prem-ico { overflow: visible; }
+/* Calendrier JCC (2026-11-20, porteur) : calendrier aux dates qui se cochent l'une après l'autre. */
+.pkm-prem-cal { width: 28px; height: 28px; overflow: visible; }
+.pkm-prem-cal-body { fill: #F3F6FC; stroke: #3A4F80; stroke-width: 1.4; }
+.pkm-prem-cal-top { fill: #FFD60A; stroke: #7A4A00; stroke-width: 1.4; stroke-linejoin: round; }
+.pkm-prem-cal-ring { fill: none; stroke: #E8ECF2; stroke-width: 2.4; stroke-linecap: round; }
+.pkm-prem-cal-day { fill: #D3DBEE; }
+.pkm-prem-cal-ok { fill: none; stroke: #16A35A; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 7; stroke-dashoffset: 7; animation: pkmPremCheck 3.2s ease-out infinite; }
+.pkm-prem-cal-ok2 { animation-delay: 0.4s; }
+.pkm-prem-cal-ok3 { animation-delay: 0.8s; }
+@keyframes pkmPremCheck { 0% { stroke-dashoffset: 7; opacity: 1; } 16%, 78% { stroke-dashoffset: 0; opacity: 1; } 92%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .pkm-prem-cal-ok { animation: none; stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .pkm-prem-bind-card, .pkm-prem-hist-line, .pkm-prem-xp-drop, .pkm-prem-xp-tag, .pkm-prem-xp-spark, .pkm-prem-banner, .pkm-prem-banner::after { animation: none; } .pkm-prem-hist-line { stroke-dashoffset: 0; } }
 /* Paiement branché (2026-11-07) : abonné Premium, erreur, bouton occupé, paiement sécurisé. */
 .pkm-prem-cta[aria-disabled="true"] { opacity: 0.75; cursor: progress; }

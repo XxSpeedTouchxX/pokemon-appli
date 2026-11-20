@@ -36,10 +36,25 @@ await SEC.screenshot({ path: shot('bindercap-1.png') });
 // Presque plein (80 %) : orange ; plein : rouge « Plein ».
 const addCards = n => page.evaluate(n => { const p = window.__pkm, s = p.st(), c = p.catalog().find(q => q.type !== 'sealed' && p.compute(s).stock[q.id]);
   p.setState({ purchases: s.purchases.concat([{ id: 'zz-' + n + '-' + s.purchases.length, date: '2026-10-30', where: 'Test', total: null, lines: [{ pid: c.id, qty: n, lang: 'FR', cond: 'NM' }] }]) }); }, n);
-await addCards(30 - cnt.cards);
-await page.waitForTimeout(500);
-ok('30/36 : orange (' + N(await row.locator('button').first().innerText()) + ')', /pkm-bdc-warn/.test(await row.locator('button').first().getAttribute('class')) && /30\/36/.test(await row.locator('button').first().innerText()));
-await addCards(6);
+// Couleurs (2026-11-20, porteur) : vert de 0 à 60 %, orange de 61 à 90 %, rouge de 91 à 100 %.
+const tone = async () => page.evaluate(() => { const b = document.querySelector('section[aria-label="Mon classeur"] .pkm-bdc-row button'); return { cls: b.className, bg: getComputedStyle(b.querySelector('i i')).backgroundColor, txt: b.innerText.replace(/\s+/g, ' ').trim() }; });
+const GREEN = 'rgb(61, 220, 132)', ORANGE = 'rgb(255, 165, 61)', RED = 'rgb(255, 90, 90)';
+await addCards(21 - cnt.cards); await page.waitForTimeout(800);
+let tn = await tone();
+ok('21/36 (58 %) : vert (' + tn.txt + ', ' + tn.bg + ')', /21\/36/.test(tn.txt) && tn.bg === GREEN && !/warn|red|full/.test(tn.cls));
+await addCards(1); await page.waitForTimeout(800); tn = await tone();
+ok('22/36 (61 %) : orange (' + tn.txt + ', ' + tn.bg + ')', /22\/36/.test(tn.txt) && tn.bg === ORANGE && /pkm-bdc-warn/.test(tn.cls));
+await addCards(8); await page.waitForTimeout(800); tn = await tone();
+ok('30/36 (83 %) : orange (' + tn.txt + ')', /30\/36/.test(tn.txt) && tn.bg === ORANGE);
+await addCards(2); await page.waitForTimeout(800); tn = await tone();
+ok('32/36 (89 %) : encore orange (' + tn.txt + ')', /32\/36/.test(tn.txt) && tn.bg === ORANGE);
+await addCards(1); await page.waitForTimeout(800); tn = await tone();
+ok('33/36 (92 %) : rouge (' + tn.txt + ', ' + tn.bg + ')', /33\/36/.test(tn.txt) && tn.bg === RED && /pkm-bdc-red/.test(tn.cls) && /3 places/.test(tn.txt));
+// Nouveau grade (Chasseur, 72 cartes) : plus de place, la barre redescend et repasse au vert.
+await page.evaluate(() => { localStorage.setItem('pkm-grade-force', '2'); window.__pkm.setState({}); }); await page.waitForTimeout(900); tn = await tone();
+ok('grade Chasseur : 33/72 (46 %), la barre repasse au vert (' + tn.txt + ', ' + tn.bg + ')', /33\/72/.test(tn.txt) && tn.bg === GREEN);
+await page.evaluate(() => { localStorage.setItem('pkm-grade-force', '1'); window.__pkm.setState({}); }); await page.waitForTimeout(900);
+await addCards(3);
 await page.waitForTimeout(500);
 ok('36/36 : rouge « Plein » (' + N(await row.locator('button').first().innerText()) + ')', /pkm-bdc-full/.test(await row.locator('button').first().getAttribute('class')) && N(await row.locator('button').first().innerText()) === 'Cartes 36/36 Plein');
 await SEC.screenshot({ path: shot('bindercap-full.png') });

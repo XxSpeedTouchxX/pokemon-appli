@@ -2047,12 +2047,13 @@ html, body { touch-action: pan-x pan-y; }
 .pkm-bdc .pkm-bdc-l { font-size: 12px; font-weight: 600; color: #C9D3EA; }
 .pkm-bdc b { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; color: #FFFFFF; }
 .pkm-bdc > i { display: block; width: 100%; max-width: 76px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
-.pkm-bdc > i > i { display: block; height: 100%; border-radius: 3px; background: #3DDC84; transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+/* Vert de 0 à 60 %, orange de 61 à 90 %, rouge de 91 à 100 % (2026-11-20, porteur) ; la couleur glisse d'une à l'autre. */
+.pkm-bdc > i > i { display: block; height: 100%; border-radius: 3px; background-color: #3DDC84; transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.6s ease; }
 .pkm-bdc small { font-size: 11.5px; font-weight: 700; color: #9AA8C3; white-space: nowrap; }
-.pkm-bdc-warn > i > i { background: #FFA53D; }
+.pkm-bdc-warn > i > i { background-color: #FFA53D; }
 .pkm-bdc-warn small { color: #FFC266; }
-.pkm-bdc-full > i > i { background: #FF5A5A; }
-.pkm-bdc-full small { color: #FF7B7B; }
+.pkm-bdc-red > i > i, .pkm-bdc-full > i > i { background-color: #FF5A5A; }
+.pkm-bdc-red small, .pkm-bdc-full small { color: #FF7B7B; }
 .pkm-bdc-unl > i > i { background: linear-gradient(90deg, #FFD60A, #3DDC84); }
 .pkm-bdc-unl small { color: #FFD60A; }
 .pkm-bdc:active { transform: scale(0.96); }

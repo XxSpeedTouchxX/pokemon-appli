@@ -33,10 +33,17 @@ ok('icônes animées : scanner, classeur, radar, goutte des PA « 2XP », graphi
   && (await sh.locator('.pkm-prem-xp-tag').first().innerText()) === '2XP' && (await sh.locator('.pkm-prem-xp img[src="img/brand/pa.svg"]').count()) === 1 && (await sh.locator('svg.pkm-prem-hist').count()) === 1
   && (await sh.locator('.pkm-prem-bind-card').evaluate(e => getComputedStyle(e).animationName)) === 'pkmPremCard');
 const boxes = await sh.locator('.pkm-prem-ico').evaluateAll(l => l.map(e => Math.round(e.getBoundingClientRect().left)));
-ok('9 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 9 && new Set(boxes).size === 1);
+ok('10 icônes alignées (' + boxes.join(', ') + ')', boxes.length === 10 && new Set(boxes).size === 1);
 // Pré-gradation (2026-11-14, porteur) : « Pré-gradation 60/mois », badge « Version Proto », entre le Radar et le double XP PA.
 const order = await sh.locator('.pkm-prem-perks li > span:last-child > b').evaluateAll(l => l.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
 const iR = order.findIndex(x => /^Radar des boutiques/.test(x)), iP = order.findIndex(x => /^Pré-gradation 60\/mois Version Proto$/.test(x)), iX = order.findIndex(x => /^Double XP permanent sur tes PA/.test(x));
+// Calendrier JCC (2026-11-20, porteur) : juste sous « Historique des prix complet », calendrier aux dates cochées.
+const iH = order.findIndex(x => /^Historique des prix complet/.test(x));
+const calTxt = await sh.locator('.pkm-prem-perks li').nth(iH + 1).innerText().catch(() => '');
+const calFx = await sh.locator('svg.pkm-prem-cal .pkm-prem-cal-ok').evaluateAll(l => l.map(e => getComputedStyle(e).animationName));
+ok('« Le calendrier JCC Pokémon · mis à jour régulièrement avec les toutes dernières sorties » juste sous l’historique des prix (« ' + calTxt.replace(/\s+/g, ' ').trim() + ' »)',
+  iH >= 0 && order[iH + 1] === 'Le calendrier JCC Pokémon' && /Mis à jour régulièrement avec les toutes dernières sorties/.test(calTxt));
+ok('icône : calendrier aux 3 dates qui se cochent (' + calFx.join(', ') + ')', (await sh.locator('svg.pkm-prem-cal').count()) === 1 && calFx.length === 3 && calFx.every(a => a === 'pkmPremCheck'));
 ok('« Soutenir Dropicards » toute à la fin de la liste (' + order[order.length - 1] + ')', /^Soutenir Dropicards/.test(order[order.length - 1]));
 ok('« Pré-gradation 60/mois · Version Proto » entre le Radar et le double XP PA (' + [iR, iP, iX].join(', ') + ' · ' + order[iR + 1] + ')', iR >= 0 && iP === iR + 1 && iX === iP + 1 && (await sh.locator('.pkm-prem-pg img[src="img/brand/pregrade.svg"]').count()) === 1);
 ok('double XP sur les PA seulement', /Double XP permanent sur tes PA/.test(await sh.innerText()) && !/PK et tes PA/.test(await sh.innerText()));

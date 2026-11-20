@@ -9,7 +9,7 @@
   //      rumeurs), chaque date avec son statut et sa source (web/data/calendar.json, tenu à la main), puis les « News
   //      Pokémon » du moment (web/data/news.json, relu chaque jour par le workflow « News Pokémon » : titre, date,
   //      source et lien seulement, jamais le texte des articles).
-  //   Logo de l'onglet : 4 propositions (?coinvis=1 à 4), « Dresseurs » par défaut en attendant le choix du porteur.
+  //   Logo de l'onglet : « Dresseurs qui discutent » (n° 11), choix du porteur du 2026-11-20 ; ?coinvis=1 à 12 pour comparer.
   const COIN_FILE = 'tools/supabase/install_024_a_034.sql';
   const coinProto = Component.prototype;
   const coinOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
@@ -18,10 +18,11 @@
   // Logo de l'onglet : 1 Dresseurs (deux dresseurs à casquette), 2 Échange de cartes, 3 Bulle et ball, 4 Rassemblement.
   // 5 à 8 (2026-11-20, porteur : « propose-moi d'autres visuels, il n'est pas clair ») : 2 dresseurs qui échangent,
   // casquette, vitrine, bulle et carte (tools/brand/navicons/). 9 à 12 (2026-11-20, porteur : « plus axé sur la
-  // communauté, des profils de gens, le 1 sans leur casquette ») : deux dresseurs, groupe, discussion, profils.
+  // communauté, des profils de gens, le 1 sans leur casquette ») : deux dresseurs, groupe, discussion, profils ;
+  // la 11, « Dresseurs qui discutent », choisie par le porteur le 2026-11-20 (par défaut ; ?coinvis= pour comparer).
   // Icône « Toutes les séries » : la 2 (cartes en éventail, sans marque au milieu) choisie par le porteur le 2026-11-20 ;
   // ?servis=0 (ancienne), 1, 3 ou 4 pour comparer.
-  const COIN_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('coinvis')); return v >= 1 && v <= 12 ? v : 1; } catch (e) { return 1; } })();
+  const COIN_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('coinvis')); return v >= 1 && v <= 12 ? v : 11; } catch (e) { return 11; } })();
   const SER_VIS = (() => { try { const q = new URLSearchParams(location.search).get('servis'), v = Number(q); return q !== null && q !== '' && v >= 0 && v <= 4 ? v : 2; } catch (e) { return 2; } })();
   if (typeof document !== 'undefined' && document.documentElement) { document.documentElement.setAttribute('data-coinvis', String(COIN_VIS)); document.documentElement.setAttribute('data-servis', String(SER_VIS)); }
   // Dessin de la barre du bas (2026-11-19, porteur) : 4 propositions (?navvis=1 à 4, navbar.css), « Dôme » par défaut.

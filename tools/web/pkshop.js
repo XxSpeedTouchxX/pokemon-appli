@@ -172,7 +172,11 @@
   // Compteur de places du classeur (2026-11-20, porteur : « le décompte des cartes que l'on a actuellement par rapport à ce
   // qui est autorisé en fonction de notre grade, à gauche du logo classeur pour les cartes et à droite pour les produits
   // scellés : l'utilisateur sait combien il lui reste de place avant d'être bloqué jusqu'au prochain grade »).
-  // Illimité dès Maître Pokémon, avec le DropiPass et pour un admin déverrouillé. Orange à 80 %, rouge quand c'est plein.
+  // Illimité dès Maître Pokémon, avec le DropiPass et pour un admin déverrouillé.
+  // Couleur de la barre (2026-11-20, porteur) : vert de 0 à 60 % des places, orange de 61 à 90 %, rouge de 91 à 100 %
+  // (« Plein » à 100 %). Un nouveau grade agrandit le classeur : la barre redescend et change de couleur d'elle-même.
+  // Part des places prise, en pour cent exact (sans arrondi : 61 % commence dès 60,1 %).
+  const binderTone = (have, lim) => { const r = lim > 0 ? have / lim * 100 : 0; return r > 90 ? ' pkm-bdc-red' : r > 60 ? ' pkm-bdc-warn' : ''; };
   shopProto.binderCap = function (s) {
     const gi = this.shopGrade(), g = PF_GRADES[gi], n = this.binderCounts(s);
     const unl = !g || !g.cards || (typeof this.premOn === 'function' && this.premOn());
@@ -180,7 +184,7 @@
       const left = unl ? 0 : Math.max(0, lim - have), full = !unl && have >= lim, pct = unl ? 100 : Math.min(100, Math.round(have / lim * 100));
       const sub = unl ? 'Illimité' : full ? 'Plein' : left + (left > 1 ? ' places' : ' place');
       return { label: label, num: unl ? pfNum(have) : pfNum(have) + '/' + pfNum(lim), sub: sub, bar: 'width: ' + pct + '%',
-        cls: 'pkm-bdc' + (unl ? ' pkm-bdc-unl' : full ? ' pkm-bdc-full' : pct >= 80 ? ' pkm-bdc-warn' : ''),
+        cls: 'pkm-bdc' + (unl ? ' pkm-bdc-unl' : full ? ' pkm-bdc-full' : binderTone(have, lim)),
         aria: unl ? pfNum(have) + ' ' + what + ' dans ton classeur, places illimitées'
           : pfNum(have) + ' ' + what + ' sur ' + pfNum(lim) + ' autorisées au grade ' + shopGradeName(gi) + (full ? ' : classeur plein' : ' : encore ' + sub),
         open: () => this.push('grade', { gradeIx: gi }) };

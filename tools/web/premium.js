@@ -32,6 +32,9 @@
     // 2XP PK offert le premier mois (2026-11-09, porteur ; serveur : 018, une fois par compte).
     { kind: 'xppk', ico: '', title: '1er mois : 2XP PK offert', text: 'Tes PK du Booster PK et de pile ou face doublés pendant 30 jours.' },
     { kind: 'hist', ico: '', title: 'Historique des prix complet', text: 'Toute l’évolution de la cote de chaque carte.' },
+    // Calendrier JCC (2026-11-20, porteur : « Le calendrier JCC Pokémon mis à jour régulièrement avec les toutes dernières
+    // sorties », juste sous l'historique des prix, avec un calendrier aux dates cochées).
+    { kind: 'cal', ico: '', title: 'Le calendrier JCC Pokémon', text: 'Mis à jour régulièrement avec les toutes dernières sorties.' },
     // Mode avatar (2026-11-11, porteur) : Premium débloque tout, quelle que soit la formule.
     { kind: '', ico: '🎨', title: 'Tous les accessoires et Pokémon du mode avatar débloqués', text: 'Coiffures, habits, décors, cadres, accessoires, Pokémon et shiny : tout ton avatar, sans PA.' },
     // Soutien (2026-11-09, porteur : « Soutenir Dropicards pour vous faire gagner de plus en plus de lots », avec un cœur
@@ -166,7 +169,7 @@
       // PK n'est offert que 30 jours au 1er abonnement).
       banner: { title: PREM_NAME, text: on ? 'DropiPass actif · voir ou gérer mon abonnement.' : 'Scans illimités, double XP de PA, Radar des boutiques, pré-gradation des cartes et plein d’autres avantages…', open: () => this.premOpen() },
       open: !!s.premOpen, close: () => this.premClose(),
-      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isPg: p.kind === 'pg', hasProto: !!p.proto, isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isHeart: p.kind === 'heart', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
+      perks: PREM_PERKS.map(p => Object.assign({}, p, { isScan: p.kind === 'scan', isRadar: p.kind === 'radar', isPg: p.kind === 'pg', hasProto: !!p.proto, isXp: p.kind === 'xp', isXpPk: p.kind === 'xppk', isHeart: p.kind === 'heart', isBinder: p.kind === 'binder', isHist: p.kind === 'hist', isCal: p.kind === 'cal', isEmoji: !p.kind, icoCls: 'pkm-prem-ico' })),
       buy: !on, isOn: on,
       mine: { title: mineTitle, text: mineText },
       manage: () => this.premGo('portal'),

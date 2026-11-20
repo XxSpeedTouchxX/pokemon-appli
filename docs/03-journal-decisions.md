@@ -6,10 +6,13 @@
 
 ---
 
-## 2026-11-20 — Icônes de la barre du bas (porteur)
+## 2026-11-20 — Icônes de la barre du bas, couleurs du classeur, calendrier dans le DropiPass (porteur)
 
 - **Choix du porteur** : « Toutes les séries » = la proposition 2, « cartes en éventail », **sans la marque au milieu** (« je veux le 2 mais sans le cœur au milieu, juste les cartes en éventail »). Icône par défaut de l'app (cache v258) ; les autres restent pour essai (`?servis=0` ancienne, `1`, `3`, `4`).
 - **« Le coin des dresseurs »** : nouvelles propositions « plus axées sur la communauté, des profils de gens, comme le 1 mais sans leur casquette » : 9 Deux dresseurs, 10 Groupe de dresseurs, 11 Dresseurs qui discutent, 12 Profils de dresseurs (`?coinvis=9` à `12`, planche `tools/brand/navicons/planche-coin-communaute.png`). **Choix du porteur attendu** ; « Dresseurs » (1) en attendant.
+- **Choix du porteur (même jour, « ok pour le 11 »)** : « Le coin des dresseurs » = n° 11, « Dresseurs qui discutent », icône par défaut (cache v259) ; les autres restent pour essai (`?coinvis=1` à `12`).
+- **Barre du compteur du classeur (porteur, même jour)** : verte de 0 à 60 % des places prises, orange de 61 à 90 %, rouge de 91 à 100 % (« Plein » à 100 %) ; elle change de couleur d'elle-même quand un nouveau grade agrandit le classeur (ex. 33/36 rouge → 33/72 vert au grade Chasseur). Avant : orange dès 80 %, rouge seulement plein.
+- **DropiPass (porteur, même jour)** : nouvelle ligne « Le calendrier JCC Pokémon » avec « Mis à jour régulièrement avec les toutes dernières sorties » en dessous, juste sous « Historique des prix complet », icône de calendrier dont les dates se cochent l'une après l'autre.
 
 ---
 

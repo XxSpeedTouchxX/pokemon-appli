@@ -2305,12 +2305,13 @@ html, body { touch-action: pan-x pan-y; }
 .pkm-bdc .pkm-bdc-l { font-size: 12px; font-weight: 600; color: #C9D3EA; }
 .pkm-bdc b { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; color: #FFFFFF; }
 .pkm-bdc > i { display: block; width: 100%; max-width: 76px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
-.pkm-bdc > i > i { display: block; height: 100%; border-radius: 3px; background: #3DDC84; transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+/* Vert de 0 à 60 %, orange de 61 à 90 %, rouge de 91 à 100 % (2026-11-20, porteur) ; la couleur glisse d'une à l'autre. */
+.pkm-bdc > i > i { display: block; height: 100%; border-radius: 3px; background-color: #3DDC84; transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.6s ease; }
 .pkm-bdc small { font-size: 11.5px; font-weight: 700; color: #9AA8C3; white-space: nowrap; }
-.pkm-bdc-warn > i > i { background: #FFA53D; }
+.pkm-bdc-warn > i > i { background-color: #FFA53D; }
 .pkm-bdc-warn small { color: #FFC266; }
-.pkm-bdc-full > i > i { background: #FF5A5A; }
-.pkm-bdc-full small { color: #FF7B7B; }
+.pkm-bdc-red > i > i, .pkm-bdc-full > i > i { background-color: #FF5A5A; }
+.pkm-bdc-red small, .pkm-bdc-full small { color: #FF7B7B; }
 .pkm-bdc-unl > i > i { background: linear-gradient(90deg, #FFD60A, #3DDC84); }
 .pkm-bdc-unl small { color: #FFD60A; }
 .pkm-bdc:active { transform: scale(0.96); }
@@ -2883,6 +2884,17 @@ nav[aria-label="Navigation principale"] > button[aria-current] > span[style*="wi
 .pkm-prem-xp-spark { position: absolute; left: 4px; top: 3px; width: 7px; height: 7px; background: #FFFFFF; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: pkmPremSpark 2s ease-in-out infinite; }
 @keyframes pkmPremSpark { 0%, 40%, 100% { opacity: 0; transform: scale(0.4); } 60% { opacity: 1; transform: scale(1.2) rotate(45deg); } }
 .pkm-prem-ico { overflow: visible; }
+/* Calendrier JCC (2026-11-20, porteur) : calendrier aux dates qui se cochent l'une après l'autre. */
+.pkm-prem-cal { width: 28px; height: 28px; overflow: visible; }
+.pkm-prem-cal-body { fill: #F3F6FC; stroke: #3A4F80; stroke-width: 1.4; }
+.pkm-prem-cal-top { fill: #FFD60A; stroke: #7A4A00; stroke-width: 1.4; stroke-linejoin: round; }
+.pkm-prem-cal-ring { fill: none; stroke: #E8ECF2; stroke-width: 2.4; stroke-linecap: round; }
+.pkm-prem-cal-day { fill: #D3DBEE; }
+.pkm-prem-cal-ok { fill: none; stroke: #16A35A; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 7; stroke-dashoffset: 7; animation: pkmPremCheck 3.2s ease-out infinite; }
+.pkm-prem-cal-ok2 { animation-delay: 0.4s; }
+.pkm-prem-cal-ok3 { animation-delay: 0.8s; }
+@keyframes pkmPremCheck { 0% { stroke-dashoffset: 7; opacity: 1; } 16%, 78% { stroke-dashoffset: 0; opacity: 1; } 92%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .pkm-prem-cal-ok { animation: none; stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .pkm-prem-bind-card, .pkm-prem-hist-line, .pkm-prem-xp-drop, .pkm-prem-xp-tag, .pkm-prem-xp-spark, .pkm-prem-banner, .pkm-prem-banner::after { animation: none; } .pkm-prem-hist-line { stroke-dashoffset: 0; } }
 /* Paiement branché (2026-11-07) : abonné Premium, erreur, bouton occupé, paiement sécurisé. */
 .pkm-prem-cta[aria-disabled="true"] { opacity: 0.75; cursor: progress; }
@@ -3542,10 +3554,11 @@ html.pkm-landscape, html.pkm-landscape body { overflow: hidden; }
    « Le calendrier JCC » (frise chronologique en plein écran ; un appui sur une sortie ouvre sa fiche, un appui sur une
    extension ouvre ses items). Cartes sombres, lisibles dans les 3 apparences (Sombre, Clair, Original). */
 
-/* Logo de l'onglet : un seul des 4 logos proposés est visible (?coinvis=1 à 4, « Dresseurs » par défaut). Disposition
+/* Logo de l'onglet : un seul des 12 logos proposés est visible (« Dresseurs qui discutent », n° 11, choisi par le porteur
+   le 2026-11-20 ; ?coinvis=1 à 12 pour comparer). Disposition
    de la barre du bas : navbar.css. */
 .pkm-coin-ico { display: none; }
-html:not([data-coinvis]) .pkm-coin-ico-1, html[data-coinvis="1"] .pkm-coin-ico-1, html[data-coinvis="2"] .pkm-coin-ico-2,
+html:not([data-coinvis]) .pkm-coin-ico-11, html[data-coinvis="1"] .pkm-coin-ico-1, html[data-coinvis="2"] .pkm-coin-ico-2,
 html[data-coinvis="3"] .pkm-coin-ico-3, html[data-coinvis="4"] .pkm-coin-ico-4, html[data-coinvis="5"] .pkm-coin-ico-5,
 html[data-coinvis="6"] .pkm-coin-ico-6, html[data-coinvis="7"] .pkm-coin-ico-7, html[data-coinvis="8"] .pkm-coin-ico-8,
 html[data-coinvis="9"] .pkm-coin-ico-9, html[data-coinvis="10"] .pkm-coin-ico-10, html[data-coinvis="11"] .pkm-coin-ico-11,
@@ -4701,6 +4714,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=0a25a410"></script>
+<script src="app.js?v=19f3c5ed"></script>
 </body>
 </html>
