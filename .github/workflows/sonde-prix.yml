@@ -1,0 +1,32 @@
+# Sonde des prix d'une extension (diagnostic manuel, 2026-11-20, porteur : prix de l'Édition 1 du Set de Base trop bas) :
+# écrit dans le journal les prix bruts de TCGdex (Cardmarket et toutes les versions TCGplayer). Lecture seule.
+name: Sonde des prix
+
+on:
+  workflow_dispatch:
+    inputs:
+      set:
+        description: "Extension (ex. base1)"
+        required: true
+        default: "base1"
+      lang:
+        description: "Langue TCGdex"
+        required: false
+        default: "fr"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/pokemon-app-mockup-1mxt7p
+      - name: Prix
+        env:
+          SET: ${{ github.event.inputs.set }}
+          LANG_TCGDEX: ${{ github.event.inputs.lang }}
+        run: python3 tools/tcgdex/probe_prices.py "$SET" --lang "$LANG_TCGDEX"
