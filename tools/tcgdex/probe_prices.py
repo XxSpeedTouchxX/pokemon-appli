@@ -29,7 +29,7 @@ def get(url):
     return None
 
 
-def probe_cm(names):
+def probe_cm(names, exps=frozenset()):
     """Tous les produits du catalogue public de Cardmarket qui portent ces noms, avec leur extension et leur prix."""
     cm = "https://downloads.s3.cardmarket.com/productCatalog/"
     prods = (get(cm + "productList/products_singles_6.json") or {}).get("products") or []
@@ -40,7 +40,9 @@ def probe_cm(names):
     print("CATALOGUE", len(prods), "produits,", len(guide), "prix", flush=True)
     for p in prods:
         n = (p.get("name") or "").lower()
-        if any(n == x or n.startswith(x + " ") or n.startswith(x + " (") for x in names):
+        if p.get("idExpansion") in exps:
+            print("EXP", json.dumps({"p": p, "g": guide.get(p["idProduct"])}, ensure_ascii=False), flush=True)
+        elif any(n == x or n.startswith(x + " ") or n.startswith(x + " (") for x in names):
             print("CM", json.dumps({"id": p["idProduct"], "name": p.get("name"), "exp": p.get("idExpansion"), "expSize": size.get(p.get("idExpansion")),
                                     "cat": p.get("idCategory"), "added": p.get("dateAdded"), "g": guide.get(p["idProduct"])}, ensure_ascii=False), flush=True)
     return 0
@@ -52,9 +54,10 @@ def main():
     ap.add_argument("--lang", default="fr")
     ap.add_argument("--ptcg", default="", help="extension pokemontcg.io à sonder aussi (ex. base1)")
     ap.add_argument("--cm", default="", help="noms anglais séparés par des virgules : tous les produits Cardmarket de ce nom")
+    ap.add_argument("--exp", default="", help="extension(s) Cardmarket (idExpansion, virgules) : tous leurs produits, champs bruts")
     a = ap.parse_args()
-    if a.cm:
-        return probe_cm([x.strip().lower() for x in a.cm.split(",") if x.strip()])
+    if a.cm or a.exp:
+        return probe_cm([x.strip().lower() for x in a.cm.split(",") if x.strip()], {int(x) for x in a.exp.split(",") if x.strip()})
     if a.ptcg:
         d = get(f"https://api.pokemontcg.io/v2/cards?q=set.id:{a.ptcg}&pageSize=250&select=id,name,rarity,tcgplayer,cardmarket") or {}
         for c in d.get("data") or []:

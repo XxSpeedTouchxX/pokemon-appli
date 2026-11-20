@@ -21,6 +21,10 @@ on:
         description: "Noms anglais (virgules) : tous les produits Cardmarket de ce nom, vide sinon"
         required: false
         default: ""
+      exp:
+        description: "Extensions Cardmarket (idExpansion, virgules) : tous leurs produits, vide sinon"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -39,4 +43,5 @@ jobs:
           LANG_TCGDEX: ${{ github.event.inputs.lang }}
           PTCG: ${{ github.event.inputs.ptcg }}
           CMN: ${{ github.event.inputs.cm }}
-        run: python3 tools/tcgdex/probe_prices.py "$SET" --lang "$LANG_TCGDEX" --ptcg "$PTCG" --cm "$CMN"
+          EXP: ${{ github.event.inputs.exp }}
+        run: python3 tools/tcgdex/probe_prices.py "$SET" --lang "$LANG_TCGDEX" --ptcg "$PTCG" --cm "$CMN" --exp "$EXP"
