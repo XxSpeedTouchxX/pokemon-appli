@@ -33,7 +33,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("set")
     ap.add_argument("--lang", default="fr")
+    ap.add_argument("--ptcg", default="", help="extension pokemontcg.io à sonder aussi (ex. base1)")
     a = ap.parse_args()
+    if a.ptcg:
+        d = get(f"https://api.pokemontcg.io/v2/cards?q=set.id:{a.ptcg}&pageSize=250&select=id,name,rarity,tcgplayer,cardmarket") or {}
+        for c in d.get("data") or []:
+            tp = ((c.get("tcgplayer") or {}).get("prices")) or {}
+            cm = ((c.get("cardmarket") or {}).get("prices")) or {}
+            print("PTCG", json.dumps({"id": c.get("id"), "name": c.get("name"), "rarity": c.get("rarity"),
+                                      "tcp": {k: (v or {}).get("market") or (v or {}).get("mid") for k, v in tp.items()},
+                                      "cm": {k: cm.get(k) for k in ("trendPrice", "avg7", "avg30", "averageSellPrice") if cm.get(k)}}, ensure_ascii=False), flush=True)
+        return 0
     s = get(f"https://api.tcgdex.net/v2/{a.lang}/sets/{a.set}")
     if not s:
         print("extension introuvable")
