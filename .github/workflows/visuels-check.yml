@@ -12,6 +12,14 @@ on:
         description: "Langues TCGdex à essayer"
         required: false
         default: "fr,en,de,it,es,pt"
+      detail:
+        description: "Langue à détailler (formats et comparaison avec l'anglais), vide sinon"
+        required: false
+        default: ""
+      thumbs:
+        description: "Cartes dont la vignette est écrite dans le journal (ex. base1-4,base1-58)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -28,4 +36,9 @@ jobs:
         env:
           SET: ${{ github.event.inputs.set }}
           LANGS: ${{ github.event.inputs.langs }}
-        run: python3 tools/visuels/check_set.py "$SET" --langs "$LANGS" | tee "$RUNNER_TEMP/visuels.txt"; tail -1 "$RUNNER_TEMP/visuels.txt" >> "$GITHUB_STEP_SUMMARY"
+          DETAIL: ${{ github.event.inputs.detail }}
+          THUMBS: ${{ github.event.inputs.thumbs }}
+        run: |
+          pip install --quiet pillow
+          python3 tools/visuels/check_set.py "$SET" --langs "$LANGS" --detail "$DETAIL" --thumbs "$THUMBS" | tee "$RUNNER_TEMP/visuels.txt"
+          tail -1 "$RUNNER_TEMP/visuels.txt" >> "$GITHUB_STEP_SUMMARY"

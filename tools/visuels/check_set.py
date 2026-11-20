@@ -28,12 +28,53 @@ def status(url):
         return 0
 
 
+def body(url):
+    try:
+        with urlopen(Request(url, headers=UA), timeout=60) as r:
+            return r.read()
+    except (HTTPError, URLError, TimeoutError):
+        return None
+
+
+def detail(a):
+    """Pour chaque carte : formats présents dans la langue demandée, et visuel identique ou non à l'anglais."""
+    import hashlib
+    d = json.loads((ROOT / "web/data/cards-base.json").read_text("utf-8"))
+    f = {k: i for i, k in enumerate(d["fields"])}
+    cards = [c for c in d["cards"] if c[f["set"]] == a.set]
+    lg, thumbs = a.detail, set(t for t in a.thumbs.split(",") if t)
+    tot = {"low.webp": 0, "high.webp": 0, "high.png": 0, "same": 0, "diff": 0}
+    for c in cards:
+        path = "/".join(c[f["img"]].split("/")[1:]) if c[f["img"]] else ""
+        base = f"https://assets.tcgdex.net/{lg}/{path}"
+        st = {q: status(f"{base}/{q}") for q in ("low.webp", "high.webp", "high.png")}
+        for q, v in st.items():
+            tot[q] += v == 200
+        mine, en = body(f"{base}/high.webp"), body(f"https://assets.tcgdex.net/en/{path}/high.webp")
+        same = "?" if not (mine and en) else ("identique" if hashlib.md5(mine).digest() == hashlib.md5(en).digest() else "différent")
+        tot["same"] += same == "identique"; tot["diff"] += same == "différent"
+        print(c[f["id"]], c[f["name"]], " ".join(f"{q}:{v}" for q, v in st.items()), "anglais:" + same, flush=True)
+        if c[f["id"]] in thumbs and mine:
+            import base64, io
+            from PIL import Image
+            im = Image.open(io.BytesIO(mine)).convert("RGB")
+            im.thumbnail((160, 220))
+            buf = io.BytesIO(); im.save(buf, "PNG", optimize=True)
+            print("VIGNETTE", c[f["id"]], base64.b64encode(buf.getvalue()).decode())
+    print("RÉSUMÉ", lg, " ".join(f"{k}={v}/{len(cards)}" for k, v in tot.items()))
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("set")
     ap.add_argument("--langs", default="fr,en,de,it,es,pt")
     ap.add_argument("--ptcg", default=None, help="identifiant pokemontcg.io de l'extension (par défaut : le même)")
+    ap.add_argument("--detail", default="", help="langue à détailler : low.webp, high.webp, high.png et comparaison avec l'anglais")
+    ap.add_argument("--thumbs", default="", help="cartes dont la vignette (160 px, PNG en base64) est écrite dans le journal")
     a = ap.parse_args(argv)
+    if a.detail:
+        return detail(a)
     d = json.loads((ROOT / "web/data/cards-base.json").read_text("utf-8"))
     f = {k: i for i, k in enumerate(d["fields"])}
     cards = [c for c in d["cards"] if c[f["set"]] == a.set]
