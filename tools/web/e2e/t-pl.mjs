@@ -1,4 +1,5 @@
-// Points de loyauté (2026-11-14, « go » du porteur, docs/38) : « Ma ligue » (ex-« Ma progression ») en 2 onglets, classement en PL,
+// Points de loyauté (2026-11-14, « go » du porteur, docs/38) : « Ma ligue » (ex-« Ma progression » ; 1ʳᵉ bulle du coin des dresseurs
+// depuis le 2026-11-21) en 2 onglets, classement en PL,
 // onglet « Mes missions » (ex-« Gagner des PL ») (ligne vers « Parrainer un ami » du coin des dresseurs, réseaux sur l'honneur, séries de jours, capture d'un partage),
 // code d'un lien ?parrain=CODE appliqué à la connexion, Admin › « Défis à valider ».
 // Le serveur est imité (page.route) : jamais le vrai serveur.
@@ -38,14 +39,14 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   await page.locator('.pkm-pg-tabs button').nth(0).click(); await page.waitForTimeout(400);
   ok('bas du classement : « Revoir l’explication de la ligue »', (await page.locator('button.pkm-pg-replay').count()) === 1);
   const tabs = await page.locator('.pkm-pg-tabs button').allInnerTexts();
-  ok('3 onglets : « Classement et récompenses », « Mes missions » et « Échanges »', tabs.length === 3 && /Classement et récompenses/.test(tabs[0]) && /Mes missions/.test(tabs[1]) && /Échanges/.test(tabs[2]));
+  ok('2 onglets : « Classement et récompenses » et « Mes missions » (« Échanges » retiré le 2026-11-21)', tabs.length === 2 && /Classement et récompenses/.test(tabs[0]) && /Mes missions/.test(tabs[1]));
   ok('onglet du classement ouvert d’abord', (await page.locator('.pkm-pg-tab-on').innerText()) === tabs[0] && (await page.locator('section.pkm-pg-card').count()) === 1);
   const rw = N(await page.locator('section[aria-label="Lots de la saison"]').innerText());
   ok('lots : ETB, coffret, 2 boosters, Premium ou ticket Or / Argent / Bronze', /1ʳᵉ place Un ETB des 30 ans/.test(rw) && /2ᵉ place Un coffret poster des 30 ans/.test(rw) && /3ᵉ place 2 boosters des 30 ans/.test(rw)
     && /4ᵉ et 5ᵉ place 1 mois de DropiPass ou 1 ticket Or/.test(rw) && /6ᵉ et 7ᵉ place 1 mois de DropiPass ou 1 ticket Argent/.test(rw) && /8ᵉ à 10ᵉ place 1 mois de DropiPass ou 1 ticket Bronze/.test(rw) && /au moins 50 joueurs/.test(rw));
   await page.locator('.pkm-pg-tabs button').nth(1).click(); await page.waitForTimeout(500);
   ok('« Mes missions » sans compte : invitation à se connecter, classement caché', /Connecte-toi à ton compte Dropicards pour gagner des Points de loyauté/.test(await page.locator('.pkm-ple-msg').innerText()) && (await page.locator('section.pkm-pg-card').count()) === 0);
-  ok('en-tête : « Ma ligue · Mes missions »', /Ma ligue/.test(await page.locator('header').first().innerText()) && /Mes missions/.test(await page.locator('header').first().innerText()));
+  ok('Le coin des dresseurs : bulle « Ma ligue » choisie, onglet « Mes missions »', /Ma ligue/.test(await page.locator('.pkm-coin-tabs [aria-selected="true"]').innerText()) && /Mes missions/.test(await page.locator('.pkm-pg-tab-on').innerText()));
   await ctx.close();
 }
 

@@ -43,12 +43,14 @@
   // ligue, qu'on lui explique rapidement qu'il y a un championnat chaque saison, avec un classement, et que pour monter
   // dans le classement il faut remplir les défis de l'onglet Mes missions ») : même moteur, même starter qui parle,
   // 5 étapes ; une seule fois par appareil (état « ligueTuto »), à revoir depuis le bas du classement.
+  // « Ma ligue » est la 1ʳᵉ bulle de « Le coin des dresseurs » depuis le 2026-11-21 (coin.js).
+  const ligueOn = s => s.screen === 'coin' && !(s.coinTab === 'vit' || s.coinTab === 'par' || s.coinTab === 'cal');
   const LIGUE_STEPS = [
-    { tab: 'progress', pg: 'board', sel: 'section.pkm-pg-season', noRing: true, text: 'Bienvenue dans ta ligue ! Chaque saison dure 60 jours : c’est un championnat entre tous les dresseurs de Dropicards.' },
-    { tab: 'progress', pg: 'board', sel: 'section.pkm-pg-card', noRing: true, text: 'Voici ta carte : ta place au classement et tes Points de loyauté (PL) de la saison. Plus tu as de PL, plus tu montes !' },
-    { tab: 'progress', pg: 'board', sel: 'section[aria-label="Lots de la saison"]', noRing: true, text: 'À la fin de la saison, les 10 premiers du classement gagnent des lots : un ETB, un coffret, des boosters, du DropiPass ou des tickets du PK shop !' },
-    { tab: 'progress', pg: 'board', sel: '.pkm-pg-tabs > button:last-child', pad: 4, noRing: true, text: 'Pour monter au classement, remplis les missions de l’onglet « Mes missions ».' },
-    { tab: 'progress', pg: 'earn', sel: 'section[aria-label="Missions"], .pkm-ple-msg', noRing: true, last: true, text: 'Parraine tes amis, suis Dropicards sur les réseaux, ouvre l’appli plusieurs jours d’affilée et partage-la : chaque mission te rapporte des PL. Bonne chance pour la saison !' }
+    { tab: 'coin', pg: 'board', sel: 'section.pkm-pg-season', noRing: true, text: 'Bienvenue dans ta ligue ! Chaque saison dure 60 jours : c’est un championnat entre tous les dresseurs de Dropicards.' },
+    { tab: 'coin', pg: 'board', sel: 'section.pkm-pg-card', noRing: true, text: 'Voici ta carte : ta place au classement et tes Points de loyauté (PL) de la saison. Plus tu as de PL, plus tu montes !' },
+    { tab: 'coin', pg: 'board', sel: 'section[aria-label="Lots de la saison"]', noRing: true, text: 'À la fin de la saison, les 10 premiers du classement gagnent des lots : un ETB, un coffret, des boosters, du DropiPass ou des tickets du PK shop !' },
+    { tab: 'coin', pg: 'board', sel: '.pkm-pg-tabs > button:last-child', pad: 4, noRing: true, text: 'Pour monter au classement, remplis les missions de l’onglet « Mes missions ».' },
+    { tab: 'coin', pg: 'earn', sel: 'section[aria-label="Missions"], .pkm-ple-msg', noRing: true, last: true, text: 'Parraine tes amis, suis Dropicards sur les réseaux, ouvre l’appli plusieurs jours d’affilée et partage-la : chaque mission te rapporte des PL. Bonne chance pour la saison !' }
   ];
   // Visite en cours : le didacticiel de l'app (TUTO_STEPS) ou celui de « Ma ligue » (LIGUE_STEPS).
   let TSTEPS = TUTO_STEPS;
@@ -522,7 +524,7 @@
   // Mini-tuto de « Ma ligue » : départ, fin (vu ou passé), une seule fois par appareil.
   tutoProto.ligueStart = function () {
     const s = this.st();
-    if (s.tutoStep >= -1 || s.screen !== 'progress') return;
+    if (s.tutoStep >= -1 || !ligueOn(s)) return;
     tutoAudioInit();
     TUTO.mode = 'ligue'; TSTEPS = LIGUE_STEPS;
     this.tutoGo(0);
@@ -556,9 +558,9 @@
     if (want && TUTO.dlg !== want) setTimeout(() => { const b = document.querySelector(want === 'ask' ? 'section[role="dialog"][aria-label="Didacticiel"] button' : 'section[aria-label="Choisis ton starter"] button'); if (b) b.focus({ preventScroll: true }); }, 80);
     TUTO.dlg = want;
     // Première ouverture de « Ma ligue » : le mini-tuto démarre une fois la page arrivée (glissement de la page).
-    if (s.screen === 'progress' && s.ligueTuto !== 'done' && !(s.tutoStep >= -1) && !s.sheet && !s.fiId && !TUTO.ligueSoon) {
+    if (ligueOn(s) && s.ligueTuto !== 'done' && !(s.tutoStep >= -1) && !s.sheet && !s.fiId && !TUTO.ligueSoon) {
       TUTO.ligueSoon = true;
-      setTimeout(() => { TUTO.ligueSoon = false; const t = this.st(); if (t.screen === 'progress' && t.ligueTuto !== 'done') this.ligueStart(); }, 900);
+      setTimeout(() => { TUTO.ligueSoon = false; const t = this.st(); if (ligueOn(t) && t.ligueTuto !== 'done') this.ligueStart(); }, 900);
     }
     return r;
   };

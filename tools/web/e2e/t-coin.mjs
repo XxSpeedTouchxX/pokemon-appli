@@ -1,4 +1,5 @@
-// « Le coin des dresseurs » (2026-11-18, porteur) : 5ᵉ onglet entre « Toutes les séries » et le scan ; « Ma vitrine »
+// « Le coin des dresseurs » (2026-11-18, porteur) : 5ᵉ onglet entre « Toutes les séries » et le scan ; « Ma ligue » en 1ʳᵉ bulle
+// (2026-11-21) ; « Ma vitrine »
 // (interface Échanges de Ma ligue + recherche des dresseurs, 034) ; « Le calendrier JCC » (2026-11-19 : la frise seule,
 // en plein écran, avec les logos des extensions ; un appui sur une sortie ouvre sa fiche, un appui sur un logo l'enfonce,
 // zoome dessus puis ouvre la page de l'extension, onglets « Cartes » et « Items »). Le serveur est imité : jamais le vrai serveur.
@@ -90,8 +91,10 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   const tabSt = [await page.evaluate(() => window.__pkm.st().screen), await page.locator(NAV + ' button[aria-label="Le coin des dresseurs"]').getAttribute('aria-current'), N(await page.locator('h1, h2').first().innerText())];
   ok('onglet : écran « Le coin des dresseurs » ouvert, bouton allumé (' + tabSt.join(' | ') + ')', tabSt[0] === 'coin' && tabSt[1] === 'page' && /Le coin des dresseurs/.test(tabSt[2]));
   const tabs = await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button').allInnerTexts();
-  // « Parrainer un ami » entre les deux depuis le 2026-11-21 (porteur ; t-parrain.mjs).
-  ok('3 sous-rubriques : « Ma vitrine », « Parrainer un ami » et « Le calendrier JCC »', tabs.length === 3 && /Ma vitrine/.test(tabs[0]) && /Parrainer un ami/.test(tabs[1]) && /calendrier JCC/.test(tabs[2]));
+  // « Parrainer un ami » (t-parrain.mjs) et « Ma ligue », en 1ʳᵉ position, ajoutés le 2026-11-21 (porteur).
+  ok('4 sous-rubriques : « Ma ligue », « Ma vitrine », « Parrainer un ami » et « Le calendrier JCC »', tabs.length === 4 && /Ma ligue/.test(tabs[0]) && /Ma vitrine/.test(tabs[1]) && /Parrainer un ami/.test(tabs[2]) && /calendrier JCC/.test(tabs[3]));
+  ok('ouverture sur « Ma ligue » (classement de la saison)', /Ma ligue/.test(await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button[aria-selected="true"]').innerText()) && (await page.locator('section.pkm-pg-season').count()) === 1);
+  await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'Ma vitrine' }).click(); await page.waitForTimeout(1200);
 
   // B. Ma vitrine : même interface que l'onglet Échanges, recherche, vitrines des dresseurs.
   ok('Ma vitrine : sections « Mes cartes Pour trade et à vendre », « Je cherche », « Échanges possibles » (interface Échanges)',
@@ -277,9 +280,14 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('?navvis=3 : forme « Socle » seule, scan en carré arrondi, tout dans l’écran à 320 px', nv.shown.length === 1 && /pkm-nd-3/.test(nv.shown[0]) && nv.rad < 25 && nv.fits);
   const vis = await page.locator(NAV + ' .pkm-coin-ico').evaluateAll(a => a.map(s => getComputedStyle(s).display !== 'none'));
   ok('?coinvis=3 : logo « Bulle » seul visible', vis[2] && vis.filter(Boolean).length === 1);
-  await page.click(NAV + ' button[aria-label="Le coin des dresseurs"]'); await page.waitForTimeout(1200);
+  await page.click(NAV + ' button[aria-label="Le coin des dresseurs"]'); await page.waitForTimeout(2000); // entrée en cascade de Ma ligue terminée
   const over = await page.evaluate(() => { const m = document.querySelector('main'); return m ? m.scrollWidth - m.clientWidth : 99; });
-  ok('320 px : aucun débordement horizontal (' + over + ')', over <= 1);
+  const wide = await page.evaluate(() => { const m = document.querySelector('main'), mr = m.getBoundingClientRect(); return [...m.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width && r.right > mr.right + 1; }).slice(0, 4).map(e => e.tagName + '.' + String(e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className).slice(0, 60)).join(' ; '); });
+  ok('320 px, Ma ligue : aucun débordement horizontal (' + over + ')', over <= 1, wide);
+  await page.screenshot({ path: shot('coin-ligue-320.png') });
+  await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'Ma vitrine' }).click(); await page.waitForTimeout(1200);
+  const overV = await page.evaluate(() => { const m = document.querySelector('main'); return m ? m.scrollWidth - m.clientWidth : 99; });
+  ok('320 px, Ma vitrine : aucun débordement horizontal (' + overV + ')', overV <= 1);
   ok('serveur sans 034 : l’admin voit le fichier à installer', /install_024_a_034\.sql/.test(await page.locator('section[aria-label="Vitrines des dresseurs"]').innerText()));
   await page.screenshot({ path: shot('coin-320.png') });
   await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'calendrier JCC' }).click(); await page.waitForTimeout(1500);

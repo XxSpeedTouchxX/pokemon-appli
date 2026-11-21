@@ -1,4 +1,5 @@
-// « Ma ligue » (ex-« Ma progression », 2026-11-08, porteur ; renommée le 2026-11-14) : bannière dans Jeux, saison et temps restant, carte du joueur (avatar,
+// « Ma ligue » (ex-« Ma progression », 2026-11-08, porteur ; renommée le 2026-11-14 ; 2026-11-21 : 1ʳᵉ bulle du « Coin des dresseurs »,
+// à gauche de « Ma vitrine », bannière de Jeux et onglet « Échanges » retirés) : saison et temps restant, carte du joueur (avatar,
 // pseudo, emblème, PK de la saison (le total retiré le 2026-11-15), place), podium du top 3, classement avec grades, ma ligne hors du
 // top, lots de la saison. Le classement du serveur (season_board, 013_saisons.sql) est imité.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -9,16 +10,17 @@ await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r =
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?debug', { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.evaluate(() => { window.__pkm.setState({ ligueTuto: 'done' }); window.__pkm.tab('market'); }); await page.waitForTimeout(700); // mini-tuto testé dans t-pl.mjs
-const ban = page.locator('button.pkm-pg-banner');
-ok('Jeux : bannière « Ma ligue · Saison 1 »', (await ban.count()) === 1 && /Ma ligue/.test(await ban.innerText()) && /Saison 1/.test(await ban.innerText()));
+ok('Jeux : plus de bannière « Ma ligue » (déplacée dans Le coin des dresseurs)', (await page.locator('button.pkm-pg-banner').count()) === 0);
 ok('Pokédex : « Progression du Pokédex » (plus de doublon « Ma progression »)', (await page.locator('section[aria-label="Progression du Pokédex"]').count()) <= 1 && (await page.locator('section[aria-label="Ma progression"]').count()) === 0);
-await ban.click(); await page.waitForTimeout(60);
-const tIn = await page.evaluate(() => getComputedStyle(document.querySelector('#app main')).transform);
-ok('ouverture : la page arrive de la droite (' + tIn + ')', /^matrix\(1, 0, 0, 1, [1-9]/.test(tIn));
+await page.locator('nav[aria-label="Navigation principale"] button[aria-label*="coin des dresseurs" i]').first().click(); await page.waitForTimeout(80);
 ok('ouverture : saison, carte, classement et lots arrivent l’un après l’autre', await page.evaluate(() => ['.pkm-pg-season', '.pkm-pg-card', '.pkm-pg-board', '.pkm-pg-rewards'].map(q => parseFloat(getComputedStyle(document.querySelector(q)).animationDelay)).every((d, i, a) => d > 0 && (i === 0 || d > a[i - 1]))));
 await page.screenshot({ path: shot('progress-entree.png') });
 await page.waitForTimeout(700);
-ok('page « Ma ligue » ouverte', /Ma ligue/.test(await page.locator('header').first().innerText().catch(() => '')) || (await page.locator('section.pkm-pg-card').count()) === 1);
+const ctabs = await page.locator('.pkm-coin-tabs [role="tab"]').evaluateAll(bs => bs.map(b => b.innerText.replace(/\s+/g, ' ').trim() + (b.getAttribute('aria-selected') === 'true' ? '*' : '')));
+ok('Le coin des dresseurs : 4 bulles, « Ma ligue » choisie et à gauche de « Ma vitrine » (' + ctabs.join(' | ') + ')', ctabs.length === 4 && ctabs[0] === 'Ma ligue*' && ctabs[1] === 'Ma vitrine' && /Parrainer un ami/.test(ctabs[2]) && /calendrier JCC/.test(ctabs[3]));
+const btabs = await page.locator('.pkm-pg-tabs [role="tab"]').allInnerTexts();
+ok('Ma ligue : 2 onglets « Classement et récompenses » et « Mes missions », plus d’« Échanges » (' + btabs.join(' | ') + ')', btabs.length === 2 && /Classement et récompenses/.test(btabs[0]) && /Mes missions/.test(btabs[1]));
+ok('page « Ma ligue » ouverte', (await page.locator('section.pkm-pg-card').count()) === 1);
 const season = await page.locator('section.pkm-pg-season').innerText();
 ok('saison : « Saison 1 », temps restant, 8 novembre au 6 janvier (' + season.replace(/\s+/g, ' ') + ')', /Saison 1/.test(season) && /Se termine dans \d+ j/.test(season) && /8 novembre au 6 janvier 2027/.test(season));
 ok('sans serveur : carte sans place, invitation à se connecter', /Connecte-toi pour voir ta place/.test(await page.locator('section.pkm-pg-card').innerText()));
@@ -66,9 +68,14 @@ await page.locator('section[aria-label="Lots de la saison"]').scrollIntoViewIfNe
 await page.evaluate(() => { const b = window.__pkm.st().progBoard; b.top[6].me = true; b.me = { rank: 7, pk: b.top[6].pk }; window.__pkm.setState({ progBoard: Object.assign({}, b) }); });
 await page.waitForTimeout(300);
 ok('7ᵉ : « Dans le top 10 », ligne surlignée dans la liste, pas de ligne en plus', /Dans le top 10/.test(await page.locator('section.pkm-pg-card').innerText()) && (await page.locator('ol.pkm-pg-list > li > .pkm-pg-me').count()) === 1 && (await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').count()) === 0);
-// Retour vers Jeux.
-await page.evaluate(() => window.__pkm.pop()); await page.waitForTimeout(700);
-ok('retour : onglet Jeux', (await page.locator('button.pkm-pg-banner').count()) === 1);
+// Aller sur « Ma vitrine » puis revenir sur « Ma ligue ».
+await page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma vitrine' }).click(); await page.waitForTimeout(900);
+ok('« Ma vitrine » : la ligue disparaît', (await page.locator('section.pkm-pg-card').count()) === 0 && (await page.locator('section[aria-label="Rechercher un dresseur"]').count()) === 1);
+await page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma ligue' }).click(); await page.waitForTimeout(900);
+ok('retour sur « Ma ligue » : carte et classement', (await page.locator('section.pkm-pg-card').count()) === 1 && (await page.locator('section[aria-label="Classement général"]').count()) === 1);
+// Ancienne adresse ?start=progress : ouvre Le coin des dresseurs sur Ma ligue.
+await page.goto(E2E + '/?start=progress&debug', { waitUntil: 'load' }); await page.waitForTimeout(2200);
+ok('?start=progress : Le coin des dresseurs, bulle Ma ligue', await page.evaluate(() => window.__pkm.st().screen === 'coin' && (window.__pkm.st().coinTab || 'lig') === 'lig') && (await page.locator('section.pkm-pg-card').count()) === 1);
 ok('aucune erreur JavaScript', errors.length === 0);
 if (errors.length) console.log(errors.join('\n'));
 console.log(res.join('\n'));

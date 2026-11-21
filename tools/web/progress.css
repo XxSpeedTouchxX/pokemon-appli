@@ -1,10 +1,4 @@
 /* « Ma progression » (2026-11-08, porteur) : saison, carte du joueur, podium, classement, lots. */
-.pkm-pg-banner { flex: none; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 22px; border: 1px solid #5B4A12; background: linear-gradient(120deg, rgba(255, 214, 10, 0.22), rgba(255, 214, 10, 0) 55%), #121C33; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; }
-.pkm-pg-banner > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.pkm-pg-banner b { font-family: 'Sora', sans-serif; font-size: 17px; }
-.pkm-pg-banner small { font-size: 12.5px; color: #C9D3EA; }
-.pkm-pg-banner svg { flex: none; fill: none; stroke: #FFD60A; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.pkm-pg-banner-cup { flex: none; filter: drop-shadow(0 4px 8px rgba(255, 190, 0, 0.35)); animation: pkmPgBob 2.6s ease-in-out infinite; }
 @keyframes pkmPgBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-3px) rotate(4deg); } }
 
 .pkm-pg-season { flex: none; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 12px; padding: 14px 16px; border-radius: 22px; border: 1px solid #5B4A12; background: radial-gradient(120% 90% at 0% 0%, rgba(255, 214, 10, 0.25), rgba(255, 214, 10, 0) 60%), #121C33; color: #F3F6FC; }
@@ -78,8 +72,8 @@
 .pkm-pg-rwt span { font-size: 13px; color: #E6ECFA; }
 .pkm-pg-rwt small { font-size: 11.5px; color: #9AA8C3; }
 .pkm-pg-rules { margin: 0; font-size: 12px; line-height: 1.5; color: #9AA8C3; }
-@media (prefers-reduced-motion: reduce) { .pkm-pg-banner-cup, .pkm-pg-pod-1 .pkm-pg-medal { animation: none; } }
-html.pkm-calm .pkm-pg-banner-cup, html.pkm-calm .pkm-pg-pod-1 .pkm-pg-medal { animation: none; }
+@media (prefers-reduced-motion: reduce) { .pkm-pg-pod-1 .pkm-pg-medal { animation: none; } }
+html.pkm-calm .pkm-pg-pod-1 .pkm-pg-medal { animation: none; }
 .pkm-pg-ava-m { flex: none; position: relative; display: block; width: 38px; height: 38px; border-radius: 12px; overflow: hidden; background: #0B1120; border: 2px solid #2A3A5C; }
 .pkm-pg-ava-m img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .pkm-pg-ava-m img.pkm-pg-ava-pk { inset: auto; image-rendering: pixelated; object-fit: contain; }

@@ -190,18 +190,13 @@
 
   const qmBaseCard = qmProto.vPlayerCard;
   qmProto.vPlayerCard = function (s) { const r = qmBaseCard.call(this, s); r.qm = r.open ? this.vQmCard(s) : { show: false, chips: [] }; return r; };
-  const qmBaseBanner = qmProto.vProgressBanner;
-  qmProto.vProgressBanner = function (s) {
-    const r = qmBaseBanner.call(this, s), n = qmOnline() ? Number((s.qmState || {}).unread) || 0 : 0;
-    if (n) r.aria += ' · ' + n + ' nouveau' + (n > 1 ? 'x messages' : ' message');
-    return r;
-  };
   const qmBaseRender = qmProto.renderVals;
   qmProto.renderVals = function () {
     const s = this.st(), r = qmBaseRender.call(this);
     r.qmb = this.vQmButton(s);
     r.qmx = this.vQmBox(s);
-    // Pastille : état relu sur l'onglet Jeux et dans Ma ligue (au plus une fois par minute).
-    if (r.ui && (r.ui.isGames || r.ui.isProgress) && qmOnline() && !(s.qmState && Date.now() - (s.qmState.at || 0) < QM_TTL) && !this.__qmStBusy) setTimeout(() => this.qmLoadState(false), 0);
+    // Pastille : état relu dans Le coin des dresseurs (bulle « Ma ligue », 2026-11-21) et dans Jeux (au plus une fois par minute).
+    // ui.isCoin est posé plus tard (coin.js enveloppe ce module) : l'écran est lu directement.
+    if (r.ui && (r.ui.isGames || r.ui.isProgress || s.screen === 'coin') && qmOnline() && !(s.qmState && Date.now() - (s.qmState.at || 0) < QM_TTL) && !this.__qmStBusy) setTimeout(() => this.qmLoadState(false), 0);
     return r;
   };

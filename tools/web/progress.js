@@ -10,6 +10,11 @@
   // Depuis le 2026-11-14 (« go » du porteur, docs/38) : 2 onglets, « Classement et récompenses » et « Mes missions » (ex-« Gagner des PL »)
   // (pl.js) ; classement en Points de loyauté (season_board de 028_points_loyaute.sql) ; lots de la grille du porteur.
   // Serveur sans 028 : classement en PK comme avant.
+  // Depuis le 2026-11-21 (porteur : « déplace Ma ligue dans le coin des dresseurs, au début, à gauche de Ma vitrine ;
+  // supprime complètement Échanges ») : « Ma ligue » est la 1ʳᵉ bulle de « Le coin des dresseurs » (coin.js, ouverte par
+  // défaut) et n'a plus que 2 onglets ; plus d'écran à part ni de bannière dans Jeux (« ?start=progress » et progOpen
+  // ouvrent la bulle).
+  const progIn = s => s.screen === 'coin' && !(s.coinTab === 'vit' || s.coinTab === 'par' || s.coinTab === 'cal');
   const PROG_START = Date.parse('2026-11-08T00:00:00+01:00'), PROG_DAYS = 60, PROG_DAY = 86400000;
   const PROG_TTL = 60000; // classement relu au plus une fois par minute
   // Lots de la saison (grille du porteur, docs/38 §4, L8) ; podium seulement avec au moins 50 joueurs classés.
@@ -51,7 +56,7 @@
     Cloud.rpc('season_board', { lim: 50 }).then(b => this.setState({ progBoard: b || null, progAt: Date.now(), progBusy: false, progErr: '' }),
       e => this.setState({ progBusy: false, progErr: e && e.code === 'network' ? 'Pas de réseau : le classement s’affichera dès que tu seras connecté.' : 'Le classement n’est pas disponible pour le moment.' }));
   };
-  progProto.progOpen = function () { this.push('progress'); this.progLoad(false); if (this.plSync) this.plSync(false); };
+  progProto.progOpen = function () { if (typeof this.coinGo === 'function') this.coinGo('lig'); this.progLoad(false); if (this.plSync) this.plSync(false); };
   progProto.progTab = function (t) {
     if (this.st().pgTab === t) return;
     this.setState({ pgTab: t });
@@ -88,7 +93,7 @@
     const rankTxt = me ? '#' + progNum(me.rank) : '—';
     const cap = isPl ? 10 : 30;
     const myPrize = me ? (me.rank <= 10 ? 'Dans le top 10 : un lot t’attend si tu y restes' : !isPl && me.rank <= 30 ? 'Dans le top 30 : DropiPass offert si tu y restes' : 'Encore ' + progNum(Math.max(0, me.rank - cap)) + ' place' + (me.rank - cap > 1 ? 's' : '') + ' pour le top ' + cap + (isPl ? ' : gagne des PL avec les défis' : '')) : '';
-    const tab = s.pgTab === 'earn' ? 'earn' : 'board';
+    const tab = s.pgTab === 'earn' ? 'earn' : 'board'; // « Échanges » retiré le 2026-11-21 (dans Ma vitrine)
     return {
       seasonN: 'Saison ' + se.n, seasonLabel: 'Saison ' + se.n, left: progLeft(se.end - now), barW: 'width: ' + Math.round(done * 100) + '%',
       dates: 'Du ' + new Date(se.start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }) + ' au ' + new Date(se.end - 1).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }),
@@ -177,24 +182,17 @@
       note: note, hasNote: !!note
     };
   };
-  // Bannière de l'onglet Jeux.
-  progProto.vProgressBanner = function (s) {
-    const b = s.progBoard && s.progBoard.me ? s.progBoard : null, se = b && b.season ? Number(b.season.n) : progLocalSeason(Date.now()).n;
-    const sub = 'Saison ' + se + (b ? ' · #' + progNum(b.me.rank) + ' au classement' : ' · classement et lots');
-    return { title: 'Ma ligue', sub: sub, aria: 'Ma ligue : ' + sub, open: () => this.progOpen() };
-  };
   const progBaseRender = progProto.renderVals;
   progProto.renderVals = function () {
     const s = this.st(), r = progBaseRender.call(this), ui = r.ui;
-    ui.isProgress = s.screen === 'progress';
-    r.pgb = this.vProgressBanner(s);
+    // En-tête : celui du coin des dresseurs (coin.js).
+    ui.isProgress = progIn(s);
     r.tcd = this.vPlayerCard(s); // « pc » est déjà pris par Mon profil (Communauté, contact)
     if (ui.isProgress) {
       r.pg = this.vProgress(s);
       r.ple = r.pg.isEarn && this.vPlEarn ? this.vPlEarn(s) : { rows: [], shareNets: [] };
-      Object.assign(ui, { title: 'Ma ligue', subtitle: r.pg.seasonLabel + (r.pg.isEarn ? ' · Mes missions' : ' · classement général'), hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: false, headerDetail: true });
       // Temps restant : nouveau rendu chaque minute tant que la page est ouverte ; classement relu s'il date.
-      if (!progTick) progTick = setInterval(() => { if (this.st().screen === 'progress') { this.setState({ pgNow: Date.now() }); this.progLoad(false); } else { clearInterval(progTick); progTick = null; } }, 60000);
+      if (!progTick) progTick = setInterval(() => { if (progIn(this.st())) { this.setState({ pgNow: Date.now() }); this.progLoad(false); } else { clearInterval(progTick); progTick = null; } }, 60000);
     } else { r.pg = { card: {}, podium: [], rest: [], rewards: [], tabs: [] }; r.ple = { rows: [], shareNets: [] }; }
     // Fond de l'en-tête figé = fond de l'app (jaune, thème d'un compagnon ou apparence sombre).
     if (r.ui && r.ui.isProgress) setTimeout(() => { try {
@@ -203,12 +201,16 @@
     } catch (e) { /* page sans racine */ } }, 0);
     return r;
   };
-  const progBaseParent = progProto.parentOf;
-  progProto.parentOf = function (sc) { return sc === 'progress' ? 'market' : progBaseParent.call(this, sc); };
-  // Lien direct : ?start=progress (tests, partage).
+  // Lien direct : ?start=progress (tests, partage) → Le coin des dresseurs › Ma ligue (« ?pgtab=earn » : Mes missions ;
+  // « ?pgtab=trade », ancien onglet Échanges : Ma vitrine). Un écran « progress » resté en mémoire y mène aussi.
   const progBaseSt = progProto.st;
   progProto.st = function () {
     const d = progBaseSt.call(this), p = this.props || {};
-    if (!(this.state && this.state.screen) && p.start === 'progress') { d.screen = 'progress'; d.stack = ['market']; if (p.pgtab === 'earn' && !(this.state && this.state.pgTab)) d.pgTab = 'earn'; }
+    if (!(this.state && this.state.screen) && p.start === 'progress') {
+      d.screen = 'coin'; d.stack = [];
+      if (!(this.state && this.state.coinTab)) d.coinTab = p.pgtab === 'trade' ? 'vit' : 'lig';
+      if (p.pgtab === 'earn' && !(this.state && this.state.pgTab)) d.pgTab = 'earn';
+    }
+    if (d.screen === 'progress') { d.screen = 'coin'; d.stack = []; d.coinTab = 'lig'; }
     return d;
   };

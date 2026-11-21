@@ -235,7 +235,8 @@ patchJs("return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x
   "return { meta: this.d2(a.date) + ' · ' + a.where + (s.adv ? ' · ' + x.who[a.by || 'toi'] : '') + this.copyMeta(p, l), amount:");
 // Onglet « Jeux » (games.js, 2026-10-11, demande du porteur) : l'onglet « Marché » devient « Jeux » (manette) ; son
 // écran montre le booster PK et le pile ou face. L'ancien Marché reste l'écran de recherche (« search »).
-patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.progress + FRAG.pregrade + FRAG.annonces + FRAG.avatar + FRAG.games + FRAG.pkshop + FRAG.coin + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
+// « Ma ligue » (fragment progress) s'affiche sous les bulles du coin des dresseurs (2026-11-21) : placée après « coin ».
+patch('<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">', FRAG.pregrade + FRAG.annonces + FRAG.avatar + FRAG.games + FRAG.pkshop + FRAG.coin + FRAG.progress + '<sc-if value="{{ ui.isMarket }}" hint-placeholder-val="{{ false }}">');
 // 5ᵉ onglet « Le coin des dresseurs » (2026-11-18, porteur), entre « Toutes les séries » et le scan (donc avant « Jeux ») :
 // logo de l'onglet : 4 propositions (coin.js, ?coinvis=1 à 4), une seule visible (coin.css).
 // Barre du bas (2026-11-19, porteur) : 5 colonnes, scan au milieu et « Le coin des dresseurs » juste en dessous (navbar.css),

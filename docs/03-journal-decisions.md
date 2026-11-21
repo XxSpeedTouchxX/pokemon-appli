@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-11-21 — « Ma ligue » déplacée dans « Le coin des dresseurs », « Échanges » retiré (porteur)
+
+- **Demande** : « déplace "Ma ligue" dans le coin des dresseurs, au début, à gauche de "Ma vitrine" : il y aura donc 4 bulles ; et dans "Ma ligue", supprime complètement "Échanges" : laisse "Classement et récompenses" et "Mes missions" ».
+- **Fait (cache v263)** :
+  - « Le coin des dresseurs » en **4 bulles** : Ma ligue, Ma vitrine, Parrainer un ami, Le calendrier JCC ; l'onglet s'ouvre sur « Ma ligue » (saison, carte du joueur, classement, lots, missions, mini-tuto à la première ouverture) ;
+  - **bannière « Ma ligue » retirée de l'onglet Jeux** ; la pastille des messages rapides non lus passe sur la bulle « Ma ligue » (état relu en ouvrant Le coin des dresseurs) ;
+  - **onglet « Échanges » retiré de Ma ligue** : restent « Classement et récompenses » et « Mes missions » ; l'interface des échanges (mes cartes Pour trade et à vendre, Je cherche, échanges possibles) reste dans « Ma vitrine » ;
+  - anciennes adresses gardées : `?start=progress` ouvre Ma ligue dans Le coin des dresseurs, `?pgtab=trade` ouvre Ma vitrine ;
+  - bulles compactes (icône et texte sur 2 ou 3 lignes, sans coupure de mot) ; la frise du calendrier tient compte de leur hauteur réelle.
+- **Corrigé au passage** : la pastille des messages rapides ne se chargeait pas dans Le coin des dresseurs ; deux tests GitHub corrigés (attente de la ligne « Parrainer un ami » sur une machine lente ; consigne de la caméra « Carte ajoutée : place la suivante dans le cadre » qui n'est pas un message du bas).
+- **Tests** : `t-progress.mjs`, `t-pl.mjs`, `t-qmsg.mjs`, `t-vitrine.mjs`, `t-coin.mjs`, `t-parrain.mjs`, `t-scan.mjs` mis à jour.
+
+---
+
 ## 2026-11-21 — Mot de passe de 8 caractères à l'inscription (porteur)
 
 - **Demande** : « lorsqu'on crée un compte, on n'oblige pas à mettre un mot de passe à 12 caractères, il faut que ça soit 8 caractères ».

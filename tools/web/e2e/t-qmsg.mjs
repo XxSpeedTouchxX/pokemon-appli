@@ -1,4 +1,5 @@
-// Messages rapides entre joueurs de « Ma ligue » (2026-11-16, porteur : « ok pour le B », option B de docs/43) :
+// Messages rapides entre joueurs de « Ma ligue » (2026-11-16, porteur : « ok pour le B », option B de docs/43 ; pastille sur la bulle
+// « Ma ligue » du coin des dresseurs depuis le 2026-11-21) :
 // 8 messages tout faits sur la carte de dresseur, « Mes messages » (pastille, réponses, réglage), carte de l'expéditeur.
 // Le serveur est imité (page.route) : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -57,14 +58,14 @@ const setup = async (S, role) => {
     { id: 3, code: 'safari', at: ago(60 * 30), read: true, from: 'u-7', pseudo: 'Régis', avatar: null, grade: 1, replied: 'gg' }
   ] };
   const { ctx, page } = await setup(S);
-  // Onglet Jeux : pastille « 2 » sur la bannière « Ma ligue ».
+  // Le coin des dresseurs (2026-11-21 : « Ma ligue » y est la 1ʳᵉ bulle, plus de bannière dans Jeux) : pastille « 2 » sur la bulle « Ma ligue ».
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-  await page.evaluate(() => window.__pkm.setState({ screen: 'market', stack: [] })); await page.waitForTimeout(1200);
-  const ban = page.locator('button.pkm-pg-banner');
-  ok('Jeux : pastille « 2 » sur la bannière Ma ligue (' + N(await ban.innerText().catch(() => '')) + ')', (await ban.locator('.pkm-qm-badge').innerText().catch(() => '')) === '2' && /2 nouveaux messages/.test(await ban.getAttribute('aria-label') || ''));
+  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1500);
+  const ban = page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma ligue' });
+  ok('Le coin des dresseurs : pastille « 2 » sur la bulle Ma ligue (' + N(await ban.innerText().catch(() => '')) + ')', (await ban.locator('.pkm-qm-badge').innerText().catch(() => '')) === '2' && /2 messages non lus/.test(await ban.getAttribute('aria-label') || ''));
   ok('état lu une seule fois (quick_msg_state)', (S.calls.quick_msg_state || []).length === 1);
-  await ban.screenshot({ path: shot('qm-banniere.png') });
-  // Ma ligue (ouverte par la bannière) : bouton « Mes messages » dans ma carte.
+  await page.locator('.pkm-coin-tabs').screenshot({ path: shot('qm-banniere.png') });
+  // Ma ligue (bulle du coin des dresseurs) : bouton « Mes messages » dans ma carte.
   await ban.click(); await page.waitForTimeout(2000);
   const ob = page.locator('section.pkm-pg-card button.pkm-qm-open');
   ok('Ma ligue : bouton « Mes messages » avec la pastille 2', (await ob.count()) === 1 && /Mes messages/.test(await ob.innerText()) && (await ob.locator('.pkm-qm-badge').innerText()) === '2');
@@ -132,15 +133,13 @@ const setup = async (S, role) => {
   const S = { calls: {}, left: 10, off: false, sent: [], items: [] };
   const { ctx, page } = await setup(S);
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-  await page.evaluate(() => { window.__pkm.setState({ screen: 'market', stack: [] }); }); await page.waitForTimeout(500);
-  await page.locator('button.pkm-pg-banner').click(); await page.waitForTimeout(2000);
+  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(2000);
   await page.locator('section.pkm-pg-card button.pkm-qm-open').click(); await page.waitForTimeout(800);
   ok('boîte vide : « Aucun message pour l’instant »', /Aucun message pour l’instant/.test(await page.locator('section.pkm-qm').innerText()) && (S.calls.quick_msg_read || []).length === 0);
   await page.locator('section.pkm-qm button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
   S.off32 = true;
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-  await page.evaluate(() => { window.__pkm.setState({ screen: 'market', stack: [] }); }); await page.waitForTimeout(500);
-  await page.locator('button.pkm-pg-banner').click(); await page.waitForTimeout(2000);
+  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(2000);
   await page.locator('ol.pkm-pg-list button', { hasText: 'Dresseur5' }).click(); await page.waitForTimeout(900);
   ok('sans 032, joueur : carte avec « Les messages rapides arrivent très bientôt »', /arrivent très bientôt/.test(await page.locator('section.pkm-tc').innerText()));
   await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
@@ -152,8 +151,7 @@ const setup = async (S, role) => {
   const S = { calls: {}, left: 10, off: false, sent: [], items: [], off32: true };
   const { ctx, page } = await setup(S, 'admin');
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-  await page.evaluate(() => { window.__pkm.setState({ screen: 'market', stack: [] }); }); await page.waitForTimeout(500);
-  await page.locator('button.pkm-pg-banner').click(); await page.waitForTimeout(2000);
+  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(2000);
   await page.locator('section.pkm-pg-card button.pkm-qm-open').click(); await page.waitForTimeout(800);
   ok('sans 032, admin : fichier install_024_a_034.sql à coller dans Studio', /install_024_a_034\.sql/.test(await page.locator('section.pkm-qm').innerText()));
   await ctx.close();

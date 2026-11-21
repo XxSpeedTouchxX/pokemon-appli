@@ -367,6 +367,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - conditions inchangées (adresse validée + 3 jours dans les 14 premiers jours, docs/38) ; **retrait de la condition « adresse validée » proposé, à confirmer par le porteur** ;
   - **037 à installer par le porteur** (dans `install_024_a_034.sql`, avec 033 et 034) ; confidentialité et CGU à jour (21 novembre 2026) ; cache v261.
 - **Mot de passe de 8 caractères (2026-11-21, porteur) :** 8 caractères au moins à l'inscription et pour un nouveau mot de passe (avant : 12) ; le serveur de comptes accepte dès 6 ; cache v262.
+- **« Ma ligue » dans « Le coin des dresseurs » (2026-11-21, porteur) :** 4 bulles (Ma ligue, Ma vitrine, Parrainer un ami, Le calendrier JCC), ouverture sur « Ma ligue » ; bannière « Ma ligue » de l'onglet Jeux retirée (pastille des messages rapides sur la bulle « Ma ligue ») ; onglet « Échanges » de Ma ligue retiré (son interface reste dans « Ma vitrine ») : restent « Classement et récompenses » et « Mes missions » ; ancienne adresse `?start=progress` gardée ; bulles compactes, frise du calendrier ajustée à leur hauteur ; cache v263.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 

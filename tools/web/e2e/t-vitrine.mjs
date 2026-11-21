@@ -1,5 +1,6 @@
 // Échanges entre joueurs, étage 1 (2026-11-16, « go » du porteur, docs/45) : vitrine, « Pour trade », « À vendre » au
-// prix choisi par le joueur (après « J'ai 18 ans ou plus »), « Je la cherche », onglet « Échanges » de Ma ligue, vitrine
+// prix choisi par le joueur (après « J'ai 18 ans ou plus »), « Je la cherche », interface des échanges dans Le coin des
+// dresseurs › Ma vitrine (l'onglet « Échanges » de Ma ligue est retiré le 2026-11-21), vitrine
 // sur la carte de dresseur, propositions et accord dans « Mes messages ». Le serveur est imité : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
@@ -124,14 +125,11 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'));
   ok('vitrine et « Je cherche » gardées sur l’appareil', saved.vit && Object.keys(saved.vit).length === 1 && Array.isArray(saved.wants) && saved.wants[0] === c5 && saved.tradeAdult === true);
 
-  // B. Ma ligue › Échanges.
-  await page.evaluate(() => window.__pkm.setState({ screen: 'market', stack: [] })); await page.waitForTimeout(900);
-  await page.locator('button.pkm-pg-banner').click(); await page.waitForTimeout(1800);
+  // B. Le coin des dresseurs › Ma vitrine (2026-11-21 : l'onglet « Échanges » de Ma ligue est retiré, son interface reste ici).
+  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(1800);
   const tabs = await page.locator('.pkm-pg-tabs [role="tab"]').allInnerTexts();
-  ok('Ma ligue : 3 onglets (' + tabs.join(' | ') + ')', tabs.length === 3 && tabs[2] === 'Échanges');
-  const tb = await page.locator('.pkm-pg-tabs').boundingBox(), t3 = await page.locator('.pkm-pg-tabs [role="tab"]').nth(2).boundingBox();
-  ok('onglets sur une ligne, dans l’écran', tb && t3 && Math.abs(t3.y - tb.y) < 10 && t3.x + t3.width <= 390);
-  await page.locator('.pkm-pg-tabs [role="tab"]', { hasText: 'Échanges' }).click(); await page.waitForTimeout(1600);
+  ok('Ma ligue : 2 onglets, plus d’« Échanges » (' + tabs.join(' | ') + ')', tabs.length === 2 && !tabs.some(t => /Échanges/.test(t)));
+  await page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma vitrine' }).click(); await page.waitForTimeout(1600);
   const T = page.locator('section.pkm-vt-tab');
   const tt = N(await T.innerText().catch(() => ''));
   ok('Échanges : mes cartes Pour trade et à vendre (1 carte, POUR TRADE et À VENDRE · 42,50 €)', (await T.locator('.pkm-vt-sec').first().locator('.pkm-vt-cd').count()) === 1 && /⇄ POUR TRADE/.test(tt) && /À VENDRE · 42,50 €/.test(tt));
@@ -203,8 +201,7 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
       card: { sid: 777, card_id: c6, lang: 'FR', cond: 'EX', grade: null, trade: true, sale: false, price_cents: null }, offer: { sid: 900, card_id: c0, lang: 'FR', cond: 'NM', grade: null, trade: true, sale: false, price_cents: null } }
   ];
   void S0;
-  await page.evaluate(() => window.__pkm.setState({ screen: 'market', stack: [] })); await page.waitForTimeout(900);
-  await page.locator('button.pkm-pg-banner').click(); await page.waitForTimeout(1800);
+  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(1800);
   await page.locator('section.pkm-pg-card button.pkm-qm-open').click(); await page.waitForTimeout(1200);
   const M = page.locator('section.pkm-qm');
   const it = M.locator('li.pkm-qm-item');
@@ -256,7 +253,7 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
 {
   const S = newS({ off33: true });
   const { ctx, page } = await setup(S, 'admin');
-  await page.evaluate(() => window.__pkm.setState({ screen: 'progress', stack: ['market'], pgTab: 'trade' })); await page.waitForTimeout(1800);
+  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1800);
   ok('sans 033 : l’admin voit le fichier à installer', /install_024_a_034\.sql/.test(N(await page.locator('section.pkm-vt-tab').innerText().catch(() => ''))));
   await ctx.close();
 }

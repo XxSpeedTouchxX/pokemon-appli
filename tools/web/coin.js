@@ -13,14 +13,19 @@
   //      visuellement plus simple à comprendre ») : comment ça marche en 3 étapes, lien, code et QR code, partage,
   //      mes filleuls et où ils en sont, mon parrain (code à saisir, conditions qui lui donnent ses 200 PL) ; pl.js
   //      (vPlRef), serveur 028 et 037. Ma ligue › « Mes missions » garde une ligne qui mène ici.
+  //   0. « Ma ligue » (2026-11-21, porteur : « déplace Ma ligue dans le coin des dresseurs, au début, à gauche de Ma
+  //      vitrine ; supprime complètement Échanges, laisse Classement et récompenses et Mes missions ») : 1ʳᵉ bulle, ouverte
+  //      par défaut ; même contenu qu'avant (progress.js, pl.js), plus de bannière dans l'onglet Jeux ; pastille des
+  //      messages rapides non lus sur la bulle.
   //   Logo de l'onglet : « Dresseurs qui discutent » (n° 11), choix du porteur du 2026-11-20 ; ?coinvis=1 à 12 pour comparer.
   const COIN_FILE = 'tools/supabase/install_024_a_034.sql';
   const coinProto = Component.prototype;
   const coinOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
   const coinAdmin = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin && Cloud.isAdmin();
-  const COIN_TABS = [['vit', 'Ma vitrine'], ['par', 'Parrainer un ami'], ['cal', 'Le calendrier JCC']];
-  const coinTabOf = s => (s.coinTab === 'cal' || s.coinTab === 'par' ? s.coinTab : 'vit');
-  const coinEnter = (inst, t, force) => (t === 'vit' ? inst.coinEnterVit(force) : t === 'par' ? (inst.plSync && inst.plSync(!!force)) : inst.calLoad(false));
+  const COIN_TABS = [['lig', 'Ma ligue'], ['vit', 'Ma vitrine'], ['par', 'Parrainer un ami'], ['cal', 'Le calendrier JCC']];
+  const coinTabOf = s => (s.coinTab === 'vit' || s.coinTab === 'cal' || s.coinTab === 'par' ? s.coinTab : 'lig');
+  const coinEnter = (inst, t, force) => (t === 'vit' ? inst.coinEnterVit(force) : t === 'par' ? (inst.plSync && inst.plSync(!!force))
+    : t === 'lig' ? (inst.progLoad && inst.progLoad(!!force), inst.plSync && inst.plSync(false)) : inst.calLoad(false));
   // Logo de l'onglet : 1 Dresseurs (deux dresseurs à casquette), 2 Échange de cartes, 3 Bulle et ball, 4 Rassemblement.
   // 5 à 8 (2026-11-20, porteur : « propose-moi d'autres visuels, il n'est pas clair ») : 2 dresseurs qui échangent,
   // casquette, vitrine, bulle et carte (tools/brand/navicons/). 9 à 12 (2026-11-20, porteur : « plus axé sur la
@@ -537,12 +542,15 @@
       Object.assign(r.tab, { coinFg: sec ? 'var(--pkm-nav-on)' : 'var(--pkm-nav-off)', coinDot: sec ? 'var(--pkm-nav-dot)' : 'transparent', coinCur: sec ? 'page' : 'false' });
     }
     if (on) {
-      Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Le calendrier JCC' : tab === 'par' ? 'Parrainer un ami' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
+      Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Le calendrier JCC' : tab === 'par' ? 'Parrainer un ami' : tab === 'lig' ? 'Ma ligue' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
       if (!this.__coinOnce) { this.__coinOnce = true; setTimeout(() => coinEnter(this, tab, false), 0); }
+      // Messages rapides non lus (qmsg.js) : pastille sur la bulle « Ma ligue » (avant : sur la bannière de Jeux).
+      const qn = r.qmb && r.qmb.hasN ? r.qmb.n : '';
       r.coin = {
         tabs: COIN_TABS.map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-shop-tab pkm-coin-tab' + (tab === k ? ' pkm-shop-tab-on' : ''), pick: () => this.coinPick(k),
-          icon: k, isVit: k === 'vit', isCal: k === 'cal', isPar: k === 'par' })),
-        isVit: tab === 'vit', isCal: tab === 'cal', isPar: tab === 'par',
+          icon: k, isVit: k === 'vit', isCal: k === 'cal', isPar: k === 'par', isLig: k === 'lig', hasN: k === 'lig' && !!qn, n: qn,
+          aria: label + (k === 'lig' && qn ? ' (' + qn + ' message' + (qn === '1' ? '' : 's') + ' non lu' + (qn === '1' ? '' : 's') + ')' : '') })),
+        isVit: tab === 'vit', isCal: tab === 'cal', isPar: tab === 'par', isLig: tab === 'lig',
         // Calendrier : onglets et frise figés en haut (2026-11-19, porteur : « fige l'écran de la frise ») ; seul le
         // contenu dessous défile. Fond de l'app repris derrière (--pkm-app-bg), comme « Ma ligue ».
         pinCls: 'pkm-coin-top' + (tab === 'cal' ? ' pkm-cal-pin' : '')
@@ -550,6 +558,9 @@
       if (tab === 'cal') setTimeout(() => { try {
         const app = document.getElementById('app'), c = app ? getComputedStyle(app).backgroundColor : '';
         if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) document.documentElement.style.setProperty('--pkm-app-bg', c);
+        // Hauteur réelle des 4 bulles (2 ou 3 lignes selon la largeur) : la frise en tient compte (coin.css, --pkm-cal-cq).
+        const tb = document.querySelector('.pkm-coin-tabs'), h = tb ? Math.round(tb.offsetHeight) + 'px' : '';
+        if (h && h !== '0px' && document.documentElement.style.getPropertyValue('--pkm-coin-tabs-h') !== h) document.documentElement.style.setProperty('--pkm-coin-tabs-h', h);
       } catch (e) { /* page sans racine */ } }, 0);
       r.cv = tab === 'vit' ? this.vCoinVit(s) : { found: [], recent: [] };
       if (tab === 'vit' && typeof this.vTradeTab === 'function') r.tdx = this.vTradeTab(s);

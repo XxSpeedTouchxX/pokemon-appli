@@ -6,7 +6,7 @@
   //     après « J'ai 18 ans ou plus »), pour chaque exemplaire (langue, état, note). Carte que je n'ai pas : « ♡ Je la
   //     cherche ». La vitrine (30 cartes) et la liste (50 cartes) restent sur l'appareil et partent au serveur
   //     (033_vitrine.sql : showcase_set, wants_set) ; une carte retirée du classeur sort de la vitrine.
-  //   - Ma ligue › onglet « Échanges » : mes cartes Pour trade ou à vendre, « Je cherche », échanges possibles.
+  //   - Le coin des dresseurs › « Ma vitrine » (ex-onglet « Échanges » de Ma ligue, retiré le 2026-11-21) : mes cartes Pour trade ou à vendre, « Je cherche », échanges possibles.
   //   - Carte de dresseur : sa vitrine (étiquettes POUR TRADE et À VENDRE avec le prix), ce qu'il cherche, ce qui colle
   //     avec moi ; un appui sur une carte : « Je suis intéressé » ou « Je te propose une de mes cartes » (trade_send).
   //   - « Mes messages » : propositions avec les cartes, réponses « Ça m'intéresse » (accord), « Non merci », « Plus
@@ -316,25 +316,9 @@
   const vtBaseFi = vtProto.fiView;
   vtProto.fiView = function (s) { const r = vtBaseFi.call(this, s); r.vt = r.open ? this.vVitFiche(s) : { show: false, groups: [], wantShow: false }; return r; };
 
-  // ——— Ma ligue › onglet « Échanges » ———
-  const vtBaseProg = vtProto.vProgress;
-  vtProto.vProgress = function (s) {
-    const r = vtBaseProg.call(this, s), tab = s.pgTab === 'trade' ? 'trade' : s.pgTab === 'earn' ? 'earn' : 'board';
-    r.tabs = [['board', 'Classement et récompenses'], ['earn', 'Mes missions'], ['trade', 'Échanges']].map(([k, label]) => ({ label: label, on: tab === k,
-      cls: 'pkm-pg-tab' + (tab === k ? ' pkm-pg-tab-on' : ''), pick: () => this.progTab(k) }));
-    r.isTrade = tab === 'trade';
-    if (r.isTrade) { r.isBoard = false; r.isEarn = false; }
-    return r;
-  };
-  const vtBaseTab = vtProto.progTab;
-  vtProto.progTab = function (t) { vtBaseTab.call(this, t); if (t === 'trade') this.vtTabLoad(true); };
+  // (« Ma ligue › Échanges » retiré le 2026-11-21, porteur : « supprime complètement Échanges » ; la même interface reste
+  // dans Le coin des dresseurs › Ma vitrine, coin.js.)
   vtProto.vtTabLoad = function (force) { this.vtPush(); this.vtLoadState(force); this.vtLoadMatches(force); };
-  const vtBaseSt = vtProto.st;
-  vtProto.st = function () {
-    const d = vtBaseSt.call(this), p = this.props || {};
-    if (!(this.state && this.state.pgTab) && p.start === 'progress' && p.pgtab === 'trade') d.pgTab = 'trade';
-    return d;
-  };
   vtProto.vTradeTab = function (s) {
     const st = s.vtSt || {}, vit = s.vit || {}, online = vtOnline(), m = s.vtMatches || {};
     const mine = Object.keys(vit).filter(ref => vit[ref] && (vit[ref].t || vit[ref].s)).map(ref => {
@@ -497,9 +481,7 @@
   const vtBaseRender = vtProto.renderVals;
   vtProto.renderVals = function () {
     const s = this.st(), r = vtBaseRender.call(this);
-    r.tdx = r.pg && r.pg.isTrade ? this.vTradeTab(s) : { show: false, mine: [], wants: [], matches: [] };
-    if (r.pg && r.pg.isTrade && r.ui) { r.ui.subtitle = r.pg.seasonLabel + ' · Échanges'; if (!this.__vtTabOnce) { this.__vtTabOnce = true; setTimeout(() => this.vtTabLoad(false), 0); } }
-    else this.__vtTabOnce = false;
+    r.tdx = { show: false, mine: [], wants: [], matches: [] }; // rempli par coin.js (Ma vitrine)
     r.tcs = this.vTradeSheet(s);
     // Vitrine envoyée au démarrage, puis à chaque changement du classeur (une carte vendue ou retirée en sort).
     if (vtOnline() && (s.vtEver || Object.keys(s.vit || {}).length || (s.wants || []).length)) {

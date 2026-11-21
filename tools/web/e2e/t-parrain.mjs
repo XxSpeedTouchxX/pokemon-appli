@@ -106,7 +106,7 @@ t = await toastsFor(4500);
 ok('lien d’un ami sur un compte ancien : « réservé aux nouveaux comptes »', t.some(x => /réservé aux nouveaux comptes/.test(x)));
 S.setErr = null;
 
-// D. Page « Parrainer un ami » : 3 onglets, étapes, lien, QR, partage, filleuls, mon parrain ; 200 PL du parrain montrés.
+// D. Page « Parrainer un ami » : 4 onglets (Ma ligue en 1ʳᵉ position depuis le 2026-11-21), étapes, lien, QR, partage, filleuls, mon parrain ; 200 PL du parrain montrés.
 S.me = { parrain: 'Sacha', verified: false, days: 1, need: 3, until: plus(13), open: true, done: false, counted: false, missed: false };
 S.newList.push({ kind: 'referral', ref: 'f', pl: 200, note: 'Filleul : Ondine' });
 await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' });
@@ -114,7 +114,7 @@ t = await toastsFor(4000);
 ok('200 PL du parrain arrivés en son absence : montrés avec l’animation (' + t.join(' | ') + ')', t.some(x => /\+200 PL · ton filleul Ondine a rempli les conditions/.test(x)));
 await page.evaluate(() => window.__pkm.coinGo('par')); await page.waitForTimeout(1500);
 const tabs = await page.locator('.pkm-coin-tabs button').allInnerTexts();
-ok('coin des dresseurs : 3 onglets « Ma vitrine », « Parrainer un ami », « Le calendrier JCC »', tabs.length === 3 && /Ma vitrine/.test(tabs[0]) && /Parrainer un ami/.test(tabs[1]) && /calendrier JCC/.test(tabs[2]));
+ok('coin des dresseurs : 4 onglets « Ma ligue », « Ma vitrine », « Parrainer un ami », « Le calendrier JCC »', tabs.length === 4 && /Ma ligue/.test(tabs[0]) && /Ma vitrine/.test(tabs[1]) && /Parrainer un ami/.test(tabs[2]) && /calendrier JCC/.test(tabs[3]));
 ok('onglet « Parrainer un ami » choisi', /Parrainer un ami/.test(await page.locator('.pkm-coin-tabs button[aria-selected="true"]').innerText()));
 const stp = N(await page.locator('section[aria-label="Comment ça marche"]').innerText());
 ok('« Comment ça marche » en 3 étapes (partage, 50 PL de bienvenue, adresse + 3 jours = 200 PL)', /Partage ton lien ou ton code/.test(stp) && /50 PL de bienvenue/.test(stp) && /3 jours/.test(stp) && /200 PL/.test(stp));
@@ -139,7 +139,7 @@ await page.screenshot({ path: shot('parrain-page.png'), fullPage: false });
 for (const sel of ['Comment ça marche', 'Mon lien de parrainage', 'Mon parrain', 'Mes filleuls']) await page.locator('section[aria-label="' + sel + '"]').screenshot({ path: shot('parrain-' + sel.replace(/\s+/g, '-').toLowerCase() + '.png') });
 await page.locator('section[aria-label="Mon parrain"] button', { hasText: 'valider mon adresse' }).click(); await page.waitForTimeout(600);
 ok('« Recevoir l’e-mail pour valider mon adresse » : e-mail redemandé', S.auth.length === 1 && S.auth[0].email === EMAIL);
-// Petit écran : les 3 onglets restent lisibles, rien ne déborde.
+// Petit écran : les 4 onglets restent lisibles, rien ne déborde.
 await page.setViewportSize({ width: 320, height: 640 }); await page.waitForTimeout(400);
 const ovf = await page.evaluate(() => [...document.querySelectorAll('.pkm-coin-tabs button')].some(b => b.scrollWidth > b.clientWidth + 1) || document.documentElement.scrollWidth > innerWidth + 1);
 ok('320 px : onglets sans débordement', !ovf);
@@ -165,9 +165,12 @@ t = await toastsFor(4000);
 ok('code déjà relié à l’inscription : un seul message de bienvenue (' + t.join(' | ') + ')', t.filter(x => /parrainé par Sacha/.test(x)).length === 1 && !t.some(x => /^Bienvenue ! Tu es parrainé/.test(x)));
 S.setAlready = false;
 
-// G. Ma ligue › Mes missions : la ligne « Parrainer un ami » mène au coin des dresseurs.
-await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(2600);
-await page.locator('.pkm-ple-row').first().locator('button').click(); await page.waitForTimeout(1200);
+// G. Ma ligue › Mes missions : la ligne « Parrainer un ami » mène à l'onglet du même nom du coin des dresseurs.
+await page.evaluate(() => window.__pkm.setState({ ligueTuto: 'done' })); // mini-tuto de la ligue testé dans t-pl.mjs
+await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' });
+const parRow = page.locator('.pkm-ple-row').first().locator('button');
+await parRow.waitFor({ timeout: 15000 }); await page.waitForTimeout(600); // GitHub est plus lent : on attend la ligne
+await parRow.click(); await page.waitForTimeout(1200);
 ok('Mes missions › « Parrainer un ami » → Le coin des dresseurs, onglet Parrainer un ami', await page.evaluate(() => window.__pkm.st().screen === 'coin' && window.__pkm.st().coinTab === 'par') && (await page.locator('section[aria-label="Mon lien de parrainage"]').count()) === 1);
 
 ok('aucune erreur JavaScript', errors.length === 0);
