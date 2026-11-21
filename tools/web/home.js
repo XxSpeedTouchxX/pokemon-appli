@@ -102,10 +102,23 @@
         head: { logo: m.logo, hasLogo: m.hasLogo, name: m.name, count: count, cls: 'pkm-hk-sethead' + (first ? '' : ' pkm-hk-sethead-next') } };
     };
     const cell = t => Object.assign(t, { isHead: false, isTile: true, real: true, pocket: false, cellCls: 'pkm-hk-cell', slotCls: 'pkm-vit-slot' });
-    const emptySlot = () => ({ isHead: false, isTile: false, real: false, pocket: false, cellCls: 'pkm-hk-cell', slotCls: 'pkm-vit-slot' });
+    const emptySlot = () => ({ isHead: false, isTile: false, real: false, pocket: false, pocketCls: 'pkm-hk-pocket', cellCls: 'pkm-hk-cell', slotCls: 'pkm-vit-slot' });
+    // Emplacements invisibles qui donnent à chaque page la même hauteur (2026-11-21, porteur : « quand on change de page,
+    // le classeur bouge en permanence ; je veux que l'écran ne bouge plus entre chaque page ») : rangée de pochettes et
+    // titre de série cachés, à la taille exacte des vrais.
+    const ghostCell = () => Object.assign(emptySlot(), { pocket: true, pocketCls: 'pkm-hk-pocket pkm-hk-ghost' });
+    const ghostHead = () => ({ isHead: true, isTile: false, real: false, pocket: false, cellCls: 'pkm-hk-cell pkm-hk-cell-head', slotCls: 'pkm-vit-slot pkm-vit-headslot',
+      head: { logo: '', hasLogo: false, name: '', count: '', cls: 'pkm-hk-sethead pkm-hk-sethead-next pkm-hk-ghost' } });
+    // Forme d'une page « Par série » : nombre de titres et de rangées (3 cartes ou une tablette de 3 produits par rangée).
+    const shapeOf = (l, from, n, per) => {
+      let heads = 0, rows = 0, run = 0;
+      for (let j = 0; j < n; j++) { if (startsSet(l, from + j, per)) { rows += Math.ceil(run / 3); run = 0; heads++; } run++; }
+      return { heads: heads, rows: rows + Math.ceil(run / 3) };
+    };
     // l : liste triée ; from, n : tranche affichée ; per : taille d'une page (0 pour « Tout afficher ») ; shelf : vitrine du
-    // scellé (chaque série finit sa tablette par des emplacements vides, la suivante commence sur la tablette d'après).
-    const grouped = (l, from, n, per, make, shelf, sealedL) => {
+    // scellé (chaque série finit sa tablette par des emplacements vides, la suivante commence sur la tablette d'après) ;
+    // fit : forme de la page la plus haute, que la page affichée complète par des emplacements invisibles.
+    const grouped = (l, from, n, per, make, shelf, sealedL, fit) => {
       const out = [];
       let run = 0;
       const pad = () => { if (shelf) for (let r = (3 - run % 3) % 3; r > 0; r--) out.push(emptySlot()); run = 0; };
@@ -114,7 +127,13 @@
         if (startsSet(l, i, per)) { if (out.length) pad(); out.push(setHead(l, i, !out.length, sealedL)); }
         out.push(cell(make(l[i]))); run++;
       }
-      if (shelf) pad();
+      if (fit) {
+        const me = shapeOf(l, from, n, per);
+        if (!shelf) for (let r = (3 - run % 3) % 3; r > 0; r--) out.push(emptySlot());
+        else pad();
+        for (let r = (fit.rows - me.rows) * 3; r > 0; r--) out.push(shelf ? emptySlot() : ghostCell());
+        for (let h = fit.heads - me.heads; h > 0; h--) out.push(ghostHead());
+      } else if (shelf) pad();
       return out;
     };
     const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
@@ -142,15 +161,22 @@
     const isGraded = e => !!(e.gr || e.p.grade);
     const graded = units(cards.filter(isGraded)), extra = cards.reduce((t, e) => t + Math.max(0, e.q - 1), 0);
     const slice = list.slice(page * per, page * per + per);
-    const shown = isSet ? grouped(list, page * per, slice.length, per, tile, tab === 'sealed', tab === 'sealed') : slice.map(e => cell(tile(e)));
-    // Cartes sur plusieurs pages : pochettes vides jusqu'à 9, pour que la page garde sa hauteur quand on la tourne (pas en
-    // « Par série », où chaque série commence sur sa ligne).
+    // « Par série » sur plusieurs pages : toutes les pages prennent la hauteur de la plus haute (même nombre de titres et
+    // de rangées), pour que les flèches de page restent sous le doigt.
+    let fit = null;
+    if (isSet && pages > 1) {
+      fit = { heads: 0, rows: 0 };
+      for (let pg = 0; pg < pages; pg++) { const f = shapeOf(list, pg * per, Math.min(per, list.length - pg * per), per); fit.heads = Math.max(fit.heads, f.heads); fit.rows = Math.max(fit.rows, f.rows); }
+    }
+    const shown = isSet ? grouped(list, page * per, slice.length, per, tile, tab === 'sealed', tab === 'sealed', fit) : slice.map(e => cell(tile(e)));
+    // Cartes sur plusieurs pages : pochettes vides jusqu'à 9, pour que la page garde sa hauteur quand on la tourne
+    // (« Par série » : emplacements invisibles, ci-dessus).
     const pockets = tab !== 'sealed' && pages > 1 && !isSet ? Array.from({ length: per - slice.length }, () => Object.assign(emptySlot(), { pocket: true })) : [];
-    // Tourner la page (cartes seulement ; le scellé est une vitrine) : sens et parité pour relancer l'animation.
-    const turn = (to, dir) => this.setState({ [key]: to, hbTurn: tab === 'sealed' ? null : dir + '-' + (to % 2) });
-    // Vitrine : la dernière tablette est complétée par des emplacements vides, pour que le verre reste d'un seul tenant.
+    this.__hkPages = pages;
+    // Vitrine : la dernière tablette est complétée par des emplacements vides, pour que le verre reste d'un seul tenant ;
+    // sur plusieurs pages, chaque page garde ses 3 tablettes.
     const shelf = tab === 'sealed' ? (isSet ? shown : shown
-      .concat(Array.from({ length: (3 - shown.length % 3) % 3 }, emptySlot))) : [];
+      .concat(Array.from({ length: pages > 1 ? per - shown.length : (3 - shown.length % 3) % 3 }, emptySlot))) : [];
     const headV = sum(list), headBig = x.mask(this.eur(headV));
     return {
       // Valeur totale de l'onglet, écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir), à la même
@@ -189,8 +215,10 @@
       add: () => (tab === 'sealed' ? this.openSealedList() : this.tab('collection')),
       hasPages: pages > 1, pageLabel: 'Page ' + (page + 1) + ' sur ' + pages,
       prevOff: page === 0, nextOff: page === pages - 1, prevDim: page === 0 ? 0.35 : 1, nextDim: page === pages - 1 ? 0.35 : 1,
-      prev: () => { if (page > 0) turn(page - 1, 'prev'); },
-      next: () => { if (page < pages - 1) turn(page + 1, 'next'); },
+      // Appui : la page tourne tout de suite (au posé du doigt) ; doigt gardé appuyé : les pages défilent vite ; appuis
+      // répétés : une page par appui, sans attendre la fin de l'animation (2026-11-21, porteur).
+      prev: () => this.hkClick(-1), next: () => this.hkClick(1),
+      pressPrev: e => this.hkPress(-1, e), pressNext: e => this.hkPress(1, e), release: () => this.hkRelease(),
       // Glisser vers la gauche ou la droite : page suivante ou précédente.
       touchStart: e => { const t = e.touches && e.touches[0]; homeSwipe = t ? { x: t.clientX, y: t.clientY } : null; },
       touchEnd: e => {
@@ -199,12 +227,43 @@
         if (!t || !o) return;
         const dx = t.clientX - o.x, dy = t.clientY - o.y;
         if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
-        if (dx < 0 && page < pages - 1) turn(page + 1, 'next');
-        if (dx > 0 && page > 0) turn(page - 1, 'prev');
+        if (dx < 0) this.hkStep(1);
+        if (dx > 0) this.hkStep(-1);
       }
     };
   };
   let homeSwipe = null;
+  // Tourner une page du classeur (cartes : sens et parité pour relancer l'animation ; le scellé est une vitrine, sans
+  // animation). Lu dans l'état du moment : plusieurs appuis rapides avancent bien d'une page chacun.
+  proto.hkStep = function (d) {
+    const s = this.st(), sealedTab = s.hbk === 'sealed', key = sealedTab ? 'hbsp' : 'hbcp', pages = this.__hkPages || 1;
+    const cur = Math.min(Math.max(0, Number(s[key]) || 0), pages - 1), to = cur + d;
+    if (to < 0 || to > pages - 1) return false;
+    this.setState({ [key]: to, hbTurn: sealedTab ? null : (d > 0 ? 'next' : 'prev') + '-' + (to % 2) });
+    return true;
+  };
+  // Doigt posé sur une flèche : une page tout de suite, puis, doigt gardé, une page toutes les 0,16 s après 0,4 s.
+  let homeHold = null;
+  proto.hkPress = function (d, e) {
+    if (e && e.button > 0) return;
+    this.hkRelease();
+    homeHold = { d: d, up: 0 };
+    this.hkStep(d);
+    const h = homeHold;
+    h.t = setTimeout(() => { if (homeHold === h && !h.up) h.iv = setInterval(() => { if (!this.hkStep(d)) this.hkRelease(); }, 160); }, 400);
+  };
+  proto.hkRelease = function () {
+    if (!homeHold) return;
+    clearTimeout(homeHold.t); clearInterval(homeHold.iv);
+    if (!homeHold.up) homeHold.up = Date.now();
+  };
+  // Le « clic » qui suit le doigt levé ne tourne pas une 2ᵉ fois ; clavier (Entrée, Espace) : une page.
+  proto.hkClick = function (d) {
+    const h = homeHold;
+    if (h && h.d === d && (!h.up || Date.now() - h.up < 700)) { this.hkRelease(); homeHold = null; return; }
+    homeHold = null;
+    this.hkStep(d);
+  };
   const HOME_FULL = 30, HOME_NO_FULL = { open: false };
   // Rang de chaque extension dans « Toutes les séries » (des plus récentes aux plus anciennes) ; inconnue : à la fin.
   let homeRankFor = null, homeRankMap = null;

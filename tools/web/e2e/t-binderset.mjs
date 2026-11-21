@@ -57,18 +57,18 @@ ok('Collection Classique rangée avec le 30ᵉ Anniversaire (Dracaufeu en tête 
 ok('plus aucun petit logo dans les cartes', !(await page.locator(TILE + ' .pkm-hk-set').count()));
 // Ordre réel à l'écran (titres et cartes mêlés) : un titre, puis les cartes de sa série.
 const seq = async (root, tileSel) => page.locator(root).evaluate((el, ts) => [...el.querySelectorAll('.pkm-hk-sethead, ' + ts)].map(n => n.classList.contains('pkm-hk-sethead')
-  ? { head: (n.querySelector('.pkm-hk-sethead-name') || {}).textContent, n: (n.querySelector('.pkm-hk-sethead-n') || {}).textContent, logo: !!n.querySelector('img') }
+  ? { head: (n.querySelector('.pkm-hk-sethead-name') || {}).textContent, n: (n.querySelector('.pkm-hk-sethead-n') || {}).textContent, logo: !!n.querySelector('img'), ghost: n.classList.contains('pkm-hk-ghost') }
   : { label: n.getAttribute('aria-label') || '' }), tileSel);
 const s1 = await seq(PANEL, 'button[aria-label$="Ouvrir la fiche"]');
-const shape = l => l.map(x => x.head ? '[' + x.head + ' · ' + x.n + ']' : setOfId(idOf(x.label))).join(' ');
+const shape = l => l.filter(x => !x.ghost).map(x => x.head ? '[' + x.head + ' · ' + x.n + ']' : setOfId(idOf(x.label))).join(' ');
 const want1 = '[Règne Delta · 2 cartes] me06 me06 [30ᵉ Anniversaire · 3 cartes] 30th 30th 30th [Nuit Noire · 1 carte] me05 [Étincelles Déferlantes · 2 cartes] sv08 sv08 [Set de Base · 2 cartes] base1';
 ok('page 1 : un titre au-dessus de chaque série, avec son nombre de cartes', shape(s1) === want1, shape(s1));
-ok('titres avec le logo de l’extension', s1.filter(x => x.head).every(x => x.logo));
+ok('titres avec le logo de l’extension', s1.filter(x => x.head && !x.ghost).every(x => x.logo));
 // Géométrie : titre pleine largeur, au-dessus de la 1ʳᵉ carte (hors carte), plus gros qu'avant, série qui commence à
 // gauche sur une nouvelle ligne, marge nette avant une nouvelle série.
 const geo = await page.locator(PANEL).evaluate(el => {
   const grid = el.querySelector('.pkm-hk-sethead').closest('[style*="grid"]') || el, gr = grid.getBoundingClientRect();
-  return [...el.querySelectorAll('.pkm-hk-sethead')].map(h => {
+  return [...el.querySelectorAll('.pkm-hk-sethead:not(.pkm-hk-ghost)')].map(h => {
     const r = h.getBoundingClientRect(), cell = h.parentElement, next = cell.nextElementSibling, prev = cell.previousElementSibling;
     const b = next && next.querySelector('button'), br = b ? b.getBoundingClientRect() : null, pb = prev && prev.querySelector('button'), pr = pb ? pb.getBoundingClientRect() : null;
     const img = h.querySelector('img'), name = h.querySelector('.pkm-hk-sethead-name');
@@ -82,9 +82,27 @@ ok('chaque série commence à gauche d’une nouvelle ligne (' + geo.map(g => g.
 ok('titre plus gros (police ' + geo[0].font + ' px, logo ' + geo[0].logoH + ' px de haut)', geo.every(g => g.font >= 15) && geo[0].logoH >= 22);
 ok('séparation nette entre deux séries (' + geo.slice(1).map(g => g.gapPrev).join(', ') + ' px)', geo.slice(1).every(g => g.gapPrev !== null && g.gapPrev >= 20));
 await page.locator(SEC).screenshot({ path: shot('classeur-par-serie.png') });
+// Même hauteur pour chaque page : les flèches ne bougent pas quand on tourne la page (2026-11-21, porteur).
+const arrowY = async () => page.locator(SEC + ' button[aria-label="Page suivante"]').evaluate(b => Math.round(b.getBoundingClientRect().top + (document.querySelector('#app main') || document.scrollingElement).scrollTop));
+const y1 = await arrowY();
 await page.locator(SEC + ' button[aria-label="Page suivante"]').click(); await page.waitForTimeout(900);
+const y2 = await arrowY();
+ok('« Par série » : les flèches restent à la même place d’une page à l’autre (' + y1 + ' / ' + y2 + ')', y1 === y2);
 const s2 = await seq(PANEL, 'button[aria-label$="Ouvrir la fiche"]');
 ok('page 2 : le titre du Set de Base revient en haut (« suite »)', shape(s2) === '[Set de Base · suite · 2 cartes] base1', shape(s2));
+ok('page 2 : complétée par des emplacements invisibles (titres et pochettes cachés)', await page.locator(PANEL + ' .pkm-hk-sethead.pkm-hk-ghost').count() === 4 && await page.locator(PANEL + ' .pkm-hk-pocket.pkm-hk-ghost').count() > 0
+  && await page.locator(PANEL + ' .pkm-hk-ghost').evaluateAll(g => g.every(n => getComputedStyle(n).visibility === 'hidden')));
+// Appuis rapides : une page par appui, sans attendre la fin de l'animation.
+const label = () => page.locator(SEC + ' [aria-live="polite"]').filter({ hasText: /^Page / }).first().innerText();
+for (const a of ['Page précédente', 'Page suivante', 'Page précédente']) await page.locator(SEC + ' button[aria-label="' + a + '"]').click({ delay: 20 });
+await page.waitForTimeout(150);
+ok('3 appuis rapides : une page par appui (' + await label() + ')', await label() === 'Page 1 sur 2');
+// Doigt gardé appuyé sur « Page suivante » : les pages défilent jusqu'à la dernière, puis s'arrêtent.
+const nb = await page.locator(SEC + ' button[aria-label="Page suivante"]').boundingBox();
+await page.mouse.move(nb.x + nb.width / 2, nb.y + nb.height / 2); await page.mouse.down(); await page.waitForTimeout(900);
+const held = await label();
+await page.mouse.up(); await page.waitForTimeout(300);
+ok('doigt gardé : les pages défilent seules (' + held + ', puis ' + await label() + ' après le doigt levé)', held === 'Page 2 sur 2' && await label() === 'Page 2 sur 2');
 // Choix gardé sur l'appareil.
 const keep = await page.evaluate(() => (JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}') || {}).hbSort);
 ok('tri « Par série » gardé sur l’appareil', keep === 'set');
@@ -139,6 +157,31 @@ const firsts = vit.map((x, i) => (x.head && vit[i + 1] && !vit[i + 1].head ? vit
 const left0 = Math.min(...vit.filter(x => !x.head).map(x => x.left));
 ok('vitrine : chaque série commence sur une nouvelle tablette, à gauche (' + firsts.join(', ') + ')', firsts.length === 3 && firsts.every(v => v === left0));
 await pg2.locator(SEC).screenshot({ path: shot('classeur-par-serie-scelle.png') });
+
+// G. Classeur de 4 pages trié par prix : doigt gardé sur « Page suivante », les pages défilent seules (une page tout de
+// suite, puis une toutes les 0,16 s), les flèches ne bougent pas, et la page finale est celle du doigt levé.
+const many = doc.cards.filter(r => r[0].indexOf('sv08-') === 0).slice(0, 34);
+const ctx3 = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+await withFonts(ctx3); await withDemoCards(ctx3);
+const pg3 = await ctx3.newPage(); pg3.on('pageerror', e => errors.push(e.message));
+const saved3 = JSON.stringify({ v: 1, savedAt: new Date().toISOString(), tuto: 'done', onb: 0,
+  cards: Object.fromEntries(many.map(r => [r[0], { r: r, f: doc.fields }])),
+  purchases: many.map((r, i) => ({ id: 'm' + i, date: '2026-10-01', seq: i, lines: [{ pid: r[0], qty: 1, lang: 'FR', cond: 'NM' }], total: null, where: 'Test', by: 'toi' })), sales: [], seq: 90 });
+await pg3.addInitScript(v => { if (!sessionStorage.getItem('seeded')) { localStorage.setItem('pkm-collection-v1', v); sessionStorage.setItem('seeded', '1'); } }, saved3);
+await pg3.goto(BASE + '&debug', { waitUntil: 'load' }); await pg3.waitForTimeout(2600);
+await pg3.locator(SEC).scrollIntoViewIfNeeded(); await pg3.waitForTimeout(300);
+const lab3 = () => pg3.locator(SEC + ' [aria-live="polite"]').filter({ hasText: /^Page / }).first().innerText();
+const nx = pg3.locator(SEC + ' button[aria-label="Page suivante"]');
+await nx.scrollIntoViewIfNeeded(); await pg3.waitForTimeout(300);
+const b0 = await nx.boundingBox();
+await pg3.mouse.move(b0.x + b0.width / 2, b0.y + b0.height / 2); await pg3.mouse.down();
+await pg3.waitForTimeout(120); const at1 = await lab3();
+await pg3.waitForTimeout(560); const at2 = await lab3();
+const b1 = await nx.boundingBox();
+await pg3.mouse.up(); await pg3.waitForTimeout(400); const at3 = await lab3();
+ok('doigt gardé : page 2 tout de suite, puis les suivantes (' + [at1, at2, at3].join(' → ') + ')', at1 === 'Page 2 sur 4' && /Page [34] sur 4/.test(at2) && at3 === at2);
+ok('doigt gardé : la flèche reste sous le doigt (' + Math.round(b0.y) + ' / ' + Math.round(b1.y) + ')', Math.abs(b0.y - b1.y) < 1);
+await ctx3.close();
 
 ok('aucune erreur JavaScript', errors.length === 0, errors.slice(0, 2).join(' | '));
 console.log(res.join('\n'));

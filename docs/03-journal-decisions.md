@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-21 — Mon classeur : pages qui se tournent vite, écran immobile (porteur)
+
+- **Demande** : « quand on change de page de classeur, celui-ci bouge en permanence ; je veux pouvoir changer de page directement en cliquant dessus en continu avec mon doigt pour aller plus vite, et que l'écran ne bouge plus entre chaque page ».
+- **Fait (cache v267)** :
+  - **toutes les pages ont la même hauteur** : en « Par série », chaque page est complétée par des titres et des pochettes invisibles à la taille de la page la plus haute ; la vitrine du scellé garde ses 3 tablettes sur chaque page ; les flèches de page restent exactement sous le doigt ;
+  - la page tourne **dès que le doigt se pose** sur une flèche, et chaque appui rapide tourne une page, sans attendre la fin de l'animation ;
+  - **doigt gardé appuyé** : les pages défilent seules (une tout de suite, puis une toutes les 0,16 s après 0,4 s), jusqu'à la dernière ; pas de menu ni de sélection sur un appui long ;
+  - animation de la page plus courte (0,3 s au lieu de 0,55 s, la page part à moitié ouverte) ;
+  - tests `t-binderset.mjs` (flèches à la même place, emplacements invisibles, 3 appuis rapides, doigt gardé sur un classeur de 4 pages).
+
+---
+
 ## 2026-11-21 — « Par série » : un titre au-dessus de chaque série (porteur)
 
 - **Demande** : « une délimitation plus nette pour bien voir entre chaque série ; grossis légèrement le titre de la série et mets-le juste au-dessus de la première carte de la série, pas dans la carte ».

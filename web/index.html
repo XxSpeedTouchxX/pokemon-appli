@@ -717,15 +717,19 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 /* Mon classeur (2026-10-21, demande du porteur) : la page des cartes se tourne comme dans un classeur (la nouvelle
    page pivote depuis la reliure) ; pochettes vides pour garder la même hauteur de page ; « Tout afficher ». */
 .pkm-hk-grid { transform-origin: left center; }
-.pkm-turn-next-0 { animation: pkmTurnNextA 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: left center; }
-.pkm-turn-next-1 { animation: pkmTurnNextB 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: left center; }
-.pkm-turn-prev-0 { animation: pkmTurnPrevA 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: right center; }
-.pkm-turn-prev-1 { animation: pkmTurnPrevB 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: right center; }
-@keyframes pkmTurnNextA { 0% { transform: perspective(1400px) rotateY(-92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
-@keyframes pkmTurnNextB { 0% { transform: perspective(1400px) rotateY(-92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
-@keyframes pkmTurnPrevA { 0% { transform: perspective(1400px) rotateY(92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
-@keyframes pkmTurnPrevB { 0% { transform: perspective(1400px) rotateY(92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
+.pkm-turn-next-0 { animation: pkmTurnNextA 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: left center; }
+.pkm-turn-next-1 { animation: pkmTurnNextB 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: left center; }
+.pkm-turn-prev-0 { animation: pkmTurnPrevA 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: right center; }
+.pkm-turn-prev-1 { animation: pkmTurnPrevB 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-origin: right center; }
+/* Page qui se tourne plus vite (0,3 s, 2026-11-21, porteur : changer de page en continu) : elle part à moitié ouverte. */
+@keyframes pkmTurnNextA { 0% { transform: perspective(1400px) rotateY(-55deg); filter: brightness(0.7); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
+@keyframes pkmTurnNextB { 0% { transform: perspective(1400px) rotateY(-55deg); filter: brightness(0.7); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
+@keyframes pkmTurnPrevA { 0% { transform: perspective(1400px) rotateY(55deg); filter: brightness(0.7); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
+@keyframes pkmTurnPrevB { 0% { transform: perspective(1400px) rotateY(55deg); filter: brightness(0.7); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
 @media (prefers-reduced-motion: reduce) { .pkm-turn-next-0, .pkm-turn-next-1, .pkm-turn-prev-0, .pkm-turn-prev-1 { animation: none; } }
+/* Flèches de page : appui long sans menu ni sélection ; emplacements invisibles qui gardent la hauteur de la page. */
+.pkm-hk-pg { touch-action: manipulation; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.pkm-hk-ghost { visibility: hidden; }
 .pkm-hk-pocket { display: block; width: 100%; aspect-ratio: 600 / 825; box-sizing: border-box; border-radius: 5% / 3.6%; border: 1.5px dashed rgba(168, 182, 255, 0.22); background: rgba(255, 255, 255, 0.03); }
 /* Tri « Par série » de Mon classeur (2026-11-21, porteur : « une délimitation plus nette entre chaque série, le titre
    un peu plus gros, juste au-dessus de la première carte de la série, pas dans la carte ») : bandeau pleine largeur
@@ -4884,6 +4888,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=41f4e436"></script>
+<script src="app.js?v=61c0e928"></script>
 </body>
 </html>
