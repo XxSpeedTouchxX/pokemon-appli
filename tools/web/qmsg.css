@@ -57,3 +57,13 @@
 .pkm-qm-discord-off { background: #26345A; color: #C9D3EA; }
 .pkm-qm-discord:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
 .pkm-qm-safe { display: block; margin-top: 6px; font-size: 11.5px; line-height: 1.4; color: #C9D3EA; }
+
+/* Enveloppe de l'en-tête, à droite de l'emblème du grade (2026-11-21, porteur) : ouvre « Mes messages » ; pastille rouge
+   avec le nombre de propositions d'échange non lues. Posée en absolu : l'emblème et le logo ne bougent pas. */
+.pkm-hh-mail { position: absolute; z-index: 2; top: -2px; left: calc(50% + 30px); width: 30px; height: 30px; padding: 2px; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45)); }
+.pkm-hh-mail::before { content: ''; position: absolute; inset: -7px; }
+.pkm-hh-mail img { display: block; width: 26px; height: 26px; }
+.pkm-hh-mail:active { transform: scale(0.92); }
+.pkm-hh-mail-n { position: absolute; top: -6px; right: -8px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: #E5484D; color: #FFFFFF; font: 800 11px/18px 'Sora', sans-serif; text-align: center; box-shadow: 0 0 0 2px #0B1120; animation: pkmMailPop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+@keyframes pkmMailPop { from { transform: scale(0.2); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-hh-mail-n { animation: none; } }

@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-21 — Enveloppe des propositions dans l'en-tête, recherche sans saisie automatique (porteur)
+
+- **Demande** : « dans "Rechercher une carte ou un dresseur", supprime la saisie automatique des mots ; enlève l'onglet "Mes messages" juste en dessous des 4 bulles ; la petite enveloppe à droite du logo du grade avec une notification 1, 2, 3… si un autre utilisateur est intéressé par une carte de sa vitrine et lui a fait une offre ».
+- **Fait** : barre de recherche sans correction, majuscule automatique ni suggestions du navigateur (`autocomplete`, `autocorrect`, `autocapitalize` sur « off », `spellcheck` sur « false » ; les suggestions du clavier de l'iPhone peuvent rester visibles au-dessus des touches, elles ne remplacent plus rien) ; bouton « Mes messages » retiré de « Ma vitrine » ; **petite enveloppe** (`web/img/brand/enveloppe.svg`) à droite de l'emblème du grade, dans l'en-tête de tous les onglets, pastille rouge avec le nombre de propositions et de réponses non lues (relu chaque minute tant que l'app est visible), un appui ouvre « Mes messages » ; pastille de la bulle « Ma vitrine » gardée ; enveloppe montrée aux comptes connectés (cachée pour un joueur tant que le serveur n'a pas les échanges, gardée pour un admin) ; cache v270.
+- **Choix par défaut, à confirmer** : la pastille compte aussi les réponses reçues (« Ça m'intéresse », « Non merci »…), pas seulement les offres.
+
 ## 2026-11-21 — Le coin des dresseurs : 4 logos en couleur, « Calendrier JCC » (porteur)
 
 - **Demande** : « mets-moi les 4 logos des 4 bulles en couleur dans le coin des dresseurs (actuellement seule Ma vitrine est en couleur) ; "Le calendrier JCC" devient "Calendrier JCC" pour faire descendre un peu le logo, trop haut actuellement ».

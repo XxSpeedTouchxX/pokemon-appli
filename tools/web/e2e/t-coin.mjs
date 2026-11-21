@@ -119,10 +119,14 @@ const NAV = 'nav[aria-label="Navigation principale"]';
     && (await page.locator('section[aria-label="Échanges possibles"]').count()) === 1);
   ok('Ma vitrine : plus de « Voir ma vitrine » ni de « Vitrines des dresseurs »', (await page.locator('button.pkm-coin-mine').count()) === 0
     && (await page.locator('section[aria-label="Vitrines des dresseurs"]').count()) === 0 && !(S.calls.player_search || []).some(b => b.q === ''));
-  ok('Ma vitrine : bouton « Mes messages » en haut', (await page.locator('button.pkm-qm-open.pkm-coin-msgs').count()) === 1);
+  // « Mes messages » : par l'enveloppe de l'en-tête (2026-11-21, porteur : « enlève l'onglet Mes messages juste en dessous des 4 bulles »).
+  ok('Ma vitrine : plus de bouton « Mes messages » sous les 4 bulles ; enveloppe dans l’en-tête', (await page.locator('button.pkm-qm-open').count()) === 0 && (await page.locator('button.pkm-hh-mail').count()) === 1);
   ok('bulle « Ma vitrine » : le petit magasin de l’animation de la vitrine', (await page.locator('[role="tablist"] button', { hasText: 'Ma vitrine' }).locator('img[src*="brand/vitrine.svg"]').count()) === 1);
   const IN = 'input[aria-label="Recherche une carte ou un dresseur"]', FS = 'section[aria-label="Rechercher une carte ou un dresseur"]';
   ok('barre « Recherche une carte ou un dresseur… »', (await page.getAttribute(IN, 'placeholder')) === 'Recherche une carte ou un dresseur…');
+  // Sans saisie automatique (2026-11-21, porteur) : ni correction, ni majuscule, ni suggestions du navigateur.
+  const ia = await page.evaluate(q => { const i = document.querySelector(q); return ['autocomplete', 'autocorrect', 'autocapitalize', 'spellcheck'].map(a => i.getAttribute(a)).join(','); }, IN);
+  ok('recherche sans saisie automatique (' + ia + ')', ia === 'off,off,off,false');
   await page.fill(IN, 'ond'); await page.waitForTimeout(900);
   ok('recherche : serveur interrogé avec « ond »', (S.calls.player_search || []).some(b => b.q === 'ond'));
   const found = N(await page.locator(FS).innerText());

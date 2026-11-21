@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- Petite enveloppe de l'en-tête, à droite de l'emblème du grade : ouvre « Mes messages » (propositions d'échange),
+       pastille rouge avec le nombre de propositions non lues (2026-11-21, porteur). Même style que les logos du coin des
+       dresseurs (contour bleu nuit, jaune de l'app). -->
+  <rect x="2" y="5" width="20" height="14.6" rx="2.4" fill="#F6F8FC" stroke="#0B1120" stroke-width="1.3"/>
+  <path d="M2.9 18.6l7-6.2M21.1 18.6l-7-6.2" fill="none" stroke="#B8C4DE" stroke-width="1.1" stroke-linecap="round"/>
+  <path d="M2.7 6.2l9.3 7.3 9.3-7.3" fill="#FFD60A" stroke="#0B1120" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M2.7 6.2C3 5.5 3.6 5 4.4 5h15.2c.8 0 1.4.5 1.7 1.2l-9.3 7.3z" fill="#FFD60A" stroke="#0B1120" stroke-width="1.3" stroke-linejoin="round"/>
+</svg>

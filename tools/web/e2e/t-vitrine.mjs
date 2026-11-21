@@ -206,7 +206,7 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   // « Mes messages » en haut de Ma vitrine (2026-11-21 ; avant : dans la carte de Ma ligue).
   await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1800);
   ok('Ma ligue : plus de bouton « Mes messages »', (await page.locator('section.pkm-pg-card button.pkm-qm-open').count()) === 0);
-  await page.locator('button.pkm-qm-open.pkm-coin-msgs').click(); await page.waitForTimeout(1200);
+  await page.locator('button.pkm-hh-mail').click(); await page.waitForTimeout(1200);
   const M = page.locator('section.pkm-qm');
   const it = M.locator('li.pkm-qm-item');
   ok('messages : 3 messages', (await it.count()) === 3);

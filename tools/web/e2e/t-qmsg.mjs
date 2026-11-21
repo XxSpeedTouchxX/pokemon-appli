@@ -1,8 +1,9 @@
 // « Mes messages » et carte de dresseur (2026-11-21, porteur : « supprime tous les messages rapides » ; « dans la carte de
 // visite, uniquement le pseudo, le grade, membre depuis, le classement et les PL de la saison actuelle, le classement et
 // les PL de la saison passée, et sa vitrine ») : plus de messages rapides (ni sur la carte, ni dans la boîte, ni pour
-// répondre) ; « Mes messages » ne garde que les propositions d'échange, ouvert depuis Ma vitrine (pastille sur la bulle
-// « Ma vitrine ») ; carte de dresseur avec la saison en cours et la saison passée.
+// répondre) ; « Mes messages » ne garde que les propositions d'échange ; carte de dresseur avec la saison en cours et la
+// saison passée. Depuis le 2026-11-21 (porteur) : « Mes messages » s'ouvre par la petite enveloppe de l'en-tête, à droite
+// de l'emblème du grade, avec le nombre de propositions non lues ; plus de bouton sous les 4 bulles.
 // Le serveur est imité (page.route) : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
@@ -73,8 +74,15 @@ const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null
   const vb = page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma vitrine' }), lb = page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma ligue' });
   ok('pastille « 1 » (proposition non lue) sur la bulle « Ma vitrine », plus sur « Ma ligue »', (await vb.locator('.pkm-qm-badge').innerText().catch(() => '')) === '1'
     && /1 proposition non lue/.test(await vb.getAttribute('aria-label') || '') && (await lb.locator('.pkm-qm-badge').count()) === 0);
-  const mb = page.locator('button.pkm-qm-open.pkm-coin-msgs');
-  ok('Ma vitrine : « Mes messages » avec la pastille 1', (await mb.count()) === 1 && (await mb.locator('.pkm-qm-badge').innerText()) === '1');
+  const mb = page.locator('button.pkm-hh-mail');
+  ok('Ma vitrine : plus de bouton « Mes messages » sous les 4 bulles', (await page.locator('button.pkm-qm-open').count()) === 0);
+  ok('en-tête : enveloppe avec la pastille « 1 »', (await mb.count()) === 1 && (await mb.locator('.pkm-hh-mail-n').innerText()) === '1'
+    && /1 nouvelle proposition d’échange/.test(await mb.getAttribute('aria-label') || ''));
+  // À droite de l'emblème du grade, à la même hauteur ; l'emblème reste centré au-dessus du logo.
+  const geo = await page.evaluate(() => { const g = document.querySelector('.pkm-hh-gbtn').getBoundingClientRect(), m = document.querySelector('.pkm-hh-mail').getBoundingClientRect(), l = document.querySelector('.pkm-hh-mid > img:last-child').getBoundingClientRect();
+    return { gap: Math.round(m.left - g.right), dy: Math.round((m.top + m.height / 2) - (g.top + g.height / 2)), gc: Math.round((g.left + g.width / 2) - (l.left + l.width / 2)), right: Math.round(m.right), avatar: Math.round(document.querySelector('header button[aria-label*="profil" i], .pkm-hh-ava, [aria-label="Mon profil"]') ? document.querySelector('header button[aria-label*="profil" i], .pkm-hh-ava, [aria-label="Mon profil"]').getBoundingClientRect().left : 999) }; });
+  ok('enveloppe à droite de l’emblème du grade, même hauteur, emblème toujours centré sur le logo (' + JSON.stringify(geo) + ')', geo.gap >= 0 && geo.gap <= 10 && Math.abs(geo.dy) <= 3 && Math.abs(geo.gc) <= 6 && geo.right <= geo.avatar);
+  await page.locator('header').first().screenshot({ path: shot('qm-enveloppe-entete.png') }).catch(() => {});
   // Ma ligue : plus de bouton « Mes messages » dans ma carte.
   await lb.click(); await page.waitForTimeout(2000);
   ok('Ma ligue : plus de bouton « Mes messages »', (await page.locator('section.pkm-pg-card button.pkm-qm-open').count()) === 0);
@@ -106,7 +114,7 @@ const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null
   ok('Mes messages : « Propositions d’échange des dresseurs »', /Propositions d’échange des dresseurs/.test(N(await QM.innerText())));
   ok('proposition : 3 réponses ; réponse reçue : aucune réponse toute faite', (await QM.locator('li.pkm-qm-item').nth(0).locator('.pkm-qm-chip').count()) === 3 && (await QM.locator('li.pkm-qm-item').nth(1).locator('.pkm-qm-chip').count()) === 0);
   ok('accord reçu : rendez-vous sur le Discord (bientôt disponible tant que le lien manque)', /Retrouve Régis sur le Discord Dropicards/.test(items[1]) && /Discord Dropicards bientôt disponible/.test(items[1]));
-  ok('ouverture : tout marqué comme lu (quick_msg_read), pastille retirée', (S.calls.quick_msg_read || []).length === 1 && (await mb.locator('.pkm-qm-badge').count()) === 0);
+  ok('ouverture : tout marqué comme lu (quick_msg_read), pastille retirée', (S.calls.quick_msg_read || []).length === 1 && (await mb.locator('.pkm-hh-mail-n').count()) === 0);
   ok('réglage « Recevoir les propositions d’échange »', (await QM.locator('button.pkm-qm-set[aria-checked="true"]', { hasText: 'Recevoir les propositions d’échange' }).count()) === 1);
   ok('aucun envoi ni réponse par message rapide', !(S.calls.quick_msg_send || []).length && !(S.calls.quick_msg_reply || []).length);
   await page.screenshot({ path: shot('qm-mes-messages.png') });
@@ -118,7 +126,13 @@ const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null
   ok('réglage coupé : quick_msg_set(receive: false), « Coupées »', (S.calls.quick_msg_set || []).slice(-1)[0].receive === false && /Coupées/.test(await QM.locator('button.pkm-qm-set').innerText()));
   await QM.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
   // Petit écran (320 px) : rien ne dépasse.
-  await page.setViewportSize({ width: 320, height: 640 }); await mb.click(); await page.waitForTimeout(900);
+  await page.setViewportSize({ width: 320, height: 640 }); await page.waitForTimeout(400);
+  const g320 = await page.evaluate(() => { const g = document.querySelector('.pkm-hh-gbtn').getBoundingClientRect(), m = document.querySelector('.pkm-hh-mail').getBoundingClientRect();
+    const others = [...document.querySelectorAll('header button, header img')].filter(e => !e.closest('.pkm-hh-mail') && !e.closest('.pkm-hh-mid')).map(e => e.getBoundingClientRect()).filter(r => r.width && r.height);
+    return { gap: Math.round(m.left - g.right), hit: others.some(r => r.left < m.right && r.right > m.left && r.top < m.bottom && r.bottom > m.top), out: m.right > innerWidth }; });
+  ok('320 px : enveloppe à droite de l’emblème, ne touche ni l’avatar ni les soldes (' + JSON.stringify(g320) + ')', g320.gap >= 0 && !g320.hit && !g320.out);
+  await page.locator('header').first().screenshot({ path: shot('qm-enveloppe-entete-320.png') }).catch(() => {});
+  await mb.click(); await page.waitForTimeout(900);
   const over = await page.evaluate(() => { const q = document.querySelector('section.pkm-qm'); if (!q) return 'absent'; const w = q.getBoundingClientRect().right; return Array.from(q.querySelectorAll('*')).filter(e => e.getBoundingClientRect().right > w + 1).map(e => e.className).slice(0, 3).join(' | '); });
   ok('320 px : rien ne dépasse (' + (over || 'ok') + ')', over === '');
   await ctx.close();
@@ -132,15 +146,15 @@ const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null
   await page.evaluate(() => window.__pkm.pcOpen({ id: 'u-5', pseudo: 'Dresseur5', grade: 3 }, 'PL', 0)); await page.waitForTimeout(900);
   ok('saison 1 : « Première saison de la ligue : pas encore de saison passée »', /Première saison de la ligue : pas encore de saison passée/.test(N(await page.locator('section.pkm-tc section[aria-label="Saison passée"]').innerText())));
   await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
-  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1500);
-  await page.locator('button.pkm-qm-open.pkm-coin-msgs').click(); await page.waitForTimeout(800);
+  await page.evaluate(() => window.__pkm.tab('home')); await page.waitForTimeout(1200);
+  ok('accueil : enveloppe sans pastille (rien de nouveau)', (await page.locator('button.pkm-hh-mail').count()) === 1 && (await page.locator('.pkm-hh-mail-n').count()) === 0);
+  await page.locator('button.pkm-hh-mail').click(); await page.waitForTimeout(800);
   ok('boîte vide : « Aucune proposition pour l’instant »', /Aucune proposition pour l’instant/.test(await page.locator('section.pkm-qm').innerText()) && (S.calls.quick_msg_read || []).length === 0);
   await page.locator('section.pkm-qm button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
   S.off32 = true;
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
   await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1500);
-  await page.locator('button.pkm-qm-open.pkm-coin-msgs').click(); await page.waitForTimeout(800);
-  ok('sans 032, joueur : « Mes messages » « bientôt », sans réglage', /arrivent très bientôt/.test(await page.locator('section.pkm-qm').innerText()) && (await page.locator('button.pkm-qm-set').count()) === 0);
+  ok('sans 032, joueur : pas d’enveloppe dans l’en-tête', (await page.locator('button.pkm-hh-mail').count()) === 0);
   await ctx.close();
 }
 {
@@ -148,11 +162,11 @@ const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null
   const { ctx, page } = await setup(S, 'admin');
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
   await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1500);
-  await page.locator('button.pkm-qm-open.pkm-coin-msgs').click(); await page.waitForTimeout(800);
+  await page.locator('button.pkm-hh-mail').click(); await page.waitForTimeout(800);
   ok('sans 032, admin : fichier install_024_a_034.sql à coller dans Studio', /install_024_a_034\.sql/.test(await page.locator('section.pkm-qm').innerText()));
   await ctx.close();
 }
-// C. Sans compte : pas de bouton « Mes messages ».
+// C. Sans compte : pas d'enveloppe.
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.route(ABORT, r => r.abort());
@@ -161,7 +175,7 @@ const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null
   await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.ligueTuto = 'done'; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
   await page.goto(E2E + '/?start=progress&debug', { waitUntil: 'load' }); await page.waitForTimeout(2000);
   await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1200);
-  ok('sans compte : pas de bouton « Mes messages »', (await page.locator('button.pkm-qm-open').count()) === 0);
+  ok('sans compte : ni bouton « Mes messages » ni enveloppe', (await page.locator('button.pkm-qm-open').count()) === 0 && (await page.locator('button.pkm-hh-mail').count()) === 0);
   await ctx.close();
 }
 

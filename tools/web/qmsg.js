@@ -5,6 +5,10 @@
   // « Je suis intéressé », « Je te propose une de mes cartes », « Ça m'intéresse »…), ouvert depuis Le coin des dresseurs ›
   // Ma vitrine (pastille sur la bulle « Ma vitrine »). Un appui sur une proposition ouvre la carte de dresseur du joueur.
   // Serveur sans 032 : un admin voit le fichier à installer, un joueur « bientôt ».
+  // Depuis le 2026-11-21 (porteur : « enlève l'onglet "Mes messages" juste en dessous des 4 bulles ; la petite enveloppe
+  // à droite du logo du grade avec une notification 1, 2, 3… si un autre utilisateur est intéressé par une carte de sa
+  // vitrine et lui a fait une offre ») : « Mes messages » s'ouvre par l'enveloppe de l'en-tête, sur tous les onglets ;
+  // pastille rouge = propositions et réponses non lues, relues chaque minute tant que l'app est visible.
   // Types gardés dans « Mes messages » : propositions d'échange et leurs réponses (033).
   const QM_TRADE = /^(interest|offer|answer)$/;
   const QM_TTL = 60000, QM_DAY_MAX = 10;
@@ -27,18 +31,22 @@
   const qmProto = Component.prototype;
 
   const qmPatchState = (inst, p) => inst.setState({ qmState: Object.assign({ unread: 0, left: QM_DAY_MAX, off: false, old: false }, inst.st().qmState || {}, p, { at: Date.now() }) });
+  // Dernière lecture de l'état (instance) : l'enveloppe est relue chaque minute sans redessiner l'app quand rien ne change.
+  const qmFresh = (inst, s) => Date.now() - Math.max(inst.__qmAt || 0, (s.qmState && s.qmState.at) || 0) < QM_TTL;
   // État (pastille, messages restants, messages coupés), relu au plus une fois par minute.
   qmProto.qmLoadState = function (force) {
     const s = this.st();
     if (!qmOnline() || this.__qmStBusy) return Promise.resolve(null);
-    if (!force && s.qmState && Date.now() - (s.qmState.at || 0) < QM_TTL) return Promise.resolve(s.qmState);
+    if (!force && s.qmState && qmFresh(this, s)) return Promise.resolve(s.qmState);
     this.__qmStBusy = true;
     return Cloud.rpc('quick_msg_state', {}).then(d => {
-      this.__qmStBusy = false;
+      this.__qmStBusy = false; this.__qmAt = Date.now();
       const st = { at: Date.now(), unread: Number(d && d.unread) || 0, left: d && d.left != null ? Number(d.left) : QM_DAY_MAX, off: !!(d && d.off), old: false };
+      const o = this.st().qmState;
+      if (o && !o.old && o.unread === st.unread && o.left === st.left && o.off === st.off) return o; // rien de nouveau : pas de rendu
       this.setState({ qmState: st }); return st;
     }, e => {
-      this.__qmStBusy = false;
+      this.__qmStBusy = false; this.__qmAt = Date.now();
       // Serveur sans 032 : « old » ; pas de réseau ou autre erreur : on réessaiera dans une minute.
       qmPatchState(this, e && e.code === 'not_installed' ? { old: true } : {});
       return null;
@@ -85,11 +93,19 @@
     this.pcOpen({ id: it.from, pseudo: it.pseudo || '—', grade: it.grade, avatar: it.avatar || null }, 'PL', 0);
   };
 
-  // Bouton « Mes messages » (Ma vitrine) et pastille de la bulle « Ma vitrine ».
+  // Pastille de la bulle « Ma vitrine » (le bouton « Mes messages » de Ma vitrine est retiré le 2026-11-21 : enveloppe de l’en-tête).
   qmProto.vQmButton = function (s) {
     const st = s.qmState || {}, n = qmOnline() ? Number(st.unread) || 0 : 0;
     return { open: () => this.qmOpen(), hasN: n > 0, n: n > 9 ? '9+' : String(n),
       aria: 'Mes messages' + (n ? ' : ' + n + (n > 1 ? ' nouvelles propositions' : ' nouvelle proposition') : ''), show: qmOnline() };
+  };
+
+  // Enveloppe de l'en-tête, à droite de l'emblème du grade (2026-11-21, porteur) : compte connecté seulement ; cachée
+  // pour un joueur tant que le serveur n’a pas les échanges (un admin la garde, pour l’aperçu) ; montrée une fois l’état lu.
+  qmProto.vQmHeader = function (s) {
+    const st = s.qmState || {}, on = qmOnline(), n = on ? Number(st.unread) || 0 : 0;
+    return { show: on && !!s.qmState && !(st.old && !qmAdmin()), open: () => this.qmOpen(), hasN: n > 0, n: n > 9 ? '9+' : String(n),
+      aria: 'Mes messages' + (n ? ' : ' + n + (n > 1 ? ' nouvelles propositions d’échange' : ' nouvelle proposition d’échange') : ' : propositions d’échange') };
   };
 
   // Fenêtre « Mes messages ».
@@ -124,9 +140,14 @@
   qmProto.renderVals = function () {
     const s = this.st(), r = qmBaseRender.call(this);
     r.qmb = this.vQmButton(s);
+    r.qmh = this.vQmHeader(s);
     r.qmx = this.vQmBox(s);
-    // Pastille : état relu dans Le coin des dresseurs (bulle « Ma vitrine », 2026-11-21) et dans Jeux (au plus une fois par minute).
-    // ui.isCoin est posé plus tard (coin.js enveloppe ce module) : l'écran est lu directement.
-    if (r.ui && (r.ui.isGames || r.ui.isProgress || s.screen === 'coin') && qmOnline() && !(s.qmState && Date.now() - (s.qmState.at || 0) < QM_TTL) && !this.__qmStBusy) setTimeout(() => this.qmLoadState(false), 0);
+    // Pastille de l'enveloppe (en-tête, tous les onglets) et de la bulle « Ma vitrine » : état relu au plus une fois par
+    // minute, et chaque minute tant que l'app est visible (une proposition arrive même si l'on ne touche à rien).
+    if (qmOnline() && !(s.qmState && qmFresh(this, s)) && !this.__qmStBusy) setTimeout(() => this.qmLoadState(false), 0);
+    if (!this.__qmTick && typeof setInterval === 'function') {
+      this.__qmTick = setInterval(() => { try { if (!document.hidden && qmOnline()) this.qmLoadState(false); } catch (e) { /* rien */ } }, QM_TTL);
+      try { document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && qmOnline()) this.qmLoadState(false); }); } catch (e) { /* rien */ }
+    }
     return r;
   };

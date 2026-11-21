@@ -379,6 +379,7 @@ Le test prévu est un service « concierge » par messagerie, **sans développem
   - **Mon classeur** : petit magasin juste au-dessus de l'état des cartes mises en vitrine (aussi dans « Tout afficher ») ;
   - serveur `tools/supabase/038_recherche_cartes.sql` (25 tests) **à installer avec `install_024_a_034.sql`** ; confidentialité et CGU à jour ; cache v268.
 - **Logos du coin des dresseurs (2026-11-21, porteur) :** les 4 bulles avec un logo en couleur dans le style du petit magasin (coupe dorée, petit magasin, cadeau turquoise, calendrier à en-tête rouge ; `web/img/brand/coin-*.svg`), tous à la même hauteur ; « Le calendrier JCC » devient **« Calendrier JCC »** (bulle, en-tête, voile du DropiPass) ; cache v269.
+- **Enveloppe et recherche (2026-11-21, porteur) :** petite enveloppe à droite de l'emblème du grade (en-tête de tous les onglets) avec le nombre de propositions et réponses d'échange non lues, un appui ouvre « Mes messages » ; bouton « Mes messages » retiré de « Ma vitrine » ; recherche « une carte ou un dresseur » sans saisie automatique ; **défaut à confirmer** : la pastille compte aussi les réponses reçues ; cache v270.
 - **Décalage connu :** `docs/06` (Hypothèses) et `docs/08` (Protocole de test) restent écrits pour les revendeurs de scellé ; CLAUDE.md cite `docs/10-analyse-pokeitem-brouillon.md`, absent du dépôt.
 - Les documents ont été écrits en parallèle : plusieurs disent « tel document n'existe pas encore » alors qu'il existe maintenant. Signale ces décalages.
 
