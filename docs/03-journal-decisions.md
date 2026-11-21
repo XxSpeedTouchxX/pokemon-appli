@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-11-21 — Mon classeur trié « Par série » (porteur)
+
+- **Demande** : « un filtre "Par série" qui classe toutes les cartes par série ; un tout petit logo sur la page de mon classeur qui fait la séparation entre les séries ; les cartes rangées par prix décroissant dans chaque série ; l'ordre décroissant des séries en priorité : la première série sera Règne Delta, avec les prix des cartes du plus élevé au plus bas, ensuite viendra 30ème anniversaire, etc. ».
+- **Fait (cache v265)** :
+  - bouton de tri de Mon classeur : **Prix, Nom, Par série** ; « Par série » range les extensions des plus récentes aux plus anciennes (même ordre que « Toutes les séries », par date de sortie en France), puis les cartes de la plus chère à la moins chère dans chaque extension ; la Collection Classique est rangée avec le 30ᵉ Anniversaire ;
+  - **tout petit logo de l'extension** (pastille sombre bordée de jaune) en haut au milieu de la première carte de chaque série, et de la première carte de chaque page pour savoir où l'on est ; sous l'étiquette d'une carte gradée quand il y en a une ; nom écrit à la place quand l'extension n'a pas de logo ;
+  - même tri pour « Mes produits scellés » (extension du produit ; produits sans extension en dernier, « Autres ») et dans « Tout afficher » (« Classés par série ») ; choix gardé sur l'appareil ;
+  - petit écran : les 3 choix tiennent à 320 px ;
+  - tests `t-binderset.mjs` (nouveau, 18 vérifications), `t-binder.mjs` (3 choix).
+
+---
+
 ## 2026-11-21 — Animation du compagnon choisie, mission de parrainage en haut de page (porteur)
 
 - **Demandes** : « je veux l'animation 2 de choisir mon compagnon » ; « quand l'utilisateur va dans Mes missions et appuie sur la mission de parrainage, ça le renvoie directement sur l'onglet parrainage en haut de la page ».

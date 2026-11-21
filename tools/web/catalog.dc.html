@@ -393,7 +393,7 @@
 </div>
 </div>
 <sc-if value="{{ home.hk.sort.open }}" hint-placeholder-val="{{ false }}">
-<div role="radiogroup" aria-label="Trier mon classeur par" class="pkm-rise" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 14px; border-radius: 16px; border: 1px solid #24345C; background: rgba(8, 13, 26, 0.5)">
+<div role="radiogroup" aria-label="Trier mon classeur par" class="pkm-rise pkm-hk-sortg" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 14px; border-radius: 16px; border: 1px solid #24345C; background: rgba(8, 13, 26, 0.5)">
 <span style="flex: none; font-size: 13px; font-weight: 600; color: #C9D3EA">Trier par</span>
 <sc-for list="{{ home.hk.sort.opts }}" as="hks" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{ hks.on }}" aria-label="{{ hks.aria }}" onClick="{{ hks.pick }}" style="flex: 1; min-width: 0; height: 36px; padding: 0 8px; border-radius: 999px; border: 1px solid {{ hks.bc }}; background: {{ hks.bg }}; color: {{ hks.fg }}; font: inherit; font-size: 13.5px; font-weight: 700; white-space: nowrap; cursor: pointer">{{ hks.label }}</button></sc-for>
 </div>
@@ -407,6 +407,7 @@
 <sc-if value="{{ hkc.real }}" hint-placeholder-val="{{ true }}">
 <button type="button" onClick="{{ hkc.open }}" aria-label="{{ hkc.label }}" style="position: relative; container-type: inline-size; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; background: #16213A; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer">
 <img src="{{ hkc.img }}" srcset="{{ hkc.srcset }}" sizes="(max-width: 520px) 30vw, 118px" alt="" loading="lazy" decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover">
+<sc-if value="{{ hkc.hasMark }}" hint-placeholder-val="{{ false }}"><span class="{{ hkc.markCls }}" aria-hidden="true"><sc-if value="{{ hkc.mark.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ hkc.mark.logo }}" alt="" loading="lazy" decoding="async"></sc-if><sc-if value="{{ hkc.mark.noLogo }}" hint-placeholder-val="{{ false }}"><b>{{ hkc.mark.name }}</b></sc-if></span></sc-if>
 <sc-if value="{{ hkc.graded }}" hint-placeholder-val="{{ false }}"><span class="{{ hkc.gradeCls }}" aria-hidden="true"><sc-if value="{{ hkc.gradeHasMark }}" hint-placeholder-val="{{ true }}"><img src="{{ hkc.gradeMark }}" alt="" class="pkm-gr-badge-logo"></sc-if><b class="{{ hkc.gradeTone }}">{{ hkc.grade }}</b></span></sc-if>
 <sc-if value="{{ hkc.many }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 5px; left: 5px; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: var(--pkm-white); font-size: 11px; font-weight: 700">{{ hkc.qty }}</span></sc-if>
 <span class="pkm-pill2" style="bottom: 6%">
@@ -429,6 +430,7 @@
 <sc-if value="{{ hks.hasPhoto }}" hint-placeholder-val="{{ true }}"><img src="{{ hks.photo }}" alt="" loading="lazy"></sc-if>
 <sc-if value="{{ hks.sealedArt }}" hint-placeholder-val="{{ false }}"><span class="pkm-vit-art" style="background: {{ hks.bg }}"><img src="{{ hks.logo }}" alt="" loading="lazy"></span></sc-if>
 </span>
+<sc-if value="{{ hks.hasMark }}" hint-placeholder-val="{{ false }}"><span class="{{ hks.markCls }}" aria-hidden="true"><sc-if value="{{ hks.mark.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ hks.mark.logo }}" alt="" loading="lazy" decoding="async"></sc-if><sc-if value="{{ hks.mark.noLogo }}" hint-placeholder-val="{{ false }}"><b>{{ hks.mark.name }}</b></sc-if></span></sc-if>
 <sc-if value="{{ hks.many }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; bottom: 30px; left: 4px; z-index: 2; padding: 1px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.82); border: 1px solid rgba(168, 182, 255, 0.5); color: var(--pkm-white); font-size: 11px; font-weight: 700">{{ hks.qty }}</span></sc-if>
 <span class="pkm-vit-pill" style="display: flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.86); color: var(--pkm-white); font-size: 11px; font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4)">
 <span style="flex: none; width: 14px; height: 10px; border-radius: 2px; background: {{ hks.flag }}"></span>
@@ -2471,6 +2473,7 @@ PKCOUNTER
 <sc-for list="{{ hf.items }}" as="hfi" hint-placeholder-count="9">
 <button type="button" onClick="{{ hfi.open }}" aria-label="{{ hfi.label }}" class="pkm-hf-tile" style="background: {{ hfi.bg }}">
 <sc-if value="{{ hf.isCards }}" hint-placeholder-val="{{ true }}"><img src="{{ hfi.img }}" srcset="{{ hfi.srcset }}" sizes="30vw" alt="" loading="lazy" decoding="async" class="pkm-hf-card"></sc-if>
+<sc-if value="{{ hfi.hasMark }}" hint-placeholder-val="{{ false }}"><span class="{{ hfi.markCls }}" aria-hidden="true"><sc-if value="{{ hfi.mark.hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ hfi.mark.logo }}" alt="" loading="lazy" decoding="async"></sc-if><sc-if value="{{ hfi.mark.noLogo }}" hint-placeholder-val="{{ false }}"><b>{{ hfi.mark.name }}</b></sc-if></span></sc-if>
 <sc-if value="{{ hfi.hasPhoto }}" hint-placeholder-val="{{ false }}"><img src="{{ hfi.photo }}" alt="" loading="lazy" class="pkm-hf-photo"></sc-if>
 <sc-if value="{{ hfi.sealedArt }}" hint-placeholder-val="{{ false }}"><img src="{{ hfi.logo }}" alt="" loading="lazy" class="pkm-hf-photo"></sc-if>
 <sc-if value="{{ hfi.graded }}" hint-placeholder-val="{{ false }}"><span class="{{ hfi.gradeCls }}" aria-hidden="true"><sc-if value="{{ hfi.gradeHasMark }}" hint-placeholder-val="{{ true }}"><img src="{{ hfi.gradeMark }}" alt="" class="pkm-gr-badge-logo"></sc-if><b class="{{ hfi.gradeTone }}">{{ hfi.grade }}</b></span></sc-if>

@@ -67,10 +67,35 @@
     // Tri du classeur (2026-11-15, porteur, à la place du « i ») : Prix (du plus cher au moins cher, par défaut) ou Nom
     // (de A à Z) ; même ordre dans les 2 onglets et dans « Tout afficher », gardé sur l'appareil.
     const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'fr', { sensitivity: 'base', numeric: true });
-    const sortBy = s.hbSort === 'name' ? 'name' : 'price';
+    const sortBy = s.hbSort === 'name' ? 'name' : s.hbSort === 'set' ? 'set' : 'price';
+    // « Par série » (2026-11-21, porteur : « la première série qui sortira sera Règne Delta, avec les prix des cartes du
+    // plus élevé au plus bas, ensuite viendra 30ème anniversaire, etc. ») : extensions des plus récentes aux plus
+    // anciennes (ordre de « Toutes les séries »), puis cartes de la plus chère à la moins chère dans chaque extension ;
+    // la Collection Classique est rangée avec le 30ᵉ Anniversaire (setHome). Scellé : extension du produit, s'il en a une.
+    const setKey = p => (p.type === 'sealed' ? String(p.setId || '') : p.set ? setHome(p.set) : '');
+    const setRank = homeSetRank();
+    const bySet = (a, b) => { const ka = setKey(a.p), kb = setKey(b.p); return setRank(ka) - setRank(kb) || (ka < kb ? -1 : ka > kb ? 1 : 0); };
     // Entrées du classeur (2026-11-01) : { p, gr, q, v } ; les exemplaires gradés d'une carte ont chacun la leur, par note
     // (graded.js), à côté des exemplaires non gradés.
-    const order = sortBy === 'name' ? (a, b) => byName(a.p, b.p) || b.v - a.v : (a, b) => b.v - a.v || byName(a.p, b.p);
+    const order = sortBy === 'name' ? (a, b) => byName(a.p, b.p) || b.v - a.v
+      : sortBy === 'set' ? (a, b) => bySet(a, b) || b.v - a.v || byName(a.p, b.p) : (a, b) => b.v - a.v || byName(a.p, b.p);
+    // Petit logo de l'extension sur la première carte de chaque série (et en haut de chaque page du classeur, pour savoir
+    // où l'on est) : la séparation entre les séries, triées « Par série » seulement.
+    const marks = new Map();
+    const markOf = k => {
+      if (!marks.has(k)) {
+        const e = k ? (TCG.setList || []).find(z => z.id === k) : null, name = e ? e.name : k ? (setOf(k)[0] || k) : 'Autres';
+        const logo = e ? setLogo(e.id, e.logo) : '';
+        marks.set(k, { logo: logo, hasLogo: !!logo, noLogo: !logo, name: name });
+      }
+      return marks.get(k);
+    };
+    const withMark = (t, l, i, per) => {
+      const on = sortBy === 'set' && (i === 0 || setKey(l[i].p) !== setKey(l[i - 1].p) || (per > 0 && i % per === 0));
+      const m = on ? markOf(setKey(l[i].p)) : HOME_NO_MARK;
+      return Object.assign(t, { hasMark: on, mark: m, markCls: 'pkm-hk-set' + (t.graded ? ' pkm-hk-set-low' : ''),
+        label: on ? 'Série ' + m.name + '. ' + t.label : t.label });
+    };
     const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
     const mine = sealed => all(sealed).flatMap(p => this.gradeEntries(s, p, unit(p), qty(p))).sort(order);
     const cards = mine(false), sealed = mine(true), list = tab === 'sealed' ? sealed : cards, per = HOME_BINDER[tab];
@@ -95,7 +120,7 @@
     };
     const isGraded = e => !!(e.gr || e.p.grade);
     const graded = units(cards.filter(isGraded)), extra = cards.reduce((t, e) => t + Math.max(0, e.q - 1), 0);
-    const shown = list.slice(page * per, page * per + per).map(tile).map(t => Object.assign(t, { real: true, pocket: false }));
+    const shown = list.slice(page * per, page * per + per).map((e, j) => withMark(tile(e), list, page * per + j, per)).map(t => Object.assign(t, { real: true, pocket: false }));
     // Cartes sur plusieurs pages : pochettes vides jusqu'à 9, pour que la page garde sa hauteur quand on la tourne.
     const pockets = tab !== 'sealed' && pages > 1 ? Array.from({ length: per - shown.length }, () => ({ real: false, pocket: true })) : [];
     // Tourner la page (cartes seulement ; le scellé est une vitrine) : sens et parité pour relancer l'animation.
@@ -114,17 +139,18 @@
           : [plural(units(cards), 'carte', 'cartes')].concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · ')
       },
       sort: {
-        open: !!s.hbSortOpen, cur: sortBy === 'name' ? 'Nom' : 'Prix',
-        label: s.hbSortOpen ? 'Fermer le tri' : 'Trier mon classeur, par ' + (sortBy === 'name' ? 'nom' : 'prix') + ' en ce moment',
+        open: !!s.hbSortOpen, cur: sortBy === 'name' ? 'Nom' : sortBy === 'set' ? 'Par série' : 'Prix',
+        label: s.hbSortOpen ? 'Fermer le tri' : 'Trier mon classeur, par ' + (sortBy === 'name' ? 'nom' : sortBy === 'set' ? 'série' : 'prix') + ' en ce moment',
         toggle: () => this.setState({ hbSortOpen: !s.hbSortOpen }),
-        opts: [['price', 'Prix', 'Trier par prix, du plus cher au moins cher'], ['name', 'Nom', 'Trier par nom, de A à Z']].map(([k, label, aria]) =>
+        opts: [['price', 'Prix', 'Trier par prix, du plus cher au moins cher'], ['name', 'Nom', 'Trier par nom, de A à Z'],
+          ['set', 'Par série', 'Trier par série : les extensions les plus récentes d’abord, puis les cartes de la plus chère à la moins chère']].map(([k, label, aria]) =>
           Object.assign({ label: label, aria: aria, on: sortBy === k, pick: () => this.setState({ hbSort: k, hbSortOpen: false, hbcp: 0, hbsp: 0, hbTurn: null }) }, this.chip(sortBy === k)))
       },
       shelf: shelf, gridCls: 'pkm-hk-grid' + (tab !== 'sealed' && s.hbTurn ? ' pkm-turn-' + s.hbTurn : ''),
       // « Tout afficher » (2026-10-21, vidéo du porteur) : écran plein « Toutes mes cartes » ou « Tous mes produits
       // scellés », classés par valeur, à faire défiler ; filtres Toutes, Loose, Gradées ; « Charger plus » par 30.
       all: { show: true, on: false, label: 'Tout afficher', toggle: () => this.setState({ hbFull: tab, hbFullF: 'all', hbFullN: HOME_FULL }) },
-      full: s.hbFull ? this.homeFull(s, s.hbFull === 'sealed' ? sealed : cards, s.hbFull === 'sealed', tile, l => x.mask(this.eur(sum(l))), units, plural, isGraded) : HOME_NO_FULL,
+      full: s.hbFull ? this.homeFull(s, s.hbFull === 'sealed' ? sealed : cards, s.hbFull === 'sealed', (e, l, i) => withMark(tile(e), l, i, 0), l => x.mask(this.eur(sum(l))), units, plural, isGraded) : HOME_NO_FULL,
       tabs: [['cards', 'Mes cartes'], ['sealed', 'Mes produits scellés']].map(([k, label]) =>
         Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k, hbTurn: null }) }, this.chip(tab === k))),
       tabLabel: tab === 'sealed' ? 'Mes produits scellés' : 'Mes cartes',
@@ -155,7 +181,15 @@
     };
   };
   let homeSwipe = null;
-  const HOME_FULL = 30, HOME_NO_FULL = { open: false };
+  const HOME_FULL = 30, HOME_NO_FULL = { open: false }, HOME_NO_MARK = { logo: '', hasLogo: false, noLogo: false, name: '' };
+  // Rang de chaque extension dans « Toutes les séries » (des plus récentes aux plus anciennes) ; inconnue : à la fin.
+  let homeRankFor = null, homeRankMap = null;
+  const homeSetRank = () => {
+    const l = TCG.setList || [];
+    if (homeRankFor !== l) { homeRankFor = l; homeRankMap = {}; l.forEach((e, i) => { homeRankMap[e.id] = i; }); }
+    const m = homeRankMap;
+    return k => (k && Object.prototype.hasOwnProperty.call(m, k) ? m[k] : 1e6);
+  };
   proto.homeFull = function (s, list, sealed, tile, money, units, plural, isGraded) {
     const F = sealed ? 'all' : (['loose', 'graded'].indexOf(s.hbFullF) >= 0 ? s.hbFullF : 'all');
     const kept = list.filter(e => F === 'all' || (F === 'graded') === isGraded(e));
@@ -165,9 +199,9 @@
     return {
       open: true, isCards: !sealed, isSealed: sealed, gridCls: 'pkm-hf-grid' + (sealed ? ' pkm-hf-grid-s' : ''),
       title: sealed ? 'Tous mes produits scellés' : 'Toutes mes cartes',
-      sub: (s.hbSort === 'name' ? 'Classés par nom' : 'Classés par prix') + ' · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
+      sub: (s.hbSort === 'name' ? 'Classés par nom' : s.hbSort === 'set' ? 'Classés par série' : 'Classés par prix') + ' · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
       chips: sealed ? [] : [chip('all', 'Toutes', list), chip('loose', 'Loose', list.filter(e => !isGraded(e))), chip('graded', 'Gradées', list.filter(isGraded))],
-      hasChips: !sealed, items: shown.map(tile), empty: !kept.length,
+      hasChips: !sealed, items: shown.map((e, i) => tile(e, shown, i)), empty: !kept.length,
       more: left > 0, moreLabel: 'Charger plus (' + Math.min(left, HOME_FULL) + ')', loadMore: () => this.setState({ hbFullN: n + HOME_FULL })
     };
   };
