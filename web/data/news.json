@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-20T22:47:54Z",
+ "updated": "2026-11-21T13:41:06Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,13 @@
   }
  ],
  "items": [
+  {
+   "title": "Pokémon Sleep : Cadeau de célébration de la Journée Évoli !",
+   "url": "https://www.pokebip.com/news/7654/pokemon-sleep-cadeau-de-celebration-de-la-journee-evoli",
+   "date": "2026-11-21T09:04:38Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "Pokémon Pocket : Missions Évoli : Voli Voli !",
    "url": "https://www.pokebip.com/news/7653/pokemon-pocket-missions-evoli-voli-voli",
@@ -120,13 +127,6 @@
    "title": "Écarlate et Violet : Retour d'Ékaïser surpuissant",
    "url": "https://www.pokebip.com/news/7640/ecarlate-et-violet-retour-dekaiser-surpuissant",
    "date": "2026-11-13T08:40:16Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Légendes Pokémon Z-A : Saison X des combats classés !",
-   "url": "https://www.pokebip.com/news/7636/legendes-pokemon-z-a-saison-x-des-combats-classes",
-   "date": "2026-11-13T08:40:01Z",
    "source": "Pokébip",
    "tcg": false
   },
