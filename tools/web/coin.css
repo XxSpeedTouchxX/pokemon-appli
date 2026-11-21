@@ -60,9 +60,10 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-coin-offer-t small { font-size: 12px; color: #C9D3EA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pkm-coin-offer-tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .pkm-coin-offer .pkm-qm-chev { flex: none; }
-/* Bulle « Ma vitrine » : le petit magasin de l'animation de la vitrine (en couleurs). */
-.pkm-coin-tab-ico.pkm-coin-tab-shop { width: 20px; height: 20px; }
-.pkm-coin-tabs-4 .pkm-coin-tab-ico.pkm-coin-tab-shop { width: 19px; height: 19px; margin-bottom: -2px; }
+/* Logos des 4 bulles en couleur (2026-11-21, porteur : « les 4 logos des 4 bulles en couleur ») : coupe (Ma ligue), petit
+   magasin de l'animation de la vitrine (Ma vitrine), cadeau (Parrainer un ami), calendrier (Calendrier JCC) ; web/img/brand/. */
+.pkm-coin-tab-ico.pkm-coin-tab-img { width: 20px; height: 20px; }
+.pkm-coin-tabs-4 .pkm-coin-tab-ico.pkm-coin-tab-img { width: 21px; height: 21px; }
 /* « Mes messages » en haut de Ma vitrine. */
 .pkm-qm-open.pkm-coin-msgs { margin-top: 0; }
 
@@ -277,9 +278,11 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 /* 4 bulles depuis le 2026-11-21 (« Ma ligue » en premier, porteur) : nom sous l'icône, sur 2 lignes au plus ; pastille
    des messages rapides non lus sur « Ma ligue ». */
 .pkm-coin-tabs-4 { gap: 6px; }
-.pkm-coin-tabs-4 .pkm-coin-tab { position: relative; min-width: 0; flex-direction: column; gap: 2px; min-height: 52px; padding: 5px 3px; font-size: 12px; line-height: 1.1; text-align: center; border-radius: 18px; }
+.pkm-coin-tabs-4 .pkm-coin-tab { position: relative; min-width: 0; flex-direction: column; justify-content: flex-start; gap: 3px; min-height: 52px; padding: 7px 3px 6px; font-size: 12px; line-height: 1.1; text-align: center; border-radius: 18px; }
 .pkm-coin-tabs-4 .pkm-coin-tab-ico { width: 16px; height: 16px; }
-.pkm-coin-tabs-4 .pkm-coin-tab > span { max-width: 100%; overflow-wrap: normal; word-break: normal; hyphens: manual; }
+/* Logos tous à la même hauteur (2026-11-21, porteur : logo du calendrier trop haut) : chaque nom occupe la place de 2 lignes
+   et s'y centre, qu'il tienne sur 1 ligne (« Ma ligue ») ou sur 2 (« Parrainer un ami », « Calendrier JCC »). */
+.pkm-coin-tabs-4 .pkm-coin-tab > span { display: flex; align-items: center; justify-content: center; min-height: 2.2em; max-width: 100%; overflow-wrap: normal; word-break: normal; hyphens: manual; }
 .pkm-coin-tab-badge { position: absolute; top: 4px; right: 8px; }
 @media (max-width: 359px) { .pkm-coin-tabs-4 .pkm-coin-tab { font-size: 11px; padding: 5px 2px; } }
 .pkm-prf-hero { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 24px; border: 1px solid #1F6F78; background: radial-gradient(120% 100% at 0% 0%, rgba(32, 201, 194, 0.3), rgba(32, 201, 194, 0) 62%), #0F1A30; color: #F3F6FC; animation: pkmPgIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }

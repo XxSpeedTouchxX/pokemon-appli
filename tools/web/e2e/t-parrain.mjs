@@ -114,7 +114,7 @@ t = await toastsFor(4000);
 ok('200 PL du parrain arrivés en son absence : montrés avec l’animation (' + t.join(' | ') + ')', t.some(x => /\+200 PL · ton filleul Ondine a rempli les conditions/.test(x)));
 await page.evaluate(() => window.__pkm.coinGo('par')); await page.waitForTimeout(1500);
 const tabs = await page.locator('.pkm-coin-tabs button').allInnerTexts();
-ok('coin des dresseurs : 4 onglets « Ma ligue », « Ma vitrine », « Parrainer un ami », « Le calendrier JCC »', tabs.length === 4 && /Ma ligue/.test(tabs[0]) && /Ma vitrine/.test(tabs[1]) && /Parrainer un ami/.test(tabs[2]) && /calendrier JCC/.test(tabs[3]));
+ok('coin des dresseurs : 4 onglets « Ma ligue », « Ma vitrine », « Parrainer un ami », « Calendrier JCC »', tabs.length === 4 && /Ma ligue/.test(tabs[0]) && /Ma vitrine/.test(tabs[1]) && /Parrainer un ami/.test(tabs[2]) && /Calendrier JCC/.test(tabs[3]));
 ok('onglet « Parrainer un ami » choisi', /Parrainer un ami/.test(await page.locator('.pkm-coin-tabs button[aria-selected="true"]').innerText()));
 const stp = N(await page.locator('section[aria-label="Comment ça marche"]').innerText());
 ok('« Comment ça marche » en 3 étapes (partage, 50 PL de bienvenue, adresse + 3 jours = 200 PL)', /Partage ton lien ou ton code/.test(stp) && /50 PL de bienvenue/.test(stp) && /3 jours/.test(stp) && /200 PL/.test(stp));

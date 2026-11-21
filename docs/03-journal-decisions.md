@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-21 — Le coin des dresseurs : 4 logos en couleur, « Calendrier JCC » (porteur)
+
+- **Demande** : « mets-moi les 4 logos des 4 bulles en couleur dans le coin des dresseurs (actuellement seule Ma vitrine est en couleur) ; "Le calendrier JCC" devient "Calendrier JCC" pour faire descendre un peu le logo, trop haut actuellement ».
+- **Fait** : coupe dorée (Ma ligue), petit magasin (Ma vitrine, inchangé), cadeau turquoise au ruban jaune (Parrainer un ami), calendrier à en-tête rouge et date du jour en jaune (Calendrier JCC), dans le style du petit magasin (contour bleu nuit, jaune de l'app ; `web/img/brand/coin-ligue.svg`, `coin-parrain.svg`, `coin-calendrier.svg`) ; bulle, titre de l'en-tête et voile du DropiPass renommés « Calendrier JCC » (2 lignes au lieu de 3) ; les 4 logos à la même hauteur (chaque nom occupe la place de 2 lignes) ; vérifié en Sombre, Clair et Original, de 320 à 390 px ; cache v269.
+
 ## 2026-11-21 — Carte de dresseur simplifiée, messages rapides supprimés, « Ma vitrine » : recherche d'une carte (porteur)
 
 - **Demandes** :

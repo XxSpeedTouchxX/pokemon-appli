@@ -25,7 +25,10 @@
   const coinProto = Component.prototype;
   const coinOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
   const coinAdmin = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin && Cloud.isAdmin();
-  const COIN_TABS = [['lig', 'Ma ligue'], ['vit', 'Ma vitrine'], ['par', 'Parrainer un ami'], ['cal', 'Le calendrier JCC']];
+  // Bulles : logos en couleur (2026-11-21, porteur : « mets-moi les 4 logos des 4 bulles en couleur ») dans le style du petit
+  // magasin de « Ma vitrine » ; « Le calendrier JCC » devient « Calendrier JCC » (2 lignes au lieu de 3 : logo moins haut).
+  const COIN_TABS = [['lig', 'Ma ligue'], ['vit', 'Ma vitrine'], ['par', 'Parrainer un ami'], ['cal', 'Calendrier JCC']];
+  const COIN_ICO = { lig: 'img/brand/coin-ligue.svg', vit: 'img/brand/vitrine.svg', par: 'img/brand/coin-parrain.svg', cal: 'img/brand/coin-calendrier.svg' };
   const coinTabOf = s => (s.coinTab === 'vit' || s.coinTab === 'cal' || s.coinTab === 'par' ? s.coinTab : 'lig');
   const coinEnter = (inst, t, force) => (t === 'vit' ? inst.coinEnterVit(force) : t === 'par' ? (inst.plSync && inst.plSync(!!force))
     : t === 'lig' ? (inst.progLoad && inst.progLoad(!!force), inst.plSync && inst.plSync(false)) : inst.calLoad(false));
@@ -561,13 +564,13 @@
       Object.assign(r.tab, { coinFg: sec ? 'var(--pkm-nav-on)' : 'var(--pkm-nav-off)', coinDot: sec ? 'var(--pkm-nav-dot)' : 'transparent', coinCur: sec ? 'page' : 'false' });
     }
     if (on) {
-      Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Le calendrier JCC' : tab === 'par' ? 'Parrainer un ami' : tab === 'lig' ? 'Ma ligue' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
+      Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Calendrier JCC' : tab === 'par' ? 'Parrainer un ami' : tab === 'lig' ? 'Ma ligue' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
       if (!this.__coinOnce) { this.__coinOnce = true; setTimeout(() => coinEnter(this, tab, false), 0); }
       // Propositions d'échange non lues (qmsg.js) : pastille sur la bulle « Ma vitrine » (2026-11-21 ; avant : « Ma ligue »).
       const qn = r.qmb && r.qmb.hasN ? r.qmb.n : '';
       r.coin = {
         tabs: COIN_TABS.map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-shop-tab pkm-coin-tab' + (tab === k ? ' pkm-shop-tab-on' : ''), pick: () => this.coinPick(k),
-          icon: k, isVit: k === 'vit', isCal: k === 'cal', isPar: k === 'par', isLig: k === 'lig', hasN: k === 'vit' && !!qn, n: qn,
+          icon: k, ico: COIN_ICO[k], isVit: k === 'vit', isCal: k === 'cal', isPar: k === 'par', isLig: k === 'lig', hasN: k === 'vit' && !!qn, n: qn,
           aria: label + (k === 'vit' && qn ? ' (' + qn + (qn === '1' ? ' proposition non lue' : ' propositions non lues') + ')' : '') })),
         isVit: tab === 'vit', isCal: tab === 'cal', isPar: tab === 'par', isLig: tab === 'lig',
         // Calendrier : onglets et frise figés en haut (2026-11-19, porteur : « fige l'écran de la frise ») ; seul le
@@ -593,7 +596,7 @@
         const locked = !(typeof this.premOn === 'function' && this.premOn()) && !(typeof admOf === 'function' && admOf(s).on);
         Object.assign(r.cal, { locked: locked, heroCls: 'pkm-cal-hero pkm-dark' + (locked ? ' pkm-cal-locked' : ''), unlock: () => this.dpLock('cal'),
           lockSub: store ? 'Bientôt disponible dans cette version' : 'Réservé au DropiPass', lockBtn: store ? 'En savoir plus' : 'Débloquer',
-          lockAria: store ? 'Le calendrier JCC : bientôt disponible' : 'Le calendrier JCC réservé au DropiPass : en savoir plus' });
+          lockAria: store ? 'Calendrier JCC : bientôt disponible' : 'Calendrier JCC réservé au DropiPass : en savoir plus' });
         if (locked) r.cal.hasSel = false;
       }
     } else {

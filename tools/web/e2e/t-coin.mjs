@@ -98,7 +98,17 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('onglet : écran « Le coin des dresseurs » ouvert, bouton allumé (' + tabSt.join(' | ') + ')', tabSt[0] === 'coin' && tabSt[1] === 'page' && /Le coin des dresseurs/.test(tabSt[2]));
   const tabs = await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button').allInnerTexts();
   // « Parrainer un ami » (t-parrain.mjs) et « Ma ligue », en 1ʳᵉ position, ajoutés le 2026-11-21 (porteur).
-  ok('4 sous-rubriques : « Ma ligue », « Ma vitrine », « Parrainer un ami » et « Le calendrier JCC »', tabs.length === 4 && /Ma ligue/.test(tabs[0]) && /Ma vitrine/.test(tabs[1]) && /Parrainer un ami/.test(tabs[2]) && /calendrier JCC/.test(tabs[3]));
+  ok('4 sous-rubriques : « Ma ligue », « Ma vitrine », « Parrainer un ami » et « Calendrier JCC »', tabs.length === 4 && /Ma ligue/.test(tabs[0]) && /Ma vitrine/.test(tabs[1]) && /Parrainer un ami/.test(tabs[2]) && /Calendrier JCC/.test(tabs[3]));
+  // Logos en couleur et à la même hauteur (2026-11-21, porteur : « les 4 logos en couleur », « Calendrier JCC » pour
+  // descendre son logo, trop haut quand le nom tenait sur 3 lignes).
+  const icos = await page.evaluate(() => [...document.querySelectorAll('[aria-label="Le coin des dresseurs"][role="tablist"] button')].map(b => {
+    const i = b.querySelector('img.pkm-coin-tab-img'), r = i ? i.getBoundingClientRect() : null, br = b.getBoundingClientRect(), sp = b.querySelector('span');
+    return { src: i ? i.getAttribute('src') : '', top: r ? Math.round(r.top - br.top) : -1, ok: !!i && i.complete && i.naturalWidth > 0, lines: sp ? Math.round(sp.scrollHeight / parseFloat(getComputedStyle(sp).lineHeight)) : 0 }; }));
+  ok('4 logos en couleur (coupe, petit magasin, cadeau, calendrier), tous chargés (' + icos.map(x => x.src.replace('img/brand/', '')).join(', ') + ')',
+    icos.map(x => x.src).join() === 'img/brand/coin-ligue.svg,img/brand/vitrine.svg,img/brand/coin-parrain.svg,img/brand/coin-calendrier.svg' && icos.every(x => x.ok)
+    && (await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] svg.pkm-coin-tab-ico').count()) === 0);
+  ok('logos à la même hauteur dans les 4 bulles (' + icos.map(x => x.top).join(', ') + ' px)', icos.every(x => x.top === icos[0].top && x.top >= 4 && x.top <= 10));
+  ok('« Calendrier JCC » sur 2 lignes au plus', icos[3].lines <= 2);
   ok('ouverture sur « Ma ligue » (classement de la saison)', /Ma ligue/.test(await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button[aria-selected="true"]').innerText()) && (await page.locator('section.pkm-pg-season').count()) === 1);
   await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'Ma vitrine' }).click(); await page.waitForTimeout(1200);
 

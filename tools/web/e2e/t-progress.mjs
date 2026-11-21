@@ -17,7 +17,7 @@ ok('ouverture : saison, carte, classement et lots arrivent l’un après l’aut
 await page.screenshot({ path: shot('progress-entree.png') });
 await page.waitForTimeout(700);
 const ctabs = await page.locator('.pkm-coin-tabs [role="tab"]').evaluateAll(bs => bs.map(b => b.innerText.replace(/\s+/g, ' ').trim() + (b.getAttribute('aria-selected') === 'true' ? '*' : '')));
-ok('Le coin des dresseurs : 4 bulles, « Ma ligue » choisie et à gauche de « Ma vitrine » (' + ctabs.join(' | ') + ')', ctabs.length === 4 && ctabs[0] === 'Ma ligue*' && ctabs[1] === 'Ma vitrine' && /Parrainer un ami/.test(ctabs[2]) && /calendrier JCC/.test(ctabs[3]));
+ok('Le coin des dresseurs : 4 bulles, « Ma ligue » choisie et à gauche de « Ma vitrine » (' + ctabs.join(' | ') + ')', ctabs.length === 4 && ctabs[0] === 'Ma ligue*' && ctabs[1] === 'Ma vitrine' && /Parrainer un ami/.test(ctabs[2]) && /Calendrier JCC/.test(ctabs[3]));
 const btabs = await page.locator('.pkm-pg-tabs [role="tab"]').allInnerTexts();
 ok('Ma ligue : 2 onglets « Classement et récompenses » et « Mes missions », plus d’« Échanges » (' + btabs.join(' | ') + ')', btabs.length === 2 && /Classement et récompenses/.test(btabs[0]) && /Mes missions/.test(btabs[1]));
 ok('page « Ma ligue » ouverte', (await page.locator('section.pkm-pg-card').count()) === 1);
