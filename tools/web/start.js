@@ -79,6 +79,9 @@
     // Sans serveur (pas de clé, pas de réseau) : compte gardé sur l'appareil, comme avant (server: false).
     const s = x.s, acc = s.account && s.account.email ? s.account : null, tr = s.trainer || {}, page = s.onb || 1;
     const ST_MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    // Mot de passe : 8 caractères au moins (2026-11-21, porteur : « on n'oblige pas à mettre 12 caractères, il faut que ça
+    // soit 8 »). Le serveur de comptes (Supabase Auth) accepte dès 6 par défaut.
+    const ST_PWD = 8;
     const go = n => this.setState({ onb: n, obErr: '', obNote: '' });
     const cloud = Cloud.on(), signed = cloud && Cloud.signedIn(), busy = !!s.obBusy;
     const mode = cloud && (s.obMode === 'login' || s.obMode === 'reset') ? s.obMode : 'signup';
@@ -160,8 +163,8 @@
       title: T[0], lead: T[1], go: busy ? 'Un instant…' : T[2], busy: busy ? 'true' : 'false',
       isSignup: mode === 'signup', isLogin: mode === 'login', isReset: mode === 'reset', showPwd: mode !== 'reset' || resetSent, showCode: resetSent,
       pwLabel: resetSent ? 'Nouveau mot de passe' : 'Mot de passe', pwAuto: mode === 'login' ? 'current-password' : 'new-password', emailAuto: mode === 'login' ? 'username' : 'email',
-      pwHold: mode === 'login' ? 'Ton mot de passe' : needPwd ? '12 caractères au moins' : 'Déjà choisi (facultatif)',
-      pwHint: mode === 'login' ? '' : needPwd ? '12 caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.' : 'Laisse vide pour garder ton mot de passe actuel.',
+      pwHold: mode === 'login' ? 'Ton mot de passe' : needPwd ? ST_PWD + ' caractères au moins' : 'Déjà choisi (facultatif)',
+      pwHint: mode === 'login' ? '' : needPwd ? ST_PWD + ' caractères au moins. Ton téléphone peut en créer un et l’enregistrer pour toi.' : 'Laisse vide pour garder ton mot de passe actuel.',
       hasHint: mode !== 'login',
       code: s.obCode || '', onCode: e => this.setState({ obCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 6) }),
       shown: s.obShow ? 'true' : 'false', pwType: s.obShow ? 'text' : 'password', eye: s.obShow ? 'Masquer' : 'Afficher',
@@ -210,13 +213,13 @@
           }
           const code = String(f && f.code ? f.code.value : t.obCode || '').replace(/\D/g, '');
           if (code.length !== 6) { this.setState({ obErr: 'Le code fait 6 chiffres : vérifie l’e-mail reçu.' }); return; }
-          if (pwd.length < 12) { this.setState({ obPwd: '', obErr: 'Ton nouveau mot de passe doit faire au moins 12 caractères.' }); return; }
+          if (pwd.length < ST_PWD) { this.setState({ obPwd: '', obErr: 'Ton nouveau mot de passe doit faire au moins ' + ST_PWD + ' caractères.' }); return; }
           this.setState({ obBusy: true, obErr: '' });
           try { await Cloud.verify(email, code, 'recovery'); await Cloud.setPassword(pwd); fromProfile(await Cloud.profile()); this.setState({ toast: 'Mot de passe changé : tu es connecté' }); } catch (e2) { fail(e2); }
           return;
         }
         const news = f && f.news ? !!f.news.checked : t.obNews !== undefined ? !!t.obNews : !!(acc && acc.news);
-        if (pwd.length < 12 && !(!needPwd && !pwd)) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins 12 caractères.' }); return; }
+        if (pwd.length < ST_PWD && !(!needPwd && !pwd)) { this.setState({ obEmail: email, obPwd: '', obErr: 'Ton mot de passe doit faire au moins ' + ST_PWD + ' caractères.' }); return; }
         // Pseudo demandé avec l'adresse (2026-11-08, porteur) : l'e-mail de bienvenue s'adresse au joueur par son pseudo.
         const nick0 = String(f && f.nickname ? f.nickname.value : t.obNick || '').replace(/\s+/g, ' ').trim().slice(0, 24);
         if (cloud && !signed && nick0.length < 2) { this.setState({ obEmail: email, obPwd: pwd, obNick: nick0, obErr: 'Choisis un pseudo de dresseur de 2 à 24 caractères.' }); return; }
@@ -350,7 +353,7 @@
             return;
           }
           const email = t.obEmail || (acc && acc.email) || '', pwd = t.obPwd || '';
-          if (!ST_MAIL.test(email) || pwd.length < 12) { this.setState({ obBusy: false, onb: 2, obMode: 'signup', obErr: 'Choisis ton mot de passe (12 caractères au moins) pour créer ton compte.' }); return; }
+          if (!ST_MAIL.test(email) || pwd.length < ST_PWD) { this.setState({ obBusy: false, onb: 2, obMode: 'signup', obErr: 'Choisis ton mot de passe (' + ST_PWD + ' caractères au moins) pour créer ton compte.' }); return; }
           const res = await Cloud.signUp(email, pwd, { pseudo: nick, age_range: obAge, starter: num, news_optin: news });
           if (res.exists) { this.setState({ obBusy: false, onb: 2, obMode: 'login', obPwd: '', obErr: 'Un compte existe déjà avec cette adresse : connecte-toi.' }); return; }
           if (res.session) { done(t, nick, obAge, line, true); return; }
@@ -373,8 +376,8 @@
         const form = document.querySelector('form.pkm-acc'), el = form && form.elements;
         const email = String(el && el.email ? el.email.value : t.obEmail || '').trim(), pwd = String(el && el.password ? el.password.value : t.obPwd || '');
         if (mode !== 'signup') return false;
-        if (!ST_MAIL.test(email) || (pwd.length < 12 && !(!needPwd && !pwd))) {
-          this.setState({ obEmail: email, obPwd: pwd, obErr: !ST_MAIL.test(email) ? 'Pour passer à la suite, entre ton adresse e-mail.' : 'Pour passer à la suite, choisis ton mot de passe (12 caractères au moins).' });
+        if (!ST_MAIL.test(email) || (pwd.length < ST_PWD && !(!needPwd && !pwd))) {
+          this.setState({ obEmail: email, obPwd: pwd, obErr: !ST_MAIL.test(email) ? 'Pour passer à la suite, entre ton adresse e-mail.' : 'Pour passer à la suite, choisis ton mot de passe (' + ST_PWD + ' caractères au moins).' });
           return false;
         }
         r.acc.submit(el ? { target: { elements: el } } : null);

@@ -1,5 +1,5 @@
 // Premier écran en 3 pages (2026-10-30, demande du porteur) : cinq cartes gardées dans l'app (web/img/onb/) ;
-// page 1 « Créer mon compte » → page 2 e-mail, mot de passe (12 caractères au moins, jamais enregistré), « Suivant »
+// page 1 « Créer mon compte » → page 2 e-mail, mot de passe (8 caractères au moins depuis le 2026-11-21, jamais enregistré), « Suivant »
 // → page 3 âge (4 tranches), pseudo de dresseur et starter (bulle choisie bien visible, fiche qui change avec une
 // transition, « Choisir X comme compagnon ») ; le starter remercie au milieu de l'écran en souriant, puis lance le
 // didacticiel. Retour possible (flèche et points), saisies gardées, transition glissée entre les pages.
@@ -33,11 +33,12 @@ ok('page 2 : création du compte avec « Suivant »', (await form.count()) === 1
 await form.locator('input[name=email]').fill('pas-une-adresse');
 await form.locator('button[type=submit]').click(); await page.waitForTimeout(250);
 ok('adresse invalide refusée', /Adresse e-mail invalide/.test(await page.locator('.pkm-acc-err').innerText()));
-await form.locator('input[name=email]').fill('sacha@exemple.fr'); await form.locator('input[name=password]').fill('court');
+await form.locator('input[name=email]').fill('sacha@exemple.fr'); await form.locator('input[name=password]').fill('pika202');
 await form.locator('button[type=submit]').click(); await page.waitForTimeout(250);
-ok('mot de passe trop court refusé', /au moins 12 caractères/.test(await page.locator('.pkm-acc-err').innerText()));
+ok('mot de passe de 7 caractères refusé : « au moins 8 caractères »', /au moins 8 caractères/.test(await page.locator('.pkm-acc-err').innerText()));
+ok('consigne : « 8 caractères au moins »', /8 caractères au moins/.test(await form.innerText()));
 ok('nouveautés décochées par défaut', !(await form.locator('input[name=news]').isChecked()));
-await form.locator('input[name=password]').fill('un-mot-de-passe-solide');
+await form.locator('input[name=password]').fill('pika2026'); // 8 caractères : accepté
 await page.screenshot({ path: shot('onb-2-compte.png') });
 await form.locator('button[type=submit]').click(); await page.waitForTimeout(600);
 const f3 = page.locator('form[aria-label="Ton profil de dresseur"]');
@@ -46,7 +47,7 @@ ok('page 3 : profil de dresseur', (await f3.count()) === 1);
 await page.click('button[aria-label^="Présentation"]'); await page.waitForTimeout(600);
 ok('retour à la page 1 depuis la page 3', (await page.locator('button:has-text("Créer mon compte")').count()) === 1);
 await page.click('button:has-text("Créer mon compte")'); await page.waitForTimeout(600);
-ok('e-mail et mot de passe gardés au retour', (await form.locator('input[name=email]').inputValue()) === 'sacha@exemple.fr' && (await form.locator('input[name=password]').inputValue()).length === 22);
+ok('e-mail et mot de passe gardés au retour', (await form.locator('input[name=email]').inputValue()) === 'sacha@exemple.fr' && (await form.locator('input[name=password]').inputValue()) === 'pika2026');
 await form.locator('button[type=submit]').click(); await page.waitForTimeout(600);
 await page.click('button[aria-label="Page précédente"]'); await page.waitForTimeout(600);
 ok('flèche retour : page 3 → page 2', (await form.count()) === 1);

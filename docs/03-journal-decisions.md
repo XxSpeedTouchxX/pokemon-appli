@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-21 — Mot de passe de 8 caractères à l'inscription (porteur)
+
+- **Demande** : « lorsqu'on crée un compte, on n'oblige pas à mettre un mot de passe à 12 caractères, il faut que ça soit 8 caractères ».
+- **Fait (cache v262)** : 8 caractères au moins pour créer un compte et pour un nouveau mot de passe (`start.js`, `ST_PWD`), consignes et messages à jour ; test `t-onb.mjs` (7 caractères refusés, 8 acceptés). Le serveur de comptes (Supabase Auth) accepte dès 6 par défaut : rien à changer dans Coolify. Remplace les « 12 caractères » proposés dans `docs/17` (mot de passe des admins, `tools/supabase/README.md`, inchangé).
+
+---
+
 ## 2026-11-21 — Parrainage fiabilisé, onglet « Parrainer un ami » dans « Le coin des dresseurs » (porteur)
 
 - **Demande** : « Retravaille la page parrainage pour que tous les liens de parrainage soient fonctionnels, que les redirections se fassent correctement, que les personnes reçoivent bien le gain après le parrainage. Et mets l'onglet pour parrainer un ami dans le coin des dresseurs, pour que ce soit visuellement plus simple à comprendre. »
