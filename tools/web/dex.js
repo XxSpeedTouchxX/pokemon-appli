@@ -282,14 +282,15 @@
     else { this.pkUnlockShow(n); done(); }
   };
   // « Choisir comme compagnon » animé (2026-11-20, porteur : « une petite animation de 2 s qui montre le Pokémon qui est
-  // OK comme compagnon, propose-moi des choses ») : 4 propositions, ?compvis=1 à 4 (1 par défaut en attendant le choix) :
+  // OK comme compagnon, propose-moi des choses ») : 4 propositions, ?compvis=1 à 4 ; **la 2 « Halo d'amitié » choisie par
+  // le porteur le 2026-11-21** (par défaut ; les autres pour essai) :
   //   1 Saut de joie : le Pokémon arrive, fait deux bonds, un cœur jaillit, badge vert « ✓ Compagnon ».
   //   2 Halo d'amitié : anneaux dorés et étincelles derrière le Pokémon qui brille, coche verte qui se dessine.
   //   3 Cœurs : un grand cœur se dessine derrière lui, il se dandine, des petits cœurs montent.
   //   4 Direction l'accueil : il salue, puis file vers le bouton Accueil de la barre du bas (sa place), qui rebondit.
   // Texte « X t’accompagne » (« · thème … » pour Kyogre, Groudon, Rayquaza) dans l'animation, à la place du message du bas.
   const DEX_CMP_MS = 2000, DEX_CMP_BOX = 170;
-  const DEX_CMP_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('compvis')); return v >= 1 && v <= 4 ? v : 1; } catch (e) { return 1; } })();
+  const DEX_CMP_VIS = (() => { try { const v = Number(new URLSearchParams(location.search).get('compvis')); return v >= 1 && v <= 4 ? v : 2; } catch (e) { return 2; } })();
   dexProto.dexChooseFx = function (n, text) {
     if (typeof document === 'undefined') return;
     const host = document.getElementById('app') || document.body, old = document.querySelector('.pkm-cmp');

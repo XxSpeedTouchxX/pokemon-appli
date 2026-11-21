@@ -41,15 +41,20 @@
   if (typeof document !== 'undefined' && document.documentElement) document.documentElement.setAttribute('data-navvis', String(NAV_VIS));
 
   // ——— Onglet et en-tête ———
+  // Haut de la page (2026-11-21, porteur : « la mission de parrainage renvoie directement sur l'onglet Parrainer un ami,
+  // en haut de la page ») : les 4 bulles partagent la même page, sa position n'est donc pas remise à zéro par la
+  // navigation ; une bulle ouverte (depuis une mission, une alerte, un lien ou au toucher) part toujours du haut.
+  const coinTop = () => { try { const m = document.querySelector('#app main'); if (m && m.scrollTop) m.scrollTop = 0; } catch (e) { /* sans page */ } };
   coinProto.coinGo = function (t) {
     this.setState(Object.assign({ calSel: null, calHelp: false }, t ? { coinTab: t } : {}));
     this.tab('coin');
     const k = coinTabOf(Object.assign({}, this.st(), t ? { coinTab: t } : {}));
-    setTimeout(() => coinEnter(this, k, k === 'par'), 0);
+    coinTop(); setTimeout(() => { coinTop(); coinEnter(this, k, k === 'par'); }, 0);
   };
   coinProto.coinPick = function (t) {
     if (this.st().coinTab === t) return;
     this.setState({ coinTab: t, calSel: null, calHelp: false });
+    coinTop(); setTimeout(coinTop, 0);
     coinEnter(this, t, true);
   };
   coinProto.coinEnterVit = function (force) {

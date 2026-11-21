@@ -1,6 +1,7 @@
 // « Choisir comme compagnon » animé (2026-11-20, porteur : « une petite animation de 2 s qui montre le Pokémon qui est OK
 // comme compagnon, propose-moi des choses ») : 4 propositions (?compvis=1 à 4), texte « X t’accompagne » dans
-// l'animation, retirée au bout de 2 s ; 4 : vol vers le bouton Accueil de la barre du bas.
+// l'animation, retirée au bout de 2 s ; 4 : vol vers le bouton Accueil de la barre du bas. La 2 « Halo d'amitié » est
+// celle de l'app depuis le 2026-11-21 (choix du porteur) : elle s'ouvre sans ?compvis.
 import { unlockPaid, launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
@@ -9,7 +10,7 @@ for (const v of [1, 2, 3, 4]) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
-  const URL = E2E + '/?today=2026-10-04&debug' + (v === 1 ? '' : '&compvis=' + v);
+  const URL = E2E + '/?today=2026-10-04&debug' + (v === 2 ? '' : '&compvis=' + v); // la 2, choisie par le porteur (2026-11-21), sans paramètre
   await page.goto(URL, { waitUntil: 'load' }); await page.waitForTimeout(1000);
   await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); Object.assign(d, { tuto: 'done', onb: 0 }); localStorage.setItem(k, JSON.stringify(d)); }, KEY);
   await unlockPaid(page);

@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-21 — Animation du compagnon choisie, mission de parrainage en haut de page (porteur)
+
+- **Demandes** : « je veux l'animation 2 de choisir mon compagnon » ; « quand l'utilisateur va dans Mes missions et appuie sur la mission de parrainage, ça le renvoie directement sur l'onglet parrainage en haut de la page ».
+- **Fait (cache v264)** :
+  - **animation « Choisir comme compagnon » : la 2 « Halo d'amitié »** (anneaux dorés et étincelles, coche verte) par défaut ; les 3 autres restent pour essai (`?compvis=1`, `3`, `4`) ; `dex.js` ;
+  - la ligne « Parrainer un ami » de Mes missions ouvre la bulle « Parrainer un ami » **tout en haut de la page**, même après avoir fait défiler les missions ; les 4 bulles partageant la même page, chaque bulle ouverte (au toucher, depuis une mission, une alerte ou un lien) part désormais du haut (`coin.js`, `coinTop`) ;
+  - tests `t-compfx.mjs` (la 2 sans paramètre), `t-parrain.mjs` (défilement 785 → 0 px, page « Parrainer un ami » visible).
+
+---
+
 ## 2026-11-21 — « Ma ligue » déplacée dans « Le coin des dresseurs », « Échanges » retiré (porteur)
 
 - **Demande** : « déplace "Ma ligue" dans le coin des dresseurs, au début, à gauche de "Ma vitrine" : il y aura donc 4 bulles ; et dans "Ma ligue", supprime complètement "Échanges" : laisse "Classement et récompenses" et "Mes missions" ».

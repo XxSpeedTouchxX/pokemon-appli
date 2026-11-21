@@ -170,7 +170,14 @@ await page.evaluate(() => window.__pkm.setState({ ligueTuto: 'done' })); // mini
 await page.goto(E2E + '/?start=progress&pgtab=earn&debug' + Q, { waitUntil: 'load' });
 const parRow = page.locator('.pkm-ple-row').first().locator('button');
 await parRow.waitFor({ timeout: 15000 }); await page.waitForTimeout(600); // GitHub est plus lent : on attend la ligne
-await parRow.click(); await page.waitForTimeout(1200);
+// 2026-11-21 (porteur) : on arrive en haut de la page « Parrainer un ami », même après avoir fait défiler les missions.
+await page.evaluate(() => { const m = document.querySelector('#app main'); m.style.minHeight = ''; m.scrollTop = m.scrollHeight; });
+await page.waitForTimeout(200);
+const scrolledBefore = await page.evaluate(() => document.querySelector('#app main').scrollTop);
+await parRow.evaluate(b => b.click()); await page.waitForTimeout(1200); // appui sans faire défiler la page avant
+const topAfter = await page.evaluate(() => { const m = document.querySelector('#app main'), sel = document.querySelector('.pkm-coin-tabs [aria-selected="true"]'), hero = document.querySelector('section[aria-label="Parraine tes amis"]');
+  const mr = m.getBoundingClientRect(), hr = hero ? hero.getBoundingClientRect() : null; return { top: m.scrollTop, tab: sel ? sel.innerText.replace(/\s+/g, ' ') : '', heroIn: !!hr && hr.top >= mr.top - 1 && hr.top < innerHeight / 2 }; });
+ok('mission de parrainage : page « Parrainer un ami » ouverte en haut (défilement ' + scrolledBefore + ' → ' + topAfter.top + ', ' + topAfter.tab + ')', scrolledBefore > 100 && topAfter.top === 0 && /Parrainer un ami/.test(topAfter.tab) && topAfter.heroIn);
 ok('Mes missions › « Parrainer un ami » → Le coin des dresseurs, onglet Parrainer un ami', await page.evaluate(() => window.__pkm.st().screen === 'coin' && window.__pkm.st().coinTab === 'par') && (await page.locator('section[aria-label="Mon lien de parrainage"]').count()) === 1);
 
 ok('aucune erreur JavaScript', errors.length === 0);
