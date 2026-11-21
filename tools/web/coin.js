@@ -9,12 +9,18 @@
   //      rumeurs), chaque date avec son statut et sa source (web/data/calendar.json, tenu à la main), puis les « News
   //      Pokémon » du moment (web/data/news.json, relu chaque jour par le workflow « News Pokémon » : titre, date,
   //      source et lien seulement, jamais le texte des articles).
+  //   3. « Parrainer un ami » (2026-11-21, porteur : « mets l'onglet pour parrainer un ami dans le coin des dresseurs,
+  //      visuellement plus simple à comprendre ») : comment ça marche en 3 étapes, lien, code et QR code, partage,
+  //      mes filleuls et où ils en sont, mon parrain (code à saisir, conditions qui lui donnent ses 200 PL) ; pl.js
+  //      (vPlRef), serveur 028 et 037. Ma ligue › « Mes missions » garde une ligne qui mène ici.
   //   Logo de l'onglet : « Dresseurs qui discutent » (n° 11), choix du porteur du 2026-11-20 ; ?coinvis=1 à 12 pour comparer.
   const COIN_FILE = 'tools/supabase/install_024_a_034.sql';
   const coinProto = Component.prototype;
   const coinOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
   const coinAdmin = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin && Cloud.isAdmin();
-  const COIN_TABS = [['vit', 'Ma vitrine'], ['cal', 'Le calendrier JCC']];
+  const COIN_TABS = [['vit', 'Ma vitrine'], ['par', 'Parrainer un ami'], ['cal', 'Le calendrier JCC']];
+  const coinTabOf = s => (s.coinTab === 'cal' || s.coinTab === 'par' ? s.coinTab : 'vit');
+  const coinEnter = (inst, t, force) => (t === 'vit' ? inst.coinEnterVit(force) : t === 'par' ? (inst.plSync && inst.plSync(!!force)) : inst.calLoad(false));
   // Logo de l'onglet : 1 Dresseurs (deux dresseurs à casquette), 2 Échange de cartes, 3 Bulle et ball, 4 Rassemblement.
   // 5 à 8 (2026-11-20, porteur : « propose-moi d'autres visuels, il n'est pas clair ») : 2 dresseurs qui échangent,
   // casquette, vitrine, bulle et carte (tools/brand/navicons/). 9 à 12 (2026-11-20, porteur : « plus axé sur la
@@ -33,13 +39,13 @@
   coinProto.coinGo = function (t) {
     this.setState(Object.assign({ calSel: null, calHelp: false }, t ? { coinTab: t } : {}));
     this.tab('coin');
-    if ((t || this.st().coinTab || 'vit') === 'vit') setTimeout(() => this.coinEnterVit(false), 0);
-    else setTimeout(() => this.calLoad(false), 0);
+    const k = coinTabOf(Object.assign({}, this.st(), t ? { coinTab: t } : {}));
+    setTimeout(() => coinEnter(this, k, k === 'par'), 0);
   };
   coinProto.coinPick = function (t) {
     if (this.st().coinTab === t) return;
     this.setState({ coinTab: t, calSel: null, calHelp: false });
-    if (t === 'vit') this.coinEnterVit(true); else this.calLoad(false);
+    coinEnter(this, t, true);
   };
   coinProto.coinEnterVit = function (force) {
     if (typeof this.vtTabLoad === 'function') this.vtTabLoad(!!force);
@@ -524,19 +530,19 @@
   coinProto.renderVals = function () {
     const s = this.st(), r = coinBaseRender.call(this), ui = r.ui, on = s.screen === 'coin';
     ui.isCoin = on;
-    const tab = s.coinTab === 'cal' ? 'cal' : 'vit';
+    const tab = coinTabOf(s);
     r.tabCoin = () => this.coinGo();
     if (r.tab) {
       const sec = this.section(s) === 'coin';
       Object.assign(r.tab, { coinFg: sec ? 'var(--pkm-nav-on)' : 'var(--pkm-nav-off)', coinDot: sec ? 'var(--pkm-nav-dot)' : 'transparent', coinCur: sec ? 'page' : 'false' });
     }
     if (on) {
-      Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Le calendrier JCC' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
-      if (!this.__coinOnce) { this.__coinOnce = true; setTimeout(() => (tab === 'vit' ? this.coinEnterVit(false) : this.calLoad(false)), 0); }
+      Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Le calendrier JCC' : tab === 'par' ? 'Parrainer un ami' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
+      if (!this.__coinOnce) { this.__coinOnce = true; setTimeout(() => coinEnter(this, tab, false), 0); }
       r.coin = {
         tabs: COIN_TABS.map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-shop-tab pkm-coin-tab' + (tab === k ? ' pkm-shop-tab-on' : ''), pick: () => this.coinPick(k),
-          icon: k === 'vit' ? 'vit' : 'cal', isVit: k === 'vit', isCal: k === 'cal' })),
-        isVit: tab === 'vit', isCal: tab === 'cal',
+          icon: k, isVit: k === 'vit', isCal: k === 'cal', isPar: k === 'par' })),
+        isVit: tab === 'vit', isCal: tab === 'cal', isPar: tab === 'par',
         // Calendrier : onglets et frise figés en haut (2026-11-19, porteur : « fige l'écran de la frise ») ; seul le
         // contenu dessous défile. Fond de l'app repris derrière (--pkm-app-bg), comme « Ma ligue ».
         pinCls: 'pkm-coin-top' + (tab === 'cal' ? ' pkm-cal-pin' : '')
@@ -548,6 +554,7 @@
       r.cv = tab === 'vit' ? this.vCoinVit(s) : { found: [], recent: [] };
       if (tab === 'vit' && typeof this.vTradeTab === 'function') r.tdx = this.vTradeTab(s);
       r.cal = tab === 'cal' ? this.vCal(s) : { months: [], blocs: [], sel: [] };
+      r.prf = tab === 'par' && typeof this.vPlRef === 'function' ? this.vPlRef(s) : { fl: [], meSteps: [] };
       // Calendrier réservé au DropiPass (2026-11-20, porteur : « bloque-le comme l'historique du prix, pour que
       // l'utilisateur ne puisse pas l'utiliser sans avoir pris le DropiPass ») : frise floutée sous un voile, un appui
       // ouvre « Accès verrouillé ». Ouvert aux admins.
@@ -561,7 +568,7 @@
       }
     } else {
       this.__coinOnce = false;
-      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], blocs: [], sel: [] };
+      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], blocs: [], sel: [] }; r.prf = { fl: [], meSteps: [] };
     }
     // Frise : le mois en cours au milieu, une fois le calendrier affiché.
     if (on && tab === 'cal' && CAL.data && !this.__calScrolled) {

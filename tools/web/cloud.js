@@ -177,6 +177,9 @@
       if (!tk) { const e = new Error('Connecte-toi à ton compte Dropicards pour jouer.'); e.code = 'login'; throw e; }
       return this.req('/rest/v1/rpc/' + fn, { method: 'POST', token: tk, body: args || {}, keepalive: !!(opt && opt.keepalive) });
     },
+    // Fonction du serveur ouverte aux visiteurs non connectés (rôle « anon ») : invitation d'un lien de parrainage
+    // (pl_invite, 037_parrainage.sql), lue avant l'inscription.
+    rpcPublic(fn, args) { return this.req('/rest/v1/rpc/' + fn, { method: 'POST', body: args || {} }); },
     reqId() {
       try { if (crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* ancien navigateur */ }
       const b = new Uint8Array(16); crypto.getRandomValues(b); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;

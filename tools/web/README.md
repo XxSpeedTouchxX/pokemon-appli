@@ -941,6 +941,13 @@ Le script `tools/web/build.mjs` :
   - `pregrade.css` (nouveau) : `.pkm-pgh-*` (accueil), `.pkm-pgd-*` (écran) ; `catalog.dc.html` : fragments `pregrade-home` (après les boutiques) et `pregrade` ; `build.mjs` : modules, fragment, styles ; `persist.js` : `pgLast`, `pgMonth`, `pgUsed`, `pgHist`, `pgCost` ; `web/img/brand/pregrade.svg` (logo L1).
   - `legal.js` : confidentialité (photos analysées sur le téléphone, jamais envoyées) et CGU (« Pré-gradation »).
   - Tests : `test_pregrade.mjs` (11), `e2e/t-pregrade.mjs` (45 : accueil, recto et verso importés, photo sans carte, compteur gratuit puis Premium, recherche, ajout, vraie note, liste, app des stores).
+- **Parrainage fiabilisé (cache v261, 2026-11-21, porteur)** :
+  - `pl.js` : `plRefCode`, `plRemember`, `plInvite` (pseudo du parrain lu sans compte, `Cloud.rpcPublic('pl_invite')`, état `plInv`) ; `plSync` : `already` sans message, lien refusé → `plLinkRefused` (message clair puis `coinGo('par')`), bienvenue jamais en double ; `plCelebrate` attend la fin de l'accueil (`onb`) et du didacticiel (`tutoStep`) ; `PL_WHY` avec le pseudo du filleul ; `plCopyCode`, `plVerifyMail` ; `vPlRef` (page « Parrainer un ami » : `prf`, filleuls et étapes `plSteps`, mon parrain, code d'un ami) ; `vPlEarn` : la rubrique parrainage est remplacée par la ligne « Parrainer un ami » (→ coin des dresseurs).
+  - `coin.js` : 3ᵉ sous-rubrique `par` (« Parrainer un ami », entre « Ma vitrine » et « Le calendrier JCC »), `coinTabOf`, `coinEnter` (`plSync` à l'ouverture) ; `coin.css` : `.pkm-coin-tabs-3`, `.pkm-prf-*`, `.pkm-onb-invite`.
+  - `start.js` : invitation `ob.invite` sur le premier écran (`build.mjs`, patch du premier écran), case `parrain` dans l'inscription (préremplie, 4 à 12 lettres ou chiffres), `data.parrain` envoyé avec `Cloud.signUp`.
+  - `cloud.js` : `rpcPublic` (clé publique, visiteur non connecté).
+  - `legal.js` : confidentialité et CGU (21 novembre 2026).
+  - Serveur : `tools/supabase/037_parrainage.sql`. Tests : `t-parrain.mjs` (29), `t-pl.mjs` et `t-coin.mjs` mis à jour.
 - **Points de loyauté (cache v195)** :
   - `pl.js` (nouveau) :
     - code d'un lien `?parrain=CODE` gardé (`pkm-parrain`, 30 jours) puis envoyé par `pl_set_parrain` à la connexion ;

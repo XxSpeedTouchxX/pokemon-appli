@@ -1,5 +1,5 @@
 // Points de loyauté (2026-11-14, « go » du porteur, docs/38) : « Ma ligue » (ex-« Ma progression ») en 2 onglets, classement en PL,
-// onglet « Mes missions » (ex-« Gagner des PL ») (parrainage avec lien et QR code, réseaux sur l'honneur, séries de jours, capture d'un partage),
+// onglet « Mes missions » (ex-« Gagner des PL ») (ligne vers « Parrainer un ami » du coin des dresseurs, réseaux sur l'honneur, séries de jours, capture d'un partage),
 // code d'un lien ?parrain=CODE appliqué à la connexion, Admin › « Défis à valider ».
 // Le serveur est imité (page.route) : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
@@ -106,24 +106,16 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   const head = N(await page.locator('section.pkm-ple-head').innerText());
   // PL de la saison seulement (2026-11-15, porteur : « on s'en fiche des PL gagnés au total »).
   ok('en tête : PL de la saison (150) seulement, sans total, logo des PL', /Mes PL de la saison 150/.test(head) && !/au total/.test(head) && (await page.locator('section.pkm-ple-head img[src="img/brand/pl.svg"]').count()) === 1);
-  const ref = N(await page.locator('section[aria-label="Parrainage"]').innerText());
-  ok('parrainage : code SACHA7, lien dropicards.fr/?parrain=SACHA7, 2 / 20 amis, 1 en attente', /SACHA7/.test(ref) && /dropicards\.fr\/\?parrain=SACHA7/.test(ref) && /2 \/ 20 amis comptés cette saison/.test(ref) && /1 en attente/.test(ref));
-  ok('parrainage : « Tu as été parrainé par Ondine », plus de champ de code', /Tu as été parrainé par Ondine/.test(ref) && (await page.locator('.pkm-ple-codein').count()) === 0);
-  const qr = await page.evaluate(() => { const s = document.querySelector('svg.pkm-ple-qr'), d = s && s.querySelector('path').getAttribute('d'); return s ? { box: s.getAttribute('viewBox'), n: (d.match(/M/g) || []).length } : null; });
-  ok('QR code dessiné dans l’app (' + (qr ? qr.n + ' modules, ' + qr.box : 'absent') + ')', !!qr && qr.n > 150 && /^-2 -2 (2[5-9]|3\d) /.test(qr.box));
-  await page.locator('section[aria-label="Parrainage"]').screenshot({ path: shot('pl-parrainage.png') });
-  await page.locator('section[aria-label="Parrainage"] button', { hasText: 'Partager mon lien' }).click(); await page.waitForTimeout(200);
-  const sh = await page.evaluate(() => window.__shared);
-  ok('« Partager mon lien » : partage du téléphone avec le lien', !!sh && sh.url === 'https://dropicards.fr/?parrain=SACHA7' && /50 PL de bienvenue/.test(sh.text));
-  await page.locator('section[aria-label="Parrainage"] button', { hasText: 'Copier le lien' }).click(); await page.waitForTimeout(300);
-  ok('« Copier le lien » : lien dans le presse-papiers', (await page.evaluate(() => navigator.clipboard.readText())) === 'https://dropicards.fr/?parrain=SACHA7');
+  // Parrainage : sa page est dans « Le coin des dresseurs » (2026-11-21, porteur ; t-parrain.mjs) ; ici une ligne y mène.
+  ok('« Mes missions » : plus de rubrique parrainage, ligne « Parrainer un ami · +200 » en tête', (await page.locator('section[aria-label="Parrainage"]').count()) === 0
+    && /Parrainer un ami/.test(await page.locator('.pkm-ple-row').first().innerText()) && /\+200/.test(await page.locator('.pkm-ple-row').first().innerText()));
   // Missions.
   const rows = await page.locator('.pkm-ple-row').allInnerTexts();
-  ok('7 défis : 3 réseaux, 3 séries de jours, 1 partage', rows.length === 7);
-  ok('Discord sans adresse : « Bientôt », bouton inactif', /Discord/.test(rows[2]) && /Bientôt/.test(rows[2]) && await page.locator('.pkm-ple-row').nth(2).locator('button').isDisabled());
-  ok('séries : 5 jours fait ✓, 15 jours « 3 / 15 jours » avec barre, 30 jours « 3 / 30 »', /Fait ✓/.test(rows[3]) && /3 \/ 15 jours/.test(rows[4]) && /3 \/ 30 jours/.test(rows[5]) && (await page.locator('.pkm-ple-row').nth(4).locator('.pkm-ple-bar').count()) === 1);
-  const tk = page.locator('.pkm-ple-row').nth(0).locator('button');
-  ok('TikTok : « Y aller », +100', /Y aller/.test(await tk.innerText()) && /\+100/.test(rows[0]));
+  ok('8 missions : parrainage, 3 réseaux, 3 séries de jours, 1 partage', rows.length === 8);
+  ok('Discord sans adresse : « Bientôt », bouton inactif', /Discord/.test(rows[3]) && /Bientôt/.test(rows[3]) && await page.locator('.pkm-ple-row').nth(3).locator('button').isDisabled());
+  ok('séries : 5 jours fait ✓, 15 jours « 3 / 15 jours » avec barre, 30 jours « 3 / 30 »', /Fait ✓/.test(rows[4]) && /3 \/ 15 jours/.test(rows[5]) && /3 \/ 30 jours/.test(rows[6]) && (await page.locator('.pkm-ple-row').nth(5).locator('.pkm-ple-bar').count()) === 1);
+  const tk = page.locator('.pkm-ple-row').nth(1).locator('button');
+  ok('TikTok : « Y aller », +100', /Y aller/.test(await tk.innerText()) && /\+100/.test(rows[1]));
   await tk.click(); await page.waitForTimeout(300);
   ok('TikTok : le réseau s’ouvre, puis « Valider »', (await page.evaluate(() => window.__opened[0])) === 'https://example.invalid/tiktok' && /Valider/.test(await tk.innerText()) && !(S.calls.pl_claim_social || []).length);
   await tk.click(); await page.waitForTimeout(400);
@@ -135,7 +127,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   ok('animation : s’efface seule', await page.locator('.pkm-plfx').count() === 0);
   ok('TikTok validé : demandé au serveur, « Fait », +100 PL', (S.calls.pl_claim_social || []).length === 1 && S.calls.pl_claim_social[0].net === 'tiktok' && /Fait/.test(await tk.innerText()) && /Mes PL de la saison 250/.test(N(await page.locator('section.pkm-ple-head').innerText())));
   // Partage avec capture.
-  await page.locator('.pkm-ple-row').nth(6).locator('button').click(); await page.waitForTimeout(300);
+  await page.locator('.pkm-ple-row').nth(7).locator('button').click(); await page.waitForTimeout(300);
   ok('partage : explication, choix du réseau et de la capture', (await page.locator('.pkm-ple-shot').count()) === 1 && (await page.locator('.pkm-ple-chip').count()) === 8 && await page.locator('.pkm-ple-shot button', { hasText: 'Envoyer ma capture' }).isDisabled());
   await page.locator('.pkm-ple-chip', { hasText: 'Instagram' }).click();
   const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 1600; c.height = 2400; const g = c.getContext('2d'); g.fillStyle = '#3366FF'; g.fillRect(0, 0, 1600, 2400); g.fillStyle = '#FFD60A'; g.fillRect(200, 300, 900, 600); return c.toDataURL('image/png').split(',')[1]; });
@@ -146,7 +138,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   await page.locator('.pkm-ple-shot button', { hasText: 'Envoyer ma capture' }).click(); await page.waitForTimeout(1000);
   const dims = S.proof ? await page.evaluate(src => new Promise(r => { const i = new Image(); i.onload = () => r([i.naturalWidth, i.naturalHeight]); i.src = src; }), S.proof.img) : [0, 0];
   ok('capture envoyée : réseau Instagram, JPEG de 1 080 px au plus (' + dims.join(' × ') + ', ' + Math.round(((S.proof || {}).img || '').length / 1024) + ' Ko)', !!S.proof && S.proof.net === 'instagram' && /^data:image\/jpeg;base64,/.test(S.proof.img) && Math.max(...dims) === 1080 && S.proof.img.length < 600000);
-  ok('partage : « En attente » de validation', /En attente/.test(await page.locator('.pkm-ple-row').nth(6).innerText()) && (await page.locator('.pkm-ple-shot').count()) === 0);
+  ok('partage : « En attente » de validation', /En attente/.test(await page.locator('.pkm-ple-row').nth(7).innerText()) && (await page.locator('.pkm-ple-shot').count()) === 0);
   ok('règle : pas de PL contre une pub ni un avis', /Pas de PL contre un clic sur une publicité ni contre un avis sur les stores/.test(await page.locator('section[aria-label="Missions"]').innerText()));
   await page.locator('section[aria-label="Missions"]').screenshot({ path: shot('pl-missions.png') });
   await page.screenshot({ path: shot('pl-gagner.png') });

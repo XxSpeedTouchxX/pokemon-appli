@@ -250,3 +250,54 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-launch-up b { color: #3DDC84; }
 .pkm-launch-down b { color: #FF7A6B; }
 
+
+/* « Parrainer un ami » (2026-11-21, porteur : « mets l'onglet pour parrainer un ami dans le coin des dresseurs, pour que
+   ce soit visuellement plus simple à comprendre ») : 3 sous-rubriques, icône au-dessus du nom ; page en 4 blocs (en-tête
+   cadeau, « Comment ça marche », mon lien, mon parrain, mes filleuls). Turquoise des PL. */
+.pkm-coin-tabs-3 .pkm-coin-tab { flex-direction: column; gap: 3px; min-height: 58px; padding: 6px 4px; font-size: 12.5px; line-height: 1.15; text-align: center; border-radius: 18px; }
+.pkm-coin-tabs-3 .pkm-coin-tab > span { max-width: 100%; overflow-wrap: anywhere; }
+.pkm-prf-hero { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 24px; border: 1px solid #1F6F78; background: radial-gradient(120% 100% at 0% 0%, rgba(32, 201, 194, 0.3), rgba(32, 201, 194, 0) 62%), #0F1A30; color: #F3F6FC; animation: pkmPgIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pkm-prf-gift { position: relative; flex: none; width: 64px; height: 64px; border-radius: 20px; background: rgba(32, 201, 194, 0.16); display: flex; align-items: center; justify-content: center; }
+.pkm-prf-gift svg { fill: none; stroke: #5CE1D9; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; animation: pkmPgBob 2.8s ease-in-out infinite; }
+.pkm-prf-gift-pl { position: absolute; right: -6px; bottom: -6px; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45)); }
+.pkm-prf-hero-t { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pkm-prf-hero-t b { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; }
+.pkm-prf-hero-t small { font-size: 13px; line-height: 1.45; color: #C9D3EA; }
+.pkm-prf-hero-t em { font-style: normal; font-weight: 800; color: #5CE1D9; }
+.pkm-prf-steps, .pkm-prf-me, .pkm-prf-list { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; color: #F3F6FC; animation: pkmPgIn 0.55s 0.06s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pkm-prf-steps h3, .pkm-prf-me h3, .pkm-prf-list h3 { margin: 0; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; }
+.pkm-prf-steps ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.pkm-prf-steps li { display: flex; align-items: flex-start; gap: 12px; }
+.pkm-prf-steps li > i { flex: none; width: 28px; height: 28px; border-radius: 14px; background: #20C9C2; color: #0B1120; font-style: normal; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.pkm-prf-steps li > span { min-width: 0; display: flex; flex-direction: column; gap: 2px; padding-top: 3px; }
+.pkm-prf-steps li b { font-size: 14px; }
+.pkm-prf-steps li small { font-size: 12.5px; line-height: 1.45; color: #9AA8C3; }
+.pkm-prf-btns .pkm-ple-btn-main { grid-column: 1 / -1; }
+.pkm-prf-checks { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.pkm-prf-ck { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #C9D3EA; }
+.pkm-prf-ck > i { flex: none; width: 16px; height: 16px; border-radius: 8px; border: 2px solid #4A5A7C; box-sizing: border-box; }
+.pkm-prf-ck-ok { color: #5CE1D9; }
+.pkm-prf-ck-ok > i { border-color: #20C9C2; background: #20C9C2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.3l2.6 2.5L12 5.4' fill='none' stroke='%230B1120' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat; }
+.pkm-prf-list-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pkm-prf-list-h small { font-size: 12px; color: #9AA8C3; }
+.pkm-prf-list > ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.pkm-prf-fl { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 16px; background: #0B1120; border: 1px solid #24345C; }
+.pkm-prf-fl-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-prf-fl-h b { min-width: 0; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-prf-fl > small { font-size: 11.5px; line-height: 1.4; color: #9AA8C3; }
+.pkm-prf-st { flex: none; padding: 3px 9px; border-radius: 999px; font-style: normal; font-size: 11.5px; font-weight: 800; }
+.pkm-prf-st-ok { background: rgba(32, 201, 194, 0.18); color: #5CE1D9; }
+.pkm-prf-st-wait { background: rgba(255, 214, 10, 0.16); color: #FFE680; }
+.pkm-prf-st-off { background: rgba(154, 168, 195, 0.16); color: #9AA8C3; }
+html.pkm-calm .pkm-prf-hero, html.pkm-calm .pkm-prf-steps, html.pkm-calm .pkm-prf-me, html.pkm-calm .pkm-prf-list { animation: none; }
+@media (prefers-reduced-motion: reduce) { .pkm-prf-gift svg { animation: none; } }
+
+/* Invitation d'un lien de parrainage sur le premier écran (start.js) et code à l'inscription. */
+.pkm-onb-invite { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; border: 1px solid #1F6F78; background: radial-gradient(120% 120% at 0% 0%, rgba(32, 201, 194, 0.3), rgba(32, 201, 194, 0) 65%), #0F1A30; color: #F3F6FC; animation: pkmPgIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pkm-onb-invite-ico { flex: none; width: 44px; height: 44px; border-radius: 14px; background: rgba(32, 201, 194, 0.18); display: flex; align-items: center; justify-content: center; }
+.pkm-onb-invite-ico svg { fill: none; stroke: #5CE1D9; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-onb-invite-t { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-onb-invite-t b { font-size: 15px; }
+.pkm-onb-invite-t small { font-size: 12.5px; line-height: 1.4; color: #C9D3EA; }
+.pkm-acc-ref { text-transform: uppercase; letter-spacing: 0.06em; }
+.pkm-acc-refok { color: #2BB8B1; font-weight: 700; }

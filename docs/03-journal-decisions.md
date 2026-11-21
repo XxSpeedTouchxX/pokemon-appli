@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-11-21 — Parrainage fiabilisé, onglet « Parrainer un ami » dans « Le coin des dresseurs » (porteur)
+
+- **Demande** : « Retravaille la page parrainage pour que tous les liens de parrainage soient fonctionnels, que les redirections se fassent correctement, que les personnes reçoivent bien le gain après le parrainage. Et mets l'onglet pour parrainer un ami dans le coin des dresseurs, pour que ce soit visuellement plus simple à comprendre. »
+- **Ce qui ne marchait pas (diagnostic)** :
+  - le code du lien n'était gardé que dans la mémoire du navigateur qui avait ouvert le lien : ouvert dans TikTok ou Instagram, ou dans Safari puis l'app ajoutée à l'écran d'accueil de l'iPhone (mémoire séparée), il était perdu, sans rien pour le taper à la main à l'inscription ;
+  - aucune invitation visible : le visiteur arrivait sur le premier écran comme tout le monde ;
+  - lien ouvert par un compte qui ne peut plus être parrainé (son propre lien, compte de plus de 14 jours, déjà parrainé) : le code était effacé **sans aucun message** (le porteur qui teste son propre lien ne voyait rien se passer) ;
+  - les 200 PL du parrain sont souvent donnés quand le **filleul** ouvre l'app : ils arrivaient bien au journal, mais le parrain ne voyait **jamais** l'animation ni le message (seuls ses propres gains du moment étaient montrés) ;
+  - personne ne savait où en était un filleul : la condition « adresse e-mail validée » bloque souvent les 200 PL depuis que la validation est facultative (2026-11-08), sans que le filleul le sache.
+- **Fait (cache v261)** :
+  - serveur `tools/supabase/037_parrainage.sql` (37 tests, `tests/test_037.sql`) : code envoyé **avec l'inscription** (`data.parrain`) → filleul relié et **50 PL tout de suite** (déclencheur `pl_parrain_signup`, jamais bloquant) ; `pl_invite(code)` (pseudo du parrain, lu sans compte) ; `pl_set_parrain` répond « déjà fait » au même code ; `pl_seen` : tous les gains pas encore montrés reviennent dans `pl_state.new` (200 PL du parrain montrés) ; `pl_state` renvoie `filleuls` (pseudo, date, adresse validée, jours, état ; jamais d'e-mail) et `me_ref` (où le filleul en est) ; ajouté à la fin de `install_024_a_034.sql` ;
+  - app : invitation « Sacha t'invite sur Dropicards ! » sur le premier écran ; case « Code de parrainage (facultatif) » préremplie à l'inscription ; lien refusé expliqué, puis ouverture de « Parrainer un ami » ; animation des PL qui attend la fin de l'accueil et du didacticiel ; plus de double message de bienvenue ;
+  - **« Le coin des dresseurs » › 3ᵉ onglet « Parrainer un ami »** (entre « Ma vitrine » et « Le calendrier JCC ») : en-tête cadeau, « Comment ça marche » en 3 étapes, mon lien (code, QR code, Partager, Copier le lien, Copier le code), mon parrain (étapes et « Recevoir l'e-mail pour valider mon adresse », ou code d'un ami à saisir), mes filleuls et où ils en sont ; « Ma ligue › Mes missions » garde une ligne « Parrainer un ami » qui y mène ;
+  - confidentialité et CGU à jour (21 novembre 2026) ; tests `t-parrain.mjs` (29), `t-pl.mjs`, `t-coin.mjs` mis à jour.
+- **Conditions des gains inchangées** (docs/38, L3, choix du porteur du 2026-11-14) : 200 PL quand le filleul a validé son adresse et ouvert l'app 3 jours dans ses 14 premiers jours. **Proposition, à confirmer par le porteur** : retirer la condition « adresse validée » (facultative ailleurs dans l'app depuis le 2026-11-08), en gardant les 3 jours, les 20 filleuls par saison et le refus des alias d'adresses.
+- **À faire par le porteur** : coller `tools/supabase/install_024_a_034.sql` dans Studio (il contient 033, 034 et maintenant 037), puis `000_verifier.sql`.
+
+---
+
 ## 2026-11-20 — Animation « Choisir comme compagnon », logos des séries (porteur)
 
 - **Demande** : « lorsque l'on va dans le Pokédex et qu'on choisit “Choisir comme compagnon”, je veux une petite animation de 2 s qui montre le Pokémon qui est OK comme compagnon, propose-moi des choses ».

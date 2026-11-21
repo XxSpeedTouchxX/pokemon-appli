@@ -115,6 +115,11 @@
     // Compte déjà créé (accueil revu depuis Mon profil, 2026-10-30, porteur) : les trois pages restent accessibles,
     // préremplies ; « Passer » ramène à l'app à tout moment.
     r.cta = acc ? 'Continuer' : 'Créer mon compte';
+    // Lien de parrainage (2026-11-21, pl.js) : « Sacha t'invite » sur le premier écran, tant que le compte n'existe pas.
+    const inv = cloud && !signed && typeof this.plInvite === 'function' ? this.plInvite() : null;
+    r.invite = inv && !inv.bad
+      ? { on: true, title: (inv.pseudo || 'Un ami') + ' t’invite sur Dropicards !', sub: 'Crée ton compte avec son code ' + inv.code + ' : 50 PL de bienvenue pour toi.' }
+      : { on: false, title: '', sub: '' };
     r.next1 = () => go(2);
     // Connexion obligatoire (2026-11-07, porteur : « qu'un utilisateur ne puisse pas avoir accès à l'application sans
     // pouvoir se connecter ») : avec le serveur, « Passer » n'apparaît que pour un compte connecté.
@@ -145,6 +150,12 @@
     r.acc = this._obAcc = {
       email: s.obEmail !== undefined ? s.obEmail : (tr.email || (acc && acc.email) || ''), pwd: s.obPwd || '',
       askNick: cloud && !signed && mode === 'signup', nick: s.obNick !== undefined ? s.obNick : (tr.name || ''), onNick: e => this.setState({ obNick: String(e.target.value || '').slice(0, 24) }),
+      // Code de parrainage (facultatif) : prérempli avec celui du lien, à taper sinon (lien ouvert dans une autre app).
+      askRef: cloud && !signed && mode === 'signup',
+      ref: s.obRef !== undefined ? s.obRef : (inv && !inv.bad ? inv.code : ''),
+      onRef: e => this.setState({ obRef: String(e.target.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) }),
+      refWho: inv && !inv.bad && inv.pseudo && (s.obRef === undefined || s.obRef === inv.code) ? 'Code de ' + inv.pseudo + ' : 50 PL de bienvenue pour toi.' : '',
+      refBad: /parrainage/.test(s.obErr || '') ? 'true' : 'false',
       nickBad: /pseudo/.test(s.obErr || '') ? 'true' : 'false', news: s.obNews !== undefined ? !!s.obNews : !!(acc && acc.news),
       title: T[0], lead: T[1], go: busy ? 'Un instant…' : T[2], busy: busy ? 'true' : 'false',
       isSignup: mode === 'signup', isLogin: mode === 'login', isReset: mode === 'reset', showPwd: mode !== 'reset' || resetSent, showCode: resetSent,
@@ -209,6 +220,11 @@
         // Pseudo demandé avec l'adresse (2026-11-08, porteur) : l'e-mail de bienvenue s'adresse au joueur par son pseudo.
         const nick0 = String(f && f.nickname ? f.nickname.value : t.obNick || '').replace(/\s+/g, ' ').trim().slice(0, 24);
         if (cloud && !signed && nick0.length < 2) { this.setState({ obEmail: email, obPwd: pwd, obNick: nick0, obErr: 'Choisis un pseudo de dresseur de 2 à 24 caractères.' }); return; }
+        // Code de parrainage (2026-11-21) : envoyé avec l'inscription (037 relie le filleul et donne ses 50 PL) et gardé
+        // pour pl_set_parrain à la première connexion (serveur sans 037).
+        const inv0 = typeof this.plInvite === 'function' ? this.plInvite() : null;
+        const ref0 = String(f && f.parrain ? f.parrain.value : t.obRef !== undefined ? t.obRef : (inv0 && !inv0.bad ? inv0.code : '')).toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (cloud && !signed && ref0 && !/^[A-Z0-9]{4,12}$/.test(ref0)) { this.setState({ obEmail: email, obPwd: pwd, obNick: nick0, obRef: ref0, obErr: 'Code de parrainage : 4 à 12 lettres ou chiffres (ou laisse la case vide).' }); return; }
         // Compte créé tout de suite sur le serveur (2026-11-08, porteur : « l'adresse mail est directement enregistrée
         // dans notre serveur »), puis connexion sans attendre la vérification de l'adresse (lien ou code reçu par e-mail,
         // à faire plus tard) et proposition de Face ID / Touch ID / empreinte. Si le serveur exige encore la vérification
@@ -216,7 +232,8 @@
         if (cloud && !signed) {
           this.setState({ obEmail: email, obNews: news, obNick: nick0, obBusy: true, obErr: '', obNote: '' });
           try {
-            const res = await Cloud.signUp(email, pwd, { pseudo: nick0, news_optin: news });
+            if (ref0 && typeof this.plRemember === 'function') this.plRemember(ref0);
+            const res = await Cloud.signUp(email, pwd, Object.assign({ pseudo: nick0, news_optin: news }, ref0 ? { parrain: ref0 } : {}));
             if (res.exists) { this.setState({ obBusy: false, obMode: 'login', obPwd: '', obErr: 'Un compte existe déjà avec cette adresse : connecte-toi.' }); return; }
             let ok = !!res.session;
             if (!ok) { try { await Cloud.signIn(email, pwd); ok = true; } catch (e3) { if (e3.code !== 'email_not_confirmed') throw e3; } }

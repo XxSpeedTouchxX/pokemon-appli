@@ -42,6 +42,34 @@
   })();
   const plPending = () => { try { const v = JSON.parse(localStorage.getItem(PL_LS) || 'null'); return v && plCodeOk(v.code) && Date.now() - (v.at || 0) < 30 * 86400000 ? v.code : ''; } catch (e) { return ''; } };
   const plForget = () => { try { localStorage.removeItem(PL_LS); } catch (e) { /* stockage indisponible */ } };
+  const plRemember = c => { try { if (plCodeOk(c)) localStorage.setItem(PL_LS, JSON.stringify({ code: c, at: Date.now() })); } catch (e) { /* stockage indisponible */ } };
+  // Parrainage fiabilisé (2026-11-21, porteur : « que tous les liens de parrainage soient fonctionnels, que les
+  // redirections se fassent correctement, que les personnes reçoivent bien le gain ») :
+  //   - le code du lien est montré sur le premier écran (« Sacha t'invite », pseudo lu par pl_invite sans compte, 037)
+  //     et prérempli dans la page d'inscription, où il peut aussi être tapé à la main (lien ouvert dans TikTok ou
+  //     Instagram, app ajoutée à l'écran d'accueil de l'iPhone : leur mémoire n'est pas celle de Safari) ;
+  //   - il part avec l'inscription (data.parrain) : le serveur relie le filleul et donne ses 50 PL tout de suite (037) ;
+  //     sinon (serveur sans 037) pl_set_parrain à la première connexion, comme avant ;
+  //   - lien ouvert par un compte qui ne peut plus être parrainé (le sien, compte de plus de 14 jours, déjà parrainé) :
+  //     un message clair et la page « Parrainer un ami » du coin des dresseurs, au lieu de rien ;
+  //   - 200 PL du parrain montrés avec l'animation même s'ils sont arrivés en son absence (pl_state « new », 037) ;
+  //   - pas d'animation des PL par-dessus l'accueil ou le didacticiel : elle attend qu'ils soient finis.
+  plProto.plRefCode = () => plPending();
+  plProto.plRemember = c => plRemember(String(c || '').toUpperCase());
+  // Invitation du premier écran : code en attente et pseudo de son propriétaire (lu une fois par code).
+  let plInvAsk = '';
+  plProto.plInvite = function () {
+    const code = plPending();
+    if (!code) return null;
+    const inv = this.st().plInv;
+    if (inv && inv.code === code) return inv;
+    if (plInvAsk !== code && typeof Cloud !== 'undefined' && Cloud.on() && typeof Cloud.rpcPublic === 'function') {
+      plInvAsk = code;
+      Cloud.rpcPublic('pl_invite', { code: code }).then(r => this.setState({ plInv: { code: code, pseudo: (r && r.pseudo) || '', bad: !r } }),
+        () => this.setState({ plInv: { code: code, pseudo: '', bad: false } }));
+    }
+    return { code: code, pseudo: '', bad: false };
+  };
 
   // QR code du lien : chemin SVG d'un carré par module noir (marge de 2 modules).
   const plQrCache = {};
@@ -79,8 +107,11 @@
 
   // Gains reçus : un message (et leur détail dans « Ma ligue »).
   const PL_WHY = {
-    streak: g => g.ref + ' jours d’affilée', referral: () => 'un ami de plus parrainé', referral_premium: () => 'ton filleul a pris le DropiPass',
-    share: () => 'partage validé', social: () => 'merci de suivre Dropicards', welcome_ref: () => 'bienvenue'
+    streak: g => g.ref + ' jours d’affilée',
+    referral: g => (g.note && /^Filleul : /.test(g.note) ? g.note.replace(/^Filleul : /, 'ton filleul ') + ' a rempli les conditions' : 'un ami de plus parrainé'),
+    referral_premium: () => 'ton filleul a pris le DropiPass',
+    share: () => 'partage validé', social: () => 'merci de suivre Dropicards',
+    welcome_ref: g => (g.note && /^Bienvenue, /.test(g.note) ? 'bienvenue, tu es ' + g.note.replace(/^Bienvenue, /, '') : 'bienvenue')
   };
   // Animation des PL gagnés (2026-11-14, porteur : « quand l'utilisateur remporte des PL, une petite animation où l'on
   // voit le nombre de PL gagnés ») : le bouclier-cœur des PL arrive en rebondissant, « +N PL » compte jusqu'au total,
@@ -114,7 +145,20 @@
     } catch (e) { /* animation facultative */ }
   };
   // « first » : message déjà prévu (bienvenue d'un filleul), mis devant pour ne pas être effacé.
+  // Accueil (création du compte) ou didacticiel en cours : l'animation attend qu'ils soient finis.
+  let plLater = null, plLaterT = null;
+  const plBusyUi = s => s.onb > 0 || s.tutoStep >= -1;
   plProto.plCelebrate = function (list, first) {
+    if (plBusyUi(this.st())) {
+      plLater = plLater ? { list: plLater.list.concat(list), first: plLater.first || first } : { list: list.slice(), first: first };
+      if (!plLaterT) plLaterT = setInterval(() => {
+        if (plBusyUi(this.st())) return;
+        clearInterval(plLaterT); plLaterT = null;
+        const l = plLater; plLater = null;
+        if (l) setTimeout(() => this.plCelebrate(l.list, l.first), 600);
+      }, 1500);
+      return;
+    }
     const sum = list.reduce((a, g) => a + (Number(g.pl) || 0), 0);
     const why = list.length === 1 ? (PL_WHY[list[0].kind] ? PL_WHY[list[0].kind](list[0]) : '') : list.length + ' missions réussies';
     const msg = sum ? '+' + plNum(sum) + ' PL' + (why ? ' · ' + why : '') + ' (Ma ligue)' : '';
@@ -132,16 +176,21 @@
     if (!force && plAt && Date.now() - plAt < PL_TTL) return Promise.resolve(this.st().plState || null);
     plAt = Date.now();
     const code = plPending();
-    let hello = '';
+    let hello = '', linkErr = '';
+    // Code d'un lien (ou tapé à l'inscription) : relié au compte. « already » : déjà fait à l'inscription (037), la
+    // bienvenue arrive par la liste « new ». Refus (son propre lien, compte trop ancien…) : expliqué, puis la page
+    // « Parrainer un ami ».
     const first = code ? Cloud.rpc('pl_set_parrain', { code: code }).then(r => {
       plForget();
-      if (r && r.ok) hello = 'Bienvenue ! Tu es parrainé par ' + (r.parrain || 'un ami') + ' : +' + plNum(r.pl) + ' PL';
-    }, e => { if (e && e.code === 'game') plForget(); }) : Promise.resolve();
+      if (r && r.ok && !r.already) hello = 'Bienvenue ! Tu es parrainé par ' + (r.parrain || 'un ami') + ' : +' + plNum(r.pl) + ' PL';
+    }, e => { if (e && e.code === 'game') { plForget(); linkErr = e.message || ''; } }) : Promise.resolve();
     plBusy = first.then(() => Cloud.rpc('pl_state')).then(st => {
       plBusy = null;
+      if (linkErr) this.plLinkRefused(linkErr);
       if (!st || typeof st !== 'object') { if (hello) this.plCelebrate([], hello + ' (Ma ligue)'); return null; }
       this.setState({ plState: st, plErr: '' });
-      const nw = Array.isArray(st.new) ? st.new : [];
+      // La bienvenue déjà annoncée (hello) n'est pas répétée.
+      const nw = (Array.isArray(st.new) ? st.new : []).filter(g => !(hello && g && g.kind === 'welcome_ref'));
       if (nw.length || hello) this.plCelebrate(nw, hello);
       return st;
     }, e => {
@@ -152,6 +201,24 @@
       return null;
     });
     return plBusy;
+  };
+  // Lien de parrainage refusé pour ce compte : explication, puis « Parrainer un ami » (sauf pendant l'accueil ou le
+  // didacticiel, où le message attend la fin).
+  const PL_LINK_WHY = [
+    [/propre parrain/, 'C’est ton propre lien de parrainage : partage-le à tes amis pour gagner des PL !', true],
+    [/14 jours/, 'Ce lien de parrainage est réservé aux nouveaux comptes (14 premiers jours). À ton tour : invite tes amis avec ton lien !', true],
+    [/déjà un parrain/, 'Tu as déjà un parrain : un seul par compte.', true],
+    [/déjà ton filleul/, 'Ce dresseur est déjà ton filleul : vous ne pouvez pas vous parrainer l’un l’autre.', true],
+    [/inconnu/, 'Ce code de parrainage n’existe pas : vérifie le lien reçu, ou tape le code de ton ami dans « Parrainer un ami ».', true]
+  ];
+  plProto.plLinkRefused = function (msg) {
+    const m = PL_LINK_WHY.find(x => x[0].test(msg)), text = m ? m[1] : msg;
+    const go = () => {
+      if (m && m[2] && typeof this.coinGo === 'function') this.coinGo('par');
+      this.setState({ toast: text }); this.flash();
+    };
+    if (!plBusyUi(this.st())) { go(); return; }
+    const t = setInterval(() => { if (!plBusyUi(this.st())) { clearInterval(t); setTimeout(go, 600); } }, 1500);
   };
   // Ouverture de l'app, connexion, retour au premier plan : après l'état du jeu (et le temps passé, 025).
   const plBaseGc = plProto.gcSync;
@@ -182,7 +249,7 @@
   plProto.plShare = function () {
     const st = this.st().plState, code = st && st.code;
     if (!code) return;
-    const url = PL_LINK + code, text = 'Rejoins-moi sur Dropicards, l’app des collectionneurs de cartes Pokémon : la valeur de ta collection, des jeux et des lots. Avec mon lien, tu reçois 50 PL de bienvenue !';
+    const url = PL_LINK + code, text = 'Rejoins-moi sur Dropicards, l’app des collectionneurs de cartes Pokémon : la valeur de ta collection, des jeux et des lots. Crée ton compte avec mon lien (ou mon code ' + code + ') et reçois 50 PL de bienvenue !';
     let shared = false;
     try { if (typeof navigator.share === 'function') { shared = true; navigator.share({ title: 'Dropicards', text: text, url: url }).catch(() => {}); } } catch (e) { shared = false; }
     if (!shared) this.plCopy();
@@ -193,6 +260,12 @@
     const say = t => { this.setState({ toast: t + PL_LINK.replace('https://', '') + code }); this.flash(); };
     const done = () => say('Lien de parrainage copié : '), fail = () => say('Copie impossible ici. Ton lien : ');
     try { navigator.clipboard.writeText(PL_LINK + code).then(done, fail); } catch (e) { fail(); }
+  };
+  plProto.plCopyCode = function () {
+    const st = this.st().plState, code = st && st.code;
+    if (!code) return;
+    const say = t => { this.setState({ toast: t }); this.flash(); };
+    try { navigator.clipboard.writeText(code).then(() => say('Code copié : ' + code), () => say('Ton code : ' + code)); } catch (e) { say('Ton code : ' + code); }
   };
   plProto.plNet = function (id) {
     const href = plSocial(id);
@@ -234,7 +307,13 @@
     const code = (st && st.code) || '', link = code ? PL_LINK + code : '', qr = plQr(link);
     const ref = (st && st.referrals) || {}, soc = (st && st.social) || {}, stk = (st && st.streak) || {}, sh = (st && st.share) || {};
     const done = Array.isArray(stk.done) ? stk.done.map(Number) : [], cur = Number(stk.cur) || 0;
-    const rows = [];
+    // Parrainage : sa page est dans « Le coin des dresseurs » (2026-11-21, porteur) ; ici, une ligne qui y mène.
+    const rows = [{
+      icon: 'img/brand/pl.svg', icoCls: 'pkm-ple-ico pkm-ple-ico-ref', title: 'Parrainer un ami', pl: '200',
+      sub: 'Par ami inscrit avec ton lien · dans « Le coin des dresseurs »', hasBar: false, barW: '', cta: 'Y aller', off: false,
+      btnCls: 'pkm-ple-cta pkm-ple-cta-go', cls: 'pkm-ple-row', aria: 'Parrainer un ami : 200 PL par ami, ouvrir la page dans Le coin des dresseurs',
+      pick: () => { if (typeof this.coinGo === 'function') this.coinGo('par'); }
+    }];
     PL_NETS.forEach(n => {
       const href = plSocial(n.id), ok = !!soc[n.id], opened = !!(s.plOpened || {})[n.id];
       rows.push({
@@ -285,6 +364,77 @@
       hasShot: !!s.plShot, shot: s.plShot || '', shotErr: s.plShotErr || '', hasShotErr: !!s.plShotErr, shotBusy: !!s.plShotBusy,
       send: () => this.plSendProof(), sendOff: !s.plShot || busy === 'pl_submit_proof', sendLabel: busy === 'pl_submit_proof' ? 'Envoi…' : 'Envoyer ma capture',
       shareMine: () => this.plShare()
+    };
+  };
+
+  // ——— « Parrainer un ami » (Le coin des dresseurs, coin.js) ———
+  const plDay = d => { const t = Date.parse(String(d || '') + 'T12:00:00'); return isNaN(t) ? '' : new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); };
+  const PL_FL_STATE = {
+    ok: ['200 PL reçus ✓', 'pkm-prf-st pkm-prf-st-ok'], wait: ['En cours', 'pkm-prf-st pkm-prf-st-wait'],
+    missed: ['Délai passé', 'pkm-prf-st pkm-prf-st-off'], nocount: ['Sans PL', 'pkm-prf-st pkm-prf-st-off']
+  };
+  // Étapes d'un filleul (ou les miennes) : adresse validée, jours d'ouverture, date limite.
+  const plSteps = p => {
+    if (!p || p.verified === undefined) return [];
+    const need = Number(p.need) || 3, d = Math.min(need, Number(p.days) || 0), out = [];
+    out.push({ label: p.verified ? 'Adresse e-mail validée' : 'Adresse e-mail à valider', cls: 'pkm-prf-ck' + (p.verified ? ' pkm-prf-ck-ok' : '') });
+    out.push({ label: 'App ouverte ' + d + ' jour' + (d > 1 ? 's' : '') + ' sur ' + need + (p.until && p.open ? ' · jusqu’au ' + plDay(p.until) : ''), cls: 'pkm-prf-ck' + (d >= need ? ' pkm-prf-ck-ok' : '') });
+    return out;
+  };
+  plProto.plVerifyMail = async function () {
+    const ses = typeof Cloud !== 'undefined' && Cloud.session ? Cloud.session() : null;
+    if (!ses || !ses.email) return;
+    try { await Cloud.resend(ses.email); this.setState({ toast: 'E-mail envoyé à ' + ses.email + ' : touche son bouton (regarde aussi dans les spams).' }); } catch (e) { this.setState({ toast: (e && e.message) || 'Envoi impossible pour le moment.' }); }
+    this.flash();
+  };
+  plProto.vPlRef = function (s) {
+    const st = s.plState && typeof s.plState === 'object' ? s.plState : null, online = plOnline();
+    const admin = typeof Cloud !== 'undefined' && Cloud.isAdmin && Cloud.isAdmin();
+    let msg = '';
+    if (!online) msg = 'Connecte-toi à ton compte Dropicards pour parrainer tes amis.';
+    else if (s.plErr === 'off') msg = admin ? 'Aperçu admin : le parrainage n’est pas encore installé sur le serveur. Colle tools/supabase/install_024_a_034.sql dans Studio (SQL Editor › Run).' : 'Bientôt disponible : le parrainage arrive très vite.';
+    else if (!st && s.plErr === 'net') msg = 'Pas de réseau : ton lien de parrainage s’affiche dès que tu es connecté.';
+    else if (!st && s.plErr) msg = 'Le parrainage n’est pas disponible pour le moment.';
+    else if (!st) msg = 'Chargement de ton lien de parrainage…';
+    const code = (st && st.code) || '', link = code ? PL_LINK + code : '', qr = plQr(link), ref = (st && st.referrals) || {};
+    const flRaw = st && Array.isArray(st.filleuls) ? st.filleuls : null;
+    const fl = (flRaw || []).map(f => {
+      const k = PL_FL_STATE[f.state] || PL_FL_STATE.wait, steps = f.state === 'wait' ? plSteps(f) : [];
+      return {
+        pseudo: f.pseudo || 'Nouveau dresseur', state: k[0] + (f.premium ? ' · +400 PL DropiPass' : ''), stateCls: k[1],
+        when: 'Inscrit le ' + plDay(f.at) + (f.state === 'nocount' ? ' · pas compté (20 amis déjà comptés cette saison, ou 2ᵉ adresse d’un même compte)' : f.state === 'missed' ? ' · 3 jours non atteints dans ses 14 premiers jours' : ''),
+        steps: steps, hasSteps: steps.length > 0
+      };
+    });
+    const me = st && st.me_ref && typeof st.me_ref === 'object' ? st.me_ref : null, pp = (st && st.parrain) || '';
+    let meText = '';
+    if (me && me.done) meText = 'Merci ! Grâce à toi, ' + pp + ' a gagné ses 200 PL.';
+    else if (me && me.missed) meText = 'Les 14 premiers jours sont passés : ' + pp + ' n’a pas reçu ses 200 PL cette fois.';
+    else if (me) meText = 'Aide ' + pp + ' à gagner 200 PL : valide ton adresse e-mail et ouvre l’app 3 jours différents dans tes 14 premiers jours.';
+    const meSteps = me && !me.done && !me.missed ? plSteps(me) : [];
+    const canCode = !!(st && st.can_set_parrain), busy = s.plActBusy || '';
+    const total = flRaw ? flRaw.length : Number(ref.all || 0);
+    return {
+      hasMsg: !!msg, msg: msg, ready: !!st,
+      code: code, linkShort: link.replace('https://', ''), hasQr: !!qr, qrPath: qr ? qr.d : '', qrBox: qr ? qr.box : '0 0 1 1',
+      share: () => this.plShare(), copy: () => this.plCopy(), copyCode: () => this.plCopyCode(),
+      refCount: plNum(ref.season) + ' / ' + plNum(ref.cap || 20), refPending: plNum(ref.pending), refPrem: plNum(ref.premium),
+      hasMe: !!pp || canCode, hasParrain: !!pp, parrain: pp, hasMeText: !!meText, meText: meText,
+      meSteps: meSteps, hasMeSteps: meSteps.length > 0, canVerify: !!(me && !me.verified && !me.done && !me.missed),
+      verify: () => this.plVerifyMail(),
+      canCode: canCode, codeIn: s.plCodeIn || '',
+      onCode: e => this.setState({ plCodeIn: String((e && e.target && e.target.value) || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) }),
+      sendCode: () => { const c = (this.st().plCodeIn || '').trim(); if (!plCodeOk(c)) { this.setState({ toast: 'Code de parrainage : 4 à 12 lettres ou chiffres.' }); this.flash(); return; }
+        // Serveur avec 037 : la bienvenue arrive avec l'animation (liste « new ») ; avant 037, un message.
+        this.plAct('pl_set_parrain', { code: c }, r => {
+          const v37 = (this.st().plState || {}).v >= 37;
+          this.setState(Object.assign({ plCodeIn: '' }, v37 ? {} : { toast: 'Parrainé par ' + ((r && r.parrain) || 'un ami') + ' : +' + plNum(r && r.pl) + ' PL' }));
+          if (!v37) this.flash();
+        }); },
+      codeBusy: busy === 'pl_set_parrain',
+      fl: fl, hasFl: fl.length > 0, noFl: !fl.length,
+      flCount: total ? plNum(total) + ' ami' + (total > 1 ? 's' : '') + ' inscrit' + (total > 1 ? 's' : '') : '',
+      flEmpty: flRaw ? 'Aucun filleul pour l’instant : partage ton lien ou ton code à tes amis !' : total ? plNum(total) + ' ami' + (total > 1 ? 's' : '') + ' inscrit' + (total > 1 ? 's' : '') + ' avec ton lien.' : 'Aucun filleul pour l’instant : partage ton lien ou ton code à tes amis !'
     };
   };
 

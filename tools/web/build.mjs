@@ -145,6 +145,9 @@ for (const k of Object.keys(FRAG)) FRAG[k] = FRAG[k].replace(/@@([\w-]+)(?: ([\w
 // Accueil en 3 pages (2026-10-30) : flèche de retour et points cliquables (pages déjà vues), pages qui glissent.
 patch('<span aria-hidden="true" style="display: flex; gap: 6px"><sc-for list="{{ ob.dots }}" as="dt" hint-placeholder-count="3"><span style="width: {{ dt.w }}; height: 8px; border-radius: 4px; background: {{ dt.bg }}"></span></sc-for></span>', FRAG['onb-top'].trim());
 patch('<sc-if value="{{ ob.is1 }}" hint-placeholder-val="{{ true }}">\n<div style="flex: 1; display: flex;', '<sc-if value="{{ ob.is1 }}" hint-placeholder-val="{{ true }}">\n<div class="pkm-onb-page" style="flex: 1; display: flex;');
+// Lien de parrainage (2026-11-21, pl.js) : « Sacha t'invite sur Dropicards ! » en haut du premier écran.
+patch('<div class="pkm-onb-page" style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 8px 20px 24px">\n',
+  '<div class="pkm-onb-page" style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 8px 20px 24px">\n<sc-if value="{{ ob.invite.on }}" hint-placeholder-val="{{ false }}"><div role="status" class="pkm-onb-invite"><span class="pkm-onb-invite-ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11.5" rx="1.8"></rect><path d="M2.8 9h18.4M12 9v11.5M12 9c-1.6-4.2-6.2-4.6-6.2-1.8C5.8 9 9.6 9 12 9zM12 9c1.6-4.2 6.2-4.6 6.2-1.8C18.2 9 14.4 9 12 9z"></path></svg></span><span class="pkm-onb-invite-t"><b>{{ ob.invite.title }}</b><small>{{ ob.invite.sub }}</small></span></div></sc-if>\n');
 // Mon profil (2026-10-14, profile.js) : « Ton espace » devient « Mon profil » ; la bulle de l'avatar ouvre « Mon avatar »
 // (2026-11-08 : photo personnelle retirée, avatar.js, crayon à la place de l'appareil photo) ; rubrique « Informations du dresseur » sous l'identité.
 patch(`<span style="position: relative; flex: none; width: 76px; height: 76px">

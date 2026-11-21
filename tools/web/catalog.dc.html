@@ -2495,6 +2495,9 @@ PKCOUNTER
 <sc-if value="{{ ob.acc.askNick }}" hint-placeholder-val="{{ false }}"><label class="pkm-acc-l">Pseudo de dresseur
 <input class="pkm-tr-in" type="text" name="nickname" autocomplete="nickname" maxlength="24" placeholder="Ex. : Sacha du Bourg" value="{{ ob.acc.nick }}" onChange="{{ ob.acc.onNick }}" aria-invalid="{{ ob.acc.nickBad }}">
 </label></sc-if>
+<sc-if value="{{ ob.acc.askRef }}" hint-placeholder-val="{{ false }}"><label class="pkm-acc-l">Code de parrainage (facultatif)
+<input class="pkm-tr-in pkm-acc-ref" type="text" name="parrain" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="Code d’un ami, ex. : SACHA7X" value="{{ ob.acc.ref }}" onChange="{{ ob.acc.onRef }}" aria-invalid="{{ ob.acc.refBad }}"></label>
+<sc-if value="{{ ob.acc.refWho }}" hint-placeholder-val="{{ false }}"><span class="pkm-acc-hint pkm-acc-refok">{{ ob.acc.refWho }}</span></sc-if></sc-if>
 <sc-if value="{{ ob.acc.showCode }}" hint-placeholder-val="{{ false }}"><label class="pkm-acc-l">Code reçu par e-mail
 <input class="pkm-tr-in pkm-acc-code" type="text" name="code" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="6 chiffres" value="{{ ob.acc.code }}" onChange="{{ ob.acc.onCode }}">
 </label></sc-if>
@@ -2676,18 +2679,6 @@ PKCOUNTER
 <span class="pkm-ple-tot"><small>Mes PL de la saison</small><b>{{ ple.season }}</b></span>
 </section>
 <p class="pkm-ple-what">Les Points de loyauté (PL) récompensent ta fidélité. Remplis les missions pour en gagner et monter au classement de ta ligue. Ils ne s’achètent pas et ne se dépensent pas.</p>
-<section aria-label="Parrainage" class="pkm-ple-ref pkm-dark">
-<h2>Parraine tes amis</h2>
-<p class="pkm-ple-sub"><b>+200 PL</b> par ami qui s’inscrit avec ton lien, vérifie son adresse e-mail et ouvre l’app 3 jours différents dans ses 14 premiers jours (20 amis comptés par saison). <b>+400 PL</b> s’il garde le DropiPass plus de 14 jours. Ton ami reçoit 50 PL de bienvenue.</p>
-<div class="pkm-ple-qrrow">
-<sc-if value="{{ ple.hasQr }}" hint-placeholder-val="{{ true }}"><svg viewBox="{{ ple.qrBox }}" width="128" height="128" role="img" aria-label="QR code de ton lien de parrainage" class="pkm-ple-qr"><path d="{{ ple.qrPath }}"></path></svg></sc-if>
-<span class="pkm-ple-code"><small>Ton code</small><b>{{ ple.code }}</b><small class="pkm-ple-link">{{ ple.linkShort }}</small></span>
-</div>
-<div class="pkm-ple-btns"><button type="button" onClick="{{ ple.share }}" class="pkm-ple-btn pkm-ple-btn-main">Partager mon lien</button><button type="button" onClick="{{ ple.copy }}" class="pkm-ple-btn">Copier le lien</button></div>
-<div class="pkm-ple-stats"><span><b>{{ ple.refCount }}</b><small>amis comptés cette saison</small></span><span><b>{{ ple.refPending }}</b><small>en attente</small></span><span><b>{{ ple.refPrem }}</b><small>DropiPass</small></span></div>
-<sc-if value="{{ ple.hasParrain }}" hint-placeholder-val="{{ false }}"><p class="pkm-ple-sub">Tu as été parrainé par <b>{{ ple.parrain }}</b>.</p></sc-if>
-<sc-if value="{{ ple.canCode }}" hint-placeholder-val="{{ false }}"><div class="pkm-ple-codein"><input type="text" aria-label="Code de parrainage d’un ami" placeholder="Code d’un ami" autocomplete="off" maxlength="12" value="{{ ple.codeIn }}" onInput="{{ ple.onCode }}"><button type="button" onClick="{{ ple.sendCode }}" disabled="{{ ple.codeBusy }}">Valider</button></div></sc-if>
-</section>
 <section aria-label="Missions" class="pkm-ple-list pkm-dark">
 <h2>Missions</h2>
 <sc-for list="{{ ple.rows }}" as="plr" hint-placeholder-count="7"><div class="{{ plr.cls }}">
@@ -3129,7 +3120,7 @@ PKCOUNTER
 <!-- fragment: coin -->
 <sc-if value="{{ ui.isCoin }}" hint-placeholder-val="{{ false }}">
 <div class="{{ coin.pinCls }}">
-<div role="tablist" aria-label="Le coin des dresseurs" class="pkm-coin-tabs"><sc-for list="{{ coin.tabs }}" as="cnt" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ cnt.on }}" onClick="{{ cnt.pick }}" class="{{ cnt.cls }}"><sc-if value="{{ cnt.isVit }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="4" width="17" height="15" rx="2"></rect><path d="M3.5 9h17M8 13v3M12 12v4M16 13v3"></path></svg></sc-if><sc-if value="{{ cnt.isCal }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="5" width="17" height="15" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"></path></svg></sc-if><span>{{ cnt.label }}</span></button></sc-for></div>
+<div role="tablist" aria-label="Le coin des dresseurs" class="pkm-coin-tabs pkm-coin-tabs-3"><sc-for list="{{ coin.tabs }}" as="cnt" hint-placeholder-count="3"><button type="button" role="tab" aria-selected="{{ cnt.on }}" onClick="{{ cnt.pick }}" class="{{ cnt.cls }}"><sc-if value="{{ cnt.isVit }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="4" width="17" height="15" rx="2"></rect><path d="M3.5 9h17M8 13v3M12 12v4M16 13v3"></path></svg></sc-if><sc-if value="{{ cnt.isCal }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="5" width="17" height="15" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"></path></svg></sc-if><sc-if value="{{ cnt.isPar }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-coin-tab-ico"><rect x="3.5" y="9" width="17" height="11.5" rx="1.8"></rect><path d="M2.8 9h18.4M12 9v11.5M12 9c-1.6-4.2-6.2-4.6-6.2-1.8C5.8 9 9.6 9 12 9zM12 9c1.6-4.2 6.2-4.6 6.2-1.8C18.2 9 14.4 9 12 9z"></path></svg></sc-if><span>{{ cnt.label }}</span></button></sc-for></div>
 <sc-if value="{{ coin.isCal }}" hint-placeholder-val="{{ false }}"><sc-if value="{{ cal.ready }}" hint-placeholder-val="{{ true }}">
 <section aria-label="Frise du JCC Pokémon" class="{{ cal.heroCls }}">
 <sc-if value="{{ cal.locked }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ cal.unlock }}" aria-label="{{ cal.lockAria }}" class="pkm-fh-veil pkm-lock-veil"><span class="pkm-fh-veil-in"><svg width="30" height="34" viewBox="0 0 12 14" aria-hidden="true" class="pkm-fh-veil-lock"><path d="M3 6V4.2a3 3 0 0 1 6 0V6" fill="none" stroke="currentColor" stroke-width="1.6"></path><rect x="1" y="6" width="10" height="7.5" rx="1.8" fill="currentColor"></rect></svg><b>Le calendrier JCC</b><small>{{ cal.lockSub }}</small><em>{{ cal.lockBtn }}</em></span></button></sc-if>
@@ -3155,6 +3146,49 @@ PKCOUNTER
 <sc-if value="{{ cv.hasRecent }}" hint-placeholder-val="{{ true }}"><ul class="pkm-vt-matches pkm-coin-list"><sc-for list="{{ cv.recent }}" as="cvr" hint-placeholder-count="2"><li><button type="button" onClick="{{ cvr.open }}" aria-label="{{ cvr.aria }}" class="pkm-vt-match pkm-coin-row"><sc-if value="{{ cvr.hasAva }}" hint-placeholder-val="{{ true }}"><span class="pkm-pg-ava-m pkm-qm-ava" aria-hidden="true"><img src="{{ cvr.ava.bg }}" alt=""><img src="{{ cvr.ava.char }}" alt=""><sc-if value="{{ cvr.ava.hasPoke }}" hint-placeholder-val="{{ false }}"><img src="{{ cvr.ava.poke.src }}" alt="" class="pkm-pg-ava-pk" style="{{ cvr.ava.pokeStyle }}"></sc-if><sc-if value="{{ cvr.ava.hasAcc }}" hint-placeholder-val="{{ false }}"><img src="{{ cvr.ava.acc.src }}" alt="" class="pkm-pg-ava-pk pkm-pg-ava-acc" style="{{ cvr.ava.accStyle }}"></sc-if></span></sc-if><sc-if value="{{ cvr.noAva }}" hint-placeholder-val="{{ false }}"><span class="pkm-qm-noava" aria-hidden="true"><img src="{{ cvr.gImg }}" alt="" width="40" height="40"></span></sc-if><span class="pkm-vt-match-t"><b>{{ cvr.pseudo }}</b><span class="pkm-coin-grade" style="color: {{ cvr.gColor }}"><img src="{{ cvr.gImg }}" alt="" width="16" height="16">{{ cvr.gName }}</span><small>{{ cvr.text }}<sc-if value="{{ cvr.hasTrade }}" hint-placeholder-val="{{ false }}"> · <em class="pkm-coin-tt">{{ cvr.trade }}</em></sc-if><sc-if value="{{ cvr.hasSale }}" hint-placeholder-val="{{ false }}"> · <em class="pkm-coin-ts">{{ cvr.sale }}</em></sc-if></small></span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" class="pkm-qm-chev"><path d="M9 6l6 6-6 6"></path></svg></button></li></sc-for></ul></sc-if>
 <sc-if value="{{ cv.hasRecMsg }}" hint-placeholder-val="{{ false }}"><p class="pkm-pg-note">{{ cv.recMsg }}</p></sc-if>
 </section>
+</sc-if>
+
+<sc-if value="{{ coin.isPar }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ prf.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-ple-msg">{{ prf.msg }}</p></sc-if>
+<section aria-label="Parraine tes amis" class="pkm-prf-hero pkm-dark">
+<span class="pkm-prf-gift" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11.5" rx="1.8"></rect><path d="M2.8 9h18.4M12 9v11.5M12 9c-1.6-4.2-6.2-4.6-6.2-1.8C5.8 9 9.6 9 12 9zM12 9c1.6-4.2 6.2-4.6 6.2-1.8C18.2 9 14.4 9 12 9z"></path></svg><img src="img/brand/pl.svg" alt="" width="26" height="26" class="pkm-prf-gift-pl"></span>
+<span class="pkm-prf-hero-t"><b>Parraine tes amis</b><small>Chaque ami qui s’inscrit avec ton lien te rapporte <em>200 PL</em> pour le classement de ta ligue.</small></span>
+</section>
+<section aria-label="Comment ça marche" class="pkm-prf-steps pkm-dark">
+<h3>Comment ça marche</h3>
+<ol>
+<li><i aria-hidden="true">1</i><span><b>Partage ton lien ou ton code</b><small>Par message, sur tes réseaux, ou montre ton QR code à un ami.</small></span></li>
+<li><i aria-hidden="true">2</i><span><b>Ton ami crée son compte avec</b><small>Il reçoit 50 PL de bienvenue tout de suite.</small></span></li>
+<li><i aria-hidden="true">3</i><span><b>Il valide son adresse e-mail et revient 3 jours</b><small>Dans ses 14 premiers jours : tu reçois 200 PL. Et 400 PL de plus s’il garde le DropiPass plus de 14 jours.</small></span></li>
+</ol>
+</section>
+<sc-if value="{{ prf.ready }}" hint-placeholder-val="{{ true }}">
+<section aria-label="Mon lien de parrainage" class="pkm-ple-ref pkm-dark">
+<h2>Mon lien de parrainage</h2>
+<div class="pkm-ple-qrrow">
+<sc-if value="{{ prf.hasQr }}" hint-placeholder-val="{{ true }}"><svg viewBox="{{ prf.qrBox }}" width="128" height="128" role="img" aria-label="QR code de ton lien de parrainage" class="pkm-ple-qr"><path d="{{ prf.qrPath }}"></path></svg></sc-if>
+<span class="pkm-ple-code"><small>Ton code</small><b>{{ prf.code }}</b><small class="pkm-ple-link">{{ prf.linkShort }}</small></span>
+</div>
+<div class="pkm-ple-btns pkm-prf-btns"><button type="button" onClick="{{ prf.share }}" class="pkm-ple-btn pkm-ple-btn-main">Partager mon lien</button><button type="button" onClick="{{ prf.copy }}" class="pkm-ple-btn">Copier le lien</button><button type="button" onClick="{{ prf.copyCode }}" class="pkm-ple-btn">Copier le code</button></div>
+<div class="pkm-ple-stats"><span><b>{{ prf.refCount }}</b><small>amis comptés cette saison</small></span><span><b>{{ prf.refPending }}</b><small>en cours</small></span><span><b>{{ prf.refPrem }}</b><small>DropiPass</small></span></div>
+</section>
+<sc-if value="{{ prf.hasMe }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Mon parrain" class="pkm-prf-me pkm-dark">
+<h3>Mon parrain</h3>
+<sc-if value="{{ prf.hasParrain }}" hint-placeholder-val="{{ false }}"><p class="pkm-ple-sub">Tu as été parrainé par <b>{{ prf.parrain }}</b>.</p></sc-if>
+<sc-if value="{{ prf.hasMeText }}" hint-placeholder-val="{{ false }}"><p class="pkm-ple-sub">{{ prf.meText }}</p></sc-if>
+<sc-if value="{{ prf.hasMeSteps }}" hint-placeholder-val="{{ false }}"><ul class="pkm-prf-checks"><sc-for list="{{ prf.meSteps }}" as="pms" hint-placeholder-count="2"><li class="{{ pms.cls }}"><i aria-hidden="true"></i>{{ pms.label }}</li></sc-for></ul></sc-if>
+<sc-if value="{{ prf.canVerify }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ prf.verify }}" class="pkm-ple-btn">Recevoir l’e-mail pour valider mon adresse</button></sc-if>
+<sc-if value="{{ prf.canCode }}" hint-placeholder-val="{{ false }}"><p class="pkm-ple-sub">Un ami t’a invité ? Entre son code dans les 14 premiers jours de ton compte : 50 PL pour toi.</p><div class="pkm-ple-codein"><input type="text" aria-label="Code de parrainage d’un ami" placeholder="Code d’un ami" autocomplete="off" autocapitalize="characters" maxlength="12" value="{{ prf.codeIn }}" onInput="{{ prf.onCode }}"><button type="button" onClick="{{ prf.sendCode }}" disabled="{{ prf.codeBusy }}">Valider</button></div></sc-if>
+</section>
+</sc-if>
+<section aria-label="Mes filleuls" class="pkm-prf-list pkm-dark">
+<div class="pkm-prf-list-h"><h3>Mes filleuls</h3><small>{{ prf.flCount }}</small></div>
+<sc-if value="{{ prf.hasFl }}" hint-placeholder-val="{{ true }}"><ul><sc-for list="{{ prf.fl }}" as="pfl" hint-placeholder-count="2"><li class="pkm-prf-fl"><span class="pkm-prf-fl-h"><b>{{ pfl.pseudo }}</b><em class="{{ pfl.stateCls }}">{{ pfl.state }}</em></span><small>{{ pfl.when }}</small><sc-if value="{{ pfl.hasSteps }}" hint-placeholder-val="{{ true }}"><ul class="pkm-prf-checks"><sc-for list="{{ pfl.steps }}" as="pfs" hint-placeholder-count="2"><li class="{{ pfs.cls }}"><i aria-hidden="true"></i>{{ pfs.label }}</li></sc-for></ul></sc-if></li></sc-for></ul></sc-if>
+<sc-if value="{{ prf.noFl }}" hint-placeholder-val="{{ false }}"><p class="pkm-ple-sub">{{ prf.flEmpty }}</p></sc-if>
+</section>
+</sc-if>
+<p class="pkm-pg-rules">Le parrainage marche pour les nouveaux comptes, dans leurs 14 premiers jours. 20 amis comptés par saison. Pas de PL pour son propre lien, un faux compte ou une 2ᵉ adresse de la même boîte mail (nom+1@gmail.com…) : toute triche retire les PL et exclut du classement. Les PL ne s’achètent pas et ne se dépensent pas.</p>
 </sc-if>
 
 <sc-if value="{{ coin.isCal }}" hint-placeholder-val="{{ false }}">

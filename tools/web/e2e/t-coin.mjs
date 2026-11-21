@@ -90,7 +90,8 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   const tabSt = [await page.evaluate(() => window.__pkm.st().screen), await page.locator(NAV + ' button[aria-label="Le coin des dresseurs"]').getAttribute('aria-current'), N(await page.locator('h1, h2').first().innerText())];
   ok('onglet : écran « Le coin des dresseurs » ouvert, bouton allumé (' + tabSt.join(' | ') + ')', tabSt[0] === 'coin' && tabSt[1] === 'page' && /Le coin des dresseurs/.test(tabSt[2]));
   const tabs = await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button').allInnerTexts();
-  ok('2 sous-rubriques : « Ma vitrine » et « Le calendrier JCC »', tabs.length === 2 && /Ma vitrine/.test(tabs[0]) && /calendrier JCC/.test(tabs[1]));
+  // « Parrainer un ami » entre les deux depuis le 2026-11-21 (porteur ; t-parrain.mjs).
+  ok('3 sous-rubriques : « Ma vitrine », « Parrainer un ami » et « Le calendrier JCC »', tabs.length === 3 && /Ma vitrine/.test(tabs[0]) && /Parrainer un ami/.test(tabs[1]) && /calendrier JCC/.test(tabs[2]));
 
   // B. Ma vitrine : même interface que l'onglet Échanges, recherche, vitrines des dresseurs.
   ok('Ma vitrine : sections « Mes cartes Pour trade et à vendre », « Je cherche », « Échanges possibles » (interface Échanges)',
@@ -118,7 +119,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
 
   // C. Le calendrier JCC : la frise seule, en plein écran (2026-11-19, porteur : « je veux juste la chronologie qui prenne
   // tout l'écran »), une fiche au toucher d'une sortie, l'appui puis le zoom et les items d'une extension.
-  await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button').nth(1).click(); await page.waitForTimeout(1500);
+  await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'calendrier JCC' }).click(); await page.waitForTimeout(1500);
   const hero = page.locator('section[aria-label="Frise du JCC Pokémon"]');
   ok('frise : mois et repère « Aujourd’hui »', (await hero.count()) === 1 && (await page.locator('.pkm-cal-m').count()) > 12
     && (await page.locator('.pkm-cal-m-now .pkm-cal-now').count()) === 1);
@@ -281,7 +282,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('320 px : aucun débordement horizontal (' + over + ')', over <= 1);
   ok('serveur sans 034 : l’admin voit le fichier à installer', /install_024_a_034\.sql/.test(await page.locator('section[aria-label="Vitrines des dresseurs"]').innerText()));
   await page.screenshot({ path: shot('coin-320.png') });
-  await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button').nth(1).click(); await page.waitForTimeout(1500);
+  await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'calendrier JCC' }).click(); await page.waitForTimeout(1500);
   const over2 = await page.evaluate(() => { const m = document.querySelector('main'); return m ? m.scrollWidth - m.clientWidth : 99; });
   ok('calendrier à 320 px : aucun débordement horizontal (' + over2 + ')', over2 <= 1);
   await page.screenshot({ path: shot('coin-calendrier-320.png') });
