@@ -469,14 +469,19 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 @keyframes pkmTurnPrevB { 0% { transform: perspective(1400px) rotateY(92deg); filter: brightness(0.55); } 60% { filter: brightness(0.85); } 100% { transform: perspective(1400px) rotateY(0); filter: none; } }
 @media (prefers-reduced-motion: reduce) { .pkm-turn-next-0, .pkm-turn-next-1, .pkm-turn-prev-0, .pkm-turn-prev-1 { animation: none; } }
 .pkm-hk-pocket { display: block; width: 100%; aspect-ratio: 600 / 825; box-sizing: border-box; border-radius: 5% / 3.6%; border: 1.5px dashed rgba(168, 182, 255, 0.22); background: rgba(255, 255, 255, 0.03); }
-/* Tri « Par série » de Mon classeur (2026-11-21, porteur) : tout petit logo de l'extension, en haut au milieu de la
-   première carte de chaque série (et de la première carte de chaque page), pour séparer les séries. Sous l'étiquette
-   d'une carte gradée (en haut à droite) quand il y en a une. */
-.pkm-hk-set { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); z-index: 2; display: inline-flex; align-items: center; justify-content: center; max-width: 64%; height: 20px; box-sizing: border-box; padding: 3px 7px; border-radius: 999px; background: rgba(8, 13, 26, 0.88); border: 1px solid rgba(255, 214, 10, 0.8); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45); pointer-events: none; }
-.pkm-hk-set img { display: block; height: 13px; width: auto; max-width: 100%; object-fit: contain; }
-.pkm-hk-set b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9.5px; font-weight: 800; color: #FFFFFF; }
-.pkm-hk-set-low { top: 31px; }
-.pkm-vit-item .pkm-hk-set { top: 1px; }
+/* Tri « Par série » de Mon classeur (2026-11-21, porteur : « une délimitation plus nette entre chaque série, le titre
+   un peu plus gros, juste au-dessus de la première carte de la série, pas dans la carte ») : bandeau pleine largeur
+   (logo de l'extension, nom, nombre de cartes) au-dessus de chaque série, qui commence sur une nouvelle ligne ; marge
+   au-dessus du bandeau d'une nouvelle série. Cartes, vitrine du scellé et « Tout afficher ». */
+.pkm-hk-cell-head, .pkm-vit-headslot, .pkm-hf-setrow { grid-column: 1 / -1; min-width: 0; }
+.pkm-vit-headslot { height: auto; padding: 0 4px; }
+.pkm-vit-headslot::after { content: none; }
+.pkm-hk-sethead { display: flex; align-items: center; gap: 10px; min-height: 44px; box-sizing: border-box; padding: 6px 12px 6px 8px; border-radius: 12px; border: 1px solid rgba(255, 214, 10, 0.5); border-left: 4px solid #FFD60A; background: linear-gradient(90deg, rgba(255, 214, 10, 0.18), rgba(8, 13, 26, 0.88) 60%); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+.pkm-hk-sethead-next { margin-top: 14px; }
+.pkm-hk-sethead-logo { flex: none; display: flex; align-items: center; justify-content: center; width: 68px; height: 30px; }
+.pkm-hk-sethead-logo img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
+.pkm-hk-sethead-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 800; line-height: 1.2; color: #FFFFFF; }
+.pkm-hk-sethead-n { flex: none; font-size: 12px; font-weight: 700; color: #C9D3EA; white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* 3 choix de tri (Prix, Nom, Par série) sur un petit écran : texte et marges resserrés, rien de coupé. */
 @media (max-width: 374px) { .pkm-hk-sortg { gap: 5px !important; padding-left: 10px !important; padding-right: 8px !important; } .pkm-hk-sortg > span { font-size: 12px !important; } .pkm-hk-sortg [role="radio"] { flex: 1 1 auto !important; padding: 0 6px !important; font-size: 13px !important; white-space: nowrap; } }
 .pkm-hk-all { min-height: 28px; padding: 0; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 12.5px; font-weight: 700; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

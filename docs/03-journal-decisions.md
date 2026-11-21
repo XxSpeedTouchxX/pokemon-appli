@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-21 — « Par série » : un titre au-dessus de chaque série (porteur)
+
+- **Demande** : « une délimitation plus nette pour bien voir entre chaque série ; grossis légèrement le titre de la série et mets-le juste au-dessus de la première carte de la série, pas dans la carte ».
+- **Fait (cache v266)** :
+  - le petit logo posé sur la première carte est remplacé par un **bandeau de titre pleine largeur** au-dessus de chaque série : logo de l'extension plus grand (30 px de haut au lieu de 13), nom de la série en 15 px gras, nombre de cartes à droite (« 2 cartes », « 1 carte ») ; bandeau sombre bordé de jaune, trait jaune à gauche ;
+  - chaque série **commence sur une nouvelle ligne** (plus de série qui démarre au milieu d'une rangée) et un espace de 24 px sépare la dernière carte d'une série du titre de la suivante ;
+  - le titre revient en haut de chaque page du classeur quand une série continue d'une page à l'autre (« suite · N cartes ») ;
+  - même présentation dans la vitrine du scellé (chaque extension sur sa propre tablette, « 2 produits ») et dans « Tout afficher » ;
+  - lisible dans les 3 apparences (Sombre, Clair, Original) ;
+  - test `t-binderset.mjs` refait (27 vérifications : ordre titre puis cartes, titre hors des cartes et juste au-dessus, pleine largeur, série à gauche d'une nouvelle ligne, taille du titre, espace entre deux séries, page 2, « Tout afficher », vitrine du scellé).
+
+---
+
 ## 2026-11-21 — Mon classeur trié « Par série » (porteur)
 
 - **Demande** : « un filtre "Par série" qui classe toutes les cartes par série ; un tout petit logo sur la page de mon classeur qui fait la séparation entre les séries ; les cartes rangées par prix décroissant dans chaque série ; l'ordre décroissant des séries en priorité : la première série sera Règne Delta, avec les prix des cartes du plus élevé au plus bas, ensuite viendra 30ème anniversaire, etc. ».

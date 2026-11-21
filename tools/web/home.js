@@ -79,22 +79,43 @@
     // (graded.js), à côté des exemplaires non gradés.
     const order = sortBy === 'name' ? (a, b) => byName(a.p, b.p) || b.v - a.v
       : sortBy === 'set' ? (a, b) => bySet(a, b) || b.v - a.v || byName(a.p, b.p) : (a, b) => b.v - a.v || byName(a.p, b.p);
-    // Petit logo de l'extension sur la première carte de chaque série (et en haut de chaque page du classeur, pour savoir
-    // où l'on est) : la séparation entre les séries, triées « Par série » seulement.
+    // Titre de chaque série (2026-11-21, porteur : « une délimitation plus nette entre chaque série, le titre un peu plus
+    // gros, juste au-dessus de la première carte de la série, pas dans la carte ») : trié « Par série », chaque série
+    // commence sur une nouvelle ligne, sous un bandeau pleine largeur (logo de l'extension, nom, nombre) ; le bandeau
+    // revient en haut de chaque page du classeur (« suite ») pour savoir où l'on est.
     const marks = new Map();
     const markOf = k => {
       if (!marks.has(k)) {
         const e = k ? (TCG.setList || []).find(z => z.id === k) : null, name = e ? e.name : k ? (setOf(k)[0] || k) : 'Autres';
         const logo = e ? setLogo(e.id, e.logo) : '';
-        marks.set(k, { logo: logo, hasLogo: !!logo, noLogo: !logo, name: name });
+        marks.set(k, { logo: logo, hasLogo: !!logo, name: name });
       }
       return marks.get(k);
     };
-    const withMark = (t, l, i, per) => {
-      const on = sortBy === 'set' && (i === 0 || setKey(l[i].p) !== setKey(l[i - 1].p) || (per > 0 && i % per === 0));
-      const m = on ? markOf(setKey(l[i].p)) : HOME_NO_MARK;
-      return Object.assign(t, { hasMark: on, mark: m, markCls: 'pkm-hk-set' + (t.graded ? ' pkm-hk-set-low' : ''),
-        label: on ? 'Série ' + m.name + '. ' + t.label : t.label });
+    const isSet = sortBy === 'set';
+    const startsSet = (l, i, per) => isSet && (i === 0 || setKey(l[i].p) !== setKey(l[i - 1].p) || (per > 0 && i % per === 0));
+    const setHead = (l, i, first, sealedL) => {
+      const k = setKey(l[i].p), m = markOf(k), cont = i > 0 && setKey(l[i - 1].p) === k;
+      const n = l.reduce((t, e) => t + (setKey(e.p) === k ? e.q : 0), 0);
+      const count = (cont ? 'suite · ' : '') + n + ' ' + (sealedL ? (n > 1 ? 'produits' : 'produit') : (n > 1 ? 'cartes' : 'carte'));
+      return { isHead: true, isTile: false, real: false, pocket: false, cellCls: 'pkm-hk-cell pkm-hk-cell-head', slotCls: 'pkm-vit-slot pkm-vit-headslot',
+        head: { logo: m.logo, hasLogo: m.hasLogo, name: m.name, count: count, cls: 'pkm-hk-sethead' + (first ? '' : ' pkm-hk-sethead-next') } };
+    };
+    const cell = t => Object.assign(t, { isHead: false, isTile: true, real: true, pocket: false, cellCls: 'pkm-hk-cell', slotCls: 'pkm-vit-slot' });
+    const emptySlot = () => ({ isHead: false, isTile: false, real: false, pocket: false, cellCls: 'pkm-hk-cell', slotCls: 'pkm-vit-slot' });
+    // l : liste triée ; from, n : tranche affichée ; per : taille d'une page (0 pour « Tout afficher ») ; shelf : vitrine du
+    // scellé (chaque série finit sa tablette par des emplacements vides, la suivante commence sur la tablette d'après).
+    const grouped = (l, from, n, per, make, shelf, sealedL) => {
+      const out = [];
+      let run = 0;
+      const pad = () => { if (shelf) for (let r = (3 - run % 3) % 3; r > 0; r--) out.push(emptySlot()); run = 0; };
+      for (let j = 0; j < n; j++) {
+        const i = from + j;
+        if (startsSet(l, i, per)) { if (out.length) pad(); out.push(setHead(l, i, !out.length, sealedL)); }
+        out.push(cell(make(l[i]))); run++;
+      }
+      if (shelf) pad();
+      return out;
     };
     const all = sealed => x.owned.filter(p => (p.type === 'sealed') === sealed);
     const mine = sealed => all(sealed).flatMap(p => this.gradeEntries(s, p, unit(p), qty(p))).sort(order);
@@ -120,14 +141,16 @@
     };
     const isGraded = e => !!(e.gr || e.p.grade);
     const graded = units(cards.filter(isGraded)), extra = cards.reduce((t, e) => t + Math.max(0, e.q - 1), 0);
-    const shown = list.slice(page * per, page * per + per).map((e, j) => withMark(tile(e), list, page * per + j, per)).map(t => Object.assign(t, { real: true, pocket: false }));
-    // Cartes sur plusieurs pages : pochettes vides jusqu'à 9, pour que la page garde sa hauteur quand on la tourne.
-    const pockets = tab !== 'sealed' && pages > 1 ? Array.from({ length: per - shown.length }, () => ({ real: false, pocket: true })) : [];
+    const slice = list.slice(page * per, page * per + per);
+    const shown = isSet ? grouped(list, page * per, slice.length, per, tile, tab === 'sealed', tab === 'sealed') : slice.map(e => cell(tile(e)));
+    // Cartes sur plusieurs pages : pochettes vides jusqu'à 9, pour que la page garde sa hauteur quand on la tourne (pas en
+    // « Par série », où chaque série commence sur sa ligne).
+    const pockets = tab !== 'sealed' && pages > 1 && !isSet ? Array.from({ length: per - slice.length }, () => Object.assign(emptySlot(), { pocket: true })) : [];
     // Tourner la page (cartes seulement ; le scellé est une vitrine) : sens et parité pour relancer l'animation.
     const turn = (to, dir) => this.setState({ [key]: to, hbTurn: tab === 'sealed' ? null : dir + '-' + (to % 2) });
     // Vitrine : la dernière tablette est complétée par des emplacements vides, pour que le verre reste d'un seul tenant.
-    const shelf = tab === 'sealed' ? shown
-      .concat(Array.from({ length: (3 - shown.length % 3) % 3 }, () => ({ real: false }))) : [];
+    const shelf = tab === 'sealed' ? (isSet ? shown : shown
+      .concat(Array.from({ length: (3 - shown.length % 3) % 3 }, emptySlot))) : [];
     const headV = sum(list), headBig = x.mask(this.eur(headV));
     return {
       // Valeur totale de l'onglet, écrite comme « Valeur de toute ma collection » (Sora, blanc, contour noir), à la même
@@ -150,7 +173,8 @@
       // « Tout afficher » (2026-10-21, vidéo du porteur) : écran plein « Toutes mes cartes » ou « Tous mes produits
       // scellés », classés par valeur, à faire défiler ; filtres Toutes, Loose, Gradées ; « Charger plus » par 30.
       all: { show: true, on: false, label: 'Tout afficher', toggle: () => this.setState({ hbFull: tab, hbFullF: 'all', hbFullN: HOME_FULL }) },
-      full: s.hbFull ? this.homeFull(s, s.hbFull === 'sealed' ? sealed : cards, s.hbFull === 'sealed', (e, l, i) => withMark(tile(e), l, i, 0), l => x.mask(this.eur(sum(l))), units, plural, isGraded) : HOME_NO_FULL,
+      full: s.hbFull ? this.homeFull(s, s.hbFull === 'sealed' ? sealed : cards, s.hbFull === 'sealed',
+        l => (isSet ? grouped(l, 0, l.length, 0, tile, false, s.hbFull === 'sealed') : l.map(e => cell(tile(e)))), l => x.mask(this.eur(sum(l))), units, plural, isGraded) : HOME_NO_FULL,
       tabs: [['cards', 'Mes cartes'], ['sealed', 'Mes produits scellés']].map(([k, label]) =>
         Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k, hbTurn: null }) }, this.chip(tab === k))),
       tabLabel: tab === 'sealed' ? 'Mes produits scellés' : 'Mes cartes',
@@ -181,7 +205,7 @@
     };
   };
   let homeSwipe = null;
-  const HOME_FULL = 30, HOME_NO_FULL = { open: false }, HOME_NO_MARK = { logo: '', hasLogo: false, noLogo: false, name: '' };
+  const HOME_FULL = 30, HOME_NO_FULL = { open: false };
   // Rang de chaque extension dans « Toutes les séries » (des plus récentes aux plus anciennes) ; inconnue : à la fin.
   let homeRankFor = null, homeRankMap = null;
   const homeSetRank = () => {
@@ -190,7 +214,7 @@
     const m = homeRankMap;
     return k => (k && Object.prototype.hasOwnProperty.call(m, k) ? m[k] : 1e6);
   };
-  proto.homeFull = function (s, list, sealed, tile, money, units, plural, isGraded) {
+  proto.homeFull = function (s, list, sealed, layout, money, units, plural, isGraded) {
     const F = sealed ? 'all' : (['loose', 'graded'].indexOf(s.hbFullF) >= 0 ? s.hbFullF : 'all');
     const kept = list.filter(e => F === 'all' || (F === 'graded') === isGraded(e));
     const n = Math.max(HOME_FULL, s.hbFullN || HOME_FULL), shown = kept.slice(0, n), left = kept.length - shown.length;
@@ -201,7 +225,7 @@
       title: sealed ? 'Tous mes produits scellés' : 'Toutes mes cartes',
       sub: (s.hbSort === 'name' ? 'Classés par nom' : s.hbSort === 'set' ? 'Classés par série' : 'Classés par prix') + ' · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
       chips: sealed ? [] : [chip('all', 'Toutes', list), chip('loose', 'Loose', list.filter(e => !isGraded(e))), chip('graded', 'Gradées', list.filter(isGraded))],
-      hasChips: !sealed, items: shown.map((e, i) => tile(e, shown, i)), empty: !kept.length,
+      hasChips: !sealed, items: layout(shown), empty: !kept.length,
       more: left > 0, moreLabel: 'Charger plus (' + Math.min(left, HOME_FULL) + ')', loadMore: () => this.setState({ hbFullN: n + HOME_FULL })
     };
   };
