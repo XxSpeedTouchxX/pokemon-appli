@@ -255,3 +255,6 @@
   .pkm-vfx-stand, .pkm-vfx-lamp::after, .pkm-vfx-sign, .pkm-vfx-shine::before, .pkm-vfx-ring, .pkm-vfx-glint, .pkm-vfx-ripple, .pkm-vfx-sparks i { animation: none; }
   .pkm-vfx-ring, .pkm-vfx-glint, .pkm-vfx-ripple, .pkm-vfx-sparks i { opacity: 0; }
 }
+
+/* Fiche d'échange ouverte depuis la recherche de Ma vitrine : lien vers la carte de dresseur du joueur. */
+.pkm-vt-owner { align-self: center; margin-top: 4px; }

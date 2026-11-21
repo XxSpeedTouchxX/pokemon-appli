@@ -144,17 +144,21 @@
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
     // Valeur de mon exemplaire sur la pastille (selon son état) : même format que la fiche qui s'ouvre (coteTxt).
     const cote = e => { const v = e.v; return v ? x.mask(this.coteTxt(v)) : '—'; };
+    // Cartes mises dans ma vitrine (2026-11-21, porteur : « un petit logo juste au-dessus de l'état de nos cartes, pour
+    // savoir directement si la carte est en vitrine ») : clé « carte|note » de chaque exemplaire de s.vit (vitrine.js).
+    const vitIn = new Set(Object.keys(s.vit || {}).map(ref => { const a = String(ref).split('|'); return a[0] + '|' + (a[3] || ''); }));
     const tile = e => {
       const p = e.p, k = homeCopy(s.purchases, p), q = e.q, l = this.look(p), G = e.gr;
+      const inVit = p.type !== 'sealed' && vitIn.has(p.id + '|' + (G ? G.key : ''));
       // Carte gradée : logo de l'entreprise et note sur la carte, à la place de la bulle de l'état.
       const demoG = !G && p.grade ? gradeOf(String(p.grade).replace(/^(PCA|CCC|PSA)\s+(\d+(?:[,.]5)?).*$/, (m, c, n) => c + '-' + n.replace(',', '.'))) : null; // article de démo « PCA 9,5 »
       const gb = G || demoG ? this.gradeBadge(G || demoG) : { graded: !!p.grade, grade: p.grade || '', gradeMark: '', gradeHasMark: false, gradeCls: 'pkm-gr-badge', gradeTone: 'pkm-gr-badge-g', gradeName: p.grade || '' };
       const cond = !G && homeCondIcon(k.cond);
       return Object.assign(l, gb, {
         name: p.name, sub: copyBase(p.sub), flag: this.flag(k.lang), cote: cote(e), condColor: HOME_COND[k.cond] || HOME_COND.NM, condIcon: cond || '', hasCond: !!cond, noCond: !cond && !G, condAb: G ? '' : HOME_COND_AB[k.cond] || '',
-        many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg,
+        many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg, inVit: inVit,
         label: p.name + (gb.graded ? ', gradée ' + gb.gradeName : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
-          + (G ? '' : copyLabel(p, k.cond) + ', ') + 'cote ' + (e.v ? x.mask(this.eur(e.v)) : 'inconnue') + '. Ouvrir la fiche',
+          + (G ? '' : copyLabel(p, k.cond) + ', ') + 'cote ' + (e.v ? x.mask(this.eur(e.v)) : 'inconnue') + (inVit ? ', dans ta vitrine' : '') + '. Ouvrir la fiche',
         open: () => this.fiOpen(p.id, { gr: G ? G.key : '', from: 'binder' })
       });
     };

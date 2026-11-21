@@ -70,7 +70,7 @@ await page.waitForTimeout(300);
 ok('7ᵉ : « Dans le top 10 », ligne surlignée dans la liste, pas de ligne en plus', /Dans le top 10/.test(await page.locator('section.pkm-pg-card').innerText()) && (await page.locator('ol.pkm-pg-list > li > .pkm-pg-me').count()) === 1 && (await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').count()) === 0);
 // Aller sur « Ma vitrine » puis revenir sur « Ma ligue ».
 await page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma vitrine' }).click(); await page.waitForTimeout(900);
-ok('« Ma vitrine » : la ligue disparaît', (await page.locator('section.pkm-pg-card').count()) === 0 && (await page.locator('section[aria-label="Rechercher un dresseur"]').count()) === 1);
+ok('« Ma vitrine » : la ligue disparaît', (await page.locator('section.pkm-pg-card').count()) === 0 && (await page.locator('section[aria-label="Rechercher une carte ou un dresseur"]').count()) === 1);
 await page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma ligue' }).click(); await page.waitForTimeout(900);
 ok('retour sur « Ma ligue » : carte et classement', (await page.locator('section.pkm-pg-card').count()) === 1 && (await page.locator('section[aria-label="Classement général"]').count()) === 1);
 // Ancienne adresse ?start=progress : ouvre Le coin des dresseurs sur Ma ligue.

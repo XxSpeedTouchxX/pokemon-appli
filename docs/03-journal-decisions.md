@@ -6,6 +6,28 @@
 
 ---
 
+## 2026-11-21 — Carte de dresseur simplifiée, messages rapides supprimés, « Ma vitrine » : recherche d'une carte (porteur)
+
+- **Demandes** :
+  - « dans la carte de visite de chaque joueur de la ligue, uniquement le pseudo, le grade, membre depuis, le classement de la saison actuelle + PL de la saison actuelle + le classement et PL de la saison passée + sa vitrine ; supprime tous les messages rapides » ;
+  - « dans Ma vitrine, supprime "Voir ma vitrine" avec le logo œil, et "Vitrines des dresseurs" en bas ; change le logo de la bulle "Ma vitrine" pour le petit logo du magasin de l'animation » ;
+  - « dans Mon classeur, ce petit logo juste au-dessus de l'état de nos cartes, pour savoir si la carte est mise en vitrine » ;
+  - « dans Ma vitrine, rechercher par le nom d'une carte ou d'un dresseur dans la barre "Recherche une carte ou un dresseur" : si l'utilisateur cherche un Groudon Star, il sort et indique quel dresseur le propose à la vente ou par trade ; ensuite on met en relation les deux joueurs et on leur donne rendez-vous sur notre Discord pour réaliser l'échange ».
+- **Fait (cache v268)** :
+  - carte de dresseur : avatar (gardé), pseudo, grade, membre depuis, **saison en cours** et **saison passée** (classement, médaille du podium, PL), sa vitrine ; plus de liste des anciennes saisons ni de « Il cherche » ; première saison : « pas encore de saison passée » ;
+  - **messages rapides supprimés** : plus d'envoi depuis la carte, plus de réponses toutes faites ; serveur `038` : `quick_msg_send` et `quick_msg_reply` refusent, les messages rapides déjà envoyés sont effacés, « Mes messages » ne renvoie que les propositions d'échange ;
+  - « Mes messages » (propositions d'échange) déplacé en haut de « Ma vitrine », pastille sur la bulle « Ma vitrine » ; réglage « Recevoir les propositions d'échange » ;
+  - « Ma vitrine » : « Voir ma vitrine » et « Vitrines des dresseurs » retirés ; logo de la bulle : le petit magasin (store jaune et blanc, vitrine, carte), `web/img/brand/vitrine.svg` ;
+  - barre unique **« Recherche une carte ou un dresseur »** : l'app trouve dans son catalogue les cartes dont le nom correspond (français ou anglais ; « star » pour ☆, « delta » pour δ), le serveur (`showcase_offers`, 038) renvoie qui les propose Pour trade ou à vendre (état, langue, prix demandé, dresseur) ; un appui ouvre la fiche d'échange (« Je suis intéressé », « Je te propose une de mes cartes », « Voir la carte de dresseur ») ; les dresseurs trouvés par pseudo restent dessous ;
+  - **mise en relation** : quand le joueur accepte (« Ça m'intéresse »), les deux voient « Rendez-vous sur le Discord Dropicards » avec un rappel de prudence ; **lien du Discord à fournir** (en attendant : « Discord Dropicards bientôt disponible ») ;
+  - Mon classeur : petit magasin juste au-dessus de l'état des cartes mises en vitrine (aussi dans « Tout afficher ») ;
+  - **choix par défaut** : avatar gardé sur la carte ; « Mes messages » déplacé dans Ma vitrine (il ne contient plus que des échanges) ; un compte de moins de 15 ans n'apparaît jamais dans les résultats ;
+  - serveur `tools/supabase/038_recherche_cartes.sql` (tests `tests/test_038.sql`, 25) **à installer** : inclus dans `install_024_a_034.sql` ; `000_verifier.sql` à jour ;
+  - confidentialité et CGU à jour (21 novembre 2026) ;
+  - tests `t-qmsg.mjs` (refait, 26), `t-coin.mjs` (71), `t-vitrine.mjs` (70), `t-pl.mjs`, `t-progress.mjs`, `t-binderset.mjs`.
+
+---
+
 ## 2026-11-21 — Mon classeur : pages qui se tournent vite, écran immobile (porteur)
 
 - **Demande** : « quand on change de page de classeur, celui-ci bouge en permanence ; je veux pouvoir changer de page directement en cliquant dessus en continu avec mon doigt pour aller plus vite, et que l'écran ne bouge plus entre chaque page ».

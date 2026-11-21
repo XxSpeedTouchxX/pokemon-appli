@@ -19,6 +19,7 @@ const IDS = ['base1-3', 'sv08-029', 'me06-084', '30th-032', 'me05-087', '30th-c-
 const rows = IDS.map(id => SET[id]).filter(Boolean);
 const HOME = { me06: 'me06', '30th': '30th', '30th-c': '30th', me05: 'me05', sv08: 'sv08', base1: 'base1' };
 const saved = JSON.stringify({ v: 1, savedAt: new Date().toISOString(), tuto: 'done', onb: 0,
+  vit: { 'me06-084|FR|NM|': { t: true } }, // une carte dans ma vitrine (petit magasin au-dessus de son état)
   cards: Object.fromEntries(rows.map(r => [r[0], { r: r, f: doc.fields }])),
   purchases: rows.map((r, i) => ({ id: 'n' + i, date: '2026-10-01', seq: i, lines: [{ pid: r[0], qty: 1, lang: 'FR', cond: 'NM' }], total: null, where: 'Test', by: 'toi' })),
   sales: [], seq: 50 });
@@ -81,6 +82,16 @@ ok('titres hors des cartes, juste au-dessus de la 1ʳᵉ carte de la série (' +
 ok('chaque série commence à gauche d’une nouvelle ligne (' + geo.map(g => g.left).join(', ') + ')', geo.every(g => g.left !== null && Math.abs(g.left) <= 2));
 ok('titre plus gros (police ' + geo[0].font + ' px, logo ' + geo[0].logoH + ' px de haut)', geo.every(g => g.font >= 15) && geo[0].logoH >= 22);
 ok('séparation nette entre deux séries (' + geo.slice(1).map(g => g.gapPrev).join(', ') + ' px)', geo.slice(1).every(g => g.gapPrev !== null && g.gapPrev >= 20));
+// Carte dans ma vitrine (2026-11-21, porteur) : le petit magasin juste au-dessus de son état, sans cacher la carte.
+const vt = await page.locator(TILE).evaluateAll(bs => bs.map(b => {
+  const ic = b.querySelector('img.pkm-hk-vit'), pill = b.querySelector('.pkm-pill2'), c = b.querySelector('.pkm-pill2-c') || pill;
+  if (!ic) return { label: b.getAttribute('aria-label'), icon: false };
+  const r = ic.getBoundingClientRect(), pr = pill.getBoundingClientRect(), cr = c.getBoundingClientRect(), br = b.getBoundingClientRect();
+  return { label: b.getAttribute('aria-label'), icon: true, src: ic.getAttribute('src'), w: Math.round(r.width), gap: Math.round(pr.top - r.bottom), right: Math.round(cr.right - r.right), inside: r.left >= br.left && r.right <= br.right, area: (r.width * r.height) / (br.width * br.height) };
+}));
+const withIcon = vt.filter(x => x.icon);
+ok('petit magasin seulement sur la carte en vitrine (' + withIcon.length + ')', withIcon.length === 1 && idOf(withIcon[0].label) === 'me06-084' && /dans ta vitrine/.test(withIcon[0].label) && /brand\/vitrine\.svg/.test(withIcon[0].src));
+ok('petit magasin : juste au-dessus de l’état, petit, dans la carte (' + JSON.stringify(withIcon[0] || {}) + ')', !!withIcon[0] && withIcon[0].gap >= 0 && withIcon[0].gap <= 6 && Math.abs(withIcon[0].right) <= 4 && withIcon[0].inside && withIcon[0].area < 0.05 && withIcon[0].w >= 14);
 await page.locator(SEC).screenshot({ path: shot('classeur-par-serie.png') });
 // Même hauteur pour chaque page : les flèches ne bougent pas quand on tourne la page (2026-11-21, porteur).
 const arrowY = async () => page.locator(SEC + ' button[aria-label="Page suivante"]').evaluate(b => Math.round(b.getBoundingClientRect().top + (document.querySelector('#app main') || document.scrollingElement).scrollTop));
@@ -158,9 +169,9 @@ const left0 = Math.min(...vit.filter(x => !x.head).map(x => x.left));
 ok('vitrine : chaque série commence sur une nouvelle tablette, à gauche (' + firsts.join(', ') + ')', firsts.length === 3 && firsts.every(v => v === left0));
 await pg2.locator(SEC).screenshot({ path: shot('classeur-par-serie-scelle.png') });
 
-// G. Classeur de 4 pages trié par prix : doigt gardé sur « Page suivante », les pages défilent seules (une page tout de
-// suite, puis une toutes les 0,16 s), les flèches ne bougent pas, et la page finale est celle du doigt levé.
-const many = doc.cards.filter(r => r[0].indexOf('sv08-') === 0).slice(0, 34);
+// G. Classeur de 8 pages trié par prix : doigt gardé sur « Page suivante », les pages défilent seules (une page tout de
+// suite, puis une toutes les 0,16 s), les flèches ne bougent pas, et le défilement s'arrête quand le doigt se lève.
+const many = doc.cards.filter(r => r[0].indexOf('sv08-') === 0).slice(0, 70);
 const ctx3 = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
 await withFonts(ctx3); await withDemoCards(ctx3);
 const pg3 = await ctx3.newPage(); pg3.on('pageerror', e => errors.push(e.message));
@@ -179,7 +190,9 @@ await pg3.waitForTimeout(120); const at1 = await lab3();
 await pg3.waitForTimeout(560); const at2 = await lab3();
 const b1 = await nx.boundingBox();
 await pg3.mouse.up(); await pg3.waitForTimeout(400); const at3 = await lab3();
-ok('doigt gardé : page 2 tout de suite, puis les suivantes (' + [at1, at2, at3].join(' → ') + ')', at1 === 'Page 2 sur 4' && /Page [34] sur 4/.test(at2) && at3 === at2);
+await pg3.waitForTimeout(600); const at4 = await lab3();
+const pn = t => Number((/Page (\d+)/.exec(t) || [])[1] || 0);
+ok('doigt gardé : page 2 tout de suite, puis les suivantes, arrêt au doigt levé (' + [at1, at2, at3, at4].join(' → ') + ')', at1 === 'Page 2 sur 8' && pn(at2) >= 3 && pn(at3) < 8 && at3 === at4);
 ok('doigt gardé : la flèche reste sous le doigt (' + Math.round(b0.y) + ' / ' + Math.round(b1.y) + ')', Math.abs(b0.y - b1.y) < 1);
 await ctx3.close();
 

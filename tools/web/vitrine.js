@@ -10,7 +10,8 @@
   //   - Carte de dresseur : sa vitrine (étiquettes POUR TRADE et À VENDRE avec le prix), ce qu'il cherche, ce qui colle
   //     avec moi ; un appui sur une carte : « Je suis intéressé » ou « Je te propose une de mes cartes » (trade_send).
   //   - « Mes messages » : propositions avec les cartes, réponses « Ça m'intéresse » (accord), « Non merci », « Plus
-  //     disponible » (trade_answer). Jamais de texte libre, jamais de paiement : pour s'organiser, étage 2 (plus tard).
+  //     disponible » (trade_answer). Jamais de texte libre, jamais de paiement ; accord : rendez-vous sur le Discord de
+  //     Dropicards pour organiser l'échange (2026-11-21, porteur).
   // Serveur sans 033 : un admin voit le fichier à installer, un joueur « bientôt ».
   const VT_MAX = 30, WANT_MAX = 50, VT_TTL = 60000;
   const VT_FILE = 'tools/supabase/install_024_a_034.sql';
@@ -22,6 +23,8 @@
   const vtOld = () => (vtAdmin() ? 'Aperçu admin : les échanges ne sont pas encore installés sur le serveur. Colle ' + VT_FILE + ' dans Studio (SQL Editor › Run).' : 'Les échanges entre joueurs arrivent très bientôt.');
   const vtErrText = e => (e && e.code === 'network' ? 'Pas de réseau : réessaie dans un instant.' : e && e.code === 'not_installed' ? vtOld() : (e && e.message) || 'Une erreur est survenue. Réessaie dans un instant.');
   const vtProto = Component.prototype;
+  // Lien du Discord de Dropicards (profile.js ; vide tant que le porteur ne l'a pas donné).
+  const vtDiscord = () => { try { return String((SOCIAL_LINKS && SOCIAL_LINKS.discord) || ''); } catch (e) { return ''; } };
 
   // Exemplaires restants d'une carte, par langue, état et note (comme la fiche).
   const vtGroups = (s, pid) => {
@@ -411,7 +414,7 @@
   };
   vtProto.vTradeSheet = function (s) {
     const t = s.tcs;
-    if (!t || !t.it || !s.pcCard) return { open: false, offers: [] };
+    if (!t || !t.it) return { open: false, offers: [] };
     const x = t.it, c = this.vtCard(x.card_id, x.lang, x.cond, x.grade), st = s.vtSt || {}, ageOk = st.ageOk !== false;
     const avail = (x.trade || x.sale) && !x.deal, mineT = x.trade && avail ? this.vtMyTrade(s) : [];
     const pick = mineT.find(o => o.sid === t.pick);
@@ -427,7 +430,11 @@
         aria: 'Proposer ' + o.name + ' (' + o.condLong + ')' })),
       lacksOffers: avail && ageOk && !!x.trade && !mineT.length, offer: () => this.vtSend('offer'), offerLabel: pick ? '⇄ Proposer ma carte ' + pick.name : 'Choisis une de tes cartes ci-dessus', offerOff: !pick || !!t.busy,
       noOffers: 'Mets d’abord une de tes cartes « Pour trade » (fiche d’une carte de ton classeur) pour la proposer en échange.',
-      note: x.deal ? 'Échange ou vente en cours avec un autre joueur.' : !ageOk ? 'Les échanges sont ouverts à partir de 15 ans.' : !avail ? 'Cette carte est seulement montrée dans sa vitrine.' : 'Seulement des messages tout faits, avec les cartes. Dropicards ne prend aucun paiement : la vente ou l’échange se fait entre joueurs.'
+      // Ouverte depuis la recherche de Ma vitrine : lien vers la carte de dresseur du joueur (sa vitrine).
+      hasOwner: !s.pcCard, ownerLabel: 'Voir la carte de dresseur de ' + t.owner.pseudo,
+      openOwner: () => { const o = t.owner; this.setState({ tcs: null }); this.pcOpen({ id: o.id, pseudo: o.pseudo, grade: o.grade, avatar: o.avatar || null }, 'PL', 0); },
+      note: x.deal ? 'Échange ou vente en cours avec un autre joueur.' : !ageOk ? 'Les échanges sont ouverts à partir de 15 ans.' : !avail ? 'Cette carte est seulement montrée dans sa vitrine.'
+        : 'Si ' + t.owner.pseudo + ' accepte, vous vous retrouvez sur le Discord Dropicards pour organiser l’échange. Dropicards ne prend aucun paiement : la vente ou l’échange se fait entre joueurs.'
     };
   };
 
@@ -450,7 +457,7 @@
     const r = vtBaseBox.call(this, s), raw = s.qmBox && Array.isArray(s.qmBox.items) ? s.qmBox.items : [], rb = s.qmReplyBusy || '';
     (r.items || []).forEach((v, i) => {
       const it = raw[i];
-      v.isTrade = false; v.tcards = []; v.hasDeal = false; v.swapCls = 'pkm-qm-swap'; v.dealText = ''; v.dealNote = '';
+      v.isTrade = false; v.tcards = []; v.hasDeal = false; v.swapCls = 'pkm-qm-swap'; v.dealText = ''; v.dealNote = ''; v.discord = ''; v.hasDiscord = false; v.noDiscord = false; v.safeNote = '';
       if (!it || !/^(interest|offer|answer)$/.test(it.kind || '')) return;
       const snap = x => (x ? Object.assign(this.vtCard(x.card_id, x.lang, x.cond, x.grade), { tag: x.sale && !x.trade ? 'À vendre · ' + vtPriceTxt(x.price_cents) : x.trade ? 'Pour trade' : '' }) : null);
       const card = snap(it.card), offer = snap(it.offer), ans = it.kind === 'answer';
@@ -461,7 +468,9 @@
       v.tcards = [theirs ? Object.assign({ who: ans ? 'Sa carte' : 'Sa carte proposée' }, theirs) : null, mine ? Object.assign({ who: ans ? 'Ta carte' : 'Ta carte' }, mine) : null].filter(Boolean)
         .map(cd => Object.assign(cd, { sub2: [cd.cond, cd.value, cd.tag].filter(Boolean).join(' · ') }));
       v.swapCls = 'pkm-qm-swap' + (v.tcards.length > 1 ? ' pkm-qm-swap2' : '');
-      // Une réponse reçue se répond par un message rapide (base de qmsg.js) ; une proposition, par ses 3 boutons.
+      // Une proposition se répond par ses 3 boutons ; une réponse reçue ne se répond plus (messages rapides retirés le
+      // 2026-11-21) : en cas d'accord, rendez-vous sur le Discord.
+      v.replies = []; v.hasReplies = false; v.replied = ''; v.hasReplied = false;
       if (!ans) {
         const done = !!it.replied;
         v.replies = done ? [] : ['deal_yes', 'deal_no', 'gone'].map(code => ({ label: VT_CODES[code], aria: VT_CODES[code] + ' : répondre à ' + (it.pseudo || 'ce joueur'),
@@ -472,7 +481,12 @@
       const sale = !!(it.card && it.card.sale && !it.offer);
       v.hasDeal = !!it.deal;
       v.dealText = (sale ? 'Vente d’accord avec ' : 'Échange d’accord avec ') + (it.pseudo || 'ce joueur');
-      v.dealNote = 'Vos cartes sont marquées « d’accord » dans vos vitrines. Pour vous organiser (envoi, rendez-vous), il faudra l’étage 2 : bientôt.';
+      // Mise en relation (2026-11-21, porteur : « mettre en relation les deux joueurs et leur donner rendez-vous sur
+      // notre Discord pour réaliser l'échange ») : lien du Discord de Dropicards (SOCIAL_LINKS, profile.js).
+      const dsc = vtDiscord();
+      v.dealNote = 'Vos cartes sont marquées « d’accord » dans vos vitrines. Retrouve ' + (it.pseudo || 'ce dresseur') + ' sur le Discord Dropicards (donne-lui ton pseudo Dropicards) pour organiser l’échange.';
+      v.discord = dsc; v.hasDiscord = !!dsc; v.noDiscord = !dsc;
+      v.safeNote = 'Ne donne jamais ton adresse ni tes coordonnées bancaires : préfère un échange en main propre dans un lieu public ou une boutique.';
     });
     return r;
   };

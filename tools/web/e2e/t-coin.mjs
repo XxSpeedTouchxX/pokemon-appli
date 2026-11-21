@@ -34,6 +34,12 @@ const setup = async (S, o) => {
     if (fn === 'player_card') return send(200, { id: body.target, pseudo: body.target === UID ? 'Sacha' : 'Ondine', avatar: null, grade: 3, me: body.target === UID, since: '2026-11', season: { n: 1, rank: 4, pl: 1200, players: 40 }, past: [] });
     if (fn === 'player_showcase') return send(200, body.target === UID ? { me: true, items: [], wants: [] } : { me: false, has_for_me: 0, wants_mine: 0, wants: [], items: [
       { sid: 501, card_id: S.ids[0], lang: 'FR', cond: 'NM', grade: null, trade: true, sale: false, price_cents: null, deal: false }] });
+    if (fn === 'showcase_offers') {
+      if (S.off38) return send(404, { code: 'PGRST202', message: 'not found' });
+      return send(200, (body.ids || []).indexOf('ex11-111') >= 0 ? [{ sid: 777, card_id: 'ex11-111', lang: 'FR', cond: 'EX', grade: null, trade: false, sale: true, price_cents: 45000, deal: false,
+        owner: { id: 'u-ond', pseudo: 'Ondine', avatar: null, grade: 3 } }] : []);
+    }
+    if (fn === 'trade_send') return send(200, { ok: true, id: 9, left: 9 });
     if (fn === 'trade_state') return send(200, { adult: false, age_ok: true, mine: [], demand: {}, supply: {} });
     if (fn === 'trade_matches') return send(200, []);
     if (fn === 'showcase_set' || fn === 'wants_set') return send(200, null);
@@ -96,29 +102,46 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   ok('ouverture sur « Ma ligue » (classement de la saison)', /Ma ligue/.test(await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button[aria-selected="true"]').innerText()) && (await page.locator('section.pkm-pg-season').count()) === 1);
   await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'Ma vitrine' }).click(); await page.waitForTimeout(1200);
 
-  // B. Ma vitrine : même interface que l'onglet Échanges, recherche, vitrines des dresseurs.
+  // B. Ma vitrine : même interface que l'onglet Échanges, « Mes messages », une seule recherche « une carte ou un
+  // dresseur » (2026-11-21, porteur) ; « Voir ma vitrine » et « Vitrines des dresseurs » retirés.
   ok('Ma vitrine : sections « Mes cartes Pour trade et à vendre », « Je cherche », « Échanges possibles » (interface Échanges)',
     (await page.locator('section[aria-label="Mes cartes Pour trade et à vendre"]').count()) === 1 && (await page.locator('section[aria-label="Je cherche"]').count()) === 1
     && (await page.locator('section[aria-label="Échanges possibles"]').count()) === 1);
-  ok('vitrines des dresseurs : chargées sans recherche (player_search vide)', (S.calls.player_search || []).some(b => b.q === '')
-    && /Ondine/.test(await page.locator('section[aria-label="Vitrines des dresseurs"]').innerText()));
-  await page.fill('input[aria-label="Pseudo du dresseur"]', 'ond'); await page.waitForTimeout(900);
+  ok('Ma vitrine : plus de « Voir ma vitrine » ni de « Vitrines des dresseurs »', (await page.locator('button.pkm-coin-mine').count()) === 0
+    && (await page.locator('section[aria-label="Vitrines des dresseurs"]').count()) === 0 && !(S.calls.player_search || []).some(b => b.q === ''));
+  ok('Ma vitrine : bouton « Mes messages » en haut', (await page.locator('button.pkm-qm-open.pkm-coin-msgs').count()) === 1);
+  ok('bulle « Ma vitrine » : le petit magasin de l’animation de la vitrine', (await page.locator('[role="tablist"] button', { hasText: 'Ma vitrine' }).locator('img[src*="brand/vitrine.svg"]').count()) === 1);
+  const IN = 'input[aria-label="Recherche une carte ou un dresseur"]', FS = 'section[aria-label="Rechercher une carte ou un dresseur"]';
+  ok('barre « Recherche une carte ou un dresseur… »', (await page.getAttribute(IN, 'placeholder')) === 'Recherche une carte ou un dresseur…');
+  await page.fill(IN, 'ond'); await page.waitForTimeout(900);
   ok('recherche : serveur interrogé avec « ond »', (S.calls.player_search || []).some(b => b.q === 'ond'));
-  const found = N(await page.locator('section[aria-label="Rechercher un dresseur"]').innerText());
-  ok('recherche : « 1 dresseur trouvé », Ondine, 5 cartes, 2 Pour trade, 1 à vendre (' + found.slice(0, 120) + ')', /1 dresseur trouvé/.test(found) && /Ondine/.test(found) && /5 cartes en vitrine/.test(found) && /2 Pour trade/.test(found) && /1 à vendre/.test(found));
-  await page.screenshot({ path: shot('coin-vitrine.png') });
-  await page.locator('section[aria-label="Rechercher un dresseur"] button.pkm-coin-row').first().click(); await page.waitForTimeout(1200);
+  const found = N(await page.locator(FS).innerText());
+  ok('recherche : « 1 dresseur trouvé », Ondine, 5 cartes, 2 Pour trade, 1 à vendre (' + found.slice(0, 120) + ')', /1 dresseur trouvé/i.test(found) && /Ondine/.test(found) && /5 cartes en vitrine/.test(found) && /2 Pour trade/.test(found) && /1 à vendre/.test(found));
+  await page.locator(FS + ' button.pkm-coin-row').first().click(); await page.waitForTimeout(1200);
   const card = N(await page.locator('body').innerText());
   ok('un dresseur trouvé ouvre sa carte de dresseur avec « Sa vitrine »', (S.calls.player_showcase || []).some(b => b.target === 'u-ond') && /Sa vitrine/.test(card));
   await page.screenshot({ path: shot('coin-carte-dresseur.png') });
   await page.evaluate(() => window.__pkm.setState({ pcCard: null, pcVit: null })); await page.waitForTimeout(300);
-  await page.fill('input[aria-label="Pseudo du dresseur"]', 'zzz'); await page.waitForTimeout(900);
-  ok('recherche sans résultat : « Aucun dresseur ne s’appelle »', /Aucun dresseur ne s’appelle « zzz »/.test(await page.locator('section[aria-label="Rechercher un dresseur"]').innerText()));
+  // Une carte : « Groudon star » trouve Groudon ☆ (ex11-111) et le dresseur qui le propose.
+  await page.fill(IN, 'groudon star'); await page.waitForTimeout(1100);
+  const sent = (S.calls.showcase_offers || []).slice(-1)[0] || {};
+  ok('carte : identifiants du catalogue envoyés au serveur, Groudon ☆ en tête (' + (sent.ids || []).slice(0, 3).join(', ') + ')', Array.isArray(sent.ids) && sent.ids[0] === 'ex11-111');
+  const fc = N(await page.locator(FS).innerText());
+  ok('carte : « 1 carte proposée », Groudon ☆, À VENDRE · 450 €, par Ondine, sans « Aucun dresseur » (' + fc.slice(0, 160) + ')', /1 carte proposée/i.test(fc) && !/Aucun dresseur/.test(fc) && /Groudon ☆/.test(fc) && /À VENDRE · 450 €/.test(fc) && /Ondine/.test(fc));
+  await page.screenshot({ path: shot('coin-recherche-carte.png') });
+  await page.locator(FS + ' button.pkm-coin-offer').first().click(); await page.waitForTimeout(900);
+  const TS = page.locator('section.pkm-vt-sheet'), tst = N(await TS.innerText().catch(() => ''));
+  ok('carte : la fiche d’échange s’ouvre (« Carte de Ondine », « Je suis intéressé (450 €) », rendez-vous Discord annoncé)', (await TS.count()) === 1 && /Carte de Ondine/.test(tst) && /Je suis intéressé \(450 €\)/.test(tst) && /Discord Dropicards/.test(tst));
+  ok('carte : lien « Voir la carte de dresseur de Ondine »', (await TS.locator('button', { hasText: 'Voir la carte de dresseur de Ondine' }).count()) === 1);
+  await TS.locator('button', { hasText: 'Je suis intéressé (450 €)' }).click(); await page.waitForTimeout(800);
+  ok('carte : mise en relation (trade_send : intéressé, exemplaire 777, Ondine)', (S.calls.trade_send || []).length === 1 && S.calls.trade_send[0].kind === 'interest' && S.calls.trade_send[0].card_sid === 777 && S.calls.trade_send[0].target === 'u-ond');
+  await page.fill(IN, 'pikachu'); await page.waitForTimeout(1100);
+  ok('carte que personne ne propose : « Personne ne propose « pikachu » pour l’instant »', /Personne ne propose « pikachu » pour l’instant/.test(N(await page.locator(FS).innerText())));
+  await page.fill(IN, 'zzz'); await page.waitForTimeout(900);
+  const fz0 = N(await page.locator(FS).innerText());
+  ok('recherche sans résultat : « Aucun dresseur ne s’appelle », aucune partie « cartes »', /Aucun dresseur ne s’appelle « zzz »/.test(fz0) && !/carte proposée|Cartes proposées/.test(fz0));
   await page.click('button[aria-label="Effacer la recherche"]'); await page.waitForTimeout(300);
-  ok('effacer : champ vide, plus de résultats', (await page.inputValue('input[aria-label="Pseudo du dresseur"]')) === '' && (await page.locator('section[aria-label="Rechercher un dresseur"] .pkm-coin-row').count()) === 0);
-  await page.click('button.pkm-coin-mine'); await page.waitForTimeout(1000);
-  ok('« Voir ma vitrine » : ma carte de dresseur, « Ma vitrine »', (S.calls.player_showcase || []).some(b => b.target === UID) && /Ma vitrine/.test(N(await page.locator('body').innerText())));
-  await page.evaluate(() => window.__pkm.setState({ pcCard: null, pcVit: null })); await page.waitForTimeout(300);
+  ok('effacer : champ vide, plus de résultats', (await page.inputValue(IN)) === '' && (await page.locator(FS + ' .pkm-coin-row, ' + FS + ' .pkm-coin-offer').count()) === 0);
 
   // C. Le calendrier JCC : la frise seule, en plein écran (2026-11-19, porteur : « je veux juste la chronologie qui prenne
   // tout l'écran »), une fiche au toucher d'une sortie, l'appui puis le zoom et les items d'une extension.
@@ -274,7 +297,7 @@ const NAV = 'nav[aria-label="Navigation principale"]';
 
 // D. Petit écran (320 px) : pas de débordement ; logo 3 avec ?coinvis=3 ; serveur sans 034 (admin).
 {
-  const S = newS({ off34: true });
+  const S = newS({ off34: true, off38: true });
   const { ctx, page } = await setup(S, { w: 320, q: '&coinvis=3&navvis=3', role: 'admin' });
   const nv = await page.evaluate(() => { const shown = [...document.querySelectorAll('.pkm-navdeco .pkm-nds')].filter(e => getComputedStyle(e).display === 'block').map(e => e.getAttribute('class')); const sc = document.querySelector('button[aria-label^="Scanner"]'), co = document.querySelector('button[aria-label="Le coin des dresseurs"]').getBoundingClientRect(); return { shown, rad: parseFloat(getComputedStyle(sc).borderTopLeftRadius), fits: co.left >= 0 && co.right <= innerWidth && sc.getBoundingClientRect().right <= innerWidth }; });
   ok('?navvis=3 : forme « Socle » seule, scan en carré arrondi, tout dans l’écran à 320 px', nv.shown.length === 1 && /pkm-nd-3/.test(nv.shown[0]) && nv.rad < 25 && nv.fits);
@@ -288,7 +311,11 @@ const NAV = 'nav[aria-label="Navigation principale"]';
   await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'Ma vitrine' }).click(); await page.waitForTimeout(1200);
   const overV = await page.evaluate(() => { const m = document.querySelector('main'); return m ? m.scrollWidth - m.clientWidth : 99; });
   ok('320 px, Ma vitrine : aucun débordement horizontal (' + overV + ')', overV <= 1);
-  ok('serveur sans 034 : l’admin voit le fichier à installer', /install_024_a_034\.sql/.test(await page.locator('section[aria-label="Vitrines des dresseurs"]').innerText()));
+  await page.fill('input[aria-label="Recherche une carte ou un dresseur"]', 'dracaufeu'); await page.waitForTimeout(1200);
+  const off = N(await page.locator('section[aria-label="Rechercher une carte ou un dresseur"]').innerText());
+  ok('serveur sans 034 ni 038 : l’admin voit le fichier à installer (dresseurs et cartes)', (off.match(/install_024_a_034\.sql/g) || []).length === 2, off.slice(0, 200));
+  const overS = await page.evaluate(() => { const m = document.querySelector('main'); return m ? m.scrollWidth - m.clientWidth : 99; });
+  ok('320 px, recherche : aucun débordement horizontal (' + overS + ')', overS <= 1);
   await page.screenshot({ path: shot('coin-320.png') });
   await page.locator('[aria-label="Le coin des dresseurs"][role="tablist"] button', { hasText: 'calendrier JCC' }).click(); await page.waitForTimeout(1500);
   const over2 = await page.evaluate(() => { const m = document.querySelector('main'); return m ? m.scrollWidth - m.clientWidth : 99; });

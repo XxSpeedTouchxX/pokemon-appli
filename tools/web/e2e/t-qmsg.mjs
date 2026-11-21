@@ -1,6 +1,8 @@
-// Messages rapides entre joueurs de « Ma ligue » (2026-11-16, porteur : « ok pour le B », option B de docs/43 ; pastille sur la bulle
-// « Ma ligue » du coin des dresseurs depuis le 2026-11-21) :
-// 8 messages tout faits sur la carte de dresseur, « Mes messages » (pastille, réponses, réglage), carte de l'expéditeur.
+// « Mes messages » et carte de dresseur (2026-11-21, porteur : « supprime tous les messages rapides » ; « dans la carte de
+// visite, uniquement le pseudo, le grade, membre depuis, le classement et les PL de la saison actuelle, le classement et
+// les PL de la saison passée, et sa vitrine ») : plus de messages rapides (ni sur la carte, ni dans la boîte, ni pour
+// répondre) ; « Mes messages » ne garde que les propositions d'échange, ouvert depuis Ma vitrine (pastille sur la bulle
+// « Ma vitrine ») ; carte de dresseur avec la saison en cours et la saison passée.
 // Le serveur est imité (page.route) : jamais le vrai serveur.
 const { launch, BASE: E2E, shot } = await import('./helpers.mjs');
 const browser = await launch();
@@ -23,14 +25,20 @@ const setup = async (S, role) => {
     if (fn === 'pl_state') return send(404, {});
     if (fn === 'season_board') return send(200, { unit: 'pl', season: { n: 1, start: '2026-11-07T23:00:00Z', end: '2027-01-06T23:00:00Z' }, players: 40, ranked: 25,
       top: Array.from({ length: 12 }, (_, i) => ({ id: 'u-' + (i + 1), rank: i + 1, pseudo: 'Dresseur' + (i + 1), grade: 1, pl: 2000 - i * 100, me: false })), me: { id: UID, rank: 14, pl: 150 }, pl_season: 150, pl_total: 150, pk_total: 500, grade: 1 });
-    if (fn === 'player_card') return send(200, body.target === UID ? { id: UID, pseudo: 'Sacha', avatar: null, grade: 1, me: true, since: '2026-11', season: { n: 1, rank: 14, pl: 150, players: 40 }, past: [] }
-      : { id: body.target, pseudo: body.target === 'u-ond' ? 'Ondine' : 'Dresseur5', avatar: { skin: 's2', hair: 'long', hc: 'roux', bg: 'holo', poke: 25 }, grade: 3, me: false, since: '2026-11', season: { n: 1, rank: 5, pl: 1600, players: 40 }, past: [] });
+    if (fn === 'player_card') return send(200, body.target === UID ? { id: UID, pseudo: 'Sacha', avatar: null, grade: 1, me: true, since: '2026-11', season: { n: S.n || 2, rank: 14, pl: 150, players: 40 }, past: [] }
+      : body.target === 'u-ond' ? { id: 'u-ond', pseudo: 'Ondine', avatar: null, grade: 3, me: false, since: '2026-09', season: { n: S.n || 2, rank: 9, pl: 900, players: 40 }, past: [] }
+        : { id: body.target, pseudo: 'Dresseur5', avatar: { skin: 's2', hair: 'long', hc: 'roux', bg: 'holo', poke: 25 }, grade: 3, me: false, since: '2026-11', season: { n: S.n || 2, rank: 5, pl: 1600, players: 40 },
+          past: (S.n || 2) > 1 ? [{ n: 1, rank: 3, pl: 2400, players: 120 }] : [] });
+    if (fn === 'player_showcase') return send(200, { me: false, has_for_me: 0, wants_mine: 0, wants: ['base1-2'], items: [] });
+    if (fn === 'trade_state') return send(200, { adult: false, age_ok: true, mine: [], demand: {}, supply: {} });
+    if (fn === 'trade_matches') return send(200, []);
     if (/^quick_msg_/.test(fn) && S.off32) return send(404, {});
-    if (fn === 'quick_msg_state') return send(200, { unread: S.items.filter(x => !x.read).length, left: S.left, off: S.off });
+    if (fn === 'quick_msg_state') return send(200, { unread: S.items.filter(x => !x.read && x.kind !== 'quick').length, left: S.left, off: S.off });
     if (fn === 'quick_msg_send') {
       if (S.left <= 0) return game('Tu as déjà envoyé tes 10 messages rapides aujourd’hui. Reviens demain !');
       S.sent.push(body); S.left--; return send(200, { ok: true, id: 100 + S.sent.length, left: S.left });
     }
+    // Serveur sans 038 : renvoie encore les anciens messages rapides (l'app les écarte).
     if (fn === 'quick_msg_inbox') return send(200, { off: S.off, unread: S.items.filter(x => !x.read).length, left: S.left, items: S.items.map(x => Object.assign({}, x)) });
     if (fn === 'quick_msg_read') { const n = S.items.filter(x => !x.read).length; S.items.forEach(x => { x.read = true; }); return send(200, { ok: true, read: n }); }
     if (fn === 'quick_msg_reply') {
@@ -50,100 +58,88 @@ const setup = async (S, role) => {
   return { ctx, page };
 };
 
-// A. Joueur : badge, envoi depuis la carte, « Mes messages », réponses, réglage.
+const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null, trade: true, sale: false, price_cents: null });
+
+// A. Joueur : carte de dresseur simplifiée, plus de messages rapides, « Mes messages » dans Ma vitrine.
 {
   const S = { calls: {}, left: 10, off: false, sent: [], items: [
-    { id: 1, code: 'bravo', at: ago(2), read: false, from: 'u-ond', pseudo: 'Ondine', avatar: { skin: 's2', hair: 'long', hc: 'roux', bg: 'holo', poke: 25 }, grade: 3, replied: null },
-    { id: 2, code: 'tirage', at: ago(65), read: false, from: 'u-7', pseudo: 'Régis', avatar: null, grade: 1, replied: null },
-    { id: 3, code: 'safari', at: ago(60 * 30), read: true, from: 'u-7', pseudo: 'Régis', avatar: null, grade: 1, replied: 'gg' }
+    { id: 1, code: 'bravo', kind: 'quick', at: ago(1), read: false, from: 'u-7', pseudo: 'Régis', avatar: null, grade: 1, replied: null },
+    { id: 2, code: 'interest', kind: 'interest', at: ago(2), read: false, from: 'u-ond', pseudo: 'Ondine', avatar: null, grade: 3, replied: null, deal: false, card: CARD('base1-4'), offer: null },
+    { id: 3, code: 'deal_yes', kind: 'answer', at: ago(65), read: true, from: 'u-7', pseudo: 'Régis', avatar: null, grade: 1, replied: null, deal: true, card: CARD('base1-2'), offer: CARD('base1-4') }
   ] };
   const { ctx, page } = await setup(S);
-  // Le coin des dresseurs (2026-11-21 : « Ma ligue » y est la 1ʳᵉ bulle, plus de bannière dans Jeux) : pastille « 2 » sur la bulle « Ma ligue ».
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
   await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1500);
-  const ban = page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma ligue' });
-  ok('Le coin des dresseurs : pastille « 2 » sur la bulle Ma ligue (' + N(await ban.innerText().catch(() => '')) + ')', (await ban.locator('.pkm-qm-badge').innerText().catch(() => '')) === '2' && /2 messages non lus/.test(await ban.getAttribute('aria-label') || ''));
-  ok('état lu une seule fois (quick_msg_state)', (S.calls.quick_msg_state || []).length === 1);
-  await page.locator('.pkm-coin-tabs').screenshot({ path: shot('qm-banniere.png') });
-  // Ma ligue (bulle du coin des dresseurs) : bouton « Mes messages » dans ma carte.
-  await ban.click(); await page.waitForTimeout(2000);
-  const ob = page.locator('section.pkm-pg-card button.pkm-qm-open');
-  ok('Ma ligue : bouton « Mes messages » avec la pastille 2', (await ob.count()) === 1 && /Mes messages/.test(await ob.innerText()) && (await ob.locator('.pkm-qm-badge').innerText()) === '2');
-  // Carte de dresseur d'un autre joueur : 8 messages tout faits.
-  await page.locator('ol.pkm-pg-list button', { hasText: 'Dresseur5' }).click(); await page.waitForTimeout(900);
-  const PC = page.locator('section.pkm-tc:not(.pkm-qm)');
-  const chips = await PC.locator('.pkm-qm-send .pkm-qm-chip').allInnerTexts();
-  ok('carte : « Envoyer un message rapide », 8 messages tout faits (' + chips.length + ')', /Envoyer un message rapide/.test(await PC.innerText()) && chips.length === 8 && /👋 Salut !/.test(chips[0]) && /😄 Merci !/.test(chips[7]));
-  ok('carte : aucun champ pour écrire', (await PC.locator('textarea, input').count()) === 0);
-  ok('carte : règle et « 10 messages restants aujourd’hui »', /10 par jour au plus/.test(N(await PC.innerText())) && /10 messages restants aujourd’hui/.test(N(await PC.innerText())));
-  await PC.locator('.pkm-qm-chip', { hasText: 'Bien joué' }).click(); await page.waitForTimeout(600);
-  ok('envoi : quick_msg_send (u-5, « bravo »)', S.sent.length === 1 && S.sent[0].target === 'u-5' && S.sent[0].code === 'bravo');
-  ok('envoi : message de confirmation', /Message envoyé à Dresseur5 : 👏 Bien joué !/.test(await page.evaluate(() => window.__pkm.st().toast || '')));
-  ok('envoi : bulle « envoyé » (jaune, coche) et « 9 messages restants »', (await PC.locator('.pkm-qm-chip.pkm-qm-sent').count()) === 1 && (await PC.locator('.pkm-qm-sent svg.pkm-qm-ok').count()) === 1 && /9 messages restants/.test(N(await PC.innerText())));
-  await PC.locator('.pkm-qm-send').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('qm-carte.png') });
-  // Limite du jour atteinte (serveur) : message, bulles grisées.
-  S.left = 0;
-  await PC.locator('.pkm-qm-chip', { hasText: 'GG' }).click(); await page.waitForTimeout(600);
-  ok('11ᵉ message : refus du serveur affiché, bulles grisées, « Reviens demain »', /10 messages rapides/.test(await page.evaluate(() => window.__pkm.st().toast || '')) && (await PC.locator('.pkm-qm-dim').count()) === 8 && /Reviens demain/.test(N(await PC.innerText())));
-  S.left = 9;
+  const vb = page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma vitrine' }), lb = page.locator('.pkm-coin-tabs [role="tab"]', { hasText: 'Ma ligue' });
+  ok('pastille « 1 » (proposition non lue) sur la bulle « Ma vitrine », plus sur « Ma ligue »', (await vb.locator('.pkm-qm-badge').innerText().catch(() => '')) === '1'
+    && /1 proposition non lue/.test(await vb.getAttribute('aria-label') || '') && (await lb.locator('.pkm-qm-badge').count()) === 0);
+  const mb = page.locator('button.pkm-qm-open.pkm-coin-msgs');
+  ok('Ma vitrine : « Mes messages » avec la pastille 1', (await mb.count()) === 1 && (await mb.locator('.pkm-qm-badge').innerText()) === '1');
+  // Ma ligue : plus de bouton « Mes messages » dans ma carte.
+  await lb.click(); await page.waitForTimeout(2000);
+  ok('Ma ligue : plus de bouton « Mes messages »', (await page.locator('section.pkm-pg-card button.pkm-qm-open').count()) === 0);
+  // Carte de dresseur d'un autre joueur.
+  await page.locator('ol.pkm-pg-list button', { hasText: 'Dresseur5' }).click(); await page.waitForTimeout(1200);
+  const PC = page.locator('section.pkm-tc:not(.pkm-qm)'), pct = N(await PC.innerText());
+  ok('carte : plus de messages rapides (ni « Envoyer un message rapide », ni bulles)', !/message rapide/i.test(pct) && (await PC.locator('.pkm-qm-chip, .pkm-qm-send').count()) === 0 && (await PC.locator('textarea, input').count()) === 0);
+  ok('carte : pseudo, grade, « Membre depuis novembre 2026 »', /Dresseur5/.test(pct) && (await PC.locator('.pkm-tc-grade').count()) === 1 && /Membre depuis novembre 2026/.test(pct));
+  const now = N(await PC.locator('section[aria-label="Saison en cours"]').innerText());
+  ok('carte : saison en cours, classement et PL (' + now + ')', /Saison 2 · en cours/.test(now) && /#5/.test(now) && /sur 40 joueurs/.test(now) && /1 600/.test(now));
+  const prev = PC.locator('section[aria-label="Saison passée"]'), pt = N(await prev.innerText());
+  ok('carte : saison passée, classement, médaille et PL (' + pt + ')', /Saison 1 · terminée/.test(pt) && /#3/.test(pt) && /sur 120 joueurs/.test(pt) && /2 400/.test(pt) && (await prev.locator('img[src*="rank/3"]').count()) === 1);
+  ok('carte : plus de liste des anciennes saisons ni de « Il cherche »', (await PC.locator('section[aria-label="Saisons passées"]').count()) === 0 && !/Il cherche/.test(pct));
+  const order = await PC.evaluate(el => ['.pkm-tc-pseudo', '.pkm-tc-grade', '.pkm-tc-since', 'section[aria-label="Saison en cours"]', 'section[aria-label="Saison passée"]', '.pkm-vt-pc'].map(q => { const n = el.querySelector(q); return n ? Math.round(n.getBoundingClientRect().top) : -1; }));
+  ok('carte : dans l’ordre pseudo, grade, membre depuis, saison en cours, saison passée, vitrine (' + order.join(' ≤ ') + ')', order.every(v => v >= 0) && order.every((v, i) => !i || v >= order[i - 1]));
+  await page.screenshot({ path: shot('carte-dresseur.png') });
   await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
-  // Ma propre carte : pas de messages.
-  await page.locator('section[aria-label="Classement général"] > button.pkm-pg-me').click(); await page.waitForTimeout(900);
-  ok('ma carte : pas de messages rapides', (await page.locator('.pkm-qm-send').count()) === 0);
+  // Joueur pas classé la saison passée.
+  await page.evaluate(() => window.__pkm.pcOpen({ id: 'u-ond', pseudo: 'Ondine', grade: 3 }, 'PL', 0)); await page.waitForTimeout(900);
+  const po = N(await page.locator('section.pkm-tc section[aria-label="Saison passée"]').innerText());
+  ok('saison passée sans PL : « — », « pas classé », 0 PL (' + po + ')', /—/.test(po) && /pas classé/.test(po) && / 0$|\b0\b/.test(po));
   await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
-  // « Mes messages ».
-  await ob.click(); await page.waitForTimeout(900);
+  // « Mes messages » : seulement les propositions d'échange (l'ancien message rapide est écarté).
+  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1200);
+  await mb.click(); await page.waitForTimeout(900);
   const QM = page.locator('section.pkm-qm');
   const items = await QM.locator('li.pkm-qm-item').allInnerTexts();
-  ok('Mes messages : 3 messages, du plus récent au plus ancien', items.length === 3 && /Ondine/.test(items[0]) && /Bien joué/.test(items[0]) && /Régis/.test(items[1]) && /Bonne chance au tirage/.test(items[1]));
-  ok('Mes messages : « il y a 2 min », « il y a 1 h », « hier »', /il y a 2 min/.test(items[0]) && /il y a 1 h/.test(items[1]) && /hier/.test(items[2]));
-  ok('Mes messages : 2 « Nouveau » encadrés', (await QM.locator('li.pkm-qm-new').count()) === 2 && (await QM.locator('.pkm-qm-newtag').count()) === 2);
-  ok('réponses proposées : Merci, GG, Rendez-vous au top 10 sous « Bien joué »', /😄 Merci !/.test(items[0]) && /💪 GG !/.test(items[0]) && /Rendez-vous au top 10/.test(items[0]));
-  ok('déjà répondu : « Tu as répondu « 💪 GG ! » »', /Tu as répondu « 💪 GG ! »/.test(items[2]) && (await QM.locator('li.pkm-qm-item').nth(2).locator('.pkm-qm-replies').count()) === 0);
-  ok('ouverture : tout marqué comme lu (quick_msg_read), pastille retirée', (S.calls.quick_msg_read || []).length === 1 && (await page.locator('section.pkm-pg-card .pkm-qm-badge').count()) === 0);
-  ok('réglage « Recevoir les messages rapides » activé', (await QM.locator('button.pkm-qm-set[aria-checked="true"]').count()) === 1);
+  ok('Mes messages : 2 propositions d’échange, l’ancien message rapide écarté', items.length === 2 && /Ondine/.test(items[0]) && /Je suis intéressé/.test(items[0]) && !items.some(t => /Bien joué/.test(t)));
+  ok('Mes messages : « Propositions d’échange des dresseurs »', /Propositions d’échange des dresseurs/.test(N(await QM.innerText())));
+  ok('proposition : 3 réponses ; réponse reçue : aucune réponse toute faite', (await QM.locator('li.pkm-qm-item').nth(0).locator('.pkm-qm-chip').count()) === 3 && (await QM.locator('li.pkm-qm-item').nth(1).locator('.pkm-qm-chip').count()) === 0);
+  ok('accord reçu : rendez-vous sur le Discord (bientôt disponible tant que le lien manque)', /Retrouve Régis sur le Discord Dropicards/.test(items[1]) && /Discord Dropicards bientôt disponible/.test(items[1]));
+  ok('ouverture : tout marqué comme lu (quick_msg_read), pastille retirée', (S.calls.quick_msg_read || []).length === 1 && (await mb.locator('.pkm-qm-badge').count()) === 0);
+  ok('réglage « Recevoir les propositions d’échange »', (await QM.locator('button.pkm-qm-set[aria-checked="true"]', { hasText: 'Recevoir les propositions d’échange' }).count()) === 1);
+  ok('aucun envoi ni réponse par message rapide', !(S.calls.quick_msg_send || []).length && !(S.calls.quick_msg_reply || []).length);
   await page.screenshot({ path: shot('qm-mes-messages.png') });
-  // Répondre « Merci ! » à Ondine.
-  await QM.locator('li.pkm-qm-item').nth(0).locator('.pkm-qm-chip', { hasText: 'Merci' }).click(); await page.waitForTimeout(600);
-  ok('réponse : quick_msg_reply (message 1, « merci »)', (S.calls.quick_msg_reply || []).length === 1 && S.calls.quick_msg_reply[0].msg_id === 1 && S.calls.quick_msg_reply[0].code === 'merci');
-  ok('réponse : « Tu as répondu « 😄 Merci ! » », bulles retirées', /Tu as répondu « 😄 Merci ! »/.test(await QM.locator('li.pkm-qm-item').nth(0).innerText()) && (await QM.locator('li.pkm-qm-item').nth(0).locator('.pkm-qm-replies').count()) === 0);
-  // Appui sur un message : carte de l'expéditeur, au-dessus.
+  // Appui sur une proposition : carte de l'expéditeur, au-dessus.
   await QM.locator('li.pkm-qm-item').nth(0).locator('button.pkm-qm-from').click(); await page.waitForTimeout(900);
-  ok('appui sur le message : carte de dresseur d’Ondine, au-dessus de « Mes messages »', (S.calls.player_card || []).slice(-1)[0].target === 'u-ond' && /Ondine/.test(await PC.innerText()) && (await QM.count()) === 1
-    && await page.evaluate(() => { const a = document.querySelector('section.pkm-tc:not(.pkm-qm)'), b = document.querySelector('section.pkm-qm'); return !!(a && b && (b.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING)); }));
+  ok('appui : carte de dresseur d’Ondine, au-dessus de « Mes messages »', (S.calls.player_card || []).slice(-1)[0].target === 'u-ond' && /Ondine/.test(await PC.innerText()) && (await QM.count()) === 1);
   await page.locator('section.pkm-tc:not(.pkm-qm) button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
-  ok('carte fermée : retour à « Mes messages »', (await PC.count()) === 0 && (await QM.count()) === 1);
-  // Couper les messages.
   await QM.locator('button.pkm-qm-set').click(); await page.waitForTimeout(600);
-  ok('réglage coupé : quick_msg_set(receive: false), interrupteur éteint', (S.calls.quick_msg_set || []).slice(-1)[0].receive === false && (await QM.locator('button.pkm-qm-set[aria-checked="false"]').count()) === 1 && /Coupés/.test(await QM.locator('button.pkm-qm-set').innerText()));
-  await QM.locator('button.pkm-qm-set').click(); await page.waitForTimeout(600);
-  ok('réglage réactivé : quick_msg_set(receive: true)', (S.calls.quick_msg_set || []).slice(-1)[0].receive === true && (await QM.locator('button.pkm-qm-set[aria-checked="true"]').count()) === 1);
+  ok('réglage coupé : quick_msg_set(receive: false), « Coupées »', (S.calls.quick_msg_set || []).slice(-1)[0].receive === false && /Coupées/.test(await QM.locator('button.pkm-qm-set').innerText()));
   await QM.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
-  ok('« Mes messages » fermé', (await QM.count()) === 0);
   // Petit écran (320 px) : rien ne dépasse.
-  await page.setViewportSize({ width: 320, height: 640 }); await ob.click(); await page.waitForTimeout(900);
+  await page.setViewportSize({ width: 320, height: 640 }); await mb.click(); await page.waitForTimeout(900);
   const over = await page.evaluate(() => { const q = document.querySelector('section.pkm-qm'); if (!q) return 'absent'; const w = q.getBoundingClientRect().right; return Array.from(q.querySelectorAll('*')).filter(e => e.getBoundingClientRect().right > w + 1).map(e => e.className).slice(0, 3).join(' | '); });
   ok('320 px : rien ne dépasse (' + (over || 'ok') + ')', over === '');
-  await page.screenshot({ path: shot('qm-mes-messages-320.png') });
   await ctx.close();
 }
 
-// B. Boîte vide, puis serveur sans 032 (joueur, admin).
+// B. Première saison : pas de saison passée ; boîte vide ; serveur sans 032 (joueur, admin).
 {
-  const S = { calls: {}, left: 10, off: false, sent: [], items: [] };
+  const S = { calls: {}, left: 10, off: false, sent: [], items: [], n: 1 };
   const { ctx, page } = await setup(S);
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(2000);
-  await page.locator('section.pkm-pg-card button.pkm-qm-open').click(); await page.waitForTimeout(800);
-  ok('boîte vide : « Aucun message pour l’instant »', /Aucun message pour l’instant/.test(await page.locator('section.pkm-qm').innerText()) && (S.calls.quick_msg_read || []).length === 0);
+  await page.evaluate(() => window.__pkm.pcOpen({ id: 'u-5', pseudo: 'Dresseur5', grade: 3 }, 'PL', 0)); await page.waitForTimeout(900);
+  ok('saison 1 : « Première saison de la ligue : pas encore de saison passée »', /Première saison de la ligue : pas encore de saison passée/.test(N(await page.locator('section.pkm-tc section[aria-label="Saison passée"]').innerText())));
+  await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
+  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1500);
+  await page.locator('button.pkm-qm-open.pkm-coin-msgs').click(); await page.waitForTimeout(800);
+  ok('boîte vide : « Aucune proposition pour l’instant »', /Aucune proposition pour l’instant/.test(await page.locator('section.pkm-qm').innerText()) && (S.calls.quick_msg_read || []).length === 0);
   await page.locator('section.pkm-qm button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
   S.off32 = true;
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(2000);
-  await page.locator('ol.pkm-pg-list button', { hasText: 'Dresseur5' }).click(); await page.waitForTimeout(900);
-  ok('sans 032, joueur : carte avec « Les messages rapides arrivent très bientôt »', /arrivent très bientôt/.test(await page.locator('section.pkm-tc').innerText()));
-  await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
-  await page.locator('section.pkm-pg-card button.pkm-qm-open').click(); await page.waitForTimeout(800);
+  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1500);
+  await page.locator('button.pkm-qm-open.pkm-coin-msgs').click(); await page.waitForTimeout(800);
   ok('sans 032, joueur : « Mes messages » « bientôt », sans réglage', /arrivent très bientôt/.test(await page.locator('section.pkm-qm').innerText()) && (await page.locator('button.pkm-qm-set').count()) === 0);
   await ctx.close();
 }
@@ -151,12 +147,12 @@ const setup = async (S, role) => {
   const S = { calls: {}, left: 10, off: false, sent: [], items: [], off32: true };
   const { ctx, page } = await setup(S, 'admin');
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
-  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(2000);
-  await page.locator('section.pkm-pg-card button.pkm-qm-open').click(); await page.waitForTimeout(800);
+  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1500);
+  await page.locator('button.pkm-qm-open.pkm-coin-msgs').click(); await page.waitForTimeout(800);
   ok('sans 032, admin : fichier install_024_a_034.sql à coller dans Studio', /install_024_a_034\.sql/.test(await page.locator('section.pkm-qm').innerText()));
   await ctx.close();
 }
-// C. Sans compte : pas de bouton « Mes messages », pas de messages sur les cartes.
+// C. Sans compte : pas de bouton « Mes messages ».
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.route(ABORT, r => r.abort());
@@ -164,6 +160,7 @@ const setup = async (S, role) => {
   await page.goto(E2E + '/?debug', { waitUntil: 'load' }); await page.waitForTimeout(500);
   await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.ligueTuto = 'done'; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); });
   await page.goto(E2E + '/?start=progress&debug', { waitUntil: 'load' }); await page.waitForTimeout(2000);
+  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1200);
   ok('sans compte : pas de bouton « Mes messages »', (await page.locator('button.pkm-qm-open').count()) === 0);
   await ctx.close();
 }

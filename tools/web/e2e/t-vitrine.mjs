@@ -55,6 +55,8 @@ const setup = async (S, role) => {
     return send(404, {});
   });
   const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
+  // Lien d'essai du Discord de Dropicards (tests seulement, profile.js : SOCIAL_LINKS).
+  await page.addInitScript(() => { window.__pkmSocial = { discord: 'https://discord.gg/essai-dropicards' }; });
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' }); await page.waitForTimeout(800);
   // Cartes réelles du catalogue : 3 dans mon classeur (0, 1, 2), les autres pour l'autre joueur.
   S.ids = await page.evaluate(() => window.__pkm.catalog().filter(p => p.type !== 'sealed' && p.img).slice(0, 6).map(p => p.id));
@@ -149,7 +151,7 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   ok('carte de dresseur : carte réservée (accord en cours)', /RÉSERVÉE/.test(pct));
   ok('carte de dresseur : « Tu la cherches » sur la carte de ma liste', (await PC.locator('.pkm-vt-cd-want').count()) === 1 && /Tu la cherches/.test(pct));
   ok('carte de dresseur : bandeau « Il a 1 carte que tu cherches et il cherche 1 de tes cartes »', /Il a 1 carte que tu cherches et il cherche 1 de tes cartes/.test(pct));
-  ok('carte de dresseur : « Il cherche » avec « Tu l’as »', /Il cherche/.test(pct) && (await PC.locator('.pkm-vt-mini-have').count()) === 1);
+  ok('carte de dresseur : plus de liste « Il cherche » (2026-11-21, carte simplifiée)', !/Il cherche/.test(pct) && (await PC.locator('.pkm-vt-minis').count()) === 0);
   await PC.locator('.pkm-vt-pc').screenshot({ path: shot('vitrine-dresseur.png') });
 
   // D. Appui sur une carte Pour trade : proposer une de mes cartes.
@@ -201,8 +203,10 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
       card: { sid: 777, card_id: c6, lang: 'FR', cond: 'EX', grade: null, trade: true, sale: false, price_cents: null }, offer: { sid: 900, card_id: c0, lang: 'FR', cond: 'NM', grade: null, trade: true, sale: false, price_cents: null } }
   ];
   void S0;
-  await page.evaluate(() => window.__pkm.coinGo('lig')); await page.waitForTimeout(1800);
-  await page.locator('section.pkm-pg-card button.pkm-qm-open').click(); await page.waitForTimeout(1200);
+  // « Mes messages » en haut de Ma vitrine (2026-11-21 ; avant : dans la carte de Ma ligue).
+  await page.evaluate(() => window.__pkm.coinGo('vit')); await page.waitForTimeout(1800);
+  ok('Ma ligue : plus de bouton « Mes messages »', (await page.locator('section.pkm-pg-card button.pkm-qm-open').count()) === 0);
+  await page.locator('button.pkm-qm-open.pkm-coin-msgs').click(); await page.waitForTimeout(1200);
   const M = page.locator('section.pkm-qm');
   const it = M.locator('li.pkm-qm-item');
   ok('messages : 3 messages', (await it.count()) === 3);
@@ -212,12 +216,15 @@ const newS = o => Object.assign({ calls: {}, left: 10, adult: false, ageOk: true
   const t1 = N(await it.nth(1).innerText());
   ok('intérêt : « Je suis intéressé par ta carte (à vendre 42,50 €) »', /Je suis intéressé par ta carte \(à vendre 42,50 €\)/.test(t1) && (await it.nth(1).locator('.pkm-qm-tcard').count()) === 1);
   const t2 = N(await it.nth(2).innerText());
-  ok('réponse reçue : « Réponse à ta proposition : 🙅 Non merci » et messages rapides pour répondre', /Réponse à ta proposition : 🙅 Non merci/.test(t2) && /Merci/.test(t2) && (await it.nth(2).locator('.pkm-qm-tcard').count()) === 2);
+  ok('réponse reçue : « Réponse à ta proposition : 🙅 Non merci », sans message rapide pour répondre', /Réponse à ta proposition : 🙅 Non merci/.test(t2) && (await it.nth(2).locator('.pkm-qm-chip').count()) === 0 && (await it.nth(2).locator('.pkm-qm-tcard').count()) === 2);
   ok('messages : aucun champ pour écrire', (await M.locator('textarea, input').count()) === 0);
   await it.nth(0).locator('.pkm-qm-chip', { hasText: 'Ça m’intéresse' }).click(); await page.waitForTimeout(900);
   ok('accord : trade_answer (11, deal_yes)', (S.calls.trade_answer || []).length === 1 && S.calls.trade_answer[0].msg_id === 11 && S.calls.trade_answer[0].code === 'deal_yes');
   const t0b = N(await it.nth(0).innerText());
-  ok('accord : bandeau « Échange d’accord avec Ondine » et étage 2 annoncé', /Échange d’accord avec Ondine/.test(t0b) && /étage 2/.test(t0b) && /Tu as répondu « 👍 Ça m’intéresse »/.test(t0b));
+  ok('accord : bandeau « Échange d’accord avec Ondine » et rendez-vous sur le Discord Dropicards', /Échange d’accord avec Ondine/.test(t0b) && /Retrouve Ondine sur le Discord Dropicards/.test(t0b) && /Tu as répondu « 👍 Ça m’intéresse »/.test(t0b));
+  const dl = it.nth(0).locator('a.pkm-qm-discord');
+  ok('accord : bouton « Rendez-vous sur le Discord Dropicards » vers le lien du Discord', (await dl.count()) === 1 && (await dl.getAttribute('href')) === 'https://discord.gg/essai-dropicards' && (await dl.getAttribute('target')) === '_blank');
+  ok('accord : rappel de prudence (jamais d’adresse)', /Ne donne jamais ton adresse/.test(t0b));
   ok('accord : quick_msg_reply jamais utilisé pour une proposition', !(S.calls.quick_msg_reply || []).some(x => x.msg_id === 11));
   await M.screenshot({ path: shot('vitrine-messages.png') });
   await it.nth(1).locator('.pkm-qm-chip', { hasText: 'Non merci' }).click(); await page.waitForTimeout(900);

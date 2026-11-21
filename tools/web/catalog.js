@@ -310,6 +310,22 @@
     hits.sort((a, b) => a.rank - b.rank || b.v - a.v);
     return { total: hits.length, items: hits.slice(0, limit).map(h => TCG.item(h.x.r[F.id])) };
   };
+  // Cartes dont le nom correspond à une recherche, pour « Ma vitrine » (2026-11-21, porteur : « si l'utilisateur cherche
+  // un Groudon Star, celui-ci sort ») : nom français, nom anglais, extension, numéro ; « ☆ » ou « ★ » se tape « star »,
+  // « δ » « delta ». Identifiants seulement (le serveur dit ensuite qui les propose), nom exact d'abord, puis cote.
+  const foldCard = t => fold(String(t || '').replace(/[☆★]/g, ' star ').replace(/δ/g, ' delta '));
+  TCG.findIds = function (q, limit) {
+    const F = TCG.F, fq = foldCard(q).replace(/\s+/g, ' ').trim(), words = fq.split(' ').filter(Boolean);
+    if (!words.length || !F) return [];
+    const hits = [];
+    for (const x of TCG.rows) {
+      const r = x.r;
+      if (!x.nm) { x.fn = foldCard(r[F.name]).replace(/\s+/g, ' ').trim(); x.nm = x.fn + ' | ' + foldCard(F.en != null ? r[F.en] : '') + ' | ' + x.hay; }
+      if (words.every(w => x.nm.indexOf(w) >= 0)) hits.push({ id: r[F.id], rank: x.fn === fq ? 0 : x.fn.indexOf(fq) === 0 ? 1 : 2, v: coteOf(r, F) });
+    }
+    hits.sort((a, b) => a.rank - b.rank || b.v - a.v);
+    return hits.slice(0, limit || 300).map(h => h.id);
+  };
   // Cartes données (Pokédex) : celles du catalogue, de la plus cotée à la moins cotée.
   TCG.pick = function (ids, limit) {
     const F = TCG.F, rows = ids.map(id => TCG.byId[id]).filter(Boolean).sort((a, b) => coteOf(b.r, F) - coteOf(a.r, F));

@@ -50,3 +50,10 @@
 .pkm-qm-set { margin-top: 2px; padding: 8px 12px; border: 1px solid #1E2B45; border-radius: 16px; background: #0B1120; }
 @media (max-width: 360px) { .pkm-qm-replies { padding-left: 0; } .pkm-qm-replied { margin-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .pkm-qm-chip, .pkm-qm-badge { transition: none; animation: none; } }
+
+/* Accord d'échange : rendez-vous sur le Discord de Dropicards (2026-11-21, porteur), et rappel de prudence. */
+.pkm-qm-discord { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; margin-top: 8px; padding: 0 14px; border-radius: 999px; background: #5865F2; color: #FFFFFF; font-size: 13.5px; font-weight: 800; text-decoration: none; }
+.pkm-qm-discord img { flex: none; filter: brightness(0) invert(1); }
+.pkm-qm-discord-off { background: #26345A; color: #C9D3EA; }
+.pkm-qm-discord:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
+.pkm-qm-safe { display: block; margin-top: 6px; font-size: 11.5px; line-height: 1.4; color: #C9D3EA; }

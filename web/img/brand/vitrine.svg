@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- Petit magasin de l'animation « Ma vitrine » (store jaune et blanc, vitrine, carte au milieu) : logo de la bulle
+       « Ma vitrine » et repère des cartes mises en vitrine dans Mon classeur (2026-11-21, porteur). -->
+  <rect x="3" y="9.6" width="18" height="12.2" rx="1.4" fill="#24345C" stroke="#0B1120" stroke-width="1.2"/>
+  <rect x="5.6" y="12.6" width="12.8" height="7.4" rx="0.8" fill="#BFD4FF" stroke="#0B1120" stroke-width="1"/>
+  <path d="M6.2 13.2l3 0-3.1 3z" fill="#FFFFFF" opacity="0.7"/>
+  <rect x="10.3" y="13.5" width="3.4" height="5.2" rx="0.5" fill="#FFD60A" stroke="#0B1120" stroke-width="0.8"/>
+  <path d="M3.4 2.6h17.2l2.2 6.2H1.2z" fill="#F6F8FC" stroke="#0B1120" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M3.4 2.6h3.44l-.69 6.2H1.2zM10.28 2.6h3.44l.43 6.2H9.85zM17.16 2.6h3.44l2.2 6.2h-4.95z" fill="#FFD60A"/>
+  <path d="M3.4 2.6h17.2l2.2 6.2H1.2z" fill="none" stroke="#0B1120" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M1.2 8.8a2.2 2.2 0 0 0 4.3 0a2.2 2.2 0 0 0 4.3 0a2.2 2.2 0 0 0 4.4 0a2.2 2.2 0 0 0 4.3 0a2.2 2.2 0 0 0 4.3 0" fill="#FFD60A" stroke="#0B1120" stroke-width="1.1" stroke-linejoin="round"/>
+</svg>

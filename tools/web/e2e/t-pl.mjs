@@ -161,9 +161,11 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   ok('carte de Dresseur5 : avatar, pseudo, grade, membre depuis novembre 2026 (« ' + pc.slice(0, 120) + ' »)', /Carte de dresseur/.test(pc) && /Dresseur5/.test(pc) && /Dresseur Pokémon/.test(pc) && /Membre depuis novembre 2026/.test(pc)
     && (await PC.locator('.pkm-tc-ava img').count()) >= 2 && (S.calls.player_card || []).slice(-1)[0].target === 'u-5');
   ok('carte : saison en cours #5 sur 40, 1 600 PL', /Saison 2 · en cours/.test(pc) && /#5/.test(pc) && /sur 40 joueurs/.test(pc) && /1 600/.test(pc));
-  ok('carte : saisons passées (Saison 1, 2ᵉ sur 30, 900 PL, médaille d’argent)', /Saison 1/.test(pc) && /2ᵉ sur 30/.test(pc) && /900 PL/.test(pc) && (await PC.locator('.pkm-tc-past img[src="img/rank/2.svg"]').count()) === 1);
-  // Messages rapides (2026-11-16, option B de docs/43) : seulement les 8 messages tout faits, jamais de champ pour écrire.
-  ok('carte : ni e-mail ni champ pour écrire, « Envoyer un message rapide »', !/@/.test(pc) && /Envoyer un message rapide/.test(pc) && (await PC.locator('textarea, input').count()) === 0);
+  // Saison passée seulement (2026-11-21, porteur) : classement et PL de la saison 1.
+  const prv = N(await PC.locator('section[aria-label="Saison passée"]').innerText().catch(() => ''));
+  ok('carte : saison passée (Saison 1 · terminée, #2 sur 30, 900 PL, médaille d’argent) (' + prv + ')', /Saison 1 · terminée/.test(prv) && /#2/.test(prv) && /sur 30 joueurs/.test(prv) && /900/.test(prv) && (await PC.locator('section[aria-label="Saison passée"] img[src="img/rank/2.svg"]').count()) === 1);
+  // Messages rapides retirés (2026-11-21, porteur) : ni message rapide, ni champ pour écrire.
+  ok('carte : ni e-mail ni champ pour écrire, plus de message rapide', !/@/.test(pc) && !/message rapide/i.test(pc) && (await PC.locator('textarea, input').count()) === 0);
   await PC.screenshot({ path: shot('pl-carte-dresseur.png') });
   await page.locator('section.pkm-tc button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
   ok('carte fermée', (await page.locator('section.pkm-tc').count()) === 0);

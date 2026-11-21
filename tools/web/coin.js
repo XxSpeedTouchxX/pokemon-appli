@@ -2,9 +2,12 @@
   // « Un nouvel onglet "Le coin des dresseurs", entre "Toutes les séries" et "Jeux", un endroit social de la communauté
   // Pokémon, avec 2 sous-rubriques » :
   //   1. « Ma vitrine » : exactement l'interface « Échanges » de Ma ligue (mes cartes Pour trade et à vendre, Je cherche,
-  //      échanges possibles : vitrine.js, vTradeTab), plus la recherche de tous les dresseurs de l'app par leur pseudo et
-  //      les vitrines des dresseurs (serveur 034, player_search). Un dresseur trouvé ouvre sa carte de dresseur, avec sa
-  //      vitrine : « Je suis intéressé », « Je te propose une de mes cartes », messages rapides (031 à 033, inchangés).
+  //      échanges possibles : vitrine.js, vTradeTab), « Mes messages » (propositions d'échange) et, depuis le
+  //      2026-11-21 (porteur), une seule barre « Recherche une carte ou un dresseur » : les cartes dont le nom correspond
+  //      (catalogue de l'app, TCG.findIds) proposées Pour trade ou à vendre, avec le dresseur qui les propose (serveur
+  //      038, showcase_offers) ; un appui ouvre la fiche d'échange (« Je suis intéressé », « Je te propose une de mes
+  //      cartes ») ; puis les dresseurs dont le pseudo correspond (034, player_search). « Voir ma vitrine » et « Vitrines
+  //      des dresseurs » retirés (porteur, même jour). Logo de la bulle : le petit magasin de l'animation de la vitrine.
   //   2. « Le calendrier JCC » : frise de l'univers JCC Pokémon (blocs, extensions sorties, à venir, annonces japonaises,
   //      rumeurs), chaque date avec son statut et sa source (web/data/calendar.json, tenu à la main), puis les « News
   //      Pokémon » du moment (web/data/news.json, relu chaque jour par le workflow « News Pokémon » : titre, date,
@@ -59,7 +62,7 @@
   };
   coinProto.coinEnterVit = function (force) {
     if (typeof this.vtTabLoad === 'function') this.vtTabLoad(!!force);
-    this.coinRecent(!!force);
+    if (typeof this.qmLoadState === 'function') this.qmLoadState(!!force);
   };
   const coinBaseSection = coinProto.section;
   coinProto.section = function (s) {
@@ -67,12 +70,13 @@
     return coinBaseSection.call(this, s);
   };
 
-  // ——— Recherche des dresseurs (034) ———
+  // ——— Recherche d'une carte ou d'un dresseur (034 et 038) ———
   let coinTimer = null;
   const coinErr = e => (e && e.code === 'not_installed' ? 'old' : e && e.code === 'network' ? 'net' : 'err');
   const coinOldText = () => (coinAdmin() ? 'Aperçu admin : la recherche des dresseurs n’est pas encore installée sur le serveur. Colle ' + COIN_FILE + ' dans Studio (SQL Editor › Run).' : 'La recherche des dresseurs arrive très bientôt.');
+  const coinOldCards = () => (coinAdmin() ? 'Aperçu admin : la recherche des cartes proposées n’est pas encore installée sur le serveur. Colle ' + COIN_FILE + ' dans Studio (SQL Editor › Run).' : 'La recherche des cartes proposées arrive très bientôt.');
   coinProto.coinQuery = function (q) {
-    q = String(q || '').slice(0, 24);
+    q = String(q || '').slice(0, 40);
     this.setState({ coinQ: q });
     clearTimeout(coinTimer);
     const t = q.trim();
@@ -80,20 +84,32 @@
     coinTimer = setTimeout(() => this.coinFind(t), 350);
   };
   coinProto.coinFind = function (t) {
-    if (!coinOnline()) { this.setState({ coinRes: { q: t, list: [], busy: false, err: 'off' } }); return; }
-    this.setState({ coinRes: { q: t, list: [], busy: true, err: '' } });
-    Cloud.rpc('player_search', { q: t, lim: 30 }).then(d => {
-      const c = this.st().coinRes;
-      if (c && c.q === t) this.setState({ coinRes: { q: t, list: Array.isArray(d) ? d : [], busy: false, err: '' } });
-    }, e => { const c = this.st().coinRes; if (c && c.q === t) this.setState({ coinRes: { q: t, list: [], busy: false, err: coinErr(e) } }); });
+    if (!coinOnline()) { this.setState({ coinRes: { q: t, list: [], offers: [], ids: 0, busy: false, cBusy: false, err: 'off', cErr: '' } }); return; }
+    const ids = typeof TCG !== 'undefined' && TCG.findIds ? TCG.findIds(t, 300) : [];
+    // Les deux réponses (dresseurs, cartes) arrivent dans n'importe quel ordre : elles complètent le même résultat.
+    const acc = { q: t, list: [], offers: [], ids: ids.length, busy: true, cBusy: ids.length > 0, err: '', cErr: '' };
+    this.setState({ coinRes: Object.assign({}, acc) });
+    const put = p => { Object.assign(acc, p); const c = this.st().coinRes; if (c && c.q === t) this.setState({ coinRes: Object.assign({}, acc) }); };
+    Cloud.rpc('player_search', { q: t.slice(0, 24), lim: 30 }).then(d => put({ list: Array.isArray(d) ? d : [], busy: false }), e => put({ busy: false, err: coinErr(e) }));
+    if (ids.length) Cloud.rpc('showcase_offers', { ids: ids, lim: 40 }).then(d => put({ offers: Array.isArray(d) ? d : [], cBusy: false }), e => put({ cBusy: false, cErr: coinErr(e) }));
   };
-  // Vitrines des dresseurs (recherche vide) : relues au plus toutes les minutes.
-  coinProto.coinRecent = function (force) {
-    const s = this.st(), r = s.coinRecent;
-    if (!coinOnline() || (r && r.busy) || (!force && r && Date.now() - (r.at || 0) < 60000)) return;
-    this.setState({ coinRecent: Object.assign({ list: [] }, r || {}, { busy: true, err: '' }) });
-    Cloud.rpc('player_search', { q: '', lim: 30 }).then(d => this.setState({ coinRecent: { list: Array.isArray(d) ? d : [], busy: false, err: '', at: Date.now() } }),
-      e => this.setState({ coinRecent: { list: [], busy: false, err: coinErr(e), at: Date.now() } }));
+  // Une carte proposée : fiche d'échange (vitrine.js, vTradeSheet), comme depuis la vitrine d'un dresseur.
+  coinProto.coinOffer = function (x) {
+    const o = x.owner || {};
+    if (typeof this.vtLoadState === 'function') this.vtLoadState(false);
+    this.setState({ tcs: { owner: { id: o.id, pseudo: o.pseudo || '—', grade: o.grade, avatar: o.avatar || null }, it: x, pick: null, busy: false } });
+  };
+  coinProto.coinOffers = function (list) {
+    const T = this.tiers();
+    return (list || []).map(x => {
+      const o = x.owner || {}, g = T[Math.max(0, Math.min(T.length - 1, Number(o.grade) || 0))];
+      const c = typeof this.vtCard === 'function' ? this.vtCard(x.card_id, x.lang, x.cond, x.grade) : { name: x.card_id, img: '', hasImg: false, noImg: true, sub: '', cond: '', value: '' };
+      const price = x.sale ? (Number(x.price_cents) / 100).toLocaleString('fr-FR', { minimumFractionDigits: Number(x.price_cents) % 100 ? 2 : 0, maximumFractionDigits: 2 }) + ' €' : '';
+      return { name: c.name, sub: c.sub, img: c.img, hasImg: c.hasImg, noImg: c.noImg, cond: c.cond + ' · ' + (x.lang || 'FR'), value: c.value,
+        trade: !!x.trade, sale: !!x.sale, price: price, pseudo: o.pseudo || '—', gImg: g.sym, gName: g.name, gColor: g.color,
+        open: () => this.coinOffer(x),
+        aria: c.name + ', ' + (x.sale ? 'à vendre ' + price : '') + (x.sale && x.trade ? ' ou ' : '') + (x.trade ? 'pour trade' : '') + ', proposée par ' + (o.pseudo || '—') + ', grade ' + g.name + '. Voir la proposition' };
+    });
   };
   coinProto.coinPlayers = function (list) {
     const T = this.tiers();
@@ -108,27 +124,25 @@
         aria: (x.pseudo || '—') + ', grade ' + g.name + ', ' + text + (nt ? ', ' + nt + ' Pour trade' : '') + (ns ? ', ' + ns + ' à vendre' : '') + '. Voir sa vitrine' };
     });
   };
-  // Ma propre vitrine, telle que les autres dresseurs la voient (carte de dresseur, « Ma vitrine »).
-  coinProto.coinMine = function () {
-    const s = this.st(), ses = typeof Cloud !== 'undefined' && Cloud.session ? Cloud.session() : null;
-    if (!coinOnline() || !ses || !ses.uid) { this.setState({ toast: 'Connecte-toi à ton compte Dropicards pour partager ta vitrine.' }); this.flash(); return; }
-    const pseudo = (s.account && s.account.pseudo) || (s.trainer && s.trainer.name) || 'Moi';
-    this.pcOpen({ id: ses.uid, pseudo: pseudo, grade: this.tierOf().i, avatar: s.avatarCfg || null, me: true }, 'PL', 0);
-  };
   coinProto.vCoinVit = function (s) {
-    const q = String(s.coinQ || ''), res = s.coinRes, rec = s.coinRecent || {}, online = coinOnline();
-    const found = res ? this.coinPlayers(res.list) : [], recent = this.coinPlayers(rec.list);
+    const q = String(s.coinQ || ''), res = s.coinRes, online = coinOnline();
+    const found = res ? this.coinPlayers(res.list) : [], offers = res ? this.coinOffers(res.offers) : [];
     const searching = !!q.trim();
-    const errOf = e => (e === 'old' ? coinOldText() : e === 'net' ? 'Pas de réseau : réessaie dans un instant.' : e === 'off' ? 'Connecte-toi à ton compte Dropicards pour chercher un dresseur.' : e ? 'La recherche n’a pas marché. Réessaie dans un instant.' : '');
-    const resMsg = res ? (res.busy ? 'Recherche de « ' + res.q + ' »…' : errOf(res.err) || (!found.length ? 'Aucun dresseur ne s’appelle « ' + res.q + ' ».' : '')) : '';
-    const recMsg = !online ? 'Connecte-toi à ton compte Dropicards pour voir les vitrines des dresseurs.' : rec.busy && !recent.length ? 'Chargement des vitrines…' : errOf(rec.err) || (!recent.length ? 'Pas encore de vitrine partagée : sois le premier ! Ouvre une carte de ton classeur et active « Dans ma vitrine ».' : '');
+    const errOf = e => (e === 'old' ? coinOldText() : e === 'net' ? 'Pas de réseau : réessaie dans un instant.' : e === 'off' ? 'Connecte-toi à ton compte Dropicards pour chercher une carte ou un dresseur.' : e ? 'La recherche n’a pas marché. Réessaie dans un instant.' : '');
+    // « Aucun dresseur » seulement quand la recherche ne vise aucune carte (sinon, la partie « cartes » répond).
+    const resMsg = res ? (res.busy && !res.ids ? 'Recherche de « ' + res.q + ' »…' : res.busy ? '' : res.err === 'off' ? '' : errOf(res.err) || (!found.length && !res.ids ? 'Aucun dresseur ne s’appelle « ' + res.q + ' ».' : '')) : '';
+    // Cartes : rien si aucun nom de carte ne correspond (la recherche vise alors un pseudo).
+    const cardsOn = !!res && (res.ids > 0 || res.err === 'off');
+    const cMsg = !res ? '' : res.err === 'off' ? errOf('off') : res.cBusy ? 'Recherche des dresseurs qui proposent « ' + res.q + ' »…'
+      : res.cErr === 'old' ? coinOldCards() : res.cErr ? errOf(res.cErr) : res.ids && !offers.length ? 'Personne ne propose « ' + res.q + ' » pour l’instant. Ouvre sa fiche et touche « ♡ Je la cherche » : tu verras qui la propose.' : '';
     return {
       q: q, onQ: e => this.coinQuery(e && e.target ? e.target.value : ''), clear: () => this.coinQuery(''), hasQ: searching,
-      searching: searching, found: found, hasFound: found.length > 0, resMsg: resMsg, hasResMsg: !!resMsg,
+      searching: searching, idle: !searching, online: online,
+      cardsOn: cardsOn, offers: offers, hasOffers: offers.length > 0, cMsg: cMsg, hasCMsg: !!cMsg,
+      offersTitle: offers.length ? offers.length + (offers.length > 1 ? ' cartes proposées' : ' carte proposée') : 'Cartes proposées',
+      found: found, hasFound: found.length > 0, resMsg: res && res.err === 'off' ? '' : resMsg, hasResMsg: !!resMsg && !(res && res.err === 'off'),
       foundTitle: found.length ? found.length + (found.length > 1 ? ' dresseurs trouvés' : ' dresseur trouvé') : '',
-      recent: recent, hasRecent: recent.length > 0 && !searching, recMsg: searching ? '' : recMsg, hasRecMsg: !searching && !!recMsg,
-      recentCount: recent.length ? recent.length + (recent.length > 1 ? ' vitrines' : ' vitrine') : '',
-      refresh: () => this.coinRecent(true), mine: () => this.coinMine()
+      hint: 'Exemples : « Groudon star », « Dracaufeu », ou le pseudo d’un dresseur.'
     };
   };
 
@@ -549,12 +563,12 @@
     if (on) {
       Object.assign(ui, { title: 'Le coin des dresseurs', subtitle: tab === 'cal' ? 'Le calendrier JCC' : tab === 'par' ? 'Parrainer un ami' : tab === 'lig' ? 'Ma ligue' : 'Ma vitrine', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
       if (!this.__coinOnce) { this.__coinOnce = true; setTimeout(() => coinEnter(this, tab, false), 0); }
-      // Messages rapides non lus (qmsg.js) : pastille sur la bulle « Ma ligue » (avant : sur la bannière de Jeux).
+      // Propositions d'échange non lues (qmsg.js) : pastille sur la bulle « Ma vitrine » (2026-11-21 ; avant : « Ma ligue »).
       const qn = r.qmb && r.qmb.hasN ? r.qmb.n : '';
       r.coin = {
         tabs: COIN_TABS.map(([k, label]) => ({ label: label, on: tab === k, cls: 'pkm-shop-tab pkm-coin-tab' + (tab === k ? ' pkm-shop-tab-on' : ''), pick: () => this.coinPick(k),
-          icon: k, isVit: k === 'vit', isCal: k === 'cal', isPar: k === 'par', isLig: k === 'lig', hasN: k === 'lig' && !!qn, n: qn,
-          aria: label + (k === 'lig' && qn ? ' (' + qn + ' message' + (qn === '1' ? '' : 's') + ' non lu' + (qn === '1' ? '' : 's') + ')' : '') })),
+          icon: k, isVit: k === 'vit', isCal: k === 'cal', isPar: k === 'par', isLig: k === 'lig', hasN: k === 'vit' && !!qn, n: qn,
+          aria: label + (k === 'vit' && qn ? ' (' + qn + (qn === '1' ? ' proposition non lue' : ' propositions non lues') + ')' : '') })),
         isVit: tab === 'vit', isCal: tab === 'cal', isPar: tab === 'par', isLig: tab === 'lig',
         // Calendrier : onglets et frise figés en haut (2026-11-19, porteur : « fige l'écran de la frise ») ; seul le
         // contenu dessous défile. Fond de l'app repris derrière (--pkm-app-bg), comme « Ma ligue ».
@@ -567,7 +581,7 @@
         const tb = document.querySelector('.pkm-coin-tabs'), h = tb ? Math.round(tb.offsetHeight) + 'px' : '';
         if (h && h !== '0px' && document.documentElement.style.getPropertyValue('--pkm-coin-tabs-h') !== h) document.documentElement.style.setProperty('--pkm-coin-tabs-h', h);
       } catch (e) { /* page sans racine */ } }, 0);
-      r.cv = tab === 'vit' ? this.vCoinVit(s) : { found: [], recent: [] };
+      r.cv = tab === 'vit' ? this.vCoinVit(s) : { found: [], offers: [] };
       if (tab === 'vit' && typeof this.vTradeTab === 'function') r.tdx = this.vTradeTab(s);
       r.cal = tab === 'cal' ? this.vCal(s) : { months: [], blocs: [], sel: [] };
       r.prf = tab === 'par' && typeof this.vPlRef === 'function' ? this.vPlRef(s) : { fl: [], meSteps: [] };
@@ -584,7 +598,7 @@
       }
     } else {
       this.__coinOnce = false;
-      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], recent: [] }; r.cal = { months: [], blocs: [], sel: [] }; r.prf = { fl: [], meSteps: [] };
+      r.coin = { tabs: [], pinCls: 'pkm-coin-top' }; r.cv = { found: [], offers: [] }; r.cal = { months: [], blocs: [], sel: [] }; r.prf = { fl: [], meSteps: [] };
     }
     // Frise : le mois en cours au milieu, une fois le calendrier affiché.
     if (on && tab === 'cal' && CAL.data && !this.__calScrolled) {

@@ -1096,6 +1096,9 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
    plus, unité « cqw » : la carte est un conteneur), pour que « 12 345 € · NM » tienne même sur un écran de 320 px.
    Marges intérieures élargies (2026-11-15, porteur) : drapeau et sigle bien à l'intérieur des bouts arrondis. */
 .pkm-pill2 { position: absolute; left: 2%; right: 2%; bottom: 6%; width: fit-content; max-width: 96%; margin: 0 auto; transform: none; box-sizing: border-box; display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 0.3em; padding: 0.34em 0.85em 0.34em 0.78em; border-radius: 999px; background: rgba(8, 13, 26, 0.88); color: #FFFFFF; font-size: clamp(6.6px, 9.1cqw, 10.5px); font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
+/* Carte dans ma vitrine (2026-11-21, porteur) : le petit magasin de la vitrine, juste au-dessus de l'état de la carte
+   (bout droit de la pastille), sans cacher la carte. */
+.pkm-hk-vit { position: absolute; right: 0.85em; bottom: calc(100% + 3px); width: clamp(15px, 17cqw, 21px); height: auto; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)); pointer-events: none; }
 .pkm-pill2-v, .pkm-pill2-c { flex: none; display: inline-flex; align-items: center; gap: 0.25em; }
 .pkm-pill2-c { gap: 0.12em; }
 .pkm-pill2-v > span:first-child { width: 1.1em !important; height: 0.8em !important; }
@@ -3393,6 +3396,13 @@ button.pkm-pg-row:active, .pkm-pg-podbtn:active { transform: scale(0.98); }
 @media (max-width: 360px) { .pkm-qm-replies { padding-left: 0; } .pkm-qm-replied { margin-left: 0; } }
 @media (prefers-reduced-motion: reduce) { .pkm-qm-chip, .pkm-qm-badge { transition: none; animation: none; } }
 
+/* Accord d'échange : rendez-vous sur le Discord de Dropicards (2026-11-21, porteur), et rappel de prudence. */
+.pkm-qm-discord { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; margin-top: 8px; padding: 0 14px; border-radius: 999px; background: #5865F2; color: #FFFFFF; font-size: 13.5px; font-weight: 800; text-decoration: none; }
+.pkm-qm-discord img { flex: none; filter: brightness(0) invert(1); }
+.pkm-qm-discord-off { background: #26345A; color: #C9D3EA; }
+.pkm-qm-discord:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
+.pkm-qm-safe { display: block; margin-top: 6px; font-size: 11.5px; line-height: 1.4; color: #C9D3EA; }
+
 /* Échanges entre joueurs : vitrine, « Pour trade », « À vendre » au prix du joueur, « Je cherche » (vitrine.js,
    2026-11-16, « go » du porteur, docs/45 et sa maquette). Fenêtres et rubriques sombres dans les 3 apparences. */
 
@@ -3651,6 +3661,9 @@ button.pkm-pg-row:active, .pkm-pg-podbtn:active { transform: scale(0.98); }
   .pkm-vfx-ring, .pkm-vfx-glint, .pkm-vfx-ripple, .pkm-vfx-sparks i { opacity: 0; }
 }
 
+/* Fiche d'échange ouverte depuis la recherche de Ma vitrine : lien vers la carte de dresseur du joueur. */
+.pkm-vt-owner { align-self: center; margin-top: 4px; }
+
 /* Application toujours à la verticale (orient.js, 2026-11-16, porteur). Téléphone à l'horizontale (iPhone,
    navigateur) : écran plein « Remets ton téléphone droit », au-dessus de tout ; l'app reste en place derrière. */
 .pkm-rotlock { display: none; }
@@ -3713,7 +3726,26 @@ nav[aria-label="Navigation principale"] { padding-left: 4px !important; padding-
 .pkm-coin-tt, .pkm-coin-ts { font-style: normal; font-weight: 800; }
 .pkm-coin-tt { color: #FFE680; }
 .pkm-coin-ts { color: #FFB46B; }
-.pkm-coin-mine:focus-visible, .pkm-coin-clear:focus-visible, .pkm-coin-row:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
+.pkm-coin-mine:focus-visible, .pkm-coin-clear:focus-visible, .pkm-coin-row:focus-visible, .pkm-coin-offer:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
+/* Recherche d'une carte ou d'un dresseur (2026-11-21, porteur) : cartes proposées (visuel, nom, état, étiquettes, dresseur),
+   puis dresseurs ; sous-titres de chaque partie ; exemple sous la barre tant que rien n'est tapé. */
+.pkm-coin-hint { margin: 0; font-size: 12.5px; line-height: 1.45; color: #9AA8C3; }
+.pkm-coin-sub { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.pkm-coin-sub h4 { margin: 0; font-size: 12.5px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; color: #C9D3EA; }
+.pkm-coin-offers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pkm-coin-offer { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 10px 8px 8px; border-radius: 16px; border: 1px solid #2A3A5C; background: #0B1120; color: #F3F6FC; font: inherit; text-align: left; cursor: pointer; }
+.pkm-coin-offer-img { flex: none; width: 54px; border-radius: 5px; }
+.pkm-coin-offer-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pkm-coin-offer-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.pkm-coin-offer-t b { font-size: 14.5px; font-weight: 800; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-coin-offer-t small { font-size: 12px; color: #C9D3EA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkm-coin-offer-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.pkm-coin-offer .pkm-qm-chev { flex: none; }
+/* Bulle « Ma vitrine » : le petit magasin de l'animation de la vitrine (en couleurs). */
+.pkm-coin-tab-ico.pkm-coin-tab-shop { width: 20px; height: 20px; }
+.pkm-coin-tabs-4 .pkm-coin-tab-ico.pkm-coin-tab-shop { width: 19px; height: 19px; margin-bottom: -2px; }
+/* « Mes messages » en haut de Ma vitrine. */
+.pkm-qm-open.pkm-coin-msgs { margin-top: 0; }
 
 /* ——— Le calendrier JCC ——— */
 .pkm-cal-st { flex: none; display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 0.2px; white-space: nowrap; }
@@ -4888,6 +4920,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=61c0e928"></script>
+<script src="app.js?v=b3ad8c95"></script>
 </body>
 </html>

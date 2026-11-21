@@ -129,9 +129,10 @@
   // La carte s'ouvre tout de suite avec ce que le classement montre déjà (avatar, pseudo, grade, place, PL), puis le
   // serveur complète (player_card, 031_carte_joueur.sql) : mois d'arrivée sur Dropicards et saisons passées. Serveur sans
   // 031 (ou classement sans identifiant) : la carte reste sur ces premières informations, avec un mot d'explication.
-  // Messages rapides entre joueurs (8 messages tout faits, option B de docs/43, 2026-11-16) : qmsg.js.
+  // Carte simplifiée (2026-11-21, porteur : « uniquement le pseudo, le grade, membre depuis, le classement et les PL de
+  // la saison actuelle, le classement et les PL de la saison passée, et sa vitrine ; supprime tous les messages
+  // rapides ») : avatar gardé, plus de messages rapides, plus de liste des anciennes saisons ni de « Il cherche ».
   const PC_MONTH = ym => { const m = /^(\d{4})-(\d{2})/.exec(ym || ''); if (!m) return ''; try { return new Date(Date.UTC(+m[1], +m[2] - 1, 15)).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }); } catch (e) { return ''; } };
-  const pcRank = r => (Number(r) > 0 ? Number(r) + (Number(r) === 1 ? 'ᵉʳ' : 'ᵉ') : '—');
   progProto.pcOpen = function (e, unit, pts) {
     const s = this.st(), online = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
     const seed = { id: e.id || '', pseudo: e.pseudo || '—', avatar: e.me && s.avatarCfg ? s.avatarCfg : e.avatar || null, grade: e.grade, rank: Number(e.rank) || 0, pts: Number(pts) || 0, unit: unit || 'PL', me: !!e.me };
@@ -150,7 +151,7 @@
   };
   progProto.vPlayerCard = function (s) {
     const c = s.pcCard;
-    if (!c || !c.seed) return { open: false, past: [] };
+    if (!c || !c.seed) return { open: false, prev: {} };
     const T = this.tiers(), sd = c.seed, d = c.data && typeof c.data === 'object' ? c.data : null;
     const g = progGrade(T, d && d.grade != null ? d.grade : sd.grade);
     const ava = avMini(sd.me && s.avatarCfg ? s.avatarCfg : d && d.avatar ? d.avatar : sd.avatar);
@@ -158,14 +159,19 @@
     const board = s.progBoard && s.progBoard.season ? Number(s.progBoard.season.n) : progLocalSeason(Date.now()).n;
     const n = cur ? Number(cur.n) || board : board, rank = cur ? Number(cur.rank) || 0 : sd.rank, players = cur ? Number(cur.players) || 0 : (s.progBoard ? Number(s.progBoard.players) || 0 : 0);
     const since = d && d.since ? PC_MONTH(d.since) : '';
-    const past = (d && Array.isArray(d.past) ? d.past : []).map(x => {
-      const r = Number(x.rank) || 0;
-      return { season: 'Saison ' + x.n, rank: pcRank(r) + (Number(x.players) ? ' sur ' + progNum(x.players) : ''), pl: progNum(x.pl) + ' PL', medal: r >= 1 && r <= 3 ? 'img/rank/' + r + '.svg' : '', hasMedal: r >= 1 && r <= 3,
-        aria: 'Saison ' + x.n + ' : ' + pcRank(r) + ', ' + progNum(x.pl) + ' PL' };
-    });
+    // Saison passée seulement (2026-11-21, porteur : « le classement et les PL de la saison passée ») : le serveur ne
+    // renvoie que les saisons où le joueur a gagné des PL ; sans ligne, il n'était pas classé (0 PL).
+    const pn = n - 1, pe = d && Array.isArray(d.past) ? d.past.find(x => Number(x.n) === pn) || null : null;
+    const pr = pe ? Number(pe.rank) || 0 : 0, pp = pe ? Number(pe.players) || 0 : 0;
+    const prev = {
+      has: pn >= 1, none: pn < 1, label: 'Saison ' + pn + ' · terminée', known: !!d, unknown: !d,
+      rank: pr ? '#' + progNum(pr) : '—', of: pr && pp ? 'sur ' + progNum(pp) + ' joueur' + (pp > 1 ? 's' : '') : d ? 'pas classé' : '',
+      pts: d ? progNum(pe ? pe.pl : 0) : '—', medal: pr >= 1 && pr <= 3 ? 'img/rank/' + pr + '.svg' : '', hasMedal: pr >= 1 && pr <= 3,
+      noneText: 'Première saison de la ligue : pas encore de saison passée.'
+    };
     const admin = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.isAdmin();
     const note = c.busy ? 'Chargement de la carte…'
-      : c.err === 'old' ? (admin ? 'Carte complète (date d’arrivée, saisons passées) après l’installation de tools/supabase/install_024_a_034.sql dans Supabase Studio.' : 'La carte complète (date d’arrivée, saisons passées) arrive très bientôt.')
+      : c.err === 'old' ? (admin ? 'Carte complète (date d’arrivée, saison passée) après l’installation de tools/supabase/install_024_a_034.sql dans Supabase Studio.' : 'La carte complète (date d’arrivée, saison passée) arrive très bientôt.')
         : c.err === 'net' ? 'Pas de réseau : la carte complète s’affichera une fois connecté.'
           : c.err === 'gone' ? 'Ce joueur n’est plus dans la ligue.'
             : c.err ? 'La carte complète n’est pas disponible pour le moment.' : '';
@@ -177,8 +183,7 @@
       since: since ? 'Membre depuis ' + since : '', hasSince: !!since,
       seasonLabel: 'Saison ' + n + ' · en cours', rank: rank ? '#' + progNum(rank) : '—', of: rank && players ? 'sur ' + progNum(players) + ' joueur' + (players > 1 ? 's' : '') : rank ? '' : 'pas classé',
       unitLabel: sd.unit + ' de la saison', unitImg: unitImg, pts: progNum(cur ? cur.pl : sd.pts),
-      past: past, hasPast: past.length > 0, noPast: !past.length && !c.busy && (!!d || !c.err),
-      pastEmpty: !d ? 'Ses saisons passées s’affichent une fois connecté à ton compte Dropicards.' : n > 1 ? 'Aucun PL gagné lors des saisons passées.' : 'Première saison de la ligue : ses résultats passés s’afficheront ici.',
+      prev: prev,
       note: note, hasNote: !!note
     };
   };

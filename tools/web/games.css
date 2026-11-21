@@ -838,6 +838,9 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
    plus, unité « cqw » : la carte est un conteneur), pour que « 12 345 € · NM » tienne même sur un écran de 320 px.
    Marges intérieures élargies (2026-11-15, porteur) : drapeau et sigle bien à l'intérieur des bouts arrondis. */
 .pkm-pill2 { position: absolute; left: 2%; right: 2%; bottom: 6%; width: fit-content; max-width: 96%; margin: 0 auto; transform: none; box-sizing: border-box; display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 0.3em; padding: 0.34em 0.85em 0.34em 0.78em; border-radius: 999px; background: rgba(8, 13, 26, 0.88); color: #FFFFFF; font-size: clamp(6.6px, 9.1cqw, 10.5px); font-weight: 700; line-height: 1.2; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); }
+/* Carte dans ma vitrine (2026-11-21, porteur) : le petit magasin de la vitrine, juste au-dessus de l'état de la carte
+   (bout droit de la pastille), sans cacher la carte. */
+.pkm-hk-vit { position: absolute; right: 0.85em; bottom: calc(100% + 3px); width: clamp(15px, 17cqw, 21px); height: auto; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)); pointer-events: none; }
 .pkm-pill2-v, .pkm-pill2-c { flex: none; display: inline-flex; align-items: center; gap: 0.25em; }
 .pkm-pill2-c { gap: 0.12em; }
 .pkm-pill2-v > span:first-child { width: 1.1em !important; height: 0.8em !important; }

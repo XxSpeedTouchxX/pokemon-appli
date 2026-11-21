@@ -37,6 +37,7 @@ from (values
   ('034_recherche_dresseurs', to_regprocedure('public.player_search(text,integer)') is not null, 'Le coin des dresseurs : rechercher un dresseur'),
   ('035_recharges_pa', to_regprocedure('public.pa_shop_state()') is not null, 'Recharger mes PA : paiement Stripe des 4 packs'),
   ('037_parrainage', to_regprocedure('public.pl_invite(text)') is not null, 'parrainage fiabilisé : code à l''inscription, invitation, gains montrés'),
+  ('038_recherche_cartes', to_regprocedure('public.showcase_offers(text[],integer)') is not null, 'Ma vitrine : chercher une carte proposée ; messages rapides retirés'),
   ('036_notifications_push', to_regprocedure('public.push_due(timestamp with time zone,integer)') is not null, 'notifications envoyées par le serveur (installation à part, docs/46)'),
   ('020_premium_formules', exists (select 1 from pg_constraint where conname = 'premium_plan_check' and pg_get_constraintdef(oid) like '%quarter%'), 'Premium trimestriel et semestriel')
 ) as t(script, ok, role)
