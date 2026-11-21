@@ -102,7 +102,10 @@ const audit = () => page.evaluate(() => {
     // visible est le premier arrêt du dégradé (le reflet ne fait que passer), posée sur le fond de son parent.
     const clipped = /text/.test(cs.webkitBackgroundClip || '') || /text/.test(cs.backgroundClip || '');
     let fg = clipped ? parse((cs.backgroundImage.match(/rgba?\([^)]*\)/) || [''])[0]) : parse(cs.color); if (!fg) continue;
-    const bgs = backs(clipped ? el.parentElement : el); if (!bgs) continue;
+    // Texte entouré d'un contour opaque d'au moins 1 px (« +2 » du Safari, 2026-11-21) : la couleur se lit sur son contour,
+    // pas sur le décor qui passe derrière (ciel, herbe).
+    const sw = parseFloat(cs.webkitTextStrokeWidth) || 0, sc = sw >= 1 ? parse(cs.webkitTextStrokeColor) : null;
+    const bgs = sc && sc.a >= 0.9 ? [sc] : backs(clipped ? el.parentElement : el); if (!bgs) continue;
     let op = 1; for (let e = el; e && e.id !== 'app'; e = e.parentElement) op *= +getComputedStyle(e).opacity;
     let worst = 99, worstBg = null;
     for (const b of bgs) { const f = over({ r: fg.r, g: fg.g, b: fg.b, a: fg.a * op }, b); const k = ratio(f, b); if (k < worst) { worst = k; worstBg = b; } }
