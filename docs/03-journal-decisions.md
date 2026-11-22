@@ -11,6 +11,7 @@
 - **Demandes** : voix du compagnon supprimée ; « Mon classeur » barré (titre hors du cadre) ; anneau mal centré sur l'icône des séries et sur la manette ; cadre des PK rectangulaire (ovale comme celui des PA) ; présenter « Le coin des dresseurs » et ses 4 rubriques (textes du porteur), avec l'anneau bien centré, puis la page des jeux à PK ; arbre d'évolution : 2 rectangles qui se chevauchaient ; « grâce à tes PK et PA gagnés » ; plus de « À toi de jouer… » à la fin.
 - **Cause des défauts** : sur un écran d'iPhone de 664 px, le cadre de l'arbre descendait sous l'anneau de la manette, et le titre du classeur passait sous la bulle quand la courbe de la valeur est pliée ; l'anneau était calé sur le bouton entier, plus haut que l'icône depuis la nouvelle barre du bas.
 - **Fait** : 14 étapes (coin des dresseurs et jeux à PK après les séries) ; voix gardée seulement pour l'explication de « Ma ligue » (à retirer aussi si le porteur le souhaite) ; texte des rubriques en liste, « Parrainer un ami » pour la 3ᵉ (nom de la bulle dans l'app) ; vérifié à 390 × 844, 390 × 664 (courbe pliée), 375 × 667 et 360 × 640 ; cache v273.
+- **Validé par le porteur (même jour)** : voix gardée dans l'explication de « Ma ligue » ; textes des 4 rubriques raccourcis tels quels (« Ma vitrine : échange ou vends tes cartes avec d'autres dresseurs », « Calendrier JCC : ne rate pas les prochaines sorties Pokémon ») ; tests GitHub du commit passés.
 
 ## 2026-11-22 — Notifications du serveur : étapes 1 et 2 faites (porteur)
 
