@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-22 — Notifications du serveur : étapes 1 et 2 faites (porteur)
+
+- **Fait par le porteur** : `install-push.sh` lancé dans le terminal de Coolify (serveur « localhost ») ; réponse « OK : fonction « push » installée (171 lignes) » puis « OK : la fonction répond et la clé d'envoi est prête » (capture). La clé d'envoi n'est créée que si 036 est en place : l'étape 1 est donc faite aussi.
+- **Reste** : étape 3 de `docs/46` sur le téléphone (Mon profil › Notifications › « Autoriser les notifications », iPhone depuis l'icône de l'écran d'accueil), puis contrôle facultatif `select public.push_status();` dans Studio.
+
 ## 2026-11-22 — Guide illustré : retrouver l'adresse de Coolify et son terminal (porteur)
 
 - **Demande** : « mais où est l'adresse de mon Coolify ? fais-moi des screenshots étape par étape » (étape 2 de `docs/46`).

@@ -3,6 +3,8 @@
 *2026-11-20 · pour le porteur, sans jargon · demande du porteur : « je veux que l'utilisateur reçoive une notif sur son téléphone dès lors que les jeux (booster, pièce ou safari) sont de nouveau disponibles », plus une relance après 72 h et une après 1 semaine sans ouvrir l'app.*
 
 > **À retenir.** Tout est construit et testé. Il reste **3 étapes** à faire une fois (environ 5 minutes). **Sans elles, aucune notification n'arrive app fermée** ; depuis le 22 novembre 2026, l'app n'en montre plus non plus à l'ouverture (seulement les pastilles). **Pour savoir si c'est en place** : Mon profil › Notifications doit afficher « Notifications actives sur ce téléphone, même quand l'app est fermée ». **Coût : 0 €** (les services d'envoi de Google, Apple et Mozilla sont gratuits ; rien à payer, aucun compte à créer pour le site).
+>
+> **Point au 22 novembre 2026 :** étapes 1 et 2 faites par le porteur (la fonction répond et la clé d'envoi est prête) ; reste l'étape 3 sur le téléphone.
 
 ---
 
