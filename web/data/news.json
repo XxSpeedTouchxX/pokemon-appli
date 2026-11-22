@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-21T21:52:20Z",
+ "updated": "2026-11-22T13:35:11Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,13 @@
   }
  ],
  "items": [
+  {
+   "title": "Pokémon GO : Saison 29 de la Ligue Combat GO !",
+   "url": "https://www.pokebip.com/news/7655/pokemon-go-saison-29-de-la-ligue-combat-go",
+   "date": "2026-11-22T12:35:44Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "Pokémon Sleep : Cadeau de célébration de la Journée Évoli !",
    "url": "https://www.pokebip.com/news/7654/pokemon-sleep-cadeau-de-celebration-de-la-journee-evoli",
@@ -120,13 +127,6 @@
    "title": "Pokémon GO : Souhaits crépusculaires !",
    "url": "https://www.pokebip.com/news/7632/pokemon-go-souhaits-crepusculaires",
    "date": "2026-11-13T17:25:02Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Écarlate et Violet : Retour d'Ékaïser surpuissant",
-   "url": "https://www.pokebip.com/news/7640/ecarlate-et-violet-retour-dekaiser-surpuissant",
-   "date": "2026-11-13T08:40:16Z",
    "source": "Pokébip",
    "tcg": false
   },
