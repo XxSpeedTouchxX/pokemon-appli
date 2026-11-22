@@ -113,11 +113,39 @@
     share: () => 'partage validé', social: () => 'merci de suivre Dropicards',
     welcome_ref: g => (g.note && /^Bienvenue, /.test(g.note) ? 'bienvenue, tu es ' + g.note.replace(/^Bienvenue, /, '') : 'bienvenue')
   };
+  // Mission qui a rapporté des PL, écrite sous « +N PL » (2026-11-22, porteur : « qu'il y ait marqué dessous la mission
+  // correspondante, pour que l'utilisateur sache pourquoi il en a gagné ») : même nom que dans « Mes missions ».
+  const plEsc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const plMission = g => {
+    const k = g && g.kind, note = String((g && g.note) || ''), ref = String((g && g.ref) || '');
+    if (k === 'streak') return { k: 'Mission réussie', t: ref + ' jours d’affilée', d: 'tu as ouvert Dropicards ' + ref + ' jours de suite' };
+    if (k === 'social') { const n = PL_NETS.find(x => x.id === ref); return { k: 'Mission réussie', t: n ? n.title : 'Suivre Dropicards', d: 'merci de nous suivre !' }; }
+    if (k === 'share') {
+      const net = note.replace(/^Partage sur /, ''), lab = (PL_SHARE_NETS.find(x => x[0] === net) || [net, net])[1];
+      return { k: 'Mission réussie', t: 'Partager Dropicards sur tes réseaux', d: lab ? 'partage sur ' + lab + ' validé' : 'partage validé' };
+    }
+    if (k === 'referral') return { k: 'Mission réussie', t: 'Parrainer un ami', d: /^Filleul : /.test(note) ? note.replace(/^Filleul : /, '') + ' a rempli les conditions' : 'un ami de plus parrainé' };
+    if (k === 'referral_premium') return { k: 'Mission réussie', t: 'Parrainer un ami', d: 'ton filleul a pris le DropiPass' };
+    if (k === 'welcome_ref') return { k: 'Cadeau de bienvenue', t: 'Bienvenue sur Dropicards', d: /^Bienvenue, /.test(note) ? 'tu es ' + note.replace(/^Bienvenue, /, '') : 'tu as été parrainé' };
+    if (k === 'admin') return { k: 'Bonus', t: 'Cadeau de l’équipe Dropicards', d: note };
+    return { k: 'Mission réussie', t: 'Mission Dropicards', d: note };
+  };
+  const plWhyHtml = list => {
+    const gs = (list || []).filter(g => g && Number(g.pl) > 0);
+    if (!gs.length) return '';
+    if (gs.length === 1) {
+      const m = plMission(gs[0]);
+      return '<div class="pkm-plfx-why"><span class="pkm-plfx-why-k">' + plEsc(m.k) + '</span><b>' + plEsc(m.t) + '</b>' + (m.d ? '<em>' + plEsc(m.d) + '</em>' : '') + '</div>';
+    }
+    const rows = gs.slice(0, 4).map(g => { const m = plMission(g); return '<li><b>' + plEsc(m.t) + '</b><i>+' + plNum(g.pl) + '</i></li>'; }).join('');
+    const more = gs.length > 4 ? '<li class="pkm-plfx-more">+ ' + (gs.length - 4) + (gs.length - 4 > 1 ? ' autres missions' : ' autre mission') + '</li>' : '';
+    return '<div class="pkm-plfx-why"><span class="pkm-plfx-why-k">' + gs.length + ' missions réussies</span><ul>' + rows + more + '</ul></div>';
+  };
   // Animation des PL gagnés (2026-11-14, porteur : « quand l'utilisateur remporte des PL, une petite animation où l'on
   // voit le nombre de PL gagnés ») : le bouclier-cœur des PL arrive en rebondissant, « +N PL » compte jusqu'au total,
-  // des petits boucliers jaillissent ; tout s'efface seul en 2,6 s (ou au toucher). Sans mouvement si l'appareil le
-  // demande (prefers-reduced-motion).
-  const plFx = n => {
+  // des petits boucliers jaillissent, puis la mission réussie s'écrit dessous (2026-11-22) ; tout s'efface seul en 3,8 s
+  // (ou au toucher). Sans mouvement si l'appareil le demande (prefers-reduced-motion).
+  const plFx = (n, list) => {
     if (!(n > 0) || typeof document === 'undefined') return;
     try {
       const old = document.querySelector('.pkm-plfx');
@@ -130,7 +158,7 @@
         sparks += '<img src="img/brand/pl.svg" alt="" class="pkm-plfx-spark" style="--x:' + Math.round(Math.cos(a) * d) + 'px;--y:' + Math.round(Math.sin(a) * d) + 'px;--d:' + (i * 30) + 'ms">';
       }
       ov.innerHTML = '<div class="pkm-plfx-box"><span class="pkm-plfx-glow" aria-hidden="true"></span>' + sparks
-        + '<img src="img/brand/pl.svg" alt="" class="pkm-plfx-logo"><b class="pkm-plfx-n">+' + plNum(n) + ' PL</b><small>Points de loyauté gagnés</small></div>';
+        + '<img src="img/brand/pl.svg" alt="" class="pkm-plfx-logo"><b class="pkm-plfx-n">+' + plNum(n) + ' PL</b><small>Points de loyauté gagnés</small>' + plWhyHtml(list) + '</div>';
       document.body.appendChild(ov);
       const b = ov.querySelector('.pkm-plfx-n'), t0 = performance.now(), dur = 900;
       const still = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
@@ -141,7 +169,7 @@
       }
       const bye = () => { ov.classList.add('pkm-plfx-out'); setTimeout(() => ov.remove(), 380); };
       ov.addEventListener('click', bye);
-      setTimeout(bye, 2600);
+      setTimeout(bye, ov.querySelector('.pkm-plfx-why') ? 3800 : 2600);
     } catch (e) { /* animation facultative */ }
   };
   // « first » : message déjà prévu (bienvenue d'un filleul), mis devant pour ne pas être effacé.
@@ -163,7 +191,7 @@
     const why = list.length === 1 ? (PL_WHY[list[0].kind] ? PL_WHY[list[0].kind](list[0]) : '') : list.length + ' missions réussies';
     const msg = sum ? '+' + plNum(sum) + ' PL' + (why ? ' · ' + why : '') + ' (Ma ligue)' : '';
     if (!msg && !first) return;
-    plFx(sum);
+    plFx(sum, list);
     this.setState({ toast: first && msg ? first + ' · ' + msg : first || msg });
     this.flash();
   };
@@ -176,26 +204,27 @@
     if (!force && plAt && Date.now() - plAt < PL_TTL) return Promise.resolve(this.st().plState || null);
     plAt = Date.now();
     const code = plPending();
-    let hello = '', linkErr = '';
+    let hello = null, linkErr = '';
     // Code d'un lien (ou tapé à l'inscription) : relié au compte. « already » : déjà fait à l'inscription (037), la
     // bienvenue arrive par la liste « new ». Refus (son propre lien, compte trop ancien…) : expliqué, puis la page
     // « Parrainer un ami ».
     const first = code ? Cloud.rpc('pl_set_parrain', { code: code }).then(r => {
       plForget();
-      if (r && r.ok && !r.already) hello = 'Bienvenue ! Tu es parrainé par ' + (r.parrain || 'un ami') + ' : +' + plNum(r.pl) + ' PL';
+      if (r && r.ok && !r.already) hello = { kind: 'welcome_ref', ref: '', pl: Number(r.pl) || 0, note: 'Bienvenue, parrainé par ' + (r.parrain || 'un ami') };
     }, e => { if (e && e.code === 'game') { plForget(); linkErr = e.message || ''; } }) : Promise.resolve();
     plBusy = first.then(() => Cloud.rpc('pl_state')).then(st => {
       plBusy = null;
       if (linkErr) this.plLinkRefused(linkErr);
-      if (!st || typeof st !== 'object') { if (hello) this.plCelebrate([], hello + ' (Ma ligue)'); return null; }
+      if (!st || typeof st !== 'object') { if (hello) this.plCelebrate([hello]); return null; }
       this.setState({ plState: st, plErr: '' });
-      // La bienvenue déjà annoncée (hello) n'est pas répétée.
+      // La bienvenue (hello) n'est montrée qu'une fois, en tête.
       const nw = (Array.isArray(st.new) ? st.new : []).filter(g => !(hello && g && g.kind === 'welcome_ref'));
-      if (nw.length || hello) this.plCelebrate(nw, hello);
+      const all = hello ? [hello].concat(nw) : nw;
+      if (all.length) this.plCelebrate(all);
       return st;
     }, e => {
       plBusy = null;
-      if (hello) this.plCelebrate([], hello + ' (Ma ligue)');
+      if (hello) this.plCelebrate([hello]);
       if (e && e.code === 'not_installed') plOff = true;
       this.setState({ plErr: e && e.code === 'not_installed' ? 'off' : e && e.code === 'network' ? 'net' : 'err' });
       return null;

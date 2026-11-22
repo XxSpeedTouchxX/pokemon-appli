@@ -81,7 +81,7 @@ const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null
   // À droite de l'emblème du grade, à la même hauteur ; l'emblème reste centré au-dessus du logo.
   const geo = await page.evaluate(() => { const g = document.querySelector('.pkm-hh-gbtn').getBoundingClientRect(), m = document.querySelector('.pkm-hh-mail').getBoundingClientRect(), l = document.querySelector('.pkm-hh-mid > img:last-child').getBoundingClientRect();
     return { gap: Math.round(m.left - g.right), dy: Math.round((m.top + m.height / 2) - (g.top + g.height / 2)), gc: Math.round((g.left + g.width / 2) - (l.left + l.width / 2)), right: Math.round(m.right), avatar: Math.round(document.querySelector('header button[aria-label*="profil" i], .pkm-hh-ava, [aria-label="Mon profil"]') ? document.querySelector('header button[aria-label*="profil" i], .pkm-hh-ava, [aria-label="Mon profil"]').getBoundingClientRect().left : 999) }; });
-  ok('enveloppe à droite de l’emblème du grade, même hauteur, emblème toujours centré sur le logo (' + JSON.stringify(geo) + ')', geo.gap >= 0 && geo.gap <= 10 && Math.abs(geo.dy) <= 3 && Math.abs(geo.gc) <= 6 && geo.right <= geo.avatar);
+  ok('enveloppe à droite de l’emblème du grade (≈ 14 px d’écart, 2026-11-22), même hauteur, emblème toujours centré sur le logo (' + JSON.stringify(geo) + ')', geo.gap >= 11 && geo.gap <= 18 && Math.abs(geo.dy) <= 3 && Math.abs(geo.gc) <= 6 && geo.right <= geo.avatar);
   await page.locator('header').first().screenshot({ path: shot('qm-enveloppe-entete.png') }).catch(() => {});
   // Ma ligue : plus de bouton « Mes messages » dans ma carte.
   await lb.click(); await page.waitForTimeout(2000);
@@ -130,7 +130,7 @@ const CARD = id => ({ sid: 900, card_id: id, lang: 'FR', cond: 'NM', grade: null
   const g320 = await page.evaluate(() => { const g = document.querySelector('.pkm-hh-gbtn').getBoundingClientRect(), m = document.querySelector('.pkm-hh-mail').getBoundingClientRect();
     const others = [...document.querySelectorAll('header button, header img')].filter(e => !e.closest('.pkm-hh-mail') && !e.closest('.pkm-hh-mid')).map(e => e.getBoundingClientRect()).filter(r => r.width && r.height);
     return { gap: Math.round(m.left - g.right), hit: others.some(r => r.left < m.right && r.right > m.left && r.top < m.bottom && r.bottom > m.top), out: m.right > innerWidth }; });
-  ok('320 px : enveloppe à droite de l’emblème, ne touche ni l’avatar ni les soldes (' + JSON.stringify(g320) + ')', g320.gap >= 0 && !g320.hit && !g320.out);
+  ok('320 px : enveloppe à droite de l’emblème, ne touche ni l’avatar ni les soldes (' + JSON.stringify(g320) + ')', g320.gap >= 6 && !g320.hit && !g320.out);
   await page.locator('header').first().screenshot({ path: shot('qm-enveloppe-entete-320.png') }).catch(() => {});
   await mb.click(); await page.waitForTimeout(900);
   const over = await page.evaluate(() => { const q = document.querySelector('section.pkm-qm'); if (!q) return 'absent'; const w = q.getBoundingClientRect().right; return Array.from(q.querySelectorAll('*')).filter(e => e.getBoundingClientRect().right > w + 1).map(e => e.className).slice(0, 3).join(' | '); });

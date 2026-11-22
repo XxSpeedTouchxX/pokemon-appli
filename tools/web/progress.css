@@ -195,6 +195,18 @@ html.pkm-calm .pkm-ple-head, html.pkm-calm .pkm-ple-ref, html.pkm-calm .pkm-ple-
 .pkm-plfx-logo { position: relative; width: 84px; height: 84px; animation: pkm-plfx-bounce 0.9s cubic-bezier(0.3, 1.6, 0.5, 1) both; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45)); }
 .pkm-plfx-n { position: relative; font-family: 'Luckiest Guy', 'Sora', sans-serif; font-size: 40px; letter-spacing: 0.02em; color: #FFD60A; -webkit-text-stroke: 1.5px #0B1120; font-variant-numeric: tabular-nums; }
 .pkm-plfx-box small { position: relative; font-size: 13px; font-weight: 700; color: #C9D3EA; }
+/* Mission qui a rapporté les PL, sous « +N PL » (2026-11-22, porteur) : arrive juste après le compteur. */
+.pkm-plfx-box { max-width: calc(100vw - 32px); box-sizing: border-box; }
+.pkm-plfx-why { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 100%; max-width: 280px; margin-top: 6px; padding: 10px 14px 11px; box-sizing: border-box; border-radius: 16px; border: 1px solid rgba(32, 201, 194, 0.55); background: rgba(32, 201, 194, 0.12); text-align: center; animation: pkm-plfx-why 0.45s cubic-bezier(0.2, 1.2, 0.4, 1) 0.75s both; }
+.pkm-plfx-why-k { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #5EE0DA; }
+.pkm-plfx-why b { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; line-height: 1.25; color: #FFFFFF; }
+.pkm-plfx-why em { font-style: normal; font-size: 12.5px; line-height: 1.3; color: #C9D3EA; }
+.pkm-plfx-why ul { display: flex; flex-direction: column; gap: 4px; width: 100%; margin: 2px 0 0; padding: 0; list-style: none; }
+.pkm-plfx-why li { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; text-align: left; }
+.pkm-plfx-why li b { font-size: 13.5px; }
+.pkm-plfx-why li i { flex: none; font-style: normal; font-weight: 800; font-size: 13px; color: #FFD60A; font-variant-numeric: tabular-nums; }
+.pkm-plfx-why li.pkm-plfx-more { justify-content: center; font-size: 12px; color: #C9D3EA; }
+@keyframes pkm-plfx-why { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .pkm-plfx-spark { position: absolute; left: 50%; top: 58px; width: 22px; height: 22px; margin: -11px 0 0 -11px; opacity: 0; animation: pkm-plfx-spark 1.1s ease-out var(--d) both; pointer-events: none; }
 @keyframes pkm-plfx-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pkm-plfx-fade { to { opacity: 0; } }
@@ -202,7 +214,7 @@ html.pkm-calm .pkm-ple-head, html.pkm-calm .pkm-ple-ref, html.pkm-calm .pkm-ple-
 @keyframes pkm-plfx-bounce { 0% { transform: translateY(-60px) scale(0.5); } 60% { transform: translateY(6px) scale(1.12); } 100% { transform: none; } }
 @keyframes pkm-plfx-glow { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1.12); opacity: 1; } }
 @keyframes pkm-plfx-spark { 0% { opacity: 0; transform: translate(0, 0) scale(0.4); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1) rotate(25deg); } }
-@media (prefers-reduced-motion: reduce) { .pkm-plfx, .pkm-plfx-box, .pkm-plfx-logo, .pkm-plfx-glow { animation: none; } .pkm-plfx-spark { display: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-plfx, .pkm-plfx-box, .pkm-plfx-logo, .pkm-plfx-glow, .pkm-plfx-why { animation: none; } .pkm-plfx-spark { display: none; } }
 /* Lots alignés (2026-11-14, porteur) : même colonne de 124 px pour tous les visuels, les textes commencent au même endroit.
    « Premium » : logo argenté bordé d'or de la bannière Premium (même dégradé), à la place de la couronne. */
 .pkm-pg-rwprem { flex: none; position: relative; width: 50px; height: 36px; box-sizing: border-box; border-radius: 9px; border: 2px solid #FFD60A; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(115deg, #E9EDF3 0%, #C3CBD8 22%, #FFFFFF 42%, #B4BDCB 62%, #EEF1F6 82%, #CDD4DF 100%); box-shadow: 0 0 0 1.5px rgba(255, 214, 10, 0.35), 0 0 10px rgba(255, 200, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.4); transform: rotate(6deg); }

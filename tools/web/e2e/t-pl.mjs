@@ -97,9 +97,13 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   await page.evaluate(([tok, uid, email]) => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}'); d.tuto = 'done'; d.ligueTuto = 'done'; d.onb = 0; localStorage.setItem('pkm-collection-v1', JSON.stringify(d)); localStorage.setItem('pkm-pky-asked', '1'); localStorage.setItem('pkm-cloud-session', JSON.stringify({ access_token: tok, refresh_token: 'r', expires_at: Date.now() + 3600e3, uid: uid, email: email, role: 'user' })); }, [TOKEN, UID, EMAIL]);
   await page.goto(E2E + '/?debug' + Q, { waitUntil: 'load' });
   let toasts = [];
-  for (let i = 0; i < 16; i++) { await page.waitForTimeout(250); const t = await page.evaluate(() => window.__pkm && window.__pkm.st().toast); if (t && !toasts.includes(t)) toasts.push(t); }
+  let fx0 = '';
+  for (let i = 0; i < 16; i++) { await page.waitForTimeout(250); const t = await page.evaluate(() => window.__pkm && window.__pkm.st().toast); if (t && !toasts.includes(t)) toasts.push(t);
+    const w = await page.evaluate(() => { const e = document.querySelector('.pkm-plfx-why'); return e ? e.innerText.replace(/\s+/g, ' ').trim() : ''; }); if (w) fx0 = w; }
   ok('connexion : code envoyé au serveur (pl_set_parrain « OND1NE28 »), puis oublié', (S.calls.pl_set_parrain || []).length === 1 && S.calls.pl_set_parrain[0].code === 'OND1NE28' && !(await page.evaluate(() => localStorage.getItem('pkm-parrain'))));
-  ok('un seul message : « parrainé par Ondine : +50 PL » et gain de la série (+30 PL) (' + toasts.join(' | ') + ')', toasts.some(t => /parrainé par Ondine : \+50 PL · \+30 PL · 5 jours d’affilée/.test(t)));
+  // Bienvenue et série dans la même animation, chaque mission écrite sous « +80 PL » (2026-11-22, porteur).
+  ok('un seul message : bienvenue (+50 PL) et série (+30 PL) ensemble, « +80 PL · 2 missions réussies » (' + toasts.join(' | ') + ')', toasts.some(t => /\+80 PL · 2 missions réussies/.test(t)));
+  ok('animation : les 2 missions écrites dessous (« ' + fx0 + ' »)', /2 missions réussies/i.test(fx0) && /Bienvenue sur Dropicards \+50/.test(fx0) && /5 jours d’affilée \+30/.test(fx0));
   ok('état des PL lu à l’ouverture (pl_state)', (S.calls.pl_state || []).length >= 1);
   ok('les PL ne s’affichent pas sur l’accueil', !/PL de la saison|Points de loyauté/.test(await page.locator('main').innerText()));
   // Onglet « Mes missions ».
@@ -122,10 +126,14 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   await tk.click(); await page.waitForTimeout(400);
   const fx = await page.evaluate(() => { const o = document.querySelector('.pkm-plfx'); return o ? o.innerText.replace(/\s+/g, ' ').trim() : ''; });
   ok('animation des PL gagnés : bouclier-cœur et « +100 PL » (« ' + fx + ' »)', /\+\d+ PL/.test(fx) && /Points de loyauté gagnés/.test(fx) && await page.locator('.pkm-plfx .pkm-plfx-logo').count() === 1);
+  // La mission qui a rapporté les PL est écrite dessous (2026-11-22, porteur : « pour que l'utilisateur sache pourquoi »).
+  ok('animation : « Mission réussie · Suivre Dropicards sur TikTok » sous « +100 PL »', /Mission réussie Suivre Dropicards sur TikTok/i.test(fx)
+    && await page.evaluate(() => { const n = document.querySelector('.pkm-plfx-n').getBoundingClientRect(), w = document.querySelector('.pkm-plfx-why').getBoundingClientRect(); return w.top > n.bottom && w.right <= innerWidth && w.left >= 0; }));
   await page.waitForTimeout(1100);
   ok('animation : compte jusqu’à +100 PL', /\+100 PL/.test(await page.evaluate(() => (document.querySelector('.pkm-plfx-n') || {}).textContent || '')));
-  await page.waitForTimeout(2200);
-  ok('animation : s’efface seule', await page.locator('.pkm-plfx').count() === 0);
+  await page.screenshot({ path: shot('pl-mission.png') });
+  await page.waitForTimeout(3000);
+  ok('animation : s’efface seule (3,8 s avec la mission)', await page.locator('.pkm-plfx').count() === 0);
   ok('TikTok validé : demandé au serveur, « Fait », +100 PL', (S.calls.pl_claim_social || []).length === 1 && S.calls.pl_claim_social[0].net === 'tiktok' && /Fait/.test(await tk.innerText()) && /Mes PL de la saison 250/.test(N(await page.locator('section.pkm-ple-head').innerText())));
   // Partage avec capture.
   await page.locator('.pkm-ple-row').nth(7).locator('button').click(); await page.waitForTimeout(300);

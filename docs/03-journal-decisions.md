@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-22 — Mission écrite sous l'animation des PL, enveloppe décalée (porteur)
+
+- **Demandes** : « quand l'animation des points de loyauté arrive, je veux qu'il y ait marqué dessous la mission correspondante, pour que l'utilisateur sache pourquoi il en a gagné » ; « décale un peu le logo message à droite du grade ».
+- **Fait** : sous « +N PL » et « Points de loyauté gagnés », un encadré turquoise « Mission réussie » avec le nom de la mission tel que dans « Mes missions » (« Suivre Dropicards sur TikTok », « 5 jours d'affilée », « Partager Dropicards sur tes réseaux », « Parrainer un ami »…) et une précision (« merci de nous suivre ! », « Sacha a rempli les conditions », « partage sur Instagram validé ») ; bienvenue d'un filleul : « Cadeau de bienvenue · Bienvenue sur Dropicards · tu es parrainé par … » (l'animation se joue désormais aussi pour elle) ; plusieurs gains à la fois : « N missions réussies » et la liste (4 au plus, puis « + N autres »), chacune avec ses PL ; l'animation reste 3,8 s au lieu de 2,6 s quand une mission est écrite ; enveloppe de l'en-tête décalée de 9 px vers la droite (14 px d'écart avec l'emblème ; 7 px et un peu plus petite sous 360 px de large, pour ne pas toucher l'avatar) ; cache v271.
+
 ## 2026-11-21 — Enveloppe des propositions dans l'en-tête, recherche sans saisie automatique (porteur)
 
 - **Demande** : « dans "Rechercher une carte ou un dresseur", supprime la saisie automatique des mots ; enlève l'onglet "Mes messages" juste en dessous des 4 bulles ; la petite enveloppe à droite du logo du grade avec une notification 1, 2, 3… si un autre utilisateur est intéressé par une carte de sa vitrine et lui a fait une offre ».
