@@ -4,8 +4,8 @@
   // Le starter présente ensuite l'app lui-même, partie par partie :
   // - ce dont il parle est encadré (cadre jaune animé, le reste assombri) et relié à lui par un trait ; la bulle se
   //   place au-dessus ou au-dessous, là où elle ne cache rien, et le cadre s'arrête avant elle ;
-  // - son texte s'écrit lettre par lettre, sa bouche s'ouvre et se ferme (tools/sprites/make_talk.py), sa voix
-  //   accompagne l'écriture (voice.js : voix choisie par le porteur parmi celles proposées, coupable) ;
+  // - son texte s'écrit lettre par lettre, sa bouche s'ouvre et se ferme (tools/sprites/make_talk.py), sans voix
+  //   depuis le 2026-11-22 (porteur) ; la voix (voice.js) ne reste que pour l'explication de « Ma ligue » ;
   // - on avance en touchant « Suivant », mis en avant (rien n'avance tout seul) ;
   // - pendant la visite, la place du compagnon dans « Valeur de toute ma collection » est vide : le starter y revient
   //   à la fin (« Maintenant que tu connais toute l'appli, tu pourras me trouver ici ! ») ;
@@ -25,18 +25,27 @@
   // Textes du porteur (2026-10-30), orthographe revue ; encadré des PA dans le Pokédex et solde des PK ajoutés,
   // « Tous les Pokémon » retiré. « fit » : sur un petit écran, seuls les premiers enfants sont encadrés (la valeur reste
   // entière au-dessus de la bulle). « pad » de 12 px sur la valeur (2026-11-01, porteur : des lettres touchaient le cadre).
+  // Retouches du 2026-11-22 (porteur) : voix du compagnon coupée (tutoVoiceOn) ; « Mon classeur » toujours dans son
+  // cadre, bulle en bas (« under » : le titre passait sous la bulle quand la courbe de la valeur était pliée) ; nouvelles
+  // étapes « Le coin des dresseurs » (ses 4 rubriques, « list ») et « jeux à PK » (titre et booster encadrés, bulle en bas), juste après les séries ; anneau de
+  // l'onglet centré sur son icône ; cadre du solde de PK arrondi comme celui des PA ; cadres des étapes du haut arrêtés
+  // au-dessus de la barre du bas (l'arbre d'évolution passait sous l'anneau de la manette) ; « PK et PA gagnés » ; plus
+  // de message « À toi de jouer ! » à la fin.
   const TUTO_STEPS = [
     { tab: 'home', sel: 'section[aria-label="Valeur de ma collection"]', fit: 2, pad: 12, text: 'Salut ! Ici, tu vois la valeur de toute ta collection : cartes et produits scellés, au prix du marché.' },
-    { tab: 'home', sel: 'section[aria-label="Mon classeur"]', text: 'Ici, tu pourras trouver ton classeur : il servira à ranger toutes les cartes et tous les produits scellés de ta collection.' },
+    { tab: 'home', sel: 'section[aria-label="Mon classeur"]', under: true, text: 'Ici, tu pourras trouver ton classeur : il servira à ranger toutes les cartes et tous les produits scellés de ta collection.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label^="Scanner"]', text: 'Ici, c’est le Scan Dropicards : grâce à lui, tu pourras scanner rapidement ta carte et connaître sa valeur sur le marché actuel.' },
     { tab: 'home', sel: 'section[aria-label="Boutiques près de toi"]', kids: 2, text: 'Tu pourras retrouver ici le radar des boutiques : il te permettra de localiser précisément les boutiques qui vendent du Pokémon autour de toi, et la probabilité d’y trouver des items.' },
     { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', sweep: true, text: 'Ici, tu pourras retrouver toutes les séries et leurs extensions. Touche une carte pour voir ses infos, et ajoute-la dans ton classeur si tu la possèdes déjà.' },
+    // Textes du porteur (2026-11-22), orthographe revue ; une ligne par rubrique.
+    { tab: 'coin', sel: '.pkm-coin-tabs-4', pad: 6, list: true, text: 'Voici le coin des dresseurs et ses 4 rubriques :\n• Ma ligue : un classement général pour te confronter à tous les utilisateurs de Dropicards et tenter de gagner des lots.\n• Ma vitrine : échange ou vends tes cartes avec d’autres dresseurs.\n• Parrainer un ami : gagne des PL (points de loyauté) en parrainant tes amis et grimpe dans le classement général.\n• Calendrier JCC : ne rate pas les prochaines sorties Pokémon.' },
+    { tab: 'market', sel: 'section[aria-label="Booster PK"]', kids: 2, under: true, text: 'Voici la page des jeux à PK : des jeux quotidiens qui te feront gagner des PK !' },
     { tab: 'market', dex: true, sel: '.pkm-dex-device', top: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
     { tab: 'market', dex: true, sel: '.pkm-dex-lcd-r', top: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
     { tab: 'market', dex: true, sel: '[aria-label="Route d’évolution"]', top: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
     { tab: 'market', sel: 'header .pkm-pa-bar', text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : tu peux en obtenir jusqu’à 80 quotidiennement !' }, // texte du porteur, 2026-11-01 ; 80 depuis le 2026-11-09 (avant : 70) ; 70 depuis les gains du 2026-11-02
     { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', inner: true, pad: 3, text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
-    { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés !' },
+    { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK et PA gagnés !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
   ];
   // ——— Mini-tuto de « Ma ligue » (2026-11-14, porteur : « lorsque l'utilisateur va cliquer la première fois sur Ma
@@ -80,7 +89,10 @@
       if (tutoAc.state === 'suspended') tutoAc.resume();
     } catch (e) { tutoAc = null; }
   };
-  const tutoSay = (ch, i) => { if (tutoAc && !tutoMuted() && !tutoTts()) voicePlay(tutoAc, tutoOut, tutoVoice(), TUTO.mon, ch, i); };
+  // Voix du compagnon : seulement pour l'explication de « Ma ligue » ; coupée dans le didacticiel de départ et le
+  // remerciement du starter (2026-11-22, porteur : « supprime le son lorsque ton compagnon parle »).
+  const tutoVoiceOn = () => TUTO.mode === 'ligue';
+  const tutoSay = (ch, i) => { if (tutoVoiceOn() && tutoAc && !tutoMuted() && !tutoTts()) voicePlay(tutoAc, tutoOut, tutoVoice(), TUTO.mon, ch, i); };
 
   // ——— Calque de la visite (hors de Vue) ———
   const TUTO = { comp: null, i: -1, mon: 25, typed: 0, text: '', typing: null, raf: 0, el: null, tab: null, done: false };
@@ -104,7 +116,7 @@
     box.addEventListener('keydown', ev => {
       if (ev.key === 'Escape') { ev.preventDefault(); if (TUTO.comp) TUTO.comp.tutoEnd(false); return; }
       if (ev.key !== 'Tab') return;
-      const els = [...box.querySelectorAll('button')], i = els.indexOf(document.activeElement);
+      const els = [...box.querySelectorAll('button')].filter(b => !b.hidden), i = els.indexOf(document.activeElement);
       if (i < 0 || (ev.shiftKey && i === 0) || (!ev.shiftKey && i === els.length - 1)) { ev.preventDefault(); els[ev.shiftKey ? els.length - 1 : 0].focus(); }
     });
     box.innerHTML = '<div class="pkm-tt-row"><div class="pkm-tt-mon" aria-hidden="true"><img class="pkm-tt-m0" alt="" width="104" height="108"><img class="pkm-tt-m1" alt="" width="104" height="108"></div>'
@@ -148,7 +160,7 @@
     TUTO.text = text; TUTO.typed = 0; el.typed.textContent = ''; el.box.classList.add('pkm-tt-typing');
     // Zone lue par les lecteurs d'écran : remplie juste après sa création, pour que la première phrase soit annoncée.
     clearTimeout(TUTO.sayT); TUTO.sayT = setTimeout(() => { el.full.textContent = text; }, 60);
-    if (tutoAc && !tutoMuted() && tutoTts()) voiceSpeak(text, TUTO.mon);
+    if (tutoVoiceOn() && tutoAc && !tutoMuted() && tutoTts()) voiceSpeak(text, TUTO.mon);
     if (tutoStill()) { TUTO.typed = text.length; el.typed.textContent = text; tutoSay('a', 0); tutoTyped(); return; }
     const tick = () => {
       if (TUTO.typed >= text.length) { tutoTyped(); return; }
@@ -240,7 +252,9 @@
   // Bulle en bas : au-dessus de la barre du bas (92 px), ou tout en bas, par-dessus la barre (« pkm-tt-low », 10 px),
   // quand ce qui est présenté ne tient pas au-dessus d'elle (2026-11-01, porteur : « l'encadré est trop petit,
   // agrandis-le pour voir tout l'encadré » : sur un petit écran, la bulle coupait la valeur de la collection).
-  const tutoBottom = () => (TUTO.el && TUTO.el.box.classList.contains('pkm-tt-low') ? 10 : 92);
+  // Étape en liste (« Le coin des dresseurs ») : la bulle descend juste au-dessus de l'anneau de l'onglet (style posé
+  // par tutoShow), pour laisser voir les 4 rubriques en haut même sur un petit écran.
+  const tutoBottom = () => { const el = TUTO.el, b = el ? parseFloat(el.box.style.bottom) : NaN; return b >= 0 ? b : el && el.box.classList.contains('pkm-tt-low') ? 10 : 92; };
   // Place libre entre le haut de la zone qui défile et la bulle en bas.
   const tutoRoom = (t, bottom) => {
     const main = t.closest('main'), top = main ? main.getBoundingClientRect().top : 0, bh = TUTO.el ? TUTO.el.box.offsetHeight : 260;
@@ -284,6 +298,7 @@
   const tutoPlace = (t, st) => {
     const el = TUTO.el;
     if (st.top) return true;
+    if (st.under) return false;
     if (!t) return false;
     const H = el.host.getBoundingClientRect(), r = tutoRect(t, st), bh = el.box.offsetHeight, navTop = tutoNavTop(H);
     if (!t.closest('main') || t.closest(TUTO_NAV.trim()) || t.closest('header')) {
@@ -292,6 +307,19 @@
     }
     // Bulle en bas, sauf si ce qui est présenté se voit mieux avec la bulle en haut.
     return tutoZone(t, st, true).seen > tutoZone(t, st, false).seen + 4;
+  };
+  // Anneau de l'onglet : carré arrondi de 52 px centré sur l'icône visible du bouton (les autres dessins proposés de
+  // l'icône sont cachés, de taille nulle) ; sous le scan, sa hauteur est réduite de part et d'autre du centre pour ne
+  // pas passer sur le bouton du scan.
+  const TUTO_RING = 52;
+  const tutoTabRing = btn => {
+    const b = btn.getBoundingClientRect();
+    const ic = [...btn.querySelectorAll('svg, img')].map(e => e.getBoundingClientRect()).find(r => r.width > 0 && r.height > 0) || b;
+    const cx = ic.left + ic.width / 2, cy = ic.top + ic.height / 2, w = Math.min(TUTO_RING, Math.max(ic.width + 14, b.width - 4));
+    let h = TUTO_RING;
+    const scan = document.querySelector(TUTO_NAV + 'button[aria-label^="Scanner"]'), s = scan && scan !== btn ? scan.getBoundingClientRect() : null;
+    if (s && s.right > cx - w / 2 && s.left < cx + w / 2 && s.bottom > cy - h / 2 && s.bottom < cy) h = Math.max(ic.height + 12, 2 * (cy - s.bottom - 1));
+    return { left: cx - w / 2, top: cy - h / 2, width: w, height: h };
   };
   // Cadre, trait et anneau de l'onglet : suivis à chaque image tant que la visite est ouverte. Le cadre s'arrête avant
   // la bulle : rien de ce qui est présenté n'est caché par le texte.
@@ -316,7 +344,10 @@
       if (!t) { el.link.style.opacity = '0'; el.last = ''; }
       if (t && !TUTO.done) {
         const r = tutoRect(t, st), pad = st.pad != null ? st.pad : 6, B = el.box.getBoundingClientRect(), top = el.box.classList.contains('pkm-tt-top');
-        const lo = top ? B.bottom - H.top + 8 : 4, hi = top ? H.height - 4 : B.top - H.top - 8;
+        // Bulle en haut : le cadre d'une partie de la page s'arrête au-dessus de la barre du bas, sans passer sous
+        // l'anneau de l'onglet (2026-11-22, porteur : l'arbre d'évolution et l'anneau de la manette se chevauchaient).
+        const inMain = !!t.closest('main') && !t.closest(TUTO_NAV.trim()) && !t.closest('header');
+        const lo = top ? B.bottom - H.top + 8 : 4, hi = top ? (inMain ? Math.min(H.height - 4, tutoNavTop(H) - H.top - 8) : H.height - 4) : B.top - H.top - 8;
         const y0 = Math.max(lo, r.top - H.top - pad), y1 = Math.min(hi, r.bottom - H.top + pad);
         const x = Math.max(4, r.left - H.left - pad), w = Math.min(H.width - 4, r.right - H.left + pad) - x, h = y1 - y0;
         // Le cadre rejoint sa cible en douceur, image par image (aussi pendant le défilement) : plus d'à-coups.
@@ -329,7 +360,9 @@
           el.last = key;
           Object.assign(el.frame.style, { transform: 'translate3d(' + f[0].toFixed(1) + 'px, ' + f[1].toFixed(1) + 'px, 0)', width: f[2].toFixed(1) + 'px', height: f[3].toFixed(1) + 'px' });
         }
-        if (el.rad !== TUTO.i) { el.rad = TUTO.i; el.frame.style.borderRadius = st.ico ? '18px' : Math.min(26, parseFloat(getComputedStyle(t).borderTopLeftRadius) + pad || 18) + 'px'; }
+        // Arrondi du cadre : celui de l'élément encadré (de la pastille elle-même pour le solde de PK : cadre ovale comme
+        // celui des PA, 2026-11-22, porteur).
+        if (el.rad !== TUTO.i) { el.rad = TUTO.i; const rt = st.inner && t.firstElementChild ? t.firstElementChild : t; el.frame.style.borderRadius = st.ico ? '18px' : Math.min(26, parseFloat(getComputedStyle(rt).borderTopLeftRadius) + pad || 18) + 'px'; }
         const m = el.mon.getBoundingClientRect();
         const mx = m.left - H.left + m.width / 2, my = top ? m.bottom - H.top - 6 : m.top - H.top + 10;
         const F = TUTO.fr, fx = Math.max(F[0] + 14, Math.min(F[0] + F[2] - 14, mx)), fy = top ? F[1] : F[1] + F[3];
@@ -341,10 +374,13 @@
           el.link.lastChild.setAttribute('cx', fx.toFixed(1)); el.link.lastChild.setAttribute('cy', fy.toFixed(1));
         }
       }
-      // Onglet de la barre du bas qui mène à cette partie : anneau jaune par-dessus l'assombrissement.
-      const tb = TUTO.tab && !TUTO.done ? TUTO.tab.getBoundingClientRect() : null;
+      // Onglet de la barre du bas qui mène à cette partie : anneau jaune par-dessus l'assombrissement, centré sur l'icône
+      // de l'onglet (2026-11-22, porteur : il était décalé vers le haut sur les cartes et la manette depuis la nouvelle
+      // barre, où les boutons occupent toute la hauteur). « Le coin des dresseurs », sous le scan : l'anneau garde son
+      // centre et s'arrête sous le bouton du scan.
+      const tb = TUTO.tab && !TUTO.done ? tutoTabRing(TUTO.tab) : null;
       el.ring.style.display = tb ? 'block' : 'none';
-      if (tb) Object.assign(el.ring.style, { transform: 'translate(' + (tb.left - H.left + 4).toFixed(1) + 'px, ' + (tb.top - H.top + 6).toFixed(1) + 'px)', width: (tb.width - 8).toFixed(1) + 'px', height: (tb.height - 12).toFixed(1) + 'px' });
+      if (tb) Object.assign(el.ring.style, { transform: 'translate(' + (tb.left - H.left).toFixed(1) + 'px, ' + (tb.top - H.top).toFixed(1) + 'px)', width: tb.width.toFixed(1) + 'px', height: tb.height.toFixed(1) + 'px' });
       TUTO.raf = requestAnimationFrame(loop);
     };
     TUTO.raf = requestAnimationFrame(loop);
@@ -390,11 +426,18 @@
     el.prev.hidden = i === 0;
     const navBtn = st.sel.indexOf(TUTO_NAV) === 0;
     TUTO.tab = st.tab === 'home' || navBtn || st.noRing ? null : document.querySelector(TUTO_NAV + 'button[aria-current="page"]');
+    el.box.style.bottom = '';
+    if (st.list && TUTO.tab) { const rg = tutoTabRing(TUTO.tab), H = el.host.getBoundingClientRect(); el.box.style.bottom = Math.max(10, Math.min(92, Math.round(H.bottom - rg.top + 8))) + 'px'; }
     const text = tutoText(st);
+    // Texte en liste (« Le coin des dresseurs ») : une ligne par rubrique, un peu plus petit (avant la mesure de la bulle).
+    el.box.classList.toggle('pkm-tt-list', !!st.list);
+    // Bouton du son : seulement quand le compagnon a une voix (explication de « Ma ligue »).
+    el.snd.hidden = !tutoVoiceOn();
     tutoSize(text);
-    // Étape « fit » (la valeur de la collection) : si l'encadré ne tient pas au-dessus de la bulle, la bulle descend
-    // tout en bas, par-dessus la barre du bas, pour lui laisser la place.
-    el.box.classList.toggle('pkm-tt-low', !!(st.fit && TUTO.target && tutoRoom(TUTO.target, 92) < TUTO.target.getBoundingClientRect().height + 2 * (st.pad != null ? st.pad : 6)));
+    // Étapes « fit » (la valeur de la collection) et « under » (le classeur) : si l'encadré ne tient pas au-dessus de la
+    // bulle, la bulle descend tout en bas, par-dessus la barre du bas, pour lui laisser la place.
+    // (jamais quand l'anneau d'un onglet est affiché : la bulle le cacherait)
+    el.box.classList.toggle('pkm-tt-low', !!((st.fit || (st.under && !TUTO.tab)) && TUTO.target && tutoRoom(TUTO.target, 92) < TUTO.target.getBoundingClientRect().height + 2 * (st.pad != null ? st.pad : 6)));
     const top = tutoPlace(TUTO.target, st);
     el.box.classList.toggle('pkm-tt-top', top);
     tutoType(text);
@@ -448,6 +491,8 @@
     // page glisse, puis il se rouvre sur la partie suivante : plus de flash ni de cadre qui traverse l'écran.
     // Étapes du Pokédex : rubrique « Pokédex » de l'onglet Jeux (2026-11-10).
     if (st.tab === 'market' && this.st().gameTab !== (st.dex ? 'dex' : 'pk')) this.setState({ gameTab: st.dex ? 'dex' : 'pk' });
+    // « Le coin des dresseurs » : présenté depuis sa première bulle, « Ma ligue », en haut de la page.
+    if (st.tab === 'coin' && !st.pg && this.st().coinTab !== 'lig') this.setState({ coinTab: 'lig' });
     if (!same) { TUTO.switching = true; if (TUTO.el) TUTO.el.box.classList.add('pkm-tt-switch'); this.tab(st.tab); }
     this.setState({ tutoStep: i, dexList: false, paClaim: false, toast: null });
     // L'onglet s'ouvre (transition de page), puis l'étape se montre.
@@ -518,8 +563,9 @@
     TUTO.ended = true; setTimeout(() => { TUTO.ended = false; }, 0);
     tutoForced = false;
     tutoStop();
-    this.setState({ tuto: 'done', tutoStep: -2, toast: finished ? 'À toi de jouer ! Récupère tes PA du jour et débloque des Pokémon dans le Pokédex.' : null });
-    if (finished) { if (this.st().screen !== 'home') this.tab('home'); this.flash(); }
+    // Plus de message « À toi de jouer ! » en bas de l'écran une fois le compagnon à sa place (2026-11-22, porteur).
+    this.setState({ tuto: 'done', tutoStep: -2, toast: null });
+    if (finished && this.st().screen !== 'home') this.tab('home');
   };
   // Mini-tuto de « Ma ligue » : départ, fin (vu ou passé), une seule fois par appareil.
   tutoProto.ligueStart = function () {

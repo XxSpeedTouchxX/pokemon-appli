@@ -2,11 +2,22 @@
 // en 12 étapes (2026-10-30 : textes du porteur, PA dans le Pokédex et solde des PK ajoutés, « Tous les Pokémon » retiré) où l'on
 // avance en touchant « Suivant » (rien n'avance seul) ; chaque partie encadrée sans être cachée par la bulle ; la place
 // du compagnon reste vide jusqu'à la fin, où le starter y saute ; Pokédex présenté en détail (bulle en haut).
+// 2026-11-22 (porteur) : 14 étapes (« Le coin des dresseurs » et ses 4 rubriques, puis les jeux à PK, après les
+// séries) ; voix coupée (aucun son joué, bouton du son caché) ; anneau de l'onglet centré sur son icône ; cadre du
+// solde de PK ovale ; « Mon classeur » dans son cadre ; cadres jamais sur l'anneau ; « PK et PA gagnés » ; fin sans
+// message « À toi de jouer ».
 import { launch, BASE as E2E, shot } from './helpers.mjs';
 const browser = await launch();
 const res = []; const ok = (l, c) => res.push((c ? '✓ ' : '✗ ') + l); const errors = [];
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
 await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
+// Sons : chaque oscillateur ou voix créé est compté (le didacticiel de départ n'en joue plus aucun).
+await ctx.addInitScript(() => {
+  window.__snd = 0;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (AC) { const o = AC.prototype.createOscillator; AC.prototype.createOscillator = function () { window.__snd++; return o.apply(this, arguments); }; }
+  try { if (window.speechSynthesis) { const sp = window.speechSynthesis.speak.bind(window.speechSynthesis); window.speechSynthesis.speak = u => { window.__snd++; return sp(u); }; } } catch (e) { /* rien */ }
+});
 const page = await ctx.newPage(); page.on('pageerror', e => errors.push(e.message));
 await page.goto(E2E + '/?tuto=1&today=2026-10-04', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 const ask = page.locator('section[role="dialog"][aria-label="Didacticiel"]');
@@ -38,7 +49,7 @@ await page.waitForTimeout(7000);
 ok('pas d’avance automatique (7 s)', (await page.locator('.pkm-tt-full').textContent()).trim() === t0);
 await page.screenshot({ path: shot('tuto-01.png') });
 const steps = [];
-for (let k = 0; k < 14; k++) {
+for (let k = 0; k < 18; k++) {
   if (!(await bubble.count())) break;
   await page.waitForTimeout(1400);
   const info = await page.evaluate(() => {
@@ -54,7 +65,16 @@ for (let k = 0; k < 14; k++) {
     const ico = document.querySelector('nav button[aria-label="PK shop"] svg').getBoundingClientRect();
     const off = Math.round(Math.hypot(f.left + f.width / 2 - ico.left - ico.width / 2, f.top + f.height / 2 - ico.top - ico.height / 2));
     const paBar = document.querySelector('header .pkm-pa-bar'), paGap = paBar ? Math.round(paBar.getBoundingClientRect().top - f.bottom) : null;
-    return { paGap: paGap, prev: !document.querySelector('.pkm-tt-prev').hidden, t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), fw: Math.round(f.width), clip: clip, radar: radar, off: off, top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
+    // Anneau de l'onglet : centré sur l'icône visible du bouton, jamais sous le cadre.
+    const ringEl = document.querySelector('.pkm-tt-ring'), ring = ringEl && getComputedStyle(ringEl).display !== 'none' ? ringEl.getBoundingClientRect() : null;
+    const cur = document.querySelector('nav[aria-label="Navigation principale"] > button[aria-current="page"]');
+    const ic = cur && [...cur.querySelectorAll('svg, img')].map(e => e.getBoundingClientRect()).find(r => r.width > 0);
+    const ringOff = ring && ic ? Math.round(Math.hypot(ring.left + ring.width / 2 - ic.left - ic.width / 2, ring.top + ring.height / 2 - ic.top - ic.height / 2)) : null;
+    const ringHit = ring ? Math.round(Math.max(0, Math.min(f.right, ring.right) - Math.max(f.left, ring.left)) * Math.max(0, Math.min(f.bottom, ring.bottom) - Math.max(f.top, ring.top))) : 0;
+    const k6 = document.querySelector('section[aria-label="Mon classeur"] > div'), k6r = k6 && k6.getBoundingClientRect();
+    const titleIn = k6r ? k6r.top >= f.top - 1 && k6r.bottom <= f.bottom + 1 : null;
+    const snd = document.querySelector('.pkm-tt-snd');
+    return { ringOff: ringOff, ringHit: ringHit, titleIn: titleIn, sndHidden: !!(snd && snd.hidden && getComputedStyle(snd).visibility === 'hidden'), rad: parseFloat(getComputedStyle(document.querySelector('.pkm-tt-frame')).borderTopLeftRadius), paGap: paGap, prev: !document.querySelector('.pkm-tt-prev').hidden, t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), fw: Math.round(f.width), clip: clip, radar: radar, off: off, top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
       fresh: /Nouveau/.test(document.querySelector('.pkm-tuto-bubble').innerText), nav: [...document.querySelectorAll('nav button[aria-current="page"]')].map(b => b.getAttribute('aria-label')).join('') };
   });
   if (!info) break;
@@ -63,20 +83,28 @@ for (let k = 0; k < 14; k++) {
   await page.locator('.pkm-tt-next').click(); await page.waitForTimeout(80);
   await page.locator('.pkm-tt-next').click().catch(() => {}); // la 1re touche termine la phrase, la 2e avance
 }
-ok(steps.length + ' étapes', steps.length === 12);
+ok(steps.length + ' étapes', steps.length === 14);
 ok('cadre jamais sous la bulle (' + steps.map(x => x.overlap).join(',') + ')', steps.every(x => x.overlap <= 2 && x.fh > 20));
 ok('valeur, classeur, scan, radar, séries', /valeur/.test(steps[0].t) && /Ici, tu pourras trouver ton classeur/.test(steps[1].t) && /Scan Dropicards/.test(steps[2].t) && /radar des boutiques/.test(steps[3].t) && /toutes les séries et leurs extensions/.test(steps[4].t));
-ok('Pokédex en 3 étapes (Pokédex, PA, arbre d’évolution), bulle en haut, sans étiquette « Nouveau » (retirée le 2026-10-31)', steps.every(x => !x.fresh) && [5, 6, 7].every(i => steps[i].top && steps[i].nav === 'Jeux') && /Voici ton Pokédex : tu pourras y voir ton compagnon/.test(steps[5].t) && /points d’Aura/.test(steps[6].t) && /arbre d’évolution/.test(steps[7].t) && !steps.some(x => /Tous les Pokémon|Sa fiche/.test(x.t)));
+ok('« Mon classeur » entier dans son cadre', steps[1].titleIn === true);
+ok('coin des dresseurs : 4 rubriques, onglet du coin (' + steps[5].nav + ')', steps[5].nav === 'Le coin des dresseurs' && /4 rubriques/.test(steps[5].t) && ['Ma ligue :', 'Ma vitrine :', 'Parrainer un ami :', 'Calendrier JCC :'].every(w => steps[5].t.indexOf(w) >= 0) && /points de loyauté/.test(steps[5].t));
+ok('jeux à PK juste après (' + steps[6].nav + ')', steps[6].nav === 'Jeux' && /jeux à PK : des jeux quotidiens qui te feront gagner des PK/.test(steps[6].t));
+ok('Pokédex en 3 étapes (Pokédex, PA, arbre d’évolution), bulle en haut, sans étiquette « Nouveau » (retirée le 2026-10-31)', steps.every(x => !x.fresh) && [7, 8, 9].every(i => steps[i].top && steps[i].nav === 'Jeux') && /Voici ton Pokédex : tu pourras y voir ton compagnon/.test(steps[7].t) && /points d’Aura/.test(steps[8].t) && /arbre d’évolution/.test(steps[9].t) && !steps.some(x => /Tous les Pokémon|Sa fiche/.test(x.t)));
+ok('anneau de l’onglet centré sur son icône (' + steps.map(x => x.ringOff).filter(v => v !== null).join(',') + ')', steps.filter(x => x.ringOff !== null).length >= 8 && steps.every(x => x.ringOff === null || x.ringOff <= 1));
+ok('cadre jamais sur l’anneau (' + steps.map(x => x.ringHit).join(',') + ')', steps.every(x => x.ringHit === 0));
 ok('bouton « Étape précédente » caché à la 1re étape, visible ensuite', !steps[0].prev && steps.slice(1).every(x => x.prev));
-ok('cadre du solde de PK sans mordre sur le solde de PA (' + steps[9].paGap + ' px)', steps[9].paGap >= 0);
-ok('solde de PA, puis solde de PK : « ' + steps[9].t + ' »', /récupérer tes PA/.test(steps[8].t) && /tes PK : ils te serviront à acheter des items/.test(steps[9].t));
-ok('PK shop (cadre ' + steps[10].fw + ' × ' + steps[10].fh + ', écart au centre de l’icône ' + steps[10].off + ' px)', /Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK gagnés/.test(steps[10].t) && steps[10].nav === 'Accueil' && steps[10].fw <= 60 && steps[10].fh <= 60 && steps[10].off <= 2);
-ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[11].t));
+ok('cadre du solde de PK sans mordre sur le solde de PA (' + steps[11].paGap + ' px) et ovale comme celui des PA (' + steps[11].rad + ' / ' + steps[10].rad + ' px)', steps[11].paGap >= 0 && steps[11].rad >= 20 && steps[10].rad >= 20);
+ok('solde de PA, puis solde de PK : « ' + steps[11].t + ' »', /récupérer tes PA/.test(steps[10].t) && /tes PK : ils te serviront à acheter des items/.test(steps[11].t));
+ok('PK shop (cadre ' + steps[12].fw + ' × ' + steps[12].fh + ', écart au centre de l’icône ' + steps[12].off + ' px)', /Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK et PA gagnés/.test(steps[12].t) && steps[12].nav === 'Accueil' && steps[12].fw <= 60 && steps[12].fh <= 60 && steps[12].off <= 2);
+ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[13].t));
+ok('voix coupée : aucun son joué, bouton du son caché (' + await page.evaluate(() => window.__snd) + ' son)', steps.every(x => x.sndHidden) && (await page.evaluate(() => window.__snd)) === 0);
 ok('valeur entière dans le cadre (' + steps[0].clip + ' px coupés) ; radar sans ses petites lignes (' + steps[3].radar + ')', steps[0].clip <= 2 && steps[3].radar === 'ok');
 ok('plus de booster ni de pièce présentés', !steps.some(x => /booster|pièce|mini-jeux/i.test(x.t)));
 await page.waitForTimeout(1400);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { tuto: d.tuto, evo: d.evo, buddy: d.buddy }; });
 const slot = await page.evaluate(() => getComputedStyle(document.querySelector('button[aria-label^="Compagnon : "] img')).visibility);
+const endToast = await page.evaluate(() => document.body.innerText.indexOf('À toi de jouer') >= 0);
+ok('fin sans message « À toi de jouer »', !endToast);
 ok('Salamèche de retour à sa place ; didacticiel vu', st.tuto === 'done' && st.evo && st.evo.line === 'sala' && st.buddy === 4 && slot === 'visible' && (await page.locator('.pkm-tuto-host').count()) === 0);
 await page.screenshot({ path: shot('tuto-14-fin.png') });
 // Revoir : pas de nouveau choix ; « Passer ».

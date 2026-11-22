@@ -662,6 +662,21 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-tt-bar { order: 3; }
 .pkm-tt-skip { padding: 0 8px; background: transparent; color: #B9C5FF; }
 .pkm-tt-snd { width: 40px; border-radius: 20px; background: transparent; color: #C9D3EA; display: flex; align-items: center; justify-content: center; }
+/* Didacticiel de départ sans voix (2026-11-22, porteur) : le bouton du son est caché mais garde sa place (points centrés). */
+.pkm-tt-snd[hidden] { visibility: hidden; pointer-events: none; }
+/* Texte en liste (« Le coin des dresseurs », 2026-11-22) : une ligne par rubrique, un peu plus petit. */
+.pkm-tt-typed, .pkm-tt-full { white-space: pre-line; }
+.pkm-tt-list .pkm-tuto-text { font-size: 12.5px; line-height: 1.3; padding: 8px 10px; }
+.pkm-tuto-bubble.pkm-tt-list { gap: 6px; padding-bottom: 10px; }
+.pkm-tt-list .pkm-tt-next { height: 46px; }
+.pkm-tt-list .pkm-tt-prev { width: 46px; height: 46px; }
+.pkm-tt-list .pkm-tt-bar button { height: 34px; }
+@media (max-width: 380px) { .pkm-tt-list .pkm-tuto-text { font-size: 12px; line-height: 1.26; padding: 7px 9px; } }
+@media (max-height: 660px) { .pkm-tt-list .pkm-tuto-text { font-size: 11.5px; line-height: 1.24; } }
+/* Le starter un peu plus petit pour laisser la largeur au texte (sans transition : la hauteur de la bulle est mesurée
+   aussitôt), et il reprend sa taille à l'étape suivante. */
+.pkm-tt-list .pkm-tt-mon { width: 70px; height: 73px; margin: -30px 0 -4px; }
+.pkm-tt-list .pkm-tt-mon img { width: 70px; height: 73px; }
 .pkm-tt-snd svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pkm-tt-dots { flex: 1; min-width: 0; display: flex; justify-content: center; gap: 4px; }
 .pkm-tt-dots i { width: 6px; height: 6px; border-radius: 3px; background: #2A3A5C; transition: width 0.3s, background 0.3s; }
@@ -670,7 +685,7 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 /* Onglet de la barre du bas qui mène à ce que présente le starter. */
 /* box-sizing : le contour de 3 px reste dans la taille calculée, sinon l'anneau débordait de 6 px à droite et en bas et l'icône
    paraissait décalée à gauche (2026-11-01, porteur : « recentre la manette »). */
-.pkm-tt-ring { position: absolute; left: 0; top: 0; display: none; box-sizing: border-box; border-radius: 18px; border: 3px solid #FFD60A; box-shadow: 0 0 18px rgba(255, 214, 10, 0.8); animation: pkmTtTab 1.4s ease-in-out infinite; }
+.pkm-tt-ring { position: absolute; left: 0; top: 0; display: none; box-sizing: border-box; border-radius: 16px; border: 3px solid #FFD60A; box-shadow: 0 0 18px rgba(255, 214, 10, 0.8); animation: pkmTtTab 1.4s ease-in-out infinite; }
 @keyframes pkmTtTab { 50% { box-shadow: 0 0 30px rgba(255, 214, 10, 1); transform-origin: center; } }
 @media (prefers-reduced-motion: reduce) {
   .pkm-tuto-pop, .pkm-tt-frame, .pkm-tt-c, .pkm-tt-link path, .pkm-tt-mon, .pkm-tt-hop, .pkm-tt-hop .pkm-tt-mon, .pkm-tt-caret, .pkm-tt-ring, .pkm-tt-ready .pkm-tt-next, .pkm-tt-ready .pkm-tt-next svg { animation: none !important; }
