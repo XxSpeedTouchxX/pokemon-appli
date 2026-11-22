@@ -4,7 +4,8 @@
   // - Booster PK prêt à ouvrir, pièce prête à lancer (games.js, selon les délais du grade) ;
   // - sorties et boutiques suivies (alertes de start.js, déjà calculées à l'ouverture de l'app).
   // Les rappels sont calculés sur l'appareil : à l'ouverture de l'app, puis chaque minute tant qu'elle est ouverte ou en
-  // arrière-plan, et au retour dessus. Chaque rappel n'est montré qu'une fois par cycle (« notifDone », enregistré) :
+  // arrière-plan, et au retour dessus ; depuis le 2026-11-22, jamais de notification du téléphone quand l'app est à
+  // l'écran (voir notifTick). Chaque rappel n'est montré qu'une fois par cycle (« notifDone », enregistré) :
   // une fois par jour pour les PA, une fois par booster ou lancer pour les jeux. Notification du téléphone si
   // l'utilisateur l'a autorisée (bouton dans la rubrique), par le service worker quand il est là (iPhone : app ajoutée
   // à l'écran d'accueil, iOS 16.4 et plus), et pastille avec le nombre de rappels sur l'icône de l'app (Badging API).
@@ -61,6 +62,11 @@
     } catch (e) { /* notifications indisponibles */ }
   };
   // Vérifie les rappels : pastille de l'icône (nombre de rappels prêts) et notification des nouveaux.
+  // Plus de notification du téléphone quand l'app est à l'écran (2026-11-22, porteur : « j'ai les notifs dès que je me
+  // connecte et je ne veux pas ça ») : à l'ouverture, les rappels déjà prêts sont seulement notés comme vus (pastilles
+  // dans l'app et sur l'icône). App en arrière-plan : notification calculée ici seulement si ce téléphone ne reçoit pas
+  // encore celles du serveur (pushOn) ; sinon c'est le serveur qui prévient, app fermée.
+  const ntVisible = () => { try { return document.visibilityState === 'visible'; } catch (e) { return true; } };
   ntProto.notifTick = function () {
     const s = this.st(), due = this.notifDue(s);
     try {
@@ -69,7 +75,7 @@
     } catch (e) { /* pastille indisponible */ }
     const done = s.notifDone || {}, fresh = due.filter(d => done[d.key] !== d.cycle);
     if (!fresh.length) return;
-    if (ntPerm() === 'granted') fresh.forEach(d => ntShow(d.title, d.text, 'pkm-' + d.key));
+    if (ntPerm() === 'granted' && !ntVisible() && !s.pushOn) fresh.forEach(d => ntShow(d.title, d.text, 'pkm-' + d.key));
     const next = Object.assign({}, done);
     fresh.forEach(d => { next[d.key] = d.cycle; });
     this.setState({ notifDone: next });

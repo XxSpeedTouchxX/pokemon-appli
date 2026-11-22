@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-22 — Plus de notifications à l'ouverture de l'app (porteur)
+
+- **Demande** : « je n'ai toujours pas les notifs dès que les jeux sont dispo, j'ai les notifs dès que je me connecte et je ne veux pas ça ; je veux que l'utilisateur ait les notifs sans avoir à se connecter ».
+- **Constat** : les notifications « app fermée » viennent du serveur (036 et fonction `push`) et demandent les 3 étapes de `docs/46` (036 dans Studio, `install-push.sh` dans Coolify, « Autoriser » sur le téléphone ; iPhone : depuis l'app ajoutée à l'écran d'accueil). Sans elles, seuls les rappels calculés sur le téléphone existaient, et ils se déclenchaient à l'ouverture de l'app (rappels prêts pendant l'absence).
+- **Fait** : plus aucune notification du téléphone quand l'app est à l'écran ; à l'ouverture, les rappels prêts sont seulement notés comme vus (pastilles dans l'app et sur l'icône) ; app en arrière-plan, le téléphone ne calcule une notification que s'il n'est pas inscrit aux envois du serveur ; cache v272.
+- **Reste au porteur** : les 3 étapes de `docs/46` (non vérifiables depuis Claude : aucun accès au serveur).
+
 ## 2026-11-22 — Mission écrite sous l'animation des PL, enveloppe décalée (porteur)
 
 - **Demandes** : « quand l'animation des points de loyauté arrive, je veux qu'il y ait marqué dessous la mission correspondante, pour que l'utilisateur sache pourquoi il en a gagné » ; « décale un peu le logo message à droite du grade ».

@@ -32,14 +32,31 @@ const dot = page.locator('header .pkm-pa-dot').first();
 ok('pastille « ' + (await dot.textContent().catch(() => '')).trim() + ' » sur le solde de PA', (await dot.count()) >= 1 && (await dot.textContent()).trim() === '1');
 const dotStyle = await dot.evaluate(e => { const c = getComputedStyle(e); return c.color + ' / ' + c.backgroundColor; });
 ok('pastille rouge, chiffre blanc (' + dotStyle + ')', dotStyle === 'rgb(255, 255, 255) / rgb(194, 24, 7)');
-// Rappels : PA et booster prêts (pièce pas encore) → deux notifications, pastille 2 sur l'icône.
-await page.waitForFunction(() => window.__nt.shown.length >= 2, null, { timeout: 6000 }).catch(() => {});
+// Rappels : PA et booster prêts (pièce pas encore). App à l'écran (2026-11-22, porteur : « j'ai les notifs dès que je me
+// connecte et je ne veux pas ça ») : aucune notification du téléphone, seulement la pastille 2 sur l'icône.
+await page.waitForTimeout(3500);
 const nt1 = await page.evaluate(() => JSON.parse(JSON.stringify(window.__nt)));
-ok('notifications : ' + nt1.shown.join(' ; '), nt1.shown.length === 2 && /PA dispo aujourd’hui/.test(nt1.shown.join()) && /Booster PK prêt/.test(nt1.shown.join()) && !/Pièce/.test(nt1.shown.join()));
+ok('ouverture de l’app : aucune notification du téléphone (' + (nt1.shown.join(' ; ') || 'aucune') + ')', nt1.shown.length === 0);
 ok('pastille de l’icône de l’app : ' + nt1.badge.join(','), nt1.badge[nt1.badge.length - 1] === 2);
+ok('rappels déjà prêts notés comme vus (PA, booster)', await page.evaluate(() => { const d = window.__pkm.st().notifDone || {}; return !!d.pa && !!d.booster; }));
+// App en arrière-plan, téléphone sans les notifications du serveur : un nouveau booster prêt est annoncé ici.
+await page.evaluate(() => {
+  Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+  const g = Object.assign({}, window.__pkm.st().games, { boosterAt: new Date(Date.now() - 3 * 86400000).toISOString() });
+  window.__pkm.setState({ games: g, pushOn: false }); window.__pkm.notifTick();
+}); await page.waitForTimeout(200);
+const nt2 = await page.evaluate(() => window.__nt.shown.slice());
+ok('app en arrière-plan, sans le serveur : « Booster PK prêt » annoncé (' + nt2.join(' ; ') + ')', nt2.length === 1 && /Booster PK prêt/.test(nt2[0]));
 // Une seule fois par rappel : rien de plus au tick suivant.
 await page.evaluate(() => window.__pkm.notifTick()); await page.waitForTimeout(200);
-ok('pas de doublon au rappel suivant', (await page.evaluate(() => window.__nt.shown.length)) === 2);
+ok('pas de doublon au rappel suivant', (await page.evaluate(() => window.__nt.shown.length)) === 1);
+// Téléphone inscrit aux notifications du serveur : c'est lui qui prévient, rien en double ici.
+await page.evaluate(() => {
+  const g = Object.assign({}, window.__pkm.st().games, { boosterAt: new Date(Date.now() - 4 * 86400000).toISOString() });
+  window.__pkm.setState({ games: g, pushOn: true }); window.__pkm.notifTick();
+}); await page.waitForTimeout(200);
+ok('téléphone inscrit au serveur : pas de notification calculée ici', (await page.evaluate(() => window.__nt.shown.length)) === 1);
+await page.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); window.__pkm.setState({ pushOn: false }); });
 // Mon profil › Notifications.
 await page.click('header button[aria-label^="Ouvrir mon profil"], header .pkm-hh-me'); await page.waitForTimeout(900);
 // Depuis le 2026-11-14 (porteur) : une ligne « Notifications » entre « Information sur les grades » et « Réglages »,
