@@ -55,6 +55,8 @@ Toucher une notification de jeu ouvre l'onglet **Jeux** ; une relance ouvre l'**
 > 036 s'installe à part : il ne dépend pas de `install_024_a_034.sql` (s'il te reste 033 et 034 à installer, l'ordre n'a pas d'importance).
 
 **Étape 2 · La fonction qui envoie (terminal de Coolify, 1 minute)**
+> Guide en images (où trouver l'adresse de ton Coolify, puis son terminal) : `docs/47-guide-adresse-et-terminal-coolify/` (`etape-1.png` à `etape-7.png`).
+
 1. Coolify › **Terminal** › choisis le serveur.
 2. Colle cette ligne puis Entrée :
    ```

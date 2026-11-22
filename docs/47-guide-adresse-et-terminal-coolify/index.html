@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retrouver ton Coolify</title>
+<!-- Guide illustré (2026-11-22, porteur : « mais où est l'adresse de mon Coolify, fais-moi des screenshots étape par étape »).
+     Dessins d'explication, pas des captures : aucune adresse IP, aucun mot de passe. Images : etape-1.png à etape-7.png. -->
+<style>
+  :root { --red: #FF3B4E; --yellow: #FFD60A; }
+  body { margin: 0; padding: 20px; background: #E9EDF3; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #111; }
+  .shot { width: 720px; margin: 0 auto 28px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  .cap { display: flex; gap: 14px; align-items: flex-start; padding: 18px 22px; background: #FFF7D1; border-bottom: 4px solid var(--yellow); }
+  .cap .n { flex: none; width: 48px; height: 48px; border-radius: 24px; background: var(--red); color: #fff; font-weight: 900; font-size: 26px; display: flex; align-items: center; justify-content: center; }
+  .cap b { display: block; font-size: 25px; line-height: 1.2; }
+  .cap small { display: block; margin-top: 5px; font-size: 18px; line-height: 1.35; color: #3a4252; }
+  .note { padding: 9px 16px; background: #F3F5F9; font-size: 14px; color: #5b6475; text-align: center; }
+  /* Fenêtre de navigateur */
+  .win { margin: 16px; border-radius: 14px; overflow: hidden; border: 1px solid #c9ced8; }
+  .bar { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #DEE1E6; }
+  .dots { display: flex; gap: 6px; } .dots i { width: 12px; height: 12px; border-radius: 6px; background: #ff5f57; } .dots i:nth-child(2) { background: #febc2e; } .dots i:nth-child(3) { background: #28c840; }
+  .url { flex: 1; padding: 8px 14px; border-radius: 18px; background: #fff; font-size: 17px; color: #222; }
+  .url.hl { outline-offset: 2px; }
+  .screen { position: relative; display: flex; min-height: 470px; }
+  /* Repère rouge */
+  .hl { position: relative; outline: 4px solid var(--red); outline-offset: 4px; border-radius: 10px; box-shadow: 0 0 0 10px rgba(255,59,78,.18); }
+  .tag { position: absolute; z-index: 8; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; letter-spacing: 0; white-space: nowrap; padding: 6px 12px; border-radius: 999px; background: var(--red); color: #fff; font-size: 16px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,.3); }
+  .tag::before { content: attr(data-n); display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-right: 7px; border-radius: 11px; background: #fff; color: var(--red); font-weight: 900; }
+  /* Coolify (sombre, violet) */
+  .co { background: #101010; color: #e6e6e6; width: 100%; }
+  .co-side { width: 210px; flex: none; padding: 18px 12px; background: #181818; border-right: 1px solid #262626; display: flex; flex-direction: column; gap: 4px; }
+  .co-logo { display: flex; align-items: center; gap: 8px; margin: 0 8px 14px; font-weight: 800; font-size: 20px; color: #fff; }
+  .co-logo i { width: 22px; height: 22px; border-radius: 6px; background: #6B16ED; }
+  .co-item { padding: 9px 10px; border-radius: 8px; font-size: 17px; color: #bdbdbd; }
+  .co-item.on { background: #242424; color: #fff; }
+  .co-main { flex: 1; padding: 22px 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .co-h { font-size: 27px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 12px; }
+  .co-btn { font-size: 14px; font-weight: 700; padding: 5px 10px; border-radius: 6px; background: #242424; border: 1px solid #333; color: #ddd; }
+  .co-card { padding: 16px 18px; border-radius: 10px; background: #1c1c1c; border: 1px solid #2c2c2c; }
+  .co-card b { display: block; font-size: 20px; color: #fff; } .co-card small { display: block; margin-top: 4px; font-size: 15px; color: #9a9a9a; }
+  .co-card.dim { opacity: .45; }
+  .crumb { font-size: 16px; color: #9a9a9a; } .crumb b { color: #fff; }
+  .run { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #8be9a8; } .run::before { content: ""; width: 9px; height: 9px; border-radius: 5px; background: #22c55e; }
+  .co-tabs { display: flex; gap: 18px; font-size: 16px; color: #9a9a9a; border-bottom: 1px solid #2a2a2a; padding-bottom: 8px; } .co-tabs .on { color: #fff; font-weight: 700; }
+  .co-sub { width: 205px; flex: none; display: flex; flex-direction: column; gap: 3px; }
+  .co-env { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+  .env { display: grid; grid-template-columns: 1fr; gap: 4px; padding: 9px 10px; border-radius: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; }
+  .env .k { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; color: #fff; overflow: hidden; text-overflow: ellipsis; }
+  .env .v { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; background: #101010; border: 1px solid #333; font-size: 15px; color: #aaa; }
+  .env .v span { flex: 1; letter-spacing: 2px; }
+  .eye { width: 22px; height: 22px; } .eye path, .eye circle { fill: none; stroke: #ddd; stroke-width: 2; }
+  .env.dim { opacity: .4; }
+  /* Studio (sombre, vert) */
+  .st { background: #1C1C1C; color: #ededed; width: 100%; flex-direction: column; }
+  .st-top { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid #2e2e2e; font-size: 16px; color: #bbb; }
+  .bolt { width: 22px; height: 22px; }
+  .st-body { flex: 1; display: flex; min-height: 420px; }
+  .rail { width: 58px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 0; border-right: 1px solid #2e2e2e; background: #171717; }
+  .ic { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #9b9b9b; }
+  .ic svg { width: 22px; height: 22px; } .ic svg * { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .ic.on { background: #2a2a2a; color: #fff; }
+  .tip { position: absolute; left: 76px; padding: 7px 12px; border-radius: 6px; background: #ededed; color: #111; font-size: 16px; font-weight: 700; white-space: nowrap; }
+  .st-main { flex: 1; padding: 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .st-h { font-size: 26px; font-weight: 700; color: #fff; }
+  .st-card { padding: 14px 16px; border-radius: 10px; background: #232323; border: 1px solid #333; font-size: 16px; color: #bbb; }
+  .sq-list { width: 235px; flex: none; padding: 14px 12px; border-right: 1px solid #2e2e2e; display: flex; flex-direction: column; gap: 10px; background: #1a1a1a; }
+  .sq-h { display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 700; color: #fff; }
+  .plus { width: 34px; height: 34px; border-radius: 8px; background: #2a2a2a; border: 1px solid #3a3a3a; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
+  .search { padding: 7px 10px; border-radius: 6px; background: #121212; border: 1px solid #333; font-size: 14px; color: #777; }
+  .menu { position: absolute; z-index: 4; left: 150px; top: 58px; width: 230px; padding: 6px; border-radius: 8px; background: #262626; border: 1px solid #3c3c3c; box-shadow: 0 10px 24px rgba(0,0,0,.5); }
+  .menu div { padding: 9px 10px; border-radius: 6px; font-size: 16px; color: #ddd; }
+  .menu .pick { background: #333; color: #fff; }
+  .sec { font-size: 12px; letter-spacing: .08em; color: #888; margin-top: 6px; }
+  .snip { padding: 7px 9px; border-radius: 6px; font-size: 15px; color: #ccc; } .snip.on { background: #2a2a2a; color: #fff; }
+  .ed { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .ed-tabs { display: flex; gap: 2px; padding: 8px 10px 0; border-bottom: 1px solid #2e2e2e; } .ed-tabs span { padding: 8px 12px; font-size: 15px; color: #fff; background: #232323; border-radius: 6px 6px 0 0; }
+  .code { flex: 1; position: relative; padding: 12px 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; line-height: 1.6; color: #ddd; background: #1C1C1C; }
+  .code .l { display: flex; } .code .l i { width: 40px; flex: none; text-align: right; padding-right: 12px; color: #666; font-style: normal; }
+  .code .c { color: #6a9955; } .code .k { color: #c586c0; } .code .cur { display: inline-block; width: 2px; height: 18px; background: #fff; vertical-align: middle; }
+  .ed-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 9px 12px; border-top: 1px solid #2e2e2e; background: #1a1a1a; }
+  .runbtn { padding: 8px 16px; border-radius: 6px; background: #3ECF8E; color: #0b2a1b; font-weight: 800; font-size: 16px; }
+  .res { padding: 12px 14px; border-top: 1px solid #2e2e2e; font-size: 15px; color: #888; background: #171717; min-height: 46px; }
+  .res.ok { color: #3ECF8E; font-weight: 700; }
+  .modal { position: absolute; z-index: 6; left: 50%; top: 46%; transform: translate(-50%, -50%); width: 420px; padding: 18px; border-radius: 12px; background: #262626; border: 1px solid #444; box-shadow: 0 20px 50px rgba(0,0,0,.7); }
+  .modal b { display: block; font-size: 18px; color: #fff; } .modal p { margin: 8px 0 14px; font-size: 15px; color: #bbb; line-height: 1.4; }
+  .modal .row { display: flex; justify-content: flex-end; gap: 10px; } .modal .row span { padding: 8px 12px; border-radius: 6px; font-size: 15px; font-weight: 700; } .modal .cancel { background: #333; color: #ddd; } .modal .go { background: #E5484D; color: #fff; }
+  .shade { position: absolute; inset: 0; z-index: 5; background: rgba(0,0,0,.45); }
+  /* Fenêtre de connexion du navigateur */
+  .login { margin: 70px auto; width: 430px; padding: 22px; border-radius: 12px; background: #fff; box-shadow: 0 16px 40px rgba(0,0,0,.35); color: #202124; }
+  .login b { display: block; font-size: 22px; } .login small { display: block; margin: 4px 0 16px; font-size: 15px; color: #5f6368; }
+  .login label { display: block; margin: 12px 0 5px; font-size: 15px; color: #3c4043; }
+  .login .in { position: relative; padding: 10px 12px; border-radius: 6px; border: 1px solid #9aa0a6; font-size: 16px; color: #999; }
+  .login .row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; } .login .row span { padding: 9px 16px; border-radius: 18px; font-size: 15px; font-weight: 700; } .login .no { color: #1a73e8; border: 1px solid #dadce0; } .login .yes { background: #1a73e8; color: #fff; }
+  .greyweb { background: #f1f3f4; width: 100%; }
+
+  .cap small strong { font-weight: 800; color: #111; }
+  .ico { width: 22px; height: 22px; flex: none; } .ico * { fill: none; stroke: #5f6368; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .url .cur { display: inline-block; width: 2px; height: 19px; margin-left: 2px; background: #1a73e8; vertical-align: middle; }
+  .url .star { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; }
+  .url .star * { fill: none; stroke: #5f6368; stroke-width: 2; stroke-linejoin: round; }
+  .url.rel { position: relative; padding-right: 48px; }
+  /* Propositions de la barre d'adresse */
+  .omni { margin: 0 16px; padding: 8px 0; border-radius: 0 0 14px 14px; background: #fff; box-shadow: 0 10px 22px rgba(0,0,0,.18); }
+  .sg { position: relative; display: flex; align-items: center; gap: 14px; margin: 4px 10px; padding: 11px 12px; border-radius: 10px; font-size: 17px; color: #202124; }
+  .sg span b { display: block; font-size: 18px; } .sg span small { display: block; margin-top: 2px; font-size: 15px; color: #1a73e8; }
+  .sg.dim { opacity: .5; } .sg em { margin-left: auto; font-style: normal; font-size: 14px; color: #c5221f; font-weight: 700; }
+  .sg.hl { background: #e8f0fe; }
+  /* Historique du navigateur */
+  .hist { width: 100%; padding: 18px 26px; background: #fff; color: #202124; }
+  .hist-h { display: flex; align-items: center; gap: 18px; font-size: 24px; font-weight: 700; }
+  .hist-q { position: relative; flex: 1; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 22px; background: #f1f3f4; font-size: 18px; font-weight: 400; color: #202124; }
+  .day { margin: 20px 0 8px; font-size: 15px; font-weight: 700; color: #5f6368; }
+  .row-h { position: relative; display: flex; align-items: center; gap: 14px; padding: 11px 12px; border-radius: 10px; font-size: 17px; }
+  .row-h .t { width: 70px; color: #5f6368; font-size: 15px; } .row-h .fav { width: 20px; height: 20px; border-radius: 5px; background: #6B16ED; }
+  .row-h small { color: #5f6368; font-size: 15px; margin-left: 6px; }
+  /* OVHcloud */
+  .ovh { width: 100%; background: #f2f2f2; color: #00185e; flex-direction: column; }
+  .ovh-top { display: flex; align-items: center; gap: 18px; padding: 12px 18px; background: #000e9c; color: #fff; font-size: 15px; }
+  .ovh-top b { font-size: 19px; margin-right: 10px; } .ovh-top > span:not(.on) { opacity: .75; } .ovh-top .on { position: relative; opacity: 1; font-weight: 800; }
+  .ovh-body { display: flex; flex: 1; }
+  .ovh-side { width: 190px; flex: none; padding: 14px 10px; background: #fff; border-right: 1px solid #dcdcdc; display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+  .ovh-side .sec2 { margin: 8px 6px 4px; font-size: 13px; font-weight: 800; color: #4d5592; text-transform: uppercase; letter-spacing: .04em; }
+  .ovh-side .it { position: relative; padding: 8px 8px; border-radius: 6px; } .ovh-side .it.on { background: #e5e8ff; font-weight: 800; }
+  .ovh-main { flex: 1; min-width: 0; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .ovh-h { font-size: 24px; font-weight: 800; }
+  .ovh-tabs { display: flex; gap: 22px; white-space: nowrap; font-size: 15px; color: #4d5592; border-bottom: 2px solid #dcdcdc; } .ovh-tabs span { position: relative; padding-bottom: 8px; } .ovh-tabs .on { color: #000e9c; font-weight: 800; border-bottom: 3px solid #000e9c; margin-bottom: -2px; }
+  .dns { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border-radius: 8px; overflow: hidden; font-size: 15px; }
+  .dns th { padding: 9px 10px; text-align: left; background: #e5e8ff; font-size: 13px; color: #4d5592; }
+  .dns td { position: relative; padding: 10px 10px; border-top: 1px solid #ececec; }
+  .dns tr.dim td { opacity: .4; } .dns .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
+  .dns tr.pick td { background: #fff4c2; font-weight: 800; }
+  /* Connexion à Coolify */
+  .co-login { width: 100%; display: flex; align-items: center; justify-content: center; background: #101010; }
+  .co-box { width: 380px; display: flex; flex-direction: column; gap: 8px; }
+  .co-box .co-logo { justify-content: center; margin: 0 0 18px; font-size: 30px; } .co-box .co-logo i { width: 30px; height: 30px; }
+  .co-box label { font-size: 15px; color: #bdbdbd; margin-top: 8px; }
+  .co-in { position: relative; padding: 11px 12px; border-radius: 6px; background: #1c1c1c; border: 1px solid #333; font-size: 16px; color: #777; }
+  .co-go { position: relative; margin-top: 16px; padding: 11px; border-radius: 6px; background: #6B16ED; color: #fff; font-weight: 800; font-size: 17px; text-align: center; }
+  .co-forgot { margin-top: 8px; font-size: 14px; color: #8a8a8a; text-align: center; }
+  /* Terminal de Coolify */
+  .sel { position: relative; padding: 10px 12px; border-radius: 6px; background: #1c1c1c; border: 1px solid #3a3a3a; font-size: 16px; color: #ddd; display: flex; justify-content: space-between; }
+  .drop { margin-top: -8px; padding: 6px; border-radius: 0 0 8px 8px; background: #202020; border: 1px solid #3a3a3a; border-top: 0; display: flex; flex-direction: column; gap: 2px; }
+  .drop .grp { padding: 6px 8px 6px; font-size: 12px; letter-spacing: .08em; color: #888; text-transform: uppercase; }
+  .drop .opt { position: relative; padding: 8px 10px; border-radius: 6px; font-size: 16px; color: #ddd; } .drop .opt.pick { background: #2f2f2f; color: #fff; font-weight: 700; } .drop .opt.dim { opacity: .45; }
+  .co-connect { position: relative; align-self: flex-start; padding: 9px 18px; border-radius: 6px; background: #6B16ED; color: #fff; font-weight: 800; font-size: 16px; }
+  .term { position: relative; flex: 1; padding: 14px 16px; border-radius: 8px; background: #000; border: 1px solid #2c2c2c; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; line-height: 1.55; color: #e6e6e6; word-break: break-all; }
+  .term .p { color: #8be9a8; } .term .ok { color: #4ade80; font-weight: 700; } .term .mut { color: #9a9a9a; }
+  .term .cur { display: inline-block; width: 9px; height: 17px; background: #e6e6e6; vertical-align: middle; }
+  .cmd { margin: 0 auto 28px; width: 720px; padding: 16px 20px; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.12); font-size: 16px; }
+  .cmd code { display: block; margin-top: 8px; padding: 12px 14px; border-radius: 8px; background: #111; color: #eee; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; word-break: break-all; }
+  h1.top { width: 720px; margin: 0 auto 6px; font-size: 26px; } p.top { width: 720px; margin: 0 auto 18px; font-size: 16px; color: #3a4252; line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<h1 class="top">Retrouver ton Coolify et lancer une ligne dans son terminal</h1>
+<p class="top">Guide illustré pour l'étape 2 de <code>docs/46-guide-notifications.md</code> (2026-11-22). Les images sont des dessins d'explication, pas des captures de ton écran : les noms peuvent varier un peu selon la version de Coolify et ton navigateur. Aucune adresse IP ni aucun mot de passe n'y figure.</p>
+<div class="cmd"><b>La ligne à coller à l'étape 7</b><code>curl -fsSL https://raw.githubusercontent.com/XxSpeedTouchxX/pokemon-appli/claude/pokemon-app-mockup-1mxt7p/tools/supabase/functions/install-push.sh | bash</code></div>
+
+<!-- 1. Barre d'adresse -->
+<section class="shot" id="s1">
+  <div class="cap"><span class="n">1</span><span><b>Tape «&nbsp;coolify&nbsp;» dans la barre d'adresse</b><small>Sur l'<strong>ordinateur</strong> où tu as déjà ouvert Coolify : clique dans la barre d'adresse tout en haut et tape <strong>coolify</strong>, <strong>sans appuyer sur Entrée</strong>. Ton navigateur propose la page Coolify déjà visitée : clique dessus.</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url hl rel">coolify<span class="cur"></span><span class="tag" data-n="1" style="right: 10px; top: 4px">Tape «&nbsp;coolify&nbsp;»</span></span></div>
+    <div class="screen greyweb" style="flex-direction: column; min-height: 400px">
+      <div class="omni">
+        <div class="sg hl"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span><b>Coolify</b><small>https:// … ton adresse Coolify …</small></span><span class="tag" data-n="2" style="right: 12px; top: 14px">Clique</span></div>
+        <div class="sg dim"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span>coolify – Rechercher sur Google</span><em>pas celle-ci</em></div>
+        <div class="sg dim"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span>coolify login</span><em>pas celle-ci</em></div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication (pas une capture de ton écran) · la bonne ligne a une petite horloge (page déjà visitée), pas une loupe (recherche Google)</div>
+</section>
+
+<!-- 2. Historique -->
+<section class="shot" id="s2">
+  <div class="cap"><span class="n">2</span><span><b>Rien ne s'affiche ? Cherche dans l'historique</b><small>Appuie sur <strong>Ctrl + H</strong> (Mac : <strong>⌘ + Y</strong>). Dans la case de recherche, tape <strong>coolify</strong>, puis clique sur une ligne «&nbsp;Coolify&nbsp;». Toujours rien ? Fais pareil sur ton autre ordinateur ou ton téléphone, si tu y as déjà ouvert Coolify.</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">Historique</span></div>
+    <div class="screen" style="min-height: 420px">
+      <div class="hist">
+        <div class="hist-h">Historique<span class="hist-q hl"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>coolify<span class="tag" data-n="1" style="right: 10px; top: 4px">Tape «&nbsp;coolify&nbsp;»</span></span></div>
+        <div class="day">Dimanche 16 novembre 2026</div>
+        <div class="row-h hl"><span class="t">21:14</span><i class="fav"></i>Coolify<small>… ton adresse Coolify …</small><span class="tag" data-n="2" style="right: 12px; top: 8px">Clique</span></div>
+        <div class="row-h"><span class="t">20:52</span><i class="fav"></i>Supabase | Coolify<small>… ton adresse Coolify …</small></div>
+        <div class="day">Mercredi 5 novembre 2026</div>
+        <div class="row-h"><span class="t">18:03</span><i class="fav"></i>Terminal | Coolify<small>… ton adresse Coolify …</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication (pas une capture de ton écran) · Safari sur Mac : menu «&nbsp;Historique&nbsp;» › «&nbsp;Afficher tout l'historique&nbsp;»</div>
+</section>
+
+<!-- 3. OVH zone DNS -->
+<section class="shot" id="s3">
+  <div class="cap"><span class="n">3</span><span><b>Toujours rien ? Regarde tes domaines chez OVH</b><small>Va sur <strong>ovh.com/manager</strong> › «&nbsp;Web Cloud&nbsp;» › «&nbsp;Noms de domaine&nbsp;» › un de tes domaines › onglet <strong>«&nbsp;Zone DNS&nbsp;»</strong>. Cherche une ligne de type <strong>A</strong> dont le nom n'est ni www ni api (souvent coolify, panel, admin ou deploy). Tape ce nom avec <strong>https://</strong> devant. Regarde chacun de tes domaines.</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https://www.ovh.com/manager/</span></div>
+    <div class="screen ovh" style="display: flex">
+      <div class="ovh-top"><b>OVHcloud</b><span>Bare Metal Cloud</span><span>Public Cloud</span><span class="on hl">Web Cloud<span class="tag" data-n="1" style="left: 96px; top: -6px">Clique</span></span></div>
+      <div class="ovh-body">
+        <nav class="ovh-side">
+          <span class="sec2">Noms de domaine</span>
+          <span class="it">dropicards.fr</span>
+          <span class="it">dropicards.com</span>
+          <span class="it on hl">ton-domaine.fr<span class="tag" data-n="2" style="left: 4px; top: 44px">Un de tes domaines</span></span>
+        </nav>
+        <div class="ovh-main">
+          <span class="ovh-h">ton-domaine.fr</span>
+          <div class="ovh-tabs"><span>Informations générales</span><span class="on hl">Zone DNS<span class="tag" data-n="3" style="left: 30px; top: -50px">Onglet</span></span></div>
+          <table class="dns">
+            <tr><th>Domaine</th><th>Type</th><th>Cible</th></tr>
+            <tr class="dim"><td class="mono">ton-domaine.fr.</td><td>A</td><td class="mono">•••.•••.•••.•••</td></tr>
+            <tr class="dim"><td class="mono">www.ton-domaine.fr.</td><td>A</td><td class="mono">•••.•••.•••.•••</td></tr>
+            <tr class="pick"><td class="mono hl">coolify.ton-domaine.fr.</td><td>A</td><td class="mono">•••.•••<span class="tag" data-n="4" style="right: 6px; top: 3px">Par exemple ici</span></td></tr>
+            <tr class="dim"><td class="mono">ton-domaine.fr.</td><td>MX</td><td class="mono">mx1.mail.ovh.net.</td></tr>
+            <tr class="dim"><td class="mono">ton-domaine.fr.</td><td>TXT</td><td class="mono">"v=spf1 …"</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication · exemple : dans cet exemple, l'adresse à taper serait https://coolify.ton-domaine.fr · les chiffres (adresse IP) ne servent pas : Coolify s'ouvre par son nom</div>
+</section>
+
+<!-- 4. Connexion à Coolify -->
+<section class="shot" id="s4">
+  <div class="cap"><span class="n">4</span><span><b>Connecte-toi, puis mets Coolify en favori</b><small>E-mail et mot de passe de ton <strong>compte Coolify</strong> (créés à l'installation de Coolify, pas ceux de Dropicards), puis «&nbsp;Login&nbsp;». Ensuite <strong>Ctrl + D</strong> (Mac : <strong>⌘ + D</strong>) : la page reste dans tes favoris pour la prochaine fois.</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url rel">https:// … ton adresse Coolify … /login<svg class="star hl" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></svg><span class="tag" data-n="4" style="right: -6px; top: 40px">Ctrl + D : favori</span></span></div>
+    <div class="screen co-login">
+      <div class="co-box">
+        <span class="co-logo"><i></i>Coolify</span>
+        <label>Email</label><div class="co-in hl">ton e-mail Coolify<span class="tag" data-n="1" style="right: -10px; top: -18px">E-mail</span></div>
+        <label>Password</label><div class="co-in hl">••••••••••<span class="tag" data-n="2" style="right: -10px; top: -18px">Mot de passe</span></div>
+        <div class="co-go hl">Login<span class="tag" data-n="3" style="right: -10px; top: 34px">Clique</span></div>
+        <div class="co-forgot">Forgot password?</div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication (pas une capture de ton écran) · déjà connecté ? Coolify s'ouvre directement sur le tableau de bord : passe à l'étape 5</div>
+</section>
+
+<!-- 5. Menu Terminal -->
+<section class="shot" id="s5">
+  <div class="cap"><span class="n">5</span><span><b>Dans le menu de gauche : «&nbsp;Terminal&nbsp;»</b><small>C'est le terminal que tu as déjà utilisé pour l'audit du serveur (5&nbsp;novembre). Pas dans le menu ? Clique sur «&nbsp;Servers&nbsp;», puis «&nbsp;localhost&nbsp;», puis sur «&nbsp;Terminal&nbsp;».</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https:// … ton adresse Coolify …</span></div>
+    <div class="screen co">
+      <nav class="co-side">
+        <span class="co-logo"><i></i>Coolify</span>
+        <span class="co-item on">Dashboard</span>
+        <span class="co-item">Projects</span>
+        <span class="co-item">Servers</span>
+        <span class="co-item">Sources</span>
+        <span class="co-item">Destinations</span>
+        <span class="co-item">S3 Storages</span>
+        <span class="co-item">Shared Variables</span>
+        <span class="co-item">Notifications</span>
+        <span class="co-item">Keys &amp; Tokens</span>
+        <span class="co-item">Tags</span>
+        <span class="co-item hl" style="color: #fff">Terminal<span class="tag" data-n="1" style="left: 128px; top: 2px">Clique</span></span>
+        <span class="co-item">Settings</span>
+      </nav>
+      <div class="co-main">
+        <span class="co-h">Dashboard</span>
+        <span class="crumb">Projects</span>
+        <div class="co-card"><b>PKM</b><small>Dropicards</small></div>
+        <div class="co-card dim"><b>Autre projet</b><small>(tes autres sites)</small></div>
+        <span class="crumb">Servers</span>
+        <div class="co-card"><b>localhost</b><small>le serveur où tourne Coolify</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication (pas une capture de ton écran) · les noms peuvent varier un peu selon la version</div>
+</section>
+
+<!-- 6. Choisir le serveur -->
+<section class="shot" id="s6">
+  <div class="cap"><span class="n">6</span><span><b>Choisis «&nbsp;localhost&nbsp;», puis «&nbsp;Connect&nbsp;»</b><small>Dans la liste, prends le <strong>serveur</strong> (localhost), pas un conteneur (les noms qui commencent par supabase-…, coolify-…). Clique sur «&nbsp;Connect&nbsp;» : une zone noire s'ouvre en dessous.</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https:// … ton adresse Coolify … /terminal</span></div>
+    <div class="screen co">
+      <nav class="co-side">
+        <span class="co-logo"><i></i>Coolify</span>
+        <span class="co-item">Dashboard</span>
+        <span class="co-item">Projects</span>
+        <span class="co-item">Servers</span>
+        <span class="co-item">Keys &amp; Tokens</span>
+        <span class="co-item on">Terminal</span>
+        <span class="co-item">Settings</span>
+      </nav>
+      <div class="co-main">
+        <span class="co-h">Terminal</span>
+        <div class="sel">Select a server or container<span>▾</span></div>
+        <div class="drop">
+          <span class="grp">Servers</span>
+          <span class="opt pick hl">localhost<span class="tag" data-n="1" style="right: 10px; top: 2px">Choisis</span></span>
+          <span class="grp">Containers</span>
+          <span class="opt dim">supabase-db-…</span>
+          <span class="opt dim">supabase-kong-…</span>
+          <span class="opt dim">coolify-…</span>
+        </div>
+        <span class="co-connect hl">Connect<span class="tag" data-n="2" style="left: 112px; top: 4px">Clique</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Dessin d'explication (pas une capture de ton écran) · les noms peuvent varier un peu selon la version</div>
+</section>
+
+<!-- 7. Coller la ligne -->
+<section class="shot" id="s7">
+  <div class="cap"><span class="n">7</span><span><b>Colle la ligne, Entrée, puis lis «&nbsp;OK&nbsp;»</b><small>Clique dans la zone noire. Colle la ligne (en haut de ce guide) avec <strong>Ctrl + V</strong> (Mac : <strong>⌘ + V</strong> ; si rien ne vient : clic droit › Coller, ou Ctrl + Maj + V). Appuie sur <strong>Entrée</strong>. Quelques secondes plus tard : deux lignes «&nbsp;OK&nbsp;».</small></span></div>
+  <div class="win">
+    <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">https:// … ton adresse Coolify … /terminal</span></div>
+    <div class="screen co">
+      <div class="co-main">
+        <span class="co-h">Terminal <span class="run">localhost</span></span>
+        <div class="term">
+          <div class="hl" style="border-radius: 4px"><span class="p">root@ton-serveur:~#</span> curl -fsSL https://raw.githubusercontent.com/XxSpeedTouchxX/pokemon-appli/claude/pokemon-app-mockup-1mxt7p/tools/supabase/functions/install-push.sh | bash<span class="tag" data-n="1" style="right: -4px; top: 58px">Colle, puis Entrée</span></div>
+          <div class="mut" style="margin-top: 34px">Dossier des fonctions : /data/coolify/services/…/volumes/functions</div>
+          <div class="hl ok" style="margin-top: 6px; border-radius: 4px">OK : fonction «&nbsp;push&nbsp;» installée (… lignes).<br>OK : la fonction répond et la clé d'envoi est prête.<span class="tag" data-n="2" style="right: -4px; top: 58px">C'est réussi</span></div>
+          <div style="margin-top: 40px"><span class="p">root@ton-serveur:~#</span> <span class="cur"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Tu lis «&nbsp;À VÉRIFIER&nbsp;» ? L'étape 1 (036 dans Studio) n'est pas faite : fais-la, puis recolle la ligne. Tu lis «&nbsp;ARRÊT&nbsp;» ? Envoie-moi la phrase.</div>
+</section>
+
+</body>
+</html>

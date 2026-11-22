@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-22 — Guide illustré : retrouver l'adresse de Coolify et son terminal (porteur)
+
+- **Demande** : « mais où est l'adresse de mon Coolify ? fais-moi des screenshots étape par étape » (étape 2 de `docs/46`).
+- **Constat** : l'adresse de Coolify n'est écrite nulle part dans le dépôt (règle : ni adresse IP ni mot de passe du serveur). Le porteur ouvrait Coolify par son nom de domaine et par l'adresse IP (audit du 2026-11-05) ; l'accès par l'IP et le port 8000 est fermé au public depuis `tools/server/close-ports.sh`. Claude n'a pas accès au Coolify du porteur : pas de vraies captures possibles.
+- **Fait** : `docs/47-guide-adresse-et-terminal-coolify/` (page et 7 images, dessins d'explication comme `docs/44`) : 1. taper « coolify » dans la barre d'adresse ; 2. historique du navigateur ; 3. zone DNS de ses domaines chez OVH ; 4. connexion à Coolify et favori ; 5. menu « Terminal » ; 6. serveur « localhost » puis « Connect » ; 7. ligne `install-push.sh` collée et les deux « OK ». Lien ajouté à l'étape 2 de `docs/46`.
+
 ## 2026-11-22 — Plus de notifications à l'ouverture de l'app (porteur)
 
 - **Demande** : « je n'ai toujours pas les notifs dès que les jeux sont dispo, j'ai les notifs dès que je me connecte et je ne veux pas ça ; je veux que l'utilisateur ait les notifs sans avoir à se connecter ».
