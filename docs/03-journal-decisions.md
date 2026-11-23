@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-23 (suite 2) — Didacticiel : un vrai arbre d'évolution même avec un compagnon qui n'évolue pas (porteur)
+
+- **Demande** : « l'arbre de Pokévolution ne marche toujours pas sur le didacticiel, on n'arrive toujours pas à voir l'arbre ».
+- **Cause trouvée** : sur tous les écrans d'iPhone simulés, l'arbre s'affichait bien pour un nouveau joueur. En revanche, quand le didacticiel est revu par un compte dont le compagnon n'évolue pas (Kyogre, Groudon, Rayquaza, Mew…), l'étape montrait la famille du compagnon : un seul Pokémon, donc aucun arbre à voir.
+- **Correction** : les étapes du Pokédex montrent le compagnon (même si un autre Pokémon avait été touché avant) ; l'étape de l'arbre montre la famille du starter qui parle dans la bulle (par exemple Salamèche → Reptincel → Dracaufeu et ses méga-évolutions) quand le compagnon n'évolue pas. Le Pokémon affiché avant le didacticiel revient à la fin. Cache v277.
+- **Vérifié** : iPhone 13, 13 mini, SE et 14 Pro Max simulés (vraies polices, animations réduites ou non), les 4 starters ; test ajouté dans `t-tuto.mjs` (compagnon Kyogre).
+- **Reste** : sur un très petit écran (iPhone SE dans Safari, 375 × 548), l'arbre de Salamèche reste réduit de moitié (bulle, onglets et barre du bas prennent la place). Si l'arbre reste invisible sur le téléphone du porteur, une capture d'écran de l'étape permettra de trouver la cause.
+
 ## 2026-11-23 (suite) — Didacticiel : PA bien encadrés, arbre d'évolution bien visible (porteur)
 
 - **Demandes** : « les PA du Pokédex ne sont pas bien encadrés » ; « l'arbre de Pokévolution ne ressort pas bien, fais en sorte de bien voir l'arbre ».

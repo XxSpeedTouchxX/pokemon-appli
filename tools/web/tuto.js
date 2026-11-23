@@ -48,7 +48,7 @@
     { tab: 'market', dex: true, sel: '.pkm-dex-lcd-r', place: '.pkm-dex-device', pad: 10, under: true, small: true, tabs: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
     // Arbre (2026-11-23, porteur : « fais en sorte de bien voir l'arbre ») : marge du cadre réduite, l'arbre aussi grand
     // que l'écran le permet.
-    { tab: 'market', dex: true, sel: '[aria-label="Route d’évolution"]', pad: 4, under: true, small: true, tabs: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
+    { tab: 'market', dex: true, tree: true, sel: '[aria-label="Route d’évolution"]', pad: 4, under: true, small: true, tabs: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
     { tab: 'market', sel: 'header .pkm-pa-bar', text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : tu peux en obtenir jusqu’à 80 quotidiennement !' }, // texte du porteur, 2026-11-01 ; 80 depuis le 2026-11-09 (avant : 70) ; 70 depuis les gains du 2026-11-02
     { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', inner: true, pad: 3, text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK et PA gagnés !' },
@@ -598,6 +598,22 @@
     if (L) return L[0];
     return TUTO_TALKERS.indexOf(s.buddy) >= 0 ? s.buddy : 25;
   };
+  // Pokémon montré par les étapes du Pokédex (2026-11-23, porteur : « on n'arrive toujours pas à voir l'arbre ») : le
+  // compagnon, même si un autre Pokémon avait été touché avant ; pour l'arbre, la famille de la mascotte (le starter qui
+  // parle) quand le compagnon n'évolue pas (Kyogre, Mew… : un seul Pokémon, aucun arbre à voir). Le Pokémon touché
+  // avant le didacticiel revient ensuite.
+  const tutoFam = n => { try { return DEX[n] ? dexRoute(n).nodes.length : 0; } catch (e) { return 0; } };
+  const tutoDexPick = (comp, st) => {
+    const s = comp.st();
+    if (!st.dex) {
+      if ('dexPrev' in TUTO) { comp.setState({ dexSel: TUTO.dexPrev }); delete TUTO.dexPrev; }
+      return;
+    }
+    if (!('dexPrev' in TUTO)) TUTO.dexPrev = s.dexSel;
+    let want = s.buddy;
+    if (st.tree && tutoFam(want) < 2 && tutoFam(TUTO.mon) >= 2) want = TUTO.mon;
+    if (DEX[want] && s.dexSel !== want) comp.setState({ dexSel: want, megaAsk: null });
+  };
   tutoProto.tutoGo = function (i) {
     if (i >= TSTEPS.length) { this.tutoEnd(true); return; }
     const st = TSTEPS[i];
@@ -616,6 +632,7 @@
     // page glisse, puis il se rouvre sur la partie suivante : plus de flash ni de cadre qui traverse l'écran.
     // Étapes du Pokédex : rubrique « Pokédex » de l'onglet Jeux (2026-11-10).
     if (st.tab === 'market' && this.st().gameTab !== (st.dex ? 'dex' : 'pk')) this.setState({ gameTab: st.dex ? 'dex' : 'pk' });
+    tutoDexPick(this, st);
     // « Le coin des dresseurs » : présenté depuis sa première bulle, « Ma ligue », en haut de la page.
     if (st.tab === 'coin' && !st.pg && this.st().coinTab !== 'lig') this.setState({ coinTab: 'lig' });
     if (!same) { TUTO.switching = true; if (TUTO.el) TUTO.el.box.classList.add('pkm-tt-switch'); this.tab(st.tab); }
@@ -688,6 +705,7 @@
     TUTO.ended = true; setTimeout(() => { TUTO.ended = false; }, 0);
     tutoForced = false;
     tutoStop();
+    tutoDexPick(this, {});
     // Plus de message « À toi de jouer ! » en bas de l'écran une fois le compagnon à sa place (2026-11-22, porteur).
     this.setState({ tuto: 'done', tutoStep: -2, toast: null });
     if (finished && this.st().screen !== 'home') this.tab('home');

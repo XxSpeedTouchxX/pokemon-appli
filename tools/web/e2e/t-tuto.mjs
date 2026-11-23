@@ -189,6 +189,32 @@ for (let k = 0; k < 10; k++) {
 ok('petit écran, PA : cadre large autour de l’écran des PA (' + (g3.pa && g3.pa.lcdM) + ' px), appareil entier sous les onglets (' + (g3.pa && g3.pa.devUnder) + ' px), « Pokédex » entouré, anneau de la manette', !!g3.pa && g3.pa.lcdM >= 8 && g3.pa.devUnder >= 0 && g3.pa.tab2 && g3.pa.ring && g3.pa.over === 0);
 ok('petit écran, arbre : presque à sa taille (×' + (g3.tree && g3.tree.k) + '), entier dans le cadre, bulle en haut, onglets et anneau visibles (' + JSON.stringify(g3.tree) + ')', !!g3.tree && g3.tree.k >= 0.7 && g3.tree.treeIn && g3.tree.top && g3.tree.tab2 && g3.tree.ring && g3.tree.over === 0 && g3.tree.r2f >= 6);
 await ctx3.close();
+// Didacticiel revu avec un compagnon qui n'évolue pas (2026-11-23, porteur : « on n'arrive toujours pas à voir l'arbre ») :
+// Kyogre seul n'a pas d'arbre ; l'étape de l'arbre montre celui de la mascotte (Salamèche → Dracaufeu), le Pokédex
+// montre Kyogre aux autres étapes, et Kyogre revient à la fin.
+const ctx4 = await browser.newContext({ viewport: { width: 390, height: 664 }, deviceScaleFactor: 1 });
+await ctx4.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
+const p4 = await ctx4.newPage(); p4.on('pageerror', e => errors.push(e.message));
+await p4.goto(E2E + '/?today=2026-10-04', { waitUntil: 'load' }); await p4.waitForTimeout(800);
+await p4.evaluate(() => { const k = 'pkm-collection-v1', d = JSON.parse(localStorage.getItem(k) || '{}'); d.tuto = 'done'; d.evo = { line: 'sala', stage: 0 }; d.buddy = 382; d.pkOwn = [4, 382]; d.pa = 600; localStorage.setItem(k, JSON.stringify(d)); });
+await p4.goto(E2E + '/?tuto=1&today=2026-10-04', { waitUntil: 'load' }); await p4.waitForTimeout(1200);
+if (await p4.locator('section[role="dialog"][aria-label="Didacticiel"] button:has-text("Oui")').count()) { await p4.locator('section[role="dialog"][aria-label="Didacticiel"] button:has-text("Oui")').click(); await p4.waitForTimeout(400); }
+if (await p4.locator('section[aria-label="Choisis ton starter"] button[aria-label="Choisir Salamèche"]').count()) await p4.locator('section[aria-label="Choisis ton starter"] button[aria-label="Choisir Salamèche"]').click();
+await p4.locator('section.pkm-tuto-bubble').waitFor({ timeout: 4000 }); await p4.waitForTimeout(1500);
+const route4 = () => p4.evaluate(() => [...document.querySelectorAll('[aria-label="Route d’évolution"] .pkm-dex-node')].map(n => n.textContent.trim().split(/\s/)[0]));
+const g4 = {};
+for (let k = 0; k < 14; k++) {
+  await p4.locator('.pkm-tt-next').click(); await p4.waitForTimeout(80); await p4.locator('.pkm-tt-next').click().catch(() => {}); await p4.waitForTimeout(1500);
+  const t = await p4.evaluate(() => (document.querySelector('.pkm-tt-full') || {}).textContent || '');
+  if (/Voici ton Pokédex/.test(t)) g4.dev = await route4();
+  if (/arbre d’évolution/.test(t)) { g4.tree = await route4(); g4.in = await p4.evaluate(() => { const f = document.querySelector('.pkm-tt-frame').getBoundingClientRect(), r = document.querySelector('[aria-label="Route d’évolution"]').getBoundingClientRect(); return r.top >= f.top - 1 && r.bottom <= f.bottom + 1; }); await p4.screenshot({ path: shot('tuto-arbre-compagnon-sans-evolution.png') }); break; }
+}
+ok('compagnon sans évolution (Kyogre) : Pokédex sur Kyogre (' + g4.dev + '), arbre de la mascotte (' + g4.tree + ') entier dans le cadre', !!g4.dev && g4.dev.length === 1 && /^Kyogre/.test(g4.dev[0]) && !!g4.tree && g4.tree.length >= 3 && g4.tree.some(n => /^Dracaufeu/.test(n)) && g4.in);
+await p4.locator('.pkm-tt-skip').click().catch(() => {}); await p4.waitForTimeout(900);
+await p4.evaluate(() => { const b = document.querySelector('main .pkm-gm-tabs [role="tab"]:last-child, main .pkm-gm-tabs button:last-child'); if (b) b.click(); }); await p4.waitForTimeout(600);
+const after4 = await route4();
+ok('après le didacticiel, le Pokédex revient sur Kyogre (' + after4 + ')', after4.length === 1 && /^Kyogre/.test(after4[0]));
+await ctx4.close();
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
 await browser.close();
