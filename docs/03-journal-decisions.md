@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-23 (suite 4) — Grade offert avec des PA (porteur)
+
+- **Demande** : « pas le rôle admin, plutôt le grade max pour qu'il puisse utiliser toute l'application correctement, et un gain de PA pour les cosmétiques ».
+- **Fait** : `tools/supabase/requetes_grade.sql` donne en un seul lancement le grade Grand maître Pokémon (Pokédex complet, 100 000 PK gagnés au total, solde de PK inchangé) **et** des PA à dépenser (`pa_offerts`, 5 000 par défaut), avec une ligne dans l'historique des PK et PA du joueur et dans le journal admin. Essayé sur la base de test.
+- **Repères** : tous les styles de « Mon avatar » ≈ 16 650 PA ; les 171 Pokémon d'avatar 12 850 PA ; leurs shiny 25 700 PA.
+- **Limite** : le grade n'ouvre pas ce qui est réservé au DropiPass (pré-gradation, calendrier JCC, historique complet du prix, scans illimités) ; un DropiPass offert depuis Studio est possible, **proposé, rien de fait sans « go »**.
+
 ## 2026-11-23 (suite 3) — Didacticiel : la page descend enfin jusqu'à l'arbre sur iPhone (porteur)
 
 - **Demande** : « l'arbre ne s'affiche toujours pas, le didacticiel reste en haut de la page et ne descend pas sur l'arbre ; essaie de trouver une solution qui marche ».
