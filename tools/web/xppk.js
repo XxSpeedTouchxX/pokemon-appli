@@ -246,20 +246,60 @@
     }
     // Message du badge « 2XP » (2026-11-12, nuit, porteur : « que le message apparaisse de manière la plus satisfaisante
     // possible […] d'en haut de l'écran ») : une carte descend du haut, le badge rebondit, le temps restant en grand ;
-    // elle remonte seule au bout de 5 s (barre qui se vide) ou au toucher.
+    // elle remonte seule au bout de 5 s (barre qui se vide), au toucher ou d'un balayage vers le haut (2026-11-23).
     const xt = s.xpTip, xtU = xt ? (xt.what === 'PA' ? this.paXpUntilMs() : this.xpUntilMs()) : 0;
     r.xptip = xt && xtU ? {
       open: true, cls: 'pkm-xptip pkm-xptip-' + xt.what.toLowerCase() + (xt.out ? ' pkm-xptip-out' : ''),
       icon: xt.what === 'PA' ? 'img/brand/pa.svg' : 'img/brand/pk.svg', title: '2XP ' + xt.what + ' actif', left: xpLeft(xtU - Date.now()),
       end: 'jusqu’au ' + xpEnd(xtU),
       what: xt.what === 'PA' ? 'Tes PA du jour sont doublés.' : 'Tes gains de PK sont doublés au Booster PK, à pile ou face et au Safari éclair.',
-      aria: '2XP ' + xt.what + ' actif, encore ' + xpLeft(xtU - Date.now()) + ', jusqu’au ' + xpEnd(xtU) + '. Toucher pour fermer.',
+      aria: '2XP ' + xt.what + ' actif, encore ' + xpLeft(xtU - Date.now()) + ', jusqu’au ' + xpEnd(xtU) + '. Toucher ou balayer vers le haut pour fermer.',
       close: () => this.xpTipClose()
     } : { open: false };
     return r;
   };
+  // Balayer vers le haut (2026-11-23, porteur : « qu'il puisse balayer vers le haut pour enlever la petite fenêtre ») :
+  // la carte suit le doigt vers le haut (jamais vers le bas) et s'en va au-delà de 28 px ou d'un geste vif ; sinon elle
+  // revient en place. Le toucher seul la ferme toujours. Écouteurs posés une seule fois, hors du rendu de l'app.
+  let xpSw = null;
+  const xpSwipe = comp => {
+    if (xpSwipe.on) return;
+    xpSwipe.on = true;
+    document.addEventListener('pointerdown', e => {
+      const c = e.target && e.target.closest && e.target.closest('.pkm-xptip');
+      if (!c || c.classList.contains('pkm-xptip-out')) return;
+      xpSw = { c: c, id: e.pointerId, y: e.clientY, t: performance.now(), dy: 0 };
+      clearTimeout(comp._xpTipT);
+    }, true);
+    document.addEventListener('pointermove', e => {
+      if (!xpSw || e.pointerId !== xpSw.id) return;
+      const dy = Math.min(0, e.clientY - xpSw.y);
+      xpSw.dy = dy;
+      if (dy > -4) return;
+      const c = xpSw.c;
+      c.style.animation = 'none'; c.style.transition = 'none';
+      c.style.transform = 'translateY(' + dy.toFixed(1) + 'px)'; c.style.opacity = String(Math.max(0.35, 1 + dy / 180));
+    }, true);
+    const end = e => {
+      if (!xpSw || e.pointerId !== xpSw.id) return;
+      const g = xpSw; xpSw = null;
+      const fast = g.dy < -12 && g.dy / Math.max(1, performance.now() - g.t) < -0.5;
+      if (g.dy <= -28 || fast) {
+        // Elle s'envole vers le haut depuis là où le doigt l'a laissée (pas de seconde animation de sortie).
+        g.c.style.transition = 'transform 0.24s ease-in, opacity 0.24s ease-in';
+        g.c.style.transform = 'translateY(-160%)'; g.c.style.opacity = '0';
+        comp.xpTipClose();
+        return;
+      }
+      if (g.dy < -4) { g.c.style.transition = 'transform 0.25s cubic-bezier(0.2, 1.3, 0.4, 1), opacity 0.2s'; g.c.style.transform = ''; g.c.style.opacity = ''; }
+      comp._xpTipT = setTimeout(() => comp.xpTipClose(), 2500);
+    };
+    document.addEventListener('pointerup', end, true);
+    document.addEventListener('pointercancel', end, true);
+  };
   xpProto.xpTipOpen = function (what) {
     if (!(what === 'PA' ? this.paXpUntilMs() : this.xpUntilMs())) return;
+    xpSwipe(this);
     clearTimeout(this._xpTipT); clearTimeout(this._xpTipT2);
     this.setState({ xpTip: { what: what, at: Date.now() } });
     this._xpTipT = setTimeout(() => this.xpTipClose(), 5000);

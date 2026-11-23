@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-23 — Didacticiel : anneau de la manette, onglets du Pokédex ; carte 2XP balayée ; PL contre une pub refusés (porteur)
+
+- **Demandes** : (1) jeux à PK : voir l'onglet de la barre du bas encadré et centré sur la manette ; (2) Pokédex : voir en haut les 2 onglets, être sur « Pokédex » et non « Jeux à PK », avec toujours l'encadré sur la manette ; (3) carte « 2XP » (temps restant) : la faire disparaître aussi en la balayant vers le haut ; (4) « Mes missions » : +10 PL par jour pour un clic sur « les pubs ajoutées ensemble la semaine dernière ».
+- **Fait (1-2)** : anneau de la manette toujours affiché aux étapes des jeux à PK et du Pokédex (sur un petit écran, le booster rétrécit au lieu de cacher l'anneau) ; Pokédex : bulle en bas, onglets figés en haut, second anneau autour de « Pokédex », partie présentée juste dessous (appareil, PA, arbre), réduite le temps de l'étape si l'écran est petit ; vérifié à 390 × 844, 375 × 667, 360 × 640 et 390 × 664.
+- **Fait (3)** : la carte suit le doigt vers le haut et s'en va au-delà de 28 px ou d'un geste vif ; un petit geste lent la remet en place ; vers le bas, rien ne bouge ; le toucher la ferme toujours.
+- **Pas fait (4)** : aucune publicité n'a été ajoutée à l'app (le 2026-11-15, seule une réponse sur les pubs a été écrite) ; récompenser un clic sur une pub est interdit par Google (règlement AdSense et AdMob, « Encouraging clicks ») et fait fermer le compte publicitaire avec les gains retenus ; l'app le dit déjà dans les règles de Ma ligue. **Alternative proposée** : mission « Regarder une vidéo pub : +10 PL par jour » (vidéo récompensée, la régie confirme la fin de la vidéo ; permise par Google pour l'app Android avec AdMob, et pour le site avec Google Ad Manager) ; demande un compte de régie du porteur, un bandeau de consentement et le DropiPass sans pub ; **« go » attendu**.
+- Cache v275.
+
 ## 2026-11-22 — Didacticiel : étape des jeux à PK refaite (porteur)
 
 - **Demande** : « une explication qui encadre tout : le terme Jeux et entièrement le booster », et dire en substance « ici tu retrouveras les jeux à PK qui te font gagner des PK chaque jour, par exemple le booster, mais il y a d'autres jeux en bas de la page » (reformulation laissée à Claude).

@@ -677,6 +677,15 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
    aussitôt), et il reprend sa taille à l'étape suivante. */
 .pkm-tt-list .pkm-tt-mon { width: 70px; height: 73px; margin: -30px 0 -4px; }
 .pkm-tt-list .pkm-tt-mon img { width: 70px; height: 73px; }
+/* Didacticiel, bulle resserrée (« small » : jeux à PK et Pokédex, 2026-11-23) : boutons et marges plus petits, pour
+   laisser voir les onglets en haut et l'anneau de la manette en bas. */
+.pkm-tuto-bubble.pkm-tt-slim { padding: 8px 10px; gap: 5px; }
+.pkm-tt-slim .pkm-tuto-text { min-height: 0; }
+.pkm-tt-slim .pkm-tt-next { height: 42px; font-size: 16px; }
+.pkm-tt-slim .pkm-tt-prev { width: 42px; height: 42px; }
+.pkm-tt-slim .pkm-tt-bar button { height: 24px; font-size: 13px; }
+/* Étapes du Pokédex : onglets « Jeux à PK » / « Pokédex » figés en haut de la page, sur le fond de l'app. */
+.pkm-tt-tabs main .pkm-gm-tabs { position: sticky; top: -4px; z-index: 6; margin: -4px -16px 0; padding: 4px 16px 6px; background: var(--pkm-app-bg, #1E1F24); }
 /* Didacticiel, jeux à PK sur un petit écran (2026-11-22) : dessin du booster réduit le temps de l'étape (tutoWhole). */
 .pkm-tt-sqz section[aria-label="Booster PK"] > div:nth-child(2) { height: var(--tt-sq-h) !important; }
 .pkm-tt-sqz section[aria-label="Booster PK"] > div:nth-child(2) > div { zoom: var(--tt-sq); }
@@ -1690,6 +1699,7 @@ input, textarea, select, [contenteditable="true"], input *, textarea * { -webkit
    badge saute, le temps restant s'affiche en grand ; la barre du bas se vide en 5 s, puis la carte remonte. */
 .pkm-xptip-wrap { position: absolute; z-index: 97; left: 12px; right: 12px; top: calc(env(safe-area-inset-top, 0px) + 10px); display: flex; justify-content: center; pointer-events: none; }
 .pkm-xptip { pointer-events: auto; position: relative; width: 100%; max-width: 420px; display: flex; align-items: center; gap: 14px; padding: 14px 16px 16px; box-sizing: border-box; overflow: hidden; border-radius: 22px; border: 1.5px solid rgba(255, 214, 10, 0.55); background: linear-gradient(135deg, rgba(22, 34, 58, 0.97), rgba(11, 17, 32, 0.97)); color: #F3F6FC; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(255, 214, 10, 0.12); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); animation: pkmXptipIn 0.55s cubic-bezier(0.2, 1.25, 0.35, 1) both; }
+.pkm-xptip { touch-action: none; }
 .pkm-xptip-pa { border-color: rgba(178, 107, 255, 0.65); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(178, 107, 255, 0.14); }
 .pkm-xptip-out { animation: pkmXptipOut 0.3s ease-in both; }
 .pkm-xptip::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.14) 48%, rgba(255, 255, 255, 0) 66%); background-size: 260% 100%; animation: pkmXptipShine 1.4s 0.35s ease-out both; pointer-events: none; }

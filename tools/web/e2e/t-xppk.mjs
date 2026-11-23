@@ -50,6 +50,21 @@ const geo = await page.evaluate(() => { const b = s => document.querySelector(s)
 ok('badge au-dessus du logo des PK, sans le couvrir ; soldes PK et PA de même taille (' + Math.round(geo.pk.width) + '×' + Math.round(geo.pk.height) + ')', geo.x.bottom <= geo.i.top + 0.5 && Math.abs(geo.pk.width - geo.pa.width) < 1 && Math.abs(geo.pk.height - geo.pa.height) < 1);
 await page.locator('.pkm-xptip').click(); await page.waitForTimeout(500);
 ok('un toucher la referme', (await page.locator('.pkm-xptip').count()) === 0);
+// Balayer vers le haut (2026-11-23, porteur) : la carte suit le doigt et s'en va ; un petit geste lent la laisse en place.
+const ptr = (t, dy) => page.evaluate(([t, d]) => { const c = document.querySelector('.pkm-xptip'); if (!c) return '';
+  const r = window.__sw || (window.__sw = c.getBoundingClientRect());
+  c.dispatchEvent(new PointerEvent(t, { bubbles: true, pointerId: 7, pointerType: 'touch', isPrimary: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 + d }));
+  return c.style.transform; }, [t, dy]);
+const swipe = async (dy, slow) => { await page.evaluate(() => { window.__sw = null; }); await ptr('pointerdown', 0); if (slow) await page.waitForTimeout(400); await ptr('pointermove', dy / 2); const mid = await ptr('pointermove', dy); await ptr('pointerup', dy); return mid; };
+await page.locator('.pkm-xpb-pk').click(); await page.waitForTimeout(700);
+const small = await swipe(-16, true); await page.waitForTimeout(450);
+ok('petit geste lent vers le haut : la carte suit le doigt puis revient (' + small + ')', /translateY\(-16/.test(small) && (await page.locator('.pkm-xptip').count()) === 1 && (await page.locator('.pkm-xptip').evaluate(e => e.style.transform)) === '');
+const big = await swipe(-70); await page.waitForTimeout(500);
+ok('balayage vers le haut : la carte s’en va (' + big + ')', /translateY\(-70/.test(big) && (await page.locator('.pkm-xptip').count()) === 0);
+await page.locator('.pkm-xpb-pk').click(); await page.waitForTimeout(700);
+await ptr('pointerdown', 0); await ptr('pointermove', 40); await ptr('pointerup', 40); await page.waitForTimeout(300);
+ok('vers le bas : la carte ne bouge pas', (await page.locator('.pkm-xptip').count()) === 1 && (await page.locator('.pkm-xptip').evaluate(e => e.style.transform)) === '');
+await page.locator('.pkm-xptip').click(); await page.waitForTimeout(500);
 await page.evaluate(() => window.__pkm.setState({ pa: 700 })); await page.waitForTimeout(150);
 await open('xppa-7'); await page.locator('.pkm-mx').click(); await page.waitForTimeout(300);
 st = await page.evaluate(() => ({ pa: window.__pkm.st().pa, u: window.__pkm.st().paXpUntil, pend: window.__pkm.st().paDay }));
