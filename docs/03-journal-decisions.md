@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-23 (suite) — Didacticiel : PA bien encadrés, arbre d'évolution bien visible (porteur)
+
+- **Demandes** : « les PA du Pokédex ne sont pas bien encadrés » ; « l'arbre de Pokévolution ne ressort pas bien, fais en sorte de bien voir l'arbre ».
+- **Cause** : l'écran des PA était amené juste sous les onglets, l'appareil coupé au-dessus et le cadre collé à la bordure orange de l'écran ; sur un petit écran (iPhone dans Safari, 390 × 664), onglets en haut, bulle et anneau de la manette en bas ne laissaient que la moitié de la hauteur à l'arbre (×0,53).
+- **Fait** : PA : l'appareil entier sous les onglets, cadre plus large (10 px) ; bulle des étapes du Pokédex resserrée (points en haut, « Passer » à côté de « Suivant ») ; arbre : quand la bulle en bas le réduirait trop, elle passe en haut par-dessus l'en-tête et le titre « Jeux », les onglets « Jeux à PK » / « Pokédex » restent juste dessous avec « Pokédex » entouré, l'anneau de la manette reste en bas et l'arbre prend toute la place entre les deux (×0,79 à 390 × 664, taille réelle sur un grand écran) ; vérifié à 390 × 844, 390 × 664, 375 × 667 et 360 × 640 ; cache v276.
+
 ## 2026-11-23 — Didacticiel : anneau de la manette, onglets du Pokédex ; carte 2XP balayée ; PL contre une pub refusés (porteur)
 
 - **Demandes** : (1) jeux à PK : voir l'onglet de la barre du bas encadré et centré sur la manette ; (2) Pokédex : voir en haut les 2 onglets, être sur « Pokédex » et non « Jeux à PK », avec toujours l'encadré sur la manette ; (3) carte « 2XP » (temps restant) : la faire disparaître aussi en la balayant vers le haut ; (4) « Mes missions » : +10 PL par jour pour un clic sur « les pubs ajoutées ensemble la semaine dernière ».

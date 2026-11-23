@@ -43,8 +43,12 @@
     { tab: 'market', sel: 'section[aria-label="Booster PK"]', also: 'h1.pkm-hb-title', kids: 2, under: true, small: true, whole: true, text: 'Ici, tu retrouveras les jeux à PK : ils te permettent de gagner des PK chaque jour. Par exemple ici, le Booster PK à ouvrir, mais d’autres jeux t’attendent plus bas dans la page !' },
     // Pokédex (2026-11-23, porteur) : bulle en bas, onglets « Jeux à PK » / « Pokédex » visibles en haut (« tabs »).
     { tab: 'market', dex: true, sel: '.pkm-dex-device', under: true, small: true, tabs: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
-    { tab: 'market', dex: true, sel: '.pkm-dex-lcd-r', under: true, small: true, tabs: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
-    { tab: 'market', dex: true, sel: '[aria-label="Route d’évolution"]', under: true, small: true, tabs: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
+    // PA (2026-11-23, porteur : « les PA ne sont pas bien encadrés ») : l'appareil entier sous les onglets (« place »), cadre
+    // plus large autour de l'écran des PA.
+    { tab: 'market', dex: true, sel: '.pkm-dex-lcd-r', place: '.pkm-dex-device', pad: 10, under: true, small: true, tabs: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
+    // Arbre (2026-11-23, porteur : « fais en sorte de bien voir l'arbre ») : marge du cadre réduite, l'arbre aussi grand
+    // que l'écran le permet.
+    { tab: 'market', dex: true, sel: '[aria-label="Route d’évolution"]', pad: 4, under: true, small: true, tabs: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
     { tab: 'market', sel: 'header .pkm-pa-bar', text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : tu peux en obtenir jusqu’à 80 quotidiennement !' }, // texte du porteur, 2026-11-01 ; 80 depuis le 2026-11-09 (avant : 70) ; 70 depuis les gains du 2026-11-02
     { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', inner: true, pad: 3, text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK et PA gagnés !' },
@@ -314,6 +318,7 @@
   const tutoPlace = (t, st) => {
     const el = TUTO.el;
     if (st.top) return true;
+    if (st.tabs) return !!TUTO.fitTop;
     if (st.under) return false;
     if (!t) return false;
     const H = el.host.getBoundingClientRect(), r = tutoRect(t, st), bh = el.box.offsetHeight, navTop = tutoNavTop(H);
@@ -364,14 +369,16 @@
         if ((st.whole || st.tabs) && TUTO.fitBh && Math.abs(el.box.offsetHeight - TUTO.fitBh) > 3) tutoWhole(st, el);
         if (st.tabs && TUTO.want) {
           const m = t.closest('main'), sc = m ? m.scrollTop : 0;
-          if (m && sc === TUTO.lastSt) tutoTabsScroll(t, true);
+          if (m && sc === TUTO.lastSt) tutoTabsScroll(TUTO.wantEl && document.contains(TUTO.wantEl) ? TUTO.wantEl : t, true);
           TUTO.lastSt = sc;
         }
         const r = tutoRect(t, st), pad = st.pad != null ? st.pad : 6, B = el.box.getBoundingClientRect(), top = el.box.classList.contains('pkm-tt-top');
         // Bulle en haut : le cadre d'une partie de la page s'arrête au-dessus de la barre du bas, sans passer sous
         // l'anneau de l'onglet (2026-11-22, porteur : l'arbre d'évolution et l'anneau de la manette se chevauchaient).
         const inMain = !!t.closest('main') && !t.closest(TUTO_NAV.trim()) && !t.closest('header');
-        const lo = top ? B.bottom - H.top + 8 : 4, hi = top ? (inMain ? Math.min(H.height - 4, tutoNavTop(H) - H.top - 8) : H.height - 4) : B.top - H.top - 8;
+        const scanB = top && inMain && st.tabs ? document.querySelector(TUTO_NAV + 'button[aria-label^="Scanner"]') : null;
+        const navT = scanB ? Math.min(tutoNavTop(H), scanB.getBoundingClientRect().top) : tutoNavTop(H);
+        const lo = top ? B.bottom - H.top + 8 : 4, hi = top ? (inMain ? Math.min(H.height - 4, navT - H.top - 8) : H.height - 4) : B.top - H.top - 8;
         const y0 = Math.max(lo, r.top - H.top - pad), y1 = Math.min(hi, r.bottom - H.top + pad);
         const x = Math.max(4, r.left - H.left - pad), w = Math.min(H.width - 4, r.right - H.left + pad) - x, h = y1 - y0;
         // Le cadre rejoint sa cible en douceur, image par image (aussi pendant le défilement) : plus d'à-coups.
@@ -390,7 +397,8 @@
         const m = el.mon.getBoundingClientRect();
         const mx = m.left - H.left + m.width / 2, my = top ? m.bottom - H.top - 6 : m.top - H.top + 10;
         const F = TUTO.fr, fx = Math.max(F[0] + 14, Math.min(F[0] + F[2] - 14, mx)), fy = top ? F[1] : F[1] + F[3];
-        const ok = F[3] > 20 && (top ? fy > my + 18 : fy < my - 18);
+        // Bulle en haut au-dessus des onglets du Pokédex : pas de trait (il passerait sur l'onglet « Jeux à PK »).
+        const ok = F[3] > 20 && !(top && st.tabs) && (top ? fy > my + 18 : fy < my - 18);
         el.link.style.opacity = ok ? '1' : '0';
         if (ok) {
           const cy = (my + fy) / 2;
@@ -446,7 +454,7 @@
   };
   const tutoSqueeze = (h, k) => {
     const d = document.documentElement;
-    if (!h) { tutoUnfit(); d.classList.remove('pkm-tt-tabs'); return; }
+    if (!h) { tutoUnfit(); d.classList.remove('pkm-tt-tabs'); d.style.removeProperty('--tt-tabs-top'); TUTO.fitTop = false; return; }
     d.style.setProperty('--tt-sq-h', Math.round(h) + 'px'); d.style.setProperty('--tt-sq', k.toFixed(3)); d.classList.add('pkm-tt-sqz');
   };
   const tutoZoom = (sel, k, h) => {
@@ -480,15 +488,29 @@
     d.classList.add('pkm-tt-tabs');
     const bar = tutoTabsBar();
     if (!main || !bar) return;
-    // Haut de la partie présentée : sous les onglets figés, l'anneau de « Pokédex » et les coins du cadre.
-    const M = main.getBoundingClientRect(), top = M.top + bar.offsetHeight + 16 + pad;
+    // Haut de la partie présentée : sous les onglets figés, l'anneau de « Pokédex » et les coins du cadre. « place » :
+    // c'est l'élément qui le contient (l'appareil, pour l'écran des PA) qu'on amène sous les onglets.
+    const M = main.getBoundingClientRect(), pl = st.place ? document.querySelector(st.place) || t : t, barH = bar.offsetHeight;
     // Hauteur de mise en page (sans les animations d'entrée de la page, qui agrandissent ou réduisent l'appareil).
     const h = t.offsetHeight || t.getBoundingClientRect().height;
-    if (top + h > room) { const k = Math.max(0.45, (room - top) / h); tutoZoom(st.sel, k, h); }
+    // Bulle en bas (au-dessus de l'anneau) ou, si la partie présentée y serait trop réduite (arbre d'évolution sur un
+    // petit écran, 2026-11-23, porteur : « fais en sorte de bien voir l'arbre »), bulle en haut, par-dessus l'en-tête et
+    // le titre « Jeux » : les onglets se figent juste sous elle et la partie présentée descend jusqu'au-dessus de la
+    // barre du bas et du bouton du scan.
+    const topB = M.top + barH + 12 + (pl === t ? pad : 0), kB = Math.min(1, (room - topB) / h);
+    const nav = document.querySelector(TUTO_NAV.trim()), scan = document.querySelector(TUTO_NAV + 'button[aria-label^="Scanner"]');
+    const low = Math.min(nav ? nav.getBoundingClientRect().top : H.bottom, scan ? scan.getBoundingClientRect().top : H.bottom) - 8;
+    const barT = Math.max(M.top, H.top + 14 + bh + 6), topT = barT + barH + 12 + pad, kT = Math.min(1, (low - pad - topT) / h);
+    const useTop = pl === t && kB < 0.98 && kT > kB + 0.05;
+    TUTO.fitTop = useTop;
+    if (useTop) { el.box.style.bottom = ''; d.style.setProperty('--tt-tabs-top', Math.round(barT - M.top - 4) + 'px'); }
+    else d.style.removeProperty('--tt-tabs-top');
+    const top = useTop ? topT : topB, k = useTop ? kT : kB;
+    if (pl === t && k < 1) tutoZoom(st.sel, Math.max(0.45, k), h);
     // Défilement : la partie présentée juste sous les onglets ; tutoTrack corrige ensuite l'écart (la page du Pokédex
     // peut encore bouger après l'ouverture de la rubrique).
-    TUTO.want = top; TUTO.lastSt = -1;
-    tutoTabsScroll(t, true);
+    TUTO.want = top; TUTO.wantEl = pl; TUTO.lastSt = -1;
+    tutoTabsScroll(pl, true);
   };
   // Amène la partie présentée à TUTO.want (borné à ce que la page peut défiler).
   const tutoTabsScroll = (t, smooth) => {
@@ -505,7 +527,7 @@
     if (!el || !st) return;
     if (el.dots.children.length !== TSTEPS.length) el.dots.innerHTML = TSTEPS.map(() => '<i></i>').join('');
     el.box.setAttribute('aria-label', TUTO.mode === 'ligue' ? 'Explication de Ma ligue' : 'Didacticiel');
-    tutoSqueeze(0); TUTO.want = 0; TUTO.fitBh = 0;
+    tutoSqueeze(0); TUTO.want = 0; TUTO.wantEl = null; TUTO.fitBh = 0;
     TUTO.i = i; TUTO.target = document.querySelector(st.sel); el.last = '';
     if (TUTO.switching) {
       // Après un changement d'onglet, le trou du cadre se rouvre depuis le centre de la nouvelle partie.

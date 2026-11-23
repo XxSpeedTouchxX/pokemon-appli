@@ -158,6 +158,37 @@ ok('séries : défilement lent ' + sl.join(' → '), sl[2] > sl[1] && sl[1] > sl
 await p2.locator('.pkm-tt-prev').click(); await p2.waitForTimeout(1600);
 ok('« Étape précédente » ramène au radar', /radar des boutiques/.test(await p2.locator('.pkm-tt-full').textContent()));
 await ctx2.close();
+// Petit écran d'iPhone dans Safari (390 × 664, 2026-11-23, porteur : « les PA ne sont pas bien encadrés », « fais en sorte
+// de bien voir l'arbre ») : PA dans un cadre large, appareil entier sous les onglets ; arbre de Salamèche (le plus haut,
+// avec ses 2 méga-évolutions) presque à sa taille, bulle en haut, onglets et anneau de la manette visibles.
+const ctx3 = await browser.newContext({ viewport: { width: 390, height: 664 }, deviceScaleFactor: 1 });
+await ctx3.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
+const p3 = await ctx3.newPage(); p3.on('pageerror', e => errors.push(e.message));
+await p3.goto(E2E + '/?tuto=1&today=2026-10-04', { waitUntil: 'load' }); await p3.waitForTimeout(1200);
+await p3.locator('section[role="dialog"][aria-label="Didacticiel"] button:has-text("Oui")').click(); await p3.waitForTimeout(400);
+await p3.locator('section[aria-label="Choisis ton starter"] button[aria-label="Choisir Salamèche"]').click(); await p3.waitForTimeout(1600);
+const geo3 = async () => p3.evaluate(() => {
+  const R = e => e && e.getBoundingClientRect(), f = R(document.querySelector('.pkm-tt-frame')), b = R(document.querySelector('.pkm-tuto-bubble'));
+  const r2el = document.querySelector('.pkm-tt-ring2'), r2 = r2el && getComputedStyle(r2el).display !== 'none' ? R(r2el) : null;
+  const ringEl = document.querySelector('.pkm-tt-ring'), ring = ringEl && getComputedStyle(ringEl).display !== 'none' ? R(ringEl) : null;
+  const gt = R(document.querySelector('main .pkm-gm-tabs [aria-selected="true"]')), lcd = R(document.querySelector('.pkm-dex-lcd-r')), dev = R(document.querySelector('.pkm-dex-device'));
+  const tree = document.querySelector('[aria-label="Route d’évolution"]'), tr = R(tree), k = tree ? tr.height / tree.offsetHeight : 0;
+  const bar = R(document.querySelector('main .pkm-gm-tabs'));
+  return { t: document.querySelector('.pkm-tt-full').textContent.slice(0, 80), top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
+    ring: !!ring, tab2: !!(r2 && gt && r2.top <= gt.top && r2.bottom >= gt.bottom && gt.top >= 0), over: Math.round(Math.max(0, Math.min(f.bottom, b.bottom) - Math.max(f.top, b.top))),
+    lcdM: lcd ? Math.round(Math.min(lcd.left - f.left, f.right - lcd.right, lcd.top - f.top, f.bottom - lcd.bottom)) : null, devUnder: dev && bar ? Math.round(dev.top - bar.bottom) : null,
+    treeIn: tr ? tr.top >= f.top - 1 && tr.bottom <= f.bottom + 1 : null, k: Math.round(k * 100) / 100, r2f: r2 ? Math.round(f.top - r2.bottom) : null };
+});
+const g3 = {};
+for (let k = 0; k < 10; k++) {
+  await p3.locator('.pkm-tt-next').click(); await p3.waitForTimeout(80); await p3.locator('.pkm-tt-next').click().catch(() => {}); await p3.waitForTimeout(1500);
+  const g = await geo3();
+  if (/points d’Aura/.test(g.t)) g3.pa = g;
+  if (/arbre d’évolution/.test(g.t)) { g3.tree = g; await p3.screenshot({ path: shot('tuto-arbre-petit-ecran.png') }); break; }
+}
+ok('petit écran, PA : cadre large autour de l’écran des PA (' + (g3.pa && g3.pa.lcdM) + ' px), appareil entier sous les onglets (' + (g3.pa && g3.pa.devUnder) + ' px), « Pokédex » entouré, anneau de la manette', !!g3.pa && g3.pa.lcdM >= 8 && g3.pa.devUnder >= 0 && g3.pa.tab2 && g3.pa.ring && g3.pa.over === 0);
+ok('petit écran, arbre : presque à sa taille (×' + (g3.tree && g3.tree.k) + '), entier dans le cadre, bulle en haut, onglets et anneau visibles (' + JSON.stringify(g3.tree) + ')', !!g3.tree && g3.tree.k >= 0.7 && g3.tree.treeIn && g3.tree.top && g3.tree.tab2 && g3.tree.ring && g3.tree.over === 0 && g3.tree.r2f >= 6);
+await ctx3.close();
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
 await browser.close();

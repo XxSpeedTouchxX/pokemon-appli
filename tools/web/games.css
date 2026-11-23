@@ -679,13 +679,22 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-tt-list .pkm-tt-mon img { width: 70px; height: 73px; }
 /* Didacticiel, bulle resserrée (« small » : jeux à PK et Pokédex, 2026-11-23) : boutons et marges plus petits, pour
    laisser voir les onglets en haut et l'anneau de la manette en bas. */
-.pkm-tuto-bubble.pkm-tt-slim { padding: 8px 10px; gap: 5px; }
+.pkm-tuto-bubble.pkm-tt-slim { padding: 13px 10px 8px; gap: 5px; }
 .pkm-tt-slim .pkm-tuto-text { min-height: 0; }
 .pkm-tt-slim .pkm-tt-next { height: 42px; font-size: 16px; }
 .pkm-tt-slim .pkm-tt-prev { width: 42px; height: 42px; }
-.pkm-tt-slim .pkm-tt-bar button { height: 24px; font-size: 13px; }
+/* Ligne « Passer » et points de progression retirée du bas (2026-11-23) : les points passent en haut de la bulle,
+   « Passer » à droite du bouton « Suivant » ; la bulle perd une ligne et l'arbre d'évolution gagne de la place. */
+.pkm-tt-slim .pkm-tt-bar { position: absolute; inset: 0; display: block; pointer-events: none; }
+.pkm-tt-slim .pkm-tt-dots { position: absolute; top: 4px; left: 0; right: 0; }
+.pkm-tt-slim .pkm-tt-dots i { height: 5px; }
+.pkm-tt-slim .pkm-tt-skip { position: absolute; right: 8px; bottom: 8px; height: 42px; padding: 0 6px; font-size: 13.5px; pointer-events: auto; }
+.pkm-tt-slim .pkm-tt-snd { display: none; }
+.pkm-tt-slim .pkm-tt-go { margin-right: 70px; }
 /* Étapes du Pokédex : onglets « Jeux à PK » / « Pokédex » figés en haut de la page, sur le fond de l'app. */
-.pkm-tt-tabs main .pkm-gm-tabs { position: sticky; top: -4px; z-index: 6; margin: -4px -16px 0; padding: 4px 16px 6px; background: var(--pkm-app-bg, #1E1F24); }
+.pkm-tt-tabs main .pkm-gm-tabs { position: sticky; top: var(--tt-tabs-top, -4px); z-index: 6; margin: -4px -16px 0; padding: 4px 16px 6px; background: var(--pkm-app-bg, #1E1F24); }
+/* Bulle en haut (arbre d'évolution, petit écran) : les onglets figés plus bas, le fond de l'app peint aussi au-dessus. */
+.pkm-tt-tabs main .pkm-gm-tabs::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 120px; background: var(--pkm-app-bg, #1E1F24); pointer-events: none; }
 /* Didacticiel, jeux à PK sur un petit écran (2026-11-22) : dessin du booster réduit le temps de l'étape (tutoWhole). */
 .pkm-tt-sqz section[aria-label="Booster PK"] > div:nth-child(2) { height: var(--tt-sq-h) !important; }
 .pkm-tt-sqz section[aria-label="Booster PK"] > div:nth-child(2) > div { zoom: var(--tt-sq); }
