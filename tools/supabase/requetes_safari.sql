@@ -1,6 +1,8 @@
 -- Safari éclair sans délai pour un compte (2026-11-13, porteur : « Safari illimité pour l'instant pour les admins et le
 -- compte de mon ami »). Il faut 027_safari_libre.sql installé (install_024_a_033.sql). Les comptes admin sont déjà
 -- sans délai ; ici, on ajoute (ou retire) un autre compte. Supabase Studio › SQL Editor › New query › Run.
+-- Depuis 039 (2026-11-23, porteur) : « sans délai » retire seulement l'attente entre deux parties ; le Safari reste
+-- fermé sous le grade Collectionneur, même pour un compte de la liste ou un admin (offrir un grade : requetes_grade.sql).
 
 -- 1. AJOUTER un compte : remplace l'adresse, puis Run.
 insert into public.safari_free (user_id, note)

@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-23 (suite 5) — Chaque jeu s'ouvre au grade prévu, pour tout le monde (porteur)
+
+- **Signalement** : « je suis grade Chasseur et j'ai accès à Safari éclair, qui n'est dispo qu'à partir du grade Collectionneur ; rectifie-moi ça et fais une vérification pour le déblocage de chaque jeu en fonction des grades ».
+- **Cause** : depuis 027 (2026-11-13, « Safari illimité pour les admins et mon ami »), un compte « sans délai » (compte admin, mot de passe des admins, liste `safari_free`) ouvrait aussi le Safari éclair **sous son grade**, dans l'app comme sur le serveur ; la pièce aussi, sur le serveur, avec le mot de passe des admins.
+- **Décision** : « sans délai » retire seulement l'attente entre deux parties ; le grade décide toujours, pour tout le monde : Booster PK à tous les grades (24, 20, 12, 8, 6, 4 h), pile ou face dès Chasseur (24, 12, 8, 6, 4 h), Safari éclair dès Collectionneur (24, 12, 6, 4 h). Pour essayer le Safari avec un compte admin de grade plus bas : lui offrir le grade (`requetes_grade.sql`).
+- **Fait** : app (`safari.js` : verrou du grade d'abord, fermé aussi si le serveur répond « fermé ») ; serveur `tools/supabase/039_jeux_grades.sql` (Safari et pièce fermés sous leur grade pour tous, délais remis aux valeurs de l'app ; 29 vérifications, `tests/test_039.sql`), **à installer par le porteur** avec `install_024_a_034.sql` (039 ajouté) ; test navigateur `t-gamelocks.mjs` : les 3 jeux pour les 6 grades, en joueur ordinaire et en compte « sans délai ». Le PK shop garde l'exception du mode Admin (ce n'est pas un jeu). Cache v279.
+
+---
+
 ## 2026-11-23 (suite 4) — Grade offert avec des PA (porteur)
 
 - **Demande** : « pas le rôle admin, plutôt le grade max pour qu'il puisse utiliser toute l'application correctement, et un gain de PA pour les cosmétiques ».

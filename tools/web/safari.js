@@ -55,9 +55,17 @@
   // Délai du grade (0 : fermé) ; le serveur fait foi quand il répond. Admin déverrouillé (PK illimités) : jamais fermé.
   // Sans délai aussi pour les comptes admin et ceux de la liste safari_free (2026-11-13, porteur : « Safari illimité
   // pour l'instant pour les admins et le compte de mon ami » ; 027_safari_libre.sql, champ « free » de safari_state).
+  // Grade d'abord (2026-11-23, porteur : « je suis grade Chasseur et j'ai accès à Safari éclair, qui n'est dispo qu'à
+  // partir du grade Collectionneur ») : « sans délai » retire seulement l'attente, jamais le verrou du grade, pour tout le
+  // monde (admins et mode Admin compris ; serveur : 039_jeux_grades.sql). Fermé si le grade de l'app le ferme, ou si le
+  // serveur a répondu « fermé » (son grade est plus bas : il refuserait la partie).
   const sfFree = s => !!(s && ((s.cloudGame && s.cloudGame.unlimited) || s.sfFreeSrv));
-  sfProto.sfHours = function () { const s = this.st(); return (s.sfHours | 0) || (this.perks().safariH | 0); };
-  sfProto.sfLocked = function () { const s = this.st(); return !this.sfHours() && !sfFree(s) && !(sfCloud() && Cloud.isAdmin() && s.sfOff); };
+  sfProto.sfHours = function () {
+    const s = this.st(), app = this.perks().safariH | 0;
+    if (!app || (typeof s.sfHours === 'number' && s.sfHours === 0 && !s.sfOff)) return 0;
+    return (s.sfHours | 0) || app;
+  };
+  sfProto.sfLocked = function () { return !this.sfHours(); };
   sfProto.sfWaitMs = function () { const s = this.st(), g = s.games || {}, h = this.sfHours(); return h && !sfFree(s) ? gmWait(g.safariAt, h * 3600000) : 0; };
 
   // État du serveur (dernière partie, délai du grade) : relu à l'ouverture des Jeux et après chaque partie.
@@ -335,7 +343,7 @@
     const w = this.sfWaitMs(), busy = !!s.sfOpen, h = this.sfHours(), locked = this.sfLocked(), adminTry = !!s.sfOff && sfCloud() && Cloud.isAdmin();
     const grade = this.perkGrade('safariH') || 'Collectionneur';
     r.sf = {
-      every: locked ? 'Au grade ' + grade : sfFree(s) ? 'Sans délai' : h ? '1 partie toutes les ' + h + ' h' : 'Sans délai (admin)', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
+      every: locked ? 'Au grade ' + grade : sfFree(s) ? 'Sans délai' : '1 partie toutes les ' + h + ' h', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
       lockText: 'Le Safari éclair se débloque au grade ' + grade + ' (7 500 PK gagnés et 30 compagnons).',
       // « GO » (2026-11-13, porteur) : à la place de « Jouer au safari » et de « Essayer (aperçu admin) ».
       button: locked ? '🔒 Au grade ' + grade : s.sfOff && !adminTry ? 'Bientôt disponible' : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'GO',
