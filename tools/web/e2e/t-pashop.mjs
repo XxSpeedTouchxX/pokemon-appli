@@ -18,9 +18,10 @@ ok('Magasin : les articles (ticket) affichés', (await page.locator('section.pkm
 await page.locator('header button.pkm-pa-head').first().click(); await page.waitForTimeout(700);
 const paS = page.locator('section[aria-label="Mes PA"]');
 const rb = paS.locator('.pkm-pa-sheet-head button.pkm-pa-recharge');
-const pos = await page.evaluate(() => { const h = document.querySelector('section[aria-label="Mes PA"] .pkm-pa-sheet-head'), b = h && h.querySelector('.pkm-pa-recharge'), x = h && h.querySelector('.pkm-pa-sheet-x'), t = h && h.querySelector('h2');
-  if (!b) return null; const R = e => e.getBoundingClientRect(), hr = R(h); return { right: (R(b).left + R(b).right) / 2 > hr.left + hr.width / 2, top: Math.abs(R(b).top + R(b).height / 2 - (R(t).top + R(t).height / 2)) < 12, beforeX: R(b).right <= R(x).left }; });
-ok('« Mes PA » : bouton « Recharger mes PA » en haut à droite (' + JSON.stringify(pos) + ')', (await rb.count()) === 1 && pos && pos.right && pos.top && pos.beforeX);
+// Depuis le 2026-11-23 : onglet PA de « Mes points », bouton à droite du titre « Mes PA ».
+const pos = await page.evaluate(() => { const h = document.querySelector('section[aria-label="Mes PA"] .pkm-pa-sheet-head'), b = h && h.querySelector('.pkm-pa-recharge'), t = h && h.querySelector('h2');
+  if (!b) return null; const R = e => e.getBoundingClientRect(), hr = R(h); return { right: (R(b).left + R(b).right) / 2 > hr.left + hr.width / 2, top: Math.abs(R(b).top + R(b).height / 2 - (R(t).top + R(t).height / 2)) < 12, inside: R(b).right <= hr.right + 1 }; });
+ok('« Mes PA » : bouton « Recharger mes PA » en haut à droite (' + JSON.stringify(pos) + ')', (await rb.count()) === 1 && pos && pos.right && pos.top && pos.inside);
 ok('« Mes PA » : texte sans « ne s’achètent pas »', /tu peux aussi en recharger/.test(await paS.innerText()) && !/ne s’achètent pas/.test(await paS.innerText()));
 await paS.screenshot({ path: shot('pashop-mespa.png') });
 await rb.click(); await page.waitForTimeout(600);
@@ -48,7 +49,7 @@ await dlg.locator('button:has-text("Fermer")').click(); await page.waitForTimeou
 ok('fermé, rien de crédité', (await dlg.count()) === 0 && (await page.evaluate(() => window.__pkm.st().pa)) === 120);
 await page.locator('.pkm-pas-page button[aria-label="Retour à Mes PA"]').click(); await page.waitForTimeout(600);
 ok('flèche : retour à « Mes PA »', (await page.locator('.pkm-pas-page').count()) === 0 && (await page.locator('section[aria-label="Mes PA"]').count()) === 1);
-await page.evaluate(() => window.__pkm.setState({ paSheet: false })); await page.waitForTimeout(400);
+await page.evaluate(() => window.__pkm.setState({ points: '' })); await page.waitForTimeout(400);
 // Pokédex › Tous les Pokémon : logo des PA à côté du prix.
 await page.evaluate(() => { window.__pkm.tab('market'); window.__pkm.setState({ dexList: true }); }); await page.waitForTimeout(900);
 const herb = page.locator('[aria-label="Tous les Pokémon"] button[aria-label^="Herbizarre,"]');

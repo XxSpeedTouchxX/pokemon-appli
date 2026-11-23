@@ -33,7 +33,7 @@ ok('appui sur le solde : « PA dispo aujourd’hui »', a.open);
 ok('1er jour récupéré : +20 PA (' + a.pa + ', série ' + a.streak + ')', a.pa === 20 && a.streak === 1 && a.day === '2026-11-01');
 ok('après récupération : fenêtre fermée, pastille retirée', a.closed && a.dotAfter === 0);
 const b = await day('2026-11-02'); ok('2e jour d’affilée : +30 PA (' + b.pa + ')', b.before.pa === 20 && b.dotOn && b.pa === 50 && b.streak === 2);
-// Même jour : plus de pastille, le solde ouvre « Mes PA » (c'est quoi, comment les gagner, à quoi ils servent).
+// Même jour : plus de pastille, le solde ouvre « Mes points » sur l'onglet PA (2026-11-23 ; c'est quoi, comment les gagner, à quoi ils servent).
 await page.goto(E2E + '/?today=2026-11-02', { waitUntil: 'load' }); await page.waitForTimeout(900);
 const sameAria = await pill.getAttribute('aria-label');
 ok('même jour : pas de pastille, rien de plus (' + (await saved()).pa + ')', await dot.count() === 0 && (await saved()).pa === 50 && /Ouvrir Mes PA/.test(sameAria || ''));
@@ -41,10 +41,10 @@ await pill.click(); await page.waitForTimeout(1200);
 const paSheet = page.locator('section[aria-label="Mes PA"]');
 const paTxt = (await paSheet.innerText().catch(() => '')).replace(/\s+/g, ' ');
 ok('sans PA à récupérer : le solde ouvre « Mes PA » (' + paTxt.slice(0, 60) + '…)', !(await sheet.isVisible().catch(() => false)) && /C’est quoi/.test(paTxt) && /Comment les gagner/.test(paTxt) && /À quoi servent-ils/.test(paTxt));
-// Solde de « Mes PA » en blanc (2026-11-01, porteur : « il est écrit encore en violet clair »).
-const balCol = await paSheet.locator('.pkm-pa-sheet-bal b').evaluate(b => getComputedStyle(b).color).catch(() => '');
+// Solde des PA en blanc (2026-11-01, porteur : « il est écrit encore en violet clair ») : sur la carte PA de « Mes points ».
+const balCol = await page.locator('section[aria-label="Mes points"] [role="tab"]').nth(1).locator('b').evaluate(b => getComputedStyle(b).color).catch(() => '');
 ok('Mes PA : solde en blanc (' + balCol + ')', balCol === 'rgb(255, 255, 255)');
-await page.locator('section[aria-label="Mes PA"] button[aria-label="Fermer"]').click(); await page.waitForTimeout(400);
+await page.locator('section[aria-label="Mes points"] .pkm-pts-head button[aria-label="Fermer"]').click(); await page.waitForTimeout(700);
 const c = await day('2026-11-03'); ok('3e jour : +40 PA (' + c.pa + ')', c.pa === 90 && c.streak === 3);
 // Un jour sans récupérer (le 4) : palier J3 (+40 PA) le 5 (2026-11-09).
 const d = await day('2026-11-05'); ok('un jour manqué : palier J3, +40 PA (' + d.pa + ')', d.aria && /40 PA à récupérer/.test(d.aria) && d.pa === 130 && d.streak === 3);

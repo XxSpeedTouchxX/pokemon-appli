@@ -24,9 +24,9 @@ await sh.locator('button[aria-label="Fermer"]').click(); await page.waitForTimeo
 ok('fermé', (await sh.count()) === 0);
 await page.goto(E2E + '/', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 await page.click('header button[aria-label^="Mes PK"]'); await page.waitForTimeout(300);
-await page.click('section[aria-label="Mes PK"] button:has-text("Règles des PK et PA")'); await page.waitForTimeout(300);
+await page.click('section[aria-label="Mes points"] button:has-text("Règles complètes des PK et PA")'); await page.waitForTimeout(500);
 const rk = page.locator('section[aria-label="Informations légales"]');
-ok('depuis « Mes PK » : « ' + (await rk.locator('h2').innerText()) + ' »', (await rk.locator('h2').innerText()) === 'Règles des PK et PA');
+ok('depuis « Mes points » : « ' + (await rk.locator('h2').innerText()) + ' »', (await rk.locator('h2').innerText()) === 'Règles des PK et PA');
 ok('sans bulles Mentions légales, Confidentialité, Conditions', (await rk.locator('[aria-label="Rubriques"]').count()) === 0);
 const cards = await rk.locator('.pkm-rules-card').evaluateAll(els => els.map(e => e.getAttribute('aria-label')).join('|'));
 ok('règles en images : ' + cards, cards === 'Gagner des PK|Booster PK|Pile ou face|Safari éclair|Délais selon le grade|Points d’Aura|PK shop' && (await rk.locator('.pkm-rules-row:not(.pkm-rules-th)').count()) === 6 && (await rk.locator('.pkm-rules-odds i').count()) === 5);

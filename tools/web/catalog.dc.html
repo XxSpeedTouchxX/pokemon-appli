@@ -360,6 +360,7 @@
 </div></div>
 </section>
 
+@@points-home@@
 @@backup-reminder@@
 <section aria-label="Mon classeur" style="flex: none; display: flex; flex-direction: column; gap: 10px">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
@@ -927,57 +928,46 @@
 <div class="pkm-tuto-host"></div>
 </sc-if>
 
-<!-- fragment: pk-sheet -->
-<sc-if value="{{ pk.sheet }}" hint-placeholder-val="{{ false }}">
-<div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
-<button type="button" aria-label="Fermer Mes PK" onClick="{{ pk.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Mes PK" role="dialog" aria-modal="true" style="flex: none; max-height: 86%; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; background: #0F1828; border-top: 1px solid #24345C; border-radius: 28px 28px 0 0; padding: 8px 16px 20px; display: flex; flex-direction: column; gap: 14px" class="pkm-sheet">
-<div aria-hidden="true" style="flex: none; align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #2A3A5C"></div>
-<div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px">
-<h2 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600">Mes PK</h2>
-<button type="button" onClick="{{ pk.close }}" aria-label="Fermer" style="flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid #1E2B45; border-radius: 23px; background: #111A2C; color: #F3F6FC; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+<!-- fragment: points-sheet -->
+<sc-if value="{{ pts.open }}" hint-placeholder-val="{{ false }}">
+<div class="pkm-pts-veil">
+<button type="button" aria-label="Fermer Mes points" onClick="{{ pts.close }}" class="pkm-pts-shut"></button>
+<section aria-label="Mes points" role="dialog" aria-modal="true" class="pkm-sheet pkm-pa-sheet pkm-pts-sheet pkm-dark">
+<div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
+<div class="pkm-pts-head"><h2>Mes points</h2><button type="button" onClick="{{ pts.close }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<p class="pkm-pts-intro">Trois sortes de points, tous gagnés gratuitement dans l’app. Touche une carte pour tout savoir.</p>
+<div role="tablist" aria-label="Choisir les points" class="pkm-pts-cards">
+<sc-for list="{{ pts.cards }}" as="ptc" hint-placeholder-count="3"><button type="button" role="tab" aria-selected="{{ ptc.sel }}" onClick="{{ ptc.pick }}" aria-label="{{ ptc.aria }}" class="{{ ptc.cls }}"><img src="{{ ptc.ico }}" alt="" width="34" height="34"><b>{{ ptc.bal }}</b><span class="pkm-pts-cl">{{ ptc.label }}</span><small>{{ ptc.name }}</small><sc-if value="{{ ptc.hasDot }}" hint-placeholder-val="{{ false }}"><i class="pkm-pts-dot" aria-hidden="true">{{ ptc.dot }}</i></sc-if></button></sc-for>
 </div>
-<div style="flex: none; display: flex; align-items: center; gap: 14px">
-<img src="img/brand/pk.svg" alt="" width="64" height="64" style="flex: none; display: block">
-<div style="display: flex; flex-direction: column">
-<span style="font-size: 13px; color: #9AA8C3">Ton solde</span>
-<span style="font-family: 'Sora', sans-serif; font-size: 32px; line-height: 1.1; font-weight: 700">{{ pk.balance }} PK</span>
+<section aria-label="Aujourd’hui, tu peux encore gagner" class="pkm-pts-today">
+<h3>Aujourd’hui, tu peux encore gagner</h3>
+<sc-for list="{{ pts.today }}" as="ptr" hint-placeholder-count="5"><div class="{{ ptr.cls }}"><img src="{{ ptr.ico }}" alt="" width="28" height="28"><span class="pkm-pts-rt"><b>{{ ptr.title }}</b><small>{{ ptr.sub }}</small></span><button type="button" onClick="{{ ptr.go }}" aria-label="{{ ptr.aria }}" disabled="{{ ptr.off }}" class="{{ ptr.ctaCls }}">{{ ptr.cta }}</button></div></sc-for>
+</section>
+<section aria-label="{{ pts.p.title }}" role="tabpanel" class="{{ pts.panelCls }}">
+<div class="pkm-pa-sheet-head pkm-pts-ph"><h2><img src="{{ pts.p.ico }}" alt="" width="30" height="30">{{ pts.p.title }}</h2><sc-if value="{{ pts.p.canRecharge }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pts.p.recharge }}" class="pkm-pa-recharge"><img src="img/brand/pa.svg" alt="" width="22" height="22"><span>Recharger mes PA</span><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button></sc-if></div>
+<div class="pkm-cur-what pkm-pts-block"><h3>C’est quoi ?</h3><p>{{ pts.p.what }}</p></div>
+<div class="pkm-pts-block"><h3>Comment les gagner ?</h3>
+<sc-if value="{{ pts.p.isPa }}" hint-placeholder-val="{{ false }}">
+<p class="pkm-pts-how">{{ pts.p.how }}</p>
+<div class="pkm-rules-streak"><sc-for list="{{ pts.p.streak }}" as="pas" hint-placeholder-count="7"><div class="{{ pas.cls }}"><b>{{ pas.pa }}</b><span>{{ pas.day }}</span></div></sc-for></div>
+<p class="pkm-pa-sheet-note">{{ pts.p.note }}</p>
+<div class="pkm-pa-series" role="group" aria-label="Série de connexion"><h3>Série de connexion</h3><div class="pkm-pa-ser-days"><sc-for list="{{ pts.p.series.days }}" as="psd" hint-placeholder-count="7"><span class="{{ psd.cls }}" aria-label="{{ psd.aria }}"><sc-if value="{{ psd.notGift }}" hint-placeholder-val="{{ true }}"><b>{{ psd.n }}</b></sc-if><sc-if value="{{ psd.gift }}" hint-placeholder-val="{{ false }}"><i class="pkm-pa-ser-box"><img src="{{ psd.base }}" alt=""><img src="{{ psd.lid }}" alt=""></i></sc-if></span></sc-for></div><p class="pkm-pa-ser-status">{{ pts.p.series.status }}</p><p class="pkm-pa-ser-text">{{ pts.p.series.text }}</p></div>
+</sc-if>
+<ul class="pkm-pts-steps"><sc-for list="{{ pts.p.earn }}" as="pte" hint-placeholder-count="4"><li><img src="{{ pte.ico }}" alt="" width="30" height="30" class="{{ pte.icoCls }}"><span class="pkm-pts-st"><b>{{ pte.title }}</b><small>{{ pte.text }}</small></span><span class="pkm-pts-side"><sc-if value="{{ pte.hasAmount }}" hint-placeholder-val="{{ true }}"><em>{{ pte.amount }}</em></sc-if><sc-if value="{{ pte.hasGo }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pte.go }}" class="pkm-pts-go">{{ pte.cta }}</button></sc-if></span></li></sc-for></ul>
 </div>
+<div class="pkm-pts-block"><h3>À quoi servent-ils ?</h3>
+<ul class="pkm-pts-steps"><sc-for list="{{ pts.p.use }}" as="ptu" hint-placeholder-count="3"><li><img src="{{ ptu.ico }}" alt="" width="30" height="30" class="{{ ptu.icoCls }}"><span class="pkm-pts-st"><b>{{ ptu.title }}</b><small>{{ ptu.text }}</small></span><span class="pkm-pts-side"><sc-if value="{{ ptu.hasAmount }}" hint-placeholder-val="{{ false }}"><em>{{ ptu.amount }}</em></sc-if><sc-if value="{{ ptu.hasGo }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ ptu.go }}" class="pkm-pts-go">{{ ptu.cta }}</button></sc-if></span></li></sc-for></ul>
+<sc-if value="{{ pts.p.hasEvo }}" hint-placeholder-val="{{ false }}"><div class="pkm-rules-evo"><sc-for list="{{ pts.p.evo }}" as="pae" hint-placeholder-count="5"><div><span>{{ pae.label }}</span><b>{{ pae.pa }}</b></div></sc-for></div></sc-if>
 </div>
-<div class="pkm-cur-what"><h3>C’est quoi ?</h3><p>{{ pk.what }}</p></div>
-<h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA">Comment les gagner ?</h3>
-<ul style="flex: none; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
-<sc-for list="{{ pk.rules }}" as="pkr" hint-placeholder-count="3">
-<li style="display: flex; align-items: center; gap: 10px; font-size: 14px; line-height: 1.35"><span style="flex: none; min-width: 52px; box-sizing: border-box; padding: 3px 8px; border-radius: 999px; background: var(--pkm-accent); color: var(--pkm-on-accent); font-weight: 800; text-align: center">{{ pkr.n }}</span><span>{{ pkr.text }}</span></li>
-</sc-for>
-</ul>
-<div class="pkm-cur-what"><h3>À quoi servent-ils ?</h3><p>{{ pk.use }}</p></div>
-<p style="flex: none; margin: 0; font-size: 12px; line-height: 1.45; color: #7D8BA8">{{ pk.note }}</p>
-<button type="button" onClick="{{ legal.openPk }}" style="flex: none; align-self: flex-start; min-height: 44px; padding: 0 14px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer">Règles des PK et PA</button>
+<div class="pkm-pts-block pkm-pts-tips"><h3>Bon à savoir</h3><ul><sc-for list="{{ pts.p.tips }}" as="ptt" hint-placeholder-count="2"><li>{{ ptt.text }}</li></sc-for></ul></div>
+</section>
+<button type="button" onClick="{{ pts.rules }}" class="pkm-pa-sheet-rules pkm-pts-rules">Règles complètes des PK et PA</button>
 </section>
 </div>
 </sc-if>
 
-<!-- fragment: pa-sheet -->
-<sc-if value="{{ pk.paSheet.open }}" hint-placeholder-val="{{ false }}">
-<div style="position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62)">
-<button type="button" aria-label="Fermer Mes PA" onClick="{{ pk.paSheet.close }}" style="flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"></button>
-<section aria-label="Mes PA" role="dialog" aria-modal="true" class="pkm-sheet pkm-pa-sheet">
-<div aria-hidden="true" class="pkm-pa-sheet-grip"></div>
-<div class="pkm-pa-sheet-head"><h2>Mes PA</h2><span class="pkm-pa-sheet-tools"><sc-if value="{{ pk.paSheet.canRecharge }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ pk.paSheet.recharge }}" class="pkm-pa-recharge"><img src="img/brand/pa.svg" alt="" width="22" height="22"><span>Recharger mes PA</span><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button></sc-if><button type="button" onClick="{{ pk.paSheet.close }}" aria-label="Fermer" class="pkm-pa-sheet-x"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span></div>
-<div class="pkm-pa-sheet-bal"><img src="{{ pk.paSheet.logo }}" alt="" width="64" height="64"><div><span>Ton solde</span><b>{{ pk.paSheet.balance }} PA</b></div></div>
-<div class="pkm-cur-what"><h3>C’est quoi ?</h3><p>{{ pk.paSheet.what }}</p></div>
-<div class="pkm-cur-what"><h3>Comment les gagner ?</h3><p>{{ pk.paSheet.how }}</p></div>
-<div class="pkm-rules-streak"><sc-for list="{{ pk.paSheet.streak }}" as="pas" hint-placeholder-count="5"><div class="{{ pas.cls }}"><b>{{ pas.pa }}</b><span>{{ pas.day }}</span></div></sc-for></div>
-<p class="pkm-pa-sheet-note">{{ pk.paSheet.note }}</p>
-<div class="pkm-pa-series" role="group" aria-label="Série de connexion"><h3>Série de connexion</h3><div class="pkm-pa-ser-days"><sc-for list="{{ pk.paSheet.series.days }}" as="psd" hint-placeholder-count="7"><span class="{{ psd.cls }}" aria-label="{{ psd.aria }}"><sc-if value="{{ psd.notGift }}" hint-placeholder-val="{{ true }}"><b>{{ psd.n }}</b></sc-if><sc-if value="{{ psd.gift }}" hint-placeholder-val="{{ false }}"><i class="pkm-pa-ser-box"><img src="{{ psd.base }}" alt=""><img src="{{ psd.lid }}" alt=""></i></sc-if></span></sc-for></div><p class="pkm-pa-ser-status">{{ pk.paSheet.series.status }}</p><p class="pkm-pa-ser-text">{{ pk.paSheet.series.text }}</p></div>
-<div class="pkm-cur-what"><h3>À quoi servent-ils ?</h3><p>{{ pk.paSheet.use }}</p></div>
-<div class="pkm-rules-evo"><sc-for list="{{ pk.paSheet.evo }}" as="pae" hint-placeholder-count="6"><div><span>{{ pae.label }}</span><b>{{ pae.pa }}</b></div></sc-for></div>
-<button type="button" onClick="{{ pk.paSheet.dex }}" class="pkm-pa-sheet-go">Ouvrir le Pokédex</button>
-<button type="button" onClick="{{ legal.openPk }}" class="pkm-pa-sheet-rules">Règles des PK et PA</button>
-</section>
-</div>
-</sc-if>
+<!-- fragment: points-home -->
+<button type="button" onClick="{{ ptsh.open }}" aria-label="{{ ptsh.aria }}" class="{{ ptsh.cls }}"><span class="pkm-pts-hlogos" aria-hidden="true"><img src="img/brand/pk.svg" alt="" width="30" height="30"><img src="img/brand/pa.svg" alt="" width="30" height="30"><img src="img/brand/pl.svg" alt="" width="30" height="30"></span><span class="pkm-pts-ht"><b>Comment gagner des points ?</b><small>{{ ptsh.sub }}</small></span><sc-if value="{{ ptsh.hasN }}" hint-placeholder-val="{{ false }}"><i class="pkm-pts-hn" aria-hidden="true">{{ ptsh.n }}</i></sc-if><svg class="pkm-pts-chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
 
 <!-- fragment: profile-cat -->
 <section aria-label="Type de collectionneur" style="flex: none; padding: 16px; border-radius: 22px; border: 1px solid #1E2B45; background: #111A2C; display: flex; flex-direction: column; gap: 12px">
@@ -2676,6 +2666,7 @@ PKCOUNTER
 </sc-if>
 <sc-if value="{{ pg.isEarn }}" hint-placeholder-val="{{ false }}">
 <sc-if value="{{ ple.hasMsg }}" hint-placeholder-val="{{ false }}"><p role="status" class="pkm-ple-msg">{{ ple.msg }}</p></sc-if>
+<button type="button" onClick="{{ ple.howPl }}" class="pkm-ple-how"><img src="img/brand/pl.svg" alt="" width="20" height="20">Comment marchent les PL ?<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
 <sc-if value="{{ ple.ready }}" hint-placeholder-val="{{ true }}">
 <section aria-label="{{ ple.headAria }}" class="pkm-ple-head pkm-dark">
 <img src="img/brand/pl.svg" alt="" width="68" height="68" class="pkm-ple-logo">

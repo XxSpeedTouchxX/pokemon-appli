@@ -427,7 +427,7 @@
   // Ouvre « Recharger mes PA » depuis « Mes PA » (relit sur le serveur si la 1ʳᵉ recharge est encore doublée).
   shopProto.paStoreOpen = function () {
     if (typeof this.buyLocked === 'function' && this.buyLocked()) return;
-    this.setState({ paStore: true, paSheet: false, shopPaAsk: null, paErr: '' });
+    this.setState({ paStore: true, points: '', shopPaAsk: null, paErr: '' });
     this.paShopSync();
   };
   const shopTabs = (self, s) => {
@@ -645,7 +645,7 @@
     // Page « Recharger mes PA », ouverte par le bouton en haut à droite de « Mes PA » (2026-11-20, porteur) ; la flèche
     // ramène à « Mes PA ».
     r.pas = s.paStore ? Object.assign(shopTabs(this, Object.assign({}, s, { shopTab: 'pa' })), { open: true,
-      back: () => { if (!s.paBusy) this.setState({ paStore: false, shopPaAsk: null, paErr: '', paSheet: true }); } }) : { open: false, ask: { open: false }, packs: [] };
+      back: () => { if (!s.paBusy) this.setState({ paStore: false, shopPaAsk: null, paErr: '', points: 'pa', ptsLast: 'pa' }); } }) : { open: false, ask: { open: false }, packs: [] };
     if (ui.isPkShop) Object.assign(ui, { title: 'PK shop', subtitle: 'Dépense tes PK', hasSubtitle: true, hasSubRow: false, headerHome: false, headerBig: true, headerDetail: false });
     // Territoire n'est plus un onglet : écran de détail ouvert depuis l'accueil, avec Retour.
     if (ui.isTerritory) Object.assign(ui, { headerBig: false, headerDetail: true });

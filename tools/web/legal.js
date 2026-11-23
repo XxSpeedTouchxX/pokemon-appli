@@ -108,8 +108,8 @@
   // @legal-data-end
   const LEGAL_TABS = ['mentions', 'privacy', 'terms', 'sales', 'pk'];
 
-  // Les panneaux Mes PK et Mes PA se ferment : les règles s'affichent seules par-dessus l'app.
-  proto.legalOpen = function (tab) { this.setState({ legal: LEGAL[tab] ? tab : 'mentions', pkSheet: false, paSheet: false, premOpen: false }); };
+  // « Mes points » se ferme : les règles s'affichent seules par-dessus l'app.
+  proto.legalOpen = function (tab) { this.setState({ legal: LEGAL[tab] ? tab : 'mentions', points: '', premOpen: false }); };
   const legalBaseRender = proto.renderVals;
   proto.renderVals = function () {
     const r = legalBaseRender.call(this), s = this.st(), cur = LEGAL[s.legal] ? s.legal : '';

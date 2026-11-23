@@ -27,7 +27,7 @@ ok('appui long : texte non sélectionnable (' + sel.body + '), champs de saisie 
 
 // 3. Règles des PK et PA : la boîte mystère à la fin du PK shop.
 await page.click('header button[aria-label^="Mes PK"]'); await page.waitForTimeout(300);
-await page.click('section[aria-label="Mes PK"] button:has-text("Règles des PK et PA")'); await page.waitForTimeout(400);
+await page.click('section[aria-label="Mes points"] button:has-text("Règles complètes des PK et PA")'); await page.waitForTimeout(600);
 const shopRows = await page.locator('.pkm-rules-shop > div').allInnerTexts();
 // Boîte mystère en 4ᵉ position, sous le ticket Or (2026-11-13, porteur) ; chaque prix avec le logo de sa monnaie.
 const shopPrices = await page.locator('.pkm-rules-shop > div strong').evaluateAll(ss => ss.map(e => e.getAttribute('aria-label') + '|' + ((e.querySelector('img') || {}).getAttribute ? e.querySelector('img').getAttribute('src') : '')));

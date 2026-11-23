@@ -147,8 +147,8 @@
         aria: own ? (cur ? name + ' est ton compagnon' : 'Choisir ' + name + ' comme compagnon') : 'Voir ' + name + ' dans le Pokédex : ' + pkNum(price) + ' PA',
         go: () => {
           if (cur) return;
-          if (own) { this.setState({ buddy: k, pkSheet: false, toast: name + ' t’accompagne' + (HOME_THEMES[k] ? ' · ' + pkTheme(k) : '') }); this.flash(); return; }
-          this.setState({ pkSheet: false }); this.dexOpen(k);
+          if (own) { this.setState({ buddy: k, points: '', toast: name + ' t’accompagne' + (HOME_THEMES[k] ? ' · ' + pkTheme(k) : '') }); this.flash(); return; }
+          this.setState({ points: '' }); this.dexOpen(k);
         }
       };
     });
@@ -156,7 +156,8 @@
       n: pkNum(s.pk), aria: 'Mes PK : ' + pkNum(s.pk) + '. Voir comment en gagner et quoi débloquer',
       // Gain (« +N ») ou perte (« −N », en rouge : Safari éclair en Normal ou Difficile, 2026-11-13) sous le solde.
       gain: s.pkGain > 0 || s.pkLoss > 0, gainText: s.pkGain > 0 ? '+' + pkNum(s.pkGain) : '−' + pkNum(s.pkLoss), gainCls: 'pkm-gain' + (s.pkGain > 0 ? '' : ' pkm-gain-loss'),
-      open: () => this.setState({ pkSheet: true }), close: () => this.setState({ pkSheet: false }), sheet: !!s.pkSheet,
+      // Le solde de PK ouvre « Mes points » sur l'onglet PK (points.js, 2026-11-23 ; avant : « Mes PK »).
+      open: () => this.ptsOpen('pk'), close: () => this.ptsClose(), sheet: s.points === 'pk',
       balance: pkNum(s.pk),
       rules: [
         ['Jeux', 'booster PK, pile ou face et Safari éclair, dans l’onglet Jeux'],
@@ -164,7 +165,7 @@
       ].map(([n, t]) => ({ n: n, text: t })), // « +300 en partageant l’app » retiré le 2026-11-14 (porteur)
       shop: shop,
       locked: (() => { const n = HOME_BUDDIES.filter(([k]) => !pkOwns(s, k)).length; return n + (n > 1 ? ' Pokémon à débloquer avec tes PA dans le Pokédex' : ' Pokémon à débloquer avec tes PA'); })(),
-      all: () => { this.setState({ pkSheet: false }); this.dexOpen(s.buddy, true); },
+      all: () => { this.setState({ points: '' }); this.dexOpen(s.buddy, true); },
       shareDone: !!s.pkShared, shareOpen: !s.pkShared,
       shareText: s.pkShared ? 'Merci pour le partage ! Tes +' + PK_SHARE + ' PK sont reçus.' : '+' + PK_SHARE + ' PK la première fois que tu partages Dropicards sur un réseau social.',
       nets: PK_NETS.map(([name, href]) => ({ name: name, href: href, label: 'Partager Dropicards sur ' + name, go: () => this.pkShare(name) })),

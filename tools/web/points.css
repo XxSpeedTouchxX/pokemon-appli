@@ -1,0 +1,96 @@
+/* « Mes points » (points.js, 2026-11-23) : PK en jaune (accent), PA en prune, PL en turquoise. Couleurs sombres de
+   l'app (#0F1828, #111A2C, #1E2B45…) : la construction les relie aux thèmes Clair et Original. */
+.pkm-pts-veil { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; background: rgba(3, 6, 14, 0.62); }
+.pkm-pts-shut { flex: 1 1 auto; min-height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.pkm-pts-sheet { border-top-color: #24345C; gap: 14px; }
+.pkm-pts-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pkm-pts-head h2 { margin: 0; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; }
+.pkm-pts-intro { flex: none; margin: -8px 0 0; font-size: 13px; line-height: 1.4; color: #9AA8C3; }
+
+/* Les 3 cartes-onglets. */
+.pkm-pts-cards { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pkm-pts-card { position: relative; min-width: 0; min-height: 118px; box-sizing: border-box; padding: 10px 4px 9px; border: 1.5px solid #1E2B45; border-radius: 18px; background: #111A2C; color: #F3F6FC; font: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; transition: border-color 0.2s, background-color 0.2s, transform 0.15s; -webkit-tap-highlight-color: transparent; }
+.pkm-pts-card:active { transform: scale(0.97); }
+.pkm-pts-card img { display: block; width: 34px; height: 34px; margin-bottom: 3px; }
+.pkm-pts-card b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Sora', sans-serif; font-size: 18px; line-height: 1.15; font-weight: 700; font-variant-numeric: tabular-nums; color: #FFFFFF; }
+.pkm-pts-cl { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; }
+.pkm-pts-card small { font-size: 10.5px; line-height: 1.2; color: #9AA8C3; text-align: center; }
+.pkm-pts-c-pk .pkm-pts-cl { color: var(--pkm-accent); }
+.pkm-pts-c-pa .pkm-pts-cl { color: #E3A6FF; }
+.pkm-pts-c-pl .pkm-pts-cl { color: #3FE0CF; }
+.pkm-pts-c-pk.pkm-pts-card-on { border-color: var(--pkm-accent); background: radial-gradient(120% 90% at 50% 0%, rgba(var(--pkm-accent-rgb), 0.22), rgba(var(--pkm-accent-rgb), 0) 70%), #111A2C; }
+.pkm-pts-c-pa.pkm-pts-card-on { border-color: #C97DFF; background: radial-gradient(120% 90% at 50% 0%, rgba(178, 107, 255, 0.26), rgba(178, 107, 255, 0) 70%), #111A2C; }
+.pkm-pts-c-pl.pkm-pts-card-on { border-color: #3FE0CF; background: radial-gradient(120% 90% at 50% 0%, rgba(63, 224, 207, 0.22), rgba(63, 224, 207, 0) 70%), #111A2C; }
+.pkm-pts-dot { position: absolute; top: 6px; right: 6px; min-width: 18px; height: 18px; box-sizing: border-box; padding: 0 5px; border-radius: 9px; background: #FF4D5E; color: #FFFFFF; font-style: normal; font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; }
+
+/* « Aujourd'hui, tu peux encore gagner ». */
+.pkm-pts-today { flex: none; display: flex; flex-direction: column; padding: 12px 14px 6px; border: 1px solid #1E2B45; border-radius: 20px; background: #111A2C; }
+.pkm-pts-today h3 { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: #C9D3EA; }
+.pkm-pts-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid #1E2B45; }
+.pkm-pts-row:first-of-type { border-top: 0; }
+.pkm-pts-row > img { flex: none; display: block; width: 28px; height: 28px; }
+.pkm-pts-rt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pkm-pts-rt b { font-size: 14px; font-weight: 700; }
+.pkm-pts-rt small { font-size: 12px; line-height: 1.3; color: #9AA8C3; }
+.pkm-pts-lock .pkm-pts-rt small::before { content: '🔒 '; }
+.pkm-pts-ready .pkm-pts-rt small { color: #C9D3EA; }
+.pkm-pts-cta { flex: none; min-width: 72px; min-height: 36px; padding: 0 12px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.pkm-pts-cta:disabled { opacity: 0.5; cursor: default; }
+.pkm-pts-pk .pkm-pts-cta-go { border-color: transparent; background: var(--pkm-accent); color: var(--pkm-on-accent); }
+.pkm-pts-pa .pkm-pts-cta-go { border-color: transparent; background: linear-gradient(180deg, #A44BD6, #6A2A9E); color: #FFFFFF; }
+.pkm-pts-pl .pkm-pts-cta-go { border-color: transparent; background: linear-gradient(180deg, #3FE0CF, #12B5A6); color: #062421; }
+
+/* Onglet choisi. */
+.pkm-pts-panel { flex: none; display: flex; flex-direction: column; gap: 16px; padding: 14px; border: 1.5px solid #1E2B45; border-radius: 22px; background: #111A2C; }
+.pkm-pts-p-pk { border-color: rgba(var(--pkm-accent-rgb), 0.55); background: radial-gradient(110% 40% at 50% 0%, rgba(var(--pkm-accent-rgb), 0.12), rgba(var(--pkm-accent-rgb), 0) 80%), #111A2C; }
+.pkm-pts-p-pa { border-color: rgba(201, 125, 255, 0.55); background: radial-gradient(110% 40% at 50% 0%, rgba(178, 107, 255, 0.16), rgba(178, 107, 255, 0) 80%), #111A2C; }
+.pkm-pts-p-pl { border-color: rgba(63, 224, 207, 0.5); background: radial-gradient(110% 40% at 50% 0%, rgba(63, 224, 207, 0.13), rgba(63, 224, 207, 0) 80%), #111A2C; }
+.pkm-pts-ph h2 { display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.pkm-pts-ph h2 img { flex: none; display: block; width: 30px; height: 30px; }
+.pkm-pts-block { flex: none; display: flex; flex-direction: column; gap: 8px; }
+.pkm-pts-block > h3 { margin: 0; font-size: 14px; font-weight: 700; color: #C9D3EA; }
+.pkm-pts-how { margin: 0; font-size: 13.5px; line-height: 1.45; color: #F3F6FC; }
+.pkm-pts-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.pkm-pts-steps li { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #1E2B45; border-radius: 14px; background: #0F1828; }
+.pkm-pts-steps li > img { flex: none; display: block; width: 30px; height: 30px; object-fit: contain; }
+.pkm-pts-steps li > img.pkm-pts-ico-soc { box-sizing: border-box; padding: 5px; border-radius: 9px; background: #FFFFFF; }
+.pkm-pts-st { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pkm-pts-st b { font-size: 13.5px; font-weight: 700; }
+.pkm-pts-st small { font-size: 12px; line-height: 1.35; color: #9AA8C3; }
+.pkm-pts-side { flex: none; max-width: 42%; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.pkm-pts-side em { padding: 3px 8px; border-radius: 999px; font-style: normal; font-size: 12px; font-weight: 800; text-align: right; }
+.pkm-pts-p-pk .pkm-pts-side em { background: var(--pkm-accent); color: var(--pkm-on-accent); }
+.pkm-pts-p-pa .pkm-pts-side em { background: #3B1D5E; color: #FFD1F2; }
+.pkm-pts-p-pl .pkm-pts-side em { background: rgba(63, 224, 207, 0.16); color: #3FE0CF; }
+.pkm-pts-go { min-height: 32px; padding: 0 12px; border: 1px solid #2A3A5C; border-radius: 999px; background: transparent; color: #F3F6FC; font: inherit; font-size: 12.5px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.pkm-pts-tips ul { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 6px; }
+.pkm-pts-tips li { font-size: 13px; line-height: 1.45; color: #C9D3EA; }
+.pkm-pts-rules { align-self: stretch; }
+
+/* Bandeau de l'accueil, sous « Valeur de toute ma collection ». */
+.pkm-pts-home { flex: none; position: relative; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--pkm-line-2); border-radius: 20px;
+  background: linear-gradient(90deg, rgba(var(--pkm-accent-rgb), 0.12), rgba(178, 107, 255, 0.12) 55%, rgba(63, 224, 207, 0.12)), var(--pkm-card); color: var(--pkm-t1); font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pkm-pts-home:active { transform: scale(0.985); }
+.pkm-pts-hlogos { flex: none; display: flex; align-items: center; }
+.pkm-pts-hlogos img { display: block; width: 30px; height: 30px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45)); }
+.pkm-pts-hlogos img + img { margin-left: -9px; }
+.pkm-pts-ht { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pkm-pts-ht b { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; }
+.pkm-pts-ht small { font-size: 12px; color: var(--pkm-t3); }
+.pkm-pts-hn { flex: none; min-width: 22px; height: 22px; box-sizing: border-box; padding: 0 6px; border-radius: 11px; background: #FF4D5E; color: #FFFFFF; font-style: normal; font-size: 12px; font-weight: 800; line-height: 22px; text-align: center; }
+.pkm-pts-chev { flex: none; fill: none; stroke: var(--pkm-t3); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Tant que la page n'a jamais été ouverte : le bandeau brille doucement. */
+.pkm-pts-home-new { border-color: rgba(var(--pkm-accent-rgb), 0.7); animation: pkm-pts-glow 2.4s ease-in-out infinite; }
+@keyframes pkm-pts-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(var(--pkm-accent-rgb), 0); } 50% { box-shadow: 0 0 0 3px rgba(var(--pkm-accent-rgb), 0.28), 0 0 18px rgba(var(--pkm-accent-rgb), 0.3); } }
+@media (prefers-reduced-motion: reduce) { .pkm-pts-home-new { animation: none; } }
+.pkm-calm .pkm-pts-home-new { animation: none; }
+@media (max-width: 350px) {
+  .pkm-pts-card b { font-size: 15.5px; }
+  .pkm-pts-card small { font-size: 9.5px; }
+}
+
+/* « Ma ligue › Mes missions » : lien vers l'onglet PL de « Mes points ». */
+.pkm-ple-how { flex: none; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px 0 10px; border: 1px solid rgba(63, 224, 207, 0.5); border-radius: 999px; background: rgba(63, 224, 207, 0.1); color: #3FE0CF; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.pkm-ple-how img { display: block; width: 20px; height: 20px; }
+.pkm-ple-how svg { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }

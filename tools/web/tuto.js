@@ -52,6 +52,8 @@
     { tab: 'market', sel: 'header .pkm-pa-bar', text: 'Chaque jour, touche ton solde de PA pour récupérer tes PA : tu peux en obtenir jusqu’à 80 quotidiennement !' }, // texte du porteur, 2026-11-01 ; 80 depuis le 2026-11-09 (avant : 70) ; 70 depuis les gains du 2026-11-02
     { tab: 'market', sel: 'header button[aria-label^="Mes PK"]', inner: true, pad: 3, text: 'Ici, tu retrouveras tes PK : ils te serviront à acheter des items, mais aussi à monter en grade pour profiter de plein d’avantages.' },
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK et PA gagnés !' },
+    // « Mes points » (2026-11-23, « go » du porteur) : le bandeau de l'accueil qui explique PK, PA et PL.
+    { tab: 'home', sel: 'button.pkm-pts-home', pad: 4, text: 'Et pour savoir comment gagner tes PK, tes PA et tes PL, touche ici : tout est expliqué simplement, avec ce que tu peux encore gagner aujourd’hui.' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
   ];
   // ——— Mini-tuto de « Ma ligue » (2026-11-14, porteur : « lorsque l'utilisateur va cliquer la première fois sur Ma

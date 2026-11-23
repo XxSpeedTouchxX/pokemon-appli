@@ -36,23 +36,22 @@ await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(800);
 ok('même jour : toujours 100 PK, pas de « + »', await cText() === '100 PK' && (await page.locator('header .pkm-gain').count()) === 0);
 await page.goto(BASE + '?today=2026-10-09', { waitUntil: 'load' }); await page.waitForTimeout(800);
 ok('lendemain : ' + await cText() + ', sans gain', await cText() === '100 PK' && (await page.locator('header .pkm-gain').count()) === 0);
-// 3. Panneau « Mes PK ».
-await counter.click(); await page.waitForTimeout(400);
-const sheet = page.locator('section[aria-label="Mes PK"]');
+// 3. Le compteur ouvre « Mes points » sur l'onglet PK (2026-11-23, points.js ; avant : le panneau « Mes PK »).
+await counter.click(); await page.waitForTimeout(500);
+const sheet = page.locator('section[aria-label="Mes points"] section[aria-label="Mes PK"]');
 const sheetText = (await sheet.innerText()).replace(/\s+/g, ' ');
-// 2026-10-31 (porteur) : « C’est quoi ? », « Comment les gagner ? », « À quoi servent-ils ? » ; plus de « Compagnons à
-// thème » ni de « Mon Pokédex » ; bouton « Règles des PK et PA ».
-ok('panneau : solde, c’est quoi, jeux, bienvenue, partage (sans +10), à quoi ils servent', /Ton solde 100 PK/.test(sheetText) && /C’est quoi \? Les PK sont la monnaie de Dropicards/.test(sheetText) && /Jeux booster PK/.test(sheetText) && !/\+10 /.test(sheetText) && /\+100 de bienvenue/.test(sheetText)
-  && /À quoi servent-ils \? Dans le PK shop/.test(sheetText));
-ok('panneau : plus de « Compagnons à thème » ni de « Mon Pokédex »', !/Compagnons à thème|Mon Pokédex|Kyogre/.test(sheetText) && (await sheet.locator('button[aria-label^="Voir "][aria-label$=" PA"]').count()) === 0);
-ok('panneau : bouton « Règles des PK et PA »', (await sheet.locator('button', { hasText: 'Règles des PK et PA' }).count()) === 1);
-const order = await sheet.locator('ul li span:first-child').allInnerTexts();
-ok('gains : ' + order.join(' / '), order.join() === 'Jeux,+100');
-ok('panneau : les PK ne s’achètent pas', /ne s’achètent pas et n’ont aucune valeur en euros/.test(sheetText));
-ok('panneau : plus de +300 ni de « Partager Dropicards » (2026-11-14, porteur)', !/\+300/.test(sheetText) && !/Partager Dropicards/.test(sheetText) && !/Tous les compagnons/.test(sheetText));
+const cardPk = (await page.locator('section[aria-label="Mes points"] [role="tab"]').first().innerText()).replace(/\s+/g, ' ');
+ok('onglet PK : solde sur la carte (' + cardPk + '), c’est quoi, jeux, bienvenue (sans +10), à quoi ils servent', /^100 PK Monnaie des jeux/.test(cardPk) && /C’est quoi \? Les PK sont la monnaie de Dropicards/.test(sheetText) && /Booster PK/.test(sheetText) && !/\+10 /.test(sheetText) && /\+100 PK/.test(sheetText)
+  && /À quoi servent-ils \?/.test(sheetText) && /Tickets du tirage/.test(sheetText));
+ok('onglet PK : plus de « Compagnons à thème » ni de « Mon Pokédex »', !/Compagnons à thème|Mon Pokédex|Kyogre/.test(sheetText) && (await sheet.locator('button[aria-label^="Voir "][aria-label$=" PA"]').count()) === 0);
+ok('« Mes points » : bouton « Règles complètes des PK et PA »', (await page.locator('section[aria-label="Mes points"] button', { hasText: 'Règles complètes des PK et PA' }).count()) === 1);
+const order = await sheet.locator('.pkm-pts-block').nth(1).locator('.pkm-pts-st b').allInnerTexts();
+ok('gains : ' + order.join(' / '), order.join() === 'Booster PK,Pile ou face,Safari éclair,Bienvenue,2XP PK');
+ok('onglet PK : les PK ne s’achètent pas', /ne s’achètent pas et n’ont aucune valeur en euros/.test(sheetText));
+ok('onglet PK : plus de +300 ni de « Partager Dropicards » (2026-11-14, porteur)', !/\+300/.test(sheetText) && !/Partager Dropicards/.test(sheetText) && !/Tous les compagnons/.test(sheetText));
 await page.screenshot({ path: shot('pk-panneau.png') });
 // 4. Pokédex (onglet Jeux) après fermeture de « Mes PK » ; sans starter, on le choisit d'abord.
-await page.locator('button[aria-label="Fermer Mes PK"]').click(); await page.waitForTimeout(400);
+await page.locator('button[aria-label="Fermer Mes points"]').click({ position: { x: 20, y: 20 } }); await page.waitForTimeout(700);
 await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(1200); await page.click('[role=tablist][aria-label=\"Jeux\"] button:has-text(\"Pokédex\")'); await page.waitForTimeout(300);
 const dex = page.locator('section[aria-label="Pokédex"]');
 // (l'onglet Jeux a aussi un encadré « Mes PK », sans rôle de dialogue)
@@ -187,7 +186,7 @@ await page.screenshot({ path: shot('pk-kyogre.png'), clip: { x: 0, y: 0, width: 
 await counter.click(); await page.waitForTimeout(400);
 const after = await page.$$eval('section[aria-label="Mes PK"] button[aria-label]', bs => bs.map(b => b.getAttribute('aria-label')).filter(a => /Kyogre|Groudon|Rayquaza|Pokédex/.test(a)));
 ok('après déblocage, « Mes PK » sans compagnons ni Pokédex (' + (after.join(' ; ') || 'aucun') + ')', after.length === 0);
-await page.locator('button[aria-label="Fermer Mes PK"]').click(); await page.waitForTimeout(400);
+await page.locator('button[aria-label="Fermer Mes points"]').click({ position: { x: 20, y: 20 } }); await page.waitForTimeout(700);
 // La liste complète s'ouvre depuis le Pokédex (onglet Jeux, « Tous les Pokémon »).
 await page.click('nav button[aria-label="Jeux"]'); await page.waitForTimeout(800); await page.click('[role=tablist][aria-label=\"Jeux\"] button:has-text(\"Pokédex\")'); await page.waitForTimeout(300);
 await page.click('.pkm-dex-all'); await page.waitForTimeout(1000);
@@ -211,7 +210,7 @@ ok('v2 : Évoli déjà choisi reste acquis : pkOwn ' + JSON.stringify(d.pkOwn) +
 // 7 ter. Partage : « Partager Dropicards » (+300 PK) retiré de « Mes PK » (2026-11-14, porteur).
 await counter.click(); await page.waitForTimeout(400);
 ok('« Mes PK » : plus de liens de partage', (await page.locator('section[aria-label="Mes PK"] a[aria-label^="Partager Dropicards"]').count()) === 0);
-await page.click('section[aria-label="Mes PK"] button[aria-label="Fermer"]'); await page.waitForTimeout(300);
+await page.click('section[aria-label="Mes points"] .pkm-pts-head button[aria-label="Fermer"]'); await page.waitForTimeout(700);
 // 8. Grands titres et écrans de détail.
 for (const [tab, name] of [['Toutes les séries', 'Toutes les séries'], ['Jeux', 'Jeux'], ['PK shop', 'PK shop']]) {
   await page.click('nav button[aria-label="' + tab + '"]'); await page.waitForTimeout(500);

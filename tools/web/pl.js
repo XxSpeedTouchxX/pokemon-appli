@@ -375,6 +375,8 @@
     const net = s.plShotNet || 'tiktok';
     return {
       hasMsg: !!msg, msg: msg, ready: !!st,
+      // « Comment marchent les PL ? » : la page « Mes points », onglet PL (points.js, 2026-11-23).
+      howPl: () => this.ptsOpen('pl'),
       season: plNum(st && st.pl_season), total: plNum(st && st.pl_total),
       headAria: 'Mes Points de loyauté : ' + plNum(st && st.pl_season) + ' cette saison, ' + plNum(st && st.pl_total) + ' au total',
       code: code, linkShort: link.replace('https://', ''), hasQr: !!qr, qrPath: qr ? qr.d : '', qrBox: qr ? qr.box : '0 0 1 1',

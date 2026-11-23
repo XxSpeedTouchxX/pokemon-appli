@@ -322,14 +322,13 @@
       return r;
     };
   })(gcProto.admView);
-  // Soldes « ∞ » partout (en-tête, Mes PK, Mes PA, PK shop) tant que le mode Admin est ouvert.
+  // Soldes « ∞ » partout (en-tête, Mes points — points.js —, PK shop) tant que le mode Admin est ouvert.
   const gcInfRender = gcProto.renderVals;
   gcProto.renderVals = function () {
     const r = gcInfRender.call(this), s = this.st();
     if (!gcFree(s)) return r;
     if (r.pk) {
       Object.assign(r.pk, { n: '∞', pa: '∞', balance: '∞' });
-      if (r.pk.paSheet && r.pk.paSheet.open) r.pk.paSheet.balance = '∞';
     }
     if (r.pks && r.pks.pk !== undefined) Object.assign(r.pks, { pk: '∞', paBal: '∞' });
     return r;

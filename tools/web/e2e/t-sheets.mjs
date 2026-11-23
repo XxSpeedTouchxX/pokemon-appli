@@ -42,13 +42,13 @@ const tDown = await page.evaluate(() => { const e = document.querySelector('sect
 ok('règles : la fenêtre redescend avant de se fermer (' + tDown + ')', /^matrix\(1, 0, 0, 1, 0, [1-9]/.test(tDown));
 await page.waitForTimeout(500);
 ok('règles : fermée ensuite', (await rules.count()) === 0);
-// 3. Mes PK : voile touché, glissement puis fermeture.
-await page.evaluate(() => window.__pkm.setState({ pkSheet: true })); await page.waitForTimeout(700);
-await page.locator('button[aria-label="Fermer Mes PK"]').click({ position: { x: 20, y: 20 } }); await page.waitForTimeout(150);
-const tPk = await page.evaluate(() => { const e = document.querySelector('section[aria-label="Mes PK"]'); return e ? getComputedStyle(e).transform : 'absent'; });
-ok('Mes PK : redescend en touchant le voile (' + tPk + ')', /^matrix\(1, 0, 0, 1, 0, [1-9]/.test(tPk));
+// 3. « Mes points » (ex-« Mes PK », 2026-11-23) : voile touché, glissement puis fermeture.
+await page.evaluate(() => window.__pkm.setState({ points: 'pk' })); await page.waitForTimeout(700);
+await page.locator('button[aria-label="Fermer Mes points"]').click({ position: { x: 20, y: 20 } }); await page.waitForTimeout(150);
+const tPk = await page.evaluate(() => { const e = document.querySelector('section[aria-label="Mes points"]'); return e ? getComputedStyle(e).transform : 'absent'; });
+ok('Mes points : redescend en touchant le voile (' + tPk + ')', /^matrix\(1, 0, 0, 1, 0, [1-9]/.test(tPk));
 await page.waitForTimeout(500);
-ok('Mes PK : fermée ensuite', (await page.locator('section[aria-label="Mes PK"]').count()) === 0);
+ok('Mes points : fermée ensuite', (await page.locator('section[aria-label="Mes points"]').count()) === 0);
 // 4. Réglages › Sons.
 await page.goto(E2E + '/?start=settings&debug', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 const snd = page.locator('section[aria-label="Sons"]');
