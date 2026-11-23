@@ -367,9 +367,9 @@
         // Étapes du Pokédex : la page ne défile plus (la visite couvre l'écran) ; si la partie présentée n'est pas
         // juste sous les onglets une fois le défilement fini, on la ramène.
         if ((st.whole || st.tabs) && TUTO.fitBh && Math.abs(el.box.offsetHeight - TUTO.fitBh) > 3) tutoWhole(st, el);
-        if (st.tabs && TUTO.want) {
+        if (st.tabs && TUTO.want && !TUTO.gliding) {
           const m = t.closest('main'), sc = m ? m.scrollTop : 0;
-          if (m && sc === TUTO.lastSt) tutoTabsScroll(TUTO.wantEl && document.contains(TUTO.wantEl) ? TUTO.wantEl : t, true);
+          if (m && sc === TUTO.lastSt) tutoTabsScroll(TUTO.wantEl && document.contains(TUTO.wantEl) ? TUTO.wantEl : t, false);
           TUTO.lastSt = sc;
         }
         const r = tutoRect(t, st), pad = st.pad != null ? st.pad : 6, B = el.box.getBoundingClientRect(), top = el.box.classList.contains('pkm-tt-top');
@@ -513,13 +513,31 @@
     tutoTabsScroll(pl, true);
   };
   // Amène la partie présentée à TUTO.want (borné à ce que la page peut défiler).
+  // Défilement animé par l'app elle-même, image par image (2026-11-23, porteur : « le didacticiel reste en haut de la
+  // page et ne descend pas sur l'arbre ») : sur iPhone, le défilement « en douceur » du navigateur ne met la position à
+  // jour qu'à la fin, et chaque correction le relançait avant qu'il ait bougé ; la page restait en haut. Pendant
+  // l'animation, plus aucune correction ; ensuite, les petits écarts (page du Pokédex qui bouge encore) sont rattrapés
+  // d'un coup.
+  const tutoGlideStop = () => { cancelAnimationFrame(TUTO.glide); TUTO.gliding = false; };
+  const tutoGlide = (main, d) => {
+    tutoGlideStop();
+    if (tutoStill()) { main.scrollTop += d; return; }
+    const from = main.scrollTop, t0 = performance.now(), dur = Math.min(650, 260 + Math.abs(d) * 0.5);
+    TUTO.gliding = true;
+    const step = now => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      main.scrollTop = from + d * e;
+      if (p < 1 && TUTO.gliding) TUTO.glide = requestAnimationFrame(step); else TUTO.gliding = false;
+    };
+    TUTO.glide = requestAnimationFrame(step);
+  };
   const tutoTabsScroll = (t, smooth) => {
     const main = t && t.closest('main');
     if (!main || !TUTO.want) return;
     const d = Math.max(-main.scrollTop, Math.min(main.scrollHeight - main.clientHeight - main.scrollTop, t.getBoundingClientRect().top - TUTO.want));
     if (Math.abs(d) < 1.5) return;
-    if (!smooth || tutoStill()) { main.scrollTop += d; return; }
-    try { main.scrollBy({ top: d, behavior: 'smooth' }); } catch (e) { main.scrollTop += d; }
+    if (!smooth) { main.scrollTop += d; return; }
+    tutoGlide(main, d);
   };
   // Montre une étape : texte qui s'écrit, bulle placée, élément amené et encadré, onglet mis en avant.
   const tutoShow = i => {
@@ -527,7 +545,7 @@
     if (!el || !st) return;
     if (el.dots.children.length !== TSTEPS.length) el.dots.innerHTML = TSTEPS.map(() => '<i></i>').join('');
     el.box.setAttribute('aria-label', TUTO.mode === 'ligue' ? 'Explication de Ma ligue' : 'Didacticiel');
-    tutoSqueeze(0); TUTO.want = 0; TUTO.wantEl = null; TUTO.fitBh = 0;
+    tutoGlideStop(); tutoSqueeze(0); TUTO.want = 0; TUTO.wantEl = null; TUTO.fitBh = 0;
     TUTO.i = i; TUTO.target = document.querySelector(st.sel); el.last = '';
     if (TUTO.switching) {
       // Après un changement d'onglet, le trou du cadre se rouvre depuis le centre de la nouvelle partie.
@@ -579,7 +597,7 @@
   };
   const tutoStop = () => {
     clearTimeout(TUTO.typing); clearTimeout(TUTO.fly); clearTimeout(TUTO.hopT); clearTimeout(TUTO.sayT); cancelAnimationFrame(TUTO.raf); cancelAnimationFrame(TUTO.sweep);
-    voiceStop(); tutoSqueeze(0);
+    voiceStop(); tutoGlideStop(); tutoSqueeze(0);
     if (TUTO.el && TUTO.el.host) TUTO.el.host.innerHTML = '';
     TUTO.el = null; TUTO.tab = null; TUTO.target = null; TUTO.fr = null; TUTO.i = -1;
   };

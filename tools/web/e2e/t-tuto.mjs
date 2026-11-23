@@ -215,6 +215,34 @@ await p4.evaluate(() => { const b = document.querySelector('main .pkm-gm-tabs [r
 const after4 = await route4();
 ok('après le didacticiel, le Pokédex revient sur Kyogre (' + after4 + ')', after4.length === 1 && /^Kyogre/.test(after4[0]));
 await ctx4.close();
+// Défilement comme sur iPhone (2026-11-23, porteur : « le didacticiel reste en haut de la page et ne descend pas sur
+// l'arbre ») : dans Safari, la position d'un défilement « en douceur » ne change qu'à la fin et un nouvel appel annule
+// celui en cours ; l'étape de l'arbre doit quand même amener l'arbre à l'écran, dans son cadre.
+const ctx5 = await browser.newContext({ viewport: { width: 390, height: 664 }, deviceScaleFactor: 1 });
+await ctx5.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg/, r => r.abort());
+await ctx5.addInitScript(() => {
+  const anim = (el, to) => { clearTimeout(el.__wk); el.__wk = setTimeout(() => { el.scrollTop = to; }, 350); };
+  const sb = Element.prototype.scrollBy, sto = Element.prototype.scrollTo;
+  Element.prototype.scrollBy = function (a, b) { if (a && typeof a === 'object' && a.behavior === 'smooth') return anim(this, this.scrollTop + (a.top || 0)); return sb.call(this, a, b); };
+  Element.prototype.scrollTo = function (a, b) { if (a && typeof a === 'object' && a.behavior === 'smooth') return anim(this, a.top != null ? a.top : this.scrollTop); return sto.call(this, a, b); };
+});
+const p5 = await ctx5.newPage(); p5.on('pageerror', e => errors.push(e.message));
+await p5.goto(E2E + '/?tuto=1&today=2026-10-04', { waitUntil: 'load' }); await p5.waitForTimeout(1200);
+await p5.locator('section[role="dialog"][aria-label="Didacticiel"] button:has-text("Oui")').click(); await p5.waitForTimeout(400);
+await p5.locator('section[aria-label="Choisis ton starter"] button[aria-label="Choisir Salamèche"]').click(); await p5.waitForTimeout(1600);
+let g5 = null;
+for (let k = 0; k < 14; k++) {
+  await p5.locator('.pkm-tt-next').click(); await p5.waitForTimeout(80); await p5.locator('.pkm-tt-next').click().catch(() => {}); await p5.waitForTimeout(2000);
+  const g = await p5.evaluate(() => {
+    const t = (document.querySelector('.pkm-tt-full') || {}).textContent || '';
+    const f = document.querySelector('.pkm-tt-frame').getBoundingClientRect(), tree = document.querySelector('[aria-label="Route d’évolution"]');
+    const r = tree && tree.getBoundingClientRect(), m = document.querySelector('main');
+    return { t: t.slice(0, 40), st: m ? Math.round(m.scrollTop) : 0, onScreen: !!r && r.top >= 0 && r.bottom <= innerHeight, inFrame: !!r && r.top >= f.top - 1 && r.bottom <= f.bottom + 1 };
+  });
+  if (/arbre d’évolution/.test(g.t)) { g5 = g; await p5.screenshot({ path: shot('tuto-arbre-defilement-iphone.png') }); break; }
+}
+ok('défilement comme sur iPhone : la page descend jusqu’à l’arbre, entier à l’écran et dans le cadre (' + JSON.stringify(g5) + ')', !!g5 && g5.st > 200 && g5.onScreen && g5.inFrame);
+await ctx5.close();
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');
 await browser.close();

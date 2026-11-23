@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-23 (suite 3) — Didacticiel : la page descend enfin jusqu'à l'arbre sur iPhone (porteur)
+
+- **Demande** : « l'arbre ne s'affiche toujours pas, le didacticiel reste en haut de la page et ne descend pas sur l'arbre ; essaie de trouver une solution qui marche ».
+- **Cause** : pour amener l'arbre sous les onglets, l'app demandait au navigateur un défilement « en douceur », puis le corrigeait à chaque image tant que la page ne bougeait pas. Sur iPhone (Safari), la position de ce défilement ne change qu'à la fin : chaque correction relançait le défilement avant qu'il ait bougé, et la page restait en haut, sur l'appareil du Pokédex. Chrome met la position à jour à chaque image, d'où des essais réussis jusqu'ici.
+- **Correction** : l'app anime elle-même le défilement, image par image (même rendu sur tous les téléphones) ; aucune correction pendant l'animation ; ensuite, les petits écarts sont rattrapés d'un coup. Cache v278.
+- **Vérifié** : défilement imitant Safari (position mise à jour à la fin seulement, appel annulé par le suivant) : avant, page restée en haut (écart 0, arbre hors de l'écran) ; après, page descendue jusqu'à l'arbre, entier dans son cadre, à 390 × 664, 390 × 844, 375 × 548 et 430 × 740 ; test ajouté dans `t-tuto.mjs`.
+
 ## 2026-11-23 (suite 2) — Didacticiel : un vrai arbre d'évolution même avec un compagnon qui n'évolue pas (porteur)
 
 - **Demande** : « l'arbre de Pokévolution ne marche toujours pas sur le didacticiel, on n'arrive toujours pas à voir l'arbre ».
