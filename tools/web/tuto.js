@@ -27,7 +27,7 @@
   // entière au-dessus de la bulle). « pad » de 12 px sur la valeur (2026-11-01, porteur : des lettres touchaient le cadre).
   // Retouches du 2026-11-22 (porteur) : voix du compagnon coupée (tutoVoiceOn) ; « Mon classeur » toujours dans son
   // cadre, bulle en bas (« under » : le titre passait sous la bulle quand la courbe de la valeur était pliée) ; nouvelles
-  // étapes « Le coin des dresseurs » (ses 4 rubriques, « list ») et « jeux à PK » (titre et booster encadrés, bulle en bas), juste après les séries ; anneau de
+  // étapes « Le coin des dresseurs » (ses 4 rubriques, « list ») et « jeux à PK » (titre « Jeux », onglets et booster entier encadrés, « whole »), juste après les séries ; anneau de
   // l'onglet centré sur son icône ; cadre du solde de PK arrondi comme celui des PA ; cadres des étapes du haut arrêtés
   // au-dessus de la barre du bas (l'arbre d'évolution passait sous l'anneau de la manette) ; « PK et PA gagnés » ; plus
   // de message « À toi de jouer ! » à la fin.
@@ -39,7 +39,8 @@
     { tab: 'collection', sel: 'nav[aria-label="Aller à une série"]', sweep: true, text: 'Ici, tu pourras retrouver toutes les séries et leurs extensions. Touche une carte pour voir ses infos, et ajoute-la dans ton classeur si tu la possèdes déjà.' },
     // Textes du porteur (2026-11-22), orthographe revue ; une ligne par rubrique.
     { tab: 'coin', sel: '.pkm-coin-tabs-4', pad: 6, list: true, text: 'Voici le coin des dresseurs et ses 4 rubriques :\n• Ma ligue : un classement général pour te confronter à tous les utilisateurs de Dropicards et tenter de gagner des lots.\n• Ma vitrine : échange ou vends tes cartes avec d’autres dresseurs.\n• Parrainer un ami : gagne des PL (points de loyauté) en parrainant tes amis et grimpe dans le classement général.\n• Calendrier JCC : ne rate pas les prochaines sorties Pokémon.' },
-    { tab: 'market', sel: 'section[aria-label="Booster PK"]', kids: 2, under: true, text: 'Voici la page des jeux à PK : des jeux quotidiens qui te feront gagner des PK !' },
+    // Jeux à PK (2026-11-22, porteur) : le cadre prend le titre « Jeux » (« also »), les onglets et tout le booster.
+    { tab: 'market', sel: 'section[aria-label="Booster PK"]', also: 'h1.pkm-hb-title', kids: 2, under: true, small: true, whole: true, text: 'Ici, tu retrouveras les jeux à PK : ils te permettent de gagner des PK chaque jour. Par exemple ici, le Booster PK à ouvrir, mais d’autres jeux t’attendent plus bas dans la page !' },
     { tab: 'market', dex: true, sel: '.pkm-dex-device', top: true, text: 'Voici ton Pokédex : tu pourras y voir ton compagnon.' },
     { tab: 'market', dex: true, sel: '.pkm-dex-lcd-r', top: true, text: 'Les PA sont des points d’Aura : tu les gagnes en te connectant chaque jour à l’appli. Plus tu te connectes, plus tu crées de liens avec ton compagnon, et plus tu gagnes de PA !' },
     { tab: 'market', dex: true, sel: '[aria-label="Route d’évolution"]', top: true, text: 'Ici, tu trouveras l’arbre d’évolution de ton Pokémon : plus tu obtiens de PA, plus tu as de chances de faire évoluer ton compagnon.' },
@@ -261,8 +262,19 @@
     return window.innerHeight - (bottom != null ? bottom : tutoBottom()) - bh - 14 - top - 8;
   };
   // Rectangle encadré : l'élément, ses premiers enfants seulement (« kids » : le titre et la carte du radar, sans les
-  // petites lignes en dessous) ou un carré centré sur son icône (« ico » : l'onglet PK shop).
+  // petites lignes en dessous) ou un carré centré sur son icône (« ico » : l'onglet PK shop). « also » : le cadre monte
+  // jusqu'au texte d'un autre élément visible (le titre « Jeux » de la page, sans l'interligne au-dessus des lettres :
+  // les coins du cadre ne touchent pas le solde de PA) et prend toute la largeur de l'élément présenté.
   const tutoRect = (t, st) => {
+    const r = tutoRect1(t, st), a = st.also && [...document.querySelectorAll(st.also)].find(e => e.getBoundingClientRect().height > 0);
+    if (!a) return r;
+    const rg = document.createRange(); rg.selectNodeContents(a);
+    const q = rg.getBoundingClientRect(), T = t.getBoundingClientRect();
+    const o = { left: Math.min(r.left, q.left, T.left), right: Math.max(r.right, q.right, T.right), top: Math.min(r.top, q.top + 4), bottom: Math.max(r.bottom, q.bottom) };
+    o.width = o.right - o.left; o.height = o.bottom - o.top;
+    return o;
+  };
+  const tutoRect1 = (t, st) => {
     // Solde des PK (2026-10-31, porteur) : le cadre suit la pastille elle-même, pas sa zone de toucher, pour ne plus
     // mordre sur le solde de PA juste dessous.
     if (st.inner && t.firstElementChild) return t.firstElementChild.getBoundingClientRect();
@@ -400,12 +412,41 @@
     const h = p.offsetHeight;
     el.typed.textContent = ''; p.style.minHeight = h + 'px';
   };
+  // Étape « jeux à PK » (« whole », 2026-11-22, porteur : « un encadré qui prend le terme Jeux et entièrement le
+  // booster ») : la page reste en haut et tout doit tenir au-dessus de la bulle. D'abord la bulle juste au-dessus de
+  // l'anneau de l'onglet ; si le cadre n'y tient pas, la bulle descend tout en bas, par-dessus la barre du bas (sans
+  // l'anneau) ; sur un petit écran, le dessin du booster rétrécit le temps de l'étape (classe « pkm-tt-sqz » sur la
+  // page, posée hors du rendu de l'app).
+  const tutoSqueeze = (h, k) => {
+    const d = document.documentElement;
+    if (!h) { d.classList.remove('pkm-tt-sqz'); d.style.removeProperty('--tt-sq-h'); d.style.removeProperty('--tt-sq'); return; }
+    d.style.setProperty('--tt-sq-h', Math.round(h) + 'px'); d.style.setProperty('--tt-sq', k.toFixed(3)); d.classList.add('pkm-tt-sqz');
+  };
+  const tutoWhole = (st, el) => {
+    const t = TUTO.target;
+    if (!st.whole || !t) return;
+    const main = t.closest('main');
+    if (main) main.scrollTop = 0;
+    const H = el.host.getBoundingClientRect(), pad = st.pad != null ? st.pad : 6, bh = el.box.offsetHeight;
+    const vis = st.kids && t.children[st.kids - 1], vh = vis ? vis.getBoundingClientRect().height : 0;
+    const over = bottom => tutoRect(t, st).bottom + pad + 12 - (H.bottom - bottom - bh);
+    const shrink = o => { if (o > 0 && vh > 0) { const h = Math.max(vh * 0.4, vh - o); tutoSqueeze(h, h / vh); } };
+    // Avec l'anneau, le booster peut perdre jusqu'à 15 % de sa hauteur ; au-delà, la bulle descend.
+    if (TUTO.tab) {
+      const b = Math.max(10, Math.round(H.bottom - tutoTabRing(TUTO.tab).top + 8)), o = over(b);
+      if (o <= vh * 0.15) { el.box.style.bottom = b + 'px'; shrink(o); return; }
+      TUTO.tab = null;
+    }
+    el.box.style.bottom = '10px';
+    shrink(over(10));
+  };
   // Montre une étape : texte qui s'écrit, bulle placée, élément amené et encadré, onglet mis en avant.
   const tutoShow = i => {
     const el = tutoBuild(), st = TSTEPS[i];
     if (!el || !st) return;
     if (el.dots.children.length !== TSTEPS.length) el.dots.innerHTML = TSTEPS.map(() => '<i></i>').join('');
     el.box.setAttribute('aria-label', TUTO.mode === 'ligue' ? 'Explication de Ma ligue' : 'Didacticiel');
+    tutoSqueeze(0);
     TUTO.i = i; TUTO.target = document.querySelector(st.sel); el.last = '';
     if (TUTO.switching) {
       // Après un changement d'onglet, le trou du cadre se rouvre depuis le centre de la nouvelle partie.
@@ -429,8 +470,9 @@
     el.box.style.bottom = '';
     if (st.list && TUTO.tab) { const rg = tutoTabRing(TUTO.tab), H = el.host.getBoundingClientRect(); el.box.style.bottom = Math.max(10, Math.min(92, Math.round(H.bottom - rg.top + 8))) + 'px'; }
     const text = tutoText(st);
-    // Texte en liste (« Le coin des dresseurs ») : une ligne par rubrique, un peu plus petit (avant la mesure de la bulle).
-    el.box.classList.toggle('pkm-tt-list', !!st.list);
+    // Texte en liste (« Le coin des dresseurs ») : une ligne par rubrique, un peu plus petit (avant la mesure de la bulle) ;
+    // « small » : même texte resserré, sans liste (jeux à PK).
+    el.box.classList.toggle('pkm-tt-list', !!(st.list || st.small));
     // Bouton du son : seulement quand le compagnon a une voix (explication de « Ma ligue »).
     el.snd.hidden = !tutoVoiceOn();
     tutoSize(text);
@@ -438,10 +480,11 @@
     // bulle, la bulle descend tout en bas, par-dessus la barre du bas, pour lui laisser la place.
     // (jamais quand l'anneau d'un onglet est affiché : la bulle le cacherait)
     el.box.classList.toggle('pkm-tt-low', !!((st.fit || (st.under && !TUTO.tab)) && TUTO.target && tutoRoom(TUTO.target, 92) < TUTO.target.getBoundingClientRect().height + 2 * (st.pad != null ? st.pad : 6)));
+    tutoWhole(st, el);
     const top = tutoPlace(TUTO.target, st);
     el.box.classList.toggle('pkm-tt-top', top);
     tutoType(text);
-    tutoScroll(TUTO.target, st, top);
+    if (!st.whole) tutoScroll(TUTO.target, st, top);
     tutoTrack();
     cancelAnimationFrame(TUTO.sweep);
     if (st.sweep) setTimeout(() => { if (TUTO.i === i) tutoSweep(TUTO.target); }, 600);
@@ -454,7 +497,7 @@
   };
   const tutoStop = () => {
     clearTimeout(TUTO.typing); clearTimeout(TUTO.fly); clearTimeout(TUTO.hopT); clearTimeout(TUTO.sayT); cancelAnimationFrame(TUTO.raf); cancelAnimationFrame(TUTO.sweep);
-    voiceStop();
+    voiceStop(); tutoSqueeze(0);
     if (TUTO.el && TUTO.el.host) TUTO.el.host.innerHTML = '';
     TUTO.el = null; TUTO.tab = null; TUTO.target = null; TUTO.fr = null; TUTO.i = -1;
   };

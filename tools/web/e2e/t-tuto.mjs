@@ -73,8 +73,14 @@ for (let k = 0; k < 18; k++) {
     const ringHit = ring ? Math.round(Math.max(0, Math.min(f.right, ring.right) - Math.max(f.left, ring.left)) * Math.max(0, Math.min(f.bottom, ring.bottom) - Math.max(f.top, ring.top))) : 0;
     const k6 = document.querySelector('section[aria-label="Mon classeur"] > div'), k6r = k6 && k6.getBoundingClientRect();
     const titleIn = k6r ? k6r.top >= f.top - 1 && k6r.bottom <= f.bottom + 1 : null;
+    // Jeux à PK : le titre « Jeux » et le dessin du booster entiers dans le cadre.
+    const bst = document.querySelector('section[aria-label="Booster PK"]'), pack = bst && bst.children[1] && bst.children[1].getBoundingClientRect();
+    const h1 = [...document.querySelectorAll('h1.pkm-hb-title')].find(e => e.getBoundingClientRect().height > 0), rg = document.createRange();
+    if (h1) rg.selectNodeContents(h1);
+    const ht = h1 && rg.getBoundingClientRect(), inF = r => r.top >= f.top - 1 && r.bottom <= f.bottom + 1 && r.left >= f.left - 1 && r.right <= f.right + 1;
+    const jeuxIn = pack && pack.height > 0 && ht ? (inF(pack) ? '' : 'booster ') + (ht.left >= f.left + 2 && ht.bottom <= f.bottom && ht.top + 6 >= f.top ? '' : 'titre') || 'ok' : null;
     const snd = document.querySelector('.pkm-tt-snd');
-    return { ringOff: ringOff, ringHit: ringHit, titleIn: titleIn, sndHidden: !!(snd && snd.hidden && getComputedStyle(snd).visibility === 'hidden'), rad: parseFloat(getComputedStyle(document.querySelector('.pkm-tt-frame')).borderTopLeftRadius), paGap: paGap, prev: !document.querySelector('.pkm-tt-prev').hidden, t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), fw: Math.round(f.width), clip: clip, radar: radar, off: off, top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
+    return { jeuxIn: jeuxIn, ringOff: ringOff, ringHit: ringHit, titleIn: titleIn, sndHidden: !!(snd && snd.hidden && getComputedStyle(snd).visibility === 'hidden'), rad: parseFloat(getComputedStyle(document.querySelector('.pkm-tt-frame')).borderTopLeftRadius), paGap: paGap, prev: !document.querySelector('.pkm-tt-prev').hidden, t: document.querySelector('.pkm-tt-full').textContent, overlap: Math.round(overlap), fh: Math.round(f.height), fw: Math.round(f.width), clip: clip, radar: radar, off: off, top: document.querySelector('.pkm-tuto-bubble').classList.contains('pkm-tt-top'),
       fresh: /Nouveau/.test(document.querySelector('.pkm-tuto-bubble').innerText), nav: [...document.querySelectorAll('nav button[aria-current="page"]')].map(b => b.getAttribute('aria-label')).join('') };
   });
   if (!info) break;
@@ -88,7 +94,7 @@ ok('cadre jamais sous la bulle (' + steps.map(x => x.overlap).join(',') + ')', s
 ok('valeur, classeur, scan, radar, séries', /valeur/.test(steps[0].t) && /Ici, tu pourras trouver ton classeur/.test(steps[1].t) && /Scan Dropicards/.test(steps[2].t) && /radar des boutiques/.test(steps[3].t) && /toutes les séries et leurs extensions/.test(steps[4].t));
 ok('« Mon classeur » entier dans son cadre', steps[1].titleIn === true);
 ok('coin des dresseurs : 4 rubriques, onglet du coin (' + steps[5].nav + ')', steps[5].nav === 'Le coin des dresseurs' && /4 rubriques/.test(steps[5].t) && ['Ma ligue :', 'Ma vitrine :', 'Parrainer un ami :', 'Calendrier JCC :'].every(w => steps[5].t.indexOf(w) >= 0) && /points de loyauté/.test(steps[5].t));
-ok('jeux à PK juste après (' + steps[6].nav + ')', steps[6].nav === 'Jeux' && /jeux à PK : des jeux quotidiens qui te feront gagner des PK/.test(steps[6].t));
+ok('jeux à PK juste après (' + steps[6].nav + ') : titre « Jeux » et booster entiers dans le cadre (' + steps[6].jeuxIn + ')', steps[6].nav === 'Jeux' && /Ici, tu retrouveras les jeux à PK : ils te permettent de gagner des PK chaque jour/.test(steps[6].t) && /Booster PK/.test(steps[6].t) && /d’autres jeux t’attendent plus bas dans la page/.test(steps[6].t) && steps[6].jeuxIn === 'ok');
 ok('Pokédex en 3 étapes (Pokédex, PA, arbre d’évolution), bulle en haut, sans étiquette « Nouveau » (retirée le 2026-10-31)', steps.every(x => !x.fresh) && [7, 8, 9].every(i => steps[i].top && steps[i].nav === 'Jeux') && /Voici ton Pokédex : tu pourras y voir ton compagnon/.test(steps[7].t) && /points d’Aura/.test(steps[8].t) && /arbre d’évolution/.test(steps[9].t) && !steps.some(x => /Tous les Pokémon|Sa fiche/.test(x.t)));
 ok('anneau de l’onglet centré sur son icône (' + steps.map(x => x.ringOff).filter(v => v !== null).join(',') + ')', steps.filter(x => x.ringOff !== null).length >= 8 && steps.every(x => x.ringOff === null || x.ringOff <= 1));
 ok('cadre jamais sur l’anneau (' + steps.map(x => x.ringHit).join(',') + ')', steps.every(x => x.ringHit === 0));
@@ -99,7 +105,7 @@ ok('PK shop (cadre ' + steps[12].fw + ' × ' + steps[12].fh + ', écart au centr
 ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[13].t));
 ok('voix coupée : aucun son joué, bouton du son caché (' + await page.evaluate(() => window.__snd) + ' son)', steps.every(x => x.sndHidden) && (await page.evaluate(() => window.__snd)) === 0);
 ok('valeur entière dans le cadre (' + steps[0].clip + ' px coupés) ; radar sans ses petites lignes (' + steps[3].radar + ')', steps[0].clip <= 2 && steps[3].radar === 'ok');
-ok('plus de booster ni de pièce présentés', !steps.some(x => /booster|pièce|mini-jeux/i.test(x.t)));
+ok('booster seulement dans l’étape des jeux à PK, pièce jamais', steps.every((x, i) => i === 6 || !/booster|pièce|mini-jeux/i.test(x.t)) && !/pièce/i.test(steps[6].t));
 await page.waitForTimeout(1400);
 const st = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('pkm-collection-v1')); return { tuto: d.tuto, evo: d.evo, buddy: d.buddy }; });
 const slot = await page.evaluate(() => getComputedStyle(document.querySelector('button[aria-label^="Compagnon : "] img')).visibility);

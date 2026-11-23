@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-22 — Didacticiel : étape des jeux à PK refaite (porteur)
+
+- **Demande** : « une explication qui encadre tout : le terme Jeux et entièrement le booster », et dire en substance « ici tu retrouveras les jeux à PK qui te font gagner des PK chaque jour, par exemple le booster, mais il y a d'autres jeux en bas de la page » (reformulation laissée à Claude).
+- **Fait** : phrase « Ici, tu retrouveras les jeux à PK : ils te permettent de gagner des PK chaque jour. Par exemple ici, le Booster PK à ouvrir, mais d'autres jeux t'attendent plus bas dans la page ! » ; cadre du titre « Jeux » jusqu'au bas du dessin du booster (onglets compris) ; bulle resserrée ; grand écran : bulle au-dessus de l'anneau de la manette ; petit écran : bulle tout en bas (sans l'anneau) et dessin du booster réduit le temps de l'étape, pour que tout tienne dans le cadre ; vérifié à 390 × 844, 375 × 667, 360 × 640 et 390 × 664 ; cache v274.
+
 ## 2026-11-22 — Didacticiel de départ retouché (porteur)
 
 - **Demandes** : voix du compagnon supprimée ; « Mon classeur » barré (titre hors du cadre) ; anneau mal centré sur l'icône des séries et sur la manette ; cadre des PK rectangulaire (ovale comme celui des PA) ; présenter « Le coin des dresseurs » et ses 4 rubriques (textes du porteur), avec l'anneau bien centré, puis la page des jeux à PK ; arbre d'évolution : 2 rectangles qui se chevauchaient ; « grâce à tes PK et PA gagnés » ; plus de « À toi de jouer… » à la fin.

@@ -935,6 +935,9 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
    aussitôt), et il reprend sa taille à l'étape suivante. */
 .pkm-tt-list .pkm-tt-mon { width: 70px; height: 73px; margin: -30px 0 -4px; }
 .pkm-tt-list .pkm-tt-mon img { width: 70px; height: 73px; }
+/* Didacticiel, jeux à PK sur un petit écran (2026-11-22) : dessin du booster réduit le temps de l'étape (tutoWhole). */
+.pkm-tt-sqz section[aria-label="Booster PK"] > div:nth-child(2) { height: var(--tt-sq-h) !important; }
+.pkm-tt-sqz section[aria-label="Booster PK"] > div:nth-child(2) > div { zoom: var(--tt-sq); }
 .pkm-tt-snd svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .pkm-tt-dots { flex: 1; min-width: 0; display: flex; justify-content: center; gap: 4px; }
 .pkm-tt-dots i { width: 6px; height: 6px; border-radius: 3px; background: #2A3A5C; transition: width 0.3s, background 0.3s; }
@@ -4963,6 +4966,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=42f832e5"></script>
+<script src="app.js?v=b90d5faa"></script>
 </body>
 </html>
