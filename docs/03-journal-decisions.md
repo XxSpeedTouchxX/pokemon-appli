@@ -15,7 +15,7 @@
   - pour l'onglet choisi : « C'est quoi ? », « Comment les gagner ? », « À quoi servent-ils ? », « Bon à savoir » ; chiffres lus dans les modules qui les appliquent (délais du grade, gains, prix du PK shop, missions PL) ; « Recharger mes PA » en haut de l'onglet PA (jamais dans l'app des stores ni quand les achats sont fermés) ;
   - « Règles complètes des PK et PA » en bas.
 - **Entrées** : bandeau sous « Valeur de toute ma collection » (3 logos, « Comment gagner des points ? », pastille des gains prêts, il brille tant que la page n'a jamais été ouverte) ; soldes de PK et de PA de l'en-tête (« Tes PA du jour » reste la première action quand des PA attendent) ; « Comment marchent les PL ? » dans Ma ligue › Mes missions ; nouvelle étape du didacticiel avant la dernière (15 étapes) ; touche Retour du téléphone.
-- **Tests** : `t-points.mjs` (26 vérifications) ; `t-pk`, `t-pa`, `t-paday`, `t-pashop`, `t-pa-pay`, `t-sheets`, `t-legal`, `t-retouches12`, `t-tuto` adaptés. Cache v280.
+- **Tests** : `t-points.mjs` (26 vérifications) ; `t-pk`, `t-pa`, `t-paday`, `t-pashop`, `t-pa-pay`, `t-sheets`, `t-legal`, `t-retouches12`, `t-tuto` adaptés. Cache v280. Accueil entièrement plié (courbe et haut du classeur repliés) : bandeau caché, la valeur reste suivie des cartes (décision du 2026-11-15 ; `t-binder`), cache v281.
 
 ---
 

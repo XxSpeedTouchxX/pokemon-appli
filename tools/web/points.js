@@ -181,7 +181,8 @@
     clearTimeout(ptsWake);
     const w = ptsNextReady(this, s);
     if (w > 0 && w < 6 * 3600000) ptsWake = setTimeout(() => { if (this.st().screen === 'home') this.setState({ ptsNow: Date.now() }); }, w + 800);
-    return { n: String(n), hasN: n > 0, cls: 'pkm-pts-home pkm-dark' + (seen ? '' : ' pkm-pts-home-new'),
+    // Accueil plié (courbe et haut du classeur repliés) : la valeur reste suivie des cartes, sans le bandeau.
+    return { show: !(s.hvFold && s.hkFold), n: String(n), hasN: n > 0, cls: 'pkm-pts-home pkm-dark' + (seen ? '' : ' pkm-pts-home-new'),
       sub: n ? n + ' gain' + (n > 1 ? 's' : '') + ' prêt' + (n > 1 ? 's' : '') + ' aujourd’hui' : 'PK, PA et PL expliqués simplement',
       aria: 'Comment gagner des points ? PK, PA et PL expliqués' + (n ? ', ' + n + ' gain' + (n > 1 ? 's' : '') + ' prêt' + (n > 1 ? 's' : '') : ''),
       open: () => this.ptsOpen(n && (typeof paPending === 'function' && paPending(s)) ? 'pa' : 'pk') };
@@ -191,6 +192,6 @@
   ptsProto.renderVals = function () {
     const r = ptsBaseRender.call(this), s = this.st();
     r.pts = this.vPoints(s);
-    r.ptsh = s.screen === 'home' ? this.vPointsHome(s) : { hasN: false };
+    r.ptsh = s.screen === 'home' ? this.vPointsHome(s) : { show: false, hasN: false };
     return r;
   };
