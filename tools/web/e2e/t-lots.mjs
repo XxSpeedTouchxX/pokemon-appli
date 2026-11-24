@@ -51,7 +51,7 @@ ok('tickets : étoiles de rareté (2 argentées, 1 dorée, 2 dorées)', (await t
 await tiles.first().click(); await page.waitForTimeout(800);
 let sheet = page.locator('.pkm-tks-sheet');
 t = N(await sheet.innerText());
-ok('fiche Bronze : « Une carte ultra rare », « 1 carte ce mois-ci », « Chaque mois, le 1er à 20 h »', /Une carte ultra rare/.test(t) && /1 carte ce mois-ci/.test(t) && /Chaque mois, le 1er à 20 h/.test(t));
+ok('fiche Bronze : « Une carte ultra rare », « 1 carte ce mois-ci », « Chaque mois », « Le prochain tirage arrive bientôt »', /Une carte ultra rare/.test(t) && /1 carte ce mois-ci/.test(t) && /Chaque mois/.test(t) && /Le prochain tirage arrive bientôt/.test(t) && !/1er à 20 h/.test(t));
 ok('sans cartes annoncées : message, pas d’achat', /arrivent très bientôt/.test(t) && (await sheet.locator('button:has-text("Acheter un ticket")').count()) === 0);
 await sheet.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(800);
 // Cartes chargées (comme le panneau Admin le ferait sur l'appareil).
@@ -73,7 +73,7 @@ ok('ticket acheté pour Mew-ex', st.n === 1 && st.mine['sv03.5-200'] === 1);
 sheet = page.locator('.pkm-tks-sheet');
 ok('fiche : « Ton choix » sur Mew-ex', /Ton choix/.test(N(await sheet.locator('.pkm-tkc').nth(1).innerText())));
 t = N(await sheet.innerText());
-ok('un ticket par mois : « Ticket déjà acheté », prochain ticket le 1er à 20 h, compte à rebours, plus de bouton d’achat', /Ticket déjà acheté/.test(t) && /Prochain ticket disponible le 1er \S+ à 20 h/.test(t) && (await sheet.locator('.pkm-lotwait-ok .pkm-cdx').count()) === 1 && (await sheet.locator('button:has-text("Acheter un ticket")').count()) === 0);
+ok('un ticket par mois : « Ticket déjà acheté », prochain ticket juste après le tirage, sans compte à rebours, plus de bouton d’achat', /Ticket déjà acheté/.test(t) && /Prochain ticket disponible juste après le tirage/.test(t) && (await sheet.locator('.pkm-lotwait-ok .pkm-cdx').count()) === 0 && (await sheet.locator('button:has-text("Acheter un ticket")').count()) === 0);
 const tag = sheet.locator('.pkm-lotwait-ok b.pkm-tks-boughttag');
 ok('« ✓ Ticket déjà acheté » en pastille verte (couleur du badge « acheté »)', (await tag.count()) === 1 && /Ticket déjà acheté/.test(await tag.innerText()) && (await tag.evaluate(e => getComputedStyle(e).backgroundColor)) === 'rgb(94, 224, 207)');
 await tag.scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('lots-ticket-deja-achete.png') });

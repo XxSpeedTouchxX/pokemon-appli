@@ -98,11 +98,9 @@ await page.locator('.pkm-lotfx button:has-text("Super !")').click(); await page.
 ok('« Super ! » ferme l’écran', (await page.locator('.pkm-lotfx').count()) === 0);
 await page.locator('button[aria-label^="Ticket Bronze"]').first().click(); await page.waitForTimeout(600);
 const cd = page.locator('.pkm-tks-cd');
-const s1 = await cd.locator('[data-u="s"]').innerText().catch(() => '');
-ok('fiche du ticket : compte à rebours (jours, heures, min, s) et date du tirage', (await cd.count()) === 1 && /jours/.test(await cd.innerText()) && /Tirage le [a-z]+ 1 [a-zéû]+ à 20 h/.test(await cd.innerText()));
-await page.waitForFunction(v => { const e = document.querySelector('.pkm-tks-cd [data-u="s"]'); return e && e.textContent !== v; }, s1, { timeout: 5000 }).catch(() => {});
-const s2 = await cd.locator('[data-u="s"]').innerText().catch(() => '');
-ok('les secondes défilent (' + s1 + ' → ' + s2 + ')', s1 !== s2);
+// Plus de compte à rebours (2026-11-24, porteur) : « Le prochain tirage arrive bientôt », sans chiffres, barre ni date.
+ok('fiche du ticket : « Le prochain tirage arrive bientôt » à la place du compte à rebours', (await cd.count()) === 1 && /Le prochain tirage arrive bientôt/.test(await cd.innerText()) && (await cd.locator('[data-u="s"]').count()) === 0);
+ok('ni barre ni date du tirage', (await cd.locator('.pkm-tks-cd-bar').count()) === 0 && !/Tirage le /.test(await cd.innerText()));
 await page.screenshot({ path: shot('locks-ticket-decompte.png') });
 ok('fiche du ticket : « Lot à gagner », « Lots », « Tirage »', /Lot à gagner/.test(await page.locator('.pkm-tks-lines').innerText()) && /Lots/.test(await page.locator('.pkm-tks-lines').innerText()) && /Tirage/.test(await page.locator('.pkm-tks-lines').innerText()));
 ok('fiche du ticket : plus de ligne « Prochain tirage » (le compte à rebours suffit)', !/Prochain tirage\n/.test(await page.locator('.pkm-tks-lines').innerText()) && !/Prochain tirage/.test(await page.locator('.pkm-tks-lines').innerText()));

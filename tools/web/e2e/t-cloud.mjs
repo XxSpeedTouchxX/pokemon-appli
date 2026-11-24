@@ -388,7 +388,7 @@ const shopTxt = await page.locator('main').innerText();
 ok('PK shop : 3 tickets (500, 1 500, 5 000 PK) ; achats 7 500, 25 000, 50 000 PK', ['Booster de la série du moment', 'Item rare au choix', 'ETB 30 ans'].every(t => shopTxt.includes(t))
   && ['500PK', '1500PK', '5000PK', '7500PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)));
 await page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk').nth(0).click(); await page.waitForTimeout(400);
-ok('compte à 300 PK : fiche du ticket Bronze, « Il te manque 200 PK », date du tirage du serveur', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()) && /Tirage le [a-z]+ \d+ [a-zéû]+ à \d+ h/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
+ok('compte à 300 PK : fiche du ticket Bronze, « Il te manque 200 PK », « Le prochain tirage arrive bientôt »', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()) && /Le prochain tirage arrive bientôt/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
 await page.screenshot({ path: shot('cloud-shop.png'), fullPage: false });
 await page.goto(E2E + '/?start=market' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);

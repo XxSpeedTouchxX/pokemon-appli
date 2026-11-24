@@ -1873,12 +1873,15 @@
 <div class="pkm-pas-wrap pkm-tks-wrap"><button type="button" aria-label="Fermer" onClick="{{ pks.sheet.close }}" class="pkm-pas-scrim"></button>
 <section aria-label="{{ pks.sheet.name }}" role="dialog" aria-modal="true" class="pkm-dark pkm-pas-sheet pkm-tks-sheet">
 <div class="pkm-tks-top"><span class="{{ pks.sheet.ticketCls }}" aria-hidden="true"><span class="pkm-shop-ticket-in">{{ pks.sheet.tag }}</span></span><div><h2>{{ pks.sheet.name }}</h2><b class="pkm-shop-price"><img src="img/brand/pk.svg" alt="" width="24" height="24">{{ pks.sheet.priceN }}<small>PK</small></b></div></div>
-<div class="{{ pks.sheet.cdCls }}" data-end="{{ pks.sheet.cdEnd }}" data-cycle="{{ pks.sheet.cdCycle }}" role="timer" aria-label="{{ pks.sheet.cdAria }}">
+<div class="{{ pks.sheet.cdCls }}" data-end="{{ pks.sheet.cdEnd }}" data-cycle="{{ pks.sheet.cdCycle }}" role="{{ pks.sheet.cdRole }}" aria-label="{{ pks.sheet.cdAria }}">
+<sc-if value="{{ pks.sheet.soon }}" hint-placeholder-val="{{ false }}"><span class="pkm-tks-cd-h">Tirage au sort</span><b class="pkm-tks-soon">{{ pks.sheet.soonText }}</b></sc-if>
+<sc-if value="{{ pks.sheet.cdShow }}" hint-placeholder-val="{{ true }}">
 <span class="pkm-tks-cd-h">Prochain tirage dans</span>
 <div class="pkm-tks-cd-row" aria-hidden="true"><span><b data-u="d">{{ pks.sheet.cdD }}</b><small>jours</small></span><i>:</i><span><b data-u="h">{{ pks.sheet.cdH }}</b><small>heures</small></span><i>:</i><span><b data-u="m">{{ pks.sheet.cdM }}</b><small>min</small></span><i>:</i><span><b data-u="s">{{ pks.sheet.cdS }}</b><small>s</small></span></div>
 <div class="pkm-tks-cd-bar" aria-hidden="true"><i style="{{ pks.sheet.cdW }}"></i></div>
 <span class="pkm-tks-cd-date"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>{{ pks.sheet.cdDate }}</span>
 <sc-if value="{{ pks.sheet.cdLast }}" hint-placeholder-val="{{ false }}"><span class="pkm-tks-cd-last">Dernière ligne droite : le tirage a lieu dans moins de 24 h !</span></sc-if>
+</sc-if>
 </div>
 <div class="pkm-tks-lines"><div><span>Lot à gagner</span><b>{{ pks.sheet.prize }} <span class="{{ pks.sheet.starsCls }}" role="img" aria-label="{{ pks.sheet.starsText }}"><sc-for list="{{ pks.sheet.stars }}" as="sst2" hint-placeholder-count="2"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 2.6l2.8 6.1 6.6.7-5 4.5 1.4 6.6L12 17.2l-5.8 3.3 1.4-6.6-5-4.5 6.6-.7z"></path></svg></sc-for></span></b></div><div><span>Lots</span><b>{{ pks.sheet.value }}</b></div><div><span>Tirage</span><b>{{ pks.sheet.every }}</b></div></div>
 <section aria-label="{{ pks.sheet.cardsHead }}" class="pkm-tkcs">
@@ -1900,7 +1903,7 @@
 <sc-if value="{{ pks.sheet.redoNeed }}" hint-placeholder-val="{{ false }}"><button type="button" aria-disabled="true" class="pkm-tks-buy pkm-tks-buy-off">{{ pks.sheet.redoNeedText }}</button></sc-if>
 <sc-if value="{{ pks.sheet.redoCan }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ pks.sheet.redoGo }}" class="pkm-tks-buy">{{ pks.sheet.redoLabel }}</button></sc-if></div></sc-if>
 <sc-if value="{{ pks.sheet.bought }}" hint-placeholder-val="{{ false }}"><div class="pkm-lotwait pkm-lotwait-ok"><b class="pkm-tks-boughttag">✓ {{ pks.sheet.boughtTitle }}</b><span>{{ pks.sheet.boughtText }}</span>
-<div class="pkm-cdx" data-end="{{ pks.sheet.boughtCd.end }}" role="timer" aria-label="{{ pks.sheet.boughtCd.aria }}"><span><b data-u="d">{{ pks.sheet.boughtCd.d }}</b><small>j</small></span><i>:</i><span><b data-u="h">{{ pks.sheet.boughtCd.h }}</b><small>h</small></span><i>:</i><span><b data-u="m">{{ pks.sheet.boughtCd.m }}</b><small>min</small></span><i>:</i><span><b data-u="s">{{ pks.sheet.boughtCd.s }}</b><small>s</small></span></div></div></sc-if>
+<sc-if value="{{ pks.sheet.cdShow }}" hint-placeholder-val="{{ true }}"><div class="pkm-cdx" data-end="{{ pks.sheet.boughtCd.end }}" role="timer" aria-label="{{ pks.sheet.boughtCd.aria }}"><span><b data-u="d">{{ pks.sheet.boughtCd.d }}</b><small>j</small></span><i>:</i><span><b data-u="h">{{ pks.sheet.boughtCd.h }}</b><small>h</small></span><i>:</i><span><b data-u="m">{{ pks.sheet.boughtCd.m }}</b><small>min</small></span><i>:</i><span><b data-u="s">{{ pks.sheet.boughtCd.s }}</b><small>s</small></span></div></sc-if></div></sc-if>
 <sc-if value="{{ pks.sheet.miss }}" hint-placeholder-val="{{ false }}"><p class="pkm-tks-miss">{{ pks.sheet.missText }}</p></sc-if>
 <sc-if value="{{ pks.sheet.needCard }}" hint-placeholder-val="{{ false }}"><button type="button" aria-disabled="true" class="pkm-tks-buy pkm-tks-buy-off">{{ pks.sheet.needCardText }}</button></sc-if>
 <sc-if value="{{ pks.sheet.can }}" hint-placeholder-val="{{ false }}">

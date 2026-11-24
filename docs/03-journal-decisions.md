@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-24 (suite 4) — Tickets du PK shop : « Le prochain tirage arrive bientôt »
+
+- **Demande** : « Dans les cartes à gagner grâce aux tickets, je ne veux pas que tu mettes le décompte, mais tu marqueras "Le prochain tirage arrive bientôt", afin de faire un peu patienter les gens avant qu'ils arrivent. »
+- **Fait** : fiche de chaque ticket (Bronze, Argent, Or) sans compte à rebours, sans barre ni date du tirage ; à la place, « Tirage au sort » et « Le prochain tirage arrive bientôt » en grand, qui pulse doucement. Ticket déjà acheté : plus de compte à rebours, « Prochain ticket disponible juste après le tirage ».
+- **Choix par défaut, à confirmer** : la mention « le 1er à 20 h » est aussi retirée des textes des tickets (rubrique, ligne « Chaque mois », explication du ticket, message « Ticket déjà acheté »), pour ne jamais afficher de date tant que les tirages n'ont pas commencé.
+- **Inchangé** : achats directs (« Plus que N ce mois-ci », « Épuisé » et son compte à rebours), règles des tickets, serveur.
+- **Pour rouvrir le décompte** : `SHOP_DRAW_SOON = false` dans `tools/web/pkshop.js` (Claude le fait sur demande). Tests `t-games`, `t-locks`, `t-lots`, `t-cloud`. Cache v286.
+
 ## 2026-11-24 (suite 3) — Prix eBay : estimation expliquée, pas de contournement, guide « Marketplace Insights »
 
 - **Demande** : « rectifier le prix eBay » de Méga-Rayquaza-ex 138 (Règne Delta, illustration spéciale) : 301,61 € affichés, environ 420 € dans les ventes réussies d'eBay ; puis « contourner le robot eBay », puis « copier les prix de PokéItem », avec ou sans coefficient de 1,02.

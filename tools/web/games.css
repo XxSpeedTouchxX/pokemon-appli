@@ -1143,8 +1143,10 @@ html:has(.pkm-lockw-wrap), html:has(.pkm-lockw-wrap) body { overflow: hidden; ov
 .pkm-tks-cd-bar i { display: block; height: 100%; border-radius: 999px; background: var(--cd); transition: width 0.9s linear; }
 .pkm-tks-cd-date { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #E2E8F5; }
 .pkm-tks-cd-date svg { fill: none; stroke: var(--cd); stroke-width: 2; stroke-linecap: round; }
+.pkm-tks-soon { display: block; padding: 4px 6px 2px; font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 800; line-height: 1.25; text-align: center; color: #FFFFFF; animation: pkmTksSoon 2.4s ease-in-out infinite; }
+@keyframes pkmTksSoon { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
 .pkm-tks-cd-last { font-size: 12.5px; font-weight: 800; color: #FF9A9A; animation: pkmNewTheme 1.6s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .pkm-tks-cd-row > i, .pkm-tks-cd-last { animation: none; } .pkm-tks-cd-bar i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .pkm-tks-cd-row > i, .pkm-tks-cd-last, .pkm-tks-soon { animation: none; } .pkm-tks-cd-bar i { transition: none; } }
 
 /* Fiche d'un grade (2026-11-07, porteur) : PK gagnés au total (achats non déduits), progression, « Nouveau ». */
 .pkm-gr-prog { width: 100%; box-sizing: border-box; margin-top: 6px; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(255, 255, 255, 0.08); text-align: left; }

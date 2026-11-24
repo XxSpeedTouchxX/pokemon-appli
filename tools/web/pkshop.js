@@ -282,7 +282,7 @@
     const patch = {};
     if (item.kind === 'ticket') {
       if (!this.shopPrizes(s, id).some(c => c.id === choice)) return;
-      if (this.shopBought(s, id)) { this.setState({ toast: 'Ticket déjà acheté : prochain ticket disponible ' + shopWhen(this.shopDrawAt(s)), shopAsk: null }); return; }
+      if (this.shopBought(s, id)) { this.setState({ toast: SHOP_DRAW_SOON ? 'Ticket déjà acheté : prochain ticket disponible juste après le prochain tirage' : 'Ticket déjà acheté : prochain ticket disponible ' + shopWhen(this.shopDrawAt(s)), shopAsk: null }); return; }
       const key = shopDrawKey(this.shopDrawAt(s)), picks = Object.assign({}, s.shopPicks || {}), d = Object.assign({}, picks[key] || {}), mine = Object.assign({}, d[id] || {});
       mine[choice] = (mine[choice] || 0) + 1; d[id] = mine; picks[key] = d; patch.shopPicks = picks;
     } else {
@@ -471,6 +471,10 @@
   // écoulé (2 semaines, 1 mois, 2 mois) et « Dernière ligne droite » le dernier jour. Les chiffres sont mis à jour chaque
   // seconde directement dans la page (pas de nouveau rendu de l'app).
   const SHOP_CYCLE_MS = { '2w': 14 * 86400000, '1m': 30 * 86400000, '2m': 61 * 86400000 };
+  // Tirages « bientôt » (2026-11-24, porteur : « je ne veux pas le décompte, mets "Le prochain tirage arrive bientôt"
+  // afin de faire un peu patienter les gens ») : fiche d'un ticket sans compte à rebours, sans barre ni date du tirage ;
+  // aucune date de tirage dans les textes. Remettre false quand les tirages commencent.
+  const SHOP_DRAW_SOON = true;
   const shopCd = end => {
     const ms = Math.max(0, end - Date.now()), d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24, m = Math.floor(ms / 60000) % 60, sec = Math.floor(ms / 1000) % 60;
     return { ms: ms, d: String(d), h: String(h).padStart(2, '0'), m: String(m).padStart(2, '0'), s: String(sec).padStart(2, '0') };
@@ -535,17 +539,18 @@
       return {
         cdEnd: String(end), cdCycle: String(cyc), cdD: cd.d, cdH: cd.h, cdM: cd.m, cdS: cd.s, cdCls: 'pkm-tks-cd pkm-tks-cd-' + it.tier,
         cdW: 'width: ' + Math.min(100, Math.max(0, (1 - cd.ms / cyc) * 100)).toFixed(2) + '%', cdDate: 'Tirage le ' + draw,
-        cdLast: cd.ms < 86400000, cdAria: 'Temps restant avant le tirage : ' + cd.d + ' jours, ' + Number(cd.h) + ' heures et ' + Number(cd.m) + ' minutes. Tirage le ' + draw + '.',
+        cdLast: cd.ms < 86400000, cdAria: SHOP_DRAW_SOON ? 'Le prochain tirage arrive bientôt' : 'Temps restant avant le tirage : ' + cd.d + ' jours, ' + Number(cd.h) + ' heures et ' + Number(cd.m) + ' minutes. Tirage le ' + draw + '.',
+        cdShow: !SHOP_DRAW_SOON, soon: SHOP_DRAW_SOON, cdRole: SHOP_DRAW_SOON ? 'status' : 'timer', soonText: 'Le prochain tirage arrive bientôt',
         open: true, name: it.name, tag: it.tag, ticketCls: 'pkm-shop-ticket pkm-shop-ticket-xl pkm-shop-t-' + it.tier, prize: it.prize, value: '1 carte ce mois-ci',
         stars: stars(it), starsCls: it.starsCls, starsText: it.starsText,
-        every: it.every, draw: draw, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note,
-        use: 'Ce ticket te donne une chance de gagner la carte que tu as choisie ci-dessus, au tirage du ' + draw + '. Un seul ticket par catégorie et par mois, un seul gagnant par tirage. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit sa carte chez lui, après vérification de son identité.',
+        every: SHOP_DRAW_SOON ? it.every.replace(/, le 1er à 20 h$/, '') : it.every, draw: draw, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note,
+        use: 'Ce ticket te donne une chance de gagner la carte que tu as choisie ci-dessus, ' + (SHOP_DRAW_SOON ? 'au prochain tirage' : 'au tirage du ' + draw) + '. Un seul ticket par catégorie et par mois, un seul gagnant par tirage. Un ticket ne sert que pour ce tirage ; le gagnant est prévenu par e-mail et reçoit sa carte chez lui, après vérification de son identité.',
         // Cartes à gagner ce mois-ci.
         cardsHead: prizes.length > 1 ? 'Choisis ta carte' : 'La carte à gagner',
         cardsSub: redo ? 'La carte que tu avais choisie a été retirée du tirage par Dropicards. Ton ticket reste valable : choisis une autre carte.'
           : bought ? 'Ton ticket du mois participe au tirage de la carte marquée « Ton choix ».' : prizes.length > 1 ? 'Touche la carte que tu veux gagner, puis achète ton ticket. Un seul ticket par mois : choisis bien !' : 'Ton ticket participe au tirage de cette carte.',
         hasCards: prizes.length > 0, noCards: prizes.length === 0,
-        noCardsText: 'Les cartes du tirage du ' + draw + ' arrivent très bientôt. Reviens vite pour choisir la tienne !',
+        noCardsText: (SHOP_DRAW_SOON ? 'Les cartes du prochain tirage' : 'Les cartes du tirage du ' + draw) + ' arrivent très bientôt. Reviens vite pour choisir la tienne !',
         // Une seule carte (2026-11-12, porteur) : plus grande, au centre, et un appui l'agrandit en plein écran. Avec
         // plusieurs cartes, un appui la choisit ; la loupe l'agrandit.
         gridCls: 'pkm-tkc-grid' + (prizes.length === 1 ? ' pkm-tkc-one' : ''),
@@ -566,7 +571,7 @@
         // Ticket du mois déjà pris : « Ticket déjà acheté », le prochain au tirage suivant, compte à rebours.
         redo: redo, redoTitle: 'Carte à rechoisir', redoCan: redo && !!pick, redoNeed: redo && !pick, redoNeedText: 'Touche la carte que tu veux gagner',
         redoLabel: pick ? 'Choisir « ' + pick.name + ' »' : '', redoGo: () => pick && this.shopRechoose(it.id, pick),
-        bought: bought, boughtTitle: 'Ticket déjà acheté', boughtText: 'Prochain ticket disponible ' + shopWhen(drawAt) + ', juste après le tirage.', boughtCd: shopCdView(drawAt),
+        bought: bought, boughtTitle: 'Ticket déjà acheté', boughtText: SHOP_DRAW_SOON ? 'Prochain ticket disponible juste après le tirage.' : 'Prochain ticket disponible ' + shopWhen(drawAt) + ', juste après le tirage.', boughtCd: shopCdView(drawAt),
         can: can, needCard: open && !bought && pk >= it.price && !pick && prizes.length > 0, needCardText: 'Choisis d’abord ta carte',
         miss: open && !bought && pk < it.price, missText: 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
         ask: ask, idle: !ask, buyLabel: 'Acheter un ticket · ' + price,
@@ -578,7 +583,7 @@
     const month = this.shopMonthBuy(s);
     return {
       pk: pk.toLocaleString('fr-FR'),
-      ticketsHead: 'Tickets du tirage au sort', ticketsSub: 'Un tirage par mois pour chaque ticket, le 1er à 20 h, avec une carte à gagner. Un ticket de chaque catégorie par mois : touche un ticket pour choisir ta carte.',
+      ticketsHead: 'Tickets du tirage au sort', ticketsSub: 'Un tirage par mois pour chaque ticket' + (SHOP_DRAW_SOON ? '' : ', le 1er à 20 h') + ', avec une carte à gagner. Un ticket de chaque catégorie par mois : touche un ticket pour choisir ta carte.',
       tickets: tks.map(it => {
         const open = gi >= it.minGrade, n = this.shopBought(s, it.id);
         return {

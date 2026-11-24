@@ -98,7 +98,7 @@ await page.screenshot({ path: shot('pkshop-verrou.png') });
 await lw.locator('button:has-text("Compris")').click(); await page.waitForTimeout(300);
 await tks.locator('.pkm-shop-tk').nth(1).click(); await page.waitForTimeout(500);
 const sheet = page.locator('section[aria-label="Ticket Argent"]');
-ok('fiche du ticket Argent : carte AR, 1 lot, chaque mois le 1er à 20 h, prochain tirage, à quoi il sert', /Une carte AR/.test(await sheet.innerText()) && /1 carte ce mois-ci/.test(await sheet.innerText()) && /Chaque mois, le 1er à 20 h/.test(await sheet.innerText()) && /Tirage le [a-z]+ 1 [a-zéû]+ à 20 h/.test(await sheet.innerText()) && /À quoi sert ce ticket/.test(await sheet.innerText()));
+ok('fiche du ticket Argent : carte AR, 1 lot, chaque mois, « Le prochain tirage arrive bientôt » sans date (2026-11-24), à quoi il sert', /Une carte AR/.test(await sheet.innerText()) && /1 carte ce mois-ci/.test(await sheet.innerText()) && /Chaque mois/.test(await sheet.innerText()) && !/1er à 20 h|Tirage le /.test(await sheet.innerText()) && /Le prochain tirage arrive bientôt/.test(await sheet.innerText()) && /À quoi sert ce ticket/.test(await sheet.innerText()));
 await sheet.locator('button:has-text("Déverrouillé au grade")').click(); await page.waitForTimeout(500);
 ok('ticket verrouillé : « pour avoir accès à cette loterie »', /grade Collectionneur pour avoir accès à cette loterie/.test(await lw.innerText()));
 await lw.locator('button:has-text("Compris")').click(); await sheet.locator('button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
