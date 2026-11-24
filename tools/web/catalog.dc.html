@@ -2614,8 +2614,8 @@ PKCOUNTER
 <div class="pkm-pg-pin">
 <section aria-label="{{ pg.seasonLabel }}" class="pkm-pg-season pkm-dark">
 <span class="pkm-pg-sbadge"><img src="img/rank/1.svg" alt="" width="34" height="34"><b>{{ pg.seasonN }}</b></span>
-<span class="pkm-pg-stext"><b>{{ pg.left }}</b><span>{{ pg.dates }} · 60 jours</span></span>
-<i class="pkm-pg-sbar" aria-hidden="true"><i style="{{ pg.barW }}"></i></i>
+<span class="pkm-pg-stext"><b>{{ pg.left }}</b><span>{{ pg.dates }}</span></span>
+<sc-if value="{{ pg.hasBar }}" hint-placeholder-val="{{ true }}"><i class="pkm-pg-sbar" aria-hidden="true"><i style="{{ pg.barW }}"></i></i></sc-if>
 </section>
 <div role="tablist" aria-label="Ma ligue" class="pkm-pg-tabs"><sc-for list="{{ pg.tabs }}" as="pgt" hint-placeholder-count="2"><button type="button" role="tab" aria-selected="{{ pgt.on }}" onClick="{{ pgt.pick }}" class="{{ pgt.cls }}">{{ pgt.label }}</button></sc-for></div>
 </div>

@@ -32,8 +32,10 @@
       starsText: 'Une étoile dorée', price: 1500, minGrade: 2, cycle: '1m', every: 'Chaque mois, le 1er à 20 h', everyShort: 'chaque mois', note: 'Carte AR, illustration rare (une étoile dorée). Les cartes à gagner changent chaque mois.' },
     { id: 'ticket-or', kind: 'ticket', tier: 'or', tag: 'OR', name: 'Ticket Or', prize: 'Une carte ALT', lot: 'une carte ALT', rarity: 'Illustration spéciale rare', starsN: 2, starsCls: 'pkm-shop-stars pkm-shop-stars-gold',
       starsText: 'Deux étoiles dorées', price: 5000, minGrade: 4, cycle: '1m', every: 'Chaque mois, le 1er à 20 h', everyShort: 'chaque mois', note: 'Carte ALT, illustration spéciale rare (deux étoiles dorées). Les cartes à gagner changent chaque mois.' },
-    { id: 'achat-booster', kind: 'lot', name: 'Booster de la série du moment', prize: 'Booster 30 ans, envoyé chez toi', value: 'Valeur : 5 à 15 €', price: 7500, minGrade: 0,
-      img: 'img/shop-booster-30-anniversaire.webp', imgAlt: 'Booster du 30ᵉ anniversaire Pokémon',
+    { id: 'achat-booster', kind: 'lot', name: 'Booster de la série du moment', prize: 'Booster Règne Delta, envoyé chez toi', value: 'Valeur : 5 à 15 €', price: 7500, minGrade: 0,
+      // Booster Règne Delta au Méga-Rayquaza (2026-11-24, porteur) à la place du booster des 30 ans : visuel officiel du
+      // kit presse de The Pokémon Company (version anglaise, comme l'ancien), fond rendu transparent.
+      img: 'img/shop-booster-regne-delta.webp', imgAlt: 'Booster Méga-Évolution Règne Delta avec Méga-Rayquaza',
       note: 'Achat direct, sans tirage.', head: 'Achat direct', headSub: 'Sans tirage : l’article est pour toi. Quantités limitées, réassort le 1er de chaque mois à 20 h ; 1 achat direct par compte et par mois, pour donner sa chance à tout le monde. Envoi après vérification de ton identité.' },
     { id: 'achat-rare', kind: 'lot', name: 'Item rare au choix', prize: 'Coffret, classeur… de la série du moment, envoyé chez toi', value: 'Valeur : 20 à 60 €', price: 25000, minGrade: 2,
       img: 'img/products/30th-celebration-binder-collection.webp', imgAlt: 'Coffret classeur 30ᵉ anniversaire Pokémon', wide: true, choices: SHOP_RARE,

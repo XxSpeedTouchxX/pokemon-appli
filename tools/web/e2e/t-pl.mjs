@@ -42,7 +42,7 @@ const ABORT = /fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex
   ok('2 onglets : « Classement et récompenses » et « Mes missions » (« Échanges » retiré le 2026-11-21)', tabs.length === 2 && /Classement et récompenses/.test(tabs[0]) && /Mes missions/.test(tabs[1]));
   ok('onglet du classement ouvert d’abord', (await page.locator('.pkm-pg-tab-on').innerText()) === tabs[0] && (await page.locator('section.pkm-pg-card').count()) === 1);
   const rw = N(await page.locator('section[aria-label="Lots de la saison"]').innerText());
-  ok('lots : ETB, coffret, 2 boosters, Premium ou ticket Or / Argent / Bronze', /1ʳᵉ place Un ETB des 30 ans/.test(rw) && /2ᵉ place Un coffret poster des 30 ans/.test(rw) && /3ᵉ place 2 boosters des 30 ans/.test(rw)
+  ok('lots : ETB, coffret, 2 boosters, Premium ou ticket Or / Argent / Bronze', /1ʳᵉ place Un ETB des 30 ans/.test(rw) && /2ᵉ place Un coffret poster des 30 ans/.test(rw) && /3ᵉ place 2 boosters Règne Delta/.test(rw)
     && /4ᵉ et 5ᵉ place 1 mois de DropiPass ou 1 ticket Or/.test(rw) && /6ᵉ et 7ᵉ place 1 mois de DropiPass ou 1 ticket Argent/.test(rw) && /8ᵉ à 10ᵉ place 1 mois de DropiPass ou 1 ticket Bronze/.test(rw) && /au moins 50 joueurs/.test(rw));
   await page.locator('.pkm-pg-tabs button').nth(1).click(); await page.waitForTimeout(500);
   ok('« Mes missions » sans compte : invitation à se connecter, classement caché', /Connecte-toi à ton compte Dropicards pour gagner des Points de loyauté/.test(await page.locator('.pkm-ple-msg').innerText()) && (await page.locator('section.pkm-pg-card').count()) === 0);

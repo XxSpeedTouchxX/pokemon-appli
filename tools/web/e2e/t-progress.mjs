@@ -22,7 +22,8 @@ const btabs = await page.locator('.pkm-pg-tabs [role="tab"]').allInnerTexts();
 ok('Ma ligue : 2 onglets « Classement et récompenses » et « Mes missions », plus d’« Échanges » (' + btabs.join(' | ') + ')', btabs.length === 2 && /Classement et récompenses/.test(btabs[0]) && /Mes missions/.test(btabs[1]));
 ok('page « Ma ligue » ouverte', (await page.locator('section.pkm-pg-card').count()) === 1);
 const season = await page.locator('section.pkm-pg-season').innerText();
-ok('saison : « Saison 1 », temps restant, 8 novembre au 6 janvier (' + season.replace(/\s+/g, ' ') + ')', /Saison 1/.test(season) && /Se termine dans \d+ j/.test(season) && /8 novembre au 6 janvier 2027/.test(season));
+// Saison 1 « Commence bientôt » (2026-11-24, porteur : « lève le chrono ») : ni compte à rebours, ni dates, ni barre.
+ok('saison 1 : « Commence bientôt », sans compte à rebours, dates ni barre (' + season.replace(/\s+/g, ' ') + ')', /Saison 1/.test(season) && /Commence bientôt/.test(season) && !/Se termine/.test(season) && !/novembre|janvier/.test(season) && /assez de dresseurs/.test(season) && (await page.locator('.pkm-pg-sbar').count()) === 0);
 ok('sans serveur : carte sans place, invitation à se connecter', /Connecte-toi pour voir ta place/.test(await page.locator('section.pkm-pg-card').innerText()));
 // Classement du serveur imité : 40 joueurs, moi 34ᵉ.
 await page.evaluate(() => {
@@ -32,6 +33,16 @@ await page.evaluate(() => {
   window.__pkm.setState({ progBoard: { season: { n: 1, start: '2026-11-07T23:00:00Z', end: '2027-01-06T23:00:00Z' }, players: 40, top: top, me: { rank: 34, pk: 4200 }, pk_total: 12850, grade: 2 }, progAt: Date.now() });
 });
 await page.waitForTimeout(400);
+ok('serveur au départ d’origine (8 novembre) : toujours « Commence bientôt »', /Commence bientôt/.test(await page.locator('section.pkm-pg-season').innerText()) && (await page.locator('.pkm-pg-sbar').count()) === 0);
+// Départ fixé dans Studio (requetes_saison.sql) : l'app suit le serveur toute seule.
+const seasonAt = async (start, end) => { await page.evaluate(([a, b]) => window.__pkm.setState({ progBoard: Object.assign({}, window.__pkm.st().progBoard, { season: { n: 1, start: a, end: b } }) }), [start, end]); await page.waitForTimeout(250); return (await page.locator('section.pkm-pg-season').innerText()).replace(/\s+/g, ' '); };
+const fut = new Date(Date.now() + 6 * 86400000 + 4 * 3600000), futEnd = new Date(fut.getTime() + 60 * 86400000);
+const sFut = await seasonAt(fut.toISOString(), futEnd.toISOString());
+ok('départ fixé plus tard : « Commence le … » et « Dans 6 j 4 h », sans barre (' + sFut + ')', /Commence le \d/.test(sFut) && /Dans 6 j [34] h/.test(sFut) && (await page.locator('.pkm-pg-sbar').count()) === 0);
+const past = new Date(Date.now() - 2 * 86400000), pastEnd = new Date(past.getTime() + 60 * 86400000);
+const sPast = await seasonAt(past.toISOString(), pastEnd.toISOString());
+ok('départ passé : « Se termine dans 57 j », dates et barre (' + sPast + ')', /Se termine dans 5[78] j/.test(sPast) && / au /.test(sPast) && /60 jours/.test(sPast) && (await page.locator('.pkm-pg-sbar').count()) === 1);
+await seasonAt('2026-11-07T23:00:00Z', '2027-01-06T23:00:00Z');
 const card = await page.locator('section.pkm-pg-card').innerText();
 ok('carte : place #34 sur 40 joueurs, PK de la saison 4 200, plus de total (2026-11-15)', /#34/.test(card) && /sur 40 joueurs/.test(card) && /4\s200/.test(card) && !/12\s850/.test(card) && !/au total/.test(card));
 ok('carte : emblème du grade Collectionneur et avatar', /Collectionneur/.test(card) && (await page.locator('section.pkm-pg-card img.pkm-pg-ava-g').count()) === 1);
@@ -45,9 +56,9 @@ ok('classement : 4ᵉ à 30ᵉ avec le grade à côté du pseudo', (await page.l
 ok('ma ligne en bas (34ᵉ), en jaune', (await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').count()) === 1 && /34/.test(await page.locator('section[aria-label="Classement général"] > .pkm-pg-me').innerText()));
 await page.locator('section[aria-label="Classement général"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('progress-podium.png') });
 const rw = await page.locator('section[aria-label="Lots de la saison"]').innerText();
-ok('lots (grille du porteur, 2026-11-14) : ETB, coffret poster, 2 boosters des 30 ans, puis Premium ou ticket jusqu’à la 10ᵉ place', /1ʳᵉ place/.test(rw) && /ETB des 30 ans/.test(rw) && /coffret poster des 30 ans/.test(rw) && /8ᵉ à 10ᵉ place/.test(rw) && /ticket Bronze/.test(rw) && !/11ᵉ à 30ᵉ place/.test(rw));
+ok('lots (grille du porteur, 2026-11-14) : ETB, coffret poster, 2 boosters Règne Delta (2026-11-24), puis Premium ou ticket jusqu’à la 10ᵉ place', /1ʳᵉ place/.test(rw) && /ETB des 30 ans/.test(rw) && /coffret poster des 30 ans/.test(rw) && /2 boosters Règne Delta/.test(rw) && !/boosters des 30 ans/.test(rw) && /8ᵉ à 10ᵉ place/.test(rw) && /ticket Bronze/.test(rw) && !/11ᵉ à 30ᵉ place/.test(rw));
 const lotImgs = await page.locator('section[aria-label="Lots de la saison"] .pkm-pg-rwimg img').evaluateAll(els => els.map(e => e.getAttribute('src').split('/').pop() + ':' + e.naturalWidth));
-ok('lots : visuels ETB, coffret poster, 2 boosters des 30 ans (' + lotImgs.join(', ') + ')', lotImgs.length === 4 && /30th-celebration-elite-trainer-box\.webp:[1-9]/.test(lotImgs[0]) && /30th-poster-collection\.webp:[1-9]/.test(lotImgs[1]) && lotImgs.slice(2).every(t => /shop-booster-30-anniversaire\.webp:[1-9]/.test(t)));
+ok('lots : visuels ETB, coffret poster, 2 boosters Règne Delta au Méga-Rayquaza (' + lotImgs.join(', ') + ')', lotImgs.length === 4 && /30th-celebration-elite-trainer-box\.webp:[1-9]/.test(lotImgs[0]) && /30th-poster-collection\.webp:[1-9]/.test(lotImgs[1]) && lotImgs.slice(2).every(t => /shop-booster-regne-delta\.webp:[1-9]/.test(t)));
 const duo = await page.locator('section[aria-label="Lots de la saison"] .pkm-pg-rwduo').evaluateAll(els => els.map(e => (e.querySelector('.pkm-pg-rwdp img[src$="dropipass-2b.svg"]') && /^1M$/.test(e.querySelector('.pkm-pg-rwdp i').textContent) && !e.querySelector('svg') ? 'Premium' : '') + '+' + ((e.querySelector('.pkm-shop-ticket-in') || {}).textContent || '')));
 // 2026-11-15 (porteur) : logo du DropiPass (carte holo 2b) avec une bulle « 1M » ; visuels sur 30 % du cadre, textes alignés.
 ok('lots 4ᵉ à 10ᵉ : logo du DropiPass avec « 1M » ou ticket Or, Argent, Bronze (' + duo.join(', ') + ')', duo.join(',') === 'Premium+OR,Premium+ARGENT,Premium+BRONZE');

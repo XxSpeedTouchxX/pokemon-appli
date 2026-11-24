@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-24 (suite 2) — Saison 1 « Commence bientôt », booster Règne Delta en lot
+
+- **Demande** : « Pour la saison 1, lève le chrono et mets "Commence bientôt", car pour l'instant pas assez de monde pour commencer. Et change l'image du booster 30 ans sur le PK shop et dans Ma ligue par l'image des boosters Règne Delta avec le Rayquaza dessus. »
+- **Saison 1** : « Ma ligue » affiche « Commence bientôt » et « Départ dès qu'il y aura assez de dresseurs · 60 jours de championnat », sans compte à rebours, dates ni barre (`PROG_SOON`, `progress.js`). Les PL gagnés en attendant comptent déjà pour la saison 1 (rien ne change sur le serveur). CGU mises à jour (24 novembre 2026).
+- **Départ de la saison (défaut proposé)** : le jour choisi, le porteur colle une requête dans Studio (`tools/supabase/requetes_saison.sql`, nouvelle date de départ de `game_season`). L'app suit le serveur toute seule : « Commence le 1ᵉʳ décembre » et « Dans 6 j 4 h » avant le départ, puis « Se termine dans … », les dates et la barre. Les saisons suivantes s'enchaînent tous les 60 jours.
+- **Booster Règne Delta** : visuel officiel du booster Méga-Rayquaza (kit presse de The Pokémon Company, version anglaise comme l'ancien booster des 30 ans, fond rendu transparent, `web/img/shop-booster-regne-delta.webp`) à la place du booster des 30 ans : achat direct du PK shop (« Booster Règne Delta, envoyé chez toi ») et lot de la 3ᵉ place de Ma ligue (« 2 boosters Règne Delta »). Aucun visuel officiel français du booster seul n'est publié (seuls l'ETB, le display, le lot de boosters et le boîtier le sont) ; la version française pourra remplacer l'anglaise si le porteur en fournit une photo.
+- **Facultatif** : `tools/supabase/requetes_boutique.sql` change le nom du booster dans l'e-mail d'achat envoyé au porteur (« Booster de la série du moment (Règne Delta) »).
+- **Outil** : le workflow « Visuels de produits » peut désormais ranger les visuels téléchargés dans le dépôt (option « ranger = oui »), pour choisir un visuel depuis une session qui ne joint pas les serveurs de Pokémon.
+- Tests : `t-progress` (30, dont départ annoncé et départ passé), `t-pl` (52), `t-lots` (36), `t-grades`. Cache v285.
+
 ## 2026-11-24 (suite) — 2XP PK et 2XP PA vérifiés de bout en bout
 
 - **Demande** : « Fais en sorte que les doubles XP de PA et PK marchent bien, j'ai l'impression que je n'ai pas eu de double XP sur mes PK aujourd'hui. »

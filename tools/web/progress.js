@@ -17,13 +17,19 @@
   const progIn = s => s.screen === 'coin' && !(s.coinTab === 'vit' || s.coinTab === 'par' || s.coinTab === 'cal');
   const PROG_START = Date.parse('2026-11-08T00:00:00+01:00'), PROG_DAYS = 60, PROG_DAY = 86400000;
   const PROG_TTL = 60000; // classement relu au plus une fois par minute
+  // Saison 1 « Commence bientôt » (2026-11-24, porteur : « pour l'instant pas assez de monde pour commencer ») : ni
+  // compte à rebours, ni dates, ni barre. Les PL gagnés en attendant restent comptés (saison 1 du serveur). Le départ se
+  // donne dans Studio (tools/supabase/requetes_saison.sql : nouvelle date de départ de game_season) : dès que le serveur
+  // annonce un départ après le 8 novembre, l'app le suit d'elle-même (« Commence le … » puis le compte à rebours).
+  const PROG_SOON = true;
   // Lots de la saison (grille du porteur, docs/38 §4, L8) ; podium seulement avec au moins 50 joueurs classés.
   // Visuels des lots (2026-11-14, porteur) : 1ʳᵉ place l'ETB des 30 ans, 2ᵉ le coffret poster des 30 ans, 3ᵉ deux
-  // boosters des 30 ans ; de la 4ᵉ à la 10ᵉ, le logo Premium (1 mois) ou le ticket Or, Argent ou Bronze du PK shop.
+  // boosters Règne Delta au Méga-Rayquaza (2026-11-24, porteur ; avant : boosters des 30 ans) ; de la 4ᵉ à la 10ᵉ, le
+  // logo Premium (1 mois) ou le ticket Or, Argent ou Bronze du PK shop.
   const PROG_REWARDS = [
     { range: '1ʳᵉ place', prize: 'Un ETB des 30 ans', note: 'Coffret Dresseur d’élite du 30ᵉ anniversaire', img: 'img/products/30th-celebration-elite-trainer-box.webp', cls: 'pkm-pg-rw pkm-pg-rw-top' },
     { range: '2ᵉ place', prize: 'Un coffret poster des 30 ans', note: 'Collection poster du 30ᵉ anniversaire', img: 'img/products/30th-poster-collection.webp', cls: 'pkm-pg-rw pkm-pg-rw-top' },
-    { range: '3ᵉ place', prize: '2 boosters des 30 ans', note: 'Boosters du 30ᵉ anniversaire', img: 'img/shop-booster-30-anniversaire.webp', two: true, cls: 'pkm-pg-rw pkm-pg-rw-top' },
+    { range: '3ᵉ place', prize: '2 boosters Règne Delta', note: 'Boosters Méga-Évolution Règne Delta', img: 'img/shop-booster-regne-delta.webp', two: true, cls: 'pkm-pg-rw pkm-pg-rw-top' },
     { range: '4ᵉ et 5ᵉ place', prize: '1 mois de DropiPass ou 1 ticket Or', note: 'Au choix, en fin de saison', tier: 'or', tag: 'OR', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-or' },
     { range: '6ᵉ et 7ᵉ place', prize: '1 mois de DropiPass ou 1 ticket Argent', note: 'Au choix, en fin de saison', tier: 'argent', tag: 'ARGENT', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-ag' },
     { range: '8ᵉ à 10ᵉ place', prize: '1 mois de DropiPass ou 1 ticket Bronze', note: 'Au choix, en fin de saison', tier: 'bronze', tag: 'BRONZE', img: '', cls: 'pkm-pg-rw pkm-pg-rw-prem pkm-pg-rw-bz' }
@@ -89,14 +95,22 @@
     }));
     const rest = top.slice(3), inList = top.some(e => e.me);
     const span = Math.max(1, se.end - se.start), done = Math.max(0, Math.min(1, (now - se.start) / span));
+    // Départ changé dans Studio (après le 8 novembre) : l'app suit le serveur ; sinon, saison 1 « Commence bientôt ».
+    const moved = !!(b && b.season && Date.parse(b.season.start) > PROG_START + PROG_DAY);
+    const later = se.start > now, soon = later || (PROG_SOON && !moved);
+    const dayFr = t => new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' });
     const online = typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
     const rankTxt = me ? '#' + progNum(me.rank) : '—';
     const cap = isPl ? 10 : 30;
     const myPrize = me ? (me.rank <= 10 ? 'Dans le top 10 : un lot t’attend si tu y restes' : !isPl && me.rank <= 30 ? 'Dans le top 30 : DropiPass offert si tu y restes' : 'Encore ' + progNum(Math.max(0, me.rank - cap)) + ' place' + (me.rank - cap > 1 ? 's' : '') + ' pour le top ' + cap + (isPl ? ' : gagne des PL avec les défis' : '')) : '';
     const tab = s.pgTab === 'earn' ? 'earn' : 'board'; // « Échanges » retiré le 2026-11-21 (dans Ma vitrine)
     return {
-      seasonN: 'Saison ' + se.n, seasonLabel: 'Saison ' + se.n, left: progLeft(se.end - now), barW: 'width: ' + Math.round(done * 100) + '%',
-      dates: 'Du ' + new Date(se.start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }) + ' au ' + new Date(se.end - 1).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }),
+      seasonN: 'Saison ' + se.n, seasonLabel: 'Saison ' + se.n, soon: soon, hasBar: !soon,
+      left: later ? 'Commence le ' + dayFr(se.start).replace(/^1 /, '1ᵉʳ ') : soon ? 'Commence bientôt' : progLeft(se.end - now),
+      barW: 'width: ' + Math.round(done * 100) + '%',
+      dates: later ? 'Dans ' + progLeft(se.start - now).replace(/^Se termine dans /, '') + ' · 60 jours de championnat'
+        : soon ? 'Départ dès qu’il y aura assez de dresseurs · 60 jours de championnat'
+        : 'Du ' + dayFr(se.start) + ' au ' + new Date(se.end - 1).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }) + ' · 60 jours',
       card: {
         avatar: this.img().avatar, pseudo: pseudo, gImg: my.img, gName: my.name, gColor: my.color, gStyle: 'color: ' + my.color,
         // PL de la saison seulement (2026-11-15, porteur : « on s'en fiche des PL gagnés au total »).
