@@ -13,6 +13,15 @@
   xpProto.xpMul = function () { return this.xpUntilMs() ? 2 : 1; };
   // 2XP PA (boîte mystère, 2026-11-09) : fin du doublement des PA du jour.
   xpProto.paXpUntilMs = function () { const t = Date.parse((this.st() || {}).paXpUntil || ''); return t > Date.now() ? t : 0; };
+  // DropiPass actif : PA du jour doublés par le serveur (019), comme un 2XP PA sans fin.
+  const xpPaPrem = self => !!(typeof self.premOn === 'function' && self.premOn());
+  // Badge « 2XP PK » toujours d'accord avec le serveur (2026-11-24, porteur : « j'ai l'impression que je n'ai pas eu de
+  // double XP sur mes PK aujourd'hui ») : chaque gain du Booster PK, de la pièce ou du Safari dit s'il a été doublé ;
+  // si l'app pensait le contraire (2XP fini ou gagné sur un autre appareil), la fin du 2XP est relue aussitôt.
+  xpProto.xpCheck = function (boost) {
+    if (!!boost === !!this.xpUntilMs() || !xpCloud()) return;
+    Cloud.rpc('pk_boost_state').then(b => { if (b) this.setState({ xpUntil: b.on && b.until ? b.until : '' }); }, () => null);
+  };
   const xpLeft = ms => {
     const d = Math.floor(ms / 86400000), h = Math.floor((ms % 86400000) / 3600000), m = Math.max(1, Math.ceil((ms % 3600000) / 60000));
     return d ? d + ' j ' + h + ' h' : h ? h + ' h ' + String(m === 60 ? 59 : m).padStart(2, '0') : m + ' min';
@@ -235,25 +244,31 @@
     // Badge « 2XP » sur les soldes de PK et de PA (2026-11-12, porteur) : toujours visible pendant un 2XP, il scintille
     // quand des PK (ou des PA) arrivent ; un appui dit combien de temps il reste (les phrases « 2XP actif » sont retirées).
     if (r.pk) {
-      const pkU = this.xpUntilMs(), paU = this.paXpUntilMs(), now = Date.now();
+      // DropiPass : PA du jour doublés tant que l'abonnement est actif (2026-11-24) : badge « 2XP » sur les PA aussi.
+      const pkU = this.xpUntilMs(), paU = this.paXpUntilMs(), paP = !paU && xpPaPrem(this), now = Date.now();
       Object.assign(r.pk, {
         xpPk: !!pkU, xpPkCls: 'pkm-xpb pkm-xpb-pk' + (pkU && s.pkGain > 0 ? ' pkm-xpb-hot' : ''),
         xpPkAria: pkU ? '2XP PK actif : voir le temps restant' : '', xpPkTap: () => this.xpTipOpen('PK'),
-        xpPa: !!paU, xpPaCls: 'pkm-xpb pkm-xpb-pa' + (paU && s.paGain ? ' pkm-xpb-hot' : ''),
-        xpPaAria: paU ? '2XP PA actif : voir le temps restant' : '', xpPaTap: () => this.xpTipOpen('PA')
+        xpPa: !!(paU || paP), xpPaCls: 'pkm-xpb pkm-xpb-pa' + ((paU || paP) && s.paGain ? ' pkm-xpb-hot' : ''),
+        xpPaAria: paU ? '2XP PA actif : voir le temps restant' : paP ? '2XP PA du DropiPass : tes PA du jour sont doublés' : '', xpPaTap: () => this.xpTipOpen('PA')
       });
       if (pkU && r.pk.gain) r.pk.gainText = '2XP · ' + r.pk.gainText;
     }
     // Message du badge « 2XP » (2026-11-12, nuit, porteur : « que le message apparaisse de manière la plus satisfaisante
     // possible […] d'en haut de l'écran ») : une carte descend du haut, le badge rebondit, le temps restant en grand ;
     // elle remonte seule au bout de 5 s (barre qui se vide), au toucher ou d'un balayage vers le haut (2026-11-23).
-    const xt = s.xpTip, xtU = xt ? (xt.what === 'PA' ? this.paXpUntilMs() : this.xpUntilMs()) : 0;
+    const xt = s.xpTip, xtU = xt ? (xt.what === 'PA' ? this.paXpUntilMs() : this.xpUntilMs()) : 0, xtP = !!(xt && xt.what === 'PA' && !xtU && xpPaPrem(this));
     r.xptip = xt && xtU ? {
       open: true, cls: 'pkm-xptip pkm-xptip-' + xt.what.toLowerCase() + (xt.out ? ' pkm-xptip-out' : ''),
-      icon: xt.what === 'PA' ? 'img/brand/pa.svg' : 'img/brand/pk.svg', title: '2XP ' + xt.what + ' actif', left: xpLeft(xtU - Date.now()),
+      icon: xt.what === 'PA' ? 'img/brand/pa.svg' : 'img/brand/pk.svg', title: '2XP ' + xt.what + ' actif', pre: 'Encore ', left: xpLeft(xtU - Date.now()),
       end: 'jusqu’au ' + xpEnd(xtU),
       what: xt.what === 'PA' ? 'Tes PA du jour sont doublés.' : 'Tes gains de PK sont doublés au Booster PK, à pile ou face et au Safari éclair.',
       aria: '2XP ' + xt.what + ' actif, encore ' + xpLeft(xtU - Date.now()) + ', jusqu’au ' + xpEnd(xtU) + '. Toucher ou balayer vers le haut pour fermer.',
+      close: () => this.xpTipClose()
+    } : xtP ? {
+      open: true, cls: 'pkm-xptip pkm-xptip-pa' + (xt.out ? ' pkm-xptip-out' : ''), icon: 'img/brand/pa.svg', title: '2XP PA actif', pre: '', left: 'Avec ton DropiPass',
+      end: 'tant que ton abonnement est actif', what: 'Tes PA du jour sont doublés.',
+      aria: '2XP PA actif avec ton DropiPass, tant que ton abonnement est actif : tes PA du jour sont doublés. Toucher ou balayer vers le haut pour fermer.',
       close: () => this.xpTipClose()
     } : { open: false };
     return r;
@@ -298,7 +313,7 @@
     document.addEventListener('pointercancel', end, true);
   };
   xpProto.xpTipOpen = function (what) {
-    if (!(what === 'PA' ? this.paXpUntilMs() : this.xpUntilMs())) return;
+    if (!(what === 'PA' ? this.paXpUntilMs() || xpPaPrem(this) : this.xpUntilMs())) return;
     xpSwipe(this);
     clearTimeout(this._xpTipT); clearTimeout(this._xpTipT2);
     this.setState({ xpTip: { what: what, at: Date.now() } });

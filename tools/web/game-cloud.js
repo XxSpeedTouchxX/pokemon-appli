@@ -82,6 +82,8 @@
       // Série de jours d'affilée (run) et boîte offerte : posées de même (019 ; sans 019, run vaut la série).
       const run = r.run !== undefined ? r.run | 0 : r.streak | 0;
       this.setState({ pa: gcPa(this.st(), (r.pa | 0) - (r.gain | 0)), paDay: r.streak > 1 || run > 1 ? yday : '', paStreak: Math.max(0, r.streak - 1), paRun: Math.max(0, run - 1) });
+      // Gain exact du serveur (doublé avec le DropiPass ou un 2XP PA) : l'animation et le solde montrent ce chiffre-là.
+      paSrvGain = r.gain | 0;
       gcBasePaClaim.call(this);
       setTimeout(() => this.gcSync(), 2500);
     }, e => { gcPaBusy = false; this.gcFail(e, { paClaim: false }); });
@@ -98,6 +100,7 @@
       Cloud.rpc('open_booster', { req: Cloud.reqId() }).then(r => {
         // 2XP PK (016) : r.base est le gain du tirage, r.won le gain crédité (doublé pendant un 2XP).
         const i = Math.max(0, GM_TABLE.findIndex(row => row[0] === (r.base || r.won))), mul = r.boost ? 2 : 1, win = r.won || GM_TABLE[i][0], at = new Date().toISOString();
+        if (this.xpCheck) this.xpCheck(r.boost); // badge « 2XP » toujours d'accord avec le serveur (xppk.js)
         const t = this.st(), gg = t.games || {};
         const hist = [{ at: at, game: 'booster', pk: win }].concat(gg.hist || []).slice(0, 20);
         const credit = () => {
@@ -127,6 +130,7 @@
       Cloud.rpc('flip_coin', { req: Cloud.reqId() }).then(r => {
         gcCoinBusy = false;
         const win = !!r.win, at = new Date().toISOString(), gg = this.st().games || {}, mul = r.boost ? 2 : 1, gain = r.won || GM_COIN_WIN;
+        if (this.xpCheck) this.xpCheck(r.boost);
         const hist = [{ at: at, game: 'coin', pk: win ? gain : 0 }].concat(gg.hist || []).slice(0, 20);
         const done = () => {
           const now = this.st(), from = Number(now.pk) || 0, final = gcPk(now, r.pk);

@@ -34,6 +34,8 @@
   ptsProto.ptsDex = function () { this.ptsGo(() => { this.setState({ gameTab: 'dex' }); this.tab('market'); ptsScroll('main section[aria-label="Pokédex"]'); }); };
   ptsProto.ptsShop = function (label) { this.ptsGo(() => { this.tab('pkshop'); if (label) ptsScroll('main section[aria-label="' + label + '"]'); }); };
 
+  // 2XP PK actif (xppk.js) : gains annoncés doublés, comme le serveur les donne (2026-11-24).
+  const ptsXpPk = self => !!(typeof self.xpUntilMs === 'function' && self.xpUntilMs());
   // Ce qui est prêt maintenant ou bientôt. Un jeu fermé par le grade ou par le serveur n'est jamais « prêt ».
   const ptsToday = (self, s) => {
     const g = s.games || {}, P = self.perks(), rows = [];
@@ -45,17 +47,17 @@
       aria: 'PA du jour : ' + n.gain + ' PA à récupérer', go: () => { self.setState({ points: '', paClaim: true }); if (typeof paDialogKeys === 'function') paDialogKeys(self); } }
       : { key: 'pa', cur: 'pa', ico: 'img/brand/pa.svg', title: 'PA du jour', sub: (typeof paNextText === 'function' && paNextText(s)) || 'Récupérés aujourd’hui', state: 'done', cta: 'Fait', off: true,
         aria: 'PA du jour déjà récupérés', go: () => {} });
-    const bw = gmWait(g.boosterAt, gmBoosterMs(self));
-    row({ key: 'booster', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Booster PK', sub: bw ? 'Prêt dans ' + gmLeft(bw) : '30 à 500 PK à gagner', state: bw ? 'wait' : 'ready', cta: bw ? 'Voir' : 'Ouvrir',
+    const bw = gmWait(g.boosterAt, gmBoosterMs(self)), xp = ptsXpPk(self), x2 = v => ptsNum(v * (xp ? 2 : 1));
+    row({ key: 'booster', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Booster PK', sub: bw ? 'Prêt dans ' + gmLeft(bw) : x2(30) + ' à ' + x2(500) + ' PK à gagner' + (xp ? ' · 2XP' : ''), state: bw ? 'wait' : 'ready', cta: bw ? 'Voir' : 'Ouvrir',
       aria: 'Booster PK : ' + (bw ? 'prêt dans ' + gmLeft(bw) : 'prêt, 30 à 500 PK'), go: () => self.ptsGames('Booster PK') });
     if (!P.coinH) row({ key: 'coin', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Pile ou face', sub: 'Au grade ' + self.perkGrade('coinH'), state: 'lock', cta: 'Voir',
       aria: 'Pile ou face : au grade ' + self.perkGrade('coinH'), go: () => self.ptsGo(() => self.push('grade', { gradeIx: PF_GRADES.findIndex(x => x.coinH) })) });
-    else { const cw = gmWait(g.coinAt, gmCoinMs(self)); row({ key: 'coin', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Pile ou face', sub: cw ? 'Prête dans ' + gmLeft(cw) : '0 ou ' + GM_COIN_WIN + ' PK, une chance sur deux', state: cw ? 'wait' : 'ready', cta: cw ? 'Voir' : 'Lancer',
+    else { const cw = gmWait(g.coinAt, gmCoinMs(self)); row({ key: 'coin', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Pile ou face', sub: cw ? 'Prête dans ' + gmLeft(cw) : '0 ou ' + x2(GM_COIN_WIN) + ' PK, une chance sur deux' + (xp ? ' · 2XP' : ''), state: cw ? 'wait' : 'ready', cta: cw ? 'Voir' : 'Lancer',
       aria: 'Pile ou face : ' + (cw ? 'prête dans ' + gmLeft(cw) : 'prête'), go: () => self.ptsGames('Pile ou face') }); }
     if (typeof self.sfLocked === 'function') {
       if (self.sfLocked()) row({ key: 'safari', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Safari éclair', sub: 'Au grade ' + (self.perkGrade('safariH') || 'Collectionneur'), state: 'lock', cta: 'Voir',
         aria: 'Safari éclair : au grade ' + (self.perkGrade('safariH') || 'Collectionneur'), go: () => self.ptsGo(() => self.push('grade', { gradeIx: PF_GRADES.findIndex(x => x.safariH) })) });
-      else { const sw = self.sfWaitMs(); row({ key: 'safari', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Safari éclair', sub: sw ? 'Prêt dans ' + gmLeft(sw) : 'Jusqu’à 36 PK en Facile', state: sw ? 'wait' : 'ready', cta: sw ? 'Voir' : 'Jouer',
+      else { const sw = self.sfWaitMs(); row({ key: 'safari', cur: 'pk', ico: 'img/brand/pk.svg', title: 'Safari éclair', sub: sw ? 'Prêt dans ' + gmLeft(sw) : 'Jusqu’à ' + x2(36) + ' PK en Facile' + (xp ? ' · 2XP' : ''), state: sw ? 'wait' : 'ready', cta: sw ? 'Voir' : 'Jouer',
         aria: 'Safari éclair : ' + (sw ? 'prêt dans ' + gmLeft(sw) : 'prêt'), go: () => self.ptsGames('Safari éclair') }); }
     }
     // PL : la première mission des réseaux pas encore faite, sinon le parrainage.
@@ -91,17 +93,19 @@
       const range = a => a.length ? ptsNum(Math.min.apply(null, a.map(x => x.price))) + ' à ' + ptsNum(Math.max.apply(null, a.map(x => x.price))) + ' PK' : '';
       const miss = !t.next ? [] : [].concat(t.remaining ? [ptsNum(t.remaining) + ' PK gagnés'] : [], t.compMissing ? [t.compMissing + ' Pokémon débloqués'] : [],
         t.megaMissing ? [t.megaMissing + ' méga-évolution' + (t.megaMissing > 1 ? 's' : '')] : []);
+      const xp = ptsXpPk(self), x2 = v => ptsNum(v * (xp ? 2 : 1)), xpT = xp ? ' (2XP)' : '';
       const nextTxt = !t.next ? 'Tu as atteint le plus haut grade.' : miss.length ? 'Encore ' + miss.join(' et ') + ' pour le grade ' + t.next.name + '.' : 'Prochain grade : ' + t.next.name + '.';
       return {
         title: 'Mes PK', ico: 'img/brand/pk.svg', what: 'Les PK sont la monnaie de Dropicards. Tu les gagnes gratuitement en jouant dans l’onglet Jeux : ils ne s’achètent pas et n’ont aucune valeur en euros.',
         earn: [
-          step('img/brand/pk.svg', 'Booster PK', 'Un booster offert toutes les ' + P.boosterH + ' h à ton grade.', '30 à 500 PK', () => self.ptsGames('Booster PK'), 'Jouer'),
-          P.coinH ? step('img/brand/pk.svg', 'Pile ou face', 'Un lancer toutes les ' + P.coinH + ' h : une chance sur deux.', '0 ou ' + GM_COIN_WIN + ' PK', () => self.ptsGames('Pile ou face'), 'Jouer')
+          step('img/brand/pk.svg', 'Booster PK', 'Un booster offert toutes les ' + P.boosterH + ' h à ton grade.', x2(30) + ' à ' + x2(500) + ' PK' + xpT, () => self.ptsGames('Booster PK'), 'Jouer'),
+          P.coinH ? step('img/brand/pk.svg', 'Pile ou face', 'Un lancer toutes les ' + P.coinH + ' h : une chance sur deux.', '0 ou ' + x2(GM_COIN_WIN) + ' PK' + xpT, () => self.ptsGames('Pile ou face'), 'Jouer')
             : step('img/brand/pk.svg', 'Pile ou face', 'Se débloque au grade ' + self.perkGrade('coinH') + '.', '0 ou ' + GM_COIN_WIN + ' PK', () => self.ptsGo(() => self.push('grade', { gradeIx: PF_GRADES.findIndex(x => x.coinH) })), 'Voir'),
-          P.safariH ? step('img/brand/pk.svg', 'Safari éclair', 'Une partie toutes les ' + P.safariH + ' h : touche les Pokémon du type demandé.', 'Jusqu’à 144 PK', () => self.ptsGames('Safari éclair'), 'Jouer')
+          P.safariH ? step('img/brand/pk.svg', 'Safari éclair', 'Une partie toutes les ' + P.safariH + ' h : touche les Pokémon du type demandé.', 'Jusqu’à ' + x2(144) + ' PK' + xpT, () => self.ptsGames('Safari éclair'), 'Jouer')
             : step('img/brand/pk.svg', 'Safari éclair', 'Se débloque au grade ' + self.perkGrade('safariH') + '.', 'Jusqu’à 144 PK', () => self.ptsGo(() => self.push('grade', { gradeIx: PF_GRADES.findIndex(x => x.safariH) })), 'Voir'),
           step('img/brand/pk.svg', 'Bienvenue', 'Offerts une fois, à ton arrivée.', '+' + PK_WELCOME + ' PK'),
-          step('img/brand/pk.svg', '2XP PK', 'Tous tes gains des jeux doublés pendant quelques jours : à gagner dans la boîte mystère.', '× 2')
+          step('img/brand/pk.svg', '2XP PK', xp ? 'Actif encore ' + xpLeft(self.xpUntilMs() - Date.now()) + ' : tes gains au Booster PK, à pile ou face et au Safari sont doublés.'
+            : 'Tous tes gains des jeux doublés pendant quelques jours : à gagner dans la boîte mystère (30 jours offerts au premier abonnement DropiPass).', '× 2')
         ],
         use: [
           step('img/brand/pk.svg', 'Tickets du tirage', 'Un ticket Bronze, Argent ou Or pour le tirage au sort du mois, au PK shop.', range(shopT), () => self.ptsShop(), 'PK shop'),
@@ -122,7 +126,8 @@
         streak: R.streak, series: paSeries(s),
         note: (n ? '' : paNextText(s) + '. ') + 'Un jour sans les récupérer : retour au palier J3 (+40 PA) ; deux jours ou plus : palier J1. Une boîte mystère offerte tous les 7 jours d’affilée.',
         earn: [
-          step('img/brand/pa.svg', '2XP PA', 'Tes PA du jour doublés : avec le DropiPass, ou à gagner dans la boîte mystère.', '× 2')
+          step('img/brand/pa.svg', '2XP PA', self.paXpUntilMs && self.paXpUntilMs() ? 'Actif encore ' + xpLeft(self.paXpUntilMs() - Date.now()) + ' : tes PA du jour sont doublés.'
+            : self.premOn && self.premOn() ? 'Actif avec ton DropiPass : tes PA du jour sont doublés.' : 'Tes PA du jour doublés : avec le DropiPass, ou à gagner dans la boîte mystère.', '× 2')
         ].concat(canRe ? [step('img/brand/pa.svg', 'Recharger mes PA', 'Des packs de PA, si tu veux aller plus vite.', '', () => self.ptsGo(() => self.paStoreOpen()), 'Voir')] : []),
         use: [
           step('img/brand/pokedex.svg', 'Pokédex', 'Débloque des Pokémon et fais évoluer ton compagnon. Débloquer des Pokémon te fait aussi monter en grade (dès Collectionneur).', '', () => self.ptsDex(), 'Pokédex'),

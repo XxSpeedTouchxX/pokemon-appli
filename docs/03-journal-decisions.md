@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-24 (suite) — 2XP PK et 2XP PA vérifiés de bout en bout
+
+- **Demande** : « Fais en sorte que les doubles XP de PA et PK marchent bien, j'ai l'impression que je n'ai pas eu de double XP sur mes PK aujourd'hui. »
+- **Serveur, vérifié** : nouveau test `tools/supabase/tests/test_2xp.sql` lancé après tous les scripts (001 à 039), puis sur l'état exact du serveur du porteur (001 à 032) : 22 vérifications réussies dans les deux cas. Pendant un 2XP PK, le Booster PK, pile ou face et le Safari éclair sont doublés (gains seulement ; une perte du Safari n'est jamais doublée), aussi pour un admin déverrouillé ; le journal porte « 2XP PK » ; les PK doublés comptent pour les grades et la saison. PA du jour doublés avec le DropiPass ou un 2XP PA (×2 au plus). **Aucun défaut côté serveur, rien à installer.**
+- **App, corrigé** : avec le DropiPass, l'app annonçait et animait les PA du jour non doublés (+20 au lieu de +40), puis le solde sautait à la relecture du serveur ; elle montre désormais le gain exact du serveur. Badge « 2XP » sur le solde de PA pour les abonnés (« Avec ton DropiPass »). Le badge 2XP PK est relu sur le serveur dès qu'un gain le contredit (2XP fini ou gagné ailleurs), pour qu'il ne mente jamais. « Mes points » annonce les gains doublés pendant un 2XP PK (Booster 60 à 1 000 PK, pièce 0 ou 100 PK, Safari jusqu'à 72 PK en Facile). Test `t-2xp.mjs` (15). Cache v284.
+- **Pour vérifier le compte du porteur** (Claude n'a pas accès à la base) : `tools/supabase/requetes_2xp.sql` dans Studio, en lecture seule : fin du 2XP PK, du 2XP PA, DropiPass, et chaque gain du jour avec « doublé : oui / non ». Si « 2XP PK actif » est vide ou faux, aucun 2XP PK n'était en cours : seuls la boîte mystère et le premier abonnement DropiPass (30 jours) en donnent ; le DropiPass double les PA, pas les PK.
+
 ## 2026-11-24 — Logos TikTok, Instagram et Discord visibles dans « Mes points »
 
 - **Demande** : « Dans "Mes missions" pour remporter des PL, les logos Insta, Discord et TikTok ne ressortent pas : fais en sorte qu'ils apparaissent. »

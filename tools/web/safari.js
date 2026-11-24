@@ -326,7 +326,11 @@
       return;
     }
     // Le serveur demande au moins 18 s depuis le départ : on attend si besoin, puis on réessaie une fois en cas de coupure.
-    const send = (tries) => Cloud.rpc('safari_finish', { round: rd.round, hits: hits, req: SF.req || (SF.req = Cloud.reqId()) }).then(show, e => {
+    const send = (tries) => Cloud.rpc('safari_finish', { round: rd.round, hits: hits, req: SF.req || (SF.req = Cloud.reqId()) }).then(res => {
+      // Badge « 2XP » toujours d'accord avec le serveur (xppk.js) ; une perte ou 0 ne dit rien du 2XP.
+      if (res && (res.won | 0) > 0 && this.xpCheck) this.xpCheck(res.boost);
+      show(res);
+    }, e => {
       if (tries > 0 && e && (e.code === 'network' || /pas encore finie/.test(e.message || ''))) { setTimeout(() => send(tries - 1), 2500); return; }
       this.sfPanel('<div class="pkm-sf-card"><p class="pkm-sf-wait">' + sfEsc((e && e.message) || 'Résultat indisponible') + '</p><button type="button" class="pkm-sf-go">Fermer</button></div>');
       el.querySelector('.pkm-sf-go').addEventListener('click', () => this.sfClose());

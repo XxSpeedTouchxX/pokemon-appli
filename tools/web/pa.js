@@ -50,17 +50,25 @@
   const paToday = () => { const d = new Date(paNow()); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   // Mode Admin « PA à volonté » (2026-11-01, porteur) : les PA se récupèrent à chaque appui sur le solde.
   const paFree = s => !!(s.admin && s.admin.on && s.admin.paFree && admAllowed() && !Cloud.on());
+  // PA du jour doublés, ×2 au plus (le serveur fait de même, 019) : 2XP PA gagné dans la boîte mystère (2026-11-09) ou
+  // DropiPass (2026-11-24, porteur : « que les doubles XP de PA et PK marchent bien » ; l'app oubliait le DropiPass et
+  // affichait la moitié du gain, puis le solde sautait à la relecture du serveur). at : instant visé (demain minuit…).
+  const paPrem = s => !!(s.cloudGame && s.cloudGame.premium && s.cloudGame.premium.on) || (typeof premForced === 'function' && premForced());
+  const paMul = (s, at) => (Date.parse(s.paXpUntil || '') > (at || Date.now()) || paPrem(s) ? 2 : 1);
+  // Gain exact donné par le serveur pour la récupération en cours (game-cloud.js) : l'animation montre ce chiffre-là.
+  let paSrvGain = 0;
   const paPending = s => {
     const n0 = PaCore.next(s.paDay || '', s.paStreak || 0, paToday(), s.paRun || 0);
     const n = n0 || !paFree(s) ? n0 : PaCore.next(s.paDay, s.paStreak || 0, PaCore.nextDay(s.paDay), s.paRun || 0);
-    // 2XP PA gagné dans la boîte mystère (2026-11-09) : PA du jour doublés (le serveur fait de même, 019).
-    return n && Date.parse(s.paXpUntil || '') > Date.now() ? Object.assign({}, n, { gain: n.gain * 2, xp: true }) : n;
+    return n && paMul(s) > 1 ? Object.assign({}, n, { gain: n.gain * 2, xp: true, prem: paPrem(s) }) : n;
   };
+  // PA de demain (série qui continue), doublés si le 2XP PA dure jusque-là ou avec le DropiPass.
+  const paTomorrow = (s, streak) => PaCore.tomorrow(streak) * paMul(s, paNow() + paToMidnight() + 1000);
   // Temps restant jusqu'à minuit, lisible : « 5 h 12 », « 12 min », « moins d'une minute ».
   const paLeft = ms => { const m = Math.max(0, Math.ceil(ms / 60000)), h = Math.floor(m / 60); return m < 1 ? 'moins d’une minute' : h ? h + ' h ' + String(m % 60).padStart(2, '0') : m + ' min'; };
   const paToMidnight = () => { const n = paNow(), d = new Date(n); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime() - n; };
   // Prochains PA (déjà récupérés aujourd'hui) : à minuit, dans combien de temps, et combien.
-  const paNextText = s => (s.paDay ? 'Prochains PA à minuit (dans ' + paLeft(paToMidnight()) + ') : +' + PaCore.tomorrow(s.paStreak) + ' PA' : '');
+  const paNextText = s => (s.paDay ? 'Prochains PA à minuit (dans ' + paLeft(paToMidnight()) + ') : +' + paTomorrow(s, s.paStreak) + ' PA' : '');
   // PA qui attendent avec une série en cours : à récupérer avant ce soir minuit.
   const paKeepText = s => { const n = paPending(s); return n && s.paDay && PaCore.nextDay(s.paDay) === paToday() && !paFree(s) ? 'À récupérer avant ce soir minuit (dans ' + paLeft(paToMidnight()) + ') pour garder ta série' : ''; };
   // Série de connexion (2026-11-10, porteur : « une sorte de série de connexion, à 7 d'affilée tu obtiens le cadeau
@@ -118,7 +126,8 @@
   // les gouttes de PA jaillissent, s'éparpillent puis volent en arc jusqu'au solde, qui grimpe à chaque goutte.
   let paFlyOn = false;
   paProto.paClaim = function () {
-    const s = this.st(), n = paPending(s);
+    const s = this.st(), n0 = paPending(s), n = n0 && paSrvGain > 0 ? Object.assign({}, n0, { gain: paSrvGain }) : n0;
+    paSrvGain = 0;
     if (!n || paFlyOn) return;
     const from = document.querySelector('.pkm-pa-claim-btn'), to = document.querySelector('header .pkm-pa-bar') || document.querySelector('.pkm-pa-bar');
     const old = Number(s.pa) || 0, total = old + n.gain;
@@ -321,7 +330,7 @@
       paLogo: still ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
       // Série et gain : d'après les PA en attente s'il y en a (une série cassée n'est plus affichée comme en cours).
       pa: pa.toLocaleString('fr-FR'), streak: paStreakText(s),
-      tomorrow: paPending(s) ? 'Récupère tes PA : +' + paPending(s).gain + ' PA, puis +' + PaCore.tomorrow(paPending(s).streak) + ' PA demain' : paNextText(s),
+      tomorrow: paPending(s) ? 'Récupère tes PA : +' + paPending(s).gain + ' PA, puis +' + paTomorrow(s, paPending(s).streak) + ' PA demain' : paNextText(s),
       rules: PA_RULES,
       choosing: !e, chosen: !!e, starters: [],
       // Écrans du Pokédex dessiné : ton compagnon à gauche, le solde de PA à droite.
@@ -348,7 +357,7 @@
       openPa: () => { if (n) { this.setState({ paClaim: true }); paDialogKeys(this); } else this.ptsOpen('pa'); }, paReady: !!n,
       paCls: 'pkm-tk-bar pkm-pa-bar' + (s.paGain ? ' pkm-pa-pulse' : '') + (n ? ' pkm-pa-ready' : ''),
       claim: { open: !!(n && s.paClaim), gain: n ? '+' + n.gain + ' PA' : '', streak: n ? (n.streak > 1 ? n.streak + ' jours d’affilée' : 'Premier jour de ta série') : '',
-        next: n ? 'Demain : +' + PaCore.tomorrow(n.streak) + ' PA si tu reviens' : '', keep: n ? paKeepText(s) : '', hasKeep: !!(n && paKeepText(s)), drop: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
+        next: n ? 'Demain : +' + paTomorrow(s, n.streak) + ' PA si tu reviens' : '', keep: n ? paKeepText(s) : '', hasKeep: !!(n && paKeepText(s)), drop: paStill() ? 'img/brand/pa.svg' : 'img/brand/pa-anim.svg',
         go: () => this.paClaim(), close: () => this.setState({ paClaim: false }), dex: () => { this.setState({ paClaim: false }); openDex(); } } });
   };
   const paBaseRender = paProto.renderVals;
