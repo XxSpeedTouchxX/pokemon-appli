@@ -41,6 +41,8 @@ Ce que Claude a construit : la table des annonces (`tools/supabase/029_annonces.
 
 ---
 
+> **Ventes réussies eBay (dernière vente, médiane)** : accès « Marketplace Insights » à demander à part, voir `docs/49-guide-ebay-marketplace-insights.md` (2026-11-24). Les étapes 1 à 5 ci-dessous sont communes.
+
 ## Ce que tu fais, ce que fait Claude
 
 | # | Étape | Qui | Durée pour toi |

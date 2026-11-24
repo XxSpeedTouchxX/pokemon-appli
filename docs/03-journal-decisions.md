@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-24 (suite 3) — Prix eBay : estimation expliquée, pas de contournement, guide « Marketplace Insights »
+
+- **Demande** : « rectifier le prix eBay » de Méga-Rayquaza-ex 138 (Règne Delta, illustration spéciale) : 301,61 € affichés, environ 420 € dans les ventes réussies d'eBay ; puis « contourner le robot eBay », puis « copier les prix de PokéItem », avec ou sans coefficient de 1,02.
+- **Constat** : 301,61 € = cote Dropicards 274,19 € (médiane Cardmarket : tendance 258,21 €, moyenne 7 jours 274,19 €, moyenne 30 jours 293,29 €) × 1,10, l'estimation eBay validée le 2026-11-14. Ce n'est pas une vente eBay. Prix en baisse depuis la sortie (moyenne d'hier 246,41 €), carte en vente dès 179,99 € sur Cardmarket.
+- **Refusé** : contourner la protection d'eBay (connexion obligatoire et filtre anti-robots depuis juillet 2026), et copier les prix de PokéItem, avec ou sans coefficient (base de données d'un concurrent, risque de parasitisme, dépendance). Règle du projet maintenue : pas de contournement, pas de lecture automatique d'un autre site sans avis juridique.
+- **Appris** (page publique « méthode des prix » de PokéItem) : leur indice pèse surtout sur les ventes réussies eBay, plafonné par le moins cher en vente sur Cardmarket, par langue et par état ; la voie d'accès à eBay n'est pas indiquée.
+- **Fait** : guide pas à pas `docs/49-guide-ebay-marketplace-insights.md` (compte développeur, clés, avis de suppression de compte, demande « Application Growth Check » avec le texte anglais à coller, clés dans Coolify, ce que Claude branche ensuite, plan B si eBay refuse).
+- **En attente** : démarche du porteur chez eBay ; « go » pour le relevé à la main de la dernière vente eBay dans le panneau Admin ; « go étape 3 » pour la fonction des avis de suppression de compte.
+
 ## 2026-11-24 (suite 2) — Saison 1 « Commence bientôt », booster Règne Delta en lot
 
 - **Demande** : « Pour la saison 1, lève le chrono et mets "Commence bientôt", car pour l'instant pas assez de monde pour commencer. Et change l'image du booster 30 ans sur le PK shop et dans Ma ligue par l'image des boosters Règne Delta avec le Rayquaza dessus. »
