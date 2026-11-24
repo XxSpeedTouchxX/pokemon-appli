@@ -1,5 +1,7 @@
 # Visuels de produits (2026-11-14, contenus réseaux sociaux, lecture seule) : visuels officiels de produits à venir (adresses données), copiés
 # dans le journal du workflow. Rien n'est écrit dans l'app.
+# Option « ranger = oui » (2026-11-24) : les visuels sont rangés dans tools/marketing/apercu/ et envoyés dans le dépôt,
+# pour choisir un visuel de l'app depuis une session qui ne peut pas joindre les serveurs de Pokémon.
 name: Visuels de produits
 
 on:
@@ -8,9 +10,13 @@ on:
       urls:
         description: "nom=adresse séparés par des espaces"
         required: true
+      ranger:
+        description: "oui = ranger les visuels dans tools/marketing/apercu/ (envoyés dans le dépôt)"
+        required: false
+        default: "non"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   images:
@@ -26,4 +32,14 @@ jobs:
       - name: Visuels
         env:
           URLS: ${{ github.event.inputs.urls }}
+          SAVE_DIR: ${{ github.event.inputs.ranger == 'oui' && 'tools/marketing/apercu' || '' }}
         run: pip install --quiet pillow && python tools/marketing/url_images.py "$URLS"
+      - name: Envoi des visuels rangés
+        if: github.event.inputs.ranger == 'oui'
+        run: |
+          git add tools/marketing/apercu || true
+          if git diff --cached --quiet; then echo "Aucun visuel rangé."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Visuels de produits rangés pour aperçu ($(date -u +%Y-%m-%d))"
+          for i in 1 2 3; do git pull --rebase origin claude/pokemon-app-mockup-1mxt7p && git push origin HEAD:claude/pokemon-app-mockup-1mxt7p && break; sleep $((i * 5)); done
