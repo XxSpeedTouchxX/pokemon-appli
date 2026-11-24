@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-24 — Logos TikTok, Instagram et Discord visibles dans « Mes points »
+
+- **Demande** : « Dans "Mes missions" pour remporter des PL, les logos Insta, Discord et TikTok ne ressortent pas : fais en sorte qu'ils apparaissent. »
+- **Cause** : dans « Mes points › PL › Comment les gagner ? » (page du 2026-11-23), les 3 logos, blancs, étaient posés sur un carré blanc : invisibles. La liste de « Ma ligue › Mes missions » les montrait déjà sur la couleur de chaque réseau.
+- **Fait** (`points.js`, `points.css`) : chaque logo sur la couleur de son réseau, comme dans « Mes missions » (TikTok noir bordé, Instagram en dégradé, Discord bleu violet) ; contrôle ajouté à `t-points.mjs` (jamais de fond blanc) ; cache v283.
+
 ## 2026-11-23 (suite 6) — Page « Mes points » : PK, PA et PL expliqués (« go » du porteur)
 
 - **Demande** : « un endroit sur la page d'accueil pour comprendre comment on gagne les PK et les PA, et les PL ; une page la plus claire possible pour qu'un nouveau comprenne au plus vite » ; puis « go, on part sur tes propositions par défaut, je te laisse tout optimiser ».

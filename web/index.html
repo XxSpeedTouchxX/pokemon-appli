@@ -4132,7 +4132,11 @@ html.pkm-calm .pkm-prf-hero, html.pkm-calm .pkm-prf-steps, html.pkm-calm .pkm-pr
 .pkm-pts-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .pkm-pts-steps li { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #1E2B45; border-radius: 14px; background: #0F1828; }
 .pkm-pts-steps li > img { flex: none; display: block; width: 30px; height: 30px; object-fit: contain; }
-.pkm-pts-steps li > img.pkm-pts-ico-soc { box-sizing: border-box; padding: 5px; border-radius: 9px; background: #FFFFFF; }
+/* Logos des réseaux (blancs) sur la couleur de chaque réseau, comme dans « Mes missions » (2026-11-24, porteur : ils ne se voyaient pas sur fond blanc). */
+.pkm-pts-steps li > img.pkm-pts-ico-soc { box-sizing: border-box; padding: 6px; border-radius: 9px; background: #1A2645; }
+.pkm-pts-steps li > img.pkm-pts-soc-tiktok { background: #000000; box-shadow: inset 0 0 0 1px #3A4A6C; }
+.pkm-pts-steps li > img.pkm-pts-soc-instagram { background: linear-gradient(45deg, #F58529, #DD2A7B 45%, #8134AF 75%, #515BD4); }
+.pkm-pts-steps li > img.pkm-pts-soc-discord { background: #5865F2; }
 .pkm-pts-st { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .pkm-pts-st b { font-size: 13.5px; font-weight: 700; }
 .pkm-pts-st small { font-size: 12px; line-height: 1.35; color: #9AA8C3; }
@@ -5084,6 +5088,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=673e248c"></script>
+<script src="app.js?v=99b7aad8"></script>
 </body>
 </html>

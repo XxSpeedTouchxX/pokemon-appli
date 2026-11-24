@@ -85,7 +85,7 @@
   // Panneaux des 3 onglets.
   const ptsPanel = (self, s, tab) => {
     const P = self.perks(), t = self.tierOf(), canRe = !(typeof storeApp !== 'undefined' && storeApp) && !(typeof self.buyLocked === 'function' && self.buyLocked());
-    const step = (logo, title, text, amount, go, cta) => ({ ico: logo, icoCls: /img\/social\//.test(logo) ? 'pkm-pts-ico-soc' : '', title: title, text: text, amount: amount || '', hasAmount: !!amount, hasGo: !!go, go: go || (() => {}), cta: cta || 'Y aller' });
+    const step = (logo, title, text, amount, go, cta) => ({ ico: logo, icoCls: /img\/social\//.test(logo) ? 'pkm-pts-ico-soc pkm-pts-soc-' + logo.replace(/^.*\/|\.svg$/g, '') : '', title: title, text: text, amount: amount || '', hasAmount: !!amount, hasGo: !!go, go: go || (() => {}), cta: cta || 'Y aller' });
     if (tab === 'pk') {
       const shopT = SHOP_ITEMS.filter(x => x.kind === 'ticket'), shopB = SHOP_ITEMS.filter(x => x.kind !== 'ticket' && !x.soon);
       const range = a => a.length ? ptsNum(Math.min.apply(null, a.map(x => x.price))) + ' à ' + ptsNum(Math.max.apply(null, a.map(x => x.price))) + ' PK' : '';

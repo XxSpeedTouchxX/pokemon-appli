@@ -44,6 +44,11 @@ for (const [i, title, re] of [[0, 'Mes PK', /Booster PK.*Pile ou face.*Safari é
   ok('onglet ' + title + ' : C’est quoi, Comment les gagner, À quoi servent-ils, Bon à savoir', (await p.getAttribute('aria-label')) === title && /C’est quoi \?/.test(t) && /Comment les gagner \?/.test(t) && /À quoi servent-ils \?/.test(t) && /Bon à savoir/.test(t) && re.test(t));
   await p.screenshot({ path: shot('points-' + title.slice(4).toLowerCase() + '.png') });
 }
+// Logos TikTok, Instagram, Discord (blancs) : sur la couleur du réseau, jamais sur fond blanc (2026-11-24, porteur : « ils ne ressortent pas »).
+await dlg.locator('[role="tab"]').nth(2).click(); await page.waitForTimeout(250);
+const socBg = await dlg.locator('.pkm-pts-steps li > img.pkm-pts-ico-soc').evaluateAll(l => l.map(i => { const c = getComputedStyle(i); return i.getAttribute('src').replace(/^.*\//, '') + ' ' + c.backgroundColor + ' ' + c.backgroundImage.slice(0, 15); }));
+ok('onglet PL : logos TikTok, Instagram, Discord sur la couleur du réseau (' + socBg.join(' | ') + ')', socBg.length === 3
+  && /tiktok\.svg rgb\(0, 0, 0\)/.test(socBg[0]) && /instagram\.svg .*linear-gradient/.test(socBg[1]) && /discord\.svg rgb\(88, 101, 242\)/.test(socBg[2]) && !socBg.some(x => /rgb\(255, 255, 255\)/.test(x)));
 // La note des PA du jour reste exacte (même texte que l'ancien « Mes PA »).
 await dlg.locator('[role="tab"]').nth(1).click(); await page.waitForTimeout(250);
 ok('onglet PA : paliers J1 à J7 et note des PA', (await dlg.locator('.pkm-rules-streak > div').count()) === 7 && /Un jour sans les récupérer : retour au palier J3 \(\+40 PA\)/.test(await dlg.locator('.pkm-pa-sheet-note').innerText()));
