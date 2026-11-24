@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-24T03:02:06Z",
+ "updated": "2026-11-24T16:20:44Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,13 @@
   }
  ],
  "items": [
+  {
+   "title": "Pokémon GO : Saison Destinations de rêves",
+   "url": "https://www.pokebip.com/news/7656/pokemon-go-saison-destinations-de-reves",
+   "date": "2026-11-24T14:45:33Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "Pokémon GO : Saison 29 de la Ligue Combat GO !",
    "url": "https://www.pokebip.com/news/7655/pokemon-go-saison-29-de-la-ligue-combat-go",
@@ -120,13 +127,6 @@
    "title": "Pokémon Pocket : Semaine bonus !",
    "url": "https://www.pokebip.com/news/7641/pokemon-pocket-semaine-bonus",
    "date": "2026-11-14T10:01:56Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Souhaits crépusculaires !",
-   "url": "https://www.pokebip.com/news/7632/pokemon-go-souhaits-crepusculaires",
-   "date": "2026-11-13T17:25:02Z",
    "source": "Pokébip",
    "tcg": false
   },
