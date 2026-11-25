@@ -258,3 +258,28 @@
 
 /* Fiche d'échange ouverte depuis la recherche de Ma vitrine : lien vers la carte de dresseur du joueur. */
 .pkm-vt-owner { align-self: center; margin-top: 4px; }
+
+/* « Mes messages » : onglets Reçus / Envoyés, « Modifié », modifier ou supprimer un message (2026-11-25, porteur). */
+.pkm-qm-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid #1E2B45; background: #0B1120; }
+.pkm-qm-tab { min-height: 38px; border: 0; border-radius: 999px; background: transparent; color: #C9D3EA; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pkm-qm-tab-on { background: #FFD60A; color: #0B1120; }
+.pkm-qm-tab:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
+.pkm-qm-edtag { flex: none; padding: 1px 7px; border-radius: 999px; border: 1px solid #5A6B8F; color: #C9D3EA; font-size: 10.5px; font-style: normal; font-weight: 800; }
+.pkm-qm-replied.pkm-qm-wait { border-color: rgba(201, 211, 234, 0.35); background: rgba(201, 211, 234, 0.08); color: #C9D3EA; }
+.pkm-qm-wait .pkm-qm-ok { display: none; }
+.pkm-qm-acts { display: flex; justify-content: flex-end; gap: 8px; }
+.pkm-qm-act { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #C9D3EA; font: inherit; font-size: 12.5px; font-weight: 800; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pkm-qm-act svg { flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pkm-qm-act-del { color: #FF9AA5; border-color: rgba(255, 90, 110, 0.4); }
+.pkm-qm-act:focus-visible, .pkm-qm-cancel:focus-visible, .pkm-qm-del:focus-visible { outline: 3px solid #FFD60A; outline-offset: 2px; }
+.pkm-qm-act.pkm-qm-busy { opacity: 0.6; pointer-events: none; }
+.pkm-qm-ed, .pkm-qm-ask { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 14px; border: 1px solid rgba(255, 214, 10, 0.4); background: #111A2C; }
+.pkm-qm-ask { border-color: rgba(255, 90, 110, 0.5); font-size: 13.5px; line-height: 1.4; color: #F3F6FC; }
+.pkm-qm-ed-t { font-size: 14px; }
+.pkm-qm-ed-n { margin: 0; font-size: 12px; line-height: 1.4; color: #9AA8C3; }
+.pkm-qm-ed-b { display: flex; flex-wrap: wrap; gap: 8px; }
+.pkm-qm-save { flex: 1 1 auto; }
+.pkm-qm-save[disabled] { opacity: 0.5; }
+.pkm-qm-cancel { min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid #2A3A5C; background: transparent; color: #F3F6FC; font: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer; }
+.pkm-qm-del { flex: 1 1 auto; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 0; background: #E5394D; color: #FFFFFF; font: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer; }
+.pkm-qm-del[disabled] { opacity: 0.6; }

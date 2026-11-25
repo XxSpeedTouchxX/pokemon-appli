@@ -88,7 +88,7 @@ insert into public.quick_messages (from_id, to_id, code, kind) values ('00000000
 select pg_temp.as_user('00000000-0000-0000-0000-0000000f2803');
 set role authenticated;
 select pg_temp.check((select not exists (select 1 from jsonb_array_elements(public.quick_msg_inbox(30)->'items') e where e->>'kind' = 'quick')), 'Mes messages : plus de message rapide');
-select pg_temp.check((select (public.quick_msg_state()->>'unread')::int = 1 and (public.quick_msg_state()->>'v')::int = 38), 'non lus : seulement la réponse d''échange');
+select pg_temp.check((select (public.quick_msg_state()->>'unread')::int = 1 and (public.quick_msg_state()->>'v')::int >= 38), 'non lus : seulement la réponse d''échange');
 reset role;
 -- Rejouable : relancer 038 efface les messages rapides et garde les propositions.
 \i 038_recherche_cartes.sql

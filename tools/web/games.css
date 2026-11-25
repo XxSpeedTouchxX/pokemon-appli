@@ -486,8 +486,12 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-hk-sethead-logo img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
 .pkm-hk-sethead-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 800; line-height: 1.2; color: #FFFFFF; }
 .pkm-hk-sethead-n { flex: none; font-size: 12px; font-weight: 700; color: #C9D3EA; white-space: nowrap; font-variant-numeric: tabular-nums; }
-/* 3 choix de tri (Prix, Nom, Par série) sur un petit écran : texte et marges resserrés, rien de coupé. */
-@media (max-width: 374px) { .pkm-hk-sortg { gap: 5px !important; padding-left: 10px !important; padding-right: 8px !important; } .pkm-hk-sortg > span { font-size: 12px !important; } .pkm-hk-sortg [role="radio"] { flex: 1 1 auto !important; padding: 0 6px !important; font-size: 13px !important; white-space: nowrap; } }
+/* 4 choix de tri (Prix, Nom, Par série, Numéro) : « Trier par » au-dessus des 4 boutons sur toute la largeur de l'écran,
+   rien de coupé jusqu'à 320 px. */
+.pkm-hk-sortg { flex-wrap: wrap; row-gap: 6px !important; }
+.pkm-hk-sortg > span { flex: 1 0 100% !important; }
+.pkm-hk-sortg [role="radio"] { flex: 1 1 auto !important; }
+@media (max-width: 374px) { .pkm-hk-sortg { gap: 5px !important; padding-left: 10px !important; padding-right: 8px !important; } .pkm-hk-sortg > span { font-size: 12px !important; } .pkm-hk-sortg [role="radio"] { padding: 0 6px !important; font-size: 13px !important; white-space: nowrap; } }
 .pkm-hk-all { min-height: 28px; padding: 0; border: 0; background: transparent; color: #B9C5FF; font: inherit; font-size: 12.5px; font-weight: 700; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 /* « Tout afficher » du classeur (2026-10-21, vidéo du porteur) : écran plein, classé par valeur, grille de 3. */
 .pkm-hf { position: absolute; inset: 0; z-index: 17; overflow-y: auto; scrollbar-width: none; box-sizing: border-box; padding: 18px 14px calc(28px + env(safe-area-inset-bottom)); background: #0B1120; color: #F3F6FC; display: flex; flex-direction: column; gap: 12px; }
@@ -495,6 +499,22 @@ details[open] > .pkm-gm-sum .pkm-gm-chev { transform: rotate(180deg); }
 .pkm-hf-title { margin: 0; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
 .pkm-hf-sub { margin: 0; font-size: 12.5px; color: #9AA8C3; }
 .pkm-hf-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+/* Bandeau des séries de « Tout afficher » (2026-11-25, porteur) : une tuile par extension du classeur (logo, nom, nombre
+   de cartes), à faire défiler de côté ; la tuile choisie en jaune. Puis les tris (Prix, Nom, Par série, Numéro). */
+.pkm-hf-sets { display: flex; gap: 8px; margin: 0 -14px; padding: 2px 14px 4px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.pkm-hf-sets::-webkit-scrollbar, .pkm-hf-chips::-webkit-scrollbar { display: none; }
+.pkm-hf-set { flex: none; position: relative; width: 96px; min-height: 86px; box-sizing: border-box; padding: 8px 6px 7px; border-radius: 14px; border: 1px solid #2A3A5C; background: #111A2C; color: #F3F6FC; display: flex; flex-direction: column; align-items: center; gap: 5px; font: inherit; text-align: center; cursor: pointer; scroll-snap-align: start; }
+.pkm-hf-set-on { border: 2px solid #FFD60A; padding: 7px 5px 6px; background: linear-gradient(180deg, rgba(255, 214, 10, 0.2), #111A2C 75%); box-shadow: 0 4px 12px rgba(255, 214, 10, 0.18); }
+.pkm-hf-set-logo { flex: none; display: flex; align-items: center; justify-content: center; width: 80px; height: 30px; color: #C9D3EA; }
+.pkm-hf-set-logo img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
+.pkm-hf-set-on .pkm-hf-set-logo { color: #FFD60A; }
+.pkm-hf-set-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; width: 100%; font-size: 11.5px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.pkm-hf-set-n { position: absolute; top: -1px; right: -1px; min-width: 20px; box-sizing: border-box; padding: 1px 6px; border-radius: 0 13px 0 9px; background: #24345C; color: #FFFFFF; font-size: 10.5px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.pkm-hf-set-on .pkm-hf-set-n { top: -2px; right: -2px; background: #FFD60A; color: #0B1120; }
+.pkm-hf-sorts { display: flex; align-items: center; gap: 6px; }
+.pkm-hf-sorts-t { flex: none; font-size: 12.5px; font-weight: 600; color: #C9D3EA; }
+.pkm-hf-sorts [role="radio"] { flex: 1 1 auto; min-width: 0; height: 34px; padding: 0 8px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+@media (max-width: 374px) { .pkm-hf-sorts { gap: 4px; } .pkm-hf-sorts-t { font-size: 11.5px; } .pkm-hf-sorts [role="radio"] { padding: 0 5px; font-size: 12px; } }
 .pkm-hf-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
 .pkm-hf-tile { container-type: inline-size; position: relative; display: block; width: 100%; aspect-ratio: 600 / 825; padding: 0; border: 0; border-radius: 5% / 3.6%; overflow: hidden; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.08); cursor: pointer; }
 .pkm-hf-card { display: block; width: 100%; height: 100%; object-fit: cover; }

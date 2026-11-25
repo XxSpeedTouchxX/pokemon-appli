@@ -491,6 +491,174 @@
     return r;
   };
 
+  // ——— « Mes messages » : Reçus et Envoyés, modifier ou supprimer un message ———
+  // 2026-11-25, porteur : « dans l'endroit où on envoie les messages, on ait la possibilité de supprimer un message ou
+  // bien de le modifier ». Serveur 041 (tools/supabase/041_messages_modifier.sql) : quick_msg_sent, trade_edit,
+  // trade_answer_edit, trade_delete. Règles (serveur) : ma proposition se modifie tant que l'autre n'a pas répondu
+  // (« Je suis intéressé » ou « Je te propose une de mes cartes », carte proposée), 5 fois au plus ; supprimée sans
+  // réponse, elle disparaît pour les deux ; avec une réponse, de ma liste seulement. Ma réponse se change ou se retire
+  // (un accord annulé libère les cartes). Un message reçu se retire de ma liste seulement. Toujours sans texte libre.
+  const qmV41 = s => !!(s.qmBox && Number(s.qmBox.v) >= 41);
+  const QM_ICON = { edit: 'M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4z', del: 'M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5' };
+  const vtBaseOpen = vtProto.qmOpen;
+  vtProto.qmOpen = function () {
+    this.setState({ qmTabK: 'in', qmEdit: null, qmDel: null, qmSent: null, qmSentErr: '' });
+    return vtBaseOpen.call(this);
+  };
+  vtProto.qmSetTab = function (k) {
+    this.setState({ qmTabK: k, qmEdit: null, qmDel: null });
+    if (k === 'out') this.qmLoadSent();
+  };
+  vtProto.qmLoadSent = function () {
+    if (!vtOnline()) return Promise.resolve(null);
+    this.setState({ qmSentBusy: true, qmSentErr: '' });
+    return Cloud.rpc('quick_msg_sent', { lim: 30 }).then(d => {
+      const items = d && Array.isArray(d.items) ? d.items.filter(it => /^(interest|offer|answer)$/.test(it && it.kind || '')) : [];
+      this.setState({ qmSent: { items: items }, qmSentBusy: false, qmSentErr: '' });
+    }, e => this.setState({ qmSentBusy: false, qmSentErr: e && e.code === 'network' ? 'net' : e && e.code === 'not_installed' ? 'old' : 'err' }));
+  };
+  // Une action (modifier, supprimer) puis les deux listes relues ; la vitrine est relue si un accord a pu changer.
+  vtProto.qmAct = function (rpc, args, okText) {
+    if (this.st().qmActBusy) return;
+    this.setState({ qmActBusy: rpc + ':' + args.msg_id });
+    Cloud.rpc(rpc, args).then(r => {
+      this.setState({ qmActBusy: '', qmEdit: null, qmDel: null, toast: typeof okText === 'function' ? okText(r || {}) : okText }); this.flash();
+      this.qmLoadBox();
+      if (this.st().qmTabK === 'out') this.qmLoadSent();
+      if (rpc !== 'trade_edit') this.vtLoadState(true);
+    }, e => { this.setState({ qmActBusy: '' , toast: vtErrText(e) }); this.flash(); });
+  };
+  // Bouton d'action (Modifier, Supprimer) sous un message.
+  const qmActBtn = (k, label, aria, pick, busy) => ({ label: label, aria: aria, pick: pick, icon: QM_ICON[k], cls: 'pkm-qm-act pkm-qm-act-' + k + (busy ? ' pkm-qm-busy' : '') });
+  // Champs ajoutés à chaque message (valeurs par défaut).
+  const qmExtra = v => Object.assign(v, { isEdited: false, acts: [], hasActs: false, editing: false, ed: { title: '', opts: [], showPick: false, picks: [], noPicks: false, noPicksText: '', hasSave: false, save: null, saveOff: true, saveLabel: '', cancel: null, note: '' },
+    asking: false, ask: { text: '', yes: null, yesLabel: '', no: null, busy: false } });
+  // Changer ma réponse : les 3 réponses, la mienne cochée ; un appui sur une autre l'enregistre.
+  vtProto.qmAnswerEd = function (s, propId, cur, pseudo, editsLeft) {
+    const busy = s.qmActBusy || '';
+    return { title: 'Changer ta réponse à ' + pseudo, opts: ['deal_yes', 'deal_no', 'gone'].map(code => ({ label: VT_CODES[code], on: code === cur ? 'true' : 'false',
+      cls: 'pkm-qm-chip pkm-qm-chip-s' + (code === 'deal_yes' ? ' pkm-qm-chip-yes' : '') + (code === cur ? ' pkm-qm-sent' : '') + (busy === 'trade_answer_edit:' + propId ? ' pkm-qm-busy' : ''),
+      pick: () => (code === cur ? this.setState({ qmEdit: null }) : this.qmAct('trade_answer_edit', { msg_id: propId, code: code },
+        r => (r.deal ? '🤝 Réponse changée : d’accord avec ' + pseudo : 'Réponse changée : ' + pseudo + ' verra « Modifié »'))) })),
+      showPick: false, picks: [], noPicks: false, noPicksText: '', hasSave: false, save: null, saveOff: true, saveLabel: '',
+      cancel: () => this.setState({ qmEdit: null }),
+      note: (cur === 'deal_yes' ? 'Quitter « Ça m’intéresse » annule l’accord et libère vos cartes. ' : '') + 'Encore ' + editsLeft + ' modification' + (editsLeft > 1 ? 's' : '') + ' possible' + (editsLeft > 1 ? 's' : '') + '.' };
+  };
+  // Modifier ma proposition : « Je suis intéressé » ou « Je te propose une de mes cartes » (si sa carte est Pour trade).
+  vtProto.qmPropEd = function (s, it) {
+    const e = s.qmEdit || {}, kind = e.kind || it.kind, canOffer = !!(it.card && it.card.trade), mineT = canOffer ? this.vtMyTrade(s) : [];
+    const pick = kind === 'offer' ? (e.pick != null ? e.pick : it.offer && it.offer.sid) : null, picked = mineT.find(o => o.sid === pick);
+    const set = p => this.setState({ qmEdit: Object.assign({}, this.st().qmEdit || {}, p) });
+    const left = Number(it.edits_left != null ? it.edits_left : 5), busy = (s.qmActBusy || '') === 'trade_edit:' + it.id;
+    const opts = [['interest', it.card && it.card.sale && !it.card.trade ? '👋 Je suis intéressé (' + vtPriceTxt(it.card.price_cents) + ')' : '👋 Je suis intéressé']]
+      .concat(canOffer ? [['offer', '⇄ Je te propose une de mes cartes']] : []);
+    return { title: 'Modifier ton message à ' + (it.pseudo || 'ce joueur'),
+      opts: opts.map(([k, label]) => ({ label: label, on: k === kind ? 'true' : 'false', cls: 'pkm-qm-chip pkm-qm-chip-s' + (k === kind ? ' pkm-qm-sent' : ''), pick: () => set({ kind: k }) })),
+      showPick: kind === 'offer' && mineT.length > 0,
+      picks: kind === 'offer' ? mineT.map(o => Object.assign({}, o, { on: o.sid === pick ? 'true' : 'false', cls: 'pkm-vt-pick' + (o.sid === pick ? ' pkm-vt-pick-on' : ''), pick: () => set({ kind: 'offer', pick: o.sid }), aria: 'Proposer ' + o.name + ' (' + o.condLong + ')' })) : [],
+      noPicks: kind === 'offer' && !mineT.length, noPicksText: 'Mets d’abord une de tes cartes « Pour trade » (fiche d’une carte de ton classeur) pour la proposer en échange.',
+      hasSave: true, saveOff: busy || (kind === 'offer' && !picked), saveLabel: busy ? 'Enregistrement…' : kind === 'offer' ? (picked ? 'Enregistrer : proposer ' + picked.name : 'Choisis une de tes cartes') : 'Enregistrer',
+      save: () => this.qmAct('trade_edit', { msg_id: it.id, kind: kind, offer_sid: kind === 'offer' ? pick : null }, r => (r.same ? 'Rien n’a changé' : 'Message modifié : ' + (it.pseudo || 'ce joueur') + ' verra « Modifié »')),
+      cancel: () => this.setState({ qmEdit: null }),
+      note: 'Encore ' + left + ' modification' + (left > 1 ? 's' : '') + ' possible' + (left > 1 ? 's' : '') + '. Ton message redevient « nouveau » chez ' + (it.pseudo || 'ce joueur') + ', avec la mention « Modifié ».' };
+  };
+  // Demande de confirmation avant de supprimer.
+  vtProto.qmAsk = function (s, id, text) {
+    const busy = (s.qmActBusy || '') === 'trade_delete:' + id;
+    return { text: text, yesLabel: busy ? 'Suppression…' : 'Supprimer', busy: busy,
+      yes: () => this.qmAct('trade_delete', { msg_id: id }, r => (r.removed === 'both' ? 'Message supprimé' : 'Message retiré de ta liste')),
+      no: () => this.setState({ qmDel: null }) };
+  };
+  // Message envoyé (onglet « Envoyés »).
+  vtProto.qmSentItem = function (s, it, now) {
+    const T = this.tiers(), g = T[Math.max(0, Math.min(T.length - 1, Number(it.grade) || 0))];
+    const ava = typeof avMini === 'function' ? avMini(it.avatar) : null, who = it.pseudo || 'ce joueur', ans = it.kind === 'answer';
+    const snap = x => (x ? Object.assign(this.vtCard(x.card_id, x.lang, x.cond, x.grade), { tag: x.sale && !x.trade ? 'À vendre · ' + vtPriceTxt(x.price_cents) : x.trade ? 'Pour trade' : '' }) : null);
+    const card = snap(it.card), offer = snap(it.offer);
+    // Ma proposition : « card » = sa carte, « offer » = la mienne. Ma réponse : « card » = ma carte, « offer » = la sienne.
+    const theirs = ans ? offer : card, mine = ans ? card : offer;
+    const v = qmExtra({
+      pseudo: 'À ' + who, ago: qmAgo(it.at, now), isNew: false, cls: 'pkm-qm-item pkm-qm-out',
+      text: ans ? 'Ta réponse : ' + (VT_CODES[it.code] || '') : it.kind === 'interest' ? VT_CODES.interest + (it.card && it.card.sale && !it.card.trade ? ' (à vendre ' + vtPriceTxt(it.card.price_cents) + ')' : '') : VT_CODES.offer,
+      hasAva: !!ava, noAva: !ava, ava: ava || { bg: '', char: '', poke: {}, pokeStyle: '', hasPoke: false, acc: {}, accStyle: '', hasAcc: false }, gImg: g.sym,
+      openCard: () => this.qmOpenSender({ from: it.to, pseudo: it.pseudo, grade: it.grade, avatar: it.avatar }), cardAria: 'Voir la carte de dresseur de ' + who + ', ' + qmAgo(it.at, now),
+      isTrade: true, replies: [], hasReplies: false
+    });
+    v.tcards = [theirs ? Object.assign({ who: ans ? 'Sa carte proposée' : 'Sa carte' }, theirs) : null, mine ? Object.assign({ who: ans ? 'Ta carte' : 'Ta carte proposée' }, mine) : null].filter(Boolean)
+      .map(cd => Object.assign(cd, { sub2: [cd.cond, cd.value, cd.tag].filter(Boolean).join(' · ') }));
+    v.swapCls = 'pkm-qm-swap' + (v.tcards.length > 1 ? ' pkm-qm-swap2' : '');
+    v.isEdited = !!it.edited;
+    // État : en attente (vu ou non), ou sa réponse.
+    v.replied = ans ? (it.seen ? 'Vu par ' + who : 'Pas encore vu') : it.answer ? 'Sa réponse : « ' + (VT_CODES[it.answer] || it.answer) + ' »' + (it.answer_edited ? ' (modifiée)' : '')
+      : 'En attente de sa réponse · ' + (it.seen ? 'vu' : 'pas encore vu');
+    v.hasReplied = true; v.repliedCls = 'pkm-qm-replied' + (ans || it.answer ? '' : ' pkm-qm-wait');
+    v.hasDeal = !!it.deal;
+    const sale = !!(it.card && it.card.sale && !it.offer), dsc = vtDiscord();
+    v.dealText = (sale ? 'Vente d’accord avec ' : 'Échange d’accord avec ') + who;
+    v.dealNote = 'Vos cartes sont marquées « d’accord » dans vos vitrines. Retrouve ' + who + ' sur le Discord Dropicards (donne-lui ton pseudo Dropicards) pour organiser l’échange.';
+    v.discord = dsc; v.hasDiscord = !!dsc; v.noDiscord = !dsc;
+    v.safeNote = 'Ne donne jamais ton adresse ni tes coordonnées bancaires : préfère un échange en main propre dans un lieu public ou une boutique.';
+    const ed = s.qmEdit, busy = s.qmActBusy || '', left = Number(it.edits_left != null ? it.edits_left : 5);
+    const canEdit = (ans ? !!it.reply_to : !it.answer) && left > 0;
+    v.editing = !!(ed && ed.id === it.id && canEdit);
+    if (v.editing) v.ed = ans ? this.qmAnswerEd(s, it.reply_to, it.code, who, left) : this.qmPropEd(s, it);
+    v.asking = s.qmDel === it.id;
+    if (v.asking) v.ask = this.qmAsk(s, it.id, ans ? 'Retirer ta réponse ? ' + who + ' ne la verra plus et ta proposition reçue redevient « sans réponse ».' + (it.code === 'deal_yes' ? ' L’accord est annulé et vos cartes sont libérées.' : '')
+      : it.answer ? 'Retirer ce message de ta liste ? ' + who + ' garde le sien.' : 'Retirer ta proposition ? ' + who + ' ne la verra plus.');
+    if (!v.editing && !v.asking) {
+      v.acts = (canEdit ? [qmActBtn('edit', ans ? 'Modifier ma réponse' : 'Modifier', (ans ? 'Modifier ta réponse à ' : 'Modifier ton message à ') + who, () => this.setState({ qmEdit: { id: it.id }, qmDel: null }), false)] : [])
+        .concat([qmActBtn('del', 'Supprimer', 'Supprimer ton message à ' + who, () => this.setState({ qmDel: it.id, qmEdit: null }), busy === 'trade_delete:' + it.id)]);
+      v.hasActs = true;
+    }
+    return v;
+  };
+  const vtBoxBase2 = vtProto.vQmBox;
+  vtProto.vQmBox = function (s) {
+    const r = vtBoxBase2.call(this, s);
+    if (!r.open) return r;
+    const v41 = qmV41(s), out = s.qmTabK === 'out', raw = s.qmBox && Array.isArray(s.qmBox.items) ? s.qmBox.items : [], now = Date.now();
+    const nIn = raw.filter(it => !it.read).length;
+    r.hasTabs = !!s.qmBox && !s.qmErr;
+    r.tabs = [['in', 'Reçus' + (nIn ? ' (' + nIn + ')' : '')], ['out', 'Envoyés']].map(([k, label]) => ({ label: label, on: (k === 'out') === out ? 'true' : 'false',
+      cls: 'pkm-qm-tab' + ((k === 'out') === out ? ' pkm-qm-tab-on' : ''), pick: () => this.qmSetTab(k) }));
+    r.sub = out ? 'Tes propositions d’échange et tes réponses' : 'Propositions d’échange des dresseurs';
+    if (!out) {
+      (r.items || []).forEach((v, i) => {
+        qmExtra(v);
+        const it = raw[i];
+        if (!it || !v41) return;
+        v.isEdited = !!it.edited;
+        const who = it.pseudo || 'ce joueur', ed = s.qmEdit, left = Number(it.replied_edits_left != null ? it.replied_edits_left : 5);
+        const canEdit = it.kind !== 'answer' && !!it.replied && left > 0;
+        v.editing = !!(ed && ed.id === it.id && canEdit);
+        if (v.editing) { v.ed = this.qmAnswerEd(s, it.id, it.replied, who, left); v.hasReplied = false; }
+        v.asking = s.qmDel === it.id;
+        if (v.asking) { v.ask = this.qmAsk(s, it.id, 'Retirer ce message de ta liste ? ' + who + ' garde le sien.' + (it.kind !== 'answer' && !it.replied ? ' Tu ne pourras plus y répondre.' : '')); v.hasReplies = false; }
+        if (!v.editing && !v.asking) {
+          v.acts = (canEdit ? [qmActBtn('edit', 'Modifier ma réponse', 'Modifier ta réponse à ' + who, () => this.setState({ qmEdit: { id: it.id }, qmDel: null }), false)] : [])
+            .concat([qmActBtn('del', 'Supprimer', 'Supprimer le message de ' + who + ' de ta liste', () => this.setState({ qmDel: it.id, qmEdit: null }), (s.qmActBusy || '') === 'trade_delete:' + it.id)]);
+          v.hasActs = true;
+        }
+        v.repliedCls = 'pkm-qm-replied';
+      });
+      (r.items || []).forEach(v => { if (!v.repliedCls) v.repliedCls = 'pkm-qm-replied'; });
+      return r;
+    }
+    // Onglet « Envoyés ».
+    const sent = s.qmSent && Array.isArray(s.qmSent.items) ? s.qmSent.items : [];
+    r.items = s.qmSentErr ? [] : sent.map(it => this.qmSentItem(s, it, now));
+    r.hasItems = r.items.length > 0;
+    r.busy = !!s.qmSentBusy && !s.qmSent;
+    const err = s.qmSentErr === 'old' ? (vtAdmin() ? 'Aperçu admin : les messages envoyés arrivent avec le script 041. Colle tools/supabase/install_024_a_034.sql dans Studio (SQL Editor › Run).' : 'Tes messages envoyés seront bientôt visibles ici.')
+      : s.qmSentErr === 'net' ? 'Pas de réseau : tes messages envoyés s’afficheront dès que tu seras connecté.' : s.qmSentErr ? 'Tes messages envoyés ne sont pas disponibles pour le moment.' : '';
+    r.err = err; r.hasErr = !!err;
+    r.empty = !r.busy && !err && !r.items.length;
+    r.emptyText = 'Aucun message envoyé. Propose un échange depuis la vitrine d’un dresseur (Le coin des dresseurs › Ma vitrine).';
+    r.showSet = false;
+    r.foot = 'Tant que le dresseur n’a pas répondu, tu peux modifier ou supprimer ta proposition. Un appui sur un message ouvre sa carte de dresseur.';
+    return r;
+  };
+
   // ——— Rendu ———
   const vtBaseRender = vtProto.renderVals;
   vtProto.renderVals = function () {

@@ -40,7 +40,7 @@ const setOfId = id => HOME[String(id).replace(/-[^-]+$/, '')] || '?';
 await page.locator(SEC).scrollIntoViewIfNeeded();
 await page.locator(SEC + ' button[aria-label^="Trier mon classeur"]').click(); await page.waitForTimeout(300);
 const opts = await page.locator(SEC + ' [role="radiogroup"] [role="radio"]').allInnerTexts();
-ok('tri : Prix, Nom et « Par série » (' + opts.join(' | ') + ')', opts.length === 3 && opts[2] === 'Par série');
+ok('tri : Prix, Nom, « Par série » et Numéro (' + opts.join(' | ') + ')', opts.length === 4 && opts[2] === 'Par série' && opts[3] === 'Numéro');
 // Tri par prix (par défaut) : aucun titre de série.
 ok('tri par prix : aucun titre de série', !(await page.locator(PANEL + ' .pkm-hk-sethead').count()));
 await page.locator(SEC + ' [role="radiogroup"] [role="radio"]', { hasText: 'Par série' }).click(); await page.waitForTimeout(600);
@@ -134,11 +134,11 @@ await page.locator(SEC + ' button[aria-label^="Trier mon classeur"]').click(); a
 await page.locator(SEC + ' [role="radiogroup"] [role="radio"]', { hasText: 'Prix' }).click(); await page.waitForTimeout(600);
 ok('retour au tri par prix : plus de titres de série', !(await page.locator(PANEL + ' .pkm-hk-sethead').count()) && (await tiles()).length === 9);
 
-// E. Petit écran (320 px) : les 3 choix de tri tiennent, « Par série » n'est pas coupé.
+// E. Petit écran (320 px) : les 4 choix de tri tiennent, « Par série » n'est pas coupé.
 await page.setViewportSize({ width: 320, height: 700 }); await page.waitForTimeout(400);
 await page.locator(SEC + ' button[aria-label^="Trier mon classeur"]').click(); await page.waitForTimeout(400);
 const fit = await page.locator(SEC + ' [role="radiogroup"]').evaluate(el => ({ g: el.scrollWidth - el.clientWidth, b: [...el.querySelectorAll('[role="radio"]')].map(b => b.scrollWidth - b.clientWidth) }));
-ok('320 px : Prix, Nom et « Par série » entiers (' + JSON.stringify(fit) + ')', fit.g <= 0 && fit.b.every(d => d <= 0));
+ok('320 px : Prix, Nom, « Par série » et Numéro entiers (' + JSON.stringify(fit) + ')', fit.g <= 0 && fit.b.every(d => d <= 0));
 
 // F. Vitrine du scellé triée « Par série » : un titre par extension, chaque série sur sa tablette.
 const sd = JSON.parse(readFileSync(ROOT + 'web/data/sealed.json', 'utf8'));

@@ -67,7 +67,7 @@
     // Tri du classeur (2026-11-15, porteur, à la place du « i ») : Prix (du plus cher au moins cher, par défaut) ou Nom
     // (de A à Z) ; même ordre dans les 2 onglets et dans « Tout afficher », gardé sur l'appareil.
     const byName = (a, b) => String(a.name).localeCompare(String(b.name), 'fr', { sensitivity: 'base', numeric: true });
-    const sortBy = s.hbSort === 'name' ? 'name' : s.hbSort === 'set' ? 'set' : 'price';
+    const sortBy = ['name', 'set', 'num'].indexOf(s.hbSort) >= 0 ? s.hbSort : 'price';
     // « Par série » (2026-11-21, porteur : « la première série qui sortira sera Règne Delta, avec les prix des cartes du
     // plus élevé au plus bas, ensuite viendra 30ème anniversaire, etc. ») : extensions des plus récentes aux plus
     // anciennes (ordre de « Toutes les séries »), puis cartes de la plus chère à la moins chère dans chaque extension ;
@@ -77,8 +77,14 @@
     const bySet = (a, b) => { const ka = setKey(a.p), kb = setKey(b.p); return setRank(ka) - setRank(kb) || (ka < kb ? -1 : ka > kb ? 1 : 0); };
     // Entrées du classeur (2026-11-01) : { p, gr, q, v } ; les exemplaires gradés d'une carte ont chacun la leur, par note
     // (graded.js), à côté des exemplaires non gradés.
+    // « Numéro » (2026-11-25, porteur : « trier par le numéro de la carte, du numéro 1 jusqu'au numéro 100 ») : séries
+    // rangées comme « Par série », puis cartes du n° 1 au dernier dans chaque extension (numéros à lettres, TG01 ou
+    // SV001, après les numéros simples) ; cartes de la Collection Classique après celles du 30ᵉ Anniversaire. Le scellé,
+    // sans numéro, reste par nom dans chaque extension.
     const order = sortBy === 'name' ? (a, b) => byName(a.p, b.p) || b.v - a.v
-      : sortBy === 'set' ? (a, b) => bySet(a, b) || b.v - a.v || byName(a.p, b.p) : (a, b) => b.v - a.v || byName(a.p, b.p);
+      : sortBy === 'set' ? (a, b) => bySet(a, b) || b.v - a.v || byName(a.p, b.p)
+      : sortBy === 'num' ? (a, b) => bySet(a, b) || setRank(a.p.set || '') - setRank(b.p.set || '') || homeByNum(a.p, b.p) || byName(a.p, b.p) || b.v - a.v
+      : (a, b) => b.v - a.v || byName(a.p, b.p);
     // Titre de chaque série (2026-11-21, porteur : « une délimitation plus nette entre chaque série, le titre un peu plus
     // gros, juste au-dessus de la première carte de la série, pas dans la carte ») : trié « Par série », chaque série
     // commence sur une nouvelle ligne, sous un bandeau pleine largeur (logo de l'extension, nom, nombre) ; le bandeau
@@ -92,7 +98,7 @@
       }
       return marks.get(k);
     };
-    const isSet = sortBy === 'set';
+    const isSet = sortBy === 'set' || sortBy === 'num';
     const startsSet = (l, i, per) => isSet && (i === 0 || setKey(l[i].p) !== setKey(l[i - 1].p) || (per > 0 && i % per === 0));
     const setHead = (l, i, first, sealedL) => {
       const k = setKey(l[i].p), m = markOf(k), cont = i > 0 && setKey(l[i - 1].p) === k;
@@ -192,19 +198,19 @@
           : [plural(units(cards), 'carte', 'cartes')].concat(graded ? [plural(graded, 'gradée', 'gradées')] : [], extra ? [plural(extra, 'doublon', 'doublons')] : []).join(' · ')
       },
       sort: {
-        open: !!s.hbSortOpen, cur: sortBy === 'name' ? 'Nom' : sortBy === 'set' ? 'Par série' : 'Prix',
-        label: s.hbSortOpen ? 'Fermer le tri' : 'Trier mon classeur, par ' + (sortBy === 'name' ? 'nom' : sortBy === 'set' ? 'série' : 'prix') + ' en ce moment',
+        open: !!s.hbSortOpen, cur: HOME_SORT_CUR[sortBy],
+        label: s.hbSortOpen ? 'Fermer le tri' : 'Trier mon classeur, par ' + HOME_SORT_CUR[sortBy].toLowerCase().replace(/^par /, '') + ' en ce moment',
         toggle: () => this.setState({ hbSortOpen: !s.hbSortOpen }),
-        opts: [['price', 'Prix', 'Trier par prix, du plus cher au moins cher'], ['name', 'Nom', 'Trier par nom, de A à Z'],
-          ['set', 'Par série', 'Trier par série : les extensions les plus récentes d’abord, puis les cartes de la plus chère à la moins chère']].map(([k, label, aria]) =>
+        opts: HOME_SORTS.map(([k, label, aria]) =>
           Object.assign({ label: label, aria: aria, on: sortBy === k, pick: () => this.setState({ hbSort: k, hbSortOpen: false, hbcp: 0, hbsp: 0, hbTurn: null }) }, this.chip(sortBy === k)))
       },
       shelf: shelf, gridCls: 'pkm-hk-grid' + (tab !== 'sealed' && s.hbTurn ? ' pkm-turn-' + s.hbTurn : ''),
       // « Tout afficher » (2026-10-21, vidéo du porteur) : écran plein « Toutes mes cartes » ou « Tous mes produits
       // scellés », classés par valeur, à faire défiler ; filtres Toutes, Loose, Gradées ; « Charger plus » par 30.
-      all: { show: true, on: false, label: 'Tout afficher', toggle: () => this.setState({ hbFull: tab, hbFullF: 'all', hbFullN: HOME_FULL }) },
+      all: { show: true, on: false, label: 'Tout afficher', toggle: () => this.setState({ hbFull: tab, hbFullF: 'all', hbFullSet: '', hbFullN: HOME_FULL }) },
       full: s.hbFull ? this.homeFull(s, s.hbFull === 'sealed' ? sealed : cards, s.hbFull === 'sealed',
-        l => (isSet ? grouped(l, 0, l.length, 0, tile, false, s.hbFull === 'sealed') : l.map(e => cell(tile(e)))), l => x.mask(this.eur(sum(l))), units, plural, isGraded) : HOME_NO_FULL,
+        l => (isSet ? grouped(l, 0, l.length, 0, tile, false, s.hbFull === 'sealed') : l.map(e => cell(tile(e)))), l => x.mask(this.eur(sum(l))), units, plural, isGraded,
+        { key: setKey, mark: markOf, rank: setRank, sortBy: sortBy }) : HOME_NO_FULL,
       tabs: [['cards', 'Mes cartes'], ['sealed', 'Mes produits scellés']].map(([k, label]) =>
         Object.assign({ label: label, on: tab === k, pick: () => this.setState({ hbk: k, hbTurn: null }) }, this.chip(tab === k))),
       tabLabel: tab === 'sealed' ? 'Mes produits scellés' : 'Mes cartes',
@@ -269,6 +275,23 @@
     this.hkStep(d);
   };
   const HOME_FULL = 30, HOME_NO_FULL = { open: false };
+  // Tris du classeur et de « Tout afficher » (clé, nom du bouton, phrase lue par le lecteur d'écran).
+  const HOME_SORTS = [['price', 'Prix', 'Trier par prix, du plus cher au moins cher'], ['name', 'Nom', 'Trier par nom, de A à Z'],
+    ['set', 'Par série', 'Trier par série : les extensions les plus récentes d’abord, puis les cartes de la plus chère à la moins chère'],
+    ['num', 'Numéro', 'Trier par numéro : chaque série, des plus récentes aux plus anciennes, puis les cartes du numéro 1 au dernier']];
+  const HOME_SORT_CUR = { price: 'Prix', name: 'Nom', set: 'Par série', num: 'Numéro' };
+  // Numéro d'une carte : préfixe en lettres (TG, SV, RC…), nombre, reste ; numéros simples d'abord (1, 2… 100), puis ceux
+  // à lettres, chacun dans l'ordre de ses nombres ; carte sans numéro à la fin. Scellé : aucun numéro (égalité).
+  const homeNumParts = p => {
+    const m = /^(\D*?)0*(\d+)(.*)$/.exec(String(p.num || '').trim());
+    return m ? [m[1].toUpperCase(), Number(m[2]), m[3]] : [String(p.num || '').trim() ? String(p.num).toUpperCase() : '\uffff', Infinity, ''];
+  };
+  const homeByNum = (a, b) => {
+    if (a.type === 'sealed' || b.type === 'sealed') return 0;
+    const x = homeNumParts(a), y = homeNumParts(b);
+    return (x[0] ? 1 : 0) - (y[0] ? 1 : 0) || (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0)
+      || (x[1] === y[1] ? 0 : x[1] < y[1] ? -1 : 1) || x[2].localeCompare(y[2], 'fr', { numeric: true });
+  };
   // Rang de chaque extension dans « Toutes les séries » (des plus récentes aux plus anciennes) ; inconnue : à la fin.
   let homeRankFor = null, homeRankMap = null;
   const homeSetRank = () => {
@@ -277,17 +300,40 @@
     const m = homeRankMap;
     return k => (k && Object.prototype.hasOwnProperty.call(m, k) ? m[k] : 1e6);
   };
-  proto.homeFull = function (s, list, sealed, layout, money, units, plural, isGraded) {
+  // « Tout afficher » (2026-11-25, porteur : « sur le bandeau en haut du catalogue, tu puisses facilement avoir la
+  // sélection de quelle série tu souhaites visualiser ; dans les filtres, trier par le numéro de la carte ») : bandeau des
+  // extensions présentes dans le classeur (logo, nom, nombre ; des plus récentes aux plus anciennes), « Toutes les
+  // séries » en tête ; puis les tris du classeur (Prix, Nom, Par série, Numéro), partagés avec lui.
+  proto.homeFull = function (s, list, sealed, layout, money, units, plural, isGraded, g) {
     const F = sealed ? 'all' : (['loose', 'graded'].indexOf(s.hbFullF) >= 0 ? s.hbFullF : 'all');
-    const kept = list.filter(e => F === 'all' || (F === 'graded') === isGraded(e));
+    const sets = [], seen = new Map();
+    list.forEach(e => { const k = g.key(e.p); if (!seen.has(k)) { seen.set(k, 0); sets.push(k); } seen.set(k, seen.get(k) + e.q); });
+    sets.sort((a, b) => g.rank(a) - g.rank(b) || (a < b ? -1 : a > b ? 1 : 0));
+    // Extension choisie (« ~ » : produits sans extension, rangés dans « Autres ») ; null : toutes les séries.
+    const want = s.hbFullSet === '~' ? '' : s.hbFullSet, S = s.hbFullSet && seen.has(want) ? want : null;
+    const inSet = list.filter(e => S === null || g.key(e.p) === S);
+    const kept = inSet.filter(e => F === 'all' || (F === 'graded') === isGraded(e));
     const n = Math.max(HOME_FULL, s.hbFullN || HOME_FULL), shown = kept.slice(0, n), left = kept.length - shown.length;
     const count = l => (sealed ? plural(units(l), 'produit', 'produits') : plural(units(l), 'carte', 'cartes'));
     const chip = (k, label, l) => Object.assign({ label: label + ' (' + l.length + ')', on: F === k, pick: () => this.setState({ hbFullF: k, hbFullN: HOME_FULL }) }, this.chip(F === k));
+    const setChip = k => {
+      const m = k === null ? null : g.mark(k), on = S === k, q = k === null ? units(list) : seen.get(k);
+      const name = m ? m.name : 'Toutes les séries';
+      return { name: name, n: String(q), on: on, logo: m ? m.logo : '', hasLogo: !!(m && m.hasLogo), all: k === null,
+        cls: 'pkm-hf-set' + (on ? ' pkm-hf-set-on' : '') + (k === null ? ' pkm-hf-set-all' : ''),
+        aria: name + ', ' + count(k === null ? list : list.filter(e => g.key(e.p) === k)) + (on ? ', affichée' : ''),
+        pick: () => this.setState({ hbFullSet: k === null ? '' : k === '' ? '~' : k, hbFullN: HOME_FULL }) };
+    };
+    const sortCur = HOME_SORT_CUR[g.sortBy] || 'Prix';
     return {
       open: true, isCards: !sealed, isSealed: sealed, gridCls: 'pkm-hf-grid' + (sealed ? ' pkm-hf-grid-s' : ''),
       title: sealed ? 'Tous mes produits scellés' : 'Toutes mes cartes',
-      sub: (s.hbSort === 'name' ? 'Classés par nom' : s.hbSort === 'set' ? 'Classés par série' : 'Classés par prix') + ' · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
-      chips: sealed ? [] : [chip('all', 'Toutes', list), chip('loose', 'Loose', list.filter(e => !isGraded(e))), chip('graded', 'Gradées', list.filter(isGraded))],
+      sub: (S !== null ? g.mark(S).name + ' · ' : '') + 'Classés par ' + sortCur.toLowerCase().replace(/^par /, '') + ' · ' + count(kept) + ' · ' + money(kept), close: () => this.setState({ hbFull: null }),
+      // Bandeau des séries : seulement s'il y a au moins 2 extensions dans le classeur.
+      hasSets: sets.length > 1, sets: sets.length > 1 ? [setChip(null)].concat(sets.map(setChip)) : [],
+      sorts: HOME_SORTS.map(([k, label, aria]) => Object.assign({ label: label, aria: aria, on: g.sortBy === k,
+        pick: () => this.setState({ hbSort: k, hbFullN: HOME_FULL, hbcp: 0, hbsp: 0, hbTurn: null }) }, this.chip(g.sortBy === k))),
+      chips: sealed ? [] : [chip('all', 'Toutes', inSet), chip('loose', 'Loose', inSet.filter(e => !isGraded(e))), chip('graded', 'Gradées', inSet.filter(isGraded))],
       hasChips: !sealed, items: layout(shown), empty: !kept.length,
       more: left > 0, moreLabel: 'Charger plus (' + Math.min(left, HOME_FULL) + ')', loadMore: () => this.setState({ hbFullN: n + HOME_FULL })
     };

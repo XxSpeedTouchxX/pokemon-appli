@@ -222,7 +222,7 @@ const saved = (rows, extraLines = []) => JSON.stringify({ v: 1, savedAt: new Dat
   const priceOrder = await names();
   await sortBtn.click(); await page.waitForTimeout(350);
   const radios = sec.locator('[role="radiogroup"][aria-label="Trier mon classeur par"] [role="radio"]');
-  ok('tri ouvert : ' + (await radios.allInnerTexts()).join(' | ') + ', « Prix » coché', (await radios.allInnerTexts()).join('|') === 'Prix|Nom|Par série' && (await radios.first().getAttribute('aria-checked')) === 'true' && (await sortBtn.getAttribute('aria-expanded')) === 'true');
+  ok('tri ouvert : ' + (await radios.allInnerTexts()).join(' | ') + ', « Prix » coché', (await radios.allInnerTexts()).join('|') === 'Prix|Nom|Par série|Numéro' && (await radios.first().getAttribute('aria-checked')) === 'true' && (await sortBtn.getAttribute('aria-expanded')) === 'true');
   await page.screenshot({ path: shot('binder-sort.png') });
   await radios.nth(1).click(); await page.waitForTimeout(500);
   const nameOrder = await names(), coll = new Intl.Collator('fr', { sensitivity: 'base', numeric: true });

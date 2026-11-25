@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-11-25 (suite 2) — « Tout afficher » par série et par numéro ; modifier ou supprimer un message
+
+- **Demandes** : « Dans la page d'accueil, lorsqu'on se retrouve dans le catalogue, j'aimerais qu'il y ait plusieurs catégories selon la série. Par exemple, si tu as Nuit Noire et KO ascendant, il faut que sur le bandeau en haut, sur le catalogue, tu puisses facilement avoir la sélection de quelle série souhaites-tu visualiser. Il faut également que dans les filtres, tu puisses trier par le numéro de la carte, du numéro 1 jusqu'au numéro 100 par exemple. » ; « il faut que dans l'endroit où on envoie les messages, on ait la possibilité de supprimer un message ou bien de le modifier. »
+- **Catalogue (lecture retenue : Mon classeur › « Tout afficher », l'album « Toutes mes cartes »)** :
+  - bandeau des séries en haut : « Toutes les séries » puis une tuile par extension du classeur (logo, nom, nombre de cartes), des plus récentes aux plus anciennes, à faire défiler de côté ; un appui n'affiche que cette série (filtres Toutes, Loose, Gradées comptés dans la série) ; à la réouverture, toutes les séries ;
+  - tri « Numéro » ajouté (Prix, Nom, Par série, **Numéro**), dans l'album et dans le menu du classeur (tri partagé, gardé sur l'appareil) : chaque série dans l'ordre du bandeau, puis cartes du n° 1 au dernier ; numéros à lettres (TG01, SV001…) après les numéros simples ; Collection Classique après le 30ᵉ Anniversaire ; scellé par nom dans chaque extension.
+- **Messages (« Mes messages »)** : onglets **Reçus** et **Envoyés** (avant : seulement les messages reçus ; l'expéditeur ne retrouvait nulle part sa proposition).
+  - Ma proposition sans réponse : **Modifier** (« Je suis intéressé » ou « Je te propose une de mes cartes », autre carte proposée ; 5 fois au plus ; « Modifié » et de nouveau non lue chez l'autre joueur) et **Supprimer** (retirée pour les deux, toujours comptée dans les 10 envois du jour).
+  - Ma proposition avec réponse : Supprimer seulement (retirée de ma liste, l'autre garde la sienne).
+  - Ma réponse : **Modifier ma réponse** (Ça m'intéresse, Non merci, Plus disponible ; un accord annulé libère les cartes, un nouvel accord les réserve) et Supprimer (retirée pour les deux, la proposition redevient sans réponse).
+  - Message reçu : Supprimer (retiré de ma liste seulement). Toujours sans texte libre ; confirmation avant chaque suppression.
+- **Défauts à confirmer** : 5 modifications par message ; suppression d'une proposition sans réponse comptée dans les 10 envois du jour ; message modifié de nouveau « non lu » chez l'autre joueur.
+- **Serveur** : `tools/supabase/041_messages_modifier.sql` (`quick_msg_sent`, `trade_edit`, `trade_answer_edit`, `trade_delete`, `quick_msg_inbox` et `quick_msg_state` en version 41, `trade_send` et `trade_answer` sans les propositions retirées), 63 tests (`tests/test_041.sql`) ; **à installer par le porteur** avec `install_024_a_034.sql` (qui contient désormais 041), puis `000_verifier.sql`. Sans 041 : aucun bouton Modifier ni Supprimer, « Envoyés » annonce l'installation (admin) ou « bientôt » (joueur).
+- **App** : `home.js`, `catalog.dc.html`, `games.css` (album) ; `vitrine.js`, `vitrine.css` (messages) ; politique de confidentialité à jour (25 novembre 2026) ; tests `t-binderfull` (25, nouveau), `t-msgedit` (33, nouveau), `t-binder`, `t-binderset`, `t-vitrine`, `t-qmsg` ; cache v288.
+
 ## 2026-11-25 (suite) — Remettre un compte à zéro
 
 - **Demande** : « Rappelle-moi la commande pour enlever les stats que j'ai mises à quelqu'un, pour le faire recommencer à 0 sur l'app. »
