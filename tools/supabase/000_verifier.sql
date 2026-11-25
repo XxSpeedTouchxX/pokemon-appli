@@ -41,6 +41,7 @@ from (values
   ('038_recherche_cartes', to_regprocedure('public.showcase_offers(text[],integer)') is not null, 'Ma vitrine : chercher une carte proposée ; messages rapides retirés'),
   ('040_stock_admin', coalesce(obj_description(to_regprocedure('public.shop_state()'), 'pg_proc'), '') like '040%', 'PK shop : chaque achat direct retire un article du stock, admin compris'),
   ('042_shop_bientot', coalesce(obj_description('public.game_items'::regclass, 'pg_class'), '') like '042%', 'PK shop : booster à 10 000 PK, item rare et ETB bientôt disponibles'),
+  ('043_mail_joueur_lot', to_regclass('public.shop_player_mails') is not null, 'e-mail de félicitations au joueur après un achat direct (avec la fonction notify, docs/30 § 9)'),
   ('041_messages_modifier', to_regprocedure('public.quick_msg_sent(integer)') is not null and position('41' in coalesce((select prosrc from pg_proc where oid = to_regprocedure('public.quick_msg_state()')), '')) > 0, 'Mes messages : messages envoyés, modifier ou supprimer un message'),
   ('036_notifications_push', to_regprocedure('public.push_due(timestamp with time zone,integer)') is not null, 'notifications envoyées par le serveur (installation à part, docs/46)'),
   ('020_premium_formules', exists (select 1 from pg_constraint where conname = 'premium_plan_check' and pg_get_constraintdef(oid) like '%quarter%'), 'Premium trimestriel et semestriel')

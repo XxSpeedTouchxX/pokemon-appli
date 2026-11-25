@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-25 (suite 4) — E-mail de félicitations au joueur après un achat direct au PK shop
+
+- **Demande** : « lorsque l'utilisateur arrive à acheter un booster direct à 10 000 PK ou autre item dans le PK shop comme l'item rare ou l'ETB, qu'il reçoive automatiquement un mail sur sa boîte mail renseignée dans l'appli, un mail de "félicitations" en remontrant le lot qu'il a acheté et lui demandant de mettre son nom, prénom, adresse, code postal, adresse mail et numéro de téléphone, et dire dans le mail qu'une fois complété il nous le renvoie sur l'adresse mail de Dropicards pour qu'on puisse faire le nécessaire pour lui envoyer ; je veux que le mail soit satisfaisant et sympa à lire et compréhensible ».
+- **Serveur installé (porteur, même jour)** : `install_024_a_034.sql` (033, 034, 037 à 042) et requête 4 de `requetes_boutique.sql` (stock des boosters remis à 10).
+- **L'e-mail** (à l'adresse du compte, juste après chaque achat direct ; jamais pour un ticket de tirage) : objet « Félicitations Sacha ! Ton booster Règne Delta t'attend 🎉 » ; le lot remontré (visuel, nom, item choisi, « Obtenu avec 10 000 PK », date, référence `DC-XXXXXXXX`, la même que dans l'e-mail reçu par contact@dropicards.fr) ; « Plus qu'une étape pour le recevoir » en 3 étapes ; **fiche à remplir** : nom, prénom, adresse, code postal, **ville** (ajoutée : indispensable pour un envoi), adresse e-mail, numéro de téléphone ; bouton « Envoyer mes coordonnées » (e-mail prérempli vers contact@dropicards.fr avec la fiche et la référence) ; « Répondre » écrit aussi à contact@dropicards.fr ; « Dropicards ne te demandera jamais ton mot de passe ni tes coordonnées bancaires » ; mention de non-affiliation. Aperçu : `docs/30-apercu-email-felicitations.png`.
+- **Choix par défaut, à confirmer** : un achat fait en mode Admin (0 PK) donne aussi l'e-mail, avec le vrai prix de l'article (pour essayer) ; la pièce d'identité prévue par les CGU n'est **pas** demandée dans cet e-mail (seulement « peut t'être demandée » dans la politique de confidentialité) ; pas de délai d'envoi promis.
+- **Serveur** : `tools/supabase/043_mail_joueur_lot.sql` (achats directs à écrire, un e-mail par achat, réservé au serveur ; 21 tests, `tests/test_043.sql`), dans `install_024_a_034.sql` et `000_verifier.sql` ; fonction `notify` (`buildPlayerMail`, `LOTS` : nom et visuel de chaque lot, à changer avec la série du moment comme `pkshop.js` ; sans 043, seul l'e-mail à Dropicards part) ; 27 tests (`functions/notify/test.mjs`, faux Brevo). Visuels des lots en PNG : `web/email/lots/`.
+- **À faire par le porteur** (`docs/30` § 9) : coller `043_mail_joueur_lot.sql` dans Studio ; relancer la ligne de `install-notify.sh` dans le terminal de Coolify ; vérifier que contact@dropicards.fr reçoit bien les réponses.
+- **App** : politique de confidentialité (coordonnées demandées par e-mail pour l'envoi d'un lot ; Brevo envoie aussi les e-mails du PK shop) ; cache v290.
+
 ## 2026-11-25 (suite 3) — PK shop : booster à 10 000 PK et 10 en stock, item rare et ETB « Bientôt disponible »
 
 - **Demande** : « Pour les boosters, remets à 10 le nombre de dispos et monte le prix à 10 000 PK ; remplace "Épuisé" sur l'item rare au choix et l'ETB 30 ans par "Bientôt disponible". »

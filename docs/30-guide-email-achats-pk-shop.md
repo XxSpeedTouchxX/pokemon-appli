@@ -82,3 +82,45 @@ order by t.bought_at desc limit 50;
 ## 8. Coût
 
 Brevo gratuit : 300 e-mails par jour, ce qui couvre largement les achats du PK shop. 0 €.
+
+## 9. E-mail de félicitations au joueur (2026-11-25)
+
+Demande du porteur : « lorsque l'utilisateur arrive à acheter un booster direct à 10 000 PK ou un autre item du PK shop comme l'item rare ou l'ETB, qu'il reçoive automatiquement un mail de félicitations… ».
+
+**Ce que reçoit le joueur**, juste après un **achat direct** (booster, item rare, ETB ; jamais pour un ticket de tirage), à l'adresse e-mail de son compte :
+
+- objet « Félicitations Sacha ! Ton booster Règne Delta t'attend 🎉 » ;
+- le lot remontré : visuel, nom, item choisi (item rare), « Obtenu avec 10 000 PK », date et **référence** (ex. `DC-42BA7ADE`, la même que dans l'e-mail reçu par contact@dropicards.fr) ;
+- « Plus qu'une étape pour le recevoir » en 3 étapes ;
+- une **fiche à remplir** : nom, prénom, adresse, code postal, ville, adresse e-mail, numéro de téléphone ;
+- un bouton **« Envoyer mes coordonnées »** qui ouvre un e-mail prérempli vers contact@dropicards.fr (la fiche et la référence sont déjà dedans) ; « Répondre » écrit aussi à contact@dropicards.fr ;
+- « Tes coordonnées servent uniquement à t'envoyer ton lot. Dropicards ne te demandera jamais ton mot de passe ni tes coordonnées bancaires. »
+
+Un e-mail par achat, jamais deux. Un achat fait en **mode Admin** donne aussi l'e-mail (pratique pour le voir). Aperçu : `docs/30-apercu-email-felicitations.png`.
+
+**À faire (2 étapes, 3 minutes) :**
+
+1. **Studio** (`api.dropicards.fr`) › SQL Editor › « + » › New query › colle tout `tools/supabase/043_mail_joueur_lot.sql` › **Run** (« Success. No rows returned »).
+2. **Coolify** › Terminal › le serveur › colle cette ligne › Entrée (même ligne qu'à l'étape 4 du § 6, elle remplace la fonction par la nouvelle version) :
+
+   ```
+   curl -fsSL https://raw.githubusercontent.com/XxSpeedTouchxX/pokemon-appli/claude/pokemon-app-mockup-1mxt7p/tools/supabase/functions/install-notify.sh | bash
+   ```
+
+   Doit afficher « OK : fonction « notify » installée » et « OK : BREVO_API_KEY est réglée. ».
+
+**Essai :** en mode Admin, achète le booster au PK shop (rien n'est débité). Dans la minute, 2 e-mails : « [Dropicards] Achat direct : … » sur contact@dropicards.fr, et « Félicitations … » sur l'adresse de ton compte (regarde aussi les spams). Ensuite, rends ce booster d'essai au stock avec la requête 4 de `requetes_boutique.sql`.
+
+**Important :** les réponses des joueurs arrivent sur **contact@dropicards.fr**. Vérifie que cette adresse reçoit bien les e-mails (boîte créée chez OVH ou redirection vers ta boîte habituelle).
+
+Voir les e-mails partis aux joueurs (Studio › SQL Editor) :
+
+```sql
+select t.bought_at, t.item, t.choice, u.email, m.sent_at
+from public.tickets t join auth.users u on u.id = t.user_id
+join public.game_items i on i.id = t.item
+left join public.shop_player_mails m on m.ticket_id = t.id
+where i.kind = 'lot' order by t.bought_at desc limit 50;
+```
+
+Changer de booster ou de série : le nom et le visuel du lot sont dans `tools/supabase/functions/notify/index.ts` (`LOTS`), comme dans l'app (`tools/web/pkshop.js`) ; demande-le à Claude, puis relance la ligne de l'étape 2.
