@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-25T01:03:01Z",
+ "updated": "2026-11-25T16:00:14Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,27 @@
   }
  ],
  "items": [
+  {
+   "title": "Pokémon GO : Passe GO de décembre 2026 !",
+   "url": "https://www.pokebip.com/news/7659/pokemon-go-passe-go-de-decembre-2026",
+   "date": "2026-11-25T14:59:44Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Champions : Règlement M-D des combats classés !",
+   "url": "https://www.pokebip.com/news/7658/pokemon-champions-reglement-m-d-des-combats-classes",
+   "date": "2026-11-25T05:49:40Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Sleep : Évènement Semaine des Compétences 4 + nouveau Pokémon !",
+   "url": "https://www.pokebip.com/news/7657/pokemon-sleep-evenement-semaine-des-competences-4-nouveau-pokemon",
+   "date": "2026-11-25T05:41:29Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "Pokémon GO : Saison Destinations de rêve",
    "url": "https://www.pokebip.com/news/7656/pokemon-go-saison-destinations-de-reve",
@@ -106,27 +127,6 @@
    "title": "Pokémon Pocket : Combats restreints Fusion Double (C1) et nouveau Booster promo !",
    "url": "https://www.pokebip.com/news/7644/pokemon-pocket-combats-restreints-fusion-double-c1-et-nouveau-booster-promo",
    "date": "2026-11-18T08:48:06Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Collaboration avec Duolingo !",
-   "url": "https://www.pokebip.com/news/7643/pokemon-go-collaboration-avec-duolingo",
-   "date": "2026-11-18T07:50:01Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon Champions : Distribution de Coupons de Vitesse !",
-   "url": "https://www.pokebip.com/news/7642/pokemon-champions-distribution-de-coupons-de-vitesse",
-   "date": "2026-11-17T20:19:33Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon Pocket : Semaine bonus !",
-   "url": "https://www.pokebip.com/news/7641/pokemon-pocket-semaine-bonus",
-   "date": "2026-11-14T10:01:56Z",
    "source": "Pokébip",
    "tcg": false
   },
