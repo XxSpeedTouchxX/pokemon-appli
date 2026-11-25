@@ -32,7 +32,10 @@ const shopRows = await page.locator('.pkm-rules-shop > div').allInnerTexts();
 // Boîte mystère en 4ᵉ position, sous le ticket Or (2026-11-13, porteur) ; chaque prix avec le logo de sa monnaie.
 const shopPrices = await page.locator('.pkm-rules-shop > div strong').evaluateAll(ss => ss.map(e => e.getAttribute('aria-label') + '|' + ((e.querySelector('img') || {}).getAttribute ? e.querySelector('img').getAttribute('src') : '')));
 ok('règles : « Boîte mystère · 300 PA » en 4ᵉ, sous le ticket Or (' + shopRows.length + ' lignes)', /Ticket Or/.test(shopRows[2] || '') && /Boîte mystère/.test(shopRows[3] || '') && shopPrices[3] === '300 PA|img/brand/pa.svg' && (await page.locator('.pkm-rules-box img').count()) === 2);
-ok('règles : prix des PK avec la gemme (' + shopPrices.filter(p => /PK\|/.test(p)).length + ')', shopPrices.filter(p => /PK\|/.test(p)).every(p => p.endsWith('img/brand/pk.svg')) && shopPrices.filter(p => /PK\|/.test(p)).length >= 5);
+// Item rare et ETB « Bientôt disponible » depuis le 2026-11-25 (porteur) : « Bientôt », sans prix ni gemme ; restent
+// 4 prix en PK (3 tickets et le booster).
+ok('règles : prix des PK avec la gemme (' + shopPrices.filter(p => /PK\|/.test(p)).length + ')', shopPrices.filter(p => /PK\|/.test(p)).every(p => p.endsWith('img/brand/pk.svg')) && shopPrices.filter(p => /PK\|/.test(p)).length >= 4);
+ok('règles : item rare et ETB « Bientôt », sans gemme', shopPrices.filter(p => /^Bientôt\|$/.test(p)).length === 2);
 await page.locator('.pkm-rules-shop').scrollIntoViewIfNeeded(); await page.waitForTimeout(200); await page.screenshot({ path: shot('regles-shop.png') });
 await page.goto(E2E + '/?debug', { waitUntil: 'load' }); await page.waitForTimeout(1200);
 
