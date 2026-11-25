@@ -21,8 +21,17 @@ ok('prochain tirage : le 1er à 20 h, dans moins d’un mois (' + cal.p + ')', /
 await page.evaluate(() => { window.__pkm.setState({ pk: 100000, shopLots: [], tickets: {} }); window.__pkm.tab('pkshop'); }); await page.waitForTimeout(700);
 const boosterCard = page.locator('section.pkm-shop-item[aria-label="Booster de la série du moment"]');
 ok('booster : « Plus que 10 ce mois-ci » et 10 points', /Plus que 10 ce mois-ci/.test(N(await boosterCard.innerText())) && (await boosterCard.locator('.pkm-stock-dot-on').count()) === 10);
-const etbText = N(await page.locator('section.pkm-shop-item[aria-label="ETB 30 ans"]').innerText());
-ok('ETB : « 1 article disponible jusqu’au 1er … » (1 tous les 2 mois)', /1 article disponible jusqu’au 1er (janvier|mars|mai|juillet|septembre|novembre)/.test(etbText));
+// Booster à 10 000 PK ; item rare et ETB « Bientôt disponible » à la place du stock et de « Épuisé » (2026-11-25, porteur).
+ok('booster : 10 000 PK', /10 000\s*PK/.test(N(await boosterCard.innerText())));
+for (const name of ['Item rare au choix', 'ETB 30 ans']) {
+  const card = page.locator('section.pkm-shop-item[aria-label="' + name + '"]'), txt = N(await card.innerText());
+  ok(name + ' : « Bientôt disponible », sans stock, sans « Épuisé » ni compte à rebours, sans bouton d’achat', /Bientôt disponible/i.test(txt) && !/Épuisé|disponible jusqu’|Plus que/i.test(txt)
+    && (await card.locator('.pkm-lotwait-soon').count()) === 1 && (await card.locator('.pkm-cdx').count()) === 0 && (await card.locator('button:has-text("Acheter")').count()) === 0 && (await card.locator('.pkm-shop-img-out').count()) === 1);
+}
+const pk0 = await page.evaluate(() => window.__pkm.st().pk);
+await page.evaluate(() => window.__pkm.shopBuy('achat-etb-30'));
+ok('ETB « Bientôt disponible » : achat refusé, aucun PK débité', (await page.evaluate(() => window.__pkm.st().pk)) === pk0 && !(await page.evaluate(() => (window.__pkm.st().tickets || {})['achat-etb-30'])));
+await page.locator('section.pkm-shop-item[aria-label="ETB 30 ans"]').scrollIntoViewIfNeeded(); await page.screenshot({ path: shot('lots-bientot.png') });
 ok('rubrique : quantités limitées, réassort le 1er à 20 h, 1 achat par mois', /Quantités limitées, réassort le 1er de chaque mois à 20 h ; 1 achat direct par compte et par mois/.test(N(await page.locator('.pkm-shop-head').allInnerTexts().then(a => a.join(' ')))));
 await boosterCard.locator('button:has-text("Acheter")').click(); await page.waitForTimeout(300);
 await boosterCard.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);

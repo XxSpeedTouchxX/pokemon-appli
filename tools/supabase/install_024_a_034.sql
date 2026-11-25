@@ -20,10 +20,11 @@
 -- en mode Admin compris.
 -- 041 (2026-11-25) : « Mes messages » : messages envoyés, modifier ou supprimer un message (proposition sans réponse
 -- modifiable ou retirée pour les deux, réponse modifiable ou retirée, message reçu retiré de sa liste).
+-- 042 (2026-11-25) : PK shop : booster à 10 000 PK, item rare au choix et ETB 30 ans « Bientôt disponible » (fermés).
 -- 029 (annonces Vinted) n'y est pas : il a sa propre installation (docs/42).
 -- Il faut 001 à 023 déjà installés (fait le 2026-11-12). Rejouable : sans risque si l'un d'eux est déjà installé.
 -- Supabase Studio › SQL Editor › New query › colle TOUT ce fichier › Run. Puis colle 000_verifier.sql › Run : les lignes
--- 024 à 028, 030 à 034, 037, 038, 039, 040 et 041 doivent être « oui ». Ce fichier est fabriqué à partir de ces scripts
+-- 024 à 028, 030 à 034 et 037 à 042 doivent être « oui ». Ce fichier est fabriqué à partir de ces scripts
 -- (tools/supabase/make_install_024.sh) : ne pas le modifier à la main.
 
 -- ================= 024_safari.sql =================
@@ -2582,6 +2583,33 @@ grant execute on function public.quick_msg_inbox(int) to authenticated;
 comment on function public.quick_msg_sent(int) is '041 : messages envoyés, modifier ou supprimer un message';
 
 -- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).
+notify pgrst, 'reload schema';
+
+-- ================= 042_shop_bientot.sql =================
+-- 042_shop_bientot.sql — PK shop : booster à 10 000 PK, item rare et ETB « Bientôt disponible » (2026-11-25, porteur :
+-- « pour les boosters, remets à 10 le nombre de dispos et monte le prix à 10 000 PK ; remplace "Épuisé" sur l'item rare
+-- au choix et l'ETB 30 ans par "Bientôt disponible" »).
+--
+--   - Booster de la série du moment : 10 000 PK (7 500 avant). buy_item prend toujours le prix de cette table.
+--   - Item rare au choix et ETB 30 ans fermés (active = false) : buy_item les refuse (« Article indisponible ») ; l'app
+--     affiche « Bientôt disponible » à la place du stock et de « Épuisé ».
+--   - Stock du booster remis à 10 : voir requetes_boutique.sql, requête 4 (achats d'essai faits en mode Admin rendus au
+--     stock). Ce script ne touche à aucun achat.
+-- Rouvrir l'item rare ou l'ETB plus tard : requetes_boutique.sql, requête 5 (et retirer « soon » dans l'app).
+-- À installer après 040 (fichier install_024_a_034.sql, qui le contient). Rejouable. Tests : tests/test_042.sql.
+
+do $$ begin
+  if to_regclass('public.shop_stock') is null or to_regclass('public.game_items') is null then
+    raise exception 'Installe d''abord 018_lots_limites.sql et 040_stock_admin.sql';
+  end if;
+end $$;
+
+update public.game_items set price_pk = 10000 where id = 'achat-booster';
+update public.game_items set active = false where id in ('achat-rare', 'achat-etb-30');
+
+-- Repère lu par 000_verifier.sql.
+comment on table public.game_items is '042 : booster 10 000 PK, item rare et ETB bientôt disponibles';
+
 notify pgrst, 'reload schema';
 
 -- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).

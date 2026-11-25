@@ -195,6 +195,9 @@
     return function (id, choice) {
       if (!gcOn()) return base.call(this, id, choice);
       if (busy || this.gcNeed()) return;
+      // Article « Bientôt disponible » (2026-11-25) : jamais envoyé au serveur (qui le refuse aussi, 042).
+      const why = id.indexOf('ticket') === 0 ? '' : this.shopLotBlock(this.st(), id);
+      if (why === 'Bientôt disponible') { this.setState({ toast: why, shopAsk: null, shopChoice: null }); return; }
       // Un ticket de chaque catégorie par mois, admin compris (2026-11-13, porteur).
       if (id.indexOf('ticket') === 0 && this.shopBought(this.st(), id)) { this.setState({ toast: 'Ticket déjà acheté : prochain ticket au prochain tirage', shopAsk: null }); return; }
       busy = true;

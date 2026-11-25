@@ -1846,6 +1846,7 @@
 </span>
 </div>
 <sc-if value="{{ si.hasStock }}" hint-placeholder-val="{{ false }}"><div class="{{ si.stockCls }}" role="status" aria-label="{{ si.stockAria }}"><span class="pkm-stock-t">{{ si.stockText }}</span><span class="pkm-stock-dots" aria-hidden="true"><sc-for list="{{ si.dots }}" as="sdt" hint-placeholder-count="3"><i class="{{ sdt.cls }}"></i></sc-for></span></div></sc-if>
+<sc-if value="{{ si.soon }}" hint-placeholder-val="{{ false }}"><div role="status" class="pkm-lotwait pkm-lotwait-soon"><b>{{ si.soonTitle }}</b><span>{{ si.soonText }}</span></div></sc-if>
 <sc-if value="{{ si.out }}" hint-placeholder-val="{{ false }}"><div class="pkm-lotwait pkm-lotwait-out"><b>{{ si.outTitle }}</b><span>{{ si.outText }}</span>
 <div class="pkm-cdx" data-end="{{ si.outCd.end }}" role="timer" aria-label="{{ si.outCd.aria }}"><span><b data-u="d">{{ si.outCd.d }}</b><small>j</small></span><i>:</i><span><b data-u="h">{{ si.outCd.h }}</b><small>h</small></span><i>:</i><span><b data-u="m">{{ si.outCd.m }}</b><small>min</small></span><i>:</i><span><b data-u="s">{{ si.outCd.s }}</b><small>s</small></span></div></div></sc-if>
 <sc-if value="{{ si.done }}" hint-placeholder-val="{{ false }}"><div class="pkm-lotwait"><b>{{ si.doneTitle }}</b><span>{{ si.doneText }}</span>

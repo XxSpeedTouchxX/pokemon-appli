@@ -9,7 +9,8 @@
   // l'appareil et l'annonce, sans rien expédier pour l'instant.
   // Nouveau magasin (2026-11-06, porteur ; serveur : tools/supabase/007_admin_boutique.sql puis 008_shop_grades.sql) :
   // - 3 tickets : Bronze 500 PK, Argent 1 500 PK, Or 5 000 PK (tirages et lots revus le 2026-11-09, plus bas) ;
-  // - 3 achats directs : booster de la série du moment 7 500 PK, item rare au choix 25 000 PK, ETB 30 ans 50 000 PK ;
+  // - 3 achats directs : booster de la série du moment 10 000 PK (7 500 avant le 2026-11-25), item rare au choix 25 000 PK,
+  //   ETB 30 ans 50 000 PK ;
   // - grade demandé (porteur, 2026-11-06) : Recrue et plus → ticket Bronze et booster ; Collectionneur et plus → ticket
   //   Argent et item rare ; Maître Pokémon et plus → ticket Or et ETB. Sinon « Déverrouillé au grade … » et son emblème,
   //   et un appui ouvre la fenêtre « Tu dois d'abord déverrouiller le grade … » ;
@@ -32,15 +33,19 @@
       starsText: 'Une étoile dorée', price: 1500, minGrade: 2, cycle: '1m', every: 'Chaque mois, le 1er à 20 h', everyShort: 'chaque mois', note: 'Carte AR, illustration rare (une étoile dorée). Les cartes à gagner changent chaque mois.' },
     { id: 'ticket-or', kind: 'ticket', tier: 'or', tag: 'OR', name: 'Ticket Or', prize: 'Une carte ALT', lot: 'une carte ALT', rarity: 'Illustration spéciale rare', starsN: 2, starsCls: 'pkm-shop-stars pkm-shop-stars-gold',
       starsText: 'Deux étoiles dorées', price: 5000, minGrade: 4, cycle: '1m', every: 'Chaque mois, le 1er à 20 h', everyShort: 'chaque mois', note: 'Carte ALT, illustration spéciale rare (deux étoiles dorées). Les cartes à gagner changent chaque mois.' },
-    { id: 'achat-booster', kind: 'lot', name: 'Booster de la série du moment', prize: 'Booster Règne Delta, envoyé chez toi', value: 'Valeur : 5 à 15 €', price: 7500, minGrade: 0,
+    // Prix du booster : 10 000 PK depuis le 2026-11-25 (porteur ; 7 500 avant), comme le serveur (042_shop_bientot.sql).
+    { id: 'achat-booster', kind: 'lot', name: 'Booster de la série du moment', prize: 'Booster Règne Delta, envoyé chez toi', value: 'Valeur : 5 à 15 €', price: 10000, minGrade: 0,
       // Booster Règne Delta au Méga-Rayquaza (2026-11-24, porteur) à la place du booster des 30 ans : visuel officiel du
       // kit presse de The Pokémon Company (version anglaise, comme l'ancien), fond rendu transparent.
       img: 'img/shop-booster-regne-delta.webp', imgAlt: 'Booster Méga-Évolution Règne Delta avec Méga-Rayquaza',
       note: 'Achat direct, sans tirage.', head: 'Achat direct', headSub: 'Sans tirage : l’article est pour toi. Quantités limitées, réassort le 1er de chaque mois à 20 h ; 1 achat direct par compte et par mois, pour donner sa chance à tout le monde. Envoi après vérification de ton identité.' },
-    { id: 'achat-rare', kind: 'lot', name: 'Item rare au choix', prize: 'Coffret, classeur… de la série du moment, envoyé chez toi', value: 'Valeur : 20 à 60 €', price: 25000, minGrade: 2,
+    // Item rare et ETB « Bientôt disponible » (2026-11-25, porteur : « remplace "Épuisé" sur l'item rare au choix et l'ETB
+    // 30 ans par "Bientôt disponible" ») : plus d'achat ni de stock affiché, ni « Épuisé » ; le serveur les ferme aussi
+    // (042_shop_bientot.sql : active = false). Rouvrir : retirer soon ici et passer active à true (requetes_boutique.sql).
+    { id: 'achat-rare', kind: 'lot', soon: true, name: 'Item rare au choix', prize: 'Coffret, classeur… de la série du moment, envoyé chez toi', value: 'Valeur : 20 à 60 €', price: 25000, minGrade: 2,
       img: 'img/products/30th-celebration-binder-collection.webp', imgAlt: 'Coffret classeur 30ᵉ anniversaire Pokémon', wide: true, choices: SHOP_RARE,
       note: 'Tu choisis le type d’item à l’achat ; le modèle dépend de la série du moment.' },
-    { id: 'achat-etb-30', kind: 'lot', name: 'ETB 30 ans', prize: 'Coffret Dresseur d’élite 30ᵉ anniversaire, envoyé chez toi', value: 'Valeur : 60 à 200 €', price: 50000, minGrade: 4,
+    { id: 'achat-etb-30', kind: 'lot', soon: true, name: 'ETB 30 ans', prize: 'Coffret Dresseur d’élite 30ᵉ anniversaire, envoyé chez toi', value: 'Valeur : 60 à 200 €', price: 50000, minGrade: 4,
       img: 'img/products/30th-celebration-elite-trainer-box.webp', imgAlt: 'Coffret Dresseur d’élite 30ᵉ anniversaire', wide: true,
       note: 'Achat direct, sans tirage.' },
     // Item « Deluxe » retiré du shop le 2026-11-06 (porteur).
@@ -218,6 +223,8 @@
   const shopCloud = s => !!(s && s.cloudShop && typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn());
   const shopOnline = () => typeof Cloud !== 'undefined' && Cloud.on() && Cloud.signedIn();
   const shopFree = s => !!(s && s.cloudGame && s.cloudGame.unlimited && shopOnline());
+  // Article « Bientôt disponible » (soon) ; ?shopsoon=0 les rouvre tous pour un essai (tests seulement).
+  const shopSoon = it => { if (!it || !it.soon) return false; try { return !/[?&]shopsoon=0(&|$)/.test(location.search); } catch (e) { return true; } };
   shopProto.shopSync = function () {
     if (!shopOnline()) return Promise.resolve(null);
     return Cloud.rpc('shop_state').then(r => { if (r) this.setState({ cloudShop: Object.assign({ at: Date.now() }, r) }); return r; },
@@ -273,6 +280,7 @@
   // compte admin et le stock est toujours de 10 ») : l'achat d'un admin retire lui aussi un article du stock (serveur
   // 040) et « Épuisé » vaut pour tout le monde ; seule la limite d'un achat direct par mois ne s'applique pas à l'admin.
   shopProto.shopLotBlock = function (s, id) {
+    if (shopSoon(SHOP_ITEMS.find(x => x.id === id))) return 'Bientôt disponible';
     const st = this.shopStock(s, id), mb = this.shopMonthBuy(s);
     if (st && st.left <= 0) return 'Épuisé : retour ' + shopWhen(st.restock);
     if (shopFree(s)) return '';
@@ -281,7 +289,7 @@
   };
   shopProto.shopBuy = function (id, choice) {
     const s = this.st(), item = SHOP_ITEMS.find(x => x.id === id), pk = Number(s.pk) || 0;
-    if (!item || item.soon || pk < item.price || this.shopGrade() < (item.minGrade || 0) || (item.choices && item.choices.indexOf(choice) < 0)) return;
+    if (!item || shopSoon(item) || pk < item.price || this.shopGrade() < (item.minGrade || 0) || (item.choices && item.choices.indexOf(choice) < 0)) return;
     const patch = {};
     if (item.kind === 'ticket') {
       if (!this.shopPrizes(s, id).some(c => c.id === choice)) return;
@@ -600,9 +608,9 @@
       }),
       sheet: sheet,
       items: SHOP_ITEMS.filter(it => it.kind !== 'ticket').map(it => {
-        const n = tickets[it.id] || 0, open = gi >= (it.minGrade || 0), st = this.shopStock(s, it.id);
-        const out = !!st && st.left <= 0, done = !free && !out && !!month;
-        const can = open && !it.soon && !out && !done && pk >= it.price, ask = can && s.shopAsk === it.id;
+        const n = tickets[it.id] || 0, open = gi >= (it.minGrade || 0), soon = shopSoon(it), st = soon ? null : this.shopStock(s, it.id);
+        const out = !!st && st.left <= 0, done = !soon && !free && !out && !!month;
+        const can = open && !soon && !out && !done && pk >= it.price, ask = can && s.shopAsk === it.id;
         const price = it.price.toLocaleString('fr-FR') + ' PK';
         const choice = ask && it.choices && it.choices.indexOf(s.shopChoice) >= 0 ? s.shopChoice : '';
         // ETB (tous les 2 mois, porteur 2026-11-09) : « 1 article disponible jusqu'au 1er janvier ».
@@ -611,7 +619,8 @@
           name: it.name, prize: it.prize, price: price, priceN: it.price.toLocaleString('fr-FR'), note: it.note, value: it.value || '', hasValue: !!it.value,
           hasHead: !!it.head, head: it.head || '', headSub: it.headSub || '', hasHeadSub: !!it.headSub,
           isTicket: false, isDeluxe: false, ticketCls: 'pkm-shop-ticket', tag: 'TICKET',
-          hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '', imgCls: (it.wide ? 'pkm-shop-img pkm-shop-img-wide' : 'pkm-shop-img') + (out ? ' pkm-shop-img-out' : ''),
+          hasImg: !!it.img, img: it.img || '', imgAlt: it.imgAlt || '', imgCls: (it.wide ? 'pkm-shop-img pkm-shop-img-wide' : 'pkm-shop-img') + (out || soon ? ' pkm-shop-img-out' : ''),
+          soon: soon, soonTitle: 'Bientôt disponible', soonText: 'Cet article revient très bientôt dans le PK shop.',
           // Stock (2026-11-09, porteur) : « Plus que N ce mois-ci », points restants, puis « Épuisé » et le réassort.
           hasStock: !!st && !out, stockText: stockText, stockCls: 'pkm-stock' + (out ? ' pkm-stock-out' : st && st.left <= Math.max(1, Math.ceil(st.total / 3)) ? ' pkm-stock-low' : ''),
           dots: st && st.total <= 12 ? Array.from({ length: st.total }, (_, k) => ({ cls: 'pkm-stock-dot' + (k < st.left ? ' pkm-stock-dot-on' : '') })) : [],
@@ -620,8 +629,8 @@
           done: done, doneTitle: 'Tu as déjà fait ton achat du mois', doneText: month ? 'Prochain achat possible ' + shopWhen(month.next) + ' : un achat direct par compte et par mois, pour donner sa chance à tout le monde.' : '',
           doneCd: month ? shopCdView(month.next) : shopCdView(Date.now()),
           owned: n > 0, ownedText: 'Tu as ' + shopUnit(it, n),
-          can: can, cannot: !can && open && !out && !done, locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade || 0), lock: () => this.shopLockOpen(it),
-          missText: it.soon ? 'Bientôt disponible' : 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
+          can: can, cannot: !can && open && !soon && !out && !done, locked: !open, lockLabel: lockLabel(it), lockImg: emblem(it.minGrade || 0), lock: () => this.shopLockOpen(it),
+          missText: soon ? 'Bientôt disponible' : 'Il te manque ' + (it.price - pk).toLocaleString('fr-FR') + ' PK',
           ask: ask, idle: !ask, buyLabel: 'Acheter · ' + price,
           hasChoices: ask && !!it.choices, choices: (it.choices || []).map(c => ({ label: c, on: String(c === choice), cls: 'pkm-shop-choice' + (c === choice ? ' pkm-shop-choice-on' : ''), pick: () => this.setState({ shopChoice: c }) })),
           confirmText: it.choices && !choice ? 'Choisis ton item, puis confirme (' + price + ').' : 'Échanger ' + price + ' contre « ' + it.name + (choice ? ' : ' + choice : '') + ' » ?',

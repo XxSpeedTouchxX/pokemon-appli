@@ -20,3 +20,19 @@ from public.shop_stock s order by s.item;
 -- Les achats des joueurs ne sont jamais touchés. Enlève les deux tirets au début de la ligne « delete » pour l'activer.
 -- delete from public.tickets t using public.shop_stock s
 --   where t.item = s.item and t.cost_pk = 0 and t.bought_at >= public._shop_period(now(), s.months);
+
+-- 4. Remettre à 10 le stock des BOOSTERS (2026-11-25, porteur : « pour les boosters, remets à 10 le nombre de dispos »).
+-- Efface les achats d'essai de boosters faits en mode Admin pendant le mois en cours (enregistrés à 0 PK) : le stock
+-- remonte d'autant. Les achats des joueurs ne sont jamais touchés (ce sont de vraies commandes à envoyer) : s'il y en a,
+-- le stock reste à 10 moins leur nombre. La 2ᵉ partie (select) montre le stock après.
+delete from public.tickets t using public.shop_stock s
+  where t.item = 'achat-booster' and s.item = t.item and t.cost_pk = 0 and t.bought_at >= public._shop_period(now(), s.months);
+select s.qty as "boosters par mois",
+  greatest(0, s.qty - (select count(*) from public.tickets t where t.item = s.item and t.bought_at >= public._shop_period(now(), s.months))) as "boosters disponibles"
+from public.shop_stock s where s.item = 'achat-booster';
+
+-- 5. Rouvrir l'item rare au choix ou l'ETB 30 ans, fermés « Bientôt disponible » le 2026-11-25 (042_shop_bientot.sql).
+-- Enlève les deux tirets au début de la ligne voulue, puis Run. Il faut aussi la version de l'app qui les rouvre
+-- (demande-la à Claude : il retire « soon » dans tools/web/pkshop.js).
+-- update public.game_items set active = true where id = 'achat-rare';
+-- update public.game_items set active = true where id = 'achat-etb-30';

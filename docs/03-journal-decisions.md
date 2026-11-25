@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-25 (suite 3) — PK shop : booster à 10 000 PK et 10 en stock, item rare et ETB « Bientôt disponible »
+
+- **Demande** : « Pour les boosters, remets à 10 le nombre de dispos et monte le prix à 10 000 PK ; remplace "Épuisé" sur l'item rare au choix et l'ETB 30 ans par "Bientôt disponible". »
+- **Booster de la série du moment** : 10 000 PK (7 500 avant), dans l'app et sur le serveur (`game_items.price_pk`, pris par `buy_item`).
+- **Stock des boosters remis à 10** : requête 4 de `tools/supabase/requetes_boutique.sql` (efface les achats d'essai de boosters faits en mode Admin ce mois-ci, enregistrés à 0 PK) ; les achats des joueurs ne sont jamais effacés (vraies commandes) : s'il y en a, le stock reste à 10 moins leur nombre.
+- **Item rare au choix et ETB 30 ans « Bientôt disponible »** (lecture retenue : fermés à l'achat pour l'instant) : cadre « Bientôt disponible » à la place du stock, de « Épuisé » et du compte à rebours, visuel grisé, aucun bouton d'achat ; le serveur les refuse aussi (`active = false`). Rouvrir : requête 5 de `requetes_boutique.sql` et retrait de `soon` dans `tools/web/pkshop.js`.
+- **Serveur** : `tools/supabase/042_shop_bientot.sql` (19 tests, `tests/test_042.sql`), dans `install_024_a_034.sql` et `000_verifier.sql` ; **à installer par le porteur**, puis la requête 4.
+- **App** : `pkshop.js` (prix, `soon`, `shopSoon`, `?shopsoon=0` pour les tests), `game-cloud.js` (achat « bientôt » jamais envoyé), `catalog.dc.html`, `games.css` ; tests `t-lots`, `t-games`, `t-cloud` ; cache v289.
+
 ## 2026-11-25 (suite 2) — « Tout afficher » par série et par numéro ; modifier ou supprimer un message
 
 - **Demandes** : « Dans la page d'accueil, lorsqu'on se retrouve dans le catalogue, j'aimerais qu'il y ait plusieurs catégories selon la série. Par exemple, si tu as Nuit Noire et KO ascendant, il faut que sur le bandeau en haut, sur le catalogue, tu puisses facilement avoir la sélection de quelle série souhaites-tu visualiser. Il faut également que dans les filtres, tu puisses trier par le numéro de la carte, du numéro 1 jusqu'au numéro 100 par exemple. » ; « il faut que dans l'endroit où on envoie les messages, on ait la possibilité de supprimer un message ou bien de le modifier. »

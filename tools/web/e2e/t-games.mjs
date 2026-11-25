@@ -89,7 +89,7 @@ ok('ticket Or verrouillé, toujours dans sa couleur (filtre : ' + orF + ')', orF
 ok('Recrue : Argent et Or « Collectionneur » et « Maître Pokémon » avec leur emblème', /Collectionneur/.test(tkTxt) && /Maître Pokémon/.test(tkTxt) && (await tks.locator('img[src="img/grades/grade-3.svg"]').count()) === 1 && (await tks.locator('img[src="img/grades/grade-5.svg"]').count()) === 1);
 const lot = page.locator('section[aria-label="ETB 30 ans"]');
 const shopTxt = (await page.locator('main').innerText()).replace(/[\u202f\u00a0]/g, ' ');
-ok('achats directs : booster 7 500, item rare 25 000, ETB 30 ans 50 000 PK, avec visuels', ['7500PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)) && (await lot.locator('img[src="img/products/30th-celebration-elite-trainer-box.webp"]').count()) === 1);
+ok('achats directs : booster 10 000, item rare 25 000, ETB 30 ans 50 000 PK, avec visuels', ['10000PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)) && (await lot.locator('img[src="img/products/30th-celebration-elite-trainer-box.webp"]').count()) === 1);
 ok('Recrue : ETB « Déverrouillé au grade Maître Pokémon »', /Déverrouillé au grade Maître Pokémon/.test(await lot.innerText()));
 await lot.locator('button:has-text("Déverrouillé au grade")').click(); await page.waitForTimeout(500);
 const lw = page.locator('section[aria-label="Accès verrouillé"]');

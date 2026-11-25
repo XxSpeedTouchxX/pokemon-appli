@@ -298,7 +298,8 @@ for (const [who, pwd, admin] of [['ondine@exemple.fr', 'nouveau-mot-de-passe-99'
 ({ ctx, page } = await fresh());
 await admIn(page, 'sacha@exemple.fr', 'mot-de-passe-admin-42');
 await page.evaluate(k => { const d = JSON.parse(localStorage.getItem(k) || '{}'); d.onb = 0; d.tuto = 'done'; localStorage.setItem(k, JSON.stringify(d)); }, KEY);
-await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
+// ?shopsoon=0 : item rare et ETB rouverts pour ce test (« Bientôt disponible » depuis le 2026-11-25, voir t-lots).
+await page.goto(E2E + '/?start=settings&shopsoon=0' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.locator('button:has-text("Mode Admin")').first().click(); await page.waitForTimeout(800);
 const lock = page.locator('section[aria-label="Code Admin"]');
 ok('admin : « Mot de passe admin » demandé (champ texte masqué, plus de QR code ni de code à 6 chiffres)', /Mot de passe admin/.test(await lock.innerText()) && (await lock.locator('input[type=password][aria-label="Mot de passe admin"]').count()) === 1 && (await lock.locator('img').count()) === 0);
@@ -391,8 +392,8 @@ gs = await page.evaluate(k => JSON.parse(localStorage.getItem(k) || '{}'), KEY);
 ok('booster : gain tiré par le serveur (+200), animation jouée : ' + gs.pk + ' PK', gs.pk === 300 && calls.some(c => c.startsWith('RPC open_booster')) && /\+200 PK/.test(await boost.innerText()));
 await page.click('nav button[aria-label="PK shop"]'); await page.waitForTimeout(900);
 const shopTxt = await page.locator('main').innerText();
-ok('PK shop : 3 tickets (500, 1 500, 5 000 PK) ; achats 7 500, 25 000, 50 000 PK', ['Booster de la série du moment', 'Item rare au choix', 'ETB 30 ans'].every(t => shopTxt.includes(t))
-  && ['500PK', '1500PK', '5000PK', '7500PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)));
+ok('PK shop : 3 tickets (500, 1 500, 5 000 PK) ; achats 10 000, 25 000, 50 000 PK', ['Booster de la série du moment', 'Item rare au choix', 'ETB 30 ans'].every(t => shopTxt.includes(t))
+  && ['500PK', '1500PK', '5000PK', '10000PK', '25000PK', '50000PK'].every(t => shopTxt.replace(/\s/g, '').includes(t)));
 await page.locator('section[aria-label="Tickets du tirage au sort"] .pkm-shop-tk').nth(0).click(); await page.waitForTimeout(400);
 ok('compte à 300 PK : fiche du ticket Bronze, « Il te manque 200 PK », « Le prochain tirage arrive bientôt »', /Il te manque 200/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()) && /Le prochain tirage arrive bientôt/.test(await page.locator('section[aria-label="Ticket Bronze"]').innerText()));
 await page.locator('section[aria-label="Ticket Bronze"] button:has-text("Fermer")').last().click(); await page.waitForTimeout(300);
