@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-25 — Stock du PK shop : les achats des admins comptent
+
+- **Demande** : « Je veux que lorsqu'on achète un booster au PK shop, celui-ci se retire automatiquement du nombre de boosters en stock ; par exemple j'en ai acheté un avec mon compte admin et le nombre de boosters dispo est toujours de 10. »
+- **Cause** : règle du 2026-11-09 (`018_lots_limites.sql`) : un achat fait en mode Admin était un « achat d'essai », enregistré à 0 PK et jamais compté dans le stock. Les achats des joueurs, eux, étaient déjà comptés.
+- **Fait** : `tools/supabase/040_stock_admin.sql` (après 030, 23 tests) : chaque achat direct (booster, item rare, ETB) retire un article du stock, admin compris ; les achats d'admin déjà faits ce mois-ci comptent dès l'installation (le booster du porteur : stock à 9). Dans l'app, le stock baisse aussitôt après l'achat, puis le serveur le confirme. Message « Bravo » du booster corrigé : « booster Pokémon Règne Delta » (il parlait encore du 30ᵉ anniversaire).
+- **Choix par défaut, à confirmer** : stock épuisé = « Épuisé » pour tout le monde, admin compris. L'admin garde ses achats sans PK, sans grade demandé et sans la limite d'un achat direct par mois.
+- **Pour rendre au stock des achats d'essai** : `requetes_boutique.sql`, requête 3 (efface seulement les achats d'admin de la période en cours ; la requête 2 montre le stock du mois).
+- **À faire par le porteur** : coller `install_024_a_034.sql` dans Studio (il contient maintenant 040, avec 033, 034, 037, 038 et 039), puis `000_verifier.sql`. Tant que 040 n'est pas installé, le stock affiché revient à l'ancien calcul après la relecture du serveur. Cache v287.
+
 ## 2026-11-24 (suite 4) — Tickets du PK shop : « Le prochain tirage arrive bientôt »
 
 - **Demande** : « Dans les cartes à gagner grâce aux tickets, je ne veux pas que tu mettes le décompte, mais tu marqueras "Le prochain tirage arrive bientôt", afin de faire un peu patienter les gens avant qu'ils arrivent. »

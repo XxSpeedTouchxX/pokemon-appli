@@ -73,7 +73,8 @@ async function fake(route) {
     if (fn === 'admin_lock') { u.until = null; return send(200, null); }
     // État du PK shop imité (017) : une carte à gagner par ticket, stocks pleins.
     if (fn === 'shop_state') return send(200, { draw_at: new Date(Date.now() + 10 * 864e5).toISOString(), next_month: new Date(Date.now() + 10 * 864e5).toISOString(), draw_lots: 1,
-      stock: { 'achat-booster': { total: 10, left: 10, months: 1, restock: new Date(Date.now() + 10 * 864e5).toISOString() }, 'achat-rare': { total: 3, left: 3, months: 1, restock: new Date(Date.now() + 10 * 864e5).toISOString() } },
+      // Stock restant = stock moins les achats directs, admin compris (040, 2026-11-25).
+      stock: { 'achat-booster': { total: 10, left: 10 - ((G.shop || {})['achat-booster'] | 0), months: 1, restock: new Date(Date.now() + 10 * 864e5).toISOString() }, 'achat-rare': { total: 3, left: 3 - ((G.shop || {})['achat-rare'] | 0), months: 1, restock: new Date(Date.now() + 10 * 864e5).toISOString() } },
       month_buy: null, prizes: PRZ.reduce((o, x) => { (o[x.item] = o[x.item] || []).push({ id: x.card, name: x.name, info: x.info, img: x.img }); return o; }, {}),
       mine: G.tk || {}, redo: G.redo || [] });
     // Retirer une carte déjà choisie (030, 2026-11-15, porteur) : les tickets restent, à rechoisir ; l'admin a mis une
@@ -334,6 +335,11 @@ await page.screenshot({ path: shot('cloud-shop-rare.png') });
 await rare.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(900);
 ok('item rare au choix : « Poster » envoyé au serveur', calls.some(c => c.startsWith('RPC buy_item') && c.includes('achat-rare') && c.includes('Poster')));
 ok('item rare acheté : « Bravo ! … un item rare : Poster de la série 30ᵉ anniversaire »', /Tu viens d’acheter un item rare : Poster de la série 30ᵉ anniversaire/.test(await page.locator('.pkm-lotfx').innerText().catch(() => '')));
+// Stock (2026-11-25, porteur : « j'en ai acheté un avec mon compte admin et le nombre dispo est toujours de 10 ») :
+// l'achat de l'admin retire un article du stock, tout de suite et après la relecture du serveur.
+ok('admin : item rare acheté, stock de 3 à 2 (« Plus que 2 ce mois-ci »)', /Plus que 2 ce mois-ci/.test(await rare.innerText()) && (await rare.locator('.pkm-stock-dot-on').count()) === 2);
+await page.waitForTimeout(1200);
+ok('stock relu sur le serveur : toujours 2', /Plus que 2 ce mois-ci/.test(await rare.innerText()) && calls.filter(c => c.startsWith('RPC shop_state')).length >= 2);
 await page.goto(E2E + '/?start=settings' + Q, { waitUntil: 'load' }); await page.waitForTimeout(1500);
 await page.locator('button:has-text("Panneau Admin")').first().click(); await page.waitForTimeout(600);
 // Carte d'un tirage déjà choisie (2026-11-15, porteur : « laisse-moi changer les cartes proposées même si des joueurs ont

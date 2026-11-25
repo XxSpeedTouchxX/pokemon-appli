@@ -91,7 +91,7 @@ const bst = page.locator('section[aria-label="Booster de la série du moment"]')
 await bst.locator('button:has-text("Acheter")').click(); await page.waitForTimeout(300);
 await bst.locator('button:has-text("Confirmer")').click(); await page.waitForTimeout(1200);
 const lot = await page.locator('.pkm-lotfx').innerText().catch(() => '');
-ok('booster acheté : « Bravo ! Tu viens d’acheter un booster Pokémon 30ᵉ anniversaire… à ton domicile »', /Bravo !/.test(lot) && /Tu viens d’acheter un booster Pokémon 30ᵉ anniversaire\. Tu vas recevoir très prochainement un e-mail t’indiquant la démarche à suivre pour réceptionner ton booster directement à ton domicile\./.test(lot) && (await page.locator('.pkm-lotfx img').count()) === 1);
+ok('booster acheté : « Bravo ! Tu viens d’acheter un booster Pokémon Règne Delta… à ton domicile »', /Bravo !/.test(lot) && /Tu viens d’acheter un booster Pokémon Règne Delta\. Tu vas recevoir très prochainement un e-mail t’indiquant la démarche à suivre pour réceptionner ton booster directement à ton domicile\./.test(lot) && (await page.locator('.pkm-lotfx img').count()) === 1);
 ok('booster acheté : confettis et feu d’artifice', (await page.locator('.pkm-party .pkm-fw').count()) >= 5);
 await page.screenshot({ path: shot('locks-achat-booster.png') });
 await page.locator('.pkm-lotfx button:has-text("Super !")').click(); await page.waitForTimeout(500);

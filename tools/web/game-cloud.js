@@ -202,10 +202,14 @@
         busy = false;
         const tickets = Object.assign({}, this.st().tickets || {}, { [id]: r.count | 0 }), free = gcFree(this.st());
         const it = SHOP_ITEMS.find(x => x.id === id) || { name: 'Article' };
+        // Stock (2026-11-25, porteur) : l'article acheté (admin compris) disparaît tout de suite du stock affiché ; le
+        // serveur (040) le confirme à la relecture juste après.
+        const cs = this.st().cloudShop, stk = cs && cs.stock && cs.stock[id];
+        const less = stk ? { cloudShop: Object.assign({}, cs, { stock: Object.assign({}, cs.stock, { [id]: Object.assign({}, stk, { left: Math.max(0, (stk.left | 0) - 1) }) }) }) } : {};
         // Achat direct : l'écran « Bravo » remplace le message du bas (2026-11-07, porteur).
-        this.setState({ pk: free ? GC_INF : r.pk, tickets: tickets, shopAsk: null, shopChoice: null,
+        this.setState(Object.assign(less, { pk: free ? GC_INF : r.pk, tickets: tickets, shopAsk: null, shopChoice: null,
           toast: id.indexOf('ticket') === 0 ? it.name + ' ajouté · tu en as ' + (r.count | 0) + ' pour le prochain tirage'
-            + (free ? ' · mode Admin, rien débité' : ' · il te reste ' + Number(r.pk).toLocaleString('fr-FR') + ' PK') : null });
+            + (free ? ' · mode Admin, rien débité' : ' · il te reste ' + Number(r.pk).toLocaleString('fr-FR') + ' PK') : null }));
         this.flash();
         this.shopDone(id, r.choice, r.count | 0);
         if (this.shopSync) this.shopSync(); // stock, achat du mois, mes tickets par carte (018)

@@ -269,10 +269,13 @@
     return mine.length ? { id: mine[mine.length - 1].id, at: mine[mine.length - 1].at, next: p.end } : null;
   };
   // Raison qui empêche un achat direct (épuisé, achat du mois fait), ou ''.
+  // Mode Admin (2026-11-25, porteur : « quand on achète un booster, il se retire du stock ; j'en ai acheté un avec mon
+  // compte admin et le stock est toujours de 10 ») : l'achat d'un admin retire lui aussi un article du stock (serveur
+  // 040) et « Épuisé » vaut pour tout le monde ; seule la limite d'un achat direct par mois ne s'applique pas à l'admin.
   shopProto.shopLotBlock = function (s, id) {
-    if (shopFree(s)) return '';
     const st = this.shopStock(s, id), mb = this.shopMonthBuy(s);
     if (st && st.left <= 0) return 'Épuisé : retour ' + shopWhen(st.restock);
+    if (shopFree(s)) return '';
     if (st && mb) return 'Tu as déjà fait ton achat du mois : prochain achat possible ' + shopWhen(mb.next);
     return '';
   };
@@ -299,8 +302,9 @@
     this.shopDone(id, choice, tickets[id]);
   };
   // ——— Après un achat (2026-11-07, porteur) ———
-  // Série du moment, citée dans le message des achats directs (à changer avec les sorties).
-  const SHOP_SERIES = '30ᵉ anniversaire';
+  // Série du moment, citée dans le message des achats directs (à changer avec les sorties). Le booster est celui de
+  // Règne Delta depuis le 2026-11-24 (porteur) ; l'item rare et l'ETB restent ceux du 30ᵉ anniversaire.
+  const SHOP_SERIES = '30ᵉ anniversaire', SHOP_BOOSTER_SERIES = 'Règne Delta';
   // Ticket acheté : le ticket apparaît avec un « +1 ». Trois propositions, à choisir par le porteur (?anitk=1, 2 ou 3) :
   //   1. Envol : le ticket surgit au centre, rebondit, « +1 » monte, puis il s'envole vers le ticket de la fiche ;
   //   2. Tampon : le ticket surgit, un tampon « VALIDÉ » s'abat (secousse), « +1 » rebondit, quelques étincelles, puis il
@@ -335,7 +339,7 @@
   // Achat direct : l'article apparaît, confettis et feu d'artifice (comme le Booster PK à 500 PK), et le message du porteur.
   const shopLotText = (it, choice) => {
     const mail = ' Tu vas recevoir très prochainement un e-mail t’indiquant la démarche à suivre pour réceptionner ';
-    if (it.id === 'achat-booster') return 'Tu viens d’acheter un booster Pokémon ' + SHOP_SERIES + '.' + mail + 'ton booster directement à ton domicile.';
+    if (it.id === 'achat-booster') return 'Tu viens d’acheter un booster Pokémon ' + SHOP_BOOSTER_SERIES + '.' + mail + 'ton booster directement à ton domicile.';
     if (it.id === 'achat-rare') return 'Tu viens d’acheter un item rare' + (choice ? ' : ' + choice : '') + ' de la série ' + SHOP_SERIES + '.' + mail + 'ton item directement à ton domicile.';
     if (it.id === 'achat-etb-30') return 'Tu viens d’acheter l’ETB ' + SHOP_SERIES + ' (Coffret Dresseur d’élite).' + mail + 'ton ETB directement à ton domicile.';
     return 'Tu viens d’acheter ' + it.name + '.' + mail + 'ton article directement à ton domicile.';
@@ -597,7 +601,7 @@
       sheet: sheet,
       items: SHOP_ITEMS.filter(it => it.kind !== 'ticket').map(it => {
         const n = tickets[it.id] || 0, open = gi >= (it.minGrade || 0), st = this.shopStock(s, it.id);
-        const out = !free && !!st && st.left <= 0, done = !free && !out && !!month;
+        const out = !!st && st.left <= 0, done = !free && !out && !!month;
         const can = open && !it.soon && !out && !done && pk >= it.price, ask = can && s.shopAsk === it.id;
         const price = it.price.toLocaleString('fr-FR') + ' PK';
         const choice = ask && it.choices && it.choices.indexOf(s.shopChoice) >= 0 ? s.shopChoice : '';
