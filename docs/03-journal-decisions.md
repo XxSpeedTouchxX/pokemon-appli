@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-25 (suite) — Remettre un compte à zéro
+
+- **Demande** : « Rappelle-moi la commande pour enlever les stats que j'ai mises à quelqu'un, pour le faire recommencer à 0 sur l'app. »
+- **Constat** : aucune requête n'existait pour l'inverse de `requetes_grade.sql` (grade Grand maître et PA offerts).
+- **Fait** : `tools/supabase/requetes_remise_a_zero.sql` : requête 1 pour voir le compte (lecture seule), requête 2 pour le remettre à zéro (100 PK, 0 PA, grade Recrue, Pokédex vidé sauf le starter, 2XP, coffres, scans bonus et cosmétiques d'avatar retirés, retiré du Safari sans délai, trace dans l'historique et le journal admin). Refusée sur un compte admin.
+- **Choix par défaut** : on garde le compte, le DropiPass, les tickets et achats du PK shop, les PL et « Ma ligue », la vitrine. Des PA achetés en euros seraient remis à 0 aussi (la requête le signale).
+
 ## 2026-11-25 — Stock du PK shop : les achats des admins comptent
 
 - **Demande** : « Je veux que lorsqu'on achète un booster au PK shop, celui-ci se retire automatiquement du nombre de boosters en stock ; par exemple j'en ai acheté un avec mon compte admin et le nombre de boosters dispo est toujours de 10. »

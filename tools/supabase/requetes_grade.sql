@@ -12,6 +12,7 @@
 --   4. écrit une ligne dans le journal admin (qui, quoi, quand).
 -- Le grade et les PA apparaissent sur son téléphone à sa prochaine ouverture de l'app (avec l'animation de passage de
 -- grade). Ce n'est pas le rôle admin : il ne voit ni le panneau Admin ni les comptes des autres.
+-- Pour tout retirer et le faire recommencer à zéro : requetes_remise_a_zero.sql (2026-11-25).
 do $$
 declare
   ami text := 'ADRESSE-DE-TON-AMI@exemple.fr';   -- ← remplace par l'adresse e-mail du compte de ton ami
