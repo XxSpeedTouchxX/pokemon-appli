@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-26 (suite) — Didacticiel : étape du grade ; gain de PK regroupé ; ouverture avec le logo Dropicards
+
+- **Demandes** : « juste avant le dernier conseil du didacticiel, encadre le petit logo du grade en haut de Dropicards et explique que pour chaque nouveau grade tu débloques de nouveaux avantages » ; « propose-moi une autre animation à la fin des PK sur le solde : actuellement il y a des jetons qui partent dans tous les sens, regroupe-moi un peu plus tout ça » ; « propose une nouvelle animation du booster quand on ouvre l'application, même durée, et mets sur le booster le logo Dropicards de l'appli avec le D et la carte ».
+- **Didacticiel** : 16 étapes ; avant-dernière = emblème du grade de l'en-tête encadré : « Ici, tu retrouves ton grade. Gagne des PK et débloque des Pokémon pour monter en grade : chaque nouveau grade te donne de nouveaux avantages dans l'appli (plus de scans, des jeux plus souvent, un classeur plus grand…). Touche-le pour les découvrir ! » (`tuto.js`, test `t-tuto`).
+- **Gain de PK (Booster PK, pièce, Safari)** : 3 animations regroupées proposées, toutes les gemmes sur un seul arc jusqu'au solde, anneau doré à l'arrivée : **1 Grappe** (par défaut : gemmes serrées au-dessus du gain, qui partent l'une derrière l'autre), 2 Ruban (file indienne), 3 Comète (une grosse gemme et sa traîne, solde qui monte d'un coup) ; 0 = l'ancienne (éparpillée). Essai `?pkfly=0` à `3` ; vidéo `tools/brand/pkfly/propositions.mp4` ; **choix du porteur attendu**. Les PA du jour gardent leur animation. `pa.js` (`paFlyTight`), `games.css`.
+- **Ouverture de l'app** : booster refait avec le logo de l'app (le « D » et la carte à la gemme) et le nom ; fin sur ce logo et « Dropicards » ; même durée (3,5 s). 4 variantes : **1 Déchirure** (par défaut : la chorégraphie actuelle), 2 La carte sort, 3 Holo, 4 Coupé en deux. Essai `?intro=1&introvis=1` à `4` ; vidéo `tools/brand/intro/propositions.mp4` ; **choix du porteur attendu**. `intro.html` (test `t-intro`).
+- Cache v292.
+
 ## 2026-11-26 — Safari éclair : une partie toutes les X heures selon le grade, pour tous
 
 - **Demande** : « Pour le Safari éclair, mets bien le délai en rapport avec les grades ; actuellement je suis Collectionneur et j'ai joué autant de fois que je voulais ; mets la limite à 1 fois toutes les X heures en fonction du grade actuel. »

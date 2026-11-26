@@ -54,6 +54,9 @@
     { tab: 'home', sel: TUTO_NAV + 'button[aria-label="PK shop"]', ico: 42, text: 'Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK et PA gagnés !' },
     // « Mes points » (2026-11-23, « go » du porteur) : le bandeau de l'accueil qui explique PK, PA et PL.
     { tab: 'home', sel: 'button.pkm-pts-home', pad: 4, text: 'Et pour savoir comment gagner tes PK, tes PA et tes PL, touche ici : tout est expliqué simplement, avec ce que tu peux encore gagner aujourd’hui.' },
+    // Grade (2026-11-26, porteur : « juste avant le dernier conseil, encadre le petit logo du grade en haut de Dropicards
+    // et explique rapidement : ici tu trouveras ton grade, chaque nouveau grade débloque de nouveaux avantages »).
+    { tab: 'home', sel: 'header button.pkm-hh-grade', ico: 54, text: 'Ici, tu retrouves ton grade. Gagne des PK et débloque des Pokémon pour monter en grade : chaque nouveau grade te donne de nouveaux avantages dans l’appli (plus de scans, des jeux plus souvent, un classeur plus grand…). Touche-le pour les découvrir !' },
     { tab: 'home', sel: 'button[aria-label^="Compagnon : "]', final: true, text: 'Maintenant que tu connais toute l’appli, tu pourras me trouver ici !' }
   ];
   // ——— Mini-tuto de « Ma ligue » (2026-11-14, porteur : « lorsque l'utilisateur va cliquer la première fois sur Ma

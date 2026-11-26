@@ -768,6 +768,14 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pafly-pk .pkm-pafly-drop { filter: drop-shadow(0 0 6px rgba(255, 214, 10, 0.85)); }
 .pkm-pafly-pk .pkm-pafly-burst { background: radial-gradient(circle, #FFFFFF 0 10%, #FFF3B0 18%, #FFD60A 34%, rgba(255, 196, 0, 0.5) 52%, rgba(255, 196, 0, 0) 70%); }
 .pkm-pafly-lost { filter: grayscale(0.85) brightness(0.8) drop-shadow(0 0 6px rgba(224, 69, 58, 0.9)); }
+/* Gain de PK regroupé (2026-11-26, porteur : « regroupe-moi un peu plus tout ça ») : éclat de départ plus petit, grosse
+   gemme de la Comète, anneau doré qui s'ouvre sur le solde à l'arrivée (pa.js, paFlyTight, ?pkfly=). */
+.pkm-pafly-tight .pkm-pafly-burst { width: 120px; height: 120px; margin: -94px 0 0 -60px; }
+.pkm-pafly-tight .pkm-pafly-burst::after { inset: -16px; }
+.pkm-pafly-pk .pkm-pafly-big { filter: drop-shadow(0 0 10px rgba(255, 214, 10, 0.95)) drop-shadow(0 0 22px rgba(255, 196, 0, 0.55)); }
+.pkm-pafly-ring { position: absolute; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; border: 3px solid #FFD60A;
+  box-shadow: 0 0 12px rgba(255, 214, 10, 0.8), inset 0 0 8px rgba(255, 214, 10, 0.6); animation: pkmPaRing 0.5s ease-out forwards; }
+@keyframes pkmPaRing { 0% { transform: scale(0.3); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
 .pkm-pk-hurt { animation: pkmPkHurt 0.9s ease-out; }
 @keyframes pkmPkHurt { 0%, 100% { transform: none; color: inherit; } 10%, 30%, 50% { transform: translateX(-4px); color: #FF5A4E; } 20%, 40%, 60% { transform: translateX(4px); color: #FF5A4E; } 80% { color: #FF5A4E; } }
 .pkm-gain.pkm-gain-loss { background: #E0453A !important; color: #FFFFFF !important; }

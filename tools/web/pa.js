@@ -142,18 +142,37 @@
     this.sfxPa(drops); // bruitage des PA du jour (sfx.js, 2026-11-01)
     paFly(from, to, drops, k => this.setState({ paCount: Math.round(old + n.gain * (k + 1) / drops) }), end);
   };
+  // Vol des gemmes des PK jusqu'au solde (2026-11-26, porteur : « propose-moi une autre animation à la fin des PK sur
+  // le solde : actuellement il y a des jetons qui partent dans tous les sens, regroupe-moi un peu plus tout ça ») :
+  //   0 Éparpillé (l'ancienne : éparpillement en étoile puis vol de chaque gemme sur son arc),
+  //   1 Grappe (par défaut) : les gemmes se serrent en grappe au-dessus du gain, tournent ensemble, puis partent
+  //     l'une derrière l'autre sur un seul arc,
+  //   2 Ruban : les gemmes sautent du gain et filent en file indienne sur le même arc, comme un ruban doré,
+  //   3 Comète : les gemmes se fondent en une grosse gemme qui file jusqu'au solde, suivie d'une petite traîne ;
+  //     le solde monte d'un coup à l'arrivée.
+  // Essai : ?pkfly=0 à 3. Les PA du jour gardent leur animation (éparpillé).
+  const pkFlyMode = () => {
+    let v = '';
+    try { v = (/[?&]pkfly=(\d)/.exec(location.search) || [])[1] || ''; } catch (e) { v = ''; }
+    return /^[0-3]$/.test(v) ? Number(v) : 1;
+  };
+  // Point d'un arc (courbe de Bézier quadratique) de p0 à p2 tiré vers c.
+  const qb = (p0, c, p2, t) => (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * c + t * t * p2;
   // opts.img : image qui vole (gouttes des PA par défaut ; gemmes des PK pour le Safari, 2026-11-13).
+  // opts.mode : 0 à 3 (voir pkFlyMode) ; absent = 0.
   const paFly = (fromEl, toEl, count, hit, done, opts) => {
     const root = document.querySelector('.pkm-root') || document.body, R = root.getBoundingClientRect();
     const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
     const ax = a.left - R.left + a.width / 2, ay = a.top - R.top + a.height / 2, bx = b.left - R.left + 14, by = b.top - R.top + b.height / 2;
+    const mode = (opts && opts.mode) || 0;
     const layer = document.createElement('div');
     // Gemmes des PK : reflet jaune comme les PK, pas violet comme les PA (2026-11-15, porteur).
-    layer.className = 'pkm-pafly' + (opts && /pk\.svg$/.test(opts.img || '') ? ' pkm-pafly-pk' : ''); layer.setAttribute('aria-hidden', 'true');
+    layer.className = 'pkm-pafly' + (opts && /pk\.svg$/.test(opts.img || '') ? ' pkm-pafly-pk' : '') + (mode ? ' pkm-pafly-tight pkm-pafly-m' + mode : ''); layer.setAttribute('aria-hidden', 'true');
     const burst = document.createElement('i');
     burst.className = 'pkm-pafly-burst'; burst.style.left = ax + 'px'; burst.style.top = ay + 'px';
     layer.appendChild(burst);
     root.appendChild(layer);
+    if (mode) { paFlyTight(layer, toEl, count, hit, done, opts, mode, ax, ay, bx, by); return; }
     let left = count;
     for (let i = 0; i < count; i++) {
       const d = document.createElement('img');
@@ -175,6 +194,105 @@
         toEl.classList.remove('pkm-pa-bump'); void toEl.offsetWidth; toEl.classList.add('pkm-pa-bump');
         hit(count - left); left--;
         if (!left) { setTimeout(() => layer.remove(), 300); done(); }
+      };
+    }
+  };
+  // Variantes regroupées (1 Grappe, 2 Ruban, 3 Comète) : toutes les gemmes suivent le même arc, du gain au solde ;
+  // un anneau doré s'ouvre sur le solde à l'arrivée de la dernière.
+  const paFlyTight = (layer, toEl, count, hit, done, opts, mode, ax, ay, bx, by) => {
+    const src = (opts && opts.img) || 'img/brand/pa.svg';
+    const tx = bx - ax, ty = by - ay;
+    // Départ un peu au-dessus du gain ; arc tiré vers le haut et vers l'intérieur de l'écran.
+    const sx = 0, sy = -34, cx = tx * 0.35 + 40, cy = Math.min(sy, ty) - 70;
+    const path = t => [qb(sx, cx, tx, t), qb(sy, cy, ty, t)];
+    const bump = () => { toEl.classList.remove('pkm-pa-bump'); void toEl.offsetWidth; toEl.classList.add('pkm-pa-bump'); };
+    const ring = () => {
+      const o = document.createElement('i');
+      o.className = 'pkm-pafly-ring'; o.style.left = bx + 'px'; o.style.top = by + 'px';
+      layer.appendChild(o);
+    };
+    const end = () => { ring(); setTimeout(() => layer.remove(), 520); done(); };
+    const gem = (size, cls) => {
+      const d = document.createElement('img');
+      d.src = src; d.alt = ''; d.className = 'pkm-pafly-drop' + (cls ? ' ' + cls : '');
+      d.style.width = d.style.height = size + 'px';
+      d.style.left = (ax - size / 2) + 'px'; d.style.top = (ay - size / 2) + 'px';
+      layer.appendChild(d);
+      return d;
+    };
+    // Vol le long de l'arc : n points, l'écart (dx, dy) au départ se resserre jusqu'à 0 à l'arrivée.
+    const flight = (dx, dy, t0, t1, D, s0, s1, rot) => {
+      const ks = [], N = 7;
+      for (let j = 0; j <= N; j++) {
+        const u = j / N, e = u * u * (3 - 2 * u), p = path(e), f = 1 - e;
+        ks.push({ transform: 'translate(' + (p[0] + dx * f) + 'px, ' + (p[1] + dy * f) + 'px) scale(' + (s0 + (s1 - s0) * e) + ') rotate(' + (rot * (1 - e)) + 'deg)', opacity: j === N ? 0.9 : 1, offset: (t0 + (t1 - t0) * u) / D });
+      }
+      return ks;
+    };
+    if (mode === 3) {
+      // Comète : les petites gemmes se rejoignent au-dessus du gain, la grosse gemme apparaît et file au solde.
+      const small = Math.min(count, 8), F = 360, GO = 430, FLY = 700, D = GO + FLY;
+      for (let i = 0; i < small; i++) {
+        const ang = i / small * Math.PI * 2, r = 38, d = gem(26);
+        d.animate([
+          { transform: 'translate(0, 0) scale(0.2)', opacity: 0 },
+          { transform: 'translate(' + (Math.cos(ang) * r) + 'px, ' + (sy + Math.sin(ang) * r) + 'px) scale(1)', opacity: 1, offset: 0.45 },
+          { transform: 'translate(0px, ' + sy + 'px) scale(0.5)', opacity: 0 }
+        ], { duration: F, delay: i * 18, easing: 'cubic-bezier(0.3, 0, 0.6, 1)', fill: 'forwards' }).onfinish = function () { this.effect.target.remove(); };
+      }
+      const big = gem(54, 'pkm-pafly-big');
+      big.animate([{ transform: 'translate(0px, ' + sy + 'px) scale(0)', opacity: 0, offset: 0 },
+        { transform: 'translate(0px, ' + sy + 'px) scale(0)', opacity: 0, offset: (F - 60) / D },
+        { transform: 'translate(0px, ' + sy + 'px) scale(1.25) rotate(-12deg)', opacity: 1, offset: (F + 20) / D },
+        { transform: 'translate(0px, ' + (sy - 4) + 'px) scale(1) rotate(0deg)', opacity: 1, offset: GO / D }]
+        .concat(flight(0, 0, GO, D, D, 1, 0.5, 0).slice(1)), { duration: D, easing: 'linear', fill: 'forwards' })
+        .onfinish = () => {
+          big.remove();
+          // Le solde monte vite, gemme après gemme, pendant que l'anneau s'ouvre.
+          ring(); let k = 0;
+          const tick = () => { bump(); hit(k); k++; if (k < count) setTimeout(tick, 45); else { setTimeout(() => layer.remove(), 520); done(); } };
+          tick();
+        };
+      // Traîne : 3 petites gemmes qui suivent la grosse.
+      for (let i = 1; i <= 3; i++) {
+        const d = gem(22 - i * 3), lag = i * 55;
+        d.animate([{ transform: 'translate(0px, ' + sy + 'px) scale(0)', opacity: 0, offset: 0 },
+          { transform: 'translate(0px, ' + sy + 'px) scale(0)', opacity: 0, offset: (GO + lag) / (D + lag) }]
+          .concat(flight(0, 0, GO + lag, D + lag, D + lag, 0.9, 0.3, 0).slice(1).map(k => Object.assign(k, { opacity: 0.85 - i * 0.18 }))),
+          { duration: D + lag, easing: 'linear', fill: 'forwards' }).onfinish = function () { this.effect.target.remove(); };
+      }
+      return;
+    }
+    let left = count;
+    for (let i = 0; i < count; i++) {
+      const d = gem(32);
+      let ks, D;
+      if (mode === 1) {
+        // Grappe : gemmes serrées (rayon 12 à 24 px) au-dessus du gain, qui tournent ensemble, puis partent à la file.
+        const ang = i * 2.39996, r = 12 + (i * 7) % 13, ox = Math.cos(ang) * r, oy = Math.sin(ang) * r * 0.8;
+        const ang2 = ang + 0.9, ox2 = Math.cos(ang2) * r * 0.85, oy2 = Math.sin(ang2) * r * 0.7;
+        const FORM = 280, HOLD = 520, GO = HOLD + i * 42, FLY = 640;
+        D = GO + FLY;
+        ks = [
+          { transform: 'translate(0, 0) scale(0.2) rotate(0deg)', opacity: 0, offset: 0 },
+          { transform: 'translate(' + ox + 'px, ' + (sy + oy) + 'px) scale(1.15) rotate(' + (i % 2 ? 14 : -14) + 'deg)', opacity: 1, offset: FORM / D },
+          { transform: 'translate(' + ox2 + 'px, ' + (sy + oy2) + 'px) scale(1) rotate(0deg)', opacity: 1, offset: GO / D }
+        ].concat(flight(ox2, oy2, GO, D, D, 1, 0.55, 0).slice(1));
+      } else {
+        // Ruban : petit saut hors du gain, puis la file part sur l'arc, chaque gemme 70 ms derrière la précédente.
+        const w = (i % 2 ? 1 : -1) * (3 + (i % 3) * 2), HOP = 240, GO = HOP + i * 70, FLY = 760;
+        D = GO + FLY;
+        ks = [
+          { transform: 'translate(0, 0) scale(0.2) rotate(0deg)', opacity: 0, offset: 0 },
+          { transform: 'translate(' + w + 'px, ' + (sy - 6) + 'px) scale(1.15) rotate(' + (i % 2 ? 10 : -10) + 'deg)', opacity: 1, offset: HOP * 0.8 / D },
+          { transform: 'translate(' + w + 'px, ' + sy + 'px) scale(1) rotate(0deg)', opacity: 1, offset: GO / D }
+        ].concat(flight(w, 0, GO, D, D, 1, 0.55, 0).slice(1));
+      }
+      const an = d.animate(ks, { duration: D, easing: 'linear', fill: 'forwards' });
+      an.onfinish = () => {
+        d.remove(); bump();
+        hit(count - left); left--;
+        if (!left) end();
       };
     }
   };
@@ -218,7 +336,7 @@
       const drops = Math.min(14, Math.max(8, Math.round(gain / 2)));
       try { this.sfxPa(drops); } catch (e) { /* son coupé */ }
       // Solde qui monte gemme après gemme ; solde illimité (admin déverrouillé) : les gemmes volent, le nombre reste.
-      paFly({ getBoundingClientRect: () => r }, to, drops, k => { if (climb && !ended) put(Math.round(gain * (k + 1) / drops)); }, fin, { img: 'img/brand/pk.svg' });
+      paFly({ getBoundingClientRect: () => r }, to, drops, k => { if (climb && !ended) put(Math.round(gain * (k + 1) / drops)); }, fin, { img: 'img/brand/pk.svg', mode: pkFlyMode() });
     }));
   };
   // Perte de PK (Safari éclair en Normal ou Difficile, 2026-11-13, porteur : « une animation d'enlèvement de PK si
