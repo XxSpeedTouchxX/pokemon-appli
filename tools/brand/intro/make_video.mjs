@@ -12,7 +12,9 @@ const OUT = fileURLToPath(new URL('.', import.meta.url)), TMP = OUT + 'tmp/';
 rmSync(TMP, { recursive: true, force: true }); mkdirSync(TMP, { recursive: true });
 const NAMES = { 1: 'Déchirure', 2: 'La carte sort', 3: 'Holo', 4: 'Coupé en deux' };
 const browser = await launch();
-for (const v of [1, 2, 3, 4]) {
+// ONLY=2 : une seule variante, en grand (sortie ouverture-2.mp4).
+const ONLY = process.env.ONLY ? [Number(process.env.ONLY)] : [1, 2, 3, 4];
+for (const v of ONLY) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   // Le filet de sécurité de l'intro (4,5 s) la cacherait pendant la prise de vue image par image : il est neutralisé.
@@ -34,6 +36,12 @@ for (const v of [1, 2, 3, 4]) {
     '-an', TMP + 'c' + v + '.mp4']);
 }
 await browser.close();
+if (ONLY.length === 1) {
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', TMP + 'c' + ONLY[0] + '.mp4', '-vf', 'tpad=stop_mode=clone:stop_duration=1', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT + 'ouverture-' + ONLY[0] + '.mp4']);
+  rmSync(TMP, { recursive: true, force: true });
+  console.log('vidéo écrite');
+  process.exit(0);
+}
 execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', TMP + 'c1.mp4', '-i', TMP + 'c2.mp4', '-i', TMP + 'c3.mp4', '-i', TMP + 'c4.mp4',
   '-filter_complex', '[0][1][2][3]xstack=inputs=4:layout=0_0|w0_0|0_h0|w0_h0,tpad=stop_mode=clone:stop_duration=1[v]', '-map', '[v]', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT + 'propositions.mp4']);
 rmSync(TMP, { recursive: true, force: true });

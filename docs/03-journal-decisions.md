@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-27 — Ouverture de l'app : découpe horizontale du haut du booster
+
+- **Demande** : « à la place de l'éclair qui ouvre le booster, la même découpe que pour l'animation 4, mais horizontale en haut du booster ; pour le reste, garder la carte Dropicards qui sort du booster et le D qui la rejoint par la gauche ».
+- **Fait** : variante 2 « La carte sort » (celle de l'app) : l'éclair est remplacé par un trait lumineux jaune et blanc qui tranche le haut du booster de gauche à droite (même trait que la découpe de la 4), éclair blanc, puis le haut glisse un peu le long de la coupe et s'envole ; la suite ne change pas (carte qui sort, se retourne, se pose, « D » qui arrive par la gauche, nom « Dropicards »). Même durée (3,5 s). `intro.html` ; vidéo `tools/brand/intro/ouverture-2.mp4` ; test `t-intro`. Cache v296.
+
 ## 2026-11-26 (suite 4) — Didacticiel sans « Comment gagner des points ? » ; gain de PK = animation des PA, en jaune
 
 - **Demandes** : « dans le didacticiel, l'explication "Et pour savoir comment gagner…" supprime-la, elle ne sert à rien » ; « je veux que l'animation des PK soit pareille que l'animation des PA, mais avec une dominante jaune et non violette ».
