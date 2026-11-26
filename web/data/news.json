@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26T00:39:16Z",
+ "updated": "2026-11-26T15:43:28Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,34 @@
   }
  ],
  "items": [
+  {
+   "title": "Pokémon Champions x Pokémon GO : Obtenez la tenue du Professeur Willow !",
+   "url": "https://www.pokebip.com/news/7663/pokemon-champions-x-pokemon-go-obtenez-la-tenue-du-professeur-willow",
+   "date": "2026-11-26T08:32:09Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Pocket : Évènement cartes promo à thème vacances d'hiver !",
+   "url": "https://www.pokebip.com/news/7662/pokemon-pocket-evenement-cartes-promo-a-theme-vacances-dhiver",
+   "date": "2026-11-26T08:13:32Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Paradis tropical !",
+   "url": "https://www.pokebip.com/news/7661/pokemon-go-paradis-tropical",
+   "date": "2026-11-26T08:09:04Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Célébration pour Pokémon Champions !",
+   "url": "https://www.pokebip.com/news/7660/pokemon-go-celebration-pour-pokemon-champions",
+   "date": "2026-11-26T08:07:47Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "Pokémon GO : Passe GO de décembre 2026 !",
    "url": "https://www.pokebip.com/news/7659/pokemon-go-passe-go-de-decembre-2026",
@@ -99,34 +127,6 @@
    "title": "Pokémon GO : Journée Combat Max : Lézargus Gigamax !",
    "url": "https://www.pokebip.com/news/7647/pokemon-go-journee-combat-max-lezargus-gigamax",
    "date": "2026-11-20T16:04:03Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Écarlate et Violet : Retour de Lanssorien surpuissant",
-   "url": "https://www.pokebip.com/news/7646/ecarlate-et-violet-retour-de-lanssorien-surpuissant",
-   "date": "2026-11-20T08:35:53Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Distribution d'un Nymphali, de boosters numériques et d'une étude ponctuelle !",
-   "url": "https://www.pokebip.com/news/7593/distribution-dun-nymphali-de-boosters-numeriques-et-dune-etude-ponctuelle",
-   "date": "2026-11-20T08:00:01Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "JCC Pokémon : Nouvelle extension Méga-Évolution – Poings Fluides !",
-   "url": "https://www.pokebip.com/news/7645/jcc-pokemon-nouvelle-extension-mega-evolution-poings-fluides",
-   "date": "2026-11-19T20:55:47Z",
-   "source": "Pokébip",
-   "tcg": true
-  },
-  {
-   "title": "Pokémon Pocket : Combats restreints Fusion Double (C1) et nouveau Booster promo !",
-   "url": "https://www.pokebip.com/news/7644/pokemon-pocket-combats-restreints-fusion-double-c1-et-nouveau-booster-promo",
-   "date": "2026-11-18T08:48:06Z",
    "source": "Pokébip",
    "tcg": false
   },
