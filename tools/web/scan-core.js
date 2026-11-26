@@ -376,11 +376,16 @@
     // doit être très proche (distance d1) et nettement devant la suivante (écart) : une réimpression au même dessin est
     // aussi proche, l'écart manque, et c'est le texte qui tranche. Une image très nette suffit ; sinon deux de suite.
     // Banc d'essai (384 photos simulées) : 0 erreur jusqu'à d1 ≤ 20 et écart ≥ 6 ; règles prises avec de la marge.
+    // Trois images de suite (2026-11-26, porteur : carte sous pochette ou toploader) : le plastique éloigne un peu le
+    // dessin (voile, reflets doux), la bonne carte reste en tête à 18-22 ; la même carte en tête trois fois de suite,
+    // ≤ 22 et 10 d'avance à chaque fois, suffit. Banc d'essai (576 prises et 7 scènes sans carte, 3 images chacune) :
+    // aucune mauvaise carte jusqu'à ≤ 26 et 6 d'avance ; les autres cartes et les scènes sans carte restent à 26 et plus.
     function visSure(frames) {
-      const f = frames[frames.length - 1], p = frames[frames.length - 2];
+      const f = frames[frames.length - 1], p = frames[frames.length - 2], q = frames[frames.length - 3];
       const ok = (x, d, gap) => x && x[0] && x[0].d <= d && (!x[1] || x[1].d - x[0].d >= gap);
       if (ok(f, 12, 12) || ok(f, 16, 18)) return f[0].id;
       if (ok(f, 18, 10) && ok(p, 18, 10) && p[0].id === f[0].id) return f[0].id;
+      if (ok(f, 22, 10) && ok(p, 22, 10) && ok(q, 22, 10) && p[0].id === f[0].id && q[0].id === f[0].id) return f[0].id;
       return null;
     }
 

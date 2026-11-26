@@ -106,6 +106,7 @@
   // Réimpressions des 30 ans ↔ cartes d'origine (CLASSIC_30, catalog.js).
   const SCAN_TWIN = new Map();
   CLASSIC_30.forEach((o, k) => { const id = '30th-c-' + String(k + 1).padStart(3, '0'); SCAN_TWIN.set(id, o); SCAN_TWIN.set(o, id); });
+  SCAN.TWIN = SCAN_TWIN; // banc d'essai (bench-scan.mjs) : même règle des réimpressions que SCAN.open
   // Carte trouvée dans l'image (ses bords), puis cartes au dessin le plus proche (7 cadrages autour d'elle).
   // Carte inclinée (tenue à la main) : image redressée, bords cherchés à nouveau ; la lecture du texte se fait aussi sur
   // l'image redressée (look.src).
@@ -113,31 +114,59 @@
     // Deux essais quand la carte paraît inclinée : image telle quelle et image redressée ; on garde celui dont le dessin
     // ressemble le plus à une carte du catalogue (une inclinaison mal mesurée, sur une table de la couleur du bord de
     // la carte, ne gâche donc rien).
-    const tries = [];
-    let found = false;
+    const tries = [], more = [], box = l => ({ sx: l.sx, sy: l.sy, sw: l.sw, sh: l.sh });
+    let found = false, glare = false;
     try {
       const l = ScanPrint.locate(src, rect);
       found = !!l.found;
-      tries.push({ src: src, r: l.found ? { sx: l.sx, sy: l.sy, sw: l.sw, sh: l.sh } : rect });
+      tries.push({ src: src, r: l.found ? box(l) : rect });
+      if (l.found && l.more) more.push({ src: src, l: l });
       if (l.found && l.a) {
         const k = 'dk' + (key || 'X'), c = ScanPrint.deskew(src, l.a, SCAN[k] || (SCAN[k] = document.createElement('canvas'))), l2 = ScanPrint.locate(c, rect);
-        if (l2.found) tries.push({ src: c, r: { sx: l2.sx, sy: l2.sy, sw: l2.sw, sh: l2.sh } });
+        if (l2.found) { tries.push({ src: c, r: box(l2) }); if (l2.more) more.push({ src: c, l: l2 }); }
       }
     } catch (e) { if (!tries.length) tries.push({ src: src, r: rect }); }
     let best = tries[0], vis = null, prints = null;
+    // gain : essai de secours, gardé seulement s'il ressemble vraiment à une carte du catalogue (≤ 28) et fait mieux d'au
+    // moins « gain » ; sinon, pour une carte que le dessin ne reconnaît pas (dessin à 34), un autre rectangle l'emporterait
+    // de peu et la lecture du texte se ferait au mauvais endroit.
+    const full = (t, gain) => {
+      try {
+        const p = ScanPrint.jitter(t.r).map(x => ScanPrint.print(t.src, x)), v = ScanPrint.nearest(SCAN.pidx, p, 12), d = v[0] ? v[0].d : 999, cur = vis && vis[0] ? vis[0].d : 999;
+        if (gain ? d <= 28 && d <= cur - gain : !vis || d < cur) { vis = v; prints = p; best = t; }
+      } catch (e) { /* essai suivant */ }
+    };
     if (SCAN.pidx) {
-      tries.forEach(t => {
+      tries.forEach(t => full(t));
+      // Carte dans une pochette ou un toploader (2026-11-26, porteur) : le plastique a lui aussi des bords nets, et le
+      // rectangle trouvé peut être celui du plastique. Dessin pas assez proche : les autres rectangles trouvés (la carte
+      // à l'intérieur du plastique) sont jugés d'une seule empreinte (≈ 1 ms chacun) ; le plus prometteur est essayé en
+      // entier (7 cadrages et 2 inclinaisons), et le plus proche d'une carte du catalogue l'emporte.
+      // Seulement autour de l'essai gagnant (image telle quelle ou redressée) ; un seul essai complet, deux si ex æquo.
+      const d1 = vis && vis[0] ? vis[0].d : 999, m = more.find(x => x.src === best.src);
+      if (d1 > 12 && m) {
+        const alts = [];
+        try { m.l.more().forEach(a => alts.push({ src: m.src, r: box(a) })); } catch (e) { /* rien de plus */ }
+        alts.forEach(t => { try { const v = ScanPrint.nearest(SCAN.pidx, [ScanPrint.print(t.src, t.r)], 1); t.d0 = v[0] ? v[0].d : 999; } catch (e) { t.d0 = 999; } });
+        const good = alts.filter(t => t.d0 < d1 + 2).sort((a, b) => a.d0 - b.d0);
+        good.filter((t, i) => i === 0 || t.d0 <= good[0].d0).slice(0, 2).forEach(t => full(t, 4));
+      }
+      // Bande de reflet du plastique (lampe, fenêtre) : dessin toujours pas assez proche, la même carte sans son reflet
+      // (ScanPrint.deglare) est essayée aussi (banc d'essai sous plastique : 35 → 40 % de fiches directes, aucune
+      // erreur). La lecture du texte garde l'image d'origine. glare : bande vue, l'écran demande d'incliner la carte.
+      if (SCAN.deglare !== false && vis && vis[0] && vis[0].d > 12) {
         try {
-          const p = ScanPrint.jitter(t.r).map(x => ScanPrint.print(t.src, x)), v = ScanPrint.nearest(SCAN.pidx, p, 12);
-          if (!vis || (v[0] ? v[0].d : 999) < (vis[0] ? vis[0].d : 999)) { vis = v; prints = p; best = t; }
-        } catch (e) { /* essai suivant */ }
-      });
+          const k = 'dg' + (key || 'X'), o = best, dg = ScanPrint.deglare(o.src, o.r, SCAN[k] || (SCAN[k] = document.createElement('canvas')));
+          if (dg) { glare = true; full({ src: dg.canvas, r: dg.r, from: o }, 1); }
+        } catch (e) { /* sans reflet retiré */ }
+      }
     }
+    if (best.from) best = best.from;
     src = best.src;
     const r = best.r;
     // Bord mesuré seulement si une réimpression des 30 ans ou sa carte d'origine est parmi les plus proches.
     if (vis && vis.slice(0, 3).some(v => SCAN_TWIN.has(v.id))) { try { SCAN.lastBorder = ScanPrint.border(src, r); } catch (e) { /* bord inconnu */ } }
-    return { rect: r, found: found, vis: vis, src: src, prints: prints };
+    return { rect: r, found: found, vis: vis, src: src, prints: prints, glare: glare };
   };
   // Moteur de lecture prêt (progression affichée la première fois), puis lecture continue.
   SCAN.ready = function (inst, gen) {
@@ -180,6 +209,8 @@
       const shot = SCAN.grab('cvVis');
       if (shot) {
         const look = SCAN.look(shot.canvas, shot.rect, 'Vis');
+        // Image et carte trouvée gardées pour la lecture du texte (SCAN.loop), qui n'a pas à refaire ce calcul.
+        SCAN.lastVis = { t: Date.now(), shot: shot, look: look };
         if (look.vis) {
           // Temps de reconnaissance : depuis la première image où un dessin proche apparaît.
           if (!SCAN.visSeen && look.vis[0] && look.vis[0].d <= 30) SCAN.visSeen = Date.now();
@@ -187,11 +218,15 @@
           if (SCAN.visFrames.length > 4) SCAN.visFrames.shift();
           const id = ScanCore.visSure(SCAN.visFrames), now = Date.now();
           if (id && !(SCAN.cool.get(id) > now) && SCAN.visOpen(inst, id, look.vis)) return SCAN.visLoop(inst, gen);
+          // Bande de reflet sur 3 images de suite et carte pas reconnue (2026-11-26) : on demande d'incliner la carte
+          // (sous toploader, la carte sans reflet est reconnue presque comme sans plastique).
+          SCAN.glareN = look.glare ? (SCAN.glareN || 0) + 1 : 0;
+          if (SCAN.glareN >= 3) { SCAN.glareAt = now; SCAN.say(inst, SCAN.GLARE); }
         }
       }
-      // Dessin déjà proche : l'image suivante tout de suite (confirmation en deux images).
+      // Dessin déjà proche : l'image suivante tout de suite (confirmation en deux ou trois images).
       const lv = SCAN.visFrames[SCAN.visFrames.length - 1];
-      SCAN.visTimer = setTimeout(step, lv && lv[0] && lv[0].d <= 20 ? 30 : 110);
+      SCAN.visTimer = setTimeout(step, lv && lv[0] && lv[0].d <= 22 ? 30 : 110);
     };
     SCAN.visTimer = setTimeout(step, 0);
   };
@@ -247,13 +282,17 @@
       if (gen !== SCAN.gen) return;
       const s = inst.st();
       if (s.screen !== 'scan' || s.scanPhase !== 'live' || s.scanSheet || s.sheet || document.hidden || SCAN.fine) { SCAN.timer = setTimeout(step, 400); return; }
-      const t0 = Date.now(), shot = SCAN.grab('cvLoop');
+      // Dernière image de la reconnaissance du dessin, si elle a moins de 250 ms (2026-11-26) : sa carte trouvée et ses
+      // dessins proches servent aussi à la lecture du texte (deux fois moins de calcul sur le téléphone pendant le scan).
+      // La lecture copie ses bandes tout de suite (avant la prochaine image du dessin) : l'image peut ensuite changer.
+      const t0 = Date.now(), lv = SCAN.lastVis && t0 - SCAN.lastVis.t < 250 ? SCAN.lastVis : null, shot = lv ? lv.shot : SCAN.grab('cvLoop');
       if (!shot) { SCAN.timer = setTimeout(step, 300); return; }
       const hint = SCAN.gate(shot);
       if (hint) { SCAN.say(inst, hint); SCAN.timer = setTimeout(step, 350); return; }
       // Polarité : celle choisie par l'image, puis l'inverse une fois sur deux tant que rien n'est lu.
       const invert = SCAN.miss % 2 === 1 ? !SCAN.inv : undefined;
-      const look = SCAN.look(shot.canvas, shot.rect, 'Loop');
+      const look = lv ? lv.look : SCAN.look(shot.canvas, shot.rect, 'Loop');
+      SCAN.lastVis = null;
       ScanOcr.read(look.src, look.rect, { invert: invert, debug: SCAN.debug }).then(read => {
         if (gen !== SCAN.gen) return;
         read.vis = look.vis; read.found = look.found; read.prints = look.prints;
@@ -297,7 +336,7 @@
     }
 
     const parts = [m.ev.num ? 'n° ' + m.ev.num : '', m.ev.name || ''].filter(Boolean);
-    SCAN.say(inst, parts.length ? 'Lu : ' + parts.join(' · ') : now - SCAN.since > 12000 ? 'Toujours rien : rapproche la carte, ou appuie sur le déclencheur' : 'Lecture en cours…');
+    SCAN.say(inst, now - (SCAN.glareAt || 0) < 1500 ? SCAN.GLARE : parts.length ? 'Lu : ' + parts.join(' · ') : now - SCAN.since > 12000 ? 'Toujours rien : rapproche la carte, bien à plat et sans reflet' : 'Lecture en cours…');
     return false;
   };
   // Carte reconnue sans doute possible (2026-10-25) : sa fiche s'ouvre tout de suite (carte, cote, état, ajout) ;
@@ -314,6 +353,7 @@
     if (auto) inst.scanPick(ids[0]);
   };
   SCAN.say = function (inst, msg) { if (inst.st().scanMsg !== msg) inst.setState({ scanMsg: msg }); };
+  SCAN.GLARE = 'Reflet sur la carte : incline-la un peu';
   // Déclencheur : lecture fine de l'image en cours (deux polarités pour le numéro), propositions même si la carte
   // ne domine pas encore.
   // Déclencheur retiré (2026-11-09, porteur) : la lecture se fait toute seule quand la carte reste dans le cadre ; un

@@ -96,5 +96,47 @@ await browser.close();
   ok('vraie carte reconnue par son dessin en ' + (sLive ? s1 - sLive : -1) + ' ms après l’allumage de la caméra (' + (s1 - s0) + ' ms depuis l’ouverture du scan) : ' + t2.slice(0, 60), done && /Pikachu/.test(t2) && sLive && s1 - sLive <= 800);
   await b2.close();
 }
+// 4. La même carte dans un toploader (2026-11-26, porteur : « scanner en 2 s max la carte même si elle est dans une
+// sleeve ou une protection ») : cadre épais transparent, voile, reflet doux en diagonale, carte posée au fond (83 % du
+// toploader, que l'utilisateur aligne sur le cadre de l'écran). La carte doit être retrouvée dans le plastique et sa
+// fiche ouverte en 2 s au plus après l'allumage de la caméra.
+{
+  const CAM3 = OUT + 'scan-cam-toploader.mjpeg';
+  const b0 = await launch(), p0 = await b0.newPage();
+  const jpg = await p0.evaluate(async src => {
+    const img = new Image(); img.src = src; await img.decode();
+    const c = document.createElement('canvas'); c.width = 720; c.height = 1280;
+    const g = c.getContext('2d'); g.fillStyle = '#5A4A3A'; g.fillRect(0, 0, 720, 1280);
+    const th = 560, tw = th * 76 / 102, w = tw * 63 / 76, h = w * img.naturalHeight / img.naturalWidth, rim = tw * 2.5 / 76;
+    g.translate(360, 555); g.rotate(1 * Math.PI / 180);
+    g.drawImage(img, -w / 2, th / 2 - rim - 4 - h, w, h);
+    const x = -tw / 2, y = -th / 2;
+    g.fillStyle = 'rgba(235,242,255,0.1)'; g.fillRect(x, y, tw, th);
+    const gr = g.createLinearGradient(x, y, x + tw, y + th);
+    gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.3, 'rgba(255,255,255,0)'); gr.addColorStop(0.38, 'rgba(255,255,255,0.3)'); gr.addColorStop(0.46, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr; g.fillRect(x, y, tw, th);
+    g.fillStyle = 'rgba(255,255,255,0.3)'; g.fillRect(x, y, tw, rim); g.fillRect(x, y + th - rim, tw, rim); g.fillRect(x, y + rim, rim, th - 2 * rim); g.fillRect(x + tw - rim, y + rim, rim, th - 2 * rim);
+    g.lineWidth = 2.5; g.strokeStyle = 'rgba(255,255,255,0.7)'; g.strokeRect(x + 1, y + 1, tw - 2, th - 2);
+    g.lineWidth = 2; g.strokeStyle = 'rgba(0,0,0,0.28)'; g.strokeRect(x + rim, y + rim, tw - 2 * rim, th - 2 * rim);
+    return c.toDataURL('image/jpeg', 0.85).split(',')[1];
+  }, 'data:image/jpeg;base64,' + readFileSync(ROOT + 'tools/web/e2e/files/bench/sv08-238.jpg').toString('base64'));
+  writeFileSync(CAM3, Buffer.concat(Array.from({ length: 10 }, () => Buffer.from(jpg, 'base64'))));
+  await b0.close();
+  const b3 = await launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--use-file-for-fake-video-capture=' + CAM3] });
+  const c3 = await b3.newContext({ viewport: { width: 390, height: 844 }, permissions: ['camera'] });
+  await c3.route(/fonts\.(googleapis|gstatic)|openfreemap|pokemontcg|tcgdex/, r => r.abort());
+  const p3 = await c3.newPage(); p3.on('pageerror', e => errors.push(e.message));
+  await p3.goto(E2E + '/?start=scan&today=2026-10-04', { waitUntil: 'load' });
+  const s0 = Date.now(); let sLive = 0, done = false;
+  while (Date.now() - s0 < 60000) {
+    const st = await p3.evaluate(() => ({ sheet: !!document.querySelector('section[aria-label="Résultat du scan"]'), txt: document.body.innerText }));
+    if (!sLive && /Place la carte dans le cadre/.test(st.txt) && !/Préparation de la lecture|Ouverture de la caméra/.test(st.txt)) sLive = Date.now();
+    if (st.sheet) { done = true; break; }
+    await p3.waitForTimeout(20);
+  }
+  const s1 = Date.now(), t3 = done ? (await p3.locator('section[aria-label="Résultat du scan"]').innerText()).replace(/\s+/g, ' ') : '';
+  ok('carte dans un toploader reconnue en ' + (sLive ? s1 - sLive : -1) + ' ms après l’allumage de la caméra (' + (s1 - s0) + ' ms depuis l’ouverture du scan) : ' + t3.slice(0, 60), done && /Pikachu/.test(t3) && sLive && s1 - sLive <= 2000);
+  await b3.close();
+}
 console.log(res.join('\n'));
 console.log(errors.length ? 'Erreurs : ' + errors.join(' | ') : 'aucune erreur');

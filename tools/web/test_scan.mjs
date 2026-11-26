@@ -105,6 +105,12 @@ test('dessin seul : ouverture sans attendre le texte seulement sans ambiguïté'
   assert.equal(S.visSure([[{ id: 'b', d: 15 }, { id: 'a', d: 40 }], v(17, 35)]), null, 'deux cartes différentes');
   assert.equal(S.visSure([v(25, 60)]), null, 'trop loin');
   assert.equal(S.visSure([[{ id: 'a', d: 9 }]]), 'a', 'seule carte proche');
+  // Carte sous pochette ou toploader (2026-11-26) : un peu moins proche, mais la même carte en tête 3 fois de suite.
+  assert.equal(S.visSure([v(21, 33), v(20, 32)]), null, 'sous plastique : deux images ne suffisent pas');
+  assert.equal(S.visSure([v(21, 33), v(20, 32), v(22, 34)]), 'a', 'sous plastique : trois images de suite');
+  assert.equal(S.visSure([v(21, 33), [{ id: 'b', d: 20 }, { id: 'a', d: 32 }], v(22, 34)]), null, 'trois images, deux cartes différentes');
+  assert.equal(S.visSure([v(21, 28), v(20, 32), v(22, 34)]), null, 'trois images, une avec trop peu d\'avance');
+  assert.equal(S.visSure([v(24, 40), v(24, 40), v(24, 40)]), null, 'trop loin même trois fois');
 });
 
 test('réimpression des 30 ans : les deux jumelles proposées, ordre selon le bord, jamais d\'ouverture directe', () => {

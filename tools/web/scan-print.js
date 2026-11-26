@@ -132,42 +132,81 @@
       };
       const tops = peaks(R, fy0 - fh * 0.12, fy0 + fh * 0.3), bots = peaks(R, fy0 + fh * 0.6, fy0 + fh * 1.12);
       const lefts = peaks(C, fx0 - fw * 0.12, fx0 + fw * 0.3), rights = peaks(C, fx0 + fw * 0.6, fx0 + fw * 1.12);
-      let best = null;
+      // Rectangles aux proportions d'une carte, du plus net au moins net.
+      const list = [];
       for (const t of tops) for (const b of bots) for (const l of lefts) for (const r of rights) {
         const cw = r - l, ch = b - t, ar = cw / ch;
         if (ch < fh * 0.6 || Math.abs(ar - AR) > 0.05) continue;
         const v = Math.min(R[t], R[b], C[l], C[r]) * (1 - 6 * Math.abs(ar - AR)) * (0.85 + 0.15 * ch / fh);
-        if (!best || v > best.v) best = { v: v, t: t, b: b, l: l, r: r };
+        if (v >= 16) list.push({ v: v, t: t, b: b, l: l, r: r });
       }
-      if (!best || best.v < 16) return Object.assign({ found: false }, f);
+      if (!list.length) return Object.assign({ found: false }, f);
+      list.sort((p, q) => q.v - p.v);
       // Bord jaune de la carte : ses deux limites (table → bord, bord → illustration) sont nettes ; on garde
       // la plus extérieure si elle est assez forte (jusqu'à 6 % de la carte vers l'extérieur).
       const out = (arr, list, v, dir, span) => { let o = v; list.forEach(p => { if ((p - v) * dir > 0 && Math.abs(p - v) <= span && arr[p] >= 0.4 * arr[v] && (p - o) * dir > 0) o = p; }); return o; };
       const allT = peaks(R, fy0 - fh * 0.15, fy0 + fh * 0.3, 40), allB = peaks(R, fy0 + fh * 0.6, fy0 + fh * 1.15, 40);
       const allL = peaks(C, fx0 - fw * 0.15, fx0 + fw * 0.3, 40), allR = peaks(C, fx0 + fw * 0.6, fx0 + fw * 1.15, 40);
-      const sp = (best.b - best.t) * 0.06;
-      best.t = out(R, allT, best.t, -1, sp); best.b = out(R, allB, best.b, 1, sp);
-      best.l = out(C, allL, best.l, -1, sp); best.r = out(C, allR, best.r, 1, sp);
-      // Inclinaison : bords gauche et droit cherchés séparément dans le haut et le bas de la carte.
       const colsIn = (y0, y1) => { const m = new Float32Array(w * 3), a0 = Math.max(0, Math.round(y0)), a1 = Math.min(h, Math.round(y1)); for (let x = 0; x < w; x++) for (let y = a0; y < a1; y++) { const j = (y * w + x) * 4; m[x * 3] += d[j]; m[x * 3 + 1] += d[j + 1]; m[x * 3 + 2] += d[j + 2]; } for (let i = 0; i < m.length; i++) m[i] /= Math.max(1, a1 - a0); return edge(m, w); };
-      const ch0 = best.b - best.t, Ct = colsIn(best.t + ch0 * 0.12, best.t + ch0 * 0.36), Cb = colsIn(best.t + ch0 * 0.64, best.t + ch0 * 0.88);
-      const near = (e, x0) => { let bx = -1, bv = 0; for (let x = Math.max(2, x0 - 10); x <= Math.min(e.length - 3, x0 + 10); x++) if (e[x] > bv) { bv = e[x]; bx = x; } return bv >= 14 ? fine(e, bx) : null; };
-      const slope = x0 => { const a = near(Ct, x0), b = near(Cb, x0); return a === null || b === null ? null : Math.atan2(a - b, ch0 * 0.52); };
-      // Bords haut et bas de même, dans la gauche et la droite de la carte ; inclinaison = médiane des 4 mesures.
-      const cw0 = best.r - best.l;
       const rowsIn = (x0, x1) => { const m = new Float32Array(h * 3), a0 = Math.max(0, Math.round(x0)), a1 = Math.min(w, Math.round(x1)); for (let y = 0; y < h; y++) for (let x = a0; x < a1; x++) { const j = (y * w + x) * 4; m[y * 3] += d[j]; m[y * 3 + 1] += d[j + 1]; m[y * 3 + 2] += d[j + 2]; } for (let i = 0; i < m.length; i++) m[i] /= Math.max(1, a1 - a0); return edge(m, h); };
-      const Rl = rowsIn(best.l + cw0 * 0.12, best.l + cw0 * 0.36), Rrt = rowsIn(best.l + cw0 * 0.64, best.l + cw0 * 0.88);
-      const tilt = y0 => { const a = near(Rl, y0), b = near(Rrt, y0); return a === null || b === null ? null : Math.atan2(b - a, cw0 * 0.52); };
-      const all = [slope(best.l), slope(best.r), tilt(best.t), tilt(best.b)].filter(v => v !== null && Math.abs(v) < 0.1).sort((p, q) => p - q);
-      const ang = all.length >= 2 ? (all.length % 2 ? all[all.length >> 1] : (all[all.length / 2 - 1] + all[all.length / 2]) / 2) : 0;
-      let T = fine(R, best.t), B = fine(R, best.b);
-      const L = fine(C, best.l), Rr = fine(C, best.r);
-      // La largeur est la mesure la plus sûre (bords gauche et droit nets sur toute la hauteur) : la hauteur en découle
-      // (63 × 88 mm), à partir du bord haut ou du bord bas, celui dont le bord opposé attendu est le plus net.
-      const H0 = (Rr - L) / AR, at = i => { const k = Math.round(i); return k >= 2 && k < R.length - 2 ? Math.max(R[k - 1], R[k], R[k + 1]) : 0; };
-      if (Math.abs((B - T) - H0) > H0 * 0.03) { if (at(T + H0) >= at(B - H0)) B = T + H0; else T = B - H0; }
-      // a : inclinaison mesurée (le rectangle englobe la carte ; scan.js redresse l'image et cherche à nouveau).
-      return { sx: ox + (L + 0.5) / sc, sy: oy + (T + 0.5) / sc, sw: (Rr - L) / sc, sh: (B - T) / sc, a: Math.abs(ang) > 0.005 ? ang : 0, found: true };
+      const near = (e, x0) => { let bx = -1, bv = 0; for (let x = Math.max(2, x0 - 10); x <= Math.min(e.length - 3, x0 + 10); x++) if (e[x] > bv) { bv = e[x]; bx = x; } return bv >= 14 ? fine(e, bx) : null; };
+      const at = i => { const k = Math.round(i); return k >= 2 && k < R.length - 2 ? Math.max(R[k - 1], R[k], R[k + 1]) : 0; };
+      // Rectangle retenu → rectangle de la carte en pixels de src (ext : avec le bord jaune cherché vers l'extérieur ;
+      // flat : sans mesurer l'inclinaison, inutile pour les rectangles de rechange).
+      const refine = (c, ext, flat) => {
+        const best = { t: c.t, b: c.b, l: c.l, r: c.r };
+        if (ext) {
+          const sp = (best.b - best.t) * 0.06;
+          best.t = out(R, allT, best.t, -1, sp); best.b = out(R, allB, best.b, 1, sp);
+          best.l = out(C, allL, best.l, -1, sp); best.r = out(C, allR, best.r, 1, sp);
+        }
+        // Inclinaison : bords gauche et droit cherchés séparément dans le haut et le bas de la carte.
+        let ang = 0;
+        if (!flat) {
+          const ch0 = best.b - best.t, Ct = colsIn(best.t + ch0 * 0.12, best.t + ch0 * 0.36), Cb = colsIn(best.t + ch0 * 0.64, best.t + ch0 * 0.88);
+          const slope = x0 => { const a = near(Ct, x0), b = near(Cb, x0); return a === null || b === null ? null : Math.atan2(a - b, ch0 * 0.52); };
+          // Bords haut et bas de même, dans la gauche et la droite de la carte ; inclinaison = médiane des 4 mesures.
+          const cw0 = best.r - best.l;
+          const Rl = rowsIn(best.l + cw0 * 0.12, best.l + cw0 * 0.36), Rrt = rowsIn(best.l + cw0 * 0.64, best.l + cw0 * 0.88);
+          const tilt = y0 => { const a = near(Rl, y0), b = near(Rrt, y0); return a === null || b === null ? null : Math.atan2(b - a, cw0 * 0.52); };
+          const all = [slope(best.l), slope(best.r), tilt(best.t), tilt(best.b)].filter(v => v !== null && Math.abs(v) < 0.1).sort((p, q) => p - q);
+          ang = all.length >= 2 ? (all.length % 2 ? all[all.length >> 1] : (all[all.length / 2 - 1] + all[all.length / 2]) / 2) : 0;
+        }
+        let T = fine(R, best.t), B = fine(R, best.b);
+        const L = fine(C, best.l), Rr = fine(C, best.r);
+        // La largeur est la mesure la plus sûre (bords gauche et droit nets sur toute la hauteur) : la hauteur en
+        // découle (63 × 88 mm), à partir du bord haut ou du bord bas, celui dont le bord opposé attendu est le plus net.
+        const H0 = (Rr - L) / AR;
+        if (Math.abs((B - T) - H0) > H0 * 0.03) { if (at(T + H0) >= at(B - H0)) B = T + H0; else T = B - H0; }
+        // a : inclinaison mesurée (le rectangle englobe la carte ; scan.js redresse l'image et cherche à nouveau).
+        return { sx: ox + (L + 0.5) / sc, sy: oy + (T + 0.5) / sc, sw: (Rr - L) / sc, sh: (B - T) / sc, a: Math.abs(ang) > 0.005 ? ang : 0, found: true };
+      };
+      const main = refine(list[0], true);
+      // Carte dans une protection (2026-11-26, porteur : scan sous pochette ou toploader) : le plastique a lui aussi des
+      // bords nets, aux proportions proches d'une carte (toploader 76 × 102 mm), autour de la carte. main.more() donne
+      // d'autres rectangles possibles, calculés seulement si on les demande : le meilleur sans son bord cherché vers
+      // l'extérieur (qui saute de la carte au plastique), puis ceux à l'intérieur du meilleur (d'abord ceux qui en
+      // rentrent par le plus de côtés : la carte posée au fond du toploader rentre par le haut et les deux côtés), puis
+      // les autres. scan.js garde celui dont le dessin ressemble le plus à une carte du catalogue.
+      main.more = () => {
+        const alts = [], tol = 0.022 * fw, b0 = list[0];
+        const differ = (a, o) => Math.max(Math.abs(a.sx - o.sx), Math.abs(a.sy - o.sy), Math.abs(a.sx + a.sw - o.sx - o.sw), Math.abs(a.sy + a.sh - o.sy - o.sh)) * sc > tol;
+        const add = r => { if (alts.length < 8 && [main].concat(alts).every(o => differ(r, o))) alts.push(r); };
+        add(refine(b0, false, true));
+        const inward = c => (c.t - b0.t > tol) + (b0.b - c.b > tol) + (c.l - b0.l > tol) + (b0.r - c.r > tol);
+        const inside = c => c.t >= b0.t - 2 && c.b <= b0.b + 2 && c.l >= b0.l - 2 && c.r <= b0.r + 2 && inward(c) > 0;
+        const seen = [b0], fresh = c => seen.every(o => Math.max(Math.abs(c.t - o.t), Math.abs(c.b - o.b), Math.abs(c.l - o.l), Math.abs(c.r - o.r)) > tol);
+        const nested = list.filter(c => c.v >= 0.3 * b0.v && inside(c)).sort((p, q) => inward(q) - inward(p) || q.v - p.v);
+        const others = list.filter(c => c.v >= 0.3 * b0.v && !inside(c));
+        let n = 0;
+        for (const c of nested.concat(others)) {
+          if (n >= 6) break;
+          if (!fresh(c)) continue;
+          seen.push(c); n++; add(refine(c, false, true)); add(refine(c, true, true));
+        }
+        return alts;
+      };
+      return main;
     }
     // ——— Bord doré des réimpressions des 30 ans ———
     // Les 30 réimpressions de la Collection Classique ont le même dessin et le même numéro que leur carte d'origine ;
@@ -210,6 +249,109 @@
       g.setTransform(1, 0, 0, 1, 0, 0);
       return dc;
     }
+    // ——— Reflet d'une protection plastique (2026-11-26, porteur : scan sous pochette ou toploader) ———
+    // Sous un toploader ou une pochette, le reflet d'une lampe ou d'une fenêtre fait une bande droite de lumière blanche
+    // qui traverse la carte : chaque couleur c y devient c + (255 − c) × α, α allant de 0 (rien) à 1 (blanc). Sans ce
+    // reflet, le dessin est reconnu presque aussi bien que sans plastique (banc d'essai) ; avec, il ne l'est presque plus.
+    // Mesure : pour 12 directions, on suit des lignes parallèles qui traversent toute la carte et on note, sur chacune,
+    // le niveau de ses pixels les plus sombres (15 % des pixels, plus petit des trois canaux) : une ligne de carte croise
+    // toujours du texte, des traits ou des ombres, sauf dans le reflet. La direction où ce niveau fait la bosse la plus
+    // nette est celle du reflet ; la bosse donne α de chaque ligne, et on retire le reflet : c = 255 − (255 − c') / (1 − α).
+    // Pas de bosse nette (pas de bande de reflet) : null, l'image n'est pas touchée. Copie réduite de la carte et de 6 %
+    // autour (160 px de large). Seulement pour la photo, jamais pour les empreintes du catalogue ; renvoie le canevas et
+    // le rectangle de la carte dans ce canevas.
+    function deglare(src, r, out) {
+      const m = 0.06, W = 160, x0 = r.sx - r.sw * m, y0 = r.sy - r.sh * m, w0 = r.sw * (1 + 2 * m), h0 = r.sh * (1 + 2 * m);
+      const H = Math.max(8, Math.round(W * h0 / w0)), k = W / w0, c = out || document.createElement('canvas');
+      c.width = W; c.height = H;
+      const g = c.getContext('2d', { willReadFrequently: true });
+      g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+      // Découpe gardée dans l'image (Safari ne dessine rien si le rectangle source déborde).
+      const SW = src.videoWidth || src.naturalWidth || src.width, SH = src.videoHeight || src.naturalHeight || src.height;
+      const ax = Math.max(0, x0), ay = Math.max(0, y0), bx = Math.min(SW, x0 + w0), by = Math.min(SH, y0 + h0);
+      if (bx - ax >= 1 && by - ay >= 1) g.drawImage(src, ax, ay, bx - ax, by - ay, (ax - x0) * k, (ay - y0) * k, (bx - ax) * k, (by - ay) * k);
+      const img = g.getImageData(0, 0, W, H), d = img.data;
+      // Pixels de la carte seulement (sans les 6 % autour ni son bord extérieur) : plus petit canal, en 64 niveaux.
+      const cx0 = Math.round(W * (m + 0.03) / (1 + 2 * m)), cx1 = W - cx0, cy0 = Math.round(H * (m + 0.03) / (1 + 2 * m)), cy1 = H - cy0;
+      const cw = cx1 - cx0, chh = cy1 - cy0, mn = new Uint8Array(cw * chh);
+      for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) { const j = ((y + cy0) * W + x + cx0) * 4; mn[y * cw + x] = Math.min(d[j], d[j + 1], d[j + 2]) >> 2; }
+      // Chaque ligne est coupée en 3 tronçons : un reflet relève les trois, une zone claire du dessin seulement une partie.
+      const BIN = 3, ccx = cw / 2, ccy = chh / 2, NB = Math.ceil(Math.hypot(cw, chh) / BIN) + 2, hist = new Uint16Array(NB * 3 * 64), cnt = new Uint16Array(NB * 3);
+      let best = null;
+      for (let a = 0; a < 12; a++) {
+        const th = a * Math.PI / 12, ux = Math.cos(th), uy = Math.sin(th);
+        hist.fill(0); cnt.fill(0);
+        // Un pixel sur quatre (une ligne sur deux, une colonne sur deux) : assez pour le niveau des pixels sombres.
+        for (let y = 0; y < chh; y += 2) for (let x = 0; x < cw; x += 2) {
+          const X = x - ccx, Y = y - ccy, b = Math.round((X * ux + Y * uy) / BIN + NB / 2), t = -X * uy + Y * ux;
+          // Tronçon le long de la ligne : avant, milieu, après (bornes à ± 1/6 de la plus grande longueur de ligne).
+          const seg = b * 3 + (t < -chh / 6 ? 0 : t > chh / 6 ? 2 : 1);
+          hist[seg * 64 + mn[y * cw + x]]++; cnt[seg]++;
+        }
+        // Niveau des 15 % de pixels les plus sombres de chaque tronçon ; celui de la ligne = le plus bas des trois.
+        let maxN = 0;
+        for (let b = 0; b < NB; b++) maxN = Math.max(maxN, cnt[b * 3] + cnt[b * 3 + 1] + cnt[b * 3 + 2]);
+        const P = new Float32Array(NB).fill(-1);
+        for (let b = 0; b < NB; b++) {
+          if (cnt[b * 3] + cnt[b * 3 + 1] + cnt[b * 3 + 2] < maxN * 0.35) continue;
+          let low = 255;
+          for (let sgi = 0; sgi < 3; sgi++) {
+            const sg = b * 3 + sgi;
+            if (cnt[sg] < 4) continue;
+            let s = 0, q = 0; const lim = cnt[sg] * 0.15;
+            for (; q < 64 && (s += hist[sg * 64 + q]) < lim; q++);
+            low = Math.min(low, q * 4);
+          }
+          if (low < 255) P[b] = low;
+        }
+        const vals = Array.from(P).filter(v => v >= 0).sort((p, q) => p - q);
+        if (vals.length < 10) continue;
+        // Niveau ordinaire d'une ligne de carte (le tiers le plus bas) et bosse du reflet au-dessus ; une bande de reflet
+        // n'occupe qu'une partie des lignes (au-delà de 60 %, c'est un voile uniforme, sans effet sur l'empreinte).
+        const base = vals[Math.floor(vals.length * 0.33)], top = vals[vals.length - 1], wide = vals.filter(v => v - base >= 24).length / vals.length;
+        if (wide <= 0.6 && (!best || top - base > best.top - best.base)) best = { a: th, ux: ux, uy: uy, P: P, base: base, top: top };
+      }
+      // Pas de bande de reflet nette : rien à retirer.
+      if (!best || best.top - best.base < 48 || best.top < 150) return null;
+      // α de chaque ligne (lignes trop courtes : la plus proche mesurée), seulement dans la bosse autour de la ligne la
+      // plus claire (lignes au moins 16 au-dessus du niveau ordinaire, 2 lignes plus sombres tolérées) ; ailleurs, les
+      // écarts viennent du dessin et on n'y touche pas. Lissé sur ±2 lignes.
+      const P = best.P, al = new Float32Array(NB), lv = new Float32Array(NB);
+      let peak = 0;
+      for (let b = 0; b < NB; b++) {
+        let v = P[b];
+        for (let k2 = 1; v < 0 && k2 < NB; k2++) v = P[b - k2] >= 0 ? P[b - k2] : P[b + k2] >= 0 ? P[b + k2] : -1;
+        lv[b] = v;
+        if (P[b] >= 0 && P[b] > P[peak]) peak = b;
+      }
+      const grow = dir => { let b = peak, miss = 0; for (let n2 = peak + dir; n2 >= 0 && n2 < NB; n2 += dir) { if (lv[n2] - best.base >= 16) { b = n2; miss = 0; } else if (++miss > 2) break; } return b; };
+      const b0 = grow(-1), b1 = grow(1);
+      for (let b = b0; b <= b1; b++) al[b] = Math.max(0, (lv[b] - best.base) / Math.max(1, 255 - best.base));
+      const as = new Float32Array(NB);
+      for (let b = 0; b < NB; b++) { let s = 0, q = 0; for (let k2 = Math.max(0, b - 2); k2 <= Math.min(NB - 1, b + 2); k2++) { s += al[k2]; q++; } as[b] = Math.min(0.92, s / q); }
+      // Retrait du reflet sur tout le canevas (la bande continue hors de la carte). Pixels brûlés au cœur du reflet
+      // (blancs, plus d'information) : marqués, puis remplis à travers la bande par les pixels voisins non brûlés.
+      const ox = cx0 + ccx, oy = cy0 + ccy, burnt = new Uint8Array(W * H);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const b = Math.round(((x - ox) * best.ux + (y - oy) * best.uy) / BIN + NB / 2), A = b >= 0 && b < NB ? as[b] : 0;
+        if (A <= 0.02) continue;
+        const j = (y * W + x) * 4, t = 1 - A;
+        if (A >= 0.5 && Math.min(d[j], d[j + 1], d[j + 2]) >= 246) { burnt[y * W + x] = 1; continue; }
+        for (let q = 0; q < 3; q++) { const v = 255 - (255 - d[j + q]) / t; d[j + q] = v < 0 ? 0 : v; }
+      }
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        if (!burnt[y * W + x]) continue;
+        // Premier pixel non brûlé de chaque côté, en travers de la bande (direction du profil), à 24 px au plus.
+        const side = sgn => { for (let s = 1; s <= 24; s++) { const X = Math.round(x + sgn * s * best.ux), Y = Math.round(y + sgn * s * best.uy); if (X < 0 || Y < 0 || X >= W || Y >= H) return null; if (!burnt[Y * W + X]) return { j: (Y * W + X) * 4, s: s }; } return null; };
+        const p = side(-1), q2 = side(1), j = (y * W + x) * 4;
+        if (!p && !q2) continue;
+        const wp = p && q2 ? q2.s / (p.s + q2.s) : p ? 1 : 0;
+        for (let q = 0; q < 3; q++) d[j + q] = (p ? d[p.j + q] * wp : 0) + (q2 ? d[q2.j + q] * (1 - wp) : 0);
+      }
+      g.putImageData(img, 0, 0);
+      return { canvas: c, r: { sx: r.sw * m * k, sy: r.sh * m * k, sw: r.sw * k, sh: r.sh * k }, angle: best.a, glare: best.top - best.base };
+    }
     // Distance exacte entre la photo (plusieurs cadrages) et des cartes précises (ids) : pour vérifier qu'une carte
     // proposée par le texte a bien ce dessin.
     function distTo(idx, prints, ids) {
@@ -223,5 +365,5 @@
         return { id: id, d: best };
       }).filter(Boolean);
     }
-    return { print: print, load: load, encode: encode, nearest: nearest, jitter: jitter, locate: locate, border: border, deskew: deskew, distTo: distTo, ZONES: ZONES };
+    return { print: print, load: load, encode: encode, nearest: nearest, jitter: jitter, locate: locate, border: border, deskew: deskew, deglare: deglare, distTo: distTo, ZONES: ZONES };
   })();
