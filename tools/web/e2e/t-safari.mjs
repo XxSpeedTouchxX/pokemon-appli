@@ -161,11 +161,17 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   const after3 = await p2.evaluate(() => ({ pk: window.__pkm.st().pk, pill: (document.querySelector('header .pkm-gain-loss') || {}).textContent || '' }));
   ok('après la perte : solde ' + pk3 + ' → ' + after3.pk + ' (serveur ' + S.pk + '), « ' + N(after3.pill) + ' » en rouge sous le solde', after3.pk === S.pk && pk3 - after3.pk === 8 * wrong && N(after3.pill) === '−' + (8 * wrong) + ' PK');
   await p2.screenshot({ path: shot('safari-loss-after.png'), clip: { x: 0, y: 0, width: 390, height: 140 } });
-  // Compte sans délai (admin ou ami ajouté dans Studio, 027_safari_libre.sql) : rejouer tout de suite.
+  // Plus de compte « sans délai » (2026-11-26, porteur ; 044_safari_delai.sql) : même un serveur pas encore à jour qui
+  // répond « free » ne laisse pas rejouer avant le délai du grade.
   S.free = true; await p2.evaluate(() => window.__pkm.sfSync(true)); await p2.waitForTimeout(800);
-  ok('compte sans délai : « Sans délai » et « GO » juste après une partie', /Sans délai/.test(N(await sc.innerText())) && N(await sc.locator('button.pkm-gm-go').innerText()) === 'GO');
+  ok('ancien « sans délai » ignoré : « Tu dois attendre » juste après une partie, pas de « Sans délai »', !/Sans délai/.test(N(await sc.innerText())) && /Tu dois attendre/.test(N(await sc.innerText())));
+  await sc.locator('button', { hasText: 'Tu dois attendre' }).first().click(); await p2.waitForTimeout(600);
+  ok('ancien « sans délai » ignoré : aucune nouvelle partie ouverte', (await p2.locator('.pkm-sf-lv').count()) === 0);
+  // Délai passé (le serveur ne renvoie plus de dernière partie) : « GO » rouvre le choix du niveau.
+  S.free = false; await p2.evaluate(() => window.__pkm.sfSync(true)); await p2.waitForTimeout(800);
+  ok('délai passé : « GO » de nouveau', N(await sc.locator('button.pkm-gm-go').innerText()) === 'GO');
   await sc.locator('button.pkm-gm-go').click(); await p2.waitForTimeout(600);
-  ok('compte sans délai : nouvelle partie ouverte (choix du niveau)', (await p2.locator('.pkm-sf-lv').count()) === 3);
+  ok('délai passé : nouvelle partie ouverte (choix du niveau)', (await p2.locator('.pkm-sf-lv').count()) === 3);
   // Normal (2026-11-14, porteur : « on ne peut pas rentrer dans le jeu ») : on entre dans la partie comme en Facile, que
   // des bons Pokémon → gain du serveur, « Récupérer mes PK », solde repris du serveur.
   await p2.locator('.pkm-sf-lv2').click(); await p2.waitForTimeout(800);

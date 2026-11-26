@@ -1,5 +1,5 @@
 #!/bin/bash
-# Refait install_024_a_034.sql à partir des scripts 024 à 028, 030 à 034, 037 à 043 (sauf 036) (à relancer après toute modification de l'un d'eux).
+# Refait install_024_a_034.sql à partir des scripts 024 à 028, 030 à 034, 037 à 044 (sauf 036) (à relancer après toute modification de l'un d'eux).
 # 029 (annonces Vinted) n'y est pas : il demande pg_cron et la fonction « annonces » (docs/42).
 cd "$(dirname "$0")" && {
   cat <<'H'
@@ -28,12 +28,14 @@ cd "$(dirname "$0")" && {
 -- 042 (2026-11-25) : PK shop : booster à 10 000 PK, item rare au choix et ETB 30 ans « Bientôt disponible » (fermés).
 -- 043 (2026-11-25) : e-mail de félicitations au joueur après un achat direct (booster, item rare, ETB), avec une fiche
 -- à renvoyer à contact@dropicards.fr ; il faut aussi la nouvelle fonction « notify » (docs/30 § 9).
+-- 044 (2026-11-26) : Safari éclair au délai du grade pour tous (plus de « sans délai » pour les admins, le mode Admin
+-- ni la liste safari_free).
 -- 029 (annonces Vinted) n'y est pas : il a sa propre installation (docs/42).
 -- Il faut 001 à 023 déjà installés (fait le 2026-11-12). Rejouable : sans risque si l'un d'eux est déjà installé.
 -- Supabase Studio › SQL Editor › New query › colle TOUT ce fichier › Run. Puis colle 000_verifier.sql › Run : les lignes
--- 024 à 028, 030 à 034 et 037 à 043 doivent être « oui ». Ce fichier est fabriqué à partir de ces scripts
+-- 024 à 028, 030 à 034 et 037 à 044 doivent être « oui ». Ce fichier est fabriqué à partir de ces scripts
 -- (tools/supabase/make_install_024.sh) : ne pas le modifier à la main.
 H
-  for f in 024 025 026 027 028 030 031 032 033 034 037 038 039 040 041 042 043; do printf '\n-- ================= %s =================\n' "$(ls ${f}_*.sql)"; cat ${f}_*.sql; done
+  for f in 024 025 026 027 028 030 031 032 033 034 037 038 039 040 041 042 043 044; do printf '\n-- ================= %s =================\n' "$(ls ${f}_*.sql)"; cat ${f}_*.sql; done
   printf "\n-- Fin : l'API de Supabase relit la liste des fonctions (sinon l'app ne les voit qu'au redémarrage).\nnotify pgrst, 'reload schema';\n"
 } > install_024_a_034.sql.new && mv install_024_a_034.sql.new install_024_a_034.sql && echo "install_024_a_034.sql refait"

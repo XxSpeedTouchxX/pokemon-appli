@@ -52,21 +52,19 @@
       t: i * 520 + Math.floor(gmRand() * 250), lane: Math.floor(gmRand() * 5), dir: gmRand() < 0.5 ? 1 : -1, dur: Math.floor((3400 - i * 38 + Math.floor(gmRand() * 300)) / lv.speed) })) };
   };
   const sfCloud = () => typeof gcOn === 'function' && gcOn();
-  // Délai du grade (0 : fermé) ; le serveur fait foi quand il répond. Admin déverrouillé (PK illimités) : jamais fermé.
-  // Sans délai aussi pour les comptes admin et ceux de la liste safari_free (2026-11-13, porteur : « Safari illimité
-  // pour l'instant pour les admins et le compte de mon ami » ; 027_safari_libre.sql, champ « free » de safari_state).
-  // Grade d'abord (2026-11-23, porteur : « je suis grade Chasseur et j'ai accès à Safari éclair, qui n'est dispo qu'à
-  // partir du grade Collectionneur ») : « sans délai » retire seulement l'attente, jamais le verrou du grade, pour tout le
-  // monde (admins et mode Admin compris ; serveur : 039_jeux_grades.sql). Fermé si le grade de l'app le ferme, ou si le
-  // serveur a répondu « fermé » (son grade est plus bas : il refuserait la partie).
-  const sfFree = s => !!(s && ((s.cloudGame && s.cloudGame.unlimited) || s.sfFreeSrv));
+  // Délai du grade (0 : fermé) ; le serveur fait foi quand il répond. Fermé si le grade de l'app le ferme, ou si le
+  // serveur a répondu « fermé » (son grade est plus bas : il refuserait la partie ; 039_jeux_grades.sql).
+  // Une partie toutes les X heures selon le grade pour TOUS les comptes (2026-11-26, porteur : « je suis Collectionneur
+  // et j'ai joué autant de fois que je voulais ; mets la limite à 1 fois toutes les X heures en fonction du grade
+  // actuel ») : plus de « sans délai » pour les admins, le mode Admin ni la liste safari_free (avant : 027 ;
+  // serveur : 044_safari_delai.sql).
   sfProto.sfHours = function () {
     const s = this.st(), app = this.perks().safariH | 0;
     if (!app || (typeof s.sfHours === 'number' && s.sfHours === 0 && !s.sfOff)) return 0;
     return (s.sfHours | 0) || app;
   };
   sfProto.sfLocked = function () { return !this.sfHours(); };
-  sfProto.sfWaitMs = function () { const s = this.st(), g = s.games || {}, h = this.sfHours(); return h && !sfFree(s) ? gmWait(g.safariAt, h * 3600000) : 0; };
+  sfProto.sfWaitMs = function () { const s = this.st(), g = s.games || {}, h = this.sfHours(); return h ? gmWait(g.safariAt, h * 3600000) : 0; };
 
   // État du serveur (dernière partie, délai du grade) : relu à l'ouverture des Jeux et après chaque partie.
   let sfSynced = 0;
@@ -76,7 +74,7 @@
     Cloud.rpc('safari_state').then(x => {
       if (!x) return;
       const s = this.st();
-      this.setState({ sfHours: x.hours | 0, sfFreeSrv: !!x.free, sfOff: false, games: Object.assign({}, s.games || {}, { safariAt: x.last || '' }) });
+      this.setState({ sfHours: x.hours | 0, sfOff: false, games: Object.assign({}, s.games || {}, { safariAt: x.last || '' }) });
     }, e => { if (e && e.code === 'not_installed') this.setState({ sfOff: true }); });
   };
 
@@ -297,7 +295,7 @@
         + (won < 0 ? '<p class="pkm-sf-lossmsg">Plus d’erreurs que de bons Pokémon : <b>' + (-won) + ' PK</b> sont retirés de ton solde.'
           + (raw < won ? ' Ton total était de ' + sfSigned(raw) + ' PK, mais ton solde ne descend jamais sous 0.' : '') + '</p>' : '')
         + (grid ? '<h3 class="pkm-sf-h3">Ton safari</h3><div class="pkm-sf-caught">' + grid + '</div>' : '<p class="pkm-sf-p">Aucun Pokémon attrapé cette fois.</p>')
-        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : les PK ne sont pas enregistrés tant que 024_safari.sql n’est pas installé dans Studio (install_024_a_028.sql).</p>' : (sfFree(this.st()) ? '<p class="pkm-sf-next">Sans délai : tu peux rejouer tout de suite</p>' : this.sfHours() ? '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>' : ''))
+        + (SF.preview ? '<p class="pkm-sf-next">Aperçu admin : les PK ne sont pas enregistrés tant que 024_safari.sql n’est pas installé dans Studio (install_024_a_028.sql).</p>' : (this.sfHours() ? '<p class="pkm-sf-next">Prochaine partie dans ' + this.sfHours() + ' h</p>' : ''))
         // « Récupérer mes PK » à la place de « Fermer » (2026-11-13, porteur) : les gemmes volent jusqu'au solde, avec
         // l'animation et le bruit des PA du jour (aussi dans l'aperçu admin, où le solde ne bouge pas).
         // Perte ou 0 : « Quitter le safari » (2026-11-14, porteur) ; après une perte, les PK quittent le solde en sortant.
@@ -347,7 +345,7 @@
     const w = this.sfWaitMs(), busy = !!s.sfOpen, h = this.sfHours(), locked = this.sfLocked(), adminTry = !!s.sfOff && sfCloud() && Cloud.isAdmin();
     const grade = this.perkGrade('safariH') || 'Collectionneur';
     r.sf = {
-      every: locked ? 'Au grade ' + grade : sfFree(s) ? 'Sans délai' : '1 partie toutes les ' + h + ' h', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
+      every: locked ? 'Au grade ' + grade : '1 partie toutes les ' + h + ' h', ready: w === 0 && !busy && !locked, off: !!s.sfOff, locked: locked,
       lockText: 'Le Safari éclair se débloque au grade ' + grade + ' (7 500 PK gagnés et 30 compagnons).',
       // « GO » (2026-11-13, porteur) : à la place de « Jouer au safari » et de « Essayer (aperçu admin) ».
       button: locked ? '🔒 Au grade ' + grade : s.sfOff && !adminTry ? 'Bientôt disponible' : busy ? 'Safari en cours…' : w > 0 ? 'Tu dois attendre ' + gmLeft(w) + ' pour rejouer' : 'GO',

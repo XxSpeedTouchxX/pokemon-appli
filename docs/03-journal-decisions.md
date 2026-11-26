@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-26 — Safari éclair : une partie toutes les X heures selon le grade, pour tous
+
+- **Demande** : « Pour le Safari éclair, mets bien le délai en rapport avec les grades ; actuellement je suis Collectionneur et j'ai joué autant de fois que je voulais ; mets la limite à 1 fois toutes les X heures en fonction du grade actuel. »
+- **Cause** : depuis `027_safari_libre.sql` (2026-11-13, demande du porteur « Safari illimité pour l'instant pour les admins et le compte de mon ami »), les comptes admin, le mode Admin et la liste `safari_free` jouaient au Safari sans délai ; le compte du porteur est admin.
+- **Désormais, plus aucune exception** : Collectionneur 1 partie toutes les 24 h, Dresseur Pokémon 12 h, Maître Pokémon 6 h, Grand maître Pokémon 4 h ; fermé à la Recrue et au Chasseur (inchangé). Admins, mode Admin et liste de l'ami compris (lecture retenue de « en fonction du grade actuel » ; la liste est gardée mais n'est plus lue). Booster PK et pièce inchangés.
+- **Serveur** : `tools/supabase/044_safari_delai.sql` (`_safari_free` répond toujours « non » ; 15 tests, `tests/test_044.sql`), dans `install_024_a_034.sql` et `000_verifier.sql` ; **à installer par le porteur** (coller 044 seul dans Studio). Retour possible : relancer 027 puis 039.
+- **App** : `safari.js` (plus de « Sans délai », attente du grade toujours appliquée, même si un serveur pas encore à jour répond « sans délai ») ; tests `t-safari`, `t-gamelocks` ; cache v291.
+
 ## 2026-11-25 (suite 4) — E-mail de félicitations au joueur après un achat direct au PK shop
 
 - **Demande** : « lorsque l'utilisateur arrive à acheter un booster direct à 10 000 PK ou autre item dans le PK shop comme l'item rare ou l'ETB, qu'il reçoive automatiquement un mail sur sa boîte mail renseignée dans l'appli, un mail de "félicitations" en remontrant le lot qu'il a acheté et lui demandant de mettre son nom, prénom, adresse, code postal, adresse mail et numéro de téléphone, et dire dans le mail qu'une fois complété il nous le renvoie sur l'adresse mail de Dropicards pour qu'on puisse faire le nécessaire pour lui envoyer ; je veux que le mail soit satisfaisant et sympa à lire et compréhensible ».

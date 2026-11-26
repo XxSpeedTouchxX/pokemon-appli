@@ -22,7 +22,8 @@ const atGrade = async (g, extra) => {
   await page.waitForTimeout(250);
 };
 
-for (const [label, extra] of [['joueur', null], ['sans délai (admin, mode Admin, liste du Safari)', { sfFreeSrv: true, cloudGame: { unlimited: true } }]]) {
+// Admin, mode Admin, liste du Safari (2026-11-26, porteur) : plus de « sans délai », même délai que tout le monde.
+for (const [label, extra] of [['joueur', null], ['admin, mode Admin (PK illimités)', { cloudGame: { unlimited: true } }]]) {
   const rows = [];
   for (let g = 0; g < 6; g++) {
     await atGrade(g, extra);
@@ -30,7 +31,7 @@ for (const [label, extra] of [['joueur', null], ['sans délai (admin, mode Admin
     const b = await card('Booster PK'), c = await card('Pile ou face'), s = await card('Safari éclair');
     const bOk = new RegExp('toutes les ' + BOOSTER[g] + ' h').test(b) && /Ouvrir mon booster/.test(b);
     const cOk = COIN[g] ? new RegExp('toutes les ' + COIN[g] + ' h').test(c) && /Lancer la pièce/.test(c) : /🔒 Au grade Chasseur/.test(c);
-    const sOk = SAFARI[g] ? (extra ? /Sans délai/.test(s) : new RegExp('toutes les ' + SAFARI[g] + ' h').test(s)) && /GO/.test(s) : /🔒 Au grade Collectionneur/.test(s);
+    const sOk = SAFARI[g] ? new RegExp('toutes les ' + SAFARI[g] + ' h').test(s) && !/Sans délai/.test(s) && /GO/.test(s) : /🔒 Au grade Collectionneur/.test(s);
     // Un jeu fermé ne s'ouvre pas : la fenêtre « Accès verrouillé » s'affiche à la place.
     let tapOk = true;
     if (!SAFARI[g]) {
@@ -40,23 +41,24 @@ for (const [label, extra] of [['joueur', null], ['sans délai (admin, mode Admin
       if (await lw.count()) { await lw.locator('button:has-text("Compris")').click(); await page.waitForTimeout(300); }
     }
     rows.push(NAMES[g] + ' ' + [bOk, cOk, sOk, tapOk].map(x => x ? 'o' : 'X').join(''));
-    ok(label + ' · ' + NAMES[g] + ' (grade affiché : ' + shown + ') : Booster ' + BOOSTER[g] + ' h, pièce ' + (COIN[g] ? COIN[g] + ' h' : 'fermée') + ', Safari ' + (SAFARI[g] ? (extra ? 'sans délai' : SAFARI[g] + ' h') : 'fermé'),
+    ok(label + ' · ' + NAMES[g] + ' (grade affiché : ' + shown + ') : Booster ' + BOOSTER[g] + ' h, pièce ' + (COIN[g] ? COIN[g] + ' h' : 'fermée') + ', Safari ' + (SAFARI[g] ? SAFARI[g] + ' h' : 'fermé'),
       shown === NAMES[g] && bOk && cOk && sOk && tapOk);
   }
   console.log(label + ' : ' + rows.join(' | '));
 }
 
 // Le cas du porteur : grade Chasseur, compte admin « sans délai » → Safari fermé, fenêtre « Accès verrouillé ».
-await atGrade(1, { sfFreeSrv: true, sfHours: 24, cloudGame: { unlimited: true } });
+await atGrade(1, { sfHours: 24, cloudGame: { unlimited: true } });
 const s1 = await card('Safari éclair');
 ok('Chasseur admin, serveur qui répond « 24 h » (ancien 027) : Safari toujours fermé', /🔒 Au grade Collectionneur/.test(s1) && await page.evaluate(() => window.__pkm.sfLocked()));
 await page.locator('main section[aria-label="Safari éclair"]').screenshot({ path: shot('gamelocks-chasseur.png') });
 // Grade de l'app Collectionneur, mais le serveur répond « fermé » (son grade est plus bas) : fermé aussi.
 await atGrade(2, { sfHours: 0 });
 ok('Collectionneur dans l’app, serveur « fermé » : Safari fermé', /🔒 Au grade Collectionneur/.test(await card('Safari éclair')));
-// Collectionneur « sans délai » : partie jouée à l'instant, rejouable aussitôt ; joueur ordinaire : attente de 24 h.
-await atGrade(2, { sfFreeSrv: true, games: { safariAt: new Date().toISOString() } });
-ok('Collectionneur sans délai : rejouable aussitôt (GO)', /GO/.test(await card('Safari éclair')) && await page.evaluate(() => window.__pkm.sfWaitMs()) === 0);
+// Collectionneur admin en mode Admin (2026-11-26, porteur : « je suis Collectionneur et j'ai joué autant de fois que je
+// voulais ») : partie jouée à l'instant → attente de 24 h, comme un joueur ordinaire.
+await atGrade(2, { cloudGame: { unlimited: true }, games: { safariAt: new Date().toISOString() } });
+ok('Collectionneur admin (mode Admin) : « Tu dois attendre » 24 h après une partie', /Tu dois attendre 2[34] h/.test(await card('Safari éclair')) && await page.evaluate(() => window.__pkm.sfWaitMs()) > 23 * 3600000);
 await atGrade(2, { games: { safariAt: new Date().toISOString() } });
 ok('Collectionneur ordinaire : « Tu dois attendre » après une partie', /Tu dois attendre 2[34] h/.test(await card('Safari éclair')));
 
