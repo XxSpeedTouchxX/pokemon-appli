@@ -94,7 +94,7 @@ for (let k = 0; k < 18; k++) {
   await page.locator('.pkm-tt-next').click(); await page.waitForTimeout(80);
   await page.locator('.pkm-tt-next').click().catch(() => {}); // la 1re touche termine la phrase, la 2e avance
 }
-ok(steps.length + ' étapes', steps.length === 16); // 16 depuis le 2026-11-26 (emblème du grade avant la fin ; 15 le 2026-11-23)
+ok(steps.length + ' étapes', steps.length === 15); // 15 depuis le 2026-11-26 (emblème du grade avant la fin, bandeau « Comment gagner des points ? » retiré)
 ok('cadre jamais sous la bulle (' + steps.map(x => x.overlap).join(',') + ')', steps.every(x => x.overlap <= 2 && x.fh > 20));
 ok('valeur, classeur, scan, radar, séries', /valeur/.test(steps[0].t) && /Ici, tu pourras trouver ton classeur/.test(steps[1].t) && /Scan Dropicards/.test(steps[2].t) && /radar des boutiques/.test(steps[3].t) && /toutes les séries et leurs extensions/.test(steps[4].t));
 ok('« Mon classeur » entier dans son cadre', steps[1].titleIn === true);
@@ -111,10 +111,10 @@ ok('bouton « Étape précédente » caché à la 1re étape, visible ensuite', 
 ok('cadre du solde de PK sans mordre sur le solde de PA (' + steps[11].paGap + ' px) et ovale comme celui des PA (' + steps[11].rad + ' / ' + steps[10].rad + ' px)', steps[11].paGap >= 0 && steps[11].rad >= 20 && steps[10].rad >= 20);
 ok('solde de PA, puis solde de PK : « ' + steps[11].t + ' »', /récupérer tes PA/.test(steps[10].t) && /tes PK : ils te serviront à acheter des items/.test(steps[11].t));
 ok('PK shop (cadre ' + steps[12].fw + ' × ' + steps[12].fh + ', écart au centre de l’icône ' + steps[12].off + ' px)', /Dans l’onglet PK shop, tu pourras acheter plein d’items grâce à tes PK et PA gagnés/.test(steps[12].t) && steps[12].nav === 'Accueil' && steps[12].fw <= 60 && steps[12].fh <= 60 && steps[12].off <= 2);
-ok('bandeau « Comment gagner des points ? » avant la fin (' + steps[13].nav + ')', /comment gagner tes PK, tes PA et tes PL/.test(steps[13].t) && steps[13].overlap <= 2);
+ok('plus d’étape « Comment gagner des points ? » (porteur, 2026-11-26)', !steps.some(x => /comment gagner tes PK/.test(x.t)));
 // Grade (2026-11-26, porteur) : l'emblème du haut encadré, juste avant la fin.
-ok('emblème du grade avant la fin (cadre ' + steps[14].fw + ' × ' + steps[14].fh + ', écart au centre ' + steps[14].grOff + ' px) : « ' + steps[14].t.slice(0, 40) + '… »', /Ici, tu retrouves ton grade/.test(steps[14].t) && /nouveaux avantages/.test(steps[14].t) && steps[14].fw <= 72 && steps[14].fh <= 72 && steps[14].grOff <= 3 && steps[14].overlap <= 2);
-ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[15].t));
+ok('emblème du grade avant la fin (cadre ' + steps[13].fw + ' × ' + steps[13].fh + ', écart au centre ' + steps[13].grOff + ' px) : « ' + steps[13].t.slice(0, 40) + '… »', /Ici, tu retrouves ton grade/.test(steps[13].t) && /nouveaux avantages/.test(steps[13].t) && steps[13].fw <= 72 && steps[13].fh <= 72 && steps[13].grOff <= 3 && steps[13].overlap <= 2);
+ok('fin : « tu pourras me trouver ici »', /tu pourras me trouver ici/.test(steps[14].t));
 ok('voix coupée : aucun son joué, bouton du son caché (' + await page.evaluate(() => window.__snd) + ' son)', steps.every(x => x.sndHidden) && (await page.evaluate(() => window.__snd)) === 0);
 ok('valeur entière dans le cadre (' + steps[0].clip + ' px coupés) ; radar sans ses petites lignes (' + steps[3].radar + ')', steps[0].clip <= 2 && steps[3].radar === 'ok');
 ok('booster seulement dans l’étape des jeux à PK, pièce jamais', steps.every((x, i) => i === 6 || !/booster|pièce|mini-jeux/i.test(x.t)) && !/pièce/i.test(steps[6].t));

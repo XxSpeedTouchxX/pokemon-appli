@@ -62,21 +62,21 @@ await page3.screenshot({ path: shot('fx-burst.png') });
 await page3.waitForTimeout(1700);
 ok('gerbe retirée après l’animation', (await page3.locator('.pkm-burst').count()) === 0);
 // Gain de PK : plus aucune gerbe de gemmes autour du solde (2026-11-26, porteur : « je ne veux plus voir toutes ces
-// pièces qui partent dans tous les sens à la fin de l'animation ») ; une seule gemme fait le trajet, puis halo doré.
+// pièces qui partent dans tous les sens à la fin de l'animation ») ; les gemmes volent comme les PA du jour, en jaune.
 await page3.evaluate(() => { const s = JSON.parse(localStorage.getItem('pkm-collection-v1')); s.games = {}; localStorage.setItem('pkm-collection-v1', JSON.stringify(s)); });
 await page3.goto(B + 'start=market&r=2', { waitUntil: 'load' }); await page3.waitForTimeout(2000);
-await page3.evaluate(() => { window.__bursts = []; window.__glow = 0; new MutationObserver(m => m.forEach(r => r.addedNodes.forEach(n => { if (n.classList && n.classList.contains('pkm-burst')) window.__bursts.push(n.className); if (n.querySelector && n.querySelector('.pkm-pafly-glow')) window.__glow++; if (n.classList && n.classList.contains('pkm-pafly-glow')) window.__glow++; }))).observe(document.body, { childList: true, subtree: true }); });
+await page3.evaluate(() => { window.__bursts = []; window.__glow = 0; window.__pkfly = 0; new MutationObserver(m => m.forEach(r => r.addedNodes.forEach(n => { if (n.classList && n.classList.contains('pkm-burst')) window.__bursts.push(n.className); if (n.querySelector && n.querySelector('.pkm-pafly-glow')) window.__glow++; if (n.classList && n.classList.contains('pkm-pafly-glow')) window.__glow++; if (n.classList && n.classList.contains('pkm-pafly-pk')) window.__pkfly++; }))).observe(document.body, { childList: true, subtree: true }); });
 const pkNow = () => page3.evaluate(() => (JSON.parse(localStorage.getItem('pkm-collection-v1') || '{}').pk) || 0);
 const pkB = await pkNow();
 await page3.click('button:has-text("Ouvrir mon booster")');
 // Gain versé à l'arrivée de la gemme (jusqu'à 4,5 s après l'ouverture, pa.js) : attente jusqu'à 8 s.
 for (let i = 0; i < 32 && (await pkNow()) <= pkB; i++) await page3.waitForTimeout(250);
 await page3.waitForTimeout(1500);
-const b2 = await page3.evaluate(() => window.__bursts.slice()), glow = await page3.evaluate(() => window.__glow);
+const b2 = await page3.evaluate(() => window.__bursts.slice()), pkfly = await page3.evaluate(() => window.__pkfly);
 const pkA = await pkNow();
 ok('gain de PK (booster) : solde monté (' + pkB + ' → ' + pkA + ')', pkA > pkB);
 ok('gain de PK : aucune gerbe de gemmes autour du solde (' + (b2.join(', ') || 'aucune') + ')', !b2.some(c => /pkm-burst-gem/.test(c)));
-ok('gain de PK : halo doré autour du solde (' + glow + ')', glow >= 1);
+ok('gain de PK : gemmes jaunes qui volent jusqu’au solde, comme les PA (' + pkfly + ')', pkfly >= 1);
 ok('aucune erreur JS', errors.length === 0);
 console.log(res.join('\n')); if (errors.length) console.log('Erreurs :', errors);
 await browser.close();

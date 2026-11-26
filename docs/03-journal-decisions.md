@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-26 (suite 4) — Didacticiel sans « Comment gagner des points ? » ; gain de PK = animation des PA, en jaune
+
+- **Demandes** : « dans le didacticiel, l'explication "Et pour savoir comment gagner…" supprime-la, elle ne sert à rien » ; « je veux que l'animation des PK soit pareille que l'animation des PA, mais avec une dominante jaune et non violette ».
+- **Didacticiel** : 15 étapes, l'étape du bandeau « Comment gagner des points ? » est retirée (le bandeau reste sur l'accueil) ; `tuto.js`, test `t-tuto`.
+- **Gain de PK** : par défaut, exactement l'animation des PA du jour (éclat, gemmes qui jaillissent puis volent en arc jusqu'au solde, solde qui monte à chaque gemme), avec l'éclat, ses rayons et le halo des gemmes en jaune ; la gerbe de gemmes qui repartait du solde à chaque PK gagné reste retirée. Les fins calmes (1 à 4) et les propositions 5 à 7 restent pour essai (`?pkfly=`). Vidéo côte à côte `tools/brand/pkfly/pa-et-pk.mp4`. `pa.js`, `games.css` ; tests `t-games`, `t-safari`, `t-fx`. Cache v295.
+
 ## 2026-11-26 (suite 3) — Ouverture « La carte sort » choisie ; gain de PK sans pièces dans tous les sens
 
 - **Demandes** : « pour l'ouverture de l'app ok pour garder le 2 » ; « pour le gain de PK, je ne veux plus voir toutes ces pièces qui partent dans tous les sens à la fin de l'animation, propose-m'en d'autres sans les animations dans tous les sens ».

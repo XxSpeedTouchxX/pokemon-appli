@@ -142,19 +142,17 @@
     this.sfxPa(drops); // bruitage des PA du jour (sfx.js, 2026-11-01)
     paFly(from, to, drops, k => this.setState({ paCount: Math.round(old + n.gain * (k + 1) / drops) }), end);
   };
-  // Gain de PK jusqu'au solde (2026-11-26, porteur : « je ne veux plus voir toutes ces pièces qui partent dans tous
-  // les sens à la fin de l'animation, propose-m'en d'autres sans les animations dans tous les sens ») : plus aucune
-  // gemme éparpillée ni éclat en rayons ; le solde s'illumine d'un halo doré et monte jusqu'au nouveau total.
-  //   1 Compteur : rien ne vole, le solde s'illumine et compte,
-  //   2 Une seule gemme (par défaut) : une gemme fait le trajet du gain au solde, puis le solde s'illumine et compte,
-  //   3 Le gain s'envole : la pastille « +N PK » glisse jusqu'au solde et s'y fond, puis il compte,
-  //   4 Trait de lumière : un trait doré file du gain au solde, puis il compte.
-  // Propositions précédentes gardées pour essai : 0 Éparpillé (l'ancienne), 5 Grappe, 6 Ruban, 7 Comète.
-  // Essai : ?pkfly=0 à 7. Les PA du jour gardent leur animation.
+  // Gain de PK jusqu'au solde. Par défaut (0, 2026-11-26, soir, porteur : « je veux que l'animation des PK soit pareille
+  // que l'animation des PA, mais avec une dominante jaune et non violette ») : exactement l'animation des PA du jour
+  // (éclat, gemmes qui jaillissent et s'éparpillent puis volent en arc jusqu'au solde, qui monte à chaque gemme), avec
+  // l'éclat et le halo des gemmes en jaune (.pkm-pafly-pk, games.css). La gerbe de gemmes qui repartait du solde à chaque
+  // PK gagné (fx.js) reste retirée.
+  // Autres propositions gardées pour essai (?pkfly=1 à 7) : 1 Compteur, 2 Une seule gemme, 3 Le gain s'envole, 4 Trait
+  // de lumière (fins calmes avec halo doré), 5 Grappe, 6 Ruban, 7 Comète.
   const pkFlyMode = () => {
     let v = '';
     try { v = (/[?&]pkfly=(\d)/.exec(location.search) || [])[1] || ''; } catch (e) { v = ''; }
-    return /^[0-7]$/.test(v) ? Number(v) : 2;
+    return /^[0-7]$/.test(v) ? Number(v) : 0;
   };
   // Point d'un arc (courbe de Bézier quadratique) de p0 à p2 tiré vers c.
   const qb = (p0, c, p2, t) => (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * c + t * t * p2;
