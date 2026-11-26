@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-26 (suite 2) — Scan des cartes sous pochette ou toploader
+
+- **Demande** : « continue à optimiser le scan : je veux qu'il scanne la carte en 2 s maximum, même si elle est dans une sleeve ou une protection ».
+- **Fait** : la carte est retrouvée à l'intérieur du plastique (le bord du toploader n'est plus pris pour celui de la carte) ; une bande de reflet droite est retirée avant la comparaison du dessin ; une carte en tête 3 images de suite ouvre sa fiche ; message « Reflet sur la carte : incline-la un peu » ; lecture du texte sur l'image déjà analysée (moins de calcul). `scan-print.js`, `scan.js`, `scan-core.js`.
+- **Banc d'essai** (48 cartes, 12 prises, 3 images par prise) : bonne carte en tête 84 → 90 %, fiche directe 69 → 75 %, sous plastique 58 → 76 % (en tête) et 32 → 46 % (fiche directe), **toujours 0 mauvaise fiche** ; carte dans un toploader filmée : fiche en 0,31 s (jamais avant). Limite : reflet vif sous toploader (29 % de fiches directes), d'où le message « incline-la ».
+- **À vérifier sur téléphone** avec de vraies sleeves et toploaders (`?debug=scan`) : les 2 s tiennent si le calcul reste sous ≈ 300 ms par image. Cache v293.
+
 ## 2026-11-26 (suite) — Didacticiel : étape du grade ; gain de PK regroupé ; ouverture avec le logo Dropicards
 
 - **Demandes** : « juste avant le dernier conseil du didacticiel, encadre le petit logo du grade en haut de Dropicards et explique que pour chaque nouveau grade tu débloques de nouveaux avantages » ; « propose-moi une autre animation à la fin des PK sur le solde : actuellement il y a des jetons qui partent dans tous les sens, regroupe-moi un peu plus tout ça » ; « propose une nouvelle animation du booster quand on ouvre l'application, même durée, et mets sur le booster le logo Dropicards de l'appli avec le D et la carte ».
