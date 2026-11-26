@@ -142,24 +142,24 @@
     this.sfxPa(drops); // bruitage des PA du jour (sfx.js, 2026-11-01)
     paFly(from, to, drops, k => this.setState({ paCount: Math.round(old + n.gain * (k + 1) / drops) }), end);
   };
-  // Vol des gemmes des PK jusqu'au solde (2026-11-26, porteur : « propose-moi une autre animation à la fin des PK sur
-  // le solde : actuellement il y a des jetons qui partent dans tous les sens, regroupe-moi un peu plus tout ça ») :
-  //   0 Éparpillé (l'ancienne : éparpillement en étoile puis vol de chaque gemme sur son arc),
-  //   1 Grappe (par défaut) : les gemmes se serrent en grappe au-dessus du gain, tournent ensemble, puis partent
-  //     l'une derrière l'autre sur un seul arc,
-  //   2 Ruban : les gemmes sautent du gain et filent en file indienne sur le même arc, comme un ruban doré,
-  //   3 Comète : les gemmes se fondent en une grosse gemme qui file jusqu'au solde, suivie d'une petite traîne ;
-  //     le solde monte d'un coup à l'arrivée.
-  // Essai : ?pkfly=0 à 3. Les PA du jour gardent leur animation (éparpillé).
+  // Gain de PK jusqu'au solde (2026-11-26, porteur : « je ne veux plus voir toutes ces pièces qui partent dans tous
+  // les sens à la fin de l'animation, propose-m'en d'autres sans les animations dans tous les sens ») : plus aucune
+  // gemme éparpillée ni éclat en rayons ; le solde s'illumine d'un halo doré et monte jusqu'au nouveau total.
+  //   1 Compteur : rien ne vole, le solde s'illumine et compte,
+  //   2 Une seule gemme (par défaut) : une gemme fait le trajet du gain au solde, puis le solde s'illumine et compte,
+  //   3 Le gain s'envole : la pastille « +N PK » glisse jusqu'au solde et s'y fond, puis il compte,
+  //   4 Trait de lumière : un trait doré file du gain au solde, puis il compte.
+  // Propositions précédentes gardées pour essai : 0 Éparpillé (l'ancienne), 5 Grappe, 6 Ruban, 7 Comète.
+  // Essai : ?pkfly=0 à 7. Les PA du jour gardent leur animation.
   const pkFlyMode = () => {
     let v = '';
     try { v = (/[?&]pkfly=(\d)/.exec(location.search) || [])[1] || ''; } catch (e) { v = ''; }
-    return /^[0-3]$/.test(v) ? Number(v) : 1;
+    return /^[0-7]$/.test(v) ? Number(v) : 2;
   };
   // Point d'un arc (courbe de Bézier quadratique) de p0 à p2 tiré vers c.
   const qb = (p0, c, p2, t) => (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * c + t * t * p2;
   // opts.img : image qui vole (gouttes des PA par défaut ; gemmes des PK pour le Safari, 2026-11-13).
-  // opts.mode : 0 à 3 (voir pkFlyMode) ; absent = 0.
+  // opts.mode : 0 à 7 (voir pkFlyMode) ; absent = 0. opts.label : texte de la pastille du mode 3 (« +60 PK »).
   const paFly = (fromEl, toEl, count, hit, done, opts) => {
     const root = document.querySelector('.pkm-root') || document.body, R = root.getBoundingClientRect();
     const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
@@ -167,12 +167,17 @@
     const mode = (opts && opts.mode) || 0;
     const layer = document.createElement('div');
     // Gemmes des PK : reflet jaune comme les PK, pas violet comme les PA (2026-11-15, porteur).
-    layer.className = 'pkm-pafly' + (opts && /pk\.svg$/.test(opts.img || '') ? ' pkm-pafly-pk' : '') + (mode ? ' pkm-pafly-tight pkm-pafly-m' + mode : ''); layer.setAttribute('aria-hidden', 'true');
-    const burst = document.createElement('i');
-    burst.className = 'pkm-pafly-burst'; burst.style.left = ax + 'px'; burst.style.top = ay + 'px';
-    layer.appendChild(burst);
+    const calm = mode >= 1 && mode <= 4;
+    layer.className = 'pkm-pafly' + (opts && /pk\.svg$/.test(opts.img || '') ? ' pkm-pafly-pk' : '') + (mode ? (calm ? ' pkm-pafly-calm' : ' pkm-pafly-tight') + ' pkm-pafly-m' + mode : ''); layer.setAttribute('aria-hidden', 'true');
+    // Éclat en rayons au départ : seulement pour les anciennes animations (plus rien qui part dans tous les sens).
+    if (!calm) {
+      const burst = document.createElement('i');
+      burst.className = 'pkm-pafly-burst'; burst.style.left = ax + 'px'; burst.style.top = ay + 'px';
+      layer.appendChild(burst);
+    }
     root.appendChild(layer);
-    if (mode) { paFlyTight(layer, toEl, count, hit, done, opts, mode, ax, ay, bx, by); return; }
+    if (calm) { paFlyCalm(layer, toEl, count, hit, done, opts, mode, ax, ay, bx, by); return; }
+    if (mode) { paFlyTight(layer, toEl, count, hit, done, opts, mode - 4, ax, ay, bx, by); return; }
     let left = count;
     for (let i = 0; i < count; i++) {
       const d = document.createElement('img');
@@ -196,6 +201,74 @@
         if (!left) { setTimeout(() => layer.remove(), 300); done(); }
       };
     }
+  };
+  // Gain calme (modes 1 à 4) : au plus un seul objet fait le trajet du gain au solde, sur un arc doux ; à l'arrivée, un
+  // halo doré entoure le solde pendant qu'il monte jusqu'au nouveau total (hit à chaque étape, sans secousse).
+  const paFlyCalm = (layer, toEl, count, hit, done, opts, mode, ax, ay, bx, by) => {
+    const src = (opts && opts.img) || 'img/brand/pa.svg';
+    const L = layer.getBoundingClientRect(), B = toEl.getBoundingClientRect();
+    const tx = bx - ax, ty = by - ay, cx = tx * 0.45 + 36, cy = Math.min(0, ty) - 70;
+    const ease = u => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    // Halo doré posé sur le solde, puis le solde compte en douceur (ms : durée du comptage).
+    const climb = ms => {
+      const g = document.createElement('i');
+      g.className = 'pkm-pafly-glow';
+      g.style.left = (B.left - L.left) + 'px'; g.style.top = (B.top - L.top) + 'px'; g.style.width = B.width + 'px'; g.style.height = B.height + 'px';
+      layer.appendChild(g);
+      let k = 0;
+      const step = () => {
+        hit(k); k++;
+        if (k < count) setTimeout(step, ms / count);
+        else { setTimeout(() => layer.remove(), 700); done(); }
+      };
+      step();
+    };
+    // Trajet d'un objet le long de l'arc (pop au départ, rétréci à l'arrivée).
+    const fly = (el, w, h, s1, dur, then) => {
+      el.style.left = (ax - w / 2) + 'px'; el.style.top = (ay - h / 2) + 'px';
+      layer.appendChild(el);
+      const ks = [{ transform: 'translate(0, 0) scale(0.2)', opacity: 0, offset: 0 },
+        { transform: 'translate(0, -6px) scale(1.12)', opacity: 1, offset: 0.16 },
+        { transform: 'translate(0, -4px) scale(1)', opacity: 1, offset: 0.26 }];
+      for (let j = 1; j <= 10; j++) {
+        const u = ease(j / 10);
+        ks.push({ transform: 'translate(' + qb(0, cx, tx, u) + 'px, ' + qb(-4, cy, ty, u) + 'px) scale(' + (1 + (s1 - 1) * u) + ')', opacity: j === 10 ? 0.85 : 1, offset: 0.26 + 0.74 * j / 10 });
+      }
+      el.animate(ks, { duration: dur, easing: 'linear', fill: 'forwards' }).onfinish = () => { el.remove(); then(); };
+    };
+    if (mode === 1) { setTimeout(() => climb(950), 120); return; }
+    if (mode === 2) {
+      const d = document.createElement('img');
+      d.src = src; d.alt = ''; d.className = 'pkm-pafly-drop pkm-pafly-one';
+      d.style.width = d.style.height = '42px';
+      fly(d, 42, 42, 0.55, 900, () => climb(700));
+      return;
+    }
+    if (mode === 3) {
+      const p = document.createElement('span');
+      p.className = 'pkm-pafly-pill';
+      const im = document.createElement('img'); im.src = src; im.alt = '';
+      p.appendChild(im); p.appendChild(document.createTextNode((opts && opts.label) || ''));
+      layer.appendChild(p);
+      const w = p.offsetWidth || 96, h = p.offsetHeight || 36;
+      fly(p, w, h, 0.35, 950, () => climb(700));
+      return;
+    }
+    // 4 Trait de lumière : un seul trait doré (cœur blanc) qui file sur l'arc, sans rien d'autre qui bouge.
+    const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'pkm-pafly-trail');
+    const dd = 'M' + ax + ' ' + ay + ' Q' + (ax + cx) + ' ' + (ay + cy) + ' ' + bx + ' ' + by;
+    const glowP = document.createElementNS(NS, 'path'), core = document.createElementNS(NS, 'path');
+    glowP.setAttribute('d', dd); glowP.setAttribute('class', 'pkm-pafly-trail-glow');
+    core.setAttribute('d', dd); core.setAttribute('class', 'pkm-pafly-trail-core');
+    svg.appendChild(glowP); svg.appendChild(core); layer.appendChild(svg);
+    let len = 400;
+    try { len = core.getTotalLength() || 400; } catch (e) { /* longueur estimée */ }
+    const seg = Math.max(60, len * 0.32);
+    [glowP, core].forEach(pth => { pth.style.strokeDasharray = seg + ' ' + (len + seg); });
+    const anim = pth => pth.animate([{ strokeDashoffset: seg, opacity: 1 }, { strokeDashoffset: -len * 0.98, opacity: 1, offset: 0.92 }, { strokeDashoffset: -len, opacity: 0 }],
+      { duration: 720, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'forwards' });
+    anim(glowP); anim(core).onfinish = () => { svg.remove(); climb(700); };
   };
   // Variantes regroupées (1 Grappe, 2 Ruban, 3 Comète) : toutes les gemmes suivent le même arc, du gain au solde ;
   // un anneau doré s'ouvre sur le solde à l'arrivée de la dernière.
@@ -336,7 +409,7 @@
       const drops = Math.min(14, Math.max(8, Math.round(gain / 2)));
       try { this.sfxPa(drops); } catch (e) { /* son coupé */ }
       // Solde qui monte gemme après gemme ; solde illimité (admin déverrouillé) : les gemmes volent, le nombre reste.
-      paFly({ getBoundingClientRect: () => r }, to, drops, k => { if (climb && !ended) put(Math.round(gain * (k + 1) / drops)); }, fin, { img: 'img/brand/pk.svg', mode: pkFlyMode() });
+      paFly({ getBoundingClientRect: () => r }, to, drops, k => { if (climb && !ended) put(Math.round(gain * (k + 1) / drops)); }, fin, { img: 'img/brand/pk.svg', mode: pkFlyMode(), label: '+' + gain + ' PK' });
     }));
   };
   // Perte de PK (Safari éclair en Normal ou Difficile, 2026-11-13, porteur : « une animation d'enlèvement de PK si

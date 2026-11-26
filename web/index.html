@@ -1034,6 +1034,21 @@ html.pkm-calm .pkm-zh-anim { display: none; } html.pkm-calm .pkm-zh-static { dis
 .pkm-pafly-ring { position: absolute; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; border: 3px solid #FFD60A;
   box-shadow: 0 0 12px rgba(255, 214, 10, 0.8), inset 0 0 8px rgba(255, 214, 10, 0.6); animation: pkmPaRing 0.5s ease-out forwards; }
 @keyframes pkmPaRing { 0% { transform: scale(0.3); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+
+/* Gain de PK calme (2026-11-26, porteur : « plus de pièces qui partent dans tous les sens ») : une seule gemme, la
+   pastille « +N PK » ou un trait doré au plus, puis halo doré autour du solde pendant qu'il compte (pa.js, paFlyCalm). */
+.pkm-pafly-pill { position: absolute; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-radius: 999px;
+  background: #1B2440; color: #FFD60A; font: 800 17px/1 'Sora', system-ui, sans-serif; white-space: nowrap; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 214, 10, 0.55); }
+.pkm-pafly-pill img { width: 24px; height: 24px; }
+.pkm-pafly-trail { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pkm-pafly-trail path { fill: none; stroke-linecap: round; }
+.pkm-pafly-trail-glow { stroke: #FFD60A; stroke-width: 10; filter: drop-shadow(0 0 8px rgba(255, 214, 10, 0.9)); }
+.pkm-pafly-trail-core { stroke: #FFFFFF; stroke-width: 3.5; }
+.pkm-pafly-glow { position: absolute; border-radius: 999px; pointer-events: none; animation: pkmPaGlow 1.2s ease-out forwards; }
+@keyframes pkmPaGlow { 0% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0), 0 0 0 0 rgba(255, 214, 10, 0); }
+  25% { box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.9), 0 0 22px 6px rgba(255, 214, 10, 0.65); }
+  70% { box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.7), 0 0 18px 4px rgba(255, 214, 10, 0.45); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 214, 10, 0), 0 0 0 0 rgba(255, 214, 10, 0); } }
 .pkm-pk-hurt { animation: pkmPkHurt 0.9s ease-out; }
 @keyframes pkmPkHurt { 0%, 100% { transform: none; color: inherit; } 10%, 30%, 50% { transform: translateX(-4px); color: #FF5A4E; } 20%, 40%, 60% { transform: translateX(4px); color: #FF5A4E; } 80% { color: #FF5A4E; } }
 .pkm-gain.pkm-gain-loss { background: #E0453A !important; color: #FFFFFF !important; }
@@ -5019,7 +5034,8 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <!-- Animation d'entrée « Ouverture de booster » (K1, 2026-10-09), insérée par build.mjs dans web/index.html.
      Booster Dropicards portant le logo de l'app (le « D » et la carte à la gemme, 2026-11-26, porteur : « mets sur le booster
      le logo Dropicards de l'appli avec le D et la carte ») ; à la fin, ce logo et le nom « Dropicards », tenus 0,5 s.
-     4 variantes proposées au porteur, même durée (3,5 s au plus, 2026-10-25) ; ?introvis=1 à 4 (1 par défaut) :
+     4 variantes proposées au porteur, même durée (3,5 s au plus, 2026-10-25) ; ?introvis=1 à 4 ; **la 2 « La carte sort »
+     choisie par le porteur** (2026-11-26), les autres pour essai :
        1 Déchirure : le booster tombe et tremble, l'éclair le déchire, le haut s'envole, les gemmes PK jaillissent en éventail,
          la gemme du milieu grandit et laisse place au logo ;
        2 La carte sort : la carte du logo sort du booster déchiré, se retourne et brille, puis se pose et le « D » arrive ;
@@ -5229,8 +5245,8 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
     el.addEventListener('animationend', function (e) { if (e.target === el) done(); });
     el.addEventListener('click', function () { if (el && el.className !== 'pi-out') { el.className = 'pi-out'; } });
     // Variante (2026-11-26, porteur : « propose-moi des animations du booster, avec le logo Dropicards, le D et la
-    // carte ») : ?introvis=1 à 4 ; 1 par défaut en attendant le choix du porteur.
-    el.setAttribute('data-v', (/[?&]introvis=([1-4])(&|$)/.exec(q) || [])[1] || '1');
+    // carte ») : ?introvis=1 à 4 ; la 2 « La carte sort » par défaut (choix du porteur, même jour).
+    el.setAttribute('data-v', (/[?&]introvis=([1-4])(&|$)/.exec(q) || [])[1] || '2');
     play(kind());
     // App installée sur le téléphone : elle reprend souvent sans recharger la page. Après 10 min en arrière-plan,
     // le retour compte comme un démarrage et rejoue l'animation complète.
@@ -5246,6 +5262,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=3efe6c9a"></script>
+<script src="app.js?v=9c39d98f"></script>
 </body>
 </html>

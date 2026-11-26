@@ -1,7 +1,8 @@
 <!-- Animation d'entrée « Ouverture de booster » (K1, 2026-10-09), insérée par build.mjs dans web/index.html.
      Booster Dropicards portant le logo de l'app (le « D » et la carte à la gemme, 2026-11-26, porteur : « mets sur le booster
      le logo Dropicards de l'appli avec le D et la carte ») ; à la fin, ce logo et le nom « Dropicards », tenus 0,5 s.
-     4 variantes proposées au porteur, même durée (3,5 s au plus, 2026-10-25) ; ?introvis=1 à 4 (1 par défaut) :
+     4 variantes proposées au porteur, même durée (3,5 s au plus, 2026-10-25) ; ?introvis=1 à 4 ; **la 2 « La carte sort »
+     choisie par le porteur** (2026-11-26), les autres pour essai :
        1 Déchirure : le booster tombe et tremble, l'éclair le déchire, le haut s'envole, les gemmes PK jaillissent en éventail,
          la gemme du milieu grandit et laisse place au logo ;
        2 La carte sort : la carte du logo sort du booster déchiré, se retourne et brille, puis se pose et le « D » arrive ;
@@ -211,8 +212,8 @@
     el.addEventListener('animationend', function (e) { if (e.target === el) done(); });
     el.addEventListener('click', function () { if (el && el.className !== 'pi-out') { el.className = 'pi-out'; } });
     // Variante (2026-11-26, porteur : « propose-moi des animations du booster, avec le logo Dropicards, le D et la
-    // carte ») : ?introvis=1 à 4 ; 1 par défaut en attendant le choix du porteur.
-    el.setAttribute('data-v', (/[?&]introvis=([1-4])(&|$)/.exec(q) || [])[1] || '1');
+    // carte ») : ?introvis=1 à 4 ; la 2 « La carte sort » par défaut (choix du porteur, même jour).
+    el.setAttribute('data-v', (/[?&]introvis=([1-4])(&|$)/.exec(q) || [])[1] || '2');
     play(kind());
     // App installée sur le téléphone : elle reprend souvent sans recharger la page. Après 10 min en arrière-plan,
     // le retour compte comme un démarrage et rejoue l'animation complète.

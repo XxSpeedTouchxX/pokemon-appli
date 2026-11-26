@@ -45,7 +45,6 @@
     document.body.appendChild(b);
     setTimeout(() => b.remove(), 1500);
   }
-  const fxCenter = el => { const r = el && el.getBoundingClientRect(); return r && r.width ? [r.left + r.width / 2, r.top + r.height / 2] : null; };
   const fxUnits = s => (s.purchases || []).reduce((t, a) => t + a.lines.reduce((u, l) => u + (l.qty || 0), 0), 0);
 
   const fxBaseSet = fxProto.setState;
@@ -58,7 +57,9 @@
     // Après le rendu : positions des éléments à jour.
     const later = f => (window.requestAnimationFrame ? window.requestAnimationFrame(() => setTimeout(f, 0)) : setTimeout(f, 16));
     if (after.purchases !== before.purchases && fxUnits(after) > fxUnits(before)) later(() => fxBurst('card', W / 2, H - 150));
-    if ((after.pk || 0) > (before.pk || 0)) later(() => { const c = fxCenter(document.querySelector('header button[aria-label^="Mes PK"]')); fxBurst('gem', c ? c[0] : W - 80, c ? c[1] : 40); });
+    // Gerbe de gemmes autour du solde à chaque PK gagné : retirée (2026-11-26, porteur : « je ne veux plus voir toutes
+    // ces pièces qui partent dans tous les sens à la fin de l'animation ») ; le gain de PK finit sur un halo doré
+    // autour du solde (pa.js, paFlyCalm).
     const unlocked = Array.isArray(after.pkOwn) && Array.isArray(before.pkOwn) && after.pkOwn.length > before.pkOwn.length;
     const tier = typeof after.toast === 'string' && after.toast !== before.toast && /grade/.test(after.toast);
     if (unlocked || tier) later(() => {

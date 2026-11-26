@@ -64,7 +64,7 @@ const btn = N(await page.locator('.pkm-sf-go').innerText());
 ok('bouton « ' + btn + ' »', btn === (won > 0 ? 'Récupérer mes PK' : 'Fermer'));
 await page.locator('.pkm-sf-go').click(); await page.waitForTimeout(450);
 const flying = await page.evaluate(() => [...document.querySelectorAll('.pkm-pafly-drop')].map(d => d.getAttribute('src')));
-if (won > 0) ok('gemmes des PK qui volent vers le solde (' + flying.length + '), comme les PA du jour', flying.length >= 8 && flying.every(f => f === 'img/brand/pk.svg'));
+if (won > 0) ok('une seule gemme des PK vole vers le solde (' + flying.length + ')', flying.length === 1 && flying.every(f => f === 'img/brand/pk.svg'));
 await page.screenshot({ path: shot('safari-collect.png') });
 await page.waitForTimeout(2200);
 ok('calque retiré, PK ajoutés au solde (' + (await page.evaluate(() => window.__pkm.st().pk)) + ')', (await page.locator('.pkm-sf').count()) === 0 && (await page.evaluate(() => window.__pkm.st().pk)) === 100 + won && !(await page.locator('.pkm-pafly-drop').count()));
@@ -188,7 +188,7 @@ await page.screenshot({ path: shot('safari-header.png'), clip: { x: 0, y: 0, wid
   const eN = N(await p2.locator('.pkm-sf').innerText()), pkN = S.pk;
   ok('Normal : ' + goodN + ' bons Pokémon → « +' + (4 * goodN) + ' PK », bouton « Récupérer mes PK »', goodN > 2 && new RegExp('\\+' + (4 * goodN) + ' PK').test(eN) && N(await p2.locator('.pkm-sf-go').innerText()) === 'Récupérer mes PK');
   await p2.locator('.pkm-sf-go').click(); await p2.waitForTimeout(450);
-  ok('Normal : les gemmes volent vers le solde (' + (await p2.locator('.pkm-pafly-drop').count()) + ')', (await p2.locator('.pkm-pafly-drop').count()) >= 8);
+  ok('Normal : la gemme vole vers le solde (' + (await p2.locator('.pkm-pafly-drop').count()) + ')', (await p2.locator('.pkm-pafly-drop').count()) === 1);
   await p2.waitForTimeout(2600);
   ok('Normal : solde repris du serveur (' + pkN + ')', (await p2.evaluate(() => window.__pkm.st().pk)) === pkN);
   await c2.close();
@@ -239,7 +239,7 @@ for (const role of ['user', 'admin']) {
     if (won0 > 0) {
       ok('sans 024, admin : « Récupérer mes PK » aussi dans l’aperçu', N(await p3.locator('.pkm-sf-go').innerText()) === 'Récupérer mes PK');
       await p3.locator('.pkm-sf-go').click(); await p3.waitForTimeout(450);
-      ok('aperçu : les gemmes volent vers le solde (' + (await p3.locator('.pkm-pafly-drop').count()) + '), le solde ne bouge pas', (await p3.locator('.pkm-pafly-drop').count()) >= 8);
+      ok('aperçu : la gemme vole vers le solde (' + (await p3.locator('.pkm-pafly-drop').count()) + '), le solde ne bouge pas', (await p3.locator('.pkm-pafly-drop').count()) === 1);
       await p3.waitForTimeout(2300);
       ok('aperçu : solde inchangé (' + (await p3.evaluate(() => window.__pkm.st().pk)) + ')', (await p3.evaluate(() => window.__pkm.st().pk)) === pk0);
     }

@@ -1,5 +1,5 @@
-// Vidéo des 4 animations de gain de PK (2026-11-26, porteur : « propose-moi une autre animation à la fin des PK sur le
-// solde : actuellement il y a des jetons qui partent dans tous les sens, regroupe-moi un peu plus tout ça »), en 2 × 2.
+// Vidéo des 4 animations calmes de gain de PK (2026-11-26, porteur : « je ne veux plus voir toutes ces pièces qui
+// partent dans tous les sens, propose-m'en d'autres sans les animations dans tous les sens »), en 2 × 2.
 // Usage : app servie en local (E2E_BASE), puis node tools/brand/pkfly/make_video.mjs
 // Sortie : tools/brand/pkfly/propositions.mp4. Les animations tournent 10 fois moins vite pendant la prise de vue
 // (CDP Animation.setPlaybackRate, minuteries ralenties d'autant), puis la vidéo est remise à la vraie vitesse.
@@ -10,10 +10,10 @@ import { launch } from '../../web/e2e/helpers.mjs';
 const BASE = process.env.E2E_BASE || 'http://localhost:8799';
 const OUT = fileURLToPath(new URL('.', import.meta.url)), TMP = OUT + 'tmp/';
 rmSync(TMP, { recursive: true, force: true }); mkdirSync(TMP, { recursive: true });
-const NAMES = { 0: 'Actuelle (éparpillée)', 1: 'Grappe', 2: 'Ruban', 3: 'Comète' };
-const RATE = 0.1, FPS = 25, LEN = 2600; // durée filmée (ms de l'animation)
+const NAMES = { 1: 'Compteur', 2: 'Une seule gemme', 3: 'Le gain s’envole', 4: 'Trait de lumière' };
+const RATE = 0.1, FPS = 25, LEN = 2800; // durée filmée (ms de l'animation)
 const browser = await launch();
-for (const v of [0, 1, 2, 3]) {
+for (const v of [1, 2, 3, 4]) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await ctx.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   const page = await ctx.newPage();
@@ -58,7 +58,7 @@ for (const v of [0, 1, 2, 3]) {
   await ctx.close();
 }
 await browser.close();
-execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', TMP + 'c0.mp4', '-i', TMP + 'c1.mp4', '-i', TMP + 'c2.mp4', '-i', TMP + 'c3.mp4',
+execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', TMP + 'c1.mp4', '-i', TMP + 'c2.mp4', '-i', TMP + 'c3.mp4', '-i', TMP + 'c4.mp4',
   '-filter_complex', '[0][1][2][3]xstack=inputs=4:layout=0_0|w0_0|0_h0|w0_h0,tpad=stop_mode=clone:stop_duration=1[v]', '-map', '[v]', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT + 'propositions.mp4']);
 rmSync(TMP, { recursive: true, force: true });
 console.log('vidéo écrite');

@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-26 (suite 3) — Ouverture « La carte sort » choisie ; gain de PK sans pièces dans tous les sens
+
+- **Demandes** : « pour l'ouverture de l'app ok pour garder le 2 » ; « pour le gain de PK, je ne veux plus voir toutes ces pièces qui partent dans tous les sens à la fin de l'animation, propose-m'en d'autres sans les animations dans tous les sens ».
+- **Ouverture** : variante **2 « La carte sort » par défaut** (choix du porteur) ; les autres restent pour essai (`?intro=1&introvis=1|3|4`).
+- **Cause trouvée** : à chaque PK gagné, une gerbe de 10 petites gemmes jaillissait du solde (`fx.js`, « pluie de gemmes ») ; pendant que le solde comptait, elle repartait à chaque étape. **Gerbe retirée** pour tous les gains de PK ; l'éclat en rayons au départ du gain aussi.
+- **4 nouvelles fins calmes**, sans rien qui part dans tous les sens, toutes terminées par un halo doré autour du solde pendant qu'il compte : 1 Compteur (rien ne vole), **2 Une seule gemme (par défaut)**, 3 Le gain s'envole (la pastille « +N PK » glisse jusqu'au solde), 4 Trait de lumière. Essai `?pkfly=1` à `4` (anciennes propositions : 0, 5 Grappe, 6 Ruban, 7 Comète) ; vidéo `tools/brand/pkfly/propositions.mp4` ; **choix du porteur attendu**. `pa.js` (`paFlyCalm`), `games.css`, `fx.js` ; tests `t-fx`, `t-games`, `t-safari`. Cache v294.
+
 ## 2026-11-26 (suite 2) — Scan des cartes sous pochette ou toploader
 
 - **Demande** : « continue à optimiser le scan : je veux qu'il scanne la carte en 2 s maximum, même si elle est dans une sleeve ou une protection ».

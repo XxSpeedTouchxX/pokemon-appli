@@ -20,9 +20,9 @@ const pk0 = await page.evaluate(() => JSON.parse(localStorage.getItem('pkm-colle
 await boost.locator('button:has-text("Ouvrir mon booster")').click(); await page.waitForTimeout(1300);
 await page.screenshot({ path: shot('games-scissors.png') });
 await page.waitForTimeout(1100);
-// Gain des PK comme les PA du jour (2026-11-13, porteur) : les gemmes volent jusqu'au solde, qui monte à chaque gemme.
+// Gain des PK (2026-11-26, porteur : plus de pièces dans tous les sens) : une seule gemme vole jusqu'au solde.
 const fly = await page.evaluate(() => [...document.querySelectorAll('.pkm-pafly-drop')].map(d => d.getAttribute('src')));
-ok('booster : gemmes des PK qui volent jusqu’au solde (' + fly.length + ')', fly.length >= 8 && fly.every(f => f === 'img/brand/pk.svg'));
+ok('booster : une seule gemme des PK vole jusqu’au solde (' + fly.length + ')', fly.length === 1 && fly.every(f => f === 'img/brand/pk.svg'));
 await page.screenshot({ path: shot('games-pkfly.png') });
 // Un autre mouvement du solde pendant le vol des gemmes (achat au PK shop…) n'est jamais effacé par la fin du vol.
 await page.evaluate(() => window.__pkm.setState({ pk: window.__pkm.st().pk + 1000 }));
