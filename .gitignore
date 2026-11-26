@@ -12,3 +12,6 @@ mobile/node_modules/
 *.jks
 *.keystore
 out-android/
+
+# Copies de travail temporaires des agents Claude (worktrees), jamais dans le dépôt.
+.claude/worktrees/
