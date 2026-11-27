@@ -1,4 +1,4 @@
-// K1 : animation d’entrée, complète à chaque démarrage (2026-10-11) ; booster d’abord figé pendant le chargement, puis ouverture de 4 s (2026-11-27) ; un appui la passe ; version éclair ;
+// K1 : animation d’entrée, complète à chaque démarrage (2026-10-11) ; booster d’abord figé pendant le chargement, puis ouverture de 3,7 s (2026-11-27) ; un appui la passe ; version éclair ;
 // animations réduites ; absente pour un navigateur de test ; l'app se charge en dessous pendant ce temps.
 import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const B = E2E + '/';
@@ -34,10 +34,10 @@ ok('booster seul et figé avant l’ouverture (' + (ev.holdVis || []).join(', ')
 ok('ouverture lancée après ' + Math.round(ev.full - ev.hold) + ' ms d’attente (2 s au plus)', ev.hold > 0 && ev.full > ev.hold && ev.full - ev.hold <= 2300);
 ok('booster à la même place avant et pendant l’ouverture (' + JSON.stringify(ev.holdRect) + ' / ' + JSON.stringify(ev.fullRect) + ')', !!ev.holdRect && JSON.stringify(ev.holdRect) === JSON.stringify(ev.fullRect));
 const dur = Math.round(ev.gone - ev.full);
-// Ouverture avancée de 0,3 s (2026-11-27, porteur : « il reste trop longtemps figé ») : la languette bouge déjà 0,45 s
-// après le départ, et l'ouverture dure 4 s.
+// Ouverture avancée de 0,6 s (2026-11-27, porteur : « il reste trop longtemps figé », puis « encore 0,3 s plus tôt ») :
+// la languette se soulève dès le départ (déjà levée 0,45 s après), et l'ouverture dure 3,7 s.
 ok('languette déjà soulevée 0,45 s après le départ (' + ev.tab450 + ')', !!ev.tab450 && ev.tab450 !== 'none');
-ok('ouverture retirée après ' + dur + ' ms (3 700 à 4 300 ms)', !(await has()) && dur >= 3700 && dur <= 4300);
+ok('ouverture retirée après ' + dur + ' ms (3 400 à 4 000 ms)', !(await has()) && dur >= 3400 && dur <= 4000);
 
 ok('l’app est prête dessous', (await page.locator('header img[alt="Dropicards"]').count()) === 1);
 // Appui pour passer.

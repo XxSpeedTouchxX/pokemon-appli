@@ -36,8 +36,8 @@ for (const v of ONLY) {
   }
   const dir = TMP + 'v' + v + '/'; mkdirSync(dir, { recursive: true });
   let k = 0;
-  // L'app saute les 0,3 premières secondes de l'ouverture (booster déjà resté figé pendant le chargement, 2026-11-27).
-  for (let t = ONLY.length === 1 ? 300 : 0; t <= 4300; t += 40) {
+  // L'app saute les 0,6 premières secondes de l'ouverture (booster déjà resté figé pendant le chargement, 2026-11-27).
+  for (let t = ONLY.length === 1 ? 600 : 0; t <= 4300; t += 40) {
     await page.evaluate(t => document.getAnimations().forEach(a => { a.pause(); try { a.currentTime = t; } catch (e) { /* rien */ } }), t);
     await page.screenshot({ path: dir + String(k++).padStart(3, '0') + '.png' });
   }

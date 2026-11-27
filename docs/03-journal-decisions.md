@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-27 (suite 14) — Languette soulevée dès le départ de l'ouverture
+
+- **Demande** : « fais soulever la languette encore 0,3 s plus tôt ».
+- **Fait** : l'ouverture saute maintenant ses 0,6 premières secondes (0,3 s avant) : la languette se soulève dès que l'ouverture démarre, juste après l'attente du chargement où le booster reste immobile ; la suite est identique, l'ouverture dure 3,7 s au lieu de 4 s. L'attente du chargement ne change pas (2 s au plus).
+- `intro.html` (`SKIP` 300 → 600) ; vidéo `tools/brand/intro/ouverture-2.mp4` ; test `t-intro` (ouverture 3,4 à 4 s). Cache v310.
+
 ## 2026-11-27 (suite 13) — Ouverture avancée de 0,3 s
 
 - **Demande** : « quand tu ouvres l'appli, est-ce que tu peux accélérer de 0,3 s l'animation de l'ouverture du booster ? Il reste trop longtemps figé ».
