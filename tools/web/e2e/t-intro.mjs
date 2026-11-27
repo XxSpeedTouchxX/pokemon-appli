@@ -1,4 +1,4 @@
-// K1 : animation d’entrée, complète à chaque démarrage (2026-10-11) ; booster d’abord figé pendant le chargement, puis ouverture de 4,3 s (2026-11-27) ; un appui la passe ; version éclair ;
+// K1 : animation d’entrée, complète à chaque démarrage (2026-10-11) ; booster d’abord figé pendant le chargement, puis ouverture de 4 s (2026-11-27) ; un appui la passe ; version éclair ;
 // animations réduites ; absente pour un navigateur de test ; l'app se charge en dessous pendant ce temps.
 import { withFonts, launch, BASE as E2E, shot, ROOT } from './helpers.mjs';
 const B = E2E + '/';
@@ -21,7 +21,7 @@ await ctx.addInitScript(() => {
       ev.hold = performance.now(); ev.holdRect = rect();
       ev.holdVis = [...el.querySelectorAll('svg > *')].filter(e => e.tagName !== 'defs' && getComputedStyle(e).display !== 'none').map(e => e.getAttribute('class') || e.tagName);
     }
-    if (c === 'pi-full' && !ev.full) { ev.full = performance.now(); setTimeout(() => { ev.fullRect = rect(); }, 300); }
+    if (c === 'pi-full' && !ev.full) { ev.full = performance.now(); setTimeout(() => { ev.fullRect = rect(); }, 150); setTimeout(() => { const t = el.querySelector('.pi-pack .pi-tab'); ev.tab450 = t ? getComputedStyle(t).transform : ''; }, 450); }
     if (el.style.display === 'none' && !ev.gone) ev.gone = performance.now();
   }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'style'] });
 });
@@ -34,7 +34,10 @@ ok('booster seul et figé avant l’ouverture (' + (ev.holdVis || []).join(', ')
 ok('ouverture lancée après ' + Math.round(ev.full - ev.hold) + ' ms d’attente (2 s au plus)', ev.hold > 0 && ev.full > ev.hold && ev.full - ev.hold <= 2300);
 ok('booster à la même place avant et pendant l’ouverture (' + JSON.stringify(ev.holdRect) + ' / ' + JSON.stringify(ev.fullRect) + ')', !!ev.holdRect && JSON.stringify(ev.holdRect) === JSON.stringify(ev.fullRect));
 const dur = Math.round(ev.gone - ev.full);
-ok('ouverture retirée après ' + dur + ' ms (4 000 à 4 600 ms)', !(await has()) && dur >= 4000 && dur <= 4600);
+// Ouverture avancée de 0,3 s (2026-11-27, porteur : « il reste trop longtemps figé ») : la languette bouge déjà 0,45 s
+// après le départ, et l'ouverture dure 4 s.
+ok('languette déjà soulevée 0,45 s après le départ (' + ev.tab450 + ')', !!ev.tab450 && ev.tab450 !== 'none');
+ok('ouverture retirée après ' + dur + ' ms (3 700 à 4 300 ms)', !(await has()) && dur >= 3700 && dur <= 4300);
 
 ok('l’app est prête dessous', (await page.locator('header img[alt="Dropicards"]').count()) === 1);
 // Appui pour passer.

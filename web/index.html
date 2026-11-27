@@ -5367,7 +5367,7 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 (function () {
   var el = document.getElementById('pkm-intro');
   if (!el) return;
-  var timer = 0, hiddenAt = 0, holdTimer = 0, HOLD_MAX = 2000;
+  var timer = 0, hiddenAt = 0, holdTimer = 0, HOLD_MAX = 2000, SKIP = 300;
   var raf = window.requestAnimationFrame ? function (f) { window.requestAnimationFrame(f); } : function (f) { setTimeout(function () { f(Date.now()); }, 16); };
   var done = function () { clearTimeout(timer); clearTimeout(holdTimer); if (el) { el.style.display = 'none'; el.className = ''; } };
   // Ouverture (4,3 s), lancée une fois le booster affiché immobile.
@@ -5375,8 +5375,16 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
     if (!el || el.className !== 'pi-hold') return;
     clearTimeout(holdTimer);
     el.className = 'pi-full';
+    // Ouverture avancée de 0,3 s (2026-11-27, porteur : « il reste trop longtemps figé ») : le booster vient de rester
+    // immobile pendant l'attente, l'ouverture saute donc ses 0,3 premières secondes (où rien ne bouge encore) ; la
+    // languette se soulève 0,26 s après le départ au lieu de 0,56 s, la suite est inchangée (4 s au lieu de 4,3 s).
+    try {
+      void el.offsetWidth;
+      var an = el.getAnimations ? el.getAnimations({ subtree: true }) : [];
+      for (var i = 0; i < an.length; i++) an[i].currentTime = (an[i].currentTime || 0) + SKIP;
+    } catch (e) { /* ouverture à son rythme d'origine */ }
     clearTimeout(timer);
-    timer = setTimeout(done, 5300); // filet de sécurité (ouverture de 4,3 s)
+    timer = setTimeout(done, 5300); // filet de sécurité (ouverture de 4 s)
   };
   // Booster figé (2026-11-27, porteur) : l'ouverture attend que l'app ait chargé son catalogue (window.__pkmReady,
   // posé par l'app) puis 3 images de suite sans à-coup (le téléphone a fini ses gros calculs) ; 2 s d'attente au plus.
@@ -5443,6 +5451,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=512378bb"></script>
+<script src="app.js?v=a88e8ef0"></script>
 </body>
 </html>

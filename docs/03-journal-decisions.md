@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-27 (suite 13) — Ouverture avancée de 0,3 s
+
+- **Demande** : « quand tu ouvres l'appli, est-ce que tu peux accélérer de 0,3 s l'animation de l'ouverture du booster ? Il reste trop longtemps figé ».
+- **Fait** : l'ouverture saute ses 0,3 premières secondes, où rien ne bougeait encore (le booster vient déjà de rester immobile pendant le chargement de l'app) : la languette se soulève 0,26 s après le départ au lieu de 0,56 s ; la suite est identique, l'ouverture dure 4 s au lieu de 4,3 s. L'attente du chargement ne change pas (2 s au plus).
+- `intro.html` (`SKIP`, animations avancées au départ de l'ouverture) ; vidéo `tools/brand/intro/ouverture-2.mp4` (qui commence au même moment) ; test `t-intro` (13). Cache v309.
+
 ## 2026-11-27 (suite 12) — Booster figé au lancement, puis ouverture
 
 - **Demande** : « lorsque je lance l'application, le booster se décale légèrement comme s'il buggait ; je veux que le booster soit figé et qu'ensuite vienne l'animation de l'ouverture ».
