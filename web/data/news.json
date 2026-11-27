@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T00:47:14Z",
+ "updated": "2026-11-27T15:32:28Z",
  "sources": [
   {
    "name": "Pokébip",
@@ -11,6 +11,55 @@
   }
  ],
  "items": [
+  {
+   "title": "Pokémon GO : Journée Combat Max : Lézargus Gigamax !",
+   "url": "https://www.pokebip.com/news/7647/pokemon-go-journee-combat-max-lezargus-gigamax",
+   "date": "2026-11-27T14:35:02Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Programme du mois de décembre !",
+   "url": "https://www.pokebip.com/news/7652/pokemon-go-programme-du-mois-de-decembre",
+   "date": "2026-11-27T14:35:02Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon GO : Passe GO de décembre 2026 !",
+   "url": "https://www.pokebip.com/news/7659/pokemon-go-passe-go-de-decembre-2026",
+   "date": "2026-11-27T14:35:02Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Écarlate et Violet : Retour de Serpente-Eau et Vert-de-Fer !",
+   "url": "https://www.pokebip.com/news/7667/ecarlate-et-violet-retour-de-serpente-eau-et-vert-de-fer",
+   "date": "2026-11-27T08:29:10Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Écarlate et Violet : Retour de Glaivodo surpuissant",
+   "url": "https://www.pokebip.com/news/7666/ecarlate-et-violet-retour-de-glaivodo-surpuissant",
+   "date": "2026-11-27T08:23:28Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Sleep : Évènement Journée de la nouvelle lune n°20",
+   "url": "https://www.pokebip.com/news/7665/pokemon-sleep-evenement-journee-de-la-nouvelle-lune-n20",
+   "date": "2026-11-27T08:16:06Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
+  {
+   "title": "Pokémon Masters EX : 97ème message des développeurs",
+   "url": "https://www.pokebip.com/news/7664/pokemon-masters-ex-97eme-message-des-developpeurs",
+   "date": "2026-11-27T08:09:29Z",
+   "source": "Pokébip",
+   "tcg": false
+  },
   {
    "title": "Pokémon Champions x Pokémon GO : Obtenez la tenue du Professeur Willow !",
    "url": "https://www.pokebip.com/news/7663/pokemon-champions-x-pokemon-go-obtenez-la-tenue-du-professeur-willow",
@@ -40,13 +89,6 @@
    "tcg": false
   },
   {
-   "title": "Pokémon GO : Passe GO de décembre 2026 !",
-   "url": "https://www.pokebip.com/news/7659/pokemon-go-passe-go-de-decembre-2026",
-   "date": "2026-11-25T14:59:44Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
    "title": "Pokémon Champions : Règlement M-D des combats classés !",
    "url": "https://www.pokebip.com/news/7658/pokemon-champions-reglement-m-d-des-combats-classes",
    "date": "2026-11-25T05:49:40Z",
@@ -68,41 +110,6 @@
    "tcg": false
   },
   {
-   "title": "Pokémon GO : Saison 29 de la Ligue Combat GO !",
-   "url": "https://www.pokebip.com/news/7655/pokemon-go-saison-29-de-la-ligue-combat-go",
-   "date": "2026-11-24T20:35:01Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon Sleep : Cadeau de célébration de la Journée Évoli !",
-   "url": "https://www.pokebip.com/news/7654/pokemon-sleep-cadeau-de-celebration-de-la-journee-evoli",
-   "date": "2026-11-21T09:04:38Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon Pocket : Missions Évoli : Voli Voli !",
-   "url": "https://www.pokebip.com/news/7653/pokemon-pocket-missions-evoli-voli-voli",
-   "date": "2026-11-20T19:33:18Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Community Day All-Stars édition 2026 !",
-   "url": "https://www.pokebip.com/news/7651/pokemon-go-community-day-all-stars-edition-2026",
-   "date": "2026-11-20T19:15:01Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Programme du mois de décembre !",
-   "url": "https://www.pokebip.com/news/7652/pokemon-go-programme-du-mois-de-decembre",
-   "date": "2026-11-20T17:03:50Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
    "title": "Journée Communauté classique de janvier : retour d'Arcko !",
    "url": "https://www.pokebip.com/news/7650/journee-communaute-classique-de-janvier-retour-darcko",
    "date": "2026-11-20T16:27:00Z",
@@ -120,13 +127,6 @@
    "title": "Pokémon GO : Journée Éclosion de Korillon !",
    "url": "https://www.pokebip.com/news/7648/pokemon-go-journee-eclosion-de-korillon",
    "date": "2026-11-20T16:08:46Z",
-   "source": "Pokébip",
-   "tcg": false
-  },
-  {
-   "title": "Pokémon GO : Journée Combat Max : Lézargus Gigamax !",
-   "url": "https://www.pokebip.com/news/7647/pokemon-go-journee-combat-max-lezargus-gigamax",
-   "date": "2026-11-20T16:04:03Z",
    "source": "Pokébip",
    "tcg": false
   },
