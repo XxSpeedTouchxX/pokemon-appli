@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-27 (suite 2) — Ouverture de l'app : même cinématique que « 4 · Coupé en deux », coupe horizontale
+
+- **Demande** : « reproduis sur l'ouverture du booster exactement la même cinématique que le 4 · Coupé en deux, car là on ne voit pas très bien le booster tranché sur le haut ».
+- **Fait** : variante 2 (celle de l'app) : comme la 4, le booster tombe et tremble, le trait jaune et blanc tranche le booster (à l'horizontale, dans le haut, sous les dents), éclair blanc, puis le booster est remplacé par ses deux morceaux coupés net : le haut (dents et bande du corps) s'envole en tournant, le bas encaisse le coup, laisse sortir la carte Dropicards, puis tombe ; « D » par la gauche et nom inchangés, même durée (3,5 s). L'éclat de la version précédente est retiré ; le trait blanc de la 4 revient avec la cinématique. `intro.html` ; vidéo `tools/brand/intro/ouverture-2.mp4` (vitesse réelle puis ralenti × 4) ; test `t-intro`. Cache v298.
+
 ## 2026-11-27 (suite) — Ouverture de l'app : découpe sans trait, rapide et nette
 
 - **Demande** : « le trait de découpe est beaucoup trop visible, je ne veux pas voir le trait blanc ; il faut que le découpage soit très rapide, net et satisfaisant ».
