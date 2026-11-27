@@ -23,12 +23,12 @@ for (const v of ONLY) {
   await page.waitForSelector('#pkm-intro', { state: 'attached' });
   await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
   await page.waitForTimeout(2500);
-  // ONLY : la découpe aussi au ralenti (× 4, de 0,85 s à 1,45 s), ajoutée après la vidéo à vitesse réelle ;
+  // ONLY : la découpe, la sortie de la carte et son reflet aussi au ralenti (× 4, de 0,85 s à 2,25 s), ajoutée après la vidéo à vitesse réelle ;
   // filmée d'abord, car la fin de l'intro (3,5 s) la retire de la page.
   if (ONLY.length === 1) {
     const sd = TMP + 's' + v + '/'; mkdirSync(sd, { recursive: true });
     let j = 0;
-    for (let t = 850; t <= 1450; t += 10) {
+    for (let t = 850; t <= 2250; t += 10) {
       await page.evaluate(t => document.getAnimations().forEach(a => { a.pause(); try { a.currentTime = t; } catch (e) { /* rien */ } }), t);
       await page.screenshot({ path: sd + String(j++).padStart(3, '0') + '.png' });
     }

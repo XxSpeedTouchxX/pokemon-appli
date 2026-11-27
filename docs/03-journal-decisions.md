@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-27 (suite 7) — Sortie « Glisse et se pose » choisie, avec un reflet blanc brillant
+
+- **Demande** : « ok pour le 1 Glisse et se pose, mais je veux qu'à peine la carte sortie du booster elle ait un effet de reflet brillant, exactement le même que le 4 avec le reflet arc-en-ciel, mais un reflet neutre brillant ».
+- **Fait** : sortie **1 « Glisse et se pose » choisie par le porteur**, par défaut (les autres pour essai, `?introcarte=2` à `4`). Dès que la carte sort du booster (1,12 s), un reflet blanc la traverse en 0,5 s : même trajet et même inclinaison que l'arc-en-ciel de la 4, en blanc, avec une bande lumineuse suivie d'un fin trait de lumière pour qu'il brille sur le jaune. Carte plate en vol, fond noir à l'arrivée, puis le « D » : inchangés ; durée toujours 3,5 s.
+- `intro.html` (`.pi-v2glint`, dégradé `piGlint`, `piGlintSweep`) ; vidéo `tools/brand/intro/ouverture-2.mp4` (vitesse réelle, puis ralenti × 4 de la découpe à l'arrivée de la carte, `ONLY=2 node tools/brand/intro/make_video.mjs`) ; test `t-intro`. Cache v303.
+
 ## 2026-11-27 (suite 6) — Carte plate pendant la sortie, fond noir à l'arrivée
 
 - **Demande** : « quand la carte sort du booster, je ne veux pas ce fond noir en effet un peu 3D ; je veux une carte normale en 2D, sans fond noir décalé sur le côté ; et quand la carte se met à sa place, avant que le "D" arrive par la gauche, que le fond noir resurgisse pour bien voir le logo Dropicards ».
