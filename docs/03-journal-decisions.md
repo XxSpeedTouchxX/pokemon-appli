@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-27 (suite 10) — Ouverture sans à-coup
+
+- **Demande** : « au début de l'animation, il y a un très léger à-coup du booster, est-ce que tu peux l'enlever ? Je ne veux pas qu'il y ait des à-coups ».
+- **Cause** : en se posant, le booster descendait 7 pixels trop bas puis remontait (courbe avec dépassement, entre 0,2 et 0,54 s). Mesuré image par image ; le passage du booster entier à ses deux morceaux (0,9 s) ne bouge pas d'un pixel.
+- **Fait** : le booster se pose en ralentissant, sans dépasser (courbe sans rebond, position qui ne fait que descendre jusqu'à sa place) ; le petit sursaut du bas du booster quand la carte sort (6 pixels vers le bas puis retour, à 1,1 s) est aussi retiré, pour qu'il ne reste aucun à-coup. Le reste de l'ouverture (4,3 s) est inchangé.
+- `intro.html` (`piDrop`, `piRecoil1` retiré de la Languette) ; vidéo `tools/brand/intro/ouverture-2.mp4` ; test `t-intro`. Cache v306.
+
 ## 2026-11-27 (suite 9) — Ouverture allongée de 0,8 s (4,3 s)
 
 - **Demande** : « super pour cette animation, est-ce que tu peux l'allonger de 0,8 s en plus ? ».
