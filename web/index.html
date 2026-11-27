@@ -5089,7 +5089,8 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 /* Découpe du haut du booster à la place de l'éclair (2026-11-26, porteur ; refaite 3 fois le 2026-11-27). Puis (porteur :
    « je n'aime toujours pas l'animation d'ouverture du booster, propose-m'en plusieurs avec une ouverture différente et une
    coupe nette satisfaisante ») : 4 ouvertures proposées, sans trait ni éclair blanc, ?introcut=1 à 4 (0 = la version
-   précédente, morceaux qui glissent) ; la suite ne change pas (carte qui sort, « D » par la gauche, nom).
+   précédente, morceaux qui glissent) ; **la 4 « Languette » choisie par le porteur** (même jour), les autres pour essai ;
+   la suite ne change pas (carte qui sort, « D » par la gauche, nom).
      1 Ciseaux : des ciseaux font 3 coups secs le long du haut, la bande coupée tombe ;
      2 Sabre : un éclat doré tranche d'un coup, temps d'arrêt, puis le haut glisse le long de la coupe et tombe ;
      3 Bouchon : le booster gonfle deux fois, le haut saute comme un bouchon en tournant, éclats jaunes ;
@@ -5130,7 +5131,18 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 #pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-tab { transform-origin: 0% 50%; animation: piTabWiggle 0.3s ease-in-out 0.58s 1; }
 #pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-cutT { transform-origin: 0% 18.5%; animation: piVis 0.01s linear 0.9s forwards, piPeel 0.85s cubic-bezier(0.3, 0.1, 0.3, 1) 0.9s forwards; }
 #pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-cutB { animation: piVis 0.01s linear 0.9s forwards, piRecoil1 0.25s ease-out 1.1s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
-#pkm-intro.pi-full[data-v="2"] .pi-v2c { opacity: 0; animation: piCardOut 1.15s cubic-bezier(0.3, 0.6, 0.35, 1) 1.1s both; }
+/* Sortie de la carte (2026-11-27, porteur : « juste après l'ouverture, on dirait qu'il y a une sorte de pic qui sort du
+   booster, ensuite on voit la carte ; je veux que ce soit directement une forme de carte qui sorte ») : le pic était la
+   carte vue de profil pendant son retournement (0, gardée pour essai). 4 sorties proposées, la carte garde toujours sa
+   forme : ?introcarte=1 Glisse et se pose (par défaut en attendant le choix), 2 Tourbillon, 3 Bond, 4 Lévitation holo. */
+#pkm-intro.pi-full[data-v="2"] .pi-v2c { opacity: 0; animation: piCardSlide 1.15s cubic-bezier(0.3, 0.6, 0.35, 1) 1.1s both, piShow 0.01s linear 1.05s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-o="0"] .pi-v2c { opacity: 0; animation: piCardOut 1.15s cubic-bezier(0.3, 0.6, 0.35, 1) 1.1s both; }
+#pkm-intro.pi-full[data-v="2"][data-o="2"] .pi-v2c { opacity: 0; animation: piCardSpin 1.15s cubic-bezier(0.3, 0.6, 0.35, 1) 1.1s both, piShow 0.01s linear 1.05s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-o="3"] .pi-v2c { opacity: 0; animation: piCardBounce 1.15s linear 1.1s both, piShow 0.01s linear 1.05s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-o="4"] .pi-v2c { opacity: 0; animation: piCardFloat 1.15s cubic-bezier(0.3, 0.6, 0.35, 1) 1.1s both, piShow 0.01s linear 1.05s forwards; }
+#pkm-intro .pi-v2shine { display: none; }
+#pkm-intro.pi-full[data-v="2"][data-o="4"] .pi-v2shine { display: inline; }
+#pkm-intro.pi-full[data-v="2"][data-o="4"] .pi-v2bar { opacity: 0; animation: piCardShine 0.55s ease-in-out 1.55s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-endD { opacity: 0; animation: piSlideD 0.42s cubic-bezier(0.2, 0.8, 0.3, 1.25) 2.02s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-rays { opacity: 0; animation: piRays 1s ease-out 1.42s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-logo { animation-delay: 2.34s; }
@@ -5182,6 +5194,17 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 @keyframes piGrow { from { opacity: 1; transform: translate(0, -290px) scale(1); } to { opacity: 0; transform: translate(0, -150px) scale(2.6); } }
 @keyframes piPop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
 @keyframes piSpark { 0% { opacity: 0; transform: scale(0.3) rotate(0); } 40% { opacity: 1; } 100% { opacity: 0; transform: scale(1.4) rotate(45deg); } }
+@keyframes piCardSlide { 0% { transform: translate(-56px, 76px) scale(1.5); } 38% { transform: translate(-56px, -100px) scale(1.5); }
+  52% { transform: translate(-56px, -86px) scale(1.55) rotate(-3deg); } 100% { transform: none; } }
+@keyframes piCardSpin { 0% { transform: translate(-56px, 76px) scale(1.5) rotate(0deg); } 30% { transform: translate(-56px, -70px) scale(1.55) rotate(0deg); }
+  62% { transform: translate(-36px, -104px) scale(1.7) rotate(360deg); } 100% { transform: translate(0, 0) scale(1) rotate(360deg); } }
+@keyframes piCardBounce { 0% { transform: translate(-56px, 76px) scale(1.5); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  28% { transform: translate(-56px, -150px) scale(1.42, 1.66); animation-timing-function: ease-out; } 42% { transform: translate(-48px, -168px) scale(1.55); animation-timing-function: ease-in; }
+  68% { transform: translate(0, 8px) scale(1.1, 0.9); animation-timing-function: ease-out; } 82% { transform: translate(0, -8px) scale(0.97, 1.04); animation-timing-function: ease-in-out; } 100% { transform: none; } }
+@keyframes piCardFloat { 0% { transform: translate(-56px, 76px) scale(1.5); } 42% { transform: translate(-56px, -96px) scale(1.62); }
+  55% { transform: translate(-56px, -104px) scale(1.62) rotate(2deg); } 70% { transform: translate(-50px, -98px) scale(1.62) rotate(-2deg); } 100% { transform: none; } }
+@keyframes piShow { to { opacity: 1; } }
+@keyframes piCardShine { 0% { opacity: 0; transform: translateX(-70px); } 20% { opacity: 0.85; } 80% { opacity: 0.85; } 100% { opacity: 0; transform: translateX(70px); } }
 @keyframes piCardOut { 0% { opacity: 0; transform: translate(-56px, 78px) scale(0.55); } 8% { opacity: 1; } 22% { transform: translate(-56px, 8px) scale(0.06, 1.05); }
   43% { opacity: 1; transform: translate(-56px, -42px) scale(1.5); } 68% { transform: translate(-56px, -50px) scale(1.55) rotate(-4deg); } 100% { opacity: 1; transform: none; } }
 @keyframes piSlideD { 0% { opacity: 0; transform: translateX(-300px) rotate(-18deg); } 20% { opacity: 1; } 70% { transform: translateX(12px) rotate(3deg); } 100% { opacity: 1; transform: none; } }
@@ -5241,6 +5264,7 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <clipPath id="piClipT3"><polygon points="0,0 390,0 390,331.8 0,294.2"/></clipPath>
 <clipPath id="piClipB3"><polygon points="0,294.2 390,331.8 390,800 0,800"/></clipPath>
 <linearGradient id="piSwG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFB703" stop-opacity="0"/><stop offset="0.55" stop-color="#FFE45C"/><stop offset="1" stop-color="#FFB703"/></linearGradient>
+<clipPath id="piClipCard"><use href="#piCp"/></clipPath>
 <clipPath id="piClipB"><polygon points="390,168.7 390,800 0,800 0,711.3"/></clipPath>
 <g id="piBody">
 <use href="#piBodyP" fill="url(#piFoil)" stroke="#111111" stroke-width="5" stroke-linejoin="round"/>
@@ -5271,7 +5295,7 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <g class="pi-x2 pi-cutT" clip-path="url(#piClipT2)"><use href="#piBody"/><use href="#piTop"/><g class="pi-k4 pi-tab"><path d="M283 298H301Q307 298 307 304Q307 310 301 310H283Z" fill="#FFD60A" stroke="#111111" stroke-width="2.5" stroke-linejoin="round"/><path d="M293 300.5L297 304L293 307.5" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></g>
 <g class="pi-x2 pi-k2 pi-sT" clip-path="url(#piClipT3)"><use href="#piBody"/><use href="#piTop"/></g>
 <!-- 2 : la carte du logo, cachée dans le booster, qui en sort -->
-<g class="pi-x2 pi-v2c"><use href="#piMC" transform="translate(115 387) scale(1.3)"/></g>
+<g class="pi-x2 pi-v2c"><use href="#piMC" transform="translate(115 387) scale(1.3)"/><g transform="translate(115 387) scale(1.3)"><g class="pi-v2shine" clip-path="url(#piClipCard)"><g class="pi-v2bar"><rect x="70" y="-95" width="26" height="90" fill="url(#piRainbow)" transform="skewX(-14)"/></g></g></g></g>
 <!-- Booster : corps (logo D + carte), reflet holo (3), haut à déchirer -->
 <g class="pi-pack">
 <use href="#piBody"/>
@@ -5333,8 +5357,11 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
     // carte ») : ?introvis=1 à 4 ; la 2 « La carte sort » par défaut (choix du porteur, même jour).
     el.setAttribute('data-v', (/[?&]introvis=([1-4])(&|$)/.exec(q) || [])[1] || '2');
     // Ouverture de la 2 (2026-11-27, porteur : « propose-m'en plusieurs, avec une coupe nette satisfaisante ») :
-    // ?introcut=1 Ciseaux (par défaut en attendant le choix), 2 Sabre, 3 Bouchon, 4 Languette, 0 version précédente.
-    el.setAttribute('data-k', (/[?&]introcut=([0-4])(&|$)/.exec(q) || [])[1] || '1');
+    // ?introcut=4 Languette (choix du porteur, 2026-11-27), 1 Ciseaux, 2 Sabre, 3 Bouchon, 0 version précédente.
+    el.setAttribute('data-k', (/[?&]introcut=([0-4])(&|$)/.exec(q) || [])[1] || '4');
+    // Sortie de la carte (2026-11-27, porteur : « directement une forme de carte qui sorte du booster ») :
+    // ?introcarte=1 Glisse et se pose (par défaut en attendant le choix), 2 Tourbillon, 3 Bond, 4 Lévitation holo, 0 ancienne.
+    el.setAttribute('data-o', (/[?&]introcarte=([0-4])(&|$)/.exec(q) || [])[1] || '1');
     play(kind());
     // App installée sur le téléphone : elle reprend souvent sans recharger la page. Après 10 min en arrière-plan,
     // le retour compte comme un démarrage et rejoue l'animation complète.
@@ -5350,6 +5377,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=d5fccae5"></script>
+<script src="app.js?v=5427b56d"></script>
 </body>
 </html>

@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-27 (suite 5) — Ouverture « Languette » choisie ; 4 sorties de la carte proposées
+
+- **Demande** : « ok pour l'ouverture 4 avec languette, mais juste après l'ouverture on dirait qu'il y a une sorte de pic qui sort du booster et ensuite on voit la carte ; je veux que ce soit directement une forme de carte qui sorte du booster, propose-moi des visuels ».
+- **Fait** : ouverture **4 « Languette » choisie par le porteur**, par défaut (`?introcut=4` ; les autres pour essai). Le « pic » était la carte vue de profil pendant son retournement (largeur ramenée à 6 %). 4 sorties proposées où la carte garde toujours sa forme et sort entière de l'ouverture (cachée dans le booster jusque-là) :
+  1. **Glisse et se pose** : la carte monte tout droit hors du booster, s'arrête au-dessus avec une petite inclinaison, puis se pose à sa place à côté du « D » ;
+  2. **Tourbillon** : la carte jaillit et fait un tour complet sur elle-même en grandissant, puis se pose ;
+  3. **Bond** : la carte saute haut (un peu étirée), retombe à sa place et rebondit ;
+  4. **Lévitation holo** : la carte monte lentement, flotte en se balançant, un reflet arc-en-ciel la traverse, puis elle se pose.
+- **En attendant le choix du porteur** : la 1 par défaut ; essai `?intro=1&introcarte=1` à `4` (0 = ancienne sortie). « D » par la gauche, nom et durée (3,5 s) inchangés. `intro.html` ; vidéo `tools/brand/intro/propositions-carte.mp4` (2 × 2, vitesse réelle puis ralenti × 4, `MODE=carte node tools/brand/intro/make_cuts.mjs`) ; test `t-intro`. Cache v301.
+
 ## 2026-11-27 (suite 4) — Ouverture de l'app : 4 ouvertures du booster proposées
 
 - **Demande** : « je n'aime toujours pas l'animation d'ouverture de booster, propose-m'en plusieurs avec une ouverture de booster différente et une coupe nette satisfaisante ».
