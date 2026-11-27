@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-27 (suite 4) — Ouverture de l'app : 4 ouvertures du booster proposées
+
+- **Demande** : « je n'aime toujours pas l'animation d'ouverture de booster, propose-m'en plusieurs avec une ouverture de booster différente et une coupe nette satisfaisante ».
+- **Fait** : 4 ouvertures pour la variante 2 (celle de l'app), toutes sans trait ni éclair blanc, coupe droite dans le haut du booster ; la suite ne change pas (carte Dropicards qui sort, « D » par la gauche, nom), même durée (3,5 s) :
+  1. **Ciseaux** : des ciseaux dessinés font 3 coups secs le long du haut du booster, la bande coupée se soulève puis tombe ;
+  2. **Sabre** : un éclat doré tranche le booster d'un coup (coupe un peu en biais), temps d'arrêt, puis le haut glisse le long de la coupe et tombe, petite secousse ;
+  3. **Bouchon** : le booster gonfle deux fois, puis le haut saute comme un bouchon en tournant, éclats jaunes ;
+  4. **Languette** : une languette dépasse du booster, elle bouge, on la tire, le haut s'ouvre comme un couvercle puis s'envole.
+- **En attendant le choix du porteur** : la 1 « Ciseaux » par défaut ; essai `?intro=1&introcut=1` à `4` (0 = version précédente, morceaux qui glissent). Le morceau du haut passe désormais derrière la carte qui sort. `intro.html` ; vidéo `tools/brand/intro/propositions-coupe.mp4` (2 × 2, vitesse réelle puis ralenti × 4, `make_cuts.mjs`) ; test `t-intro`. Cache v300.
+
 ## 2026-11-27 (suite 3) — Ouverture de l'app : coupe nette sans aucun trait blanc
 
 - **Demande** : « le trait blanc est trop visible, je t'ai dit enlève-moi le trait blanc, je ne veux pas voir de trait blanc ; je veux voir une découpe nette et satisfaisante, comme dans la 4 ».

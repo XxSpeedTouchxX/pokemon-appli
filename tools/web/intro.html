@@ -6,8 +6,8 @@
        1 Déchirure : le booster tombe et tremble, l'éclair le déchire, le haut s'envole, les gemmes PK jaillissent en éventail,
          la gemme du milieu grandit et laisse place au logo ;
        2 La carte sort (choisie par le porteur) : une découpe horizontale tranche le haut du booster (2026-11-26, porteur :
-         « à la place de l'éclair, la même découpe que pour la 4, mais horizontale en haut du booster » ; le 2026-11-27,
-         booster coupé net en deux morceaux comme la 4, sans trait ni éclair blanc : les morceaux glissent le long de la coupe), le haut s'envole, la carte du
+         « à la place de l'éclair, la même découpe que pour la 4, mais horizontale en haut du booster » ; 4 ouvertures
+         proposées le 2026-11-27, sans trait ni éclair blanc : ciseaux, sabre, bouchon, languette ; ?introcut=1 à 4), le haut s'envole, la carte du
          logo sort du bas, se retourne et brille, puis se pose et le « D » arrive par la gauche ;
        3 Holo : le booster tourne sur lui-même avec un reflet arc-en-ciel, gonfle et éclate en gemmes qui tourbillonnent
          jusqu'au centre, où le logo apparaît dans une onde de choc ;
@@ -52,19 +52,50 @@
 /* 2 La carte sort */
 #pkm-intro.pi-full[data-v="2"] .pi-card, #pkm-intro.pi-full[data-v="2"] .pi-endC { display: none; }
 #pkm-intro.pi-full[data-v="2"] .pi-endM { opacity: 1; animation: none; }
-/* Découpe horizontale du haut du booster à la place de l'éclair (2026-11-26, porteur). Le 2026-11-27 : éclat sans trait,
-   puis cinématique de la 4 (trait jaune et blanc, éclair blanc), puis (porteur : « enlève le trait blanc, je ne veux voir
-   aucun trait blanc, je veux une découpe nette et satisfaisante comme dans la 4 ») : ni trait ni éclair blanc ; le booster
-   est coupé net en deux morceaux qui glissent l'un contre l'autre le long de la coupe (le haut vers la droite, le bas vers
-   la gauche), petits éclats jaunes et petite secousse ; le haut s'envole, le bas encaisse, laisse sortir la carte, tombe. */
-#pkm-intro.pi-full[data-v="2"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piShake 0.42s ease-in-out 0.54s 1, piHide 0.01s linear 1s forwards; }
+/* Découpe du haut du booster à la place de l'éclair (2026-11-26, porteur ; refaite 3 fois le 2026-11-27). Puis (porteur :
+   « je n'aime toujours pas l'animation d'ouverture du booster, propose-m'en plusieurs avec une ouverture différente et une
+   coupe nette satisfaisante ») : 4 ouvertures proposées, sans trait ni éclair blanc, ?introcut=1 à 4 (0 = la version
+   précédente, morceaux qui glissent) ; la suite ne change pas (carte qui sort, « D » par la gauche, nom).
+     1 Ciseaux : des ciseaux font 3 coups secs le long du haut, la bande coupée tombe ;
+     2 Sabre : un éclat doré tranche d'un coup, temps d'arrêt, puis le haut glisse le long de la coupe et tombe ;
+     3 Bouchon : le booster gonfle deux fois, le haut saute comme un bouchon en tournant, éclats jaunes ;
+     4 Languette : on tire la languette, le haut s'ouvre comme un couvercle puis s'envole. */
 #pkm-intro.pi-full[data-v="2"] .pi-top { animation: none; }
 #pkm-intro.pi-full[data-v="2"] .pi-bolt, #pkm-intro.pi-full[data-v="2"] .pi-flash { display: none; }
-#pkm-intro.pi-full[data-v="2"] svg { animation: piJolt 0.22s ease-out 1s; }
-#pkm-intro.pi-full[data-v="2"] .pi-cutT, #pkm-intro.pi-full[data-v="2"] .pi-cutB { visibility: hidden; }
-#pkm-intro.pi-full[data-v="2"] .pi-cutT { animation: piVis 0.01s linear 1s forwards, piSplitT 0.8s cubic-bezier(0.25, 0.7, 0.4, 1) 1s forwards; }
-#pkm-intro.pi-full[data-v="2"] .pi-cutB { animation: piVis 0.01s linear 1s forwards, piSplitB2 0.34s ease-out 1s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
+#pkm-intro .pi-k0, #pkm-intro .pi-k1, #pkm-intro .pi-k2, #pkm-intro .pi-k3, #pkm-intro .pi-k4,
+#pkm-intro.pi-full[data-v="2"] .pi-k0, #pkm-intro.pi-full[data-v="2"] .pi-k1, #pkm-intro.pi-full[data-v="2"] .pi-k2, #pkm-intro.pi-full[data-v="2"] .pi-k3, #pkm-intro.pi-full[data-v="2"] .pi-k4 { display: none; }
+#pkm-intro.pi-full[data-v="2"][data-k="0"] .pi-k0, #pkm-intro.pi-full[data-v="2"][data-k="1"] .pi-k1, #pkm-intro.pi-full[data-v="2"][data-k="2"] .pi-k2,
+#pkm-intro.pi-full[data-v="2"][data-k="3"] .pi-k3, #pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-k4 { display: inline; }
+#pkm-intro.pi-full[data-v="2"] .pi-cutT, #pkm-intro.pi-full[data-v="2"] .pi-cutB, #pkm-intro.pi-full[data-v="2"] .pi-sT, #pkm-intro.pi-full[data-v="2"] .pi-sB { visibility: hidden; }
 #pkm-intro.pi-full[data-v="2"] .pi-chip { opacity: 0; animation: piChip 0.34s cubic-bezier(0.2, 0.7, 0.4, 1) 1s both; }
+/* 0 Glisse (version du 2026-11-27, gardée pour essai) */
+#pkm-intro.pi-full[data-v="2"][data-k="0"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piShake 0.42s ease-in-out 0.54s 1, piHide 0.01s linear 1s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="0"] svg { animation: piJolt 0.22s ease-out 1s; }
+#pkm-intro.pi-full[data-v="2"][data-k="0"] .pi-cutT { animation: piVis 0.01s linear 1s forwards, piSplitT 0.8s cubic-bezier(0.25, 0.7, 0.4, 1) 1s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="0"] .pi-cutB { animation: piVis 0.01s linear 1s forwards, piSplitB2 0.34s ease-out 1s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
+/* 1 Ciseaux */
+#pkm-intro.pi-full[data-v="2"][data-k="1"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piHide 0.01s linear 1.02s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="1"] .pi-sc { opacity: 0; animation: piScMove 0.56s linear 0.5s both; }
+#pkm-intro.pi-full[data-v="2"][data-k="1"] .pi-scA { animation: piSnipA 0.13s ease-in-out 0.6s 3 both; }
+#pkm-intro.pi-full[data-v="2"][data-k="1"] .pi-scB { animation: piSnipB 0.13s ease-in-out 0.6s 3 both; }
+#pkm-intro.pi-full[data-v="2"][data-k="1"] .pi-cutT { transform-origin: 50% 9%; animation: piVis 0.01s linear 1.02s forwards, piStripOff 0.66s cubic-bezier(0.45, 0, 0.85, 0.45) 1.02s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="1"] .pi-cutB { animation: piVis 0.01s linear 1.02s forwards, piRecoil1 0.25s ease-out 1.02s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
+/* 2 Sabre (coupe un peu en biais) */
+#pkm-intro.pi-full[data-v="2"][data-k="2"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piShake 0.3s ease-in-out 0.54s 1, piHide 0.01s linear 0.92s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="2"] .pi-swoosh { opacity: 0; transform-origin: 0% 50%; animation: piSwoosh 0.16s ease-out 0.84s both; }
+#pkm-intro.pi-full[data-v="2"][data-k="2"] .pi-sT { transform-origin: 50% 10%; animation: piVis 0.01s linear 0.92s forwards, piNudge 0.01s linear 0.92s forwards, piSlideOff 0.7s cubic-bezier(0.5, 0, 0.85, 0.45) 1.1s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="2"] .pi-sB { animation: piVis 0.01s linear 0.92s forwards, piRecoil1 0.25s ease-out 1.1s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="2"] svg { animation: piJolt 0.2s ease-out 0.92s; }
+/* 3 Bouchon */
+#pkm-intro.pi-full[data-v="2"][data-k="3"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piPuff 0.44s ease-in-out 0.56s 1, piHide 0.01s linear 1s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="3"] .pi-cutT { transform-origin: 50% 9%; animation: piVis 0.01s linear 1s forwards, piCork 0.85s cubic-bezier(0.2, 0.6, 0.4, 1) 1s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="3"] .pi-cutB { animation: piVis 0.01s linear 1s forwards, piRecoil3 0.3s ease-out 1s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="3"] svg { animation: piJolt 0.2s ease-out 1s; }
+/* 4 Languette */
+#pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piHide 0.01s linear 0.9s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-tab { transform-origin: 0% 50%; animation: piTabWiggle 0.3s ease-in-out 0.58s 1; }
+#pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-cutT { transform-origin: 0% 18.5%; animation: piVis 0.01s linear 0.9s forwards, piPeel 0.85s cubic-bezier(0.3, 0.1, 0.3, 1) 0.9s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-cutB { animation: piVis 0.01s linear 0.9s forwards, piRecoil1 0.25s ease-out 1.1s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
 #pkm-intro.pi-full[data-v="2"] .pi-v2c { opacity: 0; animation: piCardOut 1.15s cubic-bezier(0.3, 0.6, 0.35, 1) 1.1s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-endD { opacity: 0; animation: piSlideD 0.42s cubic-bezier(0.2, 0.8, 0.3, 1.25) 2.02s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-rays { opacity: 0; animation: piRays 1s ease-out 1.42s both; }
@@ -134,6 +165,20 @@
 @keyframes piHide { to { opacity: 0; } }
 @keyframes piSplitT { 0% { transform: none; opacity: 1; } 12% { transform: translate(18px, 0); } 28% { transform: translate(26px, -14px) rotate(3deg); } 45% { opacity: 1; } 100% { transform: translate(135px, -185px) rotate(20deg); opacity: 0; } }
 @keyframes piSplitB2 { 0%, 100% { transform: none; } 18% { transform: translate(-7px, 0); } 45% { transform: translate(-4px, 10px) rotate(-1.5deg); } }
+@keyframes piScMove { 0% { opacity: 0; transform: translateX(0); } 10% { opacity: 1; } 17.9% { transform: translateX(62px); } 41% { transform: translateX(128px); }
+  64% { transform: translateX(194px); } 87.5% { opacity: 1; transform: translateX(262px); } 100% { opacity: 0; transform: translateX(310px); } }
+@keyframes piSnipA { 0%, 100% { transform: rotate(-24deg); } 55% { transform: rotate(-1deg); } }
+@keyframes piSnipB { 0%, 100% { transform: rotate(24deg); } 55% { transform: rotate(1deg); } }
+@keyframes piStripOff { 0% { transform: none; opacity: 1; } 16% { transform: translate(6px, 5px) rotate(4deg); } 75% { opacity: 1; } 100% { transform: translate(190px, 330px) rotate(70deg); opacity: 0; } }
+@keyframes piRecoil1 { 0%, 100% { transform: none; } 35% { transform: translateY(6px); } }
+@keyframes piSwoosh { 0% { opacity: 1; transform: scaleX(0.05); } 55% { opacity: 1; transform: scaleX(1); } 100% { opacity: 0; transform: scaleX(1); } }
+@keyframes piNudge { to { transform: translate(2px, 0.4px); } }
+@keyframes piSlideOff { 0% { transform: translate(2px, 0.4px); opacity: 1; } 30% { transform: translate(38px, 4px) rotate(2deg); } 75% { opacity: 1; } 100% { transform: translate(200px, 360px) rotate(48deg); opacity: 0; } }
+@keyframes piPuff { 0%, 100% { transform: none; } 25% { transform: scale(1.05, 0.95); } 50% { transform: scale(0.95, 1.06); } 80% { transform: scale(1.08, 0.92); } }
+@keyframes piCork { 0% { transform: none; opacity: 1; } 12% { transform: translate(2px, -46px) rotate(40deg); } 80% { opacity: 1; } 100% { transform: translate(16px, -360px) rotate(400deg); opacity: 0; } }
+@keyframes piRecoil3 { 0%, 100% { transform: none; } 30% { transform: translateY(10px) scale(1.02, 0.96); } }
+@keyframes piTabWiggle { 0%, 100% { transform: none; } 25% { transform: rotate(-10deg); } 50% { transform: rotate(8deg); } 75% { transform: rotate(-5deg); } }
+@keyframes piPeel { 0% { transform: none; opacity: 1; } 14% { transform: rotate(-5deg); } 42% { transform: rotate(-30deg); } 55% { transform: rotate(-35deg); opacity: 1; } 100% { transform: translate(-140px, -260px) rotate(-85deg); opacity: 0; } }
 @keyframes piJolt { 0%, 100% { transform: none; } 25% { transform: translate(3px, -2px); } 50% { transform: translate(-3px, 2px); } 75% { transform: translate(2px, 1px); } }
 @keyframes piChip { 0% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1) rotate(90deg); } }
 @keyframes piVis { to { visibility: visible; } }
@@ -159,6 +204,9 @@
 <clipPath id="piClipA"><polygon points="0,0 390,0 390,168.7 0,711.3"/></clipPath>
 <clipPath id="piClipT2"><rect x="0" y="0" width="390" height="312"/></clipPath>
 <clipPath id="piClipB2"><rect x="0" y="312" width="390" height="500"/></clipPath>
+<clipPath id="piClipT3"><polygon points="0,0 390,0 390,331.8 0,294.2"/></clipPath>
+<clipPath id="piClipB3"><polygon points="0,294.2 390,331.8 390,800 0,800"/></clipPath>
+<linearGradient id="piSwG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFB703" stop-opacity="0"/><stop offset="0.55" stop-color="#FFE45C"/><stop offset="1" stop-color="#FFB703"/></linearGradient>
 <clipPath id="piClipB"><polygon points="390,168.7 390,800 0,800 0,711.3"/></clipPath>
 <g id="piBody">
 <use href="#piBodyP" fill="url(#piFoil)" stroke="#111111" stroke-width="5" stroke-linejoin="round"/>
@@ -185,6 +233,9 @@
 <g class="pi-card pi-c7"><image href="img/brand/pk.svg" x="10" y="10" width="44" height="44"/></g>
 <g class="pi-card pi-c3"><image href="img/brand/pk.svg" x="-4" y="-4" width="72" height="72"/></g>
 </g>
+<!-- 2 : morceau du haut du booster coupé (sous la carte, qui passe devant en sortant) -->
+<g class="pi-x2 pi-cutT" clip-path="url(#piClipT2)"><use href="#piBody"/><use href="#piTop"/><g class="pi-k4 pi-tab"><path d="M283 298H301Q307 298 307 304Q307 310 301 310H283Z" fill="#FFD60A" stroke="#111111" stroke-width="2.5" stroke-linejoin="round"/><path d="M293 300.5L297 304L293 307.5" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+<g class="pi-x2 pi-k2 pi-sT" clip-path="url(#piClipT3)"><use href="#piBody"/><use href="#piTop"/></g>
 <!-- 2 : la carte du logo, cachée dans le booster, qui en sort -->
 <g class="pi-x2 pi-v2c"><use href="#piMC" transform="translate(115 387) scale(1.3)"/></g>
 <!-- Booster : corps (logo D + carte), reflet holo (3), haut à déchirer -->
@@ -192,14 +243,21 @@
 <use href="#piBody"/>
 <g class="pi-holo" clip-path="url(#piClipBody)"><g class="pi-holo-bar"><rect x="60" y="280" width="90" height="360" fill="url(#piRainbow)" transform="skewX(-14)"/></g></g>
 <g class="pi-top"><use href="#piTop"/></g>
+<g class="pi-k4 pi-tab"><path d="M283 298H301Q307 298 307 304Q307 310 301 310H283Z" fill="#FFD60A" stroke="#111111" stroke-width="2.5" stroke-linejoin="round"/><path d="M293 300.5L297 304L293 307.5" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
 </g>
 <!-- 4 : les deux moitiés du booster tranché -->
 <g class="pi-x4 pi-halfA" clip-path="url(#piClipA)"><use href="#piBody"/><use href="#piTop"/></g>
 <g class="pi-x4 pi-halfB" clip-path="url(#piClipB)"><use href="#piBody"/><use href="#piTop"/></g>
-<!-- 2 : les deux morceaux du booster coupé net à l'horizontale dans le haut (sans trait), et des éclats jaunes -->
+<!-- 2 : morceau du bas du booster coupé, ciseaux, éclat du sabre, éclats jaunes (selon l'ouverture choisie) -->
 <g class="pi-x2 pi-cutB" clip-path="url(#piClipB2)"><use href="#piBody"/><use href="#piTop"/></g>
-<g class="pi-x2 pi-cutT" clip-path="url(#piClipT2)"><use href="#piBody"/><use href="#piTop"/></g>
-<g class="pi-x2 pi-hchips"><g transform="translate(100 312)"><path class="pi-chip" style="--dx:-14px;--dy:-10px;animation-delay:1.0s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(108 312)"><path class="pi-chip" style="--dx:-10px;--dy:14px;animation-delay:1.0s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(150 312)"><path class="pi-chip" style="--dx:-2px;--dy:-16px;animation-delay:1.015s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(240 312)"><path class="pi-chip" style="--dx:2px;--dy:15px;animation-delay:1.03s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(282 312)"><path class="pi-chip" style="--dx:12px;--dy:-12px;animation-delay:1.045s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(290 312)"><path class="pi-chip" style="--dx:15px;--dy:9px;animation-delay:1.045s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g></g>
+<g class="pi-x2 pi-k2 pi-sB" clip-path="url(#piClipB3)"><use href="#piBody"/><use href="#piTop"/></g>
+<g class="pi-x2 pi-k1"><g transform="translate(40 312) scale(1.15)"><g class="pi-sc"><g class="pi-scB"><rect x="-50" y="-50" width="100" height="100" opacity="0"/><path d="M-14 10L0 3L46 1Q49 0 46 -1L0 -2L-12 4Z" fill="#DDE3EE" stroke="#111111" stroke-width="2" stroke-linejoin="round"/><circle cx="-22" cy="12" r="9" fill="#FFD60A" stroke="#111111" stroke-width="2.5"/><circle cx="-22" cy="12" r="4" fill="#111111"/></g><g class="pi-scA"><rect x="-50" y="-50" width="100" height="100" opacity="0"/><path d="M-14 -10L0 -3L46 -1Q49 0 46 1L0 2L-12 -4Z" fill="#EEF2F8" stroke="#111111" stroke-width="2" stroke-linejoin="round"/><circle cx="-22" cy="-12" r="9" fill="#FFD60A" stroke="#111111" stroke-width="2.5"/><circle cx="-22" cy="-12" r="4" fill="#111111"/></g><circle r="3.2" fill="#FFD60A" stroke="#111111" stroke-width="1.8"/></g></g></g>
+<g class="pi-x2 pi-k2"><path class="pi-swoosh" d="M56 299.6Q195 306 334 326.4Q190 322 56 299.6Z" fill="url(#piSwG)" stroke="#111111" stroke-width="1" stroke-opacity="0.35"/></g>
+<g class="pi-x2 pi-k0"><g transform="translate(100 312)"><path class="pi-chip" style="--dx:-14px;--dy:-10px;animation-delay:1.0s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(108 312)"><path class="pi-chip" style="--dx:-10px;--dy:14px;animation-delay:1.0s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(150 312)"><path class="pi-chip" style="--dx:-2px;--dy:-16px;animation-delay:1.015s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(240 312)"><path class="pi-chip" style="--dx:2px;--dy:15px;animation-delay:1.03s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(282 312)"><path class="pi-chip" style="--dx:12px;--dy:-12px;animation-delay:1.045s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(290 312)"><path class="pi-chip" style="--dx:15px;--dy:9px;animation-delay:1.045s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g></g>
+<g class="pi-x2 pi-k1"><g transform="translate(286 312)"><path class="pi-chip" style="--dx:16px;--dy:-10px;animation-delay:1.0s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(290 312)"><path class="pi-chip" style="--dx:20px;--dy:8px;animation-delay:1.01s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(282 312)"><path class="pi-chip" style="--dx:10px;--dy:16px;animation-delay:1.02s" d="M0 -4L2.8 0L0 4L-2.8 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g></g>
+<g class="pi-x2 pi-k2"><g transform="translate(70 301)"><path class="pi-chip" style="--dx:-16px;--dy:-8px;animation-delay:0.92s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(330 326)"><path class="pi-chip" style="--dx:18px;--dy:-6px;animation-delay:0.94s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(200 313)"><path class="pi-chip" style="--dx:-4px;--dy:18px;animation-delay:0.93s" d="M0 -4L2.8 0L0 4L-2.8 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(250 318)"><path class="pi-chip" style="--dx:6px;--dy:-16px;animation-delay:0.95s" d="M0 -4L2.8 0L0 4L-2.8 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g></g>
+<g class="pi-x2 pi-k3"><g transform="translate(130 312)"><path class="pi-chip" style="--dx:-34px;--dy:-60px;animation-delay:1.0s" d="M0 -6L4.2 0L0 6L-4.2 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(160 312)"><path class="pi-chip" style="--dx:-14px;--dy:-84px;animation-delay:1.01s" d="M0 -6L4.2 0L0 6L-4.2 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(195 312)"><path class="pi-chip" style="--dx:4px;--dy:-96px;animation-delay:1.0s" d="M0 -7L4.9 0L0 7L-4.9 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(225 312)"><path class="pi-chip" style="--dx:20px;--dy:-80px;animation-delay:1.02s" d="M0 -6L4.2 0L0 6L-4.2 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(258 312)"><path class="pi-chip" style="--dx:36px;--dy:-58px;animation-delay:1.01s" d="M0 -6L4.2 0L0 6L-4.2 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(175 312)"><path class="pi-chip" style="--dx:-26px;--dy:-40px;animation-delay:1.03s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(215 312)"><path class="pi-chip" style="--dx:28px;--dy:-42px;animation-delay:1.03s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g></g>
+<g class="pi-x2 pi-k4"><g transform="translate(300 304)"><path class="pi-chip" style="--dx:18px;--dy:-12px;animation-delay:0.9s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(304 310)"><path class="pi-chip" style="--dx:22px;--dy:6px;animation-delay:0.92s" d="M0 -4L2.8 0L0 4L-2.8 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(296 300)"><path class="pi-chip" style="--dx:8px;--dy:-20px;animation-delay:0.94s" d="M0 -4L2.8 0L0 4L-2.8 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g></g>
 <g class="pi-x4 pi-slash"><path class="pi-sl" d="M40 655L350 224" stroke="#FFD60A" stroke-width="16" stroke-linecap="round"/><path class="pi-sl" d="M40 655L350 224" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/></g>
 <!-- Éclair du logo qui déchire le booster (1 et 2), puis éclair blanc -->
 <path class="pi-bolt" d="M232 170 L166 300 L206 300 L180 400 L270 262 L228 262 L258 170 Z" fill="#FFD60A" stroke="#111111" stroke-width="7" stroke-linejoin="round" paint-order="stroke"/>
@@ -240,6 +298,9 @@
     // Variante (2026-11-26, porteur : « propose-moi des animations du booster, avec le logo Dropicards, le D et la
     // carte ») : ?introvis=1 à 4 ; la 2 « La carte sort » par défaut (choix du porteur, même jour).
     el.setAttribute('data-v', (/[?&]introvis=([1-4])(&|$)/.exec(q) || [])[1] || '2');
+    // Ouverture de la 2 (2026-11-27, porteur : « propose-m'en plusieurs, avec une coupe nette satisfaisante ») :
+    // ?introcut=1 Ciseaux (par défaut en attendant le choix), 2 Sabre, 3 Bouchon, 4 Languette, 0 version précédente.
+    el.setAttribute('data-k', (/[?&]introcut=([0-4])(&|$)/.exec(q) || [])[1] || '1');
     play(kind());
     // App installée sur le téléphone : elle reprend souvent sans recharger la page. Après 10 min en arrière-plan,
     // le retour compte comme un démarrage et rejoue l'animation complète.
