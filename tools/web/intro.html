@@ -7,7 +7,7 @@
          la gemme du milieu grandit et laisse place au logo ;
        2 La carte sort (choisie par le porteur) : une découpe horizontale tranche le haut du booster (2026-11-26, porteur :
          « à la place de l'éclair, la même découpe que pour la 4, mais horizontale en haut du booster » ; le 2026-11-27,
-         même cinématique que la 4 : trait, éclair blanc, booster coupé net en deux morceaux), le haut s'envole, la carte du
+         booster coupé net en deux morceaux comme la 4, sans trait ni éclair blanc : les morceaux glissent le long de la coupe), le haut s'envole, la carte du
          logo sort du bas, se retourne et brille, puis se pose et le « D » arrive par la gauche ;
        3 Holo : le booster tourne sur lui-même avec un reflet arc-en-ciel, gonfle et éclate en gemmes qui tourbillonnent
          jusqu'au centre, où le logo apparaît dans une onde de choc ;
@@ -52,20 +52,19 @@
 /* 2 La carte sort */
 #pkm-intro.pi-full[data-v="2"] .pi-card, #pkm-intro.pi-full[data-v="2"] .pi-endC { display: none; }
 #pkm-intro.pi-full[data-v="2"] .pi-endM { opacity: 1; animation: none; }
-/* Découpe horizontale du haut du booster à la place de l'éclair (2026-11-26, porteur). Le 2026-11-27, d'abord un éclat
-   sans trait, puis (porteur : « exactement la même cinématique que la 4 - Coupé en deux, car on ne voit pas très bien le
-   booster tranché sur le haut ») la cinématique de la 4, coupe horizontale : le trait jaune et blanc tranche le haut du
-   booster, éclair blanc, le booster est remplacé par ses deux morceaux coupés net ; le haut s'envole, le bas encaisse le
-   coup, laisse sortir la carte puis tombe. */
-#pkm-intro.pi-full[data-v="2"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piShake 0.42s ease-in-out 0.54s 1, piHide 0.01s linear 1.1s forwards; }
+/* Découpe horizontale du haut du booster à la place de l'éclair (2026-11-26, porteur). Le 2026-11-27 : éclat sans trait,
+   puis cinématique de la 4 (trait jaune et blanc, éclair blanc), puis (porteur : « enlève le trait blanc, je ne veux voir
+   aucun trait blanc, je veux une découpe nette et satisfaisante comme dans la 4 ») : ni trait ni éclair blanc ; le booster
+   est coupé net en deux morceaux qui glissent l'un contre l'autre le long de la coupe (le haut vers la droite, le bas vers
+   la gauche), petits éclats jaunes et petite secousse ; le haut s'envole, le bas encaisse, laisse sortir la carte, tombe. */
+#pkm-intro.pi-full[data-v="2"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.2, 0.9, 0.3, 1.25) both, piShake 0.42s ease-in-out 0.54s 1, piHide 0.01s linear 1s forwards; }
 #pkm-intro.pi-full[data-v="2"] .pi-top { animation: none; }
-#pkm-intro.pi-full[data-v="2"] .pi-bolt { display: none; }
-#pkm-intro.pi-full[data-v="2"] .pi-hsl { stroke-dasharray: 280; stroke-dashoffset: 280; animation: piSlash 0.16s ease-in 0.95s forwards; }
-#pkm-intro.pi-full[data-v="2"] .pi-hcut { animation: piHide 0.3s ease-out 1.14s forwards; }
-#pkm-intro.pi-full[data-v="2"] .pi-flash { animation-delay: 1.06s; }
+#pkm-intro.pi-full[data-v="2"] .pi-bolt, #pkm-intro.pi-full[data-v="2"] .pi-flash { display: none; }
+#pkm-intro.pi-full[data-v="2"] svg { animation: piJolt 0.22s ease-out 1s; }
 #pkm-intro.pi-full[data-v="2"] .pi-cutT, #pkm-intro.pi-full[data-v="2"] .pi-cutB { visibility: hidden; }
-#pkm-intro.pi-full[data-v="2"] .pi-cutT { animation: piVis 0.01s linear 1.1s forwards, piSplitT 0.75s cubic-bezier(0.2, 0.7, 0.4, 1) 1.1s forwards; }
-#pkm-intro.pi-full[data-v="2"] .pi-cutB { animation: piVis 0.01s linear 1.1s forwards, piSplitB2 0.3s ease-out 1.1s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
+#pkm-intro.pi-full[data-v="2"] .pi-cutT { animation: piVis 0.01s linear 1s forwards, piSplitT 0.8s cubic-bezier(0.25, 0.7, 0.4, 1) 1s forwards; }
+#pkm-intro.pi-full[data-v="2"] .pi-cutB { animation: piVis 0.01s linear 1s forwards, piSplitB2 0.34s ease-out 1s, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.62s forwards; }
+#pkm-intro.pi-full[data-v="2"] .pi-chip { opacity: 0; animation: piChip 0.34s cubic-bezier(0.2, 0.7, 0.4, 1) 1s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-v2c { opacity: 0; animation: piCardOut 1.15s cubic-bezier(0.3, 0.6, 0.35, 1) 1.1s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-endD { opacity: 0; animation: piSlideD 0.42s cubic-bezier(0.2, 0.8, 0.3, 1.25) 2.02s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-rays { opacity: 0; animation: piRays 1s ease-out 1.42s both; }
@@ -133,8 +132,10 @@
 @keyframes piRing { 0% { opacity: 0; transform: scale(0.2); } 12% { opacity: 1; } 100% { opacity: 0; transform: scale(3); } }
 @keyframes piMat { 0% { opacity: 0; transform: scale(0) rotate(-30deg); } 60% { opacity: 1; transform: scale(1.15) rotate(5deg); } 100% { opacity: 1; transform: none; } }
 @keyframes piHide { to { opacity: 0; } }
-@keyframes piSplitT { 0% { transform: none; opacity: 1; } 35% { opacity: 1; } 100% { transform: translate(120px, -170px) rotate(18deg); opacity: 0; } }
-@keyframes piSplitB2 { 0%, 100% { transform: none; } 35% { transform: translate(-4px, 12px) rotate(-1.5deg); } }
+@keyframes piSplitT { 0% { transform: none; opacity: 1; } 12% { transform: translate(18px, 0); } 28% { transform: translate(26px, -14px) rotate(3deg); } 45% { opacity: 1; } 100% { transform: translate(135px, -185px) rotate(20deg); opacity: 0; } }
+@keyframes piSplitB2 { 0%, 100% { transform: none; } 18% { transform: translate(-7px, 0); } 45% { transform: translate(-4px, 10px) rotate(-1.5deg); } }
+@keyframes piJolt { 0%, 100% { transform: none; } 25% { transform: translate(3px, -2px); } 50% { transform: translate(-3px, 2px); } 75% { transform: translate(2px, 1px); } }
+@keyframes piChip { 0% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1) rotate(90deg); } }
 @keyframes piVis { to { visibility: visible; } }
 @keyframes piSlash { to { stroke-dashoffset: 0; } }
 @keyframes piSplitA { 0% { transform: none; opacity: 1; } 35% { opacity: 1; } 100% { transform: translate(-130px, -90px) rotate(-16deg); opacity: 0; } }
@@ -195,10 +196,10 @@
 <!-- 4 : les deux moitiés du booster tranché -->
 <g class="pi-x4 pi-halfA" clip-path="url(#piClipA)"><use href="#piBody"/><use href="#piTop"/></g>
 <g class="pi-x4 pi-halfB" clip-path="url(#piClipB)"><use href="#piBody"/><use href="#piTop"/></g>
-<!-- 2 : les deux morceaux du booster coupé à l'horizontale dans le haut, puis le trait de la découpe (comme la 4) -->
+<!-- 2 : les deux morceaux du booster coupé net à l'horizontale dans le haut (sans trait), et des éclats jaunes -->
 <g class="pi-x2 pi-cutB" clip-path="url(#piClipB2)"><use href="#piBody"/><use href="#piTop"/></g>
 <g class="pi-x2 pi-cutT" clip-path="url(#piClipT2)"><use href="#piBody"/><use href="#piTop"/></g>
-<g class="pi-x2 pi-hcut"><path class="pi-hsl" d="M62 312H328" stroke="#FFD60A" stroke-width="16" stroke-linecap="round"/><path class="pi-hsl" d="M62 312H328" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/></g>
+<g class="pi-x2 pi-hchips"><g transform="translate(100 312)"><path class="pi-chip" style="--dx:-14px;--dy:-10px;animation-delay:1.0s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(108 312)"><path class="pi-chip" style="--dx:-10px;--dy:14px;animation-delay:1.0s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(150 312)"><path class="pi-chip" style="--dx:-2px;--dy:-16px;animation-delay:1.015s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(240 312)"><path class="pi-chip" style="--dx:2px;--dy:15px;animation-delay:1.03s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(282 312)"><path class="pi-chip" style="--dx:12px;--dy:-12px;animation-delay:1.045s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(290 312)"><path class="pi-chip" style="--dx:15px;--dy:9px;animation-delay:1.045s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g></g>
 <g class="pi-x4 pi-slash"><path class="pi-sl" d="M40 655L350 224" stroke="#FFD60A" stroke-width="16" stroke-linecap="round"/><path class="pi-sl" d="M40 655L350 224" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/></g>
 <!-- Éclair du logo qui déchire le booster (1 et 2), puis éclair blanc -->
 <path class="pi-bolt" d="M232 170 L166 300 L206 300 L180 400 L270 262 L228 262 L258 170 Z" fill="#FFD60A" stroke="#111111" stroke-width="7" stroke-linejoin="round" paint-order="stroke"/>
