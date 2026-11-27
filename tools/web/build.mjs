@@ -1055,10 +1055,13 @@ ${code}
   const loadLocal = () => getJson('data/img-local.json').then(x => { TCG.local = (x && x.p) || {}; TCG.ed1 = (x && x.ed1) || {}; }).catch(() => { TCG.local = TCG.local || {}; TCG.ed1 = TCG.ed1 || {}; });
   // Copies locales des logos des extensions (2026-11-20, web/data/logos-local.json, workflow « Logos des extensions »).
   const loadLogos = () => getJson('data/logos-local.json').then(x => { TCG.logos = (x && x.p) || {}; }).catch(() => { TCG.logos = TCG.logos || {}; });
+  // Animation d'ouverture (intro.html, 2026-11-27) : le booster reste figé tant que le catalogue n'est pas chargé, pour
+  // que l'ouverture ne se fige pas pendant ce gros calcul.
+  const introReady = () => { try { window.__pkmReady = 1; } catch (e) { /* sans effet */ } };
   const loadCatalog = () => Promise.all([getJson('data/cards-base.json'), getJson('data/cards-prices.json'), loadFix(), loadLocal(), loadLogos()]).then(([b, p]) => CatalogJoin(b, p)).catch(() => null)
     .then(doc => doc || getJson('data/cards.json'))
-    .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); })
-    .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); retryLater(); });
+    .then(doc => { TCG.load(doc); inst.setState({ tcg: TCG.rows.length }); introReady(); })
+    .catch(() => { TCG.status = 'error'; inst.setState({ tcg: -1 }); retryLater(); introReady(); });
   const loadSealed = () => getJson('data/sealed.json')
     .then(doc => { SEALED.load(doc); inst.setState({ sealedN: SEALED.rows.length }); })
     .catch(() => { SEALED.status = 'error'; inst.setState({ sealedN: -1 }); retryLater(); });

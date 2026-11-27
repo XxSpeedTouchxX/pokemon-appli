@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-11-27 (suite 12) — Booster figé au lancement, puis ouverture
+
+- **Demande** : « lorsque je lance l'application, le booster se décale légèrement comme s'il buggait ; je veux que le booster soit figé et qu'ensuite vienne l'animation de l'ouverture ».
+- **Cause** : au lancement, le booster tombait du haut pendant que l'app chargeait et préparait son catalogue (plus de 3 Mo). Le téléphone, occupé, ne dessinait plus l'animation : la chute se figeait puis sautait à sa place. Mesuré avec un processeur ralenti comme un téléphone : plus d'1 s sans aucune image pendant la chute.
+- **Fait** :
+  - le booster apparaît **immobile, à sa place**, sans chute, et rien d'autre ne s'affiche ;
+  - l'ouverture (tirer la languette, etc., 4,3 s) ne part que quand l'app a chargé son catalogue et fini ses gros calculs, **au plus tard après 2 s** d'attente (0,65 s sur l'ordinateur de test) ;
+  - le booster est fixé à sa place pour toute l'animation, même si l'écran change de taille au démarrage (barre d'état, zone sûre de l'iPhone).
+  Vérifié : position du booster identique au pixel pendant l'attente et au début de l'ouverture ; plus aucun gros calcul pendant l'ouverture sur l'ordinateur de test.
+- `intro.html` (`pi-hold`, `piDrop` retiré), signal de l'app `window.__pkmReady` (`build.mjs`, chargement du catalogue) ; vidéo `tools/brand/intro/ouverture-2.mp4` ; test `t-intro` (12). Cache v308.
+
 ## 2026-11-27 (suite 11) — Décrochage du haut du booster fluide
 
 - **Demande** : « le décrochage lié à l'ouverture du booster est saccadé, je veux qu'il se fasse de manière fluide ».

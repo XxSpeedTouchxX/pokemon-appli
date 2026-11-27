@@ -18,9 +18,10 @@ for (const v of ONLY) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   // Le filet de sécurité de l'intro (4,5 s) la cacherait pendant la prise de vue image par image : il est neutralisé.
-  await page.addInitScript(() => { const st = window.setTimeout; window.setTimeout = (f, ms, ...a) => (ms === 4500 || ms === 5300 ? 0 : st(f, ms, ...a)); });
+  await page.addInitScript(() => { const st = window.setTimeout; window.setTimeout = (f, ms, ...a) => (ms === 4500 || ms === 5300 || ms === 7300 ? 0 : st(f, ms, ...a)); });
   await page.goto(BASE + '/?intro=1&introvis=' + v, { waitUntil: 'commit' });
-  await page.waitForSelector('#pkm-intro', { state: 'attached' });
+  // Booster d'abord figé pendant le chargement (pi-hold, 2026-11-27) : la prise de vue commence avec l'ouverture.
+  await page.waitForSelector('#pkm-intro.pi-full', { state: 'attached', timeout: 6000 });
   await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
   await page.waitForTimeout(2500);
   // ONLY : la découpe, la sortie de la carte et son reflet aussi au ralenti (× 4, de 0,85 s à 2,8 s), ajoutée après la vidéo à vitesse réelle ;

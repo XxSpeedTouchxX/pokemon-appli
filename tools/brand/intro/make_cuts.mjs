@@ -33,9 +33,10 @@ for (const k of [1, 2, 3, 4]) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   // Le filet de sécurité de l'intro (4,5 s) la cacherait pendant la prise de vue image par image : il est neutralisé.
-  await page.addInitScript(() => { const st = window.setTimeout; window.setTimeout = (f, ms, ...a) => (ms === 4500 || ms === 5300 ? 0 : st(f, ms, ...a)); });
+  await page.addInitScript(() => { const st = window.setTimeout; window.setTimeout = (f, ms, ...a) => (ms === 4500 || ms === 5300 || ms === 7300 ? 0 : st(f, ms, ...a)); });
   await page.goto(URL_OF(k), { waitUntil: 'commit' });
-  await page.waitForSelector('#pkm-intro', { state: 'attached' });
+  // Booster d'abord figé pendant le chargement (pi-hold, 2026-11-27) : la prise de vue commence avec l'ouverture.
+  await page.waitForSelector('#pkm-intro.pi-full', { state: 'attached', timeout: 6000 });
   await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
   await page.waitForTimeout(2500);
   // Ralenti d'abord : la fin de l'intro (3,5 s) la retire de la page.
