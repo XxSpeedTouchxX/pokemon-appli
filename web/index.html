@@ -5131,8 +5131,11 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 #pkm-intro.pi-full[data-v="2"][data-k="3"] svg { animation: piJolt 0.2s ease-out 1s; }
 /* 4 Languette */
 #pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-pack { animation: piDrop 0.54s cubic-bezier(0.22, 1, 0.36, 1) both, piHide 0.01s linear 0.9s forwards; }
-#pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-tab { transform-origin: 0% 50%; animation: piTabWiggle 0.3s ease-in-out 0.58s 1; }
-#pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-cutT { transform-origin: 0% 18.5%; animation: piVis 0.01s linear 0.9s forwards, piPeel 0.85s cubic-bezier(0.3, 0.1, 0.3, 1) 0.9s forwards; }
+/* Décrochage fluide (2026-11-27, porteur : « le décrochage lié à l'ouverture du booster est saccadé ») : la languette se
+   soulève d'un seul geste (plus de va-et-vient), puis le haut pivote et s'envole en un mouvement continu calculé image
+   par image (piPeel, plus d'arrêts à 1,0 s, 1,25 s et 1,35 s). */
+#pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-tab { transform-origin: 0% 50%; animation: piTabTug 0.34s cubic-bezier(0.45, 0, 0.55, 1) 0.56s forwards; }
+#pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-cutT { transform-origin: 0% 18.5%; animation: piVis 0.01s linear 0.9s forwards, piPeel 0.85s linear 0.9s forwards; }
 #pkm-intro.pi-full[data-v="2"][data-k="4"] .pi-cutB { animation: piVis 0.01s linear 0.9s forwards, piFall 0.63s cubic-bezier(0.5, 0, 0.9, 0.4) 1.5s forwards; }
 /* Sortie de la carte (2026-11-27, porteur : « juste après l'ouverture, on dirait qu'il y a une sorte de pic qui sort du
    booster, ensuite on voit la carte ; je veux que ce soit directement une forme de carte qui sorte ») : le pic était la
@@ -5255,8 +5258,9 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 @keyframes piPuff { 0%, 100% { transform: none; } 25% { transform: scale(1.05, 0.95); } 50% { transform: scale(0.95, 1.06); } 80% { transform: scale(1.08, 0.92); } }
 @keyframes piCork { 0% { transform: none; opacity: 1; } 12% { transform: translate(2px, -46px) rotate(40deg); } 80% { opacity: 1; } 100% { transform: translate(16px, -360px) rotate(400deg); opacity: 0; } }
 @keyframes piRecoil3 { 0%, 100% { transform: none; } 30% { transform: translateY(10px) scale(1.02, 0.96); } }
+@keyframes piTabTug { to { transform: rotate(-14deg); } }
 @keyframes piTabWiggle { 0%, 100% { transform: none; } 25% { transform: rotate(-10deg); } 50% { transform: rotate(8deg); } 75% { transform: rotate(-5deg); } }
-@keyframes piPeel { 0% { transform: none; opacity: 1; } 14% { transform: rotate(-5deg); } 42% { transform: rotate(-30deg); } 55% { transform: rotate(-35deg); opacity: 1; } 100% { transform: translate(-140px, -260px) rotate(-85deg); opacity: 0; } }
+@keyframes piPeel { 0.0% { transform: translate(-0.0px, -0.0px) rotate(-0.0deg); opacity: 1; } 4.17% { transform: translate(-0.0px, -0.0px) rotate(-0.53deg); opacity: 1; } 8.33% { transform: translate(-0.0px, -0.3px) rotate(-1.59deg); opacity: 1; } 12.5% { transform: translate(-0.2px, -0.9px) rotate(-3.05deg); opacity: 1; } 16.67% { transform: translate(-0.5px, -2.0px) rotate(-4.83deg); opacity: 1; } 20.83% { transform: translate(-0.9px, -3.6px) rotate(-6.91deg); opacity: 1; } 25.0% { transform: translate(-1.7px, -6.0px) rotate(-9.25deg); opacity: 1; } 29.17% { transform: translate(-2.7px, -9.1px) rotate(-11.84deg); opacity: 1; } 33.33% { transform: translate(-4.2px, -13.1px) rotate(-14.66deg); opacity: 1; } 37.5% { transform: translate(-6.1px, -18.0px) rotate(-17.7deg); opacity: 1; } 41.67% { transform: translate(-8.5px, -24.0px) rotate(-20.95deg); opacity: 1; } 45.83% { transform: translate(-11.5px, -31.1px) rotate(-24.4deg); opacity: 1; } 50.0% { transform: translate(-15.2px, -39.5px) rotate(-28.04deg); opacity: 1; } 54.17% { transform: translate(-19.7px, -49.1px) rotate(-31.87deg); opacity: 1; } 58.33% { transform: translate(-24.9px, -60.0px) rotate(-35.88deg); opacity: 1; } 62.5% { transform: translate(-31.1px, -72.4px) rotate(-40.07deg); opacity: 0.999; } 66.67% { transform: translate(-38.3px, -86.3px) rotate(-44.43deg); opacity: 0.958; } 70.83% { transform: translate(-46.4px, -101.8px) rotate(-48.96deg); opacity: 0.863; } 75.0% { transform: translate(-55.8px, -118.9px) rotate(-53.64deg); opacity: 0.729; } 79.17% { transform: translate(-66.3px, -137.7px) rotate(-58.49deg); opacity: 0.572; } 83.33% { transform: translate(-78.1px, -158.3px) rotate(-63.49deg); opacity: 0.408; } 87.5% { transform: translate(-91.3px, -180.8px) rotate(-68.65deg); opacity: 0.253; } 91.67% { transform: translate(-106.0px, -205.2px) rotate(-73.95deg); opacity: 0.123; } 95.83% { transform: translate(-122.2px, -231.6px) rotate(-79.4deg); opacity: 0.033; } 100.0% { transform: translate(-140.0px, -260.0px) rotate(-85.0deg); opacity: 0; } }
 @keyframes piJolt { 0%, 100% { transform: none; } 25% { transform: translate(3px, -2px); } 50% { transform: translate(-3px, 2px); } 75% { transform: translate(2px, 1px); } }
 @keyframes piChip { 0% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1) rotate(90deg); } }
 @keyframes piVis { to { visibility: visible; } }
@@ -5400,6 +5404,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=e2eed807"></script>
+<script src="app.js?v=772e5b78"></script>
 </body>
 </html>

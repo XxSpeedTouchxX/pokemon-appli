@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-27 (suite 11) — Décrochage du haut du booster fluide
+
+- **Demande** : « le décrochage lié à l'ouverture du booster est saccadé, je veux qu'il se fasse de manière fluide ».
+- **Cause** : le haut du booster (Languette) suivait 4 étapes, chacune ralentie au début et à la fin : il s'arrêtait presque 3 fois (vers 1,0 s, 1,25 s et 1,35 s) puis partait d'un coup ; la languette faisait aussi un va-et-vient avant l'ouverture.
+- **Fait** : un seul mouvement continu, calculé image par image : le haut pivote autour de son bord gauche en accélérant doucement, monte et s'envole vers le haut à gauche en s'effaçant, sans aucun arrêt (déplacement mesuré toutes les 20 ms : il ne fait qu'augmenter). La languette se soulève d'un seul geste juste avant. Durée de l'ouverture inchangée (4,3 s).
+- `intro.html` (`piPeel`, `piTabTug`) ; vidéo `tools/brand/intro/ouverture-2.mp4` ; test `t-intro`. Cache v307.
+
 ## 2026-11-27 (suite 10) — Ouverture sans à-coup
 
 - **Demande** : « au début de l'animation, il y a un très léger à-coup du booster, est-ce que tu peux l'enlever ? Je ne veux pas qu'il y ait des à-coups ».
