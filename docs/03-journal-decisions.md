@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-27 (suite 8) — Trajet de la carte fluide jusqu'à sa place
+
+- **Demande** : « est-ce que la carte peut avoir une trajectoire beaucoup plus fluide vers sa position finale ? Actuellement elle sort du booster, part un peu sur la gauche, puis revient sur la droite ».
+- **Cause** : le reflet blanc (v303) glisse en dehors de la carte ; il agrandissait la zone autour de laquelle la carte grandit et rapetisse, donc la carte se décalait vers la gauche. Le trajet d'avant avait en plus 3 temps (montée, arrêt avec une inclinaison à gauche, puis descente vers la droite).
+- **Fait** : centre de la carte fixé (251, 322) ; un seul mouvement continu calculé image par image (25 positions) : la carte monte tout droit hors du booster, s'incline légèrement vers la droite en arc, puis se pose à sa place en ralentissant, sans arrêt ni retour à gauche (position mesurée toutes les 20 ms : aucun retour). Le bas du booster tombe dès 1,36 s (au lieu de 1,62 s) pour que la carte ne repasse pas derrière lui en se posant. Reflet blanc, fond noir à l'arrivée et « D » inchangés ; durée toujours 3,5 s.
+- `intro.html` (`piCardSlide`, `transform-box: view-box`) ; vidéo `tools/brand/intro/ouverture-2.mp4` ; test `t-intro`. Cache v304.
+
 ## 2026-11-27 (suite 7) — Sortie « Glisse et se pose » choisie, avec un reflet blanc brillant
 
 - **Demande** : « ok pour le 1 Glisse et se pose, mais je veux qu'à peine la carte sortie du booster elle ait un effet de reflet brillant, exactement le même que le 4 avec le reflet arc-en-ciel, mais un reflet neutre brillant ».
