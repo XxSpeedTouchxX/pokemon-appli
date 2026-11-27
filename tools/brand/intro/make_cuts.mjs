@@ -15,7 +15,7 @@ rmSync(TMP, { recursive: true, force: true }); mkdirSync(TMP, { recursive: true 
 const CARTE = process.env.MODE === 'carte';
 const NAMES = CARTE ? { 1: 'Glisse et se pose', 2: 'Tourbillon', 3: 'Bond', 4: 'Lévitation holo' } : { 1: 'Ciseaux', 2: 'Sabre', 3: 'Bouchon', 4: 'Languette' };
 const URL_OF = k => BASE + (CARTE ? '/?intro=1&introvis=2&introcut=4&introcarte=' : '/?intro=1&introvis=2&introcut=') + k;
-const SLOW = CARTE ? [900, 2450] : [450, 1550];
+const SLOW = CARTE ? [900, 2800] : [450, 1550];
 const font = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
 const browser = await launch();
 const clip = async (page, dir, from, to, step) => {
@@ -33,14 +33,14 @@ for (const k of [1, 2, 3, 4]) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   // Le filet de sécurité de l'intro (4,5 s) la cacherait pendant la prise de vue image par image : il est neutralisé.
-  await page.addInitScript(() => { const st = window.setTimeout; window.setTimeout = (f, ms, ...a) => (ms === 4500 ? 0 : st(f, ms, ...a)); });
+  await page.addInitScript(() => { const st = window.setTimeout; window.setTimeout = (f, ms, ...a) => (ms === 4500 || ms === 5300 ? 0 : st(f, ms, ...a)); });
   await page.goto(URL_OF(k), { waitUntil: 'commit' });
   await page.waitForSelector('#pkm-intro', { state: 'attached' });
   await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
   await page.waitForTimeout(2500);
   // Ralenti d'abord : la fin de l'intro (3,5 s) la retire de la page.
   await clip(page, TMP + 's' + k + '/', SLOW[0], SLOW[1], 10);
-  await clip(page, TMP + 'v' + k + '/', 0, 3500, 40);
+  await clip(page, TMP + 'v' + k + '/', 0, 4300, 40);
   await page.close();
   enc(TMP + 'v' + k + '/', `${k} · ${NAMES[k]}`, TMP + 'c' + k + '.mp4');
   enc(TMP + 's' + k + '/', `${k} · ${NAMES[k]} · ralenti × 4`, TMP + 'r' + k + '.mp4');

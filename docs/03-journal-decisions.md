@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-27 (suite 9) — Ouverture allongée de 0,8 s (4,3 s)
+
+- **Demande** : « super pour cette animation, est-ce que tu peux l'allonger de 0,8 s en plus ? ».
+- **Fait** : ouverture (variante 2, celle de l'app) de 3,5 s à **4,3 s**. La carte met 1,4 s (au lieu de 0,88 s) pour aller du booster à sa place, sur le même arc ; le reflet blanc suit sa sortie (1,16 s, 0,62 s) ; le bas du booster tombe à 1,5 s ; le fond noir ressort à 2,48 s, le « D » arrive à 2,66 s, le nom à 2,94 s ; le logo reste 0,3 s de plus avant que l'écran s'ouvre (3,92 s). Découpe « Languette » inchangée. Filet de sécurité de l'animation : 5,3 s.
+- `intro.html` ; test `t-intro` (durée 4,0 à 4,6 s) ; vidéo `tools/brand/intro/ouverture-2.mp4` (`make_video.mjs`, `make_cuts.mjs` filment 4,3 s). Cache v305.
+
 ## 2026-11-27 (suite 8) — Trajet de la carte fluide jusqu'à sa place
 
 - **Demande** : « est-ce que la carte peut avoir une trajectoire beaucoup plus fluide vers sa position finale ? Actuellement elle sort du booster, part un peu sur la gauche, puis revient sur la droite ».

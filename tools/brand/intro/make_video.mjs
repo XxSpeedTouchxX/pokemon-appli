@@ -18,24 +18,24 @@ for (const v of ONLY) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.route(/fonts\.(googleapis|gstatic)|openfreemap|tcgdex|pokemontcg|scrydex/, r => r.abort());
   // Le filet de sécurité de l'intro (4,5 s) la cacherait pendant la prise de vue image par image : il est neutralisé.
-  await page.addInitScript(() => { const st = window.setTimeout; window.setTimeout = (f, ms, ...a) => (ms === 4500 ? 0 : st(f, ms, ...a)); });
+  await page.addInitScript(() => { const st = window.setTimeout; window.setTimeout = (f, ms, ...a) => (ms === 4500 || ms === 5300 ? 0 : st(f, ms, ...a)); });
   await page.goto(BASE + '/?intro=1&introvis=' + v, { waitUntil: 'commit' });
   await page.waitForSelector('#pkm-intro', { state: 'attached' });
   await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
   await page.waitForTimeout(2500);
-  // ONLY : la découpe, la sortie de la carte et son reflet aussi au ralenti (× 4, de 0,85 s à 2,25 s), ajoutée après la vidéo à vitesse réelle ;
+  // ONLY : la découpe, la sortie de la carte et son reflet aussi au ralenti (× 4, de 0,85 s à 2,8 s), ajoutée après la vidéo à vitesse réelle ;
   // filmée d'abord, car la fin de l'intro (3,5 s) la retire de la page.
   if (ONLY.length === 1) {
     const sd = TMP + 's' + v + '/'; mkdirSync(sd, { recursive: true });
     let j = 0;
-    for (let t = 850; t <= 2250; t += 10) {
+    for (let t = 850; t <= 2800; t += 10) {
       await page.evaluate(t => document.getAnimations().forEach(a => { a.pause(); try { a.currentTime = t; } catch (e) { /* rien */ } }), t);
       await page.screenshot({ path: sd + String(j++).padStart(3, '0') + '.png' });
     }
   }
   const dir = TMP + 'v' + v + '/'; mkdirSync(dir, { recursive: true });
   let k = 0;
-  for (let t = 0; t <= 3500; t += 40) {
+  for (let t = 0; t <= 4300; t += 40) {
     await page.evaluate(t => document.getAnimations().forEach(a => { a.pause(); try { a.currentTime = t; } catch (e) { /* rien */ } }), t);
     await page.screenshot({ path: dir + String(k++).padStart(3, '0') + '.png' });
   }

@@ -14,7 +14,7 @@ await page.goto(B + '?intro=1', { waitUntil: 'domcontentloaded' });
 ok('complète : affichée (' + await page.evaluate(() => document.getElementById('pkm-intro') && document.getElementById('pkm-intro').className) + ')', await has() && (await page.evaluate(() => document.getElementById('pkm-intro').className)) === 'pi-full');
 await page.waitForFunction(gone, null, { timeout: 6000 }).catch(() => {});
 const dur = Date.now() - t0;
-ok('retirée après ' + dur + ' ms (3 200 à 3 800 ms)', !(await has()) && dur >= 3200 && dur <= 3800);
+ok('retirée après ' + dur + ' ms (4 000 à 4 600 ms)', !(await has()) && dur >= 4000 && dur <= 4600);
 
 ok('l’app est prête dessous', (await page.locator('header img[alt="Dropicards"]').count()) === 1);
 // Appui pour passer.
