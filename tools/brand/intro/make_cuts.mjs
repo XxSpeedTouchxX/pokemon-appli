@@ -15,7 +15,7 @@ rmSync(TMP, { recursive: true, force: true }); mkdirSync(TMP, { recursive: true 
 const CARTE = process.env.MODE === 'carte';
 const NAMES = CARTE ? { 1: 'Glisse et se pose', 2: 'Tourbillon', 3: 'Bond', 4: 'Lévitation holo' } : { 1: 'Ciseaux', 2: 'Sabre', 3: 'Bouchon', 4: 'Languette' };
 const URL_OF = k => BASE + (CARTE ? '/?intro=1&introvis=2&introcut=4&introcarte=' : '/?intro=1&introvis=2&introcut=') + k;
-const SLOW = CARTE ? [900, 2300] : [450, 1550];
+const SLOW = CARTE ? [900, 2450] : [450, 1550];
 const font = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
 const browser = await launch();
 const clip = async (page, dir, from, to, step) => {

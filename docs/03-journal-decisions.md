@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-27 (suite 6) — Carte plate pendant la sortie, fond noir à l'arrivée
+
+- **Demande** : « quand la carte sort du booster, je ne veux pas ce fond noir en effet un peu 3D ; je veux une carte normale en 2D, sans fond noir décalé sur le côté ; et quand la carte se met à sa place, avant que le "D" arrive par la gauche, que le fond noir resurgisse pour bien voir le logo Dropicards ».
+- **Fait** (les 4 sorties) : pendant le vol, la carte est plate, avec seulement un fin contour noir (sans lui, la carte jaune disparaîtrait sur le fond jaune) ; l'ombre noire décalée et le gros contour noir sont retirés. Quand la carte se pose (1,96 s), le fond noir ressort de derrière elle en 0,24 s (petit rebond), puis le « D » arrive par la gauche (2,14 s), le nom à 2,42 s. Pour garder la durée de 3,5 s, la sortie de la carte passe de 1,15 s à 0,88 s.
+- `intro.html` (carte `#piMCf` sans fond, fond `.pi-v2bk`, `piBackIn`) ; vidéo `tools/brand/intro/propositions-carte.mp4` refaite ; test `t-intro`. Choix de la sortie (1 à 4) toujours attendu, la 1 par défaut. Cache v302.
+
 ## 2026-11-27 (suite 5) — Ouverture « Languette » choisie ; 4 sorties de la carte proposées
 
 - **Demande** : « ok pour l'ouverture 4 avec languette, mais juste après l'ouverture on dirait qu'il y a une sorte de pic qui sort du booster et ensuite on voit la carte ; je veux que ce soit directement une forme de carte qui sorte du booster, propose-moi des visuels ».
