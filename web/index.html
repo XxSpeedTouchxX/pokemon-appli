@@ -5039,10 +5039,10 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
      choisie par le porteur** (2026-11-26), les autres pour essai :
        1 Déchirure : le booster tombe et tremble, l'éclair le déchire, le haut s'envole, les gemmes PK jaillissent en éventail,
          la gemme du milieu grandit et laisse place au logo ;
-       2 La carte sort (choisie par le porteur) : une découpe lumineuse horizontale tranche le haut du booster (comme la
-         découpe de la 4, 2026-11-26, porteur : « à la place de l'éclair, la même découpe que pour la 4, mais horizontale en
-         haut du booster »), le haut s'envole, la carte du logo sort, se retourne et brille, puis se pose et le « D » arrive
-         par la gauche ;
+       2 La carte sort (choisie par le porteur) : une découpe horizontale tranche le haut du booster (2026-11-26, porteur :
+         « à la place de l'éclair, la même découpe que pour la 4, mais horizontale en haut du booster » ; refaite le
+         2026-11-27 sans trait blanc, très rapide et nette : un éclat file le long de la coupe), le haut saute et s'envole,
+         la carte du logo sort, se retourne et brille, puis se pose et le « D » arrive par la gauche ;
        3 Holo : le booster tourne sur lui-même avec un reflet arc-en-ciel, gonfle et éclate en gemmes qui tourbillonnent
          jusqu'au centre, où le logo apparaît dans une onde de choc ;
        4 Coupé en deux : un éclair tranche le booster en diagonale, les deux moitiés s'écartent et le logo monte dans les rayons.
@@ -5086,12 +5086,17 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 /* 2 La carte sort */
 #pkm-intro.pi-full[data-v="2"] .pi-card, #pkm-intro.pi-full[data-v="2"] .pi-endC { display: none; }
 #pkm-intro.pi-full[data-v="2"] .pi-endM { opacity: 1; animation: none; }
-/* Découpe horizontale du haut du booster à la place de l'éclair (2026-11-26, porteur), même trait que la découpe de la 4. */
+/* Découpe horizontale du haut du booster à la place de l'éclair (2026-11-26, porteur). Refaite le 2026-11-27 (porteur :
+   « le trait de découpe est beaucoup trop visible, je ne veux pas voir le trait blanc, il faut que le découpage soit très
+   rapide, net et satisfaisant ») : plus de trait dessiné ; un éclat file en 0,11 s le long du haut du booster, quelques
+   éclats jaunes sautent de la coupe, le booster encaisse le coup et le haut saute puis s'envole. */
 #pkm-intro.pi-full[data-v="2"] .pi-bolt { display: none; }
-#pkm-intro.pi-full[data-v="2"] .pi-hsl { stroke-dasharray: 280; stroke-dashoffset: 280; animation: piSlash 0.16s ease-in 0.95s forwards; }
-#pkm-intro.pi-full[data-v="2"] .pi-hcut { animation: piHide 0.3s ease-out 1.14s forwards; }
-#pkm-intro.pi-full[data-v="2"] .pi-flash { animation-delay: 1.06s; }
-#pkm-intro.pi-full[data-v="2"] .pi-top { animation: piCutTop 0.62s cubic-bezier(0.3, 0.6, 0.4, 1) 1.1s forwards; }
+#pkm-intro.pi-full[data-v="2"] .pi-hgl { opacity: 0; animation: piGlide 0.11s cubic-bezier(0.5, 0, 0.5, 1) 0.95s both; }
+#pkm-intro.pi-full[data-v="2"] .pi-hst { animation: piGlint 0.11s linear 0.95s both; }
+#pkm-intro.pi-full[data-v="2"] .pi-chip { opacity: 0; animation: piChip 0.32s cubic-bezier(0.2, 0.7, 0.4, 1) 1s both; }
+#pkm-intro.pi-full[data-v="2"] .pi-body { animation: piRecoil 0.2s ease-out 1.04s both; }
+#pkm-intro.pi-full[data-v="2"] .pi-flash { animation: piFlashSoft 0.16s ease-out 1.04s both; }
+#pkm-intro.pi-full[data-v="2"] .pi-top { animation: piCutTop 0.56s cubic-bezier(0.2, 0.7, 0.3, 1) 1.04s forwards; }
 #pkm-intro.pi-full[data-v="2"] .pi-v2c { opacity: 0; animation: piCardOut 1.15s cubic-bezier(0.3, 0.6, 0.35, 1) 1.1s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-endD { opacity: 0; animation: piSlideD 0.42s cubic-bezier(0.2, 0.8, 0.3, 1.25) 2.02s both; }
 #pkm-intro.pi-full[data-v="2"] .pi-rays { opacity: 0; animation: piRays 1s ease-out 1.42s both; }
@@ -5159,7 +5164,12 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 @keyframes piRing { 0% { opacity: 0; transform: scale(0.2); } 12% { opacity: 1; } 100% { opacity: 0; transform: scale(3); } }
 @keyframes piMat { 0% { opacity: 0; transform: scale(0) rotate(-30deg); } 60% { opacity: 1; transform: scale(1.15) rotate(5deg); } 100% { opacity: 1; transform: none; } }
 @keyframes piHide { to { opacity: 0; } }
-@keyframes piCutTop { 0% { transform: none; opacity: 1; } 25% { transform: translate(16px, -4px); opacity: 1; } 100% { transform: translate(150px, -170px) rotate(28deg); opacity: 0; } }
+@keyframes piCutTop { 0% { transform: none; opacity: 1; } 12% { transform: translate(2px, -13px) rotate(-2deg); opacity: 1; } 100% { transform: translate(170px, -200px) rotate(30deg); opacity: 0; } }
+@keyframes piGlide { 0% { opacity: 0; transform: translateX(-8px); } 15%, 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(214px); } }
+@keyframes piGlint { 0% { transform: scale(0.5) rotate(0deg); } 75% { transform: scale(1) rotate(90deg); } 100% { transform: scale(1.5) rotate(135deg); } }
+@keyframes piChip { 0% { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1) rotate(90deg); } }
+@keyframes piRecoil { 0%, 100% { transform: none; } 30% { transform: translateY(5px) scaleY(0.985); } }
+@keyframes piFlashSoft { 0% { opacity: 0; } 35% { opacity: 0.3; } 100% { opacity: 0; } }
 @keyframes piVis { to { visibility: visible; } }
 @keyframes piSlash { to { stroke-dashoffset: 0; } }
 @keyframes piSplitA { 0% { transform: none; opacity: 1; } 35% { opacity: 1; } 100% { transform: translate(-130px, -90px) rotate(-16deg); opacity: 0; } }
@@ -5211,15 +5221,19 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <g class="pi-x2 pi-v2c"><use href="#piMC" transform="translate(115 387) scale(1.3)"/></g>
 <!-- Booster : corps (logo D + carte), reflet holo (3), haut à déchirer -->
 <g class="pi-pack">
-<use href="#piBody"/>
+<use class="pi-body" href="#piBody"/>
 <g class="pi-holo" clip-path="url(#piClipBody)"><g class="pi-holo-bar"><rect x="60" y="280" width="90" height="360" fill="url(#piRainbow)" transform="skewX(-14)"/></g></g>
 <g class="pi-top"><use href="#piTop"/></g>
 </g>
 <!-- 4 : les deux moitiés du booster tranché -->
 <g class="pi-x4 pi-halfA" clip-path="url(#piClipA)"><use href="#piBody"/><use href="#piTop"/></g>
 <g class="pi-x4 pi-halfB" clip-path="url(#piClipB)"><use href="#piBody"/><use href="#piTop"/></g>
-<!-- 2 : découpe horizontale du haut du booster -->
-<g class="pi-x2 pi-hcut"><path class="pi-hsl" d="M62 289H328" stroke="#FFD60A" stroke-width="16" stroke-linecap="round"/><path class="pi-hsl" d="M62 289H328" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/></g>
+<!-- 2 : découpe horizontale du haut du booster : un éclat qui file le long de la coupe, sans trait, et des éclats jaunes -->
+<g class="pi-x2 pi-hcut">
+<linearGradient id="piStreak" gradientUnits="userSpaceOnUse" x1="-44" y1="0" x2="-6" y2="0"><stop offset="0" stop-color="#FFB703" stop-opacity="0"/><stop offset="1" stop-color="#FFB703" stop-opacity="0.9"/></linearGradient>
+<g transform="translate(92 289)"><g class="pi-hgl"><path d="M-44 0H-6" stroke="url(#piStreak)" stroke-width="4" stroke-linecap="round"/><path class="pi-hst" d="M0 -12Q1.8 -1.8 12 0Q1.8 1.8 0 12Q-1.8 1.8 -12 0Q-1.8 -1.8 0 -12Z" fill="#FFF6C2" stroke="#111111" stroke-width="2.2" stroke-linejoin="round"/></g></g>
+<g transform="translate(118 289)"><path class="pi-chip" style="--dx:4px;--dy:-18px;animation-delay:0.965s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(150 289)"><path class="pi-chip" style="--dx:-3px;--dy:16px;animation-delay:0.98s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(182 289)"><path class="pi-chip" style="--dx:5px;--dy:-20px;animation-delay:1.0s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(214 289)"><path class="pi-chip" style="--dx:-4px;--dy:14px;animation-delay:1.015s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(246 289)"><path class="pi-chip" style="--dx:4px;--dy:-17px;animation-delay:1.03s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g><g transform="translate(274 289)"><path class="pi-chip" style="--dx:-3px;--dy:15px;animation-delay:1.045s" d="M0 -5L3.5 0L0 5L-3.5 0Z" fill="#FFD60A" stroke="#111111" stroke-width="1.5" stroke-linejoin="round"/></g>
+</g>
 <g class="pi-x4 pi-slash"><path class="pi-sl" d="M40 655L350 224" stroke="#FFD60A" stroke-width="16" stroke-linecap="round"/><path class="pi-sl" d="M40 655L350 224" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/></g>
 <!-- Éclair du logo qui déchire le booster (1 et 2), puis éclair blanc -->
 <path class="pi-bolt" d="M232 170 L166 300 L206 300 L180 400 L270 262 L228 262 L258 170 Z" fill="#FFD60A" stroke="#111111" stroke-width="7" stroke-linejoin="round" paint-order="stroke"/>
@@ -5275,6 +5289,6 @@ html.pkm-theme-day:not(.pkm-classic) #app { background: #EEF3FF; }
 <p class="pkm-caption">Démo Dropicards · catalogue, scellé et prix réels (TCGdex, Cardmarket) ; boutiques réelles (OpenStreetMap) ; collection, ventes et partenaires de Territoire fictifs · application indépendante, non affiliée à Nintendo, GAME FREAK ou The Pokémon Company.</p>
 </div>
 <script src="vendor/vue.runtime.global.prod.js"></script>
-<script src="app.js?v=ca5c06ae"></script>
+<script src="app.js?v=be361c26"></script>
 </body>
 </html>

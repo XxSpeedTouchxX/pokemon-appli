@@ -23,6 +23,16 @@ for (const v of ONLY) {
   await page.waitForSelector('#pkm-intro', { state: 'attached' });
   await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
   await page.waitForTimeout(2500);
+  // ONLY : la découpe aussi au ralenti (× 4, de 0,85 s à 1,45 s), ajoutée après la vidéo à vitesse réelle ;
+  // filmée d'abord, car la fin de l'intro (3,5 s) la retire de la page.
+  if (ONLY.length === 1) {
+    const sd = TMP + 's' + v + '/'; mkdirSync(sd, { recursive: true });
+    let j = 0;
+    for (let t = 850; t <= 1450; t += 10) {
+      await page.evaluate(t => document.getAnimations().forEach(a => { a.pause(); try { a.currentTime = t; } catch (e) { /* rien */ } }), t);
+      await page.screenshot({ path: sd + String(j++).padStart(3, '0') + '.png' });
+    }
+  }
   const dir = TMP + 'v' + v + '/'; mkdirSync(dir, { recursive: true });
   let k = 0;
   for (let t = 0; t <= 3500; t += 40) {
@@ -37,7 +47,13 @@ for (const v of ONLY) {
 }
 await browser.close();
 if (ONLY.length === 1) {
-  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', TMP + 'c' + ONLY[0] + '.mp4', '-vf', 'tpad=stop_mode=clone:stop_duration=1', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT + 'ouverture-' + ONLY[0] + '.mp4']);
+  const v = ONLY[0], font = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', '25', '-i', TMP + 's' + v + '/%03d.png',
+    '-vf', `scale=300:-2,drawtext=fontfile=${font}:text='Ralenti × 4':x=(w-text_w)/2:y=h-40:fontsize=18:fontcolor=white:box=1:boxcolor=black@0.6:boxborderw=6,fps=25`,
+    '-an', TMP + 'r' + v + '.mp4']);
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', TMP + 'c' + v + '.mp4', '-i', TMP + 'r' + v + '.mp4',
+    '-filter_complex', '[0]tpad=stop_mode=clone:stop_duration=0.6[a];[a][1]concat=n=2:v=1:a=0,tpad=stop_mode=clone:stop_duration=0.6[v]', '-map', '[v]',
+    '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', OUT + 'ouverture-' + v + '.mp4']);
   rmSync(TMP, { recursive: true, force: true });
   console.log('vidéo écrite');
   process.exit(0);

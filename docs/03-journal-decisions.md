@@ -6,6 +6,11 @@
 
 ---
 
+## 2026-11-27 (suite) — Ouverture de l'app : découpe sans trait, rapide et nette
+
+- **Demande** : « le trait de découpe est beaucoup trop visible, je ne veux pas voir le trait blanc ; il faut que le découpage soit très rapide, net et satisfaisant ».
+- **Fait** : plus de trait jaune et blanc dessiné ni d'éclair blanc plein écran. Un petit éclat (étoile claire bordée de noir, courte traînée orangée) file le long du haut du booster en 0,11 s, six petits éclats jaunes sautent de la coupe, le booster encaisse le coup (petit tassement), un flash léger (30 %) marque l'instant, et le haut saute de 13 px puis s'envole en tournant. La suite ne change pas (carte qui sort, « D » par la gauche). Même durée (3,5 s). `intro.html` ; vidéo `tools/brand/intro/ouverture-2.mp4` (vitesse réelle puis ralenti × 4 de la découpe) ; test `t-intro`. Cache v297.
+
 ## 2026-11-27 — Ouverture de l'app : découpe horizontale du haut du booster
 
 - **Demande** : « à la place de l'éclair qui ouvre le booster, la même découpe que pour l'animation 4, mais horizontale en haut du booster ; pour le reste, garder la carte Dropicards qui sort du booster et le D qui la rejoint par la gauche ».
