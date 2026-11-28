@@ -165,7 +165,11 @@
         many: q > 1, qty: '×' + q, bg: l.hasPhoto ? 'var(--pkm-photo-mat)' : l.bg, inVit: inVit,
         label: p.name + (gb.graded ? ', gradée ' + gb.gradeName : '') + ', ' + plural(q, 'exemplaire', 'exemplaires') + ', ' + k.lang + ', '
           + (G ? '' : copyLabel(p, k.cond) + ', ') + 'cote ' + (e.v ? x.mask(this.eur(e.v)) : 'inconnue') + (inVit ? ', dans ta vitrine' : '') + '. Ouvrir la fiche',
-        open: () => this.fiOpen(p.id, { gr: G ? G.key : '', from: 'binder' })
+        // Liste du classeur dans son ordre (onglet de l'article) : flèches de la carte agrandie (fiche.js, fiNavView).
+        open: () => {
+          const L = p.type === 'sealed' ? sealed : cards;
+          this.fiOpen(p.id, { gr: G ? G.key : '', from: 'binder', nav: { list: L.map(o => ({ id: o.p.id, gr: o.gr ? o.gr.key : '', sealed: o.p.type === 'sealed' })), i: L.indexOf(e) } });
+        }
       });
     };
     const isGraded = e => !!(e.gr || e.p.grade);

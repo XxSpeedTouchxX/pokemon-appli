@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-11-28 (suite 1) — Carte agrandie du classeur : flèches gauche et droite
+
+- **Demande** : « quand l'utilisateur appuie sur une carte de son classeur et rappuie dessus pour l'agrandir, je veux que dans l'interface de la carte agrandie tu rajoutes une flèche à gauche et à droite de la carte pour faire défiler ses cartes du classeur, en avant ou en arrière ».
+- **Fait** :
+  - carte agrandie ouverte depuis la fiche d'une carte du classeur : une **flèche à gauche** et une **flèche à droite** de la carte (la carte se resserre un peu pour leur laisser la place, rien n'est caché) ;
+  - la carte suivante ou précédente arrive en glissant du côté de la flèche touchée ;
+  - **ordre du classeur** (le tri choisi : prix, nom, série ou numéro), sur toutes les pages, pas seulement la page affichée ; chaque exemplaire gradé à sa place ;
+  - compteur **« 3 / 24 »** au-dessus du nom ;
+  - la fiche derrière suit : en fermant la carte agrandie, on retrouve la fiche de la dernière carte vue ;
+  - onglet « Mes produits scellés » : mêmes flèches, sur la liste des produits.
+- **Défauts proposés (à confirmer)** : à la première et à la dernière carte, la flèche est **grisée** (pas de retour au début) ; flèches seulement depuis le classeur (pas depuis une extension, une recherche ou le Pokédex) ; pas de glissement au doigt (flèches seulement, comme demandé).
+- `fiche.js` (`FI_NAV`, `fiNavView`, `fiStep`), `home.js` (liste du classeur passée à la fiche), fragment `zoom` (`catalog.dc.html`), `catalog.js` (valeurs par défaut) ; test `t-zoomnav` (16). Cache v312.
+
 ## 2026-11-28 — Mode Admin : le grade choisi vaut aussi sur le serveur (pièce et Safari)
 
 - **Demande** : « je suis en mode admin en Grand maître Pokémon et je ne peux pas relancer la pièce ; il est marqué réservé au grade Collectionneur, et pareil pour le Safari ; fais en sorte qu'à partir du grade Collectionneur on ait le lancer de la pièce, pas que pour le grade Collectionneur ».

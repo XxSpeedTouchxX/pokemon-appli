@@ -20,11 +20,48 @@
   };
   // Ouvrir la fiche : l'article rejoint le catalogue de l'app s'il n'y est pas (comme openTcg).
   // opts.from === 'binder' : ouverte depuis « Mon classeur », dont la pastille montre la valeur de mon exemplaire.
+  // opts.nav : { list: [{ id, gr, sealed }], i } (classeur, dans son ordre de tri) pour les flèches de la carte agrandie.
+  let FI_NAV = null;
   fiProto.fiOpen = function (id, opts) {
+    const nv = opts && opts.nav;
+    FI_NAV = nv && Array.isArray(nv.list) && nv.list.length > 1 && nv.i >= 0 && nv.list[nv.i] && nv.list[nv.i].id === id ? { list: nv.list, i: nv.i } : null;
     const ex = this.st().extra || [], p = this.catalog().find(q => q.id === id);
     this.setState(Object.assign({ fiId: id, fiPer: 'COMPLET', fiCond: false, fiZoom: false, fiEtat: null, fiLang: 'fr', fiLangOpen: false, fiFrom: opts && opts.from || '' }, p ? {} : { extra: ex.indexOf(id) >= 0 ? ex : ex.concat([id]) }));
   };
-  fiProto.fiClose = function () { this.setState({ fiId: null, fiZoom: false, fiEtat: null }); };
+  fiProto.fiClose = function () { FI_NAV = null; this.setState({ fiId: null, fiZoom: false, fiEtat: null }); };
+
+  // ——— Carte agrandie : flèches gauche et droite (2026-11-28, porteur : « quand l'utilisateur appuie sur une carte de son
+  // classeur et rappuie dessus pour l'agrandir, une flèche à gauche et à droite de la carte pour faire défiler ses cartes
+  // du classeur, en avant ou en arrière ») ———
+  // Ordre : celui du classeur (tri choisi : prix, nom, série ou numéro), onglet de la carte (cartes ou produits scellés),
+  // chaque exemplaire gradé à sa place. Flèche grisée à la première et à la dernière carte ; la fiche derrière suit.
+  fiProto.fiNavView = function (s) {
+    const n = FI_NAV, cur = n && n.list[n.i];
+    if (!cur || cur.id !== s.fiId) return { hasNav: false, imgMax: '100%', pos: '', prevOff: true, nextOff: true, prevDim: 1, nextDim: 1, prevLabel: '', nextLabel: '', prev: null, next: null };
+    const first = n.i === 0, last = n.i === n.list.length - 1, sealed = !!cur.sealed;
+    const what = sealed ? 'produit' : 'carte';
+    return {
+      hasNav: true, imgMax: 'calc(100% - 96px)', pos: (n.i + 1) + ' / ' + n.list.length,
+      prevOff: first, nextOff: last, prevDim: first ? 0.3 : 1, nextDim: last ? 0.3 : 1,
+      prevLabel: first ? 'Première ' + what + ' du classeur' : (sealed ? 'Produit précédent' : 'Carte précédente') + ' du classeur',
+      nextLabel: last ? 'Dernière ' + what + ' du classeur' : (sealed ? 'Produit suivant' : 'Carte suivante') + ' du classeur',
+      prev: () => this.fiStep(-1), next: () => this.fiStep(1)
+    };
+  };
+  fiProto.fiStep = function (d) {
+    const n = FI_NAV, j = n ? n.i + d : -1;
+    if (!n || j < 0 || j >= n.list.length) return;
+    const t = n.list[j], from = this.st().fiFrom || 'binder';
+    this.fiOpen(t.id, { gr: t.gr, from: from, nav: { list: n.list, i: j } });
+    this.setState({ fiZoom: true });
+    // La nouvelle carte arrive du côté de la flèche touchée (sauf « mouvements réduits »).
+    requestAnimationFrame(() => {
+      const im = document.querySelector('#pkm-zoom img');
+      let calm = false;
+      try { calm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* sans effet */ }
+      if (im && im.animate && !calm) im.animate([{ transform: 'translateX(' + (d * 48) + 'px) scale(0.96)', opacity: 0.15 }, { transform: 'none', opacity: 1 }], { duration: 240, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+    });
+  };
 
   // Résultats de recherche (2026-11-15, porteur : « la même interface que pour les cartes et items, avec la cote selon
   // eBay, Vinted… ») : une carte ou un produit touché s'ouvre dans cette fiche en panneau, plus dans l'ancienne page.
@@ -648,7 +685,7 @@
     const fx = r.fi.open && r.fi.hist && r.fi.hist.fx;
     if (fx && fx.key !== fiAnim.key) queueMicrotask(() => fiMorph(fx));
     else if (!r.fi.open) { fiAnim.id = ''; fiAnim.key = ''; }
-    if (r.fi.open && s.fiZoom && r.fi.big.img) { r.ui.zoomOpen = true; r.zoom = r.fi.big; }
+    if (r.fi.open && s.fiZoom && r.fi.big.img) { r.ui.zoomOpen = true; r.zoom = Object.assign({}, r.fi.big, this.fiNavView(s)); }
     return r;
   };
 
